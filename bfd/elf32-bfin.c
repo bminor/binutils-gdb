@@ -3253,7 +3253,6 @@ _bfin_create_got_section (bfd *abfd, struct bfd_link_info *info)
   flagword flags, pltflags;
   asection *s;
   struct elf_link_hash_entry *h;
-  struct bfd_link_hash_entry *bh;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   int ptralign;
   int offset;
