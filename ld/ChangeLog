@@ -1,3 +1,12 @@
+2006-04-05  Richard Sandiford  <richard@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* configure.tgt (sparc*-*-vxworks*): New stanza.
+	* emulparams/elf32_sparc_vxworks.sh: New file.
+	* Makefile.am (ALL_EMULATIONS): Add eelf32_sparc_vxworks.o.
+	(eelf32_sparc_vxworks.c): New rule.
+	* Makefile.in: Regenerate.
+
 2006-04-04  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* ldlang.c (lang_map): Print the list of discarded input sections.

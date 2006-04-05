@@ -370,6 +370,7 @@ ALL_EMULATIONS = \
 	eelf32_i960.o \
 	eelf32_i860.o \
 	eelf32_sparc.o \
+	eelf32_sparc_vxworks.o \
 	eelf32b4300.o \
 	eelf32bfin.o \
 	eelf32bfinfd.o \
@@ -1493,6 +1494,11 @@ em32rlelf_linux.c: $(srcdir)/emulparams/m32rlelf_linux.sh \
 eelf32_sparc.c: $(srcdir)/emulparams/elf32_sparc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_sparc "$(tdir_elf32_sparc)"
+eelf32_sparc_vxworks.c: $(srcdir)/emulparams/elf32_sparc_vxworks.sh \
+  $(srcdir)/emulparams/vxworks.sh $(srcdir)/emulparams/elf32_sparc.sh \
+  $(srcdir)/emultempl/vxworks.em $(srcdir)/emultempl/elf32.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32_sparc_vxworks "$(tdir_elf32_sparc_vxworks)"
 eelf32_i860.c: $(srcdir)/emulparams/elf32_i860.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_i860 "$(tdir_elf32_i860)"

@@ -494,6 +494,7 @@ sparc*-*-aout)		targ_emul=sparcaout ;;
 sparc*-*-coff)		targ_emul=coff_sparc ;;
 sparc*-*-elf)		targ_emul=elf32_sparc ;;
 sparc*-*-sysv4*)	targ_emul=elf32_sparc ;;
+sparc*-*-vxworks*)	targ_emul=elf32_sparc_vxworks ;;
 sparc64-*-freebsd* | sparcv9-*-freebsd* | sparc64-*-kfreebsd*-gnu | sparcv9-*-kfreebsd*-gnu)
 			targ_emul=elf64_sparc_fbsd
 			targ_extra_emuls="elf64_sparc elf32_sparc"

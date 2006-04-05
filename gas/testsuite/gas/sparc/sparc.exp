@@ -17,7 +17,7 @@ proc gas_64_check { } {
 }
 
 proc sparc_elf_setup { } {
-    setup_xfail "sparc*-*-*aout*" "sparc*-*-sunos4*" "sparc*-*-vxworks*"
+    setup_xfail "sparc*-*-*aout*" "sparc*-*-sunos4*"
     setup_xfail "sparc*-fujitsu-none" "sparc*-*-*n*bsd*"
     setup_xfail "sparc*-*-coff" "sparc*-*-lynxos*"
     clear_xfail "sparc64*-*-*n*bsd*"
@@ -48,6 +48,10 @@ if [istarget sparc*-*-*] {
 	run_dump_test "pcrel64"
 	run_dump_test "plt64"
     }
+}
+
+if [istarget sparc-*-vxworks*] {
+    run_dump_test "vxworks-pic"
 }
 
 if [istarget sparclet*-*-*] {

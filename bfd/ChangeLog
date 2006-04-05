@@ -1,3 +1,52 @@
+2006-04-05  Richard Sandiford  <richard@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* config.bfd (sparc-*-vxworks*): New stanza.
+	* configure.in (bfd_elf32_sparc_vxworks_vec): New stanza.
+	(bfd_elf32_sparc_vec, bfd_elf64_sparc_vec): Add elf-vxworks.lo.
+	* configure: Regenerate.
+	* elf32-sparc.c: Include elf-vxworks.h.
+	(elf32_sparc_vxworks_link_hash_table_create: New.
+	(elf32_sparc_vxworks_final_write_processing): New.
+	(TARGET_BIG_SYM): Override for VxWorks.
+	(TARGET_BIG_NAME, ELF_MINPAGESIZE): Likewise.
+	(bfd_elf32_bfd_link_hash_table_create): Likewise.
+	(elf_backend_want_got_plt, elf_backend_plt_readonly): Likewise.
+	(elf_backend_got_header_size, elf_backend_add_symbol_hook): Likewise.
+	(elf_backend_link_output_symbol_hook): Likewise.
+	(elf_backend_emit_relocs): Likewise.
+	(elf_backend_final_write_processing, elf32_bed): Likewise.
+	* elfxx-sparc.c: Include libiberty.h and elf-vxworks.h.
+	(sparc_vxworks_exec_plt0_entry, sparc_vxworks_exec_plt_entry): New.
+	(sparc_vxworks_shared_plt0_entry, sparc_vxworks_shared_plt_entry): New.
+	(_bfd_sparc_elf_link_hash_table_create): Don't initialize
+	build_plt_entry here.
+	(create_got_section): Initialize sgotplt for VxWorks.
+	(_bfd_sparc_elf_create_dynamic_sections): Initialize build_plt_entry,
+	plt_header_size and plt_entry_size, with new VxWorks-specific settings.
+	Call elf_vxworks_create_dynamic_sections for VxWorks.
+	(allocate_dynrelocs): Use plt_header_size and plt_entry_size.
+	Allocate room for .got.plt and .rela.plt.unloaded entries on VxWorks.
+	(_bfd_sparc_elf_size_dynamic_sections): Don't allocate a nop in .plt
+	for VxWorks.  Check for the .got.plt section.
+	(sparc_vxworks_build_plt_entry): New function.
+	(_bfd_sparc_elf_finish_dynamic_symbol): Add handling of VxWorks PLTs.
+	Don't make _GLOBAL_OFFSET_TABLE_ and _PROCEDURE_LINKAGE_TABLE_
+	absolute on VxWorks.
+	(sparc32_finish_dyn): Add special handling for DT_RELASZ
+	and DT_PLTGOT on VxWorks.
+	(sparc_vxworks_finish_exec_plt): New.
+	(sparc_vxworks_finish_shared_plt): New.
+	(_bfd_sparc_elf_finish_dynamic_sections): Call them.
+	Use plt_header_size and plt_entry_size.
+	* elfxx-sparc.h (_bfd_sparc_elf_link_hash_table): Add is_vxworks,
+	srelplt2, sgotplt, plt_header_size and plt_entry_size fields.
+	* Makefile.am (elfxx-sparc.lo): Depend on elf-vxworks.h.
+	(elf32-sparc.lo): Likewise.
+	* Makefile.in: Regenerate.
+	* targets.c (bfd_elf32_sparc_vxworks_vec): Declare.
+	(_bfd_target_vector): Add a pointer to it.
+
 2006-03-30  Ben Elliston  <bje@au.ibm.com>
 
 	PR ld/2267
