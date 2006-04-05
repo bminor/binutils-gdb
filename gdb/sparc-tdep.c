@@ -22,6 +22,7 @@
 #include "defs.h"
 #include "arch-utils.h"
 #include "dis-asm.h"
+#include "dwarf2-frame.h"
 #include "floatformat.h"
 #include "frame.h"
 #include "frame-base.h"
@@ -994,6 +995,32 @@ sparc32_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
 	  || (sparc_floating_p (type) && TYPE_LENGTH (type) == 16));
 }
 
+static void
+sparc32_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
+			       struct dwarf2_frame_state_reg *reg)
+{
+  switch (regnum)
+    {
+    case SPARC_G0_REGNUM:
+      /* Since %g0 is always zero, there is no point in saving it, and
+	 people will be inclined omit it from the CFI.  Make sure we
+	 don't warn about that.  */
+      reg->how = DWARF2_FRAME_REG_SAME_VALUE;
+      break;
+    case SPARC_SP_REGNUM:
+      reg->how = DWARF2_FRAME_REG_CFA;
+      break;
+    case SPARC32_PC_REGNUM:
+      reg->how = DWARF2_FRAME_REG_RA_OFFSET;
+      reg->loc.offset = 8;
+      break;
+    case SPARC32_NPC_REGNUM:
+      reg->how = DWARF2_FRAME_REG_RA_OFFSET;
+      reg->loc.offset = 12;
+      break;
+    }
+}
+
 
 /* The SPARC Architecture doesn't have hardware single-step support,
    and most operating systems don't implement it either, so we provide
@@ -1247,6 +1274,11 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
+
+  /* Hook in the DWARF CFI frame unwinder.  */
+  dwarf2_frame_set_init_reg (gdbarch, sparc32_dwarf2_frame_init_reg);
+  /* FIXME: kettenis/20050423: Don't enable the unwinder until the
+     StackGhost issues have been resolved.  */
 
   frame_unwind_append_sniffer (gdbarch, sparc32_frame_sniffer);
 

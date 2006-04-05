@@ -1,3 +1,9 @@
+2006-04-05  David S. Miller  <davem@sunset.davemloft.net>
+
+	* sparc-tdep.c (sparc32_dwarf2_frame_init_reg): New.
+	(sparc32_gdbarch_init): Pass it to dwarf2_frame_set_init_reg.
+	* Makefile.in (sparc-tdep.o): Update dependencies.
+	
 2006-04-04  David S. Miller  <davem@davemloft.net>
 
 	* config/linux.mh (NATDEPFILES): Remove sparc-sol2-nat.o
