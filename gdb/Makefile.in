@@ -2641,10 +2641,10 @@ sparc64-tdep.o: sparc64-tdep.c $(defs_h) $(arch_utils_h) $(dwarf2_frame_h) \
 sparc-linux-nat.o: sparc-linux-nat.c $(defs_h) $(regcache_h) $(gregset_h) \
 	$(sparc_tdep_h) $(sparc_nat_h) $(inferior_h) $(target_h) \
 	$(linux_nat_h)
-sparc-linux-tdep.o: sparc-linux-tdep.c $(defs_h) $(floatformat_h) $(frame_h) \
-	$(frame_unwind_h) $(gdbarch_h) $(gdbcore_h) $(osabi_h) $(regcache_h) \
-	$(solib_svr4_h) $(symtab_h) $(trad_frame_h) $(tramp_frame_h) \
-	$(sparc_tdep_h)
+sparc-linux-tdep.o: sparc-linux-tdep.c $(defs_h) $(dwarf2_frame_h) \
+	$(floatformat_h) $(frame_h) $(frame_unwind_h) $(gdbarch_h) \
+	$(gdbcore_h) $(osabi_h) $(regcache_h) $(solib_svr4_h) $(symtab_h) \
+	$(trad_frame_h) $(tramp_frame_h) $(sparc_tdep_h)
 sparc-nat.o: sparc-nat.c $(defs_h) $(inferior_h) $(regcache_h) $(target_h) \
 	$(gdb_assert_h) $(gdb_string_h) $(gdb_wait_h) $(sparc_tdep_h) \
 	$(sparc_nat_h) $(inf_ptrace_h)
@@ -2666,10 +2666,10 @@ sparc-sol2-tdep.o: sparc-sol2-tdep.c $(defs_h) $(frame_h) $(frame_unwind_h) \
 	$(sparc_tdep_h) $(solib_svr4_h)
 sparc-stub.o: sparc-stub.c
 sparc-tdep.o: sparc-tdep.c $(defs_h) $(arch_utils_h) $(dis_asm_h) \
-	$(floatformat_h) $(frame_h) $(frame_base_h) $(frame_unwind_h) \
-	$(gdbcore_h) $(gdbtypes_h) $(inferior_h) $(symtab_h) $(objfiles_h) \
-	$(osabi_h) $(regcache_h) $(target_h) $(value_h) $(gdb_assert_h) \
-	$(gdb_string_h) $(sparc_tdep_h)
+	$(dwarf2_frame_h) $(floatformat_h) $(frame_h) $(frame_base_h) \
+	$(frame_unwind_h) $(gdbcore_h) $(gdbtypes_h) $(inferior_h) \
+	$(symtab_h) $(objfiles_h) $(osabi_h) $(regcache_h) $(target_h) \
+	$(value_h) $(gdb_assert_h) $(gdb_string_h) $(sparc_tdep_h)
 stabsread.o: stabsread.c $(defs_h) $(gdb_string_h) $(bfd_h) $(gdb_obstack_h) \
 	$(symtab_h) $(gdbtypes_h) $(expression_h) $(symfile_h) $(objfiles_h) \
 	$(aout_stab_gnu_h) $(libaout_h) $(aout_aout64_h) $(gdb_stabs_h) \

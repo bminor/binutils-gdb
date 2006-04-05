@@ -24,6 +24,9 @@
 	(sparc_dwarf2_frame_init_reg): Use it to determine if the function
 	returns a structure and thus we have to indicate the return PC and
 	NPC are 4 bytes later than usual.
+	* sparc-linux-tdep.c (sparc32_linux_init_abi): Append
+	dwarf2 frame sniffer.
+	* Makefile.in (sparc-linux-tdep.o): Update dependencies.
 	
 2006-04-04  David S. Miller  <davem@davemloft.net>
 
