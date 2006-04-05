@@ -1,6 +1,6 @@
 # Support routines for LD testsuite.
 #   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-#    2004, 2005 Free Software Foundation, Inc.
+#    2004, 2005, 2006 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,10 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
-#
-#
-# default_ld_version
-#	extract and print the version number of ld
+
+# Extract and print the version number of ld.
 #
 proc default_ld_version { ld } {
     global host_triplet
@@ -36,9 +34,7 @@ proc default_ld_version { ld } {
     }
 }
 
-#
-# default_ld_relocate
-#	link an object using relocation
+# Link an object using relocation.
 #
 proc default_ld_relocate { ld target objects } {
     global HOSTING_EMU
@@ -62,7 +58,7 @@ proc default_ld_relocate { ld target objects } {
 }
 
 # Check to see if ld is being invoked with a non-endian output format
-
+#
 proc is_endian_output_format { object_flags } {
 
     if {[string match "*-oformat binary*" $object_flags] ||      \
@@ -86,7 +82,7 @@ proc is_endian_output_format { object_flags } {
 # the site.exp file will include the switch "-mbig-endian"
 # (rather than "big-endian") which is not detected by proc
 # process_multilib_options.
-
+#
 proc big_or_little_endian {} {
 
     if [board_info [target_info name] exists multilib_flags] {
@@ -110,9 +106,7 @@ proc big_or_little_endian {} {
     return $flags
 }
 
-#
-# default_ld_link
-#	link a program using ld
+# Link a program using ld.
 #
 proc default_ld_link { ld target objects } {
     global HOSTING_EMU
@@ -147,9 +141,7 @@ proc default_ld_link { ld target objects } {
     }
 }
 
-#
-# default_ld_simple_link
-#	link a program using ld, without including any libraries
+# Link a program using ld, without including any libraries.
 #
 proc default_ld_simple_link { ld target objects } {
     global host_triplet
@@ -197,9 +189,7 @@ proc default_ld_simple_link { ld target objects } {
     }
 }
 
-#
-# default_ld_compile
-#	compile an object using cc
+# Compile an object using cc.
 #
 proc default_ld_compile { cc source object } {
     global CFLAGS
@@ -272,9 +262,7 @@ proc default_ld_compile { cc source object } {
     }
 }
 
-#
-# default_ld_assemble
-#	assemble a file
+# Assemble a file.
 #
 proc default_ld_assemble { as source object } {
     global ASFLAGS
@@ -302,9 +290,7 @@ proc default_ld_assemble { as source object } {
     }
 }
 
-#
-# default_ld_nm
-#	run nm on a file, putting the result in the array nm_output
+# Run nm on a file, putting the result in the array nm_output.
 #
 proc default_ld_nm { nm nmflags object } {
     global NMFLAGS
@@ -355,9 +341,7 @@ proc default_ld_nm { nm nmflags object } {
     }
 }
 
-#
-# is_elf_format
-#	true if the object format is known to be ELF
+# True if the object format is known to be ELF.
 #
 proc is_elf_format {} {
     if { ![istarget *-*-sysv4*] \
@@ -393,9 +377,8 @@ proc is_elf_format {} {
     return 1
 }
 
+# True if the object format is known to be 64-bit ELF.
 #
-# is_elf64
-#	true if the object format is known to be 64bit ELF
 proc is_elf64 { binary_file } {
     global READELF
     global READELFFLAGS
@@ -419,9 +402,8 @@ proc is_elf64 { binary_file } {
     return 0
 }
 
+# True if the object format is known to be a.out.
 #
-# is_aout_format
-#	true if the object format is known to be aout
 proc is_aout_format {} {
     if { [istarget *-*-*\[ab\]out*] \
 	     || [istarget *-*-linux*oldld*] \
@@ -449,9 +431,7 @@ proc is_aout_format {} {
     return 0
 }
 
-#
-# is_pecoff_format
-#	true if the object format is known to be PECOFF
+# True if the object format is known to be PE COFF.
 #
 proc is_pecoff_format {} {
     if { ![istarget *-*-mingw32*] \
@@ -463,11 +443,9 @@ proc is_pecoff_format {} {
     return 1
 }
 
-#
-# simple_diff
-#	compares two files line-by-line
-#	returns differences if exist
-#	returns null if file(s) cannot be opened
+# Compares two files line-by-line.
+#   Returns differences if exist.
+#   Returns null if file(s) cannot be opened.
 #
 proc simple_diff { file_1 file_2 } {
     global target
@@ -630,7 +608,7 @@ proc simple_diff { file_1 file_2 } {
 # `regexp_diff' to compare the output of the dumping tool against the
 # regexps in FILE.d.  `regexp_diff' is defined later in this file; see
 # further comments there.
-
+#
 proc run_dump_test { name } {
     global subdir srcdir
     global OBJDUMP NM AS OBJCOPY READELF LD
@@ -851,7 +829,7 @@ proc run_dump_test { name } {
 	    # redirected, exec *always* returns failure, regardless of the
 	    # program exit code.  Thankfully, we can retrieve the true
 	    # return status from a special variable.  Redirection would
-	    # cause a tcl-specific message to be appended, and we'd rather
+	    # cause a Tcl-specific message to be appended, and we'd rather
 	    # not deal with that if we can help it.
 	    global errorCode
 	    if { [lindex $errorCode 0] == "NONE" } {
@@ -1099,12 +1077,12 @@ proc file_contents { filename } {
 # 0:name 1:ld options 2:assembler options
 # 3:filenames of assembler files 4: action and options. 5: name of output file
 # 6:compiler flags (optional)
-
+#
 # Actions:
 # objdump: Apply objdump options on result.  Compare with regex (last arg).
 # nm: Apply nm options on result.  Compare with regex (last arg).
 # readelf: Apply readelf options on result.  Compare with regex (last arg).
-
+#
 proc run_ld_link_tests { ldtests } {
     global ld
     global as

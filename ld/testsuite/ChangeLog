@@ -1,3 +1,7 @@
+2006-04-05  Ben Elliston  <bje@au.ibm.com>
+
+	* lib/ld-lib.exp: Comment cleanups.
+
 2006-03-27  Richard Sandiford  <richard@codesourcery.com>
 
 	* ld-mips-elf/tls-hidden3a.s, ld-mips-elf/tls-hidden3b.s,
