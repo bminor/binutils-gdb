@@ -1,5 +1,12 @@
 2006-04-05  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/2411
+	* elflink.c (check_dynsym): New.
+	(elf_link_output_extsym): Use it.
+	(bfd_elf_final_link): Likewise.
+
+2006-04-05  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/2404
 	* elflink.c (_bfd_elf_merge_symbol): Skip the default indirect
 	symbol from the dynamic definition with the default version if

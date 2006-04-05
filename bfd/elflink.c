@@ -6204,6 +6204,24 @@ elf_link_output_sym (struct elf_final_link_info *finfo,
   return TRUE;
 }
 
+/* Return TRUE if the dynamic symbol SYM in ABFD is supported.  */
+
+static bfd_boolean
+check_dynsym (bfd *abfd, Elf_Internal_Sym *sym)
+{
+  if (sym->st_shndx > SHN_HIRESERVE)
+    {
+      /* The gABI doesn't support dynamic symbols in output sections
+         beyond 64k.  */
+      (*_bfd_error_handler)
+	(_("%B: Too many sections: %d (>= %d)"),
+	 abfd, bfd_count_sections (abfd), SHN_LORESERVE);
+      bfd_set_error (bfd_error_nonrepresentable_section);
+      return FALSE;
+    }
+  return TRUE;
+}
+
 /* For DSOs loaded in via a DT_NEEDED entry, emulate ld.so in
    allowing an unsatisfied unversioned symbol in the DSO to match a
    versioned symbol that would normally require an explicit version.
@@ -6636,6 +6654,11 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
 
       sym.st_name = h->dynstr_index;
       esym = finfo->dynsym_sec->contents + h->dynindx * bed->s->sizeof_sym;
+      if (! check_dynsym (finfo->output_bfd, &sym))
+	{
+	  eoinfo->failed = TRUE;
+	  return FALSE;
+	}
       bed->s->swap_symbol_out (finfo->output_bfd, &sym, esym, 0);
 
       bucketcount = elf_hash_table (finfo->info)->bucketcount;
@@ -8313,6 +8336,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      indx = elf_section_data (s)->this_idx;
 	      BFD_ASSERT (indx > 0);
 	      sym.st_shndx = indx;
+	      if (! check_dynsym (abfd, &sym))
+		return FALSE;
 	      sym.st_value = s->vma;
 	      dest = dynsym + dynindx * bed->s->sizeof_sym;
 	      if (last_local < dynindx)
@@ -8347,6 +8372,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
 		  sym.st_shndx =
 		    elf_section_data (s->output_section)->this_idx;
+		  if (! check_dynsym (abfd, &sym))
+		    return FALSE;
 		  sym.st_value = (s->output_section->vma
 				  + s->output_offset
 				  + e->isym.st_value);
