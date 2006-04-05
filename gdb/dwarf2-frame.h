@@ -79,7 +79,8 @@ struct dwarf2_frame_state_reg
 
 extern void dwarf2_frame_set_init_reg (struct gdbarch *gdbarch,
 				       void (*init_reg) (struct gdbarch *, int,
-					     struct dwarf2_frame_state_reg *));
+					     struct dwarf2_frame_state_reg *,
+					     struct frame_info *));
 
 /* Set the architecture-specific signal trampoline recognition
    function for GDBARCH to SIGNAL_FRAME_P.  */

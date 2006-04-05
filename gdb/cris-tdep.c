@@ -1852,7 +1852,8 @@ cris_dwarf2_reg_to_regnum (int reg)
 
 static void
 cris_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
-                            struct dwarf2_frame_state_reg *reg)
+                            struct dwarf2_frame_state_reg *reg,
+			    struct frame_info *next_frame)
 {
   /* The return address column.  */
   if (regnum == PC_REGNUM)

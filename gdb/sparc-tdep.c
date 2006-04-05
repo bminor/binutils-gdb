@@ -680,6 +680,23 @@ sparc_frame_cache (struct frame_info *next_frame, void **this_cache)
   return cache;
 }
 
+static int
+sparc32_struct_return_from_sym (struct symbol *sym)
+{
+  struct type *type = check_typedef (SYMBOL_TYPE (sym));
+  enum type_code code = TYPE_CODE (type);
+
+  if (code == TYPE_CODE_FUNC || code == TYPE_CODE_METHOD)
+    {
+      type = check_typedef (TYPE_TARGET_TYPE (type));
+      if (sparc_structure_or_union_p (type)
+	  || (sparc_floating_p (type) && TYPE_LENGTH (type) == 16))
+	return 1;
+    }
+
+  return 0;
+}
+
 struct sparc_frame_cache *
 sparc32_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
@@ -694,16 +711,7 @@ sparc32_frame_cache (struct frame_info *next_frame, void **this_cache)
   sym = find_pc_function (cache->pc);
   if (sym)
     {
-      struct type *type = check_typedef (SYMBOL_TYPE (sym));
-      enum type_code code = TYPE_CODE (type);
-
-      if (code == TYPE_CODE_FUNC || code == TYPE_CODE_METHOD)
-	{
-	  type = check_typedef (TYPE_TARGET_TYPE (type));
-	  if (sparc_structure_or_union_p (type)
-	      || (sparc_floating_p (type) && TYPE_LENGTH (type) == 16))
-	    cache->struct_return_p = 1;
-	}
+      cache->struct_return_p = sparc32_struct_return_from_sym (sym);
     }
   else
     {
@@ -995,10 +1003,24 @@ sparc32_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
 	  || (sparc_floating_p (type) && TYPE_LENGTH (type) == 16));
 }
 
+static int
+sparc32_dwarf2_struct_return_p (struct frame_info *next_frame)
+{
+  CORE_ADDR pc = frame_unwind_address_in_block (next_frame);
+  struct symbol *sym = find_pc_function (pc);
+
+  if (sym)
+    return sparc32_struct_return_from_sym (sym);
+  return 0;
+}
+
 static void
 sparc32_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
-			       struct dwarf2_frame_state_reg *reg)
+			       struct dwarf2_frame_state_reg *reg,
+			       struct frame_info *next_frame)
 {
+  int off;
+
   switch (regnum)
     {
     case SPARC_G0_REGNUM:
@@ -1011,12 +1033,14 @@ sparc32_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
       reg->how = DWARF2_FRAME_REG_CFA;
       break;
     case SPARC32_PC_REGNUM:
-      reg->how = DWARF2_FRAME_REG_RA_OFFSET;
-      reg->loc.offset = 8;
-      break;
     case SPARC32_NPC_REGNUM:
       reg->how = DWARF2_FRAME_REG_RA_OFFSET;
-      reg->loc.offset = 12;
+      off = 8;
+      if (sparc32_dwarf2_struct_return_p (next_frame))
+	off += 4;
+      if (regnum == SPARC32_NPC_REGNUM)
+	off += 4;
+      reg->loc.offset = off;
       break;
     }
 }

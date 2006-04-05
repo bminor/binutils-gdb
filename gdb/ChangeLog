@@ -6,6 +6,24 @@
 	* sparc-linux-tdep.c (sparc32_linux_sigframe_init): Pull register
 	window out of the correct stack frame.
 	* sparc64-linux-tdep.c (sparc64_linux_sigframe_init): Likewise.
+	* dwarf2-frame.c (dwarf2_frame_ops init_reg): Add "next_frame"
+	argument.
+	(dwarf2_frame_default_init_reg): Likewise.
+	(dwarf2_frame_set_init_reg): Update init_reg arg.
+	(dwarf2_frame_init_reg): Take "next_frame" and pass it to
+	ops->init_reg().
+	(dwarf2_frame_cache): Pass next_frame to dwarf2_frame_init_reg.
+	* dwarf2-frame.h (dwarf2-frame_set_init_reg): Update declaration.
+	* cris-tdep.c (cris_dwarf2_frame_init_reg): Add next_frame arg.
+	* s390-tdep.c (s390_dwarf2_frame_init_reg): Likewise.
+	* sh-tdep.c (sh_dwarf2_frame_init_reg): Likewise.
+	* sparc64-tdep.c (sparc64_dwarf2_frame_init_reg): Likewise.
+	* sparc-tdep.c (sparc32_struct_return_from_sym): New function.
+	(sparc32_frame_cache): Call it.
+	(sparc32_dwarf2_struct_return_p): New function.
+	(sparc_dwarf2_frame_init_reg): Use it to determine if the function
+	returns a structure and thus we have to indicate the return PC and
+	NPC are 4 bytes later than usual.
 	
 2006-04-04  David S. Miller  <davem@davemloft.net>
 
