@@ -3,6 +3,9 @@
 	* sparc-tdep.c (sparc32_dwarf2_frame_init_reg): New.
 	(sparc32_gdbarch_init): Pass it to dwarf2_frame_set_init_reg.
 	* Makefile.in (sparc-tdep.o): Update dependencies.
+	* sparc-linux-tdep.c (sparc32_linux_sigframe_init): Pull register
+	window out of the correct stack frame.
+	* sparc64-linux-tdep.c (sparc64_linux_sigframe_init): Likewise.
 	
 2006-04-04  David S. Miller  <davem@davemloft.net>
 

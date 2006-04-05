@@ -59,7 +59,7 @@ sparc64_linux_sigframe_init (const struct tramp_frame *self,
 			     struct trad_frame_cache *this_cache,
 			     CORE_ADDR func)
 {
-  CORE_ADDR base, addr;
+  CORE_ADDR base, addr, sp_addr;
   int regnum;
 
   base = frame_unwind_register_unsigned (next_frame, SPARC_O1_REGNUM);
@@ -69,6 +69,7 @@ sparc64_linux_sigframe_init (const struct tramp_frame *self,
 
   /* Since %g0 is always zero, keep the identity encoding.  */
   addr = base + 8;
+  sp_addr = base + ((SPARC_SP_REGNUM - SPARC_G0_REGNUM) * 8);
   for (regnum = SPARC_G1_REGNUM; regnum <= SPARC_O7_REGNUM; regnum++)
     {
       trad_frame_set_reg_addr (this_cache, regnum, addr);
@@ -81,11 +82,14 @@ sparc64_linux_sigframe_init (const struct tramp_frame *self,
   trad_frame_set_reg_addr (this_cache, SPARC64_Y_REGNUM, addr + 24);
   trad_frame_set_reg_addr (this_cache, SPARC64_FPRS_REGNUM, addr + 28);
 
-  addr = frame_unwind_register_unsigned (next_frame, SPARC_SP_REGNUM);
+  base = frame_unwind_register_unsigned (next_frame, SPARC_SP_REGNUM);
+  if (base & 1)
+    base += BIAS;
+
+  addr = get_frame_memory_unsigned (next_frame, sp_addr, 8);
   if (addr & 1)
     addr += BIAS;
 
-  base = addr;
   for (regnum = SPARC_L0_REGNUM; regnum <= SPARC_I7_REGNUM; regnum++)
     {
       trad_frame_set_reg_addr (this_cache, regnum, addr);
