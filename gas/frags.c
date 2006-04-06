@@ -419,6 +419,7 @@ frag_offset_fixed_p (fragS *frag1, fragS *frag2, bfd_vma *offset)
     }
 
   /* Maybe frag1 is after frag2.  */
+  off = frag1->fr_address - frag2->fr_address;
   frag = frag2;
   while (frag->fr_type == rs_fill)
     {

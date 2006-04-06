@@ -1,3 +1,8 @@
+2006-04-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* frags.c (frag_offset_fixed_p): Reinitialise offset before
+	second scan.
+
 2006-04-05  Richard Sandiford  <richard@codesourcery.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 
