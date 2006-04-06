@@ -253,5 +253,10 @@ if test x${EXTRA_SHLIB_EXTENSION} != x ; then
    [Additional extension a shared object might have.])
 fi
 
+dnl Required by html and install-html
+AC_SUBST(datarootdir)
+AC_SUBST(docdir)
+AC_SUBST(htmldir)
+
 AC_OUTPUT(Makefile po/Makefile.in:po/Make-in,
 [sed -e '/POTFILES =/r po/POTFILES' po/Makefile.in > po/Makefile])

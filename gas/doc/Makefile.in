@@ -170,6 +170,8 @@ build_os = @build_os@
 build_vendor = @build_vendor@
 cgen_cpu_prefix = @cgen_cpu_prefix@
 datadir = @datadir@
+datarootdir = @datarootdir@
+docdir = @docdir@
 exec_prefix = @exec_prefix@
 extra_objects = @extra_objects@
 host = @host@
@@ -177,6 +179,7 @@ host_alias = @host_alias@
 host_cpu = @host_cpu@
 host_os = @host_os@
 host_vendor = @host_vendor@
+htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
@@ -250,6 +253,7 @@ CPU_DOCS = \
 	c-z80.texi \
 	c-z8k.texi
 
+html__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 
 # This one isn't ready for prime time yet.  Not even a little bit.
 noinst_TEXINFOS = internals.texi
@@ -593,6 +597,25 @@ $(srcdir)/as.info as.dvi as.html: $(srcdir)/as.texinfo asconfig.texi gasver.texi
 # We want install to imply install-info as per GNU standards, despite the
 # cygnus option.
 install-data-local: install-info
+
+install-html: install-html-am
+
+install-html-am: $(HTMLS)
+	@$(NORMAL_INSTALL)
+	test -z "$(htmldir)" || $(mkdir_p) "$(DESTDIR)$(htmldir)"
+	@list='$(HTMLS)'; for p in $$list; do \
+	  if test -f "$$p" || test -d "$$p"; then d=""; else d="$(srcdir)/"; fi; \
+	  f=$(html__strip_dir) \
+	  if test -d "$$d$$p"; then \
+	    echo " $(mkdir_p) '$(DESTDIR)$(htmldir)/$$f'"; \
+	    $(mkdir_p) "$(DESTDIR)$(htmldir)/$$f" || exit 1; \
+	    echo " $(INSTALL_DATA) '$$d$$p'/* '$(DESTDIR)$(htmldir)/$$f'"; \
+	    $(INSTALL_DATA) "$$d$$p"/* "$(DESTDIR)$(htmldir)/$$f"; \
+	  else \
+	    echo " $(INSTALL_DATA) '$$d$$p' '$(DESTDIR)$(htmldir)/$$f'"; \
+	    $(INSTALL_DATA) "$$d$$p" "$(DESTDIR)$(htmldir)/$$f"; \
+	  fi; \
+	done
 
 # Maintenance
 

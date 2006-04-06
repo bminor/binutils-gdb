@@ -1,3 +1,12 @@
+2006-04-06  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* Makefile.am: Add install-html, install-html-am, and
+	install-html-recursive targets.
+	* Makefile.in: Regenerate.
+	* configure.in: AC_SUBST datarootdir, docdir, htmldir.
+	* configure: Regenerate.
+	* po/Make-in: Add install-html target.
+
 2006-04-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* emultempl/ia64elf.em: Set link_info.relax_pass to 2. Remove
