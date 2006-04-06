@@ -7813,6 +7813,7 @@ Also a prefix command for deletion of other GDB objects.\n\
 The \"unset\" command is also an alias for \"delete\"."),
 		  &deletelist, "delete ", 1, &cmdlist);
   add_com_alias ("d", "delete", class_breakpoint, 1);
+  add_com_alias ("del", "delete", class_breakpoint, 1);
   if (xdb_commands)
     add_com ("db", class_breakpoint, delete_command, _("\
 Delete some breakpoints.\n\
