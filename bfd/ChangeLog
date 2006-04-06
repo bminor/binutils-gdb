@@ -1,3 +1,9 @@
+2006-04-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Skip unneeded passes
+	with the skip_relax_pass_0 and skip_relax_pass_1 bits in the
+	section structure.
+
 2006-04-05  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	* elf32-bfin.c (bfinfdpic_relocs_info_hash): Sprinkle casts to

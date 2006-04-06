@@ -863,6 +863,12 @@ elfNN_ia64_relax_brl (bfd_byte *contents, bfd_vma off)
   bfd_putl64 (t0, hit_addr);
   bfd_putl64 (t1, hit_addr + 8);
 }
+
+/* Rename some of the generic section flags to better document how they
+   are used here.  */
+#define skip_relax_pass_0 need_finalize_relax
+#define skip_relax_pass_1 has_gp_reloc
+
 
 /* These functions do relaxation for IA-64 ELF.  */
 
@@ -891,6 +897,8 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
   bfd_boolean changed_contents = FALSE;
   bfd_boolean changed_relocs = FALSE;
   bfd_boolean changed_got = FALSE;
+  bfd_boolean skip_relax_pass_0 = TRUE;
+  bfd_boolean skip_relax_pass_1 = TRUE;
   bfd_vma gp = 0;
 
   /* Assume we're not going to change any sizes, and we'll only need
@@ -902,11 +910,11 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
     return FALSE;
 
   /* Nothing to do if there are no relocations or there is no need for
-     the relax finalize pass.  */
+     the current pass.  */
   if ((sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0
-      || (!link_info->need_relax_finalize
-	  && sec->need_finalize_relax == 0))
+      || (link_info->relax_pass == 0 && sec->skip_relax_pass_0)
+      || (link_info->relax_pass == 1 && sec->skip_relax_pass_1))
     return TRUE;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -947,20 +955,19 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	case R_IA64_PCREL21BI:
 	case R_IA64_PCREL21M:
 	case R_IA64_PCREL21F:
-	  /* In the finalize pass, all br relaxations are done. We can
-	     skip it. */
-	  if (!link_info->need_relax_finalize)
+	  /* In pass 1, all br relaxations are done. We can skip it. */
+	  if (link_info->relax_pass == 1)
 	    continue;
+	  skip_relax_pass_0 = FALSE;
 	  is_branch = TRUE;
 	  break;
 
 	case R_IA64_PCREL60B:
-	  /* We can't optimize brl to br before the finalize pass since
-	     br relaxations will increase the code size. Defer it to
-	     the finalize pass.  */
-	  if (link_info->need_relax_finalize)
+	  /* We can't optimize brl to br in pass 0 since br relaxations
+	     will increase the code size. Defer it to pass 1.  */
+	  if (link_info->relax_pass == 0)
 	    {
-	      sec->need_finalize_relax = 1;
+	      skip_relax_pass_1 = FALSE;
 	      continue;
 	    }
 	  is_branch = TRUE;
@@ -968,12 +975,11 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 
 	case R_IA64_LTOFF22X:
 	case R_IA64_LDXMOV:
-	  /* We can't relax ldx/mov before the finalize pass since
-	     br relaxations will increase the code size. Defer it to
-	     the finalize pass.  */
-	  if (link_info->need_relax_finalize)
+	  /* We can't relax ldx/mov in pass 0 since br relaxations will
+	     increase the code size. Defer it to pass 1.  */
+	  if (link_info->relax_pass == 0)
 	    {
-	      sec->need_finalize_relax = 1;
+	      skip_relax_pass_1 = FALSE;
 	      continue;
 	    }
 	  is_branch = FALSE;
@@ -1363,8 +1369,12 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	}
     }
 
-  if (!link_info->need_relax_finalize)
-    sec->need_finalize_relax = 0;
+  if (link_info->relax_pass == 0)
+    {
+      /* Pass 0 is only needed to relax br.  */
+      sec->skip_relax_pass_0 = skip_relax_pass_0;
+      sec->skip_relax_pass_1 = skip_relax_pass_1;
+    }
 
   *again = changed_contents || changed_relocs;
   return TRUE;
@@ -1380,6 +1390,8 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
     free (internal_relocs);
   return FALSE;
 }
+#undef skip_relax_pass_0
+#undef skip_relax_pass_1
 
 static void
 elfNN_ia64_relax_ldxmov (contents, off)

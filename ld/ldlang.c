@@ -5411,6 +5411,37 @@ lang_gc_sections (void)
     bfd_gc_sections (output_bfd, &link_info);
 }
 
+/* Relax all sections until bfd_relax_section gives up.  */
+
+static void
+relax_sections (void)
+{
+  /* Keep relaxing until bfd_relax_section gives up.  */
+  bfd_boolean relax_again;
+
+  do
+    {
+      relax_again = FALSE; 
+
+      /* Note: pe-dll.c does something like this also.  If you find
+	 you need to change this code, you probably need to change
+	 pe-dll.c also.  DJ  */
+
+      /* Do all the assignments with our current guesses as to
+	 section sizes.  */
+      lang_do_assignments ();
+
+      /* We must do this after lang_do_assignments, because it uses
+	 size.  */
+      lang_reset_memory_regions ();
+
+      /* Perform another relax pass - this time we know where the
+	 globals are, so can make a better guess.  */
+      lang_size_sections (&relax_again, FALSE);
+    }
+  while (relax_again);
+}
+
 void
 lang_process (void)
 {
@@ -5507,38 +5538,17 @@ lang_process (void)
   /* Now run around and relax if we can.  */
   if (command_line.relax)
     {
-      /* Keep relaxing until bfd_relax_section gives up.  */
-      bfd_boolean relax_again;
+      /* We may need more than one relaxation pass.  */
+      int i = link_info.relax_pass;
 
-      do
+      /* The backend can use it to determine the current pass.  */
+      link_info.relax_pass = 0;
+
+      while (i--)
 	{
-	  relax_again = FALSE;
-
-	  /* Note: pe-dll.c does something like this also.  If you find
-	     you need to change this code, you probably need to change
-	     pe-dll.c also.  DJ  */
-
-	  /* Do all the assignments with our current guesses as to
-	     section sizes.  */
-	  lang_do_assignments ();
-
-	  /* We must do this after lang_do_assignments, because it uses
-	     size.  */
-	  lang_reset_memory_regions ();
-
-	  /* Perform another relax pass - this time we know where the
-	     globals are, so can make a better guess.  */
-	  lang_size_sections (&relax_again, FALSE);
-
-	  /* If the normal relax is done and the relax finalize pass
-	     is not performed yet, we perform another relax pass.  */
-	  if (!relax_again && link_info.need_relax_finalize)
-	    {
-	      link_info.need_relax_finalize = FALSE;
-	      relax_again = TRUE;
-	    }
+	  relax_sections ();
+	  link_info.relax_pass++;
 	}
-      while (relax_again);
 
       /* Final extra sizing to report errors.  */
       lang_do_assignments ();

@@ -1,3 +1,15 @@
+2006-04-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/ia64elf.em: Set link_info.relax_pass to 2. Remove
+	link_info.need_relax_finalize.
+
+	* ldlang.c (relax_sections): New.
+	(lang_process): Use. Call relax_sections link_info.relax_pass
+	times.
+
+	* ldmain.c (main): Set link_info.relax_pass to 1. Remove
+	link_info.need_relax_finalize.
+
 2006-04-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (GENSCRIPTS): Pass prefix.
