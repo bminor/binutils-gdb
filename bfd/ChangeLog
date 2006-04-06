@@ -1,3 +1,8 @@
+2006-04-05  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* elf32-bfin.c (bfinfdpic_relocs_info_hash): Sprinkle casts to
+	eliminate warnings.
+
 2006-04-05  H.J. Lu  <hongjiu.lu@intel.com>
 	    James E Wilson  <wilson@specifixinc.com>
 
