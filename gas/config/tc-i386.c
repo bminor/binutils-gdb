@@ -2263,19 +2263,7 @@ match_template ()
 			      : (i.suffix == LONG_DOUBLE_MNEM_SUFFIX
 				 ? No_xSuf : 0))))));
 
-  t = current_templates->start;
-  if (i.suffix == QWORD_MNEM_SUFFIX
-      && flag_code != CODE_64BIT
-      && (intel_syntax
-	  ? !(t->opcode_modifier & IgnoreSize)
-	    && !intel_float_operand (t->name)
-	  : intel_float_operand (t->name) != 2)
-      && (!(t->operand_types[0] & (RegMMX | RegXMM))
-	  || !(t->operand_types[t->operands > 1] & (RegMMX | RegXMM)))
-      && (t->base_opcode != 0x0fc7
-	  || t->extension_opcode != 1 /* cmpxchg8b */))
-    t = current_templates->end;
-  for (; t < current_templates->end; t++)
+  for (t = current_templates->start; t < current_templates->end; t++)
     {
       /* Must have right number of operands.  */
       if (i.operands != t->operands)
@@ -2285,6 +2273,19 @@ match_template ()
       if ((t->opcode_modifier & suffix_check)
 	  && !(intel_syntax
 	       && (t->opcode_modifier & IgnoreSize)))
+	continue;
+
+      /* In general, don't allow 64-bit operands in 32-bit mode.  */
+      if (i.suffix == QWORD_MNEM_SUFFIX
+	  && flag_code != CODE_64BIT
+	  && (intel_syntax
+	      ? (!(t->opcode_modifier & IgnoreSize)
+		 && !intel_float_operand (t->name))
+	      : intel_float_operand (t->name) != 2)
+	  && (!(t->operand_types[0] & (RegMMX | RegXMM))
+	      || !(t->operand_types[t->operands > 1] & (RegMMX | RegXMM)))
+	  && (t->base_opcode != 0x0fc7
+	      || t->extension_opcode != 1 /* cmpxchg8b */))
 	continue;
 
       /* Do not verify operands when there are none.  */

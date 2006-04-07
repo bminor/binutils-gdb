@@ -1,3 +1,9 @@
+2006-04-07  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 2512.
+	* config/tc-i386.c (match_template): Move 64-bit operand tests
+	inside loop.
+
 2006-04-06  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* po/Make-in: Add install-html target.
