@@ -1,3 +1,8 @@
+2006-04-07  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* ldlang.c (load_symbols): Set as_needed and add_needed according
+	to the corresponding script's fields while processing it.
+
 2006-04-06  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* Makefile.am: Add install-html, install-html-am, and
