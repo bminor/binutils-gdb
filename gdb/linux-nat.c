@@ -2388,7 +2388,7 @@ linux_nat_thread_alive (ptid_t ptid)
      will first do a lookup for the process based upon the
      passed-in pid.  If that fails we will get either -ESRCH
      or -EPERM, otherwise the child exists and is alive.  */
-  if (errno == -ESRCH || errno == -EPERM)
+  if (errno == ESRCH || errno == EPERM)
     return 0;
 
   return 1;
