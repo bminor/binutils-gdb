@@ -2542,6 +2542,68 @@ elf64_hppa_finish_dynamic_sections (output_bfd, info)
   return TRUE;
 }
 
+/* Support for core dump NOTE sections.  */
+
+static bfd_boolean
+elf64_hppa_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
+{
+  int offset;
+  size_t size;
+
+  switch (note->descsz)
+    {
+      default:
+	return FALSE;
+
+      case 760:		/* Linux/hppa */
+	/* pr_cursig */
+	elf_tdata (abfd)->core_signal = bfd_get_16 (abfd, note->descdata + 12);
+
+	/* pr_pid */
+	elf_tdata (abfd)->core_pid = bfd_get_32 (abfd, note->descdata + 32);
+
+	/* pr_reg */
+	offset = 112;
+	size = 640;
+
+	break;
+    }
+
+  /* Make a ".reg/999" section.  */
+  return _bfd_elfcore_make_pseudosection (abfd, ".reg",
+					  size, note->descpos + offset);
+}
+
+static bfd_boolean
+elf64_hppa_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
+{
+  char * command;
+  int n;
+
+  switch (note->descsz)
+    {
+    default:
+      return FALSE;
+
+    case 136:		/* Linux/hppa elf_prpsinfo.  */
+      elf_tdata (abfd)->core_program
+	= _bfd_elfcore_strndup (abfd, note->descdata + 40, 16);
+      elf_tdata (abfd)->core_command
+	= _bfd_elfcore_strndup (abfd, note->descdata + 56, 80);
+    }
+
+  /* Note that for some reason, a spurious space is tacked
+     onto the end of the args in some (at least one anyway)
+     implementations, so strip it off if it exists.  */
+  command = elf_tdata (abfd)->core_command;
+  n = strlen (command);
+
+  if (0 < n && command[n - 1] == ' ')
+    command[n - 1] = '\0';
+
+  return TRUE;
+}
+
 /* Return the number of additional phdrs we will need.
 
    The generic ELF code only creates PT_PHDRs for executables.  The HP
@@ -2775,7 +2837,9 @@ const struct elf_size_info hppa64_elf_size_info =
 					elf64_hppa_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections \
 					elf64_hppa_finish_dynamic_sections
-
+#define elf_backend_grok_prstatus	elf64_hppa_grok_prstatus
+#define elf_backend_grok_psinfo		elf64_hppa_grok_psinfo
+ 
 /* Stuff for the BFD linker: */
 #define bfd_elf64_bfd_link_hash_table_create \
 	elf64_hppa_hash_table_create
