@@ -1,3 +1,7 @@
+2006-04-07  Bernhard Fischer  <aldot@gcc.gnu.org>
+
+	* ld.texinfo: Fix typo in documentation of --check-sections.
+
 2006-04-07  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* ldlang.c (load_symbols): Set as_needed and add_needed according

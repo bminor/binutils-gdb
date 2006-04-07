@@ -1117,7 +1117,7 @@ platforms which support shared libraries.
 @item --check-sections
 @itemx --no-check-sections
 Asks the linker @emph{not} to check section addresses after they have
-been assigned to see if there any overlaps.  Normally the linker will
+been assigned to see if there are any overlaps.  Normally the linker will
 perform this check, and if it finds any overlaps it will produce
 suitable error messages.  The linker does know about, and does make
 allowances for sections in overlays.  The default behaviour can be
