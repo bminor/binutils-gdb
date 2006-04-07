@@ -583,7 +583,40 @@ proc stray_arg0_test { } {
 	"\\\$\[0-9\]* = 1" \
 	"stray_arg0_test #4"
 }
-  
+
+# Test that GDB can handle arguments when sourcing files recursively.
+# If the arguments are overwritten with ####### then the test has failed.
+proc recursive_source_test {} {
+    set fd [open "file1" w]
+    puts $fd \
+{source file2
+abcdef qwerty}
+    close $fd
+
+    set fd [open "file2" w]
+    puts $fd \
+{define abcdef
+  echo 1: <<<$arg0>>>\n
+  source file3
+  echo 2: <<<$arg0>>>\n
+end}
+    close $fd
+
+    set fd [open "file3" w]
+    puts $fd \
+"echo in file3\\n
+#################################################################"
+    close $fd
+
+    gdb_test "source file1" \
+	"1: <<<qwerty>>>\[\r\n]+in file3\[\r\n]+2: <<<qwerty>>>" \
+	"recursive source test"
+
+    file delete file1
+    file delete file2
+    file delete file3
+}
+
 gdbvar_simple_if_test
 gdbvar_simple_while_test
 gdbvar_complex_if_while_test
@@ -600,3 +633,4 @@ deprecated_command_test
 bp_deleted_in_command_test
 temporary_breakpoint_commands
 stray_arg0_test
+recursive_source_test

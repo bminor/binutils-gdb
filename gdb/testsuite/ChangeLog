@@ -1,3 +1,7 @@
+2006-04-07  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* gdb.base/commands.exp (recursive_source_test): New test.
+
 2006-04-04  David S. Miller  <davem@sunset.davemloft.net>
 
 	* gdb.base/float.exp: Add pattern for sparc targets.

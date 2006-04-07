@@ -1,3 +1,9 @@
+2006-04-07  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* cli/cli-script.c (struct user_args): Add command field.
+	(arg_cleanup): Free command string.
+	(setup_user_args): Copy the command line before relying on it.
+
 2006-04-06  Joel Brobecker  <brobecker@adacore.com>
 
 	* breakpoint.c (_initialize_breakpoint): Add "del" as an alias
