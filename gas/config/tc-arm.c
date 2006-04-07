@@ -560,6 +560,7 @@ struct asm_opcode
 #define THUMB_SIZE	2	/* Size of thumb instruction.  */
 #define THUMB_PP_PC_LR 0x0100
 #define THUMB_LOAD_BIT 0x0800
+#define THUMB2_LOAD_BIT 0x00100000
 
 #define BAD_ARGS	_("bad arguments to instruction")
 #define BAD_PC		_("r15 not allowed here")
@@ -4443,7 +4444,14 @@ encode_arm_cp_address (int i, int wb_ok, int unind_ok, int reloc_override)
 static int
 move_or_literal_pool (int i, bfd_boolean thumb_p, bfd_boolean mode_3)
 {
-  if ((inst.instruction & (thumb_p ? THUMB_LOAD_BIT : LOAD_BIT)) == 0)
+  unsigned long tbit;
+
+  if (thumb_p)
+    tbit = (inst.instruction > 0xffff) ? THUMB2_LOAD_BIT : THUMB_LOAD_BIT;
+  else
+    tbit = LOAD_BIT;
+
+  if ((inst.instruction & tbit) == 0)
     {
       inst.error = _("invalid pseudo operation");
       return 1;
@@ -4457,7 +4465,7 @@ move_or_literal_pool (int i, bfd_boolean thumb_p, bfd_boolean mode_3)
     {
       if (thumb_p)
 	{
-	  if ((inst.reloc.exp.X_add_number & ~0xFF) == 0)
+	  if (!unified_syntax && (inst.reloc.exp.X_add_number & ~0xFF) == 0)
 	    {
 	      /* This can be done with a mov(1) instruction.  */
 	      inst.instruction	= T_OPCODE_MOV_I8 | (inst.operands[i].reg << 8);
@@ -5965,7 +5973,7 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
   bfd_boolean is_pc = (inst.operands[i].reg == REG_PC);
 
   constraint (!inst.operands[i].isreg,
-	      _("Thumb does not support the ldr =N pseudo-operation"));
+	      _("Instruction does not support =N addresses"));
 
   inst.instruction |= inst.operands[i].reg << 16;
   if (inst.operands[i].immisreg)
@@ -6979,6 +6987,13 @@ do_t_ldst (void)
   opcode = inst.instruction;
   if (unified_syntax)
     {
+      if (!inst.operands[1].isreg)
+	{
+	  if (opcode <= 0xffff)
+	    inst.instruction = THUMB_OP32 (opcode);
+	  if (move_or_literal_pool (0, /*thumb_p=*/TRUE, /*mode_3=*/FALSE))
+	    return;
+	}
       if (inst.operands[1].isreg
 	  && !inst.operands[1].writeback
 	  && !inst.operands[1].shifted && !inst.operands[1].postind

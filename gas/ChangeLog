@@ -1,3 +1,9 @@
+2006-04-07  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (THUMB2_LOAD_BIT): Define.
+	(move_or_literal_pool): Handle Thumb-2 instructions.
+	(do_t_ldst): Call move_or_literal_pool for =N addressing modes.
+
 2006-04-07  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 2512.
