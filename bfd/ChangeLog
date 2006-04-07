@@ -1,3 +1,8 @@
+2006-04-06  DJ Delorie  <dj@redhat.com>
+
+	* elf32-m32c.c (m32c_elf_relocate_section): Generate a symbol for
+	each plt entry we create.
+
 2006-04-06  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* po/Make-in: Add install-html target.
