@@ -1,5 +1,9 @@
 2006-04-07  Paul Brook  <paul@codesourcery.com>
 
+	* config/tc-arm.c (md_apply_fix): Set H bit on blx instruction.
+
+2006-04-07  Paul Brook  <paul@codesourcery.com>
+
 	* config/tc-arm.c (THUMB2_LOAD_BIT): Define.
 	(move_or_literal_pool): Handle Thumb-2 instructions.
 	(do_t_ldst): Call move_or_literal_pool for =N addressing modes.

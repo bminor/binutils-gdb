@@ -1,5 +1,10 @@
 2006-04-07  Paul Brook  <paul@codesourcery.com>
 
+	* gas/arm/blx-local.d: New test.
+	* gas/arm/blx-local.d: New test.
+
+2006-04-07  Paul Brook  <paul@codesourcery.com>
+
 	* gas/arm/thumb2_pool.d: New test.
 	* gas/arm/thumb2_pool.s: New test.
 

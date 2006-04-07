@@ -11927,6 +11927,14 @@ md_apply_fix (fixS *	fixP,
 	{
 	  newval = md_chars_to_number (buf, INSN_SIZE);
 	  newval |= (value >> 2) & 0x00ffffff;
+	  /* Set the H bit on BLX instructions.  */
+	  if (temp == 1)
+	    {
+	      if (value & 2)
+		newval |= 0x01000000;
+	      else
+		newval &= ~0x01000000;
+	    }
 	  md_number_to_chars (buf, newval, INSN_SIZE);
 	}
       break;
