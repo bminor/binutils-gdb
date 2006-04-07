@@ -1,3 +1,8 @@
+2006-04-07  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c (remote_wait): Convert warning to error before
+	parsing corrupt packets.
+
 2006-04-07  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* cli/cli-script.c (struct user_args): Add command field.

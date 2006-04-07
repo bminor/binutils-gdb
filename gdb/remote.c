@@ -2741,9 +2741,9 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 		  {
 		    p1 = strchr (p, ':');
 		    if (p1 == NULL)
-		      warning (_("Malformed packet(a) (missing colon): %s\n\
+		      error (_("Malformed packet(a) (missing colon): %s\n\
 Packet: '%s'\n"),
-			       p, buf);
+			     p, buf);
 		    if (strncmp (p, "thread", p1 - p) == 0)
 		      {
 			p_temp = unpack_varlen_hex (++p1, &thread_num);
