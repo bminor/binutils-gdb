@@ -2382,7 +2382,13 @@ linux_nat_thread_alive (ptid_t ptid)
 			"LLTA: PTRACE_PEEKUSER %s, 0, 0 (%s)\n",
 			target_pid_to_str (ptid),
 			errno ? safe_strerror (errno) : "OK");
-  if (errno)
+
+  /* Not every Linux target implements PTRACE_PEEKUSER.
+     But we can handle that case gracefully since ptrace
+     will first do a lookup for the process based upon the
+     passed-in pid.  If that fails we will get either -ESRCH
+     or -EPERM, otherwise the child exists and is alive.  */
+  if (errno == -ESRCH || errno == -EPERM)
     return 0;
 
   return 1;

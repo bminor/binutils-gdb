@@ -1,3 +1,8 @@
+2006-04-07  David S. Miller  <davem@sunset.davemloft.net>
+
+	* linux-nat.c (linux_nat_thread_alive): Handle targets that
+	do not implement PTRACE_PEEKUSER.
+
 2006-04-07  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote.c (remote_wait): Convert warning to error before
