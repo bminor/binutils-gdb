@@ -1,3 +1,7 @@
+2006-04-08  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris/crisv32f.c (MY (deliver_interrupt)): Set CCS to new_ccs.
+
 2006-04-03  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cris/dv-cris.c, cris/dv-rv.c, cris/rvdummy.c: New files.

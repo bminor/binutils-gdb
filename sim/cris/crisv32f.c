@@ -590,6 +590,8 @@ MY (deliver_interrupt) (SIM_CPU *current_cpu,
      recognize that we're in kernel mode.  */
   CPU (h_ubit_v32) = 0;
 
+  SET_H_SR (H_SR_CCS, new_ccs);
+
   if (was_user)
     {
       /* These methods require that user mode is unset.  */
