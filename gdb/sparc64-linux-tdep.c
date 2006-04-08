@@ -22,7 +22,9 @@
 #include "defs.h"
 #include "frame.h"
 #include "frame-unwind.h"
+#include "regcache.h"
 #include "gdbarch.h"
+#include "gdbcore.h"
 #include "osabi.h"
 #include "solib-svr4.h"
 #include "symtab.h"
@@ -98,6 +100,36 @@ sparc64_linux_sigframe_init (const struct tramp_frame *self,
   trad_frame_set_id (this_cache, frame_id_build (base, func));
 }
 
+/* Return the address of a system call's alternative return
+   address.  */
+
+static CORE_ADDR
+sparc64_linux_step_trap (unsigned long insn)
+{
+  if (insn == 0x91d0206d)
+    {
+      ULONGEST sp;
+
+      regcache_cooked_read_unsigned (current_regcache,
+				     SPARC_SP_REGNUM, &sp);
+      if (sp & 1)
+	sp += BIAS;
+
+      /* The kernel puts the sigreturn registers on the stack,
+	 and this is where the signal unwinding state is take from
+	 when returning from a signal.
+
+	 A siginfo_t sits 192 bytes from the base of the stack.  This
+	 siginfo_t is 128 bytes, and is followed by the sigreturn
+	 register save area.  The saved PC sits at a 136 byte offset
+	 into there.  */
+
+      return read_memory_unsigned_integer (sp + 192 + 128 + 136, 8);
+    }
+
+  return 0;
+}
+
 
 static void
 sparc64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -120,6 +152,9 @@ sparc64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
                                              svr4_fetch_objfile_link_map);
+
+  /* Make sure we can single-step over signal return system calls.  */
+  tdep->step_trap = sparc64_linux_step_trap;
 }
 
 

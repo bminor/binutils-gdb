@@ -2616,8 +2616,9 @@ sparc64-linux-nat.o: sparc64-linux-nat.c $(defs_h) $(regcache_h) \
 	$(gregset_h) $(sparc64_tdep_h) $(sparc_tdep_h) \
 	$(sparc_nat_h) $(inferior_h) $(target_h) $(linux_nat_h)
 sparc64-linux-tdep.o: sparc64-linux-tdep.c $(defs_h) $(frame_h) \
-	$(frame_unwind_h) $(gdbarch_h) $(osabi_h) $(solib_svr4_h) \
-	$(symtab_h) $(trad_frame_h) $(tramp_frame_h) $(sparc64_tdep_h)
+	$(frame_unwind_h) $(regcache_h) $(gdbarch_h) $(gdbcore_h) \
+	$(osabi_h) $(solib_svr4_h) $(symtab_h) $(trad_frame_h) \
+	$(tramp_frame_h) $(sparc64_tdep_h)
 sparc64-nat.o: sparc64-nat.c $(defs_h) $(gdbarch_h) $(sparc64_tdep_h) \
 	$(sparc_nat_h)
 sparc64nbsd-nat.o: sparc64nbsd-nat.c $(defs_h) $(regcache_h) $(target_h) \

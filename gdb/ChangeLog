@@ -1,3 +1,11 @@
+2006-04-08  David S. Miller  <davem@sunset.davemloft.net>
+
+	* sparc-linux-tdep.c (sparc32_linux_step_trap): New.
+	(sparc32_linux_init_abi): Hook it into tdep->step_trap.
+	* sparc64-linux-tdep.c (sparc64_linux_step_trap): New.
+	(sparc64_linux_init_abi): Hook it into tdep->step_trap.
+	* Makefile.in: Update dependencies.
+
 2006-04-07  David S. Miller  <davem@sunset.davemloft.net>
 
 	* linux-nat.c (linux_nat_thread_alive): Handle targets that

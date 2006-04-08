@@ -126,6 +126,49 @@ sparc32_linux_sigframe_init (const struct tramp_frame *self,
   trad_frame_set_id (this_cache, frame_id_build (base, func));
 }
 
+/* Return the address of a system call's alternative return
+   address.  */
+
+static CORE_ADDR
+sparc32_linux_step_trap (unsigned long insn)
+{
+  if (insn == 0x91d02010)
+    {
+      ULONGEST sc_num;
+
+      regcache_cooked_read_unsigned (current_regcache,
+				     SPARC_G1_REGNUM, &sc_num);
+
+      /* __NR_rt_sigreturn is 101 and __NR_sigreturn is 216  */
+      if (sc_num == 101 || sc_num == 216)
+	{
+	  ULONGEST sp, pc_offset;
+
+	  regcache_cooked_read_unsigned (current_regcache,
+					 SPARC_SP_REGNUM, &sp);
+
+	  /* The kernel puts the sigreturn registers on the stack,
+	     and this is where the signal unwinding state is take from
+	     when returning from a signal.
+
+	     For __NR_sigreturn, this register area sits 96 bytes from
+	     the base of the stack.  The saved PC sits 4 bytes into the
+	     sigreturn register save area.
+
+	     For __NR_rt_sigreturn a siginfo_t, which is 128 bytes, sits
+	     right before the sigreturn register save area.  */
+
+	  pc_offset = 96 + 4;
+	  if (sc_num == 101)
+	    pc_offset += 128;
+
+	  return read_memory_unsigned_integer (sp + pc_offset, 4);
+	}
+    }
+
+  return 0;
+}
+
 
 static void
 sparc32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -151,6 +194,9 @@ sparc32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
                                              svr4_fetch_objfile_link_map);
+
+  /* Make sure we can single-step over signal return system calls.  */
+  tdep->step_trap = sparc32_linux_step_trap;
 
   /* Hook in the DWARF CFI frame unwinder.  */
   frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
