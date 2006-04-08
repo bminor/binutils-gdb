@@ -1,3 +1,17 @@
+2006-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/2513
+	* elf32-i386.c (GOT_TLS_MASK): New macro for tls_type.
+	(GOT_TLS_IE_IE): Likewise.
+	(GOT_TLS_IE_GD): Likewise.
+	(GOT_TLS_IE_MASK): Likewise.
+	(elf_i386_check_relocs): For global symbols, set GOT_TLS_IE_GD
+	and GOT_TLS_IE_IE for R_386_TLS_GD and R_386_TLS_IE
+	respectively.
+	(allocate_dynrelocs): If both GOT_TLS_IE_IE and GOT_TLS_IE_GD
+	are set, treat tls_type as GOT_TLS_IE_BOTH.
+	(elf_i386_relocate_section): Likewise.
+
 2006-04-07  Randolph Chung  <tausq@debian.org>
 
 	* elf64-hppa.c (elf64_hppa_grok_prstatus): New function.
