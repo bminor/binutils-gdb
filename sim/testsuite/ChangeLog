@@ -1,3 +1,7 @@
+2006-04-08  Hans-Peter Nilsson  <hp@axis.com>
+
+	* sim/cris/hw/rv-n-cris/irq6.ms: New test.
+
 2006-04-03  Hans-Peter Nilsson  <hp@axis.com>
 
 	* sim/cris/hw: New directory for subdirectories with tests.
