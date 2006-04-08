@@ -2616,8 +2616,8 @@ sparc64-linux-nat.o: sparc64-linux-nat.c $(defs_h) $(regcache_h) \
 	$(gregset_h) $(sparc64_tdep_h) $(sparc_tdep_h) \
 	$(sparc_nat_h) $(inferior_h) $(target_h) $(linux_nat_h)
 sparc64-linux-tdep.o: sparc64-linux-tdep.c $(defs_h) $(frame_h) \
-	$(frame_unwind_h) $(regcache_h) $(gdbarch_h) $(gdbcore_h) \
-	$(osabi_h) $(solib_svr4_h) $(symtab_h) $(trad_frame_h) \
+	$(frame_unwind_h) $(regset_h) $(regcache_h) $(gdbarch_h) \
+	$(gdbcore_h) $(osabi_h) $(solib_svr4_h) $(symtab_h) $(trad_frame_h) \
 	$(tramp_frame_h) $(sparc64_tdep_h)
 sparc64-nat.o: sparc64-nat.c $(defs_h) $(gdbarch_h) $(sparc64_tdep_h) \
 	$(sparc_nat_h)
@@ -2644,9 +2644,9 @@ sparc-linux-nat.o: sparc-linux-nat.c $(defs_h) $(regcache_h) $(gregset_h) \
 	$(sparc_tdep_h) $(sparc_nat_h) $(inferior_h) $(target_h) \
 	$(linux_nat_h)
 sparc-linux-tdep.o: sparc-linux-tdep.c $(defs_h) $(dwarf2_frame_h) \
-	$(floatformat_h) $(frame_h) $(frame_unwind_h) $(gdbarch_h) \
-	$(gdbcore_h) $(osabi_h) $(regcache_h) $(solib_svr4_h) $(symtab_h) \
-	$(trad_frame_h) $(tramp_frame_h) $(sparc_tdep_h)
+	$(floatformat_h) $(frame_h) $(frame_unwind_h) $(regset_h) \
+	$(gdbarch_h) $(gdbcore_h) $(osabi_h) $(regcache_h) $(solib_svr4_h) \
+	$(symtab_h) $(trad_frame_h) $(tramp_frame_h) $(sparc_tdep_h)
 sparc-nat.o: sparc-nat.c $(defs_h) $(inferior_h) $(regcache_h) $(target_h) \
 	$(gdb_assert_h) $(gdb_string_h) $(gdb_wait_h) $(sparc_tdep_h) \
 	$(sparc_nat_h) $(inf_ptrace_h)

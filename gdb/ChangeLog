@@ -2,8 +2,22 @@
 
 	* sparc-linux-tdep.c (sparc32_linux_step_trap): New.
 	(sparc32_linux_init_abi): Hook it into tdep->step_trap.
+	(sparc32_linux_core_gregset,
+	sparc32_linux_supply_core_gregset,
+	sparc32_linux_collect_core_gregset,
+	sparc32_linux_supply_core_fpregset,
+	sparc32_linux_collect_core_fpregset): New.
+	(sparc32_linux_init_abi): Register them with generic sparc
+	core regset infrastructure.
 	* sparc64-linux-tdep.c (sparc64_linux_step_trap): New.
 	(sparc64_linux_init_abi): Hook it into tdep->step_trap.
+	(sparc64_linux_core_gregset,
+	sparc64_linux_supply_core_gregset,
+	sparc64_linux_collect_core_gregset,
+	sparc64_linux_supply_core_fpregset,
+	sparc64_linux_collect_core_fpregset): New.
+	(sparc64_linux_init_abi): Register them with generic sparc
+	core regset infrastructure.	
 	* Makefile.in: Update dependencies.
 
 2006-04-07  David S. Miller  <davem@sunset.davemloft.net>

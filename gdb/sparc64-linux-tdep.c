@@ -22,6 +22,7 @@
 #include "defs.h"
 #include "frame.h"
 #include "frame-unwind.h"
+#include "regset.h"
 #include "regcache.h"
 #include "gdbarch.h"
 #include "gdbcore.h"
@@ -131,10 +132,66 @@ sparc64_linux_step_trap (unsigned long insn)
 }
 
 
+const struct sparc_gregset sparc64_linux_core_gregset =
+{
+  32 * 8,			/* %tstate */
+  33 * 8,			/* %tpc */
+  34 * 8,			/* %tnpc */
+  35 * 8,			/* %y */
+  -1,				/* %wim */
+  -1,				/* %tbr */
+  1 * 8,			/* %g1 */
+  16 * 8,			/* %l0 */
+  8,				/* y size */
+};
+
+
+static void
+sparc64_linux_supply_core_gregset (const struct regset *regset,
+				   struct regcache *regcache,
+				   int regnum, const void *gregs, size_t len)
+{
+  sparc64_supply_gregset (&sparc64_linux_core_gregset, regcache, regnum, gregs);
+}
+
+static void
+sparc64_linux_collect_core_gregset (const struct regset *regset,
+				    const struct regcache *regcache,
+				    int regnum, void *gregs, size_t len)
+{
+  sparc64_collect_gregset (&sparc64_linux_core_gregset, regcache, regnum, gregs);
+}
+
+static void
+sparc64_linux_supply_core_fpregset (const struct regset *regset,
+				    struct regcache *regcache,
+				    int regnum, const void *fpregs, size_t len)
+{
+  sparc64_supply_fpregset (regcache, regnum, fpregs);
+}
+
+static void
+sparc64_linux_collect_core_fpregset (const struct regset *regset,
+				     const struct regcache *regcache,
+				     int regnum, void *fpregs, size_t len)
+{
+  sparc64_collect_fpregset (regcache, regnum, fpregs);
+}
+
+
+
 static void
 sparc64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  tdep->gregset = regset_alloc (gdbarch, sparc64_linux_supply_core_gregset,
+				sparc64_linux_collect_core_gregset);
+  tdep->sizeof_gregset = 288;
+
+  tdep->fpregset = regset_alloc (gdbarch, sparc64_linux_supply_core_fpregset,
+				 sparc64_linux_collect_core_fpregset);
+  tdep->sizeof_fpregset = 280;
 
   tramp_frame_prepend_unwinder (gdbarch, &sparc64_linux_rt_sigframe);
 

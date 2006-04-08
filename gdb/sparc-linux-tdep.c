@@ -24,6 +24,7 @@
 #include "floatformat.h"
 #include "frame.h"
 #include "frame-unwind.h"
+#include "regset.h"
 #include "gdbarch.h"
 #include "gdbcore.h"
 #include "osabi.h"
@@ -170,10 +171,66 @@ sparc32_linux_step_trap (unsigned long insn)
 }
 
 
+const struct sparc_gregset sparc32_linux_core_gregset =
+{
+  32 * 4,			/* %psr */
+  33 * 4,			/* %pc */
+  34 * 4,			/* %npc */
+  35 * 4,			/* %y */
+  -1,				/* %wim */
+  -1,				/* %tbr */
+  1 * 4,			/* %g1 */
+  16 * 4,			/* %l0 */
+  4,				/* y size */
+};
+
+
+static void
+sparc32_linux_supply_core_gregset (const struct regset *regset,
+				   struct regcache *regcache,
+				   int regnum, const void *gregs, size_t len)
+{
+  sparc32_supply_gregset (&sparc32_linux_core_gregset, regcache, regnum, gregs);
+}
+
+static void
+sparc32_linux_collect_core_gregset (const struct regset *regset,
+				    const struct regcache *regcache,
+				    int regnum, void *gregs, size_t len)
+{
+  sparc32_collect_gregset (&sparc32_linux_core_gregset, regcache, regnum, gregs);
+}
+
+static void
+sparc32_linux_supply_core_fpregset (const struct regset *regset,
+				    struct regcache *regcache,
+				    int regnum, const void *fpregs, size_t len)
+{
+  sparc32_supply_fpregset (regcache, regnum, fpregs);
+}
+
+static void
+sparc32_linux_collect_core_fpregset (const struct regset *regset,
+				     const struct regcache *regcache,
+				     int regnum, void *fpregs, size_t len)
+{
+  sparc32_collect_fpregset (regcache, regnum, fpregs);
+}
+
+
+
 static void
 sparc32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  tdep->gregset = regset_alloc (gdbarch, sparc32_linux_supply_core_gregset,
+				sparc32_linux_collect_core_gregset);
+  tdep->sizeof_gregset = 152;
+
+  tdep->fpregset = regset_alloc (gdbarch, sparc32_linux_supply_core_fpregset,
+				 sparc32_linux_collect_core_fpregset);
+  tdep->sizeof_fpregset = 396;
 
   tramp_frame_prepend_unwinder (gdbarch, &sparc32_linux_sigframe);
   tramp_frame_prepend_unwinder (gdbarch, &sparc32_linux_rt_sigframe);
