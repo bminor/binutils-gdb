@@ -22,6 +22,7 @@
 #include "defs.h"
 #include "frame.h"
 #include "frame-unwind.h"
+#include "dwarf2-frame.h"
 #include "regset.h"
 #include "regcache.h"
 #include "gdbarch.h"
@@ -194,6 +195,9 @@ sparc64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sizeof_fpregset = 280;
 
   tramp_frame_prepend_unwinder (gdbarch, &sparc64_linux_rt_sigframe);
+
+  /* Hook in the DWARF CFI frame unwinder.  */
+  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
 
   sparc64_init_abi (info, gdbarch);
 

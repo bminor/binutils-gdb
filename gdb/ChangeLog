@@ -1,3 +1,12 @@
+2006-04-09  David S. Miller  <davem@sunset.davemloft.net>
+
+	* sparc64-linux-tdep.c (sparc64_linux_init_abi): Append dwarf2
+	frame sniffer.
+	* sparc-tdep.c (sparc32_gdbarch_init): Make sure to call
+	dwarf2_frame_set_init_reg() before gdbarch_init_osabi() so
+	that the latter can override.
+	* Makefile.in (sparc64-linux-tdep.o): Update dependencies.
+
 2006-04-09  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* s390-tdep.c (struct s390_prologue_data): New field 'stack'.

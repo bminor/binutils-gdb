@@ -1296,13 +1296,13 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   frame_base_set_default (gdbarch, &sparc32_frame_base);
 
-  /* Hook in ABI-specific overrides, if they have been registered.  */
-  gdbarch_init_osabi (info, gdbarch);
-
   /* Hook in the DWARF CFI frame unwinder.  */
   dwarf2_frame_set_init_reg (gdbarch, sparc32_dwarf2_frame_init_reg);
   /* FIXME: kettenis/20050423: Don't enable the unwinder until the
      StackGhost issues have been resolved.  */
+
+  /* Hook in ABI-specific overrides, if they have been registered.  */
+  gdbarch_init_osabi (info, gdbarch);
 
   frame_unwind_append_sniffer (gdbarch, sparc32_frame_sniffer);
 
