@@ -1,3 +1,19 @@
+2006-04-09  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* Makefile.in (s390-tdep.o): Add dependency on $(prologue_value_h).
+	* s390-tdep.c: Include "prologue-value.h".
+	(struct prologue_value): Remove.
+	(pv_set_to_unknown, pv_set_to_constant, pv_set_to_register,
+	pv_constant_last, pv_add, pv_add_constant, pv_subtract,
+	pv_logical_and, pv_is_identical, pv_is_register): Remove.
+	(compute_x_addr): Remove, replace by ...
+	(s390_addr): ... this new function.
+	(struct s390_prologue_data): Use pv_t instead of prologue_value.
+	(s390_store, s390_load): Likewise.
+	(s390_prologue_frame_unwind_cache): Likewise.
+	(s390_analyze_prologue): Likewise.  Also, simplify and combine
+	several conditional statements.
+
 2006-04-08  Jim Blandy  <jimb@codesourcery.com>
 
 	* Makefile.in (COMMON_OBS): List prologue-value.o.  (Omitted from
