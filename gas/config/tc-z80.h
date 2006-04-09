@@ -55,12 +55,10 @@
 /* Define some functions to be called by generic code.  */
 #define md_end               z80_md_end
 #define md_start_line_hook() { if (z80_start_line_hook ()) continue; }
-#define md_optimize_expr     z80_optimize_expr
 #define TC_CONS_FIX_NEW z80_cons_fix_new
 
 extern void z80_md_end (void);
 extern int z80_start_line_hook (void);
-extern int z80_optimize_expr (expressionS *, operatorT, expressionS *);
 extern void z80_cons_fix_new (fragS *, int, int, expressionS *);
 
 #define WORKING_DOT_WORD

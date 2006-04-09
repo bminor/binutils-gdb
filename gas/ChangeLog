@@ -1,3 +1,8 @@
+2006-04-09  Arnold Metselaar  <arnold.metselaar@planet.nl>
+
+	* config/tc-z80.c (z80_optimize_expr): Removed; redundant since 2006-04-04.
+	* config/tc-z80.h (z80_optimize_expr, md_optimize_expr): Removed.
+
 2006-04-07  Joerg Wunsch <j.gnu@uriah.heep.sax.de>
 
 	* gas/config/tc-avr.c (mcu_types): Add support for attiny261,
