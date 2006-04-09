@@ -716,6 +716,9 @@ is_rxy (bfd_byte *insn, int op1, int op2,
 
 struct s390_prologue_data {
 
+  /* The stack.  */
+  struct pv_area *stack;
+
   /* The size of a GPR or FPR.  */
   int gpr_size;
   int fpr_size;
@@ -768,8 +771,7 @@ s390_store (struct s390_prologue_data *data,
 	    pv_t value)
 {
   pv_t addr = s390_addr (data, d2, x2, b2);
-  pv_t cfa, offset;
-  int i;
+  pv_t offset;
 
   /* Check whether we are storing the backchain.  */
   offset = pv_subtract (data->gpr[S390_SP_REGNUM - S390_R0_REGNUM], addr);
@@ -784,37 +786,8 @@ s390_store (struct s390_prologue_data *data,
 
 
   /* Check whether we are storing a register into the stack.  */
-  cfa = pv_register (S390_SP_REGNUM, 16 * data->gpr_size + 32);
-  offset = pv_subtract (cfa, addr);
-
-  if (pv_is_constant (offset)
-      && offset.k < INT_MAX && offset.k > 0
-      && offset.k % data->gpr_size == 0)
-    {
-      /* If we are storing the original value of a register, we want to
-	 record the CFA offset.  If the same register is stored multiple
-	 times, the stack slot with the highest address counts.  */
-      
-      for (i = 0; i < S390_NUM_GPRS; i++)
-	if (size == data->gpr_size
-	    && pv_is_register_k (value, S390_R0_REGNUM + i, 0))
-	  if (data->gpr_slot[i] == 0
-	      || data->gpr_slot[i] > offset.k)
-	    {
-	      data->gpr_slot[i] = offset.k;
-	      return;
-	    }
-
-      for (i = 0; i < S390_NUM_FPRS; i++)
-	if (size == data->fpr_size
-	    && pv_is_register_k (value, S390_F0_REGNUM + i, 0))
-	  if (data->fpr_slot[i] == 0
-	      || data->fpr_slot[i] > offset.k)
-	    {
-	      data->fpr_slot[i] = offset.k;
-	      return;
-	    }
-    }
+  if (!pv_area_store_would_trash (data->stack, addr))
+    pv_area_store (data->stack, addr, size, value);
 
 
   /* Note: If this is some store we cannot identify, you might think we
@@ -832,8 +805,7 @@ s390_load (struct s390_prologue_data *data,
 	   
 {
   pv_t addr = s390_addr (data, d2, x2, b2);
-  pv_t cfa, offset;
-  int i;
+  pv_t offset;
 
   /* If it's a load from an in-line constant pool, then we can
      simulate that, under the assumption that the code isn't
@@ -851,25 +823,51 @@ s390_load (struct s390_prologue_data *data,
     }
 
   /* Check whether we are accessing one of our save slots.  */
-  cfa = pv_register (S390_SP_REGNUM, 16 * data->gpr_size + 32);
-  offset = pv_subtract (cfa, addr);
-
-  if (pv_is_constant (offset)
-      && offset.k < INT_MAX && offset.k > 0)
-    {
-      for (i = 0; i < S390_NUM_GPRS; i++)
-	if (offset.k == data->gpr_slot[i])
-	  return pv_register (S390_R0_REGNUM + i, 0);
-
-      for (i = 0; i < S390_NUM_FPRS; i++)
-	if (offset.k == data->fpr_slot[i])
-	  return pv_register (S390_F0_REGNUM + i, 0);
-    }
-
-  /* Otherwise, we don't know the value.  */
-  return pv_unknown ();
+  return pv_area_fetch (data->stack, addr, size);
 }
-            
+
+/* Function for finding saved registers in a 'struct pv_area'; we pass
+   this to pv_area_scan.
+
+   If VALUE is a saved register, ADDR says it was saved at a constant
+   offset from the frame base, and SIZE indicates that the whole
+   register was saved, record its offset in the reg_offset table in
+   PROLOGUE_UNTYPED.  */
+static void
+s390_check_for_saved (void *data_untyped, pv_t addr, CORE_ADDR size, pv_t value)
+{
+  struct s390_prologue_data *data = data_untyped;
+  int i, offset;
+
+  if (!pv_is_register (addr, S390_SP_REGNUM))
+    return;
+
+  offset = 16 * data->gpr_size + 32 - addr.k;
+
+  /* If we are storing the original value of a register, we want to
+     record the CFA offset.  If the same register is stored multiple
+     times, the stack slot with the highest address counts.  */
+ 
+  for (i = 0; i < S390_NUM_GPRS; i++)
+    if (size == data->gpr_size
+	&& pv_is_register_k (value, S390_R0_REGNUM + i, 0))
+      if (data->gpr_slot[i] == 0
+	  || data->gpr_slot[i] > offset)
+	{
+	  data->gpr_slot[i] = offset;
+	  return;
+	}
+
+  for (i = 0; i < S390_NUM_FPRS; i++)
+    if (size == data->fpr_size
+	&& pv_is_register_k (value, S390_F0_REGNUM + i, 0))
+      if (data->fpr_slot[i] == 0
+	  || data->fpr_slot[i] > offset)
+	{
+	  data->fpr_slot[i] = offset;
+	  return;
+	}
+}
 
 /* Analyze the prologue of the function starting at START_PC,
    continuing at most until CURRENT_PC.  Initialize DATA to
@@ -900,6 +898,8 @@ s390_analyze_prologue (struct gdbarch *gdbarch,
   /* Set up everything's initial value.  */
   {
     int i;
+
+    data->stack = make_pv_area (S390_SP_REGNUM);
 
     /* For the purpose of prologue tracking, we consider the GPR size to
        be equal to the ABI word size, even if it is actually larger
@@ -1122,6 +1122,12 @@ s390_analyze_prologue (struct gdbarch *gdbarch,
           result = next_pc;
       }
     }
+
+  /* Record where all the registers were saved.  */
+  pv_area_scan (data->stack, s390_check_for_saved, data);
+
+  free_pv_area (data->stack);
+  data->stack = NULL;
 
   return result;
 }

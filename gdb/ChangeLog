@@ -1,5 +1,13 @@
 2006-04-09  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* s390-tdep.c (struct s390_prologue_data): New field 'stack'.
+	(s390_store): Call pv_area_store to track stack slots.
+	(s390_load): Call pv_area_fetch to track stack slots.
+	(s390_check_for_saved): New function.
+	(s390_analyze_prologue): Call pv_area_scan.  Allocate and free stack.
+
+2006-04-09  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* Makefile.in (s390-tdep.o): Add dependency on $(prologue_value_h).
 	* s390-tdep.c: Include "prologue-value.h".
 	(struct prologue_value): Remove.
