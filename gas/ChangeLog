@@ -1,3 +1,12 @@
+2006-04-10  Sterling Augustine  <sterling@tensilica.com>
+
+	* config/tc-xtensa.c (xg_assemble_vliw_tokens): Record loop target
+	symbols in RELAX[_CHECK]_ALIGN_NEXT_OPCODE frags.
+	(xtensa_fix_close_loop_end_frags): Use the recorded values instead of
+	decoding the loop instructions.  Remove current_offset variable.
+	(xtensa_fix_short_loop_frags): Likewise.
+	(min_bytes_to_other_loop_end): Remove current_offset argument.
+
 2006-04-09  Arnold Metselaar  <arnold.metselaar@planet.nl>
 
 	* config/tc-z80.c (z80_optimize_expr): Removed; redundant since 2006-04-04.

@@ -6724,6 +6724,14 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
     {
       int max_fill;
 
+      /* Remember the symbol that marks the end of the loop in the frag
+	 that marks the start of the loop.  This way we can easily find
+	 the end of the loop at the beginning, without adding special code
+	 to mark the loop instructions themselves.  */
+      symbolS *target_sym = NULL;
+      if (vinsn->slots[0].tok[1].X_op == O_symbol)
+	target_sym = vinsn->slots[0].tok[1].X_add_symbol;
+
       xtensa_set_frag_assembly_state (frag_now);
       frag_now->tc_frag_data.is_insn = TRUE;
 
@@ -6733,13 +6741,10 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
 
       if (use_transform ())
 	frag_var (rs_machine_dependent, max_fill, max_fill,
-		  RELAX_ALIGN_NEXT_OPCODE,
-		  frag_now->fr_symbol,
-		  frag_now->fr_offset,
-		  NULL);
+		  RELAX_ALIGN_NEXT_OPCODE, target_sym, 0, NULL);
       else
 	frag_var (rs_machine_dependent, 0, 0,
-		  RELAX_CHECK_ALIGN_NEXT_OPCODE, 0, 0, NULL);
+		  RELAX_CHECK_ALIGN_NEXT_OPCODE, target_sym, 0, NULL);
       xtensa_set_frag_assembly_state (frag_now);
 
       xtensa_move_labels (frag_now, 0, FALSE);
@@ -7341,7 +7346,7 @@ next_instr_is_loop_end (fragS *fragP)
    .fill 0.  */
 
 static offsetT min_bytes_to_other_loop_end
-  (fragS *, fragS *, offsetT, offsetT);
+  (fragS *, fragS *, offsetT);
 
 static void
 xtensa_fix_close_loop_end_frags (void)
@@ -7355,32 +7360,14 @@ xtensa_fix_close_loop_end_frags (void)
       fragS *fragP;
 
       fragS *current_target = NULL;
-      offsetT current_offset = 0;
 
       /* Walk over all of the fragments in a subsection.  */
       for (fragP = frchP->frch_root; fragP; fragP = fragP->fr_next)
 	{
 	  if (fragP->fr_type == rs_machine_dependent
-	      && ((fragP->fr_subtype == RELAX_IMMED)
-		  || ((fragP->fr_subtype == RELAX_SLOTS)
-		      && (fragP->tc_frag_data.slot_subtypes[0]
-			  == RELAX_IMMED))))
-	    {
-	      /* Read it.  If the instruction is a loop, get the target.  */
-	      TInsn t_insn;
-	      tinsn_from_chars (&t_insn, fragP->fr_opcode, 0);
-	      if (xtensa_opcode_is_loop (xtensa_default_isa,
-					 t_insn.opcode) == 1)
-		{
-		  /* Get the current fragment target.  */
-		  if (fragP->tc_frag_data.slot_symbols[0])
-		    {
-		      symbolS *sym = fragP->tc_frag_data.slot_symbols[0];
-		      current_target = symbol_get_frag (sym);
-		      current_offset = fragP->fr_offset;
-		    }
-		}
-	    }
+	      && ((fragP->fr_subtype == RELAX_ALIGN_NEXT_OPCODE)
+		  || (fragP->fr_subtype == RELAX_CHECK_ALIGN_NEXT_OPCODE)))
+	      current_target = symbol_get_frag (fragP->fr_symbol);
 
 	  if (current_target
 	      && fragP->fr_type == rs_machine_dependent
@@ -7392,8 +7379,7 @@ xtensa_fix_close_loop_end_frags (void)
 #define REQUIRED_LOOP_DIVIDING_BYTES 12
 	      /* Max out at 12.  */
 	      min_bytes = min_bytes_to_other_loop_end
-		(fragP->fr_next, current_target, current_offset,
-		 REQUIRED_LOOP_DIVIDING_BYTES);
+		(fragP->fr_next, current_target, REQUIRED_LOOP_DIVIDING_BYTES);
 
 	      if (min_bytes < REQUIRED_LOOP_DIVIDING_BYTES)
 		{
@@ -7434,7 +7420,6 @@ static offsetT unrelaxed_frag_min_size (fragS *);
 static offsetT
 min_bytes_to_other_loop_end (fragS *fragP,
 			     fragS *current_target,
-			     offsetT current_offset,
 			     offsetT max_size)
 {
   offsetT offset = 0;
@@ -7446,11 +7431,11 @@ min_bytes_to_other_loop_end (fragS *fragP,
     {
       if (current_fragP->tc_frag_data.is_loop_target
 	  && current_fragP != current_target)
-	return offset + current_offset;
+	return offset;
 
       offset += unrelaxed_frag_min_size (current_fragP);
 
-      if (offset + current_offset >= max_size)
+      if (offset >= max_size)
 	return max_size;
     }
   return max_size;
@@ -7537,35 +7522,22 @@ xtensa_fix_short_loop_frags (void)
     {
       fragS *fragP;
       fragS *current_target = NULL;
-      offsetT current_offset = 0;
       xtensa_opcode current_opcode = XTENSA_UNDEFINED;
 
       /* Walk over all of the fragments in a subsection.  */
       for (fragP = frchP->frch_root; fragP; fragP = fragP->fr_next)
 	{
-	  /* Check on the current loop.  */
 	  if (fragP->fr_type == rs_machine_dependent
-	      && ((fragP->fr_subtype == RELAX_IMMED)
-		  || ((fragP->fr_subtype == RELAX_SLOTS)
-		      && (fragP->tc_frag_data.slot_subtypes[0]
-			  == RELAX_IMMED))))
+	      && ((fragP->fr_subtype == RELAX_ALIGN_NEXT_OPCODE)
+		  || (fragP->fr_subtype == RELAX_CHECK_ALIGN_NEXT_OPCODE)))
 	    {
 	      TInsn t_insn;
-
-	      /* Read it.  If the instruction is a loop, get the target.  */
-	      tinsn_from_chars (&t_insn, fragP->fr_opcode, 0);
-	      if (xtensa_opcode_is_loop (xtensa_default_isa,
-					 t_insn.opcode) == 1)
-		{
-		  /* Get the current fragment target.  */
-		  if (fragP->tc_frag_data.slot_symbols[0])
-		    {
-		      symbolS *sym = fragP->tc_frag_data.slot_symbols[0];
-		      current_target = symbol_get_frag (sym);
-		      current_offset = fragP->fr_offset;
-		      current_opcode = t_insn.opcode;
-		    }
-		}
+	      fragS *loop_frag = next_non_empty_frag (fragP);
+	      tinsn_from_chars (&t_insn, loop_frag->fr_opcode, 0);
+	      current_target = symbol_get_frag (fragP->fr_symbol);
+	      current_opcode = t_insn.opcode;
+	      assert (xtensa_opcode_is_loop (xtensa_default_isa,
+					     current_opcode));
 	    }
 
 	  if (fragP->fr_type == rs_machine_dependent
