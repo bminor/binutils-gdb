@@ -1,3 +1,7 @@
+2006-04-10  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-linux-tdep.c (arm_linux_extract_return_value): Use gdb_byte.
+
 2006-04-09  David S. Miller  <davem@sunset.davemloft.net>
 
 	* sparc64-linux-tdep.c (sparc64_linux_init_abi): Append dwarf2
