@@ -73,6 +73,12 @@ proc default_binutils_run { prog progargs } {
     if {![string match "" $exec_output]} then {
 	send_log "$exec_output\n"
 	verbose "$exec_output"
+    } else {
+	if { [lindex $state 0] != 0 } {
+	    set exec_output "$prog exited with status [lindex $state 0]"
+	    send_log "$exec_output\n"
+	    verbose "$exec_output"
+	}
     }
     return $exec_output
 }
