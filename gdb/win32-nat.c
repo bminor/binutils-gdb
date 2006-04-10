@@ -354,6 +354,7 @@ do_win32_fetch_inferior_registers (int r)
 
   if (current_thread->reload_context)
     {
+#ifdef __COPY_CONTEXT_SIZE
       if (have_saved_context)
 	{
 	  /* Lie about where the program actually is stopped since cygwin has informed us that
@@ -363,6 +364,7 @@ do_win32_fetch_inferior_registers (int r)
 	  have_saved_context = 0;
 	}
       else
+#endif
 	{
 	  thread_info *th = current_thread;
 	  th->context.ContextFlags = CONTEXT_DEBUGGER_DR;
@@ -928,6 +930,7 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
       if (strncmp (s, "cYg", 3) != 0)
 	warning (("%s"), s);
     }
+#ifdef __COPY_CONTEXT_SIZE
   else
     {
       /* Got a cygwin signal marker.  A cygwin signal is followed by the signal number
@@ -955,6 +958,7 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
 	  current_event.dwThreadId = retval;
 	}
     }
+#endif
 
   if (s)
     xfree (s);
