@@ -1,3 +1,7 @@
+2006-04-10  DJ Delorie  <dj@redhat.com>
+
+	* m32c-asm.c: Regenerate.
+
 2006-04-06  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* Makefile.am: Add install-html target.
