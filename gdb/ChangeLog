@@ -1,5 +1,11 @@
 2006-04-10  Christopher Faylor  <cgf@timesys.com>
 
+	* win32-nat.c (open_symbol_file_object): New function.
+	(in_dynsym_resolve_code): Ditto.
+	(init_win32_ops): Fill in fields which ought not to be NULL.
+
+2006-04-10  Christopher Faylor  <cgf@timesys.com>
+
 	* win32-nat.c (do_win32_fetch_inferior_registers): Don't do anything
 	with saved context if __COPY_CONTEXT_SIZE is not defined.
 	(handle_output_debug_string): Ditto.

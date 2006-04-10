@@ -2345,6 +2345,18 @@ fetch_elf_core_registers (char *core_reg_sect,
     regcache_raw_supply (current_regcache, r, core_reg_sect + mappings[r]);
 }
 
+static int
+open_symbol_file_object (void *from_ttyp)
+{
+  return 0;
+}
+
+static int
+in_dynsym_resolve_code (CORE_ADDR pc)
+{
+  return 0;
+}
+
 static void
 init_win32_ops (void)
 {
@@ -2392,8 +2404,8 @@ init_win32_ops (void)
   win32_so_ops.solib_create_inferior_hook = win32_solib_create_inferior_hook;
   win32_so_ops.special_symbol_handling = win32_special_symbol_handling;
   win32_so_ops.current_sos = win32_current_sos;
-  win32_so_ops.open_symbol_file_object = NULL;
-  win32_so_ops.in_dynsym_resolve_code = NULL;
+  win32_so_ops.open_symbol_file_object = open_symbol_file_object;
+  win32_so_ops.in_dynsym_resolve_code = in_dynsym_resolve_code;
 
   /* FIXME: Don't do this here.  *_gdbarch_init() should set so_ops. */
   current_target_so_ops = &win32_so_ops;
