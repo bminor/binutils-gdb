@@ -1,3 +1,9 @@
+2006-04-11  Jim Blandy  <jimb@codesourcery.com>
+
+	* serial.c (serial_open): Check for special cases at the front of
+	the "device" name before scanning for the ':' that would indicate
+	an IP-based connection.
+
 2006-04-10  Christopher Faylor  <cgf@timesys.com>
 
 	* win32-nat.c (open_symbol_file_object): New function.

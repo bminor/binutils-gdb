@@ -184,8 +184,6 @@ serial_open (const char *name)
 
   if (strcmp (name, "pc") == 0)
     ops = serial_interface_lookup ("pc");
-  else if (strchr (name, ':'))
-    ops = serial_interface_lookup ("tcp");
   else if (strncmp (name, "lpt", 3) == 0)
     ops = serial_interface_lookup ("parallel");
   else if (strncmp (name, "|", 1) == 0)
@@ -193,6 +191,11 @@ serial_open (const char *name)
       ops = serial_interface_lookup ("pipe");
       open_name = name + 1; /* discard ``|'' */
     }
+  /* Check for a colon, suggesting an IP address/port pair.
+     Do this *after* checking for all the interesting prefixes.  We
+     don't want to constrain the syntax of what can follow them.  */
+  else if (strchr (name, ':'))
+    ops = serial_interface_lookup ("tcp");
   else
     ops = serial_interface_lookup ("hardwire");
 
