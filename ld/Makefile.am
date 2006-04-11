@@ -418,7 +418,7 @@ CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 
 HFILES = ld.h ldctor.h ldemul.h ldexp.h ldfile.h \
 	ldlang.h ldlex.h ldmain.h ldmisc.h ldver.h \
-	ldwrite.h mri.h deffile.h pe-dll.h
+	ldwrite.h mri.h deffile.h pe-dll.h elf-hints-local.h
 
 GENERATED_CFILES = ldgram.c ldlex.c deffilep.c
 GENERATED_HFILES = ldgram.h ldemul-list.h deffilep.h

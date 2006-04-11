@@ -1,3 +1,13 @@
+2006-04-11  Diego Pettenò  <flameeyes@gentoo.org>
+
+	* emultempl/elf32.em: Add support for elf-hints.h on FreeBSD
+	and Dragonfly targets.
+	* configure.in (AC_CHECK_HEADERS): Add elf-hints.h.
+	* Makefile.am (HFILES): Add elf-hints-local.h.
+	* elf-hints-local.h: New file.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
 2006-04-07  Bernhard Fischer  <aldot@gcc.gnu.org>
 
 	* ld.texinfo: Fix typo in documentation of --check-sections.

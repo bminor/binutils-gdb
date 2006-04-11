@@ -529,6 +529,68 @@ gld${EMULATION_NAME}_add_sysroot (const char *path)
 
 EOF
   case ${target} in
+    *-*-freebsd* | *-*-dragonfly*)
+      cat >>e${EMULATION_NAME}.c <<EOF
+/* Read the system search path the FreeBSD way rather than the Linux way.  */
+#ifdef HAVE_ELF_HINTS_H
+#include <elf-hints.h>
+#else
+#include "elf-hints-local.h"
+#endif
+
+static bfd_boolean
+gld${EMULATION_NAME}_check_ld_elf_hints (const char *name, int force)
+{
+  static bfd_boolean initialized;
+  static char *ld_elf_hints;
+  struct dt_needed needed;
+
+  if (!initialized)
+    {
+      FILE *f;
+      char *tmppath;
+
+      tmppath = concat (ld_sysroot, _PATH_ELF_HINTS, NULL);
+      f = fopen (tmppath, FOPEN_RB);
+      free (tmppath);
+      if (f != NULL)
+	{
+	  struct elfhints_hdr hdr;
+
+	  if (fread (&hdr, 1, sizeof (hdr), f) == sizeof (hdr)
+	      && hdr.magic == ELFHINTS_MAGIC
+	      && hdr.version == 1)
+	    {
+	      if (fseek (f, hdr.strtab + hdr.dirlist, SEEK_SET) != -1)
+		{
+		  char *b;
+
+		  b = xmalloc (hdr.dirlistlen + 1);
+		  if (fread (b, 1, hdr.dirlistlen + 1, f) ==
+		      hdr.dirlistlen + 1)
+		    ld_elf_hints = gld${EMULATION_NAME}_add_sysroot (b);
+		
+		  free (b);
+		}
+	    }
+	  fclose (f);
+	}
+
+      initialized = TRUE;
+    }
+
+  if (ld_elf_hints == NULL)
+    return FALSE;
+
+  needed.by = NULL;
+  needed.name = name;
+  return gld${EMULATION_NAME}_search_needed (ld_elf_hints, & needed,
+			       		     force);
+}
+EOF
+    # FreeBSD
+    ;;
+
     *-*-linux-* | *-*-k*bsd*-*)
       cat >>e${EMULATION_NAME}.c <<EOF
 /* For a native linker, check the file /etc/ld.so.conf for directories
@@ -928,6 +990,14 @@ EOF
 fi
 if [ "x${USE_LIBPATH}" = xyes ] ; then
   case ${target} in
+    *-*-freebsd* | *-*-dragonfly*)
+      cat >>e${EMULATION_NAME}.c <<EOF
+	  if (gld${EMULATION_NAME}_check_ld_elf_hints (l->name, force))
+	    break;
+EOF
+    # FreeBSD
+    ;;
+
     *-*-linux-* | *-*-k*bsd*-*)
     # Linux
       cat >>e${EMULATION_NAME}.c <<EOF
