@@ -3371,11 +3371,8 @@ static int insert_dbx_link_breakpoint (procinfo *pi);
 static void remove_dbx_link_breakpoint (void);
 
 /* On mips-irix, we need to insert a breakpoint at __dbx_link during
-   the startup phase.  The following two variables are used to record
-   the address of the breakpoint, and the code that was replaced by
-   a breakpoint.  */
-static int dbx_link_bpt_addr = 0;
-static char dbx_link_shadow_contents[BREAKPOINT_MAX];
+   the startup phase.  */
+static struct breakpoint *dbx_link_bpt;
 
 /*
  * Function: procfs_debug_inferior
@@ -4207,8 +4204,8 @@ wait_again:
                   /* If we hit our __dbx_link() internal breakpoint,
                      then remove it.  See comments in procfs_init_inferior()
                      for more details.  */
-                  if (dbx_link_bpt_addr != 0
-                      && dbx_link_bpt_addr == read_pc ())
+		  if (dbx_link_bpt != NULL
+		      && dbx_link_bpt->loc->address == read_pc ())
                     remove_dbx_link_breakpoint ();
 
 		  wstat = (SIGTRAP << 8) | 0177;
@@ -4777,6 +4774,13 @@ procfs_mourn_inferior (void)
 	destroy_procinfo (pi);
     }
   unpush_target (&procfs_ops);
+
+  if (dbx_link_bpt != NULL)
+    {
+      deprecated_remove_raw_breakpoint (dbx_link_bpt);
+      dbx_link_bpt = NULL;
+    }
+
   generic_mourn_inferior ();
 }
 
@@ -4886,7 +4890,6 @@ procfs_init_inferior (int pid)
      has been inserted, the syssgi() notifications are no longer necessary,
      so they should be canceled.  */
   proc_trace_syscalls_1 (pi, SYS_syssgi, PR_SYSEXIT, FLAG_SET, 0);
-  dbx_link_bpt_addr = 0;
 #endif
 }
 
@@ -5568,14 +5571,13 @@ proc_find_memory_regions (int (*func) (CORE_ADDR,
 static void
 remove_dbx_link_breakpoint (void)
 {
-  if (dbx_link_bpt_addr == 0)
+  if (dbx_link_bpt == NULL)
     return;
 
-  if (memory_remove_breakpoint (dbx_link_bpt_addr,
-                                dbx_link_shadow_contents) != 0)
+  if (deprecated_remove_raw_breakpoint (dbx_link_bpt) != 0)
     warning (_("Unable to remove __dbx_link breakpoint."));
 
-  dbx_link_bpt_addr = 0;
+  dbx_link_bpt = NULL;
 }
 
 /* Return the address of the __dbx_link() function in the file
@@ -5642,8 +5644,8 @@ insert_dbx_link_bpt_in_file (int fd, CORE_ADDR ignored)
   if (sym_addr != 0)
     {
       /* Insert the breakpoint.  */
-      dbx_link_bpt_addr = sym_addr;
-      if (target_insert_breakpoint (sym_addr, dbx_link_shadow_contents) != 0)
+      dbx_link_bpt = deprecated_insert_raw_breakpoint (sym_addr);
+      if (dbx_link_bpt == NULL)
         {
           warning (_("Failed to insert dbx_link breakpoint."));
           bfd_close (abfd);

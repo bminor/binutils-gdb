@@ -30,6 +30,7 @@ struct objfile;
 struct ui_file;
 struct mem_attrib;
 struct target_ops;
+struct bp_location;
 struct gdb_feature_set;
 
 /* This include file defines the interface between the main part
@@ -361,11 +362,11 @@ struct target_ops
 				   struct target_ops *target);
 
     void (*to_files_info) (struct target_ops *);
-    int (*to_insert_breakpoint) (CORE_ADDR, gdb_byte *);
-    int (*to_remove_breakpoint) (CORE_ADDR, gdb_byte *);
+    int (*to_insert_breakpoint) (CORE_ADDR, struct bp_location *);
+    int (*to_remove_breakpoint) (CORE_ADDR, struct bp_location *);
     int (*to_can_use_hw_breakpoint) (int, int, int);
-    int (*to_insert_hw_breakpoint) (CORE_ADDR, gdb_byte *);
-    int (*to_remove_hw_breakpoint) (CORE_ADDR, gdb_byte *);
+    int (*to_insert_hw_breakpoint) (CORE_ADDR, struct bp_location *);
+    int (*to_remove_hw_breakpoint) (CORE_ADDR, struct bp_location *);
     int (*to_remove_watchpoint) (CORE_ADDR, int, int);
     int (*to_insert_watchpoint) (CORE_ADDR, int, int);
     int (*to_stopped_by_watchpoint) (void);
@@ -644,22 +645,23 @@ extern void print_section_info (struct target_ops *, bfd *);
 #define	target_files_info()	\
      (*current_target.to_files_info) (&current_target)
 
-/* Insert a breakpoint at address ADDR in the target machine.  SAVE is
-   a pointer to memory allocated for saving the target contents.  It
-   is guaranteed by the caller to be long enough to save the number of
-   breakpoint bytes indicated by BREAKPOINT_FROM_PC.  Result is 0 for
-   success, or an errno value.  */
+/* Insert a breakpoint at address ADDR in the target machine.  BPT is
+   a struct bp_location *, which contains some memory for saving the
+   target contents.  It is guaranteed to be long enough to save the
+   number of breakpoint bytes indicated by BREAKPOINT_FROM_PC.  Result
+   is 0 for success, or an errno value.  */
 
-#define	target_insert_breakpoint(addr, save)	\
-     (*current_target.to_insert_breakpoint) (addr, save)
+#define	target_insert_breakpoint(addr, bpt)	\
+     (*current_target.to_insert_breakpoint) (addr, bpt)
 
 /* Remove a breakpoint at address ADDR in the target machine.
-   SAVE is a pointer to the same save area
+   BPT is a pointer to the same save area
    that was previously passed to target_insert_breakpoint.
+
    Result is 0 for success, or an errno value.  */
 
-#define	target_remove_breakpoint(addr, save)	\
-     (*current_target.to_remove_breakpoint) (addr, save)
+#define	target_remove_breakpoint(addr, bpt)	\
+     (*current_target.to_remove_breakpoint) (addr, bpt)
 
 /* Initialize the terminal settings we record for the inferior,
    before we actually run the inferior.  */
@@ -1089,11 +1091,11 @@ extern void (*deprecated_target_new_objfile_hook) (struct objfile *);
 #endif
 
 #ifndef target_insert_hw_breakpoint
-#define target_insert_hw_breakpoint(addr, save) \
-     (*current_target.to_insert_hw_breakpoint) (addr, save)
+#define target_insert_hw_breakpoint(addr, bpt) \
+     (*current_target.to_insert_hw_breakpoint) (addr, bpt)
 
-#define target_remove_hw_breakpoint(addr, save) \
-     (*current_target.to_remove_hw_breakpoint) (addr, save)
+#define target_remove_hw_breakpoint(addr, bpt) \
+     (*current_target.to_remove_hw_breakpoint) (addr, bpt)
 #endif
 
 extern int target_stopped_data_address_p (struct target_ops *);
@@ -1177,13 +1179,13 @@ struct section_table *target_section_by_addr (struct target_ops *target,
 
 /* From mem-break.c */
 
-extern int memory_remove_breakpoint (CORE_ADDR, gdb_byte *);
+extern int memory_remove_breakpoint (CORE_ADDR, struct bp_location *);
 
-extern int memory_insert_breakpoint (CORE_ADDR, gdb_byte *);
+extern int memory_insert_breakpoint (CORE_ADDR, struct bp_location *);
 
-extern int default_memory_remove_breakpoint (CORE_ADDR, gdb_byte *);
+extern int default_memory_remove_breakpoint (CORE_ADDR, struct bp_location *);
 
-extern int default_memory_insert_breakpoint (CORE_ADDR, gdb_byte *);
+extern int default_memory_insert_breakpoint (CORE_ADDR, struct bp_location *);
 
 
 /* From target.c */

@@ -625,10 +625,10 @@ i386_stopped_by_hwbp (void)
   return 0;
 }
 
-/* Insert a hardware-assisted breakpoint at address ADDR.  SHADOW is
+/* Insert a hardware-assisted breakpoint at address ADDR.  BPT is
    unused.  Return 0 on success, EBUSY on failure.  */
 int
-i386_insert_hw_breakpoint (CORE_ADDR addr, void *shadow)
+i386_insert_hw_breakpoint (CORE_ADDR addr, struct bp_location *bpt)
 {
   unsigned len_rw = i386_length_and_rw_bits (1, hw_execute);
   int retval = i386_insert_aligned_watchpoint (addr, len_rw) ? EBUSY : 0;
@@ -639,11 +639,11 @@ i386_insert_hw_breakpoint (CORE_ADDR addr, void *shadow)
   return retval;
 }
 
-/* Remove a hardware-assisted breakpoint at address ADDR.  SHADOW is
+/* Remove a hardware-assisted breakpoint at address ADDR.  BPT is
    unused.  Return 0 on success, -1 on failure.  */
 
 int
-i386_remove_hw_breakpoint (CORE_ADDR addr, void *shadow)
+i386_remove_hw_breakpoint (CORE_ADDR addr, struct bp_location *bpt)
 {
   unsigned len_rw = i386_length_and_rw_bits (1, hw_execute);
   int retval = i386_remove_aligned_watchpoint (addr, len_rw);

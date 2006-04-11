@@ -81,10 +81,11 @@ m32r_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
    The following functions take care of this behavior. */
 
 static int
-m32r_memory_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
+m32r_memory_insert_breakpoint (CORE_ADDR addr, struct bp_location *bpt)
 {
   int val;
   gdb_byte buf[4];
+  gdb_byte *contents_cache = bpt->shadow_contents;
   gdb_byte bp_entry[] = { 0x10, 0xf1 };	/* dpt */
 
   /* Save the memory contents.  */
@@ -134,10 +135,11 @@ m32r_memory_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
 }
 
 static int
-m32r_memory_remove_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
+m32r_memory_remove_breakpoint (CORE_ADDR addr, struct bp_location *bpt)
 {
   int val;
   gdb_byte buf[4];
+  gdb_byte *contents_cache = bpt->shadow_contents;
 
   buf[0] = contents_cache[0];
   buf[1] = contents_cache[1];

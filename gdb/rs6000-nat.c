@@ -527,15 +527,15 @@ exec_one_dummy_insn (void)
 {
 #define	DUMMY_INSN_ADDR	(TEXT_SEGMENT_BASE)+0x200
 
-  char shadow_contents[BREAKPOINT_MAX];		/* Stash old bkpt addr contents */
   int ret, status, pid;
   CORE_ADDR prev_pc;
+  struct breakpoint *b;
 
   /* We plant one dummy breakpoint into DUMMY_INSN_ADDR address. We
      assume that this address will never be executed again by the real
      code. */
 
-  target_insert_breakpoint (DUMMY_INSN_ADDR, shadow_contents);
+  b = deprecated_insert_raw_breakpoint (DUMMY_INSN_ADDR);
 
   /* You might think this could be done with a single ptrace call, and
      you'd be correct for just about every platform I've ever worked
@@ -559,7 +559,7 @@ exec_one_dummy_insn (void)
   while (pid != PIDGET (inferior_ptid));
 
   write_pc (prev_pc);
-  target_remove_breakpoint (DUMMY_INSN_ADDR, shadow_contents);
+  deprecated_remove_raw_breakpoint (b);
 }
 
 /* Fetch registers from the register section in core bfd. */

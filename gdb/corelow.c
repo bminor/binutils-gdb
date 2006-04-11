@@ -86,8 +86,6 @@ static void get_core_registers (int);
 
 static void add_to_thread_list (bfd *, asection *, void *);
 
-static int ignore (CORE_ADDR, bfd_byte *);
-
 static int core_file_thread_alive (ptid_t tid);
 
 static void init_core_ops (void);
@@ -603,7 +601,7 @@ core_xfer_partial (struct target_ops *ops, enum target_object object,
    `gdb internal error' (since generic_mourn calls breakpoint_init_inferior).  */
 
 static int
-ignore (CORE_ADDR addr, bfd_byte *contents)
+ignore (CORE_ADDR addr, struct bp_location *bpt)
 {
   return 0;
 }

@@ -110,17 +110,6 @@ struct reg
                                    register number.  */
   };
 
-/* Breakpoint shadows for the single step instructions will be kept here. */
-
-static struct sstep_breaks
-{
-  /* Address, or 0 if this is not in use.  */
-  CORE_ADDR address;
-  /* Shadow contents.  */
-  gdb_byte data[4];
-}
-stepBreaks[2];
-
 /* Hook for determining the TOC address when calling functions in the
    inferior under AIX. The initialization code in rs6000-nat.c sets
    this hook to point to find_toc_address.  */
@@ -730,7 +719,6 @@ rs6000_software_single_step (enum target_signal signal,
 
   if (insert_breakpoints_p)
     {
-
       loc = read_pc ();
 
       insn = read_memory_integer (loc, 4);
@@ -743,28 +731,17 @@ rs6000_software_single_step (enum target_signal signal,
       if (breaks[1] == breaks[0])
 	breaks[1] = -1;
 
-      stepBreaks[1].address = 0;
-
       for (ii = 0; ii < 2; ++ii)
 	{
-
 	  /* ignore invalid breakpoint. */
 	  if (breaks[ii] == -1)
 	    continue;
-	  target_insert_breakpoint (breaks[ii], stepBreaks[ii].data);
-	  stepBreaks[ii].address = breaks[ii];
+	  insert_single_step_breakpoint (breaks[ii]);
 	}
-
     }
   else
-    {
+    remove_single_step_breakpoints ();
 
-      /* remove step breakpoints. */
-      for (ii = 0; ii < 2; ++ii)
-	if (stepBreaks[ii].address != 0)
-	  target_remove_breakpoint (stepBreaks[ii].address,
-				    stepBreaks[ii].data);
-    }
   errno = 0;			/* FIXME, don't ignore errors! */
   /* What errors?  {read,write}_memory call error().  */
 }

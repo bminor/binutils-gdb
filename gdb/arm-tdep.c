@@ -1901,16 +1901,18 @@ arm_get_next_pc (CORE_ADDR pc)
 static void
 arm_software_single_step (enum target_signal sig, int insert_bpt)
 {
-  static int next_pc;		 /* State between setting and unsetting.  */
-  static char break_mem[BREAKPOINT_MAX]; /* Temporary storage for mem@bpt */
+  /* NOTE: This may insert the wrong breakpoint instruction when
+     single-stepping over a mode-changing instruction, if the
+     CPSR heuristics are used.  */
 
   if (insert_bpt)
     {
-      next_pc = arm_get_next_pc (read_register (ARM_PC_REGNUM));
-      target_insert_breakpoint (next_pc, break_mem);
+      CORE_ADDR next_pc = arm_get_next_pc (read_register (ARM_PC_REGNUM));
+
+      insert_single_step_breakpoint (next_pc);
     }
   else
-    target_remove_breakpoint (next_pc, break_mem);
+    remove_single_step_breakpoints ();
 }
 
 #include "bfd-in2.h"

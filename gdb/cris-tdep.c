@@ -558,15 +558,6 @@ struct instruction_environment
   int   disable_interrupt;
 } inst_env_type;
 
-/* Save old breakpoints in order to restore the state before a single_step. 
-   At most, two breakpoints will have to be remembered.  */
-typedef 
-char binsn_quantum[BREAKPOINT_MAX];
-static binsn_quantum break_mem[2];
-static CORE_ADDR next_pc = 0;
-static CORE_ADDR branch_target_address = 0;
-static unsigned char branch_break_inserted = 0;
-
 /* Machine-dependencies in CRIS for opcodes.  */
 
 /* Instruction sizes.  */
@@ -2129,7 +2120,7 @@ static void
 cris_software_single_step (enum target_signal ignore, int insert_breakpoints)
 {
   inst_env_type inst_env;
-  
+
   if (insert_breakpoints)
     {
       /* Analyse the present instruction environment and insert 
@@ -2145,28 +2136,19 @@ cris_software_single_step (enum target_signal ignore, int insert_breakpoints)
         {
           /* Insert at most two breakpoints.  One for the next PC content
              and possibly another one for a branch, jump, etc.  */
-          next_pc = (CORE_ADDR) inst_env.reg[PC_REGNUM];
-          target_insert_breakpoint (next_pc, break_mem[0]);
+          CORE_ADDR next_pc = (CORE_ADDR) inst_env.reg[PC_REGNUM];
+          insert_single_step_breakpoint (next_pc);
           if (inst_env.branch_found 
               && (CORE_ADDR) inst_env.branch_break_address != next_pc)
             {
-              branch_target_address = 
-                (CORE_ADDR) inst_env.branch_break_address;
-              target_insert_breakpoint (branch_target_address, break_mem[1]);
-              branch_break_inserted = 1;
+              CORE_ADDR branch_target_address
+                = (CORE_ADDR) inst_env.branch_break_address;
+              insert_single_step_breakpoint (branch_target_address);
             }
         }
     }
   else
-    {
-      /* Remove breakpoints.  */
-      target_remove_breakpoint (next_pc, break_mem[0]);
-      if (branch_break_inserted)
-        {
-          target_remove_breakpoint (branch_target_address, break_mem[1]);
-          branch_break_inserted = 0;
-        }
-    }
+    remove_single_step_breakpoints ();
 }
 
 /* Calculates the prefix value for quick offset addressing mode.  */

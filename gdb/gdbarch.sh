@@ -549,8 +549,8 @@ f:=:CORE_ADDR:skip_prologue:CORE_ADDR ip:ip:0:0
 f:=:int:inner_than:CORE_ADDR lhs, CORE_ADDR rhs:lhs, rhs:0:0
 f:=:const gdb_byte *:breakpoint_from_pc:CORE_ADDR *pcptr, int *lenptr:pcptr, lenptr::0:
 M::CORE_ADDR:adjust_breakpoint_address:CORE_ADDR bpaddr:bpaddr
-f:=:int:memory_insert_breakpoint:CORE_ADDR addr, gdb_byte *contents_cache:addr, contents_cache:0:default_memory_insert_breakpoint::0
-f:=:int:memory_remove_breakpoint:CORE_ADDR addr, gdb_byte *contents_cache:addr, contents_cache:0:default_memory_remove_breakpoint::0
+f:=:int:memory_insert_breakpoint:CORE_ADDR addr, struct bp_location *bpt:addr, bpt:0:default_memory_insert_breakpoint::0
+f:=:int:memory_remove_breakpoint:CORE_ADDR addr, struct bp_location *bpt:addr, bpt:0:default_memory_remove_breakpoint::0
 v:=:CORE_ADDR:decr_pc_after_break:::0:::0
 
 # A function can be addressed by either it's "pointer" (possibly a
@@ -777,6 +777,7 @@ struct regset;
 struct disassemble_info;
 struct target_ops;
 struct obstack;
+struct bp_location;
 struct gdb_feature_set;
 
 extern struct gdbarch *current_gdbarch;

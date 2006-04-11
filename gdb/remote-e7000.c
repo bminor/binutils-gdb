@@ -1702,7 +1702,7 @@ static CORE_ADDR breakaddr[MAX_BREAKPOINTS] =
 {0};
 
 static int
-e7000_insert_breakpoint (CORE_ADDR addr, bfd_byte *shadow)
+e7000_insert_breakpoint (CORE_ADDR addr, struct bp_location *bpt)
 {
   int i;
   char buf[200];
@@ -1728,7 +1728,7 @@ e7000_insert_breakpoint (CORE_ADDR addr, bfd_byte *shadow)
 	  }
 #else
 #if 0
-	e7000_read_inferior_memory (addr, shadow, 2);
+	e7000_read_inferior_memory (addr, bpt->shadow_contents, 2);
 	e7000_write_inferior_memory (addr, nop, 2);
 #endif
 
@@ -1745,7 +1745,7 @@ e7000_insert_breakpoint (CORE_ADDR addr, bfd_byte *shadow)
 }
 
 static int
-e7000_remove_breakpoint (CORE_ADDR addr, bfd_byte *shadow)
+e7000_remove_breakpoint (CORE_ADDR addr, struct bp_location *bpt)
 {
   int i;
   char buf[200];
@@ -1773,7 +1773,7 @@ e7000_remove_breakpoint (CORE_ADDR addr, bfd_byte *shadow)
 
 #if 0
 	/* Replace the insn under the break */
-	e7000_write_inferior_memory (addr, shadow, 2);
+	e7000_write_inferior_memory (addr, bpt->shadow_contents, 2);
 #endif
 #endif
 

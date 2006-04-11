@@ -805,18 +805,6 @@ gdbsim_mourn_inferior (void)
   generic_mourn_inferior ();
 }
 
-static int
-gdbsim_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
-{
-  return memory_insert_breakpoint (addr, contents_cache);
-}
-
-static int
-gdbsim_remove_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
-{
-  return memory_remove_breakpoint (addr, contents_cache);
-}
-
 /* Pass the command argument through to the simulator verbatim.  The
    simulator must do any command interpretation work.  */
 
@@ -866,8 +854,8 @@ init_gdbsim_ops (void)
   gdbsim_ops.to_prepare_to_store = gdbsim_prepare_to_store;
   gdbsim_ops.deprecated_xfer_memory = gdbsim_xfer_inferior_memory;
   gdbsim_ops.to_files_info = gdbsim_files_info;
-  gdbsim_ops.to_insert_breakpoint = gdbsim_insert_breakpoint;
-  gdbsim_ops.to_remove_breakpoint = gdbsim_remove_breakpoint;
+  gdbsim_ops.to_insert_breakpoint = memory_insert_breakpoint;
+  gdbsim_ops.to_remove_breakpoint = memory_remove_breakpoint;
   gdbsim_ops.to_kill = gdbsim_kill;
   gdbsim_ops.to_load = gdbsim_load;
   gdbsim_ops.to_create_inferior = gdbsim_create_inferior;

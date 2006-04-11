@@ -491,10 +491,11 @@ These two macros should return 0 for success, non-zero for failure.
 @cindex insert or remove hardware breakpoint
 @findex target_remove_hw_breakpoint
 @findex target_insert_hw_breakpoint
-@item target_remove_hw_breakpoint (@var{addr}, @var{shadow})
-@itemx target_insert_hw_breakpoint (@var{addr}, @var{shadow})
+@item target_remove_hw_breakpoint (@var{addr}, @var{bpt})
+@itemx target_insert_hw_breakpoint (@var{addr}, @var{bpt})
 Insert or remove a hardware-assisted breakpoint at address @var{addr}.
-Returns zero for success, non-zero for failure.  @var{shadow} is the
+Returns zero for success, non-zero for failure.  @var{bpt} is the
+breakpoint location.  @code{@var{bpt}->shadow_contents} is the
 real contents of the byte where the breakpoint has been inserted; it
 is generally not valid when hardware breakpoints are used, but since
 no other code touches these values, the implementations of the above
@@ -689,8 +690,8 @@ the count goes to zero.
 
 @findex i386_insert_hw_breakpoint
 @findex i386_remove_hw_breakpoint
-@item i386_insert_hw_breakpoint (@var{addr}, @var{shadow}
-@itemx i386_remove_hw_breakpoint (@var{addr}, @var{shadow})
+@item i386_insert_hw_breakpoint (@var{addr}, @var{bpt})
+@itemx i386_remove_hw_breakpoint (@var{addr}, @var{bpt})
 These functions insert and remove hardware-assisted breakpoints.  The
 macros @code{target_insert_hw_breakpoint} and
 @code{target_remove_hw_breakpoint} are set to call these functions.
@@ -3060,8 +3061,8 @@ instruction of the architecture.
 
 Replaces all the other @var{BREAKPOINT} macros.
 
-@item MEMORY_INSERT_BREAKPOINT (@var{addr}, @var{contents_cache})
-@itemx MEMORY_REMOVE_BREAKPOINT (@var{addr}, @var{contents_cache})
+@item MEMORY_INSERT_BREAKPOINT (@var{addr}, @var{bpt})
+@itemx MEMORY_REMOVE_BREAKPOINT (@var{addr}, @var{len}, @var{bpt})
 @findex MEMORY_REMOVE_BREAKPOINT
 @findex MEMORY_INSERT_BREAKPOINT
 Insert or remove memory based breakpoints.  Reasonable defaults

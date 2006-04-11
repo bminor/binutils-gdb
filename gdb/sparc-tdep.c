@@ -1085,8 +1085,7 @@ sparc_software_single_step (enum target_signal sig, int insert_breakpoints_p)
 {
   struct gdbarch *arch = current_gdbarch;
   struct gdbarch_tdep *tdep = gdbarch_tdep (arch);
-  static CORE_ADDR npc, nnpc;
-  static gdb_byte npc_save[4], nnpc_save[4];
+  CORE_ADDR npc, nnpc;
 
   if (insert_breakpoints_p)
     {
@@ -1098,9 +1097,10 @@ sparc_software_single_step (enum target_signal sig, int insert_breakpoints_p)
       /* Analyze the instruction at PC.  */
       nnpc = sparc_analyze_control_transfer (arch, pc, &npc);
       if (npc != 0)
-	target_insert_breakpoint (npc, npc_save);
+	insert_single_step_breakpoint (npc);
+
       if (nnpc != 0)
-	target_insert_breakpoint (nnpc, nnpc_save);
+	insert_single_step_breakpoint (nnpc);
 
       /* Assert that we have set at least one breakpoint, and that
 	 they're not set at the same spot - unless we're going
@@ -1109,12 +1109,7 @@ sparc_software_single_step (enum target_signal sig, int insert_breakpoints_p)
       gdb_assert (nnpc != npc || orig_npc == 0);
     }
   else
-    {
-      if (npc != 0)
-	target_remove_breakpoint (npc, npc_save);
-      if (nnpc != 0)
-	target_remove_breakpoint (nnpc, nnpc_save);
-    }
+    remove_single_step_breakpoints ();
 }
 
 static void

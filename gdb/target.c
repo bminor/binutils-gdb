@@ -111,15 +111,15 @@ static void debug_to_prepare_to_store (void);
 
 static void debug_to_files_info (struct target_ops *);
 
-static int debug_to_insert_breakpoint (CORE_ADDR, gdb_byte *);
+static int debug_to_insert_breakpoint (CORE_ADDR, struct bp_location *);
 
-static int debug_to_remove_breakpoint (CORE_ADDR, gdb_byte *);
+static int debug_to_remove_breakpoint (CORE_ADDR, struct bp_location *);
 
 static int debug_to_can_use_hw_breakpoint (int, int, int);
 
-static int debug_to_insert_hw_breakpoint (CORE_ADDR, gdb_byte *);
+static int debug_to_insert_hw_breakpoint (CORE_ADDR, struct bp_location *);
 
-static int debug_to_remove_hw_breakpoint (CORE_ADDR, gdb_byte *);
+static int debug_to_remove_hw_breakpoint (CORE_ADDR, struct bp_location *);
 
 static int debug_to_insert_watchpoint (CORE_ADDR, int, int);
 
@@ -516,10 +516,10 @@ update_current_target (void)
 	    (int (*) (int, int, int))
 	    return_zero);
   de_fault (to_insert_hw_breakpoint,
-	    (int (*) (CORE_ADDR, gdb_byte *))
+	    (int (*) (CORE_ADDR, struct bp_location *))
 	    return_minus_one);
   de_fault (to_remove_hw_breakpoint,
-	    (int (*) (CORE_ADDR, gdb_byte *))
+	    (int (*) (CORE_ADDR, struct bp_location *))
 	    return_minus_one);
   de_fault (to_insert_watchpoint,
 	    (int (*) (CORE_ADDR, int, int))
@@ -2142,11 +2142,11 @@ debug_to_files_info (struct target_ops *target)
 }
 
 static int
-debug_to_insert_breakpoint (CORE_ADDR addr, gdb_byte *save)
+debug_to_insert_breakpoint (CORE_ADDR addr, struct bp_location *bpt)
 {
   int retval;
 
-  retval = debug_target.to_insert_breakpoint (addr, save);
+  retval = debug_target.to_insert_breakpoint (addr, bpt);
 
   fprintf_unfiltered (gdb_stdlog,
 		      "target_insert_breakpoint (0x%lx, xxx) = %ld\n",
@@ -2156,11 +2156,11 @@ debug_to_insert_breakpoint (CORE_ADDR addr, gdb_byte *save)
 }
 
 static int
-debug_to_remove_breakpoint (CORE_ADDR addr, gdb_byte *save)
+debug_to_remove_breakpoint (CORE_ADDR addr, struct bp_location *bpt)
 {
   int retval;
 
-  retval = debug_target.to_remove_breakpoint (addr, save);
+  retval = debug_target.to_remove_breakpoint (addr, bpt);
 
   fprintf_unfiltered (gdb_stdlog,
 		      "target_remove_breakpoint (0x%lx, xxx) = %ld\n",
@@ -2228,11 +2228,11 @@ debug_to_stopped_data_address (struct target_ops *target, CORE_ADDR *addr)
 }
 
 static int
-debug_to_insert_hw_breakpoint (CORE_ADDR addr, gdb_byte *save)
+debug_to_insert_hw_breakpoint (CORE_ADDR addr, struct bp_location *bpt)
 {
   int retval;
 
-  retval = debug_target.to_insert_hw_breakpoint (addr, save);
+  retval = debug_target.to_insert_hw_breakpoint (addr, bpt);
 
   fprintf_unfiltered (gdb_stdlog,
 		      "target_insert_hw_breakpoint (0x%lx, xxx) = %ld\n",
@@ -2242,11 +2242,11 @@ debug_to_insert_hw_breakpoint (CORE_ADDR addr, gdb_byte *save)
 }
 
 static int
-debug_to_remove_hw_breakpoint (CORE_ADDR addr, gdb_byte *save)
+debug_to_remove_hw_breakpoint (CORE_ADDR addr, struct bp_location *bpt)
 {
   int retval;
 
-  retval = debug_target.to_remove_hw_breakpoint (addr, save);
+  retval = debug_target.to_remove_hw_breakpoint (addr, bpt);
 
   fprintf_unfiltered (gdb_stdlog,
 		      "target_remove_hw_breakpoint (0x%lx, xxx) = %ld\n",

@@ -76,10 +76,6 @@ static ptid_t do_attach (ptid_t ptid);
 
 static int procfs_can_use_hw_breakpoint (int, int, int);
 
-static int procfs_insert_hw_breakpoint (CORE_ADDR, char *);
-
-static int procfs_remove_hw_breakpoint (CORE_ADDR addr, char *);
-
 static int procfs_insert_hw_watchpoint (CORE_ADDR addr, int len, int type);
 
 static int procfs_remove_hw_watchpoint (CORE_ADDR addr, int len, int type);
@@ -812,25 +808,25 @@ procfs_breakpoint (CORE_ADDR addr, int type, int size)
 }
 
 static int
-procfs_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
+procfs_insert_breakpoint (CORE_ADDR addr, struct bp_location *bpt)
 {
   return procfs_breakpoint (addr, _DEBUG_BREAK_EXEC, 0);
 }
 
 static int
-procfs_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
+procfs_remove_breakpoint (CORE_ADDR addr, struct bp_location *bpt)
 {
   return procfs_breakpoint (addr, _DEBUG_BREAK_EXEC, -1);
 }
 
 static int
-procfs_insert_hw_breakpoint (CORE_ADDR addr, char *contents_cache)
+procfs_insert_hw_breakpoint (CORE_ADDR addr, struct bp_location *bpt)
 {
   return procfs_breakpoint (addr, _DEBUG_BREAK_EXEC | _DEBUG_BREAK_HW, 0);
 }
 
 static int
-procfs_remove_hw_breakpoint (CORE_ADDR addr, char *contents_cache)
+procfs_remove_hw_breakpoint (CORE_ADDR addr, struct bp_location *bpt)
 {
   return procfs_breakpoint (addr, _DEBUG_BREAK_EXEC | _DEBUG_BREAK_HW, -1);
 }

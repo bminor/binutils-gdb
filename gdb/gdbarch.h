@@ -49,6 +49,7 @@ struct regset;
 struct disassemble_info;
 struct target_ops;
 struct obstack;
+struct bp_location;
 struct gdb_feature_set;
 
 extern struct gdbarch *current_gdbarch;
@@ -900,24 +901,24 @@ typedef CORE_ADDR (gdbarch_adjust_breakpoint_address_ftype) (struct gdbarch *gdb
 extern CORE_ADDR gdbarch_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr);
 extern void set_gdbarch_adjust_breakpoint_address (struct gdbarch *gdbarch, gdbarch_adjust_breakpoint_address_ftype *adjust_breakpoint_address);
 
-typedef int (gdbarch_memory_insert_breakpoint_ftype) (CORE_ADDR addr, gdb_byte *contents_cache);
-extern int gdbarch_memory_insert_breakpoint (struct gdbarch *gdbarch, CORE_ADDR addr, gdb_byte *contents_cache);
+typedef int (gdbarch_memory_insert_breakpoint_ftype) (CORE_ADDR addr, struct bp_location *bpt);
+extern int gdbarch_memory_insert_breakpoint (struct gdbarch *gdbarch, CORE_ADDR addr, struct bp_location *bpt);
 extern void set_gdbarch_memory_insert_breakpoint (struct gdbarch *gdbarch, gdbarch_memory_insert_breakpoint_ftype *memory_insert_breakpoint);
 #if !defined (GDB_TM_FILE) && defined (MEMORY_INSERT_BREAKPOINT)
 #error "Non multi-arch definition of MEMORY_INSERT_BREAKPOINT"
 #endif
 #if !defined (MEMORY_INSERT_BREAKPOINT)
-#define MEMORY_INSERT_BREAKPOINT(addr, contents_cache) (gdbarch_memory_insert_breakpoint (current_gdbarch, addr, contents_cache))
+#define MEMORY_INSERT_BREAKPOINT(addr, bpt) (gdbarch_memory_insert_breakpoint (current_gdbarch, addr, bpt))
 #endif
 
-typedef int (gdbarch_memory_remove_breakpoint_ftype) (CORE_ADDR addr, gdb_byte *contents_cache);
-extern int gdbarch_memory_remove_breakpoint (struct gdbarch *gdbarch, CORE_ADDR addr, gdb_byte *contents_cache);
+typedef int (gdbarch_memory_remove_breakpoint_ftype) (CORE_ADDR addr, struct bp_location *bpt);
+extern int gdbarch_memory_remove_breakpoint (struct gdbarch *gdbarch, CORE_ADDR addr, struct bp_location *bpt);
 extern void set_gdbarch_memory_remove_breakpoint (struct gdbarch *gdbarch, gdbarch_memory_remove_breakpoint_ftype *memory_remove_breakpoint);
 #if !defined (GDB_TM_FILE) && defined (MEMORY_REMOVE_BREAKPOINT)
 #error "Non multi-arch definition of MEMORY_REMOVE_BREAKPOINT"
 #endif
 #if !defined (MEMORY_REMOVE_BREAKPOINT)
-#define MEMORY_REMOVE_BREAKPOINT(addr, contents_cache) (gdbarch_memory_remove_breakpoint (current_gdbarch, addr, contents_cache))
+#define MEMORY_REMOVE_BREAKPOINT(addr, bpt) (gdbarch_memory_remove_breakpoint (current_gdbarch, addr, bpt))
 #endif
 
 extern CORE_ADDR gdbarch_decr_pc_after_break (struct gdbarch *gdbarch);

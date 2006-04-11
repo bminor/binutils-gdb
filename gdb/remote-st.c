@@ -599,20 +599,15 @@ static CORE_ADDR breakaddr[MAX_STDEBUG_BREAKPOINTS] =
 {0};
 
 static int
-st2000_insert_breakpoint (CORE_ADDR addr, char *shadow)
+st2000_insert_breakpoint (CORE_ADDR addr, struct bp_location *bpt)
 {
   int i;
-  CORE_ADDR bp_addr = addr;
-  int bp_size = 0;
-
-  BREAKPOINT_FROM_PC (&bp_addr, &bp_size);
 
   for (i = 0; i <= MAX_STDEBUG_BREAKPOINTS; i++)
     if (breakaddr[i] == 0)
       {
 	breakaddr[i] = addr;
 
-	st2000_read_inferior_memory (bp_addr, shadow, bp_size);
 	printf_stdebug ("BR %x H\r", addr);
 	expect_prompt (1);
 	return 0;
@@ -623,7 +618,7 @@ st2000_insert_breakpoint (CORE_ADDR addr, char *shadow)
 }
 
 static int
-st2000_remove_breakpoint (CORE_ADDR addr, char *shadow)
+st2000_remove_breakpoint (CORE_ADDR addr, struct bp_location *bpt)
 {
   int i;
 

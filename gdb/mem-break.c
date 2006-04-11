@@ -36,13 +36,14 @@
 /* Insert a breakpoint on targets that don't have any better breakpoint
    support.  We read the contents of the target location and stash it,
    then overwrite it with a breakpoint instruction.  ADDR is the target
-   location in the target machine.  CONTENTS_CACHE is a pointer to 
-   memory allocated for saving the target contents.  It is guaranteed
-   by the caller to be long enough to save BREAKPOINT_LEN bytes (this
-   is accomplished via BREAKPOINT_MAX).  */
+   location in the target machine.  BPT is a pointer to the breakpoint
+   location being inserted, which contains some memory allocated for
+   saving the target contents.  It is guaranteed by the caller to be
+   long enough to save BREAKPOINT_LEN bytes (this is accomplished via
+   BREAKPOINT_MAX).  */
 
 int
-default_memory_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
+default_memory_insert_breakpoint (CORE_ADDR addr, struct bp_location *bpt)
 {
   int val;
   const unsigned char *bp;
@@ -54,7 +55,9 @@ default_memory_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
     error (_("Software breakpoints not implemented for this target."));
 
   /* Save the memory contents.  */
-  val = target_read_memory (addr, contents_cache, bplen);
+  bpt->placed_address = addr;
+  bpt->placed_size = bplen;
+  val = target_read_memory (addr, bpt->shadow_contents, bplen);
 
   /* Write the breakpoint.  */
   if (val == 0)
@@ -65,28 +68,21 @@ default_memory_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
 
 
 int
-default_memory_remove_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
+default_memory_remove_breakpoint (CORE_ADDR addr, struct bp_location *bpt)
 {
-  const bfd_byte *bp;
-  int bplen;
-
-  /* Determine appropriate breakpoint contents and size for this address.  */
-  bp = BREAKPOINT_FROM_PC (&addr, &bplen);
-  if (bp == NULL)
-    error (_("Software breakpoints not implemented for this target."));
-
-  return target_write_memory (addr, contents_cache, bplen);
+  return target_write_memory (bpt->placed_address, bpt->shadow_contents,
+			      bpt->placed_size);
 }
 
 
 int
-memory_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
+memory_insert_breakpoint (CORE_ADDR addr, struct bp_location *bpt)
 {
-  return MEMORY_INSERT_BREAKPOINT(addr, contents_cache);
+  return MEMORY_INSERT_BREAKPOINT (addr, bpt);
 }
 
 int
-memory_remove_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
+memory_remove_breakpoint (CORE_ADDR addr, struct bp_location *bpt)
 {
-  return MEMORY_REMOVE_BREAKPOINT(addr, contents_cache);
+  return MEMORY_REMOVE_BREAKPOINT (addr, bpt);
 }

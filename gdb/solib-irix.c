@@ -227,10 +227,9 @@ fetch_lm_info (CORE_ADDR addr)
 /* The symbol which starts off the list of shared libraries.  */
 #define DEBUG_BASE "__rld_obj_head"
 
-char shadow_contents[BREAKPOINT_MAX];	/* Stash old bkpt addr contents */
+static struct breakpoint *base_breakpoint;
 
 static CORE_ADDR debug_base;	/* Base of dynamic linker structures */
-static CORE_ADDR breakpoint_addr;	/* Address where end bkpt is set */
 
 /*
 
@@ -319,10 +318,12 @@ disable_break (void)
   /* Note that breakpoint address and original contents are in our address
      space, so we just need to write the original contents back. */
 
-  if (memory_remove_breakpoint (breakpoint_addr, shadow_contents) != 0)
+  if (deprecated_remove_raw_breakpoint (base_breakpoint) != 0)
     {
       status = 0;
     }
+
+  base_breakpoint = NULL;
 
   /* Note that it is possible that we have stopped at a location that
      is different from the location where we inserted our breakpoint.
@@ -352,12 +353,13 @@ disable_break (void)
 static int
 enable_break (void)
 {
-  if (symfile_objfile != NULL
-      && target_insert_breakpoint (entry_point_address (),
-				   shadow_contents) == 0)
+  if (symfile_objfile != NULL)
     {
-      breakpoint_addr = entry_point_address ();
-      return 1;
+      base_breakpoint
+	= deprecated_insert_raw_breakpoint (entry_point_address ());
+
+      if (base_breakpoint != NULL)
+	return 1;
     }
 
   return 0;

@@ -242,13 +242,6 @@ struct bp_location
      associated with the address.  Used primarily for overlay debugging.  */
   asection *section;
 
-  /* "Real" contents of byte where breakpoint has been inserted.
-     Valid only when breakpoints are in the program.  Under the complete
-     control of the target insert_breakpoint and remove_breakpoint routines.
-     No other code should assume anything about the value(s) here.
-     Valid only for bp_loc_software_breakpoint.  */
-  gdb_byte shadow_contents[BREAKPOINT_MAX];
-
   /* Address at which breakpoint was requested, either by the user or
      by GDB for internal breakpoints.  This will usually be the same
      as ``address'' (above) except for cases in which
@@ -256,6 +249,27 @@ struct bp_location
      which to place the breakpoint in order to comply with a
      processor's architectual constraints.  */
   CORE_ADDR requested_address;
+
+  /* The members after this point are only set or read by the target's
+     insert and remove methods, for its own purposes.  Any which the
+     insert method does not set, the remove method should not read.
+     Nothing besides the target should access these!  */
+
+  /* "Real" contents of byte where breakpoint has been inserted.
+     Valid only when breakpoints are in the program.  Under the complete
+     control of the target insert_breakpoint and remove_breakpoint routines.
+     No other code should assume anything about the value(s) here.
+     Valid only for bp_loc_software_breakpoint.  */
+  gdb_byte shadow_contents[BREAKPOINT_MAX];
+
+  /* Address at which the breakpoint was placed.  This is normally the same
+     as "address", above, except when adjustment happens in
+     BREAKPOINT_FROM_PC, usually stripping an alternate ISA marker
+     from the PC which is used to determine the correct breakpoint.  */
+  CORE_ADDR placed_address;
+
+  /* Size of the placed breakpoint, according to BREAKPOINT_FROM_PC.  */
+  int placed_size;
 };
 
 /* This structure is a collection of function pointers that, if available,
@@ -796,6 +810,16 @@ extern void delete_command (char *arg, int from_tty);
    remove fails. */
 extern int remove_hw_watchpoints (void);
 
+/* Manage a software single step breakpoint (or two).  Insert may be called
+   twice before remove is called.  */
+extern void insert_single_step_breakpoint (CORE_ADDR);
+extern void remove_single_step_breakpoints (void);
+
+/* Manage manual breakpoints, separate from the normal chain of
+   breakpoints.  These functions are used in murky target-specific
+   ways.  Please do not add more uses!  */
+extern struct breakpoint *deprecated_insert_raw_breakpoint (CORE_ADDR);
+extern int deprecated_remove_raw_breakpoint (struct breakpoint *);
 
 /* Indicator of whether exception catchpoints should be nuked between
    runs of a program.  */

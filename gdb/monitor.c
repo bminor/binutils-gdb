@@ -85,8 +85,6 @@ static int monitor_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
 				struct mem_attrib *attrib,
 				struct target_ops *target);
 static void monitor_files_info (struct target_ops *ops);
-static int monitor_insert_breakpoint (CORE_ADDR addr, gdb_byte *shadow);
-static int monitor_remove_breakpoint (CORE_ADDR addr, gdb_byte *shadow);
 static void monitor_kill (void);
 static void monitor_load (char *file, int from_tty);
 static void monitor_mourn_inferior (void);
@@ -2037,7 +2035,7 @@ monitor_mourn_inferior (void)
 /* Tell the monitor to add a breakpoint.  */
 
 static int
-monitor_insert_breakpoint (CORE_ADDR addr, gdb_byte *shadow)
+monitor_insert_breakpoint (CORE_ADDR addr, struct bp_location *bpt)
 {
   int i;
   const unsigned char *bp;
@@ -2052,13 +2050,14 @@ monitor_insert_breakpoint (CORE_ADDR addr, gdb_byte *shadow)
 
   /* Determine appropriate breakpoint size for this address.  */
   bp = gdbarch_breakpoint_from_pc (current_gdbarch, &addr, &bplen);
+  bpt->placed_address = addr;
+  bpt->placed_size = bplen;
 
   for (i = 0; i < current_monitor->num_breakpoints; i++)
     {
       if (breakaddr[i] == 0)
 	{
 	  breakaddr[i] = addr;
-	  monitor_read_memory (addr, shadow, bplen);
 	  monitor_printf (current_monitor->set_break, addr);
 	  monitor_expect_prompt (NULL, 0);
 	  return 0;
@@ -2071,7 +2070,7 @@ monitor_insert_breakpoint (CORE_ADDR addr, gdb_byte *shadow)
 /* Tell the monitor to remove a breakpoint.  */
 
 static int
-monitor_remove_breakpoint (CORE_ADDR addr, gdb_byte *shadow)
+monitor_remove_breakpoint (CORE_ADDR addr, struct bp_location *bpt)
 {
   int i;
 
@@ -2079,8 +2078,7 @@ monitor_remove_breakpoint (CORE_ADDR addr, gdb_byte *shadow)
   if (current_monitor->clr_break == NULL)
     error (_("No clr_break defined for this monitor"));
 
-  if (current_monitor->flags & MO_ADDR_BITS_REMOVE)
-    addr = ADDR_BITS_REMOVE (addr);
+  addr = bpt->placed_address;
 
   for (i = 0; i < current_monitor->num_breakpoints; i++)
     {

@@ -135,8 +135,8 @@ void ocd_write_bdm_register (int bdm_regno, CORE_ADDR reg);
 
 int ocd_wait (void);
 
-int ocd_insert_breakpoint (CORE_ADDR addr, char *contents_cache);
-int ocd_remove_breakpoint (CORE_ADDR addr, char *contents_cache);
+int ocd_insert_breakpoint (CORE_ADDR addr, struct bp_location *bpt);
+int ocd_remove_breakpoint (CORE_ADDR addr, struct bp_location *bpt);
 
 int ocd_write_bytes (CORE_ADDR memaddr, char *myaddr, int len);
 
