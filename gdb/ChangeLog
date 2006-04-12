@@ -1,3 +1,8 @@
+2006-04-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c (extended_remote_restart): Pass the correct length
+	to getpkt.
+
 2006-04-11  Jim Blandy  <jimb@codesourcery.com>
 
 	* serial.c (serial_open): Check for special cases at the front of

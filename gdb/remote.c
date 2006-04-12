@@ -1796,7 +1796,7 @@ extended_remote_restart (void)
   /* Now query for status so this looks just like we restarted
      gdbserver from scratch.  */
   putpkt ("?");
-  getpkt (&rs->buf, &rs->remote_packet_size, 0);
+  getpkt (&rs->buf, &rs->buf_size, 0);
 }
 
 /* Clean up connection to a remote debugger.  */
