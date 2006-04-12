@@ -33,8 +33,11 @@ unsigned long thread_from_wait;
 unsigned long old_thread_from_wait;
 int extended_protocol;
 int server_waiting;
+int exit_requested;
 
 jmp_buf toplevel;
+
+static int attached;
 
 /* The PID of the originally created or attached inferior.  Used to
    send signals to the process when GDB sends us an asynchronous interrupt
@@ -43,9 +46,17 @@ jmp_buf toplevel;
 
 unsigned long signal_pid;
 
+int restarting_program;
+
+char **program_argv;
+
 static int
 start_inferior (char *argv[], char *statusptr)
 {
+  int sig;
+
+  attached = 0;
+
   signal (SIGTTOU, SIG_DFL);
   signal (SIGTTIN, SIG_DFL);
 
@@ -59,7 +70,11 @@ start_inferior (char *argv[], char *statusptr)
   tcsetpgrp (fileno (stderr), signal_pid);
 
   /* Wait till we are at 1st instruction in program, return signal number.  */
-  return mywait (statusptr, 0);
+  restarting_program = 1;
+  block_async_io ();
+  sig = mywait (statusptr, 0);
+  restarting_program = 0;
+  return sig;
 }
 
 static int
@@ -70,6 +85,8 @@ attach_inferior (int pid, char *statusptr, int *sigptr)
 
   if (myattach (pid) != 0)
     return -1;
+
+  attached = 1;
 
   fprintf (stderr, "Attached; pid = %d\n", pid);
 
@@ -161,6 +178,67 @@ handle_query (char *own_buf)
       else
 	convert_int_to_ascii (data, own_buf, n);
       return;
+    }
+
+  if (strncmp ("qRcmd,", own_buf, 6) == 0)
+    {
+      if (strcmp (own_buf + 6, "65786974") == 0)
+	{
+	  /* "exit".  */
+	  write_ok (own_buf);
+	  exit_requested = 1;
+	  return;
+	}
+      else
+	{
+	  write_enn (own_buf);
+	  return;
+	}
+    }
+
+  /* Otherwise we didn't know what packet it was.  Say we didn't
+     understand it.  */
+  own_buf[0] = 0;
+}
+
+void
+handle_query_non_running (char *own_buf)
+{
+  if (strcmp ("qSymbol::", own_buf) == 0)
+    {
+      /* No symbols to look up when the target is not running.  */
+      write_ok (own_buf);
+      return;
+    }
+
+  if (strcmp ("qfThreadInfo", own_buf) == 0
+      || strcmp ("qsThreadInfo", own_buf) == 0)
+    {
+      write_enn (own_buf);
+      return;
+    }
+
+  if (the_target->read_auxv != NULL
+      && strncmp ("qPart:auxv:read::", own_buf, 17) == 0)
+    {
+      write_enn (own_buf);
+      return;
+    }
+
+  if (strncmp ("qRcmd,", own_buf, 6) == 0)
+    {
+      if (strcmp (own_buf + 6, "65786974") == 0)
+	{
+	  /* "exit".  */
+	  write_ok (own_buf);
+	  exit_requested = 1;
+	  return;
+	}
+      else
+	{
+	  write_enn (own_buf);
+	  return;
+	}
     }
 
   /* Otherwise we didn't know what packet it was.  Say we didn't
@@ -275,10 +353,104 @@ handle_v_cont (char *own_buf, char *status, int *signal)
   return;
 
 err:
-  /* No other way to report an error... */
-  strcpy (own_buf, "");
+  write_enn (own_buf);
   free (resume_info);
   return;
+}
+
+/* Attach to a new program.  Return 1 if successful, 0 if failure.  */
+int
+handle_v_attach (char *own_buf, char *status, int *signal)
+{
+  int pid;
+
+  /* FIXME: attach_inferior failures may return -1, or may call error().
+     gdbserver use of error() is totally busted; the protocol conversation
+     gets out of sync.  */
+
+  pid = strtol (own_buf + 8, NULL, 16);
+  if (pid != 0 && attach_inferior (pid, status, signal) == 0)
+    {
+      prepare_resume_reply (own_buf, *status, *signal);
+      putpkt (own_buf);
+      return 1;
+    }
+  else
+    {
+      write_enn (own_buf);
+      return 0;
+    }
+}
+
+/* Run a new program.  Return 1 if successful, 0 if failure.  */
+static int
+handle_v_run (char *own_buf, char *status, int *signal)
+{
+  char *p, **pp, *next_p, **new_argv;
+  int i, new_argc;
+
+  new_argc = 0;
+  for (p = own_buf + strlen ("vRun;"); p && *p; p = strchr (p, ';'))
+    {
+      p++;
+      new_argc++;
+    }
+
+  new_argv = malloc ((new_argc + 2) * sizeof (char *));
+  i = 0;
+  for (p = own_buf + strlen ("vRun;"); *p; p = next_p)
+    {
+      next_p = strchr (p, ';');
+      if (next_p == NULL)
+	next_p = p + strlen (p);
+
+      if (i == 0 && p == next_p)
+	new_argv[i] = NULL;
+      else
+	{
+	  new_argv[i] = malloc (1 + (next_p - p) / 2);
+	  unhexify (new_argv[i], p, (next_p - p) / 2);
+	  new_argv[i][(next_p - p) / 2] = '\0';
+	}
+
+      if (*next_p)
+	next_p++;
+      i++;
+    }
+  new_argv[i] = NULL;
+
+  if (new_argv[0] == NULL)
+    {
+      if (program_argv == NULL)
+	{
+	  write_enn (own_buf);
+	  return 0;
+	}
+
+      new_argv[0] = strdup (program_argv[0]);
+    }
+
+  /* Free the old argv.  */
+  if (program_argv)
+    {
+      for (pp = program_argv; *pp != NULL; pp++)
+	free (*pp);
+      free (program_argv);
+    }
+  program_argv = new_argv;
+
+  *signal = start_inferior (program_argv, status);
+  if (*status == 'T')
+    {
+      prepare_resume_reply (own_buf, *status, *signal);
+      putpkt (own_buf);
+      return 1;
+    }
+  else
+    {
+      write_enn (own_buf);
+      return 0;
+    }
 }
 
 /* Handle all of the extended 'v' packets.  */
@@ -297,10 +469,56 @@ handle_v_requests (char *own_buf, char *status, int *signal)
       return;
     }
 
+  if (strncmp (own_buf, "vAttach;", 8) == 0)
+    {
+      fprintf (stderr, "Killing inferior\n");
+      kill_inferior ();
+      handle_v_attach (own_buf, status, signal);
+      return;
+    }
+
+  if (strncmp (own_buf, "vRun;", 5) == 0)
+    {
+      fprintf (stderr, "Killing inferior\n");
+      kill_inferior ();
+      handle_v_run (own_buf, status, signal);
+      return;
+    }
+
   /* Otherwise we didn't know what packet it was.  Say we didn't
      understand it.  */
   own_buf[0] = 0;
   return;
+}
+
+/* Handle all of the extended 'v' packets.  Return 1 if there is now
+   an inferior.  */
+int
+handle_v_requests_non_running (char *own_buf, char *status, int *signal)
+{
+  if (strncmp (own_buf, "vCont;", 6) == 0)
+    {
+      /* Can't do this when not running.  */
+      write_enn (own_buf);
+      return 0;
+    }
+
+  if (strncmp (own_buf, "vCont?", 6) == 0)
+    {
+      strcpy (own_buf, "vCont;c;C;s;S");
+      return 0;
+    }
+
+  if (strncmp (own_buf, "vAttach;", 8) == 0)
+    return handle_v_attach (own_buf, status, signal);
+
+  if (strncmp (own_buf, "vRun;", 5) == 0)
+    return handle_v_run (own_buf, status, signal);
+
+  /* Otherwise we didn't know what packet it was.  Say we didn't
+     understand it.  */
+  own_buf[0] = 0;
+  return 0;
 }
 
 void
@@ -326,8 +544,6 @@ myresume (int step, int sig)
   (*the_target->resume) (resume_info);
 }
 
-static int attached;
-
 static void
 gdbserver_version (void)
 {
@@ -348,6 +564,97 @@ gdbserver_usage (void)
 	  "HOST:PORT to listen for a TCP connection.\n");
 }
 
+/* FIXME declare here, give sensible name, give values?  */
+extern int debug_threads;
+
+/* Handle a single packet.  Return 1 if the program is now running, 0
+   if it is not.  */
+
+int
+non_running (char *own_buf, char *status, int *signal)
+{
+  char ch;
+  int i = 0;
+
+  ch = own_buf[i++];
+  switch (ch)
+    {
+    case 'q':
+      handle_query_non_running (own_buf);
+      break;
+    case 'd':
+      remote_debug = !remote_debug;
+      break;
+    case 'D':
+      /* Can not detach with nothing running.  */
+      write_enn (own_buf);
+      break;
+    case '!':
+      /* Already in extended mode.  */
+      write_ok (own_buf);
+      break;
+    case '?':
+      prepare_resume_reply (own_buf, *status, *signal);
+      break;
+    case 'H':
+      if (own_buf[1] == 'c' || own_buf[1] == 'g' || own_buf[1] == 's')
+	write_enn (own_buf);
+      else
+	own_buf[0] = 0;
+      break;
+    case 'g':
+    case 'G':
+    case 'm':
+    case 'M':
+    case 'C':
+    case 'S':
+    case 'c':
+    case 's':
+      /* Commands which do not make sense without a program to debug.  */
+      write_enn (own_buf);
+      break;
+
+    case 'k':
+      /* This is special.  It doesn't make sense - but we can't reply
+	 to it, either.  */
+      return 2;
+
+    case 'Z':
+    case 'z':
+      /* If we return an error, the client will assume we support this
+	 particular breakpoint packet.  But maybe we do, and maybe we
+	 don't.  However, we don't worry about it - it's a bug in the
+	 client to insert breakpoints when there is no inferior.  */
+      write_enn (own_buf);
+      break;
+
+    case 'T':
+      /* Obviously the thread is not alive.  */
+      write_enn (own_buf);
+      break;
+
+    case 'R':
+      /* Restart request.  */
+      fprintf (stderr, "GDBserver restarting\n");
+
+      /* Wait till we are at 1st instruction in prog.  */
+      *signal = start_inferior (program_argv, status);
+      return 1;
+
+    case 'v':
+      /* Extended (long) request.  */
+      return handle_v_requests_non_running (own_buf, status, signal);
+
+    default:
+      /* It is a request we don't understand.  Respond with an
+	 empty packet so that gdb knows that we don't support this
+	 request.  */
+      own_buf[0] = '\0';
+      break;
+    }
+  return 0;
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -360,6 +667,7 @@ main (int argc, char *argv[])
   int bad_attach;
   int pid;
   char *arg_end;
+  int running;
 
   if (argc >= 2 && strcmp (argv[1], "--version") == 0)
     {
@@ -379,9 +687,15 @@ main (int argc, char *argv[])
       exit (1);
     }
 
+  if (argc >= 2 && strcmp (argv[1], "--debug") == 0)
+    {
+      argc--;
+      argv++;
+      debug_threads = 1;
+    }
+
   bad_attach = 0;
   pid = 0;
-  attached = 0;
   if (argc >= 3 && strcmp (argv[2], "--attach") == 0)
     {
       if (argc == 4
@@ -408,23 +722,25 @@ main (int argc, char *argv[])
 
   if (pid == 0)
     {
+      int i;
+      program_argv = malloc (sizeof (char *) * (argc + 1));
+      for (i = 0; 2 + i < argc; i++)
+	program_argv[i] = strdup (argv[2 + i]);
+      program_argv[argc] = NULL;
+
       /* Wait till we are at first instruction in program.  */
-      signal = start_inferior (&argv[2], &status);
+      signal = start_inferior (program_argv, &status);
 
       /* We are now stopped at the first instruction of the target process */
     }
   else
     {
-      switch (attach_inferior (pid, &status, &signal))
-	{
-	case -1:
-	  error ("Attaching not supported on this target");
-	  break;
-	default:
-	  attached = 1;
-	  break;
-	}
+      if (attach_inferior (pid, &status, &signal) == -1)
+	error ("Attaching not supported on this target");
+
+      /* Otherwise succeeded.  */
     }
+  running = 1;
 
   while (1)
     {
@@ -432,9 +748,27 @@ main (int argc, char *argv[])
 
     restart:
       setjmp (toplevel);
-      while (getpkt (own_buf) > 0)
+      while (!exit_requested && getpkt (own_buf) > 0)
 	{
 	  unsigned char sig;
+
+	  if (running == 0)
+	    {
+	      int ret = non_running (own_buf, &status, &signal);
+	      if (ret == 1)
+		{
+		  /* Go back to the top.  We do not call putpkt; the 'R'
+		     packet does not expect a response for historical
+		     reasons.  */
+		  running = 1;
+		  goto restart;
+		}
+	      if (ret == 2)
+		/* A packet which should not be responded to.  */
+		goto restart;
+	      goto done_packet;
+	    }
+
 	  i = 0;
 	  ch = own_buf[i++];
 	  switch (ch)
@@ -449,24 +783,36 @@ main (int argc, char *argv[])
 	      fprintf (stderr, "Detaching from inferior\n");
 	      detach_inferior ();
 	      write_ok (own_buf);
-	      putpkt (own_buf);
-	      remote_close ();
 
-	      /* If we are attached, then we can exit.  Otherwise, we need to
-		 hang around doing nothing, until the child is gone.  */
-	      if (!attached)
+	      if (extended_protocol)
 		{
-		  int status, ret;
-
-		  do {
-		    ret = waitpid (signal_pid, &status, 0);
-		    if (WIFEXITED (status) || WIFSIGNALED (status))
-		      break;
-		  } while (ret != -1 || errno != ECHILD);
+		  /* Treat this like a normal program exit.  */
+		  signal = 0;
+		  status = 'W';
+		  running = 0;
 		}
+	      else
+		{
+		  putpkt (own_buf);
+		  remote_close ();
 
-	      exit (0);
+		  /* If we are attached, then we can exit.  Otherwise,
+		     we need to hang around doing nothing, until the
+		     child is gone.  */
+		  if (!attached)
+		    {
+		      int status, ret;
 
+		      do {
+			ret = waitpid (signal_pid, &status, 0);
+			if (WIFEXITED (status) || WIFSIGNALED (status))
+			  break;
+		      } while (ret != -1 || errno != ECHILD);
+		    }
+
+		  exit (0);
+		}
+	      break;
 	    case '!':
 	      if (attached == 0)
 		{
@@ -490,11 +836,16 @@ main (int argc, char *argv[])
 		  unsigned long gdb_id, thread_id;
 
 		  gdb_id = strtoul (&own_buf[2], NULL, 16);
-		  thread_id = gdb_id_to_thread_id (gdb_id);
-		  if (thread_id == 0)
+		  if (gdb_id == 0 || gdb_id == -1)
+		    thread_id = gdb_id;
+		  else
 		    {
-		      write_enn (own_buf);
-		      break;
+		      thread_id = gdb_id_to_thread_id (gdb_id);
+		      if (thread_id == 0)
+			{
+			  write_enn (own_buf);
+			  break;
+			}
 		    }
 
 		  if (own_buf[1] == 'g')
@@ -642,10 +993,17 @@ main (int argc, char *argv[])
 	      if (extended_protocol)
 		{
 		  write_ok (own_buf);
+		  status = 'X';
+		  signal = SIGKILL;
+#if 0
 		  fprintf (stderr, "GDBserver restarting\n");
 
 		  /* Wait till we are at 1st instruction in prog.  */
-		  signal = start_inferior (&argv[2], &status);
+		  signal = start_inferior (program_argv, &status);
+#else
+		  fprintf (stderr, "GDBserver killing inferior\n");
+		  running = 0;
+#endif
 		  goto restart;
 		  break;
 		}
@@ -682,7 +1040,7 @@ main (int argc, char *argv[])
 		  fprintf (stderr, "GDBserver restarting\n");
 
 		  /* Wait till we are at 1st instruction in prog.  */
-		  signal = start_inferior (&argv[2], &status);
+		  signal = start_inferior (program_argv, &status);
 		  goto restart;
 		  break;
 		}
@@ -706,27 +1064,22 @@ main (int argc, char *argv[])
 	      break;
 	    }
 
+done_packet:
 	  putpkt (own_buf);
 
-	  if (status == 'W')
-	    fprintf (stderr,
-		     "\nChild exited with status %d\n", signal);
-	  if (status == 'X')
-	    fprintf (stderr, "\nChild terminated with signal = 0x%x\n",
-		     signal);
-	  if (status == 'W' || status == 'X')
+	  if (running && (status == 'W' || status == 'X'))
 	    {
+	      if (status == 'W')
+		fprintf (stderr,
+			 "\nChild exited with status %d\n", signal);
+	      if (status == 'X')
+		fprintf (stderr, "\nChild terminated with signal = 0x%x\n",
+			 signal);
+
 	      if (extended_protocol)
 		{
-		  fprintf (stderr, "Killing inferior\n");
-		  kill_inferior ();
-		  write_ok (own_buf);
-		  fprintf (stderr, "GDBserver restarting\n");
-
-		  /* Wait till we are at 1st instruction in prog.  */
-		  signal = start_inferior (&argv[2], &status);
+		  running = 0;
 		  goto restart;
-		  break;
 		}
 	      else
 		{
@@ -736,16 +1089,18 @@ main (int argc, char *argv[])
 	    }
 	}
 
-      /* We come here when getpkt fails.
+      /* If an exit was requested (using the "monitor exit" command),
+	 terminate now.  The only other way to get here is for
+	 getpkt to fail; close the connection and reopen it at the
+	 top of the loop.  */
 
-         For the extended remote protocol we exit (and this is the only
-         way we gracefully exit!).
-
-         For the traditional remote protocol close the connection,
-         and re-open it at the top of the loop.  */
-      if (extended_protocol)
+      if (exit_requested)
 	{
 	  remote_close ();
+	  if (attached && running)
+	    detach_inferior ();
+	  else if (running)
+	    kill_inferior ();
 	  exit (0);
 	}
       else

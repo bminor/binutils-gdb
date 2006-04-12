@@ -27,6 +27,10 @@
 struct so_list;
 struct target_ops;
 
+/* An alternate extension for symbol files.  */
+
+extern char *solib_symbols_extension;
+
 /* Called when we free all symtabs, to free the shared library information
    as well. */
 

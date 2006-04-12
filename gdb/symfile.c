@@ -145,6 +145,8 @@ static char *find_separate_debug_file (struct objfile *objfile);
 
 static void init_filename_language_table (void);
 
+static void symfile_find_segment_sections (struct objfile *objfile);
+
 void _initialize_symfile (void);
 
 /* List of all available sym_fns.  On gdb startup, each object file reader
@@ -429,12 +431,19 @@ init_objfile_sect_indices (struct objfile *objfile)
   /* This is where things get really weird...  We MUST have valid
      indices for the various sect_index_* members or gdb will abort.
      So if for example, there is no ".text" section, we have to
-     accomodate that.  Except when explicitly adding symbol files at
-     some address, section_offsets contains nothing but zeros, so it
-     doesn't matter which slot in section_offsets the individual
-     sect_index_* members index into.  So if they are all zero, it is
-     safe to just point all the currently uninitialized indices to the
-     first slot. */
+     accomodate that.  First, check for a file with the standard
+     one or two segments.  */
+
+  symfile_find_segment_sections (objfile);
+
+  /* Except when explicitly adding symbol files at some address,
+     section_offsets contains nothing but zeros, so it doesn't matter
+     which slot in section_offsets the individual sect_index_* members
+     index into.  So if they are all zero, it is safe to just point
+     all the currently uninitialized indices to the first slot.  But
+     beware: if this is the main executable, it may be relocated
+     later, e.g. by the remote qOffsets packet, and then this will
+     be wrong!  That's why we try segments first.  */
 
   for (i = 0; i < objfile->num_sections; i++)
     {
@@ -3721,6 +3730,226 @@ symfile_relocate_debug_section (bfd *abfd, asection *sectp, bfd_byte *buf)
   bfd_map_over_sections (abfd, symfile_dummy_outputs, NULL);
 
   return bfd_simple_get_relocated_section_contents (abfd, sectp, buf, NULL);
+}
+
+/* FIXME: This should probably go through the symfile ops vector.  */
+
+#include "elf/internal.h"
+#include "elf/common.h"
+
+static int
+symfile_find_segments (bfd *abfd, Elf_Internal_Phdr *text_segment,
+		       Elf_Internal_Phdr *data_segment)
+{
+  Elf_Internal_Phdr *phdrs, *segments[2];
+  int num_phdrs, i, num_segments;
+  long phdrs_size;
+  asection *sect;
+  CORE_ADDR text_offset, data_offset;
+
+  phdrs_size = bfd_get_elf_phdr_upper_bound (abfd);
+  if (phdrs_size == -1)
+    return 0;
+
+  phdrs = alloca (phdrs_size);
+  num_phdrs = bfd_get_elf_phdrs (abfd, phdrs);
+  if (num_phdrs == -1)
+    return 0;
+
+  num_segments = 0;
+  for (i = 0; i < num_phdrs; i++)
+    if (phdrs[i].p_type == PT_LOAD)
+      {
+	if (num_segments == 2)
+	  return 0;
+	segments[num_segments++] = &phdrs[i];
+      }
+
+  if (num_segments == 0)
+    return 0;
+
+  if (num_segments == 1)
+    {
+      if ((segments[0]->p_flags & PF_W) && !(segments[0]->p_flags & PF_X))
+	{
+	  memset (text_segment, 0, sizeof (*text_segment));
+	  *data_segment = *segments[0];
+	}
+      else
+	{
+	  *text_segment = *segments[0];
+	  memset (data_segment, 0, sizeof (*data_segment));
+	}
+    }
+  else
+    {
+      if ((segments[0]->p_flags & PF_X) && !(segments[1]->p_flags & PF_X))
+	{
+	  *text_segment = *segments[0];
+	  *data_segment = *segments[1];
+	}
+      else if ((segments[1]->p_flags & PF_X) && !(segments[0]->p_flags & PF_X))
+	{
+	  *text_segment = *segments[1];
+	  *data_segment = *segments[0];
+	}
+      else if ((segments[1]->p_flags & PF_W) && !(segments[0]->p_flags & PF_W))
+	{
+	  *text_segment = *segments[0];
+	  *data_segment = *segments[1];
+	}
+      else if ((segments[0]->p_flags & PF_W) && !(segments[1]->p_flags & PF_W))
+	{
+	  *text_segment = *segments[1];
+	  *data_segment = *segments[0];
+	}
+      else
+	return 0;
+    }
+
+  return 1;
+}
+
+int
+symfile_map_offsets_to_segments (struct objfile *objfile,
+				 struct section_offsets *offsets,
+				 CORE_ADDR text_addr, CORE_ADDR data_addr)
+{
+  Elf_Internal_Phdr text_segment, data_segment;
+  bfd *abfd = objfile->obfd;
+  int i;
+  asection *sect;
+  CORE_ADDR text_offset, data_offset;
+
+  if (symfile_find_segments (abfd, &text_segment, &data_segment) == 0)
+    return 0;
+
+  text_offset = text_addr - text_segment.p_vaddr;
+  data_offset = data_addr - data_segment.p_vaddr;
+
+  for (i = 0, sect = abfd->sections; sect != NULL; i++, sect = sect->next)
+    {
+      CORE_ADDR vma;
+
+      if ((bfd_get_section_flags (abfd, sect) & SEC_LOAD) == 0)
+	continue;
+
+      vma = bfd_get_section_vma (abfd, sect);
+
+      if (text_segment.p_memsz
+	  && vma >= text_segment.p_vaddr
+	  && vma < text_segment.p_vaddr + text_segment.p_memsz)
+	offsets->offsets[i] = text_offset;
+
+      else if (data_segment.p_memsz
+	       && vma >= data_segment.p_vaddr
+	       && vma < data_segment.p_vaddr + data_segment.p_memsz)
+	offsets->offsets[i] = data_offset;
+
+      else
+	warning (_("Loadable segment \"%s\" outside of ELF segments"),
+		 bfd_section_name (abfd, sect));
+    }
+
+  return 1;
+}
+
+CORE_ADDR
+symfile_section_offset_from_segment (bfd *abfd, asection *sect,
+				     CORE_ADDR text_addr, CORE_ADDR data_addr)
+{
+  Elf_Internal_Phdr text_segment, data_segment;
+  CORE_ADDR text_offset, data_offset, vma;
+
+  if (symfile_find_segments (abfd, &text_segment, &data_segment) == 0)
+    return 0;
+
+  text_offset = text_addr - text_segment.p_vaddr;
+  data_offset = data_addr - data_segment.p_vaddr;
+
+  if ((bfd_get_section_flags (abfd, sect) & SEC_LOAD) == 0)
+    return 0;
+
+  vma = bfd_get_section_vma (abfd, sect);
+
+  if (text_segment.p_memsz
+      && vma >= text_segment.p_vaddr
+      && vma < text_segment.p_vaddr + text_segment.p_memsz)
+    return text_offset;
+
+  else if (data_segment.p_memsz
+	   && vma >= data_segment.p_vaddr
+	   && vma < data_segment.p_vaddr + data_segment.p_memsz)
+    return data_offset;
+
+  else
+    {
+      warning (_("Loadable segment \"%s\" outside of ELF segments"),
+	       bfd_section_name (abfd, sect));
+      return 0;
+    }
+}
+
+static void
+symfile_find_segment_sections (struct objfile *objfile)
+{
+  Elf_Internal_Phdr text_segment, data_segment;
+  bfd *abfd = objfile->obfd;
+  int i;
+  asection *sect;
+
+  if (symfile_find_segments (abfd, &text_segment, &data_segment) == 0)
+    return;
+
+  for (i = 0, sect = abfd->sections; sect != NULL; i++, sect = sect->next)
+    {
+      CORE_ADDR vma;
+
+      if ((bfd_get_section_flags (abfd, sect) & SEC_LOAD) == 0)
+	continue;
+
+      vma = bfd_get_section_vma (abfd, sect);
+
+      if (text_segment.p_memsz
+	  && vma >= text_segment.p_vaddr
+	  && vma < text_segment.p_vaddr + text_segment.p_memsz)
+	{
+	  if (objfile->sect_index_text == -1)
+	    objfile->sect_index_text = sect->index;
+
+	  if (objfile->sect_index_rodata == -1)
+	    objfile->sect_index_rodata = sect->index;
+	}
+
+      else if (data_segment.p_memsz
+	       && vma >= data_segment.p_vaddr
+	       && vma < data_segment.p_vaddr + data_segment.p_memsz)
+	{
+	  if (objfile->sect_index_data == -1)
+	    objfile->sect_index_data = sect->index;
+
+	  if (objfile->sect_index_bss == -1)
+	    objfile->sect_index_bss = sect->index;
+	}
+    }
+}
+
+void
+symfile_find_segment_lengths (bfd *abfd, CORE_ADDR *text_len,
+			      CORE_ADDR *data_len)
+{
+  Elf_Internal_Phdr text_segment, data_segment;
+
+  if (symfile_find_segments (abfd, &text_segment, &data_segment) == 0)
+    {
+      *text_len = 0;
+      *data_len = 0;
+    }
+  else
+    {
+      *text_len = text_segment.p_memsz;
+      *data_len = data_segment.p_memsz;
+    }
 }
 
 void

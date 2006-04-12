@@ -14012,6 +14012,24 @@ This command forces @value{GDBN} to use the specified ABI.
 @item show arm abi
 Show the currently used ABI.
 
+@item set arm fallback-mode
+This command sets the mode (ARM versus Thumb) which @value{GDBN} will
+assume for code without a symbol table.  The default is @samp{auto},
+which causes @value{GDBN} to use the mode associated with the current
+CPSR.
+
+@item show arm fallback-mode
+Show the current fallback execution mode.
+
+@item set arm force-mode
+This command sets the mode (ARM versus Thumb) which @value{GDBN} will
+assume for all code, even when a symbol table is present.  The default
+is @samp{auto}, which causes @value{GDBN} to use the symbol table
+and fall back to the value of @samp{set arm fallback-mode}.
+
+@item show arm force-mode
+Show the currently forced execution mode.
+
 @item set debug arm
 Toggle whether to display ARM-specific debugging messages from the ARM
 target support subsystem.

@@ -623,6 +623,9 @@ som_current_sos (void)
 	    	    paddr_nz (new->lm_info->tsd_start_addr));
 #endif
 
+	    new->addr_low = lmi->text_addr;
+	    new->addr_high = lmi->text_end;
+
 	    /* Link the new object onto the list.  */
 	    new->next = NULL;
 	    *link_ptr = new;

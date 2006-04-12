@@ -124,63 +124,36 @@ deprecated_show_value_hack (struct ui_file *ignore_file,
 void
 do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 {
+  struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
+
   if (c->type == set_cmd)
     {
+      char **argv;
+
+      switch (c->var_type)
+	{
+	  /* case var_string: */
+	case var_string_noescape:
+	case var_filename:
+	case var_optional_filename:
+	  if (arg != NULL)
+	    {
+	      argv = buildargv (arg);
+	      if (argv == NULL)
+		nomem (0);
+	      if (argv[0] == NULL || argv[1] != NULL)
+		error (_("A single argument is required (missing quotes?)."));
+	      make_cleanup_freeargv (argv);
+	      arg = argv[0];
+	    }
+	}
+
       switch (c->var_type)
 	{
 	case var_string:
-	  {
-	    char *new;
-	    char *p;
-	    char *q;
-	    int ch;
-
-	    if (arg == NULL)
-	      arg = "";
-	    new = (char *) xmalloc (strlen (arg) + 2);
-	    p = arg;
-	    q = new;
-	    while ((ch = *p++) != '\000')
-	      {
-		if (ch == '\\')
-		  {
-		    /* \ at end of argument is used after spaces
-		       so they won't be lost.  */
-		    /* This is obsolete now that we no longer strip
-		       trailing whitespace and actually, the backslash
-		       didn't get here in my test, readline or
-		       something did something funky with a backslash
-		       right before a newline.  */
-		    if (*p == 0)
-		      break;
-		    ch = parse_escape (&p);
-		    if (ch == 0)
-		      break;	/* C loses */
-		    else if (ch > 0)
-		      *q++ = ch;
-		  }
-		else
-		  *q++ = ch;
-	      }
-#if 0
-	    if (*(p - 1) != '\\')
-	      *q++ = ' ';
-#endif
-	    *q++ = '\0';
-	    new = (char *) xrealloc (new, q - new);
-	    if (*(char **) c->var != NULL)
-	      xfree (*(char **) c->var);
-	    *(char **) c->var = new;
-	  }
-	  break;
 	case var_string_noescape:
-	  if (arg == NULL)
-	    arg = "";
-	  if (*(char **) c->var != NULL)
-	    xfree (*(char **) c->var);
-	  *(char **) c->var = savestring (arg, strlen (arg));
-	  break;
 	case var_optional_filename:
+	  /* Should the var_optional_filename case call tilde_expand?  */
 	  if (arg == NULL)
 	    arg = "";
 	  if (*(char **) c->var != NULL)
@@ -301,9 +274,12 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
       switch (c->var_type)
 	{
 	case var_string:
+	  /* FALLTHROUGH */
+#if 0
 	  if (*(char **) c->var)
 	    fputstr_filtered (*(char **) c->var, '"', stb->stream);
 	  break;
+#endif
 	case var_string_noescape:
 	case var_optional_filename:
 	case var_filename:
@@ -380,6 +356,8 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
   c->func (c, NULL, from_tty);
   if (c->type == set_cmd && deprecated_set_hook)
     deprecated_set_hook (c);
+
+  do_cleanups (back_to);
 }
 
 /* Show all the settings in a list of show commands.  */

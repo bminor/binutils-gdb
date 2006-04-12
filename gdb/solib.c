@@ -85,6 +85,11 @@ static int solib_cleanup_queued = 0;	/* make_run_cleanup called */
 
 static void do_clear_solib (void *);
 
+/* If non-empty, this is a file extension that will be opened in place
+   of the file extension reported by the shared library list.  */
+
+char *solib_symbols_extension;
+
 /* If non-zero, this is a prefix that will be added to the front of the name
    shared libraries with an absolute filename for loading.  */
 static char *solib_absolute_prefix = NULL;
@@ -145,7 +150,30 @@ solib_open (char *in_pathname, char **found_pathname)
   struct target_so_ops *ops = solib_ops (current_gdbarch);
   int found_file = -1;
   char *temp_pathname = NULL;
-  char *p = in_pathname;
+  char *p;
+
+  /* If solib-symbols-extension is set, replace the file's extension.  */
+  if (solib_symbols_extension && *solib_symbols_extension)
+    {
+      p = in_pathname + strlen (in_pathname);
+      while (p > in_pathname && *p != '.')
+	p--;
+
+      if (*p == '.')
+	{
+	  char *new_pathname;
+
+	  new_pathname = alloca (p - in_pathname + 1
+				 + strlen (solib_symbols_extension) + 1);
+	  memcpy (new_pathname, in_pathname, p - in_pathname + 1);
+	  strcpy (new_pathname + (p - in_pathname) + 1,
+		  solib_symbols_extension);
+
+	  in_pathname = new_pathname;
+	}
+    }
+
+  p = in_pathname;
 
   while (*p && !IS_DIR_SEPARATOR (*p))
     p++;
@@ -314,9 +342,14 @@ solib_map_sections (void *arg)
          object's file by the base address to which the object was actually
          mapped. */
       ops->relocate_section_addresses (so, p);
-      if (strcmp (p->the_bfd_section->name, ".text") == 0)
+
+      /* If the target didn't provide information about the address range
+	 of the DLL, assume we want the location of the .text section.  */
+      if (so->addr_low == 0 && so->addr_high == 0
+	  && strcmp (p->the_bfd_section->name, ".text") == 0)
 	{
-	  so->textsection = p;
+	  so->addr_low = p->addr;
+	  so->addr_high = p->endaddr;
 	}
     }
 
@@ -716,15 +749,15 @@ info_sharedlibrary_command (char *ignore, int from_tty)
 	    }
 
 	  printf_unfiltered ("%-*s", addr_width,
-			     so->textsection != NULL 
+			     so->addr_high != 0
 			       ? hex_string_custom (
-			           (LONGEST) so->textsection->addr,
+			           (LONGEST) so->addr_low,
 	                           addr_width - 4)
 			       : "");
 	  printf_unfiltered ("%-*s", addr_width,
-			     so->textsection != NULL 
+			     so->addr_high != 0
 			       ? hex_string_custom (
-			           (LONGEST) so->textsection->endaddr,
+			           (LONGEST) so->addr_high,
 	                           addr_width - 4)
 			       : "");
 	  printf_unfiltered ("%-12s", so->symbols_loaded ? "Yes" : "No");

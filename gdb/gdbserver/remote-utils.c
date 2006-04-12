@@ -396,6 +396,12 @@ void
 unblock_async_io (void)
 {
   sigset_t sigio_set;
+
+  /* HACK */
+  extern int restarting_program;
+  if (restarting_program)
+    return;
+
   sigemptyset (&sigio_set);
   sigaddset (&sigio_set, SIGIO);
   sigprocmask (SIG_UNBLOCK, &sigio_set, NULL);

@@ -97,8 +97,6 @@ static void debug_to_attach (char *, int);
 
 static void debug_to_detach (char *, int);
 
-static void debug_to_disconnect (char *, int);
-
 static void debug_to_resume (ptid_t, int, enum target_signal);
 
 static ptid_t debug_to_wait (ptid_t, struct target_waitstatus *);
@@ -366,7 +364,7 @@ maybe_kill_then_create_inferior (char *exec, char *args, char **env,
    locally search the target stack for the target that can handle the
    request.  */
 
-static void
+void
 update_current_target (void)
 {
   struct target_ops *t;
@@ -388,7 +386,7 @@ update_current_target (void)
       INHERIT (to_attach, t);
       INHERIT (to_post_attach, t);
       INHERIT (to_detach, t);
-      INHERIT (to_disconnect, t);
+      /* Do not inherit to_disconnect.  */
       INHERIT (to_resume, t);
       INHERIT (to_wait, t);
       INHERIT (to_fetch_registers, t);
@@ -458,6 +456,7 @@ update_current_target (void)
       INHERIT (to_make_corefile_notes, t);
       INHERIT (to_get_thread_local_address, t);
       /* Do not inherit to_available_features.  */
+      /* Do not inherit to_get_shared_libraries.  */
       INHERIT (to_magic, t);
     }
 #undef INHERIT
@@ -484,9 +483,6 @@ update_current_target (void)
   de_fault (to_detach, 
 	    (void (*) (char *, int)) 
 	    target_ignore);
-  de_fault (to_disconnect, 
-	    (void (*) (char *, int)) 
-	    tcomplain);
   de_fault (to_resume, 
 	    (void (*) (ptid_t, int, enum target_signal)) 
 	    noprocess);
@@ -1535,7 +1531,19 @@ target_detach (char *args, int from_tty)
 void
 target_disconnect (char *args, int from_tty)
 {
-  (current_target.to_disconnect) (args, from_tty);
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_disconnect != NULL)
+	{
+	  if (targetdebug)
+	    fprintf_unfiltered (gdb_stdlog, "target_disconnect (%s, %d)\n",
+				args, from_tty);
+	  t->to_disconnect (t, args, from_tty);
+	  return;
+	}
+
+  tcomplain ();
 }
 
 int
@@ -1591,6 +1599,27 @@ target_available_features (struct target_ops *target, struct obstack *obstack)
       }
 
   return NULL;
+}
+
+/* Look through the list of possible targets for a target that can
+   fetch shared libraries.  */
+
+void
+target_get_shared_libraries (void)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_get_shared_libraries != NULL)
+	{
+	  t->to_get_shared_libraries (t);
+	  break;
+	}
+    }
+
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog, "target_get_shared_libraries ()\n");
 }
 
 /* Look through the list of possible targets for a target that can
@@ -1971,15 +2000,6 @@ debug_to_detach (char *args, int from_tty)
   debug_target.to_detach (args, from_tty);
 
   fprintf_unfiltered (gdb_stdlog, "target_detach (%s, %d)\n", args, from_tty);
-}
-
-static void
-debug_to_disconnect (char *args, int from_tty)
-{
-  debug_target.to_disconnect (args, from_tty);
-
-  fprintf_unfiltered (gdb_stdlog, "target_disconnect (%s, %d)\n",
-		      args, from_tty);
 }
 
 static void
@@ -2588,7 +2608,6 @@ setup_target_debug (void)
   current_target.to_attach = debug_to_attach;
   current_target.to_post_attach = debug_to_post_attach;
   current_target.to_detach = debug_to_detach;
-  current_target.to_disconnect = debug_to_disconnect;
   current_target.to_resume = debug_to_resume;
   current_target.to_wait = debug_to_wait;
   current_target.to_fetch_registers = debug_to_fetch_registers;
@@ -2636,7 +2655,6 @@ setup_target_debug (void)
   current_target.to_enable_exception_callback = debug_to_enable_exception_callback;
   current_target.to_get_current_exception_event = debug_to_get_current_exception_event;
   current_target.to_pid_to_exec_file = debug_to_pid_to_exec_file;
-
 }
 
 

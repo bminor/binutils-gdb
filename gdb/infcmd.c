@@ -2068,14 +2068,14 @@ Show terminal for future runs of program being debugged."), _("\
 Usage: set inferior-tty /dev/pts/1"), NULL, NULL, &setlist, &showlist);
   add_com_alias ("tty", "set inferior-tty", class_alias, 0);
 
-  add_setshow_optional_filename_cmd ("args", class_run,
-				     &inferior_args, _("\
+  add_setshow_string_cmd ("args", class_run,
+			  &inferior_args, _("\
 Set argument list to give program being debugged when it is started."), _("\
 Show argument list to give program being debugged when it is started."), _("\
 Follow this command with any number of args, to be passed to the program."),
-				     notice_args_set,
-				     notice_args_read,
-				     &setlist, &showlist);
+			  notice_args_set,
+			  notice_args_read,
+			  &setlist, &showlist);
 
   c = add_cmd ("environment", no_class, environment_info, _("\
 The environment to give the program, or one variable's value.\n\

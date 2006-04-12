@@ -1474,6 +1474,7 @@ ALLDEPFILES = \
 	mips64obsd-nat.c mips64obsd-tdep.c \
 	nbsd-tdep.c obsd-tdep.c \
 	solib-osf.c \
+	solib-target.c \
 	somread.c solib-som.c $(HPREAD_SOURCE) \
 	posix-hdep.c \
 	ppc-sysv-tdep.c ppc-linux-nat.c ppc-linux-tdep.c \
@@ -2510,7 +2511,7 @@ remote.o: remote.c $(defs_h) $(gdb_string_h) $(inferior_h) $(bfd_h) \
 	$(gdb_stabs_h) $(gdbthread_h) $(remote_h) $(regcache_h) $(value_h) \
 	$(gdb_assert_h) $(event_loop_h) $(event_top_h) $(inf_loop_h) \
 	$(serial_h) $(gdbcore_h) $(remote_fileio_h) $(solib_h) $(observer_h) \
-	$(cli_decode_h) $(cli_setshow_h) $(available_h)
+	$(cli_decode_h) $(cli_setshow_h) $(available_h) $(solist_h)
 remote-e7000.o: remote-e7000.c $(defs_h) $(gdbcore_h) $(gdbarch_h) \
 	$(inferior_h) $(target_h) $(value_h) $(command_h) $(gdb_string_h) \
 	$(exceptions_h) $(gdbcmd_h) $(serial_h) $(remote_utils_h) \
@@ -2645,6 +2646,8 @@ solib-svr4.o: solib-svr4.c $(defs_h) $(elf_external_h) $(elf_common_h) \
 	$(elf_mips_h) $(symtab_h) $(bfd_h) $(symfile_h) $(objfiles_h) \
 	$(gdbcore_h) $(target_h) $(inferior_h) $(gdb_assert_h) \
 	$(solist_h) $(solib_h) $(solib_svr4_h) $(bfd_target_h) $(exec_h)
+solib-target.o: solib-target.c $(defs_h) $(solist_h) $(symtab_h) \
+	$(symfile_h) $(target_h) $(gdb_string_h)
 sol-thread.o: sol-thread.c $(defs_h) $(gdbthread_h) $(target_h) \
 	$(inferior_h) $(gdb_stat_h) $(gdbcmd_h) $(gdbcore_h) $(regcache_h) \
 	$(solib_h) $(symfile_h) $(gdb_string_h) $(gregset_h)
@@ -2733,6 +2736,7 @@ stack.o: stack.c $(defs_h) $(value_h) $(symtab_h) $(gdbtypes_h) \
 std-regs.o: std-regs.c $(defs_h) $(user_regs_h) $(frame_h) $(gdbtypes_h) \
 	$(value_h) $(gdb_string_h)
 stop-gdb.o: stop-gdb.c $(defs_h)
+symbian-tdep.o: symbian-tdep.c $(defs_h) $(solib_h)
 symfile.o: symfile.c $(defs_h) $(bfdlink_h) $(symtab_h) $(gdbtypes_h) \
 	$(gdbcore_h) $(frame_h) $(target_h) $(value_h) $(symfile_h) \
 	$(objfiles_h) $(source_h) $(gdbcmd_h) $(breakpoint_h) $(language_h) \

@@ -65,7 +65,11 @@ struct so_list
     struct objfile *objfile;	/* objfile for loaded lib */
     struct section_table *sections;
     struct section_table *sections_end;
-    struct section_table *textsection;
+
+    /* Record the range of addresses belonging to this shared library.
+       There may not be just one (e.g. if two segments are relocated
+       differently); but this is only used for "info sharedlibrary".  */
+    CORE_ADDR addr_low, addr_high;
   };
 
 struct target_so_ops
@@ -104,7 +108,11 @@ struct target_so_ops
        Convenience function for remote debuggers finding host libs.  */
     int (*find_and_open_solib) (char *soname,
         unsigned o_flags, char **temp_pathname);
-    
+
+    void (*add_one_solib) (char *soname, CORE_ADDR textSeg,
+			   CORE_ADDR dataSeg);
+    void (*remove_one_solib) (char *soname, CORE_ADDR textSeg,
+			      CORE_ADDR dataSeg);
   };
 
 /* Free the memory associated with a (so_list *).  */

@@ -263,6 +263,10 @@ linux_kill (void)
       /* Make sure it died.  The loop is most likely unnecessary.  */
       wstat = linux_wait_for_event (thread);
     } while (WIFSTOPPED (wstat));
+
+  clear_inferiors ();
+  free (all_processes.head);
+  all_processes.head = all_processes.tail = NULL;
 }
 
 static void
@@ -278,6 +282,10 @@ static void
 linux_detach (void)
 {
   for_each_inferior (&all_threads, linux_detach_one_process);
+
+  clear_inferiors ();
+  free (all_processes.head);
+  all_processes.head = all_processes.tail = NULL;
 }
 
 /* Return nonzero if the given thread is still alive.  */
@@ -415,6 +423,16 @@ linux_wait_for_process (struct process_info **childp, int *wstatp)
 
   if (to_wait_for == -1)
     *childp = (struct process_info *) find_inferior_id (&all_processes, ret);
+
+  /* If we see an event for a process we don't know about, one of two things
+     could be happening: it could be a new thread, e.g. via CLONE_PTRACE,
+     or it could be a detached process exiting.  We do not yet support
+     CLONE_PTRACE, so we should disregard extraneous events.  */
+  if (*childp == NULL)
+    {
+      linux_wait_for_process (childp, wstatp);
+      return;
+    }
 
   (*childp)->stopped = 1;
   (*childp)->pending_is_breakpoint = 0;

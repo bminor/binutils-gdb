@@ -324,7 +324,7 @@ gdb_expect {
 # This is a quasi-define command: Verify that the user can redefine
 # GDB's gdb_prompt.
 #
-send_gdb "set prompt \\(blah\\) \n"
+send_gdb "set prompt (blah) \n"
 gdb_expect {
   -re "\\(blah\\) $"\
           {pass "set gdb_prompt"}
@@ -333,7 +333,7 @@ gdb_expect {
   timeout {fail "(timeout) set gdb_prompt"}
 }
 
-send_gdb "set prompt \\(gdb\\) \n"
+send_gdb "set prompt (gdb) \n"
 gdb_expect {
   -re "$gdb_prompt $"\
           {pass "reset gdb_prompt"}

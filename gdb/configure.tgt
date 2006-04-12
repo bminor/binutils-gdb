@@ -59,6 +59,7 @@ arm*-*-netbsd* | arm*-*-knetbsd*-gnu)
 			gdb_target=nbsd ;;
 arm-*-nto*)		gdb_target=nto ;;
 arm*-*-openbsd*)	gdb_target=nbsd ;;
+arm*-*-symbian*)	gdb_target=symbian ;;
 arm*-stellaris-*)	gdb_target=armv7m ;;
 arm*-*-* | thumb*-*-* | strongarm*-*-*)
 			gdb_target=embed

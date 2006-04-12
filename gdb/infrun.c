@@ -877,6 +877,8 @@ init_wait_for_inferior (void)
   clear_proceed_status ();
 
   stepping_past_singlestep_breakpoint = 0;
+
+  target_last_wait_ptid = minus_one_ptid;
 }
 
 /* This enum encodes possible reasons for doing a target_wait, so that
@@ -942,7 +944,7 @@ void init_execution_control_state (struct execution_control_state *ecs);
 void handle_inferior_event (struct execution_control_state *ecs);
 
 static void step_into_function (struct execution_control_state *ecs);
-static void insert_step_resume_breakpoint_at_frame (struct frame_info *step_frame);
+static void insert_step_resume_breakpoint_at_frame (struct frame_info *, int);
 static void insert_step_resume_breakpoint_at_sal (struct symtab_and_line sr_sal,
 						  struct frame_id sr_id);
 static void stop_stepping (struct execution_control_state *ecs);
@@ -1314,13 +1316,16 @@ handle_inferior_event (struct execution_control_state *ecs)
       /* Ignore gracefully during startup of the inferior, as it
          might be the shell which has just loaded some objects,
          otherwise add the symbols for the newly loaded objects.  */
-#ifdef SOLIB_ADD
       if (stop_soon == NO_STOP_QUIETLY)
 	{
+	  int breakpoints_were_inserted;
+
 	  /* Remove breakpoints, SOLIB_ADD might adjust
 	     breakpoint addresses via breakpoint_re_set.  */
+	  breakpoints_were_inserted = breakpoints_inserted;
 	  if (breakpoints_inserted)
 	    remove_breakpoints ();
+	  breakpoints_inserted = 0;
 
 	  /* Check for any newly added shared libraries if we're
 	     supposed to be adding them automatically.  Switch
@@ -1342,17 +1347,52 @@ handle_inferior_event (struct execution_control_state *ecs)
 	     exec/process stratum, instead relying on the target stack
 	     to propagate relevant changes (stop, section table
 	     changed, ...) up to other layers.  */
+#ifdef SOLIB_ADD
 	  SOLIB_ADD (NULL, 0, &current_target, auto_solib_add);
+#else
+	  solib_add (NULL, 0, &current_target, auto_solib_add);
+#endif
 	  target_terminal_inferior ();
 
+	  /* Try to reenable shared library breakpoints, additional
+	     code segments in shared libraries might be mapped in now. */
+	  re_enable_breakpoints_in_shlibs ();
+
+	  /* If requested, stop when the dynamic linker notifies
+	     gdb of events.  This allows the user to get control
+	     and place breakpoints in initializer routines for
+	     dynamically loaded objects (among other things).  */
+	  if (stop_on_solib_events || stop_stack_dummy)
+	    {
+	      stop_stepping (ecs);
+	      return;
+	    }
+
+	  /* NOTE drow/2006-03-14: This might be a good place to check
+	     for "catch load".  */
+
 	  /* Reinsert breakpoints and continue.  */
-	  if (breakpoints_inserted)
-	    insert_breakpoints ();
+	  if (breakpoints_were_inserted)
+	    {
+	      insert_breakpoints ();
+	      breakpoints_inserted = 1;
+	    }
 	}
-#endif
-      resume (0, TARGET_SIGNAL_0);
-      prepare_to_wait (ecs);
-      return;
+
+      /* NOTE drow/2006-03-28: For the reason described before the
+	 previous if statement, GDB used to automatically resume
+	 here.  But that's only true if a shell is running; if
+	 we've just attached to a process, then that's a whole
+	 different case - it might have been stopped at a load
+	 event.  */
+      if (inferior_ignoring_startup_exec_events || stop_soon == NO_STOP_QUIETLY)
+	{
+	  resume (0, TARGET_SIGNAL_0);
+	  prepare_to_wait (ecs);
+	  return;
+	}
+      else
+	break;
 
     case TARGET_WAITKIND_SPURIOUS:
       if (debug_infrun)
@@ -1965,7 +2005,7 @@ process_event_stop_test:
 	     code paths as single-step - set a breakpoint at the
 	     signal return address and then, once hit, step off that
 	     breakpoint.  */
-	  insert_step_resume_breakpoint_at_frame (get_current_frame ());
+	  insert_step_resume_breakpoint_at_frame (get_current_frame (), 0);
 	  ecs->step_after_step_resume_breakpoint = 1;
 	  keep_going (ecs);
 	  return;
@@ -1987,7 +2027,7 @@ process_event_stop_test:
 	     Note that this is only needed for a signal delivered
 	     while in the single-step range.  Nested signals aren't a
 	     problem as they eventually all return.  */
-	  insert_step_resume_breakpoint_at_frame (get_current_frame ());
+	  insert_step_resume_breakpoint_at_frame (get_current_frame (), 0);
 	  keep_going (ecs);
 	  return;
 	}
@@ -2396,7 +2436,7 @@ process_event_stop_test:
 	  /* We're doing a "next", set a breakpoint at callee's return
 	     address (the address at which the caller will
 	     resume).  */
-	  insert_step_resume_breakpoint_at_frame (get_prev_frame (get_current_frame ()));
+	  insert_step_resume_breakpoint_at_frame (get_current_frame (), 1);
 	  keep_going (ecs);
 	  return;
 	}
@@ -2459,7 +2499,7 @@ process_event_stop_test:
 
       /* Set a breakpoint at callee's return address (the address at
          which the caller will resume).  */
-      insert_step_resume_breakpoint_at_frame (get_prev_frame (get_current_frame ()));
+      insert_step_resume_breakpoint_at_frame (get_current_frame (), 1);
       keep_going (ecs);
       return;
     }
@@ -2528,7 +2568,7 @@ process_event_stop_test:
 	{
 	  /* Set a breakpoint at callee's return address (the address
 	     at which the caller will resume).  */
-	  insert_step_resume_breakpoint_at_frame (get_prev_frame (get_current_frame ()));
+	  insert_step_resume_breakpoint_at_frame (get_current_frame (), 1);
 	  keep_going (ecs);
 	  return;
 	}
@@ -2741,21 +2781,32 @@ insert_step_resume_breakpoint_at_sal (struct symtab_and_line sr_sal,
    that the function/signal handler being skipped eventually returns
    to the breakpoint inserted at RETURN_FRAME.pc.
 
-   For the skip-function case, the function may have been reached by
-   either single stepping a call / return / signal-return instruction,
-   or by hitting a breakpoint.  In all cases, the RETURN_FRAME belongs
-   to the skip-function's caller.
+   If USE_PREVIOUS is zero, RETURN_FRAME belongs to the function being
+   skipped.  The function may have been reached by either single
+   stepping a call / return / signal-return instruction, or by hitting
+   a breakpoint.
 
    For the signals case, this is called with the interrupted
    function's frame.  The signal handler, when it returns, will resume
    the interrupted function at RETURN_FRAME.pc.  */
 
 static void
-insert_step_resume_breakpoint_at_frame (struct frame_info *return_frame)
+insert_step_resume_breakpoint_at_frame (struct frame_info *return_frame,
+					int use_previous)
 {
   struct symtab_and_line sr_sal;
 
   init_sal (&sr_sal);		/* initialize to zeros */
+
+  if (use_previous)
+    {
+      struct frame_info *caller_frame;
+      caller_frame = get_prev_frame (return_frame);
+      if (caller_frame == NULL)
+	error (_("Could not step out of the function at 0x%lx - unwinding failed"),
+	       (long) get_frame_pc (return_frame));
+      return_frame = caller_frame;
+    }
 
   sr_sal.pc = ADDR_BITS_REMOVE (get_frame_pc (return_frame));
   sr_sal.section = find_pc_overlay (sr_sal.pc);
