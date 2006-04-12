@@ -1830,37 +1830,6 @@ remote_threads_extra_info (struct thread_info *tp)
 }
 
 
-/* Mark OPS as a running target.  This should restore the target to its
-   original state, undoing any effects of remote_mark_killed.  */
-
-static void
-remote_mark_running (struct target_ops *ops)
-{
-  ops->to_has_execution = 1;
-  ops->to_has_all_memory = 1;
-  ops->to_has_memory = 1;
-  ops->to_has_stack = 1;
-  ops->to_has_registers = 1;
-
-  update_current_target ();
-}
-
-/* Mark OPS as a dead target, undoing any effects of remote_mark_running.
-   The target is still on the stack, and GDB is still connected to it,
-   but the process we were debugging has exited.  */
-
-static void
-remote_mark_killed (struct target_ops *ops)
-{
-  ops->to_has_execution = 0;
-  ops->to_has_all_memory = 0;
-  ops->to_has_memory = 0;
-  ops->to_has_stack = 0;
-  ops->to_has_registers = 0;
-
-  update_current_target ();
-}
-
 /* Restart the remote side; this is an extended protocol operation.  */
 
 static void
@@ -1897,7 +1866,7 @@ get_offsets (void)
   struct remote_state *rs = get_remote_state ();
   char *buf = rs->buf;
   char *ptr;
-  int lose, seen_text_seg = 0;
+  int lose;
   CORE_ADDR text_addr, data_addr, bss_addr;
   struct section_offsets *offs;
 
@@ -1933,41 +1902,24 @@ get_offsets (void)
       /* Don't use strtol, could lose on big values.  */
       while (*ptr && *ptr != ';')
 	text_addr = (text_addr << 4) + fromhex (*ptr++);
-
-      if (strncmp (ptr, ";Data=", 6) == 0)
-	{
-	  ptr += 6;
-	  while (*ptr && *ptr != ';')
-	    data_addr = (data_addr << 4) + fromhex (*ptr++);
-	}
-      else
-	lose = 1;
-
-      if (!lose && strncmp (ptr, ";Bss=", 5) == 0)
-	{
-	  ptr += 5;
-	  while (*ptr && *ptr != ';')
-	    bss_addr = (bss_addr << 4) + fromhex (*ptr++);
-	}
-      else
-	lose = 1;
     }
-  else if (strncmp (ptr, "TextSeg=", 8) == 0)
-    {
-      ptr += 8;
-      /* Don't use strtol, could lose on big values.  */
-      while (*ptr && *ptr != ';')
-	text_addr = (text_addr << 4) + fromhex (*ptr++);
-      seen_text_seg = 1;
+  else
+    lose = 1;
 
-      if (strncmp (ptr, ";DataSeg=", 9) == 0)
-	{
-	  ptr += 9;
-	  while (*ptr && *ptr != ';')
-	    data_addr = (data_addr << 4) + fromhex (*ptr++);
-	}
-      else
-	lose = 1;
+  if (!lose && strncmp (ptr, ";Data=", 6) == 0)
+    {
+      ptr += 6;
+      while (*ptr && *ptr != ';')
+	data_addr = (data_addr << 4) + fromhex (*ptr++);
+    }
+  else
+    lose = 1;
+
+  if (!lose && strncmp (ptr, ";Bss=", 5) == 0)
+    {
+      ptr += 5;
+      while (*ptr && *ptr != ';')
+	bss_addr = (bss_addr << 4) + fromhex (*ptr++);
     }
   else
     lose = 1;
@@ -1983,23 +1935,14 @@ get_offsets (void)
   memcpy (offs, symfile_objfile->section_offsets,
 	  SIZEOF_N_SECTION_OFFSETS (symfile_objfile->num_sections));
 
-  if (seen_text_seg)
-    {
-      if (! symfile_map_offsets_to_segments (symfile_objfile, offs,
-					     text_addr, data_addr))
-	error (_("Can not handle qOffsets TextSeg response with this symbol file"));
-    }
-  else
-    {
-      offs->offsets[SECT_OFF_TEXT (symfile_objfile)] = text_addr;
+  offs->offsets[SECT_OFF_TEXT (symfile_objfile)] = text_addr;
 
-      /* This is a temporary kludge to force data and bss to use the same offsets
-	 because that's what nlmconv does now.  The real solution requires changes
-	 to the stub and remote.c that I don't have time to do right now.  */
+  /* This is a temporary kludge to force data and bss to use the same offsets
+     because that's what nlmconv does now.  The real solution requires changes
+     to the stub and remote.c that I don't have time to do right now.  */
 
-      offs->offsets[SECT_OFF_DATA (symfile_objfile)] = data_addr;
-      offs->offsets[SECT_OFF_BSS (symfile_objfile)] = data_addr;
-    }
+  offs->offsets[SECT_OFF_DATA (symfile_objfile)] = data_addr;
+  offs->offsets[SECT_OFF_BSS (symfile_objfile)] = data_addr;
 
   objfile_relocate (symfile_objfile, offs);
 }
@@ -2263,10 +2206,6 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
 
   unpush_target (target);
 
-  /* We're about to connect; assume that the target will be running
-     when we do so.  */
-  remote_mark_running (target);
-
   remote_desc = remote_serial_open (name);
   if (!remote_desc)
     perror_with_name (name);
@@ -2420,20 +2359,16 @@ remote_detach (char *args, int from_tty)
 /* Same as remote_detach, but don't send the "D" packet; just disconnect.  */
 
 static void
-remote_disconnect (struct target_ops *target, char *args, int from_tty)
+remote_disconnect (char *args, int from_tty)
 {
   if (args)
-    error (_("Argument given to \"disconnect\" when remotely debugging."));
+    error (_("Argument given to \"detach\" when remotely debugging."));
 
   /* Unregister the file descriptor from the event loop.  */
   if (target_is_async_p ())
     serial_async (remote_desc, NULL, 0);
 
-  /* Make sure we unpush even the extended remote targets; mourn
-     won't do it.  So call remote_mourn_1 directly instead of
-     target_mourn_inferior.  */
-  remote_mourn_1 (target);
-
+  target_mourn_inferior ();
   if (from_tty)
     puts_filtered ("Ending remote debugging.\n");
 }
@@ -4553,23 +4488,14 @@ remote_async_mourn (void)
 static void
 extended_remote_mourn (void)
 {
-  /* We do not want to unpush the target; then the next time the
-     user says "run", we won't be connected.  Just mark ourselves
-     as not executing.  */
+  /* We do _not_ want to mourn the target like this; this will
+     remove the extended remote target  from the target stack,
+     and the next time the user says "run" it'll fail.
 
-  generic_mourn_inferior ();
-  remote_mark_killed (&extended_remote_ops);
-}
-
-static void
-extended_async_remote_mourn (void)
-{
-  /* We do not want to unpush the target; then the next time the
-     user says "run", we won't be connected.  Just mark ourselves
-     as not executing.  */
-
-  generic_mourn_inferior ();
-  remote_mark_killed (&extended_async_remote_ops);
+     FIXME: What is the right thing to do here?  */
+#if 0
+  remote_mourn_1 (&extended_remote_ops);
+#endif
 }
 
 /* Worker function for remote_mourn.  */
@@ -4604,8 +4530,6 @@ extended_remote_create_inferior (char *exec_file, char *args,
 
   /* Clean up from the last time we were running.  */
   clear_proceed_status ();
-
-  remote_mark_running (&extended_remote_ops);
 }
 
 /* Async version of extended_remote_create_inferior.  */
@@ -4631,8 +4555,6 @@ extended_remote_async_create_inferior (char *exec_file, char *args,
 
   /* Clean up from the last time we were running.  */
   clear_proceed_status ();
-
-  remote_mark_running (&extended_async_remote_ops);
 }
 
 
@@ -4881,7 +4803,7 @@ remote_check_watch_resources (int type, int cnt, int ot)
 static int
 remote_stopped_by_watchpoint (void)
 {
-  return remote_stopped_by_watchpoint_p;
+    return remote_stopped_by_watchpoint_p;
 }
 
 extern int stepped_after_stopped_by_watchpoint;
@@ -4999,7 +4921,7 @@ push_remote_target (char *name, int from_tty)
 /* Table used by the crc32 function to calcuate the checksum.  */
 
 static unsigned long crc32_table[256] =
-  {0, 0};
+{0, 0};
 
 static unsigned long
 crc32 (unsigned char *buf, int len, unsigned int crc)
@@ -5028,10 +4950,10 @@ crc32 (unsigned char *buf, int len, unsigned int crc)
 
 /* compare-sections command
 
-With no arguments, compares each loadable section in the exec bfd
-with the same memory range on the target, and reports mismatches.
-Useful for verifying the image on the target against the exec file.
-Depends on the target understanding the new "qCRC:" request.  */
+   With no arguments, compares each loadable section in the exec bfd
+   with the same memory range on the target, and reports mismatches.
+   Useful for verifying the image on the target against the exec file.
+   Depends on the target understanding the new "qCRC:" request.  */
 
 /* FIXME: cagney/1999-10-26: This command should be broken down into a
    target method (target verify memory) and generic version of the
@@ -5669,9 +5591,9 @@ remote_async (void (*callback) (enum inferior_event_type event_type,
 
 /* Target async and target extended-async.
 
-This are temporary targets, until it is all tested.  Eventually
-async support will be incorporated int the usual 'remote'
-target.  */
+   This are temporary targets, until it is all tested.  Eventually
+   async support will be incorporated int the usual 'remote'
+   target.  */
 
 static void
 init_remote_async_ops (void)
@@ -5746,7 +5668,7 @@ init_extended_async_remote_ops (void)
 Specify the serial device it is connected to (e.g. /dev/ttya).",
     extended_async_remote_ops.to_open = extended_remote_async_open;
   extended_async_remote_ops.to_create_inferior = extended_remote_async_create_inferior;
-  extended_async_remote_ops.to_mourn_inferior = extended_async_remote_mourn;
+  extended_async_remote_ops.to_mourn_inferior = extended_remote_mourn;
 }
 
 static void

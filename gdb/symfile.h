@@ -319,10 +319,6 @@ extern void symbol_file_clear (int from_tty);
 extern bfd_byte *symfile_relocate_debug_section (bfd *abfd, asection *sectp,
 						 bfd_byte * buf);
 
-extern int symfile_map_offsets_to_segments (struct objfile *,
-					    struct section_offsets *,
-					    CORE_ADDR, CORE_ADDR);
-
 /* From dwarfread.c */
 
 extern void dwarf_build_psymtabs (struct objfile *, int, file_ptr,
