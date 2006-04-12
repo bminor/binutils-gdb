@@ -275,8 +275,7 @@ handle_v_cont (char *own_buf, char *status, int *signal)
   return;
 
 err:
-  /* No other way to report an error... */
-  strcpy (own_buf, "");
+  write_enn (own_buf);
   free (resume_info);
   return;
 }
@@ -348,6 +347,9 @@ gdbserver_usage (void)
 	  "HOST:PORT to listen for a TCP connection.\n");
 }
 
+/* FIXME declare here, give sensible name, give values?  */
+extern int debug_threads;
+
 int
 main (int argc, char *argv[])
 {
@@ -377,6 +379,13 @@ main (int argc, char *argv[])
     {
       fprintf (stderr, "Exiting\n");
       exit (1);
+    }
+
+  if (argc >= 2 && strcmp (argv[1], "--debug") == 0)
+    {
+      argc--;
+      argv++;
+      debug_threads = 1;
     }
 
   bad_attach = 0;
@@ -490,11 +499,16 @@ main (int argc, char *argv[])
 		  unsigned long gdb_id, thread_id;
 
 		  gdb_id = strtoul (&own_buf[2], NULL, 16);
-		  thread_id = gdb_id_to_thread_id (gdb_id);
-		  if (thread_id == 0)
+		  if (gdb_id == 0 || gdb_id == -1)
+		    thread_id = gdb_id;
+		  else
 		    {
-		      write_enn (own_buf);
-		      break;
+		      thread_id = gdb_id_to_thread_id (gdb_id);
+		      if (thread_id == 0)
+			{
+			  write_enn (own_buf);
+			  break;
+			}
 		    }
 
 		  if (own_buf[1] == 'g')

@@ -263,6 +263,10 @@ linux_kill (void)
       /* Make sure it died.  The loop is most likely unnecessary.  */
       wstat = linux_wait_for_event (thread);
     } while (WIFSTOPPED (wstat));
+
+  clear_inferiors ();
+  free (all_processes.head);
+  all_processes.head = all_processes.tail = NULL;
 }
 
 static void

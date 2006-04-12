@@ -3723,6 +3723,106 @@ symfile_relocate_debug_section (bfd *abfd, asection *sectp, bfd_byte *buf)
   return bfd_simple_get_relocated_section_contents (abfd, sectp, buf, NULL);
 }
 
+/* FIXME: This should probably go through the symfile ops vector.  */
+
+#include "elf/internal.h"
+#include "elf/common.h"
+
+int
+symfile_map_offsets_to_segments (struct objfile *objfile,
+				 struct section_offsets *offsets,
+				 CORE_ADDR text_addr, CORE_ADDR data_addr)
+{
+  Elf_Internal_Phdr *phdrs, *segments[2];
+  int num_phdrs, i, num_segments;
+  long phdrs_size;
+  bfd *abfd = objfile->obfd;
+  asection *sect;
+  CORE_ADDR text_offset, data_offset;
+
+  phdrs_size = bfd_get_elf_phdr_upper_bound (objfile->obfd);
+  if (phdrs_size == -1)
+    return 0;
+
+  phdrs = alloca (phdrs_size);
+  num_phdrs = bfd_get_elf_phdrs (objfile->obfd, phdrs);
+  if (num_phdrs == -1)
+    return 0;
+
+  num_segments = 0;
+  for (i = 0; i < num_phdrs; i++)
+    if (phdrs[i].p_type == PT_LOAD)
+      {
+	if (num_segments == 2)
+	  return 0;
+	segments[num_segments++] = &phdrs[i];
+      }
+
+  if (num_segments == 0)
+    return 0;
+
+  if (num_segments == 1)
+    {
+      if ((segments[0]->p_flags & PF_W) && !(segments[0]->p_flags & PF_X))
+	{
+	  segments[1] = segments[0];
+	  segments[0] = NULL;
+	}
+      else
+	segments[1] = NULL;
+    }
+  else
+    {
+      if ((segments[0]->p_flags & PF_X) && !(segments[1]->p_flags & PF_X))
+	/* OK */;
+      else if ((segments[1]->p_flags & PF_X) && !(segments[0]->p_flags & PF_X))
+	{
+	  Elf_Internal_Phdr *tmp = segments[0];
+	  segments[0] = segments[1];
+	  segments[1] = tmp;
+	}
+      else if ((segments[1]->p_flags & PF_W) && !(segments[0]->p_flags & PF_W))
+	/* OK */;
+      else if ((segments[0]->p_flags & PF_W) && !(segments[1]->p_flags & PF_W))
+	{
+	  Elf_Internal_Phdr *tmp = segments[0];
+	  segments[0] = segments[1];
+	  segments[1] = tmp;
+	}
+      else
+	return 0;
+    }
+
+  text_offset = text_addr - segments[0]->p_vaddr;
+  data_offset = data_addr - segments[1]->p_vaddr;
+
+  for (i = 0, sect = abfd->sections; sect != NULL; i++, sect = sect->next)
+    {
+      CORE_ADDR vma;
+
+      if ((bfd_get_section_flags (abfd, sect) & SEC_LOAD) == 0)
+	continue;
+
+      vma = bfd_get_section_vma (abfd, sect);
+
+      if (segments[0]
+	  && vma >= segments[0]->p_vaddr
+	  && vma < segments[0]->p_vaddr + segments[0]->p_memsz)
+	offsets->offsets[i] = text_offset;
+
+      else if (segments[1]
+	       && vma >= segments[1]->p_vaddr
+	       && vma < segments[1]->p_vaddr + segments[1]->p_memsz)
+	offsets->offsets[i] = data_offset;
+
+      else
+	warning (_("Loadable segment \"%s\" outside of ELF segments"),
+		 bfd_section_name (abfd, sect));
+    }
+
+  return 1;
+}
+
 void
 _initialize_symfile (void)
 {

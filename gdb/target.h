@@ -328,7 +328,7 @@ struct target_ops
     void (*to_attach) (char *, int);
     void (*to_post_attach) (int);
     void (*to_detach) (char *, int);
-    void (*to_disconnect) (char *, int);
+    void (*to_disconnect) (struct target_ops *, char *, int);
     void (*to_resume) (ptid_t, int, enum target_signal);
     ptid_t (*to_wait) (ptid_t, struct target_waitstatus *);
     void (*to_fetch_registers) (int);
@@ -897,11 +897,9 @@ int target_follow_fork (int follow_child);
      (current_target.to_has_registers)
 
 /* Does the target have execution?  Can we make it jump (through
-   hoops), or pop its stack a few times?  FIXME: If this is to work that
-   way, it needs to check whether an inferior actually exists.
-   remote-udi.c and probably other targets can be the current target
-   when the inferior doesn't actually exist at the moment.  Right now
-   this just tells us whether this target is *capable* of execution.  */
+   hoops), or pop its stack a few times?  This used to mean the target
+   was capable of execution; now it means that a program is actually
+   running.  */
 
 #define	target_has_execution	\
      (current_target.to_has_execution)
@@ -1157,6 +1155,11 @@ extern int unpush_target (struct target_ops *);
 extern void target_preopen (int);
 
 extern void pop_target (void);
+
+/* Update current_target after some target on the current stack has
+   changed state.  */
+
+extern void update_current_target (void);
 
 /* Struct section_table maps address ranges to file sections.  It is
    mostly used with BFD files, but can be used without (e.g. for handling
