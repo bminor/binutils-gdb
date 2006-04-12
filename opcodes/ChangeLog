@@ -1,3 +1,10 @@
+2006-04-12   Hochstein  <hochstein@algo.informatik.tu-darmstadt.de>
+
+	PR binutils/2454
+	* avr-dis.c (avr_operand): Arrange for a comment to appear before
+	the symolic form of an address, so that the output of objdump -d
+	can be reassembled.
+
 2006-04-10  DJ Delorie  <dj@redhat.com>
 
 	* m32c-asm.c: Regenerate.
