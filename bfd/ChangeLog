@@ -1,3 +1,11 @@
+2006-04-14  David Heine  <dlheine@tensilica.com>
+
+	* elf32-xtensa.c (build_reloc_opcodes): New.
+	(compute_text_actions): Use it to decode opcodes outside inner loop.
+	(check_section_ebb_pcrels_fit): Add "reloc_opcodes" argument, and if
+	it is set, use it to get the opcodes for relocations.
+	(move_shared_literal): Adjust call to check_section_ebb_pcrels_fit.
+
 2006-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/2513
