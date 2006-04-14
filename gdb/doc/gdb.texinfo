@@ -5005,8 +5005,7 @@ is recorded as @file{../lib/foo.c}, @value{GDBN} would first try
 that---@file{/mnt/cross/foo.c}.
 
 Note that the executable search path is @emph{not} used to locate the
-source files.  Neither is the current working directory, unless it
-happens to be in the source path.
+source files.
 
 Whenever you reset or rearrange the source path, @value{GDBN} clears out
 any information it has cached about where source files are found and where
@@ -5048,7 +5047,7 @@ session, while the latter is immediately expanded to the current
 directory at the time you add an entry to the source path.
 
 @item directory
-Reset the source path to empty again.  This requires confirmation.
+Reset the source path to its default value (@samp{$cdir:$cwd} on Unix systems).  This requires confirmation.
 
 @c RET-repeat for @code{directory} is explicitly disabled, but since
 @c repeating it would be a no-op we do not say that.  (thanks to RMS)
@@ -5064,7 +5063,7 @@ versions of source.  You can correct the situation as follows:
 
 @enumerate
 @item
-Use @code{directory} with no argument to reset the source path to empty.
+Use @code{directory} with no argument to reset the source path to its default value.
 
 @item
 Use @code{directory} with suitable arguments to reinstall the

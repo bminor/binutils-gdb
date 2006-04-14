@@ -1,3 +1,9 @@
+2006-04-14  Frederic Riss  <frederic.riss@st.com>
+
+	* gdb.texinfo (Specifying source directories): Update the description
+	of the source file search to reflect the fact that the source path
+	always contains at least $cdir and $cwd.
+
 2006-03-31  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.texinfo: Update copyright dates.
