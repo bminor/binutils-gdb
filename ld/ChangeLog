@@ -1,3 +1,12 @@
+2006-04-14  David Heine  <dlheine@tensilica.com>
+	    Bob Wilson  <bob.wilson@acm.org>
+
+	* emultempl/xtensaelf.em (elf_xtensa_before_allocation): Call new
+	function to strip inconsistent linkonce sections.
+	(input_section_linked_worker, input_section_linked): New.
+	(is_inconsistent_linkonce_section): New.
+	(xtensa_strip_inconsistent_linkonce_sections): New.
+
 2006-04-11  Diego Pettenò  <flameeyes@gentoo.org>
 
 	* emultempl/elf32.em: Add support for elf-hints.h on FreeBSD
