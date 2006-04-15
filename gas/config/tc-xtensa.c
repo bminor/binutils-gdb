@@ -6573,7 +6573,8 @@ emit_single_op (TInsn *orig_insn)
        || orig_insn->opcode == xtensa_movi_n_opcode)
       && !cur_vinsn.inside_bundle
       && (orig_insn->tok[1].X_op == O_symbol
-	  || orig_insn->tok[1].X_op == O_pltrel))
+	  || orig_insn->tok[1].X_op == O_pltrel)
+      && !orig_insn->is_specific_opcode && use_transform ())
     xg_assembly_relax (&istack, orig_insn, now_seg, frag_now, 0, 1, 0);
   else
     if (xg_expand_assembly_insn (&istack, orig_insn))
