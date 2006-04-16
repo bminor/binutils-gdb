@@ -5964,9 +5964,21 @@ For ELF targets, the @code{.type} directive is used like this:
 This sets the type of symbol @var{name} to be either a
 function symbol or an object symbol.  There are five different syntaxes
 supported for the @var{type description} field, in order to provide
-compatibility with various other assemblers.  The syntaxes supported are:
+compatibility with various other assemblers.  
+
+Because some of the characters used in these syntaxes (such as @samp{@@} and
+@samp{#}) are comment characters for some architectures, some of the syntaxes
+below do not work on all architectures.  The first variant will be accepted by
+the GNU assembler on all architectures so that variant should be used for
+maximum portability, if you do not need to assemble your code with other
+assemblers.
+
+The syntaxes supported are:
 
 @smallexample
+  .type <name> STT_FUNCTION
+  .type <name> STT_OBJECT
+
   .type <name>,#function
   .type <name>,#object
 
@@ -5978,9 +5990,6 @@ compatibility with various other assemblers.  The syntaxes supported are:
   
   .type <name>,"function"
   .type <name>,"object"
-  
-  .type <name> STT_FUNCTION
-  .type <name> STT_OBJECT
 @end smallexample
 @end ifset
 @end ifset

@@ -1,3 +1,8 @@
+2006-04-16  Mark Mitchell  <mark@codesourcery.com>
+
+	* doc/as.texinfo: Mention that some .type syntaxes are not
+	supported on all architectures.
+
 2006-04-14  Sterling Augustine  <sterling@tensilica.com>
 
 	* config/tc-xtensa.c (emit_single_op): Do not relax MOVI
