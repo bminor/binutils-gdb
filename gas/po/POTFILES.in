@@ -116,6 +116,8 @@ config/tc-v850.c
 config/tc-v850.h
 config/tc-vax.c
 config/tc-vax.h
+config/tc-xc16x.c
+config/tc-xc16x.h
 config/tc-xstormy16.c
 config/tc-xstormy16.h
 config/tc-xtensa.c

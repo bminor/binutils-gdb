@@ -1,5 +1,9 @@
 2006-04-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* po/SRC-POTFILES.in: Regenerated.
+
+2006-04-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* configure.in: Update version to 2.17.50.
 	* configure: Regenerated.
 
