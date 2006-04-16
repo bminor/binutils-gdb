@@ -1,3 +1,8 @@
+2006-04-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* configure.in: Update version to 2.17.50.
+	* configure: Regenerated.
+
 2006-04-14  David Heine  <dlheine@tensilica.com>
 
 	* elf32-xtensa.c (build_reloc_opcodes): New.
