@@ -1,3 +1,11 @@
+2006-04-16  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/arch7.d: Skip test for non-ELF targets.
+	* gas/arm/blx-local.d: Likewise.
+	* gas/arm/svc.d: Likewise.
+	* gas/arm/thumb2_bcond.d: Likewise.
+	* gas/arm/thumb2_it_bad.d: Likewise.
+
 2006-04-07  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/blx-local.d: New test.

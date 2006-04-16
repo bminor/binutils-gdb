@@ -1,5 +1,6 @@
 #name: Local BLX instructions
 #objdump: -dr --prefix-addresses --show-raw-insn
+#skip: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd *-*-riscix*
 #as:
 
 # Test assembler resolution of blx instructions.
