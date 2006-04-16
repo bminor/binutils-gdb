@@ -1,3 +1,8 @@
+2006-04-06  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* intl/Makefile.in: Add html info and dvi and install-html to .PHONY
+	Add install-html target.
+
 2006-02-27  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* intl/Makefile.in: Add html target.

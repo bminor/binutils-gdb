@@ -99,7 +99,7 @@ AC_SUBST(HOSTING_CRT0)
 AC_SUBST(HOSTING_LIBS)
 AC_SUBST(NATIVE_LIB_DIRS)
 
-AC_CHECK_HEADERS(string.h strings.h stdlib.h unistd.h)
+AC_CHECK_HEADERS(string.h strings.h stdlib.h unistd.h elf-hints.h)
 AC_CHECK_FUNCS(sbrk realpath glob)
 AC_HEADER_DIRENT
 
@@ -252,6 +252,11 @@ if test x${EXTRA_SHLIB_EXTENSION} != x ; then
   AC_DEFINE_UNQUOTED(EXTRA_SHLIB_EXTENSION, "$EXTRA_SHLIB_EXTENSION",
    [Additional extension a shared object might have.])
 fi
+
+dnl Required by html and install-html
+AC_SUBST(datarootdir)
+AC_SUBST(docdir)
+AC_SUBST(htmldir)
 
 AC_OUTPUT(Makefile po/Makefile.in:po/Make-in,
 [sed -e '/POTFILES =/r po/POTFILES' po/Makefile.in > po/Makefile])

@@ -21,9 +21,13 @@
 %{
 
 #include <stdio.h>
-#include "bfin-aux.h"
 #include <stdarg.h>
 #include <obstack.h>
+
+#include "bfin-aux.h"  // opcode generating auxiliaries
+#include "libbfd.h"
+#include "elf/common.h"
+#include "elf/bfin.h"
 
 #define DSP32ALU(aopcde, HL, dst1, dst0, src0, src1, s, x, aop) \
 	bfin_gen_dsp32alu (HL, aopcde, aop, s, x, dst0, dst1, src0, src1)
@@ -485,7 +489,8 @@ is_group2 (INSTR_T x)
 %token STATUS_REG
 %token MNOP
 %token SYMBOL NUMBER
-%token GOT AT PLTPC
+%token GOT GOT17M4 FUNCDESC_GOT17M4
+%token AT PLTPC
 
 /* Types.  */
 %type <instr> asm
@@ -544,7 +549,7 @@ is_group2 (INSTR_T x)
 %type <expr> got
 %type <expr> got_or_expr
 %type <expr> pltpc
-
+%type <value> any_gotrel GOT GOT17M4 FUNCDESC_GOT17M4
 
 /* Precedence rules.  */
 %left BAR
@@ -4111,9 +4116,20 @@ symbol: SYMBOL
 	}
 	;
 
-got:	symbol AT GOT
+any_gotrel:
+	GOT
+	{ $$ = BFD_RELOC_BFIN_GOT; }
+	| GOT17M4
+	{ $$ = BFD_RELOC_BFIN_GOT17M4; }
+	| FUNCDESC_GOT17M4
+	{ $$ = BFD_RELOC_BFIN_FUNCDESC_GOT17M4; }
+	;
+
+got:	symbol AT any_gotrel
 	{
-	$$ = $1;
+	Expr_Node_Value val;
+	val.i_value = $3;
+	$$ = Expr_Node_Create (Expr_Node_GOT_Reloc, val, $1, NULL);
 	}
 	;
 

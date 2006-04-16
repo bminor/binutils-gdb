@@ -1,3 +1,44 @@
+2006-04-12  Nick Clifton  <nickc@redhat.com>
+
+	* objdump.c (objdump_symbol_at_address): Fix typo in comment.
+
+2006-04-10  Ben Elliston  <bje@gnu.org>
+
+	* MAINTAINERS (CGEN Maintainers): Remove myself.
+
+2006-04-06  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* po/Make-in: Add install-html target.
+	* Makefile.am: Add install-html and install-html-recursive targets.
+	* Makefile.in: Regenerate.
+	* configure.in: AC_SUBST datarootdir, docdir and htmldir.
+	* configure: Regenerate.
+	* doc/Makefile.am: Add install-html and install-html-am targets.
+	* doc/Makefile.in: Regenerate.
+
+2006-04-05  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* addr2line.c (long_options): Add new option 'section'.
+	(usage): Document new -j/--section option.
+	(find_offset_in_section): New function.
+	(translate_addresses): Add 'section' parameter.
+	If it is non-null, call find_offset_in_section on it.
+	(process_file): Add 'section_name' parameter.
+	If it is non-null, look for the section in the BFD object.
+	Pass the section to translate_addresses.
+	(main): Handle new -j option.
+	Pass the section name to process_file.
+	* doc/binutils.texi (addr2line): Document new -j/--section option.
+
+2006-03-29  Ben Elliston  <bje@au.ibm.com>
+
+	* resbin.c: Avoid duplicating constants in calls to reswr_alloc.
+
+2006-03-20  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* BRANCHES: Remove binutils-csl-arm-2006q1-branch.  Document
+	binutils-csl-2_17-branch instead.
+
 2006-03-20  Paul Brook  <paul@codesourcery.com>
 
 	* BRANCHES: Mention binutils-csl-arm-2006q1-branch.

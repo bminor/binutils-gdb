@@ -1,3 +1,51 @@
+2006-03-29  Jim Blandy  <jimb@codesourcery.com>
+
+ 	* pex-common.c (pex_input_file, pex_input_pipe): New functions.
+	(pex_init_common): Initialize obj->input_file.
+	(pex_run): Close any file opened by pex_input_file.
+ 	* pexecute.txh (pex_input_file, pex_input_pipe): New docs.
+ 	* pex-common.h (struct pex_obj): New field input_file.
+	(struct pex_funcs): New function ptr fdopenw.
+ 	* pex-unix.c (pex_unix_fdopenw): New function.
+ 	(funcs): List it as our fdopenw function.
+ 	* pex-win32.c (pex_win32_fdopenw): New function.
+ 	(funcs): List it as our fdopenw function.
+ 	* pex-djgpp.c (funcs): Leave fdopenw null.
+ 	* pex-msdos (funcs): Same.
+ 	* functions.texi: Regenerated.
+
+2006-04-10  Jim Blandy  <jimb@codesourcery.com>
+
+	* pex-common.c (temp_file): New function, containing guts of
+	pex-style temporary file name generation.
+	(pex_run): Use it.
+
+2006-04-06  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* Makefile.in: Add install-html, install-html-am, and
+	install-html-recursive targets. Define mkdir_p and 
+	NORMAL_INSTALL. 
+	* configure.ac: AC_SUBST datarootdir, docdir, htmldir.
+	* configure: Regenerate.
+	* testsuite/Makefile.in: Add install-html and html targets.
+
+2006-03-31  Mark Mitchell  <mark@codesourcery.com>
+
+	* pex-win32.c (<errno.h>): Include.
+	(fix_argv): Remove.
+	(argv_to_cmdline): New function.
+	(std_suffixes): New variable.
+	(no_suffixes): Likewise.
+	(find_executable): New function.
+	(win32_spawn): Likewise.
+	(spawn_script): Use win32_spawn instead of _spawnv[p].
+	(pex_win32_exec_child): Replace MSVCRT calls with Win32 API calls.
+	(pex_win32_wait): Likewise.
+
+2006-03-24  Jim Blandy  <jimb@codesourcery.com>
+
+	* pex-common.c (pex_run): Simplify output name handling.
+
 2006-03-12  Jim Blandy  <jimb@red-bean.com>
 
 	* pex-common.h (struct pex_obj): Doc fixes.

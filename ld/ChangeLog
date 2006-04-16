@@ -1,3 +1,117 @@
+2006-04-14  David Heine  <dlheine@tensilica.com>
+	    Bob Wilson  <bob.wilson@acm.org>
+
+	* emultempl/xtensaelf.em (elf_xtensa_before_allocation): Call new
+	function to strip inconsistent linkonce sections.
+	(input_section_linked_worker, input_section_linked): New.
+	(is_inconsistent_linkonce_section): New.
+	(xtensa_strip_inconsistent_linkonce_sections): New.
+
+2006-04-11  Diego Pettenò  <flameeyes@gentoo.org>
+
+	* emultempl/elf32.em: Add support for elf-hints.h on FreeBSD
+	and Dragonfly targets.
+	* configure.in (AC_CHECK_HEADERS): Add elf-hints.h.
+	* Makefile.am (HFILES): Add elf-hints-local.h.
+	* elf-hints-local.h: New file.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
+2006-04-07  Bernhard Fischer  <aldot@gcc.gnu.org>
+
+	* ld.texinfo: Fix typo in documentation of --check-sections.
+
+2006-04-07  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* ldlang.c (load_symbols): Set as_needed and add_needed according
+	to the corresponding script's fields while processing it.
+
+2006-04-06  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* Makefile.am: Add install-html, install-html-am, and
+	install-html-recursive targets.
+	* Makefile.in: Regenerate.
+	* configure.in: AC_SUBST datarootdir, docdir, htmldir.
+	* configure: Regenerate.
+	* po/Make-in: Add install-html target.
+
+2006-04-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/ia64elf.em: Set link_info.relax_pass to 2. Remove
+	link_info.need_relax_finalize.
+
+	* ldlang.c (relax_sections): New.
+	(lang_process): Use. Call relax_sections link_info.relax_pass
+	times.
+
+	* ldmain.c (main): Set link_info.relax_pass to 1. Remove
+	link_info.need_relax_finalize.
+
+2006-04-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (GENSCRIPTS): Pass prefix.
+	* Makefile.in: Regenerate.
+	* genscripts.sh: Adjust for extra parameter.
+	* emultempl/elf32.em (parse_ld_so_conf): Return true iff file
+	exists.
+	(check_ld_so_conf): Use ${prefix}/etc/ld.so.conf if it exists.
+	* NEWS: Update.
+
+2006-04-05  Richard Sandiford  <richard@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* configure.tgt (sparc*-*-vxworks*): New stanza.
+	* emulparams/elf32_sparc_vxworks.sh: New file.
+	* Makefile.am (ALL_EMULATIONS): Add eelf32_sparc_vxworks.o.
+	(eelf32_sparc_vxworks.c): New rule.
+	* Makefile.in: Regenerate.
+
+2006-04-04  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* ldlang.c (lang_map): Print the list of discarded input sections.
+	(print_input_section): Change parameter and print zero-sized sections.
+	(print_statement): Adjust call to print_input_section.
+
+2006-04-01  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* deffilep.y (def_image_name): If LIBRARY or NAME statement
+	specifies an empty string, retain the name specified on command
+	line.
+	* ld.texinfo: Document above.
+
+2006-03-31  Jakub Jelinek  <jakub@redhat.com>
+
+	* ldmisc.c (vfinfo): Revert 2005-10-05 changes.  If
+	bfd_find_nearest_line succeeded for %C or %D, but filename
+	is NULL, print section+offset at the end.
+
+2006-03-25  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* emulparams/elf32bfinfd.sh: New file.
+	* emultempl/bfin.em: Delete.
+	* emulparams/bfin.sh: Lose reference to bfin.em.
+	* Makefile.am (eelf32bfin.c): Likewise.
+	(eelf32bfinfd.c): New.
+	* Makefile.in: Regenerate.
+	* configure.tgt (bfin-*-elf, bfin-*-uclinux): Add elf32bfinfd to
+	targ_extra_emuls.
+
+2006-03-22  Richard Sandiford  <richard@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+	    Phil Edwards  <phil@codesourcery.com>
+	    Zack Weinberg  <zack@codesourcery.com>
+	    Mark Mitchell  <mark@codesourcery.com>
+	    Nathan Sidwell  <nathan@codesourcery.com>
+
+	* configure.tgt (mips*el-*-vxworks*, mips*-*-vxworks*): Use
+	separate VxWorks emulations.
+	* emulparams/elf32ebmipvxworks.sh: New file.
+	* emulparams/elf32elmipvxworks.sh: New file.
+	* Makefile.am (ALL_EMULATIONS): Add eelf32ebmipvxworks.o and
+	eelf32elmipvxworks.o.
+	(eelf32ebmipvxworks.c, eelf32elmipvxworks.c): New rules.
+	* Makefile.in: Regenerate.
+
 2006-03-16  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 2434

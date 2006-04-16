@@ -30,7 +30,7 @@ bad	mov	xtrn(%eip), %eax
 	call	xtrn
 	jrcxz	xtrn
 
-bad	movabs	$xtrn@got, %rax
+	movabs	$xtrn@got, %rax
 	add	$xtrn@got, %rax
 bad	mov	$xtrn@got, %eax
 bad	mov	$xtrn@got, %ax
@@ -128,9 +128,9 @@ bad	call	xtrn@tpoff
  .data
 	.quad	xtrn
 	.quad	xtrn - .
-bad	.quad	xtrn@got
+	.quad	xtrn@got
 	.quad	xtrn@gotoff
-bad	.quad	xtrn@gotpcrel
+	.quad	xtrn@gotpcrel
 ill	.quad	_GLOBAL_OFFSET_TABLE_
 ill	.quad	_GLOBAL_OFFSET_TABLE_ - .
 bad	.quad	xtrn@plt

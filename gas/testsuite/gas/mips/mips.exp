@@ -383,12 +383,14 @@ mips_arch_create sb1 	64	mips64	{ mips3d } \
 			{ -march=sb1 -mtune=sb1 } { -mmips:sb1 } \
 			{ mipsisa64sb1-*-* mipsisa64sb1el-*-* }
 
-
 #
-# And now begin the actual tests!
+# And now begin the actual tests!  VxWorks uses RELA rather than REL
+# relocations, so most of the generic dump tests will not work there.
 #
-
-if { [istarget mips*-*-*] } then {
+if { [istarget mips*-*-vxworks*] } {
+    run_dump_test "vxworks1"
+    run_dump_test "vxworks1-xgot"
+} elseif { [istarget mips*-*-*] } {
     set no_mips16 0
     set elf [expr [istarget *-*-elf*] || [istarget *-*-irix5*] || [istarget *-*-irix6* ] || [istarget *-*-linux*] || [istarget *-*-netbsd*] ]
     set ecoff [expr [istarget *-*-ecoff*] || [istarget *-*-ultrix*] || [istarget *-*-irix\[1-4\]*] ]
@@ -777,4 +779,6 @@ if { [istarget mips*-*-*] } then {
         run_dump_test "mips16e-jrc"
         run_dump_test "mips16e-save"
     }
+    run_dump_test "vxworks1"
+    run_dump_test "vxworks1-xgot"
 }

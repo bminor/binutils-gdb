@@ -560,6 +560,7 @@ struct asm_opcode
 #define THUMB_SIZE	2	/* Size of thumb instruction.  */
 #define THUMB_PP_PC_LR 0x0100
 #define THUMB_LOAD_BIT 0x0800
+#define THUMB2_LOAD_BIT 0x00100000
 
 #define BAD_ARGS	_("bad arguments to instruction")
 #define BAD_PC		_("r15 not allowed here")
@@ -3705,7 +3706,10 @@ parse_tb (char **str)
   int reg;
 
   if (skip_past_char (&p, '[') == FAIL)
-    return FAIL;
+    {
+      inst.error = _("'[' expected");
+      return FAIL;
+    }
 
   if ((reg = arm_reg_parse (&p, REG_TYPE_RN)) == FAIL)
     {
@@ -3715,7 +3719,10 @@ parse_tb (char **str)
   inst.operands[0].reg = reg;
 
   if (skip_past_comma (&p) == FAIL)
-    return FAIL;
+    {
+      inst.error = _("',' expected");
+      return FAIL;
+    }
   
   if ((reg = arm_reg_parse (&p, REG_TYPE_RN)) == FAIL)
     {
@@ -4132,7 +4139,13 @@ parse_operands (char *str, const unsigned char *pattern)
 
     failure:
       if (!backtrack_pos)
-	return FAIL;
+	{
+	  /* The parse routine should already have set inst.error, but set a
+	     defaut here just in case.  */
+	  if (!inst.error)
+	    inst.error = _("syntax error");
+	  return FAIL;
+	}
 
       /* Do not backtrack over a trailing optional argument that
 	 absorbed some text.  We will only fail again, with the
@@ -4140,7 +4153,11 @@ parse_operands (char *str, const unsigned char *pattern)
 	 probably less helpful than the current one.  */
       if (backtrack_index == i && backtrack_pos != str
 	  && upat[i+1] == OP_stop)
-	return FAIL;
+	{
+	  if (!inst.error)
+	    inst.error = _("syntax error");
+	  return FAIL;
+	}
 
       /* Try again, skipping the optional argument at backtrack_pos.  */
       str = backtrack_pos;
@@ -4443,7 +4460,14 @@ encode_arm_cp_address (int i, int wb_ok, int unind_ok, int reloc_override)
 static int
 move_or_literal_pool (int i, bfd_boolean thumb_p, bfd_boolean mode_3)
 {
-  if ((inst.instruction & (thumb_p ? THUMB_LOAD_BIT : LOAD_BIT)) == 0)
+  unsigned long tbit;
+
+  if (thumb_p)
+    tbit = (inst.instruction > 0xffff) ? THUMB2_LOAD_BIT : THUMB_LOAD_BIT;
+  else
+    tbit = LOAD_BIT;
+
+  if ((inst.instruction & tbit) == 0)
     {
       inst.error = _("invalid pseudo operation");
       return 1;
@@ -4457,7 +4481,7 @@ move_or_literal_pool (int i, bfd_boolean thumb_p, bfd_boolean mode_3)
     {
       if (thumb_p)
 	{
-	  if ((inst.reloc.exp.X_add_number & ~0xFF) == 0)
+	  if (!unified_syntax && (inst.reloc.exp.X_add_number & ~0xFF) == 0)
 	    {
 	      /* This can be done with a mov(1) instruction.  */
 	      inst.instruction	= T_OPCODE_MOV_I8 | (inst.operands[i].reg << 8);
@@ -5965,7 +5989,7 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
   bfd_boolean is_pc = (inst.operands[i].reg == REG_PC);
 
   constraint (!inst.operands[i].isreg,
-	      _("Thumb does not support the ldr =N pseudo-operation"));
+	      _("Instruction does not support =N addresses"));
 
   inst.instruction |= inst.operands[i].reg << 16;
   if (inst.operands[i].immisreg)
@@ -6979,6 +7003,13 @@ do_t_ldst (void)
   opcode = inst.instruction;
   if (unified_syntax)
     {
+      if (!inst.operands[1].isreg)
+	{
+	  if (opcode <= 0xffff)
+	    inst.instruction = THUMB_OP32 (opcode);
+	  if (move_or_literal_pool (0, /*thumb_p=*/TRUE, /*mode_3=*/FALSE))
+	    return;
+	}
       if (inst.operands[1].isreg
 	  && !inst.operands[1].writeback
 	  && !inst.operands[1].shifted && !inst.operands[1].postind
@@ -9034,9 +9065,9 @@ static const struct asm_opcode insns[] =
   CL(teqp,	130f000,           2, (RR, SH),      cmp),
 
  TC3(ldrt,	4300000, f8500e00, 2, (RR, ADDR),    ldstt, t_ldstt),
- TC3(ldrbt,	4700000, f8300e00, 2, (RR, ADDR),    ldstt, t_ldstt),
+ TC3(ldrbt,	4700000, f8100e00, 2, (RR, ADDR),    ldstt, t_ldstt),
  TC3(strt,	4200000, f8400e00, 2, (RR, ADDR),    ldstt, t_ldstt),
- TC3(strbt,	4600000, f8200e00, 2, (RR, ADDR),    ldstt, t_ldstt),
+ TC3(strbt,	4600000, f8000e00, 2, (RR, ADDR),    ldstt, t_ldstt),
 
  TC3(stmdb,	9000000, e9000000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
  TC3(stmfd,     9000000, e9000000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
@@ -11912,6 +11943,14 @@ md_apply_fix (fixS *	fixP,
 	{
 	  newval = md_chars_to_number (buf, INSN_SIZE);
 	  newval |= (value >> 2) & 0x00ffffff;
+	  /* Set the H bit on BLX instructions.  */
+	  if (temp == 1)
+	    {
+	      if (value & 2)
+		newval |= 0x01000000;
+	      else
+		newval &= ~0x01000000;
+	    }
 	  md_number_to_chars (buf, newval, INSN_SIZE);
 	}
       break;
@@ -11925,7 +11964,7 @@ md_apply_fix (fixS *	fixP,
       if (fixP->fx_done || !seg->use_rela_p)
 	{
 	  newval = md_chars_to_number (buf, THUMB_SIZE);
-	  newval |= ((value & 0x2e) << 2) | ((value & 0x40) << 3);
+	  newval |= ((value & 0x3e) << 2) | ((value & 0x40) << 3);
 	  md_number_to_chars (buf, newval, THUMB_SIZE);
 	}
       break;

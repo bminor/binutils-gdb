@@ -208,9 +208,16 @@ bfd_m68k_compatible (const bfd_arch_info_type *a,
       /* Merge cf machine.  */
       unsigned features = (bfd_m68k_mach_to_features (a->mach)
 			   | bfd_m68k_mach_to_features (b->mach));
-      unsigned machine = bfd_m68k_features_to_mach (features);
 
-      return bfd_lookup_arch (a->arch, machine);
+      /* ISA A+ and ISA B are incompatible.  */
+      if ((~features & (mcfisa_aa | mcfisa_b)) == 0)
+	return NULL;
+
+      /* MAC and EMAC code cannot be merged.  */
+      if ((~features & (mcfmac | mcfemac)) == 0)
+	return NULL;
+
+      return bfd_lookup_arch (a->arch, bfd_m68k_features_to_mach (features));
     }
   else
     /* They are incompatible.  */

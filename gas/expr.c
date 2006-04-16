@@ -1,6 +1,6 @@
 /* expr.c -operands, expressions-
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -1662,6 +1662,7 @@ expr (int rankarg,		/* Larger # is higher rank.  */
   while (op_left != O_illegal && op_rank[(int) op_left] > rank)
     {
       segT rightseg;
+      bfd_vma frag_off;
 
       input_line_pointer += op_chars;	/* -> after operator.  */
 
@@ -1741,12 +1742,15 @@ expr (int rankarg,		/* Larger # is higher rank.  */
       else if (op_left == O_subtract
 	       && right.X_op == O_symbol
 	       && resultP->X_op == O_symbol
-	       && (symbol_get_frag (right.X_add_symbol)
-		   == symbol_get_frag (resultP->X_add_symbol))
+	       && retval == rightseg
 	       && (SEG_NORMAL (rightseg)
-		   || right.X_add_symbol == resultP->X_add_symbol))
+		   || right.X_add_symbol == resultP->X_add_symbol)
+	       && frag_offset_fixed_p (symbol_get_frag (resultP->X_add_symbol),
+				       symbol_get_frag (right.X_add_symbol),
+				       &frag_off))
 	{
 	  resultP->X_add_number -= right.X_add_number;
+	  resultP->X_add_number -= frag_off / OCTETS_PER_BYTE;
 	  resultP->X_add_number += (S_GET_VALUE (resultP->X_add_symbol)
 				    - S_GET_VALUE (right.X_add_symbol));
 	  resultP->X_op = O_constant;
@@ -1900,6 +1904,7 @@ resolve_expression (expressionS *expressionP)
   valueT left, right;
   segT seg_left, seg_right;
   fragS *frag_left, *frag_right;
+  bfd_vma frag_off;
 
   switch (op)
     {
@@ -2002,13 +2007,15 @@ resolve_expression (expressionS *expressionP)
 	 on the input value.
 	 Otherwise, both operands must be absolute.  We already handled
 	 the case of addition or subtraction of a constant above.  */
+      frag_off = 0;
       if (!(seg_left == absolute_section
 	       && seg_right == absolute_section)
 	  && !(op == O_eq || op == O_ne)
 	  && !((op == O_subtract
 		|| op == O_lt || op == O_le || op == O_ge || op == O_gt)
 	       && seg_left == seg_right
-	       && (finalize_syms || frag_left == frag_right)
+	       && (finalize_syms
+		   || frag_offset_fixed_p (frag_left, frag_right, &frag_off))
 	       && (seg_left != reg_section || left == right)
 	       && (seg_left != undefined_section || add_symbol == op_symbol)))
 	{
@@ -2068,6 +2075,7 @@ resolve_expression (expressionS *expressionP)
 	    return 0;
 	}
 
+      right += frag_off / OCTETS_PER_BYTE;
       switch (op)
 	{
 	case O_add:			left += right; break;

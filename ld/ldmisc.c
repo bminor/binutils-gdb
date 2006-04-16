@@ -1,6 +1,6 @@
 /* ldmisc.c
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005
+   2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support.
 
@@ -337,7 +337,7 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 				&& strcmp (last_file, filename) != 0)
 			    || strcmp (last_function, functionname) != 0)
 			  {
-			    lfinfo (fp, _("%B: In function `%T'"),
+			    lfinfo (fp, _("%B: In function `%T':\n"),
 				    abfd, functionname);
 
 			    last_bfd = abfd;
@@ -353,20 +353,17 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 			discard_last = FALSE;
 		      }
 		    else
-		      lfinfo (fp, "%B", abfd);
+		      lfinfo (fp, "%B:", abfd);
 
 		    if (filename != NULL)
-		      fprintf (fp, ":%s", filename);
+		      fprintf (fp, "%s:", filename);
 
 		    if (functionname != NULL && fmt[-1] == 'G')
-		      lfinfo (fp, ":%T", functionname);
-		    else if (filename != NULL)
-		      {
-			if (linenumber != 0)
-			  fprintf (fp, ":%u", linenumber);
-			else
-			  lfinfo (fp, ":(%A+0x%v)", section, offset);
-		      }
+		      lfinfo (fp, "%T", functionname);
+		    else if (filename != NULL && linenumber != 0)
+		      fprintf (fp, "%u", linenumber);
+		    else
+		      lfinfo (fp, "(%A+0x%v)", section, offset);
 		  }
 		else
 		  lfinfo (fp, "%B:(%A+0x%v)", abfd, section, offset);

@@ -1,5 +1,6 @@
 #name: ARM V7 instructions
 #as: -march=armv7r
+#skip: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd *-*-riscix*
 #objdump: -dr --prefix-addresses --show-raw-insn
 
 .*: +file format .*arm.*

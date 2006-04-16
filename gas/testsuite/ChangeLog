@@ -1,3 +1,41 @@
+2006-04-16  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/arch7.d: Skip test for non-ELF targets.
+	* gas/arm/blx-local.d: Likewise.
+	* gas/arm/svc.d: Likewise.
+	* gas/arm/thumb2_bcond.d: Likewise.
+	* gas/arm/thumb2_it_bad.d: Likewise.
+
+2006-04-07  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/blx-local.d: New test.
+	* gas/arm/blx-local.d: New test.
+
+2006-04-07  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb2_pool.d: New test.
+	* gas/arm/thumb2_pool.s: New test.
+
+2006-04-05  Richard Sandiford  <richard@codesourcery.com>
+
+	* gas/sparc/vxworks-pic.s, gas/sparc/vxworks-pic.d: New test.
+	* gas/sparc/sparc.exp: Run it.  Remove sparc*-*-vxworks* XFAILs.
+
+2006-03-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/rep.s: Pad with .p2align.
+	* gas/i386/rep.d: Adjust.
+
+2006-03-22  Richard Sandiford  <richard@codesourcery.com>
+
+	* gas/mips/vxworks1.s, gas/mips/vxworks1.d,
+	* gas/mips/vxworks1-xgot.d: New tests.
+	* gas/mips/mips.exp: Run them.  Do not run other tests on VxWorks.
+	
+2006-03-21  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb32.d: Correct expected output.
+
 2006-03-20  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/thumb2_bcond.d: New test.

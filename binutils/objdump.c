@@ -899,7 +899,7 @@ objdump_print_address (bfd_vma vma, struct disassemble_info *info)
   objdump_print_addr (vma, info, ! prefix_addresses);
 }
 
-/* Determine of the given address has a symbol associated with it.  */
+/* Determine if the given address has a symbol associated with it.  */
 
 static int
 objdump_symbol_at_address (bfd_vma vma, struct disassemble_info * info)

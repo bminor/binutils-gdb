@@ -613,7 +613,8 @@ $(srcdir)/config/m68k-parse.h: ; @true
 bfin-parse.c: $(srcdir)/config/bfin-parse.y
 	$(SHELL) $(YLWRAP) $(srcdir)/config/bfin-parse.y y.tab.c bfin-parse.c y.tab.h bfin-parse.h -- $(YACCCOMPILE) -d ;
 bfin-parse.h: bfin-parse.c
-bfin-parse.o: bfin-parse.c bfin-parse.h $(srcdir)/config/bfin-defs.h
+bfin-parse.o: bfin-parse.c bfin-parse.h $(srcdir)/config/bfin-defs.h \
+ $(INCDIR)/elf/common.h $(INCDIR)/elf/bfin.h $(BFDDIR)/libbfd.h
 
 bfin-defs.h: ; @true
 $(srcdir)/config/bfin-defs.h: ; @true
@@ -670,6 +671,35 @@ MOSTLYCLEANFILES = $(STAGESTUFF) core \
 	testsuite/site.exp site.bak site.exp stage stage1 stage2
 
 CLEANFILES = dep.sed DEPTC DEPTCA DEPOBJ DEPOBJA DEP2 DEP2A DEP1 DEPA DEP DEPDIR
+
+.PHONY: install-html install-html-am install-html-recursive
+
+install-html:	install-html-recursive
+
+install-html-recursive:
+	@failcom='exit 1'; \
+	for f in x $$MAKEFLAGS; do \
+	  case $$f in \
+	    *=* | --[!k]*);; \
+	    *k*) failcom='fail=yes';; \
+	  esac; \
+	done; \
+	dot_seen=no; \
+	target=`echo $@ | sed s/-recursive//`; \
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  echo "Making $$target in $$subdir"; \
+	  if test "$$subdir" = "."; then \
+	    dot_seen=yes; \
+	    local_target="$$target-am"; \
+	  else \
+	    local_target="$$target"; \
+	  fi; \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
+	  || eval $$failcom; \
+	done; \
+	if test "$$dot_seen" = "no"; then \
+	  $(MAKE) $(AM_MAKEFLAGS) "$$target-am" || exit 1; \
+	fi; test -z "$$fail"
 
 .PHONY: install-exec-local install-data-local
 .PHONY: install-exec-bindir install-exec-tooldir
@@ -1021,14 +1051,17 @@ DEPTC_bfin_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h struc-symbol.h \
   $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h dwarf2dbg.h \
-  $(srcdir)/config/bfin-defs.h $(INCDIR)/obstack.h $(INCDIR)/safe-ctype.h \
-  $(srcdir)/config/bfin-aux.h $(INCDIR)/opcode/bfin.h
+  $(INCDIR)/obstack.h $(INCDIR)/safe-ctype.h \
+  $(srcdir)/config/bfin-aux.h $(INCDIR)/opcode/bfin.h \
+  $(srcdir)/config/bfin-defs.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/bfin.h $(BFDDIR)/libbfd.h
 DEPTC_bfin_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-bfin.h \
   dwarf2dbg.h struc-symbol.h $(srcdir)/config/bfin-defs.h \
   $(INCDIR)/obstack.h $(INCDIR)/safe-ctype.h $(srcdir)/config/bfin-aux.h \
-  $(INCDIR)/opcode/bfin.h
+  $(INCDIR)/opcode/bfin.h $(srcdir)/config/bfin-defs.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/bfin.h $(BFDDIR)/libbfd.h
 DEPTC_cris_aout = $(INCDIR)/symcat.h $(srcdir)/config/obj-aout.h \
   $(srcdir)/config/tc-cris.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \

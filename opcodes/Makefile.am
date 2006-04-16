@@ -15,6 +15,9 @@ AM_CFLAGS = $(WARN_CFLAGS)
 bfdlibdir = @bfdlibdir@
 bfdincludedir = @bfdincludedir@
 
+.PHONY: install-html
+install-html:
+
 bfdlib_LTLIBRARIES = libopcodes.la
 
 # This is where bfd.h lives.

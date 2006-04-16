@@ -155,7 +155,7 @@ core_init (const char *aout_name)
 
   if (!bfd_check_format (core_bfd, bfd_object))
     {
-      fprintf (stderr, _("%s: %s: not in a.out format\n"), whoami, aout_name);
+      fprintf (stderr, _("%s: %s: not in executable format\n"), whoami, aout_name);
       done (1);
     }
 

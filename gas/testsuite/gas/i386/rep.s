@@ -48,3 +48,5 @@ _start:
 	addr16 rep stosl
 	addr16 repz cmpsl
 	addr16 repz scasl
+
+	.p2align        4,0

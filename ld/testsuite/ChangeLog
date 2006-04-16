@@ -1,3 +1,43 @@
+2006-04-05  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-sparc/vxworks1.dd, ld-sparc/vxworks1.ld, ld-sparc/vxworks1-lib.dd,
+	* ld-sparc/vxworks1-lib.nd, ld-sparc/vxworks1-lib.rd,
+	* ld-sparc/vxworks1-lib.s, ld-sparc/vxworks1.rd, ld-sparc/vxworks1.s,
+	* ld-sparc/vxworks1-static.d, ld-sparc/vxworks2.s,
+	* ld-sparc/vxworks2.sd, ld-sparc/vxworks2-static.sd: New tests.
+	* ld-sparc/sparc.exp: Run them.
+
+2006-04-05  Ben Elliston  <bje@au.ibm.com>
+
+	* lib/ld-lib.exp: Comment cleanups.
+
+2006-03-27  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-mips-elf/tls-hidden3a.s, ld-mips-elf/tls-hidden3b.s,
+	* ld-mips-elf/tls-hidden3.d, ld-mips-elf/tls-hidden3.got,
+	* ld-mips-elf/tls-hidden3.ld, ld-mips-elf/tls-hidden3.r,
+	* ld-mips-elf/tls-hidden4a.s, ld-mips-elf/tls-hidden4b.s,
+	* ld-mips-elf/tls-hidden4.got, ld-mips-elf/tls-hidden4.r: New tests.
+	* ld-mips-elf/mips-elf.exp: Run them.
+
+2006-03-25  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-m68k/merge-error-1a.s, ld-m68k/merge-error-1b.s,
+	* ld-m68k/merge-error-1a.d, ld-m68k/merge-error-1b.d,
+	* ld-m68k/merge-error-1c.d, ld-m68k/merge-error-1d.d,
+	* ld-m68k/merge-error-1e.d, ld-m68k/merge-ok-1a.d,
+	* ld-m68k/merge-ok-1b.d: New tests.
+	* ld-m68k/m68k.exp: Run them.
+
+2006-03-22  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-mips/vxworks1.dd, ld-mips/vxworks1.ld, ld-mips/vxworks1-lib.dd,
+	* ld-mips/vxworks1-lib.nd, ld-mips/vxworks1-lib.rd,
+	* ld-mips/vxworks1-lib.s, ld-mips/vxworks1.rd, ld-mips/vxworks1.s,
+	* ld-mips/vxworks1-static.d, ld-mips/vxworks2.s, ld-mips/vxworks2.sd,
+	* ld-mips/vxworks2-static.sd: New tests.
+	* ld-mips/mips-elf.exp: Run them.
+
 2006-03-17  Alexandre Oliva  <aoliva@redhat.com>
 
 	* ld-powerpc/tls32.s: Verify that +32768 @plt addend is

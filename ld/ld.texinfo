@@ -1117,7 +1117,7 @@ platforms which support shared libraries.
 @item --check-sections
 @itemx --no-check-sections
 Asks the linker @emph{not} to check section addresses after they have
-been assigned to see if there any overlaps.  Normally the linker will
+been assigned to see if there are any overlaps.  Normally the linker will
 perform this check, and if it finds any overlaps it will produce
 suitable error messages.  The linker does know about, and does make
 allowances for sections in overlays.  The default behaviour can be
@@ -5618,7 +5618,8 @@ specification @code{BASE = <number>} may be used to specify a
 non-default base address for the image. 
 
 If neither @code{LIBRARY <name>} nor  @code{NAME <name>} is specified,
-the internal name is the same as the filename specified on the command line. 
+or they specify an empty string, the internal name is the same as the
+filename specified on the command line.
 
 The complete specification of an export symbol is:
 

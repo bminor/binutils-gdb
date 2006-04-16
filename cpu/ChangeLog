@@ -1,3 +1,17 @@
+2006-04-10  DJ Delorie  <dj@redhat.com>
+
+	* m32c.opc (parse_unsigned_bitbase): Take a new parameter which
+	decides if this function accepts symbolic constants or not.
+	(parse_signed_bitbase): Likewise.
+	(parse_unsigned_bitbase8): Pass the new parameter.
+	(parse_unsigned_bitbase11): Likewise.
+	(parse_unsigned_bitbase16): Likewise.
+	(parse_unsigned_bitbase19): Likewise.
+	(parse_unsigned_bitbase27): Likewise.
+	(parse_signed_bitbase8): Likewise.
+	(parse_signed_bitbase11): Likewise.
+	(parse_signed_bitbase19): Likewise.
+	
 2006-03-13  DJ Delorie  <dj@redhat.com>
 
 	* m32c.cpu (Bit3-S): New.

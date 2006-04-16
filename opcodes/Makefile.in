@@ -933,6 +933,9 @@ uninstall-info: uninstall-info-recursive
 	uninstall-bfdlibLTLIBRARIES uninstall-info-am
 
 
+.PHONY: install-html
+install-html:
+
 disassemble.lo: disassemble.c $(INCDIR)/dis-asm.h
 	$(LIBTOOL) --mode=compile $(COMPILE) -c @archdefs@ $(srcdir)/disassemble.c
 

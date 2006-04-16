@@ -157,6 +157,27 @@ $(DEMANGLER_NAME).1: cxxfilt.man Makefile
 # cygnus option.
 install-data-local: install-info
 
+html__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
+
+install-html: install-html-am
+
+install-html-am: $(HTMLS)
+	@$(NORMAL_INSTALL)
+	test -z "$(htmldir)" || $(mkdir_p) "$(DESTDIR)$(htmldir)"
+	@list='$(HTMLS)'; for p in $$list; do \
+	  if test -f "$$p" || test -d "$$p"; then d=""; else d="$(srcdir)/"; fi; \
+	  f=$(html__strip_dir) \
+	  if test -d "$$d$$p"; then \
+	    echo " $(mkdir_p) '$(DESTDIR)$(htmldir)/$$f'"; \
+	    $(mkdir_p) "$(DESTDIR)$(htmldir)/$$f" || exit 1; \
+	    echo " $(INSTALL_DATA) '$$d$$p'/* '$(DESTDIR)$(htmldir)/$$f'"; \
+	    $(INSTALL_DATA) "$$d$$p"/* "$(DESTDIR)$(htmldir)/$$f"; \
+	  else \
+	    echo " $(INSTALL_DATA) '$$d$$p' '$(DESTDIR)$(htmldir)/$$f'"; \
+	    $(INSTALL_DATA) "$$d$$p" "$(DESTDIR)$(htmldir)/$$f"; \
+	  fi; \
+	done
+
 # Maintenance
 
 # We need it for the taz target in ../../Makefile.in.
