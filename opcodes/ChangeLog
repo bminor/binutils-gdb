@@ -1,3 +1,7 @@
+2006-04-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* po/POTFILES.in: Regenerated.
+
 2006-04-12   Hochstein  <hochstein@algo.informatik.tu-darmstadt.de>
 
 	PR binutils/2454

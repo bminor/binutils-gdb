@@ -150,6 +150,13 @@ v850-opc.c
 vax-dis.c
 w65-dis.c
 w65-opc.h
+xc16x-asm.c
+xc16x-desc.c
+xc16x-desc.h
+xc16x-dis.c
+xc16x-ibld.c
+xc16x-opc.c
+xc16x-opc.h
 xstormy16-asm.c
 xstormy16-desc.c
 xstormy16-desc.h
