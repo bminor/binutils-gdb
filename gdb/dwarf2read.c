@@ -2779,16 +2779,9 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_producer, cu);
   if (attr) 
     cu->producer = DW_STRING (attr);
-  
+
   /* We assume that we're processing GCC output. */
   processing_gcc_compilation = 2;
-#if 0
-  /* FIXME:Do something here.  */
-  if (dip->at_producer != NULL)
-    {
-      handle_producer (dip->at_producer);
-    }
-#endif
 
   /* The compilation unit may be in a different language or objfile,
      zero out all remembered fundamental types.  */
@@ -2796,6 +2789,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   start_symtab (name, comp_dir, lowpc);
   record_debugformat ("DWARF 2");
+  record_producer (cu->producer);
 
   initialize_cu_func_list (cu);
 

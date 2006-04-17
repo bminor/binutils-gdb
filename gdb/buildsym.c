@@ -591,6 +591,9 @@ start_subfile (char *name, char *dirname)
      later via a call to record_debugformat. */
   subfile->debugformat = NULL;
 
+  /* Similarly for the producer.  */
+  subfile->producer = NULL;
+
   /* If the filename of this subfile ends in .C, then change the
      language of any pending subfiles from C to C++.  We also accept
      any other C++ suffixes accepted by deduce_language_from_filename.  */
@@ -999,6 +1002,12 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 						  &objfile->objfile_obstack);
 	    }
 
+	  /* Similarly for the producer.  */
+	  if (subfile->producer != NULL)
+	    symtab->producer = obsavestring (subfile->producer,
+					     strlen (subfile->producer),
+					     &objfile->objfile_obstack);
+
 	  /* All symtabs for the main file and the subfiles share a
 	     blockvector, so we need to clear primary for everything
 	     but the main file.  */
@@ -1021,6 +1030,8 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 	{
 	  xfree ((void *) subfile->debugformat);
 	}
+      if (subfile->producer != NULL)
+	xfree (subfile->producer);
 
       nextsub = subfile->next;
       xfree ((void *) subfile);
@@ -1095,6 +1106,12 @@ void
 record_debugformat (char *format)
 {
   current_subfile->debugformat = savestring (format, strlen (format));
+}
+
+void
+record_producer (const char *producer)
+{
+  current_subfile->producer = savestring (producer, strlen (producer));
 }
 
 /* Merge the first symbol list SRCLIST into the second symbol list
