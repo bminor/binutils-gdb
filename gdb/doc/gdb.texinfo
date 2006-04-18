@@ -22554,7 +22554,7 @@ breakpoint at @var{addr}.
 Don't use this packet.  Use the @samp{Z} and @samp{z} packets instead
 (@pxref{insert breakpoint or watchpoint packet}).
 
-@item c @var{addr}
+@item c @r{[}@var{addr}@r{]}
 @cindex @samp{c} packet
 Continue.  @var{addr} is address to resume.  If @var{addr} is omitted,
 resume at current address.
@@ -22562,7 +22562,7 @@ resume at current address.
 Reply:
 @xref{Stop Reply Packets}, for the reply specifications.
 
-@item C @var{sig};@var{addr}
+@item C @var{sig}@r{[};@var{addr}@r{]}
 @cindex @samp{C} packet
 Continue with signal @var{sig} (hex signal number).  If
 @samp{;@var{addr}} is omitted, resume at same address.
@@ -22768,7 +22768,7 @@ This packet is only available in extended mode.
 
 The @samp{R} packet has no reply.
 
-@item s @var{addr}
+@item s @r{[}@var{addr}@r{]}
 @cindex @samp{s} packet
 Single step.  @var{addr} is the address at which to resume.  If
 @var{addr} is omitted, resume at same address.
@@ -22776,7 +22776,7 @@ Single step.  @var{addr} is the address at which to resume.  If
 Reply:
 @xref{Stop Reply Packets}, for the reply specifications.
 
-@item S @var{sig};@var{addr}
+@item S @var{sig}@r{[};@var{addr}@r{]}
 @anchor{step with signal packet}
 @cindex @samp{S} packet
 Step with signal.  This is analogous to the @samp{C} packet, but
