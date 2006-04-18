@@ -1,5 +1,8 @@
 2006-04-18  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-i386.c: Formatting.
+	(output_disp, output_imm): ISO C90 params.
+
 	* frags.c (frag_offset_fixed_p): Constify args.
 	* frags.h (frag_offset_fixed_p): Ditto.
 

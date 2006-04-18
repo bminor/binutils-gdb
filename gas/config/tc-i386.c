@@ -1226,9 +1226,9 @@ pt (t)
 
 static bfd_reloc_code_real_type
 reloc (unsigned int size,
-     int pcrel,
-     int sign,
-     bfd_reloc_code_real_type other)
+       int pcrel,
+       int sign,
+       bfd_reloc_code_real_type other)
 {
   if (other != NO_RELOC)
     {
@@ -1237,26 +1237,26 @@ reloc (unsigned int size,
       if (size == 8)
 	switch (other)
 	  {
-	    case BFD_RELOC_X86_64_GOT32:
-	      return BFD_RELOC_X86_64_GOT64;
-	      break;
-	    case BFD_RELOC_X86_64_PLTOFF64:
-	      return BFD_RELOC_X86_64_PLTOFF64;
-	      break;
-	    case BFD_RELOC_X86_64_GOTPC32:
-	      other = BFD_RELOC_X86_64_GOTPC64;
-	      break;
-	    case BFD_RELOC_X86_64_GOTPCREL:
-	      other = BFD_RELOC_X86_64_GOTPCREL64;
-	      break;
-	    case BFD_RELOC_X86_64_TPOFF32:
-	      other = BFD_RELOC_X86_64_TPOFF64;
-	      break;
-	    case BFD_RELOC_X86_64_DTPOFF32:
-	      other = BFD_RELOC_X86_64_DTPOFF64;
-	      break;
-	    default:
-	      break;
+	  case BFD_RELOC_X86_64_GOT32:
+	    return BFD_RELOC_X86_64_GOT64;
+	    break;
+	  case BFD_RELOC_X86_64_PLTOFF64:
+	    return BFD_RELOC_X86_64_PLTOFF64;
+	    break;
+	  case BFD_RELOC_X86_64_GOTPC32:
+	    other = BFD_RELOC_X86_64_GOTPC64;
+	    break;
+	  case BFD_RELOC_X86_64_GOTPCREL:
+	    other = BFD_RELOC_X86_64_GOTPCREL64;
+	    break;
+	  case BFD_RELOC_X86_64_TPOFF32:
+	    other = BFD_RELOC_X86_64_TPOFF64;
+	    break;
+	  case BFD_RELOC_X86_64_DTPOFF32:
+	    other = BFD_RELOC_X86_64_DTPOFF64;
+	    break;
+	  default:
+	    break;
 	  }
 
       /* Sign-checking 4-byte relocations in 16-/32-bit code is pointless.  */
@@ -1275,7 +1275,7 @@ reloc (unsigned int size,
       else if ((reloc->complain_on_overflow == complain_overflow_signed
 		&& !sign)
 	       || (reloc->complain_on_overflow == complain_overflow_unsigned
-		&& sign > 0))
+		   && sign > 0))
 	as_bad (_("relocated field and relocation type differ in signedness"));
       else
 	return other;
@@ -1567,7 +1567,7 @@ md_assemble (line)
 	  for (x = 0; x < i.operands; x++)
 	    if (i.op[x].regs->reg_num != x)
 	      as_bad (_("can't use register '%%%s' as operand %d in '%s'."),
-			i.op[x].regs->reg_name, x + 1, i.tm.name);
+		      i.op[x].regs->reg_name, x + 1, i.tm.name);
 	  i.operands = 0;
  	}
 
@@ -1832,9 +1832,9 @@ parse_insn (line, mnemonic)
     {
       if (!((t->cpu_flags & ~(Cpu64 | CpuNo64))
 	    & ~(cpu_arch_flags & ~(Cpu64 | CpuNo64))))
-	  supported |= 1;
+	supported |= 1;
       if (!(t->cpu_flags & (flag_code == CODE_64BIT ? CpuNo64 : Cpu64)))
-	  supported |= 2;
+	supported |= 2;
     }
   if (!(supported & 2))
     {
@@ -1867,7 +1867,7 @@ parse_insn (line, mnemonic)
       if (t >= current_templates->end)
 	{
 	  as_bad (_("expecting string instruction after `%s'"),
-	        expecting_string_instruction);
+		  expecting_string_instruction);
 	  return NULL;
 	}
       for (override.start = t; t < current_templates->end; ++t)
@@ -2151,8 +2151,8 @@ optimize_imm ()
 		  mask = 0;
 		  break;
 		}
-		if (mask & allowed)
-		  i.types[op] &= mask;
+	      if (mask & allowed)
+		i.types[op] &= mask;
 	    }
 	    break;
 	  }
@@ -2515,9 +2515,9 @@ process_suffix (void)
   else if (intel_syntax
 	   && !i.suffix
 	   && ((i.tm.operand_types[0] & JumpAbsolute)
-	    || (i.tm.opcode_modifier & (JumpByte|JumpInterSegment))
-	    || (i.tm.base_opcode == 0x0f01 /* [ls][gi]dt */
-		&& i.tm.extension_opcode <= 3)))
+	       || (i.tm.opcode_modifier & (JumpByte|JumpInterSegment))
+	       || (i.tm.base_opcode == 0x0f01 /* [ls][gi]dt */
+		   && i.tm.extension_opcode <= 3)))
     {
       switch (flag_code)
 	{
@@ -2550,13 +2550,13 @@ process_suffix (void)
 	}
       else
 	{
-	  unsigned int suffixes = ~i.tm.opcode_modifier
-				  & (No_bSuf
-				     | No_wSuf
-				     | No_lSuf
-				     | No_sSuf
-				     | No_xSuf
-				     | No_qSuf);
+	  unsigned int suffixes = (~i.tm.opcode_modifier
+				   & (No_bSuf
+				      | No_wSuf
+				      | No_lSuf
+				      | No_sSuf
+				      | No_xSuf
+				      | No_qSuf));
 
 	  if ((i.tm.opcode_modifier & W)
 	      || ((suffixes & (suffixes - 1))
@@ -3504,7 +3504,7 @@ output_insn ()
 	  prefix = (i.tm.base_opcode >> 16) & 0xff;
 	  if ((i.tm.cpu_flags & CpuPadLock) != 0)
 	    {
-check_prefix:
+	    check_prefix:
 	      if (prefix != REPE_PREFIX_OPCODE
 		  || i.prefix[LOCKREP_PREFIX] != REPE_PREFIX_OPCODE)
 		add_prefix (prefix);
@@ -3587,9 +3587,7 @@ check_prefix:
 }
 
 static void
-output_disp (insn_start_frag, insn_start_off)
-    fragS *insn_start_frag;
-    offsetT insn_start_off;
+output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 {
   char *p;
   unsigned int n;
@@ -3712,9 +3710,7 @@ output_disp (insn_start_frag, insn_start_off)
 }
 
 static void
-output_imm (insn_start_frag, insn_start_off)
-    fragS *insn_start_frag;
-    offsetT insn_start_off;
+output_imm (fragS *insn_start_frag, offsetT insn_start_off)
 {
   char *p;
   unsigned int n;
@@ -3858,9 +3854,9 @@ static int cons_sign = -1;
 
 void
 x86_cons_fix_new (fragS *frag,
-     unsigned int off,
-     unsigned int len,
-     expressionS *exp)
+		  unsigned int off,
+		  unsigned int len,
+		  expressionS *exp)
 {
   enum bfd_reloc_code_real r = reloc (len, 0, cons_sign, got_reloc);
 
@@ -3891,8 +3887,8 @@ x86_cons_fix_new (fragS *frag,
    input line.  Otherwise return NULL.  */
 static char *
 lex_got (enum bfd_reloc_code_real *reloc,
-     int *adjust,
-     unsigned int *types)
+	 int *adjust,
+	 unsigned int *types)
 {
   /* Some of the relocations depend on the size of what field is to
      be relocated.  But in our callers i386_immediate and i386_displacement
@@ -4224,9 +4220,9 @@ i386_displacement (disp_start, disp_end)
   if (flag_code == CODE_64BIT)
     {
       if (!bigdisp)
-	bigdisp = (override || i.suffix == WORD_MNEM_SUFFIX)
-		  ? Disp16
-		  : Disp32S | Disp32;
+	bigdisp = ((override || i.suffix == WORD_MNEM_SUFFIX)
+		   ? Disp16
+		   : Disp32S | Disp32);
       else if (!override)
 	bigdisp = Disp64 | Disp32S | Disp32;
     }
@@ -4403,9 +4399,9 @@ i386_index_check (operand_string)
       else if (flag_code == CODE_64BIT)
 	RegXX = i.prefix[ADDR_PREFIX] == 0 ? Reg64 : Reg32;
       else
-	RegXX = (flag_code == CODE_16BIT) ^ (i.prefix[ADDR_PREFIX] != 0)
-		? Reg16
-		: Reg32;
+	RegXX = ((flag_code == CODE_16BIT) ^ (i.prefix[ADDR_PREFIX] != 0)
+		 ? Reg16
+		 : Reg32);
       if (!i.base_reg
 	  || !(i.base_reg->reg_type & Acc)
 	  || !(i.base_reg->reg_type & RegXX)
@@ -4414,17 +4410,17 @@ i386_index_check (operand_string)
 	ok = 0;
     }
   else if (flag_code == CODE_64BIT)
-     {
-       unsigned RegXX = (i.prefix[ADDR_PREFIX] == 0 ? Reg64 : Reg32);
+    {
+      unsigned RegXX = (i.prefix[ADDR_PREFIX] == 0 ? Reg64 : Reg32);
 
-       if ((i.base_reg
-	    && ((i.base_reg->reg_type & RegXX) == 0)
-	    && (i.base_reg->reg_type != BaseIndex
-		|| i.index_reg))
-	   || (i.index_reg
-	       && ((i.index_reg->reg_type & (RegXX | BaseIndex))
-		   != (RegXX | BaseIndex))))
-	 ok = 0;
+      if ((i.base_reg
+	   && ((i.base_reg->reg_type & RegXX) == 0)
+	   && (i.base_reg->reg_type != BaseIndex
+	       || i.index_reg))
+	  || (i.index_reg
+	      && ((i.index_reg->reg_type & (RegXX | BaseIndex))
+		  != (RegXX | BaseIndex))))
+	ok = 0;
     }
   else
     {
@@ -4467,7 +4463,7 @@ i386_index_check (operand_string)
 	     Disp16 and Disp32 flags.  The same goes for Imm16 and Imm32.
 	     Removing them would probably clean up the code quite a lot.  */
 	  if (flag_code != CODE_64BIT && (i.types[this_operand] & (Disp16 | Disp32)))
-	     i.types[this_operand] ^= (Disp16 | Disp32);
+	    i.types[this_operand] ^= (Disp16 | Disp32);
 	  fudged = 1;
 	  goto tryprefix;
 	}
@@ -6309,7 +6305,7 @@ intel_e06 ()
       else
 	break;
 
-     intel_match_token (cur_token.code);
+      intel_match_token (cur_token.code);
 
       if (nregs < 0)
 	nregs = ~nregs;
@@ -6581,7 +6577,7 @@ intel_bracket_expr ()
       intel_parser.op_modifier &= ~was_offset;
     }
   else
-      strcat (intel_parser.disp, "[");
+    strcat (intel_parser.disp, "[");
 
   /* Add a '+' to the displacement string if necessary.  */
   if (*intel_parser.disp != '\0'
@@ -7281,9 +7277,9 @@ x86_64_section_letter (int letter, char **ptr_msg)
 	return SHF_X86_64_LARGE;
 
       *ptr_msg = _("Bad .section directive: want a,l,w,x,M,S,G,T in string");
-     }
+    }
   else
-   *ptr_msg = _("Bad .section directive: want a,w,x,M,S,G,T in string");
+    *ptr_msg = _("Bad .section directive: want a,w,x,M,S,G,T in string");
   return -1;
 }
 
