@@ -1,4 +1,7 @@
-2006-04-16  Alan Modra  <amodra@bigpond.net.au>
+2006-04-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-dlx.h (tc_coff_symbol_emit_hook): Delete.
+	(COFF_MAGIC): Delete.
 
 	* config/tc-xc16x.h (TC_LINKRELAX_FIXUP): Delete.
 

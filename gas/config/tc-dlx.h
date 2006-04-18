@@ -48,10 +48,6 @@ extern bfd_boolean md_dlx_fix_adjustable  (struct fix *);
 
 #define tc_unrecognized_line(c) dlx_unrecognized_line (c)
 
-#define tc_coff_symbol_emit_hook(a)	;	/* Not used.  */
-
-#define COFF_MAGIC DLXMAGIC
-
 /* No shared lib support, so we don't need to ensure externally
    visible symbols can be overridden.  */
 #define EXTERN_FORCE_RELOC 0
