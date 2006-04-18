@@ -222,9 +222,11 @@ static void (*byte_put) (unsigned char *, bfd_vma, int);
 
 #define UNKNOWN -1
 
-#define SECTION_NAME(X)	((X) == NULL ? "<none>" : \
-			 ((X)->sh_name >= string_table_length \
-			  ? "<corrupt>" : string_table + (X)->sh_name))
+#define SECTION_NAME(X)	\
+  ((X) == NULL ? "<none>" \
+  : string_table == NULL ? "<no-name>" \
+  : ((X)->sh_name >= string_table_length ? "<corrupt>" \
+  : string_table + (X)->sh_name))
 
 /* Given st_shndx I, map to section_headers index.  */
 #define SECTION_HEADER_INDEX(I)				\
@@ -3142,6 +3144,11 @@ process_file_header (void)
 	      (long) elf_header.e_shstrndx);
       if (section_headers != NULL && elf_header.e_shstrndx == SHN_XINDEX)
 	printf (" (%ld)", (long) section_headers[0].sh_link);
+      else if (elf_header.e_shstrndx != SHN_UNDEF
+	       && (elf_header.e_shstrndx >= elf_header.e_shnum
+		   || (elf_header.e_shstrndx >= SHN_LORESERVE
+		       && elf_header.e_shstrndx <= SHN_HIRESERVE)))
+	printf (" <corrupt: out of range>");
       putc ('\n', stdout);
     }
 
@@ -3151,6 +3158,11 @@ process_file_header (void)
 	elf_header.e_shnum = section_headers[0].sh_size;
       if (elf_header.e_shstrndx == SHN_XINDEX)
 	elf_header.e_shstrndx = section_headers[0].sh_link;
+      else if (elf_header.e_shstrndx != SHN_UNDEF
+	       && (elf_header.e_shstrndx >= elf_header.e_shnum
+		   || (elf_header.e_shstrndx >= SHN_LORESERVE
+		       && elf_header.e_shstrndx <= SHN_HIRESERVE)))
+	elf_header.e_shstrndx = SHN_UNDEF;
       free (section_headers);
       section_headers = NULL;
     }
@@ -3920,7 +3932,8 @@ process_section_headers (FILE *file)
     return 0;
 
   /* Read in the string table, so that we have names to display.  */
-  if (SECTION_HEADER_INDEX (elf_header.e_shstrndx) < elf_header.e_shnum)
+  if (elf_header.e_shstrndx != SHN_UNDEF
+       && SECTION_HEADER_INDEX (elf_header.e_shstrndx) < elf_header.e_shnum)
     {
       section = SECTION_HEADER (elf_header.e_shstrndx);
 

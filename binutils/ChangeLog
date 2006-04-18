@@ -1,3 +1,11 @@
+2006-04-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 2257
+	* readelf.c (SECTION_NAME): Cope with a missing string table.
+	(process_file_header): Cope with a corrupt e_shstrndx field.
+	(process_section_headers): Correctly handle an e_shstrndx value of
+	SHF_UNDEF.
+
 2006-04-12  Nick Clifton  <nickc@redhat.com>
 
 	* objdump.c (objdump_symbol_at_address): Fix typo in comment.

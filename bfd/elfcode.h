@@ -742,9 +742,18 @@ elf_object_p (bfd *abfd)
       if (i_ehdrp->e_shstrndx >= elf_numsections (abfd)
 	  || (i_ehdrp->e_shstrndx >= SHN_LORESERVE
 	      && i_ehdrp->e_shstrndx <= SHN_HIRESERVE))
-	goto got_wrong_format_error;
+	{
+	  /* PR 2257:
+	     We used to just goto got_wrong_format_error here
+	     but there are binaries in existance for which this test
+	     will prevent the binutils from working with them at all.
+	     So we are kind, and reset the string index value to 0
+	     so that at least some processing can be done.  */
+	  i_ehdrp->e_shstrndx = SHN_UNDEF;
+	  _bfd_error_handler (_("warning: %s has a corrupt string table index - ignoring"), abfd->filename);
+	}
     }
-  else if (i_ehdrp->e_shstrndx != 0)
+  else if (i_ehdrp->e_shstrndx != SHN_UNDEF)
     goto got_wrong_format_error;
 
   /* Read in the program headers.  */
