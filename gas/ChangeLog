@@ -1,3 +1,7 @@
+2006-04-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-xc16x.h (TC_LINKRELAX_FIXUP): Delete.
+
 2006-04-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* po/POTFILES.in: Regenerated.
@@ -23,7 +27,7 @@
 
 2006-04-09  Arnold Metselaar  <arnold.metselaar@planet.nl>
 
-	* config/tc-z80.c (z80_optimize_expr): Removed; redundant since 2006-04-04.
+	* config/tc-z80.c (z80_optimize_expr): Removed.
 	* config/tc-z80.h (z80_optimize_expr, md_optimize_expr): Removed.
 
 2006-04-07  Joerg Wunsch <j.gnu@uriah.heep.sax.de>
