@@ -1050,8 +1050,10 @@ rdp_execute (void)
 }
 
 static int
-remote_rdp_insert_breakpoint (CORE_ADDR addr, bfd_byte *save)
+remote_rdp_insert_breakpoint (struct bp_target_info *bp_tgt)
 {
+  CORE_ADDR addr = bp_tgt->placed_address;
+
   int res;
   if (ds.rdi_level > 0)
     {
@@ -1059,7 +1061,7 @@ remote_rdp_insert_breakpoint (CORE_ADDR addr, bfd_byte *save)
 		RDP_SET_BREAK,
 		addr,
 		RDP_SET_BREAK_TYPE_PC_EQUAL | RDP_SET_BREAK_TYPE_GET_HANDLE,
-		save,
+		bp_tgt->shadow_contents,
 		&res);
     }
   else
@@ -1074,14 +1076,15 @@ remote_rdp_insert_breakpoint (CORE_ADDR addr, bfd_byte *save)
 }
 
 static int
-remote_rdp_remove_breakpoint (CORE_ADDR addr, bfd_byte *save)
+remote_rdp_remove_breakpoint (struct bp_target_info *bp_tgt)
 {
+  CORE_ADDR addr = bp_tgt->placed_address;
   int res;
   if (ds.rdi_level > 0)
     {
       send_rdp ("b-p-S-B",
 		RDP_CLEAR_BREAK,
-		save, 4,
+		bp_tgt->shadow_contents, 4,
 		&res);
     }
   else
@@ -1108,12 +1111,12 @@ rdp_step (void)
     }
   else
     {
-      char handle[4];
+      void *b;
       CORE_ADDR pc = read_register (ARM_PC_REGNUM);
       pc = arm_get_next_pc (pc);
-      remote_rdp_insert_breakpoint (pc, handle);
+      b = deprecated_insert_raw_breakpoint (pc);
       rdp_execute ();
-      remote_rdp_remove_breakpoint (pc, handle);
+      deprecated_remove_raw_breakpoint (b);
     }
 }
 

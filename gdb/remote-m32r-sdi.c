@@ -1141,15 +1141,16 @@ m32r_mourn_inferior (void)
 }
 
 static int
-m32r_insert_breakpoint (CORE_ADDR addr, bfd_byte *shadow)
+m32r_insert_breakpoint (struct bp_target_info *bp_tgt)
 {
+  CORE_ADDR addr = bp_tgt->placed_address;
   int ib_breakpoints;
   unsigned char buf[13];
   int i, c;
 
   if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog, "m32r_insert_breakpoint(%08lx,\"%s\")\n",
-			addr, shadow);
+    fprintf_unfiltered (gdb_stdlog, "m32r_insert_breakpoint(%08lx,...)\n",
+			addr);
 
   if (use_ib_breakpoints)
     ib_breakpoints = max_ib_breakpoints;
@@ -1183,13 +1184,14 @@ m32r_insert_breakpoint (CORE_ADDR addr, bfd_byte *shadow)
 }
 
 static int
-m32r_remove_breakpoint (CORE_ADDR addr, bfd_byte *shadow)
+m32r_remove_breakpoint (struct bp_target_info *bp_tgt)
 {
+  CORE_ADDR addr = bp_tgt->placed_address;
   int i;
 
   if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog, "m32r_remove_breakpoint(%08lx,\"%s\")\n",
-			addr, shadow);
+    fprintf_unfiltered (gdb_stdlog, "m32r_remove_breakpoint(%08lx)\n",
+			addr);
 
   for (i = 0; i < MAX_BREAKPOINTS; i++)
     {

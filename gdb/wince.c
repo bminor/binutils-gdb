@@ -146,7 +146,6 @@ typedef struct thread_info_struct
     int suspend_count;
     int stepped;		/* True if stepped.  */
     CORE_ADDR step_pc;
-    unsigned long step_prev;
     CONTEXT context;
   }
 thread_info;
@@ -834,7 +833,7 @@ undoSStep (thread_info * th)
 {
   if (th->stepped)
     {
-      memory_remove_breakpoint (th->step_pc, (void *) &th->step_prev);
+      remove_single_step_breakpoints ();
       th->stepped = 0;
     }
 }
@@ -857,8 +856,7 @@ wince_software_single_step (enum target_signal ignore,
   th->stepped = 1;
   pc = read_register (PC_REGNUM);
   th->step_pc = mips_next_pc (pc);
-  th->step_prev = 0;
-  memory_insert_breakpoint (th->step_pc, (void *) &th->step_prev);
+  insert_single_step_breakpoint (th->step_pc);
   return;
 }
 #elif SHx
@@ -971,7 +969,7 @@ undoSStep (thread_info * th)
 {
   if (th->stepped)
     {
-      memory_remove_breakpoint (th->step_pc, (void *) &th->step_prev);
+      remove_single_step_breakpoints ();
       th->stepped = 0;
     }
   return;
@@ -996,8 +994,7 @@ wince_software_single_step (enum target_signal ignore,
 
   th->stepped = 1;
   th->step_pc = sh_get_next_pc (&th->context);
-  th->step_prev = 0;
-  memory_insert_breakpoint (th->step_pc, (void *) &th->step_prev);
+  insert_single_step_breakpoint (th->step_pc);
   return;
 }
 #elif defined (ARM)
@@ -1024,7 +1021,7 @@ undoSStep (thread_info * th)
 {
   if (th->stepped)
     {
-      memory_remove_breakpoint (th->step_pc, (void *) &th->step_prev);
+      remove_single_step_breakpoints ();
       th->stepped = 0;
     }
 }
@@ -1047,8 +1044,7 @@ wince_software_single_step (enum target_signal ignore,
   th->stepped = 1;
   pc = read_register (PC_REGNUM);
   th->step_pc = arm_get_next_pc (pc);
-  th->step_prev = 0;
-  memory_insert_breakpoint (th->step_pc, (void *) &th->step_prev);
+  insert_single_step_breakpoint (th->step_pc);
   return;
 }
 #endif

@@ -2188,20 +2188,17 @@ mips_addr_bits_remove (CORE_ADDR addr)
 void
 mips_software_single_step (enum target_signal sig, int insert_breakpoints_p)
 {
-  static CORE_ADDR next_pc;
-  typedef char binsn_quantum[BREAKPOINT_MAX];
-  static binsn_quantum break_mem;
-  CORE_ADDR pc;
+  CORE_ADDR pc, next_pc;
 
   if (insert_breakpoints_p)
     {
       pc = read_register (mips_regnum (current_gdbarch)->pc);
       next_pc = mips_next_pc (pc);
 
-      target_insert_breakpoint (next_pc, break_mem);
+      insert_single_step_breakpoint (next_pc);
     }
   else
-    target_remove_breakpoint (next_pc, break_mem);
+    remove_single_step_breakpoints ();
 }
 
 /* Test whether the PC points to the return instruction at the

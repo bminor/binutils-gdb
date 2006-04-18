@@ -1524,7 +1524,7 @@ sol_make_note_section (bfd *obfd, int *note_size)
 }
 
 static int
-ignore (CORE_ADDR addr, gdb_byte *contents)
+ignore (struct bp_target_info *bp_tgt)
 {
   return 0;
 }

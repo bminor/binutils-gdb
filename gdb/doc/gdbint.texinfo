@@ -527,6 +527,47 @@ The basic definition of the software breakpoint is the macro
 Basic breakpoint object handling is in @file{breakpoint.c}.  However,
 much of the interesting breakpoint action is in @file{infrun.c}.
 
+@table @code
+@cindex insert or remove software breakpoint
+@findex target_remove_breakpoint
+@findex target_insert_breakpoint
+@item target_remove_breakpoint (@var{bp_tgt})
+@itemx target_insert_breakpoint (@var{bp_tgt})
+Insert or remove a software breakpoint at address
+@code{@var{bp_tgt}->placed_address}.  Returns zero for success,
+non-zero for failure.  On input, @var{bp_tgt} contains the address of the
+breakpoint, and is otherwise initialized to zero.  The fields of the
+@code{struct bp_target_info} pointed to by @var{bp_tgt} are updated
+to contain other information about the breakpoint on output.  The field
+@code{placed_address} may be updated if the breakpoint was placed at a
+related address; the field @code{shadow_contents} contains the real
+contents of the bytes where the breakpoint has been inserted,
+if reading memory would return the breakpoint instead of the
+underlying memory; the field @code{shadow_len} is the length of
+memory cached in @code{shadow_contents}, if any; and the field
+@code{placed_size} is optionally set and used by the target, if
+it could differ from @code{shadow_len}.
+
+For example, the remote target @samp{Z0} packet does not require
+shadowing memory, so @code{shadow_len} is left at zero.  However,
+the length reported by @code{BREAKPOINT_FROM_PC} is cached in
+@code{placed_size}, so that a matching @samp{z0} packet can be
+used to remove the breakpoint.
+
+@cindex insert or remove hardware breakpoint
+@findex target_remove_hw_breakpoint
+@findex target_insert_hw_breakpoint
+@item target_remove_hw_breakpoint (@var{bp_tgt})
+@itemx target_insert_hw_breakpoint (@var{bp_tgt})
+Insert or remove a hardware-assisted breakpoint at address
+@code{@var{bp_tgt}->placed_address}.  Returns zero for success,
+non-zero for failure.  See @code{target_insert_breakpoint} for
+a description of the @code{struct bp_target_info} pointed to by
+@var{bp_tgt}; the @code{shadow_contents} and
+@code{shadow_len} members are not used for hardware breakpoints,
+but @code{placed_size} may be.
+@end table
+
 @section Single Stepping
 
 @section Signal Handling
@@ -656,18 +697,6 @@ defined by @file{breakpoint.h} as follows:
 
 @noindent
 These two macros should return 0 for success, non-zero for failure.
-
-@cindex insert or remove hardware breakpoint
-@findex target_remove_hw_breakpoint
-@findex target_insert_hw_breakpoint
-@item target_remove_hw_breakpoint (@var{addr}, @var{shadow})
-@itemx target_insert_hw_breakpoint (@var{addr}, @var{shadow})
-Insert or remove a hardware-assisted breakpoint at address @var{addr}.
-Returns zero for success, non-zero for failure.  @var{shadow} is the
-real contents of the byte where the breakpoint has been inserted; it
-is generally not valid when hardware breakpoints are used, but since
-no other code touches these values, the implementations of the above
-two macros can use them for their internal purposes.
 
 @findex target_stopped_data_address
 @item target_stopped_data_address (@var{addr_p})
@@ -858,11 +887,13 @@ the count goes to zero.
 
 @findex i386_insert_hw_breakpoint
 @findex i386_remove_hw_breakpoint
-@item i386_insert_hw_breakpoint (@var{addr}, @var{shadow}
-@itemx i386_remove_hw_breakpoint (@var{addr}, @var{shadow})
+@item i386_insert_hw_breakpoint (@var{bp_tgt})
+@itemx i386_remove_hw_breakpoint (@var{bp_tgt})
 These functions insert and remove hardware-assisted breakpoints.  The
 macros @code{target_insert_hw_breakpoint} and
 @code{target_remove_hw_breakpoint} are set to call these functions.
+The argument is a @code{struct bp_target_info *}, as described in
+the documentation for @code{target_insert_breakpoint}.
 These functions work like @code{i386_insert_watchpoint} and
 @code{i386_remove_watchpoint}, respectively, except that they set up
 the debug registers to watch instruction execution, and each
@@ -3229,8 +3260,8 @@ instruction of the architecture.
 
 Replaces all the other @var{BREAKPOINT} macros.
 
-@item MEMORY_INSERT_BREAKPOINT (@var{addr}, @var{contents_cache})
-@itemx MEMORY_REMOVE_BREAKPOINT (@var{addr}, @var{contents_cache})
+@item MEMORY_INSERT_BREAKPOINT (@var{bp_tgt})
+@itemx MEMORY_REMOVE_BREAKPOINT (@var{bp_tgt})
 @findex MEMORY_REMOVE_BREAKPOINT
 @findex MEMORY_INSERT_BREAKPOINT
 Insert or remove memory based breakpoints.  Reasonable defaults

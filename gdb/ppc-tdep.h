@@ -56,8 +56,7 @@ CORE_ADDR ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
 					  CORE_ADDR struct_addr);
 CORE_ADDR ppc64_sysv_abi_adjust_breakpoint_address (struct gdbarch *gdbarch,
 						    CORE_ADDR bpaddr);
-int ppc_linux_memory_remove_breakpoint (CORE_ADDR addr,
-					gdb_byte *contents_cache);
+int ppc_linux_memory_remove_breakpoint (struct bp_target_info *bp_tgt);
 struct link_map_offsets *ppc_linux_svr4_fetch_link_map_offsets (void);
 void ppc_linux_supply_gregset (struct regcache *regcache,
 			       int regnum, const void *gregs, size_t size,

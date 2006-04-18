@@ -136,10 +136,6 @@ static void skip_frame (void);
 
 static long read_frame (char **buf_p, long *sizeof_buf);
 
-static int remote_insert_breakpoint (CORE_ADDR, bfd_byte *);
-
-static int remote_remove_breakpoint (CORE_ADDR, bfd_byte *);
-
 static int hexnumlen (ULONGEST num);
 
 static void init_remote_ops (void);
@@ -4356,22 +4352,18 @@ static unsigned char little_break_insn[] = DEPRECATED_LITTLE_REMOTE_BREAKPOINT;
 
 #endif /* DEPRECATED_REMOTE_BREAKPOINT */
 
-/* Insert a breakpoint on targets that don't have any better
-   breakpoint support.  We read the contents of the target location
-   and stash it, then overwrite it with a breakpoint instruction.
-   ADDR is the target location in the target machine.  CONTENTS_CACHE
-   is a pointer to memory allocated for saving the target contents.
-   It is guaranteed by the caller to be long enough to save the number
-   of bytes returned by BREAKPOINT_FROM_PC.  */
+/* Insert a breakpoint.  On targets that have software breakpoint
+   support, we ask the remote target to do the work; on targets
+   which don't, we insert a traditional memory breakpoint.  */
 
 static int
-remote_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
+remote_insert_breakpoint (struct bp_target_info *bp_tgt)
 {
+  CORE_ADDR addr = bp_tgt->placed_address;
   struct remote_state *rs = get_remote_state ();
 #ifdef DEPRECATED_REMOTE_BREAKPOINT
   int val;
 #endif
-  int bp_size;
 
   /* Try the "Z" s/w breakpoint packet if it is not already disabled.
      If it succeeds, then set the support to PACKET_ENABLE.  If it
@@ -4382,13 +4374,13 @@ remote_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
     {
       char *p = rs->buf;
 
-      addr = remote_address_masked (addr);
       *(p++) = 'Z';
       *(p++) = '0';
       *(p++) = ',';
-      p += hexnumstr (p, (ULONGEST) addr);
-      BREAKPOINT_FROM_PC (&addr, &bp_size);
-      sprintf (p, ",%d", bp_size);
+      BREAKPOINT_FROM_PC (&bp_tgt->placed_address, &bp_tgt->placed_size);
+      addr = (ULONGEST) remote_address_masked (bp_tgt->placed_address);
+      p += hexnumstr (p, addr);
+      sprintf (p, ",%d", bp_tgt->placed_size);
 
       putpkt (rs->buf);
       getpkt (&rs->buf, &rs->buf_size, 0);
@@ -4405,7 +4397,8 @@ remote_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
     }
 
 #ifdef DEPRECATED_REMOTE_BREAKPOINT
-  val = target_read_memory (addr, contents_cache, sizeof big_break_insn);
+  bp_tgt->placed_size = bp_tgt->shadow_len = sizeof big_break_insn;
+  val = target_read_memory (addr, bp_tgt->shadow_contents, bp_tgt->shadow_len);
 
   if (val == 0)
     {
@@ -4419,13 +4412,14 @@ remote_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
 
   return val;
 #else
-  return memory_insert_breakpoint (addr, contents_cache);
+  return memory_insert_breakpoint (bp_tgt);
 #endif /* DEPRECATED_REMOTE_BREAKPOINT */
 }
 
 static int
-remote_remove_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
+remote_remove_breakpoint (struct bp_target_info *bp_tgt)
 {
+  CORE_ADDR addr = bp_tgt->placed_address;
   struct remote_state *rs = get_remote_state ();
   int bp_size;
 
@@ -4437,10 +4431,9 @@ remote_remove_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
       *(p++) = '0';
       *(p++) = ',';
 
-      addr = remote_address_masked (addr);
-      p += hexnumstr (p, (ULONGEST) addr);
-      BREAKPOINT_FROM_PC (&addr, &bp_size);
-      sprintf (p, ",%d", bp_size);
+      addr = (ULONGEST) remote_address_masked (bp_tgt->placed_address);
+      p += hexnumstr (p, addr);
+      sprintf (p, ",%d", bp_tgt->placed_size);
 
       putpkt (rs->buf);
       getpkt (&rs->buf, &rs->buf_size, 0);
@@ -4449,9 +4442,10 @@ remote_remove_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
     }
 
 #ifdef DEPRECATED_REMOTE_BREAKPOINT
-  return target_write_memory (addr, contents_cache, sizeof big_break_insn);
+  return target_write_memory (bp_tgt->placed_address, bp_tgt->shadow_contents,
+			      bp_tgt->shadow_len);
 #else
-  return memory_remove_breakpoint (addr, contents_cache);
+  return memory_remove_breakpoint (bp_tgt);
 #endif /* DEPRECATED_REMOTE_BREAKPOINT */
 }
 
@@ -4595,16 +4589,16 @@ remote_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
 
 
 static int
-remote_insert_hw_breakpoint (CORE_ADDR addr, gdb_byte *shadow)
+remote_insert_hw_breakpoint (struct bp_target_info *bp_tgt)
 {
-  int len = 0;
+  CORE_ADDR addr;
   struct remote_state *rs = get_remote_state ();
   char *p = rs->buf;
 
   /* The length field should be set to the size of a breakpoint
-     instruction.  */
+     instruction, even though we aren't inserting one ourselves.  */
 
-  BREAKPOINT_FROM_PC (&addr, &len);
+  BREAKPOINT_FROM_PC (&bp_tgt->placed_address, &bp_tgt->placed_size);
 
   if (remote_protocol_packets[PACKET_Z1].support == PACKET_DISABLE)
     error (_("Can't set hardware breakpoint without the '%s' (%s) packet."),
@@ -4615,9 +4609,9 @@ remote_insert_hw_breakpoint (CORE_ADDR addr, gdb_byte *shadow)
   *(p++) = '1';
   *(p++) = ',';
 
-  addr = remote_address_masked (addr);
+  addr = remote_address_masked (bp_tgt->placed_address);
   p += hexnumstr (p, (ULONGEST) addr);
-  sprintf (p, ",%x", len);
+  sprintf (p, ",%x", bp_tgt->placed_size);
 
   putpkt (rs->buf);
   getpkt (&rs->buf, &rs->buf_size, 0);
@@ -4636,16 +4630,11 @@ remote_insert_hw_breakpoint (CORE_ADDR addr, gdb_byte *shadow)
 
 
 static int
-remote_remove_hw_breakpoint (CORE_ADDR addr, gdb_byte *shadow)
+remote_remove_hw_breakpoint (struct bp_target_info *bp_tgt)
 {
-  int len;
+  CORE_ADDR addr;
   struct remote_state *rs = get_remote_state ();
   char *p = rs->buf;
-
-  /* The length field should be set to the size of a breakpoint
-     instruction.  */
-
-  BREAKPOINT_FROM_PC (&addr, &len);
 
   if (remote_protocol_packets[PACKET_Z1].support == PACKET_DISABLE)
     error (_("Can't clear hardware breakpoint without the '%s' (%s) packet."),
@@ -4656,9 +4645,9 @@ remote_remove_hw_breakpoint (CORE_ADDR addr, gdb_byte *shadow)
   *(p++) = '1';
   *(p++) = ',';
 
-  addr = remote_address_masked (addr);
+  addr = remote_address_masked (bp_tgt->placed_address);
   p += hexnumstr (p, (ULONGEST) addr);
-  sprintf (p, ",%x", len);
+  sprintf (p, ",%x", bp_tgt->placed_size);
 
   putpkt (rs->buf);
   getpkt (&rs->buf, &rs->buf_size, 0);

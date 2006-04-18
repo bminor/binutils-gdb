@@ -550,8 +550,9 @@ fetch_instruction (CORE_ADDR addr, instruction_type *it, long long *instr)
 #define IA64_BREAKPOINT 0x00003333300LL
 
 static int
-ia64_memory_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
+ia64_memory_insert_breakpoint (struct bp_target_info *bp_tgt)
 {
+  CORE_ADDR addr = bp_tgt->placed_address;
   char bundle[BUNDLE_LEN];
   int slotnum = (int) (addr & 0x0f) / SLOT_MULTIPLIER;
   long long instr;
@@ -574,7 +575,8 @@ ia64_memory_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
     }
 
   instr = slotN_contents (bundle, slotnum);
-  memcpy(contents_cache, &instr, sizeof(instr));
+  memcpy (bp_tgt->shadow_contents, &instr, sizeof (instr));
+  bp_tgt->placed_size = bp_tgt->shadow_len = sizeof (instr);
   replace_slotN_contents (bundle, IA64_BREAKPOINT, slotnum);
   if (val == 0)
     target_write_memory (addr, bundle, BUNDLE_LEN);
@@ -583,8 +585,9 @@ ia64_memory_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
 }
 
 static int
-ia64_memory_remove_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
+ia64_memory_remove_breakpoint (struct bp_target_info *bp_tgt)
 {
+  CORE_ADDR addr = bp_tgt->placed_address;
   char bundle[BUNDLE_LEN];
   int slotnum = (addr & 0x0f) / SLOT_MULTIPLIER;
   long long instr;
@@ -603,7 +606,7 @@ ia64_memory_remove_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
       slotnum = 2;
     }
 
-  memcpy (&instr, contents_cache, sizeof instr);
+  memcpy (&instr, bp_tgt->shadow_contents, sizeof instr);
   replace_slotN_contents (bundle, instr, slotnum);
   if (val == 0)
     target_write_memory (addr, bundle, BUNDLE_LEN);

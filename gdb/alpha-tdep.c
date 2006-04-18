@@ -1493,8 +1493,6 @@ void
 alpha_software_single_step (enum target_signal sig, int insert_breakpoints_p)
 {
   static CORE_ADDR next_pc;
-  typedef char binsn_quantum[BREAKPOINT_MAX];
-  static binsn_quantum break_mem;
   CORE_ADDR pc;
 
   if (insert_breakpoints_p)
@@ -1502,11 +1500,11 @@ alpha_software_single_step (enum target_signal sig, int insert_breakpoints_p)
       pc = read_pc ();
       next_pc = alpha_next_pc (pc);
 
-      target_insert_breakpoint (next_pc, break_mem);
+      insert_single_step_breakpoint (next_pc);
     }
   else
     {
-      target_remove_breakpoint (next_pc, break_mem);
+      remove_single_step_breakpoints ();
       write_pc (next_pc);
     }
 }
