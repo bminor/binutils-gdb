@@ -1278,7 +1278,7 @@ sim_stop_reason (sd, reason, sigrc)
 
     case SIG_D10V_BUS:
       *reason = sim_stopped;
-      *reson = TARGET_SIGNAL_BUS;
+      *sigrc = TARGET_SIGNAL_BUS;
       break;
 
     default:				/* some signal */
