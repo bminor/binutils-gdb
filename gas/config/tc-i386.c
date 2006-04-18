@@ -4127,6 +4127,11 @@ i386_immediate (imm_start)
       return 0;
     }
 #endif
+  else if (!intel_syntax && exp->X_op == O_register)
+    {
+      as_bad (_("illegal immediate register operand %s"), imm_start);
+      return 0;
+    }
   else
     {
       /* This is an address.  The size of the address will be

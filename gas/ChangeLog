@@ -1,3 +1,9 @@
+2006-04-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/2533
+	* config/tc-i386.c (i386_immediate): Check illegal immediate
+	register operand.
+
 2006-04-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-i386.c: Formatting.

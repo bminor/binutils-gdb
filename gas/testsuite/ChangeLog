@@ -1,3 +1,10 @@
+2006-04-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/2533
+	* gas/i386/inval.s: Add test for illegal immediate register
+	operand.
+	* gas/i386/inval.l: Updated.
+
 2006-04-16  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/arch7.d: Skip test for non-ELF targets.
