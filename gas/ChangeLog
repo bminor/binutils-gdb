@@ -1,5 +1,8 @@
 2006-04-18  Alan Modra  <amodra@bigpond.net.au>
 
+	* frags.c (frag_offset_fixed_p): Constify args.
+	* frags.h (frag_offset_fixed_p): Ditto.
+
 	* config/tc-dlx.h (tc_coff_symbol_emit_hook): Delete.
 	(COFF_MAGIC): Delete.
 
