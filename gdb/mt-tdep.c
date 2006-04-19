@@ -109,6 +109,12 @@ enum mt_gdb_regnums
   MT_OUT_REGNUM,			/* 16 bits.  */
   MT_EXMAC_REGNUM,		/* 32 bits (8 used).  */
   MT_QCHANNEL_REGNUM,		/* 32 bits.  */
+  MT_ZI2_REGNUM,                /* 16 bits.  */
+  MT_ZQ2_REGNUM,                /* 16 bits.  */
+  MT_CHANNEL2_REGNUM,           /* 32 bits.  */
+  MT_ISCRAMB2_REGNUM,           /* 32 bits.  */
+  MT_QSCRAMB2_REGNUM,           /* 32 bits.  */
+  MT_QCHANNEL2_REGNUM,          /* 32 bits.  */
 
   /* Number of real registers.  */
   MT_NUM_REGS,
@@ -149,6 +155,7 @@ mt_register_name (int regnum)
     "cr8", "cr9", "cr10", "cr11", "cr12", "cr13", "cr14", "cr15",
     "bypa", "bypb", "bypc", "flag", "context", "" /* mac.  */ , "z1", "z2",
     "Ichannel", "Iscramb", "Qscramb", "out", "" /* ex-mac.  */ , "Qchannel",
+    "zi2", "zq2", "Ichannel2", "Iscramb2", "Qscramb2", "Qchannel2",
     /* Pseudo-registers.  */
     "coprocessor", "MAC"
   };
@@ -213,6 +220,8 @@ mt_copro_register_type (struct gdbarch *arch, int regnum)
     case MT_Z1_REGNUM:
     case MT_Z2_REGNUM:
     case MT_OUT_REGNUM:
+    case MT_ZI2_REGNUM:
+    case MT_ZQ2_REGNUM:
       return builtin_type_int16;
     case MT_EXMAC_REGNUM:
     case MT_MAC_REGNUM:
