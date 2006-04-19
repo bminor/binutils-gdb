@@ -2458,17 +2458,15 @@ wild (lang_wild_statement_type *s,
 
   walk_wild (s, output_section_callback, output);
 
-  for (sec = s->section_list; sec != NULL; sec = sec->next)
-    {
-      if (default_common_section != NULL)
-	break;
+  if (default_common_section == NULL)
+    for (sec = s->section_list; sec != NULL; sec = sec->next)
       if (sec->spec.name != NULL && strcmp (sec->spec.name, "COMMON") == 0)
 	{
 	  /* Remember the section that common is going to in case we
 	     later get something which doesn't know where to put it.  */
 	  default_common_section = output;
+	  break;
 	}
-    }
 }
 
 /* Return TRUE iff target is the sought target.  */
@@ -3509,64 +3507,61 @@ static void
 print_input_section (asection *i)
 {
   bfd_size_type size = i->size;
+  int len;
+  bfd_vma addr;
 
   init_opb ();
 
+  print_space ();
+  minfo ("%s", i->name);
+
+  len = 1 + strlen (i->name);
+  if (len >= SECTION_NAME_MAP_LENGTH - 1)
     {
-      int len;
-      bfd_vma addr;
-
+      print_nl ();
+      len = 0;
+    }
+  while (len < SECTION_NAME_MAP_LENGTH)
+    {
       print_space ();
-      minfo ("%s", i->name);
+      ++len;
+    }
 
-      len = 1 + strlen (i->name);
-      if (len >= SECTION_NAME_MAP_LENGTH - 1)
-	{
-	  print_nl ();
-	  len = 0;
-	}
-      while (len < SECTION_NAME_MAP_LENGTH)
+  if (i->output_section != NULL && i->output_section->owner == output_bfd)
+    addr = i->output_section->vma + i->output_offset;
+  else
+    {
+      addr = print_dot;
+      size = 0;
+    }
+
+  minfo ("0x%V %W %B\n", addr, TO_ADDR (size), i->owner);
+
+  if (size != i->rawsize && i->rawsize != 0)
+    {
+      len = SECTION_NAME_MAP_LENGTH + 3;
+#ifdef BFD64
+      len += 16;
+#else
+      len += 8;
+#endif
+      while (len > 0)
 	{
 	  print_space ();
-	  ++len;
+	  --len;
 	}
 
-      if (i->output_section != NULL && i->output_section->owner == output_bfd)
-	addr = i->output_section->vma + i->output_offset;
+      minfo (_("%W (size before relaxing)\n"), i->rawsize);
+    }
+
+  if (i->output_section != NULL && i->output_section->owner == output_bfd)
+    {
+      if (command_line.reduce_memory_overheads)
+	bfd_link_hash_traverse (link_info.hash, print_one_symbol, i);
       else
-	{
-	  addr = print_dot;
-	  size = 0;
-	}
+	print_all_symbols (i);
 
-      minfo ("0x%V %W %B\n", addr, TO_ADDR (size), i->owner);
-
-      if (size != i->rawsize && i->rawsize != 0)
-	{
-	  len = SECTION_NAME_MAP_LENGTH + 3;
-#ifdef BFD64
-	  len += 16;
-#else
-	  len += 8;
-#endif
-	  while (len > 0)
-	    {
-	      print_space ();
-	      --len;
-	    }
-
-	  minfo (_("%W (size before relaxing)\n"), i->rawsize);
-	}
-
-      if (i->output_section != NULL && i->output_section->owner == output_bfd)
-	{
-	  if (command_line.reduce_memory_overheads)
-	    bfd_link_hash_traverse (link_info.hash, print_one_symbol, i);
-	  else
-	    print_all_symbols (i);
-
-	  print_dot = addr + TO_ADDR (size);
-	}
+      print_dot = addr + TO_ADDR (size);
     }
 }
 
