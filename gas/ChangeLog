@@ -1,5 +1,12 @@
 2006-04-19  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.am (CPU_TYPES): Add maxq and mt.  Sort.
+	(CPU_OBJ_VALID): Change sense of COFF test to default to invalid.
+	Make some cpus unsupported on ELF.  Run "make dep-am".
+	* Makefile.in: Regenerate.
+
+2006-04-19  Alan Modra  <amodra@bigpond.net.au>
+
 	* configure.in (--enable-targets): Indent help message.
 	* configure: Regenerate.
 
