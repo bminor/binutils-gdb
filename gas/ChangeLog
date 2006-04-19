@@ -1,3 +1,8 @@
+2006-04-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure.in (--enable-targets): Indent help message.
+	* configure: Regenerate.
+
 2006-04-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/2533

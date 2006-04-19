@@ -858,8 +858,8 @@ Optional Features:
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --enable-targets        alternative target configurations
   --enable-commonbfdlib   build shared BFD/opcodes/libiberty library
-  --enable-werror    treat compile warnings as errors
-  --enable-build-warnings Enable build-time compiler warnings
+  --enable-werror         treat compile warnings as errors
+  --enable-build-warnings enable build-time compiler warnings
   --disable-nls           do not use Native Language Support
   --enable-maintainer-mode  enable make rules and dependencies not useful
 			  (and sometimes confusing) to the casual installer

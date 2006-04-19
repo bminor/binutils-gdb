@@ -859,8 +859,8 @@ Optional Features:
   --disable-nls           do not use Native Language Support
   --enable-maintainer-mode  enable make rules and dependencies not useful
 			  (and sometimes confusing) to the casual installer
-  --enable-werror    treat compile warnings as errors
-  --enable-build-warnings Enable build-time compiler warnings
+  --enable-werror         treat compile warnings as errors
+  --enable-build-warnings enable build-time compiler warnings
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
