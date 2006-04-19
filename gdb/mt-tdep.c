@@ -109,6 +109,12 @@ enum mt_gdb_regnums
   MT_OUT_REGNUM,			/* 16 bits.  */
   MT_EXMAC_REGNUM,		/* 32 bits (8 used).  */
   MT_QCHANNEL_REGNUM,		/* 32 bits.  */
+  MT_ZI2_REGNUM,                /* 16 bits.  */
+  MT_ZQ2_REGNUM,                /* 16 bits.  */
+  MT_CHANNEL2_REGNUM,           /* 32 bits.  */
+  MT_ISCRAMB2_REGNUM,           /* 32 bits.  */
+  MT_QSCRAMB2_REGNUM,           /* 32 bits.  */
+  MT_QCHANNEL2_REGNUM,          /* 32 bits.  */
 
   /* Number of real registers.  */
   MT_NUM_REGS,
@@ -120,7 +126,12 @@ enum mt_gdb_regnums
 
   MT_COPRO_PSEUDOREG_DIM_1 = 2,
   MT_COPRO_PSEUDOREG_DIM_2 = 8,
-  MT_COPRO_PSEUDOREG_REGS = 32,
+  /* The number of pseudo-registers for each coprocessor.  These
+     include the real coprocessor registers, the pseudo-registe for
+     the coprocessor number, and the pseudo-register for the MAC.  */
+  MT_COPRO_PSEUDOREG_REGS = MT_NUM_REGS - MT_NUM_CPU_REGS + 2,
+  /* The register number of the MAC, relative to a given coprocessor.  */
+  MT_COPRO_PSEUDOREG_MAC_REGNUM = MT_COPRO_PSEUDOREG_REGS - 1,
 
   /* Two pseudo-regs ('coprocessor' and 'mac').  */
   MT_NUM_PSEUDO_REGS = 2 + (MT_COPRO_PSEUDOREG_REGS
@@ -144,6 +155,7 @@ mt_register_name (int regnum)
     "cr8", "cr9", "cr10", "cr11", "cr12", "cr13", "cr14", "cr15",
     "bypa", "bypb", "bypc", "flag", "context", "" /* mac.  */ , "z1", "z2",
     "Ichannel", "Iscramb", "Qscramb", "out", "" /* ex-mac.  */ , "Qchannel",
+    "zi2", "zq2", "Ichannel2", "Iscramb2", "Qscramb2", "Qchannel2",
     /* Pseudo-registers.  */
     "coprocessor", "MAC"
   };
@@ -171,7 +183,7 @@ mt_register_name (int regnum)
     dim_1 = ((regnum / MT_COPRO_PSEUDOREG_REGS / MT_COPRO_PSEUDOREG_DIM_2)
 	     %  MT_COPRO_PSEUDOREG_DIM_1);
     
-    if (index == MT_COPRO_PSEUDOREG_REGS - 1)
+    if (index == MT_COPRO_PSEUDOREG_MAC_REGNUM)
       stub = register_names[MT_MAC_PSEUDOREG_REGNUM];
     else if (index > MT_QCHANNEL_REGNUM - MT_CPR0_REGNUM)
       stub = "";
@@ -208,6 +220,8 @@ mt_copro_register_type (struct gdbarch *arch, int regnum)
     case MT_Z1_REGNUM:
     case MT_Z2_REGNUM:
     case MT_OUT_REGNUM:
+    case MT_ZI2_REGNUM:
+    case MT_ZQ2_REGNUM:
       return builtin_type_int16;
     case MT_EXMAC_REGNUM:
     case MT_MAC_REGNUM:
@@ -219,7 +233,7 @@ mt_copro_register_type (struct gdbarch *arch, int regnum)
     default:
       if (regnum >= MT_CPR0_REGNUM && regnum <= MT_CPR15_REGNUM)
 	return builtin_type_int16;
-      else if (regnum == MT_CPR0_REGNUM + MT_COPRO_PSEUDOREG_REGS - 1)
+      else if (regnum == MT_CPR0_REGNUM + MT_COPRO_PSEUDOREG_MAC_REGNUM)
 	{
 	  if (gdbarch_bfd_arch_info (arch)->mach == bfd_mach_mrisc2
 	      || gdbarch_bfd_arch_info (arch)->mach == bfd_mach_ms2)
@@ -269,7 +283,7 @@ mt_register_type (struct gdbarch *arch, int regnum)
 	case MT_MAC_PSEUDOREG_REGNUM:
 	  return mt_copro_register_type (arch,
 					 MT_CPR0_REGNUM
-					 + MT_COPRO_PSEUDOREG_REGS - 1);
+					 + MT_COPRO_PSEUDOREG_MAC_REGNUM);
 	default:
 	  if (regnum >= MT_R0_REGNUM && regnum <= MT_R15_REGNUM)
 	    return builtin_type_int32;
@@ -530,9 +544,9 @@ mt_pseudo_register_read (struct gdbarch *gdbarch,
       {
 	unsigned index = mt_select_coprocessor (gdbarch, regcache, regno);
 	
-	if (index == MT_COPRO_PSEUDOREG_REGS - 1)
+	if (index == MT_COPRO_PSEUDOREG_MAC_REGNUM)
 	  mt_pseudo_register_read (gdbarch, regcache,
-				   MT_COPRO_PSEUDOREG_REGNUM, buf);
+				   MT_MAC_PSEUDOREG_REGNUM, buf);
 	else if (index < MT_NUM_REGS - MT_CPR0_REGNUM)
 	  regcache_raw_read (regcache, index + MT_CPR0_REGNUM, buf);
       }
@@ -584,9 +598,9 @@ mt_pseudo_register_write (struct gdbarch *gdbarch,
       {
 	unsigned index = mt_select_coprocessor (gdbarch, regcache, regno);
 	
-	if (index == MT_COPRO_PSEUDOREG_REGS - 1)
+	if (index == MT_COPRO_PSEUDOREG_MAC_REGNUM)
 	  mt_pseudo_register_write (gdbarch, regcache,
-				    MT_COPRO_PSEUDOREG_REGNUM, buf);
+				    MT_MAC_PSEUDOREG_REGNUM, buf);
 	else if (index < MT_NUM_REGS - MT_CPR0_REGNUM)
 	  regcache_raw_write (regcache, index + MT_CPR0_REGNUM, buf);
       }

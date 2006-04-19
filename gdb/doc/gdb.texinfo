@@ -12624,6 +12624,20 @@ packet.
 @item show remote get-thread-local-storage-address
 @kindex show remote get-thread-local-storage-address
 Show the current setting of @samp{qGetTLSAddr} packet usage.
+
+@item set remote load-offsets
+@kindex set remote load-offsets
+@cindex load offsets of remote targets
+This command enables or disables the use of the @samp{qOffsets}
+request packet.  This packet is used to find a relocated downloaded
+image.  @xref{General Query Packets, qOffsets}, for more details about
+this packet.  The default depends on the remote stub's support of this
+packet (@value{GDBN} queries the stub when this packet is first
+required).
+
+@item show remote load-offsets
+@kindex show remote load-offsets
+Show the current setting of @samp{qOffsets} packet usage.
 @end table
 
 @node remote stub
@@ -23266,6 +23280,59 @@ Returns information on @var{threadid}.  Where: @var{mode} is a hex
 encoded 32 bit mode; @var{threadid} is a hex encoded 64 bit thread ID.
 
 Reply: see @code{remote.c:remote_unpack_thread_info_response()}.
+
+@item qPacketInfo @r{[};@var{feature}@r{]}...
+@cindex supported packets, remote query
+@cindex @samp{qPacketInfo} packet
+Tell the remote target about features supported by @value{GDBN}, and
+query it for features it supports.
+
+No values of @var{feature} are defined yet.  Targets should ignore any
+unknown values for @var{feature}.  Any @value{GDBN} which sends a
+@samp{qPacketInfo} packet supports receiving packets of unlimited
+length.  Values for @var{feature} may be defined in the future to let
+the stub take advantage of new features in @value{GDBN}, e.g.@:
+incompatible improvements in the remote protocol.
+
+The reply is one or more feature responses, or empty if this packet is
+not supported.  Multiple feature responses are separated by semicolons,
+and individual feature responses may not include semicolons.  @value{GDBN}
+will silently ignore unrecognized feature responses, as long as the
+unrecognized response has one of the standard forms.  The standard forms
+are:
+
+@table @samp
+@item @var{name}=@var{value}
+Set a remote communication parameter to the specified value.
+@item @var{name}+
+The remote protocol packet @var{name} is supported.
+@item @var{name}-
+The remote protocol packet @var{name} is not supported.
+@end table
+
+Currently only one communication parameter is supported:
+
+@table @samp
+@item PacketSize=@var{bytes}
+The remote target can accept packets up to at least @var{bytes} in
+length.
+@end table
+
+The name of a packet which can be marked as supported or unsupported
+is the text of the packet in this documentation, up to but not
+including the first punctuation character or variable.  For example, a
+target which supports hardware watchpoints but not hardware
+breakpoints might report @samp{Z0-;Z1-;Z2+;Z3+;Z4+}.  An exception is
+made for @samp{qPart:@var{object}} packets; the name of the packet
+includes the @var{object}, but not the @var{annex}.  Individual
+@samp{qPart} packet types must be reported separately.
+
+Currently, all remote packets which are not mentioned in the response
+will be probed individually, just as if the @samp{qPacketInfo} command
+was not supported.  In the future, some new packets may be added to
+the remote protocol which will be assumed to be unsupported unless
+@samp{qPacketInfo} is supported and the new packet is reported in the
+@samp{qPacketInfo} response.
 
 @item qPart:@var{object}:read:@var{annex}:@var{offset},@var{length}
 @cindex read special object, remote request
