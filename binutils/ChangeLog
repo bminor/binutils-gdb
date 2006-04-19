@@ -1,5 +1,10 @@
 2006-04-19  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
+2006-04-19  Alan Modra  <amodra@bigpond.net.au>
+
 	* configure: Regenerate.
 
 2006-04-18  Nick Clifton  <nickc@redhat.com>

@@ -1,5 +1,10 @@
 2006-04-19  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
+2006-04-19  Alan Modra  <amodra@bigpond.net.au>
+
 	* warning.m4 (--enable-werror): Format help message.
 	(--enable-build-warnings): Likewise.
 	* configure: Regenerate.
