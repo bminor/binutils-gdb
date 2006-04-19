@@ -1,5 +1,7 @@
 2006-04-19  Alan Modra  <amodra@bigpond.net.au>
 
+	* avr-dis.c (avr_operand): Warning fix.
+
 	* configure: Regenerate.
 
 2006-04-16  Daniel Jacobowitz  <dan@codesourcery.com>
