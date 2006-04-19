@@ -1,3 +1,11 @@
+2006-04-19  Masaki Muranaka  <monaka@monami-software.com>
+
+	* m32r-rom.c: On MinGW, include winsock.h instead of sys/types.h,
+	netdb.h, netinet/in.h.
+	(m32r_upload_command); Add calls WSAStartup().
+	* remote-m32r-sdi.c: On MinGW, include winsock.h instead of
+	netinet/in.h.
+
 2006-04-18  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* breakpoint.c (deprecated_read_memory_nobpt): Update to use

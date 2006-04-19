@@ -31,7 +31,11 @@
 #include "gdb_string.h"
 #include <ctype.h>
 #include <signal.h>
+#ifdef __MINGW32__
+#include <winsock.h>
+#else
 #include <netinet/in.h>
+#endif
 #include <sys/types.h>
 #include <sys/time.h>
 #include <signal.h>
