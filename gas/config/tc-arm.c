@@ -2956,11 +2956,11 @@ bad:
   as_bad (_("expected <tag> , <value>"));
   ignore_rest_of_line ();
 }
+#endif /* OBJ_ELF */
 
 static void s_arm_arch (int);
 static void s_arm_cpu (int);
 static void s_arm_fpu (int);
-#endif /* OBJ_ELF */
 
 /* This table describes all the machine specific pseudo-ops the assembler
    has to support.  The fields are:
@@ -2985,6 +2985,9 @@ const pseudo_typeS md_pseudo_table[] =
   { "ltorg",	   s_ltorg,	  0 },
   { "pool",	   s_ltorg,	  0 },
   { "syntax",	   s_syntax,	  0 },
+  { "cpu",	   s_arm_cpu,	  0 },
+  { "arch",	   s_arm_arch,	  0 },
+  { "fpu",	   s_arm_fpu,	  0 },
 #ifdef OBJ_ELF
   { "word",	   s_arm_elf_cons, 4 },
   { "long",	   s_arm_elf_cons, 4 },
@@ -3000,9 +3003,6 @@ const pseudo_typeS md_pseudo_table[] =
   { "pad",		s_arm_unwind_pad,	0 },
   { "setfp",		s_arm_unwind_setfp,	0 },
   { "unwind_raw",	s_arm_unwind_raw,	0 },
-  { "cpu",		s_arm_cpu,		0 },
-  { "arch",		s_arm_arch,		0 },
-  { "fpu",		s_arm_fpu,		0 },
   { "eabi_attribute",	s_arm_eabi_attribute,	0 },
 #else
   { "word",	   cons, 4},
@@ -13909,6 +13909,7 @@ arm_md_end (void)
   p = frag_more (size);
   elf32_arm_set_eabi_attr_contents (stdoutput, (bfd_byte *)p, size);
 }
+#endif /* OBJ_ELF */
 
 
 /* Parse a .cpu directive.  */
@@ -14015,5 +14016,4 @@ s_arm_fpu (int ignored ATTRIBUTE_UNUSED)
   *input_line_pointer = saved_char;
   ignore_rest_of_line ();
 }
-#endif /* OBJ_ELF */
 

@@ -1,3 +1,10 @@
+2005-04-20  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/arch7.d: Remove skip.
+	* gas/arm/svc.d: Ditto.
+	* gas/arm/thumb2_bcond.d: Ditto.
+	* gas/arm/thumb2_it_bad.d: Ditto.
+
 2006-04-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/2533

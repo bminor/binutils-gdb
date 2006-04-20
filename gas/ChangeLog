@@ -1,3 +1,9 @@
+2005-04-20  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (s_arm_arch, s_arm_cpu, s_arm_fpu): Enable for
+	all targets.
+	(md_pseudo_table): Enable .arch, .cpu and .fpu for all targets.
+
 2006-04-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (CPU_TYPES): Add maxq and mt.  Sort.
