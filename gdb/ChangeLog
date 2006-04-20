@@ -1,3 +1,409 @@
+2006-04-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* m68klinux-tdep.c (m68k_linux_sigtramp_frame_prev_register):
+	Correct type of VALUEP.  Reported by Jean-Rene Peulve
+	<jr.peulve@wanadoo.fr>.
+
+2006-04-19  Masaki Muranaka  <monaka@monami-software.com>
+
+	* m32r-rom.c: On MinGW, include winsock.h instead of sys/types.h,
+	netdb.h, netinet/in.h.
+	(m32r_upload_command); Add calls WSAStartup().
+	* remote-m32r-sdi.c: On MinGW, include winsock.h instead of
+	netinet/in.h.
+
+2006-04-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* breakpoint.c (deprecated_read_memory_nobpt): Update to use
+	shadow_len.
+	(insert_bp_location, reattach_breakpoints, remove_breakpoint)
+	(delete_breakpoint): Update calls to changed methods.
+	(deprecated_insert_raw_breakpoint, deprecated_remove_raw_breakpoint)
+	(single_step_breakpoints, insert_single_step_breakpoint)
+	(remove_single_step_breakpoints): New.
+	* breakpoint.h (struct bp_target_info): New.
+	(struct bp_location): Replace shadow_contents with
+	target_info and overlay_target_info.
+	(deprecated_insert_raw_breakpoint, deprecated_remove_raw_breakpoint)
+	(insert_single_step_breakpoint, remove_single_step_breakpoints): New
+	prototypes.
+	* gdbarch.sh: Forward declare struct bp_target_info in gdbarch.h.
+	(memory_insert_breakpoint, memory_remove_breakpoint): Update second
+	argument.
+	* mem-break.c (default_memory_insert_breakpoint): Update.  Set
+	placed_address, placed_size, and shadow_len.
+	(default_memory_remove_breakpoint): Update.  Don't use
+	BREAKPOINT_FROM_PC.
+	(memory_insert_breakpoint, memory_remove_breakpoint): Update.
+	* target.c (update_current_target): Update prototypes for changed
+	functions.
+	(debug_to_insert_breakpoint, debug_to_remove_breakpoint)
+	(debug_to_insert_hw_breakpoint, debug_to_remove_hw_breakpoint):
+	Update.
+	* target.h: Forward declare struct bp_target_info.
+	(struct target_ops): Use a bp_target_info argument for
+	to_insert_breakpoint, to_remove_breakpoint,
+	to_insert_hw_breakpoint, and to_remove_hw_breakpoint.
+	(target_insert_breakpoint, target_remove_breakpoint)
+	(target_insert_hw_breakpoint, target_remove_hw_breakpoint)
+	(memory_insert_breakpoint, memory_remove_breakpoint)
+	(default_memory_insert_breakpoint, default_memory_remove_breakpoint):
+	Update.
+	* config/i386/nm-i386.h: Forward declare struct bp_target_info.
+	(i386_insert_hw_breakpoint, i386_remove_hw_breakpoint): Update.
+	(target_insert_hw_breakpoint, target_remove_hw_breakpoint): Likewise.
+
+	* gdbarch.c, gdbarch.h: Regenerated.
+
+	* alpha-tdep.c (alpha_software_single_step): Use
+	insert_single_step_breakpoint and remove_single_step_breakpoints.
+	Remove unused statics.
+	* arm-tdep.c (arm_software_single_step): Likewise.  Add a note.
+	* cris-tdep.c (cris_software_single_step): Likewise.
+	* mips-tdep.c (mips_software_single_step): Likewise.
+	* rs6000-tdep.c (rs6000_software_single_step): Likewise.
+	* sparc-tdep.c (sparc_software_single_step): Likewise.
+	* wince.c (struct thread_info_struct): Remove step_prev.
+	(undoSStep): Use remove_single_step_breakpoints.
+	(wince_software_single_step): Use insert_single_step_breakpoint.
+
+	* corelow.c (ignore): Remove unneeded prototype.  Update arguments.
+	* exec.c (ignore): Likewise.
+	* sol-thread.c (ignore): Likewise.
+
+	* procfs.c (dbx_link_shadow_contents): Delete.
+	(dbx_link_bpt): New.
+	(procfs_mourn_inferior): Remove it if necessary.
+	(remove_dbx_link_breakpoint): Use it.
+	(insert_dbx_link_bpt_in_file): Set it.
+	(procfs_init_inferior): Don't update dbx_link_bpt_addr.
+	* rs6000-nat.c (exec_one_dummy_insn): Use
+	deprecated_insert_raw_breakpoint and
+	deprecated_remove_raw_breakpoint.
+	* solib-irix.c (shadow_contents, breakpoint_addr): Delete.
+	(base_breakpoint): New.
+	(disable_break): Use it.
+	(enable_break): Set it.
+
+	* i386-nat.c (i386_insert_hw_breakpoint, i386_remove_hw_breakpoint):
+	Update.
+	* ia64-tdep.c (ia64_memory_insert_breakpoint)
+	(ia64_memory_remove_breakpoint): Likewise.
+	* m32r-tdep.c (m32r_memory_insert_breakpoint)
+	(m32r_memory_remove_breakpoint): Likewise.
+	* monitor.c (monitor_insert_breakpoint, monitor_remove_breakpoint):
+	Likewise.  Remove unnecessary prototypes.  Use placed_address
+	and placed_size.  Removed useless read from memory.
+	* nto-procfs.c (procfs_insert_breakpoint)
+	(procfs_remove_breakpoint, procfs_insert_hw_breakpoint)
+	(procfs_remove_hw_breakpoint): Update.
+	* ocd.c (ocd_insert_breakpoint, ocd_remove_breakpoint): Likewise.
+	* ocd.h (ocd_insert_breakpoint, ocd_remove_breakpoint): Likewise.
+	* ppc-linux-tdep.c (ppc_linux_memory_remove_breakpoint): Likewise.
+	* ppc-tdep.h (ppc_linux_memory_remove_breakpoint): Likewise.
+	* remote-e7000.c (e7000_insert_breakpoint)
+	(e7000_remove_breakpoint): Likewise.
+	* remote-m32r-sdi.c (m32r_insert_breakpoint)
+	(m32r_remove_breakpoint): Likewise.
+	* remote-mips.c (mips_insert_breakpoint)
+	(mips_remove_breakpoint): Likewise.
+	* remote-rdp.c (remote_rdp_insert_breakpoint)
+	(remote_rdp_remove_breakpoint): Likewise.
+	(rdp_step): Use deprecated_insert_raw_breakpoint and
+	deprecated_remove_raw_breakpoint.
+	* remote-sds.c (sds_insert_breakpoint, sds_remove_breakpoint):
+	Update.
+	* remote-sim.c (gdbsim_insert_breakpoint, gdbsim_remove_breakpoint):
+	Delete.
+	(init_gdbsim_ops): Use memory_insert_breakpoint and
+	memory_remove_breakpoint.
+	* remote-st.c (st2000_insert_breakpoint)
+	(st2000_remove_breakpoint): Update.  Remove unused
+	BREAKPOINT_FROM_PC.
+	* remote.c (remote_insert_breakpoint, remote_remove_breakpoint):
+	Update.  Use placed_address and placed_size.
+	(remote_insert_hw_breakpoint, remote_remove_hw_breakpoint): Likewise.
+
+2006-04-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c (extended_remote_restart): Pass the correct length
+	to getpkt.
+
+2006-04-11  Jim Blandy  <jimb@codesourcery.com>
+
+	* serial.c (serial_open): Check for special cases at the front of
+	the "device" name before scanning for the ':' that would indicate
+	an IP-based connection.
+
+2006-04-10  Christopher Faylor  <cgf@timesys.com>
+
+	* win32-nat.c (open_symbol_file_object): New function.
+	(in_dynsym_resolve_code): Ditto.
+	(init_win32_ops): Fill in fields which ought not to be NULL.
+
+2006-04-10  Christopher Faylor  <cgf@timesys.com>
+
+	* win32-nat.c (do_win32_fetch_inferior_registers): Don't do anything
+	with saved context if __COPY_CONTEXT_SIZE is not defined.
+	(handle_output_debug_string): Ditto.
+
+2006-04-10  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-linux-tdep.c (arm_linux_extract_return_value): Use gdb_byte.
+
+2006-04-09  David S. Miller  <davem@sunset.davemloft.net>
+
+	* sparc64-linux-tdep.c (sparc64_linux_init_abi): Append dwarf2
+	frame sniffer.
+	* sparc-tdep.c (sparc32_gdbarch_init): Make sure to call
+	dwarf2_frame_set_init_reg() before gdbarch_init_osabi() so
+	that the latter can override.
+	* Makefile.in (sparc64-linux-tdep.o): Update dependencies.
+
+2006-04-09  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* s390-tdep.c (struct s390_prologue_data): New field 'stack'.
+	(s390_store): Call pv_area_store to track stack slots.
+	(s390_load): Call pv_area_fetch to track stack slots.
+	(s390_check_for_saved): New function.
+	(s390_analyze_prologue): Call pv_area_scan.  Allocate and free stack.
+
+2006-04-09  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* Makefile.in (s390-tdep.o): Add dependency on $(prologue_value_h).
+	* s390-tdep.c: Include "prologue-value.h".
+	(struct prologue_value): Remove.
+	(pv_set_to_unknown, pv_set_to_constant, pv_set_to_register,
+	pv_constant_last, pv_add, pv_add_constant, pv_subtract,
+	pv_logical_and, pv_is_identical, pv_is_register): Remove.
+	(compute_x_addr): Remove, replace by ...
+	(s390_addr): ... this new function.
+	(struct s390_prologue_data): Use pv_t instead of prologue_value.
+	(s390_store, s390_load): Likewise.
+	(s390_prologue_frame_unwind_cache): Likewise.
+	(s390_analyze_prologue): Likewise.  Also, simplify and combine
+	several conditional statements.
+
+2006-04-08  Jim Blandy  <jimb@codesourcery.com>
+
+	* Makefile.in (COMMON_OBS): List prologue-value.o.  (Omitted from
+	last patch.)
+
+2006-04-08  David S. Miller  <davem@sunset.davemloft.net>
+
+	* sparc-linux-tdep.c (sparc32_linux_step_trap): New.
+	(sparc32_linux_init_abi): Hook it into tdep->step_trap.
+	(sparc32_linux_core_gregset,
+	sparc32_linux_supply_core_gregset,
+	sparc32_linux_collect_core_gregset,
+	sparc32_linux_supply_core_fpregset,
+	sparc32_linux_collect_core_fpregset): New.
+	(sparc32_linux_init_abi): Register them with generic sparc
+	core regset infrastructure.
+	* sparc64-linux-tdep.c (sparc64_linux_step_trap): New.
+	(sparc64_linux_init_abi): Hook it into tdep->step_trap.
+	(sparc64_linux_core_gregset,
+	sparc64_linux_supply_core_gregset,
+	sparc64_linux_collect_core_gregset,
+	sparc64_linux_supply_core_fpregset,
+	sparc64_linux_collect_core_fpregset): New.
+	(sparc64_linux_init_abi): Register them with generic sparc
+	core regset infrastructure.	
+	* Makefile.in: Update dependencies.
+
+2006-04-07  David S. Miller  <davem@sunset.davemloft.net>
+
+	* linux-nat.c (linux_nat_thread_alive): Handle targets that
+	do not implement PTRACE_PEEKUSER.
+
+2006-04-07  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c (remote_wait): Convert warning to error before
+	parsing corrupt packets.
+
+2006-04-07  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* cli/cli-script.c (struct user_args): Add command field.
+	(arg_cleanup): Free command string.
+	(setup_user_args): Copy the command line before relying on it.
+
+2006-04-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* breakpoint.c (_initialize_breakpoint): Add "del" as an alias
+	of the "delete" command.
+
+2006-04-06  Randolph Chung  <tausq@debian.org>
+
+	* MAINTAINERS (Patch champions): Add myself.
+
+2006-04-05  Andreas Schwab  <schwab@suse.de>
+
+	* Makefile.in: Update dependencies.
+
+2006-04-05  David S. Miller  <davem@sunset.davemloft.net>
+
+	* sparc-tdep.c (sparc32_dwarf2_frame_init_reg): New.
+	(sparc32_gdbarch_init): Pass it to dwarf2_frame_set_init_reg.
+	* Makefile.in (sparc-tdep.o): Update dependencies.
+	* sparc-linux-tdep.c (sparc32_linux_sigframe_init): Pull register
+	window out of the correct stack frame.
+	* sparc64-linux-tdep.c (sparc64_linux_sigframe_init): Likewise.
+	* dwarf2-frame.c (dwarf2_frame_ops init_reg): Add "next_frame"
+	argument.
+	(dwarf2_frame_default_init_reg): Likewise.
+	(dwarf2_frame_set_init_reg): Update init_reg arg.
+	(dwarf2_frame_init_reg): Take "next_frame" and pass it to
+	ops->init_reg().
+	(dwarf2_frame_cache): Pass next_frame to dwarf2_frame_init_reg.
+	* dwarf2-frame.h (dwarf2-frame_set_init_reg): Update declaration.
+	* cris-tdep.c (cris_dwarf2_frame_init_reg): Add next_frame arg.
+	* s390-tdep.c (s390_dwarf2_frame_init_reg): Likewise.
+	* sh-tdep.c (sh_dwarf2_frame_init_reg): Likewise.
+	* sparc64-tdep.c (sparc64_dwarf2_frame_init_reg): Likewise.
+	* sparc-tdep.c (sparc32_struct_return_from_sym): New function.
+	(sparc32_frame_cache): Call it.
+	(sparc32_dwarf2_struct_return_p): New function.
+	(sparc_dwarf2_frame_init_reg): Use it to determine if the function
+	returns a structure and thus we have to indicate the return PC and
+	NPC are 4 bytes later than usual.
+	* sparc-linux-tdep.c (sparc32_linux_init_abi): Append
+	dwarf2 frame sniffer.
+	* Makefile.in (sparc-linux-tdep.o): Update dependencies.
+	
+2006-04-04  David S. Miller  <davem@davemloft.net>
+
+	* config/linux.mh (NATDEPFILES): Remove sparc-sol2-nat.o
+	* config/linux64.h (NATDEPFILES): Likewise
+	* sparc-linux-nat.c (supply_gregset, supply_fpregset, fill_gregset,
+	fill_fpregset): New.
+	* sparc64-linux-nat.c (supply_gregset, supply_fpregset, fill_gregset,
+	fill_fpregset): New.
+	* Makefile.in (sparc-linux-nat.o, sparc64-linux-nat.o): Update for
+	new includes.
+	
+2006-04-04  Andreas Schwab  <schwab@suse.de>
+
+	* Makefile.in (elf_common_h): Define.
+
+2006-04-03  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* sh-tdep.c (sh_dwarf2_frame_init_reg): New function.
+	(sh_gdbarch_init): Call dwarf2_frame_set_init_reg().
+
+2006-03-31  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* value.h (struct internalvar): Add field 'endian'.
+	* value.c (lookup_internalvar): Initialise endian.
+	(value_of_internalvar): Flip the endian of built-in types if required.
+	(set_internalvar): Set the endian.
+	(show_convenience): Access the value through value_of_internalvar().
+
+2006-03-30  Vladimir Prus  <ghost@cs.msu.su>
+
+	* remote.c (watchpoint_to_Z_packet): Use values of Z_packet_type enum
+	instead of hardcoded integer literals.
+
+2006-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* cli/cli-script.c (insert_args): Handle NULL user_args.
+
+2006-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-tdep.c (thumb_scan_prologue): Don't try to analyze
+	the function at zero if we have no symbols.
+
+2006-03-30  Adrien Kunysz  <a_kunysz@yahoo.com>
+
+	* i386-stub.c (getpacket): Fix array overflow.
+	* m32r-stub.c (getpacket): Likewise.
+	* m68k-stub.c (getpacket): Likewise.
+	* sh-stub.c (getpacket): Likewise.
+	* sparc-stub.c (getpacket): Likewise.
+
+2006-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+ 
+	* frame.h (set_current_sal_from_frame): New prototype.
+	* stack.c (set_current_sal_from_frame): Make global.
+	* infrun.c (normal_stop): Call set_current_sal_from_frame.
+
+2006-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-thread-db.c: Include "linux-nat.h".
+	(check_for_thread_db): New function, split out from
+	thread_db_new_objfile.  Remove dead check for active
+	thread_db on inapplicable targets.
+	(thread_db_new_objfile): Call check_for_thread_db.
+	* Makefile.in (linux-thread-db.o): Update.
+	* linux-nat.c (child_post_attach): Call check_for_thread_db.
+	(linux_child_post_startup_inferior): Likewise.
+	(lin_lwp_attach_lwp): Call target_post_attach instead of
+	child_post_attach.
+	* linux-nat.h (check_for_thread_db): New prototype.
+
+2006-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c (struct remote_state): Add BUF and BUF_SIZE.
+	(init_remote_state): Initialize the new fields.
+	(get_memory_packet_size): Update BUF and BUF_SIZE if necessary.
+	(set_thread, remote_thread_alive, remote_unpack_thread_info_response)
+	(remote_get_threadinfo, parse_threadlist_response)
+	(remote_get_threadlist, remote_current_thread, remote_threads_info)
+	(remote_threads_extra_info, extended_remote_restart, get_offsets)
+	(remote_check_symbols, remote_open_1, remote_detach)
+	(remove_vcont_probe, remote_vcont_resume, remote_resume)
+	(remote_wait, remote_async_wait, fetch_register_using_p)
+	(remote_fetch_registers, store_register_using_P)
+	(remote_store_registers, check_binary_download, remote_write_bytes)
+	(remote_read_bytes, remote_insert_breakpoint)
+	(remote_remove_breakpoint, remote_insert_watchpoint)
+	(remote_remove_watchpoint, remote_insert_hw_breakpoint)
+	(remote_remove_hw_breakpoint, compare_sections_command)
+	(remote_xfer_partial, remote_rcmd, packet_command)
+	(remote_get_thread_local_address): Use the global incoming buffer
+	instead of alloca or xmalloc.  Limit outgoing packets to
+	rs->remote_packet_size and incoming packets to rs->buf_size.
+	Update calls to getpkt and remote_send.
+	(remote_send): Take arguments by reference.
+	(putpkt_binary): Eliminate junkbuf.  Use skip_frame.
+	(skip_frame): New function.
+	(read_frame): Take arguments by reference.  Expand the packet
+	buffer instead of issuing an error.
+	(getpkt, getpkt_sane): Take arguments by reference.
+	* remote.h (getpkt): Update prototype and doc.
+	* tracepoint.c (remote_get_noisy_reply): Take arguments by
+	reference.
+	(target_buf): Change from array to pointer.
+	(target_buf_size): New variable.
+	(remote_set_transparent_ranges): Update call to getpkt.
+	(trace_start_command, trace_stop_command, trace_status_command):
+	Update calls to remote_get_noisy_reply.
+	(finish_tfind_command): Take arguments by reference.
+	(trace_find_command, trace_find_pc_command)
+	(trace_find_tracepoint_command, trace_find_line_command):
+	(trace_find_range_command, trace_find_outside_command): Update
+	calls to finish_tfind_command.
+	(_initialize_tracepoint): Initialize target_buf_size and target_buf.
+
+2005-03-30  Randolph Chung  <tausq@debian.org>
+
+	* hppa-linux-tdep.c: Include regset.h.
+	(GR_REGNUM, TR_REGNUM, greg_map): New.
+	(hppa_linux_supply_regset, hppa_linux_supply_fpregset): New.
+	(hppa_linux_regset, hppa_linux_fpregset): New.
+	(hppa_linux_regset_from_core_section): New.
+	(hppa_linux_init_abi): Set regset_from_core_section.
+	(_initialize_hppa_linux_tdep): Register osabi handler for
+	64-bit Linux.
+	* Makefile.in (hppa-linux-tdep.o): Update dependencies.
+	* config/pa/linux.mh: Stop using core-regset.o
+
+2006-03-30  Randolph Chung  <tausq@debian.org>
+
+	* hppa-tdep.c (hppa_find_unwind_entry_in_block): New.
+	(hppa_frame_cache): Use new function to find unwind entry.
+	(hppa_frame_this_id): Likewise.
+	(hppa_frame_unwind_sniffer): Likewise.
+
 2006-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* NEWS: Mention the removal of NLM.

@@ -1,3 +1,23 @@
+2006-04-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdbint.texinfo (x86 Watchpoints, Target Conditionals): Update insert
+	and remove breakpoint prototypes.
+	(Watchpoints): Move description of target_insert_hw_breakpoint and
+	target_remove_hw_breakpoint ...
+	(Breakpoints): ... to here.  Document target_insert_breakpoint and
+	target_remove_breakpoint.
+
+2006-04-17  Jim Blandy  <jimb@codesourcery.com>
+
+	* gdb.texinfo (Packets): Note that 'addr' arguments to s, S, c,
+	and C packets are optional.
+
+2006-04-14  Frederic Riss  <frederic.riss@st.com>
+
+	* gdb.texinfo (Specifying source directories): Update the description
+	of the source file search to reflect the fact that the source path
+	always contains at least $cdir and $cwd.
+
 2006-03-31  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.texinfo: Update copyright dates.

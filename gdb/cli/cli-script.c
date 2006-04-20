@@ -54,6 +54,9 @@ static int control_level;
 struct user_args
   {
     struct user_args *next;
+    /* It is necessary to store a malloced copy of the command line to
+       ensure that the arguments are not overwritten before they are used.  */
+    char *command;
     struct
       {
 	char *arg;
@@ -483,6 +486,7 @@ arg_cleanup (void *ignore)
 		    _("arg_cleanup called with no user args.\n"));
 
   user_args = user_args->next;
+  xfree (oargs->command);
   xfree (oargs);
 }
 
@@ -506,6 +510,8 @@ setup_user_args (char *p)
 
   if (p == NULL)
     return old_chain;
+
+  user_args->command = p = xstrdup (p);
 
   while (*p)
     {
@@ -592,6 +598,11 @@ insert_args (char *line)
 {
   char *p, *save_line, *new_line;
   unsigned len, i;
+
+  /* If we are not in a user-defined function, treat $argc, $arg0, et
+     cetera as normal convenience variables.  */
+  if (user_args == NULL)
+    return xstrdup (line);
 
   /* First we need to know how much memory to allocate for the new line.  */
   save_line = line;

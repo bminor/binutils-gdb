@@ -3375,7 +3375,7 @@ static void remove_dbx_link_breakpoint (void);
    the address of the breakpoint, and the code that was replaced by
    a breakpoint.  */
 static int dbx_link_bpt_addr = 0;
-static char dbx_link_shadow_contents[BREAKPOINT_MAX];
+static void *dbx_link_bpt;
 
 /*
  * Function: procfs_debug_inferior
@@ -4777,6 +4777,14 @@ procfs_mourn_inferior (void)
 	destroy_procinfo (pi);
     }
   unpush_target (&procfs_ops);
+
+  if (dbx_link_bpt != NULL)
+    {
+      deprecated_remove_raw_breakpoint (dbx_link_bpt);
+      dbx_link_bpt_addr = 0;
+      dbx_link_bpt = NULL;
+    }
+
   generic_mourn_inferior ();
 }
 
@@ -4886,7 +4894,6 @@ procfs_init_inferior (int pid)
      has been inserted, the syssgi() notifications are no longer necessary,
      so they should be canceled.  */
   proc_trace_syscalls_1 (pi, SYS_syssgi, PR_SYSEXIT, FLAG_SET, 0);
-  dbx_link_bpt_addr = 0;
 #endif
 }
 
@@ -5571,11 +5578,11 @@ remove_dbx_link_breakpoint (void)
   if (dbx_link_bpt_addr == 0)
     return;
 
-  if (memory_remove_breakpoint (dbx_link_bpt_addr,
-                                dbx_link_shadow_contents) != 0)
+  if (deprecated_remove_raw_breakpoint (dbx_link_bpt) != 0)
     warning (_("Unable to remove __dbx_link breakpoint."));
 
   dbx_link_bpt_addr = 0;
+  dbx_link_bpt = NULL;
 }
 
 /* Return the address of the __dbx_link() function in the file
@@ -5643,7 +5650,8 @@ insert_dbx_link_bpt_in_file (int fd, CORE_ADDR ignored)
     {
       /* Insert the breakpoint.  */
       dbx_link_bpt_addr = sym_addr;
-      if (target_insert_breakpoint (sym_addr, dbx_link_shadow_contents) != 0)
+      dbx_link_bpt = deprecated_insert_raw_breakpoint (sym_addr);
+      if (dbx_link_bpt == NULL)
         {
           warning (_("Failed to insert dbx_link breakpoint."));
           bfd_close (abfd);

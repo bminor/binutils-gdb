@@ -24,11 +24,12 @@
 /* FIXME?: move this interface down to tgt vector) */
 
 /* Read a packet from the remote machine, with error checking, and
-   store it in BUF.  BUF is expected to be of size PBUFSIZ.  If
-   FOREVER, wait forever rather than timing out; this is used while
-   the target is executing user code.  */
+   store it in *BUF.  Resize *BUF using xrealloc if necessary to hold
+   the result, and update *SIZEOF_BUF.  If FOREVER, wait forever
+   rather than timing out; this is used (in synchronous mode) to wait
+   for a target that is is executing user code to stop.  */
 
-extern void getpkt (char *buf, long sizeof_buf, int forever);
+extern void getpkt (char **buf, long *sizeof_buf, int forever);
 
 /* Send a packet to the remote machine, with error checking.  The data
    of the packet is in BUF.  The string in BUF can be at most PBUFSIZ

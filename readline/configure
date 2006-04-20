@@ -849,6 +849,10 @@ if test -n "$ac_init_help"; then
 Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+<<<<<<< configure
+  --enable-shared         build shared libraries [default=NO]
+=======
+>>>>>>> 1.6
   --enable-static         build static libraries [default=YES]
 
 Optional Packages:

@@ -3044,6 +3044,12 @@ Further execution is probably impossible.\n"));
 
   target_terminal_ours ();
 
+  /* Set the current source location.  This will also happen if we
+     display the frame below, but the current SAL will be incorrect
+     during a user hook-stop function.  */
+  if (target_has_stack && !stop_stack_dummy)
+    set_current_sal_from_frame (get_current_frame (), 1);
+
   /* Look up the hook_stop and run it (CLI internally handles problem
      of stop_command's pre-hook not existing).  */
   if (stop_command)

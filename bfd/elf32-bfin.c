@@ -1284,8 +1284,8 @@ bfinfdpic_relocs_info_hash (const void *entry_)
   const struct bfinfdpic_relocs_info *entry = entry_;
 
   return (entry->symndx == -1
-	  ? entry->d.h->root.root.hash
-	  : entry->symndx + entry->d.abfd->id * 257) + entry->addend;
+	  ? (long) entry->d.h->root.root.hash
+	  : entry->symndx + (long) entry->d.abfd->id * 257) + entry->addend;
 }
 
 /* Test whether the key fields of two bfinfdpic_relocs_info entries are
@@ -3253,7 +3253,6 @@ _bfin_create_got_section (bfd *abfd, struct bfd_link_info *info)
   flagword flags, pltflags;
   asection *s;
   struct elf_link_hash_entry *h;
-  struct bfd_link_hash_entry *bh;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   int ptralign;
   int offset;
@@ -3342,23 +3341,6 @@ _bfin_create_got_section (bfd *abfd, struct bfd_link_info *info)
       offset = 2048;
       flags = BSF_GLOBAL | BSF_WEAK;
     }
-
-  /* Define _gp in .rofixup, for FDPIC, or .got otherwise.  If it
-     turns out that we're linking with a different linker script, the
-     linker script will override it.  */
-  bh = NULL;
-  if (!(_bfd_generic_link_add_one_symbol
-	(info, abfd, "_gp", flags, s, offset, (const char *) NULL, FALSE,
-	 bed->collect, &bh)))
-    return FALSE;
-  h = (struct elf_link_hash_entry *) bh;
-  h->def_regular = 1;
-  h->type = STT_OBJECT;
-  /* h->other = STV_HIDDEN; */ /* Should we?  */
-
-  /* Machine-specific: we want the symbol for executables as well.  */
-  if (IS_FDPIC (abfd) && ! bfd_elf_link_record_dynamic_symbol (info, h))
-    return FALSE;
 
   return TRUE;
 }

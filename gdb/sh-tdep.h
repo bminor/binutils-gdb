@@ -41,6 +41,7 @@ enum
     FPUL_REGNUM = 23,
     /* Floating point registers */
     FPSCR_REGNUM = 24,
+    FR0_REGNUM = 25,
     FLOAT_ARG0_REGNUM = 29,
     FLOAT_ARGLAST_REGNUM = 36,
     FP_LAST_REGNUM = 40,

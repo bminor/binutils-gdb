@@ -1250,8 +1250,8 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
 #ifdef MEMORY_INSERT_BREAKPOINT
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
-                      "MEMORY_INSERT_BREAKPOINT(addr, contents_cache)",
-                      XSTRING (MEMORY_INSERT_BREAKPOINT (addr, contents_cache)));
+                      "MEMORY_INSERT_BREAKPOINT(bp_tgt)",
+                      XSTRING (MEMORY_INSERT_BREAKPOINT (bp_tgt)));
 #endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: memory_insert_breakpoint = <0x%lx>\n",
@@ -1259,8 +1259,8 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
 #ifdef MEMORY_REMOVE_BREAKPOINT
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
-                      "MEMORY_REMOVE_BREAKPOINT(addr, contents_cache)",
-                      XSTRING (MEMORY_REMOVE_BREAKPOINT (addr, contents_cache)));
+                      "MEMORY_REMOVE_BREAKPOINT(bp_tgt)",
+                      XSTRING (MEMORY_REMOVE_BREAKPOINT (bp_tgt)));
 #endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: memory_remove_breakpoint = <0x%lx>\n",
@@ -2934,13 +2934,13 @@ set_gdbarch_adjust_breakpoint_address (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_memory_insert_breakpoint (struct gdbarch *gdbarch, CORE_ADDR addr, gdb_byte *contents_cache)
+gdbarch_memory_insert_breakpoint (struct gdbarch *gdbarch, struct bp_target_info *bp_tgt)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->memory_insert_breakpoint != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_memory_insert_breakpoint called\n");
-  return gdbarch->memory_insert_breakpoint (addr, contents_cache);
+  return gdbarch->memory_insert_breakpoint (bp_tgt);
 }
 
 void
@@ -2951,13 +2951,13 @@ set_gdbarch_memory_insert_breakpoint (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_memory_remove_breakpoint (struct gdbarch *gdbarch, CORE_ADDR addr, gdb_byte *contents_cache)
+gdbarch_memory_remove_breakpoint (struct gdbarch *gdbarch, struct bp_target_info *bp_tgt)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->memory_remove_breakpoint != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_memory_remove_breakpoint called\n");
-  return gdbarch->memory_remove_breakpoint (addr, contents_cache);
+  return gdbarch->memory_remove_breakpoint (bp_tgt);
 }
 
 void

@@ -192,6 +192,7 @@ patches; and ensure that contributors are given credit.
 
 Current patch champions (in alphabetical order):
 
+	Randolph Chung     <tausq@debian.org>
 	Daniel Jacobowitz  <dan@debian.org>
 
 

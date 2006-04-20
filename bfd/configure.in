@@ -8,7 +8,7 @@ AC_CONFIG_SRCDIR([libbfd.c])
 AC_CANONICAL_TARGET
 AC_ISC_POSIX
 
-AM_INIT_AUTOMAKE(bfd, 2.16.91)
+AM_INIT_AUTOMAKE(bfd, 2.17.50)
 
 dnl These must be called before AM_PROG_LIBTOOL, because it may want
 dnl to call AC_CHECK_PROG.
@@ -672,7 +672,8 @@ do
     bfd_elf32_shlin_vec)	tb="$tb elf32-sh.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
     bfd_elf32_shlnbsd_vec)	tb="$tb elf32-sh.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
     bfd_elf32_shnbsd_vec)	tb="$tb elf32-sh.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
-    bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.lo elfxx-sparc.lo elf32.lo $elf" ;;
+    bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.lo elfxx-sparc.lo elf-vxworks.lo elf32.lo $elf" ;;
+    bfd_elf32_sparc_vxworks_vec) tb="$tb elf32-sparc.lo elfxx-sparc.lo elf-vxworks.lo elf32.lo $elf" ;;
     bfd_elf32_tradbigmips_vec)  tb="$tb elf32-mips.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo" ;;
     bfd_elf32_tradlittlemips_vec) tb="$tb elf32-mips.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo" ;;
     bfd_elf32_us_cris_vec)	tb="$tb elf32-cris.lo elf32.lo $elf" ;;
@@ -703,7 +704,7 @@ do
     bfd_elf64_sh64blin_vec)	tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
     bfd_elf64_sh64lnbsd_vec)	tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
     bfd_elf64_sh64nbsd_vec)	tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
-    bfd_elf64_sparc_vec)	tb="$tb elf64-sparc.lo elfxx-sparc.lo elf64.lo $elf"; target_size=64 ;;
+    bfd_elf64_sparc_vec)	tb="$tb elf64-sparc.lo elfxx-sparc.lo elf-vxworks.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_tradbigmips_vec)	tb="$tb elf64-mips.lo elf64.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
     bfd_elf64_tradlittlemips_vec) tb="$tb elf64-mips.lo elf64.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
     bfd_elf64_x86_64_vec)	tb="$tb elf64-x86-64.lo elf64.lo $elf"; target_size=64 ;;
@@ -962,5 +963,11 @@ esac
 rm -f doc/config.status
 AC_CONFIG_FILES([Makefile doc/Makefile bfd-in3.h:bfd-in2.h po/Makefile.in:po/Make-in])
 AC_CONFIG_COMMANDS([default],[[sed -e '/SRC-POTFILES =/r po/SRC-POTFILES' -e '/BLD-POTFILES =/r po/BLD-POTFILES' po/Makefile.in > po/Makefile]],[[]])
+
+dnl Required by html and install-html
+AC_SUBST(datarootdir)
+AC_SUBST(docdir)
+AC_SUBST(htmldir)
+
 AC_OUTPUT
 

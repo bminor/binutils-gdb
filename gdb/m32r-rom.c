@@ -46,11 +46,15 @@
 /*
  * All this stuff just to get my host computer's IP address!
  */
+#ifdef __MINGW32__
+#include <winsock.h>
+#else
 #include <sys/types.h>
 #include <netdb.h>		/* for hostent */
 #include <netinet/in.h>		/* for struct in_addr */
 #if 1
 #include <arpa/inet.h>		/* for inet_ntoa */
+#endif
 #endif
 
 static char *board_addr;	/* user-settable IP address for M32R-EVA */
@@ -435,6 +439,13 @@ m32r_upload_command (char *args, int from_tty)
     }
   if (server_addr == 0)
     {
+#ifdef __MINGW32__
+      WSADATA wd;
+      /* Winsock initialization. */
+      if (WSAStartup (MAKEWORD (1, 1), &wd))
+	error (_("Couldn't initialize WINSOCK."));
+#endif
+
       buf[0] = 0;
       gethostname (buf, sizeof (buf));
       if (buf[0] != 0)

@@ -506,7 +506,8 @@ static struct gdbarch_data *dwarf2_frame_data;
 struct dwarf2_frame_ops
 {
   /* Pre-initialize the register state REG for register REGNUM.  */
-  void (*init_reg) (struct gdbarch *, int, struct dwarf2_frame_state_reg *);
+  void (*init_reg) (struct gdbarch *, int, struct dwarf2_frame_state_reg *,
+		    struct frame_info *);
 
   /* Check whether the frame preceding NEXT_FRAME will be a signal
      trampoline.  */
@@ -518,7 +519,8 @@ struct dwarf2_frame_ops
 
 static void
 dwarf2_frame_default_init_reg (struct gdbarch *gdbarch, int regnum,
-			       struct dwarf2_frame_state_reg *reg)
+			       struct dwarf2_frame_state_reg *reg,
+			       struct frame_info *next_frame)
 {
   /* If we have a register that acts as a program counter, mark it as
      a destination for the return address.  If we have a register that
@@ -570,7 +572,8 @@ dwarf2_frame_init (struct obstack *obstack)
 void
 dwarf2_frame_set_init_reg (struct gdbarch *gdbarch,
 			   void (*init_reg) (struct gdbarch *, int,
-					     struct dwarf2_frame_state_reg *))
+					     struct dwarf2_frame_state_reg *,
+					     struct frame_info *))
 {
   struct dwarf2_frame_ops *ops = gdbarch_data (gdbarch, dwarf2_frame_data);
 
@@ -581,11 +584,12 @@ dwarf2_frame_set_init_reg (struct gdbarch *gdbarch,
 
 static void
 dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
-		       struct dwarf2_frame_state_reg *reg)
+		       struct dwarf2_frame_state_reg *reg,
+		       struct frame_info *next_frame)
 {
   struct dwarf2_frame_ops *ops = gdbarch_data (gdbarch, dwarf2_frame_data);
 
-  ops->init_reg (gdbarch, regnum, reg);
+  ops->init_reg (gdbarch, regnum, reg, next_frame);
 }
 
 /* Set the architecture-specific signal trampoline recognition
@@ -713,7 +717,7 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
     int regnum;
 
     for (regnum = 0; regnum < num_regs; regnum++)
-      dwarf2_frame_init_reg (gdbarch, regnum, &cache->reg[regnum]);
+      dwarf2_frame_init_reg (gdbarch, regnum, &cache->reg[regnum], next_frame);
   }
 
   /* Go through the DWARF2 CFI generated table and save its register

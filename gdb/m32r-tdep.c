@@ -81,16 +81,20 @@ m32r_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
    The following functions take care of this behavior. */
 
 static int
-m32r_memory_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
+m32r_memory_insert_breakpoint (struct bp_target_info *bp_tgt)
 {
+  CORE_ADDR addr = bp_tgt->placed_address;
   int val;
   gdb_byte buf[4];
+  gdb_byte *contents_cache = bp_tgt->shadow_contents;
   gdb_byte bp_entry[] = { 0x10, 0xf1 };	/* dpt */
 
   /* Save the memory contents.  */
   val = target_read_memory (addr & 0xfffffffc, contents_cache, 4);
   if (val != 0)
     return val;			/* return error */
+
+  bp_tgt->placed_size = bp_tgt->shadow_len = 4;
 
   /* Determine appropriate breakpoint contents and size for this address.  */
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
@@ -134,10 +138,12 @@ m32r_memory_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
 }
 
 static int
-m32r_memory_remove_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
+m32r_memory_remove_breakpoint (struct bp_target_info *bp_tgt)
 {
+  CORE_ADDR addr = bp_tgt->placed_address;
   int val;
   gdb_byte buf[4];
+  gdb_byte *contents_cache = bp_tgt->shadow_contents;
 
   buf[0] = contents_cache[0];
   buf[1] = contents_cache[1];

@@ -457,9 +457,9 @@ ppc_linux_skip_trampoline_code (CORE_ADDR pc)
    regard to removing breakpoints in some potentially self modifying
    code.  */
 int
-ppc_linux_memory_remove_breakpoint (CORE_ADDR addr,
-				    gdb_byte *contents_cache)
+ppc_linux_memory_remove_breakpoint (struct bp_target_info *bp_tgt)
 {
+  CORE_ADDR addr = bp_tgt->placed_address;
   const unsigned char *bp;
   int val;
   int bplen;
@@ -476,7 +476,7 @@ ppc_linux_memory_remove_breakpoint (CORE_ADDR addr,
      program modified the code on us, so it is wrong to put back the
      old value */
   if (val == 0 && memcmp (bp, old_contents, bplen) == 0)
-    val = target_write_memory (addr, contents_cache, bplen);
+    val = target_write_memory (addr, bp_tgt->shadow_contents, bplen);
 
   return val;
 }

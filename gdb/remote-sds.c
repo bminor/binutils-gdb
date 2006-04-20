@@ -99,10 +99,6 @@ static void interrupt_query (void);
 
 static int read_frame (char *);
 
-static int sds_insert_breakpoint (CORE_ADDR, char *);
-
-static int sds_remove_breakpoint (CORE_ADDR, char *);
-
 static void init_sds_ops (void);
 
 static void sds_command (char *args, int from_tty);
@@ -1004,8 +1000,9 @@ sds_load (char *filename, int from_tty)
    replaced instruction back to the debugger.  */
 
 static int
-sds_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
+sds_insert_breakpoint (struct bp_target_info *bp_tgt)
 {
+  CORE_ADDR addr = bp_tgt->placed_address;
   int i, retlen;
   unsigned char *p, buf[PBUFSIZ];
 
@@ -1020,14 +1017,15 @@ sds_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
   retlen = sds_send (buf, p - buf);
 
   for (i = 0; i < 4; ++i)
-    contents_cache[i] = buf[i + 2];
+    bp_tgt->shadow_contents[i] = buf[i + 2];
 
   return 0;
 }
 
 static int
-sds_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
+sds_remove_breakpoint (struct bp_target_info *bp_tgt)
 {
+  CORE_ADDR addr = bp_tgt->placed_address;
   int i, retlen;
   unsigned char *p, buf[PBUFSIZ];
 
@@ -1039,7 +1037,7 @@ sds_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
   *p++ = (int) (addr >> 8) & 0xff;
   *p++ = (int) (addr) & 0xff;
   for (i = 0; i < 4; ++i)
-    *p++ = contents_cache[i];
+    *p++ = bp_tgt->shadow_contents[i];
 
   retlen = sds_send (buf, p - buf);
 

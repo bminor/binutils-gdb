@@ -22,6 +22,7 @@
 #include "defs.h"
 #include "arch-utils.h"
 #include "dis-asm.h"
+#include "dwarf2-frame.h"
 #include "floatformat.h"
 #include "frame.h"
 #include "frame-base.h"
@@ -679,6 +680,23 @@ sparc_frame_cache (struct frame_info *next_frame, void **this_cache)
   return cache;
 }
 
+static int
+sparc32_struct_return_from_sym (struct symbol *sym)
+{
+  struct type *type = check_typedef (SYMBOL_TYPE (sym));
+  enum type_code code = TYPE_CODE (type);
+
+  if (code == TYPE_CODE_FUNC || code == TYPE_CODE_METHOD)
+    {
+      type = check_typedef (TYPE_TARGET_TYPE (type));
+      if (sparc_structure_or_union_p (type)
+	  || (sparc_floating_p (type) && TYPE_LENGTH (type) == 16))
+	return 1;
+    }
+
+  return 0;
+}
+
 struct sparc_frame_cache *
 sparc32_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
@@ -693,16 +711,7 @@ sparc32_frame_cache (struct frame_info *next_frame, void **this_cache)
   sym = find_pc_function (cache->pc);
   if (sym)
     {
-      struct type *type = check_typedef (SYMBOL_TYPE (sym));
-      enum type_code code = TYPE_CODE (type);
-
-      if (code == TYPE_CODE_FUNC || code == TYPE_CODE_METHOD)
-	{
-	  type = check_typedef (TYPE_TARGET_TYPE (type));
-	  if (sparc_structure_or_union_p (type)
-	      || (sparc_floating_p (type) && TYPE_LENGTH (type) == 16))
-	    cache->struct_return_p = 1;
-	}
+      cache->struct_return_p = sparc32_struct_return_from_sym (sym);
     }
   else
     {
@@ -994,6 +1003,48 @@ sparc32_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
 	  || (sparc_floating_p (type) && TYPE_LENGTH (type) == 16));
 }
 
+static int
+sparc32_dwarf2_struct_return_p (struct frame_info *next_frame)
+{
+  CORE_ADDR pc = frame_unwind_address_in_block (next_frame);
+  struct symbol *sym = find_pc_function (pc);
+
+  if (sym)
+    return sparc32_struct_return_from_sym (sym);
+  return 0;
+}
+
+static void
+sparc32_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
+			       struct dwarf2_frame_state_reg *reg,
+			       struct frame_info *next_frame)
+{
+  int off;
+
+  switch (regnum)
+    {
+    case SPARC_G0_REGNUM:
+      /* Since %g0 is always zero, there is no point in saving it, and
+	 people will be inclined omit it from the CFI.  Make sure we
+	 don't warn about that.  */
+      reg->how = DWARF2_FRAME_REG_SAME_VALUE;
+      break;
+    case SPARC_SP_REGNUM:
+      reg->how = DWARF2_FRAME_REG_CFA;
+      break;
+    case SPARC32_PC_REGNUM:
+    case SPARC32_NPC_REGNUM:
+      reg->how = DWARF2_FRAME_REG_RA_OFFSET;
+      off = 8;
+      if (sparc32_dwarf2_struct_return_p (next_frame))
+	off += 4;
+      if (regnum == SPARC32_NPC_REGNUM)
+	off += 4;
+      reg->loc.offset = off;
+      break;
+    }
+}
+
 
 /* The SPARC Architecture doesn't have hardware single-step support,
    and most operating systems don't implement it either, so we provide
@@ -1085,8 +1136,7 @@ sparc_software_single_step (enum target_signal sig, int insert_breakpoints_p)
 {
   struct gdbarch *arch = current_gdbarch;
   struct gdbarch_tdep *tdep = gdbarch_tdep (arch);
-  static CORE_ADDR npc, nnpc;
-  static gdb_byte npc_save[4], nnpc_save[4];
+  CORE_ADDR npc, nnpc;
 
   if (insert_breakpoints_p)
     {
@@ -1098,9 +1148,10 @@ sparc_software_single_step (enum target_signal sig, int insert_breakpoints_p)
       /* Analyze the instruction at PC.  */
       nnpc = sparc_analyze_control_transfer (arch, pc, &npc);
       if (npc != 0)
-	target_insert_breakpoint (npc, npc_save);
+	insert_single_step_breakpoint (npc);
+
       if (nnpc != 0)
-	target_insert_breakpoint (nnpc, nnpc_save);
+	insert_single_step_breakpoint (nnpc);
 
       /* Assert that we have set at least one breakpoint, and that
 	 they're not set at the same spot - unless we're going
@@ -1109,12 +1160,7 @@ sparc_software_single_step (enum target_signal sig, int insert_breakpoints_p)
       gdb_assert (nnpc != npc || orig_npc == 0);
     }
   else
-    {
-      if (npc != 0)
-	target_remove_breakpoint (npc, npc_save);
-      if (nnpc != 0)
-	target_remove_breakpoint (nnpc, nnpc_save);
-    }
+    remove_single_step_breakpoints ();
 }
 
 static void
@@ -1244,6 +1290,11 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_unwind_pc (gdbarch, sparc_unwind_pc);
 
   frame_base_set_default (gdbarch, &sparc32_frame_base);
+
+  /* Hook in the DWARF CFI frame unwinder.  */
+  dwarf2_frame_set_init_reg (gdbarch, sparc32_dwarf2_frame_init_reg);
+  /* FIXME: kettenis/20050423: Don't enable the unwinder until the
+     StackGhost issues have been resolved.  */
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);

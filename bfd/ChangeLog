@@ -1,3 +1,175 @@
+2006-04-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
+2006-04-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* warning.m4 (--enable-werror): Format help message.
+	(--enable-build-warnings): Likewise.
+	* configure: Regenerate.
+
+2006-04-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 2257
+	* elfcode.h (elf_object_p): Allow files with corrupt e_shstrndx
+	fields to still be handled as ELF files.
+
+2006-04-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* po/SRC-POTFILES.in: Regenerated.
+
+2006-04-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* configure.in: Update version to 2.17.50.
+	* configure: Regenerated.
+
+2006-04-14  David Heine  <dlheine@tensilica.com>
+
+	* elf32-xtensa.c (build_reloc_opcodes): New.
+	(compute_text_actions): Use it to decode opcodes outside inner loop.
+	(check_section_ebb_pcrels_fit): Add "reloc_opcodes" argument, and if
+	it is set, use it to get the opcodes for relocations.
+	(move_shared_literal): Adjust call to check_section_ebb_pcrels_fit.
+
+2006-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/2513
+	* elf32-i386.c (GOT_TLS_MASK): New macro for tls_type.
+	(GOT_TLS_IE_IE): Likewise.
+	(GOT_TLS_IE_GD): Likewise.
+	(GOT_TLS_IE_MASK): Likewise.
+	(elf_i386_check_relocs): For global symbols, set GOT_TLS_IE_GD
+	and GOT_TLS_IE_IE for R_386_TLS_GD and R_386_TLS_IE
+	respectively.
+	(allocate_dynrelocs): If both GOT_TLS_IE_IE and GOT_TLS_IE_GD
+	are set, treat tls_type as GOT_TLS_IE_BOTH.
+	(elf_i386_relocate_section): Likewise.
+
+2006-04-07  Randolph Chung  <tausq@debian.org>
+
+	* elf64-hppa.c (elf64_hppa_grok_prstatus): New function.
+	(elf64_hppa_grok_psinfo): Likewise.
+	(elf_backend_grok_pstatus, elf_backend_grok_psinfo): Define.
+
+2006-04-06  DJ Delorie  <dj@redhat.com>
+
+	* elf32-m32c.c (m32c_elf_relocate_section): Generate a symbol for
+	each plt entry we create.
+
+2006-04-06  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* po/Make-in: Add install-html target.
+	* Makefile.am: Rename docdir to bfddocdir. Add datarootdir, docdir
+	htmldir. Add install-html and install-html-recursive targets.
+	* Makefile.in: Regenerate.
+	* configure.in: AC_SUBST for datarootdir, docdir and htmldir.
+	* configure: Regenerate.
+
+2006-04-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Skip unneeded passes
+	with the skip_relax_pass_0 and skip_relax_pass_1 bits in the
+	section structure.
+
+2006-04-05  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* elf32-bfin.c (bfinfdpic_relocs_info_hash): Sprinkle casts to
+	eliminate warnings.
+
+2006-04-05  H.J. Lu  <hongjiu.lu@intel.com>
+	    James E Wilson  <wilson@specifixinc.com>
+
+	PR ld/2442
+	* elfxx-ia64.c (elfNN_ia64_dyn_sym_info): Remove next.
+	(elfNN_ia64_local_hash_entry): Add count, sorted_count and
+	size.
+	(elfNN_ia64_link_hash_entry): Likewise.
+	(elfNN_ia64_new_elf_hash_entry): Initialize count, sorted_count
+	and size.
+	(elfNN_ia64_hash_copy_indirect): Updated elfNN_ia64_dyn_sym_info
+	processing.
+	(elfNN_ia64_hash_hide_symbol): Likewise.
+	(elfNN_ia64_global_dyn_sym_thunk): Likewise.
+	(elfNN_ia64_local_dyn_sym_thunk): Likewise.
+	(elfNN_ia64_global_dyn_info_free): New function.
+	(elfNN_ia64_local_dyn_info_free): Likewise.
+	(elfNN_ia64_hash_table_free): Free local and global
+	elfNN_ia64_dyn_sym_info.
+	(addend_compare): New function.
+	(sort_dyn_sym_info): Likewise.
+	(get_dyn_sym_info): Updated to use binary search for addend.
+	(elfNN_ia64_check_relocs): Scan relocations to create dynamic
+	relocation arrays first.
+
+2006-04-05  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* elf32-bfin.c (_bfin_create_got_section): Don't generate a _gp
+	symbol.
+
+2006-04-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/2411
+	* elflink.c (check_dynsym): New.
+	(elf_link_output_extsym): Use it.
+	(bfd_elf_final_link): Likewise.
+
+2006-04-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/2404
+	* elflink.c (_bfd_elf_merge_symbol): Skip the default indirect
+	symbol from the dynamic definition with the default version if
+	its type and the type of existing regular definition mismatch.
+
+2006-04-05  Richard Sandiford  <richard@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* config.bfd (sparc-*-vxworks*): New stanza.
+	* configure.in (bfd_elf32_sparc_vxworks_vec): New stanza.
+	(bfd_elf32_sparc_vec, bfd_elf64_sparc_vec): Add elf-vxworks.lo.
+	* configure: Regenerate.
+	* elf32-sparc.c: Include elf-vxworks.h.
+	(elf32_sparc_vxworks_link_hash_table_create: New.
+	(elf32_sparc_vxworks_final_write_processing): New.
+	(TARGET_BIG_SYM): Override for VxWorks.
+	(TARGET_BIG_NAME, ELF_MINPAGESIZE): Likewise.
+	(bfd_elf32_bfd_link_hash_table_create): Likewise.
+	(elf_backend_want_got_plt, elf_backend_plt_readonly): Likewise.
+	(elf_backend_got_header_size, elf_backend_add_symbol_hook): Likewise.
+	(elf_backend_link_output_symbol_hook): Likewise.
+	(elf_backend_emit_relocs): Likewise.
+	(elf_backend_final_write_processing, elf32_bed): Likewise.
+	* elfxx-sparc.c: Include libiberty.h and elf-vxworks.h.
+	(sparc_vxworks_exec_plt0_entry, sparc_vxworks_exec_plt_entry): New.
+	(sparc_vxworks_shared_plt0_entry, sparc_vxworks_shared_plt_entry): New.
+	(_bfd_sparc_elf_link_hash_table_create): Don't initialize
+	build_plt_entry here.
+	(create_got_section): Initialize sgotplt for VxWorks.
+	(_bfd_sparc_elf_create_dynamic_sections): Initialize build_plt_entry,
+	plt_header_size and plt_entry_size, with new VxWorks-specific settings.
+	Call elf_vxworks_create_dynamic_sections for VxWorks.
+	(allocate_dynrelocs): Use plt_header_size and plt_entry_size.
+	Allocate room for .got.plt and .rela.plt.unloaded entries on VxWorks.
+	(_bfd_sparc_elf_size_dynamic_sections): Don't allocate a nop in .plt
+	for VxWorks.  Check for the .got.plt section.
+	(sparc_vxworks_build_plt_entry): New function.
+	(_bfd_sparc_elf_finish_dynamic_symbol): Add handling of VxWorks PLTs.
+	Don't make _GLOBAL_OFFSET_TABLE_ and _PROCEDURE_LINKAGE_TABLE_
+	absolute on VxWorks.
+	(sparc32_finish_dyn): Add special handling for DT_RELASZ
+	and DT_PLTGOT on VxWorks.
+	(sparc_vxworks_finish_exec_plt): New.
+	(sparc_vxworks_finish_shared_plt): New.
+	(_bfd_sparc_elf_finish_dynamic_sections): Call them.
+	Use plt_header_size and plt_entry_size.
+	* elfxx-sparc.h (_bfd_sparc_elf_link_hash_table): Add is_vxworks,
+	srelplt2, sgotplt, plt_header_size and plt_entry_size fields.
+	* Makefile.am (elfxx-sparc.lo): Depend on elf-vxworks.h.
+	(elf32-sparc.lo): Likewise.
+	* Makefile.in: Regenerate.
+	* targets.c (bfd_elf32_sparc_vxworks_vec): Declare.
+	(_bfd_target_vector): Add a pointer to it.
+
 2006-03-30  Ben Elliston  <bje@au.ibm.com>
 
 	PR ld/2267
@@ -405,8 +577,7 @@
 2006-03-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/2443
-	* dwarf2.c (concat_filename): Don't issue an error if file is
-	0.
+	* dwarf2.c (concat_filename): Don't issue an error if file is 0.
 
 2006-03-10  Paul Brook  <paul@codesourcery.com>
 

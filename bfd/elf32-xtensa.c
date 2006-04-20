@@ -5766,7 +5766,8 @@ static bfd_boolean compute_text_actions
 static bfd_boolean compute_ebb_proposed_actions (ebb_constraint *);
 static bfd_boolean compute_ebb_actions (ebb_constraint *);
 static bfd_boolean check_section_ebb_pcrels_fit
-  (bfd *, asection *, bfd_byte *, Elf_Internal_Rela *, const ebb_constraint *);
+  (bfd *, asection *, bfd_byte *, Elf_Internal_Rela *, const ebb_constraint *,
+   const xtensa_opcode *);
 static bfd_boolean check_section_ebb_reduces (const ebb_constraint *);
 static void text_action_add_proposed
   (text_action_list *, const ebb_constraint *, asection *);
@@ -6302,6 +6303,24 @@ find_associated_l32r_irel (bfd *abfd,
 }
 
 
+static xtensa_opcode *
+build_reloc_opcodes (bfd *abfd,
+		     asection *sec,
+		     bfd_byte *contents,
+		     Elf_Internal_Rela *internal_relocs)
+{
+  unsigned i;
+  xtensa_opcode *reloc_opcodes =
+    (xtensa_opcode *) bfd_malloc (sizeof (xtensa_opcode) * sec->reloc_count);
+  for (i = 0; i < sec->reloc_count; i++)
+    {
+      Elf_Internal_Rela *irel = &internal_relocs[i];
+      reloc_opcodes[i] = get_relocation_opcode (abfd, sec, contents, irel);
+    }
+  return reloc_opcodes;
+}
+
+
 /* The compute_text_actions function will build a list of potential
    transformation actions for code in the extended basic block of each
    longcall that is optimized to a direct call.  From this list we
@@ -6318,6 +6337,7 @@ compute_text_actions (bfd *abfd,
 		      asection *sec,
 		      struct bfd_link_info *link_info)
 {
+  xtensa_opcode *reloc_opcodes = NULL;
   xtensa_relax_info *relax_info;
   bfd_byte *contents;
   Elf_Internal_Rela *internal_relocs;
@@ -6423,11 +6443,17 @@ compute_text_actions (bfd *abfd,
       ebb->start_reloc_idx = i;
       ebb->end_reloc_idx = i;
 
+      /* Precompute the opcode for each relocation.  */
+      if (reloc_opcodes == NULL)
+	reloc_opcodes = build_reloc_opcodes (abfd, sec, contents,
+					     internal_relocs);
+
       if (!extend_ebb_bounds (ebb)
 	  || !compute_ebb_proposed_actions (&ebb_table)
 	  || !compute_ebb_actions (&ebb_table)
 	  || !check_section_ebb_pcrels_fit (abfd, sec, contents,
-					    internal_relocs, &ebb_table)
+					    internal_relocs, &ebb_table,
+					    reloc_opcodes)
 	  || !check_section_ebb_reduces (&ebb_table))
 	{
 	  /* If anything goes wrong or we get unlucky and something does
@@ -6459,6 +6485,8 @@ error_return:
   release_internal_relocs (sec, internal_relocs);
   if (prop_table)
     free (prop_table);
+  if (reloc_opcodes)
+    free (reloc_opcodes);
 
   return ok;
 }
@@ -7026,7 +7054,8 @@ check_section_ebb_pcrels_fit (bfd *abfd,
 			      asection *sec,
 			      bfd_byte *contents,
 			      Elf_Internal_Rela *internal_relocs,
-			      const ebb_constraint *constraint)
+			      const ebb_constraint *constraint,
+			      const xtensa_opcode *reloc_opcodes)
 {
   unsigned i, j;
   Elf_Internal_Rela *irel;
@@ -7117,7 +7146,10 @@ check_section_ebb_pcrels_fit (bfd *abfd,
 	  xtensa_opcode opcode;
 	  int opnum;
 
-	  opcode = get_relocation_opcode (abfd, sec, contents, irel);
+	  if (reloc_opcodes)
+	    opcode = reloc_opcodes[i];
+	  else
+	    opcode = get_relocation_opcode (abfd, sec, contents, irel);
 	  if (opcode == XTENSA_UNDEFINED)
 	    {
 	      ok = FALSE;
@@ -7814,7 +7846,7 @@ move_shared_literal (asection *sec,
   relocs_fit = check_section_ebb_pcrels_fit (target_sec->owner, target_sec, 
 					     target_sec_cache->contents,
 					     target_sec_cache->relocs,
-					     &ebb_table);
+					     &ebb_table, NULL);
 
   if (!relocs_fit) 
     return FALSE;

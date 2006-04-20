@@ -1048,28 +1048,27 @@ ocd_load (char *args, int from_tty)
 /* BDM (at least on CPU32) uses a different breakpoint */
 
 int
-ocd_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
+ocd_insert_breakpoint (struct bp_target_info *bp_tgt)
 {
   static char break_insn[] = BDM_BREAKPOINT;
   int val;
 
-  val = target_read_memory (addr, contents_cache, sizeof (break_insn));
+  bp_tgt->placed_size = bp_tgt->shadow_len = sizeof (break_insn);
+  val = target_read_memory (bp_tgt->placed_address, bp_tgt->shadow_contents,
+			    bp_tgt->placed_size);
 
   if (val == 0)
-    val = target_write_memory (addr, break_insn, sizeof (break_insn));
+    val = target_write_memory (bp_tgt->placed_address, break_insn,
+			       bp_tgt->placed_size);
 
   return val;
 }
 
 int
-ocd_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
+ocd_remove_breakpoint (struct bp_target_info *bp_tgt)
 {
-  static char break_insn[] = BDM_BREAKPOINT;
-  int val;
-
-  val = target_write_memory (addr, contents_cache, sizeof (break_insn));
-
-  return val;
+  return target_write_memory (bp_tgt->placed_address, bp_tgt->shadow_contents,
+			      bp_tgt->placed_size);
 }
 
 static void
