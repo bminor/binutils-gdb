@@ -73,6 +73,9 @@ switch -glob -- [istarget] {
     "m32r*-linux*" {
         set asm-arch m32r-linux
     }
+    "m32c-*-*" {
+        set asm-arch m32c
+    }
     "m32r*-*" {
         set asm-arch m32r
         append link-flags "--whole-archive -lgloss --no-whole-archive"

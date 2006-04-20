@@ -1,3 +1,11 @@
+2006-04-20  Michael Snyder  <msnyder@redhat.com>
+
+	* 2006-03-22  Jim Blandy  <jimb@redhat.com>
+	Add support for the Renesas M32C and M16C.
+
+	* gdb.asm/asm-source.exp: Add m32c target.
+	* gdb.asm/m32c.inc: Support for m32c target.
+
 2006-04-07  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* gdb.base/commands.exp (recursive_source_test): New test.
