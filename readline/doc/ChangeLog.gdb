@@ -13,6 +13,10 @@
 
 2000-07-09  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
+        * Removed generated files rluserman.{dvi, info, html, ps}.
+
+2000-07-07  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
         * Import of readline 4.1.
 
         Regenerated inc-hist.texinfo as copy of hsuser.texinfo, for

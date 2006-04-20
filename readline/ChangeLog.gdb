@@ -266,12 +266,17 @@
 	(insert_some_chars) [__MSDOS__]: Don't call tputs.
 	(delete_chars) [__MSDOS__]: Don't call tputs.
 
-2000-07-09  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+2000-07-08  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+        * readline/readline.h: Ifdef out the export of savestring().
+        It should not have been in the distribution.
+
+2000-07-07  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
         * Import of readline 4.1.
 
         Locally modified files: Makefile.in, configure.in, configure
-        (regenerated), config.h.in (regenerated), readline.h, rltty.c,
+        (regenerated), config.h.in (regenerated), rltty.c,
  	shell.c signals.c.
 
         Locally added files: acconfig.h, config/*, config.h.bot,
