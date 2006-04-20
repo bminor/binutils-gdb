@@ -1,6 +1,6 @@
 <HTML>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<!-- Created on June, 27  2002 by texi2html 1.64 -->
+<!-- Created on December, 6  2005 by texi2html 1.64 -->
 <!-- 
 Written by: Lionel Cons <Lionel.Cons@cern.ch> (original author)
             Karl Berry  <karl@freefriends.org>
@@ -34,11 +34,12 @@ Send bugs and suggestions to <texi2html@mathematik.uni-kl.de>
 
 This document describes the end user interface of the GNU Readline Library,
 a utility which aids in the consistency of user interface across discrete
-programs that need to provide a command line interface.
+programs which provide a command line interface.
 </P><P>
 
 <BLOCKQUOTE><TABLE BORDER=0 CELLSPACING=0> 
 <TR><TD ALIGN="left" VALIGN="TOP"><A HREF="rluserman.html#SEC1">1. Command Line Editing</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP">GNU Readline User's Manual.</TD></TR>
+<TR><TD ALIGN="left" VALIGN="TOP"><A HREF="rluserman.html#SEC23">A. Copying This Manual</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP"></TD></TR>
 </TABLE></BLOCKQUOTE>
 <P>
 
@@ -49,7 +50,7 @@ programs that need to provide a command line interface.
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC2"> &gt; </A>]</TD>
 <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[ &lt;&lt; ]</TD>
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC_Top"> Up </A>]</TD>
-<TD VALIGN="MIDDLE" ALIGN="LEFT">[ &gt;&gt; ]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC23"> &gt;&gt; </A>]</TD>
 <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC_Top">Top</A>]</TD>
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC_Contents">Contents</A>]</TD>
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
@@ -83,7 +84,7 @@ command line editing interface.
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC3"> &gt; </A>]</TD>
 <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[ &lt;&lt; ]</TD>
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC1"> Up </A>]</TD>
-<TD VALIGN="MIDDLE" ALIGN="LEFT">[ &gt;&gt; ]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC23"> &gt;&gt; </A>]</TD>
 <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC_Top">Top</A>]</TD>
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC_Contents">Contents</A>]</TD>
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
@@ -558,7 +559,12 @@ change from the default Emacs-like key binding to use
 </pre></td></tr></table></P><P>
 
 Variable names and values, where appropriate, are recognized without regard
-to case. 
+to case.  Unrecognized variable names are ignored.
+</P><P>
+
+Boolean variables (those that can be set to on or off) are set to on if
+the value is null or empty, <VAR>on</VAR> (case-insensitive), or 1.  Any other
+value results in the variable being set to off.
 </P><P>
 
 A great deal of run-time behavior is changeable with the following
@@ -577,8 +583,15 @@ If set to <SAMP>`audible'</SAMP> (the default), Readline attempts to ring
 the terminal's bell.
 <P>
 
-<DT><CODE>comment-begin</CODE>
+<DT><CODE>bind-tty-special-chars</CODE>
 <DD><A NAME="IDX6"></A>
+If set to <SAMP>`on'</SAMP>, Readline attempts to bind the control characters  
+treated specially by the kernel's terminal driver to their Readline
+equivalents.
+<P>
+
+<DT><CODE>comment-begin</CODE>
+<DD><A NAME="IDX7"></A>
 The string to insert at the beginning of the line when the
 <CODE>insert-comment</CODE> command is executed.  The default value
 is <CODE>"#"</CODE>.
@@ -591,18 +604,19 @@ The default value is <SAMP>`off'</SAMP>.
 <P>
 
 <DT><CODE>completion-query-items</CODE>
-<DD><A NAME="IDX7"></A>
+<DD><A NAME="IDX8"></A>
 The number of possible completions that determines when the user is
-asked whether he wants to see the list of possibilities.  If the
-number of possible completions is greater than this value,
+asked whether the list of possibilities should be displayed.
+If the number of possible completions is greater than this value,
 Readline will ask the user whether or not he wishes to view
 them; otherwise, they are simply listed.
 This variable must be set to an integer value greater than or equal to 0.
+A negative value means Readline should never ask.
 The default limit is <CODE>100</CODE>.
 <P>
 
 <DT><CODE>convert-meta</CODE>
-<DD><A NAME="IDX8"></A>
+<DD><A NAME="IDX9"></A>
 If set to <SAMP>`on'</SAMP>, Readline will convert characters with the
 eighth bit set to an ASCII key sequence by stripping the eighth
 bit and prefixing an <KBD>ESC</KBD> character, converting them to a
@@ -610,14 +624,14 @@ meta-prefixed key sequence.  The default value is <SAMP>`on'</SAMP>.
 <P>
 
 <DT><CODE>disable-completion</CODE>
-<DD><A NAME="IDX9"></A>
+<DD><A NAME="IDX10"></A>
 If set to <SAMP>`On'</SAMP>, Readline will inhibit word completion.
 Completion  characters will be inserted into the line as if they had
 been mapped to <CODE>self-insert</CODE>.  The default is <SAMP>`off'</SAMP>.
 <P>
 
 <DT><CODE>editing-mode</CODE>
-<DD><A NAME="IDX10"></A>
+<DD><A NAME="IDX11"></A>
 The <CODE>editing-mode</CODE> variable controls which default set of
 key bindings is used.  By default, Readline starts up in Emacs editing
 mode, where the keystrokes are most similar to Emacs.  This variable can be
@@ -625,26 +639,27 @@ set to either <SAMP>`emacs'</SAMP> or <SAMP>`vi'</SAMP>.
 <P>
 
 <DT><CODE>enable-keypad</CODE>
-<DD><A NAME="IDX11"></A>
+<DD><A NAME="IDX12"></A>
 When set to <SAMP>`on'</SAMP>, Readline will try to enable the application
 keypad when it is called.  Some systems need this to enable the
 arrow keys.  The default is <SAMP>`off'</SAMP>.
 <P>
 
 <DT><CODE>expand-tilde</CODE>
-<DD><A NAME="IDX12"></A>
+<DD><A NAME="IDX13"></A>
 If set to <SAMP>`on'</SAMP>, tilde expansion is performed when Readline
 attempts word completion.  The default is <SAMP>`off'</SAMP>.
 <P>
 
-<A NAME="IDX13"></A>
+<DT><CODE>history-preserve-point</CODE>
+<DD><A NAME="IDX14"></A>
 If set to <SAMP>`on'</SAMP>, the history code attempts to place point at the
-same location on each history line retrived with <CODE>previous-history</CODE>
-or <CODE>next-history</CODE>.
-</P><P>
+same location on each history line retrieved with <CODE>previous-history</CODE>
+or <CODE>next-history</CODE>.  The default is <SAMP>`off'</SAMP>.
+<P>
 
 <DT><CODE>horizontal-scroll-mode</CODE>
-<DD><A NAME="IDX14"></A>
+<DD><A NAME="IDX15"></A>
 This variable can be set to either <SAMP>`on'</SAMP> or <SAMP>`off'</SAMP>.  Setting it
 to <SAMP>`on'</SAMP> means that the text of the lines being edited will scroll
 horizontally on a single screen line when they are longer than the width
@@ -653,8 +668,8 @@ this variable is set to <SAMP>`off'</SAMP>.
 <P>
 
 <DT><CODE>input-meta</CODE>
-<DD><A NAME="IDX15"></A>
-<A NAME="IDX16"></A>
+<DD><A NAME="IDX16"></A>
+<A NAME="IDX17"></A>
 If set to <SAMP>`on'</SAMP>, Readline will enable eight-bit input (it
 will not clear the eighth bit in the characters it reads),
 regardless of what the terminal claims it can support.  The
@@ -663,7 +678,7 @@ synonym for this variable.
 <P>
 
 <DT><CODE>isearch-terminators</CODE>
-<DD><A NAME="IDX17"></A>
+<DD><A NAME="IDX18"></A>
 The string of characters that should terminate an incremental search without
 subsequently executing the character as a command (see section <A HREF="rluserman.html#SEC8">1.2.5 Searching for Commands in the History</A>).
 If this variable has not been given a value, the characters <KBD>ESC</KBD> and
@@ -671,7 +686,7 @@ If this variable has not been given a value, the characters <KBD>ESC</KBD> and
 <P>
 
 <DT><CODE>keymap</CODE>
-<DD><A NAME="IDX18"></A>
+<DD><A NAME="IDX19"></A>
 Sets Readline's idea of the current keymap for key binding commands.
 Acceptable <CODE>keymap</CODE> names are
 <CODE>emacs</CODE>,
@@ -694,14 +709,14 @@ appended.  The default is <SAMP>`on'</SAMP>.
 <P>
 
 <DT><CODE>mark-modified-lines</CODE>
-<DD><A NAME="IDX19"></A>
+<DD><A NAME="IDX20"></A>
 This variable, when set to <SAMP>`on'</SAMP>, causes Readline to display an
 asterisk (<SAMP>`*'</SAMP>) at the start of history lines which have been modified.
 This variable is <SAMP>`off'</SAMP> by default.
 <P>
 
 <DT><CODE>mark-symlinked-directories</CODE>
-<DD><A NAME="IDX20"></A>
+<DD><A NAME="IDX21"></A>
 If set to <SAMP>`on'</SAMP>, completed names which are symbolic links
 to directories have a slash appended (subject to the value of
 <CODE>mark-directories</CODE>).
@@ -709,7 +724,7 @@ The default is <SAMP>`off'</SAMP>.
 <P>
 
 <DT><CODE>match-hidden-files</CODE>
-<DD><A NAME="IDX21"></A>
+<DD><A NAME="IDX22"></A>
 This variable, when set to <SAMP>`on'</SAMP>, causes Readline to match files whose
 names begin with a <SAMP>`.'</SAMP> (hidden files) when performing filename
 completion, unless the leading <SAMP>`.'</SAMP> is
@@ -718,14 +733,14 @@ This variable is <SAMP>`on'</SAMP> by default.
 <P>
 
 <DT><CODE>output-meta</CODE>
-<DD><A NAME="IDX22"></A>
+<DD><A NAME="IDX23"></A>
 If set to <SAMP>`on'</SAMP>, Readline will display characters with the
 eighth bit set directly rather than as a meta-prefixed escape
 sequence.  The default is <SAMP>`off'</SAMP>.
 <P>
 
 <DT><CODE>page-completions</CODE>
-<DD><A NAME="IDX23"></A>
+<DD><A NAME="IDX24"></A>
 If set to <SAMP>`on'</SAMP>, Readline uses an internal <CODE>more</CODE>-like pager
 to display a screenful of possible completions at a time.
 This variable is <SAMP>`on'</SAMP> by default.
@@ -738,7 +753,7 @@ The default is <SAMP>`off'</SAMP>.
 <P>
 
 <DT><CODE>show-all-if-ambiguous</CODE>
-<DD><A NAME="IDX24"></A>
+<DD><A NAME="IDX25"></A>
 This alters the default behavior of the completion functions.  If
 set to <SAMP>`on'</SAMP>, 
 words which have more than one possible completion cause the
@@ -746,8 +761,20 @@ matches to be listed immediately instead of ringing the bell.
 The default value is <SAMP>`off'</SAMP>.
 <P>
 
+<DT><CODE>show-all-if-unmodified</CODE>
+<DD><A NAME="IDX26"></A>
+This alters the default behavior of the completion functions in
+a fashion similar to <VAR>show-all-if-ambiguous</VAR>.
+If set to <SAMP>`on'</SAMP>, 
+words which have more than one possible completion without any
+possible partial completion (the possible completions don't share
+a common prefix) cause the matches to be listed immediately instead
+of ringing the bell.
+The default value is <SAMP>`off'</SAMP>.
+<P>
+
 <DT><CODE>visible-stats</CODE>
-<DD><A NAME="IDX25"></A>
+<DD><A NAME="IDX27"></A>
 If set to <SAMP>`on'</SAMP>, a character denoting a file's type
 is appended to the filename when listing possible
 completions.  The default is <SAMP>`off'</SAMP>.
@@ -1161,54 +1188,54 @@ The text between the point and mark is referred to as the <EM>region</EM>.
 <H3> 1.4.1 Commands For Moving </H3>
 <!--docid::SEC14::-->
 <DL COMPACT>
-<A NAME="IDX26"></A>
+<A NAME="IDX28"></A>
 <DT><CODE>beginning-of-line (C-a)</CODE>
-<DD><A NAME="IDX27"></A>
+<DD><A NAME="IDX29"></A>
 Move to the start of the current line.
 <P>
 
-<A NAME="IDX28"></A>
+<A NAME="IDX30"></A>
 <DT><CODE>end-of-line (C-e)</CODE>
-<DD><A NAME="IDX29"></A>
+<DD><A NAME="IDX31"></A>
 Move to the end of the line.
 <P>
 
-<A NAME="IDX30"></A>
+<A NAME="IDX32"></A>
 <DT><CODE>forward-char (C-f)</CODE>
-<DD><A NAME="IDX31"></A>
+<DD><A NAME="IDX33"></A>
 Move forward a character.
 <P>
 
-<A NAME="IDX32"></A>
+<A NAME="IDX34"></A>
 <DT><CODE>backward-char (C-b)</CODE>
-<DD><A NAME="IDX33"></A>
+<DD><A NAME="IDX35"></A>
 Move back a character.
 <P>
 
-<A NAME="IDX34"></A>
+<A NAME="IDX36"></A>
 <DT><CODE>forward-word (M-f)</CODE>
-<DD><A NAME="IDX35"></A>
+<DD><A NAME="IDX37"></A>
 Move forward to the end of the next word.  Words are composed of
 letters and digits.
 <P>
 
-<A NAME="IDX36"></A>
+<A NAME="IDX38"></A>
 <DT><CODE>backward-word (M-b)</CODE>
-<DD><A NAME="IDX37"></A>
+<DD><A NAME="IDX39"></A>
 Move back to the start of the current or previous word.  Words are
 composed of letters and digits.
 <P>
 
-<A NAME="IDX38"></A>
+<A NAME="IDX40"></A>
 <DT><CODE>clear-screen (C-l)</CODE>
-<DD><A NAME="IDX39"></A>
+<DD><A NAME="IDX41"></A>
 Clear the screen and redraw the current line,
 leaving the current line at the top of the screen.
 <P>
 
-<A NAME="IDX40"></A>
+<A NAME="IDX42"></A>
 <DT><CODE>redraw-current-line ()</CODE>
-<DD><A NAME="IDX41"></A>
+<DD><A NAME="IDX43"></A>
 Refresh the current line.  By default, this is unbound.
 <P>
 
@@ -1234,9 +1261,9 @@ Refresh the current line.  By default, this is unbound.
 <P>
 
 <DL COMPACT>
-<A NAME="IDX42"></A>
+<A NAME="IDX44"></A>
 <DT><CODE>accept-line (Newline or Return)</CODE>
-<DD><A NAME="IDX43"></A>
+<DD><A NAME="IDX45"></A>
 Accept the line regardless of where the cursor is.
 If this line is
 non-empty, it may be added to the history list for future recall with
@@ -1245,97 +1272,101 @@ If this line is a modified history line, the history line is restored
 to its original state.
 <P>
 
-<A NAME="IDX44"></A>
+<A NAME="IDX46"></A>
 <DT><CODE>previous-history (C-p)</CODE>
-<DD><A NAME="IDX45"></A>
+<DD><A NAME="IDX47"></A>
 Move `back' through the history list, fetching the previous command.
 <P>
 
-<A NAME="IDX46"></A>
+<A NAME="IDX48"></A>
 <DT><CODE>next-history (C-n)</CODE>
-<DD><A NAME="IDX47"></A>
+<DD><A NAME="IDX49"></A>
 Move `forward' through the history list, fetching the next command.
 <P>
 
-<A NAME="IDX48"></A>
+<A NAME="IDX50"></A>
 <DT><CODE>beginning-of-history (M-&#60;)</CODE>
-<DD><A NAME="IDX49"></A>
+<DD><A NAME="IDX51"></A>
 Move to the first line in the history.
 <P>
 
-<A NAME="IDX50"></A>
+<A NAME="IDX52"></A>
 <DT><CODE>end-of-history (M-&#62;)</CODE>
-<DD><A NAME="IDX51"></A>
+<DD><A NAME="IDX53"></A>
 Move to the end of the input history, i.e., the line currently
 being entered.
 <P>
 
-<A NAME="IDX52"></A>
+<A NAME="IDX54"></A>
 <DT><CODE>reverse-search-history (C-r)</CODE>
-<DD><A NAME="IDX53"></A>
+<DD><A NAME="IDX55"></A>
 Search backward starting at the current line and moving `up' through
 the history as necessary.  This is an incremental search.
 <P>
 
-<A NAME="IDX54"></A>
+<A NAME="IDX56"></A>
 <DT><CODE>forward-search-history (C-s)</CODE>
-<DD><A NAME="IDX55"></A>
+<DD><A NAME="IDX57"></A>
 Search forward starting at the current line and moving `down' through
 the the history as necessary.  This is an incremental search.
 <P>
 
-<A NAME="IDX56"></A>
+<A NAME="IDX58"></A>
 <DT><CODE>non-incremental-reverse-search-history (M-p)</CODE>
-<DD><A NAME="IDX57"></A>
+<DD><A NAME="IDX59"></A>
 Search backward starting at the current line and moving `up'
 through the history as necessary using a non-incremental search
 for a string supplied by the user.
 <P>
 
-<A NAME="IDX58"></A>
+<A NAME="IDX60"></A>
 <DT><CODE>non-incremental-forward-search-history (M-n)</CODE>
-<DD><A NAME="IDX59"></A>
+<DD><A NAME="IDX61"></A>
 Search forward starting at the current line and moving `down'
 through the the history as necessary using a non-incremental search
 for a string supplied by the user.
 <P>
 
-<A NAME="IDX60"></A>
+<A NAME="IDX62"></A>
 <DT><CODE>history-search-forward ()</CODE>
-<DD><A NAME="IDX61"></A>
+<DD><A NAME="IDX63"></A>
 Search forward through the history for the string of characters
 between the start of the current line and the point.
 This is a non-incremental search.
 By default, this command is unbound.
 <P>
 
-<A NAME="IDX62"></A>
+<A NAME="IDX64"></A>
 <DT><CODE>history-search-backward ()</CODE>
-<DD><A NAME="IDX63"></A>
+<DD><A NAME="IDX65"></A>
 Search backward through the history for the string of characters
 between the start of the current line and the point.  This
 is a non-incremental search.  By default, this command is unbound.
 <P>
 
-<A NAME="IDX64"></A>
+<A NAME="IDX66"></A>
 <DT><CODE>yank-nth-arg (M-C-y)</CODE>
-<DD><A NAME="IDX65"></A>
+<DD><A NAME="IDX67"></A>
 Insert the first argument to the previous command (usually
 the second word on the previous line) at point.
 With an argument <VAR>n</VAR>,
 insert the <VAR>n</VAR>th word from the previous command (the words
 in the previous command begin with word 0).  A negative argument
 inserts the <VAR>n</VAR>th word from the end of the previous command.
+Once the argument <VAR>n</VAR> is computed, the argument is extracted
+as if the <SAMP>`!<VAR>n</VAR>'</SAMP> history expansion had been specified.
 <P>
 
-<A NAME="IDX66"></A>
+<A NAME="IDX68"></A>
 <DT><CODE>yank-last-arg (M-. or M-_)</CODE>
-<DD><A NAME="IDX67"></A>
+<DD><A NAME="IDX69"></A>
 Insert last argument to the previous command (the last word of the
 previous history entry).  With an
 argument, behave exactly like <CODE>yank-nth-arg</CODE>.
 Successive calls to <CODE>yank-last-arg</CODE> move back through the history
 list, inserting the last argument of each line in turn.
+The history expansion facilities are used to extract the last argument,
+as if the <SAMP>`!$'</SAMP> history expansion had been specified.
 <P>
 
 </DL>
@@ -1360,52 +1391,52 @@ list, inserting the last argument of each line in turn.
 <P>
 
 <DL COMPACT>
-<A NAME="IDX68"></A>
+<A NAME="IDX70"></A>
 <DT><CODE>delete-char (C-d)</CODE>
-<DD><A NAME="IDX69"></A>
+<DD><A NAME="IDX71"></A>
 Delete the character at point.  If point is at the
 beginning of the line, there are no characters in the line, and
 the last character typed was not bound to <CODE>delete-char</CODE>, then
 return EOF.
 <P>
 
-<A NAME="IDX70"></A>
+<A NAME="IDX72"></A>
 <DT><CODE>backward-delete-char (Rubout)</CODE>
-<DD><A NAME="IDX71"></A>
+<DD><A NAME="IDX73"></A>
 Delete the character behind the cursor.  A numeric argument means
 to kill the characters instead of deleting them.
 <P>
 
-<A NAME="IDX72"></A>
+<A NAME="IDX74"></A>
 <DT><CODE>forward-backward-delete-char ()</CODE>
-<DD><A NAME="IDX73"></A>
+<DD><A NAME="IDX75"></A>
 Delete the character under the cursor, unless the cursor is at the
 end of the line, in which case the character behind the cursor is
 deleted.  By default, this is not bound to a key.
 <P>
 
-<A NAME="IDX74"></A>
+<A NAME="IDX76"></A>
 <DT><CODE>quoted-insert (C-q or C-v)</CODE>
-<DD><A NAME="IDX75"></A>
+<DD><A NAME="IDX77"></A>
 Add the next character typed to the line verbatim.  This is
 how to insert key sequences like <KBD>C-q</KBD>, for example.
 <P>
 
-<A NAME="IDX76"></A>
+<A NAME="IDX78"></A>
 <DT><CODE>tab-insert (M-<KBD>TAB</KBD>)</CODE>
-<DD><A NAME="IDX77"></A>
+<DD><A NAME="IDX79"></A>
 Insert a tab character.
 <P>
 
-<A NAME="IDX78"></A>
+<A NAME="IDX80"></A>
 <DT><CODE>self-insert (a, b, A, 1, !, <small>...</small>)</CODE>
-<DD><A NAME="IDX79"></A>
+<DD><A NAME="IDX81"></A>
 Insert yourself.
 <P>
 
-<A NAME="IDX80"></A>
+<A NAME="IDX82"></A>
 <DT><CODE>transpose-chars (C-t)</CODE>
-<DD><A NAME="IDX81"></A>
+<DD><A NAME="IDX83"></A>
 Drag the character before the cursor forward over
 the character at the cursor, moving the
 cursor forward as well.  If the insertion point
@@ -1414,39 +1445,39 @@ transposes the last two characters of the line.
 Negative arguments have no effect.
 <P>
 
-<A NAME="IDX82"></A>
+<A NAME="IDX84"></A>
 <DT><CODE>transpose-words (M-t)</CODE>
-<DD><A NAME="IDX83"></A>
+<DD><A NAME="IDX85"></A>
 Drag the word before point past the word after point,
 moving point past that word as well.
 If the insertion point is at the end of the line, this transposes
 the last two words on the line.
 <P>
 
-<A NAME="IDX84"></A>
+<A NAME="IDX86"></A>
 <DT><CODE>upcase-word (M-u)</CODE>
-<DD><A NAME="IDX85"></A>
+<DD><A NAME="IDX87"></A>
 Uppercase the current (or following) word.  With a negative argument,
 uppercase the previous word, but do not move the cursor.
 <P>
 
-<A NAME="IDX86"></A>
+<A NAME="IDX88"></A>
 <DT><CODE>downcase-word (M-l)</CODE>
-<DD><A NAME="IDX87"></A>
+<DD><A NAME="IDX89"></A>
 Lowercase the current (or following) word.  With a negative argument,
 lowercase the previous word, but do not move the cursor.
 <P>
 
-<A NAME="IDX88"></A>
+<A NAME="IDX90"></A>
 <DT><CODE>capitalize-word (M-c)</CODE>
-<DD><A NAME="IDX89"></A>
+<DD><A NAME="IDX91"></A>
 Capitalize the current (or following) word.  With a negative argument,
 capitalize the previous word, but do not move the cursor.
 <P>
 
-<A NAME="IDX90"></A>
+<A NAME="IDX92"></A>
 <DT><CODE>overwrite-mode ()</CODE>
-<DD><A NAME="IDX91"></A>
+<DD><A NAME="IDX93"></A>
 Toggle overwrite mode.  With an explicit positive numeric argument,
 switches to overwrite mode.  With an explicit non-positive numeric
 argument, switches to insert mode.  This command affects only
@@ -1486,98 +1517,106 @@ By default, this command is unbound.
 
 <DL COMPACT>
 
-<A NAME="IDX92"></A>
+<A NAME="IDX94"></A>
 <DT><CODE>kill-line (C-k)</CODE>
-<DD><A NAME="IDX93"></A>
+<DD><A NAME="IDX95"></A>
 Kill the text from point to the end of the line.
 <P>
 
-<A NAME="IDX94"></A>
+<A NAME="IDX96"></A>
 <DT><CODE>backward-kill-line (C-x Rubout)</CODE>
-<DD><A NAME="IDX95"></A>
+<DD><A NAME="IDX97"></A>
 Kill backward to the beginning of the line.
 <P>
 
-<A NAME="IDX96"></A>
+<A NAME="IDX98"></A>
 <DT><CODE>unix-line-discard (C-u)</CODE>
-<DD><A NAME="IDX97"></A>
+<DD><A NAME="IDX99"></A>
 Kill backward from the cursor to the beginning of the current line.
 <P>
 
-<A NAME="IDX98"></A>
+<A NAME="IDX100"></A>
 <DT><CODE>kill-whole-line ()</CODE>
-<DD><A NAME="IDX99"></A>
+<DD><A NAME="IDX101"></A>
 Kill all characters on the current line, no matter where point is.
 By default, this is unbound.
 <P>
 
-<A NAME="IDX100"></A>
+<A NAME="IDX102"></A>
 <DT><CODE>kill-word (M-d)</CODE>
-<DD><A NAME="IDX101"></A>
+<DD><A NAME="IDX103"></A>
 Kill from point to the end of the current word, or if between
 words, to the end of the next word.
 Word boundaries are the same as <CODE>forward-word</CODE>.
 <P>
 
-<A NAME="IDX102"></A>
+<A NAME="IDX104"></A>
 <DT><CODE>backward-kill-word (M-<KBD>DEL</KBD>)</CODE>
-<DD><A NAME="IDX103"></A>
+<DD><A NAME="IDX105"></A>
 Kill the word behind point.
 Word boundaries are the same as <CODE>backward-word</CODE>.
 <P>
 
-<A NAME="IDX104"></A>
+<A NAME="IDX106"></A>
 <DT><CODE>unix-word-rubout (C-w)</CODE>
-<DD><A NAME="IDX105"></A>
+<DD><A NAME="IDX107"></A>
 Kill the word behind point, using white space as a word boundary.
 The killed text is saved on the kill-ring.
 <P>
 
-<A NAME="IDX106"></A>
+<A NAME="IDX108"></A>
+<DT><CODE>unix-filename-rubout ()</CODE>
+<DD><A NAME="IDX109"></A>
+Kill the word behind point, using white space and the slash character
+as the word boundaries.
+The killed text is saved on the kill-ring.
+<P>
+
+<A NAME="IDX110"></A>
 <DT><CODE>delete-horizontal-space ()</CODE>
-<DD><A NAME="IDX107"></A>
+<DD><A NAME="IDX111"></A>
 Delete all spaces and tabs around point.  By default, this is unbound.
 <P>
 
-<A NAME="IDX108"></A>
+<A NAME="IDX112"></A>
 <DT><CODE>kill-region ()</CODE>
-<DD><A NAME="IDX109"></A>
+<DD><A NAME="IDX113"></A>
 Kill the text in the current region.
 By default, this command is unbound.
 <P>
 
-<A NAME="IDX110"></A>
+<A NAME="IDX114"></A>
 <DT><CODE>copy-region-as-kill ()</CODE>
-<DD><A NAME="IDX111"></A>
+<DD><A NAME="IDX115"></A>
 Copy the text in the region to the kill buffer, so it can be yanked
 right away.  By default, this command is unbound.
 <P>
 
-<A NAME="IDX112"></A>
+<A NAME="IDX116"></A>
 <DT><CODE>copy-backward-word ()</CODE>
-<DD><A NAME="IDX113"></A>
+<DD><A NAME="IDX117"></A>
 Copy the word before point to the kill buffer.
 The word boundaries are the same as <CODE>backward-word</CODE>.
 By default, this command is unbound.
 <P>
 
-<A NAME="IDX114"></A>
+<A NAME="IDX118"></A>
 <DT><CODE>copy-forward-word ()</CODE>
-<DD><A NAME="IDX115"></A>
+<DD><A NAME="IDX119"></A>
 Copy the word following point to the kill buffer.
 The word boundaries are the same as <CODE>forward-word</CODE>.
 By default, this command is unbound.
 <P>
 
-<A NAME="IDX116"></A>
+<A NAME="IDX120"></A>
 <DT><CODE>yank (C-y)</CODE>
-<DD><A NAME="IDX117"></A>
+<DD><A NAME="IDX121"></A>
 Yank the top of the kill ring into the buffer at point.
 <P>
 
-<A NAME="IDX118"></A>
+<A NAME="IDX122"></A>
 <DT><CODE>yank-pop (M-y)</CODE>
-<DD><A NAME="IDX119"></A>
+<DD><A NAME="IDX123"></A>
 Rotate the kill-ring, and yank the new top.  You can only do this if
 the prior command is <CODE>yank</CODE> or <CODE>yank-pop</CODE>.
 </DL>
@@ -1601,16 +1640,16 @@ the prior command is <CODE>yank</CODE> or <CODE>yank-pop</CODE>.
 <!--docid::SEC18::-->
 <DL COMPACT>
 
-<A NAME="IDX120"></A>
+<A NAME="IDX124"></A>
 <DT><CODE>digit-argument (<KBD>M-0</KBD>, <KBD>M-1</KBD>, <small>...</small> <KBD>M--</KBD>)</CODE>
-<DD><A NAME="IDX121"></A>
+<DD><A NAME="IDX125"></A>
 Add this digit to the argument already accumulating, or start a new
 argument.  <KBD>M--</KBD> starts a negative argument.
 <P>
 
-<A NAME="IDX122"></A>
+<A NAME="IDX126"></A>
 <DT><CODE>universal-argument ()</CODE>
-<DD><A NAME="IDX123"></A>
+<DD><A NAME="IDX127"></A>
 This is another way to specify an argument.
 If this command is followed by one or more digits, optionally with a
 leading minus sign, those digits define the argument.
@@ -1645,30 +1684,30 @@ By default, this is not bound to a key.
 <P>
 
 <DL COMPACT>
-<A NAME="IDX124"></A>
+<A NAME="IDX128"></A>
 <DT><CODE>complete (<KBD>TAB</KBD>)</CODE>
-<DD><A NAME="IDX125"></A>
+<DD><A NAME="IDX129"></A>
 Attempt to perform completion on the text before point.
 The actual completion performed is application-specific.
 The default is filename completion.
 <P>
 
-<A NAME="IDX126"></A>
+<A NAME="IDX130"></A>
 <DT><CODE>possible-completions (M-?)</CODE>
-<DD><A NAME="IDX127"></A>
+<DD><A NAME="IDX131"></A>
 List the possible completions of the text before point.
 <P>
 
-<A NAME="IDX128"></A>
+<A NAME="IDX132"></A>
 <DT><CODE>insert-completions (M-*)</CODE>
-<DD><A NAME="IDX129"></A>
+<DD><A NAME="IDX133"></A>
 Insert all completions of the text before point that would have
 been generated by <CODE>possible-completions</CODE>.
 <P>
 
-<A NAME="IDX130"></A>
+<A NAME="IDX134"></A>
 <DT><CODE>menu-complete ()</CODE>
-<DD><A NAME="IDX131"></A>
+<DD><A NAME="IDX135"></A>
 Similar to <CODE>complete</CODE>, but replaces the word to be completed
 with a single match from the list of possible completions.
 Repeated execution of <CODE>menu-complete</CODE> steps through the list
@@ -1683,9 +1722,9 @@ This command is intended to be bound to <KBD>TAB</KBD>, but is unbound
 by default.
 <P>
 
-<A NAME="IDX132"></A>
+<A NAME="IDX136"></A>
 <DT><CODE>delete-char-or-list ()</CODE>
-<DD><A NAME="IDX133"></A>
+<DD><A NAME="IDX137"></A>
 Deletes the character under the cursor if not at the beginning or
 end of the line (like <CODE>delete-char</CODE>).
 If at the end of the line, behaves identically to
@@ -1714,22 +1753,22 @@ This command is unbound by default.
 <!--docid::SEC20::-->
 <DL COMPACT>
 
-<A NAME="IDX134"></A>
+<A NAME="IDX138"></A>
 <DT><CODE>start-kbd-macro (C-x ()</CODE>
-<DD><A NAME="IDX135"></A>
+<DD><A NAME="IDX139"></A>
 Begin saving the characters typed into the current keyboard macro.
 <P>
 
-<A NAME="IDX136"></A>
+<A NAME="IDX140"></A>
 <DT><CODE>end-kbd-macro (C-x ))</CODE>
-<DD><A NAME="IDX137"></A>
+<DD><A NAME="IDX141"></A>
 Stop saving the characters typed into the current keyboard macro
 and save the definition.
 <P>
 
-<A NAME="IDX138"></A>
+<A NAME="IDX142"></A>
 <DT><CODE>call-last-kbd-macro (C-x e)</CODE>
-<DD><A NAME="IDX139"></A>
+<DD><A NAME="IDX143"></A>
 Re-execute the last keyboard macro defined, by making the characters
 in the macro appear as if typed at the keyboard.
 <P>
@@ -1755,87 +1794,87 @@ in the macro appear as if typed at the keyboard.
 <!--docid::SEC21::-->
 <DL COMPACT>
 
-<A NAME="IDX140"></A>
+<A NAME="IDX144"></A>
 <DT><CODE>re-read-init-file (C-x C-r)</CODE>
-<DD><A NAME="IDX141"></A>
+<DD><A NAME="IDX145"></A>
 Read in the contents of the <VAR>inputrc</VAR> file, and incorporate
 any bindings or variable assignments found there.
 <P>
 
-<A NAME="IDX142"></A>
+<A NAME="IDX146"></A>
 <DT><CODE>abort (C-g)</CODE>
-<DD><A NAME="IDX143"></A>
+<DD><A NAME="IDX147"></A>
 Abort the current editing command and
 ring the terminal's bell (subject to the setting of
 <CODE>bell-style</CODE>).
 <P>
 
-<A NAME="IDX144"></A>
+<A NAME="IDX148"></A>
 <DT><CODE>do-uppercase-version (M-a, M-b, M-<VAR>x</VAR>, <small>...</small>)</CODE>
-<DD><A NAME="IDX145"></A>
+<DD><A NAME="IDX149"></A>
 If the metafied character <VAR>x</VAR> is lowercase, run the command
 that is bound to the corresponding uppercase character.
 <P>
 
-<A NAME="IDX146"></A>
+<A NAME="IDX150"></A>
 <DT><CODE>prefix-meta (<KBD>ESC</KBD>)</CODE>
-<DD><A NAME="IDX147"></A>
+<DD><A NAME="IDX151"></A>
 Metafy the next character typed.  This is for keyboards
 without a meta key.  Typing <SAMP>`<KBD>ESC</KBD> f'</SAMP> is equivalent to typing
 <KBD>M-f</KBD>.
 <P>
 
-<A NAME="IDX148"></A>
+<A NAME="IDX152"></A>
 <DT><CODE>undo (C-_ or C-x C-u)</CODE>
-<DD><A NAME="IDX149"></A>
+<DD><A NAME="IDX153"></A>
 Incremental undo, separately remembered for each line.
 <P>
 
-<A NAME="IDX150"></A>
+<A NAME="IDX154"></A>
 <DT><CODE>revert-line (M-r)</CODE>
-<DD><A NAME="IDX151"></A>
+<DD><A NAME="IDX155"></A>
 Undo all changes made to this line.  This is like executing the <CODE>undo</CODE>
 command enough times to get back to the beginning.
 <P>
 
-<A NAME="IDX152"></A>
+<A NAME="IDX156"></A>
 <DT><CODE>tilde-expand (M-~)</CODE>
-<DD><A NAME="IDX153"></A>
+<DD><A NAME="IDX157"></A>
 Perform tilde expansion on the current word.
 <P>
 
-<A NAME="IDX154"></A>
+<A NAME="IDX158"></A>
 <DT><CODE>set-mark (C-@)</CODE>
-<DD><A NAME="IDX155"></A>
+<DD><A NAME="IDX159"></A>
 Set the mark to the point.  If a
 numeric argument is supplied, the mark is set to that position.
 <P>
 
-<A NAME="IDX156"></A>
+<A NAME="IDX160"></A>
 <DT><CODE>exchange-point-and-mark (C-x C-x)</CODE>
-<DD><A NAME="IDX157"></A>
+<DD><A NAME="IDX161"></A>
 Swap the point with the mark.  The current cursor position is set to
 the saved position, and the old cursor position is saved as the mark.
 <P>
 
-<A NAME="IDX158"></A>
+<A NAME="IDX162"></A>
 <DT><CODE>character-search (C-])</CODE>
-<DD><A NAME="IDX159"></A>
+<DD><A NAME="IDX163"></A>
 A character is read and point is moved to the next occurrence of that
 character.  A negative count searches for previous occurrences.
 <P>
 
-<A NAME="IDX160"></A>
+<A NAME="IDX164"></A>
 <DT><CODE>character-search-backward (M-C-])</CODE>
-<DD><A NAME="IDX161"></A>
+<DD><A NAME="IDX165"></A>
 A character is read and point is moved to the previous occurrence
 of that character.  A negative count searches for subsequent
 occurrences.
 <P>
 
-<A NAME="IDX162"></A>
+<A NAME="IDX166"></A>
 <DT><CODE>insert-comment (M-#)</CODE>
-<DD><A NAME="IDX163"></A>
+<DD><A NAME="IDX167"></A>
 Without a numeric argument, the value of the <CODE>comment-begin</CODE>
 variable is inserted at the beginning of the current line.
 If a numeric argument is supplied, this command acts as a toggle:  if
@@ -1846,43 +1885,43 @@ the line.
 In either case, the line is accepted as if a newline had been typed.
 <P>
 
-<A NAME="IDX164"></A>
+<A NAME="IDX168"></A>
 <DT><CODE>dump-functions ()</CODE>
-<DD><A NAME="IDX165"></A>
+<DD><A NAME="IDX169"></A>
 Print all of the functions and their key bindings to the
 Readline output stream.  If a numeric argument is supplied,
 the output is formatted in such a way that it can be made part
 of an <VAR>inputrc</VAR> file.  This command is unbound by default.
 <P>
 
-<A NAME="IDX166"></A>
+<A NAME="IDX170"></A>
 <DT><CODE>dump-variables ()</CODE>
-<DD><A NAME="IDX167"></A>
+<DD><A NAME="IDX171"></A>
 Print all of the settable variables and their values to the
 Readline output stream.  If a numeric argument is supplied,
 the output is formatted in such a way that it can be made part
 of an <VAR>inputrc</VAR> file.  This command is unbound by default.
 <P>
 
-<A NAME="IDX168"></A>
+<A NAME="IDX172"></A>
 <DT><CODE>dump-macros ()</CODE>
-<DD><A NAME="IDX169"></A>
+<DD><A NAME="IDX173"></A>
 Print all of the Readline key sequences bound to macros and the
 strings they output.  If a numeric argument is supplied,
 the output is formatted in such a way that it can be made part
 of an <VAR>inputrc</VAR> file.  This command is unbound by default.
 <P>
 
-<A NAME="IDX170"></A>
+<A NAME="IDX174"></A>
 <DT><CODE>emacs-editing-mode (C-e)</CODE>
-<DD><A NAME="IDX171"></A>
+<DD><A NAME="IDX175"></A>
 When in <CODE>vi</CODE> command mode, this causes a switch to <CODE>emacs</CODE>
 editing mode.
 <P>
 
-<A NAME="IDX172"></A>
+<A NAME="IDX176"></A>
 <DT><CODE>vi-editing-mode (M-C-j)</CODE>
-<DD><A NAME="IDX173"></A>
+<DD><A NAME="IDX177"></A>
 When in <CODE>emacs</CODE> editing mode, this causes a switch to <CODE>vi</CODE>
 editing mode.
 <P>
@@ -1895,10 +1934,10 @@ editing mode.
 <A NAME="SEC22"></A>
 <TABLE CELLPADDING=1 CELLSPACING=1 BORDER=0>
 <TR><TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC21"> &lt; </A>]</TD>
-<TD VALIGN="MIDDLE" ALIGN="LEFT">[ &gt; ]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC23"> &gt; </A>]</TD>
 <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[ &lt;&lt; ]</TD>
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC1"> Up </A>]</TD>
-<TD VALIGN="MIDDLE" ALIGN="LEFT">[ &gt;&gt; ]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC23"> &gt;&gt; </A>]</TD>
 <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC_Top">Top</A>]</TD>
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC_Contents">Contents</A>]</TD>
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
@@ -1926,6 +1965,567 @@ switches you into `command' mode, where you can edit the text of the
 line with the standard <CODE>vi</CODE> movement keys, move to previous
 history lines with <SAMP>`k'</SAMP> and subsequent lines with <SAMP>`j'</SAMP>, and
 so forth.
+</P><P>
+
+<A NAME="Copying This Manual"></A>
+<HR SIZE="6">
+<A NAME="SEC23"></A>
+<TABLE CELLPADDING=1 CELLSPACING=1 BORDER=0>
+<TR><TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC22"> &lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC24"> &gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC1"> &lt;&lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC_Top"> Up </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[ &gt;&gt; ]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC_Top">Top</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC_Contents">Contents</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC_About"> ? </A>]</TD>
+</TR></TABLE>
+<H1> A. Copying This Manual </H1>
+<!--docid::SEC23::-->
+<P>
+
+<BLOCKQUOTE><TABLE BORDER=0 CELLSPACING=0> 
+<TR><TD ALIGN="left" VALIGN="TOP"><A HREF="rluserman.html#SEC24">A.1 GNU Free Documentation License</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP">License for copying this manual.</TD></TR>
+</TABLE></BLOCKQUOTE>
+<P>
+
+<A NAME="GNU Free Documentation License"></A>
+<HR SIZE="6">
+<A NAME="SEC24"></A>
+<TABLE CELLPADDING=1 CELLSPACING=1 BORDER=0>
+<TR><TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC23"> &lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC25"> &gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC23"> &lt;&lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC23"> Up </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[ &gt;&gt; ]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC_Top">Top</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC_Contents">Contents</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC_About"> ? </A>]</TD>
+</TR></TABLE>
+<H2> A.1 GNU Free Documentation License </H2>
+<!--docid::SEC24::-->
+<P>
+
+<A NAME="IDX178"></A>
+<center>
+ Version 1.2, November 2002
+</center>
+</P><P>
+
+<TABLE><tr><td>&nbsp;</td><td class=display><pre style="font-family: serif">Copyright (C) 2000,2001,2002 Free Software Foundation, Inc.
+59 Temple Place, Suite 330, Boston, MA  02111-1307, USA
+
+Everyone is permitted to copy and distribute verbatim copies
+of this license document, but changing it is not allowed.
+</pre></td></tr></table></P><P>
+
+<OL>
+<LI>
+PREAMBLE
+<P>
+
+The purpose of this License is to make a manual, textbook, or other
+functional and useful document <EM>free</EM> in the sense of freedom: to
+assure everyone the effective freedom to copy and redistribute it,
+with or without modifying it, either commercially or noncommercially.
+Secondarily, this License preserves for the author and publisher a way
+to get credit for their work, while not being considered responsible
+for modifications made by others.
+</P><P>
+
+This License is a kind of "copyleft", which means that derivative
+works of the document must themselves be free in the same sense.  It
+complements the GNU General Public License, which is a copyleft
+license designed for free software.
+</P><P>
+
+We have designed this License in order to use it for manuals for free
+software, because free software needs free documentation: a free
+program should come with manuals providing the same freedoms that the
+software does.  But this License is not limited to software manuals;
+it can be used for any textual work, regardless of subject matter or
+whether it is published as a printed book.  We recommend this License
+principally for works whose purpose is instruction or reference.
+</P><P>
+
+<LI>
+APPLICABILITY AND DEFINITIONS
+<P>
+
+This License applies to any manual or other work, in any medium, that
+contains a notice placed by the copyright holder saying it can be
+distributed under the terms of this License.  Such a notice grants a
+world-wide, royalty-free license, unlimited in duration, to use that
+work under the conditions stated herein.  The "Document", below,
+refers to any such manual or work.  Any member of the public is a
+licensee, and is addressed as "you".  You accept the license if you
+copy, modify or distribute the work in a way requiring permission
+under copyright law.
+</P><P>
+
+A "Modified Version" of the Document means any work containing the
+Document or a portion of it, either copied verbatim, or with
+modifications and/or translated into another language.
+</P><P>
+
+A "Secondary Section" is a named appendix or a front-matter section
+of the Document that deals exclusively with the relationship of the
+publishers or authors of the Document to the Document's overall
+subject (or to related matters) and contains nothing that could fall
+directly within that overall subject.  (Thus, if the Document is in
+part a textbook of mathematics, a Secondary Section may not explain
+any mathematics.)  The relationship could be a matter of historical
+connection with the subject or with related matters, or of legal,
+commercial, philosophical, ethical or political position regarding
+them.
+</P><P>
+
+The "Invariant Sections" are certain Secondary Sections whose titles
+are designated, as being those of Invariant Sections, in the notice
+that says that the Document is released under this License.  If a
+section does not fit the above definition of Secondary then it is not
+allowed to be designated as Invariant.  The Document may contain zero
+Invariant Sections.  If the Document does not identify any Invariant
+Sections then there are none.
+</P><P>
+
+The "Cover Texts" are certain short passages of text that are listed,
+as Front-Cover Texts or Back-Cover Texts, in the notice that says that
+the Document is released under this License.  A Front-Cover Text may
+be at most 5 words, and a Back-Cover Text may be at most 25 words.
+</P><P>
+
+A "Transparent" copy of the Document means a machine-readable copy,
+represented in a format whose specification is available to the
+general public, that is suitable for revising the document
+straightforwardly with generic text editors or (for images composed of
+pixels) generic paint programs or (for drawings) some widely available
+drawing editor, and that is suitable for input to text formatters or
+for automatic translation to a variety of formats suitable for input
+to text formatters.  A copy made in an otherwise Transparent file
+format whose markup, or absence of markup, has been arranged to thwart
+or discourage subsequent modification by readers is not Transparent.
+An image format is not Transparent if used for any substantial amount
+of text.  A copy that is not "Transparent" is called "Opaque".
+</P><P>
+
+Examples of suitable formats for Transparent copies include plain
+ASCII without markup, Texinfo input format, LaTeX input
+format, <FONT SIZE="-1">SGML</FONT> or <FONT SIZE="-1">XML</FONT> using a publicly available
+<FONT SIZE="-1">DTD</FONT>, and standard-conforming simple <FONT SIZE="-1">HTML</FONT>,
+PostScript or <FONT SIZE="-1">PDF</FONT> designed for human modification.  Examples
+of transparent image formats include <FONT SIZE="-1">PNG</FONT>, <FONT SIZE="-1">XCF</FONT> and
+<FONT SIZE="-1">JPG</FONT>.  Opaque formats include proprietary formats that can be
+read and edited only by proprietary word processors, <FONT SIZE="-1">SGML</FONT> or
+<FONT SIZE="-1">XML</FONT> for which the <FONT SIZE="-1">DTD</FONT> and/or processing tools are
+not generally available, and the machine-generated <FONT SIZE="-1">HTML</FONT>,
+PostScript or <FONT SIZE="-1">PDF</FONT> produced by some word processors for
+output purposes only.
+</P><P>
+
+The "Title Page" means, for a printed book, the title page itself,
+plus such following pages as are needed to hold, legibly, the material
+this License requires to appear in the title page.  For works in
+formats which do not have any title page as such, "Title Page" means
+the text near the most prominent appearance of the work's title,
+preceding the beginning of the body of the text.
+</P><P>
+
+A section "Entitled XYZ" means a named subunit of the Document whose
+title either is precisely XYZ or contains XYZ in parentheses following
+text that translates XYZ in another language.  (Here XYZ stands for a
+specific section name mentioned below, such as "Acknowledgements",
+"Dedications", "Endorsements", or "History".)  To "Preserve the Title"
+of such a section when you modify the Document means that it remains a
+section "Entitled XYZ" according to this definition.
+</P><P>
+
+The Document may include Warranty Disclaimers next to the notice which
+states that this License applies to the Document.  These Warranty
+Disclaimers are considered to be included by reference in this
+License, but only as regards disclaiming warranties: any other
+implication that these Warranty Disclaimers may have is void and has
+no effect on the meaning of this License.
+</P><P>
+
+<LI>
+VERBATIM COPYING
+<P>
+
+You may copy and distribute the Document in any medium, either
+commercially or noncommercially, provided that this License, the
+copyright notices, and the license notice saying this License applies
+to the Document are reproduced in all copies, and that you add no other
+conditions whatsoever to those of this License.  You may not use
+technical measures to obstruct or control the reading or further
+copying of the copies you make or distribute.  However, you may accept
+compensation in exchange for copies.  If you distribute a large enough
+number of copies you must also follow the conditions in section 3.
+</P><P>
+
+You may also lend copies, under the same conditions stated above, and
+you may publicly display copies.
+</P><P>
+
+<LI>
+COPYING IN QUANTITY
+<P>
+
+If you publish printed copies (or copies in media that commonly have
+printed covers) of the Document, numbering more than 100, and the
+Document's license notice requires Cover Texts, you must enclose the
+copies in covers that carry, clearly and legibly, all these Cover
+Texts: Front-Cover Texts on the front cover, and Back-Cover Texts on
+the back cover.  Both covers must also clearly and legibly identify
+you as the publisher of these copies.  The front cover must present
+the full title with all words of the title equally prominent and
+visible.  You may add other material on the covers in addition.
+Copying with changes limited to the covers, as long as they preserve
+the title of the Document and satisfy these conditions, can be treated
+as verbatim copying in other respects.
+</P><P>
+
+If the required texts for either cover are too voluminous to fit
+legibly, you should put the first ones listed (as many as fit
+reasonably) on the actual cover, and continue the rest onto adjacent
+pages.
+</P><P>
+
+If you publish or distribute Opaque copies of the Document numbering
+more than 100, you must either include a machine-readable Transparent
+copy along with each Opaque copy, or state in or with each Opaque copy
+a computer-network location from which the general network-using
+public has access to download using public-standard network protocols
+a complete Transparent copy of the Document, free of added material.
+If you use the latter option, you must take reasonably prudent steps,
+when you begin distribution of Opaque copies in quantity, to ensure
+that this Transparent copy will remain thus accessible at the stated
+location until at least one year after the last time you distribute an
+Opaque copy (directly or through your agents or retailers) of that
+edition to the public.
+</P><P>
+
+It is requested, but not required, that you contact the authors of the
+Document well before redistributing any large number of copies, to give
+them a chance to provide you with an updated version of the Document.
+</P><P>
+
+<LI>
+MODIFICATIONS
+<P>
+
+You may copy and distribute a Modified Version of the Document under
+the conditions of sections 2 and 3 above, provided that you release
+the Modified Version under precisely this License, with the Modified
+Version filling the role of the Document, thus licensing distribution
+and modification of the Modified Version to whoever possesses a copy
+of it.  In addition, you must do these things in the Modified Version:
+</P><P>
+
+<OL>
+<LI>
+Use in the Title Page (and on the covers, if any) a title distinct
+from that of the Document, and from those of previous versions
+(which should, if there were any, be listed in the History section
+of the Document).  You may use the same title as a previous version
+if the original publisher of that version gives permission.
+<P>
+
+<LI>
+List on the Title Page, as authors, one or more persons or entities
+responsible for authorship of the modifications in the Modified
+Version, together with at least five of the principal authors of the
+Document (all of its principal authors, if it has fewer than five),
+unless they release you from this requirement.
+<P>
+
+<LI>
+State on the Title page the name of the publisher of the
+Modified Version, as the publisher.
+<P>
+
+<LI>
+Preserve all the copyright notices of the Document.
+<P>
+
+<LI>
+Add an appropriate copyright notice for your modifications
+adjacent to the other copyright notices.
+<P>
+
+<LI>
+Include, immediately after the copyright notices, a license notice
+giving the public permission to use the Modified Version under the
+terms of this License, in the form shown in the Addendum below.
+<P>
+
+<LI>
+Preserve in that license notice the full lists of Invariant Sections
+and required Cover Texts given in the Document's license notice.
+<P>
+
+<LI>
+Include an unaltered copy of this License.
+<P>
+
+<LI>
+Preserve the section Entitled "History", Preserve its Title, and add
+to it an item stating at least the title, year, new authors, and
+publisher of the Modified Version as given on the Title Page.  If
+there is no section Entitled "History" in the Document, create one
+stating the title, year, authors, and publisher of the Document as
+given on its Title Page, then add an item describing the Modified
+Version as stated in the previous sentence.
+<P>
+
+<LI>
+Preserve the network location, if any, given in the Document for
+public access to a Transparent copy of the Document, and likewise
+the network locations given in the Document for previous versions
+it was based on.  These may be placed in the "History" section.
+You may omit a network location for a work that was published at
+least four years before the Document itself, or if the original
+publisher of the version it refers to gives permission.
+<P>
+
+<LI>
+For any section Entitled "Acknowledgements" or "Dedications", Preserve
+the Title of the section, and preserve in the section all the
+substance and tone of each of the contributor acknowledgements and/or
+dedications given therein.
+<P>
+
+<LI>
+Preserve all the Invariant Sections of the Document,
+unaltered in their text and in their titles.  Section numbers
+or the equivalent are not considered part of the section titles.
+<P>
+
+<LI>
+Delete any section Entitled "Endorsements".  Such a section
+may not be included in the Modified Version.
+<P>
+
+<LI>
+Do not retitle any existing section to be Entitled "Endorsements" or
+to conflict in title with any Invariant Section.
+<P>
+
+<LI>
+Preserve any Warranty Disclaimers.
+</OL>
+<P>
+
+If the Modified Version includes new front-matter sections or
+appendices that qualify as Secondary Sections and contain no material
+copied from the Document, you may at your option designate some or all
+of these sections as invariant.  To do this, add their titles to the
+list of Invariant Sections in the Modified Version's license notice.
+These titles must be distinct from any other section titles.
+</P><P>
+
+You may add a section Entitled "Endorsements", provided it contains
+nothing but endorsements of your Modified Version by various
+parties--for example, statements of peer review or that the text has
+been approved by an organization as the authoritative definition of a
+standard.
+</P><P>
+
+You may add a passage of up to five words as a Front-Cover Text, and a
+passage of up to 25 words as a Back-Cover Text, to the end of the list
+of Cover Texts in the Modified Version.  Only one passage of
+Front-Cover Text and one of Back-Cover Text may be added by (or
+through arrangements made by) any one entity.  If the Document already
+includes a cover text for the same cover, previously added by you or
+by arrangement made by the same entity you are acting on behalf of,
+you may not add another; but you may replace the old one, on explicit
+permission from the previous publisher that added the old one.
+</P><P>
+
+The author(s) and publisher(s) of the Document do not by this License
+give permission to use their names for publicity for or to assert or
+imply endorsement of any Modified Version.
+</P><P>
+
+<LI>
+COMBINING DOCUMENTS
+<P>
+
+You may combine the Document with other documents released under this
+License, under the terms defined in section 4 above for modified
+versions, provided that you include in the combination all of the
+Invariant Sections of all of the original documents, unmodified, and
+list them all as Invariant Sections of your combined work in its
+license notice, and that you preserve all their Warranty Disclaimers.
+</P><P>
+
+The combined work need only contain one copy of this License, and
+multiple identical Invariant Sections may be replaced with a single
+copy.  If there are multiple Invariant Sections with the same name but
+different contents, make the title of each such section unique by
+adding at the end of it, in parentheses, the name of the original
+author or publisher of that section if known, or else a unique number.
+Make the same adjustment to the section titles in the list of
+Invariant Sections in the license notice of the combined work.
+</P><P>
+
+In the combination, you must combine any sections Entitled "History"
+in the various original documents, forming one section Entitled
+"History"; likewise combine any sections Entitled "Acknowledgements",
+and any sections Entitled "Dedications".  You must delete all
+sections Entitled "Endorsements."
+</P><P>
+
+<LI>
+COLLECTIONS OF DOCUMENTS
+<P>
+
+You may make a collection consisting of the Document and other documents
+released under this License, and replace the individual copies of this
+License in the various documents with a single copy that is included in
+the collection, provided that you follow the rules of this License for
+verbatim copying of each of the documents in all other respects.
+</P><P>
+
+You may extract a single document from such a collection, and distribute
+it individually under this License, provided you insert a copy of this
+License into the extracted document, and follow this License in all
+other respects regarding verbatim copying of that document.
+</P><P>
+
+<LI>
+AGGREGATION WITH INDEPENDENT WORKS
+<P>
+
+A compilation of the Document or its derivatives with other separate
+and independent documents or works, in or on a volume of a storage or
+distribution medium, is called an "aggregate" if the copyright
+resulting from the compilation is not used to limit the legal rights
+of the compilation's users beyond what the individual works permit.
+When the Document is included an aggregate, this License does not
+apply to the other works in the aggregate which are not themselves
+derivative works of the Document.
+</P><P>
+
+If the Cover Text requirement of section 3 is applicable to these
+copies of the Document, then if the Document is less than one half of
+the entire aggregate, the Document's Cover Texts may be placed on
+covers that bracket the Document within the aggregate, or the
+electronic equivalent of covers if the Document is in electronic form.
+Otherwise they must appear on printed covers that bracket the whole
+aggregate.
+</P><P>
+
+<LI>
+TRANSLATION
+<P>
+
+Translation is considered a kind of modification, so you may
+distribute translations of the Document under the terms of section 4.
+Replacing Invariant Sections with translations requires special
+permission from their copyright holders, but you may include
+translations of some or all Invariant Sections in addition to the
+original versions of these Invariant Sections.  You may include a
+translation of this License, and all the license notices in the
+Document, and any Warranty Disclaimers, provided that you also include
+the original English version of this License and the original versions
+of those notices and disclaimers.  In case of a disagreement between
+the translation and the original version of this License or a notice
+or disclaimer, the original version will prevail.
+</P><P>
+
+If a section in the Document is Entitled "Acknowledgements",
+"Dedications", or "History", the requirement (section 4) to Preserve
+its Title (section 1) will typically require changing the actual
+title.
+</P><P>
+
+<LI>
+TERMINATION
+<P>
+
+You may not copy, modify, sublicense, or distribute the Document except
+as expressly provided for under this License.  Any other attempt to
+copy, modify, sublicense or distribute the Document is void, and will
+automatically terminate your rights under this License.  However,
+parties who have received copies, or rights, from you under this
+License will not have their licenses terminated so long as such
+parties remain in full compliance.
+</P><P>
+
+<LI>
+FUTURE REVISIONS OF THIS LICENSE
+<P>
+
+The Free Software Foundation may publish new, revised versions
+of the GNU Free Documentation License from time to time.  Such new
+versions will be similar in spirit to the present version, but may
+differ in detail to address new problems or concerns.  See
+<A HREF="http://www.gnu.org/copyleft/">http://www.gnu.org/copyleft/</A>.
+</P><P>
+
+Each version of the License is given a distinguishing version number.
+If the Document specifies that a particular numbered version of this
+License "or any later version" applies to it, you have the option of
+following the terms and conditions either of that specified version or
+of any later version that has been published (not as a draft) by the
+Free Software Foundation.  If the Document does not specify a version
+number of this License, you may choose any version ever published (not
+as a draft) by the Free Software Foundation.
+</OL>
+<P>
+
+<HR SIZE="6">
+<A NAME="SEC25"></A>
+<TABLE CELLPADDING=1 CELLSPACING=1 BORDER=0>
+<TR><TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC24"> &lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[ &gt; ]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC23"> &lt;&lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC24"> Up </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[ &gt;&gt; ]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC_Top">Top</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC_Contents">Contents</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC_About"> ? </A>]</TD>
+</TR></TABLE>
+<H3> A.1.1 ADDENDUM: How to use this License for your documents </H3>
+<!--docid::SEC25::-->
+<P>
+
+To use this License in a document you have written, include a copy of
+the License in the document and put the following copyright and
+license notices just after the title page:
+</P><P>
+
+<TABLE><tr><td>&nbsp;</td><td class=smallexample><FONT SIZE=-1><pre>  Copyright (C)  <VAR>year</VAR>  <VAR>your name</VAR>.
+  Permission is granted to copy, distribute and/or modify this document
+  under the terms of the GNU Free Documentation License, Version 1.2
+  or any later version published by the Free Software Foundation;
+  with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+  A copy of the license is included in the section entitled ``GNU
+  Free Documentation License''.
+</FONT></pre></td></tr></table></P><P>
+
+If you have Invariant Sections, Front-Cover Texts and Back-Cover Texts,
+replace the "with...Texts." line with this:
+</P><P>
+
+<TABLE><tr><td>&nbsp;</td><td class=smallexample><FONT SIZE=-1><pre>    with the Invariant Sections being <VAR>list their titles</VAR>, with
+    the Front-Cover Texts being <VAR>list</VAR>, and with the Back-Cover Texts
+    being <VAR>list</VAR>.
+</FONT></pre></td></tr></table></P><P>
+
+If you have Invariant Sections without Cover Texts, or some other
+combination of the three, merge those two alternatives to suit the
+situation.
+</P><P>
+
+If your document contains nontrivial examples of program code, we
+recommend releasing these examples in parallel under your choice of
+free software license, such as the GNU General Public License,
+to permit their use in free software.
 </P><P>
 
 <HR SIZE="6">
@@ -1990,6 +2590,16 @@ so forth.
 <A NAME="TOC22" HREF="rluserman.html#SEC22">1.5 Readline vi Mode</A>
 <BR>
 </UL>
+<A NAME="TOC23" HREF="rluserman.html#SEC23">A. Copying This Manual</A>
+<BR>
+<UL>
+<A NAME="TOC24" HREF="rluserman.html#SEC24">A.1 GNU Free Documentation License</A>
+<BR>
+<UL>
+<A NAME="TOC25" HREF="rluserman.html#SEC25">A.1.1 ADDENDUM: How to use this License for your documents</A>
+<BR>
+</UL>
+</UL>
 </UL>
 <HR SIZE=1>
 <A NAME="SEC_OVERVIEW"></A>
@@ -2003,6 +2613,8 @@ so forth.
 <BLOCKQUOTE>
 <A NAME="TOC1" HREF="rluserman.html#SEC1">1. Command Line Editing</A>
 <BR>
+<A NAME="TOC23" HREF="rluserman.html#SEC23">A. Copying This Manual</A>
+<BR>
 
 </BLOCKQUOTE>
 <HR SIZE=1>
@@ -2014,7 +2626,7 @@ so forth.
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC_About"> ? </A>]</TD>
 </TR></TABLE>
 <H1>About this document</H1>
-This document was generated by <I>Chet Ramey</I> on <I>June, 27  2002</I>
+This document was generated by <I>Chet Ramey</I> on <I>December, 6  2005</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 <P></P>  
@@ -2176,7 +2788,7 @@ the following structure:
 <BR>  
 <FONT SIZE="-1">
 This document was generated
-by <I>Chet Ramey</I> on <I>June, 27  2002</I>
+by <I>Chet Ramey</I> on <I>December, 6  2005</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 

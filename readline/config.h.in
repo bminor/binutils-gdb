@@ -1,10 +1,16 @@
 /* config.h.in.  Maintained by hand. */
 
+/* Define NO_MULTIBYTE_SUPPORT to not compile in support for multibyte
+   characters, even if the OS supports them. */
+#undef NO_MULTIBYTE_SUPPORT
+
 /* Define if on MINIX.  */
 #undef _MINIX
 
 /* Define as the return type of signal handlers (int or void).  */
 #undef RETSIGTYPE
+
+#undef VOID_SIGHANDLER
 
 /* Characteristics of the compiler. */
 #undef const
@@ -20,7 +26,17 @@
 /* Define if the `S_IS*' macros in <sys/stat.h> do not work properly.  */
 #undef STAT_MACROS_BROKEN
 
-#undef VOID_SIGHANDLER
+/* Define if you have the fcntl function. */
+#undef HAVE_FCNTL
+
+/* Define if you have the getpwent function. */
+#undef HAVE_GETPWENT
+
+/* Define if you have the getpwnam function. */
+#undef HAVE_GETPWNAM
+
+/* Define if you have the getpwuid function. */
+#undef HAVE_GETPWUID
 
 /* Define if you have the isascii function. */
 #undef HAVE_ISASCII
@@ -28,8 +44,17 @@
 /* Define if you have the isxdigit function. */
 #undef HAVE_ISXDIGIT
 
+/* Define if you have the kill function. */
+#undef HAVE_KILL
+
 /* Define if you have the lstat function. */
 #undef HAVE_LSTAT
+
+/* Define if you have the mbrlen function. */
+#undef HAVE_MBRLEN
+
+/* Define if you have the mbrtowc function. */
+#undef HAVE_MBRTOWC
 
 /* Define if you have the mbsrtowcs function. */
 #undef HAVE_MBSRTOWCS
@@ -66,11 +91,19 @@
 /* Define if you have the vsnprintf function.  */
 #undef HAVE_VSNPRINTF
 
+/* Define if you have the wctomb function.  */
+#undef HAVE_WCTOMB 
+
 /* Define if you have the wcwidth function.  */
 #undef HAVE_WCWIDTH
 
+#undef STDC_HEADERS
+
 /* Define if you have the <dirent.h> header file.  */
 #undef HAVE_DIRENT_H
+
+/* Define if you have the <fcntl.h> header file.  */
+#undef HAVE_FCNTL_H
 
 /* Define if you have the <langinfo.h> header file.  */
 #undef HAVE_LANGINFO_H
@@ -86,6 +119,9 @@
 
 /* Define if you have the <ndir.h> header file.  */
 #undef HAVE_NDIR_H
+
+/* Define if you have the <pwd.h> header file.  */
+#undef HAVE_PWD_H
 
 /* Define if you have the <stdarg.h> header file.  */
 #undef HAVE_STDARG_H
@@ -176,6 +212,8 @@
 #undef MUST_REINSTALL_SIGHANDLERS
 
 #undef HAVE_POSIX_SIGSETJMP
+
+#undef CTYPE_NON_ASCII
 
 /* modify settings or make new ones based on what autoconf tells us. */
 
