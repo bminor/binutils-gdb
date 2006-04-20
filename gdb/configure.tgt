@@ -107,6 +107,8 @@ ia64*-*-*)		gdb_target=ia64 ;;
 
 iq2000-*-*)		gdb_target=iq2000 ;;
 
+m32c-*-*)		gdb_target=m32c ;;
+
 m32r*-*-linux*)		gdb_target=linux ;;
 m32r*-*-*)		gdb_target=m32r ;;
 

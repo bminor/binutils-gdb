@@ -582,6 +582,7 @@ elf_sh_h =	$(INCLUDE_DIR)/elf/sh.h
 elf_arm_h =	$(INCLUDE_DIR)/elf/arm.h $(elf_reloc_macros_h)
 elf_bfd_h =	$(BFD_SRC)/elf-bfd.h
 elf_frv_h =	$(INCLUDE_DIR)/elf/frv.h $(elf_reloc_macros_h)
+elf_m32c_h =    $(INCLUDE_DIR)/elf/m32c.h $(elf_reloc_macros_h)
 libaout_h =	$(BFD_SRC)/libaout.h
 libiberty_h =	$(INCLUDE_DIR)/libiberty.h
 libbfd_h =	$(BFD_SRC)/libbfd.h
@@ -598,6 +599,7 @@ gdb_callback_h = $(INCLUDE_DIR)/gdb/callback.h
 gdb_sim_arm_h =	$(INCLUDE_DIR)/gdb/sim-arm.h
 gdb_sim_d10v_h = $(INCLUDE_DIR)/gdb/sim-d10v.h
 gdb_sim_frv_h = $(INCLUDE_DIR)/gdb/sim-frv.h
+gdb_sim_m32c_h = $(INCLUDE_DIR)/gdb/sim-m32c.h
 gdb_sim_ppc_h =	$(INCLUDE_DIR)/gdb/sim-ppc.h
 gdb_sim_sh_h =	$(INCLUDE_DIR)/gdb/sim-sh.h
 splay_tree_h =  $(INCLUDE_DIR)/splay-tree.h
@@ -2215,6 +2217,11 @@ m2-typeprint.o: m2-typeprint.c $(defs_h) $(bfd_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) $(value_h) $(gdbcore_h) $(target_h) $(m2_lang_h)
 m2-valprint.o: m2-valprint.c $(defs_h) $(symtab_h) $(gdbtypes_h) \
 	$(m2_lang_h) $(c_lang_h)
+m32c-tdep.o: m32c-tdep.c $(defs_h) $(gdb_assert_h) $(elf_bfd_h)		\
+	$(elf_m32c_h) $(gdb_sim_m32c_h) $(dis_asm_h) $(gdbtypes_h)	\
+	$(regcache_h) $(arch_utils_h) $(frame_h) $(frame_unwind_h)	\
+	$(dwarf2_frame_h) $(dwarf2expr_h) $(symtab_h) $(gdbcore_h)	\
+	$(value_h) $(reggroups_h) $(prologue_value_h) $(target_h)
 m32r-linux-nat.o: m32r-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(regcache_h) $(linux_nat_h) $(gdb_assert_h) $(gdb_string_h) \
 	$(gregset_h) $(m32r_tdep_h) $(target_h)
