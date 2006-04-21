@@ -1,3 +1,13 @@
+2006-04-21  Frederic Riss  <frederic.riss@st.com>
+
+	* dwarf2read.c (dwarf2_start_subfile): Change prototype to accept
+	compilation directory as last argument. 
+	Always pass comp_dir as second argument to start_subfile and prepend
+	dirname to the filename when necessary. 
+	Remove now superfluous search for pre-existing subfile.
+	(dwarf_decode_lines): Pass the compilation directory to
+	dwarf2_start_subfile.
+
 2006-04-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* m68klinux-tdep.c (m68k_linux_sigtramp_frame_prev_register):
