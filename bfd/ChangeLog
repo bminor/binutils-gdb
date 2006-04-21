@@ -1,3 +1,9 @@
+2006-04-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (assign_file_positions_except_relocs): Move code setting
+	file position of non-loaded sections..
+	(assign_file_positions_for_segments): ..to here.
+
 2006-04-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/2537

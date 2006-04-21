@@ -4119,6 +4119,10 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
   bfd_vma filehdr_vaddr, filehdr_paddr;
   bfd_vma phdrs_vaddr, phdrs_paddr;
   Elf_Internal_Phdr *p;
+  Elf_Internal_Shdr **i_shdrpp;
+  Elf_Internal_Shdr **hdrpp;
+  unsigned int i;
+  unsigned int num_sec;
 
   if (elf_tdata (abfd)->segment_map == NULL)
     {
@@ -4136,7 +4140,6 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 	   m = m->next)
 	{
 	  unsigned int new_count;
-	  unsigned int i;
 
 	  new_count = 0;
 	  for (i = 0; i < m->count; i ++)
@@ -4210,7 +4213,6 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
        m != NULL;
        m = m->next, p++)
     {
-      unsigned int i;
       asection **secpp;
 
       /* If elf_segment_map is not from map_sections_to_segments, the
@@ -4535,6 +4537,51 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 	}
     }
 
+  /* Assign file positions for the other sections.  */
+  i_shdrpp = elf_elfsections (abfd);
+  num_sec = elf_numsections (abfd);
+  for (i = 1, hdrpp = i_shdrpp + 1; i < num_sec; i++, hdrpp++)
+    {
+      struct elf_obj_tdata *tdata = elf_tdata (abfd);
+      Elf_Internal_Shdr *hdr;
+
+      hdr = *hdrpp;
+      if (hdr->bfd_section != NULL
+	  && hdr->bfd_section->filepos != 0)
+	hdr->sh_offset = hdr->bfd_section->filepos;
+      else if ((hdr->sh_flags & SHF_ALLOC) != 0)
+	{
+	  ((*_bfd_error_handler)
+	   (_("%B: warning: allocated section `%s' not in segment"),
+	    abfd,
+	    (hdr->bfd_section == NULL
+	     ? "*unknown*"
+	     : hdr->bfd_section->name)));
+	  if ((abfd->flags & D_PAGED) != 0)
+	    off += vma_page_aligned_bias (hdr->sh_addr, off,
+					  bed->maxpagesize);
+	  else
+	    off += vma_page_aligned_bias (hdr->sh_addr, off,
+					  hdr->sh_addralign);
+	  off = _bfd_elf_assign_file_position_for_section (hdr, off,
+							   FALSE);
+	}
+      else if (((hdr->sh_type == SHT_REL || hdr->sh_type == SHT_RELA)
+		&& hdr->bfd_section == NULL)
+	       || hdr == i_shdrpp[tdata->symtab_section]
+	       || hdr == i_shdrpp[tdata->symtab_shndx_section]
+	       || hdr == i_shdrpp[tdata->strtab_section])
+	hdr->sh_offset = -1;
+      else
+	off = _bfd_elf_assign_file_position_for_section (hdr, off, TRUE);
+
+      if (i == SHN_LORESERVE - 1)
+	{
+	  i += SHN_HIRESERVE + 1 - SHN_LORESERVE;
+	  hdrpp += SHN_HIRESERVE + 1 - SHN_LORESERVE;
+	}
+    }
+
   /* Now that we have set the section file positions, we can set up
      the file positions for the non PT_LOAD segments.  */
   for (m = elf_tdata (abfd)->segment_map, p = phdrs;
@@ -4550,7 +4597,6 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 	     PT_LOAD segment, so it will not be processed above.  */
 	  if (p->p_type == PT_DYNAMIC && m->sections[0]->filepos == 0)
 	    {
-	      unsigned int i;
 	      Elf_Internal_Shdr ** const i_shdrpp = elf_elfsections (abfd);
 
 	      i = 1;
@@ -4753,16 +4799,16 @@ static bfd_boolean
 assign_file_positions_except_relocs (bfd *abfd,
 				     struct bfd_link_info *link_info)
 {
-  struct elf_obj_tdata * const tdata = elf_tdata (abfd);
-  Elf_Internal_Ehdr * const i_ehdrp = elf_elfheader (abfd);
-  Elf_Internal_Shdr ** const i_shdrpp = elf_elfsections (abfd);
-  unsigned int num_sec = elf_numsections (abfd);
+  struct elf_obj_tdata *tdata = elf_tdata (abfd);
+  Elf_Internal_Ehdr *i_ehdrp = elf_elfheader (abfd);
   file_ptr off;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0
       && bfd_get_format (abfd) != bfd_core)
     {
+      Elf_Internal_Shdr ** const i_shdrpp = elf_elfsections (abfd);
+      unsigned int num_sec = elf_numsections (abfd);
       Elf_Internal_Shdr **hdrpp;
       unsigned int i;
 
@@ -4797,57 +4843,12 @@ assign_file_positions_except_relocs (bfd *abfd,
     }
   else
     {
-      unsigned int i;
-      Elf_Internal_Shdr **hdrpp;
-
       /* Assign file positions for the loaded sections based on the
          assignment of sections to segments.  */
       if (! assign_file_positions_for_segments (abfd, link_info))
 	return FALSE;
 
-      /* Assign file positions for the other sections.  */
-
-      off = elf_tdata (abfd)->next_file_pos;
-      for (i = 1, hdrpp = i_shdrpp + 1; i < num_sec; i++, hdrpp++)
-	{
-	  Elf_Internal_Shdr *hdr;
-
-	  hdr = *hdrpp;
-	  if (hdr->bfd_section != NULL
-	      && hdr->bfd_section->filepos != 0)
-	    hdr->sh_offset = hdr->bfd_section->filepos;
-	  else if ((hdr->sh_flags & SHF_ALLOC) != 0)
-	    {
-	      ((*_bfd_error_handler)
-	       (_("%B: warning: allocated section `%s' not in segment"),
-		abfd,
-		(hdr->bfd_section == NULL
-		 ? "*unknown*"
-		 : hdr->bfd_section->name)));
-	      if ((abfd->flags & D_PAGED) != 0)
-		off += vma_page_aligned_bias (hdr->sh_addr, off,
-					      bed->maxpagesize);
-	      else
-		off += vma_page_aligned_bias (hdr->sh_addr, off,
-					      hdr->sh_addralign);
-	      off = _bfd_elf_assign_file_position_for_section (hdr, off,
-							       FALSE);
-	    }
-	  else if (((hdr->sh_type == SHT_REL || hdr->sh_type == SHT_RELA)
-		    && hdr->bfd_section == NULL)
-		   || hdr == i_shdrpp[tdata->symtab_section]
-		   || hdr == i_shdrpp[tdata->symtab_shndx_section]
-		   || hdr == i_shdrpp[tdata->strtab_section])
-	    hdr->sh_offset = -1;
-	  else
-	    off = _bfd_elf_assign_file_position_for_section (hdr, off, TRUE);
-
-	  if (i == SHN_LORESERVE - 1)
-	    {
-	      i += SHN_HIRESERVE + 1 - SHN_LORESERVE;
-	      hdrpp += SHN_HIRESERVE + 1 - SHN_LORESERVE;
-	    }
-	}
+      off = tdata->next_file_pos;
     }
 
   /* Place the section headers.  */
@@ -4855,7 +4856,7 @@ assign_file_positions_except_relocs (bfd *abfd,
   i_ehdrp->e_shoff = off;
   off += i_ehdrp->e_shnum * i_ehdrp->e_shentsize;
 
-  elf_tdata (abfd)->next_file_pos = off;
+  tdata->next_file_pos = off;
 
   return TRUE;
 }
