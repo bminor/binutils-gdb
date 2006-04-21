@@ -2159,8 +2159,43 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 
     default:
       /* Check for any processor-specific section types.  */
-      return bed->elf_backend_section_from_shdr (abfd, hdr, name,
-						 shindex);
+      if (bed->elf_backend_section_from_shdr (abfd, hdr, name, shindex))
+	return TRUE;
+
+      if (hdr->sh_type >= SHT_LOUSER && hdr->sh_type <= SHT_HIUSER)
+	{
+	  if ((hdr->sh_flags & SHF_ALLOC) != 0)
+	    /* FIXME: How to properly handle allocated section reserved
+	       for applications?  */
+	    (*_bfd_error_handler)
+	      (_("%B: don't know how to handle allocated, application "
+		 "specific section `%s' [0x%8x]"),
+	       abfd, name, hdr->sh_type);
+	  else
+	    /* Allow sections reserved for applications.  */
+	    return _bfd_elf_make_section_from_shdr (abfd, hdr, name,
+						    shindex);
+	}
+      else if (hdr->sh_type >= SHT_LOPROC
+	       && hdr->sh_type <= SHT_HIPROC)
+	/* FIXME: We should handle this section.  */
+	(*_bfd_error_handler)
+	  (_("%B: don't know how to handle processor specific section "
+	     "`%s' [0x%8x]"),
+	   abfd, name, hdr->sh_type);
+      else if (hdr->sh_type >= SHT_LOOS && hdr->sh_type <= SHT_HIOS)
+	/* FIXME: We should handle this section.  */
+	(*_bfd_error_handler)
+	  (_("%B: don't know how to handle OS specific section "
+	     "`%s' [0x%8x]"),
+	   abfd, name, hdr->sh_type);
+      else
+	/* FIXME: We should handle this section.  */
+	(*_bfd_error_handler)
+	  (_("%B: don't know how to handle section `%s' [0x%8x]"),
+	   abfd, name, hdr->sh_type);
+
+      return FALSE;
     }
 
   return TRUE;

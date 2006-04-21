@@ -1,3 +1,10 @@
+2006-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/2537
+	* elf.c (bfd_section_from_shdr): Allow sections reserved for
+	applications. Issue an error on sections we don't know how
+	to handle.
+
 2006-04-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
