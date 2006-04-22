@@ -484,6 +484,19 @@ Sakamoto, Yoshinori Sato, Michael Snyder, Andreas Schwab, Jason
 Thorpe, Corinna Vinschen, Ulrich Weigand, and Elena Zannoni, helped
 with the migration of old architectures to this new framework.
 
+Andrew Cagney completely re-designed and re-implemented @value{GDBN}'s
+unwinder framework, this consisting of a fresh new design featuring
+frame IDs, independent frame sniffers, and the sentinel frame.  Mark
+Kettenis implemented the @sc{dwarf 2} unwinder, Jeff Johnston the
+libunwind unwinder, and Andrew Cagney the dummy, sentinel, tramp, and
+trad unwinders.  The architecture specific changes, each involving a
+complete rewrite of the architecture's frame code, were carried out by
+Jim Blandy, Joel Brobecker, Kevin Buettner, Andrew Cagney, Stephane
+Carrez, Randolph Chung, Orjan Friberg, Richard Henderson, Daniel
+Jacobowitz, Jeff Johnston, Mark Kettenis, Theodore A. Roth, Kei
+Sakamoto, Yoshinori Sato, Michael Snyder, Corinna Vinschen, and Ulrich
+Weigand.
+
 @node Sample Session
 @chapter A Sample @value{GDBN} Session
 
