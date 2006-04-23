@@ -2640,7 +2640,7 @@ md_assemble (str)
 
       if ((i = tic4x_operands_parse (s, insn->operands, 0)) < 0)
 	{
-	  insn->inst = NULL;	/* Flag that error occured.  */
+	  insn->inst = NULL;	/* Flag that error occurred.  */
 	  insn->parallel = 0;
 	  insn->in_use = 0;
 	  return;

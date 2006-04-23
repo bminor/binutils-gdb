@@ -2798,7 +2798,7 @@ md_assemble (char *str)
   if (opcode == NULL)
     {
       /* The opcode is not in the hash table.
-	 This means we definately have an assembly failure,
+	 This means we definitely have an assembly failure,
 	 but the instruction may be valid in another CPU variant.
 	 In this case emit something better than 'unknown opcode'.
 	 Search the full table in sh-opc.h to check. */

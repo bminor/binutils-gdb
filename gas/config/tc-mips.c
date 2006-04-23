@@ -150,7 +150,7 @@ struct mips_cl_insn
   /* True if this entry cannot be moved from its current position.  */
   unsigned int fixed_p : 1;
 
-  /* True if this instruction occured in a .set noreorder block.  */
+  /* True if this instruction occurred in a .set noreorder block.  */
   unsigned int noreorder_p : 1;
 
   /* True for mips16 instructions that jump to an absolute address.  */
@@ -11809,7 +11809,7 @@ s_change_section (int ignore ATTRIBUTE_UNUSED)
 
      There's nothing really harmful in this, since bfd will correct
      SHT_PROGBITS to SHT_MIPS_DWARF before writing out the file.  But it
-     means that, for backwards compatibiltiy, the special_section entries
+     means that, for backwards compatibility, the special_section entries
      for dwarf sections must use SHT_PROGBITS rather than SHT_MIPS_DWARF.
 
      Even so, we shouldn't force users of the MIPS .section syntax to

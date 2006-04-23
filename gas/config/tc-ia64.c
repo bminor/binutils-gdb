@@ -11862,7 +11862,7 @@ struct alias
 {
   char *file;		/* The file where the directive is seen.  */
   unsigned int line;	/* The line number the directive is at.  */
-  const char *name;	/* The orignale name of the symbol.  */
+  const char *name;	/* The original name of the symbol.  */
 };
 
 /* Called for .alias and .secalias directives. If SECTION is 1, it is

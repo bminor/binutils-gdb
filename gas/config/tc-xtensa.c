@@ -8616,7 +8616,7 @@ future_alignment_required (fragS *fragP, long stretch ATTRIBUTE_UNUSED)
     c          0      2         1 (case 5b makes this case unnecessary)
    6a          2      0         0
     b          1      0         3
-    c          0      1         4 (case 6b makes this case unneccesary)
+    c          0      1         4 (case 6b makes this case unnecessary)
     d          1      1         1 (case 6a makes this case unnecessary)
     e          0      2         2 (case 6a makes this case unnecessary)
     f          0      3         0 (case 6a makes this case unnecessary)

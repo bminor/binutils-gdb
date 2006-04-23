@@ -1054,7 +1054,7 @@ Expr_Node_Gen_Reloc (Expr_Node * head, int parent_reloc)
 	}
       switch (parent_reloc)
 	{
-	  /*  Some reloctions will need to allocate extra words.  */
+	  /*  Some relocations will need to allocate extra words.  */
 	case BFD_RELOC_BFIN_16_IMM:
 	case BFD_RELOC_BFIN_16_LOW:
 	case BFD_RELOC_BFIN_16_HIGH:

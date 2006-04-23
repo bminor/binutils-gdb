@@ -2310,7 +2310,7 @@ match_template ()
 	  if (!MATCH (overlap0, i.types[0], t->operand_types[0])
 	      || !MATCH (overlap1, i.types[1], t->operand_types[1])
 	      /* monitor in SSE3 is a very special case.  The first
-		 register and the second register may have differnet
+		 register and the second register may have different
 		 sizes.  */
 	      || !((t->base_opcode == 0x0f01
 		    && t->extension_opcode == 0xc8)

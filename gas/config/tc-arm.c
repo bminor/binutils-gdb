@@ -2502,7 +2502,7 @@ s_arm_unwind_save_mmxwr (void)
 
   demand_empty_rest_of_line ();
 
-  /* Generate any deferred opcodes becuuse we're going to be looking at
+  /* Generate any deferred opcodes because we're going to be looking at
      the list.	*/
   flush_pending_unwind ();
 
@@ -2635,7 +2635,7 @@ s_arm_unwind_save_mmxwcg (void)
 
   demand_empty_rest_of_line ();
 
-  /* Generate any deferred opcodes becuuse we're going to be looking at
+  /* Generate any deferred opcodes because we're going to be looking at
      the list.	*/
   flush_pending_unwind ();
 
@@ -2818,7 +2818,7 @@ static void
 s_arm_unwind_raw (int ignored ATTRIBUTE_UNUSED)
 {
   expressionS exp;
-  /* This is an arbitary limit.	 */
+  /* This is an arbitrary limit.	 */
   unsigned char op[16];
   int count;
 
@@ -4570,7 +4570,7 @@ static void
 do_rd_rm_rn (void)
 {
   unsigned Rn = inst.operands[2].reg;
-  /* Enforce resutrictions on SWP instruction.  */
+  /* Enforce restrictions on SWP instruction.  */
   if ((inst.instruction & 0x0fbfffff) == 0x01000090)
     constraint (Rn == inst.operands[0].reg || Rn == inst.operands[1].reg,
 		_("Rn must not overlap other operands"));
@@ -8432,7 +8432,7 @@ md_assemble (char *str)
       ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used,
 			      *opcode->tvariant);
       /* Many Thumb-2 instructions also have Thumb-1 variants, so explicitly
-	 set those bits when Thumb-2 32-bit instuctions are seen.  ie.
+	 set those bits when Thumb-2 32-bit instructions are seen.  ie.
 	 anything other than bl/blx.
 	 This is overly pessimistic for relaxable instructions.  */
       if ((inst.size == 4 && (inst.instruction & 0xf800e800) != 0xf000e800)
@@ -10894,7 +10894,7 @@ finish_unwind_opcodes (void)
 
   if (unwind.fp_used)
     {
-      /* Adjust sp as neccessary.  */
+      /* Adjust sp as necessary.  */
       unwind.pending_offset += unwind.fp_offset - unwind.frame_size;
       flush_pending_unwind ();
 

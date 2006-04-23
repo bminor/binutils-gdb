@@ -34,7 +34,7 @@
 
 /*
    We will disable polymorphs by default because it is dangerous.
-   The potencial problem here is the following: assume we got the
+   The potential problem here is the following: assume we got the
    following code:
 
 	jump .l1
@@ -487,7 +487,7 @@ skip_space (char * s)
   return s;
 }
 
-/* Extract one word from FROM and copy it to TO. Delimeters are ",;\n"  */
+/* Extract one word from FROM and copy it to TO. Delimiters are ",;\n"  */
 
 static char *
 extract_operand (char * from, char * to, int limit)

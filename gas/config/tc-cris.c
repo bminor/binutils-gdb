@@ -991,7 +991,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT sec ATTRIBUTE_UNUSED,
       break;
 
     case ENCODE_RELAX (STATE_MUL, STATE_BYTE):
-      /* This is the only time we check position and aligmnent of the
+      /* This is the only time we check position and alignment of the
 	 placement-tracking frag.  */
       if (sec->alignment_power < 2)
 	as_bad_where (fragP->fr_file, fragP->fr_line,
