@@ -1,3 +1,9 @@
+2006-04-23  Andreas Schwab  <schwab@suse.de>
+
+	* Makefile.in (tmp-ld-decode): Fix dependencies.
+	(tmp-ld-cache): Likewise.
+	(tmp-ld-insn): Likewise.
+
 2006-02-01  Mark Mitchell  <mark@codesourcery.com>
 
 	* emul_netbsd.c (emul_netbsd_create): Quote file-name property.
