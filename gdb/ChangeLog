@@ -1,3 +1,8 @@
+2006-04-23  Andreas Schwab  <schwab@suse.de>
+
+	* rs6000-tdep.c: Include "reggroups.h" only once.
+	* Makefile.in (rs6000-tdep.o): Update dependencies.
+
 2006-04-21  Frederic Riss  <frederic.riss@st.com>
 
 	* dwarf2read.c (dwarf2_start_subfile): Change prototype to accept

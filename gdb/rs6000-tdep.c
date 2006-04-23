@@ -59,7 +59,6 @@
 #include "frame-unwind.h"
 #include "frame-base.h"
 
-#include "reggroups.h"
 #include "rs6000-tdep.h"
 
 /* If the kernel has to deliver a signal, it pushes a sigcontext
