@@ -525,6 +525,27 @@ arm_skip_prologue (CORE_ADDR pc)
   return skip_pc;		/* End of prologue */
 }
 
+/* Attempt to find the start of the function containing PREV_PC, and
+   store it in *PROLOGUE_START.  Returns 1 if found, 0 if not.  */
+
+static int
+thumb_heuristic_function_start (CORE_ADDR prev_pc, CORE_ADDR *prologue_start)
+{
+  unsigned short insn;
+
+  /* Right now, we only support a very simple case: if this is a push
+     instruction that pushes lr, then we are probably at the very start
+     of a function.  */
+  insn = read_memory_unsigned_integer (prev_pc, 2);
+  if ((insn & 0xff00) == 0xb500)
+    {
+      *prologue_start = prev_pc;
+      return 1;
+    }
+
+  return 0;
+}
+
 /* *INDENT-OFF* */
 /* Function: thumb_scan_prologue (helper function for arm_scan_prologue)
    This function decodes a Thumb function prologue to determine:
@@ -571,13 +592,16 @@ thumb_scan_prologue (CORE_ADDR prev_pc, struct arm_prologue_cache *cache)
 	prologue_end = prev_pc;
       else if (sal.end < prologue_end)	/* next line begins after fn end */
 	prologue_end = sal.end;		/* (probably means no prologue)  */
+
+      prologue_end = min (prologue_end, prev_pc);
     }
+  else if (thumb_heuristic_function_start (prev_pc, &prologue_start))
+    /* We think we found it!  */
+    prologue_end = prev_pc;
   else
     /* We're in the boondocks: we have no idea where the start of the
        function is.  */
     return;
-
-  prologue_end = min (prologue_end, prev_pc);
 
   thumb_analyze_prologue (current_gdbarch, prologue_start, prologue_end,
 			  cache);
@@ -935,8 +959,9 @@ arm_prologue_this_id (struct frame_info *next_frame,
   func = frame_func_unwind (next_frame);
 
   /* This is meant to halt the backtrace at "_start".  Make sure we
-     don't halt it at a generic dummy frame. */
-  if (func <= LOWEST_PC)
+     don't halt it just because we don't have a symbol table; so
+     we use the PC, not the (possibly unknown) function start.  */
+  if (frame_pc_unwind (next_frame) <= LOWEST_PC)
     return;
 
   /* If we've hit a wall, stop.  */
