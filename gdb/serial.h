@@ -253,6 +253,7 @@ struct serial_ops
        when signaled, in *READ.  Return a handle indicating errors
        in *EXCEPT.  */
     void (*wait_handle) (struct serial *scb, HANDLE *read, HANDLE *except);
+    void (*done_wait_handle) (struct serial *scb);
 #endif /* USE_WIN32API */
   };
 
@@ -269,6 +270,9 @@ extern void serial_log_command (const char *);
 /* Windows-only: find or create handles that we can wait on for this
    serial device.  */
 extern void serial_wait_handle (struct serial *, HANDLE *, HANDLE *);
+
+/* Windows-only: signal that we are done with the wait handles.  */
+extern void serial_done_wait_handle (struct serial *);
 
 #endif /* USE_WIN32API */
 

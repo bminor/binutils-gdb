@@ -167,6 +167,10 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
   for (fd = 0, indx = 0; fd < n; ++fd)
     {
       HANDLE fd_h;
+      struct serial *scb;
+
+      if (!FD_ISSET (fd, readfds) && !FD_ISSET (fd, writefds))
+	continue;
 
       if (FD_ISSET (fd, readfds))
 	{
@@ -189,6 +193,12 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 	  else
 	    num_ready++;
 	}
+
+      /* We created at least one event handle for this fd.  Let the
+	 device know we are finished with it.  */
+      scb = serial_for_fd (fd);
+      if (scb)
+	serial_done_wait_handle (scb);
     }
 
   return num_ready;

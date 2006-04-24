@@ -1,3 +1,35 @@
+2006-04-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ser-mingw.c: Include <conio.h>.
+	(struct ser_console_state, struct net_windows_state): Add exit_select,
+	have_stopped, thread.
+	(pipe_select_thread, console_select_thread)
+	(net_windows_select_thread): Don't create a local state copy or
+	close stop_select.  Exit on exit_select instead of stop_select.  Set
+	have_stopped.
+	(console_select_thread): Don't report control keypresses as pending
+	input.
+	(pipe_select_thread): Allow stop_select to interrupt sleeping.
+	(set_console_wait_handle): Create exit_select and have_stopped.
+	Save the thread handle.  Check _kbhit before starting a thread.
+	(ser_console_done_wait_handle): New.
+	(ser_console_close): Close new handles.  Wait for the thread to
+	exit.
+	(new_windows_select_thread): Assert that an event occurred.
+	(net_windows_wait_handle): Check for pending input before starting
+	a thread.
+	(net_windows_done_wait_handle): New.
+	(net_windows_open): Create exit_select and have_stopped.
+	Save the thread handle.
+	(net_windows_close): Close new handles.  Wait for the thread to
+	exit.
+	(_intiialize_ser_windows): Register done_wait_handle methods.
+
+	* serial.c [USE_WIN32API] (serial_done_wait_handle): New.
+	* serial.h [USE_WIN32API] (struct serial_ops): Add done_wait_handle.
+	[USE_WIN32API] (serial_done_wait_handle): New prototype.
+	* mingw-hdep.c (gdb_select): Use serial_done_wait_handle.
+
 2006-04-23  Andreas Schwab  <schwab@suse.de>
 
 	* rs6000-tdep.c: Include "reggroups.h" only once.
