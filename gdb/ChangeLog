@@ -45,6 +45,19 @@
 	(dwarf_decode_lines): Pass the compilation directory to
 	dwarf2_start_subfile.
 
+2006-04-20  Michael Snyder  <msnyder@redhat.com>
+
+	* 2006-03-22  Jim Blandy  <jimb@redhat.com>
+	Add support for the Renesas M32C and M16C.
+
+	* configure.tgt (m32c-*-*): New entry.
+	* config/m32c/m32c.mt: New file.
+	* m32c-tdep.c: New file.
+	* Makefile.in (elf_m32c_h): New variable.
+	(m32c-tdep.o): New rule.
+	* NEWS: Mention new target.
+	* MAINTAINERS: Designate Jim Blandy as responsible maintainer.
+
 2006-04-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* m68klinux-tdep.c (m68k_linux_sigtramp_frame_prev_register):
@@ -491,6 +504,14 @@
 	(s390_remove_watchpoint): Likewise.
 
 2006-03-28  Jim Blandy  <jimb@codesourcery.com>
+
+	Add support for the Renesas M32C and M16C.
+
+	* configure.tgt (m32c-*-*): New entry.
+	* config/m32c/m32c.mt: New file.
+	* m32c-tdep.c: New file.
+	* Makefile.in (elf_m32c_h): New variable.
+	(m32c-tdep.o): New rule.
 
 	* prologue-value.c, prologue-value.h: New files.
 	* Makefile.in (prologue_value_h): New variable.
