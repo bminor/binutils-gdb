@@ -1,5 +1,13 @@
 2006-04-25  Bob Wilson  <bob.wilson@acm.org>
 
+	* config/xtensa-relax.c (widen_spec_list): Use new "WIDE.<opcode>"
+	syntax instead of hardcoded opcodes with ".w18" suffixes.
+	(wide_branch_opcode): New.
+	(build_transition): Use it to check for wide branch opcodes with
+	either ".w18" or ".w15" suffixes.
+
+2006-04-25  Bob Wilson  <bob.wilson@acm.org>
+
 	* config/tc-xtensa.c (xtensa_create_literal_symbol,
 	xg_assemble_literal, xg_assemble_literal_space): Do not set the
 	frag's is_literal flag.
