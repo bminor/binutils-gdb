@@ -1,5 +1,11 @@
 2006-04-25  Bob Wilson  <bob.wilson@acm.org>
 
+	* config/tc-xtensa.c (xtensa_create_literal_symbol,
+	xg_assemble_literal, xg_assemble_literal_space): Do not set the
+	frag's is_literal flag.
+
+2006-04-25  Bob Wilson  <bob.wilson@acm.org>
+
 	* config/xtensa-relax.c (XCHAL_HAVE_WIDE_BRANCHES): Provide default.
 
 2006-04-16  Daniel Jacobowitz  <dan@codesourcery.com>

@@ -3980,7 +3980,6 @@ xtensa_create_literal_symbol (segT sec, fragS *frag)
 
   xtensa_add_literal_sym (symbolP);
 
-  frag->tc_frag_data.is_literal = TRUE;
   lit_num++;
   return symbolP;
 }
@@ -4046,7 +4045,6 @@ xg_assemble_literal (/* const */ TInsn *insn)
   frag_now->tc_frag_data.literal_frag = get_literal_pool_location (now_seg);
   frag_now->fr_symbol = xtensa_create_literal_symbol (now_seg, frag_now);
   lit_sym = frag_now->fr_symbol;
-  frag_now->tc_frag_data.is_literal = TRUE;
 
   /* Go back.  */
   xtensa_restore_emit_state (&state);
@@ -4075,7 +4073,6 @@ xg_assemble_literal_space (/* const */ int size, int slot)
 
   lit_saved_frag = frag_now;
   frag_now->tc_frag_data.literal_frag = get_literal_pool_location (now_seg);
-  frag_now->tc_frag_data.is_literal = TRUE;
   frag_now->fr_symbol = xtensa_create_literal_symbol (now_seg, frag_now);
   xg_finish_frag (0, RELAX_LITERAL, 0, size, FALSE);
 
@@ -4230,7 +4227,6 @@ xg_resolve_labels (TInsn *insn, symbolS *label_sym)
 {
   symbolS *sym = get_special_label_symbol ();
   int i;
-  /* assert (!insn->is_literal); */
   for (i = 0; i < insn->ntok; i++)
     if (insn->tok[i].X_add_symbol == sym)
       insn->tok[i].X_add_symbol = label_sym;
