@@ -7936,9 +7936,23 @@ unrecord_section_via_map_over_sections (bfd * abfd ATTRIBUTE_UNUSED,
 static bfd_boolean
 elf32_arm_close_and_cleanup (bfd * abfd)
 {
-  bfd_map_over_sections (abfd, unrecord_section_via_map_over_sections, NULL);
+  if (abfd->sections)
+    bfd_map_over_sections (abfd,
+			   unrecord_section_via_map_over_sections,
+			   NULL);
 
   return _bfd_elf_close_and_cleanup (abfd);
+}
+
+static bfd_boolean
+elf32_arm_bfd_free_cached_info (bfd * abfd)
+{
+  if (abfd->sections)
+    bfd_map_over_sections (abfd,
+			   unrecord_section_via_map_over_sections,
+			   NULL);
+
+  return _bfd_free_cached_info (abfd);
 }
 
 /* Display STT_ARM_TFUNC symbols as functions.  */
@@ -8100,6 +8114,7 @@ const struct elf_size_info elf32_arm_size_info = {
 #define bfd_elf32_new_section_hook		elf32_arm_new_section_hook
 #define bfd_elf32_bfd_is_target_special_symbol	elf32_arm_is_target_special_symbol
 #define bfd_elf32_close_and_cleanup             elf32_arm_close_and_cleanup
+#define bfd_elf32_bfd_free_cached_info          elf32_arm_bfd_free_cached_info
 #define bfd_elf32_bfd_final_link		elf32_arm_bfd_final_link
 
 #define elf_backend_get_symbol_type             elf32_arm_get_symbol_type

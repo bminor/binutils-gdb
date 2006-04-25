@@ -7207,7 +7207,7 @@ _bfd_elf_close_and_cleanup (bfd *abfd)
 {
   if (bfd_get_format (abfd) == bfd_object)
     {
-      if (elf_shstrtab (abfd) != NULL)
+      if (elf_tdata (abfd) != NULL && elf_shstrtab (abfd) != NULL)
 	_bfd_elf_strtab_free (elf_shstrtab (abfd));
       _bfd_dwarf2_cleanup_debug_info (abfd);
     }

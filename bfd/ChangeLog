@@ -1,3 +1,23 @@
+2006-04-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/2467
+	* elf.c (_bfd_elf_close_and_cleanup): Check elf_tdata (abfd)
+	is NULL first.
+
+	* elf32-arm.c (elf32_arm_close_and_cleanup): Check if
+	abfd->sections is NULL.
+	(elf32_arm_bfd_free_cached_info): New.
+	(bfd_elf32_bfd_free_cached_info): Defined.
+
+	* elfxx-target.h (bfd_elfNN_bfd_free_cached_info): Default it
+	to _bfd_free_cached_info.
+
+	* libbfd-in.h (_bfd_free_cached_info): New.
+	* libbfd: Regenerated.
+
+	* opncls.c (_bfd_delete_bfd): Check if abfd->memory is NULL.
+	(_bfd_free_cached_info): New.
+
 2006-04-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (assign_file_positions_except_relocs): Move code setting

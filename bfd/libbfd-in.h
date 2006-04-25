@@ -155,6 +155,8 @@ bfd * _bfd_new_bfd
   (void);
 void _bfd_delete_bfd
   (bfd *);
+bfd_boolean _bfd_free_cached_info
+  (bfd *);
 
 bfd_boolean bfd_false
   (bfd *ignore);
