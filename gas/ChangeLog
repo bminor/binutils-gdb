@@ -1,3 +1,7 @@
+2006-04-25  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/xtensa-relax.c (XCHAL_HAVE_WIDE_BRANCHES): Provide default.
+
 2006-04-23  Kazu Hirata  <kazu@codesourcery.com>
 
 	* config/obj-coff.c, config/tc-arm.c, config/tc-bfin.c,
