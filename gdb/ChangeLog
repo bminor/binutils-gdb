@@ -1,3 +1,9 @@
+2006-04-25  Mark Kettenis  <kettenis@gnu.org>
+
+	From Masaki MURANAKA <monaka@monami-software.com>:
+	* mips-mdebug-tdep.c (mips_mdebug_frame_prev_register): Change
+	type of last argument to `gdb_byte *'
+
 2006-04-25  Jim Blandy  <jimb@codesourcery.com>
 
 	Add support for 'target remote |' on MinGW.
