@@ -101,6 +101,10 @@
 #include <stddef.h>
 #include "xtensa-config.h"
 
+#ifndef XCHAL_HAVE_WIDE_BRANCHES
+#define XCHAL_HAVE_WIDE_BRANCHES 0
+#endif
+
 /* Imported from bfd.  */
 extern xtensa_isa xtensa_default_isa;
 
