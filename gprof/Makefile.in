@@ -393,7 +393,7 @@ distclean-libtool:
 	else \
 	  rc=$$?; \
 	  cd $(srcdir) && \
-	  $$restore $$backupdir/* `echo "./$@" | sed 's|[^/]*$$||'`; \
+	  $$restore $$backupdir/* `echo "$@" | sed 's|[^/]*$$||'`; \
 	fi; \
 	rm -rf $$backupdir; exit $$rc
 
@@ -798,6 +798,9 @@ uninstall-man: uninstall-man1
 
 
 diststuff: $(BUILT_SOURCES) info $(man_MANS)
+
+# this empry rule is a hack against gmake patched by Apple.
+%.o:%.m
 
 .m.c:
 	awk -f $(srcdir)/gen-c-prog.awk > ./$*.c \

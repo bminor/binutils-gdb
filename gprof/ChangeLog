@@ -1,3 +1,10 @@
+2006-04-25  Masaki Muranaka  <monaka@monami-software.com>
+
+	PR 2587
+	* Makefile.am: Add empty rule for .m -> .o build in order to work
+	around bug in gmake shipped by Apple.
+	* Makefile.in: Regenerate.
+
 2006-04-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* configure: Regenerate.
