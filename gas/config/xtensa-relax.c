@@ -349,30 +349,30 @@ static string_pattern_pair widen_spec_list[] =
      table since they are more efficient than the branch-around
      relaxations.  */
   
-  {"beqz %as,%label ? IsaUseWideBranches", "beqz.w18 %as,%label"},
-  {"bnez %as,%label ? IsaUseWideBranches", "bnez.w18 %as,%label"},
-  {"bgez %as,%label ? IsaUseWideBranches", "bgez.w18 %as,%label"},
-  {"bltz %as,%label ? IsaUseWideBranches", "bltz.w18 %as,%label"},
-  {"beqi %as,%imm,%label ? IsaUseWideBranches", "beqi.w18 %as,%imm,%label"},
-  {"bnei %as,%imm,%label ? IsaUseWideBranches", "bnei.w18 %as,%imm,%label"},
-  {"bgei %as,%imm,%label ? IsaUseWideBranches", "bgei.w18 %as,%imm,%label"},
-  {"blti %as,%imm,%label ? IsaUseWideBranches", "blti.w18 %as,%imm,%label"},
-  {"bgeui %as,%imm,%label ? IsaUseWideBranches", "bgeui.w18 %as,%imm,%label"},
-  {"bltui %as,%imm,%label ? IsaUseWideBranches", "bltui.w18 %as,%imm,%label"},
-  {"bbci %as,%imm,%label ? IsaUseWideBranches", "bbci.w18 %as,%imm,%label"},
-  {"bbsi %as,%imm,%label ? IsaUseWideBranches", "bbsi.w18 %as,%imm,%label"},
-  {"beq %as,%at,%label ? IsaUseWideBranches", "beq.w18 %as,%at,%label"},
-  {"bne %as,%at,%label ? IsaUseWideBranches", "bne.w18 %as,%at,%label"},
-  {"bge %as,%at,%label ? IsaUseWideBranches", "bge.w18 %as,%at,%label"},
-  {"blt %as,%at,%label ? IsaUseWideBranches", "blt.w18 %as,%at,%label"},
-  {"bgeu %as,%at,%label ? IsaUseWideBranches", "bgeu.w18 %as,%at,%label"},
-  {"bltu %as,%at,%label ? IsaUseWideBranches", "bltu.w18 %as,%at,%label"},
-  {"bany %as,%at,%label ? IsaUseWideBranches", "bany.w18 %as,%at,%label"},
-  {"bnone %as,%at,%label ? IsaUseWideBranches", "bnone.w18 %as,%at,%label"},
-  {"ball %as,%at,%label ? IsaUseWideBranches", "ball.w18 %as,%at,%label"},
-  {"bnall %as,%at,%label ? IsaUseWideBranches", "bnall.w18 %as,%at,%label"},
-  {"bbc %as,%at,%label ? IsaUseWideBranches", "bbc.w18 %as,%at,%label"},
-  {"bbs %as,%at,%label ? IsaUseWideBranches", "bbs.w18 %as,%at,%label"},
+  {"beqz %as,%label ? IsaUseWideBranches", "WIDE.beqz %as,%label"},
+  {"bnez %as,%label ? IsaUseWideBranches", "WIDE.bnez %as,%label"},
+  {"bgez %as,%label ? IsaUseWideBranches", "WIDE.bgez %as,%label"},
+  {"bltz %as,%label ? IsaUseWideBranches", "WIDE.bltz %as,%label"},
+  {"beqi %as,%imm,%label ? IsaUseWideBranches", "WIDE.beqi %as,%imm,%label"},
+  {"bnei %as,%imm,%label ? IsaUseWideBranches", "WIDE.bnei %as,%imm,%label"},
+  {"bgei %as,%imm,%label ? IsaUseWideBranches", "WIDE.bgei %as,%imm,%label"},
+  {"blti %as,%imm,%label ? IsaUseWideBranches", "WIDE.blti %as,%imm,%label"},
+  {"bgeui %as,%imm,%label ? IsaUseWideBranches", "WIDE.bgeui %as,%imm,%label"},
+  {"bltui %as,%imm,%label ? IsaUseWideBranches", "WIDE.bltui %as,%imm,%label"},
+  {"bbci %as,%imm,%label ? IsaUseWideBranches", "WIDE.bbci %as,%imm,%label"},
+  {"bbsi %as,%imm,%label ? IsaUseWideBranches", "WIDE.bbsi %as,%imm,%label"},
+  {"beq %as,%at,%label ? IsaUseWideBranches", "WIDE.beq %as,%at,%label"},
+  {"bne %as,%at,%label ? IsaUseWideBranches", "WIDE.bne %as,%at,%label"},
+  {"bge %as,%at,%label ? IsaUseWideBranches", "WIDE.bge %as,%at,%label"},
+  {"blt %as,%at,%label ? IsaUseWideBranches", "WIDE.blt %as,%at,%label"},
+  {"bgeu %as,%at,%label ? IsaUseWideBranches", "WIDE.bgeu %as,%at,%label"},
+  {"bltu %as,%at,%label ? IsaUseWideBranches", "WIDE.bltu %as,%at,%label"},
+  {"bany %as,%at,%label ? IsaUseWideBranches", "WIDE.bany %as,%at,%label"},
+  {"bnone %as,%at,%label ? IsaUseWideBranches", "WIDE.bnone %as,%at,%label"},
+  {"ball %as,%at,%label ? IsaUseWideBranches", "WIDE.ball %as,%at,%label"},
+  {"bnall %as,%at,%label ? IsaUseWideBranches", "WIDE.bnall %as,%at,%label"},
+  {"bbc %as,%at,%label ? IsaUseWideBranches", "WIDE.bbc %as,%at,%label"},
+  {"bbs %as,%at,%label ? IsaUseWideBranches", "WIDE.bbs %as,%at,%label"},
   
   /* Widening branch comparisons eq/ne to zero.  Prefer relaxing to narrow
      branches if the density option is available.  */
@@ -1554,6 +1554,31 @@ transition_applies (insn_pattern *initial_insn,
 }
 
 
+static bfd_boolean
+wide_branch_opcode (const char *opcode_name,
+		    char *suffix,
+		    xtensa_opcode *popcode)
+{
+  xtensa_isa isa = xtensa_default_isa;
+  xtensa_opcode opcode;
+  static char wbr_name_buf[20];
+
+  if (strncmp (opcode_name, "WIDE.", 5) != 0)
+    return FALSE;
+
+  strcpy (wbr_name_buf, opcode_name + 5);
+  strcat (wbr_name_buf, suffix);
+  opcode = xtensa_opcode_lookup (isa, wbr_name_buf);
+  if (opcode != XTENSA_UNDEFINED)
+    {
+      *popcode = opcode;
+      return TRUE;
+    }
+
+  return FALSE;
+}
+
+
 static TransitionRule *
 build_transition (insn_pattern *initial_insn,
 		  insn_repl *replace_insns,
@@ -1731,13 +1756,19 @@ build_transition (insn_pattern *initial_insn,
       else
 	{
 	  bi->typ = INSTR_INSTR;
-	  bi->opcode = xtensa_opcode_lookup (isa, r->t.opcode_name);
+	  if (wide_branch_opcode (opcode_name, ".w18", &bi->opcode)
+	      || wide_branch_opcode (opcode_name, ".w15", &bi->opcode))
+	    opcode_name = xtensa_opcode_name (isa, bi->opcode);
+	  else
+	    bi->opcode = xtensa_opcode_lookup (isa, opcode_name);
+
 	  if (bi->opcode == XTENSA_UNDEFINED)
 	    {
 	      as_warn (_("invalid opcode '%s' in transition rule '%s'"),
-		       r->t.opcode_name, to_string);
+		       opcode_name, to_string);
 	      return NULL;
 	    }
+
 	  /* Check for the right number of ops.  */
 	  if (xtensa_opcode_num_operands (isa, bi->opcode)
 	      != (int) operand_count)
