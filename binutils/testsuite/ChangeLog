@@ -1,3 +1,9 @@
+2006-04-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/2467
+	* binutils-all/objcopy.exp (strip_test): Also test "strip -g"
+	on archive.
+
 2006-04-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* lib/utils-lib.exp (default_binutils_run): Check exit status.

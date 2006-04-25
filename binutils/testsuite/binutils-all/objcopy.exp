@@ -359,6 +359,12 @@ proc strip_test { } {
 	return
     }
 
+    set exec_output [binutils_run $STRIP "-g $archive"]
+    if ![string match "" $exec_output] {
+	fail $test
+	return
+    }
+
     set exec_output [binutils_run $STRIP "$STRIPFLAGS $archive"]
     if ![string match "" $exec_output] {
 	fail $test
