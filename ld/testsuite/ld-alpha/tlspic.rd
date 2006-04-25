@@ -67,7 +67,7 @@ Symbol table '.dynsym' contains [0-9]+ entries:
 .* [0-9a-f]+     0 TLS     GLOBAL DEFAULT    8 sg5
 .* [0-9a-f]+     0 NOTYPE  GLOBAL DEFAULT  UND __tls_get_addr
 .* [0-9a-f]+     0 TLS     GLOBAL DEFAULT    8 sg1
-.* [0-9a-f]+   172 FUNC    GLOBAL DEFAULT    6 fn1
+.* [0-9a-f]+   172 FUNC    GLOBAL DEFAULT \[<other>: 88\]     6 fn1
 .* [0-9a-f]+     0 NOTYPE  GLOBAL DEFAULT  ABS __bss_start
 .* [0-9a-f]+     0 TLS     GLOBAL DEFAULT    8 sg2
 .* [0-9a-f]+     0 TLS     GLOBAL DEFAULT    8 sg6
@@ -126,7 +126,7 @@ Symbol table '.symtab' contains [0-9]+ entries:
 .* [0-9a-f]+ +0 TLS +GLOBAL DEFAULT +8 sg5
 .* [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +UND __tls_get_addr
 .* [0-9a-f]+ +0 TLS +GLOBAL DEFAULT +8 sg1
-.* [0-9a-f]+ +172 FUNC +GLOBAL DEFAULT +6 fn1
+.* [0-9a-f]+ +172 FUNC +GLOBAL DEFAULT +\[<other>: 88\] +6 fn1
 .* [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS __bss_start
 .* [0-9a-f]+ +0 TLS +GLOBAL DEFAULT +8 sg2
 .* [0-9a-f]+ +0 TLS +GLOBAL DEFAULT +8 sg6
