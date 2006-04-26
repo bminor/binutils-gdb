@@ -209,12 +209,12 @@ static const struct opcode32 coprocessor_opcodes[] =
   {FPU_FPA_EXT_V2, 0x0c100200, 0x0e100f00, "lfm%c\t%12-14f, %F, %A"},
 
   /* Register load/store */
+  {FPU_NEON_EXT_V1, 0x0d200b00, 0x0fb00f01, "vstmdb%c\t%16-19r%21'!, %B"},
+  {FPU_NEON_EXT_V1, 0x0d300b00, 0x0fb00f01, "vldmdb%c\t%16-19r%21'!, %B"},
+  {FPU_NEON_EXT_V1, 0x0c800b00, 0x0f900f01, "vstmia%c\t%16-19r%21'!, %B"},
+  {FPU_NEON_EXT_V1, 0x0c900b00, 0x0f900f01, "vldmia%c\t%16-19r%21'!, %B"},
   {FPU_NEON_EXT_V1, 0x0d000b00, 0x0f300f00, "vstr%c\t%12-15,22D, %C"},
   {FPU_NEON_EXT_V1, 0x0d100b00, 0x0f300f00, "vldr%c\t%12-15,22D, %C"},
-  {FPU_NEON_EXT_V1, 0x0c800b00, 0x0f900f00, "vstmia%c\t%16-19r%21'!, %B"},
-  {FPU_NEON_EXT_V1, 0x0c900b00, 0x0f900f00, "vldmia%c\t%16-19r%21'!, %B"},
-  {FPU_NEON_EXT_V1, 0x0d000b00, 0x0f900f00, "vstmdb%c\t%16-19r%21'!, %B"},
-  {FPU_NEON_EXT_V1, 0x0d100b00, 0x0f900f00, "vldmdb%c\t%16-19r%21'!, %B"},
 
   /* Data transfer between ARM and NEON registers */
   {FPU_NEON_EXT_V1, 0x0e800b10, 0x0ff00f70, "vdup%c.32\t%16-19,7D, %12-15r"},

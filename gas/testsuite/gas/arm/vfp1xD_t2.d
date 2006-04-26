@@ -33,24 +33,24 @@ Disassembly of section .text:
 0+05c <[^>]*> ecb0 0a01 	fldmias	r0!, {s0}
 0+060 <[^>]*> ed30 0a01 	fldmdbs	r0!, {s0}
 0+064 <[^>]*> ed30 0a01 	fldmdbs	r0!, {s0}
-0+068 <[^>]*> ec90 0b03 	vldmia	r0, {d0}
-0+06c <[^>]*> ec90 0b03 	vldmia	r0, {d0}
-0+070 <[^>]*> ecb0 0b03 	vldmia	r0!, {d0}
-0+074 <[^>]*> ecb0 0b03 	vldmia	r0!, {d0}
-0+078 <[^>]*> ed30 0b03 	vldmdb	r0!, {d0}
-0+07c <[^>]*> ed30 0b03 	vldmdb	r0!, {d0}
+0+068 <[^>]*> ec90 0b03 	fldmiax	r0, {d0}
+0+06c <[^>]*> ec90 0b03 	fldmiax	r0, {d0}
+0+070 <[^>]*> ecb0 0b03 	fldmiax	r0!, {d0}
+0+074 <[^>]*> ecb0 0b03 	fldmiax	r0!, {d0}
+0+078 <[^>]*> ed30 0b03 	fldmdbx	r0!, {d0}
+0+07c <[^>]*> ed30 0b03 	fldmdbx	r0!, {d0}
 0+080 <[^>]*> ec80 0a01 	fstmias	r0, {s0}
 0+084 <[^>]*> ec80 0a01 	fstmias	r0, {s0}
 0+088 <[^>]*> eca0 0a01 	fstmias	r0!, {s0}
 0+08c <[^>]*> eca0 0a01 	fstmias	r0!, {s0}
 0+090 <[^>]*> ed20 0a01 	fstmdbs	r0!, {s0}
 0+094 <[^>]*> ed20 0a01 	fstmdbs	r0!, {s0}
-0+098 <[^>]*> ec80 0b03 	vstmia	r0, {d0}
-0+09c <[^>]*> ec80 0b03 	vstmia	r0, {d0}
-0+0a0 <[^>]*> eca0 0b03 	vstmia	r0!, {d0}
-0+0a4 <[^>]*> eca0 0b03 	vstmia	r0!, {d0}
-0+0a8 <[^>]*> ed20 0b03 	vstmdb	r0!, {d0}
-0+0ac <[^>]*> ed20 0b03 	vstmdb	r0!, {d0}
+0+098 <[^>]*> ec80 0b03 	fstmiax	r0, {d0}
+0+09c <[^>]*> ec80 0b03 	fstmiax	r0, {d0}
+0+0a0 <[^>]*> eca0 0b03 	fstmiax	r0!, {d0}
+0+0a4 <[^>]*> eca0 0b03 	fstmiax	r0!, {d0}
+0+0a8 <[^>]*> ed20 0b03 	fstmdbx	r0!, {d0}
+0+0ac <[^>]*> ed20 0b03 	fstmdbx	r0!, {d0}
 0+0b0 <[^>]*> eeb8 0ac0 	fsitos	s0, s0
 0+0b4 <[^>]*> eeb8 0a40 	fuitos	s0, s0
 0+0b8 <[^>]*> eebd 0a40 	ftosis	s0, s0
@@ -142,17 +142,17 @@ Disassembly of section .text:
 0+210 <[^>]*> ec90 fa02 	fldmias	r0, {s30-s31}
 0+214 <[^>]*> ec91 0a01 	fldmias	r1, {s0}
 0+218 <[^>]*> ec9e 0a01 	fldmias	lr, {s0}
-0+21c <[^>]*> ec80 1b03 	vstmia	r0, {d1}
-0+220 <[^>]*> ec80 2b03 	vstmia	r0, {d2}
-0+224 <[^>]*> ec80 fb03 	vstmia	r0, {d15}
-0+228 <[^>]*> ec80 0b05 	vstmia	r0, {d0-d1}
-0+22c <[^>]*> ec80 0b07 	vstmia	r0, {d0-d2}
-0+230 <[^>]*> ec80 0b21 	vstmia	r0, {d0-d15}
-0+234 <[^>]*> ec80 1b1f 	vstmia	r0, {d1-d15}
-0+238 <[^>]*> ec80 2b1d 	vstmia	r0, {d2-d15}
-0+23c <[^>]*> ec80 eb05 	vstmia	r0, {d14-d15}
-0+240 <[^>]*> ec81 0b03 	vstmia	r1, {d0}
-0+244 <[^>]*> ec8e 0b03 	vstmia	lr, {d0}
+0+21c <[^>]*> ec80 1b03 	fstmiax	r0, {d1}
+0+220 <[^>]*> ec80 2b03 	fstmiax	r0, {d2}
+0+224 <[^>]*> ec80 fb03 	fstmiax	r0, {d15}
+0+228 <[^>]*> ec80 0b05 	fstmiax	r0, {d0-d1}
+0+22c <[^>]*> ec80 0b07 	fstmiax	r0, {d0-d2}
+0+230 <[^>]*> ec80 0b21 	fstmiax	r0, {d0-d15}
+0+234 <[^>]*> ec80 1b1f 	fstmiax	r0, {d1-d15}
+0+238 <[^>]*> ec80 2b1d 	fstmiax	r0, {d2-d15}
+0+23c <[^>]*> ec80 eb05 	fstmiax	r0, {d14-d15}
+0+240 <[^>]*> ec81 0b03 	fstmiax	r1, {d0}
+0+244 <[^>]*> ec8e 0b03 	fstmiax	lr, {d0}
 0+248 <[^>]*> eeb5 0a40 	fcmpzs	s0
 0+24c <[^>]*> eef5 0a40 	fcmpzs	s1
 0+250 <[^>]*> eeb5 1a40 	fcmpzs	s2
@@ -219,13 +219,13 @@ Disassembly of section .text:
 0+334 <[^>]*> bf01      	itttt	eq
 0+336 <[^>]*> ed35 2a01 	fldmdbs(eq|)	r5!, {s4}
 0+33a <[^>]*> ed76 1a01 	fldmdbs(eq|)	r6!, {s3}
-0+33e <[^>]*> ec97 1b03 	vldmia(eq|)	r7, {d1}
-0+342 <[^>]*> ec98 2b03 	vldmia(eq|)	r8, {d2}
+0+33e <[^>]*> ec97 1b03 	fldmiax(eq|)	r7, {d1}
+0+342 <[^>]*> ec98 2b03 	fldmiax(eq|)	r8, {d2}
 0+346 <[^>]*> bf01      	itttt	eq
-0+348 <[^>]*> ecb9 3b03 	vldmia(eq|)	r9!, {d3}
-0+34c <[^>]*> ecba 4b03 	vldmia(eq|)	sl!, {d4}
-0+350 <[^>]*> ed3b 5b03 	vldmdb(eq|)	fp!, {d5}
-0+354 <[^>]*> ed3c 6b03 	vldmdb(eq|)	ip!, {d6}
+0+348 <[^>]*> ecb9 3b03 	fldmiax(eq|)	r9!, {d3}
+0+34c <[^>]*> ecba 4b03 	fldmiax(eq|)	sl!, {d4}
+0+350 <[^>]*> ed3b 5b03 	fldmdbx(eq|)	fp!, {d5}
+0+354 <[^>]*> ed3c 6b03 	fldmdbx(eq|)	ip!, {d6}
 0+358 <[^>]*> bf01      	itttt	eq
 0+35a <[^>]*> ec8d 1a01 	fstmias(eq|)	sp, {s2}
 0+35e <[^>]*> ecce 0a01 	fstmias(eq|)	lr, {s1}
@@ -234,13 +234,13 @@ Disassembly of section .text:
 0+36a <[^>]*> bf01      	itttt	eq
 0+36c <[^>]*> ed63 ea01 	fstmdbs(eq|)	r3!, {s29}
 0+370 <[^>]*> ed24 ea01 	fstmdbs(eq|)	r4!, {s28}
-0+374 <[^>]*> ec85 7b03 	vstmia(eq|)	r5, {d7}
-0+378 <[^>]*> ec86 8b03 	vstmia(eq|)	r6, {d8}
+0+374 <[^>]*> ec85 7b03 	fstmiax(eq|)	r5, {d7}
+0+378 <[^>]*> ec86 8b03 	fstmiax(eq|)	r6, {d8}
 0+37c <[^>]*> bf01      	itttt	eq
-0+37e <[^>]*> eca7 9b03 	vstmia(eq|)	r7!, {d9}
-0+382 <[^>]*> eca8 ab03 	vstmia(eq|)	r8!, {d10}
-0+386 <[^>]*> ed29 bb03 	vstmdb(eq|)	r9!, {d11}
-0+38a <[^>]*> ed2a cb03 	vstmdb(eq|)	sl!, {d12}
+0+37e <[^>]*> eca7 9b03 	fstmiax(eq|)	r7!, {d9}
+0+382 <[^>]*> eca8 ab03 	fstmiax(eq|)	r8!, {d10}
+0+386 <[^>]*> ed29 bb03 	fstmdbx(eq|)	r9!, {d11}
+0+38a <[^>]*> ed2a cb03 	fstmdbx(eq|)	sl!, {d12}
 0+38e <[^>]*> bf01      	itttt	eq
 0+390 <[^>]*> eef8 dac3 	fsitos(eq|)	s27, s6
 0+394 <[^>]*> eefd ca62 	ftosis(eq|)	s25, s5

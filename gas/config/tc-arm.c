@@ -1553,6 +1553,15 @@ parse_vfp_reg_list (char **str, unsigned int *pbase, enum reg_list_els etype)
     
     case REGLIST_VFP_D:
       regtype = REG_TYPE_VFD;
+      break;
+    
+    case REGLIST_NEON_D:
+      regtype = REG_TYPE_NDQ;
+      break;
+    }
+
+  if (etype != REGLIST_VFP_S)
+    {
       /* VFPv3 allows 32 D registers.  */
       if (ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v3))
         {
@@ -1566,12 +1575,6 @@ parse_vfp_reg_list (char **str, unsigned int *pbase, enum reg_list_els etype)
         }
       else
         max_regs = 16;
-      break;
-    
-    case REGLIST_NEON_D:
-      regtype = REG_TYPE_NDQ;
-      max_regs = 32;
-      break;
     }
 
   base_reg = max_regs;
@@ -1587,6 +1590,12 @@ parse_vfp_reg_list (char **str, unsigned int *pbase, enum reg_list_els etype)
 	  first_error (_(reg_expected_msgs[regtype]));
 	  return FAIL;
 	}
+ 
+      if (new_base >= max_regs)
+        {
+          first_error (_("register out of range in list"));
+          return FAIL;
+        }
  
       /* Note: a value of 2 * n is returned for the register Q<n>.  */
       if (regtype == REG_TYPE_NQ)
@@ -1625,6 +1634,12 @@ parse_vfp_reg_list (char **str, unsigned int *pbase, enum reg_list_els etype)
 	      inst.error = gettext (reg_expected_msgs[regtype]);
 	      return FAIL;
 	    }
+
+          if (high_range >= max_regs)
+            {
+              first_error (_("register out of range in list"));
+              return FAIL;
+            }
 
           if (regtype == REG_TYPE_NQ)
             high_range = high_range + 1;
@@ -11304,6 +11319,9 @@ do_neon_dup (void)
    
    All the encoded bits are hardcoded by this function.
    
+   Cases 4, 6 may be used with VFPv1 and above (only 32-bit transfers!).
+   Cases 5, 7 may be used with VFPv2 and above.
+   
    FIXME: Some of the checking may be a bit sloppy (in a couple of cases you
    can specify a type where it doesn't make sense to, and is ignored).
 */
@@ -11314,6 +11332,7 @@ do_neon_mov (void)
   int nargs = inst.operands[0].present + inst.operands[1].present
               + inst.operands[2].present;
   unsigned save_cond = thumb_mode ? 0xe0000000 : inst.instruction & 0xf0000000;
+  const char *vfp_vers = "selected FPU does not support instruction";
 
   switch (nargs)
     {
@@ -11329,6 +11348,10 @@ do_neon_mov (void)
           unsigned x = NEON_SCALAR_INDEX (inst.operands[1].reg);
           unsigned abcdebits = 0;
 
+          constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v1),
+                      _(vfp_vers));
+          constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_neon_ext_v1)
+                      && et.size != 32, _(vfp_vers));
           constraint (et.type == NT_invtype, _("bad type for scalar"));
           constraint (x >= 64 / et.size, _("scalar index out of range"));
 
@@ -11362,6 +11385,10 @@ do_neon_mov (void)
               unsigned dn = NEON_SCALAR_REG (inst.operands[0].reg);
               unsigned x = NEON_SCALAR_INDEX (inst.operands[0].reg);
 
+              constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v1),
+                          _(vfp_vers));
+              constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_neon_ext_v1)
+                          && et.size != 32, _(vfp_vers));
               constraint (et.type == NT_invtype, _("bad type for scalar"));
               constraint (x >= 64 / et.size, _("scalar index out of range"));
 
@@ -11412,6 +11439,9 @@ do_neon_mov (void)
     
     case 3:
       /* Cases 5, 7.  */
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v2),
+                  _(vfp_vers));
+
       if (inst.operands[0].regisimm)
         {
           /* Case 5.  */
@@ -14138,7 +14168,16 @@ static const struct asm_opcode insns[] =
  nUF(vcvtq,     vcvt,    3, (RNQ,  RNQ,  oI32b), neon_cvt),
 
   /* One register and an immediate value. All encoding special-cased!  */
+#undef THUMB_VARIANT
+#define THUMB_VARIANT &fpu_vfp_ext_v1
+#undef ARM_VARIANT
+#define ARM_VARIANT &fpu_vfp_ext_v1
  NCE(vmov,      0,       1, (VMOV),             neon_mov),
+
+#undef THUMB_VARIANT
+#define THUMB_VARIANT &fpu_neon_ext_v1
+#undef ARM_VARIANT
+#define ARM_VARIANT &fpu_neon_ext_v1
  NCE(vmovq,     0,       1, (VMOV),             neon_mov),
  nUF(vmvn,      vmvn,    2, (RNDQ, RNDQ_IMVNb), neon_mvn),
  nUF(vmvnq,     vmvn,    2, (RNQ,  RNDQ_IMVNb), neon_mvn),
@@ -14233,9 +14272,9 @@ static const struct asm_opcode insns[] =
  NUF(vtbx,      1b00840, 3, (RND, NRDLST, RND), neon_tbl_tbx),
 
 #undef THUMB_VARIANT
-#define THUMB_VARIANT &fpu_vfp_v3_or_neon_ext
+#define THUMB_VARIANT &fpu_vfp_ext_v1xd
 #undef ARM_VARIANT
-#define ARM_VARIANT &fpu_vfp_v3_or_neon_ext
+#define ARM_VARIANT &fpu_vfp_ext_v1xd
 
   /* Load/store instructions. Available in Neon or VFPv3.  */
  NCE(vldm,      c900b00, 2, (RRw, NRDLST),    neon_ldm_stm),
@@ -14246,6 +14285,11 @@ static const struct asm_opcode insns[] =
  NCE(vstmdb,    d000b00, 2, (RRw, NRDLST),    neon_ldm_stm),
  NCE(vldr,      d100b00, 2, (RND, ADDR),      neon_ldr_str),
  NCE(vstr,      d000b00, 2, (RND, ADDR),      neon_ldr_str),
+
+#undef THUMB_VARIANT
+#define THUMB_VARIANT &fpu_vfp_v3_or_neon_ext
+#undef ARM_VARIANT
+#define ARM_VARIANT &fpu_vfp_v3_or_neon_ext
 
   /* Neon element/structure load/store.  */
  nUF(vld1,      vld1,    2, (NSTRLST, ADDR),  neon_ldx_stx),
