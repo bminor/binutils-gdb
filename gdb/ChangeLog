@@ -74,6 +74,10 @@
 	* NEWS: Mention new target.
 	* MAINTAINERS: Designate Jim Blandy as responsible maintainer.
 
+2006-04-20  Michael Snyder  <msnyder@redhat.com>
+
+	* remote.c: Fix spelling error in comment.
+
 2006-04-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* m68klinux-tdep.c (m68k_linux_sigtramp_frame_prev_register):
