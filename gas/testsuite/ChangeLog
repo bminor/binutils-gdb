@@ -1,4 +1,9 @@
-2005-04-26  Julian Brown  <julian@codesourcery.com>
+2006-04-26  Julian Brown  <julian@codesourcery.com>
+
+	* gas/arm/neon-psyn.s: Basic test of programmers syntax.
+	* gas/arm/neon-psyn.d: Expected output of above.
+
+2006-04-26  Julian Brown  <julian@codesourcery.com>
 
 	* gas/arm/copro.s: Avoid ldcl which encodes as a bad Neon instruction.
 	* gas/arm/copro.d: Update accordingly.
