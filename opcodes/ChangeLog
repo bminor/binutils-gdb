@@ -1,3 +1,19 @@
+2006-04-26  Nathan Sidwell  <nathan@codesourcery.com>
+	    Julian Brown  <julian@codesourcery.com>
+
+	* opcodes/arm-dis.c (coprocessor_opcodes): Add %A, %B, %k, convert
+	%<code>[zy] into %[zy]<code>.  Expand meaning of %<bitfield>['`?].
+	Add unified load/store instruction names.
+	(neon_opcode_table): New.
+	(arm_opcodes): Expand meaning of %<bitfield>['`?].
+	(arm_decode_bitfield): New.
+	(print_insn_coprocessor): Add pc argument. Add %A & %B specifiers.
+	Use arm_decode_bitfield and adjust numeric specifiers. Adjust %z & %y.
+	(print_insn_neon): New.
+	(print_insn_arm): Adjust print_insn_coprocessor call. Call
+	print_insn_neon. Use arm_decode_bitfield and adjust numeric specifiers.
+	(print_insn_thumb32): Likewise.
+
 2006-04-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
