@@ -1,3 +1,19 @@
+2006-04-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/2593
+	* binutils-all/copy-1.d: New file.
+	* binutils-all/copy-1.s: Likewise.
+	* binutils-all/copy-2.d: Likewise.
+
+	* binutils-all/objcopy.exp: Add run_dump_test "copy-1" and
+	run_dump_test "copy-2".
+
+	* lib/utils-lib.exp (run_dump_test): New.
+	(slurp_options): Likewise.
+	(regexp_diff): Likewise.
+	(file_contents): Likewise.
+	(verbose_eval): Likewise.
+
 2006-04-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/2467
