@@ -311,6 +311,24 @@
 	bfd_get_compatible to set the new bfd architecture.  Rely on it
 	to detect incompatibilities.
 
+2006-03-23  Michael Matz  <matz@suse.de>
+
+	* reloc.c: Add BFD_RELOC_X86_64_GOT64, BFD_RELOC_X86_64_GOTPCREL64,
+	BFD_RELOC_X86_64_GOTPC64, BFD_RELOC_X86_64_GOTPLT64,
+	BFD_RELOC_X86_64_PLTOFF64.
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Regenerated.
+	* elf64-x86-64.c (x86_64_elf_howto_table): Correct comment.
+	Add howtos for above relocs.
+	(x86_64_reloc_map): Add mappings for new relocs.
+	(elf64_x86_64_check_relocs): R_X86_64_GOT64, R_X86_64_GOTPCREL64,
+	R_X86_64_GOTPLT64 need a got entry.  R_X86_64_GOTPLT64 also a PLT
+	entry.  R_X86_64_GOTPC64 needs a .got section.  R_X86_64_PLTOFF64
+	needs a PLT entry.
+	(elf64_x86_64_gc_sweep_hook): Reflect changes from
+	elf64_x86_64_check_relocs for the new relocs.
+	(elf64_x86_64_relocate_section): Handle new relocs.
+
 2006-03-22  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (xtensa_read_table_entries): Remove assertion that

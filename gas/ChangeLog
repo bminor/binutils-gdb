@@ -228,6 +228,24 @@
 	* config/tc-m68k.c (m68k_cpus): Change cpu_cf5208 entries to use
 	mcfemac instead of mcfmac.
 
+2006-03-23  Michael Matz  <matz@suse.de>
+
+	* config/tc-i386.c (type_names): Correct placement of 'static'.
+	(reloc): Map some more relocs to their 64 bit counterpart when
+	size is 8.
+	(output_insn): Work around breakage if DEBUG386 is defined.
+	(output_disp): A BFD_RELOC_64 with GOT_symbol as operand also
+	needs to be mapped to BFD_RELOC_X86_64_GOTPC64 or
+	BFD_RELOC_X86_64_GOTPC32.  Also x86-64 handles pcrel addressing
+	different from i386.
+	(output_imm): Ditto.
+	(lex_got): Recognize @PLTOFF and @GOTPLT.  Make @GOT accept also
+	Imm64.
+	(md_convert_frag): Jumps can now be larger than 2GB away, error
+	out in that case.
+	(tc_gen_reloc): New relocs are passed through.  BFD_RELOC_64
+	and BFD_RELOC_64_PCREL are mapped to BFD_RELOC_X86_64_GOTPC64.
+
 2006-03-22  Richard Sandiford  <richard@codesourcery.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 	    Phil Edwards  <phil@codesourcery.com>
