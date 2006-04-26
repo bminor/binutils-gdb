@@ -3994,6 +3994,55 @@ parse_fpa_immediate (char ** str)
   return FAIL;
 }
 
+/* Returns 1 if a number has "quarter-precision" float format
+   0baBbbbbbc defgh000 00000000 00000000.  */
+
+static int
+is_quarter_float (unsigned imm)
+{
+  int bs = (imm & 0x20000000) ? 0x3e000000 : 0x40000000;
+  return (imm & 0x7ffff) == 0 && ((imm & 0x7e000000) ^ bs) == 0;
+}
+
+/* Parse an 8-bit "quarter-precision" floating point number of the form:
+   0baBbbbbbc defgh000 00000000 00000000.
+   The minus-zero case needs special handling, since it can't be encoded in the
+   "quarter-precision" float format, but can nonetheless be loaded as an integer
+   constant.  */
+
+static unsigned
+parse_qfloat_immediate (char **ccp, int *immed)
+{
+  char *str = *ccp;
+  LITTLENUM_TYPE words[MAX_LITTLENUMS];
+  
+  skip_past_char (&str, '#');
+  
+  if ((str = atof_ieee (str, 's', words)) != NULL)
+    {
+      unsigned fpword = 0;
+      int i;
+      
+      /* Our FP word must be 32 bits (single-precision FP).  */
+      for (i = 0; i < 32 / LITTLENUM_NUMBER_OF_BITS; i++)
+        {
+          fpword <<= LITTLENUM_NUMBER_OF_BITS;
+          fpword |= words[i];
+        }
+      
+      if (is_quarter_float (fpword) || fpword == 0x80000000)
+        *immed = fpword;
+      else
+        return FAIL;
+
+      *ccp = str;
+      
+      return SUCCESS;
+    }
+  
+  return FAIL;
+}
+
 /* Shift operands.  */
 enum shift_kind
 {
@@ -4701,6 +4750,13 @@ parse_neon_mov (char **str, int *which_operand)
           inst.operands[i].reg = val;
           inst.operands[i].isreg = 1;
           inst.operands[i].present = 1;
+        }
+      else if (parse_qfloat_immediate (&ptr, &inst.operands[i].imm) == SUCCESS)
+        {
+          /* Case 2: VMOV<c><q>.<dt> <Qd>, #<float-imm>
+             Case 3: VMOV<c><q>.<dt> <Dd>, #<float-imm>  */
+          if (!thumb_mode && (inst.instruction & 0xf0000000) != 0xe0000000)
+            goto bad_cond;
         }
       else if (parse_big_immediate (&ptr, i) == SUCCESS)
         {
@@ -10214,25 +10270,12 @@ neon_squash_bits (unsigned imm)
          | ((imm & 0x01000000) >> 21);
 }
 
-/* Returns 1 if a number has "quarter-precision" float format
-   0baBbbbbbc defgh000 00000000 00000000.  */
-
-static int
-neon_is_quarter_float (unsigned imm)
-{
-  int b = (imm & 0x20000000) != 0;
-  int bs = (b << 25) | (b << 26) | (b << 27) | (b << 28) | (b << 29)
-           | ((!b) << 30);
-  return (imm & 0x81ffffff) == (imm & 0x81f80000)
-         && ((imm & 0x7e000000) ^ bs) == 0;
-}
-
-/* Compress above representation to 0b...000 abcdefgh.  */
+/* Compress quarter-float representation to 0b...000 abcdefgh.  */
 
 static unsigned
 neon_qfloat_bits (unsigned imm)
 {
-  return ((imm >> 19) & 0x7f) | (imm >> 24);
+  return ((imm >> 19) & 0x7f) | ((imm >> 24) & 0x80);
 }
 
 /* Returns CMODE. IMMBITS [7:0] is set to bits suitable for inserting into
@@ -10243,9 +10286,16 @@ neon_qfloat_bits (unsigned imm)
 
 static int
 neon_cmode_for_move_imm (unsigned immlo, unsigned immhi, unsigned *immbits,
-                         int *op, int size)
+                         int *op, int size, enum neon_el_type type)
 {
-  if (size == 64 && neon_bits_same_in_bytes (immhi)
+  if (type == NT_float && is_quarter_float (immlo) && immhi == 0)
+    {
+      if (size != 32 || *op == 1)
+        return FAIL;
+      *immbits = neon_qfloat_bits (immlo);
+      return 0xf;
+    }
+  else if (size == 64 && neon_bits_same_in_bytes (immhi)
       && neon_bits_same_in_bytes (immlo))
     {
       /* Check this one first so we don't have to bother with immhi in later
@@ -10302,13 +10352,6 @@ neon_cmode_for_move_imm (unsigned immlo, unsigned immhi, unsigned *immbits,
         return FAIL;
       *immbits = (immlo >> 16) & 0xff;
       return 0xd;
-    }
-  else if (neon_is_quarter_float (immlo))
-    {
-      if (size != 32 || *op == 1)
-        return FAIL;
-      *immbits = neon_qfloat_bits (immlo);
-      return 0xf;
     }
 
   return FAIL;
@@ -10996,7 +11039,7 @@ neon_move_immediate (void)
               _("immediate has bits set outside the operand size"));
 
   if ((cmode = neon_cmode_for_move_imm (immlo, immhi, &immbits, &op,
-                                        et.size)) == FAIL)
+                                        et.size, et.type)) == FAIL)
     {
       /* Invert relevant bits only.  */
       neon_invert_size (&immlo, &immhi, et.size);
@@ -11005,7 +11048,7 @@ neon_move_immediate (void)
          neon_cmode_for_move_imm.  */
       op = !op;
       if ((cmode = neon_cmode_for_move_imm (immlo, immhi, &immbits, &op,
-                                            et.size)) == FAIL)
+                                            et.size, et.type)) == FAIL)
         {
           first_error (_("immediate out of range"));
           return;
