@@ -1,3 +1,7 @@
+2006-04-26  Julian Brown  <julian@codesourcery.com>
+
+	* readelf.c (arm_attr_tag_VFP_arch): Add VFPv3.
+
 2006-04-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
