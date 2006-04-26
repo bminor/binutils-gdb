@@ -26,6 +26,7 @@
 #include "opcode/arm.h"
 #include "opintl.h"
 #include "safe-ctype.h"
+#include "floatformat.h"
 
 /* FIXME: This shouldn't be done here.  */
 #include "coff/internal.h"
@@ -2283,6 +2284,7 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 			unsigned long value = 0, hival = 0;
 			unsigned shift;
                         int size = 0;
+                        int isfloat = 0;
 			
 			bits |= ((given >> 24) & 1) << 7;
 			bits |= ((given >> 16) & 7) << 4;
@@ -2339,11 +2341,12 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 			    /* floating point encoding */
 			    int tmp;
 			    
-			    value = (unsigned long)(bits & 0x7f) << (24 - 6);
+			    value = (unsigned long)(bits & 0x7f) << 19;
 			    value |= (unsigned long)(bits & 0x80) << 24;
 			    tmp = bits & 0x40 ? 0x3c : 0x40;
 			    value |= (unsigned long)tmp << 24;
                             size = 32;
+                            isfloat = 1;
 			  }
 			else
 			  {
@@ -2363,7 +2366,27 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
                             break;
 
                           case 32:
-                            func (stream, "#%ld\t; 0x%.8lx", value, value);
+                            if (isfloat)
+                              {
+                                unsigned char valbytes[4];
+                                double fvalue;
+                                
+                                /* Do this a byte at a time so we don't have to
+                                   worry about the host's endianness.  */
+                                valbytes[0] = value & 0xff;
+                                valbytes[1] = (value >> 8) & 0xff;
+                                valbytes[2] = (value >> 16) & 0xff;
+                                valbytes[3] = (value >> 24) & 0xff;
+                                
+                                floatformat_to_double 
+                                  (&floatformat_ieee_single_little, valbytes,
+                                  &fvalue);
+                                                                
+                                func (stream, "#%.7g\t; 0x%.8lx", fvalue,
+                                      value);
+                              }
+                            else
+                              func (stream, "#%ld\t; 0x%.8lx", value, value);
                             break;
 
                           case 64:
