@@ -1,3 +1,32 @@
+2005-04-26  Julian Brown  <julian@codesourcery.com>
+
+	* gas/arm/copro.s: Avoid ldcl which encodes as a bad Neon instruction.
+	* gas/arm/copro.d: Update accordingly.
+	* gas/arm/neon-cond.s: New test. Conditional Neon opcodes in ARM mode.
+	* gas/arm/neon-cond.d: Expected results of above.
+	* gas/arm/neon-cov.s: New test. Coverage of Neon instructions.
+	* gas/arm/neon-cov.d: Expected results of above.
+	* gas/arm/neon-ldst-es.s: New test. Element and structure loads and
+	stores.
+	* gas/arm/neon-ldst-es.d: Expected results of above.
+	* gas/arm/neon-ldst-rm.s: New test. Single and multiple register loads
+	and stores.
+	* gas/arm/neon-ldst-rm.d: Expected results of above.
+	* gas/arm/neon-omit.s: New test. Omission of optional operands.
+	* gas/arm/neon-omit.d: Expected results of above.
+	* gas/arm/vfp1.d: Expect Neon syntax for some VFP instructions.
+	* gas/arm/vfp1_t2.d: Likewise.
+	* gas/arm/vfp1xD.d: Likewise.
+	* gas/arm/vfp1xD_t2.d: Likewise.
+	* gas/arm/vfp2.d: Likewise.
+	* gas/arm/vfp2_t2.d: Likewise.
+	* gas/arm/vfp3-32drs.s: New test. Extended D register range for VFP
+	instructions.
+	* gas/arm/vfp3-32drs.d: Expected results of above.
+	* gas/arm/vfp3-const-conv.s: New test. VFPv3 constant-load and
+	conversion instructions.
+	* gas/arm/vfp3-const-conv.d: Expected results of above.
+
 2005-04-20  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/arch7.d: Remove skip.

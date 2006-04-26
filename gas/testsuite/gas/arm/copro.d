@@ -31,7 +31,7 @@ Disassembly of section .text:
 0+054 <[^>]*> ecc52805 	stcl	8, cr2, \[r5\], \{5\}
 0+058 <[^>]*> fcd61906 	ldc2l	9, cr1, \[r6\], \{6\}
 0+05c <[^>]*> fcc70a07 	stc2l	10, cr0, \[r7\], \{7\}
-0+060 <[^>]*> ecd88bff 	ldcl	11, cr8, \[r8\], \{255\}
+0+060 <[^>]*> ecd88cff 	ldcl	12, cr8, \[r8\], \{255\}
 0+064 <[^>]*> ecc99cfe 	stcl	12, cr9, \[r9\], \{254\}
 0+068 <[^>]*> ec507d04 	mrrc	13, 0, r7, r0, cr4
 0+06c <[^>]*> ec407e05 	mcrr	14, 0, r7, r0, cr5
