@@ -1,5 +1,13 @@
 2006-04-26  Julian Brown  <julian@codesourcery.com>
 
+	* gas/testsuite/gas/arm/neon-const.s: New testcase. Neon floating-point
+	constants.
+	* gas/testsuite/gas/arm/neon-const.d: Expected output of above.
+	* gas/testsuite/gas/arm/neon-cov.d: Expect floating-point disassembly
+	for VMOV.F32.
+
+2006-04-26  Julian Brown  <julian@codesourcery.com>
+
 	* gas/arm/neon-psyn.s: Basic test of programmers syntax.
 	* gas/arm/neon-psyn.d: Expected output of above.
 
