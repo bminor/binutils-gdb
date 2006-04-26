@@ -1,3 +1,12 @@
+2006-04-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/2593
+	* elf.c (_bfd_elf_new_section_hook): Don't set section ELF type
+	and flags if its BFD flags have been set.
+	(_bfd_elf_init_private_section_data): Don't copy the output ELF
+	section type from input if it has been set to something
+	different.
+
 2006-04-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/2467

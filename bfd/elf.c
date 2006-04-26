@@ -2487,10 +2487,13 @@ _bfd_elf_new_section_hook (bfd *abfd, asection *sec)
   bed = get_elf_backend_data (abfd);
   sec->use_rela_p = bed->default_use_rela_p;
 
-  /* When we read a file, we don't need section type and flags unless
-     it is a linker created section.  They will be overridden in
-     _bfd_elf_make_section_from_shdr anyway.  */
-  if (abfd->direction != read_direction
+  /* When we read a file, we don't need to set ELF section type and
+     flags.  They will be overridden in _bfd_elf_make_section_from_shdr
+     anyway.  We will set ELF section type and flags for all linker
+     created sections.  If user specifies BFD section flags, we will
+     set ELF section type and flags based on BFD section flags in
+     elf_fake_sections.  */
+  if ((!sec->flags && abfd->direction != read_direction)
       || (sec->flags & SEC_LINKER_CREATED) != 0)
     {
       ssect = (*bed->get_sec_type_attr) (abfd, sec);
@@ -5906,9 +5909,11 @@ _bfd_elf_init_private_section_data (bfd *ibfd,
       || obfd->xvec->flavour != bfd_target_elf_flavour)
     return TRUE;
 
-  /* FIXME: What if the output ELF section type has been set to
-     something different?  */
-  if (elf_section_type (osec) == SHT_NULL)
+  /* Don't copy the output ELF section type from input if the
+     output BFD section flags has been set to something different.
+     elf_fake_sections will set ELF section type based on BFD
+     section flags.  */
+  if (osec->flags == isec->flags || !osec->flags)
     elf_section_type (osec) = elf_section_type (isec);
 
   /* Set things up for objcopy and relocatable link.  The output
