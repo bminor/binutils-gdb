@@ -1,3 +1,7 @@
+2006-04-27  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.texinfo (delete-fork): Command renamed to "delete fork".
+
 2006-04-22  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.texinfo (Contributors): Credit frame unwinder contributors.

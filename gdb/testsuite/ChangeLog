@@ -1,3 +1,9 @@
+2006-04-26  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/multi-forks.exp: Modify patterns for "run to exit",
+	which may have to consume output from other forks.
+	Add tests to make sure that "delete fork" succeeded.
+
 2006-04-20  Michael Snyder  <msnyder@redhat.com>
 
 	* 2006-03-22  Jim Blandy  <jimb@redhat.com>

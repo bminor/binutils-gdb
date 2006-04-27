@@ -2576,7 +2576,7 @@ as shown in the first field of the @samp{info forks} display.
 To quit debugging one of the forked processes, you can either detach
 from it by using the @w{@code{detach-fork}} command (allowing it to
 run independently), or delete (and kill) it using the
-@w{@code{delete-fork}} command.
+@w{@code{delete fork}} command.
 
 @table @code
 @kindex detach-fork @var{fork-id}
@@ -2585,8 +2585,8 @@ Detach from the process identified by @value{GDBN} fork number
 @var{fork-id}, and remove it from the fork list.  The process will be
 allowed to run independently.
 
-@kindex delete-fork @var{fork-id}
-@item delete-fork @var{fork-id}
+@kindex delete fork @var{fork-id}
+@item delete fork @var{fork-id}
 Kill the process identified by @value{GDBN} fork number @var{fork-id},
 and remove it from the fork list.
 
@@ -2675,8 +2675,8 @@ are not affected by restoring a checkpoint.  In general, a checkpoint
 only restores things that reside in the program being debugged, not in
 the debugger.
 
-@kindex delete-checkpoint @var{checkpoint-id}
-@item delete-checkpoint @var{checkpoint-id}
+@kindex delete checkpoint @var{checkpoint-id}
+@item delete checkpoint @var{checkpoint-id}
 Delete the previously-saved checkpoint identified by @var{checkpoint-id}.
 
 @end table

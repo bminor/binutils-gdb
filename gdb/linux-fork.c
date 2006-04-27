@@ -448,9 +448,18 @@ info_forks_command (char *arg, int from_tty)
   struct fork_info *fp;
   int cur_line;
   ULONGEST pc;
+  int requested = -1;
+  struct fork_info *printed = NULL;
+
+  if (arg && *arg)
+    requested = (int) parse_and_eval_long (arg);
 
   for (fp = fork_list; fp; fp = fp->next)
     {
+      if (requested > 0 && fp->num != requested)
+	continue;
+
+      printed = fp;
       if (ptid_equal (fp->ptid, inferior_ptid))
 	{
 	  printf_filtered ("* ");
@@ -489,6 +498,13 @@ info_forks_command (char *arg, int from_tty)
 	}
 
       putchar_filtered ('\n');
+    }
+  if (printed == NULL)
+    {
+      if (requested > 0)
+	printf_filtered (_("No fork number %d.\n"), requested);
+      else
+	printf_filtered (_("No forks.\n"));
     }
 }
 
@@ -670,11 +686,12 @@ Fork a duplicate process (experimental)."));
 restart <n>: restore program context from a checkpoint.\n\
 Argument 'n' is checkpoint ID, as displayed by 'info checkpoints'."));
 
-  /* Delete-checkpoint command: kill the process and remove it from
+  /* Delete checkpoint command: kill the process and remove it from
      fork list.  */
 
-  add_com ("delete-checkpoint", class_obscure, delete_fork_command, _("\
-Delete a fork/checkpoint (experimental)."));
+  add_cmd ("checkpoint", class_obscure, delete_fork_command, _("\
+Delete a fork/checkpoint (experimental)."),
+	   &deletelist);
 
   /* Detach-checkpoint command: release the process to run independantly, 
      and remove it from the fork list.  */
@@ -691,7 +708,7 @@ Detach from a fork/checkpoint (experimental)."));
   /* Command aliases (let "fork" and "checkpoint" be used 
      interchangeably).  */
 
-  add_com_alias ("delete-fork", "delete-checkpoint", class_obscure, 1);
+  add_alias_cmd ("fork", "checkpoint", class_obscure, 1, &deletelist);
   add_com_alias ("detach-fork", "detach-checkpoint", class_obscure, 1);
   add_info_alias ("forks", "checkpoints", 0);
 

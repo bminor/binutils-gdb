@@ -1,3 +1,11 @@
+2006-04-26  Michael Snyder  <msnyder@redhat.com>
+
+	* linux-fork.c (_initialize_linux_fork): Rename "delete-fork"
+	command to "delete fork" (no hyphen), compatible with other
+	"delete" commands.
+	(info_forks_command): Accept a fork ID argument, for info
+	on a single fork.  Report if no matching forks.
+
 2006-04-25  Mark Kettenis  <kettenis@gnu.org>
 
 	From Masaki MURANAKA <monaka@monami-software.com>:
