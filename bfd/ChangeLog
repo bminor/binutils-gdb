@@ -1,3 +1,7 @@
+2006-04-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* coff-rs6000.c (xcoff_write_archive_contents_old): Warning fix.
+
 2006-04-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* configure.in: Update version to 2.16.92.
