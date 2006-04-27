@@ -1,3 +1,7 @@
+2006-04-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* coff-rs6000.c (xcoff_write_archive_contents_old): Warning fix.
+
 2006-04-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/2593

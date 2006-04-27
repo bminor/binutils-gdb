@@ -1,5 +1,5 @@
 /* BFD back-end for IBM RS/6000 "XCOFF" files.
-   Copyright 1990-1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Copyright 1990-1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
    FIXME: Can someone provide a transliteration of this name into ASCII?
    Using the following chars caused a compiler warning on HIUX (so I replaced
@@ -2083,7 +2083,7 @@ xcoff_write_archive_contents_old (abfd)
   char decbuf[XCOFFARMAG_ELEMENT_SIZE + 1];
 
   memset (&fhdr, 0, sizeof fhdr);
-  strncpy (fhdr.magic, XCOFFARMAG, SXCOFFARMAG);
+  (void) strncpy (fhdr.magic, XCOFFARMAG, SXCOFFARMAG);
   sprintf (fhdr.firstmemoff, "%d", SIZEOF_AR_FILE_HDR);
   sprintf (fhdr.freeoff, "%d", 0);
 
