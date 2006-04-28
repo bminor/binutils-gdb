@@ -691,7 +691,8 @@ static void
 print_insn_args (const char *d,
 		 register unsigned long int l,
 		 bfd_vma pc,
-		 struct disassemble_info *info)
+		 struct disassemble_info *info,
+		 const struct mips_opcode *opp)
 {
   int op, delta;
   unsigned int lsb, msb, msbd;
@@ -1252,7 +1253,7 @@ print_insn_mips (bfd_vma memaddr,
 	      if (d != NULL && *d != '\0')
 		{
 		  (*info->fprintf_func) (info->stream, "\t");
-		  print_insn_args (d, word, memaddr, info);
+		  print_insn_args (d, word, memaddr, info, op);
 		}
 
 	      return INSNLEN;
