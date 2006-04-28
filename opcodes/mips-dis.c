@@ -1072,7 +1072,9 @@ print_insn_args (const char *d,
 	  break;
 
 	case 'N':
-	  (*info->fprintf_func) (info->stream, "$fcc%ld",
+	  (*info->fprintf_func) (info->stream,
+				 ((opp->pinfo & (FP_D | FP_S)) != 0
+				  ? "$fcc%ld" : "$cc%ld"),
 				 (l >> OP_SH_BCC) & OP_MASK_BCC);
 	  break;
 

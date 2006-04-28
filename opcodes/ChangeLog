@@ -1,6 +1,12 @@
 2006-04-28  Thiemo Seufer  <ths@mips.com>
             Nigel Stevens  <nigel@mips.com>
 
+	* mips-dis.c (print_insn_args): Print $fcc only for FP
+	instructions, use $cc elsewise.
+
+2006-04-28  Thiemo Seufer  <ths@mips.com>
+            Nigel Stevens  <nigel@mips.com>
+
 	* opcodes/mips-dis.c (mips16_to_32_reg_map, mips16_reg_names):
 	Map MIPS16 registers to O32 names.
 	(print_mips16_insn_arg): Use mips16_reg_names.
