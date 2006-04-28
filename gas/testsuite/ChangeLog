@@ -1,10 +1,15 @@
+2006-04-28  Thiemo Seufer  <ths@mips.com>
+            David Ung  <davidu@mips.com>
+	    Nigel Stevens  <nigel@mips.com>
+
+	* gas/mips/cp0sel-names-mips32r2.d,
+	gas/mips/cp0sel-names-mips64r2.d: Update for MT register names.
+
 2006-04-26  Julian Brown  <julian@codesourcery.com>
 
-	* gas/testsuite/gas/arm/neon-const.s: New testcase. Neon floating-point
-	constants.
-	* gas/testsuite/gas/arm/neon-const.d: Expected output of above.
-	* gas/testsuite/gas/arm/neon-cov.d: Expect floating-point disassembly
-	for VMOV.F32.
+	* gas/arm/neon-const.s: New testcase. Neon floating-point constants.
+	* gas/arm/neon-const.d: Expected output of above.
+	* gas/arm/neon-cov.d: Expect floating-point disassembly for VMOV.F32.
 
 2006-04-26  Julian Brown  <julian@codesourcery.com>
 

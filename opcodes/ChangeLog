@@ -1,4 +1,11 @@
 2006-04-28  Thiemo Seufer  <ths@mips.com>
+            David Ung  <davidu@mips.com>
+	    Nigel Stevens  <nigel@mips.com>
+
+	* mips-dis.c (mips_cp0sel_names_mips3264r2): Add MT register
+	names.
+
+2006-04-28  Thiemo Seufer  <ths@mips.com>
             Nigel Stevens  <nigel@mips.com>
             David Ung  <davidu@mips.com>
 
