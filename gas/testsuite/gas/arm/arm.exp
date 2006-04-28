@@ -64,6 +64,7 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
     run_errors_test "archv6t2-bad" "-march=armv6t2" "Invalid V6T2 instructions"
     run_errors_test "t16-bad" "-march=armv6k" "Valid ARM, invalid Thumb"
     run_errors_test "iwmmxt-bad" "-mcpu=iwmmxt" "iWMMXt errors"
+    run_errors_test "iwmmxt-bad2" "-mcpu=iwmmxt" "iWMMXt errors"
 
     if {[istarget *-*-*coff] || [istarget *-*-pe] || [istarget *-*-wince] ||
         [istarget *-*-*aout*] || [istarget *-*-netbsd] || [istarget *-*-riscix*]} then {

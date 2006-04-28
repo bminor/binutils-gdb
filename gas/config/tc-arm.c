@@ -5446,7 +5446,6 @@ static void
 do_iwmmxt_wldstbh (void)
 {
   inst.instruction |= inst.operands[0].reg << 12;
-  inst.reloc.exp.X_add_number *= 4;
   encode_arm_cp_address (1, TRUE, FALSE, BFD_RELOC_ARM_CP_OFF_IMM_S2);
 }
 
@@ -10886,6 +10885,7 @@ md_apply_fix3 (fixS *	fixP,
       if (value < -255 || value > 255)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("co-processor offset out of range"));
+      value *= 4;
       goto cp_off_common;
 
     case BFD_RELOC_ARM_THUMB_OFFSET:

@@ -135,8 +135,8 @@ Disassembly of section .text:
 0+1fc <[^>]*> ee65114b[ 	]+wsrlhg[ 	]+wr1, wr5, wcgr3
 0+200 <[^>]*> 4ea51148[ 	]+wsrlwgmi[ 	]+wr1, wr5, wcgr0
 0+204 <[^>]*> eee51149[ 	]+wsrldg[ 	]+wr1, wr5, wcgr1
-0+208 <[^>]*> ed811004[ 	]+wstrb[ 	]+wr1, \[r1, #4\]
-0+20c <[^>]*> ede11004[ 	]+wstrh[ 	]+wr1, \[r1, #4\]!
+0+208 <[^>]*> ed8110ff[ 	]+wstrb[ 	]+wr1, \[r1, #255\]
+0+20c <[^>]*> ed6110ff[ 	]+wstrh[ 	]+wr1, \[r1, #-255\]!
 0+210 <[^>]*> eca11101[ 	]+wstrw[ 	]+wr1, \[r1\], #4
 0+214 <[^>]*> edc111ff[ 	]+wstrd[ 	]+wr1, \[r1, #1020\]
 0+218 <[^>]*> fca1314b[ 	]+wstrw[ 	]+wcasf, \[r1\], #300
