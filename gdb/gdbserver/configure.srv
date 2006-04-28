@@ -48,7 +48,8 @@ case "${target}" in
 			srv_linux_usrregs=yes
  			srv_linux_thread_db=yes
 			;;
-  m68*-*-linux*)	srv_regobj=reg-m68k.o
+  m68*-*-linux*)	# FIXME, we really need a way of distinguishing
+			srv_regobj=reg-cf.o
 			srv_tgtobj="linux-low.o linux-m68k-low.o"
 			srv_linux_usrregs=yes
 			srv_linux_regsets=yes
