@@ -51,11 +51,14 @@ struct mips_cp0sel_name
   const char * const name;
 };
 
-/* The mips16 register names.  */
-static const char * const mips16_reg_names[] =
+/* The mips16 registers.  */
+static const unsigned int mips16_to_32_reg_map[] =
 {
-  "s0", "s1", "v0", "v1", "a0", "a1", "a2", "a3"
+  16, 17, 2, 3, 4, 5, 6, 7
 };
+
+#define mips16_reg_names(rn)	mips_gpr_names[mips16_to_32_reg_map[rn]]
+
 
 static const char * const mips_gpr_names_numeric[32] =
 {
@@ -1283,27 +1286,27 @@ print_mips16_insn_arg (char type,
     case 'y':
     case 'w':
       (*info->fprintf_func) (info->stream, "%s",
-			     mips16_reg_names[((l >> MIPS16OP_SH_RY)
-					       & MIPS16OP_MASK_RY)]);
+			     mips16_reg_names(((l >> MIPS16OP_SH_RY)
+					       & MIPS16OP_MASK_RY)));
       break;
 
     case 'x':
     case 'v':
       (*info->fprintf_func) (info->stream, "%s",
-			     mips16_reg_names[((l >> MIPS16OP_SH_RX)
-					       & MIPS16OP_MASK_RX)]);
+			     mips16_reg_names(((l >> MIPS16OP_SH_RX)
+					       & MIPS16OP_MASK_RX)));
       break;
 
     case 'z':
       (*info->fprintf_func) (info->stream, "%s",
-			     mips16_reg_names[((l >> MIPS16OP_SH_RZ)
-					       & MIPS16OP_MASK_RZ)]);
+			     mips16_reg_names(((l >> MIPS16OP_SH_RZ)
+					       & MIPS16OP_MASK_RZ)));
       break;
 
     case 'Z':
       (*info->fprintf_func) (info->stream, "%s",
-			     mips16_reg_names[((l >> MIPS16OP_SH_MOVE32Z)
-					       & MIPS16OP_MASK_MOVE32Z)]);
+			     mips16_reg_names(((l >> MIPS16OP_SH_MOVE32Z)
+					       & MIPS16OP_MASK_MOVE32Z)));
       break;
 
     case '0':
