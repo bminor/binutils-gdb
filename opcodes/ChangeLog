@@ -1,25 +1,25 @@
 2006-04-28  Thiemo Seufer  <ths@mips.com>
             David Ung  <davidu@mips.com>
-	    Nigel Stevens  <nigel@mips.com>
+	    Nigel Stephens  <nigel@mips.com>
 
 	* mips-dis.c (mips_cp0sel_names_mips3264r2): Add MT register
 	names.
 
 2006-04-28  Thiemo Seufer  <ths@mips.com>
-            Nigel Stevens  <nigel@mips.com>
+            Nigel Stephens  <nigel@mips.com>
             David Ung  <davidu@mips.com>
 
 	* mips-dis.c (print_insn_args): Add mips_opcode argument.
 	(print_insn_mips):  Adjust print_insn_args call.
 
 2006-04-28  Thiemo Seufer  <ths@mips.com>
-            Nigel Stevens  <nigel@mips.com>
+            Nigel Stephens  <nigel@mips.com>
 
 	* mips-dis.c (print_insn_args): Print $fcc only for FP
 	instructions, use $cc elsewise.
 
 2006-04-28  Thiemo Seufer  <ths@mips.com>
-            Nigel Stevens  <nigel@mips.com>
+            Nigel Stephens  <nigel@mips.com>
 
 	* opcodes/mips-dis.c (mips16_to_32_reg_map, mips16_reg_names):
 	Map MIPS16 registers to O32 names.

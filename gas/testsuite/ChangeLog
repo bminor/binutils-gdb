@@ -1,6 +1,6 @@
 2006-04-28  Thiemo Seufer  <ths@mips.com>
             David Ung  <davidu@mips.com>
-	    Nigel Stevens  <nigel@mips.com>
+	    Nigel Stephens  <nigel@mips.com>
 
 	* gas/mips/cp0sel-names-mips32r2.d,
 	gas/mips/cp0sel-names-mips64r2.d: Update for MT register names.
