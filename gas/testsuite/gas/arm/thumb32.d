@@ -349,163 +349,163 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> bf90      	nop	\{9\}
 0[0-9a-f]+ <[^>]+> f3af 8081 	nop\.w	\{129\}
 0[0-9a-f]+ <[^>]+> bf08      	it	eq
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
 0[0-9a-f]+ <[^>]+> bf18      	it	ne
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopne
 0[0-9a-f]+ <[^>]+> bf28      	it	cs
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopcs
 0[0-9a-f]+ <[^>]+> bf28      	it	cs
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopcs
 0[0-9a-f]+ <[^>]+> bf38      	it	cc
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopcc
 0[0-9a-f]+ <[^>]+> bf38      	it	cc
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopcc
 0[0-9a-f]+ <[^>]+> bf38      	it	cc
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopcc
 0[0-9a-f]+ <[^>]+> bf48      	it	mi
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopmi
 0[0-9a-f]+ <[^>]+> bf58      	it	pl
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	noppl
 0[0-9a-f]+ <[^>]+> bf68      	it	vs
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopvs
 0[0-9a-f]+ <[^>]+> bf78      	it	vc
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopvc
 0[0-9a-f]+ <[^>]+> bf88      	it	hi
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nophi
 0[0-9a-f]+ <[^>]+> bfa8      	it	ge
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopge
 0[0-9a-f]+ <[^>]+> bfb8      	it	lt
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	noplt
 0[0-9a-f]+ <[^>]+> bfc8      	it	gt
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopgt
 0[0-9a-f]+ <[^>]+> bfd8      	it	le
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nople
 0[0-9a-f]+ <[^>]+> bfe8      	it	al
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopal
 0[0-9a-f]+ <[^>]+> bf04      	itt	eq
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
 0[0-9a-f]+ <[^>]+> bf0c      	ite	eq
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopne
 0[0-9a-f]+ <[^>]+> bf02      	ittt	eq
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
 0[0-9a-f]+ <[^>]+> bf0a      	itet	eq
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
 0[0-9a-f]+ <[^>]+> bf06      	itte	eq
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopne
 0[0-9a-f]+ <[^>]+> bf0e      	itee	eq
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopne
 0[0-9a-f]+ <[^>]+> bf01      	itttt	eq
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
 0[0-9a-f]+ <[^>]+> bf09      	itett	eq
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
 0[0-9a-f]+ <[^>]+> bf05      	ittet	eq
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
 0[0-9a-f]+ <[^>]+> bf03      	ittte	eq
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopne
 0[0-9a-f]+ <[^>]+> bf07      	ittee	eq
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopne
 0[0-9a-f]+ <[^>]+> bf0b      	itete	eq
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopne
 0[0-9a-f]+ <[^>]+> bf0d      	iteet	eq
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
 0[0-9a-f]+ <[^>]+> bf0f      	iteee	eq
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopne
 0[0-9a-f]+ <[^>]+> bf1c      	itt	ne
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopne
 0[0-9a-f]+ <[^>]+> bf14      	ite	ne
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
 0[0-9a-f]+ <[^>]+> bf1e      	ittt	ne
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopne
 0[0-9a-f]+ <[^>]+> bf16      	itet	ne
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopne
 0[0-9a-f]+ <[^>]+> bf1a      	itte	ne
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
 0[0-9a-f]+ <[^>]+> bf12      	itee	ne
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
 0[0-9a-f]+ <[^>]+> bf1f      	itttt	ne
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopne
 0[0-9a-f]+ <[^>]+> bf17      	itett	ne
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopne
 0[0-9a-f]+ <[^>]+> bf1b      	ittet	ne
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopne
 0[0-9a-f]+ <[^>]+> bf1d      	ittte	ne
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
 0[0-9a-f]+ <[^>]+> bf19      	ittee	ne
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
 0[0-9a-f]+ <[^>]+> bf15      	itete	ne
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
 0[0-9a-f]+ <[^>]+> bf13      	iteet	ne
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopne
 0[0-9a-f]+ <[^>]+> bf11      	iteee	ne
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> bf00      	nopne
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
+0[0-9a-f]+ <[^>]+> bf00      	nopeq
 0[0-9a-f]+ <[^>]+> f895 f000 	pld	\[r5\]
 0[0-9a-f]+ <[^>]+> f895 f330 	pld	\[r5, #816\]
 0[0-9a-f]+ <[^>]+> f815 fc30 	pld	\[r5, #-48\]
@@ -949,8 +949,8 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> e890 0300 	ldmia.w	r0, \{r8, r9\}
 0[0-9a-f]+ <[^>]+> e880 0300 	stmia.w	r0, \{r8, r9\}
 0[0-9a-f]+ <[^>]+> bf01      	itttt	eq
-0[0-9a-f]+ <[^>]+> c806      	ldmia	r0!, \{r1, r2\}
-0[0-9a-f]+ <[^>]+> c006      	stmia	r0!, \{r1, r2\}
-0[0-9a-f]+ <[^>]+> e890 0300 	ldmia.w	r0, \{r8, r9\}
-0[0-9a-f]+ <[^>]+> e880 0300 	stmia.w	r0, \{r8, r9\}
+0[0-9a-f]+ <[^>]+> c806      	ldmiaeq	r0!, \{r1, r2\}
+0[0-9a-f]+ <[^>]+> c006      	stmiaeq	r0!, \{r1, r2\}
+0[0-9a-f]+ <[^>]+> e890 0300 	ldmiaeq.w	r0, \{r8, r9\}
+0[0-9a-f]+ <[^>]+> e880 0300 	stmiaeq.w	r0, \{r8, r9\}
 0[0-9a-f]+ <[^>]+> bf00      	nop

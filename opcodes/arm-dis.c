@@ -62,7 +62,8 @@ struct opcode16
 
    %%			%
 
-   %c			print condition code (always bits 28-31)
+   %c			print condition code (always bits 28-31 in ARM mode)
+   %u			print condition code (unconditional in ARM mode)
    %A			print address for ldc/stc/ldf/stf instruction
    %B			print vstm/vldm register list
    %C			print vstr/vldr address operand
@@ -409,15 +410,15 @@ static const struct opcode32 coprocessor_opcodes[] =
   {ARM_EXT_V2, 0x0c100000, 0x0e100000, "ldc%c%22'l\t%8-11d, cr%12-15d, %A"},
 
   /* V6 coprocessor instructions */
-  {ARM_EXT_V6, 0xfc500000, 0xfff00000, "mrrc2\t%8-11d, %4-7d, %12-15r, %16-19r, cr%0-3d"},
-  {ARM_EXT_V6, 0xfc400000, 0xfff00000, "mcrr2\t%8-11d, %4-7d, %12-15r, %16-19r, cr%0-3d"},
+  {ARM_EXT_V6, 0xfc500000, 0xfff00000, "mrrc2%c\t%8-11d, %4-7d, %12-15r, %16-19r, cr%0-3d"},
+  {ARM_EXT_V6, 0xfc400000, 0xfff00000, "mcrr2%c\t%8-11d, %4-7d, %12-15r, %16-19r, cr%0-3d"},
 
   /* V5 coprocessor instructions */
-  {ARM_EXT_V5, 0xfc100000, 0xfe100000, "ldc2%22'l\t%8-11d, cr%12-15d, %A"},
-  {ARM_EXT_V5, 0xfc000000, 0xfe100000, "stc2%22'l\t%8-11d, cr%12-15d, %A"},
-  {ARM_EXT_V5, 0xfe000000, 0xff000010, "cdp2\t%8-11d, %20-23d, cr%12-15d, cr%16-19d, cr%0-3d, {%5-7d}"},
-  {ARM_EXT_V5, 0xfe000010, 0xff100010, "mcr2\t%8-11d, %21-23d, %12-15r, cr%16-19d, cr%0-3d, {%5-7d}"},
-  {ARM_EXT_V5, 0xfe100010, 0xff100010, "mrc2\t%8-11d, %21-23d, %12-15r, cr%16-19d, cr%0-3d, {%5-7d}"},
+  {ARM_EXT_V5, 0xfc100000, 0xfe100000, "ldc2%22'l%c\t%8-11d, cr%12-15d, %A"},
+  {ARM_EXT_V5, 0xfc000000, 0xfe100000, "stc2%22'l%c\t%8-11d, cr%12-15d, %A"},
+  {ARM_EXT_V5, 0xfe000000, 0xff000010, "cdp2%c\t%8-11d, %20-23d, cr%12-15d, cr%16-19d, cr%0-3d, {%5-7d}"},
+  {ARM_EXT_V5, 0xfe000010, 0xff100010, "mcr2%c\t%8-11d, %21-23d, %12-15r, cr%16-19d, cr%0-3d, {%5-7d}"},
+  {ARM_EXT_V5, 0xfe100010, 0xff100010, "mrc2%c\t%8-11d, %21-23d, %12-15r, cr%16-19d, cr%0-3d, {%5-7d}"},
 
   {0, 0, 0, 0}
 };
@@ -430,6 +431,7 @@ static const struct opcode32 coprocessor_opcodes[] =
 
    %%			%
 
+   %c			print condition code
    %A			print v{st,ld}[1234] operands
    %B			print v{st,ld}[1234] any one operands
    %C			print v{st,ld}[1234] single->all operands
@@ -454,246 +456,246 @@ static const struct opcode32 coprocessor_opcodes[] =
 static const struct opcode32 neon_opcodes[] =
 {
   /* Extract */
-  {FPU_NEON_EXT_V1, 0xf2b00840, 0xffb00850, "vext.8\t%12-15,22R, %16-19,7R, %0-3,5R, #%8-11d"},
-  {FPU_NEON_EXT_V1, 0xf2b00000, 0xffb00810, "vext.8\t%12-15,22R, %16-19,7R, %0-3,5R, #%8-11d"},
+  {FPU_NEON_EXT_V1, 0xf2b00840, 0xffb00850, "vext%c.8\t%12-15,22R, %16-19,7R, %0-3,5R, #%8-11d"},
+  {FPU_NEON_EXT_V1, 0xf2b00000, 0xffb00810, "vext%c.8\t%12-15,22R, %16-19,7R, %0-3,5R, #%8-11d"},
 
   /* Move data element to all lanes */
-  {FPU_NEON_EXT_V1, 0xf3b40c00, 0xffb70f90, "vdup.32\t%12-15,22R, %0-3,5D[%19d]"},
-  {FPU_NEON_EXT_V1, 0xf3b20c00, 0xffb30f90, "vdup.16\t%12-15,22R, %0-3,5D[%18-19d]"},
-  {FPU_NEON_EXT_V1, 0xf3b10c00, 0xffb10f90, "vdup.8\t%12-15,22R, %0-3,5D[%17-19d]"},
+  {FPU_NEON_EXT_V1, 0xf3b40c00, 0xffb70f90, "vdup%c.32\t%12-15,22R, %0-3,5D[%19d]"},
+  {FPU_NEON_EXT_V1, 0xf3b20c00, 0xffb30f90, "vdup%c.16\t%12-15,22R, %0-3,5D[%18-19d]"},
+  {FPU_NEON_EXT_V1, 0xf3b10c00, 0xffb10f90, "vdup%c.8\t%12-15,22R, %0-3,5D[%17-19d]"},
 
   /* Table lookup */
-  {FPU_NEON_EXT_V1, 0xf3b00800, 0xffb00c50, "vtbl.8\t%12-15,22D, %F, %0-3,5D"},
-  {FPU_NEON_EXT_V1, 0xf3b00840, 0xffb00c50, "vtbx.8\t%12-15,22D, %F, %0-3,5D"},
+  {FPU_NEON_EXT_V1, 0xf3b00800, 0xffb00c50, "vtbl%c.8\t%12-15,22D, %F, %0-3,5D"},
+  {FPU_NEON_EXT_V1, 0xf3b00840, 0xffb00c50, "vtbx%c.8\t%12-15,22D, %F, %0-3,5D"},
   
   /* Two registers, miscellaneous */
-  {FPU_NEON_EXT_V1, 0xf2880a10, 0xfebf0fd0, "vmovl.%24?us8\t%12-15,22Q, %0-3,5D"},
-  {FPU_NEON_EXT_V1, 0xf2900a10, 0xfebf0fd0, "vmovl.%24?us16\t%12-15,22Q, %0-3,5D"},
-  {FPU_NEON_EXT_V1, 0xf2a00a10, 0xfebf0fd0, "vmovl.%24?us32\t%12-15,22Q, %0-3,5D"},
-  {FPU_NEON_EXT_V1, 0xf3b00500, 0xffbf0f90, "vcnt.8\t%12-15,22R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3b00580, 0xffbf0f90, "vmvn\t%12-15,22R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3b20000, 0xffbf0f90, "vswp\t%12-15,22R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3b20200, 0xffb30fd0, "vmovn.i%18-19S2\t%12-15,22D, %0-3,5Q"},
-  {FPU_NEON_EXT_V1, 0xf3b20240, 0xffb30fd0, "vqmovun.s%18-19T2\t%12-15,22D, %0-3,5Q"},
-  {FPU_NEON_EXT_V1, 0xf3b20280, 0xffb30fd0, "vqmovn.s%18-19T2\t%12-15,22D, %0-3,5Q"},
-  {FPU_NEON_EXT_V1, 0xf3b202c0, 0xffb30fd0, "vqmovn.u%18-19T2\t%12-15,22D, %0-3,5Q"},
-  {FPU_NEON_EXT_V1, 0xf3b20300, 0xffb30fd0, "vshll.i%18-19S2\t%12-15,22Q, %0-3,5D, #%18-19S2"},
-  {FPU_NEON_EXT_V1, 0xf3bb0400, 0xffbf0e90, "vrecpe.%8?fu%18-19S2\t%12-15,22R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3bb0480, 0xffbf0e90, "vrsqrte.%8?fu%18-19S2\t%12-15,22R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3b00000, 0xffb30f90, "vrev64.%18-19S2\t%12-15,22R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3b00080, 0xffb30f90, "vrev32.%18-19S2\t%12-15,22R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3b00100, 0xffb30f90, "vrev16.%18-19S2\t%12-15,22R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3b00400, 0xffb30f90, "vcls.s%18-19S2\t%12-15,22R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3b00480, 0xffb30f90, "vclz.i%18-19S2\t%12-15,22R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3b00700, 0xffb30f90, "vqabs.s%18-19S2\t%12-15,22R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3b00780, 0xffb30f90, "vqneg.s%18-19S2\t%12-15,22R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3b20080, 0xffb30f90, "vtrn.%18-19S2\t%12-15,22R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3b20100, 0xffb30f90, "vuzp.%18-19S2\t%12-15,22R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3b20180, 0xffb30f90, "vzip.%18-19S2\t%12-15,22R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3b10000, 0xffb30b90, "vcgt.%10?fs%18-19S2\t%12-15,22R, %0-3,5R, #0"},
-  {FPU_NEON_EXT_V1, 0xf3b10080, 0xffb30b90, "vcge.%10?fs%18-19S2\t%12-15,22R, %0-3,5R, #0"},
-  {FPU_NEON_EXT_V1, 0xf3b10100, 0xffb30b90, "vceq.%10?fi%18-19S2\t%12-15,22R, %0-3,5R, #0"},
-  {FPU_NEON_EXT_V1, 0xf3b10180, 0xffb30b90, "vcle.%10?fs%18-19S2\t%12-15,22R, %0-3,5R, #0"},
-  {FPU_NEON_EXT_V1, 0xf3b10200, 0xffb30b90, "vclt.%10?fs%18-19S2\t%12-15,22R, %0-3,5R, #0"},
-  {FPU_NEON_EXT_V1, 0xf3b10300, 0xffb30b90, "vabs.%10?fs%18-19S2\t%12-15,22R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3b10380, 0xffb30b90, "vneg.%10?fs%18-19S2\t%12-15,22R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3b00200, 0xffb30f10, "vpaddl.%7?us%18-19S2\t%12-15,22R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3b00600, 0xffb30f10, "vpadal.%7?us%18-19S2\t%12-15,22R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3b30600, 0xffb30e10, "vcvt.%7-8?usff%18-19Sa.%7-8?ffus%18-19Sa\t%12-15,22R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2880a10, 0xfebf0fd0, "vmovl%c.%24?us8\t%12-15,22Q, %0-3,5D"},
+  {FPU_NEON_EXT_V1, 0xf2900a10, 0xfebf0fd0, "vmovl%c.%24?us16\t%12-15,22Q, %0-3,5D"},
+  {FPU_NEON_EXT_V1, 0xf2a00a10, 0xfebf0fd0, "vmovl%c.%24?us32\t%12-15,22Q, %0-3,5D"},
+  {FPU_NEON_EXT_V1, 0xf3b00500, 0xffbf0f90, "vcnt%c.8\t%12-15,22R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3b00580, 0xffbf0f90, "vmvn%c\t%12-15,22R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3b20000, 0xffbf0f90, "vswp%c\t%12-15,22R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3b20200, 0xffb30fd0, "vmovn%c.i%18-19S2\t%12-15,22D, %0-3,5Q"},
+  {FPU_NEON_EXT_V1, 0xf3b20240, 0xffb30fd0, "vqmovun%c.s%18-19T2\t%12-15,22D, %0-3,5Q"},
+  {FPU_NEON_EXT_V1, 0xf3b20280, 0xffb30fd0, "vqmovn%c.s%18-19T2\t%12-15,22D, %0-3,5Q"},
+  {FPU_NEON_EXT_V1, 0xf3b202c0, 0xffb30fd0, "vqmovn%c.u%18-19T2\t%12-15,22D, %0-3,5Q"},
+  {FPU_NEON_EXT_V1, 0xf3b20300, 0xffb30fd0, "vshll%c.i%18-19S2\t%12-15,22Q, %0-3,5D, #%18-19S2"},
+  {FPU_NEON_EXT_V1, 0xf3bb0400, 0xffbf0e90, "vrecpe%c.%8?fu%18-19S2\t%12-15,22R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3bb0480, 0xffbf0e90, "vrsqrte%c.%8?fu%18-19S2\t%12-15,22R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3b00000, 0xffb30f90, "vrev64%c.%18-19S2\t%12-15,22R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3b00080, 0xffb30f90, "vrev32%c.%18-19S2\t%12-15,22R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3b00100, 0xffb30f90, "vrev16%c.%18-19S2\t%12-15,22R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3b00400, 0xffb30f90, "vcls%c.s%18-19S2\t%12-15,22R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3b00480, 0xffb30f90, "vclz%c.i%18-19S2\t%12-15,22R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3b00700, 0xffb30f90, "vqabs%c.s%18-19S2\t%12-15,22R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3b00780, 0xffb30f90, "vqneg%c.s%18-19S2\t%12-15,22R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3b20080, 0xffb30f90, "vtrn%c.%18-19S2\t%12-15,22R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3b20100, 0xffb30f90, "vuzp%c.%18-19S2\t%12-15,22R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3b20180, 0xffb30f90, "vzip%c.%18-19S2\t%12-15,22R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3b10000, 0xffb30b90, "vcgt%c.%10?fs%18-19S2\t%12-15,22R, %0-3,5R, #0"},
+  {FPU_NEON_EXT_V1, 0xf3b10080, 0xffb30b90, "vcge%c.%10?fs%18-19S2\t%12-15,22R, %0-3,5R, #0"},
+  {FPU_NEON_EXT_V1, 0xf3b10100, 0xffb30b90, "vceq%c.%10?fi%18-19S2\t%12-15,22R, %0-3,5R, #0"},
+  {FPU_NEON_EXT_V1, 0xf3b10180, 0xffb30b90, "vcle%c.%10?fs%18-19S2\t%12-15,22R, %0-3,5R, #0"},
+  {FPU_NEON_EXT_V1, 0xf3b10200, 0xffb30b90, "vclt%c.%10?fs%18-19S2\t%12-15,22R, %0-3,5R, #0"},
+  {FPU_NEON_EXT_V1, 0xf3b10300, 0xffb30b90, "vabs%c.%10?fs%18-19S2\t%12-15,22R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3b10380, 0xffb30b90, "vneg%c.%10?fs%18-19S2\t%12-15,22R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3b00200, 0xffb30f10, "vpaddl%c.%7?us%18-19S2\t%12-15,22R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3b00600, 0xffb30f10, "vpadal%c.%7?us%18-19S2\t%12-15,22R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3b30600, 0xffb30e10, "vcvt%c.%7-8?usff%18-19Sa.%7-8?ffus%18-19Sa\t%12-15,22R, %0-3,5R"},
 
   /* Three registers of the same length */
-  {FPU_NEON_EXT_V1, 0xf2000110, 0xffb00f10, "vand\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2100110, 0xffb00f10, "vbic\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2200110, 0xffb00f10, "vorr\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2300110, 0xffb00f10, "vorn\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3000110, 0xffb00f10, "veor\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3100110, 0xffb00f10, "vbsl\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3200110, 0xffb00f10, "vbit\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3300110, 0xffb00f10, "vbif\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000d00, 0xffa00f10, "vadd.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000d10, 0xffa00f10, "vmla.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000e00, 0xffa00f10, "vceq.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000f00, 0xffa00f10, "vmax.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000f10, 0xffa00f10, "vrecps.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2200d00, 0xffa00f10, "vsub.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2200d10, 0xffa00f10, "vmls.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2200f00, 0xffa00f10, "vmin.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2200f10, 0xffa00f10, "vrsqrts.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3000d00, 0xffa00f10, "vpadd.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3000d10, 0xffa00f10, "vmul.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3000e00, 0xffa00f10, "vcge.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3000e10, 0xffa00f10, "vacge.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3000f00, 0xffa00f10, "vpmax.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3200d00, 0xffa00f10, "vabd.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3200e00, 0xffa00f10, "vcgt.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3200e10, 0xffa00f10, "vacgt.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3200f00, 0xffa00f10, "vpmin.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000800, 0xff800f10, "vadd.i%20-21S3\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000810, 0xff800f10, "vtst.%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000900, 0xff800f10, "vmla.i%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000b00, 0xff800f10, "vqdmulh.s%20-21S6\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000b10, 0xff800f10, "vpadd.i%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3000800, 0xff800f10, "vsub.i%20-21S3\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3000810, 0xff800f10, "vceq.i%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3000900, 0xff800f10, "vmls.i%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf3000b00, 0xff800f10, "vqrdmulh.s%20-21S6\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000000, 0xfe800f10, "vhadd.%24?us%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000010, 0xfe800f10, "vqadd.%24?us%20-21S3\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000100, 0xfe800f10, "vrhadd.%24?us%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000200, 0xfe800f10, "vhsub.%24?us%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000210, 0xfe800f10, "vqsub.%24?us%20-21S3\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000300, 0xfe800f10, "vcgt.%24?us%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000310, 0xfe800f10, "vcge.%24?us%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000400, 0xfe800f10, "vshl.%24?us%20-21S3\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000410, 0xfe800f10, "vqshl.%24?us%20-21S3\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000500, 0xfe800f10, "vrshl.%24?us%20-21S3\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000510, 0xfe800f10, "vqrshl.%24?us%20-21S3\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000600, 0xfe800f10, "vmax.%24?us%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000610, 0xfe800f10, "vmin.%24?us%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000700, 0xfe800f10, "vabd.%24?us%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000710, 0xfe800f10, "vaba.%24?us%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000910, 0xfe800f10, "vmul.%24?pi%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000a00, 0xfe800f10, "vpmax.%24?us%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
-  {FPU_NEON_EXT_V1, 0xf2000a10, 0xfe800f10, "vpmin.%24?us%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000110, 0xffb00f10, "vand%c\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2100110, 0xffb00f10, "vbic%c\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2200110, 0xffb00f10, "vorr%c\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2300110, 0xffb00f10, "vorn%c\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3000110, 0xffb00f10, "veor%c\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3100110, 0xffb00f10, "vbsl%c\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3200110, 0xffb00f10, "vbit%c\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3300110, 0xffb00f10, "vbif%c\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000d00, 0xffa00f10, "vadd%c.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000d10, 0xffa00f10, "vmla%c.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000e00, 0xffa00f10, "vceq%c.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000f00, 0xffa00f10, "vmax%c.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000f10, 0xffa00f10, "vrecps%c.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2200d00, 0xffa00f10, "vsub%c.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2200d10, 0xffa00f10, "vmls%c.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2200f00, 0xffa00f10, "vmin%c.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2200f10, 0xffa00f10, "vrsqrts%c.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3000d00, 0xffa00f10, "vpadd%c.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3000d10, 0xffa00f10, "vmul%c.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3000e00, 0xffa00f10, "vcge%c.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3000e10, 0xffa00f10, "vacge%c.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3000f00, 0xffa00f10, "vpmax%c.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3200d00, 0xffa00f10, "vabd%c.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3200e00, 0xffa00f10, "vcgt%c.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3200e10, 0xffa00f10, "vacgt%c.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3200f00, 0xffa00f10, "vpmin%c.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000800, 0xff800f10, "vadd%c.i%20-21S3\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000810, 0xff800f10, "vtst%c.%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000900, 0xff800f10, "vmla%c.i%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000b00, 0xff800f10, "vqdmulh%c.s%20-21S6\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000b10, 0xff800f10, "vpadd%c.i%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3000800, 0xff800f10, "vsub%c.i%20-21S3\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3000810, 0xff800f10, "vceq%c.i%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3000900, 0xff800f10, "vmls%c.i%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf3000b00, 0xff800f10, "vqrdmulh%c.s%20-21S6\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000000, 0xfe800f10, "vhadd%c.%24?us%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000010, 0xfe800f10, "vqadd%c.%24?us%20-21S3\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000100, 0xfe800f10, "vrhadd%c.%24?us%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000200, 0xfe800f10, "vhsub%c.%24?us%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000210, 0xfe800f10, "vqsub%c.%24?us%20-21S3\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000300, 0xfe800f10, "vcgt%c.%24?us%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000310, 0xfe800f10, "vcge%c.%24?us%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000400, 0xfe800f10, "vshl%c.%24?us%20-21S3\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000410, 0xfe800f10, "vqshl%c.%24?us%20-21S3\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000500, 0xfe800f10, "vrshl%c.%24?us%20-21S3\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000510, 0xfe800f10, "vqrshl%c.%24?us%20-21S3\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000600, 0xfe800f10, "vmax%c.%24?us%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000610, 0xfe800f10, "vmin%c.%24?us%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000700, 0xfe800f10, "vabd%c.%24?us%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000710, 0xfe800f10, "vaba%c.%24?us%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000910, 0xfe800f10, "vmul%c.%24?pi%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000a00, 0xfe800f10, "vpmax%c.%24?us%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_V1, 0xf2000a10, 0xfe800f10, "vpmin%c.%24?us%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
 
   /* One register and an immediate value */
-  {FPU_NEON_EXT_V1, 0xf2800e10, 0xfeb80fb0, "vmov.i8\t%12-15,22R, %E"},
-  {FPU_NEON_EXT_V1, 0xf2800e30, 0xfeb80fb0, "vmov.i64\t%12-15,22R, %E"},
-  {FPU_NEON_EXT_V1, 0xf2800f10, 0xfeb80fb0, "vmov.f32\t%12-15,22R, %E"},
-  {FPU_NEON_EXT_V1, 0xf2800810, 0xfeb80db0, "vmov.i16\t%12-15,22R, %E"},
-  {FPU_NEON_EXT_V1, 0xf2800830, 0xfeb80db0, "vmvn.i16\t%12-15,22R, %E"},
-  {FPU_NEON_EXT_V1, 0xf2800910, 0xfeb80db0, "vorr.i16\t%12-15,22R, %E"},
-  {FPU_NEON_EXT_V1, 0xf2800930, 0xfeb80db0, "vbic.i16\t%12-15,22R, %E"},
-  {FPU_NEON_EXT_V1, 0xf2800c10, 0xfeb80eb0, "vmov.i32\t%12-15,22R, %E"},
-  {FPU_NEON_EXT_V1, 0xf2800c30, 0xfeb80eb0, "vmvn.i32\t%12-15,22R, %E"},
-  {FPU_NEON_EXT_V1, 0xf2800110, 0xfeb809b0, "vorr.i32\t%12-15,22R, %E"},
-  {FPU_NEON_EXT_V1, 0xf2800130, 0xfeb809b0, "vbic.i32\t%12-15,22R, %E"},
-  {FPU_NEON_EXT_V1, 0xf2800010, 0xfeb808b0, "vmov.i32\t%12-15,22R, %E"},
-  {FPU_NEON_EXT_V1, 0xf2800030, 0xfeb808b0, "vmvn.i32\t%12-15,22R, %E"},
+  {FPU_NEON_EXT_V1, 0xf2800e10, 0xfeb80fb0, "vmov%c.i8\t%12-15,22R, %E"},
+  {FPU_NEON_EXT_V1, 0xf2800e30, 0xfeb80fb0, "vmov%c.i64\t%12-15,22R, %E"},
+  {FPU_NEON_EXT_V1, 0xf2800f10, 0xfeb80fb0, "vmov%c.f32\t%12-15,22R, %E"},
+  {FPU_NEON_EXT_V1, 0xf2800810, 0xfeb80db0, "vmov%c.i16\t%12-15,22R, %E"},
+  {FPU_NEON_EXT_V1, 0xf2800830, 0xfeb80db0, "vmvn%c.i16\t%12-15,22R, %E"},
+  {FPU_NEON_EXT_V1, 0xf2800910, 0xfeb80db0, "vorr%c.i16\t%12-15,22R, %E"},
+  {FPU_NEON_EXT_V1, 0xf2800930, 0xfeb80db0, "vbic%c.i16\t%12-15,22R, %E"},
+  {FPU_NEON_EXT_V1, 0xf2800c10, 0xfeb80eb0, "vmov%c.i32\t%12-15,22R, %E"},
+  {FPU_NEON_EXT_V1, 0xf2800c30, 0xfeb80eb0, "vmvn%c.i32\t%12-15,22R, %E"},
+  {FPU_NEON_EXT_V1, 0xf2800110, 0xfeb809b0, "vorr%c.i32\t%12-15,22R, %E"},
+  {FPU_NEON_EXT_V1, 0xf2800130, 0xfeb809b0, "vbic%c.i32\t%12-15,22R, %E"},
+  {FPU_NEON_EXT_V1, 0xf2800010, 0xfeb808b0, "vmov%c.i32\t%12-15,22R, %E"},
+  {FPU_NEON_EXT_V1, 0xf2800030, 0xfeb808b0, "vmvn%c.i32\t%12-15,22R, %E"},
 
   /* Two registers and a shift amount */
-  {FPU_NEON_EXT_V1, 0xf2880810, 0xffb80fd0, "vshrn.i16\t%12-15,22D, %0-3,5Q, #%16-18e"},
-  {FPU_NEON_EXT_V1, 0xf2880850, 0xffb80fd0, "vrshrn.i16\t%12-15,22D, %0-3,5Q, #%16-18e"},
-  {FPU_NEON_EXT_V1, 0xf2880810, 0xfeb80fd0, "vqshrun.s16\t%12-15,22D, %0-3,5Q, #%16-18e"},
-  {FPU_NEON_EXT_V1, 0xf2880850, 0xfeb80fd0, "vqrshrun.s16\t%12-15,22D, %0-3,5Q, #%16-18e"},
-  {FPU_NEON_EXT_V1, 0xf2880910, 0xfeb80fd0, "vqshrn.%24?us16\t%12-15,22D, %0-3,5Q, #%16-18e"},
-  {FPU_NEON_EXT_V1, 0xf2880950, 0xfeb80fd0, "vqrshrn.%24?us16\t%12-15,22D, %0-3,5Q, #%16-18e"},
-  {FPU_NEON_EXT_V1, 0xf2880a10, 0xfeb80fd0, "vshll.%24?us8\t%12-15,22D, %0-3,5Q, #%16-18d"},
-  {FPU_NEON_EXT_V1, 0xf2900810, 0xffb00fd0, "vshrn.i32\t%12-15,22D, %0-3,5Q, #%16-19e"},
-  {FPU_NEON_EXT_V1, 0xf2900850, 0xffb00fd0, "vrshrn.i32\t%12-15,22D, %0-3,5Q, #%16-19e"},
-  {FPU_NEON_EXT_V1, 0xf2880510, 0xffb80f90, "vshl.%24?us8\t%12-15,22R, %0-3,5R, #%16-18d"},
-  {FPU_NEON_EXT_V1, 0xf3880410, 0xffb80f90, "vsri.8\t%12-15,22R, %0-3,5R, #%16-18e"},
-  {FPU_NEON_EXT_V1, 0xf3880510, 0xffb80f90, "vsli.8\t%12-15,22R, %0-3,5R, #%16-18d"},
-  {FPU_NEON_EXT_V1, 0xf3880610, 0xffb80f90, "vqshlu.s8\t%12-15,22R, %0-3,5R, #%16-18d"},
-  {FPU_NEON_EXT_V1, 0xf2900810, 0xfeb00fd0, "vqshrun.s32\t%12-15,22D, %0-3,5Q, #%16-19e"},
-  {FPU_NEON_EXT_V1, 0xf2900850, 0xfeb00fd0, "vqrshrun.s32\t%12-15,22D, %0-3,5Q, #%16-19e"},
-  {FPU_NEON_EXT_V1, 0xf2900910, 0xfeb00fd0, "vqshrn.%24?us32\t%12-15,22D, %0-3,5Q, #%16-19e"},
-  {FPU_NEON_EXT_V1, 0xf2900950, 0xfeb00fd0, "vqrshrn.%24?us32\t%12-15,22D, %0-3,5Q, #%16-19e"},
-  {FPU_NEON_EXT_V1, 0xf2900a10, 0xfeb00fd0, "vshll.%24?us16\t%12-15,22D, %0-3,5Q, #%16-19d"},
-  {FPU_NEON_EXT_V1, 0xf2880010, 0xfeb80f90, "vshr.%24?us8\t%12-15,22R, %0-3,5R, #%16-18e"},
-  {FPU_NEON_EXT_V1, 0xf2880110, 0xfeb80f90, "vsra.%24?us8\t%12-15,22R, %0-3,5R, #%16-18e"},
-  {FPU_NEON_EXT_V1, 0xf2880210, 0xfeb80f90, "vrshr.%24?us8\t%12-15,22R, %0-3,5R, #%16-18e"},
-  {FPU_NEON_EXT_V1, 0xf2880310, 0xfeb80f90, "vrsra.%24?us8\t%12-15,22R, %0-3,5R, #%16-18e"},
-  {FPU_NEON_EXT_V1, 0xf2880710, 0xfeb80f90, "vqshl.%24?us8\t%12-15,22R, %0-3,5R, #%16-18d"},
-  {FPU_NEON_EXT_V1, 0xf2a00810, 0xffa00fd0, "vshrn.i64\t%12-15,22D, %0-3,5Q, #%16-20e"},
-  {FPU_NEON_EXT_V1, 0xf2a00850, 0xffa00fd0, "vrshrn.i64\t%12-15,22D, %0-3,5Q, #%16-20e"},
-  {FPU_NEON_EXT_V1, 0xf2900510, 0xffb00f90, "vshl.%24?us16\t%12-15,22R, %0-3,5R, #%16-19d"},
-  {FPU_NEON_EXT_V1, 0xf3900410, 0xffb00f90, "vsri.16\t%12-15,22R, %0-3,5R, #%16-19e"},
-  {FPU_NEON_EXT_V1, 0xf3900510, 0xffb00f90, "vsli.16\t%12-15,22R, %0-3,5R, #%16-19d"},
-  {FPU_NEON_EXT_V1, 0xf3900610, 0xffb00f90, "vqshlu.s16\t%12-15,22R, %0-3,5R, #%16-19d"},
-  {FPU_NEON_EXT_V1, 0xf2a00a10, 0xfea00fd0, "vshll.%24?us32\t%12-15,22D, %0-3,5Q, #%16-20d"},
-  {FPU_NEON_EXT_V1, 0xf2900010, 0xfeb00f90, "vshr.%24?us16\t%12-15,22R, %0-3,5R, #%16-19e"},
-  {FPU_NEON_EXT_V1, 0xf2900110, 0xfeb00f90, "vsra.%24?us16\t%12-15,22R, %0-3,5R, #%16-19e"},
-  {FPU_NEON_EXT_V1, 0xf2900210, 0xfeb00f90, "vrshr.%24?us16\t%12-15,22R, %0-3,5R, #%16-19e"},
-  {FPU_NEON_EXT_V1, 0xf2900310, 0xfeb00f90, "vrsra.%24?us16\t%12-15,22R, %0-3,5R, #%16-19e"},
-  {FPU_NEON_EXT_V1, 0xf2900710, 0xfeb00f90, "vqshl.%24?us16\t%12-15,22R, %0-3,5R, #%16-19d"},
-  {FPU_NEON_EXT_V1, 0xf2800810, 0xfec00fd0, "vqshrun.s64\t%12-15,22D, %0-3,5Q, #%16-20e"},
-  {FPU_NEON_EXT_V1, 0xf2800850, 0xfec00fd0, "vqrshrun.s64\t%12-15,22D, %0-3,5Q, #%16-20e"},
-  {FPU_NEON_EXT_V1, 0xf2800910, 0xfec00fd0, "vqshrn.%24?us64\t%12-15,22D, %0-3,5Q, #%16-20e"},
-  {FPU_NEON_EXT_V1, 0xf2800950, 0xfec00fd0, "vqrshrn.%24?us64\t%12-15,22D, %0-3,5Q, #%16-20e"},
-  {FPU_NEON_EXT_V1, 0xf2a00510, 0xffa00f90, "vshl.%24?us32\t%12-15,22R, %0-3,5R, #%16-20d"},
-  {FPU_NEON_EXT_V1, 0xf3a00410, 0xffa00f90, "vsri.32\t%12-15,22R, %0-3,5R, #%16-20e"},
-  {FPU_NEON_EXT_V1, 0xf3a00510, 0xffa00f90, "vsli.32\t%12-15,22R, %0-3,5R, #%16-20d"},
-  {FPU_NEON_EXT_V1, 0xf3a00610, 0xffa00f90, "vqshlu.s32\t%12-15,22R, %0-3,5R, #%16-20d"},
-  {FPU_NEON_EXT_V1, 0xf2a00010, 0xfea00f90, "vshr.%24?us32\t%12-15,22R, %0-3,5R, #%16-20e"},
-  {FPU_NEON_EXT_V1, 0xf2a00110, 0xfea00f90, "vsra.%24?us32\t%12-15,22R, %0-3,5R, #%16-20e"},
-  {FPU_NEON_EXT_V1, 0xf2a00210, 0xfea00f90, "vrshr.%24?us32\t%12-15,22R, %0-3,5R, #%16-20e"},
-  {FPU_NEON_EXT_V1, 0xf2a00310, 0xfea00f90, "vrsra.%24?us32\t%12-15,22R, %0-3,5R, #%16-20e"},
-  {FPU_NEON_EXT_V1, 0xf2a00710, 0xfea00f90, "vqshl.%24?us32\t%12-15,22R, %0-3,5R, #%16-20d"},
-  {FPU_NEON_EXT_V1, 0xf2800590, 0xff800f90, "vshl.%24?us64\t%12-15,22R, %0-3,5R, #%16-21d"},
-  {FPU_NEON_EXT_V1, 0xf3800490, 0xff800f90, "vsri.64\t%12-15,22R, %0-3,5R, #%16-21e"},
-  {FPU_NEON_EXT_V1, 0xf3800590, 0xff800f90, "vsli.64\t%12-15,22R, %0-3,5R, #%16-21d"},
-  {FPU_NEON_EXT_V1, 0xf3800690, 0xff800f90, "vqshlu.s64\t%12-15,22R, %0-3,5R, #%16-21d"},
-  {FPU_NEON_EXT_V1, 0xf2800090, 0xfe800f90, "vshr.%24?us64\t%12-15,22R, %0-3,5R, #%16-21e"},
-  {FPU_NEON_EXT_V1, 0xf2800190, 0xfe800f90, "vsra.%24?us64\t%12-15,22R, %0-3,5R, #%16-21e"},
-  {FPU_NEON_EXT_V1, 0xf2800290, 0xfe800f90, "vrshr.%24?us64\t%12-15,22R, %0-3,5R, #%16-21e"},
-  {FPU_NEON_EXT_V1, 0xf2800390, 0xfe800f90, "vrsra.%24?us64\t%12-15,22R, %0-3,5R, #%16-21e"},
-  {FPU_NEON_EXT_V1, 0xf2800790, 0xfe800f90, "vqshl.%24?us64\t%12-15,22R, %0-3,5R, #%16-21d"},
-  {FPU_NEON_EXT_V1, 0xf2a00e10, 0xfea00e90, "vcvt.%24,8?usff32.%24,8?ffus32\t%12-15,22R, %0-3,5R, #%16-20e"},
+  {FPU_NEON_EXT_V1, 0xf2880810, 0xffb80fd0, "vshrn%c.i16\t%12-15,22D, %0-3,5Q, #%16-18e"},
+  {FPU_NEON_EXT_V1, 0xf2880850, 0xffb80fd0, "vrshrn%c.i16\t%12-15,22D, %0-3,5Q, #%16-18e"},
+  {FPU_NEON_EXT_V1, 0xf2880810, 0xfeb80fd0, "vqshrun%c.s16\t%12-15,22D, %0-3,5Q, #%16-18e"},
+  {FPU_NEON_EXT_V1, 0xf2880850, 0xfeb80fd0, "vqrshrun%c.s16\t%12-15,22D, %0-3,5Q, #%16-18e"},
+  {FPU_NEON_EXT_V1, 0xf2880910, 0xfeb80fd0, "vqshrn%c.%24?us16\t%12-15,22D, %0-3,5Q, #%16-18e"},
+  {FPU_NEON_EXT_V1, 0xf2880950, 0xfeb80fd0, "vqrshrn%c.%24?us16\t%12-15,22D, %0-3,5Q, #%16-18e"},
+  {FPU_NEON_EXT_V1, 0xf2880a10, 0xfeb80fd0, "vshll%c.%24?us8\t%12-15,22D, %0-3,5Q, #%16-18d"},
+  {FPU_NEON_EXT_V1, 0xf2900810, 0xffb00fd0, "vshrn%c.i32\t%12-15,22D, %0-3,5Q, #%16-19e"},
+  {FPU_NEON_EXT_V1, 0xf2900850, 0xffb00fd0, "vrshrn%c.i32\t%12-15,22D, %0-3,5Q, #%16-19e"},
+  {FPU_NEON_EXT_V1, 0xf2880510, 0xffb80f90, "vshl%c.%24?us8\t%12-15,22R, %0-3,5R, #%16-18d"},
+  {FPU_NEON_EXT_V1, 0xf3880410, 0xffb80f90, "vsri%c.8\t%12-15,22R, %0-3,5R, #%16-18e"},
+  {FPU_NEON_EXT_V1, 0xf3880510, 0xffb80f90, "vsli%c.8\t%12-15,22R, %0-3,5R, #%16-18d"},
+  {FPU_NEON_EXT_V1, 0xf3880610, 0xffb80f90, "vqshlu%c.s8\t%12-15,22R, %0-3,5R, #%16-18d"},
+  {FPU_NEON_EXT_V1, 0xf2900810, 0xfeb00fd0, "vqshrun%c.s32\t%12-15,22D, %0-3,5Q, #%16-19e"},
+  {FPU_NEON_EXT_V1, 0xf2900850, 0xfeb00fd0, "vqrshrun%c.s32\t%12-15,22D, %0-3,5Q, #%16-19e"},
+  {FPU_NEON_EXT_V1, 0xf2900910, 0xfeb00fd0, "vqshrn%c.%24?us32\t%12-15,22D, %0-3,5Q, #%16-19e"},
+  {FPU_NEON_EXT_V1, 0xf2900950, 0xfeb00fd0, "vqrshrn%c.%24?us32\t%12-15,22D, %0-3,5Q, #%16-19e"},
+  {FPU_NEON_EXT_V1, 0xf2900a10, 0xfeb00fd0, "vshll%c.%24?us16\t%12-15,22D, %0-3,5Q, #%16-19d"},
+  {FPU_NEON_EXT_V1, 0xf2880010, 0xfeb80f90, "vshr%c.%24?us8\t%12-15,22R, %0-3,5R, #%16-18e"},
+  {FPU_NEON_EXT_V1, 0xf2880110, 0xfeb80f90, "vsra%c.%24?us8\t%12-15,22R, %0-3,5R, #%16-18e"},
+  {FPU_NEON_EXT_V1, 0xf2880210, 0xfeb80f90, "vrshr%c.%24?us8\t%12-15,22R, %0-3,5R, #%16-18e"},
+  {FPU_NEON_EXT_V1, 0xf2880310, 0xfeb80f90, "vrsra%c.%24?us8\t%12-15,22R, %0-3,5R, #%16-18e"},
+  {FPU_NEON_EXT_V1, 0xf2880710, 0xfeb80f90, "vqshl%c.%24?us8\t%12-15,22R, %0-3,5R, #%16-18d"},
+  {FPU_NEON_EXT_V1, 0xf2a00810, 0xffa00fd0, "vshrn%c.i64\t%12-15,22D, %0-3,5Q, #%16-20e"},
+  {FPU_NEON_EXT_V1, 0xf2a00850, 0xffa00fd0, "vrshrn%c.i64\t%12-15,22D, %0-3,5Q, #%16-20e"},
+  {FPU_NEON_EXT_V1, 0xf2900510, 0xffb00f90, "vshl%c.%24?us16\t%12-15,22R, %0-3,5R, #%16-19d"},
+  {FPU_NEON_EXT_V1, 0xf3900410, 0xffb00f90, "vsri%c.16\t%12-15,22R, %0-3,5R, #%16-19e"},
+  {FPU_NEON_EXT_V1, 0xf3900510, 0xffb00f90, "vsli%c.16\t%12-15,22R, %0-3,5R, #%16-19d"},
+  {FPU_NEON_EXT_V1, 0xf3900610, 0xffb00f90, "vqshlu%c.s16\t%12-15,22R, %0-3,5R, #%16-19d"},
+  {FPU_NEON_EXT_V1, 0xf2a00a10, 0xfea00fd0, "vshll%c.%24?us32\t%12-15,22D, %0-3,5Q, #%16-20d"},
+  {FPU_NEON_EXT_V1, 0xf2900010, 0xfeb00f90, "vshr%c.%24?us16\t%12-15,22R, %0-3,5R, #%16-19e"},
+  {FPU_NEON_EXT_V1, 0xf2900110, 0xfeb00f90, "vsra%c.%24?us16\t%12-15,22R, %0-3,5R, #%16-19e"},
+  {FPU_NEON_EXT_V1, 0xf2900210, 0xfeb00f90, "vrshr%c.%24?us16\t%12-15,22R, %0-3,5R, #%16-19e"},
+  {FPU_NEON_EXT_V1, 0xf2900310, 0xfeb00f90, "vrsra%c.%24?us16\t%12-15,22R, %0-3,5R, #%16-19e"},
+  {FPU_NEON_EXT_V1, 0xf2900710, 0xfeb00f90, "vqshl%c.%24?us16\t%12-15,22R, %0-3,5R, #%16-19d"},
+  {FPU_NEON_EXT_V1, 0xf2800810, 0xfec00fd0, "vqshrun%c.s64\t%12-15,22D, %0-3,5Q, #%16-20e"},
+  {FPU_NEON_EXT_V1, 0xf2800850, 0xfec00fd0, "vqrshrun%c.s64\t%12-15,22D, %0-3,5Q, #%16-20e"},
+  {FPU_NEON_EXT_V1, 0xf2800910, 0xfec00fd0, "vqshrn%c.%24?us64\t%12-15,22D, %0-3,5Q, #%16-20e"},
+  {FPU_NEON_EXT_V1, 0xf2800950, 0xfec00fd0, "vqrshrn%c.%24?us64\t%12-15,22D, %0-3,5Q, #%16-20e"},
+  {FPU_NEON_EXT_V1, 0xf2a00510, 0xffa00f90, "vshl%c.%24?us32\t%12-15,22R, %0-3,5R, #%16-20d"},
+  {FPU_NEON_EXT_V1, 0xf3a00410, 0xffa00f90, "vsri%c.32\t%12-15,22R, %0-3,5R, #%16-20e"},
+  {FPU_NEON_EXT_V1, 0xf3a00510, 0xffa00f90, "vsli%c.32\t%12-15,22R, %0-3,5R, #%16-20d"},
+  {FPU_NEON_EXT_V1, 0xf3a00610, 0xffa00f90, "vqshlu%c.s32\t%12-15,22R, %0-3,5R, #%16-20d"},
+  {FPU_NEON_EXT_V1, 0xf2a00010, 0xfea00f90, "vshr%c.%24?us32\t%12-15,22R, %0-3,5R, #%16-20e"},
+  {FPU_NEON_EXT_V1, 0xf2a00110, 0xfea00f90, "vsra%c.%24?us32\t%12-15,22R, %0-3,5R, #%16-20e"},
+  {FPU_NEON_EXT_V1, 0xf2a00210, 0xfea00f90, "vrshr%c.%24?us32\t%12-15,22R, %0-3,5R, #%16-20e"},
+  {FPU_NEON_EXT_V1, 0xf2a00310, 0xfea00f90, "vrsra%c.%24?us32\t%12-15,22R, %0-3,5R, #%16-20e"},
+  {FPU_NEON_EXT_V1, 0xf2a00710, 0xfea00f90, "vqshl%c.%24?us32\t%12-15,22R, %0-3,5R, #%16-20d"},
+  {FPU_NEON_EXT_V1, 0xf2800590, 0xff800f90, "vshl%c.%24?us64\t%12-15,22R, %0-3,5R, #%16-21d"},
+  {FPU_NEON_EXT_V1, 0xf3800490, 0xff800f90, "vsri%c.64\t%12-15,22R, %0-3,5R, #%16-21e"},
+  {FPU_NEON_EXT_V1, 0xf3800590, 0xff800f90, "vsli%c.64\t%12-15,22R, %0-3,5R, #%16-21d"},
+  {FPU_NEON_EXT_V1, 0xf3800690, 0xff800f90, "vqshlu%c.s64\t%12-15,22R, %0-3,5R, #%16-21d"},
+  {FPU_NEON_EXT_V1, 0xf2800090, 0xfe800f90, "vshr%c.%24?us64\t%12-15,22R, %0-3,5R, #%16-21e"},
+  {FPU_NEON_EXT_V1, 0xf2800190, 0xfe800f90, "vsra%c.%24?us64\t%12-15,22R, %0-3,5R, #%16-21e"},
+  {FPU_NEON_EXT_V1, 0xf2800290, 0xfe800f90, "vrshr%c.%24?us64\t%12-15,22R, %0-3,5R, #%16-21e"},
+  {FPU_NEON_EXT_V1, 0xf2800390, 0xfe800f90, "vrsra%c.%24?us64\t%12-15,22R, %0-3,5R, #%16-21e"},
+  {FPU_NEON_EXT_V1, 0xf2800790, 0xfe800f90, "vqshl%c.%24?us64\t%12-15,22R, %0-3,5R, #%16-21d"},
+  {FPU_NEON_EXT_V1, 0xf2a00e10, 0xfea00e90, "vcvt%c.%24,8?usff32.%24,8?ffus32\t%12-15,22R, %0-3,5R, #%16-20e"},
 
   /* Three registers of different lengths */
-  {FPU_NEON_EXT_V1, 0xf2800e00, 0xfea00f50, "vmull.p%20S0\t%12-15,22Q, %16-19,7D, %0-3,5D"},
-  {FPU_NEON_EXT_V1, 0xf2800400, 0xff800f50, "vaddhn.i%20-21T2\t%12-15,22D, %16-19,7Q, %0-3,5Q"},
-  {FPU_NEON_EXT_V1, 0xf2800600, 0xff800f50, "vsubhn.i%20-21T2\t%12-15,22D, %16-19,7Q, %0-3,5Q"},
-  {FPU_NEON_EXT_V1, 0xf2800900, 0xff800f50, "vqdmlal.s%20-21S6\t%12-15,22Q, %16-19,7D, %0-3,5D"},
-  {FPU_NEON_EXT_V1, 0xf2800b00, 0xff800f50, "vqdmlsl.s%20-21S6\t%12-15,22Q, %16-19,7D, %0-3,5D"},
-  {FPU_NEON_EXT_V1, 0xf2800d00, 0xff800f50, "vqdmull.s%20-21S6\t%12-15,22Q, %16-19,7D, %0-3,5D"},
-  {FPU_NEON_EXT_V1, 0xf3800400, 0xff800f50, "vraddhn.i%20-21T2\t%12-15,22D, %16-19,7Q, %0-3,5Q"},
-  {FPU_NEON_EXT_V1, 0xf3800600, 0xff800f50, "vrsubhn.i%20-21T2\t%12-15,22D, %16-19,7Q, %0-3,5Q"},
-  {FPU_NEON_EXT_V1, 0xf2800000, 0xfe800f50, "vaddl.%24?us%20-21S2\t%12-15,22Q, %16-19,7D, %0-3,5D"},
-  {FPU_NEON_EXT_V1, 0xf2800100, 0xfe800f50, "vaddw.%24?us%20-21S2\t%12-15,22Q, %16-19,7Q, %0-3,5D"},
-  {FPU_NEON_EXT_V1, 0xf2800200, 0xfe800f50, "vsubl.%24?us%20-21S2\t%12-15,22Q, %16-19,7D, %0-3,5D"},
-  {FPU_NEON_EXT_V1, 0xf2800300, 0xfe800f50, "vsubw.%24?us%20-21S2\t%12-15,22Q, %16-19,7Q, %0-3,5D"},
-  {FPU_NEON_EXT_V1, 0xf2800500, 0xfe800f50, "vabal.%24?us%20-21S2\t%12-15,22Q, %16-19,7D, %0-3,5D"},
-  {FPU_NEON_EXT_V1, 0xf2800700, 0xfe800f50, "vabdl.%24?us%20-21S2\t%12-15,22Q, %16-19,7D, %0-3,5D"},
-  {FPU_NEON_EXT_V1, 0xf2800800, 0xfe800f50, "vmlal.%24?us%20-21S2\t%12-15,22Q, %16-19,7D, %0-3,5D"},
-  {FPU_NEON_EXT_V1, 0xf2800a00, 0xfe800f50, "vmlsl.%24?us%20-21S2\t%12-15,22Q, %16-19,7D, %0-3,5D"},
-  {FPU_NEON_EXT_V1, 0xf2800c00, 0xfe800f50, "vmull.%24?us%20-21S2\t%12-15,22Q, %16-19,7D, %0-3,5D"},
+  {FPU_NEON_EXT_V1, 0xf2800e00, 0xfea00f50, "vmull%c.p%20S0\t%12-15,22Q, %16-19,7D, %0-3,5D"},
+  {FPU_NEON_EXT_V1, 0xf2800400, 0xff800f50, "vaddhn%c.i%20-21T2\t%12-15,22D, %16-19,7Q, %0-3,5Q"},
+  {FPU_NEON_EXT_V1, 0xf2800600, 0xff800f50, "vsubhn%c.i%20-21T2\t%12-15,22D, %16-19,7Q, %0-3,5Q"},
+  {FPU_NEON_EXT_V1, 0xf2800900, 0xff800f50, "vqdmlal%c.s%20-21S6\t%12-15,22Q, %16-19,7D, %0-3,5D"},
+  {FPU_NEON_EXT_V1, 0xf2800b00, 0xff800f50, "vqdmlsl%c.s%20-21S6\t%12-15,22Q, %16-19,7D, %0-3,5D"},
+  {FPU_NEON_EXT_V1, 0xf2800d00, 0xff800f50, "vqdmull%c.s%20-21S6\t%12-15,22Q, %16-19,7D, %0-3,5D"},
+  {FPU_NEON_EXT_V1, 0xf3800400, 0xff800f50, "vraddhn%c.i%20-21T2\t%12-15,22D, %16-19,7Q, %0-3,5Q"},
+  {FPU_NEON_EXT_V1, 0xf3800600, 0xff800f50, "vrsubhn%c.i%20-21T2\t%12-15,22D, %16-19,7Q, %0-3,5Q"},
+  {FPU_NEON_EXT_V1, 0xf2800000, 0xfe800f50, "vaddl%c.%24?us%20-21S2\t%12-15,22Q, %16-19,7D, %0-3,5D"},
+  {FPU_NEON_EXT_V1, 0xf2800100, 0xfe800f50, "vaddw%c.%24?us%20-21S2\t%12-15,22Q, %16-19,7Q, %0-3,5D"},
+  {FPU_NEON_EXT_V1, 0xf2800200, 0xfe800f50, "vsubl%c.%24?us%20-21S2\t%12-15,22Q, %16-19,7D, %0-3,5D"},
+  {FPU_NEON_EXT_V1, 0xf2800300, 0xfe800f50, "vsubw%c.%24?us%20-21S2\t%12-15,22Q, %16-19,7Q, %0-3,5D"},
+  {FPU_NEON_EXT_V1, 0xf2800500, 0xfe800f50, "vabal%c.%24?us%20-21S2\t%12-15,22Q, %16-19,7D, %0-3,5D"},
+  {FPU_NEON_EXT_V1, 0xf2800700, 0xfe800f50, "vabdl%c.%24?us%20-21S2\t%12-15,22Q, %16-19,7D, %0-3,5D"},
+  {FPU_NEON_EXT_V1, 0xf2800800, 0xfe800f50, "vmlal%c.%24?us%20-21S2\t%12-15,22Q, %16-19,7D, %0-3,5D"},
+  {FPU_NEON_EXT_V1, 0xf2800a00, 0xfe800f50, "vmlsl%c.%24?us%20-21S2\t%12-15,22Q, %16-19,7D, %0-3,5D"},
+  {FPU_NEON_EXT_V1, 0xf2800c00, 0xfe800f50, "vmull%c.%24?us%20-21S2\t%12-15,22Q, %16-19,7D, %0-3,5D"},
 
   /* Two registers and a scalar */
-  {FPU_NEON_EXT_V1, 0xf2800040, 0xff800f50, "vmla.i%20-21S6\t%12-15,22D, %16-19,7D, %D"},
-  {FPU_NEON_EXT_V1, 0xf2800140, 0xff800f50, "vmla.f%20-21Sa\t%12-15,22D, %16-19,7D, %D"},
-  {FPU_NEON_EXT_V1, 0xf2800340, 0xff800f50, "vqdmlal.s%20-21S6\t%12-15,22Q, %16-19,7D, %D"},
-  {FPU_NEON_EXT_V1, 0xf2800440, 0xff800f50, "vmls.i%20-21S6\t%12-15,22D, %16-19,7D, %D"},
-  {FPU_NEON_EXT_V1, 0xf2800540, 0xff800f50, "vmls.f%20-21S6\t%12-15,22D, %16-19,7D, %D"},
-  {FPU_NEON_EXT_V1, 0xf2800740, 0xff800f50, "vqdmlsl.s%20-21S6\t%12-15,22Q, %16-19,7D, %D"},
-  {FPU_NEON_EXT_V1, 0xf2800840, 0xff800f50, "vmul.i%20-21S6\t%12-15,22D, %16-19,7D, %D"},
-  {FPU_NEON_EXT_V1, 0xf2800940, 0xff800f50, "vmul.f%20-21Sa\t%12-15,22D, %16-19,7D, %D"},
-  {FPU_NEON_EXT_V1, 0xf2800b40, 0xff800f50, "vqdmull.s%20-21S6\t%12-15,22Q, %16-19,7D, %D"},
-  {FPU_NEON_EXT_V1, 0xf2800c40, 0xff800f50, "vqdmulh.s%20-21S6\t%12-15,22D, %16-19,7D, %D"},
-  {FPU_NEON_EXT_V1, 0xf2800d40, 0xff800f50, "vqrdmulh.s%20-21S6\t%12-15,22D, %16-19,7D, %D"},
-  {FPU_NEON_EXT_V1, 0xf3800040, 0xff800f50, "vmla.i%20-21S6\t%12-15,22Q, %16-19,7Q, %D"},
-  {FPU_NEON_EXT_V1, 0xf3800140, 0xff800f50, "vmla.f%20-21Sa\t%12-15,22Q, %16-19,7Q, %D"},
-  {FPU_NEON_EXT_V1, 0xf3800440, 0xff800f50, "vmls.i%20-21S6\t%12-15,22Q, %16-19,7Q, %D"},
-  {FPU_NEON_EXT_V1, 0xf3800540, 0xff800f50, "vmls.f%20-21Sa\t%12-15,22Q, %16-19,7Q, %D"},
-  {FPU_NEON_EXT_V1, 0xf3800840, 0xff800f50, "vmul.i%20-21S6\t%12-15,22Q, %16-19,7Q, %D"},
-  {FPU_NEON_EXT_V1, 0xf3800940, 0xff800f50, "vmul.f%20-21Sa\t%12-15,22Q, %16-19,7Q, %D"},
-  {FPU_NEON_EXT_V1, 0xf3800c40, 0xff800f50, "vqdmulh.s%20-21S6\t%12-15,22Q, %16-19,7Q, %D"},
-  {FPU_NEON_EXT_V1, 0xf3800d40, 0xff800f50, "vqrdmulh.s%20-21S6\t%12-15,22Q, %16-19,7Q, %D"},
-  {FPU_NEON_EXT_V1, 0xf2800240, 0xfe800f50, "vmlal.%24?us%20-21S6\t%12-15,22Q, %16-19,7D, %D"},
-  {FPU_NEON_EXT_V1, 0xf2800640, 0xfe800f50, "vmlsl.%24?us%20-21S6\t%12-15,22Q, %16-19,7D, %D"},
-  {FPU_NEON_EXT_V1, 0xf2800a40, 0xfe800f50, "vmull.%24?us%20-21S6\t%12-15,22Q, %16-19,7D, %D"},
+  {FPU_NEON_EXT_V1, 0xf2800040, 0xff800f50, "vmla%c.i%20-21S6\t%12-15,22D, %16-19,7D, %D"},
+  {FPU_NEON_EXT_V1, 0xf2800140, 0xff800f50, "vmla%c.f%20-21Sa\t%12-15,22D, %16-19,7D, %D"},
+  {FPU_NEON_EXT_V1, 0xf2800340, 0xff800f50, "vqdmlal%c.s%20-21S6\t%12-15,22Q, %16-19,7D, %D"},
+  {FPU_NEON_EXT_V1, 0xf2800440, 0xff800f50, "vmls%c.i%20-21S6\t%12-15,22D, %16-19,7D, %D"},
+  {FPU_NEON_EXT_V1, 0xf2800540, 0xff800f50, "vmls%c.f%20-21S6\t%12-15,22D, %16-19,7D, %D"},
+  {FPU_NEON_EXT_V1, 0xf2800740, 0xff800f50, "vqdmlsl%c.s%20-21S6\t%12-15,22Q, %16-19,7D, %D"},
+  {FPU_NEON_EXT_V1, 0xf2800840, 0xff800f50, "vmul%c.i%20-21S6\t%12-15,22D, %16-19,7D, %D"},
+  {FPU_NEON_EXT_V1, 0xf2800940, 0xff800f50, "vmul%c.f%20-21Sa\t%12-15,22D, %16-19,7D, %D"},
+  {FPU_NEON_EXT_V1, 0xf2800b40, 0xff800f50, "vqdmull%c.s%20-21S6\t%12-15,22Q, %16-19,7D, %D"},
+  {FPU_NEON_EXT_V1, 0xf2800c40, 0xff800f50, "vqdmulh%c.s%20-21S6\t%12-15,22D, %16-19,7D, %D"},
+  {FPU_NEON_EXT_V1, 0xf2800d40, 0xff800f50, "vqrdmulh%c.s%20-21S6\t%12-15,22D, %16-19,7D, %D"},
+  {FPU_NEON_EXT_V1, 0xf3800040, 0xff800f50, "vmla%c.i%20-21S6\t%12-15,22Q, %16-19,7Q, %D"},
+  {FPU_NEON_EXT_V1, 0xf3800140, 0xff800f50, "vmla%c.f%20-21Sa\t%12-15,22Q, %16-19,7Q, %D"},
+  {FPU_NEON_EXT_V1, 0xf3800440, 0xff800f50, "vmls%c.i%20-21S6\t%12-15,22Q, %16-19,7Q, %D"},
+  {FPU_NEON_EXT_V1, 0xf3800540, 0xff800f50, "vmls%c.f%20-21Sa\t%12-15,22Q, %16-19,7Q, %D"},
+  {FPU_NEON_EXT_V1, 0xf3800840, 0xff800f50, "vmul%c.i%20-21S6\t%12-15,22Q, %16-19,7Q, %D"},
+  {FPU_NEON_EXT_V1, 0xf3800940, 0xff800f50, "vmul%c.f%20-21Sa\t%12-15,22Q, %16-19,7Q, %D"},
+  {FPU_NEON_EXT_V1, 0xf3800c40, 0xff800f50, "vqdmulh%c.s%20-21S6\t%12-15,22Q, %16-19,7Q, %D"},
+  {FPU_NEON_EXT_V1, 0xf3800d40, 0xff800f50, "vqrdmulh%c.s%20-21S6\t%12-15,22Q, %16-19,7Q, %D"},
+  {FPU_NEON_EXT_V1, 0xf2800240, 0xfe800f50, "vmlal%c.%24?us%20-21S6\t%12-15,22Q, %16-19,7D, %D"},
+  {FPU_NEON_EXT_V1, 0xf2800640, 0xfe800f50, "vmlsl%c.%24?us%20-21S6\t%12-15,22Q, %16-19,7D, %D"},
+  {FPU_NEON_EXT_V1, 0xf2800a40, 0xfe800f50, "vmull%c.%24?us%20-21S6\t%12-15,22Q, %16-19,7D, %D"},
 
   /* Element and structure load/store */
-  {FPU_NEON_EXT_V1, 0xf4a00fc0, 0xffb00fc0, "vld4.32\t%C"},
-  {FPU_NEON_EXT_V1, 0xf4a00c00, 0xffb00f00, "vld1.%6-7S2\t%C"},
-  {FPU_NEON_EXT_V1, 0xf4a00d00, 0xffb00f00, "vld2.%6-7S2\t%C"},
-  {FPU_NEON_EXT_V1, 0xf4a00e00, 0xffb00f00, "vld3.%6-7S2\t%C"},
-  {FPU_NEON_EXT_V1, 0xf4a00f00, 0xffb00f00, "vld4.%6-7S2\t%C"},
-  {FPU_NEON_EXT_V1, 0xf4000200, 0xff900f00, "v%21?ls%21?dt1.%6-7S3\t%A"},
-  {FPU_NEON_EXT_V1, 0xf4000300, 0xff900f00, "v%21?ls%21?dt2.%6-7S2\t%A"},
-  {FPU_NEON_EXT_V1, 0xf4000400, 0xff900f00, "v%21?ls%21?dt3.%6-7S2\t%A"},
-  {FPU_NEON_EXT_V1, 0xf4000500, 0xff900f00, "v%21?ls%21?dt3.%6-7S2\t%A"},
-  {FPU_NEON_EXT_V1, 0xf4000600, 0xff900f00, "v%21?ls%21?dt1.%6-7S3\t%A"},
-  {FPU_NEON_EXT_V1, 0xf4000700, 0xff900f00, "v%21?ls%21?dt1.%6-7S3\t%A"},
-  {FPU_NEON_EXT_V1, 0xf4000800, 0xff900f00, "v%21?ls%21?dt2.%6-7S2\t%A"},
-  {FPU_NEON_EXT_V1, 0xf4000900, 0xff900f00, "v%21?ls%21?dt2.%6-7S2\t%A"},
-  {FPU_NEON_EXT_V1, 0xf4000a00, 0xff900f00, "v%21?ls%21?dt1.%6-7S3\t%A"},
-  {FPU_NEON_EXT_V1, 0xf4000000, 0xff900e00, "v%21?ls%21?dt4.%6-7S2\t%A"},
-  {FPU_NEON_EXT_V1, 0xf4800000, 0xff900300, "v%21?ls%21?dt1.%10-11S2\t%B"},
-  {FPU_NEON_EXT_V1, 0xf4800100, 0xff900300, "v%21?ls%21?dt2.%10-11S2\t%B"},
-  {FPU_NEON_EXT_V1, 0xf4800200, 0xff900300, "v%21?ls%21?dt3.%10-11S2\t%B"},
-  {FPU_NEON_EXT_V1, 0xf4800300, 0xff900300, "v%21?ls%21?dt4.%10-11S2\t%B"},
+  {FPU_NEON_EXT_V1, 0xf4a00fc0, 0xffb00fc0, "vld4%c.32\t%C"},
+  {FPU_NEON_EXT_V1, 0xf4a00c00, 0xffb00f00, "vld1%c.%6-7S2\t%C"},
+  {FPU_NEON_EXT_V1, 0xf4a00d00, 0xffb00f00, "vld2%c.%6-7S2\t%C"},
+  {FPU_NEON_EXT_V1, 0xf4a00e00, 0xffb00f00, "vld3%c.%6-7S2\t%C"},
+  {FPU_NEON_EXT_V1, 0xf4a00f00, 0xffb00f00, "vld4%c.%6-7S2\t%C"},
+  {FPU_NEON_EXT_V1, 0xf4000200, 0xff900f00, "v%21?ls%21?dt1%c.%6-7S3\t%A"},
+  {FPU_NEON_EXT_V1, 0xf4000300, 0xff900f00, "v%21?ls%21?dt2%c.%6-7S2\t%A"},
+  {FPU_NEON_EXT_V1, 0xf4000400, 0xff900f00, "v%21?ls%21?dt3%c.%6-7S2\t%A"},
+  {FPU_NEON_EXT_V1, 0xf4000500, 0xff900f00, "v%21?ls%21?dt3%c.%6-7S2\t%A"},
+  {FPU_NEON_EXT_V1, 0xf4000600, 0xff900f00, "v%21?ls%21?dt1%c.%6-7S3\t%A"},
+  {FPU_NEON_EXT_V1, 0xf4000700, 0xff900f00, "v%21?ls%21?dt1%c.%6-7S3\t%A"},
+  {FPU_NEON_EXT_V1, 0xf4000800, 0xff900f00, "v%21?ls%21?dt2%c.%6-7S2\t%A"},
+  {FPU_NEON_EXT_V1, 0xf4000900, 0xff900f00, "v%21?ls%21?dt2%c.%6-7S2\t%A"},
+  {FPU_NEON_EXT_V1, 0xf4000a00, 0xff900f00, "v%21?ls%21?dt1%c.%6-7S3\t%A"},
+  {FPU_NEON_EXT_V1, 0xf4000000, 0xff900e00, "v%21?ls%21?dt4%c.%6-7S2\t%A"},
+  {FPU_NEON_EXT_V1, 0xf4800000, 0xff900300, "v%21?ls%21?dt1%c.%10-11S2\t%B"},
+  {FPU_NEON_EXT_V1, 0xf4800100, 0xff900300, "v%21?ls%21?dt2%c.%10-11S2\t%B"},
+  {FPU_NEON_EXT_V1, 0xf4800200, 0xff900300, "v%21?ls%21?dt3%c.%10-11S2\t%B"},
+  {FPU_NEON_EXT_V1, 0xf4800300, 0xff900300, "v%21?ls%21?dt4%c.%10-11S2\t%B"},
 
   {0,0 ,0, 0}
 };
@@ -991,6 +993,11 @@ static const struct opcode32 arm_opcodes[] =
    %M                   print Thumb register mask
    %b			print CZB's 6-bit unsigned branch destination
    %s			print Thumb right-shift immediate (6..10; 0 == 32).
+   %c			print the condition code
+   %C			print the condition code, or "s" if not conditional
+   %x			print warning if conditional an not at end of IT block"
+   %X			print "\t; unpredictable <IT:code>" if conditional
+   %I			print IT instruction suffix and operands
    %<bitfield>r		print bitfield as an ARM register
    %<bitfield>d		print bitfield as a decimal
    %<bitfield>H         print (bitfield * 2) as a decimal
@@ -1006,117 +1013,111 @@ static const struct opcode16 thumb_opcodes[] =
   /* Thumb instructions.  */
 
   /* ARM V6K no-argument instructions.  */
-  {ARM_EXT_V6K, 0xbf00, 0xffff, "nop"},
-  {ARM_EXT_V6K, 0xbf10, 0xffff, "yield"},
-  {ARM_EXT_V6K, 0xbf20, 0xffff, "wfe"},
-  {ARM_EXT_V6K, 0xbf30, 0xffff, "wfi"},
-  {ARM_EXT_V6K, 0xbf40, 0xffff, "sev"},
-  {ARM_EXT_V6K, 0xbf00, 0xff0f, "nop\t{%4-7d}"},
+  {ARM_EXT_V6K, 0xbf00, 0xffff, "nop%c"},
+  {ARM_EXT_V6K, 0xbf10, 0xffff, "yield%c"},
+  {ARM_EXT_V6K, 0xbf20, 0xffff, "wfe%c"},
+  {ARM_EXT_V6K, 0xbf30, 0xffff, "wfi%c"},
+  {ARM_EXT_V6K, 0xbf40, 0xffff, "sev%c"},
+  {ARM_EXT_V6K, 0xbf00, 0xff0f, "nop%c\t{%4-7d}"},
 
   /* ARM V6T2 instructions.  */
-  {ARM_EXT_V6T2, 0xb900, 0xfd00, "cbnz\t%0-2r, %b"},
-  {ARM_EXT_V6T2, 0xb100, 0xfd00, "cbz\t%0-2r, %b"},
-  {ARM_EXT_V6T2, 0xbf08, 0xff0f, "it\t%4-7c"},
-  {ARM_EXT_V6T2, 0xbf14, 0xff17, "it%3?te\t%4-7c"},
-  {ARM_EXT_V6T2, 0xbf04, 0xff17, "it%3?et\t%4-7c"},
-  {ARM_EXT_V6T2, 0xbf12, 0xff13, "it%3?te%2?te\t%4-7c"},
-  {ARM_EXT_V6T2, 0xbf02, 0xff13, "it%3?et%2?et\t%4-7c"},
-  {ARM_EXT_V6T2, 0xbf11, 0xff11, "it%3?te%2?te%1?te\t%4-7c"},
-  {ARM_EXT_V6T2, 0xbf01, 0xff11, "it%3?et%2?et%1?et\t%4-7c"},
+  {ARM_EXT_V6T2, 0xb900, 0xfd00, "cbnz\t%0-2r, %b%X"},
+  {ARM_EXT_V6T2, 0xb100, 0xfd00, "cbz\t%0-2r, %b%X"},
+  {ARM_EXT_V6T2, 0xbf00, 0xff00, "it%I%X"},
 
   /* ARM V6.  */
-  {ARM_EXT_V6, 0xb660, 0xfff8, "cpsie\t%2'a%1'i%0'f"},
-  {ARM_EXT_V6, 0xb670, 0xfff8, "cpsid\t%2'a%1'i%0'f"},
-  {ARM_EXT_V6, 0x4600, 0xffc0, "mov\t%0-2r, %3-5r"},
-  {ARM_EXT_V6, 0xba00, 0xffc0, "rev\t%0-2r, %3-5r"},
-  {ARM_EXT_V6, 0xba40, 0xffc0, "rev16\t%0-2r, %3-5r"},
-  {ARM_EXT_V6, 0xbac0, 0xffc0, "revsh\t%0-2r, %3-5r"},
-  {ARM_EXT_V6, 0xb650, 0xfff7, "setend\t%3?ble"},
-  {ARM_EXT_V6, 0xb200, 0xffc0, "sxth\t%0-2r, %3-5r"},
-  {ARM_EXT_V6, 0xb240, 0xffc0, "sxtb\t%0-2r, %3-5r"},
-  {ARM_EXT_V6, 0xb280, 0xffc0, "uxth\t%0-2r, %3-5r"},
-  {ARM_EXT_V6, 0xb2c0, 0xffc0, "uxtb\t%0-2r, %3-5r"},
+  {ARM_EXT_V6, 0xb660, 0xfff8, "cpsie\t%2'a%1'i%0'f%X"},
+  {ARM_EXT_V6, 0xb670, 0xfff8, "cpsid\t%2'a%1'i%0'f%X"},
+  {ARM_EXT_V6, 0x4600, 0xffc0, "mov%c\t%0-2r, %3-5r"},
+  {ARM_EXT_V6, 0xba00, 0xffc0, "rev%c\t%0-2r, %3-5r"},
+  {ARM_EXT_V6, 0xba40, 0xffc0, "rev16%c\t%0-2r, %3-5r"},
+  {ARM_EXT_V6, 0xbac0, 0xffc0, "revsh%c\t%0-2r, %3-5r"},
+  {ARM_EXT_V6, 0xb650, 0xfff7, "setend\t%3?ble%X"},
+  {ARM_EXT_V6, 0xb200, 0xffc0, "sxth%c\t%0-2r, %3-5r"},
+  {ARM_EXT_V6, 0xb240, 0xffc0, "sxtb%c\t%0-2r, %3-5r"},
+  {ARM_EXT_V6, 0xb280, 0xffc0, "uxth%c\t%0-2r, %3-5r"},
+  {ARM_EXT_V6, 0xb2c0, 0xffc0, "uxtb%c\t%0-2r, %3-5r"},
 
   /* ARM V5 ISA extends Thumb.  */
-  {ARM_EXT_V5T, 0xbe00, 0xff00, "bkpt\t%0-7x"},
+  {ARM_EXT_V5T, 0xbe00, 0xff00, "bkpt\t%0-7x"}, /* Is always unconditional.  */
   /* This is BLX(2).  BLX(1) is a 32-bit instruction.  */
-  {ARM_EXT_V5T, 0x4780, 0xff87, "blx\t%3-6r"},	/* note: 4 bit register number.  */
+  {ARM_EXT_V5T, 0x4780, 0xff87, "blx%c\t%3-6r%x"},	/* note: 4 bit register number.  */
   /* ARM V4T ISA (Thumb v1).  */
-  {ARM_EXT_V4T, 0x46C0, 0xFFFF, "nop\t\t\t(mov r8, r8)"},
+  {ARM_EXT_V4T, 0x46C0, 0xFFFF, "nop%c\t\t\t(mov r8, r8)"},
   /* Format 4.  */
-  {ARM_EXT_V4T, 0x4000, 0xFFC0, "ands\t%0-2r, %3-5r"},
-  {ARM_EXT_V4T, 0x4040, 0xFFC0, "eors\t%0-2r, %3-5r"},
-  {ARM_EXT_V4T, 0x4080, 0xFFC0, "lsls\t%0-2r, %3-5r"},
-  {ARM_EXT_V4T, 0x40C0, 0xFFC0, "lsrs\t%0-2r, %3-5r"},
-  {ARM_EXT_V4T, 0x4100, 0xFFC0, "asrs\t%0-2r, %3-5r"},
-  {ARM_EXT_V4T, 0x4140, 0xFFC0, "adcs\t%0-2r, %3-5r"},
-  {ARM_EXT_V4T, 0x4180, 0xFFC0, "sbcs\t%0-2r, %3-5r"},
-  {ARM_EXT_V4T, 0x41C0, 0xFFC0, "rors\t%0-2r, %3-5r"},
-  {ARM_EXT_V4T, 0x4200, 0xFFC0, "tst\t%0-2r, %3-5r"},
-  {ARM_EXT_V4T, 0x4240, 0xFFC0, "negs\t%0-2r, %3-5r"},
-  {ARM_EXT_V4T, 0x4280, 0xFFC0, "cmp\t%0-2r, %3-5r"},
-  {ARM_EXT_V4T, 0x42C0, 0xFFC0, "cmn\t%0-2r, %3-5r"},
-  {ARM_EXT_V4T, 0x4300, 0xFFC0, "orrs\t%0-2r, %3-5r"},
-  {ARM_EXT_V4T, 0x4340, 0xFFC0, "muls\t%0-2r, %3-5r"},
-  {ARM_EXT_V4T, 0x4380, 0xFFC0, "bics\t%0-2r, %3-5r"},
-  {ARM_EXT_V4T, 0x43C0, 0xFFC0, "mvns\t%0-2r, %3-5r"},
+  {ARM_EXT_V4T, 0x4000, 0xFFC0, "and%C\t%0-2r, %3-5r"},
+  {ARM_EXT_V4T, 0x4040, 0xFFC0, "eor%C\t%0-2r, %3-5r"},
+  {ARM_EXT_V4T, 0x4080, 0xFFC0, "lsl%C\t%0-2r, %3-5r"},
+  {ARM_EXT_V4T, 0x40C0, 0xFFC0, "lsr%C\t%0-2r, %3-5r"},
+  {ARM_EXT_V4T, 0x4100, 0xFFC0, "asr%C\t%0-2r, %3-5r"},
+  {ARM_EXT_V4T, 0x4140, 0xFFC0, "adc%C\t%0-2r, %3-5r"},
+  {ARM_EXT_V4T, 0x4180, 0xFFC0, "sbc%C\t%0-2r, %3-5r"},
+  {ARM_EXT_V4T, 0x41C0, 0xFFC0, "ror%C\t%0-2r, %3-5r"},
+  {ARM_EXT_V4T, 0x4200, 0xFFC0, "tst%c\t%0-2r, %3-5r"},
+  {ARM_EXT_V4T, 0x4240, 0xFFC0, "neg%C\t%0-2r, %3-5r"},
+  {ARM_EXT_V4T, 0x4280, 0xFFC0, "cmp%c\t%0-2r, %3-5r"},
+  {ARM_EXT_V4T, 0x42C0, 0xFFC0, "cmn%c\t%0-2r, %3-5r"},
+  {ARM_EXT_V4T, 0x4300, 0xFFC0, "orr%C\t%0-2r, %3-5r"},
+  {ARM_EXT_V4T, 0x4340, 0xFFC0, "mul%C\t%0-2r, %3-5r"},
+  {ARM_EXT_V4T, 0x4380, 0xFFC0, "bic%C\t%0-2r, %3-5r"},
+  {ARM_EXT_V4T, 0x43C0, 0xFFC0, "mvn%C\t%0-2r, %3-5r"},
   /* format 13 */
-  {ARM_EXT_V4T, 0xB000, 0xFF80, "add\tsp, #%0-6W"},
-  {ARM_EXT_V4T, 0xB080, 0xFF80, "sub\tsp, #%0-6W"},
+  {ARM_EXT_V4T, 0xB000, 0xFF80, "add%c\tsp, #%0-6W"},
+  {ARM_EXT_V4T, 0xB080, 0xFF80, "sub%c\tsp, #%0-6W"},
   /* format 5 */
-  {ARM_EXT_V4T, 0x4700, 0xFF80, "bx\t%S"},
-  {ARM_EXT_V4T, 0x4400, 0xFF00, "add\t%D, %S"},
-  {ARM_EXT_V4T, 0x4500, 0xFF00, "cmp\t%D, %S"},
-  {ARM_EXT_V4T, 0x4600, 0xFF00, "mov\t%D, %S"},
+  {ARM_EXT_V4T, 0x4700, 0xFF80, "bx%c\t%S%x"},
+  {ARM_EXT_V4T, 0x4400, 0xFF00, "add%c\t%D, %S"},
+  {ARM_EXT_V4T, 0x4500, 0xFF00, "cmp%c\t%D, %S"},
+  {ARM_EXT_V4T, 0x4600, 0xFF00, "mov%c\t%D, %S"},
   /* format 14 */
-  {ARM_EXT_V4T, 0xB400, 0xFE00, "push\t%N"},
-  {ARM_EXT_V4T, 0xBC00, 0xFE00, "pop\t%O"},
+  {ARM_EXT_V4T, 0xB400, 0xFE00, "push%c\t%N"},
+  {ARM_EXT_V4T, 0xBC00, 0xFE00, "pop%c\t%O"},
   /* format 2 */
-  {ARM_EXT_V4T, 0x1800, 0xFE00, "adds\t%0-2r, %3-5r, %6-8r"},
-  {ARM_EXT_V4T, 0x1A00, 0xFE00, "subs\t%0-2r, %3-5r, %6-8r"},
-  {ARM_EXT_V4T, 0x1C00, 0xFE00, "adds\t%0-2r, %3-5r, #%6-8d"},
-  {ARM_EXT_V4T, 0x1E00, 0xFE00, "subs\t%0-2r, %3-5r, #%6-8d"},
+  {ARM_EXT_V4T, 0x1800, 0xFE00, "add%C\t%0-2r, %3-5r, %6-8r"},
+  {ARM_EXT_V4T, 0x1A00, 0xFE00, "sub%C\t%0-2r, %3-5r, %6-8r"},
+  {ARM_EXT_V4T, 0x1C00, 0xFE00, "add%C\t%0-2r, %3-5r, #%6-8d"},
+  {ARM_EXT_V4T, 0x1E00, 0xFE00, "sub%C\t%0-2r, %3-5r, #%6-8d"},
   /* format 8 */
-  {ARM_EXT_V4T, 0x5200, 0xFE00, "strh\t%0-2r, [%3-5r, %6-8r]"},
-  {ARM_EXT_V4T, 0x5A00, 0xFE00, "ldrh\t%0-2r, [%3-5r, %6-8r]"},
-  {ARM_EXT_V4T, 0x5600, 0xF600, "ldrs%11?hb\t%0-2r, [%3-5r, %6-8r]"},
+  {ARM_EXT_V4T, 0x5200, 0xFE00, "strh%c\t%0-2r, [%3-5r, %6-8r]"},
+  {ARM_EXT_V4T, 0x5A00, 0xFE00, "ldrh%c\t%0-2r, [%3-5r, %6-8r]"},
+  {ARM_EXT_V4T, 0x5600, 0xF600, "ldrs%11?hb%c\t%0-2r, [%3-5r, %6-8r]"},
   /* format 7 */
-  {ARM_EXT_V4T, 0x5000, 0xFA00, "str%10'b\t%0-2r, [%3-5r, %6-8r]"},
-  {ARM_EXT_V4T, 0x5800, 0xFA00, "ldr%10'b\t%0-2r, [%3-5r, %6-8r]"},
+  {ARM_EXT_V4T, 0x5000, 0xFA00, "str%10'b%c\t%0-2r, [%3-5r, %6-8r]"},
+  {ARM_EXT_V4T, 0x5800, 0xFA00, "ldr%10'b%c\t%0-2r, [%3-5r, %6-8r]"},
   /* format 1 */
-  {ARM_EXT_V4T, 0x0000, 0xF800, "lsls\t%0-2r, %3-5r, #%6-10d"},
-  {ARM_EXT_V4T, 0x0800, 0xF800, "lsrs\t%0-2r, %3-5r, %s"},
-  {ARM_EXT_V4T, 0x1000, 0xF800, "asrs\t%0-2r, %3-5r, %s"},
+  {ARM_EXT_V4T, 0x0000, 0xF800, "lsl%C\t%0-2r, %3-5r, #%6-10d"},
+  {ARM_EXT_V4T, 0x0800, 0xF800, "lsr%C\t%0-2r, %3-5r, %s"},
+  {ARM_EXT_V4T, 0x1000, 0xF800, "asr%C\t%0-2r, %3-5r, %s"},
   /* format 3 */
-  {ARM_EXT_V4T, 0x2000, 0xF800, "movs\t%8-10r, #%0-7d"},
-  {ARM_EXT_V4T, 0x2800, 0xF800, "cmp\t%8-10r, #%0-7d"},
-  {ARM_EXT_V4T, 0x3000, 0xF800, "adds\t%8-10r, #%0-7d"},
-  {ARM_EXT_V4T, 0x3800, 0xF800, "subs\t%8-10r, #%0-7d"},
+  {ARM_EXT_V4T, 0x2000, 0xF800, "mov%C\t%8-10r, #%0-7d"},
+  {ARM_EXT_V4T, 0x2800, 0xF800, "cmp%c\t%8-10r, #%0-7d"},
+  {ARM_EXT_V4T, 0x3000, 0xF800, "add%C\t%8-10r, #%0-7d"},
+  {ARM_EXT_V4T, 0x3800, 0xF800, "sub%C\t%8-10r, #%0-7d"},
   /* format 6 */
-  {ARM_EXT_V4T, 0x4800, 0xF800, "ldr\t%8-10r, [pc, #%0-7W]\t(%0-7a)"},  /* TODO: Disassemble PC relative "LDR rD,=<symbolic>" */
+  {ARM_EXT_V4T, 0x4800, 0xF800, "ldr%c\t%8-10r, [pc, #%0-7W]\t(%0-7a)"},  /* TODO: Disassemble PC relative "LDR rD,=<symbolic>" */
   /* format 9 */
-  {ARM_EXT_V4T, 0x6000, 0xF800, "str\t%0-2r, [%3-5r, #%6-10W]"},
-  {ARM_EXT_V4T, 0x6800, 0xF800, "ldr\t%0-2r, [%3-5r, #%6-10W]"},
-  {ARM_EXT_V4T, 0x7000, 0xF800, "strb\t%0-2r, [%3-5r, #%6-10d]"},
-  {ARM_EXT_V4T, 0x7800, 0xF800, "ldrb\t%0-2r, [%3-5r, #%6-10d]"},
+  {ARM_EXT_V4T, 0x6000, 0xF800, "str%c\t%0-2r, [%3-5r, #%6-10W]"},
+  {ARM_EXT_V4T, 0x6800, 0xF800, "ldr%c\t%0-2r, [%3-5r, #%6-10W]"},
+  {ARM_EXT_V4T, 0x7000, 0xF800, "strb%c\t%0-2r, [%3-5r, #%6-10d]"},
+  {ARM_EXT_V4T, 0x7800, 0xF800, "ldrb%c\t%0-2r, [%3-5r, #%6-10d]"},
   /* format 10 */
-  {ARM_EXT_V4T, 0x8000, 0xF800, "strh\t%0-2r, [%3-5r, #%6-10H]"},
-  {ARM_EXT_V4T, 0x8800, 0xF800, "ldrh\t%0-2r, [%3-5r, #%6-10H]"},
+  {ARM_EXT_V4T, 0x8000, 0xF800, "strh%c\t%0-2r, [%3-5r, #%6-10H]"},
+  {ARM_EXT_V4T, 0x8800, 0xF800, "ldrh%c\t%0-2r, [%3-5r, #%6-10H]"},
   /* format 11 */
-  {ARM_EXT_V4T, 0x9000, 0xF800, "str\t%8-10r, [sp, #%0-7W]"},
-  {ARM_EXT_V4T, 0x9800, 0xF800, "ldr\t%8-10r, [sp, #%0-7W]"},
+  {ARM_EXT_V4T, 0x9000, 0xF800, "str%c\t%8-10r, [sp, #%0-7W]"},
+  {ARM_EXT_V4T, 0x9800, 0xF800, "ldr%c\t%8-10r, [sp, #%0-7W]"},
   /* format 12 */
-  {ARM_EXT_V4T, 0xA000, 0xF800, "add\t%8-10r, pc, #%0-7W\t(adr %8-10r,%0-7a)"},
-  {ARM_EXT_V4T, 0xA800, 0xF800, "add\t%8-10r, sp, #%0-7W"},
+  {ARM_EXT_V4T, 0xA000, 0xF800, "add%c\t%8-10r, pc, #%0-7W\t(adr %8-10r,%0-7a)"},
+  {ARM_EXT_V4T, 0xA800, 0xF800, "add%c\t%8-10r, sp, #%0-7W"},
   /* format 15 */
-  {ARM_EXT_V4T, 0xC000, 0xF800, "stmia\t%8-10r!, %M"},
-  {ARM_EXT_V4T, 0xC800, 0xF800, "ldmia\t%8-10r!, %M"},
+  {ARM_EXT_V4T, 0xC000, 0xF800, "stmia%c\t%8-10r!, %M"},
+  {ARM_EXT_V4T, 0xC800, 0xF800, "ldmia%c\t%8-10r!, %M"},
   /* format 17 */
-  {ARM_EXT_V4T, 0xDF00, 0xFF00, "svc\t%0-7d"},
+  {ARM_EXT_V4T, 0xDF00, 0xFF00, "svc%c\t%0-7d"},
   /* format 16 */
-  {ARM_EXT_V4T, 0xD000, 0xF000, "b%8-11c.n\t%0-7B"},
+  {ARM_EXT_V4T, 0xD000, 0xF000, "b%8-11c.n\t%0-7B%X"},
   /* format 18 */
-  {ARM_EXT_V4T, 0xE000, 0xF800, "b.n\t%0-10B"},
+  {ARM_EXT_V4T, 0xE000, 0xF800, "b%c.n\t%0-10B%x"},
 
   /* The E800 .. FFFF range is unconditionally redirected to the
      32-bit table, because even in pre-V6T2 ISAs, BL and BLX(1) pairs
@@ -1152,6 +1153,9 @@ static const struct opcode16 thumb_opcodes[] =
        %R		print the rotation field of an SXT instruction
        %U		print barrier type.
        %P		print address for pli instruction.
+       %c		print the condition code
+       %x		print warning if conditional an not at end of IT block"
+       %X		print "\t; unpredictable <IT:code>" if conditional
 
        %<bitfield>d	print bitfield in decimal
        %<bitfield>W	print bitfield*4 in decimal
@@ -1173,202 +1177,202 @@ static const struct opcode16 thumb_opcodes[] =
 static const struct opcode32 thumb32_opcodes[] =
 {
   /* V7 instructions.  */
-  {ARM_EXT_V7, 0xf910f000, 0xff70f000, "pli\t%a"},
-  {ARM_EXT_V7, 0xf3af80f0, 0xfffffff0, "dbg\t#%0-3d"},
-  {ARM_EXT_V7, 0xf3bf8f50, 0xfffffff0, "dmb\t%U"},
-  {ARM_EXT_V7, 0xf3bf8f40, 0xfffffff0, "dsb\t%U"},
-  {ARM_EXT_V7, 0xf3bf8f60, 0xfffffff0, "isb\t%U"},
-  {ARM_EXT_DIV, 0xfb90f0f0, 0xfff0f0f0, "sdiv\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_DIV, 0xfbb0f0f0, 0xfff0f0f0, "udiv\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V7, 0xf910f000, 0xff70f000, "pli%c\t%a"},
+  {ARM_EXT_V7, 0xf3af80f0, 0xfffffff0, "dbg%c\t#%0-3d"},
+  {ARM_EXT_V7, 0xf3bf8f50, 0xfffffff0, "dmb%c\t%U"},
+  {ARM_EXT_V7, 0xf3bf8f40, 0xfffffff0, "dsb%c\t%U"},
+  {ARM_EXT_V7, 0xf3bf8f60, 0xfffffff0, "isb%c\t%U"},
+  {ARM_EXT_DIV, 0xfb90f0f0, 0xfff0f0f0, "sdiv%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_DIV, 0xfbb0f0f0, 0xfff0f0f0, "udiv%c\t%8-11r, %16-19r, %0-3r"},
 
   /* Instructions defined in the basic V6T2 set.  */
-  {ARM_EXT_V6T2, 0xf3af8000, 0xffffffff, "nop.w"},
-  {ARM_EXT_V6T2, 0xf3af8001, 0xffffffff, "yield.w"},
-  {ARM_EXT_V6T2, 0xf3af8002, 0xffffffff, "wfe.w"},
-  {ARM_EXT_V6T2, 0xf3af8003, 0xffffffff, "wfi.w"},
-  {ARM_EXT_V6T2, 0xf3af9004, 0xffffffff, "sev.w"},
-  {ARM_EXT_V6T2, 0xf3af8000, 0xffffff00, "nop.w\t{%0-7d}"},
+  {ARM_EXT_V6T2, 0xf3af8000, 0xffffffff, "nop%c.w"},
+  {ARM_EXT_V6T2, 0xf3af8001, 0xffffffff, "yield%c.w"},
+  {ARM_EXT_V6T2, 0xf3af8002, 0xffffffff, "wfe%c.w"},
+  {ARM_EXT_V6T2, 0xf3af8003, 0xffffffff, "wfi%c.w"},
+  {ARM_EXT_V6T2, 0xf3af9004, 0xffffffff, "sev%c.w"},
+  {ARM_EXT_V6T2, 0xf3af8000, 0xffffff00, "nop%c.w\t{%0-7d}"},
 
-  {ARM_EXT_V6T2, 0xf3bf8f2f, 0xffffffff, "clrex"},
-  {ARM_EXT_V6T2, 0xf3af8400, 0xffffff1f, "cpsie.w\t%7'a%6'i%5'f"},
-  {ARM_EXT_V6T2, 0xf3af8600, 0xffffff1f, "cpsid.w\t%7'a%6'i%5'f"},
-  {ARM_EXT_V6T2, 0xf3c08f00, 0xfff0ffff, "bxj\t%16-19r"},
-  {ARM_EXT_V6T2, 0xe810c000, 0xffd0ffff, "rfedb\t%16-19r%21'!"},
-  {ARM_EXT_V6T2, 0xe990c000, 0xffd0ffff, "rfeia\t%16-19r%21'!"},
-  {ARM_EXT_V6T2, 0xf3ef8000, 0xffeff000, "mrs\t%8-11r, %D"},
-  {ARM_EXT_V6T2, 0xf3af8100, 0xffffffe0, "cps\t#%0-4d"},
-  {ARM_EXT_V6T2, 0xe8d0f000, 0xfff0fff0, "tbb\t[%16-19r, %0-3r]"},
-  {ARM_EXT_V6T2, 0xe8d0f010, 0xfff0fff0, "tbh\t[%16-19r, %0-3r, lsl #1]"},
-  {ARM_EXT_V6T2, 0xf3af8500, 0xffffff00, "cpsie\t%7'a%6'i%5'f, #%0-4d"},
-  {ARM_EXT_V6T2, 0xf3af8700, 0xffffff00, "cpsid\t%7'a%6'i%5'f, #%0-4d"},
-  {ARM_EXT_V6T2, 0xf3de8f00, 0xffffff00, "subs\tpc, lr, #%0-7d"},
-  {ARM_EXT_V6T2, 0xf3808000, 0xffe0f000, "msr\t%C, %16-19r"},
-  {ARM_EXT_V6T2, 0xe8500f00, 0xfff00fff, "ldrex\t%12-15r, [%16-19r]"},
-  {ARM_EXT_V6T2, 0xe8d00f4f, 0xfff00fef, "ldrex%4?hb\t%12-15r, [%16-19r]"},
-  {ARM_EXT_V6T2, 0xe800c000, 0xffd0ffe0, "srsdb\t#%0-4d%21'!"},
-  {ARM_EXT_V6T2, 0xe980c000, 0xffd0ffe0, "srsia\t#%0-4d%21'!"},
-  {ARM_EXT_V6T2, 0xfa0ff080, 0xfffff0c0, "sxth.w\t%8-11r, %0-3r%R"},
-  {ARM_EXT_V6T2, 0xfa1ff080, 0xfffff0c0, "uxth.w\t%8-11r, %0-3r%R"},
-  {ARM_EXT_V6T2, 0xfa2ff080, 0xfffff0c0, "sxtb16\t%8-11r, %0-3r%R"},
-  {ARM_EXT_V6T2, 0xfa3ff080, 0xfffff0c0, "uxtb16\t%8-11r, %0-3r%R"},
-  {ARM_EXT_V6T2, 0xfa4ff080, 0xfffff0c0, "sxtb.w\t%8-11r, %0-3r%R"},
-  {ARM_EXT_V6T2, 0xfa5ff080, 0xfffff0c0, "uxtb.w\t%8-11r, %0-3r%R"},
-  {ARM_EXT_V6T2, 0xe8400000, 0xfff000ff, "strex\t%8-11r, %12-15r, [%16-19r]"},
-  {ARM_EXT_V6T2, 0xe8d0007f, 0xfff000ff, "ldrexd\t%12-15r, %8-11r, [%16-19r]"},
-  {ARM_EXT_V6T2, 0xfa80f000, 0xfff0f0f0, "sadd8\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfa80f010, 0xfff0f0f0, "qadd8\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfa80f020, 0xfff0f0f0, "shadd8\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfa80f040, 0xfff0f0f0, "uadd8\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfa80f050, 0xfff0f0f0, "uqadd8\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfa80f060, 0xfff0f0f0, "uhadd8\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfa80f080, 0xfff0f0f0, "qadd\t%8-11r, %0-3r, %16-19r"},
-  {ARM_EXT_V6T2, 0xfa80f090, 0xfff0f0f0, "qdadd\t%8-11r, %0-3r, %16-19r"},
-  {ARM_EXT_V6T2, 0xfa80f0a0, 0xfff0f0f0, "qsub\t%8-11r, %0-3r, %16-19r"},
-  {ARM_EXT_V6T2, 0xfa80f0b0, 0xfff0f0f0, "qdsub\t%8-11r, %0-3r, %16-19r"},
-  {ARM_EXT_V6T2, 0xfa90f000, 0xfff0f0f0, "sadd16\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfa90f010, 0xfff0f0f0, "qadd16\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfa90f020, 0xfff0f0f0, "shadd16\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfa90f040, 0xfff0f0f0, "uadd16\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfa90f050, 0xfff0f0f0, "uqadd16\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfa90f060, 0xfff0f0f0, "uhadd16\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfa90f080, 0xfff0f0f0, "rev.w\t%8-11r, %16-19r"},
-  {ARM_EXT_V6T2, 0xfa90f090, 0xfff0f0f0, "rev16.w\t%8-11r, %16-19r"},
-  {ARM_EXT_V6T2, 0xfa90f0a0, 0xfff0f0f0, "rbit\t%8-11r, %16-19r"},
-  {ARM_EXT_V6T2, 0xfa90f0b0, 0xfff0f0f0, "revsh.w\t%8-11r, %16-19r"},
-  {ARM_EXT_V6T2, 0xfaa0f000, 0xfff0f0f0, "saddsubx\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfaa0f010, 0xfff0f0f0, "qaddsubx\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfaa0f020, 0xfff0f0f0, "shaddsubx\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfaa0f040, 0xfff0f0f0, "uaddsubx\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfaa0f050, 0xfff0f0f0, "uqaddsubx\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfaa0f060, 0xfff0f0f0, "uhaddsubx\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfaa0f080, 0xfff0f0f0, "sel\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfab0f080, 0xfff0f0f0, "clz\t%8-11r, %16-19r"},
-  {ARM_EXT_V6T2, 0xfac0f000, 0xfff0f0f0, "ssub8\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfac0f010, 0xfff0f0f0, "qsub8\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfac0f020, 0xfff0f0f0, "shsub8\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfac0f040, 0xfff0f0f0, "usub8\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfac0f050, 0xfff0f0f0, "uqsub8\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfac0f060, 0xfff0f0f0, "uhsub8\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfad0f000, 0xfff0f0f0, "ssub16\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfad0f010, 0xfff0f0f0, "qsub16\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfad0f020, 0xfff0f0f0, "shsub16\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfad0f040, 0xfff0f0f0, "usub16\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfad0f050, 0xfff0f0f0, "uqsub16\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfad0f060, 0xfff0f0f0, "uhsub16\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfae0f000, 0xfff0f0f0, "ssubaddx\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfae0f010, 0xfff0f0f0, "qsubaddx\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfae0f020, 0xfff0f0f0, "shsubaddx\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfae0f040, 0xfff0f0f0, "usubaddx\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfae0f050, 0xfff0f0f0, "uqsubaddx\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfae0f060, 0xfff0f0f0, "uhsubaddx\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfb00f000, 0xfff0f0f0, "mul.w\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfb70f000, 0xfff0f0f0, "usad8\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfa00f000, 0xffe0f0f0, "lsl%20's.w\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfa20f000, 0xffe0f0f0, "lsr%20's.w\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfa40f000, 0xffe0f0f0, "asr%20's.w\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfa60f000, 0xffe0f0f0, "ror%20's.w\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xe8c00f40, 0xfff00fe0, "strex%4?hb\t%0-3r, %12-15r, [%16-19r]"},
-  {ARM_EXT_V6T2, 0xf3200000, 0xfff0f0e0, "ssat16\t%8-11r, #%0-4d, %16-19r"},
-  {ARM_EXT_V6T2, 0xf3a00000, 0xfff0f0e0, "usat16\t%8-11r, #%0-4d, %16-19r"},
-  {ARM_EXT_V6T2, 0xfb20f000, 0xfff0f0e0, "smuad%4'x\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfb30f000, 0xfff0f0e0, "smulw%4?tb\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfb40f000, 0xfff0f0e0, "smusd%4'x\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfb50f000, 0xfff0f0e0, "smmul%4'r\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfa00f080, 0xfff0f0c0, "sxtah\t%8-11r, %16-19r, %0-3r%R"},
-  {ARM_EXT_V6T2, 0xfa10f080, 0xfff0f0c0, "uxtah\t%8-11r, %16-19r, %0-3r%R"},
-  {ARM_EXT_V6T2, 0xfa20f080, 0xfff0f0c0, "sxtab16\t%8-11r, %16-19r, %0-3r%R"},
-  {ARM_EXT_V6T2, 0xfa30f080, 0xfff0f0c0, "uxtab16\t%8-11r, %16-19r, %0-3r%R"},
-  {ARM_EXT_V6T2, 0xfa40f080, 0xfff0f0c0, "sxtab\t%8-11r, %16-19r, %0-3r%R"},
-  {ARM_EXT_V6T2, 0xfa50f080, 0xfff0f0c0, "uxtab\t%8-11r, %16-19r, %0-3r%R"},
-  {ARM_EXT_V6T2, 0xfb10f000, 0xfff0f0c0, "smul%5?tb%4?tb\t%8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xf36f0000, 0xffff8020, "bfc\t%8-11r, %E"},
-  {ARM_EXT_V6T2, 0xea100f00, 0xfff08f00, "tst.w\t%16-19r, %S"},
-  {ARM_EXT_V6T2, 0xea900f00, 0xfff08f00, "teq\t%16-19r, %S"},
-  {ARM_EXT_V6T2, 0xeb100f00, 0xfff08f00, "cmn.w\t%16-19r, %S"},
-  {ARM_EXT_V6T2, 0xebb00f00, 0xfff08f00, "cmp.w\t%16-19r, %S"},
-  {ARM_EXT_V6T2, 0xf0100f00, 0xfbf08f00, "tst.w\t%16-19r, %M"},
-  {ARM_EXT_V6T2, 0xf0900f00, 0xfbf08f00, "teq\t%16-19r, %M"},
-  {ARM_EXT_V6T2, 0xf1100f00, 0xfbf08f00, "cmn.w\t%16-19r, %M"},
-  {ARM_EXT_V6T2, 0xf1b00f00, 0xfbf08f00, "cmp.w\t%16-19r, %M"},
-  {ARM_EXT_V6T2, 0xea4f0000, 0xffef8000, "mov%20's.w\t%8-11r, %S"},
-  {ARM_EXT_V6T2, 0xea6f0000, 0xffef8000, "mvn%20's.w\t%8-11r, %S"},
-  {ARM_EXT_V6T2, 0xe8c00070, 0xfff000f0, "strexd\t%0-3r, %12-15r, %8-11r, [%16-19r]"},
-  {ARM_EXT_V6T2, 0xfb000000, 0xfff000f0, "mla\t%8-11r, %16-19r, %0-3r, %12-15r"},
-  {ARM_EXT_V6T2, 0xfb000010, 0xfff000f0, "mls\t%8-11r, %16-19r, %0-3r, %12-15r"},
-  {ARM_EXT_V6T2, 0xfb700000, 0xfff000f0, "usada8\t%8-11r, %16-19r, %0-3r, %12-15r"},
-  {ARM_EXT_V6T2, 0xfb800000, 0xfff000f0, "smull\t%12-15r, %8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfba00000, 0xfff000f0, "umull\t%12-15r, %8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfbc00000, 0xfff000f0, "smlal\t%12-15r, %8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfbe00000, 0xfff000f0, "umlal\t%12-15r, %8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfbe00060, 0xfff000f0, "umaal\t%12-15r, %8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xe8500f00, 0xfff00f00, "ldrex\t%12-15r, [%16-19r, #%0-7W]"},
-  {ARM_EXT_V6T2, 0xf7f08000, 0xfff0f000, "smc\t%K"},
-  {ARM_EXT_V6T2, 0xf04f0000, 0xfbef8000, "mov%20's.w\t%8-11r, %M"},
-  {ARM_EXT_V6T2, 0xf06f0000, 0xfbef8000, "mvn%20's.w\t%8-11r, %M"},
-  {ARM_EXT_V6T2, 0xf810f000, 0xff70f000, "pld\t%a"},
-  {ARM_EXT_V6T2, 0xfb200000, 0xfff000e0, "smlad%4'x\t%8-11r, %16-19r, %0-3r, %12-15r"},
-  {ARM_EXT_V6T2, 0xfb300000, 0xfff000e0, "smlaw%4?tb\t%8-11r, %16-19r, %0-3r, %12-15r"},
-  {ARM_EXT_V6T2, 0xfb400000, 0xfff000e0, "smlsd%4'x\t%8-11r, %16-19r, %0-3r, %12-15r"},
-  {ARM_EXT_V6T2, 0xfb500000, 0xfff000e0, "smmla%4'r\t%8-11r, %16-19r, %0-3r, %12-15r"},
-  {ARM_EXT_V6T2, 0xfb600000, 0xfff000e0, "smmls%4'r\t%8-11r, %16-19r, %0-3r, %12-15r"},
-  {ARM_EXT_V6T2, 0xfbc000c0, 0xfff000e0, "smlald%4'x\t%12-15r, %8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xfbd000c0, 0xfff000e0, "smlsld%4'x\t%12-15r, %8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xeac00000, 0xfff08030, "pkhbt\t%8-11r, %16-19r, %S"},
-  {ARM_EXT_V6T2, 0xeac00020, 0xfff08030, "pkhtb\t%8-11r, %16-19r, %S"},
-  {ARM_EXT_V6T2, 0xf3400000, 0xfff08020, "sbfx\t%8-11r, %16-19r, %F"},
-  {ARM_EXT_V6T2, 0xf3c00000, 0xfff08020, "ubfx\t%8-11r, %16-19r, %F"},
-  {ARM_EXT_V6T2, 0xf8000e00, 0xff900f00, "str%wt\t%12-15r, %a"},
-  {ARM_EXT_V6T2, 0xfb100000, 0xfff000c0, "smla%5?tb%4?tb\t%8-11r, %16-19r, %0-3r, %12-15r"},
-  {ARM_EXT_V6T2, 0xfbc00080, 0xfff000c0, "smlal%5?tb%4?tb\t%12-15r, %8-11r, %16-19r, %0-3r"},
-  {ARM_EXT_V6T2, 0xf3600000, 0xfff08020, "bfi\t%8-11r, %16-19r, %E"},
-  {ARM_EXT_V6T2, 0xf8100e00, 0xfe900f00, "ldr%wt\t%12-15r, %a"},
-  {ARM_EXT_V6T2, 0xf3000000, 0xffd08020, "ssat\t%8-11r, #%0-4d, %16-19r%s"},
-  {ARM_EXT_V6T2, 0xf3800000, 0xffd08020, "usat\t%8-11r, #%0-4d, %16-19r%s"},
-  {ARM_EXT_V6T2, 0xf2000000, 0xfbf08000, "addw\t%8-11r, %16-19r, %I"},
-  {ARM_EXT_V6T2, 0xf2400000, 0xfbf08000, "movw\t%8-11r, %J"},
-  {ARM_EXT_V6T2, 0xf2a00000, 0xfbf08000, "subw\t%8-11r, %16-19r, %I"},
-  {ARM_EXT_V6T2, 0xf2c00000, 0xfbf08000, "movt\t%8-11r, %J"},
-  {ARM_EXT_V6T2, 0xea000000, 0xffe08000, "and%20's.w\t%8-11r, %16-19r, %S"},
-  {ARM_EXT_V6T2, 0xea200000, 0xffe08000, "bic%20's.w\t%8-11r, %16-19r, %S"},
-  {ARM_EXT_V6T2, 0xea400000, 0xffe08000, "orr%20's.w\t%8-11r, %16-19r, %S"},
-  {ARM_EXT_V6T2, 0xea600000, 0xffe08000, "orn%20's\t%8-11r, %16-19r, %S"},
-  {ARM_EXT_V6T2, 0xea800000, 0xffe08000, "eor%20's.w\t%8-11r, %16-19r, %S"},
-  {ARM_EXT_V6T2, 0xeb000000, 0xffe08000, "add%20's.w\t%8-11r, %16-19r, %S"},
-  {ARM_EXT_V6T2, 0xeb400000, 0xffe08000, "adc%20's.w\t%8-11r, %16-19r, %S"},
-  {ARM_EXT_V6T2, 0xeb600000, 0xffe08000, "sbc%20's.w\t%8-11r, %16-19r, %S"},
-  {ARM_EXT_V6T2, 0xeba00000, 0xffe08000, "sub%20's.w\t%8-11r, %16-19r, %S"},
-  {ARM_EXT_V6T2, 0xebc00000, 0xffe08000, "rsb%20's\t%8-11r, %16-19r, %S"},
-  {ARM_EXT_V6T2, 0xe8400000, 0xfff00000, "strex\t%8-11r, %12-15r, [%16-19r, #%0-7W]"},
-  {ARM_EXT_V6T2, 0xf0000000, 0xfbe08000, "and%20's.w\t%8-11r, %16-19r, %M"},
-  {ARM_EXT_V6T2, 0xf0200000, 0xfbe08000, "bic%20's.w\t%8-11r, %16-19r, %M"},
-  {ARM_EXT_V6T2, 0xf0400000, 0xfbe08000, "orr%20's.w\t%8-11r, %16-19r, %M"},
-  {ARM_EXT_V6T2, 0xf0600000, 0xfbe08000, "orn%20's\t%8-11r, %16-19r, %M"},
-  {ARM_EXT_V6T2, 0xf0800000, 0xfbe08000, "eor%20's.w\t%8-11r, %16-19r, %M"},
-  {ARM_EXT_V6T2, 0xf1000000, 0xfbe08000, "add%20's.w\t%8-11r, %16-19r, %M"},
-  {ARM_EXT_V6T2, 0xf1400000, 0xfbe08000, "adc%20's.w\t%8-11r, %16-19r, %M"},
-  {ARM_EXT_V6T2, 0xf1600000, 0xfbe08000, "sbc%20's.w\t%8-11r, %16-19r, %M"},
-  {ARM_EXT_V6T2, 0xf1a00000, 0xfbe08000, "sub%20's.w\t%8-11r, %16-19r, %M"},
-  {ARM_EXT_V6T2, 0xf1c00000, 0xfbe08000, "rsb%20's\t%8-11r, %16-19r, %M"},
-  {ARM_EXT_V6T2, 0xe8800000, 0xffd00000, "stmia.w\t%16-19r%21'!, %m"},
-  {ARM_EXT_V6T2, 0xe8900000, 0xffd00000, "ldmia.w\t%16-19r%21'!, %m"},
-  {ARM_EXT_V6T2, 0xe9000000, 0xffd00000, "stmdb\t%16-19r%21'!, %m"},
-  {ARM_EXT_V6T2, 0xe9100000, 0xffd00000, "ldmdb\t%16-19r%21'!, %m"},
-  {ARM_EXT_V6T2, 0xe9c00000, 0xffd000ff, "strd\t%12-15r, %8-11r, [%16-19r]"},
-  {ARM_EXT_V6T2, 0xe9d00000, 0xffd000ff, "ldrd\t%12-15r, %8-11r, [%16-19r]"},
-  {ARM_EXT_V6T2, 0xe9400000, 0xff500000, "strd\t%12-15r, %8-11r, [%16-19r, #%23`-%0-7W]"},
-  {ARM_EXT_V6T2, 0xe9500000, 0xff500000, "ldrd\t%12-15r, %8-11r, [%16-19r, #%23`-%0-7W]"},
-  {ARM_EXT_V6T2, 0xf8000000, 0xff100000, "str%w.w\t%12-15r, %a"},
-  {ARM_EXT_V6T2, 0xf8100000, 0xfe100000, "ldr%w.w\t%12-15r, %a"},
+  {ARM_EXT_V6T2, 0xf3bf8f2f, 0xffffffff, "clrex%c"},
+  {ARM_EXT_V6T2, 0xf3af8400, 0xffffff1f, "cpsie.w\t%7'a%6'i%5'f%X"},
+  {ARM_EXT_V6T2, 0xf3af8600, 0xffffff1f, "cpsid.w\t%7'a%6'i%5'f%X"},
+  {ARM_EXT_V6T2, 0xf3c08f00, 0xfff0ffff, "bxj%c\t%16-19r%x"},
+  {ARM_EXT_V6T2, 0xe810c000, 0xffd0ffff, "rfedb%c\t%16-19r%21'!"},
+  {ARM_EXT_V6T2, 0xe990c000, 0xffd0ffff, "rfeia%c\t%16-19r%21'!"},
+  {ARM_EXT_V6T2, 0xf3ef8000, 0xffeff000, "mrs%c\t%8-11r, %D"},
+  {ARM_EXT_V6T2, 0xf3af8100, 0xffffffe0, "cps\t#%0-4d%X"},
+  {ARM_EXT_V6T2, 0xe8d0f000, 0xfff0fff0, "tbb%c\t[%16-19r, %0-3r]%x"},
+  {ARM_EXT_V6T2, 0xe8d0f010, 0xfff0fff0, "tbh%c\t[%16-19r, %0-3r, lsl #1]%x"},
+  {ARM_EXT_V6T2, 0xf3af8500, 0xffffff00, "cpsie\t%7'a%6'i%5'f, #%0-4d%X"},
+  {ARM_EXT_V6T2, 0xf3af8700, 0xffffff00, "cpsid\t%7'a%6'i%5'f, #%0-4d%X"},
+  {ARM_EXT_V6T2, 0xf3de8f00, 0xffffff00, "subs%c\tpc, lr, #%0-7d"},
+  {ARM_EXT_V6T2, 0xf3808000, 0xffe0f000, "msr%c\t%C, %16-19r"},
+  {ARM_EXT_V6T2, 0xe8500f00, 0xfff00fff, "ldrex%c\t%12-15r, [%16-19r]"},
+  {ARM_EXT_V6T2, 0xe8d00f4f, 0xfff00fef, "ldrex%4?hb%c\t%12-15r, [%16-19r]"},
+  {ARM_EXT_V6T2, 0xe800c000, 0xffd0ffe0, "srsdb%c\t#%0-4d%21'!"},
+  {ARM_EXT_V6T2, 0xe980c000, 0xffd0ffe0, "srsia%c\t#%0-4d%21'!"},
+  {ARM_EXT_V6T2, 0xfa0ff080, 0xfffff0c0, "sxth%c.w\t%8-11r, %0-3r%R"},
+  {ARM_EXT_V6T2, 0xfa1ff080, 0xfffff0c0, "uxth%c.w\t%8-11r, %0-3r%R"},
+  {ARM_EXT_V6T2, 0xfa2ff080, 0xfffff0c0, "sxtb16%c\t%8-11r, %0-3r%R"},
+  {ARM_EXT_V6T2, 0xfa3ff080, 0xfffff0c0, "uxtb16%c\t%8-11r, %0-3r%R"},
+  {ARM_EXT_V6T2, 0xfa4ff080, 0xfffff0c0, "sxtb%c.w\t%8-11r, %0-3r%R"},
+  {ARM_EXT_V6T2, 0xfa5ff080, 0xfffff0c0, "uxtb%c.w\t%8-11r, %0-3r%R"},
+  {ARM_EXT_V6T2, 0xe8400000, 0xfff000ff, "strex%c\t%8-11r, %12-15r, [%16-19r]"},
+  {ARM_EXT_V6T2, 0xe8d0007f, 0xfff000ff, "ldrexd%c\t%12-15r, %8-11r, [%16-19r]"},
+  {ARM_EXT_V6T2, 0xfa80f000, 0xfff0f0f0, "sadd8%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfa80f010, 0xfff0f0f0, "qadd8%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfa80f020, 0xfff0f0f0, "shadd8%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfa80f040, 0xfff0f0f0, "uadd8%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfa80f050, 0xfff0f0f0, "uqadd8%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfa80f060, 0xfff0f0f0, "uhadd8%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfa80f080, 0xfff0f0f0, "qadd%c\t%8-11r, %0-3r, %16-19r"},
+  {ARM_EXT_V6T2, 0xfa80f090, 0xfff0f0f0, "qdadd%c\t%8-11r, %0-3r, %16-19r"},
+  {ARM_EXT_V6T2, 0xfa80f0a0, 0xfff0f0f0, "qsub%c\t%8-11r, %0-3r, %16-19r"},
+  {ARM_EXT_V6T2, 0xfa80f0b0, 0xfff0f0f0, "qdsub%c\t%8-11r, %0-3r, %16-19r"},
+  {ARM_EXT_V6T2, 0xfa90f000, 0xfff0f0f0, "sadd16%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfa90f010, 0xfff0f0f0, "qadd16%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfa90f020, 0xfff0f0f0, "shadd16%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfa90f040, 0xfff0f0f0, "uadd16%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfa90f050, 0xfff0f0f0, "uqadd16%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfa90f060, 0xfff0f0f0, "uhadd16%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfa90f080, 0xfff0f0f0, "rev%c.w\t%8-11r, %16-19r"},
+  {ARM_EXT_V6T2, 0xfa90f090, 0xfff0f0f0, "rev16%c.w\t%8-11r, %16-19r"},
+  {ARM_EXT_V6T2, 0xfa90f0a0, 0xfff0f0f0, "rbit%c\t%8-11r, %16-19r"},
+  {ARM_EXT_V6T2, 0xfa90f0b0, 0xfff0f0f0, "revsh%c.w\t%8-11r, %16-19r"},
+  {ARM_EXT_V6T2, 0xfaa0f000, 0xfff0f0f0, "saddsubx%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfaa0f010, 0xfff0f0f0, "qaddsubx%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfaa0f020, 0xfff0f0f0, "shaddsubx%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfaa0f040, 0xfff0f0f0, "uaddsubx%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfaa0f050, 0xfff0f0f0, "uqaddsubx%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfaa0f060, 0xfff0f0f0, "uhaddsubx%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfaa0f080, 0xfff0f0f0, "sel%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfab0f080, 0xfff0f0f0, "clz%c\t%8-11r, %16-19r"},
+  {ARM_EXT_V6T2, 0xfac0f000, 0xfff0f0f0, "ssub8%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfac0f010, 0xfff0f0f0, "qsub8%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfac0f020, 0xfff0f0f0, "shsub8%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfac0f040, 0xfff0f0f0, "usub8%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfac0f050, 0xfff0f0f0, "uqsub8%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfac0f060, 0xfff0f0f0, "uhsub8%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfad0f000, 0xfff0f0f0, "ssub16%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfad0f010, 0xfff0f0f0, "qsub16%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfad0f020, 0xfff0f0f0, "shsub16%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfad0f040, 0xfff0f0f0, "usub16%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfad0f050, 0xfff0f0f0, "uqsub16%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfad0f060, 0xfff0f0f0, "uhsub16%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfae0f000, 0xfff0f0f0, "ssubaddx%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfae0f010, 0xfff0f0f0, "qsubaddx%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfae0f020, 0xfff0f0f0, "shsubaddx%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfae0f040, 0xfff0f0f0, "usubaddx%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfae0f050, 0xfff0f0f0, "uqsubaddx%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfae0f060, 0xfff0f0f0, "uhsubaddx%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfb00f000, 0xfff0f0f0, "mul%c.w\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfb70f000, 0xfff0f0f0, "usad8%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfa00f000, 0xffe0f0f0, "lsl%20's%c.w\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfa20f000, 0xffe0f0f0, "lsr%20's%c.w\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfa40f000, 0xffe0f0f0, "asr%20's%c.w\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfa60f000, 0xffe0f0f0, "ror%20's%c.w\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xe8c00f40, 0xfff00fe0, "strex%4?hb%c\t%0-3r, %12-15r, [%16-19r]"},
+  {ARM_EXT_V6T2, 0xf3200000, 0xfff0f0e0, "ssat16%c\t%8-11r, #%0-4d, %16-19r"},
+  {ARM_EXT_V6T2, 0xf3a00000, 0xfff0f0e0, "usat16%c\t%8-11r, #%0-4d, %16-19r"},
+  {ARM_EXT_V6T2, 0xfb20f000, 0xfff0f0e0, "smuad%4'x%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfb30f000, 0xfff0f0e0, "smulw%4?tb%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfb40f000, 0xfff0f0e0, "smusd%4'x%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfb50f000, 0xfff0f0e0, "smmul%4'r%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfa00f080, 0xfff0f0c0, "sxtah%c\t%8-11r, %16-19r, %0-3r%R"},
+  {ARM_EXT_V6T2, 0xfa10f080, 0xfff0f0c0, "uxtah%c\t%8-11r, %16-19r, %0-3r%R"},
+  {ARM_EXT_V6T2, 0xfa20f080, 0xfff0f0c0, "sxtab16%c\t%8-11r, %16-19r, %0-3r%R"},
+  {ARM_EXT_V6T2, 0xfa30f080, 0xfff0f0c0, "uxtab16%c\t%8-11r, %16-19r, %0-3r%R"},
+  {ARM_EXT_V6T2, 0xfa40f080, 0xfff0f0c0, "sxtab%c\t%8-11r, %16-19r, %0-3r%R"},
+  {ARM_EXT_V6T2, 0xfa50f080, 0xfff0f0c0, "uxtab%c\t%8-11r, %16-19r, %0-3r%R"},
+  {ARM_EXT_V6T2, 0xfb10f000, 0xfff0f0c0, "smul%5?tb%4?tb%c\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xf36f0000, 0xffff8020, "bfc%c\t%8-11r, %E"},
+  {ARM_EXT_V6T2, 0xea100f00, 0xfff08f00, "tst%c.w\t%16-19r, %S"},
+  {ARM_EXT_V6T2, 0xea900f00, 0xfff08f00, "teq%c\t%16-19r, %S"},
+  {ARM_EXT_V6T2, 0xeb100f00, 0xfff08f00, "cmn%c.w\t%16-19r, %S"},
+  {ARM_EXT_V6T2, 0xebb00f00, 0xfff08f00, "cmp%c.w\t%16-19r, %S"},
+  {ARM_EXT_V6T2, 0xf0100f00, 0xfbf08f00, "tst%c.w\t%16-19r, %M"},
+  {ARM_EXT_V6T2, 0xf0900f00, 0xfbf08f00, "teq%c\t%16-19r, %M"},
+  {ARM_EXT_V6T2, 0xf1100f00, 0xfbf08f00, "cmn%c.w\t%16-19r, %M"},
+  {ARM_EXT_V6T2, 0xf1b00f00, 0xfbf08f00, "cmp%c.w\t%16-19r, %M"},
+  {ARM_EXT_V6T2, 0xea4f0000, 0xffef8000, "mov%20's%c.w\t%8-11r, %S"},
+  {ARM_EXT_V6T2, 0xea6f0000, 0xffef8000, "mvn%20's%c.w\t%8-11r, %S"},
+  {ARM_EXT_V6T2, 0xe8c00070, 0xfff000f0, "strexd%c\t%0-3r, %12-15r, %8-11r, [%16-19r]"},
+  {ARM_EXT_V6T2, 0xfb000000, 0xfff000f0, "mla%c\t%8-11r, %16-19r, %0-3r, %12-15r"},
+  {ARM_EXT_V6T2, 0xfb000010, 0xfff000f0, "mls%c\t%8-11r, %16-19r, %0-3r, %12-15r"},
+  {ARM_EXT_V6T2, 0xfb700000, 0xfff000f0, "usada8%c\t%8-11r, %16-19r, %0-3r, %12-15r"},
+  {ARM_EXT_V6T2, 0xfb800000, 0xfff000f0, "smull%c\t%12-15r, %8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfba00000, 0xfff000f0, "umull%c\t%12-15r, %8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfbc00000, 0xfff000f0, "smlal%c\t%12-15r, %8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfbe00000, 0xfff000f0, "umlal%c\t%12-15r, %8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfbe00060, 0xfff000f0, "umaal%c\t%12-15r, %8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xe8500f00, 0xfff00f00, "ldrex%c\t%12-15r, [%16-19r, #%0-7W]"},
+  {ARM_EXT_V6T2, 0xf7f08000, 0xfff0f000, "smc%c\t%K"},
+  {ARM_EXT_V6T2, 0xf04f0000, 0xfbef8000, "mov%20's%c.w\t%8-11r, %M"},
+  {ARM_EXT_V6T2, 0xf06f0000, 0xfbef8000, "mvn%20's%c.w\t%8-11r, %M"},
+  {ARM_EXT_V6T2, 0xf810f000, 0xff70f000, "pld%c\t%a"},
+  {ARM_EXT_V6T2, 0xfb200000, 0xfff000e0, "smlad%4'x%c\t%8-11r, %16-19r, %0-3r, %12-15r"},
+  {ARM_EXT_V6T2, 0xfb300000, 0xfff000e0, "smlaw%4?tb%c\t%8-11r, %16-19r, %0-3r, %12-15r"},
+  {ARM_EXT_V6T2, 0xfb400000, 0xfff000e0, "smlsd%4'x%c\t%8-11r, %16-19r, %0-3r, %12-15r"},
+  {ARM_EXT_V6T2, 0xfb500000, 0xfff000e0, "smmla%4'r%c\t%8-11r, %16-19r, %0-3r, %12-15r"},
+  {ARM_EXT_V6T2, 0xfb600000, 0xfff000e0, "smmls%4'r%c\t%8-11r, %16-19r, %0-3r, %12-15r"},
+  {ARM_EXT_V6T2, 0xfbc000c0, 0xfff000e0, "smlald%4'x%c\t%12-15r, %8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xfbd000c0, 0xfff000e0, "smlsld%4'x%c\t%12-15r, %8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xeac00000, 0xfff08030, "pkhbt%c\t%8-11r, %16-19r, %S"},
+  {ARM_EXT_V6T2, 0xeac00020, 0xfff08030, "pkhtb%c\t%8-11r, %16-19r, %S"},
+  {ARM_EXT_V6T2, 0xf3400000, 0xfff08020, "sbfx%c\t%8-11r, %16-19r, %F"},
+  {ARM_EXT_V6T2, 0xf3c00000, 0xfff08020, "ubfx%c\t%8-11r, %16-19r, %F"},
+  {ARM_EXT_V6T2, 0xf8000e00, 0xff900f00, "str%wt%c\t%12-15r, %a"},
+  {ARM_EXT_V6T2, 0xfb100000, 0xfff000c0, "smla%5?tb%4?tb%c\t%8-11r, %16-19r, %0-3r, %12-15r"},
+  {ARM_EXT_V6T2, 0xfbc00080, 0xfff000c0, "smlal%5?tb%4?tb%c\t%12-15r, %8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_V6T2, 0xf3600000, 0xfff08020, "bfi%c\t%8-11r, %16-19r, %E"},
+  {ARM_EXT_V6T2, 0xf8100e00, 0xfe900f00, "ldr%wt%c\t%12-15r, %a"},
+  {ARM_EXT_V6T2, 0xf3000000, 0xffd08020, "ssat%c\t%8-11r, #%0-4d, %16-19r%s"},
+  {ARM_EXT_V6T2, 0xf3800000, 0xffd08020, "usat%c\t%8-11r, #%0-4d, %16-19r%s"},
+  {ARM_EXT_V6T2, 0xf2000000, 0xfbf08000, "addw%c\t%8-11r, %16-19r, %I"},
+  {ARM_EXT_V6T2, 0xf2400000, 0xfbf08000, "movw%c\t%8-11r, %J"},
+  {ARM_EXT_V6T2, 0xf2a00000, 0xfbf08000, "subw%c\t%8-11r, %16-19r, %I"},
+  {ARM_EXT_V6T2, 0xf2c00000, 0xfbf08000, "movt%c\t%8-11r, %J"},
+  {ARM_EXT_V6T2, 0xea000000, 0xffe08000, "and%20's%c.w\t%8-11r, %16-19r, %S"},
+  {ARM_EXT_V6T2, 0xea200000, 0xffe08000, "bic%20's%c.w\t%8-11r, %16-19r, %S"},
+  {ARM_EXT_V6T2, 0xea400000, 0xffe08000, "orr%20's%c.w\t%8-11r, %16-19r, %S"},
+  {ARM_EXT_V6T2, 0xea600000, 0xffe08000, "orn%20's%c\t%8-11r, %16-19r, %S"},
+  {ARM_EXT_V6T2, 0xea800000, 0xffe08000, "eor%20's%c.w\t%8-11r, %16-19r, %S"},
+  {ARM_EXT_V6T2, 0xeb000000, 0xffe08000, "add%20's%c.w\t%8-11r, %16-19r, %S"},
+  {ARM_EXT_V6T2, 0xeb400000, 0xffe08000, "adc%20's%c.w\t%8-11r, %16-19r, %S"},
+  {ARM_EXT_V6T2, 0xeb600000, 0xffe08000, "sbc%20's%c.w\t%8-11r, %16-19r, %S"},
+  {ARM_EXT_V6T2, 0xeba00000, 0xffe08000, "sub%20's%c.w\t%8-11r, %16-19r, %S"},
+  {ARM_EXT_V6T2, 0xebc00000, 0xffe08000, "rsb%20's%c\t%8-11r, %16-19r, %S"},
+  {ARM_EXT_V6T2, 0xe8400000, 0xfff00000, "strex%c\t%8-11r, %12-15r, [%16-19r, #%0-7W]"},
+  {ARM_EXT_V6T2, 0xf0000000, 0xfbe08000, "and%20's%c.w\t%8-11r, %16-19r, %M"},
+  {ARM_EXT_V6T2, 0xf0200000, 0xfbe08000, "bic%20's%c.w\t%8-11r, %16-19r, %M"},
+  {ARM_EXT_V6T2, 0xf0400000, 0xfbe08000, "orr%20's%c.w\t%8-11r, %16-19r, %M"},
+  {ARM_EXT_V6T2, 0xf0600000, 0xfbe08000, "orn%20's%c\t%8-11r, %16-19r, %M"},
+  {ARM_EXT_V6T2, 0xf0800000, 0xfbe08000, "eor%20's%c.w\t%8-11r, %16-19r, %M"},
+  {ARM_EXT_V6T2, 0xf1000000, 0xfbe08000, "add%20's%c.w\t%8-11r, %16-19r, %M"},
+  {ARM_EXT_V6T2, 0xf1400000, 0xfbe08000, "adc%20's%c.w\t%8-11r, %16-19r, %M"},
+  {ARM_EXT_V6T2, 0xf1600000, 0xfbe08000, "sbc%20's%c.w\t%8-11r, %16-19r, %M"},
+  {ARM_EXT_V6T2, 0xf1a00000, 0xfbe08000, "sub%20's%c.w\t%8-11r, %16-19r, %M"},
+  {ARM_EXT_V6T2, 0xf1c00000, 0xfbe08000, "rsb%20's%c\t%8-11r, %16-19r, %M"},
+  {ARM_EXT_V6T2, 0xe8800000, 0xffd00000, "stmia%c.w\t%16-19r%21'!, %m"},
+  {ARM_EXT_V6T2, 0xe8900000, 0xffd00000, "ldmia%c.w\t%16-19r%21'!, %m"},
+  {ARM_EXT_V6T2, 0xe9000000, 0xffd00000, "stmdb%c\t%16-19r%21'!, %m"},
+  {ARM_EXT_V6T2, 0xe9100000, 0xffd00000, "ldmdb%c\t%16-19r%21'!, %m"},
+  {ARM_EXT_V6T2, 0xe9c00000, 0xffd000ff, "strd%c\t%12-15r, %8-11r, [%16-19r]"},
+  {ARM_EXT_V6T2, 0xe9d00000, 0xffd000ff, "ldrd%c\t%12-15r, %8-11r, [%16-19r]"},
+  {ARM_EXT_V6T2, 0xe9400000, 0xff500000, "strd%c\t%12-15r, %8-11r, [%16-19r, #%23`-%0-7W]"},
+  {ARM_EXT_V6T2, 0xe9500000, 0xff500000, "ldrd%c\t%12-15r, %8-11r, [%16-19r, #%23`-%0-7W]"},
+  {ARM_EXT_V6T2, 0xf8000000, 0xff100000, "str%w%c.w\t%12-15r, %a"},
+  {ARM_EXT_V6T2, 0xf8100000, 0xfe100000, "ldr%w%c.w\t%12-15r, %a"},
 
   /* Filter out Bcc with cond=E or F, which are used for other instructions.  */
   {ARM_EXT_V6T2, 0xf3c08000, 0xfbc0d000, "undefined (bcc, cond=0xF)"},
   {ARM_EXT_V6T2, 0xf3808000, 0xfbc0d000, "undefined (bcc, cond=0xE)"},
-  {ARM_EXT_V6T2, 0xf0008000, 0xf800d000, "b%22-25c.w\t%b"},
-  {ARM_EXT_V6T2, 0xf0009000, 0xf800d000, "b.w\t%B"},
+  {ARM_EXT_V6T2, 0xf0008000, 0xf800d000, "b%22-25c.w\t%b%X"},
+  {ARM_EXT_V6T2, 0xf0009000, 0xf800d000, "b%c.w\t%B%x"},
 
   /* These have been 32-bit since the invention of Thumb.  */
-  {ARM_EXT_V4T,  0xf000c000, 0xf800d000, "blx\t%B"},
-  {ARM_EXT_V4T,  0xf000d000, 0xf800d000, "bl\t%B"},
+  {ARM_EXT_V4T,  0xf000c000, 0xf800d000, "blx%c\t%B%x"},
+  {ARM_EXT_V4T,  0xf000d000, 0xf800d000, "bl%c\t%B%x"},
 
   /* Fallback.  */
   {ARM_EXT_V1,   0x00000000, 0x00000000, "undefined"},
@@ -1377,7 +1381,7 @@ static const struct opcode32 thumb32_opcodes[] =
    
 static const char *const arm_conditional[] =
 {"eq", "ne", "cs", "cc", "mi", "pl", "vs", "vc",
- "hi", "ls", "ge", "lt", "gt", "le", "", "<und>"};
+ "hi", "ls", "ge", "lt", "gt", "le", "al", "<und>", ""};
 
 static const char *const arm_fp_const[] =
 {"0.0", "1.0", "2.0", "3.0", "4.0", "5.0", "0.5", "10.0"};
@@ -1436,6 +1440,15 @@ static unsigned int regname_selected = 1;
 #define arm_regnames      regnames[regname_selected].reg_names
 
 static bfd_boolean force_thumb = FALSE;
+
+/* Current IT instruction state.  This conatins the same state as the IT
+   bits in the CPSR.  */
+static unsigned int ifthen_state;
+/* IT state for the next instruction.  */
+static unsigned int ifthen_next_state;
+/* The address of the insn for which the IT state is valid.  */
+static bfd_vma ifthen_address;
+#define IFTHEN_COND ((ifthen_state >> 4) & 0xf)
 
 
 /* Functions.  */
@@ -1544,6 +1557,7 @@ print_insn_coprocessor (bfd_vma pc, struct disassemble_info *info, long given,
   fprintf_ftype func = info->fprintf_func;
   unsigned long mask;
   unsigned long value;
+  int cond;
 
   for (insn = coprocessor_opcodes; insn->assembler; insn++)
     {
@@ -1561,13 +1575,26 @@ print_insn_coprocessor (bfd_vma pc, struct disassemble_info *info, long given,
 	     encoding is the same.  */
 	  mask |= 0xf0000000;
 	  value |= 0xe0000000;
+	  if (ifthen_state)
+	    cond = IFTHEN_COND;
+	  else
+	    cond = 16;
 	}
       else
 	{
 	  /* Only match unconditional instuctions against unconditional
 	     patterns.  */
 	  if ((given & 0xf0000000) == 0xf0000000)
-	    mask |= 0xf0000000;
+	    {
+	      mask |= 0xf0000000;
+	      cond = 16;
+	    }
+	  else
+	    {
+	      cond = (given >> 28) & 0xf;
+	      if (cond == 0xe)
+		cond = 16;
+	    }
 	}
       if ((given & mask) == value)
 	{
@@ -1655,10 +1682,9 @@ print_insn_coprocessor (bfd_vma pc, struct disassemble_info *info, long given,
 			  }
 		      }
 		      break;
-      
+
 		    case 'c':
-		      func (stream, "%s",
-			    arm_conditional [(given >> 28) & 0xf]);
+		      func (stream, "%s", arm_conditional[cond]);
 		      break;
 
 		    case 'I':
@@ -2099,6 +2125,11 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 		    {
 		    case '%':
 		      func (stream, "%%");
+		      break;
+
+		    case 'c':
+		      if (thumb && ifthen_state)
+			func (stream, "%s", arm_conditional[IFTHEN_COND]);
 		      break;
 
 		    case 'A':
@@ -2633,8 +2664,9 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 		      break;
 
 		    case 'c':
-		      func (stream, "%s",
-			    arm_conditional [(given >> 28) & 0xf]);
+		      if (((given >> 28) & 0xf) != 0xe)
+			func (stream, "%s",
+			      arm_conditional [(given >> 28) & 0xf]);
 		      break;
 
 		    case 'm':
@@ -2892,6 +2924,40 @@ print_insn_thumb16 (bfd_vma pc, struct disassemble_info *info, long given)
 		func (stream, "%%");
 		break;
 
+	      case 'c':
+		if (ifthen_state)
+		  func (stream, "%s", arm_conditional[IFTHEN_COND]);
+		break;
+
+	      case 'C':
+		if (ifthen_state)
+		  func (stream, "%s", arm_conditional[IFTHEN_COND]);
+		else
+		  func (stream, "s");
+		break;
+
+	      case 'I':
+		{
+		  unsigned int tmp;
+
+		  ifthen_next_state = given & 0xff;
+		  for (tmp = given << 1; tmp & 0xf; tmp <<= 1)
+		    func (stream, ((given ^ tmp) & 0x10) ? "e" : "t");
+		  func (stream, "\t%s", arm_conditional[(given >> 4) & 0xf]);
+		}
+		break;
+
+	      case 'x':
+		if (ifthen_next_state)
+		  func (stream, "\t; unpredictable branch in IT block\n");
+		break;
+
+	      case 'X':
+		if (ifthen_state)
+		  func (stream, "\t; unpredictable <IT:%s>",
+			arm_conditional[IFTHEN_COND]);
+		break;
+
 	      case 'S':
 		{
 		  long reg;
@@ -3040,14 +3106,7 @@ print_insn_thumb16 (bfd_vma pc, struct disassemble_info *info, long given)
 			    break;
 
 			  case 'c':
-			    {
-			      /* Must print 0xE as 'al' to distinguish
-				 unconditional B from conditional BAL.  */
-			      if (reg == 0xE)
-				func (stream, "al");
-			      else
-				func (stream, "%s", arm_conditional [reg]);
-			    }
+			    func (stream, "%s", arm_conditional [reg]);
 			    break;
 
 			  default:
@@ -3142,6 +3201,22 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 	      {
 	      case '%':
 		func (stream, "%%");
+		break;
+
+	      case 'c':
+		if (ifthen_state)
+		  func (stream, "%s", arm_conditional[IFTHEN_COND]);
+		break;
+
+	      case 'x':
+		if (ifthen_next_state)
+		  func (stream, "\t; unpredictable branch in IT block\n");
+		break;
+
+	      case 'X':
+		if (ifthen_state)
+		  func (stream, "\t; unpredictable <IT:%s>",
+			arm_conditional[IFTHEN_COND]);
 		break;
 
 	      case 'I':
@@ -3514,10 +3589,7 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		    case 'r': func (stream, "%s", arm_regnames[val]); break;
 
 		    case 'c':
-		      if (val == 0xE)
-			func (stream, "al");
-		      else
-			func (stream, "%s", arm_conditional[val]);
+		      func (stream, "%s", arm_conditional[val]);
 		      break;
 
 		    case '\'':
@@ -3629,6 +3701,84 @@ parse_disassembler_options (char *options)
     }
 }
 
+/* Search back through the insn stream to determine if this instruction is
+   conditionally executed.  */
+static void
+find_ifthen_state (bfd_vma pc, struct disassemble_info *info,
+		   bfd_boolean little)
+{
+  unsigned char b[2];
+  unsigned int insn;
+  int status;
+  /* COUNT is twice the number of instructions seen.  It will be odd if we
+     just crossed an instruction boundary.  */
+  int count;
+  int it_count;
+  unsigned int seen_it;
+  bfd_vma addr;
+
+  ifthen_address = pc;
+  ifthen_state = 0;
+
+  addr = pc;
+  count = 1;
+  it_count = 0;
+  seen_it = 0;
+  /* Scan backwards looking for IT instructions, keeping track of where
+     instruction boundaries are.  We don't know if something is actually an
+     IT instruction until we find a definite instruction boundary.  */
+  for (;;)
+    {
+      if (addr == 0 || info->symbol_at_address_func(addr, info))
+	{
+	  /* A symbol must be on an instruction boundary, and will not
+	     be within an IT block.  */
+	  if (seen_it && (count & 1))
+	    break;
+
+	  return;
+	}
+      addr -= 2;
+      status = info->read_memory_func (addr, (bfd_byte *)b, 2, info);
+      if (status)
+	return;
+
+      if (little)
+	insn = (b[0]) | (b[1] << 8);
+      else
+	insn = (b[1]) | (b[0] << 8);
+      if (seen_it)
+	{
+	  if ((insn & 0xf800) < 0xe800)
+	    {
+	      /* Addr + 2 is an instruction boundary.  See if this matches
+	         the expected boundary based on the position of the last
+		 IT candidate.  */
+	      if (count & 1)
+		break;
+	      seen_it = 0;
+	    }
+	}
+      if ((insn & 0xff00) == 0xbf00 && (insn & 0xf) != 0)
+	{
+	  /* This could be an IT instruction.  */
+	  seen_it = insn;
+	  it_count = count >> 1;
+	}
+      if ((insn & 0xf800) >= 0xe800)
+	count++;
+      else
+	count = (count + 2) | 1;
+      /* IT blocks contain at most 4 instructions.  */
+      if (count >= 8 && !seen_it)
+	return;
+    }
+  /* We found an IT instruction.  */
+  ifthen_state = (seen_it & 0xe0) | ((seen_it << it_count) & 0x1f);
+  if ((ifthen_state & 0xf) == 0)
+    ifthen_state = 0;
+}
+
 /* NOTE: There are no checks in these routines that
    the relevant number of data bytes exist.  */
 
@@ -3728,6 +3878,18 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
 	      size = 4;
 	    }
 	}
+
+      if (ifthen_address != pc)
+	find_ifthen_state(pc, info, little);
+
+      if (ifthen_state)
+	{
+	  if ((ifthen_state & 0xf) == 0x8)
+	    ifthen_next_state = 0;
+	  else
+	    ifthen_next_state = (ifthen_state & 0xe0)
+				| ((ifthen_state & 0xf) << 1);
+	}
     }
 
   if (status)
@@ -3744,6 +3906,12 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
     pc = 0;
 
   printer (pc, info, given);
+
+  if (is_thumb)
+    {
+      ifthen_state = ifthen_next_state;
+      ifthen_address += size;
+    }
   return size;
 }
 
