@@ -185,7 +185,7 @@ mt_register_name (int regnum)
     
     if (index == MT_COPRO_PSEUDOREG_MAC_REGNUM)
       stub = register_names[MT_MAC_PSEUDOREG_REGNUM];
-    else if (index > MT_QCHANNEL_REGNUM - MT_CPR0_REGNUM)
+    else if (index >= MT_NUM_REGS - MT_CPR0_REGNUM)
       stub = "";
     else
       stub = register_names[index + MT_CPR0_REGNUM];
