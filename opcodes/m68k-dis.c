@@ -1308,12 +1308,14 @@ match_insn_m68k (bfd_vma memaddr,
 	}
       else
 	{
+	  /* We must restore the print functions before trying to print the
+	     error message.  */
+	  info->fprintf_func = save_printer;
+	  info->print_address_func = save_print_address;
 	  info->fprintf_func (info->stream,
 			      /* xgettext:c-format */
 			      _("<internal error in opcode table: %s %s>\n"),
 			      best->name,  best->args);
-	  info->fprintf_func = save_printer;
-	  info->print_address_func = save_print_address;
 	  return 2;
 	}
     }
