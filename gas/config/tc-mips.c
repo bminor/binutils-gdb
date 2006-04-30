@@ -7814,6 +7814,10 @@ validate_mips_insn (const struct mips_opcode *opc)
       case '+':
     	switch (c = *p++)
 	  {
+	  case '1': USE_BITS (OP_MASK_UDI1,     OP_SH_UDI1); 	break;
+	  case '2': USE_BITS (OP_MASK_UDI2,	OP_SH_UDI2); 	break;
+	  case '3': USE_BITS (OP_MASK_UDI3,	OP_SH_UDI3); 	break;
+	  case '4': USE_BITS (OP_MASK_UDI4,	OP_SH_UDI4); 	break;
 	  case 'A': USE_BITS (OP_MASK_SHAMT,	OP_SH_SHAMT);	break;
 	  case 'B': USE_BITS (OP_MASK_INSMSB,	OP_SH_INSMSB);	break;
 	  case 'C': USE_BITS (OP_MASK_EXTMSBD,	OP_SH_EXTMSBD);	break;
@@ -7918,6 +7922,22 @@ validate_mips_insn (const struct mips_opcode *opc)
     }
   return 1;
 }
+
+/* UDI immediates.  */
+struct mips_immed {
+  char		type;
+  unsigned int	shift;
+  unsigned long	mask;
+  const char *	desc;
+};
+
+static const struct mips_immed mips_immed[] = {
+  { '1',	OP_SH_UDI1,	OP_MASK_UDI1,		0},
+  { '2',	OP_SH_UDI2,	OP_MASK_UDI2,		0},
+  { '3',	OP_SH_UDI3,	OP_MASK_UDI3,		0},
+  { '4',	OP_SH_UDI4,	OP_MASK_UDI4,		0},
+  { 0,0,0,0 }
+};
 
 /* This routine assembles an instruction into its binary format.  As a
    side effect, it sets one of the global variables imm_reloc or
@@ -8324,6 +8344,34 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	    case '+':		/* Opcode extension character.  */
 	      switch (*++args)
 		{
+		case '1':	/* UDI immediates.  */
+		case '2':
+		case '3':
+		case '4':
+		  {
+		    const struct mips_immed *imm = mips_immed;
+
+		    while (imm->type && imm->type != *args)
+		      ++imm;
+		    if (! imm->type)
+		      internalError ();
+		    my_getExpression (&imm_expr, s);
+		    check_absolute_expr (ip, &imm_expr);
+		    if ((unsigned long) imm_expr.X_add_number & ~imm->mask)
+		      {
+		        as_warn (_("Illegal %s number (%lu, 0x%lx)"),
+				 imm->desc ? imm->desc : ip->insn_mo->name,
+				 (unsigned long) imm_expr.X_add_number,
+				 (unsigned long) imm_expr.X_add_number);
+			      imm_expr.X_add_number &= imm->mask;
+		      }
+		    ip->insn_opcode |= ((unsigned long) imm_expr.X_add_number
+					<< imm->shift);
+		    imm_expr.X_op = O_absent;
+		    s = expr_end;
+		  }
+		  continue;
+		  
 		case 'A':		/* ins/ext position, becomes LSB.  */
 		  limlo = 0;
 		  limhi = 31;

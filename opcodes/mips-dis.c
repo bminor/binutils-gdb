@@ -753,6 +753,26 @@ print_insn_args (const char *d,
 	      (*info->fprintf_func) (info->stream, "0x%x", msb - lsb + 1);
 	      break;
 
+	    case '1':
+	      (*info->fprintf_func) (info->stream, "0x%lx",
+				     (l >> OP_SH_UDI1) & OP_MASK_UDI1);
+	      break;
+	      
+	    case '2':
+	      (*info->fprintf_func) (info->stream, "0x%lx",
+				     (l >> OP_SH_UDI2) & OP_MASK_UDI2);
+	      break;
+	      
+	    case '3':
+	      (*info->fprintf_func) (info->stream, "0x%lx",
+				     (l >> OP_SH_UDI3) & OP_MASK_UDI3);
+	      break;
+      
+	    case '4':
+	      (*info->fprintf_func) (info->stream, "0x%lx",
+				     (l >> OP_SH_UDI4) & OP_MASK_UDI4);
+	      break;
+	      
 	    case 'C':
 	    case 'H':
 	      msbd = (l >> OP_SH_EXTMSBD) & OP_MASK_EXTMSBD;

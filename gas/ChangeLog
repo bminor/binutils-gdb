@@ -1,3 +1,11 @@
+2006-04-30  Thiemo Seufer  <ths@mips.com>
+            David Ung  <davidu@mips.com>
+
+	* config/tc-mips.c (validate_mips_insn): Handling of udi cases.
+	(mips_immed): New table that records various handling of udi
+	instruction patterns.
+	(mips_ip): Adds udi handling.
+
 2006-04-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* dwarf2dbg.c (get_line_subseg): Attach new struct line_seg to end

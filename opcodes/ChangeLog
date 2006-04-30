@@ -1,3 +1,10 @@
+2006-04-30  Thiemo Seufer  <ths@mips.com>
+            David Ung  <davidu@mips.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Add udi instructions
+	"udi0" to "udi15".
+	* mips-dis.c (print_insn_args): Adds udi argument handling.
+
 2006-04-28  James E Wilson  <wilson@specifix.com>
 
 	* m68k-dis.c (match_insn_m68k): Restore fprintf_func before printing
