@@ -723,7 +723,7 @@ if { ([istarget "ia64-*-elf*"]
 if [is_elf_format] {
     objcopy_test "ELF unknown section type" unknown.s
     objcopy_test_readelf "ELF group" group.s
+    run_dump_test "copy-1"
 }
 
-run_dump_test "copy-1"
 run_dump_test "copy-2"
