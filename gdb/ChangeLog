@@ -1,3 +1,8 @@
+2006-04-30  Mark Kettenis  <kettenis@gnu.org>
+
+	* breakpoint.c (insert_single_step_breakpoint): Make a failure to
+	insert a single-step breakpoint an error instead of a warning.
+
 2006-05-01  Nathan J. Williams  <nathanw@wasabisystems.com>
 
 	* ppcnbsd-tdep.c (ppcnbsd_return_value): Change type of last two
@@ -12,6 +17,9 @@
 	on a single fork.  Report if no matching forks.
 
 2006-04-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* breakpoint.c (remove_single_step_breakpoints): Bail out early if
+	no breakpoints are inserted.
 
 	From Masaki MURANAKA <monaka@monami-software.com>:
 	* mips-mdebug-tdep.c (mips_mdebug_frame_prev_register): Change

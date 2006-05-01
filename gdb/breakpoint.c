@@ -7717,7 +7717,7 @@ insert_single_step_breakpoint (CORE_ADDR next_pc)
 
   *bpt_p = deprecated_insert_raw_breakpoint (next_pc);
   if (*bpt_p == NULL)
-    warning (_("Could not insert single-step breakpoint at 0x%s"),
+    error (_("Could not insert single-step breakpoint at 0x%s"),
 	     paddr_nz (next_pc));
 }
 
