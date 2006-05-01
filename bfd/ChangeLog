@@ -1,3 +1,11 @@
+2006-05-01  DJ Delorie  <dj@redhat.com>
+
+	* bfd-in.h (bfd_hash_table): Add count field.
+	* bfd-in2.h: Regenerate.
+	* hash.c (higher_prime_number): New.
+	(bfd_hash_table_inint_n): Init count field.
+	(bfd_hash_lookup): Grow table as needed.
+
 2006-04-27  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	PR binutils/2584

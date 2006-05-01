@@ -376,6 +376,8 @@ struct bfd_hash_table
   struct bfd_hash_entry **table;
   /* The number of slots in the hash table.  */
   unsigned int size;
+  /* The number of entries in the hash table.  */
+  unsigned int count;
   /* The size of elements.  */
   unsigned int entsize;
   /* A function used to create new elements in the hash table.  The
