@@ -1,3 +1,11 @@
+2006-04-30  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/sigbpt.exp (stepi_out): FAIL when inserting a
+	single-step breakpoint fails; make this a KFAIL on
+	sparc*-*-openbsd*.
+	* gdb.base/siginfo.exp: Likewise.
+	* gdb.base/sigstep.exp (advance, advancei): Likewise.
+
 2006-04-26  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/multi-forks.exp: Modify patterns for "run to exit",
