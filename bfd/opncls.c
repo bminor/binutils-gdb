@@ -115,9 +115,33 @@ _bfd_new_bfd_contained_in (bfd *obfd)
 void
 _bfd_delete_bfd (bfd *abfd)
 {
-  bfd_hash_table_free (&abfd->section_htab);
-  objalloc_free ((struct objalloc *) abfd->memory);
+  if (abfd->memory)
+    {
+      bfd_hash_table_free (&abfd->section_htab);
+      objalloc_free ((struct objalloc *) abfd->memory);
+    }
   free (abfd);
+}
+
+/* Free objalloc memory.  */
+
+bfd_boolean
+_bfd_free_cached_info (bfd *abfd)
+{
+  if (abfd->memory)
+    {
+      bfd_hash_table_free (&abfd->section_htab);
+      objalloc_free ((struct objalloc *) abfd->memory);
+
+      abfd->sections = NULL;
+      abfd->section_last = NULL;
+      abfd->outsymbols = NULL;
+      abfd->tdata.any = NULL;
+      abfd->usrdata = NULL;
+      abfd->memory = NULL;
+    }
+
+  return TRUE;
 }
 
 /*

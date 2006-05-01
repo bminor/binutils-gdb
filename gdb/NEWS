@@ -3,6 +3,12 @@
 
 *** Changes since GDB 6.4
 
+* New targets
+
+Renesas M32C/M16C		m32c-elf
+
+Morpho Technologies ms1		ms1-elf
+
 * New commands
 
 init-if-undefined		Initialize a convenience variable, but

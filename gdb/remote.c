@@ -973,7 +973,7 @@ typedef unsigned char threadref[OPAQUETHREADBYTES];
 typedef int gdb_threadref;	/* Internal GDB thread reference.  */
 
 /* gdb_ext_thread_info is an internal GDB data structure which is
-   equivalint to the reply of the remote threadinfo packet.  */
+   equivalent to the reply of the remote threadinfo packet.  */
 
 struct gdb_ext_thread_info
   {

@@ -1,3 +1,72 @@
+2006-05-01  DJ Delorie  <dj@redhat.com>
+
+	* bfd-in.h (bfd_hash_table): Add count field.
+	* bfd-in2.h: Regenerate.
+	* hash.c (higher_prime_number): New.
+	(bfd_hash_table_inint_n): Init count field.
+	(bfd_hash_lookup): Grow table as needed.
+
+2006-04-27  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	PR binutils/2584
+	* tekhex.c (getvalue): Change return type to bfd_boolean and
+	add the new parameter.  Return false if the unexpected character
+	is found.
+	(getsym): Likewise.
+	(first_phase): Change return type to bfd_boolean and return
+	false if the unexpected character is found.  Replace abort
+	with returning false.
+	(pass_over): Change return type to bfd_boolean and the type of
+	the second argument to bfd_boolean (*) (bfd *, int, char *).
+	Return false if FUNC returns false.
+	(tekhex_object_p): Return NULL if pass_over fails.
+
+2006-04-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* coff-rs6000.c (xcoff_write_archive_contents_old): Warning fix.
+
+2006-04-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/2593
+	* elf.c (_bfd_elf_new_section_hook): Don't set section ELF type
+	and flags if its BFD flags have been set.
+	(_bfd_elf_init_private_section_data): Don't copy the output ELF
+	section type from input if it has been set to something
+	different.
+
+2006-04-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/2467
+	* elf.c (_bfd_elf_close_and_cleanup): Check elf_tdata (abfd)
+	is NULL first.
+
+	* elf32-arm.c (elf32_arm_close_and_cleanup): Check if
+	abfd->sections is NULL.
+	(elf32_arm_bfd_free_cached_info): New.
+	(bfd_elf32_bfd_free_cached_info): Defined.
+
+	* elfxx-target.h (bfd_elfNN_bfd_free_cached_info): Default it
+	to _bfd_free_cached_info.
+
+	* libbfd-in.h (_bfd_free_cached_info): New.
+	* libbfd: Regenerated.
+
+	* opncls.c (_bfd_delete_bfd): Check if abfd->memory is NULL.
+	(_bfd_free_cached_info): New.
+
+2006-04-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (assign_file_positions_except_relocs): Move code setting
+	file position of non-loaded sections..
+	(assign_file_positions_for_segments): ..to here.
+
+2006-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/2537
+	* elf.c (bfd_section_from_shdr): Allow sections reserved for
+	applications. Issue an error on sections we don't know how
+	to handle.
+
 2006-04-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
@@ -277,6 +346,24 @@
 	* elf32-m68k.c (elf32_m68k_merge_private_bfd_data): Use
 	bfd_get_compatible to set the new bfd architecture.  Rely on it
 	to detect incompatibilities.
+
+2006-03-23  Michael Matz  <matz@suse.de>
+
+	* reloc.c: Add BFD_RELOC_X86_64_GOT64, BFD_RELOC_X86_64_GOTPCREL64,
+	BFD_RELOC_X86_64_GOTPC64, BFD_RELOC_X86_64_GOTPLT64,
+	BFD_RELOC_X86_64_PLTOFF64.
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Regenerated.
+	* elf64-x86-64.c (x86_64_elf_howto_table): Correct comment.
+	Add howtos for above relocs.
+	(x86_64_reloc_map): Add mappings for new relocs.
+	(elf64_x86_64_check_relocs): R_X86_64_GOT64, R_X86_64_GOTPCREL64,
+	R_X86_64_GOTPLT64 need a got entry.  R_X86_64_GOTPLT64 also a PLT
+	entry.  R_X86_64_GOTPC64 needs a .got section.  R_X86_64_PLTOFF64
+	needs a PLT entry.
+	(elf64_x86_64_gc_sweep_hook): Reflect changes from
+	elf64_x86_64_check_relocs for the new relocs.
+	(elf64_x86_64_relocate_section): Handle new relocs.
 
 2006-03-22  Bob Wilson  <bob.wilson@acm.org>
 
