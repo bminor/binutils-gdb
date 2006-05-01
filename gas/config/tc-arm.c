@@ -15855,6 +15855,29 @@ get_thumb32_insn (char * buf)
   return insn;
 }
 
+
+/* We usually want to set the low bit on the address of thumb function
+   symbols.  In particular .word foo - . should have the low bit set.
+   Generic code tries to fold the difference of two symbols to
+   a constant.  Prevent this and force a relocation when the first symbols
+   is a thumb function.  */
+int
+arm_optimize_expr (expressionS *l, operatorT op, expressionS *r)
+{
+  if (op == O_subtract
+      && l->X_op == O_symbol
+      && r->X_op == O_symbol
+      && THUMB_IS_FUNC (l->X_add_symbol))
+    {
+      l->X_op = O_subtract;
+      l->X_op_symbol = r->X_add_symbol;
+      l->X_add_number -= r->X_add_number;
+      return 1;
+    }
+  /* Process as normal.  */
+  return 0;
+}
+
 void
 md_apply_fix (fixS *	fixP,
 	       valueT * valP,
