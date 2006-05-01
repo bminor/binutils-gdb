@@ -683,7 +683,7 @@ proc objcopy_test_readelf {testname srcfile} {
     catch "exec $OBJCOPY $OBJCOPYFLAGS tmpdir/bintest.o tmpdir/copy.o" exec_output
     if ![string match "" $exec_output] then {
 	fail "objcopy ($testname)"
-	return;
+	return
     }
 
     verbose -log "$READELF -a tmpdir/bintest.o > tmpdir/bintest.o.out"

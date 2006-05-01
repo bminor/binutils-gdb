@@ -1,3 +1,7 @@
+2006-05-01  Ben Elliston  <bje@au.ibm.com>
+
+	* binutils-all/objcopy.exp (objcopy_test_readelf): Remove stray ;
+
 2006-04-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/2593
