@@ -163,6 +163,7 @@ if { "${asm-arch}" == "" } {
 # On NetBSD/ELF we need a special NetBSD-identifying note section.
 if { [istarget "*-*-netbsdelf*"]
      || [istarget "mips*-*-netbsd*"]
+     || [istarget "powerpc-*-netbsd*"]
      || [istarget "x86_64-*-netbsd*"] } then {
     set asm-note "netbsd"
 }

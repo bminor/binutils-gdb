@@ -1,3 +1,8 @@
+2006-05-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.asm/asm-source.exp: Add powerpc-*-netbsd* to the list of
+	NetBSD/ELF targets.
+
 2006-04-30  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/sigbpt.exp (stepi_out): FAIL when inserting a
