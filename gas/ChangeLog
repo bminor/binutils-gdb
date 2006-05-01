@@ -1,3 +1,7 @@
+2006-05-01  James Lemke  <jwlemke@wasabisystems.com>
+
+	* subsegs.c (subseg_set_rest): Always set seginfp->frchainP if NULL.
+
 2006-04-30  Thiemo Seufer  <ths@mips.com>
             David Ung  <davidu@mips.com>
 
