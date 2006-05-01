@@ -1,3 +1,7 @@
+2006-05-01  James Lemke  <jwlemke@wasabisystems.com>
+
+	* subsegs.c (subseg_set_rest): Always set seginfp->frchainP if NULL.
+
 2006-04-25  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/xtensa-relax.c (widen_spec_list): Use new "WIDE.<opcode>"

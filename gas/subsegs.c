@@ -194,7 +194,7 @@ subseg_set_rest (segT seg, subsegT subseg)
       newP->frch_next = frcP;	/* perhaps NULL */
 
       seginfo = seg_info (seg);
-      if (seginfo && seginfo->frchainP == frcP)
+      if (seginfo && (!seginfo->frchainP || seginfo->frchainP == frcP))
 	seginfo->frchainP = newP;
 
       frcP = newP;
