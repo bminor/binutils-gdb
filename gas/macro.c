@@ -1025,7 +1025,6 @@ macro_expand (int idx, sb *in, macro_entry *m, sb *out)
   sb t;
   formal_entry *ptr;
   formal_entry *f;
-  int is_positional = 0;
   int is_keyword = 0;
   int narg = 0;
   const char *err = NULL;
@@ -1116,8 +1115,6 @@ macro_expand (int idx, sb *in, macro_entry *m, sb *out)
 	}
       else
 	{
-	  /* This is a positional arg.  */
-	  is_positional = 1;
 	  if (is_keyword)
 	    {
 	      err = _("can't mix positional and keyword arguments");

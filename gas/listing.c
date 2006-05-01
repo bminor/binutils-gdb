@@ -946,15 +946,6 @@ listing_listing (char *name ATTRIBUTE_UNUSED)
   buffer = xmalloc (listing_rhs_width);
   data_buffer = xmalloc (MAX_BYTES);
   eject = 1;
-  list = head;
-
-  while (list != (list_info_type *) NULL && 0)
-    {
-      if (list->next)
-	list->frag = list->next->frag;
-      list = list->next;
-    }
-
   list = head->next;
 
   while (list)

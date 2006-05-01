@@ -336,10 +336,7 @@ colon (/* Just seen "x:" - rattle symbols & frags.  */
 	       || S_IS_COMMON (symbolP)
 	       || S_IS_VOLATILE (symbolP))
 	{
-	  if (S_IS_VOLATILE (symbolP)
-	      /* This could be avoided when the symbol wasn't used so far, but
-		 the comment in struc-symbol.h says this flag isn't reliable.  */
-	      && (1 || !symbol_used_p (symbolP)))
+	  if (S_IS_VOLATILE (symbolP))
 	    {
 	      symbolP = symbol_clone (symbolP, 1);
 	      S_SET_VALUE (symbolP, 0);

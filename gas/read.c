@@ -1,6 +1,6 @@
 /* read.c - read a source file -
    Copyright 1986, 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
@@ -1478,10 +1478,7 @@ s_comm_internal (int param,
 	  ignore_rest_of_line ();
 	  goto out;
 	}
-      /* This could be avoided when the symbol wasn't used so far, but
-	 the comment in struc-symbol.h says this flag isn't reliable.  */
-      if (1 || !symbol_used_p (symbolP))
-	symbolP = symbol_clone (symbolP, 1);
+      symbolP = symbol_clone (symbolP, 1);
       S_SET_SEGMENT (symbolP, undefined_section);
       S_SET_VALUE (symbolP, 0);
       symbol_set_frag (symbolP, &zero_address_frag);
@@ -2812,10 +2809,7 @@ assign_symbol (char *name, int mode)
       /* If the symbol is volatile, copy the symbol and replace the
 	 original with the copy, so that previous uses of the symbol will
 	 retain the value of the symbol at the point of use.  */
-      else if (S_IS_VOLATILE (symbolP)
-	  /* This could be avoided when the symbol wasn't used so far, but
-	     the comment in struc-symbol.h says this flag isn't reliable.  */
-	  && (1 || symbol_used_p (symbolP)))
+      else if (S_IS_VOLATILE (symbolP))
 	symbolP = symbol_clone (symbolP, 1);
     }
 
@@ -3186,17 +3180,14 @@ s_weakref (int ignore ATTRIBUTE_UNUSED)
 
   if (S_IS_DEFINED (symbolP) || symbol_equated_p (symbolP))
     {
-      if(!S_IS_VOLATILE (symbolP))
+      if (!S_IS_VOLATILE (symbolP))
 	{
 	  as_bad (_("symbol `%s' is already defined"), name);
 	  *end_name = delim;
 	  ignore_rest_of_line ();
 	  return;
 	}
-      /* This could be avoided when the symbol wasn't used so far, but
-	 the comment in struc-symbol.h says this flag isn't reliable.  */
-      if (1 || !symbol_used_p (symbolP))
-	symbolP = symbol_clone (symbolP, 1);
+      symbolP = symbol_clone (symbolP, 1);
       S_CLEAR_VOLATILE (symbolP);
     }
 

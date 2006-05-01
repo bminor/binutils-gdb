@@ -1,3 +1,13 @@
+2006-05-01  Ben Elliston  <bje@au.ibm.com>
+
+	* listing.c (listing_listing): Remove useless loop.
+	* macro.c (macro_expand): Remove is_positional local variable.
+	* read.c (s_comm_internal): Simplify `if' condition 1 || x -> 1
+	and simplify surrounding expressions, where possible.
+	(assign_symbol): Likewise.
+	(s_weakref): Likewise.
+	* symbols.c (colon): Likewise.
+
 2006-05-01  James Lemke  <jwlemke@wasabisystems.com>
 
 	* subsegs.c (subseg_set_rest): Always set seginfp->frchainP if NULL.
