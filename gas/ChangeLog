@@ -1,3 +1,10 @@
+2006-05-02  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (arm_optimize_expr): New function.
+	* config/tc-arm.h (md_optimize_expr): Define
+	(arm_optimize_expr): Add prototype.
+	(TC_FORCE_RELOCATION_SUB_SAME): Define.
+
 2006-05-01  James Lemke  <jwlemke@wasabisystems.com>
 
 	* subsegs.c (subseg_set_rest): Always set seginfp->frchainP if NULL.

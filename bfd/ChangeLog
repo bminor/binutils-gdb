@@ -1,3 +1,8 @@
+2006-05-02  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_final_link_relocate): Set thumb funciton bit
+	for R_ARM_REL32.
+
 2006-04-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* coff-rs6000.c (xcoff_write_archive_contents_old): Warning fix.
