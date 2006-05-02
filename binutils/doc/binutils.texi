@@ -3525,7 +3525,7 @@ programs described in this manual.
 
 @c man begin OPTIONS
 @table @env
-@include @value{top_srcdir}/../libiberty/at-file.texi
+@include at-file.texi
 @c man end
 
 @item --help

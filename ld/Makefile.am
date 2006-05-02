@@ -46,7 +46,7 @@ DOCVER = gen
 # Options to extract the man page from ld.texinfo
 MANCONF = -Dman
 
-TEXI2POD = perl $(BASEDIR)/etc/texi2pod.pl
+TEXI2POD = perl $(BASEDIR)/etc/texi2pod.pl $(AM_MAKEINFOFLAGS)
 
 POD2MAN = pod2man --center="GNU Development Tools" \
 	--release="binutils-$(VERSION)" --section=1
@@ -97,7 +97,7 @@ info_TEXINFOS = ld.texinfo
 noinst_TEXINFOS = ldint.texinfo
 man_MANS = ld.1
 
-AM_MAKEINFOFLAGS = -I $(srcdir) -I $(BFDDIR)/doc
+AM_MAKEINFOFLAGS = -I $(srcdir) -I $(BFDDIR)/doc -I $(top_srcdir)/../libiberty
 TEXI2DVI = texi2dvi -I $(srcdir) -I $(BFDDIR)/doc
 
 INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) -I$(top_srcdir)/../intl -I../intl $(HDEFINES) $(CFLAGS) -DLOCALEDIR="\"$(datadir)/locale\""
@@ -1702,7 +1702,6 @@ bootstrap: ld3$(EXEEXT)
 configdoc.texi:	${DOCVER}-doc.texi
 	cp ${srcdir}/${DOCVER}-doc.texi ./configdoc.texi
 	chmod u+w ./configdoc.texi
-	echo "@set top_srcdir $(top_srcdir)" >> ./configdoc.texi
 
 ldver.texi: $(srcdir)/../bfd/configure
 	rm -f $@

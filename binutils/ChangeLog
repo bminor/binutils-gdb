@@ -1,3 +1,11 @@
+2006-05-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* doc/Makefile.am (AM_MAKEINFOFLAGS): New.
+	(TEXI2POD): Use AM_MAKEINFOFLAGS.
+	(config.texi): Don't set top_srcdir.
+	* doc/binutils.texi: Don't use top_srcdir.
+	* aclocal.m4, Makefile.in, doc/Makefile.in: Regenerated.
+
 2006-04-26  Julian Brown  <julian@codesourcery.com>
 
 	* readelf.c (arm_attr_tag_VFP_arch): Add VFPv3.

@@ -1,3 +1,11 @@
+2006-05-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* doc/Makefile.am (AM_MAKEINFOFLAGS): New.
+	(TEXI2POD): Use AM_MAKEINFOFLAGS.
+	(asconfig.texi): Don't set top_srcdir.
+	* doc/as.texinfo: Don't use top_srcdir.
+	* aclocal.m4, Makefile.in, doc/Makefile.in: Regenerated.
+
 2006-05-02  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (arm_optimize_expr): New function.
