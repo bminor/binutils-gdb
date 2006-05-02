@@ -5634,7 +5634,7 @@ declare_register_set (prefix, num_regs, base_regnum)
 
   for (i = 0; i < num_regs; ++i)
     {
-      sprintf (name, "%s%u", prefix, i);
+      snprintf (name, sizeof (name), "%s%u", prefix, i);
       declare_register (name, base_regnum + i);
     }
 }
@@ -6971,7 +6971,8 @@ emit_one_bundle ()
 	  else
 	    as_fatal ("emit_one_bundle: unexpected dynamic op");
 
-	  sprintf (mnemonic, "%s.%c", idesc->name, "?imbfxx"[insn_unit]);
+	  snprintf (mnemonic, sizeof (mnemonic), "%s.%c",
+		    idesc->name, "?imbfxx"[insn_unit]);
 	  opnd1 = idesc->operands[0];
 	  opnd2 = idesc->operands[1];
 	  ia64_free_opcode (idesc);
@@ -10544,12 +10545,15 @@ check_dependencies (idesc)
 	      int certain = (matchtype == 1 && CURR_SLOT.qp_regno == 0);
 
 	      if (path != 0)
-		sprintf (pathmsg, " when entry is at label '%s'",
+		snprintf (pathmsg, sizeof (pathmsg),
+			  " when entry is at label '%s'",
 			 md.entry_labels[path - 1]);
 	      if (matchtype == 1 && rs->index >= 0)
-		sprintf (indexmsg, ", specific resource number is %d",
+		snprintf (indexmsg, sizeof (indexmsg),
+			  ", specific resource number is %d",
 			 rs->index);
-	      sprintf (msg, "Use of '%s' %s %s dependency '%s' (%s)%s%s",
+	      snprintf (msg, sizeof (msg),
+			"Use of '%s' %s %s dependency '%s' (%s)%s%s",
 		       idesc->name,
 		       (certain ? "violates" : "may violate"),
 		       dv_mode[dep->mode], dep->name,

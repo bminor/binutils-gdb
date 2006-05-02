@@ -5251,16 +5251,18 @@ md_atof (type, litP, sizeP)
   return 0;
 }
 
-static char output_invalid_buf[8];
+static char output_invalid_buf[16];
 
 static char *
 output_invalid (c)
      int c;
 {
   if (ISPRINT (c))
-    sprintf (output_invalid_buf, "'%c'", c);
+    snprintf (output_invalid_buf, sizeof (output_invalid_buf),
+	      "'%c'", c);
   else
-    sprintf (output_invalid_buf, "(0x%x)", (unsigned) c);
+    snprintf (output_invalid_buf, sizeof (output_invalid_buf),
+	      "(0x%x)", (unsigned) c);
   return output_invalid_buf;
 }
 
