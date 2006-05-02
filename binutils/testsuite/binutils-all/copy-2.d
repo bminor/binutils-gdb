@@ -1,14 +1,18 @@
 #PROG: objcopy
 #objdump: -h
-#objcopy: --set-section-flags .text=alloc,data
+#objcopy: --set-section-flags foo=contents,alloc,load,code
 #name: copy with seting section flags 2
-#source: bintest.s
+#source: copytest.s
+#not-target: *-*-aout
+# Note - we use copytest.s and a section named "foo" rather
+# than .text because for some file formats (eg PE) the .text
+# section has a fixed set of flags and these cannot be changed.
 
 .*: +file format .*
 
 Sections:
 Idx.*
 #...
-  [0-9]* .text.*
-                  CONTENTS, ALLOC, LOAD, RELOC, DATA
+  [0-9]* foo.*
+                  CONTENTS, ALLOC, LOAD, CODE
 #...

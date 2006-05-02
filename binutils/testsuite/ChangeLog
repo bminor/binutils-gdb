@@ -1,3 +1,10 @@
+2006-05-02  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/copy-2.d: Change the name of the section whose
+	flags are changed to "foo" so that the test will work with PE
+	based targets.  Skip this test for AOUT based targeted.
+	* binutils-all/copytest.s: New file.
+
 2006-05-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* binutils-all/objcopy.exp: Run "copy-1" for ELF only.
