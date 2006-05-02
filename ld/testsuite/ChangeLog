@@ -1,3 +1,9 @@
+2006-05-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-cdtest/cdtest-foo.cc (Foo::Foo): Add const to char *.
+	* ld-cdtest/cdtest-foo.h (Foo::Foo): Likewise.
+	* ld-srec/sr3.cc (Foo::Foo): Likewise.
+
 2006-05-02  Paul Brook  <paul@codesourcery.com>
 
 	* ld-arm/arm-elf.exp: Add thumb-rel32.
