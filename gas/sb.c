@@ -56,7 +56,10 @@ static void sb_check (sb *, int);
 static int string_count[sb_max_power_two];
 
 /* Free list of sb structures.  */
-static sb_list_vector free_list;
+static struct
+{
+  sb_element *size[sb_max_power_two];
+} free_list;
 
 /* Initializes an sb.  */
 
@@ -66,8 +69,7 @@ sb_build (sb *ptr, int size)
   /* See if we can find one to allocate.  */
   sb_element *e;
 
-  if (size > sb_max_power_two)
-    abort ();
+  assert (size < sb_max_power_two);
 
   e = free_list.size[size];
   if (!e)

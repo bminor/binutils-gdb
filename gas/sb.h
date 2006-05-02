@@ -70,14 +70,6 @@ typedef struct le
 }
 sb_element;
 
-/* The free list.  */
-
-typedef struct
-{
-  sb_element *size[sb_max_power_two];
-}
-sb_list_vector;
-
 extern void sb_new (sb *);
 extern void sb_kill (sb *);
 extern void sb_add_sb (sb *, sb *);

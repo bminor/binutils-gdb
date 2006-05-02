@@ -1,3 +1,9 @@
+2006-05-02  Ben Elliston  <bje@au.ibm.com>
+
+	* sb.h (sb_list_vector): Move to sb.c.
+	* sb.c (free_list): Use type of sb_list_vector directly.
+	(sb_build): Fix off-by-one error in assertion about `size'.
+
 2006-05-01  Ben Elliston  <bje@au.ibm.com>
 
 	* listing.c (listing_listing): Remove useless loop.
