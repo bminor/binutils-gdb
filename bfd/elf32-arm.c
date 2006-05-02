@@ -3274,9 +3274,11 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  break;
 
 	case R_ARM_REL32:
+	  value += addend;
+	  if (sym_flags == STT_ARM_TFUNC)
+	    value |= 1;
 	  value -= (input_section->output_section->vma
 		    + input_section->output_offset + rel->r_offset);
-	  value += addend;
 	  break;
 
 	case R_ARM_PREL31:

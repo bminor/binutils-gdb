@@ -83,6 +83,9 @@ struct fix;
   arm_relax_frag(segment, fragp, stretch)
 extern int arm_relax_frag (asection *, struct frag *, long);
 
+#define md_optimize_expr(l,o,r)		arm_optimize_expr (l, o, r)
+extern int arm_optimize_expr (expressionS *, operatorT, expressionS *);
+
 #define md_cleanup() arm_cleanup ()
 
 #define md_start_line_hook() arm_start_line_hook ()
@@ -147,6 +150,12 @@ extern void arm_md_end (void);
    || (FIX)->fx_r_type == BFD_RELOC_ARM_GOT32		\
    || (FIX)->fx_r_type == BFD_RELOC_32			\
    || TC_FORCE_RELOCATION (FIX))
+
+/* Force output of R_ARM_REL32 relocations against thumb function symbols.
+   This is needed to ensure the low bit is handled correctly.  */
+#define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEG)	\
+  (THUMB_IS_FUNC ((FIX)->fx_addsy)		\
+   || !SEG_NORMAL (SEG))
 
 #define TC_CONS_FIX_NEW cons_fix_new_arm
 

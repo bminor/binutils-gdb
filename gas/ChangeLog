@@ -1,3 +1,10 @@
+2006-05-02  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (arm_optimize_expr): New function.
+	* config/tc-arm.h (md_optimize_expr): Define
+	(arm_optimize_expr): Add prototype.
+	(TC_FORCE_RELOCATION_SUB_SAME): Define.
+
 2006-05-02  Ben Elliston  <bje@au.ibm.com>
 
 	* config/obj-elf.h (ELF_TARGET_SYMBOL_FIELDS): Make single bit

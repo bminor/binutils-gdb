@@ -1,3 +1,9 @@
+2006-05-02  Paul Brook  <paul@codesourcery.com>
+
+	* ld-arm/arm-elf.exp: Add thumb-rel32.
+	* ld-arm/thumb-rel32.d: New test.
+	* ld-arm/thumb-rel32.s: New test.
+
 2006-04-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elfvers/vers.exp: Xfail vers7a, vers7, vers23a, vers23b,

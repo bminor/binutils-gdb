@@ -119,6 +119,9 @@ set armelftests {
     {"Thumb entry point" "-T arm.ld" "" {thumb-entry.s}
      {{readelf -h thumb-entry.d}}
      "thumb-entry"}
+    {"thumb-rel32" "-static -T arm.ld" "" {thumb-rel32.s}
+     {{objdump -s thumb-rel32.d}}
+     "thumb-rel32"}
 }
 
 run_ld_link_tests $armelftests
