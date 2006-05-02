@@ -1,3 +1,8 @@
+2006-05-02  James E Wilson  <wilson@specifix.com>
+
+	* gprof.c (main): When setting default output_style, add separate
+	checks for INPUT_HISTOGRAM and INPUT_CALL_GRAPH.
+
 2006-04-25  Masaki Muranaka  <monaka@monami-software.com>
 
 	PR 2587
