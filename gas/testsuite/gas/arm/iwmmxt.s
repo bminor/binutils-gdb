@@ -164,8 +164,8 @@ iwmmxt:
 	wsrlwgmi	wr1, wr5, wcgr0
 	wsrldg		wr1, wr5, wcgr1
 
-	wstrb		wr1, [r1, #4]
-	wstrh		wr1, [r1, #4]!
+	wstrb		wr1, [r1, #0xFF]
+	wstrh		wr1, [r1, #-0xFF]!
 	wstrw		wr1, [r1], #4
 	wstrd		wr1, [r1, #0x3FC]
 	wstrw		wcasf, [r1], #300

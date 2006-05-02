@@ -1,3 +1,10 @@
+2006-05-02  Joseph Myers  <joseph@codesourcery.com>
+
+	* config/tc-arm.c (do_iwmmxt_wldstbh): Don't multiply offset by 4
+	here.
+	(md_apply_fix3): Multiply offset by 4 here for
+	BFD_RELOC_ARM_CP_OFF_IMM_S2 and BFD_RELOC_ARM_T32_CP_OFF_IMM_S2.
+
 2006-05-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* doc/Makefile.am (AM_MAKEINFOFLAGS): New.
