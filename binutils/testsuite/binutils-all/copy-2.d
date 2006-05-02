@@ -1,7 +1,7 @@
 #PROG: objcopy
 #objdump: -h
 #objcopy: --set-section-flags foo=contents,alloc,load,code
-#name: copy with seting section flags 2
+#name: copy with setting section flags 2
 #source: copytest.s
 #not-target: *-*-aout
 # Note - we use copytest.s and a section named "foo" rather
