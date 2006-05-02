@@ -8,7 +8,7 @@ CONFIG=all
 # Options to extract the man page from as.texinfo
 MANCONF = -Dman
 
-TEXI2POD = perl $(top_srcdir)/../etc/texi2pod.pl
+TEXI2POD = perl $(top_srcdir)/../etc/texi2pod.pl $(AM_MAKEINFOFLAGS)
 
 POD2MAN = pod2man --center="GNU Development Tools" \
 	 --release="binutils-$(VERSION)" --section=1
@@ -34,12 +34,13 @@ info_TEXINFOS = binutils.texi
 binutils_TEXINFOS = config.texi
 binutils_TEXI = $(srcdir)/binutils.texi
 
+AM_MAKEINFOFLAGS = -I "$(srcdir)" -I "$(top_srcdir)/../libiberty"
+
 config.texi: $(srcdir)/../../bfd/configure $(binutils_TEXI)
 	rm -f config.texi
 	eval `grep '^ *VERSION=' $(srcdir)/../../bfd/configure`; \
 	  echo "@set VERSION $$VERSION" > $@
 	echo "@set UPDATED `date "+%B %Y"`" >> config.texi
-	echo "@set top_srcdir $(top_srcdir)" >> config.texi
 
 # Man page generation from texinfo
 addr2line.1:	$(binutils_TEXI)

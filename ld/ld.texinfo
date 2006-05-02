@@ -342,7 +342,7 @@ Here is a table of the generic command line switches accepted by the GNU
 linker:
 
 @table @gcctabopt
-@include @value{top_srcdir}/../libiberty/at-file.texi
+@include at-file.texi
 
 @kindex -a@var{keyword}
 @item -a@var{keyword}

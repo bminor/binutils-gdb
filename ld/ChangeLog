@@ -1,3 +1,11 @@
+2006-05-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.am (AM_MAKEINFOFLAGS): Add libiberty.
+	(TEXI2POD): Use AM_MAKEINFOFLAGS.
+	(configdoc.texi): Don't set top_srcdir.
+	* ld.texinfo: Don't use top_srcdir.
+	* aclocal.m4, Makefile.in: Regenerated.
+
 2006-04-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* po/POTFILES.in: Regenerated.
