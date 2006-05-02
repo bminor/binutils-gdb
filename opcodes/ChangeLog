@@ -1,3 +1,10 @@
+2006-05-02  Thiemo Seufer  <ths@mips.com>
+            Nigel Stephens  <nigel@mips.com>
+            David Ung  <davidu@mips.com>
+
+	* mips-dis.c (print_insn_args): Force mips16 to odd addresses.
+	(print_mips16_insn_arg): Force mips16 to odd addresses.
+
 2006-04-30  Thiemo Seufer  <ths@mips.com>
             David Ung  <davidu@mips.com>
 

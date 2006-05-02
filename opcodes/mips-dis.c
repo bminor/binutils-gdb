@@ -984,6 +984,10 @@ print_insn_args (const char *d,
 	case 'a':
 	  info->target = (((pc + 4) & ~(bfd_vma) 0x0fffffff)
 			  | (((l >> OP_SH_TARGET) & OP_MASK_TARGET) << 2));
+	  /* For gdb disassembler, force odd address on jalx.  */
+	  if (info->flavour == bfd_target_unknown_flavour
+	      && strcmp (opp->name, "jalx") == 0)
+	    info->target |= 1;
 	  (*info->print_address_func) (info->target, info);
 	  break;
 
@@ -1632,15 +1636,26 @@ print_mips16_insn_arg (char type,
 		  }
 	      }
 	    info->target = (baseaddr & ~((1 << shift) - 1)) + immed;
+	    if (pcrel && branch
+		&& info->flavour == bfd_target_unknown_flavour)
+	      /* For gdb disassembler, maintain odd address.  */
+	      info->target |= 1;
 	    (*info->print_address_func) (info->target, info);
 	  }
       }
       break;
 
     case 'a':
-      if (! use_extend)
-	extend = 0;
-      l = ((l & 0x1f) << 23) | ((l & 0x3e0) << 13) | (extend << 2);
+      {
+	int jalx = l & 0x400;
+
+	if (! use_extend)
+	  extend = 0;
+	l = ((l & 0x1f) << 23) | ((l & 0x3e0) << 13) | (extend << 2);
+	if (!jalx && info->flavour == bfd_target_unknown_flavour)
+	  /* For gdb disassembler, maintain odd address.  */
+	  l |= 1;
+      }
       info->target = ((memaddr + 4) & ~(bfd_vma) 0x0fffffff) | l;
       (*info->print_address_func) (info->target, info);
       info->insn_type = dis_jsr;
