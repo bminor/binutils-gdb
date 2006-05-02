@@ -1,5 +1,8 @@
 2006-05-02  Ben Elliston  <bje@au.ibm.com>
 
+	* config/obj-elf.h (ELF_TARGET_SYMBOL_FIELDS): Make single bit
+	field unsigned.
+
 	* sb.h (sb_list_vector): Move to sb.c.
 	* sb.c (free_list): Use type of sb_list_vector directly.
 	(sb_build): Fix off-by-one error in assertion about `size'.

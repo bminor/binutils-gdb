@@ -83,7 +83,7 @@ struct elf_obj_sy
 #define OBJ_SYMFIELD_TYPE struct elf_obj_sy
 
 /* Symbol fields used by the ELF back end.  */
-#define ELF_TARGET_SYMBOL_FIELDS int local:1;
+#define ELF_TARGET_SYMBOL_FIELDS unsigned int local:1;
 
 /* Don't change this; change ELF_TARGET_SYMBOL_FIELDS instead.  */
 #ifndef TARGET_SYMBOL_FIELDS
