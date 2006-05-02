@@ -1,3 +1,14 @@
+2006-05-02  H.J. Lu  <hongjiu.lu@intel.com>
+	    Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-i386.c (output_invalid_buf): Change size for
+	unsigned char.
+	* config/tc-tic30.c (output_invalid_buf): Likewise.
+
+	* config/tc-i386.c (output_invalid): Cast none-ascii char to
+	unsigned char.
+	* config/tc-tic30.c (output_invalid): Likewise.
+
 2006-05-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* doc/Makefile.am (AM_MAKEINFOFLAGS): New.
@@ -5,6 +16,18 @@
 	(asconfig.texi): Don't set top_srcdir.
 	* doc/as.texinfo: Don't use top_srcdir.
 	* aclocal.m4, Makefile.in, doc/Makefile.in: Regenerated.
+
+2006-05-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (output_invalid_buf): Change size to 16.
+	* config/tc-tic30.c (output_invalid_buf): Likewise.
+
+	* config/tc-i386.c (output_invalid): Use snprintf instead of
+	sprintf.
+	* config/tc-ia64.c (declare_register_set): Likewise.
+	(emit_one_bundle): Likewise.
+	(check_dependencies): Likewise.
+	* config/tc-tic30.c (output_invalid): Likewise.
 
 2006-05-02  Paul Brook  <paul@codesourcery.com>
 

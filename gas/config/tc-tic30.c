@@ -273,7 +273,7 @@ struct tic30_insn
 struct tic30_insn insn;
 static int found_parallel_insn;
 
-static char output_invalid_buf[16];
+static char output_invalid_buf[sizeof (unsigned char) * 2 + 6];
 
 static char *
 output_invalid (char c)
@@ -283,7 +283,7 @@ output_invalid (char c)
 	      "'%c'", c);
   else
     snprintf (output_invalid_buf, sizeof (output_invalid_buf), 
-	      "(0x%x)", (unsigned) c);
+	      "(0x%x)", (unsigned char) c);
   return output_invalid_buf;
 }
 

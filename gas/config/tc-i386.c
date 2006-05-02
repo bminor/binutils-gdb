@@ -5251,7 +5251,7 @@ md_atof (type, litP, sizeP)
   return 0;
 }
 
-static char output_invalid_buf[16];
+static char output_invalid_buf[sizeof (unsigned char) * 2 + 6];
 
 static char *
 output_invalid (c)
@@ -5262,7 +5262,7 @@ output_invalid (c)
 	      "'%c'", c);
   else
     snprintf (output_invalid_buf, sizeof (output_invalid_buf),
-	      "(0x%x)", (unsigned) c);
+	      "(0x%x)", (unsigned char) c);
   return output_invalid_buf;
 }
 
