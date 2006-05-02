@@ -751,15 +751,12 @@ out (bfd *abfd, int type, char *start, char *end)
 static bfd_boolean
 tekhex_write_object_contents (bfd *abfd)
 {
-  int bytes_written;
   char buffer[100];
   asymbol **p;
   asection *s;
   struct data_struct *d;
 
   tekhex_init ();
-
-  bytes_written = 0;
 
   /* And the raw data.  */
   for (d = abfd->tdata.tekhex_data->data;

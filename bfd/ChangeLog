@@ -1,3 +1,20 @@
+2006-05-02  Ben Elliston  <bje@au.ibm.com>
+
+	* archive.c (bfd_generic_archive_p): Remove unused local variable
+	`fail'.
+	* dwarf2.c (decode_line_info): Remove unused local variable
+	`basic_block'.
+	* elfcode.h (elf_slurp_reloc_table_from_section): Remove unsed
+	local varibale `s'.
+	* tekhex.c (tekhex_write_object_contents): Remove unused local
+	variable `bytes_written'.
+	* aout-ns32k.c (MY_swap_std_reloc_out): Remove unused local
+	variable `r_addend'.
+	* elf32-dlx.c (dlx_rtype_to_howto): Remove breaks after returns.
+	* elfxx-mips.c (_bfd_elf_mips_mach): Remove breaks after returns.
+	(_bfd_ns32k_relocate_contents): Remove break after return.
+	* elf.c (bfd_section_from_shdr): Remove breaks after returns.
+
 2006-05-02  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-sh-symbian.c: Rename local define DEBUG to SYMBIAN_DEBUG

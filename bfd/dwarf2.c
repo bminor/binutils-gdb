@@ -1117,7 +1117,6 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
       unsigned int line = 1;
       unsigned int column = 0;
       int is_stmt = lh.default_is_stmt;
-      int basic_block = 0;
       int end_sequence = 0;
       /* eraxxon@alumni.rice.edu: Against the DWARF2 specs, some
 	 compilers generate address sequences that are wildly out of
@@ -1142,7 +1141,6 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 	      line += lh.line_base + (adj_opcode % lh.line_range);
 	      /* Append row to matrix using current values.  */
 	      add_line_info (table, address, filename, line, column, 0);
-	      basic_block = 1;
 	      if (address < low_pc)
 		low_pc = address;
 	      if (address > high_pc)
@@ -1214,7 +1212,6 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 	      break;
 	    case DW_LNS_copy:
 	      add_line_info (table, address, filename, line, column, 0);
-	      basic_block = 0;
 	      if (address < low_pc)
 		low_pc = address;
 	      if (address > high_pc)
@@ -1250,7 +1247,6 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 	      is_stmt = (!is_stmt);
 	      break;
 	    case DW_LNS_set_basic_block:
-	      basic_block = 1;
 	      break;
 	    case DW_LNS_const_add_pc:
 	      address += lh.minimum_instruction_length

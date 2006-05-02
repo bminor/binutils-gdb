@@ -1350,10 +1350,8 @@ elf_slurp_reloc_table_from_section (bfd *abfd,
 	}
       else
 	{
-	  asymbol **ps, *s;
-
+	  asymbol **ps;
 	  ps = symbols + ELF_R_SYM (rela.r_info) - 1;
-	  s = *ps;
 
 	  relent->sym_ptr_ptr = ps;
 	}

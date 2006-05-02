@@ -4955,39 +4955,30 @@ _bfd_elf_mips_mach (flagword flags)
 	default:
 	case E_MIPS_ARCH_1:
 	  return bfd_mach_mips3000;
-	  break;
 
 	case E_MIPS_ARCH_2:
 	  return bfd_mach_mips6000;
-	  break;
 
 	case E_MIPS_ARCH_3:
 	  return bfd_mach_mips4000;
-	  break;
 
 	case E_MIPS_ARCH_4:
 	  return bfd_mach_mips8000;
-	  break;
 
 	case E_MIPS_ARCH_5:
 	  return bfd_mach_mips5;
-	  break;
 
 	case E_MIPS_ARCH_32:
 	  return bfd_mach_mipsisa32;
-	  break;
 
 	case E_MIPS_ARCH_64:
 	  return bfd_mach_mipsisa64;
-	  break;
 
 	case E_MIPS_ARCH_32R2:
 	  return bfd_mach_mipsisa32r2;
-	  break;
 
 	case E_MIPS_ARCH_64R2:
 	  return bfd_mach_mipsisa64r2;
-	  break;
 	}
     }
 

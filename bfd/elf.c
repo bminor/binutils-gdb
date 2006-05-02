@@ -2113,13 +2113,11 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
       elf_dynversym (abfd) = shindex;
       elf_tdata (abfd)->dynversym_hdr = *hdr;
       return _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex);
-      break;
 
     case SHT_GNU_verneed:
       elf_dynverref (abfd) = shindex;
       elf_tdata (abfd)->dynverref_hdr = *hdr;
       return _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex);
-      break;
 
     case SHT_SHLIB:
       return TRUE;
