@@ -6293,7 +6293,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			  BFD_ASSERT (indx > 0);
 #ifdef DEBUG
 			  if (indx <= 0)
-			    printf ("indx=%d section=%s flags=%08x name=%s\n",
+			    printf ("indx=%ld section=%s flags=%08x name=%s\n",
 				    indx, osec->name, osec->flags,
 				    h->root.root.string);
 #endif

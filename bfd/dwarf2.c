@@ -1625,7 +1625,7 @@ read_rangelist (struct comp_unit *unit, struct arange *arange, bfd_uint64_t offs
       if (low_pc == -1UL && high_pc != -1UL)
 	base_address = high_pc;
       else
-	  arange_add (unit->abfd, arange, base_address + low_pc, base_address + high_pc);
+	arange_add (unit->abfd, arange, base_address + low_pc, base_address + high_pc);
     }
 }
 

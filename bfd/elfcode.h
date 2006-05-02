@@ -1,6 +1,6 @@
 /* ELF executable support for BFD.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
    in "UNIX System V Release 4, Programmers Guide: ANSI C and
@@ -139,10 +139,11 @@ Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. 
 #define LOG_FILE_ALIGN	2
 #endif
 
-#ifdef DEBUG
+#if DEBUG & 2
 static void elf_debug_section (int, Elf_Internal_Shdr *);
+#endif
+#if DEBUG & 1
 static void elf_debug_file (Elf_Internal_Ehdr *);
-static char *elf_symbol_flags (flagword);
 #endif
 
 /* Structure swapping routines */
@@ -545,7 +546,7 @@ elf_object_p (bfd *abfd)
   if (i_ehdrp->e_shoff == 0 && i_ehdrp->e_type == ET_REL)
     goto got_wrong_format_error;
 
-  /* As a simple sanity check, verify that the what BFD thinks is the
+  /* As a simple sanity check, verify that what BFD thinks is the
      size of each section header table entry actually matches the size
      recorded in the file, but only if there are any sections.  */
   if (i_ehdrp->e_shentsize != sizeof (x_shdr) && i_ehdrp->e_shnum != 0)
@@ -1450,7 +1451,7 @@ elf_slurp_reloc_table (bfd *abfd,
   return TRUE;
 }
 
-#ifdef DEBUG
+#if DEBUG & 2
 static void
 elf_debug_section (int num, Elf_Internal_Shdr *hdr)
 {
@@ -1476,7 +1477,9 @@ elf_debug_section (int num, Elf_Internal_Shdr *hdr)
 	   (long) hdr->sh_entsize);
   fflush (stderr);
 }
+#endif
 
+#if DEBUG & 1
 static void
 elf_debug_file (Elf_Internal_Ehdr *ehdrp)
 {
@@ -1487,77 +1490,6 @@ elf_debug_file (Elf_Internal_Ehdr *ehdrp)
   fprintf (stderr, "e_shoff      = %ld\n", (long) ehdrp->e_shoff);
   fprintf (stderr, "e_shnum      = %ld\n", (long) ehdrp->e_shnum);
   fprintf (stderr, "e_shentsize  = %ld\n", (long) ehdrp->e_shentsize);
-}
-
-static char *
-elf_symbol_flags (flagword flags)
-{
-  static char buffer[1024];
-
-  buffer[0] = '\0';
-  if (flags & BSF_LOCAL)
-    strcat (buffer, " local");
-
-  if (flags & BSF_GLOBAL)
-    strcat (buffer, " global");
-
-  if (flags & BSF_DEBUGGING)
-    strcat (buffer, " debug");
-
-  if (flags & BSF_FUNCTION)
-    strcat (buffer, " function");
-
-  if (flags & BSF_KEEP)
-    strcat (buffer, " keep");
-
-  if (flags & BSF_KEEP_G)
-    strcat (buffer, " keep_g");
-
-  if (flags & BSF_WEAK)
-    strcat (buffer, " weak");
-
-  if (flags & BSF_SECTION_SYM)
-    strcat (buffer, " section-sym");
-
-  if (flags & BSF_OLD_COMMON)
-    strcat (buffer, " old-common");
-
-  if (flags & BSF_NOT_AT_END)
-    strcat (buffer, " not-at-end");
-
-  if (flags & BSF_CONSTRUCTOR)
-    strcat (buffer, " constructor");
-
-  if (flags & BSF_WARNING)
-    strcat (buffer, " warning");
-
-  if (flags & BSF_INDIRECT)
-    strcat (buffer, " indirect");
-
-  if (flags & BSF_FILE)
-    strcat (buffer, " file");
-
-  if (flags & DYNAMIC)
-    strcat (buffer, " dynamic");
-
-  if (flags & ~(BSF_LOCAL
-		| BSF_GLOBAL
-		| BSF_DEBUGGING
-		| BSF_FUNCTION
-		| BSF_KEEP
-		| BSF_KEEP_G
-		| BSF_WEAK
-		| BSF_SECTION_SYM
-		| BSF_OLD_COMMON
-		| BSF_NOT_AT_END
-		| BSF_CONSTRUCTOR
-		| BSF_WARNING
-		| BSF_INDIRECT
-		| BSF_FILE
-		| BSF_DYNAMIC))
-    strcat (buffer, " unknown-bits");
-
-  return buffer;
 }
 #endif
 

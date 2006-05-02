@@ -1,3 +1,17 @@
+2006-05-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* dwarf2.c: Formatting.
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Simplify
+	output section check.
+	* elf32-i370.c: Warning fixes inside #ifdef DEBUG.
+	* elf32-m32c.c: Similarly.
+	* elf32-ppc.c: Similarly.
+	* elf32-v850.c: Similarly.
+	* nlm32-sparc.c: Similarly.
+	* elfcode.h: Similarly.
+	(elf_symbol_flags): Delete.
+	* elflink.c (elf_link_input_bfd): Comment typo.
+
 2006-05-01  DJ Delorie  <dj@redhat.com>
 
 	* bfd-in.h (bfd_hash_table): Add count field.

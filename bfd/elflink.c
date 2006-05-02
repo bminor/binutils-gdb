@@ -7250,7 +7250,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 		      /* This is a reloc for a deleted entry or somesuch.
 			 Turn it into an R_*_NONE reloc, at the same
 			 offset as the last reloc.  elf_eh_frame.c and
-			 elf_bfd_discard_info rely on reloc offsets
+			 bfd_elf_discard_info rely on reloc offsets
 			 being ordered.  */
 		      irela->r_offset = last_offset;
 		      irela->r_info = 0;

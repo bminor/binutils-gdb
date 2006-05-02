@@ -40,7 +40,8 @@ static bfd_boolean m32c_elf_check_relocs
   (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
 static bfd_boolean m32c_elf_relax_delete_bytes (bfd *, asection *, bfd_vma, int);
 #ifdef DEBUG
-static char * m32c_get_reloc (long reloc);
+char * m32c_get_reloc (long reloc);
+void dump_symtab (bfd *, void *, void *);
 #endif
 static bfd_boolean m32c_elf_relax_section
 (bfd *abfd, asection *sec, struct bfd_link_info *link_info, bfd_boolean *again);
@@ -936,7 +937,7 @@ m32c_elf_object_p (bfd *abfd)
  
 
 #ifdef DEBUG
-static void
+void
 dump_symtab (bfd * abfd, void *internal_syms, void *external_syms)
 {
   size_t locsymcount;
@@ -977,7 +978,6 @@ dump_symtab (bfd * abfd, void *internal_syms, void *external_syms)
 	{
 	case STT_FUNC: st_info_str = "STT_FUNC";
 	case STT_SECTION: st_info_str = "STT_SECTION";
-	case STT_SRELC: st_info_str = "STT_SRELC";
 	case STT_FILE: st_info_str = "STT_FILE";
 	case STT_OBJECT: st_info_str = "STT_OBJECT";
 	case STT_TLS: st_info_str = "STT_TLS";
@@ -1022,7 +1022,7 @@ dump_symtab (bfd * abfd, void *internal_syms, void *external_syms)
     free (external_syms);
 }
 
-static char *
+char *
 m32c_get_reloc (long reloc)
 {
   if (0 <= reloc && reloc < R_M32C_max)
