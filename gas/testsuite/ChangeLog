@@ -1,3 +1,10 @@
+2006-05-02  Joseph Myers  <joseph@codesourcery.com>
+
+	* gas/arm/iwmmxt.s: Increase offsets for wstrb and wstrh.
+	* gas/arm/iwmmxt.d: Update expected results.
+	* gas/arm/iwmmxt-bad2.s: Test wstrb, wstrh, wldrb and wldrh.
+	* gas/arm/iwmmxt-bad2.l: Update expected error messages.
+
 2006-04-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/fp.d: New file.
