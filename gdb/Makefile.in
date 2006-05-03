@@ -1977,7 +1977,7 @@ environ.o: environ.c $(defs_h) $(environ_h) $(gdb_string_h)
 eval.o: eval.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(value_h) $(expression_h) $(target_h) $(frame_h) $(language_h) \
 	$(f_lang_h) $(cp_abi_h) $(infcall_h) $(objc_lang_h) $(block_h) \
-	$(parser_defs_h) $(cp_support_h)
+	$(parser_defs_h) $(cp_support_h) $(exceptions_h) $(uiout_h)
 event-loop.o: event-loop.c $(defs_h) $(event_loop_h) $(event_top_h) \
 	$(gdb_string_h) $(exceptions_h) $(gdb_assert_h) $(gdb_select_h)
 event-top.o: event-top.c $(defs_h) $(top_h) $(inferior_h) $(target_h) \

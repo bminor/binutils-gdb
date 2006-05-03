@@ -37,6 +37,8 @@
 #include "block.h"
 #include "parser-defs.h"
 #include "cp-support.h"
+#include "ui-out.h"
+#include "exceptions.h"
 
 /* This is defined in valops.c */
 extern int overload_resolution;
@@ -461,8 +463,26 @@ evaluate_subexp_standard (struct type *expect_type,
 	 value_rtti_target_type () if we are dealing with a pointer
 	 or reference to a base class and print object is on. */
 
-	return value_of_variable (exp->elts[pc + 2].symbol,
-				  exp->elts[pc + 1].block);
+      {
+	volatile struct gdb_exception except;
+	struct value *ret = NULL;
+
+	TRY_CATCH (except, RETURN_MASK_ERROR)
+	  {
+	    ret = value_of_variable (exp->elts[pc + 2].symbol,
+				     exp->elts[pc + 1].block);
+	  }
+
+	if (except.reason < 0)
+	  {
+	    if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	      ret = value_zero (SYMBOL_TYPE (exp->elts[pc + 2].symbol), not_lval);
+	    else
+	      throw_exception (except);
+	  }
+
+	return ret;
+      }
 
     case OP_LAST:
       (*pos) += 2;

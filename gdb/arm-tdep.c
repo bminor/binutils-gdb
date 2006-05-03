@@ -414,6 +414,17 @@ arm_skip_prologue (CORE_ADDR pc)
 
   /* See what the symbol table says.  */
 
+  /* See if we can determine the end of the prologue via the symbol table.
+     If so, then return either PC, or the PC after the prologue, whichever
+     is greater.  */
+  if (find_pc_partial_function (pc, NULL, &func_addr, NULL))
+    {
+      CORE_ADDR post_prologue_pc = skip_prologue_using_sal (func_addr);
+      if (post_prologue_pc != 0)
+        return max (pc, post_prologue_pc);
+    }
+
+#if 0
   if (find_pc_partial_function (pc, &func_name, &func_addr, &func_end))
     {
       struct symbol *sym;
@@ -428,10 +439,12 @@ arm_skip_prologue (CORE_ADDR pc)
 	    return sal.end;
         }
     }
+#endif
 
   /* Can't find the prologue end in the symbol table, try it the hard way
      by disassembling the instructions.  */
 
+  func_end = skip_prologue_using_sal (pc);
   /* Like arm_scan_prologue, stop no later than pc + 64. */
   if (func_end == 0 || func_end > pc + 64)
     func_end = pc + 64;

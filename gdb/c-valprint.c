@@ -165,8 +165,11 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	}
       else if (TYPE_CODE (elttype) == TYPE_CODE_MEMBER)
 	{
-	  cp_print_class_member (valaddr + embedded_offset,
-				 TYPE_DOMAIN_TYPE (TYPE_TARGET_TYPE (type)),
+	  struct type *target_type, *domain_type;
+
+	  target_type = check_typedef (TYPE_TARGET_TYPE (type));
+	  domain_type = TYPE_DOMAIN_TYPE (target_type);
+	  cp_print_class_member (valaddr + embedded_offset, domain_type,
 				 stream, "&");
 	}
       else

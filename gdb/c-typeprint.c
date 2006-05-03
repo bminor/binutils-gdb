@@ -168,7 +168,7 @@ cp_type_print_method_args (struct type *mtype, char *prefix, char *varstring,
     {
       while (i < nargs)
 	{
-	  type_print (args[i++].type, "", stream, 0);
+	  type_print (args[i++].type, "", stream, -1);
 
 	  if (i == nargs && varargs)
 	    fprintf_filtered (stream, ", ...");

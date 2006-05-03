@@ -513,7 +513,10 @@ varobj_create (char *objname,
 	    gdb_value_fetch_lazy (var->value);
 	}
       else
-	var->value = evaluate_type (var->root->exp);
+	{
+	  var->value = evaluate_type (var->root->exp);
+	  release_value (var->value);
+	}
 
       var->type = value_type (var->value);
 
@@ -1868,7 +1871,7 @@ c_name_of_child (struct varobj *parent, int index)
 static struct value *
 c_value_of_root (struct varobj **var_handle)
 {
-  struct value *new_val;
+  struct value *new_val = NULL;
   struct varobj *var = *var_handle;
   struct frame_info *fi;
   int within_scope;
@@ -1912,11 +1915,12 @@ c_value_of_root (struct varobj **var_handle)
 	      else
 		var->error = 0;
 	    }
+
+	  release_value (new_val);
 	}
       else
 	var->error = 1;
 
-      release_value (new_val);
       return new_val;
     }
 

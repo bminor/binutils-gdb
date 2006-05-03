@@ -266,6 +266,10 @@ execute_stack_op (struct dwarf_expr_context *ctx,
       LONGEST offset;
       int bytes_read;
 
+      if (ctx->in_reg && op != DW_OP_piece && op != DW_OP_nop)
+	error (_("DWARF-2 expression error: DW_OP_reg operations must be "
+		 "used either alone or in conjuction with DW_OP_piece."));
+
       switch (op)
 	{
 	case DW_OP_lit0:
@@ -383,10 +387,6 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	case DW_OP_reg29:
 	case DW_OP_reg30:
 	case DW_OP_reg31:
-	  if (op_ptr != op_end && *op_ptr != DW_OP_piece)
-	    error (_("DWARF-2 expression error: DW_OP_reg operations must be "
-		   "used either alone or in conjuction with DW_OP_piece."));
-
 	  result = op - DW_OP_reg0;
 	  ctx->in_reg = 1;
 
@@ -394,10 +394,6 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
 	case DW_OP_regx:
 	  op_ptr = read_uleb128 (op_ptr, op_end, &reg);
-	  if (op_ptr != op_end && *op_ptr != DW_OP_piece)
-	    error (_("DWARF-2 expression error: DW_OP_reg operations must be "
-		   "used either alone or in conjuction with DW_OP_piece."));
-
 	  result = reg;
 	  ctx->in_reg = 1;
 	  break;
