@@ -1,6 +1,6 @@
 /* write.c - emit .o file
    Copyright 1986, 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -379,7 +379,7 @@ chain_frchains_together_1 (segT section, struct frchain *frchp)
   fragS dummy, *prev_frag = &dummy;
   fixS fix_dummy, *prev_fix = &fix_dummy;
 
-  for (; frchp && frchp->frch_seg == section; frchp = frchp->frch_next)
+  for (; frchp; frchp = frchp->frch_next)
     {
       prev_frag->fr_next = frchp->frch_root;
       prev_frag = frchp->frch_last;
@@ -1136,8 +1136,7 @@ set_symtab (void)
    of the section.  This allows proper nop-filling at the end of
    code-bearing sections.  */
 #define SUB_SEGMENT_ALIGN(SEG, FRCHAIN)					\
-  (!(FRCHAIN)->frch_next || (FRCHAIN)->frch_next->frch_seg != (SEG)	\
-   ? get_recorded_alignment (SEG) : 0)
+  (!(FRCHAIN)->frch_next ? get_recorded_alignment (SEG) : 0)
 #else
 #define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) 0
 #endif
@@ -1147,48 +1146,58 @@ void
 subsegs_finish (void)
 {
   struct frchain *frchainP;
+  asection *s;
 
-  for (frchainP = frchain_root; frchainP; frchainP = frchainP->frch_next)
+  for (s = stdoutput->sections; s; s = s->next)
     {
-      int alignment = 0;
+      segment_info_type *seginfo = seg_info (s);
+      if (!seginfo)
+	continue;
 
-      subseg_set (frchainP->frch_seg, frchainP->frch_subseg);
-
-      /* This now gets called even if we had errors.  In that case,
-         any alignment is meaningless, and, moreover, will look weird
-         if we are generating a listing.  */
-      if (!had_errors ())
+      for (frchainP = seginfo->frchainP;
+	   frchainP != NULL;
+	   frchainP = frchainP->frch_next)
 	{
-	  alignment = SUB_SEGMENT_ALIGN (now_seg, frchainP);
-	  if ((bfd_get_section_flags (now_seg->owner, now_seg) & SEC_MERGE)
-	      && now_seg->entsize)
+	  int alignment = 0;
+
+	  subseg_set (s, frchainP->frch_subseg);
+
+	  /* This now gets called even if we had errors.  In that case,
+	     any alignment is meaningless, and, moreover, will look weird
+	     if we are generating a listing.  */
+	  if (!had_errors ())
 	    {
-	      unsigned int entsize = now_seg->entsize;
-	      int entalign = 0;
-
-	      while ((entsize & 1) == 0)
+	      alignment = SUB_SEGMENT_ALIGN (now_seg, frchainP);
+	      if ((bfd_get_section_flags (now_seg->owner, now_seg) & SEC_MERGE)
+		  && now_seg->entsize)
 		{
-		  ++entalign;
-		  entsize >>= 1;
+		  unsigned int entsize = now_seg->entsize;
+		  int entalign = 0;
+
+		  while ((entsize & 1) == 0)
+		    {
+		      ++entalign;
+		      entsize >>= 1;
+		    }
+		  if (entalign > alignment)
+		    alignment = entalign;
 		}
-	      if (entalign > alignment)
-		alignment = entalign;
 	    }
+
+	  if (subseg_text_p (now_seg))
+	    frag_align_code (alignment, 0);
+	  else
+	    frag_align (alignment, 0, 0);
+
+	  /* frag_align will have left a new frag.
+	     Use this last frag for an empty ".fill".
+
+	     For this segment ...
+	     Create a last frag. Do not leave a "being filled in frag".  */
+	  frag_wane (frag_now);
+	  frag_now->fr_fix = 0;
+	  know (frag_now->fr_next == NULL);
 	}
-
-      if (subseg_text_p (now_seg))
-	frag_align_code (alignment, 0);
-      else
-	frag_align (alignment, 0, 0);
-
-      /* frag_align will have left a new frag.
-	 Use this last frag for an empty ".fill".
-
-	 For this segment ...
-	 Create a last frag. Do not leave a "being filled in frag".  */
-      frag_wane (frag_now);
-      frag_now->fr_fix = 0;
-      know (frag_now->fr_next == NULL);
     }
 }
 

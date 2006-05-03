@@ -6954,44 +6954,46 @@ static void
 xtensa_cleanup_align_frags (void)
 {
   frchainS *frchP;
+  asection *s;
 
-  for (frchP = frchain_root; frchP; frchP = frchP->frch_next)
-    {
-      fragS *fragP;
-      /* Walk over all of the fragments in a subsection.  */
-      for (fragP = frchP->frch_root; fragP; fragP = fragP->fr_next)
-	{
-	  if ((fragP->fr_type == rs_align
-	       || fragP->fr_type == rs_align_code
-	       || (fragP->fr_type == rs_machine_dependent
-		   && (fragP->fr_subtype == RELAX_DESIRE_ALIGN
-		       || fragP->fr_subtype == RELAX_DESIRE_ALIGN_IF_TARGET)))
-	      && fragP->fr_fix == 0)
-	    {
-	      fragS *next = fragP->fr_next;
+  for (s = stdoutput->sections; s; s = s->next)
+    for (frchP = seg_info (s)->frchainP; frchP; frchP = frchP->frch_next)
+      {
+	fragS *fragP;
+	/* Walk over all of the fragments in a subsection.  */
+	for (fragP = frchP->frch_root; fragP; fragP = fragP->fr_next)
+	  {
+	    if ((fragP->fr_type == rs_align
+		 || fragP->fr_type == rs_align_code
+		 || (fragP->fr_type == rs_machine_dependent
+		     && (fragP->fr_subtype == RELAX_DESIRE_ALIGN
+			 || fragP->fr_subtype == RELAX_DESIRE_ALIGN_IF_TARGET)))
+		&& fragP->fr_fix == 0)
+	      {
+		fragS *next = fragP->fr_next;
 
-	      while (next
-		     && next->fr_fix == 0
-		     && next->fr_type == rs_machine_dependent
-		     && next->fr_subtype == RELAX_DESIRE_ALIGN_IF_TARGET)
-		{
-		  frag_wane (next);
-		  next = next->fr_next;
-		}
-	    }
-	  /* If we don't widen branch targets, then they
-	     will be easier to align.  */
-	  if (fragP->tc_frag_data.is_branch_target
-	      && fragP->fr_opcode == fragP->fr_literal
-	      && fragP->fr_type == rs_machine_dependent
-	      && fragP->fr_subtype == RELAX_SLOTS
-	      && fragP->tc_frag_data.slot_subtypes[0] == RELAX_NARROW)
-	    frag_wane (fragP);
-	  if (fragP->fr_type == rs_machine_dependent
-	      && fragP->fr_subtype == RELAX_UNREACHABLE)
-	    fragP->tc_frag_data.is_unreachable = TRUE;
-	}
-    }
+		while (next
+		       && next->fr_fix == 0
+		       && next->fr_type == rs_machine_dependent
+		       && next->fr_subtype == RELAX_DESIRE_ALIGN_IF_TARGET)
+		  {
+		    frag_wane (next);
+		    next = next->fr_next;
+		  }
+	      }
+	    /* If we don't widen branch targets, then they
+	       will be easier to align.  */
+	    if (fragP->tc_frag_data.is_branch_target
+		&& fragP->fr_opcode == fragP->fr_literal
+		&& fragP->fr_type == rs_machine_dependent
+		&& fragP->fr_subtype == RELAX_SLOTS
+		&& fragP->tc_frag_data.slot_subtypes[0] == RELAX_NARROW)
+	      frag_wane (fragP);
+	    if (fragP->fr_type == rs_machine_dependent
+		&& fragP->fr_subtype == RELAX_UNREACHABLE)
+	      fragP->tc_frag_data.is_unreachable = TRUE;
+	  }
+      }
 }
 
 
@@ -7004,26 +7006,28 @@ static void
 xtensa_fix_target_frags (void)
 {
   frchainS *frchP;
+  asection *s;
 
   /* When this routine is called, all of the subsections are still intact
      so we walk over subsections instead of sections.  */
-  for (frchP = frchain_root; frchP; frchP = frchP->frch_next)
-    {
-      fragS *fragP;
+  for (s = stdoutput->sections; s; s = s->next)
+    for (frchP = seg_info (s)->frchainP; frchP; frchP = frchP->frch_next)
+      {
+	fragS *fragP;
 
-      /* Walk over all of the fragments in a subsection.  */
-      for (fragP = frchP->frch_root; fragP; fragP = fragP->fr_next)
-	{
-	  if (fragP->fr_type == rs_machine_dependent
-	      && fragP->fr_subtype == RELAX_DESIRE_ALIGN_IF_TARGET)
-	    {
-	      if (next_frag_is_branch_target (fragP))
-		fragP->fr_subtype = RELAX_DESIRE_ALIGN;
-	      else
-		frag_wane (fragP);
-	    }
-	}
-    }
+	/* Walk over all of the fragments in a subsection.  */
+	for (fragP = frchP->frch_root; fragP; fragP = fragP->fr_next)
+	  {
+	    if (fragP->fr_type == rs_machine_dependent
+		&& fragP->fr_subtype == RELAX_DESIRE_ALIGN_IF_TARGET)
+	      {
+		if (next_frag_is_branch_target (fragP))
+		  fragP->fr_subtype = RELAX_DESIRE_ALIGN;
+		else
+		  frag_wane (fragP);
+	      }
+	  }
+      }
 }
 
 
@@ -7033,36 +7037,38 @@ static void
 xtensa_mark_narrow_branches (void)
 {
   frchainS *frchP;
+  asection *s;
 
-  for (frchP = frchain_root; frchP; frchP = frchP->frch_next)
-    {
-      fragS *fragP;
-      /* Walk over all of the fragments in a subsection.  */
-      for (fragP = frchP->frch_root; fragP; fragP = fragP->fr_next)
-	{
-	  if (fragP->fr_type == rs_machine_dependent
-	      && fragP->fr_subtype == RELAX_SLOTS
-	      && fragP->tc_frag_data.slot_subtypes[0] == RELAX_IMMED)
-	    {
-	      vliw_insn vinsn;
+  for (s = stdoutput->sections; s; s = s->next)
+    for (frchP = seg_info (s)->frchainP; frchP; frchP = frchP->frch_next)
+      {
+	fragS *fragP;
+	/* Walk over all of the fragments in a subsection.  */
+	for (fragP = frchP->frch_root; fragP; fragP = fragP->fr_next)
+	  {
+	    if (fragP->fr_type == rs_machine_dependent
+		&& fragP->fr_subtype == RELAX_SLOTS
+		&& fragP->tc_frag_data.slot_subtypes[0] == RELAX_IMMED)
+	      {
+		vliw_insn vinsn;
 
-	      vinsn_from_chars (&vinsn, fragP->fr_opcode);
-	      tinsn_immed_from_frag (&vinsn.slots[0], fragP, 0);
+		vinsn_from_chars (&vinsn, fragP->fr_opcode);
+		tinsn_immed_from_frag (&vinsn.slots[0], fragP, 0);
 
-	      if (vinsn.num_slots == 1
-		  && xtensa_opcode_is_branch (xtensa_default_isa,
-					      vinsn.slots[0].opcode)
-		  && xg_get_single_size (vinsn.slots[0].opcode) == 2
-		  && is_narrow_branch_guaranteed_in_range (fragP,
-							   &vinsn.slots[0]))
-		{
-		  fragP->fr_subtype = RELAX_SLOTS;
-		  fragP->tc_frag_data.slot_subtypes[0] = RELAX_NARROW;
-		  fragP->tc_frag_data.is_aligning_branch = 1;
-		}
-	    }
-	}
-    }
+		if (vinsn.num_slots == 1
+		    && xtensa_opcode_is_branch (xtensa_default_isa,
+						vinsn.slots[0].opcode)
+		    && xg_get_single_size (vinsn.slots[0].opcode) == 2
+		    && is_narrow_branch_guaranteed_in_range (fragP,
+							     &vinsn.slots[0]))
+		  {
+		    fragP->fr_subtype = RELAX_SLOTS;
+		    fragP->tc_frag_data.slot_subtypes[0] = RELAX_NARROW;
+		    fragP->tc_frag_data.is_aligning_branch = 1;
+		  }
+	      }
+	  }
+      }
 }
 
 
@@ -7119,48 +7125,50 @@ static void
 xtensa_mark_zcl_first_insns (void)
 {
   frchainS *frchP;
+  asection *s;
 
-  for (frchP = frchain_root; frchP; frchP = frchP->frch_next)
-    {
-      fragS *fragP;
-      /* Walk over all of the fragments in a subsection.  */
-      for (fragP = frchP->frch_root; fragP; fragP = fragP->fr_next)
-	{
-	  if (fragP->fr_type == rs_machine_dependent
-	      && (fragP->fr_subtype == RELAX_ALIGN_NEXT_OPCODE
-		  || fragP->fr_subtype == RELAX_CHECK_ALIGN_NEXT_OPCODE))
-	    {
-	      /* Find the loop frag.  */
-	      fragS *targ_frag = next_non_empty_frag (fragP);
-	      /* Find the first insn frag.  */
-	      targ_frag = next_non_empty_frag (targ_frag);
+  for (s = stdoutput->sections; s; s = s->next)
+    for (frchP = seg_info (s)->frchainP; frchP; frchP = frchP->frch_next)
+      {
+	fragS *fragP;
+	/* Walk over all of the fragments in a subsection.  */
+	for (fragP = frchP->frch_root; fragP; fragP = fragP->fr_next)
+	  {
+	    if (fragP->fr_type == rs_machine_dependent
+		&& (fragP->fr_subtype == RELAX_ALIGN_NEXT_OPCODE
+		    || fragP->fr_subtype == RELAX_CHECK_ALIGN_NEXT_OPCODE))
+	      {
+		/* Find the loop frag.  */
+		fragS *targ_frag = next_non_empty_frag (fragP);
+		/* Find the first insn frag.  */
+		targ_frag = next_non_empty_frag (targ_frag);
 
-	      /* Of course, sometimes (mostly for toy test cases) a
-		 zero-cost loop instruction is the last in a section.  */
-	      if (targ_frag)
-		{
-		  targ_frag->tc_frag_data.is_first_loop_insn = TRUE;
-		  /* Do not widen a frag that is the first instruction of a
-		     zero-cost loop.  It makes that loop harder to align.  */
-		  if (targ_frag->fr_type == rs_machine_dependent
-		      && targ_frag->fr_subtype == RELAX_SLOTS
-		      && (targ_frag->tc_frag_data.slot_subtypes[0]
-			  == RELAX_NARROW))
-		    {
-		      if (targ_frag->tc_frag_data.is_aligning_branch)
-			targ_frag->tc_frag_data.slot_subtypes[0] = RELAX_IMMED;
-		      else
-			{
-			  frag_wane (targ_frag);
-			  targ_frag->tc_frag_data.slot_subtypes[0] = 0;
-			}
-		    }
-		}
-	      if (fragP->fr_subtype == RELAX_CHECK_ALIGN_NEXT_OPCODE)
-		frag_wane (fragP);
-	    }
-	}
-    }
+		/* Of course, sometimes (mostly for toy test cases) a
+		   zero-cost loop instruction is the last in a section.  */
+		if (targ_frag)
+		  {
+		    targ_frag->tc_frag_data.is_first_loop_insn = TRUE;
+		    /* Do not widen a frag that is the first instruction of a
+		       zero-cost loop.  It makes that loop harder to align.  */
+		    if (targ_frag->fr_type == rs_machine_dependent
+			&& targ_frag->fr_subtype == RELAX_SLOTS
+			&& (targ_frag->tc_frag_data.slot_subtypes[0]
+			    == RELAX_NARROW))
+		      {
+			if (targ_frag->tc_frag_data.is_aligning_branch)
+			  targ_frag->tc_frag_data.slot_subtypes[0] = RELAX_IMMED;
+			else
+			  {
+			    frag_wane (targ_frag);
+			    targ_frag->tc_frag_data.slot_subtypes[0] = 0;
+			  }
+		      }
+		  }
+		if (fragP->fr_subtype == RELAX_CHECK_ALIGN_NEXT_OPCODE)
+		  frag_wane (fragP);
+	      }
+	  }
+      }
 }
 
 
@@ -7175,30 +7183,32 @@ static void
 xtensa_fix_a0_b_retw_frags (void)
 {
   frchainS *frchP;
+  asection *s;
 
   /* When this routine is called, all of the subsections are still intact
      so we walk over subsections instead of sections.  */
-  for (frchP = frchain_root; frchP; frchP = frchP->frch_next)
-    {
-      fragS *fragP;
+  for (s = stdoutput->sections; s; s = s->next)
+    for (frchP = seg_info (s)->frchainP; frchP; frchP = frchP->frch_next)
+      {
+	fragS *fragP;
 
-      /* Walk over all of the fragments in a subsection.  */
-      for (fragP = frchP->frch_root; fragP; fragP = fragP->fr_next)
-	{
-	  if (fragP->fr_type == rs_machine_dependent
-	      && fragP->fr_subtype == RELAX_ADD_NOP_IF_A0_B_RETW)
-	    {
-	      if (next_instrs_are_b_retw (fragP))
-		{
-		  if (fragP->tc_frag_data.is_no_transform)
-		    as_bad (_("instruction sequence (write a0, branch, retw) may trigger hardware errata"));
-		  else
-		    relax_frag_add_nop (fragP);
-		}
-	      frag_wane (fragP);
-	    }
-	}
-    }
+	/* Walk over all of the fragments in a subsection.  */
+	for (fragP = frchP->frch_root; fragP; fragP = fragP->fr_next)
+	  {
+	    if (fragP->fr_type == rs_machine_dependent
+		&& fragP->fr_subtype == RELAX_ADD_NOP_IF_A0_B_RETW)
+	      {
+		if (next_instrs_are_b_retw (fragP))
+		  {
+		    if (fragP->tc_frag_data.is_no_transform)
+		      as_bad (_("instruction sequence (write a0, branch, retw) may trigger hardware errata"));
+		    else
+		      relax_frag_add_nop (fragP);
+		  }
+		frag_wane (fragP);
+	      }
+	  }
+      }
 }
 
 
@@ -7285,30 +7295,32 @@ static void
 xtensa_fix_b_j_loop_end_frags (void)
 {
   frchainS *frchP;
+  asection *s;
 
   /* When this routine is called, all of the subsections are still intact
      so we walk over subsections instead of sections.  */
-  for (frchP = frchain_root; frchP; frchP = frchP->frch_next)
-    {
-      fragS *fragP;
+  for (s = stdoutput->sections; s; s = s->next)
+    for (frchP = seg_info (s)->frchainP; frchP; frchP = frchP->frch_next)
+      {
+	fragS *fragP;
 
-      /* Walk over all of the fragments in a subsection.  */
-      for (fragP = frchP->frch_root; fragP; fragP = fragP->fr_next)
-	{
-	  if (fragP->fr_type == rs_machine_dependent
-	      && fragP->fr_subtype == RELAX_ADD_NOP_IF_PRE_LOOP_END)
-	    {
-	      if (next_instr_is_loop_end (fragP))
-		{
-		  if (fragP->tc_frag_data.is_no_transform)
-		    as_bad (_("branching or jumping to a loop end may trigger hardware errata"));
-		  else
-		    relax_frag_add_nop (fragP);
-		}
-	      frag_wane (fragP);
-	    }
-	}
-    }
+	/* Walk over all of the fragments in a subsection.  */
+	for (fragP = frchP->frch_root; fragP; fragP = fragP->fr_next)
+	  {
+	    if (fragP->fr_type == rs_machine_dependent
+		&& fragP->fr_subtype == RELAX_ADD_NOP_IF_PRE_LOOP_END)
+	      {
+		if (next_instr_is_loop_end (fragP))
+		  {
+		    if (fragP->tc_frag_data.is_no_transform)
+		      as_bad (_("branching or jumping to a loop end may trigger hardware errata"));
+		    else
+		      relax_frag_add_nop (fragP);
+		  }
+		frag_wane (fragP);
+	      }
+	  }
+      }
 }
 
 
@@ -7349,66 +7361,68 @@ static void
 xtensa_fix_close_loop_end_frags (void)
 {
   frchainS *frchP;
+  asection *s;
 
   /* When this routine is called, all of the subsections are still intact
      so we walk over subsections instead of sections.  */
-  for (frchP = frchain_root; frchP; frchP = frchP->frch_next)
-    {
-      fragS *fragP;
+  for (s = stdoutput->sections; s; s = s->next)
+    for (frchP = seg_info (s)->frchainP; frchP; frchP = frchP->frch_next)
+      {
+	fragS *fragP;
 
-      fragS *current_target = NULL;
+	fragS *current_target = NULL;
 
-      /* Walk over all of the fragments in a subsection.  */
-      for (fragP = frchP->frch_root; fragP; fragP = fragP->fr_next)
-	{
-	  if (fragP->fr_type == rs_machine_dependent
-	      && ((fragP->fr_subtype == RELAX_ALIGN_NEXT_OPCODE)
-		  || (fragP->fr_subtype == RELAX_CHECK_ALIGN_NEXT_OPCODE)))
+	/* Walk over all of the fragments in a subsection.  */
+	for (fragP = frchP->frch_root; fragP; fragP = fragP->fr_next)
+	  {
+	    if (fragP->fr_type == rs_machine_dependent
+		&& ((fragP->fr_subtype == RELAX_ALIGN_NEXT_OPCODE)
+		    || (fragP->fr_subtype == RELAX_CHECK_ALIGN_NEXT_OPCODE)))
 	      current_target = symbol_get_frag (fragP->fr_symbol);
 
-	  if (current_target
-	      && fragP->fr_type == rs_machine_dependent
-	      && fragP->fr_subtype == RELAX_ADD_NOP_IF_CLOSE_LOOP_END)
-	    {
-	      offsetT min_bytes;
-	      int bytes_added = 0;
+	    if (current_target
+		&& fragP->fr_type == rs_machine_dependent
+		&& fragP->fr_subtype == RELAX_ADD_NOP_IF_CLOSE_LOOP_END)
+	      {
+		offsetT min_bytes;
+		int bytes_added = 0;
 
 #define REQUIRED_LOOP_DIVIDING_BYTES 12
-	      /* Max out at 12.  */
-	      min_bytes = min_bytes_to_other_loop_end
-		(fragP->fr_next, current_target, REQUIRED_LOOP_DIVIDING_BYTES);
+		/* Max out at 12.  */
+		min_bytes = min_bytes_to_other_loop_end
+		  (fragP->fr_next, current_target, REQUIRED_LOOP_DIVIDING_BYTES);
 
-	      if (min_bytes < REQUIRED_LOOP_DIVIDING_BYTES)
-		{
-		  if (fragP->tc_frag_data.is_no_transform)
-		    as_bad (_("loop end too close to another loop end may trigger hardware errata"));
-		  else
-		    {
-		      while (min_bytes + bytes_added
-			     < REQUIRED_LOOP_DIVIDING_BYTES)
-			{
-			  int length = 3;
+		if (min_bytes < REQUIRED_LOOP_DIVIDING_BYTES)
+		  {
+		    if (fragP->tc_frag_data.is_no_transform)
+		      as_bad (_("loop end too close to another loop end may trigger hardware errata"));
+		    else
+		      {
+			while (min_bytes + bytes_added
+			       < REQUIRED_LOOP_DIVIDING_BYTES)
+			  {
+			    int length = 3;
 
-			  if (fragP->fr_var < length)
-			    as_fatal (_("fr_var %lu < length %d"),
-				      (long) fragP->fr_var, length);
-			  else
-			    {
-			      assemble_nop (length,
-					    fragP->fr_literal + fragP->fr_fix);
-			      fragP->fr_fix += length;
-			      fragP->fr_var -= length;
-			    }
-			  bytes_added += length;
-			}
-		    }
-		}
-	      frag_wane (fragP);
-	    }
-	  assert (fragP->fr_type != rs_machine_dependent
-		  || fragP->fr_subtype != RELAX_ADD_NOP_IF_CLOSE_LOOP_END);
-	}
-    }
+			    if (fragP->fr_var < length)
+			      as_fatal (_("fr_var %lu < length %d"),
+					(long) fragP->fr_var, length);
+			    else
+			      {
+				assemble_nop (length,
+					      fragP->fr_literal + fragP->fr_fix);
+				fragP->fr_fix += length;
+				fragP->fr_var -= length;
+			      }
+			    bytes_added += length;
+			  }
+		      }
+		  }
+		frag_wane (fragP);
+	      }
+	    assert (fragP->fr_type != rs_machine_dependent
+		    || fragP->fr_subtype != RELAX_ADD_NOP_IF_CLOSE_LOOP_END);
+	  }
+      }
 }
 
 
@@ -7512,49 +7526,51 @@ static void
 xtensa_fix_short_loop_frags (void)
 {
   frchainS *frchP;
+  asection *s;
 
   /* When this routine is called, all of the subsections are still intact
      so we walk over subsections instead of sections.  */
-  for (frchP = frchain_root; frchP; frchP = frchP->frch_next)
-    {
-      fragS *fragP;
-      fragS *current_target = NULL;
-      xtensa_opcode current_opcode = XTENSA_UNDEFINED;
+  for (s = stdoutput->sections; s; s = s->next)
+    for (frchP = seg_info (s)->frchainP; frchP; frchP = frchP->frch_next)
+      {
+	fragS *fragP;
+	fragS *current_target = NULL;
+	xtensa_opcode current_opcode = XTENSA_UNDEFINED;
 
-      /* Walk over all of the fragments in a subsection.  */
-      for (fragP = frchP->frch_root; fragP; fragP = fragP->fr_next)
-	{
-	  if (fragP->fr_type == rs_machine_dependent
-	      && ((fragP->fr_subtype == RELAX_ALIGN_NEXT_OPCODE)
-		  || (fragP->fr_subtype == RELAX_CHECK_ALIGN_NEXT_OPCODE)))
-	    {
-	      TInsn t_insn;
-	      fragS *loop_frag = next_non_empty_frag (fragP);
-	      tinsn_from_chars (&t_insn, loop_frag->fr_opcode, 0);
-	      current_target = symbol_get_frag (fragP->fr_symbol);
-	      current_opcode = t_insn.opcode;
-	      assert (xtensa_opcode_is_loop (xtensa_default_isa,
-					     current_opcode));
-	    }
+	/* Walk over all of the fragments in a subsection.  */
+	for (fragP = frchP->frch_root; fragP; fragP = fragP->fr_next)
+	  {
+	    if (fragP->fr_type == rs_machine_dependent
+		&& ((fragP->fr_subtype == RELAX_ALIGN_NEXT_OPCODE)
+		    || (fragP->fr_subtype == RELAX_CHECK_ALIGN_NEXT_OPCODE)))
+	      {
+		TInsn t_insn;
+		fragS *loop_frag = next_non_empty_frag (fragP);
+		tinsn_from_chars (&t_insn, loop_frag->fr_opcode, 0);
+		current_target = symbol_get_frag (fragP->fr_symbol);
+		current_opcode = t_insn.opcode;
+		assert (xtensa_opcode_is_loop (xtensa_default_isa,
+					       current_opcode));
+	      }
 
-	  if (fragP->fr_type == rs_machine_dependent
-	      && fragP->fr_subtype == RELAX_ADD_NOP_IF_SHORT_LOOP)
-	    {
-	      if (count_insns_to_loop_end (fragP->fr_next, TRUE, 3) < 3
-		  && (branch_before_loop_end (fragP->fr_next)
-		      || (workaround_all_short_loops
-			  && current_opcode != XTENSA_UNDEFINED
-			  && current_opcode != xtensa_loop_opcode)))
-		{
-		  if (fragP->tc_frag_data.is_no_transform)
-		    as_bad (_("loop containing less than three instructions may trigger hardware errata"));
-		  else
-		    relax_frag_add_nop (fragP);
-		}
-	      frag_wane (fragP);
-	    }
-	}
-    }
+	    if (fragP->fr_type == rs_machine_dependent
+		&& fragP->fr_subtype == RELAX_ADD_NOP_IF_SHORT_LOOP)
+	      {
+		if (count_insns_to_loop_end (fragP->fr_next, TRUE, 3) < 3
+		    && (branch_before_loop_end (fragP->fr_next)
+			|| (workaround_all_short_loops
+			    && current_opcode != XTENSA_UNDEFINED
+			    && current_opcode != xtensa_loop_opcode)))
+		  {
+		    if (fragP->tc_frag_data.is_no_transform)
+		      as_bad (_("loop containing less than three instructions may trigger hardware errata"));
+		    else
+		      relax_frag_add_nop (fragP);
+		  }
+		frag_wane (fragP);
+	      }
+	  }
+      }
 }
 
 
@@ -7697,50 +7713,51 @@ xtensa_sanity_check (void)
 {
   char *file_name;
   unsigned line;
-
   frchainS *frchP;
+  asection *s;
 
   as_where (&file_name, &line);
-  for (frchP = frchain_root; frchP; frchP = frchP->frch_next)
-    {
-      fragS *fragP;
+  for (s = stdoutput->sections; s; s = s->next)
+    for (frchP = seg_info (s)->frchainP; frchP; frchP = frchP->frch_next)
+      {
+	fragS *fragP;
 
-      /* Walk over all of the fragments in a subsection.  */
-      for (fragP = frchP->frch_root; fragP; fragP = fragP->fr_next)
-	{
-	  /* Currently we only check for empty loops here.  */
-	  if (fragP->fr_type == rs_machine_dependent
-	      && fragP->fr_subtype == RELAX_IMMED)
-	    {
-	      static xtensa_insnbuf insnbuf = NULL;
-	      TInsn t_insn;
+	/* Walk over all of the fragments in a subsection.  */
+	for (fragP = frchP->frch_root; fragP; fragP = fragP->fr_next)
+	  {
+	    /* Currently we only check for empty loops here.  */
+	    if (fragP->fr_type == rs_machine_dependent
+		&& fragP->fr_subtype == RELAX_IMMED)
+	      {
+		static xtensa_insnbuf insnbuf = NULL;
+		TInsn t_insn;
 
-	      if (fragP->fr_opcode != NULL)
-		{
-		  if (!insnbuf)
-		    insnbuf = xtensa_insnbuf_alloc (xtensa_default_isa);
-		  tinsn_from_chars (&t_insn, fragP->fr_opcode, 0);
-		  tinsn_immed_from_frag (&t_insn, fragP, 0);
+		if (fragP->fr_opcode != NULL)
+		  {
+		    if (!insnbuf)
+		      insnbuf = xtensa_insnbuf_alloc (xtensa_default_isa);
+		    tinsn_from_chars (&t_insn, fragP->fr_opcode, 0);
+		    tinsn_immed_from_frag (&t_insn, fragP, 0);
 
-		  if (xtensa_opcode_is_loop (xtensa_default_isa,
-					     t_insn.opcode) == 1)
-		    {
-		      if (is_empty_loop (&t_insn, fragP))
-			{
-			  new_logical_line (fragP->fr_file, fragP->fr_line);
-			  as_bad (_("invalid empty loop"));
-			}
-		      if (!is_local_forward_loop (&t_insn, fragP))
-			{
-			  new_logical_line (fragP->fr_file, fragP->fr_line);
-			  as_bad (_("loop target does not follow "
-				    "loop instruction in section"));
-			}
-		    }
-		}
-	    }
-	}
-    }
+		    if (xtensa_opcode_is_loop (xtensa_default_isa,
+					       t_insn.opcode) == 1)
+		      {
+			if (is_empty_loop (&t_insn, fragP))
+			  {
+			    new_logical_line (fragP->fr_file, fragP->fr_line);
+			    as_bad (_("invalid empty loop"));
+			  }
+			if (!is_local_forward_loop (&t_insn, fragP))
+			  {
+			    new_logical_line (fragP->fr_file, fragP->fr_line);
+			    as_bad (_("loop target does not follow "
+				      "loop instruction in section"));
+			  }
+		      }
+		  }
+	      }
+	  }
+      }
   new_logical_line (file_name, line);
 }
 
@@ -10384,7 +10401,6 @@ retrieve_segment_info (segT seg)
       frchainP->frch_root = NULL;
       frchainP->frch_last = NULL;
       frchainP->frch_next = NULL;
-      frchainP->frch_seg = seg;
       frchainP->frch_subseg = 0;
       frchainP->fix_root = NULL;
       frchainP->fix_tail = NULL;

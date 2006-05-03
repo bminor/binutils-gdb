@@ -169,7 +169,7 @@ static void out_two (int);
 static void out_four (int);
 static void out_abbrev (int, int);
 static void out_uleb128 (addressT);
-static offsetT get_frag_fix (fragS *);
+static offsetT get_frag_fix (fragS *, segT);
 static void out_set_addr (symbolS *);
 static int size_inc_line_addr (int, addressT);
 static void emit_inc_line_addr (int, addressT, char *, int);
@@ -670,27 +670,18 @@ dwarf2_directive_loc_mark_labels (int dummy ATTRIBUTE_UNUSED)
 static struct frag *
 first_frag_for_seg (segT seg)
 {
-  frchainS *f, *first = NULL;
-
-  for (f = frchain_root; f; f = f->frch_next)
-    if (f->frch_seg == seg
-	&& (! first || first->frch_subseg > f->frch_subseg))
-      first = f;
-
-  return first ? first->frch_root : NULL;
+  return seg_info (seg)->frchainP->frch_root;
 }
 
 static struct frag *
 last_frag_for_seg (segT seg)
 {
-  frchainS *f, *last = NULL;
+  frchainS *f = seg_info (seg)->frchainP;
 
-  for (f = frchain_root; f; f = f->frch_next)
-    if (f->frch_seg == seg
-	&& (! last || last->frch_subseg < f->frch_subseg))
-      last= f;
+  while (f->frch_next != NULL)
+    f = f->frch_next;
 
-  return last ? last->frch_last : NULL;
+  return f->frch_last;
 }
 
 /* Emit a single byte into the current segment.  */
@@ -745,7 +736,7 @@ out_abbrev (int name, int form)
 /* Get the size of a fragment.  */
 
 static offsetT
-get_frag_fix (fragS *frag)
+get_frag_fix (fragS *frag, segT seg)
 {
   frchainS *fr;
 
@@ -755,7 +746,7 @@ get_frag_fix (fragS *frag)
   /* If a fragment is the last in the chain, special measures must be
      taken to find its size before relaxation, since it may be pending
      on some subsegment chain.  */
-  for (fr = frchain_root; fr; fr = fr->frch_next)
+  for (fr = seg_info (seg)->frchainP; fr; fr = fr->frch_next)
     if (fr->frch_last == frag)
       return (char *) obstack_next_free (&fr->frch_obstack) - frag->fr_literal;
 
@@ -1134,7 +1125,7 @@ process_entries (segT seg, struct line_entry *e)
 
   /* Emit a DW_LNE_end_sequence for the end of the section.  */
   frag = last_frag_for_seg (seg);
-  frag_ofs = get_frag_fix (frag);
+  frag_ofs = get_frag_fix (frag, seg);
   if (frag == last_frag)
     out_inc_line_addr (INT_MAX, frag_ofs - last_frag_ofs);
   else
@@ -1332,7 +1323,7 @@ out_debug_aranges (segT aranges_seg, segT info_seg)
       s->text_start = beg;
 
       frag = last_frag_for_seg (s->seg);
-      end = symbol_temp_new (s->seg, get_frag_fix (frag), frag);
+      end = symbol_temp_new (s->seg, get_frag_fix (frag, s->seg), frag);
       s->text_end = end;
 
       expr.X_op = O_symbol;
