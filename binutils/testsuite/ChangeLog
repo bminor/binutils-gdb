@@ -1,5 +1,9 @@
 2006-05-03  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* binutils-all/copy-3.d: Fix a typo.
+
+2006-05-03  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* binutils-all/copy-3.d: New.
 
 	* objcopy.exp: Run copy-3.
