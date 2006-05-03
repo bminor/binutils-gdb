@@ -1,3 +1,6 @@
 #include "hang.H"
 
-int main (int argc, char **argv) { return 0; }
+extern int dummy2 (void);
+extern int dummy3 (void);
+
+int main (int argc, char **argv) { return dummy2() + dummy3(); }

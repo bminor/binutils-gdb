@@ -2452,6 +2452,8 @@ rank_one_type (struct type *parm, struct type *arg)
 		  else
 		    return INTEGER_CONVERSION_BADNESS;	/* signed/unsigned char -> plain char */
 		}
+	      else if (TYPE_NOSIGN (arg))
+		return INTEGER_CONVERSION_BADNESS;	/* plain char -> signed/unsigned char */
 	      else if (TYPE_UNSIGNED (parm))
 		{
 		  if (TYPE_UNSIGNED (arg))

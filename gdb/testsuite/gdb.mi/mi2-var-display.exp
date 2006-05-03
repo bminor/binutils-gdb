@@ -183,7 +183,7 @@ mi_gdb_test "-var-create weird * weird" \
 	"create local variable weird"
 
 mi_gdb_test "-var-list-children weird" \
-	"\\^done,numchild=\"11\",children=\\\[child=\{name=\"weird.integer\",exp=\"integer\",numchild=\"0\",type=\"int\"\},child=\{name=\"weird.character\",exp=\"character\",numchild=\"0\",type=\"char\"\},child={name=\"weird.char_ptr\",exp=\"char_ptr\",numchild=\"1\",type=\"char \\*\"\},child=\{name=\"weird.long_int\",exp=\"long_int\",numchild=\"0\",type=\"long int\"\},child=\{name=\"weird.int_ptr_ptr\",exp=\"int_ptr_ptr\",numchild=\"1\",type=\"int \\*\\*\"\},child=\{name=\"weird.long_array\",exp=\"long_array\",numchild=\"10\",type=\"long int \\\[10\\\]\"\},child=\{name=\"weird.func_ptr\",exp=\"func_ptr\",numchild=\"0\",type=\"void \\(\\*\\)\\((void|)\\)\"\},child=\{name=\"weird.func_ptr_struct\",exp=\"func_ptr_struct\",numchild=\"0\",type=\"struct _struct_decl \\(\\*\\)\\((int, char \\*, long int|)\\)\"\},child=\{name=\"weird.func_ptr_ptr\",exp=\"func_ptr_ptr\",numchild=\"0\",type=\"struct _struct_decl \\*\\(\\*\\)\\((int, char \\*, long int|)\\)\"\},child=\{name=\"weird.u1\",exp=\"u1\",numchild=\"4\",type=\"union \{\\.\\.\\.\}\"\},child=\{name=\"weird.s2\",exp=\"s2\",numchild=\"4\",type=\"struct \{\\.\\.\\.\}\"\}\\\]" \
+	"\\^done,numchild=\"11\",children=\\\[child=\{name=\"weird.integer\",exp=\"integer\",numchild=\"0\",type=\"int\"\},child=\{name=\"weird.character\",exp=\"character\",numchild=\"0\",type=\"char\"\},child={name=\"weird.char_ptr\",exp=\"char_ptr\",numchild=\"1\",type=\"char \\*\"\},child=\{name=\"weird.long_int\",exp=\"long_int\",numchild=\"0\",type=\"long( int)?\"\},child=\{name=\"weird.int_ptr_ptr\",exp=\"int_ptr_ptr\",numchild=\"1\",type=\"int \\*\\*\"\},child=\{name=\"weird.long_array\",exp=\"long_array\",numchild=\"10\",type=\"long( int)? \\\[10\\\]\"\},child=\{name=\"weird.func_ptr\",exp=\"func_ptr\",numchild=\"0\",type=\"void \\(\\*\\)\\((void|)\\)\"\},child=\{name=\"weird.func_ptr_struct\",exp=\"func_ptr_struct\",numchild=\"0\",type=\"struct _struct_decl \\(\\*\\)\\((int, char \\*, long( int)?|)\\)\"\},child=\{name=\"weird.func_ptr_ptr\",exp=\"func_ptr_ptr\",numchild=\"0\",type=\"struct _struct_decl \\*\\(\\*\\)\\((int, char \\*, long( int)?|)\\)\"\},child=\{name=\"weird.u1\",exp=\"u1\",numchild=\"4\",type=\"union \{\\.\\.\\.\}\"\},child=\{name=\"weird.s2\",exp=\"s2\",numchild=\"4\",type=\"struct \{\\.\\.\\.\}\"\}\\\]" \
 	"get children local variable weird"
 
 
@@ -410,7 +410,7 @@ mi_gdb_test "-var-info-num-children anonu" \
 # Test: c_variable-7.25
 # Desc: children of anonu
 mi_gdb_test "-var-list-children anonu" \
-	"\\^done,numchild=\"3\",children=\\\[child=\{name=\"anonu.a\",exp=\"a\",numchild=\"0\",type=\"int\"\},child=\{name=\"anonu.b\",exp=\"b\",numchild=\"0\",type=\"char\"\},child=\{name=\"anonu.c\",exp=\"c\",numchild=\"0\",type=\"long int\"\}\\\]" \
+	"\\^done,numchild=\"3\",children=\\\[child=\{name=\"anonu.a\",exp=\"a\",numchild=\"0\",type=\"int\"\},child=\{name=\"anonu.b\",exp=\"b\",numchild=\"0\",type=\"char\"\},child=\{name=\"anonu.c\",exp=\"c\",numchild=\"0\",type=\"long( int)?\"\}\\\]" \
 	"get children of anonu"
 
 # Test: c_variable-7.30
@@ -484,7 +484,7 @@ mi_gdb_test "-var-info-num-children anons" \
 # Test: c_variable-7.45
 # Desc: children of anons
 mi_gdb_test "-var-list-children anons" \
-	"\\^done,numchild=\"3\",children=\\\[child=\{name=\"anons.a\",exp=\"a\",numchild=\"0\",type=\"int\"\},child=\{name=\"anons.b\",exp=\"b\",numchild=\"0\",type=\"char\"\},child=\{name=\"anons.c\",exp=\"c\",numchild=\"0\",type=\"long int\"\}\\\]" \
+	"\\^done,numchild=\"3\",children=\\\[child=\{name=\"anons.a\",exp=\"a\",numchild=\"0\",type=\"int\"\},child=\{name=\"anons.b\",exp=\"b\",numchild=\"0\",type=\"char\"\},child=\{name=\"anons.c\",exp=\"c\",numchild=\"0\",type=\"long( int)?y\"\}\\\]" \
 	"get children of anons"
 
 

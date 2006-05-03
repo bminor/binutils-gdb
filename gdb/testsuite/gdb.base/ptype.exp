@@ -550,6 +550,11 @@ proc ptype_maybe_prototyped { id prototyped plain } {
     regsub -all "\[\]\[*()\]" $prototyped "\\\\&" prototyped
     regsub -all "\[\]\[*()\]" $plain "\\\\&" plain
 
+    # Adjust all "short int" and "long int" patterns to accept
+    # "short" and "long".
+    regsub -all "(short|long) int" $prototyped "\\1( int)?" prototyped
+    regsub -all "(short|long) int" $plain "\\1( int)?" plain
+
     send_gdb "ptype $id\n"
     gdb_expect {
         -re "type = $prototyped\[\r\n\]+$gdb_prompt $" {

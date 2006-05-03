@@ -196,6 +196,10 @@ gdb_expect {
 		# This is what happens on ARM in thumb mode -fn 2000-02-01
 		pass "step out of main (on ARM thumb)"
 	    }
+	    -re ".*__rt_entry ().*$gdb_prompt $" {
+		# This is what happens on the ARM RVDS runtime
+		pass "step out of main (on ARM runtime)"
+	    }
 	    -re ".*in.*\\\$START\\\$.*from.*dld.sl.*$gdb_prompt $" { 
 		pass "step out of main"
 	    }

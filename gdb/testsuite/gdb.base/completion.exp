@@ -700,7 +700,7 @@ gdb_expect  {
                       -re "marker1.*$gdb_prompt info func marker$"\
                       { send_gdb "\n"
                         gdb_expect {
-                                -re "All functions matching regular expression \"marker\":.*File.*break1.c:\r\nint marker1\\((void|)\\);\r\nint marker2\\(int\\).*marker3\\(char.*char.*\\).*marker4\\(long int\\);.*$gdb_prompt $"\
+                                -re "All functions matching regular expression \"marker\":.*File.*break1.c:\r\nint marker1\\((void|)\\);\r\nint marker2\\(int\\).*marker3\\(char.*char.*\\).*marker4\\(long( int)?\\);.*$gdb_prompt $"\
                                                   { pass "complete 'info func marke'"}
                                 -re ".*$gdb_prompt $" { fail "complete 'info func marke'"}
                                 timeout           {fail "(timeout) complete 'info func marke'"}

@@ -60,5 +60,5 @@ int main()
   C theC (1);				// breakpoint: first-constructs-done
   theC.marker ();
   
-  return 0;
+  return shadow;
 }

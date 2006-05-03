@@ -182,7 +182,7 @@ local_compiler_xfail_check
 gdb_test "ptype veneer" "type = volatile short( int)? \\* volatile.*"
 
 local_compiler_xfail_check
-gdb_test "ptype video" "type = volatile (unsigned short|short unsigned)( int) \\* volatile.*"
+gdb_test "ptype video" "type = volatile (unsigned short|short unsigned)( int)? \\* volatile.*"
 
 local_compiler_xfail_check
 gdb_test "ptype vacuum" "type = volatile long( int)? \\* volatile.*"

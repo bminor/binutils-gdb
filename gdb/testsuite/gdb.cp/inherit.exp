@@ -477,6 +477,7 @@ proc test_print_svi_classes { } {
     # Print all members of g_vB.
     set re_vbptr_2	"(_vb.2vA|_vb.vA)"
     set re_vbptr_3	"_vptr.vB"
+    set re_vbptr_ARM	"__vptr"
 
     set name "print g_vB"
     gdb_test_multiple "print g_vB" $name {
@@ -492,6 +493,9 @@ proc test_print_svi_classes { } {
 	    # gcc HEAD 2004-07-31 -gdwarf-2
 	    pass "$name (FIXME v3 vtbl ptr)"
 	}
+	-re "$vhn = \{<vA> = \{va = 3, vx = 4\}, $re_vbptr_ARM = $hex, vb = 5, vx = 6\}$nl$gdb_prompt $" {
+	    pass "$name (FIXME ARM vtbl ptr)"
+	}
 	-re "$vhn = \{<vA> = \{va = 3, vx = 4\}, $re_vbptr_3 = $hex <VTT for vB>, vb = 5, vx = 6\}$nl$gdb_prompt $" {
 	    # gcc 3.3.4 -gstabs+
 	    pass $name
@@ -505,6 +509,7 @@ proc test_print_svi_classes { } {
     # Print all members of g_vC.
     set re_vbptr_2	"(_vb.2vA|_vb.vA)"
     set re_vbptr_3	"_vptr.vC"
+    set re_vbptr_ARM	"__vptr"
 
     set name "print g_vC"
     gdb_test_multiple "print g_vC" $name {
@@ -519,6 +524,9 @@ proc test_print_svi_classes { } {
 	    # gcc 3.4.1 -gstabs+
 	    # gcc HEAD 2004-07-31 -gdwarf-2
 	    pass "$name (FIXME v3 vtbl ptr)"
+	}
+	-re "$vhn = \{<vA> = \{va = 7, vx = 8\}, $re_vbptr_ARM = $hex, vc = 9, vx = 10\}$nl$gdb_prompt $" {
+	    pass "$name (FIXME ARM vtbl ptr)"
 	}
 	-re "$vhn = \{<vA> = \{va = 7, vx = 8\}, $re_vbptr_3 = $hex <VTT for vC>, vc = 9, vx = 10\}$nl$gdb_prompt $" {
 	    # gcc 3.3.4 -gstabs+
@@ -579,6 +587,7 @@ proc test_print_mvi_classes { } {
     set re_vbptr_3_vC	"_vptr.vC"
     set re_vbptr_3_vD	"_vptr.vD"
     set re_vbptr_3_vE	"_vptr.vE"
+    set re_vbptr_ARM	"__vptr"
 
     # Print all members of g_vD.
 
@@ -594,6 +603,9 @@ proc test_print_mvi_classes { } {
 	    # gcc HEAD 2004-01-21 -gdwarf-2
 	    # gcc HEAD 2004-01-21 -gstabs+
 	    pass "$name (FIXME v3 vtbl ptr)"
+	}
+	-re "$vhn = \{<vB> = \{<vA> = \{va = 19, vx = 20\}, $re_vbptr_ARM = $hex, vb = 21, vx = 22\}, <vC> = \{$re_vbptr_ARM = $hex, vc = 23, vx = 24\}, $re_vbptr_ARM = $hex, vd = 25, vx = 26\}$nl$gdb_prompt $" {
+	    pass "$name (FIXME ARM vtbl ptr)"
 	}
 	-re "$vhn = \{<vB> = \{<vA> = \{va = 19, vx = 20\}, $re_vbptr_3_vB = $hex, vb = 21, vx = 22\}, <vC> = \{$re_vbptr_3_vC = $hex <VTT for vD>, vc = 23, vx = 24\}, $re_vbptr_3_vD = $hex, vd = 25, vx = 26\}$nl$gdb_prompt $" {
 	    # gcc 3.3.2 -gstabs+
@@ -617,6 +629,9 @@ proc test_print_mvi_classes { } {
 	    # gcc 3.4.1 -gstabs+
 	    # gcc HEAD 2004-07-31 -gdwarf-2
 	    pass "$name (FIXME v3 vtbl ptr)"
+	}
+	-re "$vhn = \{<vD> = \{<vB> = \{<vA> = \{va = 0, vx = 0\}, $re_vbptr_ARM = $hex, vb = 0, vx = 0\}, <vC> = \{$re_vbptr_ARM = $hex, vc = 0, vx = 0\}, $re_vbptr_ARM = $hex, vd = 0, vx = 0\}, $re_vbptr_ARM = $hex, ve = 27, vx = 28\}$nl$gdb_prompt $" {
+	    pass "$name (FIXME ARM vtbl ptr)"
 	}
 	-re "$vhn = \{<vD> = \{<vB> = \{<vA> = \{va = 0, vx = 0\}, $re_vbptr_3_vB = $hex, vb = 0, vx = 0\}, <vC> = \{$re_vbptr_3_vC = $hex <VTT for vD>, vc = 0, vx = 0\}, $re_vbptr_3_vD = $hex, vd = 0, vx = 0\}, $re_vbptr_3_vE = $hex, ve = 27, vx = 28\}$nl$gdb_prompt $" {
 	    # gcc 3.2.7-rh -gstabs+

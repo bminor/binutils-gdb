@@ -13,7 +13,7 @@ int bar (int y)
   return z;
 }
 
-void func()
+void func(int c)
 {
   x = x + 5;
   func2 ();

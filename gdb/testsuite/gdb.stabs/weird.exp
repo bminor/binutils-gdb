@@ -290,7 +290,7 @@ if { [lindex $exec_output 0] != 0 } {
 }
 
 if  { [gdb_compile "${srcfile}" "${binfile}" object ""] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+    return -1
 }
 
 remote_file build delete ${srcfile}

@@ -90,11 +90,11 @@ mi_gdb_test "-var-create lpcharacter * lpcharacter" \
 	"create local variable lpcharacter"
 
 mi_gdb_test "-var-create llong * llong" \
-	"\\^done,name=\"llong\",numchild=\"0\",type=\"long int\"" \
+	"\\^done,name=\"llong\",numchild=\"0\",type=\"long( int)?\"" \
 	"create local variable llong"
 
 mi_gdb_test "-var-create lplong * lplong" \
-	"\\^done,name=\"lplong\",numchild=\"1\",type=\"long int \\*\"" \
+	"\\^done,name=\"lplong\",numchild=\"1\",type=\"long( int)? \\*\"" \
 	"create local variable lplong"
 
 mi_gdb_test "-var-create lfloat * lfloat" \
@@ -401,7 +401,7 @@ mi_gdb_test "-var-create i  * i" \
 	"create i"
 
 mi_gdb_test "-var-create l * l" \
-	"\\^done,name=\"l\",numchild=\"1\",type=\"long int \\*\"" \
+	"\\^done,name=\"l\",numchild=\"1\",type=\"long( int)? \\*\"" \
 	"create l"
 
 # Test: c_variable-2.11
