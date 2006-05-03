@@ -787,7 +787,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"mfthi",   "d,*",	0x41010021, 0xfff307ff, TRAP|WR_d|RD_a,		0,		MT32	},
 {"mftlo",   "d",	0x41000021, 0xffff07ff, TRAP|WR_d|RD_a,		0,		MT32	},
 {"mftlo",   "d,*",	0x41000021, 0xfff307ff, TRAP|WR_d|RD_a,		0,		MT32	},
-{"mftr",    "t,d,!,H,$", 0x41000000, 0xffe007c8, TRAP|WR_d,		0,		MT32	},
+{"mftr",    "d,t,!,H,$", 0x41000000, 0xffe007c8, TRAP|WR_d,		0,		MT32	},
 {"mfc0",    "t,G",	0x40000000, 0xffe007ff,	LCD|WR_t|RD_C0,		0,		I1	},
 {"mfc0",    "t,+D",     0x40000000, 0xffe007f8, LCD|WR_t|RD_C0, 	0,		I32     },
 {"mfc0",    "t,G,H",    0x40000000, 0xffe007f8, LCD|WR_t|RD_C0, 	0,		I32     },
