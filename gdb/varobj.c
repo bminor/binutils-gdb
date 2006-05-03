@@ -2054,10 +2054,16 @@ c_variable_editable (struct varobj *var)
 static char *
 c_value_of_variable (struct varobj *var)
 {
-  /* BOGUS: if val_print sees a struct/class, it will print out its
-     children instead of "{...}" */
+  /* BOGUS: if val_print sees a struct/class, or a reference to one,
+     it will print out its children instead of "{...}".  So we need to
+     catch that case explicitly.  */
+  struct type *type = get_type (var);
 
-  switch (TYPE_CODE (get_type (var)))
+  /* Strip top-level references. */
+  while (TYPE_CODE (type) == TYPE_CODE_REF)
+    type = check_typedef (TYPE_TARGET_TYPE (type));
+
+  switch (TYPE_CODE (type))
     {
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
