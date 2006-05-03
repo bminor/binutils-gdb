@@ -391,7 +391,7 @@ example:
 @cindex @code{unreq} directive, ARM
 @item .unreq @var{alias-name}
 This undefines a register alias which was previously defined using the
-@code{req} directive.  For example:
+@code{req}, @code{dn} or @code{qn} directives.  For example:
 
 @smallexample
         foo .req r0
@@ -401,6 +401,35 @@ This undefines a register alias which was previously defined using the
 An error occurs if the name is undefined.  Note - this pseudo op can
 be used to delete builtin in register name aliases (eg 'r0').  This
 should only be done if it is really necessary.
+
+@cindex @code{dn} and @code{qn} directives, ARM
+@item @var{name} .dn @var{register name} [@var{.type}] [@var{[index]}]
+@item @var{name} .qn @var{register name} [@var{.type}] [@var{[index]}]
+
+The @code{dn} and @code{qn} are used to create typed and/or indexed
+register aliases for use in Advanced SIMD Extension (Neon) instructions.
+The former should be used to create aliases of double-precision registers,
+and the latter to create aliases of quad-precision registers.
+
+If these directives are used to create typed aliases, those aliases can
+be used in Neon instructions instead of writing types after the mnemonic
+or after each operand.  For example:
+
+@smallexample
+        x .dn d2.f32
+        y .dn d3.f32
+        z .dn d4.f32[1]
+        vmul x,y,z
+@end smallexample
+
+This is equivalent to writing the following:
+
+@smallexample
+        vmul.f32 d2,d3,d4[1]
+@end smallexample
+
+Aliases created using @code{dn} or @code{qn} can be destroyed using
+@code{unreq}.
 
 @cindex @code{code} directive, ARM
 @item .code @code{[16|32]}
