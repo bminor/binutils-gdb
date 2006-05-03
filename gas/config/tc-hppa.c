@@ -1,6 +1,6 @@
 /* tc-hppa.c -- Assemble for the PA
    Copyright 1989, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -4196,36 +4196,39 @@ tc_gen_reloc (section, fixp)
 	     of two symbols.  With that in mind we fill in all four
 	     relocs now and break out of the loop.  */
 	  assert (i == 1);
-	  relocs[0]->sym_ptr_ptr = (asymbol **) &(bfd_abs_symbol);
-	  relocs[0]->howto =
-	    bfd_reloc_type_lookup (stdoutput,
-				   (bfd_reloc_code_real_type) *codes[0]);
+	  relocs[0]->sym_ptr_ptr
+	    = (asymbol **) bfd_abs_section_ptr->symbol_ptr_ptr;
+	  relocs[0]->howto
+	    = bfd_reloc_type_lookup (stdoutput,
+				     (bfd_reloc_code_real_type) *codes[0]);
 	  relocs[0]->address = fixp->fx_frag->fr_address + fixp->fx_where;
 	  relocs[0]->addend = 0;
 	  relocs[1]->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
 	  *relocs[1]->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
-	  relocs[1]->howto =
-	    bfd_reloc_type_lookup (stdoutput,
-				   (bfd_reloc_code_real_type) *codes[1]);
+	  relocs[1]->howto
+	    = bfd_reloc_type_lookup (stdoutput,
+				     (bfd_reloc_code_real_type) *codes[1]);
 	  relocs[1]->address = fixp->fx_frag->fr_address + fixp->fx_where;
 	  relocs[1]->addend = 0;
 	  relocs[2]->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
 	  *relocs[2]->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_subsy);
-	  relocs[2]->howto =
-	    bfd_reloc_type_lookup (stdoutput,
-				   (bfd_reloc_code_real_type) *codes[2]);
+	  relocs[2]->howto
+	    = bfd_reloc_type_lookup (stdoutput,
+				     (bfd_reloc_code_real_type) *codes[2]);
 	  relocs[2]->address = fixp->fx_frag->fr_address + fixp->fx_where;
 	  relocs[2]->addend = 0;
-	  relocs[3]->sym_ptr_ptr = (asymbol **) &(bfd_abs_symbol);
-	  relocs[3]->howto =
-	    bfd_reloc_type_lookup (stdoutput,
-				   (bfd_reloc_code_real_type) *codes[3]);
+	  relocs[3]->sym_ptr_ptr
+	    = (asymbol **) bfd_abs_section_ptr->symbol_ptr_ptr;
+	  relocs[3]->howto
+	    = bfd_reloc_type_lookup (stdoutput,
+				     (bfd_reloc_code_real_type) *codes[3]);
 	  relocs[3]->address = fixp->fx_frag->fr_address + fixp->fx_where;
 	  relocs[3]->addend = 0;
-	  relocs[4]->sym_ptr_ptr = (asymbol **) &(bfd_abs_symbol);
-	  relocs[4]->howto =
-	    bfd_reloc_type_lookup (stdoutput,
-				   (bfd_reloc_code_real_type) *codes[4]);
+	  relocs[4]->sym_ptr_ptr
+	    = (asymbol **) bfd_abs_section_ptr->symbol_ptr_ptr;
+	  relocs[4]->howto
+	    = bfd_reloc_type_lookup (stdoutput,
+				     (bfd_reloc_code_real_type) *codes[4]);
 	  relocs[4]->address = fixp->fx_frag->fr_address + fixp->fx_where;
 	  relocs[4]->addend = 0;
 	  goto done;

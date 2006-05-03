@@ -7822,13 +7822,16 @@ elf32_arm_output_symbol_hook (struct bfd_link_info *info,
 static bfd_boolean
 elf32_arm_new_section_hook (bfd *abfd, asection *sec)
 {
-  _arm_elf_section_data *sdata;
-  bfd_size_type amt = sizeof (*sdata);
+  if (!sec->used_by_bfd)
+    {
+      _arm_elf_section_data *sdata;
+      bfd_size_type amt = sizeof (*sdata);
 
-  sdata = bfd_zalloc (abfd, amt);
-  if (sdata == NULL)
-    return FALSE;
-  sec->used_by_bfd = sdata;
+      sdata = bfd_zalloc (abfd, amt);
+      if (sdata == NULL)
+	return FALSE;
+      sec->used_by_bfd = sdata;
+    }
 
   record_section_with_arm_elf_section_data (sec);
 

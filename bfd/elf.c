@@ -2502,7 +2502,7 @@ _bfd_elf_new_section_hook (bfd *abfd, asection *sec)
 	}
     }
 
-  return TRUE;
+  return _bfd_generic_new_section_hook (abfd, sec);
 }
 
 /* Create a new bfd section from an ELF program header.
@@ -8760,8 +8760,7 @@ done:
 /* It is only used by x86-64 so far.  */
 asection _bfd_elf_large_com_section
   = BFD_FAKE_SECTION (_bfd_elf_large_com_section,
-		      SEC_IS_COMMON, NULL, NULL, "LARGE_COMMON",
-		      0);
+		      SEC_IS_COMMON, NULL, "LARGE_COMMON", 0);
 
 /* Return TRUE if 2 section types are compatible.  */
 

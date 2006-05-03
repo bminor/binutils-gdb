@@ -2407,7 +2407,8 @@ tc_gen_reloc (seg, fixp)
 	      break;
 
 	    default:
-	      reloc->sym_ptr_ptr = (asymbol **) &bfd_abs_symbol;
+	      reloc->sym_ptr_ptr
+		= (asymbol **) bfd_abs_section_ptr->symbol_ptr_ptr;
 	      return reloc;
 	    }
 	}

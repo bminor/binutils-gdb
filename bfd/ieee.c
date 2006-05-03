@@ -2014,12 +2014,15 @@ ieee_print_symbol (bfd *abfd,
 static bfd_boolean
 ieee_new_section_hook (bfd *abfd, asection *newsect)
 {
-  newsect->used_by_bfd = bfd_alloc (abfd, (bfd_size_type) sizeof (ieee_per_section_type));
   if (!newsect->used_by_bfd)
-    return FALSE;
+    {
+      newsect->used_by_bfd = bfd_alloc (abfd, sizeof (ieee_per_section_type));
+      if (!newsect->used_by_bfd)
+	return FALSE;
+    }
   ieee_per_section (newsect)->data = NULL;
   ieee_per_section (newsect)->section = newsect;
-  return TRUE;
+  return _bfd_generic_new_section_hook (abfd, newsect);
 }
 
 static long

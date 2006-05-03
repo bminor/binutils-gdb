@@ -1,6 +1,6 @@
 /* Support for the generic parts of most COFF variants, for BFD.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005
+   2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -1559,6 +1559,10 @@ coff_new_section_hook (bfd * abfd, asection * section)
       && strcmp (bfd_get_section_name (abfd, section), ".data") == 0)
     section->alignment_power = bfd_xcoff_data_align_power (abfd);
 #endif
+
+  /* Set up the section symbol.  */
+  if (!_bfd_generic_new_section_hook (abfd, section))
+    return FALSE;
 
   /* Allocate aux records for section symbols, to store size and
      related info.

@@ -1,5 +1,41 @@
 2006-05-03  Alan Modra  <amodra@bigpond.net.au>
 
+	* libbfd-in.h (_bfd_generic_new_section_hook): Declare.
+	* section.c (bfd_abs_symbol, bfd_com_symbol): Delete.
+	(bfd_und_symbol, bfd_ind_symbol): Delete.
+	(BFD_FAKE_SECTION): Remove SYM_PTR param, set symbol_ptr_ptr to
+	&SEC.symbol.
+	(STD_SECTION): Adjust.
+	(_bfd_generic_new_section_hook): New function, extracted from..
+	(bfd_section_init): ..here.
+	(bfd_make_section_old_way): Call new_section_hook for abs, com,
+	und and ind sections.
+	* elf.c (_bfd_elf_large_com_section): Adjust.
+	* aoutx.h (new_section_hook): Call _bfd_generic_new_section_hook.
+	* pdp11.c (new_section_hook): Likewise.
+	* coffcode.h (coff_new_section_hook): Likewise.
+	* ecoff.c (_bfd_ecoff_new_section_hook): Likewise.
+	* elf.c (_bfd_elf_new_section_hook): Likewise.
+	* vms.c (vms_new_section_hook): Likwise.
+	* elf32-arm.c (elf32_arm_new_section_hook): Check used_by_bfd isn't
+	already set.
+	* elf32-sh64.c (sh64_elf_new_section_hook): Likewise.
+	* elf32-xtensa.c (elf_xtensa_new_section_hook): Likewise.
+	* elf64-mmix.c (mmix_elf_new_section_hook): Likewise.
+	* elf64-ppc.c (ppc64_elf_new_section_hook): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_new_section_hook): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_new_section_hook): Likewise.
+	* ieee.c (ieee_new_section_hook): Likewise.  Call
+	_bfd_generic_new_section_hook too.
+	* mmo.c (mmo_new_section_hook): Likewise.
+	* oasys.c (oasys_new_section_hook): Likewise.
+	* som.c (som_new_section_hook): Likewise.
+	* coff-w65.c (reloc_processing): Don't use bfd_abs_symbol.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+2006-05-03  Alan Modra  <amodra@bigpond.net.au>
+
 	* hash.c (DEFAULT_SIZE): Revert last change.
 	(higher_prime_number): Correct test for no larger prime.  Don't
 	abort on error, instead return 0.  Depopulate primes[].

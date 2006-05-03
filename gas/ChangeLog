@@ -1,3 +1,10 @@
+2006-05-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* subsegs.c (subseg_get): Don't call obj_sec_set_private_data.
+	* config/obj-elf.h (obj_sec_set_private_data): Delete.
+	* config/tc-hppa.c (tc_gen_reloc): Don't use bfd_abs_symbol.
+	* config/tc-mn10300.c (tc_gen_reloc): Likewise.
+
 2006-05-02  Joseph Myers  <joseph@codesourcery.com>
 
 	* config/tc-arm.c (do_iwmmxt_wldstbh): Don't multiply offset by 4

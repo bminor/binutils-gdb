@@ -134,13 +134,6 @@ int elf_s_get_other (symbolS *);
 
 extern asection *gdb_section;
 
-#ifndef obj_sec_set_private_data
-#define obj_sec_set_private_data(B, S) \
-  if (! BFD_SEND ((B), _new_section_hook, ((B), (S)))) \
-    as_fatal (_("can't allocate ELF private section data: %s"),	\
-	      bfd_errmsg (bfd_get_error ()))
-#endif
-
 #ifndef obj_frob_file
 #define obj_frob_file  elf_frob_file
 #endif
