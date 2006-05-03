@@ -623,6 +623,13 @@ struct symbol
 
   ENUM_BITFIELD(address_class) aclass : 6;
 
+  /* Currently the address class determines whether a block-local symbol
+     is a local variable or an argument.  If IS_ARGUMENT is set, the symbol
+     is an argument even if ACLASS does not indicate so.  This is not set
+     by all debug readers in all circumstances, so a symbol is an argument
+     if either this flag or ACLASS indicates so.  */
+  unsigned int is_argument : 1;
+
   /* Line number of definition.  FIXME:  Should we really make the assumption
      that nobody will try to debug files longer than 64K lines?  What about
      machine generated programs? */
@@ -668,6 +675,7 @@ struct symbol
 #define SYMBOL_OBJFILE(symbol)          (symbol)->aux_value.objfile
 #define SYMBOL_OPS(symbol)              (symbol)->ops
 #define SYMBOL_LOCATION_BATON(symbol)   (symbol)->aux_value.ptr
+#define SYMBOL_IS_ARGUMENT(symbol)	(symbol)->is_argument
 
 /* A partial_symbol records the name, domain, and address class of
    symbols whose types we have not parsed yet.  For functions, it also

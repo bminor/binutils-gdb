@@ -224,8 +224,11 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
 	    case LOC_COMPUTED_ARG:
 	      break;
 
-	    /* Other types of symbols we just skip over.  */
 	    default:
+	      if (SYMBOL_IS_ARGUMENT (sym))
+		break;
+
+	      /* Other types of symbols we just skip over.  */
 	      continue;
 	    }
 
@@ -1491,6 +1494,13 @@ print_frame_arg_vars (struct frame_info *frame, struct ui_file *stream)
     {
       switch (SYMBOL_CLASS (sym))
 	{
+	default:
+	  /* Don't worry about things which aren't arguments.  */
+	  if (!SYMBOL_IS_ARGUMENT (sym))
+	    break;
+
+	  /* FALL THROUGH */
+
 	case LOC_ARG:
 	case LOC_LOCAL_ARG:
 	case LOC_REF_ARG:
@@ -1517,10 +1527,6 @@ print_frame_arg_vars (struct frame_info *frame, struct ui_file *stream)
 				b, VAR_DOMAIN, NULL, NULL);
 	  print_variable_value (sym2, frame, stream);
 	  fprintf_filtered (stream, "\n");
-	  break;
-
-	default:
-	  /* Don't worry about things which aren't arguments.  */
 	  break;
 	}
     }

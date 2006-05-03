@@ -1301,7 +1301,7 @@ partial_read_comp_unit_head (struct comp_unit_head *header, gdb_byte *info_ptr,
 
   info_ptr = read_comp_unit_head (header, info_ptr, abfd);
 
-  if (header->version != 2)
+  if (header->version != 2 && header->version != 3)
     error (_("Dwarf Error: wrong version in compilation unit header "
 	   "(is %d, should be %d) [in module %s]"), header->version,
 	   2, bfd_get_filename (abfd));
@@ -3954,6 +3954,29 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 		    }
 		}
 	    }
+	  else if (cu->producer
+		   && strncmp (cu->producer,
+			       "ARM C++ Compiler, ADS", 21) == 0)
+	    {
+	      /* The ARM compiler does not provide direct indication
+		 of the containing type, but the vtable pointer is
+		 always named __VPTR.  Of course, we don't support this
+		 C++ ABI, so this isn't too useful.  */
+
+	      int i;
+
+	      for (i = TYPE_NFIELDS (type) - 1;
+		   i >= TYPE_N_BASECLASSES (type);
+		   --i)
+		{
+		  if (strcmp (TYPE_FIELD_NAME (type, i), "__VPTR") == 0)
+		    {
+		      TYPE_VPTR_FIELDNO (type) = i;
+		      TYPE_VPTR_BASETYPE (type) = type;
+		      break;
+		    }
+		}
+	    }
 	}
 
       do_cleanups (back_to);
@@ -4661,12 +4684,27 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
   struct type *type;		/* Type that this function returns */
   struct type *ftype;		/* Function that returns above type */
   struct attribute *attr;
+  struct die_info *spec_die;
 
   /* Decode the type that this subroutine returns */
   if (die->type)
     {
       return;
     }
+
+  /* This works around a bug in armcc.  It marks "this" as artificial
+     in the declaration but not in the definition.  It's also more
+     efficient.  Should we be doing this for all types?  */
+  spec_die = die_specification (die, cu);
+  if (spec_die)
+    {
+      if (spec_die->type == NULL)
+	read_type_die (spec_die, cu);
+      die->type = spec_die->type;
+      set_die_type (die, die->type, cu);
+      return;
+    }
+
   type = die_type (die, cu);
   ftype = make_function_type (type, (struct type **) 0);
 
@@ -4907,6 +4945,23 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   set_die_type (die, range_type, cu);
 }
   
+static void
+read_unspecified_type (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct type *type;
+  struct attribute *attr;
+
+  if (die->type)
+    return;
+
+  /* For now, we only support the C meaning of an unspecified type: void.  */
+
+  attr = dwarf2_attr (die, DW_AT_name, cu);
+  type = init_type (TYPE_CODE_VOID, 0, 0, attr ? DW_STRING (attr) : "",
+		    cu->objfile);
+
+  set_die_type (die, type, cu);
+}
 
 /* Read a whole compilation unit into a linked list of dies.  */
 
@@ -6603,8 +6658,11 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 
           if (fe->dir_index)
             dir = lh->include_dirs[fe->dir_index - 1];
-          else
+          else if (!IS_ABSOLUTE_PATH (fe->name))
             dir = comp_dir;
+	  else
+	    dir = NULL;
+
 	  dwarf2_start_subfile (fe->name, dir);
 	}
 
@@ -6704,8 +6762,10 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
                 fe = &lh->file_names[file - 1];
                 if (fe->dir_index)
                   dir = lh->include_dirs[fe->dir_index - 1];
-                else
+		else if (!IS_ABSOLUTE_PATH (fe->name))
                   dir = comp_dir;
+                else
+		  dir = NULL;
                 if (!decode_for_pst_p)
                   dwarf2_start_subfile (fe->name, dir);
               }
@@ -6808,13 +6868,29 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 static void
 dwarf2_start_subfile (char *filename, char *dirname)
 {
+  /* If the filename is absolute and no directory is known then
+     split into a directory and relative path.   */
+  if (dirname == NULL && IS_ABSOLUTE_PATH (filename))
+    {
+      char *new_name = (char *) lbasename (filename);
+      dirname = alloca (new_name - filename);
+      memcpy (dirname, filename, new_name - filename - 1);
+      dirname[new_name - filename - 1] = '\0';
+      filename = new_name;
+    }
+
   /* If the filename isn't absolute, try to match an existing subfile
      with the full pathname.  */
 
   if (!IS_ABSOLUTE_PATH (filename) && dirname != NULL)
     {
       struct subfile *subfile;
-      char *fullname = concat (dirname, "/", filename, (char *)NULL);
+      char *fullname;
+
+      if (dirname[strlen (dirname) - 1] == '/')
+	fullname = concat (dirname, filename, (char *)NULL);
+      else
+	fullname = concat (dirname, "/", filename, (char *)NULL);
 
       for (subfile = subfiles; subfile; subfile = subfile->next)
 	{
@@ -6827,6 +6903,7 @@ dwarf2_start_subfile (char *filename, char *dirname)
 	}
       xfree (fullname);
     }
+
   start_subfile (filename, dirname);
 }
 
@@ -7005,6 +7082,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	    }
 	  break;
 	case DW_TAG_formal_parameter:
+	  SYMBOL_IS_ARGUMENT (sym) = 1;
 	  attr = dwarf2_attr (die, DW_AT_location, cu);
 	  if (attr)
 	    {
@@ -7013,6 +7091,8 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	      if (SYMBOL_CLASS (sym) == LOC_COMPUTED)
 		SYMBOL_CLASS (sym) = LOC_COMPUTED_ARG;
 	    }
+	  else
+	    SYMBOL_CLASS (sym) = LOC_OPTIMIZED_OUT;
 	  attr = dwarf2_attr (die, DW_AT_const_value, cu);
 	  if (attr)
 	    {
@@ -7383,6 +7463,9 @@ read_type_die (struct die_info *die, struct dwarf2_cu *cu)
       break;
     case DW_TAG_base_type:
       read_base_type (die, cu);
+      break;
+    case DW_TAG_unspecified_type:
+      read_unspecified_type (die, cu);
       break;
     default:
       complaint (&symfile_complaints, _("unexepected tag in read_type_die: '%s'"),
