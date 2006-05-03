@@ -79,8 +79,8 @@ static const char arm_linux_thumb_le_breakpoint[] = {0x01, 0xde};
    hidden behind the regcache abstraction.  */
 static void
 arm_linux_extract_return_value (struct type *type,
-				char regbuf[],
-				char *valbuf)
+				gdb_byte regbuf[],
+				gdb_byte *valbuf)
 {
   /* ScottB: This needs to be looked at to handle the different
      floating point emulators on ARM GNU/Linux.  Right now the code
