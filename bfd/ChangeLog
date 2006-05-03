@@ -1,3 +1,10 @@
+2006-05-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* hash.c (DEFAULT_SIZE): Revert last change.
+	(higher_prime_number): Correct test for no larger prime.  Don't
+	abort on error, instead return 0.  Depopulate primes[].
+	(bfd_hash_lookup): If we overflow size, refuse to grow table.
+
 2006-05-02  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_final_link_relocate): Set thumb funciton bit

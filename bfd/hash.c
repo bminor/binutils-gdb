@@ -298,10 +298,11 @@ SUBSUBSECTION
 */
 
 /* The default number of entries to use when creating a hash table.  */
-#define DEFAULT_SIZE (4093)
+#define DEFAULT_SIZE 4051
 
 /* The following function returns a nearest prime number which is
-   greater than N, and near a power of two.  Copied from libiberty.  */
+   greater than N, and near a power of two.  Copied from libiberty.
+   Returns zero for ridiculously large N to signify an error.  */
 
 static unsigned long
 higher_prime_number (unsigned long n)
@@ -309,18 +310,8 @@ higher_prime_number (unsigned long n)
   /* These are primes that are near, but slightly smaller than, a
      power of two.  */
   static const unsigned long primes[] = {
-    (unsigned long) 7,
-    (unsigned long) 13,
-    (unsigned long) 31,
-    (unsigned long) 61,
     (unsigned long) 127,
-    (unsigned long) 251,
-    (unsigned long) 509,
-    (unsigned long) 1021,
     (unsigned long) 2039,
-    (unsigned long) 4093,
-    (unsigned long) 8191,
-    (unsigned long) 16381,
     (unsigned long) 32749,
     (unsigned long) 65521,
     (unsigned long) 131071,
@@ -343,7 +334,7 @@ higher_prime_number (unsigned long n)
   };
 
   const unsigned long *low = &primes[0];
-  const unsigned long *high = &primes[sizeof(primes) / sizeof(primes[0])];
+  const unsigned long *high = &primes[sizeof (primes) / sizeof (primes[0])];
 
   while (low != high)
     {
@@ -354,12 +345,8 @@ higher_prime_number (unsigned long n)
 	high = mid;
     }
 
-  /* If we've run out of primes, abort.  */
-  if (n > *low)
-    {
-      fprintf (stderr, "Cannot find prime bigger than %lu\n", n);
-      abort ();
-    }
+  if (n >= *low)
+    return 0;
 
   return *low;
 }
@@ -486,12 +473,19 @@ bfd_hash_lookup (struct bfd_hash_table *table,
 
   if (table->count > table->size * 3 / 4)
     {
-      int newsize = higher_prime_number (table->size);
+      unsigned long newsize = higher_prime_number (table->size);
       struct bfd_hash_entry **newtable;
       unsigned int hi;
-      unsigned int alloc;
+      unsigned long alloc = newsize * sizeof (struct bfd_hash_entry *);
 
-      alloc = newsize * sizeof (struct bfd_hash_entry *);
+      /* If we can't find a higher prime, or we can't possibly alloc
+	 that much memory, don't try to grow the table.  */
+      if (newsize == 0 || alloc / sizeof (struct bfd_hash_entry *) != newsize)
+	{
+	  /* Lie.  Stops us trying to grow again for a while.  */
+	  table->count = 0;
+	  return hashp;
+	}
 
       newtable = ((struct bfd_hash_entry **)
 		  objalloc_alloc ((struct objalloc *) table->memory, alloc));
@@ -505,7 +499,7 @@ bfd_hash_lookup (struct bfd_hash_table *table,
 	    int index;
 
 	    while (chain_end->next && chain_end->next->hash == chain->hash)
-	      chain_end = chain_end->next; 
+	      chain_end = chain_end->next;
 
 	    table->table[hi] = chain_end->next;
 	    index = chain->hash % newsize;
