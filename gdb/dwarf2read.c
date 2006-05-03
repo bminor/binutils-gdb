@@ -604,9 +604,9 @@ struct field_info
 	int virtuality;
 	struct field field;
       }
-     *fields;
+     *fields, *baseclasses;
 
-    /* Number of fields.  */
+    /* Number of fields (including baseclasses).  */
     int nfields;
 
     /* Number of baseclasses.  */
@@ -3257,8 +3257,17 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
   new_field = (struct nextfield *) xmalloc (sizeof (struct nextfield));
   make_cleanup (xfree, new_field);
   memset (new_field, 0, sizeof (struct nextfield));
-  new_field->next = fip->fields;
-  fip->fields = new_field;
+
+  if (die->tag == DW_TAG_inheritance)
+    {
+      new_field->next = fip->baseclasses;
+      fip->baseclasses = new_field;
+    }
+  else
+    {
+      new_field->next = fip->fields;
+      fip->fields = new_field;
+    }
   fip->nfields++;
 
   /* Handle accessibility and virtuality of field.
@@ -3464,8 +3473,21 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
      up in the same order in the array in which they were added to the list.  */
   while (nfields-- > 0)
     {
-      TYPE_FIELD (type, nfields) = fip->fields->field;
-      switch (fip->fields->accessibility)
+      struct nextfield *fieldp;
+
+      if (fip->fields)
+	{
+	  fieldp = fip->fields;
+	  fip->fields = fieldp->next;
+	}
+      else
+	{
+	  fieldp = fip->baseclasses;
+	  fip->baseclasses = fieldp->next;
+	}
+
+      TYPE_FIELD (type, nfields) = fieldp->field;
+      switch (fieldp->accessibility)
 	{
 	case DW_ACCESS_private:
 	  SET_TYPE_FIELD_PRIVATE (type, nfields);
@@ -3482,13 +3504,13 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
 	  /* Unknown accessibility.  Complain and treat it as public.  */
 	  {
 	    complaint (&symfile_complaints, _("unsupported accessibility %d"),
-		       fip->fields->accessibility);
+		       fieldp->accessibility);
 	  }
 	  break;
 	}
       if (nfields < fip->nbaseclasses)
 	{
-	  switch (fip->fields->virtuality)
+	  switch (fieldp->virtuality)
 	    {
 	    case DW_VIRTUALITY_virtual:
 	    case DW_VIRTUALITY_pure_virtual:
@@ -3496,7 +3518,6 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
 	      break;
 	    }
 	}
-      fip->fields = fip->fields->next;
     }
 }
 
@@ -3620,9 +3641,14 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   if (attr && DW_UNSND (attr) != 0)
     fnp->is_artificial = 1;
 
-  /* Get index in virtual function table if it is a virtual member function.  */
+  /* Get index in virtual function table if it is a virtual member
+     function.  For GCC, this is an offset in the appropriate
+     virtual table, as specified by DW_AT_containing_type.  For
+     everyone else, it is an expression to be evaluated relative
+     to the object address.  */
+
   attr = dwarf2_attr (die, DW_AT_vtable_elem_location, cu);
-  if (attr)
+  if (attr && fnp->fcontext)
     {
       /* Support the .debug_loc offsets */
       if (attr_form_is_block (attr))
@@ -3638,7 +3664,28 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 	  dwarf2_invalid_attrib_class_complaint ("DW_AT_vtable_elem_location",
 						 fieldname);
         }
-   }
+    }
+  else if (attr)
+    {
+      /* We only support trivial expressions here.  This hack will work
+         for v3 classes, which always start with the vtable pointer.  */
+      if (attr_form_is_block (attr) && DW_BLOCK (attr)->size > 0
+	  && DW_BLOCK (attr)->data[0] == DW_OP_deref)
+	{
+	  struct dwarf_block blk;
+	  blk.size = DW_BLOCK (attr)->size - 1;
+	  blk.data = DW_BLOCK (attr)->data + 1;
+          fnp->voffset = decode_locdesc (&blk, cu);
+          if ((fnp->voffset % cu->header.addr_size) != 0)
+            dwarf2_complex_location_expr_complaint ();
+          else
+            fnp->voffset /= cu->header.addr_size;
+	  fnp->voffset += 2;
+	  fnp->fcontext = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (die->type, 0));
+	}
+      else
+	dwarf2_complex_location_expr_complaint ();
+    }
 }
 
 /* Create the vector of member function fields, and attach it to the type.  */
@@ -3825,7 +3872,8 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 
 	  /* Get the type which refers to the base class (possibly this
 	     class itself) which contains the vtable pointer for the current
-	     class from the DW_AT_containing_type attribute.  */
+	     class from the DW_AT_containing_type attribute.  This use of
+	     DW_AT_containing_type is a GNU extension.  */
 
 	  if (dwarf2_attr (die, DW_AT_containing_type, cu) != NULL)
 	    {
@@ -3877,6 +3925,28 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 		   --i)
 		{
 		  if (strcmp (TYPE_FIELD_NAME (type, i), "__vfp") == 0)
+		    {
+		      TYPE_VPTR_FIELDNO (type) = i;
+		      TYPE_VPTR_BASETYPE (type) = type;
+		      break;
+		    }
+		}
+	    }
+	  else if (cu->producer
+		   && strncmp (cu->producer,
+			       "ARM/Thumb C/C++ Compiler, RVCT", 30) == 0)
+	    {
+	      /* The ARM compiler does not provide direct indication
+		 of the containing type, but the vtable pointer is
+		 always named __vptr.  */
+
+	      int i;
+
+	      for (i = TYPE_NFIELDS (type) - 1;
+		   i >= TYPE_N_BASECLASSES (type);
+		   --i)
+		{
+		  if (strcmp (TYPE_FIELD_NAME (type, i), "__vptr") == 0)
 		    {
 		      TYPE_VPTR_FIELDNO (type) = i;
 		      TYPE_VPTR_BASETYPE (type) = type;

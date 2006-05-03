@@ -1035,6 +1035,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	      basetype = TYPE_TARGET_TYPE (value_type (arg2));
 	      if (domain_type != basetype)
 		arg2 = value_cast (lookup_pointer_type (domain_type), arg2);
+	      fill_in_vptr_fieldno (domain_type);
 	      basetype = TYPE_VPTR_BASETYPE (domain_type);
 	      for (i = TYPE_NFN_FIELDS (basetype) - 1; i >= 0; i--)
 		{

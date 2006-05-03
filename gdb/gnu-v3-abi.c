@@ -216,7 +216,10 @@ gnuv3_rtti_type (struct value *value,
 
   /* Fetch VALUE's virtual table pointer, and tweak it to point at
      an instance of our imaginary gdb_gnu_v3_abi_vtable structure.  */
-  base_type = check_typedef (TYPE_VPTR_BASETYPE (values_type));
+  base_type = TYPE_VPTR_BASETYPE (values_type);
+  if (base_type == NULL)
+    return NULL;
+  base_type = check_typedef (base_type);
   if (values_type != base_type)
     {
       value = value_cast (base_type, value);
@@ -301,6 +304,10 @@ gnuv3_virtual_fn_field (struct value **value_p,
        it's the same base class that has our vtable; this is wrong for
        multiple inheritance, but it's better than nothing.  */
     vfn_base = TYPE_VPTR_BASETYPE (type);
+
+  if (! vfn_base)
+    error (_("Could not find virtual table pointer for class \"%s\"."),
+	   TYPE_TAG_NAME (type) ? TYPE_TAG_NAME (type) : "<unknown>");
 
   /* This type may have been defined before its virtual function table
      was.  If so, fill in the virtual function table entry for the
@@ -397,9 +404,13 @@ gnuv3_baseclass_offset (struct type *type, int index, const bfd_byte *valaddr,
      start of whichever baseclass it resides in, as a sanity measure - iff
      we have debugging information for that baseclass.  */
 
+  if (TYPE_VPTR_FIELDNO (type) < 0)
+    fill_in_vptr_fieldno (type);
+  if (TYPE_VPTR_FIELDNO (type) < 0)
+    error (_("Could not find virtual table pointer for class \"%s\"."),
+	   TYPE_TAG_NAME (type) ? TYPE_TAG_NAME (type) : "<unknown>");
+
   vbasetype = TYPE_VPTR_BASETYPE (type);
-  if (TYPE_VPTR_FIELDNO (vbasetype) < 0)
-    fill_in_vptr_fieldno (vbasetype);
 
   if (TYPE_VPTR_FIELDNO (vbasetype) >= 0
       && TYPE_FIELD_BITPOS (vbasetype, TYPE_VPTR_FIELDNO (vbasetype)) != 0)

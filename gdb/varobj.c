@@ -2169,6 +2169,7 @@ cplus_class_num_children (struct type *type, int children[3])
   children[v_private] = 0;
   children[v_protected] = 0;
 
+  fill_in_vptr_fieldno (type);
   for (i = TYPE_N_BASECLASSES (type); i < TYPE_NFIELDS (type); i++)
     {
       /* If we have a virtual table pointer, omit it. */
@@ -2218,6 +2219,7 @@ cplus_name_of_child (struct varobj *parent, int index)
 	     have the access control we are looking for to properly
 	     find the indexed field. */
 	  int type_index = TYPE_N_BASECLASSES (type);
+	  fill_in_vptr_fieldno (type);
 	  if (strcmp (parent->name, "private") == 0)
 	    {
 	      while (index >= 0)
