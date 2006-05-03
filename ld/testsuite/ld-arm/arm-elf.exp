@@ -122,6 +122,9 @@ set armelftests {
     {"thumb-rel32" "-static -T arm.ld" "" {thumb-rel32.s}
      {{objdump -s thumb-rel32.d}}
      "thumb-rel32"}
+    {"MOVW/MOVT" "-static -T arm.ld" "" {arm-movwt.s}
+     {{objdump -dw arm-movwt.d}}
+     "arm-movwt"}
 }
 
 run_ld_link_tests $armelftests
