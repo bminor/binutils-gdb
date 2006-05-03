@@ -1,3 +1,18 @@
+2006-05-03  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	PR binutils/2584
+	* tekhex.c (getvalue): Change return type to bfd_boolean and
+	add the new parameter.  Return false if the unexpected character
+	is found.
+	(getsym): Likewise.
+	(first_phase): Change return type to bfd_boolean and return
+	false if the unexpected character is found.  Replace abort
+	with returning false.
+	(pass_over): Change return type to bfd_boolean and the type of
+	the second argument to bfd_boolean (*) (bfd *, int, char *).
+	Return false if FUNC returns false.
+	(tekhex_object_p): Return NULL if pass_over fails.
+
 2006-05-02  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_final_link_relocate): Set thumb funciton bit
