@@ -15,6 +15,19 @@
 	Also check for empty reply (target doesn't understand "bs" or "bc).
 	(_initialize_remote): Add new methods to remote target vector.
 
+	* breakpoint.h (breakpoint_silence): Export.
+	* breakpoint.c (breakpoint_silence): New function.
+	* infcmd.c (finish_command): Check for reverse exec direction.
+	(finish_backward): New function, handle finish cmd in reverse.
+	* infrun.c (enum inferior_stop_reason): Add NO_HISTORY reason.
+	(handle_inferior_event): Handle TARGET_WAITKIND_NO_HISTORY.
+	Handle stepping over a function call in reverse.
+	Handle stepping thru a line range in reverse.
+	Handle setting a step-resume breakpoint in reverse.
+	Handle stepping into a function in reverse.
+	Handle stepping between line ranges in reverse.
+	(print_stop_reason): Print reason for NO_HISTORY.
+
 2006-04-30  Mark Kettenis  <kettenis@gnu.org>
 
 	* breakpoint.c (insert_single_step_breakpoint): Make a failure to

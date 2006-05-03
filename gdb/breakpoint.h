@@ -1,6 +1,6 @@
 /* Data structures associated with breakpoints in GDB.
-   Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004
+   Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
+   2001, 2002, 2003, 2004, 2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -843,5 +843,8 @@ extern int deprecated_exception_catchpoints_are_fragile;
 /* Indicator of when exception catchpoints set-up should be
    reinitialized -- e.g. when program is re-run.  */
 extern int deprecated_exception_support_initialized;
+
+/* Tell a breakpoint to be quiet.  */
+extern void breakpoint_silence (struct breakpoint *);
 
 #endif /* !defined (BREAKPOINT_H) */
