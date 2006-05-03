@@ -2327,6 +2327,10 @@ remote_vcont_resume (ptid_t ptid, int step, enum target_signal siggnal)
   char *buf = NULL, *outbuf;
   struct cleanup *old_cleanup;
 
+  /* vCont does not currently support reverse execution.  */
+  if (target_get_execdir () == EXEC_REVERSE)
+    return 0;
+
   if (remote_protocol_packets[PACKET_vCont].support == PACKET_SUPPORT_UNKNOWN)
     remote_vcont_probe (rs);
 
@@ -2419,7 +2423,15 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
   else
     set_thread (pid, 0);	/* Run this thread.  */
 
-  if (siggnal != TARGET_SIGNAL_0)
+  if (target_get_execdir () == EXEC_REVERSE)
+    {
+      /* We don't pass signals to the target in reverse exec mode.  */
+      if (info_verbose && siggnal != TARGET_SIGNAL_0)
+	warning (_(" - Can't pass signal %d to target in reverse: ignored.\n"),
+		 siggnal);
+      strcpy (buf, step ? "bs" : "bc");
+    }
+  else if (siggnal != TARGET_SIGNAL_0)
     {
       buf[0] = step ? 'S' : 'C';
       buf[1] = tohex (((int) siggnal >> 4) & 0xf);
@@ -2693,6 +2705,12 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
       switch (buf[0])
 	{
 	case 'E':		/* Error of some sort.  */
+	  if (buf[1] == '0' && buf[2] == '6' 
+	      && target_get_execdir () == EXEC_REVERSE)
+	    {
+	      status->kind = TARGET_WAITKIND_NO_HISTORY;
+	      goto got_status;
+	    }
 	  warning (_("Remote failure reply: %s"), buf);
 	  continue;
 	case 'F':		/* File-I/O request.  */
@@ -2823,10 +2841,10 @@ Packet: '%s'\n"),
 	  remote_console_output (buf + 1);
 	  continue;
 	case '\0':
+	  /* Zero length reply may mean that we tried 'S' or 'C' and
+	     the remote system doesn't support it.  */
 	  if (last_sent_signal != TARGET_SIGNAL_0)
 	    {
-	      /* Zero length reply means that we tried 'S' or 'C' and
-	         the remote system doesn't support it.  */
 	      target_terminal_ours_for_output ();
 	      printf_filtered
 		("Can't send signals to this remote system.  %s not sent.\n",
@@ -2838,10 +2856,16 @@ Packet: '%s'\n"),
 	      putpkt ((char *) buf);
 	      continue;
 	    }
+	  /* Or, it may mean that we tried "bs" or "bc" and
+	     the remote system doesn't support that.  */
+	  else if (target_get_execdir () == EXEC_REVERSE)
+	    {
+	      error (_("Target does not support reverse execution."));
+	    }
 	  /* else fallthrough */
 	default:
-	  warning (_("Invalid remote reply: %s"), buf);
-	  continue;
+	  error (_("Invalid remote reply: %s"), buf);
+	  break;	/* Lint.  */
 	}
     }
 got_status:
@@ -5218,6 +5242,40 @@ remote_get_thread_local_address (ptid_t ptid, CORE_ADDR lm, CORE_ADDR offset)
   return 0;
 }
 
+/* Reverse execution.  
+   FIXME: set up as a capability.  */
+static enum exec_direction_kind remote_execdir = EXEC_FORWARD;
+
+static enum exec_direction_kind 
+remote_get_execdir (void)
+{
+  if (remote_debug && info_verbose)
+    printf_filtered ("remote execdir is %s\n", 
+		     remote_execdir == EXEC_FORWARD ? "forward" :
+		     remote_execdir == EXEC_REVERSE ? "reverse" :
+		     "unknown");
+  return remote_execdir;
+}
+
+static enum exec_direction_kind 
+remote_set_execdir (enum exec_direction_kind dir)
+{
+  if (remote_debug && info_verbose)
+    printf_filtered ("Set remote execdir: %s\n",
+		     dir == EXEC_FORWARD ? "forward" :
+		     dir == EXEC_REVERSE ? "reverse" :
+		     "bad direction");
+
+  /* FIXME: check target for capability.  */
+  if (dir == EXEC_FORWARD || dir == EXEC_REVERSE)
+    {
+      remote_execdir = dir;
+      return dir;
+    }
+  else
+    return EXEC_ERROR;
+}
+
 static void
 init_remote_ops (void)
 {
@@ -5265,6 +5323,8 @@ Specify the serial device it is connected to\n\
   remote_ops.to_has_registers = 1;
   remote_ops.to_has_execution = 1;
   remote_ops.to_has_thread_control = tc_schedlock;	/* can lock scheduler */
+  remote_ops.to_get_execdir = remote_get_execdir;
+  remote_ops.to_set_execdir = remote_set_execdir;
   remote_ops.to_magic = OPS_MAGIC;
 }
 

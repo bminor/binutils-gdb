@@ -457,6 +457,8 @@ update_current_target (void)
       INHERIT (to_find_memory_regions, t);
       INHERIT (to_make_corefile_notes, t);
       INHERIT (to_get_thread_local_address, t);
+      /* Do not inherit to_get_execdir.  */
+      /* Do not inherit to_set_execdir.  */
       INHERIT (to_magic, t);
     }
 #undef INHERIT
@@ -1499,6 +1501,61 @@ target_async_mask (int mask)
   int saved_async_masked_status = target_async_mask_value;
   target_async_mask_value = mask;
   return saved_async_masked_status;
+}
+
+/* Look through the list of possible targets for a target that can
+   support reverse execution.  */
+
+enum exec_direction_kind
+target_get_execdir (void)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_get_execdir != NULL)
+	{
+	  enum exec_direction_kind retval = t->to_get_execdir ();
+	  if (targetdebug)
+	    fprintf_unfiltered (gdb_stdlog, "%s->to_get_execdir () = %s\n",
+				t->to_shortname, 
+				retval == EXEC_FORWARD ? "Forward" :
+				retval == EXEC_REVERSE ? "Reverse" :
+				retval == EXEC_ERROR   ? "Error"   :
+				"*unknown*");
+	  return retval;
+	}
+    }
+
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog, "target_get_execdir: unsupported\n");
+  return EXEC_ERROR;
+}
+
+enum exec_direction_kind
+target_set_execdir (enum exec_direction_kind setdir)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_set_execdir != NULL)
+	{
+	  enum exec_direction_kind retval = t->to_set_execdir (setdir);
+	  if (targetdebug)
+	    fprintf_unfiltered (gdb_stdlog, "%s->to_set_execdir () = %s\n",
+				t->to_shortname, 
+				retval == EXEC_FORWARD ? "Forward" :
+				retval == EXEC_REVERSE ? "Reverse" :
+				retval == EXEC_ERROR   ? "Error"   :
+				"*unknown*");
+	  return retval;
+	}
+    }
+
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog, "target_set_execdir: unsupported\n");
+  return EXEC_ERROR;
 }
 
 /* Look through the list of possible targets for a target that can

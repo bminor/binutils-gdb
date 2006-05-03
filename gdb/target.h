@@ -130,7 +130,11 @@ enum target_waitkind
        inferior, rather than being stuck in the remote_async_wait()
        function. This way the event loop is responsive to other events,
        like for instance the user typing.  */
-    TARGET_WAITKIND_IGNORE
+    TARGET_WAITKIND_IGNORE,
+
+    /* The target has run out of history information,
+       and cannot run backward any further.  */
+    TARGET_WAITKIND_NO_HISTORY
   };
 
 struct target_waitstatus
@@ -147,6 +151,14 @@ struct target_waitstatus
 	int syscall_id;
       }
     value;
+  };
+
+/* Reverse execution.  */
+enum exec_direction_kind 
+  {
+    EXEC_FORWARD,
+    EXEC_REVERSE,
+    EXEC_ERROR
   };
 
 /* Possible types of events that the inferior handler will have to
@@ -423,6 +435,11 @@ struct target_ops
 				enum target_object object, const char *annex,
 				gdb_byte *readbuf, const gdb_byte *writebuf,
 				ULONGEST offset, LONGEST len);
+
+    /* Set execution direction (forward/reverse).  */
+    enum exec_direction_kind (*to_set_execdir) (enum exec_direction_kind);
+    /* Get execution direction (forward/reverse).  */
+    enum exec_direction_kind (*to_get_execdir) (void);
 
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
@@ -1069,6 +1086,12 @@ extern int target_stopped_data_address_p (struct target_ops *);
 /* Horrible hack to get around existing macros :-(.  */
 #define target_stopped_data_address_p(CURRENT_TARGET) (1)
 #endif
+
+/* Forward/reverse execution direction.  These will only be
+   implemented by a target that supports reverse execution.  */
+
+extern enum exec_direction_kind target_get_execdir (void);
+extern enum exec_direction_kind target_set_execdir (enum exec_direction_kind);
 
 /* This will only be defined by a target that supports catching vfork events,
    such as HP-UX.

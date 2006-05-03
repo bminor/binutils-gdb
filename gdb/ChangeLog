@@ -1,3 +1,20 @@
+2006-05-02  Michael Snyder  <msnyder@redhat.com>
+
+	* Target interface for reverse execution.
+	* target.h (enum target_waitkind): 
+	Add new wait event, TARGET_WAITKIND_NO_HISTORY.
+	(enum exec_direction_kind): New enum.
+	(struct target_ops): New methods to_set_execdir, to_get_execdir.
+	* target.c (target_get_execdir): New generic method.
+	(target_set_execdir): Ditto.
+	* remote.c (remote_get_execdir, remote_set_execdir): New methods.
+	(remote_vcont_resume): Jump out if attempting reverse execution.
+	(remote_resume): Check for reverse exec direction, and send
+	appropriate command to target.
+	(remote_wait): Check target response for NO_HISTORY status.
+	Also check for empty reply (target doesn't understand "bs" or "bc).
+	(_initialize_remote): Add new methods to remote target vector.
+
 2006-04-30  Mark Kettenis  <kettenis@gnu.org>
 
 	* breakpoint.c (insert_single_step_breakpoint): Make a failure to
