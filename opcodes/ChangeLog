@@ -1,3 +1,24 @@
+2006-05-04  Thiemo Seufer  <ths@mips.com>
+            Nigel Stephens  <nigel@mips.com>
+	    David Ung  <davidu@mips.com>
+
+	* mips-dis.c (mips_arch_choices): Add smartmips instruction
+	decoding to MIPS32 and MIPS32R2.  Limit DSP decoding to release
+	2 ISAs.  Add MIPS3D decoding to MIPS32R2.  Add MT decoding to
+	MIPS64R2.
+	* mips-opc.c: fix random typos in comments.
+	(INSN_SMARTMIPS): New defines.
+	(mips_builtin_opcodes): Add paired single support for MIPS32R2.
+	Move bc3f, bc3fl, bc3t, bc3tl downwards.  Move flushi, flushd,
+	flushid, wb upwards.  Move cfc3, ctc3 downwards.  Rework the
+	FP_S and FP_D flags to denote single and double register
+	accesses separately.  Move dmfc3, dmtc3, mfc3, mtc3 downwards.
+	Allow jr.hb and jalr.hb for release 1 ISAs.  Allow luxc1, suxc1
+	for MIPS32R2.  Add SmartMIPS instructions.  Add two-argument
+	variants of bc2f, bc2fl, bc2t, bc2tl.  Add mfhc2, mthc2 to
+	release 2 ISAs.
+	* mips16-opc.c (mips16_opcodes): Add sdbbp instruction.
+
 2006-05-03  Thiemo Seufer  <ths@mips.com>
 
 	* mips-opc.c (mips_builtin_opcodes): Fix mftr argument order.

@@ -64,6 +64,7 @@ Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
 
 const struct mips_opcode mips16_opcodes[] =
 {
+/* name,    args,	match,	mask,	pinfo,         	pinfo2, membership */
 {"nop",	    "",		0x6500, 0xffff, RD_Z,		0,	0 }, /* move $0,$Z */
 {"la",	    "x,A",	0x0800, 0xf800, WR_x|RD_PC,	0,	0 },
 {"abs",	    "x,w",	0, (int) M_ABS, INSN_MACRO,	0,	0 },
@@ -228,6 +229,7 @@ const struct mips_opcode mips16_opcodes[] =
 {"jrc",     "R",	0xe8a0, 0xffff, RD_31|TRAP,	0,      0 },
 {"restore", "M",	0x6400, 0xff80, WR_31|RD_SP|WR_SP|TRAP,	0,	0 },
 {"save",    "m",	0x6480, 0xff80, RD_31|RD_SP|WR_SP|TRAP,	0,	0 },
+{"sdbbp",   "6",	0xe801, 0xf81f, TRAP,		0,	0 },
 {"seb",	    "x",	0xe891, 0xf8ff, WR_x|RD_x,	0,      0 },
 {"seh",	    "x",	0xe8b1, 0xf8ff, WR_x|RD_x,	0,      0 },
 {"sew",	    "x",	0xe8d1, 0xf8ff, WR_x|RD_x,	0,      I3 },
