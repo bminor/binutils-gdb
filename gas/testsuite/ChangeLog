@@ -1,3 +1,7 @@
+2006-05-04  Thiemo Seufer  <ths@mips.com>
+
+	* gas/mips/mips32-mt.d: Fix mftr argument order.
+
 2006-05-02  Joseph Myers  <joseph@codesourcery.com>
 
 	* gas/arm/iwmmxt.s: Increase offsets for wstrb and wstrh.

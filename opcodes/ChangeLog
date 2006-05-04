@@ -1,3 +1,7 @@
+2006-05-04  Thiemo Seufer  <ths@mips.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Fix mftr argument order.
+
 2006-04-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* po/POTFILES.in: Regenerated.
