@@ -1,5 +1,10 @@
 2006-05-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* elfxx-mips.c (_bfd_mips_elf_hide_symbol): Adjust handling
+	for missing GOTs.
+
+2006-05-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* bfd/cpu-arm.c (bfd_is_arm_mapping_symbol_name): Accept more
 	mapping symbols.
 

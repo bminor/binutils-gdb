@@ -9380,7 +9380,7 @@ _bfd_mips_elf_hide_symbol (struct bfd_link_info *info,
 
   dynobj = elf_hash_table (info)->dynobj;
   if (dynobj != NULL && force_local && h->root.type != STT_TLS
-      && (got = mips_elf_got_section (dynobj, FALSE)) != NULL
+      && (got = mips_elf_got_section (dynobj, TRUE)) != NULL
       && (g = mips_elf_section_data (got)->u.got_info) != NULL)
     {
       if (g->next)
