@@ -1,3 +1,8 @@
+2006-05-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* MAINTAINERS: Add an "Authorized committers" section, and list
+	DJ Delorie for v850.
+
 2006-04-08  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cris/crisv32f.c (MY (deliver_interrupt)): Set CCS to new_ccs.
