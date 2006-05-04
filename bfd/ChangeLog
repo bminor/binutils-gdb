@@ -1,3 +1,13 @@
+2006-05-04  Ben Elliston  <bje@au.ibm.com>
+
+	* coff-or32.c (bfd_section_from_shdr): Remove unused local
+	variable `ptr'.
+	* cofflink.c (process_embedded_commands): Remove unused local
+	variables `had_read' and `had_shared'.
+	* ecofflink.c (bfd_ecoff_debug_accumulate): Remove unused local
+	variable `fdr_adr'.
+	* ihex.c (ihex_read_section): Remove unused local variable `addr'.
+
 2006-05-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* libbfd-in.h (_bfd_generic_new_section_hook): Declare.
