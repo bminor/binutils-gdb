@@ -12111,6 +12111,8 @@ enum opcode_tag
   OT_cinfix3,		/* Instruction takes a conditional infix,
 			   beginning at character index 3.  (In
 			   unified mode, it becomes a suffix.)  */
+  OT_cinfix3_deprecated, /* The same as OT_cinfix3.  This is used for
+			    tsts, cmps, cmns, and teqs. */
   OT_cinfix3_legacy,	/* Legacy instruction takes a conditional infix at
 			   character index 3, even in unified mode.  Used for
 			   legacy instructions where suffix and infix forms
@@ -12267,6 +12269,7 @@ opcode_lookup (char **str)
 	  break;
 
 	case OT_cinfix3:
+	case OT_cinfix3_deprecated:
 	case OT_odd_infix_unc:
 	  if (!unified_syntax)
 	    return 0;
@@ -12313,11 +12316,16 @@ opcode_lookup (char **str)
   memmove (affix + 2, affix, (end - affix) - 2);
   memcpy (affix, save, 2);
 
-  if (opcode && (opcode->tag == OT_cinfix3 || opcode->tag == OT_csuf_or_in3
-		 || opcode->tag == OT_cinfix3_legacy))
+  if (opcode
+      && (opcode->tag == OT_cinfix3
+	  || opcode->tag == OT_cinfix3_deprecated
+	  || opcode->tag == OT_csuf_or_in3
+	  || opcode->tag == OT_cinfix3_legacy))
     {
       /* step CM */
-      if (unified_syntax && opcode->tag == OT_cinfix3)
+      if (unified_syntax
+	  && (opcode->tag == OT_cinfix3
+	      || opcode->tag == OT_cinfix3_deprecated))
 	as_warn (_("conditional infixes are deprecated in unified syntax"));
 
       inst.cond = cond->value;
@@ -12355,6 +12363,9 @@ md_assemble (char *str)
 
       return;
     }
+
+  if (opcode->tag == OT_cinfix3_deprecated)
+    as_warn (_("s suffix on comparison instruction is deprecated"));
 
   if (thumb_mode)
     {
@@ -12857,10 +12868,17 @@ static struct asm_barrier_opt barrier_opt_names[] =
 #define TxC3(mnem, op, top, nops, ops, ae, te) \
   { #mnem, OPS##nops ops, OT_cinfix3, 0x##op, top, ARM_VARIANT, \
     THUMB_VARIANT, do_##ae, do_##te }
+#define TxC3w(mnem, op, top, nops, ops, ae, te) \
+  { #mnem, OPS##nops ops, OT_cinfix3_deprecated, 0x##op, top, ARM_VARIANT, \
+    THUMB_VARIANT, do_##ae, do_##te }
 #define TC3(mnem, aop, top, nops, ops, ae, te) \
        TxC3(mnem, aop, 0x##top, nops, ops, ae, te)
+#define TC3w(mnem, aop, top, nops, ops, ae, te) \
+       TxC3w(mnem, aop, 0x##top, nops, ops, ae, te)
 #define tC3(mnem, aop, top, nops, ops, ae, te) \
        TxC3(mnem, aop, T_MNEM_##top, nops, ops, ae, te)
+#define tC3w(mnem, aop, top, nops, ops, ae, te) \
+       TxC3w(mnem, aop, T_MNEM_##top, nops, ops, ae, te)
 
 /* Mnemonic with a conditional infix in an unusual place.  Each and every variant has to
    appear in the condition table.  */
@@ -13023,13 +13041,13 @@ static const struct asm_opcode insns[] =
     for setting PSR flag bits.  They are obsolete in V6 and do not
     have Thumb equivalents. */
  tCE(tst,	1100000, tst,	   2, (RR, SH),      cmp,  t_mvn_tst),
- tC3(tsts,	1100000, tst,	   2, (RR, SH),      cmp,  t_mvn_tst),
+ tC3w(tsts,	1100000, tst,	   2, (RR, SH),      cmp,  t_mvn_tst),
   CL(tstp,	110f000,     	   2, (RR, SH),      cmp),
  tCE(cmp,	1500000, cmp,	   2, (RR, SH),      cmp,  t_mov_cmp),
- tC3(cmps,	1500000, cmp,	   2, (RR, SH),      cmp,  t_mov_cmp),
+ tC3w(cmps,	1500000, cmp,	   2, (RR, SH),      cmp,  t_mov_cmp),
   CL(cmpp,	150f000,     	   2, (RR, SH),      cmp),
  tCE(cmn,	1700000, cmn,	   2, (RR, SH),      cmp,  t_mvn_tst),
- tC3(cmns,	1700000, cmn,	   2, (RR, SH),      cmp,  t_mvn_tst),
+ tC3w(cmns,	1700000, cmn,	   2, (RR, SH),      cmp,  t_mvn_tst),
   CL(cmnp,	170f000,     	   2, (RR, SH),      cmp),
 
  tCE(mov,	1a00000, mov,	   2, (RR, SH),      mov,  t_mov_cmp),
@@ -13083,7 +13101,7 @@ static const struct asm_opcode insns[] =
  TCE(rsb,	0600000, ebc00000, 3, (RR, oRR, SH), arit, t_rsb),
  TC3(rsbs,	0700000, ebd00000, 3, (RR, oRR, SH), arit, t_rsb),
  TCE(teq,	1300000, ea900f00, 2, (RR, SH),      cmp,  t_mvn_tst),
- TC3(teqs,	1300000, ea900f00, 2, (RR, SH),      cmp,  t_mvn_tst),
+ TC3w(teqs,	1300000, ea900f00, 2, (RR, SH),      cmp,  t_mvn_tst),
   CL(teqp,	130f000,           2, (RR, SH),      cmp),
 
  TC3(ldrt,	4300000, f8500e00, 2, (RR, ADDR),    ldstt, t_ldstt),

@@ -1,3 +1,13 @@
+2006-05-04  Kazu Hirata  <kazu@codesourcery.com>
+
+	* config/tc-arm.c (opcode_tag): Add OT_cinfix3_deprecated.
+	(opcode_lookup): Issue a warning for opcode with
+	OT_cinfix3_deprecated.  Otherwise treat OT_cinfix3_deprecated
+	identical to OT_cinfix3.
+	(TxC3w, TC3w, tC3w): New.
+	(insns): Use tC3w and TC3w for comparison instructions with
+	's' suffix.
+
 2006-05-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* subsegs.h (struct frchain): Delete frch_seg.
