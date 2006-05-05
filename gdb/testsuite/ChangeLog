@@ -1,3 +1,8 @@
+2006-05-05  David S. Miller  <davem@sunset.davemloft.net>
+
+	* gdb.base/break.exp: Do not assume a breakpoint on
+	main will actually be in $srcfile when optimizing.
+
 2006-05-05  Christophe Lyon  <christophe.lyon@st.com>
 
 	* gdb.cp/m-static.h (class gnu_obj_4): Add dummy member.

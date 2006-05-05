@@ -887,7 +887,7 @@ if [target_info exists gdb_stub] {
 # test break at function
 #
 gdb_test "break main" \
-    "Breakpoint.*at.* file .*$srcfile, line.*" \
+    "Breakpoint.*at.* file .*, line.*" \
     "breakpoint function, optimized file"
 
 #
