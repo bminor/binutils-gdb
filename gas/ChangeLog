@@ -1,3 +1,10 @@
+2006-05-05  Thiemo Seufer  <ths@mips.com>
+            David Ung  <davidu@mips.com>
+
+	* config/tc-mips.c (macro_build): Add case 'k' to handle cache
+	instruction.
+	(macro): Add new case M_CACHE_AB.
+
 2006-05-04  Kazu Hirata  <kazu@codesourcery.com>
 
 	* config/tc-arm.c (opcode_tag): Add OT_cinfix3_deprecated.

@@ -3196,6 +3196,10 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 	  insn.insn_opcode |= va_arg (args, unsigned long);
 	  continue;
 
+	case 'k':
+	  insn.insn_opcode |= va_arg (args, unsigned long) << OP_SH_CACHE;
+	  continue;
+
 	default:
 	  internalError ();
 	}
@@ -5820,6 +5824,9 @@ macro (struct mips_cl_insn *ip)
     case M_SCD_AB:
       s = "scd";
       goto st;
+    case M_CACHE_AB:
+      s = "cache";
+      goto st;
     case M_SDC1_AB:
       if (mips_opts.arch == CPU_R4650)
 	{
@@ -5857,6 +5864,8 @@ macro (struct mips_cl_insn *ip)
 	  || mask == M_L_DAB
 	  || mask == M_S_DAB)
 	fmt = "T,o(b)";
+      else if (mask == M_CACHE_AB)
+	fmt = "k,o(b)";
       else if (coproc)
 	fmt = "E,o(b)";
       else
