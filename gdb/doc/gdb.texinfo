@@ -12452,17 +12452,6 @@ expect to see @samp{Ctrl-C} as the interrupt signal.
 Show whether @value{GDBN} sends @code{BREAK} or @samp{Ctrl-C} to
 interrupt the remote program.
 
-@item set remotedebug
-@cindex debug remote protocol
-@cindex remote protocol debugging
-@cindex display remote packets
-Control the debugging of the remote protocol.  When enabled, each
-packet sent to or received from the remote target is displayed.  The
-defaults is off.
-
-@item show remotedebug
-Show the current setting of the remote protocol debugging.
-
 @item set remotedevice @var{device}
 @cindex serial port name
 Set the name of the serial port through which to communicate to the
@@ -15947,6 +15936,9 @@ Displays the current state of displaying @value{GDBN} C@t{++} overload
 debugging info.
 @cindex packets, reporting on stdout
 @cindex serial connections, debugging
+@cindex debug remote protocol
+@cindex remote protocol debugging
+@cindex display remote packets
 @item set debug remote
 Turns on or off display of reports on all packets sent back and forth across
 the serial line to the remote machine.  The info is printed on the

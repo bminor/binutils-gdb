@@ -1,3 +1,9 @@
+2006-05-05  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (Remote Configuration): Remove "set remotedebug"
+	and "show remotedebug".
+	(Debugging Output): Add additional index entries.
+
 2006-04-27  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.texinfo (delete-fork): Command renamed to "delete fork".
