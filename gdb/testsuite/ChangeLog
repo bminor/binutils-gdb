@@ -1,3 +1,8 @@
+2006-05-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/help.exp: Update expected text for help d and
+	help delete.
+
 2006-05-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.asm/asm-source.exp: Add powerpc-*-netbsd* to the list of
