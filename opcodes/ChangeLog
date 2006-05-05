@@ -1,3 +1,8 @@
+2006-05-05  Julian Brown  <julian@codesourcery.com>
+
+	* arm-dis.c (coprocessor_opcodes): Don't interpret fldmx/fstmx as
+	vldm/vstm.
+
 2006-05-05  Thiemo Seufer  <ths@mips.com>
             David Ung  <davidu@mips.com>
 
