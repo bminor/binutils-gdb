@@ -303,7 +303,7 @@ struct target_ops
     void (*to_attach) (char *, int);
     void (*to_post_attach) (int);
     void (*to_detach) (char *, int);
-    void (*to_disconnect) (char *, int);
+    void (*to_disconnect) (struct target_ops *, char *, int);
     void (*to_resume) (ptid_t, int, enum target_signal);
     ptid_t (*to_wait) (ptid_t, struct target_waitstatus *);
     void (*to_fetch_registers) (int);

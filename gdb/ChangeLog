@@ -1,3 +1,13 @@
+2006-05-05  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c (remote_disconnect): Add TARGET argument.
+	* target.c (debug_to_disconnect): Delete.
+	(update_current_target): Do not inherit to_disconnect.
+	(target_disconnect): Search for a target to implement to_disconnect.
+	(setup_target_debug): Do not reference to_disconnect.
+	* target.h (struct target_ops): Add target argument to
+	to_disconnect.
+
 2006-05-06  Fred Fish  <fnf@specifix.com>
 
 	* mips-tdep.c (mips_o64_push_dummy_call): Left shift big endian
