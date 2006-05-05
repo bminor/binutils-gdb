@@ -3719,26 +3719,9 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		     big endian targets.
 
 		     It does not seem to be necessary to do the
-		     same for integral types.
+		     same for integral types. */
 
-		     Also don't do this adjustment on O64 binaries.
-
-		     cagney/2001-07-23: gdb/179: Also, GCC, when
-		     outputting LE O32 with sizeof (struct) <
-		     mips_abi_regsize(), generates a left shift as
-		     part of storing the argument in a register a
-		     register (the left shift isn't generated when
-		     sizeof (struct) >= mips_abi_regsize()).  Since
-		     it is quite possible that this is GCC
-		     contradicting the LE/O32 ABI, GDB has not been
-		     adjusted to accommodate this.  Either someone
-		     needs to demonstrate that the LE/O32 ABI
-		     specifies such a left shift OR this new ABI gets
-		     identified as such and GDB gets tweaked
-		     accordingly.  */
-
-		  if (mips_abi_regsize (gdbarch) < 8
-		      && TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
+		  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
 		      && partial_len < mips_abi_regsize (gdbarch)
 		      && (typecode == TYPE_CODE_STRUCT ||
 			  typecode == TYPE_CODE_UNION))

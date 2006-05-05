@@ -1,5 +1,10 @@
 2006-05-06  Fred Fish  <fnf@specifix.com>
 
+	* mips-tdep.c (mips_o64_push_dummy_call): Left shift big endian
+	structs or unions independent of ABI register size.
+
+2006-05-06  Fred Fish  <fnf@specifix.com>
+
 	* mips-tdep.c (mips_o64_return_value): Replace stub that always
 	returned RETURN_VALUE_STRUCT_CONVENTION with a real function.
 
