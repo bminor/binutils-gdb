@@ -1,3 +1,8 @@
+2006-05-06  Fred Fish  <fnf@specifix.com>
+
+	* mips-tdep.c (mips_o64_return_value): Replace stub that always
+	returned RETURN_VALUE_STRUCT_CONVENTION with a real function.
+
 2006-05-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* mi/mi-main.c (captured_mi_execute_command): Check the return

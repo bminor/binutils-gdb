@@ -3788,7 +3788,45 @@ mips_o64_return_value (struct gdbarch *gdbarch,
 		       struct type *type, struct regcache *regcache,
 		       gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  return RETURN_VALUE_STRUCT_CONVENTION;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
+      || TYPE_CODE (type) == TYPE_CODE_UNION
+      || TYPE_CODE (type) == TYPE_CODE_ARRAY)
+    return RETURN_VALUE_STRUCT_CONVENTION;
+  else if (fp_register_arg_p (TYPE_CODE (type), type))
+    {
+      /* A floating-point value.  It fits in the least significant
+         part of FP0.  */
+      if (mips_debug)
+	fprintf_unfiltered (gdb_stderr, "Return float in $fp0\n");
+      mips_xfer_register (regcache,
+			  NUM_REGS + mips_regnum (current_gdbarch)->fp0,
+			  TYPE_LENGTH (type),
+			  TARGET_BYTE_ORDER, readbuf, writebuf, 0);
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+  else
+    {
+      /* A scalar extract each part but least-significant-byte
+         justified. */
+      int offset;
+      int regnum;
+      for (offset = 0, regnum = MIPS_V0_REGNUM;
+	   offset < TYPE_LENGTH (type);
+	   offset += mips_stack_argsize (gdbarch), regnum++)
+	{
+	  int xfer = mips_stack_argsize (gdbarch);
+	  if (offset + xfer > TYPE_LENGTH (type))
+	    xfer = TYPE_LENGTH (type) - offset;
+	  if (mips_debug)
+	    fprintf_unfiltered (gdb_stderr, "Return scalar+%d:%d in $%d\n",
+				offset, xfer, regnum);
+	  mips_xfer_register (regcache, NUM_REGS + regnum, xfer,
+			      TARGET_BYTE_ORDER, readbuf, writebuf, offset);
+	}
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
 }
 
 /* Floating point register management.
