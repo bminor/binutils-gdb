@@ -1,4 +1,12 @@
-2006-05-04  Daniel Jacobowitz  <dan@codesourcery.com>
+2006-05-05  Christophe Lyon  <christophe.lyon@st.com>
+
+	* gdb.cp/m-static.h (class gnu_obj_4): Add dummy member.
+	* gdb.cp/m-static.cc (main): Write to test4.dummy, so that test4
+	is allocated by the compiler.
+	* gdb.mi/var-cmd.c: (do_special_tests): Write to u, anonu, s,
+	anons, e, anone to force their allocation by the compiler.
+
+2006-05-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/help.exp: Update expected text for help d and
 	help delete.
