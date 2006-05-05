@@ -1,3 +1,9 @@
+2006-05-05:  Paul Gilliam  <pgilliam@us.ibm.com>
+
+	* ppc-linux-nat.c: Clean up types for ptrace.
+	Replace (CORE_ADDR) with  (uintptr_t) to avoid the size difference
+	between a CORE_ADDR and a void* on ppc64 systems compiled for 32-bits.
+
 2006-05-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote.c (remote_disconnect): Add TARGET argument.
@@ -25,8 +31,8 @@
 
 2006-05-03  Vladimir Prus  <ghost@cs.msu.su>
 
-        * varobj.c (c_value_of_variable): Ignore top-level references.
-        (Committed by Jim Blandy.)
+	* varobj.c (c_value_of_variable): Ignore top-level references.
+	(Committed by Jim Blandy.)
 
 2006-04-30  Mark Kettenis  <kettenis@gnu.org>
 

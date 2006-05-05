@@ -30,6 +30,7 @@
 #include "target.h"
 #include "linux-nat.h"
 
+#include <stdint.h>
 #include <sys/types.h>
 #include <sys/param.h>
 #include <signal.h>
@@ -43,18 +44,6 @@
 /* Prototypes for supply_gregset etc. */
 #include "gregset.h"
 #include "ppc-tdep.h"
-
-#ifndef PT_READ_U
-#define PT_READ_U PTRACE_PEEKUSR
-#endif
-#ifndef PT_WRITE_U
-#define PT_WRITE_U PTRACE_POKEUSR
-#endif
-
-/* Default the type of the ptrace transfer to int.  */
-#ifndef PTRACE_XFER_TYPE
-#define PTRACE_XFER_TYPE int
-#endif
 
 /* Glibc's headers don't define PTRACE_GETVRREGS so we cannot use a
    configure time check.  Some older glibc's (for instance 2.2.1)
@@ -126,13 +115,12 @@ typedef char gdb_vrregset_t[SIZEOF_VRREGS];
 
 /* On PPC processors that support the the Signal Processing Extension
    (SPE) APU, the general-purpose registers are 64 bits long.
-   However, the ordinary Linux kernel PTRACE_PEEKUSR / PTRACE_POKEUSR
-   / PT_READ_U / PT_WRITE_U ptrace calls only access the lower half of
-   each register, to allow them to behave the same way they do on
-   non-SPE systems.  There's a separate pair of calls,
-   PTRACE_GETEVRREGS / PTRACE_SETEVRREGS, that read and write the top
-   halves of all the general-purpose registers at once, along with
-   some SPE-specific registers.
+   However, the ordinary Linux kernel PTRACE_PEEKUSER / PTRACE_POKEUSER
+   ptrace calls only access the lower half of each register, to allow
+   them to behave the same way they do on non-SPE systems.  There's a
+   separate pair of calls, PTRACE_GETEVRREGS / PTRACE_SETEVRREGS, that
+   read and write the top halves of all the general-purpose registers
+   at once, along with some SPE-specific registers.
 
    GDB itself continues to claim the general-purpose registers are 32
    bits long.  It has unnamed raw registers that hold the upper halves
@@ -190,7 +178,7 @@ ppc_register_u_addr (int regno)
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   /* NOTE: cagney/2003-11-25: This is the word size used by the ptrace
      interface, and not the wordsize of the program's ABI.  */
-  int wordsize = sizeof (PTRACE_XFER_TYPE);
+  int wordsize = sizeof (long);
 
   /* General purpose registers occupy 1 slot each in the buffer */
   if (regno >= tdep->ppc_gp0_regnum 
@@ -384,17 +372,17 @@ fetch_register (int tid, int regno)
       return;
     }
 
-  /* Read the raw register using PTRACE_XFER_TYPE sized chunks.  On a
+  /* Read the raw register using sizeof(long) sized chunks.  On a
      32-bit platform, 64-bit floating-point registers will require two
      transfers.  */
   for (bytes_transferred = 0;
        bytes_transferred < register_size (current_gdbarch, regno);
-       bytes_transferred += sizeof (PTRACE_XFER_TYPE))
+       bytes_transferred += sizeof (long))
     {
       errno = 0;
-      *(PTRACE_XFER_TYPE *) & buf[bytes_transferred]
-        = ptrace (PT_READ_U, tid, (PTRACE_ARG3_TYPE) regaddr, 0);
-      regaddr += sizeof (PTRACE_XFER_TYPE);
+      *(long *) &buf[bytes_transferred]
+        = ptrace (PTRACE_PEEKUSER, tid, (PTRACE_TYPE_ARG3) regaddr, 0);
+      regaddr += sizeof (long);
       if (errno != 0)
 	{
           char message[128];
@@ -406,7 +394,7 @@ fetch_register (int tid, int regno)
 
   /* Now supply the register.  Keep in mind that the regcache's idea
      of the register's size may not be a multiple of sizeof
-     (PTRACE_XFER_TYPE).  */
+     (long).  */
   if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
     {
       /* Little-endian values are always found at the left end of the
@@ -668,10 +656,10 @@ store_register (int tid, int regno)
 
   /* First collect the register.  Keep in mind that the regcache's
      idea of the register's size may not be a multiple of sizeof
-     (PTRACE_XFER_TYPE).  */
+     (long).  */
   memset (buf, 0, sizeof buf);
   bytes_to_transfer = align_up (register_size (current_gdbarch, regno),
-                                sizeof (PTRACE_XFER_TYPE));
+                                sizeof (long));
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
     {
       /* Little-endian values always sit at the left end of the buffer.  */
@@ -685,12 +673,12 @@ store_register (int tid, int regno)
       regcache_raw_collect (current_regcache, regno, buf + padding);
     }
 
-  for (i = 0; i < bytes_to_transfer; i += sizeof (PTRACE_XFER_TYPE))
+  for (i = 0; i < bytes_to_transfer; i += sizeof (long))
     {
       errno = 0;
-      ptrace (PT_WRITE_U, tid, (PTRACE_ARG3_TYPE) regaddr,
-	      *(PTRACE_XFER_TYPE *) & buf[i]);
-      regaddr += sizeof (PTRACE_XFER_TYPE);
+      ptrace (PTRACE_POKEUSER, tid, (PTRACE_TYPE_ARG3) regaddr,
+	      *(long *) &buf[i]);
+      regaddr += sizeof (long);
 
       if (errno == EIO 
           && regno == tdep->ppc_fpscr_regnum)
@@ -901,7 +889,7 @@ ppc_linux_stopped_by_watchpoint (void)
       (siginfo.si_code & 0xffff) != 0x0004)
     return 0;
 
-  last_stopped_data_address = (CORE_ADDR) siginfo.si_addr;
+  last_stopped_data_address = (uintptr_t) siginfo.si_addr;
   return 1;
 }
 
@@ -926,7 +914,7 @@ supply_gregset (gdb_gregset_t *gregsetp)
 {
   /* NOTE: cagney/2003-11-25: This is the word size used by the ptrace
      interface, and not the wordsize of the program's ABI.  */
-  int wordsize = sizeof (PTRACE_XFER_TYPE);
+  int wordsize = sizeof (long);
   ppc_linux_supply_gregset (current_regcache, -1, gregsetp,
 			    sizeof (gdb_gregset_t), wordsize);
 }
@@ -936,7 +924,7 @@ right_fill_reg (int regnum, void *reg)
 {
   /* NOTE: cagney/2003-11-25: This is the word size used by the ptrace
      interface, and not the wordsize of the program's ABI.  */
-  int wordsize = sizeof (PTRACE_XFER_TYPE);
+  int wordsize = sizeof (long);
   /* Right fill the register.  */
   regcache_raw_collect (current_regcache, regnum,
 			((bfd_byte *) reg
