@@ -1,3 +1,11 @@
+2006-05-05  Julian Brown  <julian@codesourcery.com>
+
+	* config/tc-arm.c (parse_vfp_reg_list): Improve register bounds
+	checking.
+	(do_neon_mov): Enable several VMOV variants for VFP. Add suitable
+	architecture version checks.
+	(insns): Allow overlapping instructions to be used in VFP mode.
+
 2006-05-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/2598
