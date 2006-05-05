@@ -46,6 +46,29 @@
 #include "dwarf2dbg.h"
 #include <filenames.h>
 
+#ifdef HAVE_DOS_BASED_FILE_SYSTEM
+/* We need to decide which character to use as a directory separator.
+   Just because HAVE_DOS_BASED_FILE_SYSTEM is defined, it does not
+   necessarily mean that the backslash character is the one to use.
+   Some environments, eg Cygwin, can support both naming conventions.
+   So we use the heuristic that we only need to use the backslash if
+   the path is an absolute path starting with a DOS style drive
+   selector.  eg C: or D:  */
+# define INSERT_DIR_SEPARATOR(string, offset) \
+  do \
+    { \
+      if (offset > 1 \
+          && string[0] != 0 \
+          && string[1] == ':') \
+       string [offset] = '\\'; \
+      else \
+       string [offset] = '/'; \
+    } \
+  while (0)
+#else
+# define INSERT_DIR_SEPARATOR(string, offset) string[offset] = '/'
+#endif
+
 #ifndef DWARF2_FORMAT
 # define DWARF2_FORMAT() dwarf2_format_32bit
 #endif
@@ -569,7 +592,7 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 	  char *cp = (char *) alloca (dir_len + 1 + file_len + 1);
 
 	  memcpy (cp, dirs[files[filenum].dir], dir_len);
-	  cp[dir_len] = '/';
+	  INSERT_DIR_SEPARATOR (cp, dir_len);
 	  memcpy (cp + dir_len + 1, files[filenum].filename, file_len);
 	  cp[dir_len + file_len + 1] = '\0';
 	  listing_source_file (cp);
@@ -1464,7 +1487,7 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg)
       len = strlen (dirs[files[1].dir]);
       p = frag_more (len + 1);
       memcpy (p, dirs[files[1].dir], len);
-      p[len] = '/';
+      INSERT_DIR_SEPARATOR (p, len);
     }
   len = strlen (files[1].filename) + 1;
   p = frag_more (len);

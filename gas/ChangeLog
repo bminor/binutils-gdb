@@ -1,3 +1,13 @@
+2006-05-05  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/2582
+	* dwarf2dbg.c (INSERT_DIR_SEPARATOR): New macro.  Handles the
+	insertion of a directory separator character into a string at a
+	given offset.  Uses heuristics to decide when to use a backslash
+	character rather than a forward-slash character.
+	(dwarf2_directive_loc): Use the macro.
+	(out_debug_info): Likewise.
+
 2006-05-05  Thiemo Seufer  <ths@mips.com>
             David Ung  <davidu@mips.com>
 
