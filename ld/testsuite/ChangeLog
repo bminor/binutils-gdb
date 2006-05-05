@@ -1,3 +1,8 @@
+2006-05-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/tlsexetoc.r: Update for correction to tls optimization.
+	* ld-powerpc/tlsexetoc.g: Likewise.
+
 2006-05-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-cdtest/cdtest-foo.cc (Foo::Foo): Add const to char *.
