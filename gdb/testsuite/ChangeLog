@@ -2,6 +2,8 @@
 
 	* gdb.base/break.exp: Do not assume a breakpoint on
 	main will actually be in $srcfile when optimizing.
+	* gdb.base/savedregs.exp: Do not require that the dummy
+	frame location match up to a symbol and source file location.
 
 2006-05-05  Christophe Lyon  <christophe.lyon@st.com>
 
