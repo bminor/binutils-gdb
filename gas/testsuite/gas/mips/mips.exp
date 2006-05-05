@@ -781,4 +781,6 @@ if { [istarget mips*-*-vxworks*] } {
     }
     run_dump_test "vxworks1"
     run_dump_test "vxworks1-xgot"
+
+    run_dump_test "noreorder"
 }

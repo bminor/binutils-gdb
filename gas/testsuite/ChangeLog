@@ -1,3 +1,9 @@
+2006-05-05  Nigel Stephens  <nigel@mips.com>
+
+	* gas/mips/noreorder.s, gas/mips/noreorder.d: New test for
+	reorder/noreorder corner case.
+	* gas/mips/mips.exp: Run new test.
+	
 2006-05-04  Kazu Hirata  <kazu@codesourcery.com>
 
 	* gas/arm/armv1.d (error-output): New.
