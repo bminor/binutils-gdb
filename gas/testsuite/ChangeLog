@@ -1,3 +1,12 @@
+2006-05-05  Julian Brown  <julian@codesourcery.com>
+
+	* gas/arm/vfp-neon-overlap.s: New test. Overlapping VFP/Neon
+	instructions.
+	* gas/arm/vfp-neon-overlap.d: Expected output of above.
+	* gas/arm/vfp1xD.d: Test for fldmx/fstmx.
+	* gas/arm/vfp1xD_t2.d: Likewise.
+	* gas/arm/vfpv3-32drs.d: Likewise.
+
 2006-05-05  Nigel Stephens  <nigel@mips.com>
 
 	* gas/mips/noreorder.s, gas/mips/noreorder.d: New test for
