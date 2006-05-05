@@ -2240,6 +2240,7 @@ invalid_tls_insn (input_bfd, input_section, rel)
      input_section,
      (long) rel->r_offset,
      howto->name);
+  bfd_set_error (bfd_error_bad_value);
 }
 
 /* Relocate a 390 ELF section.  */

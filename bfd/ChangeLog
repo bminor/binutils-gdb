@@ -1,3 +1,11 @@
+2006-05-05  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* elf32-s390.c (invalid_tls_insn): Call bfd_set_error.
+	(elf_s390_relocate_section): Add code to do the GD->LE and
+	LD->LE TLS linker optimizations if a brasl instruction is used
+	for the __tls_get_offset function call.
+	* elf64-s390.c (invalid_tls_insn): Call bfd_set_error.
+
 2006-05-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_tls_optimize): Only optimize
