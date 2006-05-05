@@ -9,6 +9,8 @@
 @set HPPA
 @set MMIX
 @set MSP430
+@set POWERPC
+@set POWERPC64
 @set TICOFF
 @set WIN32
 @set XTENSA
@@ -18,4 +20,3 @@
 @set UsesEnvVars
 @c ------------------------------ end CONFIGURATION VARS
 
-@set top_srcdir .././ld

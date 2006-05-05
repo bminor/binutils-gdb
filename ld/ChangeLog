@@ -1,3 +1,10 @@
+2006-05-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld.texinfo: Document PowerPC and PowerPC64 options.
+	* gen-doc.texi: Enable.
+	* configdoc.texi: Regenerate.
+	* ld.info: Regenerate.
+
 2006-05-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.am (AM_MAKEINFOFLAGS): Add libiberty.
