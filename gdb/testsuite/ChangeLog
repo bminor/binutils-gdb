@@ -9,7 +9,12 @@
 	main will actually be in $srcfile when optimizing.
 	* gdb.base/savedregs.exp: Do not require that the dummy
 	frame location match up to a symbol and source file location.
-
+	* gdb.mi/mi-regs.exp (111-data-list-register-values x): "No registers"
+	will get printed without a mi_cmd_data_list_register_values prefix.
+	(*-data-list-register-*): Correct regular expressions to expect the new
+	pseudo d? floating point registers.
+	* gdb.mi/mi2-regs.exp: Likewise.
+	
 2006-05-05  Christophe Lyon  <christophe.lyon@st.com>
 
 	* gdb.cp/m-static.h (class gnu_obj_4): Add dummy member.
