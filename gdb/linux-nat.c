@@ -2155,7 +2155,10 @@ retry:
     {
       int signo = target_signal_from_host (WSTOPSIG (status));
 
-      if (signal_stop_state (signo) == 0
+      /* If we get a signal while single-stepping, we may need special
+	 care, e.g. to skip the signal handler.  Defer to common code.  */
+      if (!lp->step
+	  && signal_stop_state (signo) == 0
 	  && signal_print_state (signo) == 0
 	  && signal_pass_state (signo) == 1)
 	{
