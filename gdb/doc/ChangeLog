@@ -1,5 +1,10 @@
 2006-05-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* Makefile.in (GDB_DOC_SOURCE_INCLUDES): Update for readline 5.1.
+	* gdb.texinfo: Likewise.
+
+2006-05-05  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.texinfo (Remote Configuration): Remove "set remotedebug"
 	and "show remotedebug".
 	(Debugging Output): Add additional index entries.
