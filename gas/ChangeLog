@@ -1,3 +1,8 @@
+2006-05-05  Bjoern Haase  <bjoern.m.haase@web.de>
+
+	* gas/config/tc-avr.h (TC_VALIDATE_FIX): Define.  Disable fixups
+	for PMEM related expressions.
+
 2006-05-05  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/2582

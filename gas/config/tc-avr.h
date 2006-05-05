@@ -1,5 +1,5 @@
 /* This file is tc-avr.h
-   Copyright 1999, 2000, 2001, 2002, 2005 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2005, 2006 Free Software Foundation, Inc.
 
    Contributed by Denis Chertykov <denisc@overta.ru>
 
@@ -109,7 +109,7 @@ extern long md_pcrel_from_section (struct fix *, segT);
    would print `12 34 56 78'.  The default value is 4.  */
 #define LISTING_WORD_SIZE 2
 
-/* AVR port uses `$' as a logical line separator */
+/* AVR port uses `$' as a logical line separator.  */
 #define LEX_DOLLAR 0
 
 /* An `.lcomm' directive with no explicit alignment parameter will
@@ -120,3 +120,20 @@ extern long md_pcrel_from_section (struct fix *, segT);
    also affected by this macro.  The default definition will set
    P2VAR to the truncated power of two of sizes up to eight bytes.  */
 #define TC_IMPLICIT_LCOMM_ALIGNMENT(SIZE, P2VAR) (P2VAR) = 0
+
+/* We don't want gas to fixup the following program memory related relocations.
+   We will need them in case that we want to do linker relaxation.
+   We could in principle keep these fixups in gas when not relaxing.
+   However, there is no serious performance penilty when making the linker
+   make the fixup work.  */
+#define TC_VALIDATE_FIX(FIXP,SEG,SKIP)                      \
+  if ( FIXP->fx_r_type == BFD_RELOC_AVR_7_PCREL             \
+    || FIXP->fx_r_type == BFD_RELOC_AVR_13_PCREL            \
+    || FIXP->fx_r_type == BFD_RELOC_AVR_LO8_LDI_PM          \
+    || FIXP->fx_r_type == BFD_RELOC_AVR_HI8_LDI_PM          \
+    || FIXP->fx_r_type == BFD_RELOC_AVR_HH8_LDI_PM          \
+    || FIXP->fx_r_type == BFD_RELOC_AVR_16_PM)              \
+    {                                                       \
+      goto SKIP;                                            \
+    }
+
