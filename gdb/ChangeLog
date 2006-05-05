@@ -1,3 +1,7 @@
+2006-05-05  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* MAINTAINERS: Move NEWS to the documentation entry.
+
 2006-05-05  David S. Miller  <davem@sunset.davemloft.net>
 
 	* linux-nat.c (linux_nat_do_thread_registers): Use the

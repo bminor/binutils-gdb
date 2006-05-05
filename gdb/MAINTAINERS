@@ -354,6 +354,7 @@ language support
 shared libs		Kevin Buettner		kevinb@redhat.com
 
 documentation		Eli Zaretskii		eliz@gnu.org
+  (including NEWS)
 testsuite
   gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
   threads (gdb.threads) Michael Snyder          msnyder@redhat.com
@@ -374,8 +375,6 @@ gdb/gdbserver		Daniel Jacobowitz	dan@debian.org
 Makefile.in, configure*	ALL
 
 mmalloc/		ALL Host maintainers
-
-NEWS			ALL
 
 sim/			See sim/MAINTAINERS
 
