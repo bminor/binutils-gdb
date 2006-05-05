@@ -63,6 +63,7 @@ AR_FLAGS = rc
 CC = @CC@
 CFLAGS = @CFLAGS@
 CC_FOR_BUILD = @CC_FOR_BUILD@
+CFLAGS_FOR_BUILD = @CFLAGS_FOR_BUILD@
 BISON = bison
 MAKEINFO = makeinfo
 RANLIB = @RANLIB@
@@ -116,7 +117,7 @@ SIM_FPU_CFLAGS = @sim_fpu_cflags@
 
 STD_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(WARNING_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES) $(INTL_CFLAGS) $(SIM_FPU_CFLAGS)
 NOWARN_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES)  $(SIM_FPU_CFLAGS)
-BUILD_CFLAGS	= -g -O $(INCLUDES) $(WARNING_CFLAGS)
+BUILD_CFLAGS	= $(CFLAGS_FOR_BUILD) $(INCLUDES) $(WARNING_CFLAGS)
 
 BUILD_LDFLAGS	=
 
@@ -627,7 +628,7 @@ mon.o: mon.c $(BASICS_H) $(CPU_H) $(MON_H)
 # GDB after 4.16 expects the default_callback structure to be setup.
 # As a kludge, build the common stuff here for now.
 gentmap: ../common/gentmap.c Makefile targ-vals.def
-	$(CC_FOR_BUILD) $(BUILD_FLAGS) -I. -I../common -I$(srcdir)/../common -o gentmap $< $(BUILD_LIBS)
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -I. -I../common -I$(srcdir)/../common -o gentmap $< $(BUILD_LIBS)
 
 targ-vals.def: $(srcdir)/../common/nltvals.def
 	rm -f targ-vals.def tmp-def

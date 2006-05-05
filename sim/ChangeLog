@@ -1,3 +1,12 @@
+2006-05-05  Andreas Schwab  <schwab@suse.de>
+
+	* configure.ac (CFLAGS_FOR_BUILD): Set and substitute.
+	* configure: Regenerate.
+
+	* Makefile.in (CFLAGS_FOR_BUILD): Define.
+	(CC_FOR_BUILD): Don't override.
+	(FLAGS_TO_PASS): Pass CFLAGS_FOR_BUILD.
+
 2006-05-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* MAINTAINERS: Add an "Authorized committers" section, and list

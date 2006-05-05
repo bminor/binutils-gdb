@@ -23,6 +23,8 @@ else
   CC_FOR_BUILD=gcc
 fi
 AC_SUBST(CC_FOR_BUILD)
+CFLAGS_FOR_BUILD=${CFLAGS_FOR_BUILD-${CFLAGS}}
+AC_SUBST(CFLAGS_FOR_BUILD)
 
 # If a cpu ever has more than one simulator to choose from, use
 # --enable-sim=... to choose.
