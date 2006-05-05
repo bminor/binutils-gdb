@@ -1,3 +1,8 @@
+2006-05-05  Jim Blandy  <jimb@codesourcery.com>
+
+	* gdb.texinfo (General Query Packets): Document conventions for
+	terminating packet names, and their violations.
+
 2006-05-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (GDB_DOC_SOURCE_INCLUDES): Update for readline 5.1.
