@@ -4,6 +4,8 @@
 	regset_from_core_section infrastructure if the target
 	supports it.
 	* Makefile.in: Update dependencies.
+	* linux-thread-db.c (thread_db_store_registers): Use
+	regcache_raw_collect.
 
 2006-05-05:  Paul Gilliam  <pgilliam@us.ibm.com>
 

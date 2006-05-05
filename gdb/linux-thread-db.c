@@ -1047,7 +1047,7 @@ thread_db_store_registers (int regno)
     {
       gdb_byte raw[MAX_REGISTER_SIZE];
 
-      deprecated_read_register_gen (regno, raw);
+      regcache_raw_collect (current_regcache, regno, raw);
       thread_db_fetch_registers (-1);
       regcache_raw_supply (current_regcache, regno, raw);
     }
