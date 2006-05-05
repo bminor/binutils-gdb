@@ -36,6 +36,7 @@
 #include "gdbthread.h"
 #include "gdbcmd.h"
 #include "regcache.h"
+#include "regset.h"
 #include "inf-ptrace.h"
 #include "auxv.h"
 #include <sys/param.h>		/* for MAXPATHLEN */
@@ -2535,25 +2536,72 @@ linux_nat_do_thread_registers (bfd *obfd, ptid_t ptid,
   gdb_fpxregset_t fpxregs;
 #endif
   unsigned long lwp = ptid_get_lwp (ptid);
+  struct gdbarch *gdbarch = current_gdbarch;
+  const struct regset *regset;
+  int core_regset_p, record_reg_p;
 
-  fill_gregset (&gregs, -1);
-  note_data = (char *) elfcore_write_prstatus (obfd,
-					       note_data,
-					       note_size,
-					       lwp,
-					       stop_signal, &gregs);
+  core_regset_p = gdbarch_regset_from_core_section_p (gdbarch);
+  record_reg_p = 1;
+  if (core_regset_p)
+    {
+      regset = gdbarch_regset_from_core_section (gdbarch, ".reg",
+						 sizeof (gregs));
+      if (regset)
+	regset->collect_regset (regset, current_regcache, -1,
+				&gregs, sizeof (gregs));
+      else
+	record_reg_p = 0;
+    }
+  else
+    fill_gregset (&gregs, -1);
 
-  fill_fpregset (&fpregs, -1);
-  note_data = (char *) elfcore_write_prfpreg (obfd,
-					      note_data,
-					      note_size,
-					      &fpregs, sizeof (fpregs));
+  if (record_reg_p)
+    note_data = (char *) elfcore_write_prstatus (obfd,
+						 note_data,
+						 note_size,
+						 lwp,
+						 stop_signal, &gregs);
+
+  record_reg_p = 1;
+  if (core_regset_p)
+    {
+      regset = gdbarch_regset_from_core_section (gdbarch, ".reg2",
+						 sizeof (fpregs));
+      if (regset)
+	regset->collect_regset (regset, current_regcache, -1,
+				&fpregs, sizeof (fpregs));
+      else
+	record_reg_p = 0;
+    }
+  else
+    fill_fpregset (&fpregs, -1);
+
+  if (record_reg_p)
+    note_data = (char *) elfcore_write_prfpreg (obfd,
+						note_data,
+						note_size,
+						&fpregs, sizeof (fpregs));
+
 #ifdef FILL_FPXREGSET
-  fill_fpxregset (&fpxregs, -1);
-  note_data = (char *) elfcore_write_prxfpreg (obfd,
-					       note_data,
-					       note_size,
-					       &fpxregs, sizeof (fpxregs));
+  record_reg_p = 1;
+  if (core_regset_p)
+    {
+      regset = gdbarch_regset_from_core_section (gdbarch, ".reg-xfp",
+						 sizeof (fpxregs));
+      if (regset)
+	regset->collect_regset (regset, current_regcache, -1,
+				&fpxregs, sizeof (fpxregs));
+      else
+	record_reg_p = 0;
+    }
+  else
+    fill_fpxregset (&fpxregs, -1);
+
+  if (record_reg_p)
+    note_data = (char *) elfcore_write_prxfpreg (obfd,
+						 note_data,
+						 note_size,
+						 &fpxregs, sizeof (fpxregs));
 #endif
   return note_data;
 }
