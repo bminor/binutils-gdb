@@ -1,5 +1,12 @@
 2006-05-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* linux-nat.c (exit_lwp): Fix NULL pointer access.
+	(linux_nat_handle_extended): New parameter STOPPING.
+	(wait_lwp): Call it with STOPPING equals 1.
+	(linux_nat_wait): Call it with STOPPING equals 0.
+
+2006-05-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* linux-nat.c (linux_nat_wait): Do not short-cut reporting
 	of 'uninteresting' signals when single-stepping.
 
