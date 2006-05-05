@@ -632,6 +632,11 @@ obj_elf_change_section (const char *name,
 	  else if (attr == SHF_EXECINSTR
 		   && strcmp (name, ".note.GNU-stack") == 0)
 	    override = TRUE;
+#ifdef TC_ALPHA
+	  /* A section on Alpha may have SHF_ALPHA_GPREL.  */
+	  else if ((attr & ~ssect->attr) == SHF_ALPHA_GPREL)
+	    override = TRUE;
+#endif
 	  else
 	    {
 	      if (group_name == NULL)
