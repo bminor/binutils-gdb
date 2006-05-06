@@ -1,3 +1,8 @@
+2006-05-06  Nick Roberts  <nickrob@snap.net.nz>
+
+	* dwarf2read.c: Make LOC_OPTIMIZED_OUT the default value for a
+	symbol.
+
 2006-05-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* linux-nat.c (exit_lwp): Fix NULL pointer access.
