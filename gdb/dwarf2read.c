@@ -6856,7 +6856,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
       /* Default assumptions.
          Use the passed type or decode it from the die.  */
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
-      SYMBOL_CLASS (sym) = LOC_STATIC;
+      SYMBOL_CLASS (sym) = LOC_OPTIMIZED_OUT;
       if (type != NULL)
 	SYMBOL_TYPE (sym) = type;
       else
