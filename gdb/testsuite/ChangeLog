@@ -1,3 +1,9 @@
+2006-05-06  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.mi/mi-basics.exp: Add missing serial number to 
+	expected output in some mi_gdb_test statements.
+	* gdb.mi/mi2-basics.exp: Likewise.
+
 2006-05-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/del.c: New file.
