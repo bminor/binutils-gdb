@@ -444,19 +444,41 @@ s390_supply_regset (const struct regset *regset, struct regcache *regcache,
     }
 }
 
+/* Collect register REGNUM from the register cache REGCACHE and store
+   it in the buffer specified by REGS and LEN as described by the
+   general-purpose register set REGSET.  If REGNUM is -1, do this for
+   all registers in REGSET.  */
+static void
+s390_collect_regset (const struct regset *regset,
+		     const struct regcache *regcache,
+		     int regnum, void *regs, size_t len)
+{
+  const int *offset = regset->descr;
+  int i;
+
+  for (i = 0; i < S390_NUM_REGS; i++)
+    {
+      if ((regnum == i || regnum == -1) && offset[i] != -1)
+	regcache_raw_collect (regcache, i, (char *)regs + offset[i]);
+    }
+}
+
 static const struct regset s390_gregset = {
   s390_regmap_gregset, 
-  s390_supply_regset
+  s390_supply_regset,
+  s390_collect_regset
 };
 
 static const struct regset s390x_gregset = {
   s390x_regmap_gregset, 
-  s390_supply_regset
+  s390_supply_regset,
+  s390_collect_regset
 };
 
 static const struct regset s390_fpregset = {
   s390_regmap_fpregset, 
-  s390_supply_regset
+  s390_supply_regset,
+  s390_collect_regset
 };
 
 /* Return the appropriate register set for the core section identified
