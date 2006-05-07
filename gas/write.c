@@ -512,19 +512,21 @@ cvt_frag_to_fill (segT sec ATTRIBUTE_UNUSED, fragS *fragP)
 #endif
 }
 
-static void relax_seg (bfd *, asection *, PTR);
+struct relax_seg_info
+{
+  int pass;
+  int changed;
+};
 
 static void
-relax_seg (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, PTR xxx)
+relax_seg (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *xxx)
 {
   segment_info_type *seginfo = seg_info (sec);
+  struct relax_seg_info *info = (struct relax_seg_info *) xxx;
 
   if (seginfo && seginfo->frchainP
-      && relax_segment (seginfo->frchainP->frch_root, sec))
-    {
-      int *result = (int *) xxx;
-      *result = 1;
-    }
+      && relax_segment (seginfo->frchainP->frch_root, sec, info->pass))
+    info->changed = 1;
 }
 
 static void size_seg (bfd *, asection *, PTR);
@@ -1206,6 +1208,7 @@ subsegs_finish (void)
 void
 write_object_file (void)
 {
+  struct relax_seg_info rsi;
 #ifndef WORKING_DOT_WORD
   fragS *fragP;			/* Track along all frags.  */
 #endif
@@ -1264,10 +1267,9 @@ write_object_file (void)
       merge_data_into_text ();
     }
 
+  rsi.pass = 0;
   while (1)
     {
-      int changed;
-
 #ifndef WORKING_DOT_WORD
       /* We need to reset the markers in the broken word list and
 	 associated frags between calls to relax_segment (via
@@ -1288,9 +1290,10 @@ write_object_file (void)
 	}
 #endif
 
-      changed = 0;
-      bfd_map_over_sections (stdoutput, relax_seg, &changed);
-      if (!changed)
+      rsi.changed = 0;
+      bfd_map_over_sections (stdoutput, relax_seg, &rsi);
+      rsi.pass++;
+      if (!rsi.changed)
 	break;
     }
 
@@ -1721,7 +1724,7 @@ relax_align (register relax_addressT address,	/* Address now.  */
    addresses.  */
 
 int
-relax_segment (struct frag *segment_frag_root, segT segment)
+relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 {
   unsigned long frag_count;
   struct frag *fragP;
@@ -1835,6 +1838,7 @@ relax_segment (struct frag *segment_frag_root, segT segment)
     if (max_iterations < frag_count)
       max_iterations = frag_count;
 
+    ret = 0;
     do
       {
 	stretch = 0;
@@ -1964,6 +1968,26 @@ relax_segment (struct frag *segment_frag_root, segT segment)
 		  growth = target - after;
 		  if (growth < 0)
 		    {
+		      growth = 0;
+
+		      /* Don't error on first few frag relax passes.
+			 The symbol might be an expression involving
+			 symbol values from other sections.  If those
+			 sections have not yet been processed their
+			 frags will all have zero addresses, so we
+			 will calculate incorrect values for them.  The
+			 number of passes we allow before giving an
+			 error is somewhat arbitrary.  It should be at
+			 least one, with larger values requiring
+			 increasingly contrived dependencies between
+			 frags to trigger a false error.  */
+		      if (pass < 2)
+			{
+			  /* Force another pass.  */
+			  ret = 1;
+			  break;
+			}
+
 		      /* Growth may be negative, but variable part of frag
 			 cannot have fewer than 0 chars.  That is, we can't
 			 .org backwards.  */
@@ -1976,7 +2000,7 @@ relax_segment (struct frag *segment_frag_root, segT segment)
 		      fragP->fr_subtype = 0;
 		      fragP->fr_offset = 0;
 		      fragP->fr_fix = after - was_address;
-		      growth = stretch;
+		      break;
 		    }
 
 		  /* This is an absolute growth factor  */
@@ -2002,6 +2026,14 @@ relax_segment (struct frag *segment_frag_root, segT segment)
 		      }
 		    else if (amount < 0)
 		      {
+			/* Don't error on first few frag relax passes.
+			   See rs_org comment for a longer explanation.  */
+			if (pass < 2)
+			  {
+			    ret = 1;
+			    break;
+			  }
+
 			as_warn_where (fragP->fr_file, fragP->fr_line,
 				       _(".space or .fill with negative value, ignored"));
 			fragP->fr_symbol = 0;
@@ -2063,7 +2095,6 @@ relax_segment (struct frag *segment_frag_root, segT segment)
 		segment_name (segment));
   }
 
-  ret = 0;
   for (fragP = segment_frag_root; fragP; fragP = fragP->fr_next)
     if (fragP->last_fr_address != fragP->fr_address)
       {
