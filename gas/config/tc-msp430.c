@@ -168,7 +168,7 @@ static struct hcodes_s msp430_hcodes[] =
 
 const char comment_chars[] = ";";
 const char line_comment_chars[] = "#";
-const char line_separator_chars[] = "";
+const char line_separator_chars[] = "|";
 const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "dD";
 
