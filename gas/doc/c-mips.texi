@@ -106,6 +106,14 @@ Generate code for the MIPS 16 processor.  This is equivalent to putting
 @samp{.set mips16} at the start of the assembly file.  @samp{-no-mips16}
 turns off this option.
 
+@item -msmartmips
+@itemx -mno-smartmips
+Enables the SmartMIPS extensions to the MIPS32 instruction set, which
+provides a number of new instructions which target smartcard and
+cryptographic applications.  This is equivalent to putting
+@samp{.set smartmips} at the start of the assembly file.
+@samp{-mno-smartmips} turns off this option.
+
 @item -mips3d
 @itemx -no-mips3d
 Generate code for the MIPS-3D Application Specific Extension.
@@ -398,6 +406,10 @@ care!
 The directive @samp{.set mips16} puts the assembler into MIPS 16 mode,
 in which it will assemble instructions for the MIPS 16 processor.  Use
 @samp{.set nomips16} to return to normal 32 bit mode.
+
+The @samp{.set smartmips} directive enables use of the SmartMIPS
+extensions to the MIPS32 @sc{isa}; the @samp{.set nosmartmips} directive
+reverses that.
 
 Traditional @sc{mips} assemblers do not support this directive.
 

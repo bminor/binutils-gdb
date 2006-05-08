@@ -367,6 +367,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-trap}] [@b{-no-break}] [@b{-break}] [@b{-no-trap}]
    [@b{-mfix7000}] [@b{-mno-fix7000}]
    [@b{-mips16}] [@b{-no-mips16}]
+   [@b{-msmartmips}] [@b{-mno-smartmips}]
    [@b{-mips3d}] [@b{-no-mips3d}]
    [@b{-mdmx}] [@b{-no-mdmx}]
    [@b{-mdsp}] [@b{-mno-dsp}]
@@ -1005,6 +1006,12 @@ and @samp{-mfp32} controls the size of floating-point registers.
 Generate code for the MIPS 16 processor.  This is equivalent to putting
 @code{.set mips16} at the start of the assembly file.  @samp{-no-mips16}
 turns off this option.
+
+@item -msmartmips
+@itemx -mno-smartmips
+Enables the SmartMIPS extension to the MIPS32 instruction set. This is
+equivalent to putting @code{.set smartmips} at the start of the assembly file.
+@samp{-mno-smartmips} turns off this option.
 
 @item -mips3d
 @itemx -no-mips3d

@@ -193,6 +193,7 @@ struct mips_set_options
      command line options, and based on the default architecture.  */
   int ase_mips3d;
   int ase_mdmx;
+  int ase_smartmips;
   int ase_dsp;
   int ase_mt;
   /* Whether we are assembling for the mips16 processor.  0 if we are
@@ -245,7 +246,7 @@ static int file_mips_fp32 = -1;
 
 static struct mips_set_options mips_opts =
 {
-  ISA_UNKNOWN, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, CPU_UNKNOWN, FALSE
+  ISA_UNKNOWN, -1, -1, 0, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, CPU_UNKNOWN, FALSE
 };
 
 /* These variables are filled in with the masks of registers used.
@@ -268,6 +269,13 @@ static int file_ase_mips3d;
 /* True if -mdmx was passed or implied by arguments passed on the
    command line (e.g., by -march).  */
 static int file_ase_mdmx;
+
+/* True if -msmartmips was passed or implied by arguments passed on the
+   command line (e.g., by -march).  */
+static int file_ase_smartmips;
+
+#define ISA_SUPPORT_SMARTMIPS (mips_opts.isa == ISA_MIPS32       \
+			       || mips_opts.isa == ISA_MIPS32R2)
 
 /* True if -mdsp was passed or implied by arguments passed on the
    command line (e.g., by -march).  */
@@ -318,6 +326,7 @@ static int mips_32bitmode = 0;
 #define ISA_HAS_ROR(ISA) (	\
    (ISA) == ISA_MIPS32R2	\
    || (ISA) == ISA_MIPS64R2	\
+   || mips_opts.ase_smartmips	\
    )
 
 #define HAVE_32BIT_GPRS		                   \
@@ -3012,7 +3021,8 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 	 || mo->pinfo == INSN_MACRO
 	 || !OPCODE_IS_MEMBER (mo,
 			       (mips_opts.isa
-				| (file_ase_mips16 ? INSN_MIPS16 : 0)),
+				| (file_ase_mips16 ? INSN_MIPS16 : 0)
+				| (mips_opts.ase_smartmips ? INSN_SMARTMIPS : 0)),
 			       mips_opts.arch)
 	 || (mips_opts.arch == CPU_R4650 && (mo->pinfo & FP_D) != 0))
     {
@@ -8032,7 +8042,8 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      		     | (mips_opts.ase_mdmx ? INSN_MDMX : 0)
 	      		     | (mips_opts.ase_dsp ? INSN_DSP : 0)
 	      		     | (mips_opts.ase_mt ? INSN_MT : 0)
-			     | (mips_opts.ase_mips3d ? INSN_MIPS3D : 0)),
+			     | (mips_opts.ase_mips3d ? INSN_MIPS3D : 0)
+			     | (mips_opts.ase_smartmips ? INSN_SMARTMIPS : 0)),
 			    mips_opts.arch))
 	ok = TRUE;
       else
@@ -10620,9 +10631,13 @@ struct option md_longopts[] =
   {"mmt", no_argument, NULL, OPTION_MT},
 #define OPTION_NO_MT (OPTION_ASE_BASE + 9)
   {"mno-mt", no_argument, NULL, OPTION_NO_MT},
+#define OPTION_SMARTMIPS (OPTION_ASE_BASE + 10)
+  {"msmartmips", no_argument, NULL, OPTION_SMARTMIPS},
+#define OPTION_NO_SMARTMIPS (OPTION_ASE_BASE + 11)
+  {"mno-smartmips", no_argument, NULL, OPTION_NO_SMARTMIPS},
 
   /* Old-style architecture options.  Don't add more of these.  */
-#define OPTION_COMPAT_ARCH_BASE (OPTION_ASE_BASE + 10)
+#define OPTION_COMPAT_ARCH_BASE (OPTION_ASE_BASE + 12)
 #define OPTION_M4650 (OPTION_COMPAT_ARCH_BASE + 0)
   {"m4650", no_argument, NULL, OPTION_M4650},
 #define OPTION_NO_M4650 (OPTION_COMPAT_ARCH_BASE + 1)
@@ -10908,6 +10923,14 @@ md_parse_option (int c, char *arg)
 
     case OPTION_NO_MIPS3D:
       mips_opts.ase_mips3d = 0;
+      break;
+
+    case OPTION_SMARTMIPS:
+      mips_opts.ase_smartmips = 1;
+      break;
+
+    case OPTION_NO_SMARTMIPS:
+      mips_opts.ase_smartmips = 0;
       break;
 
     case OPTION_FIX_VR4120:
@@ -11248,6 +11271,7 @@ mips_after_parse_args (void)
   file_ase_mips16 = mips_opts.mips16;
   file_ase_mips3d = mips_opts.ase_mips3d;
   file_ase_mdmx = mips_opts.ase_mdmx;
+  file_ase_smartmips = mips_opts.ase_smartmips;
   file_ase_dsp = mips_opts.ase_dsp;
   file_ase_mt = mips_opts.ase_mt;
   mips_opts.gp32 = file_mips_gp32;
@@ -12101,6 +12125,15 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
   else if (strcmp (name, "nomips16") == 0
 	   || strcmp (name, "noMIPS-16") == 0)
     mips_opts.mips16 = 0;
+  else if (strcmp (name, "smartmips") == 0)
+    {
+      if (!ISA_SUPPORT_SMARTMIPS)
+	as_warn ("%s ISA does not support SmartMIPS ASE", 
+		 mips_cpu_info_from_isa (mips_opts.isa)->name);
+      mips_opts.ase_smartmips = 1;
+    }
+  else if (strcmp (name, "nosmartmips") == 0)
+    mips_opts.ase_smartmips = 0;
   else if (strcmp (name, "mips3d") == 0)
     mips_opts.ase_mips3d = 1;
   else if (strcmp (name, "nomips3d") == 0)
@@ -14569,6 +14602,9 @@ MIPS options:\n\
   fprintf (stream, _("\
 -mips16			generate mips16 instructions\n\
 -no-mips16		do not generate mips16 instructions\n"));
+  fprintf (stream, _("\
+-msmartmips		generate smartmips instructions\n\
+-mno-smartmips		do not generate smartmips instructions\n"));  
   fprintf (stream, _("\
 -mdsp			generate DSP instructions\n\
 -mno-dsp		do not generate DSP instructions\n"));

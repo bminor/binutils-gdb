@@ -1,3 +1,21 @@
+2006-05-08  Thiemo Seufer  <ths@mips.com>
+            Nigel Stephens  <nigel@mips.com>
+            David Ung  <davidu@mips.com>
+
+	* config/tc-mips.c (mips_set_options): Add ase_smartmips flag.
+	(mips_opts): Likewise.
+	(file_ase_smartmips): New variable.
+	(ISA_HAS_ROR): SmartMIPS implements rotate instructions.
+	(macro_build): Handle SmartMIPS instructions.
+	(mips_ip): Likewise.
+	(md_longopts): Add argument handling for smartmips.
+	(md_parse_options, mips_after_parse_args): Likewise.
+	(s_mipsset): Add .set smartmips support.
+	(md_show_usage): Document -msmartmips/-mno-smartmips.
+	* doc/as.texinfo: Document -msmartmips/-mno-smartmips and
+	.set smartmips.
+	* doc/c-mips.texi: Likewise.
+
 2006-05-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* write.c (relax_segment): Add pass count arg.  Don't error on
