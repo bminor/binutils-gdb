@@ -1,6 +1,6 @@
 2006-05-05  Bjoern Haase  <bjoern.m.haase@web.de>
 
-	* bfd/elf32-avr.c (elf32_avr_relax_delete_bytes): Iterate over all
+	* elf32-avr.c (elf32_avr_relax_delete_bytes): Iterate over all
 	of the bfd's sections for the reloc-addend adjustments.
 
 2006-05-05  Martin Schwidefsky  <schwidefsky@de.ibm.com>
