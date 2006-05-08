@@ -1,4 +1,9 @@
 2006-05-08  Thiemo Seufer  <ths@mips.com>
+
+	* gas/mips/mips32.s, gas/mips/mips32.d: Extend testcase to check
+	larger offset arguments for cache instructions.
+
+2006-05-08  Thiemo Seufer  <ths@mips.com>
             Nigel Stephens  <nigel@mips.com>
             David Ung  <davidu@mips.com>
 

@@ -49,6 +49,12 @@ text_label:
       cache   5, ($1)
       cache   5, 32767($2)
       cache   5, -32768($3)
+      .set at
+      cache   5, 32768($4)
+      cache   5, -32769($5)
+      cache   5, 32768
+      cache   5, -32769
+      .set noat
       eret
       tlbp
       tlbr
