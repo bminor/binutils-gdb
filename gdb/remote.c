@@ -2155,7 +2155,11 @@ remote_get_shared_libraries (struct target_ops *ops)
       return;
     }
 
-  if (added)
+  /* If OPS is set, we were called from the target vector and should handle
+     adding shared libraries now.  If it is NULL, we were called as part of
+     a TARGET_WAITKIND_LOADED event, and the libraries will be added momentarily,
+     so we don't need to do it now.  */
+  if (added && ops != NULL)
     {
 #ifdef SOLIB_ADD
       SOLIB_ADD (NULL, 0, &current_target, auto_solib_add);
@@ -3270,9 +3274,19 @@ Packet: '%s'\n"),
 			while (*p_temp && *p_temp != ';')
 			  p_temp++;
 
-			parse_load_response (p1, p_temp, 1);
+			if (p_temp - p1 > 4
+			    && strncmp (p_temp - 4, ",nop", 4) == 0)
+			  {
+			    /* For now, ignore no-op unload events.  Later,
+			       maybe report them?  */
+			  }
+			else
+			  {
+			    parse_load_response (p1, p_temp, 1);
 
-			solibs_changed = 1;
+			    solibs_changed = 1;
+			  }
+
 			p = p_temp;
 		      }
 		    else if (strncmp (p, "unload", p1 - p) == 0)
@@ -3282,9 +3296,29 @@ Packet: '%s'\n"),
 			while (*p_temp && *p_temp != ';')
 			  p_temp++;
 
-			parse_load_response (p1, p_temp, 0);
+			if (p_temp - p1 > 4
+			    && strncmp (p_temp - 4, ",nop", 4) == 0)
+			  {
+			    /* For now, ignore no-op unload events.  Later,
+			       maybe report them?  */
+			  }
+			else
+			  {
+			    parse_load_response (p1, p_temp, 0);
 
-			solibs_changed = 1;
+			    solibs_changed = 1;
+			  }
+
+			p = p_temp;
+		      }
+		    else if (strncmp (p, "dll", p1 - p) == 0)
+		      {
+			p1++;
+			p_temp = p1;
+			while (*p_temp && *p_temp != ';')
+			  p_temp++;
+
+			solibs_changed = -1;
 			p = p_temp;
 		      }
 		    else
@@ -3378,7 +3412,10 @@ Packet: '%s'\n"),
 	}
     }
 got_status:
-  if (solibs_changed)
+  if (solibs_changed == -1)
+    remote_get_shared_libraries (NULL);
+  
+  if (solibs_changed != 0)
     status->kind = TARGET_WAITKIND_LOADED;
 
   if (thread_num != -1)
