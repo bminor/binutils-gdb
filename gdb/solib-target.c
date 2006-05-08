@@ -219,8 +219,7 @@ solib_target_remove_one_solib (char *soname, CORE_ADDR textSeg,
   if (!solibs_fetched)
     return;
 
-  slot = &solib_start;
-  while (*slot)
+  for (slot = &solib_start; *slot != NULL; slot = &(*slot)->next)
     {
       if (textSeg != ~(CORE_ADDR) 0 && textSeg != (*slot)->lm_info->textSeg)
 	continue;
