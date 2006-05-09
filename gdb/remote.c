@@ -2098,7 +2098,6 @@ static void
 remote_get_shared_libraries (struct target_ops *ops)
 {
   struct remote_state *rs = get_remote_state ();
-  int added = 0;
 
   /* If this target doesn't support remote DLLs, nothing to do.  */
   if (current_target_so_ops->add_one_solib == NULL)
@@ -2137,8 +2136,6 @@ remote_get_shared_libraries (struct target_ops *ops)
 	      return;
 	    }
 
-	  added = 1;
-
 	  if (*p_end == ';')
 	    p = p_end + 1;
 	  else
@@ -2155,18 +2152,8 @@ remote_get_shared_libraries (struct target_ops *ops)
       return;
     }
 
-  /* If OPS is set, we were called from the target vector and should handle
-     adding shared libraries now.  If it is NULL, we were called as part of
-     a TARGET_WAITKIND_LOADED event, and the libraries will be added momentarily,
-     so we don't need to do it now.  */
-  if (added && ops != NULL)
-    {
-#ifdef SOLIB_ADD
-      SOLIB_ADD (NULL, 0, &current_target, auto_solib_add);
-#else
-      solib_add (NULL, 0, &current_target, auto_solib_add);
-#endif
-    }
+  /* We don't need to call solib_add here, because we're being called from
+     ->current_sos ().  */
 }
 
 /* Stub for catch_errors.  */

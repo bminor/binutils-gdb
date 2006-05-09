@@ -2623,7 +2623,7 @@ solib.o: solib.c $(defs_h) $(gdb_string_h) $(symtab_h) $(bfd_h) $(symfile_h) \
 	$(objfiles_h) $(exceptions_h) $(gdbcore_h) $(command_h) $(target_h) \
 	$(frame_h) $(gdb_regex_h) $(inferior_h) $(environ_h) $(language_h) \
 	$(gdbcmd_h) $(completer_h) $(filenames_h) $(exec_h) $(solist_h) \
-	$(observer_h) $(readline_h)
+	$(observer_h) $(readline_h) $(exceptions_h)
 solib-frv.o: solib-frv.c $(defs_h) $(gdb_string_h) $(inferior_h) \
 	$(gdbcore_h) $(solist_h) $(frv_tdep_h) $(objfiles_h) $(symtab_h) \
 	$(language_h) $(command_h) $(gdbcmd_h) $(elf_frv_h)
