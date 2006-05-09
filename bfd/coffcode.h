@@ -2532,11 +2532,15 @@ coff_write_relocs (bfd * abfd, int first_undef)
 		else
 		  {
 		    n.r_symndx = get_index ((*(q->sym_ptr_ptr)));
-		    /* Take notice if the symbol reloc points to a symbol
-		       we don't have in our symbol table.  What should we
-		       do for this??  */
+		    /* Check to see if the symbol reloc points to a symbol
+		       we don't have in our symbol table.  */
 		    if (n.r_symndx > obj_conv_table_size (abfd))
-		      abort ();
+		      {
+			bfd_set_error (bfd_error_bad_value);
+			_bfd_error_handler (_("%B: reloc against a non-existant symbol index: %ld"),
+					    abfd, n.r_symndx);
+			return FALSE;
+		      }
 		  }
 	      }
 

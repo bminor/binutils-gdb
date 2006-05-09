@@ -1,3 +1,9 @@
+2006-05-09  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (arm_fix_adjustable): For COFF, convert fixups
+	against symbols which are not going to be placed into the symbol
+	table.
+
 2006-05-09  Ben Elliston  <bje@au.ibm.com>
 
 	* expr.c (operand): Remove `if (0 && ..)' statement and

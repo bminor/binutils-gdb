@@ -17003,17 +17003,35 @@ arm_force_relocation (struct fix * fixp)
 }
 
 #ifdef OBJ_COFF
-/* This is a little hack to help the gas/arm/adrl.s test.  It prevents
-   local labels from being added to the output symbol table when they
-   are used with the ADRL pseudo op.  The ADRL relocation should always
-   be resolved before the binbary is emitted, so it is safe to say that
-   it is adjustable.  */
-
 bfd_boolean
 arm_fix_adjustable (fixS * fixP)
 {
+  /* This is a little hack to help the gas/arm/adrl.s test.  It prevents
+     local labels from being added to the output symbol table when they
+     are used with the ADRL pseudo op.  The ADRL relocation should always
+     be resolved before the binbary is emitted, so it is safe to say that
+     it is adjustable.  */
   if (fixP->fx_r_type == BFD_RELOC_ARM_ADRL_IMMEDIATE)
     return 1;
+
+  /* This is a hack for the gas/all/redef2.s test.  This test causes symbols
+     to be cloned, and without this test relocs would still be generated
+     against the original pre-cloned symbol.  Such symbols would not appear
+     in the symbol table however, and so a valid reloc could not be
+     generated.  So check to see if the fixup is against a symbol which has
+     been removed from the symbol chain, and if it is, then allow it to be
+     adjusted into a reloc against a section symbol. */
+  if (fixP->fx_addsy != NULL)
+    {
+      symbolS * sym;
+
+      for (sym = symbol_rootP; sym != NULL; sym = symbol_next (sym))
+	if (sym == fixP->fx_addsy)
+	  break;
+      if (sym == NULL)
+	return 1;
+    }
+  
   return 0;
 }
 #endif

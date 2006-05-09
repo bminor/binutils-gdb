@@ -1,3 +1,8 @@
+2006-05-09  Nick Clifton  <nickc@redhat.com>
+
+	* coffcode.h (coff_write_relocs): Produce an error message if a an
+	out-of-range symbol index is detected in a reloc.
+
 2006-05-09  Ben Elliston  <bje@au.ibm.com>
 
 	* elf64-ppc.c (ppc64_elf_finish_dynamic_symbol): Remove unused
