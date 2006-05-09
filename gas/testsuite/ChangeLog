@@ -1,3 +1,8 @@
+2006-05-09  David Ung  <davidu@mips.com>
+
+	* gas/mips/jal-range.l: Only warn about an out-of-range j or jal
+	address.
+
 2006-05-08  Thiemo Seufer  <ths@mips.com>
 
 	* gas/mips/mips32.s, gas/mips/mips32.d: Extend testcase to check
