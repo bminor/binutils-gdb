@@ -1,3 +1,13 @@
+2006-05-09  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* configure.srv (m68k*-*-uclinux*): New target.
+	* linux-low.c (linux_create_inferior): Use vfork on mmuless systems.
+	(linux_resume_one_process): Remove extraneous cast.
+	(linux_read_offsets): New.
+	(linux_target_op): Add linux_read_offsets on mmuless systems.
+	* server.c (handle_query): Add qOffsets logic.
+	* target.h (struct target_ops): Add read_offsets.
+
 2006-03-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-mips-low.c: Include <sys/ptrace.h> and "gdb_proc_service.h".

@@ -129,6 +129,20 @@ handle_query (char *own_buf)
 	}
     }
 
+  if (the_target->read_offsets != NULL
+      && strcmp ("qOffsets", own_buf) == 0)
+    {
+      CORE_ADDR text, data;
+      
+      if (the_target->read_offsets (&text, &data))
+	sprintf (own_buf, "Text=%lX;Data=%lX;Bss=%lX",
+		 (long)text, (long)data, (long)data);
+      else
+	write_enn (own_buf);
+      
+      return;
+    }
+
   if (the_target->read_auxv != NULL
       && strncmp ("qPart:auxv:read::", own_buf, 17) == 0)
     {
