@@ -1,3 +1,19 @@
+2006-05-09  Andreas Schwab  <schwab@suse.de>
+
+	* dwarf2-frame.c (struct dwarf2_fde): Add eh_frame_p.
+	(execute_cfa_program): Add parameter eh_frame_p.  Call
+	dwarf2_frame_eh_frame_regnum when true.
+	(dwarf2_frame_cache): Pass eh_frame_p from fde to
+	execute_cfa_program.
+	(decode_frame_entry_1): Call dwarf2_frame_eh_frame_regnum when
+	processing .eh_frame.  Copy eh_frame_p to the new fde.
+	(struct dwarf2_frame_ops): Add eh_frame_regnum.
+	(dwarf2_frame_set_eh_frame_regnum): Define.
+	(dwarf2_frame_eh_frame_regnum): Define.
+
+	* dwarf2-frame.h (dwarf2_frame_set_eh_frame_regnum): Declare.
+	(dwarf2_frame_eh_frame_regnum): Declare.
+
 2006-05-06  David S. Miller  <davem@sunset.davemloft.net>
 
 	* linux-nat.c (linux_nat_do_thread_registers): Check for
