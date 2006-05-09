@@ -17016,21 +17016,16 @@ arm_fix_adjustable (fixS * fixP)
 
   /* This is a hack for the gas/all/redef2.s test.  This test causes symbols
      to be cloned, and without this test relocs would still be generated
-     against the original pre-cloned symbol.  Such symbols would not appear
+     against the original, pre-cloned symbol.  Such symbols would not appear
      in the symbol table however, and so a valid reloc could not be
      generated.  So check to see if the fixup is against a symbol which has
      been removed from the symbol chain, and if it is, then allow it to be
      adjusted into a reloc against a section symbol. */
-  if (fixP->fx_addsy != NULL)
-    {
-      symbolS * sym;
-
-      for (sym = symbol_rootP; sym != NULL; sym = symbol_next (sym))
-	if (sym == fixP->fx_addsy)
-	  break;
-      if (sym == NULL)
-	return 1;
-    }
+  if (fixP->fx_addsy != NULL
+      && ! S_IS_LOCAL (fixP->fx_addsy)
+      && symbol_next (fixP->fx_addsy) == NULL
+      && symbol_next (fixP->fx_addsy) == symbol_previous (fixP->fx_addsy))
+    return 1;
   
   return 0;
 }
