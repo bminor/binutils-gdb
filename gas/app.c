@@ -888,9 +888,6 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 
 	  switch (state)
 	    {
-	    case 0:
-	      state++;
-	      goto recycle;	/* Punted leading sp */
 	    case 1:
 	      /* We can arrive here if we leave a leading whitespace
 		 character at the beginning of a line.  */

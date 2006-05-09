@@ -1,3 +1,11 @@
+2006-05-09  Ben Elliston  <bje@au.ibm.com>
+
+	* expr.c (operand): Remove `if (0 && ..)' statement and
+	subsequently unused target_op label.  Collapse `if (1 || ..)'
+	statement.
+	* app.c (do_scrub_chars): Remove unused case 0, as it is handled
+	separately above the switch.
+
 2006-05-08  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/2623

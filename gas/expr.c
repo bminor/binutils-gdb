@@ -1003,11 +1003,6 @@ operand (expressionS *expressionP, enum expr_mode mode)
     case '-':
     case '+':
       {
-	/* Do not accept ++e or --e as +(+e) or -(-e)
-	   Disabled, since the preprocessor removes whitespace.  */
-	if (0 && (c == '-' || c == '+') && *input_line_pointer == c)
-	  goto target_op;
-	
 	operand (expressionP, mode);
 	if (expressionP->X_op == O_constant)
 	  {
@@ -1291,7 +1286,6 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	}
       else
 	{
-	target_op:
 	  /* Let the target try to parse it.  Success is indicated by changing
 	     the X_op field to something other than O_absent and pointing
 	     input_line_pointer past the expression.  If it can't parse the
@@ -1552,11 +1546,7 @@ operator (int *num_chars)
 
     case '+':
     case '-':
-      /* Do not allow a++b and a--b to be a + (+b) and a - (-b)
-	 Disabled, since the preprocessor removes whitespace.  */
-      if (1 || input_line_pointer[1] != c)
-	return op_encoding[c];
-      return O_illegal;
+      return op_encoding[c];
 
     case '<':
       switch (input_line_pointer[1])
