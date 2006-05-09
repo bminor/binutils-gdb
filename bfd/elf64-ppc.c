@@ -11102,13 +11102,11 @@ ppc64_elf_finish_dynamic_symbol (bfd *output_bfd,
 				 Elf_Internal_Sym *sym)
 {
   struct ppc_link_hash_table *htab;
-  bfd *dynobj;
   struct plt_entry *ent;
   Elf_Internal_Rela rela;
   bfd_byte *loc;
 
   htab = ppc_hash_table (info);
-  dynobj = htab->elf.dynobj;
 
   for (ent = h->plt.plist; ent != NULL; ent = ent->next)
     if (ent->plt.offset != (bfd_vma) -1)

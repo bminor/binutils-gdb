@@ -1,3 +1,8 @@
+2006-05-09  Ben Elliston  <bje@au.ibm.com>
+
+	* elf64-ppc.c (ppc64_elf_finish_dynamic_symbol): Remove unused
+	local variable `dynobj'.
+	
 2006-05-05  Bjoern Haase  <bjoern.m.haase@web.de>
 
 	* elf32-avr.c (elf32_avr_relax_delete_bytes): Iterate over all
@@ -103,8 +108,8 @@
 	`fail'.
 	* dwarf2.c (decode_line_info): Remove unused local variable
 	`basic_block'.
-	* elfcode.h (elf_slurp_reloc_table_from_section): Remove unsed
-	local varibale `s'.
+	* elfcode.h (elf_slurp_reloc_table_from_section): Remove unused
+	local variable `s'.
 	* tekhex.c (tekhex_write_object_contents): Remove unused local
 	variable `bytes_written'.
 	* aout-ns32k.c (MY_swap_std_reloc_out): Remove unused local
