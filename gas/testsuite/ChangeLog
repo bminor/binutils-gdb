@@ -1,3 +1,10 @@
+2006-05-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Run x86-64-gidt.
+
+	* gas/i386/x86-64-gidt.d: New file.
+	* gas/i386/x86-64-gidt.s: Likewise.
+
 2006-05-09  David Ung  <davidu@mips.com>
 
 	* gas/mips/jal-range.l: Only warn about an out-of-range j or jal

@@ -1400,8 +1400,8 @@ static const struct dis386 grps[][8] = {
   },
   /* GRP7 */
   {
-    { "sgdtIQ", VMX_Fixup, 0, XX, XX },
-    { "sidtIQ", PNI_Fixup, 0, XX, XX },
+    { "sgdt{Q|IQ||}", VMX_Fixup, 0, XX, XX },
+    { "sidt{Q|IQ||}", PNI_Fixup, 0, XX, XX },
     { "lgdt{Q|Q||}",	 M, XX, XX },
     { "lidt{Q|Q||}",	 SVME_Fixup, 0, XX, XX },
     { "smswQ",	Ev, XX, XX },
