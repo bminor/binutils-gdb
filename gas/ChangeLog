@@ -1,3 +1,11 @@
+2006-05-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* write.c (relax_segment): Add pass count arg.  Don't error on
+	negative org/space on first two passes.
+	(relax_seg_info): New struct.
+	(relax_seg, write_object_file): Adjust.
+	* write.h (relax_segment): Update prototype.
+
 2006-05-02  Joseph Myers  <joseph@codesourcery.com>
 
 	* config/tc-arm.c (do_iwmmxt_wldstbh): Don't multiply offset by 4
