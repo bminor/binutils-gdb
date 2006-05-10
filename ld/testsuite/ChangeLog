@@ -1,3 +1,7 @@
+2006-05-10  Thiemo Seufer  <ths@debian.org>
+
+	* ld-elf/sec64k.exp: Extend for MIPS ELF.
+
 2006-05-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/tlsexetoc.r: Update for correction to tls optimization.
