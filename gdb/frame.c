@@ -1133,6 +1133,26 @@ get_prev_frame_1 (struct frame_info *this_frame)
   this_frame->prev = prev_frame;
   prev_frame->next = this_frame;
 
+  /* Now that the frame chain is in a consistant state, check whether
+     this frame is useful.  If it is not, unlink it.  Its storage will
+     be reclaimed the next time the frame cache is flushed, and we
+     will not try to unwind THIS_FRAME again.  */
+
+  /* Assume that the only way to get a zero PC is through something
+     like a SIGSEGV or a dummy frame, and hence that NORMAL frames
+     will never unwind a zero PC.  This will look up the unwinder
+     for the newly created frame, to determine its type.  */
+  if (prev_frame->level > 0
+      && get_frame_type (prev_frame) == NORMAL_FRAME
+      && get_frame_type (this_frame) == NORMAL_FRAME
+      && get_frame_pc (prev_frame) == 0)
+    {
+      if (frame_debug)
+	fprintf_unfiltered (gdb_stdlog, "-> // zero PC}\n");
+      this_frame->prev = NULL;
+      return NULL;
+    }
+
   if (frame_debug)
     {
       fprintf_unfiltered (gdb_stdlog, "-> ");
@@ -1307,18 +1327,6 @@ get_prev_frame (struct frame_info *this_frame)
       && inside_entry_func (this_frame))
     {
       frame_debug_got_null_frame (gdb_stdlog, this_frame, "inside entry func");
-      return NULL;
-    }
-
-  /* Assume that the only way to get a zero PC is through something
-     like a SIGSEGV or a dummy frame, and hence that NORMAL frames
-     will never unwind a zero PC.  */
-  if (this_frame->level > 0
-      && get_frame_type (this_frame) == NORMAL_FRAME
-      && get_frame_type (get_next_frame (this_frame)) == NORMAL_FRAME
-      && get_frame_pc (this_frame) == 0)
-    {
-      frame_debug_got_null_frame (gdb_stdlog, this_frame, "zero PC");
       return NULL;
     }
 
