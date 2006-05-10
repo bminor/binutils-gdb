@@ -1,3 +1,8 @@
+2006-05-10  Steve Ellcey  <sje@cup.hp.com>
+
+	* hppa-hpux-tdep.c (initialize_hp_cxx_exception_support): Remove
+	message.
+
 2006-05-09  Andreas Schwab  <schwab@suse.de>
 
 	* dwarf2-frame.c (struct dwarf2_fde): Add eh_frame_p.

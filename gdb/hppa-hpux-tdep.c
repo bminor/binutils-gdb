@@ -865,14 +865,14 @@ GDB will be unable to intercept exception events."),
            does the equivalent of shl_findsym()) to find the plabel.  */
 
         args_for_find_stub args;
-        static char message[] = _("Error while finding exception callback hook:\n");
 
         args.solib_handle = gdbarch_tdep (current_gdbarch)->solib_get_solib_by_pc (eh_notify_callback_addr);
         args.msym = msym;
         args.return_val = 0;
 
         recurse++;
-        catch_errors (cover_find_stub_with_shl_get, &args, message,
+        catch_errors (cover_find_stub_with_shl_get, &args,
+		      _("Error while finding exception callback hook:\n"),
 		      RETURN_MASK_ALL);
         eh_notify_callback_addr = args.return_val;
         recurse--;
