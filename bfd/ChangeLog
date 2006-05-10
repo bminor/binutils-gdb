@@ -1,5 +1,10 @@
 2006-05-10  Alan Modra  <amodra@bigpond.net.au>
 
+	PR 2342
+	* elflink.c (_bfd_elf_default_action_discarded): Revert 2006-02-16.
+
+2006-05-10  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf64-ppc.c (ppc64_elf_tls_optimize): Only optimize
 	R_PPC64_TPREL64 and R_PPC64_DTPMOD64 relocs when they are in
 	the .toc and referenced by a TLS code sequence.
