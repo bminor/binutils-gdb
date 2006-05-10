@@ -1,5 +1,10 @@
 2006-05-10  Alan Modra  <amodra@bigpond.net.au>
 
+	* dwarf2dbg.c (get_line_subseg): Attach new struct line_seg to end
+	of list rather than beginning.
+
+2006-05-10  Alan Modra  <amodra@bigpond.net.au>
+
 	* write.c (relax_segment): Add pass count arg.  Don't error on
 	negative org/space on first two passes.
 	(relax_seg_info): New struct.
