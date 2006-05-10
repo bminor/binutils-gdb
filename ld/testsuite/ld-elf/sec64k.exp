@@ -51,7 +51,9 @@ for { set i 0 } { $i < $max_sec / $secs_per_file } { incr i } {
 
     if { $i == 0 } {
 	puts $ofd " .global _start"
+	puts $ofd " .global __start"
 	puts $ofd "_start:"
+	puts $ofd "__start:"
 	puts $ofd " .global foo_0"
 	puts $ofd "foo_0: .long 0"
     }
@@ -101,7 +103,7 @@ puts $ofd "  \\\[65536\\\] (.rel\[a\]?)?\\.foo\\.\[0-9\]+ .*"
 puts $ofd "#..."
 puts $ofd " 680..: 0+\[ \]+0\[ \]+SECTION\[ \]+LOCAL\[ \]+DEFAULT\[ \]+68... "
 puts $ofd "#..."
-puts $ofd " 680..: 0+4\[ \]+0\[ \]+NOTYPE\[ \]+LOCAL\[ \]+DEFAULT\[ \]+2 bar_1"
+puts $ofd " 680..: 0+4\[ \]+0\[ \]+NOTYPE\[ \]+LOCAL\[ \]+DEFAULT\[ \]+\[23\] bar_1"
 puts $ofd "#..."
 puts $ofd ".* bar_34000"
 puts $ofd "#..."
