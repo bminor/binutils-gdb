@@ -5,6 +5,13 @@
 @c @setchapternewpage off
 @c %**end of header
 
+@c This file is part of the GDB manual.
+@c
+@c Copyright (C) 2003, 2004, 2005, 2006
+@c               Free Software Foundation, Inc.
+@c
+@c See the file gdb.texinfo for copying conditions.
+
 @c Revision: $Id$
 
 @node Agent Expressions
