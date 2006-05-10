@@ -6696,12 +6696,22 @@ ppc64_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
     {
       Elf_Internal_Sym *locsyms = NULL;
+      asection *toc = bfd_get_section_by_name (ibfd, ".toc");
+      unsigned char *toc_ref = NULL;
 
-      for (sec = ibfd->sections; sec != NULL; sec = sec->next)
+      /* Look at all the sections for this file, with TOC last.  */
+      for (sec = (ibfd->sections == toc && toc && toc->next ? toc->next
+		  : ibfd->sections);
+	   sec != NULL;
+	   sec = (sec == toc ? NULL
+		  : sec->next == NULL ? toc
+		  : sec->next == toc && toc->next ? toc->next
+		  : sec->next))
 	if (sec->has_tls_reloc && !bfd_is_abs_section (sec->output_section))
 	  {
 	    Elf_Internal_Rela *relstart, *rel, *relend;
 	    int expecting_tls_get_addr;
+	    long toc_ref_index = 0;
 
 	    /* Read the relocations.  */
 	    relstart = _bfd_elf_link_read_relocs (ibfd, sec, NULL, NULL,
@@ -6730,6 +6740,8 @@ ppc64_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 		  err_free_rel:
 		    if (elf_section_data (sec)->relocs != relstart)
 		      free (relstart);
+		    if (toc_ref != NULL)
+		      free (toc_ref);
 		    if (locsyms != NULL
 			&& (elf_tdata (ibfd)->symtab_hdr.contents
 			    != (unsigned char *) locsyms))
@@ -6837,8 +6849,12 @@ ppc64_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 						   rel - 1, ibfd);
 			    if (retval == 0)
 			      goto err_free_rel;
-			    if (toc_tls != NULL)
-			      expecting_tls_get_addr = retval > 1;
+			    if (retval > 1 && toc_tls != NULL)
+			      {
+				expecting_tls_get_addr = 1;
+				if (toc_ref != NULL)
+				  toc_ref[toc_ref_index] = 1;
+			      }
 			  }
 
 			if (expecting_tls_get_addr)
@@ -6856,8 +6872,40 @@ ppc64_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 		    expecting_tls_get_addr = 0;
 		    continue;
 
+		  case R_PPC64_TOC16:
+		  case R_PPC64_TOC16_LO:
+		  case R_PPC64_TLS:
+		    expecting_tls_get_addr = 0;
+		    if (sym_sec == toc && toc != NULL)
+		      {
+			/* Mark this toc entry as referenced by a TLS
+			   code sequence.  We can do that now in the
+			   case of R_PPC64_TLS, and after checking for
+			   tls_get_addr for the TOC16 relocs.  */
+			if (toc_ref == NULL)
+			  {
+			    toc_ref = bfd_zmalloc (toc->size / 8);
+			    if (toc_ref == NULL)
+			      goto err_free_rel;
+			  }
+			if (h != NULL)
+			  value = h->root.u.def.value;
+			else
+			  value = sym->st_value;
+			value += rel->r_addend;
+			BFD_ASSERT (value < toc->size && value % 8 == 0);
+			toc_ref_index = value / 8;
+			if (r_type == R_PPC64_TLS)
+			  toc_ref[toc_ref_index] = 1;
+		      }
+		    continue;
+
 		  case R_PPC64_TPREL64:
 		    expecting_tls_get_addr = 0;
+		    if (sec != toc
+			|| toc_ref == NULL
+			|| !toc_ref[rel->r_offset / 8])
+		      continue;
 		    if (ok_tprel)
 		      {
 			/* IE -> LE */
@@ -6870,6 +6918,10 @@ ppc64_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 
 		  case R_PPC64_DTPMOD64:
 		    expecting_tls_get_addr = 0;
+		    if (sec != toc
+			|| toc_ref == NULL
+			|| !toc_ref[rel->r_offset / 8])
+		      continue;
 		    if (rel + 1 < relend
 			&& (rel[1].r_info
 			    == ELF64_R_INFO (r_symndx, R_PPC64_DTPREL64))
@@ -6947,6 +6999,9 @@ ppc64_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 	    if (elf_section_data (sec)->relocs != relstart)
 	      free (relstart);
 	  }
+
+      if (toc_ref != NULL)
+	free (toc_ref);
 
       if (locsyms != NULL
 	  && (elf_tdata (ibfd)->symtab_hdr.contents
@@ -7143,13 +7198,14 @@ ppc64_elf_edit_toc (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 	  return FALSE;
 	}
 
-      /* Now check all kept sections that might reference the toc.  */
-      for (sec = ibfd->sections;
+      /* Now check all kept sections that might reference the toc.
+	 Check the toc itself last.  */
+      for (sec = (ibfd->sections == toc && toc->next ? toc->next
+		  : ibfd->sections);
 	   sec != NULL;
-	   /* Check the toc itself last.  */
 	   sec = (sec == toc ? NULL
-		  : sec->next == toc && sec->next->next ? sec->next->next
 		  : sec->next == NULL ? toc
+		  : sec->next == toc && toc->next ? toc->next
 		  : sec->next))
 	{
 	  int repeat;
