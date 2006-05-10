@@ -1,3 +1,8 @@
+2006-05-10  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 2342
+	* elflink.c (_bfd_elf_default_action_discarded): Revert 2006-02-16.
+
 2006-05-09  Nick Clifton  <nickc@redhat.com>
 
 	* coffcode.h (coff_write_relocs): Produce an error message if a an

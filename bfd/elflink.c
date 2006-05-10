@@ -6758,7 +6758,7 @@ unsigned int
 _bfd_elf_default_action_discarded (asection *sec)
 {
   if (sec->flags & SEC_DEBUGGING)
-    return 0;
+    return PRETEND;
 
   if (strcmp (".eh_frame", sec->name) == 0)
     return 0;
