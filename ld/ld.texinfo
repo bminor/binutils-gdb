@@ -182,7 +182,7 @@ section entitled ``GNU Free Documentation License''.
 * Reporting Bugs::              Reporting Bugs
 * MRI::                         MRI Compatible Script Files
 * GNU Free Documentation License::  GNU Free Documentation License
-* Index::                       Index
+* LD Index::                       LD Index
 @end menu
 @end ifnottex
 
@@ -6629,8 +6629,8 @@ If you have more than one @code{SECT} statement for the same
 
 @include fdl.texi
 
-@node Index
-@unnumbered Index
+@node LD Index
+@unnumbered LD Index
 
 @printindex cp
 

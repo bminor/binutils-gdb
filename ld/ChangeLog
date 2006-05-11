@@ -1,3 +1,7 @@
+2006-05-11  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* ld.texinfo: Rename "Index" to "LD Index" 
+
 2006-05-11  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* pe-dll.c (autofilter_symbollist): Add Dllmain,

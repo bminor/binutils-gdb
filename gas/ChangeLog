@@ -1,3 +1,8 @@
+2006-05-11  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* doc/as.texinfo: Rename "Index" to "AS Index",
+	and "ABORT" to "ABORT (COFF)".
+
 2006-05-11  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (parse_half): New function.
