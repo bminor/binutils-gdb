@@ -6782,6 +6782,7 @@ match_group_member (asection *sec, asection *group)
       if (bfd_elf_match_symbols_in_sections (s, sec))
 	return s;
 
+      s = elf_next_in_group (s);
       if (s == first)
 	break;
     }
