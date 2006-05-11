@@ -1,3 +1,7 @@
+2006-05-11  Alfred M. Szmidt  <ams@gnu.org>
+
+	* gnu-nat.c (inf_validate_procs): Don't use lvalue in assignments.
+
 2006-05-11  Fred Fish  <fnf@specifix.com>
 
 	* symtab.c (skip_prologue_using_sal): Handle single line functions

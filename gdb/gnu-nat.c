@@ -1050,7 +1050,10 @@ inf_validate_procs (struct inf *inf)
 	    proc_debug (thread, "died!");
 	    thread->port = MACH_PORT_NULL;
 	    thread = _proc_free (thread);	/* THREAD is dead.  */
-	    (last ? last->next : inf->threads) = thread;
+	    if (last)
+	      last->next = thread;
+	    else
+	      inf->threads = thread;
 	  }
       }
 
@@ -1063,7 +1066,10 @@ inf_validate_procs (struct inf *inf)
 	  /* THREADS[I] is a thread we don't know about yet!  */
 	  {
 	    thread = make_proc (inf, threads[i], next_thread_id++);
-	    (last ? last->next : inf->threads) = thread;
+	    if (last)
+	      last->next = thread;
+	    else
+	      inf->threads = thread;
 	    last = thread;
 	    proc_debug (thread, "new thread: %d", threads[i]);
 	    add_thread (pid_to_ptid (thread->tid));	/* Tell GDB's generic thread code.  */
