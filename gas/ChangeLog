@@ -1,5 +1,17 @@
 2006-05-11  Paul Brook  <paul@codesourcery.com>
 
+	* config/tc-arm.c (parse_half): New function.
+	(operand_parse_code): Remove OP_Iffff.  Add OP_HALF.
+	(parse_operands): Ditto.
+	(do_mov16): Reject invalid relocations.
+	(do_t_mov16): Ditto.  Use Thumb reloc numbers.
+	(insns): Replace Iffff with HALF.
+	(md_apply_fix): Add MOVW and MOVT relocs.
+	(tc_gen_reloc): Ditto.
+	* doc/c-arm.texi: Document relocation operators
+
+2006-05-11  Paul Brook  <paul@codesourcery.com>
+
 	* config/tc-arm.c (arm_fix_adjustable): Return 0 for function symbols.
 
 2006-05-11  Thiemo Seufer  <ths@mips.com>

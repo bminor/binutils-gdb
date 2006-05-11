@@ -1,3 +1,10 @@
+2006-05-11  Paul Brook  <paul@codesourcery.com>
+
+	* ld-arm/arm-elf.exp: Add arm-movwt.
+	* ld-arm/arm-movwt.d: New test.
+	* ld-arm/arm-movwt.s: New test.
+	* ld-arm/arm.ld: Add .far.
+
 2006-05-11  Mike Bland  <mbland@google.com>
 
 	* ld-elf/stab.d: New.

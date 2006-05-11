@@ -1,3 +1,13 @@
+2006-05-11  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_reloc_map): Add MOVW and MOVT relocs.
+	(elf32_arm_final_link_relocate): Handle MOVW and MOVT relocs.
+	(elf32_arm_gc_sweep_hook, elf32_arm_check_relocs): Ditto.
+	* reloc.c: Ditto.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* libcoff.h: Regenerate.
+
 2006-05-11  Mike Bland  <mbland@google.com>
 
 	* elf.c (_bfd_elf_init_private_section_data): Don't change

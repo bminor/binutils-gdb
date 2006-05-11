@@ -1366,6 +1366,14 @@ static const struct elf32_arm_reloc_map elf32_arm_reloc_map[] =
     {BFD_RELOC_ARM_TLS_LE32,         R_ARM_TLS_LE32},
     {BFD_RELOC_VTABLE_INHERIT,	     R_ARM_GNU_VTINHERIT},
     {BFD_RELOC_VTABLE_ENTRY,	     R_ARM_GNU_VTENTRY},
+    {BFD_RELOC_ARM_MOVW,	     R_ARM_MOVW_ABS_NC},
+    {BFD_RELOC_ARM_MOVT,	     R_ARM_MOVT_ABS},
+    {BFD_RELOC_ARM_MOVW_PCREL,	     R_ARM_MOVW_PREL_NC},
+    {BFD_RELOC_ARM_MOVT_PCREL,	     R_ARM_MOVT_PREL},
+    {BFD_RELOC_ARM_THUMB_MOVW,	     R_ARM_THM_MOVW_ABS_NC},
+    {BFD_RELOC_ARM_THUMB_MOVT,	     R_ARM_THM_MOVT_ABS},
+    {BFD_RELOC_ARM_THUMB_MOVW_PCREL, R_ARM_THM_MOVW_PREL_NC},
+    {BFD_RELOC_ARM_THUMB_MOVT_PCREL, R_ARM_THM_MOVT_PREL},
   };
 
 static reloc_howto_type *
@@ -4080,6 +4088,76 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
         }
       return bfd_reloc_ok;
 
+    case R_ARM_MOVW_ABS_NC:
+    case R_ARM_MOVT_ABS:
+    case R_ARM_MOVW_PREL_NC:
+    case R_ARM_MOVT_PREL:
+      {
+	bfd_vma insn = bfd_get_32 (input_bfd, hit_data);
+
+	if (globals->use_rel)
+	  {
+	    addend = ((insn >> 4) & 0xf000) | (insn & 0xfff);
+	    signed_addend = (addend ^ 0x10000) - 0x10000;
+	  }
+	value += signed_addend;
+	if (sym_flags == STT_ARM_TFUNC)
+	  value |= 1;
+
+	if (r_type == R_ARM_MOVW_PREL_NC || r_type == R_ARM_MOVT_PREL)
+	  value -= (input_section->output_section->vma
+		    + input_section->output_offset + rel->r_offset);
+
+	if (r_type == R_ARM_MOVT_ABS || r_type == R_ARM_MOVT_PREL)
+	  value >>= 16;
+
+	insn &= 0xfff0f000;
+	insn |= value & 0xfff;
+	insn |= (value & 0xf000) << 4;
+	bfd_put_32 (input_bfd, insn, hit_data);
+      }
+      return bfd_reloc_ok;
+
+    case R_ARM_THM_MOVW_ABS_NC:
+    case R_ARM_THM_MOVT_ABS:
+    case R_ARM_THM_MOVW_PREL_NC:
+    case R_ARM_THM_MOVT_PREL:
+      {
+	bfd_vma insn;
+	
+	insn = bfd_get_16 (input_bfd, hit_data) << 16;
+	insn |= bfd_get_16 (input_bfd, hit_data + 2);
+
+	if (globals->use_rel)
+	  {
+	    addend = ((insn >> 4)  & 0xf000)
+		   | ((insn >> 15) & 0x0800)
+		   | ((insn >> 4)  & 0x0700)
+		   | (insn         & 0x00ff);
+	    signed_addend = (addend ^ 0x10000) - 0x10000;
+	  }
+	value += signed_addend;
+	if (sym_flags == STT_ARM_TFUNC)
+	  value |= 1;
+
+	if (r_type == R_ARM_THM_MOVW_PREL_NC || r_type == R_ARM_THM_MOVT_PREL)
+	  value -= (input_section->output_section->vma
+		    + input_section->output_offset + rel->r_offset);
+
+	if (r_type == R_ARM_THM_MOVT_ABS || r_type == R_ARM_THM_MOVT_PREL)
+	  value >>= 16;
+
+	insn &= 0xfbf08f00;
+	insn |= (value & 0xf000) << 4;
+	insn |= (value & 0x0800) << 15;
+	insn |= (value & 0x0700) << 4;
+	insn |= (value & 0x00ff);
+
+	bfd_put_16 (input_bfd, insn >> 16, hit_data);
+	bfd_put_16 (input_bfd, insn & 0xffff, hit_data + 2);
+      }
+      return bfd_reloc_ok;
+
     default:
       return bfd_reloc_notsupported;
     }
@@ -5651,6 +5729,14 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd,
 	case R_ARM_JUMP24:
 	case R_ARM_PREL31:
 	case R_ARM_THM_CALL:
+	case R_ARM_MOVW_ABS_NC:
+	case R_ARM_MOVT_ABS:
+	case R_ARM_MOVW_PREL_NC:
+	case R_ARM_MOVT_PREL:
+	case R_ARM_THM_MOVW_ABS_NC:
+	case R_ARM_THM_MOVT_ABS:
+	case R_ARM_THM_MOVW_PREL_NC:
+	case R_ARM_THM_MOVT_PREL:
 	  /* Should the interworking branches be here also?  */
 
 	  if (h != NULL)
@@ -5861,6 +5947,14 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  case R_ARM_JUMP24:
 	  case R_ARM_PREL31:
 	  case R_ARM_THM_CALL:
+	  case R_ARM_MOVW_ABS_NC:
+	  case R_ARM_MOVT_ABS:
+	  case R_ARM_MOVW_PREL_NC:
+	  case R_ARM_MOVT_PREL:
+	  case R_ARM_THM_MOVW_ABS_NC:
+	  case R_ARM_THM_MOVT_ABS:
+	  case R_ARM_THM_MOVW_PREL_NC:
+	  case R_ARM_THM_MOVT_PREL:
 	    /* Should the interworking branches be listed here?  */
 	    if (h != NULL)
 	      {
@@ -5877,12 +5971,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		   refers to is in a different object.  We can't tell for
 		   sure yet, because something later might force the
 		   symbol local.  */
-		if (r_type == R_ARM_PC24
-		    || r_type == R_ARM_CALL
-		    || r_type == R_ARM_JUMP24
-		    || r_type == R_ARM_PREL31
-		    || r_type == R_ARM_PLT32
-		    || r_type == R_ARM_THM_CALL)
+		if (r_type != R_ARM_ABS32 && r_type != R_ARM_REL32)
 		  h->needs_plt = 1;
 
 		/* If we create a PLT entry, this relocation will reference
