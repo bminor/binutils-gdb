@@ -4030,6 +4030,11 @@ skip_prologue_using_sal (CORE_ADDR func_addr)
   prologue_sal = find_pc_line (start_pc, 0);
   if (prologue_sal.line != 0)
     {
+      /* If there is only one sal that covers the entire function,
+	 then it is probably a single line function, like
+	 "foo(){}". */
+      if (prologue_sal.end == end_pc)
+	return start_pc;
       while (prologue_sal.end < end_pc)
 	{
 	  struct symtab_and_line sal;
