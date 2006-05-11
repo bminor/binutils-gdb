@@ -191,7 +191,7 @@ section entitled ``GNU Free Documentation License''.
 * Reporting Bugs::              Reporting Bugs
 * Acknowledgements::            Who Did What
 * GNU Free Documentation License::  GNU Free Documentation License
-* Index::                       Index
+* AS Index::                AS Index
 @end menu
 @end ifnottex
 
@@ -3729,7 +3729,7 @@ Some machine configurations provide additional directives.
 @menu
 * Abort::                       @code{.abort}
 @ifset COFF
-* ABORT::                       @code{.ABORT}
+* ABORT (COFF)::                       @code{.ABORT}
 @end ifset
 
 * Align::                       @code{.align @var{abs-expr} , @var{abs-expr}}
@@ -3907,8 +3907,8 @@ of the source quit, it could use this directive tells @command{@value{AS}} to
 quit also.  One day @code{.abort} will not be supported.
 
 @ifset COFF
-@node ABORT
-@section @code{.ABORT}
+@node ABORT (COFF)
+@section @code{.ABORT} (COFF)
 
 @cindex @code{ABORT} directive
 When producing COFF output, @command{@value{AS}} accepts this directive as a
@@ -6756,8 +6756,8 @@ intentionally leaving anyone out.
 
 @include fdl.texi
 
-@node Index
-@unnumbered Index
+@node AS Index
+@unnumbered AS Index
 
 @printindex cp
 
