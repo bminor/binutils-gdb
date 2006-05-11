@@ -2406,18 +2406,12 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      if ((address_expr->X_add_number & 3) != 0)
 		as_bad (_("jump to misaligned address (0x%lx)"),
 			(unsigned long) address_expr->X_add_number);
-	      if (address_expr->X_add_number & ~0xfffffff)
-		as_bad (_("jump address range overflow (0x%lx)"),
-			(unsigned long) address_expr->X_add_number);
 	      ip->insn_opcode |= (address_expr->X_add_number >> 2) & 0x3ffffff;
 	      break;
 
 	    case BFD_RELOC_MIPS16_JMP:
 	      if ((address_expr->X_add_number & 3) != 0)
 		as_bad (_("jump to misaligned address (0x%lx)"),
-			(unsigned long) address_expr->X_add_number);
-	      if (address_expr->X_add_number & ~0xfffffff)
-		as_bad (_("jump address range overflow (0x%lx)"),
 			(unsigned long) address_expr->X_add_number);
 	      ip->insn_opcode |=
 		(((address_expr->X_add_number & 0x7c0000) << 3)
