@@ -1,3 +1,9 @@
+2006-05-11  Fred Fish  <fnf@specifix.com>
+
+	* gdb.base/bang.exp: Ignore unexpected output between the
+	"program exited normally" and the gdb prompt, as many other
+	tests do.
+
 2006-05-07  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/help.exp: Make "delete checkpoint" part option for
