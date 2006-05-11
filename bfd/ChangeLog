@@ -1,3 +1,17 @@
+2006-05-11  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/2607
+	* elfcode.h (valid_section_index_p): New function: Checks for a
+	valid section index.  Allows indicies in the range SHN_LOPROC to
+	SHN_HIOS.
+	(elf_object_p): Use valid_section_index_p.
+
+2006-05-11  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/2257
+	* elfcode.h (elf_object_p): Allow files with corrupt e_shstrndx
+	fields to still be handled as ELF files.
+
 2006-05-10  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 2342

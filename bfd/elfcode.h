@@ -458,6 +458,25 @@ elf_file_p (Elf_External_Ehdr *x_ehdrp)
 	  && (x_ehdrp->e_ident[EI_MAG3] == ELFMAG3));
 }
 
+/* Determines if a given section index is valid.  */
+
+static inline bfd_boolean
+valid_section_index_p (unsigned index, unsigned num_sections)
+{
+  /* Note: We allow SHN_UNDEF as a valid section index.  */
+  if (index < SHN_LORESERVE || index > SHN_HIRESERVE)
+    return index < num_sections;
+  
+  /* We disallow the use of reserved indcies, except for those
+     with OS or Application specific meaning.  The test make use
+     of the knowledge that:
+       SHN_LORESERVE == SHN_LOPROC
+     and
+       SHN_HIPROC == SHN_LOOS - 1  */
+  /* XXX - Should we allow SHN_XINDEX as a valid index here ?  */
+  return (index >= SHN_LOPROC && index <= SHN_HIOS);
+}
+
 /* Check to see if the file associated with ABFD matches the target vector
    that ABFD points to.
 
@@ -545,7 +564,7 @@ elf_object_p (bfd *abfd)
   if (i_ehdrp->e_shoff == 0 && i_ehdrp->e_type == ET_REL)
     goto got_wrong_format_error;
 
-  /* As a simple sanity check, verify that the what BFD thinks is the
+  /* As a simple sanity check, verify that what BFD thinks is the
      size of each section header table entry actually matches the size
      recorded in the file, but only if there are any sections.  */
   if (i_ehdrp->e_shentsize != sizeof (x_shdr) && i_ehdrp->e_shnum != 0)
@@ -711,17 +730,13 @@ elf_object_p (bfd *abfd)
 	  elf_swap_shdr_in (abfd, &x_shdr, i_shdrp + shindex);
 
 	  /* Sanity check sh_link and sh_info.  */
-	  if (i_shdrp[shindex].sh_link >= num_sec
-	      || (i_shdrp[shindex].sh_link >= SHN_LORESERVE
-		  && i_shdrp[shindex].sh_link <= SHN_HIRESERVE))
+	  if (! valid_section_index_p (i_shdrp[shindex].sh_link, num_sec))
 	    goto got_wrong_format_error;
 
 	  if (((i_shdrp[shindex].sh_flags & SHF_INFO_LINK)
 	       || i_shdrp[shindex].sh_type == SHT_RELA
 	       || i_shdrp[shindex].sh_type == SHT_REL)
-	      && (i_shdrp[shindex].sh_info >= num_sec
-		  || (i_shdrp[shindex].sh_info >= SHN_LORESERVE
-		      && i_shdrp[shindex].sh_info <= SHN_HIRESERVE)))
+	      && ! valid_section_index_p (i_shdrp[shindex].sh_info, num_sec))
 	    goto got_wrong_format_error;
 
 	  /* If the section is loaded, but not page aligned, clear
@@ -739,12 +754,19 @@ elf_object_p (bfd *abfd)
   /* A further sanity check.  */
   if (i_ehdrp->e_shnum != 0)
     {
-      if (i_ehdrp->e_shstrndx >= elf_numsections (abfd)
-	  || (i_ehdrp->e_shstrndx >= SHN_LORESERVE
-	      && i_ehdrp->e_shstrndx <= SHN_HIRESERVE))
-	goto got_wrong_format_error;
+      if (! valid_section_index_p (i_ehdrp->e_shstrndx, elf_numsections (abfd)))
+	{
+	  /* PR 2257:
+	     We used to just goto got_wrong_format_error here
+	     but there are binaries in existance for which this test
+	     will prevent the binutils from working with them at all.
+	     So we are kind, and reset the string index value to 0
+	     so that at least some processing can be done.  */
+	  i_ehdrp->e_shstrndx = SHN_UNDEF;
+	  _bfd_error_handler (_("warning: %s has a corrupt string table index - ignoring"), abfd->filename);
+	}
     }
-  else if (i_ehdrp->e_shstrndx != 0)
+  else if (i_ehdrp->e_shstrndx != SHN_UNDEF)
     goto got_wrong_format_error;
 
   /* Read in the program headers.  */
@@ -1340,10 +1362,9 @@ elf_slurp_reloc_table_from_section (bfd *abfd,
 	}
       else
 	{
-	  asymbol **ps, *s;
+	  asymbol **ps;
 
 	  ps = symbols + ELF_R_SYM (rela.r_info) - 1;
-	  s = *ps;
 
 	  relent->sym_ptr_ptr = ps;
 	}
