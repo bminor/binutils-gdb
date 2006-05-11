@@ -1,3 +1,17 @@
+2006-05-11  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* pe-dll.c (autofilter_symbollist): Add Dllmain,
+	DllMainCRTStartup, _DllMainCRTStartup and .text.
+	(autofilter_liblist): Add libcegcc.
+	(autofilter_symbolprefixlist): Add __imp_ and .idata$.
+	(generate_reloc): Do not skip sections without a SEC_LOAD flag,
+	they can still contain relocs that need processing.
+	Skip the .idata$6 section.
+	(jmp_arm_bytes): New array: Contains byte codes for an ARM jump.
+	(make_one): Use the new array.
+	(make_import_fixup_entry): Use .idata$2 instead of .idata$3.
+	* emultempl/pe.em (MajorSubsystemVersion): Set to 3 for armpe.
+
 2006-05-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld.texinfo: Document PowerPC and PowerPC64 options.

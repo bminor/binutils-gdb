@@ -1,5 +1,5 @@
 /* Routines to help build PEI-format DLLs (Win32 etc)
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
    Written by DJ Delorie <dj@cygnus.com>
 
@@ -95,7 +95,7 @@
     For each reference of data symbol to be imported from DLL (to set of which
     belong symbols with name <sym>, if __imp_<sym> is found in implib), the
     import fixup entry is generated. That entry is of type
-    IMAGE_IMPORT_DESCRIPTOR and stored in .idata$3 subsection. Each
+    IMAGE_IMPORT_DESCRIPTOR and stored in .idata$2 subsection. Each
     fixup entry contains pointer to symbol's address within .text section
     (marked with __fuN_<sym> symbol, where N is integer), pointer to DLL name
     (so, DLL name is referenced by multiple entries), and pointer to symbol
@@ -216,6 +216,9 @@ static pe_details_type *pe_details;
 
 static autofilter_entry_type autofilter_symbollist[] =
 {
+  { "DllMain", 7 },
+  { "DllMainCRTStartup", 17 },
+  { "_DllMainCRTStartup", 18 },
   { "DllMain@12", 10 },
   { "DllEntryPoint@0", 15 },
   { "DllMainCRTStartup@12", 20 },
@@ -226,12 +229,14 @@ static autofilter_entry_type autofilter_symbollist[] =
   { "_pei386_runtime_relocator", 25 },
   { "do_pseudo_reloc", 15 },
   { "cygwin_crt0", 11 },
+  { ".text", 5 },
   { NULL, 0 }
 };
 
 /* Do not specify library suffix explicitly, to allow for dllized versions.  */
 static autofilter_entry_type autofilter_liblist[] =
 {
+  { "libcegcc", 8 },
   { "libcygwin", 9 },
   { "libgcc", 6 },
   { "libstdc++", 9 },
@@ -261,9 +266,10 @@ static autofilter_entry_type autofilter_objlist[] =
 
 static autofilter_entry_type autofilter_symbolprefixlist[] =
 {
-  /*  { "__imp_", 6 }, */
+  { "__imp_", 6 },
   /* Do __imp_ explicitly to save time.  */
   { "__rtti_", 7 },
+  { ".idata$", 7 },
   /* Don't re-export auto-imported symbols.  */
   { "_nm_", 4 },
   { "__builtin_", 10 },
@@ -1131,7 +1137,12 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 	  int nsyms, symsize;
 
 	  /* If it's not loaded, we don't need to relocate it this way.  */
+#if 0	  /* Some toolchains can generate .data sections without a SEC_LOAD flag but with relocs.  */
 	  if (!(s->output_section->flags & SEC_LOAD))
+	    continue;
+#endif
+	  /* Huh ?  */
+	  if (strncmp (bfd_get_section_name (abfd, s), ".idata",6) == 0)
 	    continue;
 
 	  /* I don't know why there would be a reloc for these, but I've
@@ -1780,6 +1791,14 @@ static unsigned char jmp_mips_bytes[] =
   0x08, 0x00, 0x00, 0x01,  0x00, 0x00, 0x00, 0x00
 };
 
+static unsigned char jmp_arm_bytes[] =
+{
+  0x00, 0xc0, 0x9f, 0xe5,	/* ldr  ip, [pc] */
+  0x00, 0xf0, 0x9c, 0xe5,	/* ldr  pc, [ip] */
+  0,    0,    0,    0
+};
+
+
 static bfd *
 make_one (def_file_export *exp, bfd *parent)
 {
@@ -1804,6 +1823,10 @@ make_one (def_file_export *exp, bfd *parent)
     case PE_ARCH_mips:
       jmp_bytes = jmp_mips_bytes;
       jmp_byte_count = sizeof (jmp_mips_bytes);
+      break;
+    case PE_ARCH_arm:
+      jmp_bytes = jmp_arm_bytes;
+      jmp_byte_count = sizeof (jmp_arm_bytes);
       break;
     default:
       abort ();
@@ -1877,6 +1900,9 @@ make_one (def_file_export *exp, bfd *parent)
 	  quick_reloc (abfd, 0, BFD_RELOC_HI16_S, 2);
 	  quick_reloc (abfd, 0, BFD_RELOC_LO16, 0); /* MIPS_R_PAIR */
 	  quick_reloc (abfd, 4, BFD_RELOC_LO16, 2);
+	  break;
+	case PE_ARCH_arm:
+	  quick_reloc (abfd, 8, BFD_RELOC_32, 2);
 	  break;
 	default:
 	  abort ();
@@ -2048,7 +2074,7 @@ make_import_fixup_mark (arelent *rel)
   return fixup_name;
 }
 
-/*	.section	.idata$3
+/*	.section	.idata$2
   	.rva		__nm_thnk_SYM (singleton thunk with name of func)
  	.long		0
  	.long		0
@@ -2061,8 +2087,8 @@ make_import_fixup_entry (const char *name,
 			 const char *dll_symname,
 			 bfd *parent)
 {
-  asection *id3;
-  unsigned char *d3;
+  asection *id2;
+  unsigned char *d2;
   char *oname;
   bfd *abfd;
 
@@ -2079,25 +2105,25 @@ make_import_fixup_entry (const char *name,
 
   symptr = 0;
   symtab = xmalloc (6 * sizeof (asymbol *));
-  id3 = quick_section (abfd, ".idata$3", SEC_HAS_CONTENTS, 2);
+  id2 = quick_section (abfd, ".idata$2", SEC_HAS_CONTENTS, 2);
 
   quick_symbol (abfd, U ("_nm_thnk_"), name, "", UNDSEC, BSF_GLOBAL, 0);
   quick_symbol (abfd, U (""), dll_symname, "_iname", UNDSEC, BSF_GLOBAL, 0);
   quick_symbol (abfd, "", fixup_name, "", UNDSEC, BSF_GLOBAL, 0);
 
-  bfd_set_section_size (abfd, id3, 20);
-  d3 = xmalloc (20);
-  id3->contents = d3;
-  memset (d3, 0, 20);
+  bfd_set_section_size (abfd, id2, 20);
+  d2 = xmalloc (20);
+  id2->contents = d2;
+  memset (d2, 0, 20);
 
   quick_reloc (abfd, 0, BFD_RELOC_RVA, 1);
   quick_reloc (abfd, 12, BFD_RELOC_RVA, 2);
   quick_reloc (abfd, 16, BFD_RELOC_RVA, 3);
-  save_relocs (id3);
+  save_relocs (id2);
 
   bfd_set_symtab (abfd, symtab, symptr);
 
-  bfd_set_section_contents (abfd, id3, d3, 0, 20);
+  bfd_set_section_contents (abfd, id2, d2, 0, 20);
 
   bfd_make_readable (abfd);
   return abfd;

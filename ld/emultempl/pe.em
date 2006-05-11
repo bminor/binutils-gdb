@@ -283,7 +283,7 @@ static definfo init[] =
   D(MajorImageVersion,"__major_image_version__", 1),
   D(MinorImageVersion,"__minor_image_version__", 0),
 #ifdef TARGET_IS_armpe
-  D(MajorSubsystemVersion,"__major_subsystem_version__", 2),
+  D(MajorSubsystemVersion,"__major_subsystem_version__", 3),
 #else
   D(MajorSubsystemVersion,"__major_subsystem_version__", 4),
 #endif

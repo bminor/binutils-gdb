@@ -15561,10 +15561,16 @@ md_pcrel_from_section (fixS * fixP, segT seg)
 
   /* If this is pc-relative and we are going to emit a relocation
      then we just want to put out any pipeline compensation that the linker
-     will need.  Otherwise we want to use the calculated base.  */
+     will need.  Otherwise we want to use the calculated base.
+     For WinCE we skip the bias for externals as well, since this
+     is how the MS ARM-CE assembler behaves and we want to be compatible.  */
   if (fixP->fx_pcrel 
       && ((fixP->fx_addsy && S_GET_SEGMENT (fixP->fx_addsy) != seg)
-	  || arm_force_relocation (fixP)))
+	  || (arm_force_relocation (fixP)
+#ifdef TE_WINCE
+	      && !S_IS_EXTERNAL (fixP->fx_addsy)
+#endif
+	      )))
     base = 0;
 
   switch (fixP->fx_r_type)
@@ -15601,6 +15607,17 @@ md_pcrel_from_section (fixS * fixP, segT seg)
     case BFD_RELOC_ARM_PCREL_BLX:
     case BFD_RELOC_ARM_PLT32:
 #ifdef TE_WINCE
+      /* When handling fixups immediately, because we have already 
+         discovered the value of a symbol, or the address of the frag involved
+	 we must account for the offset by +8, as the OS loader will never see the reloc.
+         see fixup_segment() in write.c
+         The S_IS_EXTERNAL test handles the case of global symbols.
+         Those need the calculated base, not just the pipe compensation the linker will need.  */
+      if (fixP->fx_pcrel
+	  && fixP->fx_addsy != NULL
+	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
+	  && (S_IS_EXTERNAL (fixP->fx_addsy) || !arm_force_relocation (fixP)))
+	return base + 8;
       return base;
 #else
       return base + 8;
@@ -16512,7 +16529,11 @@ md_apply_fix (fixS *	fixP,
     case BFD_RELOC_ARM_SBREL32:
     case BFD_RELOC_32_PCREL:
       if (fixP->fx_done || !seg->use_rela_p)
-	md_number_to_chars (buf, value, 4);
+#ifdef TE_WINCE
+	/* For WinCE we only do this for pcrel fixups.  */
+	if (fixP->fx_done || fixP->fx_pcrel)
+#endif
+	  md_number_to_chars (buf, value, 4);
       break;
 
 #ifdef OBJ_ELF

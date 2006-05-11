@@ -1,3 +1,10 @@
+2006-05-11  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* coff-arm.c (ARM_26D, ARM_32, ARM_RVA_32, ARM_SECTION,
+	ARM_SECREL): Mark WinCE versions of these relocs as partial
+	inplace.
+	(coff_arm_relocate_section): Adjust addend for WinCE.
+
 2006-05-10  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 2342

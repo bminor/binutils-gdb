@@ -1,3 +1,9 @@
+2006-05-11  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* config/tc-arm.c (md_pcrel_from_section): Force a bias for
+	relocs against external symbols for WinCE targets. 
+	(md_apply_fix): Likewise.
+
 2006-05-09  David Ung  <davidu@mips.com>
 
 	* config/tc-mips.c (append_insn): Only warn about an out-of-range
