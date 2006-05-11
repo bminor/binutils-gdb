@@ -459,6 +459,25 @@ elf_file_p (Elf_External_Ehdr *x_ehdrp)
 	  && (x_ehdrp->e_ident[EI_MAG3] == ELFMAG3));
 }
 
+/* Determines if a given section index is valid.  */
+
+static inline bfd_boolean
+valid_section_index_p (unsigned index, unsigned num_sections)
+{
+  /* Note: We allow SHN_UNDEF as a valid section index.  */
+  if (index < SHN_LORESERVE || index > SHN_HIRESERVE)
+    return index < num_sections;
+  
+  /* We disallow the use of reserved indcies, except for those
+     with OS or Application specific meaning.  The test make use
+     of the knowledge that:
+       SHN_LORESERVE == SHN_LOPROC
+     and
+       SHN_HIPROC == SHN_LOOS - 1  */
+  /* XXX - Should we allow SHN_XINDEX as a valid index here ?  */
+  return (index >= SHN_LOPROC && index <= SHN_HIOS);
+}
+
 /* Check to see if the file associated with ABFD matches the target vector
    that ABFD points to.
 
@@ -712,17 +731,13 @@ elf_object_p (bfd *abfd)
 	  elf_swap_shdr_in (abfd, &x_shdr, i_shdrp + shindex);
 
 	  /* Sanity check sh_link and sh_info.  */
-	  if (i_shdrp[shindex].sh_link >= num_sec
-	      || (i_shdrp[shindex].sh_link >= SHN_LORESERVE
-		  && i_shdrp[shindex].sh_link <= SHN_HIRESERVE))
+	  if (! valid_section_index_p (i_shdrp[shindex].sh_link, num_sec))
 	    goto got_wrong_format_error;
 
 	  if (((i_shdrp[shindex].sh_flags & SHF_INFO_LINK)
 	       || i_shdrp[shindex].sh_type == SHT_RELA
 	       || i_shdrp[shindex].sh_type == SHT_REL)
-	      && (i_shdrp[shindex].sh_info >= num_sec
-		  || (i_shdrp[shindex].sh_info >= SHN_LORESERVE
-		      && i_shdrp[shindex].sh_info <= SHN_HIRESERVE)))
+	      && ! valid_section_index_p (i_shdrp[shindex].sh_info, num_sec))
 	    goto got_wrong_format_error;
 
 	  /* If the section is loaded, but not page aligned, clear
@@ -740,9 +755,7 @@ elf_object_p (bfd *abfd)
   /* A further sanity check.  */
   if (i_ehdrp->e_shnum != 0)
     {
-      if (i_ehdrp->e_shstrndx >= elf_numsections (abfd)
-	  || (i_ehdrp->e_shstrndx >= SHN_LORESERVE
-	      && i_ehdrp->e_shstrndx <= SHN_HIRESERVE))
+      if (! valid_section_index_p (i_ehdrp->e_shstrndx, elf_numsections (abfd)))
 	{
 	  /* PR 2257:
 	     We used to just goto got_wrong_format_error here

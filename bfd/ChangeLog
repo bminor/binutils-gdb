@@ -1,3 +1,11 @@
+2006-05-10  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/2607
+	* elfcode.h (valid_section_index_p): New function: Checks for a
+	valid section index.  Allows indicies in the range SHN_LOPROC to
+	SHN_HIOS.
+	(elf_object_p): Use valid_section_index_p.
+
 2006-05-11  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* coff-arm.c (ARM_26D, ARM_32, ARM_RVA_32, ARM_SECTION,
