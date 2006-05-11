@@ -5911,7 +5911,8 @@ _bfd_elf_init_private_section_data (bfd *ibfd,
      output BFD section flags has been set to something different.
      elf_fake_sections will set ELF section type based on BFD
      section flags.  */
-  if (osec->flags == isec->flags || !osec->flags)
+  if (osec->flags == isec->flags
+      || (osec->flags == 0 && elf_section_type (osec) == SHT_NULL))
     elf_section_type (osec) = elf_section_type (isec);
 
   /* Set things up for objcopy and relocatable link.  The output

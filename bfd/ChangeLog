@@ -1,3 +1,8 @@
+2006-05-11  Mike Bland  <mbland@google.com>
+
+	* elf.c (_bfd_elf_init_private_section_data): Don't change
+	section type if already set.
+
 2006-05-10  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/2607
