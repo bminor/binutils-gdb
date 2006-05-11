@@ -1,3 +1,8 @@
+2006-05-11  Michael Matz  <matz@suse.de>
+
+	* elflink.c (match_group_member): Correctly iterate group
+	members.
+
 2006-05-11  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/2607
