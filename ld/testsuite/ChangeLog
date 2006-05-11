@@ -1,3 +1,7 @@
+2006-05-11  Mike Bland  <mbland@google.com>
+
+	* ld-elf/stab.d: New.
+
 2006-05-10  Thiemo Seufer  <ths@debian.org>
 
 	* ld-elf/sec64k.exp: Extend for MIPS ELF.
