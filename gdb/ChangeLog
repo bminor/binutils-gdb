@@ -1,3 +1,48 @@
+2006-05-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* ppcnbsd-tdep.h: Update copyright year.  Include <stddef.h>
+	(ppcnbsd_supply_reg, ppcnbsd_fill_reg, ppcnbsd_supply_fpreg)
+	(ppcnbsd_fill_fpreg): Remove prototypes.
+	(struct regset): Add forward declaration.
+	(ppcnbsd_gregset, ppcnbsd_fpregset): Extern declarations.
+	* ppcnbsd-tdep.c: Update copyright year.  Include "gdbtypes.h",
+	"regset.h" and "gdb_string.h".  Don't include "breakpoint.h",
+	"value.h", target.h and nbsd-tdep.h".  Reorder includes.
+	(REG_FIXREG_OFFSET, REG_LR_OFFSET, REG_CR_OFFSET, REG_XER_OFFSET)
+	(REG_CTR_OFFSET, REG_PC_OFFSET, SIZEOF_STRUCT_REG)
+	(FPREG_FPR_OFFSET, FPREG_FPSCR_OFFSET, SIZEOF_STRUCT_FPREG):
+	Remove macros.
+	(ppcnbsd_supply_reg, ppcnbsd_fill_reg, ppcnbsd_supply_fpreg)
+	(ppcnbsd_fill_fpreg): Remove functions.
+	(fetch_core_registers, fetch_elfcore_registers): Remove functions.
+	(ppcnbsd_core_fns, ppcnbsd_elfcore_fns): Remove variables.
+	(ppcnbsd_reg_offsets): New variable.
+	(ppcnbsd_gregset, ppcnbsd_fpregset): New variables.
+	(ppcnbsd_sigtramp_cache_init): Deal with new signal trampoline
+	introduced in NetBSD 2.0.
+	(ppcnbsd_sigtramp): Provide complete signal trampoline.
+	(ppcnbsd2_sigtramp): New variable.
+	(ppcnbsd_init_abi): Set svr4_fetch_link_map_offsets to
+	svr4_ilp32_fetch_link_map_offsets.  Set regset_from_core_section.
+	Add ppcnbs2_sigtramp unwinder.
+	(_initialize_ppcnbsd_tdep): Don't use deprecated_add_core_fns.
+	Initialize ppcnbsd_reg_offsets.
+	* ppcnbsd-nat.c: Update copyright year.  Reorder includes.
+	(getregs_supplies): Use regnum instead of regno.
+	(getfpregs_supplies): Likewise.
+	(ppcnbsd_fetch_inferior_registers): Likewise.  Call
+	ppc_supply_gregset and ppc_suppply_fpregset instead of
+	ppcnbsd_supply_reg and ppcnbsd_supply_fpreg
+	(ppcnbsd_store_inferior_registers): Likewise.  Call
+	ppc_collect_gregset and ppc_collect_fpregset instead of
+	ppcnbsd_fill_reg and ppcnbsd_fill_fpreg.
+	(ppcnbsd_supply_pcb): Use `gdb_byte *' instead of `char *'.
+	(_initialize_ppcnbsd_nat): Add some whitespace.
+	* Makefile.in (ppcnbsd-nat.o, ppcnbsd-tdep.o): Update dependencies.
+	* config/powerpc/nbsd.mh (NATDEPFILES): Remove infptrace.o.
+	(NAT_FILE): Remove.
+	* config/powerpc/nbsd.mt (TDEPFILES): Remove nbsd-tdep.o.
+
 2006-05-11  Alfred M. Szmidt  <ams@gnu.org>
 
 	* gnu-nat.c (inf_validate_procs): Don't use lvalue in assignments.
