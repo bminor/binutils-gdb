@@ -123,11 +123,11 @@ interp_add (struct interp *interp)
 
 /* This sets the current interpreter to be INTERP.  If INTERP has not
    been initialized, then this will also run the init proc.  If the
-   init proc is successful, return 1, if it fails, set the old
-   interpreter back in place and return 0.  If we can't restore the
-   old interpreter, then raise an internal error, since we are in
-   pretty bad shape at this point. */
-int
+   init proc is successful, return a pointer to the old interp.  If we
+   can't restore the old interpreter, then raise an internal error,
+   since we are in pretty bad shape at this point. */
+
+struct interp *
 interp_set (struct interp *interp)
 {
   struct interp *old_interp = current_interpreter;
@@ -138,7 +138,12 @@ interp_set (struct interp *interp)
 
   if (current_interpreter != NULL)
     {
+      /* APPLE LOCAL: Don't do this, you can't be sure there are no
+	 continuations from the enclosing interpreter which should
+	 really be run when that interpreter is in force. */
+#if 0
       do_all_continuations ();
+#endif
       ui_out_flush (uiout);
       if (current_interpreter->procs->suspend_proc
 	  && !current_interpreter->procs->suspend_proc (current_interpreter->
@@ -169,6 +174,9 @@ interp_set (struct interp *interp)
 
   /* Run the init proc.  If it fails, try to restore the old interp. */
 
+  /* APPLE LOCAL: FIXME: Keith cut restoring the old interp, but didn't
+     change the comment to reflect this.  */
+
   if (!interp->inited)
     {
       if (interp->procs->init_proc != NULL)
@@ -178,8 +186,14 @@ interp_set (struct interp *interp)
       interp->inited = 1;
     }
 
+  /* APPLE LOCAL: I don't think we want to clear the parent interpreter's
+     The parent interpreter may want to be able to snoop on the child
+     interpreter through them.  */
+
+#if 0
   /* Clear out any installed interpreter hooks/event handlers.  */
   clear_interpreter_hooks ();
+#endif
 
   if (interp->procs->resume_proc != NULL
       && (!interp->procs->resume_proc (interp->data)))
@@ -188,7 +202,7 @@ interp_set (struct interp *interp)
 	internal_error (__FILE__, __LINE__,
 			_("Failed to initialize new interp \"%s\" %s"),
 			interp->name, "and could not restore old interp!\n");
-      return 0;
+      return NULL;
     }
 
   /* Finally, put up the new prompt to show that we are indeed here. 
@@ -206,7 +220,13 @@ interp_set (struct interp *interp)
       display_gdb_prompt (NULL);
     }
 
-  return 1;
+  /* If there wasn't any interp before, return the current interp.  
+     That way if somebody is grabbing the return value and using
+     it, it will actually work first time through.  */
+  if (old_interp == NULL)
+    return current_interpreter;
+  else
+    return old_interp;
 }
 
 /* interp_lookup - Looks up the interpreter for NAME.  If no such
@@ -272,12 +292,12 @@ current_interp_command_loop (void)
      selecting the command loop.  `deprecated_command_loop_hook'
      should be deprecated.  */
   if (deprecated_command_loop_hook != NULL)
-    deprecated_command_loop_hook ();
+    deprecated_command_loop_hook (NULL);
   else if (current_interpreter != NULL
 	   && current_interpreter->procs->command_loop_proc != NULL)
     current_interpreter->procs->command_loop_proc (current_interpreter->data);
   else
-    cli_command_loop ();
+    cli_command_loop (NULL);
 }
 
 int
@@ -289,7 +309,7 @@ interp_quiet_p (struct interp *interp)
     return current_interpreter->quiet_p;
 }
 
-static int
+int
 interp_set_quiet (struct interp *interp, int quiet)
 {
   int old_val = interp->quiet_p;

@@ -183,7 +183,7 @@ rl_callback_read_char_wrapper (gdb_client_data client_data)
 /* Initialize all the necessary variables, start the event loop,
    register readline, and stdin, start the loop. */
 void
-cli_command_loop (void)
+cli_command_loop (void *data /* unused */)
 {
   int length;
   char *a_prompt;
@@ -259,6 +259,7 @@ display_gdb_prompt (char *new_prompt)
 {
   int prompt_length = 0;
   char *gdb_prompt = get_prompt ();
+  static int stdin_handler_removed = 0;
 
   /* Each interpreter has its own rules on displaying the command
      prompt.  */
@@ -282,6 +283,8 @@ display_gdb_prompt (char *new_prompt)
          between the calls to the above two functions.
          Calling rl_callback_handler_remove(), does the job. */
 
+      delete_file_handler (input_fd);
+      stdin_handler_removed = 1;
       rl_callback_handler_remove ();
       return;
     }
@@ -305,6 +308,20 @@ display_gdb_prompt (char *new_prompt)
 
   if (async_command_editing_p)
     {
+      /* Claim the terminal before we reset it.  It is quick if the
+	 terminal is already ours, and if not, we are going to lose
+	 when we try to install the callback handler otherwise.  We
+	 can get here with the terminal still belonging to the
+	 inferior if it dies an unexpected death, and somebody forgets
+	 to clean up properly.  Better safe than sorry... */
+
+      target_terminal_ours ();
+      if (stdin_handler_removed)
+	{
+	  add_file_handler (input_fd, stdin_event_handler, 0);
+	  stdin_handler_removed = 0;
+	}
+
       rl_callback_handler_remove ();
       rl_callback_handler_install (new_prompt, input_handler);
     }
@@ -430,18 +447,37 @@ stdin_event_handler (int error, gdb_client_data client_data)
 
 /* Re-enable stdin after the end of an execution command in
    synchronous mode, or after an error from the target, and we aborted
-   the exec operation. */
+   the exec operation. 
+   One tricky point here.  We want to be careful not to stack up
+   enables & disables.  This is because we can run the inferior many
+   times in one execution command (for instance if a breakpoint command
+   restarts the inferior).  And it is not possible a-priori to know when
+   we find that the inferior has been restarted whether 
+   async_disable_stdin has been called (and thus whether we should re-enable
+   it).  If we just make sure that we only do things one level deep here,
+   it removes the bookkeeping from callers, which is much better.
+*/
+
+int stdin_enabled = 1;
 
 void
 async_enable_stdin (void *dummy)
 {
+  if (stdin_enabled)
+    return;
+
+  stdin_enabled = 1; 
+
   /* See NOTE in async_disable_stdin() */
   /* FIXME: cagney/1999-09-27: Call this before clearing
      sync_execution.  Current target_terminal_ours() implementations
      check for sync_execution before switching the terminal. */
   target_terminal_ours ();
   pop_prompt ();
-  sync_execution = 0;
+  /* This is bogus...  We shouldn't have to lie about the type of
+     execution in order to implement the terminal_ours...
+     sync_execution = 0;
+  */
 }
 
 /* Disable reads from stdin (the console) marking the command as
@@ -450,7 +486,15 @@ async_enable_stdin (void *dummy)
 void
 async_disable_stdin (void)
 {
-  sync_execution = 1;
+
+  if (!stdin_enabled)
+    return;
+
+  stdin_enabled = 0;
+
+  /* Just don't do this...
+     sync_execution = 1; */
+
   push_prompt ("", "", "");
   /* FIXME: cagney/1999-09-27: At present this call is technically
      redundant since infcmd.c and infrun.c both already call
@@ -954,6 +998,16 @@ handle_sigint (int sig)
 {
   signal (sig, handle_sigint);
 
+  /* We used to set the quit flag in async_request_quit, which is either
+     called when immediate_quit is 1, or when we get back to the event
+     loop.  This is wrong, because you could be running in a loop reading
+     in symfiles or something, and it could be quite a while before you 
+     get to the event loop.  Instead, set quit_flag to 1 here, then mark
+     the sigint handler as ready.  Then if somebody calls QUIT before you
+     get to the event loop, they will unwind as expected.  */
+
+  quit_flag = 1;
+
   /* If immediate_quit is set, we go ahead and process the SIGINT right
      away, even if we usually would defer this to the event loop. The
      assumption here is that it is safe to process ^C immediately if
@@ -982,7 +1036,14 @@ handle_sigterm (int sig)
 void
 async_request_quit (gdb_client_data arg)
 {
-  quit_flag = 1;
+  /* If the quit_flag has gotten reset back to 0 by the time we get
+     back here, that means that an exception was thrown to unwind
+     the current command before we got back to the event loop.  So
+     there is no reason to call quit again here. */
+
+  if (quit_flag == 0)
+    return;
+
   quit ();
 }
 
@@ -1127,7 +1188,16 @@ gdb_setup_readline (void)
      that the sync setup is ALL done in gdb_init, and we would only
      mess it up here.  The sync stuff should really go away over
      time.  */
+
+  /* Note also that if instream == NULL, then we don't want to setup
+     readline even IF event_loop_p is true, because we don't have an
+     input source for events yet.  This usually only happens if a
+     command is run in the .gdbinit file. */
+
   extern int batch_silent;
+
+  if (instream == NULL)
+    return;
 
   if (!batch_silent)
     gdb_stdout = stdio_fileopen (stdout);
@@ -1196,4 +1266,17 @@ gdb_disable_readline (void)
 
   rl_callback_handler_remove ();
   delete_file_handler (input_fd);
+}
+
+/* Don't set up readline now, this is better done in the interpreter's
+   resume method, since we will have to do this coming back & forth
+   among interpreters anyway... */
+
+void
+_initialize_event_loop (void)
+{
+  /* Tell gdb to use the cli_command_loop as the main loop. */
+
+  if (deprecated_command_loop_hook == NULL)
+    deprecated_command_loop_hook = cli_command_loop;
 }

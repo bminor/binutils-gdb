@@ -57,7 +57,9 @@
 
    Corollary tasks are the creation and deletion of event sources. */
 
-typedef void *gdb_client_data;
+#ifndef EVENT_LOOP__H
+#define EVENT_LOOP__H
+
 struct async_signal_handler;
 typedef void (handler_func) (int, gdb_client_data);
 typedef void (sig_handler_func) (gdb_client_data);
@@ -94,3 +96,8 @@ extern struct async_signal_handler *
 extern void delete_async_signal_handler (struct async_signal_handler **async_handler_ptr);
 extern int create_timer (int milliseconds, timer_handler_func * proc, gdb_client_data client_data);
 extern void delete_timer (int id);
+
+typedef void (event_handler_func) (void *);
+extern void gdb_queue_event (event_handler_func proc, void *data, queue_position position);
+
+#endif /* #ifndef EVENT_LOOP__H */

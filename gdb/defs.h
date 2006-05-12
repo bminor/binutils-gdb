@@ -725,6 +725,8 @@ extern struct continuation *cmd_continuation;
 /* Used only by the step_1 function. */
 extern struct continuation *intermediate_continuation;
 
+extern int gdb_mi_run_status;
+
 /* From utils.c */
 extern void add_continuation (void (*)(struct continuation_arg *),
 			      struct continuation_arg *);
@@ -1100,12 +1102,16 @@ extern char *interpreter_p;
 struct target_waitstatus;
 struct cmd_list_element;
 
+extern int event_loop_p;
+
+typedef void *gdb_client_data;
+
 extern void (*deprecated_pre_add_symbol_hook) (const char *);
 extern void (*deprecated_post_add_symbol_hook) (void);
 extern void (*selected_frame_level_changed_hook) (int);
 extern int (*deprecated_ui_loop_hook) (int signo);
 extern void (*deprecated_init_ui_hook) (char *argv0);
-extern void (*deprecated_command_loop_hook) (void);
+extern void (*deprecated_command_loop_hook) (void* data);
 extern void (*deprecated_show_load_progress) (const char *section,
 					      unsigned long section_sent, 
 					      unsigned long section_size, 
@@ -1132,7 +1138,8 @@ extern void (*deprecated_register_changed_hook) (int regno);
 extern void (*deprecated_memory_changed_hook) (CORE_ADDR addr, int len);
 extern void (*deprecated_context_hook) (int);
 extern ptid_t (*deprecated_target_wait_hook) (ptid_t ptid,
-                                         struct target_waitstatus * status);
+					      struct target_waitstatus * status,
+					      gdb_client_data client_data);
 
 extern void (*deprecated_attach_hook) (void);
 extern void (*deprecated_detach_hook) (void);

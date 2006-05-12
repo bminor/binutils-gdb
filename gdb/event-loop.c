@@ -41,7 +41,8 @@
 #include "gdb_select.h"
 
 typedef struct gdb_event gdb_event;
-typedef void (event_handler_func) (int);
+
+/* async make globally visible */
 
 /* Event for the GDB event system.  Events are queued by calling
    async_queue_event and serviced later on by gdb_do_one_event. An
@@ -49,15 +50,21 @@ typedef void (event_handler_func) (int);
    read. Servicing an event simply means that the procedure PROC will
    be called.  We have 2 queues, one for file handlers that we listen
    to in the event loop, and one for the file handlers+events that are
-   ready. The procedure PROC associated with each event is always the
-   same (handle_file_event).  Its duty is to invoke the handler
-   associated with the file descriptor whose state change generated
-   the event, plus doing other cleanups and such. */
+   APPLE LOCAL begin async
+   ready. 
+
+   File events are all handled through the procedure
+   handle_file_event.  Its duty is to invoke the handler associated
+   with the file descriptor whose state change generated the event,
+   plus doing other cleanups and such. 
+
+   Other event types can be created, and added to the event queue by
+   using gdb_queue_event.  */
 
 struct gdb_event
   {
     event_handler_func *proc;	/* Procedure to call to service this event. */
-    int fd;			/* File descriptor that is ready. */
+    void *data;			/* The data for this event */
     struct gdb_event *next_event;	/* Next in list of events or NULL. */
   };
 
@@ -134,7 +141,8 @@ event_queue;
 #define USE_POLL 0
 #endif /* HAVE_POLL */
 
-static unsigned char use_poll = USE_POLL;
+//static unsigned char use_poll = USE_POLL;
+static unsigned char use_poll = 0;
 
 #ifdef USE_WIN32API
 #include <windows.h>
@@ -217,15 +225,26 @@ static int async_handler_ready = 0;
 
 static void create_file_handler (int fd, int mask, handler_func * proc, gdb_client_data client_data);
 static void invoke_async_signal_handler (void);
-static void handle_file_event (int event_file_desc);
+static void handle_file_event (void *data);
 static int gdb_wait_for_event (void);
 static int check_async_ready (void);
-static void async_queue_event (gdb_event * event_ptr, queue_position position);
+void async_queue_event (gdb_event * event_ptr, queue_position position);
+int sigint_taken_p(void);
+static gdb_event *gdb_create_event (event_handler_func proc, void *data);
 static gdb_event *create_file_event (int fd);
 static int process_event (void);
-static void handle_timer_event (int dummy);
+static void handle_timer_event (void *dummy);
 static void poll_timers (void);
 
+void
+gdb_queue_event (event_handler_func proc, void *data, queue_position position)
+{
+  gdb_event *new_event;
+
+  new_event = gdb_create_event (proc, data);
+  async_queue_event (new_event, position);
+
+}
 
 /* Insert an event object into the gdb event queue at 
    the specified position.
@@ -237,7 +256,7 @@ static void poll_timers (void);
    events inserted at the head of the queue will be processed
    as last in first out. Event appended at the tail of the queue
    will be processed first in first out. */
-static void
+void
 async_queue_event (gdb_event * event_ptr, queue_position position)
 {
   if (position == TAIL)
@@ -261,6 +280,17 @@ async_queue_event (gdb_event * event_ptr, queue_position position)
       event_queue.first_event = event_ptr;
     }
 }
+static gdb_event *
+gdb_create_event (event_handler_func proc, void *data)
+{
+  gdb_event *new_event;
+  
+  new_event = (gdb_event *) xmalloc (sizeof (gdb_event));
+  new_event->proc = proc;
+  new_event->data = data;
+
+  return new_event;
+}
 
 /* Create a file event, to be enqueued in the event queue for
    processing. The procedure associated to this event is always
@@ -269,12 +299,7 @@ async_queue_event (gdb_event * event_ptr, queue_position position)
 static gdb_event *
 create_file_event (int fd)
 {
-  gdb_event *file_event_ptr;
-
-  file_event_ptr = (gdb_event *) xmalloc (sizeof (gdb_event));
-  file_event_ptr->proc = handle_file_event;
-  file_event_ptr->fd = fd;
-  return (file_event_ptr);
+  return gdb_create_event (handle_file_event, (void *) fd);
 }
 
 /* Process one event.
@@ -291,7 +316,7 @@ process_event (void)
 {
   gdb_event *event_ptr, *prev_ptr;
   event_handler_func *proc;
-  int fd;
+  void *data;
 
   /* First let's see if there are any asynchronous event handlers that
      are ready. These would be the result of invoking any of the
@@ -312,7 +337,7 @@ process_event (void)
       /* Call the handler for the event. */
 
       proc = event_ptr->proc;
-      fd = event_ptr->fd;
+      data = event_ptr->data;
 
       /* Let's get rid of the event from the event queue.  We need to
          do this now because while processing the event, the proc
@@ -340,7 +365,7 @@ process_event (void)
       xfree (event_ptr);
 
       /* Now call the procedure associated with the event. */
-      (*proc) (fd);
+      (*proc) (data);
       return 1;
     }
 
@@ -657,8 +682,9 @@ delete_file_handler (int fd)
    through event_ptr->proc.  EVENT_FILE_DESC is file descriptor of the
    event in the front of the event queue. */
 static void
-handle_file_event (int event_file_desc)
+handle_file_event (void *data)
 {
+  int event_file_desc = (int) data;
   file_handler *file_ptr;
   int mask;
 #ifdef HAVE_POLL
@@ -1074,7 +1100,7 @@ delete_timer (int id)
    timer event from the event queue. Repeat this for each timer that
    has expired. */
 static void
-handle_timer_event (int dummy)
+handle_timer_event (void *dummy)
 {
   struct timeval time_now;
   struct gdb_timer *timer_ptr, *saved_timer;
@@ -1140,7 +1166,7 @@ poll_timers (void)
 	{
 	  event_ptr = (gdb_event *) xmalloc (sizeof (gdb_event));
 	  event_ptr->proc = handle_timer_event;
-	  event_ptr->fd = timer_list.first_timer->timer_id;
+	  event_ptr->data = (void *) timer_list.first_timer->timer_id;
 	  async_queue_event (event_ptr, TAIL);
 	}
 

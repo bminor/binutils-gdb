@@ -58,9 +58,9 @@ static void mi_command_loop (int mi_version);
 static int mi_interp_query_hook (const char *ctlstr, va_list ap)
      ATTR_FORMAT (printf, 1, 0);
 
-static void mi3_command_loop (void);
-static void mi2_command_loop (void);
-static void mi1_command_loop (void);
+static void mi3_command_loop (void* data);
+static void mi2_command_loop (void* data);
+static void mi1_command_loop (void* data);
 
 static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
@@ -165,32 +165,14 @@ mi_interpreter_prompt_p (void *data)
   return 0;
 }
 
-static void
-mi_interpreter_exec_continuation (struct continuation_arg *arg)
-{
-  bpstat_do_actions (&stop_bpstat);
-  if (!target_executing)
-    {
-      fputs_unfiltered ("*stopped", raw_stdout);
-      mi_out_put (uiout, raw_stdout);
-      fputs_unfiltered ("\n", raw_stdout);
-      fputs_unfiltered ("(gdb) \n", raw_stdout);
-      gdb_flush (raw_stdout);
-      do_exec_cleanups (ALL_CLEANUPS);
-    }
-  else if (target_can_async_p ())
-    {
-      add_continuation (mi_interpreter_exec_continuation, NULL);
-    }
-}
-
 enum mi_cmd_result
 mi_cmd_interpreter_exec (char *command, char **argv, int argc)
 {
   struct interp *interp_to_use;
+  struct interp *old_interp;
   enum mi_cmd_result result = MI_CMD_DONE;
   int i;
-  struct interp_procs *procs;
+  int old_quiet;
 
   if (argc < 2)
     {
@@ -211,11 +193,34 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
 				     argv[0]);
       return MI_CMD_ERROR;
     }
+  
+  old_quiet = interp_set_quiet (interp_to_use, 1);
+
+  old_interp = interp_set (interp_to_use); 
+  if (old_interp == NULL)
+    {
+      asprintf (&mi_error_message,
+                "Could not switch to interpreter \"%s\".", argv[0]);
+      return MI_CMD_ERROR;
+    }  
+  
+  /* Set the global mi_interp.  We need this so that the hook functions
+     can leave their results in the mi interpreter, rather than dumping
+     them to the console.  */
+  mi_interp = old_interp;
 
   /* Insert the MI out hooks, making sure to also call the interpreter's hooks
      if it has any. */
   /* KRS: We shouldn't need this... Events should be installed and they should
      just ALWAYS fire something out down the MI channel... */
+
+  /* APPLE LOCAL: I disagree, how do we know the mi is going to always
+     be the parent interpreter for whatever child interpreter we are
+     running?  The only reason this works in the FSF version is that
+     they don't actually switch interpreters, they just hack the
+     cli_exec command so it knows how to set just enough of itself not
+     to get in the mi's way, which seems a little hacky to me.  */
+
   mi_insert_notify_hooks ();
 
   /* Now run the code... */
@@ -254,18 +259,35 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
       sync_execution = 0;
     }
 
+  /* Now do the switch */
+  interp_set (old_interp);
+  mi_interp = NULL;
+
   mi_remove_notify_hooks ();
+  interp_set_quiet (interp_to_use, old_quiet);
 
   /* Okay, now let's see if the command set the inferior going...
      Tricky point - have to do this AFTER resetting the interpreter, since
      changing the interpreter will clear out all the continuations for
      that interpreter... */
-
-  if (target_can_async_p () && target_executing)
+  
+  /* APPLE LOCAL: The FSF version leaves out the 
+     mi_dont_register_continuation.  Maybe this hadn't been added yet when
+     they adopted the code.  */
+  
+  if (target_can_async_p () && target_executing
+      && !mi_dont_register_continuation)
     {
+      struct mi_continuation_arg *cont_args =
+        mi_setup_continuation_arg (NULL);
+      
+      if (current_command_token)
+        fputs_unfiltered (current_command_token, raw_stdout);
+      
       fputs_unfiltered ("^running\n", raw_stdout);
-      add_continuation (mi_interpreter_exec_continuation, NULL);
-    }
+      add_continuation (mi_interpreter_exec_continuation,
+                        (void *) cont_args);
+    }  
 
   return result;
 }
@@ -303,19 +325,19 @@ mi_execute_command_wrapper (char *cmd)
 }
 
 static void
-mi1_command_loop (void)
+mi1_command_loop (void* data)
 {
   mi_command_loop (1);
 }
 
 static void
-mi2_command_loop (void)
+mi2_command_loop (void* data)
 {
   mi_command_loop (2);
 }
 
 static void
-mi3_command_loop (void)
+mi3_command_loop (void* data)
 {
   mi_command_loop (3);
 }

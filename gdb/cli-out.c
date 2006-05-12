@@ -28,6 +28,7 @@
 #include "cli-out.h"
 #include "gdb_string.h"
 #include "gdb_assert.h"
+#include "mi/mi-console.h"
 
 struct ui_out_data
   {
@@ -386,6 +387,17 @@ cli_out_new (struct ui_file *stream)
   cli_out_data *data = XMALLOC (cli_out_data);
   data->stream = stream;
   data->original_stream = NULL;
+  data->suppress_output = 0;
+  return ui_out_new (&cli_ui_out_impl, data, flags);
+}
+
+struct ui_out *
+cli_quoted_out_new (struct ui_file *raw)
+{
+  int flags = ui_source_list;
+
+  struct ui_out_data *data = XMALLOC (struct ui_out_data);
+  data->stream = mi_console_file_new (raw, "~", '"');
   data->suppress_output = 0;
   return ui_out_new (&cli_ui_out_impl, data, flags);
 }

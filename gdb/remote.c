@@ -108,10 +108,10 @@ static void remote_send (char **buf, long *sizeof_buf_p);
 
 static int readchar (int timeout);
 
-static ptid_t remote_wait (ptid_t ptid,
-                                 struct target_waitstatus *status);
-static ptid_t remote_async_wait (ptid_t ptid,
-                                       struct target_waitstatus *status);
+static ptid_t remote_wait
+ (ptid_t ptid, struct target_waitstatus *status, gdb_client_data client_data);
+static ptid_t remote_async_wait
+ (ptid_t ptid, struct target_waitstatus *status, gdb_client_data client_data);
 
 static void remote_kill (void);
 static void remote_async_kill (void);
@@ -2665,7 +2665,7 @@ remote_console_output (char *msg)
    remote OS, is the thread-id.  */
 
 static ptid_t
-remote_wait (ptid_t ptid, struct target_waitstatus *status)
+remote_wait (ptid_t ptid, struct target_waitstatus *status, gdb_client_data client_data)
 {
   struct remote_state *rs = get_remote_state ();
   char *buf = rs->buf;
@@ -2854,7 +2854,7 @@ got_status:
 
 /* Async version of remote_wait.  */
 static ptid_t
-remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
+remote_async_wait (ptid_t ptid, struct target_waitstatus *status, gdb_client_data client_data)
 {
   struct remote_state *rs = get_remote_state ();
   char *buf = rs->buf;

@@ -927,14 +927,14 @@ check_event (ptid_t ptid)
 }
 
 static ptid_t
-thread_db_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
+thread_db_wait (ptid_t ptid, struct target_waitstatus *ourstatus, gdb_client_data client_data)
 {
   extern ptid_t trap_ptid;
 
   if (GET_PID (ptid) != -1 && is_thread (ptid))
     ptid = lwp_from_thread (ptid);
 
-  ptid = target_beneath->to_wait (ptid, ourstatus);
+  ptid = target_beneath->to_wait (ptid, ourstatus, NULL);
 
   if (proc_handle.pid == 0)
     /* The current child process isn't the actual multi-threaded

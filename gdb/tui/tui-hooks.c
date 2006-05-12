@@ -200,7 +200,7 @@ static struct gdb_events tui_event_hooks =
 /* Called when going to wait for the target.
    Leave curses mode and setup program mode.  */
 static ptid_t
-tui_target_wait_hook (ptid_t pid, struct target_waitstatus *status)
+tui_target_wait_hook (ptid_t pid, struct target_waitstatus *status, gdb_client_data client_data)
 {
   ptid_t res;
 
@@ -214,7 +214,7 @@ tui_target_wait_hook (ptid_t pid, struct target_waitstatus *status)
     }
 #endif
   tui_target_has_run = 1;
-  res = target_wait (pid, status);
+  res = target_wait (pid, status, NULL);
 
   if (tui_active)
     {

@@ -41,6 +41,7 @@
 #include "top.h"
 #include <signal.h>
 #include "inf-loop.h"
+#include "event-top.h"
 #include "regcache.h"
 #include "value.h"
 #include "observer.h"
@@ -100,7 +101,7 @@ show_step_stop_if_no_debug (struct ui_file *file, int from_tty,
 
 /* In asynchronous mode, but simulating synchronous execution. */
 
-int sync_execution = 0;
+int sync_execution = 1;
 
 /* wait_for_inferior and normal_stop use this to notify the user
    when the inferior stopped in a different thread than it had been
@@ -825,6 +826,8 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
     {
       wait_for_inferior ();
       normal_stop ();
+      /* Why doesn't normal_stop set target_executing to 0?  */
+      target_executing = 0;
     }
 }
 
@@ -993,9 +996,10 @@ wait_for_inferior (void)
   while (1)
     {
       if (deprecated_target_wait_hook)
-	ecs->ptid = deprecated_target_wait_hook (ecs->waiton_ptid, ecs->wp);
+	ecs->ptid =
+	  deprecated_target_wait_hook (ecs->waiton_ptid, ecs->wp, NULL);
       else
-	ecs->ptid = target_wait (ecs->waiton_ptid, ecs->wp);
+	ecs->ptid = target_wait (ecs->waiton_ptid, ecs->wp, NULL);
 
       /* Now figure out what to do with the result of the result.  */
       handle_inferior_event (ecs);
@@ -1049,9 +1053,10 @@ fetch_inferior_event (void *client_data)
 
   if (deprecated_target_wait_hook)
     async_ecs->ptid =
-      deprecated_target_wait_hook (async_ecs->waiton_ptid, async_ecs->wp);
+      deprecated_target_wait_hook (async_ecs->waiton_ptid, async_ecs->wp, client_data);
   else
-    async_ecs->ptid = target_wait (async_ecs->waiton_ptid, async_ecs->wp);
+    async_ecs->ptid =
+      target_wait (async_ecs->waiton_ptid, async_ecs->wp, client_data);
 
   /* Now figure out what to do with the result of the result.  */
   handle_inferior_event (async_ecs);
@@ -2143,7 +2148,10 @@ process_event_stop_test:
       case BPSTAT_WHAT_CHECK_SHLIBS:
       case BPSTAT_WHAT_CHECK_SHLIBS_RESUME_FROM_HOOK:
 	{
-          if (debug_infrun)
+	  int was_sync_execution = 0;
+	  int solib_changed = 0;
+
+	  if (debug_infrun)
 	    fprintf_unfiltered (gdb_stdlog, "infrun: BPSTATE_WHAT_CHECK_SHLIBS\n");
 	  /* Remove breakpoints, we eventually want to step over the
 	     shlib event breakpoint, and SOLIB_ADD might adjust
@@ -2156,6 +2164,10 @@ process_event_stop_test:
 	     supposed to be adding them automatically.  Switch
 	     terminal for any messages produced by
 	     breakpoint_re_set.  */
+	  /*  Also, the error handlers for breakpoint_re_set may have
+	      run async_enable_stdin, which is not appropriate in this
+	      case.  Run it again just in case...  */
+	  was_sync_execution = sync_execution;
 	  target_terminal_ours_for_output ();
 	  /* NOTE: cagney/2003-11-25: Make certain that the target
 	     stack's section table is kept up-to-date.  Architectures,
@@ -2177,6 +2189,8 @@ process_event_stop_test:
 #else
 	  solib_add (NULL, 0, &current_target, auto_solib_add);
 #endif
+	  if (was_sync_execution && !sync_execution)
+	    async_disable_stdin();
 	  target_terminal_inferior ();
 
 	  /* Try to reenable shared library breakpoints, additional

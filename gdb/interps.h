@@ -59,7 +59,8 @@ extern struct interp *interp_new (const char *name, void *data,
 				  struct ui_out *uiout,
 				  const struct interp_procs *procs);
 extern void interp_add (struct interp *interp);
-extern int interp_set (struct interp *interp);
+extern struct interp * interp_set (struct interp *interp);
+extern int interp_set_quiet (struct interp *interp, int quiet);
 extern struct interp *interp_lookup (const char *name);
 extern struct ui_out *interp_ui_out (struct interp *interp);
 

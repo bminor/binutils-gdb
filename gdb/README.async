@@ -1,0 +1,54 @@
+This branch is an attempt to get GDB to work asynchronously (whatever that
+might mean).  I have started this by copying some changes from Apple's version
+(CVS as of Sept 5 2005 and covered by GPL) to get some of the funtionality
+that I'm looking for (and because I couldn't do it on my own!).  It uses
+pthreads which Daniel Jacobowitz dislikes and thinks that it should be done in
+one process.  Where I don't really understand the code changes, I have put
+"Make asynchronous." and somtimes "(copied verbatim)" in the ChangeLog.
+
+The initial changes are directed at the output of the asynchronous commands
+such as run, continue, next, finish etc.  These are implemented through
+mi_execute_async_cli_command and for asynchronus operation require
+mi_exec_async_cli_cmd_continuation to be called through fetch_inferior event.
+
+Currently -exec-next and next generate different output because the
+asynchronous output is faked:
+
+(gdb)
+-exec-next
+^running
+(gdb)
+*stopped,reason="end-stepping-range",thread-id="0",frame={addr="0x0804857f",func="main",args=[],file="myprog.c",fullname="/home/nickrob/myprog.c",line="69"}
+(gdb)
+n
+&"n\n"
+~"70\t  int n1 = 7, n2 = 8, n3 = 9;\n"
+^done
+(gdb)
+
+With these changes the output is the same:
+
+-exec-next
+^running
+(gdb)
+*stopped,reason="end-stepping-range",thread-id="0",frame={addr="0x0804857f",func="main",args=[],file="myprog.c",fullname="/home/nickrob/myprog.c",line="69"}
+(gdb)
+n
+&"n\n"
+^running
+^done
+(gdb)
+*stopped,reason="end-stepping-range",thread-id="0",frame={addr="0x080485bb",func="main",args=[],file="myprog.c",fullname="/home/nickrob/myprog.c",line="70"}
+(gdb)
+
+(actually it generates an extra &"n\n" and ^done but with 
+"-interpreter-exec console" its identical.
+
+To help integration with HEAD I've re-instated the --async option so that
+--noasync (the default) *should* run as on the trunk.
+
+Bugs/Problems are in PROBLEMS.async
+
+
+Nick Roberts
+nickrob@snap.net.nz

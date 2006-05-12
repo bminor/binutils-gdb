@@ -99,7 +99,8 @@ static void debug_to_detach (char *, int);
 
 static void debug_to_resume (ptid_t, int, enum target_signal);
 
-static ptid_t debug_to_wait (ptid_t, struct target_waitstatus *);
+static ptid_t debug_to_wait (ptid_t, struct target_waitstatus *,
+			     gdb_client_data client_data);
 
 static void debug_to_fetch_registers (int);
 
@@ -206,6 +207,10 @@ show_targetdebug (struct ui_file *file, int from_tty,
 }
 
 static void setup_target_debug (void);
+
+/* Non-zero if we are overriding the target's async behavior as far as
+   user commands go... */
+int gdb_override_async = 0;
 
 DCACHE *target_dcache;
 
@@ -484,8 +489,8 @@ update_current_target (void)
   de_fault (to_resume, 
 	    (void (*) (ptid_t, int, enum target_signal)) 
 	    noprocess);
-  de_fault (to_wait, 
-	    (ptid_t (*) (ptid_t, struct target_waitstatus *)) 
+  de_fault (to_wait,  
+	    (ptid_t (*) (ptid_t, struct target_waitstatus *, gdb_client_data client_data)) 
 	    noprocess);
   de_fault (to_fetch_registers, 
 	    (void (*) (int)) 
@@ -1508,6 +1513,21 @@ target_async_mask (int mask)
   return saved_async_masked_status;
 }
 
+void
+gdb_set_async_override (void* on)
+{
+  if (on) gdb_override_async = 1;
+}
+
+/* do_restore_target_async_mask is a convenience function to use
+   in make_cleanup to restore the state of the async mask. */
+ 
+void
+do_restore_target_async_mask (int mask)
+{
+  target_async_mask (mask);
+}
+
 /* Look through the list of possible targets for a target that can
    follow forks.  */
 
@@ -1924,11 +1944,12 @@ debug_to_resume (ptid_t ptid, int step, enum target_signal siggnal)
 }
 
 static ptid_t
-debug_to_wait (ptid_t ptid, struct target_waitstatus *status)
+debug_to_wait (ptid_t ptid, struct target_waitstatus *status,
+	       gdb_client_data client_data)
 {
   ptid_t retval;
 
-  retval = debug_target.to_wait (ptid, status);
+  retval = debug_target.to_wait (ptid, status, client_data);
 
   fprintf_unfiltered (gdb_stdlog,
 		      "target_wait (%d, status) = %d,   ", PIDGET (ptid),

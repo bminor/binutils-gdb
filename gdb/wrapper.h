@@ -50,4 +50,6 @@ extern int gdb_value_ind (struct value *val, struct value ** rval);
 
 extern int gdb_parse_and_eval_type (char *, int, struct type **);
 
+struct gdb_exception safe_execute_command (struct ui_out *uiout, char *command,
+					   int from_tty);
 #endif /* wrapper.h */

@@ -1,0 +1,13 @@
+1) You can't exit at the end with CTRL-D, the process has to be killed. Typing
+"q" just makes it hang.
+
+2) The inferior can't accept input (on the same terminal):
+
+-exec-run
+^running
+(gdb)
+Enter value for n1 : 5
+Enter value for n2 :
+Suspended (tty input)
+
+This also happens with Apple's GDB but I don't understand it.

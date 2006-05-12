@@ -221,7 +221,7 @@ int (*deprecated_ui_loop_hook) (int);
 /* Called instead of command_loop at top level.  Can be invoked via
    throw_exception().  */
 
-void (*deprecated_command_loop_hook) (void);
+void (*deprecated_command_loop_hook) (void *data);
 
 
 /* Called from print_frame_info to list the line we stopped in.  */
@@ -287,7 +287,8 @@ void (*deprecated_memory_changed_hook) (CORE_ADDR addr, int len);
    while waiting for target events.  */
 
 ptid_t (*deprecated_target_wait_hook) (ptid_t ptid,
-				       struct target_waitstatus * status);
+				       struct target_waitstatus * status,
+				       gdb_client_data client_data);
 
 /* Used by UI as a wrapper around command execution.  May do various things
    like enabling/disabling buttons, etc...  */
@@ -355,6 +356,26 @@ read_command_file (FILE *stream)
 
   cleanups = make_cleanup (do_restore_instream_cleanup, instream);
   instream = stream;
+
+  /* You can't run command files for gdb asynchronously.  If there
+     were a "wait till done" gdb command that you could put in a
+     command file, then this would make sense.  But otherwise things
+     like:
+
+     step
+     print somevar
+
+     won't work correctly.  So for command files, we temporarily force
+     the target to run synchronously.  */
+
+  if (target_can_async_p ()) 
+    { 
+      void *on;
+      on = (void *)1;
+      gdb_set_async_override (on); 
+      make_cleanup (gdb_set_async_override, &on); 
+    }
+
   command_loop ();
   do_cleanups (cleanups);
 }

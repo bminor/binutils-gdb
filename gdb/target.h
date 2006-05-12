@@ -305,7 +305,7 @@ struct target_ops
     void (*to_detach) (char *, int);
     void (*to_disconnect) (struct target_ops *, char *, int);
     void (*to_resume) (ptid_t, int, enum target_signal);
-    ptid_t (*to_wait) (ptid_t, struct target_waitstatus *);
+    ptid_t (*to_wait) (ptid_t, struct target_waitstatus *, gdb_client_data client_data);
     void (*to_fetch_registers) (int);
     void (*to_store_registers) (int);
     void (*to_prepare_to_store) (void);
@@ -508,8 +508,8 @@ extern void target_disconnect (char *, int);
    to the prompt with a debugging target but without the frame cache,
    stop_pc, etc., set up.  */
 
-#define	target_wait(ptid, status)		\
-     (*current_target.to_wait) (ptid, status)
+#define	target_wait(ptid, status, client_data)		\
+     (*current_target.to_wait) (ptid, status, client_data)
 
 /* Fetch at least register REGNO, or all regs if regno == -1.  No result.  */
 
@@ -878,8 +878,16 @@ int target_follow_fork (int follow_child);
 #define target_can_switch_threads \
      (current_target.to_has_thread_control & tc_switch)
 
+/* Defined in target.c, this variable gives us a way, independent of
+   the target's can_async method, to shut off async behavior. */
+extern int gdb_override_async;
+
+/* Use this to set the override of async behavior.
+   Set ON to 1 to turn on the override, 0 to turn it off. */
+extern void gdb_set_async_override (void* on);
+
 /* Can the target support asynchronous execution? */
-#define target_can_async_p() (current_target.to_can_async_p ())
+#define target_can_async_p() (gdb_override_async ? 0 : current_target.to_can_async_p ())
 
 /* Is the target in asynchronous execution mode? */
 #define target_is_async_p() (current_target.to_is_async_p())

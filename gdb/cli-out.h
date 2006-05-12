@@ -25,6 +25,7 @@
 struct ui_file;
 
 extern struct ui_out *cli_out_new (struct ui_file *stream);
+extern struct ui_out *cli_quoted_out_new (struct ui_file *stream);
 
 extern struct ui_file *cli_out_set_stream (struct ui_out *uiout,
 					   struct ui_file *stream);
