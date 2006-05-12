@@ -38,7 +38,7 @@ gdb_load ${binfile}
 
 gdb_run_cmd
 gdb_expect {
-    -re ".*Program exited normally\.\r\n$gdb_prompt $" {
+    -re ".*Program exited normally.*$gdb_prompt $" {
         pass "run program"
     }
     timeout {

@@ -557,6 +557,13 @@ serial_wait_handle (struct serial *scb, HANDLE *read, HANDLE *except)
       *except = NULL;
     }
 }
+
+void
+serial_done_wait_handle (struct serial *scb)
+{
+  if (scb->ops->done_wait_handle)
+    scb->ops->done_wait_handle (scb);
+}
 #endif
 
 #if 0

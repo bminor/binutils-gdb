@@ -3719,26 +3719,9 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		     big endian targets.
 
 		     It does not seem to be necessary to do the
-		     same for integral types.
+		     same for integral types. */
 
-		     Also don't do this adjustment on O64 binaries.
-
-		     cagney/2001-07-23: gdb/179: Also, GCC, when
-		     outputting LE O32 with sizeof (struct) <
-		     mips_abi_regsize(), generates a left shift as
-		     part of storing the argument in a register a
-		     register (the left shift isn't generated when
-		     sizeof (struct) >= mips_abi_regsize()).  Since
-		     it is quite possible that this is GCC
-		     contradicting the LE/O32 ABI, GDB has not been
-		     adjusted to accommodate this.  Either someone
-		     needs to demonstrate that the LE/O32 ABI
-		     specifies such a left shift OR this new ABI gets
-		     identified as such and GDB gets tweaked
-		     accordingly.  */
-
-		  if (mips_abi_regsize (gdbarch) < 8
-		      && TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
+		  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
 		      && partial_len < mips_abi_regsize (gdbarch)
 		      && (typecode == TYPE_CODE_STRUCT ||
 			  typecode == TYPE_CODE_UNION))
@@ -3788,7 +3771,45 @@ mips_o64_return_value (struct gdbarch *gdbarch,
 		       struct type *type, struct regcache *regcache,
 		       gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  return RETURN_VALUE_STRUCT_CONVENTION;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
+      || TYPE_CODE (type) == TYPE_CODE_UNION
+      || TYPE_CODE (type) == TYPE_CODE_ARRAY)
+    return RETURN_VALUE_STRUCT_CONVENTION;
+  else if (fp_register_arg_p (TYPE_CODE (type), type))
+    {
+      /* A floating-point value.  It fits in the least significant
+         part of FP0.  */
+      if (mips_debug)
+	fprintf_unfiltered (gdb_stderr, "Return float in $fp0\n");
+      mips_xfer_register (regcache,
+			  NUM_REGS + mips_regnum (current_gdbarch)->fp0,
+			  TYPE_LENGTH (type),
+			  TARGET_BYTE_ORDER, readbuf, writebuf, 0);
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+  else
+    {
+      /* A scalar extract each part but least-significant-byte
+         justified. */
+      int offset;
+      int regnum;
+      for (offset = 0, regnum = MIPS_V0_REGNUM;
+	   offset < TYPE_LENGTH (type);
+	   offset += mips_stack_argsize (gdbarch), regnum++)
+	{
+	  int xfer = mips_stack_argsize (gdbarch);
+	  if (offset + xfer > TYPE_LENGTH (type))
+	    xfer = TYPE_LENGTH (type) - offset;
+	  if (mips_debug)
+	    fprintf_unfiltered (gdb_stderr, "Return scalar+%d:%d in $%d\n",
+				offset, xfer, regnum);
+	  mips_xfer_register (regcache, NUM_REGS + regnum, xfer,
+			      TARGET_BYTE_ORDER, readbuf, writebuf, offset);
+	}
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
 }
 
 /* Floating point register management.

@@ -826,13 +826,16 @@ mips_elf_link_hash_newfunc (struct bfd_hash_entry *entry,
 bfd_boolean
 _bfd_mips_elf_new_section_hook (bfd *abfd, asection *sec)
 {
-  struct _mips_elf_section_data *sdata;
-  bfd_size_type amt = sizeof (*sdata);
+  if (!sec->used_by_bfd)
+    {
+      struct _mips_elf_section_data *sdata;
+      bfd_size_type amt = sizeof (*sdata);
 
-  sdata = bfd_zalloc (abfd, amt);
-  if (sdata == NULL)
-    return FALSE;
-  sec->used_by_bfd = sdata;
+      sdata = bfd_zalloc (abfd, amt);
+      if (sdata == NULL)
+	return FALSE;
+      sec->used_by_bfd = sdata;
+    }
 
   return _bfd_elf_new_section_hook (abfd, sec);
 }
@@ -4955,39 +4958,30 @@ _bfd_elf_mips_mach (flagword flags)
 	default:
 	case E_MIPS_ARCH_1:
 	  return bfd_mach_mips3000;
-	  break;
 
 	case E_MIPS_ARCH_2:
 	  return bfd_mach_mips6000;
-	  break;
 
 	case E_MIPS_ARCH_3:
 	  return bfd_mach_mips4000;
-	  break;
 
 	case E_MIPS_ARCH_4:
 	  return bfd_mach_mips8000;
-	  break;
 
 	case E_MIPS_ARCH_5:
 	  return bfd_mach_mips5;
-	  break;
 
 	case E_MIPS_ARCH_32:
 	  return bfd_mach_mipsisa32;
-	  break;
 
 	case E_MIPS_ARCH_64:
 	  return bfd_mach_mipsisa64;
-	  break;
 
 	case E_MIPS_ARCH_32R2:
 	  return bfd_mach_mipsisa32r2;
-	  break;
 
 	case E_MIPS_ARCH_64R2:
 	  return bfd_mach_mipsisa64r2;
-	  break;
 	}
     }
 
@@ -9386,7 +9380,7 @@ _bfd_mips_elf_hide_symbol (struct bfd_link_info *info,
 
   dynobj = elf_hash_table (info)->dynobj;
   if (dynobj != NULL && force_local && h->root.type != STT_TLS
-      && (got = mips_elf_got_section (dynobj, FALSE)) != NULL
+      && (got = mips_elf_got_section (dynobj, TRUE)) != NULL
       && (g = mips_elf_section_data (got)->u.got_info) != NULL)
     {
       if (g->next)

@@ -1239,9 +1239,7 @@ process_embedded_commands (bfd *output_bfd,
 	  asection *asec;
 	  int loop = 1;
 	  int had_write = 0;
-	  int had_read = 0;
 	  int had_exec= 0;
-	  int had_shared= 0;
 
 	  s += 5;
 	  s = get_name (s, &name);
@@ -1255,10 +1253,8 @@ process_embedded_commands (bfd *output_bfd,
 		  had_write = 1;
 		  break;
 		case 'R':
-		  had_read = 1;
 		  break;
 		case 'S':
-		  had_shared = 1;
 		  break;
 		case 'X':
 		  had_exec = 1;

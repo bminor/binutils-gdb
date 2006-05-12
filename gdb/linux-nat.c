@@ -36,6 +36,7 @@
 #include "gdbthread.h"
 #include "gdbcmd.h"
 #include "regcache.h"
+#include "regset.h"
 #include "inf-ptrace.h"
 #include "auxv.h"
 #include <sys/param.h>		/* for MAXPATHLEN */
@@ -899,10 +900,13 @@ exit_lwp (struct lwp_info *lp)
       struct thread_info *thr;
 
       thr = iterate_over_threads (find_thread_from_lwp, &lp->ptid);
-      if (thr && !ptid_equal (thr->ptid, inferior_ptid))
-	delete_thread (thr->ptid);
-      else
-	record_dead_thread (thr->ptid);
+      if (thr)
+	{
+	  if (!ptid_equal (thr->ptid, inferior_ptid))
+	    delete_thread (thr->ptid);
+	  else
+	    record_dead_thread (thr->ptid);
+	}
     }
 
   delete_lwp (lp->ptid);
@@ -1278,10 +1282,11 @@ kill_lwp (int lwpid, int signo)
    just pass off to linux_handle_extended_wait, but if it reports a
    clone event we need to add the new LWP to our list (and not report
    the trap to higher layers).  This function returns non-zero if
-   the event should be ignored and we should wait again.  */
+   the event should be ignored and we should wait again.  If STOPPING
+   is true, the new LWP remains stopped, otherwise it is continued.  */
 
 static int
-linux_nat_handle_extended (struct lwp_info *lp, int status)
+linux_nat_handle_extended (struct lwp_info *lp, int status, int stopping)
 {
   linux_handle_extended_wait (GET_LWP (lp->ptid), status,
 			      &lp->waitstatus);
@@ -1293,7 +1298,11 @@ linux_nat_handle_extended (struct lwp_info *lp, int status)
       new_lp = add_lwp (BUILD_LWP (lp->waitstatus.value.related_pid,
 				   GET_PID (inferior_ptid)));
       new_lp->cloned = 1;
-      new_lp->stopped = 1;
+
+      if (stopping)
+	new_lp->stopped = 1;
+      else
+	ptrace (PTRACE_CONT, lp->waitstatus.value.related_pid, 0, 0);
 
       lp->waitstatus.kind = TARGET_WAITKIND_IGNORE;
 
@@ -1377,7 +1386,7 @@ wait_lwp (struct lwp_info *lp)
 	fprintf_unfiltered (gdb_stdlog,
 			    "WL: Handling extended status 0x%06x\n",
 			    status);
-      if (linux_nat_handle_extended (lp, status))
+      if (linux_nat_handle_extended (lp, status, 1))
 	return wait_lwp (lp);
     }
 
@@ -2022,7 +2031,7 @@ retry:
 		fprintf_unfiltered (gdb_stdlog,
 				    "LLW: Handling extended status 0x%06x\n",
 				    status);
-	      if (linux_nat_handle_extended (lp, status))
+	      if (linux_nat_handle_extended (lp, status, 0))
 		{
 		  status = 0;
 		  continue;
@@ -2154,7 +2163,10 @@ retry:
     {
       int signo = target_signal_from_host (WSTOPSIG (status));
 
-      if (signal_stop_state (signo) == 0
+      /* If we get a signal while single-stepping, we may need special
+	 care, e.g. to skip the signal handler.  Defer to common code.  */
+      if (!lp->step
+	  && signal_stop_state (signo) == 0
 	  && signal_print_state (signo) == 0
 	  && signal_pass_state (signo) == 1)
 	{
@@ -2535,21 +2547,50 @@ linux_nat_do_thread_registers (bfd *obfd, ptid_t ptid,
   gdb_fpxregset_t fpxregs;
 #endif
   unsigned long lwp = ptid_get_lwp (ptid);
+  struct gdbarch *gdbarch = current_gdbarch;
+  const struct regset *regset;
+  int core_regset_p;
 
-  fill_gregset (&gregs, -1);
+  core_regset_p = gdbarch_regset_from_core_section_p (gdbarch);
+  if (core_regset_p
+      && (regset = gdbarch_regset_from_core_section (gdbarch, ".reg",
+						     sizeof (gregs))) != NULL
+      && regset->collect_regset != NULL)
+    regset->collect_regset (regset, current_regcache, -1,
+			    &gregs, sizeof (gregs));
+  else
+    fill_gregset (&gregs, -1);
+
   note_data = (char *) elfcore_write_prstatus (obfd,
 					       note_data,
 					       note_size,
 					       lwp,
 					       stop_signal, &gregs);
 
-  fill_fpregset (&fpregs, -1);
+  if (core_regset_p
+      && (regset = gdbarch_regset_from_core_section (gdbarch, ".reg2",
+						     sizeof (fpregs))) != NULL
+      && regset->collect_regset != NULL)
+    regset->collect_regset (regset, current_regcache, -1,
+			    &fpregs, sizeof (fpregs));
+  else
+    fill_fpregset (&fpregs, -1);
+
   note_data = (char *) elfcore_write_prfpreg (obfd,
 					      note_data,
 					      note_size,
 					      &fpregs, sizeof (fpregs));
+
 #ifdef FILL_FPXREGSET
-  fill_fpxregset (&fpxregs, -1);
+  if (core_regset_p
+      && (regset = gdbarch_regset_from_core_section (gdbarch, ".reg-xfp",
+						     sizeof (fpxregs))) != NULL
+      && regset->collect_regset != NULL)
+    regset->collect_regset (regset, current_regcache, -1,
+			    &fpxregs, sizeof (fpxregs));
+  else
+    fill_fpxregset (&fpxregs, -1);
+
   note_data = (char *) elfcore_write_prxfpreg (obfd,
 					       note_data,
 					       note_size,

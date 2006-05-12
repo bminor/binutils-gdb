@@ -782,7 +782,6 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
        fdr_ptr += fdr_add, i++)
     {
       FDR fdr;
-      bfd_vma fdr_adr;
       bfd_byte *sym_out;
       bfd_byte *lraw_src;
       bfd_byte *lraw_end;
@@ -798,8 +797,6 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
 	fdr = *(FDR *) fdr_ptr;
       else
 	(*input_swap->swap_fdr_in) (input_bfd, (PTR) fdr_ptr, &fdr);
-
-      fdr_adr = fdr.adr;
 
       /* FIXME: It is conceivable that this FDR points to the .init or
 	 .fini section, in which case this will not do the right

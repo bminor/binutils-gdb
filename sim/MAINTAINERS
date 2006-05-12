@@ -20,6 +20,9 @@ common		Ben Elliston <bje@gnu.org>
 common		Frank Ch. Eigler <fche@redhat.com>
 *		(target, then global maintainers)
 
+	Authorized committers for particular sims:
+v850		DJ Delorie <dj@redhat.com>
+
 	Past sim maintainers:
 
 mips		Andrew Cagney <ac131313@redhat.com>

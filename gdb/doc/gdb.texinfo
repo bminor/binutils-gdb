@@ -484,6 +484,19 @@ Sakamoto, Yoshinori Sato, Michael Snyder, Andreas Schwab, Jason
 Thorpe, Corinna Vinschen, Ulrich Weigand, and Elena Zannoni, helped
 with the migration of old architectures to this new framework.
 
+Andrew Cagney completely re-designed and re-implemented @value{GDBN}'s
+unwinder framework, this consisting of a fresh new design featuring
+frame IDs, independent frame sniffers, and the sentinel frame.  Mark
+Kettenis implemented the @sc{dwarf 2} unwinder, Jeff Johnston the
+libunwind unwinder, and Andrew Cagney the dummy, sentinel, tramp, and
+trad unwinders.  The architecture specific changes, each involving a
+complete rewrite of the architecture's frame code, were carried out by
+Jim Blandy, Joel Brobecker, Kevin Buettner, Andrew Cagney, Stephane
+Carrez, Randolph Chung, Orjan Friberg, Richard Henderson, Daniel
+Jacobowitz, Jeff Johnston, Mark Kettenis, Theodore A. Roth, Kei
+Sakamoto, Yoshinori Sato, Michael Snyder, Corinna Vinschen, and Ulrich
+Weigand.
+
 @node Sample Session
 @chapter A Sample @value{GDBN} Session
 
@@ -2563,7 +2576,7 @@ as shown in the first field of the @samp{info forks} display.
 To quit debugging one of the forked processes, you can either detach
 from it by using the @w{@code{detach-fork}} command (allowing it to
 run independently), or delete (and kill) it using the
-@w{@code{delete-fork}} command.
+@w{@code{delete fork}} command.
 
 @table @code
 @kindex detach-fork @var{fork-id}
@@ -2572,8 +2585,8 @@ Detach from the process identified by @value{GDBN} fork number
 @var{fork-id}, and remove it from the fork list.  The process will be
 allowed to run independently.
 
-@kindex delete-fork @var{fork-id}
-@item delete-fork @var{fork-id}
+@kindex delete fork @var{fork-id}
+@item delete fork @var{fork-id}
 Kill the process identified by @value{GDBN} fork number @var{fork-id},
 and remove it from the fork list.
 
@@ -2662,8 +2675,8 @@ are not affected by restoring a checkpoint.  In general, a checkpoint
 only restores things that reside in the program being debugged, not in
 the debugger.
 
-@kindex delete-checkpoint @var{checkpoint-id}
-@item delete-checkpoint @var{checkpoint-id}
+@kindex delete checkpoint @var{checkpoint-id}
+@item delete checkpoint @var{checkpoint-id}
 Delete the previously-saved checkpoint identified by @var{checkpoint-id}.
 
 @end table
@@ -12439,17 +12452,6 @@ expect to see @samp{Ctrl-C} as the interrupt signal.
 Show whether @value{GDBN} sends @code{BREAK} or @samp{Ctrl-C} to
 interrupt the remote program.
 
-@item set remotedebug
-@cindex debug remote protocol
-@cindex remote protocol debugging
-@cindex display remote packets
-Control the debugging of the remote protocol.  When enabled, each
-packet sent to or received from the remote target is displayed.  The
-defaults is off.
-
-@item show remotedebug
-Show the current setting of the remote protocol debugging.
-
 @item set remotedevice @var{device}
 @cindex serial port name
 Set the name of the serial port through which to communicate to the
@@ -15934,6 +15936,9 @@ Displays the current state of displaying @value{GDBN} C@t{++} overload
 debugging info.
 @cindex packets, reporting on stdout
 @cindex serial connections, debugging
+@cindex debug remote protocol
+@cindex remote protocol debugging
+@cindex display remote packets
 @item set debug remote
 Turns on or off display of reports on all packets sent back and forth across
 the serial line to the remote machine.  The info is printed on the
@@ -21662,7 +21667,7 @@ things without first using the debugger to find the facts.
 @c     inc-hist.texinfo
 @c Use -I with makeinfo to point to the appropriate directory,
 @c environment var TEXINPUTS with TeX.
-@include rluser.texinfo
+@include rluser.texi
 @include inc-hist.texinfo
 
 
@@ -23093,9 +23098,14 @@ the Acme Corporation might begin with @samp{qacme.foo} (for querying
 foos) or @samp{Qacme.bar} (for setting bars).
 @end itemize
 
-A query or set packet may optionally be followed by a @samp{,} or
-@samp{;} separated list.  Stubs must be careful to match the full
-packet name, in case packet names have common prefixes.
+The name of a query or set packet should be separated from any
+parameters by a @samp{:}; the parameters themselves should be
+separated by @samp{,} or @samp{;}.  Stubs must be careful to match the
+full packet name, in case packet names have common prefixes.  New
+packets should not begin with @samp{qP} or @samp{qL}@footnote{The
+@samp{qP} and @samp{qL} packets predate these conventions, and don't
+have any terminator for the packet name; we suspect they are in
+widespread use in places that are difficult to upgrade.}.
 
 Like the descriptions of the other packets, each description here
 has a template showing the packet's overall syntax, followed by an
@@ -23239,6 +23249,9 @@ Reply:
 Returns information on @var{threadid}.  Where: @var{mode} is a hex
 encoded 32 bit mode; @var{threadid} is a hex encoded 64 bit thread ID.
 
+Don't use this packet; use the @samp{qThreadExtraInfo} query instead
+(see below).
+
 Reply: see @code{remote.c:remote_unpack_thread_info_response()}.
 
 @item qPart:@var{object}:read:@var{annex}:@var{offset},@var{length}
@@ -23249,6 +23262,9 @@ identified by the keyword @var{object}.  Request @var{length} bytes
 starting at @var{offset} bytes into the data.  The content and
 encoding of @var{annex} is specific to the object; it can supply
 additional details about what data to access.
+
+Since this packet is ambiguous with the older @code{qP} packet, we
+plan to rename it.
 
 Here are the specific requests of this form defined so far.  All
 @samp{qPart:@var{object}:read:@dots{}} requests use the same reply
@@ -23341,6 +23357,11 @@ Indicate a badly formed request.
 An empty reply indicates that @samp{qRcmd} is not recognized.
 @end table
 
+(Note that the @code{qRcmd} packet's name is separated from the
+command by a @samp{,}, not a @samp{:}, contrary to the naming
+conventions above.  Please don't use this packet as a model for new
+packets.)
+
 @item qSymbol::
 @cindex symbol lookup, remote request
 @cindex @samp{qSymbol} packet
@@ -23400,6 +23421,11 @@ Where @samp{@var{XX}@dots{}} is a hex encoding of @sc{ascii} data,
 comprising the printable string containing the extra information about
 the thread's attributes.
 @end table
+
+(Note that the @code{qThreadExtraInfo} packet's name is separated from
+the command by a @samp{,}, not a @samp{:}, contrary to the naming
+conventions above.  Please don't use this packet as a model for new
+packets.)
 
 @item QTStart    
 @itemx QTStop     

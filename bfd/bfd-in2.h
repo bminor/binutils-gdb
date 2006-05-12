@@ -383,6 +383,8 @@ struct bfd_hash_table
   struct bfd_hash_entry **table;
   /* The number of slots in the hash table.  */
   unsigned int size;
+  /* The number of entries in the hash table.  */
+  unsigned int count;
   /* The size of elements.  */
   unsigned int entsize;
   /* A function used to create new elements in the hash table.  The
@@ -1465,11 +1467,6 @@ extern asection bfd_ind_section;
   || ((SEC) == bfd_com_section_ptr)            \
   || ((SEC) == bfd_ind_section_ptr))
 
-extern const struct bfd_symbol * const bfd_abs_symbol;
-extern const struct bfd_symbol * const bfd_com_symbol;
-extern const struct bfd_symbol * const bfd_und_symbol;
-extern const struct bfd_symbol * const bfd_ind_symbol;
-
 /* Macros to handle insertion and deletion of a bfd's sections.  These
    only handle the list pointers, ie. do not adjust section_count,
    target_index etc.  */
@@ -1560,7 +1557,7 @@ extern const struct bfd_symbol * const bfd_ind_symbol;
 #define bfd_section_removed_from_list(ABFD, S) \
   ((S)->next == NULL ? (ABFD)->section_last != (S) : (S)->next->prev != (S))
 
-#define BFD_FAKE_SECTION(SEC, FLAGS, SYM, SYM_PTR, NAME, IDX)          \
+#define BFD_FAKE_SECTION(SEC, FLAGS, SYM, NAME, IDX)                   \
   /* name, id,  index, next, prev, flags, user_set_vma,            */  \
   { NAME,  IDX, 0,     NULL, NULL, FLAGS, 0,                           \
                                                                        \
@@ -1591,11 +1588,8 @@ extern const struct bfd_symbol * const bfd_ind_symbol;
   /* target_index, used_by_bfd, constructor_chain, owner,          */  \
      0,            NULL,        NULL,              NULL,               \
                                                                        \
-  /* symbol,                                                       */  \
-     (struct bfd_symbol *) SYM,                                        \
-                                                                       \
-  /* symbol_ptr_ptr,                                               */  \
-     (struct bfd_symbol **) SYM_PTR,                                   \
+  /* symbol,                    symbol_ptr_ptr,                    */  \
+     (struct bfd_symbol *) SYM, &SEC.symbol,                           \
                                                                        \
   /* map_head, map_tail                                            */  \
      { NULL }, { NULL }                                                \
@@ -2902,6 +2896,16 @@ pc-relative or some form of GOT-indirect relocation.  */
 
 /* 31-bit PC relative address.  */
   BFD_RELOC_ARM_PREL31,
+
+/* Low and High halfword relocations for MOVW and MOVT instructions.  */
+  BFD_RELOC_ARM_MOVW,
+  BFD_RELOC_ARM_MOVT,
+  BFD_RELOC_ARM_MOVW_PCREL,
+  BFD_RELOC_ARM_MOVT_PCREL,
+  BFD_RELOC_ARM_THUMB_MOVW,
+  BFD_RELOC_ARM_THUMB_MOVT,
+  BFD_RELOC_ARM_THUMB_MOVW_PCREL,
+  BFD_RELOC_ARM_THUMB_MOVT_PCREL,
 
 /* Relocations for setting up GOTs and PLTs for shared libraries.  */
   BFD_RELOC_ARM_JUMP_SLOT,

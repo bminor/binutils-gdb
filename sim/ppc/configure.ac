@@ -12,6 +12,7 @@ if test "x$cross_compiling" = "xno"; then
 else
   CC_FOR_BUILD=gcc
 fi
+CFLAGS_FOR_BUILD=${CFLAGS_FOR_BUILD-${CFLAGS}}
 
 dnl We don't use gettext, but bfd does.  So we do the appropriate checks
 dnl to see if there are intl libraries we should link against.
@@ -747,6 +748,7 @@ dnl Check for exe extension
 AC_EXEEXT
 
 AC_SUBST(CC_FOR_BUILD)
+AC_SUBST(CFLAGS_FOR_BUILD)
 AC_SUBST(CFLAGS)
 AC_SUBST(HDEFINES)
 AR=${AR-ar}

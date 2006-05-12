@@ -973,7 +973,7 @@ typedef unsigned char threadref[OPAQUETHREADBYTES];
 typedef int gdb_threadref;	/* Internal GDB thread reference.  */
 
 /* gdb_ext_thread_info is an internal GDB data structure which is
-   equivalint to the reply of the remote threadinfo packet.  */
+   equivalent to the reply of the remote threadinfo packet.  */
 
 struct gdb_ext_thread_info
   {
@@ -2187,7 +2187,7 @@ remote_detach (char *args, int from_tty)
 /* Same as remote_detach, but don't send the "D" packet; just disconnect.  */
 
 static void
-remote_disconnect (char *args, int from_tty)
+remote_disconnect (struct target_ops *target, char *args, int from_tty)
 {
   if (args)
     error (_("Argument given to \"detach\" when remotely debugging."));

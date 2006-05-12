@@ -1193,26 +1193,21 @@ NAME (aout, new_section_hook) (bfd *abfd, asection *newsect)
 	{
 	  obj_textsec (abfd)= newsect;
 	  newsect->target_index = N_TEXT;
-	  return TRUE;
 	}
-
-      if (obj_datasec (abfd) == NULL && !strcmp (newsect->name, ".data"))
+      else if (obj_datasec (abfd) == NULL && !strcmp (newsect->name, ".data"))
 	{
 	  obj_datasec (abfd) = newsect;
 	  newsect->target_index = N_DATA;
-	  return TRUE;
 	}
-
-      if (obj_bsssec (abfd) == NULL && !strcmp (newsect->name, ".bss"))
+      else if (obj_bsssec (abfd) == NULL && !strcmp (newsect->name, ".bss"))
 	{
 	  obj_bsssec (abfd) = newsect;
 	  newsect->target_index = N_BSS;
-	  return TRUE;
 	}
     }
 
   /* We allow more than three sections internally.  */
-  return TRUE;
+  return _bfd_generic_new_section_hook (abfd, newsect);
 }
 
 bfd_boolean

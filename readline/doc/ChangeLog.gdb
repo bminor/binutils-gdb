@@ -1,3 +1,7 @@
+2006-04-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	Imported readline 5.1, and upstream patches 001-004.
+
 2003-09-14  Andrew Cagney  <cagney@redhat.com>
 
 	* history.0: Delete generated file.

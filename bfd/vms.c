@@ -487,7 +487,7 @@ vms_new_section_hook (bfd * abfd, asection *section)
   vms_debug (7, "%d: %s\n", section->index, section->name);
 #endif
 
-  return TRUE;
+  return _bfd_generic_new_section_hook (abfd, section);
 }
 
 /* Read the contents of a section.

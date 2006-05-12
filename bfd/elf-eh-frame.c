@@ -390,8 +390,7 @@ _bfd_elf_discard_section_eh_frame
       return FALSE;
     }
 
-  if ((sec->output_section != NULL
-       && bfd_is_abs_section (sec->output_section)))
+  if (bfd_is_abs_section (sec->output_section))
     {
       /* At least one of the sections is being discarded from the
 	 link, so we should just ignore them.  */

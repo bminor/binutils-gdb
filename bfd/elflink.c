@@ -6758,7 +6758,7 @@ unsigned int
 _bfd_elf_default_action_discarded (asection *sec)
 {
   if (sec->flags & SEC_DEBUGGING)
-    return 0;
+    return PRETEND;
 
   if (strcmp (".eh_frame", sec->name) == 0)
     return 0;
@@ -6782,6 +6782,7 @@ match_group_member (asection *sec, asection *group)
       if (bfd_elf_match_symbols_in_sections (s, sec))
 	return s;
 
+      s = elf_next_in_group (s);
       if (s == first)
 	break;
     }
@@ -7250,7 +7251,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 		      /* This is a reloc for a deleted entry or somesuch.
 			 Turn it into an R_*_NONE reloc, at the same
 			 offset as the last reloc.  elf_eh_frame.c and
-			 elf_bfd_discard_info rely on reloc offsets
+			 bfd_elf_discard_info rely on reloc offsets
 			 being ordered.  */
 		      irela->r_offset = last_offset;
 		      irela->r_info = 0;

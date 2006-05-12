@@ -160,6 +160,8 @@ bfd * _bfd_new_bfd
   (void);
 void _bfd_delete_bfd
   (bfd *);
+bfd_boolean _bfd_free_cached_info
+  (bfd *);
 
 bfd_boolean bfd_false
   (bfd *ignore);
@@ -220,8 +222,8 @@ int bfd_generic_stat_arch_elt
 
 #define _bfd_generic_close_and_cleanup bfd_true
 #define _bfd_generic_bfd_free_cached_info bfd_true
-#define _bfd_generic_new_section_hook \
-  ((bfd_boolean (*) (bfd *, asection *)) bfd_true)
+extern bfd_boolean _bfd_generic_new_section_hook
+  (bfd *, asection *);
 extern bfd_boolean _bfd_generic_get_section_contents
   (bfd *, asection *, void *, file_ptr, bfd_size_type);
 extern bfd_boolean _bfd_generic_get_section_contents_in_window
@@ -1206,6 +1208,14 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_ARM_SBREL32",
   "BFD_RELOC_ARM_TARGET2",
   "BFD_RELOC_ARM_PREL31",
+  "BFD_RELOC_ARM_MOVW",
+  "BFD_RELOC_ARM_MOVT",
+  "BFD_RELOC_ARM_MOVW_PCREL",
+  "BFD_RELOC_ARM_MOVT_PCREL",
+  "BFD_RELOC_ARM_THUMB_MOVW",
+  "BFD_RELOC_ARM_THUMB_MOVT",
+  "BFD_RELOC_ARM_THUMB_MOVW_PCREL",
+  "BFD_RELOC_ARM_THUMB_MOVT_PCREL",
   "BFD_RELOC_ARM_JUMP_SLOT",
   "BFD_RELOC_ARM_GLOB_DAT",
   "BFD_RELOC_ARM_GOT32",

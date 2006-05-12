@@ -232,25 +232,21 @@ A frame is a construct that @value{GDBN} uses to keep track of calling
 and called functions.
 
 @cindex frame, unwind
-@value{GDBN}'s current frame model is the result of an incremental
-cleanup of working code, not a fresh design, so it's a little weird.
-
-The natural model would have a frame object, with methods that read
-and write that frame's registers.  Reading or writing the youngest
-frame's registers would simply read or write the processor's current
-registers, since the youngest frame is running directly on the
-processor.  Older frames might have some registers saved on the stack
-by younger frames, so accessing the older frames' registers would do a
-mix of memory accesses and register accesses, as appropriate.
+@value{GDBN}'s frame model, a fresh design, was implemented with the
+need to support @sc{dwarf}'s Call Frame Information in mind.  In fact,
+the term ``unwind'' is taken directly from that specification.
+Developers wishing to learn more about unwinders, are encouraged to
+read the the @sc{dwarf} specification.
 
 @findex frame_register_unwind
-Instead, @value{GDBN}'s model is that you find a frame's registers by
-``unwinding'' them from the next younger frame.  That is, to access
-the registers of frame #1 (the next-to-youngest frame), you actually
-apply @code{frame_register_unwind} to frame #0 (the youngest frame).
-But then the obvious question is: how do you access the registers of
-the youngest frame itself?  How do you ``unwind'' them when they're
-not wound up?
+@findex get_frame_register
+@value{GDBN}'s model is that you find a frame's registers by
+``unwinding'' them from the next younger frame.  That is,
+@samp{get_frame_register} which returns the value of a register in
+frame #1 (the next-to-youngest frame), is implemented by calling frame
+#0's @code{frame_register_unwind} (the youngest frame).  But then the
+obvious question is: how do you access the registers of the youngest
+frame itself?
 
 @cindex sentinel frame
 @findex get_frame_type
@@ -260,32 +256,6 @@ To answer this question, GDB has the @dfn{sentinel} frame, the
 the current values of the youngest real frame's registers.  If @var{f}
 is a sentinel frame, then @code{get_frame_type (@var{f}) ==
 SENTINEL_FRAME}.
-
-@findex create_new_frame
-@vindex FRAME_FP
-@code{FRAME_FP} in the machine description has no meaning to the
-machine-independent part of @value{GDBN}, except that it is used when
-setting up a new frame from scratch, as follows:
-
-@smallexample
-create_new_frame (read_register (DEPRECATED_FP_REGNUM), read_pc ()));
-@end smallexample
-
-@cindex frame pointer register
-Other than that, all the meaning imparted to @code{DEPRECATED_FP_REGNUM}
-is imparted by the machine-dependent code.  So,
-@code{DEPRECATED_FP_REGNUM} can have any value that is convenient for
-the code that creates new frames.  (@code{create_new_frame} calls
-@code{DEPRECATED_INIT_EXTRA_FRAME_INFO} if it is defined; that is where
-you should use the @code{DEPRECATED_FP_REGNUM} value, if your frames are
-nonstandard.)
-
-@cindex frame chain
-Given a @value{GDBN} frame, define @code{DEPRECATED_FRAME_CHAIN} to
-determine the address of the calling function's frame.  This will be
-used to create a new @value{GDBN} frame struct, and then
-@code{DEPRECATED_INIT_EXTRA_FRAME_INFO} and
-@code{DEPRECATED_INIT_FRAME_PC} will be called for the new frame.
 
 @section Prologue Analysis
 

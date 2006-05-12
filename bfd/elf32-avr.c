@@ -433,6 +433,7 @@ struct avr_reloc_map
 unsigned int avr_pc_wrap_around = 0x10000000;
 
 /* Calculates the effective distance of a pc relative jump/call.  */
+
 static int
 avr_relative_distance_considering_wrap_around (unsigned int distance)
 {
@@ -455,10 +456,8 @@ bfd_elf32_bfd_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   for (i = 0;
        i < sizeof (avr_reloc_map) / sizeof (struct avr_reloc_map);
        i++)
-    {
-      if (avr_reloc_map[i].bfd_reloc_val == code)
-	return &elf_avr_howto_table[avr_reloc_map[i].elf_reloc_val];
-    }
+    if (avr_reloc_map[i].bfd_reloc_val == code)
+      return &elf_avr_howto_table[avr_reloc_map[i].elf_reloc_val];
 
   return NULL;
 }
@@ -1049,9 +1048,9 @@ elf32_avr_object_p (bfd *abfd)
 
 static bfd_boolean
 elf32_avr_relax_delete_bytes (bfd *abfd,
-			      asection *sec,
+                              asection *sec,
                               bfd_vma addr,
-			      int count)
+                              int count)
 {
   Elf_Internal_Shdr *symtab_hdr;
   unsigned int sec_shndx;
@@ -1085,10 +1084,9 @@ elf32_avr_relax_delete_bytes (bfd *abfd,
              (size_t) (toaddr - addr - count));
   sec->size -= count;
 
-  /* Adjust all the relocs.  */
+  /* Adjust all the reloc addresses.  */
   for (irel = elf_section_data (sec)->relocs; irel < irelend; irel++)
     {
-      bfd_vma symval;
       bfd_vma old_reloc_address;
       bfd_vma shrinked_insn_address;
 
@@ -1111,69 +1109,91 @@ elf32_avr_relax_delete_bytes (bfd *abfd,
           irel->r_offset -= count;
         }
 
-      /* The reloc's own addresses are now ok. However, we need to readjust
-         the reloc's addend if two conditions are met:
-         1.) the reloc is relative to a symbol in this section that
-             is located in front of the shrinked instruction
-         2.) symbol plus addend end up behind the shrinked instruction.
+    }
 
-         This should happen only for local symbols that are progmem related.  */
+   /* The reloc's own addresses are now ok. However, we need to readjust
+      the reloc's addend, i.e. the reloc's value if two conditions are met:
+      1.) the reloc is relative to a symbol in this section that
+          is located in front of the shrinked instruction
+      2.) symbol plus addend end up behind the shrinked instruction.  
+      
+      The most common case where this happens are relocs relative to
+      the section-start symbol.
+         
+      This step needs to be done for all of the sections of the bfd.  */
 
-      /* Read this BFD's local symbols if we haven't done so already.  */
-      if (isymbuf == NULL && symtab_hdr->sh_info != 0)
-        {
-          isymbuf = (Elf_Internal_Sym *) symtab_hdr->contents;
-          if (isymbuf == NULL)
-            isymbuf = bfd_elf_get_elf_syms (abfd, symtab_hdr,
-                                            symtab_hdr->sh_info, 0,
-                                            NULL, NULL, NULL);
-          if (isymbuf == NULL)
-             return FALSE;
-         }
+  {
+    struct bfd_section *isec;
 
-      /* Get the value of the symbol referred to by the reloc.  */
-      if (ELF32_R_SYM (irel->r_info) < symtab_hdr->sh_info)
-        {
-          /* A local symbol.  */
-          Elf_Internal_Sym *isym;
-          asection *sym_sec;
+    for (isec = abfd->sections; isec; isec = isec->next)
+     {
+       bfd_vma symval;
+       bfd_vma shrinked_insn_address;
 
-          isym = isymbuf + ELF32_R_SYM (irel->r_info);
-          sym_sec = bfd_section_from_elf_index (abfd, isym->st_shndx);
-          symval = isym->st_value;
-          /* If the reloc is absolute, it will not have
-             a symbol or section associated with it.  */
-          if (sym_sec)
-            {
-               symval += sym_sec->output_section->vma
-                         + sym_sec->output_offset;
+       shrinked_insn_address = (sec->output_section->vma
+                                + sec->output_offset + addr - count);
 
-               if (DEBUG_RELAX)
-                printf ("Checking if the relocation's "
-                        "addend needs corrections.\n"
-                        "Address of anchor symbol: 0x%x \n"
-                        "Address of relocation target: 0x%x \n"
-                        "Address of relaxed insn: 0x%x \n",
-                        (unsigned int) symval,
-                        (unsigned int) (symval + irel->r_addend),
-                        (unsigned int) shrinked_insn_address);
+       irelend = elf_section_data (isec)->relocs + isec->reloc_count;
+       for (irel = elf_section_data (isec)->relocs; 
+            irel < irelend;
+            irel++)
+         {
+           /* Read this BFD's local symbols if we haven't done 
+              so already.  */
+           if (isymbuf == NULL && symtab_hdr->sh_info != 0)
+             {
+               isymbuf = (Elf_Internal_Sym *) symtab_hdr->contents;
+               if (isymbuf == NULL)
+                 isymbuf = bfd_elf_get_elf_syms (abfd, symtab_hdr,
+                                                 symtab_hdr->sh_info, 0,
+                                                 NULL, NULL, NULL);
+               if (isymbuf == NULL)
+                 return FALSE;
+             }
 
-               if (symval <= shrinked_insn_address
-                   && (symval + irel->r_addend) > shrinked_insn_address)
-                 {
-                   irel->r_addend -= count;
+           /* Get the value of the symbol referred to by the reloc.  */
+           if (ELF32_R_SYM (irel->r_info) < symtab_hdr->sh_info)
+             {
+               /* A local symbol.  */
+               Elf_Internal_Sym *isym;
+               asection *sym_sec;
+
+               isym = isymbuf + ELF32_R_SYM (irel->r_info);
+               sym_sec = bfd_section_from_elf_index (abfd, isym->st_shndx);
+               symval = isym->st_value;
+               /* If the reloc is absolute, it will not have
+                  a symbol or section associated with it.  */
+               if (sym_sec == sec)
+                 { 
+                   symval += sym_sec->output_section->vma
+                             + sym_sec->output_offset;
 
                    if (DEBUG_RELAX)
-                     printf ("Anchor symbol and relocation target bracket "
-                             "shrinked insn address.\n"
-                             "Need for new addend : 0x%x\n",
-                             (unsigned int) irel->r_addend);
+                     printf ("Checking if the relocation's "
+                             "addend needs corrections.\n"
+                             "Address of anchor symbol: 0x%x \n"
+                             "Address of relocation target: 0x%x \n"
+                             "Address of relaxed insn: 0x%x \n",
+                             (unsigned int) symval,
+                             (unsigned int) (symval + irel->r_addend),
+                             (unsigned int) shrinked_insn_address);
+
+                   if (symval <= shrinked_insn_address
+                       && (symval + irel->r_addend) > shrinked_insn_address)
+                     {
+                       irel->r_addend -= count;
+
+                       if (DEBUG_RELAX)
+                         printf ("Relocation's addend needed to be fixed \n");
+                     }
                  }
-            }
-	  /* else ... Reference symbol is absolute.  No adjustment needed.  */
-        }
-      /* else ... Reference symbol is extern. No need for adjusting the addend.  */
-    }
+	       /* else...Reference symbol is absolute.  No adjustment needed.  */
+              }
+	   /* else...Reference symbol is extern. No need for adjusting 
+	      the addend.  */
+          }
+     }
+  }
 
   /* Adjust the local symbols defined in this section.  */
   isym = (Elf_Internal_Sym *) symtab_hdr->contents;

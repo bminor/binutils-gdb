@@ -1,3 +1,7 @@
+2006-05-11  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* bfd.texinfo: Rename "Index" to "BFD Index"  
+
 2006-04-06  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* Makefile.am: Add install-html and install-html-am targets. 

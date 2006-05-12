@@ -101,7 +101,7 @@ GDB_DOC_SOURCE_INCLUDES = \
 	$(srcdir)/fdl.texi \
 	$(srcdir)/gpl.texi \
 	$(srcdir)/agentexpr.texi \
-	$(READLINE_DIR)/rluser.texinfo \
+	$(READLINE_DIR)/rluser.texi \
 	$(READLINE_DIR)/inc-hist.texinfo
 GDB_DOC_BUILD_INCLUDES = \
 	gdb-cfg.texi \

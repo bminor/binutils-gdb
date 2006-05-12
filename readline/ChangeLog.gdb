@@ -1,3 +1,7 @@
+2006-04-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	Imported readline 5.1, and upstream patches 001-004.
+
 2006-03-21  Denis Pilat  <denis.pilat@st.com>
 
 	* histfile.c (read_history_range): Remove '\r' character from

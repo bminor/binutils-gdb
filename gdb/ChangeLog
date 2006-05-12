@@ -1,3 +1,210 @@
+2006-05-11  Alfred M. Szmidt  <ams@gnu.org>
+
+	* gnu-nat.c (inf_validate_procs): Don't use lvalue in assignments.
+
+2006-05-11  Fred Fish  <fnf@specifix.com>
+
+	* symtab.c (skip_prologue_using_sal): Handle single line functions
+	like "foo(){}", which may optimize down to a single return inst.
+
+2006-05-10  Steve Ellcey  <sje@cup.hp.com>
+
+	* hppa-hpux-tdep.c (initialize_hp_cxx_exception_support): Remove
+	message.
+
+2006-05-09  Andreas Schwab  <schwab@suse.de>
+
+	* dwarf2-frame.c (struct dwarf2_fde): Add eh_frame_p.
+	(execute_cfa_program): Add parameter eh_frame_p.  Call
+	dwarf2_frame_eh_frame_regnum when true.
+	(dwarf2_frame_cache): Pass eh_frame_p from fde to
+	execute_cfa_program.
+	(decode_frame_entry_1): Call dwarf2_frame_eh_frame_regnum when
+	processing .eh_frame.  Copy eh_frame_p to the new fde.
+	(struct dwarf2_frame_ops): Add eh_frame_regnum.
+	(dwarf2_frame_set_eh_frame_regnum): Define.
+	(dwarf2_frame_eh_frame_regnum): Define.
+
+	* dwarf2-frame.h (dwarf2_frame_set_eh_frame_regnum): Declare.
+	(dwarf2_frame_eh_frame_regnum): Declare.
+
+2006-05-06  David S. Miller  <davem@sunset.davemloft.net>
+
+	* linux-nat.c (linux_nat_do_thread_registers): Check for
+	NULL collect_regset method.
+
+2006-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* s390-tdep.c (s390_collect_regset): New function.
+	(s390_gregset, s390x_gregset, s390_fpregset): Add it.
+
+2006-05-06  Nick Roberts  <nickrob@snap.net.nz>
+
+	* dwarf2read.c: Make LOC_OPTIMIZED_OUT the default value for a
+	symbol.
+
+2006-05-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* linux-nat.c (exit_lwp): Fix NULL pointer access.
+	(linux_nat_handle_extended): New parameter STOPPING.
+	(wait_lwp): Call it with STOPPING equals 1.
+	(linux_nat_wait): Call it with STOPPING equals 0.
+
+2006-05-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* linux-nat.c (linux_nat_wait): Do not short-cut reporting
+	of 'uninteresting' signals when single-stepping.
+
+2006-05-05  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* MAINTAINERS: Move NEWS to the documentation entry.
+
+2006-05-05  David S. Miller  <davem@sunset.davemloft.net>
+
+	* linux-nat.c (linux_nat_do_thread_registers): Use the
+	regset_from_core_section infrastructure if the target
+	supports it.
+	* Makefile.in: Update dependencies.
+	* linux-thread-db.c (thread_db_store_registers): Use
+	regcache_raw_collect.
+
+2006-05-05:  Paul Gilliam  <pgilliam@us.ibm.com>
+
+	* ppc-linux-nat.c: Clean up types for ptrace.
+	Replace (CORE_ADDR) with  (uintptr_t) to avoid the size difference
+	between a CORE_ADDR and a void* on ppc64 systems compiled for 32-bits.
+
+2006-05-05  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c (remote_disconnect): Add TARGET argument.
+	* target.c (debug_to_disconnect): Delete.
+	(update_current_target): Do not inherit to_disconnect.
+	(target_disconnect): Search for a target to implement to_disconnect.
+	(setup_target_debug): Do not reference to_disconnect.
+	* target.h (struct target_ops): Add target argument to
+	to_disconnect.
+
+2006-05-06  Fred Fish  <fnf@specifix.com>
+
+	* mips-tdep.c (mips_o64_push_dummy_call): Left shift big endian
+	structs or unions independent of ABI register size.
+
+2006-05-06  Fred Fish  <fnf@specifix.com>
+
+	* mips-tdep.c (mips_o64_return_value): Replace stub that always
+	returned RETURN_VALUE_STRUCT_CONVENTION with a real function.
+
+2006-05-05  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* mi/mi-main.c (captured_mi_execute_command): Check the return
+	value of -interpreter-exec.
+
+2006-05-03  Vladimir Prus  <ghost@cs.msu.su>
+
+	* varobj.c (c_value_of_variable): Ignore top-level references.
+	(Committed by Jim Blandy.)
+
+2006-04-30  Mark Kettenis  <kettenis@gnu.org>
+
+	* breakpoint.c (insert_single_step_breakpoint): Make a failure to
+	insert a single-step breakpoint an error instead of a warning.
+
+2006-05-01  Nathan J. Williams  <nathanw@wasabisystems.com>
+
+	* ppcnbsd-tdep.c (ppcnbsd_return_value): Change type of last two
+	arguments from void * to gdb_byte *.
+
+2006-04-26  Michael Snyder  <msnyder@redhat.com>
+
+	* linux-fork.c (_initialize_linux_fork): Rename "delete-fork"
+	command to "delete fork" (no hyphen), compatible with other
+	"delete" commands.
+	(info_forks_command): Accept a fork ID argument, for info
+	on a single fork.  Report if no matching forks.
+
+2006-04-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* breakpoint.c (remove_single_step_breakpoints): Bail out early if
+	no breakpoints are inserted.
+
+	From Masaki MURANAKA <monaka@monami-software.com>:
+	* mips-mdebug-tdep.c (mips_mdebug_frame_prev_register): Change
+	type of last argument to `gdb_byte *'
+
+2006-04-25  Jim Blandy  <jimb@codesourcery.com>
+
+	Add support for 'target remote |' on MinGW.
+	* ser-mingw.c (struct pipe_state): New structure.
+	(make_pipe_state, free_pipe_state, cleanup_pipe_state)
+	(pipe_windows_open, pipe_windows_close, pipe_windows_read)
+	(pipe_windows_write, pipe_wait_handle): New functions.
+	(_initialize_ser_windows): Register a "pipe" interface based on
+	them.
+
+2006-04-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ser-mingw.c: Include <conio.h>.
+	(struct ser_console_state, struct net_windows_state): Add exit_select,
+	have_stopped, thread.
+	(pipe_select_thread, console_select_thread)
+	(net_windows_select_thread): Don't create a local state copy or
+	close stop_select.  Exit on exit_select instead of stop_select.  Set
+	have_stopped.
+	(console_select_thread): Don't report control keypresses as pending
+	input.
+	(pipe_select_thread): Allow stop_select to interrupt sleeping.
+	(set_console_wait_handle): Create exit_select and have_stopped.
+	Save the thread handle.  Check _kbhit before starting a thread.
+	(ser_console_done_wait_handle): New.
+	(ser_console_close): Close new handles.  Wait for the thread to
+	exit.
+	(new_windows_select_thread): Assert that an event occurred.
+	(net_windows_wait_handle): Check for pending input before starting
+	a thread.
+	(net_windows_done_wait_handle): New.
+	(net_windows_open): Create exit_select and have_stopped.
+	Save the thread handle.
+	(net_windows_close): Close new handles.  Wait for the thread to
+	exit.
+	(_intiialize_ser_windows): Register done_wait_handle methods.
+
+	* serial.c [USE_WIN32API] (serial_done_wait_handle): New.
+	* serial.h [USE_WIN32API] (struct serial_ops): Add done_wait_handle.
+	[USE_WIN32API] (serial_done_wait_handle): New prototype.
+	* mingw-hdep.c (gdb_select): Use serial_done_wait_handle.
+
+2006-04-23  Andreas Schwab  <schwab@suse.de>
+
+	* rs6000-tdep.c: Include "reggroups.h" only once.
+	* Makefile.in (rs6000-tdep.o): Update dependencies.
+
+2006-04-21  Frederic Riss  <frederic.riss@st.com>
+
+	* dwarf2read.c (dwarf2_start_subfile): Change prototype to accept
+	compilation directory as last argument. 
+	Always pass comp_dir as second argument to start_subfile and prepend
+	dirname to the filename when necessary. 
+	Remove now superfluous search for pre-existing subfile.
+	(dwarf_decode_lines): Pass the compilation directory to
+	dwarf2_start_subfile.
+
+2006-04-20  Michael Snyder  <msnyder@redhat.com>
+
+	* 2006-03-22  Jim Blandy  <jimb@redhat.com>
+	Add support for the Renesas M32C and M16C.
+
+	* configure.tgt (m32c-*-*): New entry.
+	* config/m32c/m32c.mt: New file.
+	* m32c-tdep.c: New file.
+	* Makefile.in (elf_m32c_h): New variable.
+	(m32c-tdep.o): New rule.
+	* NEWS: Mention new target.
+	* MAINTAINERS: Designate Jim Blandy as responsible maintainer.
+
+2006-04-20  Michael Snyder  <msnyder@redhat.com>
+
+	* remote.c: Fix spelling error in comment.
+
 2006-04-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* m68klinux-tdep.c (m68k_linux_sigtramp_frame_prev_register):

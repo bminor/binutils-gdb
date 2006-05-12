@@ -1,3 +1,257 @@
+2006-05-11  Michael Matz  <matz@suse.de>
+
+	* elflink.c (match_group_member): Correctly iterate group
+	members.
+
+2006-05-11  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_reloc_map): Add MOVW and MOVT relocs.
+	(elf32_arm_final_link_relocate): Handle MOVW and MOVT relocs.
+	(elf32_arm_gc_sweep_hook, elf32_arm_check_relocs): Ditto.
+	* reloc.c: Ditto.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* libcoff.h: Regenerate.
+
+2006-05-11  Mike Bland  <mbland@google.com>
+
+	* elf.c (_bfd_elf_init_private_section_data): Don't change
+	section type if already set.
+
+2006-05-10  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/2607
+	* elfcode.h (valid_section_index_p): New function: Checks for a
+	valid section index.  Allows indicies in the range SHN_LOPROC to
+	SHN_HIOS.
+	(elf_object_p): Use valid_section_index_p.
+
+2006-05-11  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* coff-arm.c (ARM_26D, ARM_32, ARM_RVA_32, ARM_SECTION,
+	ARM_SECREL): Mark WinCE versions of these relocs as partial
+	inplace.
+	(coff_arm_relocate_section): Adjust addend for WinCE.
+
+2006-05-10  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 2342
+	* elflink.c (_bfd_elf_default_action_discarded): Revert 2006-02-16.
+
+2006-05-09  Nick Clifton  <nickc@redhat.com>
+
+	* coffcode.h (coff_write_relocs): Produce an error message if a an
+	out-of-range symbol index is detected in a reloc.
+
+2006-05-09  Ben Elliston  <bje@au.ibm.com>
+
+	* elf64-ppc.c (ppc64_elf_finish_dynamic_symbol): Remove unused
+	local variable `dynobj'.
+	
+2006-05-05  Bjoern Haase  <bjoern.m.haase@web.de>
+
+	* elf32-avr.c (elf32_avr_relax_delete_bytes): Iterate over all
+	of the bfd's sections for the reloc-addend adjustments.
+
+2006-05-05  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* elf32-s390.c (invalid_tls_insn): Call bfd_set_error.
+	(elf_s390_relocate_section): Add code to do the GD->LE and
+	LD->LE TLS linker optimizations if a brasl instruction is used
+	for the __tls_get_offset function call.
+	* elf64-s390.c (invalid_tls_insn): Call bfd_set_error.
+
+2006-05-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_tls_optimize): Only optimize
+	R_PPC64_TPREL64 and R_PPC64_DTPMOD64 relocs when they are in
+	the .toc and referenced by a TLS code sequence.
+	(ppc64_elf_edit_toc): Cater for the unlikely situation that
+	.toc is the first section in a file.
+
+2006-05-04  Andreas Schwab  <schwab@suse.de>
+
+	* aoutf1.h (struct external_sparc_core): Declare c_regs as struct
+	regs instead of an array of int.
+	(struct external_solaris_bcp_core): Likewise.
+	(swapcore_sun3): Use offsetof instead of computing the offset
+	manually.
+	(swapcore_sparc): Likewise.  Simplify reference to c_regs.
+	(swapcore_solaris_bcp): Likewise.
+
+2006-05-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_hide_symbol): Adjust handling
+	for missing GOTs.
+
+2006-05-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* bfd/cpu-arm.c (bfd_is_arm_mapping_symbol_name): Accept more
+	mapping symbols.
+
+2006-05-04  Ben Elliston  <bje@au.ibm.com>
+
+	* coff-or32.c (bfd_section_from_shdr): Remove unused local
+	variable `ptr'.
+	* cofflink.c (process_embedded_commands): Remove unused local
+	variables `had_read' and `had_shared'.
+	* ecofflink.c (bfd_ecoff_debug_accumulate): Remove unused local
+	variable `fdr_adr'.
+	* ihex.c (ihex_read_section): Remove unused local variable `addr'.
+
+2006-05-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* libbfd-in.h (_bfd_generic_new_section_hook): Declare.
+	* section.c (bfd_abs_symbol, bfd_com_symbol): Delete.
+	(bfd_und_symbol, bfd_ind_symbol): Delete.
+	(BFD_FAKE_SECTION): Remove SYM_PTR param, set symbol_ptr_ptr to
+	&SEC.symbol.
+	(STD_SECTION): Adjust.
+	(_bfd_generic_new_section_hook): New function, extracted from..
+	(bfd_section_init): ..here.
+	(bfd_make_section_old_way): Call new_section_hook for abs, com,
+	und and ind sections.
+	* elf.c (_bfd_elf_large_com_section): Adjust.
+	* aoutx.h (new_section_hook): Call _bfd_generic_new_section_hook.
+	* pdp11.c (new_section_hook): Likewise.
+	* coffcode.h (coff_new_section_hook): Likewise.
+	* ecoff.c (_bfd_ecoff_new_section_hook): Likewise.
+	* elf.c (_bfd_elf_new_section_hook): Likewise.
+	* vms.c (vms_new_section_hook): Likwise.
+	* elf32-arm.c (elf32_arm_new_section_hook): Check used_by_bfd isn't
+	already set.
+	* elf32-sh64.c (sh64_elf_new_section_hook): Likewise.
+	* elf32-xtensa.c (elf_xtensa_new_section_hook): Likewise.
+	* elf64-mmix.c (mmix_elf_new_section_hook): Likewise.
+	* elf64-ppc.c (ppc64_elf_new_section_hook): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_new_section_hook): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_new_section_hook): Likewise.
+	* ieee.c (ieee_new_section_hook): Likewise.  Call
+	_bfd_generic_new_section_hook too.
+	* mmo.c (mmo_new_section_hook): Likewise.
+	* oasys.c (oasys_new_section_hook): Likewise.
+	* som.c (som_new_section_hook): Likewise.
+	* coff-w65.c (reloc_processing): Don't use bfd_abs_symbol.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+2006-05-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* hash.c (DEFAULT_SIZE): Revert last change.
+	(higher_prime_number): Correct test for no larger prime.  Don't
+	abort on error, instead return 0.  Depopulate primes[].
+	(bfd_hash_lookup): If we overflow size, refuse to grow table.
+
+2006-05-02  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_final_link_relocate): Set thumb funciton bit
+	for R_ARM_REL32.
+
+2006-05-02  Ben Elliston  <bje@au.ibm.com>
+
+	* archive.c (bfd_generic_archive_p): Remove unused local variable
+	`fail'.
+	* dwarf2.c (decode_line_info): Remove unused local variable
+	`basic_block'.
+	* elfcode.h (elf_slurp_reloc_table_from_section): Remove unused
+	local variable `s'.
+	* tekhex.c (tekhex_write_object_contents): Remove unused local
+	variable `bytes_written'.
+	* aout-ns32k.c (MY_swap_std_reloc_out): Remove unused local
+	variable `r_addend'.
+	* elf32-dlx.c (dlx_rtype_to_howto): Remove breaks after returns.
+	* elfxx-mips.c (_bfd_elf_mips_mach): Remove breaks after returns.
+	(_bfd_ns32k_relocate_contents): Remove break after return.
+	* elf.c (bfd_section_from_shdr): Remove breaks after returns.
+
+2006-05-02  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-sh-symbian.c: Rename local define DEBUG to SYMBIAN_DEBUG
+	in order to avoid conflicts with the global DEBUG define.
+
+2006-05-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* dwarf2.c: Formatting.
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Simplify
+	output section check.
+	* elf32-i370.c: Warning fixes inside #ifdef DEBUG.
+	* elf32-m32c.c: Similarly.
+	* elf32-ppc.c: Similarly.
+	* elf32-v850.c: Similarly.
+	* nlm32-sparc.c: Similarly.
+	* elfcode.h: Similarly.
+	(elf_symbol_flags): Delete.
+	* elflink.c (elf_link_input_bfd): Comment typo.
+
+2006-05-01  DJ Delorie  <dj@redhat.com>
+
+	* bfd-in.h (bfd_hash_table): Add count field.
+	* bfd-in2.h: Regenerate.
+	* hash.c (higher_prime_number): New.
+	(bfd_hash_table_inint_n): Init count field.
+	(bfd_hash_lookup): Grow table as needed.
+
+2006-04-27  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	PR binutils/2584
+	* tekhex.c (getvalue): Change return type to bfd_boolean and
+	add the new parameter.  Return false if the unexpected character
+	is found.
+	(getsym): Likewise.
+	(first_phase): Change return type to bfd_boolean and return
+	false if the unexpected character is found.  Replace abort
+	with returning false.
+	(pass_over): Change return type to bfd_boolean and the type of
+	the second argument to bfd_boolean (*) (bfd *, int, char *).
+	Return false if FUNC returns false.
+	(tekhex_object_p): Return NULL if pass_over fails.
+
+2006-04-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* coff-rs6000.c (xcoff_write_archive_contents_old): Warning fix.
+
+2006-04-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/2593
+	* elf.c (_bfd_elf_new_section_hook): Don't set section ELF type
+	and flags if its BFD flags have been set.
+	(_bfd_elf_init_private_section_data): Don't copy the output ELF
+	section type from input if it has been set to something
+	different.
+
+2006-04-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/2467
+	* elf.c (_bfd_elf_close_and_cleanup): Check elf_tdata (abfd)
+	is NULL first.
+
+	* elf32-arm.c (elf32_arm_close_and_cleanup): Check if
+	abfd->sections is NULL.
+	(elf32_arm_bfd_free_cached_info): New.
+	(bfd_elf32_bfd_free_cached_info): Defined.
+
+	* elfxx-target.h (bfd_elfNN_bfd_free_cached_info): Default it
+	to _bfd_free_cached_info.
+
+	* libbfd-in.h (_bfd_free_cached_info): New.
+	* libbfd: Regenerated.
+
+	* opncls.c (_bfd_delete_bfd): Check if abfd->memory is NULL.
+	(_bfd_free_cached_info): New.
+
+2006-04-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (assign_file_positions_except_relocs): Move code setting
+	file position of non-loaded sections..
+	(assign_file_positions_for_segments): ..to here.
+
+2006-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/2537
+	* elf.c (bfd_section_from_shdr): Allow sections reserved for
+	applications. Issue an error on sections we don't know how
+	to handle.
+
 2006-04-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
@@ -277,6 +531,24 @@
 	* elf32-m68k.c (elf32_m68k_merge_private_bfd_data): Use
 	bfd_get_compatible to set the new bfd architecture.  Rely on it
 	to detect incompatibilities.
+
+2006-03-23  Michael Matz  <matz@suse.de>
+
+	* reloc.c: Add BFD_RELOC_X86_64_GOT64, BFD_RELOC_X86_64_GOTPCREL64,
+	BFD_RELOC_X86_64_GOTPC64, BFD_RELOC_X86_64_GOTPLT64,
+	BFD_RELOC_X86_64_PLTOFF64.
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Regenerated.
+	* elf64-x86-64.c (x86_64_elf_howto_table): Correct comment.
+	Add howtos for above relocs.
+	(x86_64_reloc_map): Add mappings for new relocs.
+	(elf64_x86_64_check_relocs): R_X86_64_GOT64, R_X86_64_GOTPCREL64,
+	R_X86_64_GOTPLT64 need a got entry.  R_X86_64_GOTPLT64 also a PLT
+	entry.  R_X86_64_GOTPC64 needs a .got section.  R_X86_64_PLTOFF64
+	needs a PLT entry.
+	(elf64_x86_64_gc_sweep_hook): Reflect changes from
+	elf64_x86_64_check_relocs for the new relocs.
+	(elf64_x86_64_relocate_section): Handle new relocs.
 
 2006-03-22  Bob Wilson  <bob.wilson@acm.org>
 

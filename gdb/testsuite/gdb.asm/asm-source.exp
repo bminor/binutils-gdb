@@ -73,6 +73,9 @@ switch -glob -- [istarget] {
     "m32r*-linux*" {
         set asm-arch m32r-linux
     }
+    "m32c-*-*" {
+        set asm-arch m32c
+    }
     "m32r*-*" {
         set asm-arch m32r
         append link-flags "--whole-archive -lgloss --no-whole-archive"
@@ -160,6 +163,7 @@ if { "${asm-arch}" == "" } {
 # On NetBSD/ELF we need a special NetBSD-identifying note section.
 if { [istarget "*-*-netbsdelf*"]
      || [istarget "mips*-*-netbsd*"]
+     || [istarget "powerpc-*-netbsd*"]
      || [istarget "x86_64-*-netbsd*"] } then {
     set asm-note "netbsd"
 }

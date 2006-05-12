@@ -405,11 +405,11 @@ bfd_boolean
 bfd_is_arm_mapping_symbol_name (const char * name)
 {
   /* The ARM compiler outputs several obsolete forms.  Recognize them
-     in addition to the standard $a, $t and $d.  */
+     in addition to the standard $a, $t and $d.  We are somewhat loose
+     in what we accept here, since the full set is not documented.  */
   return (name != NULL)
     && (name[0] == '$')
-    && ((name[1] == 'a') || (name[1] == 't') || (name[1] == 'd')
-	|| (name[1] == 'm') || (name[1] == 'f') || (name[1] == 'p'))
+    && (name[1] >= 'a' && name[1] <= 'z')
     && (name[2] == 0 || name[2] == '.');
 }
 
