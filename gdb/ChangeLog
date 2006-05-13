@@ -1,3 +1,21 @@
+2006-05-14  Nick Roberts  <nickrob@snap.net.nz>
+
+	* mi/gdb-mi.el: Version that uses MI tokens insted of queuing.
+
+2006-05-13  Nick Roberts  <nickrob@snap.net.nz>
+
+	* main.c: (event_loop_p): Re-instate variable.
+	(captured_main): Re-instate async/noasync option.
+	(print_gdb_help): Describe option again.
+
+	* exec.c(init_exec_ops): Only initialise async methods with async
+	option.
+
+	* inf-ptrace.c (inf_ptrace_him): Only reate a signal thread with
+	async option.
+
+	* README.async, TODO.async, PROBLEMS.async: New files.
+
 2006-05-13    Changes based on Apple GDB (CVS repository 5th Sept 2005)
 
 	* async-nat-inferior.c, async-nat-inferior.h,
@@ -124,17 +142,3 @@
 	(COMMON_OBS): Add above object files.
 	(exec.o, i386-linux-nat.o, inf-ptrace.o, linux-nat.o):
 	Update dependencies.
-
-2006-05-13  Nick Roberts  <nickrob@snap.net.nz>
-
-	* main.c: (event_loop_p): Re-instate variable.
-	(captured_main): Re-instate async/noasync option.
-	(print_gdb_help): Describe option again.
-
-	* exec.c(init_exec_ops): Only initialise async methods with async
-	option.
-
-	* inf-ptrace.c (inf_ptrace_him): Only reate a signal thread with
-	async option.
-
-	* README.async, TODO.async, PROBLEMS.async: New files.
