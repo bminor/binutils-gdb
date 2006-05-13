@@ -9471,6 +9471,7 @@ table.
 * M2 Operators::                Built-in operators
 * Built-In Func/Proc::          Built-in functions and procedures
 * M2 Constants::                Modula-2 constants
+* M2 Types::                    Modula-2 types
 * M2 Defaults::                 Default settings for Modula-2
 * Deviations::                  Deviations from standard Modula-2
 * M2 Checks::                   Modula-2 type and range checks
@@ -9595,7 +9596,7 @@ as @code{^}.
 @end table
 
 @quotation
-@emph{Warning:} Sets and their operations are not yet supported, so @value{GDBN}
+@emph{Warning:} Set expressions and their operations are not yet supported, so @value{GDBN}
 treats the use of the operator @code{IN}, or the use of operators
 @code{+}, @code{-}, @code{*}, @code{/}, @code{=}, , @code{<>}, @code{#},
 @code{<=}, and @code{>=} on sets as an error.
@@ -9763,6 +9764,170 @@ Pointer constants consist of integral values only.
 @item
 Set constants are not yet supported.
 @end itemize
+
+@node M2 Types
+@subsubsection Modula-2 Types
+@cindex Modula-2 types
+
+Currently @value{GDBN} can print the following data types in Modula-2
+syntax: array types, record types, set types, pointer types, procedure
+types, enumerated types, subrange types and base types.  You can also
+print the contents of variables declared using these type.
+This section gives a number of simple source code examples together with
+sample @value{GDBN} sessions.
+
+The first example contains the following section of code:
+
+@smallexample
+VAR
+   s: SET OF CHAR ;
+   r: [20..40] ;
+@end smallexample
+
+@noindent
+and you can request @value{GDBN} to interrogate the type and value of
+@code{r} and @code{s}.
+
+@smallexample
+(@value{GDBP}) print s
+@{'A'..'C', 'Z'@}
+(@value{GDBP}) ptype s
+SET OF CHAR
+(@value{GDBP}) print r
+21
+(@value{GDBP}) ptype r
+[20..40]
+@end smallexample
+
+@noindent
+Likewise if your source code declares @code{s} as:
+
+@smallexample
+VAR
+   s: SET ['A'..'Z'] ;
+@end smallexample
+
+@noindent
+then you may query the type of @code{s} by:
+
+@smallexample
+(@value{GDBP}) ptype s
+type = SET ['A'..'Z']
+@end smallexample
+
+@noindent
+Note that at present you cannot interactively manipulate set
+expressions using the debugger.
+
+The following example shows how you might declare an array in Modula-2
+and how you can interact with @value{GDBN} to print its type and contents:
+
+@smallexample
+VAR
+   s: ARRAY [-10..10] OF CHAR ;
+@end smallexample
+
+@smallexample
+(@value{GDBP}) ptype s
+ARRAY [-10..10] OF CHAR
+@end smallexample
+
+Note that the array handling is not yet complete and although the type
+is printed correctly, expression handling still assumes that all
+arrays have a lower bound of zero and not @code{-10} as in the example
+above.  Unbounded arrays are also not yet recognized in @value{GDBN}.
+
+Here are some more type related Modula-2 examples:
+
+@smallexample
+TYPE
+   colour = (blue, red, yellow, green) ;
+   t = [blue..yellow] ;
+VAR
+   s: t ;
+BEGIN
+   s := blue ;
+@end smallexample
+
+@noindent
+The @value{GDBN} interaction shows how you can query the data type
+and value of a variable.
+
+@smallexample
+(@value{GDBP}) print s
+$1 = blue
+(@value{GDBP}) ptype t
+type = [blue..yellow]
+@end smallexample
+
+@noindent
+In this example a Modula-2 array is declared and its contents
+displayed.  Observe that the contents are written in the same way as
+their @code{C} counterparts.
+
+@smallexample
+VAR
+   s: ARRAY [1..5] OF CARDINAL ;
+BEGIN
+   s[1] := 1 ;
+@end smallexample
+
+@smallexample
+(@value{GDBP}) print s
+$1 = @{1, 0, 0, 0, 0@}
+(@value{GDBP}) ptype s
+type = ARRAY [1..5] OF CARDINAL
+@end smallexample
+
+The Modula-2 language interface to @value{GDBN} also understands
+pointer types as shown in this example:
+
+@smallexample
+VAR
+   s: POINTER TO ARRAY [1..5] OF CARDINAL ;
+BEGIN
+   NEW(s) ;
+   s^[1] := 1 ;
+@end smallexample
+
+@noindent
+and you can request that @value{GDBN} describes the type of @code{s}.
+
+@smallexample
+(@value{GDBP}) ptype s
+type = POINTER TO ARRAY [1..5] OF CARDINAL
+@end smallexample
+
+@value{GDBN} handles compound types as we can see in this example.
+Here we combine array types, record types, pointer types and subrange
+types:
+
+@smallexample
+TYPE
+   foo = RECORD
+            f1: CARDINAL ;
+            f2: CHAR ;
+            f3: myarray ;
+         END ;
+
+   myarray = ARRAY myrange OF CARDINAL ;
+   myrange = [-2..2] ;
+VAR
+   s: POINTER TO ARRAY myrange OF foo ;
+@end smallexample
+
+@noindent
+and you can ask @value{GDBN} to describe the type of @code{s} as shown
+below.
+
+@smallexample
+(@value{GDBP}) ptype s
+type = POINTER TO ARRAY [-2..2] OF foo = RECORD
+    f1 : CARDINAL;
+    f2 : CHAR;
+    f3 : ARRAY [-2..2] OF CARDINAL;
+END 
+@end smallexample
 
 @node M2 Defaults
 @subsubsection Modula-2 defaults

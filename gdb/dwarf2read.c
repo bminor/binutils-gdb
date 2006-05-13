@@ -1,7 +1,7 @@
 /* DWARF 2 debugging format support for GDB.
 
-   Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006
+   Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
+                 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    Adapted by Gary Funck (gary@intrepid.com), Intrepid Technology,
@@ -1072,6 +1072,9 @@ static void dwarf2_add_dependence (struct dwarf2_cu *,
 static void dwarf2_mark (struct dwarf2_cu *);
 
 static void dwarf2_clear_marks (struct dwarf2_per_cu_data *);
+
+static void read_set_type (struct die_info *, struct dwarf2_cu *);
+
 
 /* Try to locate the sections we need for DWARF 2 debugging
    information and return true if we have enough to do something.  */
@@ -2662,6 +2665,9 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
     case DW_TAG_subroutine_type:
       read_subroutine_type (die, cu);
       break;
+    case DW_TAG_set_type:
+      read_set_type (die, cu);
+      break;
     case DW_TAG_array_type:
       read_array_type (die, cu);
       break;
@@ -4240,6 +4246,15 @@ read_array_order (struct die_info *die, struct dwarf2_cu *cu)
     };
 }
 
+/* Extract all information from a DW_TAG_set_type DIE and put it in
+   the DIE's type field. */
+
+static void
+read_set_type (struct die_info *die, struct dwarf2_cu *cu)
+{
+  if (die->type == NULL)
+    die->type = create_set_type ((struct type *) NULL, die_type (die, cu));
+}
 
 /* First cut: install each common block member as a global variable.  */
 
@@ -4728,10 +4743,17 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	  code = TYPE_CODE_FLT;
 	  break;
 	case DW_ATE_signed:
-	case DW_ATE_signed_char:
 	  break;
 	case DW_ATE_unsigned:
-	case DW_ATE_unsigned_char:
+	  type_flags |= TYPE_FLAG_UNSIGNED;
+	  break;
+	case DW_ATE_signed_char:
+	  if (cu->language == language_m2)
+	    code = TYPE_CODE_CHAR;
+	  break;
+ 	case DW_ATE_unsigned_char:
+	  if (cu->language == language_m2)
+	    code = TYPE_CODE_CHAR;
 	  type_flags |= TYPE_FLAG_UNSIGNED;
 	  break;
 	default:
@@ -6168,10 +6190,12 @@ set_cu_language (unsigned int lang, struct dwarf2_cu *cu)
     case DW_LANG_Ada95:
       cu->language = language_ada;
       break;
+    case DW_LANG_Modula2:
+      cu->language = language_m2;
+      break;
     case DW_LANG_Cobol74:
     case DW_LANG_Cobol85:
     case DW_LANG_Pascal83:
-    case DW_LANG_Modula2:
     default:
       cu->language = language_minimal;
       break;
@@ -6961,6 +6985,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	case DW_TAG_class_type:
 	case DW_TAG_structure_type:
 	case DW_TAG_union_type:
+	case DW_TAG_set_type:
 	case DW_TAG_enumeration_type:
 	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
 	  SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
@@ -7289,6 +7314,9 @@ read_type_die (struct die_info *die, struct dwarf2_cu *cu)
       break;
     case DW_TAG_array_type:
       read_array_type (die, cu);
+      break;
+    case DW_TAG_set_type:
+      read_set_type (die, cu);
       break;
     case DW_TAG_pointer_type:
       read_tag_pointer_type (die, cu);
