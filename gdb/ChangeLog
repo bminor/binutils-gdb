@@ -39,7 +39,8 @@
 	(print_unpacked_pointer): added.
 	(print_variable_at_address): added.
 	(m2_val_print): replaced.
-	* gdb/MAINTAINERS (Write After Approval): added Gaius Mulley <gaius@glam.ac.uk>
+	* gdb/MAINTAINERS (Write After Approval): added
+	Gaius Mulley <gaius@glam.ac.uk>
 
 2006-05-12  Mark Kettenis  <kettenis@gnu.org>
 
