@@ -21,15 +21,12 @@
 	(m2_long_set): New function.
 	(m2_record_fields): New function.
 	(m2_enum): New function.
-	* dwarf2read.c: Added ability to detect the language
-	Modula-2 and handle SET and CHAR types.
+	* dwarf2read.c: Modified.
 	(read_set_type): New function.
 	(process_die): Call read_set_type.
-	(read_base_type): Modifed signed/unsigned char handling for
-	Modula-2.
+	(read_base_type): Modifed.
 	(set_cu_language): Added Modula-2 case clause.
-	* m2-valprint.c: Complete replacement so that Modula-2
-	values are printed rather than call the C language routines.
+	* m2-valprint.c: Complete replacement.
 	(print_function_pointer_address): New function.
 	(get_long_set_bounds): New function.
 	(m2_print_long_set): New function.
