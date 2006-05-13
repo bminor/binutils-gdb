@@ -1,6 +1,6 @@
 2006-05-13  Gaius Mulley <gaius@glam.ac.uk>
-	
-	* gdb/doc/gdb.texinfo: added a section on Modula-2 Types.
+
+	* gdb.texinfo (M2 Types): New section.
 
 2006-05-10  Daniel Jacobowitz  <dan@codesourcery.com>
 
