@@ -1,46 +1,43 @@
-2006-05-13  Gaius Mulley <gaius@glam.ac.uk>
+2006-05-13  Gaius Mulley  <gaius@glam.ac.uk>
 
-	* gdb/m2-lang.h: added function extern prototypes for
+	* m2-lang.h: Added function extern prototypes for
 	m2_is_long_set and get_long_set_bounds.
-	* gm2/m2-typeprint.c: This file has been completely
-	replaced to reflect the Modula-2 syntax rather than call
-	the c_print_type function.
-	(m2_print_type): walk the Modula-2 type tree.
-	(m2_type_name): added.
-	(m2_range): added.
-	(m2_typedef): added.
-	(m2_array): added.
-	(m2_pointer): added.
-	(m2_ref): added.
-	(m2_unknown): added.
-	(m2_union): added.
-	(m2_procedure): added.
-	(m2_print_bounds): added.
-	(m2_short_set): added.
-	(m2_is_long_set): added.
-	(m2_get_discrete_bounds): added.
-	(m2_is_long_set_of_type): added.
-	(m2_long_set): added.
-	(m2_record_fields): added.
-	(m2_enum): added.
-	* gdb/dwarf2read.c: added ability to detect the language
-	Modula-2
-	and handle SET and CHAR types.
-	(read_set_type): added.
-	(process_die): call read_set_type.
-	(read_base_type): modifed signed/unsigned char handling for
+	* m2-typeprint.c: Complete replacement.
+	(m2_print_type): Walk the Modula-2 type tree.
+	(m2_type_name): New function.
+	(m2_range): New function.
+	(m2_typedef): New function.
+	(m2_array): New function.
+	(m2_pointer): New function.
+	(m2_ref): New function.
+	(m2_unknown): New function.
+	(m2_union): New function.
+	(m2_procedure): New function.
+	(m2_print_bounds): New function.
+	(m2_short_set): New function.
+	(m2_is_long_set): New function.
+	(m2_get_discrete_bounds): New function.
+	(m2_is_long_set_of_type): New function.
+	(m2_long_set): New function.
+	(m2_record_fields): New function.
+	(m2_enum): New function.
+	* dwarf2read.c: Added ability to detect the language
+	Modula-2 and handle SET and CHAR types.
+	(read_set_type): New function.
+	(process_die): Call read_set_type.
+	(read_base_type): Modifed signed/unsigned char handling for
 	Modula-2.
-	(set_cu_language): added Modula-2 case clause.
-	* gdb/m2-valprint.c: complete replacement so that Modula-2
+	(set_cu_language): Added Modula-2 case clause.
+	* m2-valprint.c: Complete replacement so that Modula-2
 	values are printed rather than call the C language routines.
-	(print_function_pointer_address): added.
-	(get_long_set_bounds): added.
-	(m2_print_long_set): added.
-	(print_unpacked_pointer): added.
-	(print_variable_at_address): added.
-	(m2_val_print): replaced.
-	* gdb/MAINTAINERS (Write After Approval): added
-	Gaius Mulley <gaius@glam.ac.uk>
+	(print_function_pointer_address): New function.
+	(get_long_set_bounds): New function.
+	(m2_print_long_set): New function.
+	(print_unpacked_pointer): New function.
+	(print_variable_at_address): New function.
+	(m2_val_print): Replaced.
+	* gdb/MAINTAINERS (Write After Approval): Added
+	Gaius Mulley  <gaius@glam.ac.uk>
 
 2006-05-12  Mark Kettenis  <kettenis@gnu.org>
 
