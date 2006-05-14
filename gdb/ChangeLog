@@ -1,3 +1,10 @@
+2006-05-14  Nick Roberts  <nickrob@snap.net.nz>
+
+	* mi/gdb-mi.el (gdbmi-send): Correct regexp for repeat commands.
+	(gdbmi): Use new variable name gdb-pc-address.
+	(gdbmi-frame-handler):  Use new variable name gdb-pc-address.
+	Check that a match has been found.
+
 2006-05-13  Gaius Mulley  <gaius@glam.ac.uk>
 
 	* m2-lang.h: Added function extern prototypes for
