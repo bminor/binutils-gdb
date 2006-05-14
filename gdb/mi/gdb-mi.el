@@ -170,7 +170,7 @@ detailed description of this mode.
   (setq comint-input-sender 'gdbmi-send)
   ;;
   ;; (re-)initialise
-  (setq gdb-frame-address (if gdb-show-main "main" nil)
+  (setq gdb-pc-address (if gdb-show-main "main" nil)
         gdb-previous-frame-address nil
         gdb-memory-address "main"
         gdb-previous-frame nil
@@ -225,7 +225,7 @@ detailed description of this mode.
     (setq gdb-output-sink 'user)
     (setq gdb-prompting nil)
     ;; mimic <RET> key to repeat previous command in GDB
-    (if (string-match "^\\S+$" string)
+    (if (not (string-match "^\\s+$" string))
 	(setq gdb-last-command string)
       (if gdb-last-command (setq string gdb-last-command)))
     (if gdb-enable-debug
@@ -563,22 +563,23 @@ buffers, if required."
     (goto-char (point-min))
     (when (re-search-forward gdb-stack-list-frames-regexp nil t)
       (setq gdb-frame-number (match-string 1))
-      (setq gdb-frame-address (match-string 2))
+      (setq gdb-pc-address (match-string 2))
       (setq gdb-selected-frame (match-string 3))
-      (setq gud-last-frame
-	    (cons (match-string 4) (string-to-number (match-string 5))))
-      (gud-display-frame)
-      (if gud-overlay-arrow-position
-	  (let ((buffer (marker-buffer gud-overlay-arrow-position))
-		(position (marker-position gud-overlay-arrow-position)))
-	    (when buffer
-	      (with-current-buffer buffer
-		(setq fringe-indicator-alist
-		      (if (string-equal gdb-frame-number "0")
-			  nil
-			'((overlay-arrow . hollow-right-triangle))))
-		(setq gud-overlay-arrow-position (make-marker))
-		(set-marker gud-overlay-arrow-position position)))))
+      (when (match-string 4)
+	(setq gud-last-frame
+	      (cons (match-string 4) (string-to-number (match-string 5))))
+	(gud-display-frame)
+	(if gud-overlay-arrow-position
+	    (let ((buffer (marker-buffer gud-overlay-arrow-position))
+		  (position (marker-position gud-overlay-arrow-position)))
+	      (when buffer
+		(with-current-buffer buffer
+		  (setq fringe-indicator-alist
+			(if (string-equal gdb-frame-number "0")
+			    nil
+			  '((overlay-arrow . hollow-right-triangle))))
+		  (setq gud-overlay-arrow-position (make-marker))
+		  (set-marker gud-overlay-arrow-position position))))))
       (if (gdb-get-buffer 'gdb-locals-buffer)
 	  (with-current-buffer (gdb-get-buffer 'gdb-locals-buffer)
 	    (setq mode-name (concat "Locals:" gdb-selected-frame))))
