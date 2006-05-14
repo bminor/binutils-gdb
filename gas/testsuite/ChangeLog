@@ -1,3 +1,10 @@
+2006-05-14  Thiemo Seufer  <ths@mips.com>
+            Nigel Stephens  <nigel@mips.com>
+
+	* gas/mips/mips.exp: Run new tests.
+	* gas/mips/mips16e.s, gas/mips/mips16e.d, gas/mips/mips16e-64.s,
+	gas/mips/mips16e-64.d, gas/mips/mips16e-64.l: New tests.
+
 2006-05-11  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/local_function.d: New test.

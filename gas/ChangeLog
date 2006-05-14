@@ -1,3 +1,9 @@
+2006-05-14  Thiemo Seufer  <ths@mips.com>
+
+	* config/tc-mips.c (macro_build): Test for currently active
+	mips16 option.
+	(mips16_ip): Reject invalid opcodes.
+
 2006-05-11  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* doc/as.texinfo: Rename "Index" to "AS Index",

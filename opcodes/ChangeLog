@@ -1,3 +1,9 @@
+2006-05-14  Thiemo Seufer  <ths@mips.com>
+
+	* mips16-opc.c (I1, I32, I64): New shortcut defines.
+	(mips16_opcodes): Change membership of instructions to their
+	lowest baseline ISA.
+
 2006-05-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (grps): Update sgdt/sidt for 64bit.

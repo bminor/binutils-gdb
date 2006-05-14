@@ -3015,7 +3015,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 	 || mo->pinfo == INSN_MACRO
 	 || !OPCODE_IS_MEMBER (mo,
 			       (mips_opts.isa
-				| (file_ase_mips16 ? INSN_MIPS16 : 0)
+				| (mips_opts.mips16 ? INSN_MIPS16 : 0)
 				| (mips_opts.ase_smartmips ? INSN_SMARTMIPS : 0)),
 			       mips_opts.arch)
 	 || (mips_opts.arch == CPU_R4650 && (mo->pinfo & FP_D) != 0))
@@ -8032,6 +8032,9 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 
       if (OPCODE_IS_MEMBER (insn,
 			    (mips_opts.isa
+			     /* We don't check for mips_opts.mips16 here since
+			        we want to allow jalx if -mips16 was specified
+			        on the command line.  */
 			     | (file_ase_mips16 ? INSN_MIPS16 : 0)
 	      		     | (mips_opts.ase_mdmx ? INSN_MDMX : 0)
 	      		     | (mips_opts.ase_dsp ? INSN_DSP : 0)
@@ -9467,7 +9470,37 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
   argsstart = s;
   for (;;)
     {
+      bfd_boolean ok;
+
       assert (strcmp (insn->name, str) == 0);
+
+      if (OPCODE_IS_MEMBER (insn, mips_opts.isa, mips_opts.arch))
+	ok = TRUE;
+      else
+	ok = FALSE;
+
+      if (! ok)
+	{
+	  if (insn + 1 < &mips16_opcodes[bfd_mips16_num_opcodes]
+	      && strcmp (insn->name, insn[1].name) == 0)
+	    {
+	      ++insn;
+	      continue;
+	    }
+	  else
+	    {
+	      if (!insn_error)
+		{
+		  static char buf[100];
+		  sprintf (buf,
+			   _("opcode not supported on this processor: %s (%s)"),
+			   mips_cpu_info_from_arch (mips_opts.arch)->name,
+			   mips_cpu_info_from_isa (mips_opts.isa)->name);
+		  insn_error = buf;
+		}
+	      return;
+	    }
+	}
 
       create_insn (ip, insn);
       imm_expr.X_op = O_absent;

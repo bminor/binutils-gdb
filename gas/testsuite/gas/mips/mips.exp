@@ -777,8 +777,12 @@ if { [istarget mips*-*-vxworks*] } {
 	}
     }
     if { !$no_mips16 } { 
+        # Check MIPS16e extensions
+        run_dump_test_arches "mips16e" 	[mips_arch_list_matching mips32]
         run_dump_test "mips16e-jrc"
         run_dump_test "mips16e-save"
+        run_dump_test "mips16e-64"
+        run_list_test "mips16e-64" "-march=mips32"
     }
     run_dump_test "vxworks1"
     run_dump_test "vxworks1-xgot"
