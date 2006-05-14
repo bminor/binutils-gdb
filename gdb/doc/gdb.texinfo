@@ -23266,11 +23266,14 @@ foos) or @samp{Qacme.bar} (for setting bars).
 The name of a query or set packet should be separated from any
 parameters by a @samp{:}; the parameters themselves should be
 separated by @samp{,} or @samp{;}.  Stubs must be careful to match the
-full packet name, in case packet names have common prefixes.  New
-packets should not begin with @samp{qP} or @samp{qL}@footnote{The
-@samp{qP} and @samp{qL} packets predate these conventions, and don't
-have any terminator for the packet name; we suspect they are in
-widespread use in places that are difficult to upgrade.}.
+full packet name, and check for a separator or the end of the packet,
+in case two packet names share a common prefix.  New packets should not begin
+with @samp{qC}, @samp{qP}, or @samp{qL}@footnote{The @samp{qP} and @samp{qL}
+packets predate these conventions, and have arguments without any terminator
+for the packet name; we suspect they are in widespread use in places that
+are difficult to upgrade.  The @samp{qC} packet has no arguments, but some
+existing stubs (e.g.@: RedBoot) are known to not check for the end of the
+packet.}.
 
 Like the descriptions of the other packets, each description here
 has a template showing the packet's overall syntax, followed by an

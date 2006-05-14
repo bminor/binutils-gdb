@@ -1,3 +1,8 @@
+2006-05-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (General Query Packets): Recommend not starting
+	new packets with qC and clarify.
+
 2006-05-13  Gaius Mulley  <gaius@glam.ac.uk>
 
 	* gdb.texinfo (M2 Types): New section.
