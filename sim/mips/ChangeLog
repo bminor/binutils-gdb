@@ -1,3 +1,7 @@
+2006-05-15 Chao-ying Fu  <fu@mips.com>
+
+	* dsp.igen (do_ph_shift, do_w_shra): Fix bugs for rounding instructions.
+
 2006-04-18  Nick Clifton  <nickc@redhat.com>
 
 	* dv-tx3904tmr.c (deliver_tx3904tmr_tick): Add missing break
