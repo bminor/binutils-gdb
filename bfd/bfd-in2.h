@@ -855,8 +855,12 @@ extern bfd_boolean bfd_elf32_arm_add_glue_sections_to_bfd
   (bfd *, struct bfd_link_info *);
 
 /* ELF ARM mapping symbol support */
-extern bfd_boolean bfd_is_arm_mapping_symbol_name
-  (const char * name);
+#define BFD_ARM_SPECIAL_SYM_TYPE_MAP	(1 << 0)
+#define BFD_ARM_SPECIAL_SYM_TYPE_TAG	(1 << 1)
+#define BFD_ARM_SPECIAL_SYM_TYPE_OTHER  (1 << 2)
+#define BFD_ARM_SPECIAL_SYM_TYPE_ANY	(~0)
+extern bfd_boolean bfd_is_arm_special_symbol_name
+  (const char * name, int type);
 
 /* ARM Note section processing.  */
 extern bfd_boolean bfd_arm_merge_machines
