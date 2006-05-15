@@ -2773,7 +2773,8 @@ valops.o: valops.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(value_h) $(frame_h) \
 	$(cp_support_h) $(observer_h)
 valprint.o: valprint.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(value_h) $(gdbcore_h) $(gdbcmd_h) $(target_h) $(language_h) \
-	$(annotate_h) $(valprint_h) $(floatformat_h) $(doublest_h)
+	$(annotate_h) $(valprint_h) $(floatformat_h) $(doublest_h) \
+	$(exceptions_h)
 value.o: value.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(value_h) $(gdbcore_h) $(command_h) $(gdbcmd_h) $(target_h) \
 	$(language_h) $(scm_lang_h) $(demangle_h) $(doublest_h) \

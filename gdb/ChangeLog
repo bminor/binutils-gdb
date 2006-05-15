@@ -1,3 +1,9 @@
+2006-05-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* valprint.c: Include "exceptions.h".
+	(val_print): If something goes wrong while printing, supply an
+	error message.
+
 2006-05-15  Peter O'Gorman  <gdb-patches@mlists.thewrittenword.com>
 
 	* source.c (get_current_source_symtab_and_line)
