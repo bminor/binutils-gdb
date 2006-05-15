@@ -1,3 +1,8 @@
+2006-05-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf.c (display_debug_frames): Don't return on ZERO
+	terminator.
+
 2006-05-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* doc/Makefile.am (AM_MAKEINFOFLAGS): New.

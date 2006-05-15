@@ -2927,7 +2927,7 @@ display_debug_frames (struct dwarf_section *section,
 	{
 	  printf ("\n%08lx ZERO terminator\n\n",
 		    (unsigned long)(saved_start - section_start));
-	  return 1;
+	  continue;
 	}
 
       if (length == 0xffffffff)
