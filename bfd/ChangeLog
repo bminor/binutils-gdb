@@ -1,3 +1,18 @@
+2006-05-15  Paul Brook  <paul@codesourcery.com>
+
+	* cpu-arm.c (bfd_is_arm_mapping_symbol_name): Rename ...
+	(bfd_is_arm_special_symbol_name): ... to this.  Add type argument.
+	Check symbol name is of specified type.
+	* elf32-arm.c (elf32_arm_is_target_special_symbol,
+	arm_elf_find_function, elf32_arm_output_symbol_hook): Use
+	bfd_is_arm_special_symbol_name.
+	* bfd-in.h (BFD_ARM_SPECIAL_SYM_TYPE_MAP,
+	BFD_ARM_SPECIAL_SYM_TYPE_TAG, BFD_ARM_SPECIAL_SYM_TYPE_OTHER,
+	BFD_ARM_SPECIAL_SYM_TYPE_ANY): Define.
+	(bfd_is_arm_mapping_symbol_name): Remove prototype.
+	(bfd_is_arm_special_symbol_name): Add prototype.
+	* bfd-in2.h: Regenerate.
+
 2006-05-15  David Heine  <dlheine@tensilica.com>
 	    Bob Wilson  <bob.wilson@acm.org>
 

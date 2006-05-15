@@ -1,3 +1,8 @@
+2006-05-15  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (arm_adjust_symtab): Use
+	bfd_is_arm_special_symbol_name.
+
 2006-05-15  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (is_direct_call_opcode, is_branch_jmp_to_next,

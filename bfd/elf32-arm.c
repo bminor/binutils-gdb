@@ -6110,7 +6110,8 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 static bfd_boolean
 elf32_arm_is_target_special_symbol (bfd * abfd ATTRIBUTE_UNUSED, asymbol * sym)
 {
-  return bfd_is_arm_mapping_symbol_name (sym->name);
+  return bfd_is_arm_special_symbol_name (sym->name,
+					 BFD_ARM_SPECIAL_SYM_TYPE_ANY);
 }
 
 /* This is a copy of elf_find_function() from elf.c except that
@@ -6146,9 +6147,10 @@ arm_elf_find_function (bfd *         abfd ATTRIBUTE_UNUSED,
 	case STT_FUNC:
 	case STT_ARM_TFUNC:
 	case STT_NOTYPE:
-	  /* Skip $a and $t symbols.  */
+	  /* Skip mapping symbols.  */
 	  if ((q->symbol.flags & BSF_LOCAL)
-	      && bfd_is_arm_mapping_symbol_name (q->symbol.name))
+	      && bfd_is_arm_special_symbol_name (q->symbol.name,
+		    BFD_ARM_SPECIAL_SYM_TYPE_ANY))
 	    continue;
 	  /* Fall through.  */
 	  if (bfd_get_section (&q->symbol) == section
@@ -7879,7 +7881,7 @@ elf32_arm_output_symbol_hook (struct bfd_link_info *info,
     return TRUE;
 
   /* We only want mapping symbols.  */
-  if (! bfd_is_arm_mapping_symbol_name (name))
+  if (!bfd_is_arm_special_symbol_name (name, BFD_ARM_SPECIAL_SYM_TYPE_MAP))
     return TRUE;
 
   /* If this section has not been allocated an _arm_elf_section_data
