@@ -1,3 +1,9 @@
+2006-05-15  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 2658
+	* elf32-ppc.c (ppc_elf_relax_section): Don't segfault on non-pic
+	-shared link.
+
 2006-05-11  Michael Matz  <matz@suse.de>
 
 	* elflink.c (match_group_member): Correctly iterate group

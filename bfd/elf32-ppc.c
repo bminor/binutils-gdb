@@ -5181,6 +5181,10 @@ ppc_elf_relax_section (bfd *abfd,
       else if (r_type != R_PPC_PLTREL24)
 	toff += irel->r_addend;
 
+      /* Attempted -shared link of non-pic code loses.  */
+      if (tsec->output_section == NULL)
+	continue;
+
       symaddr = tsec->output_section->vma + tsec->output_offset + toff;
 
       roff = irel->r_offset;
