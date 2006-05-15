@@ -1,3 +1,8 @@
+2006-05-15  Chao-ying Fu  <fu@mips.com>
+
+	* mips32-dsp.s: Add some tests for shra_r.ph, shrav_r.ph, shra_r.w,
+	shrav_r.w.
+
 2005-12-14  Chao-ying Fu  <fu@mips.com>
 
 	* basic.exp: Run the dsp test.
