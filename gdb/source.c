@@ -139,7 +139,7 @@ get_lines_to_list (void)
 struct symtab_and_line
 get_current_source_symtab_and_line (void)
 {
-  struct symtab_and_line cursal = { };
+  struct symtab_and_line cursal = { 0 };
 
   cursal.symtab = current_source_symtab;
   cursal.line = current_source_line;
@@ -178,7 +178,7 @@ set_default_source_symtab_and_line (void)
 struct symtab_and_line
 set_current_source_symtab_and_line (const struct symtab_and_line *sal)
 {
-  struct symtab_and_line cursal = { };
+  struct symtab_and_line cursal = { 0 };
   
   cursal.symtab = current_source_symtab;
   cursal.line = current_source_line;
