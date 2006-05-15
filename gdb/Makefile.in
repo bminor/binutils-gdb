@@ -613,6 +613,7 @@ hashtab_h =	$(INCLUDE_DIR)/hashtab.h
 config_h = config.h
 exc_request_U_h = exc_request_U.h
 exc_request_S_h = exc_request_S.h
+gdb_stdint_h = gdb_stdint.h
 msg_reply_S_h = msg_reply_S.h
 msg_U_h = msg_U.h
 notify_S_h = notify_S.h
@@ -1280,6 +1281,7 @@ distclean: clean
 	rm -f gdbserver/tm.h gdbserver/xm.h gdbserver/nm.h
 	rm -f gdbserver/Makefile gdbserver/config.cache
 	rm -f nm.h tm.h xm.h config.status config.h stamp-h .gdbinit
+	rm -f gdb_stdint.h
 	rm -f y.output yacc.acts yacc.tmp y.tab.h
 	rm -f config.log config.cache
 	rm -f Makefile
@@ -1317,11 +1319,28 @@ subdir_do: force
 	done
 
 Makefile: Makefile.in config.status @frags@
-	$(SHELL) config.status
+	# Regenerate the Makefile and the tm.h / nm.h links.
+	CONFIG_FILES=Makefile \
+	  CONFIG_COMMANDS= \
+	  CONFIG_HEADERS= \
+	  $(SHELL) config.status
 
 config.h: stamp-h ; @true
 stamp-h: config.in config.status
-	CONFIG_HEADERS=config.h:config.in $(SHELL) config.status
+	CONFIG_HEADERS=config.h:config.in \
+	  CONFIG_COMMANDS=default \
+	  CONFIG_FILES= \
+	  CONFIG_LINKS= \
+	  $(SHELL) config.status
+
+gdb_stdint.h: stamp-int ; @true
+stamp-int: config.status
+	CONFIG_COMMANDS=gdb_stdint.h \
+	  CONFIG_FILES= \
+	  CONFIG_HEADERS= \
+	  CONFIG_LINKS= \
+	  $(SHELL) config.status
+	echo stamp > stamp-int
 
 config.status: configure configure.tgt configure.host
 	$(SHELL) config.status --recheck

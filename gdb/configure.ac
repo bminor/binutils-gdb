@@ -422,6 +422,9 @@ AC_CHECK_HEADERS(term.h, [], [],
 # unconditionally, so what's the point in checking these?
 AC_CHECK_HEADERS(ctype.h time.h)
 
+# Create a header we can use portably to get the standard integer types.
+GCC_HEADER_STDINT(gdb_stdint.h)
+
 # ------------------------- #
 # Checks for declarations.  #
 # ------------------------- #

@@ -1,5 +1,16 @@
 2006-05-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* configure.ac: Use GCC_HEADER_STDINT.
+	* acinclude.m4: Include stdint.m4.
+	* Makefile.in (gdb_stdint_h): Define.
+	(distclean): Remove gdb_stdint.h.
+	(Makefile, stamp-h): Update rules to generate only the correct
+	files.
+	(gdb_stdint.h, stamp-int): New rules.
+	* config.in, configure: Regenerated.
+
+2006-05-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* valprint.c: Include "exceptions.h".
 	(val_print): If something goes wrong while printing, supply an
 	error message.

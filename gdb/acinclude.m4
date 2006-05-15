@@ -7,6 +7,9 @@ sinclude(../bfd/bfd.m4)
 dnl This gets the standard macros, like the TCL, TK, etc ones.
 sinclude(../config/acinclude.m4)
 
+dnl This gets GCC_HEADER_STDINT.
+sinclude(../config/stdint.m4)
+
 sinclude(../gettext.m4)
 dnl The lines below arrange for aclocal not to bring gettext.m4's
 dnl CY_GNU_GETTEXT into aclocal.m4.
