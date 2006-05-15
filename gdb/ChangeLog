@@ -1,3 +1,18 @@
+2006-05-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* ppcobsd-nat.c: Include "gdb_assert.h".
+	[PT_GETFPREGS] (getfpregs_supplies): New function.
+	(ppcobsd_fetch_registers, ppcobsd_fetch_registers): Hanlde OS
+	versions that have PT_GETFPREGS.
+	(_initialize_ppcobsd_nat) [PT_GETFPREGS]: Initialize
+	ppcobsd_fpreg_offsets.
+	* ppcobsd-tdep.h (ppcobsd_fpreg_offsets, ppcobsd_fpregset):
+	Declare.
+	* ppcobsd-tdep.c (ppcobsd_fpreg_offsets, ppcobsd_fpregset): New
+	variables.
+	(_initialize_ppcobsd_tdep): Initialize ppcobsd_fpreg_offsets.
+	* Makefile.in (ppcobsd-nat.o): Update dependencies.
+
 2006-05-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* configure.ac: Use GCC_HEADER_STDINT.

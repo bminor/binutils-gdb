@@ -1,6 +1,6 @@
 /* Target-dependent code for OpenBSD/powerpc.
 
-   Copyright (C) 2004 Free Software Foundation, Inc.
+   Copyright (C) 2004, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -29,9 +29,11 @@ struct regcache;
 
 /* Register offsets for OpenBSD/powerpc.  */
 extern struct ppc_reg_offsets ppcobsd_reg_offsets;
+extern struct ppc_reg_offsets ppcobsd_fpreg_offsets;
 
 /* Register sets for OpenBSD/powerpc.  */
 extern struct regset ppcobsd_gregset;
+extern struct regset ppcobsd_fpregset;
 
 
 /* Supply register REGNUM in the general-purpose register set REGSET
