@@ -2589,7 +2589,7 @@ is_direct_call_opcode (xtensa_opcode opcode)
   xtensa_isa isa = xtensa_default_isa;
   int n, num_operands;
 
-  if (xtensa_opcode_is_call (isa, opcode) == 0)
+  if (xtensa_opcode_is_call (isa, opcode) != 1)
     return FALSE;
 
   num_operands = xtensa_opcode_num_operands (isa, opcode);
@@ -3680,8 +3680,8 @@ is_branch_jmp_to_next (TInsn *insn, fragS *fragP)
   symbolS *sym;
   fragS *target_frag;
 
-  if (xtensa_opcode_is_branch (isa, insn->opcode) == 0
-      && xtensa_opcode_is_jump (isa, insn->opcode) == 0)
+  if (xtensa_opcode_is_branch (isa, insn->opcode) != 1
+      && xtensa_opcode_is_jump (isa, insn->opcode) != 1)
     return FALSE;
 
   for (i = 0; i < num_ops; i++)
@@ -6831,7 +6831,7 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
      when converting them.  */
 
   /* "short_loop": Add a NOP if the loop is < 4 bytes.  */
-  if (xtensa_opcode_is_loop (isa, vinsn->slots[0].opcode)
+  if (xtensa_opcode_is_loop (isa, vinsn->slots[0].opcode) == 1
       && !vinsn->slots[0].is_specific_opcode)
     {
       if (workaround_short_loop && use_transform ())
@@ -7057,7 +7057,7 @@ xtensa_mark_narrow_branches (void)
 
 		if (vinsn.num_slots == 1
 		    && xtensa_opcode_is_branch (xtensa_default_isa,
-						vinsn.slots[0].opcode)
+						vinsn.slots[0].opcode) == 1
 		    && xg_get_single_size (vinsn.slots[0].opcode) == 2
 		    && is_narrow_branch_guaranteed_in_range (fragP,
 							     &vinsn.slots[0]))
@@ -7550,7 +7550,7 @@ xtensa_fix_short_loop_frags (void)
 		current_target = symbol_get_frag (fragP->fr_symbol);
 		current_opcode = t_insn.opcode;
 		assert (xtensa_opcode_is_loop (xtensa_default_isa,
-					       current_opcode));
+					       current_opcode) == 1);
 	      }
 
 	    if (fragP->fr_type == rs_machine_dependent
@@ -7823,7 +7823,7 @@ is_local_forward_loop (const TInsn *insn, fragS *fragP)
   if (insn->insn_type != ITYPE_INSN)
     return FALSE;
 
-  if (xtensa_opcode_is_loop (xtensa_default_isa, insn->opcode) == 0)
+  if (xtensa_opcode_is_loop (xtensa_default_isa, insn->opcode) != 1)
     return FALSE;
 
   if (insn->ntok <= LOOP_IMMED_OPN)
@@ -8809,7 +8809,7 @@ relax_frag_immed (segT segP,
   tinsn = cur_vinsn.slots[slot];
   tinsn_immed_from_frag (&tinsn, fragP, slot);
 
-  if (estimate_only && xtensa_opcode_is_loop (isa, tinsn.opcode))
+  if (estimate_only && xtensa_opcode_is_loop (isa, tinsn.opcode) == 1)
     return 0;
 
   if (workaround_b_j_loop_end && ! fragP->tc_frag_data.is_no_transform)

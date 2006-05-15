@@ -3433,24 +3433,23 @@ check_loop_aligned (bfd_byte *contents,
 		    bfd_vma address)
 {
   bfd_size_type loop_len, insn_len;
-  xtensa_opcode opcode =
-    insn_decode_opcode (contents, content_length, offset, 0);
-  BFD_ASSERT (opcode != XTENSA_UNDEFINED);
-  if (opcode != XTENSA_UNDEFINED)
-    return FALSE;
-  BFD_ASSERT (xtensa_opcode_is_loop (xtensa_default_isa, opcode));
-  if (!xtensa_opcode_is_loop (xtensa_default_isa, opcode))
-    return FALSE;
+  xtensa_opcode opcode;
 
+  opcode = insn_decode_opcode (contents, content_length, offset, 0);
+  if (opcode == XTENSA_UNDEFINED
+      || xtensa_opcode_is_loop (xtensa_default_isa, opcode) != 1)
+    {
+      BFD_ASSERT (FALSE);
+      return FALSE;
+    }
+  
   loop_len = insn_decode_len (contents, content_length, offset);
-  BFD_ASSERT (loop_len != 0);
-  if (loop_len == 0)
-    return FALSE;
-
   insn_len = insn_decode_len (contents, content_length, offset + loop_len);
-  BFD_ASSERT (insn_len != 0);
-  if (insn_len == 0)
-    return FALSE;
+  if (loop_len == 0 || insn_len == 0)
+    {
+      BFD_ASSERT (FALSE);
+      return FALSE;
+    }
 
   return check_branch_target_aligned_address (address + loop_len, insn_len);
 }
@@ -3562,34 +3561,133 @@ struct string_pair widenable[] =
 };
 
 
-/* Attempt to narrow an instruction.  Return true if the narrowing is
-   valid.  If the do_it parameter is non-zero, then perform the action
-   in-place directly into the contents.  Otherwise, do not modify the
-   contents.  The set of valid narrowing are specified by a string table
+/* Check if an instruction can be "narrowed", i.e., changed from a standard
+   3-byte instruction to a 2-byte "density" instruction.  If it is valid,
+   return the instruction buffer holding the narrow instruction.  Otherwise,
+   return 0.  The set of valid narrowing are specified by a string table
    but require some special case operand checks in some cases.  */
+
+static xtensa_insnbuf
+can_narrow_instruction (xtensa_insnbuf slotbuf,
+			xtensa_format fmt,
+			xtensa_opcode opcode)
+{
+  xtensa_isa isa = xtensa_default_isa;
+  xtensa_format o_fmt;
+  unsigned opi;
+
+  static xtensa_insnbuf o_insnbuf = NULL;
+  static xtensa_insnbuf o_slotbuf = NULL;
+
+  if (o_insnbuf == NULL)
+    {
+      o_insnbuf = xtensa_insnbuf_alloc (isa);
+      o_slotbuf = xtensa_insnbuf_alloc (isa);
+    }
+
+  for (opi = 0; opi < (sizeof (narrowable)/sizeof (struct string_pair)); opi++)
+    {
+      bfd_boolean is_or = (strcmp ("or", narrowable[opi].wide) == 0);
+
+      if (opcode == xtensa_opcode_lookup (isa, narrowable[opi].wide))
+	{
+	  uint32 value, newval;
+	  int i, operand_count, o_operand_count;
+	  xtensa_opcode o_opcode;
+
+	  /* Address does not matter in this case.  We might need to
+	     fix it to handle branches/jumps.  */
+	  bfd_vma self_address = 0;
+
+	  o_opcode = xtensa_opcode_lookup (isa, narrowable[opi].narrow);
+	  if (o_opcode == XTENSA_UNDEFINED)
+	    return 0;
+	  o_fmt = get_single_format (o_opcode);
+	  if (o_fmt == XTENSA_UNDEFINED)
+	    return 0;
+
+	  if (xtensa_format_length (isa, fmt) != 3
+	      || xtensa_format_length (isa, o_fmt) != 2)
+	    return 0;
+
+	  xtensa_format_encode (isa, o_fmt, o_insnbuf);
+	  operand_count = xtensa_opcode_num_operands (isa, opcode);
+	  o_operand_count = xtensa_opcode_num_operands (isa, o_opcode);
+
+	  if (xtensa_opcode_encode (isa, o_fmt, 0, o_slotbuf, o_opcode) != 0)
+	    return 0;
+
+	  if (!is_or)
+	    {
+	      if (xtensa_opcode_num_operands (isa, o_opcode) != operand_count)
+		return 0;
+	    }
+	  else
+	    {
+	      uint32 rawval0, rawval1, rawval2;
+
+	      if (o_operand_count + 1 != operand_count
+		  || xtensa_operand_get_field (isa, opcode, 0,
+					       fmt, 0, slotbuf, &rawval0) != 0
+		  || xtensa_operand_get_field (isa, opcode, 1,
+					       fmt, 0, slotbuf, &rawval1) != 0
+		  || xtensa_operand_get_field (isa, opcode, 2,
+					       fmt, 0, slotbuf, &rawval2) != 0
+		  || rawval1 != rawval2
+		  || rawval0 == rawval1 /* it is a nop */)
+		return 0;
+	    }
+
+	  for (i = 0; i < o_operand_count; ++i)
+	    {
+	      if (xtensa_operand_get_field (isa, opcode, i, fmt, 0,
+					    slotbuf, &value)
+		  || xtensa_operand_decode (isa, opcode, i, &value))
+		return 0;
+
+	      /* PC-relative branches need adjustment, but
+		 the PC-rel operand will always have a relocation.  */
+	      newval = value;
+	      if (xtensa_operand_do_reloc (isa, o_opcode, i, &newval,
+					   self_address)
+		  || xtensa_operand_encode (isa, o_opcode, i, &newval)
+		  || xtensa_operand_set_field (isa, o_opcode, i, o_fmt, 0,
+					       o_slotbuf, newval))
+		return 0;
+	    }
+
+	  if (xtensa_format_set_slot (isa, o_fmt, 0, o_insnbuf, o_slotbuf))
+	    return 0;
+
+	  return o_insnbuf;
+	}
+    }
+  return 0;
+}
+
+
+/* Attempt to narrow an instruction.  If the narrowing is valid, perform
+   the action in-place directly into the contents and return TRUE.  Otherwise,
+   the return value is FALSE and the contents are not modified.  */
 
 static bfd_boolean
 narrow_instruction (bfd_byte *contents,
 		    bfd_size_type content_length,
-		    bfd_size_type offset,
-		    bfd_boolean do_it)
+		    bfd_size_type offset)
 {
   xtensa_opcode opcode;
-  bfd_size_type insn_len, opi;
+  bfd_size_type insn_len;
   xtensa_isa isa = xtensa_default_isa;
-  xtensa_format fmt, o_fmt;
+  xtensa_format fmt;
+  xtensa_insnbuf o_insnbuf;
 
   static xtensa_insnbuf insnbuf = NULL;
   static xtensa_insnbuf slotbuf = NULL;
-  static xtensa_insnbuf o_insnbuf = NULL;
-  static xtensa_insnbuf o_slotbuf = NULL;
 
   if (insnbuf == NULL)
     {
       insnbuf = xtensa_insnbuf_alloc (isa);
       slotbuf = xtensa_insnbuf_alloc (isa);
-      o_insnbuf = xtensa_insnbuf_alloc (isa);
-      o_slotbuf = xtensa_insnbuf_alloc (isa);
     }
 
   BFD_ASSERT (offset < content_length);
@@ -3615,152 +3713,43 @@ narrow_instruction (bfd_byte *contents,
   if (insn_len > content_length)
     return FALSE;
 
-  for (opi = 0; opi < (sizeof (narrowable)/sizeof (struct string_pair)); ++opi)
+  o_insnbuf = can_narrow_instruction (slotbuf, fmt, opcode);
+  if (o_insnbuf)
     {
-      bfd_boolean is_or = (strcmp ("or", narrowable[opi].wide) == 0);
-
-      if (opcode == xtensa_opcode_lookup (isa, narrowable[opi].wide))
-	{
-	  uint32 value, newval;
-	  int i, operand_count, o_operand_count;
-	  xtensa_opcode o_opcode;
-
-	  /* Address does not matter in this case.  We might need to
-	     fix it to handle branches/jumps.  */
-	  bfd_vma self_address = 0;
-
-	  o_opcode = xtensa_opcode_lookup (isa, narrowable[opi].narrow);
-	  if (o_opcode == XTENSA_UNDEFINED)
-	    return FALSE;
-	  o_fmt = get_single_format (o_opcode);
-	  if (o_fmt == XTENSA_UNDEFINED)
-	    return FALSE;
-
-	  if (xtensa_format_length (isa, fmt) != 3
-	      || xtensa_format_length (isa, o_fmt) != 2)
-	    return FALSE;
-
-	  xtensa_format_encode (isa, o_fmt, o_insnbuf);
-	  operand_count = xtensa_opcode_num_operands (isa, opcode);
-	  o_operand_count = xtensa_opcode_num_operands (isa, o_opcode);
-
-	  if (xtensa_opcode_encode (isa, o_fmt, 0, o_slotbuf, o_opcode) != 0)
-	    return FALSE;
-
-	  if (!is_or)
-	    {
-	      if (xtensa_opcode_num_operands (isa, o_opcode) != operand_count)
-		return FALSE;
-	    }
-	  else
-	    {
-	      uint32 rawval0, rawval1, rawval2;
-
-	      if (o_operand_count + 1 != operand_count)
-		return FALSE;
-	      if (xtensa_operand_get_field (isa, opcode, 0,
-					    fmt, 0, slotbuf, &rawval0) != 0)
-		return FALSE;
-	      if (xtensa_operand_get_field (isa, opcode, 1,
-					    fmt, 0, slotbuf, &rawval1) != 0)
-		return FALSE;
-	      if (xtensa_operand_get_field (isa, opcode, 2,
-					    fmt, 0, slotbuf, &rawval2) != 0)
-		return FALSE;
-
-	      if (rawval1 != rawval2)
-		return FALSE;
-	      if (rawval0 == rawval1) /* it is a nop */
-		return FALSE;
-	    }
-
-	  for (i = 0; i < o_operand_count; ++i)
-	    {
-	      if (xtensa_operand_get_field (isa, opcode, i, fmt, 0,
-					    slotbuf, &value)
-		  || xtensa_operand_decode (isa, opcode, i, &value))
-		return FALSE;
-
-	      /* PC-relative branches need adjustment, but
-		 the PC-rel operand will always have a relocation.  */
-	      newval = value;
-	      if (xtensa_operand_do_reloc (isa, o_opcode, i, &newval,
-					   self_address)
-		  || xtensa_operand_encode (isa, o_opcode, i, &newval)
-		  || xtensa_operand_set_field (isa, o_opcode, i, o_fmt, 0,
-					       o_slotbuf, newval))
-		return FALSE;
-	    }
-
-	  if (xtensa_format_set_slot (isa, o_fmt, 0,
-				      o_insnbuf, o_slotbuf) != 0)
-	    return FALSE;
-
-	  if (do_it)
-	    xtensa_insnbuf_to_chars (isa, o_insnbuf, contents + offset,
-				     content_length - offset);
-	  return TRUE;
-	}
+      xtensa_insnbuf_to_chars (isa, o_insnbuf, contents + offset,
+			       content_length - offset);
+      return TRUE;
     }
+
   return FALSE;
 }
 
 
-/* Attempt to widen an instruction.  Return true if the widening is
-   valid.  If the do_it parameter is non-zero, then the action should
-   be performed inplace into the contents.  Otherwise, do not modify
-   the contents.  The set of valid widenings are specified by a string
-   table but require some special case operand checks in some
-   cases.  */
+/* Check if an instruction can be "widened", i.e., changed from a 2-byte
+   "density" instruction to a standard 3-byte instruction.  If it is valid,
+   return the instruction buffer holding the wide instruction.  Otherwise,
+   return 0.  The set of valid widenings are specified by a string table
+   but require some special case operand checks in some cases.  */
 
-static bfd_boolean
-widen_instruction (bfd_byte *contents,
-		   bfd_size_type content_length,
-		   bfd_size_type offset,
-		   bfd_boolean do_it)
+static xtensa_insnbuf
+can_widen_instruction (xtensa_insnbuf slotbuf,
+		       xtensa_format fmt,
+		       xtensa_opcode opcode)
 {
-  xtensa_opcode opcode;
-  bfd_size_type insn_len, opi;
   xtensa_isa isa = xtensa_default_isa;
-  xtensa_format fmt, o_fmt;
+  xtensa_format o_fmt;
+  unsigned opi;
 
-  static xtensa_insnbuf insnbuf = NULL;
-  static xtensa_insnbuf slotbuf = NULL;
   static xtensa_insnbuf o_insnbuf = NULL;
   static xtensa_insnbuf o_slotbuf = NULL;
 
-  if (insnbuf == NULL)
+  if (o_insnbuf == NULL)
     {
-      insnbuf = xtensa_insnbuf_alloc (isa);
-      slotbuf = xtensa_insnbuf_alloc (isa);
       o_insnbuf = xtensa_insnbuf_alloc (isa);
       o_slotbuf = xtensa_insnbuf_alloc (isa);
     }
 
-  BFD_ASSERT (offset < content_length);
-
-  if (content_length < 2)
-    return FALSE;
-
-  /* We will hand code a few of these for a little while.
-     These have all been specified in the assembler aleady.  */
-  xtensa_insnbuf_from_chars (isa, insnbuf, &contents[offset],
-			     content_length - offset);
-  fmt = xtensa_format_decode (isa, insnbuf);
-  if (xtensa_format_num_slots (isa, fmt) != 1)
-    return FALSE;
-
-  if (xtensa_format_get_slot (isa, fmt, 0, insnbuf, slotbuf) != 0)
-    return FALSE;
-
-  opcode = xtensa_opcode_decode (isa, fmt, 0, slotbuf);
-  if (opcode == XTENSA_UNDEFINED)
-    return FALSE;
-  insn_len = xtensa_format_length (isa, fmt);
-  if (insn_len > content_length)
-    return FALSE;
-
-  for (opi = 0; opi < (sizeof (widenable)/sizeof (struct string_pair)); ++opi)
+  for (opi = 0; opi < (sizeof (widenable)/sizeof (struct string_pair)); opi++)
     {
       bfd_boolean is_or = (strcmp ("or", widenable[opi].wide) == 0);
       bfd_boolean is_branch = (strcmp ("beqz", widenable[opi].wide) == 0
@@ -3778,14 +3767,14 @@ widen_instruction (bfd_byte *contents,
 
 	  o_opcode = xtensa_opcode_lookup (isa, widenable[opi].wide);
 	  if (o_opcode == XTENSA_UNDEFINED)
-	    return FALSE;
+	    return 0;
 	  o_fmt = get_single_format (o_opcode);
 	  if (o_fmt == XTENSA_UNDEFINED)
-	    return FALSE;
+	    return 0;
 
 	  if (xtensa_format_length (isa, fmt) != 2
 	      || xtensa_format_length (isa, o_fmt) != 3)
-	    return FALSE;
+	    return 0;
 
 	  xtensa_format_encode (isa, o_fmt, o_insnbuf);
 	  operand_count = xtensa_opcode_num_operands (isa, opcode);
@@ -3793,32 +3782,29 @@ widen_instruction (bfd_byte *contents,
 	  check_operand_count = o_operand_count;
 
 	  if (xtensa_opcode_encode (isa, o_fmt, 0, o_slotbuf, o_opcode) != 0)
-	    return FALSE;
+	    return 0;
 
 	  if (!is_or)
 	    {
 	      if (xtensa_opcode_num_operands (isa, o_opcode) != operand_count)
-		return FALSE;
+		return 0;
 	    }
 	  else
 	    {
 	      uint32 rawval0, rawval1;
 
-	      if (o_operand_count != operand_count + 1)
-		return FALSE;
-	      if (xtensa_operand_get_field (isa, opcode, 0,
-					    fmt, 0, slotbuf, &rawval0) != 0)
-		return FALSE;
-	      if (xtensa_operand_get_field (isa, opcode, 1,
-					    fmt, 0, slotbuf, &rawval1) != 0)
-		return FALSE;
-	      if (rawval0 == rawval1) /* it is a nop */
-		return FALSE;
+	      if (o_operand_count != operand_count + 1
+		  || xtensa_operand_get_field (isa, opcode, 0,
+					       fmt, 0, slotbuf, &rawval0) != 0
+		  || xtensa_operand_get_field (isa, opcode, 1,
+					       fmt, 0, slotbuf, &rawval1) != 0
+		  || rawval0 == rawval1 /* it is a nop */)
+		return 0;
 	    }
 	  if (is_branch)
 	    check_operand_count--;
 
-	  for (i = 0; i < check_operand_count; ++i)
+	  for (i = 0; i < check_operand_count; i++)
 	    {
 	      int new_i = i;
 	      if (is_or && i == o_operand_count - 1)
@@ -3826,7 +3812,7 @@ widen_instruction (bfd_byte *contents,
 	      if (xtensa_operand_get_field (isa, opcode, new_i, fmt, 0,
 					    slotbuf, &value)
 		  || xtensa_operand_decode (isa, opcode, new_i, &value))
-		return FALSE;
+		return 0;
 
 	      /* PC-relative branches need adjustment, but
 		 the PC-rel operand will always have a relocation.  */
@@ -3836,17 +3822,72 @@ widen_instruction (bfd_byte *contents,
 		  || xtensa_operand_encode (isa, o_opcode, i, &newval)
 		  || xtensa_operand_set_field (isa, o_opcode, i, o_fmt, 0,
 					       o_slotbuf, newval))
-		return FALSE;
+		return 0;
 	    }
 
 	  if (xtensa_format_set_slot (isa, o_fmt, 0, o_insnbuf, o_slotbuf))
-	    return FALSE;
+	    return 0;
 
-	  if (do_it)
-	    xtensa_insnbuf_to_chars (isa, o_insnbuf, contents + offset,
-				     content_length - offset);
-	  return TRUE;
+	  return o_insnbuf;
 	}
+    }
+  return 0;
+}
+
+		       
+/* Attempt to widen an instruction.  If the widening is valid, perform
+   the action in-place directly into the contents and return TRUE.  Otherwise,
+   the return value is FALSE and the contents are not modified.  */
+
+static bfd_boolean
+widen_instruction (bfd_byte *contents,
+		   bfd_size_type content_length,
+		   bfd_size_type offset)
+{
+  xtensa_opcode opcode;
+  bfd_size_type insn_len;
+  xtensa_isa isa = xtensa_default_isa;
+  xtensa_format fmt;
+  xtensa_insnbuf o_insnbuf;
+
+  static xtensa_insnbuf insnbuf = NULL;
+  static xtensa_insnbuf slotbuf = NULL;
+
+  if (insnbuf == NULL)
+    {
+      insnbuf = xtensa_insnbuf_alloc (isa);
+      slotbuf = xtensa_insnbuf_alloc (isa);
+    }
+
+  BFD_ASSERT (offset < content_length);
+
+  if (content_length < 2)
+    return FALSE;
+
+  /* We will hand-code a few of these for a little while.
+     These have all been specified in the assembler aleady.  */
+  xtensa_insnbuf_from_chars (isa, insnbuf, &contents[offset],
+			     content_length - offset);
+  fmt = xtensa_format_decode (isa, insnbuf);
+  if (xtensa_format_num_slots (isa, fmt) != 1)
+    return FALSE;
+
+  if (xtensa_format_get_slot (isa, fmt, 0, insnbuf, slotbuf) != 0)
+    return FALSE;
+
+  opcode = xtensa_opcode_decode (isa, fmt, 0, slotbuf);
+  if (opcode == XTENSA_UNDEFINED)
+    return FALSE;
+  insn_len = xtensa_format_length (isa, fmt);
+  if (insn_len > content_length)
+    return FALSE;
+
+  o_insnbuf = can_widen_instruction (slotbuf, fmt, opcode);
+  if (o_insnbuf)
+    {
+      xtensa_insnbuf_to_chars (isa, o_insnbuf, contents + offset,
+			       content_length - offset);
+      return TRUE;
     }
   return FALSE;
 }
@@ -6495,6 +6536,23 @@ error_return:
 }
 
 
+/* Do not widen an instruction if it is preceeded by a
+   loop opcode.  It might cause misalignment.  */
+
+static bfd_boolean
+prev_instr_is_a_loop (bfd_byte *contents,
+		      bfd_size_type content_length,
+		      bfd_size_type offset)
+{
+  xtensa_opcode prev_opcode;
+
+  if (offset < 3)
+    return FALSE;
+  prev_opcode = insn_decode_opcode (contents, content_length, offset-3, 0);
+  return (xtensa_opcode_is_loop (xtensa_default_isa, prev_opcode) == 1);
+} 
+
+
 /* Find all of the possible actions for an extended basic block.  */
 
 bfd_boolean
@@ -6503,13 +6561,24 @@ compute_ebb_proposed_actions (ebb_constraint *ebb_table)
   const ebb_t *ebb = &ebb_table->ebb;
   unsigned rel_idx = ebb->start_reloc_idx;
   property_table_entry *entry, *start_entry, *end_entry;
+  bfd_vma offset = 0;
+  xtensa_isa isa = xtensa_default_isa;
+  xtensa_format fmt;
+  static xtensa_insnbuf insnbuf = NULL;
+  static xtensa_insnbuf slotbuf = NULL;
+
+  if (insnbuf == NULL)
+    {
+      insnbuf = xtensa_insnbuf_alloc (isa);
+      slotbuf = xtensa_insnbuf_alloc (isa);
+    }
 
   start_entry = &ebb->ptbl[ebb->start_ptbl_idx];
   end_entry = &ebb->ptbl[ebb->end_ptbl_idx];
 
   for (entry = start_entry; entry <= end_entry; entry++)
     {
-      bfd_vma offset, start_offset, end_offset;
+      bfd_vma start_offset, end_offset;
       bfd_size_type insn_len;
 
       start_offset = entry->address - ebb->sec->vma;
@@ -6531,15 +6600,9 @@ compute_ebb_proposed_actions (ebb_constraint *ebb_table)
 
 	  insn_len = insn_decode_len (ebb->contents, ebb->content_length,
 				      offset);
-
-	  /* Propose no actions for a section with an undecodable offset.  */
 	  if (insn_len == 0) 
-	    {
-	      (*_bfd_error_handler)
-		(_("%B(%A+0x%lx): could not decode instruction; possible configuration mismatch"),
-		 ebb->sec->owner, ebb->sec, offset);
-	      return FALSE;
-	    }
+	    goto decode_error;
+
 	  if (check_branch_target_aligned_address (offset, insn_len))
 	    align_type = EBB_REQUIRE_TGT_ALIGN;
 
@@ -6570,12 +6633,7 @@ compute_ebb_proposed_actions (ebb_constraint *ebb_table)
 						     ebb->content_length,
 						     irel->r_offset);
 	      if (simplify_size == 0)
-		{
-		  (*_bfd_error_handler)
-		    (_("%B(%A+0x%lx): could not decode instruction for XTENSA_ASM_SIMPLIFY relocation; possible configuration mismatch"),
-		     ebb->sec->owner, ebb->sec, offset);
-		  return FALSE;
-		}
+		goto decode_error;
 
 	      ebb_propose_action (ebb_table, EBB_NO_ALIGN, 0,
 				  ta_convert_longcall, offset, 0, TRUE);
@@ -6584,47 +6642,50 @@ compute_ebb_proposed_actions (ebb_constraint *ebb_table)
 	      continue;
 	    }
 
-	  insn_len = insn_decode_len (ebb->contents, ebb->content_length,
-				      offset);
-	  /* If the instruction is undecodable, then report an error.  */
-	  if (insn_len == 0)
+	  if (offset + MIN_INSN_LENGTH > ebb->content_length)
+	    goto decode_error;
+	  xtensa_insnbuf_from_chars (isa, insnbuf, &ebb->contents[offset],
+				     ebb->content_length - offset);
+	  fmt = xtensa_format_decode (isa, insnbuf);
+	  if (fmt == XTENSA_UNDEFINED)
+	    goto decode_error;
+	  insn_len = xtensa_format_length (isa, fmt);
+	  if (insn_len == (bfd_size_type) XTENSA_UNDEFINED)
+	    goto decode_error;
+
+	  if (xtensa_format_num_slots (isa, fmt) != 1)
 	    {
-	      (*_bfd_error_handler)
-		(_("%B(%A+0x%lx): could not decode instruction; possible configuration mismatch"),
-		 ebb->sec->owner, ebb->sec, offset);
-	      return FALSE;
+	      offset += insn_len;
+	      continue;
 	    }
-	    
+
+	  xtensa_format_get_slot (isa, fmt, 0, insnbuf, slotbuf);
+	  opcode = xtensa_opcode_decode (isa, fmt, 0, slotbuf);
+	  if (opcode == XTENSA_UNDEFINED)
+	    goto decode_error;
+
 	  if ((entry->flags & XTENSA_PROP_INSN_NO_DENSITY) == 0
 	      && (entry->flags & XTENSA_PROP_INSN_NO_TRANSFORM) == 0
-	      && narrow_instruction (ebb->contents, ebb->content_length,
-				     offset, FALSE))
+	      && can_narrow_instruction (slotbuf, fmt, opcode) != 0)
 	    {
 	      /* Add an instruction narrow action.  */
 	      ebb_propose_action (ebb_table, EBB_NO_ALIGN, 0,
 				  ta_narrow_insn, offset, 0, FALSE);
-	      offset += insn_len;
-	      continue;
 	    }
-	  if ((entry->flags & XTENSA_PROP_INSN_NO_TRANSFORM) == 0
-	      && widen_instruction (ebb->contents, ebb->content_length,
-				    offset, FALSE))
+	  else if ((entry->flags & XTENSA_PROP_INSN_NO_TRANSFORM) == 0
+		   && can_widen_instruction (slotbuf, fmt, opcode) != 0
+		   && ! prev_instr_is_a_loop (ebb->contents,
+					      ebb->content_length, offset))
 	    {
 	      /* Add an instruction widen action.  */
 	      ebb_propose_action (ebb_table, EBB_NO_ALIGN, 0,
 				  ta_widen_insn, offset, 0, FALSE);
-	      offset += insn_len;
-	      continue;
 	    }
-	  opcode = insn_decode_opcode (ebb->contents, ebb->content_length,
-				       offset, 0);
-	  if (xtensa_opcode_is_loop (xtensa_default_isa, opcode))
+	  else if (xtensa_opcode_is_loop (xtensa_default_isa, opcode) == 1)
 	    {
 	      /* Check for branch targets.  */
 	      ebb_propose_action (ebb_table, EBB_REQUIRE_LOOP_ALIGN, 0,
 				  ta_none, offset, 0, TRUE);
-	      offset += insn_len;
-	      continue;
 	    }
 
 	  offset += insn_len;
@@ -6638,6 +6699,12 @@ compute_ebb_proposed_actions (ebb_constraint *ebb_table)
     }
 
   return TRUE;
+
+ decode_error:
+  (*_bfd_error_handler)
+    (_("%B(%A+0x%lx): could not decode instruction; possible configuration mismatch"),
+     ebb->sec->owner, ebb->sec, offset);
+  return FALSE;
 }
 
 
@@ -8250,7 +8317,7 @@ relax_section (bfd *abfd, asection *sec, struct bfd_link_info *link_info)
 	      copy_size = 2;
 	      memmove (scratch, &contents[orig_dot], orig_insn_size);
 	      BFD_ASSERT (action->removed_bytes == 1);
-	      rv = narrow_instruction (scratch, final_size, 0, TRUE);
+	      rv = narrow_instruction (scratch, final_size, 0);
 	      BFD_ASSERT (rv);
 	      memmove (&dup_contents[dup_dot], scratch, copy_size);
 	      orig_dot += orig_insn_size;
@@ -8283,7 +8350,7 @@ relax_section (bfd *abfd, asection *sec, struct bfd_link_info *link_info)
 	      copy_size = 3;
 	      memmove (scratch, &contents[orig_dot], orig_insn_size);
 	      BFD_ASSERT (action->removed_bytes == -1);
-	      rv = widen_instruction (scratch, final_size, 0, TRUE);
+	      rv = widen_instruction (scratch, final_size, 0);
 	      BFD_ASSERT (rv);
 	      memmove (&dup_contents[dup_dot], scratch, copy_size);
 	      orig_dot += orig_insn_size;

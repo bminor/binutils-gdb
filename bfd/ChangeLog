@@ -1,3 +1,19 @@
+2006-05-15  David Heine  <dlheine@tensilica.com>
+	    Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (check_loop_aligned): Fix reversed check for
+	undefined opcode.  Clean up assertions.
+	(narrow_instruction, widen_instruction): Remove "do_it" parameters.
+	Factor most of the code into separate functions....
+	(can_narrow_instruction, can_widen_instruction): New.
+	(prev_instr_is_a_loop): New.
+	(compute_ebb_proposed_actions): Combine error handling code for
+	decode errors.  Replace call to insn_decode_len with inline code.
+	Use can_narrow_instruction and can_widen_instruction.  Handle errors
+	from call to xtensa_opcode_is_loop.
+	(relax_section): Adjust calls to narrow_instruction and 
+	widen_instruction.
+
 2006-05-15  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 2658
