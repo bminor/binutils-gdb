@@ -1,3 +1,11 @@
+2006-06-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* version.in (version.in): Bump version number to 6.5.50 now
+	that the gdb-6.5 branch has been created.
+	* NEWS: Create a new section for changes that are included
+	since gdb-6.5. Name the "since gdb-6.4" section as the "in gdb-6.5"
+	section.
+
 2006-05-16  Jim Blandy  <jimb@codesourcery.com>
 
 	* MAINTAINERS (Authorized Committers): Gaius Mulley has accepted

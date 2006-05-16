@@ -1,7 +1,9 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 6.4
+*** Changes since GDB 6.5
+
+*** Changes in GDB 6.5
 
 * New targets
 
