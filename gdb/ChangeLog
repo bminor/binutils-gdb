@@ -1,4 +1,8 @@
-2006-06-16  Joel Brobecker  <brobecker@adacore.com>
+2006-05-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ser-e7kpc.c: Include <time.h> if it is available.
+
+2006-05-16  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in (version.in): Bump version number to 6.5.50 now
 	that the gdb-6.5 branch has been created.
