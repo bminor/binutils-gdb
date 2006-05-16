@@ -1,3 +1,9 @@
+2006-05-16  Jim Blandy  <jimb@codesourcery.com>
+
+	* MAINTAINERS (Authorized Committers): Gaius Mulley has accepted
+	the Global Maintainers' invitation to be an authorized committer
+	for the Modula-2 support.
+
 2006-05-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* ppcobsd-nat.c: Include "gdb_assert.h".

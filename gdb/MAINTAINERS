@@ -422,6 +422,7 @@ Kernel Object Display	Fernando Nasser		fnasser@redhat.com
 NetBSD native & host	Jason Thorpe		thorpej@netbsd.org
 Pascal support		Pierre Muller		muller@sources.redhat.com
 avr			Theodore A. Roth	troth@openavr.org
+Modula-2 support	Gaius Mulley		gaius@glam.ac.uk
 
 
 			Write After Approval
