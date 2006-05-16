@@ -126,14 +126,15 @@ extern long md_pcrel_from_section (struct fix *, segT);
    We could in principle keep these fixups in gas when not relaxing.
    However, there is no serious performance penilty when making the linker
    make the fixup work.  */
-#define TC_VALIDATE_FIX(FIXP,SEG,SKIP)                      \
-  if ( FIXP->fx_r_type == BFD_RELOC_AVR_7_PCREL             \
-    || FIXP->fx_r_type == BFD_RELOC_AVR_13_PCREL            \
-    || FIXP->fx_r_type == BFD_RELOC_AVR_LO8_LDI_PM          \
-    || FIXP->fx_r_type == BFD_RELOC_AVR_HI8_LDI_PM          \
-    || FIXP->fx_r_type == BFD_RELOC_AVR_HH8_LDI_PM          \
-    || FIXP->fx_r_type == BFD_RELOC_AVR_16_PM)              \
-    {                                                       \
-      goto SKIP;                                            \
-    }
+#define TC_VALIDATE_FIX(FIXP,SEG,SKIP)                     \
+ if (   (FIXP->fx_r_type == BFD_RELOC_AVR_7_PCREL          \
+      || FIXP->fx_r_type == BFD_RELOC_AVR_13_PCREL         \
+      || FIXP->fx_r_type == BFD_RELOC_AVR_LO8_LDI_PM       \
+      || FIXP->fx_r_type == BFD_RELOC_AVR_HI8_LDI_PM       \
+      || FIXP->fx_r_type == BFD_RELOC_AVR_HH8_LDI_PM       \
+      || FIXP->fx_r_type == BFD_RELOC_AVR_16_PM)           \
+     && (FIXP->fx_addsy))                                  \
+   {                                                       \
+     goto SKIP;                                            \
+   }
 
