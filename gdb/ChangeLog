@@ -1,5 +1,9 @@
 2006-05-16  Joel Brobecker  <brobecker@adacore.com>
 
+	* NEWS: Change "Changes since GDB 6.4" into "Changes in GDB 6.5".
+
+2006-05-16  Joel Brobecker  <brobecker@adacore.com>
+
 	* version.in: Update to 6.4.90.
 
 2006-05-14  Nick Roberts  <nickrob@snap.net.nz>
