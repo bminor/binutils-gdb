@@ -1,3 +1,17 @@
+2006-05-16  Nick Clifton  <nickc@redhat.com>
+
+	* Import these patches from the mainline:
+
+	2006-05-16  Bjoern Haase  <bjoern.m.haase@web.de>
+
+        * config/tc-avr.h (TC_VALIDATE_FIX): Allow fixups for immediate
+	constant values.
+
+	2006-05-05  Bjoern Haase  <bjoern.m.haase@web.de>
+
+	* gas/config/tc-avr.h (TC_VALIDATE_FIX): Define.  Disable fixups
+	for PMEM related expressions.
+
 2006-05-11  Thiemo Seufer  <ths@mips.com>
 
 	* config/tc-mips.c (append_insn): Don't check the range of j or

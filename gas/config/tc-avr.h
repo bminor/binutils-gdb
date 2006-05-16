@@ -120,3 +120,21 @@ extern long md_pcrel_from_section (struct fix *, segT);
    also affected by this macro.  The default definition will set
    P2VAR to the truncated power of two of sizes up to eight bytes.  */
 #define TC_IMPLICIT_LCOMM_ALIGNMENT(SIZE, P2VAR) (P2VAR) = 0
+
+/* We don't want gas to fixup the following program memory related relocations.
+   We will need them in case that we want to do linker relaxation.
+   We could in principle keep these fixups in gas when not relaxing.
+   However, there is no serious performance penilty when making the linker
+   make the fixup work.  */
+#define TC_VALIDATE_FIX(FIXP,SEG,SKIP)                     \
+ if (   (FIXP->fx_r_type == BFD_RELOC_AVR_7_PCREL          \
+      || FIXP->fx_r_type == BFD_RELOC_AVR_13_PCREL         \
+      || FIXP->fx_r_type == BFD_RELOC_AVR_LO8_LDI_PM       \
+      || FIXP->fx_r_type == BFD_RELOC_AVR_HI8_LDI_PM       \
+      || FIXP->fx_r_type == BFD_RELOC_AVR_HH8_LDI_PM       \
+      || FIXP->fx_r_type == BFD_RELOC_AVR_16_PM)           \
+     && (FIXP->fx_addsy))                                  \
+   {                                                       \
+     goto SKIP;                                            \
+   }
+
