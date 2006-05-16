@@ -1,3 +1,13 @@
+2006-05-16  Andreas Schwab  <schwab@suse.de>
+
+	* aoutf1.h (struct external_sparc_core): Declare c_regs as struct
+	regs instead of an array of int.
+	(struct external_solaris_bcp_core): Likewise.
+	(swapcore_sun3): Use offsetof instead of computing the offset
+	manually.
+	(swapcore_sparc): Likewise.  Simplify reference to c_regs.
+	(swapcore_solaris_bcp): Likewise.
+
 2006-05-15  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 2658
