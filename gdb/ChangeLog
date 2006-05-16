@@ -1,5 +1,9 @@
 2006-05-16  Joel Brobecker  <brobecker@adacore.com>
 
+	* README: Update GDB version number.
+
+2006-05-16  Joel Brobecker  <brobecker@adacore.com>
+
 	* NEWS: Change "Changes since GDB 6.4" into "Changes in GDB 6.5".
 
 2006-05-16  Joel Brobecker  <brobecker@adacore.com>
