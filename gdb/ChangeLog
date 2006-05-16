@@ -1,3 +1,7 @@
+2006-05-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* version.in: Update to 6.4.90.
+
 2006-05-14  Nick Roberts  <nickrob@snap.net.nz>
 
 	* mi/gdb-mi.el (gdbmi-send): Correct regexp for repeat commands.
