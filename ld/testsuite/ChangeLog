@@ -1,3 +1,7 @@
+2006-05-16  Thiemo Seufer  <ths@mips.com>
+
+	* ld-elf/orphan.ld: Add placement for MIPS .reginfo section.
+
 2006-05-15  Paul Brook  <paul@codesourcery.com>
 
 	* ld-arm/arm-be8.d: New test.
