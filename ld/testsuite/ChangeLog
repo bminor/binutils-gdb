@@ -1,3 +1,7 @@
+2006-05-16  Thiemo Seufer  <ths@mips.com>
+
+	* ld-elf/orphan.ld: Add placement for MIPS .reginfo section.
+
 2006-05-10  Thiemo Seufer  <ths@debian.org>
 
 	* ld-elf/sec64k.exp: Extend for MIPS ELF.
