@@ -1,5 +1,6 @@
 /* Disassemble AVR instructions.
-   Copyright 1999, 2000, 2002, 2004, 2005 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2002, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
    Contributed by Denis Chertykov <denisc@overta.ru>
 
@@ -142,7 +143,7 @@ avr_operand (unsigned int insn, unsigned int insn2, unsigned int pc, int constra
       /* See PR binutils/2545.  Ideally we would like to display the hex
 	 value of the address only once, but this would mean recoding
 	 objdump_print_address() which would affect many targets.  */
-      sprintf (buf, "%#lx", (unsigned long ) *sym_addr);      
+      sprintf (buf, "%#lx", (unsigned long) *sym_addr);      
       sprintf (comment, "0x");
 
       break;
