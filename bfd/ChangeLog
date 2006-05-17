@@ -1,3 +1,8 @@
+2006-05-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* configure.in: Update version to 2.16.92.
+	* configure: Regenerated.
+
 2006-05-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (elf_gc_sweep): Don't specially keep non-alloc,
