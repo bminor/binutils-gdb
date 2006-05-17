@@ -1,3 +1,8 @@
+2006-05-17  Thiemo Seufer  <ths@mips.com>
+
+	* ld-elfweak/size2.d, ld-elfweak/size2a.s, ld-elfweak/size2b.s:
+	Add __start as entry symbol.
+
 2006-05-16  Thiemo Seufer  <ths@mips.com>
 
 	* ld-elf/orphan.ld: Add placement for MIPS .reginfo section.
