@@ -4106,24 +4106,20 @@ print_segment_map (bfd *abfd)
 
 /* Assign file positions to the sections based on the mapping from
    sections to segments.  This function also sets up some fields in
-   the file header, and writes out the program headers.  */
+   the file header.  */
 
 static bfd_boolean
-assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
+assign_file_positions_for_load_sections (bfd *abfd,
+					 struct bfd_link_info *link_info)
 {
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-  unsigned int count;
   struct elf_segment_map *m;
-  unsigned int alloc;
   Elf_Internal_Phdr *phdrs;
-  file_ptr off, voff;
-  bfd_vma filehdr_vaddr, filehdr_paddr;
-  bfd_vma phdrs_vaddr, phdrs_paddr;
   Elf_Internal_Phdr *p;
-  Elf_Internal_Shdr **i_shdrpp;
-  Elf_Internal_Shdr **hdrpp;
+  file_ptr off, voff;
+  unsigned int count;
+  unsigned int alloc;
   unsigned int i;
-  unsigned int num_sec;
 
   if (elf_tdata (abfd)->segment_map == NULL)
     {
@@ -4196,19 +4192,18 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
     }
 
   if (alloc == 0)
-    alloc = count;
+    {
+      alloc = count;
+      elf_tdata (abfd)->program_header_size = alloc * bed->s->sizeof_phdr;
+    }
 
   phdrs = bfd_alloc2 (abfd, alloc, sizeof (Elf_Internal_Phdr));
+  elf_tdata (abfd)->phdr = phdrs;
   if (phdrs == NULL)
     return FALSE;
 
   off = bed->s->sizeof_ehdr;
   off += alloc * bed->s->sizeof_phdr;
-
-  filehdr_vaddr = 0;
-  filehdr_paddr = 0;
-  phdrs_vaddr = 0;
-  phdrs_paddr = 0;
 
   for (m = elf_tdata (abfd)->segment_map, p = phdrs;
        m != NULL;
@@ -4345,11 +4340,6 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 	      if (! m->p_paddr_valid)
 		p->p_paddr -= off;
 	    }
-	  if (p->p_type == PT_LOAD)
-	    {
-	      filehdr_vaddr = p->p_vaddr;
-	      filehdr_paddr = p->p_paddr;
-	    }
 	}
 
       if (m->includes_phdrs)
@@ -4357,15 +4347,7 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 	  if (! m->p_flags_valid)
 	    p->p_flags |= PF_R;
 
-	  if (m->includes_filehdr)
-	    {
-	      if (p->p_type == PT_LOAD)
-		{
-		  phdrs_vaddr = p->p_vaddr + bed->s->sizeof_ehdr;
-		  phdrs_paddr = p->p_paddr + bed->s->sizeof_ehdr;
-		}
-	    }
-	  else
+	  if (!m->includes_filehdr)
 	    {
 	      p->p_offset = bed->s->sizeof_ehdr;
 
@@ -4376,14 +4358,6 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 		  if (! m->p_paddr_valid)
 		    p->p_paddr -= off - p->p_offset;
 		}
-
-	      if (p->p_type == PT_LOAD)
-		{
-		  phdrs_vaddr = p->p_vaddr;
-		  phdrs_paddr = p->p_paddr;
-		}
-	      else
-		phdrs_vaddr = bed->maxpagesize + bed->s->sizeof_ehdr;
 	    }
 
 	  p->p_filesz += alloc * bed->s->sizeof_phdr;
@@ -4538,9 +4512,39 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 	}
     }
 
-  /* Assign file positions for the other sections.  */
+  /* Clear out any program headers we allocated but did not use.  */
+  for (; count < alloc; count++, p++)
+    {
+      memset (p, 0, sizeof *p);
+      p->p_type = PT_NULL;
+    }
+
+  elf_tdata (abfd)->next_file_pos = off;
+  return TRUE;
+}
+
+/* Assign file positions for the other sections.  */
+
+static bfd_boolean
+assign_file_positions_for_non_load_sections (bfd *abfd,
+					     struct bfd_link_info *link_info)
+{
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  Elf_Internal_Shdr **i_shdrpp;
+  Elf_Internal_Shdr **hdrpp;
+  Elf_Internal_Phdr *phdrs;
+  Elf_Internal_Phdr *p;
+  struct elf_segment_map *m;
+  bfd_vma filehdr_vaddr, filehdr_paddr;
+  bfd_vma phdrs_vaddr, phdrs_paddr;
+  file_ptr off;
+  unsigned int num_sec;
+  unsigned int i;
+  unsigned int count;
+
   i_shdrpp = elf_elfsections (abfd);
   num_sec = elf_numsections (abfd);
+  off = elf_tdata (abfd)->next_file_pos;
   for (i = 1, hdrpp = i_shdrpp + 1; i < num_sec; i++, hdrpp++)
     {
       struct elf_obj_tdata *tdata = elf_tdata (abfd);
@@ -4585,6 +4589,37 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 
   /* Now that we have set the section file positions, we can set up
      the file positions for the non PT_LOAD segments.  */
+  count = 0;
+  filehdr_vaddr = 0;
+  filehdr_paddr = 0;
+  phdrs_vaddr = bed->maxpagesize + bed->s->sizeof_ehdr;
+  phdrs_paddr = 0;
+  phdrs = elf_tdata (abfd)->phdr;
+  for (m = elf_tdata (abfd)->segment_map, p = phdrs;
+       m != NULL;
+       m = m->next, p++)
+    {
+      ++count;
+      if (p->p_type != PT_LOAD)
+	continue;
+
+      if (m->includes_filehdr)
+	{
+	  filehdr_vaddr = p->p_vaddr;
+	  filehdr_paddr = p->p_paddr;
+	}
+      if (m->includes_phdrs)
+	{
+	  phdrs_vaddr = p->p_vaddr;
+	  phdrs_paddr = p->p_paddr;
+	  if (m->includes_filehdr)
+	    {
+	      phdrs_vaddr += bed->s->sizeof_ehdr;
+	      phdrs_paddr += bed->s->sizeof_ehdr;
+	    }
+	}
+    }
+
   for (m = elf_tdata (abfd)->segment_map, p = phdrs;
        m != NULL;
        m = m->next, p++)
@@ -4657,21 +4692,7 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 	}
     }
 
-  /* Clear out any program headers we allocated but did not use.  */
-  for (; count < alloc; count++, p++)
-    {
-      memset (p, 0, sizeof *p);
-      p->p_type = PT_NULL;
-    }
-
-  elf_tdata (abfd)->phdr = phdrs;
-
   elf_tdata (abfd)->next_file_pos = off;
-
-  /* Write out the program headers.  */
-  if (bfd_seek (abfd, (bfd_signed_vma) bed->s->sizeof_ehdr, SEEK_SET) != 0
-      || bed->s->write_out_phdrs (abfd, phdrs, alloc) != 0)
-    return FALSE;
 
   return TRUE;
 }
@@ -4844,9 +4865,21 @@ assign_file_positions_except_relocs (bfd *abfd,
     }
   else
     {
+      unsigned int alloc;
+
       /* Assign file positions for the loaded sections based on the
          assignment of sections to segments.  */
-      if (! assign_file_positions_for_segments (abfd, link_info))
+      if (!assign_file_positions_for_load_sections (abfd, link_info))
+	return FALSE;
+
+      /* And for non-load sections.  */
+      if (!assign_file_positions_for_non_load_sections (abfd, link_info))
+	return FALSE;
+
+      /* Write out the program headers.  */
+      alloc = tdata->program_header_size / bed->s->sizeof_phdr;
+      if (bfd_seek (abfd, (bfd_signed_vma) bed->s->sizeof_ehdr, SEEK_SET) != 0
+	  || bed->s->write_out_phdrs (abfd, tdata->phdr, alloc) != 0)
 	return FALSE;
 
       off = tdata->next_file_pos;

@@ -1,5 +1,12 @@
 2006-05-17  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf.c (assign_file_positions_for_segments): Split into..
+	(assign_file_positions_for_load_sections): ..this, and..
+	(assign_file_positions_for_non_load_sections): ..this new function,..
+	(assign_file_positions_except_relocs): ..writing program headers here.
+
+2006-05-17  Alan Modra  <amodra@bigpond.net.au>
+
 	* elflink.c (elf_gc_sweep): Don't specially keep non-alloc,
 	non-load sections if they have relocs.
 
