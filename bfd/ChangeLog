@@ -135,7 +135,7 @@
 
 2006-05-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
-	* bfd/cpu-arm.c (bfd_is_arm_mapping_symbol_name): Accept more
+	* cpu-arm.c (bfd_is_arm_mapping_symbol_name): Accept more
 	mapping symbols.
 
 2006-05-04  Ben Elliston  <bje@au.ibm.com>
