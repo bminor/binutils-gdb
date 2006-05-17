@@ -1,3 +1,8 @@
+2006-05-17  Fred Fish  <fnf@specifix.com>
+
+	* gdb.base/relocate.exp: Use gdb_file_cmd rather than
+	gdb_load, so it works in the simulator.
+
 2006-05-11  Fred Fish  <fnf@specifix.com>
 
 	* gdb.base/bang.exp: Ignore unexpected output between the
