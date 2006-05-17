@@ -1,3 +1,2 @@
-@set VERSION 2.16.92
-@set UPDATED April 2006
-@set top_srcdir ../.././binutils
+@set VERSION 2.16.93
+@set UPDATED May 2006
