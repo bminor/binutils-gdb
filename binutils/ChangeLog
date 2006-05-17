@@ -1,3 +1,7 @@
+2006-05-17  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* doc/binutils.texi: Use "Binutils Index" for index name.
+
 2006-05-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* dwarf.c (display_debug_frames): Don't return on ZERO
