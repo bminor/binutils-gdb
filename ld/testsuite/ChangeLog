@@ -1,3 +1,11 @@
+2006-05-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	Backport:
+	2006-05-02  H.J. Lu  <hongjiu.lu@intel.com>
+	* ld-cdtest/cdtest-foo.cc (Foo::Foo): Add const to char *.
+	* ld-cdtest/cdtest-foo.h (Foo::Foo): Likewise.
+	* ld-srec/sr3.cc (Foo::Foo): Likewise.
+
 2006-05-17  Thiemo Seufer  <ths@mips.com>
 
 	* ld-elfweak/size2.d, ld-elfweak/size2a.s, ld-elfweak/size2b.s:
