@@ -1,3 +1,8 @@
+2006-05-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (elf_gc_sweep): Don't specially keep non-alloc,
+	non-load sections if they have relocs.
+
 2006-05-16  Andreas Schwab  <schwab@suse.de>
 
 	* aoutf1.h (struct external_sparc_core): Declare c_regs as struct
