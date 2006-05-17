@@ -1,3 +1,8 @@
+2005-05-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ldlang.c (lang_size_sections): Call lang_reset_memory_regions
+	before redoing one_lang_size_sections_pass.
+
 2006-05-11  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* ld.texinfo: Rename "Index" to "LD Index" 

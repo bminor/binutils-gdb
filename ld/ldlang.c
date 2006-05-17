@@ -4542,6 +4542,7 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
 	  expld.dataseg.base -= maxpage;
 	  relro_end -= maxpage;
 	}
+      lang_reset_memory_regions ();
       one_lang_size_sections_pass (relax, check_regions);
       if (expld.dataseg.relro_end > relro_end)
 	{
@@ -4565,6 +4566,7 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
 		  < old_min_base)
 		expld.dataseg.base += expld.dataseg.pagesize;
 	      expld.dataseg.base -= (1 << max_alignment_power);
+	      lang_reset_memory_regions ();
 	      one_lang_size_sections_pass (relax, check_regions);
 	    }
 	}
@@ -4585,6 +4587,7 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
 	  && first + last <= expld.dataseg.pagesize)
 	{
 	  expld.dataseg.phase = exp_dataseg_adjust;
+	  lang_reset_memory_regions ();
 	  one_lang_size_sections_pass (relax, check_regions);
 	}
     }
