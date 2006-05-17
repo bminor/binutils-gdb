@@ -1,3 +1,14 @@
+2006-05-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote-rdp.c: Deleted.
+	* NEWS: Mention removal of remote-rdp.c.
+
+	* Makefile.in (ALLDEPFILES): Remove remote-rdp.c.
+	(remote-rdp.o): Delete.
+	* README: Remove description of remote-rdp.c.
+	* arm-tdep.c (arm_breakpoint_from_pc): Remove obsolete comment.
+	* config/arm/embed.mt (TDEPFILES): Remove remote-rdp.o.
+
 2006-05-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ser-e7kpc.c: Include <time.h> if it is available.

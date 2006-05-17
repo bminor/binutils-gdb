@@ -1964,11 +1964,6 @@ static const char arm_default_thumb_be_breakpoint[] = THUMB_BE_BREAKPOINT;
    necessary) to point to the actual memory location where the
    breakpoint should be inserted.  */
 
-/* XXX ??? from old tm-arm.h: if we're using RDP, then we're inserting
-   breakpoints and storing their handles instread of what was in
-   memory.  It is nice that this is the same size as a handle -
-   otherwise remote-rdp will have to change.  */
-
 static const unsigned char *
 arm_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {

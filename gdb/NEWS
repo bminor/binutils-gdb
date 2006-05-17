@@ -3,6 +3,10 @@
 
 *** Changes since GDB 6.5
 
+* REMOVED features
+
+The ARM Demon monitor support (RDP protocol, "target rdp").
+
 *** Changes in GDB 6.5
 
 * New targets

@@ -1468,7 +1468,7 @@ ALLDEPFILES = \
 	procfs.c \
 	remote-e7000.c \
 	remote-hms.c remote-m32r-sdi.c remote-mips.c \
-	remote-rdp.c remote-sim.c \
+	remote-sim.c \
 	remote-st.c remote-utils.c dcache.c \
 	rs6000-nat.c rs6000-tdep.c \
 	s390-tdep.c s390-nat.c \
@@ -2504,9 +2504,6 @@ remote-mips.o: remote-mips.c $(defs_h) $(inferior_h) $(bfd_h) $(symfile_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(serial_h) $(target_h) $(exceptions_h) \
 	$(remote_utils_h) $(gdb_string_h) $(gdb_stat_h) $(regcache_h) \
 	$(mips_tdep_h)
-remote-rdp.o: remote-rdp.c $(defs_h) $(inferior_h) $(value_h) \
-	$(gdb_callback_h) $(command_h) $(symfile_h) $(remote_utils_h) \
-	$(gdb_string_h) $(gdbcore_h) $(regcache_h) $(serial_h) $(arm_tdep_h)
 remote-sds.o: remote-sds.c $(defs_h) $(gdb_string_h) $(frame_h) \
 	$(inferior_h) $(exceptions_h) $(bfd_h) $(symfile_h) $(target_h) \
 	$(gdbcmd_h) $(objfiles_h) $(gdb_stabs_h) $(gdbthread_h) $(gdbcore_h) \
