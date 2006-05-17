@@ -1,5 +1,11 @@
 2006-05-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* dwarf2-frame.c: Include "value.h".
+	(read_reg): Use unpack_long and register_type.
+	* Makefile.in (dwarf2-frame.o): Update.
+
+2006-05-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* remote-rdp.c: Deleted.
 	* NEWS: Mention removal of remote-rdp.c.
 

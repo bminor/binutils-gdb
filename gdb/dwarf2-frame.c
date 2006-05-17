@@ -32,6 +32,7 @@
 #include "symtab.h"
 #include "objfiles.h"
 #include "regcache.h"
+#include "value.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
@@ -218,7 +219,13 @@ read_reg (void *baton, int reg)
 
   buf = alloca (register_size (gdbarch, regnum));
   frame_unwind_register (next_frame, regnum, buf);
-  return extract_typed_address (buf, builtin_type_void_data_ptr);
+
+  /* Convert the register to an integer.  This returns a LONGEST
+     rather than a CORE_ADDR, but unpack_pointer does the same thing
+     under the covers, and this makes more sense for non-pointer
+     registers.  Maybe read_reg and the associated interfaces should
+     deal with "struct value" instead of CORE_ADDR.  */
+  return unpack_long (register_type (gdbarch, regnum), buf);
 }
 
 static void
