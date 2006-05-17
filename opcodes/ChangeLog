@@ -1,3 +1,7 @@
+2006-05-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* avr-dis.c (avr_operand): Warning fix.
+
 2006-05-04  Thiemo Seufer  <ths@mips.com>
 
 	* mips-opc.c (mips_builtin_opcodes): Fix mftr argument order.
@@ -122,7 +126,7 @@
 	New cases '$' and '%' for read/write hyperprivileged register.
 	* sparc-opc.c (sparc_opcodes): Add new entries for UA2005
 	window handling and rdhpr/wrhpr instructions.
-	
+
 2006-02-24  DJ Delorie  <dj@redhat.com>
 
 	* m32c-desc.c: Regenerate with linker relaxation attributes.
@@ -175,13 +179,13 @@
 
 	* xc16x-desc.h: New file
 	* xc16x-desc.c: New file
-	* xc16x-opc.h: New file	
+	* xc16x-opc.h: New file
 	* xc16x-opc.c: New file
 	* xc16x-ibld.c: New file
 	* xc16x-asm.c: New file
 	* xc16x-dis.c: New file
-	* Makefile.am: Entries for xc16x 
-	* Makefile.in: Regenerate 
+	* Makefile.am: Entries for xc16x
+	* Makefile.in: Regenerate
 	* cofigure.in: Add xc16x target information.
 	* configure: Regenerate.
 	* disassemble.c: Add xc16x target information.
@@ -216,7 +220,7 @@
 
 	* z80-dis.c (struct buffer, prt_d, prt_d_n, arit_d, ld_r_d,
 	ld_d_r, pref_xd_cb): Use signed char to hold data to be
-	disassembled.	
+	disassembled.
 	* z80-dis.c (TXTSIZ): Increase buffer size to 24, this fixes
 	buffer overflows when disassembling instructions like
 	ld (ix+123),0x23
