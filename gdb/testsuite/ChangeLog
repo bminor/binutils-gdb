@@ -1,3 +1,8 @@
+2006-05-18  Fred Fish  <fnf@specifix.com>
+
+	* gdb.base/a2-run.exp: Allow part of test to run when args aren't
+	required.  Check for spurious output after program exits normally.
+
 2006-05-17  Fred Fish  <fnf@specifix.com>
 
 	* gdb.base/relocate.exp: Use gdb_file_cmd rather than
