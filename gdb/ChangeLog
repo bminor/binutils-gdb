@@ -1,3 +1,7 @@
+2006-05-18  Paul Gilliam  <pgilliam@us.ibm.com
+
+	* solib-svr4.c (enable_break): Breakup a long line into 3 shorter ones.
+
 2006-05-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2-frame.c: Include "value.h".
