@@ -5823,7 +5823,7 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
 #define elf_backend_want_p_paddr_set_to_zero 1
 
 #undef  ELF_MAXPAGESIZE
-#define ELF_MAXPAGESIZE                 0x1000  /* 1K */
+#define ELF_MAXPAGESIZE                 0x1000  /* 4K */
 
 #undef  elfNN_bed
 #define elfNN_bed elfNN_ia64_hpux_bed

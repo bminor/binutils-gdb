@@ -1,3 +1,7 @@
+2006-05-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (ELF_MAXPAGESIZE): Fix a typo in comment.
+
 2006-05-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (elf_fake_sections): Formatting.
