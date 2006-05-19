@@ -1,3 +1,13 @@
+2006-05-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (elf_fake_sections): Formatting.
+	(assign_file_positions_for_load_sections): Only add SEC_ALLOC
+	sections to p_memsz.  Remove hack for PT_NOTE sections.  Allow
+	section alignment to increase p_align for PT_LOAD.
+	(assign_file_positions_for_non_load_sections): Remove ARM BPABI
+	hack for PT_DYNAMIC.  Instead, set p_filesz for all segments
+	other than PT_LOAD, and PT_NOTE in core.
+
 2006-05-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (assign_file_positions_for_segments): Split into..

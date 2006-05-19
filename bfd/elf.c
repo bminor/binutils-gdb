@@ -2736,8 +2736,8 @@ elf_fake_sections (bfd *abfd, asection *asect, void *failedptrarg)
       if ((asect->flags & SEC_GROUP) != 0)
 	this_hdr->sh_type = SHT_GROUP;
       else if ((asect->flags & SEC_ALLOC) != 0
-	  && (((asect->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
-	      || (asect->flags & SEC_NEVER_LOAD) != 0))
+	       && (((asect->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
+		   || (asect->flags & SEC_NEVER_LOAD) != 0))
 	this_hdr->sh_type = SHT_NOBITS;
       else
 	this_hdr->sh_type = SHT_PROGBITS;
@@ -4379,6 +4379,11 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	    }
 	}
 
+      /* Set up p_filesz, p_memsz, p_align and p_flags from the section
+	 maps.  Set filepos for sections in PT_LOAD segments, and in
+	 core files, for sections in PT_NOTE segments.
+	 assign_file_positions_for_non_load_sections will set filepos
+	 for other sections and update p_filesz for other segments.  */
       for (i = 0, secpp = m->sections; i < m->count; i++, secpp++)
 	{
 	  asection *sec;
@@ -4410,8 +4415,9 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		}
 	      /* .tbss is special.  It doesn't contribute to p_memsz of
 		 normal segments.  */
-	      else if ((flags & SEC_THREAD_LOCAL) == 0
-		       || p->p_type == PT_TLS)
+	      else if ((flags & SEC_ALLOC) != 0
+		       && ((flags & SEC_THREAD_LOCAL) == 0
+			   || p->p_type == PT_TLS))
 		{
 		  /* The section VMA must equal the file position
 		     modulo the page size.  */
@@ -4475,16 +4481,12 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		  p->p_filesz += sec->size;
 		  p->p_memsz += sec->size;
 		}
-	      /* PR ld/594:  Sections in note segments which are not loaded
-		 contribute to the file size but not the in-memory size.  */
-	      else if (p->p_type == PT_NOTE
-		  && (flags & SEC_HAS_CONTENTS) != 0)
-		p->p_filesz += sec->size;
 
 	      /* .tbss is special.  It doesn't contribute to p_memsz of
 		 normal segments.  */
-	      else if ((flags & SEC_THREAD_LOCAL) == 0
-		       || p->p_type == PT_TLS)
+	      else if ((flags & SEC_ALLOC) != 0
+		       && ((flags & SEC_THREAD_LOCAL) == 0
+			   || p->p_type == PT_TLS))
 		p->p_memsz += sec->size;
 
 	      if (p->p_type == PT_TLS
@@ -4497,7 +4499,9 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		}
 
 	      if (align > p->p_align
-		  && (p->p_type != PT_LOAD || (abfd->flags & D_PAGED) == 0))
+		  && (p->p_type != PT_LOAD
+		      || (abfd->flags & D_PAGED) == 0
+		      || ((p->p_vaddr - p->p_offset) & (align - 1)) == 0))
 		p->p_align = align;
 	    }
 
@@ -4624,27 +4628,24 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
        m != NULL;
        m = m->next, p++)
     {
-      if (p->p_type != PT_LOAD && m->count > 0)
+      if (m->count != 0)
 	{
-	  BFD_ASSERT (! m->includes_filehdr && ! m->includes_phdrs);
-	  /* If the section has not yet been assigned a file position,
-	     do so now.  The ARM BPABI requires that .dynamic section
-	     not be marked SEC_ALLOC because it is not part of any
-	     PT_LOAD segment, so it will not be processed above.  */
-	  if (p->p_type == PT_DYNAMIC && m->sections[0]->filepos == 0)
+	  if (p->p_type != PT_LOAD
+	      && (p->p_type != PT_NOTE || bfd_get_format (abfd) != bfd_core))
 	    {
-	      Elf_Internal_Shdr ** const i_shdrpp = elf_elfsections (abfd);
+	      Elf_Internal_Shdr *hdr;
+	      BFD_ASSERT (!m->includes_filehdr && !m->includes_phdrs);
 
-	      i = 1;
-	      while (i_shdrpp[i]->bfd_section != m->sections[0])
-		++i;
-	      off = (_bfd_elf_assign_file_position_for_section 
-		     (i_shdrpp[i], off, TRUE));
-	      p->p_filesz = m->sections[0]->size;
+	      hdr = &elf_section_data (m->sections[m->count - 1])->this_hdr;
+	      p->p_filesz = (m->sections[m->count - 1]->filepos
+			     - m->sections[0]->filepos);
+	      if (hdr->sh_type != SHT_NOBITS)
+		p->p_filesz += hdr->sh_size;
+
+	      p->p_offset = m->sections[0]->filepos;
 	    }
-	  p->p_offset = m->sections[0]->filepos;
 	}
-      if (m->count == 0)
+      else
 	{
 	  if (m->includes_filehdr)
 	    {
