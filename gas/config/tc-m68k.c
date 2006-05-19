@@ -7233,6 +7233,15 @@ m68k_init_arch (void)
   
   current_architecture &= ~not_current_architecture;
 
+  if ((current_architecture & (cfloat | m68881)) == (cfloat | m68881))
+    {
+      /* Determine which float is really meant.  */
+      if (current_architecture & (m68k_mask & ~m68881))
+	current_architecture ^= cfloat;
+      else
+	current_architecture ^= m68881;
+    }
+
   if (selected_cpu)
     {
       control_regs = selected_cpu->control_regs;
@@ -7242,15 +7251,6 @@ m68k_init_arch (void)
 	  current_architecture
 	    = selected_cpu->arch & ~not_current_architecture;
 	}
-    }
-
-  if ((current_architecture & (cfloat | m68881)) == (cfloat | m68881))
-    {
-      /* Determine which float is really meant.  */
-      if (current_architecture & (m68k_mask & ~m68881))
-	current_architecture ^= cfloat;
-      else
-	current_architecture ^= m68881;
     }
 
   if ((current_architecture & m68k_mask)
