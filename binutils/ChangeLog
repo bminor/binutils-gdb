@@ -14,6 +14,7 @@
 	(strip.1): Likewise.
 	(windres.1): Likewise.
 	(cxxfilt.man): Likewise.
+	* doc/Makefile.in: Regenerated.
 
 2006-05-17  Carlos O'Donell  <carlos@codesourcery.com>
 
