@@ -1,4 +1,4 @@
-#as: -mips2 -mvxworks-pic -xgot -mabi=32 -EB
+#as: -mips2 -mvxworks-pic -xgot -mabi=32 -EL
 #source: vxworks1.s
 #objdump: -dr
 
@@ -67,8 +67,8 @@ Disassembly of section \.text:
 .*:	003c0821 	addu	at,at,gp
 .*:	8c210000 	lw	at,0\(at\)
 			.*: R_MIPS_GOT_LO16	\.data
-.*:	88240000 	lwl	a0,0\(at\)
-.*:	98240003 	lwr	a0,3\(at\)
+.*:	88240003 	lwl	a0,3\(at\)
+.*:	98240000 	lwr	a0,0\(at\)
 #
 # ulw $4,global
 #
@@ -77,8 +77,8 @@ Disassembly of section \.text:
 .*:	003c0821 	addu	at,at,gp
 .*:	8c210000 	lw	at,0\(at\)
 			.*: R_MIPS_GOT_LO16	global
-.*:	88240000 	lwl	a0,0\(at\)
-.*:	98240003 	lwr	a0,3\(at\)
+.*:	88240003 	lwl	a0,3\(at\)
+.*:	98240000 	lwr	a0,0\(at\)
 #
 # usw $4,local
 #
@@ -87,8 +87,8 @@ Disassembly of section \.text:
 .*:	003c0821 	addu	at,at,gp
 .*:	8c210000 	lw	at,0\(at\)
 			.*: R_MIPS_GOT_LO16	\.data
-.*:	a8240000 	swl	a0,0\(at\)
-.*:	b8240003 	swr	a0,3\(at\)
+.*:	a8240003 	swl	a0,3\(at\)
+.*:	b8240000 	swr	a0,0\(at\)
 #
 # usw $4,global
 #
@@ -97,6 +97,6 @@ Disassembly of section \.text:
 .*:	003c0821 	addu	at,at,gp
 .*:	8c210000 	lw	at,0\(at\)
 			.*: R_MIPS_GOT_LO16	global
-.*:	a8240000 	swl	a0,0\(at\)
-.*:	b8240003 	swr	a0,3\(at\)
+.*:	a8240003 	swl	a0,3\(at\)
+.*:	b8240000 	swr	a0,0\(at\)
 	\.\.\.

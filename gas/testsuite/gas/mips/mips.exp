@@ -390,6 +390,8 @@ mips_arch_create sb1 	64	mips64	{ mips3d } \
 if { [istarget mips*-*-vxworks*] } {
     run_dump_test "vxworks1"
     run_dump_test "vxworks1-xgot"
+    run_dump_test "vxworks1-el"
+    run_dump_test "vxworks1-xgot-el"
 } elseif { [istarget mips*-*-*] } {
     set no_mips16 0
     set elf [expr [istarget *-*-elf*] || [istarget *-*-irix5*] || [istarget *-*-irix6* ] || [istarget *-*-linux*] || [istarget *-*-netbsd*] ]
@@ -786,6 +788,8 @@ if { [istarget mips*-*-vxworks*] } {
     }
     run_dump_test "vxworks1"
     run_dump_test "vxworks1-xgot"
+    run_dump_test "vxworks1-el"
+    run_dump_test "vxworks1-xgot-el"
 
     run_dump_test "noreorder"
 }
