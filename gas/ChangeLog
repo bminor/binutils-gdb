@@ -1,4 +1,27 @@
 2006-05-19  Thiemo Seufer  <ths@mips.com>
+            David Ung  <davidu@mips.com>
+
+	* config/tc-mips.h (tc_mips_regname_to_dw2regnum): Declare.
+	* config/tc-mipc.c (ABI_NEEDS_64BIT_REGS, ISA_HAS_64BIT_REGS,
+	ISA_HAS_DROR, ISA_HAS_ROR): Reformat.
+	(regname, RTYPE_MASK, RTYPE_NUM, RTYPE_FPU, RTYPE_FCC, RTYPE_VEC,
+	RTYPE_GP, RTYPE_CP0, RTYPE_PC, RTYPE_ACC, RTYPE_CCC, RNUM_MASK,
+	RWARN, GENERIC_REGISTER_NUMBERS, FPU_REGISTER_NAMES,
+	FPU_CONDITION_CODE_NAMES, COPROC_CONDITION_CODE_NAMES,
+	N32N64_SYMBOLIC_REGISTER_NAMES, O32_SYMBOLIC_REGISTER_NAMES,
+	SYMBOLIC_REGISTER_NAMES, MIPS16_SPECIAL_REGISTER_NAMES,
+	MDMX_VECTOR_REGISTER_NAMES, MIPS_DSP_ACCUMULATOR_NAMES, reg_names,
+	reg_names_o32, reg_names_n32n64): Define register classes.
+	(reg_lookup): New function, use register classes.
+	(md_begin): Reserve register names in the symbol table. Simplify
+	OBJ_ELF defines.
+	(mips_ip): Fix comment formatting. Handle symbolic COP0 registers.
+	Use reg_lookup.
+	(mips16_ip): Use reg_lookup.
+	(tc_get_register): Likewise.
+	(tc_mips_regname_to_dw2regnum): New function.
+
+2006-05-19  Thiemo Seufer  <ths@mips.com>
 
 	* config/tc-arm.c, config/tc-arm.h (tc_arm_regname_to_dw2regnum):
 	Un-constify string argument.
