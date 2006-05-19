@@ -326,6 +326,12 @@ static int mips_32bitmode = 0;
    || (ISA) == ISA_MIPS64R2		\
    || mips_opts.ase_smartmips)
 
+/* Return true if ISA supports single-precision floats in odd registers.  */
+#define ISA_HAS_ODD_SINGLE_FPR(ISA)	\
+  ((ISA) == ISA_MIPS32			\
+   || (ISA) == ISA_MIPS32R2		\
+   || (ISA) == ISA_MIPS64		\
+   || (ISA) == ISA_MIPS64R2)
 
 #define HAVE_32BIT_GPRS		                   \
     (mips_opts.gp32 || ! ISA_HAS_64BIT_REGS (mips_opts.isa))
@@ -8209,6 +8215,46 @@ static const struct mips_immed mips_immed[] = {
   { 0,0,0,0 }
 };
 
+/* Check whether an odd floating-point register is allowed.  */
+static int
+mips_oddfpreg_ok (const struct mips_opcode *insn, int argnum)
+{
+  const char *s = insn->name;
+
+  if (insn->pinfo == INSN_MACRO)
+    /* Let a macro pass, we'll catch it later when it is expanded.  */
+    return 1;
+
+  if (ISA_HAS_ODD_SINGLE_FPR (mips_opts.isa))
+    {
+      /* Allow odd registers for single-precision ops.  */
+      switch (insn->pinfo & (FP_S | FP_D))
+	{
+	case FP_S:
+	case 0:
+	  return 1;	/* both single precision - ok */
+	case FP_D:
+	  return 0;	/* both double precision - fail */
+	default:
+	  break;
+	}
+
+      /* Cvt.w.x and cvt.x.w allow an odd register for a 'w' or 's' operand.  */
+      s = strchr (insn->name, '.');
+      if (argnum == 2)
+	s = s != NULL ? strchr (s + 1, '.') : NULL;
+      return (s != NULL && (s[1] == 'w' || s[1] == 's'));
+    } 
+
+  /* Single-precision coprocessor loads and moves are OK too.  */
+  if ((insn->pinfo & FP_S)
+      && (insn->pinfo & (INSN_COPROC_MEMORY_DELAY | INSN_STORE_MEMORY
+			 | INSN_LOAD_COPROC_DELAY | INSN_COPROC_MOVE_DELAY)))
+    return 1;
+
+  return 0;
+}
+
 /* This routine assembles an instruction into its binary format.  As a
    side effect, it sets one of the global variables imm_reloc or
    offset_reloc to the type of relocation to do if one of the operands
@@ -9074,18 +9120,7 @@ do_msbd:
 		{
 		  if ((regno & 1) != 0
 		      && HAVE_32BIT_FPRS
-		      && ! (strcmp (str, "mtc1") == 0
-			    || strcmp (str, "mfc1") == 0
-			    || strcmp (str, "lwc1") == 0
-			    || strcmp (str, "swc1") == 0
-			    || strcmp (str, "l.s") == 0
-			    || strcmp (str, "s.s") == 0
-			    || strcmp (str, "mftc1") == 0
-			    || strcmp (str, "mfthc1") == 0
-			    || strcmp (str, "cftc1") == 0
-			    || strcmp (str, "mttc1") == 0
-			    || strcmp (str, "mtthc1") == 0
-			    || strcmp (str, "cttc1") == 0))
+		      && ! mips_oddfpreg_ok (ip->insn_mo, argnum))
 		    as_warn (_("Float register should be even, was %d"),
 			     regno);
 

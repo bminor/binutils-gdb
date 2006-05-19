@@ -1,4 +1,11 @@
 2006-05-19  Thiemo Seufer  <ths@mips.com>
+            Nigel Stephens  <nigel@mips.com>
+
+	* config/tc-mipc.c (ISA_HAS_ODD_SINGLE_FPR): New define.
+	(mips_oddfpreg_ok): New function.
+	(mips_ip): Use it.
+
+2006-05-19  Thiemo Seufer  <ths@mips.com>
             David Ung  <davidu@mips.com>
 
 	* config/tc-mips.h (tc_mips_regname_to_dw2regnum): Declare.
