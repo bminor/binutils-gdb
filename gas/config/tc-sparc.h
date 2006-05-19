@@ -171,7 +171,7 @@ extern void cons_fix_new_sparc
 extern void sparc_cfi_frame_initial_instructions PARAMS ((void));
 
 #define tc_regname_to_dw2regnum sparc_regname_to_dw2regnum
-extern int sparc_regname_to_dw2regnum PARAMS ((const char *regname));
+extern int sparc_regname_to_dw2regnum PARAMS ((char *regname));
 
 #define tc_cfi_emit_pcrel_expr sparc_cfi_emit_pcrel_expr
 extern void sparc_cfi_emit_pcrel_expr PARAMS ((expressionS *, unsigned int));

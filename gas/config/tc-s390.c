@@ -2322,7 +2322,7 @@ s390_cfi_frame_initial_instructions ()
 }
 
 int
-tc_s390_regname_to_dw2regnum (const char *regname)
+tc_s390_regname_to_dw2regnum (char *regname)
 {
   int regnum = -1;
 

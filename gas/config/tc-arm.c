@@ -15601,9 +15601,9 @@ create_unwind_entry (int have_data)
 /* Convert REGNAME to a DWARF-2 register number.  */
 
 int
-tc_arm_regname_to_dw2regnum (const char *regname)
+tc_arm_regname_to_dw2regnum (char *regname)
 {
-  int reg = arm_reg_parse ((char **) &regname, REG_TYPE_RN);
+  int reg = arm_reg_parse (&regname, REG_TYPE_RN);
 
   if (reg == FAIL)
     return -1;

@@ -244,5 +244,5 @@ extern void arm_init_frag (struct frag *);
 extern void arm_handle_align (struct frag *);
 extern bfd_boolean arm_fix_adjustable (struct fix *);
 extern int arm_elf_section_type (const char *, size_t);
-extern int tc_arm_regname_to_dw2regnum (const char *regname);
+extern int tc_arm_regname_to_dw2regnum (char *regname);
 extern void tc_arm_frame_initial_instructions (void);

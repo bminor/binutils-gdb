@@ -488,7 +488,7 @@ extern int x86_cie_data_alignment;
 #define DWARF2_CIE_DATA_ALIGNMENT x86_cie_data_alignment
 
 #define tc_regname_to_dw2regnum tc_x86_regname_to_dw2regnum
-extern int tc_x86_regname_to_dw2regnum PARAMS ((const char *regname));
+extern int tc_x86_regname_to_dw2regnum PARAMS ((char *regname));
 
 #define tc_cfi_frame_initial_instructions tc_x86_frame_initial_instructions
 extern void tc_x86_frame_initial_instructions PARAMS ((void));

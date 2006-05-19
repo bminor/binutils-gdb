@@ -7562,7 +7562,7 @@ m68k_elf_final_processing (void)
 #endif
 
 int
-tc_m68k_regname_to_dw2regnum (const char *regname)
+tc_m68k_regname_to_dw2regnum (char *regname)
 {
   unsigned int regnum;
   static const char *const regnames[] =

@@ -225,7 +225,7 @@ void sh_cons_fix_new (fragS *, int, int, expressionS *);
 extern void sh_cfi_frame_initial_instructions (void);
 
 #define tc_regname_to_dw2regnum sh_regname_to_dw2regnum
-extern int sh_regname_to_dw2regnum (const char *regname);
+extern int sh_regname_to_dw2regnum (char *regname);
 
 /* All SH instructions are multiples of 16 bits.  */
 #define DWARF2_LINE_MIN_INSN_LENGTH 2

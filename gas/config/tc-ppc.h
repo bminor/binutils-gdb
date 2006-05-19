@@ -259,7 +259,7 @@ extern int ppc_parse_name PARAMS ((const char *, struct expressionS *));
 extern void ppc_cfi_frame_initial_instructions PARAMS ((void));
 
 #define tc_regname_to_dw2regnum tc_ppc_regname_to_dw2regnum
-extern int tc_ppc_regname_to_dw2regnum PARAMS ((const char *regname));
+extern int tc_ppc_regname_to_dw2regnum PARAMS ((char *regname));
 
 extern int ppc_cie_data_alignment;
 

@@ -1,3 +1,20 @@
+2006-05-19  Thiemo Seufer  <ths@mips.com>
+
+	* config/tc-arm.c, config/tc-arm.h (tc_arm_regname_to_dw2regnum):
+	Un-constify string argument.
+	* config/tc-i386.c, config/tc-i386.h (tc_x86_regname_to_dw2regnum):
+	Likewise.
+	* config/tc-m68k.c, config/tc-m68k.h (tc_m68k_regname_to_dw2regnum):
+	Likewise.
+	* config/tc-ppc.c, config/tc-ppc.h (tc_ppc_regname_to_dw2regnum):
+	Likewise.
+	* config/tc-s390.c, config/tc-s390.h (tc_s390_regname_to_dw2regnum):
+	Likewise.
+	* config/tc-sh.c, config/tc-sh.h (sh_regname_to_dw2regnum):
+	Likewise.
+	* config/tc-sparc.c, config/tc-sparc.h (sparc_regname_to_dw2regnum):
+	Likewise.
+
 2006-05-19  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* gas/config/tc-m68k.c (m68k_init_arch): Move checking of

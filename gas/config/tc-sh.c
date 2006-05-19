@@ -4382,7 +4382,7 @@ sh_cfi_frame_initial_instructions (void)
 }
 
 int
-sh_regname_to_dw2regnum (const char *regname)
+sh_regname_to_dw2regnum (char *regname)
 {
   unsigned int regnum = -1;
   unsigned int i;

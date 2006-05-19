@@ -4602,7 +4602,7 @@ sparc_cfi_frame_initial_instructions ()
 }
 
 int
-sparc_regname_to_dw2regnum (const char *regname)
+sparc_regname_to_dw2regnum (char *regname)
 {
   char *p, *q;
 

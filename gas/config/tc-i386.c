@@ -7173,7 +7173,7 @@ intel_putback_token ()
 }
 
 int
-tc_x86_regname_to_dw2regnum (const char *regname)
+tc_x86_regname_to_dw2regnum (char *regname)
 {
   unsigned int regnum;
   unsigned int regnames_count;
