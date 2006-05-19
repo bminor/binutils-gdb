@@ -1829,7 +1829,7 @@ If you continue, the return value that you specified will be ignored.\n";
      frame).  */
   frame_pop (get_current_frame ());
 
-  /* Store RETURN_VAUE in the just-returned register set.  */
+  /* Store RETURN_VALUE in the just-returned register set.  */
   if (return_value != NULL)
     {
       struct type *return_type = value_type (return_value);

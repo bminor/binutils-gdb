@@ -2323,7 +2323,7 @@ struct mips_objfile_private
 
 /* According to the current ABI, should the type be passed in a
    floating-point register (assuming that there is space)?  When there
-   is no FPU, FP are not even considered as possibile candidates for
+   is no FPU, FP are not even considered as possible candidates for
    FP registers and, consequently this returns false - forces FP
    arguments into integer registers. */
 
@@ -2644,7 +2644,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   return sp;
 }
 
-/* Determin the return value convention being used.  */
+/* Determine the return value convention being used.  */
 
 static enum return_value_convention
 mips_eabi_return_value (struct gdbarch *gdbarch,

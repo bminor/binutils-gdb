@@ -1,3 +1,10 @@
+2006-05-19  Fred Fish  <fnf@specifix.com>
+
+	* Makefile.in: Fix spelling of 'explicitly' and 'explicit'.
+	* dwarfread.c: Fix spelling of 'unexpected'.
+	* mips-tdep.c: Fix spelling of 'possible' and 'Determine'.
+	* stack.c: Fix spelling of 'RETURN_VALUE'.
+	
 2006-05-18  Paul Gilliam  <pgilliam@us.ibm.com
 
 	* solib-svr4.c (enable_break): Breakup a long line into 3 shorter ones.

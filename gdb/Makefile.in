@@ -1274,7 +1274,7 @@ clean-tui:
 # describe removing files; the only sort of "re-create a distribution"
 # functionality described is if the distributed files are unmodified.
 # NB: While GDBSERVER might be configured on native systems, it isn't
-# always included in SUBDIRS.  Remove the gdbserver files explictly.
+# always included in SUBDIRS.  Remove the gdbserver files explicitly.
 distclean: clean
 	@$(MAKE) $(FLAGS_TO_PASS) DO=distclean "DODIRS=$(SUBDIRS)" subdir_do
 	rm -f gdbserver/config.status gdbserver/config.log
@@ -1489,7 +1489,7 @@ ALLDEPFILES = \
 	xcoffread.c xcoffsolib.c \
 	xstormy16-tdep.c
 
-# Some files need explict build rules (due to -Werror problems) or due
+# Some files need explicit build rules (due to -Werror problems) or due
 # to sub-directory fun 'n' games.
 
 # Provide explicit rule/dependency - works for more makes.

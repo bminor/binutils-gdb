@@ -7346,7 +7346,7 @@ read_type_die (struct die_info *die, struct dwarf2_cu *cu)
       read_base_type (die, cu);
       break;
     default:
-      complaint (&symfile_complaints, _("unexepected tag in read_type_die: '%s'"),
+      complaint (&symfile_complaints, _("unexpected tag in read_type_die: '%s'"),
 		 dwarf_tag_name (die->tag));
       break;
     }
