@@ -1,3 +1,10 @@
+2006-05-19  Thiemo Seufer  <ths@mips.com>
+
+	* gas/mips/vxworks1-el.d, gas/mips/vxworks1-xgot-el.d: Add little
+	endian testcases.
+	* gas/mips/vxworks1.d, gas/mips/vxworks1-xgot.d: Build as big endian.
+	* gas/mips/mips.exp: Run new testcases.
+
 2006-05-11  Thiemo Seufer  <ths@mips.com>
 
 	* gas/mips/jal-range.l: Don't check the range of j or jal
