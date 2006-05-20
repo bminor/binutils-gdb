@@ -1,3 +1,7 @@
+2006-05-20  Gaius Mulley  <gaius@glam.ac.uk>
+
+	* NEWS: (Improved Modula-2 language support): New section.
+
 2006-05-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* configure: Regenerate using proper version of autoconf.

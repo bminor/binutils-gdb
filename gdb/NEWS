@@ -53,6 +53,15 @@ GDB now builds as a cross debugger hosted on i686-mingw32, including
 native console support, and remote communications using either
 network sockets or serial ports.
 
+* Improved Modula-2 language support
+
+GDB can now print most types in the Modula-2 syntax.  This includes:
+basic types, set types, record types, enumerated types, range types,
+pointer types and ARRAY types.  Procedure var parameters are correctly
+printed and hexadecimal addresses and character constants are also
+written in the Modula-2 syntax.  Best results can be obtained by using
+GNU Modula-2 together with the -gdwarf-2 command line option.
+
 * REMOVED features
 
 The ARM rdi-share module.
