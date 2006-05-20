@@ -1,3 +1,7 @@
+2006-05-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure: Regenerate using proper version of autoconf.
+
 2006-05-16  Joel Brobecker  <brobecker@adacore.com>
 
 	* README: Update date of last modification.
