@@ -142,6 +142,7 @@ static int saw_create;
 
 /* User options. */
 static int new_console = 0;
+static int cygwin_exceptions = 0;
 static int new_group = 1;
 static int debug_exec = 0;		/* show execution */
 static int debug_events = 0;		/* show events from kernel */
@@ -1114,7 +1115,7 @@ handle_exception (struct target_waitstatus *ourstatus)
 	   within the text segment of the DLL itself. */
 	char *fn;
 	bfd_vma addr = (bfd_vma) current_event.u.Exception.ExceptionRecord.ExceptionAddress;
-	if ((addr >= cygwin_load_start && addr < cygwin_load_end)
+	if ((!cygwin_exceptions && (addr >= cygwin_load_start && addr < cygwin_load_end))
 	    || (find_pc_partial_function (addr, &fn, NULL, NULL)
 		&& strncmp (fn, "KERNEL32!IsBad", strlen ("KERNEL32!IsBad")) == 0))
 	  return 0;
@@ -2433,6 +2434,13 @@ _initialize_win32_nat (void)
   add_setshow_boolean_cmd ("shell", class_support, &useshell, _("\
 Set use of shell to start subprocess."), _("\
 Show use of shell to start subprocess."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("cygwin-exceptions", class_support, &cygwin_exceptions, _("\
+Break when an exception is detected in the Cygwin DLL itself."), _("\
+Show whether gdb breaks on exceptions in the Cygwin DLL itself."), NULL,
 			   NULL,
 			   NULL, /* FIXME: i18n: */
 			   &setlist, &showlist);
