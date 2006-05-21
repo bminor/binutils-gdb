@@ -1,3 +1,10 @@
+2006-05-21  Christopher Faylor  <cgf@timesys.com>
+
+	* win32-nat.c (cygwin_exceptions): New variable.
+	(handle_exception): Treat a cygwin exception like a normal exception if
+	cygwin_exceptions is true.
+	(_initialize_win32_nat): Add "set cygwin-exceptions" handler.
+
 2006-05-20  Gaius Mulley  <gaius@glam.ac.uk>
 
 	* NEWS: (Improved Modula-2 language support): New section.
