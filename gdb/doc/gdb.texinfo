@@ -13517,6 +13517,16 @@ This is a Cygwin specific alias of info shared.
 This command loads symbols from a dll similarly to
 add-sym command but without the need to specify a base address.
 
+@kindex set cygwin-exceptions
+@item set cygwin-exceptions @var{mode}
+If @var{mode} is @code{on} gdb will break on exceptions from the cygwin DLL itself.
+If @var{mode} is @code{off} gdb will delay recognition of exceptions and may ignore
+some exceptions which seem to be caused by internal cygwin DLL "bookkeeping".
+
+@kindex show cygwin-exceptions
+@item show cygwin-exceptions
+Displays whether gdb will break on exceptions from the cygwin DLL itself.
+
 @kindex set new-console
 @item set new-console @var{mode}
 If @var{mode} is @code{on} the debuggee will

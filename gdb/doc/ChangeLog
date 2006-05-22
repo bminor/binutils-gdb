@@ -1,3 +1,7 @@
+2006-05-22  Christopher Faylor  <cgf@timesys.com>
+
+	* gdb.texinfo (Cygwin Native): Document set/show cygwin-exceptions.
+
 2006-05-15  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdbint.texinfo (Algorithms): Correct spelling and punctuation.
