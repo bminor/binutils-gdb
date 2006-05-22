@@ -1,3 +1,7 @@
+2006-05-22  Nick Clifton  <nickc@redhat.com>
+
+	* po/opcodes.pot: Revised template.
+
 2006-05-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* avr-dis.c: Formatting fix.

@@ -1,3 +1,7 @@
+2006-05-22  Nick Clifton  <nickc@redhat.com>
+
+	* po/binutils.pot: Revised template.
+
 2006-05-19  Andreas Schwab  <schwab@suse.de>
 
 	* doc/Makefile.am (addr2line.1): Depend on $(binutils_TEXINFOS).

@@ -1,3 +1,7 @@
+2006-05-22  Nick Clifton  <nickc@redhat.com>
+
+	* po/ld.pot: Revised template.
+
 2006-05-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (lang_size_sections_1): Don't check mem regions for
