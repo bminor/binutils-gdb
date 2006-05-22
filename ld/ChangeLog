@@ -1,3 +1,7 @@
+2006-05-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-mips-elf/textrel-1.d: Relax some patterns.
+
 2006-05-22  Nick Clifton  <nickc@redhat.com>
 
 	* scripttempl/elf32crx.sc (.rdata): Add .rodata.*.

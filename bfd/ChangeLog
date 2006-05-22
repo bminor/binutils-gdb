@@ -1,3 +1,17 @@
+2006-05-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elflink.c (_bfd_elf_add_dynamic_entry): Remove DT_TEXTREL
+	check.
+	(bfd_elf_final_link): Add a late DT_TEXTREL check.
+	* elfxx-mips.c (MIPS_ELF_READONLY_SECTION): Define.
+	(mips_elf_create_dynamic_relocation): Set DF_TEXTREL.
+	(_bfd_mips_elf_check_relocs): Delete MIPS_READONLY_SECTION.
+	Use MIPS_ELF_READONLY_SECTION.
+	(_bfd_mips_elf_size_dynamic_sections): Clear DF_TEXTREL after
+	creating DT_TEXTREL.
+	(_bfd_mips_elf_finish_dynamic_sections): Clear textrel markers
+	if no text relocations were generated.
+
 2006-05-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* configure.in: Update version to 2.16.92.
