@@ -1,5 +1,5 @@
-/* Implementation of the dgettext(3) function.
-   Copyright (C) 1995-1997, 2000, 2001, 2002 Free Software Foundation, Inc.
+/* Implementation of the dcngettext(3) function.
+   Copyright (C) 1995-1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify it
    under the terms of the GNU Library General Public License as published
@@ -20,8 +20,6 @@
 # include <config.h>
 #endif
 
-#include <locale.h>
-
 #include "gettextP.h"
 #ifdef _LIBC
 # include <libintl.h>
@@ -36,24 +34,27 @@
    code is also used in GNU C Library where the names have a __
    prefix.  So we have to make a difference here.  */
 #ifdef _LIBC
-# define DGETTEXT __dgettext
-# define DCGETTEXT INTUSE(__dcgettext)
+# define DCNGETTEXT __dcngettext
+# define DCIGETTEXT __dcigettext
 #else
-# define DGETTEXT libintl_dgettext
-# define DCGETTEXT libintl_dcgettext
+# define DCNGETTEXT libintl_dcngettext
+# define DCIGETTEXT libintl_dcigettext
 #endif
 
-/* Look up MSGID in the DOMAINNAME message catalog of the current
-   LC_MESSAGES locale.  */
+/* Look up MSGID in the DOMAINNAME message catalog for the current CATEGORY
+   locale.  */
 char *
-DGETTEXT (domainname, msgid)
+DCNGETTEXT (domainname, msgid1, msgid2, n, category)
      const char *domainname;
-     const char *msgid;
+     const char *msgid1;
+     const char *msgid2;
+     unsigned long int n;
+     int category;
 {
-  return DCGETTEXT (domainname, msgid, LC_MESSAGES);
+  return DCIGETTEXT (domainname, msgid1, msgid2, 1, n, category);
 }
 
 #ifdef _LIBC
 /* Alias for function name in GNU C Library.  */
-weak_alias (__dgettext, dgettext);
+weak_alias (__dcngettext, dcngettext);
 #endif

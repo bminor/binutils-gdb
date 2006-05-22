@@ -1,4 +1,4 @@
-/* Implementation of the dgettext(3) function.
+/* Implementation of the dngettext(3) function.
    Copyright (C) 1995-1997, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify it
@@ -36,24 +36,26 @@
    code is also used in GNU C Library where the names have a __
    prefix.  So we have to make a difference here.  */
 #ifdef _LIBC
-# define DGETTEXT __dgettext
-# define DCGETTEXT INTUSE(__dcgettext)
+# define DNGETTEXT __dngettext
+# define DCNGETTEXT __dcngettext
 #else
-# define DGETTEXT libintl_dgettext
-# define DCGETTEXT libintl_dcgettext
+# define DNGETTEXT libintl_dngettext
+# define DCNGETTEXT libintl_dcngettext
 #endif
 
 /* Look up MSGID in the DOMAINNAME message catalog of the current
-   LC_MESSAGES locale.  */
+   LC_MESSAGES locale and skip message according to the plural form.  */
 char *
-DGETTEXT (domainname, msgid)
+DNGETTEXT (domainname, msgid1, msgid2, n)
      const char *domainname;
-     const char *msgid;
+     const char *msgid1;
+     const char *msgid2;
+     unsigned long int n;
 {
-  return DCGETTEXT (domainname, msgid, LC_MESSAGES);
+  return DCNGETTEXT (domainname, msgid1, msgid2, n, LC_MESSAGES);
 }
 
 #ifdef _LIBC
 /* Alias for function name in GNU C Library.  */
-weak_alias (__dgettext, dgettext);
+weak_alias (__dngettext, dngettext);
 #endif
