@@ -535,6 +535,11 @@ static bfd *reldyn_sorting_bfd;
 #define MIPS_ELF_OPTIONS_SECTION_NAME_P(NAME) \
   (strcmp (NAME, ".MIPS.options") == 0 || strcmp (NAME, ".options") == 0)
 
+/* Whether the section is readonly.  */
+#define MIPS_ELF_READONLY_SECTION(sec) \
+  ((sec->flags & (SEC_ALLOC | SEC_LOAD | SEC_READONLY))		\
+   == (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
+
 /* The name of the stub section.  */
 #define MIPS_ELF_STUB_SECTION_NAME(abfd) ".MIPS.stubs"
 
@@ -4912,6 +4917,12 @@ mips_elf_create_dynamic_relocation (bfd *output_bfd,
 	}
     }
 
+  /* If we've written this relocation for a readonly section,
+     we need to set DF_TEXTREL again, so that we do not delete the
+     DT_TEXTREL tag.  */
+  if (MIPS_ELF_READONLY_SECTION (input_section))
+    info->flags |= DF_TEXTREL;
+
   return TRUE;
 }
 
@@ -6507,15 +6518,13 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  if (sreloc == NULL)
 		    return FALSE;
 		}
-#define MIPS_READONLY_SECTION (SEC_ALLOC | SEC_LOAD | SEC_READONLY)
 	      if (info->shared)
 		{
 		  /* When creating a shared object, we must copy these
 		     reloc types into the output file as R_MIPS_REL32
 		     relocs.  Make room for this reloc in .rel(a).dyn.  */
 		  mips_elf_allocate_dynamic_relocations (dynobj, info, 1);
-		  if ((sec->flags & MIPS_READONLY_SECTION)
-		      == MIPS_READONLY_SECTION)
+		  if (MIPS_ELF_READONLY_SECTION (sec))
 		    /* We tell the dynamic linker that there are
 		       relocations against the text segment.  */
 		    info->flags |= DF_TEXTREL;
@@ -6528,8 +6537,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
                      defined in a dynamic object.  */
 		  hmips = (struct mips_elf_link_hash_entry *) h;
 		  ++hmips->possibly_dynamic_relocs;
-		  if ((sec->flags & MIPS_READONLY_SECTION)
-		      == MIPS_READONLY_SECTION)
+		  if (MIPS_ELF_READONLY_SECTION (sec))
 		    /* We need it to tell the dynamic linker if there
 		       are relocations against the text segment.  */
 		    hmips->readonly_reloc = TRUE;
@@ -7446,6 +7454,12 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	{
 	  if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_TEXTREL, 0))
 	    return FALSE;
+
+	  /* Clear the DF_TEXTREL flag.  It will be set again if we
+	     write out an actual text relocation; we may not, because
+	     at this point we do not know whether e.g. any .eh_frame
+	     absolute relocations have been converted to PC-relative.  */
+	  info->flags &= ~DF_TEXTREL;
 	}
 
       if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_PLTGOT, 0))
@@ -8472,6 +8486,7 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       bfd_byte *b;
+      int dyn_to_skip = 0, dyn_skipped = 0;
 
       BFD_ASSERT (sdyn != NULL);
       BFD_ASSERT (g != NULL);
@@ -8626,15 +8641,44 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 				+ htab->srelplt->output_offset);
 	      break;
 
+	    case DT_TEXTREL:
+	      /* If we didn't need any text relocations after all, delete
+		 the dynamic tag.  */
+	      if (!(info->flags & DF_TEXTREL))
+		{
+		  dyn_to_skip = MIPS_ELF_DYN_SIZE (dynobj);
+		  swap_out_p = FALSE;
+		}
+	      break;
+
+	    case DT_FLAGS:
+	      /* If we didn't need any text relocations after all, clear
+		 DF_TEXTREL from DT_FLAGS.  */
+	      if (!(info->flags & DF_TEXTREL))
+		dyn.d_un.d_val &= ~DF_TEXTREL;
+	      else
+		swap_out_p = FALSE;
+	      break;
+
 	    default:
 	      swap_out_p = FALSE;
 	      break;
 	    }
 
-	  if (swap_out_p)
+	  if (swap_out_p || dyn_skipped)
 	    (*get_elf_backend_data (dynobj)->s->swap_dyn_out)
-	      (dynobj, &dyn, b);
+	      (dynobj, &dyn, b - dyn_skipped);
+
+	  if (dyn_to_skip)
+	    {
+	      dyn_skipped += dyn_to_skip;
+	      dyn_to_skip = 0;
+	    }
 	}
+
+      /* Wipe out any trailing entries if we shifted down a dynamic tag.  */
+      if (dyn_skipped > 0)
+	memset (b - dyn_skipped, 0, dyn_skipped);
     }
 
   if (sgot != NULL && sgot->size > 0)
