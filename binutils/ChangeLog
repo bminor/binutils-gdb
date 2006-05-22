@@ -1,3 +1,7 @@
+2006-05-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* po/ru.po: Updated translation.
+
 2006-05-19  Andreas Schwab  <schwab@suse.de>
 
 	* doc/Makefile.am (addr2line.1): Depend on $(binutils_TEXINFOS).
