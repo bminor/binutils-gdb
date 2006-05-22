@@ -13518,14 +13518,21 @@ This command loads symbols from a dll similarly to
 add-sym command but without the need to specify a base address.
 
 @kindex set cygwin-exceptions
+@cindex debugging the Cygwin DLL
+@cindex Cygwin DLL, debugging
 @item set cygwin-exceptions @var{mode}
-If @var{mode} is @code{on} gdb will break on exceptions from the cygwin DLL itself.
-If @var{mode} is @code{off} gdb will delay recognition of exceptions and may ignore
-some exceptions which seem to be caused by internal cygwin DLL "bookkeeping".
+If @var{mode} is @code{on}, @value{GDBN} will break on exceptions that
+happen inside the Cygwin DLL.  If @var{mode} is @code{off},
+@value{GDBN} will delay recognition of exceptions, and may ignore some
+exceptions which seem to be caused by internal Cygwin DLL
+``bookkeeping''.  This option is meant primarily for debugging the
+Cygwin DLL itself; the default value is @code{off} to avoid annoying
+@value{GDBN} users with false @code{SIGSEGV} signals.
 
 @kindex show cygwin-exceptions
 @item show cygwin-exceptions
-Displays whether gdb will break on exceptions from the cygwin DLL itself.
+Displays whether @value{GDBN} will break on exceptions that happen
+inside the Cygwin DLL itself.
 
 @kindex set new-console
 @item set new-console @var{mode}
