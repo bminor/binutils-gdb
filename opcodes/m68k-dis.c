@@ -1453,6 +1453,7 @@ m68k_scan_mask (bfd_vma memaddr, disassemble_info *info,
 	      return val;
 	}
     }
+  return 0;
 }		
 
 /* Print the m68k instruction at address MEMADDR in debugged memory,
