@@ -1,3 +1,8 @@
+2006-05-22  Nick Clifton  <nickc@redhat.com>
+
+	* ld-eld/start.s (start): Add this symbol for SH targets.
+	(main): Add this symbol for HPPA targets.
+
 2006-05-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-scripts/empty-orphan.d: Update again.
