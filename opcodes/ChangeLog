@@ -1,5 +1,9 @@
 2006-05-22  Nick Clifton  <nickc@redhat.com>
 
+	* crx-dis.c (EXTRACT): Make macro work on 64-bit hosts.
+
+2006-05-22  Nick Clifton  <nickc@redhat.com>
+
 	* po/nl.po: Updated translation.
 
 2006-05-18  Alan Modra  <amodra@bigpond.net.au>
