@@ -1,3 +1,7 @@
+2006-05-22  Nick Clifton  <nickc@redhat.com>
+
+	* iq2000.cpu: Fix include paths for iq2000m.cpu and iq10.cpu.
+
 2006-04-10  DJ Delorie  <dj@redhat.com>
 
 	* m32c.opc (parse_unsigned_bitbase): Take a new parameter which
