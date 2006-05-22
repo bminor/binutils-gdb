@@ -1,7 +1,3 @@
-2006-05-22  Nick Clifton  <nickc@redhat.com>
-
-	* po/gprof.pot: Revised template.
-
 2006-05-02  James E Wilson  <wilson@specifix.com>
 
 	* gprof.c (main): When setting default output_style, add separate
