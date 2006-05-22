@@ -1,3 +1,7 @@
+2006-05-22  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/elf32crx.sc (.rdata): Add .rodata.*.
+
 2006-05-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld.texinfo: Document PowerPC and PowerPC64 options.

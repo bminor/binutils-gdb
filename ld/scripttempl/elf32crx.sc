@@ -73,7 +73,7 @@ SECTIONS
   .rdata :
   {
     __RDATA_START = .;
-    *(.rdata_4) *(.rdata_2) *(.rdata_1) *(.rdata.*) *(.gnu.linkonce.r.*)
+    *(.rdata_4) *(.rdata_2) *(.rdata_1) *(.rdata.*) *(.gnu.linkonce.r.*) *(.rodata.*)
     __RDATA_END = .;
   } > rom
 
