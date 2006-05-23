@@ -834,9 +834,14 @@ bfin_start_line_hook ()
   char *c1, *label_name;
   symbolS *line_label;
   char *c = input_line_pointer;
+  int cr_num = 0;
 
   while (ISSPACE (*c))
-    c++;
+    {
+      if (*c == '\n')
+	cr_num++;
+      c++;
+    }
 
   /* Look for Loop_Begin or Loop_End statements.  */
 
@@ -901,6 +906,12 @@ bfin_start_line_hook ()
   while (ISSPACE (*c)) c++;
   c1 = c;
   while (ISALPHA (*c) || ISDIGIT (*c) || *c == '_') c++;
+
+  if (input_line_pointer[-1] == '\n')
+    bump_line_counters ();
+
+  while (cr_num--)
+    bump_line_counters ();
 
   input_line_pointer = c;
   if (maybe_end)

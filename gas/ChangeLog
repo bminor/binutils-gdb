@@ -1,5 +1,10 @@
 2006-05-23  Jie Zhang  <jie.zhang@analog.com>
 
+	* config/tc-bfin.c (bfin_start_line_hook): Bump line counters
+	if needed.
+
+2006-05-23  Jie Zhang  <jie.zhang@analog.com>
+
 	* config/bfin-defs.h (bfin_equals): Remove declaration.
 	* config/bfin-parse.y (asm_1): Remove "expr ASSIGN expr".
 	* config/tc-bfin.c (bfin_name_is_register): Remove.
