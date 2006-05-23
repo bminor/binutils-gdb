@@ -12131,6 +12131,7 @@ want to try.
 
 @menu
 * Connecting::                  Connecting to a remote target
+* File Transfer::               Sending files to a remote system
 * Server::	                Using the gdbserver program
 * NetWare::                     Using the gdbserve.nlm program
 * Remote configuration::        Remote configuration
@@ -12246,6 +12247,29 @@ remote monitor.  Since @value{GDBN} doesn't care about the commands it
 sends like this, this command is the way to extend @value{GDBN}---you
 can add new commands that only the external monitor will understand
 and implement.
+@end table
+
+@node File Transfer
+@section Sending files to a remote system
+
+Some remote targets offer the ability to transfer files over the same
+connection used to communicate with @value{GDBN}.  For targets
+accessible through other means, e.g.@: a GNU/Linux system with a
+network interface, this offers added convenience.  For other
+targets, e.g.@: embedded devices with only a single serial port,
+this may be the only way to upload or download files.
+
+Not all remote targets support these commands.
+
+@table @code
+@item remote-download @var{hostfile} @var{targetfile}
+Copy @var{hostfile} from the host system (the machine running
+@value{GDBN}) to the path @var{targetfile} on the target system.
+
+@item remote-upload @var{targetfile} @var{hostfile}
+Copy @var{targetfile} from the target system to @var{hostfile}
+on the host system.
+
 @end table
 
 @node Server
@@ -12624,6 +12648,21 @@ packet.
 @item show remote get-thread-local-storage-address
 @kindex show remote get-thread-local-storage-address
 Show the current setting of @samp{qGetTLSAddr} packet usage.
+
+@item set remote hostio-close-packet
+@itemx set remote hostio-open-packet
+@itemx set remote hostio-read-packet
+@itemx set remote hostio-write-packet
+@cindex remote host I/O packets
+Set use of the remote host I/O packets, used to upload and
+download files to a remote system.  @xref{Host I/O Packets},
+for more details about these packets.
+
+@item show remote hostio-close-packet
+@itemx show remote hostio-open-packet
+@itemx show remote hostio-read-packet
+@itemx show remote hostio-write-packet
+Show the current settings of the remote host I/O packets.
 
 @item set remote load-offsets
 @kindex set remote load-offsets
@@ -22406,6 +22445,7 @@ Show the current setting of the target wait timeout.
 * General Query Packets::
 * Register Packet Format::
 * Tracepoint Packets::
+* Host I/O Packets::
 * Interrupts::
 * Examples::
 * File-I/O remote protocol extension::
@@ -22635,6 +22675,9 @@ for an error
 A reply from @value{GDBN} to an @samp{F} packet sent by the target.
 This is part of the File-I/O protocol extension.  @xref{File-I/O
 remote protocol extension}, for the specification.
+
+The @samp{F} prefix is also used for @xref{Host I/O Packets}.  This use
+is ambiguous and should be corrected.
 
 @item g
 @anchor{read registers packet}
@@ -23701,6 +23744,95 @@ There is a trace experiment running.
 
 @end table
 
+
+@node Host I/O Packets
+@section Host I/O Packets
+@cindex Host I/O (remote protocol)
+@cindex File Transfer (remote protocol)
+
+The @dfn{Host I/O} packets allow @value{GDBN} to perform I/O
+operations on the far side of a remote link.  For example, Host I/O is
+used to upload and download files to a remote target with its own
+filesystem.  The protocol has some common features with the File-I/O
+protocol, e.g.@: all constants and data structures are encoded in the
+same way.  However, the packets are structured differently, because
+requests are initiated by @value{GDBN}, and the target's memory is not
+involved.  @xref{File-I/O remote protocol extension}, for more details
+on the target-initiated protocol.
+
+The Host I/O request packets all encode a single operation along with
+its arguments.  They have this format:
+
+@table @samp
+
+@item F @var{operation}, @var{parameter}@dots{}
+@var{operation} is the name of the particular request; the target
+should compare the entire packet name up to the comma when checking
+for a supported operation.  The format of @var{parameter} depends on
+the operation.  Numbers are always passed in hexadecimal, and strings
+(e.g.@: filenames) are encoded as a series of hexadecimal bytes.
+The last argument to a system call may be a binary buffer, which will
+be escaped in the same way as the X packet (@pxref{X packet}).
+
+@end table
+
+The valid responses to Host I/O packets are:
+
+@table @samp
+
+@item F @var{result} [, @var{errno}] [; @var{attachment}]
+@var{result} is the integer value returned by this operation, usually
+non-negative for success and -1 for errors.  If an error has occured,
+@var{errno} will be included in the result.  @var{errno} will have a
+value defined by the File-I/O protocol (@pxref{Errno values}).  For
+operations which return data, @var{attachment} will be provided a
+binary buffer.  Binary buffers in response packets should be encoded
+in the same way as the @samp{X} packet (@pxref{X packet}), with one
+exception: the @samp{*} character must also be escaped, or it will be
+interpreted as a run-length encoding marker by the remote protocol.
+See the individual packet documentation for the interpretation of
+@var{result} and @var{attachment}.
+
+@item
+An empty response indicates that this operation is not recognized.
+
+@end table
+
+These are the supported Host I/O operations:
+
+@table @samp
+@item Fopen, @var{pathname}, @var{flags}, @var{mode}
+Open a file at @var{pathname} and return a file descriptor for it, or
+return -1 if an error occurs.  @var{pathname} is a string,
+@var{flags} is an integer indicating a mask of open flags
+(@pxref{Open flags}), and @var{mode} is an integer indicating a mask
+of mode bits to use if the file is created (@pxref{mode_t values}).
+
+@item Fclose, @var{fd}
+Close the open file corresponding to @var{fd} and return 0, or
+-1 if an error occurs.
+
+@item Fread, @var{fd}, @var{count}
+Read data from the open file corresponding to @var{fd}.  Up to
+@var{count} bytes will be read from the file.  The target may
+read fewer bytes; common reasons include packet size limits
+and an end-of-file condition.  The number of bytes read is
+returned.  Zero should only be returned for a successful
+read at the end of the file, or if @var{count} was zero.
+
+The data read should be returned as a binary attachment on success,
+even if zero bytes were read.  The return value is the number of
+target bytes read; the binary attachment may be longer if some
+characters were escaped.
+
+@item Fwrite, @var{fd}, @var{data}
+Write @var{data} (a binary buffer) to the open file corresponding
+to @var{fd}.  Unlike many @code{write} system calls, there is no
+separate @var{count} argument; the length of @var{data} in the
+packet is used.  @samp{Fwrite} returns the number of bytes written,
+which may be shorter than the length of @var{data}, or -1 if an
+error occurred.
+@end table
 
 @node Interrupts
 @section Interrupts

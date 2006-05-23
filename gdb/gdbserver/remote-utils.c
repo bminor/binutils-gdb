@@ -273,16 +273,16 @@ hexify (char *hex, const char *bin, int count)
 }
 
 /* Send a packet to the remote machine, with error checking.
-   The data of the packet is in BUF.  Returns >= 0 on success, -1 otherwise. */
+   The data of the packet is in BUF, and the length of the
+   packet is in CNT.  Returns >= 0 on success, -1 otherwise.  */
 
 int
-putpkt (char *buf)
+putpkt_binary (char *buf, int cnt)
 {
   int i;
   unsigned char csum = 0;
   char *buf2;
   char buf3[1];
-  int cnt = strlen (buf);
   char *p;
 
   buf2 = malloc (PBUFSIZ);
@@ -347,6 +347,16 @@ putpkt (char *buf)
 
   free (buf2);
   return 1;			/* Success! */
+}
+
+/* Send a packet to the remote machine, with error checking.  The data
+   of the packet is in BUF, and the packet should be a NUL-terminated
+   string.  Returns >= 0 on success, -1 otherwise.  */
+
+int
+putpkt (char *buf)
+{
+  return putpkt_binary (buf, strlen (buf));
 }
 
 /* Come here when we get an input interrupt from the remote side.  This
@@ -441,12 +451,12 @@ disable_async_io (void)
 static int
 readchar (void)
 {
-  static char buf[BUFSIZ];
+  static unsigned char buf[BUFSIZ];
   static int bufcnt = 0;
-  static char *bufp;
+  static unsigned char *bufp;
 
   if (bufcnt-- > 0)
-    return *bufp++ & 0x7f;
+    return *bufp++;
 
   bufcnt = read (remote_desc, buf, sizeof (buf));
 

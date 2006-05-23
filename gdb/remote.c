@@ -62,6 +62,8 @@
 
 #include "remote-fileio.h"
 
+#include "gdb/fileio.h"
+
 /* Prototypes for local functions.  */
 static void cleanup_sigint_signal_handler (void *dummy);
 static void initialize_sigint_signal_handler (void);
@@ -823,6 +825,10 @@ enum {
   PACKET_qPart_auxv,
   PACKET_qPart_features,
   PACKET_qGetTLSAddr,
+  PACKET_Fopen,
+  PACKET_Fread,
+  PACKET_Fwrite,
+  PACKET_Fclose,
   PACKET_vAttach,
   PACKET_vRun,
   PACKET_qfDllInfo,
@@ -4086,6 +4092,87 @@ check_binary_download (CORE_ADDR addr)
     }
 }
 
+/* Convert BUFFER, binary data at least LEN bytes long, into escaped
+   binary data in OUT_BUF.  Set *OUT_LEN to the length of the data
+   encoded in OUT_BUF, and return the number of bytes in OUT_BUF
+   (which may be more than *OUT_LEN due to escape characters).  The
+   total number of bytes in the output buffer will be at most
+   OUT_MAXLEN.  */
+
+static int
+remote_escape_output (const gdb_byte *buffer, int len,
+		      gdb_byte *out_buf, int *out_len,
+		      int out_maxlen)
+{
+  int input_index, output_index;
+
+  output_index = 0;
+  for (input_index = 0; input_index < len; input_index++)
+    {
+      gdb_byte b = buffer[input_index];
+
+      if (b == '$' || b == '#' || b == '}')
+	{
+	  /* These must be escaped.  */
+	  if (output_index + 2 > out_maxlen)
+	    break;
+	  out_buf[output_index++] = '}';
+	  out_buf[output_index++] = b ^ 0x20;
+	}
+      else
+	{
+	  if (output_index + 1 > out_maxlen)
+	    break;
+	  out_buf[output_index++] = b;
+	}
+    }
+
+  *out_len = input_index;
+  return output_index;
+}
+
+/* Convert BUFFER, escaped data LEN bytes long, into binary data
+   in OUT_BUF.  Return the number of bytes written to OUT_BUF.
+   Raise an error if the total number of bytes exceeds OUT_MAXLEN.
+
+   This function reverses remote_escape_output.  It allows more
+   escaped characters than that function does, in particular because
+   '*' must be escaped to avoid the run-length encoding processing
+   in reading packets.  */
+
+static int
+remote_unescape_input (const gdb_byte *buffer, int len,
+		       gdb_byte *out_buf, int out_maxlen)
+{
+  int input_index, output_index;
+  int escaped;
+
+  output_index = 0;
+  escaped = 0;
+  for (input_index = 0; input_index < len; input_index++)
+    {
+      gdb_byte b = buffer[input_index];
+
+      if (output_index + 1 > out_maxlen)
+	error (_("Received too much data from the target."));
+
+      if (escaped)
+	{
+	  out_buf[output_index++] = b ^ 0x20;
+	  escaped = 0;
+	}
+      else if (b == '}')
+	escaped = 1;
+      else
+	out_buf[output_index++] = b;
+    }
+
+  if (escaped)
+    error (_("Unmatched escape character in target response."));
+
+  return output_index;
+}
+
 /* Write memory data directly to the remote machine.
    This does not inform the data cache; the data cache uses this.
    MEMADDR is the address in the remote memory space.
@@ -4179,24 +4266,7 @@ remote_write_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
       /* Binary mode.  Send target system values byte by byte, in
 	 increasing byte addresses.  Only escape certain critical
 	 characters.  */
-      for (nr_bytes = 0;
-	   (nr_bytes < todo) && (p - payload_start) < payload_size;
-	   nr_bytes++)
-	{
-	  switch (myaddr[nr_bytes] & 0xff)
-	    {
-	    case '$':
-	    case '#':
-	    case 0x7d:
-	      /* These must be escaped.  */
-	      *p++ = 0x7d;
-	      *p++ = (myaddr[nr_bytes] & 0xff) ^ 0x20;
-	      break;
-	    default:
-	      *p++ = myaddr[nr_bytes] & 0xff;
-	      break;
-	    }
-	}
+      p += remote_escape_output (myaddr, todo, p, &nr_bytes, payload_size);
       if (nr_bytes < todo)
 	{
 	  /* Escape chars have filled up the buffer prematurely,
@@ -4358,8 +4428,7 @@ remote_files_info (struct target_ops *ignore)
 /* Stuff for dealing with the packets which are part of this protocol.
    See comment at top of file for details.  */
 
-/* Read a single character from the remote end, masking it down to 7
-   bits.  */
+/* Read a single character from the remote end.  */
 
 static int
 readchar (int timeout)
@@ -4369,7 +4438,7 @@ readchar (int timeout)
   ch = serial_readchar (remote_desc, timeout);
 
   if (ch >= 0)
-    return (ch & 0x7f);
+    return ch;
 
   switch ((enum serial_rc) ch)
     {
@@ -4654,7 +4723,7 @@ read_frame (char **buf_p,
 		fprintf_filtered (gdb_stdlog,
 			      "Bad checksum, sentsum=0x%x, csum=0x%x, buf=",
 				  pktcsum, csum);
-		fputs_filtered (buf, gdb_stdlog);
+		fputstrn_unfiltered (buf, bc, 0, gdb_stdlog);
 		fputs_filtered ("\n", gdb_stdlog);
 	      }
 	    /* Number of characters in buffer ignoring trailing
@@ -4733,7 +4802,8 @@ getpkt (char **buf,
    rather than timing out; this is used (in synchronous mode) to wait
    for a target that is is executing user code to stop.  If FOREVER ==
    0, this function is allowed to time out gracefully and return an
-   indication of this to the caller.  */
+   indication of this (-1) to the caller.  Otherwise return the number
+   of bytes read.  */
 static int
 getpkt_sane (char **buf, long *sizeof_buf, int forever)
 {
@@ -4794,11 +4864,11 @@ getpkt_sane (char **buf, long *sizeof_buf, int forever)
 	  if (remote_debug)
 	    {
 	      fprintf_unfiltered (gdb_stdlog, "Packet received: ");
-	      fputstr_unfiltered (*buf, 0, gdb_stdlog);
+	      fputstrn_unfiltered (*buf, val, 0, gdb_stdlog);
 	      fprintf_unfiltered (gdb_stdlog, "\n");
 	    }
 	  serial_write (remote_desc, "+", 1);
-	  return 0;
+	  return val;
 	}
 
       /* Try the whole thing again.  */
@@ -4811,7 +4881,7 @@ getpkt_sane (char **buf, long *sizeof_buf, int forever)
 
   printf_unfiltered (_("Ignoring packet error, continuing...\n"));
   serial_write (remote_desc, "+", 1);
-  return 1;
+  return -1;
 }
 
 static void
@@ -5957,6 +6027,501 @@ remote_get_thread_local_address (ptid_t ptid, CORE_ADDR lm, CORE_ADDR offset)
   return 0;
 }
 
+/* Remote file transfer support.  This is host-initiated I/O, not
+   target-initiated; for target-initiated, see remote-fileio.c.  */
+
+/* If *LEFT is at least the length of STRING, copy STRING to
+   *BUFFER, update *BUFFER to point to the new end of the buffer, and
+   decrease *LEFT.  Otherwise raise an error.  */
+
+static void
+remote_buffer_add_string (char **buffer, int *left, char *string)
+{
+  int len = strlen (string);
+
+  if (len > *left)
+    error (_("Packet too long for target."));
+
+  memcpy (*buffer, string, len);
+  *buffer += len;
+  *left -= len;
+
+  /* NUL-terminate the buffer as a convenience, if there is
+     room.  */
+  if (*left)
+    **buffer = '\0';
+}
+
+/* If *LEFT is large enough, hex encode LEN bytes from BYTES into
+   *BUFFER, update *BUFFER to point to the new end of the buffer, and
+   decrease *LEFT.  Otherwise raise an error.  */
+
+static void
+remote_buffer_add_bytes (char **buffer, int *left, const gdb_byte *bytes,
+			 int len)
+{
+  if (2 * len > *left)
+    error (_("Packet too long for target."));
+
+  bin2hex (bytes, *buffer, len);
+  *buffer += 2 * len;
+  *left -= 2 * len;
+
+  /* NUL-terminate the buffer as a convenience, if there is
+     room.  */
+  if (*left)
+    **buffer = '\0';
+}
+
+/* If *LEFT is large enough, convert VALUE to hex and add it to
+   *BUFFER, update *BUFFER to point to the new end of the buffer, and
+   decrease *LEFT.  Otherwise raise an error.  */
+
+static void
+remote_buffer_add_int (char **buffer, int *left, ULONGEST value)
+{
+  int len = hexnumlen (value);
+
+  if (len > *left)
+    error (_("Packet too long for target."));
+
+  hexnumstr (*buffer, value);
+  *buffer += len;
+  *left -= len;
+
+  /* NUL-terminate the buffer as a convenience, if there is
+     room.  */
+  if (*left)
+    **buffer = '\0';
+}
+
+/* Parse an I/O result packet from BUFFER.  Set RETCODE to the return
+   value, *REMOTE_ERRNO to the remote error number or zero if none
+   was included, and *ATTACHMENT to point to the start of the annex
+   if any.  The length of the packet isn't needed here; there may
+   be NUL bytes in BUFFER, but they will be after *ATTACHMENT.
+
+   Return 0 if the packet could be parsed, -1 if it could not.  If
+   -1 is returned, the other variables may not be initialized.  */
+
+static int
+remote_hostio_parse_result (char *buffer, int *retcode,
+			    int *remote_errno, char **attachment)
+{
+  char *p, *p2;
+
+  *remote_errno = 0;
+  *attachment = NULL;
+
+  if (buffer[0] != 'F')
+    return -1;
+
+  *retcode = strtol (&buffer[1], &p, 16);
+  if (p == &buffer[1])
+    return -1;
+
+  /* Check for ",errno".  */
+  if (*p == ',')
+    {
+      *remote_errno = strtol (p + 1, &p2, 16);
+      if (p + 1 == p2)
+	return -1;
+      p = p2;
+    }
+
+  /* Check for ";attachment".  If there is no attachment, the
+     packet should end here.  */
+  if (*p == ';')
+    {
+      *attachment = p + 1;
+      return 0;
+    }
+  else if (*p == '\0')
+    return 0;
+  else
+    return -1;
+}
+
+/* Send a prepared I/O packet to the target and read its response.
+   The prepared packet is in the global RS->BUF before this function
+   is called, and the answer is there when we return.
+
+   COMMAND_BYTES is the length of the request to send, which may include
+   binary data.  WHICH_PACKET is the packet configuration to check
+   before attempting a packet.  If an error occurs, *REMOTE_ERRNO
+   is set to the error number and -1 is returned.  Otherwise the value
+   returned by the function is returned.
+
+   ATTACHMENT and ATTACHMENT_LEN should be non-NULL if and only if an
+   attachment is expected; an error will be reported if there's a
+   mismatch.  If one is found, *ATTACHMENT will be set to point into
+   the packet buffer and *ATTACHMENT_LEN will be set to the
+   attachment's length.  */
+
+static int
+remote_hostio_send_command (int command_bytes, int which_packet,
+			    int *remote_errno, char **attachment,
+			    int *attachment_len)
+{
+  struct remote_state *rs = get_remote_state ();
+  int ret, bytes_read;
+  char *attachment_tmp;
+
+  if (remote_protocol_packets[which_packet].support == PACKET_DISABLE)
+    {
+      *remote_errno = FILEIO_ENOSYS;
+      return -1;
+    }
+
+  putpkt_binary (rs->buf, command_bytes);
+  bytes_read = getpkt_sane (&rs->buf, &rs->buf_size, 0);
+
+  /* If it timed out, something is wrong.  Don't try to parse the
+     buffer.  */
+  if (bytes_read < 0)
+    {
+      *remote_errno = FILEIO_EINVAL;
+      return -1;
+    }
+
+  switch (packet_ok (rs->buf, &remote_protocol_packets[which_packet]))
+    {
+    case PACKET_ERROR:
+      *remote_errno = FILEIO_EINVAL;
+      return -1;
+    case PACKET_UNKNOWN:
+      *remote_errno = FILEIO_ENOSYS;
+      return -1;
+    case PACKET_OK:
+      break;
+    }
+
+  if (remote_hostio_parse_result (rs->buf, &ret, remote_errno,
+				  &attachment_tmp))
+    {
+      *remote_errno = FILEIO_EINVAL;
+      return -1;
+    }
+
+  /* Make sure we saw an attachment if and only if we expected one.  */
+  if ((attachment_tmp == NULL && attachment != NULL)
+      || (attachment_tmp != NULL && attachment == NULL))
+    {
+      *remote_errno = FILEIO_EINVAL;
+      return -1;
+    }
+
+  /* If an attachment was found, it must point into the packet buffer;
+     work out how many bytes there were.  */
+  if (attachment_tmp != NULL)
+    {
+      *attachment = attachment_tmp;
+      *attachment_len = bytes_read - (*attachment - rs->buf);
+    }
+
+  return ret;
+}
+
+/* Open FILENAME on the remote target, using FLAGS and MODE.  Return a
+   remote file descriptor, or -1 if an error occurs (and set
+   *REMOTE_ERRNO).  */
+
+static int
+remote_hostio_open (const char *filename, int flags, int mode,
+		    int *remote_errno)
+{
+  struct remote_state *rs = get_remote_state ();
+  char *p = rs->buf;
+  int left = rs->remote_packet_size - 1;
+
+  remote_buffer_add_string (&p, &left, "Fopen,");
+
+  remote_buffer_add_bytes (&p, &left, (const gdb_byte *) filename,
+			   strlen (filename));
+  remote_buffer_add_string (&p, &left, ",");
+
+  remote_buffer_add_int (&p, &left, flags);
+  remote_buffer_add_string (&p, &left, ",");
+
+  remote_buffer_add_int (&p, &left, mode);
+
+  return remote_hostio_send_command (p - rs->buf, PACKET_Fopen,
+				     remote_errno, NULL, NULL);
+}
+
+/* Write up to LEN bytes from WRITE_BUF to FD on the remote target.
+   Return the number of bytes written, or -1 if an error occurs (and
+   set *REMOTE_ERRNO).  */
+
+static int
+remote_hostio_write (int fd, const gdb_byte *write_buf, int len,
+		     int *remote_errno)
+{
+  struct remote_state *rs = get_remote_state ();
+  char *p = rs->buf;
+  int left = rs->remote_packet_size;
+  int out_len;
+
+  remote_buffer_add_string (&p, &left, "Fwrite,");
+
+  remote_buffer_add_int (&p, &left, fd);
+  remote_buffer_add_string (&p, &left, ",");
+
+  p += remote_escape_output (write_buf, len, p, &out_len,
+			     rs->remote_packet_size - strlen (p));
+
+  return remote_hostio_send_command (p - rs->buf, PACKET_Fwrite,
+				     remote_errno, NULL, NULL);
+}
+
+/* Read up to LEN bytes FD on the remote target into READ_BUF
+   Return the number of bytes read, or -1 if an error occurs (and
+   set *REMOTE_ERRNO).  */
+
+static int
+remote_hostio_read (int fd, gdb_byte *read_buf, int len,
+		    int *remote_errno)
+{
+  struct remote_state *rs = get_remote_state ();
+  char *p = rs->buf;
+  char *attachment;
+  int left = rs->remote_packet_size;
+  int ret, attachment_len;
+  int read_len;
+
+  remote_buffer_add_string (&p, &left, "Fread,");
+
+  remote_buffer_add_int (&p, &left, fd);
+  remote_buffer_add_string (&p, &left, ",");
+
+  remote_buffer_add_int (&p, &left, len);
+
+  ret = remote_hostio_send_command (p - rs->buf, PACKET_Fwrite,
+				    remote_errno, &attachment,
+				    &attachment_len);
+
+  if (ret < 0)
+    return ret;
+
+  read_len = remote_unescape_input (attachment, attachment_len,
+				    read_buf, len);
+  if (read_len != ret)
+    error (_("Read returned %d, but %d bytes."), ret, (int) read_len);
+
+  return ret;
+}
+
+/* Close FD on the remote target.  Return 0, or -1 if an error occurs
+   (and set *REMOTE_ERRNO).  */
+
+static int
+remote_hostio_close (int fd, int *remote_errno)
+{
+  struct remote_state *rs = get_remote_state ();
+  char *p = rs->buf;
+  int left = rs->remote_packet_size - 1;
+
+  remote_buffer_add_string (&p, &left, "Fclose,");
+
+  remote_buffer_add_int (&p, &left, fd);
+
+  return remote_hostio_send_command (p - rs->buf, PACKET_Fclose,
+				     remote_errno, NULL, NULL);
+}
+
+static int
+remote_fileio_errno_to_host (int error)
+{
+  switch (error)
+    {
+      case FILEIO_EPERM:
+        return EPERM;
+      case FILEIO_ENOENT:
+        return ENOENT;
+      case FILEIO_EINTR:
+        return EINTR;
+      case FILEIO_EIO:
+        return EIO;
+      case FILEIO_EBADF:
+        return EBADF;
+      case FILEIO_EACCES:
+        return EACCES;
+      case FILEIO_EFAULT:
+        return EFAULT;
+      case FILEIO_EBUSY:
+        return EBUSY;
+      case FILEIO_EEXIST:
+        return EEXIST;
+      case FILEIO_ENODEV:
+        return ENODEV;
+      case FILEIO_ENOTDIR:
+        return ENOTDIR;
+      case FILEIO_EISDIR:
+        return EISDIR;
+      case FILEIO_EINVAL:
+        return EINVAL;
+      case FILEIO_ENFILE:
+        return ENFILE;
+      case FILEIO_EMFILE:
+        return EMFILE;
+      case FILEIO_EFBIG:
+        return EFBIG;
+      case FILEIO_ENOSPC:
+        return ENOSPC;
+      case FILEIO_ESPIPE:
+        return ESPIPE;
+      case FILEIO_EROFS:
+        return EROFS;
+      case FILEIO_ENOSYS:
+        return ENOSYS;
+      case FILEIO_ENAMETOOLONG:
+        return ENAMETOOLONG;
+    }
+  return -1;
+}
+
+static char *
+remote_hostio_error (int error)
+{
+  int host_error = remote_fileio_errno_to_host (error);
+
+  if (host_error == -1)
+    error (_("Unknown remote I/O error %d"), error);
+  else
+    error (_("Remote I/O error: %s"), safe_strerror (host_error));
+}
+
+static void
+fclose_cleanup (void *file)
+{
+  fclose (file);
+}
+
+static void
+remote_download_command (char *args, int from_tty)
+{
+  struct cleanup *cleanups;
+  char **argv;
+  int retcode, fd, remote_errno, bytes;
+  FILE *file;
+  gdb_byte *buffer;
+  int bytes_in_buffer;
+
+  if (!remote_desc)
+    error (_("command can only be used with remote target"));
+
+  argv = buildargv (args);
+  if (argv == NULL)
+    nomem (0);
+  cleanups = make_cleanup_freeargv (argv);
+  if (argv[0] == NULL || argv[1] == NULL || argv[2] != NULL)
+    error (_("Invalid parameters to remote-download"));
+
+  file = fopen (argv[0], "rb");
+  if (file == NULL)
+    perror_with_name (argv[0]);
+  make_cleanup (fclose_cleanup, file);
+
+  fd = remote_hostio_open (argv[1], FILEIO_O_WRONLY | FILEIO_O_CREAT, 0700,
+			   &remote_errno);
+  if (fd == -1)
+    remote_hostio_error (remote_errno);
+
+  /* FIXME: Adjust to the requested packet and memory transfer size,
+     batch I/O better.  */
+  buffer = xmalloc (1024);
+  make_cleanup (xfree, buffer);
+
+  bytes_in_buffer = 0;
+  while (1)
+    {
+      bytes = fread (buffer, 1, 1024 - bytes_in_buffer, file);
+      if (bytes == 0)
+	{
+	  if (ferror (file))
+	    error (_("Error reading %s."), argv[0]);
+	  else
+	    /* EOF */
+	    break;
+	}
+
+      bytes += bytes_in_buffer;
+      bytes_in_buffer = 0;
+
+      retcode = remote_hostio_write (fd, buffer, bytes, &remote_errno);
+
+      if (retcode < 0)
+	remote_hostio_error (remote_errno);
+      else if (retcode == 0)
+	error (_("Remote write of %d bytes returned 0!"), bytes);
+      else if (retcode < bytes)
+	{
+	  /* Short write.  Save the rest of the read data for the next
+	     write.  */
+	  bytes_in_buffer = bytes - retcode;
+	  memmove (buffer, buffer + retcode, bytes_in_buffer);
+	}
+    }
+
+  if (remote_hostio_close (fd, &remote_errno))
+    remote_hostio_error (remote_errno);
+
+  do_cleanups (cleanups);
+}
+
+static void
+remote_upload_command (char *args, int from_tty)
+{
+  struct cleanup *cleanups;
+  char **argv;
+  int retcode, fd, remote_errno, bytes;
+  FILE *file;
+  gdb_byte *buffer;
+
+  if (!remote_desc)
+    error (_("command can only be used with remote target"));
+
+  argv = buildargv (args);
+  if (argv == NULL)
+    nomem (0);
+  cleanups = make_cleanup_freeargv (argv);
+  if (argv[0] == NULL || argv[1] == NULL || argv[2] != NULL)
+    error (_("Invalid parameters to remote-upload"));
+
+  fd = remote_hostio_open (argv[0], FILEIO_O_RDONLY, 0, &remote_errno);
+  if (fd == -1)
+    remote_hostio_error (remote_errno);
+
+  file = fopen (argv[1], "wb");
+  if (file == NULL)
+    perror_with_name (argv[1]);
+  make_cleanup (fclose_cleanup, file);
+
+  /* FIXME: Adjust to the requested packet and memory transfer size,
+     batch I/O better.  */
+  buffer = xmalloc (1024);
+  make_cleanup (xfree, buffer);
+
+  while (1)
+    {
+      bytes = remote_hostio_read (fd, buffer, 1024, &remote_errno);
+      if (bytes == 0)
+	/* Success, but no bytes, means end-of-file.  */
+	break;
+      if (bytes == -1)
+	remote_hostio_error (remote_errno);
+
+      bytes = fwrite (buffer, 1, bytes, file);
+      if (bytes == 0)
+	perror_with_name (argv[1]);
+    }
+
+  if (remote_hostio_close (fd, &remote_errno))
+    remote_hostio_error (remote_errno);
+
+  do_cleanups (cleanups);
+}
+
 static void
 init_remote_ops (void)
 {
@@ -6392,6 +6957,34 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qfDllInfo],
 			 "qfDllInfo", "dll-info", 0, 0);
 
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_Fopen],
+			 "Fopen", "hostio-open",
+			 set_remote_protocol_packet_cmd,
+			 show_remote_protocol_packet_cmd,
+			 &remote_set_cmdlist, &remote_show_cmdlist,
+			 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_Fread],
+			 "Fread", "hostio-read",
+			 set_remote_protocol_packet_cmd,
+			 show_remote_protocol_packet_cmd,
+			 &remote_set_cmdlist, &remote_show_cmdlist,
+			 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_Fwrite],
+			 "Fwrite", "hostio-write",
+			 set_remote_protocol_packet_cmd,
+			 show_remote_protocol_packet_cmd,
+			 &remote_set_cmdlist, &remote_show_cmdlist,
+			 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_Fclose],
+			 "Fclose", "hostio-close",
+			 set_remote_protocol_packet_cmd,
+			 show_remote_protocol_packet_cmd,
+			 &remote_set_cmdlist, &remote_show_cmdlist,
+			 0);
+
   /* Keep the old ``set remote Z-packet ...'' working.  Each individual
      Z sub-packet has its own set and show commands, but users may
      have sets to this variable in their .gdbinit files (or in their
@@ -6412,6 +7005,16 @@ packets."),
 Set the remote pathname for \"run\""), _("\
 Show the remote pathname for \"run\""), NULL, NULL, NULL,
 				   &remote_set_cmdlist, &remote_show_cmdlist);
+
+  add_cmd ("remote-download", class_support /* ??? */,
+	   remote_download_command,
+	   _("Copy a local file to the remote system."),
+	   &cmdlist);
+
+  add_cmd ("remote-upload", class_support /* ??? */,
+	   remote_upload_command,
+	   _("Copy a remote file to the local system."),
+	   &cmdlist);
 
   /* Eventually initialize fileio.  See fileio.c */
   initialize_remote_fileio (remote_set_cmdlist, remote_show_cmdlist);

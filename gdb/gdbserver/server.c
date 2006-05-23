@@ -717,7 +717,7 @@ main (int argc, char *argv[])
 
   initialize_low ();
 
-  own_buf = malloc (PBUFSIZ);
+  own_buf = malloc (PBUFSIZ + 1);
   mem_buf = malloc (PBUFSIZ);
 
   if (pid == 0)
@@ -748,9 +748,15 @@ main (int argc, char *argv[])
 
     restart:
       setjmp (toplevel);
-      while (!exit_requested && getpkt (own_buf) > 0)
+      while (!exit_requested)
 	{
 	  unsigned char sig;
+	  int new_packet_len = -1;
+	  int packet_len;
+
+	  packet_len = getpkt (own_buf);
+	  if (packet_len <= 0)
+	    break;
 
 	  if (running == 0)
 	    {
@@ -1056,6 +1062,16 @@ main (int argc, char *argv[])
 	      /* Extended (long) request.  */
 	      handle_v_requests (own_buf, &status, &signal);
 	      break;
+	    case 'F':
+	      if (handle_f_hostio (own_buf, packet_len, &new_packet_len))
+		break;
+
+	      /* It is a request we don't understand.  Respond with an
+	         empty packet so that gdb knows that we don't support this
+	         request.  */
+	      own_buf[0] = '\0';
+	      break;
+
 	    default:
 	      /* It is a request we don't understand.  Respond with an
 	         empty packet so that gdb knows that we don't support this
@@ -1065,7 +1081,10 @@ main (int argc, char *argv[])
 	    }
 
 done_packet:
-	  putpkt (own_buf);
+	  if (new_packet_len != -1)
+	    putpkt_binary (own_buf, new_packet_len);
+	  else
+	    putpkt (own_buf);
 
 	  if (running && (status == 'W' || status == 'X'))
 	    {

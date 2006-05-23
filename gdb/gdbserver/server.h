@@ -127,9 +127,13 @@ extern int server_waiting;
 
 extern jmp_buf toplevel;
 
+/* Functions from hostio.c.  */
+extern int handle_f_hostio (char *, int, int *);
+
 /* Functions from remote-utils.c */
 
 int putpkt (char *buf);
+int putpkt_binary (char *buf, int len);
 int getpkt (char *buf);
 void remote_open (char *name);
 void remote_close (void);
