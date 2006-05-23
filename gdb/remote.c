@@ -6330,9 +6330,9 @@ remote_hostio_close (int fd, int *remote_errno)
 }
 
 static int
-remote_fileio_errno_to_host (int error)
+remote_fileio_errno_to_host (int errnum)
 {
-  switch (error)
+  switch (errnum)
     {
       case FILEIO_EPERM:
         return EPERM;
@@ -6381,12 +6381,12 @@ remote_fileio_errno_to_host (int error)
 }
 
 static char *
-remote_hostio_error (int error)
+remote_hostio_error (int errnum)
 {
-  int host_error = remote_fileio_errno_to_host (error);
+  int host_error = remote_fileio_errno_to_host (errnum);
 
   if (host_error == -1)
-    error (_("Unknown remote I/O error %d"), error);
+    error (_("Unknown remote I/O error %d"), errnum);
   else
     error (_("Remote I/O error: %s"), safe_strerror (host_error));
 }
@@ -6958,32 +6958,16 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 			 "qfDllInfo", "dll-info", 0, 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_Fopen],
-			 "Fopen", "hostio-open",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "Fopen", "hostio-open", 0, 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_Fread],
-			 "Fread", "hostio-read",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "Fread", "hostio-read", 0, 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_Fwrite],
-			 "Fwrite", "hostio-write",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "Fwrite", "hostio-write", 0, 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_Fclose],
-			 "Fclose", "hostio-close",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "Fclose", "hostio-close", 0, 0);
 
   /* Keep the old ``set remote Z-packet ...'' working.  Each individual
      Z sub-packet has its own set and show commands, but users may
