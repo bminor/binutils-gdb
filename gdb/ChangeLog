@@ -1,3 +1,22 @@
+2006-05-23  Mark Mitchell  <mark@codesourcery.com>
+
+	* mt-tdep.c (mt_register_name): Correct out-of-range logic to
+	include additional registers. 
+
+	* mt-tdep.c (mt_gdb_regnums): Add ZI2, ZQ2, Ichannel2,
+	Iscramb2, Qscramb2, Qchannel2.
+	(mt_register_name): Likewise.
+	(mt_copro_register_type): Describe ZI2 and ZQ2.
+
+	* mt-tdep.c (mt_gdb_regnums): Define
+	MT_COPRO_PSEUDOREG_MAC_REGNUM.
+	(mt_register_name): Use it.
+	(mt_copro_register_type): Likewise.
+	(mt_register_type): Likewise.
+	(mt_pseudo_register_read): Likewise.  Read the MAC register, not
+	the coprocessor register.
+	(mt_pseudo_register_write): Likewise.
+
 2006-05-21  Christopher Faylor  <cgf@timesys.com>
 
 	* win32-nat.c (cygwin_exceptions): New variable.
