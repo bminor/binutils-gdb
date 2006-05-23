@@ -1961,7 +1961,7 @@ bfin_check_relocs (bfd * abfd,
 
 	case R_got:
 	  if (h != NULL
-	      && strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
+	      && strcmp (h->root.root.string, "__GLOBAL_OFFSET_TABLE_") == 0)
 	    break;
 	  /* Fall through.  */
 
@@ -2903,7 +2903,7 @@ bfin_relocate_section (bfd * output_bfd,
 	  /* Relocation is to the address of the entry for this symbol
 	     in the global offset table.  */
 	  if (h != NULL
-	      && strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
+	      && strcmp (h->root.root.string, "__GLOBAL_OFFSET_TABLE_") == 0)
 	    goto do_default;
 	  /* Fall through.  */
 	  /* Relocation is the offset of the entry for this symbol in
@@ -3291,7 +3291,7 @@ _bfin_create_got_section (bfd *abfd, struct bfd_link_info *info)
 	 (or .got.plt) section.  We don't do this in the linker script
 	 because we don't want to define the symbol if we are not creating
 	 a global offset table.  */
-      h = _bfd_elf_define_linkage_sym (abfd, info, s, "_GLOBAL_OFFSET_TABLE_");
+      h = _bfd_elf_define_linkage_sym (abfd, info, s, "__GLOBAL_OFFSET_TABLE_");
       elf_hash_table (info)->hgot = h;
       if (h == NULL)
 	return FALSE;
@@ -3386,7 +3386,7 @@ elf32_bfinfdpic_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
       struct bfd_link_hash_entry *bh = NULL;
 
       if (! (_bfd_generic_link_add_one_symbol
-	     (info, abfd, "_PROCEDURE_LINKAGE_TABLE_", BSF_GLOBAL, s, 0, NULL,
+	     (info, abfd, "__PROCEDURE_LINKAGE_TABLE_", BSF_GLOBAL, s, 0, NULL,
 	      FALSE, get_elf_backend_data (abfd)->collect, &bh)))
 	return FALSE;
       h = (struct elf_link_hash_entry *) bh;
@@ -5035,7 +5035,7 @@ bfin_finish_dynamic_symbol (bfd * output_bfd,
 	  && (info->symbolic
 	      || h->dynindx == -1 || h->forced_local) && h->def_regular)
 	{
-fprintf(stderr, "*** check this relocation %s\n", __FUNCTION__);
+	  fprintf(stderr, "*** check this relocation %s\n", __FUNCTION__);
 	  rela.r_info = ELF32_R_INFO (0, R_pcrel24);
 	  rela.r_addend = bfd_get_signed_32 (output_bfd,
 					     (sgot->contents
@@ -5061,7 +5061,7 @@ fprintf(stderr, "*** check this relocation %s\n", __FUNCTION__);
       BFD_ASSERT (0);
     }
   /* Mark _DYNAMIC and _GLOBAL_OFFSET_TABLE_ as absolute.  */
-  if (strcmp (h->root.root.string, "_DYNAMIC") == 0
+  if (strcmp (h->root.root.string, "__DYNAMIC") == 0
       || h == elf_hash_table (info)->hgot)
     sym->st_shndx = SHN_ABS;
 

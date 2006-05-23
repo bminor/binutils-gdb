@@ -1,3 +1,13 @@
+2006-05-23  Jie Zhang  <jie.zhang@analog.com>
+
+	* elf32-bfin.c (bfin_check_relocs): Use __GLOBAL_OFFSET_TABLE_
+	instead of _GLOBAL_OFFSET_TABLE_.
+	(bfin_relocate_section): Ditto.
+	(_bfin_create_got_section): Ditto.
+	(elf32_bfinfdpic_create_dynamic_sections): Use
+	__PROCEDURE_LINKAGE_TABLE_ instead of _PROCEDURE_LINKAGE_TABLE_.
+	(bfin_finish_dynamic_symbol): Use __DYNAMIC instead of _DYNAMIC.
+
 2006-05-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (compare_symbols): Prefer strong dynamic global
