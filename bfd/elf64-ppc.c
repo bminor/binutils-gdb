@@ -2623,6 +2623,32 @@ compare_symbols (const void *ap, const void *bp)
   if (a->value + a->section->vma > b->value + b->section->vma)
     return 1;
 
+  /* For syms with the same value, prefer strong dynamic global function
+     syms over other syms.  */
+  if ((a->flags & BSF_GLOBAL) != 0 && (b->flags & BSF_GLOBAL) == 0)
+    return -1;
+
+  if ((a->flags & BSF_GLOBAL) == 0 && (b->flags & BSF_GLOBAL) != 0)
+    return 1;
+
+  if ((a->flags & BSF_FUNCTION) != 0 && (b->flags & BSF_FUNCTION) == 0)
+    return -1;
+
+  if ((a->flags & BSF_FUNCTION) == 0 && (b->flags & BSF_FUNCTION) != 0)
+    return 1;
+
+  if ((a->flags & BSF_WEAK) == 0 && (b->flags & BSF_WEAK) != 0)
+    return -1;
+
+  if ((a->flags & BSF_WEAK) != 0 && (b->flags & BSF_WEAK) == 0)
+    return 1;
+
+  if ((a->flags & BSF_DYNAMIC) != 0 && (b->flags & BSF_DYNAMIC) == 0)
+    return -1;
+
+  if ((a->flags & BSF_DYNAMIC) == 0 && (b->flags & BSF_DYNAMIC) != 0)
+    return 1;
+
   return 0;
 }
 
