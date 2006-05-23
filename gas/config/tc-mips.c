@@ -274,16 +274,22 @@ static int file_ase_mdmx;
    command line (e.g., by -march).  */
 static int file_ase_smartmips;
 
-#define ISA_SUPPORT_SMARTMIPS (mips_opts.isa == ISA_MIPS32       \
-			       || mips_opts.isa == ISA_MIPS32R2)
+#define ISA_SUPPORTS_SMARTMIPS (mips_opts.isa == ISA_MIPS32		\
+				|| mips_opts.isa == ISA_MIPS32R2)
 
 /* True if -mdsp was passed or implied by arguments passed on the
    command line (e.g., by -march).  */
 static int file_ase_dsp;
 
+#define ISA_SUPPORTS_DSP_ASE (mips_opts.isa == ISA_MIPS32R2		\
+			      || mips_opts.isa == ISA_MIPS64R2)
+
 /* True if -mmt was passed or implied by arguments passed on the
    command line (e.g., by -march).  */
 static int file_ase_mt;
+
+#define ISA_SUPPORTS_MT_ASE (mips_opts.isa == ISA_MIPS32R2		\
+			     || mips_opts.isa == ISA_MIPS64R2)
 
 /* The argument of the -march= flag.  The architecture we are assembling.  */
 static int file_mips_arch = CPU_UNKNOWN;
@@ -306,11 +312,20 @@ static int mips_32bitmode = 0;
    || (ABI) == N64_ABI			\
    || (ABI) == O64_ABI)
 
-/*  Return true if ISA supports 64 bit gp register instructions.  */
+/*  Return true if ISA supports 64 bit wide gp registers.  */
 #define ISA_HAS_64BIT_REGS(ISA)		\
   ((ISA) == ISA_MIPS3			\
    || (ISA) == ISA_MIPS4		\
    || (ISA) == ISA_MIPS5		\
+   || (ISA) == ISA_MIPS64		\
+   || (ISA) == ISA_MIPS64R2)
+
+/*  Return true if ISA supports 64 bit wide float registers.  */
+#define ISA_HAS_64BIT_FPRS(ISA)		\
+  ((ISA) == ISA_MIPS3			\
+   || (ISA) == ISA_MIPS4		\
+   || (ISA) == ISA_MIPS5		\
+   || (ISA) == ISA_MIPS32R2		\
    || (ISA) == ISA_MIPS64		\
    || (ISA) == ISA_MIPS64R2)
 
@@ -333,14 +348,20 @@ static int mips_32bitmode = 0;
    || (ISA) == ISA_MIPS64		\
    || (ISA) == ISA_MIPS64R2)
 
+/* Return true if ISA supports move to/from high part of a 64-bit
+   floating-point register. */
+#define ISA_HAS_MXHC1(ISA)		\
+  ((ISA) == ISA_MIPS32R2		\
+   || (ISA) == ISA_MIPS64R2)
+
 #define HAVE_32BIT_GPRS		                   \
-    (mips_opts.gp32 || ! ISA_HAS_64BIT_REGS (mips_opts.isa))
+    (mips_opts.gp32 || !ISA_HAS_64BIT_REGS (mips_opts.isa))
 
 #define HAVE_32BIT_FPRS                            \
-    (mips_opts.fp32 || ! ISA_HAS_64BIT_REGS (mips_opts.isa))
+    (mips_opts.fp32 || !ISA_HAS_64BIT_FPRS (mips_opts.isa))
 
-#define HAVE_64BIT_GPRS (! HAVE_32BIT_GPRS)
-#define HAVE_64BIT_FPRS (! HAVE_32BIT_FPRS)
+#define HAVE_64BIT_GPRS (!HAVE_32BIT_GPRS)
+#define HAVE_64BIT_FPRS (!HAVE_32BIT_FPRS)
 
 #define HAVE_NEWABI (mips_abi == N32_ABI || mips_abi == N64_ABI)
 
@@ -1031,10 +1052,17 @@ static int validate_mips_insn (const struct mips_opcode *);
 struct mips_cpu_info
 {
   const char *name;           /* CPU or ISA name.  */
-  int is_isa;                 /* Is this an ISA?  (If 0, a CPU.) */
+  int flags;                  /* ASEs available, or ISA flag.  */
   int isa;                    /* ISA level.  */
   int cpu;                    /* CPU number (default CPU if ISA).  */
 };
+
+#define MIPS_CPU_IS_ISA		0x0001	/* Is this an ISA?  (If 0, a CPU.) */
+#define MIPS_CPU_ASE_SMARTMIPS	0x0002	/* CPU implements SmartMIPS ASE */
+#define MIPS_CPU_ASE_DSP	0x0004	/* CPU implements DSP ASE */
+#define MIPS_CPU_ASE_MT		0x0008	/* CPU implements MT ASE */
+#define MIPS_CPU_ASE_MIPS3D	0x0010	/* CPU implements MIPS-3D ASE */
+#define MIPS_CPU_ASE_MDMX	0x0020	/* CPU implements MDMX ASE */
 
 static const struct mips_cpu_info *mips_parse_cpu (const char *, const char *);
 static const struct mips_cpu_info *mips_cpu_info_from_isa (int);
@@ -11380,14 +11408,43 @@ mips_after_parse_args (void)
 			|| !ISA_HAS_64BIT_REGS (mips_opts.isa));
     }
 
-  /* ??? GAS treats single-float processors as though they had 64-bit
-     float registers (although it complains when double-precision
-     instructions are used).  As things stand, saying they have 32-bit
-     registers would lead to spurious "register must be even" messages.
-     So here we assume float registers are always the same size as
-     integer ones, unless the user says otherwise.  */
-  if (file_mips_fp32 < 0)
-    file_mips_fp32 = file_mips_gp32;
+  switch (file_mips_fp32)
+    {
+    default:
+    case -1:
+      /* No user specified float register size.
+	 ??? GAS treats single-float processors as though they had 64-bit
+	 float registers (although it complains when double-precision
+	 instructions are used).  As things stand, saying they have 32-bit
+	 registers would lead to spurious "register must be even" messages.
+	 So here we assume float registers are never smaller than the
+	 integer ones.  */
+      if (file_mips_gp32 == 0)
+	/* 64-bit integer registers implies 64-bit float registers.  */
+	file_mips_fp32 = 0;
+      else if ((mips_opts.ase_mips3d > 0 || mips_opts.ase_mdmx > 0)
+	       && ISA_HAS_64BIT_FPRS (mips_opts.isa))
+	/* -mips3d and -mdmx imply 64-bit float registers, if possible.  */
+	file_mips_fp32 = 0;
+      else
+	/* 32-bit float registers.  */
+	file_mips_fp32 = 1;
+      break;
+
+    /* The user specified the size of the float registers.  Check if it
+       agrees with the ABI and ISA.  */
+    case 0:
+      if (!ISA_HAS_64BIT_FPRS (mips_opts.isa))
+	as_bad (_("-mfp64 used with a 32-bit fpu"));
+      else if (ABI_NEEDS_32BIT_REGS (mips_abi)
+	       && !ISA_HAS_MXHC1 (mips_opts.isa))
+	as_warn (_("-mfp64 used with a 32-bit ABI"));
+      break;
+    case 1:
+      if (ABI_NEEDS_64BIT_REGS (mips_abi))
+	as_warn (_("-mfp32 used with a 64-bit ABI"));
+      break;
+    }
 
   /* End of GCC-shared inference code.  */
 
@@ -11406,13 +11463,36 @@ mips_after_parse_args (void)
   if (mips_opts.mips16 == -1)
     mips_opts.mips16 = (CPU_HAS_MIPS16 (file_mips_arch)) ? 1 : 0;
   if (mips_opts.ase_mips3d == -1)
-    mips_opts.ase_mips3d = (CPU_HAS_MIPS3D (file_mips_arch)) ? 1 : 0;
+    mips_opts.ase_mips3d = ((CPU_HAS_MIPS3D (file_mips_arch)
+			     || (arch_info->flags & MIPS_CPU_ASE_MIPS3D))
+			    && file_mips_fp32 == 0) ? 1 : 0;
+  if (mips_opts.ase_mips3d && file_mips_fp32 == 1)
+    as_bad (_("-mfp32 used with -mips3d"));
+
   if (mips_opts.ase_mdmx == -1)
-    mips_opts.ase_mdmx = (CPU_HAS_MDMX (file_mips_arch)) ? 1 : 0;
+    mips_opts.ase_mdmx = ((CPU_HAS_MDMX (file_mips_arch)
+			   || (arch_info->flags & MIPS_CPU_ASE_MDMX))
+			  && file_mips_fp32 == 0) ? 1 : 0;
+  if (mips_opts.ase_mdmx && file_mips_fp32 == 1)
+    as_bad (_("-mfp32 used with -mdmx"));
+
+  if (mips_opts.ase_smartmips == -1)
+    mips_opts.ase_smartmips = (arch_info->flags & MIPS_CPU_ASE_SMARTMIPS) ? 1 : 0;
+  if (mips_opts.ase_smartmips && !ISA_SUPPORTS_SMARTMIPS)
+      as_warn ("%s ISA does not support SmartMIPS", 
+	       mips_cpu_info_from_isa (mips_opts.isa)->name);
+
   if (mips_opts.ase_dsp == -1)
-    mips_opts.ase_dsp = (CPU_HAS_DSP (file_mips_arch)) ? 1 : 0;
+    mips_opts.ase_dsp = (arch_info->flags & MIPS_CPU_ASE_DSP) ? 1 : 0;
+  if (mips_opts.ase_dsp && !ISA_SUPPORTS_DSP_ASE)
+      as_warn ("%s ISA does not support DSP ASE", 
+	       mips_cpu_info_from_isa (mips_opts.isa)->name);
+
   if (mips_opts.ase_mt == -1)
-    mips_opts.ase_mt = (CPU_HAS_MT (file_mips_arch)) ? 1 : 0;
+    mips_opts.ase_mt = (arch_info->flags & MIPS_CPU_ASE_MT) ? 1 : 0;
+  if (mips_opts.ase_mt && !ISA_SUPPORTS_MT_ASE)
+      as_warn ("%s ISA does not support MT ASE", 
+	       mips_cpu_info_from_isa (mips_opts.isa)->name);
 
   file_mips_isa = mips_opts.isa;
   file_ase_mips16 = mips_opts.mips16;
@@ -12266,6 +12346,28 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
     {
       mips_opts.nobopt = 1;
     }
+  else if (strcmp (name, "gp=default") == 0)
+    mips_opts.gp32 = file_mips_gp32;
+  else if (strcmp (name, "gp=32") == 0)
+    mips_opts.gp32 = 1;
+  else if (strcmp (name, "gp=64") == 0)
+    {
+      if (!ISA_HAS_64BIT_REGS (mips_opts.isa))
+	as_warn ("%s isa does not support 64-bit registers",
+		 mips_cpu_info_from_isa (mips_opts.isa)->name);
+      mips_opts.gp32 = 0;
+    }
+  else if (strcmp (name, "fp=default") == 0)
+    mips_opts.fp32 = file_mips_fp32;
+  else if (strcmp (name, "fp=32") == 0)
+    mips_opts.fp32 = 1;
+  else if (strcmp (name, "fp=64") == 0)
+    {
+      if (!ISA_HAS_64BIT_FPRS (mips_opts.isa))
+	as_warn ("%s isa does not support 64-bit floating point registers",
+		 mips_cpu_info_from_isa (mips_opts.isa)->name);
+      mips_opts.fp32 = 0;
+    }
   else if (strcmp (name, "mips16") == 0
 	   || strcmp (name, "MIPS-16") == 0)
     mips_opts.mips16 = 1;
@@ -12274,7 +12376,7 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
     mips_opts.mips16 = 0;
   else if (strcmp (name, "smartmips") == 0)
     {
-      if (!ISA_SUPPORT_SMARTMIPS)
+      if (!ISA_SUPPORTS_SMARTMIPS)
 	as_warn ("%s ISA does not support SmartMIPS ASE", 
 		 mips_cpu_info_from_isa (mips_opts.isa)->name);
       mips_opts.ase_smartmips = 1;
@@ -12290,11 +12392,21 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
   else if (strcmp (name, "nomdmx") == 0)
     mips_opts.ase_mdmx = 0;
   else if (strcmp (name, "dsp") == 0)
-    mips_opts.ase_dsp = 1;
+    {
+      if (!ISA_SUPPORTS_DSP_ASE)
+	as_warn ("%s ISA does not support DSP ASE", 
+		 mips_cpu_info_from_isa (mips_opts.isa)->name);
+      mips_opts.ase_dsp = 1;
+    }
   else if (strcmp (name, "nodsp") == 0)
     mips_opts.ase_dsp = 0;
   else if (strcmp (name, "mt") == 0)
-    mips_opts.ase_mt = 1;
+    {
+      if (!ISA_SUPPORTS_MT_ASE)
+	as_warn ("%s ISA does not support MT ASE", 
+		 mips_cpu_info_from_isa (mips_opts.isa)->name);
+      mips_opts.ase_mt = 1;
+    }
   else if (strcmp (name, "nomt") == 0)
     mips_opts.ase_mt = 0;
   else if (strncmp (name, "mips", 4) == 0 || strncmp (name, "arch=", 5) == 0)
@@ -14012,6 +14124,12 @@ mips_elf_final_processing (void)
 
   if (mips_32bitmode)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_32BITMODE;
+
+#if 0 /* XXX FIXME */
+  /* 32 bit code with 64 bit FP registers.  */
+  if (!file_mips_fp32 && ABI_NEEDS_32BIT_REGS (mips_abi))
+    elf_elfheader (stdoutput)->e_flags |= ???;
+#endif
 }
 
 #endif /* OBJ_ELF || OBJ_MAYBE_ELF */
@@ -14414,72 +14532,90 @@ s_mips_mask (int reg_type)
 static const struct mips_cpu_info mips_cpu_info_table[] =
 {
   /* Entries for generic ISAs */
-  { "mips1",          1,      ISA_MIPS1,      CPU_R3000 },
-  { "mips2",          1,      ISA_MIPS2,      CPU_R6000 },
-  { "mips3",          1,      ISA_MIPS3,      CPU_R4000 },
-  { "mips4",          1,      ISA_MIPS4,      CPU_R8000 },
-  { "mips5",          1,      ISA_MIPS5,      CPU_MIPS5 },
-  { "mips32",         1,      ISA_MIPS32,     CPU_MIPS32 },
-  { "mips32r2",       1,      ISA_MIPS32R2,   CPU_MIPS32R2 },
-  { "mips64",         1,      ISA_MIPS64,     CPU_MIPS64 },
-  { "mips64r2",       1,      ISA_MIPS64R2,   CPU_MIPS64R2 },
+  { "mips1",          MIPS_CPU_IS_ISA,		ISA_MIPS1,      CPU_R3000 },
+  { "mips2",          MIPS_CPU_IS_ISA,		ISA_MIPS2,      CPU_R6000 },
+  { "mips3",          MIPS_CPU_IS_ISA,		ISA_MIPS3,      CPU_R4000 },
+  { "mips4",          MIPS_CPU_IS_ISA,		ISA_MIPS4,      CPU_R8000 },
+  { "mips5",          MIPS_CPU_IS_ISA,		ISA_MIPS5,      CPU_MIPS5 },
+  { "mips32",         MIPS_CPU_IS_ISA,		ISA_MIPS32,     CPU_MIPS32 },
+  { "mips32r2",       MIPS_CPU_IS_ISA,		ISA_MIPS32R2,   CPU_MIPS32R2 },
+  { "mips64",         MIPS_CPU_IS_ISA,		ISA_MIPS64,     CPU_MIPS64 },
+  { "mips64r2",       MIPS_CPU_IS_ISA,		ISA_MIPS64R2,   CPU_MIPS64R2 },
 
   /* MIPS I */
-  { "r3000",          0,      ISA_MIPS1,      CPU_R3000 },
-  { "r2000",          0,      ISA_MIPS1,      CPU_R3000 },
-  { "r3900",          0,      ISA_MIPS1,      CPU_R3900 },
+  { "r3000",          0,			ISA_MIPS1,      CPU_R3000 },
+  { "r2000",          0,			ISA_MIPS1,      CPU_R3000 },
+  { "r3900",          0,			ISA_MIPS1,      CPU_R3900 },
 
   /* MIPS II */
-  { "r6000",          0,      ISA_MIPS2,      CPU_R6000 },
+  { "r6000",          0,			ISA_MIPS2,      CPU_R6000 },
 
   /* MIPS III */
-  { "r4000",          0,      ISA_MIPS3,      CPU_R4000 },
-  { "r4010",          0,      ISA_MIPS2,      CPU_R4010 },
-  { "vr4100",         0,      ISA_MIPS3,      CPU_VR4100 },
-  { "vr4111",         0,      ISA_MIPS3,      CPU_R4111 },
-  { "vr4120",         0,      ISA_MIPS3,      CPU_VR4120 },
-  { "vr4130",         0,      ISA_MIPS3,      CPU_VR4120 },
-  { "vr4181",         0,      ISA_MIPS3,      CPU_R4111 },
-  { "vr4300",         0,      ISA_MIPS3,      CPU_R4300 },
-  { "r4400",          0,      ISA_MIPS3,      CPU_R4400 },
-  { "r4600",          0,      ISA_MIPS3,      CPU_R4600 },
-  { "orion",          0,      ISA_MIPS3,      CPU_R4600 },
-  { "r4650",          0,      ISA_MIPS3,      CPU_R4650 },
+  { "r4000",          0,			ISA_MIPS3,      CPU_R4000 },
+  { "r4010",          0,			ISA_MIPS2,      CPU_R4010 },
+  { "vr4100",         0,			ISA_MIPS3,      CPU_VR4100 },
+  { "vr4111",         0,			ISA_MIPS3,      CPU_R4111 },
+  { "vr4120",         0,			ISA_MIPS3,      CPU_VR4120 },
+  { "vr4130",         0,			ISA_MIPS3,      CPU_VR4120 },
+  { "vr4181",         0,			ISA_MIPS3,      CPU_R4111 },
+  { "vr4300",         0,			ISA_MIPS3,      CPU_R4300 },
+  { "r4400",          0,			ISA_MIPS3,      CPU_R4400 },
+  { "r4600",          0,			ISA_MIPS3,      CPU_R4600 },
+  { "orion",          0,			ISA_MIPS3,      CPU_R4600 },
+  { "r4650",          0,			ISA_MIPS3,      CPU_R4650 },
 
   /* MIPS IV */
-  { "r8000",          0,      ISA_MIPS4,      CPU_R8000 },
-  { "r10000",         0,      ISA_MIPS4,      CPU_R10000 },
-  { "r12000",         0,      ISA_MIPS4,      CPU_R12000 },
-  { "vr5000",         0,      ISA_MIPS4,      CPU_R5000 },
-  { "vr5400",         0,      ISA_MIPS4,      CPU_VR5400 },
-  { "vr5500",         0,      ISA_MIPS4,      CPU_VR5500 },
-  { "rm5200",         0,      ISA_MIPS4,      CPU_R5000 },
-  { "rm5230",         0,      ISA_MIPS4,      CPU_R5000 },
-  { "rm5231",         0,      ISA_MIPS4,      CPU_R5000 },
-  { "rm5261",         0,      ISA_MIPS4,      CPU_R5000 },
-  { "rm5721",         0,      ISA_MIPS4,      CPU_R5000 },
-  { "rm7000",         0,      ISA_MIPS4,      CPU_RM7000 },
-  { "rm9000",         0,      ISA_MIPS4,      CPU_RM9000 },
+  { "r8000",          0,			ISA_MIPS4,      CPU_R8000 },
+  { "r10000",         0,			ISA_MIPS4,      CPU_R10000 },
+  { "r12000",         0,			ISA_MIPS4,      CPU_R12000 },
+  { "vr5000",         0,			ISA_MIPS4,      CPU_R5000 },
+  { "vr5400",         0,			ISA_MIPS4,      CPU_VR5400 },
+  { "vr5500",         0,			ISA_MIPS4,      CPU_VR5500 },
+  { "rm5200",         0,			ISA_MIPS4,      CPU_R5000 },
+  { "rm5230",         0,			ISA_MIPS4,      CPU_R5000 },
+  { "rm5231",         0,			ISA_MIPS4,      CPU_R5000 },
+  { "rm5261",         0,			ISA_MIPS4,      CPU_R5000 },
+  { "rm5721",         0,			ISA_MIPS4,      CPU_R5000 },
+  { "rm7000",         0,			ISA_MIPS4,      CPU_RM7000 },
+  { "rm9000",         0,			ISA_MIPS4,      CPU_RM9000 },
 
   /* MIPS 32 */
-  { "4kc",            0,      ISA_MIPS32,     CPU_MIPS32 },
-  { "4km",            0,      ISA_MIPS32,     CPU_MIPS32 },
-  { "4kp",            0,      ISA_MIPS32,     CPU_MIPS32 },
+  { "4kc",            0,			ISA_MIPS32,	CPU_MIPS32 },
+  { "4km",            0,			ISA_MIPS32,	CPU_MIPS32 },
+  { "4kp",            0,			ISA_MIPS32,	CPU_MIPS32 },
+  { "4ksc",           MIPS_CPU_ASE_SMARTMIPS,	ISA_MIPS32,	CPU_MIPS32 },
 
-  /* MIPS32 Release 2 */
-  { "m4k",            0,      ISA_MIPS32R2,   CPU_MIPS32R2 },
-  { "24k",            0,      ISA_MIPS32R2,   CPU_MIPS32R2 },
-  { "24kc",           0,      ISA_MIPS32R2,   CPU_MIPS32R2 },
-  { "24kf",           0,      ISA_MIPS32R2,   CPU_MIPS32R2 },
-  { "24kx",           0,      ISA_MIPS32R2,   CPU_MIPS32R2 },
+  /* MIPS 32 Release 2 */
+  { "4kec",           0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
+  { "4kem",           0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
+  { "4kep",           0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
+  { "4ksd",           MIPS_CPU_ASE_SMARTMIPS,	ISA_MIPS32R2,   CPU_MIPS32R2 },
+  { "m4k",            0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
+  { "m4kp",           0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
+  { "24k",            0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
+  { "24kc",           0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
+  { "24kf",           0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
+  { "24kx",           0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
+  /* 24ke is a 24k with DSP ASE, other ASEs are optional.  */
+  { "24ke",           MIPS_CPU_ASE_DSP,		ISA_MIPS32R2,	CPU_MIPS32R2 },
+  { "24kec",          MIPS_CPU_ASE_DSP,		ISA_MIPS32R2,	CPU_MIPS32R2 },
+  { "24kef",          MIPS_CPU_ASE_DSP,		ISA_MIPS32R2,	CPU_MIPS32R2 },
+  { "24kex",         MIPS_CPU_ASE_DSP,		ISA_MIPS32R2,	CPU_MIPS32R2 },
+  /* 34k is a 24k with MT ASE, other ASEs are optional.  */
+  { "34kc",           MIPS_CPU_ASE_MT,		ISA_MIPS32R2,	CPU_MIPS32R2 },
+  { "34kf",           MIPS_CPU_ASE_MT,		ISA_MIPS32R2,	CPU_MIPS32R2 },
+  { "34kx",          MIPS_CPU_ASE_MT,		ISA_MIPS32R2,	CPU_MIPS32R2 },
 
   /* MIPS 64 */
-  { "5kc",            0,      ISA_MIPS64,     CPU_MIPS64 },
-  { "5kf",            0,      ISA_MIPS64,     CPU_MIPS64 },
-  { "20kc",           0,      ISA_MIPS64,     CPU_MIPS64 },
+  { "5kc",            0,			ISA_MIPS64,	CPU_MIPS64 },
+  { "5kf",            0,			ISA_MIPS64,	CPU_MIPS64 },
+  { "20kc",           MIPS_CPU_ASE_MIPS3D,	ISA_MIPS64,	CPU_MIPS64 },
+
+  /* MIPS 64 Release 2 */
+  { "25kf",           MIPS_CPU_ASE_MIPS3D,	ISA_MIPS64R2,   CPU_MIPS64R2 },
 
   /* Broadcom SB-1 CPU core */
-  { "sb1",            0,      ISA_MIPS64,     CPU_SB1 },
+  { "sb1",            0,			ISA_MIPS64,	CPU_SB1 },
 
   /* End marker */
   { NULL, 0, 0, 0 }
@@ -14594,7 +14730,7 @@ mips_cpu_info_from_isa (int isa)
   int i;
 
   for (i = 0; mips_cpu_info_table[i].name != NULL; i++)
-    if (mips_cpu_info_table[i].is_isa
+    if ((mips_cpu_info_table[i].flags & MIPS_CPU_IS_ISA)
 	&& isa == mips_cpu_info_table[i].isa)
       return (&mips_cpu_info_table[i]);
 

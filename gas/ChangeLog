@@ -1,3 +1,33 @@
+2006-05-23  Thiemo Seufer  <ths@mips.com>
+            David Ung  <davidu@mips.com>
+            Nigel Stephens  <nigel@mips.com>
+
+	[ gas/ChangeLog ]
+	* config/tc-mips.c (ISA_SUPPORTS_SMARTMIPS): Rename.
+	(ISA_SUPPORTS_DSP_ASE, ISA_SUPPORTS_MT_ASE, ISA_HAS_64BIT_FPRS,
+	ISA_HAS_MXHC1): New macros.
+	(HAVE_32BIT_FPRS): Use ISA_HAS_64BIT_FPRS instead of
+	ISA_HAS_64BIT_REGS.  Formatting fixes.  Improved comments.
+	(mips_cpu_info): Change to use combined ASE/IS_ISA flag.
+	(MIPS_CPU_IS_ISA, MIPS_CPU_ASE_SMARTMIPS, MIPS_CPU_ASE_DSP,
+	MIPS_CPU_ASE_MT, MIPS_CPU_ASE_MIPS3D, MIPS_CPU_ASE_MDMX): New defines.
+	(mips_after_parse_args): Change default handling of float register
+	size to account for 32bit code with 64bit FP. Better sanity checking
+	of ISA/ASE/ABI option combinations.
+	(s_mipsset): Support switching of GPR and FPR sizes via
+	.set {g,f}p={32,64,default}. Better sanity checking for .set ASE
+	options.
+	(mips_elf_final_processing): We should record the use of 64bit FP
+	registers in 32bit code but we don't, because ELF header flags are
+	a scarce ressource.
+	(mips_cpu_info_table): Add ASE flags for CPUs with mandatory ASE
+	extensions. Add 4ksc, 4kec, 4kem, 4kep, 4ksd, m4kp, 24kec, 24kef,
+	24kex, 34kc, 34kf, 34kx, 25kf CPU definitions.
+	(mips_cpu_info_from_isa): Use MIPS_CPU_IS_ISA.
+	* doc/c-mips.texi: Document .set {g,f}p={32,64,default}. Document
+	missing -march options. Document .set arch=CPU. Move .set smartmips
+	to ASE page. Use @code for .set FOO examples.
+
 2006-05-23  Jie Zhang  <jie.zhang@analog.com>
 
 	* config/tc-bfin.c (bfin_start_line_hook): Bump line counters

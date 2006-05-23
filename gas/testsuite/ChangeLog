@@ -1,3 +1,12 @@
+2006-05-23  Thiemo Seufer  <ths@mips.com>
+
+	* gas/mips/mips-gp32-fp64-pic.d, mips/mips-gp32-fp64.d,
+	gas/mips/mips-gp64-fp32-pic.d, gas/mips/mips-gp64-fp32.l,
+	gas/mips/mips-gp64-fp64.d: Adjust test cases to the changes assembler
+	output.
+	* gas/mips/mips-gp32-fp64.l, gas/mips/mips-gp64-fp32-pic.l: New files,
+	catch assembler warnings.
+
 2006-05-22  Nick Clifton  <nickc@redhat.com>
 
 	* gas/mips/mips32-dsp.l: Fix expected unsigned decoding of -1 in
