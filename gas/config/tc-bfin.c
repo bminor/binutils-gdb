@@ -1969,42 +1969,6 @@ bfin_eol_in_insn (char *line)
 }
 
 bfd_boolean
-bfin_name_is_register (char *name)
-{
-  int i;
-
-  if (*name == '[' || *name == '(')
-    return TRUE;
-
-  if ((name[0] == 'W' || name[0] == 'w') && name[1] == '[')
-    return TRUE;
-
-  if ((name[0] == 'B' || name[0] == 'b') && name[1] == '[')
-    return TRUE;
-
-  for (i=0; bfin_reg_info[i].name != 0; i++)
-   {
-     if (!strcasecmp (bfin_reg_info[i].name, name))
-       return TRUE;
-   }
-  return FALSE;
-}
-
-void
-bfin_equals (Expr_Node *sym)
-{
-  char *c;
-
-  c = input_line_pointer;
-  while (*c != '=')
-   c--;
-
-  input_line_pointer = c;
-
-  equals ((char *) sym->value.s_value, 1);
-}
-
-bfd_boolean
 bfin_start_label (char *ptr)
 {
   ptr--;

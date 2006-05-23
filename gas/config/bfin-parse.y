@@ -3223,16 +3223,6 @@ asm_1:
 	}
 
 
-
-/* Expression Assignment.  */
-
-	| expr ASSIGN expr
-	{
-	  bfin_equals ($1);
-	  $$ = 0;
-	}
-
-
 /*  PushPopMultiple.  */
 	| reg_with_predec ASSIGN LPAREN REG COLON expr COMMA REG COLON expr RPAREN
 	{
