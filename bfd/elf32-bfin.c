@@ -2435,6 +2435,8 @@ bfinfdpic_relocate_section (bfd * output_bfd,
 						 input_section->output_section)
 			  & (SEC_ALLOC | SEC_LOAD)) == (SEC_ALLOC | SEC_LOAD))
 		  {
+		    bfd_vma offset;
+
 		    if (_bfinfdpic_osec_readonly_p (output_bfd,
 						   input_section
 						   ->output_section))
@@ -2445,15 +2447,23 @@ bfinfdpic_relocate_section (bfd * output_bfd,
 			   name, input_bfd, input_section, rel->r_offset);
 			return FALSE;
 		      }
-		    _bfinfdpic_add_dyn_reloc (output_bfd,
-					      bfinfdpic_gotrel_section (info),
-					      _bfd_elf_section_offset
-					      (output_bfd, info,
-					       input_section, rel->r_offset)
-					      + input_section
-					      ->output_section->vma
-					      + input_section->output_offset,
-					      r_type, dynindx, addend, picrel);
+		    offset = _bfd_elf_section_offset (output_bfd, info,
+						      input_section, rel->r_offset);
+		    /* Only output a reloc for a not deleted entry.  */
+		    if (offset >= (bfd_vma) -2)
+		      _bfinfdpic_add_dyn_reloc (output_bfd,
+						bfinfdpic_gotrel_section (info),
+						0,
+						R_unused0,
+						dynindx, addend, picrel);
+		    else
+		      _bfinfdpic_add_dyn_reloc (output_bfd,
+						bfinfdpic_gotrel_section (info),
+						offset + input_section
+						->output_section->vma
+						+ input_section->output_offset,
+						r_type,
+						dynindx, addend, picrel);
 		  }
 		else
 		  addend += bfinfdpic_got_section (info)->output_section->vma;
