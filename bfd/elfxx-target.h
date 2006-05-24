@@ -413,6 +413,9 @@
 #ifndef elf_backend_print_symbol_all
 #define elf_backend_print_symbol_all		NULL
 #endif
+#ifndef elf_backend_output_arch_local_syms
+#define elf_backend_output_arch_local_syms	NULL
+#endif
 #ifndef elf_backend_output_arch_syms
 #define elf_backend_output_arch_syms		NULL
 #endif
@@ -600,6 +603,7 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_gc_sweep_hook,
   elf_backend_post_process_headers,
   elf_backend_print_symbol_all,
+  elf_backend_output_arch_local_syms,
   elf_backend_output_arch_syms,
   elf_backend_copy_indirect_symbol,
   elf_backend_hide_symbol,

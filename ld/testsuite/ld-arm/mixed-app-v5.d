@@ -8,7 +8,7 @@ Disassembly of section .plt:
 
 .* <.plt>:
  .*:	e52de004 	str	lr, \[sp, #-4\]!
- .*:	e59fe004 	ldr	lr, \[pc, #4\]	; .* <_start-0x20>
+ .*:	e59fe004 	ldr	lr, \[pc, #4\]	; .* <\.plt\+0x10>
  .*:	e08fe00e 	add	lr, pc, lr
  .*:	e5bef008 	ldr	pc, \[lr, #8\]!
  .*:	.*
@@ -48,7 +48,7 @@ Disassembly of section .text:
 
 .* <app_tfunc>:
  .*:	b500      	push	{lr}
- .*:	f7ff efc. 	blx	.* <_start-0x..>
+ .*:	f7ff efc. 	blx	.* <.text-0x..>
  .*:	bd00      	pop	{pc}
  .*:	4770      	bx	lr
  .*:	46c0      	nop			\(mov r8, r8\)

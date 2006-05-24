@@ -8296,6 +8296,19 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   if (eoinfo.failed)
     return FALSE;
 
+  /* If backend needs to output some local symbols not present in the hash
+     table, do it now.  */
+  if (bed->elf_backend_output_arch_local_syms)
+    {
+      typedef bfd_boolean (*out_sym_func)
+	(void *, const char *, Elf_Internal_Sym *, asection *,
+	 struct elf_link_hash_entry *);
+
+      if (! ((*bed->elf_backend_output_arch_local_syms)
+	     (abfd, info, &finfo, (out_sym_func) elf_link_output_sym)))
+	return FALSE;
+    }
+
   /* That wrote out all the local symbols.  Finish up the symbol table
      with the global symbols. Even if we want to strip everything we
      can, we still need to deal with those global symbols that got

@@ -1,3 +1,13 @@
+2006-05-24  Paul Brook  <paul@codesourcery.com>
+
+	* ld-arm/arm-app-abs32.d: Update expected output.
+	* ld-arm/arm-app.d: Ditto.
+	* ld-arm/arm-lib-plt32.d: Ditto.
+	* ld-arm/arm-lib.d: Ditto.
+	* ld-arm/mixed-app-v5.d: Ditto.
+	* ld-arm/mixed-app.d: Ditto.
+	* ld-arm/mixed-lib.d: Ditto.
+
 2006-05-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/2655
