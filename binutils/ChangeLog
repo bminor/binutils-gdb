@@ -1,6 +1,10 @@
+2006-05-24  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+
 2006-05-23  Nick Clifton  <nickc@redhat.com>
 
-	* po/vi.po: Updated translation.
+	* po/vi.po: Updated Vietnamese translation.
 
 2006-05-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
