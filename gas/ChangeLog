@@ -1,3 +1,19 @@
+2006-05-24  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-hppa.c: Convert to ISO C90 format.
+	* config/tc-hppa.h: Likewise.
+
+2006-05-24  Carlos O'Donell  <carlos@systemhalted.org>
+	    Randolph Chung  <randolph@tausq.org>
+	    
+	* config/tc-hppa.c (is_tls_gdidx, is_tls_ldidx, is_tls_dtpoff,
+	is_tls_ieoff, is_tls_leoff): Define.
+	(fix_new_hppa): Handle TLS.
+	(cons_fix_new_hppa): Likewise.
+	(pa_ip): Likewise.
+	(md_apply_fix): Handle TLS relocs.
+	* config/tc-hppa.h (hppa_fix_adjustable): Handle TLS.
+
 2006-05-24  Bjoern Haase  <bjoern.m.haase@web.de> 
 
 	* config/tc-avr.c: Add new cpu targets avr6, avr2560 and avr2561.
