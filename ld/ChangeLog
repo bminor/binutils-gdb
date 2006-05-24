@@ -1,3 +1,7 @@
+2006-05-24  Nick Clifton  <nickc@redhat.com>
+
+	* po/vi.po: Updated Vietnamese translation.
+
 2006-05-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ld-mips-elf/textrel-1.d: Relax some patterns.
