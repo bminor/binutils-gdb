@@ -1,3 +1,16 @@
+2006-05-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/2655
+	PR ld/2657
+	* ld-elf/eh1.d: New file.
+	* ld-elf/eh1.s: Likewise.
+	* ld-elf/eh1a.s: Likewise.
+	* ld-elf/eh2.d: Likewise.
+	* ld-elf/eh2a.s: Likewise.
+	* ld-elf/eh3.d: Likewise.
+	* ld-elf/eh3.s: Likewise.
+	* ld-elf/eh3a.s: Likewise.
+
 2006-05-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ld-mips-elf/textrel-1.d: Relax some patterns.
