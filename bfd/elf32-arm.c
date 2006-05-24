@@ -7950,6 +7950,174 @@ elf32_arm_output_symbol_hook (struct bfd_link_info *info,
   return TRUE;
 }
 
+typedef struct
+{
+  void *finfo;
+  struct bfd_link_info *info;
+  int plt_shndx;
+  bfd_vma plt_offset;
+  bfd_boolean (*func) (void *, const char *, Elf_Internal_Sym *,
+		       asection *, struct elf_link_hash_entry *);
+} output_arch_syminfo;
+
+enum map_symbol_type
+{
+  ARM_MAP_ARM,
+  ARM_MAP_THUMB,
+  ARM_MAP_DATA
+};
+
+
+/* Output a single PLT mapping symbol.  */
+
+static bfd_boolean
+elf32_arm_ouput_plt_map_sym (output_arch_syminfo *osi,
+			     enum map_symbol_type type,
+			     bfd_vma offset)
+{
+  static const char *names[3] = {"$a", "$t", "$d"};
+  struct elf32_arm_link_hash_table *htab;
+  Elf_Internal_Sym sym;
+
+  htab = elf32_arm_hash_table (osi->info);
+  sym.st_value = osi->plt_offset + offset;
+  sym.st_size = 0;
+  sym.st_other = 0;
+  sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_NOTYPE);
+  sym.st_shndx = osi->plt_shndx;
+  if (!osi->func (osi->finfo, names[type], &sym, htab->splt, NULL))
+    return FALSE;
+  return TRUE;
+}
+
+
+/* Output mapping symbols for PLT entries associated with H.  */
+
+static bfd_boolean
+elf32_arm_output_plt_map (struct elf_link_hash_entry *h, void *inf)
+{
+  output_arch_syminfo *osi = (output_arch_syminfo *) inf;
+  struct elf32_arm_link_hash_table *htab;
+  struct elf32_arm_link_hash_entry *eh;
+  bfd_vma addr;
+
+  htab = elf32_arm_hash_table (osi->info);
+
+  if (h->root.type == bfd_link_hash_indirect)
+    return TRUE;
+
+  if (h->root.type == bfd_link_hash_warning)
+    /* When warning symbols are created, they **replace** the "real"
+       entry in the hash table, thus we never get to see the real
+       symbol in a hash traversal.  So look at it now.  */
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+  if (h->plt.offset == (bfd_vma) -1)
+    return TRUE;
+
+  eh = (struct elf32_arm_link_hash_entry *) h;
+  addr = h->plt.offset;
+  if (htab->symbian_p)
+    {
+      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_ARM, addr))
+	return FALSE;
+      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_DATA, addr + 4))
+	return FALSE;
+    }
+  else if (htab->vxworks_p)
+    {
+      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_ARM, addr))
+	return FALSE;
+      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_DATA, addr + 8))
+	return FALSE;
+      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_ARM, addr + 12))
+	return FALSE;
+      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_DATA, addr + 20))
+	return FALSE;
+    }
+  else
+    {
+      bfd_boolean thumb_stub;
+
+      thumb_stub = eh->plt_thumb_refcount > 0 && !htab->use_blx;
+      if (thumb_stub)
+	{
+	  if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_THUMB, addr - 4))
+	    return FALSE;
+	}
+#ifdef FOUR_WORD_PLT
+      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_ARM, addr))
+	return FALSE;
+      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_DATA, addr + 12))
+	return FALSE;
+#else
+      /* A three-word PLT with no Thumb thunk contains only Arm code, 
+	 so only need to output a mapping symbol for the first PLT entry and
+	 entries with thumb thunks.  */
+      if (thumb_stub || addr == 20)
+	{
+	  if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_ARM, addr))
+	    return FALSE;
+	}
+#endif
+    }
+
+  return TRUE;
+}
+
+
+/* Output mapping symbols for the PLT.  */
+
+static bfd_boolean
+elf32_arm_output_arch_local_syms (bfd *output_bfd,
+    struct bfd_link_info *info,
+    void *finfo, bfd_boolean (*func) (void *, const char *,
+				    Elf_Internal_Sym *,
+				    asection *,
+				    struct elf_link_hash_entry *))
+{
+  output_arch_syminfo osi;
+  struct elf32_arm_link_hash_table *htab;
+
+  htab = elf32_arm_hash_table (info);
+  if (!htab->splt || htab->splt->size == 0)
+    return TRUE;
+
+  check_use_blx(htab);
+  osi.finfo = finfo;
+  osi.info = info;
+  osi.func = func;
+  osi.plt_shndx = _bfd_elf_section_from_bfd_section (output_bfd,
+      htab->splt->output_section);
+  osi.plt_offset = htab->splt->output_section->vma;
+
+  /* Output mapping symbols for the plt header.  SymbianOS does not have a
+     plt header.  */
+  if (htab->vxworks_p)
+    {
+      /* VxWorks shared libraries have no PLT header.  */
+      if (!info->shared)
+	{
+	  if (!elf32_arm_ouput_plt_map_sym (&osi, ARM_MAP_ARM, 0))
+	    return FALSE;
+	  if (!elf32_arm_ouput_plt_map_sym (&osi, ARM_MAP_DATA, 12))
+	    return FALSE;
+	}
+    }
+  else if (!htab->symbian_p)
+    {
+      if (!elf32_arm_ouput_plt_map_sym (&osi, ARM_MAP_ARM, 0))
+	return FALSE;
+#ifndef FOUR_WORD_PLT
+      if (!elf32_arm_ouput_plt_map_sym (&osi, ARM_MAP_DATA, 16))
+	return FALSE;
+#endif
+    }
+
+  elf_link_hash_traverse (&htab->root, elf32_arm_output_plt_map, (void *) &osi);
+  return TRUE;
+}
+
 /* Allocate target specific section data.  */
 
 static bfd_boolean
@@ -8262,6 +8430,8 @@ const struct elf_size_info elf32_arm_size_info = {
 #define elf_backend_modify_segment_map		elf32_arm_modify_segment_map
 #define elf_backend_additional_program_headers \
   elf32_arm_additional_program_headers
+#define elf_backend_output_arch_local_syms \
+  elf32_arm_output_arch_local_syms
 
 #define elf_backend_can_refcount    1
 #define elf_backend_can_gc_sections 1
