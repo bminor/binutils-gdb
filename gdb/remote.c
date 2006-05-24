@@ -1820,6 +1820,8 @@ extended_remote_restart (void)
   xsnprintf (buf, rs->remote_packet_size, "R%x", 0);
   putpkt (buf);
 
+  remote_fileio_reset ();
+  
   /* Now query for status so this looks just like we restarted
      gdbserver from scratch.  */
   putpkt ("?");
@@ -2176,6 +2178,8 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
   if (!async_p)
     wait_forever_enabled_p = 1;
 
+  remote_fileio_reset ();
+  
   reopen_exec_file ();
   reread_symbols ();
 

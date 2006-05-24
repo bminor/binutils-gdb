@@ -1355,6 +1355,25 @@ do_remote_fileio_request (struct ui_out *uiout, void *buf_arg)
   return 0;
 }
 
+/* Close any open descriptors, and reinitialize the file mapping */
+
+void
+remote_fileio_reset (void)
+{
+  int ix;
+
+  for (ix = 0; ix != remote_fio_data.fd_map_size; ix++)
+    {
+      int fd = remote_fio_data.fd_map[ix];
+
+      if (fd >= 0)
+	close (fd);
+    }
+  free (remote_fio_data.fd_map);
+  remote_fio_data.fd_map = NULL;
+  remote_fio_data.fd_map_size = 0;
+}
+
 void
 remote_fileio_request (char *buf)
 {
