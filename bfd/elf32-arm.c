@@ -2655,6 +2655,35 @@ insert_thumb_branch (insn32 br_insn, int rel_off)
   return br_insn;
 }
 
+
+/* Store an Arm insn into an output section not processed by
+   elf32_arm_write_section.  */
+
+static void
+put_arm_insn (struct elf32_arm_link_hash_table *htab,
+	     bfd * output_bfd, bfd_vma val, void * ptr)
+{
+    if (htab->byteswap_code != bfd_little_endian (output_bfd))
+      bfd_putl32 (val, ptr);
+    else
+      bfd_putb32 (val, ptr);
+}
+
+
+/* Store a 16-bit Thumb insn into an output section not processed by
+   elf32_arm_write_section.  */
+
+static void
+put_thumb_insn (struct elf32_arm_link_hash_table *htab,
+	       bfd * output_bfd, bfd_vma val, void * ptr)
+{
+    if (htab->byteswap_code != bfd_little_endian (output_bfd))
+      bfd_putl16 (val, ptr);
+    else
+      bfd_putb16 (val, ptr);
+}
+
+
 /* Thumb code calling an ARM function.  */
 
 static int
@@ -2711,11 +2740,11 @@ elf32_thumb_to_arm_stub (struct bfd_link_info * info,
       --my_offset;
       myh->root.u.def.value = my_offset;
 
-      bfd_put_16 (output_bfd, (bfd_vma) t2a1_bx_pc_insn,
-		  s->contents + my_offset);
+      put_thumb_insn (globals, output_bfd, (bfd_vma) t2a1_bx_pc_insn,
+		      s->contents + my_offset);
 
-      bfd_put_16 (output_bfd, (bfd_vma) t2a2_noop_insn,
-		  s->contents + my_offset + 2);
+      put_thumb_insn (globals, output_bfd, (bfd_vma) t2a2_noop_insn,
+		      s->contents + my_offset + 2);
 
       ret_offset =
 	/* Address of destination of the stub.  */
@@ -2733,9 +2762,9 @@ elf32_thumb_to_arm_stub (struct bfd_link_info * info,
 	   /* ARM branches work from the pc of the instruction + 8.  */
 	   + 8);
 
-      bfd_put_32 (output_bfd,
-		  (bfd_vma) t2a3_b_insn | ((ret_offset >> 2) & 0x00FFFFFF),
-		  s->contents + my_offset + 4);
+      put_arm_insn (globals, output_bfd,
+		    (bfd_vma) t2a3_b_insn | ((ret_offset >> 2) & 0x00FFFFFF),
+		    s->contents + my_offset + 4);
     }
 
   BFD_ASSERT (my_offset <= globals->thumb_glue_size);
@@ -2820,12 +2849,12 @@ elf32_arm_to_thumb_stub (struct bfd_link_info * info,
 	     so construct the address from a relative offset.  */
 	  /* TODO: If the offset is small it's probably worth
 	     constructing the address with adds.  */
-	  bfd_put_32 (output_bfd, (bfd_vma) a2t1p_ldr_insn,
-		      s->contents + my_offset);
-	  bfd_put_32 (output_bfd, (bfd_vma) a2t2p_add_pc_insn,
-		      s->contents + my_offset + 4);
-	  bfd_put_32 (output_bfd, (bfd_vma) a2t3p_bx_r12_insn,
-		      s->contents + my_offset + 8);
+	  put_arm_insn (globals, output_bfd, (bfd_vma) a2t1p_ldr_insn,
+			s->contents + my_offset);
+	  put_arm_insn (globals, output_bfd, (bfd_vma) a2t2p_add_pc_insn,
+			s->contents + my_offset + 4);
+	  put_arm_insn (globals, output_bfd, (bfd_vma) a2t3p_bx_r12_insn,
+			s->contents + my_offset + 8);
 	  /* Adjust the offset by 4 for the position of the add,
 	     and 8 for the pipeline offset.  */
 	  ret_offset = (val - (s->output_offset
@@ -2837,11 +2866,11 @@ elf32_arm_to_thumb_stub (struct bfd_link_info * info,
 	}
       else
 	{
-	  bfd_put_32 (output_bfd, (bfd_vma) a2t1_ldr_insn,
-		      s->contents + my_offset);
+	  put_arm_insn (globals, output_bfd, (bfd_vma) a2t1_ldr_insn,
+			s->contents + my_offset);
 
-	  bfd_put_32 (output_bfd, (bfd_vma) a2t2_bx_r12_insn,
-		      s->contents + my_offset + 4);
+	  put_arm_insn (globals, output_bfd, (bfd_vma) a2t2_bx_r12_insn,
+			s->contents + my_offset + 4);
 
 	  /* It's a thumb address.  Add the low order bit.  */
 	  bfd_put_32 (output_bfd, val | a2t3_func_addr_insn,
@@ -6984,16 +7013,17 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd, struct bfd_link_info * info,
       /* Fill in the entry in the procedure linkage table.  */
       if (htab->symbian_p)
 	{
-	  unsigned i;
-	  for (i = 0; i < htab->plt_entry_size / 4; ++i)
-	    bfd_put_32 (output_bfd, 
-			elf32_arm_symbian_plt_entry[i],
-			splt->contents + h->plt.offset + 4 * i);
+	  put_arm_insn (htab, output_bfd, 
+		      elf32_arm_symbian_plt_entry[0],
+		      splt->contents + h->plt.offset);
+	  bfd_put_32 (output_bfd, 
+		      elf32_arm_symbian_plt_entry[1],
+		      splt->contents + h->plt.offset + 4);
 	  
 	  /* Fill in the entry in the .rel.plt section.  */
 	  rel.r_offset = (splt->output_section->vma
 			  + splt->output_offset
-			  + h->plt.offset + 4 * (i - 1));
+			  + h->plt.offset + 4);
 	  rel.r_info = ELF32_R_INFO (h->dynindx, R_ARM_GLOB_DAT);
 
 	  /* Get the index in the procedure linkage table which
@@ -7008,6 +7038,7 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd, struct bfd_link_info * info,
 	  bfd_vma got_offset, got_address, plt_address;
 	  bfd_vma got_displacement;
 	  asection * sgot;
+	  bfd_byte * ptr;
 	  
 	  sgot = bfd_get_section_by_name (dynobj, ".got.plt");
 	  BFD_ASSERT (sgot != NULL);
@@ -7033,20 +7064,23 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd, struct bfd_link_info * info,
 			 + splt->output_offset
 			 + h->plt.offset);
 
+	  ptr = htab->splt->contents + h->plt.offset;
 	  if (htab->vxworks_p && info->shared)
 	    {
 	      unsigned int i;
 	      bfd_vma val;
 
-	      for (i = 0; i != htab->plt_entry_size / 4; i++)
+	      for (i = 0; i != htab->plt_entry_size / 4; i++, ptr += 4)
 		{
 		  val = elf32_arm_vxworks_shared_plt_entry[i];
 		  if (i == 2)
 		    val |= got_address - sgot->output_section->vma;
 		  if (i == 5)
 		    val |= plt_index * RELOC_SIZE (htab);
-		  bfd_put_32 (output_bfd, val,
-			      htab->splt->contents + h->plt.offset + i * 4);
+		  if (i == 2 || i == 5)
+		    bfd_put_32 (output_bfd, val, ptr);
+		  else
+		    put_arm_insn (htab, output_bfd, val, ptr);
 		}
 	    }
 	  else if (htab->vxworks_p)
@@ -7063,8 +7097,10 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd, struct bfd_link_info * info,
 		    val |= 0xffffff & -((h->plt.offset + i * 4 + 8) >> 2);
 		  if (i == 5)
 		    val |= plt_index * RELOC_SIZE (htab);
-		  bfd_put_32 (output_bfd, val,
-			      htab->splt->contents + h->plt.offset + i * 4);
+		  if (i == 2 || i == 5)
+		    bfd_put_32 (output_bfd, val, ptr);
+		  else
+		    put_arm_insn (htab, output_bfd, val, ptr);
 		}
 
 	      loc = (htab->srelplt2->contents
@@ -7097,27 +7133,26 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd, struct bfd_link_info * info,
 
 	      if (!htab->use_blx && eh->plt_thumb_refcount > 0)
 		{
-		  bfd_put_16 (output_bfd, elf32_arm_plt_thumb_stub[0],
-			      splt->contents + h->plt.offset - 4);
-		  bfd_put_16 (output_bfd, elf32_arm_plt_thumb_stub[1],
-			      splt->contents + h->plt.offset - 2);
+		  put_thumb_insn (htab, output_bfd,
+				  elf32_arm_plt_thumb_stub[0], ptr - 4);
+		  put_thumb_insn (htab, output_bfd,
+				  elf32_arm_plt_thumb_stub[1], ptr - 2);
 		}
 
-	      bfd_put_32 (output_bfd,
-			  elf32_arm_plt_entry[0]
-			  | ((got_displacement & 0x0ff00000) >> 20),
-			  splt->contents + h->plt.offset + 0);
-	      bfd_put_32 (output_bfd,
-			  elf32_arm_plt_entry[1]
-			  | ((got_displacement & 0x000ff000) >> 12),
-			  splt->contents + h->plt.offset + 4);
-	      bfd_put_32 (output_bfd,
-			  elf32_arm_plt_entry[2]
-			  | (got_displacement & 0x00000fff),
-			  splt->contents + h->plt.offset + 8);
+	      put_arm_insn (htab, output_bfd,
+			    elf32_arm_plt_entry[0]
+			    | ((got_displacement & 0x0ff00000) >> 20),
+			    ptr + 0);
+	      put_arm_insn (htab, output_bfd,
+			    elf32_arm_plt_entry[1]
+			    | ((got_displacement & 0x000ff000) >> 12),
+			    ptr+ 4);
+	      put_arm_insn (htab, output_bfd,
+			    elf32_arm_plt_entry[2]
+			    | (got_displacement & 0x00000fff),
+			    ptr + 8);
 #ifdef FOUR_WORD_PLT
-	      bfd_put_32 (output_bfd, elf32_arm_plt_entry[3],
-			  splt->contents + h->plt.offset + 12);
+	      bfd_put_32 (output_bfd, elf32_arm_plt_entry[3], ptr + 12);
 #endif
 	    }
 
@@ -7427,9 +7462,12 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 	      Elf_Internal_Rela rel;
 
 	      plt0_entry = elf32_arm_vxworks_exec_plt0_entry;
-	      bfd_put_32 (output_bfd, plt0_entry[0], splt->contents + 0);
-	      bfd_put_32 (output_bfd, plt0_entry[1], splt->contents + 4);
-	      bfd_put_32 (output_bfd, plt0_entry[2], splt->contents + 8);
+	      put_arm_insn (htab, output_bfd, plt0_entry[0],
+			    splt->contents + 0);
+	      put_arm_insn (htab, output_bfd, plt0_entry[1],
+			    splt->contents + 4);
+	      put_arm_insn (htab, output_bfd, plt0_entry[2],
+			    splt->contents + 8);
 	      bfd_put_32 (output_bfd, got_address, splt->contents + 12);
 
 	      /* Generate a relocation for _GLOBAL_OFFSET_TABLE_. */
@@ -7444,10 +7482,14 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 	      got_displacement = got_address - (plt_address + 16);
 
 	      plt0_entry = elf32_arm_plt0_entry;
-	      bfd_put_32 (output_bfd, plt0_entry[0], splt->contents + 0);
-	      bfd_put_32 (output_bfd, plt0_entry[1], splt->contents + 4);
-	      bfd_put_32 (output_bfd, plt0_entry[2], splt->contents + 8);
-	      bfd_put_32 (output_bfd, plt0_entry[3], splt->contents + 12);
+	      put_arm_insn (htab, output_bfd, plt0_entry[0],
+			    splt->contents + 0);
+	      put_arm_insn (htab, output_bfd, plt0_entry[1],
+			    splt->contents + 4);
+	      put_arm_insn (htab, output_bfd, plt0_entry[2],
+			    splt->contents + 8);
+	      put_arm_insn (htab, output_bfd, plt0_entry[3],
+			    splt->contents + 12);
 
 #ifdef FOUR_WORD_PLT
 	      /* The displacement value goes in the otherwise-unused
