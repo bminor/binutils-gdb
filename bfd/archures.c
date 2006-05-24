@@ -334,6 +334,7 @@ DESCRIPTION
 .#define bfd_mach_avr3		3
 .#define bfd_mach_avr4		4
 .#define bfd_mach_avr5		5
+.#define bfd_mach_avr6		6
 .  bfd_arch_bfin,        {* ADI Blackfin *}
 .#define bfd_mach_bfin          1
 .  bfd_arch_cr16c,       {* National Semiconductor CompactRISC. *}

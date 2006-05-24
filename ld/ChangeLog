@@ -1,3 +1,15 @@
+2006-05-24  Bjoern Haase  <bjoern.m.haase@web.de> 
+
+	* configure.tgt: Add avr6 to emulation list.
+	* Makefile.am: Add eavr6.o and corresponding rule.
+	* Makefile.in: Regenerate.
+	* emulparams/avr6.sh: New file.
+	* emulparams/avrX.sh (TEMPLATE_NAME): Use elf32 instead of generic
+	for target option support.
+	(EXTRA_EM_FILE): Add reference to new em template file avrelf.
+	* scripttempl/avr.sc: Add ".trampolines" section.	
+	* emultempl/avrelf.em: Add new file for target specific options.
+
 2006-05-22  Nick Clifton  <nickc@redhat.com>
 
 	* scripttempl/elf32crx.sc (.rdata): Add .rodata.*.

@@ -1,3 +1,7 @@
+2006-05-24  Bjoern Haase  <bjoern.m.haase@web.de> 
+
+	* config/tc-avr.c: Add new cpu targets avr6, avr2560 and avr2561.
+
 2006-05-23  Thiemo Seufer  <ths@mips.com>
             David Ung  <davidu@mips.com>
             Nigel Stephens  <nigel@mips.com>

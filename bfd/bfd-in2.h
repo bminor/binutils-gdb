@@ -1929,6 +1929,7 @@ enum bfd_architecture
 #define bfd_mach_avr3          3
 #define bfd_mach_avr4          4
 #define bfd_mach_avr5          5
+#define bfd_mach_avr6          6
   bfd_arch_bfin,        /* ADI Blackfin */
 #define bfd_mach_bfin          1
   bfd_arch_cr16c,       /* National Semiconductor CompactRISC. */
@@ -3547,9 +3548,21 @@ of 32 bit value) into 8 bit immediate value of LDI insn.  */
 command address) into 8 bit immediate value of LDI insn.  */
   BFD_RELOC_AVR_LO8_LDI_PM,
 
+/* This is a 16 bit reloc for the AVR that stores 8 bit value 
+(command address) into 8 bit immediate value of LDI insn. If the address
+is beyond the 128k boundary, the linker inserts a jump stub for this reloc
+in the lower 128k.  */
+  BFD_RELOC_AVR_LO8_LDI_GS,
+
 /* This is a 16 bit reloc for the AVR that stores 8 bit value (high 8 bit
 of command address) into 8 bit immediate value of LDI insn.  */
   BFD_RELOC_AVR_HI8_LDI_PM,
+
+/* This is a 16 bit reloc for the AVR that stores 8 bit value (high 8 bit
+of command address) into 8 bit immediate value of LDI insn.  If the address
+is beyond the 128k boundary, the linker inserts a jump stub for this reloc
+below 128k.  */
+  BFD_RELOC_AVR_HI8_LDI_GS,
 
 /* This is a 16 bit reloc for the AVR that stores 8 bit value (most high 8 bit
 of command address) into 8 bit immediate value of LDI insn.  */

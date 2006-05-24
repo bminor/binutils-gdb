@@ -82,7 +82,10 @@ static const bfd_arch_info_type arch_info_struct[] =
   N (16, bfd_mach_avr4, "avr:4", FALSE, & arch_info_struct[4]),
 
   /* ATmega161, ATmega163, ATmega32, AT94K.  */
-  N (22, bfd_mach_avr5, "avr:5", FALSE, NULL)
+  N (22, bfd_mach_avr5, "avr:5", FALSE, & arch_info_struct[5]),
+
+  /* ATmega256x.  */
+  N (22, bfd_mach_avr6, "avr:6", FALSE, NULL)
 };
 
 const bfd_arch_info_type bfd_avr_arch =

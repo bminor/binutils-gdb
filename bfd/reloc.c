@@ -3684,10 +3684,24 @@ ENUMDOC
   This is a 16 bit reloc for the AVR that stores 8 bit value (usually
   command address) into 8 bit immediate value of LDI insn.
 ENUM
+  BFD_RELOC_AVR_LO8_LDI_GS
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores 8 bit value 
+  (command address) into 8 bit immediate value of LDI insn. If the address
+  is beyond the 128k boundary, the linker inserts a jump stub for this reloc
+  in the lower 128k.
+ENUM
   BFD_RELOC_AVR_HI8_LDI_PM
 ENUMDOC
   This is a 16 bit reloc for the AVR that stores 8 bit value (high 8 bit
   of command address) into 8 bit immediate value of LDI insn.
+ENUM
+  BFD_RELOC_AVR_HI8_LDI_GS
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores 8 bit value (high 8 bit
+  of command address) into 8 bit immediate value of LDI insn.  If the address
+  is beyond the 128k boundary, the linker inserts a jump stub for this reloc
+  below 128k.
 ENUM
   BFD_RELOC_AVR_HH8_LDI_PM
 ENUMDOC

@@ -1,3 +1,51 @@
+2006-05-24  Bjoern Haase  <bjoern.m.haase@web.de> 
+
+        * archures.c: Add bfd_mach_avr6.
+	* cpu-avr.c: Likewise.
+	* reloc.c (BFD_RELOC_AVR_LO8_LDI_GS, BFD_RELOC_AVR_HI8_LDI_GS):
+	New relocations.
+	* libbfd.h: Regenerate.	
+	* bfd-in2.h:Regenerate.
+	* elf32-avr.h: New file.  Protoypes for functions accessed from ld.
+	* elf32-avr.c: Add elf32-avr.h to include list.
+	(elf32_avr_stub_hash_entry): New function.
+	(elf32_avr_link_hash_table): New struct.
+	(avr_link_hash_table): Likewise.
+	(avr_stub_hash_entry): Likewise.
+	(avr_stub_hash_lookup): New function.
+	(stub_hash_newfunc): New function.
+	(elf32_avr_link_hash_table_create): New function.
+	(elf32_avr_link_hash_table_free): New function.
+	(avr_get_stub_addr): New function.
+	(debug_relax, debug_stubs): Add new global variables controlling
+	debugging printout to stdout.
+	(avr_pc_wrap_around): Change the type to bfd_vma.
+	(avr_replace_call_ret_sequences): Add a new variable controling 
+	linkrelax optimizations.
+	(avr_stub_is_required_for_16_bit_reloc): New function.
+	(avr_final_link_relocate): 
+	Add linker hash table to parameter list. Use stub addr. if necessary.
+	(elf32_avr_relocate_section):
+	Add linker hashtable to parameter list of avr_final_link_relocate.
+	(bfd_elf_avr_final_write_processing): Add support for bfd_mach_avr6.
+	(elf32_avr_object_p): Add support for E_AVR_MACH_AVR6.
+	(elf32_avr_relax_delete_bytes):
+	Iterate over all sections of a bfd when adjusting relocs addends.
+	(elf32_avr_relax_section):
+	Evaluate avr_replace_call_ret_sequences and recalculate the size of 
+	stub section.
+	(avr_stub_name): New function.
+	(avr_get_stub_entry): New function.
+	(avr_add_stub): New function.
+	(avr_build_one_stub): New function.
+	(avr_size_one_stub): New function.
+	(elf32_avr_setup_params): New function.
+	(elf32_avr_setup_section_lists): New function.
+	(get_local_syms): New function.
+	(elf32_avr_size_stubs): New function.
+	(bfd_elf32_bfd_link_hash_table_create): New function.
+	(bfd_elf32_bfd_link_hash_table_free): New function.
+
 2006-05-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/2655
