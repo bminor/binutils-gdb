@@ -1,3 +1,8 @@
+2006-05-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (compare_symbols): Prefer strong dynamic global
+	function syms over other syms.
+
 2006-05-11  Michael Matz  <matz@suse.de>
 
 	* elflink.c (match_group_member): Correctly iterate group
