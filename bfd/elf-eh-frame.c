@@ -1075,12 +1075,12 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
       end = buf + ent->size;
       new_size = size_of_output_cie_fde (ent, ptr_size);
 
-      /* Install the new size, filling the extra bytes with DW_CFA_nops.  */
+      /* Update the size.  It may be shrinked.  */
+      bfd_put_32 (abfd, new_size - 4, buf);
+
+      /* Filling the extra bytes with DW_CFA_nops.  */
       if (new_size != ent->size)
-	{
-	  memset (end, 0, new_size - ent->size);
-	  bfd_put_32 (abfd, new_size - 4, buf);
-	}
+	memset (end, 0, new_size - ent->size);
 
       if (ent->cie)
 	{
@@ -1262,40 +1262,13 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 	}
     }
 
-    {
-      unsigned int alignment = 1 << sec->alignment_power;
-      unsigned int pad = sec->size % alignment;
-
-      /* Don't pad beyond the raw size of the output section. It
-	 can happen at the last input section.  */
-      if (pad
-	  && ((sec->output_offset + sec->size + pad)
-	      <= sec->output_section->size))
-	{
-	  bfd_byte *buf;
-	  unsigned int new_size;
-
-	  /* Find the last CIE/FDE.  */
-	  ent = sec_info->entry + sec_info->count;
-	  while (--ent != sec_info->entry)
-	    if (!ent->removed)
-	      break;
-
-	  /* The size of the last CIE/FDE must be at least 4.  */
-	  if (ent->removed || ent->size < 4)
-	    abort ();
-
-	  pad = alignment - pad;
-	  buf = contents + ent->new_offset - sec->output_offset;
-	  new_size = size_of_output_cie_fde (ent, ptr_size);
-
-	  /* Pad it with DW_CFA_nop  */
-	  memset (buf + new_size, 0, pad);
-	  bfd_put_32 (abfd, new_size + pad - 4, buf);
-
-	  sec->size += pad;
-	}
-    }
+  /* We don't align the section to its section alignment since the
+     runtime library only expects all CIE/FDE records aligned at
+     the pointer size. _bfd_elf_discard_section_eh_frame should 
+     have padded CIE/FDE records to multiple of pointer size with
+     size_of_output_cie_fde.  */
+  if ((sec->size % ptr_size) != 0)
+    abort ();
 
   return bfd_set_section_contents (abfd, sec->output_section,
 				   contents, (file_ptr) sec->output_offset,
