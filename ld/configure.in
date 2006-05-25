@@ -169,6 +169,10 @@ do
       EMUL=$targ_emul
     fi
 
+    if test x${want64} = xfalse; then
+      . ${srcdir}/../bfd/config.bfd
+    fi
+
     for i in $targ_emul $targ_extra_emuls $targ_extra_libpath; do
 	case " $all_emuls " in
 	*" e${i}.o "*) ;;
@@ -210,10 +214,13 @@ AC_SUBST(EMUL)
 TDIRS=tdirs
 AC_SUBST_FILE(TDIRS)
 
-dnl FIXME: We will build a 64 bit BFD for a 64 bit host or a 64 bit
-dnl target, and in those cases we should also build the 64 bit
-dnl emulations.
 if test x${all_targets} = xtrue; then
+  if test x${want64} = xfalse; then
+    AC_CHECK_SIZEOF(long)
+    if test "x${ac_cv_sizeof_long}" = "x8"; then
+      want64=true
+    fi
+  fi
   if test x${want64} = xtrue; then
     EMULATION_OFILES='$(ALL_EMULATIONS) $(ALL_64_EMULATIONS)'
   else

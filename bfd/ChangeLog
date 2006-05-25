@@ -1,3 +1,19 @@
+2006-05-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/1485
+	* config.bfd: Set want64 to true if 64bit bfd is used.
+	(sh-*-linux*): Use targ64_selvecs for 64bit targets.
+	(sh*l*-*-netbsdelf*): Likewise.
+	(sh-*-netbsdelf*): Likewise.
+	(shl*-*-elf*): Likewise.
+	(sh[1234]l*-*-elf*): Likewise.
+	(sh3el*-*-elf*): Likewise.
+	(shl*-*-kaos*): Likewise.
+	(sh-*-elf*): Likewise.
+	(sh[1234]*-elf*): Likewise.
+	(sh-*-rtems*): Likewise.
+	(sh-*-kaos*): Likewise.
+
 2006-05-24  Paul Brook  <paul@codesourcery.com>
 
 	* elf-bfd.h (elf_backend_data): Add elf_backend_output_arch_local_syms

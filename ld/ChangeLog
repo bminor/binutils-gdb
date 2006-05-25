@@ -1,3 +1,10 @@
+2006-05-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/1485
+	* configure.in: Use ${srcdir}/../bfd/config.bfd to check 64bit
+	bfd.  Support 64bit host for --enable-targets=all.
+	* configure: Regenerated.
+
 2006-05-24  Nick Clifton  <nickc@redhat.com>
 
 	* po/vi.po: Updated Vietnamese translation.
