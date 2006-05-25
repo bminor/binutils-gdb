@@ -1,3 +1,8 @@
+2006-05-25  Jie Zhang  <jie.zhang@analog.com>
+
+	* config/bfin-parse.y (asm_1): Better check and deal with
+	vector and scalar Multiply 16-Bit Operands instructions.
+
 2006-05-24  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-hppa.c: Convert to ISO C90 format.
@@ -48,6 +53,7 @@
 	missing -march options. Document .set arch=CPU. Move .set smartmips
 	to ASE page. Use @code for .set FOO examples.
 
+>>>>>>> 1.2917
 2006-05-23  Jie Zhang  <jie.zhang@analog.com>
 
 	* config/tc-bfin.c (bfin_start_line_hook): Bump line counters
