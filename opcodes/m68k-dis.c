@@ -1204,13 +1204,13 @@ print_insn_arg (const char *d,
 static int
 match_insn_m68k (bfd_vma memaddr,
 		 disassemble_info * info,
-		 const struct m68k_opcode * best,
-		 struct private * priv)
+		 const struct m68k_opcode * best)
 {
   unsigned char *save_p;
   unsigned char *p;
   const char *d;
 
+  struct private *priv = (struct private *) info->private_data;
   bfd_byte *buffer = priv->the_buffer;
   fprintf_ftype save_printer = info->fprintf_func;
   void (* save_print_address) (bfd_vma, struct disassemble_info *)
@@ -1343,21 +1343,24 @@ match_insn_m68k (bfd_vma memaddr,
   return p - buffer;
 }
 
-/* Print the m68k instruction at address MEMADDR in debugged memory,
-   on INFO->STREAM.  Returns length of the instruction, in bytes.  */
+/* Try to interpret the instruction at address MEMADDR as one that
+   can execute on a processor with the features given by ARCH_MASK.
+   If successful, print the instruction to INFO->STREAM and return
+   its length in bytes.  Return 0 otherwise.  */
 
-int
-print_insn_m68k (bfd_vma memaddr, disassemble_info *info)
+static int
+m68k_scan_mask (bfd_vma memaddr, disassemble_info *info,
+		unsigned int arch_mask)
 {
   int i;
   const char *d;
-  unsigned int arch_mask;
-  struct private priv;
-  bfd_byte *buffer = priv.the_buffer;
-  int major_opcode;
-  static int numopcodes[16];
   static const struct m68k_opcode **opcodes[16];
+  static int numopcodes[16];
   int val;
+  int major_opcode;
+
+  struct private *priv = (struct private *) info->private_data;
+  bfd_byte *buffer = priv->the_buffer;
 
   if (!opcodes[0])
     {
@@ -1384,23 +1387,6 @@ print_insn_m68k (bfd_vma memaddr, disassemble_info *info)
       for (i = 0; i < m68k_numopcodes; i++)
 	*opc_pointer[(m68k_opcodes[i].opcode >> 28) & 15]++ = &m68k_opcodes[i];
     }
-
-  info->private_data = (PTR) &priv;
-  /* Tell objdump to use two bytes per chunk
-     and six bytes per line for displaying raw data.  */
-  info->bytes_per_chunk = 2;
-  info->bytes_per_line = 6;
-  info->display_endian = BFD_ENDIAN_BIG;
-  priv.max_fetched = priv.the_buffer;
-  priv.insn_start = memaddr;
-
-  if (setjmp (priv.bailout) != 0)
-    /* Error return.  */
-    return -1;
-
-  arch_mask = bfd_m68k_mach_to_features (info->mach);
-  if (!arch_mask)
-    arch_mask = ~(unsigned int)0;
 
   FETCH_DATA (info, buffer + 2);
   major_opcode = (buffer[0] >> 4) & 15;
@@ -1467,9 +1453,56 @@ print_insn_m68k (bfd_vma memaddr, disassemble_info *info)
 	    }
 
 	  if (*d == '\0')
-	    if ((val = match_insn_m68k (memaddr, info, opc, & priv)))
+	    if ((val = match_insn_m68k (memaddr, info, opc)))
 	      return val;
 	}
+    }
+  return 0;
+}		
+
+/* Print the m68k instruction at address MEMADDR in debugged memory,
+   on INFO->STREAM.  Returns length of the instruction, in bytes.  */
+
+int
+print_insn_m68k (bfd_vma memaddr, disassemble_info *info)
+{
+  unsigned int arch_mask;
+  struct private priv;
+  int val;
+
+  bfd_byte *buffer = priv.the_buffer;
+
+  info->private_data = (PTR) &priv;
+  /* Tell objdump to use two bytes per chunk
+     and six bytes per line for displaying raw data.  */
+  info->bytes_per_chunk = 2;
+  info->bytes_per_line = 6;
+  info->display_endian = BFD_ENDIAN_BIG;
+  priv.max_fetched = priv.the_buffer;
+  priv.insn_start = memaddr;
+
+  if (setjmp (priv.bailout) != 0)
+    /* Error return.  */
+    return -1;
+
+  arch_mask = bfd_m68k_mach_to_features (info->mach);
+  if (!arch_mask)
+    {
+      /* First try printing an m680x0 instruction.  Try printing a Coldfire
+	 one if that fails.  */
+      val = m68k_scan_mask (memaddr, info, m68k_mask);
+      if (val)
+	return val;
+
+      val = m68k_scan_mask (memaddr, info, mcf_mask);
+      if (val)
+	return val;
+    }
+  else
+    {
+      val = m68k_scan_mask (memaddr, info, arch_mask);
+      if (val)
+	return val;
     }
 
   /* Handle undefined instructions.  */
