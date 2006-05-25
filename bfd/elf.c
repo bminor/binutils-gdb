@@ -3280,7 +3280,7 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 /* Map symbol from it's internal number to the external number, moving
    all local symbols to be at the head of the list.  */
 
-static int
+static bfd_boolean
 sym_is_global (bfd *abfd, asymbol *sym)
 {
   /* If the backend has a special mapping, use it.  */
@@ -3291,6 +3291,20 @@ sym_is_global (bfd *abfd, asymbol *sym)
   return ((sym->flags & (BSF_GLOBAL | BSF_WEAK)) != 0
 	  || bfd_is_und_section (bfd_get_section (sym))
 	  || bfd_is_com_section (bfd_get_section (sym)));
+}
+
+/* Don't output section symbols for sections that are not going to be
+   output.  Also, don't output section symbols for reloc and other
+   special sections.  */
+
+static bfd_boolean
+ignore_section_sym (bfd *abfd, asymbol *sym)
+{
+  return ((sym->flags & BSF_SECTION_SYM) != 0
+	  && (sym->value != 0
+	      || (sym->section->owner != abfd
+		  && (sym->section->output_section->owner != abfd
+		      || sym->section->output_offset != 0))));
 }
 
 static bfd_boolean
@@ -3333,51 +3347,29 @@ elf_map_symbols (bfd *abfd)
       asymbol *sym = syms[idx];
 
       if ((sym->flags & BSF_SECTION_SYM) != 0
-	  && sym->value == 0)
+	  && !ignore_section_sym (abfd, sym))
 	{
-	  asection *sec;
+	  asection *sec = sym->section;
 
-	  sec = sym->section;
+	  if (sec->owner != abfd)
+	    sec = sec->output_section;
 
-	  if (sec->owner != NULL)
-	    {
-	      if (sec->owner != abfd)
-		{
-		  if (sec->output_offset != 0)
-		    continue;
-
-		  sec = sec->output_section;
-
-		  /* Empty sections in the input files may have had a
-		     section symbol created for them.  (See the comment
-		     near the end of _bfd_generic_link_output_symbols in
-		     linker.c).  If the linker script discards such
-		     sections then we will reach this point.  Since we know
-		     that we cannot avoid this case, we detect it and skip
-		     the abort and the assignment to the sect_syms array.
-		     To reproduce this particular case try running the
-		     linker testsuite test ld-scripts/weak.exp for an ELF
-		     port that uses the generic linker.  */
-		  if (sec->owner == NULL)
-		    continue;
-
-		  BFD_ASSERT (sec->owner == abfd);
-		}
-	      sect_syms[sec->index] = syms[idx];
-	    }
+	  sect_syms[sec->index] = syms[idx];
 	}
     }
 
   /* Classify all of the symbols.  */
   for (idx = 0; idx < symcount; idx++)
     {
+      if (ignore_section_sym (abfd, syms[idx]))
+	continue;
       if (!sym_is_global (abfd, syms[idx]))
 	num_locals++;
       else
 	num_globals++;
     }
 
-  /* We will be adding a section symbol for each BFD section.  Most normal
+  /* We will be adding a section symbol for each normal BFD section.  Most
      sections will already have a section symbol in outsymbols, but
      eg. SHT_GROUP sections will not, and we need the section symbol mapped
      at least in that case.  */
@@ -3403,6 +3395,8 @@ elf_map_symbols (bfd *abfd)
       asymbol *sym = syms[idx];
       unsigned int i;
 
+      if (ignore_section_sym (abfd, sym))
+	continue;
       if (!sym_is_global (abfd, sym))
 	i = num_locals2++;
       else
@@ -5130,13 +5124,14 @@ _bfd_elf_symbol_from_bfd_symbol (bfd *abfd, asymbol **asym_ptr_ptr)
       && (flags & BSF_SECTION_SYM)
       && asym_ptr->section)
     {
+      asection *sec;
       int indx;
 
-      if (asym_ptr->section->output_section != NULL)
-	indx = asym_ptr->section->output_section->index;
-      else
-	indx = asym_ptr->section->index;
-      if (indx < elf_num_section_syms (abfd)
+      sec = asym_ptr->section;
+      if (sec->owner != abfd && sec->output_section != NULL)
+	sec = sec->output_section;
+      if (sec->owner == abfd
+	  && (indx = sec->index) < elf_num_section_syms (abfd)
 	  && elf_section_syms (abfd)[indx] != NULL)
 	asym_ptr->udata.i = elf_section_syms (abfd)[indx]->udata.i;
     }
