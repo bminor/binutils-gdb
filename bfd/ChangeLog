@@ -1,3 +1,7 @@
+2006-05-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (ELF_MAXPAGESIZE): Updated to 0x200000.
+
 2006-05-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (sym_is_global): Return a bfd_boolean.

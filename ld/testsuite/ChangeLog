@@ -1,3 +1,24 @@
+2006-05-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/tlsbin.dd: Updated for 2MB maximum page size.
+	* ld-x86-64/tlsbin.rd: Likewise.
+	* ld-x86-64/tlsbin.sd: Likewise.
+	* ld-x86-64/tlsbin.td: Likewise.
+	* ld-x86-64/tlsbindesc.dd: Likewise.
+	* ld-x86-64/tlsbindesc.rd: Likewise.
+	* ld-x86-64/tlsbindesc.sd: Likewise.
+	* ld-x86-64/tlsbindesc.td: Likewise.
+	* ld-x86-64/tlsdesc.dd: Likewise.
+	* ld-x86-64/tlsdesc.pd: Likewise.
+	* ld-x86-64/tlsdesc.rd: Likewise.
+	* ld-x86-64/tlsdesc.sd: Likewise.
+	* ld-x86-64/tlsdesc.td: Likewise.
+	* ld-x86-64/tlsgdesc.dd: Likewise.
+	* ld-x86-64/tlspic.dd: Likewise.
+	* ld-x86-64/tlspic.rd: Likewise.
+	* ld-x86-64/tlspic.sd: Likewise.
+	* ld-x86-64/tlspic.td: Likewise.
+
 2006-05-24  Paul Brook  <paul@codesourcery.com>
 
 	* ld-arm/arm-app-abs32.d: Update expected output.
