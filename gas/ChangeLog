@@ -53,7 +53,6 @@
 	missing -march options. Document .set arch=CPU. Move .set smartmips
 	to ASE page. Use @code for .set FOO examples.
 
->>>>>>> 1.2917
 2006-05-23  Jie Zhang  <jie.zhang@analog.com>
 
 	* config/tc-bfin.c (bfin_start_line_hook): Bump line counters
