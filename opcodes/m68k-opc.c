@@ -913,10 +913,10 @@ const struct m68k_opcode m68k_opcodes[] =
 
 {"fmovecrx", 4,	two(0xF000, 0x5C00), two(0xF1FF, 0xFC00), "Ii#CF7", mfloat },
 
-{"fmovemd", 4,	two(0xF000, 0xD000), two(0xFFC0, 0xFF00), "Iizsl3", cfloat },
-{"fmovemd", 4,	two(0xF000, 0xD000), two(0xFFC0, 0xFF00), "Iizs#3", cfloat },
-{"fmovemd", 4,	two(0xF000, 0xF000), two(0xFFC0, 0xFF00), "Ii#3ys", cfloat },
-{"fmovemd", 4,	two(0xF000, 0xF000), two(0xFFC0, 0xFF00), "Iil3ys", cfloat },
+{"fmovemd", 4,	two(0xF000, 0xD000), two(0xF1C0, 0xFF00), "Iizsl3", cfloat },
+{"fmovemd", 4,	two(0xF000, 0xD000), two(0xF1C0, 0xFF00), "Iizs#3", cfloat },
+{"fmovemd", 4,	two(0xF000, 0xF000), two(0xF1C0, 0xFF00), "Iil3ys", cfloat },
+{"fmovemd", 4,	two(0xF000, 0xF000), two(0xF1C0, 0xFF00), "Ii#3ys", cfloat },
 
 {"fmovemx", 4,	two(0xF000, 0xF800), two(0xF1C0, 0xFF8F), "IiDk&s", mfloat },
 {"fmovemx", 4,	two(0xF020, 0xE800), two(0xF1F8, 0xFF8F), "IiDk-s", mfloat },
@@ -938,10 +938,10 @@ const struct m68k_opcode m68k_opcodes[] =
    target is a single %fpiar.  */
 {"fmoveml", 4,	two(0xF000, 0x8000), two(0xF1C0, 0xE3FF), "Ii*lL8", mfloat },
 
-{"fmovem", 4,	two(0xF000, 0xD000), two(0xFFC0, 0xFF00), "IizsL3", cfloat },
-{"fmovem", 4,	two(0xF000, 0xD000), two(0xFFC0, 0xFF00), "Iizs#3", cfloat },
-{"fmovem", 4,	two(0xF000, 0xF000), two(0xFFC0, 0xFF00), "Ii#3ys", cfloat },
-{"fmovem", 4,	two(0xF000, 0xF000), two(0xFFC0, 0xFF00), "IiL3ys", cfloat },
+{"fmovem", 4,	two(0xF000, 0xD000), two(0xF1C0, 0xFF00), "Iizsl3", cfloat },
+{"fmovem", 4,	two(0xF000, 0xD000), two(0xF1C0, 0xFF00), "Iizs#3", cfloat },
+{"fmovem", 4,	two(0xF000, 0xF000), two(0xF1C0, 0xFF00), "Iil3ys", cfloat },
+{"fmovem", 4,	two(0xF000, 0xF000), two(0xF1C0, 0xFF00), "Ii#3ys", cfloat },
 
 {"fmovem", 4,	two(0xF020, 0xE000), two(0xF1F8, 0xFF00), "IdL3-s", mfloat },
 {"fmovem", 4,	two(0xF000, 0xF000), two(0xF1C0, 0xFF00), "Idl3&s", mfloat },
