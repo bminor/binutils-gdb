@@ -1,3 +1,11 @@
+2006-05-27  Alan Modra  <amodra@bigpond.net.au>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf.c (assign_file_positions_for_load_sections): Retrieve
+	maxpagesize from m->p_align if it is valid.  Set p_vaddr,
+	p_paddr and p_align earlier.  Revert 2006-05-19 change to p_align.
+	(copy_elf_program_header): Copy p_align.  Set p_align_valid.
+
 2006-05-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (ELF_MINPAGESIZE): Changed to 0x1000.

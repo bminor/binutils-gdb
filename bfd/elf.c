@@ -4111,6 +4111,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
   Elf_Internal_Phdr *phdrs;
   Elf_Internal_Phdr *p;
   file_ptr off, voff;
+  bfd_size_type maxpagesize;
   unsigned int count;
   unsigned int alloc;
   unsigned int i;
@@ -4196,6 +4197,10 @@ assign_file_positions_for_load_sections (bfd *abfd,
   if (phdrs == NULL)
     return FALSE;
 
+  maxpagesize = 1;
+  if ((abfd->flags & D_PAGED) != 0)
+    maxpagesize = bed->maxpagesize;
+
   off = bed->s->sizeof_ehdr;
   off += alloc * bed->s->sizeof_phdr;
 
@@ -4227,6 +4232,39 @@ assign_file_positions_for_load_sections (bfd *abfd,
       p->p_type = m->p_type;
       p->p_flags = m->p_flags;
 
+      if (m->count == 0)
+	p->p_vaddr = 0;
+      else
+	p->p_vaddr = m->sections[0]->vma;
+
+      if (m->p_paddr_valid)
+	p->p_paddr = m->p_paddr;
+      else if (m->count == 0)
+	p->p_paddr = 0;
+      else
+	p->p_paddr = m->sections[0]->lma;
+
+      if (p->p_type == PT_LOAD
+	  && (abfd->flags & D_PAGED) != 0)
+	{
+	  /* p_align in demand paged PT_LOAD segments effectively stores
+	     the maximum page size.  When copying an executable with
+	     objcopy, we set m->p_align from the input file.  Use this
+	     value for maxpagesize rather than bed->maxpagesize, which
+	     may be different.  Note that we use maxpagesize for PT_TLS
+	     segment alignment later in this function, so we are relying
+	     on at least one PT_LOAD segment appearing before a PT_TLS
+	     segment.  */
+	  if (m->p_align_valid)
+	    maxpagesize = m->p_align;
+
+	  p->p_align = maxpagesize;
+	}
+      else if (m->count == 0)
+	p->p_align = 1 << bed->s->log_file_align;
+      else
+	p->p_align = 0;
+
       if (p->p_type == PT_LOAD
 	  && m->count > 0)
 	{
@@ -4244,8 +4282,8 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	    }
 	  align = (bfd_size_type) 1 << align_power;
 
-	  if ((abfd->flags & D_PAGED) != 0 && bed->maxpagesize > align)
-	    align = bed->maxpagesize;
+	  if (align < maxpagesize)
+	    align = maxpagesize;
 
 	  adjust = vma_page_aligned_bias (m->sections[0]->vma, off, align);
 	  off += adjust;
@@ -4285,26 +4323,6 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
-
-      if (m->count == 0)
-	p->p_vaddr = 0;
-      else
-	p->p_vaddr = m->sections[0]->vma;
-
-      if (m->p_paddr_valid)
-	p->p_paddr = m->p_paddr;
-      else if (m->count == 0)
-	p->p_paddr = 0;
-      else
-	p->p_paddr = m->sections[0]->lma;
-
-      if (p->p_type == PT_LOAD
-	  && (abfd->flags & D_PAGED) != 0)
-	p->p_align = bed->maxpagesize;
-      else if (m->count == 0)
-	p->p_align = 1 << bed->s->log_file_align;
-      else
-	p->p_align = 0;
 
       p->p_offset = 0;
       p->p_filesz = 0;
@@ -4386,7 +4404,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 
 	  sec = *secpp;
 	  flags = sec->flags;
-	  align = 1 << bfd_get_section_alignment (abfd, sec);
+	  align = (bfd_size_type) 1 << bfd_get_section_alignment (abfd, sec);
 
 	  if (p->p_type == PT_LOAD
 	      || p->p_type == PT_TLS)
@@ -4416,8 +4434,8 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		  /* The section VMA must equal the file position
 		     modulo the page size.  */
 		  bfd_size_type page = align;
-		  if ((abfd->flags & D_PAGED) != 0 && bed->maxpagesize > page)
-		    page = bed->maxpagesize;
+		  if (page < maxpagesize)
+		    page = maxpagesize;
 		  adjust = vma_page_aligned_bias (sec->vma,
 						  p->p_vaddr + p->p_memsz,
 						  page);
@@ -4494,8 +4512,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 
 	      if (align > p->p_align
 		  && (p->p_type != PT_LOAD
-		      || (abfd->flags & D_PAGED) == 0
-		      || ((p->p_vaddr - p->p_offset) & (align - 1)) == 0))
+		      || (abfd->flags & D_PAGED) == 0))
 		p->p_align = align;
 	    }
 
@@ -5800,6 +5817,8 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
       map->p_flags_valid = 1;
       map->p_paddr = segment->p_paddr;
       map->p_paddr_valid = 1;
+      map->p_align = segment->p_align;
+      map->p_align_valid = 1;
 
       /* Determine if this segment contains the ELF file header
 	 and if it contains the program headers themselves.  */
