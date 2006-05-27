@@ -504,13 +504,14 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
     }
   else if (show > 0)
     {
+      int i;
+      int len = TYPE_NFIELDS (type);
+
       if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
 	fprintf_filtered (stream, "RECORD\n");
       else if (TYPE_CODE (type) == TYPE_CODE_UNION)
 	/* i18n: Do not translate "CASE" and "OF" */
 	fprintf_filtered (stream, _("CASE <variant> OF\n"));
-      int i;
-      int len = TYPE_NFIELDS (type);
 
       for (i = TYPE_N_BASECLASSES (type); i < len; i++)
 	{
