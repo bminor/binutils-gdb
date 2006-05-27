@@ -1,3 +1,9 @@
+2006-05-27  Joel Brobecker  <brobecker@adacore.com>
+
+	From Peter Schauer <peterschauer@gmx.net>
+	* m2-typeprint.c (m2_record_fields): Move variable declarations
+	to the begining of the block.
+
 2006-05-20  Gaius Mulley  <gaius@glam.ac.uk>
 
 	* NEWS: (Improved Modula-2 language support): New section.
