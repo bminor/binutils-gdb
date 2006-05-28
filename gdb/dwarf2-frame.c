@@ -70,6 +70,9 @@ struct dwarf2_cie
   /* True if a 'z' augmentation existed.  */
   unsigned char saw_z_augmentation;
 
+  /* True if an 'S' augmentation existed.  */
+  unsigned char signal_frame;
+
   struct dwarf2_cie *next;
 };
 
@@ -1053,15 +1056,17 @@ dwarf2_frame_sniffer (struct frame_info *next_frame)
      function.  frame_pc_unwind(), for a no-return next function, can
      end up returning something past the end of this function's body.  */
   CORE_ADDR block_addr = frame_unwind_address_in_block (next_frame);
-  if (!dwarf2_frame_find_fde (&block_addr))
+  struct dwarf2_fde *fde = dwarf2_frame_find_fde (&block_addr);
+  if (!fde)
     return NULL;
 
   /* On some targets, signal trampolines may have unwind information.
      We need to recognize them so that we set the frame type
      correctly.  */
 
-  if (dwarf2_frame_signal_frame_p (get_frame_arch (next_frame),
-				   next_frame))
+  if (fde->cie->signal_frame
+      || dwarf2_frame_signal_frame_p (get_frame_arch (next_frame),
+				      next_frame))
     return &dwarf2_signal_frame_unwind;
 
   return &dwarf2_frame_unwind;
@@ -1521,6 +1526,10 @@ decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p)
          depends on the target address size.  */
       cie->encoding = DW_EH_PE_absptr;
 
+      /* We'll determine the final value later, but we need to
+	 initialize it conservatively.  */
+      cie->signal_frame = 0;
+
       /* Check version number.  */
       cie_version = read_1_byte (unit->abfd, buf);
       if (cie_version != 1 && cie_version != 3)
@@ -1601,6 +1610,17 @@ decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p)
 	      gdb_byte encoding = (*buf++) & ~DW_EH_PE_indirect;
 	      read_encoded_value (unit, encoding, buf, &bytes_read);
 	      buf += bytes_read;
+	      augmentation++;
+	    }
+
+	  /* "S" indicates a signal frame, such that the return
+	     address must not be decremented to locate the call frame
+	     info for the previous frame; it might even be the first
+	     instruction of a function, so decrementing it would take
+	     us to a different function.  */
+	  else if (*augmentation == 'S')
+	    {
+	      cie->signal_frame = 1;
 	      augmentation++;
 	    }
 

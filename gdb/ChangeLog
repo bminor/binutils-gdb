@@ -1,3 +1,9 @@
+2006-05-28  Alexandre Oliva  <aoliva@redhat.com>
+
+	* dwarf2-frame.c (struct dwarf2_cie): Add signal_frame field.
+	(dwarf2_frame_sniffer): Use it.
+	(decode_frame_entry_1): Set it according to augmentation "S".
+
 2006-05-27  Joel Brobecker  <brobecker@adacore.com>
 
 	From Peter Schauer <peterschauer@gmx.net>
