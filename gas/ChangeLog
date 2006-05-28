@@ -1,3 +1,8 @@
+2006-05-28  Jie Zhang  <jie.zhang@analog.com>
+ 
+	* config/bfin-parse.y (check_macfunc): Loose the condition of
+	calling check_multiply_halfregs ().
+
 2006-05-25  Jie Zhang  <jie.zhang@analog.com>
 
 	* config/bfin-parse.y (asm_1): Better check and deal with
