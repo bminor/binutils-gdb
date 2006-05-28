@@ -1,5 +1,15 @@
 2006-05-28  Alexandre Oliva  <aoliva@redhat.com>
 
+	* dwarf2-frame.h (enum dwarf2_frame_reg_rule): Add
+	DWARF2_FRAME_REG_SAVED_VAL_OFFSET and
+	DWARF2_FRAME_REG_SAVED_VAL_EXP.
+	* dwarf2-frame.c (execute_cfa_program): Handle val_offset,
+	val_offset_sf and val_expression.
+	(dwarf2_frame_prev_register): Handle the new reg rules.
+	(dwarf2_frame_this_id): Use pc instead of function entry point.
+
+2006-05-28  Alexandre Oliva  <aoliva@redhat.com>
+
 	* dwarf2-frame.c (struct dwarf2_cie): Add signal_frame field.
 	(dwarf2_frame_sniffer): Use it.
 	(decode_frame_entry_1): Set it according to augmentation "S".

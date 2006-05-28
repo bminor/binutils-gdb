@@ -481,6 +481,34 @@ bad CFI data; mismatched DW_CFA_restore_state at 0x%s"), paddr (fs->pc));
 	      fs->regs.reg[reg].loc.offset = offset;
 	      break;
 
+	    case DW_CFA_val_offset:
+	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &reg);
+	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
+	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &utmp);
+	      offset = utmp * fs->data_align;
+	      fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_VAL_OFFSET;
+	      fs->regs.reg[reg].loc.offset = offset;
+	      break;
+
+	    case DW_CFA_val_offset_sf:
+	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &reg);
+	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
+	      insn_ptr = read_sleb128 (insn_ptr, insn_end, &offset);
+	      offset *= fs->data_align;
+	      fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_VAL_OFFSET;
+	      fs->regs.reg[reg].loc.offset = offset;
+	      break;
+
+	    case DW_CFA_val_expression:
+	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &reg);
+	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
+	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &utmp);
+	      fs->regs.reg[reg].loc.exp = insn_ptr;
+	      fs->regs.reg[reg].exp_len = utmp;
+	      fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_VAL_EXP;
+	      insn_ptr += utmp;
+	      break;
+
 	    case DW_CFA_def_cfa_sf:
 	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &fs->cfa_reg);
 	      if (eh_frame_p)
@@ -963,6 +991,28 @@ dwarf2_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 	  /* Read the value in from memory.  */
 	  read_memory (*addrp, valuep, register_size (gdbarch, regnum));
 	}
+      break;
+
+    case DWARF2_FRAME_REG_SAVED_VAL_OFFSET:
+      *optimizedp = 0;
+      *lvalp = not_lval;
+      *addrp = 0;
+      *realnump = -1;
+      if (valuep)
+	store_unsigned_integer (valuep, register_size (gdbarch, regnum),
+				cache->cfa + cache->reg[regnum].loc.offset);
+      break;
+
+    case DWARF2_FRAME_REG_SAVED_VAL_EXP:
+      *optimizedp = 0;
+      *lvalp = not_lval;
+      *addrp = 0;
+      *realnump = -1;
+      if (valuep)
+	store_unsigned_integer (valuep, register_size (gdbarch, regnum),
+				execute_stack_op (cache->reg[regnum].loc.exp,
+						  cache->reg[regnum].exp_len,
+						  next_frame, cache->cfa));
       break;
 
     case DWARF2_FRAME_REG_UNSPECIFIED:

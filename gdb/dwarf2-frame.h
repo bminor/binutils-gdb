@@ -51,6 +51,10 @@ enum dwarf2_frame_reg_rule
   DWARF2_FRAME_REG_SAVED_EXP,
   DWARF2_FRAME_REG_SAME_VALUE,
 
+  /* These are defined in Dwarf3.  */
+  DWARF2_FRAME_REG_SAVED_VAL_OFFSET,
+  DWARF2_FRAME_REG_SAVED_VAL_EXP,
+
   /* These aren't defined by the DWARF2 CFI specification, but are
      used internally by GDB.  */
   DWARF2_FRAME_REG_RA,		/* Return Address.  */
