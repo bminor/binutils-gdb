@@ -1,3 +1,10 @@
+2006-05-06  Denis Chertykov  <denisc@overta.ru>
+
+	* doc/c-avr.texi: New file.
+	* doc/Makefile.am (CPU_DOCS): Add c-avr.texi
+	* doc/all.texi: Set AVR
+	* doc/as.texinfo: Include c-avr.texi
+
 2006-05-28  Jie Zhang  <jie.zhang@analog.com>
  
 	* config/bfin-parse.y (check_macfunc): Loose the condition of
