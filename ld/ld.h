@@ -270,6 +270,12 @@ typedef struct {
 
   /* The size of the hash table to use.  */
   bfd_size_type hash_table_size;
+
+  /* The maximum page size for ELF.  */
+  bfd_vma maxpagesize;
+
+  /* The common page size for ELF.  */
+  bfd_vma commonpagesize;
 } ld_config_type;
 
 extern ld_config_type config;

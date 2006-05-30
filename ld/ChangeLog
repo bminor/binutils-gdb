@@ -1,3 +1,95 @@
+2006-05-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emulparams/arcelf.sh (MAXPAGESIZE): Changed to
+	"CONSTANT (MAXPAGESIZE)".
+	* emulparams/armelf_nbsd.sh: Likewise.
+	* emulparams/armelf_vxworks.sh: Likewise.
+	* emulparams/armnto.sh: Likewise.
+	* emulparams/armsymbian.sh: Likewise.
+	* emulparams/crislinux.sh: Likewise.
+	* emulparams/elf32_i860.sh: Likewise.
+	* emulparams/elf32_i960.sh: Likewise.
+	* emulparams/elf32am33lin.sh: Likewise.
+	* emulparams/elf32bfinfd.sh: Likewise.
+	* emulparams/elf32bmipn32-defs.sh: Likewise.
+	* emulparams/elf32frvfd.sh: Likewise.
+	* emulparams/elf32i370.sh: Likewise.
+	* emulparams/elf32lppcnto.sh: Likewise.
+	* emulparams/elf32mcore.sh: Likewise.
+	* emulparams/elf32openrisc.sh: Likewise.
+	* emulparams/elf32ppcnto.sh: Likewise.
+	* emulparams/elf32ppcwindiss.sh: Likewise.
+	* emulparams/elf32vax.sh: Likewise.
+	* emulparams/elf32xc16x.sh: Likewise.
+	* emulparams/elf32xc16xl.sh: Likewise.
+	* emulparams/elf32xc16xs.sh: Likewise.
+	* emulparams/elf64_aix.sh: Likewise.
+	* emulparams/elf64hppa.sh: Likewise.
+	* emulparams/elf64mmix.sh: Likewise.
+	* emulparams/elf_i386_be.sh: Likewise.
+	* emulparams/elf_i386_chaos.sh: Likewise.
+	* emulparams/elf_i386_ldso.sh: Likewise.
+	* emulparams/hppa64linux.sh: Likewise.
+	* emulparams/hppalinux.sh: Likewise.
+	* emulparams/hppaobsd.sh: Likewise.
+	* emulparams/i386lynx.sh: Likewise.
+	* emulparams/i386moss.sh: Likewise.
+	* emulparams/i386nto.sh: Likewise.
+	* emulparams/i386nw.sh: Likewise.
+	* emulparams/m32relf_linux.sh: Likewise.
+	* emulparams/m68kpsos.sh: Likewise.
+	* emulparams/or32elf.sh: Likewise.
+	* emulparams/pjelf.sh: Likewise.
+	* emulparams/pjlelf.sh: Likewise.
+	* emulparams/ppclynx.sh: Likewise.
+	* emulparams/ppcnw.sh: Likewise.
+	* emulparams/shelf32_nbsd.sh : Likewise.
+	* emulparams/shelf_nbsd.sh: Likewise.
+	* emulparams/shelf_nto.sh: Likewise.
+	* emulparams/shlelf_nto.sh: Likewise.
+	* emulparams/xtensa-config.sh: Likewise.
+
+	* emulparams/armelf_linux.sh (MAXPAGESIZE): Changed to
+	"CONSTANT (MAXPAGESIZE)".
+	(COMMONPAGESIZE): Changed to "CONSTANT (COMMONPAGESIZE)".
+	* emulparams/elf32_sparc.sh: Likewise.
+	* emulparams/elf32bmip.sh: Likewise.
+	* emulparams/elf32ppccommon.sh: Likewise.
+	* emulparams/elf64_ia64.sh: Likewise.
+	* emulparams/elf64_s390.sh: Likewise.
+	* emulparams/elf64_sparc.sh: Likewise.
+	* emulparams/elf64alpha.sh: Likewise.
+	* emulparams/elf64ppc.sh: Likewise.
+	* emulparams/elf_i386.sh: Likewise.
+	* emulparams/elf_i386_vxworks.sh: Likewise.
+	* emulparams/elf_s390.sh: Likewise.
+	* emulparams/elf_x86_64.sh: Likewise.
+	* emulparams/shlelf32_linux.sh: Likewise.
+	* emulparams/shlelf_linux.sh: Likewise.
+
+	* emulparams/elf32bmipn32.sh (COMMONPAGESIZE): Changed to
+	"CONSTANT (COMMONPAGESIZE)".
+	* emulparams/elf32btsmipn32.sh: Likewise.
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_handle_option): Add
+	"-z max-page-size=" and "-z common-page-size=".
+	(gld${EMULATION_NAME}_list_options): Likewise.
+
+	* ld.h (ld_config_type): Add maxpagesize and commonpagesize.
+
+	* ld.texinfo: Document "-z max-page-size=" and
+	"-z common-page-size=".
+
+	* ldexp.c (exp_print_token): Handle CONSTANT.
+	(fold_name): Likewise.
+	* ldgram.y: Likewise.
+	* ldlex.l: Likewise.
+
+	* ldmain.c (main): Initiliaze config.maxpagesize and
+	config.commonpagesize. Call bfd_emul_set_maxpagesize if
+	config.maxpagesize isn't 0. Call bfd_emul_set_commonpagesize if
+	config.commonpagesize config.maxpagesize isn't 0.
+
 2006-05-30  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.

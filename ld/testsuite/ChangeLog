@@ -1,3 +1,10 @@
+2006-05-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/binutils.exp: New file.
+	* ld-elf/commonpage1.d: Likewise.
+	* ld-elf/maxpage1.d: Likewise.
+	* ld-elf/maxpage1.s: Likewise.
+
 2006-05-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-x86-64/tlsbin.dd: Updated for 2MB maximum page size.

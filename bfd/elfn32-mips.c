@@ -2384,6 +2384,7 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
    a value of 0x1000, and we are compatible.
    FIXME: How does this affect NewABI?  */
 #define ELF_MAXPAGESIZE			0x1000
+#define ELF_COMMONPAGESIZE		0x1000
 
 #include "elf32-target.h"
 

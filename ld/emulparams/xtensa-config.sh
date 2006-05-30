@@ -1,3 +1,3 @@
 # Xtensa configuration settings.
 
-MAXPAGESIZE=0x1000
+MAXPAGESIZE="CONSTANT (MAXPAGESIZE)"

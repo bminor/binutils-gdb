@@ -4709,6 +4709,14 @@ void bfd_preserve_restore (bfd *, struct bfd_preserve *);
 
 void bfd_preserve_finish (bfd *, struct bfd_preserve *);
 
+bfd_vma bfd_emul_get_maxpagesize (const char *);
+
+void bfd_emul_set_maxpagesize (const char *, bfd_vma);
+
+bfd_vma bfd_emul_get_commonpagesize (const char *);
+
+void bfd_emul_set_commonpagesize (const char *, bfd_vma);
+
 /* Extracted from archive.c.  */
 symindex bfd_get_next_mapent
    (bfd *abfd, symindex previous, carsym **sym);

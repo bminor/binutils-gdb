@@ -1846,6 +1846,22 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	link_info.relro = TRUE;
       else if (strcmp (optarg, "norelro") == 0)
 	link_info.relro = FALSE;
+      else if (strncmp (optarg, "max-page-size=", 14) == 0)
+	{
+	  char *end;
+	  config.maxpagesize = strtoul (optarg + 14, &end, 0);
+	  if (*end)
+	    einfo (_("%P%F: invalid maxium page size \`%s'\n"),
+		   optarg + 14);
+	}
+      else if (strncmp (optarg, "common-page-size=", 17) == 0)
+	{
+	  char *end;
+	  config.commonpagesize = strtoul (optarg + 17, &end, 0);
+	  if (*end)
+	    einfo (_("%P%F: invalid common page size \`%s'\n"),
+		   optarg + 17);
+	}
       /* What about the other Solaris -z options? FIXME.  */
       break;
 EOF
@@ -1897,6 +1913,8 @@ cat >>e${EMULATION_NAME}.c <<EOF
   fprintf (file, _("  -z now\t\tMark object non-lazy runtime binding\n"));
   fprintf (file, _("  -z origin\t\tMark object requiring immediate \$ORIGIN processing\n\t\t\t  at runtime\n"));
   fprintf (file, _("  -z relro\t\tCreate RELRO program header\n"));
+  fprintf (file, _("  -z max-page-size=SIZE\tSet maximum page size to SIZE\n"));
+  fprintf (file, _("  -z common-page-size=SIZE\n\t\t\tSet common page size to SIZE\n"));
   fprintf (file, _("  -z KEYWORD\t\tIgnored for Solaris compatibility\n"));
 EOF
 fi

@@ -7371,6 +7371,7 @@ sh_elf_plt_sym_val (bfd_vma i, const asection *plt,
 #define	TARGET_LITTLE_NAME		"elf32-shl-nbsd"
 #undef	ELF_MAXPAGESIZE
 #define	ELF_MAXPAGESIZE			0x10000
+#undef	ELF_COMMONPAGESIZE
 #undef	elf_symbol_leading_char
 #define	elf_symbol_leading_char		0
 #undef	elf32_bed
@@ -7388,6 +7389,8 @@ sh_elf_plt_sym_val (bfd_vma i, const asection *plt,
 #define	TARGET_LITTLE_SYM		bfd_elf32_shlin_vec
 #undef	TARGET_LITTLE_NAME
 #define	TARGET_LITTLE_NAME		"elf32-sh-linux"
+#undef	ELF_COMMONPAGESIZE
+#define	ELF_COMMONPAGESIZE		0x1000
 
 #undef	elf_backend_grok_prstatus
 #define	elf_backend_grok_prstatus	elf32_shlin_grok_prstatus

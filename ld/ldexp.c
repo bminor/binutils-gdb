@@ -99,6 +99,7 @@ exp_print_token (token_code_type code, int infix_p)
     { SIZEOF, "SIZEOF" },
     { ADDR, "ADDR" },
     { LOADADDR, "LOADADDR" },
+    { CONSTANT, "CONSTANT" },
     { MAX_K, "MAX_K" },
     { REL, "relocatable" },
     { DATA_SEGMENT_ALIGN, "DATA_SEGMENT_ALIGN" },
@@ -621,6 +622,16 @@ fold_name (etree_type *tree)
           einfo (_("%F%S: undefined MEMORY region `%s'"
 		   " referenced in expression\n"), tree->name.name);
       }
+      break;
+
+    case CONSTANT:
+      if (strcmp (tree->name.name, "MAXPAGESIZE") == 0)
+	new_abs (bfd_emul_get_maxpagesize (default_target));
+      else if (strcmp (tree->name.name, "COMMONPAGESIZE") == 0)
+	new_abs (bfd_emul_get_commonpagesize (default_target));
+      else
+	einfo (_("%F%S: unknown constant `%s' referenced in expression\n"),
+	       tree->name.name);
       break;
 
     default:

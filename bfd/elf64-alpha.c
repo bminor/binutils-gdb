@@ -5231,6 +5231,7 @@ static const struct elf_size_info alpha_elf_size_info =
 #define ELF_ARCH		bfd_arch_alpha
 #define ELF_MACHINE_CODE	EM_ALPHA
 #define ELF_MAXPAGESIZE	0x10000
+#define ELF_COMMONPAGESIZE	0x2000
 
 #define bfd_elf64_bfd_link_hash_table_create \
   elf64_alpha_bfd_link_hash_table_create

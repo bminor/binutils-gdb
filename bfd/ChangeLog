@@ -1,3 +1,37 @@
+2006-05-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd.c (bfd_emul_get_maxpagesize): New.
+	(bfd_elf_set_pagesize): Likewise.
+	(bfd_emul_set_maxpagesize): Likewise.
+	(bfd_emul_get_commonpagesize): Likewise.
+	(bfd_emul_set_commonpagesize): Likewise.
+	* bfd-in2.h: Regenerated.
+
+	* elf-bfd.h (elf_backend_data): Add commonpagesize.
+	(xvec_get_elf_backend_data): New.
+	(get_elf_backend_data): Use xvec_get_elf_backend_data.
+
+	* elf32-arm.c (elf32_arm_vxworks_bed): Remove const.
+	* elfxx-target.h (elfNN_bed): Likewise.
+
+	* elf32-arm.c (ELF_COMMONPAGESIZE): Defined.
+	* elf32-mips.c (ELF_COMMONPAGESIZE): Likewise.
+	* elf32-ppc.c (ELF_COMMONPAGESIZE): Likewise.
+	* elf32-sh.c (ELF_COMMONPAGESIZE): Likewise.
+	* elf32-sh64.c (ELF_COMMONPAGESIZE): Likewise.
+	* elf32-sparc.c (ELF_COMMONPAGESIZE): Likewise.
+	* elf64-alpha.c (ELF_COMMONPAGESIZE): Likewise.
+	* elf64-ppc.c (ELF_COMMONPAGESIZE): Likewise.
+	* elf64-sparc.c (ELF_COMMONPAGESIZE): Likewise.
+	* elf64-x86-64.c (ELF_COMMONPAGESIZE): Likewise.
+	* elfn32-mips.c (ELF_COMMONPAGESIZE): Likewise.
+	* elfxx-ia64.c (ELF_COMMONPAGESIZE): Likewise.
+
+	* elfxx-target.h (ELF_COMMONPAGESIZE): Define if not defined.
+	(elfNN_bed): Initialize commonpagesize with ELF_COMMONPAGESIZE.
+
+	* targets.c (bfd_find_target): Support NULL abfd.
+
 2006-05-30  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.

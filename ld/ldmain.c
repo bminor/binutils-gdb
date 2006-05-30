@@ -317,6 +317,9 @@ main (int argc, char **argv)
   link_info.warn_shared_textrel = FALSE;
   link_info.gc_sections = FALSE;
 
+  config.maxpagesize = 0;
+  config.commonpagesize = 0;
+
   ldfile_add_arch ("");
 
   config.make_executable = TRUE;
@@ -334,6 +337,13 @@ main (int argc, char **argv)
 
   if (config.hash_table_size != 0)
     bfd_hash_set_default_size (config.hash_table_size);
+
+  if (config.maxpagesize != 0)
+    bfd_emul_set_maxpagesize (default_target, config.maxpagesize);
+
+  if (config.commonpagesize != 0)
+    bfd_emul_set_commonpagesize (default_target,
+				 config.commonpagesize);
 
   ldemul_set_symbols ();
 

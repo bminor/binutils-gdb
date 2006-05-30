@@ -1007,6 +1007,12 @@ Marks the object may contain $ORIGIN.
 @item relro
 Create an ELF @code{PT_GNU_RELRO} segment header in the object.
 
+@item max-page-size=@var{value}
+Set the emulation maximum page size to @var{value}.
+
+@item common-page-size=@var{value}
+Set the emulation common page size to @var{value}.
+
 @end table
 
 Other keywords are ignored for Solaris compatibility.  

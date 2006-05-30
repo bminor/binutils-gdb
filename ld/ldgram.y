@@ -152,6 +152,7 @@ static int error_index;
 %token GLOBAL LOCAL VERSIONK INPUT_VERSION_SCRIPT
 %token KEEP ONLY_IF_RO ONLY_IF_RW SPECIAL
 %token EXCLUDE_FILE
+%token CONSTANT
 %type <versyms> vers_defns
 %type <versnode> vers_tag
 %type <deflist> verdep
@@ -841,6 +842,8 @@ exp	:
 			{ $$ = exp_nameop (ADDR,$3); }
 	|	LOADADDR '(' NAME ')'
 			{ $$ = exp_nameop (LOADADDR,$3); }
+	|	CONSTANT '(' NAME ')'
+			{ $$ = exp_nameop (CONSTANT,$3); }
 	|	ABSOLUTE '(' exp ')'
 			{ $$ = exp_unop (ABSOLUTE, $3); }
 	|	ALIGN_K '(' exp ')'

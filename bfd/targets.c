@@ -1307,14 +1307,15 @@ SYNOPSIS
 
 DESCRIPTION
 	Return a pointer to the transfer vector for the object target
-	named @var{target_name}.  If @var{target_name} is <<NULL>>, choose the
-	one in the environment variable <<GNUTARGET>>; if that is null or not
-	defined, then choose the first entry in the target list.
-	Passing in the string "default" or setting the environment
-	variable to "default" will cause the first entry in the target
-	list to be returned, and "target_defaulted" will be set in the
-	BFD.  This causes <<bfd_check_format>> to loop over all the
-	targets to find the one that matches the file being read.
+	named @var{target_name}.  If @var{target_name} is <<NULL>>,
+	choose the one in the environment variable <<GNUTARGET>>; if
+	that is null or not defined, then choose the first entry in the
+	target list.  Passing in the string "default" or setting the
+	environment variable to "default" will cause the first entry in
+	the target list to be returned, and "target_defaulted" will be
+	set in the BFD if @var{abfd} isn't <<NULL>>.  This causes
+	<<bfd_check_format>> to loop over all the targets to find the
+	one that matches the file being read.
 */
 
 const bfd_target *
@@ -1331,21 +1332,27 @@ bfd_find_target (const char *target_name, bfd *abfd)
   /* This is safe; the vector cannot be null.  */
   if (targname == NULL || strcmp (targname, "default") == 0)
     {
-      abfd->target_defaulted = TRUE;
       if (bfd_default_vector[0] != NULL)
-	abfd->xvec = bfd_default_vector[0];
+	target = bfd_default_vector[0];
       else
-	abfd->xvec = bfd_target_vector[0];
-      return abfd->xvec;
+	target = bfd_target_vector[0];
+      if (abfd)
+	{
+	  abfd->xvec = target;
+	  abfd->target_defaulted = TRUE;
+	}
+      return target;
     }
 
-  abfd->target_defaulted = FALSE;
+  if (abfd)
+    abfd->target_defaulted = FALSE;
 
   target = find_target (targname);
   if (target == NULL)
     return NULL;
 
-  abfd->xvec = target;
+  if (abfd)
+    abfd->xvec = target;
   return target;
 }
 

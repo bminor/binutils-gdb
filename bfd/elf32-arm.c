@@ -62,7 +62,7 @@
 #define ARM_ELF_ABI_VERSION		0
 #define ARM_ELF_OS_ABI_VERSION		ELFOSABI_ARM
 
-static const struct elf_backend_data elf32_arm_vxworks_bed;
+static struct elf_backend_data elf32_arm_vxworks_bed;
 
 /* Note: code such as elf32_arm_reloc_type_lookup expect to use e.g.
    R_ARM_PC24 as an index into this, and find the R_ARM_PC24 HOWTO
@@ -8406,6 +8406,7 @@ const struct elf_size_info elf32_arm_size_info = {
 #define ELF_MAXPAGESIZE			0x8000
 #endif
 #define ELF_MINPAGESIZE			0x1000
+#define ELF_COMMONPAGESIZE		0x1000
 
 #define bfd_elf32_mkobject		        elf32_arm_mkobject
 

@@ -1513,3 +1513,130 @@ bfd_preserve_finish (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_preserve *preserve)
      objalloc.  */
   bfd_hash_table_free (&preserve->section_htab);
 }
+
+/*
+FUNCTION
+	bfd_emul_get_maxpagesize
+
+SYNOPSIS
+ 	bfd_vma bfd_emul_get_maxpagesize (const char *);
+
+DESCRIPTION
+	Returns the maximum page size, in bytes, as determined by
+	emulation.
+
+RETURNS
+	Returns the maximum page size in bytes for ELF, abort
+	otherwise.
+*/
+
+bfd_vma
+bfd_emul_get_maxpagesize (const char *emul)
+{
+  const bfd_target *target;
+
+  target = bfd_find_target (emul, NULL);
+  if (target != NULL
+      && target->flavour == bfd_target_elf_flavour)
+    return xvec_get_elf_backend_data (target)->maxpagesize;
+
+  abort ();
+  return 0;
+}
+
+static void
+bfd_elf_set_pagesize (const bfd_target *target, bfd_vma size,
+		      int offset, const bfd_target *orig_target)
+{
+  if (target->flavour == bfd_target_elf_flavour)
+    {
+      const struct elf_backend_data *bed;
+
+      bed = xvec_get_elf_backend_data (target);
+      *((bfd_vma *) ((char *) bed + offset)) = size;
+    }
+
+  if (target->alternative_target
+      && target->alternative_target != orig_target)
+    bfd_elf_set_pagesize (target->alternative_target, size, offset,
+			  orig_target);
+}
+
+/*
+FUNCTION
+	bfd_emul_set_maxpagesize
+
+SYNOPSIS
+ 	void bfd_emul_set_maxpagesize (const char *, bfd_vma);
+
+DESCRIPTION
+	For ELF, set the maximum page size for the emulation.  It is
+	a no-op for other formats.
+
+*/
+
+void
+bfd_emul_set_maxpagesize (const char *emul, bfd_vma size)
+{
+  const bfd_target *target;
+
+  target = bfd_find_target (emul, NULL);
+  if (target)
+    bfd_elf_set_pagesize (target, size,
+			  offsetof (struct elf_backend_data,
+				    maxpagesize), target);
+}
+
+/*
+FUNCTION
+	bfd_emul_get_commonpagesize
+
+SYNOPSIS
+ 	bfd_vma bfd_emul_get_commonpagesize (const char *);
+
+DESCRIPTION
+	Returns the common page size, in bytes, as determined by
+	emulation.
+
+RETURNS
+	Returns the common page size in bytes for ELF, abort otherwise.
+*/
+
+bfd_vma
+bfd_emul_get_commonpagesize (const char *emul)
+{
+  const bfd_target *target;
+
+  target = bfd_find_target (emul, NULL);
+  if (target != NULL
+      && target->flavour == bfd_target_elf_flavour)
+    return xvec_get_elf_backend_data (target)->commonpagesize;
+
+  abort ();
+  return 0;
+}
+
+/*
+FUNCTION
+	bfd_emul_set_commonpagesize
+
+SYNOPSIS
+ 	void bfd_emul_set_commonpagesize (const char *, bfd_vma);
+
+DESCRIPTION
+	For ELF, set the common page size for the emulation.  It is
+	a no-op for other formats.
+
+*/
+
+void
+bfd_emul_set_commonpagesize (const char *emul, bfd_vma size)
+{
+  const bfd_target *target;
+
+  target = bfd_find_target (emul, NULL);
+  if (target)
+    bfd_elf_set_pagesize (target, size,
+			  offsetof (struct elf_backend_data,
+				    commonpagesize), target);
+}

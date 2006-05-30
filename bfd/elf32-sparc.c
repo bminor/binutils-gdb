@@ -172,6 +172,7 @@ elf32_sparc_reloc_type_class (const Elf_Internal_Rela *rela)
 #define ELF_MACHINE_CODE EM_SPARC
 #define ELF_MACHINE_ALT1 EM_SPARC32PLUS
 #define ELF_MAXPAGESIZE 0x10000
+#define ELF_COMMONPAGESIZE 0x2000
 
 #define bfd_elf32_bfd_merge_private_bfd_data \
 					elf32_sparc_merge_private_bfd_data

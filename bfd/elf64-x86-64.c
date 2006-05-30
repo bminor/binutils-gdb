@@ -3632,6 +3632,7 @@ static const struct bfd_elf_special_section
 #define ELF_MACHINE_CODE		    EM_X86_64
 #define ELF_MAXPAGESIZE			    0x200000
 #define ELF_MINPAGESIZE			    0x1000
+#define ELF_COMMONPAGESIZE		    0x1000
 
 #define elf_backend_can_gc_sections	    1
 #define elf_backend_can_refcount	    1

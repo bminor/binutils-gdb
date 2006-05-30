@@ -785,6 +785,7 @@ static const struct bfd_elf_special_section sh64_elf_special_sections[] =
 #define	TARGET_LITTLE_NAME	"elf32-sh64l-nbsd"
 #undef	ELF_MAXPAGESIZE
 #define	ELF_MAXPAGESIZE		0x10000
+#undef	ELF_COMMONPAGESIZE
 #undef	elf_symbol_leading_char
 #define	elf_symbol_leading_char	0
 #undef	elf32_bed
@@ -803,6 +804,8 @@ static const struct bfd_elf_special_section sh64_elf_special_sections[] =
 #define	TARGET_LITTLE_NAME	"elf32-sh64-linux"
 #undef	elf32_bed
 #define	elf32_bed		elf32_sh64_lin_bed
+#undef	ELF_COMMONPAGESIZE
+#define	ELF_COMMONPAGESIZE	0x1000
 
 #include "elf32-target.h"
 

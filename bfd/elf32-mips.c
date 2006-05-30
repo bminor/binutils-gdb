@@ -1599,6 +1599,7 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 /* The SVR4 MIPS ABI says that this should be 0x10000, but Irix 5 uses
    a value of 0x1000, and we are compatible.  */
 #define ELF_MAXPAGESIZE			0x1000
+#define ELF_COMMONPAGESIZE		0x1000
 
 #include "elf32-target.h"
 

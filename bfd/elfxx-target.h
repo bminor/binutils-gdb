@@ -294,6 +294,10 @@
 #define ELF_MINPAGESIZE ELF_MAXPAGESIZE
 #endif
 
+#ifndef ELF_COMMONPAGESIZE
+#define ELF_COMMONPAGESIZE ELF_MAXPAGESIZE
+#endif
+
 #ifndef ELF_DYNAMIC_SEC_FLAGS
 /* Note that we set the SEC_IN_MEMORY flag for these sections.  */
 #define ELF_DYNAMIC_SEC_FLAGS			\
@@ -559,12 +563,13 @@
 extern const struct elf_size_info _bfd_elfNN_size_info;
 
 #ifndef INCLUDED_TARGET_FILE
-static const struct elf_backend_data elfNN_bed =
+static struct elf_backend_data elfNN_bed =
 {
   ELF_ARCH,			/* arch */
   ELF_MACHINE_CODE,		/* elf_machine_code */
   ELF_MAXPAGESIZE,		/* maxpagesize */
   ELF_MINPAGESIZE,		/* minpagesize */
+  ELF_COMMONPAGESIZE,		/* commonpagesize */
   ELF_DYNAMIC_SEC_FLAGS,	/* dynamic_sec_flags */
   elf_info_to_howto,
   elf_info_to_howto_rel,

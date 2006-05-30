@@ -814,6 +814,7 @@ const struct elf_size_info elf64_sparc_size_info =
 #define TARGET_BIG_NAME	"elf64-sparc"
 #define ELF_ARCH	bfd_arch_sparc
 #define ELF_MAXPAGESIZE 0x100000
+#define ELF_COMMONPAGESIZE 0x2000
 
 /* This is the official ABI value.  */
 #define ELF_MACHINE_CODE EM_SPARCV9

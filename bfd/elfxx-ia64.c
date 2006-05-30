@@ -5717,6 +5717,7 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
 #define ELF_MACHINE_ALT1		1999	/* EAS2.3 */
 #define ELF_MACHINE_ALT2		1998	/* EAS2.2 */
 #define ELF_MAXPAGESIZE			0x10000	/* 64KB */
+#define ELF_COMMONPAGESIZE		0x4000	/* 16KB */
 
 #define elf_backend_section_from_shdr \
 	elfNN_ia64_section_from_shdr
@@ -5824,6 +5825,7 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
 
 #undef  ELF_MAXPAGESIZE
 #define ELF_MAXPAGESIZE                 0x1000  /* 4K */
+#undef ELF_COMMONPAGESIZE
 
 #undef  elfNN_bed
 #define elfNN_bed elfNN_ia64_hpux_bed

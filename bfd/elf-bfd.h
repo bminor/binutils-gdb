@@ -571,6 +571,9 @@ struct elf_backend_data
      pages at least this large.  May be smaller than maxpagesize.  */
   bfd_vma minpagesize;
 
+  /* The common page size for this backend.  */
+  bfd_vma commonpagesize;
+
   /* The BFD flags applied to sections created for dynamic linking.  */
   flagword dynamic_sec_flags;
 
@@ -1196,8 +1199,11 @@ struct bfd_elf_section_data
    && (sec)->sec_info_type != ELF_INFO_TYPE_MERGE		\
    && (sec)->sec_info_type != ELF_INFO_TYPE_JUST_SYMS)
 
+#define xvec_get_elf_backend_data(xvec) \
+  ((struct elf_backend_data *) (xvec)->backend_data)
+
 #define get_elf_backend_data(abfd) \
-  ((const struct elf_backend_data *) (abfd)->xvec->backend_data)
+   xvec_get_elf_backend_data ((abfd)->xvec)
 
 /* This struct is used to pass information to routines called via
    elf_link_hash_traverse which must return failure.  */
