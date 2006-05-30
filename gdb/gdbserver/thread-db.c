@@ -336,6 +336,9 @@ thread_db_init ()
      process in the list is the thread group leader.  */
   proc_handle.pid = ((struct inferior_list_entry *)current_inferior)->id;
 
+  /* Allow new symbol lookups.  */
+  all_symbols_looked_up = 0;
+
   err = td_ta_new (&proc_handle, &thread_agent);
   switch (err)
     {
@@ -350,6 +353,7 @@ thread_db_init ()
 	return 0;
       thread_db_find_new_threads ();
       thread_db_look_up_symbols ();
+      all_symbols_looked_up = 1;
       return 1;
 
     default:

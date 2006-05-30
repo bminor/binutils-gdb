@@ -1,5 +1,6 @@
 /* Common definitions for remote server for GDB.
-   Copyright (C) 1993, 1995, 1997, 1998, 1999, 2000, 2002, 2003, 2004, 2005
+   Copyright (C) 1993, 1995, 1997, 1998, 1999, 2000, 2002, 2003, 2004, 2005,
+   2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -127,7 +128,9 @@ extern int server_waiting;
 
 extern jmp_buf toplevel;
 
-/* Functions from remote-utils.c */
+/* From remote-utils.c */
+
+extern int all_symbols_looked_up;
 
 int putpkt (char *buf);
 int getpkt (char *buf);

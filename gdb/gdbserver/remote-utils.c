@@ -1,6 +1,6 @@
 /* Remote utility routines for the remote server for GDB.
    Copyright (C) 1986, 1989, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005
+   2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -51,6 +51,10 @@ struct sym_cache
 
 /* The symbol cache.  */
 static struct sym_cache *symbol_cache;
+
+/* If this flag has been set, assume cache misses are
+   failures.  */
+int all_symbols_looked_up;
 
 int remote_debug = 0;
 struct ui_file *gdb_stdlog;
@@ -768,6 +772,14 @@ look_up_one_symbol (const char *name, CORE_ADDR *addrp)
 	*addrp = sym->addr;
 	return 1;
       }
+
+  /* If we've passed the call to thread_db_look_up_symbols, then
+     anything not in the cache must not exist; we're not interested
+     in any libraries loaded after that point, only in symbols in
+     libpthread.so.  It might not be an appropriate time to look
+     up a symbol, e.g. while we're trying to fetch registers.  */
+  if (all_symbols_looked_up)
+    return 0;
 
   /* Send the request.  */
   strcpy (own_buf, "qSymbol:");

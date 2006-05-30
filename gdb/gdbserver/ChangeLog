@@ -1,5 +1,12 @@
 2006-05-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* remote-utils.c (all_symbols_looked_up): New variable.
+	(look_up_one_symbol): Check it.
+	* server.h (look_up_one_symbol): New declaration.
+	* thread-db.c (thread_db_init): Set all_symbols_looked_up.
+
+2006-05-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* Makefile.in (linux-arm-low.o): Update dependencies.
 	* linux-arm-low.c: Include "gdb_proc_service.h".
 	(PTRACE_GET_THREAD_AREA): Define.
