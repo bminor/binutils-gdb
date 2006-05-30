@@ -1,7 +1,7 @@
 2006-05-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (linux-arm-low.o): Update dependencies.
-	* linux-arm-low.c: Include "../gdb_proc_service.h".
+	* linux-arm-low.c: Include "gdb_proc_service.h".
 	(PTRACE_GET_THREAD_AREA): Define.
 	(ps_get_thread_area): New function.
 
