@@ -269,7 +269,8 @@ linux_low_h = $(srcdir)/linux-low.h
 linux-low.o: linux-low.c $(linux_low_h) $(server_h)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< @USE_THREAD_DB@
 
-linux-arm-low.o: linux-arm-low.c $(linux_low_h) $(server_h)
+linux-arm-low.o: linux-arm-low.c $(linux_low_h) $(server_h) \
+	$(gdb_proc_service_h)
 linux-cris-low.o: linux-cris-low.c $(linux_low_h) $(server_h)
 linux-crisv32-low.o: linux-crisv32-low.c $(linux_low_h) $(server_h)
 linux-i386-low.o: linux-i386-low.c $(linux_low_h) $(server_h) \

@@ -1,3 +1,10 @@
+2006-05-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (arm-linux-nat.o): Update dependencies.
+	* arm-linux-nat.c: Include "gdb_proc_service.h".
+	(PTRACE_GET_THREAD_AREA): Define.
+	(ps_get_thread_area): New function.
+
 2006-05-28  Alexandre Oliva  <aoliva@redhat.com>
 
 	* dwarf2-frame.h (enum dwarf2_frame_reg_rule): Add
