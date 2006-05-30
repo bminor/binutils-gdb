@@ -1,5 +1,7 @@
-This is ../.././binutils/doc/binutils.info, produced by makeinfo
-version 4.8 from ../.././binutils/doc/binutils.texi.
+This is
+/work/sources/binutils/branches/2_17/binutils/doc/binutils.info,
+produced by makeinfo version 4.8 from
+/work/sources/binutils/branches/2_17/binutils/doc/binutils.texi.
 
 START-INFO-DIR-ENTRY
 * Binutils: (binutils).         The GNU binary utilities.
@@ -3803,33 +3805,33 @@ Index
 
 
 Tag Table:
-Node: Top1751
-Node: ar3307
-Node: ar cmdline5485
-Node: ar scripts13628
-Node: nm19316
-Node: objcopy27512
-Node: objdump50564
-Node: ranlib65477
-Node: size66232
-Node: strings69079
-Node: strip71429
-Node: c++filt76908
-Ref: c++filt-Footnote-181836
-Node: addr2line81942
-Node: nlmconv85213
-Node: windres87819
-Node: dlltool93552
-Node: def file format104390
-Node: readelf106128
-Node: Common Options110836
-Node: Selecting The Target System111876
-Node: Target Selection112808
-Node: Architecture Selection114790
-Node: Reporting Bugs115618
-Node: Bug Criteria116397
-Node: Bug Reporting116950
-Node: GNU Free Documentation License124044
-Node: Index143776
+Node: Top1809
+Node: ar3365
+Node: ar cmdline5543
+Node: ar scripts13686
+Node: nm19374
+Node: objcopy27570
+Node: objdump50622
+Node: ranlib65535
+Node: size66290
+Node: strings69137
+Node: strip71487
+Node: c++filt76966
+Ref: c++filt-Footnote-181894
+Node: addr2line82000
+Node: nlmconv85271
+Node: windres87877
+Node: dlltool93610
+Node: def file format104448
+Node: readelf106186
+Node: Common Options110894
+Node: Selecting The Target System111934
+Node: Target Selection112866
+Node: Architecture Selection114848
+Node: Reporting Bugs115676
+Node: Bug Criteria116455
+Node: Bug Reporting117008
+Node: GNU Free Documentation License124102
+Node: Index143834
 
 End Tag Table

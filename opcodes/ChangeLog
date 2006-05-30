@@ -1,3 +1,7 @@
+2006-05-30  Nick Clifton  <nickc@redhat.com>
+
+	* po/es.po: Updated Spanish translation.
+
 2006-05-26  Richard Sandiford  <richard@codesourcery.com>
 
 	* m68k-opc.c (m68k_opcodes): Fix the masks of the Coldfire fmovemd
