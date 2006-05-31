@@ -6406,6 +6406,7 @@ remote_download_command (char *args, int from_tty)
   FILE *file;
   gdb_byte *buffer;
   int bytes_in_buffer;
+  int saw_eof;
 
   if (!remote_desc)
     error (_("command can only be used with remote target"));
@@ -6433,17 +6434,29 @@ remote_download_command (char *args, int from_tty)
   make_cleanup (xfree, buffer);
 
   bytes_in_buffer = 0;
-  while (1)
+  saw_eof = 0;
+  while (bytes_in_buffer || !saw_eof)
     {
-      bytes = fread (buffer, 1, 1024 - bytes_in_buffer, file);
-      if (bytes == 0)
+      if (!saw_eof)
 	{
-	  if (ferror (file))
-	    error (_("Error reading %s."), argv[0]);
-	  else
-	    /* EOF */
-	    break;
+	  bytes = fread (buffer + bytes_in_buffer, 1, 1024 - bytes_in_buffer,
+			 file);
+	  if (bytes == 0)
+	    {
+	      if (ferror (file))
+		error (_("Error reading %s."), argv[0]);
+	      else
+		{
+		  /* EOF.  Unless there is something still in the
+		     buffer from the last iteration, we are done.  */
+		  saw_eof = 1;
+		  if (bytes_in_buffer == 0)
+		    break;
+		}
+	    }
 	}
+      else
+	bytes = 0;
 
       bytes += bytes_in_buffer;
       bytes_in_buffer = 0;
