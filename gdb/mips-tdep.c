@@ -887,8 +887,8 @@ mips32_relative_offset (ULONGEST inst)
   return ((itype_immediate (inst) ^ 0x8000) - 0x8000) << 2;
 }
 
-/* Determine whate to set a single step breakpoint while considering
-   branch prediction */
+/* Determine where to set a single step breakpoint while considering
+   branch prediction.  */
 static CORE_ADDR
 mips32_next_pc (CORE_ADDR pc)
 {
@@ -5163,7 +5163,7 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
     {
       int ef_mips_arch;
       int ef_mips_32bitmode;
-      /* determine the ISA */
+      /* Determine the ISA.  */
       switch (tdep->elf_flags & EF_MIPS_ARCH)
 	{
 	case E_MIPS_ARCH_1:
@@ -5182,7 +5182,7 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 	  ef_mips_arch = 0;
 	  break;
 	}
-      /* determine the size of a pointer */
+      /* Determine the size of a pointer.  */
       ef_mips_32bitmode = (tdep->elf_flags & EF_MIPS_32BITMODE);
       fprintf_unfiltered (file,
 			  "mips_dump_tdep: tdep->elf_flags = 0x%x\n",
