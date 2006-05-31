@@ -85,7 +85,8 @@ AC_PROG_CC
 AC_GNU_SOURCE
 
 ALL_LINGUAS="fr tr ja es sv da zh_CN ro rw vi"
-CY_GNU_GETTEXT
+ZW_GNU_GETTEXT_SISTER_DIR
+AM_PO_SUBDIRS
 
 # Permit host specific settings.
 . ${srcdir}/configure.host
@@ -962,7 +963,28 @@ esac
 
 rm -f doc/config.status
 AC_CONFIG_FILES([Makefile doc/Makefile bfd-in3.h:bfd-in2.h po/Makefile.in:po/Make-in])
-AC_CONFIG_COMMANDS([default],[[sed -e '/SRC-POTFILES =/r po/SRC-POTFILES' -e '/BLD-POTFILES =/r po/BLD-POTFILES' po/Makefile.in > po/Makefile]],[[]])
+
+dnl We need this duplication, even though we use AM_PO_SUBDIRS, because of
+dnl our two separate POTFILES.  Yuck.
+AC_CONFIG_COMMANDS([default],
+[[
+case "$srcdir" in
+  .) srcdirpre= ;;
+  *) srcdirpre='$(srcdir)/' ;;
+esac
+POFILES=
+GMOFILES=
+for lang in dummy $OBSOLETE_ALL_LINGUAS; do
+  if test $lang != dummy; then
+    POFILES="$POFILES $srcdirpre$lang.po"
+    GMOFILES="$GMOFILES $srcdirpre$lang.gmo"
+  fi
+done
+sed -e '/SRC-POTFILES =/r po/SRC-POTFILES' \
+    -e '/BLD-POTFILES =/r po/BLD-POTFILES' \
+    -e "s,@POFILES@,$POFILES," \
+    -e "s,@GMOFILES@,$GMOFILES," \
+    po/Makefile.in > po/Makefile]],[[]])
 
 dnl Required by html and install-html
 AC_SUBST(datarootdir)

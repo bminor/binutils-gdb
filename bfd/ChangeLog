@@ -1,3 +1,11 @@
+2006-05-31  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.am (INCLUDES): Use @INCINTL@.
+	* acinclude.m4: Include new gettext macros.
+	* configure.in: Use ZW_GNU_GETTEXT_SISTER_DIR and AM_PO_SUBDIRS.
+	Manually substitute POFILES and GMOFILES.
+	* Makefile.in, aclocal.m4, configure, doc/Makefile.in: Regenerated.
+
 2006-05-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfd.c (bfd_emul_get_maxpagesize): New.

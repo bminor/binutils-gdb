@@ -1,8 +1,5 @@
 ## Process this file with automake to generate Makefile.in
 
-## FIXME: work around apparent automake bug.
-INTLLIBS = @INTLLIBS@
-
 AUTOMAKE_OPTIONS = cygnus dejagnu
 
 SUBDIRS = po
@@ -100,7 +97,7 @@ man_MANS = ld.1
 AM_MAKEINFOFLAGS = -I $(srcdir) -I $(BFDDIR)/doc -I $(top_srcdir)/../libiberty
 TEXI2DVI = texi2dvi -I $(srcdir) -I $(BFDDIR)/doc
 
-INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) -I$(top_srcdir)/../intl -I../intl $(HDEFINES) $(CFLAGS) -DLOCALEDIR="\"$(datadir)/locale\""
+INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) @INCINTL@ $(HDEFINES) $(CFLAGS) -DLOCALEDIR="\"$(datadir)/locale\""
 
 BFDLIB = ../bfd/libbfd.la
 LIBIBERTY = ../libiberty/libiberty.a
@@ -1618,8 +1615,8 @@ EXTRA_ld_new_SOURCES = deffilep.y
 
 ld_new_SOURCES = ldgram.y ldlex.l lexsup.c ldlang.c mri.c ldctor.c ldmain.c \
 	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c
-ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(INTLDEPS)
-ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(INTLLIBS)
+ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL_DEP)
+ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
 
 # The generated emulation files mostly have the same dependencies.
 $(EMULATION_OFILES): ../bfd/bfd.h sysdep.h config.h $(INCDIR)/bfdlink.h \
@@ -1641,7 +1638,7 @@ check-DEJAGNU: site.exp
 		CXX="$(CXX_FOR_TARGET)" CXXFLAGS="$(CXXFLAGS)" \
 		CC_FOR_HOST="$(CC)" CFLAGS_FOR_HOST="$(CFLAGS)" \
 		OFILES="$(OFILES)" BFDLIB="$(TESTBFDLIB)" \
-		LIBIBERTY="$(LIBIBERTY) $(INTLLIBS)" LIBS="$(LIBS)" \
+		LIBIBERTY="$(LIBIBERTY) $(LIBINTL)" LIBS="$(LIBS)" \
 		$(RUNTESTFLAGS); \
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 	fi

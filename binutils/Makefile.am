@@ -1,8 +1,5 @@
 ## Process this file with automake to generate Makefile.in
 
-## FIXME: Work around apparent bug in automake.
-INTLLIBS = @INTLLIBS@
-
 AUTOMAKE_OPTIONS = cygnus dejagnu
 
 SUBDIRS = doc po
@@ -75,7 +72,7 @@ MKDEP = gcc -MM
 INCLUDES = -D_GNU_SOURCE \
 	 -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
 	 @HDEFINES@ \
-	 -I$(srcdir)/../intl -I../intl \
+	 @INCINTL@ \
 	 -DLOCALEDIR="\"$(datadir)/locale\"" \
 	 -Dbin_dummy_emulation=$(EMULATION_VECTOR)
 
@@ -182,7 +179,29 @@ check-DEJAGNU: site.exp
 installcheck:
 	/bin/sh $(srcdir)/sanity.sh $(bindir)
 
-LDADD = $(BFDLIB) $(LIBIBERTY) $(INTLLIBS)
+# There's no global DEPENDENCIES.  So, we must explicitly list everything
+# which depends on libintl, since we don't know whether LIBINTL_DEP will be
+# non-empty until configure time.  Ugh!
+size_DEPENDENCIES = $(LIBINTL_DEP)
+objdump_DEPENDENCIES = $(LIBINTL_DEP)
+nm_new_DEPENDENCIES = $(LIBINTL_DEP)
+ar_DEPENDENCIES = $(LIBINTL_DEP)
+strings_DEPENDENCIES = $(LIBINTL_DEP)
+strip_new_DEPENDENCIES = $(LIBINTL_DEP)
+ranlib_DEPENDENCIES = $(LIBINTL_DEP)
+cxxfilt_DEPENDENCIES = $(LIBINTL_DEP)
+objcopy_DEPENDENCIES = $(LIBINTL_DEP)
+nlmconv_DEPENDENCIES = $(LIBINTL_DEP)
+srconv_DEPENDENCIES = $(LIBINTL_DEP)
+sysdump_DEPENDENCIES = $(LIBINTL_DEP)
+coffdump_DEPENDENCIES = $(LIBINTL_DEP)
+dlltool_DEPENDENCIES = $(LIBINTL_DEP)
+windres_DEPENDENCIES = $(LIBINTL_DEP)
+addr2line_DEPENDENCIES = $(LIBINTL_DEP)
+readelf_DEPENDENCIES = $(LIBINTL_DEP)
+dllwrap_DEPENDENCIES = $(LIBINTL_DEP)
+
+LDADD = $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
 
 size_SOURCES = size.c $(BULIBS)
 
@@ -191,14 +210,14 @@ objcopy_SOURCES = objcopy.c not-strip.c rename.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 strings_SOURCES = strings.c $(BULIBS)
 
 readelf_SOURCES = readelf.c version.c unwind-ia64.c dwarf.c
-readelf_LDADD   = $(INTLLIBS) $(LIBIBERTY)
+readelf_LDADD   = $(LIBINTL) $(LIBIBERTY)
 
 strip_new_SOURCES = objcopy.c is-strip.c rename.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 
 nm_new_SOURCES = nm.c budemang.c $(BULIBS)
 
 objdump_SOURCES = objdump.c dwarf.c budemang.c prdbg.c $(DEBUG_SRCS) $(BULIBS)
-objdump_LDADD = $(OPCODES) $(BFDLIB) $(LIBIBERTY) $(INTLLIBS)
+objdump_LDADD = $(OPCODES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
 
 objdump.o:objdump.c
 	$(COMPILE) -c $(OBJDUMP_DEFS) $(srcdir)/objdump.c
@@ -207,11 +226,11 @@ cxxfilt_SOURCES = cxxfilt.c $(BULIBS)
 
 ar_SOURCES = arparse.y arlex.l ar.c not-ranlib.c arsup.c rename.c binemul.c \
 	emul_$(EMULATION).c $(BULIBS)
-ar_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
+ar_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(LIBINTL)
 
 ranlib_SOURCES = ar.c is-ranlib.c arparse.y arlex.l arsup.c rename.c \
 	binemul.c emul_$(EMULATION).c $(BULIBS)
-ranlib_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
+ranlib_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(LIBINTL)
 
 addr2line_SOURCES = addr2line.c budemang.c $(BULIBS)
 
@@ -287,7 +306,7 @@ rclex.o:
 srconv_SOURCES = srconv.c coffgrok.c $(BULIBS)
 
 dlltool_SOURCES = dlltool.c defparse.y deflex.l $(BULIBS)
-dlltool_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
+dlltool_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(LIBINTL)
 
 dlltool.o:
 	$(COMPILE) -c $(DLLTOOL_DEFS) $(srcdir)/dlltool.c
@@ -309,10 +328,10 @@ nlmconv_SOURCES = nlmconv.c nlmheader.y $(BULIBS)
 
 windres_SOURCES = windres.c resrc.c rescoff.c resbin.c rcparse.y rclex.l \
 	winduni.c resres.c $(BULIBS)
-windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
+windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(LIBINTL)
 
 dllwrap_SOURCES = dllwrap.c version.c
-dllwrap_LDADD = $(LIBIBERTY) $(INTLLIBS)
+dllwrap_LDADD = $(LIBIBERTY) $(LIBINTL)
 
 
 EXTRA_DIST = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \

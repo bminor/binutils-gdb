@@ -229,7 +229,7 @@ CSEARCH = -I. -I$(srcdir) -I../common -I$(srccom) \
   -I../../include -I$(srcroot)/include \
   -I../../bfd -I$(srcroot)/bfd \
   -I../../opcodes -I$(srcroot)/opcodes \
-  -I../../intl -I$(srcroot)/intl
+  @INCINTL@
 ALL_CFLAGS = $(CONFIG_CFLAGS) $(CSEARCH) $(CFLAGS)
 BUILD_CFLAGS = -g -O $(CSEARCH)
 
@@ -238,12 +238,12 @@ COMMON_DEP_CFLAGS = $(CONFIG_CFLAGS) $(CSEARCH)
 LIBIBERTY_LIB = ../../libiberty/libiberty.a
 BFD_LIB = ../../bfd/libbfd.a
 OPCODES_LIB = ../../opcodes/libopcodes.a
-INTLLIBS = @INTLLIBS@
-INTLDEPS = @INTLDEPS@
+LIBINTL = @LIBINTL@
+LIBINTL_DEP = @LIBINTL_DEP@
 CONFIG_LIBS = @LIBS@
-LIBDEPS = $(BFD_LIB) $(OPCODES_LIB) $(INTLDEPS) $(LIBIBERTY_LIB) \
+LIBDEPS = $(BFD_LIB) $(OPCODES_LIB) $(LIBINTL_DEP) $(LIBIBERTY_LIB) \
 	$(SIM_EXTRA_LIBDEPS)
-EXTRA_LIBS = $(BFD_LIB) $(OPCODES_LIB) $(INTLLIBS) $(LIBIBERTY_LIB) \
+EXTRA_LIBS = $(BFD_LIB) $(OPCODES_LIB) $(LIBINTL) $(LIBIBERTY_LIB) \
 	$(CONFIG_LIBS) $(SIM_EXTRA_LIBS)
 
 LIB_OBJS = callback.o syscall.o targ-map.o $(SIM_OBJS)

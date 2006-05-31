@@ -1,3 +1,7 @@
+2006-05-31  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* configure: Regenerated.
+
 2005-11-28  Mark Mitchell  <mark@codesourcery.com>
 
 	* interf.c: (gdb/signals.h): Include it.

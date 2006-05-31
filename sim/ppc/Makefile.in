@@ -155,11 +155,9 @@ INCLUDES	= -I. -I$(srcdir) $(LIB_INCLUDES) $(BFD_INCLUDES) $(GDB_INCLUDES)
 LIBIBERTY_LIB	= ../../libiberty/libiberty.a
 BFD_LIB		= ../../bfd/libbfd.a
 
-INTLLIBS = @INTLLIBS@
-INTLDEPS = @INTLDEPS@
-INTL_DIR = ../../intl
-INTL_SRC = $(srcdir)/$(INTL_DIR)
-INTL_CFLAGS = -I$(INTL_DIR) -I$(INTL_SRC)
+LIBINTL = @LIBINTL@
+LIBINTL_DEP = @LIBINTL_DEP@
+INTL_CFLAGS = @INCINTL@
 
 
 TARGETLIB	= libsim.a
@@ -550,8 +548,8 @@ PACKAGE_SRC = @sim_pk_src@
 PACKAGE_OBJ = @sim_pk_obj@
 
 
-psim: $(TARGETLIB) main.o $(LIBIBERTY_LIB) $(BFD_LIB) $(LIBS) $(INTLDEPS)
-	$(CC) $(CFLAGS) $(SIM_CFLAGS) $(LDFLAGS) -o psim$(EXEEXT) main.o $(TARGETLIB) $(BFD_LIB) $(INTLLIBS) $(LIBIBERTY_LIB) $(LIBS)
+psim: $(TARGETLIB) main.o $(LIBIBERTY_LIB) $(BFD_LIB) $(LIBS) $(LIBINTL_DEP)
+	$(CC) $(CFLAGS) $(SIM_CFLAGS) $(LDFLAGS) -o psim$(EXEEXT) main.o $(TARGETLIB) $(BFD_LIB) $(LIBINTL) $(LIBIBERTY_LIB) $(LIBS)
 
 run: psim
 	rm -f run$(EXEEXT)

@@ -45,7 +45,8 @@ infodir = @infodir@
 htmldir = $(prefix)/html
 includedir = @includedir@
 
-# This can be referenced by `INTLDEPS' as computed by CY_GNU_GETTEXT.
+# This can be referenced by `LIBINTL' as computed by
+# ZW_GNU_GETTEXT_SISTER_DIR.
 top_builddir = .
 
 SHELL = @SHELL@
@@ -135,11 +136,9 @@ GDB_WERROR_CFLAGS = $(WERROR_CFLAGS)
 GDB_WARN_CFLAGS_NO_FORMAT = `echo " $(GDB_WARN_CFLAGS) " | sed "s/ -Wformat-nonliteral / /g"`
 
 # Where is the INTL library?  Typically in ../intl.
-INTL_DIR = ../intl
-INTL = @INTLLIBS@
-INTL_DEPS = @INTLDEPS@
-INTL_SRC = $(srcdir)/$(INTL_DIR)
-INTL_CFLAGS = -I$(INTL_DIR) -I$(INTL_SRC)
+INTL = @LIBINTL@
+INTL_DEPS = @LIBINTL_DEP@
+INTL_CFLAGS = @INCINTL@
 
 # Where is the ICONV library?  This can be empty if libc has iconv.
 LIBICONV = @LIBICONV@

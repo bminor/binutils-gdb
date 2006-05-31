@@ -17,7 +17,7 @@ CFLAGS_FOR_BUILD=${CFLAGS_FOR_BUILD-${CFLAGS}}
 dnl We don't use gettext, but bfd does.  So we do the appropriate checks
 dnl to see if there are intl libraries we should link against.
 ALL_LINGUAS=
-CY_GNU_GETTEXT
+ZW_GNU_GETTEXT_SISTER_DIR
 
 
 AC_ARG_ENABLE(sim-alignment,

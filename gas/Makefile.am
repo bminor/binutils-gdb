@@ -1,8 +1,5 @@
 ## Process this file with automake to generate Makefile.in
 
-## Work around apparent automake bug.
-INTLLIBS = @INTLLIBS@
-
 AUTOMAKE_OPTIONS = 1.8 cygnus dejagnu
 
 SUBDIRS = doc po
@@ -470,13 +467,13 @@ INCDIR = $(BASEDIR)/include
 # Both . and srcdir are used, in that order,
 # so that tm.h and config.h will be found in the compilation
 # subdirectory rather than in the source directory.
-INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(srcdir)/config -I$(INCDIR) -I$(srcdir)/.. -I$(BFDDIR) -I$(srcdir)/../intl -I../intl -DLOCALEDIR="\"$(datadir)/locale\""
+INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(srcdir)/config -I$(INCDIR) -I$(srcdir)/.. -I$(BFDDIR) @INCINTL@ -DLOCALEDIR="\"$(datadir)/locale\""
 
 # This should be parallel to INCLUDES, but should replace $(srcdir)
 # with $${srcdir}, and should work in a subdirectory.  This is used
 # when building dependencies, because the dependency building is done
 # in a subdirectory.
-DEP_INCLUDES = -D_GNU_SOURCE -I.. -I$${srcdir} -I../../bfd -I$${srcdir}/config -I$${srcdir}/../include -I$${srcdir}/.. -I$${srcdir}/../bfd -I$${srcdir}/../intl -I../../intl -DLOCALEDIR="\"$(datadir)/locale\""
+DEP_INCLUDES = -D_GNU_SOURCE -I.. -I$${srcdir} -I../../bfd -I$${srcdir}/config -I$${srcdir}/../include -I$${srcdir}/.. -I$${srcdir}/../bfd @INCINTL@ -DLOCALEDIR="\"$(datadir)/locale\""
 
 DEP_FLAGS = -DOBJ_MAYBE_ELF \
 	-I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES)
@@ -495,9 +492,9 @@ $(OBJS): @ALL_OBJ_DEPS@
 
 as_new_SOURCES = $(GAS_CFILES)
 as_new_LDADD = $(TARG_CPU_O) $(OBJ_FORMAT_O) $(ATOF_TARG_O) \
-	$(extra_objects) $(GASLIBS) $(INTLLIBS) $(LIBM)
+	$(extra_objects) $(GASLIBS) $(LIBINTL) $(LIBM)
 as_new_DEPENDENCIES = $(TARG_CPU_O) $(OBJ_FORMAT_O) $(ATOF_TARG_O) \
-	$(extra_objects) $(GASLIBS) $(INTLDEPS)
+	$(extra_objects) $(GASLIBS) $(LIBINTL_DEP)
 
 # Stuff that every object file depends upon.  If anything is removed
 # from this list, remove it from dep-in.sed as well.

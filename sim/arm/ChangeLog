@@ -1,3 +1,7 @@
+2006-05-31  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* configure: Regenerated.
+
 2006-03-07  Paul Brook  <paul@codesourcery.com>
 
 	* elfos.c (ARMul_OSHandleSWI): Call correct function for IsTTY.

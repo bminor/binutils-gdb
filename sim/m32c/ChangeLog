@@ -1,3 +1,7 @@
+2006-05-31  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* configure: Regenerated.
+
 2006-03-13  DJ Delorie  <dj@redhat.com>
 
 	* mem.c (mem_put_byte): Hook simulated UART to stdout.

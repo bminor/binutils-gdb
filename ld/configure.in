@@ -83,7 +83,8 @@ AC_PROG_CC
 AC_PROG_INSTALL
 
 ALL_LINGUAS="fr sv tr es da vi zh_CN"
-CY_GNU_GETTEXT
+ZW_GNU_GETTEXT_SISTER_DIR
+AM_PO_SUBDIRS
 
 AC_EXEEXT
 
@@ -265,5 +266,4 @@ AC_SUBST(datarootdir)
 AC_SUBST(docdir)
 AC_SUBST(htmldir)
 
-AC_OUTPUT(Makefile po/Makefile.in:po/Make-in,
-[sed -e '/POTFILES =/r po/POTFILES' po/Makefile.in > po/Makefile])
+AC_OUTPUT(Makefile po/Makefile.in:po/Make-in)

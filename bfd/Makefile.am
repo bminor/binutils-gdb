@@ -616,7 +616,7 @@ BFD_LIBS = @bfd_libs@
 BFD_MACHINES = @bfd_machines@
 TDEFAULTS = @tdefaults@
 
-INCLUDES = @HDEFINES@ @COREFLAG@ @TDEFINES@ $(CSEARCH) $(CSWITCHES) -I$(srcdir)/../intl -I../intl
+INCLUDES = @HDEFINES@ @COREFLAG@ @TDEFINES@ $(CSEARCH) $(CSWITCHES) @INCINTL@
 
 # C source files that correspond to .o's.
 SOURCE_CFILES = \

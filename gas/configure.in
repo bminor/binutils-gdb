@@ -578,7 +578,8 @@ AC_PROG_YACC
 AM_PROG_LEX
 
 ALL_LINGUAS="fr tr es rw"
-CY_GNU_GETTEXT
+ZW_GNU_GETTEXT_SISTER_DIR
+AM_PO_SUBDIRS
 
 AM_MAINTAINER_MODE
 AC_EXEEXT
@@ -691,9 +692,7 @@ AC_CONFIG_COMMANDS([default],
  echo '#include "itbl-'"${target_cpu_type}"'.h"' > itbl-cpu.h
  if test "x$cgen_cpu_prefix" != x ; then
    echo '#include "opcodes/'"${cgen_cpu_prefix}"'-desc.h"' > cgen-desc.h
- fi
-
- sed -e '/POTFILES =/r po/POTFILES' po/Makefile.in > po/Makefile],
+ fi],
 [target_cpu_type=${target_cpu_type}
  cgen_cpu_prefix=${cgen_cpu_prefix}
  obj_format=${obj_format}

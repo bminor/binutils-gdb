@@ -1,3 +1,13 @@
+2006-05-31  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (top_builddir): Update comments.
+	(INTL_DIR, INTL_SRC): Delete.
+	(INTL, INTL_DEPS, INTL_CFLAGS): Update.
+	* acinclude.m4: Include new gettext macros.
+	* configure.ac: Use ZW_GNU_GETTEXT_SISTER_DIR.  Remove copied
+	CATALOGS code.
+	* aclocal.m4, configure: Regenerated.
+
 2006-05-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (arm-linux-nat.o): Update dependencies.

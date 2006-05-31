@@ -40,8 +40,11 @@ subdir = doc
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
-	$(top_srcdir)/../bfd/warning.m4 $(top_srcdir)/../libtool.m4 \
-	$(top_srcdir)/../gettext.m4 $(top_srcdir)/configure.in
+	$(top_srcdir)/../bfd/warning.m4 \
+	$(top_srcdir)/../config/gettext-sister.m4 \
+	$(top_srcdir)/../config/nls.m4 $(top_srcdir)/../config/po.m4 \
+	$(top_srcdir)/../config/progtest.m4 \
+	$(top_srcdir)/../libtool.m4 $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
@@ -100,23 +103,20 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 GDBINIT = @GDBINIT@
-GMOFILES = @GMOFILES@
+GENCAT = @GENCAT@
 GMSGFMT = @GMSGFMT@
-GT_NO = @GT_NO@
-GT_YES = @GT_YES@
-INCLUDE_LOCALE_H = @INCLUDE_LOCALE_H@
+INCINTL = @INCINTL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 INSTOBJEXT = @INSTOBJEXT@
-INTLDEPS = @INTLDEPS@
-INTLLIBS = @INTLLIBS@
-INTLOBJS = @INTLOBJS@
 LDFLAGS = @LDFLAGS@
 LEX = @LEX@
 LEXLIB = @LEXLIB@
 LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
+LIBINTL = @LIBINTL@
+LIBINTL_DEP = @LIBINTL_DEP@
 LIBM = @LIBM@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
@@ -129,6 +129,7 @@ MAINTAINER_MODE_TRUE = @MAINTAINER_MODE_TRUE@
 MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 MSGFMT = @MSGFMT@
+MSGMERGE = @MSGMERGE@
 NO_WERROR = @NO_WERROR@
 OBJEXT = @OBJEXT@
 OPCODES_LIB = @OPCODES_LIB@
@@ -139,13 +140,11 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
-POFILES = @POFILES@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
-USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 WARN_CFLAGS = @WARN_CFLAGS@
@@ -184,7 +183,6 @@ includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
 install_tooldir = @install_tooldir@
-l = @l@
 libdir = @libdir@
 libexecdir = @libexecdir@
 localstatedir = @localstatedir@

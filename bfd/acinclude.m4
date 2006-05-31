@@ -1,4 +1,8 @@
 sinclude(../config/acx.m4)
+sinclude(../config/gettext-sister.m4)
+sinclude(../config/nls.m4)
+sinclude(../config/po.m4)
+sinclude(../config/progtest.m4)
 sinclude(../bfd/bfd.m4)
 sinclude(../bfd/warning.m4)
 
@@ -53,12 +57,6 @@ ifelse(yes,no,[
 AC_DEFUN([AM_PROG_LIBTOOL],)
 AC_DEFUN([AM_DISABLE_SHARED],)
 AC_SUBST(LIBTOOL)
-])
-
-sinclude(../gettext.m4)
-ifelse(yes,no,[
-AC_DEFUN([CY_WITH_NLS],)
-AC_SUBST(INTLLIBS)
 ])
 
 AC_DEFUN([AM_INSTALL_LIBBFD],

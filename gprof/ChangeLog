@@ -1,3 +1,13 @@
+2006-05-31  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.am: Replace INTLLIBS and INTLDEPS with LIBINTL
+	and LIBINTL_DEP everywhere.
+	(INCLUDES): Use @INCINTL@.
+	* acinclude.m4: Include new gettext macros.
+	* configure.in: Use ZW_GNU_GETTEXT_SISTER_DIR and AM_PO_SUBDIRS.
+	Remove local code for po/Makefile.
+	* Makefile.in, aclocal.m4, configure: Regenerated.
+
 2006-05-30  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.

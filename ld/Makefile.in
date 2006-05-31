@@ -49,9 +49,12 @@ subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/../bfd/acinclude.m4 \
-	$(top_srcdir)/../config/acx.m4 $(top_srcdir)/../bfd/bfd.m4 \
-	$(top_srcdir)/../bfd/warning.m4 $(top_srcdir)/../libtool.m4 \
-	$(top_srcdir)/../gettext.m4 $(top_srcdir)/configure.in
+	$(top_srcdir)/../config/acx.m4 \
+	$(top_srcdir)/../config/gettext-sister.m4 \
+	$(top_srcdir)/../config/nls.m4 $(top_srcdir)/../config/po.m4 \
+	$(top_srcdir)/../config/progtest.m4 \
+	$(top_srcdir)/../bfd/bfd.m4 $(top_srcdir)/../bfd/warning.m4 \
+	$(top_srcdir)/../libtool.m4 $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
@@ -115,7 +118,6 @@ DEJATOOL = $(PACKAGE)
 RUNTESTDEFAULTFLAGS = --tool $$tool --srcdir $$srcdir
 DIST_SUBDIRS = $(SUBDIRS)
 ACLOCAL = @ACLOCAL@
-ALLOCA = @ALLOCA@
 AMDEP_FALSE = @AMDEP_FALSE@
 AMDEP_TRUE = @AMDEP_TRUE@
 AMTAR = @AMTAR@
@@ -143,28 +145,25 @@ EMULATION_LIBPATH = @EMULATION_LIBPATH@
 EMULATION_OFILES = @EMULATION_OFILES@
 EMUL_EXTRA_OFILES = @EMUL_EXTRA_OFILES@
 EXEEXT = @EXEEXT@
-GMOFILES = @GMOFILES@
+GENCAT = @GENCAT@
 GMSGFMT = @GMSGFMT@
-GT_NO = @GT_NO@
-GT_YES = @GT_YES@
 HDEFINES = @HDEFINES@
 
 #stuff for self hosting (can be overridden in config file).
 HOSTING_CRT0 = @HOSTING_CRT0@
 HOSTING_LIBS = @HOSTING_LIBS@
-INCLUDE_LOCALE_H = @INCLUDE_LOCALE_H@
+INCINTL = @INCINTL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 INSTOBJEXT = @INSTOBJEXT@
-INTLDEPS = @INTLDEPS@
-INTLLIBS = @INTLLIBS@
-INTLOBJS = @INTLOBJS@
 LDFLAGS = @LDFLAGS@
 LEX = `if [ -f ../flex/flex ]; then echo ../flex/flex; else echo @LEX@; fi`
 LEXLIB = @LEXLIB@
 LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
+LIBINTL = @LIBINTL@
+LIBINTL_DEP = @LIBINTL_DEP@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -185,6 +184,7 @@ MAINTAINER_MODE_TRUE = @MAINTAINER_MODE_TRUE@
 MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 MSGFMT = @MSGFMT@
+MSGMERGE = @MSGMERGE@
 NATIVE_LIB_DIRS = @NATIVE_LIB_DIRS@
 NO_WERROR = @NO_WERROR@
 OBJEXT = @OBJEXT@
@@ -195,7 +195,6 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
-POFILES = @POFILES@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
@@ -207,7 +206,6 @@ TARGET_SYSTEM_ROOT_DEFINE = @TARGET_SYSTEM_ROOT_DEFINE@
 
 # This is the real libbfd.a created by libtool.
 TESTBFDLIB = @TESTBFDLIB@
-USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 WARN_CFLAGS = @WARN_CFLAGS@
@@ -242,7 +240,6 @@ htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
-l = @l@
 libdir = @libdir@
 libexecdir = @libexecdir@
 localstatedir = @localstatedir@
@@ -326,7 +323,7 @@ noinst_TEXINFOS = ldint.texinfo
 man_MANS = ld.1
 AM_MAKEINFOFLAGS = -I $(srcdir) -I $(BFDDIR)/doc -I $(top_srcdir)/../libiberty
 TEXI2DVI = texi2dvi -I $(srcdir) -I $(BFDDIR)/doc
-INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) -I$(top_srcdir)/../intl -I../intl $(HDEFINES) $(CFLAGS) -DLOCALEDIR="\"$(datadir)/locale\""
+INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) @INCINTL@ $(HDEFINES) $(CFLAGS) -DLOCALEDIR="\"$(datadir)/locale\""
 BFDLIB = ../bfd/libbfd.la
 LIBIBERTY = ../libiberty/libiberty.a
 ALL_EMULATIONS = \
@@ -667,8 +664,8 @@ EXTRA_ld_new_SOURCES = deffilep.y
 ld_new_SOURCES = ldgram.y ldlex.l lexsup.c ldlang.c mri.c ldctor.c ldmain.c \
 	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c
 
-ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(INTLDEPS)
-ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(INTLLIBS)
+ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL_DEP)
+ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
 MAINTAINERCLEANFILES = ldver.texi configdoc.texi
 
 # We want to reconfigure if configure.host or configure.tgt changes.  We
@@ -879,10 +876,13 @@ dist-info: $(INFO_DEPS)
 	    $(srcdir)/*) base=`echo "$$base" | sed "s|^$$srcdirstrip/||"`;; \
 	  esac; \
 	  if test -f $$base; then d=.; else d=$(srcdir); fi; \
-	  for file in $$d/$$base*; do \
-	    relfile=`expr "$$file" : "$$d/\(.*\)"`; \
-	    test -f $(distdir)/$$relfile || \
-	      cp -p $$file $(distdir)/$$relfile; \
+	  base_i=`echo "$$base" | sed 's|\.info$$||;s|$$|.i|'`; \
+	  for file in $$d/$$base $$d/$$base-[0-9] $$d/$$base-[0-9][0-9] $$d/$$base_i[0-9] $$d/$$base_i[0-9][0-9]; do \
+	    if test -f $$file; then \
+	      relfile=`expr "$$file" : "$$d/\(.*\)"`; \
+	      test -f $(distdir)/$$relfile || \
+		cp -p $$file $(distdir)/$$relfile; \
+	    else :; fi; \
 	  done; \
 	done
 
@@ -2441,7 +2441,7 @@ check-DEJAGNU: site.exp
 		CXX="$(CXX_FOR_TARGET)" CXXFLAGS="$(CXXFLAGS)" \
 		CC_FOR_HOST="$(CC)" CFLAGS_FOR_HOST="$(CFLAGS)" \
 		OFILES="$(OFILES)" BFDLIB="$(TESTBFDLIB)" \
-		LIBIBERTY="$(LIBIBERTY) $(INTLLIBS)" LIBS="$(LIBS)" \
+		LIBIBERTY="$(LIBIBERTY) $(LIBINTL)" LIBS="$(LIBS)" \
 		$(RUNTESTFLAGS); \
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 	fi

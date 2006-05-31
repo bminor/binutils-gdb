@@ -58,9 +58,12 @@ subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/../bfd/acinclude.m4 \
-	$(top_srcdir)/../config/acx.m4 $(top_srcdir)/../bfd/bfd.m4 \
-	$(top_srcdir)/../bfd/warning.m4 $(top_srcdir)/../libtool.m4 \
-	$(top_srcdir)/../gettext.m4 $(top_srcdir)/configure.in
+	$(top_srcdir)/../config/acx.m4 \
+	$(top_srcdir)/../config/gettext-sister.m4 \
+	$(top_srcdir)/../config/nls.m4 $(top_srcdir)/../config/po.m4 \
+	$(top_srcdir)/../config/progtest.m4 \
+	$(top_srcdir)/../bfd/bfd.m4 $(top_srcdir)/../bfd/warning.m4 \
+	$(top_srcdir)/../libtool.m4 $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
@@ -94,44 +97,29 @@ addr2line_LDADD = $(LDADD)
 am__DEPENDENCIES_1 = ../bfd/libbfd.la
 am__DEPENDENCIES_2 = ../libiberty/libiberty.a
 am__DEPENDENCIES_3 =
-addr2line_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3)
 am_ar_OBJECTS = arparse.$(OBJEXT) arlex.$(OBJEXT) ar.$(OBJEXT) \
 	not-ranlib.$(OBJEXT) arsup.$(OBJEXT) rename.$(OBJEXT) \
 	binemul.$(OBJEXT) emul_$(EMULATION).$(OBJEXT) $(am__objects_1)
 ar_OBJECTS = $(am_ar_OBJECTS)
-ar_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3)
 am_coffdump_OBJECTS = coffdump.$(OBJEXT) coffgrok.$(OBJEXT) \
 	$(am__objects_1)
 coffdump_OBJECTS = $(am_coffdump_OBJECTS)
 coffdump_LDADD = $(LDADD)
-coffdump_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3)
 am_cxxfilt_OBJECTS = cxxfilt.$(OBJEXT) $(am__objects_1)
 cxxfilt_OBJECTS = $(am_cxxfilt_OBJECTS)
 cxxfilt_LDADD = $(LDADD)
-cxxfilt_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3)
 am_dlltool_OBJECTS = dlltool.$(OBJEXT) defparse.$(OBJEXT) \
 	deflex.$(OBJEXT) $(am__objects_1)
 dlltool_OBJECTS = $(am_dlltool_OBJECTS)
-dlltool_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3)
 am_dllwrap_OBJECTS = dllwrap.$(OBJEXT) version.$(OBJEXT)
 dllwrap_OBJECTS = $(am_dllwrap_OBJECTS)
-dllwrap_DEPENDENCIES = $(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3)
 am_nlmconv_OBJECTS = nlmconv.$(OBJEXT) nlmheader.$(OBJEXT) \
 	$(am__objects_1)
 nlmconv_OBJECTS = $(am_nlmconv_OBJECTS)
 nlmconv_LDADD = $(LDADD)
-nlmconv_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3)
 am_nm_new_OBJECTS = nm.$(OBJEXT) budemang.$(OBJEXT) $(am__objects_1)
 nm_new_OBJECTS = $(am_nm_new_OBJECTS)
 nm_new_LDADD = $(LDADD)
-nm_new_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3)
 am__objects_2 = rddbg.$(OBJEXT) debug.$(OBJEXT) stabs.$(OBJEXT) \
 	ieee.$(OBJEXT) rdcoff.$(OBJEXT)
 am__objects_3 = $(am__objects_2) wrstabs.$(OBJEXT)
@@ -139,59 +127,40 @@ am_objcopy_OBJECTS = objcopy.$(OBJEXT) not-strip.$(OBJEXT) \
 	rename.$(OBJEXT) $(am__objects_3) $(am__objects_1)
 objcopy_OBJECTS = $(am_objcopy_OBJECTS)
 objcopy_LDADD = $(LDADD)
-objcopy_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3)
 am_objdump_OBJECTS = objdump.$(OBJEXT) dwarf.$(OBJEXT) \
 	budemang.$(OBJEXT) prdbg.$(OBJEXT) $(am__objects_2) \
 	$(am__objects_1)
 objdump_OBJECTS = $(am_objdump_OBJECTS)
 am__DEPENDENCIES_4 = ../opcodes/libopcodes.la
-objdump_DEPENDENCIES = $(am__DEPENDENCIES_4) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3)
 am_ranlib_OBJECTS = ar.$(OBJEXT) is-ranlib.$(OBJEXT) arparse.$(OBJEXT) \
 	arlex.$(OBJEXT) arsup.$(OBJEXT) rename.$(OBJEXT) \
 	binemul.$(OBJEXT) emul_$(EMULATION).$(OBJEXT) $(am__objects_1)
 ranlib_OBJECTS = $(am_ranlib_OBJECTS)
-ranlib_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3)
 am_readelf_OBJECTS = readelf.$(OBJEXT) version.$(OBJEXT) \
 	unwind-ia64.$(OBJEXT) dwarf.$(OBJEXT)
 readelf_OBJECTS = $(am_readelf_OBJECTS)
-readelf_DEPENDENCIES = $(am__DEPENDENCIES_3) $(am__DEPENDENCIES_2)
 am_size_OBJECTS = size.$(OBJEXT) $(am__objects_1)
 size_OBJECTS = $(am_size_OBJECTS)
 size_LDADD = $(LDADD)
-size_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3)
 am_srconv_OBJECTS = srconv.$(OBJEXT) coffgrok.$(OBJEXT) \
 	$(am__objects_1)
 srconv_OBJECTS = $(am_srconv_OBJECTS)
 srconv_LDADD = $(LDADD)
-srconv_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3)
 am_strings_OBJECTS = strings.$(OBJEXT) $(am__objects_1)
 strings_OBJECTS = $(am_strings_OBJECTS)
 strings_LDADD = $(LDADD)
-strings_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3)
 am_strip_new_OBJECTS = objcopy.$(OBJEXT) is-strip.$(OBJEXT) \
 	rename.$(OBJEXT) $(am__objects_3) $(am__objects_1)
 strip_new_OBJECTS = $(am_strip_new_OBJECTS)
 strip_new_LDADD = $(LDADD)
-strip_new_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3)
 am_sysdump_OBJECTS = sysdump.$(OBJEXT) $(am__objects_1)
 sysdump_OBJECTS = $(am_sysdump_OBJECTS)
 sysdump_LDADD = $(LDADD)
-sysdump_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3)
 am_windres_OBJECTS = windres.$(OBJEXT) resrc.$(OBJEXT) \
 	rescoff.$(OBJEXT) resbin.$(OBJEXT) rcparse.$(OBJEXT) \
 	rclex.$(OBJEXT) winduni.$(OBJEXT) resres.$(OBJEXT) \
 	$(am__objects_1)
 windres_OBJECTS = $(am_windres_OBJECTS)
-windres_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
 depcomp =
 am__depfiles_maybe =
@@ -264,24 +233,21 @@ EMULATION = @EMULATION@
 EMULATION_VECTOR = @EMULATION_VECTOR@
 EXEEXT = @EXEEXT@
 EXEEXT_FOR_BUILD = @EXEEXT_FOR_BUILD@
-GMOFILES = @GMOFILES@
+GENCAT = @GENCAT@
 GMSGFMT = @GMSGFMT@
-GT_NO = @GT_NO@
-GT_YES = @GT_YES@
 HDEFINES = @HDEFINES@
-INCLUDE_LOCALE_H = @INCLUDE_LOCALE_H@
+INCINTL = @INCINTL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 INSTOBJEXT = @INSTOBJEXT@
-INTLDEPS = @INTLDEPS@
-INTLLIBS = @INTLLIBS@
-INTLOBJS = @INTLOBJS@
 LDFLAGS = @LDFLAGS@
 LEX = `if [ -f ../flex/flex ]; then echo ../flex/flex; else echo @LEX@; fi`
 LEXLIB = @LEXLIB@
 LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
+LIBINTL = @LIBINTL@
+LIBINTL_DEP = @LIBINTL_DEP@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -293,6 +259,7 @@ MAINTAINER_MODE_TRUE = @MAINTAINER_MODE_TRUE@
 MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 MSGFMT = @MSGFMT@
+MSGMERGE = @MSGMERGE@
 NLMCONV_DEFS = @NLMCONV_DEFS@
 NO_WERROR = @NO_WERROR@
 OBJDUMP_DEFS = @OBJDUMP_DEFS@
@@ -304,13 +271,11 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
-POFILES = @POFILES@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
-USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 WARN_CFLAGS = @WARN_CFLAGS@
@@ -345,7 +310,6 @@ htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
-l = @l@
 libdir = @libdir@
 libexecdir = @libexecdir@
 localstatedir = @localstatedir@
@@ -403,7 +367,7 @@ MKDEP = gcc -MM
 INCLUDES = -D_GNU_SOURCE \
 	 -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
 	 @HDEFINES@ \
-	 -I$(srcdir)/../intl -I../intl \
+	 @INCINTL@ \
 	 -DLOCALEDIR="\"$(datadir)/locale\"" \
 	 -Dbin_dummy_emulation=$(EMULATION_VECTOR)
 
@@ -456,38 +420,60 @@ CC_FOR_TARGET = ` \
     fi; \
   fi`
 
-LDADD = $(BFDLIB) $(LIBIBERTY) $(INTLLIBS)
+
+# There's no global DEPENDENCIES.  So, we must explicitly list everything
+# which depends on libintl, since we don't know whether LIBINTL_DEP will be
+# non-empty until configure time.  Ugh!
+size_DEPENDENCIES = $(LIBINTL_DEP)
+objdump_DEPENDENCIES = $(LIBINTL_DEP)
+nm_new_DEPENDENCIES = $(LIBINTL_DEP)
+ar_DEPENDENCIES = $(LIBINTL_DEP)
+strings_DEPENDENCIES = $(LIBINTL_DEP)
+strip_new_DEPENDENCIES = $(LIBINTL_DEP)
+ranlib_DEPENDENCIES = $(LIBINTL_DEP)
+cxxfilt_DEPENDENCIES = $(LIBINTL_DEP)
+objcopy_DEPENDENCIES = $(LIBINTL_DEP)
+nlmconv_DEPENDENCIES = $(LIBINTL_DEP)
+srconv_DEPENDENCIES = $(LIBINTL_DEP)
+sysdump_DEPENDENCIES = $(LIBINTL_DEP)
+coffdump_DEPENDENCIES = $(LIBINTL_DEP)
+dlltool_DEPENDENCIES = $(LIBINTL_DEP)
+windres_DEPENDENCIES = $(LIBINTL_DEP)
+addr2line_DEPENDENCIES = $(LIBINTL_DEP)
+readelf_DEPENDENCIES = $(LIBINTL_DEP)
+dllwrap_DEPENDENCIES = $(LIBINTL_DEP)
+LDADD = $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
 size_SOURCES = size.c $(BULIBS)
 objcopy_SOURCES = objcopy.c not-strip.c rename.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 strings_SOURCES = strings.c $(BULIBS)
 readelf_SOURCES = readelf.c version.c unwind-ia64.c dwarf.c
-readelf_LDADD = $(INTLLIBS) $(LIBIBERTY)
+readelf_LDADD = $(LIBINTL) $(LIBIBERTY)
 strip_new_SOURCES = objcopy.c is-strip.c rename.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 nm_new_SOURCES = nm.c budemang.c $(BULIBS)
 objdump_SOURCES = objdump.c dwarf.c budemang.c prdbg.c $(DEBUG_SRCS) $(BULIBS)
-objdump_LDADD = $(OPCODES) $(BFDLIB) $(LIBIBERTY) $(INTLLIBS)
+objdump_LDADD = $(OPCODES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
 cxxfilt_SOURCES = cxxfilt.c $(BULIBS)
 ar_SOURCES = arparse.y arlex.l ar.c not-ranlib.c arsup.c rename.c binemul.c \
 	emul_$(EMULATION).c $(BULIBS)
 
-ar_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
+ar_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(LIBINTL)
 ranlib_SOURCES = ar.c is-ranlib.c arparse.y arlex.l arsup.c rename.c \
 	binemul.c emul_$(EMULATION).c $(BULIBS)
 
-ranlib_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
+ranlib_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(LIBINTL)
 addr2line_SOURCES = addr2line.c budemang.c $(BULIBS)
 srconv_SOURCES = srconv.c coffgrok.c $(BULIBS)
 dlltool_SOURCES = dlltool.c defparse.y deflex.l $(BULIBS)
-dlltool_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
+dlltool_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(LIBINTL)
 coffdump_SOURCES = coffdump.c coffgrok.c $(BULIBS)
 sysdump_SOURCES = sysdump.c $(BULIBS)
 nlmconv_SOURCES = nlmconv.c nlmheader.y $(BULIBS)
 windres_SOURCES = windres.c resrc.c rescoff.c resbin.c rcparse.y rclex.l \
 	winduni.c resres.c $(BULIBS)
 
-windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
+windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(LIBINTL)
 dllwrap_SOURCES = dllwrap.c version.c
-dllwrap_LDADD = $(LIBIBERTY) $(INTLLIBS)
+dllwrap_LDADD = $(LIBIBERTY) $(LIBINTL)
 EXTRA_DIST = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
 	syslex.c deflex.c defparse.h defparse.c rclex.c rcparse.h rcparse.c
 

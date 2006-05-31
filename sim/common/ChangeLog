@@ -1,3 +1,12 @@
+2006-05-31  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Make-common.in: Replace INTLLIBS and INTLDEPS with LIBINTL
+	and LIBINTL_DEP everywhere.
+	(CSEARCH): Use INCINTL.
+	* aclocal.m4: Use ZW_GNU_GETTEXT_SISTER_DIR.  Include new
+	gettext macros.
+	* configure: Regenerated.
+
 2006-03-29  Hans-Peter Nilsson  <hp@axis.com>
 
 	* aclocal.m4 (SIM_AC_OPTION_HARDWARE): Correct duplicate-
