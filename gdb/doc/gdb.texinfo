@@ -17215,7 +17215,8 @@ This chapter is a specification of the @sc{gdb/mi} interface.  It is written
 in the form of a reference manual.
 
 Note that @sc{gdb/mi} is still under construction, so some of the
-features described below are incomplete and subject to change.
+features described below are incomplete and subject to change
+(@pxref{GDB/MI Development and Front Ends, , @sc{gdb/mi} Development and Front Ends}).  
 
 @unnumberedsec Notation and Terminology
 
@@ -17254,6 +17255,7 @@ Elena Zannoni.
 @menu
 * GDB/MI Command Syntax::
 * GDB/MI Compatibility with CLI::
+* GDB/MI Development and Front Ends::
 * GDB/MI Output Records::
 * GDB/MI Command Description Format::
 * GDB/MI Breakpoint Table Commands::
@@ -17569,6 +17571,58 @@ clients and not as a reliable interface into the CLI.  Since the command
 is being interpreteted in an environment that assumes @sc{gdb/mi}
 behaviour, the exact output of such commands is likely to end up being
 an un-supported hybrid of @sc{gdb/mi} and CLI output.
+
+@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@node GDB/MI Development and Front Ends
+@section @sc{gdb/mi} Development and Front Ends
+@cindex @sc{gdb/mi} development
+
+The application which takes the MI output and presents the state of the
+program being debugged to the user is called a @dfn{front end}.
+
+Although @sc{gdb/mi} is still incomplete, it is currently being used
+by a variety of front ends to @value{GDBN}.  This makes it difficult
+to introduce new functionality without breaking existing usage.  This
+section tries to minimize the problems by describing how the protocol
+might change.
+
+Some changes in MI need not break a carefully designed front end, and
+for these the MI version will remain unchanged.  The following is a
+list of changes that may occur within one level, so front ends should
+parse MI output in a way that can handle them:
+
+@itemize @bullet
+@item
+New MI commands may be added.
+
+@item
+New fields may be added to the output of any MI command.
+
+@c The format of field's content e.g type prefix, may change so parse it
+@c   at your own risk.  Yes, in general?
+
+@c The order of fields may change?  Shouldn't really matter but it might
+@c resolve inconsistencies.
+@end itemize
+
+If the changes are likely to break front ends, the MI version level
+will be increased by one.  This will allow the front end to parse the
+output according to the MI version.  Apart from mi0, new versions of
+@value{GDBN} will not support old versions of MI and it will be the
+responsibility of the front end to work with the new one.
+
+@c Starting with mi3, add a new command -mi-version that prints the MI
+@c version?
+
+The best way to avoid unexpected changes in MI that might break your front
+end is to make your project known to @value{GDBN} developers and
+follow development on @email{gdb@@sources.redhat.com} and
+@email{gdb-patches@@sources.redhat.com}.  There is also the mailing list
+@email{dmi-discuss@@lists.freestandards.org}, hosted by the Free Standards
+Group, which has the aim of creating a a more general MI protocol
+called Debugger Machine Interface (DMI) that will become a standard
+for all debuggers, not just @value{GDBN}.
+@cindex mailing lists
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Output Records
