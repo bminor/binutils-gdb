@@ -1345,6 +1345,7 @@ bfd_create_gnu_debuglink_section (bfd *abfd, const char *filename)
 {
   asection *sect;
   bfd_size_type debuglink_size;
+  flagword flags;
 
   if (abfd == NULL || filename == NULL)
     {
@@ -1363,15 +1364,10 @@ bfd_create_gnu_debuglink_section (bfd *abfd, const char *filename)
       return NULL;
     }
 
-  sect = bfd_make_section (abfd, GNU_DEBUGLINK);
+  flags = SEC_HAS_CONTENTS | SEC_READONLY | SEC_DEBUGGING;
+  sect = bfd_make_section_with_flags (abfd, GNU_DEBUGLINK, flags);
   if (sect == NULL)
     return NULL;
-
-  if (! bfd_set_section_flags (abfd, sect,
-			       SEC_HAS_CONTENTS | SEC_READONLY | SEC_DEBUGGING))
-    /* XXX Should we delete the section from the bfd ?  */
-    return NULL;
-
 
   debuglink_size = strlen (filename) + 1;
   debuglink_size += 3;

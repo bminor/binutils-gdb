@@ -1,6 +1,6 @@
 /* BFD back-end for s-record objects.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005
+   2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
@@ -526,15 +526,16 @@ srec_scan (bfd *abfd)
 		    char secbuf[20];
 		    char *secname;
 		    bfd_size_type amt;
+		    flagword flags;
 
 		    sprintf (secbuf, ".sec%d", bfd_count_sections (abfd) + 1);
 		    amt = strlen (secbuf) + 1;
 		    secname = bfd_alloc (abfd, amt);
 		    strcpy (secname, secbuf);
-		    sec = bfd_make_section (abfd, secname);
+		    flags = SEC_HAS_CONTENTS | SEC_LOAD | SEC_ALLOC;
+		    sec = bfd_make_section_with_flags (abfd, secname, flags);
 		    if (sec == NULL)
 		      goto error_return;
-		    sec->flags = SEC_HAS_CONTENTS | SEC_LOAD | SEC_ALLOC;
 		    sec->vma = address;
 		    sec->lma = address;
 		    sec->size = bytes;

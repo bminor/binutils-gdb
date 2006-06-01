@@ -1,6 +1,6 @@
 /* BFD back-end for binary objects.
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005 Free Software Foundation, Inc.
+   2004, 2005, 2006 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support, <ian@cygnus.com>
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -63,6 +63,7 @@ binary_object_p (bfd *abfd)
 {
   struct stat statbuf;
   asection *sec;
+  flagword flags;
 
   if (abfd->target_defaulted)
     {
@@ -80,10 +81,10 @@ binary_object_p (bfd *abfd)
     }
 
   /* One data section.  */
-  sec = bfd_make_section (abfd, ".data");
+  flags = SEC_ALLOC | SEC_LOAD | SEC_DATA | SEC_HAS_CONTENTS;
+  sec = bfd_make_section_with_flags (abfd, ".data", flags);
   if (sec == NULL)
     return NULL;
-  sec->flags = SEC_ALLOC | SEC_LOAD | SEC_DATA | SEC_HAS_CONTENTS;
   sec->vma = 0;
   sec->size = statbuf.st_size;
   sec->filepos = 0;

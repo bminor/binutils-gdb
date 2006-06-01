@@ -1,5 +1,5 @@
 /* BFD back-end for OSF/1 core files.
-   Copyright 1993, 1994, 1995, 1998, 1999, 2001, 2002, 2003, 2004
+   Copyright 1993, 1994, 1995, 1998, 1999, 2001, 2002, 2003, 2004, 2006
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -67,11 +67,10 @@ make_bfd_asection (abfd, name, flags, size, vma, filepos)
 {
   asection *asect;
 
-  asect = bfd_make_section_anyway (abfd, name);
+  asect = bfd_make_section_anyway_with_flags (abfd, name, flags);
   if (!asect)
     return NULL;
 
-  asect->flags = flags;
   asect->size = size;
   asect->vma = vma;
   asect->filepos = filepos;

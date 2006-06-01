@@ -1080,7 +1080,6 @@ get_section_entry (bfd *abfd, ieee_data_type *ieee, unsigned int index)
       sprintf (tmp, " fsec%4d", index);
       section = bfd_make_section (abfd, tmp);
       ieee->section_table[index] = section;
-      section->flags = SEC_NO_FLAGS;
       section->target_index = index;
       ieee->section_table[index] = section;
     }
@@ -1268,14 +1267,15 @@ ieee_slurp_debug (bfd *abfd)
   ieee_data_type *ieee = IEEE_DATA (abfd);
   asection *sec;
   file_ptr debug_end;
+  flagword flags;
 
   if (ieee->w.r.debug_information_part == 0)
     return TRUE;
 
-  sec = bfd_make_section (abfd, ".debug");
+  flags = SEC_DEBUGGING | SEC_HAS_CONTENTS;
+  sec = bfd_make_section_with_flags (abfd, ".debug", flags);
   if (sec == NULL)
     return FALSE;
-  sec->flags |= SEC_DEBUGGING | SEC_HAS_CONTENTS;
   sec->filepos = ieee->w.r.debug_information_part;
 
   debug_end = ieee_part_after (ieee, ieee->w.r.debug_information_part);

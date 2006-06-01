@@ -7313,13 +7313,12 @@ elfcore_maybe_make_sect (bfd *abfd, char *name, asection *sect)
   if (bfd_get_section_by_name (abfd, name) != NULL)
     return TRUE;
 
-  sect2 = bfd_make_section (abfd, name);
+  sect2 = bfd_make_section_with_flags (abfd, name, sect->flags);
   if (sect2 == NULL)
     return FALSE;
 
   sect2->size = sect->size;
   sect2->filepos = sect->filepos;
-  sect2->flags = sect->flags;
   sect2->alignment_power = sect->alignment_power;
   return TRUE;
 }
@@ -7351,12 +7350,12 @@ _bfd_elfcore_make_pseudosection (bfd *abfd,
     return FALSE;
   memcpy (threaded_name, buf, len);
 
-  sect = bfd_make_section_anyway (abfd, threaded_name);
+  sect = bfd_make_section_anyway_with_flags (abfd, threaded_name,
+					     SEC_HAS_CONTENTS);
   if (sect == NULL)
     return FALSE;
   sect->size = size;
   sect->filepos = filepos;
-  sect->flags = SEC_HAS_CONTENTS;
   sect->alignment_power = 2;
 
   return elfcore_maybe_make_sect (abfd, name, sect);
@@ -7635,7 +7634,7 @@ elfcore_grok_lwpstatus (bfd *abfd, Elf_Internal_Note *note)
     return FALSE;
   memcpy (name, buf, len);
 
-  sect = bfd_make_section_anyway (abfd, name);
+  sect = bfd_make_section_anyway_with_flags (abfd, name, SEC_HAS_CONTENTS);
   if (sect == NULL)
     return FALSE;
 
@@ -7650,7 +7649,6 @@ elfcore_grok_lwpstatus (bfd *abfd, Elf_Internal_Note *note)
   sect->filepos = note->descpos + offsetof (lwpstatus_t, pr_reg);
 #endif
 
-  sect->flags = SEC_HAS_CONTENTS;
   sect->alignment_power = 2;
 
   if (!elfcore_maybe_make_sect (abfd, ".reg", sect))
@@ -7665,7 +7663,7 @@ elfcore_grok_lwpstatus (bfd *abfd, Elf_Internal_Note *note)
     return FALSE;
   memcpy (name, buf, len);
 
-  sect = bfd_make_section_anyway (abfd, name);
+  sect = bfd_make_section_anyway_with_flags (abfd, name, SEC_HAS_CONTENTS);
   if (sect == NULL)
     return FALSE;
 
@@ -7680,7 +7678,6 @@ elfcore_grok_lwpstatus (bfd *abfd, Elf_Internal_Note *note)
   sect->filepos = note->descpos + offsetof (lwpstatus_t, pr_fpreg);
 #endif
 
-  sect->flags = SEC_HAS_CONTENTS;
   sect->alignment_power = 2;
 
   return elfcore_maybe_make_sect (abfd, ".reg2", sect);
@@ -7721,7 +7718,7 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
 
       memcpy (name, buf, len);
 
-      sect = bfd_make_section_anyway (abfd, name);
+      sect = bfd_make_section_anyway_with_flags (abfd, name, SEC_HAS_CONTENTS);
       if (sect == NULL)
 	return FALSE;
 
@@ -7729,7 +7726,6 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
       sect->filepos = (note->descpos
 		       + offsetof (struct win32_pstatus,
 				   data.thread_info.thread_context));
-      sect->flags = SEC_HAS_CONTENTS;
       sect->alignment_power = 2;
 
       if (pstatus.data.thread_info.is_active_thread)
@@ -7749,14 +7745,13 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
 
       memcpy (name, buf, len);
 
-      sect = bfd_make_section_anyway (abfd, name);
+      sect = bfd_make_section_anyway_with_flags (abfd, name, SEC_HAS_CONTENTS);
 
       if (sect == NULL)
 	return FALSE;
 
       sect->size = note->descsz;
       sect->filepos = note->descpos;
-      sect->flags = SEC_HAS_CONTENTS;
       sect->alignment_power = 2;
       break;
 
@@ -7826,13 +7821,13 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
 
     case NT_AUXV:
       {
-	asection *sect = bfd_make_section_anyway (abfd, ".auxv");
+	asection *sect = bfd_make_section_anyway_with_flags (abfd, ".auxv",
+							     SEC_HAS_CONTENTS);
 
 	if (sect == NULL)
 	  return FALSE;
 	sect->size = note->descsz;
 	sect->filepos = note->descpos;
-	sect->flags = SEC_HAS_CONTENTS;
 	sect->alignment_power = 1 + bfd_get_arch_size (abfd) / 32;
 
 	return TRUE;
@@ -7979,13 +7974,12 @@ elfcore_grok_nto_status (bfd *abfd, Elf_Internal_Note *note, pid_t *tid)
     return FALSE;
   strcpy (name, buf);
 
-  sect = bfd_make_section_anyway (abfd, name);
+  sect = bfd_make_section_anyway_with_flags (abfd, name, SEC_HAS_CONTENTS);
   if (sect == NULL)
     return FALSE;
 
   sect->size            = note->descsz;
   sect->filepos         = note->descpos;
-  sect->flags           = SEC_HAS_CONTENTS;
   sect->alignment_power = 2;
 
   return (elfcore_maybe_make_sect (abfd, ".qnx_core_status", sect));
@@ -8009,13 +8003,12 @@ elfcore_grok_nto_regs (bfd *abfd,
     return FALSE;
   strcpy (name, buf);
 
-  sect = bfd_make_section_anyway (abfd, name);
+  sect = bfd_make_section_anyway_with_flags (abfd, name, SEC_HAS_CONTENTS);
   if (sect == NULL)
     return FALSE;
 
   sect->size            = note->descsz;
   sect->filepos         = note->descpos;
-  sect->flags           = SEC_HAS_CONTENTS;
   sect->alignment_power = 2;
 
   /* This is the current thread.  */

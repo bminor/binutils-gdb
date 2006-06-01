@@ -1,3 +1,43 @@
+2006-06-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* stabs.c (_bfd_link_section_stabs): Use bfd_make_section*_with_flags
+	instead of bfd_make_section*.
+	* aix386-core.c: Likewise.
+	* aix5ppc-core.c: Likewise.
+	* aout-adobe.c: Likewise.
+	* aoutf1.h: Likewise.
+	* binary.c: Likewise.
+	* cisco-core.c: Likewise.
+	* coff-arm.c: Likewise.
+	* coff-h8300.c: Likewise.
+	* elf.c: Likewise.
+	* elf32-bfin.c: Likewise.
+	* elf32-m32c.c: Likewise.
+	* hppabsd-core.c: Likewise.
+	* hpux-core.c: Likewise.
+	* i386linux.c: Likewise.
+	* ieee.c: Likewise.
+	* ihex.c: Likewise.
+	* irix-core.c: Likewise.
+	* lynx-core.c: Likewise.
+	* m68klinux.c: Likewise.
+	* mach-o.c: Likewise.
+	* netbsd-core.c: Likewise.
+	* nlmcode.h: Likewise.
+	* opncls.c: Likewise.
+	* osf-core.c: Likewise.
+	* peXXigen.c: Likewise.
+	* ppcboot.c: Likewise.
+	* ptrace-core.c: Likewise.
+	* rs6000-core.c: Likewise.
+	* sco5-core.c: Likewise.
+	* sparclinux.c: Likewise.
+	* srec.c: Likewise.
+	* sunos.c: Likewise.
+	* trad-core.c: Likewise.
+	* xcofflink.c: Likewise.
+	* xsym.c: Likewise.
+
 2006-05-31  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.am (INCLUDES): Use @INCINTL@.

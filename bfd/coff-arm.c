@@ -1940,12 +1940,11 @@ bfd_arm_get_bfd_for_interworking (bfd * 		 abfd,
 
   if (sec == NULL)
     {
-      flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_CODE | SEC_READONLY;
-
-      sec = bfd_make_section (abfd, ARM2THUMB_GLUE_SECTION_NAME);
-
+      flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
+	       | SEC_CODE | SEC_READONLY);
+      sec = bfd_make_section_with_flags (abfd, ARM2THUMB_GLUE_SECTION_NAME,
+					 flags);
       if (sec == NULL
-	  || ! bfd_set_section_flags (abfd, sec, flags)
 	  || ! bfd_set_section_alignment (abfd, sec, 2))
 	return FALSE;
     }
@@ -1954,12 +1953,12 @@ bfd_arm_get_bfd_for_interworking (bfd * 		 abfd,
 
   if (sec == NULL)
     {
-      flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_CODE | SEC_READONLY;
-
-      sec = bfd_make_section (abfd, THUMB2ARM_GLUE_SECTION_NAME);
+      flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
+	       | SEC_CODE | SEC_READONLY);
+      sec = bfd_make_section_with_flags (abfd, THUMB2ARM_GLUE_SECTION_NAME,
+					 flags);
 
       if (sec == NULL
-	  || ! bfd_set_section_flags (abfd, sec, flags)
 	  || ! bfd_set_section_alignment (abfd, sec, 2))
 	return FALSE;
     }

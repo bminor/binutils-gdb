@@ -316,9 +316,8 @@ linux_link_create_dynamic_sections (abfd, info)
 
   /* We choose to use the name ".linux-dynamic" for the fixup table.
      Why not? */
-  s = bfd_make_section (abfd, ".linux-dynamic");
+  s = bfd_make_section_with_flags (abfd, ".linux-dynamic", flags);
   if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, flags)
       || ! bfd_set_section_alignment (abfd, s, 2))
     return FALSE;
   s->size = 0;

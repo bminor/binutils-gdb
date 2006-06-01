@@ -1,6 +1,6 @@
 /* NLM (NetWare Loadable Module) executable support for BFD.
    Copyright 1993, 1994, 1995, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005 Free Software Foundation, Inc.
+   2005, 2006 Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, using ELF support as the
    template.
@@ -138,14 +138,13 @@ add_bfd_section (bfd *abfd,
 {
   asection *newsect;
 
-  newsect = bfd_make_section (abfd, name);
+  newsect = bfd_make_section_with_flags (abfd, name, flags);
   if (newsect == NULL)
     return FALSE;
 
   newsect->vma = 0;		/* NLM's are relocatable.  */
   newsect->size = size;
   newsect->filepos = offset;
-  newsect->flags = flags;
   newsect->alignment_power = bfd_log2 ((bfd_vma) 0);	/* FIXME */
 
   return TRUE;

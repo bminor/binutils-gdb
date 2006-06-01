@@ -147,6 +147,7 @@ _bfd_XXi_swap_sym_in (bfd * abfd, void * ext1, void * in1)
 	  int unused_section_number = 0;
 	  asection *sec;
 	  char *name;
+	  flagword flags;
 
 	  for (sec = abfd->sections; sec; sec = sec->next)
 	    if (unused_section_number <= sec->target_index)
@@ -156,7 +157,8 @@ _bfd_XXi_swap_sym_in (bfd * abfd, void * ext1, void * in1)
 	  if (name == NULL)
 	    return;
 	  strcpy (name, in->n_name);
-	  sec = bfd_make_section_anyway (abfd, name);
+	  flags = SEC_HAS_CONTENTS | SEC_ALLOC | SEC_DATA | SEC_LOAD;
+	  sec = bfd_make_section_anyway_with_flags (abfd, name, flags);
 
 	  sec->vma = 0;
 	  sec->lma = 0;
@@ -169,7 +171,6 @@ _bfd_XXi_swap_sym_in (bfd * abfd, void * ext1, void * in1)
 	  sec->userdata = NULL;
 	  sec->next = NULL;
 	  sec->alignment_power = 2;
-	  sec->flags = SEC_HAS_CONTENTS | SEC_ALLOC | SEC_DATA | SEC_LOAD;
 
 	  sec->target_index = unused_section_number;
 

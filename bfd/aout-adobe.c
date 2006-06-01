@@ -1,6 +1,6 @@
 /* BFD back-end for a.out.adobe binaries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005
+   2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
    Written by Cygnus Support.  Based on bout.c.
 
@@ -132,7 +132,7 @@ aout_adobe_callback (bfd *abfd)
       /* First one is called ".text" or whatever; subsequent ones are
 	 ".text1", ".text2", ...  */
       bfd_set_error (bfd_error_no_error);
-      sect = bfd_make_section (abfd, section_name);
+      sect = bfd_make_section_with_flags (abfd, section_name, flags);
       trynum = 0;
 
       while (!sect)
@@ -141,7 +141,7 @@ aout_adobe_callback (bfd *abfd)
 	    /* Some other error -- slide into the sunset.  */
 	    return NULL;
 	  sprintf (try_again, "%s%d", section_name, ++trynum);
-	  sect = bfd_make_section (abfd, try_again);
+	  sect = bfd_make_section_with_flags (abfd, try_again, flags);
 	}
 
       /* Fix the name, if it is a sprintf'd name.  */
@@ -155,8 +155,6 @@ aout_adobe_callback (bfd *abfd)
 	  sect->name = newname;
 	}
 
-      /* Now set the section's attributes.  */
-      bfd_set_section_flags (abfd, sect, flags);
       /* Assumed big-endian.  */
       sect->size = ((ext->e_size[0] << 8)
 		    | ext->e_size[1] << 8

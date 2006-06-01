@@ -1276,12 +1276,12 @@ h8300_bfd_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
       /* Make sure the appropriate flags are set, including SEC_IN_MEMORY.  */
       flags = (SEC_ALLOC | SEC_LOAD
 	       | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_READONLY);
-      htab->vectors_sec = bfd_make_section (abfd, ".vectors");
+      htab->vectors_sec = bfd_make_section_with_flags (abfd, ".vectors",
+						       flags);
 
       /* If the section wasn't created, or we couldn't set the flags,
 	 quit quickly now, rather than dying a painful death later.  */
-      if (!htab->vectors_sec
-	  || !bfd_set_section_flags (abfd, htab->vectors_sec, flags))
+      if (!htab->vectors_sec)
 	return FALSE;
 
       /* Also create the vector hash table.  */

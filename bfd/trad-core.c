@@ -1,6 +1,6 @@
 /* BFD back end for traditional Unix core files (U-area and raw sections)
    Copyright 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005
+   2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
    Written by John Gilmore of Cygnus Support.
 
@@ -79,6 +79,7 @@ trad_unix_core_file_p (abfd)
   struct user u;
   struct trad_core_struct *rawptr;
   bfd_size_type amt;
+  flagword flags;
 
 #ifdef TRAD_CORE_USER_OFFSET
   /* If defined, this macro is the file position of the user struct.  */
@@ -155,19 +156,19 @@ trad_unix_core_file_p (abfd)
 
   /* Create the sections.  */
 
-  core_stacksec(abfd) = bfd_make_section_anyway (abfd, ".stack");
+  flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
+  core_stacksec(abfd) = bfd_make_section_anyway_with_flags (abfd, ".stack",
+							    flags);
   if (core_stacksec (abfd) == NULL)
     goto fail;
-  core_datasec (abfd) = bfd_make_section_anyway (abfd, ".data");
+  core_datasec (abfd) = bfd_make_section_anyway_with_flags (abfd, ".data",
+							    flags);
   if (core_datasec (abfd) == NULL)
     goto fail;
-  core_regsec (abfd) = bfd_make_section_anyway (abfd, ".reg");
+  core_regsec (abfd) = bfd_make_section_anyway_with_flags (abfd, ".reg",
+							   SEC_HAS_CONTENTS);
   if (core_regsec (abfd) == NULL)
     goto fail;
-
-  core_stacksec (abfd)->flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
-  core_datasec (abfd)->flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
-  core_regsec (abfd)->flags = SEC_HAS_CONTENTS;
 
   core_datasec (abfd)->size =  NBPG * u.u_dsize
 #ifdef TRAD_CORE_DSIZE_INCLUDES_TSIZE

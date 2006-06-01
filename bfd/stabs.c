@@ -187,6 +187,8 @@ _bfd_link_section_stabs (bfd *abfd,
 
   if (sinfo->stabstr == NULL)
     {
+      flagword flags;
+
       /* Initialize the stabs information we need to keep track of.  */
       first = TRUE;
       sinfo->strings = _bfd_stringtab_init ();
@@ -198,11 +200,12 @@ _bfd_link_section_stabs (bfd *abfd,
 				 stab_link_includes_newfunc,
 				 sizeof (struct stab_link_includes_entry)))
 	goto error_return;
-      sinfo->stabstr = bfd_make_section_anyway (abfd, ".stabstr");
+      flags = (SEC_HAS_CONTENTS | SEC_READONLY | SEC_DEBUGGING
+	       | SEC_LINKER_CREATED);
+      sinfo->stabstr = bfd_make_section_anyway_with_flags (abfd, ".stabstr",
+							   flags);
       if (sinfo->stabstr == NULL)
 	goto error_return;
-      sinfo->stabstr->flags |= (SEC_HAS_CONTENTS | SEC_READONLY
-				| SEC_DEBUGGING | SEC_LINKER_CREATED);
     }
 
   /* Initialize the information we are going to store for this .stab
