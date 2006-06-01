@@ -30,7 +30,7 @@ ATOF_TARG_C = $(srcdir)/config/atof-@atof@.c
 ATOF_TARG_O = atof-@atof@.o
 
 # use @target_cpu_type@ for refering to configured target name
-IT_HDRS=itbl-parse.h $(srcdir)/itbl-ops.h 
+IT_HDRS=itbl-parse.h $(srcdir)/itbl-ops.h
 IT_SRCS=itbl-parse.c itbl-lex.c $(srcdir)/itbl-ops.c
 IT_DEPS=$(srcdir)/itbl-parse.y $(srcdir)/itbl-lex.l $(srcdir)/config/itbl-@target_cpu_type@.h
 IT_OBJS=itbl-parse.o itbl-lex.o itbl-ops.o
@@ -99,8 +99,7 @@ OBJ_FORMATS = \
 	coff \
 	ecoff \
 	elf \
-	evax \
-	ieee
+	evax
 
 # This is an sh case which sets valid according to whether the CPU
 # type in the shell variable c and the OS type in the shell variable o
@@ -337,7 +336,6 @@ OBJ_FORMAT_CFILES = \
 	config/obj-ecoff.c \
 	config/obj-elf.c \
 	config/obj-evax.c \
-	config/obj-ieee.c \
 	config/obj-som.c
 
 OBJ_FORMAT_HFILES = \
@@ -346,7 +344,6 @@ OBJ_FORMAT_HFILES = \
 	config/obj-ecoff.h \
 	config/obj-elf.h \
 	config/obj-evax.h \
-	config/obj-ieee.h \
 	config/obj-som.h
 
 # Emulation header files in config
@@ -553,8 +550,6 @@ obj-elf.o : $(srcdir)/config/obj-elf.c
 	$(COMPILE) -c $(srcdir)/config/obj-elf.c
 obj-evax.o : $(srcdir)/config/obj-evax.c
 	$(COMPILE) -c $(srcdir)/config/obj-evax.c
-obj-ieee.o : $(srcdir)/config/obj-ieee.c
-	$(COMPILE) -c $(srcdir)/config/obj-ieee.c
 obj-multi.o : $(srcdir)/config/obj-multi.c
 	$(COMPILE) -c $(srcdir)/config/obj-multi.c
 obj-som.o : $(srcdir)/config/obj-som.c
@@ -605,7 +600,7 @@ m68k-parse.c: $(srcdir)/config/m68k-parse.y
 	  rm -f m68k-parse.y; \
 	else true; fi
 # Disable -Werror, if it has been enabled, since old versions of bison/
-# yacc will produce working code which contain compile time warnings. 
+# yacc will produce working code which contain compile time warnings.
 m68k-parse.o: m68k-parse.c $(srcdir)/config/m68k-parse.h
 	$(COMPILE) -c $< $(NO_WERROR)
 
@@ -632,12 +627,12 @@ bfin-lex.o: bfin-lex.c bfin-parse.h $(srcdir)/config/bfin-defs.h
 itbl-lex.c: $(srcdir)/itbl-lex.l
 
 # Disable -Werror, if it has been enabled, since old versions of bison/
-# yacc will produce working code which contain compile time warnings. 
+# yacc will produce working code which contain compile time warnings.
 itbl-lex.o: itbl-lex.c itbl-parse.h $(srcdir)/itbl-lex.h
 	$(COMPILE) -c $< $(NO_WERROR)
 
 # Disable -Werror, if it has been enabled, since old versions of bison/
-# yacc will produce working code which contain compile time warnings. 
+# yacc will produce working code which contain compile time warnings.
 itbl-parse.o: itbl-parse.c itbl-parse.h $(srcdir)/itbl-ops.h $(srcdir)/itbl-lex.h
 	$(COMPILE) -c $< $(NO_WERROR)
 

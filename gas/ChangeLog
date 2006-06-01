@@ -1,3 +1,18 @@
+2006-06-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/obj-ieee.c: Delete.
+	* config/obj-ieee.h: Delete.
+	* Makefile.am (OBJ_FORMATS): Remove ieee.
+	(OBJ_FORMAT_CFILES, OBJ_FORMAT_HFILES): Similarly.
+	(obj-ieee.o): Remove rule.
+	* Makefile.in: Regenerate.
+	* configure.in (atof): Remove tahoe.
+	(OBJ_MAYBE_IEEE): Don't define.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2006-05-31  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.am: Replace INTLLIBS and INTLDEPS with LIBINTL

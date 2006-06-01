@@ -24,8 +24,6 @@ config/obj-elf.c
 config/obj-elf.h
 config/obj-evax.c
 config/obj-evax.h
-config/obj-ieee.c
-config/obj-ieee.h
 config/obj-som.c
 config/obj-som.h
 config/tc-alpha.c

@@ -4902,8 +4902,7 @@ fi
 # IEEE FP.  On those that don't support FP at all, usually IEEE
 # is emulated.
 case ${target_cpu} in
-  vax | tahoe )	atof=${target_cpu} ;;
-  pdp11)	atof=vax ;;
+  vax | pdp11 )	atof=vax ;;
   *)		atof=ieee ;;
 esac
 
@@ -5068,11 +5067,6 @@ cat >>confdefs.h <<\_ACEOF
 #define OBJ_MAYBE_GENERIC 1
 _ACEOF
  ;;
-      ieee)
-cat >>confdefs.h <<\_ACEOF
-#define OBJ_MAYBE_IEEE 1
-_ACEOF
-    ;;
       som)
 cat >>confdefs.h <<\_ACEOF
 #define OBJ_MAYBE_SOM 1
