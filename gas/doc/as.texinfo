@@ -6198,6 +6198,9 @@ subject, see the hardware manufacturer's manual.
 @ifset ARM
 * ARM-Dependent::               ARM Dependent Features
 @end ifset
+@ifset AVR
+* AVR-Dependent::               AVR Dependent Features
+@end ifset
 @ifset BFIN
 * BFIN-Dependent::		BFIN Dependent Features
 @end ifset
@@ -6312,6 +6315,10 @@ subject, see the hardware manufacturer's manual.
 
 @ifset ARM
 @include c-arm.texi
+@end ifset
+
+@ifset AVR
+@include c-avr.texi
 @end ifset
 
 @ifset BFIN
