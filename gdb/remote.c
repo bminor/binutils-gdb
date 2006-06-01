@@ -5652,6 +5652,12 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
       int xfered;
       errno = 0;
 
+      /* If the remote target is connected but not running, we should
+	 pass this request down to a lower stratum (e.g. the executable
+	 file).  */
+      if (!target_has_execution)
+	return 0;
+
       if (writebuf != NULL)
 	{
 	  void *buffer = xmalloc (len);

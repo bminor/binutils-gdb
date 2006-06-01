@@ -27,6 +27,7 @@
 
 #include "defs.h"
 #include "bfd.h"		/* Binary File Description */
+#include "exec.h"
 #include "symtab.h"
 #include "symfile.h"
 #include "objfiles.h"
@@ -652,6 +653,11 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
 	
 	s->addr += ANOFFSET (delta, idx);
 	s->endaddr += ANOFFSET (delta, idx);
+
+	/* FIXME: The exec file uses a completely different table from
+	   any objfile, unfortunately.  A nice improvement would
+	   be to unify those.  */
+	exec_set_section_address (bfd_get_filename (abfd), idx, s->addr);
       }
   }
 

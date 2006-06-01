@@ -2417,7 +2417,7 @@ objc-lang.o: objc-lang.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
 	$(objfiles_h) $(gdb_string_h) $(target_h) $(gdbcore_h) $(gdbcmd_h) \
 	$(frame_h) $(gdb_regex_h) $(regcache_h) $(block_h) $(infcall_h) \
 	$(valprint_h) $(gdb_assert_h)
-objfiles.o: objfiles.c $(defs_h) $(bfd_h) $(symtab_h) $(symfile_h) \
+objfiles.o: objfiles.c $(defs_h) $(bfd_h) $(symtab_h) $(symfile_h) $(exec_h) \
 	$(objfiles_h) $(gdb_stabs_h) $(target_h) $(bcache_h) $(mdebugread_h) \
 	$(gdb_assert_h) $(gdb_stat_h) $(gdb_obstack_h) $(gdb_string_h) \
 	$(hashtab_h) $(breakpoint_h) $(block_h) $(dictionary_h)

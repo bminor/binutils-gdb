@@ -674,12 +674,19 @@ exec_set_section_address (const char *filename, int index, CORE_ADDR address)
 
   for (p = exec_ops.to_sections; p < exec_ops.to_sections_end; p++)
     {
+      /* FIXME drow/2006-06-01: This used to say "&& p->addr == 0".
+	 But that messes up multiple qOffsets responses relocating an
+	 executable; the previous relocated value doesn't matter.
+	 Removing it makes qOffsets attempt to override "set section".
+	 There should be a user-specified flag - or else we should
+	 just use the objfile's sections, or something like that.
+
+	 This deserves more thought before a merge to mainline.  */
       if (strcmp (filename, p->bfd->filename) == 0
-	  && index == p->the_bfd_section->index
-	  && p->addr == 0)
+	  && index == p->the_bfd_section->index)
 	{
+	  p->endaddr += address - p->addr;
 	  p->addr = address;
-	  p->endaddr += address;
 	}
     }
 }
