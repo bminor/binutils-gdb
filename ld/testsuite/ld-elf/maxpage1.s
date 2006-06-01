@@ -1,6 +1,12 @@
+	.globl main
+	.globl start
+	.globl _start
+	.globl __start
 	.text
-	.global _start
+main:
+start:
 _start:
+__start:
 	.long	0
 
 	.data

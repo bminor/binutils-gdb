@@ -1,3 +1,21 @@
+2006-05-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/binutils.exp: Make it Linux only.
+	(strip_test): Renamed to binutils_test. Check for unsupported
+	options.
+	Add more tests.
+
+	* ld-elf/commonpage1.d: Make it Linux only.
+	* ld-elf/maxpage1.d: Likewise.
+
+	* ld-elf/maxpage1.s: Add main, start and __start.
+
+	* ld-elf/maxpage2.d: New file.
+	* ld-elf/tbss1.s: Likewise.
+	* ld-elf/tbss2.s: Likewise.
+	* ld-elf/tdata1.s: Likewise.
+	* ld-elf/tdata2.s: Likewise.
+
 2006-05-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/binutils.exp: New file.
