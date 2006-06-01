@@ -23769,10 +23769,12 @@ its arguments.  They have this format:
 @var{operation} is the name of the particular request; the target
 should compare the entire packet name up to the comma when checking
 for a supported operation.  The format of @var{parameter} depends on
-the operation.  Numbers are always passed in hexadecimal, and strings
-(e.g.@: filenames) are encoded as a series of hexadecimal bytes.
-The last argument to a system call may be a binary buffer, which will
-be escaped in the same way as the X packet (@pxref{X packet}).
+the operation.  Numbers are always passed in hexadecimal.  Negative
+numbers have an explicit minus sign (i.e.@: two's complement is not
+used).  Strings (e.g.@: filenames) are encoded as a series of
+hexadecimal bytes.  The last argument to a system call may be a binary
+buffer, which will be escaped in the same way as the X packet
+(@pxref{X packet}).
 
 @end table
 
