@@ -6116,15 +6116,17 @@ remote_hostio_parse_result (char *buffer, int *retcode,
   if (buffer[0] != 'F')
     return -1;
 
+  errno = 0;
   *retcode = strtol (&buffer[1], &p, 16);
-  if (p == &buffer[1])
+  if (errno != 0 || p == &buffer[1])
     return -1;
 
   /* Check for ",errno".  */
   if (*p == ',')
     {
+      errno = 0;
       *remote_errno = strtol (p + 1, &p2, 16);
-      if (p + 1 == p2)
+      if (errno != 0 || p + 1 == p2)
 	return -1;
       p = p2;
     }
