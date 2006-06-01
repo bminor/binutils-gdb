@@ -6425,8 +6425,9 @@ remote_download_command (char *args, int from_tty)
     perror_with_name (argv[0]);
   make_cleanup (fclose_cleanup, file);
 
-  fd = remote_hostio_open (argv[1], FILEIO_O_WRONLY | FILEIO_O_CREAT, 0700,
-			   &remote_errno);
+  fd = remote_hostio_open (argv[1], (FILEIO_O_WRONLY | FILEIO_O_CREAT
+				     | FILEIO_O_TRUNC),
+			   0700, &remote_errno);
   if (fd == -1)
     remote_hostio_error (remote_errno);
 
