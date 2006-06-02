@@ -78,7 +78,7 @@ Symbol table '.dynsym' contains [0-9]+ entries:
 .* NOTYPE +GLOBAL DEFAULT +ABS _edata
 .* NOTYPE +GLOBAL DEFAULT +ABS _end
 
-Symbol table '.symtab' contains 57 entries:
+Symbol table '.symtab' contains 54 entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
 .* NOTYPE +LOCAL +DEFAULT +UND *
 .* SECTION LOCAL +DEFAULT +1 *
@@ -95,9 +95,6 @@ Symbol table '.symtab' contains 57 entries:
 .* SECTION LOCAL +DEFAULT +12 *
 .* SECTION LOCAL +DEFAULT +13 *
 .* SECTION LOCAL +DEFAULT +14 *
-.* SECTION LOCAL +DEFAULT +15 *
-.* SECTION LOCAL +DEFAULT +16 *
-.* SECTION LOCAL +DEFAULT +17 *
 .* TLS +LOCAL +DEFAULT +10 sl1
 .* TLS +LOCAL +DEFAULT +10 sl2
 .* TLS +LOCAL +DEFAULT +10 sl3

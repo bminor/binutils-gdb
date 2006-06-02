@@ -8125,18 +8125,19 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       elfsym.st_size = 0;
       elfsym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
       elfsym.st_other = 0;
+      elfsym.st_value = 0;
       for (i = 1; i < elf_numsections (abfd); i++)
 	{
 	  o = bfd_section_from_elf_index (abfd, i);
 	  if (o != NULL)
-	    o->target_index = bfd_get_symcount (abfd);
-	  elfsym.st_shndx = i;
-	  if (info->relocatable || o == NULL)
-	    elfsym.st_value = 0;
-	  else
-	    elfsym.st_value = o->vma;
-	  if (! elf_link_output_sym (&finfo, NULL, &elfsym, o, NULL))
-	    goto error_return;
+	    {
+	      o->target_index = bfd_get_symcount (abfd);
+	      elfsym.st_shndx = i;
+	      if (!info->relocatable)
+		elfsym.st_value = o->vma;
+	      if (!elf_link_output_sym (&finfo, NULL, &elfsym, o, NULL))
+		goto error_return;
+	    }
 	  if (i == SHN_LORESERVE - 1)
 	    i += SHN_HIRESERVE + 1 - SHN_LORESERVE;
 	}

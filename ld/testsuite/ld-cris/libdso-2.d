@@ -36,7 +36,7 @@ Symbol table '\.dynsym' contains 4 entries:
      2: 0+     0 OBJECT  GLOBAL DEFAULT  ABS TST1
      3: 0+15c     0 FUNC    GLOBAL DEFAULT    7 export_1@@TST1
 
-Symbol table '\.symtab' contains 21 entries:
+Symbol table '\.symtab' contains 18 entries:
    Num:    Value  Size Type    Bind   Vis      Ndx Name
      0: 0+     0 NOTYPE  LOCAL  DEFAULT  UND 
      1: [0-9a-f]+     0 SECTION LOCAL  DEFAULT    1 
@@ -48,14 +48,11 @@ Symbol table '\.symtab' contains 21 entries:
      7: [0-9a-f]+     0 SECTION LOCAL  DEFAULT    7 
      8: [0-9a-f]+     0 SECTION LOCAL  DEFAULT    8 
      9: [0-9a-f]+     0 SECTION LOCAL  DEFAULT    9 
-    10: [0-9a-f]+     0 SECTION LOCAL  DEFAULT   10 
-    11: [0-9a-f]+     0 SECTION LOCAL  DEFAULT   11 
-    12: [0-9a-f]+     0 SECTION LOCAL  DEFAULT   12 
-    13: 0+216c     0 OBJECT  LOCAL  HIDDEN  ABS _DYNAMIC
-    14: 0+2204     0 NOTYPE  LOCAL  DEFAULT  ABS __bss_start
-    15: 0+2204     0 NOTYPE  LOCAL  DEFAULT  ABS _edata
-    16: 0+21f4     0 OBJECT  LOCAL  HIDDEN  ABS _GLOBAL_OFFSET_TABLE_
-    17: 0+2220     0 NOTYPE  LOCAL  DEFAULT  ABS _end
-    18: 0+158     0 FUNC    LOCAL  DEFAULT    7 dsofn
-    19: 0+     0 OBJECT  GLOBAL DEFAULT  ABS TST1
-    20: 0+15c     0 FUNC    GLOBAL DEFAULT    7 export_1
+    10: 0+216c     0 OBJECT  LOCAL  HIDDEN  ABS _DYNAMIC
+    11: 0+2204     0 NOTYPE  LOCAL  DEFAULT  ABS __bss_start
+    12: 0+2204     0 NOTYPE  LOCAL  DEFAULT  ABS _edata
+    13: 0+21f4     0 OBJECT  LOCAL  HIDDEN  ABS _GLOBAL_OFFSET_TABLE_
+    14: 0+2220     0 NOTYPE  LOCAL  DEFAULT  ABS _end
+    15: 0+158     0 FUNC    LOCAL  DEFAULT    7 dsofn
+    16: 0+     0 OBJECT  GLOBAL DEFAULT  ABS TST1
+    17: 0+15c     0 FUNC    GLOBAL DEFAULT    7 export_1

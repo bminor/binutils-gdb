@@ -1,3 +1,10 @@
+2006-06-02  Alan Modra  <amodra@bigpond.net.au>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/2723
+	* elflink.c (bfd_elf_final_link): Don't output section symbols
+	for special ELF sections.
+
 2006-06-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* stabs.c (_bfd_link_section_stabs): Use bfd_make_section*_with_flags

@@ -90,9 +90,6 @@ Symbol table '.symtab' contains [0-9]+ entries:
 .* [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +10 
 .* [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +11 
 .* [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +12 
-.* [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +13 
-.* [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +14 
-.* [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +15 
 .* [0-9a-f]+ +0 TLS +LOCAL +DEFAULT +8 sl1
 .* [0-9a-f]+ +0 TLS +LOCAL +DEFAULT +8 sl2
 .* [0-9a-f]+ +0 TLS +LOCAL +DEFAULT +8 sl3
