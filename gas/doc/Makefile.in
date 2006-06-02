@@ -61,11 +61,6 @@ PDFS = as.pdf
 PSS = as.ps
 HTMLS = as.html
 TEXINFOS = as.texinfo
-TEXI2DVI = `if test -f $(top_srcdir)/../texinfo/util/texi2dvi; then \
-             echo $(top_srcdir)/../texinfo/util/texi2dvi; \
-           else \
-             echo texi2dvi; \
-           fi`
 TEXI2PDF = $(TEXI2DVI) --pdf --batch
 MAKEINFOHTML = $(MAKEINFO) --html
 AM_MAKEINFOHTMLFLAGS = $(AM_MAKEINFOFLAGS)
@@ -216,10 +211,12 @@ POD2MAN = pod2man --center="GNU Development Tools" \
 man_MANS = as.1
 info_TEXINFOS = as.texinfo 
 AM_MAKEINFOFLAGS = -I "$(srcdir)" -I "$(top_srcdir)/../libiberty"
+TEXI2DVI = texi2dvi -I "$(srcdir)" -I "$(top_srcdir)/../libiberty"
 CPU_DOCS = \
 	c-alpha.texi \
 	c-arc.texi \
 	c-arm.texi \
+	c-avr.texi \
 	c-bfin.texi \
 	c-d10v.texi \
 	c-cris.texi \
