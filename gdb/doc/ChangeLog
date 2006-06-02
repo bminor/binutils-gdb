@@ -2,6 +2,7 @@
 
 	* gdb.texinfo (GDB/MI Development and Front Ends): Use
 	sourceware.org for mailing lists.
+	(GDB/MI File Commands): New Node split from Program Control.
 
 2006-06-01  Nick Roberts  <nickrob@snap.net.nz>
 
