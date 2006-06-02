@@ -2328,7 +2328,9 @@ print_it_typical (bpstat bs)
 
     case bp_until:
       if (ui_out_is_mi_like_p (uiout))
-	ui_out_field_string (uiout, "reason", "location-reached");
+	ui_out_field_string
+	  (uiout, "reason",
+	   async_reason_lookup (EXEC_ASYNC_LOCATION_REACHED));
       return PRINT_UNKNOWN;
       break;
 
