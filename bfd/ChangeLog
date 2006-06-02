@@ -1,3 +1,12 @@
+2006-06-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	Backport:
+	2006-05-23  H.J. Lu  <hongjiu.lu@intel.com>
+	PR ld/2655
+	PR ld/2657
+	* elf-eh-frame.c (_bfd_elf_write_section_eh_frame): Properly
+	update CIE/FDE length.  Don't pad to the section alignment.
+
 2006-05-30  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.
