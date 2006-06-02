@@ -1,3 +1,7 @@
+2006-06-02  Nick Roberts  <nickrob@snap.net.nz>
+
+	* breakpoint.c (print_it_typical): Use EXEC_ASYNC_LOCATION_REACHED.
+
 2006-05-31  Michael Snyder  <msnyder@redhat.com>
 
 	* mips-tdep.c: Comment tweaks.
