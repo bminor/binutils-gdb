@@ -1,3 +1,8 @@
+2006-06-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure.ac: -Werror is no longer enabled by default.
+	* configure: Regenerate.
+
 2006-05-27  Joel Brobecker  <brobecker@adacore.com>
 
 	From Peter Schauer <peterschauer@gmx.net>
