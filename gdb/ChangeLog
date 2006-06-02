@@ -1,5 +1,10 @@
 2006-06-02  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Increase version number to 6.4.91 after the first
+	pre-release has been created.
+
+2006-06-02  Joel Brobecker  <brobecker@adacore.com>
+
 	* configure.ac: -Werror is no longer enabled by default.
 	* configure: Regenerate.
 
