@@ -1,3 +1,23 @@
+2006-06-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	Backport:
+	2006-05-19  Andreas Schwab  <schwab@suse.de>
+	* doc/Makefile.am (addr2line.1): Depend on $(binutils_TEXINFOS).
+	(ar.1): Likewise.
+	(dlltool.1): Likewise.
+	(nlmconv.1): Likewise.
+	(nm.1): Likewise.
+	(objcopy.1): Likewise.
+	(objdump.1): Likewise.
+	(ranlib.1): Likewise.
+	(readelf.1): Likewise.
+	(size.1): Likewise.
+	(strings.1): Likewise.
+	(strip.1): Likewise.
+	(windres.1): Likewise.
+	(cxxfilt.man): Likewise.
+	* doc/Makefile.in: Regenerated.
+
 2006-05-30  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.
