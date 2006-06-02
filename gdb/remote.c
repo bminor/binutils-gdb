@@ -6276,7 +6276,7 @@ remote_hostio_write (int fd, const gdb_byte *write_buf, int len,
   remote_buffer_add_string (&p, &left, ",");
 
   p += remote_escape_output (write_buf, len, p, &out_len,
-			     rs->remote_packet_size - strlen (p));
+			     rs->remote_packet_size - (p - rs->buf));
 
   return remote_hostio_send_command (p - rs->buf, PACKET_Fwrite,
 				     remote_errno, NULL, NULL);
