@@ -1,3 +1,8 @@
+2006-06-02  Joseph S. Myers  <joseph@codesourcery.com>
+
+	* doc/Makefile.am (TEXI2DVI): Define.
+	* doc/Makefile.in: Regenerate.
+
 2006-06-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	Backport:

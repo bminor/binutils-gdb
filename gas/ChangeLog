@@ -1,3 +1,9 @@
+2006-06-02  Joseph S. Myers  <joseph@codesourcery.com>
+
+	* doc/Makefile.am (TEXI2DVI): Define.
+	* doc/Makefile.in: Regenerate.
+	* doc/c-arc.texi: Fix typo.
+
 2006-05-30  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.

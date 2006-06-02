@@ -61,11 +61,6 @@ PDFS = binutils.pdf
 PSS = binutils.ps
 HTMLS = binutils.html
 TEXINFOS = binutils.texi
-TEXI2DVI = `if test -f $(top_srcdir)/../texinfo/util/texi2dvi; then \
-             echo $(top_srcdir)/../texinfo/util/texi2dvi; \
-           else \
-             echo texi2dvi; \
-           fi`
 TEXI2PDF = $(TEXI2DVI) --pdf --batch
 MAKEINFOHTML = $(MAKEINFO) --html
 AM_MAKEINFOHTMLFLAGS = $(AM_MAKEINFOFLAGS)
@@ -114,7 +109,6 @@ EXEEXT = @EXEEXT@
 EXEEXT_FOR_BUILD = @EXEEXT_FOR_BUILD@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
-GREP = @GREP@
 GT_NO = @GT_NO@
 GT_YES = @GT_YES@
 HDEFINES = @HDEFINES@
@@ -165,8 +159,9 @@ VERSION = @VERSION@
 WARN_CFLAGS = @WARN_CFLAGS@
 XGETTEXT = @XGETTEXT@
 YACC = @YACC@
-YFLAGS = @YFLAGS@
 ac_ct_CC = @ac_ct_CC@
+ac_ct_RANLIB = @ac_ct_RANLIB@
+ac_ct_STRIP = @ac_ct_STRIP@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
 am__include = @am__include@
@@ -183,7 +178,6 @@ build_vendor = @build_vendor@
 datadir = @datadir@
 datarootdir = @datarootdir@
 docdir = @docdir@
-dvidir = @dvidir@
 exec_prefix = @exec_prefix@
 host = @host@
 host_alias = @host_alias@
@@ -197,15 +191,12 @@ install_sh = @install_sh@
 l = @l@
 libdir = @libdir@
 libexecdir = @libexecdir@
-localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
-pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
-psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
@@ -247,6 +238,7 @@ info_TEXINFOS = binutils.texi
 binutils_TEXINFOS = config.texi
 binutils_TEXI = $(srcdir)/binutils.texi
 AM_MAKEINFOFLAGS = -I "$(srcdir)" -I "$(top_srcdir)/../libiberty"
+TEXI2DVI = texi2dvi -I "$(srcdir)" -I "$(top_srcdir)/../libiberty"
 MAINTAINERCLEANFILES = config.texi
 MOSTLYCLEANFILES = $(DEMANGLER_NAME).1
 html__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
@@ -376,13 +368,10 @@ dist-info: $(INFO_DEPS)
 	    $(srcdir)/*) base=`echo "$$base" | sed "s|^$$srcdirstrip/||"`;; \
 	  esac; \
 	  if test -f $$base; then d=.; else d=$(srcdir); fi; \
-	  base_i=`echo "$$base" | sed 's|\.info$$||;s|$$|.i|'`; \
-	  for file in $$d/$$base $$d/$$base-[0-9] $$d/$$base-[0-9][0-9] $$d/$$base_i[0-9] $$d/$$base_i[0-9][0-9]; do \
-	    if test -f $$file; then \
-	      relfile=`expr "$$file" : "$$d/\(.*\)"`; \
-	      test -f $(distdir)/$$relfile || \
-		cp -p $$file $(distdir)/$$relfile; \
-	    else :; fi; \
+	  for file in $$d/$$base*; do \
+	    relfile=`expr "$$file" : "$$d/\(.*\)"`; \
+	    test -f $(distdir)/$$relfile || \
+	      cp -p $$file $(distdir)/$$relfile; \
 	  done; \
 	done
 

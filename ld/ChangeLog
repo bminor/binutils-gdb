@@ -1,3 +1,8 @@
+2006-06-02  Joseph S. Myers  <joseph@codesourcery.com>
+
+	* Makefile.am (TEXI2DVI): Add -I $(top_srcdir)/../libiberty.
+	* Makefile.in: Regenerate.
+
 2006-05-30  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.
