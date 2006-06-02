@@ -84,7 +84,7 @@ Symbol table '\.dynsym' contains [0-9]+ entries:
 .* TLS +GLOBAL DEFAULT +8 gd0
 .* TLS +GLOBAL DEFAULT +8 ie0
 
-Symbol table '\.symtab' contains 40 entries:
+Symbol table '\.symtab' contains .* entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
 .* NOTYPE +LOCAL +DEFAULT +UND 
 .* SECTION LOCAL +DEFAULT +1 
@@ -99,9 +99,6 @@ Symbol table '\.symtab' contains 40 entries:
 .* SECTION LOCAL +DEFAULT +10 
 .* SECTION LOCAL +DEFAULT +11 
 .* SECTION LOCAL +DEFAULT +12 
-.* SECTION LOCAL +DEFAULT +13 
-.* SECTION LOCAL +DEFAULT +14 
-.* SECTION LOCAL +DEFAULT +15 
 .* TLS +LOCAL +DEFAULT +7 gd4
 .* TLS +LOCAL +DEFAULT +7 ld4
 .* TLS +LOCAL +DEFAULT +7 ld5

@@ -1,3 +1,12 @@
+2006-06-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/tlsexe.r: Update for removal of some section syms.
+	* ld-powerpc/tlsexetoc.r: Likewise.
+	* ld-powerpc/tlsso.r: Likewise.
+	* ld-powerpc/tlstocso.r: Likewise.
+	* ld-s390/tlsbin_64.rd: Likewise.
+	* ld-s390/tlspic_64.rd: Likewise.
+
 2006-06-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/2723
