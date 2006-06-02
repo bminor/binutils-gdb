@@ -17261,6 +17261,7 @@ Elena Zannoni.
 * GDB/MI Breakpoint Table Commands::
 * GDB/MI Data Manipulation::
 * GDB/MI Program Control::
+* GDB/MI File Commands::
 * GDB/MI Miscellaneous Commands::
 @ignore
 * GDB/MI Kod Commands::
@@ -19520,6 +19521,12 @@ file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="6"@}
 Is this going away????
 @end ignore
 
+@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@node GDB/MI File Commands
+@section @sc{gdb/mi} File Commands
+
+This section describes the GDB/MI commands to specify executable file names
+and to read in and obtain symbol table information.
 
 @subheading The @code{-file-exec-and-symbols} Command
 @findex -file-exec-and-symbols
