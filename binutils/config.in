@@ -8,7 +8,8 @@
 /* Define to 1 if using `alloca.c'. */
 #undef C_ALLOCA
 
-/* Define to 1 if NLS is requested */
+/* Define to 1 if translation of program messages to the user's native
+   language is requested. */
 #undef ENABLE_NLS
 
 /* Suffix used for executables, if any. */
@@ -20,12 +21,6 @@
 /* Define to 1 if you have <alloca.h> and it should be used (not on Ultrix).
    */
 #undef HAVE_ALLOCA_H
-
-/* Define to 1 if you have the <argz.h> header file. */
-#undef HAVE_ARGZ_H
-
-/* Define to 1 if you have the `dcgettext' function. */
-#undef HAVE_DCGETTEXT
 
 /* Define to 1 if you have the declaration of `environ', and to 0 if you
    don't. */
@@ -75,17 +70,8 @@
 /* Is fopen64 available? */
 #undef HAVE_FOPEN64
 
-/* Define to 1 if you have the `getcwd' function. */
-#undef HAVE_GETCWD
-
 /* Define to 1 if you have the `getc_unlocked' function. */
 #undef HAVE_GETC_UNLOCKED
-
-/* Define to 1 if you have the `getpagesize' function. */
-#undef HAVE_GETPAGESIZE
-
-/* Define as 1 if you have gettext and don't want to use GNU gettext. */
-#undef HAVE_GETTEXT
 
 /* Does <utime.h> define struct utimbuf? */
 #undef HAVE_GOOD_UTIME_H
@@ -93,41 +79,11 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
-/* Define if your locale.h file contains LC_MESSAGES. */
-#undef HAVE_LC_MESSAGES
-
-/* Define to 1 if you have the <limits.h> header file. */
-#undef HAVE_LIMITS_H
-
-/* Define to 1 if you have the <locale.h> header file. */
-#undef HAVE_LOCALE_H
-
-/* Define to 1 if you have the <malloc.h> header file. */
-#undef HAVE_MALLOC_H
-
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
-/* Define to 1 if you have a working `mmap' system call. */
-#undef HAVE_MMAP
-
-/* Define to 1 if you have the `munmap' function. */
-#undef HAVE_MUNMAP
-
-/* Define to 1 if you have the <nl_types.h> header file. */
-#undef HAVE_NL_TYPES_H
-
-/* Define to 1 if you have the `putenv' function. */
-#undef HAVE_PUTENV
-
 /* Define to 1 if you have the `sbrk' function. */
 #undef HAVE_SBRK
-
-/* Define to 1 if you have the `setenv' function. */
-#undef HAVE_SETENV
-
-/* Define to 1 if you have the `setlocale' function. */
-#undef HAVE_SETLOCALE
 
 /* Define to 1 if you have the `setmode' function. */
 #undef HAVE_SETMODE
@@ -141,15 +97,6 @@
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
 
-/* Define if you have the stpcpy function */
-#undef HAVE_STPCPY
-
-/* Define to 1 if you have the `strcasecmp' function. */
-#undef HAVE_STRCASECMP
-
-/* Define to 1 if you have the `strchr' function. */
-#undef HAVE_STRCHR
-
 /* Define to 1 if you have the `strcoll' function. */
 #undef HAVE_STRCOLL
 
@@ -161,9 +108,6 @@
 
 /* Define to 1 if you have the <sys/file.h> header file. */
 #undef HAVE_SYS_FILE_H
-
-/* Define to 1 if you have the <sys/param.h> header file. */
-#undef HAVE_SYS_PARAM_H
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H
@@ -185,18 +129,6 @@
 
 /* Define to 1 if you have the `utimes' function. */
 #undef HAVE_UTIMES
-
-/* Define to 1 if you have the <values.h> header file. */
-#undef HAVE_VALUES_H
-
-/* Define to 1 if you have the `__argz_count' function. */
-#undef HAVE___ARGZ_COUNT
-
-/* Define to 1 if you have the `__argz_next' function. */
-#undef HAVE___ARGZ_NEXT
-
-/* Define to 1 if you have the `__argz_stringify' function. */
-#undef HAVE___ARGZ_STRINGIFY
 
 /* Name of package */
 #undef PACKAGE
@@ -250,18 +182,3 @@
 
 /* Enable LFS */
 #undef _LARGEFILE64_SOURCE
-
-/* Define to empty if `const' does not conform to ANSI C. */
-#undef const
-
-/* Define to `__inline__' or `__inline' if that's what the C compiler
-   calls it, or to nothing if 'inline' is not supported under any name.  */
-#ifndef __cplusplus
-#undef inline
-#endif
-
-/* Define to `long' if <sys/types.h> does not define. */
-#undef off_t
-
-/* Define to `unsigned' if <sys/types.h> does not define. */
-#undef size_t
