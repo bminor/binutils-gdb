@@ -1,3 +1,7 @@
+2006-06-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.in: Regenerate.
+
 2006-05-11  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* bfd.texinfo: Rename "Index" to "BFD Index"  
