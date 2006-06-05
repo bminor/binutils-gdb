@@ -1,3 +1,7 @@
+2006-06-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (lookup_name): Delete dead code.  Remove FIXMEs.
+
 2006-06-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/elf32.em (global_found): Make it a pointer.

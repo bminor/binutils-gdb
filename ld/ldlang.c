@@ -2214,12 +2214,9 @@ lookup_name (const char *name)
       /* Use the local_sym_name as the name of the file that has
 	 already been loaded as filename might have been transformed
 	 via the search directory lookup mechanism.  */
-      const char * filename = search->local_sym_name;
+      const char *filename = search->local_sym_name;
 
-      if (filename == NULL && name == NULL)
-	return search;
       if (filename != NULL
-	  && name != NULL
 	  && strcmp (filename, name) == 0)
 	break;
     }
@@ -2229,11 +2226,8 @@ lookup_name (const char *name)
 			default_target, FALSE);
 
   /* If we have already added this file, or this file is not real
-     (FIXME: can that ever actually happen?) or the name is NULL
-     (FIXME: can that ever actually happen?) don't add this file.  */
-  if (search->loaded
-      || ! search->real
-      || search->filename == NULL)
+     don't add this file.  */
+  if (search->loaded || !search->real)
     return search;
 
   if (! load_symbols (search, NULL))
