@@ -1,3 +1,10 @@
+2006-06-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elf/sec64k.exp: Add "main" symbol.  Use dc.a for addresses.
+	Cater for different address sizes.  Match end of line when
+	comparing symbols.
+	* ld-elf/start.s: Use dc.a for addresses.
+
 2006-06-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/tlsexe.r: Update for removal of some section syms.
