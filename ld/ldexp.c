@@ -1,6 +1,6 @@
 /* This module handles expression trees.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005
+   2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
@@ -1090,7 +1090,7 @@ exp_get_abs_int (etree_type *tree, int def, char *name)
 	  return expld.result.value;
 	}
       else if (name != NULL && expld.phase != lang_mark_phase_enum)
-	einfo (_("%F%S non constant expression for %s\n"), name);
+	einfo (_("%F%S nonconstant expression for %s\n"), name);
     }
   return def;
 }

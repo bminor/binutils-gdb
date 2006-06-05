@@ -1,5 +1,10 @@
 2006-06-05  Alan Modra  <amodra@bigpond.net.au>
 
+	* ldexp.c (exp_get_abs_int): Make error message the same as
+	others emitted in this file.
+
+2006-06-05  Alan Modra  <amodra@bigpond.net.au>
+
 	* config.in: Regenerate.
 
 2006-06-05  Alan Modra  <amodra@bigpond.net.au>
