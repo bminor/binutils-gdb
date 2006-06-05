@@ -76,6 +76,14 @@ struct gdbarch_tdep
 
   /* Convention for returning structures.  */
   enum struct_return struct_return;
+
+  /* Convention for returning floats.  zero in int regs, non-zero in float.  */
+  int float_return;
+
+  /* Type of an fpreg.  NULL if there a no fpregs.  Note this is a
+     pointer to the pointer to type struct, as there is something odd
+     happening with current_gdbarch_swap_out_hack.  */
+  struct type **fpreg_type;
 };
 
 /* Initialize a SVR4 architecture variant.  */

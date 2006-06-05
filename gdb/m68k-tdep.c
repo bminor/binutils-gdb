@@ -43,12 +43,10 @@
    until we can implement a more flexible general solution.  */
 #if 0
 #define M68K_FPREG_TYPE builtin_type_m68881_ext
-#define M68K_FPREG_SIZE 12
 #define M68K_LONG_DOUBLE_FORMAT floatformat_m68881_ext
 #define M68K_RETURN_FP0 1
 #else
 #define M68K_FPREG_TYPE builtin_type_double
-#define M68K_FPREG_SIZE 8
 #define M68K_LONG_DOUBLE_FORMAT floatformat_ieee_double_big
 #define M68K_RETURN_FP0 0
 #endif
@@ -68,7 +66,7 @@
 #define P_MOVEML_SP	0x48e7
 
 #define REGISTER_BYTES_NOFP (16*4 + 8)
-#define REGISTER_BYTES_FP (REGISTER_BYTES_NOFP + 8*M68K_FPREG_SIZE + 3*4)
+#define REGISTER_BYTES_FP(ARCH) (REGISTER_BYTES_NOFP + 8*TYPE_LENGTH(*gdbarch_tdep(ARCH)->fpreg_type) + 3*4)
 
 /* Offset from SP to first arg on stack at first instruction of a function */
 #define SP_ARG0 (1 * 4)
@@ -89,7 +87,7 @@ m68k_local_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 static int
 m68k_register_bytes_ok (long numbytes)
 {
-  return ((numbytes == REGISTER_BYTES_FP)
+  return ((numbytes == REGISTER_BYTES_FP (current_gdbarch))
 	  || (numbytes == REGISTER_BYTES_NOFP));
 }
 
@@ -105,7 +103,7 @@ static struct type *
 m68k_register_type (struct gdbarch *gdbarch, int regnum)
 {
   if (regnum >= FP0_REGNUM && regnum <= FP0_REGNUM + 7)
-    return M68K_FPREG_TYPE;
+    return *gdbarch_tdep (gdbarch)->fpreg_type;
 
   if (regnum == M68K_FPI_REGNUM || regnum == PC_REGNUM)
     return builtin_type_void_func_ptr;
@@ -170,7 +168,8 @@ m68k_register_to_value (struct frame_info *frame, int regnum,
   /* Convert to TYPE.  This should be a no-op if TYPE is equivalent to
      the extended floating-point format used by the FPU.  */
   get_frame_register (frame, regnum, from);
-  convert_typed_floating (from, M68K_FPREG_TYPE, to, type);
+  convert_typed_floating (from, *gdbarch_tdep (current_gdbarch)->fpreg_type,
+			  to, type);
 }
 
 /* Write the contents FROM of a value of type TYPE into register
@@ -192,7 +191,8 @@ m68k_value_to_register (struct frame_info *frame, int regnum,
 
   /* Convert from TYPE.  This should be a no-op if TYPE is equivalent
      to the extended floating-point format used by the FPU.  */
-  convert_typed_floating (from, type, to, M68K_FPREG_TYPE);
+  convert_typed_floating (from, type, to,
+			  *gdbarch_tdep (current_gdbarch)->fpreg_type);
   put_frame_register (frame, regnum, to);
 }
 
@@ -258,11 +258,12 @@ m68k_svr4_extract_return_value (struct type *type, struct regcache *regcache,
 {
   int len = TYPE_LENGTH (type);
   gdb_byte buf[M68K_MAX_REGISTER_SIZE];
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  if (M68K_RETURN_FP0 && TYPE_CODE (type) == TYPE_CODE_FLT)
+  if (tdep->float_return && TYPE_CODE (type) == TYPE_CODE_FLT)
     {
       regcache_raw_read (regcache, M68K_FP0_REGNUM, buf);
-      convert_typed_floating (buf, M68K_FPREG_TYPE, valbuf, type);
+      convert_typed_floating (buf, *tdep->fpreg_type, valbuf, type);
     }
 #if 0
   /* GCC never differentiates pointer return types this way.  */
@@ -299,11 +300,12 @@ m68k_svr4_store_return_value (struct type *type, struct regcache *regcache,
 			      const gdb_byte *valbuf)
 {
   int len = TYPE_LENGTH (type);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  if (M68K_RETURN_FP0 && TYPE_CODE (type) == TYPE_CODE_FLT)
+  if (tdep->float_return && TYPE_CODE (type) == TYPE_CODE_FLT)
     {
       gdb_byte buf[M68K_MAX_REGISTER_SIZE];
-      convert_typed_floating (valbuf, type, buf, M68K_FPREG_TYPE);
+      convert_typed_floating (valbuf, type, buf, *tdep->fpreg_type);
       regcache_raw_write (regcache, M68K_FP0_REGNUM, buf);
     }
   else if (TYPE_CODE (type) == TYPE_CODE_PTR && len == 4)
@@ -1284,6 +1286,8 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_return_value (gdbarch, m68k_svr4_return_value);
   tdep->struct_value_regnum = M68K_A0_REGNUM;
   tdep->struct_return = reg_struct_return;
+  tdep->float_return = M68K_RETURN_FP0;
+  tdep->fpreg_type = &M68K_FPREG_TYPE;
 
   /* Disassembler.  */
   set_gdbarch_print_insn (gdbarch, print_insn_m68k);
@@ -1294,8 +1298,6 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 #else
   tdep->jb_pc = -1;
 #endif
-  tdep->struct_value_regnum = M68K_A1_REGNUM;
-  tdep->struct_return = reg_struct_return;
 
   /* Frame unwinder.  */
   set_gdbarch_unwind_dummy_id (gdbarch, m68k_unwind_dummy_id);

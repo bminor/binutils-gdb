@@ -45,10 +45,12 @@
 int
 m68kbsd_fpreg_offset (int regnum)
 {
+  int fp_len = TYPE_LENGTH (*gdbarch_tdep (current_gdbarch)->fpreg_type);
+  
   if (regnum >= M68K_FPC_REGNUM)
-    return 8 * 12 + (regnum - M68K_FPC_REGNUM) * 4;
+    return 8 * fp_len + (regnum - M68K_FPC_REGNUM) * 4;
 
-  return (regnum - M68K_FP0_REGNUM) * 12;
+  return (regnum - M68K_FP0_REGNUM) * fp_len;
 }
 
 /* Supply register REGNUM from the buffer specified by FPREGS and LEN
