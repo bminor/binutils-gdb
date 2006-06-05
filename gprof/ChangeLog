@@ -1,3 +1,8 @@
+2006-06-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.in: Regenerate.
+	* gconfig.in: Regenerate.
+
 2006-05-31  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.am: Replace INTLLIBS and INTLDEPS with LIBINTL
