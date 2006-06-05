@@ -68,6 +68,8 @@ static const char *strerrno (int err);
 
 #define STRING      "Hello World"
 
+static void stop () {}
+
 int
 test_open ()
 {
@@ -78,8 +80,10 @@ test_open ()
   ret = open (FILENAME, O_CREAT | O_TRUNC | O_RDWR, S_IWUSR | S_IRUSR);
   printf ("open 1: ret = %d, errno = %d %s\n", ret, errno,
 	  ret >= 0 ? "OK" : "");
+  
   if (ret >= 0)
     close (ret);
+  stop ();
   /* Creating an already existing file (created by fileio.exp) */
   errno = 0;
   ret = open (FILENAME, O_CREAT | O_EXCL | O_WRONLY, S_IWUSR | S_IRUSR);
@@ -87,6 +91,7 @@ test_open ()
 	  strerrno (errno));
   if (ret >= 0)
     close (ret);
+  stop ();
   /* Open directory (for writing) */
   errno = 0;
   ret = open (".", O_WRONLY);
@@ -94,6 +99,7 @@ test_open ()
 	  strerrno (errno));
   if (ret >= 0)
     close (ret);
+  stop ();
   /* Opening nonexistant file */
   errno = 0;
   ret = open (NONEXISTANT, O_RDONLY);
@@ -101,12 +107,14 @@ test_open ()
 	  strerrno (errno));
   if (ret >= 0)
     close (ret);
+  stop ();
   /* Open for write but no write permission */
   errno = 0;
   ret = open (NOWRITE, O_CREAT | O_RDONLY, S_IRUSR);
   if (ret >= 0)
     {
       close (ret);
+      stop ();
       errno = 0;
       ret = open (NOWRITE, O_WRONLY);
       printf ("open 5: ret = %d, errno = %d %s\n", ret, errno,
@@ -115,7 +123,11 @@ test_open ()
 	close (ret);
     }
   else
-    printf ("open 5: ret = %d, errno = %d\n", ret, errno);
+    {
+      stop ();
+      printf ("open 5: ret = %d, errno = %d\n", ret, errno);
+    }
+  stop ();
 }
 
 int
@@ -136,11 +148,13 @@ test_write ()
     }
   else
     printf ("write 1: ret = %d, errno = %d\n", ret, errno);
+  stop ();
   /* Write using invalid file descriptor */
   errno = 0;
   ret = write (999, STRING, strlen (STRING));
   printf ("write 2: ret = %d, errno = %d, %s\n", ret, errno,
 	  strerrno (errno));
+  stop ();
   /* Write to a read-only file */
   errno = 0;
   fd = open (FILENAME, O_RDONLY);
@@ -153,6 +167,7 @@ test_write ()
     }
   else
     printf ("write 3: ret = %d, errno = %d\n", ret, errno);
+  stop ();
 }
 
 int
@@ -178,11 +193,13 @@ test_read ()
     }
   else
     printf ("read 1: ret = %d, errno = %d\n", ret, errno);
+  stop ();
   /* Read using invalid file descriptor */
   errno = 0;
   ret = read (999, buf, 16);
   printf ("read 2: ret = %d, errno = %d %s\n", ret, errno,
 	  strerrno (errno));
+  stop ();
 }
 
 int
@@ -200,10 +217,12 @@ test_lseek ()
       ret = lseek (fd, 0, SEEK_CUR);
       printf ("lseek 1: ret = %ld, errno = %d, %s\n", (long) ret, errno,
               ret == 0 ? "OK" : "");
+      stop ();
       errno = 0;
       ret = lseek (fd, 0, SEEK_END);
       printf ("lseek 2: ret = %ld, errno = %d, %s\n", (long) ret, errno,
               ret == 11 ? "OK" : "");
+      stop ();
       errno = 0;
       ret = lseek (fd, 3, SEEK_SET);
       printf ("lseek 3: ret = %ld, errno = %d, %s\n", (long) ret, errno,
@@ -212,12 +231,17 @@ test_lseek ()
     }
   else
     {
-      printf ("lseek 1: ret = %d, errno = %d\n", ret, errno);
-      printf ("lseek 2: ret = %d, errno = %d\n", ret, errno);
-      printf ("lseek 3: ret = %d, errno = %d\n", ret, errno);
+      printf ("lseek 1: ret = %d, errno = %d %s\n", ret, errno,
+	      strerrno (errno));
+      stop ();
+      printf ("lseek 2: ret = %d, errno = %d %s\n", ret, errno,
+	      strerrno (errno));
+      stop ();
+      printf ("lseek 3: ret = %d, errno = %d %s\n", ret, errno,
+	      strerrno (errno));
     }
   /* Seeking on an invalid file descriptor */
-
+  stop ();
 }
 
 int
@@ -237,11 +261,13 @@ test_close ()
     }
   else
     printf ("close 1: ret = %d, errno = %d\n", ret, errno);
+  stop ();
   /* Close an invalid file descriptor */
   errno = 0;
   ret = close (999);
   printf ("close 2: ret = %d, errno = %d, %s\n", ret, errno,
   	  strerrno (errno));
+  stop ();
 }
 
 int
@@ -258,21 +284,25 @@ test_stat ()
 	    st.st_size == 11 ? "OK" : "");
   else
     printf ("stat 1: ret = %d, errno = %d\n", ret, errno);
+  stop ();
   /* NULL pathname */
   errno = 0;
   ret = stat (NULL, &st);
   printf ("stat 2: ret = %d, errno = %d %s\n", ret, errno,
   	  strerrno (errno));
+  stop ();
   /* Empty pathname */
   errno = 0;
   ret = stat ("", &st);
   printf ("stat 3: ret = %d, errno = %d %s\n", ret, errno,
   	  strerrno (errno));
+  stop ();
   /* Nonexistant file */
   errno = 0;
   ret = stat (NONEXISTANT, &st);
   printf ("stat 4: ret = %d, errno = %d %s\n", ret, errno,
   	  strerrno (errno));
+  stop ();
 }
 
 int
@@ -297,11 +327,13 @@ test_fstat ()
     }
   else
     printf ("fstat 1: ret = %d, errno = %d\n", ret, errno);
+  stop ();
   /* Fstat using invalid file descriptor */
   errno = 0;
   ret = fstat (999, &st);
   printf ("fstat 2: ret = %d, errno = %d %s\n", ret, errno,
   	  strerrno (errno));
+  stop ();
 }
 
 int
@@ -311,10 +343,14 @@ test_isatty ()
 
   /* Check std I/O */
   printf ("isatty 1: stdin %s\n", isatty (0) ? "yes OK" : "no");
+  stop ();
   printf ("isatty 2: stdout %s\n", isatty (1) ? "yes OK" : "no");
+  stop ();
   printf ("isatty 3: stderr %s\n", isatty (2) ? "yes OK" : "no");
+  stop ();
   /* Check invalid fd */
   printf ("isatty 4: invalid %s\n", isatty (999) ? "yes" : "no OK");
+  stop ();
   /* Check open file */
   fd = open (FILENAME, O_RDONLY);
   if (fd >= 0)
@@ -324,6 +360,7 @@ test_isatty ()
     }
   else
     printf ("isatty 5: file couldn't open\n");
+  stop ();
 }
 
 
@@ -343,9 +380,11 @@ test_system ()
     printf ("system 1: ret = %d /bin/sh unavailable???\n", ret);
   else
     printf ("system 1: ret = %d %s\n", ret, ret == 0 ? "OK" : "");
+  stop ();
   /* Invalid command (just guessing ;-) ) */
   ret = system ("wrtzlpfrmpft");
   printf ("system 2: ret = %d %s\n", ret, WEXITSTATUS (ret) == 127 ? "OK" : "");
+  stop ();
 }
 
 int
@@ -374,26 +413,31 @@ test_rename ()
     }
   else
     printf ("rename 1: ret = %d, errno = %d\n", ret, errno);
+  stop ();
   /* newpath is existing directory, oldpath is not a directory */
   errno = 0;
   ret = rename (RENAMED, TESTDIR2);
   printf ("rename 2: ret = %d, errno = %d %s\n", ret, errno,
 	  strerrno (errno));
+  stop ();
   /* newpath is a non-empty directory */
   errno = 0;
   ret = rename (TESTDIR2, TESTDIR1);
   printf ("rename 3: ret = %d, errno = %d %s\n", ret, errno,
           strerrno (errno));
+  stop ();
   /* newpath is a subdirectory of old path */
   errno = 0;
   ret = rename (TESTDIR1, TESTSUBDIR);
   printf ("rename 4: ret = %d, errno = %d %s\n", ret, errno,
 	  strerrno (errno));
+  stop ();
   /* oldpath does not exist */
   errno = 0;
   ret = rename (NONEXISTANT, FILENAME);
   printf ("rename 5: ret = %d, errno = %d %s\n", ret, errno,
 	  strerrno (errno));
+  stop ();
 }
 
 int
@@ -408,6 +452,7 @@ test_unlink ()
   ret = unlink (RENAMED);
   printf ("unlink 1: ret = %d, errno = %d %s\n", ret, errno,
 	  strerrno (errno));
+  stop ();
   /* No write access */
   sprintf (name, "%s/%s", TESTDIR2, FILENAME);
   errno = 0;
@@ -428,11 +473,13 @@ test_unlink ()
     }
   else
     printf ("unlink 2: ret = %d, errno = %d\n", ret, errno);
+  stop ();
   /* pathname doesn't exist */
   errno = 0;
   ret = unlink (NONEXISTANT);
   printf ("unlink 3: ret = %d, errno = %d %s\n", ret, errno,
           strerrno (errno));
+  stop ();
 }
 
 int
@@ -443,10 +490,12 @@ test_time ()
   errno = 0;
   ret = time (&t);
   printf ("time 1: ret = %ld, errno = %d, t = %ld %s\n", (long) ret, errno, (long) t, ret == t ? "OK" : "");
+  stop ();
   errno = 0;
   ret = time (NULL);
   printf ("time 2: ret = %ld, errno = %d, t = %ld %s\n",
 	  (long) ret, errno, (long) t, ret >= t && ret < t + 10 ? "OK" : "");
+  stop ();
 }
 
 static const char *

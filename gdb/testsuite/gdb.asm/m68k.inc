@@ -10,7 +10,7 @@
 	.endm
 
 	.macro gdbasm_call subr
-	jbsr	\subr
+	jsr	\subr
 	.endm
 
 	.macro gdbasm_several_nops
