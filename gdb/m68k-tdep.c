@@ -555,6 +555,28 @@ m68k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      frame's CFA.  */
   return sp + 8;
 }
+
+/* Convert a dwarf or dwarf2 regnumber to a GDB regnum */
+
+static int
+m68k_dwarf_reg_to_regnum (int num)
+{
+  if (num < 8)
+    /* d0..7 */
+    return (num - 0) + M68K_D0_REGNUM;
+  else if (num < 16)
+    /* a0..7 */
+    return (num - 8) + M68K_A0_REGNUM;
+  else if (num < 24)
+    /* fp0..7 */
+    return (num - 16) + M68K_FP0_REGNUM;
+  else if (num == 25)
+    /* pc */
+    return M68K_PC_REGNUM;
+  else
+    return NUM_REGS + NUM_PSEUDO_REGS;
+}
+
 
 struct m68k_frame_cache
 {
@@ -1240,10 +1262,12 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_decr_pc_after_break (gdbarch, 2);
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
+  set_gdbarch_dwarf_reg_to_regnum (gdbarch, m68k_dwarf_reg_to_regnum);
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, m68k_dwarf_reg_to_regnum);
 
   set_gdbarch_register_type (gdbarch, m68k_register_type);
   set_gdbarch_register_name (gdbarch, m68k_register_name);
-  set_gdbarch_num_regs (gdbarch, 29);
+  set_gdbarch_num_regs (gdbarch, M68K_NUM_REGS);
   set_gdbarch_register_bytes_ok (gdbarch, m68k_register_bytes_ok);
   set_gdbarch_sp_regnum (gdbarch, M68K_SP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, M68K_PC_REGNUM);
