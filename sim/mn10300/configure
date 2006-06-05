@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS sim_environment sim_alignment sim_assert sim_bitsize sim_endian sim_hostendian sim_float sim_scache sim_default_model sim_hw_cflags sim_hw_objs sim_hw sim_inline sim_packages sim_regparm sim_reserved_bits sim_smp sim_stdcall sim_xor_endian WARN_CFLAGS WERROR_CFLAGS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CC_FOR_BUILD HDEFINES AR RANLIB ac_ct_RANLIB CPP EGREP MAINT sim_bswap sim_cflags sim_debug sim_stdio sim_trace sim_profile cgen_breaks LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS sim_environment sim_alignment sim_assert sim_bitsize sim_endian sim_hostendian sim_float sim_scache sim_default_model sim_hw_cflags sim_hw_objs sim_hw sim_inline sim_packages sim_regparm sim_reserved_bits sim_smp sim_stdcall sim_xor_endian WARN_CFLAGS WERROR_CFLAGS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CC_FOR_BUILD HDEFINES AR RANLIB ac_ct_RANLIB USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT CPP EGREP MAINT sim_bswap sim_cflags sim_debug sim_stdio sim_trace sim_profile cgen_breaks LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -2683,7 +2683,77 @@ fi
 
 
 ALL_LINGUAS=
-CY_GNU_GETTEXT
+# If we haven't got the data from the intl directory,
+# assume NLS is disabled.
+USE_NLS=no
+LIBINTL=
+LIBINTL_DEP=
+INCINTL=
+XGETTEXT=
+GMSGFMT=
+POSUB=
+if test -f ../intl/config.intl; then
+  . ../intl/config.intl
+fi
+echo "$as_me:$LINENO: checking whether NLS is requested" >&5
+echo $ECHO_N "checking whether NLS is requested... $ECHO_C" >&6
+if test x"$USE_NLS" != xyes; then
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+else
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+
+cat >>confdefs.h <<\_ACEOF
+#define ENABLE_NLS 1
+_ACEOF
+
+
+  echo "$as_me:$LINENO: checking for catalogs to be installed" >&5
+echo $ECHO_N "checking for catalogs to be installed... $ECHO_C" >&6
+  # Look for .po and .gmo files in the source directory.
+  CATALOGS=
+  XLINGUAS=
+  for cat in $srcdir/po/*.gmo $srcdir/po/*.po; do
+    # If there aren't any .gmo files the shell will give us the
+    # literal string "../path/to/srcdir/po/*.gmo" which has to be
+    # weeded out.
+    case "$cat" in *\**)
+      continue;;
+    esac
+    # The quadruple backslash is collapsed to a double backslash
+    # by the backticks, then collapsed again by the double quotes,
+    # leaving us with one backslash in the sed expression (right
+    # before the dot that mustn't act as a wildcard).
+    cat=`echo $cat | sed -e "s!$srcdir/po/!!" -e "s!\\\\.po!.gmo!"`
+    lang=`echo $cat | sed -e "s!\\\\.gmo!!"`
+    # The user is allowed to set LINGUAS to a list of languages to
+    # install catalogs for.  If it's empty that means "all of them."
+    if test "x$LINGUAS" = x; then
+      CATALOGS="$CATALOGS $cat"
+      XLINGUAS="$XLINGUAS $lang"
+    else
+      case "$LINGUAS" in *$lang*)
+        CATALOGS="$CATALOGS $cat"
+        XLINGUAS="$XLINGUAS $lang"
+        ;;
+      esac
+    fi
+  done
+  LINGUAS="$XLINGUAS"
+  echo "$as_me:$LINENO: result: $LINGUAS" >&5
+echo "${ECHO_T}$LINGUAS" >&6
+
+
+    DATADIRNAME=share
+
+  INSTOBJEXT=.mo
+
+  GENCAT=gencat
+
+  CATOBJEXT=.gmo
+
+fi
 
 # Check for common headers.
 # FIXME: Seems to me this can cause problems for i386-windows hosts.
@@ -5895,6 +5965,18 @@ s,@HDEFINES@,$HDEFINES,;t t
 s,@AR@,$AR,;t t
 s,@RANLIB@,$RANLIB,;t t
 s,@ac_ct_RANLIB@,$ac_ct_RANLIB,;t t
+s,@USE_NLS@,$USE_NLS,;t t
+s,@LIBINTL@,$LIBINTL,;t t
+s,@LIBINTL_DEP@,$LIBINTL_DEP,;t t
+s,@INCINTL@,$INCINTL,;t t
+s,@XGETTEXT@,$XGETTEXT,;t t
+s,@GMSGFMT@,$GMSGFMT,;t t
+s,@POSUB@,$POSUB,;t t
+s,@CATALOGS@,$CATALOGS,;t t
+s,@DATADIRNAME@,$DATADIRNAME,;t t
+s,@INSTOBJEXT@,$INSTOBJEXT,;t t
+s,@GENCAT@,$GENCAT,;t t
+s,@CATOBJEXT@,$CATOBJEXT,;t t
 s,@CPP@,$CPP,;t t
 s,@EGREP@,$EGREP,;t t
 s,@MAINT@,$MAINT,;t t
