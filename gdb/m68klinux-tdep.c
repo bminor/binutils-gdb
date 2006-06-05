@@ -291,8 +291,8 @@ m68k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      address to store a structure value.  It also returns small
      structures in registers instead of memory.  */
   m68k_svr4_init_abi (info, gdbarch);
+  /* But the struct pointer is in %a1 */
   tdep->struct_value_regnum = M68K_A1_REGNUM;
-  tdep->struct_return = reg_struct_return;
 
   frame_unwind_append_sniffer (gdbarch, m68k_linux_sigtramp_frame_sniffer);
 

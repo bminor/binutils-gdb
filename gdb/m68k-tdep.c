@@ -264,8 +264,11 @@ m68k_svr4_extract_return_value (struct type *type, struct regcache *regcache,
       regcache_raw_read (regcache, M68K_FP0_REGNUM, buf);
       convert_typed_floating (buf, M68K_FPREG_TYPE, valbuf, type);
     }
+#if 0
+  /* GCC never differentiates pointer return types this way.  */
   else if (TYPE_CODE (type) == TYPE_CODE_PTR && len == 4)
     regcache_raw_read (regcache, M68K_A0_REGNUM, valbuf);
+#endif
   else
     m68k_extract_return_value (type, regcache, valbuf);
 }
@@ -322,13 +325,97 @@ m68k_reg_struct_return_p (struct gdbarch *gdbarch, struct type *type)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum type_code code = TYPE_CODE (type);
   int len = TYPE_LENGTH (type);
+  int align;
+  int ix;
+  struct type *union_field_type = NULL;
 
   gdb_assert (code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION);
 
   if (tdep->struct_return == pcc_struct_return)
     return 0;
 
-  return (len == 1 || len == 2 || len == 4 || len == 8);
+  /* Unfortunately GCC incorrectly implements this optimization.
+     Rather than simply return all small structs, or even just those
+     of size 2^N, it uses the mode of the structure to determine this.
+     BLKmode structs will be returned by memory and QI,HI,SI,DI,SF&DF
+     mode structs will be returned by register.  For m68k a struct is
+     BLKmode unless it's size is 2^N and the mode for that size does
+     not need a greater alignment than the structure itself.  Unions
+     will get the mode of last member whose size matches that of the
+     union itself.  This is horrible.  */
+  
+  if (len > 8 || (len & -len) != len)
+    /* Length is not 2^n or is too big. */
+    return 0;
+
+  align = len > 4 ? 4 : len;
+  for (ix = 0; ix != TYPE_NFIELDS (type); ix++)
+    {
+      struct type *field_type;
+      int field_len;
+      
+      if (TYPE_FIELD_STATIC (type, ix))
+	/* Skip static fields.  */
+	continue;
+
+      field_type = TYPE_FIELD_TYPE (type, ix);
+      field_type = check_typedef (field_type);
+      field_len = TYPE_LENGTH (field_type);
+      
+      if (code == TYPE_CODE_STRUCT)
+	{
+	  /* Look through arrays.  */
+	  while (TYPE_CODE (field_type) == TYPE_CODE_ARRAY)
+	    {
+	      field_type = TYPE_TARGET_TYPE (field_type);
+	      field_type = check_typedef (field_type);
+	      field_len = TYPE_LENGTH (field_type);
+	    }
+	  
+	  /* If the field's alignment is finer than the structs, we
+	     won't be in registers. */
+	  if (field_len < align)
+	    return 0;
+
+	  /* If the field itself is a struct or union, then check it
+	     can be passed in registers.  */
+	  if ((TYPE_CODE (field_type) == TYPE_CODE_STRUCT
+	       || TYPE_CODE (field_type) == TYPE_CODE_UNION)
+	      && !m68k_reg_struct_return_p (gdbarch, field_type))
+	    return 0;
+	}
+      else
+	{
+	  /* If this field accounts for the whole union, remember it.
+	     Note that we remember the last such field to match GCC's
+	     algorithm.  */
+	  if (field_len == len)
+	    union_field_type = field_type;
+	}
+    }
+
+  if (code == TYPE_CODE_UNION)
+    {
+      if (!union_field_type)
+	return 0;
+      /* Look through arrays. */
+      while (TYPE_CODE (union_field_type) == TYPE_CODE_ARRAY)
+	{
+	  union_field_type = TYPE_TARGET_TYPE (union_field_type);
+	  union_field_type = check_typedef (union_field_type);
+	}
+      /* If this field's alignment is too small, then we won't be in
+	 registers.  */
+      if (TYPE_LENGTH (union_field_type) < align)
+	return 0;
+      
+      if (TYPE_CODE (union_field_type) == TYPE_CODE_STRUCT
+	  || TYPE_CODE (union_field_type) == TYPE_CODE_UNION)
+	return m68k_reg_struct_return_p (gdbarch, union_field_type);
+    }
+  
+  /* It will be returned in registers */
+  return 1;
 }
 
 /* Determine, for architecture GDBARCH, how a return value of TYPE
@@ -382,25 +469,11 @@ m68k_svr4_return_value (struct gdbarch *gdbarch, struct type *type,
   if ((code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION)
       && !m68k_reg_struct_return_p (gdbarch, type))
     {
-      /* The System V ABI says that:
-
-	 "A function returning a structure or union also sets %a0 to
-	 the value it finds in %a0.  Thus when the caller receives
-	 control again, the address of the returned object resides in
-	 register %a0."
-
-	 So the ABI guarantees that we can always find the return
-	 value just after the function has returned.  */
-
-      if (readbuf)
-	{
-	  ULONGEST addr;
-
-	  regcache_raw_read_unsigned (regcache, M68K_A0_REGNUM, &addr);
-	  read_memory (addr, readbuf, TYPE_LENGTH (type));
-	}
-
-      return RETURN_VALUE_ABI_RETURNS_ADDRESS;
+      /* Although they SYSV ABI specifies that a function returning a
+	 structure this way should preserve %a0, GCC doesn't do that.
+	 Furthermore there's no point changeing GCC to make it do it,
+	 as that would just be bloat. */
+      return RETURN_VALUE_STRUCT_CONVENTION;
     }
 
   /* This special case is for structures consisting of a single
@@ -435,6 +508,9 @@ m68k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   gdb_byte buf[4];
   int i;
 
+  /* Align the stack down to 4 bytes.  Needed for coldfire. */
+  sp &= ~3;
+  
   /* Push arguments in reverse order.  */
   for (i = nargs - 1; i >= 0; i--)
     {
@@ -1114,8 +1190,22 @@ m68k_svr4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* SVR4 uses a different calling convention.  */
   set_gdbarch_return_value (gdbarch, m68k_svr4_return_value);
 
-  /* SVR4 uses %a0 instead of %a1.  */
+  /* SVR4 uses %a0.  */
   tdep->struct_value_regnum = M68K_A0_REGNUM;
+  tdep->struct_return = reg_struct_return;
+}
+
+/* a.out */
+
+void
+m68k_aout_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  set_gdbarch_return_value (gdbarch, m68k_return_value);
+
+  tdep->struct_value_regnum = M68K_A1_REGNUM;
+  tdep->struct_return = reg_struct_return;
 }
 
 
@@ -1163,8 +1253,13 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_to_value (gdbarch,  m68k_register_to_value);
   set_gdbarch_value_to_register (gdbarch, m68k_value_to_register);
 
+  /* Function call & return */
   set_gdbarch_push_dummy_call (gdbarch, m68k_push_dummy_call);
-  set_gdbarch_return_value (gdbarch, m68k_return_value);
+  /* These values are for bare metal -- os specific ABIs can override
+     them */
+  set_gdbarch_return_value (gdbarch, m68k_svr4_return_value);
+  tdep->struct_value_regnum = M68K_A0_REGNUM;
+  tdep->struct_return = reg_struct_return;
 
   /* Disassembler.  */
   set_gdbarch_print_insn (gdbarch, print_insn_m68k);

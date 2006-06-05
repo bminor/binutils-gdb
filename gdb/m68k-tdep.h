@@ -80,6 +80,8 @@ struct gdbarch_tdep
 
 /* Initialize a SVR4 architecture variant.  */
 extern void m68k_svr4_init_abi (struct gdbarch_info, struct gdbarch *);
+/* Initialize a aout architecture variant.   */
+extern void m68k_aout_init_abi (struct gdbarch_info, struct gdbarch *);
 
 
 /* Functions exported from m68kbsd-tdep.c.  */
