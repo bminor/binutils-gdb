@@ -1,3 +1,9 @@
+2006-06-05  Thiemo Seufer  <ths@mips.com>
+
+	* gas/mips/mips32-dsp.d, gas/mips/mips32-dsp.s, gas/mips/mips32-mt.d,
+	gas/mips/mips32-mt.s: Remove instructions with invalid arguments.
+	* gas/mips/mips32-dsp.l, gas/mips/mips32-mt.l: Delete file.
+
 2006-05-25  Richard Sandiford  <richard@codesourcery.com>
 
 	* gas/m68k/mcf-fpu.s: Add fmovemd and fmovem instructions.

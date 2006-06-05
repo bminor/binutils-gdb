@@ -1,3 +1,14 @@
+2006-06-05  Thiemo Seufer  <ths@mips.com>
+
+	* config/tc-mips.c (macro_build): Use INSERT_OPERAND wherew
+	appropriate.
+	(mips16_macro_build): Use MIPS16_INSERT_OPERAND where appropriate.
+	(mips_ip): Make overflowed/underflowed constant arguments in DSP
+	and MT instructions a fatal error. Use INSERT_OPERAND where
+	appropriate. Improve warnings for break and wait code overflows.
+	Use symbolic constant of OP_MASK_COPZ.
+	(mips16_ip): Use MIPS16_INSERT_OPERAND where appropriate.
+
 2006-06-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* po/Make-in (top_builddir): Define.

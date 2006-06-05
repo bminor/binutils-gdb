@@ -3488,11 +3488,11 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 	  continue;
 
 	case 'C':
-	  insn.insn_opcode |= va_arg (args, unsigned long);
+	  INSERT_OPERAND (COPZ, insn, va_arg (args, unsigned long));
 	  continue;
 
 	case 'k':
-	  insn.insn_opcode |= va_arg (args, unsigned long) << OP_SH_CACHE;
+	  INSERT_OPERAND (CACHE, insn, va_arg (args, unsigned long));
 	  continue;
 
 	default:
@@ -3576,7 +3576,7 @@ mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
 
 	    regno = va_arg (args, int);
 	    regno = ((regno & 7) << 2) | ((regno & 0x18) >> 3);
-	    insn.insn_opcode |= regno << MIPS16OP_SH_REG32R;
+	    MIPS16_INSERT_OPERAND (REG32R, insn, regno);
 	  }
 	  continue;
 
@@ -8431,11 +8431,10 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      check_absolute_expr (ip, &imm_expr);
 	      if (imm_expr.X_add_number & ~OP_MASK_SA3)
 		{
-		  as_warn (_("DSP immediate not in range 0..%d (%lu)"),
-			   OP_MASK_SA3, (unsigned long) imm_expr.X_add_number);
-		  imm_expr.X_add_number &= OP_MASK_SA3;
+		  as_bad (_("DSP immediate not in range 0..%d (%lu)"),
+			  OP_MASK_SA3, (unsigned long) imm_expr.X_add_number);
 		}
-	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_SA3;
+	      INSERT_OPERAND (SA3, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -8445,11 +8444,10 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      check_absolute_expr (ip, &imm_expr);
 	      if (imm_expr.X_add_number & ~OP_MASK_SA4)
 		{
-		  as_warn (_("DSP immediate not in range 0..%d (%lu)"),
-			   OP_MASK_SA4, (unsigned long) imm_expr.X_add_number);
-		  imm_expr.X_add_number &= OP_MASK_SA4;
+		  as_bad (_("DSP immediate not in range 0..%d (%lu)"),
+			  OP_MASK_SA4, (unsigned long) imm_expr.X_add_number);
 		}
-	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_SA4;
+	      INSERT_OPERAND (SA4, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -8459,11 +8457,10 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      check_absolute_expr (ip, &imm_expr);
 	      if (imm_expr.X_add_number & ~OP_MASK_IMM8)
 		{
-		  as_warn (_("DSP immediate not in range 0..%d (%lu)"),
-			   OP_MASK_IMM8, (unsigned long) imm_expr.X_add_number);
-		  imm_expr.X_add_number &= OP_MASK_IMM8;
+		  as_bad (_("DSP immediate not in range 0..%d (%lu)"),
+			  OP_MASK_IMM8, (unsigned long) imm_expr.X_add_number);
 		}
-	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_IMM8;
+	      INSERT_OPERAND (IMM8, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -8473,11 +8470,10 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      check_absolute_expr (ip, &imm_expr);
 	      if (imm_expr.X_add_number & ~OP_MASK_RS)
 		{
-		  as_warn (_("DSP immediate not in range 0..%d (%lu)"),
-			   OP_MASK_RS, (unsigned long) imm_expr.X_add_number);
-		  imm_expr.X_add_number &= OP_MASK_RS;
+		  as_bad (_("DSP immediate not in range 0..%d (%lu)"),
+			  OP_MASK_RS, (unsigned long) imm_expr.X_add_number);
 		}
-	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_RS;
+	      INSERT_OPERAND (RS, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -8488,7 +8484,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		{
 		  regno = s[3] - '0';
 		  s += 4;
-		  ip->insn_opcode |= regno << OP_SH_DSPACC;
+		  INSERT_OPERAND (DSPACC, *ip, regno);
 		  continue;
 		}
 	      else
@@ -8500,12 +8496,11 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      check_absolute_expr (ip, &imm_expr);
 	      if (imm_expr.X_add_number & ~OP_MASK_WRDSP)
 		{
-		  as_warn (_("DSP immediate not in range 0..%d (%lu)"),
-			   OP_MASK_WRDSP,
-			   (unsigned long) imm_expr.X_add_number);
-		  imm_expr.X_add_number &= OP_MASK_WRDSP;
+		  as_bad (_("DSP immediate not in range 0..%d (%lu)"),
+			  OP_MASK_WRDSP,
+			  (unsigned long) imm_expr.X_add_number);
 		}
-	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_WRDSP;
+	      INSERT_OPERAND (WRDSP, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -8516,7 +8511,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		{
 		  regno = s[3] - '0';
 		  s += 4;
-		  ip->insn_opcode |= regno << OP_SH_DSPACC_S;
+		  INSERT_OPERAND (DSPACC_S, *ip, regno);
 		  continue;
 		}
 	      else
@@ -8531,13 +8526,11 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      if (imm_expr.X_add_number < min_range ||
 		  imm_expr.X_add_number > max_range)
 		{
-		  as_warn (_("DSP immediate not in range %ld..%ld (%ld)"),
-			   (long) min_range, (long) max_range,
-			   (long) imm_expr.X_add_number);
+		  as_bad (_("DSP immediate not in range %ld..%ld (%ld)"),
+			  (long) min_range, (long) max_range,
+			  (long) imm_expr.X_add_number);
 		}
-	      imm_expr.X_add_number &= OP_MASK_DSPSFT;
-	      ip->insn_opcode |= ((unsigned long) imm_expr.X_add_number
-				  << OP_SH_DSPSFT);
+	      INSERT_OPERAND (DSPSFT, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -8547,12 +8540,11 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      check_absolute_expr (ip, &imm_expr);
 	      if (imm_expr.X_add_number & ~OP_MASK_RDDSP)
 		{
-		  as_warn (_("DSP immediate not in range 0..%d (%lu)"),
-			   OP_MASK_RDDSP,
-			   (unsigned long) imm_expr.X_add_number);
-		  imm_expr.X_add_number &= OP_MASK_RDDSP;
+		  as_bad (_("DSP immediate not in range 0..%d (%lu)"),
+			  OP_MASK_RDDSP,
+			  (unsigned long) imm_expr.X_add_number);
 		}
-	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_RDDSP;
+	      INSERT_OPERAND (RDDSP, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -8565,13 +8557,11 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      if (imm_expr.X_add_number < min_range ||
 		  imm_expr.X_add_number > max_range)
 		{
-		  as_warn (_("DSP immediate not in range %ld..%ld (%ld)"),
-			   (long) min_range, (long) max_range,
-			   (long) imm_expr.X_add_number);
+		  as_bad (_("DSP immediate not in range %ld..%ld (%ld)"),
+			  (long) min_range, (long) max_range,
+			  (long) imm_expr.X_add_number);
 		}
-	      imm_expr.X_add_number &= OP_MASK_DSPSFT_7;
-	      ip->insn_opcode |= ((unsigned long) imm_expr.X_add_number
-				  << OP_SH_DSPSFT_7);
+	      INSERT_OPERAND (DSPSFT_7, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -8584,41 +8574,33 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      if (imm_expr.X_add_number < min_range ||
 		  imm_expr.X_add_number > max_range)
 		{
-		  as_warn (_("DSP immediate not in range %ld..%ld (%ld)"),
-			   (long) min_range, (long) max_range,
-			   (long) imm_expr.X_add_number);
+		  as_bad (_("DSP immediate not in range %ld..%ld (%ld)"),
+			  (long) min_range, (long) max_range,
+			  (long) imm_expr.X_add_number);
 		}
-	      imm_expr.X_add_number &= OP_MASK_IMM10;
-	      ip->insn_opcode |= ((unsigned long) imm_expr.X_add_number
-				  << OP_SH_IMM10);
+	      INSERT_OPERAND (IMM10, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
 
-            case '!': /* mt 1-bit unsigned immediate in bit 5 */
+            case '!': /* MT usermode flag bit.  */
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
 	      if (imm_expr.X_add_number & ~OP_MASK_MT_U)
-		{
-		  as_warn (_("MT immediate not in range 0..%d (%lu)"),
-			   OP_MASK_MT_U, (unsigned long) imm_expr.X_add_number);
-		  imm_expr.X_add_number &= OP_MASK_MT_U;
-		}
-	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_MT_U;
+		as_bad (_("MT usermode bit not 0 or 1 (%lu)"),
+			(unsigned long) imm_expr.X_add_number);
+	      INSERT_OPERAND (MT_U, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
 
-            case '$': /* mt 1-bit unsigned immediate in bit 4 */
+            case '$': /* MT load high flag bit.  */
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
 	      if (imm_expr.X_add_number & ~OP_MASK_MT_H)
-		{
-		  as_warn (_("MT immediate not in range 0..%d (%lu)"),
-			   OP_MASK_MT_H, (unsigned long) imm_expr.X_add_number);
-		  imm_expr.X_add_number &= OP_MASK_MT_H;
-		}
-	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_MT_H;
+		as_bad (_("MT load high bit not 0 or 1 (%lu)"),
+			(unsigned long) imm_expr.X_add_number);
+	      INSERT_OPERAND (MT_H, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -8629,7 +8611,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		{
 		  regno = s[3] - '0';
 		  s += 4;
-		  ip->insn_opcode |= regno << OP_SH_MTACC_T;
+		  INSERT_OPERAND (MTACC_T, *ip, regno);
 		  continue;
 		}
 	      else
@@ -8642,7 +8624,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		{
 		  regno = s[3] - '0';
 		  s += 4;
-		  ip->insn_opcode |= regno << OP_SH_MTACC_D;
+		  INSERT_OPERAND (MTACC_D, *ip, regno);
 		  continue;
 		}
 	      else
@@ -8849,7 +8831,7 @@ do_msbd:
 			as_bad (_("Invalid register number (%d)"), regno);
 		      else
 			{
-			  ip->insn_opcode |= regno << OP_SH_RT;
+			  INSERT_OPERAND (RT, *ip, regno);
 			  continue;
 			}
 		    }
@@ -8912,8 +8894,9 @@ do_msbd:
 	    case 'c':		/* break code */
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
-	      if ((unsigned long) imm_expr.X_add_number > 1023)
-		as_warn (_("Illegal break code (%lu)"),
+	      if ((unsigned long) imm_expr.X_add_number > OP_MASK_CODE)
+		as_warn (_("Code for %s not in range 0..1023 (%lu)"),
+			 ip->insn_mo->name,
 			 (unsigned long) imm_expr.X_add_number);
 	      INSERT_OPERAND (CODE, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
@@ -8923,8 +8906,9 @@ do_msbd:
 	    case 'q':		/* lower break code */
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
-	      if ((unsigned long) imm_expr.X_add_number > 1023)
-		as_warn (_("Illegal lower break code (%lu)"),
+	      if ((unsigned long) imm_expr.X_add_number > OP_MASK_CODE2)
+		as_warn (_("Lower code for %s not in range 0..1023 (%lu)"),
+			 ip->insn_mo->name,
 			 (unsigned long) imm_expr.X_add_number);
 	      INSERT_OPERAND (CODE2, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
@@ -8935,7 +8919,8 @@ do_msbd:
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
 	      if ((unsigned long) imm_expr.X_add_number > OP_MASK_CODE20)
-		as_warn (_("Illegal 20-bit code (%lu)"),
+		as_warn (_("Code for %s not in range 0..1048575 (%lu)"),
+			 ip->insn_mo->name,
 			 (unsigned long) imm_expr.X_add_number);
 	      INSERT_OPERAND (CODE20, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
@@ -8945,13 +8930,13 @@ do_msbd:
 	    case 'C':           /* Coprocessor code */
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
-	      if ((unsigned long) imm_expr.X_add_number >= (1 << 25))
+	      if ((unsigned long) imm_expr.X_add_number > OP_MASK_COPZ)
 		{
 		  as_warn (_("Coproccesor code > 25 bits (%lu)"),
 			   (unsigned long) imm_expr.X_add_number);
-		  imm_expr.X_add_number &= ((1 << 25) - 1);
+		  imm_expr.X_add_number &= OP_MASK_COPZ;
 		}
-	      ip->insn_opcode |= imm_expr.X_add_number;
+	      INSERT_OPERAND (COPZ, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -8960,8 +8945,11 @@ do_msbd:
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
 	      if ((unsigned long) imm_expr.X_add_number > OP_MASK_CODE19)
-		as_warn (_("Illegal 19-bit code (%lu)"),
-			 (unsigned long) imm_expr.X_add_number);
+		{
+		  as_warn (_("Illegal 19-bit code (%lu)"),
+			   (unsigned long) imm_expr.X_add_number);
+		  imm_expr.X_add_number &= OP_MASK_CODE19;
+		}
 	      INSERT_OPERAND (CODE19, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
@@ -8983,7 +8971,7 @@ do_msbd:
 		ok = reg_lookup (&s, RTYPE_NUM | RTYPE_CP0, &regno);
 	      else
 		ok = reg_lookup (&s, RTYPE_NUM | RTYPE_GP, &regno);
-	      ip->insn_opcode |= regno << OP_SH_RD;
+	      INSERT_OPERAND (RD, *ip, regno);
 	      if (ok) 
 		{
 		  lastregno = regno;
@@ -9857,9 +9845,9 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 		  if (c == 'v' || c == 'w')
 		    {
 		      if (c == 'v')
-			ip->insn_opcode |= lastregno << MIPS16OP_SH_RX;
+			MIPS16_INSERT_OPERAND (RX, *ip, lastregno);
 		      else
-			ip->insn_opcode |= lastregno << MIPS16OP_SH_RY;
+			MIPS16_INSERT_OPERAND (RY, *ip, lastregno);
 		      ++args;
 		      continue;
 		    }
