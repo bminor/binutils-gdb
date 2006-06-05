@@ -4670,9 +4670,7 @@ remote_insert_watchpoint (CORE_ADDR addr, int len, int type)
   enum Z_packet_type packet = watchpoint_to_Z_packet (type);
 
   if (remote_protocol_packets[PACKET_Z0 + packet].support == PACKET_DISABLE)
-    error (_("Can't set hardware watchpoints without the '%s' (%s) packet."),
-	   remote_protocol_packets[PACKET_Z0 + packet].name,
-	   remote_protocol_packets[PACKET_Z0 + packet].title);
+    return -1;
 
   sprintf (buf, "Z%x,", packet);
   p = strchr (buf, '\0');
@@ -4705,10 +4703,8 @@ remote_remove_watchpoint (CORE_ADDR addr, int len, int type)
   enum Z_packet_type packet = watchpoint_to_Z_packet (type);
 
   if (remote_protocol_packets[PACKET_Z0 + packet].support == PACKET_DISABLE)
-    error (_("Can't clear hardware watchpoints without the '%s' (%s) packet."),
-	   remote_protocol_packets[PACKET_Z0 + packet].name,
-	   remote_protocol_packets[PACKET_Z0 + packet].title);
-
+    return -1;
+  
   sprintf (buf, "z%x,", packet);
   p = strchr (buf, '\0');
   addr = remote_address_masked (addr);
@@ -4796,10 +4792,8 @@ remote_insert_hw_breakpoint (CORE_ADDR addr, gdb_byte *shadow)
   BREAKPOINT_FROM_PC (&addr, &len);
 
   if (remote_protocol_packets[PACKET_Z1].support == PACKET_DISABLE)
-    error (_("Can't set hardware breakpoint without the '%s' (%s) packet."),
-	   remote_protocol_packets[PACKET_Z1].name,
-	   remote_protocol_packets[PACKET_Z1].title);
-
+    return -1;
+  
   *(p++) = 'Z';
   *(p++) = '1';
   *(p++) = ',';
@@ -4838,9 +4832,7 @@ remote_remove_hw_breakpoint (CORE_ADDR addr, gdb_byte *shadow)
   BREAKPOINT_FROM_PC (&addr, &len);
 
   if (remote_protocol_packets[PACKET_Z1].support == PACKET_DISABLE)
-    error (_("Can't clear hardware breakpoint without the '%s' (%s) packet."),
-	   remote_protocol_packets[PACKET_Z1].name,
-	   remote_protocol_packets[PACKET_Z1].title);
+    return -1;
 
   *(p++) = 'z';
   *(p++) = '1';

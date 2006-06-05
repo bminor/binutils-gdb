@@ -129,8 +129,7 @@ typedef enum
   }
 insertion_state_t;
 
-static int remove_breakpoint (struct bp_location *, insertion_state_t,
-			      struct value *);
+static int remove_breakpoint (struct bp_location *, insertion_state_t);
 
 static enum print_stop_action print_it_typical (bpstat);
 
@@ -949,7 +948,6 @@ insert_bp_location (struct bp_location *bpt,
 
       if (within_current_scope)
 	{
-	  struct value *val_failed = NULL;
 	  free_valchain (bpt);
 
 	  /* Evaluate the expression and cut the chain of values
@@ -997,8 +995,13 @@ insert_bp_location (struct bp_location *bpt,
 		      val = target_insert_watchpoint (addr, len, type);
 		      if (val == -1)
 			{
-			  val_failed = v;
-			  break;
+			  /* Don't exit the loop, try to insert
+			     every value on the value chain.  That's
+			     because we will be removing all the
+			     watches below, and removing a
+			     watchpoint we didn't insert could have
+			     adverse effects.  */
+			  bpt->inserted = 0;
 			}
 		      val = 0;
 		    }
@@ -1006,10 +1009,9 @@ insert_bp_location (struct bp_location *bpt,
 	    }
 	  /* Failure to insert a watchpoint on any memory value in the
 	     value chain brings us here.  */
-	  if (val_failed)
+	  if (!bpt->inserted)
 	    {
-	      remove_breakpoint (bpt, mark_uninserted, val_failed);
-	      bpt->inserted = 0;
+	      remove_breakpoint (bpt, mark_uninserted);
 	      *hw_breakpoint_error = 1;
 	      fprintf_unfiltered (tmp_error_stream,
 				  "Could not insert hardware watchpoint %d.\n", 
@@ -1197,7 +1199,7 @@ remove_breakpoints (void)
   {
     if (b->inserted)
       {
-	val = remove_breakpoint (b, mark_uninserted, NULL);
+	val = remove_breakpoint (b, mark_uninserted);
 	if (val != 0)
 	  return val;
       }
@@ -1215,7 +1217,7 @@ remove_hw_watchpoints (void)
   {
     if (b->inserted && b->loc_type == bp_loc_hardware_watchpoint)
       {
-	val = remove_breakpoint (b, mark_uninserted, NULL);
+	val = remove_breakpoint (b, mark_uninserted);
 	if (val != 0)
 	  return val;
       }
@@ -1236,7 +1238,7 @@ reattach_breakpoints (int pid)
   {
     if (b->inserted)
       {
-	remove_breakpoint (b, mark_inserted, NULL);
+	remove_breakpoint (b, mark_inserted);
 	if (b->loc_type == bp_loc_hardware_breakpoint)
 	  val = target_insert_hw_breakpoint (b->address, b->shadow_contents);
 	else
@@ -1404,7 +1406,7 @@ detach_breakpoints (int pid)
   {
     if (b->inserted)
       {
-	val = remove_breakpoint (b, mark_inserted, NULL);
+	val = remove_breakpoint (b, mark_inserted);
 	if (val != 0)
 	  {
 	    do_cleanups (old_chain);
@@ -1416,13 +1418,8 @@ detach_breakpoints (int pid)
   return 0;
 }
 
-/* Remove the breakpoints for B.  FAILED_VAL, if non-null is the value
-   in the bpt->owner->val_chain that failed to be inserted.  We stop
-   at that point.  */
-
 static int
-remove_breakpoint (struct bp_location *b, insertion_state_t is,
-		   struct value *val_failed)
+remove_breakpoint (struct bp_location *b, insertion_state_t is)
 {
   int val;
 
@@ -1506,7 +1503,7 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is,
 
       b->inserted = (is == mark_inserted);
       /* Walk down the saved value chain.  */
-      for (v = b->owner->val_chain; v != val_failed; v = value_next (v))
+      for (v = b->owner->val_chain; v; v = value_next (v))
 	{
 	  /* For each memory reference remove the watchpoint
 	     at that address.  */
@@ -6778,7 +6775,7 @@ delete_breakpoint (struct breakpoint *bpt)
   breakpoint_delete_event (bpt->number);
 
   if (bpt->loc->inserted)
-    remove_breakpoint (bpt->loc, mark_inserted, NULL);
+    remove_breakpoint (bpt->loc, mark_inserted);
 
   free_valchain (bpt->loc);
 
