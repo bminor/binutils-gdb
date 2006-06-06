@@ -5956,7 +5956,7 @@ _bfd_elf_init_private_section_data (bfd *ibfd,
     return TRUE;
 
   /* Don't copy the output ELF section type from input if the
-     output BFD section flags has been set to something different.
+     output BFD section flags have been set to something different.
      elf_fake_sections will set ELF section type based on BFD
      section flags.  */
   if (osec->flags == isec->flags
@@ -5967,7 +5967,6 @@ _bfd_elf_init_private_section_data (bfd *ibfd,
      SHT_GROUP section will have its elf_next_in_group pointing back
      to the input group members.  Ignore linker created group section.
      See elfNN_ia64_object_p in elfxx-ia64.c.  */
-
   if (need_group)
     {
       if (elf_sec_group (isec) == NULL
@@ -7935,7 +7934,7 @@ elfcore_grok_netbsd_note (bfd *abfd, Elf_Internal_Note *note)
 }
 
 static bfd_boolean
-elfcore_grok_nto_status (bfd *abfd, Elf_Internal_Note *note, pid_t *tid)
+elfcore_grok_nto_status (bfd *abfd, Elf_Internal_Note *note, long *tid)
 {
   void *ddata = note->descdata;
   char buf[100];
@@ -7967,7 +7966,7 @@ elfcore_grok_nto_status (bfd *abfd, Elf_Internal_Note *note, pid_t *tid)
     elf_tdata (abfd)->core_lwpid = *tid;
 
   /* Make a ".qnx_core_status/%d" section.  */
-  sprintf (buf, ".qnx_core_status/%ld", (long) *tid);
+  sprintf (buf, ".qnx_core_status/%ld", *tid);
 
   name = bfd_alloc (abfd, strlen (buf) + 1);
   if (name == NULL)
@@ -7988,7 +7987,7 @@ elfcore_grok_nto_status (bfd *abfd, Elf_Internal_Note *note, pid_t *tid)
 static bfd_boolean
 elfcore_grok_nto_regs (bfd *abfd,
 		       Elf_Internal_Note *note,
-		       pid_t tid,
+		       long tid,
 		       char *base)
 {
   char buf[100];
@@ -7996,7 +7995,7 @@ elfcore_grok_nto_regs (bfd *abfd,
   asection *sect;
 
   /* Make a "(base)/%d" section.  */
-  sprintf (buf, "%s/%ld", base, (long) tid);
+  sprintf (buf, "%s/%ld", base, tid);
 
   name = bfd_alloc (abfd, strlen (buf) + 1);
   if (name == NULL)
@@ -8029,7 +8028,7 @@ elfcore_grok_nto_note (bfd *abfd, Elf_Internal_Note *note)
   /* Every GREG section has a STATUS section before it.  Store the
      tid from the previous call to pass down to the next gregs
      function.  */
-  static pid_t tid = 1;
+  static long tid = 1;
 
   switch (note->type)
     {
