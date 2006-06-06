@@ -74,7 +74,6 @@ static bfd_boolean load_symbols (lang_input_statement_type *,
 static struct bfd_hash_entry *lang_definedness_newfunc
  (struct bfd_hash_entry *, struct bfd_hash_table *, const char *);
 static void insert_undefined (const char *);
-static void print_all_symbols (asection *);
 static bfd_boolean sort_def_symbol (struct bfd_link_hash_entry *, void *);
 static void print_statement (lang_statement_union_type *,
 			     lang_output_section_statement_type *);
@@ -1742,6 +1741,7 @@ init_os (lang_output_section_statement_type *s, asection *isec)
     }
   s->bfd_section->output_section = s->bfd_section;
   s->bfd_section->output_offset = 0;
+
   if (!command_line.reduce_memory_overheads)
     {
       fat_section_userdata_type *new
@@ -1749,7 +1749,6 @@ init_os (lang_output_section_statement_type *s, asection *isec)
       memset (new, 0, sizeof (fat_section_userdata_type));
       get_userdata (s->bfd_section) = new;
     }
-
 
   /* If there is a base address, make sure that any sections it might
      mention are initialized.  */
@@ -3152,8 +3151,9 @@ map_input_to_output_sections
 	  if (!(os->flags & SEC_NEVER_LOAD))
 	    os->bfd_section->flags |= SEC_ALLOC | SEC_LOAD;
 	  break;
-	case lang_fill_statement_enum:
 	case lang_input_section_enum:
+	  break;
+	case lang_fill_statement_enum:
 	case lang_object_symbols_statement_enum:
 	case lang_reloc_statement_enum:
 	case lang_padding_statement_enum:
@@ -3481,8 +3481,7 @@ print_one_symbol (struct bfd_link_hash_entry *hash_entry, void *ptr)
 }
 
 static void
-print_all_symbols (sec)
-     asection *sec;
+print_all_symbols (asection *sec)
 {
   struct fat_user_section_struct *ud = get_userdata (sec);
   struct map_symbol_def *def;
