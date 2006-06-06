@@ -1,3 +1,7 @@
+2006-06-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* m68hc11-dis.c (print_insn): Warning fix.
+
 2006-06-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* po/Make-in (top_builddir): Define.
