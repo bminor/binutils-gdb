@@ -455,7 +455,6 @@ bfd_hash_lookup (struct bfd_hash_table *table,
   if (copy)
     {
       char *new;
-  table->count ++;
 
       new = objalloc_alloc ((struct objalloc *) table->memory, len + 1);
       if (!new)
@@ -470,6 +469,7 @@ bfd_hash_lookup (struct bfd_hash_table *table,
   hashp->hash = hash;
   hashp->next = table->table[index];
   table->table[index] = hashp;
+  table->count++;
 
   if (table->count > table->size * 3 / 4)
     {

@@ -1,5 +1,7 @@
 2006-06-06  Alan Modra  <amodra@bigpond.net.au>
 
+	* hash.c (bfd_hash_lookup): Correct stray line.
+
 	* elf.c (_bfd_elf_init_private_section_data): Comment typo.
 	(elfcore_grok_nto_status): Use long instead of pid_t.
 	(elfcore_grok_nto_regs, elfcore_grok_nto_note): Likewise.
