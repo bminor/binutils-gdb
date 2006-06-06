@@ -1,3 +1,15 @@
+2006-06-06  Thiemo Seufer  <ths@mips.com>
+            Chao-ying Fu  <fu@mips.com>
+
+	* config/tc-mips.c (ISA_SUPPORTS_DSP64): New macro.
+	(CPU_HAS_MIPS3D, CPU_HAS_MDMX, CPU_HAS_DSP, CPU_HAS_MT): Delete.
+	(macro_build): Update comment.
+	(mips_ip): Allow DSP64 instructions for MIPS64R2.
+	(mips_after_parse_args): Remove uses of CPU_HAS_MIPS3D and
+	CPU_HAS_MDMX.
+	(mips_cpu_info): Fix formatting. Add MIPS_CPU_ASE_MIPS3D and
+	MIPS_CPU_ASE_MDMX flags for sb1.
+
 2006-06-05  Thiemo Seufer  <ths@mips.com>
 
 	* config/tc-mips.c (macro_build): Use INSERT_OPERAND wherew

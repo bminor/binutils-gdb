@@ -284,6 +284,8 @@ static int file_ase_dsp;
 #define ISA_SUPPORTS_DSP_ASE (mips_opts.isa == ISA_MIPS32R2		\
 			      || mips_opts.isa == ISA_MIPS64R2)
 
+#define ISA_SUPPORTS_DSP64_ASE (mips_opts.isa == ISA_MIPS64R2)
+
 /* True if -mmt was passed or implied by arguments passed on the
    command line (e.g., by -march).  */
 static int file_ase_mt;
@@ -400,22 +402,6 @@ static int mips_32bitmode = 0;
 #define CPU_HAS_MIPS16(cpu)						\
    (strncmp (TARGET_CPU, "mips16", sizeof ("mips16") - 1) == 0		\
     || strncmp (TARGET_CANONICAL, "mips-lsi-elf", sizeof ("mips-lsi-elf") - 1) == 0)
-
-/* Return true if the given CPU supports the MIPS3D ASE.  */
-#define CPU_HAS_MIPS3D(cpu)	((cpu) == CPU_SB1      \
-				 )
-
-/* Return true if the given CPU supports the MDMX ASE.  */
-#define CPU_HAS_MDMX(cpu)	(FALSE                 \
-				 )
-
-/* Return true if the given CPU supports the DSP ASE.  */
-#define CPU_HAS_DSP(cpu)	(FALSE                 \
-				 )
-
-/* Return true if the given CPU supports the MT ASE.  */
-#define CPU_HAS_MT(cpu)		(FALSE                 \
-				 )
 
 /* True if CPU has a dror instruction.  */
 #define CPU_HAS_DROR(CPU)	((CPU) == CPU_VR5400 || (CPU) == CPU_VR5500)
@@ -3301,7 +3287,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
   assert (strcmp (name, mo->name) == 0);
 
   /* Search until we get a match for NAME.  It is assumed here that
-     macros will never generate MDMX or MIPS-3D instructions.  */
+     macros will never generate MDMX, MIPS-3D, DSP or MT instructions.  */
   while (strcmp (fmt, mo->args) != 0
 	 || mo->pinfo == INSN_MACRO
 	 || !OPCODE_IS_MEMBER (mo,
@@ -8371,6 +8357,8 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 			     | (file_ase_mips16 ? INSN_MIPS16 : 0)
 	      		     | (mips_opts.ase_mdmx ? INSN_MDMX : 0)
 	      		     | (mips_opts.ase_dsp ? INSN_DSP : 0)
+	      		     | ((mips_opts.ase_dsp && ISA_SUPPORTS_DSP64_ASE)
+				? INSN_DSP64 : 0)
 	      		     | (mips_opts.ase_mt ? INSN_MT : 0)
 			     | (mips_opts.ase_mips3d ? INSN_MIPS3D : 0)
 			     | (mips_opts.ase_smartmips ? INSN_SMARTMIPS : 0)),
@@ -11451,15 +11439,13 @@ mips_after_parse_args (void)
   if (mips_opts.mips16 == -1)
     mips_opts.mips16 = (CPU_HAS_MIPS16 (file_mips_arch)) ? 1 : 0;
   if (mips_opts.ase_mips3d == -1)
-    mips_opts.ase_mips3d = ((CPU_HAS_MIPS3D (file_mips_arch)
-			     || (arch_info->flags & MIPS_CPU_ASE_MIPS3D))
+    mips_opts.ase_mips3d = ((arch_info->flags & MIPS_CPU_ASE_MIPS3D)
 			    && file_mips_fp32 == 0) ? 1 : 0;
   if (mips_opts.ase_mips3d && file_mips_fp32 == 1)
     as_bad (_("-mfp32 used with -mips3d"));
 
   if (mips_opts.ase_mdmx == -1)
-    mips_opts.ase_mdmx = ((CPU_HAS_MDMX (file_mips_arch)
-			   || (arch_info->flags & MIPS_CPU_ASE_MDMX))
+    mips_opts.ase_mdmx = ((arch_info->flags & MIPS_CPU_ASE_MDMX)
 			  && file_mips_fp32 == 0) ? 1 : 0;
   if (mips_opts.ase_mdmx && file_mips_fp32 == 1)
     as_bad (_("-mfp32 used with -mdmx"));
@@ -14588,11 +14574,11 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "24ke",           MIPS_CPU_ASE_DSP,		ISA_MIPS32R2,	CPU_MIPS32R2 },
   { "24kec",          MIPS_CPU_ASE_DSP,		ISA_MIPS32R2,	CPU_MIPS32R2 },
   { "24kef",          MIPS_CPU_ASE_DSP,		ISA_MIPS32R2,	CPU_MIPS32R2 },
-  { "24kex",         MIPS_CPU_ASE_DSP,		ISA_MIPS32R2,	CPU_MIPS32R2 },
+  { "24kex",          MIPS_CPU_ASE_DSP,		ISA_MIPS32R2,	CPU_MIPS32R2 },
   /* 34k is a 24k with MT ASE, other ASEs are optional.  */
   { "34kc",           MIPS_CPU_ASE_MT,		ISA_MIPS32R2,	CPU_MIPS32R2 },
   { "34kf",           MIPS_CPU_ASE_MT,		ISA_MIPS32R2,	CPU_MIPS32R2 },
-  { "34kx",          MIPS_CPU_ASE_MT,		ISA_MIPS32R2,	CPU_MIPS32R2 },
+  { "34kx",           MIPS_CPU_ASE_MT,		ISA_MIPS32R2,	CPU_MIPS32R2 },
 
   /* MIPS 64 */
   { "5kc",            0,			ISA_MIPS64,	CPU_MIPS64 },
@@ -14603,7 +14589,8 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "25kf",           MIPS_CPU_ASE_MIPS3D,	ISA_MIPS64R2,   CPU_MIPS64R2 },
 
   /* Broadcom SB-1 CPU core */
-  { "sb1",            0,			ISA_MIPS64,	CPU_SB1 },
+  { "sb1",            MIPS_CPU_ASE_MIPS3D | MIPS_CPU_ASE_MDMX,
+						ISA_MIPS64,	CPU_SB1 },
 
   /* End marker */
   { NULL, 0, 0, 0 }

@@ -1,3 +1,9 @@
+2006-06-06  Thiemo Seufer  <ths@mips.com>
+            Chao-ying Fu  <fu@mips.com>
+
+	* mips-dis.c: Disassemble DSP64 instructions for MIPS64R2.
+	* mips-opc.c: Add DSP64 instructions.
+
 2006-06-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* m68hc11-dis.c (print_insn): Warning fix.

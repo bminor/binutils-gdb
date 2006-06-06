@@ -1,3 +1,9 @@
+2006-06-06  Thiemo Seufer  <ths@mips.com>
+            Chao-ying Fu  <fu@mips.com>
+
+	* gas/mips/mips64-dsp.s, gas/mips/mips64-dsp.d: New DSP64 tests.
+	* gas/mips/mips.exp: Run DSP64 tests.
+
 2006-06-05  Thiemo Seufer  <ths@mips.com>
 
 	* gas/mips/mips32-dsp.d, gas/mips/mips32-dsp.s, gas/mips/mips32-mt.d,
