@@ -1,3 +1,34 @@
+2006-06-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elfvers/vers.exp (objdump_versionstuff): Allow versions in
+	any order.
+	* ld-elfvers/vers1.ver: Update.
+	* ld-elfvers/vers2.ver: Update.
+	* ld-elfvers/vers4a.ver: Update.
+	* ld-elfvers/vers7a.ver: Update.
+	* ld-elfvers/vers8.ver: Update.
+	* ld-elfvers/vers9.ver: Update.
+	* ld-elfvers/vers15.ver: Update.
+	* ld-elfvers/vers16a.ver: Update.
+	* ld-elfvers/vers17.ver: Update.
+	* ld-elfvers/vers18.ver: Update.
+	* ld-elfvers/vers20.ver: Update.
+	* ld-elfvers/vers20a.ver: Update.
+	* ld-elfvers/vers21.ver: Update.
+	* ld-elfvers/vers22a.ver: Update.
+	* ld-elfvers/vers22b.ver: Update.
+	* ld-elfvers/vers23a.ver: Update.
+	* ld-elfvers/vers23b.ver: Update.
+	* ld-elfvers/vers23c.ver: Update.
+	* ld-elfvers/vers25a.ver: Update.
+	* ld-elfvers/vers26a.ver: Update.
+	* ld-elfvers/vers27a.ver: Update.
+	* ld-elfvers/vers27d.ver: Update.
+	* ld-elfvers/vers28b.ver: Update.
+	* ld-elfvers/vers29.ver: Update.
+	* ld-elfvers/vers30.ver: Update.
+	* ld-elfvers/vers31.ver: Update.
+
 2006-06-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-elf/sec64k.exp: Add "main" symbol.  Use dc.a for addresses.
