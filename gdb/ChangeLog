@@ -1,3 +1,10 @@
+2006-06-06  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gdb/remote.c (remote_insert_watchpoint): Return -1, rather than
+	fatal error if packet is disabled.
+	(remote_remove_watchpoint, remote_insert_hw_breakpoint,
+	remote_remove_hw_breakpoint): Likewise.
+
 2006-06-02  Nick Roberts  <nickrob@snap.net.nz>
 
 	* breakpoint.c (print_it_typical): Use EXEC_ASYNC_LOCATION_REACHED.
