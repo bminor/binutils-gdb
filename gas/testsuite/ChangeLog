@@ -1,3 +1,20 @@
+2006-06-07  Julian Brown  <julian@codesourcery.com>
+
+	* gas/arm/itblock.s: New file. Helper macro for making all-true IT
+	blocks.
+	* gas/arm/neon-cond-bad-inc.s: New test. Make sure unconditional
+	Neon instructions are rejected...
+	* gas/arm/neon-cond-bad.s: In ARM mode, and...
+	* gas/arm/neon-cond-bad_t2.s: Accepted in Thumb mode (with IT).
+	* gas/arm/neon-cond-bad.l: Expected error output in ARM mode.
+	* gas/arm/neon-cond-bad.d: Control ARM mode test.
+	* gas/arm/neon-cond-bad_t2.d: Expected output in Thumb mode.
+	* gas/arm/vfp-neon-syntax-inc.s: Test VFP Neon-style syntax.
+	* gas/arm/vfp-neon-syntax.s: ...in ARM mode.
+	* gas/arm/vfp-neon-syntax_t2.s: ...and Thumb mode.
+	* gas/arm/vfp-neon-syntax.d: Expected output in ARM mode.
+	* gas/arm/vfp-neon-syntax_t2.d: Expected output in Thumb mode.
+
 2006-06-06  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/thumb2_bcond.d: Update expected output.
