@@ -1,4 +1,4 @@
-@c Copyright 2001, 2002, 2003, 2005
+@c Copyright 2001, 2002, 2003, 2005, 2006
 @c Free Software Foundation, Inc.
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
@@ -78,6 +78,9 @@ Generate code for Power4 architecture.
 
 @item -mpower5
 Generate code for Power5 architecture.
+
+@item -mpower6
+Generate code for Power6 architecture.
 
 @item -mcom
 Generate code Power/PowerPC common instructions.

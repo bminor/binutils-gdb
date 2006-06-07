@@ -1,5 +1,5 @@
 /* ppc-dis.c -- Disassemble PowerPC instructions
-   Copyright 1994, 1995, 2000, 2001, 2002, 2003, 2004, 2005
+   Copyright 1994, 1995, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support
 
@@ -72,6 +72,10 @@ powerpc_dialect (struct disassemble_info *info)
   if (info->disassembler_options
       && strstr (info->disassembler_options, "power5") != NULL)
     dialect |= PPC_OPCODE_POWER4 | PPC_OPCODE_POWER5;
+
+  if (info->disassembler_options
+      && strstr (info->disassembler_options, "power6") != NULL)
+    dialect |= PPC_OPCODE_POWER4 | PPC_OPCODE_POWER5 | PPC_OPCODE_POWER6 | PPC_OPCODE_ALTIVEC;
 
   if (info->disassembler_options
       && strstr (info->disassembler_options, "any") != NULL)
@@ -306,6 +310,7 @@ the -M switch:\n");
   fprintf (stream, "  efs                      Disassemble the EFS instructions\n");
   fprintf (stream, "  power4                   Disassemble the Power4 instructions\n");
   fprintf (stream, "  power5                   Disassemble the Power5 instructions\n");
+  fprintf (stream, "  power6                   Disassemble the Power6 instructions\n");
   fprintf (stream, "  32                       Do not disassemble 64-bit instructions\n");
   fprintf (stream, "  64                       Allow disassembly of 64-bit instructions\n");
 }

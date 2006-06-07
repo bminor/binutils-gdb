@@ -1,6 +1,6 @@
 /* tc-ppc.c -- Assemble for the PowerPC or POWER (RS/6000)
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005 Free Software Foundation, Inc.
+   2004, 2005, 2006 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -917,6 +917,12 @@ parse_cpu (const char *arg)
 		 | PPC_OPCODE_64 | PPC_OPCODE_POWER4
 		 | PPC_OPCODE_POWER5);
     }
+  else if (strcmp (arg, "power6") == 0)
+    {
+      ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
+		 | PPC_OPCODE_64 | PPC_OPCODE_POWER4
+		 | PPC_OPCODE_POWER5 | PPC_OPCODE_POWER6);
+    }
   /* -mcom means assemble for the common intersection between Power
      and PowerPC.  At present, we just allow the union, rather
      than the intersection.  */
@@ -1112,6 +1118,7 @@ PowerPC options:\n\
 -mbooke, mbooke32	generate code for 32-bit PowerPC BookE\n\
 -mpower4		generate code for Power4 architecture\n\
 -mpower5		generate code for Power5 architecture\n\
+-mpower6		generate code for Power6 architecture\n\
 -mcom			generate code Power/PowerPC common instructions\n\
 -many			generate code for any architecture (PWR/PWRX/PPC)\n"));
   fprintf (stream, _("\
@@ -1270,7 +1277,10 @@ ppc_setup_opcodes (void)
 		  == (ppc_cpu & PPC_OPCODE_POWER4)))
 	  && ((op->flags & PPC_OPCODE_POWER5) == 0
 	      || ((op->flags & PPC_OPCODE_POWER5)
-		  == (ppc_cpu & PPC_OPCODE_POWER5))))
+		  == (ppc_cpu & PPC_OPCODE_POWER5)))
+	  && ((op->flags & PPC_OPCODE_POWER6) == 0
+	      || ((op->flags & PPC_OPCODE_POWER6)
+		  == (ppc_cpu & PPC_OPCODE_POWER6))))
 	{
 	  const char *retval;
 
