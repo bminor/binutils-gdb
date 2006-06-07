@@ -1,3 +1,7 @@
+2006-06-07  Joseph S. Myers  <joseph@codesourcery.com>
+
+	* po/Make-in (pdf, ps): New dummy targets.
+
 2006-06-06  Paul Brook  <paul@codesourcery.com>
 
 	* arm-dis.c (coprocessor_opcodes): Add %c to unconditional arm

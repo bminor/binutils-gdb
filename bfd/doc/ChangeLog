@@ -1,3 +1,7 @@
+2006-06-07  Joseph S. Myers  <joseph@codesourcery.com>
+
+	* bfd.texinfo: Remove local @tex code.
+
 2006-06-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.in: Regenerate.

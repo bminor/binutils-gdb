@@ -200,7 +200,7 @@ check: all
 
 cat-id-tbl.o: ../intl/libgettext.h
 
-html dvi info tags TAGS ID:
+html dvi pdf ps info tags TAGS ID:
 
 mostlyclean:
 	rm -f core core.* *.pox $(PACKAGE).po *.old.po cat-id-tbl.tmp

@@ -1,3 +1,7 @@
+2006-06-07  Joseph S. Myers  <joseph@codesourcery.com>
+
+	* po/Make-in (pdf, ps): New dummy targets.
+
 2006-06-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.h (enum section_type): Delete dsect_section, copy_section,

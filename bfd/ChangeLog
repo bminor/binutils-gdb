@@ -1,3 +1,7 @@
+2006-06-07  Joseph S. Myers  <joseph@codesourcery.com>
+
+	* po/Make-in (pdf, ps): New dummy targets.
+
 2006-06-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* hash.c (bfd_hash_lookup): Correct stray line.
