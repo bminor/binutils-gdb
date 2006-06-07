@@ -1,6 +1,6 @@
 /* ldlang.h - linker command language support
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005
+   2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
@@ -108,11 +108,8 @@ typedef struct lang_output_statement_struct
 enum section_type
 {
   normal_section,
-  dsect_section,
-  copy_section,
   noload_section,
-  info_section,
-  overlay_section
+  noalloc_section
 };
 
 /* This structure holds a list of program headers describing

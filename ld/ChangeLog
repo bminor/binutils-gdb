@@ -1,3 +1,10 @@
+2006-06-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.h (enum section_type): Delete dsect_section, copy_section,
+	info_section and overlay_section.  Add noalloc_section.
+	* ldlang.c (lang_add_section): Adjust.
+	* ldgram.y (type): Adjust.
+
 2006-06-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (init_os): Whitespace.

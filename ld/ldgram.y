@@ -1,6 +1,6 @@
 /* A YACC grammar to parse a superset of the AT&T linker scripting language.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support (steve@cygnus.com).
 
    This file is part of GNU ld.
@@ -963,10 +963,10 @@ section:	NAME 		{ ldlex_expression(); }
 
 type:
 	   NOLOAD  { sectype = noload_section; }
-	|  DSECT   { sectype = dsect_section; }
-	|  COPY    { sectype = copy_section; }
-	|  INFO    { sectype = info_section; }
-	|  OVERLAY { sectype = overlay_section; }
+	|  DSECT   { sectype = noalloc_section; }
+	|  COPY    { sectype = noalloc_section; }
+	|  INFO    { sectype = noalloc_section; }
+	|  OVERLAY { sectype = noalloc_section; }
 	;
 
 atype:

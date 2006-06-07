@@ -1962,10 +1962,7 @@ lang_add_section (lang_statement_list_type *ptr,
 	{
 	case normal_section:
 	  break;
-	case dsect_section:
-	case copy_section:
-	case info_section:
-	case overlay_section:
+	case noalloc_section:
 	  output->bfd_section->flags &= ~SEC_ALLOC;
 	  break;
 	case noload_section:
