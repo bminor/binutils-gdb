@@ -1,3 +1,10 @@
+2006-06-06  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb2_bcond.d: Update expected output.
+	* gas/arm/thumb32.d: Ditto.
+	* gas/arm/vfp1_t2.d: Ditto.
+	* gas/arm/vfp1xD_t2.d: Ditto.
+
 2006-06-06  Thiemo Seufer  <ths@mips.com>
             Chao-ying Fu  <fu@mips.com>
 

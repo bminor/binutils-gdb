@@ -145,61 +145,60 @@ Disassembly of section .text:
 0+21c <[^>]*> eeb5 db40 	fcmpzd	d13
 0+220 <[^>]*> eeb5 eb40 	fcmpzd	d14
 0+224 <[^>]*> eeb5 fb40 	fcmpzd	d15
-# The "(eq|)" should be replaces by "eq" once the disassembler is fixed.
 0+228 <[^>]*> bf01      	itttt	eq
-0+22a <[^>]*> eeb4 1bcf 	fcmped(eq|)	d1, d15
-0+22e <[^>]*> eeb5 2bc0 	fcmpezd(eq|)	d2
-0+232 <[^>]*> eeb4 3b4e 	fcmpd(eq|)	d3, d14
-0+236 <[^>]*> eeb5 4b40 	fcmpzd(eq|)	d4
+0+22a <[^>]*> eeb4 1bcf 	fcmpedeq	d1, d15
+0+22e <[^>]*> eeb5 2bc0 	fcmpezdeq	d2
+0+232 <[^>]*> eeb4 3b4e 	fcmpdeq	d3, d14
+0+236 <[^>]*> eeb5 4b40 	fcmpzdeq	d4
 0+23a <[^>]*> bf01      	itttt	eq
-0+23c <[^>]*> eeb0 5bcd 	fabsd(eq|)	d5, d13
-0+240 <[^>]*> eeb0 6b4c 	fcpyd(eq|)	d6, d12
-0+244 <[^>]*> eeb1 7b4b 	fnegd(eq|)	d7, d11
-0+248 <[^>]*> eeb1 8bca 	fsqrtd(eq|)	d8, d10
+0+23c <[^>]*> eeb0 5bcd 	fabsdeq	d5, d13
+0+240 <[^>]*> eeb0 6b4c 	fcpydeq	d6, d12
+0+244 <[^>]*> eeb1 7b4b 	fnegdeq	d7, d11
+0+248 <[^>]*> eeb1 8bca 	fsqrtdeq	d8, d10
 0+24c <[^>]*> bf01      	itttt	eq
-0+24e <[^>]*> ee31 9b0f 	faddd(eq|)	d9, d1, d15
-0+252 <[^>]*> ee83 2b0e 	fdivd(eq|)	d2, d3, d14
-0+256 <[^>]*> ee0d 4b0c 	fmacd(eq|)	d4, d13, d12
-0+25a <[^>]*> ee16 5b0b 	fmscd(eq|)	d5, d6, d11
+0+24e <[^>]*> ee31 9b0f 	fadddeq	d9, d1, d15
+0+252 <[^>]*> ee83 2b0e 	fdivdeq	d2, d3, d14
+0+256 <[^>]*> ee0d 4b0c 	fmacdeq	d4, d13, d12
+0+25a <[^>]*> ee16 5b0b 	fmscdeq	d5, d6, d11
 0+25e <[^>]*> bf01      	itttt	eq
-0+260 <[^>]*> ee2a 7b09 	fmuld(eq|)	d7, d10, d9
-0+264 <[^>]*> ee09 8b4a 	fnmacd(eq|)	d8, d9, d10
-0+268 <[^>]*> ee16 7b4b 	fnmscd(eq|)	d7, d6, d11
-0+26c <[^>]*> ee24 5b4c 	fnmuld(eq|)	d5, d4, d12
+0+260 <[^>]*> ee2a 7b09 	fmuldeq	d7, d10, d9
+0+264 <[^>]*> ee09 8b4a 	fnmacdeq	d8, d9, d10
+0+268 <[^>]*> ee16 7b4b 	fnmscdeq	d7, d6, d11
+0+26c <[^>]*> ee24 5b4c 	fnmuldeq	d5, d4, d12
 0+270 <[^>]*> bf02      	ittt	eq
-0+272 <[^>]*> ee3d 3b4e 	fsubd(eq|)	d3, d13, d14
-0+276 <[^>]*> ed95 2b00 	vldr(eq|)	d2, \[r5\]
-0+27a <[^>]*> ed8c 1b00 	vstr(eq|)	d1, \[ip\]
+0+272 <[^>]*> ee3d 3b4e 	fsubdeq	d3, d13, d14
+0+276 <[^>]*> ed95 2b00 	vldreq	d2, \[r5\]
+0+27a <[^>]*> ed8c 1b00 	vstreq	d1, \[ip\]
 0+27e <[^>]*> bf01      	itttt	eq
-0+280 <[^>]*> ec91 1b02 	vldmia(eq|)	r1, {d1}
-0+284 <[^>]*> ec92 2b02 	vldmia(eq|)	r2, {d2}
-0+288 <[^>]*> ecb3 3b02 	vldmia(eq|)	r3!, {d3}
-0+28c <[^>]*> ecb4 4b02 	vldmia(eq|)	r4!, {d4}
+0+280 <[^>]*> ec91 1b02 	vldmiaeq	r1, {d1}
+0+284 <[^>]*> ec92 2b02 	vldmiaeq	r2, {d2}
+0+288 <[^>]*> ecb3 3b02 	vldmiaeq	r3!, {d3}
+0+28c <[^>]*> ecb4 4b02 	vldmiaeq	r4!, {d4}
 0+290 <[^>]*> bf01      	itttt	eq
-0+292 <[^>]*> ed35 5b02 	vldmdb(eq|)	r5!, {d5}
-0+296 <[^>]*> ed36 6b02 	vldmdb(eq|)	r6!, {d6}
-0+29a <[^>]*> ec87 fb02 	vstmia(eq|)	r7, {d15}
-0+29e <[^>]*> ec88 eb02 	vstmia(eq|)	r8, {d14}
+0+292 <[^>]*> ed35 5b02 	vldmdbeq	r5!, {d5}
+0+296 <[^>]*> ed36 6b02 	vldmdbeq	r6!, {d6}
+0+29a <[^>]*> ec87 fb02 	vstmiaeq	r7, {d15}
+0+29e <[^>]*> ec88 eb02 	vstmiaeq	r8, {d14}
 0+2a2 <[^>]*> bf01      	itttt	eq
-0+2a4 <[^>]*> eca9 db02 	vstmia(eq|)	r9!, {d13}
-0+2a8 <[^>]*> ecaa cb02 	vstmia(eq|)	sl!, {d12}
-0+2ac <[^>]*> ed2b bb02 	vstmdb(eq|)	fp!, {d11}
-0+2b0 <[^>]*> ed2c ab02 	vstmdb(eq|)	ip!, {d10}
+0+2a4 <[^>]*> eca9 db02 	vstmiaeq	r9!, {d13}
+0+2a8 <[^>]*> ecaa cb02 	vstmiaeq	sl!, {d12}
+0+2ac <[^>]*> ed2b bb02 	vstmdbeq	fp!, {d11}
+0+2b0 <[^>]*> ed2c ab02 	vstmdbeq	ip!, {d10}
 0+2b4 <[^>]*> bf01      	itttt	eq
-0+2b6 <[^>]*> eeb8 fbe0 	fsitod(eq|)	d15, s1
-0+2ba <[^>]*> eeb8 1b6f 	fuitod(eq|)	d1, s31
-0+2be <[^>]*> eefd 0b4f 	ftosid(eq|)	s1, d15
-0+2c2 <[^>]*> eefd fbc2 	ftosizd(eq|)	s31, d2
+0+2b6 <[^>]*> eeb8 fbe0 	fsitodeq	d15, s1
+0+2ba <[^>]*> eeb8 1b6f 	fuitodeq	d1, s31
+0+2be <[^>]*> eefd 0b4f 	ftosideq	s1, d15
+0+2c2 <[^>]*> eefd fbc2 	ftosizdeq	s31, d2
 0+2c6 <[^>]*> bf01      	itttt	eq
-0+2c8 <[^>]*> eefc 7b42 	ftouid(eq|)	s15, d2
-0+2cc <[^>]*> eefc 5bc3 	ftouizd(eq|)	s11, d3
-0+2d0 <[^>]*> eeb7 1ac5 	fcvtds(eq|)	d1, s10
-0+2d4 <[^>]*> eef7 5bc1 	fcvtsd(eq|)	s11, d1
+0+2c8 <[^>]*> eefc 7b42 	ftouideq	s15, d2
+0+2cc <[^>]*> eefc 5bc3 	ftouizdeq	s11, d3
+0+2d0 <[^>]*> eeb7 1ac5 	fcvtdseq	d1, s10
+0+2d4 <[^>]*> eef7 5bc1 	fcvtsdeq	s11, d1
 0+2d8 <[^>]*> bf01      	itttt	eq
-0+2da <[^>]*> ee31 8b10 	vmov(eq|)\.32	r8, d1\[1\]
-0+2de <[^>]*> ee1f 7b10 	vmov(eq|)\.32	r7, d15\[0\]
-0+2e2 <[^>]*> ee21 fb10 	vmov(eq|)\.32	d1\[1\], pc
-0+2e6 <[^>]*> ee0f 1b10 	vmov(eq|)\.32	d15\[0\], r1
+0+2da <[^>]*> ee31 8b10 	vmoveq\.32	r8, d1\[1\]
+0+2de <[^>]*> ee1f 7b10 	vmoveq\.32	r7, d15\[0\]
+0+2e2 <[^>]*> ee21 fb10 	vmoveq\.32	d1\[1\], pc
+0+2e6 <[^>]*> ee0f 1b10 	vmoveq\.32	d15\[0\], r1
 0+2ea <[^>]*> bf00      	nop
 0+2ec <[^>]*> bf00      	nop
 0+2ee <[^>]*> bf00      	nop
