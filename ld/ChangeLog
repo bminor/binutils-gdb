@@ -1,3 +1,7 @@
+2006-06-07  Joseph S. Myers  <joseph@codesourcery.com>
+
+	* po/Make-in (pdf, ps): New dummy targets.
+
 2006-06-02  Joseph S. Myers  <joseph@codesourcery.com>
 
 	* Makefile.am (TEXI2DVI): Add -I $(top_srcdir)/../libiberty.

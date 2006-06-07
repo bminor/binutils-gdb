@@ -1,3 +1,7 @@
+2006-06-07  Joseph S. Myers  <joseph@codesourcery.com>
+
+	* po/Make-in (pdf, ps): New dummy targets.
+
 2006-05-30  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.

@@ -1,3 +1,7 @@
+2006-06-07  Joseph S. Myers  <joseph@codesourcery.com>
+
+	* po/Make-in (pdf, ps): New dummy targets.
+
 2006-06-02  Joseph S. Myers  <joseph@codesourcery.com>
 
 	* doc/Makefile.am (TEXI2DVI): Define.
