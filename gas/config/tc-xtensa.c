@@ -18,13 +18,11 @@
    the Free Software Foundation, 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
-#include <string.h>
 #include <limits.h>
 #include "as.h"
 #include "sb.h"
 #include "safe-ctype.h"
 #include "tc-xtensa.h"
-#include "frags.h"
 #include "subsegs.h"
 #include "xtensa-relax.h"
 #include "xtensa-istack.h"

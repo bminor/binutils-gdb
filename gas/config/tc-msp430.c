@@ -1,6 +1,6 @@
 /* tc-msp430.c -- Assembler code for the Texas Instruments MSP430
 
-  Copyright (C) 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+  Copyright (C) 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
   Contributed by Dmitry Diky <diwil@mail.ru>
 
   This file is part of GAS, the GNU Assembler.
@@ -20,9 +20,6 @@
   the Free Software Foundation, 51 Franklin Street - Fifth Floor,
   Boston, MA 02110-1301, USA.  */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include <limits.h>
 
 #define PUSH_1X_WORKAROUND

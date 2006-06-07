@@ -1,5 +1,5 @@
 /* tc-dlx.h -- Assemble for the DLX
-   Copyright 2002, 2003, 2005 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -21,10 +21,6 @@
 /* Initially created by Kuang Hwa Lin, 3/20/2002.  */
 
 #define TC_DLX
-
-#ifndef  __BFD_H_SEEN__
-#include "bfd.h"
-#endif
 
 /* The target BFD architecture.  */
 #define TARGET_ARCH              bfd_arch_dlx

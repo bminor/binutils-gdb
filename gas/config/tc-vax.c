@@ -2035,8 +2035,6 @@ main (void)
    We declare arrays non-local in case some of our tiny-minded machines
    default to small stacks. Also, helps with some debuggers.  */
 
-#include <stdio.h>
-
 char answer[100];		/* Human types into here.  */
 char *p;			/*  */
 char *myerr;

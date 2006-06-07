@@ -1,5 +1,5 @@
 /* itbl-ops.c
-   Copyright 1997, 1999, 2000, 2001, 2002, 2003, 2005
+   Copyright 1997, 1999, 2000, 2001, 2002, 2003, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -89,9 +89,7 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "as.h"
 #include "itbl-ops.h"
 #include <itbl-parse.h>
 
@@ -253,8 +251,6 @@ itbl_add_operand (struct itbl_entry *e, int yytype, int sbit,
 /* Interfaces for assembler and disassembler */
 
 #ifndef STAND_ALONE
-#include "as.h"
-#include "symbols.h"
 static void append_insns_as_macros (void);
 
 /* Initialize for gas.  */

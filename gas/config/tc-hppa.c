@@ -22,8 +22,6 @@
 /* HP PA-RISC support was contributed by the Center for Software Science
    at the University of Utah.  */
 
-#include <stdio.h>
-
 #include "as.h"
 #include "safe-ctype.h"
 #include "subsegs.h"

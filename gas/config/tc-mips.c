@@ -1,6 +1,6 @@
 /* tc-mips.c -- assemble code for a MIPS chip.
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2006 Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
    Modified for ECOFF and R4000 support by Ian Lance Taylor of Cygnus
@@ -27,8 +27,6 @@
 #include "config.h"
 #include "subsegs.h"
 #include "safe-ctype.h"
-
-#include <stdarg.h>
 
 #include "opcode/mips.h"
 #include "itbl-ops.h"

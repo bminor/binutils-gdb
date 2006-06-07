@@ -1,6 +1,6 @@
 /* tc-arm.c -- Assemble for the ARM
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005
+   2004, 2005, 2006
    Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
@@ -25,18 +25,12 @@
    Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
-#include <string.h>
 #include <limits.h>
 #define	 NO_RELOC 0
 #include "as.h"
 #include "safe-ctype.h"
-
-/* Need TARGET_CPU.  */
-#include "config.h"
 #include "subsegs.h"
 #include "obstack.h"
-#include "symbols.h"
-#include "listing.h"
 
 #include "opcode/arm.h"
 

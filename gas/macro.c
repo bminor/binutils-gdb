@@ -1,6 +1,6 @@
 /* macro.c - macro support for gas
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005 Free Software Foundation, Inc.
+   2004, 2005, 2006 Free Software Foundation, Inc.
 
    Written by Steve and Judy Chamberlain of Cygnus Support,
       sac@cygnus.com
@@ -22,46 +22,10 @@
    Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
-#include "config.h"
-
-#ifndef __GNUC__
-# if HAVE_ALLOCA_H
-#  include <alloca.h>
-# else
-#  ifdef _AIX
-/* Indented so that pre-ansi C compilers will ignore it, rather than
-   choke on it.  Some versions of AIX require this to be the first
-   thing in the file.  */
- #pragma alloca
-#  else
-#   ifndef alloca /* predefined by HP cc +Olibcalls */
-#    if !defined (__STDC__) && !defined (__hpux)
-extern char *alloca ();
-#    else
-extern void *alloca ();
-#    endif /* __STDC__, __hpux */
-#   endif /* alloca */
-#  endif /* _AIX */
-# endif /* HAVE_ALLOCA_H */
-#endif /* __GNUC__ */
-
-#include <stdio.h>
-#ifdef HAVE_STRING_H
-#include <string.h>
-#else
-#include <strings.h>
-#endif
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
 #include "as.h"
-#include "libiberty.h"
 #include "safe-ctype.h"
 #include "sb.h"
-#include "hash.h"
 #include "macro.h"
-
-#include "asintl.h"
 
 /* The routines in this file handle macro definition and expansion.
    They are called by gas.  */

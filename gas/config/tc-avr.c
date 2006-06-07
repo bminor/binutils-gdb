@@ -21,11 +21,9 @@
    the Free Software Foundation, 51 Franklin Street - Fifth Floor,
    Boston, MA 02110-1301, USA.  */
 
-#include <stdio.h>
 #include "as.h"
 #include "safe-ctype.h"
 #include "subsegs.h"
-#include "libiberty.h"
 
 struct avr_opcodes_s
 {

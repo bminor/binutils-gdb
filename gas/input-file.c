@@ -1,6 +1,6 @@
 /* input_file.c - Deal with Input Files -
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1999, 2000, 2001,
-   2002, 2003, 2005
+   2002, 2003, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -25,9 +25,6 @@
    What we lose in "efficiency" we gain in modularity.
    Note we don't need to #include the "as.h" file. No common coupling!  */
 
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
 #include "as.h"
 #include "input-file.h"
 #include "safe-ctype.h"

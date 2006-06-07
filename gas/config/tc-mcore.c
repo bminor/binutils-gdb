@@ -1,5 +1,5 @@
 /* tc-mcore.c -- Assemble code for M*Core
-   Copyright 1999, 2000, 2001, 2002, 2003, 2005
+   Copyright 1999, 2000, 2001, 2002, 2003, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -19,14 +19,11 @@
    Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
-#include <stdio.h>
 #include "as.h"
-#include "bfd.h"
 #include "subsegs.h"
 #define DEFINE_TABLE
 #include "../opcodes/mcore-opc.h"
 #include "safe-ctype.h"
-#include <string.h>
 
 #ifdef OBJ_ELF
 #include "elf/mcore.h"

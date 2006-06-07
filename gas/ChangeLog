@@ -1,3 +1,76 @@
+2006-06-07  Alan Modra  <amodra@bigpond.net.au>
+	    Ladislav Michl  <ladis@linux-mips.org>
+
+	* app.c: Don't include headers already included by as.h.
+	* as.c: Likewise.
+	* atof-generic.c: Likewise.
+	* cgen.c: Likewise.
+	* dwarf2dbg.c: Likewise.
+	* expr.c: Likewise.
+	* input-file.c: Likewise.
+	* input-scrub.c: Likewise.
+	* macro.c: Likewise.
+	* output-file.c: Likewise.
+	* read.c: Likewise.
+	* sb.c: Likewise.
+	* config/bfin-lex.l: Likewise.
+	* config/obj-coff.h: Likewise.
+	* config/obj-elf.h: Likewise.
+	* config/obj-som.h: Likewise.
+	* config/tc-arc.c: Likewise.
+	* config/tc-arm.c: Likewise.
+	* config/tc-avr.c: Likewise.
+	* config/tc-bfin.c: Likewise.
+	* config/tc-cris.c: Likewise.
+	* config/tc-d10v.c: Likewise.
+	* config/tc-d30v.c: Likewise.
+	* config/tc-dlx.h: Likewise.
+	* config/tc-fr30.c: Likewise.
+	* config/tc-frv.c: Likewise.
+	* config/tc-h8300.c: Likewise.
+	* config/tc-hppa.c: Likewise.
+	* config/tc-i370.c: Likewise.
+	* config/tc-i860.c: Likewise.
+	* config/tc-i960.c: Likewise.
+	* config/tc-ip2k.c: Likewise.
+	* config/tc-iq2000.c: Likewise.
+	* config/tc-m32c.c: Likewise.
+	* config/tc-m32r.c: Likewise.
+	* config/tc-maxq.c: Likewise.
+	* config/tc-mcore.c: Likewise.
+	* config/tc-mips.c: Likewise.
+	* config/tc-mmix.c: Likewise.
+	* config/tc-mn10200.c: Likewise.
+	* config/tc-mn10300.c: Likewise.
+	* config/tc-msp430.c: Likewise.
+	* config/tc-mt.c: Likewise.
+	* config/tc-ns32k.c: Likewise.
+	* config/tc-openrisc.c: Likewise.
+	* config/tc-ppc.c: Likewise.
+	* config/tc-s390.c: Likewise.
+	* config/tc-sh.c: Likewise.
+	* config/tc-sh64.c: Likewise.
+	* config/tc-sparc.c: Likewise.
+	* config/tc-tic30.c: Likewise.
+	* config/tc-tic4x.c: Likewise.
+	* config/tc-tic54x.c: Likewise.
+	* config/tc-v850.c: Likewise.
+	* config/tc-vax.c: Likewise.
+	* config/tc-xc16x.c: Likewise.
+	* config/tc-xstormy16.c: Likewise.
+	* config/tc-xtensa.c: Likewise.
+	* config/tc-z80.c: Likewise.
+	* config/tc-z8k.c: Likewise.
+	* macro.h: Don't include sb.h or ansidecl.h.
+	* sb.h: Don't include stdio.h or ansidecl.h.
+	* cond.c: Include sb.h.
+	* itbl-lex.l: Include as.h instead of other system headers.
+	* itbl-parse.y: Likewise.
+	* itbl-ops.c: Similarly.
+	* itbl-ops.h: Don't include as.h or ansidecl.h.
+	* config/bfin-defs.h: Don't include bfd.h or as.h.
+	* config/bfin-parse.y: Include as.h instead of other system headers.
+
 2006-06-06  Ben Elliston  <bje@au.ibm.com>
 	    Anton Blanchard  <anton@samba.org>
 

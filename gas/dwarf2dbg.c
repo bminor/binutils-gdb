@@ -28,7 +28,6 @@
 	      [epilogue_begin] [is_stmt VALUE] [isa VALUE]
 */
 
-#include "ansidecl.h"
 #include "as.h"
 #include "safe-ctype.h"
 

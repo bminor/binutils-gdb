@@ -25,7 +25,6 @@
    (It also gives smaller files to re-compile.)
    Here, "operand"s are of expressions, not instructions.  */
 
-#include <string.h>
 #define min(a, b)       ((a) < (b) ? (a) : (b))
 
 #include "as.h"

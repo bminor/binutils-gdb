@@ -1,6 +1,6 @@
 /* tc-z8k.c -- Assemble code for the Zilog Z800n
    Copyright 1992, 1993, 1994, 1995, 1996, 1998, 2000, 2001, 2002, 2003,
-   2005 Free Software Foundation, Inc.
+   2005, 2006 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -21,10 +21,7 @@
 
 /* Written By Steve Chamberlain <sac@cygnus.com>.  */
 
-#include <stdio.h>
-
 #include "as.h"
-#include "bfd.h"
 #include "safe-ctype.h"
 #define DEFINE_TABLE
 #include "opcodes/z8k-opc.h"

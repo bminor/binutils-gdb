@@ -1,5 +1,5 @@
 /* tc-m32c.c -- Assembler for the Renesas M32C.
-   Copyright (C) 2005 Free Software Foundation.
+   Copyright (C) 2005, 2006 Free Software Foundation.
    Contributed by RedHat.
 
    This file is part of GAS, the GNU Assembler.
@@ -19,7 +19,6 @@
    the Free Software Foundation, 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include <stdio.h>
 #include "as.h"
 #include "subsegs.h"     
 #include "symcat.h"
@@ -29,9 +28,7 @@
 #include "elf/common.h"
 #include "elf/m32c.h"
 #include "libbfd.h"
-#include "libiberty.h"
 #include "safe-ctype.h"
-#include "bfd.h"
 
 /* Structure to hold all of the different components
    describing an individual instruction.  */

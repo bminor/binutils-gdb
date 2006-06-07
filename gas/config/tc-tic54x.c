@@ -45,9 +45,7 @@
    COFF1 limits section names to 8 characters.
    Some of the default behavior changed from COFF1 to COFF2.  */
 
-#include <stdlib.h>
 #include <limits.h>
-#include <errno.h>
 #include "as.h"
 #include "safe-ctype.h"
 #include "sb.h"

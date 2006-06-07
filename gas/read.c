@@ -38,7 +38,6 @@ Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
 #include "sb.h"
 #include "macro.h"
 #include "obstack.h"
-#include "listing.h"
 #include "ecoff.h"
 #include "dw2gencfi.h"
 

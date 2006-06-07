@@ -1,6 +1,6 @@
 /* This is the Assembler Pre-Processor
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003
+   1999, 2000, 2001, 2002, 2003, 2006
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -26,8 +26,7 @@
    # <number> <filename> <garbage> into a .line <number>\n.file <filename>
    pair.  This needs better error-handling.  */
 
-#include <stdio.h>
-#include "as.h"			/* For BAD_CASE() only.  */
+#include "as.h"
 
 #if (__STDC__ != 1)
 #ifndef const

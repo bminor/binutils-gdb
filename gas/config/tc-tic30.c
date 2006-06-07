@@ -1,5 +1,5 @@
 /* tc-c30.c -- Assembly code for the Texas Instruments TMS320C30
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2006
    Free Software Foundation, Inc.
    Contributed by Steven Haworth (steve@pm.cse.rmit.edu.au)
 
@@ -28,7 +28,6 @@
 #include "as.h"
 #include "safe-ctype.h"
 #include "opcode/tic30.h"
-#include <stdarg.h>
 
 /* Put here all non-digit non-letter characters that may occur in an
    operand.  */
