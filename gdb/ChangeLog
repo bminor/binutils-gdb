@@ -13,7 +13,7 @@
 
 2006-06-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
-	* (struct remote_state): New type, only containing
+	* remote.c (struct remote_state): New type, only containing
 	buf and buf_size.
 	(remote_state): New variable.
 	(get_remote_state): New function.
