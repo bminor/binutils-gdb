@@ -1,3 +1,8 @@
+2006-06-08  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gdb/remote.c (remote_open_1): Do preopen tasks before
+	irreversably destroying state.
+
 2006-06-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* (struct remote_state): New type, only containing
