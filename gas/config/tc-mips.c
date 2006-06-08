@@ -1098,6 +1098,8 @@ static const pseudo_typeS mips_pseudo_table[] =
   {"half", s_cons, 1},
   {"dword", s_cons, 3},
   {"weakext", s_mips_weakext, 0},
+  {"origin", s_org, 0},
+  {"repeat", s_rept, 0},
 
   /* These pseudo-ops are defined in read.c, but must be overridden
      here for one reason or another.  */

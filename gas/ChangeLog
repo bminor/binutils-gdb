@@ -1,3 +1,8 @@
+2006-06-08  Nigel Stephens  <nigel@mips.com>
+
+	* config/tc-mips.c (mips_pseudo_table): Add "origin" and "repeat"
+	aliases for better compatibility with SGI tools.
+
 2006-06-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* configure.in (BFDLIB, BFDVER_H, ALL_OBJ_DEPS): Delete.
