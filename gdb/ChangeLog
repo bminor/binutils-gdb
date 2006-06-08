@@ -1,3 +1,7 @@
+2006-06-08  Michael Snyder  <msnyder@redhat.com>
+
+	* mips-tdep.c (fp_register_arg_p): Recognize floating point typedefs.
+
 2006-06-08  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* m68k-tdep.c (m68k_dwarf_reg_to_regnum): New.

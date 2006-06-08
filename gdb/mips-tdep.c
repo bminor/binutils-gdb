@@ -2335,7 +2335,8 @@ fp_register_arg_p (enum type_code typecode, struct type *arg_type)
 	       && (typecode == TYPE_CODE_STRUCT
 		   || typecode == TYPE_CODE_UNION)
 	       && TYPE_NFIELDS (arg_type) == 1
-	       && TYPE_CODE (TYPE_FIELD_TYPE (arg_type, 0)) == TYPE_CODE_FLT))
+	       && TYPE_CODE (check_typedef (TYPE_FIELD_TYPE (arg_type, 0))) 
+	       == TYPE_CODE_FLT))
 	  && MIPS_FPU_TYPE != MIPS_FPU_NONE);
 }
 
