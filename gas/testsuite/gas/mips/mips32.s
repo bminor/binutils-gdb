@@ -79,5 +79,15 @@ text_label:
       sdbbp   0                       # disassembles without code
       sdbbp   0x56789
 
+      # Cop2 branches with cond code number, like bc1t/f
+      bc2f    $cc0,text_label
+      nop
+      bc2fl   $cc1,text_label
+      nop
+      bc2t    $cc6,text_label
+      nop
+      bc2tl   $cc7,text_label
+      nop
+
 # Force at least 8 (non-delay-slot) zero bytes, to make 'objdump' print ...
       .space  8

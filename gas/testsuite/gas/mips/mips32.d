@@ -63,4 +63,12 @@ Disassembly of section .text:
 0+00d4 <[^>]*> 7000003f 	sdbbp
 0+00d8 <[^>]*> 7000003f 	sdbbp
 0+00dc <[^>]*> 7159e27f 	sdbbp	0x56789
+0+00e0 <[^>]*> 4900ffc7 	bc2f	0+0000 <text_label>
+0+00e4 <[^>]*> 00000000 	nop
+0+00e8 <[^>]*> 4906ffc5 	bc2fl	\$cc1,0+0000 <text_label>
+0+00ec <[^>]*> 00000000 	nop
+0+00f0 <[^>]*> 4919ffc3 	bc2t	\$cc6,0+0000 <text_label>
+0+00f4 <[^>]*> 00000000 	nop
+0+00f8 <[^>]*> 491fffc1 	bc2tl	\$cc7,0+0000 <text_label>
+0+00fc <[^>]*> 00000000 	nop
 	\.\.\.

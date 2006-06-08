@@ -1,3 +1,10 @@
+2006-06-08  Thiemo Seufer  <ths@mips.com>
+            Nigel Stephens  <nigel@mips.com>
+
+	* gas/mips/mips32.s: Added cop2 branches with explicit condition
+	code register numbers.
+	* gas/mips/mips32.d: Likewise.
+
 2006-06-07  Julian Brown  <julian@codesourcery.com>
 
 	* gas/arm/itblock.s: New file. Helper macro for making all-true IT
