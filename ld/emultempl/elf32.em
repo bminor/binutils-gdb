@@ -148,7 +148,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
 
 static struct bfd_link_needed_list *global_needed;
 static struct stat global_stat;
-static bfd_boolean global_found;
+static lang_input_statement_type *global_found;
 static struct bfd_link_needed_list *global_vercheck_needed;
 static bfd_boolean global_vercheck_failed;
 
@@ -229,12 +229,14 @@ gld${EMULATION_NAME}_stat_needed (lang_input_statement_type *s)
   const char *suffix;
   const char *soname;
 
-  if (global_found)
+  if (global_found != NULL)
     return;
   if (s->the_bfd == NULL)
     return;
-  if (s->as_needed
-      && (bfd_elf_get_dyn_lib_class (s->the_bfd) & DYN_AS_NEEDED) != 0)
+
+  /* If this input file was an as-needed entry, and wasn't found to be
+     needed at the stage it was linked, then don't say we have loaded it.  */
+  if ((bfd_elf_get_dyn_lib_class (s->the_bfd) & DYN_AS_NEEDED) != 0)
     return;
 
   if (bfd_stat (s->the_bfd, &st) != 0)
@@ -254,7 +256,7 @@ gld${EMULATION_NAME}_stat_needed (lang_input_statement_type *s)
       && st.st_ino == global_stat.st_ino
       && st.st_ino != 0)
     {
-      global_found = TRUE;
+      global_found = s;
       return;
     }
 
@@ -398,9 +400,9 @@ cat >>e${EMULATION_NAME}.c <<EOF
   if (trace_file_tries)
     info_msg (_("found %s at %s\n"), soname, name);
 
-  global_found = FALSE;
+  global_found = NULL;
   lang_for_each_input_file (gld${EMULATION_NAME}_stat_needed);
-  if (global_found)
+  if (global_found != NULL)
     {
       /* Return TRUE to indicate that we found the file, even though
 	 we aren't going to do anything with it.  */
@@ -569,7 +571,7 @@ gld${EMULATION_NAME}_check_ld_elf_hints (const char *name, int force)
 		  if (fread (b, 1, hdr.dirlistlen + 1, f) ==
 		      hdr.dirlistlen + 1)
 		    ld_elf_hints = gld${EMULATION_NAME}_add_sysroot (b);
-		
+
 		  free (b);
 		}
 	    }
@@ -585,7 +587,7 @@ gld${EMULATION_NAME}_check_ld_elf_hints (const char *name, int force)
   needed.by = NULL;
   needed.name = name;
   return gld${EMULATION_NAME}_search_needed (ld_elf_hints, & needed,
-			       		     force);
+					     force);
 }
 EOF
     # FreeBSD
@@ -809,49 +811,45 @@ cat >>e${EMULATION_NAME}.c <<EOF
 static void
 gld${EMULATION_NAME}_check_needed (lang_input_statement_type *s)
 {
-  if (global_found)
+  const char *soname;
+
+  /* Stop looking if we've found a loaded lib.  */
+  if (global_found != NULL
+      && (bfd_elf_get_dyn_lib_class (global_found->the_bfd)
+	  & DYN_AS_NEEDED) == 0)
     return;
 
-  /* If this input file was an as-needed entry, and wasn't found to be
-     needed at the stage it was linked, then don't say we have loaded it.  */
-  if (s->as_needed
-      && (s->the_bfd == NULL
-	  || (bfd_elf_get_dyn_lib_class (s->the_bfd) & DYN_AS_NEEDED) != 0))
+  if (s->filename == NULL || s->the_bfd == NULL)
     return;
 
-  if (s->filename != NULL)
+  /* Don't look for a second non-loaded as-needed lib.  */
+  if (global_found != NULL
+      && (bfd_elf_get_dyn_lib_class (s->the_bfd) & DYN_AS_NEEDED) != 0)
+    return;
+
+  if (strcmp (s->filename, global_needed->name) == 0)
     {
-      const char *f;
+      global_found = s;
+      return;
+    }
 
-      if (strcmp (s->filename, global_needed->name) == 0)
+  if (s->search_dirs_flag)
+    {
+      const char *f = strrchr (s->filename, '/');
+      if (f != NULL
+	  && strcmp (f + 1, global_needed->name) == 0)
 	{
-	  global_found = TRUE;
+	  global_found = s;
 	  return;
-	}
-
-      if (s->search_dirs_flag)
-	{
-	  f = strrchr (s->filename, '/');
-	  if (f != NULL
-	      && strcmp (f + 1, global_needed->name) == 0)
-	    {
-	      global_found = TRUE;
-	      return;
-	    }
 	}
     }
 
-  if (s->the_bfd != NULL)
+  soname = bfd_elf_get_dt_soname (s->the_bfd);
+  if (soname != NULL
+      && strcmp (soname, global_needed->name) == 0)
     {
-      const char *soname;
-
-      soname = bfd_elf_get_dt_soname (s->the_bfd);
-      if (soname != NULL
-	  && strcmp (soname, global_needed->name) == 0)
-	{
-	  global_found = TRUE;
-	  return;
-	}
+      global_found = s;
+      return;
     }
 }
 
@@ -904,9 +902,11 @@ gld${EMULATION_NAME}_after_open (void)
 
       /* See if this file was included in the link explicitly.  */
       global_needed = l;
-      global_found = FALSE;
+      global_found = NULL;
       lang_for_each_input_file (gld${EMULATION_NAME}_check_needed);
-      if (global_found)
+      if (global_found != NULL
+	  && (bfd_elf_get_dyn_lib_class (global_found->the_bfd)
+	      & DYN_AS_NEEDED) == 0)
 	continue;
 
       n.by = l->by;
@@ -914,6 +914,15 @@ gld${EMULATION_NAME}_after_open (void)
       nn.by = l->by;
       if (trace_file_tries)
 	info_msg (_("%s needed by %B\n"), l->name, l->by);
+
+      /* As-needed libs specified on the command line (or linker script)
+	 take priority over libs found in search dirs.  */
+      if (global_found != NULL)
+	{
+	  nn.name = global_found->filename;
+	  if (gld${EMULATION_NAME}_try_needed (&nn, TRUE))
+	    continue;
+	}
 
       /* We need to find this file and include the symbol table.  We
 	 want to search for the file in the same way that the dynamic
@@ -1725,7 +1734,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
 #define OPTION_GROUP			(OPTION_ENABLE_NEW_DTAGS + 1)
 #define OPTION_EH_FRAME_HDR		(OPTION_GROUP + 1)
 #define OPTION_EXCLUDE_LIBS		(OPTION_EH_FRAME_HDR + 1)
-  
+
 static void
 gld${EMULATION_NAME}_add_options
   (int ns, char **shortopts, int nl, struct option **longopts,

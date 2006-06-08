@@ -1,3 +1,12 @@
+2006-06-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/elf32.em (global_found): Make it a pointer.
+	(stat_needed, try_needed): Adjust.
+	(check_needed): Don't skip non-loaded as-needed entries.  Only
+	consider entries with both filename and the_bfd non-null.
+	(after_open): Try loading non-loaded as-needed libs to satisfy
+	DT_NEEDED libs.
+
 2006-06-07  Joseph S. Myers  <joseph@codesourcery.com>
 
 	* po/Make-in (pdf, ps): New dummy targets.
