@@ -1,6 +1,10 @@
 2006-06-08  Nathan Sidwell  <nathan@codesourcery.com>
 
-	* gdb/remote.c (remote_open_1): Do preopen tasks before
+	* remote-fileio.c (remote_fileio_reset): New.
+	* remote-fileio.h (remote_fileio_reset): Prototype.
+	* remote.c (extended_remote_restart, remote_open_1): Call it.
+
+	* remote.c (remote_open_1): Do preopen tasks before
 	irreversably destroying state.
 
 2006-06-08  Daniel Jacobowitz  <dan@codesourcery.com>
