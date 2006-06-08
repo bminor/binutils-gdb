@@ -1,3 +1,18 @@
+2006-06-08  David Daney  <ddaney@avtrex.com>
+
+	* elfxx-mips.c (STUB_LI16): Removed.
+	(STUB_LUI): New macro.
+	(STUB_LI16U): Ditto.
+	(STUB_LI16S): Ditto.
+	(MIPS_FUNCTION_STUB_SIZE): Rewrote to take info parameter.
+	(_bfd_mips_elf_adjust_dynamic_symbol): Pass info parameter to
+	MIPS_FUNCTION_STUB_SIZE.
+	(_bfd_mips_elf_always_size_sections): Ditto.
+	(_bfd_mips_elf_size_dynamic_sections): Ditto.
+	(_bfd_mips_elf_finish_dynamic_sections): Ditto.
+	(_bfd_mips_elf_finish_dynamic_symbol): Rewrote stub generation
+	to allow larger symbol table indexes.
+
 2006-06-07  Joseph S. Myers  <joseph@codesourcery.com>
 
 	* po/Make-in (pdf, ps): New dummy targets.
