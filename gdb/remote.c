@@ -2178,14 +2178,14 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
   if (!async_p)
     wait_forever_enabled_p = 1;
 
+  target_preopen (from_tty);
+
+  unpush_target (target);
+
   remote_fileio_reset ();
   
   reopen_exec_file ();
   reread_symbols ();
-
-  target_preopen (from_tty);
-
-  unpush_target (target);
 
   remote_desc = remote_serial_open (name);
   if (!remote_desc)
