@@ -265,11 +265,10 @@ m68k_svr4_extract_return_value (struct type *type, struct regcache *regcache,
       regcache_raw_read (regcache, M68K_FP0_REGNUM, buf);
       convert_typed_floating (buf, *tdep->fpreg_type, valbuf, type);
     }
-#if 0
-  /* GCC never differentiates pointer return types this way.  */
   else if (TYPE_CODE (type) == TYPE_CODE_PTR && len == 4)
-    regcache_raw_read (regcache, M68K_A0_REGNUM, valbuf);
-#endif
+    regcache_raw_read (regcache,
+		       gdbarch_tdep (current_gdbarch)->ptr_value_regnum,
+		       valbuf);
   else
     m68k_extract_return_value (type, regcache, valbuf);
 }
@@ -309,12 +308,75 @@ m68k_svr4_store_return_value (struct type *type, struct regcache *regcache,
       regcache_raw_write (regcache, M68K_FP0_REGNUM, buf);
     }
   else if (TYPE_CODE (type) == TYPE_CODE_PTR && len == 4)
-    {
-      regcache_raw_write (regcache, M68K_A0_REGNUM, valbuf);
-      regcache_raw_write (regcache, M68K_D0_REGNUM, valbuf);
-    }
+    regcache_raw_write (regcache,
+			gdbarch_tdep (current_gdbarch)->ptr_value_regnum,
+			valbuf);
   else
     m68k_store_return_value (type, regcache, valbuf);
+}
+
+/* Return non-zero if TYPE, which is assumed to be a structure or
+   union type, should be returned in registers for architecture
+   GDBARCH.
+   
+   Unfortunately GCC incorrectly implements this optimization.  Rather
+   than simply return all small structs, or even just those of size
+   2^N, it uses the mode of the structure to determine this.  BLKmode
+   structs will be returned by memory and QI,HI,SI,DI,SF&DF mode
+   structs will be returned by register.  For m68k a struct is BLKmode
+   unless it's size is 2^N and the mode for that size does not need a
+   greater alignment than the structure itself.  This is horrible.  */
+  
+
+static int
+m68k_reg_struct_return_r (struct type *type, int *align_p)
+{
+  enum type_code code = TYPE_CODE (type);
+  int len = TYPE_LENGTH (type);
+  int field_align = 1;
+  int my_align = len > 2 ? 2 : len;
+  int ix;
+  
+  if (code != TYPE_CODE_STRUCT && code != TYPE_CODE_UNION)
+    {
+      if (align_p && my_align > *align_p)
+	*align_p = my_align;
+      return 1;
+    }
+  
+  if ((len & -len) != len)
+    /* Length is not 2^n. */
+    return 0;
+
+  for (ix = 0; ix != TYPE_NFIELDS (type); ix++)
+    {
+      struct type *field_type;
+      int field_len;
+      
+      if (TYPE_FIELD_STATIC (type, ix))
+	/* Skip static fields.  */
+	continue;
+
+      field_type = TYPE_FIELD_TYPE (type, ix);
+      field_type = check_typedef (field_type);
+      field_len = TYPE_LENGTH (field_type);
+      
+      /* Look through arrays.  */
+      while (TYPE_CODE (field_type) == TYPE_CODE_ARRAY)
+	{
+	  field_type = TYPE_TARGET_TYPE (field_type);
+	  field_type = check_typedef (field_type);
+	  field_len = TYPE_LENGTH (field_type);
+	}
+
+      if (!m68k_reg_struct_return_r (field_type, &field_align))
+	return 0;
+    }
+
+  if (align_p && field_align > *align_p)
+    *align_p = field_align;
+  
+  return align_p || my_align <= field_align;
 }
 
 /* Return non-zero if TYPE, which is assumed to be a structure or
@@ -336,88 +398,11 @@ m68k_reg_struct_return_p (struct gdbarch *gdbarch, struct type *type)
   if (tdep->struct_return == pcc_struct_return)
     return 0;
 
-  /* Unfortunately GCC incorrectly implements this optimization.
-     Rather than simply return all small structs, or even just those
-     of size 2^N, it uses the mode of the structure to determine this.
-     BLKmode structs will be returned by memory and QI,HI,SI,DI,SF&DF
-     mode structs will be returned by register.  For m68k a struct is
-     BLKmode unless it's size is 2^N and the mode for that size does
-     not need a greater alignment than the structure itself.  Unions
-     will get the mode of last member whose size matches that of the
-     union itself.  This is horrible.  */
-  
-  if (len > 8 || (len & -len) != len)
-    /* Length is not 2^n or is too big. */
+  if (len > 8)
+    /* Length is too big. */
     return 0;
 
-  align = len > 4 ? 4 : len;
-  for (ix = 0; ix != TYPE_NFIELDS (type); ix++)
-    {
-      struct type *field_type;
-      int field_len;
-      
-      if (TYPE_FIELD_STATIC (type, ix))
-	/* Skip static fields.  */
-	continue;
-
-      field_type = TYPE_FIELD_TYPE (type, ix);
-      field_type = check_typedef (field_type);
-      field_len = TYPE_LENGTH (field_type);
-      
-      if (code == TYPE_CODE_STRUCT)
-	{
-	  /* Look through arrays.  */
-	  while (TYPE_CODE (field_type) == TYPE_CODE_ARRAY)
-	    {
-	      field_type = TYPE_TARGET_TYPE (field_type);
-	      field_type = check_typedef (field_type);
-	      field_len = TYPE_LENGTH (field_type);
-	    }
-	  
-	  /* If the field's alignment is finer than the structs, we
-	     won't be in registers. */
-	  if (field_len < align)
-	    return 0;
-
-	  /* If the field itself is a struct or union, then check it
-	     can be passed in registers.  */
-	  if ((TYPE_CODE (field_type) == TYPE_CODE_STRUCT
-	       || TYPE_CODE (field_type) == TYPE_CODE_UNION)
-	      && !m68k_reg_struct_return_p (gdbarch, field_type))
-	    return 0;
-	}
-      else
-	{
-	  /* If this field accounts for the whole union, remember it.
-	     Note that we remember the last such field to match GCC's
-	     algorithm.  */
-	  if (field_len == len)
-	    union_field_type = field_type;
-	}
-    }
-
-  if (code == TYPE_CODE_UNION)
-    {
-      if (!union_field_type)
-	return 0;
-      /* Look through arrays. */
-      while (TYPE_CODE (union_field_type) == TYPE_CODE_ARRAY)
-	{
-	  union_field_type = TYPE_TARGET_TYPE (union_field_type);
-	  union_field_type = check_typedef (union_field_type);
-	}
-      /* If this field's alignment is too small, then we won't be in
-	 registers.  */
-      if (TYPE_LENGTH (union_field_type) < align)
-	return 0;
-      
-      if (TYPE_CODE (union_field_type) == TYPE_CODE_STRUCT
-	  || TYPE_CODE (union_field_type) == TYPE_CODE_UNION)
-	return m68k_reg_struct_return_p (gdbarch, union_field_type);
-    }
-  
-  /* It will be returned in registers */
-  return 1;
+  return m68k_reg_struct_return_r (type, NULL);
 }
 
 /* Determine, for architecture GDBARCH, how a return value of TYPE
@@ -1217,6 +1202,8 @@ m68k_svr4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* SVR4 uses %a0.  */
   tdep->struct_value_regnum = M68K_A0_REGNUM;
   tdep->struct_return = reg_struct_return;
+  /* Pointers are returned in %a0 */
+  tdep->ptr_value_regnum = M68K_A0_REGNUM;
 }
 
 /* a.out */
@@ -1228,8 +1215,11 @@ m68k_aout_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_return_value (gdbarch, m68k_return_value);
 
+  /* aout uses %a1 */
   tdep->struct_value_regnum = M68K_A1_REGNUM;
   tdep->struct_return = reg_struct_return;
+  /* Pointers are returned in %a0 */
+  tdep->ptr_value_regnum = M68K_A0_REGNUM;
 }
 
 
@@ -1286,6 +1276,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_return_value (gdbarch, m68k_svr4_return_value);
   tdep->struct_value_regnum = M68K_A0_REGNUM;
   tdep->struct_return = reg_struct_return;
+  tdep->ptr_value_regnum = M68K_D0_REGNUM;
   tdep->float_return = M68K_RETURN_FP0;
   tdep->fpreg_type = &M68K_FPREG_TYPE;
 

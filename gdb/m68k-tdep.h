@@ -77,6 +77,9 @@ struct gdbarch_tdep
   /* Convention for returning structures.  */
   enum struct_return struct_return;
 
+  /* Register in which pointers are returned.  */
+  int ptr_value_regnum;
+
   /* Convention for returning floats.  zero in int regs, non-zero in float.  */
   int float_return;
 
