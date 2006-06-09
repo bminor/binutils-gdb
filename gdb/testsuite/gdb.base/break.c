@@ -99,7 +99,7 @@ char *argv[], **envp;
     marker4 (177601976L);
     argc = (argc == 12345); /* This is silly, but we can step off of it */ /* set breakpoint 2 here */
     return argc;  /* set breakpoint 10 here */
-}
+} /* set breakpoint 10a here */
 
 #ifdef PROTOTYPES
 int factorial (int value)
