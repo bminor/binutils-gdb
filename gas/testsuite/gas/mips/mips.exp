@@ -561,6 +561,8 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test_arches "mips32"	[mips_arch_list_matching mips32]
 
+    run_dump_test_arches "mips32-sf32"	[mips_arch_list_matching mips32]
+
     run_dump_test_arches "mips32r2"	[mips_arch_list_matching mips32r2]
     run_list_test_arches "mips32r2-ill" "-32" \
 			 [mips_arch_list_matching mips32r2 gpr32]

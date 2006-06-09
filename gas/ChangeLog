@@ -1,3 +1,7 @@
+2006-06-09  Thiemo Seufer  <ths@mips.com>
+
+	* config/tc-mips.c (mips_ip): Maintain argument count.
+
 2006-06-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-iq2000.c: Include sb.h.
