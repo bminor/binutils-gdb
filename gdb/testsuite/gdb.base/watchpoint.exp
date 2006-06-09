@@ -120,7 +120,6 @@ proc initialize {} {
       return 0; 
     }
 
-
     return 1
 }
 
@@ -148,7 +147,7 @@ proc test_simple_watchpoint {} {
     gdb_run_cmd
     set timeout 600
     gdb_expect {
-	-re "Breakpoint 1, marker1 .*$gdb_prompt $" {
+	-re "Breakpoint 1, .*marker1 .*$gdb_prompt $" {
 	    pass "run to marker1 in test_simple_watchpoint"
 	}
 	-re ".*$gdb_prompt $" {
@@ -314,7 +313,7 @@ proc test_disabling_watchpoints {} {
     gdb_run_cmd
     set timeout 600
     gdb_expect {
-	-re "Breakpoint 1, marker1 .*$gdb_prompt $" {
+	-re "Breakpoint 1, .*marker1 .*$gdb_prompt $" {
 	    pass "run to marker1 in test_disabling_watchpoints"
 	}
 	-re ".*$gdb_prompt $" {
