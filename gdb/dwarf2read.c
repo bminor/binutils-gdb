@@ -1304,7 +1304,7 @@ partial_read_comp_unit_head (struct comp_unit_head *header, gdb_byte *info_ptr,
 
   info_ptr = read_comp_unit_head (header, info_ptr, abfd);
 
-  if (header->version != 2)
+  if (header->version != 2 && header->version != 3)
     error (_("Dwarf Error: wrong version in compilation unit header "
 	   "(is %d, should be %d) [in module %s]"), header->version,
 	   2, bfd_get_filename (abfd));
