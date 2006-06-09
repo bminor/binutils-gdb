@@ -1,3 +1,22 @@
+2006-06-10  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.texinfo (GDB/MI): Remove duplicate acknowledgements.
+	(GDB/MI Simple Examples): Move node up one level.  Use real
+	examples.
+	(GDB/MI Compatibility with CLI): Update.
+	(GDB/MI Result Records): Add "connected" and "exit" result
+	classes.
+	(GDB/MI Stream Records): Clarify target output.
+	(GDB/MI Command Description Format): Modify example description.
+	(GDB/MI Breakpoint Table Commands): Rename to...
+	(GDB/MI Breakpoint Commands): ...this
+	(GDB/MI Breakpoint Commands): Add optional thread field.
+	(GDB/MI Program Control): Add an introduction.  Move "Program
+	termination" examples into exec-run description.
+	(GDB/MI File Commands): Mention similar CLI commands.
+	(GDB/MI Miscellaneous Commands): Move to end.  Mention "show version"
+	is similar to "-gdb-version".
+
 2006-06-09  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Symbols): Fix "(gdb)"=>"(@value{GDBP})".
