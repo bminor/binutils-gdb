@@ -8620,6 +8620,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      break;
 
 	    case ',':
+	      ++argnum;
 	      if (*s++ == *args)
 		continue;
 	      s--;
