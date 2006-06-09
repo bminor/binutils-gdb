@@ -1,3 +1,7 @@
+2006-06-09  Julian Brown  <julian@codesourcery.com>
+
+	* MAINTAINERS (Write After Approval): Add myself.
+
 2006-06-08  Michael Snyder  <msnyder@redhat.com>
 
 	* mips-tdep.c (fp_register_arg_p): Recognize floating point typedefs.
