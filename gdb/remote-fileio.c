@@ -1278,16 +1278,7 @@ remote_fileio_func_system (char *buf)
 {
   CORE_ADDR ptrval;
   int ret, length, retlength;
-  char *cmdline;
-
-  /* Check if system(3) has been explicitely allowed using the
-     `set remote system-call-allowed 1' command.  If not, return
-     EPERM */
-  if (!remote_fio_system_call_allowed)
-    {
-      remote_fileio_reply (-1, FILEIO_EPERM);
-      return;
-    }
+  char *cmdline = NULL;
 
   /* Parameter: Ptr to commandline / length incl. trailing zero */
   if (remote_fileio_extract_ptr_w_len (&buf, &ptrval, &length))
@@ -1295,19 +1286,37 @@ remote_fileio_func_system (char *buf)
       remote_fileio_ioerror ();
       return;
     }
-  /* Request commandline using 'm' packet */
-  cmdline = alloca (length);
-  retlength = remote_read_bytes (ptrval, (gdb_byte *) cmdline, length);
-  if (retlength != length)
+
+  if (length)
     {
-      remote_fileio_ioerror ();
+      /* Request commandline using 'm' packet */
+      cmdline = alloca (length);
+      retlength = remote_read_bytes (ptrval, (gdb_byte *) cmdline, length);
+      if (retlength != length)
+	{
+	  remote_fileio_ioerror ();
+	  return;
+	}
+    }
+  
+  /* Check if system(3) has been explicitely allowed using the
+     `set remote system-call-allowed 1' command.  If not, return
+     EPERM */
+  if (!remote_fio_system_call_allowed)
+    {
+      if (!length)
+	remote_fileio_return_success (0);
+      else
+	remote_fileio_reply (-1, FILEIO_EPERM);
       return;
     }
 
   remote_fio_no_longjmp = 1;
   ret = system (cmdline);
 
-  if (ret == -1)
+  if (!length)
+    remote_fileio_return_success (ret);
+  else if (ret == -1)
     remote_fileio_return_errno (-1);
   else
     remote_fileio_return_success (WEXITSTATUS (ret));

@@ -191,6 +191,10 @@ gdb_test continue \
 "System with invalid command returns 127"
 
 gdb_test continue \
+"Continuing\\..*system 3:.*OK$stop_msg" \
+"System says shell is available"
+
+gdb_test continue \
 "Continuing\\..*rename 1:.*OK$stop_msg" \
 "Rename a file"
 

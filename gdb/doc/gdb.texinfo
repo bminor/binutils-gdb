@@ -24564,11 +24564,13 @@ int system(const char *command);
 Fsystem,commandptr/len
 
 @exdent Return value:
-The value returned is -1 on error and the return status
-of the command otherwise.  Only the exit status of the
-command is returned, which is extracted from the hosts
-system return value by calling WEXITSTATUS(retval).
-In case /bin/sh could not be executed, 127 is returned.
+If @var{len} is zero, the return value indicates whether a shell is
+available.  Zero indicates it is not available and non-zero indicates
+that it is.  Otherwise, the value returned is -1 on error and the
+return status of the command otherwise.  Only the exit status of the
+command is returned, which is extracted from the hosts system return
+value by calling WEXITSTATUS(retval).  In case /bin/sh could not be
+executed, 127 is returned.
 
 @exdent Errors:
 @end smallexample

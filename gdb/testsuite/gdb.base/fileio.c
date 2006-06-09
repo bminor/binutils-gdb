@@ -385,6 +385,10 @@ test_system ()
   ret = system ("wrtzlpfrmpft");
   printf ("system 2: ret = %d %s\n", ret, WEXITSTATUS (ret) == 127 ? "OK" : "");
   stop ();
+  /* Test for shell */
+  ret = system (NULL);
+  printf ("system 3: ret = %d %s\n", ret, ret != 0 ? "OK" : "");
+  stop ();
 }
 
 int
