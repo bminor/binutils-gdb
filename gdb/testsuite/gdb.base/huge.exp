@@ -36,7 +36,13 @@ if [target_info exists gdb,skip_huge_test] {
 set testfile "huge"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
+
+for { set size [expr 2 * 1024 * 1024] } { $size > 10 } { set size [expr $size / 2] } {
+  if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
+	    executable [list debug "additional_flags=-DCRASH_GDB=$size"]] \
+      == "" } break
+}
+if { $size < 10 } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 

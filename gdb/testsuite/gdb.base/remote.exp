@@ -47,7 +47,7 @@ if {$result != "" } then {
 #
 
 gdb_test "show download-write-size" \
-	"The write size used when downloading a program is 512." \
+	"The write size used when downloading a program is 16384." \
 	"download limit default"
 
 gdb_test "set download-write-size" "Argument required.*"
@@ -65,14 +65,14 @@ gdb_test "set remote memory-write-packet-size" \
 	"Argument required .integer, `fixed' or `limited'.\." \
 	"set write-packet - NULL"
 
-gdb_test "set remote memory-write-packet-size 16" ""
+gdb_test "set remote memory-write-packet-size 20" ""
 gdb_test "show remote memory-write-packet-size" \
-	"The memory-write-packet-size is 16. Packets are limited to 16 bytes." \
+	"The memory-write-packet-size is 20. Packets are limited to 20 bytes." \
 	"set write-packet - small"
 
 gdb_test "set remote memory-write-packet-size 1" ""
 gdb_test "show remote memory-write-packet-size" \
-	"The memory-write-packet-size is 1. Packets are limited to 16 bytes." \
+	"The memory-write-packet-size is 1. Packets are limited to 20 bytes." \
 	"set write-packet - very-small"
 
 #
@@ -191,7 +191,7 @@ if {$sizeof_random_data > 16380 } then {
 gdb_test "set remote memory-read-packet-size 16" \
 	""
 gdb_test "show remote memory-read-packet-size" \
-	"The memory-read-packet-size is 16. Packets are limited to 16 bytes."
+	"The memory-read-packet-size is 16. Packets are limited to 20 bytes."
 gdb_test "x/17ub random_data" \
 	"<random_data>:\[ \t\]+60\[ \t\]+74\[ \t\]+216\[ \t\]+38\[ \t\]+149\[ \t\]+49\[ \t\]+207\[ \t\]+44.*<random_data\\+8>:\[ \t\]+124\[ \t\]+38\[ \t\]+93\[ \t\]+125\[ \t\]+232\[ \t\]+67\[ \t\]+228\[ \t\]+56.*<random_data\\+16>:\[ \t\]+161"
 
