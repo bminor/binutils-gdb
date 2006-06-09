@@ -17247,22 +17247,17 @@ may repeat one or more times.
 @heading Dependencies
 @end ignore
 
-@heading Acknowledgments
-
-In alphabetic order: Andrew Cagney, Fernando Nasser, Stan Shebs and
-Elena Zannoni.
-
 @menu
 * GDB/MI Command Syntax::
 * GDB/MI Compatibility with CLI::
 * GDB/MI Development and Front Ends::
 * GDB/MI Output Records::
+* GDB/MI Simple Examples::
 * GDB/MI Command Description Format::
-* GDB/MI Breakpoint Table Commands::
+* GDB/MI Breakpoint Commands::
 * GDB/MI Data Manipulation::
 * GDB/MI Program Control::
 * GDB/MI File Commands::
-* GDB/MI Miscellaneous Commands::
 @ignore
 * GDB/MI Kod Commands::
 * GDB/MI Memory Overlay Commands::
@@ -17274,6 +17269,7 @@ Elena Zannoni.
 * GDB/MI Thread Commands::
 * GDB/MI Tracepoint Commands::
 * GDB/MI Variable Objects::
+* GDB/MI Miscellaneous Commands::
 @end menu
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -17283,7 +17279,6 @@ Elena Zannoni.
 @menu
 * GDB/MI Input Syntax::
 * GDB/MI Output Syntax::
-* GDB/MI Simple Examples::
 @end menu
 
 @node GDB/MI Input Syntax
@@ -17499,79 +17494,22 @@ New @sc{gdb/mi} commands should only output @var{lists} containing
 @xref{GDB/MI Stream Records, , @sc{gdb/mi} Stream Records}, for more
 details about the various output records.
 
-@node GDB/MI Simple Examples
-@subsection Simple Examples of @sc{gdb/mi} Interaction
-@cindex @sc{gdb/mi}, simple examples
-
-This subsection presents several simple examples of interaction using
-the @sc{gdb/mi} interface.  In these examples, @samp{->} means that the
-following line is passed to @sc{gdb/mi} as input, while @samp{<-} means
-the output received from @sc{gdb/mi}.
-
-@subsubheading Target Stop
-@c Ummm... There is no "-stop" command. This assumes async, no?
-Here's an example of stopping the inferior process:
-
-@smallexample
--> -stop
-<- (@value{GDBP})
-@end smallexample
-
-@noindent
-and later:
-
-@smallexample
-<- *stop,reason="stop",address="0x123",source="a.c:123"
-<- (@value{GDBP})
-@end smallexample
-
-@subsubheading Simple CLI Command
-
-Here's an example of a simple CLI command being passed through
-@sc{gdb/mi} and on to the CLI.
-
-@smallexample
--> print 1+2
-<- &"print 1+2\n"
-<- ~"$1 = 3\n"
-<- ^done
-<- (@value{GDBP})
-@end smallexample
-
-@subsubheading Command With Side Effects
-
-@smallexample
--> -symbol-file xyz.exe
-<- *breakpoint,nr="3",address="0x123",source="a.c:123"
-<- (@value{GDBP})
-@end smallexample
-
-@subsubheading A Bad Command
-
-Here's what happens if you pass a non-existent command:
-
-@smallexample
--> -rubbish
-<- ^error,msg="Undefined MI command: rubbish"
-<- (@value{GDBP})
-@end smallexample
-
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Compatibility with CLI
 @section @sc{gdb/mi} Compatibility with CLI
 
 @cindex compatibility, @sc{gdb/mi} and CLI
 @cindex @sc{gdb/mi}, compatibility with CLI
-To help users familiar with @value{GDBN}'s existing CLI interface, @sc{gdb/mi}
-accepts existing CLI commands.  As specified by the syntax, such
-commands can be directly entered into the @sc{gdb/mi} interface and @value{GDBN} will
-respond.
 
-This mechanism is provided as an aid to developers of @sc{gdb/mi}
-clients and not as a reliable interface into the CLI.  Since the command
-is being interpreteted in an environment that assumes @sc{gdb/mi}
-behaviour, the exact output of such commands is likely to end up being
-an un-supported hybrid of @sc{gdb/mi} and CLI output.
+For the developers convenience CLI commands can be entered directly.
+However, CLI commands that use sequences of commands such @code{source},
+@code{commands} will not work and commands that result in queries such
+as pending breakpoints and quitting once execution has started will
+default to yes.
+
+This feature may be removed at some stage in the future and it is
+recommended that front ends use the @code{-interpreter exec} command.
+@xref{GDB/MI Miscellaneous Commands}.
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Development and Front Ends
@@ -17655,10 +17593,19 @@ values.
 The asynchronous operation was successfully started.  The target is
 running.
 
+@item "^connected"
+@findex ^connected
+GDB has connected to a remote target.
+
 @item "^error" "," @var{c-string}
 @findex ^error
 The operation failed.  The @code{@var{c-string}} contains the corresponding
 error message.
+
+@item "^exit"
+@findex ^exit
+GDB has terminated.
+
 @end table
 
 @node GDB/MI Stream Records
@@ -17683,7 +17630,8 @@ CLI console window.  It contains the textual responses to CLI commands.
 
 @item "@@" @var{string-output}
 The target output stream contains any textual output from the running
-target.
+target.  This is only present when GDB's event loop is truly
+asynchronous, which is currently only the case for remote targets.
 
 @item "&" @var{string-output}
 The log stream contains debugging messages being produced by @value{GDBN}'s
@@ -17739,16 +17687,79 @@ A signal was received by the inferior.
 
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@node GDB/MI Simple Examples
+@section Simple Examples of @sc{gdb/mi} Interaction
+@cindex @sc{gdb/mi}, simple examples
+
+This subsection presents several simple examples of interaction using
+the @sc{gdb/mi} interface.  In these examples, @samp{->} means that the
+following line is passed to @sc{gdb/mi} as input, while @samp{<-} means
+the output received from @sc{gdb/mi}.
+
+Note the the line breaks shown in the examples are here only for
+readability, they don't appear in the real output.
+
+@subheading Setting a breakpoint
+
+Setting a breakpoint generates synchronous output which contains detailed
+information of the breakpoint.
+
+@smallexample
+-> -break-insert main
+<- ^done,bkpt=@{number="1",type="breakpoint",disp="keep",
+    enabled="y",addr="0x08048564",func="main",file="myprog.c",
+    fullname="/home/nickrob/myprog.c",line="68",times="0"@}
+<- (gdb)
+@end smallexample
+
+@subheading Program Execution
+
+Program execution generates asynchronous records and MI gives the
+reason that execution stopped.
+
+@smallexample
+-> -exec-run
+<- ^running
+<- (gdb)
+<- *stopped,reason="breakpoint-hit",bkptno="1",thread-id="0",
+   frame=@{addr="0x08048564",func="main",
+   args=[@{name="argc",value="1"@},@{name="argv",value="0xbfc4d4d4"@}],
+   file="myprog.c",fullname="/home/nickrob/myprog.c",line="68"@}
+<- (gdb)
+-> -exec-continue
+<- ^running
+<- (gdb)
+<- *stopped,reason="exited-normally"
+<- (gdb)
+@end smallexample
+
+@subheading Quitting GDB
+
+Quitting GDB just prints the result class @samp{^exit}.
+
+@smallexample
+-> (gdb)
+<- -gdb-exit
+<- ^exit
+@end smallexample
+
+@subsubheading A Bad Command
+
+Here's what happens if you pass a non-existent command:
+
+@smallexample
+-> -rubbish
+<- ^error,msg="Undefined MI command: rubbish"
+<- (@value{GDBP})
+@end smallexample
+
+
+@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Command Description Format
 @section @sc{gdb/mi} Command Description Format
 
 The remaining sections describe blocks of commands.  Each block of
 commands is laid out in a fashion similar to this section.
-
-Note the the line breaks shown in the examples are here only for
-readability.  They don't appear in the real output.
-Also note that the commands with a non-available example (N.A.@:) are
-not yet implemented.
 
 @subheading Motivation
 
@@ -17776,9 +17787,13 @@ The corresponding @value{GDBN} CLI command(s), if any.
 
 @subsubheading Example
 
+Example(s) formatted for readability.  Some of the described commands  have
+not been implemented yet and these are labeled N.A.@: (not available).
+
+
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-@node GDB/MI Breakpoint Table Commands
-@section @sc{gdb/mi} Breakpoint table commands
+@node GDB/MI Breakpoint Commands
+@section @sc{gdb/mi} Breakpoint Commands
 
 @cindex breakpoint commands for @sc{gdb/mi}
 @cindex @sc{gdb/mi}, breakpoint commands
@@ -18052,7 +18067,8 @@ The result is in the form:
 @smallexample
 ^done,bkpt=@{number="@var{number}",type="@var{type}",disp="del"|"keep",
 enabled="y"|"n",addr="@var{hex}",func="@var{funcname}",file="@var{filename}",
-fullname="@var{full_filename}",line="@var{lineno}",times="@var{times}"@}
+fullname="@var{full_filename}",line="@var{lineno}",[thread="@var{threadno},]
+times="@var{times}"@}
 @end smallexample
 
 @noindent
@@ -19038,49 +19054,10 @@ The corresponding @value{GDBN} command is @samp{pwd}.
 @node GDB/MI Program Control
 @section @sc{gdb/mi} Program control
 
-@subsubheading Program termination
-
-As a result of execution, the inferior program can run to completion, if
-it doesn't encounter any breakpoints.  In this case the output will
-include an exit code, if the program has exited exceptionally.
-
-@subsubheading Examples
-
-@noindent
-Program exited normally:
-
-@smallexample
-(@value{GDBP})
--exec-run
-^running
-(@value{GDBP})
-x = 55
-*stopped,reason="exited-normally"
-(@value{GDBP})
-@end smallexample
-
-@noindent
-Program exited exceptionally:
-
-@smallexample
-(@value{GDBP})
--exec-run
-^running
-(@value{GDBP})
-x = 55
-*stopped,reason="exited",exit-code="01"
-(@value{GDBP})
-@end smallexample
-
-Another way the program can terminate is if it receives a signal such as
-@code{SIGINT}.  In this case, @sc{gdb/mi} displays this:
-
-@smallexample
-(@value{GDBP})
-*stopped,reason="exited-signalled",signal-name="SIGINT",
-signal-meaning="Interrupt"
-@end smallexample
-
+These are the asynchronous commands which generate the out-of-band
+record @samp{*stopped}.  Currently GDB only really executes
+asynchronously with remote targets and this interaction is mimicked in
+other cases.
 
 @subheading The @code{-exec-abort} Command
 @findex -exec-abort
@@ -19132,8 +19109,8 @@ Don't have one around.
  -exec-continue
 @end smallexample
 
-Asynchronous command.  Resumes the execution of the inferior program
-until a breakpoint is encountered, or until the inferior exits.
+Resumes the execution of the inferior program until a breakpoint is
+encountered, or until the inferior exits.
 
 @subsubheading @value{GDBN} Command
 
@@ -19161,9 +19138,8 @@ file="hello.c",fullname="/home/foo/bar/hello.c",line="13"@}
  -exec-finish
 @end smallexample
 
-Asynchronous command.  Resumes the execution of the inferior program
-until the current function is exited.  Displays the results returned by
-the function.
+Resumes the execution of the inferior program until the current
+function is exited.  Displays the results returned by the function.
 
 @subsubheading @value{GDBN} Command
 
@@ -19208,10 +19184,10 @@ gdb-result-var="$1",return-value="0"
  -exec-interrupt
 @end smallexample
 
-Asynchronous command.  Interrupts the background execution of the target.
-Note how the token associated with the stop message is the one for the
-execution command that has been interrupted.  The token for the interrupt
-itself only appears in the @samp{^done} output.  If the user is trying to
+Interrupts the background execution of the target.  Note how the token
+associated with the stop message is the one for the execution command
+that has been interrupted.  The token for the interrupt itself only
+appears in the @samp{^done} output.  If the user is trying to
 interrupt a non-running program, an error message will be printed.
 
 @subsubheading @value{GDBN} Command
@@ -19250,8 +19226,8 @@ fullname="/home/foo/bar/try.c",line="13"@}
  -exec-next
 @end smallexample
 
-Asynchronous command.  Resumes execution of the inferior program, stopping
-when the beginning of the next source line is reached.
+Resumes execution of the inferior program, stopping when the beginning
+of the next source line is reached.
 
 @subsubheading @value{GDBN} Command
 
@@ -19277,10 +19253,10 @@ The corresponding @value{GDBN} command is @samp{next}.
  -exec-next-instruction
 @end smallexample
 
-Asynchronous command.  Executes one machine instruction.  If the
-instruction is a function call continues until the function returns.  If
-the program stops at an instruction in the middle of a source line, the
-address will be printed as well.
+Executes one machine instruction.  If the instruction is a function
+call, continues until the function returns.  If the program stops at an
+instruction in the middle of a source line, the address will be
+printed as well.
 
 @subsubheading @value{GDBN} Command
 
@@ -19354,15 +19330,16 @@ fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="18"@}
  -exec-run
 @end smallexample
 
-Asynchronous command.  Starts execution of the inferior from the
-beginning.  The inferior executes until either a breakpoint is
-encountered or the program exits.
+Starts execution of the inferior from the beginning.  The inferior
+executes until either a breakpoint is encountered or the program
+exits.  In the latter case the output will include an exit code, if
+the program has exited exceptionally.
 
 @subsubheading @value{GDBN} Command
 
 The corresponding @value{GDBN} command is @samp{run}.
 
-@subsubheading Example
+@subsubheading Examples
 
 @smallexample
 (@value{GDBP})
@@ -19376,6 +19353,41 @@ The corresponding @value{GDBN} command is @samp{run}.
 frame=@{func="main",args=[],file="recursive2.c",
 fullname="/home/foo/bar/recursive2.c",line="4"@}
 (@value{GDBP})
+@end smallexample
+
+@noindent
+Program exited normally:
+
+@smallexample
+(@value{GDBP})
+-exec-run
+^running
+(@value{GDBP})
+x = 55
+*stopped,reason="exited-normally"
+(@value{GDBP})
+@end smallexample
+
+@noindent
+Program exited exceptionally:
+
+@smallexample
+(@value{GDBP})
+-exec-run
+^running
+(@value{GDBP})
+x = 55
+*stopped,reason="exited",exit-code="01"
+(@value{GDBP})
+@end smallexample
+
+Another way the program can terminate is if it receives a signal such as
+@code{SIGINT}.  In this case, @sc{gdb/mi} displays this:
+
+@smallexample
+(@value{GDBP})
+*stopped,reason="exited-signalled",signal-name="SIGINT",
+signal-meaning="Interrupt"
 @end smallexample
 
 
@@ -19408,10 +19420,10 @@ N.A.
  -exec-step
 @end smallexample
 
-Asynchronous command.  Resumes execution of the inferior program, stopping
-when the beginning of the next source line is reached, if the next
-source line is not a function call.  If it is, stop at the first
-instruction of the called function.
+Resumes execution of the inferior program, stopping when the beginning
+of the next source line is reached, if the next source line is not a
+function call.  If it is, stop at the first instruction of the called
+function.
 
 @subsubheading @value{GDBN} Command
 
@@ -19452,10 +19464,10 @@ Regular stepping:
  -exec-step-instruction
 @end smallexample
 
-Asynchronous command.  Resumes the inferior which executes one machine
-instruction.  The output, once @value{GDBN} has stopped, will vary depending on
-whether we have stopped in the middle of a source line or not.  In the
-former case, the address at which the program stopped will be printed as
+Resumes the inferior which executes one machine instruction.  The
+output, once @value{GDBN} has stopped, will vary depending on whether
+we have stopped in the middle of a source line or not.  In the former
+case, the address at which the program stopped will be printed as
 well.
 
 @subsubheading @value{GDBN} Command
@@ -19494,10 +19506,10 @@ fullname="/home/foo/bar/try.c",line="10"@}
  -exec-until [ @var{location} ]
 @end smallexample
 
-Asynchronous command.  Executes the inferior until the @var{location}
-specified in the argument is reached.  If there is no argument, the inferior
-executes until a source line greater than the current one is reached.
-The reason for stopping in this case will be @samp{location-reached}.
+Executes the inferior until the @var{location} specified in the
+argument is reached.  If there is no argument, the inferior executes
+until a source line greater than the current one is reached.  The
+reason for stopping in this case will be @samp{location-reached}.
 
 @subsubheading @value{GDBN} Command
 
@@ -19622,7 +19634,7 @@ to the current source file for the current executable.
 
 @subsubheading @value{GDBN} Command
 
-There's no @value{GDBN} command which directly corresponds to this one.
+The @value{GDBN} equivalent is @samp{info source}
 
 @subsubheading Example
 
@@ -19650,7 +19662,7 @@ file name of a source file, will it output the fullname.
 
 @subsubheading @value{GDBN} Command
 
-There's no @value{GDBN} command which directly corresponds to this one.
+The @value{GDBN} equivalent is @samp{info sources}.
 @code{gdbtk} has an analogous command @samp{gdb_listfiles}.
 
 @subsubheading Example
@@ -19725,202 +19737,6 @@ The corresponding @value{GDBN} command is @samp{symbol-file}.
 (@value{GDBP})
 -file-symbol-file /kwikemart/marge/ezannoni/TRUNK/mbx/hello.mbx
 ^done
-(@value{GDBP})
-@end smallexample
-
-@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-@node GDB/MI Miscellaneous Commands
-@section Miscellaneous @value{GDBN} commands in @sc{gdb/mi}
-
-@c @subheading -gdb-complete
-
-@subheading The @code{-gdb-exit} Command
-@findex -gdb-exit
-
-@subsubheading Synopsis
-
-@smallexample
- -gdb-exit
-@end smallexample
-
-Exit @value{GDBN} immediately.
-
-@subsubheading @value{GDBN} Command
-
-Approximately corresponds to @samp{quit}.
-
-@subsubheading Example
-
-@smallexample
-(@value{GDBP})
--gdb-exit
-@end smallexample
-
-@subheading The @code{-gdb-set} Command
-@findex -gdb-set
-
-@subsubheading Synopsis
-
-@smallexample
- -gdb-set
-@end smallexample
-
-Set an internal @value{GDBN} variable.
-@c IS THIS A DOLLAR VARIABLE? OR SOMETHING LIKE ANNOTATE ?????
-
-@subsubheading @value{GDBN} Command
-
-The corresponding @value{GDBN} command is @samp{set}.
-
-@subsubheading Example
-
-@smallexample
-(@value{GDBP})
--gdb-set $foo=3
-^done
-(@value{GDBP})
-@end smallexample
-
-
-@subheading The @code{-gdb-show} Command
-@findex -gdb-show
-
-@subsubheading Synopsis
-
-@smallexample
- -gdb-show
-@end smallexample
-
-Show the current value of a @value{GDBN} variable.
-
-@subsubheading @value{GDBN} command
-
-The corresponding @value{GDBN} command is @samp{show}.
-
-@subsubheading Example
-
-@smallexample
-(@value{GDBP})
--gdb-show annotate
-^done,value="0"
-(@value{GDBP})
-@end smallexample
-
-@c @subheading -gdb-source
-
-
-@subheading The @code{-gdb-version} Command
-@findex -gdb-version
-
-@subsubheading Synopsis
-
-@smallexample
- -gdb-version
-@end smallexample
-
-Show version information for @value{GDBN}.  Used mostly in testing.
-
-@subsubheading @value{GDBN} Command
-
-There's no equivalent @value{GDBN} command.  @value{GDBN} by default shows this
-information when you start an interactive session.
-
-@subsubheading Example
-
-@c This example modifies the actual output from GDB to avoid overfull
-@c box in TeX.
-@smallexample
-(@value{GDBP})
--gdb-version
-~GNU gdb 5.2.1
-~Copyright 2000 Free Software Foundation, Inc.
-~GDB is free software, covered by the GNU General Public License, and
-~you are welcome to change it and/or distribute copies of it under
-~ certain conditions.
-~Type "show copying" to see the conditions.
-~There is absolutely no warranty for GDB.  Type "show warranty" for
-~ details.
-~This GDB was configured as
- "--host=sparc-sun-solaris2.5.1 --target=ppc-eabi".
-^done
-(@value{GDBP})
-@end smallexample
-
-@subheading The @code{-interpreter-exec} Command
-@findex -interpreter-exec
-
-@subheading Synopsis
-
-@smallexample
--interpreter-exec @var{interpreter} @var{command}
-@end smallexample
-
-Execute the specified @var{command} in the given @var{interpreter}.
-
-@subheading @value{GDBN} Command
-
-The corresponding @value{GDBN} command is @samp{interpreter-exec}.
-
-@subheading Example
-
-@smallexample
-(@value{GDBP})
--interpreter-exec console "break main"
-&"During symbol reading, couldn't parse type; debugger out of date?.\n"
-&"During symbol reading, bad structure-type format.\n"
-~"Breakpoint 1 at 0x8074fc6: file ../../src/gdb/main.c, line 743.\n"
-^done
-(@value{GDBP})
-@end smallexample
-
-@subheading The @code{-inferior-tty-set} Command
-@findex -inferior-tty-set
-
-@subheading Synopsis
-
-@smallexample
--inferior-tty-set /dev/pts/1
-@end smallexample
-
-Set terminal for future runs of the program being debugged.
-
-@subheading @value{GDBN} Command
-
-The corresponding @value{GDBN} command is @samp{set inferior-tty /dev/pts/1}.
-
-@subheading Example
-
-@smallexample
-(@value{GDBP})
--inferior-tty-set /dev/pts/1
-^done
-(@value{GDBP})
-@end smallexample
-
-@subheading The @code{-inferior-tty-show} Command
-@findex -inferior-tty-show
-
-@subheading Synopsis
-
-@smallexample
--inferior-tty-show
-@end smallexample
-
-Show terminal for future runs of program being debugged.
-
-@subheading @value{GDBN} Command
-
-The corresponding @value{GDBN} command is @samp{show inferior-tty}.
-
-@subheading Example
-
-@smallexample
-(@value{GDBP})
--inferior-tty-set /dev/pts/1
-^done
-(@value{GDBP})
--inferior-tty-show
-^done,inferior_tty_terminal="/dev/pts/1"
 (@value{GDBP})
 @end smallexample
 
@@ -20568,7 +20384,8 @@ N.A.
  -target-detach
 @end smallexample
 
-Disconnect from the remote target.  There's no output.
+Detach from the remote target which normally resumes its execution.
+There's no output.
 
 @subsubheading @value{GDBN} command
 
@@ -20593,7 +20410,8 @@ The corresponding @value{GDBN} command is @samp{detach}.
  -target-disconnect
 @end example
 
-Disconnect from the remote target.  There's no output.
+Disconnect from the remote target.  There's no output and the target is
+generally not resumed.
 
 @subsubheading @value{GDBN} command
 
@@ -21357,6 +21175,203 @@ just names are printed in the manner described for
 -var-update --all-values var1
 ^done,changelist=[@{name="var1",value="3",in_scope="true",
 type_changed="false"@}]
+(@value{GDBP})
+@end smallexample
+
+@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@node GDB/MI Miscellaneous Commands
+@section Miscellaneous @sc{gdb/mi} Commands
+
+@c @subheading -gdb-complete
+
+@subheading The @code{-gdb-exit} Command
+@findex -gdb-exit
+
+@subsubheading Synopsis
+
+@smallexample
+ -gdb-exit
+@end smallexample
+
+Exit @value{GDBN} immediately.
+
+@subsubheading @value{GDBN} Command
+
+Approximately corresponds to @samp{quit}.
+
+@subsubheading Example
+
+@smallexample
+(@value{GDBP})
+-gdb-exit
+^exit
+@end smallexample
+
+@subheading The @code{-gdb-set} Command
+@findex -gdb-set
+
+@subsubheading Synopsis
+
+@smallexample
+ -gdb-set
+@end smallexample
+
+Set an internal @value{GDBN} variable.
+@c IS THIS A DOLLAR VARIABLE? OR SOMETHING LIKE ANNOTATE ?????
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{set}.
+
+@subsubheading Example
+
+@smallexample
+(@value{GDBP})
+-gdb-set $foo=3
+^done
+(@value{GDBP})
+@end smallexample
+
+
+@subheading The @code{-gdb-show} Command
+@findex -gdb-show
+
+@subsubheading Synopsis
+
+@smallexample
+ -gdb-show
+@end smallexample
+
+Show the current value of a @value{GDBN} variable.
+
+@subsubheading @value{GDBN} command
+
+The corresponding @value{GDBN} command is @samp{show}.
+
+@subsubheading Example
+
+@smallexample
+(@value{GDBP})
+-gdb-show annotate
+^done,value="0"
+(@value{GDBP})
+@end smallexample
+
+@c @subheading -gdb-source
+
+
+@subheading The @code{-gdb-version} Command
+@findex -gdb-version
+
+@subsubheading Synopsis
+
+@smallexample
+ -gdb-version
+@end smallexample
+
+Show version information for @value{GDBN}.  Used mostly in testing.
+
+@subsubheading @value{GDBN} Command
+
+The @value{GDBN} equivalent is @samp{show version}.  @value{GDBN} by
+default shows this information when you start an interactive session.
+
+@subsubheading Example
+
+@c This example modifies the actual output from GDB to avoid overfull
+@c box in TeX.
+@smallexample
+(@value{GDBP})
+-gdb-version
+~GNU gdb 5.2.1
+~Copyright 2000 Free Software Foundation, Inc.
+~GDB is free software, covered by the GNU General Public License, and
+~you are welcome to change it and/or distribute copies of it under
+~ certain conditions.
+~Type "show copying" to see the conditions.
+~There is absolutely no warranty for GDB.  Type "show warranty" for
+~ details.
+~This GDB was configured as
+ "--host=sparc-sun-solaris2.5.1 --target=ppc-eabi".
+^done
+(@value{GDBP})
+@end smallexample
+
+@subheading The @code{-interpreter-exec} Command
+@findex -interpreter-exec
+
+@subheading Synopsis
+
+@smallexample
+-interpreter-exec @var{interpreter} @var{command}
+@end smallexample
+
+Execute the specified @var{command} in the given @var{interpreter}.
+
+@subheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{interpreter-exec}.
+
+@subheading Example
+
+@smallexample
+(@value{GDBP})
+-interpreter-exec console "break main"
+&"During symbol reading, couldn't parse type; debugger out of date?.\n"
+&"During symbol reading, bad structure-type format.\n"
+~"Breakpoint 1 at 0x8074fc6: file ../../src/gdb/main.c, line 743.\n"
+^done
+(@value{GDBP})
+@end smallexample
+
+@subheading The @code{-inferior-tty-set} Command
+@findex -inferior-tty-set
+
+@subheading Synopsis
+
+@smallexample
+-inferior-tty-set /dev/pts/1
+@end smallexample
+
+Set terminal for future runs of the program being debugged.
+
+@subheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{set inferior-tty} /dev/pts/1.
+
+@subheading Example
+
+@smallexample
+(@value{GDBP})
+-inferior-tty-set /dev/pts/1
+^done
+(@value{GDBP})
+@end smallexample
+
+@subheading The @code{-inferior-tty-show} Command
+@findex -inferior-tty-show
+
+@subheading Synopsis
+
+@smallexample
+-inferior-tty-show
+@end smallexample
+
+Show terminal for future runs of program being debugged.
+
+@subheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{show inferior-tty}.
+
+@subheading Example
+
+@smallexample
+(@value{GDBP})
+-inferior-tty-set /dev/pts/1
+^done
+(@value{GDBP})
+-inferior-tty-show
+^done,inferior_tty_terminal="/dev/pts/1"
 (@value{GDBP})
 @end smallexample
 
