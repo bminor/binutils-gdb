@@ -623,20 +623,26 @@ static bfd *reldyn_sorting_bfd;
 #define MIPS_ELF_GOT_MAX_SIZE(INFO) (ELF_MIPS_GP_OFFSET (INFO) + 0x7fff)
 
 /* Instructions which appear in a stub.  */
-#define STUB_LW(abfd)						\
-  ((ABI_64_P (abfd)  						\
-    ? 0xdf998010		/* ld t9,0x8010(gp) */		\
-    : 0x8f998010))              /* lw t9,0x8010(gp) */
-#define STUB_MOVE(abfd)                                         \
-   ((ABI_64_P (abfd)						\
-     ? 0x03e0782d		/* daddu t7,ra */		\
-     : 0x03e07821))		/* addu t7,ra */
-#define STUB_JALR 0x0320f809	/* jalr t9,ra */
-#define STUB_LI16(abfd)                                         \
-  ((ABI_64_P (abfd)						\
-   ? 0x64180000			/* daddiu t8,zero,0 */		\
-   : 0x24180000))		/* addiu t8,zero,0 */
-#define MIPS_FUNCTION_STUB_SIZE (16)
+#define STUB_LW(abfd)							\
+  ((ABI_64_P (abfd)							\
+    ? 0xdf998010				/* ld t9,0x8010(gp) */	\
+    : 0x8f998010))              		/* lw t9,0x8010(gp) */
+#define STUB_MOVE(abfd)							\
+   ((ABI_64_P (abfd)							\
+     ? 0x03e0782d				/* daddu t7,ra */	\
+     : 0x03e07821))				/* addu t7,ra */
+#define STUB_LUI(VAL) (0x3c180000 + (VAL))	/* lui t8,VAL */
+#define STUB_JALR 0x0320f809			/* jalr t9,ra */
+#define STUB_LI16U(VAL) (0x34180000 + (VAL))	/* ori t8,zero,VAL unsigned*/
+#define STUB_LI16S(abfd, VAL)						\
+   ((ABI_64_P (abfd)							\
+    ? (0x64180000 + (VAL))	/* daddiu t8,zero,VAL sign extended */	\
+    : (0x24180000 + (VAL))))	/* addiu t8,zero,VAL sign extended */
+
+#define MIPS_FUNCTION_STUB_SIZE(INFO) \
+  (elf_hash_table (INFO)->dynsymcount > 65536 ? 20 : 16)
+
+#define MIPS_FUNCTION_STUB_MAX_SIZE 20
 
 /* The name of the dynamic interpreter.  This is put in the .interp
    section.  */
@@ -6883,7 +6889,7 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	  h->plt.offset = s->size;
 
 	  /* Make room for this stub code.  */
-	  s->size += MIPS_FUNCTION_STUB_SIZE;
+	  s->size += MIPS_FUNCTION_STUB_SIZE (info);
 
 	  /* The last half word of the stub will be filled with the index
 	     of this symbol in .dynsym section.  */
@@ -7148,7 +7154,7 @@ _bfd_mips_elf_always_size_sections (bfd *output_bfd,
   /* In the worst case, we'll get one stub per dynamic symbol, plus
      one to account for the dummy entry at the end required by IRIX
      rld.  */
-  loadable_size += MIPS_FUNCTION_STUB_SIZE * (i + 1);
+  loadable_size += MIPS_FUNCTION_STUB_SIZE (info) * (i + 1);
 
   if (htab->is_vxworks)
     /* There's no need to allocate page entries for VxWorks; R_MIPS_GOT16
@@ -7366,7 +7372,7 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	{
 	  /* IRIX rld assumes that the function stub isn't at the end
 	     of .text section. So put a dummy. XXX  */
-	  s->size += MIPS_FUNCTION_STUB_SIZE;
+	  s->size += MIPS_FUNCTION_STUB_SIZE (info);
 	}
       else if (! info->shared
 	       && ! mips_elf_hash_table (info)->use_rld_obj_head
@@ -8003,13 +8009,14 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
   asection *sgot;
   struct mips_got_info *g, *gg;
   const char *name;
+  int idx;
 
   dynobj = elf_hash_table (info)->dynobj;
 
   if (h->plt.offset != MINUS_ONE)
     {
       asection *s;
-      bfd_byte stub[MIPS_FUNCTION_STUB_SIZE];
+      bfd_byte stub[MIPS_FUNCTION_STUB_MAX_SIZE];
 
       /* This symbol has a stub.  Set it up.  */
 
@@ -8019,18 +8026,41 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 				   MIPS_ELF_STUB_SECTION_NAME (dynobj));
       BFD_ASSERT (s != NULL);
 
-      /* FIXME: Can h->dynindx be more than 64K?  */
-      if (h->dynindx & 0xffff0000)
+      BFD_ASSERT ((MIPS_FUNCTION_STUB_SIZE (info) == 20)
+                  || (h->dynindx <= 65536));
+
+      /* Values up to 2^31 - 1 are allowed.  Larger values would cause
+         sign extension at runtime in the stub, resulting in a
+         negative index value.  */
+      if (h->dynindx & 0x80000000)
 	return FALSE;
 
       /* Fill the stub.  */
-      bfd_put_32 (output_bfd, STUB_LW (output_bfd), stub);
-      bfd_put_32 (output_bfd, STUB_MOVE (output_bfd), stub + 4);
-      bfd_put_32 (output_bfd, STUB_JALR, stub + 8);
-      bfd_put_32 (output_bfd, STUB_LI16 (output_bfd) + h->dynindx, stub + 12);
+      idx = 0;
+      bfd_put_32 (output_bfd, STUB_LW (output_bfd), stub + idx);
+      idx += 4;
+      bfd_put_32 (output_bfd, STUB_MOVE (output_bfd), stub + idx);
+      idx += 4;
+      if (MIPS_FUNCTION_STUB_SIZE (info) == 20)
+        {
+          bfd_put_32 (output_bfd, STUB_LUI ((h->dynindx >> 16 ) & 0xffff),
+                      stub + idx);
+          idx += 4;
+        }
+      bfd_put_32 (output_bfd, STUB_JALR, stub + idx);
+      idx += 4;
 
+      /* If a large stub is not required and sign extension is not a
+         problem, then use legacy code in the stub.  */
+      if ((MIPS_FUNCTION_STUB_SIZE (info) == 20) || (h->dynindx & 0xffff8000))
+        bfd_put_32 (output_bfd, STUB_LI16U (h->dynindx & 0xffff), stub + idx);
+      else
+        bfd_put_32 (output_bfd,
+                    STUB_LI16S (output_bfd, h->dynindx & 0xffff), stub + idx);
+        
       BFD_ASSERT (h->plt.offset <= s->size);
-      memcpy (s->contents + h->plt.offset, stub, MIPS_FUNCTION_STUB_SIZE);
+      memcpy (s->contents + h->plt.offset,
+              stub, MIPS_FUNCTION_STUB_SIZE (info));
 
       /* Mark the symbol as undefined.  plt.offset != -1 occurs
 	 only for the referenced symbol.  */
@@ -8833,10 +8863,10 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 	      {
 		file_ptr dummy_offset;
 
-		BFD_ASSERT (s->size >= MIPS_FUNCTION_STUB_SIZE);
-		dummy_offset = s->size - MIPS_FUNCTION_STUB_SIZE;
+		BFD_ASSERT (s->size >= MIPS_FUNCTION_STUB_SIZE (info));
+		dummy_offset = s->size - MIPS_FUNCTION_STUB_SIZE (info);
 		memset (s->contents + dummy_offset, 0,
-			MIPS_FUNCTION_STUB_SIZE);
+			MIPS_FUNCTION_STUB_SIZE (info));
 	      }
 	  }
       }
