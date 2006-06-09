@@ -28,6 +28,7 @@
 #include "elf/common.h"
 #include "elf/iq2000.h"
 #include "libbfd.h"
+#include "sb.h"
 #include "macro.h"
 
 /* Structure to hold all of the different components describing

@@ -1,3 +1,7 @@
+2006-06-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-iq2000.c: Include sb.h.
+
 2006-06-08  Nigel Stephens  <nigel@mips.com>
 
 	* config/tc-mips.c (mips_pseudo_table): Add "origin" and "repeat"
