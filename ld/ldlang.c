@@ -869,26 +869,26 @@ lang_add_input_file (const char *name,
   return new_afile (name, file_type, target, TRUE);
 }
 
-struct output_statement_hash_entry
+struct out_section_hash_entry
 {
   struct bfd_hash_entry root;
-  lang_output_section_statement_type os;
+  lang_statement_union_type s;
 };
 
 /* The hash table.  */
 
-static struct bfd_hash_table output_statement_table;
+static struct bfd_hash_table output_section_statement_table;
 
 /* Support routines for the hash table used by lang_output_section_find,
    initialize the table, fill in an entry and remove the table.  */
 
 static struct bfd_hash_entry *
-output_statement_newfunc (struct bfd_hash_entry *entry, 
-			  struct bfd_hash_table *table,
-			  const char *string)
+output_section_statement_newfunc (struct bfd_hash_entry *entry, 
+				  struct bfd_hash_table *table,
+				  const char *string)
 {
   lang_output_section_statement_type **nextp;
-  struct output_statement_hash_entry *ret;
+  struct out_section_hash_entry *ret;
 
   if (entry == NULL)
     {
@@ -901,49 +901,48 @@ output_statement_newfunc (struct bfd_hash_entry *entry,
   if (entry == NULL)
     return entry;
 
-  ret = (struct output_statement_hash_entry *) entry;
-  memset (&ret->os, 0, sizeof (ret->os));
-  ret->os.header.type = lang_output_section_statement_enum;
-  ret->os.subsection_alignment = -1;
-  ret->os.section_alignment = -1;
-  ret->os.block_value = 1;
-  lang_list_init (&ret->os.children);
-  lang_statement_append (stat_ptr,
-			 (lang_statement_union_type *) &ret->os,
-			 &ret->os.header.next);
+  ret = (struct out_section_hash_entry *) entry;
+  memset (&ret->s, 0, sizeof (ret->s));
+  ret->s.header.type = lang_output_section_statement_enum;
+  ret->s.output_section_statement.subsection_alignment = -1;
+  ret->s.output_section_statement.section_alignment = -1;
+  ret->s.output_section_statement.block_value = 1;
+  lang_list_init (&ret->s.output_section_statement.children);
+  lang_statement_append (stat_ptr, &ret->s, &ret->s.header.next);
 
   /* For every output section statement added to the list, except the
      first one, lang_output_section_statement.tail points to the "next"
      field of the last element of the list.  */
   if (lang_output_section_statement.head != NULL)
-    ret->os.prev = (lang_output_section_statement_type *)
-      ((char *) lang_output_section_statement.tail
-       - offsetof (lang_output_section_statement_type, next));
+    ret->s.output_section_statement.prev
+      = ((lang_output_section_statement_type *)
+	 ((char *) lang_output_section_statement.tail
+	  - offsetof (lang_output_section_statement_type, next)));
 
   /* GCC's strict aliasing rules prevent us from just casting the
      address, so we store the pointer in a variable and cast that
      instead.  */
-  nextp = &ret->os.next;
+  nextp = &ret->s.output_section_statement.next;
   lang_statement_append (&lang_output_section_statement,
-			 (lang_statement_union_type *) &ret->os,
+			 &ret->s,
 			 (lang_statement_union_type **) nextp);
   return &ret->root;
 }
 
 static void
-output_statement_table_init (void)
+output_section_statement_table_init (void)
 {
-  if (!bfd_hash_table_init_n (&output_statement_table,
-			      output_statement_newfunc,
-			      sizeof (struct output_statement_hash_entry),
+  if (!bfd_hash_table_init_n (&output_section_statement_table,
+			      output_section_statement_newfunc,
+			      sizeof (struct out_section_hash_entry),
 			      61))
     einfo (_("%P%F: can not create hash table: %E\n"));
 }
 
 static void
-output_statement_table_free (void)
+output_section_statement_table_free (void)
 {
-  bfd_hash_table_free (&output_statement_table);
+  bfd_hash_table_free (&output_section_statement_table);
 }
 
 /* Build enough state so that the parser can build its tree.  */
@@ -955,7 +954,7 @@ lang_init (void)
 
   stat_ptr = &statement_list;
 
-  output_statement_table_init ();
+  output_section_statement_table_init ();
 
   lang_list_init (stat_ptr);
 
@@ -985,7 +984,7 @@ lang_init (void)
 void
 lang_finish (void)
 {
-  output_statement_table_free ();
+  output_section_statement_table_free ();
 }
 
 /*----------------------------------------------------------------------
@@ -1072,24 +1071,25 @@ lang_memory_default (asection *section)
 lang_output_section_statement_type *
 lang_output_section_find (const char *const name)
 {
-  struct output_statement_hash_entry *entry;
+  struct out_section_hash_entry *entry;
   unsigned long hash;
 
-  entry = ((struct output_statement_hash_entry *)
-	   bfd_hash_lookup (&output_statement_table, name, FALSE, FALSE));
+  entry = ((struct out_section_hash_entry *)
+	   bfd_hash_lookup (&output_section_statement_table, name,
+			    FALSE, FALSE));
   if (entry == NULL)
     return NULL;
 
   hash = entry->root.hash;
   do
     {
-      if (entry->os.constraint != -1)
-	return &entry->os;
-      entry = (struct output_statement_hash_entry *) entry->root.next;
+      if (entry->s.output_section_statement.constraint != -1)
+	return &entry->s.output_section_statement;
+      entry = (struct out_section_hash_entry *) entry->root.next;
     }
   while (entry != NULL
 	 && entry->root.hash == hash
-	 && strcmp (name, entry->os.name) == 0);
+	 && strcmp (name, entry->s.output_section_statement.name) == 0);
 
   return NULL;
 }
@@ -1097,39 +1097,43 @@ lang_output_section_find (const char *const name)
 static lang_output_section_statement_type *
 lang_output_section_statement_lookup_1 (const char *const name, int constraint)
 {
-  struct output_statement_hash_entry *entry;
-  struct output_statement_hash_entry *last_ent;
+  struct out_section_hash_entry *entry;
+  struct out_section_hash_entry *last_ent;
   unsigned long hash;
 
-  entry = ((struct output_statement_hash_entry *)
-	   bfd_hash_lookup (&output_statement_table, name, TRUE, FALSE));
+  entry = ((struct out_section_hash_entry *)
+	   bfd_hash_lookup (&output_section_statement_table, name,
+			    TRUE, FALSE));
   if (entry == NULL)
     {
       einfo (_("%P%F: failed creating section `%s': %E\n"), name);
       return NULL;
     }
 
-  if (entry->os.name != NULL)
+  if (entry->s.output_section_statement.name != NULL)
     {
       /* We have a section of this name, but it might not have the correct
 	 constraint.  */
       hash = entry->root.hash;
       do
 	{
-	  if (entry->os.constraint != -1
+	  if (entry->s.output_section_statement.constraint != -1
 	      && (constraint == 0
-		  || (constraint == entry->os.constraint
+		  || (constraint == entry->s.output_section_statement.constraint
 		      && constraint != SPECIAL)))
-	    return &entry->os;
+	    return &entry->s.output_section_statement;
 	  last_ent = entry;
-	  entry = (struct output_statement_hash_entry *) entry->root.next;
+	  entry = (struct out_section_hash_entry *) entry->root.next;
 	}
       while (entry != NULL
 	     && entry->root.hash == hash
-	     && strcmp (name, entry->os.name) == 0);
+	     && strcmp (name, entry->s.output_section_statement.name) == 0);
 
-      entry = ((struct output_statement_hash_entry *)
-	       output_statement_newfunc (NULL, &output_statement_table, name));
+      entry
+	= ((struct out_section_hash_entry *)
+	   output_section_statement_newfunc (NULL,
+					     &output_section_statement_table,
+					     name));
       if (entry == NULL)
 	{
 	  einfo (_("%P%F: failed creating section `%s': %E\n"), name);
@@ -1139,9 +1143,9 @@ lang_output_section_statement_lookup_1 (const char *const name, int constraint)
       last_ent->root.next = &entry->root;
     }
 
-  entry->os.name = name;
-  entry->os.constraint = constraint;
-  return &entry->os;
+  entry->s.output_section_statement.name = name;
+  entry->s.output_section_statement.constraint = constraint;
+  return &entry->s.output_section_statement;
 }
 
 lang_output_section_statement_type *

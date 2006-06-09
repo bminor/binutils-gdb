@@ -228,7 +228,6 @@ typedef struct lang_input_statement_struct
 
   bfd *the_bfd;
 
-  bfd_boolean closed;
   file_ptr passive_position;
 
   /* Symbol table of the file.  */
@@ -242,40 +241,42 @@ typedef struct lang_input_statement_struct
   /* Point to the next file, but skips archive contents.  */
   union lang_statement_union *next_real_file;
 
-  bfd_boolean is_archive;
+  const char *target;
+
+  unsigned int closed : 1;
+  unsigned int is_archive : 1;
 
   /* 1 means search a set of directories for this file.  */
-  bfd_boolean search_dirs_flag;
+  unsigned int search_dirs_flag : 1;
 
   /* 1 means this was found in a search directory marked as sysrooted,
      if search_dirs_flag is false, otherwise, that it should be
      searched in ld_sysroot before any other location, as long as it
      starts with a slash.  */
-  bfd_boolean sysrooted;
+  unsigned int sysrooted : 1;
 
   /* 1 means this is base file of incremental load.
      Do not load this file's text or data.
      Also default text_start to after this file's bss.  */
-  bfd_boolean just_syms_flag;
+  unsigned int just_syms_flag : 1;
 
   /* Whether to search for this entry as a dynamic archive.  */
-  bfd_boolean dynamic;
+  unsigned int dynamic : 1;
 
   /* Whether DT_NEEDED tags should be added for dynamic libraries in
      DT_NEEDED tags from this entry.  */
-  bfd_boolean add_needed;
+  unsigned int add_needed : 1;
 
   /* Whether this entry should cause a DT_NEEDED tag only when
      satisfying references from regular files, or always.  */
-  bfd_boolean as_needed;
+  unsigned int as_needed : 1;
 
   /* Whether to include the entire contents of an archive.  */
-  bfd_boolean whole_archive;
+  unsigned int whole_archive : 1;
 
-  bfd_boolean loaded;
+  unsigned int loaded : 1;
 
-  const char *target;
-  bfd_boolean real;
+  unsigned int real : 1;
 } lang_input_statement_type;
 
 typedef struct
