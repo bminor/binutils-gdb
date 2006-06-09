@@ -1,7 +1,7 @@
 2006-06-09  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Julian Brown  <julian@codesourcery.com>
 
-	* gdb/dwarf2read.c (partial_read_comp_unit_head): Accept version 3.
+	* dwarf2read.c (partial_read_comp_unit_head): Accept version 3.
 
 2006-06-09  Julian Brown  <julian@codesourcery.com>
 
