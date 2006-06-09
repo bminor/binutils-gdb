@@ -10599,7 +10599,7 @@ given these declarations:
 but no definition for @code{struct foo} itself, @value{GDBN} will say:
 
 @smallexample
-  (gdb) ptype foo
+  (@value{GDBP}) ptype foo
   $1 = <incomplete type>
 @end smallexample
 
