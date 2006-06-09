@@ -1,3 +1,18 @@
+2006-06-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.h (lang_input_statement_type): Use bitfields for booleans.
+	* ldlang.c (struct out_section_hash_entry): Rename from
+	output_statement_hash_entry.  Delete output_section_statement_type
+	entry.  Add statement_union_type entry.  Adjust all users.
+	(output_section_statement_table): Rename from output_statement_table.
+	Adjust all users.
+	(output_section_statement_newfunc): Rename from
+	output_statement_newfunc.  Adjust all users.
+	(output_section_statement_table_init): Rename from
+	output_statement_table_init.  Adjust all users.
+	(output_section_statement_table_free): Rename from
+	output_statement_table_free.  Adjust all users.
+
 2006-06-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/elf32.em (global_found): Make it a pointer.
