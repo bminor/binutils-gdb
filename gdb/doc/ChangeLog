@@ -1,3 +1,37 @@
+2006-06-10  Sandra Loosemore <sandra@codesourcery.com>
+
+	* gdb.texinfo (File-I/O overview): Copy edit for grammar, spelling,
+	and font markup.
+	(Protocol basics): Likewise.
+	(The F request packet): Likewise.
+	(The F reply packet): Likewise.
+	(Memory transfer): Move this node to be a subsubsection of
+	"Protocol specific representation of datatypes".
+	(The Ctrl-C message): More copy editing.
+	(Console I/O): Likewise.
+	(The isatty call): Delete this node, and merge its content into
+	the "isatty" node.  Fixed references elsewhere.
+	(The system call): Delete this node, and merge its content into
+	the "system" node.  Fixed references elsewhere.
+	(open): Reformat to use @table, and add appropriate font markup.
+	(close): Likewise.
+	(read): Likewise.
+	(write): Likewise.
+	(lseek): Likewise.
+	(rename): Likewise.
+	(unlink): Likewise.
+	(stat/fstat): Likewise.
+	(gettimeofday): Likewise.
+	(isatty): Likewise.
+	(system): Likewise, plus minor changes to fix confusing wording.
+	(Integral datatypes): Fix font markup.
+	(Pointer values): Likewise.
+	(struct stat): Fix markup to use @table, plus minor copy editing.
+	(struct timeval): Fix font markup, plus minor copy editing.
+	(Constants): Minor copy editing.
+	(Errno values): Add font markup.
+	(File-I/O Examples): Likewise.
+
 2006-06-10  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdb.texinfo (GDB/MI): Remove duplicate acknowledgements.
