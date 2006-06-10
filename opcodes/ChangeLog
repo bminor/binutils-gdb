@@ -1,3 +1,18 @@
+2006-06-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386.c (GRP10): Renamed to ...
+	(GRP12): This.
+	(GRP11): Renamed to ...
+	(GRP13): This.
+	(GRP12): Renamed to ...
+	(GRP14): This.
+	(GRP13): Renamed to ...
+	(GRP15): This.
+	(GRP14): Renamed to ...
+	(GRP16): This.
+	(dis386_twobyte): Updated.
+	(grps): Likewise.
+
 2006-06-09  Nick Clifton  <nickc@redhat.com>
 
 	* po/fi.po: Updated Finnish translation.

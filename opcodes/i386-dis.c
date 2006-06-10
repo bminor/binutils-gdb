@@ -418,11 +418,11 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define GRP7	  NULL, NULL, USE_GROUPS, NULL, 14, NULL, 0
 #define GRP8	  NULL, NULL, USE_GROUPS, NULL, 15, NULL, 0
 #define GRP9	  NULL, NULL, USE_GROUPS, NULL, 16, NULL, 0
-#define GRP10	  NULL, NULL, USE_GROUPS, NULL, 17, NULL, 0
-#define GRP11	  NULL, NULL, USE_GROUPS, NULL, 18, NULL, 0
-#define GRP12	  NULL, NULL, USE_GROUPS, NULL, 19, NULL, 0
-#define GRP13	  NULL, NULL, USE_GROUPS, NULL, 20, NULL, 0
-#define GRP14	  NULL, NULL, USE_GROUPS, NULL, 21, NULL, 0
+#define GRP12	  NULL, NULL, USE_GROUPS, NULL, 17, NULL, 0
+#define GRP13	  NULL, NULL, USE_GROUPS, NULL, 18, NULL, 0
+#define GRP14	  NULL, NULL, USE_GROUPS, NULL, 19, NULL, 0
+#define GRP15	  NULL, NULL, USE_GROUPS, NULL, 20, NULL, 0
+#define GRP16	  NULL, NULL, USE_GROUPS, NULL, 21, NULL, 0
 #define GRPAMD	  NULL, NULL, USE_GROUPS, NULL, 22, NULL, 0
 #define GRPPADLCK1 NULL, NULL, USE_GROUPS, NULL, 23, NULL, 0
 #define GRPPADLCK2 NULL, NULL, USE_GROUPS, NULL, 24, NULL, 0
@@ -835,7 +835,7 @@ static const struct dis386 dis386_twobyte[] = {
   { PREGRP31 },
   { "movhpX",		EX, XM, SIMD_Fixup, 'l' },
   /* 18 */
-  { GRP14 },
+  { GRP16 },
   { "(bad)",		XX, XX, XX },
   { "(bad)",		XX, XX, XX },
   { "(bad)",		XX, XX, XX },
@@ -935,9 +935,9 @@ static const struct dis386 dis386_twobyte[] = {
   { PREGRP19 },
   /* 70 */
   { PREGRP22 },
-  { GRP10 },
-  { GRP11 },
   { GRP12 },
+  { GRP13 },
+  { GRP14 },
   { "pcmpeqb",		MX, EM, XX },
   { "pcmpeqw",		MX, EM, XX },
   { "pcmpeqd",		MX, EM, XX },
@@ -1003,7 +1003,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "btsS",		Ev, Gv, XX },
   { "shrdS",		Ev, Gv, Ib },
   { "shrdS",		Ev, Gv, CL },
-  { GRP13 },
+  { GRP15 },
   { "imulS",		Gv, Ev, XX },
   /* b0 */
   { "cmpxchgB",		Eb, Gb, XX },
@@ -1431,7 +1431,7 @@ static const struct dis386 grps[][8] = {
     { "",	VM, XX, XX },		/* See OP_VMX.  */
     { "vmptrst", Eq, XX, XX },
   },
-  /* GRP10 */
+  /* GRP12 */
   {
     { "(bad)",	XX, XX, XX },
     { "(bad)",	XX, XX, XX },
@@ -1442,7 +1442,7 @@ static const struct dis386 grps[][8] = {
     { "psllw",	MS, Ib, XX },
     { "(bad)",	XX, XX, XX },
   },
-  /* GRP11 */
+  /* GRP13 */
   {
     { "(bad)",	XX, XX, XX },
     { "(bad)",	XX, XX, XX },
@@ -1453,7 +1453,7 @@ static const struct dis386 grps[][8] = {
     { "pslld",	MS, Ib, XX },
     { "(bad)",	XX, XX, XX },
   },
-  /* GRP12 */
+  /* GRP14 */
   {
     { "(bad)",	XX, XX, XX },
     { "(bad)",	XX, XX, XX },
@@ -1464,7 +1464,7 @@ static const struct dis386 grps[][8] = {
     { "psllq",	MS, Ib, XX },
     { "pslldq",	MS, Ib, XX },
   },
-  /* GRP13 */
+  /* GRP15 */
   {
     { "fxsave", Ev, XX, XX },
     { "fxrstor", Ev, XX, XX },
@@ -1475,7 +1475,7 @@ static const struct dis386 grps[][8] = {
     { "mfence", OP_0fae, 0, XX, XX },
     { "clflush", OP_0fae, 0, XX, XX },
   },
-  /* GRP14 */
+  /* GRP16 */
   {
     { "prefetchnta", Ev, XX, XX },
     { "prefetcht0", Ev, XX, XX },
