@@ -751,7 +751,16 @@ remote_fileio_func_read (char *buf)
 	    }
 	  else
 	    {
-	      ret = ui_file_read (gdb_stdtargin, (char *) buffer, 32767);
+	      /* NOTE drow/2006-06-10: Windows (mingw32) has a truly
+		 bizarre bug.  If a handle is backed by a real console
+		 device, overly large reads from the console will fail
+		 and set errno == ENOMEM.  On a Windows Server 2003
+		 system where I tested, reading 26608 bytes from the
+		 console was OK, but anything about 26609 bytes would
+		 fail.  So, we limit this read to something smaller
+		 than that - by a safe margin, in case the limit
+		 depends on system resources or version.  */
+	      ret = ui_file_read (gdb_stdtargin, (char *) buffer, 8191);
 	      remote_fio_no_longjmp = 1;
 	      if (ret > 0 && (size_t)ret > length)
 		{
