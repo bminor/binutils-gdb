@@ -1,3 +1,9 @@
+2006-06-10  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* mingw-hdep.c (gdb_select): Always check for NULL fd sets
+	before calling FD_ISSET.  Correct check for exceptfds which
+	previously tested writefds.
+
 2006-06-09  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Julian Brown  <julian@codesourcery.com>
 
