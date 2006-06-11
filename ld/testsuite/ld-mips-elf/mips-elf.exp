@@ -137,6 +137,33 @@ if $has_newabi {
     run_dump_test "emit-relocs-1"
 }
 
+if {[istarget mips*-*-linux*]} {
+     # The number of symbols that are always included in the symbol table
+     # for these tests.  The 5 are:
+     #
+     #     the null symbol entry
+     #     the .MIPS.stubs section symbol
+     #     the .text section symbol
+     #     _gp
+     #     _GLOBAL_OFFSET_TABLE_
+     set base_syms 5
+     foreach dynsym { 7fff 8000 fff0 10000 2fe80 } {
+	 run_ld_link_tests \
+	     [list [list \
+			"Stub for dynsym 0x$dynsym" \
+			"-shared -melf32btsmip -T stub-dynsym-1.ld" \
+			[concat \
+			     "-EB -march=mips1 -32 -KPIC" \
+			     "--defsym base_syms=$base_syms" \
+			     "--defsym dynsym=0x$dynsym"] \
+			[list "stub-dynsym-1.s"] \
+			[list [list \
+				   "objdump" "-dz" \
+				   "stub-dynsym-1-$dynsym.d"]] \
+			"stub-dynsym-1-$dynsym"]]
+     }
+ }
+
 # For tests which may involve multiple files, use run_ld_link_tests.
 
 # List contains test-items with 3 items followed by 2 lists:

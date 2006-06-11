@@ -1,3 +1,14 @@
+2006-06-11  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-mips-elf/stub-dynsym-1.s,
+	* ld-mips-elf/stub-dynsym-1.ld,
+	* ld-mips-elf/stub-dynsym-1-7fff.d,
+	* ld-mips-elf/stub-dynsym-1-8000.d,
+	* ld-mips-elf/stub-dynsym-1-fff0.d,
+	* ld-mips-elf/stub-dynsym-1-10000.d,
+	* ld-mips-elf/stub-dynsym-1-2fe80.d: New test.
+	* ld-mips-elf/mips-elf.exp: Run it.
+
 2006-06-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	Backport:

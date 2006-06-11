@@ -1,3 +1,32 @@
+2006-06-11  Richard Sandiford  <richard@codesourcery.com>
+	    Thiemo Seufer  <ths@mips.com>
+
+	* elfxx-mips.c (mips_elf_link_hash_table): Add function_stub_size.
+	(STUB_ORI): New macro.
+	(STUB_LI16U): Fix formatting.
+	(MIPS_FUNCTION_STUB_SIZE): Delete.
+	(MIPS_FUNCTION_STUB_MAX_SIZE): Likewise.
+	(MIPS_FUNCTION_STUB_NORMAL_SIZE): New macro.
+	(MIPS_FUNCTION_STUB_BIG_SIZE): Likewise.
+	(_bfd_mips_elf_adjust_dynamic_symbol): Use htab->function_stub_size
+	instead of MIPS_FUNCTION_STUB_SIZE.
+	(count_section_dynsyms): New function, split out from
+	_bfd_mips_elf_final_link.
+	(_bfd_mips_elf_always_size_sections): Get a worst-case estimate
+	of the number of dynamic symbols needed and use it to set up
+	function_stub_size.  Use function_stub_size rather than
+	MIPS_FUNCTION_STUB_SIZE to determine the size of the stub section.
+	Use 16-byte stubs for 0x10000 dynamic symbols.
+	(_bfd_mips_elf_size_dynamic_sections): Use htab->function_stub_size
+	instead of MIPS_FUNCTION_STUB_SIZE.  Fix formatting.
+	(_bfd_mips_elf_finish_dynamic_symbol): Likewise.  Change the
+	size of the stub buffer from MIPS_FUNCTION_STUB_MAX_SIZE to
+	MIPS_FUNCTION_STUB_BIG_SIZE.  Tweak the check for unhandled dynindxes.
+	Use MIPS_FUNCTION_STUB_BIG_SIZE rather than a hard-coded 20.
+	Use STUB_ORI rather than STUB_LI16U for big stubs.
+	(_bfd_mips_elf_link_hash_table_create): Initialize function_stub_size.
+	(_bfd_mips_elf_final_link): Use count_section_dynsyms.
+
 2006-06-08  David Daney  <ddaney@avtrex.com>
 
 	* elfxx-mips.c (STUB_LI16): Removed.

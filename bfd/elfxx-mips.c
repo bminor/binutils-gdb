@@ -335,6 +335,8 @@ struct mips_elf_link_hash_table
   bfd_vma plt_header_size;
   /* The size of a PLT entry in bytes (VxWorks only).  */
   bfd_vma plt_entry_size;
+  /* The size of a function stub entry in bytes.  */
+  bfd_vma function_stub_size;
 };
 
 #define TLS_RELOC_P(r_type) \
@@ -633,16 +635,15 @@ static bfd *reldyn_sorting_bfd;
      : 0x03e07821))				/* addu t7,ra */
 #define STUB_LUI(VAL) (0x3c180000 + (VAL))	/* lui t8,VAL */
 #define STUB_JALR 0x0320f809			/* jalr t9,ra */
-#define STUB_LI16U(VAL) (0x34180000 + (VAL))	/* ori t8,zero,VAL unsigned*/
+#define STUB_ORI(VAL) (0x37180000 + (VAL))	/* ori t8,t8,VAL */
+#define STUB_LI16U(VAL) (0x34180000 + (VAL))	/* ori t8,zero,VAL unsigned */
 #define STUB_LI16S(abfd, VAL)						\
    ((ABI_64_P (abfd)							\
     ? (0x64180000 + (VAL))	/* daddiu t8,zero,VAL sign extended */	\
     : (0x24180000 + (VAL))))	/* addiu t8,zero,VAL sign extended */
 
-#define MIPS_FUNCTION_STUB_SIZE(INFO) \
-  (elf_hash_table (INFO)->dynsymcount > 65536 ? 20 : 16)
-
-#define MIPS_FUNCTION_STUB_MAX_SIZE 20
+#define MIPS_FUNCTION_STUB_NORMAL_SIZE 16
+#define MIPS_FUNCTION_STUB_BIG_SIZE 20
 
 /* The name of the dynamic interpreter.  This is put in the .interp
    section.  */
@@ -6836,7 +6837,9 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   bfd *dynobj;
   struct mips_elf_link_hash_entry *hmips;
   asection *s;
+  struct mips_elf_link_hash_table *htab;
 
+  htab = mips_elf_hash_table (info);
   dynobj = elf_hash_table (info)->dynobj;
 
   /* Make sure we know what is going on here.  */
@@ -6889,7 +6892,7 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	  h->plt.offset = s->size;
 
 	  /* Make room for this stub code.  */
-	  s->size += MIPS_FUNCTION_STUB_SIZE (info);
+	  s->size += htab->function_stub_size;
 
 	  /* The last half word of the stub will be filled with the index
 	     of this symbol in .dynsym section.  */
@@ -7077,6 +7080,32 @@ _bfd_mips_vxworks_adjust_dynamic_symbol (struct bfd_link_info *info,
   return TRUE;
 }
 
+/* Return the number of dynamic section symbols required by OUTPUT_BFD.
+   The number might be exact or a worst-case estimate, depending on how
+   much information is available to elf_backend_omit_section_dynsym at
+   the current linking stage.  */
+
+static bfd_size_type
+count_section_dynsyms (bfd *output_bfd, struct bfd_link_info *info)
+{
+  bfd_size_type count;
+
+  count = 0;
+  if (info->shared)
+    {
+      asection *p;
+      const struct elf_backend_data *bed;
+
+      bed = get_elf_backend_data (output_bfd);
+      for (p = output_bfd->sections; p ; p = p->next)
+	if ((p->flags & SEC_EXCLUDE) == 0
+	    && (p->flags & SEC_ALLOC) != 0
+	    && !(*bed->elf_backend_omit_section_dynsym) (output_bfd, info, p))
+	  ++count;
+    }
+  return count;
+}
+
 /* This function is called after all the input files have been read,
    and the input sections have been assigned to output sections.  We
    check for any mips16 stub sections that we can discard.  */
@@ -7093,6 +7122,7 @@ _bfd_mips_elf_always_size_sections (bfd *output_bfd,
   int i;
   bfd_size_type loadable_size = 0;
   bfd_size_type local_gotno;
+  bfd_size_type dynsymcount;
   bfd *sub;
   struct mips_elf_count_tls_arg count_tls_arg;
   struct mips_elf_link_hash_table *htab;
@@ -7151,10 +7181,22 @@ _bfd_mips_elf_always_size_sections (bfd *output_bfd,
        relocations, then GLOBAL_GOTSYM will be NULL.  */
     i = 0;
 
+  /* Get a worst-case estimate of the number of dynamic symbols needed.
+     At this point, dynsymcount does not account for section symbols
+     and count_section_dynsyms may overestimate the number that will
+     be needed.  */
+  dynsymcount = (elf_hash_table (info)->dynsymcount
+		 + count_section_dynsyms (output_bfd, info));
+
+  /* Determine the size of one stub entry.  */
+  htab->function_stub_size = (dynsymcount > 0x10000
+			      ? MIPS_FUNCTION_STUB_BIG_SIZE
+			      : MIPS_FUNCTION_STUB_NORMAL_SIZE);
+
   /* In the worst case, we'll get one stub per dynamic symbol, plus
      one to account for the dummy entry at the end required by IRIX
      rld.  */
-  loadable_size += MIPS_FUNCTION_STUB_SIZE (info) * (i + 1);
+  loadable_size += htab->function_stub_size * (i + 1);
 
   if (htab->is_vxworks)
     /* There's no need to allocate page entries for VxWorks; R_MIPS_GOT16
@@ -7371,14 +7413,14 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
       else if (strcmp (name, MIPS_ELF_STUB_SECTION_NAME (output_bfd)) == 0)
 	{
 	  /* IRIX rld assumes that the function stub isn't at the end
-	     of .text section. So put a dummy. XXX  */
-	  s->size += MIPS_FUNCTION_STUB_SIZE (info);
+	     of .text section.  So put a dummy.  XXX  */
+	  s->size += htab->function_stub_size;
 	}
       else if (! info->shared
 	       && ! mips_elf_hash_table (info)->use_rld_obj_head
 	       && strncmp (name, ".rld_map", 8) == 0)
 	{
-	  /* We add a room for __rld_map. It will be filled in by the
+	  /* We add a room for __rld_map.  It will be filled in by the
 	     rtld to contain a pointer to the _r_debug structure.  */
 	  s->size += 4;
 	}
@@ -8010,13 +8052,15 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
   struct mips_got_info *g, *gg;
   const char *name;
   int idx;
+  struct mips_elf_link_hash_table *htab;
 
+  htab = mips_elf_hash_table (info);
   dynobj = elf_hash_table (info)->dynobj;
 
   if (h->plt.offset != MINUS_ONE)
     {
       asection *s;
-      bfd_byte stub[MIPS_FUNCTION_STUB_MAX_SIZE];
+      bfd_byte stub[MIPS_FUNCTION_STUB_BIG_SIZE];
 
       /* This symbol has a stub.  Set it up.  */
 
@@ -8026,13 +8070,13 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 				   MIPS_ELF_STUB_SECTION_NAME (dynobj));
       BFD_ASSERT (s != NULL);
 
-      BFD_ASSERT ((MIPS_FUNCTION_STUB_SIZE (info) == 20)
-                  || (h->dynindx <= 65536));
+      BFD_ASSERT ((htab->function_stub_size == MIPS_FUNCTION_STUB_BIG_SIZE)
+                  || (h->dynindx <= 0xffff));
 
       /* Values up to 2^31 - 1 are allowed.  Larger values would cause
-         sign extension at runtime in the stub, resulting in a
-         negative index value.  */
-      if (h->dynindx & 0x80000000)
+	 sign extension at runtime in the stub, resulting in a negative
+	 index value.  */
+      if (h->dynindx & ~0x7fffffff)
 	return FALSE;
 
       /* Fill the stub.  */
@@ -8041,9 +8085,9 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
       idx += 4;
       bfd_put_32 (output_bfd, STUB_MOVE (output_bfd), stub + idx);
       idx += 4;
-      if (MIPS_FUNCTION_STUB_SIZE (info) == 20)
+      if (htab->function_stub_size == MIPS_FUNCTION_STUB_BIG_SIZE)
         {
-          bfd_put_32 (output_bfd, STUB_LUI ((h->dynindx >> 16 ) & 0xffff),
+          bfd_put_32 (output_bfd, STUB_LUI ((h->dynindx >> 16) & 0x7fff),
                       stub + idx);
           idx += 4;
         }
@@ -8052,15 +8096,16 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 
       /* If a large stub is not required and sign extension is not a
          problem, then use legacy code in the stub.  */
-      if ((MIPS_FUNCTION_STUB_SIZE (info) == 20) || (h->dynindx & 0xffff8000))
+      if (htab->function_stub_size == MIPS_FUNCTION_STUB_BIG_SIZE)
+	bfd_put_32 (output_bfd, STUB_ORI (h->dynindx & 0xffff), stub + idx);
+      else if (h->dynindx & ~0x7fff)
         bfd_put_32 (output_bfd, STUB_LI16U (h->dynindx & 0xffff), stub + idx);
       else
-        bfd_put_32 (output_bfd,
-                    STUB_LI16S (output_bfd, h->dynindx & 0xffff), stub + idx);
-        
+        bfd_put_32 (output_bfd, STUB_LI16S (output_bfd, h->dynindx),
+		    stub + idx);
+
       BFD_ASSERT (h->plt.offset <= s->size);
-      memcpy (s->contents + h->plt.offset,
-              stub, MIPS_FUNCTION_STUB_SIZE (info));
+      memcpy (s->contents + h->plt.offset, stub, htab->function_stub_size);
 
       /* Mark the symbol as undefined.  plt.offset != -1 occurs
 	 only for the referenced symbol.  */
@@ -8863,10 +8908,10 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 	      {
 		file_ptr dummy_offset;
 
-		BFD_ASSERT (s->size >= MIPS_FUNCTION_STUB_SIZE (info));
-		dummy_offset = s->size - MIPS_FUNCTION_STUB_SIZE (info);
+		BFD_ASSERT (s->size >= htab->function_stub_size);
+		dummy_offset = s->size - htab->function_stub_size;
 		memset (s->contents + dummy_offset, 0,
-			MIPS_FUNCTION_STUB_SIZE (info));
+			htab->function_stub_size);
 	      }
 	  }
       }
@@ -9978,6 +10023,7 @@ _bfd_mips_elf_link_hash_table_create (bfd *abfd)
   ret->splt = NULL;
   ret->plt_header_size = 0;
   ret->plt_entry_size = 0;
+  ret->function_stub_size = 0;
 
   return &ret->root.root;
 }
@@ -10053,18 +10099,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	 we count the sections after (possibly) removing the .options
 	 section above.  */
 
-      dynsecsymcount = 0;
-      if (info->shared)
-	{
-	  asection * p;
-
-	  for (p = abfd->sections; p ; p = p->next)
-	    if ((p->flags & SEC_EXCLUDE) == 0
-		&& (p->flags & SEC_ALLOC) != 0
-		&& !(*bed->elf_backend_omit_section_dynsym) (abfd, info, p))
-	      ++ dynsecsymcount;
-	}
-
+      dynsecsymcount = count_section_dynsyms (abfd, info);
       if (! mips_elf_sort_hash_table (info, dynsecsymcount + 1))
 	return FALSE;
 
