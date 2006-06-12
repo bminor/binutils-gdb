@@ -1,3 +1,12 @@
+2006-06-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	Backport:
+	2006-04-29  H.J. Lu  <hongjiu.lu@intel.com>
+	* ld-elfvers/vers.exp: Xfail vers7a, vers7, vers23a, vers23b,
+	vers23c, vers23d, vers23, vers25a, vers25b1, vers25b2, vers27a,
+	vers27b, vers27c1, vers27c2, vers27d4 and vers27d5 if PIC is
+	required.
+
 2006-06-11  Richard Sandiford  <richard@codesourcery.com>
 
 	* ld-mips-elf/stub-dynsym-1.s,
