@@ -186,7 +186,20 @@ static void show_packet_config_cmd (struct packet_config *config);
 
 static void update_packet_config (struct packet_config *config);
 
+static void set_remote_protocol_packet_cmd (char *args, int from_tty,
+					    struct cmd_list_element *c);
+
+static void show_remote_protocol_packet_cmd (struct ui_file *file,
+					     int from_tty,
+					     struct cmd_list_element *c,
+					     const char *value);
+
 void _initialize_remote (void);
+
+/* For "set remote" and "show remote".  */
+
+static struct cmd_list_element *remote_set_cmdlist;
+static struct cmd_list_element *remote_show_cmdlist;
 
 /* Description of the remote protocol state for the currently
    connected target.  This is per-target state, and independent of the
@@ -614,8 +627,8 @@ enum packet_support
 
 struct packet_config
   {
-    char *name;
-    char *title;
+    const char *name;
+    const char *title;
     enum auto_boolean detect;
     enum packet_support support;
   };
@@ -678,14 +691,8 @@ show_packet_config_cmd (struct packet_config *config)
 }
 
 static void
-add_packet_config_cmd (struct packet_config *config,
-		       char *name,
-		       char *title,
-		       cmd_sfunc_ftype *set_func,
-		       show_value_ftype *show_func,
-		       struct cmd_list_element **set_remote_list,
-		       struct cmd_list_element **show_remote_list,
-		       int legacy)
+add_packet_config_cmd (struct packet_config *config, const char *name,
+		       const char *title, int legacy)
 {
   char *set_doc;
   char *show_doc;
@@ -703,17 +710,18 @@ add_packet_config_cmd (struct packet_config *config,
   cmd_name = xstrprintf ("%s-packet", title);
   add_setshow_auto_boolean_cmd (cmd_name, class_obscure,
 				&config->detect, set_doc, show_doc, NULL, /* help_doc */
-				set_func, show_func,
-				set_remote_list, show_remote_list);
+				set_remote_protocol_packet_cmd,
+				show_remote_protocol_packet_cmd,
+				&remote_set_cmdlist, &remote_show_cmdlist);
   /* set/show remote NAME-packet {auto,on,off} -- legacy.  */
   if (legacy)
     {
       char *legacy_name;
       legacy_name = xstrprintf ("%s-packet", name);
       add_alias_cmd (legacy_name, cmd_name, class_obscure, 0,
-		     set_remote_list);
+		     &remote_set_cmdlist);
       add_alias_cmd (legacy_name, cmd_name, class_obscure, 0,
-		     show_remote_list);
+		     &remote_show_cmdlist);
     }
 }
 
@@ -5444,9 +5452,6 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   extended_async_remote_ops.to_mourn_inferior = extended_remote_mourn;
 }
 
-static struct cmd_list_element *remote_set_cmdlist;
-static struct cmd_list_element *remote_show_cmdlist;
-
 static void
 set_remote_cmd (char *args, int from_tty)
 {
@@ -5634,87 +5639,40 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 			   &setlist, &showlist);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_X],
-			 "X", "binary-download",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 1);
+			 "X", "binary-download", 1);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_vCont],
-			 "vCont", "verbose-resume",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "vCont", "verbose-resume", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qSymbol],
-			 "qSymbol", "symbol-lookup",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "qSymbol", "symbol-lookup", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_P],
-			 "P", "set-register",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 1);
+			 "P", "set-register", 1);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_p],
-			 "p", "fetch-register",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 1);
+			 "p", "fetch-register", 1);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_Z0],
-			 "Z0", "software-breakpoint",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "Z0", "software-breakpoint", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_Z1],
-			 "Z1", "hardware-breakpoint",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "Z1", "hardware-breakpoint", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_Z2],
-			 "Z2", "write-watchpoint",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "Z2", "write-watchpoint", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_Z3],
-			 "Z3", "read-watchpoint",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "Z3", "read-watchpoint", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_Z4],
-			 "Z4", "access-watchpoint",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "Z4", "access-watchpoint", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qPart_auxv],
-			 "qPart_auxv", "read-aux-vector",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "qPart:auxv", "read-aux-vector", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qGetTLSAddr],
 			 "qGetTLSAddr", "get-thread-local-storage-address",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
 			 0);
 
   /* Keep the old ``set remote Z-packet ...'' working.  Each individual

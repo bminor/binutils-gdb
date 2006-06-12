@@ -1,3 +1,12 @@
+2006-06-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c (set_remote_protocol_packet_cmd)
+	(show_remote_protocol_packet_cmd): New prototypes.
+	(remote_set_cmdlist, remote_show_cmdlist): Move higher.
+	(struct packet_config): Make name and title const.
+	(add_packet_config_cmd): Remove unnecessary arguments.
+	(_initialize_remote): Update calls.
+
 2006-06-10  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* mingw-hdep.c (gdb_select): Always check for NULL fd sets
