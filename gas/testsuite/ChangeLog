@@ -1,3 +1,12 @@
+2006-06-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/opcode.s: Add "xchg %ax,%ax".
+	* gas/i386/opcode.d: Updated.
+
+	* gas/i386/x86-64-opcode.s: Add xchg %ax,%ax, xchg %eax,%eax,
+	xchg %rax,%rax, rex64 xchg %rax,%rax and xchg %rax,%r8.
+	* gas/i386/x86-64-opcode.d: Updated.
+
 2006-06-09  Thiemo Seufer  <ths@mips.com>
             Nigel Stephens  <nigel@mips.com>
 

@@ -91,7 +91,8 @@ static void OP_M (int, int);
 static void OP_VMX (int, int);
 static void OP_0fae (int, int);
 static void OP_0f07 (int, int);
-static void NOP_Fixup (int, int);
+static void NOP_Fixup1 (int, int);
+static void NOP_Fixup2 (int, int);
 static void OP_3DNowSuffix (int, int);
 static void OP_SIMD_Suffix (int, int);
 static void SIMD_Fixup (int, int);
@@ -679,7 +680,7 @@ static const struct dis386 dis386[] = {
   { "movQ",		Sw, Sv, XX },
   { "popU",		stackEv, XX, XX },
   /* 90 */
-  { "nop",		NOP_Fixup, 0, XX, XX },
+  { "xchgS",		NOP_Fixup1, eAX_reg, NOP_Fixup2, eAX_reg, XX },
   { "xchgS",		RMeCX, eAX, XX },
   { "xchgS",		RMeDX, eAX, XX },
   { "xchgS",		RMeBX, eAX, XX },
@@ -4360,12 +4361,29 @@ OP_0fae (int bytemode, int sizeflag)
   OP_E (bytemode, sizeflag);
 }
 
+/* NOP is an alias of "xchg %ax,%ax" in 16bit mode, "xchg %eax,%eax" in
+   32bit mode and "xchg %rax,%rax" in 64bit mode.  NOP with REPZ prefix
+   is called PAUSE.  We display "xchg %ax,%ax" instead of "data16 nop".
+ */
+
 static void
-NOP_Fixup (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
+NOP_Fixup1 (int bytemode, int sizeflag)
 {
-  /* NOP with REPZ prefix is called PAUSE.  */
   if (prefixes == PREFIX_REPZ)
     strcpy (obuf, "pause");
+  else if (prefixes == PREFIX_DATA
+	   || ((rex & REX_MODE64) && rex != 0x48))
+    OP_REG (bytemode, sizeflag);
+  else
+    strcpy (obuf, "nop");
+}
+
+static void
+NOP_Fixup2 (int bytemode, int sizeflag)
+{
+  if (prefixes == PREFIX_DATA
+      || ((rex & REX_MODE64) && rex != 0x48))
+    OP_IMREG (bytemode, sizeflag);
 }
 
 static const char *const Suffix3DNow[] = {

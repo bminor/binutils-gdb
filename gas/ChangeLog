@@ -1,3 +1,8 @@
+2006-06-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (process_suffix): Don't add rex64 for
+	"xchg %rax,%rax".
+
 2006-06-09  Thiemo Seufer  <ths@mips.com>
 
 	* config/tc-mips.c (mips_ip): Maintain argument count.

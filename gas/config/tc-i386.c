@@ -2615,7 +2615,15 @@ process_suffix (void)
       if (i.suffix == QWORD_MNEM_SUFFIX
 	  && flag_code == CODE_64BIT
 	  && (i.tm.opcode_modifier & NoRex64) == 0)
-	i.rex |= REX_MODE64;
+	{
+	  /* Special case for xchg %rax,%rax.  It is NOP and doesn't
+	     need rex64.  */
+	  if (i.operands != 2
+	      || i.types [0] != (Acc | Reg64)
+	      || i.types [1] != (Acc | Reg64)
+	      || strcmp (i.tm.name, "xchg") != 0)
+	  i.rex |= REX_MODE64;
+	}
 
       /* Size floating point instruction.  */
       if (i.suffix == LONG_MNEM_SUFFIX)

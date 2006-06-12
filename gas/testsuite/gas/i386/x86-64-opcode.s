@@ -387,4 +387,12 @@
 
 	# IN
 
+
+
+	xchg %ax,%ax		      # 66  --	 -- --	 90
+	xchg %eax,%eax		      # --  --	 -- --	 87 C0
+	xchg %rax,%rax		      # --  --	 -- --	 90
+	rex64 xchg %rax,%rax	      # 48  --	 -- --	 90
+	xchg %rax,%r8		      # --  --	 -- 49	 90
+
  .p2align 4,0

@@ -1,3 +1,10 @@
+2006-06-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (NOP_Fixup): Removed.
+	(NOP_Fixup1): New.
+	(NOP_Fixup2): Likewise.
+	(dis386): Use NOP_Fixup1 and NOP_Fixup2 on 0x90.
+
 2006-06-12  Julian Brown  <julian@codesourcery.com>
 
 	* arm-dis.c (print_insn_neon): Disassemble 32-bit immediates as signed
