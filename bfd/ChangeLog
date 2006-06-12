@@ -1,3 +1,8 @@
+2006-06-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* configure.in: Update version to 2.16.94.
+	* configure: Regenerated.
+
 2006-06-11  Richard Sandiford  <richard@codesourcery.com>
 	    Thiemo Seufer  <ths@mips.com>
 
@@ -80,7 +85,7 @@
 
 2006-05-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
-	* configure.in: Update version to 2.16.92.
+	* configure.in: Update version to 2.16.93.
 	* configure: Regenerated.
 
 2006-05-17  Alan Modra  <amodra@bigpond.net.au>
