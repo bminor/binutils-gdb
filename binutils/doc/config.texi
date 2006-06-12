@@ -1,2 +1,2 @@
-@set VERSION 2.16.93
-@set UPDATED May 2006
+@set VERSION 2.16.94
+@set UPDATED June 2006
