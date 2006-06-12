@@ -1,5 +1,10 @@
 2006-06-12  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-dis.c (dis386_twobyte): Use "nopQ" for 0x1f.
+	(twobyte_has_modrm): Set 1 for 0x1f.
+
+2006-06-12  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-dis.c (NOP_Fixup): Removed.
 	(NOP_Fixup1): New.
 	(NOP_Fixup2): Likewise.
