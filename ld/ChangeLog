@@ -1,3 +1,8 @@
+2006-06-12  Thiemo Seufer  <ths@mips.com>
+
+	* emulparams/elf64bmip.sh, emulparams/elf64btsmip.sh (COMMONPAGESIZE):
+	Define.
+
 2006-06-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.h (lang_input_statement_type): Use bitfields for booleans.

@@ -5,6 +5,7 @@
 OUTPUT_FORMAT="elf64-tradbigmips"
 BIG_OUTPUT_FORMAT="elf64-tradbigmips"
 LITTLE_OUTPUT_FORMAT="elf64-tradlittlemips"
+COMMONPAGESIZE="CONSTANT (COMMONPAGESIZE)"
 
 # Magic sections.
 OTHER_TEXT_SECTIONS='*(.mips16.fn.*) *(.mips16.call.*)'

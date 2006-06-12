@@ -3,6 +3,7 @@ OUTPUT_FORMAT="elf64-bigmips"
 BIG_OUTPUT_FORMAT="elf64-bigmips"
 LITTLE_OUTPUT_FORMAT="elf64-littlemips"
 SHLIB_TEXT_START_ADDR=0x3ffffe0000
+COMMONPAGESIZE="CONSTANT (COMMONPAGESIZE)"
 
 # IRIX6 defines these symbols.  0x40 is the size of the ELF header.
 EXECUTABLE_SYMBOLS="

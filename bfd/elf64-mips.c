@@ -3152,10 +3152,8 @@ extern bfd_boolean bfd_elf64_archive_write_armap
 #define TARGET_BIG_SYM			bfd_elf64_bigmips_vec
 #define TARGET_BIG_NAME			"elf64-bigmips"
 
-/* The SVR4 MIPS ABI says that this should be 0x10000, but Irix 5 uses
-   a value of 0x1000, and we are compatible.
-   FIXME: How does this affect NewABI?  */
-#define ELF_MAXPAGESIZE			0x1000
+#define ELF_MAXPAGESIZE			0x10000
+#define ELF_COMMONPAGESIZE		0x1000
 
 #include "elf64-target.h"
 
@@ -3166,15 +3164,15 @@ extern bfd_boolean bfd_elf64_archive_write_armap
 #undef TARGET_BIG_NAME
 
 #undef ELF_MAXPAGESIZE
+#undef ELF_COMMONPAGESIZE
 
 #define TARGET_LITTLE_SYM		bfd_elf64_tradlittlemips_vec
 #define TARGET_LITTLE_NAME		"elf64-tradlittlemips"
 #define TARGET_BIG_SYM			bfd_elf64_tradbigmips_vec
 #define TARGET_BIG_NAME			"elf64-tradbigmips"
 
-/* The SVR4 MIPS ABI says that this should be 0x10000, and Linux uses
-   page sizes of up to that limit, so we need to respect it.  */
 #define ELF_MAXPAGESIZE			0x10000
+#define ELF_COMMONPAGESIZE		0x1000
 #define elf64_bed			elf64_tradbed
 
 /* Include the target file again for this target.  */

@@ -1,3 +1,8 @@
+2006-06-12  Thiemo Seufer  <ths@mips.com>
+
+	* ld-mips-elf/multi-got-no-shared.d: Adjust for recent change of
+	ELF_MAXPAGESIZE.
+
 2006-06-11  Richard Sandiford  <richard@codesourcery.com>
 
 	* ld-mips-elf/stub-dynsym-1.s,

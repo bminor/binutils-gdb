@@ -1610,15 +1610,20 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #undef TARGET_BIG_NAME
 
 #undef ELF_MAXPAGESIZE
+#undef ELF_COMMONPAGESIZE
 
 #define TARGET_LITTLE_SYM               bfd_elf32_tradlittlemips_vec
 #define TARGET_LITTLE_NAME              "elf32-tradlittlemips"
 #define TARGET_BIG_SYM                  bfd_elf32_tradbigmips_vec
 #define TARGET_BIG_NAME                 "elf32-tradbigmips"
 
-/* The SVR4 MIPS ABI says that this should be 0x10000, and Linux uses
-   page sizes of up to that limit, so we need to respect it.  */
+/* The MIPS ABI says at Page 5-1:
+   Virtual addresses and file offsets for MIPS segments are congruent
+   modulo 64 KByte (0x10000) or larger powers of 2.  Because 64 KBytes
+   is the maximum page size, the files are suitable for paging
+   regardless of physical page size.  */
 #define ELF_MAXPAGESIZE			0x10000
+#define ELF_COMMONPAGESIZE		0x1000
 #define elf32_bed			elf32_tradbed
 
 /* Include the target file again for this target.  */
@@ -1703,6 +1708,9 @@ mips_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
 #undef TARGET_BIG_SYM
 #undef TARGET_BIG_NAME
 
+#undef ELF_MAXPAGESIZE
+#undef ELF_COMMONPAGESIZE
+
 #define TARGET_LITTLE_SYM               bfd_elf32_littlemips_vxworks_vec
 #define TARGET_LITTLE_NAME              "elf32-littlemips-vxworks"
 #define TARGET_BIG_SYM                  bfd_elf32_bigmips_vxworks_vec
@@ -1711,8 +1719,8 @@ mips_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
 #undef elf32_bed
 #define elf32_bed			elf32_mips_vxworks_bed
 
-#undef ELF_MAXPAGESIZE
 #define ELF_MAXPAGESIZE			0x1000
+#define ELF_COMMONPAGESIZE		0x1000
 
 #undef elf_backend_want_got_plt
 #define elf_backend_want_got_plt		1

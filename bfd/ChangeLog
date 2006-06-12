@@ -1,3 +1,11 @@
+2006-06-12  Thiemo Seufer  <ths@mips.com>
+
+	* elf32-mips.c: Expand comment about ABI-mandated pagesize values.
+	(ELF_MAXPAGESIZE, ELF_COMMONPAGESIZE): define in a more obvious way.
+	* elf64-mips.c, elfn32-mips.c (ELF_MAXPAGESIZE): Fix value for IRIX6.
+	Delete old comments.
+	(ELF_COMMONPAGESIZE): Define in a more obvious way.
+
 2006-06-12  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/2735
