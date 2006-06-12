@@ -2417,7 +2417,9 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
                                       value);
                               }
                             else
-                              func (stream, "#%ld\t; 0x%.8lx", value, value);
+                              func (stream, "#%ld\t; 0x%.8lx",
+				(long) ((value & 0x80000000)
+					? value | ~0xffffffffl : value), value);
                             break;
 
                           case 64:
