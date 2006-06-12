@@ -486,7 +486,7 @@ m68k_svr4_return_value (struct gdbarch *gdbarch, struct type *type,
 
 
 /* Always align the frame to a 4-byte boundary.  This is required on
-   some platforms and harmless on the rest.  */
+   Coldfire cores and harmless on the others.  */
 
 static CORE_ADDR
 m68k_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)

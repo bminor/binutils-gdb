@@ -388,7 +388,7 @@ foreach host_charset [all_charset_names] {
 # some strings in various target character sets.  We need to run the
 # test program to the point at which the strings have been
 # initialized.
-gdb_test "break charset.c:[gdb_get_line_number "all strings initialized"]" \
+gdb_test "break ${srcfile}:[gdb_get_line_number "all strings initialized"]" \
          ".*Breakpoint.* at .*" \
          "set breakpoint after all strings have been initialized"
 gdb_run_cmd
