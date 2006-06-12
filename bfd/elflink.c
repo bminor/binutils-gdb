@@ -3922,11 +3922,21 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		}
 
 	      if (normal_align < common_align)
-		(*_bfd_error_handler)
-		  (_("Warning: alignment %u of symbol `%s' in %B"
-		     " is smaller than %u in %B"),
-		   normal_bfd, common_bfd,
-		   1 << normal_align, name, 1 << common_align);
+		{
+		  /* PR binutils/2735 */
+		  if (normal_bfd == NULL)
+		    (*_bfd_error_handler)
+		      (_("Warning: alignment %u of common symbol `%s' in %B"
+			 " is greater than the alignment (%u) of its section %A"),
+		       common_bfd, h->root.u.def.section,
+		       1 << common_align, name, 1 << normal_align);
+		  else
+		    (*_bfd_error_handler)
+		      (_("Warning: alignment %u of symbol `%s' in %B"
+			 " is smaller than %u in %B"),
+		       normal_bfd, common_bfd,
+		       1 << normal_align, name, 1 << common_align);
+		}
 	    }
 
 	  /* Remember the symbol size and type.  */

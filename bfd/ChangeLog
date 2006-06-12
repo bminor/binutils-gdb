@@ -1,3 +1,13 @@
+2006-06-12  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/2735
+	* elflink.c (elf_link_add_object_symbols): Fix the warning message
+	about mismatched alignments to allow for the case where the common
+	alignment has been deduced from the section alignment.
+	* bfd.c (_bfd_default_error_handler): Update comment to explain
+	why bfd and asection varargs are out of order.  Explicitly catch
+	and abort on NULL bfd and asection arguments.
+
 2006-06-11  Richard Sandiford  <richard@codesourcery.com>
 	    Thiemo Seufer  <ths@mips.com>
 

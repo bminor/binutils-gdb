@@ -419,6 +419,23 @@ static const char *_bfd_error_program_name;
 
    %A section name from section.  For group components, print group name too.
    %B file name from bfd.  For archive components, prints archive too.
+
+   Note - because these two extra format specifiers require special handling
+   they are scanned for and processed in this function, before calling
+   vfprintf.  This means that the *arguments* for these format specifiers
+   must be the first ones in the variable argument list, regardless of where
+   the specifiers appear in the format string.  Thus for example calling
+   this function with a format string of:
+
+      "blah %s blah %A blah %d blah %B"
+
+   would involve passing the arguments as:
+
+      "blah %s blah %A blah %d blah %B",
+        asection_for_the_%A,
+	bfd_for_the_%B,
+	string_for_the_%s,
+	integer_for_the_%d);
  */
 
 void
@@ -483,7 +500,11 @@ _bfd_default_error_handler (const char *fmt, ...)
 	      if (p[1] == 'B')
 		{
 		  bfd *abfd = va_arg (ap, bfd *);
-		  if (abfd->my_archive)
+
+		  if (abfd == NULL)
+		    /* Invoking %B with a null bfd pointer is an internal error.  */
+		    abort ();
+		  else if (abfd->my_archive)
 		    snprintf (bufp, avail, "%s(%s)",
 			      abfd->my_archive->filename, abfd->filename);
 		  else
@@ -492,10 +513,14 @@ _bfd_default_error_handler (const char *fmt, ...)
 	      else
 		{
 		  asection *sec = va_arg (ap, asection *);
-		  bfd *abfd = sec->owner;
+		  bfd *abfd;
 		  const char *group = NULL;
 		  struct coff_comdat_info *ci;
 
+		  if (sec == NULL)
+		    /* Invoking %A with a null section pointer is an internal error.  */
+		    abort ();
+		  abfd = sec->owner;
 		  if (abfd != NULL
 		      && bfd_get_flavour (abfd) == bfd_target_elf_flavour
 		      && elf_next_in_group (sec) != NULL
