@@ -1,3 +1,8 @@
+2006-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* symfile.c (load_command): Check for a changed executable before
+	"load".
+
 2006-06-13  Fred Fish  <fnf@specifix.com>
 
 	* mips-tdep.c (mips_find_long_section): New function.

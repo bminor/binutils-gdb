@@ -1500,6 +1500,11 @@ load_command (char *arg, int from_tty)
 	}
     }
 
+  /* The user might be reloading because the binary has changed.  Take
+     this opportunity to check.  */
+  reopen_exec_file ();
+  reread_symbols ();
+
   target_load (arg, from_tty);
 
   /* After re-loading the executable, we don't really know which
