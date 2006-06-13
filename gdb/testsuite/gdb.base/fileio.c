@@ -373,17 +373,21 @@ test_system ()
   int ret;
   char sys[512];
 
+  /* Test for shell */
+  ret = system (NULL);
+  printf ("system 1: ret = %d %s\n", ret, ret != 0 ? "OK" : "");
+  stop ();
   /* This test prepares the directory for test_rename() */
   sprintf (sys, "mkdir -p %s %s", TESTSUBDIR, TESTDIR2);
   ret = system (sys);
   if (ret == 127)
-    printf ("system 1: ret = %d /bin/sh unavailable???\n", ret);
+    printf ("system 2: ret = %d /bin/sh unavailable???\n", ret);
   else
-    printf ("system 1: ret = %d %s\n", ret, ret == 0 ? "OK" : "");
+    printf ("system 2: ret = %d %s\n", ret, ret == 0 ? "OK" : "");
   stop ();
   /* Invalid command (just guessing ;-) ) */
   ret = system ("wrtzlpfrmpft");
-  printf ("system 2: ret = %d %s\n", ret, WEXITSTATUS (ret) == 127 ? "OK" : "");
+  printf ("system 3: ret = %d %s\n", ret, WEXITSTATUS (ret) == 127 ? "OK" : "");
   stop ();
 }
 

@@ -1,3 +1,10 @@
+2006-06-13  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* remote-file.io.c (remote_fileio_func_system): Treat zero length
+	string as NULL.  Adjust for NULL pointer argument.
+	* doc/gdb.texinfo (system): Document behaviour with zero length
+	string.
+
 2006-06-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote.c (set_remote_protocol_packet_cmd)

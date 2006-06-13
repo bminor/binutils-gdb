@@ -180,14 +180,18 @@ gdb_test continue \
 "Continuing\\..*isatty 5:.*OK$stop_msg" \
 "Isatty (open file)"
 
-send_gdb "set remote system-call-allowed 1\n"; gdb_expect -re ".*$gdb_prompt $"
 gdb_test continue \
 "Continuing\\..*system 1:.*OK$stop_msg" \
+"System says shell is available"
+
+send_gdb "set remote system-call-allowed 1\n"; gdb_expect -re ".*$gdb_prompt $"
+gdb_test continue \
+"Continuing\\..*system 2:.*OK$stop_msg" \
 "System(3) call"
 
 # Is this ok?  POSIX says system returns a waitpid status?
 gdb_test continue \
-"Continuing\\..*system 2:.*OK$stop_msg" \
+"Continuing\\..*system 3:.*OK$stop_msg" \
 "System with invalid command returns 127"
 
 gdb_test continue \

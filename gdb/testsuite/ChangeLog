@@ -1,5 +1,8 @@
 2006-06-13  Nathan Sidwell  <nathan@codesourcery.com>
 
+	* gdb.base/fileio.c: Add system(NULL) test.
+	* gdb.base/fileio.exp: Check it.
+
 	* gdb.base/break.c: Add 10a breakpoint at }
 	* gdb.base/break.exp: Add test for breakpoint at }
 	* gdb.cp/anon-union.cc: Add code at end of function.
