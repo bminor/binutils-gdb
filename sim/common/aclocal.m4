@@ -44,7 +44,7 @@ AC_PROG_RANLIB
 dnl We don't use gettext, but bfd does.  So we do the appropriate checks
 dnl to see if there are intl libraries we should link against.
 ALL_LINGUAS=
-ZW_GNU_GETTEXT_SISTER_DIR
+ZW_GNU_GETTEXT_SISTER_DIR(../../intl)
 
 # Check for common headers.
 # FIXME: Seems to me this can cause problems for i386-windows hosts.

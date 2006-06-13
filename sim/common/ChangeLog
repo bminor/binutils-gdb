@@ -1,3 +1,9 @@
+2006-06-13  Richard Earnshaw  <rearnsha@arm.com>
+
+	* aclocal.m4: Pass ../../intl to ZW_GNU_GETTEXT_SISTER_DIR.
+	* common.m4: Likewise.
+	* configure: Regenerated.
+
 2006-06-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* aclocal.m4: Use ZW_GNU_GETTEXT_SISTER_DIR.
