@@ -1,3 +1,9 @@
+2006-06-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (elf_link_add_object_symbols): Save and restore
+	struct bfd_hash_table table, size and count fields for
+	as-needed libs.
+
 2006-06-12  Thiemo Seufer  <ths@mips.com>
 
 	* elf32-mips.c: Expand comment about ABI-mandated pagesize values.

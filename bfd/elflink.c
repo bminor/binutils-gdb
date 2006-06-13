@@ -3080,6 +3080,9 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
   struct elf_link_hash_table *htab;
   bfd_size_type amt;
   void *alloc_mark = NULL;
+  struct bfd_hash_entry **old_table = NULL;
+  unsigned int old_size = 0;
+  unsigned int old_count = 0;
   void *old_tab = NULL;
   void *old_hash;
   void *old_ent;
@@ -3504,6 +3507,9 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       memcpy (old_hash, sym_hash, hashsize);
       old_undefs = htab->root.undefs;
       old_undefs_tail = htab->root.undefs_tail;
+      old_table = htab->root.table.table;
+      old_size = htab->root.table.size;
+      old_count = htab->root.table.count;
       old_dynsymcount = htab->dynsymcount;
 
       for (i = 0; i < htab->root.table.size; i++)
@@ -4151,6 +4157,9 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       old_hash = (char *) old_tab + tabsize;
       old_ent = (char *) old_hash + hashsize;
       sym_hash = elf_sym_hashes (abfd);
+      htab->root.table.table = old_table;
+      htab->root.table.size = old_size;
+      htab->root.table.count = old_count;
       memcpy (htab->root.table.table, old_tab, tabsize);
       memcpy (sym_hash, old_hash, hashsize);
       htab->root.undefs = old_undefs;
