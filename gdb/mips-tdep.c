@@ -4690,6 +4690,20 @@ mips_find_abi_section (bfd *abfd, asection *sect, void *obj)
     warning (_("unsupported ABI %s."), name + 8);
 }
 
+static void
+mips_find_long_section (bfd *abfd, asection *sect, void *obj)
+{
+  int *lbp = (int *) obj;
+  const char *name = bfd_get_section_name (abfd, sect);
+
+  if (strncmp (name, ".gcc_compiled_long32", 20) == 0)
+    *lbp = 32;
+  else if (strncmp (name, ".gcc_compiled_long64", 20) == 0)
+    *lbp = 64;
+  else if (strncmp (name, ".gcc_compiled_long", 18) == 0)
+    warning (_("unrecognized .gcc_compiled_longXX"));
+}
+
 static enum mips_abi
 global_mips_abi (void)
 {
@@ -5007,6 +5021,58 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
     default:
       internal_error (__FILE__, __LINE__, _("unknown ABI in switch"));
+    }
+
+  /* GCC creates a pseudo-section whose name specifies the size of
+     longs, since -mlong32 or -mlong64 may be used independent of
+     other options.  How those options affect pointer sizes is ABI and
+     architecture dependent, so use them to override the default sizes
+     set by the ABI.  This table shows the relationship between ABI,
+     -mlongXX, and size of pointers:
+
+     ABI		-mlongXX	ptr bits
+     ---		--------	--------
+     o32		32		32
+     o32		64		32
+     n32		32		32
+     n32		64		64
+     o64		32		32
+     o64		64		64
+     n64		32		32
+     n64		64		64
+     eabi32		32		32
+     eabi32		64		32
+     eabi64		32		32
+     eabi64		64		64
+
+    Note that for o32 and eabi32, pointers are always 32 bits
+    regardless of any -mlongXX option.  For all others, pointers and
+    longs are the same, as set by -mlongXX or set by defaults.
+ */
+
+  if (info.abfd != NULL)
+    {
+      int long_bit = 0;
+
+      bfd_map_over_sections (info.abfd, mips_find_long_section, &long_bit);
+      if (long_bit)
+	{
+	  set_gdbarch_long_bit (gdbarch, long_bit);
+	  switch (mips_abi)
+	    {
+	    case MIPS_ABI_O32:
+	    case MIPS_ABI_EABI32:
+	      break;
+	    case MIPS_ABI_N32:
+	    case MIPS_ABI_O64:
+	    case MIPS_ABI_N64:
+	    case MIPS_ABI_EABI64:
+	      set_gdbarch_ptr_bit (gdbarch, long_bit);
+	      break;
+	    default:
+	      internal_error (__FILE__, __LINE__, _("unknown ABI in switch"));
+	    }
+	}
     }
 
   /* FIXME: jlarmour/2000-04-07: There *is* a flag EF_MIPS_32BIT_MODE
