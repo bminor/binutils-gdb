@@ -1,3 +1,17 @@
+2006-06-13  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gdb.base/break.c: Add 10a breakpoint at }
+	* gdb.base/break.exp: Add test for breakpoint at }
+	* gdb.cp/anon-union.cc: Add code at end of function.
+	* gdb.cp/anon-union.exp: Adjust end of function breakpoint.
+	* gdb.mi/var-cmd.c: Add code at end of function.
+	* gdb.mi/mi-var-display.exp: Adjust end of next.
+	* gdb.mi/mi2-var-display.exp: Likewise.
+	* gdb.base/fileio.c: Add stop function and insert calls at
+	stopping places.
+	* gdb.base/fileio.exp: Breakpoint stop function and remove
+	explicit line number references.
+
 2006-05-19  Joel Brobecker  <brobecker@adacore.com>
 
         * gdb.base/del.exp (test_delete_alias): New function.

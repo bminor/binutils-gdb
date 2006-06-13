@@ -262,6 +262,17 @@ gdb_test "step" \
     ".*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:$bp_location10.*$bp_location10\[\t \]+return argc;.*breakpoint 10 here.*" \
     "step onto breakpoint"
 
+# Check to see if breakpoint can be set on ending brace of function
+set bp_location10a [gdb_get_line_number "set breakpoint 10a here"]
+
+gdb_test "break $bp_location10a" \
+    "Breakpoint.*at.* file .*$srcfile, line $bp_location10a\\." \
+    "setting breakpoint at }"
+
+gdb_test "continue" \
+    ".*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:$bp_location10a.*$bp_location10a\[\t \]+}.*breakpoint 10a here.*" \
+    "continue to breakpoint at }"
+
 #
 # delete all breakpoints so we can start over, course this can be a test too
 #
