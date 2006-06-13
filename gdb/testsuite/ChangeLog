@@ -1,5 +1,7 @@
 2006-06-13  Nathan Sidwell  <nathan@codesourcery.com>
 
+	* lib/gdb.exp (gdb_load_cmd): New.
+
 	* gdb.base/fileio.c: Add system(NULL) test.
 	* gdb.base/fileio.exp: Check it.
 

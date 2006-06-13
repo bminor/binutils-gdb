@@ -1867,6 +1867,50 @@ proc gdb_exit { } {
 }
 
 #
+# gdb_load_cmd -- load a file into the debugger.
+#		  ARGS - additional args to load command.
+#                 return a -1 if anything goes wrong.
+#
+proc gdb_load_cmd { args } {
+    global gdb_prompt
+
+    if [target_info exists gdb_load_timeout] {
+	set loadtimeout [target_info gdb_load_timeout]
+    } else {
+	set loadtimeout 1600
+    }
+    send_gdb "load $args\n"
+    verbose "Timeout is now $timeout seconds" 2
+    gdb_expect $loadtimeout {
+	-re "Loading section\[^\r\]*\r\n" {
+	    exp_continue
+	}
+	-re "Start address\[\r\]*\r\n" {
+	    exp_continue
+	}
+	-re "Transfer rate\[\r\]*\r\n" {
+	    exp_continue
+	}
+	-re "Memory access error\[^\r\]*\r\n" {
+	    perror "Failed to load program"
+	    return -1
+	}
+	-re "$gdb_prompt $" {
+	    return 0
+	}
+	-re "(.*)\r\n$gdb_prompt " {
+	    perror "Unexpected reponse from 'load' -- $expect_out(1,string)"
+	    return -1
+	}
+	timeout {
+	    perror "Timed out trying to load $arg."
+	    return -1
+	}
+    }
+    return -1
+}
+
+#
 # gdb_load -- load a file into the debugger.
 # Many files in config/*.exp override this procedure.
 #
