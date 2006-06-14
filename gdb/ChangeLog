@@ -1,3 +1,9 @@
+2006-06-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf2read.c (read_unspecified_type): New function.
+	(read_type_die): Handle DW_TAG_unspecified_type.
+	(Committed by Julian Brown.)
+
 2006-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* symfile.c (load_command): Check for a changed executable before

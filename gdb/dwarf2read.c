@@ -4859,6 +4859,23 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   set_die_type (die, range_type, cu);
 }
   
+static void
+read_unspecified_type (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct type *type;
+  struct attribute *attr;
+
+  if (die->type)
+    return;
+
+  /* For now, we only support the C meaning of an unspecified type: void.  */
+
+  attr = dwarf2_attr (die, DW_AT_name, cu);
+  type = init_type (TYPE_CODE_VOID, 0, 0, attr ? DW_STRING (attr) : "",
+		    cu->objfile);
+
+  set_die_type (die, type, cu);
+}
 
 /* Read a whole compilation unit into a linked list of dies.  */
 
@@ -7344,6 +7361,9 @@ read_type_die (struct die_info *die, struct dwarf2_cu *cu)
       break;
     case DW_TAG_base_type:
       read_base_type (die, cu);
+      break;
+    case DW_TAG_unspecified_type:
+      read_unspecified_type (die, cu);
       break;
     default:
       complaint (&symfile_complaints, _("unexpected tag in read_type_die: '%s'"),
