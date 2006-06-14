@@ -1826,6 +1826,11 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	  link_info.flags |= (bfd_vma) DF_BIND_NOW;
 	  link_info.flags_1 |= (bfd_vma) DF_1_NOW;
 	}
+      else if (strcmp (optarg, "lazy") == 0)
+	{
+	  link_info.flags &= ~(bfd_vma) DF_BIND_NOW;
+	  link_info.flags_1 &= ~(bfd_vma) DF_1_NOW;
+	}
       else if (strcmp (optarg, "origin") == 0)
 	{
 	  link_info.flags |= (bfd_vma) DF_ORIGIN;
@@ -1909,6 +1914,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
   fprintf (file, _("  -z execstack\t\tMark executable as requiring executable stack\n"));
   fprintf (file, _("  -z initfirst\t\tMark DSO to be initialized first at runtime\n"));
   fprintf (file, _("  -z interpose\t\tMark object to interpose all DSOs but executable\n"));
+  fprintf (file, _("  -z lazy\t\tMark object lazy runtime binding (default)\n"));
   fprintf (file, _("  -z loadfltr\t\tMark object requiring immediate process\n"));
   fprintf (file, _("  -z muldefs\t\tAllow multiple definitions\n"));
   fprintf (file, _("  -z nocombreloc\tDon't merge dynamic relocs into one section\n"));

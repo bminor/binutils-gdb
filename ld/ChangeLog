@@ -1,3 +1,10 @@
+2006-06-14  Kevin F. Quinn  <kevquinn@gentoo.org>
+
+	* ld.texinfo: Document new -z lazy option.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_handle_option): Handle
+	new option.
+	(gld${EMULATION_NAME}_list_options): Update help text.
+
 2006-06-12  Fred Fish  <fnf@specifix.com>
 
 	* emulparams/elf32bmip.sh (OTHER_SECTIONS): Keep the

@@ -962,6 +962,12 @@ objects.
 Marks the object that its symbol table interposes before all symbols
 but the primary executable.
 
+@item lazy
+When generating an executable or shared library, mark it to tell the
+dynamic linker to defer function call resolution to the point when
+the function is called (lazy binding), rather than at load time.
+Lazy binding is the default.
+
 @item loadfltr
 Marks  the object that its filters be processed immediately at
 runtime.
