@@ -1,3 +1,9 @@
+2006-06-14  Thiemo Seufer  <ths@mips.com>
+
+	* gas/mips/mips16e-jrc.d, gas/mips/mips16e-save.d,
+	gas/mips/mips32-dsp.d, gas/mips/mips32-mt.d: Explicitly specify
+	o32 ABI.
+
 2006-05-26  Richard Sandiford  <richard@codesourcery.com>
 
 	* gas/m68k/mcf-fpu.s: Add fmovemd and fmovem instructions.
