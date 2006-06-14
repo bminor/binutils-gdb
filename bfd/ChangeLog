@@ -1,3 +1,37 @@
+2006-06-14  Richard Sandiford  <richard@codesourcery.com>
+
+	* elf32-m68k.c (elf_m68k_plt_info): New structure.
+	(elf_m68k_plt0_entry): Add R_68K_PC32-style in-place addends.
+	(elf_m68k_plt_entry): Likewise.
+	(elf_m68k_plt_info): New table.
+	(CFV4E_PLT_ENTRY_SIZE): Rename to...
+	(ISAB_PLT_ENTRY_SIZE): ...this.
+	(CFV4E_FLAG): Delete.
+	(elf_cfv4e_plt0_entry): Rename to...
+	(elf_isab_plt0_entry): ...this.  Adjust comments.  Use (-6,%pc,%d0)
+	for the second instruction too.
+	(elf_cfv4e_plt_entry): Rename to...
+	(elf_isab_plt_entry): ...this.  Adjust comments and use (-6,%pc,%d0).
+	(elf_isab_plt_info): New table.
+	(CPU32_FLAG): Delete.
+	(PLT_CPU32_ENTRY_SIZE): Rename to...
+	(CPU32_PLT_ENTRY_SIZE): ...this.
+	(elf_cpu32_plt0_entry): Update bounds accordingly.  Add R_68K_PC32-
+	style in-place addends.
+	(elf_cpu32_plt_entry): Likewise.
+	(elf_cpu32_plt_info): New table.
+	(elf_m68k_link_hash_table): Add a plt_info field.
+	(elf_m68k_link_hash_table_create): Initialize it.
+	(elf_m68k_get_plt_info): New function.
+	(elf_m68k_always_size_sections): Likewise.
+	(elf_m68k_adjust_dynamic_symbol): Use the plt_info hash table field.
+	(elf_m68k_install_pc32): New function.
+	(elf_m68k_finish_dynamic_symbol): Factor code using plt_info and
+	elf_m68k_install_pc32.
+	(elf_m68k_finish_dynamic_sections): Likewise.
+	(elf_m68k_plt_sym_val): Use elf_m68k_get_plt_info.
+	(elf_backend_always_size_sections): Define.
+
 2006-06-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (elf_link_add_object_symbols): Save and restore

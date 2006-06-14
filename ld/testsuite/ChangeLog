@@ -1,3 +1,10 @@
+2006-06-14  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-m68k/plt1.s, ld-m68k/plt1-empty.s, ld-m68k/plt1.ld: New files.
+	* ld-m68k/plt1-68020.d, ld-m68k/plt1-cpu32.d: Likewise.
+	* ld-m68k/plt1-isab.d: Likewise.
+	* ld-m68k/m68k.exp: Run new PLT tests.
+
 2006-06-12  Thiemo Seufer  <ths@mips.com>
 
 	* ld-mips-elf/multi-got-no-shared.d: Adjust for recent change of
