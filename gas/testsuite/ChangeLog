@@ -1,4 +1,11 @@
 2006-06-14  Thiemo Seufer  <ths@mips.com>
+            Maciej W. Rozycki  <macro@mips.com>
+
+	* gas/mips/elf-rel6.d, gas/mips/elf-rel6.s: Extend testcase.
+	* gas/mips/elf-rel6.d-n32.d, gas/mips/elf-rel6-n64.d: New files.
+	* gas/mips/mips.exp: Run new testcases.
+
+2006-06-14  Thiemo Seufer  <ths@mips.com>
 
 	* gas/mips/mips16e-jrc.d, gas/mips/mips16e-save.d,
 	gas/mips/mips32-dsp.d, gas/mips/mips32-mt.d: Explicitly specify

@@ -651,6 +651,10 @@ if { [istarget mips*-*-vxworks*] } {
 	}
 	run_dump_test "elf-rel5"
 	run_dump_test "elf-rel6"
+	if $has_newabi {
+	    run_dump_test "elf-rel6-n32"
+	    run_dump_test "elf-rel6-n64"
+	}
 	run_dump_test "elf-rel7"
 	run_dump_test "elf-rel8"
 	run_dump_test "elf-rel9"
