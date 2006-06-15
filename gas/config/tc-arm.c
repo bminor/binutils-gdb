@@ -85,6 +85,15 @@ static struct
   unsigned	  sp_restored:1;
 } unwind;
 
+/* Results from operand parsing worker functions.  */
+
+typedef enum
+{
+  PARSE_OPERAND_SUCCESS,
+  PARSE_OPERAND_FAIL,
+  PARSE_OPERAND_FAIL_NO_BACKTRACK
+} parse_operand_result;
+
 /* Bit N indicates that an R_ARM_NONE relocation has been output for
    __aeabi_unwind_cpp_prN already if set. This enables dependencies to be
    emitted only once per section, to save unnecessary bloat.  */
@@ -4267,6 +4276,168 @@ parse_shifter_operand (char **str, int i)
   return SUCCESS;
 }
 
+/* Group relocation information.  Each entry in the table contains the
+   textual name of the relocation as may appear in assembler source
+   and must end with a colon.
+   Along with this textual name are the relocation codes to be used if
+   the corresponding instruction is an ALU instruction (ADD or SUB only),
+   an LDR, an LDRS, or an LDC.  */
+
+struct group_reloc_table_entry
+{
+  const char *name;
+  int alu_code;
+  int ldr_code;
+  int ldrs_code;
+  int ldc_code;
+};
+
+typedef enum
+{
+  /* Varieties of non-ALU group relocation.  */
+
+  GROUP_LDR,
+  GROUP_LDRS,
+  GROUP_LDC
+} group_reloc_type;
+
+static struct group_reloc_table_entry group_reloc_table[] =
+  { /* Program counter relative: */
+    { "pc_g0_nc",
+      BFD_RELOC_ARM_ALU_PC_G0_NC,	/* ALU */
+      0,				/* LDR */
+      0,				/* LDRS */
+      0 },				/* LDC */
+    { "pc_g0",
+      BFD_RELOC_ARM_ALU_PC_G0,		/* ALU */
+      BFD_RELOC_ARM_LDR_PC_G0,		/* LDR */
+      BFD_RELOC_ARM_LDRS_PC_G0,		/* LDRS */
+      BFD_RELOC_ARM_LDC_PC_G0 },	/* LDC */
+    { "pc_g1_nc",
+      BFD_RELOC_ARM_ALU_PC_G1_NC,	/* ALU */
+      0,				/* LDR */
+      0,				/* LDRS */
+      0 },				/* LDC */
+    { "pc_g1",
+      BFD_RELOC_ARM_ALU_PC_G1,		/* ALU */
+      BFD_RELOC_ARM_LDR_PC_G1, 		/* LDR */
+      BFD_RELOC_ARM_LDRS_PC_G1,		/* LDRS */
+      BFD_RELOC_ARM_LDC_PC_G1 },	/* LDC */
+    { "pc_g2",
+      BFD_RELOC_ARM_ALU_PC_G2,		/* ALU */
+      BFD_RELOC_ARM_LDR_PC_G2,		/* LDR */
+      BFD_RELOC_ARM_LDRS_PC_G2,		/* LDRS */
+      BFD_RELOC_ARM_LDC_PC_G2 },	/* LDC */
+    /* Section base relative */
+    { "sb_g0_nc",
+      BFD_RELOC_ARM_ALU_SB_G0_NC,	/* ALU */
+      0,				/* LDR */
+      0,				/* LDRS */
+      0 },				/* LDC */
+    { "sb_g0",
+      BFD_RELOC_ARM_ALU_SB_G0,		/* ALU */
+      BFD_RELOC_ARM_LDR_SB_G0,		/* LDR */
+      BFD_RELOC_ARM_LDRS_SB_G0,		/* LDRS */
+      BFD_RELOC_ARM_LDC_SB_G0 },	/* LDC */
+    { "sb_g1_nc",
+      BFD_RELOC_ARM_ALU_SB_G1_NC,	/* ALU */
+      0,				/* LDR */
+      0,				/* LDRS */
+      0 },				/* LDC */
+    { "sb_g1",
+      BFD_RELOC_ARM_ALU_SB_G1,		/* ALU */
+      BFD_RELOC_ARM_LDR_SB_G1, 		/* LDR */
+      BFD_RELOC_ARM_LDRS_SB_G1,		/* LDRS */
+      BFD_RELOC_ARM_LDC_SB_G1 },	/* LDC */
+    { "sb_g2",
+      BFD_RELOC_ARM_ALU_SB_G2,		/* ALU */
+      BFD_RELOC_ARM_LDR_SB_G2,		/* LDR */
+      BFD_RELOC_ARM_LDRS_SB_G2,		/* LDRS */
+      BFD_RELOC_ARM_LDC_SB_G2 }	};	/* LDC */
+
+/* Given the address of a pointer pointing to the textual name of a group
+   relocation as may appear in assembler source, attempt to find its details
+   in group_reloc_table.  The pointer will be updated to the character after
+   the trailing colon.  On failure, FAIL will be returned; SUCCESS
+   otherwise.  On success, *entry will be updated to point at the relevant
+   group_reloc_table entry. */
+
+static int
+find_group_reloc_table_entry (char **str, struct group_reloc_table_entry **out)
+{
+  unsigned int i;
+  for (i = 0; i < ARRAY_SIZE (group_reloc_table); i++)
+    {
+      int length = strlen (group_reloc_table[i].name);
+
+      if (strncasecmp (group_reloc_table[i].name, *str, length) == 0 &&
+          (*str)[length] == ':')
+        {
+          *out = &group_reloc_table[i];
+          *str += (length + 1);
+          return SUCCESS;
+        }
+    }
+
+  return FAIL;
+}
+
+/* Parse a <shifter_operand> for an ARM data processing instruction
+   (as for parse_shifter_operand) where group relocations are allowed:
+
+      #<immediate>
+      #<immediate>, <rotate>
+      #:<group_reloc>:<expression>
+      <Rm>
+      <Rm>, <shift>
+
+   where <group_reloc> is one of the strings defined in group_reloc_table.
+   The hashes are optional.
+
+   Everything else is as for parse_shifter_operand.  */
+
+static parse_operand_result
+parse_shifter_operand_group_reloc (char **str, int i)
+{
+  /* Determine if we have the sequence of characters #: or just :
+     coming next.  If we do, then we check for a group relocation.
+     If we don't, punt the whole lot to parse_shifter_operand.  */
+
+  if (((*str)[0] == '#' && (*str)[1] == ':')
+      || (*str)[0] == ':')
+    {
+      struct group_reloc_table_entry *entry;
+
+      if ((*str)[0] == '#')
+        (*str) += 2;
+      else
+        (*str)++;
+
+      /* Try to parse a group relocation.  Anything else is an error.  */
+      if (find_group_reloc_table_entry (str, &entry) == FAIL)
+        {
+          inst.error = _("unknown group relocation");
+          return PARSE_OPERAND_FAIL_NO_BACKTRACK;
+        }
+
+      /* We now have the group relocation table entry corresponding to
+         the name in the assembler source.  Next, we parse the expression.  */
+      if (my_get_expression (&inst.reloc.exp, str, GE_NO_PREFIX))
+        return PARSE_OPERAND_FAIL_NO_BACKTRACK;
+
+      /* Record the relocation type (always the ALU variant here).  */
+      inst.reloc.type = entry->alu_code;
+      assert (inst.reloc.type != 0);
+
+      return PARSE_OPERAND_SUCCESS;
+    }
+  else
+    return parse_shifter_operand (str, i) == SUCCESS
+           ? PARSE_OPERAND_SUCCESS : PARSE_OPERAND_FAIL;
+
+  /* Never reached.  */
+}
+
 /* Parse all forms of an ARM address expression.  Information is written
    to inst.operands[i] and/or inst.reloc.
 
@@ -4299,8 +4470,9 @@ parse_shifter_operand (char **str, int i)
   It is the caller's responsibility to check for addressing modes not
   supported by the instruction, and to set inst.reloc.type.  */
 
-static int
-parse_address (char **str, int i)
+static parse_operand_result
+parse_address_main (char **str, int i, int group_relocations,
+                    group_reloc_type group_type)
 {
   char *p = *str;
   int reg;
@@ -4318,16 +4490,16 @@ parse_address (char **str, int i)
       /* else a load-constant pseudo op, no special treatment needed here */
 
       if (my_get_expression (&inst.reloc.exp, &p, GE_NO_PREFIX))
-	return FAIL;
+	return PARSE_OPERAND_FAIL;
 
       *str = p;
-      return SUCCESS;
+      return PARSE_OPERAND_SUCCESS;
     }
 
   if ((reg = arm_reg_parse (&p, REG_TYPE_RN)) == FAIL)
     {
       inst.error = _(reg_expected_msgs[REG_TYPE_RN]);
-      return FAIL;
+      return PARSE_OPERAND_FAIL;
     }
   inst.operands[i].reg = reg;
   inst.operands[i].isreg = 1;
@@ -4346,7 +4518,7 @@ parse_address (char **str, int i)
 
 	  if (skip_past_comma (&p) == SUCCESS)
 	    if (parse_shift (&p, i, SHIFT_IMMEDIATE) == FAIL)
-	      return FAIL;
+	      return PARSE_OPERAND_FAIL;
 	}
       else if (skip_past_char (&p, ':') == SUCCESS)
         {
@@ -4358,7 +4530,7 @@ parse_address (char **str, int i)
           if (exp.X_op != O_constant)
             {
               inst.error = _("alignment must be constant");
-              return FAIL;
+              return PARSE_OPERAND_FAIL;
             }
           inst.operands[i].imm = exp.X_add_number << 8;
           inst.operands[i].immisalign = 1;
@@ -4372,15 +4544,68 @@ parse_address (char **str, int i)
 	      inst.operands[i].negative = 0;
 	      p--;
 	    }
-	  if (my_get_expression (&inst.reloc.exp, &p, GE_IMM_PREFIX))
-	    return FAIL;
+
+	  if (group_relocations &&
+              ((*p == '#' && *(p + 1) == ':') || *p == ':'))
+
+	    {
+	      struct group_reloc_table_entry *entry;
+
+              /* Skip over the #: or : sequence.  */
+              if (*p == '#')
+                p += 2;
+              else
+                p++;
+
+	      /* Try to parse a group relocation.  Anything else is an
+                 error.  */
+	      if (find_group_reloc_table_entry (&p, &entry) == FAIL)
+		{
+		  inst.error = _("unknown group relocation");
+		  return PARSE_OPERAND_FAIL_NO_BACKTRACK;
+		}
+
+	      /* We now have the group relocation table entry corresponding to
+		 the name in the assembler source.  Next, we parse the
+                 expression.  */
+	      if (my_get_expression (&inst.reloc.exp, &p, GE_NO_PREFIX))
+		return PARSE_OPERAND_FAIL_NO_BACKTRACK;
+
+	      /* Record the relocation type.  */
+              switch (group_type)
+                {
+                  case GROUP_LDR:
+	            inst.reloc.type = entry->ldr_code;
+                    break;
+
+                  case GROUP_LDRS:
+	            inst.reloc.type = entry->ldrs_code;
+                    break;
+
+                  case GROUP_LDC:
+	            inst.reloc.type = entry->ldc_code;
+                    break;
+
+                  default:
+                    assert (0);
+                }
+
+              if (inst.reloc.type == 0)
+		{
+		  inst.error = _("this group relocation is not allowed on this instruction");
+		  return PARSE_OPERAND_FAIL_NO_BACKTRACK;
+		}
+            }
+          else
+	    if (my_get_expression (&inst.reloc.exp, &p, GE_IMM_PREFIX))
+	      return PARSE_OPERAND_FAIL;
 	}
     }
 
   if (skip_past_char (&p, ']') == FAIL)
     {
       inst.error = _("']' expected");
-      return FAIL;
+      return PARSE_OPERAND_FAIL;
     }
 
   if (skip_past_char (&p, '!') == SUCCESS)
@@ -4393,20 +4618,20 @@ parse_address (char **str, int i)
 	  /* [Rn], {expr} - unindexed, with option */
 	  if (parse_immediate (&p, &inst.operands[i].imm,
 			       0, 255, TRUE) == FAIL)
-	    return FAIL;
+	    return PARSE_OPERAND_FAIL;
 
 	  if (skip_past_char (&p, '}') == FAIL)
 	    {
 	      inst.error = _("'}' expected at end of 'option' field");
-	      return FAIL;
+	      return PARSE_OPERAND_FAIL;
 	    }
 	  if (inst.operands[i].preind)
 	    {
 	      inst.error = _("cannot combine index with option");
-	      return FAIL;
+	      return PARSE_OPERAND_FAIL;
 	    }
 	  *str = p;
-	  return SUCCESS;
+	  return PARSE_OPERAND_SUCCESS;
 	}
       else
 	{
@@ -4416,7 +4641,7 @@ parse_address (char **str, int i)
 	  if (inst.operands[i].preind)
 	    {
 	      inst.error = _("cannot combine pre- and post-indexing");
-	      return FAIL;
+	      return PARSE_OPERAND_FAIL;
 	    }
 
 	  if (*p == '+') p++;
@@ -4434,7 +4659,7 @@ parse_address (char **str, int i)
 
 	      if (skip_past_comma (&p) == SUCCESS)
 		if (parse_shift (&p, i, SHIFT_IMMEDIATE) == FAIL)
-		  return FAIL;
+		  return PARSE_OPERAND_FAIL;
 	    }
 	  else
 	    {
@@ -4444,7 +4669,7 @@ parse_address (char **str, int i)
 		  p--;
 		}
 	      if (my_get_expression (&inst.reloc.exp, &p, GE_IMM_PREFIX))
-		return FAIL;
+		return PARSE_OPERAND_FAIL;
 	    }
 	}
     }
@@ -4458,7 +4683,20 @@ parse_address (char **str, int i)
       inst.reloc.exp.X_add_number = 0;
     }
   *str = p;
-  return SUCCESS;
+  return PARSE_OPERAND_SUCCESS;
+}
+
+static int
+parse_address (char **str, int i)
+{
+  return parse_address_main (str, i, 0, 0) == PARSE_OPERAND_SUCCESS
+         ? SUCCESS : FAIL;
+}
+
+static parse_operand_result
+parse_address_group_reloc (char **str, int i, group_reloc_type type)
+{
+  return parse_address_main (str, i, 1, type);
 }
 
 /* Parse an operand for a MOVW or MOVT instruction.  */
@@ -5057,7 +5295,11 @@ enum operand_parse_code
   OP_I31b,	/*			       0 .. 31 */
 
   OP_SH,	/* shifter operand */
+  OP_SHG,	/* shifter operand with possible group relocation */
   OP_ADDR,	/* Memory address expression (any mode) */
+  OP_ADDRGLDR,	/* Mem addr expr (any mode) with possible LDR group reloc */
+  OP_ADDRGLDRS, /* Mem addr expr (any mode) with possible LDRS group reloc */
+  OP_ADDRGLDC,  /* Mem addr expr (any mode) with possible LDC group reloc */
   OP_EXP,	/* arbitrary expression */
   OP_EXPi,	/* same, with optional immediate prefix */
   OP_EXPr,	/* same, with optional relocation suffix */
@@ -5112,6 +5354,7 @@ parse_operands (char *str, const unsigned char *pattern)
   const char *backtrack_error = 0;
   int i, val, backtrack_index = 0;
   enum arm_reg_type rtype;
+  parse_operand_result result;
 
 #define po_char_or_fail(chr) do {		\
   if (skip_past_char (&str, chr) == FAIL)	\
@@ -5166,6 +5409,14 @@ parse_operands (char *str, const unsigned char *pattern)
 
 #define po_misc_or_fail(expr) do {		\
   if (expr)					\
+    goto failure;				\
+} while (0)
+
+#define po_misc_or_fail_no_backtrack(expr) do {	\
+  result = expr;				\
+  if (result == PARSE_OPERAND_FAIL_NO_BACKTRACK)\
+    backtrack_pos = 0;				\
+  if (result != PARSE_OPERAND_SUCCESS)		\
     goto failure;				\
 } while (0)
 
@@ -5551,8 +5802,28 @@ parse_operands (char *str, const unsigned char *pattern)
 	  po_misc_or_fail (parse_address (&str, i));
 	  break;
 
+	case OP_ADDRGLDR:
+	  po_misc_or_fail_no_backtrack (
+            parse_address_group_reloc (&str, i, GROUP_LDR));
+	  break;
+
+	case OP_ADDRGLDRS:
+	  po_misc_or_fail_no_backtrack (
+            parse_address_group_reloc (&str, i, GROUP_LDRS));
+	  break;
+
+	case OP_ADDRGLDC:
+	  po_misc_or_fail_no_backtrack (
+            parse_address_group_reloc (&str, i, GROUP_LDC));
+	  break;
+
 	case OP_SH:
 	  po_misc_or_fail (parse_shifter_operand (&str, i));
+	  break;
+
+	case OP_SHG:
+	  po_misc_or_fail_no_backtrack (
+            parse_shifter_operand_group_reloc (&str, i));
 	  break;
 
 	case OP_oSHll:
@@ -5908,7 +6179,8 @@ encode_arm_addr_mode_3 (int i, bfd_boolean is_t)
    into a coprocessor load/store instruction.  If wb_ok is false,
    reject use of writeback; if unind_ok is false, reject use of
    unindexed addressing.  If reloc_override is not 0, use it instead
-   of BFD_ARM_CP_OFF_IMM.  */
+   of BFD_ARM_CP_OFF_IMM, unless the initial relocation is a group one
+   (in which case it is preserved).  */
 
 static int
 encode_arm_cp_address (int i, int wb_ok, int unind_ok, int reloc_override)
@@ -5950,10 +6222,16 @@ encode_arm_cp_address (int i, int wb_ok, int unind_ok, int reloc_override)
 
   if (reloc_override)
     inst.reloc.type = reloc_override;
-  else if (thumb_mode)
-    inst.reloc.type = BFD_RELOC_ARM_T32_CP_OFF_IMM;
-  else
-    inst.reloc.type = BFD_RELOC_ARM_CP_OFF_IMM;
+  else if ((inst.reloc.type < BFD_RELOC_ARM_ALU_PC_G0_NC
+            || inst.reloc.type > BFD_RELOC_ARM_LDC_SB_G2)
+           && inst.reloc.type != BFD_RELOC_ARM_LDR_PC_G0)
+    {
+      if (thumb_mode)
+        inst.reloc.type = BFD_RELOC_ARM_T32_CP_OFF_IMM;
+      else
+        inst.reloc.type = BFD_RELOC_ARM_CP_OFF_IMM;
+    }
+
   return SUCCESS;
 }
 
@@ -14028,8 +14306,8 @@ static const struct asm_opcode insns[] =
  tC3(eors,	0300000, eors,	   3, (RR, oRR, SH), arit, t_arit3c),
  tCE(sub,	0400000, sub,	   3, (RR, oRR, SH), arit, t_add_sub),
  tC3(subs,	0500000, subs,	   3, (RR, oRR, SH), arit, t_add_sub),
- tCE(add,	0800000, add,	   3, (RR, oRR, SH), arit, t_add_sub),
- tC3(adds,	0900000, adds,	   3, (RR, oRR, SH), arit, t_add_sub),
+ tCE(add,	0800000, add,	   3, (RR, oRR, SHG), arit, t_add_sub),
+ tC3(adds,	0900000, adds,	   3, (RR, oRR, SHG), arit, t_add_sub),
  tCE(adc,	0a00000, adc,	   3, (RR, oRR, SH), arit, t_arit3c),
  tC3(adcs,	0b00000, adcs,	   3, (RR, oRR, SH), arit, t_arit3c),
  tCE(sbc,	0c00000, sbc,	   3, (RR, oRR, SH), arit, t_arit3),
@@ -14057,10 +14335,10 @@ static const struct asm_opcode insns[] =
  tCE(mvn,	1e00000, mvn,	   2, (RR, SH),      mov,  t_mvn_tst),
  tC3(mvns,	1f00000, mvns,	   2, (RR, SH),      mov,  t_mvn_tst),
 
- tCE(ldr,	4100000, ldr,	   2, (RR, ADDR),    ldst, t_ldst),
- tC3(ldrb,	4500000, ldrb,	   2, (RR, ADDR),    ldst, t_ldst),
- tCE(str,	4000000, str,	   2, (RR, ADDR),    ldst, t_ldst),
- tC3(strb,	4400000, strb,	   2, (RR, ADDR),    ldst, t_ldst),
+ tCE(ldr,	4100000, ldr,	   2, (RR, ADDRGLDR),ldst, t_ldst),
+ tC3(ldrb,	4500000, ldrb,	   2, (RR, ADDRGLDR),ldst, t_ldst),
+ tCE(str,	4000000, str,	   2, (RR, ADDRGLDR),ldst, t_ldst),
+ tC3(strb,	4400000, strb,	   2, (RR, ADDRGLDR),ldst, t_ldst),
 
  tCE(stm,	8800000, stmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
  tC3(stmia,	8800000, stmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
@@ -14144,10 +14422,10 @@ static const struct asm_opcode insns[] =
 
   /* Generic coprocessor instructions.	*/
  TCE(cdp,	e000000, ee000000, 6, (RCP, I15b, RCN, RCN, RCN, oI7b), cdp,    cdp),
- TCE(ldc,	c100000, ec100000, 3, (RCP, RCN, ADDR),		        lstc,   lstc),
- TC3(ldcl,	c500000, ec500000, 3, (RCP, RCN, ADDR),		        lstc,   lstc),
- TCE(stc,	c000000, ec000000, 3, (RCP, RCN, ADDR),		        lstc,   lstc),
- TC3(stcl,	c400000, ec400000, 3, (RCP, RCN, ADDR),		        lstc,   lstc),
+ TCE(ldc,	c100000, ec100000, 3, (RCP, RCN, ADDRGLDC),	        lstc,   lstc),
+ TC3(ldcl,	c500000, ec500000, 3, (RCP, RCN, ADDRGLDC),	        lstc,   lstc),
+ TCE(stc,	c000000, ec000000, 3, (RCP, RCN, ADDRGLDC),	        lstc,   lstc),
+ TC3(stcl,	c400000, ec400000, 3, (RCP, RCN, ADDRGLDC),	        lstc,   lstc),
  TCE(mcr,	e000010, ee000010, 6, (RCP, I7b, RR, RCN, RCN, oI7b),   co_reg, co_reg),
  TCE(mrc,	e100010, ee100010, 6, (RCP, I7b, RR, RCN, RCN, oI7b),   co_reg, co_reg),
 
@@ -14176,12 +14454,12 @@ static const struct asm_opcode insns[] =
 #define ARM_VARIANT &arm_ext_v4	/* ARM Architecture 4.	*/
 #undef THUMB_VARIANT
 #define THUMB_VARIANT &arm_ext_v4t
- tC3(ldrh,	01000b0, ldrh,     2, (RR, ADDR), ldstv4, t_ldst),
- tC3(strh,	00000b0, strh,     2, (RR, ADDR), ldstv4, t_ldst),
- tC3(ldrsh,	01000f0, ldrsh,    2, (RR, ADDR), ldstv4, t_ldst),
- tC3(ldrsb,	01000d0, ldrsb,    2, (RR, ADDR), ldstv4, t_ldst),
- tCM(ld,sh,	01000f0, ldrsh,    2, (RR, ADDR), ldstv4, t_ldst),
- tCM(ld,sb,	01000d0, ldrsb,    2, (RR, ADDR), ldstv4, t_ldst),
+ tC3(ldrh,	01000b0, ldrh,     2, (RR, ADDRGLDRS), ldstv4, t_ldst),
+ tC3(strh,	00000b0, strh,     2, (RR, ADDRGLDRS), ldstv4, t_ldst),
+ tC3(ldrsh,	01000f0, ldrsh,    2, (RR, ADDRGLDRS), ldstv4, t_ldst),
+ tC3(ldrsb,	01000d0, ldrsb,    2, (RR, ADDRGLDRS), ldstv4, t_ldst),
+ tCM(ld,sh,	01000f0, ldrsh,    2, (RR, ADDRGLDRS), ldstv4, t_ldst),
+ tCM(ld,sb,	01000d0, ldrsb,    2, (RR, ADDRGLDRS), ldstv4, t_ldst),
 
 #undef ARM_VARIANT
 #define ARM_VARIANT &arm_ext_v4t_5
@@ -14202,10 +14480,10 @@ static const struct asm_opcode insns[] =
 #undef THUMB_VARIANT
 #define THUMB_VARIANT &arm_ext_v6t2
  TCE(clz,	16f0f10, fab0f080, 2, (RRnpc, RRnpc),		        rd_rm,  t_clz),
- TUF(ldc2,	c100000, fc100000, 3, (RCP, RCN, ADDR),		        lstc,	lstc),
- TUF(ldc2l,	c500000, fc500000, 3, (RCP, RCN, ADDR),		        lstc,	lstc),
- TUF(stc2,	c000000, fc000000, 3, (RCP, RCN, ADDR),		        lstc,	lstc),
- TUF(stc2l,	c400000, fc400000, 3, (RCP, RCN, ADDR),		        lstc,	lstc),
+ TUF(ldc2,	c100000, fc100000, 3, (RCP, RCN, ADDRGLDC),	        lstc,	lstc),
+ TUF(ldc2l,	c500000, fc500000, 3, (RCP, RCN, ADDRGLDC),		        lstc,	lstc),
+ TUF(stc2,	c000000, fc000000, 3, (RCP, RCN, ADDRGLDC),	        lstc,	lstc),
+ TUF(stc2l,	c400000, fc400000, 3, (RCP, RCN, ADDRGLDC),		        lstc,	lstc),
  TUF(cdp2,	e000000, fe000000, 6, (RCP, I15b, RCN, RCN, RCN, oI7b), cdp,    cdp),
  TUF(mcr2,	e000010, fe000010, 6, (RCP, I7b, RR, RCN, RCN, oI7b),   co_reg, co_reg),
  TUF(mrc2,	e100010, fe100010, 6, (RCP, I7b, RR, RCN, RCN, oI7b),   co_reg, co_reg),
@@ -14241,8 +14519,8 @@ static const struct asm_opcode insns[] =
 #undef ARM_VARIANT
 #define ARM_VARIANT &arm_ext_v5e /*  ARM Architecture 5TE.  */
  TUF(pld,	450f000, f810f000, 1, (ADDR),		     pld,  t_pld),
- TC3(ldrd,	00000d0, e9500000, 3, (RRnpc, oRRnpc, ADDR), ldrd, t_ldstd),
- TC3(strd,	00000f0, e9400000, 3, (RRnpc, oRRnpc, ADDR), ldrd, t_ldstd),
+ TC3(ldrd,	00000d0, e9500000, 3, (RRnpc, oRRnpc, ADDRGLDRS), ldrd, t_ldstd),
+ TC3(strd,	00000f0, e9400000, 3, (RRnpc, oRRnpc, ADDRGLDRS), ldrd, t_ldstd),
 
  TCE(mcrr,	c400000, ec400000, 5, (RCP, I15b, RRnpc, RRnpc, RCN), co_reg2c, co_reg2c),
  TCE(mrrc,	c500000, ec500000, 5, (RCP, I15b, RRnpc, RRnpc, RCN), co_reg2c, co_reg2c),
@@ -14458,15 +14736,15 @@ static const struct asm_opcode insns[] =
  cCE(wfc,	e400110, 1, (RR),	     rd),
  cCE(rfc,	e500110, 1, (RR),	     rd),
 
- cCL(ldfs,	c100100, 2, (RF, ADDR),	     rd_cpaddr),
- cCL(ldfd,	c108100, 2, (RF, ADDR),	     rd_cpaddr),
- cCL(ldfe,	c500100, 2, (RF, ADDR),	     rd_cpaddr),
- cCL(ldfp,	c508100, 2, (RF, ADDR),	     rd_cpaddr),
+ cCL(ldfs,	c100100, 2, (RF, ADDRGLDC),  rd_cpaddr),
+ cCL(ldfd,	c108100, 2, (RF, ADDRGLDC),  rd_cpaddr),
+ cCL(ldfe,	c500100, 2, (RF, ADDRGLDC),  rd_cpaddr),
+ cCL(ldfp,	c508100, 2, (RF, ADDRGLDC),  rd_cpaddr),
 
- cCL(stfs,	c000100, 2, (RF, ADDR),	     rd_cpaddr),
- cCL(stfd,	c008100, 2, (RF, ADDR),	     rd_cpaddr),
- cCL(stfe,	c400100, 2, (RF, ADDR),	     rd_cpaddr),
- cCL(stfp,	c408100, 2, (RF, ADDR),	     rd_cpaddr),
+ cCL(stfs,	c000100, 2, (RF, ADDRGLDC),  rd_cpaddr),
+ cCL(stfd,	c008100, 2, (RF, ADDRGLDC),  rd_cpaddr),
+ cCL(stfe,	c400100, 2, (RF, ADDRGLDC),  rd_cpaddr),
+ cCL(stfp,	c408100, 2, (RF, ADDRGLDC),  rd_cpaddr),
 
  cCL(mvfs,	e008100, 2, (RF, RF_IF),     rd_rm),
  cCL(mvfsp,	e008120, 2, (RF, RF_IF),     rd_rm),
@@ -14909,8 +15187,8 @@ static const struct asm_opcode insns[] =
  cCE(fmxr,	ee00a10, 2, (RVC, RR),	      rn_rd),
 
   /* Memory operations.	 */
- cCE(flds,	d100a00, 2, (RVS, ADDR),      vfp_sp_ldst),
- cCE(fsts,	d000a00, 2, (RVS, ADDR),      vfp_sp_ldst),
+ cCE(flds,	d100a00, 2, (RVS, ADDRGLDC),  vfp_sp_ldst),
+ cCE(fsts,	d000a00, 2, (RVS, ADDRGLDC),  vfp_sp_ldst),
  cCE(fldmias,	c900a00, 2, (RRw, VRSLST),    vfp_sp_ldstmia),
  cCE(fldmfds,	c900a00, 2, (RRw, VRSLST),    vfp_sp_ldstmia),
  cCE(fldmdbs,	d300a00, 2, (RRw, VRSLST),    vfp_sp_ldstmdb),
@@ -14968,8 +15246,8 @@ static const struct asm_opcode insns[] =
  cCE(ftouizd,	ebc0bc0, 2, (RVS, RVD),	      vfp_sp_dp_cvt),
 
   /* Memory operations.	 */
- cCE(fldd,	d100b00, 2, (RVD, ADDR),      vfp_dp_ldst),
- cCE(fstd,	d000b00, 2, (RVD, ADDR),      vfp_dp_ldst),
+ cCE(fldd,	d100b00, 2, (RVD, ADDRGLDC),  vfp_dp_ldst),
+ cCE(fstd,	d000b00, 2, (RVD, ADDRGLDC),  vfp_dp_ldst),
  cCE(fldmiad,	c900b00, 2, (RRw, VRDLST),    vfp_dp_ldstmia),
  cCE(fldmfdd,	c900b00, 2, (RRw, VRDLST),    vfp_dp_ldstmia),
  cCE(fldmdbd,	d300b00, 2, (RRw, VRDLST),    vfp_dp_ldstmdb),
@@ -15043,8 +15321,8 @@ static const struct asm_opcode insns[] =
  NCE(vstm,      c800b00, 2, (RRw, VRSDLST), neon_ldm_stm),
  NCE(vstmia,    c800b00, 2, (RRw, VRSDLST), neon_ldm_stm),
  NCE(vstmdb,    d000b00, 2, (RRw, VRSDLST), neon_ldm_stm),
- NCE(vldr,      d100b00, 2, (RVSD, ADDR), neon_ldr_str),
- NCE(vstr,      d000b00, 2, (RVSD, ADDR), neon_ldr_str),
+ NCE(vldr,      d100b00, 2, (RVSD, ADDRGLDC), neon_ldr_str),
+ NCE(vstr,      d000b00, 2, (RVSD, ADDRGLDC), neon_ldr_str),
 
  nCEF(vcvt,     vcvt,    3, (RNSDQ, RNSDQ, oI32b), neon_cvt),
 
@@ -15500,14 +15778,14 @@ static const struct asm_opcode insns[] =
 
 #undef ARM_VARIANT
 #define ARM_VARIANT &arm_cext_maverick /* Cirrus Maverick instructions.	*/
- cCE(cfldrs,	c100400, 2, (RMF, ADDR),	      rd_cpaddr),
- cCE(cfldrd,	c500400, 2, (RMD, ADDR),	      rd_cpaddr),
- cCE(cfldr32,	c100500, 2, (RMFX, ADDR),	      rd_cpaddr),
- cCE(cfldr64,	c500500, 2, (RMDX, ADDR),	      rd_cpaddr),
- cCE(cfstrs,	c000400, 2, (RMF, ADDR),	      rd_cpaddr),
- cCE(cfstrd,	c400400, 2, (RMD, ADDR),	      rd_cpaddr),
- cCE(cfstr32,	c000500, 2, (RMFX, ADDR),	      rd_cpaddr),
- cCE(cfstr64,	c400500, 2, (RMDX, ADDR),	      rd_cpaddr),
+ cCE(cfldrs,	c100400, 2, (RMF, ADDRGLDC),	      rd_cpaddr),
+ cCE(cfldrd,	c500400, 2, (RMD, ADDRGLDC),	      rd_cpaddr),
+ cCE(cfldr32,	c100500, 2, (RMFX, ADDRGLDC),	      rd_cpaddr),
+ cCE(cfldr64,	c500500, 2, (RMDX, ADDRGLDC),	      rd_cpaddr),
+ cCE(cfstrs,	c000400, 2, (RMF, ADDRGLDC),	      rd_cpaddr),
+ cCE(cfstrd,	c400400, 2, (RMD, ADDRGLDC),	      rd_cpaddr),
+ cCE(cfstr32,	c000500, 2, (RMFX, ADDRGLDC),	      rd_cpaddr),
+ cCE(cfstr64,	c400500, 2, (RMDX, ADDRGLDC),	      rd_cpaddr),
  cCE(cfmvsr,	e000450, 2, (RMF, RR),		      rn_rd),
  cCE(cfmvrs,	e100450, 2, (RR, RMF),		      rd_rn),
  cCE(cfmvdlr,	e000410, 2, (RMD, RR),		      rn_rd),
@@ -16889,6 +17167,7 @@ md_apply_fix (fixS *	fixP,
   assert (fixP->fx_r_type <= BFD_RELOC_UNUSED);
 
   /* Note whether this will delete the relocation.  */
+
   if (fixP->fx_addsy == 0 && !fixP->fx_pcrel)
     fixP->fx_done = 1;
 
@@ -17760,6 +18039,175 @@ md_apply_fix (fixS *	fixP,
 	}
       return;
 
+   case BFD_RELOC_ARM_ALU_PC_G0_NC:
+   case BFD_RELOC_ARM_ALU_PC_G0:
+   case BFD_RELOC_ARM_ALU_PC_G1_NC:
+   case BFD_RELOC_ARM_ALU_PC_G1:
+   case BFD_RELOC_ARM_ALU_PC_G2:
+   case BFD_RELOC_ARM_ALU_SB_G0_NC:
+   case BFD_RELOC_ARM_ALU_SB_G0:
+   case BFD_RELOC_ARM_ALU_SB_G1_NC:
+   case BFD_RELOC_ARM_ALU_SB_G1:
+   case BFD_RELOC_ARM_ALU_SB_G2:
+     assert (!fixP->fx_done);
+     if (!seg->use_rela_p)
+       {
+         bfd_vma insn;
+         bfd_vma encoded_addend;
+         bfd_vma addend_abs = abs (value);
+
+         /* Check that the absolute value of the addend can be
+            expressed as an 8-bit constant plus a rotation.  */
+         encoded_addend = encode_arm_immediate (addend_abs);
+         if (encoded_addend == (unsigned int) FAIL)
+	   as_bad_where (fixP->fx_file, fixP->fx_line,
+	                 _("the offset 0x%08lX is not representable"),
+                         addend_abs);
+
+         /* Extract the instruction.  */
+         insn = md_chars_to_number (buf, INSN_SIZE);
+
+         /* If the addend is positive, use an ADD instruction.
+            Otherwise use a SUB.  Take care not to destroy the S bit.  */
+         insn &= 0xff1fffff;
+         if (value < 0)
+           insn |= 1 << 22;
+         else
+           insn |= 1 << 23;
+
+         /* Place the encoded addend into the first 12 bits of the
+            instruction.  */
+         insn &= 0xfffff000;
+         insn |= encoded_addend;
+   
+         /* Update the instruction.  */  
+         md_number_to_chars (buf, insn, INSN_SIZE);
+       }
+     break;
+
+    case BFD_RELOC_ARM_LDR_PC_G0:
+    case BFD_RELOC_ARM_LDR_PC_G1:
+    case BFD_RELOC_ARM_LDR_PC_G2:
+    case BFD_RELOC_ARM_LDR_SB_G0:
+    case BFD_RELOC_ARM_LDR_SB_G1:
+    case BFD_RELOC_ARM_LDR_SB_G2:
+      assert (!fixP->fx_done);
+      if (!seg->use_rela_p)
+        {
+          bfd_vma insn;
+          bfd_vma addend_abs = abs (value);
+
+          /* Check that the absolute value of the addend can be
+             encoded in 12 bits.  */
+          if (addend_abs >= 0x1000)
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+	  	          _("bad offset 0x%08lX (only 12 bits available for the magnitude)"),
+                          addend_abs);
+
+          /* Extract the instruction.  */
+          insn = md_chars_to_number (buf, INSN_SIZE);
+
+          /* If the addend is negative, clear bit 23 of the instruction.
+             Otherwise set it.  */
+          if (value < 0)
+            insn &= ~(1 << 23);
+          else
+            insn |= 1 << 23;
+
+          /* Place the absolute value of the addend into the first 12 bits
+             of the instruction.  */
+          insn &= 0xfffff000;
+          insn |= addend_abs;
+    
+          /* Update the instruction.  */  
+          md_number_to_chars (buf, insn, INSN_SIZE);
+        }
+      break;
+
+    case BFD_RELOC_ARM_LDRS_PC_G0:
+    case BFD_RELOC_ARM_LDRS_PC_G1:
+    case BFD_RELOC_ARM_LDRS_PC_G2:
+    case BFD_RELOC_ARM_LDRS_SB_G0:
+    case BFD_RELOC_ARM_LDRS_SB_G1:
+    case BFD_RELOC_ARM_LDRS_SB_G2:
+      assert (!fixP->fx_done);
+      if (!seg->use_rela_p)
+        {
+          bfd_vma insn;
+          bfd_vma addend_abs = abs (value);
+
+          /* Check that the absolute value of the addend can be
+             encoded in 8 bits.  */
+          if (addend_abs >= 0x100)
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+	  	          _("bad offset 0x%08lX (only 8 bits available for the magnitude)"),
+                          addend_abs);
+
+          /* Extract the instruction.  */
+          insn = md_chars_to_number (buf, INSN_SIZE);
+
+          /* If the addend is negative, clear bit 23 of the instruction.
+             Otherwise set it.  */
+          if (value < 0)
+            insn &= ~(1 << 23);
+          else
+            insn |= 1 << 23;
+
+          /* Place the first four bits of the absolute value of the addend
+             into the first 4 bits of the instruction, and the remaining
+             four into bits 8 .. 11.  */
+          insn &= 0xfffff0f0;
+          insn |= (addend_abs & 0xf) | ((addend_abs & 0xf0) << 4);
+    
+          /* Update the instruction.  */  
+          md_number_to_chars (buf, insn, INSN_SIZE);
+        }
+      break;
+
+    case BFD_RELOC_ARM_LDC_PC_G0:
+    case BFD_RELOC_ARM_LDC_PC_G1:
+    case BFD_RELOC_ARM_LDC_PC_G2:
+    case BFD_RELOC_ARM_LDC_SB_G0:
+    case BFD_RELOC_ARM_LDC_SB_G1:
+    case BFD_RELOC_ARM_LDC_SB_G2:
+      assert (!fixP->fx_done);
+      if (!seg->use_rela_p)
+        {
+          bfd_vma insn;
+          bfd_vma addend_abs = abs (value);
+
+          /* Check that the absolute value of the addend is a multiple of
+             four and, when divided by four, fits in 8 bits.  */
+          if (addend_abs & 0x3)
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+	  	          _("bad offset 0x%08lX (must be word-aligned)"),
+                          addend_abs);
+
+          if ((addend_abs >> 2) > 0xff)
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+	  	          _("bad offset 0x%08lX (must be an 8-bit number of words)"),
+                          addend_abs);
+
+          /* Extract the instruction.  */
+          insn = md_chars_to_number (buf, INSN_SIZE);
+
+          /* If the addend is negative, clear bit 23 of the instruction.
+             Otherwise set it.  */
+          if (value < 0)
+            insn &= ~(1 << 23);
+          else
+            insn |= 1 << 23;
+
+          /* Place the addend (divided by four) into the first eight
+             bits of the instruction.  */
+          insn &= 0xfffffff0;
+          insn |= addend_abs >> 2;
+    
+          /* Update the instruction.  */  
+          md_number_to_chars (buf, insn, INSN_SIZE);
+        }
+      break;
+
     case BFD_RELOC_UNUSED:
     default:
       as_bad_where (fixP->fx_file, fixP->fx_line,
@@ -17879,6 +18327,34 @@ tc_gen_reloc (asection *section, fixS *fixp)
     case BFD_RELOC_ARM_TLS_LDO32:
     case BFD_RELOC_ARM_PCREL_CALL:
     case BFD_RELOC_ARM_PCREL_JUMP:
+    case BFD_RELOC_ARM_ALU_PC_G0_NC:
+    case BFD_RELOC_ARM_ALU_PC_G0:
+    case BFD_RELOC_ARM_ALU_PC_G1_NC:
+    case BFD_RELOC_ARM_ALU_PC_G1:
+    case BFD_RELOC_ARM_ALU_PC_G2:
+    case BFD_RELOC_ARM_LDR_PC_G0:
+    case BFD_RELOC_ARM_LDR_PC_G1:
+    case BFD_RELOC_ARM_LDR_PC_G2:
+    case BFD_RELOC_ARM_LDRS_PC_G0:
+    case BFD_RELOC_ARM_LDRS_PC_G1:
+    case BFD_RELOC_ARM_LDRS_PC_G2:
+    case BFD_RELOC_ARM_LDC_PC_G0:
+    case BFD_RELOC_ARM_LDC_PC_G1:
+    case BFD_RELOC_ARM_LDC_PC_G2:
+    case BFD_RELOC_ARM_ALU_SB_G0_NC:
+    case BFD_RELOC_ARM_ALU_SB_G0:
+    case BFD_RELOC_ARM_ALU_SB_G1_NC:
+    case BFD_RELOC_ARM_ALU_SB_G1:
+    case BFD_RELOC_ARM_ALU_SB_G2:
+    case BFD_RELOC_ARM_LDR_SB_G0:
+    case BFD_RELOC_ARM_LDR_SB_G1:
+    case BFD_RELOC_ARM_LDR_SB_G2:
+    case BFD_RELOC_ARM_LDRS_SB_G0:
+    case BFD_RELOC_ARM_LDRS_SB_G1:
+    case BFD_RELOC_ARM_LDRS_SB_G2:
+    case BFD_RELOC_ARM_LDC_SB_G0:
+    case BFD_RELOC_ARM_LDC_SB_G1:
+    case BFD_RELOC_ARM_LDC_SB_G2:
       code = fixp->fx_r_type;
       break;
 
@@ -18047,6 +18523,12 @@ arm_force_relocation (struct fix * fixp)
       || fixp->fx_r_type == BFD_RELOC_ARM_T32_ADD_PC12)
     return 0;
 
+  /* Always leave these relocations for the linker.  */
+  if ((fixp->fx_r_type >= BFD_RELOC_ARM_ALU_PC_G0_NC
+       && fixp->fx_r_type <= BFD_RELOC_ARM_LDC_SB_G2)
+      || fixp->fx_r_type == BFD_RELOC_ARM_LDR_PC_G0)
+    return 1;
+
   return generic_force_reloc (fixp);
 }
 
@@ -18109,6 +18591,12 @@ arm_fix_adjustable (fixS * fixP)
       || fixP->fx_r_type == BFD_RELOC_ARM_TLS_LDM32
       || fixP->fx_r_type == BFD_RELOC_ARM_TLS_LDO32
       || fixP->fx_r_type == BFD_RELOC_ARM_TARGET2)
+    return 0;
+
+  /* Similarly for group relocations.  */
+  if ((fixP->fx_r_type >= BFD_RELOC_ARM_ALU_PC_G0_NC
+       && fixP->fx_r_type <= BFD_RELOC_ARM_LDC_SB_G2)
+      || fixP->fx_r_type == BFD_RELOC_ARM_LDR_PC_G0)
     return 0;
 
   return 1;
