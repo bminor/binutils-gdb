@@ -1,3 +1,28 @@
+2006-06-15  Mark Shinwell  <shinwell@codesourcery.com>
+
+	* config/tc-arm.c (enum parse_operand_result): New.
+	(struct group_reloc_table_entry): New.
+	(enum group_reloc_type): New.
+	(group_reloc_table): New array.
+	(find_group_reloc_table_entry): New function.
+	(parse_shifter_operand_group_reloc): New function.
+	(parse_address_main): New function, incorporating code
+	from the old parse_address function.  To be used via...
+	(parse_address): wrapper for parse_address_main; and
+	(parse_address_group_reloc): new function, likewise.
+	(enum operand_parse_code): New codes OP_SHG, OP_ADDRGLDR,
+	OP_ADDRGLDRS, OP_ADDRGLDC.
+	(parse_operands): Support for these new operand codes.
+	New macro po_misc_or_fail_no_backtrack.
+	(encode_arm_cp_address): Preserve group relocations.
+	(insns): Modify to use the above operand codes where group
+	relocations are permitted.
+	(md_apply_fix): Handle the group relocations
+	ALU_PC_G0_NC through LDC_SB_G2.
+	(tc_gen_reloc): Likewise.
+	(arm_force_relocation): Leave group relocations for the linker.
+	(arm_fix_adjustable): Likewise.
+
 2006-06-15  Julian Brown  <julian@codesourcery.com>
 
 	* config/tc-arm.c (do_vfp_nsyn_ldr_str): Remove, fold into...

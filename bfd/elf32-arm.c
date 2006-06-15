@@ -130,19 +130,19 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 	 TRUE),			/* pcrel_offset */
 
   /* 8 bit absolute - R_ARM_LDR_PC_G0 in AAELF */
-  HOWTO (R_ARM_PC13,		/* type */
+  HOWTO (R_ARM_LDR_PC_G0,	/* type */
 	 0,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
-	 8,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield,/* complain_on_overflow */
+	 complain_overflow_dont,/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_ARM_PC13",		/* name */
+	 "R_ARM_LDR_PC_G0",     /* name */
 	 FALSE,			/* partial_inplace */
-	 0x000000ff,		/* src_mask */
-	 0x000000ff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
 
    /* 16 bit absolute */
   HOWTO (R_ARM_ABS16,		/* type */
@@ -884,13 +884,389 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
-};
 
-/* Relocations 57 .. 83 are the "group relocations" which we do not
-   support.  */
+  /* Group relocations.  */
 
-static reloc_howto_type elf32_arm_howto_table_2[] =
-{
+  HOWTO (R_ARM_ALU_PC_G0_NC,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_ALU_PC_G0_NC",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_ALU_PC_G0,   	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_ALU_PC_G0",   	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_ALU_PC_G1_NC,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_ALU_PC_G1_NC",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_ALU_PC_G1,   	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_ALU_PC_G1",   	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_ALU_PC_G2,   	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_ALU_PC_G2",   	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_LDR_PC_G1,   	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_LDR_PC_G1",   	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_LDR_PC_G2,   	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_LDR_PC_G2",   	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_LDRS_PC_G0,   	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_LDRS_PC_G0",   	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_LDRS_PC_G1,   	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_LDRS_PC_G1",   	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_LDRS_PC_G2,   	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_LDRS_PC_G2",   	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_LDC_PC_G0,   	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_LDC_PC_G0",   	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_LDC_PC_G1,   	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_LDC_PC_G1",   	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_LDC_PC_G2,   	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_LDC_PC_G2",   	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_ALU_SB_G0_NC,   	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_ALU_SB_G0_NC", 	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_ALU_SB_G0,   	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_ALU_SB_G0", 	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_ALU_SB_G1_NC,   	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_ALU_SB_G1_NC", 	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_ALU_SB_G1,   	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_ALU_SB_G1", 	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_ALU_SB_G2,   	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_ALU_SB_G2", 	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_LDR_SB_G0,   	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_LDR_SB_G0", 	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_LDR_SB_G1,   	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_LDR_SB_G1", 	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_LDR_SB_G2,   	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_LDR_SB_G2", 	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_LDRS_SB_G0,   	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_LDRS_SB_G0", 	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_LDRS_SB_G1,   	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_LDRS_SB_G1", 	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_LDRS_SB_G2,   	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_LDRS_SB_G2", 	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_LDC_SB_G0,   	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_LDC_SB_G0", 	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_LDC_SB_G1,   	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_LDC_SB_G1", 	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_ARM_LDC_SB_G2,   	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_ARM_LDC_SB_G2", 	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
+  /* End of group relocations.  */
+
   HOWTO (R_ARM_MOVW_BREL_NC,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -1230,7 +1606,7 @@ static reloc_howto_type elf32_arm_howto_table_2[] =
 
    249-255 extended, currently unused, relocations:  */
 
-static reloc_howto_type elf32_arm_howto_table_3[4] =
+static reloc_howto_type elf32_arm_howto_table_2[4] =
 {
   HOWTO (R_ARM_RREL32,		/* type */
 	 0,			/* rightshift */
@@ -1295,13 +1671,9 @@ elf32_arm_howto_from_type (unsigned int r_type)
   if (r_type < NUM_ELEM (elf32_arm_howto_table_1))
     return &elf32_arm_howto_table_1[r_type];
 
-  if (r_type >= R_ARM_MOVW_BREL_NC
-      && r_type < R_ARM_MOVW_BREL_NC + NUM_ELEM (elf32_arm_howto_table_2))
-    return &elf32_arm_howto_table_2[r_type - R_ARM_MOVW_BREL_NC];
-
   if (r_type >= R_ARM_RREL32
       && r_type < R_ARM_RREL32 + NUM_ELEM (elf32_arm_howto_table_2))
-    return &elf32_arm_howto_table_3[r_type - R_ARM_RREL32];
+    return &elf32_arm_howto_table_2[r_type - R_ARM_RREL32];
 
   return NULL;
 }
@@ -1374,6 +1746,34 @@ static const struct elf32_arm_reloc_map elf32_arm_reloc_map[] =
     {BFD_RELOC_ARM_THUMB_MOVT,	     R_ARM_THM_MOVT_ABS},
     {BFD_RELOC_ARM_THUMB_MOVW_PCREL, R_ARM_THM_MOVW_PREL_NC},
     {BFD_RELOC_ARM_THUMB_MOVT_PCREL, R_ARM_THM_MOVT_PREL},
+    {BFD_RELOC_ARM_ALU_PC_G0_NC, R_ARM_ALU_PC_G0_NC},
+    {BFD_RELOC_ARM_ALU_PC_G0, R_ARM_ALU_PC_G0},
+    {BFD_RELOC_ARM_ALU_PC_G1_NC, R_ARM_ALU_PC_G1_NC},
+    {BFD_RELOC_ARM_ALU_PC_G1, R_ARM_ALU_PC_G1},
+    {BFD_RELOC_ARM_ALU_PC_G2, R_ARM_ALU_PC_G2},
+    {BFD_RELOC_ARM_LDR_PC_G0, R_ARM_LDR_PC_G0},
+    {BFD_RELOC_ARM_LDR_PC_G1, R_ARM_LDR_PC_G1},
+    {BFD_RELOC_ARM_LDR_PC_G2, R_ARM_LDR_PC_G2},
+    {BFD_RELOC_ARM_LDRS_PC_G0, R_ARM_LDRS_PC_G0},
+    {BFD_RELOC_ARM_LDRS_PC_G1, R_ARM_LDRS_PC_G1},
+    {BFD_RELOC_ARM_LDRS_PC_G2, R_ARM_LDRS_PC_G2},
+    {BFD_RELOC_ARM_LDC_PC_G0, R_ARM_LDC_PC_G0},
+    {BFD_RELOC_ARM_LDC_PC_G1, R_ARM_LDC_PC_G1},
+    {BFD_RELOC_ARM_LDC_PC_G2, R_ARM_LDC_PC_G2},
+    {BFD_RELOC_ARM_ALU_SB_G0_NC, R_ARM_ALU_SB_G0_NC},
+    {BFD_RELOC_ARM_ALU_SB_G0, R_ARM_ALU_SB_G0},
+    {BFD_RELOC_ARM_ALU_SB_G1_NC, R_ARM_ALU_SB_G1_NC},
+    {BFD_RELOC_ARM_ALU_SB_G1, R_ARM_ALU_SB_G1},
+    {BFD_RELOC_ARM_ALU_SB_G2, R_ARM_ALU_SB_G2},
+    {BFD_RELOC_ARM_LDR_SB_G0, R_ARM_LDR_SB_G0},
+    {BFD_RELOC_ARM_LDR_SB_G1, R_ARM_LDR_SB_G1},
+    {BFD_RELOC_ARM_LDR_SB_G2, R_ARM_LDR_SB_G2},
+    {BFD_RELOC_ARM_LDRS_SB_G0, R_ARM_LDRS_SB_G0},
+    {BFD_RELOC_ARM_LDRS_SB_G1, R_ARM_LDRS_SB_G1},
+    {BFD_RELOC_ARM_LDRS_SB_G2, R_ARM_LDRS_SB_G2},
+    {BFD_RELOC_ARM_LDC_SB_G0, R_ARM_LDC_SB_G0},
+    {BFD_RELOC_ARM_LDC_SB_G1, R_ARM_LDC_SB_G1},
+    {BFD_RELOC_ARM_LDC_SB_G2, R_ARM_LDC_SB_G2}
   };
 
 static reloc_howto_type *
@@ -2964,6 +3364,74 @@ elf32_arm_abs12_reloc (bfd *abfd, void *data, bfd_vma value)
   return bfd_reloc_ok;
 }
 
+/* For a given value of n, calculate the value of G_n as required to
+   deal with group relocations.  We return it in the form of an
+   encoded constant-and-rotation, together with the final residual.  If n is
+   specified as less than zero, then final_residual is filled with the
+   input value and no further action is performed.  */
+
+static bfd_vma
+calculate_group_reloc_mask (bfd_vma value, int n, bfd_vma *final_residual)
+{
+  int current_n;
+  bfd_vma g_n;
+  bfd_vma encoded_g_n = 0;
+  bfd_vma residual = value; /* Also known as Y_n.  */
+
+  for (current_n = 0; current_n <= n; current_n++)
+    {
+      int shift;
+
+      /* Calculate which part of the value to mask.  */
+      if (residual == 0)
+        shift = 0;
+      else
+        {
+          int msb;
+
+          /* Determine the most significant bit in the residual and
+             align the resulting value to a 2-bit boundary.  */
+          for (msb = 30; msb >= 0; msb -= 2)
+            if (residual & (3 << msb))
+              break;
+
+          /* The desired shift is now (msb - 6), or zero, whichever
+             is the greater.  */
+          shift = msb - 6;
+          if (shift < 0)
+            shift = 0;
+        }
+
+      /* Calculate g_n in 32-bit as well as encoded constant+rotation form.  */
+      g_n = residual & (0xff << shift);
+      encoded_g_n = (g_n >> shift)
+                    | ((g_n <= 0xff ? 0 : (32 - shift) / 2) << 8);
+
+      /* Calculate the residual for the next time around.  */
+      residual &= ~g_n;
+    }
+
+  *final_residual = residual;
+
+  return encoded_g_n;
+}
+
+/* Given an ARM instruction, determine whether it is an ADD or a SUB.
+   Returns 1 if it is an ADD, -1 if it is a SUB, and 0 otherwise.  */
+static int
+identify_add_or_sub(bfd_vma insn)
+{
+  int opcode = insn & 0x1e00000;
+
+  if (opcode == 1 << 23) /* ADD */
+    return 1;
+
+  if (opcode == 1 << 22) /* SUB */
+    return -1;
+
+  return 0;
+}
+
 /* Perform a relocation as part of a final link.  */
 
 static bfd_reloc_status_type
@@ -4184,6 +4652,397 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 
 	bfd_put_16 (input_bfd, insn >> 16, hit_data);
 	bfd_put_16 (input_bfd, insn & 0xffff, hit_data + 2);
+      }
+      return bfd_reloc_ok;
+
+    case R_ARM_ALU_PC_G0_NC:
+    case R_ARM_ALU_PC_G1_NC:
+    case R_ARM_ALU_PC_G0:
+    case R_ARM_ALU_PC_G1:
+    case R_ARM_ALU_PC_G2:
+    case R_ARM_ALU_SB_G0_NC:
+    case R_ARM_ALU_SB_G1_NC:
+    case R_ARM_ALU_SB_G0:
+    case R_ARM_ALU_SB_G1:
+    case R_ARM_ALU_SB_G2:
+      {
+	bfd_vma insn = bfd_get_32 (input_bfd, hit_data);
+        bfd_vma pc = input_section->output_section->vma
+		     + input_section->output_offset + rel->r_offset;
+        /* sb should be the origin of the *segment* containing the symbol.
+           It is not clear how to obtain this OS-dependent value, so we
+           make an arbitrary choice of zero.  */
+        bfd_vma sb = 0;
+        bfd_vma residual;
+        bfd_vma g_n;
+	bfd_signed_vma signed_value;
+        int group = 0;
+
+        /* Determine which group of bits to select.  */
+        switch (r_type)
+          {
+          case R_ARM_ALU_PC_G0_NC:
+          case R_ARM_ALU_PC_G0:
+          case R_ARM_ALU_SB_G0_NC:
+          case R_ARM_ALU_SB_G0:
+            group = 0;
+            break;
+
+          case R_ARM_ALU_PC_G1_NC:
+          case R_ARM_ALU_PC_G1:
+          case R_ARM_ALU_SB_G1_NC:
+          case R_ARM_ALU_SB_G1:
+            group = 1;
+            break;
+
+          case R_ARM_ALU_PC_G2:
+          case R_ARM_ALU_SB_G2:
+            group = 2;
+            break;
+
+          default:
+            abort();
+          }
+
+        /* If REL, extract the addend from the insn.  If RELA, it will
+           have already been fetched for us.  */
+	if (globals->use_rel)
+          {
+            int negative;
+            bfd_vma constant = insn & 0xff;
+            bfd_vma rotation = (insn & 0xf00) >> 8;
+
+            if (rotation == 0)
+              signed_addend = constant;
+            else
+              {
+                /* Compensate for the fact that in the instruction, the
+                   rotation is stored in multiples of 2 bits.  */
+                rotation *= 2;
+
+                /* Rotate "constant" right by "rotation" bits.  */
+                signed_addend = (constant >> rotation) |
+                                (constant << (8 * sizeof (bfd_vma) - rotation));
+              }
+
+            /* Determine if the instruction is an ADD or a SUB.
+               (For REL, this determines the sign of the addend.)  */
+            negative = identify_add_or_sub (insn);
+            if (negative == 0)
+              {
+                (*_bfd_error_handler)
+                  (_("%B(%A+0x%lx): Only ADD or SUB instructions are allowed for ALU group relocations"),
+                  input_bfd, input_section,
+                  (long) rel->r_offset, howto->name);
+                return bfd_reloc_overflow;	  
+    	      }
+
+            signed_addend *= negative;
+          }
+
+	/* Compute the value (X) to go in the place.  */
+        if (r_type == R_ARM_ALU_PC_G0_NC
+            || r_type == R_ARM_ALU_PC_G1_NC
+            || r_type == R_ARM_ALU_PC_G0
+            || r_type == R_ARM_ALU_PC_G1
+            || r_type == R_ARM_ALU_PC_G2)
+          /* PC relative.  */
+          signed_value = value - pc + signed_addend;
+        else
+          /* Section base relative.  */
+          signed_value = value - sb + signed_addend;
+
+        /* If the target symbol is a Thumb function, then set the
+           Thumb bit in the address.  */
+	if (sym_flags == STT_ARM_TFUNC)
+	  signed_value |= 1;
+
+        /* Calculate the value of the relevant G_n, in encoded
+           constant-with-rotation format.  */
+        g_n = calculate_group_reloc_mask (abs (signed_value), group,
+                                          &residual);
+
+        /* Check for overflow if required.  */
+        if ((r_type == R_ARM_ALU_PC_G0
+             || r_type == R_ARM_ALU_PC_G1
+             || r_type == R_ARM_ALU_PC_G2
+             || r_type == R_ARM_ALU_SB_G0
+             || r_type == R_ARM_ALU_SB_G1
+             || r_type == R_ARM_ALU_SB_G2) && residual != 0)
+          {
+            (*_bfd_error_handler)
+              (_("%B(%A+0x%lx): Overflow whilst splitting 0x%lx for group relocation %s"),
+              input_bfd, input_section,
+              (long) rel->r_offset, abs (signed_value), howto->name);
+            return bfd_reloc_overflow;
+          }
+
+        /* Mask out the value and the ADD/SUB part of the opcode; take care
+           not to destroy the S bit.  */
+        insn &= 0xff1ff000;
+
+        /* Set the opcode according to whether the value to go in the
+           place is negative.  */
+        if (signed_value < 0)
+          insn |= 1 << 22;
+        else
+          insn |= 1 << 23;
+
+        /* Encode the offset.  */
+        insn |= g_n;
+
+	bfd_put_32 (input_bfd, insn, hit_data);
+      }
+      return bfd_reloc_ok;
+
+    case R_ARM_LDR_PC_G0:
+    case R_ARM_LDR_PC_G1:
+    case R_ARM_LDR_PC_G2:
+    case R_ARM_LDR_SB_G0:
+    case R_ARM_LDR_SB_G1:
+    case R_ARM_LDR_SB_G2:
+      {
+	bfd_vma insn = bfd_get_32 (input_bfd, hit_data);
+        bfd_vma pc = input_section->output_section->vma
+		     + input_section->output_offset + rel->r_offset;
+        bfd_vma sb = 0; /* See note above.  */
+        bfd_vma residual;
+	bfd_signed_vma signed_value;
+        int group = 0;
+
+        /* Determine which groups of bits to calculate.  */
+        switch (r_type)
+          {
+          case R_ARM_LDR_PC_G0:
+          case R_ARM_LDR_SB_G0:
+            group = 0;
+            break;
+
+          case R_ARM_LDR_PC_G1:
+          case R_ARM_LDR_SB_G1:
+            group = 1;
+            break;
+
+          case R_ARM_LDR_PC_G2:
+          case R_ARM_LDR_SB_G2:
+            group = 2;
+            break;
+
+          default:
+            abort();
+          }
+
+        /* If REL, extract the addend from the insn.  If RELA, it will
+           have already been fetched for us.  */
+	if (globals->use_rel)
+          {
+            int negative = (insn & (1 << 23)) ? 1 : -1;
+            signed_addend = negative * (insn & 0xfff);
+          }
+
+	/* Compute the value (X) to go in the place.  */
+        if (r_type == R_ARM_LDR_PC_G0
+            || r_type == R_ARM_LDR_PC_G1
+            || r_type == R_ARM_LDR_PC_G2)
+          /* PC relative.  */
+          signed_value = value - pc + signed_addend;
+        else
+          /* Section base relative.  */
+          signed_value = value - sb + signed_addend;
+
+        /* Calculate the value of the relevant G_{n-1} to obtain
+           the residual at that stage.  */
+        calculate_group_reloc_mask (abs (signed_value), group - 1, &residual);
+
+        /* Check for overflow.  */
+        if (residual >= 0x1000)
+          {
+            (*_bfd_error_handler)
+              (_("%B(%A+0x%lx): Overflow whilst splitting 0x%lx for group relocation %s"),
+              input_bfd, input_section,
+              (long) rel->r_offset, abs (signed_value), howto->name);
+            return bfd_reloc_overflow;
+          }
+
+        /* Mask out the value and U bit.  */
+        insn &= 0xff7ff000;
+
+        /* Set the U bit if the value to go in the place is non-negative.  */
+        if (signed_value >= 0)
+          insn |= 1 << 23;
+
+        /* Encode the offset.  */
+        insn |= residual;
+
+	bfd_put_32 (input_bfd, insn, hit_data);
+      }
+      return bfd_reloc_ok;
+
+    case R_ARM_LDRS_PC_G0:
+    case R_ARM_LDRS_PC_G1:
+    case R_ARM_LDRS_PC_G2:
+    case R_ARM_LDRS_SB_G0:
+    case R_ARM_LDRS_SB_G1:
+    case R_ARM_LDRS_SB_G2:
+      {
+	bfd_vma insn = bfd_get_32 (input_bfd, hit_data);
+        bfd_vma pc = input_section->output_section->vma
+		     + input_section->output_offset + rel->r_offset;
+        bfd_vma sb = 0; /* See note above.  */
+        bfd_vma residual;
+	bfd_signed_vma signed_value;
+        int group = 0;
+
+        /* Determine which groups of bits to calculate.  */
+        switch (r_type)
+          {
+          case R_ARM_LDRS_PC_G0:
+          case R_ARM_LDRS_SB_G0:
+            group = 0;
+            break;
+
+          case R_ARM_LDRS_PC_G1:
+          case R_ARM_LDRS_SB_G1:
+            group = 1;
+            break;
+
+          case R_ARM_LDRS_PC_G2:
+          case R_ARM_LDRS_SB_G2:
+            group = 2;
+            break;
+
+          default:
+            abort();
+          }
+
+        /* If REL, extract the addend from the insn.  If RELA, it will
+           have already been fetched for us.  */
+	if (globals->use_rel)
+          {
+            int negative = (insn & (1 << 23)) ? 1 : -1;
+            signed_addend = negative * (((insn & 0xf00) >> 4) + (insn & 0xf));
+          }
+
+	/* Compute the value (X) to go in the place.  */
+        if (r_type == R_ARM_LDRS_PC_G0
+            || r_type == R_ARM_LDRS_PC_G1
+            || r_type == R_ARM_LDRS_PC_G2)
+          /* PC relative.  */
+          signed_value = value - pc + signed_addend;
+        else
+          /* Section base relative.  */
+          signed_value = value - sb + signed_addend;
+
+        /* Calculate the value of the relevant G_{n-1} to obtain
+           the residual at that stage.  */
+        calculate_group_reloc_mask (abs (signed_value), group - 1, &residual);
+
+        /* Check for overflow.  */
+        if (residual >= 0x100)
+          {
+            (*_bfd_error_handler)
+              (_("%B(%A+0x%lx): Overflow whilst splitting 0x%lx for group relocation %s"),
+              input_bfd, input_section,
+              (long) rel->r_offset, abs (signed_value), howto->name);
+            return bfd_reloc_overflow;
+          }
+
+        /* Mask out the value and U bit.  */
+        insn &= 0xff7ff0f0;
+
+        /* Set the U bit if the value to go in the place is non-negative.  */
+        if (signed_value >= 0)
+          insn |= 1 << 23;
+
+        /* Encode the offset.  */
+        insn |= ((residual & 0xf0) << 4) | (residual & 0xf);
+
+	bfd_put_32 (input_bfd, insn, hit_data);
+      }
+      return bfd_reloc_ok;
+
+    case R_ARM_LDC_PC_G0:
+    case R_ARM_LDC_PC_G1:
+    case R_ARM_LDC_PC_G2:
+    case R_ARM_LDC_SB_G0:
+    case R_ARM_LDC_SB_G1:
+    case R_ARM_LDC_SB_G2:
+      {
+	bfd_vma insn = bfd_get_32 (input_bfd, hit_data);
+        bfd_vma pc = input_section->output_section->vma
+		     + input_section->output_offset + rel->r_offset;
+        bfd_vma sb = 0; /* See note above.  */
+        bfd_vma residual;
+	bfd_signed_vma signed_value;
+        int group = 0;
+
+        /* Determine which groups of bits to calculate.  */
+        switch (r_type)
+          {
+          case R_ARM_LDC_PC_G0:
+          case R_ARM_LDC_SB_G0:
+            group = 0;
+            break;
+
+          case R_ARM_LDC_PC_G1:
+          case R_ARM_LDC_SB_G1:
+            group = 1;
+            break;
+
+          case R_ARM_LDC_PC_G2:
+          case R_ARM_LDC_SB_G2:
+            group = 2;
+            break;
+
+          default:
+            abort();
+          }
+
+        /* If REL, extract the addend from the insn.  If RELA, it will
+           have already been fetched for us.  */
+	if (globals->use_rel)
+          {
+            int negative = (insn & (1 << 23)) ? 1 : -1;
+            signed_addend = negative * ((insn & 0xff) << 2);
+          }
+
+	/* Compute the value (X) to go in the place.  */
+        if (r_type == R_ARM_LDC_PC_G0
+            || r_type == R_ARM_LDC_PC_G1
+            || r_type == R_ARM_LDC_PC_G2)
+          /* PC relative.  */
+          signed_value = value - pc + signed_addend;
+        else
+          /* Section base relative.  */
+          signed_value = value - sb + signed_addend;
+
+        /* Calculate the value of the relevant G_{n-1} to obtain
+           the residual at that stage.  */
+        calculate_group_reloc_mask (abs (signed_value), group - 1, &residual);
+
+        /* Check for overflow.  (The absolute value to go in the place must be
+           divisible by four and, after having been divided by four, must
+           fit in eight bits.)  */
+        if ((residual & 0x3) != 0 || residual >= 0x400)
+          {
+            (*_bfd_error_handler)
+              (_("%B(%A+0x%lx): Overflow whilst splitting 0x%lx for group relocation %s"),
+              input_bfd, input_section,
+              (long) rel->r_offset, abs (signed_value), howto->name);
+            return bfd_reloc_overflow;
+          }
+
+        /* Mask out the value and U bit.  */
+        insn &= 0xff7fff00;
+
+        /* Set the U bit if the value to go in the place is non-negative.  */
+        if (signed_value >= 0)
+          insn |= 1 << 23;
+
+        /* Encode the offset.  */
+        insn |= residual >> 2;
+
+	bfd_put_32 (input_bfd, insn, hit_data);
       }
       return bfd_reloc_ok;
 

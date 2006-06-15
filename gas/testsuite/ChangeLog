@@ -1,3 +1,38 @@
+2006-06-15  Mark Shinwell  <shinwell@codesourcery.com>
+
+	* gas/arm/group-reloc-alu.d: New test.
+	* gas/arm/group-reloc-alu-encoding-bad.d: New test.
+	* gas/arm/group-reloc-alu-encoding-bad.l: New test.
+	* gas/arm/group-reloc-alu-encoding-bad.s: New test.
+	* gas/arm/group-reloc-alu-parsing-bad.d: New test.
+	* gas/arm/group-reloc-alu-parsing-bad.l: New test.
+	* gas/arm/group-reloc-alu-parsing-bad.s: New test.
+	* gas/arm/group-reloc-alu.s: New test.
+	* gas/arm/group-reloc-ldc.d: New test.
+	* gas/arm/group-reloc-ldc-encoding-bad.d: New test.
+	* gas/arm/group-reloc-ldc-encoding-bad.l: New test.
+	* gas/arm/group-reloc-ldc-encoding-bad.s: New test.
+	* gas/arm/group-reloc-ldc-parsing-bad.d: New test.
+	* gas/arm/group-reloc-ldc-parsing-bad.l: New test.
+	* gas/arm/group-reloc-ldc-parsing-bad.s: New test.
+	* gas/arm/group-reloc-ldc.s: New test.
+	* gas/arm/group-reloc-ldr.d: New test.
+	* gas/arm/group-reloc-ldr-encoding-bad.d: New test.
+	* gas/arm/group-reloc-ldr-encoding-bad.l: New test.
+	* gas/arm/group-reloc-ldr-encoding-bad.s: New test.
+	* gas/arm/group-reloc-ldr-parsing-bad.d: New test.
+	* gas/arm/group-reloc-ldr-parsing-bad.l: New test.
+	* gas/arm/group-reloc-ldr-parsing-bad.s: New test.
+	* gas/arm/group-reloc-ldr.s: New test.
+	* gas/arm/group-reloc-ldrs.d: New test.
+	* gas/arm/group-reloc-ldrs-encoding-bad.d: New test.
+	* gas/arm/group-reloc-ldrs-encoding-bad.l: New test.
+	* gas/arm/group-reloc-ldrs-encoding-bad.s: New test.
+	* gas/arm/group-reloc-ldrs-parsing-bad.d: New test.
+	* gas/arm/group-reloc-ldrs-parsing-bad.l: New test.
+	* gas/arm/group-reloc-ldrs-parsing-bad.s: New test.
+	* gas/arm/group-reloc-ldrs.s: New test.
+
 2006-06-14  Thiemo Seufer  <ths@mips.com>
             Maciej W. Rozycki  <macro@mips.com>
 

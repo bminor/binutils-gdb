@@ -1,3 +1,17 @@
+2006-06-15  Mark Shinwell  <shinwell@codesourcery.com>
+
+	* ld-arm/group-relocs-alu-bad.d: New test.
+	* ld-arm/group-relocs-alu-bad.s: New test.
+	* ld-arm/group-relocs.d: New test.
+	* ld-arm/group-relocs-ldc-bad.d: New test.
+	* ld-arm/group-relocs-ldc-bad.s: New test.
+	* ld-arm/group-relocs-ldr-bad.d: New test.
+	* ld-arm/group-relocs-ldr-bad.s: New test.
+	* ld-arm/group-relocs-ldrs-bad.d: New test.
+	* ld-arm/group-relocs-ldrs-bad.s: New test.
+	* ld-arm/group-relocs.s: New test.
+	* ld-arm/arm-elf.exp: Wire in new tests.
+
 2006-06-14  Richard Sandiford  <richard@codesourcery.com>
 
 	* ld-m68k/plt1.s, ld-m68k/plt1-empty.s, ld-m68k/plt1.ld: New files.
