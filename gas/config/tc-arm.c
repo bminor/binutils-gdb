@@ -10620,15 +10620,6 @@ do_vfp_nsyn_ldm_stm (int is_dbmode)
 }
 
 static void
-do_vfp_nsyn_ldr_str (int is_ldr)
-{
-  if (is_ldr)
-    do_vfp_nsyn_opcode ("flds");
-  else
-    do_vfp_nsyn_opcode ("fsts");
-}
-
-static void
 do_vfp_nsyn_sqrt (void)
 {
   enum neon_shape rs = neon_select_shape (NS_FF, NS_DD, NS_NULL);
@@ -12650,58 +12641,22 @@ do_neon_ldm_stm (void)
 static void
 do_neon_ldr_str (void)
 {
-  unsigned offsetbits;
-  int offset_up = 1;
   int is_ldr = (inst.instruction & (1 << 20)) != 0;
   
   if (inst.operands[0].issingle)
     {
-      do_vfp_nsyn_ldr_str (is_ldr);
-      return;
-    }
-
-  inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
-  inst.instruction |= HI1 (inst.operands[0].reg) << 22;
-  
-  constraint (inst.reloc.pc_rel && !is_ldr,
-              _("PC-relative addressing unavailable with VSTR"));
-  
-  constraint (!inst.reloc.pc_rel && inst.reloc.exp.X_op != O_constant,
-              _("Immediate value must be a constant"));
-  
-  if (inst.reloc.exp.X_add_number < 0)
-    {
-      offset_up = 0;
-      offsetbits = -inst.reloc.exp.X_add_number / 4;
-    }
-  else
-    offsetbits = inst.reloc.exp.X_add_number / 4;
-  
-  /* FIXME: Does this catch everything?  */
-  constraint (!inst.operands[1].isreg || !inst.operands[1].preind
-              || inst.operands[1].postind || inst.operands[1].writeback
-              || inst.operands[1].immisreg || inst.operands[1].shifted,
-              BAD_ADDR_MODE);
-  constraint ((inst.operands[1].imm & 3) != 0,
-              _("Offset must be a multiple of 4"));
-  constraint (offsetbits != (offsetbits & 0xff),
-              _("Immediate offset out of range"));
-
-  inst.instruction |= inst.operands[1].reg << 16;
-  inst.instruction |= offsetbits & 0xff;
-  inst.instruction |= offset_up << 23;
-  
-  do_vfp_cond_or_thumb ();
-
-  if (inst.reloc.pc_rel)
-    {
-      if (thumb_mode)
-        inst.reloc.type = BFD_RELOC_ARM_T32_CP_OFF_IMM;
+      if (is_ldr)
+        do_vfp_nsyn_opcode ("flds");
       else
-        inst.reloc.type = BFD_RELOC_ARM_CP_OFF_IMM;
+        do_vfp_nsyn_opcode ("fsts");
     }
   else
-    inst.reloc.type = BFD_RELOC_UNUSED;
+    {
+      if (is_ldr)
+        do_vfp_nsyn_opcode ("fldd");
+      else
+        do_vfp_nsyn_opcode ("fstd");
+    }
 }
 
 /* "interleave" version also handles non-interleaving register VLD1/VST1
