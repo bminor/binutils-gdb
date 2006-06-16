@@ -377,11 +377,29 @@ typedef struct
 }
 sib_byte;
 
-/* x86 arch names and features */
+enum processor_type
+{
+  PROCESSOR_UNKNOWN,
+  PROCESSOR_I486,
+  PROCESSOR_PENTIUM,
+  PROCESSOR_PENTIUMPRO,
+  PROCESSOR_PENTIUM4,
+  PROCESSOR_NOCONA,
+  PROCESSOR_YONAH,
+  PROCESSOR_MEROM,
+  PROCESSOR_K6,
+  PROCESSOR_ATHLON,
+  PROCESSOR_K8,
+  PROCESSOR_GENERIC32,
+  PROCESSOR_GENERIC64
+};
+
+/* x86 arch names, types and features */
 typedef struct
 {
-  const char *name;	/* arch name */
-  unsigned int flags;	/* cpu feature flags */
+  const char *name;		/* arch name */
+  enum processor_type type;	/* arch type */
+  unsigned int flags;		/* cpu feature flags */
 }
 arch_entry;
 

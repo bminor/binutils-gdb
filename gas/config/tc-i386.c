@@ -323,6 +323,15 @@ static const char *cpu_sub_arch_name = NULL;
 /* CPU feature flags.  */
 static unsigned int cpu_arch_flags = CpuUnknownFlags | CpuNo64;
 
+/* Cpu we are generating instructions for.  */
+static enum processor_type cpu_arch_tune = PROCESSOR_UNKNOWN;
+
+/* CPU feature flags of cpu we are generating instructions for.  */
+static unsigned int cpu_arch_tune_flags = 0;
+
+/* CPU feature flags of instruction set architecture used.  */
+static unsigned int cpu_arch_isa_flags = 0;
+
 /* If set, conditional jumps are not automatically promoted to handle
    larger than a byte offset.  */
 static unsigned int no_cond_jump_promotion = 0;
@@ -415,35 +424,85 @@ const relax_typeS md_relax_table[] =
   {0, 0, 4, 0}
 };
 
-static const arch_entry cpu_arch[] = {
-  {"i8086",	Cpu086 },
-  {"i186",	Cpu086|Cpu186 },
-  {"i286",	Cpu086|Cpu186|Cpu286 },
-  {"i386",	Cpu086|Cpu186|Cpu286|Cpu386 },
-  {"i486",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486 },
-  {"i586",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586 },
-  {"i686",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686 },
-  {"pentium",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586 },
-  {"pentiumpro",Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686 },
-  {"pentiumii",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuMMX },
-  {"pentiumiii",Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuMMX|CpuMMX2|CpuSSE },
-  {"pentium4",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX|CpuMMX2|CpuSSE|CpuSSE2 },
-  {"prescott",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuPNI },
-  {"k6",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuK6|CpuMMX },
-  {"k6_2",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuK6|CpuMMX|Cpu3dnow },
-  {"athlon",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuAthlon|CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA },
-  {"sledgehammer",Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuAthlon|CpuSledgehammer|CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2 },
-  {"opteron",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuAthlon|CpuSledgehammer|CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2 },
-  {".mmx",	CpuMMX },
-  {".sse",	CpuMMX|CpuMMX2|CpuSSE },
-  {".sse2",	CpuMMX|CpuMMX2|CpuSSE|CpuSSE2 },
-  {".sse3",	CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3 },
-  {".3dnow",	CpuMMX|Cpu3dnow },
-  {".3dnowa",	CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA },
-  {".padlock",	CpuPadLock },
-  {".pacifica",	CpuSVME },
-  {".svme",	CpuSVME },
-  {NULL, 0 }
+static const arch_entry cpu_arch[] =
+{
+  {"generic32", PROCESSOR_GENERIC32,
+   Cpu086|Cpu186|Cpu286|Cpu386},
+  {"generic64", PROCESSOR_GENERIC64,
+   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX
+   |CpuMMX2|CpuSSE|CpuSSE2},
+  {"i8086", PROCESSOR_UNKNOWN,
+   Cpu086},
+  {"i186", PROCESSOR_UNKNOWN,
+   Cpu086|Cpu186},
+  {"i286", PROCESSOR_UNKNOWN,
+   Cpu086|Cpu186|Cpu286},
+  {"i386", PROCESSOR_GENERIC32,
+   Cpu086|Cpu186|Cpu286|Cpu386},
+  {"i486", PROCESSOR_I486,
+   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486},
+  {"i586", PROCESSOR_PENTIUM,
+   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586},
+  {"i686", PROCESSOR_PENTIUMPRO,
+   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686},
+  {"pentium", PROCESSOR_PENTIUM,
+   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586},
+  {"pentiumpro",PROCESSOR_PENTIUMPRO,
+   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686},
+  {"pentiumii",	PROCESSOR_PENTIUMPRO,
+   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuMMX},
+  {"pentiumiii",PROCESSOR_PENTIUMPRO,
+   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuMMX|CpuMMX2
+   |CpuSSE},
+  {"pentium4", PROCESSOR_PENTIUM4,
+   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX
+   |CpuMMX2|CpuSSE|CpuSSE2},
+  {"prescott", PROCESSOR_NOCONA,
+   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX
+   |CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3},
+  {"nocona", PROCESSOR_NOCONA,
+   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX
+   |CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3},
+  {"yonah", PROCESSOR_YONAH,
+   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX
+   |CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3},
+  {"merom", PROCESSOR_MEROM,
+   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX
+   |CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3|CpuMNI},
+  {"k6", PROCESSOR_K6,
+   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuK6|CpuMMX},
+  {"k6_2", PROCESSOR_K6,
+   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuK6|CpuMMX|Cpu3dnow},
+  {"athlon", PROCESSOR_ATHLON,
+   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuAthlon
+   |CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA},
+  {"sledgehammer", PROCESSOR_K8,
+   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuAthlon
+   |CpuSledgehammer|CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2},
+  {"opteron", PROCESSOR_K8,
+   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuAthlon
+   |CpuSledgehammer|CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2},
+  {"k8", PROCESSOR_K8,
+   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuAthlon
+   |CpuSledgehammer|CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2},
+  {".mmx", PROCESSOR_UNKNOWN,
+   CpuMMX},
+  {".sse", PROCESSOR_UNKNOWN,
+   CpuMMX|CpuMMX2|CpuSSE},
+  {".sse2", PROCESSOR_UNKNOWN,
+   CpuMMX|CpuMMX2|CpuSSE|CpuSSE2},
+  {".sse3", PROCESSOR_UNKNOWN,
+   CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3},
+  {".3dnow", PROCESSOR_UNKNOWN,
+   CpuMMX|Cpu3dnow},
+  {".3dnowa", PROCESSOR_UNKNOWN,
+   CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA},
+  {".padlock", PROCESSOR_UNKNOWN,
+   CpuPadLock},
+  {".pacifica", PROCESSOR_UNKNOWN,
+   CpuSVME},
+  {".svme", PROCESSOR_UNKNOWN,
+   CpuSVME}
 };
 
 const pseudo_typeS md_pseudo_table[] =
@@ -866,9 +925,9 @@ set_cpu_arch (dummy)
     {
       char *string = input_line_pointer;
       int e = get_symbol_end ();
-      int i;
+      unsigned int i;
 
-      for (i = 0; cpu_arch[i].name; i++)
+      for (i = 0; i < ARRAY_SIZE (cpu_arch); i++)
 	{
 	  if (strcmp (string, cpu_arch[i].name) == 0)
 	    {
@@ -878,6 +937,7 @@ set_cpu_arch (dummy)
 		  cpu_sub_arch_name = NULL;
 		  cpu_arch_flags = (cpu_arch[i].flags
 				    | (flag_code == CODE_64BIT ? Cpu64 : CpuNo64));
+		  cpu_arch_isa_flags = cpu_arch[i].flags;
 		  break;
 		}
 	      if ((cpu_arch_flags | cpu_arch[i].flags) != cpu_arch_flags)
@@ -890,7 +950,7 @@ set_cpu_arch (dummy)
 	      return;
 	    }
 	}
-      if (!cpu_arch[i].name)
+      if (i >= ARRAY_SIZE (cpu_arch))
 	as_bad (_("no such architecture: `%s'"), string);
 
       *input_line_pointer = e;
@@ -1654,6 +1714,9 @@ md_assemble (line)
 
   if (i.rex != 0)
     add_prefix (REX_OPCODE | i.rex);
+
+  /* Record what ISA we have generated so far.  */
+  cpu_arch_isa_flags |= i.tm.cpu_flags;
 
   /* We are ready to output the insn.  */
   output_insn ();
@@ -5428,6 +5491,8 @@ const char *md_shortopts = "qn";
 #define OPTION_32 (OPTION_MD_BASE + 0)
 #define OPTION_64 (OPTION_MD_BASE + 1)
 #define OPTION_DIVIDE (OPTION_MD_BASE + 2)
+#define OPTION_MARCH (OPTION_MD_BASE + 3)
+#define OPTION_MTUNE (OPTION_MD_BASE + 4)
 
 struct option md_longopts[] = {
   {"32", no_argument, NULL, OPTION_32},
@@ -5435,15 +5500,17 @@ struct option md_longopts[] = {
   {"64", no_argument, NULL, OPTION_64},
 #endif
   {"divide", no_argument, NULL, OPTION_DIVIDE},
+  {"march", required_argument, NULL, OPTION_MARCH},
+  {"mtune", required_argument, NULL, OPTION_MTUNE},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (c, arg)
-     int c;
-     char *arg ATTRIBUTE_UNUSED;
+md_parse_option (int c, char *arg)
 {
+  unsigned int i;
+
   switch (c)
     {
     case 'n':
@@ -5513,6 +5580,37 @@ md_parse_option (c, arg)
 #endif
       break;
 
+    case OPTION_MARCH:
+      if (*arg == '.')
+	as_fatal (_("Invalid -march= option: `%s'"), arg);
+      for (i = 0; i < ARRAY_SIZE (cpu_arch); i++)
+	{
+	  if (strcmp (arg, cpu_arch [i].name) == 0)
+	    {
+	      cpu_arch_isa_flags = cpu_arch[i].flags;
+	      break;
+	    }
+	}
+      if (i >= ARRAY_SIZE (cpu_arch))
+	as_fatal (_("Invalid -march= option: `%s'"), arg);
+      break;
+
+    case OPTION_MTUNE:
+      if (*arg == '.')
+	as_fatal (_("Invalid -mtune= option: `%s'"), arg);
+      for (i = 0; i < ARRAY_SIZE (cpu_arch); i++)
+	{
+	  if (strcmp (arg, cpu_arch [i].name) == 0)
+	    {
+	      cpu_arch_tune = cpu_arch [i].type;
+	      cpu_arch_tune_flags = cpu_arch[i].flags;
+	      break;
+	    }
+	}
+      if (i >= ARRAY_SIZE (cpu_arch))
+	as_fatal (_("Invalid -mtune= option: `%s'"), arg);
+      break;
+
     default:
       return 0;
     }
@@ -5543,6 +5641,11 @@ md_show_usage (stream)
   fprintf (stream, _("\
   --divide                ignored\n"));
 #endif
+  fprintf (stream, _("\
+  -march=CPU/-mtune=CPU   generate code/optimize for CPU, where CPU is one of:\n\
+                           i386, i486, pentium, pentiumpro, pentium4, nocona,\n\
+			   yonah, merom, k6, athlon, k8, generic32, generic64\n"));
+
 }
 
 #if ((defined (OBJ_MAYBE_COFF) && defined (OBJ_MAYBE_AOUT)) \
@@ -5554,9 +5657,31 @@ const char *
 i386_target_format ()
 {
   if (!strcmp (default_arch, "x86_64"))
-    set_code_flag (CODE_64BIT);
+    {
+      set_code_flag (CODE_64BIT);
+      if (cpu_arch_isa_flags == 0)
+	cpu_arch_isa_flags = Cpu086|Cpu186|Cpu286|Cpu386|Cpu486
+			     |Cpu586|Cpu686|CpuP4|CpuMMX|CpuMMX2
+			     |CpuSSE|CpuSSE2;
+      if (cpu_arch_tune == PROCESSOR_UNKNOWN)
+	{
+	  cpu_arch_tune = PROCESSOR_GENERIC64;
+	  cpu_arch_tune_flags = Cpu086|Cpu186|Cpu286|Cpu386|Cpu486
+				|Cpu586|Cpu686|CpuP4|CpuMMX|CpuMMX2
+				|CpuSSE|CpuSSE2;
+	}
+    }
   else if (!strcmp (default_arch, "i386"))
-    set_code_flag (CODE_32BIT);
+    {
+      set_code_flag (CODE_32BIT);
+      if (cpu_arch_isa_flags == 0)
+	cpu_arch_isa_flags = Cpu086|Cpu186|Cpu286|Cpu386;
+      if (cpu_arch_tune == PROCESSOR_UNKNOWN)
+	{
+	  cpu_arch_tune = PROCESSOR_GENERIC32;
+	  cpu_arch_tune_flags = Cpu086|Cpu186|Cpu286|Cpu386;
+	}
+    }
   else
     as_fatal (_("Unknown architecture"));
   switch (OUTPUT_FLAVOR)
