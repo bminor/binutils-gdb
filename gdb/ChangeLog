@@ -1,3 +1,11 @@
+2006-06-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* infrun.c (insert_step_resume_breakpoint_at_caller): New function,
+	based on insert_step_resume_breakpoint_at_frame.
+	(handle_inferior_event): Update comments.  Use
+	insert_step_resume_breakpoint_at_caller.
+	(insert_step_resume_breakpoint_at_frame): Revise comments.
+
 2006-06-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Increase version number to 6.4.91 after the first
