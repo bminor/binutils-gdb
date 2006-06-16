@@ -1,3 +1,11 @@
+2006-06-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* infrun.c (insert_step_resume_breakpoint_at_caller): New function,
+	based on insert_step_resume_breakpoint_at_frame.
+	(handle_inferior_event): Update comments.  Use
+	insert_step_resume_breakpoint_at_caller.
+	(insert_step_resume_breakpoint_at_frame): Revise comments.
+
 2006-06-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2read.c (read_unspecified_type): New function.
