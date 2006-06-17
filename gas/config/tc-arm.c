@@ -79,6 +79,13 @@ static struct
   unsigned	  sp_restored:1;
 } unwind;
 
+/* Bit N indicates that an R_ARM_NONE relocation has been output for
+   __aeabi_unwind_cpp_prN already if set. This enables dependencies to be
+   emitted only once per section, to save unnecessary bloat.  */
+static unsigned int marked_pr_dependency = 0;
+
+#endif /* OBJ_ELF */
+
 /* Results from operand parsing worker functions.  */
 
 typedef enum
@@ -87,13 +94,6 @@ typedef enum
   PARSE_OPERAND_FAIL,
   PARSE_OPERAND_FAIL_NO_BACKTRACK
 } parse_operand_result;
-
-/* Bit N indicates that an R_ARM_NONE relocation has been output for
-   __aeabi_unwind_cpp_prN already if set. This enables dependencies to be
-   emitted only once per section, to save unnecessary bloat.  */
-static unsigned int marked_pr_dependency = 0;
-
-#endif /* OBJ_ELF */
 
 enum arm_float_abi
 {

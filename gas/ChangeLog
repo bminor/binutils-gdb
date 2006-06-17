@@ -1,3 +1,8 @@
+2006-06-17  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (enum parse_operand_result): Move outside of
+	#ifdef OBJ_ELF so that non-ELF targeted ARM ports can build.
+
 2006-06-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.h (processor_type): New.
