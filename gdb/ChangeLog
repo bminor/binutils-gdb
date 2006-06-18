@@ -1,3 +1,7 @@
+2006-06-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* m68klinux-tdep.c (m68k_linux_init_abi): Fix typo in comment.
+
 2006-06-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* infrun.c (insert_step_resume_breakpoint_at_caller): New function,

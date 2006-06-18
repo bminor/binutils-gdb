@@ -286,7 +286,7 @@ m68k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->jb_elt_size = M68K_LINUX_JB_ELEMENT_SIZE;
 
   /* GNU/Linux uses a calling convention that's similar to SVR4.  It
-     returns integer values in %d0/%di, pointer values in %a0 and
+     returns integer values in %d0/%d1, pointer values in %a0 and
      floating values in %fp0, just like SVR4, but uses %a1 to pass the
      address to store a structure value.  It also returns small
      structures in registers instead of memory.  */
