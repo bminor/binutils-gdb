@@ -1,4 +1,5 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
+#skip: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd *-*-riscix*
 #name: Group relocation tests (ldc)
 
 .*: +file format .*arm.*
