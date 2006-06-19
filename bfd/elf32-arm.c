@@ -9155,6 +9155,19 @@ elf32_arm_swap_symbol_out (bfd *abfd,
     {
       newsym = *src;
       newsym.st_info = ELF_ST_INFO (ELF_ST_BIND (src->st_info), STT_FUNC);
+      if (newsym.st_shndx != SHN_UNDEF)
+        {
+          /* Do this only for defined symbols. At link type, the static
+             linker will simulate the work of dynamic linker of resolving
+             symbols and will carry over the thumbness of found symbols to
+             the output symbol table. It's not clear how it happens, but
+             the thumbness of underfined symbols can well be different at
+             runtime, and writing '1' for them will be confusing for users
+             and possibly for dynamic linker itself.
+          */
+          newsym.st_value |= 1;
+        }
+
       newsym.st_value |= 1;
       
       src = &newsym;
