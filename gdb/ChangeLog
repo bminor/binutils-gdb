@@ -1,3 +1,11 @@
+2006-06-19  Michael Snyder  <msnyder@redhat.com>
+
+	* mips-tdep.c (mips_eabi_push_dummy_call): For 32 bit ABI, to
+	decide how many registers it takes to pass a floating point
+	argument, what matters is the size of a floating point register
+	(not the size of a general purpose register).
+	(mips_o32_push_dummy_call): Ditto.
+
 2006-06-19  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
 
 	* configure.tgt: Add gdbserver support for m32r-linux.

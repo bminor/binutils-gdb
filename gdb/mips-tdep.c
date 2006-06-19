@@ -2495,7 +2495,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       if (fp_register_arg_p (typecode, arg_type)
 	  && float_argreg <= MIPS_LAST_FP_ARG_REGNUM)
 	{
-	  if (mips_abi_regsize (gdbarch) < 8 && len == 8)
+	  if (register_size (gdbarch, float_argreg) < 8 && len == 8)
 	    {
 	      int low_offset = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 4 : 0;
 	      unsigned long regval;
@@ -3119,7 +3119,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       if (fp_register_arg_p (typecode, arg_type)
 	  && float_argreg <= MIPS_LAST_FP_ARG_REGNUM)
 	{
-	  if (mips_abi_regsize (gdbarch) < 8 && len == 8)
+	  if (register_size (gdbarch, float_argreg) < 8 && len == 8)
 	    {
 	      int low_offset = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 4 : 0;
 	      unsigned long regval;
