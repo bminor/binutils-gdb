@@ -47,10 +47,6 @@ proc recurse_tests {} {
     if [target_info exists gdb,no_hardware_watchpoints] {
 	gdb_test "set can-use-hw-watchpoints 0" "" ""
     }
-    set nwatch 99
-    if [target_info exists gdb,hardware_watchpoints] {
-	set nwatch [target_info gdb,hardware_watchpoints]
-    }
 
     if [runto recurse] then {
 	# First we need to step over the assignment of b, so it has a known
@@ -82,17 +78,14 @@ proc recurse_tests {} {
 	# First we need to step over the assignment of b, so it has a known
 	# value.
 	gdb_test "next" "if \\(a == 1\\)" "next over b = 0 in second instance"
+	gdb_test "watch b" ".*\[Ww\]atchpoint \[0-9]*: b" \
+	    "set second instance watchpoint"
 
-	if { $nwatch > 1 } {
-	    gdb_test "watch b" ".*\[Ww\]atchpoint \[0-9]*: b" \
-		"set second instance watchpoint"
-
-	    # Continue until initial set of b (second instance).
-	    if [gdb_test "continue" \
-		    "Continuing.*\[Ww\]atchpoint.*: b.*Old value = 0.*New value = 5.*"\
-		    "continue to second instance watchpoint, first time"] then {
-		gdb_suppress_tests;
-	    }
+	# Continue until initial set of b (second instance).
+	if [gdb_test "continue" \
+	    "Continuing.*\[Ww\]atchpoint.*: b.*Old value = 0.*New value = 5.*"\
+	    "continue to second instance watchpoint, first time"] then {
+	gdb_suppress_tests;
 	}
 
 	# Continue inward for a few iterations
@@ -105,33 +98,31 @@ proc recurse_tests {} {
 	gdb_test "continue" "Breakpoint.* recurse \\(a=1\\).*" \
 	    "continue to recurse (a = 1)"
 
-	if { $nwatch  > 1 } {
-	    # Continue until second set of b (second instance).
-	    if [gdb_test "continue" \
-		    "Continuing.*\[Ww\]atchpoint.*: b.*Old value = 5.*New value = 120.*return.*" \
-		    "continue to second instance watchpoint, second time"] then { 
-		gdb_suppress_tests;
-	    }
-
-	    # Continue again.  We should have a watchpoint go out of scope now
-	    if [gdb_test "continue" \
-		    "Continuing.*\[Ww\]atchpoint.*deleted.*recurse \\(a=6\\) .*" \
-		    "second instance watchpoint deleted when leaving scope"] then {
-		gdb_suppress_tests;
-	    }
+	# Continue until second set of b (second instance).
+	if [gdb_test "continue" \
+	    "Continuing.*\[Ww\]atchpoint.*: b.*Old value = 5.*New value = 120.*return.*" \
+	    "continue to second instance watchpoint, second time"] then { 
+	    gdb_suppress_tests;
 	}
-	
+
+	# Continue again.  We should have a watchpoint go out of scope now
+	if [gdb_test "continue" \
+	    "Continuing.*\[Ww\]atchpoint.*deleted.*recurse \\(a=6\\) .*" \
+	    "second instance watchpoint deleted when leaving scope"] then {
+	    gdb_suppress_tests;
+	}
+
 	# Continue until second set of b (first instance).
 	# 24320 is allowed as the final value for b as that's the value
 	# b would have on systems with 16bit integers.
 	#
 	# We could fix the test program to deal with this too.
 	if [gdb_test "continue" \
-		"Continuing.*\[Ww\]atchpoint.*b.*Old value = 10.*New value = \(3628800|24320\).*return.*" \
-		"continue to first instance watchpoint, second time"] then {
+	    "Continuing.*\[Ww\]atchpoint.*b.*Old value = 10.*New value = \(3628800|24320\).*return.*" \
+	    "continue to first instance watchpoint, second time"] then {
 	    gdb_suppress_tests
 	}
-	
+
 	# Continue again.  We should have a watchpoint go out of scope now.
 	#
 	# The former version expected the test to return to main().
