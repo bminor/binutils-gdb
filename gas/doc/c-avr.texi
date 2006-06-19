@@ -53,11 +53,15 @@ atmega8515, atmega8535, at90pwm2, at90pwm3).
 
 Instruction set avr5 is for the enhanced AVR core with up to 128K program
 memory space (MCU types: atmega16, atmega161, atmega162, atmega163,
-atmega164, atmega165, atmega168, atmega169, atmega32, atmega323,
-atmega324, atmega325, atmega329, atmega3250, atmega3290, atmega406,
-atmega64, atmega640, atmega644, atmega128, atmega1280, atmega1281, 
-atmega645, atmega649, atmega6450, atmega6490, at90can32, at90can64,
-at90can128, at90usb646, at90usb647, at90usb1286, at90usb1287, at94k).
+atmega164p, atmega165, atmega165p, atmega168, atmega169, atmega169p, 
+atmega32, atmega323, atmega324p, atmega325, atmega329, atmega3250, 
+atmega3290, atmega406, atmega64, atmega640, atmega644, atmega644p, 
+atmega128, atmega1280, atmega1281, atmega645, atmega649, atmega6450, 
+atmega6490, at90can32, at90can64, at90can128, at90usb646, at90usb647, 
+at90usb1286, at90usb1287, at94k).
+
+Instruction set avr6 is for the enhanced AVR core with 256K program
+memory space (MCU types: atmega2560, atmega2561).
 
 @cindex @code{-mall-opcodes} command line option, AVR
 @item -mall-opcodes

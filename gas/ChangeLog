@@ -1,3 +1,11 @@
+2006-18-06  Joerg Wunsch <j.gnu@uriah.heep.sax.de>
+	    Anatoly Sokolov <aesok@post.ru>
+
+	* config/tc-avr.c (mcu_types): Add support for atmega165p, atmega169p 
+	and atmega644p devices. Rename atmega164/atmega324 devices to 
+	atmega164p/atmega324p.
+	* doc/c-avr.texi: Document new mcu and arch options.
+
 2006-06-17  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (enum parse_operand_result): Move outside of
