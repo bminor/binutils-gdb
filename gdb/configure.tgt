@@ -109,7 +109,9 @@ iq2000-*-*)		gdb_target=iq2000 ;;
 
 m32c-*-*)		gdb_target=m32c ;;
 
-m32r*-*-linux*)		gdb_target=linux ;;
+m32r*-*-linux*)		gdb_target=linux
+			build_gdbserver=yes
+			;;
 m32r*-*-*)		gdb_target=m32r ;;
 
 m68hc11*-*-*|m6811*-*-*)	gdb_target=m68hc11 ;;

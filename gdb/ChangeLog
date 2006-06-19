@@ -1,3 +1,7 @@
+2006-06-19  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
+
+	* configure.tgt: Add gdbserver support for m32r-linux.
+
 2006-06-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* m68klinux-tdep.c (m68k_linux_init_abi): Fix typo in comment.
