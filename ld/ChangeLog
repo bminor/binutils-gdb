@@ -1,3 +1,7 @@
+2006-06-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldexp.c (fold_name): Adjust bfd_sizeof_headers call.
+
 2006-06-14  Kevin F. Quinn  <kevquinn@gentoo.org>
 
 	* ld.texinfo: Document new -z lazy option.

@@ -1862,7 +1862,8 @@ _bfd_ecoff_set_arch_mach (bfd *abfd,
 /* Get the size of the section headers.  */
 
 int
-_bfd_ecoff_sizeof_headers (bfd *abfd, bfd_boolean reloc ATTRIBUTE_UNUSED)
+_bfd_ecoff_sizeof_headers (bfd *abfd,
+			   struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   asection *current;
   int c;
@@ -1936,7 +1937,7 @@ ecoff_compute_section_file_positions (bfd *abfd)
   const bfd_vma round = ecoff_backend (abfd)->round;
   bfd_size_type amt;
 
-  sofar = _bfd_ecoff_sizeof_headers (abfd, FALSE);
+  sofar = _bfd_ecoff_sizeof_headers (abfd, NULL);
   file_sofar = sofar;
 
   /* Sort the sections by VMA.  */
@@ -2357,7 +2358,7 @@ _bfd_ecoff_write_object_contents (bfd *abfd)
     }
 
   if ((abfd->flags & D_PAGED) != 0)
-    text_size = _bfd_ecoff_sizeof_headers (abfd, FALSE);
+    text_size = _bfd_ecoff_sizeof_headers (abfd, NULL);
   else
     text_size = 0;
   text_start = 0;

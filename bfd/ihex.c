@@ -899,7 +899,8 @@ ihex_set_arch_mach (bfd *abfd,
 /* Get the size of the headers, for the linker.  */
 
 static int
-ihex_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED, bfd_boolean exec ATTRIBUTE_UNUSED)
+ihex_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
+		     struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   return 0;
 }

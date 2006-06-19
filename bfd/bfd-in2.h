@@ -4630,8 +4630,8 @@ bfd_boolean bfd_set_private_flags (bfd *abfd, flagword flags);
 
 #define bfd_set_private_flags(abfd, flags) \
      BFD_SEND (abfd, _bfd_set_private_flags, (abfd, flags))
-#define bfd_sizeof_headers(abfd, reloc) \
-       BFD_SEND (abfd, _bfd_sizeof_headers, (abfd, reloc))
+#define bfd_sizeof_headers(abfd, info) \
+       BFD_SEND (abfd, _bfd_sizeof_headers, (abfd, info))
 
 #define bfd_find_nearest_line(abfd, sec, syms, off, file, func, line) \
        BFD_SEND (abfd, _bfd_find_nearest_line, \
@@ -5081,7 +5081,7 @@ typedef struct bfd_target
   NAME##_bfd_discard_group, \
   NAME##_section_already_linked \
 
-  int         (*_bfd_sizeof_headers) (bfd *, bfd_boolean);
+  int         (*_bfd_sizeof_headers) (bfd *, struct bfd_link_info *);
   bfd_byte *  (*_bfd_get_relocated_section_contents)
     (bfd *, struct bfd_link_info *, struct bfd_link_order *,
      bfd_byte *, bfd_boolean, struct bfd_symbol **);

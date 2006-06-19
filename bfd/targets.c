@@ -1,6 +1,6 @@
 /* Generic target-file-type support for the BFD library.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005
+   2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -438,7 +438,7 @@ BFD_JUMP_TABLE macros.
 .  NAME##_bfd_discard_group, \
 .  NAME##_section_already_linked \
 .
-.  int         (*_bfd_sizeof_headers) (bfd *, bfd_boolean);
+.  int         (*_bfd_sizeof_headers) (bfd *, struct bfd_link_info *);
 .  bfd_byte *  (*_bfd_get_relocated_section_contents)
 .    (bfd *, struct bfd_link_info *, struct bfd_link_order *,
 .     bfd_byte *, bfd_boolean, struct bfd_symbol **);

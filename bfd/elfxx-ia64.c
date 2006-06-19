@@ -215,8 +215,6 @@ static bfd_boolean elfNN_ia64_add_symbol_hook
   PARAMS ((bfd *abfd, struct bfd_link_info *info, Elf_Internal_Sym *sym,
 	   const char **namep, flagword *flagsp, asection **secp,
 	   bfd_vma *valp));
-static int elfNN_ia64_additional_program_headers
-  PARAMS ((bfd *abfd));
 static bfd_boolean elfNN_ia64_modify_segment_map
   PARAMS ((bfd *, struct bfd_link_info *));
 static bfd_boolean elfNN_ia64_is_local_label_name
@@ -1637,8 +1635,8 @@ elfNN_ia64_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 /* Return the number of additional phdrs we will need.  */
 
 static int
-elfNN_ia64_additional_program_headers (abfd)
-     bfd *abfd;
+elfNN_ia64_additional_program_headers (bfd *abfd,
+				       struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   asection *s;
   int ret = 0;

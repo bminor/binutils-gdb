@@ -3594,7 +3594,8 @@ elf64_x86_64_merge_symbol (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 }
 
 static int
-elf64_x86_64_additional_program_headers (bfd *abfd)
+elf64_x86_64_additional_program_headers (bfd *abfd,
+					 struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   asection *s;
   int count = 0; 

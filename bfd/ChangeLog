@@ -1,3 +1,58 @@
+2006-06-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (struct elf_backend_data): Add bfd_link_info pointer
+	parameter.
+	(_bfd_elf_sizeof_headers): Replace bfd_boolean param with
+	bfd_link_info pointer.
+	* targets.c (struct bfd_target <_bfd_sizeof_headers>): Likewise.
+	* bfd.c (bfd_sizeof_headers): Tweak param name.
+	* aout-adobe.c (aout_adobe_sizeof_headers): Adjust.
+	* aoutx.h (NAME (aout, sizeof_headers)): Adjust.
+	* binary.c (binary_sizeof_headers): Adjust.
+	* bout.c (b_out_sizeof_headers): Adjust.
+	* coff-rs6000.c (_bfd_xcoff_sizeof_headers): Adjust.
+	* coff64-rs6000.c (xcoff64_sizeof_headers): Adjust.
+	* coffgen.c (coff_sizeof_headers): Adjust.
+	* ecoff.c (_bfd_ecoff_sizeof_headers): Adjust.
+	(ecoff_compute_section_file_positions): Adjust.
+	(_bfd_ecoff_write_object_contents): Adjust.
+	* elf.c (get_program_header_size, _bfd_elf_sizeof_headers): Adjust.
+	* elf32-arm.c (elf32_arm_additional_program_headers): Adjust.
+	* elf32-i370.c (elf_backend_additional_program_headers): Adjust.
+	* elf32-ppc.c (ppc_elf_additional_program_headers): Adjust.
+	* elf64-hppa.c (elf64_hppa_additional_program_headers): Adjust.
+	* elf64-x86-64.c (elf64_x86_64_additional_program_headers): Adjust.
+	* elfxx-ia64.c (elfNN_ia64_additional_program_headers): Adjust.
+	* elfxx-mips.c (_bfd_mips_elf_additional_program_headers): Adjust.
+	* elfxx-mips.h (_bfd_mips_elf_additional_program_headers): Adjust.
+	* i386msdos.c: Convert to ISO C.
+	(msdos_sizeof_headers): Adjust.
+	* i386os9k.c: Convert to ISO C.
+	(os9k_sizeof_headers): Adjust.
+	* ieee.c (ieee_sizeof_headers): Adjust.
+	* ihex.c (ihex_sizeof_headers): Adjust.
+	* libaout.h (NAME (aout, sizeof_headers)): Adjust.
+	* libbfd-in.h (_bfd_nolink_sizeof_headers): Adjust.
+	* libcoff-in.h (coff_sizeof_headers): Adjust.
+	* libecoff.h (_bfd_ecoff_sizeof_headers): Adjust.
+	* mach-o.c (bfd_mach_o_sizeof_headers): Adjust.
+	* mmo.c (mmo_sizeof_headers): Adjust.
+	* oasys.c (oasys_sizeof_headers): Adjust.
+	* pdp11.c (NAME (aout, sizeof_headers)): Adjust.
+	* pef.c (bfd_pef_sizeof_headers): Adjust.
+	* ppcboot.c (ppcboot_sizeof_headers): Adjust.
+	* som.c (som_sizeof_headers): Adjust.
+	* srec.c (srec_sizeof_headers): Adjust.
+	* tekhex.c (tekhex_sizeof_headers): Adjust.
+	* versados.c (versados_sizeof_headers): Adjust.
+	* vms.c (vms_sizeof_headers): Adjust.
+	* xcoff-target.h (_bfd_xcoff_sizeof_headers): Adjust.
+	* xsym.c (bfd_sym_sizeof_headers): Adjust.
+	* xsym.h (bfd_sym_sizeof_headers): Adjust.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* libcoff.h: Regenerate.
+
 2006-06-15  Mark Shinwell  <shinwell@codesourcery.com>
 
 	* bfd-in2.h: Regenerate.

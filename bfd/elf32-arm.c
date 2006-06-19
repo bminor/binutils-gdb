@@ -9217,7 +9217,8 @@ elf32_arm_modify_segment_map (bfd *abfd,
 /* We may add a PT_ARM_EXIDX program header.  */
 
 static int
-elf32_arm_additional_program_headers (bfd *abfd)
+elf32_arm_additional_program_headers (bfd *abfd,
+				      struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   asection *sec;
 

@@ -1,5 +1,6 @@
 /* MIPS ELF specific backend routines.
-   Copyright 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -68,7 +69,7 @@ extern bfd_boolean _bfd_mips_elf_finish_dynamic_sections
 extern void _bfd_mips_elf_final_write_processing
   (bfd *, bfd_boolean);
 extern int _bfd_mips_elf_additional_program_headers
-  (bfd *);
+  (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_mips_elf_modify_segment_map
   (bfd *, struct bfd_link_info *);
 extern asection * _bfd_mips_elf_gc_mark_hook

@@ -568,7 +568,7 @@ bfd_mach_o_write_contents (bfd *abfd)
 
 static int
 bfd_mach_o_sizeof_headers (bfd *a ATTRIBUTE_UNUSED,
-			   bfd_boolean b ATTRIBUTE_UNUSED)
+			   struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   return 0;
 }

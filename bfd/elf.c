@@ -4721,7 +4721,7 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
    will be two segments.  */
 
 static bfd_size_type
-get_program_header_size (bfd *abfd)
+get_program_header_size (bfd *abfd, struct bfd_link_info *info)
 {
   size_t segs;
   asection *s;
@@ -4805,7 +4805,7 @@ get_program_header_size (bfd *abfd)
     {
       int a;
 
-      a = (*bed->elf_backend_additional_program_headers) (abfd);
+      a = (*bed->elf_backend_additional_program_headers) (abfd, info);
       if (a == -1)
 	abort ();
       segs += a;
@@ -7116,13 +7116,13 @@ _bfd_elf_find_inliner_info (bfd *abfd,
 }
 
 int
-_bfd_elf_sizeof_headers (bfd *abfd, bfd_boolean reloc)
+_bfd_elf_sizeof_headers (bfd *abfd, struct bfd_link_info *info)
 {
   int ret;
 
   ret = get_elf_backend_data (abfd)->s->sizeof_ehdr;
-  if (! reloc)
-    ret += get_program_header_size (abfd);
+  if (!info->relocatable)
+    ret += get_program_header_size (abfd, info);
   return ret;
 }
 

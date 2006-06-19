@@ -2238,11 +2238,11 @@ coff_find_inliner_info (bfd *abfd,
 }
 
 int
-coff_sizeof_headers (bfd *abfd, bfd_boolean reloc)
+coff_sizeof_headers (bfd *abfd, struct bfd_link_info *info)
 {
   size_t size;
 
-  if (! reloc)
+  if (!info->relocatable)
     size = bfd_coff_filhsz (abfd) + bfd_coff_aoutsz (abfd);
   else
     size = bfd_coff_filhsz (abfd);

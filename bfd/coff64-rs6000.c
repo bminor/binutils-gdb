@@ -1,5 +1,5 @@
 /* BFD back-end for IBM RS/6000 "XCOFF64" files.
-   Copyright 2000, 2001, 2002, 2003, 2004, 2005
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
    Written Clinton Popetz.
    Contributed by Cygnus Support.
@@ -127,7 +127,7 @@ extern bfd_boolean _bfd_xcoff_write_armap
 extern bfd_boolean _bfd_xcoff_write_archive_contents
   PARAMS ((bfd *));
 extern int _bfd_xcoff_sizeof_headers
-  PARAMS ((bfd *, bfd_boolean));
+  PARAMS ((bfd *, struct bfd_link_info *));
 extern void _bfd_xcoff_swap_sym_in
   PARAMS ((bfd *, PTR, PTR));
 extern unsigned int _bfd_xcoff_swap_sym_out
@@ -161,7 +161,7 @@ static const bfd_target *xcoff64_archive_p
 static bfd *xcoff64_openr_next_archived_file
   PARAMS ((bfd *, bfd *));
 static int xcoff64_sizeof_headers
-  PARAMS ((bfd *, bfd_boolean));
+  PARAMS ((bfd *, struct bfd_link_info *));
 static asection *xcoff64_create_csect_from_smclas
   PARAMS ((bfd *, union internal_auxent *, const char *));
 static bfd_boolean xcoff64_is_lineno_count_overflow
@@ -2056,9 +2056,8 @@ xcoff64_openr_next_archived_file (archive, last_file)
    always uses an a.out header.  */
 
 static int
-xcoff64_sizeof_headers (abfd, reloc)
-     bfd *abfd;
-     bfd_boolean reloc ATTRIBUTE_UNUSED;
+xcoff64_sizeof_headers (bfd *abfd,
+			struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   int size;
 

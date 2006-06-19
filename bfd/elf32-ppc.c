@@ -1869,7 +1869,8 @@ ppc_elf_fake_sections (bfd *abfd ATTRIBUTE_UNUSED,
    need to bump up the number of section headers.  */
 
 static int
-ppc_elf_additional_program_headers (bfd *abfd)
+ppc_elf_additional_program_headers (bfd *abfd,
+				    struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   asection *s;
   int ret = 0;

@@ -3715,7 +3715,7 @@ ieee_generic_stat_arch_elt (bfd *abfd, struct stat *buf)
 
 static int
 ieee_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
-		     bfd_boolean x ATTRIBUTE_UNUSED)
+		     struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   return 0;
 }

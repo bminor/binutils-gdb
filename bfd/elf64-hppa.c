@@ -204,9 +204,6 @@ static bfd_boolean elf64_hppa_finish_dynamic_symbol
   PARAMS ((bfd *, struct bfd_link_info *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
 
-static int elf64_hppa_additional_program_headers
-  PARAMS ((bfd *));
-
 static bfd_boolean elf64_hppa_modify_segment_map
   PARAMS ((bfd *, struct bfd_link_info *));
 
@@ -2617,8 +2614,8 @@ elf64_hppa_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
    existence of a .interp section.  */
 
 static int
-elf64_hppa_additional_program_headers (abfd)
-     bfd *abfd;
+elf64_hppa_additional_program_headers (bfd *abfd,
+				       struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   asection *s;
 

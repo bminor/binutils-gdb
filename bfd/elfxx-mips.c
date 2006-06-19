@@ -9138,7 +9138,8 @@ _bfd_mips_elf_final_write_processing (bfd *abfd,
    segments.  */
 
 int
-_bfd_mips_elf_additional_program_headers (bfd *abfd)
+_bfd_mips_elf_additional_program_headers (bfd *abfd,
+					  struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   asection *s;
   int ret = 0;

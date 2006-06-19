@@ -1451,7 +1451,7 @@ i370_noop (void)
      (bfd *, struct bfd_link_info *, struct elf_link_hash_entry *, \
       Elf_Internal_Sym *)) i370_noop
 #define elf_backend_additional_program_headers \
-  (int (*) (bfd *)) i370_noop
+  (int (*) (bfd *, struct bfd_link_info *)) i370_noop
 #define elf_backend_modify_segment_map \
   (bfd_boolean (*) (bfd *, struct bfd_link_info *)) i370_noop
 

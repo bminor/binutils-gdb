@@ -2300,7 +2300,8 @@ bfd_sym_canonicalize_symtab (bfd *abfd ATTRIBUTE_UNUSED, asymbol **sym ATTRIBUTE
 }
 
 int
-bfd_sym_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED, bfd_boolean exec ATTRIBUTE_UNUSED)
+bfd_sym_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
+			struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   return 0;
 }

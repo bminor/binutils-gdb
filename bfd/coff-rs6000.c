@@ -59,7 +59,7 @@ extern bfd_boolean _bfd_xcoff_write_armap
 extern bfd_boolean _bfd_xcoff_write_archive_contents
   PARAMS ((bfd *));
 extern int _bfd_xcoff_sizeof_headers
-  PARAMS ((bfd *, bfd_boolean));
+  PARAMS ((bfd *, struct bfd_link_info *));
 extern void _bfd_xcoff_swap_sym_in
   PARAMS ((bfd *, PTR, PTR));
 extern unsigned int _bfd_xcoff_swap_sym_out
@@ -2573,9 +2573,8 @@ _bfd_xcoff_write_archive_contents (abfd)
    always uses an a.out header.  */
 
 int
-_bfd_xcoff_sizeof_headers (abfd, reloc)
-     bfd *abfd;
-     bfd_boolean reloc ATTRIBUTE_UNUSED;
+_bfd_xcoff_sizeof_headers (bfd *abfd,
+			   struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   int size;
 

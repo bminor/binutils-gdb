@@ -1402,7 +1402,7 @@ vms_set_section_contents (bfd * abfd,
 
 static int
 vms_sizeof_headers (bfd * abfd ATTRIBUTE_UNUSED,
-		    bfd_boolean reloc ATTRIBUTE_UNUSED)
+		    struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
 #if VMS_DEBUG
   vms_debug (1, "vms_sizeof_headers (%p, %s)\n", abfd, (reloc)?"True":"False");

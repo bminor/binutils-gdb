@@ -441,7 +441,7 @@ aout_adobe_set_arch_mach (bfd *abfd,
 
 static int
 aout_adobe_sizeof_headers (bfd *ignore_abfd ATTRIBUTE_UNUSED,
-			   bfd_boolean ignore ATTRIBUTE_UNUSED)
+			   struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   return sizeof (struct internal_exec);
 }

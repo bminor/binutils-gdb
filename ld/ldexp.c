@@ -481,7 +481,7 @@ fold_name (etree_type *tree)
 	  /* Don't find the real header size if only marking sections;
 	     The bfd function may cache incorrect data.  */
 	  if (expld.phase != lang_mark_phase_enum)
-	    hdr_size = bfd_sizeof_headers (output_bfd, link_info.relocatable);
+	    hdr_size = bfd_sizeof_headers (output_bfd, &link_info);
 	  new_abs (hdr_size);
 	}
       break;

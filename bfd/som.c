@@ -5328,7 +5328,7 @@ som_find_nearest_line (bfd *abfd ATTRIBUTE_UNUSED,
 
 static int
 som_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
-		    bfd_boolean reloc ATTRIBUTE_UNUSED)
+		    struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   (*_bfd_error_handler) (_("som_sizeof_headers unimplemented"));
   fflush (stderr);

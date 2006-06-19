@@ -1,6 +1,6 @@
 /* BFD back-end for VERSAdos-E objects.
-   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
-   Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+   2006 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
    Versados is a Motorola trademark.
@@ -675,7 +675,7 @@ versados_set_section_contents (bfd *abfd ATTRIBUTE_UNUSED,
 
 static int
 versados_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
-			 bfd_boolean exec ATTRIBUTE_UNUSED)
+			 struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   return 0;
 }

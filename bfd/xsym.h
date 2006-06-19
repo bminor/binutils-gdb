@@ -1,5 +1,5 @@
 /* xSYM symbol-file support for BFD.
-   Copyright 1999, 2000, 2001, 2002, 2003, 2005
+   Copyright 1999, 2000, 2001, 2002, 2003, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -696,6 +696,6 @@ extern long bfd_sym_get_symtab_upper_bound
 extern long bfd_sym_canonicalize_symtab
   (bfd *, asymbol **);
 extern int bfd_sym_sizeof_headers
-  (bfd *, bfd_boolean);
+  (bfd *, struct bfd_link_info *);
 
 #endif /* __xSYM_H__ */

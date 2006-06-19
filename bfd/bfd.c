@@ -1183,8 +1183,8 @@ FUNCTION
 DESCRIPTION
 	The following functions exist but have not yet been documented.
 
-.#define bfd_sizeof_headers(abfd, reloc) \
-.       BFD_SEND (abfd, _bfd_sizeof_headers, (abfd, reloc))
+.#define bfd_sizeof_headers(abfd, info) \
+.       BFD_SEND (abfd, _bfd_sizeof_headers, (abfd, info))
 .
 .#define bfd_find_nearest_line(abfd, sec, syms, off, file, func, line) \
 .       BFD_SEND (abfd, _bfd_find_nearest_line, \

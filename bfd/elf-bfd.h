@@ -829,7 +829,7 @@ struct elf_backend_data
      return the number of additional program segments which this BFD
      will need.  It should return -1 on error.  */
   int (*elf_backend_additional_program_headers)
-    (bfd *);
+    (bfd *, struct bfd_link_info *);
 
   /* This function is called to modify an existing segment map in a
      backend specific fashion.  */
@@ -1576,7 +1576,7 @@ extern bfd_boolean _bfd_elf_find_inliner_info
 #define _bfd_elf_read_minisymbols _bfd_generic_read_minisymbols
 #define _bfd_elf_minisymbol_to_symbol _bfd_generic_minisymbol_to_symbol
 extern int _bfd_elf_sizeof_headers
-  (bfd *, bfd_boolean);
+  (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_new_section_hook
   (bfd *, asection *);
 extern bfd_boolean _bfd_elf_init_reloc_shdr

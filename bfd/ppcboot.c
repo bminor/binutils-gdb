@@ -99,7 +99,6 @@ static long ppcboot_canonicalize_symtab PARAMS ((bfd *, asymbol **));
 static void ppcboot_get_symbol_info PARAMS ((bfd *, asymbol *, symbol_info *));
 static bfd_boolean ppcboot_set_section_contents
   PARAMS ((bfd *, asection *, const PTR, file_ptr, bfd_size_type));
-static int ppcboot_sizeof_headers PARAMS ((bfd *, bfd_boolean));
 static bfd_boolean ppcboot_bfd_print_private_bfd_data PARAMS ((bfd *, PTR));
 
 #define ppcboot_set_tdata(abfd, ptr) ((abfd)->tdata.any = (PTR) (ptr))
@@ -396,9 +395,8 @@ ppcboot_set_section_contents (abfd, sec, data, offset, size)
 
 
 static int
-ppcboot_sizeof_headers (abfd, exec)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     bfd_boolean exec ATTRIBUTE_UNUSED;
+ppcboot_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
+			struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   return sizeof (ppcboot_hdr_t);
 }

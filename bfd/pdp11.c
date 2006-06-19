@@ -2371,7 +2371,8 @@ NAME (aout, find_nearest_line) (bfd *abfd,
 }
 
 int
-NAME (aout, sizeof_headers) (bfd *abfd, bfd_boolean execable ATTRIBUTE_UNUSED)
+NAME (aout, sizeof_headers) (bfd *abfd,
+			     struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   return adata (abfd).exec_bytes_size;
 }

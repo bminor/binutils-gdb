@@ -557,7 +557,7 @@ extern asymbol * NAME (aout, minisymbol_to_symbol)
   (bfd *, bfd_boolean, const void *, asymbol *);
 
 extern int NAME (aout, sizeof_headers)
-  (bfd *, bfd_boolean);
+  (bfd *, struct bfd_link_info *);
 
 extern bfd_boolean NAME (aout, adjust_sizes_and_vmas)
   (bfd *, bfd_size_type *, file_ptr *);
