@@ -1,3 +1,8 @@
+2006-06-20  Jakub Jelinek  <jakub@redhat.com>
+
+	* elflink.c (elf_link_add_object_symbols): Don't create .tcommon
+	section for relocatable link.
+
 2006-06-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (struct elf_backend_data): Add

@@ -1,3 +1,8 @@
+2006-06-20  Jakub Jelinek  <jakub@redhat.com>
+
+	* ld-elf/tls_common.exp: New test.
+	* ld-elf/tls_common.s: New file.
+
 2006-06-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-elf/eh1.d: Update for fewer program headers.
