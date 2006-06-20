@@ -1,4 +1,4 @@
-#objdump: -dr --prefix-addresses --show-raw-insn
+#objdump: -dr --prefix-addresses --show-raw-insn -M reg-names=32
 #name: MIPS DSP ASE for MIPS64
 #as: -mdsp
 

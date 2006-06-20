@@ -1,3 +1,9 @@
+2006-06-20  Thiemo Seufer  <ths@networkno.de>
+
+	* gas/mips/mips.exp: Explicitly specify o32 ABI.
+	* gas/mips/mips64-dsp.d: Dump o32 register names.
+	* gas/mips/smartmips.d: Explicitly specify o32 ABI.
+
 2006-06-18  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/group-reloc-alu-encoding-bad.d: Skip for non-ELF
