@@ -1,3 +1,31 @@
+2006-06-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (struct elf_backend_data): Add
+	elf_backend_modify_program_headers.
+	* elfxx-target.h (elf_backend_modify_program_headers): Define.
+	(elfNN_bed): Init new field.
+	* elf.c (elf_modify_segment_map): Remove comment.
+	(assign_file_positions_for_load_sections): Only call
+	elf_modify_segment_map for objcopy/strip.
+	(assign_file_positions_except_relocs): Call
+	elf_backend_modify_program_headers.
+	* elf32-frv.c (elf32_frvfdpic_always_size_sections): Don't make
+	.stack section.
+	(elf32_frvfdpic_modify_segment_map): Delete.
+	(elf32_frvfdpic_modify_program_headers): New.
+	(elf_backend_modify_segment_map): Don't define.
+	(elf_backend_modify_program_headers): Define.
+	* elf32-bfin.c (elf32_bfinfdpic_always_size_sections): Don't make
+	.stack section.
+	(elf32_bfinfdpic_modify_segment_map): Delete.
+	(elf32_bfinfdpic_modify_program_headers): New.
+	(elf_backend_modify_segment_map): Don't define.
+	(elf_backend_modify_program_headers): Define.
+	* elfxx-ia64.c (elfNN_ia64_modify_program_headers): New function.
+	Split out from..
+	(elfNN_ia64_modify_segment_map): ..here.
+	(elf_backend_modify_program_headers): Define.
+
 2006-06-20  Jakub Jelinek  <jakub@redhat.com>
 
 	* bfd.c (bfd_record_phdr): Clear p_align and p_align_valid fields.

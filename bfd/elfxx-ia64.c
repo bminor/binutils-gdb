@@ -1737,17 +1737,30 @@ elfNN_ia64_modify_segment_map (bfd *abfd,
 	}
     }
 
-  /* Turn on PF_IA_64_NORECOV if needed.  This involves traversing all of
-     the input sections for each output section in the segment and testing
-     for SHF_IA_64_NORECOV on each.  */
-  for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
+  return TRUE;
+}
+
+/* Turn on PF_IA_64_NORECOV if needed.  This involves traversing all of
+   the input sections for each output section in the segment and testing
+   for SHF_IA_64_NORECOV on each.  */
+
+static bfd_boolean
+elfNN_ia64_modify_program_headers (bfd *abfd,
+				   struct bfd_link_info *info ATTRIBUTE_UNUSED)
+{
+  struct elf_obj_tdata *tdata = elf_tdata (abfd);
+  struct elf_segment_map *m;
+  Elf_Internal_Phdr *p;
+
+  for (p = tdata->phdr, m = tdata->segment_map; m != NULL; m = m->next, p++)
     if (m->p_type == PT_LOAD)
       {
 	int i;
 	for (i = m->count - 1; i >= 0; --i)
 	  {
 	    struct bfd_link_order *order = m->sections[i]->map_head.link_order;
-	    while (order)
+
+	    while (order != NULL)
 	      {
 		if (order->type == bfd_indirect_link_order)
 		  {
@@ -1755,7 +1768,7 @@ elfNN_ia64_modify_segment_map (bfd *abfd,
 		    bfd_vma flags = elf_section_data(is)->this_hdr.sh_flags;
 		    if (flags & SHF_IA_64_NORECOV)
 		      {
-			m->p_flags |= PF_IA_64_NORECOV;
+			p->p_flags |= PF_IA_64_NORECOV;
 			goto found;
 		      }
 		  }
@@ -5728,6 +5741,8 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
 	elfNN_ia64_additional_program_headers
 #define elf_backend_modify_segment_map \
 	elfNN_ia64_modify_segment_map
+#define elf_backend_modify_program_headers \
+	elfNN_ia64_modify_program_headers
 #define elf_info_to_howto \
 	elfNN_ia64_info_to_howto
 

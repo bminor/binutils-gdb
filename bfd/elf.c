@@ -3734,8 +3734,6 @@ elf_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
 	m->count = new_count;
     }
 
-  /* Yes, we call elf_backend_modify_segment_map at least two times
-     for the linker.  The final time the link_orders are available.  */
   bed = get_elf_backend_data (abfd);
   if (bed->elf_backend_modify_segment_map != NULL)
     {
@@ -4217,7 +4215,8 @@ assign_file_positions_for_load_sections (bfd *abfd,
   unsigned int alloc;
   unsigned int i;
 
-  if (!elf_modify_segment_map (abfd, link_info))
+  if (link_info == NULL
+      && !elf_modify_segment_map (abfd, link_info))
     return FALSE;
 
   alloc = 0;
@@ -4720,8 +4719,8 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 		  if (lp->p_type == PT_LOAD
 		      && lp->p_vaddr <= link_info->relro_end
 		      && lp->p_vaddr >= link_info->relro_start
-		      && lp->p_vaddr + lp->p_filesz
-			 >= link_info->relro_end)
+		      && (lp->p_vaddr + lp->p_filesz
+			  >= link_info->relro_end))
 		    break;
 		}
 
@@ -4822,6 +4821,12 @@ assign_file_positions_except_relocs (bfd *abfd,
       /* And for non-load sections.  */
       if (!assign_file_positions_for_non_load_sections (abfd, link_info))
 	return FALSE;
+
+      if (bed->elf_backend_modify_program_headers != NULL)
+	{
+	  if (!(*bed->elf_backend_modify_program_headers) (abfd, link_info))
+	    return FALSE;
+	}
 
       /* Write out the program headers.  */
       alloc = tdata->program_header_size / bed->s->sizeof_phdr;

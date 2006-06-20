@@ -4156,7 +4156,6 @@ elf32_bfinfdpic_always_size_sections (bfd *output_bfd,
   if (!info->relocatable)
     {
       struct elf_link_hash_entry *h;
-      asection *sec;
 
       /* Force a PT_GNU_STACK segment to be created.  */
       if (! elf_tdata (output_bfd)->stack_flags)
@@ -4182,64 +4181,51 @@ elf32_bfinfdpic_always_size_sections (bfd *output_bfd,
 	  h->def_regular = 1;
 	  h->type = STT_OBJECT;
 	}
-
-      /* Create a stack section, and set its alignment.  */
-      sec = bfd_make_section (output_bfd, ".stack");
-
-      if (sec == NULL
-	  || ! bfd_set_section_alignment (output_bfd, sec, 3))
-	return FALSE;
     }
 
   return TRUE;
 }
 
 static bfd_boolean
-elf32_bfinfdpic_modify_segment_map (bfd *output_bfd,
-				   struct bfd_link_info *info)
+elf32_bfinfdpic_modify_program_headers (bfd *output_bfd,
+					struct bfd_link_info *info)
 {
+  struct elf_obj_tdata *tdata = elf_tdata (output_bfd);
   struct elf_segment_map *m;
+  Elf_Internal_Phdr *p;
 
   /* objcopy and strip preserve what's already there using
      elf32_bfinfdpic_copy_private_bfd_data ().  */
   if (! info)
     return TRUE;
 
-  for (m = elf_tdata (output_bfd)->segment_map; m != NULL; m = m->next)
+  for (p = tdata->phdr, m = tdata->segment_map; m != NULL; m = m->next, p++)
     if (m->p_type == PT_GNU_STACK)
       break;
 
   if (m)
     {
-      asection *sec = bfd_get_section_by_name (output_bfd, ".stack");
       struct elf_link_hash_entry *h;
 
-      if (sec)
+      /* Obtain the pointer to the __stacksize symbol.  */
+      h = elf_link_hash_lookup (elf_hash_table (info), "__stacksize",
+				FALSE, FALSE, FALSE);
+      if (h)
 	{
-	  /* Obtain the pointer to the __stacksize symbol.  */
-	  h = elf_link_hash_lookup (elf_hash_table (info), "__stacksize",
-				    FALSE, FALSE, FALSE);
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *)h->root.u.i.link;
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	  BFD_ASSERT (h->root.type == bfd_link_hash_defined);
-
-	  /* Set the section size from the symbol value.  We
-	     intentionally ignore the symbol section.  */
-	  if (h->root.type == bfd_link_hash_defined)
-	    sec->size = h->root.u.def.value;
-	  else
-	    sec->size = DEFAULT_STACK_SIZE;
-
-	  /* Add the stack section to the PT_GNU_STACK segment,
-	     such that its size and alignment requirements make it
-	     to the segment.  */
-	  if (m->count == 0)
-	    {
-	      m->sections[m->count] = sec;
-	      m->count++;
-	    }
 	}
+
+      /* Set the header p_memsz from the symbol value.  We
+	 intentionally ignore the symbol section.  */
+      if (h && h->root.type == bfd_link_hash_defined)
+	p->p_memsz = h->root.u.def.value;
+      else
+	p->p_memsz = DEFAULT_STACK_SIZE;
+
+      p->p_align = 8;
     }
 
   return TRUE;
@@ -5594,9 +5580,9 @@ error_return:
 #undef elf_backend_always_size_sections
 #define elf_backend_always_size_sections \
 		elf32_bfinfdpic_always_size_sections
-#undef elf_backend_modify_segment_map
-#define elf_backend_modify_segment_map \
-		elf32_bfinfdpic_modify_segment_map
+#undef elf_backend_modify_program_headers
+#define elf_backend_modify_program_headers \
+		elf32_bfinfdpic_modify_program_headers
 #undef bfd_elf32_bfd_copy_private_bfd_data
 #define bfd_elf32_bfd_copy_private_bfd_data \
 		elf32_bfinfdpic_copy_private_bfd_data

@@ -836,6 +836,11 @@ struct elf_backend_data
   bfd_boolean (*elf_backend_modify_segment_map)
     (bfd *, struct bfd_link_info *);
 
+  /* This function is called to modify program headers just before
+     they are written.  */
+  bfd_boolean (*elf_backend_modify_program_headers)
+    (bfd *, struct bfd_link_info *);
+
   /* This function is called during section garbage collection to
      mark sections that define global symbols.  */
   bfd_boolean (*gc_mark_dynamic_ref)
