@@ -5757,8 +5757,11 @@ elf32_frvfdpic_modify_segment_map (bfd *output_bfd,
 	  /* Add the stack section to the PT_GNU_STACK segment,
 	     such that its size and alignment requirements make it
 	     to the segment.  */
-	  m->sections[m->count] = sec;
-	  m->count++;
+	  if (m->count == 0)
+	    {
+	      m->sections[m->count] = sec;
+	      m->count++;
+	    }
 	}
     }
 

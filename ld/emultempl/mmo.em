@@ -18,16 +18,18 @@
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
-# This file is sourced from elf32.em and mmo.em, used to define
-# linker MMIX-specifics common to ELF and MMO.
+# This file is sourced from generic.em
 
 cat >>e${EMULATION_NAME}.c <<EOF
 /* Need to have this define before mmix-elfnmmo, which includes
    needrelax.em which uses this name for the before_allocation function,
    normally defined in elf32.em.  */
 #define gldmmo_before_allocation before_allocation_default
+
+#include "elf-bfd.h"
 EOF
 
+. ${srcdir}/emultempl/elf-generic.em
 . ${srcdir}/emultempl/mmix-elfnmmo.em
 
 cat >>e${EMULATION_NAME}.c <<EOF
@@ -112,6 +114,7 @@ static void
 mmo_finish (void)
 {
   bfd_map_over_sections (output_bfd, mmo_wipe_sec_reloc_flag, NULL);
+  gld${EMULATION_NAME}_map_segments (FALSE);
   finish_default ();
 }
 

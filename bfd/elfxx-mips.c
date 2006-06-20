@@ -9230,15 +9230,18 @@ _bfd_mips_elf_modify_segment_map (bfd *abfd,
 		     || (*pm)->p_type == PT_INTERP))
 	    pm = &(*pm)->next;
 
-	  amt = sizeof (struct elf_segment_map);
-	  options_segment = bfd_zalloc (abfd, amt);
-	  options_segment->next = *pm;
-	  options_segment->p_type = PT_MIPS_OPTIONS;
-	  options_segment->p_flags = PF_R;
-	  options_segment->p_flags_valid = TRUE;
-	  options_segment->count = 1;
-	  options_segment->sections[0] = s;
-	  *pm = options_segment;
+	  if (*pm == NULL || (*pm)->p_type != PT_MIPS_OPTIONS)
+	    {
+	      amt = sizeof (struct elf_segment_map);
+	      options_segment = bfd_zalloc (abfd, amt);
+	      options_segment->next = *pm;
+	      options_segment->p_type = PT_MIPS_OPTIONS;
+	      options_segment->p_flags = PF_R;
+	      options_segment->p_flags_valid = TRUE;
+	      options_segment->count = 1;
+	      options_segment->sections[0] = s;
+	      *pm = options_segment;
+	    }
 	}
     }
   else

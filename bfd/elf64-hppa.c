@@ -204,9 +204,6 @@ static bfd_boolean elf64_hppa_finish_dynamic_symbol
   PARAMS ((bfd *, struct bfd_link_info *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
 
-static bfd_boolean elf64_hppa_modify_segment_map
-  PARAMS ((bfd *, struct bfd_link_info *));
-
 static enum elf_reloc_type_class elf64_hppa_reloc_type_class
   PARAMS ((const Elf_Internal_Rela *));
 
@@ -2641,9 +2638,8 @@ elf64_hppa_additional_program_headers (bfd *abfd,
    existence of a .interp section.  */
 
 static bfd_boolean
-elf64_hppa_modify_segment_map (abfd, info)
-     bfd *abfd;
-     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+elf64_hppa_modify_segment_map (bfd *abfd,
+			       struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   struct elf_segment_map *m;
   asection *s;

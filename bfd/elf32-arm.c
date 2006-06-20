@@ -9493,9 +9493,16 @@ elf32_arm_symbian_modify_segment_map (bfd *abfd,
   dynsec = bfd_get_section_by_name (abfd, ".dynamic");
   if (dynsec)
     {
-      m = _bfd_elf_make_dynamic_segment (abfd, dynsec);
-      m->next = elf_tdata (abfd)->segment_map;
-      elf_tdata (abfd)->segment_map = m;
+      for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
+	if (m->p_type == PT_DYNAMIC)
+	  break;
+
+      if (m == NULL)
+	{
+	  m = _bfd_elf_make_dynamic_segment (abfd, dynsec);
+	  m->next = elf_tdata (abfd)->segment_map;
+	  elf_tdata (abfd)->segment_map = m;
+	}
     }
 
   /* Also call the generic arm routine.  */

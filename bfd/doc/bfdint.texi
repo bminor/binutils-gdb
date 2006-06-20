@@ -1744,23 +1744,6 @@ support.
 The processor function hooks and constants are ad hoc and need better
 documentation.
 
-When a linker script uses @samp{SIZEOF_HEADERS}, the ELF backend must
-guess at the number of program segments which will be required, in
-@samp{get_program_header_size}.  This is because the linker calls
-@samp{bfd_sizeof_headers} before it knows all the section addresses and
-sizes.  The ELF backend may later discover, when creating program
-segments, that more program segments are required.  This is currently
-reported as an error in @samp{assign_file_positions_for_segments}.
-
-In practice this makes it difficult to use @samp{SIZEOF_HEADERS} except
-with a carefully defined linker script.  Unfortunately,
-@samp{SIZEOF_HEADERS} is required for fast program loading on a native
-system, since it permits the initial code section to appear on the same
-page as the program segments, saving a page read when the program starts
-running.  Fortunately, native systems permit careful definition of the
-linker script.  Still, ideally it would be possible to use relaxation to
-compute the number of program segments.
-
 @node BFD glossary
 @section BFD glossary
 @cindex glossary for bfd

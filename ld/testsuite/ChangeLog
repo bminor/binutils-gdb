@@ -1,3 +1,9 @@
+2006-06-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elf/eh1.d: Update for fewer program headers.
+	* ld-elf/eh2.d: Likewise.
+	* ld-elf/eh3.d: Likewise.
+
 2006-06-19  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* ld-arm/arm-elf.exp: New test.

@@ -1,0 +1,60 @@
+# This shell script emits a C file. -*- C -*-
+#   Copyright 2006 Free Software Foundation, Inc.
+#
+# This file is part of GLD, the Gnu Linker.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
+#
+
+# This file is sourced from elf32.em and from ELF targets that use
+# generic.em.
+#
+cat >>e${EMULATION_NAME}.c <<EOF
+
+static void
+gld${EMULATION_NAME}_map_segments (bfd_boolean need_layout)
+{
+  while (1)
+    {
+      if (output_bfd->xvec->flavour == bfd_target_elf_flavour)
+	{
+	  bfd_size_type phdr_size;
+
+	  phdr_size = elf_tdata (output_bfd)->program_header_size;
+	  if (!_bfd_elf_map_sections_to_segments (output_bfd, &link_info))
+	    einfo ("%F%P: map sections to segments failed: %E\n");
+
+	  if (phdr_size != elf_tdata (output_bfd)->program_header_size)
+	    need_layout = TRUE;
+	}
+
+      if (!need_layout)
+	break;
+
+      lang_reset_memory_regions ();
+
+      /* Resize the sections.  */
+      lang_size_sections (NULL, TRUE);
+
+      /* Redo special stuff.  */
+      ldemul_after_allocation ();
+
+      /* Do the assignments again.  */
+      lang_do_assignments ();
+
+      need_layout = FALSE;
+    }
+}
+EOF

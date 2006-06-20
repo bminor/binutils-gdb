@@ -1440,19 +1440,9 @@ i370_noop (void)
   return 1;
 }
 
-/* We need to define these at least as no-ops to link glibc ld.so.  */
-
-#define elf_backend_add_symbol_hook \
-  (bfd_boolean (*) \
-     (bfd *, struct bfd_link_info *, Elf_Internal_Sym *, \
-      const char **, flagword *, asection **, bfd_vma *)) i370_noop
 #define elf_backend_finish_dynamic_symbol \
   (bfd_boolean (*) \
      (bfd *, struct bfd_link_info *, struct elf_link_hash_entry *, \
       Elf_Internal_Sym *)) i370_noop
-#define elf_backend_additional_program_headers \
-  (int (*) (bfd *, struct bfd_link_info *)) i370_noop
-#define elf_backend_modify_segment_map \
-  (bfd_boolean (*) (bfd *, struct bfd_link_info *)) i370_noop
 
 #include "elf32-target.h"

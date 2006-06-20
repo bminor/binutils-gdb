@@ -5568,13 +5568,13 @@ lang_process (void)
 
   lang_do_assignments ();
 
+  ldemul_finish ();
+
   /* Make sure that the section addresses make sense.  */
   if (! link_info.relocatable
       && command_line.check_section_addresses)
     lang_check_section_addresses ();
 
-  /* Final stuffs.  */
-  ldemul_finish ();
   lang_end ();
 }
 

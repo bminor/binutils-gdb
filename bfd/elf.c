@@ -3560,6 +3560,89 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
   return TRUE;
 }
 
+/* Make an initial estimate of the size of the program header.  If we
+   get the number wrong here, we'll redo section placement.  */
+
+static bfd_size_type
+get_program_header_size (bfd *abfd, struct bfd_link_info *info)
+{
+  size_t segs;
+  asection *s;
+  const struct elf_backend_data *bed;
+
+  /* Assume we will need exactly two PT_LOAD segments: one for text
+     and one for data.  */
+  segs = 2;
+
+  s = bfd_get_section_by_name (abfd, ".interp");
+  if (s != NULL && (s->flags & SEC_LOAD) != 0)
+    {
+      /* If we have a loadable interpreter section, we need a
+	 PT_INTERP segment.  In this case, assume we also need a
+	 PT_PHDR segment, although that may not be true for all
+	 targets.  */
+      segs += 2;
+    }
+
+  if (bfd_get_section_by_name (abfd, ".dynamic") != NULL)
+    {
+      /* We need a PT_DYNAMIC segment.  */
+      ++segs;
+    }
+
+  if (elf_tdata (abfd)->eh_frame_hdr)
+    {
+      /* We need a PT_GNU_EH_FRAME segment.  */
+      ++segs;
+    }
+
+  if (elf_tdata (abfd)->stack_flags)
+    {
+      /* We need a PT_GNU_STACK segment.  */
+      ++segs;
+    }
+
+  if (elf_tdata (abfd)->relro)
+    {
+      /* We need a PT_GNU_RELRO segment.  */
+      ++segs;
+    }
+
+  for (s = abfd->sections; s != NULL; s = s->next)
+    {
+      if ((s->flags & SEC_LOAD) != 0
+	  && strncmp (s->name, ".note", 5) == 0)
+	{
+	  /* We need a PT_NOTE segment.  */
+	  ++segs;
+	}
+    }
+
+  for (s = abfd->sections; s != NULL; s = s->next)
+    {
+      if (s->flags & SEC_THREAD_LOCAL)
+	{
+	  /* We need a PT_TLS segment.  */
+	  ++segs;
+	  break;
+	}
+    }
+
+  /* Let the backend count up any program headers it might need.  */
+  bed = get_elf_backend_data (abfd);
+  if (bed->elf_backend_additional_program_headers)
+    {
+      int a;
+
+      a = (*bed->elf_backend_additional_program_headers) (abfd, info);
+      if (a == -1)
+	abort ();
+      segs += a;
+    }
+
+  return segs * bed->s->sizeof_phdr;
+}
+
 /* Create a mapping from a set of sections to a program segment.  */
 
 static struct elf_segment_map *
@@ -3614,359 +3697,413 @@ _bfd_elf_make_dynamic_segment (bfd *abfd, asection *dynsec)
   return m;
 }
 
-/* Set up a mapping from BFD sections to program segments.  */
+/* Possibly add or remove segments from the segment map.  */
 
 static bfd_boolean
-map_sections_to_segments (bfd *abfd)
+elf_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
 {
-  asection **sections = NULL;
-  asection *s;
-  unsigned int i;
-  unsigned int count;
-  struct elf_segment_map *mfirst;
-  struct elf_segment_map **pm;
   struct elf_segment_map *m;
-  asection *last_hdr;
-  bfd_vma last_size;
-  unsigned int phdr_index;
-  bfd_vma maxpagesize;
-  asection **hdrpp;
-  bfd_boolean phdr_in_segment = TRUE;
-  bfd_boolean writable;
-  int tls_count = 0;
-  asection *first_tls = NULL;
-  asection *dynsec, *eh_frame_hdr;
-  bfd_size_type amt;
+  const struct elf_backend_data *bed;
 
-  if (elf_tdata (abfd)->segment_map != NULL)
-    return TRUE;
-
-  if (bfd_count_sections (abfd) == 0)
-    return TRUE;
-
-  /* Select the allocated sections, and sort them.  */
-
-  sections = bfd_malloc2 (bfd_count_sections (abfd), sizeof (asection *));
-  if (sections == NULL)
-    goto error_return;
-
-  i = 0;
-  for (s = abfd->sections; s != NULL; s = s->next)
+  /* The placement algorithm assumes that non allocated sections are
+     not in PT_LOAD segments.  We ensure this here by removing such
+     sections from the segment map.  We also remove excluded
+     sections.  */
+  for (m = elf_tdata (abfd)->segment_map;
+       m != NULL;
+       m = m->next)
     {
-      if ((s->flags & SEC_ALLOC) != 0)
+      unsigned int i, new_count;
+
+      new_count = 0;
+      for (i = 0; i < m->count; i ++)
 	{
-	  sections[i] = s;
-	  ++i;
+	  if ((m->sections[i]->flags & SEC_EXCLUDE) == 0
+	      && ((m->sections[i]->flags & SEC_ALLOC) != 0
+		  || m->p_type != PT_LOAD))
+	    {
+	      if (i != new_count)
+		m->sections[new_count] = m->sections[i];
+
+	      new_count ++;
+	    }
 	}
-    }
-  BFD_ASSERT (i <= bfd_count_sections (abfd));
-  count = i;
 
-  qsort (sections, (size_t) count, sizeof (asection *), elf_sort_sections);
-
-  /* Build the mapping.  */
-
-  mfirst = NULL;
-  pm = &mfirst;
-
-  /* If we have a .interp section, then create a PT_PHDR segment for
-     the program headers and a PT_INTERP segment for the .interp
-     section.  */
-  s = bfd_get_section_by_name (abfd, ".interp");
-  if (s != NULL && (s->flags & SEC_LOAD) != 0)
-    {
-      amt = sizeof (struct elf_segment_map);
-      m = bfd_zalloc (abfd, amt);
-      if (m == NULL)
-	goto error_return;
-      m->next = NULL;
-      m->p_type = PT_PHDR;
-      /* FIXME: UnixWare and Solaris set PF_X, Irix 5 does not.  */
-      m->p_flags = PF_R | PF_X;
-      m->p_flags_valid = 1;
-      m->includes_phdrs = 1;
-
-      *pm = m;
-      pm = &m->next;
-
-      amt = sizeof (struct elf_segment_map);
-      m = bfd_zalloc (abfd, amt);
-      if (m == NULL)
-	goto error_return;
-      m->next = NULL;
-      m->p_type = PT_INTERP;
-      m->count = 1;
-      m->sections[0] = s;
-
-      *pm = m;
-      pm = &m->next;
+      if (new_count != m->count)
+	m->count = new_count;
     }
 
-  /* Look through the sections.  We put sections in the same program
-     segment when the start of the second section can be placed within
-     a few bytes of the end of the first section.  */
-  last_hdr = NULL;
-  last_size = 0;
-  phdr_index = 0;
-  maxpagesize = get_elf_backend_data (abfd)->maxpagesize;
-  writable = FALSE;
-  dynsec = bfd_get_section_by_name (abfd, ".dynamic");
-  if (dynsec != NULL
-      && (dynsec->flags & SEC_LOAD) == 0)
-    dynsec = NULL;
-
-  /* Deal with -Ttext or something similar such that the first section
-     is not adjacent to the program headers.  This is an
-     approximation, since at this point we don't know exactly how many
-     program headers we will need.  */
-  if (count > 0)
+  /* Yes, we call elf_backend_modify_segment_map at least two times
+     for the linker.  The final time the link_orders are available.  */
+  bed = get_elf_backend_data (abfd);
+  if (bed->elf_backend_modify_segment_map != NULL)
     {
-      bfd_size_type phdr_size;
-
-      phdr_size = elf_tdata (abfd)->program_header_size;
-      if (phdr_size == 0)
-	phdr_size = get_elf_backend_data (abfd)->s->sizeof_phdr;
-      if ((abfd->flags & D_PAGED) == 0
-	  || sections[0]->lma < phdr_size
-	  || sections[0]->lma % maxpagesize < phdr_size % maxpagesize)
-	phdr_in_segment = FALSE;
+      if (! (*bed->elf_backend_modify_segment_map) (abfd, info))
+	return FALSE;
     }
 
-  for (i = 0, hdrpp = sections; i < count; i++, hdrpp++)
+  return TRUE;
+}
+
+/* Set up a mapping from BFD sections to program segments.  */
+
+bfd_boolean
+_bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
+{
+  unsigned int count;
+  struct elf_segment_map *m;
+  asection **sections = NULL;
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+
+  if (elf_tdata (abfd)->segment_map == NULL
+      && bfd_count_sections (abfd) != 0)
     {
-      asection *hdr;
-      bfd_boolean new_segment;
+      asection *s;
+      unsigned int i;
+      struct elf_segment_map *mfirst;
+      struct elf_segment_map **pm;
+      asection *last_hdr;
+      bfd_vma last_size;
+      unsigned int phdr_index;
+      bfd_vma maxpagesize;
+      asection **hdrpp;
+      bfd_boolean phdr_in_segment = TRUE;
+      bfd_boolean writable;
+      int tls_count = 0;
+      asection *first_tls = NULL;
+      asection *dynsec, *eh_frame_hdr;
+      bfd_size_type amt;
 
-      hdr = *hdrpp;
+      /* Select the allocated sections, and sort them.  */
 
-      /* See if this section and the last one will fit in the same
-         segment.  */
-
-      if (last_hdr == NULL)
-	{
-	  /* If we don't have a segment yet, then we don't need a new
-	     one (we build the last one after this loop).  */
-	  new_segment = FALSE;
-	}
-      else if (last_hdr->lma - last_hdr->vma != hdr->lma - hdr->vma)
-	{
-	  /* If this section has a different relation between the
-             virtual address and the load address, then we need a new
-             segment.  */
-	  new_segment = TRUE;
-	}
-      else if (BFD_ALIGN (last_hdr->lma + last_size, maxpagesize)
-	       < BFD_ALIGN (hdr->lma, maxpagesize))
-	{
-	  /* If putting this section in this segment would force us to
-             skip a page in the segment, then we need a new segment.  */
-	  new_segment = TRUE;
-	}
-      else if ((last_hdr->flags & (SEC_LOAD | SEC_THREAD_LOCAL)) == 0
-	       && (hdr->flags & (SEC_LOAD | SEC_THREAD_LOCAL)) != 0)
-	{
-	  /* We don't want to put a loadable section after a
-             nonloadable section in the same segment.
-             Consider .tbss sections as loadable for this purpose.  */
-	  new_segment = TRUE;
-	}
-      else if ((abfd->flags & D_PAGED) == 0)
-	{
-	  /* If the file is not demand paged, which means that we
-             don't require the sections to be correctly aligned in the
-             file, then there is no other reason for a new segment.  */
-	  new_segment = FALSE;
-	}
-      else if (! writable
-	       && (hdr->flags & SEC_READONLY) == 0
-	       && (((last_hdr->lma + last_size - 1)
-		    & ~(maxpagesize - 1))
-		   != (hdr->lma & ~(maxpagesize - 1))))
-	{
-	  /* We don't want to put a writable section in a read only
-             segment, unless they are on the same page in memory
-             anyhow.  We already know that the last section does not
-             bring us past the current section on the page, so the
-             only case in which the new section is not on the same
-             page as the previous section is when the previous section
-             ends precisely on a page boundary.  */
-	  new_segment = TRUE;
-	}
-      else
-	{
-	  /* Otherwise, we can use the same segment.  */
-	  new_segment = FALSE;
-	}
-
-      if (! new_segment)
-	{
-	  if ((hdr->flags & SEC_READONLY) == 0)
-	    writable = TRUE;
-	  last_hdr = hdr;
-	  /* .tbss sections effectively have zero size.  */
-	  if ((hdr->flags & (SEC_THREAD_LOCAL | SEC_LOAD)) != SEC_THREAD_LOCAL)
-	    last_size = hdr->size;
-	  else
-	    last_size = 0;
-	  continue;
-	}
-
-      /* We need a new program segment.  We must create a new program
-         header holding all the sections from phdr_index until hdr.  */
-
-      m = make_mapping (abfd, sections, phdr_index, i, phdr_in_segment);
-      if (m == NULL)
+      sections = bfd_malloc2 (bfd_count_sections (abfd), sizeof (asection *));
+      if (sections == NULL)
 	goto error_return;
 
-      *pm = m;
-      pm = &m->next;
+      i = 0;
+      for (s = abfd->sections; s != NULL; s = s->next)
+	{
+	  if ((s->flags & SEC_ALLOC) != 0)
+	    {
+	      sections[i] = s;
+	      ++i;
+	    }
+	}
+      BFD_ASSERT (i <= bfd_count_sections (abfd));
+      count = i;
 
-      if ((hdr->flags & SEC_READONLY) == 0)
-	writable = TRUE;
-      else
-	writable = FALSE;
+      qsort (sections, (size_t) count, sizeof (asection *), elf_sort_sections);
 
-      last_hdr = hdr;
-      /* .tbss sections effectively have zero size.  */
-      if ((hdr->flags & (SEC_THREAD_LOCAL | SEC_LOAD)) != SEC_THREAD_LOCAL)
-	last_size = hdr->size;
-      else
-	last_size = 0;
-      phdr_index = i;
-      phdr_in_segment = FALSE;
-    }
+      /* Build the mapping.  */
 
-  /* Create a final PT_LOAD program segment.  */
-  if (last_hdr != NULL)
-    {
-      m = make_mapping (abfd, sections, phdr_index, i, phdr_in_segment);
-      if (m == NULL)
-	goto error_return;
+      mfirst = NULL;
+      pm = &mfirst;
 
-      *pm = m;
-      pm = &m->next;
-    }
-
-  /* If there is a .dynamic section, throw in a PT_DYNAMIC segment.  */
-  if (dynsec != NULL)
-    {
-      m = _bfd_elf_make_dynamic_segment (abfd, dynsec);
-      if (m == NULL)
-	goto error_return;
-      *pm = m;
-      pm = &m->next;
-    }
-
-  /* For each loadable .note section, add a PT_NOTE segment.  We don't
-     use bfd_get_section_by_name, because if we link together
-     nonloadable .note sections and loadable .note sections, we will
-     generate two .note sections in the output file.  FIXME: Using
-     names for section types is bogus anyhow.  */
-  for (s = abfd->sections; s != NULL; s = s->next)
-    {
-      if ((s->flags & SEC_LOAD) != 0
-	  && strncmp (s->name, ".note", 5) == 0)
+      /* If we have a .interp section, then create a PT_PHDR segment for
+	 the program headers and a PT_INTERP segment for the .interp
+	 section.  */
+      s = bfd_get_section_by_name (abfd, ".interp");
+      if (s != NULL && (s->flags & SEC_LOAD) != 0)
 	{
 	  amt = sizeof (struct elf_segment_map);
 	  m = bfd_zalloc (abfd, amt);
 	  if (m == NULL)
 	    goto error_return;
 	  m->next = NULL;
-	  m->p_type = PT_NOTE;
+	  m->p_type = PT_PHDR;
+	  /* FIXME: UnixWare and Solaris set PF_X, Irix 5 does not.  */
+	  m->p_flags = PF_R | PF_X;
+	  m->p_flags_valid = 1;
+	  m->includes_phdrs = 1;
+
+	  *pm = m;
+	  pm = &m->next;
+
+	  amt = sizeof (struct elf_segment_map);
+	  m = bfd_zalloc (abfd, amt);
+	  if (m == NULL)
+	    goto error_return;
+	  m->next = NULL;
+	  m->p_type = PT_INTERP;
 	  m->count = 1;
 	  m->sections[0] = s;
 
 	  *pm = m;
 	  pm = &m->next;
 	}
-      if (s->flags & SEC_THREAD_LOCAL)
+
+      /* Look through the sections.  We put sections in the same program
+	 segment when the start of the second section can be placed within
+	 a few bytes of the end of the first section.  */
+      last_hdr = NULL;
+      last_size = 0;
+      phdr_index = 0;
+      maxpagesize = bed->maxpagesize;
+      writable = FALSE;
+      dynsec = bfd_get_section_by_name (abfd, ".dynamic");
+      if (dynsec != NULL
+	  && (dynsec->flags & SEC_LOAD) == 0)
+	dynsec = NULL;
+
+      /* Deal with -Ttext or something similar such that the first section
+	 is not adjacent to the program headers.  This is an
+	 approximation, since at this point we don't know exactly how many
+	 program headers we will need.  */
+      if (count > 0)
 	{
-	  if (! tls_count)
-	    first_tls = s;
-	  tls_count++;
+	  bfd_size_type phdr_size = elf_tdata (abfd)->program_header_size;
+
+	  if (phdr_size == 0)
+	    phdr_size = get_program_header_size (abfd, info);
+	  if ((abfd->flags & D_PAGED) == 0
+	      || sections[0]->lma < phdr_size
+	      || sections[0]->lma % maxpagesize < phdr_size % maxpagesize)
+	    phdr_in_segment = FALSE;
 	}
-    }
 
-  /* If there are any SHF_TLS output sections, add PT_TLS segment.  */
-  if (tls_count > 0)
-    {
-      int i;
-
-      amt = sizeof (struct elf_segment_map);
-      amt += (tls_count - 1) * sizeof (asection *);
-      m = bfd_zalloc (abfd, amt);
-      if (m == NULL)
-	goto error_return;
-      m->next = NULL;
-      m->p_type = PT_TLS;
-      m->count = tls_count;
-      /* Mandated PF_R.  */
-      m->p_flags = PF_R;
-      m->p_flags_valid = 1;
-      for (i = 0; i < tls_count; ++i)
+      for (i = 0, hdrpp = sections; i < count; i++, hdrpp++)
 	{
-	  BFD_ASSERT (first_tls->flags & SEC_THREAD_LOCAL);
-	  m->sections[i] = first_tls;
-	  first_tls = first_tls->next;
+	  asection *hdr;
+	  bfd_boolean new_segment;
+
+	  hdr = *hdrpp;
+
+	  /* See if this section and the last one will fit in the same
+	     segment.  */
+
+	  if (last_hdr == NULL)
+	    {
+	      /* If we don't have a segment yet, then we don't need a new
+		 one (we build the last one after this loop).  */
+	      new_segment = FALSE;
+	    }
+	  else if (last_hdr->lma - last_hdr->vma != hdr->lma - hdr->vma)
+	    {
+	      /* If this section has a different relation between the
+		 virtual address and the load address, then we need a new
+		 segment.  */
+	      new_segment = TRUE;
+	    }
+	  else if (BFD_ALIGN (last_hdr->lma + last_size, maxpagesize)
+		   < BFD_ALIGN (hdr->lma, maxpagesize))
+	    {
+	      /* If putting this section in this segment would force us to
+		 skip a page in the segment, then we need a new segment.  */
+	      new_segment = TRUE;
+	    }
+	  else if ((last_hdr->flags & (SEC_LOAD | SEC_THREAD_LOCAL)) == 0
+		   && (hdr->flags & (SEC_LOAD | SEC_THREAD_LOCAL)) != 0)
+	    {
+	      /* We don't want to put a loadable section after a
+		 nonloadable section in the same segment.
+		 Consider .tbss sections as loadable for this purpose.  */
+	      new_segment = TRUE;
+	    }
+	  else if ((abfd->flags & D_PAGED) == 0)
+	    {
+	      /* If the file is not demand paged, which means that we
+		 don't require the sections to be correctly aligned in the
+		 file, then there is no other reason for a new segment.  */
+	      new_segment = FALSE;
+	    }
+	  else if (! writable
+		   && (hdr->flags & SEC_READONLY) == 0
+		   && (((last_hdr->lma + last_size - 1)
+			& ~(maxpagesize - 1))
+		       != (hdr->lma & ~(maxpagesize - 1))))
+	    {
+	      /* We don't want to put a writable section in a read only
+		 segment, unless they are on the same page in memory
+		 anyhow.  We already know that the last section does not
+		 bring us past the current section on the page, so the
+		 only case in which the new section is not on the same
+		 page as the previous section is when the previous section
+		 ends precisely on a page boundary.  */
+	      new_segment = TRUE;
+	    }
+	  else
+	    {
+	      /* Otherwise, we can use the same segment.  */
+	      new_segment = FALSE;
+	    }
+
+	  if (! new_segment)
+	    {
+	      if ((hdr->flags & SEC_READONLY) == 0)
+		writable = TRUE;
+	      last_hdr = hdr;
+	      /* .tbss sections effectively have zero size.  */
+	      if ((hdr->flags & (SEC_THREAD_LOCAL | SEC_LOAD))
+		  != SEC_THREAD_LOCAL)
+		last_size = hdr->size;
+	      else
+		last_size = 0;
+	      continue;
+	    }
+
+	  /* We need a new program segment.  We must create a new program
+	     header holding all the sections from phdr_index until hdr.  */
+
+	  m = make_mapping (abfd, sections, phdr_index, i, phdr_in_segment);
+	  if (m == NULL)
+	    goto error_return;
+
+	  *pm = m;
+	  pm = &m->next;
+
+	  if ((hdr->flags & SEC_READONLY) == 0)
+	    writable = TRUE;
+	  else
+	    writable = FALSE;
+
+	  last_hdr = hdr;
+	  /* .tbss sections effectively have zero size.  */
+	  if ((hdr->flags & (SEC_THREAD_LOCAL | SEC_LOAD)) != SEC_THREAD_LOCAL)
+	    last_size = hdr->size;
+	  else
+	    last_size = 0;
+	  phdr_index = i;
+	  phdr_in_segment = FALSE;
 	}
 
-      *pm = m;
-      pm = &m->next;
+      /* Create a final PT_LOAD program segment.  */
+      if (last_hdr != NULL)
+	{
+	  m = make_mapping (abfd, sections, phdr_index, i, phdr_in_segment);
+	  if (m == NULL)
+	    goto error_return;
+
+	  *pm = m;
+	  pm = &m->next;
+	}
+
+      /* If there is a .dynamic section, throw in a PT_DYNAMIC segment.  */
+      if (dynsec != NULL)
+	{
+	  m = _bfd_elf_make_dynamic_segment (abfd, dynsec);
+	  if (m == NULL)
+	    goto error_return;
+	  *pm = m;
+	  pm = &m->next;
+	}
+
+      /* For each loadable .note section, add a PT_NOTE segment.  We don't
+	 use bfd_get_section_by_name, because if we link together
+	 nonloadable .note sections and loadable .note sections, we will
+	 generate two .note sections in the output file.  FIXME: Using
+	 names for section types is bogus anyhow.  */
+      for (s = abfd->sections; s != NULL; s = s->next)
+	{
+	  if ((s->flags & SEC_LOAD) != 0
+	      && strncmp (s->name, ".note", 5) == 0)
+	    {
+	      amt = sizeof (struct elf_segment_map);
+	      m = bfd_zalloc (abfd, amt);
+	      if (m == NULL)
+		goto error_return;
+	      m->next = NULL;
+	      m->p_type = PT_NOTE;
+	      m->count = 1;
+	      m->sections[0] = s;
+
+	      *pm = m;
+	      pm = &m->next;
+	    }
+	  if (s->flags & SEC_THREAD_LOCAL)
+	    {
+	      if (! tls_count)
+		first_tls = s;
+	      tls_count++;
+	    }
+	}
+
+      /* If there are any SHF_TLS output sections, add PT_TLS segment.  */
+      if (tls_count > 0)
+	{
+	  int i;
+
+	  amt = sizeof (struct elf_segment_map);
+	  amt += (tls_count - 1) * sizeof (asection *);
+	  m = bfd_zalloc (abfd, amt);
+	  if (m == NULL)
+	    goto error_return;
+	  m->next = NULL;
+	  m->p_type = PT_TLS;
+	  m->count = tls_count;
+	  /* Mandated PF_R.  */
+	  m->p_flags = PF_R;
+	  m->p_flags_valid = 1;
+	  for (i = 0; i < tls_count; ++i)
+	    {
+	      BFD_ASSERT (first_tls->flags & SEC_THREAD_LOCAL);
+	      m->sections[i] = first_tls;
+	      first_tls = first_tls->next;
+	    }
+
+	  *pm = m;
+	  pm = &m->next;
+	}
+
+      /* If there is a .eh_frame_hdr section, throw in a PT_GNU_EH_FRAME
+	 segment.  */
+      eh_frame_hdr = elf_tdata (abfd)->eh_frame_hdr;
+      if (eh_frame_hdr != NULL
+	  && (eh_frame_hdr->output_section->flags & SEC_LOAD) != 0)
+	{
+	  amt = sizeof (struct elf_segment_map);
+	  m = bfd_zalloc (abfd, amt);
+	  if (m == NULL)
+	    goto error_return;
+	  m->next = NULL;
+	  m->p_type = PT_GNU_EH_FRAME;
+	  m->count = 1;
+	  m->sections[0] = eh_frame_hdr->output_section;
+
+	  *pm = m;
+	  pm = &m->next;
+	}
+
+      if (elf_tdata (abfd)->stack_flags)
+	{
+	  amt = sizeof (struct elf_segment_map);
+	  m = bfd_zalloc (abfd, amt);
+	  if (m == NULL)
+	    goto error_return;
+	  m->next = NULL;
+	  m->p_type = PT_GNU_STACK;
+	  m->p_flags = elf_tdata (abfd)->stack_flags;
+	  m->p_flags_valid = 1;
+
+	  *pm = m;
+	  pm = &m->next;
+	}
+
+      if (elf_tdata (abfd)->relro)
+	{
+	  amt = sizeof (struct elf_segment_map);
+	  m = bfd_zalloc (abfd, amt);
+	  if (m == NULL)
+	    goto error_return;
+	  m->next = NULL;
+	  m->p_type = PT_GNU_RELRO;
+	  m->p_flags = PF_R;
+	  m->p_flags_valid = 1;
+
+	  *pm = m;
+	  pm = &m->next;
+	}
+
+      free (sections);
+      elf_tdata (abfd)->segment_map = mfirst;
     }
 
-  /* If there is a .eh_frame_hdr section, throw in a PT_GNU_EH_FRAME
-     segment.  */
-  eh_frame_hdr = elf_tdata (abfd)->eh_frame_hdr;
-  if (eh_frame_hdr != NULL
-      && (eh_frame_hdr->output_section->flags & SEC_LOAD) != 0)
-    {
-      amt = sizeof (struct elf_segment_map);
-      m = bfd_zalloc (abfd, amt);
-      if (m == NULL)
-	goto error_return;
-      m->next = NULL;
-      m->p_type = PT_GNU_EH_FRAME;
-      m->count = 1;
-      m->sections[0] = eh_frame_hdr->output_section;
+  if (!elf_modify_segment_map (abfd, info))
+    return FALSE;
 
-      *pm = m;
-      pm = &m->next;
-    }
+  for (count = 0, m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
+    ++count;
+  elf_tdata (abfd)->program_header_size = count * bed->s->sizeof_phdr;
 
-  if (elf_tdata (abfd)->stack_flags)
-    {
-      amt = sizeof (struct elf_segment_map);
-      m = bfd_zalloc (abfd, amt);
-      if (m == NULL)
-	goto error_return;
-      m->next = NULL;
-      m->p_type = PT_GNU_STACK;
-      m->p_flags = elf_tdata (abfd)->stack_flags;
-      m->p_flags_valid = 1;
-
-      *pm = m;
-      pm = &m->next;
-    }
-
-  if (elf_tdata (abfd)->relro)
-    {
-      amt = sizeof (struct elf_segment_map);
-      m = bfd_zalloc (abfd, amt);
-      if (m == NULL)
-	goto error_return;
-      m->next = NULL;
-      m->p_type = PT_GNU_RELRO;
-      m->p_flags = PF_R;
-      m->p_flags_valid = 1;
-
-      *pm = m;
-      pm = &m->next;
-    }
-
-  free (sections);
-  sections = NULL;
-
-  elf_tdata (abfd)->segment_map = mfirst;
   return TRUE;
 
  error_return:
@@ -4062,42 +4199,6 @@ vma_page_aligned_bias (bfd_vma vma, ufile_ptr off, bfd_vma maxpagesize)
   return ((vma - off) % maxpagesize);
 }
 
-static void
-print_segment_map (bfd *abfd)
-{
-  struct elf_segment_map *m;
-  unsigned int i, j;
-
-  fprintf (stderr, _(" Section to Segment mapping:\n"));
-  fprintf (stderr, _("  Segment              Sections...\n"));
-
-  for (i= 0, m = elf_tdata (abfd)->segment_map;
-       m != NULL;
-       i++, m = m->next)
-    {
-      const char *pt = get_segment_type (m->p_type);
-      char buf[32];
-
-      if (pt == NULL)
-	{
-	  if (m->p_type >= PT_LOPROC && m->p_type <= PT_HIPROC)
-	    sprintf (buf, "LOPROC+%7.7x",
-		     (unsigned int) (m->p_type - PT_LOPROC));
-	  else if (m->p_type >= PT_LOOS && m->p_type <= PT_HIOS)
-	    sprintf (buf, "LOOS+%7.7x",
-		     (unsigned int) (m->p_type - PT_LOOS));
-	  else
-	    snprintf (buf, sizeof (buf), "%8.8x",
-		      (unsigned int) m->p_type);
-	  pt = buf;
-	}
-      fprintf (stderr, "  %2.2d: %14.14s:  ", i, pt);
-      for (j = 0; j < m->count; j++)
-	fprintf (stderr, "%s ", m->sections [j]->name);
-      putc ('\n',stderr);
-    }
-}
-
 /* Assign file positions to the sections based on the mapping from
    sections to segments.  This function also sets up some fields in
    the file header.  */
@@ -4112,84 +4213,30 @@ assign_file_positions_for_load_sections (bfd *abfd,
   Elf_Internal_Phdr *p;
   file_ptr off, voff;
   bfd_size_type maxpagesize;
-  unsigned int count;
   unsigned int alloc;
   unsigned int i;
 
-  if (elf_tdata (abfd)->segment_map == NULL)
-    {
-      if (! map_sections_to_segments (abfd))
-	return FALSE;
-    }
-  else
-    {
-      /* The placement algorithm assumes that non allocated sections are
-	 not in PT_LOAD segments.  We ensure this here by removing such
-	 sections from the segment map.  We also remove excluded
-	 sections.  */
-      for (m = elf_tdata (abfd)->segment_map;
-	   m != NULL;
-	   m = m->next)
-	{
-	  unsigned int new_count;
+  if (!elf_modify_segment_map (abfd, link_info))
+    return FALSE;
 
-	  new_count = 0;
-	  for (i = 0; i < m->count; i ++)
-	    {
-	      if ((m->sections[i]->flags & SEC_EXCLUDE) == 0
-		  && ((m->sections[i]->flags & SEC_ALLOC) != 0
-		      || m->p_type != PT_LOAD))
-		{
-		  if (i != new_count)
-		    m->sections[new_count] = m->sections[i];
-
-		  new_count ++;
-		}
-	    }
-
-	  if (new_count != m->count)
-	    m->count = new_count;
-	}
-    }
-
-  if (bed->elf_backend_modify_segment_map)
-    {
-      if (! (*bed->elf_backend_modify_segment_map) (abfd, link_info))
-	return FALSE;
-    }
-
-  count = 0;
+  alloc = 0;
   for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
-    ++count;
+    ++alloc;
 
   elf_elfheader (abfd)->e_phoff = bed->s->sizeof_ehdr;
   elf_elfheader (abfd)->e_phentsize = bed->s->sizeof_phdr;
-  elf_elfheader (abfd)->e_phnum = count;
+  elf_elfheader (abfd)->e_phnum = alloc;
 
-  if (count == 0)
-    {
-      elf_tdata (abfd)->next_file_pos = bed->s->sizeof_ehdr;
-      return TRUE;
-    }
-
-  /* If we already counted the number of program segments, make sure
-     that we allocated enough space.  This happens when SIZEOF_HEADERS
-     is used in a linker script.  */
-  alloc = elf_tdata (abfd)->program_header_size / bed->s->sizeof_phdr;
-  if (alloc != 0 && count > alloc)
-    {
-      ((*_bfd_error_handler)
-       (_("%B: Not enough room for program headers (allocated %u, need %u)"),
-	abfd, alloc, count));
-      print_segment_map (abfd);
-      bfd_set_error (bfd_error_bad_value);
-      return FALSE;
-    }
+  if (elf_tdata (abfd)->program_header_size == 0)
+    elf_tdata (abfd)->program_header_size = alloc * bed->s->sizeof_phdr;
+  else
+    BFD_ASSERT (elf_tdata (abfd)->program_header_size
+		== alloc * bed->s->sizeof_phdr);
 
   if (alloc == 0)
     {
-      alloc = count;
-      elf_tdata (abfd)->program_header_size = alloc * bed->s->sizeof_phdr;
+      elf_tdata (abfd)->next_file_pos = bed->s->sizeof_ehdr;
+      return TRUE;
     }
 
   phdrs = bfd_alloc2 (abfd, alloc, sizeof (Elf_Internal_Phdr));
@@ -4527,13 +4574,6 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	}
     }
 
-  /* Clear out any program headers we allocated but did not use.  */
-  for (; count < alloc; count++, p++)
-    {
-      memset (p, 0, sizeof *p);
-      p->p_type = PT_NULL;
-    }
-
   elf_tdata (abfd)->next_file_pos = off;
   return TRUE;
 }
@@ -4707,112 +4747,6 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
   elf_tdata (abfd)->next_file_pos = off;
 
   return TRUE;
-}
-
-/* Get the size of the program header.
-
-   If this is called by the linker before any of the section VMA's are set, it
-   can't calculate the correct value for a strange memory layout.  This only
-   happens when SIZEOF_HEADERS is used in a linker script.  In this case,
-   SORTED_HDRS is NULL and we assume the normal scenario of one text and one
-   data segment (exclusive of .interp and .dynamic).
-
-   ??? User written scripts must either not use SIZEOF_HEADERS, or assume there
-   will be two segments.  */
-
-static bfd_size_type
-get_program_header_size (bfd *abfd, struct bfd_link_info *info)
-{
-  size_t segs;
-  asection *s;
-  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-
-  /* We can't return a different result each time we're called.  */
-  if (elf_tdata (abfd)->program_header_size != 0)
-    return elf_tdata (abfd)->program_header_size;
-
-  if (elf_tdata (abfd)->segment_map != NULL)
-    {
-      struct elf_segment_map *m;
-
-      segs = 0;
-      for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
-	++segs;
-      elf_tdata (abfd)->program_header_size = segs * bed->s->sizeof_phdr;
-      return elf_tdata (abfd)->program_header_size;
-    }
-
-  /* Assume we will need exactly two PT_LOAD segments: one for text
-     and one for data.  */
-  segs = 2;
-
-  s = bfd_get_section_by_name (abfd, ".interp");
-  if (s != NULL && (s->flags & SEC_LOAD) != 0)
-    {
-      /* If we have a loadable interpreter section, we need a
-	 PT_INTERP segment.  In this case, assume we also need a
-	 PT_PHDR segment, although that may not be true for all
-	 targets.  */
-      segs += 2;
-    }
-
-  if (bfd_get_section_by_name (abfd, ".dynamic") != NULL)
-    {
-      /* We need a PT_DYNAMIC segment.  */
-      ++segs;
-    }
-
-  if (elf_tdata (abfd)->eh_frame_hdr)
-    {
-      /* We need a PT_GNU_EH_FRAME segment.  */
-      ++segs;
-    }
-
-  if (elf_tdata (abfd)->stack_flags)
-    {
-      /* We need a PT_GNU_STACK segment.  */
-      ++segs;
-    }
-
-  if (elf_tdata (abfd)->relro)
-    {
-      /* We need a PT_GNU_RELRO segment.  */
-      ++segs;
-    }
-
-  for (s = abfd->sections; s != NULL; s = s->next)
-    {
-      if ((s->flags & SEC_LOAD) != 0
-	  && strncmp (s->name, ".note", 5) == 0)
-	{
-	  /* We need a PT_NOTE segment.  */
-	  ++segs;
-	}
-    }
-
-  for (s = abfd->sections; s != NULL; s = s->next)
-    {
-      if (s->flags & SEC_THREAD_LOCAL)
-	{
-	  /* We need a PT_TLS segment.  */
-	  ++segs;
-	  break;
-	}
-    }
-
-  /* Let the backend count up any program headers it might need.  */
-  if (bed->elf_backend_additional_program_headers)
-    {
-      int a;
-
-      a = (*bed->elf_backend_additional_program_headers) (abfd, info);
-      if (a == -1)
-	abort ();
-      segs += a;
-    }
-
-  elf_tdata (abfd)->program_header_size = segs * bed->s->sizeof_phdr;
-  return elf_tdata (abfd)->program_header_size;
 }
 
 /* Work out the file positions of all the sections.  This is called by
@@ -7118,11 +7052,24 @@ _bfd_elf_find_inliner_info (bfd *abfd,
 int
 _bfd_elf_sizeof_headers (bfd *abfd, struct bfd_link_info *info)
 {
-  int ret;
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  int ret = bed->s->sizeof_ehdr;
 
-  ret = get_elf_backend_data (abfd)->s->sizeof_ehdr;
   if (!info->relocatable)
-    ret += get_program_header_size (abfd, info);
+    {
+      struct elf_segment_map *m;
+      bfd_size_type phdr_size = 0;
+
+      for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
+	phdr_size += bed->s->sizeof_phdr;
+
+      if (phdr_size == 0)
+	phdr_size = get_program_header_size (abfd, info);
+
+      elf_tdata (abfd)->program_header_size = phdr_size;
+      ret += phdr_size;
+    }
+
   return ret;
 }
 

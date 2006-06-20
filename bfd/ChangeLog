@@ -1,3 +1,33 @@
+2006-06-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h: Formatting.
+	(_bfd_elf_map_sections_to_segments): Declare.
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame_hdr): Don't
+	clear program_header_size.
+	* elf.c (get_program_header_size): Move.  Don't use or set saved
+	program_header_size here.
+	(elf_modify_segment_map): New function.  Split out from..
+	(assign_file_positions_for_load_sections): ..here.  Assert
+	header size is correct.  Remove dead code.
+	(_bfd_elf_map_sections_to_segments): Rename from
+	map_sections_to_segments.  Make global.  Use get_program_header_size
+	when we need estimate of header size.  Call elf_modify_segment_map.
+	Set program_header_size.
+	(print_segment_map): Delete.
+	(_bfd_elf_sizeof_headers): If segment_map available, get the
+	actual size.
+	* elf32-arm.c (elf32_arm_symbian_modify_segment_map): Make safe
+	for calling more than once.
+	* elf32-bfin.c (elf32_bfinfdpic_modify_segment_map): Likewise.
+	* elf32-frv.c (elf32_frvfdpic_modify_segment_map): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_modify_segment_map): Likewise.
+	* elf32-i370.c (elf_backend_add_symbol_hook): Delete.
+	(elf_backend_additional_program_headers): Delete.
+	(elf_backend_modify_segment_map): Delete.
+	* elf64-hppa.c (elf64_hppa_modify_segment_map): Convert to ISO C.
+	* elfxx-ia64.c (elfNN_ia64_modify_segment_map): Likewise.
+	* doc/bfdint.texi: Delete SIZEOF_HEADERS difficulties.
+
 2006-06-19  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_swap_symbol_out): Don't set low

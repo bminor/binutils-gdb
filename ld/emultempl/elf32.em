@@ -60,8 +60,7 @@ static void gld${EMULATION_NAME}_before_parse (void);
 static void gld${EMULATION_NAME}_after_open (void);
 static void gld${EMULATION_NAME}_before_allocation (void);
 static bfd_boolean gld${EMULATION_NAME}_place_orphan (asection *s);
-static void gld${EMULATION_NAME}_layout_sections_again (void);
-static void gld${EMULATION_NAME}_finish (void) ATTRIBUTE_UNUSED;
+static void gld${EMULATION_NAME}_finish (void);
 
 EOF
 
@@ -79,6 +78,7 @@ fi
 
 # Import any needed special functions and/or overrides.
 #
+. ${srcdir}/emultempl/elf-generic.em
 if test -n "$EXTRA_EM_FILE" ; then
 . ${srcdir}/emultempl/${EXTRA_EM_FILE}.em
 fi
@@ -1560,26 +1560,11 @@ if test x"$LDEMUL_FINISH" != xgld"$EMULATION_NAME"_finish; then
 cat >>e${EMULATION_NAME}.c <<EOF
 
 static void
-gld${EMULATION_NAME}_layout_sections_again (void)
-{
-  lang_reset_memory_regions ();
-
-  /* Resize the sections.  */
-  lang_size_sections (NULL, TRUE);
-
-  /* Redo special stuff.  */
-  ldemul_after_allocation ();
-
-  /* Do the assignments again.  */
-  lang_do_assignments ();
-}
-
-static void
 gld${EMULATION_NAME}_finish (void)
 {
-  if (bfd_elf_discard_info (output_bfd, &link_info))
-    gld${EMULATION_NAME}_layout_sections_again ();
+  bfd_boolean need_layout = bfd_elf_discard_info (output_bfd, &link_info);
 
+  gld${EMULATION_NAME}_map_segments (need_layout);
   finish_default ();
 }
 EOF

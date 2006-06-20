@@ -1864,9 +1864,11 @@ extern bfd_boolean bfd_elf_gc_common_final_link
 extern bfd_boolean bfd_elf_reloc_symbol_deleted_p
   (bfd_vma, void *);
 
-extern struct elf_segment_map *
-_bfd_elf_make_dynamic_segment
+extern struct elf_segment_map * _bfd_elf_make_dynamic_segment
   (bfd *, asection *);
+
+extern bfd_boolean _bfd_elf_map_sections_to_segments
+  (bfd *, struct bfd_link_info *);
 
 /* Exported interface for writing elf corefile notes. */
 extern char *elfcore_write_note

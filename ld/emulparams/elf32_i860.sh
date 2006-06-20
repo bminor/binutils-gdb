@@ -1,5 +1,7 @@
 # A work in progress...
 SCRIPT_NAME=elf
+TEMPLATE_NAME=generic
+EXTRA_EM_FILE=genelf
 OUTPUT_FORMAT="elf32-i860-little"
 BIG_OUTPUT_FORMAT="elf32-i860"
 LITTLE_OUTPUT_FORMAT="elf32-i860-little"

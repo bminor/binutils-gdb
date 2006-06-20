@@ -1,3 +1,47 @@
+2006-06-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (ELF_DEPS): Define.  Use in emul file deps.  Fix
+	many ELF emul file deps that incorrectly said they needed elf32.em
+	instead of generic.em.  Add genelf.em as required.
+	* Makefile.in: Regenerate.
+	* ldlang.c (lang_process): Call ldemul_finish before
+	lang_check_section_addresses.
+	* emulparams/arcelf.sh: Generic elf target needs genelf.
+	* emulparams/d30v_e.sh: Likewise.
+	* emulparams/d30v_o.sh: Likewise.
+	* emulparams/d30velf.sh: Likewise.
+	* emulparams/elf32_dlx.sh: Likewise.
+	* emulparams/elf32_i860.sh: Likewise.
+	* emulparams/elf32fr30.sh: Likewise.
+	* emulparams/elf32frv.sh: Likewise.
+	* emulparams/elf32iq10.sh: Likewise.
+	* emulparams/elf32iq2000.sh: Likewise.
+	* emulparams/elf32mt.sh: Likewise.
+	* emulparams/mn10200.sh: Likewise.
+	* emulparams/or32.sh: Likewise.
+	* emulparams/or32elf.sh: Likewise.
+	* emulparams/pjelf.sh: Likewise.
+	* emulparams/msp430all.sh: Likewise.  Extract common entries.
+	* emulparams/pjlelf.sh: Include pjelf.sh.
+	* emulparams/elf32frvfd.sh (EXTRA_EM_FILE): Unset.
+	* emulparams/mn10300.sh (EXTRA_EM_FILE): Unset.
+	* emultempl/elf-generic.em: New file.
+	* emultempl/genelf.em: New file.
+	* emultempl/elf32.em: Include elf-generic.em.
+	(gld${EMULATION_NAME}_layout_sections_again): Delete.
+	(gld${EMULATION_NAME}_finish): Call gld${EMULATION_NAME}_map_segments.
+	* emultempl/hppaelf.em (hppaelf_layout_sections_again): Likewise.
+	(gld${EMULATION_NAME}_finish): Rename from hppaelf_finish.  Call
+	gld${EMULATION_NAME}_map_segments.
+	(LDEMUL_FINISH): Update.
+	* emultempl/mmo.em: Correct comment.  Include elf-bfd.h and
+	source elf-generic.em.
+	(mmo_finish): Call gld${EMULATION_NAME}_map_segments.
+	* emultempl/ppc64elf.em (ppc_layout_sections_again): Likewise.
+	(gld${EMULATION_NAME}_finish): Rename from ppc_finish.  Call
+	gld${EMULATION_NAME}_map_segments.
+	(LDEMUL_FINISH): Update.
+
 2006-06-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldexp.c (fold_name): Adjust bfd_sizeof_headers call.

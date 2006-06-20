@@ -258,9 +258,8 @@ ppc_layout_sections_again (void)
   /* If we have changed sizes of the stub sections, then we need
      to recalculate all the section offsets.  This may mean we need to
      add even more stubs.  */
-  need_laying_out = 0;
-
-  gld${EMULATION_NAME}_layout_sections_again ();
+  gld${EMULATION_NAME}_map_segments (TRUE);
+  need_laying_out = -1;
 }
 
 
@@ -311,7 +310,7 @@ build_section_lists (lang_statement_union_type *statement)
 /* Final emulation specific call.  */
 
 static void
-ppc_finish (void)
+gld${EMULATION_NAME}_finish (void)
 {
   /* e_entry on PowerPC64 points to the function descriptor for
      _start.  If _start is missing, default to the first function
@@ -353,8 +352,8 @@ ppc_finish (void)
 	}
     }
 
-  if (need_laying_out)
-    ppc_layout_sections_again ();
+  if (need_laying_out != -1)
+    gld${EMULATION_NAME}_map_segments (need_laying_out);
 
   if (link_info.relocatable)
     {
@@ -574,6 +573,6 @@ PARSE_AND_LIST_ARGS_CASES='
 #
 LDEMUL_BEFORE_ALLOCATION=ppc_before_allocation
 LDEMUL_AFTER_ALLOCATION=gld${EMULATION_NAME}_after_allocation
-LDEMUL_FINISH=ppc_finish
+LDEMUL_FINISH=gld${EMULATION_NAME}_finish
 LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=ppc_create_output_section_statements
 LDEMUL_NEW_VERS_PATTERN=gld${EMULATION_NAME}_new_vers_pattern
