@@ -62,7 +62,6 @@ static lang_input_statement_type *first_file;
 static const char *current_target;
 static const char *output_target;
 static lang_statement_list_type statement_list;
-static struct lang_phdr *lang_phdr_list;
 static struct bfd_hash_table lang_definedness_table;
 
 /* Forward declarations.  */
@@ -98,6 +97,7 @@ bfd_boolean lang_has_input_file = FALSE;
 bfd_boolean had_output_filename = FALSE;
 bfd_boolean lang_float_flag = FALSE;
 bfd_boolean delete_output_file_on_failure = FALSE;
+struct lang_phdr *lang_phdr_list;
 struct lang_nocrossrefs *nocrossref_list;
 static struct unique_sections *unique_section_list;
 static bfd_boolean ldlang_sysrooted_script = FALSE;

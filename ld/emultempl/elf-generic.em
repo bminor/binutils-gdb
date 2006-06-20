@@ -26,13 +26,19 @@ cat >>e${EMULATION_NAME}.c <<EOF
 static void
 gld${EMULATION_NAME}_map_segments (bfd_boolean need_layout)
 {
-  while (1)
+  int tries = 10;
+
+  while (tries)
     {
       if (output_bfd->xvec->flavour == bfd_target_elf_flavour)
 	{
 	  bfd_size_type phdr_size;
 
 	  phdr_size = elf_tdata (output_bfd)->program_header_size;
+	  /* If we don't have user supplied phdrs, throw away any
+	     previous linker generated program headers.  */
+	  if (lang_phdr_list == NULL)
+	    elf_tdata (output_bfd)->segment_map = NULL;
 	  if (!_bfd_elf_map_sections_to_segments (output_bfd, &link_info))
 	    einfo ("%F%P: map sections to segments failed: %E\n");
 
@@ -55,6 +61,10 @@ gld${EMULATION_NAME}_map_segments (bfd_boolean need_layout)
       lang_do_assignments ();
 
       need_layout = FALSE;
+      --tries;
     }
+
+  if (tries == 0)
+    einfo (_("%P%F: looping in map_segments"));
 }
 EOF

@@ -1,3 +1,13 @@
+2006-06-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/elf-generic.em (gld${EMULATION_NAME}_map_segments): Limit
+	loop to ten iterations.  Throw away any previous linker generated
+	segment map.
+	* ldlang.c (lang_phdr_list): Make global.
+	* ldlang.h (lang_phdr_list): Declare.
+	* Makefile.am (ELF_GEN_DEPS): Define.  Use in emul deps.
+	* Makefile.in: Regenerate.
+
 2006-06-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (ELF_DEPS): Define.  Use in emul file deps.  Fix

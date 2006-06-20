@@ -381,6 +381,8 @@ struct lang_phdr
   etree_type *flags;
 };
 
+extern struct lang_phdr *lang_phdr_list;
+
 /* This structure is used to hold a list of sections which may not
    cross reference each other.  */
 
