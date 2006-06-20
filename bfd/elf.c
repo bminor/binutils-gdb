@@ -1579,6 +1579,7 @@ _bfd_elf_link_hash_table_init
   table->bucketcount = 0;
   table->needed = NULL;
   table->hgot = NULL;
+  table->hplt = NULL;
   table->merge_info = NULL;
   memset (&table->stab_info, 0, sizeof (table->stab_info));
   memset (&table->eh_info, 0, sizeof (table->eh_info));

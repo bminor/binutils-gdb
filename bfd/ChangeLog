@@ -1,3 +1,8 @@
+2006-06-20  Jakub Jelinek  <jakub@redhat.com>
+
+	* bfd.c (bfd_record_phdr): Clear p_align and p_align_valid fields.
+	* elf.c (_bfd_elf_link_hash_table_init): Clear hplt field.
+
 2006-06-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h: Formatting.

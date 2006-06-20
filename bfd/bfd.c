@@ -1336,6 +1336,8 @@ bfd_record_phdr (bfd *abfd,
   m->includes_filehdr = includes_filehdr;
   m->includes_phdrs = includes_phdrs;
   m->count = count;
+  m->p_align_valid = FALSE;
+  m->p_align = 0;
   if (count > 0)
     memcpy (m->sections, secs, count * sizeof (asection *));
 
