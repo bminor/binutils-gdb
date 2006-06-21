@@ -1445,7 +1445,18 @@ lang_insert_orphan (asection *s,
 	place->section = &output_bfd->sections;
 
       as = *place->section;
-      if (as != snew && as->prev != snew)
+
+      if (!as)
+        {
+          /* Put the section at the end of the list.  */
+
+	  /* Unlink the section.  */
+	  bfd_section_list_remove (output_bfd, snew);
+
+	  /* Now tack it back on in the right place.  */
+	  bfd_section_list_append (output_bfd, snew);
+        }
+      else if (as != snew && as->prev != snew)
 	{
 	  /* Unlink the section.  */
 	  bfd_section_list_remove (output_bfd, snew);
