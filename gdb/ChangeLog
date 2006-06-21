@@ -1,3 +1,7 @@
+2006-06-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* GDB 6.5 released from GDB 6.5 branch.
+
 2006-06-19  Michael Snyder  <msnyder@redhat.com>
 
 	* mips-tdep.c (mips_eabi_push_dummy_call): For 32 bit ABI, to
