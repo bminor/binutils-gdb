@@ -61,7 +61,7 @@ if { ![ld_simple_link $ld tmpdir/tls_common "tmpdir/tls_common1.o"] } {
 
 send_log "$READELF -l --wide tmpdir/tls_common\n"
 catch "exec $READELF -l --wide tmpdir/tls_common" readelf_output
-if ![string match "*TLS*0x000000 0x000004 R *" $readelf_output] then {
+if ![regexp ".*TLS.*0x0+ 0x0+4 R .*" $readelf_output] then {
     send_log "$readelf_output\n"
     fail "tls_common"
     return
