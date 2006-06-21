@@ -1,3 +1,9 @@
+2006-06-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (Remote configuration): Document set / show
+	remote supported-packets.
+	(General Query Packets): Document qSupported packet.
+
 2006-06-10  Sandra Loosemore <sandra@codesourcery.com>
 
 	* gdb.texinfo (File-I/O overview): Copy edit for grammar, spelling,

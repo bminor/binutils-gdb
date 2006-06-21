@@ -163,6 +163,14 @@ handle_query (char *own_buf)
       return;
     }
 
+  /* Protocol features query.  */
+  if (strncmp ("qSupported", own_buf, 10) == 0
+      && (own_buf[10] == ':' || own_buf[10] == '\0'))
+    {
+      sprintf (own_buf, "PacketSize=%x", PBUFSIZ - 1);
+      return;
+    }
+
   /* Otherwise we didn't know what packet it was.  Say we didn't
      understand it.  */
   own_buf[0] = 0;

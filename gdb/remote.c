@@ -215,6 +215,12 @@ struct remote_state
      packets.  */
   char *buf;
   long buf_size;
+
+  /* If we negotiated packet size explicitly (and thus can bypass
+     heuristics for the largest packet size that will not overflow
+     a buffer in the stub), this will be set to that packet size.
+     Otherwise zero, meaning to use the guessed size.  */
+  long explicit_packet_size;
 };
 
 /* This data could be associated with a target, but we do not always
@@ -340,7 +346,11 @@ init_remote_state (struct gdbarch *gdbarch)
 static long
 get_remote_packet_size (void)
 {
+  struct remote_state *rs = get_remote_state ();
   struct remote_arch_state *rsa = get_remote_arch_state ();
+
+  if (rs->explicit_packet_size)
+    return rs->explicit_packet_size;
 
   return rsa->remote_packet_size;
 }
@@ -484,10 +494,13 @@ get_memory_packet_size (struct memory_packet_config *config)
       if (config->size > 0
 	  && what_they_get > config->size)
 	what_they_get = config->size;
-      /* Limit it to the size of the targets ``g'' response.  */
-      if ((rsa->actual_register_packet_size) > 0
-	  && what_they_get > (rsa->actual_register_packet_size))
-	what_they_get = (rsa->actual_register_packet_size);
+
+      /* Limit it to the size of the targets ``g'' response unless we have
+	 permission from the stub to use a larger packet size.  */
+      if (rs->explicit_packet_size == 0
+	  && rsa->actual_register_packet_size > 0
+	  && what_they_get > rsa->actual_register_packet_size)
+	what_they_get = rsa->actual_register_packet_size;
     }
   if (what_they_get > MAX_REMOTE_PACKET_SIZE)
     what_they_get = MAX_REMOTE_PACKET_SIZE;
@@ -802,6 +815,7 @@ enum {
   PACKET_Z4,
   PACKET_qPart_auxv,
   PACKET_qGetTLSAddr,
+  PACKET_qSupported,
   PACKET_MAX
 };
 
@@ -2065,6 +2079,222 @@ Some events may be lost, rendering further debugging impossible."));
   return serial_open (name);
 }
 
+/* This type describes each known response to the qSupported
+   packet.  */
+struct protocol_feature
+{
+  /* The name of this protocol feature.  */
+  const char *name;
+
+  /* The default for this protocol feature.  */
+  enum packet_support default_support;
+
+  /* The function to call when this feature is reported, or after
+     qSupported processing if the feature is not supported.
+     The first argument points to this structure.  The second
+     argument indicates whether the packet requested support be
+     enabled, disabled, or probed (or the default, if this function
+     is being called at the end of processing and this feature was
+     not reported).  The third argument may be NULL; if not NULL, it
+     is a NUL-terminated string taken from the packet following
+     this feature's name and an equals sign.  */
+  void (*func) (const struct protocol_feature *, enum packet_support,
+		const char *);
+
+  /* The corresponding packet for this feature.  Only used if
+     FUNC is remote_supported_packet.  */
+  int packet;
+};
+
+#if 0
+static void
+remote_supported_packet (const struct protocol_feature *feature,
+			 enum packet_support support,
+			 const char *argument)
+{
+  if (argument)
+    {
+      warning (_("Remote qSupported response supplied an unexpected value for"
+		 " \"%s\"."), feature->name);
+      return;
+    }
+
+  if (remote_protocol_packets[feature->packet].support
+      == PACKET_SUPPORT_UNKNOWN)
+    remote_protocol_packets[feature->packet].support = support;
+}
+#endif
+
+static void
+remote_packet_size (const struct protocol_feature *feature,
+		    enum packet_support support, const char *value)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  int packet_size;
+  char *value_end;
+
+  if (support != PACKET_ENABLE)
+    return;
+
+  if (value == NULL || *value == '\0')
+    {
+      warning (_("Remote target reported \"%s\" without a size."),
+	       feature->name);
+      return;
+    }
+
+  errno = 0;
+  packet_size = strtol (value, &value_end, 16);
+  if (errno != 0 || *value_end != '\0' || packet_size < 0)
+    {
+      warning (_("Remote target reported \"%s\" with a bad size: \"%s\"."),
+	       feature->name, value);
+      return;
+    }
+
+  if (packet_size > MAX_REMOTE_PACKET_SIZE)
+    {
+      warning (_("limiting remote suggested packet size (%d bytes) to %d"),
+	       packet_size, MAX_REMOTE_PACKET_SIZE);
+      packet_size = MAX_REMOTE_PACKET_SIZE;
+    }
+
+  /* Record the new maximum packet size.  */
+  rs->explicit_packet_size = packet_size;
+}
+
+static struct protocol_feature remote_protocol_features[] = {
+  { "PacketSize", PACKET_DISABLE, remote_packet_size, -1 }
+};
+
+static void
+remote_query_supported (void)
+{
+  struct remote_state *rs = get_remote_state ();
+  char *next;
+  int i;
+  unsigned char seen [ARRAY_SIZE (remote_protocol_features)];
+
+  /* The packet support flags are handled differently for this packet
+     than for most others.  We treat an error, a disabled packet, and
+     an empty response identically: any features which must be reported
+     to be used will be automatically disabled.  An empty buffer
+     accomplishes this, since that is also the representation for a list
+     containing no features.  */
+
+  rs->buf[0] = 0;
+  if (remote_protocol_packets[PACKET_qSupported].support != PACKET_DISABLE)
+    {
+      putpkt ("qSupported");
+      getpkt (&rs->buf, &rs->buf_size, 0);
+
+      /* If an error occured, warn, but do not return - just reset the
+	 buffer to empty and go on to disable features.  */
+      if (packet_ok (rs->buf, &remote_protocol_packets[PACKET_qSupported])
+	  == PACKET_ERROR)
+	{
+	  warning (_("Remote failure reply: %s"), rs->buf);
+	  rs->buf[0] = 0;
+	}
+    }
+
+  memset (seen, 0, sizeof (seen));
+
+  next = rs->buf;
+  while (*next)
+    {
+      enum packet_support is_supported;
+      char *p, *end, *name_end, *value;
+
+      /* First separate out this item from the rest of the packet.  If
+	 there's another item after this, we overwrite the separator
+	 (terminated strings are much easier to work with).  */
+      p = next;
+      end = strchr (p, ';');
+      if (end == NULL)
+	{
+	  end = p + strlen (p);
+	  next = end;
+	}
+      else
+	{
+	  if (end == p)
+	    {
+	      warning (_("empty item in \"qSupported\" response"));
+	      continue;
+	    }
+
+	  *end = '\0';
+	  next = end + 1;
+	}
+
+      name_end = strchr (p, '=');
+      if (name_end)
+	{
+	  /* This is a name=value entry.  */
+	  is_supported = PACKET_ENABLE;
+	  value = name_end + 1;
+	  *name_end = '\0';
+	}
+      else
+	{
+	  value = NULL;
+	  switch (end[-1])
+	    {
+	    case '+':
+	      is_supported = PACKET_ENABLE;
+	      break;
+
+	    case '-':
+	      is_supported = PACKET_DISABLE;
+	      break;
+
+	    case '?':
+	      is_supported = PACKET_SUPPORT_UNKNOWN;
+	      break;
+
+	    default:
+	      warning (_("unrecognized item \"%s\" in \"qSupported\" response"), p);
+	      continue;
+	    }
+	  end[-1] = '\0';
+	}
+
+      for (i = 0; i < ARRAY_SIZE (remote_protocol_features); i++)
+	if (strcmp (remote_protocol_features[i].name, p) == 0)
+	  {
+	    const struct protocol_feature *feature;
+
+	    seen[i] = 1;
+	    feature = &remote_protocol_features[i];
+	    feature->func (feature, is_supported, value);
+	    break;
+	  }
+    }
+
+  /* If we increased the packet size, make sure to increase the global
+     buffer size also.  We delay this until after parsing the entire
+     qSupported packet, because this is the same buffer we were
+     parsing.  */
+  if (rs->buf_size < rs->explicit_packet_size)
+    {
+      rs->buf_size = rs->explicit_packet_size;
+      rs->buf = xrealloc (rs->buf, rs->buf_size);
+    }
+
+  /* Handle the defaults for unmentioned features.  */
+  for (i = 0; i < ARRAY_SIZE (remote_protocol_features); i++)
+    if (!seen[i])
+      {
+	const struct protocol_feature *feature;
+
+	feature = &remote_protocol_features[i];
+	feature->func (feature, feature->default_support, NULL);
+      }
+}
+
+
 static void
 remote_open_1 (char *name, int from_tty, struct target_ops *target,
 	       int extended_p, int async_p)
@@ -2119,7 +2349,10 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
     }
   push_target (target);		/* Switch to using remote target now.  */
 
+  /* Reset the target state; these things will be queried either by
+     remote_query_supported or as they are needed.  */
   init_all_packet_configs ();
+  rs->explicit_packet_size = 0;
 
   general_thread = -2;
   continue_thread = -2;
@@ -2127,6 +2360,11 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
   /* Probe for ability to use "ThreadInfo" query, as required.  */
   use_threadinfo_query = 1;
   use_threadextra_query = 1;
+
+  /* The first packet we send to the target is the optional "supported
+     packets" request.  If the target can answer this, it will tell us
+     which later probes to skip.  */
+  remote_query_supported ();
 
   /* Without this, some commands which require an active target (such
      as kill) won't work.  This variable serves (at least) double duty
@@ -5674,6 +5912,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qGetTLSAddr],
 			 "qGetTLSAddr", "get-thread-local-storage-address",
 			 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qSupported],
+			 "qSupported", "supported-packets", 0);
 
   /* Keep the old ``set remote Z-packet ...'' working.  Each individual
      Z sub-packet has its own set and show commands, but users may

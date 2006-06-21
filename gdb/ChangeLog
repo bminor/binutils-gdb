@@ -1,3 +1,17 @@
+2006-06-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* NEWS: Mention qSupported.
+	* remote.c (struct remote_state): Add explicit_packet_size.
+	(get_remote_packet_size): Check explicit_packet_size.
+	(get_memory_packet_size): Likewise.
+	(PACKET_qSupported): New enum value.
+	(struct protocol_feature, remote_supported_packet)
+	(remote_packet_size, remote_protocol_features)
+	(remote_query_supported): New.
+	(remote_open_1): Reset explicit_packet_size.  Call
+	remote_query_supported.
+	(_initialize_remote): Register qSupported.
+
 2006-06-21  Andrew Stubbs  <andrew.stubbs@st.com>
 
         * cli/cli-script.c (realloc_body_list): Zero new parts of body_list.

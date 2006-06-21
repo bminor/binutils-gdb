@@ -7,6 +7,15 @@
 
 The ARM Demon monitor support (RDP protocol, "target rdp").
 
+* New remote packets
+
+qSupported:
+  Tell a stub about GDB client features, and request remote target features.
+  The first feature implemented is PacketSize, which allows the target to
+  specify the size of packets it can handle - to minimize the number of
+  packets required and improve performance when connected to a remote
+  target.
+
 *** Changes in GDB 6.5
 
 * New targets

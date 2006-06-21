@@ -1,3 +1,7 @@
+2006-06-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* server.c (handle_query): Handle qSupported.
+
 2006-05-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote-utils.c (all_symbols_looked_up): New variable.

@@ -12782,6 +12782,17 @@ packet.
 @item show remote get-thread-local-storage-address
 @kindex show remote get-thread-local-storage-address
 Show the current setting of @samp{qGetTLSAddr} packet usage.
+
+@item set remote supported-packets
+@kindex set remote supported-packets
+@cindex query supported packets of remote targets
+This command enables or disables the use of the @samp{qSupported}
+request packet.  @xref{General Query Packets, qSupported}, for more
+details about this packet.  The default is to use @samp{qSupported}.
+
+@item show remote supported-packets
+@kindex show remote supported-packets
+Show the current setting of @samp{qSupported} packet usage.
 @end table
 
 @node remote stub
@@ -23622,6 +23633,129 @@ An empty reply indicates that @samp{qRcmd} is not recognized.
 command by a @samp{,}, not a @samp{:}, contrary to the naming
 conventions above.  Please don't use this packet as a model for new
 packets.)
+
+@item qSupported @r{[}:@var{gdbfeature} @r{[};@var{gdbfeature}@r{]}@dots{} @r{]}
+@cindex supported packets, remote query
+@cindex features of the remote protocol
+@cindex @samp{qSupported} packet
+Tell the remote stub about features supported by @value{GDBN}, and
+query the stub for features it supports.  This packet allows
+@value{GDBN} and the remote stub to take advantage of each others'
+features.  @samp{qSupported} also consolidates multiple feature probes
+at startup, to improve @value{GDBN} performance---a single larger
+packet performs better than multiple smaller probe packets on
+high-latency links.  Some features may enable behavior which must not
+be on by default, e.g.@: because it would confuse older clients or
+stubs.  Other features may describe packets which could be
+automatically probed for, but are not.  These features must be
+reported before @value{GDBN} will use them.  This ``default
+unsupported'' behavior is not appropriate for all packets, but it
+helps to keep the initial connection time under control with new
+versions of @value{GDBN} which support increasing numbers of packets.
+
+Reply:
+@table @samp
+@item @var{stubfeature} @r{[};@var{stubfeature}@r{]}@dots{}
+The stub supports or does not support each returned @var{stubfeature},
+depending on the form of each @var{stubfeature} (see below for the
+possible forms).
+@item
+An empty reply indicates that @samp{qSupported} is not recognized,
+or that no features needed to be reported to @value{GDBN}.
+@end table
+
+The allowed forms for each feature (either a @var{gdbfeature} in the
+@samp{qSupported} packet, or a @var{stubfeature} in the response)
+are:
+
+@table @samp
+@item @var{name}=@var{value}
+The remote protocol feature @var{name} is supported, and associated
+with the specified @var{value}.  The format of @var{value} depends
+on the feature, but it must not include a semicolon.
+@item @var{name}+
+The remote protocol feature @var{name} is supported, and does not
+need an associated value.
+@item @var{name}-
+The remote protocol feature @var{name} is not supported.
+@item @var{name}?
+The remote protocol feature @var{name} may be supported, and
+@value{GDBN} should auto-detect support in some other way when it is
+needed.  This form will not be used for @var{gdbfeature} notifications,
+but may be used for @var{stubfeature} responses.
+@end table
+
+Whenever the stub receives a @samp{qSupported} request, the
+supplied set of @value{GDBN} features should override any previous
+request.  This allows @value{GDBN} to put the stub in a known
+state, even if the stub had previously been communicating with
+a different version of @value{GDBN}.
+
+No values of @var{gdbfeature} (for the packet sent by @value{GDBN})
+are defined yet.  Stubs should ignore any unknown values for
+@var{gdbfeature}.  Any @value{GDBN} which sends a @samp{qSupported}
+packet supports receiving packets of unlimited length (earlier
+versions of @value{GDBN} may reject overly long responses).  Values
+for @var{gdbfeature} may be defined in the future to let the stub take
+advantage of new features in @value{GDBN}, e.g.@: incompatible
+improvements in the remote protocol---support for unlimited length
+responses would be a @var{gdbfeature} example, if it were not implied by
+the @samp{qSupported} query.  The stub's reply should be independent
+of the @var{gdbfeature} entries sent by @value{GDBN}; first @value{GDBN}
+describes all the features it supports, and then the stub replies with
+all the features it supports.
+
+Similarly, @value{GDBN} will silently ignore unrecognized stub feature
+responses, as long as each response uses one of the standard forms.
+
+Some features are flags.  A stub which supports a flag feature
+should respond with a @samp{+} form response.  Other features
+require values, and the stub should respond with an @samp{=}
+form response.
+
+Each feature has a default value, which @value{GDBN} will use if
+@samp{qSupported} is not available or if the feature is not mentioned
+in the @samp{qSupported} response.  The default values are fixed; a
+stub is free to omit any feature responses that match the defaults.
+
+Not all features can be probed, but for those which can, the probing
+mechanism is useful: in some cases, a stub's internal
+architecture may not allow the protocol layer to know some information
+about the underlying target in advance.  This is especially common in
+stubs which may be configured for multiple targets.
+
+These are the currently defined stub features and their properties:
+
+@multitable @columnfractions 0.25 0.2 0.2 0.2
+@c NOTE: The first row should be @headitem, but we do not yet require
+@c a new enough version of Texinfo (4.7) to use @headitem.
+@item Packet Name
+@tab Value Required
+@tab Default
+@tab Probe Allowed
+
+@item @samp{PacketSize}
+@tab Yes
+@tab @samp{-}
+@tab No
+
+@end multitable
+
+These are the currently defined stub features, in more detail:
+
+@table @samp
+@cindex packet size, remote protocol
+@item PacketSize=@var{bytes}
+The remote stub can accept packets up to at least @var{bytes} in
+length.  @value{GDBN} will send packets up to this size for bulk
+transfers, and will never send larger packets.  This is a limit on the
+data characters in the packet, including the frame and checksum.
+There is no trailing NUL byte in a remote protocol packet; if the stub
+stores packets in a NUL-terminated format, it should allow an extra
+byte in its buffer for the NUL.  If this stub feature is not supported,
+@value{GDBN} guesses based on the size of the @samp{g} packet response.
+
+@end table
 
 @item qSymbol::
 @cindex symbol lookup, remote request
