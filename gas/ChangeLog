@@ -9,7 +9,7 @@
 	* doc/c-arm.texi: Correct error in example for "save"
 	directive (fstmdf -> fstmdx).  Also document "vsave" directive.
 
-2006-18-06  Joerg Wunsch <j.gnu@uriah.heep.sax.de>
+2006-06-18  Joerg Wunsch <j.gnu@uriah.heep.sax.de>
 	    Anatoly Sokolov <aesok@post.ru>
 
 	* config/tc-avr.c (mcu_types): Add support for atmega165p, atmega169p 
