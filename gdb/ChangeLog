@@ -1,3 +1,7 @@
+2006-06-21  Andrew Stubbs  <andrew.stubbs@st.com>
+
+        * cli/cli-script.c (realloc_body_list): Zero new parts of body_list.
+
 2006-06-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* GDB 6.5 released from GDB 6.5 branch.

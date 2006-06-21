@@ -701,6 +701,7 @@ realloc_body_list (struct command_line *command, int new_length)
     xmalloc (sizeof (struct command_line *) * new_length);
 
   memcpy (body_list, command->body_list, sizeof (struct command_line *) * n);
+  memset (body_list + n, 0, sizeof (struct command_line *) * (new_length - n));
 
   xfree (command->body_list);
   command->body_list = body_list;
