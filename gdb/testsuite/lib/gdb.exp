@@ -1509,9 +1509,6 @@ proc gdb_compile {source dest type options} {
 	set options [lreplace $options $nowarnings $nowarnings $flag]
     }
 
-#    # Make sure the target directory exists, in case the testsuite
-#    # was not configured.
-
     set result [target_compile $source $dest $type $options];
     regsub "\[\r\n\]*$" "$result" "" result;
     regsub "^\[\r\n\]*" "$result" "" result;
