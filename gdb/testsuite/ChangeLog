@@ -1,5 +1,10 @@
 2006-06-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.stabs/exclfwd.exp: Skip the test if configure did not
+	enable stabs testing.
+
+2006-06-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* auxv.exp: Intercept undefined command messages before
 	gdb_test_multiple does.
 
