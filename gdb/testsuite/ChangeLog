@@ -1,5 +1,10 @@
 2006-06-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.base/gdb1555.exp: Use gdb_compile_shlib.  Skip if not
+	native.
+
+2006-06-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.stabs/exclfwd.exp: Skip the test if configure did not
 	enable stabs testing.
 
