@@ -11,7 +11,7 @@ rm -f e${EMULATION_NAME}.c
 cat >>e${EMULATION_NAME}.c <<EOF
 /* This file is part of GLD, the Gnu Linker.
    Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005 Free Software Foundation, Inc.
+   2005, 2006 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -1694,87 +1694,86 @@ gld_${EMULATION_NAME}_open_dynamic_archive
   (const char *arch ATTRIBUTE_UNUSED, search_dirs_type *search,
    lang_input_statement_type *entry)
 {
+  static const struct
+    {
+      const char * format;
+      bfd_boolean use_prefix;
+    }
+  libname_fmt [] =
+    {
+      /* Preferred explicit import library for dll's.  */
+      { "lib%s.dll.a", FALSE },
+      /* Alternate explicit import library for dll's.  */
+      { "%s.dll.a", FALSE },
+      /* "libfoo.a" could be either an import lib or a static lib.
+          For backwards compatibility, libfoo.a needs to precede
+          libfoo.dll and foo.dll in the search.  */
+      { "lib%s.a", FALSE },
+      /* The 'native' spelling of an import lib name is "foo.lib".  */  	
+      { "%s.lib", FALSE },
+#ifdef DLL_SUPPORT
+      /* Try "<prefix>foo.dll" (preferred dll name, if specified).  */
+      {	"%s%s.dll", TRUE },
+#endif
+      /* Try "libfoo.dll" (default preferred dll name).  */
+      {	"lib%s.dll", FALSE },
+      /* Finally try 'native' dll name "foo.dll".  */
+      {  "%s.dll", FALSE },
+      /* Note: If adding more formats to this table, make sure to check to
+	 see if their length is longer than libname_fmt[0].format, and if
+	 so, update the call to xmalloc() below.  */
+      { NULL, FALSE }
+    };
   const char * filename;
-  char * string;
+  char * full_string;
+  char * base_string;
+  unsigned int i;
+
 
   if (! entry->is_archive)
     return FALSE;
 
   filename = entry->filename;
 
-  string = (char *) xmalloc (strlen (search->name)
-			     + strlen (filename)
-			     + sizeof "/lib.a.dll"
+  full_string = xmalloc (strlen (search->name)
+			 + strlen (filename)
+			 /* Allow space for the characters in the format
+			    string.  We actually allow 2 more bytes than
+			    necessary, but this will not hurt.  */
+			 + sizeof libname_fmt[0].format
 #ifdef DLL_SUPPORT
-			     + (pe_dll_search_prefix ? strlen (pe_dll_search_prefix) : 0)
+			 + (pe_dll_search_prefix
+			    ? strlen (pe_dll_search_prefix) : 0)
 #endif
-			     + 1);
+			 + 1);
 
-  /* Try "libfoo.dll.a" first (preferred explicit import library for dll's.  */
-  sprintf (string, "%s/lib%s.dll.a", search->name, filename);
+  sprintf (full_string, "%s/", search->name);
+  base_string = full_string + strlen (full_string);
 
-  if (! ldfile_try_open_bfd (string, entry))
+  for (i = 0; libname_fmt[i].format; i++)
     {
-      /* Try "foo.dll.a" next (alternate explicit import library for dll's.  */
-      sprintf (string, "%s/%s.dll.a", search->name, filename);
-      if (! ldfile_try_open_bfd (string, entry))
+#ifdef DLL_SUPPORT 
+      if (libname_fmt[i].use_prefix)
 	{
-	  /* Try libfoo.a next. Normally, this would be interpreted as a static
-	     library, but it *could* be an import library. For backwards compatibility,
-	     libfoo.a needs to ==precede== libfoo.dll and foo.dll in the search,
-	     or sometimes errors occur when building legacy packages.
-
-	     Putting libfoo.a here means that in a failure case (i.e. the library
-	     -lfoo is not found) we will search for libfoo.a twice before
-	     giving up -- once here, and once when searching for a "static" lib.
-	     for a "static" lib.  */
-	  /* Try "libfoo.a" (import lib, or static lib, but must
-	     take precedence over dll's).  */
-	  sprintf (string, "%s/lib%s.a", search->name, filename);
-	  if (! ldfile_try_open_bfd (string, entry))
-	    {
-#ifdef DLL_SUPPORT
-	      if (pe_dll_search_prefix)
-		{
-		  /* Try "<prefix>foo.dll" (preferred dll name, if specified).  */
-		  sprintf (string, "%s/%s%s.dll", search->name, pe_dll_search_prefix, filename);
-		  if (! ldfile_try_open_bfd (string, entry))
-		    {
-		      /* Try "libfoo.dll" (default preferred dll name).  */
-		      sprintf (string, "%s/lib%s.dll", search->name, filename);
-		      if (! ldfile_try_open_bfd (string, entry))
-			{
-			  /* Finally, try "foo.dll" (alternate dll name).  */
-			  sprintf (string, "%s/%s.dll", search->name, filename);
-			  if (! ldfile_try_open_bfd (string, entry))
-			    {
-			      free (string);
-			      return FALSE;
-			    }
-			}
-		    }
-		}
-	      else /* pe_dll_search_prefix not specified.  */
-#endif
-		{
-		  /* Try "libfoo.dll" (preferred dll name).  */
-		  sprintf (string, "%s/lib%s.dll", search->name, filename);
-		  if (! ldfile_try_open_bfd (string, entry))
-		    {
-		      /* Finally, try "foo.dll" (alternate dll name).  */
-		      sprintf (string, "%s/%s.dll", search->name, filename);
-		      if (! ldfile_try_open_bfd (string, entry))
-			{
-			  free (string);
-			  return FALSE;
-			}
-		    }
-		}
-	    }
+	  if (!pe_dll_search_prefix)
+	    continue;
+	  sprintf (base_string, libname_fmt[i].format, pe_dll_search_prefix, filename);
 	}
+      else
+#endif
+	sprintf (base_string, libname_fmt[i].format, filename);
+
+      if (ldfile_try_open_bfd (full_string, entry))
+	break;
     }
 
-  entry->filename = string;
+  if (!libname_fmt[i].format)
+    {
+      free (full_string);
+      return FALSE;
+    }
+
+  entry->filename = full_string;
 
   return TRUE;
 }

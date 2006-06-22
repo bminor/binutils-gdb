@@ -1,3 +1,10 @@
+2006-06-22  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* emultempl/pe.em (gld_${EMULATION_NAME}_open_dynamic_archive): 
+	Restructure.  Add native "%s.lib" format to search list
+	* ld.texinfo (node WIN32): Update documentation on dynamic lib
+	search order. Add another reason for using import libs.	
+
 2006-06-21  Mark Shinwell  <shinwell@codesourcery.com>
 
 	* ldlang.c (lang_insert_orphan): Correctly handle the case where

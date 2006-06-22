@@ -1,7 +1,7 @@
 \input texinfo
 @setfilename ld.info
 @c Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-@c 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+@c 2001, 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 @syncodeindex ky cp
 @c man begin INCLUDE
 @include configdoc.texi
@@ -64,7 +64,7 @@ END-INFO-DIR-ENTRY
 This file documents the @sc{gnu} linker LD version @value{VERSION}.
 
 Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000,
-2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+2001, 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 
 @ignore
 
@@ -109,7 +109,7 @@ notice identical to this one except for the removal of this paragraph
 @vskip 0pt plus 1filll
 @c man begin COPYRIGHT
 Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001,
-2002, 2003, 2004 Free Software Foundation, Inc.
+2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1
@@ -5984,12 +5984,13 @@ For instance, when ld is called with the argument @samp{-lxxx} it will attempt
 to find, in the first directory of its search path,
 
 @example
-libxxx.dll.a 
-xxx.dll.a 
-libxxx.a 
+libxxx.dll.a
+xxx.dll.a
+libxxx.a
+xxx.lib
 cygxxx.dll (*)
-libxxx.dll 
-xxx.dll 
+libxxx.dll
+xxx.dll
 @end example
 
 before moving on to the next directory in the search path.
@@ -6061,7 +6062,7 @@ even when auto-import features are exercised, and even when
 @samp{--enable-runtime-pseudo-relocs} is used.
 
 Given the improvements in speed and memory usage, one might justifiably
-wonder why import libraries are used at all.  There are two reasons:
+wonder why import libraries are used at all.  There are three reasons:
 
 1. Until recently, the link-directly-to-dll functionality did @emph{not}
 work with auto-imported data.
@@ -6072,9 +6073,14 @@ symbols that point to the exports of a dll).  Again, the import lib
 for the cygwin kernel makes use of this ability, and it is not
 possible to do this without an import lib.
 
+3. Symbol aliases can only be resolved using an import lib.  This is
+critical when linking against OS-supplied dll's (eg, the win32 API)
+in which symbols are usually exported as undecorated aliases of their
+stdcall-decorated assembly names.
+
 So, import libs are not going away.  But the ability to replace
 true import libs with a simple symbolic link to (or a copy of) 
-a dll, in most cases, is a useful addition to the suite of tools 
+a dll, in many cases, is a useful addition to the suite of tools 
 binutils makes available to the win32 developer.  Given the 
 massive improvements in memory requirements during linking, storage
 requirements, and linking speed, we expect that many developers
