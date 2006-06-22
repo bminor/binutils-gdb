@@ -1,5 +1,10 @@
 2006-06-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* auxv.exp: Intercept undefined command messages before
+	gdb_test_multiple does.
+
+2006-06-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* Makefile.in (host_alias): Remove.
 	(target_alias): Use @target_noncanonical@.
 	(site.exp): Don't set host_alias.
