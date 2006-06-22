@@ -1,5 +1,9 @@
 2006-06-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.base/store.exp: Don't use gdb_suppress_entire_file.
+
+2006-06-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.base/gdb1555.exp: Use gdb_compile_shlib.  Skip if not
 	native.
 
