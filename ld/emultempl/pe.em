@@ -983,7 +983,7 @@ gld_${EMULATION_NAME}_after_open (void)
      including an internal BFD header.  */
 
   if (coff_data (output_bfd) == NULL || coff_data (output_bfd)->pe == 0)
-    einfo (_("%F%P: PE operations on non PE file.\n"));
+    einfo (_("%F%P: cannot perform PE operations on non PE output file '%B'.\n"), output_bfd);
 
   pe_data (output_bfd)->pe_opthdr = pe;
   pe_data (output_bfd)->dll = init[DLLOFF].value;
