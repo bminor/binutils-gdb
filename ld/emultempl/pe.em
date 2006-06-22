@@ -1738,8 +1738,10 @@ gld_${EMULATION_NAME}_open_dynamic_archive
   full_string = xmalloc (strlen (search->name)
 			 + strlen (filename)
 			 /* Allow space for the characters in the format
-			    string.  We actually allow 2 more bytes than
-			    necessary, but this will not hurt.  */
+			    string.  Also allow for the path separator that
+			    is appended after the search name. We actually
+			    allow 1 more byte than is strictly necessary,
+			    but this will not hurt.  */
 			 + sizeof libname_fmt[0].format
 #ifdef DLL_SUPPORT
 			 + (pe_dll_search_prefix
