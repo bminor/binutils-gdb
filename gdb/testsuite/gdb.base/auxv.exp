@@ -139,6 +139,9 @@ gdb_test_multiple "gcore $gcorefile" "gcore" {
     -re "Can't create a corefile\[\r\n\]+$gdb_prompt $" {
 	unsupported "gcore"
     }
+    -re "Undefined command: .*\[\r\n\]+$gdb_prompt $" {
+	unsupported "gcore"
+    }
 }
 
 # Let the program continue and die.
