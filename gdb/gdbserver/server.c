@@ -440,9 +440,16 @@ main (int argc, char *argv[])
 
     restart:
       setjmp (toplevel);
-      while (getpkt (own_buf) > 0)
+      while (1)
 	{
 	  unsigned char sig;
+	  int packet_len;
+	  int new_packet_len = -1;
+
+	  packet_len = getpkt (own_buf);
+	  if (packet_len <= 0)
+	    break;
+
 	  i = 0;
 	  ch = own_buf[i++];
 	  switch (ch)
@@ -546,6 +553,14 @@ main (int argc, char *argv[])
 		write_ok (own_buf);
 	      else
 		write_enn (own_buf);
+	      break;
+	    case 'X':
+	      if (decode_X_packet (&own_buf[1], packet_len - 1,
+				   &mem_addr, &len, mem_buf) < 0
+		  || write_inferior_memory (mem_addr, mem_buf, len) != 0)
+		write_enn (own_buf);
+	      else
+		write_ok (own_buf);
 	      break;
 	    case 'C':
 	      convert_ascii_to_int (own_buf + 1, &sig, 1);
@@ -714,7 +729,10 @@ main (int argc, char *argv[])
 	      break;
 	    }
 
-	  putpkt (own_buf);
+	  if (new_packet_len != -1)
+	    putpkt_binary (own_buf, new_packet_len);
+	  else
+	    putpkt (own_buf);
 
 	  if (status == 'W')
 	    fprintf (stderr,

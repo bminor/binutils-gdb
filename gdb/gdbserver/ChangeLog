@@ -1,3 +1,15 @@
+2006-06-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote-utils.c (remote_escape_output, remote_unescape_input): New.
+	(putpkt_binary): Renamed from putpkt and adjusted for binary
+	data.
+	(putpkt): New wrapper for putpkt_binary.
+	(readchar): Don't mask off the high bit.
+	(decode_X_packet): New function.
+	* server.c (main): Call putpkt_binary if a handler sets the packet
+	length.  Save the length of the incoming packet.  Handle 'X'.
+	* server.h (gdb_byte, remote_escape_output, decode_X_packet): New.
+
 2006-06-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* server.c (handle_query): Handle qSupported.

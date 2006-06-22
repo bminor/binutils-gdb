@@ -276,17 +276,98 @@ hexify (char *hex, const char *bin, int count)
   return i;
 }
 
-/* Send a packet to the remote machine, with error checking.
-   The data of the packet is in BUF.  Returns >= 0 on success, -1 otherwise. */
+/* Convert BUFFER, binary data at least LEN bytes long, into escaped
+   binary data in OUT_BUF.  Set *OUT_LEN to the length of the data
+   encoded in OUT_BUF, and return the number of bytes in OUT_BUF
+   (which may be more than *OUT_LEN due to escape characters).  The
+   total number of bytes in the output buffer will be at most
+   OUT_MAXLEN.  */
 
 int
-putpkt (char *buf)
+remote_escape_output (const gdb_byte *buffer, int len,
+		      gdb_byte *out_buf, int *out_len,
+		      int out_maxlen)
+{
+  int input_index, output_index;
+
+  output_index = 0;
+  for (input_index = 0; input_index < len; input_index++)
+    {
+      gdb_byte b = buffer[input_index];
+
+      if (b == '$' || b == '#' || b == '}' || b == '*')
+	{
+	  /* These must be escaped.  */
+	  if (output_index + 2 > out_maxlen)
+	    break;
+	  out_buf[output_index++] = '}';
+	  out_buf[output_index++] = b ^ 0x20;
+	}
+      else
+	{
+	  if (output_index + 1 > out_maxlen)
+	    break;
+	  out_buf[output_index++] = b;
+	}
+    }
+
+  *out_len = input_index;
+  return output_index;
+}
+
+/* Convert BUFFER, escaped data LEN bytes long, into binary data
+   in OUT_BUF.  Return the number of bytes written to OUT_BUF.
+   Raise an error if the total number of bytes exceeds OUT_MAXLEN.
+
+   This function reverses remote_escape_output.  It allows more
+   escaped characters than that function does, in particular because
+   '*' must be escaped to avoid the run-length encoding processing
+   in reading packets.  */
+
+static int
+remote_unescape_input (const gdb_byte *buffer, int len,
+		       gdb_byte *out_buf, int out_maxlen)
+{
+  int input_index, output_index;
+  int escaped;
+
+  output_index = 0;
+  escaped = 0;
+  for (input_index = 0; input_index < len; input_index++)
+    {
+      gdb_byte b = buffer[input_index];
+
+      if (output_index + 1 > out_maxlen)
+	error ("Received too much data from the target.");
+
+      if (escaped)
+	{
+	  out_buf[output_index++] = b ^ 0x20;
+	  escaped = 0;
+	}
+      else if (b == '}')
+	escaped = 1;
+      else
+	out_buf[output_index++] = b;
+    }
+
+  if (escaped)
+    error ("Unmatched escape character in target response.");
+
+  return output_index;
+}
+
+/* Send a packet to the remote machine, with error checking.
+   The data of the packet is in BUF, and the length of the
+   packet is in CNT.  Returns >= 0 on success, -1 otherwise.  */
+
+int
+putpkt_binary (char *buf, int cnt)
 {
   int i;
   unsigned char csum = 0;
   char *buf2;
   char buf3[1];
-  int cnt = strlen (buf);
   char *p;
 
   buf2 = malloc (PBUFSIZ);
@@ -352,6 +433,17 @@ putpkt (char *buf)
   free (buf2);
   return 1;			/* Success! */
 }
+
+/* Send a packet to the remote machine, with error checking.  The data
+   of the packet is in BUF, and the packet should be a NUL-terminated
+   string.  Returns >= 0 on success, -1 otherwise.  */
+
+int
+putpkt (char *buf)
+{
+  return putpkt_binary (buf, strlen (buf));
+}
+
 
 /* Come here when we get an input interrupt from the remote side.  This
    interrupt should only be active while we are waiting for the child to do
@@ -439,12 +531,12 @@ disable_async_io (void)
 static int
 readchar (void)
 {
-  static char buf[BUFSIZ];
+  static unsigned char buf[BUFSIZ];
   static int bufcnt = 0;
-  static char *bufp;
+  static unsigned char *bufp;
 
   if (bufcnt-- > 0)
-    return *bufp++ & 0x7f;
+    return *bufp++;
 
   bufcnt = read (remote_desc, buf, sizeof (buf));
 
@@ -753,6 +845,33 @@ decode_M_packet (char *from, CORE_ADDR *mem_addr_ptr, unsigned int *len_ptr,
     }
 
   convert_ascii_to_int (&from[i++], to, *len_ptr);
+}
+
+int
+decode_X_packet (char *from, int packet_len, CORE_ADDR *mem_addr_ptr,
+		 unsigned int *len_ptr, unsigned char *to)
+{
+  int i = 0;
+  char ch;
+  *mem_addr_ptr = *len_ptr = 0;
+
+  while ((ch = from[i++]) != ',')
+    {
+      *mem_addr_ptr = *mem_addr_ptr << 4;
+      *mem_addr_ptr |= fromhex (ch) & 0x0f;
+    }
+
+  while ((ch = from[i++]) != ':')
+    {
+      *len_ptr = *len_ptr << 4;
+      *len_ptr |= fromhex (ch) & 0x0f;
+    }
+
+  if (remote_unescape_input ((const gdb_byte *) &from[i], packet_len - i,
+			     to, *len_ptr) != *len_ptr)
+    return -1;
+
+  return 0;
 }
 
 /* Ask GDB for the address of NAME, and return it in ADDRP if found.
