@@ -14,7 +14,7 @@
 
 2006-06-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
-	* auxv.exp: Intercept undefined command messages before
+	* gdb.base/auxv.exp: Intercept undefined command messages before
 	gdb_test_multiple does.
 
 2006-06-22  Daniel Jacobowitz  <dan@codesourcery.com>
