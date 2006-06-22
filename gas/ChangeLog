@@ -1,3 +1,13 @@
+2006-06-22  Thiemo Seufer  <ths@mips.com>
+
+	* config/tc-mips.c (ISA_SUPPORTS_MIPS16E): New macro.
+	(append_insn): Use it.
+	(md_apply_fix): Whitespace formatting.
+	(md_begin, append_insn, macro, macro2, mips16_immed, mips_align,
+	mips16_extended_frag): Remove register specifier.
+	(md_convert_frag): Likewise. Use TRUE ans FALSE instead of numeric
+	constants.
+
 2006-06-21  Mark Shinwell  <shinwell@codesourcery.com>
 
 	* config/tc-arm.c (s_arm_unwind_save_vfp_armv6): New.  Parse

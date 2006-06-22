@@ -260,6 +260,11 @@ static int file_mips_isa = ISA_UNKNOWN;
    command line (e.g., by -march).  */
 static int file_ase_mips16;
 
+#define ISA_SUPPORTS_MIPS16E (mips_opts.isa == ISA_MIPS32		\
+			      || mips_opts.isa == ISA_MIPS32R2		\
+			      || mips_opts.isa == ISA_MIPS64		\
+			      || mips_opts.isa == ISA_MIPS64R2)
+
 /* True if -mips3d was passed or implied by arguments passed on the
    command line (e.g., by -march).  */
 static int file_ase_mips3d;
@@ -1715,7 +1720,7 @@ reg_lookup (char **s, unsigned int types, unsigned int *regnop)
 void
 md_begin (void)
 {
-  register const char *retval = NULL;
+  const char *retval = NULL;
   int i = 0;
   int broken = 0;
 
@@ -2475,7 +2480,7 @@ static void
 append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	     bfd_reloc_code_real_type *reloc_type)
 {
-  register unsigned long prev_pinfo, pinfo;
+  unsigned long prev_pinfo, pinfo;
   relax_stateT prev_insn_frag_type = 0;
   bfd_boolean relaxed_branch = FALSE;
 
@@ -3001,10 +3006,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      if (mips_opts.mips16
 		  && (pinfo & INSN_UNCOND_BRANCH_DELAY)
 		  && (pinfo & (MIPS16_INSN_READ_X | MIPS16_INSN_READ_31))
-		  && (mips_opts.isa == ISA_MIPS32
-		      || mips_opts.isa == ISA_MIPS32R2
-		      || mips_opts.isa == ISA_MIPS64
-		      || mips_opts.isa == ISA_MIPS64R2))
+		  && ISA_SUPPORTS_MIPS16E)
 		{
 		  /* Convert MIPS16 jr/jalr into a "compact" jump.  */
 		  ip->insn_opcode |= 0x0080;
@@ -4455,7 +4457,7 @@ add_got_offset_hilo (int dest, expressionS *local, int tmp)
 static void
 macro (struct mips_cl_insn *ip)
 {
-  register int treg, sreg, dreg, breg;
+  int treg, sreg, dreg, breg;
   int tempreg;
   int mask;
   int used_at = 0;
@@ -7059,7 +7061,7 @@ macro (struct mips_cl_insn *ip)
 static void
 macro2 (struct mips_cl_insn *ip)
 {
-  register int treg, sreg, dreg, breg;
+  int treg, sreg, dreg, breg;
   int tempreg;
   int mask;
   int used_at;
@@ -10373,7 +10375,7 @@ mips16_immed (char *file, unsigned int line, int type, offsetT val,
 	      unsigned long *insn, bfd_boolean *use_extend,
 	      unsigned short *extend)
 {
-  register const struct mips16_immed_operand *op;
+  const struct mips16_immed_operand *op;
   int mintiny, maxtiny;
   bfd_boolean needext;
 
@@ -11695,7 +11697,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 
   buf = (bfd_byte *) (fixP->fx_frag->fr_literal + fixP->fx_where);
 
-  assert (! fixP->fx_pcrel || fixP->fx_r_type == BFD_RELOC_16_PCREL_S2);
+  assert (!fixP->fx_pcrel || fixP->fx_r_type == BFD_RELOC_16_PCREL_S2);
 
   /* Don't treat parts of a composite relocation as done.  There are two
      reasons for this:
@@ -11707,7 +11709,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	 constants.  The easiest way of dealing with the pathological
 	 exceptions is to generate a relocation against STN_UNDEF and
 	 leave everything up to the linker.  */
-  if (fixP->fx_addsy == NULL && ! fixP->fx_pcrel && fixP->fx_tcbit == 0)
+  if (fixP->fx_addsy == NULL && !fixP->fx_pcrel && fixP->fx_tcbit == 0)
     fixP->fx_done = 1;
 
   switch (fixP->fx_r_type)
@@ -11931,8 +11933,8 @@ mips_align (int to, int fill, symbolS *label)
 static void
 s_align (int x ATTRIBUTE_UNUSED)
 {
-  register int temp;
-  register long temp_fill;
+  int temp;
+  long temp_fill;
   long max_alignment = 15;
 
   /*
@@ -13157,7 +13159,7 @@ static int
 mips16_extended_frag (fragS *fragp, asection *sec, long stretch)
 {
   int type;
-  register const struct mips16_immed_operand *op;
+  const struct mips16_immed_operand *op;
   offsetT val;
   int mintiny, maxtiny;
   segT symsec;
@@ -13627,7 +13629,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	  exp.X_add_number = fragp->fr_offset;
 
 	  fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
-			      4, &exp, 1, BFD_RELOC_16_PCREL_S2);
+			      4, &exp, TRUE, BFD_RELOC_16_PCREL_S2);
 	  fixp->fx_file = fragp->fr_file;
 	  fixp->fx_line = fragp->fr_line;
 
@@ -13744,7 +13746,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	      exp.X_add_number = fragp->fr_offset;
 
 	      fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
-				  4, &exp, 0, BFD_RELOC_MIPS_JMP);
+				  4, &exp, FALSE, BFD_RELOC_MIPS_JMP);
 	      fixp->fx_file = fragp->fr_file;
 	      fixp->fx_line = fragp->fr_line;
 
@@ -13766,7 +13768,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 		}
 
 	      fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
-				  4, &exp, 0, BFD_RELOC_MIPS_GOT16);
+				  4, &exp, FALSE, BFD_RELOC_MIPS_GOT16);
 	      fixp->fx_file = fragp->fr_file;
 	      fixp->fx_line = fragp->fr_line;
 
@@ -13784,7 +13786,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	      insn = HAVE_64BIT_ADDRESSES ? 0x64210000 : 0x24210000;
 
 	      fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
-				  4, &exp, 0, BFD_RELOC_LO16);
+				  4, &exp, FALSE, BFD_RELOC_LO16);
 	      fixp->fx_file = fragp->fr_file;
 	      fixp->fx_line = fragp->fr_line;
 
@@ -13813,7 +13815,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
   if (RELAX_MIPS16_P (fragp->fr_subtype))
     {
       int type;
-      register const struct mips16_immed_operand *op;
+      const struct mips16_immed_operand *op;
       bfd_boolean small, ext;
       offsetT val;
       bfd_byte *buf;
