@@ -3689,6 +3689,45 @@ remote_address_masked (CORE_ADDR addr)
   return addr;
 }
 
+/* Convert BUFFER, binary data at least LEN bytes long, into escaped
+   binary data in OUT_BUF.  Set *OUT_LEN to the length of the data
+   encoded in OUT_BUF, and return the number of bytes in OUT_BUF
+   (which may be more than *OUT_LEN due to escape characters).  The
+   total number of bytes in the output buffer will be at most
+   OUT_MAXLEN.  */
+
+static int
+remote_escape_output (const gdb_byte *buffer, int len,
+		      gdb_byte *out_buf, int *out_len,
+		      int out_maxlen)
+{
+  int input_index, output_index;
+
+  output_index = 0;
+  for (input_index = 0; input_index < len; input_index++)
+    {
+      gdb_byte b = buffer[input_index];
+
+      if (b == '$' || b == '#' || b == '}')
+	{
+	  /* These must be escaped.  */
+	  if (output_index + 2 > out_maxlen)
+	    break;
+	  out_buf[output_index++] = '}';
+	  out_buf[output_index++] = b ^ 0x20;
+	}
+      else
+	{
+	  if (output_index + 1 > out_maxlen)
+	    break;
+	  out_buf[output_index++] = b;
+	}
+    }
+
+  *out_len = input_index;
+  return output_index;
+}
+
 /* Determine whether the remote target supports binary downloading.
    This is accomplished by sending a no-op memory write of zero length
    to the target at the specified address. It does not suffice to send
@@ -3839,24 +3878,7 @@ remote_write_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
       /* Binary mode.  Send target system values byte by byte, in
 	 increasing byte addresses.  Only escape certain critical
 	 characters.  */
-      for (nr_bytes = 0;
-	   (nr_bytes < todo) && (p - payload_start) < payload_size;
-	   nr_bytes++)
-	{
-	  switch (myaddr[nr_bytes] & 0xff)
-	    {
-	    case '$':
-	    case '#':
-	    case 0x7d:
-	      /* These must be escaped.  */
-	      *p++ = 0x7d;
-	      *p++ = (myaddr[nr_bytes] & 0xff) ^ 0x20;
-	      break;
-	    default:
-	      *p++ = myaddr[nr_bytes] & 0xff;
-	      break;
-	    }
-	}
+      p += remote_escape_output (myaddr, todo, p, &nr_bytes, payload_size);
       if (nr_bytes < todo)
 	{
 	  /* Escape chars have filled up the buffer prematurely,

@@ -1,3 +1,8 @@
+2006-06-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c (remote_escape_output): New function.
+	(remote_write_bytes): Use remote_escape_output.
+
 2006-06-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* NEWS: Mention qSupported.
