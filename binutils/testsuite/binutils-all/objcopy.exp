@@ -722,3 +722,8 @@ if [is_elf_format] {
     objcopy_test "ELF unknown section type" unknown.s
     objcopy_test_readelf "ELF group" group.s
 }
+
+if [is_elf_format] {
+    run_dump_test "localize-hidden-1"
+}
+run_dump_test "localize-hidden-2"
