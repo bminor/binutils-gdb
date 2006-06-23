@@ -1880,7 +1880,6 @@ proc gdb_load_cmd { args } {
 	set loadtimeout 1600
     }
     send_gdb "load $args\n"
-    verbose "Timeout is now $timeout seconds" 2
     gdb_expect $loadtimeout {
 	-re "Loading section\[^\r\]*\r\n" {
 	    exp_continue

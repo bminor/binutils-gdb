@@ -17,5 +17,9 @@
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
 
-perror "Sorry, there is no support for this target"
-exit 1
+# Perhaps the board file set things up for us
+if {![board_info $board exists gdb_board_support] \
+	|| ![board_info $board gdb_board_support]} {
+    perror "Sorry, there is no support for this target"
+    exit 1
+}
