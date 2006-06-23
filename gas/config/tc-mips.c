@@ -13113,6 +13113,8 @@ nopic_need_relax (symbolS *sym, int before_relaxing)
 	  change = (strcmp (segname, ".sdata") != 0
 		    && strcmp (segname, ".sbss") != 0
 		    && strncmp (segname, ".sdata.", 7) != 0
+		    && strncmp (segname, ".sbss.", 6) != 0
+		    && strncmp (segname, ".gnu.linkonce.sb.", 17) != 0
 		    && strncmp (segname, ".gnu.linkonce.s.", 16) != 0);
 	}
       return change;

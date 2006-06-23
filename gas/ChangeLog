@@ -1,3 +1,8 @@
+2006-06-23  Nigel Stephens  <nigel@mips.com>
+
+	* config/tc-mips.c (nopic_need_relax): Handle -fdata-sections
+	generated .sbss.* and .gnu.linkonce.sb.*.
+
 2006-06-23  Thiemo Seufer  <ths@mips.com>
             David Ung  <davidu@mips.com>
 
