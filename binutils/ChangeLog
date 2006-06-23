@@ -1,3 +1,15 @@
+2006-06-23  Richard Sandiford  <richard@codesourcery.com>
+
+	* objcopy.c (localize_hidden): New variable.
+	(OPTION_LOCALIZE_HIDDEN): New command_line_switch value.
+	(copy_options): Add --localize-hidden.
+	(copy_usage): Mention --localize-hidden.
+	(is_hidden_symbol): New function.
+	(filter_symbols): Handle localize_hidden.
+	(copy_object): Call filter_symbols if localize_hidden.
+	(copy_main): Handle OPTION_LOCALIZE_HIDDEN.
+	* doc/binutils.texi (--localize-hidden): Document new option.
+
 2006-06-23  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.am (ar_DEPENDENCIES, ranlib_DEPENDENCIES)
