@@ -73,8 +73,6 @@ static enum elf_reloc_type_class elf_s390_reloc_type_class
   PARAMS ((const Elf_Internal_Rela *));
 static bfd_boolean elf_s390_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
-static bfd_boolean elf_s390_mkobject
-  PARAMS ((bfd *));
 static bfd_boolean elf_s390_object_p
   PARAMS ((bfd *));
 static bfd_boolean elf_s390_grok_prstatus
@@ -678,14 +676,16 @@ struct elf_s390_obj_tdata
   (elf_s390_tdata (abfd)->local_got_tls_type)
 
 static bfd_boolean
-elf_s390_mkobject (abfd)
-     bfd *abfd;
+elf_s390_mkobject (bfd *abfd)
 {
-  bfd_size_type amt = sizeof (struct elf_s390_obj_tdata);
-  abfd->tdata.any = bfd_zalloc (abfd, amt);
   if (abfd->tdata.any == NULL)
-    return FALSE;
-  return TRUE;
+    {
+      bfd_size_type amt = sizeof (struct elf_s390_obj_tdata);
+      abfd->tdata.any = bfd_zalloc (abfd, amt);
+      if (abfd->tdata.any == NULL)
+	return FALSE;
+    }
+  return bfd_elf_mkobject (abfd);
 }
 
 static bfd_boolean

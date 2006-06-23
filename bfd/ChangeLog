@@ -1,3 +1,24 @@
+2006-06-23  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/2754
+	* elf.c (bfd_elf_mkobject): Don't alloc if already done.  Set
+	program_header_size to -1.
+	(_bfd_elf_map_sections_to_segments): Adjust program_header_size check.
+	(assign_file_positions_for_load_sections ): Likewise.
+	(_bfd_elf_sizeof_headers): Use saved program_header_size if
+	available.
+	* elf32-arm.c (elf32_arm_mkobject): Call bfd_elf_mkobject, don't
+	alloc if already done.
+	* elf32-i386.c (elf_i386_mkobject): Likewise.
+	* elf32-ppc.c (ppc_elf_mkobject): Likewise.
+	* elf32-s390.c (elf_s390_mkobject): Likewise.
+	* elf32-sh.c (sh_elf_mkobject): Likewise.
+	* elf64-alpha.c (elf64_alpha_mkobject): Likewise.
+	* elf64-ppc.c (ppc64_elf_mkobject): Likewise.
+	* elf64-s390.c (elf_s390_mkobject): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_mkobject): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_mkobject): Likewise.
+
 2006-06-20  Jakub Jelinek  <jakub@redhat.com>
 
 	* elflink.c (elf_link_add_object_symbols): Don't create .tcommon

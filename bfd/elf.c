@@ -209,13 +209,14 @@ bfd_elf_hash (const char *namearg)
 bfd_boolean
 bfd_elf_mkobject (bfd *abfd)
 {
-  /* This just does initialization.  */
-  /* coff_mkobject zalloc's space for tdata.coff_obj_data ...  */
-  elf_tdata (abfd) = bfd_zalloc (abfd, sizeof (struct elf_obj_tdata));
-  if (elf_tdata (abfd) == 0)
-    return FALSE;
-  /* Since everything is done at close time, do we need any
-     initialization?  */
+  if (abfd->tdata.any == NULL)
+    {
+      abfd->tdata.any = bfd_zalloc (abfd, sizeof (struct elf_obj_tdata));
+      if (abfd->tdata.any == NULL)
+	return FALSE;
+    }
+
+  elf_tdata (abfd)->program_header_size = (bfd_size_type) -1;
 
   return TRUE;
 }
@@ -3852,7 +3853,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	{
 	  bfd_size_type phdr_size = elf_tdata (abfd)->program_header_size;
 
-	  if (phdr_size == 0)
+	  if (phdr_size == (bfd_size_type) -1)
 	    phdr_size = get_program_header_size (abfd, info);
 	  if ((abfd->flags & D_PAGED) == 0
 	      || sections[0]->lma < phdr_size
@@ -4227,7 +4228,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
   elf_elfheader (abfd)->e_phentsize = bed->s->sizeof_phdr;
   elf_elfheader (abfd)->e_phnum = alloc;
 
-  if (elf_tdata (abfd)->program_header_size == 0)
+  if (elf_tdata (abfd)->program_header_size == (bfd_size_type) -1)
     elf_tdata (abfd)->program_header_size = alloc * bed->s->sizeof_phdr;
   else
     BFD_ASSERT (elf_tdata (abfd)->program_header_size
@@ -7063,14 +7064,19 @@ _bfd_elf_sizeof_headers (bfd *abfd, struct bfd_link_info *info)
 
   if (!info->relocatable)
     {
-      struct elf_segment_map *m;
-      bfd_size_type phdr_size = 0;
+      bfd_size_type phdr_size = elf_tdata (abfd)->program_header_size;
 
-      for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
-	phdr_size += bed->s->sizeof_phdr;
+      if (phdr_size == (bfd_size_type) -1)
+	{
+	  struct elf_segment_map *m;
 
-      if (phdr_size == 0)
-	phdr_size = get_program_header_size (abfd, info);
+	  phdr_size = 0;
+	  for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
+	    phdr_size += bed->s->sizeof_phdr;
+
+	  if (phdr_size == 0)
+	    phdr_size = get_program_header_size (abfd, info);
+	}
 
       elf_tdata (abfd)->program_header_size = phdr_size;
       ret += phdr_size;

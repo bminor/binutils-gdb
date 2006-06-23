@@ -2408,11 +2408,14 @@ struct ppc64_elf_obj_tdata
 static bfd_boolean
 ppc64_elf_mkobject (bfd *abfd)
 {
-  bfd_size_type amt = sizeof (struct ppc64_elf_obj_tdata);
-  abfd->tdata.any = bfd_zalloc (abfd, amt);
   if (abfd->tdata.any == NULL)
-    return FALSE;
-  return TRUE;
+    {
+      bfd_size_type amt = sizeof (struct ppc64_elf_obj_tdata);
+      abfd->tdata.any = bfd_zalloc (abfd, amt);
+      if (abfd->tdata.any == NULL)
+	return FALSE;
+    }
+  return bfd_elf_mkobject (abfd);
 }
 
 /* Return 1 if target is one of ours.  */

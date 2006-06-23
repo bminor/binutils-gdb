@@ -626,11 +626,14 @@ struct elf_i386_obj_tdata
 static bfd_boolean
 elf_i386_mkobject (bfd *abfd)
 {
-  bfd_size_type amt = sizeof (struct elf_i386_obj_tdata);
-  abfd->tdata.any = bfd_zalloc (abfd, amt);
   if (abfd->tdata.any == NULL)
-    return FALSE;
-  return TRUE;
+    {
+      bfd_size_type amt = sizeof (struct elf_i386_obj_tdata);
+      abfd->tdata.any = bfd_zalloc (abfd, amt);
+      if (abfd->tdata.any == NULL)
+	return FALSE;
+    }
+  return bfd_elf_mkobject (abfd);
 }
 
 /* i386 ELF linker hash table.  */
