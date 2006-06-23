@@ -323,11 +323,17 @@ static const char *cpu_sub_arch_name = NULL;
 /* CPU feature flags.  */
 static unsigned int cpu_arch_flags = CpuUnknownFlags | CpuNo64;
 
+/* If we have selected a cpu we are generating instructions for.  */
+static int cpu_arch_tune_set = 0;
+
 /* Cpu we are generating instructions for.  */
 static enum processor_type cpu_arch_tune = PROCESSOR_UNKNOWN;
 
 /* CPU feature flags of cpu we are generating instructions for.  */
 static unsigned int cpu_arch_tune_flags = 0;
+
+/* CPU instruction set architecture used.  */
+static enum processor_type cpu_arch_isa = PROCESSOR_UNKNOWN;
 
 /* CPU feature flags of instruction set architecture used.  */
 static unsigned int cpu_arch_isa_flags = 0;
@@ -562,7 +568,7 @@ i386_align_code (fragP, count)
   static const char f32_1[] =
     {0x90};					/* nop			*/
   static const char f32_2[] =
-    {0x89,0xf6};				/* movl %esi,%esi	*/
+    {0x66,0x90};				/* xchg %ax,%ax */
   static const char f32_3[] =
     {0x8d,0x76,0x00};				/* leal 0(%esi),%esi	*/
   static const char f32_4[] =
@@ -622,13 +628,140 @@ i386_align_code (fragP, count)
     f32_1, f32_2, f16_3, f16_4, f16_5, f16_6, f16_7, f16_8,
     f32_15, f32_15, f32_15, f32_15, f32_15, f32_15, f32_15
   };
+  /* nopl (%[re]ax) */
+  static const char alt_3[] =
+    {0x0f,0x1f,0x00};
+  /* nopl 0(%[re]ax) */
+  static const char alt_4[] =
+    {0x0f,0x1f,0x40,0x00};
+  /* nopl 0(%[re]ax,%[re]ax,1) */
+  static const char alt_5[] =
+    {0x0f,0x1f,0x44,0x00,0x00};
+  /* nopw 0(%[re]ax,%[re]ax,1) */
+  static const char alt_6[] =
+    {0x66,0x0f,0x1f,0x44,0x00,0x00};
+  /* nopl 0L(%[re]ax) */
+  static const char alt_7[] =
+    {0x0f,0x1f,0x80,0x00,0x00,0x00,0x00};
+  /* nopl 0L(%[re]ax,%[re]ax,1) */
+  static const char alt_8[] =
+    {0x0f,0x1f,0x84,0x00,0x00,0x00,0x00,0x00};
+  /* nopw 0L(%[re]ax,%[re]ax,1) */
+  static const char alt_9[] =
+    {0x66,0x0f,0x1f,0x84,0x00,0x00,0x00,0x00,0x00};
+  /* nopw %cs:0L(%[re]ax,%[re]ax,1) */
+  static const char alt_10[] =
+    {0x66,0x2e,0x0f,0x1f,0x84,0x00,0x00,0x00,0x00,0x00};
+  /* data16
+     nopw %cs:0L(%[re]ax,%[re]ax,1) */
+  static const char alt_long_11[] =
+    {0x66,
+     0x66,0x2e,0x0f,0x1f,0x84,0x00,0x00,0x00,0x00,0x00};
+  /* data16
+     data16
+     nopw %cs:0L(%[re]ax,%[re]ax,1) */
+  static const char alt_long_12[] =
+    {0x66,
+     0x66,
+     0x66,0x2e,0x0f,0x1f,0x84,0x00,0x00,0x00,0x00,0x00};
+  /* data16
+     data16
+     data16
+     nopw %cs:0L(%[re]ax,%[re]ax,1) */
+  static const char alt_long_13[] =
+    {0x66,
+     0x66,
+     0x66,
+     0x66,0x2e,0x0f,0x1f,0x84,0x00,0x00,0x00,0x00,0x00};
+  /* data16
+     data16
+     data16
+     data16
+     nopw %cs:0L(%[re]ax,%[re]ax,1) */
+  static const char alt_long_14[] =
+    {0x66,
+     0x66,
+     0x66,
+     0x66,
+     0x66,0x2e,0x0f,0x1f,0x84,0x00,0x00,0x00,0x00,0x00};
+  /* data16
+     data16
+     data16
+     data16
+     data16
+     nopw %cs:0L(%[re]ax,%[re]ax,1) */
+  static const char alt_long_15[] =
+    {0x66,
+     0x66,
+     0x66,
+     0x66,
+     0x66,
+     0x66,0x2e,0x0f,0x1f,0x84,0x00,0x00,0x00,0x00,0x00};
+  /* nopl 0(%[re]ax,%[re]ax,1)
+     nopw 0(%[re]ax,%[re]ax,1) */
+  static const char alt_short_11[] =
+    {0x0f,0x1f,0x44,0x00,0x00,
+     0x66,0x0f,0x1f,0x44,0x00,0x00};
+  /* nopw 0(%[re]ax,%[re]ax,1)
+     nopw 0(%[re]ax,%[re]ax,1) */
+  static const char alt_short_12[] =
+    {0x66,0x0f,0x1f,0x44,0x00,0x00,
+     0x66,0x0f,0x1f,0x44,0x00,0x00};
+  /* nopw 0(%[re]ax,%[re]ax,1)
+     nopl 0L(%[re]ax) */
+  static const char alt_short_13[] =
+    {0x66,0x0f,0x1f,0x44,0x00,0x00,
+     0x0f,0x1f,0x80,0x00,0x00,0x00,0x00};
+  /* nopl 0L(%[re]ax)
+     nopl 0L(%[re]ax) */
+  static const char alt_short_14[] =
+    {0x0f,0x1f,0x80,0x00,0x00,0x00,0x00,
+     0x0f,0x1f,0x80,0x00,0x00,0x00,0x00};
+  /* nopl 0L(%[re]ax)
+     nopl 0L(%[re]ax,%[re]ax,1) */
+  static const char alt_short_15[] =
+    {0x0f,0x1f,0x80,0x00,0x00,0x00,0x00,
+     0x0f,0x1f,0x84,0x00,0x00,0x00,0x00,0x00};
+  static const char *const alt_short_patt[] = {
+    f32_1, f32_2, alt_3, alt_4, alt_5, alt_6, alt_7, alt_8,
+    alt_9, alt_10, alt_short_11, alt_short_12, alt_short_13,
+    alt_short_14, alt_short_15
+  };
+  static const char *const alt_long_patt[] = {
+    f32_1, f32_2, alt_3, alt_4, alt_5, alt_6, alt_7, alt_8,
+    alt_9, alt_10, alt_long_11, alt_long_12, alt_long_13,
+    alt_long_14, alt_long_15
+  };
 
   if (count <= 0 || count > 15)
     return;
 
-  /* The recommended way to pad 64bit code is to use NOPs preceded by
-     maximally four 0x66 prefixes.  Balance the size of nops.  */
-  if (flag_code == CODE_64BIT)
+  /* We need to decide which NOP sequence to use for 32bit and
+     64bit. When -mtune= is used:
+  
+     1. For PROCESSOR_I486, PROCESSOR_PENTIUM and PROCESSOR_GENERIC32,
+     f32_patt will be used.
+     2. For PROCESSOR_K8 in 64bit, NOPs with 0x66 prefixe will be used.
+     3. For PROCESSOR_MEROM, alt_long_patt will be used.
+     4. For PROCESSOR_PENTIUMPRO, PROCESSOR_PENTIUM4, PROCESSOR_NOCONA,
+     PROCESSOR_YONAH, PROCESSOR_MEROM, PROCESSOR_K6, PROCESSOR_ATHLON
+     and PROCESSOR_GENERIC64, alt_short_patt will be used.
+
+     When -mtune= isn't used, alt_short_patt will be used if
+     cpu_arch_isa_flags has Cpu686. Otherwise, f32_patt will be used.
+
+     When -march= or .arch is used, we can't use anything beyond
+     cpu_arch_isa_flags.   */
+
+  if (flag_code == CODE_16BIT)
+    {
+      memcpy (fragP->fr_literal + fragP->fr_fix,
+	      f16_patt[count - 1], count);
+      if (count > 8)
+	/* Adjust jump offset.  */
+	fragP->fr_literal[fragP->fr_fix + 1] = count - 2;
+    }
+  else if (flag_code == CODE_64BIT && cpu_arch_tune == PROCESSOR_K8)
     {
       int i;
       int nnops = (count + 3) / 4;
@@ -636,6 +769,8 @@ i386_align_code (fragP, count)
       int remains = count - nnops * len;
       int pos = 0;
 
+      /* The recommended way to pad 64bit code is to use NOPs preceded
+         by maximally four 0x66 prefixes.  Balance the size of nops.  */
       for (i = 0; i < remains; i++)
 	{
 	  memset (fragP->fr_literal + fragP->fr_fix + pos, 0x66, len);
@@ -650,17 +785,84 @@ i386_align_code (fragP, count)
 	}
     }
   else
-    if (flag_code == CODE_16BIT)
-      {
-	memcpy (fragP->fr_literal + fragP->fr_fix,
-		f16_patt[count - 1], count);
-	if (count > 8)
-	  /* Adjust jump offset.  */
-	  fragP->fr_literal[fragP->fr_fix + 1] = count - 2;
-      }
-    else
+    {
+      const char *const *patt = NULL;
+
+      if (cpu_arch_isa == PROCESSOR_UNKNOWN)
+	{
+	  /* PROCESSOR_UNKNOWN means that all ISAs may be used.  */
+	  switch (cpu_arch_tune)
+	    {
+	    case PROCESSOR_UNKNOWN:
+	      /* We use cpu_arch_isa_flags to check if we SHOULD
+		 optimize for Cpu686.  */
+	      if ((cpu_arch_isa_flags & Cpu686) != 0)
+		patt = alt_short_patt;
+	      else
+		patt = f32_patt;
+	      break;
+	    case PROCESSOR_MEROM:
+	      patt = alt_long_patt;
+	      break;
+	    case PROCESSOR_PENTIUMPRO:
+	    case PROCESSOR_PENTIUM4:
+	    case PROCESSOR_NOCONA:
+	    case PROCESSOR_YONAH:
+	    case PROCESSOR_K6:
+	    case PROCESSOR_ATHLON:
+	    case PROCESSOR_K8:
+	    case PROCESSOR_GENERIC64:
+	      patt = alt_short_patt;
+	      break;
+	    case PROCESSOR_I486:
+	    case PROCESSOR_PENTIUM:
+	    case PROCESSOR_GENERIC32:
+	      patt = f32_patt;
+	      break;
+	    } 
+	}
+      else
+	{
+	  switch (cpu_arch_tune)
+	    {
+	    case PROCESSOR_UNKNOWN:
+	      /* When cpu_arch_isa is net, cpu_arch_tune shouldn't be
+		 PROCESSOR_UNKNOWN.  */
+	      abort ();
+	      break;
+
+	    case PROCESSOR_I486:
+	    case PROCESSOR_PENTIUM:
+	    case PROCESSOR_PENTIUMPRO:
+	    case PROCESSOR_PENTIUM4:
+	    case PROCESSOR_NOCONA:
+	    case PROCESSOR_YONAH:
+	    case PROCESSOR_K6:
+	    case PROCESSOR_ATHLON:
+	    case PROCESSOR_K8:
+	    case PROCESSOR_GENERIC32:
+	      /* We use cpu_arch_isa_flags to check if we CAN optimize
+		 for Cpu686.  */
+	      if ((cpu_arch_isa_flags & Cpu686) != 0)
+		patt = alt_short_patt;
+	      else
+		patt = f32_patt;
+	      break;
+	    case PROCESSOR_MEROM:
+	      if ((cpu_arch_isa_flags & Cpu686) != 0)
+		patt = alt_long_patt;
+	      else
+		patt = f32_patt;
+	      break;
+	    case PROCESSOR_GENERIC64:
+	      patt = alt_short_patt;
+	      break;
+	    } 
+	}
+
       memcpy (fragP->fr_literal + fragP->fr_fix,
-	      f32_patt[count - 1], count);
+	      patt[count - 1], count);
+    }
   fragP->fr_var = count;
 }
 
@@ -937,7 +1139,13 @@ set_cpu_arch (dummy)
 		  cpu_sub_arch_name = NULL;
 		  cpu_arch_flags = (cpu_arch[i].flags
 				    | (flag_code == CODE_64BIT ? Cpu64 : CpuNo64));
+		  cpu_arch_isa = cpu_arch[i].type;
 		  cpu_arch_isa_flags = cpu_arch[i].flags;
+		  if (!cpu_arch_tune_set)
+		    {
+		      cpu_arch_tune = cpu_arch_isa;
+		      cpu_arch_tune_flags = cpu_arch_isa_flags;
+		    }
 		  break;
 		}
 	      if ((cpu_arch_flags | cpu_arch[i].flags) != cpu_arch_flags)
@@ -5587,7 +5795,13 @@ md_parse_option (int c, char *arg)
 	{
 	  if (strcmp (arg, cpu_arch [i].name) == 0)
 	    {
+	      cpu_arch_isa = cpu_arch[i].type;
 	      cpu_arch_isa_flags = cpu_arch[i].flags;
+	      if (!cpu_arch_tune_set)
+		{
+		  cpu_arch_tune = cpu_arch_isa;
+		  cpu_arch_tune_flags = cpu_arch_isa_flags;
+		}
 	      break;
 	    }
 	}
@@ -5602,6 +5816,7 @@ md_parse_option (int c, char *arg)
 	{
 	  if (strcmp (arg, cpu_arch [i].name) == 0)
 	    {
+	      cpu_arch_tune_set = 1;
 	      cpu_arch_tune = cpu_arch [i].type;
 	      cpu_arch_tune_flags = cpu_arch[i].flags;
 	      break;
@@ -5663,24 +5878,18 @@ i386_target_format ()
 	cpu_arch_isa_flags = Cpu086|Cpu186|Cpu286|Cpu386|Cpu486
 			     |Cpu586|Cpu686|CpuP4|CpuMMX|CpuMMX2
 			     |CpuSSE|CpuSSE2;
-      if (cpu_arch_tune == PROCESSOR_UNKNOWN)
-	{
-	  cpu_arch_tune = PROCESSOR_GENERIC64;
-	  cpu_arch_tune_flags = Cpu086|Cpu186|Cpu286|Cpu386|Cpu486
-				|Cpu586|Cpu686|CpuP4|CpuMMX|CpuMMX2
-				|CpuSSE|CpuSSE2;
-	}
+      if (cpu_arch_tune_flags == 0)
+	cpu_arch_tune_flags = Cpu086|Cpu186|Cpu286|Cpu386|Cpu486
+			      |Cpu586|Cpu686|CpuP4|CpuMMX|CpuMMX2
+			      |CpuSSE|CpuSSE2;
     }
   else if (!strcmp (default_arch, "i386"))
     {
       set_code_flag (CODE_32BIT);
       if (cpu_arch_isa_flags == 0)
 	cpu_arch_isa_flags = Cpu086|Cpu186|Cpu286|Cpu386;
-      if (cpu_arch_tune == PROCESSOR_UNKNOWN)
-	{
-	  cpu_arch_tune = PROCESSOR_GENERIC32;
-	  cpu_arch_tune_flags = Cpu086|Cpu186|Cpu286|Cpu386;
-	}
+      if (cpu_arch_tune_flags == 0)
+	cpu_arch_tune_flags = Cpu086|Cpu186|Cpu286|Cpu386;
     }
   else
     as_fatal (_("Unknown architecture"));

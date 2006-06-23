@@ -1,3 +1,17 @@
+2006-06-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (cpu_arch_tune_set): New.
+	(cpu_arch_isa): Likewise.
+	(i386_align_code): Use xchg %ax,%ax for 2 byte nop. Optimize
+	nops with short or long nop sequences based on -march=/.arch
+	and -mtune=.
+	(set_cpu_arch): Set cpu_arch_isa.  If cpu_arch_tune_set is 0,
+	set cpu_arch_tune and cpu_arch_tune_flags.
+	(md_parse_option): For -march=, set cpu_arch_isa and set
+	cpu_arch_tune and cpu_arch_tune_flags if cpu_arch_tune_set is
+	0.  Set cpu_arch_tune_set to 1 for -mtune=.
+	(i386_target_format): Don't set cpu_arch_tune.
+
 2006-06-23  Nigel Stephens  <nigel@mips.com>
 
 	* config/tc-mips.c (nopic_need_relax): Handle -fdata-sections

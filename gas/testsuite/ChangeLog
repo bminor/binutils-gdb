@@ -1,3 +1,27 @@
+2006-06-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Run nops-1, nops-1-i386, nops-1-i686,
+	nops-1-merom, nops-2, nops-2-i386, nops-2-merom, x86-64-nops-1,
+	x86-64-nops-1-k8, x86-64-nops-1-nocona and x86-64-nops-1-merom.
+
+	* gas/i386/nops-1.s: New file.
+	* gas/i386/nops-2.s: Likewise.
+	* gas/i386/nops-1-i386.d: Likewise.
+	* gas/i386/nops-1-i686.d: Likewise.
+	* gas/i386/nops-1-merom.d: Likewise.
+	* gas/i386/nops-1.d: Likewise.
+	* gas/i386/nops-2-i386.d: Likewise.
+	* gas/i386/nops-2-merom.d: Likewise.
+	* gas/i386/nops-2.d: Likewise.
+	* gas/i386/x86-64-nops-1.s: Likewise.
+	* gas/i386/x86-64-nops-1-k8.d: Likewise.
+	* gas/i386/x86-64-nops-1-merom.d: Likewise.
+	* gas/i386/x86-64-nops-1-nocona.d: Likewise.
+	* gas/i386/x86-64-nops-1.d: Likewise.
+
+	* gas/i386/sse2.d: Updated to expect xchg %ax,%ax as 2 byte
+	nop.
+
 2006-06-20  Thiemo Seufer  <ths@networkno.de>
 
 	* gas/mips/mips.exp: Explicitly specify o32 ABI.
