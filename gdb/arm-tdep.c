@@ -40,6 +40,7 @@
 #include "trad-frame.h"
 #include "objfiles.h"
 #include "dwarf2-frame.h"
+#include "gdbtypes.h"
 
 #include "arm-tdep.h"
 #include "gdb/sim-arm.h"
@@ -1356,8 +1357,12 @@ arm_register_type (struct gdbarch *gdbarch, int regnum)
       else
 	return builtin_type_arm_ext_littlebyte_bigword;
     }
+  else if (regnum == ARM_SP_REGNUM)
+    return builtin_type_void_data_ptr;
+  else if (regnum == ARM_PC_REGNUM)
+    return builtin_type_void_func_ptr;
   else
-    return builtin_type_int32;
+    return builtin_type_uint32;
 }
 
 /* Index within `registers' of the first byte of the space for

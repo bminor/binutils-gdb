@@ -1,3 +1,9 @@
+2006-06-23  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-tdep.c (arm_register_type): Use unsigned types for registers.
+	Add special types for sp and pc.
+	* Makefile.in (arm-tdep.o): Update.
+
 2006-06-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote.c (remote_escape_output): New function.
