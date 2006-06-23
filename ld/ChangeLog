@@ -1,3 +1,16 @@
+2006-06-23  Pedro Alves <pedro_alves@portugalmail.pt>
+
+	* pe-dll.c (pe_details_type): Add new pointer for symbols list
+	autofilter. 
+	(autofilter_symbollist): Split into autofilter_symbollist_generic
+	and autofilter_symbollist_i386.
+	(pe_detail_list): Add autofilter_symbollist_i386 to i386 case and
+	autofilter_symbollist_generic for all the others.
+	(autofilter_symbolprefixlist): Moved _fmode, _impure_ptr, cygwin_attach_dll,
+	cygwin_premain0, cygwin_premain1, cygwin_premain2, cygwin_premain3, environ,
+	into autofilter_symbollist_i386.
+	(auto_export): Get autofilter_symbollist from pe_details.
+
 2006-06-22  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/2757

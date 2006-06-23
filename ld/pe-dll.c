@@ -144,27 +144,68 @@ static size_t edata_sz, reloc_sz;
 static int runtime_pseudo_relocs_created = 0;
 
 typedef struct
-  {
-    char *target_name;
-    char *object_target;
-    unsigned int imagebase_reloc;
-    int pe_arch;
-    int bfd_arch;
-    int underscored;
-  }
-pe_details_type;
-
-typedef struct
-  {
-    char *name;
-    int len;
-  }
+{
+  char *name;
+  int len;
+}
 autofilter_entry_type;
 
-#define PE_ARCH_i386	1
-#define PE_ARCH_sh	2
-#define PE_ARCH_mips	3
-#define PE_ARCH_arm	4
+typedef struct
+{
+  char *target_name;
+  char *object_target;
+  unsigned int imagebase_reloc;
+  int pe_arch;
+  int bfd_arch;
+  bfd_boolean underscored;
+  autofilter_entry_type* autofilter_symbollist; 
+}
+pe_details_type;
+
+static autofilter_entry_type autofilter_symbollist_generic[] =
+{
+  { ".text", 5 },
+  /* Entry point symbols.  */
+  { "DllMain", 7 },
+  { "DllMainCRTStartup", 17 },
+  { "_DllMainCRTStartup", 18 },
+  /* Runtime pseudo-reloc.  */
+  { "_pei386_runtime_relocator", 25 },
+  { "do_pseudo_reloc", 15 },
+  { NULL, 0 }
+};
+
+static autofilter_entry_type autofilter_symbollist_i386[] =
+{
+  { ".text", 5 },
+  /* Entry point symbols, and entry hooks.  */
+  { "cygwin_crt0", 11 },
+  { "DllMain@12", 10 },
+  { "DllEntryPoint@0", 15 },
+  { "DllMainCRTStartup@12", 20 },
+  { "_cygwin_dll_entry@12", 20 },
+  { "_cygwin_crt0_common@8", 21 },
+  { "_cygwin_noncygwin_dll_entry@12", 30 },
+  { "cygwin_attach_dll", 17 },
+  { "cygwin_premain0", 15 },
+  { "cygwin_premain1", 15 },
+  { "cygwin_premain2", 15 },
+  { "cygwin_premain3", 15 },
+  /* Runtime pseudo-reloc.  */
+  { "_pei386_runtime_relocator", 25 },
+  { "do_pseudo_reloc", 15 },
+  /* Global vars that should not be exported.  */
+  { "impure_ptr", 10 },
+  { "_impure_ptr", 11 },
+  { "_fmode", 6 },
+  { "environ", 7 },
+  { NULL, 0 }
+};
+
+#define PE_ARCH_i386	 1
+#define PE_ARCH_sh	 2
+#define PE_ARCH_mips	 3
+#define PE_ARCH_arm	 4
 #define PE_ARCH_arm_epoc 5
 
 static pe_details_type pe_detail_list[] =
@@ -175,7 +216,8 @@ static pe_details_type pe_detail_list[] =
     7 /* R_IMAGEBASE */,
     PE_ARCH_i386,
     bfd_arch_i386,
-    1
+    TRUE,
+    autofilter_symbollist_i386
   },
   {
     "pei-shl",
@@ -183,7 +225,8 @@ static pe_details_type pe_detail_list[] =
     16 /* R_SH_IMAGEBASE */,
     PE_ARCH_sh,
     bfd_arch_sh,
-    1
+    TRUE,
+    autofilter_symbollist_generic
   },
   {
     "pei-mips",
@@ -191,7 +234,8 @@ static pe_details_type pe_detail_list[] =
     34 /* MIPS_R_RVA */,
     PE_ARCH_mips,
     bfd_arch_mips,
-    0
+    FALSE,
+    autofilter_symbollist_generic
   },
   {
     "pei-arm-little",
@@ -199,7 +243,8 @@ static pe_details_type pe_detail_list[] =
     11 /* ARM_RVA32 */,
     PE_ARCH_arm,
     bfd_arch_arm,
-    1
+    TRUE,
+    autofilter_symbollist_generic
   },
   {
     "epoc-pei-arm-little",
@@ -207,31 +252,13 @@ static pe_details_type pe_detail_list[] =
     11 /* ARM_RVA32 */,
     PE_ARCH_arm_epoc,
     bfd_arch_arm,
-    0
+    FALSE,
+    autofilter_symbollist_generic
   },
-  { NULL, NULL, 0, 0, 0, 0 }
+  { NULL, NULL, 0, 0, 0, FALSE, NULL }
 };
 
 static pe_details_type *pe_details;
-
-static autofilter_entry_type autofilter_symbollist[] =
-{
-  { "DllMain", 7 },
-  { "DllMainCRTStartup", 17 },
-  { "_DllMainCRTStartup", 18 },
-  { "DllMain@12", 10 },
-  { "DllEntryPoint@0", 15 },
-  { "DllMainCRTStartup@12", 20 },
-  { "_cygwin_dll_entry@12", 20 },
-  { "_cygwin_crt0_common@8", 21 },
-  { "_cygwin_noncygwin_dll_entry@12", 30 },
-  { "impure_ptr", 10 },
-  { "_pei386_runtime_relocator", 25 },
-  { "do_pseudo_reloc", 15 },
-  { "cygwin_crt0", 11 },
-  { ".text", 5 },
-  { NULL, 0 }
-};
 
 /* Do not specify library suffix explicitly, to allow for dllized versions.  */
 static autofilter_entry_type autofilter_liblist[] =
@@ -275,14 +302,6 @@ static autofilter_entry_type autofilter_symbolprefixlist[] =
   { "__builtin_", 10 },
   /* Don't export symbols specifying internal DLL layout.  */
   { "_head_", 6 },
-  { "_fmode", 6 },
-  { "_impure_ptr", 11 },
-  { "cygwin_attach_dll", 17 },
-  { "cygwin_premain0", 15 },
-  { "cygwin_premain1", 15 },
-  { "cygwin_premain2", 15 },
-  { "cygwin_premain3", 15 },
-  { "environ", 7 },
   { NULL, 0 }
 };
 
@@ -449,10 +468,9 @@ auto_export (bfd *abfd, def_file *d, const char *n)
 
       /* Don't try to blindly exclude all symbols
 	 that begin with '__'; this was tried and
-	 it is too restrictive.  */
-
-      /* Then, exclude specific symbols.  */
-      afptr = autofilter_symbollist;
+	 it is too restrictive.  Instead we have
+	 a target specific list to use:  */
+      afptr = pe_details->autofilter_symbollist; 
       while (afptr->name)
 	{
 	  if (strcmp (n, afptr->name) == 0)
