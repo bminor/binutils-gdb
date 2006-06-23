@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Ld: (ld).                       The GNU linker.
 END-INFO-DIR-ENTRY
 
-   This file documents the GNU linker LD version 2.16.94.
+   This file documents the GNU linker LD version 2.17.
 
    Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001,
 2002, 2003, 2004 Free Software Foundation, Inc.
@@ -16,7 +16,7 @@ File: ld.info,  Node: Top,  Next: Overview,  Up: (dir)
 Using ld
 ********
 
-This file documents the GNU linker ld version 2.16.94.
+This file documents the GNU linker ld version 2.17.
 
    This document is distributed under the terms of the GNU Free
 Documentation License.  A copy of the license is included in the
@@ -6611,81 +6611,81 @@ Index
 
 
 Tag Table:
-Node: Top350
-Node: Overview1115
-Node: Invocation2229
-Node: Options2637
-Node: Environment77292
-Node: Scripts79052
-Node: Basic Script Concepts80786
-Node: Script Format83493
-Node: Simple Example84356
-Node: Simple Commands87452
-Node: Entry Point87903
-Node: File Commands88662
-Node: Format Commands92528
-Node: Miscellaneous Commands94494
-Node: Assignments96724
-Node: Simple Assignments97215
-Node: PROVIDE98951
-Node: PROVIDE_HIDDEN100156
-Node: Source Code Reference100400
-Node: SECTIONS103980
-Node: Output Section Description105871
-Node: Output Section Name106924
-Node: Output Section Address107800
-Node: Input Section109449
-Node: Input Section Basics110250
-Node: Input Section Wildcards112602
-Node: Input Section Common117335
-Node: Input Section Keep118817
-Node: Input Section Example119307
-Node: Output Section Data120275
-Node: Output Section Keywords123052
-Node: Output Section Discarding126621
-Node: Output Section Attributes127577
-Node: Output Section Type128581
-Node: Output Section LMA129735
-Node: Forced Output Alignment132006
-Node: Forced Input Alignment132274
-Node: Output Section Region132659
-Node: Output Section Phdr133089
-Node: Output Section Fill133753
-Node: Overlay Description134895
-Node: MEMORY139143
-Node: PHDRS143343
-Node: VERSION148382
-Node: Expressions156173
-Node: Constants157051
-Node: Symbols157612
-Node: Orphan Sections158350
-Node: Location Counter159113
-Node: Operators163417
-Node: Evaluation164339
-Node: Expression Section165703
-Node: Builtin Functions167192
-Node: Implicit Linker Scripts174684
-Node: Machine Dependent175459
-Node: H8/300176320
-Node: i960177945
-Node: ARM179630
-Node: HPPA ELF32182546
-Node: MMIX184169
-Node: MSP430185386
-Node: PowerPC ELF32186434
-Node: PowerPC64 ELF64188725
-Node: TI COFF193139
-Node: WIN32193671
-Node: Xtensa211745
-Node: BFD214867
-Node: BFD outline216322
-Node: BFD information loss217608
-Node: Canonical format220125
-Node: Reporting Bugs224482
-Node: Bug Criteria225176
-Node: Bug Reporting225875
-Node: MRI232900
-Node: GNU Free Documentation License237543
-Node: Index257257
+Node: Top347
+Node: Overview1109
+Node: Invocation2223
+Node: Options2631
+Node: Environment77286
+Node: Scripts79046
+Node: Basic Script Concepts80780
+Node: Script Format83487
+Node: Simple Example84350
+Node: Simple Commands87446
+Node: Entry Point87897
+Node: File Commands88656
+Node: Format Commands92522
+Node: Miscellaneous Commands94488
+Node: Assignments96718
+Node: Simple Assignments97209
+Node: PROVIDE98945
+Node: PROVIDE_HIDDEN100150
+Node: Source Code Reference100394
+Node: SECTIONS103974
+Node: Output Section Description105865
+Node: Output Section Name106918
+Node: Output Section Address107794
+Node: Input Section109443
+Node: Input Section Basics110244
+Node: Input Section Wildcards112596
+Node: Input Section Common117329
+Node: Input Section Keep118811
+Node: Input Section Example119301
+Node: Output Section Data120269
+Node: Output Section Keywords123046
+Node: Output Section Discarding126615
+Node: Output Section Attributes127571
+Node: Output Section Type128575
+Node: Output Section LMA129729
+Node: Forced Output Alignment132000
+Node: Forced Input Alignment132268
+Node: Output Section Region132653
+Node: Output Section Phdr133083
+Node: Output Section Fill133747
+Node: Overlay Description134889
+Node: MEMORY139137
+Node: PHDRS143337
+Node: VERSION148376
+Node: Expressions156167
+Node: Constants157045
+Node: Symbols157606
+Node: Orphan Sections158344
+Node: Location Counter159107
+Node: Operators163411
+Node: Evaluation164333
+Node: Expression Section165697
+Node: Builtin Functions167186
+Node: Implicit Linker Scripts174678
+Node: Machine Dependent175453
+Node: H8/300176314
+Node: i960177939
+Node: ARM179624
+Node: HPPA ELF32182540
+Node: MMIX184163
+Node: MSP430185380
+Node: PowerPC ELF32186428
+Node: PowerPC64 ELF64188719
+Node: TI COFF193133
+Node: WIN32193665
+Node: Xtensa211739
+Node: BFD214861
+Node: BFD outline216316
+Node: BFD information loss217602
+Node: Canonical format220119
+Node: Reporting Bugs224476
+Node: Bug Criteria225170
+Node: Bug Reporting225869
+Node: MRI232894
+Node: GNU Free Documentation License237537
+Node: Index257251
 
 End Tag Table
