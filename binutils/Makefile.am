@@ -48,7 +48,7 @@ DLLTOOL_PROG=dlltool
 WINDRES_PROG=windres
 DLLWRAP_PROG=dllwrap
 
-SRCONV_PROG=srconv$(EXEEXT) sysdump$(EXEEXT) coffdump$(EXEEXT) 
+SRCONV_PROG=srconv$(EXEEXT) sysdump$(EXEEXT) coffdump$(EXEEXT)
 
 PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ $(ADDR2LINE_PROG) $(READELF_PROG) @BUILD_DLLWRAP@ @BUILD_MISC@
 
@@ -114,8 +114,8 @@ LIBIBERTY = ../libiberty/libiberty.a
 
 .PHONY: install-html install-html-am install-html-recursive
 
-install-html:	install-html-recursive	
-	
+install-html:	install-html-recursive
+
 install-html-recursive:
 	@failcom='exit 1'; \
 	for f in x $$MAKEFLAGS; do \
@@ -182,24 +182,24 @@ installcheck:
 # There's no global DEPENDENCIES.  So, we must explicitly list everything
 # which depends on libintl, since we don't know whether LIBINTL_DEP will be
 # non-empty until configure time.  Ugh!
-size_DEPENDENCIES = $(LIBINTL_DEP)
-objdump_DEPENDENCIES = $(LIBINTL_DEP)
-nm_new_DEPENDENCIES = $(LIBINTL_DEP)
-ar_DEPENDENCIES = $(LIBINTL_DEP)
-strings_DEPENDENCIES = $(LIBINTL_DEP)
-strip_new_DEPENDENCIES = $(LIBINTL_DEP)
-ranlib_DEPENDENCIES = $(LIBINTL_DEP)
-cxxfilt_DEPENDENCIES = $(LIBINTL_DEP)
-objcopy_DEPENDENCIES = $(LIBINTL_DEP)
-nlmconv_DEPENDENCIES = $(LIBINTL_DEP)
-srconv_DEPENDENCIES = $(LIBINTL_DEP)
-sysdump_DEPENDENCIES = $(LIBINTL_DEP)
-coffdump_DEPENDENCIES = $(LIBINTL_DEP)
-dlltool_DEPENDENCIES = $(LIBINTL_DEP)
-windres_DEPENDENCIES = $(LIBINTL_DEP)
-addr2line_DEPENDENCIES = $(LIBINTL_DEP)
-readelf_DEPENDENCIES = $(LIBINTL_DEP)
-dllwrap_DEPENDENCIES = $(LIBINTL_DEP)
+size_DEPENDENCIES =      $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
+objdump_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB) $(OPCODES)
+nm_new_DEPENDENCIES =    $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
+ar_DEPENDENCIES =        $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB) @LEXLIB@
+strings_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
+strip_new_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
+ranlib_DEPENDENCIES =    $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB) @LEXLIB@
+cxxfilt_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
+objcopy_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
+nlmconv_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
+srconv_DEPENDENCIES =    $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
+sysdump_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
+coffdump_DEPENDENCIES =  $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
+dlltool_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB) @LEXLIB@
+windres_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB) @LEXLIB@
+addr2line_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
+readelf_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY)
+dllwrap_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY)
 
 LDADD = $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
 
@@ -252,7 +252,7 @@ addr2line_SOURCES = addr2line.c budemang.c $(BULIBS)
 #	-rm -f $(STRIP_PROG)
 #	-ln $(OBJCOPY_PROG) $(STRIP_PROG)
 
-sysroff.c: sysinfo$(EXEEXT_FOR_BUILD) sysroff.info 
+sysroff.c: sysinfo$(EXEEXT_FOR_BUILD) sysroff.info
 	./sysinfo$(EXEEXT_FOR_BUILD) -c <$(srcdir)/sysroff.info >sysroff.c
 	./sysinfo$(EXEEXT_FOR_BUILD) -i <$(srcdir)/sysroff.info >>sysroff.c
 	./sysinfo$(EXEEXT_FOR_BUILD) -g <$(srcdir)/sysroff.info >>sysroff.c
@@ -285,7 +285,7 @@ rcparse.h: rcparse.c
 sysinfo.h: sysinfo.c
 
 # Disable -Werror, if it has been enabled, since old versions of bison/
-# yacc will produce working code which contain compile time warnings. 
+# yacc will produce working code which contain compile time warnings.
 arparse.o:
 	$(COMPILE) -c $< $(NO_WERROR)
 arlex.o:
