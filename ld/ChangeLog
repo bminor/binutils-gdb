@@ -1,3 +1,8 @@
+2006-06-23  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* configure.tgt (i[3-7]86-*-solaris2*, i[3-7]86-*-solaris*): Set
+	targ_extra_libpath.
+
 2006-06-23  Pedro Alves <pedro_alves@portugalmail.pt>
 
 	* pe-dll.c (pe_details_type): Add new pointer for symbols list
