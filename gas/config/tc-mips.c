@@ -1168,8 +1168,8 @@ struct insn_label_list
   symbolS *label;
 };
 
-static struct insn_label_list *insn_labels;
 static struct insn_label_list *free_insn_labels;
+#define label_list tc_segment_info_data
 
 static void mips_clear_insn_labels (void);
 
@@ -1177,12 +1177,19 @@ static inline void
 mips_clear_insn_labels (void)
 {
   register struct insn_label_list **pl;
+  segment_info_type *si;
 
-  for (pl = &free_insn_labels; *pl != NULL; pl = &(*pl)->next)
-    ;
-  *pl = insn_labels;
-  insn_labels = NULL;
+  if (now_seg)
+    {
+      for (pl = &free_insn_labels; *pl != NULL; pl = &(*pl)->next)
+	;
+      
+      si = seg_info (now_seg);
+      *pl = si->label_list;
+      si->label_list = NULL;
+    }
 }
+
 
 static char *expr_end;
 
@@ -2115,10 +2122,11 @@ reg_needs_delay (unsigned int reg)
 static void
 mips_move_labels (void)
 {
+  segment_info_type *si = seg_info (now_seg);
   struct insn_label_list *l;
   valueT val;
 
-  for (l = insn_labels; l != NULL; l = l->next)
+  for (l = si->label_list; l != NULL; l = l->next)
     {
       assert (S_GET_SEGMENT (l->label) == now_seg);
       symbol_set_frag (l->label, frag_now);
@@ -2141,21 +2149,22 @@ mips_move_labels (void)
 static void
 mips16_mark_labels (void)
 {
-  if (mips_opts.mips16)
-    {
-      struct insn_label_list *l;
-      valueT val;
+  segment_info_type *si = seg_info (now_seg);
+  struct insn_label_list *l;
 
-      for (l = insn_labels; l != NULL; l = l->next)
-	{
-#ifdef OBJ_ELF
-	  if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
-	    S_SET_OTHER (l->label, STO_MIPS16);
+  if (!mips_opts.mips16)
+    return;
+
+  for (l = si->label_list; l != NULL; l = l->next)
+   {
+      symbolS *label = l->label;
+
+#if defined(OBJ_ELF) || defined(OBJ_MAYBE_ELF)
+      if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+	S_SET_OTHER (label, STO_MIPS16);
 #endif
-	  val = S_GET_VALUE (l->label);
-	  if ((val & 1) == 0)
-	    S_SET_VALUE (l->label, val + 1);
-	}
+      if ((S_GET_VALUE (label) & 1) == 0)
+	S_SET_VALUE (label, S_GET_VALUE (label) | 1);
     }
 }
 
@@ -2483,6 +2492,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
   unsigned long prev_pinfo, pinfo;
   relax_stateT prev_insn_frag_type = 0;
   bfd_boolean relaxed_branch = FALSE;
+  segment_info_type *si = seg_info (now_seg);
 
   /* Mark instruction labels in mips16 mode.  */
   mips16_mark_labels ();
@@ -2899,7 +2909,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 		 whether there is a label on this instruction.  If
 		 there are any branches to anything other than a
 		 label, users must use .set noreorder.  */
-	      || insn_labels != NULL
+	      || si->label_list != NULL
 	      /* If the previous instruction is in a variant frag
 		 other than this branch's one, we cannot do the swap.
 		 This does not apply to the mips16, which uses variant
@@ -11966,9 +11976,11 @@ s_align (int x ATTRIBUTE_UNUSED)
     temp_fill = 0;
   if (temp)
     {
+      segment_info_type *si = seg_info (now_seg);
+      struct insn_label_list *l = si->label_list;
+      /* Auto alignment should be switched on by next section change */
       auto_align = 1;
-      mips_align (temp, (int) temp_fill,
-		  insn_labels != NULL ? insn_labels->label : NULL);
+      mips_align (temp, (int) temp_fill, l != NULL ? l->label : NULL);
     }
   else
     {
@@ -12121,9 +12133,11 @@ mips_enable_auto_align (void)
 static void
 s_cons (int log_size)
 {
+  segment_info_type *si = seg_info (now_seg);
+  struct insn_label_list *l = si->label_list;
   symbolS *label;
 
-  label = insn_labels != NULL ? insn_labels->label : NULL;
+  label = l != NULL ? l->label : NULL;
   mips_emit_delays ();
   if (log_size > 0 && auto_align)
     mips_align (log_size, 0, label);
@@ -12134,9 +12148,11 @@ s_cons (int log_size)
 static void
 s_float_cons (int type)
 {
+  segment_info_type *si = seg_info (now_seg);
+  struct insn_label_list *l = si->label_list;
   symbolS *label;
 
-  label = insn_labels != NULL ? insn_labels->label : NULL;
+  label = l != NULL ? l->label : NULL;
 
   mips_emit_delays ();
 
@@ -12811,6 +12827,8 @@ s_gpvalue (int ignore ATTRIBUTE_UNUSED)
 static void
 s_gpword (int ignore ATTRIBUTE_UNUSED)
 {
+  segment_info_type *si;
+  struct insn_label_list *l;
   symbolS *label;
   expressionS ex;
   char *p;
@@ -12822,7 +12840,9 @@ s_gpword (int ignore ATTRIBUTE_UNUSED)
       return;
     }
 
-  label = insn_labels != NULL ? insn_labels->label : NULL;
+  si = seg_info (now_seg);
+  l = si->label_list;
+  label = l != NULL ? l->label : NULL;
   mips_emit_delays ();
   if (auto_align)
     mips_align (2, 0, label);
@@ -12847,6 +12867,8 @@ s_gpword (int ignore ATTRIBUTE_UNUSED)
 static void
 s_gpdword (int ignore ATTRIBUTE_UNUSED)
 {
+  segment_info_type *si;
+  struct insn_label_list *l;
   symbolS *label;
   expressionS ex;
   char *p;
@@ -12858,7 +12880,9 @@ s_gpdword (int ignore ATTRIBUTE_UNUSED)
       return;
     }
 
-  label = insn_labels != NULL ? insn_labels->label : NULL;
+  si = seg_info (now_seg);
+  l = si->label_list;
+  label = l != NULL ? l->label : NULL;
   mips_emit_delays ();
   if (auto_align)
     mips_align (3, 0, label);
@@ -13997,6 +14021,7 @@ mips_frob_file_after_relocs (void)
 void
 mips_define_label (symbolS *sym)
 {
+  segment_info_type *si = seg_info (now_seg);
   struct insn_label_list *l;
 
   if (free_insn_labels == NULL)
@@ -14008,8 +14033,8 @@ mips_define_label (symbolS *sym)
     }
 
   l->label = sym;
-  l->next = insn_labels;
-  insn_labels = l;
+  l->next = si->label_list;
+  si->label_list = l;
 
 #ifdef OBJ_ELF
   dwarf2_emit_label (sym);

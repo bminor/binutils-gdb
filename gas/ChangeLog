@@ -1,3 +1,14 @@
+2006-06-23  Thiemo Seufer  <ths@mips.com>
+            David Ung  <davidu@mips.com>
+
+	* config/tc-mips.h (TC_SEGMENT_INFO_TYPE): Declare per-segment
+	label_list.
+	* config/tc-mips.c (label_list): Define per-segment label_list.
+	(mips_clear_insn_labels, mips_move_labels, mips16_mark_labels,
+	append_insn, s_align, s_cons, s_float_cons, s_gpword, s_gpdword,
+	mips_from_file_after_relocs, mips_define_label): Use per-segment
+	label_list.
+
 2006-06-22  Thiemo Seufer  <ths@mips.com>
 
 	* config/tc-mips.c (ISA_SUPPORTS_MIPS16E): New macro.
