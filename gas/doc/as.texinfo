@@ -3826,8 +3826,8 @@ Some machine configurations provide additional directives.
 * Noaltmacro::                  @code{.noaltmacro}
 * Nolist::                      @code{.nolist}
 * Octa::                        @code{.octa @var{bignums}}
-* Org::                         @code{.org @var{new-lc} , @var{fill}}
-* P2align::                     @code{.p2align @var{abs-expr} , @var{abs-expr}}
+* Org::                         @code{.org @var{new-lc}, @var{fill}}
+* P2align::                     @code{.p2align @var{abs-expr}, @var{abs-expr}, @var{abs-expr}}
 @ifset ELF
 * PopSection::                  @code{.popsection}
 * Previous::                    @code{.previous}
