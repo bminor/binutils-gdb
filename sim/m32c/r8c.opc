@@ -885,7 +885,7 @@ decode_r8c()
 
   /** 0111 010w 1100 dest  MOV.size:G #IMM,dest */
 
-  UNARY_UOP;
+  dc = decode_srcdest4 (dest, w);
   imm = IMM(w);
   v = imm;
   tprintf("%x = %x\n", v, v);
@@ -894,7 +894,7 @@ decode_r8c()
 
   /** 1101 100w immm dest  MOV.size:Q #IMM,dest */
 
-  UNARY_SOP;
+  dc = decode_srcdest4 (dest, w);
   v = sign_ext (immm, 4);
   tprintf ("%x = %x\n", v, v);
   set_sz (v, w+1);
@@ -1530,14 +1530,14 @@ decode_r8c()
   sc = decode_srcdest4(srcx, w);
   dc = decode_srcdest4(dest, w);
   b = get_src (sc);
-  MATH_OP (dc, b, 0, -, > 0);
+  MATH_OP (dc, b, 0, -, >= 0);
 
   /** 0010 1d sr           SUB.B:S src,R0L/R0H */
 
   sc = decode_src2 (sr, 0, d);
   dc = decode_dest1 (d, 0);
   b = get_src (sc);
-  MATH_OP (dc, b, 0, -, > 0);
+  MATH_OP (dc, b, 0, -, >= 0);
 
   /** 0111 011w 0000 dest  TST.size #IMM, dest */
 

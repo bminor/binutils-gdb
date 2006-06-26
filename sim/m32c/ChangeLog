@@ -1,3 +1,8 @@
+2006-06-26  DJ Delorie  <dj@redhat.com>
+
+	* r8c.opc (decode_r8c): Don't bother reading the destination
+	before moving a constant into it.  Fix borrow comparison for SUB.
+
 2006-06-13  Richard Earnshaw  <rearnsha@arm.com>
 
 	* configure: Regenerated.
