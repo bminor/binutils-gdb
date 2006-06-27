@@ -1724,6 +1724,7 @@ gld_${EMULATION_NAME}_open_dynamic_archive
 	 so, update the call to xmalloc() below.  */
       { NULL, FALSE }
     };
+  static unsigned int format_max_len = 0;
   const char * filename;
   char * full_string;
   char * base_string;
@@ -1735,19 +1736,30 @@ gld_${EMULATION_NAME}_open_dynamic_archive
 
   filename = entry->filename;
 
+  if (format_max_len == 0)
+    /* We need to allow space in the memory that we are going to allocate
+       for the characters in the format string.  Since the format array is
+       static we only need to calculate this information once.  In theory
+       this value could also be computed statically, but this introduces
+       the possibility for a discrepancy and hence a possible memory
+       corruption.  The lengths we compute here will be too long because
+       they will include any formating characters (%s) in the strings, but
+       this will not matter.  */
+    for (i = 0; libname_fmt[i].format; i++)
+      if (format_max_len < strlen (libname_fmt[i].format))
+	format_max_len = strlen (libname_fmt[i].format);
+
   full_string = xmalloc (strlen (search->name)
 			 + strlen (filename)
-			 /* Allow space for the characters in the format
-			    string.  Also allow for the path separator that
-			    is appended after the search name. We actually
-			    allow 1 more byte than is strictly necessary,
-			    but this will not hurt.  */
-			 + sizeof libname_fmt[0].format
+			 + format_max_len
 #ifdef DLL_SUPPORT
 			 + (pe_dll_search_prefix
 			    ? strlen (pe_dll_search_prefix) : 0)
 #endif
-			 + 1);
+			 /* Allow for the terminating NUL and for the path
+			    separator character that is inserted between
+			    search->name and the start of the format string.  */
+			 + 2);
 
   sprintf (full_string, "%s/", search->name);
   base_string = full_string + strlen (full_string);

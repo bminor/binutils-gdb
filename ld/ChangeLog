@@ -1,3 +1,11 @@
+2006-06-27  Pedro Alves  <pedro_alves@portugalmail.pt>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/pe.em (gld_$_open_dynamic_archive): Compute maximum
+	length of format strings in the libname_fmt[] array, rather than
+	relying upon a statically chosen value.  Adjust xmalloc call to
+	use this longest length.
+
 2006-06-27  Nick Clifton  <nickc@redhat.com>
 
 	* ld.texinfo (-rpath-link): Clarify distinction between -rpath and
