@@ -216,10 +216,10 @@ to provide explicit and total control over the linking process.
 
 @ifset man
 @c For the man only
-This man page does not describe the command language; see the 
+This man page does not describe the command language; see the
 @command{ld} entry in @code{info}, or the manual
-ld: the GNU linker, for full details on the command language and 
-on other aspects of the GNU linker. 
+ld: the GNU linker, for full details on the command language and
+on other aspects of the GNU linker.
 @end ifset
 
 @ifclear SingleFormat
@@ -550,7 +550,7 @@ toolchain for specifying object-file format for both input and output
 object files.
 @ifclear SingleFormat
 The @sc{gnu} linker uses other mechanisms for this purpose: the
-@option{-b}, @option{--format}, @option{--oformat} options, the 
+@option{-b}, @option{--format}, @option{--oformat} options, the
 @code{TARGET} command in linker scripts, and the @code{GNUTARGET}
 environment variable.
 @end ifclear
@@ -1021,7 +1021,7 @@ Set the emulation common page size to @var{value}.
 
 @end table
 
-Other keywords are ignored for Solaris compatibility.  
+Other keywords are ignored for Solaris compatibility.
 
 @kindex -(
 @cindex groups of archives
@@ -1122,7 +1122,7 @@ option also implies @option{--unresolved-symbols=report-all}.  This
 option can be used with @option{-shared}.  Doing so means that a
 shared library is being created but that all of the library's external
 references must be resolved by pulling in entries from static
-libraries. 
+libraries.
 
 @kindex -Bsymbolic
 @item -Bsymbolic
@@ -1272,7 +1272,7 @@ Report unresolved symbol references from regular object files.  This
 is done even if the linker is creating a non-symbolic shared library.
 The switch @option{--[no-]allow-shlib-undefined} controls the
 behaviour for reporting unresolved references found in shared
-libraries being linked in.  
+libraries being linked in.
 
 @kindex --allow-multiple-definition
 @kindex -z muldefs
@@ -1297,7 +1297,7 @@ the shared library being specified at link time may not be the same as
 the one that is available at load time, so the symbols might actually be
 resolvable at load time.  Plus there are some systems, (eg BeOS) where
 undefined symbols in shared libraries is normal.  (The kernel patches
-them at load time to select which function is most appropriate 
+them at load time to select which function is most appropriate
 for the current architecture.  This is used for example to dynamically
 select an appropriate memset function).  Apparently it is also normal
 for HPPA shared libraries to have undefined symbols.
@@ -1493,7 +1493,7 @@ is possible to use unintentionally a different search path than the
 runtime linker would do.
 
 The linker uses the following search paths to locate required shared
-libraries.
+libraries:
 @enumerate
 @item
 Any directories specified by @option{-rpath-link} options.
@@ -1502,7 +1502,9 @@ Any directories specified by @option{-rpath} options.  The difference
 between @option{-rpath} and @option{-rpath-link} is that directories
 specified by @option{-rpath} options are included in the executable and
 used at runtime, whereas the @option{-rpath-link} option is only effective
-at link time. It is for the native linker only.
+at link time. Searching @option{-rpath} in this way is only supported
+by native linkers and cross linkers which have been configured with
+the @option{--with-sysroot} option.
 @item
 On an ELF system, if the @option{-rpath} and @code{rpath-link} options
 were not used, search the contents of the environment variable
@@ -1796,7 +1798,7 @@ the section (@pxref{SECTIONS}).
 
 @kindex --warn-shared-textrel
 @item --warn-shared-textrel
-Warn if the linker adds a DT_TEXTREL to a shared object.  
+Warn if the linker adds a DT_TEXTREL to a shared object.
 
 @kindex --warn-unresolved-symbols
 @item --warn-unresolved-symbols
@@ -1970,22 +1972,22 @@ otherwise wouldn't be any exported symbols.  When symbols are
 explicitly exported via DEF files or implicitly exported via function
 attributes, the default is to not export anything else unless this
 option is given.  Note that the symbols @code{DllMain@@12},
-@code{DllEntryPoint@@0}, @code{DllMainCRTStartup@@12}, and 
+@code{DllEntryPoint@@0}, @code{DllMainCRTStartup@@12}, and
 @code{impure_ptr} will not be automatically
-exported.  Also, symbols imported from other DLLs will not be 
-re-exported, nor will symbols specifying the DLL's internal layout 
-such as those beginning with @code{_head_} or ending with 
-@code{_iname}.  In addition, no symbols from @code{libgcc}, 
+exported.  Also, symbols imported from other DLLs will not be
+re-exported, nor will symbols specifying the DLL's internal layout
+such as those beginning with @code{_head_} or ending with
+@code{_iname}.  In addition, no symbols from @code{libgcc},
 @code{libstd++}, @code{libmingw32}, or @code{crtX.o} will be exported.
 Symbols whose names begin with @code{__rtti_} or @code{__builtin_} will
 not be exported, to help with C++ DLLs.  Finally, there is an
-extensive list of cygwin-private symbols that are not exported 
+extensive list of cygwin-private symbols that are not exported
 (obviously, this applies on when building DLLs for cygwin targets).
-These cygwin-excludes are: @code{_cygwin_dll_entry@@12}, 
+These cygwin-excludes are: @code{_cygwin_dll_entry@@12},
 @code{_cygwin_crt0_common@@8}, @code{_cygwin_noncygwin_dll_entry@@12},
-@code{_fmode}, @code{_impure_ptr}, @code{cygwin_attach_dll}, 
+@code{_fmode}, @code{_impure_ptr}, @code{cygwin_attach_dll},
 @code{cygwin_premain0}, @code{cygwin_premain1}, @code{cygwin_premain2},
-@code{cygwin_premain3}, and @code{environ}. 
+@code{cygwin_premain3}, and @code{environ}.
 [This option is specific to the i386 PE targeted port of the linker]
 
 @kindex --exclude-symbols
@@ -2108,17 +2110,17 @@ default.
 @kindex --dll-search-prefix
 @item --dll-search-prefix @var{string}
 When linking dynamically to a dll without an import library,
-search for @code{<string><basename>.dll} in preference to 
+search for @code{<string><basename>.dll} in preference to
 @code{lib<basename>.dll}. This behaviour allows easy distinction
 between DLLs built for the various "subplatforms": native, cygwin,
 uwin, pw, etc.  For instance, cygwin DLLs typically use
-@code{--dll-search-prefix=cyg}. 
+@code{--dll-search-prefix=cyg}.
 [This option is specific to the i386 PE targeted port of the linker]
 
 @kindex --enable-auto-import
 @item --enable-auto-import
-Do sophisticated linking of @code{_symbol} to @code{__imp__symbol} for 
-DATA imports from DLLs, and create the necessary thunking symbols when 
+Do sophisticated linking of @code{_symbol} to @code{__imp__symbol} for
+DATA imports from DLLs, and create the necessary thunking symbols when
 building the import libraries with those DATA exports. Note: Use of the
 'auto-import' extension will cause the text section of the image file
 to be made writable. This does not conform to the PE-COFF format
@@ -2127,11 +2129,11 @@ specification published by Microsoft.
 Using 'auto-import' generally will 'just work' -- but sometimes you may
 see this message:
 
-"variable '<var>' can't be auto-imported. Please read the 
+"variable '<var>' can't be auto-imported. Please read the
 documentation for ld's @code{--enable-auto-import} for details."
 
-This message occurs when some (sub)expression accesses an address 
-ultimately given by the sum of two constants (Win32 import tables only 
+This message occurs when some (sub)expression accesses an address
+ultimately given by the sum of two constants (Win32 import tables only
 allow one).  Instances where this may occur include accesses to member 
 fields of struct variables imported from a DLL, as well as using a 
 constant index into an array variable imported from a DLL.  Any 

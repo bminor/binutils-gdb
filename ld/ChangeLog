@@ -1,3 +1,8 @@
+2006-06-27  Nick Clifton  <nickc@redhat.com>
+
+	* ld.texinfo (-rpath-link): Clarify distinction between -rpath and
+	-rpath-link.
+
 2006-06-23  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* configure.tgt (i[3-7]86-*-solaris2*, i[3-7]86-*-solaris*): Set
