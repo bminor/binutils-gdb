@@ -1,3 +1,12 @@
+2006-06-29  Jakub Jelinek  <jakub@redhat.com>
+
+	PR ld/2513
+	* elf32-i386.c (GOT_TLS_MASK, GOT_TLS_IE_IE, GOT_TLS_IE_GD,
+	GOT_TLS_IE_MASK, elf_i386_check_relocs, allocate_dynrelocs): Revert
+	2006-04-08 changes.
+	(elf_i386_relocate_section): Likewise.  For GD->IE transition
+	change subl into addl whenever tls_type is GOT_TLS_IE_POS.
+
 2006-06-23  Alan Modra  <amodra@bigpond.net.au>
 
 	PR ld/2754

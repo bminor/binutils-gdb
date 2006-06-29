@@ -582,10 +582,6 @@ struct elf_i386_link_hash_entry
 #define GOT_TLS_IE_NEG	6
 #define GOT_TLS_IE_BOTH 7
 #define GOT_TLS_GDESC	8
-#define GOT_TLS_MASK	0x0f
-#define GOT_TLS_IE_IE	0x10
-#define GOT_TLS_IE_GD	0x20
-#define GOT_TLS_IE_MASK	0x30
 #define GOT_TLS_GD_BOTH_P(type)						\
   ((type) == (GOT_TLS_GD | GOT_TLS_GDESC))
 #define GOT_TLS_GD_P(type)						\
@@ -1014,25 +1010,12 @@ elf_i386_check_relocs (bfd *abfd,
 	      case R_386_TLS_IE_32:
 		if (ELF32_R_TYPE (rel->r_info) == r_type)
 		  tls_type = GOT_TLS_IE_NEG;
-		else if (h
-			 && ELF32_R_TYPE (rel->r_info) == R_386_TLS_GD)
-		  /* If this is a GD->IE transition, we may use either
-		     of R_386_TLS_TPOFF and R_386_TLS_TPOFF32.  But if
-		     we may have both R_386_TLS_IE and R_386_TLS_GD,
-		     we can't share the same R_386_TLS_TPOFF since
-		     they require different offsets. So we remember
-		     it comes from R_386_TLS_GD.  */
-		  tls_type = GOT_TLS_IE | GOT_TLS_IE_GD;
 		else
+		  /* If this is a GD->IE transition, we may use either of
+		     R_386_TLS_TPOFF and R_386_TLS_TPOFF32.  */
 		  tls_type = GOT_TLS_IE;
 		break;
 	      case R_386_TLS_IE:
-		if (h)
-		  {
-		    /* We remember it comes from R_386_TLS_IE.  */
-		    tls_type = GOT_TLS_IE_POS | GOT_TLS_IE_IE;
-		    break;
-		  }
 	      case R_386_TLS_GOTIE:
 		tls_type = GOT_TLS_IE_POS; break;
 	      }
@@ -1072,8 +1055,7 @@ elf_i386_check_relocs (bfd *abfd,
 	      tls_type |= old_tls_type;
 	    /* If a TLS symbol is accessed using IE at least once,
 	       there is no point to use dynamic model for it.  */
-	    else if (old_tls_type != tls_type
-		     && old_tls_type != GOT_UNKNOWN
+	    else if (old_tls_type != tls_type && old_tls_type != GOT_UNKNOWN
 		     && (! GOT_TLS_GD_ANY_P (old_tls_type)
 			 || (tls_type & GOT_TLS_IE) == 0))
 	      {
@@ -1703,14 +1685,6 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       asection *s;
       bfd_boolean dyn;
       int tls_type = elf_i386_hash_entry(h)->tls_type;
-      
-      /* If we have both R_386_TLS_IE and R_386_TLS_GD, GOT_TLS_IE_BOTH
-	 should be used.  */
-      if ((tls_type & GOT_TLS_IE_MASK)
-	  == (GOT_TLS_IE_IE | GOT_TLS_IE_GD))
-	tls_type = GOT_TLS_IE_BOTH;
-      else
-	tls_type &= GOT_TLS_MASK;
 
       /* Make sure this symbol is output as a dynamic symbol.
 	 Undefined weak syms won't yet be marked as dynamic.  */
@@ -2714,13 +2688,6 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  else if (h != NULL)
 	    {
 	      tls_type = elf_i386_hash_entry(h)->tls_type;
-	      /* If we have both R_386_TLS_IE and R_386_TLS_GD,
-		 GOT_TLS_IE_BOTH should be used.  */
-	      if ((tls_type & GOT_TLS_IE_MASK)
-		  == (GOT_TLS_IE_IE | GOT_TLS_IE_GD))
-		tls_type = GOT_TLS_IE_BOTH;
-	      else
-		tls_type &= GOT_TLS_MASK;
 	      if (!info->shared && h->dynindx == -1 && (tls_type & GOT_TLS_IE))
 		r_type = R_386_TLS_LE_32;
 	    }
@@ -3175,12 +3142,8 @@ elf_i386_relocate_section (bfd *output_bfd,
 		 subl $foo@gottpoff(%reg), %eax
 		 into:
 		 addl $foo@gotntpoff(%reg), %eax.  */
-	      if (r_type == R_386_TLS_GOTIE)
-		{
-		  contents[roff + 6] = 0x03;
-		  if (tls_type == GOT_TLS_IE_BOTH)
-		    off += 4;
-		}
+	      if (tls_type == GOT_TLS_IE_POS)
+		contents[roff + 6] = 0x03;
 	      bfd_put_32 (output_bfd,
 			  htab->sgot->output_section->vma
 			  + htab->sgot->output_offset + off

@@ -50,7 +50,7 @@ Disassembly of section .text:
 #  GD -> IE because variable is not defined in executable where
 #  the variable is referenced through @gotntpoff too
  8049035:	65 a1 00 00 00 00[ 	]+mov    %gs:0x0,%eax
- 804903b:	2b 83 dc ff ff ff[ 	]+sub    0xffffffdc\(%ebx\),%eax
+ 804903b:	03 83 dc ff ff ff[ 	]+add    0xffffffdc\(%ebx\),%eax
 #				->R_386_TLS_TPOFF	sG3
  8049041:	90[ 	]+nop *
  8049042:	90[ 	]+nop *

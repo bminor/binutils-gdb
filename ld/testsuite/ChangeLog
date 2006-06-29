@@ -1,3 +1,8 @@
+2006-06-29  Jakub Jelinek  <jakub@redhat.com>
+
+	PR ld/2513
+	* ld-i386/tlsbin.dd: Fix expected output.
+
 2006-06-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-elf/tls_common.exp: Match 32-bit output.
