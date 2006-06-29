@@ -1,3 +1,7 @@
+2006-06-29  DJ Delorie  <dj@redhat.com>
+
+	* readelf.c (process_section_headers): Add H8/300 support.
+
 2006-06-23  Richard Sandiford  <richard@codesourcery.com>
 
 	* objcopy.c (localize_hidden): New variable.

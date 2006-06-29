@@ -3971,6 +3971,23 @@ process_section_headers (FILE *file)
 	  && find_section (".gcc_compiled_long32") == NULL)
 	eh_addr_size = 8;
       break;
+
+    case EM_H8_300:
+    case EM_H8_300H:
+      switch (elf_header.e_flags & EF_H8_MACH)
+	{
+	case E_H8_MACH_H8300:
+	case E_H8_MACH_H8300HN:
+	case E_H8_MACH_H8300SN:
+	case E_H8_MACH_H8300SXN:
+	  eh_addr_size = 2;
+	  break;
+	case E_H8_MACH_H8300H:
+	case E_H8_MACH_H8300S:
+	case E_H8_MACH_H8300SX:
+	  eh_addr_size = 4;
+	  break;
+	}
     }
 
 #define CHECK_ENTSIZE_VALUES(section, i, size32, size64) \
