@@ -17266,20 +17266,21 @@ may repeat one or more times.
 * GDB/MI Simple Examples::
 * GDB/MI Command Description Format::
 * GDB/MI Breakpoint Commands::
+* GDB/MI Program Context::
+* GDB/MI Thread Commands::
+* GDB/MI Program Execution::
+* GDB/MI Stack Manipulation::
+* GDB/MI Variable Objects::
 * GDB/MI Data Manipulation::
-* GDB/MI Program Control::
+* GDB/MI Tracepoint Commands::
+* GDB/MI Symbol Query::
 * GDB/MI File Commands::
 @ignore
 * GDB/MI Kod Commands::
 * GDB/MI Memory Overlay Commands::
 * GDB/MI Signal Handling Commands::
 @end ignore
-* GDB/MI Stack Manipulation::
-* GDB/MI Symbol Query::
 * GDB/MI Target Manipulation::
-* GDB/MI Thread Commands::
-* GDB/MI Tracepoint Commands::
-* GDB/MI Variable Objects::
 * GDB/MI Miscellaneous Commands::
 @end menu
 
@@ -17512,15 +17513,16 @@ details about the various output records.
 @cindex compatibility, @sc{gdb/mi} and CLI
 @cindex @sc{gdb/mi}, compatibility with CLI
 
-For the developers convenience CLI commands can be entered directly.
-However, CLI commands that use sequences of commands such @code{source},
-@code{commands} will not work and commands that result in queries such
-as pending breakpoints and quitting once execution has started will
-default to yes.
+For the developers convenience CLI commands can be entered directly,
+but there may be some unexpected behaviour.  For example, commands
+that query the user will behave as if the user replied yes, breakpoint
+command lists are not executed and some CLI commands, such as
+@code{if}, @code{when} and @code{define}, prompt for further input with
+@samp{>}, which is not valid MI output.
 
 This feature may be removed at some stage in the future and it is
-recommended that front ends use the @code{-interpreter exec} command.
-@xref{GDB/MI Miscellaneous Commands}.
+recommended that front ends use the @code{-interpreter-exec} command
+(@pxref{-interpreter-exec}).
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Development and Front Ends
@@ -17754,7 +17756,7 @@ Quitting GDB just prints the result class @samp{^exit}.
 <- ^exit
 @end smallexample
 
-@subsubheading A Bad Command
+@subheading A Bad Command
 
 Here's what happens if you pass a non-existent command:
 
@@ -18349,6 +18351,1433 @@ times="1"@}]@}
 @end smallexample
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@node GDB/MI Program Context
+@section @sc{gdb/mi}  Program Context
+
+@subheading The @code{-exec-arguments} Command
+@findex -exec-arguments
+
+
+@subsubheading Synopsis
+
+@smallexample
+ -exec-arguments @var{args}
+@end smallexample
+
+Set the inferior program arguments, to be used in the next
+@samp{-exec-run}.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{set args}.
+
+@subsubheading Example
+
+@c FIXME!
+Don't have one around.
+
+
+@subheading The @code{-exec-show-arguments} Command
+@findex -exec-show-arguments
+
+@subsubheading Synopsis
+
+@smallexample
+ -exec-show-arguments
+@end smallexample
+
+Print the arguments of the program.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{show args}.
+
+@subsubheading Example
+N.A.
+
+
+@subheading The @code{-environment-cd} Command
+@findex -environment-cd
+
+@subsubheading Synopsis
+
+@smallexample
+ -environment-cd @var{pathdir}
+@end smallexample
+
+Set @value{GDBN}'s working directory.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{cd}.
+
+@subsubheading Example
+
+@smallexample
+(@value{GDBP})
+-environment-cd /kwikemart/marge/ezannoni/flathead-dev/devo/gdb
+^done
+(@value{GDBP})
+@end smallexample
+
+
+@subheading The @code{-environment-directory} Command
+@findex -environment-directory
+
+@subsubheading Synopsis
+
+@smallexample
+ -environment-directory [ -r ] [ @var{pathdir} ]+
+@end smallexample
+
+Add directories @var{pathdir} to beginning of search path for source files.
+If the @samp{-r} option is used, the search path is reset to the default
+search path.  If directories @var{pathdir} are supplied in addition to the
+@samp{-r} option, the search path is first reset and then addition
+occurs as normal.
+Multiple directories may be specified, separated by blanks.  Specifying
+multiple directories in a single command
+results in the directories added to the beginning of the
+search path in the same order they were presented in the command.
+If blanks are needed as
+part of a directory name, double-quotes should be used around
+the name.  In the command output, the path will show up separated
+by the system directory-separator character.  The directory-seperator
+character must not be used
+in any directory name.
+If no directories are specified, the current search path is displayed.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{dir}.
+
+@subsubheading Example
+
+@smallexample
+(@value{GDBP})
+-environment-directory /kwikemart/marge/ezannoni/flathead-dev/devo/gdb
+^done,source-path="/kwikemart/marge/ezannoni/flathead-dev/devo/gdb:$cdir:$cwd"
+(@value{GDBP})
+-environment-directory ""
+^done,source-path="/kwikemart/marge/ezannoni/flathead-dev/devo/gdb:$cdir:$cwd"
+(@value{GDBP})
+-environment-directory -r /home/jjohnstn/src/gdb /usr/src
+^done,source-path="/home/jjohnstn/src/gdb:/usr/src:$cdir:$cwd"
+(@value{GDBP})
+-environment-directory -r
+^done,source-path="$cdir:$cwd"
+(@value{GDBP})
+@end smallexample
+
+
+@subheading The @code{-environment-path} Command
+@findex -environment-path
+
+@subsubheading Synopsis
+
+@smallexample
+ -environment-path [ -r ] [ @var{pathdir} ]+
+@end smallexample
+
+Add directories @var{pathdir} to beginning of search path for object files.
+If the @samp{-r} option is used, the search path is reset to the original
+search path that existed at gdb start-up.  If directories @var{pathdir} are
+supplied in addition to the
+@samp{-r} option, the search path is first reset and then addition
+occurs as normal.
+Multiple directories may be specified, separated by blanks.  Specifying
+multiple directories in a single command
+results in the directories added to the beginning of the
+search path in the same order they were presented in the command.
+If blanks are needed as
+part of a directory name, double-quotes should be used around
+the name.  In the command output, the path will show up separated
+by the system directory-separator character.  The directory-seperator
+character must not be used
+in any directory name.
+If no directories are specified, the current path is displayed.
+
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{path}.
+
+@subsubheading Example
+
+@smallexample
+(@value{GDBP})
+-environment-path
+^done,path="/usr/bin"
+(@value{GDBP})
+-environment-path /kwikemart/marge/ezannoni/flathead-dev/ppc-eabi/gdb /bin
+^done,path="/kwikemart/marge/ezannoni/flathead-dev/ppc-eabi/gdb:/bin:/usr/bin"
+(@value{GDBP})
+-environment-path -r /usr/local/bin
+^done,path="/usr/local/bin:/usr/bin"
+(@value{GDBP})
+@end smallexample
+
+
+@subheading The @code{-environment-pwd} Command
+@findex -environment-pwd
+
+@subsubheading Synopsis
+
+@smallexample
+ -environment-pwd
+@end smallexample
+
+Show the current working directory.
+
+@subsubheading @value{GDBN} command
+
+The corresponding @value{GDBN} command is @samp{pwd}.
+
+@subsubheading Example
+
+@smallexample
+(@value{GDBP})
+-environment-pwd
+^done,cwd="/kwikemart/marge/ezannoni/flathead-dev/devo/gdb"
+(@value{GDBP})
+@end smallexample
+
+@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@node GDB/MI Thread Commands
+@section @sc{gdb/mi} Thread Commands
+
+
+@subheading The @code{-thread-info} Command
+@findex -thread-info
+
+@subsubheading Synopsis
+
+@smallexample
+ -thread-info
+@end smallexample
+
+@subsubheading @value{GDBN} command
+
+No equivalent.
+
+@subsubheading Example
+N.A.
+
+
+@subheading The @code{-thread-list-all-threads} Command
+@findex -thread-list-all-threads
+
+@subsubheading Synopsis
+
+@smallexample
+ -thread-list-all-threads
+@end smallexample
+
+@subsubheading @value{GDBN} Command
+
+The equivalent @value{GDBN} command is @samp{info threads}.
+
+@subsubheading Example
+N.A.
+
+
+@subheading The @code{-thread-list-ids} Command
+@findex -thread-list-ids
+
+@subsubheading Synopsis
+
+@smallexample
+ -thread-list-ids
+@end smallexample
+
+Produces a list of the currently known @value{GDBN} thread ids.  At the
+end of the list it also prints the total number of such threads.
+
+@subsubheading @value{GDBN} Command
+
+Part of @samp{info threads} supplies the same information.
+
+@subsubheading Example
+
+No threads present, besides the main process:
+
+@smallexample
+(@value{GDBP})
+-thread-list-ids
+^done,thread-ids=@{@},number-of-threads="0"
+(@value{GDBP})
+@end smallexample
+
+
+Several threads:
+
+@smallexample
+(@value{GDBP})
+-thread-list-ids
+^done,thread-ids=@{thread-id="3",thread-id="2",thread-id="1"@},
+number-of-threads="3"
+(@value{GDBP})
+@end smallexample
+
+
+@subheading The @code{-thread-select} Command
+@findex -thread-select
+
+@subsubheading Synopsis
+
+@smallexample
+ -thread-select @var{threadnum}
+@end smallexample
+
+Make @var{threadnum} the current thread.  It prints the number of the new
+current thread, and the topmost frame for that thread.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{thread}.
+
+@subsubheading Example
+
+@smallexample
+(@value{GDBP})
+-exec-next
+^running
+(@value{GDBP})
+*stopped,reason="end-stepping-range",thread-id="2",line="187",
+file="../../../devo/gdb/testsuite/gdb.threads/linux-dp.c"
+(@value{GDBP})
+-thread-list-ids
+^done,
+thread-ids=@{thread-id="3",thread-id="2",thread-id="1"@},
+number-of-threads="3"
+(@value{GDBP})
+-thread-select 3
+^done,new-thread-id="3",
+frame=@{level="0",func="vprintf",
+args=[@{name="format",value="0x8048e9c \"%*s%c %d %c\\n\""@},
+@{name="arg",value="0x2"@}],file="vprintf.c",line="31"@}
+(@value{GDBP})
+@end smallexample
+
+@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@node GDB/MI Program Execution
+@section @sc{gdb/mi} Program Execution
+
+These are the asynchronous commands which generate the out-of-band
+record @samp{*stopped}.  Currently GDB only really executes
+asynchronously with remote targets and this interaction is mimicked in
+other cases.
+
+@subheading The @code{-exec-continue} Command
+@findex -exec-continue
+
+@subsubheading Synopsis
+
+@smallexample
+ -exec-continue
+@end smallexample
+
+Resumes the execution of the inferior program until a breakpoint is
+encountered, or until the inferior exits.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} corresponding is @samp{continue}.
+
+@subsubheading Example
+
+@smallexample
+-exec-continue
+^running
+(@value{GDBP})
+@@Hello world
+*stopped,reason="breakpoint-hit",bkptno="2",frame=@{func="foo",args=[],
+file="hello.c",fullname="/home/foo/bar/hello.c",line="13"@}
+(@value{GDBP})
+@end smallexample
+
+
+@subheading The @code{-exec-finish} Command
+@findex -exec-finish
+
+@subsubheading Synopsis
+
+@smallexample
+ -exec-finish
+@end smallexample
+
+Resumes the execution of the inferior program until the current
+function is exited.  Displays the results returned by the function.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{finish}.
+
+@subsubheading Example
+
+Function returning @code{void}.
+
+@smallexample
+-exec-finish
+^running
+(@value{GDBP})
+@@hello from foo
+*stopped,reason="function-finished",frame=@{func="main",args=[],
+file="hello.c",fullname="/home/foo/bar/hello.c",line="7"@}
+(@value{GDBP})
+@end smallexample
+
+Function returning other than @code{void}.  The name of the internal
+@value{GDBN} variable storing the result is printed, together with the
+value itself.
+
+@smallexample
+-exec-finish
+^running
+(@value{GDBP})
+*stopped,reason="function-finished",frame=@{addr="0x000107b0",func="foo",
+args=[@{name="a",value="1"],@{name="b",value="9"@}@},
+file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+gdb-result-var="$1",return-value="0"
+(@value{GDBP})
+@end smallexample
+
+
+@subheading The @code{-exec-interrupt} Command
+@findex -exec-interrupt
+
+@subsubheading Synopsis
+
+@smallexample
+ -exec-interrupt
+@end smallexample
+
+Interrupts the background execution of the target.  Note how the token
+associated with the stop message is the one for the execution command
+that has been interrupted.  The token for the interrupt itself only
+appears in the @samp{^done} output.  If the user is trying to
+interrupt a non-running program, an error message will be printed.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{interrupt}.
+
+@subsubheading Example
+
+@smallexample
+(@value{GDBP})
+111-exec-continue
+111^running
+
+(@value{GDBP})
+222-exec-interrupt
+222^done
+(@value{GDBP})
+111*stopped,signal-name="SIGINT",signal-meaning="Interrupt",
+frame=@{addr="0x00010140",func="foo",args=[],file="try.c",
+fullname="/home/foo/bar/try.c",line="13"@}
+(@value{GDBP})
+
+(@value{GDBP})
+-exec-interrupt
+^error,msg="mi_cmd_exec_interrupt: Inferior not executing."
+(@value{GDBP})
+@end smallexample
+
+
+@subheading The @code{-exec-next} Command
+@findex -exec-next
+
+@subsubheading Synopsis
+
+@smallexample
+ -exec-next
+@end smallexample
+
+Resumes execution of the inferior program, stopping when the beginning
+of the next source line is reached.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{next}.
+
+@subsubheading Example
+
+@smallexample
+-exec-next
+^running
+(@value{GDBP})
+*stopped,reason="end-stepping-range",line="8",file="hello.c"
+(@value{GDBP})
+@end smallexample
+
+
+@subheading The @code{-exec-next-instruction} Command
+@findex -exec-next-instruction
+
+@subsubheading Synopsis
+
+@smallexample
+ -exec-next-instruction
+@end smallexample
+
+Executes one machine instruction.  If the instruction is a function
+call, continues until the function returns.  If the program stops at an
+instruction in the middle of a source line, the address will be
+printed as well.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{nexti}.
+
+@subsubheading Example
+
+@smallexample
+(@value{GDBP})
+-exec-next-instruction
+^running
+
+(@value{GDBP})
+*stopped,reason="end-stepping-range",
+addr="0x000100d4",line="5",file="hello.c"
+(@value{GDBP})
+@end smallexample
+
+
+@subheading The @code{-exec-return} Command
+@findex -exec-return
+
+@subsubheading Synopsis
+
+@smallexample
+ -exec-return
+@end smallexample
+
+Makes current function return immediately.  Doesn't execute the inferior.
+Displays the new current frame.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{return}.
+
+@subsubheading Example
+
+@smallexample
+(@value{GDBP})
+200-break-insert callee4
+200^done,bkpt=@{number="1",addr="0x00010734",
+file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="8"@}
+(@value{GDBP})
+000-exec-run
+000^running
+(@value{GDBP})
+000*stopped,reason="breakpoint-hit",bkptno="1",
+frame=@{func="callee4",args=[],
+file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
+fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="8"@}
+(@value{GDBP})
+205-break-delete
+205^done
+(@value{GDBP})
+111-exec-return
+111^done,frame=@{level="0",func="callee3",
+args=[@{name="strarg",
+value="0x11940 \"A string argument.\""@}],
+file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
+fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="18"@}
+(@value{GDBP})
+@end smallexample
+
+
+@subheading The @code{-exec-run} Command
+@findex -exec-run
+
+@subsubheading Synopsis
+
+@smallexample
+ -exec-run
+@end smallexample
+
+Starts execution of the inferior from the beginning.  The inferior
+executes until either a breakpoint is encountered or the program
+exits.  In the latter case the output will include an exit code, if
+the program has exited exceptionally.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{run}.
+
+@subsubheading Examples
+
+@smallexample
+(@value{GDBP})
+-break-insert main
+^done,bkpt=@{number="1",addr="0x0001072c",file="recursive2.c",line="4"@}
+(@value{GDBP})
+-exec-run
+^running
+(@value{GDBP})
+*stopped,reason="breakpoint-hit",bkptno="1",
+frame=@{func="main",args=[],file="recursive2.c",
+fullname="/home/foo/bar/recursive2.c",line="4"@}
+(@value{GDBP})
+@end smallexample
+
+@noindent
+Program exited normally:
+
+@smallexample
+(@value{GDBP})
+-exec-run
+^running
+(@value{GDBP})
+x = 55
+*stopped,reason="exited-normally"
+(@value{GDBP})
+@end smallexample
+
+@noindent
+Program exited exceptionally:
+
+@smallexample
+(@value{GDBP})
+-exec-run
+^running
+(@value{GDBP})
+x = 55
+*stopped,reason="exited",exit-code="01"
+(@value{GDBP})
+@end smallexample
+
+Another way the program can terminate is if it receives a signal such as
+@code{SIGINT}.  In this case, @sc{gdb/mi} displays this:
+
+@smallexample
+(@value{GDBP})
+*stopped,reason="exited-signalled",signal-name="SIGINT",
+signal-meaning="Interrupt"
+@end smallexample
+
+
+@c @subheading -exec-signal
+
+
+@subheading The @code{-exec-step} Command
+@findex -exec-step
+
+@subsubheading Synopsis
+
+@smallexample
+ -exec-step
+@end smallexample
+
+Resumes execution of the inferior program, stopping when the beginning
+of the next source line is reached, if the next source line is not a
+function call.  If it is, stop at the first instruction of the called
+function.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{step}.
+
+@subsubheading Example
+
+Stepping into a function:
+
+@smallexample
+-exec-step
+^running
+(@value{GDBP})
+*stopped,reason="end-stepping-range",
+frame=@{func="foo",args=[@{name="a",value="10"@},
+@{name="b",value="0"@}],file="recursive2.c",
+fullname="/home/foo/bar/recursive2.c",line="11"@}
+(@value{GDBP})
+@end smallexample
+
+Regular stepping:
+
+@smallexample
+-exec-step
+^running
+(@value{GDBP})
+*stopped,reason="end-stepping-range",line="14",file="recursive2.c"
+(@value{GDBP})
+@end smallexample
+
+
+@subheading The @code{-exec-step-instruction} Command
+@findex -exec-step-instruction
+
+@subsubheading Synopsis
+
+@smallexample
+ -exec-step-instruction
+@end smallexample
+
+Resumes the inferior which executes one machine instruction.  The
+output, once @value{GDBN} has stopped, will vary depending on whether
+we have stopped in the middle of a source line or not.  In the former
+case, the address at which the program stopped will be printed as
+well.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{stepi}.
+
+@subsubheading Example
+
+@smallexample
+(@value{GDBP})
+-exec-step-instruction
+^running
+
+(@value{GDBP})
+*stopped,reason="end-stepping-range",
+frame=@{func="foo",args=[],file="try.c",
+fullname="/home/foo/bar/try.c",line="10"@}
+(@value{GDBP})
+-exec-step-instruction
+^running
+
+(@value{GDBP})
+*stopped,reason="end-stepping-range",
+frame=@{addr="0x000100f4",func="foo",args=[],file="try.c",
+fullname="/home/foo/bar/try.c",line="10"@}
+(@value{GDBP})
+@end smallexample
+
+
+@subheading The @code{-exec-until} Command
+@findex -exec-until
+
+@subsubheading Synopsis
+
+@smallexample
+ -exec-until [ @var{location} ]
+@end smallexample
+
+Executes the inferior until the @var{location} specified in the
+argument is reached.  If there is no argument, the inferior executes
+until a source line greater than the current one is reached.  The
+reason for stopping in this case will be @samp{location-reached}.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{until}.
+
+@subsubheading Example
+
+@smallexample
+(@value{GDBP})
+-exec-until recursive2.c:6
+^running
+(@value{GDBP})
+x = 55
+*stopped,reason="location-reached",frame=@{func="main",args=[],
+file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="6"@}
+(@value{GDBP})
+@end smallexample
+
+@ignore
+@subheading -file-clear
+Is this going away????
+@end ignore
+
+@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@node GDB/MI Stack Manipulation
+@section @sc{gdb/mi} Stack Manipulation Commands
+
+
+@subheading The @code{-stack-info-frame} Command
+@findex -stack-info-frame
+
+@subsubheading Synopsis
+
+@smallexample
+ -stack-info-frame
+@end smallexample
+
+Get info on the selected frame.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{info frame} or @samp{frame}
+(without arguments).
+
+@subsubheading Example
+
+@smallexample
+(@value{GDBP})
+-stack-info-frame
+^done,frame=@{level="1",addr="0x0001076c",func="callee3",
+file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
+fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="17"@}
+(@value{GDBP})
+@end smallexample
+
+@subheading The @code{-stack-info-depth} Command
+@findex -stack-info-depth
+
+@subsubheading Synopsis
+
+@smallexample
+ -stack-info-depth [ @var{max-depth} ]
+@end smallexample
+
+Return the depth of the stack.  If the integer argument @var{max-depth}
+is specified, do not count beyond @var{max-depth} frames.
+
+@subsubheading @value{GDBN} Command
+
+There's no equivalent @value{GDBN} command.
+
+@subsubheading Example
+
+For a stack with frame levels 0 through 11:
+
+@smallexample
+(@value{GDBP})
+-stack-info-depth
+^done,depth="12"
+(@value{GDBP})
+-stack-info-depth 4
+^done,depth="4"
+(@value{GDBP})
+-stack-info-depth 12
+^done,depth="12"
+(@value{GDBP})
+-stack-info-depth 11
+^done,depth="11"
+(@value{GDBP})
+-stack-info-depth 13
+^done,depth="12"
+(@value{GDBP})
+@end smallexample
+
+@subheading The @code{-stack-list-arguments} Command
+@findex -stack-list-arguments
+
+@subsubheading Synopsis
+
+@smallexample
+ -stack-list-arguments @var{show-values}
+    [ @var{low-frame} @var{high-frame} ]
+@end smallexample
+
+Display a list of the arguments for the frames between @var{low-frame}
+and @var{high-frame} (inclusive).  If @var{low-frame} and
+@var{high-frame} are not provided, list the arguments for the whole call
+stack.
+
+The @var{show-values} argument must have a value of 0 or 1.  A value of
+0 means that only the names of the arguments are listed, a value of 1
+means that both names and values of the arguments are printed.
+
+@subsubheading @value{GDBN} Command
+
+@value{GDBN} does not have an equivalent command.  @code{gdbtk} has a
+@samp{gdb_get_args} command which partially overlaps with the
+functionality of @samp{-stack-list-arguments}.
+
+@subsubheading Example
+
+@smallexample
+(@value{GDBP})
+-stack-list-frames
+^done,
+stack=[
+frame=@{level="0",addr="0x00010734",func="callee4",
+file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
+fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="8"@},
+frame=@{level="1",addr="0x0001076c",func="callee3",
+file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
+fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="17"@},
+frame=@{level="2",addr="0x0001078c",func="callee2",
+file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
+fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="22"@},
+frame=@{level="3",addr="0x000107b4",func="callee1",
+file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
+fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="27"@},
+frame=@{level="4",addr="0x000107e0",func="main",
+file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
+fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="32"@}]
+(@value{GDBP})
+-stack-list-arguments 0
+^done,
+stack-args=[
+frame=@{level="0",args=[]@},
+frame=@{level="1",args=[name="strarg"]@},
+frame=@{level="2",args=[name="intarg",name="strarg"]@},
+frame=@{level="3",args=[name="intarg",name="strarg",name="fltarg"]@},
+frame=@{level="4",args=[]@}]
+(@value{GDBP})
+-stack-list-arguments 1
+^done,
+stack-args=[
+frame=@{level="0",args=[]@},
+frame=@{level="1",
+ args=[@{name="strarg",value="0x11940 \"A string argument.\""@}]@},
+frame=@{level="2",args=[
+@{name="intarg",value="2"@},
+@{name="strarg",value="0x11940 \"A string argument.\""@}]@},
+@{frame=@{level="3",args=[
+@{name="intarg",value="2"@},
+@{name="strarg",value="0x11940 \"A string argument.\""@},
+@{name="fltarg",value="3.5"@}]@},
+frame=@{level="4",args=[]@}]
+(@value{GDBP})
+-stack-list-arguments 0 2 2
+^done,stack-args=[frame=@{level="2",args=[name="intarg",name="strarg"]@}]
+(@value{GDBP})
+-stack-list-arguments 1 2 2
+^done,stack-args=[frame=@{level="2",
+args=[@{name="intarg",value="2"@},
+@{name="strarg",value="0x11940 \"A string argument.\""@}]@}]
+(@value{GDBP})
+@end smallexample
+
+@c @subheading -stack-list-exception-handlers
+
+
+@subheading The @code{-stack-list-frames} Command
+@findex -stack-list-frames
+
+@subsubheading Synopsis
+
+@smallexample
+ -stack-list-frames [ @var{low-frame} @var{high-frame} ]
+@end smallexample
+
+List the frames currently on the stack.  For each frame it displays the
+following info:
+
+@table @samp
+@item @var{level}
+The frame number, 0 being the topmost frame, i.e. the innermost function.
+@item @var{addr}
+The @code{$pc} value for that frame.
+@item @var{func}
+Function name.
+@item @var{file}
+File name of the source file where the function lives.
+@item @var{line}
+Line number corresponding to the @code{$pc}.
+@end table
+
+If invoked without arguments, this command prints a backtrace for the
+whole stack.  If given two integer arguments, it shows the frames whose
+levels are between the two arguments (inclusive).  If the two arguments
+are equal, it shows the single frame at the corresponding level.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} commands are @samp{backtrace} and @samp{where}.
+
+@subsubheading Example
+
+Full stack backtrace:
+
+@smallexample
+(@value{GDBP})
+-stack-list-frames
+^done,stack=
+[frame=@{level="0",addr="0x0001076c",func="foo",
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="11"@},
+frame=@{level="1",addr="0x000107a4",func="foo",
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+frame=@{level="2",addr="0x000107a4",func="foo",
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+frame=@{level="3",addr="0x000107a4",func="foo",
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+frame=@{level="4",addr="0x000107a4",func="foo",
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+frame=@{level="5",addr="0x000107a4",func="foo",
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+frame=@{level="6",addr="0x000107a4",func="foo",
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+frame=@{level="7",addr="0x000107a4",func="foo",
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+frame=@{level="8",addr="0x000107a4",func="foo",
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+frame=@{level="9",addr="0x000107a4",func="foo",
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+frame=@{level="10",addr="0x000107a4",func="foo",
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+frame=@{level="11",addr="0x00010738",func="main",
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="4"@}]
+(@value{GDBP})
+@end smallexample
+
+Show frames between @var{low_frame} and @var{high_frame}:
+
+@smallexample
+(@value{GDBP})
+-stack-list-frames 3 5
+^done,stack=
+[frame=@{level="3",addr="0x000107a4",func="foo",
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+frame=@{level="4",addr="0x000107a4",func="foo",
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+frame=@{level="5",addr="0x000107a4",func="foo",
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@}]
+(@value{GDBP})
+@end smallexample
+
+Show a single frame:
+
+@smallexample
+(@value{GDBP})
+-stack-list-frames 3 3
+^done,stack=
+[frame=@{level="3",addr="0x000107a4",func="foo",
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@}]
+(@value{GDBP})
+@end smallexample
+
+
+@subheading The @code{-stack-list-locals} Command
+@findex -stack-list-locals
+
+@subsubheading Synopsis
+
+@smallexample
+ -stack-list-locals @var{print-values}
+@end smallexample
+
+Display the local variable names for the selected frame.  If
+@var{print-values} is 0 or @code{--no-values}, print only the names of
+the variables; if it is 1 or @code{--all-values}, print also their
+values; and if it is 2 or @code{--simple-values}, print the name,
+type and value for simple data types and the name and type for arrays,
+structures and unions.  In this last case, a frontend can immediately
+display the value of simple data types and create variable objects for
+other data types when the the user wishes to explore their values in
+more detail.
+
+@subsubheading @value{GDBN} Command
+
+@samp{info locals} in @value{GDBN}, @samp{gdb_get_locals} in @code{gdbtk}.
+
+@subsubheading Example
+
+@smallexample
+(@value{GDBP})
+-stack-list-locals 0
+^done,locals=[name="A",name="B",name="C"]
+(@value{GDBP})
+-stack-list-locals --all-values
+^done,locals=[@{name="A",value="1"@},@{name="B",value="2"@},
+  @{name="C",value="@{1, 2, 3@}"@}]
+-stack-list-locals --simple-values
+^done,locals=[@{name="A",type="int",value="1"@},
+  @{name="B",type="int",value="2"@},@{name="C",type="int [3]"@}]
+(@value{GDBP})
+@end smallexample
+
+
+@subheading The @code{-stack-select-frame} Command
+@findex -stack-select-frame
+
+@subsubheading Synopsis
+
+@smallexample
+ -stack-select-frame @var{framenum}
+@end smallexample
+
+Change the selected frame.  Select a different frame @var{framenum} on
+the stack.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} commands are @samp{frame}, @samp{up},
+@samp{down}, @samp{select-frame}, @samp{up-silent}, and @samp{down-silent}.
+
+@subsubheading Example
+
+@smallexample
+(@value{GDBP})
+-stack-select-frame 2
+^done
+(@value{GDBP})
+@end smallexample
+
+@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@node GDB/MI Variable Objects
+@section @sc{gdb/mi} Variable Objects
+
+
+@subheading Motivation for Variable Objects in @sc{gdb/mi}
+
+For the implementation of a variable debugger window (locals, watched
+expressions, etc.), we are proposing the adaptation of the existing code
+used by @code{Insight}.
+
+The two main reasons for that are:
+
+@enumerate 1
+@item
+It has been proven in practice (it is already on its second generation).
+
+@item
+It will shorten development time (needless to say how important it is
+now).
+@end enumerate
+
+The original interface was designed to be used by Tcl code, so it was
+slightly changed so it could be used through @sc{gdb/mi}.  This section
+describes the @sc{gdb/mi} operations that will be available and gives some
+hints about their use.
+
+@emph{Note}: In addition to the set of operations described here, we
+expect the @sc{gui} implementation of a variable window to require, at
+least, the following operations:
+
+@itemize @bullet
+@item @code{-gdb-show} @code{output-radix}
+@item @code{-stack-list-arguments}
+@item @code{-stack-list-locals}
+@item @code{-stack-select-frame}
+@end itemize
+
+@subheading Introduction to Variable Objects in @sc{gdb/mi}
+
+@cindex variable objects in @sc{gdb/mi}
+The basic idea behind variable objects is the creation of a named object
+to represent a variable, an expression, a memory location or even a CPU
+register.  For each object created, a set of operations is available for
+examining or changing its properties.
+
+Furthermore, complex data types, such as C structures, are represented
+in a tree format.  For instance, the @code{struct} type variable is the
+root and the children will represent the struct members.  If a child
+is itself of a complex type, it will also have children of its own.
+Appropriate language differences are handled for C, C@t{++} and Java.
+
+When returning the actual values of the objects, this facility allows
+for the individual selection of the display format used in the result
+creation.  It can be chosen among: binary, decimal, hexadecimal, octal
+and natural.  Natural refers to a default format automatically
+chosen based on the variable type (like decimal for an @code{int}, hex
+for pointers, etc.).
+
+The following is the complete set of @sc{gdb/mi} operations defined to
+access this functionality:
+
+@multitable @columnfractions .4 .6
+@item @strong{Operation}
+@tab @strong{Description}
+
+@item @code{-var-create}
+@tab create a variable object
+@item @code{-var-delete}
+@tab delete the variable object and its children
+@item @code{-var-set-format}
+@tab set the display format of this variable
+@item @code{-var-show-format}
+@tab show the display format of this variable
+@item @code{-var-info-num-children}
+@tab tells how many children this object has
+@item @code{-var-list-children}
+@tab return a list of the object's children
+@item @code{-var-info-type}
+@tab show the type of this variable object
+@item @code{-var-info-expression}
+@tab print what this variable object represents
+@item @code{-var-show-attributes}
+@tab is this variable editable? does it exist here?
+@item @code{-var-evaluate-expression}
+@tab get the value of this variable
+@item @code{-var-assign}
+@tab set the value of this variable
+@item @code{-var-update}
+@tab update the variable and its children
+@end multitable
+
+In the next subsection we describe each operation in detail and suggest
+how it can be used.
+
+@subheading Description And Use of Operations on Variable Objects
+
+@subheading The @code{-var-create} Command
+@findex -var-create
+
+@subsubheading Synopsis
+
+@smallexample
+ -var-create @{@var{name} | "-"@}
+    @{@var{frame-addr} | "*"@} @var{expression}
+@end smallexample
+
+This operation creates a variable object, which allows the monitoring of
+a variable, the result of an expression, a memory cell or a CPU
+register.
+
+The @var{name} parameter is the string by which the object can be
+referenced.  It must be unique.  If @samp{-} is specified, the varobj
+system will generate a string ``varNNNNNN'' automatically.  It will be
+unique provided that one does not specify @var{name} on that format.
+The command fails if a duplicate name is found.
+
+The frame under which the expression should be evaluated can be
+specified by @var{frame-addr}.  A @samp{*} indicates that the current
+frame should be used.
+
+@var{expression} is any expression valid on the current language set (must not
+begin with a @samp{*}), or one of the following:
+
+@itemize @bullet
+@item
+@samp{*@var{addr}}, where @var{addr} is the address of a memory cell
+
+@item
+@samp{*@var{addr}-@var{addr}} --- a memory address range (TBD)
+
+@item
+@samp{$@var{regname}} --- a CPU register name
+@end itemize
+
+@subsubheading Result
+
+This operation returns the name, number of children and the type of the
+object created.  Type is returned as a string as the ones generated by
+the @value{GDBN} CLI:
+
+@smallexample
+ name="@var{name}",numchild="N",type="@var{type}"
+@end smallexample
+
+
+@subheading The @code{-var-delete} Command
+@findex -var-delete
+
+@subsubheading Synopsis
+
+@smallexample
+ -var-delete @var{name}
+@end smallexample
+
+Deletes a previously created variable object and all of its children.
+
+Returns an error if the object @var{name} is not found.
+
+
+@subheading The @code{-var-set-format} Command
+@findex -var-set-format
+
+@subsubheading Synopsis
+
+@smallexample
+ -var-set-format @var{name} @var{format-spec}
+@end smallexample
+
+Sets the output format for the value of the object @var{name} to be
+@var{format-spec}.
+
+The syntax for the @var{format-spec} is as follows:
+
+@smallexample
+ @var{format-spec} @expansion{}
+ @{binary | decimal | hexadecimal | octal | natural@}
+@end smallexample
+
+
+@subheading The @code{-var-show-format} Command
+@findex -var-show-format
+
+@subsubheading Synopsis
+
+@smallexample
+ -var-show-format @var{name}
+@end smallexample
+
+Returns the format used to display the value of the object @var{name}.
+
+@smallexample
+ @var{format} @expansion{}
+ @var{format-spec}
+@end smallexample
+
+
+@subheading The @code{-var-info-num-children} Command
+@findex -var-info-num-children
+
+@subsubheading Synopsis
+
+@smallexample
+ -var-info-num-children @var{name}
+@end smallexample
+
+Returns the number of children of a variable object @var{name}:
+
+@smallexample
+ numchild=@var{n}
+@end smallexample
+
+
+@subheading The @code{-var-list-children} Command
+@findex -var-list-children
+
+@subsubheading Synopsis
+
+@smallexample
+ -var-list-children [@var{print-values}] @var{name}
+@end smallexample
+@anchor{-var-list-children} 
+
+Return a list of the children of the specified variable object and
+create variable objects for them, if they do not already exist.  With
+a single argument or if @var{print-values} has a value for of 0 or
+@code{--no-values}, print only the names of the variables; if
+@var{print-values} is 1 or @code{--all-values}, also print their
+values; and if it is 2 or @code{--simple-values} print the name and
+value for simple data types and just the name for arrays, structures
+and unions.
+
+@subsubheading Example
+
+@smallexample
+(@value{GDBP})
+ -var-list-children n
+ ^done,numchild=@var{n},children=[@{name=@var{name},
+ numchild=@var{n},type=@var{type}@},@r{(repeats N times)}]
+(@value{GDBP})
+ -var-list-children --all-values n
+ ^done,numchild=@var{n},children=[@{name=@var{name},
+ numchild=@var{n},value=@var{value},type=@var{type}@},@r{(repeats N times)}]
+@end smallexample
+
+
+@subheading The @code{-var-info-type} Command
+@findex -var-info-type
+
+@subsubheading Synopsis
+
+@smallexample
+ -var-info-type @var{name}
+@end smallexample
+
+Returns the type of the specified variable @var{name}.  The type is
+returned as a string in the same format as it is output by the
+@value{GDBN} CLI:
+
+@smallexample
+ type=@var{typename}
+@end smallexample
+
+
+@subheading The @code{-var-info-expression} Command
+@findex -var-info-expression
+
+@subsubheading Synopsis
+
+@smallexample
+ -var-info-expression @var{name}
+@end smallexample
+
+Returns what is represented by the variable object @var{name}:
+
+@smallexample
+ lang=@var{lang-spec},exp=@var{expression}
+@end smallexample
+
+@noindent
+where @var{lang-spec} is @code{@{"C" | "C++" | "Java"@}}.
+
+@subheading The @code{-var-show-attributes} Command
+@findex -var-show-attributes
+
+@subsubheading Synopsis
+
+@smallexample
+ -var-show-attributes @var{name}
+@end smallexample
+
+List attributes of the specified variable object @var{name}:
+
+@smallexample
+ status=@var{attr} [ ( ,@var{attr} )* ]
+@end smallexample
+
+@noindent
+where @var{attr} is @code{@{ @{ editable | noneditable @} | TBD @}}.
+
+@subheading The @code{-var-evaluate-expression} Command
+@findex -var-evaluate-expression
+
+@subsubheading Synopsis
+
+@smallexample
+ -var-evaluate-expression @var{name}
+@end smallexample
+
+Evaluates the expression that is represented by the specified variable
+object and returns its value as a string in the current format specified
+for the object:
+
+@smallexample
+ value=@var{value}
+@end smallexample
+
+Note that one must invoke @code{-var-list-children} for a variable
+before the value of a child variable can be evaluated.
+
+@subheading The @code{-var-assign} Command
+@findex -var-assign
+
+@subsubheading Synopsis
+
+@smallexample
+ -var-assign @var{name} @var{expression}
+@end smallexample
+
+Assigns the value of @var{expression} to the variable object specified
+by @var{name}.  The object must be @samp{editable}.  If the variable's
+value is altered by the assign, the variable will show up in any
+subsequent @code{-var-update} list.
+
+@subsubheading Example
+
+@smallexample
+(@value{GDBP})
+-var-assign var1 3
+^done,value="3"
+(@value{GDBP})
+-var-update *
+^done,changelist=[@{name="var1",in_scope="true",type_changed="false"@}]
+(@value{GDBP})
+@end smallexample
+
+@subheading The @code{-var-update} Command
+@findex -var-update
+
+@subsubheading Synopsis
+
+@smallexample
+ -var-update [@var{print-values}] @{@var{name} | "*"@}
+@end smallexample
+
+Update the value of the variable object @var{name} by evaluating its
+expression after fetching all the new values from memory or registers.
+A @samp{*} causes all existing variable objects to be updated.  The
+option @var{print-values} determines whether names both and values, or
+just names are printed in the manner described for
+@code{-var-list-children} (@pxref{-var-list-children}).
+
+@subsubheading Example
+
+@smallexample
+(@value{GDBP})
+-var-assign var1 3
+^done,value="3"
+(@value{GDBP})
+-var-update --all-values var1
+^done,changelist=[@{name="var1",value="3",in_scope="true",
+type_changed="false"@}]
+(@value{GDBP})
+@end smallexample
+
+@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Data Manipulation
 @section @sc{gdb/mi} Data Manipulation
 
@@ -18820,729 +20249,266 @@ next-page="0x000013c0",prev-page="0x00001380",memory=[
 (@value{GDBP})
 @end smallexample
 
-@subheading The @code{-display-delete} Command
-@findex -display-delete
+@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@node GDB/MI Tracepoint Commands
+@section @sc{gdb/mi} Tracepoint Commands
 
-@subsubheading Synopsis
+The tracepoint commands are not yet implemented.
 
-@smallexample
- -display-delete @var{number}
-@end smallexample
+@c @subheading -trace-actions
 
-Delete the display @var{number}.
+@c @subheading -trace-delete
 
-@subsubheading @value{GDBN} Command
+@c @subheading -trace-disable
 
-The corresponding @value{GDBN} command is @samp{delete display}.
+@c @subheading -trace-dump
 
-@subsubheading Example
-N.A.
+@c @subheading -trace-enable
 
+@c @subheading -trace-exists
 
-@subheading The @code{-display-disable} Command
-@findex -display-disable
+@c @subheading -trace-find
 
-@subsubheading Synopsis
+@c @subheading -trace-frame-number
 
-@smallexample
- -display-disable @var{number}
-@end smallexample
+@c @subheading -trace-info
 
-Disable display @var{number}.
+@c @subheading -trace-insert
 
-@subsubheading @value{GDBN} Command
+@c @subheading -trace-list
 
-The corresponding @value{GDBN} command is @samp{disable display}.
+@c @subheading -trace-pass-count
 
-@subsubheading Example
-N.A.
+@c @subheading -trace-save
 
+@c @subheading -trace-start
 
-@subheading The @code{-display-enable} Command
-@findex -display-enable
+@c @subheading -trace-stop
 
-@subsubheading Synopsis
-
-@smallexample
- -display-enable @var{number}
-@end smallexample
-
-Enable display @var{number}.
-
-@subsubheading @value{GDBN} Command
-
-The corresponding @value{GDBN} command is @samp{enable display}.
-
-@subsubheading Example
-N.A.
-
-
-@subheading The @code{-display-insert} Command
-@findex -display-insert
-
-@subsubheading Synopsis
-
-@smallexample
- -display-insert @var{expression}
-@end smallexample
-
-Display @var{expression} every time the program stops.
-
-@subsubheading @value{GDBN} Command
-
-The corresponding @value{GDBN} command is @samp{display}.
-
-@subsubheading Example
-N.A.
-
-
-@subheading The @code{-display-list} Command
-@findex -display-list
-
-@subsubheading Synopsis
-
-@smallexample
- -display-list
-@end smallexample
-
-List the displays.  Do not show the current values.
-
-@subsubheading @value{GDBN} Command
-
-The corresponding @value{GDBN} command is @samp{info display}.
-
-@subsubheading Example
-N.A.
-
-
-@subheading The @code{-environment-cd} Command
-@findex -environment-cd
-
-@subsubheading Synopsis
-
-@smallexample
- -environment-cd @var{pathdir}
-@end smallexample
-
-Set @value{GDBN}'s working directory.
-
-@subsubheading @value{GDBN} Command
-
-The corresponding @value{GDBN} command is @samp{cd}.
-
-@subsubheading Example
-
-@smallexample
-(@value{GDBP})
--environment-cd /kwikemart/marge/ezannoni/flathead-dev/devo/gdb
-^done
-(@value{GDBP})
-@end smallexample
-
-
-@subheading The @code{-environment-directory} Command
-@findex -environment-directory
-
-@subsubheading Synopsis
-
-@smallexample
- -environment-directory [ -r ] [ @var{pathdir} ]+
-@end smallexample
-
-Add directories @var{pathdir} to beginning of search path for source files.
-If the @samp{-r} option is used, the search path is reset to the default
-search path.  If directories @var{pathdir} are supplied in addition to the
-@samp{-r} option, the search path is first reset and then addition
-occurs as normal.
-Multiple directories may be specified, separated by blanks.  Specifying
-multiple directories in a single command
-results in the directories added to the beginning of the
-search path in the same order they were presented in the command.
-If blanks are needed as
-part of a directory name, double-quotes should be used around
-the name.  In the command output, the path will show up separated
-by the system directory-separator character.  The directory-seperator
-character must not be used
-in any directory name.
-If no directories are specified, the current search path is displayed.
-
-@subsubheading @value{GDBN} Command
-
-The corresponding @value{GDBN} command is @samp{dir}.
-
-@subsubheading Example
-
-@smallexample
-(@value{GDBP})
--environment-directory /kwikemart/marge/ezannoni/flathead-dev/devo/gdb
-^done,source-path="/kwikemart/marge/ezannoni/flathead-dev/devo/gdb:$cdir:$cwd"
-(@value{GDBP})
--environment-directory ""
-^done,source-path="/kwikemart/marge/ezannoni/flathead-dev/devo/gdb:$cdir:$cwd"
-(@value{GDBP})
--environment-directory -r /home/jjohnstn/src/gdb /usr/src
-^done,source-path="/home/jjohnstn/src/gdb:/usr/src:$cdir:$cwd"
-(@value{GDBP})
--environment-directory -r
-^done,source-path="$cdir:$cwd"
-(@value{GDBP})
-@end smallexample
-
-
-@subheading The @code{-environment-path} Command
-@findex -environment-path
-
-@subsubheading Synopsis
-
-@smallexample
- -environment-path [ -r ] [ @var{pathdir} ]+
-@end smallexample
-
-Add directories @var{pathdir} to beginning of search path for object files.
-If the @samp{-r} option is used, the search path is reset to the original
-search path that existed at gdb start-up.  If directories @var{pathdir} are
-supplied in addition to the
-@samp{-r} option, the search path is first reset and then addition
-occurs as normal.
-Multiple directories may be specified, separated by blanks.  Specifying
-multiple directories in a single command
-results in the directories added to the beginning of the
-search path in the same order they were presented in the command.
-If blanks are needed as
-part of a directory name, double-quotes should be used around
-the name.  In the command output, the path will show up separated
-by the system directory-separator character.  The directory-seperator
-character must not be used
-in any directory name.
-If no directories are specified, the current path is displayed.
-
-
-@subsubheading @value{GDBN} Command
-
-The corresponding @value{GDBN} command is @samp{path}.
-
-@subsubheading Example
-
-@smallexample
-(@value{GDBP})
--environment-path
-^done,path="/usr/bin"
-(@value{GDBP})
--environment-path /kwikemart/marge/ezannoni/flathead-dev/ppc-eabi/gdb /bin
-^done,path="/kwikemart/marge/ezannoni/flathead-dev/ppc-eabi/gdb:/bin:/usr/bin"
-(@value{GDBP})
--environment-path -r /usr/local/bin
-^done,path="/usr/local/bin:/usr/bin"
-(@value{GDBP})
-@end smallexample
-
-
-@subheading The @code{-environment-pwd} Command
-@findex -environment-pwd
-
-@subsubheading Synopsis
-
-@smallexample
- -environment-pwd
-@end smallexample
-
-Show the current working directory.
-
-@subsubheading @value{GDBN} command
-
-The corresponding @value{GDBN} command is @samp{pwd}.
-
-@subsubheading Example
-
-@smallexample
-(@value{GDBP})
--environment-pwd
-^done,cwd="/kwikemart/marge/ezannoni/flathead-dev/devo/gdb"
-(@value{GDBP})
-@end smallexample
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-@node GDB/MI Program Control
-@section @sc{gdb/mi} Program control
+@node GDB/MI Symbol Query
+@section @sc{gdb/mi} Symbol Query Commands
 
-These are the asynchronous commands which generate the out-of-band
-record @samp{*stopped}.  Currently GDB only really executes
-asynchronously with remote targets and this interaction is mimicked in
-other cases.
 
-@subheading The @code{-exec-abort} Command
-@findex -exec-abort
+@subheading The @code{-symbol-info-address} Command
+@findex -symbol-info-address
 
 @subsubheading Synopsis
 
 @smallexample
- -exec-abort
+ -symbol-info-address @var{symbol}
 @end smallexample
 
-Kill the inferior running program.
+Describe where @var{symbol} is stored.
 
 @subsubheading @value{GDBN} Command
 
-The corresponding @value{GDBN} command is @samp{kill}.
+The corresponding @value{GDBN} command is @samp{info address}.
 
 @subsubheading Example
 N.A.
 
 
-@subheading The @code{-exec-arguments} Command
-@findex -exec-arguments
+@subheading The @code{-symbol-info-file} Command
+@findex -symbol-info-file
 
 @subsubheading Synopsis
 
 @smallexample
- -exec-arguments @var{args}
+ -symbol-info-file
 @end smallexample
 
-Set the inferior program arguments, to be used in the next
-@samp{-exec-run}.
+Show the file for the symbol.
 
 @subsubheading @value{GDBN} Command
 
-The corresponding @value{GDBN} command is @samp{set args}.
-
-@subsubheading Example
-
-@c FIXME!
-Don't have one around.
-
-
-@subheading The @code{-exec-continue} Command
-@findex -exec-continue
-
-@subsubheading Synopsis
-
-@smallexample
- -exec-continue
-@end smallexample
-
-Resumes the execution of the inferior program until a breakpoint is
-encountered, or until the inferior exits.
-
-@subsubheading @value{GDBN} Command
-
-The corresponding @value{GDBN} corresponding is @samp{continue}.
-
-@subsubheading Example
-
-@smallexample
--exec-continue
-^running
-(@value{GDBP})
-@@Hello world
-*stopped,reason="breakpoint-hit",bkptno="2",frame=@{func="foo",args=[],
-file="hello.c",fullname="/home/foo/bar/hello.c",line="13"@}
-(@value{GDBP})
-@end smallexample
-
-
-@subheading The @code{-exec-finish} Command
-@findex -exec-finish
-
-@subsubheading Synopsis
-
-@smallexample
- -exec-finish
-@end smallexample
-
-Resumes the execution of the inferior program until the current
-function is exited.  Displays the results returned by the function.
-
-@subsubheading @value{GDBN} Command
-
-The corresponding @value{GDBN} command is @samp{finish}.
-
-@subsubheading Example
-
-Function returning @code{void}.
-
-@smallexample
--exec-finish
-^running
-(@value{GDBP})
-@@hello from foo
-*stopped,reason="function-finished",frame=@{func="main",args=[],
-file="hello.c",fullname="/home/foo/bar/hello.c",line="7"@}
-(@value{GDBP})
-@end smallexample
-
-Function returning other than @code{void}.  The name of the internal
-@value{GDBN} variable storing the result is printed, together with the
-value itself.
-
-@smallexample
--exec-finish
-^running
-(@value{GDBP})
-*stopped,reason="function-finished",frame=@{addr="0x000107b0",func="foo",
-args=[@{name="a",value="1"],@{name="b",value="9"@}@},
-file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
-gdb-result-var="$1",return-value="0"
-(@value{GDBP})
-@end smallexample
-
-
-@subheading The @code{-exec-interrupt} Command
-@findex -exec-interrupt
-
-@subsubheading Synopsis
-
-@smallexample
- -exec-interrupt
-@end smallexample
-
-Interrupts the background execution of the target.  Note how the token
-associated with the stop message is the one for the execution command
-that has been interrupted.  The token for the interrupt itself only
-appears in the @samp{^done} output.  If the user is trying to
-interrupt a non-running program, an error message will be printed.
-
-@subsubheading @value{GDBN} Command
-
-The corresponding @value{GDBN} command is @samp{interrupt}.
-
-@subsubheading Example
-
-@smallexample
-(@value{GDBP})
-111-exec-continue
-111^running
-
-(@value{GDBP})
-222-exec-interrupt
-222^done
-(@value{GDBP})
-111*stopped,signal-name="SIGINT",signal-meaning="Interrupt",
-frame=@{addr="0x00010140",func="foo",args=[],file="try.c",
-fullname="/home/foo/bar/try.c",line="13"@}
-(@value{GDBP})
-
-(@value{GDBP})
--exec-interrupt
-^error,msg="mi_cmd_exec_interrupt: Inferior not executing."
-(@value{GDBP})
-@end smallexample
-
-
-@subheading The @code{-exec-next} Command
-@findex -exec-next
-
-@subsubheading Synopsis
-
-@smallexample
- -exec-next
-@end smallexample
-
-Resumes execution of the inferior program, stopping when the beginning
-of the next source line is reached.
-
-@subsubheading @value{GDBN} Command
-
-The corresponding @value{GDBN} command is @samp{next}.
-
-@subsubheading Example
-
-@smallexample
--exec-next
-^running
-(@value{GDBP})
-*stopped,reason="end-stepping-range",line="8",file="hello.c"
-(@value{GDBP})
-@end smallexample
-
-
-@subheading The @code{-exec-next-instruction} Command
-@findex -exec-next-instruction
-
-@subsubheading Synopsis
-
-@smallexample
- -exec-next-instruction
-@end smallexample
-
-Executes one machine instruction.  If the instruction is a function
-call, continues until the function returns.  If the program stops at an
-instruction in the middle of a source line, the address will be
-printed as well.
-
-@subsubheading @value{GDBN} Command
-
-The corresponding @value{GDBN} command is @samp{nexti}.
-
-@subsubheading Example
-
-@smallexample
-(@value{GDBP})
--exec-next-instruction
-^running
-
-(@value{GDBP})
-*stopped,reason="end-stepping-range",
-addr="0x000100d4",line="5",file="hello.c"
-(@value{GDBP})
-@end smallexample
-
-
-@subheading The @code{-exec-return} Command
-@findex -exec-return
-
-@subsubheading Synopsis
-
-@smallexample
- -exec-return
-@end smallexample
-
-Makes current function return immediately.  Doesn't execute the inferior.
-Displays the new current frame.
-
-@subsubheading @value{GDBN} Command
-
-The corresponding @value{GDBN} command is @samp{return}.
-
-@subsubheading Example
-
-@smallexample
-(@value{GDBP})
-200-break-insert callee4
-200^done,bkpt=@{number="1",addr="0x00010734",
-file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="8"@}
-(@value{GDBP})
-000-exec-run
-000^running
-(@value{GDBP})
-000*stopped,reason="breakpoint-hit",bkptno="1",
-frame=@{func="callee4",args=[],
-file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
-fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="8"@}
-(@value{GDBP})
-205-break-delete
-205^done
-(@value{GDBP})
-111-exec-return
-111^done,frame=@{level="0",func="callee3",
-args=[@{name="strarg",
-value="0x11940 \"A string argument.\""@}],
-file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
-fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="18"@}
-(@value{GDBP})
-@end smallexample
-
-
-@subheading The @code{-exec-run} Command
-@findex -exec-run
-
-@subsubheading Synopsis
-
-@smallexample
- -exec-run
-@end smallexample
-
-Starts execution of the inferior from the beginning.  The inferior
-executes until either a breakpoint is encountered or the program
-exits.  In the latter case the output will include an exit code, if
-the program has exited exceptionally.
-
-@subsubheading @value{GDBN} Command
-
-The corresponding @value{GDBN} command is @samp{run}.
-
-@subsubheading Examples
-
-@smallexample
-(@value{GDBP})
--break-insert main
-^done,bkpt=@{number="1",addr="0x0001072c",file="recursive2.c",line="4"@}
-(@value{GDBP})
--exec-run
-^running
-(@value{GDBP})
-*stopped,reason="breakpoint-hit",bkptno="1",
-frame=@{func="main",args=[],file="recursive2.c",
-fullname="/home/foo/bar/recursive2.c",line="4"@}
-(@value{GDBP})
-@end smallexample
-
-@noindent
-Program exited normally:
-
-@smallexample
-(@value{GDBP})
--exec-run
-^running
-(@value{GDBP})
-x = 55
-*stopped,reason="exited-normally"
-(@value{GDBP})
-@end smallexample
-
-@noindent
-Program exited exceptionally:
-
-@smallexample
-(@value{GDBP})
--exec-run
-^running
-(@value{GDBP})
-x = 55
-*stopped,reason="exited",exit-code="01"
-(@value{GDBP})
-@end smallexample
-
-Another way the program can terminate is if it receives a signal such as
-@code{SIGINT}.  In this case, @sc{gdb/mi} displays this:
-
-@smallexample
-(@value{GDBP})
-*stopped,reason="exited-signalled",signal-name="SIGINT",
-signal-meaning="Interrupt"
-@end smallexample
-
-
-@subheading The @code{-exec-show-arguments} Command
-@findex -exec-show-arguments
-
-@subsubheading Synopsis
-
-@smallexample
- -exec-show-arguments
-@end smallexample
-
-Print the arguments of the program.
-
-@subsubheading @value{GDBN} Command
-
-The corresponding @value{GDBN} command is @samp{show args}.
+There's no equivalent @value{GDBN} command.  @code{gdbtk} has
+@samp{gdb_find_file}.
 
 @subsubheading Example
 N.A.
 
-@c @subheading -exec-signal
 
-@subheading The @code{-exec-step} Command
-@findex -exec-step
-
-@subsubheading Synopsis
-
-@smallexample
- -exec-step
-@end smallexample
-
-Resumes execution of the inferior program, stopping when the beginning
-of the next source line is reached, if the next source line is not a
-function call.  If it is, stop at the first instruction of the called
-function.
-
-@subsubheading @value{GDBN} Command
-
-The corresponding @value{GDBN} command is @samp{step}.
-
-@subsubheading Example
-
-Stepping into a function:
-
-@smallexample
--exec-step
-^running
-(@value{GDBP})
-*stopped,reason="end-stepping-range",
-frame=@{func="foo",args=[@{name="a",value="10"@},
-@{name="b",value="0"@}],file="recursive2.c",
-fullname="/home/foo/bar/recursive2.c",line="11"@}
-(@value{GDBP})
-@end smallexample
-
-Regular stepping:
-
-@smallexample
--exec-step
-^running
-(@value{GDBP})
-*stopped,reason="end-stepping-range",line="14",file="recursive2.c"
-(@value{GDBP})
-@end smallexample
-
-
-@subheading The @code{-exec-step-instruction} Command
-@findex -exec-step-instruction
+@subheading The @code{-symbol-info-function} Command
+@findex -symbol-info-function
 
 @subsubheading Synopsis
 
 @smallexample
- -exec-step-instruction
+ -symbol-info-function
 @end smallexample
 
-Resumes the inferior which executes one machine instruction.  The
-output, once @value{GDBN} has stopped, will vary depending on whether
-we have stopped in the middle of a source line or not.  In the former
-case, the address at which the program stopped will be printed as
-well.
+Show which function the symbol lives in.
 
 @subsubheading @value{GDBN} Command
 
-The corresponding @value{GDBN} command is @samp{stepi}.
+@samp{gdb_get_function} in @code{gdbtk}.
 
 @subsubheading Example
-
-@smallexample
-(@value{GDBP})
--exec-step-instruction
-^running
-
-(@value{GDBP})
-*stopped,reason="end-stepping-range",
-frame=@{func="foo",args=[],file="try.c",
-fullname="/home/foo/bar/try.c",line="10"@}
-(@value{GDBP})
--exec-step-instruction
-^running
-
-(@value{GDBP})
-*stopped,reason="end-stepping-range",
-frame=@{addr="0x000100f4",func="foo",args=[],file="try.c",
-fullname="/home/foo/bar/try.c",line="10"@}
-(@value{GDBP})
-@end smallexample
+N.A.
 
 
-@subheading The @code{-exec-until} Command
-@findex -exec-until
+@subheading The @code{-symbol-info-line} Command
+@findex -symbol-info-line
 
 @subsubheading Synopsis
 
 @smallexample
- -exec-until [ @var{location} ]
+ -symbol-info-line
 @end smallexample
 
-Executes the inferior until the @var{location} specified in the
-argument is reached.  If there is no argument, the inferior executes
-until a source line greater than the current one is reached.  The
-reason for stopping in this case will be @samp{location-reached}.
+Show the core addresses of the code for a source line.
 
 @subsubheading @value{GDBN} Command
 
-The corresponding @value{GDBN} command is @samp{until}.
+The corresponding @value{GDBN} command is @samp{info line}.
+@code{gdbtk} has the @samp{gdb_get_line} and @samp{gdb_get_file} commands.
 
 @subsubheading Example
+N.A.
+
+
+@subheading The @code{-symbol-info-symbol} Command
+@findex -symbol-info-symbol
+
+@subsubheading Synopsis
 
 @smallexample
+ -symbol-info-symbol @var{addr}
+@end smallexample
+
+Describe what symbol is at location @var{addr}.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{info symbol}.
+
+@subsubheading Example
+N.A.
+
+
+@subheading The @code{-symbol-list-functions} Command
+@findex -symbol-list-functions
+
+@subsubheading Synopsis
+
+@smallexample
+ -symbol-list-functions
+@end smallexample
+
+List the functions in the executable.
+
+@subsubheading @value{GDBN} Command
+
+@samp{info functions} in @value{GDBN}, @samp{gdb_listfunc} and
+@samp{gdb_search} in @code{gdbtk}.
+
+@subsubheading Example
+N.A.
+
+
+@subheading The @code{-symbol-list-lines} Command
+@findex -symbol-list-lines
+
+@subsubheading Synopsis
+
+@smallexample
+ -symbol-list-lines @var{filename}
+@end smallexample
+
+Print the list of lines that contain code and their associated program
+addresses for the given source filename.  The entries are sorted in
+ascending PC order.
+
+@subsubheading @value{GDBN} Command
+
+There is no corresponding @value{GDBN} command.
+
+@subsubheading Example
+@smallexample
 (@value{GDBP})
--exec-until recursive2.c:6
-^running
-(@value{GDBP})
-x = 55
-*stopped,reason="location-reached",frame=@{func="main",args=[],
-file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="6"@}
+-symbol-list-lines basics.c
+^done,lines=[@{pc="0x08048554",line="7"@},@{pc="0x0804855a",line="8"@}]
 (@value{GDBP})
 @end smallexample
 
-@ignore
-@subheading -file-clear
-Is this going away????
-@end ignore
+
+@subheading The @code{-symbol-list-types} Command
+@findex -symbol-list-types
+
+@subsubheading Synopsis
+
+@smallexample
+ -symbol-list-types
+@end smallexample
+
+List all the type names.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding commands are @samp{info types} in @value{GDBN},
+@samp{gdb_search} in @code{gdbtk}.
+
+@subsubheading Example
+N.A.
+
+
+@subheading The @code{-symbol-list-variables} Command
+@findex -symbol-list-variables
+
+@subsubheading Synopsis
+
+@smallexample
+ -symbol-list-variables
+@end smallexample
+
+List all the global and static variable names.
+
+@subsubheading @value{GDBN} Command
+
+@samp{info variables} in @value{GDBN}, @samp{gdb_search} in @code{gdbtk}.
+
+@subsubheading Example
+N.A.
+
+
+@subheading The @code{-symbol-locate} Command
+@findex -symbol-locate
+
+@subsubheading Synopsis
+
+@smallexample
+ -symbol-locate
+@end smallexample
+
+@subsubheading @value{GDBN} Command
+
+@samp{gdb_loc} in @code{gdbtk}.
+
+@subsubheading Example
+N.A.
+
+
+@subheading The @code{-symbol-type} Command
+@findex -symbol-type
+
+@subsubheading Synopsis
+
+@smallexample
+ -symbol-type @var{variable}
+@end smallexample
+
+Show type of @var{variable}.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{ptype}, @code{gdbtk} has
+@samp{gdb_obj_variable}.
+
+@subsubheading Example
+N.A.
+
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI File Commands
@@ -19798,548 +20764,6 @@ Signal handling commands are not implemented.
 
 @c @subheading -signal-list-signal-types
 @end ignore
-
-
-@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-@node GDB/MI Stack Manipulation
-@section @sc{gdb/mi} Stack Manipulation Commands
-
-
-@subheading The @code{-stack-info-frame} Command
-@findex -stack-info-frame
-
-@subsubheading Synopsis
-
-@smallexample
- -stack-info-frame
-@end smallexample
-
-Get info on the selected frame.
-
-@subsubheading @value{GDBN} Command
-
-The corresponding @value{GDBN} command is @samp{info frame} or @samp{frame}
-(without arguments).
-
-@subsubheading Example
-
-@smallexample
-(@value{GDBP})
--stack-info-frame
-^done,frame=@{level="1",addr="0x0001076c",func="callee3",
-file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
-fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="17"@}
-(@value{GDBP})
-@end smallexample
-
-@subheading The @code{-stack-info-depth} Command
-@findex -stack-info-depth
-
-@subsubheading Synopsis
-
-@smallexample
- -stack-info-depth [ @var{max-depth} ]
-@end smallexample
-
-Return the depth of the stack.  If the integer argument @var{max-depth}
-is specified, do not count beyond @var{max-depth} frames.
-
-@subsubheading @value{GDBN} Command
-
-There's no equivalent @value{GDBN} command.
-
-@subsubheading Example
-
-For a stack with frame levels 0 through 11:
-
-@smallexample
-(@value{GDBP})
--stack-info-depth
-^done,depth="12"
-(@value{GDBP})
--stack-info-depth 4
-^done,depth="4"
-(@value{GDBP})
--stack-info-depth 12
-^done,depth="12"
-(@value{GDBP})
--stack-info-depth 11
-^done,depth="11"
-(@value{GDBP})
--stack-info-depth 13
-^done,depth="12"
-(@value{GDBP})
-@end smallexample
-
-@subheading The @code{-stack-list-arguments} Command
-@findex -stack-list-arguments
-
-@subsubheading Synopsis
-
-@smallexample
- -stack-list-arguments @var{show-values}
-    [ @var{low-frame} @var{high-frame} ]
-@end smallexample
-
-Display a list of the arguments for the frames between @var{low-frame}
-and @var{high-frame} (inclusive).  If @var{low-frame} and
-@var{high-frame} are not provided, list the arguments for the whole call
-stack.
-
-The @var{show-values} argument must have a value of 0 or 1.  A value of
-0 means that only the names of the arguments are listed, a value of 1
-means that both names and values of the arguments are printed.
-
-@subsubheading @value{GDBN} Command
-
-@value{GDBN} does not have an equivalent command.  @code{gdbtk} has a
-@samp{gdb_get_args} command which partially overlaps with the
-functionality of @samp{-stack-list-arguments}.
-
-@subsubheading Example
-
-@smallexample
-(@value{GDBP})
--stack-list-frames
-^done,
-stack=[
-frame=@{level="0",addr="0x00010734",func="callee4",
-file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
-fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="8"@},
-frame=@{level="1",addr="0x0001076c",func="callee3",
-file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
-fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="17"@},
-frame=@{level="2",addr="0x0001078c",func="callee2",
-file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
-fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="22"@},
-frame=@{level="3",addr="0x000107b4",func="callee1",
-file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
-fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="27"@},
-frame=@{level="4",addr="0x000107e0",func="main",
-file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
-fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="32"@}]
-(@value{GDBP})
--stack-list-arguments 0
-^done,
-stack-args=[
-frame=@{level="0",args=[]@},
-frame=@{level="1",args=[name="strarg"]@},
-frame=@{level="2",args=[name="intarg",name="strarg"]@},
-frame=@{level="3",args=[name="intarg",name="strarg",name="fltarg"]@},
-frame=@{level="4",args=[]@}]
-(@value{GDBP})
--stack-list-arguments 1
-^done,
-stack-args=[
-frame=@{level="0",args=[]@},
-frame=@{level="1",
- args=[@{name="strarg",value="0x11940 \"A string argument.\""@}]@},
-frame=@{level="2",args=[
-@{name="intarg",value="2"@},
-@{name="strarg",value="0x11940 \"A string argument.\""@}]@},
-@{frame=@{level="3",args=[
-@{name="intarg",value="2"@},
-@{name="strarg",value="0x11940 \"A string argument.\""@},
-@{name="fltarg",value="3.5"@}]@},
-frame=@{level="4",args=[]@}]
-(@value{GDBP})
--stack-list-arguments 0 2 2
-^done,stack-args=[frame=@{level="2",args=[name="intarg",name="strarg"]@}]
-(@value{GDBP})
--stack-list-arguments 1 2 2
-^done,stack-args=[frame=@{level="2",
-args=[@{name="intarg",value="2"@},
-@{name="strarg",value="0x11940 \"A string argument.\""@}]@}]
-(@value{GDBP})
-@end smallexample
-
-@c @subheading -stack-list-exception-handlers
-
-
-@subheading The @code{-stack-list-frames} Command
-@findex -stack-list-frames
-
-@subsubheading Synopsis
-
-@smallexample
- -stack-list-frames [ @var{low-frame} @var{high-frame} ]
-@end smallexample
-
-List the frames currently on the stack.  For each frame it displays the
-following info:
-
-@table @samp
-@item @var{level}
-The frame number, 0 being the topmost frame, i.e. the innermost function.
-@item @var{addr}
-The @code{$pc} value for that frame.
-@item @var{func}
-Function name.
-@item @var{file}
-File name of the source file where the function lives.
-@item @var{line}
-Line number corresponding to the @code{$pc}.
-@end table
-
-If invoked without arguments, this command prints a backtrace for the
-whole stack.  If given two integer arguments, it shows the frames whose
-levels are between the two arguments (inclusive).  If the two arguments
-are equal, it shows the single frame at the corresponding level.
-
-@subsubheading @value{GDBN} Command
-
-The corresponding @value{GDBN} commands are @samp{backtrace} and @samp{where}.
-
-@subsubheading Example
-
-Full stack backtrace:
-
-@smallexample
-(@value{GDBP})
--stack-list-frames
-^done,stack=
-[frame=@{level="0",addr="0x0001076c",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="11"@},
-frame=@{level="1",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
-frame=@{level="2",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
-frame=@{level="3",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
-frame=@{level="4",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
-frame=@{level="5",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
-frame=@{level="6",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
-frame=@{level="7",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
-frame=@{level="8",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
-frame=@{level="9",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
-frame=@{level="10",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
-frame=@{level="11",addr="0x00010738",func="main",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="4"@}]
-(@value{GDBP})
-@end smallexample
-
-Show frames between @var{low_frame} and @var{high_frame}:
-
-@smallexample
-(@value{GDBP})
--stack-list-frames 3 5
-^done,stack=
-[frame=@{level="3",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
-frame=@{level="4",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
-frame=@{level="5",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@}]
-(@value{GDBP})
-@end smallexample
-
-Show a single frame:
-
-@smallexample
-(@value{GDBP})
--stack-list-frames 3 3
-^done,stack=
-[frame=@{level="3",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@}]
-(@value{GDBP})
-@end smallexample
-
-
-@subheading The @code{-stack-list-locals} Command
-@findex -stack-list-locals
-
-@subsubheading Synopsis
-
-@smallexample
- -stack-list-locals @var{print-values}
-@end smallexample
-
-Display the local variable names for the selected frame.  If
-@var{print-values} is 0 or @code{--no-values}, print only the names of
-the variables; if it is 1 or @code{--all-values}, print also their
-values; and if it is 2 or @code{--simple-values}, print the name,
-type and value for simple data types and the name and type for arrays,
-structures and unions.  In this last case, a frontend can immediately
-display the value of simple data types and create variable objects for
-other data types when the the user wishes to explore their values in
-more detail.
-
-@subsubheading @value{GDBN} Command
-
-@samp{info locals} in @value{GDBN}, @samp{gdb_get_locals} in @code{gdbtk}.
-
-@subsubheading Example
-
-@smallexample
-(@value{GDBP})
--stack-list-locals 0
-^done,locals=[name="A",name="B",name="C"]
-(@value{GDBP})
--stack-list-locals --all-values
-^done,locals=[@{name="A",value="1"@},@{name="B",value="2"@},
-  @{name="C",value="@{1, 2, 3@}"@}]
--stack-list-locals --simple-values
-^done,locals=[@{name="A",type="int",value="1"@},
-  @{name="B",type="int",value="2"@},@{name="C",type="int [3]"@}]
-(@value{GDBP})
-@end smallexample
-
-
-@subheading The @code{-stack-select-frame} Command
-@findex -stack-select-frame
-
-@subsubheading Synopsis
-
-@smallexample
- -stack-select-frame @var{framenum}
-@end smallexample
-
-Change the selected frame.  Select a different frame @var{framenum} on
-the stack.
-
-@subsubheading @value{GDBN} Command
-
-The corresponding @value{GDBN} commands are @samp{frame}, @samp{up},
-@samp{down}, @samp{select-frame}, @samp{up-silent}, and @samp{down-silent}.
-
-@subsubheading Example
-
-@smallexample
-(@value{GDBP})
--stack-select-frame 2
-^done
-(@value{GDBP})
-@end smallexample
-
-@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-@node GDB/MI Symbol Query
-@section @sc{gdb/mi} Symbol Query Commands
-
-
-@subheading The @code{-symbol-info-address} Command
-@findex -symbol-info-address
-
-@subsubheading Synopsis
-
-@smallexample
- -symbol-info-address @var{symbol}
-@end smallexample
-
-Describe where @var{symbol} is stored.
-
-@subsubheading @value{GDBN} Command
-
-The corresponding @value{GDBN} command is @samp{info address}.
-
-@subsubheading Example
-N.A.
-
-
-@subheading The @code{-symbol-info-file} Command
-@findex -symbol-info-file
-
-@subsubheading Synopsis
-
-@smallexample
- -symbol-info-file
-@end smallexample
-
-Show the file for the symbol.
-
-@subsubheading @value{GDBN} Command
-
-There's no equivalent @value{GDBN} command.  @code{gdbtk} has
-@samp{gdb_find_file}.
-
-@subsubheading Example
-N.A.
-
-
-@subheading The @code{-symbol-info-function} Command
-@findex -symbol-info-function
-
-@subsubheading Synopsis
-
-@smallexample
- -symbol-info-function
-@end smallexample
-
-Show which function the symbol lives in.
-
-@subsubheading @value{GDBN} Command
-
-@samp{gdb_get_function} in @code{gdbtk}.
-
-@subsubheading Example
-N.A.
-
-
-@subheading The @code{-symbol-info-line} Command
-@findex -symbol-info-line
-
-@subsubheading Synopsis
-
-@smallexample
- -symbol-info-line
-@end smallexample
-
-Show the core addresses of the code for a source line.
-
-@subsubheading @value{GDBN} Command
-
-The corresponding @value{GDBN} command is @samp{info line}.
-@code{gdbtk} has the @samp{gdb_get_line} and @samp{gdb_get_file} commands.
-
-@subsubheading Example
-N.A.
-
-
-@subheading The @code{-symbol-info-symbol} Command
-@findex -symbol-info-symbol
-
-@subsubheading Synopsis
-
-@smallexample
- -symbol-info-symbol @var{addr}
-@end smallexample
-
-Describe what symbol is at location @var{addr}.
-
-@subsubheading @value{GDBN} Command
-
-The corresponding @value{GDBN} command is @samp{info symbol}.
-
-@subsubheading Example
-N.A.
-
-
-@subheading The @code{-symbol-list-functions} Command
-@findex -symbol-list-functions
-
-@subsubheading Synopsis
-
-@smallexample
- -symbol-list-functions
-@end smallexample
-
-List the functions in the executable.
-
-@subsubheading @value{GDBN} Command
-
-@samp{info functions} in @value{GDBN}, @samp{gdb_listfunc} and
-@samp{gdb_search} in @code{gdbtk}.
-
-@subsubheading Example
-N.A.
-
-
-@subheading The @code{-symbol-list-lines} Command
-@findex -symbol-list-lines
-
-@subsubheading Synopsis
-
-@smallexample
- -symbol-list-lines @var{filename}
-@end smallexample
-
-Print the list of lines that contain code and their associated program
-addresses for the given source filename.  The entries are sorted in
-ascending PC order.
-
-@subsubheading @value{GDBN} Command
-
-There is no corresponding @value{GDBN} command.
-
-@subsubheading Example
-@smallexample
-(@value{GDBP})
--symbol-list-lines basics.c
-^done,lines=[@{pc="0x08048554",line="7"@},@{pc="0x0804855a",line="8"@}]
-(@value{GDBP})
-@end smallexample
-
-
-@subheading The @code{-symbol-list-types} Command
-@findex -symbol-list-types
-
-@subsubheading Synopsis
-
-@smallexample
- -symbol-list-types
-@end smallexample
-
-List all the type names.
-
-@subsubheading @value{GDBN} Command
-
-The corresponding commands are @samp{info types} in @value{GDBN},
-@samp{gdb_search} in @code{gdbtk}.
-
-@subsubheading Example
-N.A.
-
-
-@subheading The @code{-symbol-list-variables} Command
-@findex -symbol-list-variables
-
-@subsubheading Synopsis
-
-@smallexample
- -symbol-list-variables
-@end smallexample
-
-List all the global and static variable names.
-
-@subsubheading @value{GDBN} Command
-
-@samp{info variables} in @value{GDBN}, @samp{gdb_search} in @code{gdbtk}.
-
-@subsubheading Example
-N.A.
-
-
-@subheading The @code{-symbol-locate} Command
-@findex -symbol-locate
-
-@subsubheading Synopsis
-
-@smallexample
- -symbol-locate
-@end smallexample
-
-@subsubheading @value{GDBN} Command
-
-@samp{gdb_loc} in @code{gdbtk}.
-
-@subsubheading Example
-N.A.
-
-
-@subheading The @code{-symbol-type} Command
-@findex -symbol-type
-
-@subsubheading Synopsis
-
-@smallexample
- -symbol-type @var{variable}
-@end smallexample
-
-Show type of @var{variable}.
-
-@subsubheading @value{GDBN} Command
-
-The corresponding @value{GDBN} command is @samp{ptype}, @code{gdbtk} has
-@samp{gdb_obj_variable}.
-
-@subsubheading Example
-N.A.
 
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -20661,535 +21085,6 @@ The corresponding @value{GDBN} command is @samp{target}.
 @end smallexample
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-@node GDB/MI Thread Commands
-@section @sc{gdb/mi} Thread Commands
-
-
-@subheading The @code{-thread-info} Command
-@findex -thread-info
-
-@subsubheading Synopsis
-
-@smallexample
- -thread-info
-@end smallexample
-
-@subsubheading @value{GDBN} command
-
-No equivalent.
-
-@subsubheading Example
-N.A.
-
-
-@subheading The @code{-thread-list-all-threads} Command
-@findex -thread-list-all-threads
-
-@subsubheading Synopsis
-
-@smallexample
- -thread-list-all-threads
-@end smallexample
-
-@subsubheading @value{GDBN} Command
-
-The equivalent @value{GDBN} command is @samp{info threads}.
-
-@subsubheading Example
-N.A.
-
-
-@subheading The @code{-thread-list-ids} Command
-@findex -thread-list-ids
-
-@subsubheading Synopsis
-
-@smallexample
- -thread-list-ids
-@end smallexample
-
-Produces a list of the currently known @value{GDBN} thread ids.  At the
-end of the list it also prints the total number of such threads.
-
-@subsubheading @value{GDBN} Command
-
-Part of @samp{info threads} supplies the same information.
-
-@subsubheading Example
-
-No threads present, besides the main process:
-
-@smallexample
-(@value{GDBP})
--thread-list-ids
-^done,thread-ids=@{@},number-of-threads="0"
-(@value{GDBP})
-@end smallexample
-
-
-Several threads:
-
-@smallexample
-(@value{GDBP})
--thread-list-ids
-^done,thread-ids=@{thread-id="3",thread-id="2",thread-id="1"@},
-number-of-threads="3"
-(@value{GDBP})
-@end smallexample
-
-
-@subheading The @code{-thread-select} Command
-@findex -thread-select
-
-@subsubheading Synopsis
-
-@smallexample
- -thread-select @var{threadnum}
-@end smallexample
-
-Make @var{threadnum} the current thread.  It prints the number of the new
-current thread, and the topmost frame for that thread.
-
-@subsubheading @value{GDBN} Command
-
-The corresponding @value{GDBN} command is @samp{thread}.
-
-@subsubheading Example
-
-@smallexample
-(@value{GDBP})
--exec-next
-^running
-(@value{GDBP})
-*stopped,reason="end-stepping-range",thread-id="2",line="187",
-file="../../../devo/gdb/testsuite/gdb.threads/linux-dp.c"
-(@value{GDBP})
--thread-list-ids
-^done,
-thread-ids=@{thread-id="3",thread-id="2",thread-id="1"@},
-number-of-threads="3"
-(@value{GDBP})
--thread-select 3
-^done,new-thread-id="3",
-frame=@{level="0",func="vprintf",
-args=[@{name="format",value="0x8048e9c \"%*s%c %d %c\\n\""@},
-@{name="arg",value="0x2"@}],file="vprintf.c",line="31"@}
-(@value{GDBP})
-@end smallexample
-
-@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-@node GDB/MI Tracepoint Commands
-@section @sc{gdb/mi} Tracepoint Commands
-
-The tracepoint commands are not yet implemented.
-
-@c @subheading -trace-actions
-
-@c @subheading -trace-delete
-
-@c @subheading -trace-disable
-
-@c @subheading -trace-dump
-
-@c @subheading -trace-enable
-
-@c @subheading -trace-exists
-
-@c @subheading -trace-find
-
-@c @subheading -trace-frame-number
-
-@c @subheading -trace-info
-
-@c @subheading -trace-insert
-
-@c @subheading -trace-list
-
-@c @subheading -trace-pass-count
-
-@c @subheading -trace-save
-
-@c @subheading -trace-start
-
-@c @subheading -trace-stop
-
-
-@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-@node GDB/MI Variable Objects
-@section @sc{gdb/mi} Variable Objects
-
-
-@subheading Motivation for Variable Objects in @sc{gdb/mi}
-
-For the implementation of a variable debugger window (locals, watched
-expressions, etc.), we are proposing the adaptation of the existing code
-used by @code{Insight}.
-
-The two main reasons for that are:
-
-@enumerate 1
-@item
-It has been proven in practice (it is already on its second generation).
-
-@item
-It will shorten development time (needless to say how important it is
-now).
-@end enumerate
-
-The original interface was designed to be used by Tcl code, so it was
-slightly changed so it could be used through @sc{gdb/mi}.  This section
-describes the @sc{gdb/mi} operations that will be available and gives some
-hints about their use.
-
-@emph{Note}: In addition to the set of operations described here, we
-expect the @sc{gui} implementation of a variable window to require, at
-least, the following operations:
-
-@itemize @bullet
-@item @code{-gdb-show} @code{output-radix}
-@item @code{-stack-list-arguments}
-@item @code{-stack-list-locals}
-@item @code{-stack-select-frame}
-@end itemize
-
-@subheading Introduction to Variable Objects in @sc{gdb/mi}
-
-@cindex variable objects in @sc{gdb/mi}
-The basic idea behind variable objects is the creation of a named object
-to represent a variable, an expression, a memory location or even a CPU
-register.  For each object created, a set of operations is available for
-examining or changing its properties.
-
-Furthermore, complex data types, such as C structures, are represented
-in a tree format.  For instance, the @code{struct} type variable is the
-root and the children will represent the struct members.  If a child
-is itself of a complex type, it will also have children of its own.
-Appropriate language differences are handled for C, C@t{++} and Java.
-
-When returning the actual values of the objects, this facility allows
-for the individual selection of the display format used in the result
-creation.  It can be chosen among: binary, decimal, hexadecimal, octal
-and natural.  Natural refers to a default format automatically
-chosen based on the variable type (like decimal for an @code{int}, hex
-for pointers, etc.).
-
-The following is the complete set of @sc{gdb/mi} operations defined to
-access this functionality:
-
-@multitable @columnfractions .4 .6
-@item @strong{Operation}
-@tab @strong{Description}
-
-@item @code{-var-create}
-@tab create a variable object
-@item @code{-var-delete}
-@tab delete the variable object and its children
-@item @code{-var-set-format}
-@tab set the display format of this variable
-@item @code{-var-show-format}
-@tab show the display format of this variable
-@item @code{-var-info-num-children}
-@tab tells how many children this object has
-@item @code{-var-list-children}
-@tab return a list of the object's children
-@item @code{-var-info-type}
-@tab show the type of this variable object
-@item @code{-var-info-expression}
-@tab print what this variable object represents
-@item @code{-var-show-attributes}
-@tab is this variable editable? does it exist here?
-@item @code{-var-evaluate-expression}
-@tab get the value of this variable
-@item @code{-var-assign}
-@tab set the value of this variable
-@item @code{-var-update}
-@tab update the variable and its children
-@end multitable
-
-In the next subsection we describe each operation in detail and suggest
-how it can be used.
-
-@subheading Description And Use of Operations on Variable Objects
-
-@subheading The @code{-var-create} Command
-@findex -var-create
-
-@subsubheading Synopsis
-
-@smallexample
- -var-create @{@var{name} | "-"@}
-    @{@var{frame-addr} | "*"@} @var{expression}
-@end smallexample
-
-This operation creates a variable object, which allows the monitoring of
-a variable, the result of an expression, a memory cell or a CPU
-register.
-
-The @var{name} parameter is the string by which the object can be
-referenced.  It must be unique.  If @samp{-} is specified, the varobj
-system will generate a string ``varNNNNNN'' automatically.  It will be
-unique provided that one does not specify @var{name} on that format.
-The command fails if a duplicate name is found.
-
-The frame under which the expression should be evaluated can be
-specified by @var{frame-addr}.  A @samp{*} indicates that the current
-frame should be used.
-
-@var{expression} is any expression valid on the current language set (must not
-begin with a @samp{*}), or one of the following:
-
-@itemize @bullet
-@item
-@samp{*@var{addr}}, where @var{addr} is the address of a memory cell
-
-@item
-@samp{*@var{addr}-@var{addr}} --- a memory address range (TBD)
-
-@item
-@samp{$@var{regname}} --- a CPU register name
-@end itemize
-
-@subsubheading Result
-
-This operation returns the name, number of children and the type of the
-object created.  Type is returned as a string as the ones generated by
-the @value{GDBN} CLI:
-
-@smallexample
- name="@var{name}",numchild="N",type="@var{type}"
-@end smallexample
-
-
-@subheading The @code{-var-delete} Command
-@findex -var-delete
-
-@subsubheading Synopsis
-
-@smallexample
- -var-delete @var{name}
-@end smallexample
-
-Deletes a previously created variable object and all of its children.
-
-Returns an error if the object @var{name} is not found.
-
-
-@subheading The @code{-var-set-format} Command
-@findex -var-set-format
-
-@subsubheading Synopsis
-
-@smallexample
- -var-set-format @var{name} @var{format-spec}
-@end smallexample
-
-Sets the output format for the value of the object @var{name} to be
-@var{format-spec}.
-
-The syntax for the @var{format-spec} is as follows:
-
-@smallexample
- @var{format-spec} @expansion{}
- @{binary | decimal | hexadecimal | octal | natural@}
-@end smallexample
-
-
-@subheading The @code{-var-show-format} Command
-@findex -var-show-format
-
-@subsubheading Synopsis
-
-@smallexample
- -var-show-format @var{name}
-@end smallexample
-
-Returns the format used to display the value of the object @var{name}.
-
-@smallexample
- @var{format} @expansion{}
- @var{format-spec}
-@end smallexample
-
-
-@subheading The @code{-var-info-num-children} Command
-@findex -var-info-num-children
-
-@subsubheading Synopsis
-
-@smallexample
- -var-info-num-children @var{name}
-@end smallexample
-
-Returns the number of children of a variable object @var{name}:
-
-@smallexample
- numchild=@var{n}
-@end smallexample
-
-
-@subheading The @code{-var-list-children} Command
-@findex -var-list-children
-
-@subsubheading Synopsis
-
-@smallexample
- -var-list-children [@var{print-values}] @var{name}
-@end smallexample
-@anchor{-var-list-children} 
-
-Return a list of the children of the specified variable object and
-create variable objects for them, if they do not already exist.  With
-a single argument or if @var{print-values} has a value for of 0 or
-@code{--no-values}, print only the names of the variables; if
-@var{print-values} is 1 or @code{--all-values}, also print their
-values; and if it is 2 or @code{--simple-values} print the name and
-value for simple data types and just the name for arrays, structures
-and unions.
-
-@subsubheading Example
-
-@smallexample
-(@value{GDBP})
- -var-list-children n
- ^done,numchild=@var{n},children=[@{name=@var{name},
- numchild=@var{n},type=@var{type}@},@r{(repeats N times)}]
-(@value{GDBP})
- -var-list-children --all-values n
- ^done,numchild=@var{n},children=[@{name=@var{name},
- numchild=@var{n},value=@var{value},type=@var{type}@},@r{(repeats N times)}]
-@end smallexample
-
-
-@subheading The @code{-var-info-type} Command
-@findex -var-info-type
-
-@subsubheading Synopsis
-
-@smallexample
- -var-info-type @var{name}
-@end smallexample
-
-Returns the type of the specified variable @var{name}.  The type is
-returned as a string in the same format as it is output by the
-@value{GDBN} CLI:
-
-@smallexample
- type=@var{typename}
-@end smallexample
-
-
-@subheading The @code{-var-info-expression} Command
-@findex -var-info-expression
-
-@subsubheading Synopsis
-
-@smallexample
- -var-info-expression @var{name}
-@end smallexample
-
-Returns what is represented by the variable object @var{name}:
-
-@smallexample
- lang=@var{lang-spec},exp=@var{expression}
-@end smallexample
-
-@noindent
-where @var{lang-spec} is @code{@{"C" | "C++" | "Java"@}}.
-
-@subheading The @code{-var-show-attributes} Command
-@findex -var-show-attributes
-
-@subsubheading Synopsis
-
-@smallexample
- -var-show-attributes @var{name}
-@end smallexample
-
-List attributes of the specified variable object @var{name}:
-
-@smallexample
- status=@var{attr} [ ( ,@var{attr} )* ]
-@end smallexample
-
-@noindent
-where @var{attr} is @code{@{ @{ editable | noneditable @} | TBD @}}.
-
-@subheading The @code{-var-evaluate-expression} Command
-@findex -var-evaluate-expression
-
-@subsubheading Synopsis
-
-@smallexample
- -var-evaluate-expression @var{name}
-@end smallexample
-
-Evaluates the expression that is represented by the specified variable
-object and returns its value as a string in the current format specified
-for the object:
-
-@smallexample
- value=@var{value}
-@end smallexample
-
-Note that one must invoke @code{-var-list-children} for a variable
-before the value of a child variable can be evaluated.
-
-@subheading The @code{-var-assign} Command
-@findex -var-assign
-
-@subsubheading Synopsis
-
-@smallexample
- -var-assign @var{name} @var{expression}
-@end smallexample
-
-Assigns the value of @var{expression} to the variable object specified
-by @var{name}.  The object must be @samp{editable}.  If the variable's
-value is altered by the assign, the variable will show up in any
-subsequent @code{-var-update} list.
-
-@subsubheading Example
-
-@smallexample
-(@value{GDBP})
--var-assign var1 3
-^done,value="3"
-(@value{GDBP})
--var-update *
-^done,changelist=[@{name="var1",in_scope="true",type_changed="false"@}]
-(@value{GDBP})
-@end smallexample
-
-@subheading The @code{-var-update} Command
-@findex -var-update
-
-@subsubheading Synopsis
-
-@smallexample
- -var-update [@var{print-values}] @{@var{name} | "*"@}
-@end smallexample
-
-Update the value of the variable object @var{name} by evaluating its
-expression after fetching all the new values from memory or registers.
-A @samp{*} causes all existing variable objects to be updated.  The
-option @var{print-values} determines whether names both and values, or
-just names are printed in the manner described for
-@code{-var-list-children} (@pxref{-var-list-children}).
-
-@subsubheading Example
-
-@smallexample
-(@value{GDBP})
--var-assign var1 3
-^done,value="3"
-(@value{GDBP})
--var-update --all-values var1
-^done,changelist=[@{name="var1",value="3",in_scope="true",
-type_changed="false"@}]
-(@value{GDBP})
-@end smallexample
-
-@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Miscellaneous Commands
 @section Miscellaneous @sc{gdb/mi} Commands
 
@@ -21217,6 +21112,26 @@ Approximately corresponds to @samp{quit}.
 -gdb-exit
 ^exit
 @end smallexample
+
+
+@subheading The @code{-exec-abort} Command
+@findex -exec-abort
+
+@subsubheading Synopsis
+
+@smallexample
+ -exec-abort
+@end smallexample
+
+Kill the inferior running program.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{kill}.
+
+@subsubheading Example
+N.A.
+
 
 @subheading The @code{-gdb-set} Command
 @findex -gdb-set
@@ -21316,6 +21231,7 @@ default shows this information when you start an interactive session.
 @smallexample
 -interpreter-exec @var{interpreter} @var{command}
 @end smallexample
+@anchor{-interpreter-exec} 
 
 Execute the specified @var{command} in the given @var{interpreter}.
 
