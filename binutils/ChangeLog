@@ -1,3 +1,12 @@
+2006-06-30  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (display_debug_frames): Catch a corrupt length field
+	generating an end of block address that is beyond the end of the
+	section.
+	When encountering a corrupt CIE pointer do not reset the start
+	pointer as more data still has to be read.
+	Do not warn about user defined call frame instructions.
+
 2006-06-29  DJ Delorie  <dj@redhat.com>
 
 	* readelf.c (process_section_headers): Add H8/300 support.

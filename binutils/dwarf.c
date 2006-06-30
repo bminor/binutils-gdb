@@ -2519,6 +2519,7 @@ display_debug_aranges (struct dwarf_section *section,
       unsigned char *ranges;
       unsigned long length;
       unsigned long address;
+      unsigned char address_size;
       int excess;
       int offset_size;
       int initial_length_size;
@@ -2565,26 +2566,37 @@ display_debug_aranges (struct dwarf_section *section,
       printf (_("  Pointer Size:             %d\n"), arange.ar_pointer_size);
       printf (_("  Segment Size:             %d\n"), arange.ar_segment_size);
 
+      address_size = arange.ar_pointer_size + arange.ar_segment_size;
+
+      /* The DWARF spec does not require that the address size be a power
+	 of two, but we do.  This will have to change if we ever encounter
+	 an uneven architecture.  */
+      if ((address_size & (address_size - 1)) != 0)
+	{
+	  warn (_("Pointer size + Segment size is not a power of two.\n"));
+	  break;
+	}
+      
       printf (_("\n    Address  Length\n"));
 
       ranges = hdrptr;
 
-      /* Must pad to an alignment boundary that is twice the pointer size.  */
-      excess = (hdrptr - start) % (2 * arange.ar_pointer_size);
+      /* Must pad to an alignment boundary that is twice the address size.  */
+      excess = (hdrptr - start) % (2 * address_size);
       if (excess)
-	ranges += (2 * arange.ar_pointer_size) - excess;
+	ranges += (2 * address_size) - excess;
 
       start += arange.ar_length + initial_length_size;
 
-      while (ranges + 2 * arange.ar_pointer_size <= start)
+      while (ranges + 2 * address_size <= start)
 	{
-	  address = byte_get (ranges, arange.ar_pointer_size);
+	  address = byte_get (ranges, address_size);
 
-	  ranges += arange.ar_pointer_size;
+	  ranges += address_size;
 
-	  length  = byte_get (ranges, arange.ar_pointer_size);
+	  length  = byte_get (ranges, address_size);
 
-	  ranges += arange.ar_pointer_size;
+	  ranges += address_size;
 
 	  printf ("    %8.8lx %lu\n", address, length);
 	}
@@ -2879,6 +2891,7 @@ static dwarf_vma
 get_encoded_value (unsigned char *data, int encoding)
 {
   int size = size_of_encoded_value (encoding);
+
   if (encoding & DW_EH_PE_signed)
     return byte_get_signed (data, size);
   else
@@ -2944,6 +2957,12 @@ display_debug_frames (struct dwarf_section *section,
 	}
 
       block_end = saved_start + length + initial_length_size;
+      if (block_end > end)
+	{
+	  warn ("Invalid length %#08lx in FDE at %#08lx\n",
+		length, (unsigned long)(saved_start - section_start));
+	  block_end = end;
+	}
       cie_id = byte_get (start, offset_size); start += offset_size;
 
       if (is_eh ? (cie_id == 0) : (cie_id == DW_CIE_ID))
@@ -3078,9 +3097,8 @@ display_debug_frames (struct dwarf_section *section,
 
 	  if (!cie)
 	    {
-	      warn ("Invalid CIE pointer %08lx in FDE at %08lx\n",
+	      warn ("Invalid CIE pointer %#08lx in FDE at %#08lx\n",
 		    cie_id, (unsigned long)(saved_start - section_start));
-	      start = block_end;
 	      fc->ncols = 0;
 	      fc->col_type = xmalloc (sizeof (short int));
 	      fc->col_offset = xmalloc (sizeof (int));
@@ -3584,7 +3602,10 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    default:
-	      warn (_("unsupported or unknown DW_CFA_%d\n"), op);
+	      if (op >= DW_CFA_lo_user && op <= DW_CFA_hi_user)
+		printf (_("  DW_CFA_??? (User defined call frame op: %#x)\n"), op);
+	      else
+		warn (_("unsupported or unknown Dwarf Call Frame Instruction number: %#x\n"), op);		
 	      start = block_end;
 	    }
 	}
