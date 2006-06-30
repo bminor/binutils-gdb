@@ -350,7 +350,7 @@ static const bfd_byte elf64_x86_64_plt0_entry[PLT_ENTRY_SIZE] =
 {
   0xff, 0x35, 8, 0, 0, 0,	/* pushq GOT+8(%rip)  */
   0xff, 0x25, 16, 0, 0, 0,	/* jmpq *GOT+16(%rip) */
-  0x90, 0x90, 0x90, 0x90	/* pad out to 16 bytes with nops.  */
+  0x0f, 0x1f, 0x40, 0x00	/* nopl 0(%rax)       */
 };
 
 /* Subsequent entries in a procedure linkage table look like this.  */
@@ -2617,8 +2617,9 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  val = bfd_get_8 (input_bfd, contents + roff + 1);
 		  BFD_ASSERT (val == 0x10);
 
-		  /* Now modify the instruction as appropriate.  */
-		  bfd_put_8 (output_bfd, 0x90, contents + roff);
+		  /* Now modify the instruction as appropriate.  Use
+		     xchg %ax,%ax instead of 2 nops.  */
+		  bfd_put_8 (output_bfd, 0x66, contents + roff);
 		  bfd_put_8 (output_bfd, 0x90, contents + roff + 1);
 		  continue;
 		}
@@ -2910,8 +2911,9 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      val = bfd_get_8 (input_bfd, contents + roff + 1);
 	      BFD_ASSERT (val == 0x10);
 
-	      /* Now modify the instruction as appropriate.  */
-	      bfd_put_8 (output_bfd, 0x90, contents + roff);
+	      /* Now modify the instruction as appropriate.  Use
+		 xchg %ax,%ax instead of 2 nops.  */
+	      bfd_put_8 (output_bfd, 0x66, contents + roff);
 	      bfd_put_8 (output_bfd, 0x90, contents + roff + 1);
 
 	      continue;

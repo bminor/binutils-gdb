@@ -2821,8 +2821,9 @@ elf_i386_relocate_section (bfd *output_bfd,
 		  val = bfd_get_8 (input_bfd, contents + roff + 1);
 		  BFD_ASSERT (val == 0x10);
 
-		  /* Now modify the instruction as appropriate.  */
-		  bfd_put_8 (output_bfd, 0x90, contents + roff);
+		  /* Now modify the instruction as appropriate.  Use
+		     xchg %ax,%ax instead of 2 nops.  */
+		  bfd_put_8 (output_bfd, 0x66, contents + roff);
 		  bfd_put_8 (output_bfd, 0x90, contents + roff + 1);
 		  continue;
 		}
@@ -3227,8 +3228,8 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      /* Now modify the instruction as appropriate.  */
 	      if (tls_type != GOT_TLS_IE_NEG)
 		{
-		  /* nop; nop */
-		  bfd_put_8 (output_bfd, 0x90, contents + roff);
+		  /* xchg %ax,%ax */
+		  bfd_put_8 (output_bfd, 0x66, contents + roff);
 		  bfd_put_8 (output_bfd, 0x90, contents + roff + 1);
 		}
 	      else

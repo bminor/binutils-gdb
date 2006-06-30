@@ -1,3 +1,14 @@
+2006-06-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/tlsbindesc.dd: Updated to expect xchg %ax,%ax instead
+	of 2 nops.
+	* ld-i386/tlsdesc.dd: Likewise.
+	* ld-i386/tlsgdesc.dd: Likewise.
+	* ld-x86-64/tlsbindesc.dd: Likewise.
+	* ld-x86-64/tlsdesc.dd: Likewise.
+	* ld-x86-64/tlsdesc.pd: Likewise.
+	* ld-x86-64/tlsgdesc.dd: Likewise.
+
 2006-06-29  Jakub Jelinek  <jakub@redhat.com>
 
 	PR ld/2513

@@ -89,8 +89,7 @@ Disassembly of section .text:
 #  GD -> IE because variable is referenced through @gotntpoff too
  [0-9a-f]+:	8b 83 f0 ff ff ff[ 	]+mov    0xfffffff0\(%ebx\),%eax
 #				->R_386_TLS_TPOFF	sG4
- [0-9a-f]+:	90[ 	]+nop *
- [0-9a-f]+:	90[ 	]+nop *
+ [0-9a-f]+:	66 90[ 	]+xchg   %ax,%ax
  [0-9a-f]+:	90[ 	]+nop *
  [0-9a-f]+:	90[ 	]+nop *
  [0-9a-f]+:	90[ 	]+nop *
@@ -112,8 +111,7 @@ Disassembly of section .text:
  [0-9a-f]+:	90[ 	]+nop *
  [0-9a-f]+:	8b 83 e4 ff ff ff[ 	]+mov    0xffffffe4\(%ebx\),%eax
 #				->R_386_TLS_TPOFF	sG5
- [0-9a-f]+:	90[ 	]+nop *
- [0-9a-f]+:	90[ 	]+nop *
+ [0-9a-f]+:	66 90[ 	]+xchg   %ax,%ax
  [0-9a-f]+:	90[ 	]+nop *
  [0-9a-f]+:	90[ 	]+nop *
  [0-9a-f]+:	90[ 	]+nop *

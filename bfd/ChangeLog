@@ -1,3 +1,10 @@
+2006-06-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_relocate_section): Use xchg %ax,%ax
+	instead of 2 nops.
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Likewise.
+	(elf64_x86_64_plt0_entry): Use nopl 0(%rax) instead of 4 nops.
+
 2006-06-29  Jakub Jelinek  <jakub@redhat.com>
 
 	PR ld/2513

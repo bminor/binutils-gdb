@@ -24,8 +24,7 @@ Disassembly of section .text:
 #  GD -> IE because variable is not defined in executable
   [0-9a-f]+:	48 8b 05 65 03 20 00[ 	]+mov    2098021\(%rip\),%rax +# 601370 <.*>
 #				-> R_X86_64_TPOFF64	sG1
-  [0-9a-f]+:	90[ 	]+nop *
-  [0-9a-f]+:	90[ 	]+nop *
+  [0-9a-f]+:	66 90[ 	]+xchg   %ax,%ax
   [0-9a-f]+:	90[ 	]+nop *
   [0-9a-f]+:	90[ 	]+nop *
   [0-9a-f]+:	90[ 	]+nop *
@@ -34,8 +33,7 @@ Disassembly of section .text:
 #  the variable is referenced through IE too
   [0-9a-f]+:	48 8b 05 48 03 20 00[ 	]+mov    2097992\(%rip\),%rax +# 601360 <.*>
 #				-> R_X86_64_TPOFF64	sG2
-  [0-9a-f]+:	90[ 	]+nop *
-  [0-9a-f]+:	90[ 	]+nop *
+  [0-9a-f]+:	66 90[ 	]+xchg   %ax,%ax
   [0-9a-f]+:	90[ 	]+nop *
   [0-9a-f]+:	90[ 	]+nop *
   [0-9a-f]+:	90[ 	]+nop *
@@ -43,8 +41,7 @@ Disassembly of section .text:
 #  GD -> LE with global variable defined in executable
   [0-9a-f]+:	48 c7 c0 60 ff ff ff[ 	]+mov    \$0xf+60,%rax
 #							sg1
-  [0-9a-f]+:	90[ 	]+nop *
-  [0-9a-f]+:	90[ 	]+nop *
+  [0-9a-f]+:	66 90[ 	]+xchg   %ax,%ax
   [0-9a-f]+:	90[ 	]+nop *
   [0-9a-f]+:	90[ 	]+nop *
   [0-9a-f]+:	90[ 	]+nop *
@@ -52,8 +49,7 @@ Disassembly of section .text:
 #  GD -> LE with local variable defined in executable
   [0-9a-f]+:	48 c7 c0 80 ff ff ff[ 	]+mov    \$0xf+80,%rax
 #							sl1
-  [0-9a-f]+:	90[ 	]+nop *
-  [0-9a-f]+:	90[ 	]+nop *
+  [0-9a-f]+:	66 90[ 	]+xchg   %ax,%ax
   [0-9a-f]+:	90[ 	]+nop *
   [0-9a-f]+:	90[ 	]+nop *
   [0-9a-f]+:	90[ 	]+nop *
@@ -61,16 +57,14 @@ Disassembly of section .text:
 #  GD -> LE with hidden variable defined in executable
   [0-9a-f]+:	48 c7 c0 a0 ff ff ff[ 	]+mov    \$0xf+a0,%rax
 #							sh1
-  [0-9a-f]+:	90[ 	]+nop *
-  [0-9a-f]+:	90[ 	]+nop *
+  [0-9a-f]+:	66 90[ 	]+xchg   %ax,%ax
   [0-9a-f]+:	90[ 	]+nop *
   [0-9a-f]+:	90[ 	]+nop *
   [0-9a-f]+:	90[ 	]+nop *
   [0-9a-f]+:	90[ 	]+nop *
 #  LD -> LE
   [0-9a-f]+:	48 c7 c0 60 ff ff ff[ 	]+mov    \$0xf+60,%rax
-  [0-9a-f]+:	90[ 	]+nop *
-  [0-9a-f]+:	90[ 	]+nop *
+  [0-9a-f]+:	66 90[ 	]+xchg   %ax,%ax
   [0-9a-f]+:	90[ 	]+nop *
   [0-9a-f]+:	90[ 	]+nop *
   [0-9a-f]+:	48 8d 90 81 ff ff ff[ 	]+lea    0xf+81\(%rax\),%rdx
