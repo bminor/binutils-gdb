@@ -1,3 +1,14 @@
+2006-07-01  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (GDB/MI Output Syntax, GDB/MI Simple Examples)
+	(GDB/MI Breakpoint Commands, GDB/MI Program Context)
+	(GDB/MI Thread Commands, GDB/MI Program Execution)
+	(GDB/MI Stack Manipulation, GDB/MI Variable Objects)
+	(GDB/MI Data Manipulation, GDB/MI Symbol Query)
+	(GDB/MI File Commands, GDB/MI Target Manipulation)
+	(GDB/MI Miscellaneous Commands): Change (@value{GDBP})->(gdb),
+	since the MI prompt is hard-wired into the code.
+
 2006-07-01  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdb.texinfo (GDB/MI Compatibility with CLI): Qualify more carefully.
