@@ -1,3 +1,12 @@
+2006-07-04  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gdb.base/huge.c: Allow CRASH_GDB to be set from command
+	line.
+	* gdb.base/huge.exp: Loop over compilation to find a size that
+	is acceptable.
+	* gdb.base/remote.exp: Correct expected strings.
+	* gdb.dwarf2/mac-fileno.S: Avoid # comments.
+
 2006-06-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/store.exp: Don't use gdb_suppress_entire_file.
