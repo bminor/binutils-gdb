@@ -334,7 +334,7 @@ init_remote_state (struct gdbarch *gdbarch)
   if (rs->buf_size < rsa->remote_packet_size)
     {
       rs->buf_size = 2 * rsa->remote_packet_size;
-      rs->buf = xmalloc (rs->buf_size);
+      rs->buf = xrealloc (rs->buf, rs->buf_size);
     }
 
   return rsa;
