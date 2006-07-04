@@ -206,12 +206,41 @@ void _initialize_remote (void);
 static struct cmd_list_element *remote_set_cmdlist;
 static struct cmd_list_element *remote_show_cmdlist;
 
-/* Description of the remote protocol.  Strictly speaking, when the
-   target is open()ed, remote.c should create a per-target description
-   of the remote protocol using that target's architecture.
-   Unfortunately, the target stack doesn't include local state.  For
-   the moment keep the information in the target's architecture
-   object.  Sigh..  */
+/* Description of the remote protocol state for the currently
+   connected target.  This is per-target state, and independent of the
+   selected architecture.  */
+
+struct remote_state
+{
+  /* A buffer to use for incoming packets, and its current size.  The
+     buffer is grown dynamically for larger incoming packets.
+     Outgoing packets may also be constructed in this buffer.
+     BUF_SIZE is always at least REMOTE_PACKET_SIZE;
+     REMOTE_PACKET_SIZE should be used to limit the length of outgoing
+     packets.  */
+  char *buf;
+  long buf_size;
+
+  /* If we negotiated packet size explicitly (and thus can bypass
+     heuristics for the largest packet size that will not overflow
+     a buffer in the stub), this will be set to that packet size.
+     Otherwise zero, meaning to use the guessed size.  */
+  long explicit_packet_size;
+};
+
+/* This data could be associated with a target, but we do not always
+   have access to the current target when we need it, so for now it is
+   static.  This will be fine for as long as only one target is in use
+   at a time.  */
+static struct remote_state remote_state;
+
+static struct remote_state *
+get_remote_state (void)
+{
+  return &remote_state;
+}
+
+/* Description of the remote protocol for a given architecture.  */
 
 struct packet_reg
 {
@@ -224,7 +253,7 @@ struct packet_reg
   /* char *name; == REGISTER_NAME (regnum); at present.  */
 };
 
-struct remote_state
+struct remote_arch_state
 {
   /* Description of the remote protocol registers.  */
   long sizeof_g_packet;
@@ -244,27 +273,14 @@ struct remote_state
   /* This is the maximum size (in chars) of a non read/write packet.
      It is also used as a cap on the size of read/write packets.  */
   long remote_packet_size;
-
-  /* A buffer to use for incoming packets, and its current size.  The
-     buffer is grown dynamically for larger incoming packets.
-     Outgoing packets may also be constructed in this buffer.
-     BUF_SIZE is always at least REMOTE_PACKET_SIZE;
-     REMOTE_PACKET_SIZE should be used to limit the length of outgoing
-     packets.  */
-  char *buf;
-  long buf_size;
-
-  /* This flag is set if we negotiated packet size explicitly (and
-     can bypass various heuristics).  */
-  int explicit_packet_size;
 };
 
 
 /* Handle for retreving the remote protocol data from gdbarch.  */
 static struct gdbarch_data *remote_gdbarch_data_handle;
 
-static struct remote_state *
-get_remote_state (void)
+static struct remote_arch_state *
+get_remote_arch_state (void)
 {
   return gdbarch_data (current_gdbarch, remote_gdbarch_data_handle);
 }
@@ -287,15 +303,18 @@ static void *
 init_remote_state (struct gdbarch *gdbarch)
 {
   int regnum, num_remote_regs, offset;
-  struct remote_state *rs = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct remote_state);
+  struct remote_state *rs = get_remote_state ();
+  struct remote_arch_state *rsa;
   struct packet_reg **remote_regs;
+
+  rsa = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct remote_arch_state);
 
   /* Assume a 1:1 regnum<->pnum table unless the available registers
      interface informs us otherwise.  */
-  rs->regs = GDBARCH_OBSTACK_CALLOC (gdbarch, NUM_REGS, struct packet_reg);
+  rsa->regs = GDBARCH_OBSTACK_CALLOC (gdbarch, NUM_REGS, struct packet_reg);
   for (regnum = 0; regnum < NUM_REGS; regnum++)
     {
-      struct packet_reg *r = &rs->regs[regnum];
+      struct packet_reg *r = &rsa->regs[regnum];
       r->pnum = available_register_target_regnum (gdbarch, regnum);
       r->regnum = regnum;
     }
@@ -306,8 +325,8 @@ init_remote_state (struct gdbarch *gdbarch)
 
   remote_regs = alloca (NUM_REGS * sizeof (struct packet_reg *));
   for (num_remote_regs = 0, regnum = 0; regnum < NUM_REGS; regnum++)
-    if (rs->regs[regnum].pnum != -1)
-      remote_regs[num_remote_regs++] = &rs->regs[regnum];
+    if (rsa->regs[regnum].pnum != -1)
+      remote_regs[num_remote_regs++] = &rsa->regs[regnum];
 
   qsort (remote_regs, num_remote_regs, sizeof (struct packet_reg *),
 	 compare_pnums);
@@ -321,7 +340,7 @@ init_remote_state (struct gdbarch *gdbarch)
 
   /* Record the maximum possible size of the g packet - it may turn out
      to be smaller.  */
-  rs->sizeof_g_packet = offset;
+  rsa->sizeof_g_packet = offset;
 
   /* Default maximum number of characters in a packet body. Many
      remote stubs have a hardwired buffer size of 400 bytes
@@ -329,52 +348,67 @@ init_remote_state (struct gdbarch *gdbarch)
      as the maximum packet-size to ensure that the packet and an extra
      NUL character can always fit in the buffer.  This stops GDB
      trashing stubs that try to squeeze an extra NUL into what is
-     already a full buffer (As of 1999-12-04 that was most stubs.  */
-  rs->remote_packet_size = 400 - 1;
+     already a full buffer (As of 1999-12-04 that was most stubs).  */
+  rsa->remote_packet_size = 400 - 1;
 
-  /* Should rs->sizeof_g_packet needs more space than the
+  /* This one is filled in when a ``g'' packet is received.  */
+  rsa->actual_register_packet_size = 0;
+
+  /* Should rsa->sizeof_g_packet needs more space than the
      default, adjust the size accordingly. Remember that each byte is
      encoded as two characters. 32 is the overhead for the packet
      header / footer. NOTE: cagney/1999-10-26: I suspect that 8
      (``$NN:G...#NN'') is a better guess, the below has been padded a
      little.  */
-  if (rs->sizeof_g_packet > ((rs->remote_packet_size - 32) / 2))
-    rs->remote_packet_size = (rs->sizeof_g_packet * 2 + 32);
+  if (rsa->sizeof_g_packet > ((rsa->remote_packet_size - 32) / 2))
+    rsa->remote_packet_size = (rsa->sizeof_g_packet * 2 + 32);
 
-  /* This one is filled in when a ``g'' packet is received.  */
-  rs->actual_register_packet_size = 0;
+  /* Make sure that the packet buffer is plenty big enough for
+     this architecture.  */
+  if (rs->buf_size < rsa->remote_packet_size)
+    {
+      rs->buf_size = 2 * rsa->remote_packet_size;
+      rs->buf = xrealloc (rs->buf, rs->buf_size);
+    }
 
-  /* Create the buffer at a default size.  Note that this would
-     leak memory if the gdbarch were ever destroyed; there's no
-     way to register a destructor for it, and we can't realloc
-     using the gdbarch obstack.  But gdbarches are never
-     destroyed.  */
-  rs->buf_size = rs->remote_packet_size;
-  rs->buf = xmalloc (rs->buf_size);
+  return rsa;
+}
 
-  return rs;
+/* Return the current allowed size of a remote packet.  This is
+   inferred from the current architecture, and should be used to
+   limit the length of outgoing packets.  */
+static long
+get_remote_packet_size (void)
+{
+  struct remote_state *rs = get_remote_state ();
+  struct remote_arch_state *rsa = get_remote_arch_state ();
+
+  if (rs->explicit_packet_size)
+    return rs->explicit_packet_size;
+
+  return rsa->remote_packet_size;
 }
 
 static struct packet_reg *
-packet_reg_from_regnum (struct remote_state *rs, long regnum)
+packet_reg_from_regnum (struct remote_arch_state *rsa, long regnum)
 {
   if (regnum < 0 && regnum >= NUM_REGS)
     return NULL;
   else
     {
-      struct packet_reg *r = &rs->regs[regnum];
+      struct packet_reg *r = &rsa->regs[regnum];
       gdb_assert (r->regnum == regnum);
       return r;
     }
 }
 
 static struct packet_reg *
-packet_reg_from_pnum (struct remote_state *rs, LONGEST pnum)
+packet_reg_from_pnum (struct remote_arch_state *rsa, LONGEST pnum)
 {
   int i;
   for (i = 0; i < NUM_REGS; i++)
     {
-      struct packet_reg *r = &rs->regs[i];
+      struct packet_reg *r = &rsa->regs[i];
       if (r->pnum == pnum)
 	return r;
     }
@@ -445,8 +479,8 @@ static int remote_async_terminal_ours_p;
 
 
 /* User configurable variables for the number of characters in a
-   memory read/write packet.  MIN (rs->remote_packet_size,
-   rs->sizeof_g_packet) is the default.  Some targets need smaller
+   memory read/write packet.  MIN (rsa->remote_packet_size,
+   rsa->sizeof_g_packet) is the default.  Some targets need smaller
    values (fifo overruns, et.al.) and some users need larger values
    (speed up transfers).  The variables ``preferred_*'' (the user
    request), ``current_*'' (what was actually set) and ``forced_*''
@@ -466,6 +500,8 @@ static long
 get_memory_packet_size (struct memory_packet_config *config)
 {
   struct remote_state *rs = get_remote_state ();
+  struct remote_arch_state *rsa = get_remote_arch_state ();
+
   /* NOTE: The somewhat arbitrary 16k comes from the knowledge (folk
      law?) that some hosts don't cope very well with large alloca()
      calls.  Eventually the alloca() code will be replaced by calls to
@@ -488,7 +524,7 @@ get_memory_packet_size (struct memory_packet_config *config)
     }
   else
     {
-      what_they_get = rs->remote_packet_size;
+      what_they_get = get_remote_packet_size ();
       /* Limit the packet to the size specified by the user.  */
       if (config->size > 0
 	  && what_they_get > config->size)
@@ -496,10 +532,10 @@ get_memory_packet_size (struct memory_packet_config *config)
 
       /* Limit it to the size of the targets ``g'' response unless we have
 	 permission from the stub to use a larger packet size.  */
-      if (!rs->explicit_packet_size
-	  && rs->actual_register_packet_size > 0
-	  && what_they_get > rs->actual_register_packet_size)
-	what_they_get = rs->actual_register_packet_size;
+      if (rs->explicit_packet_size == 0
+	  && rsa->actual_register_packet_size > 0
+	  && what_they_get > rsa->actual_register_packet_size)
+	what_they_get = rsa->actual_register_packet_size;
     }
   if (what_they_get > MAX_REMOTE_PACKET_SIZE)
     what_they_get = MAX_REMOTE_PACKET_SIZE;
@@ -616,13 +652,12 @@ show_memory_read_packet_size (char *args, int from_tty)
 static long
 get_memory_read_packet_size (void)
 {
-  struct remote_state *rs = get_remote_state ();
   long size = get_memory_packet_size (&memory_read_packet_config);
   /* FIXME: cagney/1999-11-07: Functions like getpkt() need to get an
      extra buffer size argument before the memory read size can be
-     increased beyond RS->remote_packet_size.  */
-  if (size > rs->remote_packet_size)
-    size = rs->remote_packet_size;
+     increased beyond this.  */
+  if (size > get_remote_packet_size ())
+    size = get_remote_packet_size ();
   return size;
 }
 
@@ -979,9 +1014,9 @@ set_thread (int th, int gen)
       buf[3] = '\0';
     }
   else if (th < 0)
-    xsnprintf (&buf[2], rs->remote_packet_size - 2, "-%x", -th);
+    xsnprintf (&buf[2], get_remote_packet_size () - 2, "-%x", -th);
   else
-    xsnprintf (&buf[2], rs->remote_packet_size - 2, "%x", th);
+    xsnprintf (&buf[2], get_remote_packet_size () - 2, "%x", th);
   putpkt (buf);
   getpkt (&rs->buf, &rs->buf_size, 0);
   if (gen)
@@ -1000,9 +1035,9 @@ remote_thread_alive (ptid_t ptid)
   char *buf = rs->buf;
 
   if (tid < 0)
-    xsnprintf (buf, rs->remote_packet_size, "T-%08x", -tid);
+    xsnprintf (buf, get_remote_packet_size (), "T-%08x", -tid);
   else
-    xsnprintf (buf, rs->remote_packet_size, "T%08x", tid);
+    xsnprintf (buf, get_remote_packet_size (), "T%08x", tid);
   putpkt (buf);
   getpkt (&rs->buf, &rs->buf_size, 0);
   return (buf[0] == 'O' && buf[1] == 'K');
@@ -1569,8 +1604,8 @@ remote_get_threadlist (int startflag, threadref *nextthread, int result_limit,
   int result = 1;
 
   /* Trancate result limit to be smaller than the packet size.  */
-  if ((((result_limit + 1) * BUF_THREAD_ID_SIZE) + 10) >= rs->remote_packet_size)
-    result_limit = (rs->remote_packet_size / BUF_THREAD_ID_SIZE) - 2;
+  if ((((result_limit + 1) * BUF_THREAD_ID_SIZE) + 10) >= get_remote_packet_size ())
+    result_limit = (get_remote_packet_size () / BUF_THREAD_ID_SIZE) - 2;
 
   pack_threadlist_request (rs->buf, startflag, result_limit, nextthread);
   putpkt (rs->buf);
@@ -1791,7 +1826,7 @@ remote_threads_extra_info (struct thread_info *tp)
     {
       char *bufp = rs->buf;
 
-      xsnprintf (bufp, rs->remote_packet_size, "qThreadExtraInfo,%x", 
+      xsnprintf (bufp, get_remote_packet_size (), "qThreadExtraInfo,%x",
 		 PIDGET (tp->ptid));
       putpkt (bufp);
       getpkt (&rs->buf, &rs->buf_size, 0);
@@ -1843,7 +1878,7 @@ extended_remote_restart (void)
 
   /* Send the restart command; for reasons I don't understand the
      remote side really expects a number after the "R".  */
-  xsnprintf (rs->buf, rs->remote_packet_size, "R%x", 0);
+  xsnprintf (rs->buf, get_remote_packet_size (), "R%x", 0);
   putpkt (rs->buf);
 
   remote_fileio_reset ();
@@ -2044,7 +2079,7 @@ remote_check_symbols (struct objfile *objfile)
 
   /* Allocate a message buffer.  We can't reuse the input buffer in RS,
      because we need both at the same time.  */
-  msg = alloca (rs->remote_packet_size);
+  msg = alloca (get_remote_packet_size ());
 
   reply = rs->buf;
 
@@ -2061,9 +2096,9 @@ remote_check_symbols (struct objfile *objfile)
       msg[end] = '\0';
       sym = lookup_minimal_symbol (msg, NULL, NULL);
       if (sym == NULL)
-	xsnprintf (msg, rs->remote_packet_size, "qSymbol::%s", &reply[8]);
+	xsnprintf (msg, get_remote_packet_size (), "qSymbol::%s", &reply[8]);
       else
-	xsnprintf (msg, rs->remote_packet_size, "qSymbol:%s:%s",
+	xsnprintf (msg, get_remote_packet_size (), "qSymbol:%s:%s",
 		   paddr_nz (SYMBOL_VALUE_ADDRESS (sym)),
 		   &reply[8]);
       putpkt (msg);
@@ -2149,8 +2184,7 @@ remote_query_packet_info (void)
 			       packet_size, MAX_REMOTE_PACKET_SIZE);
 		      packet_size = MAX_REMOTE_PACKET_SIZE;
 		    }
-		  rs->remote_packet_size = packet_size;
-		  rs->explicit_packet_size = 1;
+		  rs->explicit_packet_size = packet_size;
 
 		  continue;
 		}
@@ -2184,9 +2218,9 @@ remote_query_packet_info (void)
      buffer size also.  We delay this until after parsing the entire
      qSupported packet, because this is the same buffer we were
      parsing.  */
-  if (rs->buf_size < rs->remote_packet_size)
+  if (rs->buf_size < rs->explicit_packet_size)
     {
-      rs->buf_size = rs->remote_packet_size;
+      rs->buf_size = rs->explicit_packet_size;
       rs->buf = xrealloc (rs->buf, rs->buf_size);
     }
 
@@ -2254,6 +2288,7 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
   push_target (target);		/* Switch to using remote target now.  */
 
   init_all_packet_configs ();
+  rs->explicit_packet_size = 0;
 
   general_thread = -2;
   continue_thread = -2;
@@ -2565,7 +2600,7 @@ remote_vcont_resume (ptid_t ptid, int step, enum target_signal siggnal)
 	outbuf = xstrprintf ("vCont;c:%x", pid);
     }
 
-  gdb_assert (outbuf && strlen (outbuf) < rs->remote_packet_size);
+  gdb_assert (outbuf && strlen (outbuf) < get_remote_packet_size ());
   old_cleanup = make_cleanup (xfree, outbuf);
 
   putpkt (outbuf);
@@ -2855,6 +2890,7 @@ static ptid_t
 remote_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   struct remote_state *rs = get_remote_state ();
+  struct remote_arch_state *rsa = get_remote_arch_state ();
   char *buf = rs->buf;
   ULONGEST thread_num = -1;
   ULONGEST addr;
@@ -2951,7 +2987,7 @@ Packet: '%s'\n"),
 		  }
 		else
 		  {
-		    struct packet_reg *reg = packet_reg_from_pnum (rs, pnum);
+		    struct packet_reg *reg = packet_reg_from_pnum (rsa, pnum);
 		    p = p1;
 
 		    if (*p++ != ':')
@@ -3044,6 +3080,7 @@ static ptid_t
 remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   struct remote_state *rs = get_remote_state ();
+  struct remote_arch_state *rsa = get_remote_arch_state ();
   char *buf = rs->buf;
   ULONGEST thread_num = -1;
   ULONGEST addr;
@@ -3147,7 +3184,7 @@ Packet: '%s'\n"),
 
 		else
 		  {
-		    struct packet_reg *reg = packet_reg_from_pnum (rs, pnum);
+		    struct packet_reg *reg = packet_reg_from_pnum (rsa, pnum);
 		    p = p1;
 		    if (*p++ != ':')
 		      error (_("Malformed packet(b) (missing colon): %s\n\
@@ -3295,6 +3332,7 @@ static void
 fetch_registers_using_g (void)
 {
   struct remote_state *rs = get_remote_state ();
+  struct remote_arch_state *rsa = get_remote_arch_state ();
   int i, buf_len;
   char *p;
   char *regs;
@@ -3315,8 +3353,8 @@ fetch_registers_using_g (void)
   /* Save the size of the packet sent to us by the target.  It is used
      as a heuristic when determining the max size of packets that the
      target can safely receive.  */
-  if (rs->actual_register_packet_size == 0)
-    rs->actual_register_packet_size = buf_len;
+  if (rsa->actual_register_packet_size == 0)
+    rsa->actual_register_packet_size = buf_len;
 
   /* If this is smaller than we guessed the 'g' packet would be,
      update our records.  A 'g' reply that doesn't include a register's
@@ -3328,26 +3366,26 @@ fetch_registers_using_g (void)
      with the g packet from a feature-ful architecture.  Really, sending a
      g packet at all before we know the target features is asking for
      trouble.  Order of initialization needs to be changed.  */
-  if (buf_len != 2 * rs->sizeof_g_packet)
+  if (buf_len != 2 * rsa->sizeof_g_packet)
     {
-      rs->sizeof_g_packet = buf_len / 2;
+      rsa->sizeof_g_packet = buf_len / 2;
 
       for (i = 0; i < NUM_REGS; i++)
 	{
-	  if (rs->regs[i].pnum == -1)
+	  if (rsa->regs[i].pnum == -1)
 	    continue;
 
-	  if (rs->regs[i].offset >= rs->sizeof_g_packet)
-	    rs->regs[i].in_g_packet = 0;
+	  if (rsa->regs[i].offset >= rsa->sizeof_g_packet)
+	    rsa->regs[i].in_g_packet = 0;
 	  else
-	    rs->regs[i].in_g_packet = 1;
+	    rsa->regs[i].in_g_packet = 1;
 	}
     }
 
-  regs = alloca (rs->sizeof_g_packet);
+  regs = alloca (rsa->sizeof_g_packet);
 
   /* Unimplemented registers read as all bits zero.  */
-  memset (regs, 0, rs->sizeof_g_packet);
+  memset (regs, 0, rsa->sizeof_g_packet);
 
   /* We can get out of synch in various cases.  If the first character
      in the buffer is not a hex character, assume that has happened
@@ -3368,7 +3406,7 @@ fetch_registers_using_g (void)
      register cacheing/storage mechanism.  */
 
   p = rs->buf;
-  for (i = 0; i < rs->sizeof_g_packet; i++)
+  for (i = 0; i < rsa->sizeof_g_packet; i++)
     {
       if (p[0] == 0 || p[1] == 0)
 	/* This shouldn't happen - we adjusted sizeof_g_packet above.  */
@@ -3386,7 +3424,7 @@ fetch_registers_using_g (void)
     int i;
     for (i = 0; i < NUM_REGS; i++)
       {
-	struct packet_reg *r = &rs->regs[i];
+	struct packet_reg *r = &rsa->regs[i];
 	if (r->in_g_packet)
 	  {
 	    if (r->offset * 2 >= strlen (rs->buf))
@@ -3413,13 +3451,14 @@ static void
 remote_fetch_registers (int regnum)
 {
   struct remote_state *rs = get_remote_state ();
+  struct remote_arch_state *rsa = get_remote_arch_state ();
   int i;
 
   set_thread (PIDGET (inferior_ptid), 1);
 
   if (regnum >= 0)
     {
-      struct packet_reg *reg = packet_reg_from_regnum (rs, regnum);
+      struct packet_reg *reg = packet_reg_from_regnum (rsa, regnum);
       gdb_assert (reg != NULL);
 
       /* If this register might be in the 'g' packet, try that first -
@@ -3446,8 +3485,8 @@ remote_fetch_registers (int regnum)
   fetch_registers_using_g ();
 
   for (i = 0; i < NUM_REGS; i++)
-    if (!rs->regs[i].in_g_packet)
-      if (!fetch_register_using_p (&rs->regs[i]))
+    if (!rsa->regs[i].in_g_packet)
+      if (!fetch_register_using_p (&rsa->regs[i]))
 	{
 	  /* This register is not available.  */
 	  regcache_raw_supply (current_regcache, i, NULL);
@@ -3462,7 +3501,7 @@ remote_fetch_registers (int regnum)
 static void
 remote_prepare_to_store (void)
 {
-  struct remote_state *rs = get_remote_state ();
+  struct remote_arch_state *rsa = get_remote_arch_state ();
   int i;
   gdb_byte buf[MAX_REGISTER_SIZE];
 
@@ -3473,8 +3512,8 @@ remote_prepare_to_store (void)
     case PACKET_SUPPORT_UNKNOWN:
       /* Make sure all the necessary registers are cached.  */
       for (i = 0; i < NUM_REGS; i++)
-	if (rs->regs[i].in_g_packet)
-	  regcache_raw_read (current_regcache, rs->regs[i].regnum, buf);
+	if (rsa->regs[i].in_g_packet)
+	  regcache_raw_read (current_regcache, rsa->regs[i].regnum, buf);
       break;
     case PACKET_ENABLE:
       break;
@@ -3499,7 +3538,7 @@ store_register_using_P (struct packet_reg *reg)
   if (reg->pnum == -1)
     return 0;
 
-  xsnprintf (buf, rs->remote_packet_size, "P%s=", phex_nz (reg->pnum, 0));
+  xsnprintf (buf, get_remote_packet_size (), "P%s=", phex_nz (reg->pnum, 0));
   p = buf + strlen (buf);
   regcache_raw_collect (current_regcache, reg->regnum, regp);
   bin2hex (regp, p, register_size (current_gdbarch, reg->regnum));
@@ -3526,6 +3565,7 @@ static void
 store_registers_using_G ()
 {
   struct remote_state *rs = get_remote_state ();
+  struct remote_arch_state *rsa = get_remote_arch_state ();
   gdb_byte *regs;
   char *p;
 
@@ -3533,11 +3573,11 @@ store_registers_using_G ()
      local buffer.  */
   {
     int i;
-    regs = alloca (rs->sizeof_g_packet);
-    memset (regs, 0, rs->sizeof_g_packet);
+    regs = alloca (rsa->sizeof_g_packet);
+    memset (regs, 0, rsa->sizeof_g_packet);
     for (i = 0; i < NUM_REGS; i++)
       {
-	struct packet_reg *r = &rs->regs[i];
+	struct packet_reg *r = &rsa->regs[i];
 	if (r->in_g_packet)
 	  regcache_raw_collect (current_regcache, r->regnum, regs + r->offset);
       }
@@ -3547,9 +3587,9 @@ store_registers_using_G ()
      each byte encoded as two hex characters.  */
   p = rs->buf;
   *p++ = 'G';
-  /* remote_prepare_to_store insures that rs->sizeof_g_packet gets
+  /* remote_prepare_to_store insures that rsa->sizeof_g_packet gets
      updated.  */
-  bin2hex (regs, p, rs->sizeof_g_packet);
+  bin2hex (regs, p, rsa->sizeof_g_packet);
   remote_send (&rs->buf, &rs->buf_size);
 }
 
@@ -3560,13 +3600,14 @@ static void
 remote_store_registers (int regnum)
 {
   struct remote_state *rs = get_remote_state ();
+  struct remote_arch_state *rsa = get_remote_arch_state ();
   int i;
 
   set_thread (PIDGET (inferior_ptid), 1);
 
   if (regnum >= 0)
     {
-      struct packet_reg *reg = packet_reg_from_regnum (rs, regnum);
+      struct packet_reg *reg = packet_reg_from_regnum (rsa, regnum);
       gdb_assert (reg != NULL);
 
       /* Always prefer to store registers using the 'P' packet if
@@ -3590,8 +3631,8 @@ remote_store_registers (int regnum)
   store_registers_using_G ();
 
   for (i = 0; i < NUM_REGS; i++)
-    if (!rs->regs[i].in_g_packet)
-      if (!store_register_using_P (&rs->regs[i]))
+    if (!rsa->regs[i].in_g_packet)
+      if (!store_register_using_P (&rsa->regs[i]))
 	/* See above for why we do not issue an error here.  */
 	continue;
 }
@@ -4047,14 +4088,13 @@ putpkt (char *buf)
 
 /* Send a packet to the remote machine, with error checking.  The data
    of the packet is in BUF.  The string in BUF can be at most
-   RS->remote_packet_size - 5 to account for the $, # and checksum,
+   get_remote_packet_size () - 5 to account for the $, # and checksum,
    and for a possible /0 if we are debugging (remote_debug) and want
    to print the sent packet as a string.  */
 
 static int
 putpkt_binary (char *buf, int cnt)
 {
-  struct remote_state *rs = get_remote_state ();
   int i;
   unsigned char csum = 0;
   char *buf2 = alloca (cnt + 6);
@@ -5009,7 +5049,7 @@ compare_sections_command (char *args, int from_tty)
       matched = 1;		/* do this section */
       lma = s->lma;
       /* FIXME: assumes lma can fit into long.  */
-      xsnprintf (rs->buf, rs->remote_packet_size, "qCRC:%lx,%lx",
+      xsnprintf (rs->buf, get_remote_packet_size (), "qCRC:%lx,%lx",
 		 (long) lma, (long) size);
       putpkt (rs->buf);
 
@@ -5069,8 +5109,8 @@ remote_read_qpart (struct target_ops *ops, const char *object_name,
   if (packet->support == PACKET_DISABLE)
     return -1;
 
-  n = min ((rs->remote_packet_size - 2) / 2, len);
-  snprintf (rs->buf, rs->remote_packet_size, "qPart:%s:read:%s:%s,%s",
+  n = min ((get_remote_packet_size () - 2) / 2, len);
+  snprintf (rs->buf, get_remote_packet_size (), "qPart:%s:read:%s:%s,%s",
 	    object_name, annex ? annex : "",
 	    phex_nz (offset, sizeof offset),
 	    phex_nz (n, sizeof n));
@@ -5157,12 +5197,12 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
   /* Note: a zero OFFSET and LEN can be used to query the minimum
      buffer size.  */
   if (offset == 0 && len == 0)
-    return (rs->remote_packet_size);
-  /* Minimum outbuf size is RS->remote_packet_size. If LEN is not
+    return (get_remote_packet_size ());
+  /* Minimum outbuf size is get_remote_packet_size (). If LEN is not
      large enough let the caller deal with it.  */
-  if (len < rs->remote_packet_size)
+  if (len < get_remote_packet_size ())
     return -1;
-  len = rs->remote_packet_size;
+  len = get_remote_packet_size ();
 
   /* Except for querying the minimum buffer size, target must be open.  */
   if (!remote_desc)
@@ -5181,7 +5221,7 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
      (remote_debug), we have PBUFZIZ - 7 left to pack the query
      string.  */
   i = 0;
-  while (annex[i] && (i < (rs->remote_packet_size - 8)))
+  while (annex[i] && (i < (get_remote_packet_size () - 8)))
     {
       /* Bad caller may have sent forbidden characters.  */
       gdb_assert (isprint (annex[i]) && annex[i] != '$' && annex[i] != '#');
@@ -5220,7 +5260,7 @@ remote_rcmd (char *command,
   strcpy (buf, "qRcmd,");
   p = strchr (buf, '\0');
 
-  if ((strlen (buf) + strlen (command) * 2 + 8/*misc*/) > rs->remote_packet_size)
+  if ((strlen (buf) + strlen (command) * 2 + 8/*misc*/) > get_remote_packet_size ())
     error (_("\"monitor\" command ``%s'' is too long."), command);
 
   /* Encode the actual command.  */
@@ -5738,6 +5778,8 @@ remote_new_objfile (struct objfile *objfile)
 void
 _initialize_remote (void)
 {
+  struct remote_state *rs;
+
   /* architecture specific data */
   remote_gdbarch_data_handle = 
     gdbarch_data_register_post_init (init_remote_state);
@@ -5746,6 +5788,14 @@ _initialize_remote (void)
      that the remote protocol has been initialized.  */
   DEPRECATED_REGISTER_GDBARCH_SWAP (remote_address_size);
   deprecated_register_gdbarch_swap (NULL, 0, build_remote_gdbarch_data);
+
+  /* Initialize the per-target state.  At the moment there is only one
+     of these, not one per target.  Only one target is active at a
+     time.  The default buffer size is unimportant; it will be expanded
+     whenever a larger buffer is needed.  */
+  rs = get_remote_state ();
+  rs->buf_size = 400;
+  rs->buf = xmalloc (rs->buf_size);
 
   init_remote_ops ();
   add_target (&remote_ops);
