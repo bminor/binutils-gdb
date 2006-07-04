@@ -1,3 +1,10 @@
+2006-07-04  Thiemo Seufer  <ths@mips.com>
+
+	* gas/mips/e32-rel2.d, gas/mips/e32-rel4.d: Use -mabi=32 for as.
+	* gas/mips/mips.exp: Move mips16e testcase to ELF only tests.
+	Run elf{el}-rel2 and elf-rel4 for all arches with gpr64. Run
+	e32-rel2 and e32-rel4 also for 64 bit configurations.
+
 2006-06-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run nops-1, nops-1-i386, nops-1-i686,

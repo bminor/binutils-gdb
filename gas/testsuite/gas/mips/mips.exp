@@ -533,6 +533,8 @@ if { [istarget mips*-*-vxworks*] } {
     if { $elf && !$no_mips16 } {
 	run_dump_test "mips16"
 	run_dump_test "mips16-64"
+	# Check MIPS16e extensions
+	run_dump_test_arches "mips16e" 	[mips_arch_list_matching mips32]
 	# Check jalx handling
 	run_dump_test "mips16-jalx"
 	run_dump_test "mips-jalx"
@@ -637,18 +639,11 @@ if { [istarget mips*-*-vxworks*] } {
   	run_dump_test "mips-abi32-pic2"
 
 	run_dump_test "elf${el}-rel"
-	if {[istarget mips64*-*-*] || [istarget mipsisa32*-*-*]
-	    || [istarget mipsisa64*-*-*]} { 
-	    run_dump_test "elf${el}-rel2"
-	} else {
-	    run_dump_test "e32${el}-rel2"
-	}
+	run_dump_test_arches "elf${el}-rel2" [mips_arch_list_matching gpr64]
+	run_dump_test "e32${el}-rel2"
 	run_dump_test "elf${el}-rel3"
-	if {[istarget mips64*-*-*]} {
-	    run_dump_test "elf-rel4"
-	} else {
-	    run_dump_test "e32-rel4"
-	}
+	run_dump_test_arches "elf-rel4" [mips_arch_list_matching gpr64]
+	run_dump_test "e32-rel4"
 	run_dump_test "elf-rel5"
 	run_dump_test "elf-rel6"
 	if $has_newabi {
@@ -786,8 +781,6 @@ if { [istarget mips*-*-vxworks*] } {
 	}
     }
     if { !$no_mips16 } { 
-        # Check MIPS16e extensions
-        run_dump_test_arches "mips16e" 	[mips_arch_list_matching mips32]
         run_dump_test "mips16e-jrc"
         run_dump_test "mips16e-save"
         run_dump_test "mips16e-64"
