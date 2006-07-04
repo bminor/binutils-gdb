@@ -1,3 +1,12 @@
+2006-07-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	Backport:
+	2006-05-19  Alan Modra  <amodra@bigpond.net.au>
+	* ld-scripts/empty-orphan.d: Update again.
+
+	* ld-scripts/empty-orphan.t: Discard .reginfo.
+	* ld-scripts/empty-orphan.d: Update.
+
 2006-06-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	Backport:

@@ -4207,7 +4207,8 @@ lang_size_sections_1
 		    /* If a loadable section is using the default memory
 		       region, and some non default memory regions were
 		       defined, issue an error message.  */
-		    if (!IGNORE_SECTION (os->bfd_section)
+		    if (!os->ignored
+			&& !IGNORE_SECTION (os->bfd_section)
 			&& ! link_info.relocatable
 			&& check_regions
 			&& strcmp (os->region->name,

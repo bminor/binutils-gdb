@@ -1,3 +1,10 @@
+2006-07-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	Backport:
+	2006-05-19  Alan Modra  <amodra@bigpond.net.au>
+	* ldlang.c (lang_size_sections_1): Don't check mem regions for
+	os->ignored sections.
+
 2006-06-12  Fred Fish  <fnf@specifix.com>
 
 	* emulparams/elf32bmip.sh (OTHER_SECTIONS): Keep the
