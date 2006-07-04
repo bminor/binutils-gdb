@@ -2138,6 +2138,28 @@ mips_move_labels (void)
     }
 }
 
+static bfd_boolean
+s_is_linkonce (symbolS *sym, segT from_seg)
+{
+  bfd_boolean linkonce = FALSE;
+  segT symseg = S_GET_SEGMENT (sym);
+
+  if (symseg != from_seg && !S_IS_LOCAL (sym))
+    {
+      if ((bfd_get_section_flags (stdoutput, symseg) & SEC_LINK_ONCE))
+	linkonce = TRUE;
+#ifdef OBJ_ELF
+      /* The GNU toolchain uses an extension for ELF: a section
+	 beginning with the magic string .gnu.linkonce is a
+	 linkonce section.  */
+      if (strncmp (segment_name (symseg), ".gnu.linkonce",
+		   sizeof ".gnu.linkonce" - 1) == 0)
+	linkonce = TRUE;
+#endif
+    }
+  return linkonce;
+}
+
 /* Mark instruction labels in mips16 mode.  This permits the linker to
    handle them specially, such as generating jalx instructions when
    needed.  We also make them odd for the duration of the assembly, in
@@ -2163,7 +2185,14 @@ mips16_mark_labels (void)
       if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
 	S_SET_OTHER (label, STO_MIPS16);
 #endif
-      if ((S_GET_VALUE (label) & 1) == 0)
+      if ((S_GET_VALUE (label) & 1) == 0
+	/* Don't adjust the address if the label is global or weak, or
+	   in a link-once section, since we'll be emitting symbol reloc
+	   references to it which will be patched up by the linker, and
+	   the final value of the symbol may or may not be MIPS16.  */
+	  && ! S_IS_WEAK (label)
+	  && ! S_IS_EXTERNAL (label)
+	  && ! s_is_linkonce (label, now_seg))
 	S_SET_VALUE (label, S_GET_VALUE (label) | 1);
     }
 }
@@ -13131,15 +13160,13 @@ static bfd_boolean
 pic_need_relax (symbolS *sym, asection *segtype)
 {
   asection *symsec;
-  bfd_boolean linkonce;
 
   /* Handle the case of a symbol equated to another symbol.  */
   while (symbol_equated_reloc_p (sym))
     {
       symbolS *n;
 
-      /* It's possible to get a loop here in a badly written
-	 program.  */
+      /* It's possible to get a loop here in a badly written program.  */
       n = symbol_get_value_expression (sym)->X_add_symbol;
       if (n == sym)
 	break;
@@ -13148,27 +13175,11 @@ pic_need_relax (symbolS *sym, asection *segtype)
 
   symsec = S_GET_SEGMENT (sym);
 
-  /* duplicate the test for LINK_ONCE sections as in adjust_reloc_syms */
-  linkonce = FALSE;
-  if (symsec != segtype && ! S_IS_LOCAL (sym))
-    {
-      if ((bfd_get_section_flags (stdoutput, symsec) & SEC_LINK_ONCE)
-	  != 0)
-	linkonce = TRUE;
-
-      /* The GNU toolchain uses an extension for ELF: a section
-	 beginning with the magic string .gnu.linkonce is a linkonce
-	 section.  */
-      if (strncmp (segment_name (symsec), ".gnu.linkonce",
-		   sizeof ".gnu.linkonce" - 1) == 0)
-	linkonce = TRUE;
-    }
-
   /* This must duplicate the test in adjust_reloc_syms.  */
   return (symsec != &bfd_und_section
 	  && symsec != &bfd_abs_section
-	  && ! bfd_is_com_section (symsec)
-	  && !linkonce
+	  && !bfd_is_com_section (symsec)
+	  && !s_is_linkonce (sym, segtype)
 #ifdef OBJ_ELF
 	  /* A global or weak symbol is treated as external.  */
 	  && (OUTPUT_FLAVOR != bfd_target_elf_flavour

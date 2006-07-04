@@ -1,3 +1,11 @@
+2006-07-04  Thiemo Seufer  <ths@mips.com>
+            David Ung  <davidu@mips.com>
+
+	* config/tc-mips.c (s_is_linkonce): New function.
+	(mips16_mark_labels): Don't adjust mips16 symbol addresses for
+	weak, external, and linkonce symbols.
+	(pic_need_relax): Use s_is_linkonce.
+
 2006-06-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* doc/as.texinfo (Org): Remove space.
