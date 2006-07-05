@@ -1,3 +1,8 @@
+2006-07-05  Thiemo Seufer  <ths@mips.com>
+
+	* ld-mips-elf/multi-got-1.d, ld-mips-elf/tls-multi-got-1.got,
+	ld-mips-elf/tls-multi-got-1.r: Update multigot testcases.
+
 2006-06-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-i386/tlsbindesc.dd: Updated to expect xchg %ax,%ax instead
