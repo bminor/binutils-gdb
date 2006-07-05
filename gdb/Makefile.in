@@ -532,7 +532,6 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
 	infcmd.c inflow.c infrun.c \
 	interps.c \
 	jv-exp.y jv-lang.c jv-valprint.c jv-typeprint.c \
-	kod.c kod-cisco.c \
 	language.c linespec.c \
 	m2-exp.y m2-lang.c m2-typeprint.c m2-valprint.c \
 	macrotab.c macroexp.c macrocmd.c macroscope.c main.c maint.c \
@@ -726,7 +725,6 @@ inf_ptrace_h = inf-ptrace.h
 inf_ttrace_h = inf-ttrace.h
 interps_h = interps.h $(exceptions_h)
 jv_lang_h = jv-lang.h
-kod_h = kod.h
 language_h = language.h
 libunwind_frame_h = libunwind-frame.h $(libunwind_h)
 linespec_h = linespec.h
@@ -928,7 +926,6 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	memattr.o mem-break.o target.o parse.o language.o buildsym.o \
 	std-regs.o \
 	signals.o \
-	kod.o kod-cisco.o \
 	gdb-events.o \
 	exec.o bcache.o objfiles.o observer.o minsyms.o maint.o demangle.o \
 	dbxread.o coffread.o coff-pe-read.o elfread.o \
@@ -2198,9 +2195,6 @@ jv-typeprint.o: jv-typeprint.c $(defs_h) $(symtab_h) $(gdbtypes_h) \
 jv-valprint.o: jv-valprint.c $(defs_h) $(symtab_h) $(gdbtypes_h) \
 	$(gdbcore_h) $(expression_h) $(value_h) $(demangle_h) $(valprint_h) \
 	$(language_h) $(jv_lang_h) $(c_lang_h) $(annotate_h) $(gdb_string_h)
-kod.o: kod.c $(defs_h) $(command_h) $(gdbcmd_h) $(target_h) $(gdb_string_h) \
-	$(kod_h)
-kod-cisco.o: kod-cisco.c $(defs_h) $(gdb_string_h) $(kod_h)
 language.o: language.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(value_h) $(gdbcmd_h) $(expression_h) $(language_h) $(target_h) \
 	$(parser_defs_h) $(jv_lang_h) $(demangle_h)

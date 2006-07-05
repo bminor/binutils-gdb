@@ -1,3 +1,14 @@
+2006-07-05  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c (remote_xfer_partial): Remove KOD support.
+	* target.h (enum target_object): Remove TARGET_OBJECT_KOD.
+	* MAINTAINERS: Move Kernel Object Display entry to past maintainers.
+	* Makefile.in (SFILES, kod_h, COMMON_OBS, kod.o, kod-cisco.o): Remove KOD
+	support.
+	* mi/mi-cmds.c (mi_cmds): Remove dummy KOD commands.
+	* NEWS: Mention KOD.
+	* kod.h, kod.c, kod-cisco.c: Delete files.
+
 2006-07-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote.c (init_remote_state): Use xrealloc instead of xmalloc.

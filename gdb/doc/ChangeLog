@@ -1,3 +1,8 @@
+2006-07-05  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* doc/gdb.texinfo (KOD): Remove node.
+	(GDB/MI Kod Commands): Remove commented out node.
+
 2006-07-01  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (GDB/MI Output Syntax, GDB/MI Simple Examples)

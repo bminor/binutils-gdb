@@ -5140,9 +5140,6 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
      objects!!!  Instead specify new query packets.  */
   switch (object)
     {
-    case TARGET_OBJECT_KOD:
-      query_type = 'K';
-      break;
     case TARGET_OBJECT_AVR:
       query_type = 'R';
       break;

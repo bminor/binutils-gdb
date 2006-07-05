@@ -418,7 +418,6 @@ dwarf readers		Elena Zannoni		ezannoni@redhat.com
 elf reader		Elena Zannoni		ezannoni@redhat.com
 stabs reader		Elena Zannoni		ezannoni@redhat.com
 readline/		Elena Zannoni		ezannoni@redhat.com
-Kernel Object Display	Fernando Nasser		fnasser@redhat.com
 NetBSD native & host	Jason Thorpe		thorpej@netbsd.org
 Pascal support		Pierre Muller		muller@sources.redhat.com
 avr			Theodore A. Roth	troth@openavr.org
@@ -568,7 +567,7 @@ J.T. Conklin (dcache, NetBSD, remote, global)	jtc at acorntoolworks dot com
 Frank Ch. Eigler (sim)				fche at redhat dot com
 Per Bothner (Java)				per at bothner dot com
 Anthony Green (Java)				green at redhat dot com
-Fernando Nasser (testsuite/, mi, cli)           fnasser at redhat dot com
+Fernando Nasser (testsuite/, mi, cli, KOD)      fnasser at redhat dot com
 Mark Salter (testsuite/lib+config)		msalter at redhat dot com
 Jim Kingdon (web pages)				kingdon at panix dot com
 Jim Ingham (gdbtk, libgui)			jingham at apple dot com

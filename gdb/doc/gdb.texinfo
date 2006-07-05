@@ -11977,7 +11977,6 @@ and @code{show architecture}.
 * Target Commands::             Commands for managing targets
 * Byte Order::                  Choosing target byte order
 * Remote::                      Remote debugging
-* KOD::                         Kernel Object Display
 
 @end menu
 
@@ -12262,52 +12261,6 @@ send arbitrary commands to the remote monitor:
 @cindex send command to remote monitor
 Send an arbitrary @var{command} string to the remote monitor.
 @end table
-
-
-@node KOD
-@section Kernel Object Display
-@cindex kernel object display
-@cindex KOD
-
-Some targets support kernel object display.  Using this facility,
-@value{GDBN} communicates specially with the underlying operating system
-and can display information about operating system-level objects such as
-mutexes and other synchronization objects.  Exactly which objects can be
-displayed is determined on a per-OS basis.
-
-@kindex set os
-Use the @code{set os} command to set the operating system.  This tells
-@value{GDBN} which kernel object display module to initialize:
-
-@smallexample
-(@value{GDBP}) set os cisco
-@end smallexample
-
-@kindex show os
-The associated command @code{show os} displays the operating system
-set with the @code{set os} command; if no operating system has been
-set, @code{show os} will display an empty string @samp{""}.
-
-If @code{set os} succeeds, @value{GDBN} will display some information
-about the operating system, and will create a new @code{info} command
-which can be used to query the target.  The @code{info} command is named
-after the operating system:
-
-@kindex info cisco
-@smallexample
-(@value{GDBP}) info cisco
-List of Cisco Kernel Objects
-Object     Description
-any        Any and all objects
-@end smallexample
-
-Further subcommands can be used to query about particular objects known
-by the kernel.
-
-There is currently no way to determine whether a given operating
-system is supported other than to try setting it with @kbd{set os
-@var{name}}, where @var{name} is the name of the operating system you
-want to try.
 
 
 @node Remote Debugging
@@ -20718,20 +20671,6 @@ The corresponding @value{GDBN} command is @samp{symbol-file}.
 @end smallexample
 
 @ignore
-@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-@node GDB/MI Kod Commands
-@section @sc{gdb/mi} Kod Commands
-
-The Kod commands are not implemented.
-
-@c @subheading -kod-info
-
-@c @subheading -kod-list
-
-@c @subheading -kod-list-object-types
-
-@c @subheading -kod-show
-
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Memory Overlay Commands
 @section @sc{gdb/mi} Memory Overlay Commands

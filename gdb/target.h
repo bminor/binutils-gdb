@@ -211,17 +211,10 @@ enum target_signal target_signal_from_name (char *);
    in the name.  The old code's failure to do this lead to much
    confusion and duplication of effort as each target object attempted
    to locally take responsibility for something it didn't have to
-   worry about.
-
-   NOTE: cagney/2003-10-17: With a TARGET_OBJECT_KOD object, for
-   backward compatibility with the "target_query" method that this
-   replaced, when OFFSET and LEN are both zero, return the "minimum"
-   buffer size.  See "remote.c" for further information.  */
+   worry about.  */
 
 enum target_object
 {
-  /* Kernel Object Display transfer.  See "kod.c" and "remote.c".  */
-  TARGET_OBJECT_KOD,
   /* AVR target specific transfer.  See "avr-tdep.c" and "remote.c".  */
   TARGET_OBJECT_AVR,
   /* Transfer up-to LEN bytes of memory starting at OFFSET.  */
