@@ -1,3 +1,9 @@
+2006-07-05  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/2659
+	* cofflink.c (_bfd_coff_link_input_bfd): Fix selection of aux
+	entry when multiple definitions of a symbol are encountered.
+
 2006-06-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_relocate_section): Use xchg %ax,%ax

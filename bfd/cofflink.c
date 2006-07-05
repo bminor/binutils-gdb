@@ -1921,6 +1921,7 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *finfo, bfd *input_bfd)
                  generate two symbols with the same name, but only one
                  will have aux entries.  */
 	      BFD_ASSERT (isymp->n_numaux == 0
+			  || h->numaux == 0
 			  || h->numaux == isymp->n_numaux);
 	    }
 
@@ -1936,7 +1937,7 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *finfo, bfd *input_bfd)
 	      union internal_auxent aux;
 	      union internal_auxent *auxp;
 
-	      if (h != NULL)
+	      if (h != NULL && h->aux != NULL && (h->numaux > i))
 		auxp = h->aux + i;
 	      else
 		{
