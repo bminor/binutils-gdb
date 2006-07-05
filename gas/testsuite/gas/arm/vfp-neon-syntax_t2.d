@@ -12,7 +12,7 @@ Disassembly of section \.text:
 0[0-9a-f]+ <[^>]+> ee10 0a90 	fmrs	r0, s1
 0[0-9a-f]+ <[^>]+> ee00 1a10 	fmsr	s0, r1
 0[0-9a-f]+ <[^>]+> ec51 0a11 	fmrrs	r0, r1, {s2, s3}
-0[0-9a-f]+ <[^>]+> ec44 2a10 	fmsrr	r2, r4, {s0, s1}
+0[0-9a-f]+ <[^>]+> ec44 2a10 	fmsrr	{s0, s1}, r2, r4
 0[0-9a-f]+ <[^>]+> bf01      	itttt	eq
 0[0-9a-f]+ <[^>]+> eeb0 0a60 	fcpyseq	s0, s1
 0[0-9a-f]+ <[^>]+> eeb0 0b41 	fcpydeq	d0, d1
@@ -22,7 +22,7 @@ Disassembly of section \.text:
 0[0-9a-f]+ <[^>]+> ee10 0a90 	fmrseq	r0, s1
 0[0-9a-f]+ <[^>]+> ee00 1a10 	fmsreq	s0, r1
 0[0-9a-f]+ <[^>]+> ec51 0a11 	fmrrseq	r0, r1, {s2, s3}
-0[0-9a-f]+ <[^>]+> ec44 2a10 	fmsrreq	r2, r4, {s0, s1}
+0[0-9a-f]+ <[^>]+> ec44 2a10 	fmsrreq	{s0, s1}, r2, r4
 0[0-9a-f]+ <[^>]+> eeb1 0ae0 	fsqrts	s0, s1
 0[0-9a-f]+ <[^>]+> eeb1 0bc1 	fsqrtd	d0, d1
 0[0-9a-f]+ <[^>]+> bf04      	itt	eq

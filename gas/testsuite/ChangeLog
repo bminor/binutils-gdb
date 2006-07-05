@@ -1,3 +1,10 @@
+2006-07-05  Julian Brown  <julian@codesourcery.com>
+
+	* gas/arm/vfp-neon-syntax.d: Tweak expected fmsrr syntax.
+	* gas/arm/vfp-neon-syntax_t2.d: Likewise.
+	* gas/arm/vfp2.d: Likewise.
+	* gas/arm/vfp2_t2.d: Likewise.
+
 2006-07-04  Thiemo Seufer  <ths@mips.com>
 
 	* gas/mips/e32-rel2.d, gas/mips/e32-rel4.d: Use -mabi=32 for as.
