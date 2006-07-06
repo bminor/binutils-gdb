@@ -1,8 +1,12 @@
 2006-07-06  Mohammed Adnène Trojette  <adn@diwi.org>
 
 	PR binutils/2879
-	* doc/binutils.texi: Document -T shorthand for --target switch.
+	* doc/binutils.texi (Strings): Document -T shorthand for --target
+	switch.
 	* strings.c: Update comment to include -T option.
+
+	PR binutils/2875
+	* doc/binutils.texi (readelf): Fix spelling typo.
 
 2006-06-30  Nick Clifton  <nickc@redhat.com>
 

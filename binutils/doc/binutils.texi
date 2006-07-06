@@ -3396,7 +3396,7 @@ given.
 @table @env
 @item -a
 @itemx --all
-Equivalent to specifiying @option{--file-header},
+Equivalent to specifying @option{--file-header},
 @option{--program-headers}, @option{--sections}, @option{--symbols},
 @option{--relocs}, @option{--dynamic}, @option{--notes} and
 @option{--version-info}. 
