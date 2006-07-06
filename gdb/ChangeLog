@@ -1,3 +1,9 @@
+2006-07-06  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* parse.c (write_exp_elt_opcode, write_exp_elt_sym, write_exp_elt_block
+	write_exp_elt_longcst, write_exp_elt_dblcst, write_exp_elt_type,
+	write_exp_elt_intern): Zero initialize tmp.
+
 2006-07-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote.c (remote_xfer_partial): Remove KOD support.
