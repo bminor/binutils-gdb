@@ -1,3 +1,13 @@
+2006-07-06  Mohammed Adnène Trojette  <adn@diwi.org>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/2877
+	* doc/as.texi: Fix spelling typo: branchs => branches.
+	* doc/c-m68hc11.texi: Likewise.
+	* config/tc-m68hc11.c: Likewise.
+	Support old spelling of command line switch for backwards
+	compatibility.
+
 2006-07-04  Thiemo Seufer  <ths@mips.com>
             David Ung  <davidu@mips.com>
 
