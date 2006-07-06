@@ -2136,7 +2136,7 @@ strings [@option{-afov}] [@option{-}@var{min-len}]
         [@option{-t} @var{radix}] [@option{--radix=}@var{radix}]
         [@option{-e} @var{encoding}] [@option{--encoding=}@var{encoding}]
         [@option{-}] [@option{--all}] [@option{--print-file-name}]
-        [@option{--target=}@var{bfdname}]
+        [@option{-T} @var{bfdname}] [@option{--target=}@var{bfdname}]
         [@option{--help}] [@option{--version}] @var{file}@dots{}
 @c man end
 @end smallexample
@@ -2197,7 +2197,8 @@ single-8-bit-byte characters, @samp{b} = 16-bit bigendian, @samp{l} =
 16-bit littleendian, @samp{B} = 32-bit bigendian, @samp{L} = 32-bit
 littleendian. Useful for finding wide character strings.
 
-@item --target=@var{bfdname}
+@item -T @var{bfdname}
+@itemx --target=@var{bfdname}
 @cindex object code format
 Specify an object code format other than your system's default format.
 @xref{Target Selection}, for more information.
