@@ -322,7 +322,7 @@ For options whose names are multiple letters, either one dash or two can
 precede the option name; for example, @samp{-trace-symbol} and
 @samp{--trace-symbol} are equivalent.  Note---there is one exception to
 this rule.  Multiple letter options that start with a lower case 'o' can
-only be preceeded by two dashes.  This is to reduce confusion with the
+only be preceded by two dashes.  This is to reduce confusion with the
 @samp{-o} option.  So for example @samp{-omagic} sets the output file
 name to @samp{magic} whereas @samp{--omagic} sets the NMAGIC flag on the
 output.
@@ -773,7 +773,7 @@ should only be enabled for the final binary.
 @cindex retain relocations in final executable
 @item -q
 @itemx --emit-relocs
-Leave relocation sections and contents in fully linked exececutables.
+Leave relocation sections and contents in fully linked executables.
 Post link analysis and optimization tools may need this information in
 order to perform correct modifications of executables.  This results
 in larger executables.
