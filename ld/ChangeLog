@@ -1,6 +1,12 @@
+2006-07-07  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/2874
+	* ld.texinfo: Remove "Using LD" from the title since it is
+	redundant.
+
 2006-07-06  Mohammed Adnène Trojette  <adn@diwi.org>
 
-	PR binutils/2877
+	PR ld/2877
 	* ld.texinfo: Fix spelling mistakes.
 
 2006-06-27  Pedro Alves  <pedro_alves@portugalmail.pt>

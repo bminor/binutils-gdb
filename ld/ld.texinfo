@@ -85,10 +85,9 @@ notice identical to this one except for the removal of this paragraph
 @iftex
 @finalout
 @setchapternewpage odd
-@settitle Using LD, the GNU linker
+@settitle The GNU linker
 @titlepage
-@title Using ld
-@subtitle The GNU linker
+@title The GNU linker
 @sp 1
 @subtitle @code{ld} version 2
 @subtitle Version @value{VERSION}
@@ -100,7 +99,7 @@ notice identical to this one except for the removal of this paragraph
 {\parskip=0pt
 \hfill Red Hat Inc\par
 \hfill nickc\@credhat.com, doc\@redhat.com\par
-\hfill {\it Using LD, the GNU linker}\par
+\hfill {\it The GNU linker}\par
 \hfill Edited by Jeffrey Osier (jeffrey\@cygnus.com)\par
 }
 \global\parindent=0pt % Steve likes it this way.
@@ -125,7 +124,7 @@ section entitled ``GNU Free Documentation License''.
 
 @ifnottex
 @node Top
-@top Using ld
+@top LD
 This file documents the @sc{gnu} linker ld version @value{VERSION}.
 
 This document is distributed under the terms of the GNU Free
@@ -217,9 +216,8 @@ to provide explicit and total control over the linking process.
 @ifset man
 @c For the man only
 This man page does not describe the command language; see the
-@command{ld} entry in @code{info}, or the manual
-ld: the GNU linker, for full details on the command language and
-on other aspects of the GNU linker.
+@command{ld} entry in @code{info} for full details on the command
+language and on other aspects of the GNU linker.
 @end ifset
 
 @ifclear SingleFormat
