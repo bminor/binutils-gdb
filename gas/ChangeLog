@@ -1,3 +1,7 @@
+2006-07-07  James E Wilson  <wilson@specifix.com>
+
+	* config/tc-mips.c (mips_cpu_info_table): Add sb1a.
+
 2006-07-06  Mohammed Adnène Trojette  <adn@diwi.org>
 	    Nick Clifton  <nickc@redhat.com>
 

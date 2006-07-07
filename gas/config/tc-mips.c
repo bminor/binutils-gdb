@@ -14632,6 +14632,9 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   /* Broadcom SB-1 CPU core */
   { "sb1",            MIPS_CPU_ASE_MIPS3D | MIPS_CPU_ASE_MDMX,
 						ISA_MIPS64,	CPU_SB1 },
+  /* Broadcom SB-1A CPU core */
+  { "sb1a",           MIPS_CPU_ASE_MIPS3D | MIPS_CPU_ASE_MDMX,
+						ISA_MIPS64,	CPU_SB1 },
 
   /* End marker */
   { NULL, 0, 0, 0 }
