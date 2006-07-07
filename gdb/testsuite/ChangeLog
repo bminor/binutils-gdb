@@ -1,3 +1,7 @@
+2006-07-07  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* gdb.base/ifelse.exp: New file.
+
 2006-07-04  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* gdb.base/huge.c: Allow CRASH_GDB to be set from command
