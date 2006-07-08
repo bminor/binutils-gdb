@@ -9,8 +9,8 @@
 	* remote.c (remote_xfer_partial): Remove KOD support.
 	* target.h (enum target_object): Remove TARGET_OBJECT_KOD.
 	* MAINTAINERS: Move Kernel Object Display entry to past maintainers.
-	* Makefile.in (SFILES, kod_h, COMMON_OBS, kod.o, kod-cisco.o): Remove KOD
-	support.
+	* Makefile.in (SFILES, kod_h, COMMON_OBS, kod.o, kod-cisco.o):
+	Remove KOD support.
 	* mi/mi-cmds.c (mi_cmds): Remove dummy KOD commands.
 	* NEWS: Mention KOD.
 	* kod.h, kod.c, kod-cisco.c: Delete files.
