@@ -1,7 +1,7 @@
 2006-07-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* alphabsd-tdep.h: Tweak comments.
-	(SIZOEF_STRUCT_REG, SIZEOF_STRUCT_FPREG): Remove.
+	(SIZEOF_STRUCT_REG, SIZEOF_STRUCT_FPREG): Remove.
 	* alphanbsd-tdep.c: Reorder includes.  Include "regset.h".
 	(ALPHANBSD_SIZEOF_GREGS, ALPHANBSD_SIZEOF_FPREGS): New defines.
 	(alphanbsd_supply_fpregset, alphanbsd_supply_gregset)
