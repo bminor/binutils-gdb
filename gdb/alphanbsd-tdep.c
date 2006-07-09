@@ -163,26 +163,20 @@ static struct regset alphanbsd_aout_gregset =
 /* Return the appropriate register set for the core section identified
    by SECT_NAME and SECT_SIZE.  */
 
-static const struct regset *
+const struct regset *
 alphanbsd_regset_from_core_section (struct gdbarch *gdbarch,
 				    const char *sect_name, size_t sect_size)
 {
   if (strcmp (sect_name, ".reg") == 0 && sect_size >= ALPHANBSD_SIZEOF_GREGS)
-    return &alphanbsd_gregset;
+    {
+      if (sect_size >= ALPHANBSD_SIZEOF_GREGS + ALPHANBSD_SIZEOF_FPREGS)
+	return &alphanbsd_aout_gregset;
+      else
+	return &alphanbsd_gregset;
+    }
 
   if (strcmp (sect_name, ".reg2") == 0 && sect_size >= ALPHANBSD_SIZEOF_FPREGS)
     return &alphanbsd_fpregset;
-
-  return NULL;
-}
-
-static const struct regset *
-alphanbsd_aout_regset_from_core_section (struct gdbarch *gdbarch,
-					 const char *sect_name,
-					 size_t sect_size)
-{
-  if (strcmp (sect_name, ".reg") == 0 && sect_size >= ALPHANBSD_SIZEOF_GREGS)
-    return &alphanbsd_aout_gregset;
 
   return NULL;
 }
@@ -216,7 +210,7 @@ static const unsigned char sigtramp_retcode[] =
 #define RETCODE_NWORDS		4
 #define RETCODE_SIZE		(RETCODE_NWORDS * 4)
 
-LONGEST
+static LONGEST
 alphanbsd_sigtramp_offset (CORE_ADDR pc)
 {
   unsigned char ret[RETCODE_SIZE], w[4];
@@ -261,6 +255,7 @@ alphanbsd_sigcontext_addr (struct frame_info *frame)
      out which trampoline frame type we have.  */
   return get_frame_base (frame);
 }
+
 
 static void
 alphanbsd_init_abi (struct gdbarch_info info,
@@ -292,23 +287,13 @@ alphanbsd_init_abi (struct gdbarch_info info,
   set_gdbarch_regset_from_core_section
     (gdbarch, alphanbsd_regset_from_core_section);
 }
-
-static void
-alphanbsd_aout_init_abi (struct gdbarch_info info,
-			 struct gdbarch *gdbarch)
-{
-  alphanbsd_init_abi(info, gdbarch);
-
-  set_gdbarch_regset_from_core_section
-    (gdbarch, alphanbsd_aout_regset_from_core_section);
-}
 
 
 static enum gdb_osabi
 alphanbsd_core_osabi_sniffer (bfd *abfd)
 {
   if (strcmp (bfd_get_target (abfd), "netbsd-core") == 0)
-    return GDB_OSABI_NETBSD_AOUT;
+    return GDB_OSABI_NETBSD_ELF;
 
   return GDB_OSABI_UNKNOWN;
 }
@@ -326,8 +311,6 @@ _initialize_alphanbsd_tdep (void)
 
   gdbarch_register_osabi (bfd_arch_alpha, 0, GDB_OSABI_NETBSD_ELF,
                           alphanbsd_init_abi);
-  gdbarch_register_osabi (bfd_arch_alpha, 0, GDB_OSABI_NETBSD_AOUT,
-                          alphanbsd_aout_init_abi);
   gdbarch_register_osabi (bfd_arch_alpha, 0, GDB_OSABI_OPENBSD_ELF,
-                          alphanbsd_aout_init_abi);
+                          alphanbsd_init_abi);
 }

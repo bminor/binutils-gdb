@@ -27,5 +27,14 @@ void alphabsd_fill_reg (char *, int);
 
 void alphabsd_supply_fpreg (char *, int);
 void alphabsd_fill_fpreg (char *, int);
+
+
+/* Functions exported from alphanbsd-tdep.c.  */
+
+/* Return the appropriate register set for the core section identified
+   by SECT_NAME and SECT_SIZE.  */
+extern const struct regset *
+  alphanbsd_regset_from_core_section (struct gdbarch *gdbarch,
+				      const char *sect_name, size_t len);
 
 #endif /* alphabsd-tdep.h */

@@ -1,5 +1,17 @@
 2006-07-09  Mark Kettenis  <kettenis@gnu.org>
 
+	* alphabsd-tdep.h (alphanbsd_regset_from_core_section): New
+	prototype.
+	* alphanbsd-tdep.c (alphanbsd_regset_from_core_section): Handle
+	a.out-style core file format here.  Make global.
+	(alphanbsd_regset_from_core_section): Remove.
+	(alphanbsd_sigtramp_offset): Make static.
+	(alphanbsd_aout_init_abi): Remove.
+	(alphanbsd_core_osabi_sniffer): Return GDB_OSABI_NETBSD_ELF for
+	a.out style core files.
+	(_initialize_alphanbsd_tdep): Do not register a handler for
+	GDB_OSABI_NETBSD_AOUT.
+
 	* alphabsd-tdep.h: Tweak comments.
 	(SIZEOF_STRUCT_REG, SIZEOF_STRUCT_FPREG): Remove.
 	* alphanbsd-tdep.c: Reorder includes.  Include "regset.h".
