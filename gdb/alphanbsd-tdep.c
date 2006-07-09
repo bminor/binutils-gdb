@@ -1,6 +1,7 @@
-/* Target-dependent code for NetBSD/Alpha.
+/* Target-dependent code for NetBSD/alpha.
 
-   Copyright (C) 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright (C) 2002, 2003, 2004, 2006 Free Software Foundation, Inc.
+
    Contributed by Wasabi Systems, Inc.
 
    This file is part of GDB.
@@ -210,8 +211,9 @@ alphanbsd_init_abi (struct gdbarch_info info,
      must use software single-stepping.  */
   set_gdbarch_software_single_step (gdbarch, alpha_software_single_step);
 
-  set_solib_svr4_fetch_link_map_offsets (gdbarch,
-                                 nbsd_lp64_solib_svr4_fetch_link_map_offsets);
+  /* NetBSD/alpha has SVR4-style shared libraries.  */
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, svr4_lp64_fetch_link_map_offsets);
 
   tdep->dynamic_sigtramp_offset = alphanbsd_sigtramp_offset;
   tdep->pc_in_sigtramp = alphanbsd_pc_in_sigtramp;

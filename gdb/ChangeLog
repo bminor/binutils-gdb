@@ -1,3 +1,9 @@
+2006-07-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* alphanbsd-tdep.c (alphanbsd_init_abi): Use
+	svr4_lp64_fetch_link_map_offsets instead of
+	nbsd_lp64_solib_svr4_fetch_link_map_offsets.
+
 2006-07-06  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* parse.c (write_exp_elt_opcode, write_exp_elt_sym, write_exp_elt_block
