@@ -1,5 +1,6 @@
-/* Common target dependent code for GDB on Alpha systems running BSD.
-   Copyright (C) 2002 Free Software Foundation, Inc.
+/* Common target dependent code for Alpha BSD's.
+
+   Copyright (C) 2002, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,7 +28,4 @@ void alphabsd_fill_reg (char *, int);
 void alphabsd_supply_fpreg (char *, int);
 void alphabsd_fill_fpreg (char *, int);
 
-#define SIZEOF_STRUCT_REG	(32 * 8)
-#define SIZEOF_STRUCT_FPREG	(33 * 8)
-
-#endif /* ALPHABSD_TDEP_H */
+#endif /* alphabsd-tdep.h */

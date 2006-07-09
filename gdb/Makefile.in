@@ -1707,9 +1707,10 @@ alpha-mdebug-tdep.o: alpha-mdebug-tdep.c $(defs_h) $(frame_h) \
 	$(block_h) $(gdb_assert_h) $(alpha_tdep_h) $(mdebugread_h)
 alpha-nat.o: alpha-nat.c $(defs_h) $(gdb_string_h) $(inferior_h) \
 	$(gdbcore_h) $(target_h) $(regcache_h) $(alpha_tdep_h) $(gregset_h)
-alphanbsd-tdep.o: alphanbsd-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
-	$(regcache_h) $(value_h) $(osabi_h) $(gdb_string_h) $(alpha_tdep_h) \
-	$(alphabsd_tdep_h) $(nbsd_tdep_h) $(solib_svr4_h)
+alphanbsd-tdep.o: alphanbsd-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
+	$(regcache_h) $(regset_h) $(value_h) $(osabi_h) $(gdb_string_h) \
+	$(gdb_assert_h) $(alpha_tdep_h) $(alphabsd_tdep_h) $(nbsd_tdep_h) \
+	$(solib_svr4_h)
 alpha-osf1-tdep.o: alpha-osf1-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
 	$(value_h) $(osabi_h) $(gdb_string_h) $(objfiles_h) $(alpha_tdep_h)
 alpha-tdep.o: alpha-tdep.c $(defs_h) $(doublest_h) $(frame_h) \

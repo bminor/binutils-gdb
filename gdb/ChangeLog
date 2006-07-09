@@ -1,5 +1,25 @@
 2006-07-09  Mark Kettenis  <kettenis@gnu.org>
 
+	* alphabsd-tdep.h: Tweak comments.
+	(SIZOEF_STRUCT_REG, SIZEOF_STRUCT_FPREG): Remove.
+	* alphanbsd-tdep.c: Reorder includes.  Include "regset.h".
+	(ALPHANBSD_SIZEOF_GREGS, ALPHANBSD_SIZEOF_FPREGS): New defines.
+	(alphanbsd_supply_fpregset, alphanbsd_supply_gregset)
+	(alphanbsd_aout_supply_gregset): New functions.
+	(alphanbsd_gregset, alphanbsd_fpregset, alphanbsd_aout_gregset):
+	New variables.
+	(alphanbsd_regset_from_core_section)
+	(alphanbsd_aout_regset_from_core_section): New functions.
+	(fetch_core_registers, fetch_elfcore_registers): Remove functions.
+	(alphanbsd_core_fns, alphanbsd_elf_fns): Remove variables.
+	(alphanbsd_init_abi): Set regset_from_core_section.
+	(alphanbsd_aout_init_abi, alphanbsd_core_osabi_sniffer): New
+	functions.
+	(_initialize_alphanbsd_tdep): Register NetBSD core file sniffer.
+	Use alphanbsd_aout_init_abi whre appropriate.  Don't call
+	deprecated_add_core_fns.
+	* Makefile.in (alphanbsd-tdep.o): Update dependencies.
+
 	* alphabsd-tdep.c (alphabsd_supply_reg, alphabsd_fill_reg)
 	(alphabsd_supply_fpreg, alphabsd_fill_fpreg): Add missing spaces.
 
