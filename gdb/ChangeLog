@@ -1,5 +1,8 @@
 2006-07-09  Mark Kettenis  <kettenis@gnu.org>
 
+	* alphabsd-tdep.c (alphabsd_supply_reg, alphabsd_fill_reg)
+	(alphabsd_supply_fpreg, alphabsd_fill_fpreg): Add missing spaces.
+
 	* alphanbsd-tdep.c (alphanbsd_init_abi): Use
 	svr4_lp64_fetch_link_map_offsets instead of
 	nbsd_lp64_solib_svr4_fetch_link_map_offsets.
