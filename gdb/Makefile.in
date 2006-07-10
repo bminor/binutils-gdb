@@ -1404,9 +1404,10 @@ MAKEOVERRIDES=
 
 ALLDEPFILES = \
 	aix-thread.c \
-	alpha-nat.c alphabsd-nat.c alpha-linux-nat.c linux-fork.c \
-	alpha-tdep.c alpha-linux-tdep.c alphabsd-tdep.c alphanbsd-tdep.c \
-	alpha-osf1-tdep.c alphafbsd-tdep.c alpha-mdebug-tdep.c \
+	alpha-nat.c alphabsd-nat.c alpha-linux-nat.c \
+	alpha-tdep.c alpha-mdebug-tdep.c \
+	alpha-linux-tdep.c alpha-osf1-tdep.c \
+	alphabsd-tdep.c alphafbsd-tdep.c alphanbsd-tdep.c alphaobsd-tdep.c \
 	amd64-nat.c amd64-tdep.c \
 	amd64bsd-nat.c amd64fbsd-nat.c amd64fbsd-tdep.c \
 	amd64nbsd-nat.c amd64nbsd-tdep.c \
@@ -1440,6 +1441,7 @@ ALLDEPFILES = \
 	inf-ptrace.c inf-ttrace.c \
 	infptrace.c inftarg.c irix5-nat.c \
 	libunwind-frame.c \
+	linux-fork.c \
 	lynx-nat.c \
 	m68hc11-tdep.c \
 	m32r-tdep.c \
@@ -1711,6 +1713,8 @@ alphanbsd-tdep.o: alphanbsd-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
 	$(regcache_h) $(regset_h) $(value_h) $(osabi_h) $(gdb_string_h) \
 	$(gdb_assert_h) $(alpha_tdep_h) $(alphabsd_tdep_h) $(nbsd_tdep_h) \
 	$(solib_svr4_h)
+alphaobsd-tdep.o: alphaobsd-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
+	$(osabi_h) $(alpha_tdep_h) $(alphabsd_tdep_h) $(solib_svr4_h)
 alpha-osf1-tdep.o: alpha-osf1-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
 	$(value_h) $(osabi_h) $(gdb_string_h) $(objfiles_h) $(alpha_tdep_h)
 alpha-tdep.o: alpha-tdep.c $(defs_h) $(doublest_h) $(frame_h) \

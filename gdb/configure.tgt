@@ -45,7 +45,7 @@ alpha*-*-osf*)		gdb_target=alpha-osf1 ;;
 alpha*-*-linux*)	gdb_target=alpha-linux ;;
 alpha*-*-netbsd* | alpha*-*-knetbsd*-gnu)
 			gdb_target=nbsd ;;
-alpha*-*-openbsd*)	gdb_target=nbsd ;;
+alpha*-*-openbsd*)	gdb_target=obsd ;;
 alpha*-*-*)		gdb_target=alpha ;;
 
 # mn10300 / am33 liunux

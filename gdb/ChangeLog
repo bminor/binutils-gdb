@@ -1,3 +1,13 @@
+2006-07-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* alphaobsd-tdep.c: New file.
+	* alphanbsd-tdep.c (_initialize_alphanbsd_tdep): Do not register a
+	handler for GDB_OSABI_OPENBSD_ELF.
+	* Makefile.in (ALLDEPFILES): Add alphaobsd-tdep.c.
+	(alphaobsd-tdep.o): New target.
+	* config/alpha/obsd.mt: New file.
+	* configure.tgt (alpha*-*-openbsd*): Set gdb_target to obsd.
+
 2006-07-10  Richard Henderson  <rth@redhat.com>
 
 	* alpha-tdep.h (struct gdbarch_tdep): Add return_in_memory.
