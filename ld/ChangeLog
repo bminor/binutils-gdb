@@ -1,3 +1,9 @@
+2006-07-10  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_TW.po: New Chinese (traditional) translation.
+	* configure.in (ALL_LINGUAS): Add zh_TW.
+	* configure: Regenerate.
+
 2006-07-07  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/2874
