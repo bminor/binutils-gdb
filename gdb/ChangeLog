@@ -1,3 +1,20 @@
+2006-07-10  Richard Henderson  <rth@redhat.com>
+
+	* alpha-tdep.h (struct gdbarch_tdep): Add return_in_memory.
+	* alpha-tdep.c (alpha_register_byte): Remove.
+	(alpha_extract_struct_value_address): Remove.
+	(alpha_return_value): New.
+	(alpha_return_in_memory_always): New.
+	(alpha_gdbarch_init): Set tdep->return_in_memory.  Don't call
+	set_gdbarch_deprecated_register_byte.  Do call set_gdbarch_return_value
+	instead of set_gdbarch_deprecated_use_struct_convention,
+	set_gdbarch_extract_return_value, set_gdbarch_store_return_value,
+	or set_gdbarch_deprecated_extract_struct_value_address.
+	* alphafbsd-tdep.c (alphafbsd_return_in_memory): Rename from
+	alphafbsd_use_struct_convention, remove gcc_p argument.
+	(alphafbsd_init_abi): Set tdep->return_in_memory instead of
+	set_gdbarch_deprecated_use_struct_convention.
+
 2006-07-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* alphabsd-tdep.h (alphanbsd_regset_from_core_section): New

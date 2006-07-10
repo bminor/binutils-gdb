@@ -149,12 +149,6 @@ alpha_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
     return group == general_reggroup;
 }
 
-static int
-alpha_register_byte (int regno)
-{
-  return (regno * 8);
-}
-
 /* The following represents exactly the conversion performed by
    the LDS instruction.  This applies to both single-precision
    floating point and 32-bit integers.  */
@@ -501,17 +495,6 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
     }
 }
 
-/* Extract from REGCACHE the address of a structure about to be returned
-   from a function.  */
-
-static CORE_ADDR
-alpha_extract_struct_value_address (struct regcache *regcache)
-{
-  ULONGEST addr;
-  regcache_cooked_read_unsigned (regcache, ALPHA_V0_REGNUM, &addr);
-  return addr;
-}
-
 /* Insert the given value into REGCACHE as if it was being 
    returned by a function.  */
 
@@ -585,6 +568,41 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
     }
 }
 
+static enum return_value_convention
+alpha_return_value (struct gdbarch *gdbarch, struct type *type,
+		    struct regcache *regcache, gdb_byte *readbuf,
+		    const gdb_byte *writebuf)
+{
+  enum type_code code = TYPE_CODE (type);
+
+  if ((code == TYPE_CODE_STRUCT
+       || code == TYPE_CODE_UNION
+       || code == TYPE_CODE_ARRAY)
+      && gdbarch_tdep (gdbarch)->return_in_memory (type))
+    {
+      if (readbuf)
+	{
+	  ULONGEST addr;
+	  regcache_raw_read_unsigned (regcache, ALPHA_V0_REGNUM, &addr);
+	  read_memory (addr, readbuf, TYPE_LENGTH (type));
+	}
+
+      return RETURN_VALUE_ABI_RETURNS_ADDRESS;
+    }
+
+  if (readbuf)
+    alpha_extract_return_value (type, regcache, readbuf);
+  if (writebuf)
+    alpha_store_return_value (type, regcache, writebuf);
+
+  return RETURN_VALUE_REGISTER_CONVENTION;
+}
+
+static int
+alpha_return_in_memory_always (struct type *type)
+{
+  return 1;
+}
 
 static const unsigned char *
 alpha_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
@@ -1551,6 +1569,8 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   tdep->jb_pc = -1;	/* longjmp support not enabled by default  */
 
+  tdep->return_in_memory = alpha_return_in_memory_always;
+
   /* Type sizes */
   set_gdbarch_short_bit (gdbarch, 16);
   set_gdbarch_int_bit (gdbarch, 32);
@@ -1568,7 +1588,6 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fp0_regnum (gdbarch, ALPHA_FP0_REGNUM);
 
   set_gdbarch_register_name (gdbarch, alpha_register_name);
-  set_gdbarch_deprecated_register_byte (gdbarch, alpha_register_byte);
   set_gdbarch_register_type (gdbarch, alpha_register_type);
 
   set_gdbarch_cannot_fetch_register (gdbarch, alpha_cannot_fetch_register);
@@ -1588,10 +1607,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Call info.  */
 
-  set_gdbarch_deprecated_use_struct_convention (gdbarch, always_use_struct_convention);
-  set_gdbarch_extract_return_value (gdbarch, alpha_extract_return_value);
-  set_gdbarch_store_return_value (gdbarch, alpha_store_return_value);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, alpha_extract_struct_value_address);
+  set_gdbarch_return_value (gdbarch, alpha_return_value);
 
   /* Settings for calling functions in the inferior.  */
   set_gdbarch_push_dummy_call (gdbarch, alpha_push_dummy_call);

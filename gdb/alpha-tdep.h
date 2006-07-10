@@ -88,6 +88,9 @@ struct gdbarch_tdep
      sigtramp unwinders.  */
   int (*pc_in_sigtramp) (CORE_ADDR pc, char *name);
 
+  /* If TYPE will be returned in memory, return true.  */
+  int (*return_in_memory) (struct type *type);
+
   /* Offset of registers in `struct sigcontext'.  */
   int sc_pc_offset;
   int sc_regs_offset;
