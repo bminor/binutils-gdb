@@ -1,3 +1,38 @@
+2006-07-10  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf.c (_bfd_elf_print_private_bfd_data): Handle DT_GNU_HASH.
+	(bfd_section_from_shdr, elf_fake_sections, assign_section_numbers):
+	Handle SHT_GNU_HASH.
+	(special_sections_g): Include .gnu.hash section.
+	(bfd_elf_gnu_hash): New function.
+	* elf-bfd.h (bfd_elf_gnu_hash, _bfd_elf_hash_symbol): New prototypes.
+	(struct elf_backend_data): Add elf_hash_symbol method.
+	* elflink.c (_bfd_elf_link_create_dynamic_sections): Create .hash
+	only if info->emit_hash, create .gnu.hash section if
+	info->emit_gnu_hash.
+	(struct collect_gnu_hash_codes): New type.
+	(elf_collect_gnu_hash_codes, elf_renumber_gnu_hash_syms,
+	_bfd_elf_hash_symbol): New functions.
+	(compute_bucket_count): Don't compute HASHCODES array, instead add
+	that and NSYMS as arguments.  Use bed->s->sizeof_hash_entry
+	instead of bed->s->arch_size / 8.  Fix .hash size estimation.
+	When not optimizing, use the number of hashed symbols rather than
+	dynsymcount.
+	(bfd_elf_size_dynamic_sections): Only add DT_HASH if info->emit_hash,
+	and ADD DT_GNU_HASH if info->emit_gnu_hash.
+	(bfd_elf_size_dynsym_hash_dynstr): Size .hash only if info->emit_hash,
+	adjust compute_bucket_count caller.  Create and populate .gnu.hash
+	section if info->emit_gnu_hash.
+	(elf_link_output_extsym): Only populate .hash section if
+	finfo->hash_sec != NULL.
+	(bfd_elf_final_link): Adjust assertion.  Handle DT_GNU_HASH.
+	* elfxx-target.h (elf_backend_hash_symbol): Define if not yet defined.
+	(elfNN_bed): Add elf_backend_hash_symbol.
+	* elf64-x86-64.c (elf64_x86_64_hash_symbol): New function.
+	(elf_backend_hash_symbol): Define.
+	* elf32-i386.c (elf_i386_hash_symbol): New function.
+	(elf_backend_hash_symbol): Define.
+
 2006-07-05  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/2659

@@ -1,3 +1,12 @@
+2006-07-10  Jakub Jelinek  <jakub@redhat.com>
+
+	* ld-powerpc/tlsso32.r: Adjust.
+	* ld-powerpc/tlsso32.d: Adjust.
+	* ld-powerpc/tlsso32.g: Adjust.
+	* ld-powerpc/tlsso.r: Adjust.
+	* ld-powerpc/tlsso.g: Adjust.
+	* ld-powerpc/tlstocso.g: Adjust.
+
 2006-07-05  Thiemo Seufer  <ths@mips.com>
 
 	* ld-mips-elf/multi-got-1.d, ld-mips-elf/tls-multi-got-1.got,

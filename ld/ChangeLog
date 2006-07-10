@@ -1,3 +1,13 @@
+2006-07-10  Jakub Jelinek  <jakub@redhat.com>
+
+	* scripttempl/elf.sc: Add .gnu.hash section.
+	* emultempl/elf32.em (OPTION_HASH_STYLE): Define.
+	(gld${EMULATION_NAME}_add_options): Register --hash-style option.
+	(gld${EMULATION_NAME}_handle_option): Handle it.
+	(gld${EMULATION_NAME}_list_options): Document it.
+	* ldmain.c (main): Initialize emit_hash and emit_gnu_hash.
+	* ld.texinfo: Document --hash-style option.
+
 2006-07-10  Nick Clifton  <nickc@redhat.com>
 
 	* po/zh_TW.po: New Chinese (traditional) translation.

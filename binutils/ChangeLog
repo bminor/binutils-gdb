@@ -1,3 +1,11 @@
+2006-07-10  Jakub Jelinek  <jakub@redhat.com>
+
+	* readelf.c (get_dynamic_type): Handle DT_GNU_HASH.
+	(get_section_type_name): Handle SHT_GNU_HASH.
+	(dynamic_info_DT_GNU_HASH): New variable.
+	(process_dynamic_section): Handle DT_GNU_HASH.
+	(process_symbol_table): Print also DT_GNU_HASH histogram.
+
 2006-07-06  Mohammed Adnène Trojette  <adn@diwi.org>
 
 	PR binutils/2879
