@@ -54,6 +54,9 @@
 #define ALPHA_PC_REGNUM     64  /* Contains program counter */
 #define ALPHA_UNIQUE_REGNUM 66	/* PAL_rduniq value */
 
+/* Instruction size.  */
+#define ALPHA_INSN_SIZE	4
+
 /* The alpha has two different virtual pointers for arguments and locals.
    
    The virtual argument pointer is pointing to the bottom of the argument
