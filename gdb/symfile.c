@@ -3846,7 +3846,7 @@ symfile_map_offsets_to_segments (struct objfile *objfile,
 	       && vma < data_segment.p_vaddr + data_segment.p_memsz)
 	offsets->offsets[i] = data_offset;
 
-      else
+      else if (bfd_get_section_size (sect) > 0)
 	warning (_("Loadable segment \"%s\" outside of ELF segments"),
 		 bfd_section_name (abfd, sect));
     }
@@ -3882,7 +3882,7 @@ symfile_section_offset_from_segment (bfd *abfd, asection *sect,
 	   && vma < data_segment.p_vaddr + data_segment.p_memsz)
     return data_offset;
 
-  else
+  else if (bfd_get_section_size (sect) > 0)
     {
       warning (_("Loadable segment \"%s\" outside of ELF segments"),
 	       bfd_section_name (abfd, sect));
