@@ -3882,10 +3882,11 @@ symfile_section_offset_from_segment (bfd *abfd, asection *sect,
 	   && vma < data_segment.p_vaddr + data_segment.p_memsz)
     return data_offset;
 
-  else if (bfd_get_section_size (sect) > 0)
+  else
     {
-      warning (_("Loadable segment \"%s\" outside of ELF segments"),
-	       bfd_section_name (abfd, sect));
+      if (bfd_get_section_size (sect) > 0)
+	warning (_("Loadable segment \"%s\" outside of ELF segments"),
+		 bfd_section_name (abfd, sect));
       return 0;
     }
 }

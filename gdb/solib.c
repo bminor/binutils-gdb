@@ -153,6 +153,12 @@ solib_open (char *in_pathname, char **found_pathname)
   char *temp_pathname = NULL;
   char *p;
 
+  /* By default, return ENOENT.  We must set this explicitly because
+     we don't know whether any of the various calls to open or openp
+     below will actually be made; if none of them are, return this
+     instead of whatever errno was on entry.  */
+  errno = ENOENT;
+
   /* If solib-symbols-extension is set, replace the file's extension.  */
   if (solib_symbols_extension && *solib_symbols_extension)
     {
