@@ -1,7 +1,7 @@
 2006-07-12  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-sh.c (md_apply_fix): Do not allow the generic code in
-	fixup_segment() to repeat a range check on a value that have
+	fixup_segment() to repeat a range check on a value that has
 	already been checked here.
 
 2006-07-07  James E Wilson  <wilson@specifix.com>
