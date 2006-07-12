@@ -19,6 +19,16 @@ qSupported:
   packets required and improve performance when connected to a remote
   target.
 
+qXfer:auxv:read:
+  Fetch an OS auxilliary vector from the remote stub.  This packet is a
+  more efficient replacement for qPart:auxv:read.
+
+* Removed remote packets
+
+qPart:auxv:read:
+  This packet has been replaced by qXfer:auxv:read.  Only GDB 6.4 and 6.5
+  used it, and only gdbserver implemented it.
+
 *** Changes in GDB 6.5
 
 * New targets

@@ -813,7 +813,7 @@ enum {
   PACKET_Z2,
   PACKET_Z3,
   PACKET_Z4,
-  PACKET_qPart_auxv,
+  PACKET_qXfer_auxv,
   PACKET_qGetTLSAddr,
   PACKET_qSupported,
   PACKET_MAX
@@ -2106,7 +2106,6 @@ struct protocol_feature
   int packet;
 };
 
-#if 0
 static void
 remote_supported_packet (const struct protocol_feature *feature,
 			 enum packet_support support,
@@ -2123,7 +2122,6 @@ remote_supported_packet (const struct protocol_feature *feature,
       == PACKET_SUPPORT_UNKNOWN)
     remote_protocol_packets[feature->packet].support = support;
 }
-#endif
 
 static void
 remote_packet_size (const struct protocol_feature *feature,
@@ -2165,7 +2163,9 @@ remote_packet_size (const struct protocol_feature *feature,
 }
 
 static struct protocol_feature remote_protocol_features[] = {
-  { "PacketSize", PACKET_DISABLE, remote_packet_size, -1 }
+  { "PacketSize", PACKET_DISABLE, remote_packet_size, -1 },
+  { "qPart:auxv:read", PACKET_DISABLE, remote_supported_packet,
+    PACKET_qXfer_auxv }
 };
 
 static void
@@ -3728,6 +3728,52 @@ remote_escape_output (const gdb_byte *buffer, int len,
   return output_index;
 }
 
+/* Convert BUFFER, escaped data LEN bytes long, into binary data
+   in OUT_BUF.  Return the number of bytes written to OUT_BUF.
+   Raise an error if the total number of bytes exceeds OUT_MAXLEN.
+
+   This function reverses remote_escape_output.  It allows more
+   escaped characters than that function does, in particular because
+   '*' must be escaped to avoid the run-length encoding processing
+   in reading packets.  */
+
+static int
+remote_unescape_input (const gdb_byte *buffer, int len,
+		       gdb_byte *out_buf, int out_maxlen)
+{
+  int input_index, output_index;
+  int escaped;
+
+  output_index = 0;
+  escaped = 0;
+  for (input_index = 0; input_index < len; input_index++)
+    {
+      gdb_byte b = buffer[input_index];
+
+      if (output_index + 1 > out_maxlen)
+	{
+	  warning (_("Received too much data from remote target;"
+		     " ignoring overflow."));
+	  return output_index;
+	}
+
+      if (escaped)
+	{
+	  out_buf[output_index++] = b ^ 0x20;
+	  escaped = 0;
+	}
+      else if (b == '}')
+	escaped = 1;
+      else
+	out_buf[output_index++] = b;
+    }
+
+  if (escaped)
+    error (_("Unmatched escape character in target response."));
+
+  return output_index;
+}
+
 /* Determine whether the remote target supports binary downloading.
    This is accomplished by sending a no-op memory write of zero length
    to the target at the specified address. It does not suffice to send
@@ -4040,8 +4086,7 @@ remote_files_info (struct target_ops *ignore)
 /* Stuff for dealing with the packets which are part of this protocol.
    See comment at top of file for details.  */
 
-/* Read a single character from the remote end, masking it down to 7
-   bits.  */
+/* Read a single character from the remote end.  */
 
 static int
 readchar (int timeout)
@@ -4051,7 +4096,7 @@ readchar (int timeout)
   ch = serial_readchar (remote_desc, timeout);
 
   if (ch >= 0)
-    return (ch & 0x7f);
+    return ch;
 
   switch ((enum serial_rc) ch)
     {
@@ -4335,7 +4380,7 @@ read_frame (char **buf_p,
 		fprintf_filtered (gdb_stdlog,
 			      "Bad checksum, sentsum=0x%x, csum=0x%x, buf=",
 				  pktcsum, csum);
-		fputs_filtered (buf, gdb_stdlog);
+		fputstrn_filtered (buf, bc, 0, gdb_stdlog);
 		fputs_filtered ("\n", gdb_stdlog);
 	      }
 	    /* Number of characters in buffer ignoring trailing
@@ -4414,7 +4459,8 @@ getpkt (char **buf,
    rather than timing out; this is used (in synchronous mode) to wait
    for a target that is is executing user code to stop.  If FOREVER ==
    0, this function is allowed to time out gracefully and return an
-   indication of this to the caller.  */
+   indication of this to the caller.  Otherwise return the number
+   of bytes read.  */
 static int
 getpkt_sane (char **buf, long *sizeof_buf, int forever)
 {
@@ -4475,11 +4521,11 @@ getpkt_sane (char **buf, long *sizeof_buf, int forever)
 	  if (remote_debug)
 	    {
 	      fprintf_unfiltered (gdb_stdlog, "Packet received: ");
-	      fputstr_unfiltered (*buf, 0, gdb_stdlog);
+	      fputstrn_unfiltered (*buf, val, 0, gdb_stdlog);
 	      fprintf_unfiltered (gdb_stdlog, "\n");
 	    }
 	  serial_write (remote_desc, "+", 1);
-	  return 0;
+	  return val;
 	}
 
       /* Try the whole thing again.  */
@@ -4492,7 +4538,7 @@ getpkt_sane (char **buf, long *sizeof_buf, int forever)
 
   printf_unfiltered (_("Ignoring packet error, continuing...\n"));
   serial_write (remote_desc, "+", 1);
-  return 1;
+  return -1;
 }
 
 static void
@@ -5097,6 +5143,90 @@ the loaded file\n"));
     printf_filtered (_("No loaded section named '%s'.\n"), args);
 }
 
+/* Read OBJECT_NAME/ANNEX from the remote target using a qXfer packet.
+   Data at OFFSET, of up to LEN bytes, is read into READBUF; the
+   number of bytes read is returned, or 0 for EOF, or -1 for error.
+   The number of bytes read may be less than LEN without indicating an
+   EOF.  PACKET is checked and updated to indicate whether the remote
+   target supports this object.  */
+
+static LONGEST
+remote_read_qxfer (struct target_ops *ops, const char *object_name,
+		   const char *annex,
+		   gdb_byte *readbuf, ULONGEST offset, LONGEST len,
+		   struct packet_config *packet)
+{
+  static char *finished_object;
+  static char *finished_annex;
+  static ULONGEST finished_offset;
+
+  struct remote_state *rs = get_remote_state ();
+  unsigned int total = 0;
+  LONGEST i, n, packet_len;
+
+  if (packet->support == PACKET_DISABLE)
+    return -1;
+
+  /* Check whether we've cached an end-of-object packet that matches
+     this request.  */
+  if (finished_object)
+    {
+      if (strcmp (object_name, finished_object) == 0
+	  && strcmp (annex ? annex : "", finished_annex) == 0
+	  && offset == finished_offset)
+	return 0;
+
+      /* Otherwise, we're now reading something different.  Discard
+	 the cache.  */
+      xfree (finished_object);
+      xfree (finished_annex);
+      finished_object = NULL;
+      finished_annex = NULL;
+    }
+
+  /* Request only enough to fit in a single packet.  The actual data
+     may not, since we don't know how much of it will need to be escaped;
+     the target is free to respond with slightly less data.  We subtract
+     five to account for the response type and the protocol frame.  */
+  n = min (get_remote_packet_size () - 5, len);
+  snprintf (rs->buf, get_remote_packet_size () - 4, "qXfer:%s:read:%s:%s,%s",
+	    object_name, annex ? annex : "",
+	    phex_nz (offset, sizeof offset),
+	    phex_nz (n, sizeof n));
+  i = putpkt (rs->buf);
+  if (i < 0)
+    return -1;
+
+  rs->buf[0] = '\0';
+  packet_len = getpkt_sane (&rs->buf, &rs->buf_size, 0);
+  if (packet_len < 0 || packet_ok (rs->buf, packet) != PACKET_OK)
+    return -1;
+
+  if (rs->buf[0] != 'l' && rs->buf[0] != 'm')
+    error (_("Unknown remote qXfer reply: %s"), rs->buf);
+
+  /* 'm' means there is (or at least might be) more data after this
+     batch.  That does not make sense unless there's at least one byte
+     of data in this reply.  */
+  if (rs->buf[0] == 'm' && packet_len == 1)
+    error (_("Remote qXfer reply contained no data."));
+
+  /* Got some data.  */
+  i = remote_unescape_input (rs->buf + 1, packet_len - 1, readbuf, n);
+
+  /* 'l' is an EOF marker, possibly including a final block of data,
+     or possibly empty.  Record it to bypass the next read, if one is
+     issued.  */
+  if (rs->buf[0] == 'l')
+    {
+      finished_object = xstrdup (object_name);
+      finished_annex = xstrdup (annex ? annex : "");
+      finished_offset = offset + i;
+    }
+
+  return i;
+}
+
 static LONGEST
 remote_xfer_partial (struct target_ops *ops, enum target_object object,
 		     const char *annex, gdb_byte *readbuf,
@@ -5145,27 +5275,9 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
       break;
 
     case TARGET_OBJECT_AUXV:
-      if (remote_protocol_packets[PACKET_qPart_auxv].support != PACKET_DISABLE)
-	{
-	  LONGEST n = min ((get_remote_packet_size () - 2) / 2, len);
-	  snprintf (rs->buf, get_remote_packet_size (),
-		    "qPart:auxv:read::%s,%s",
-		    phex_nz (offset, sizeof offset),
-		    phex_nz (n, sizeof n));
-	  i = putpkt (rs->buf);
-	  if (i < 0)
-	    return i;
-	  rs->buf[0] = '\0';
-	  getpkt (&rs->buf, &rs->buf_size, 0);
-	  if (packet_ok (rs->buf, &remote_protocol_packets[PACKET_qPart_auxv])
-	      != PACKET_OK)
-	    return -1;
-	  if (strcmp (rs->buf, "OK") == 0)
-	    return 0;		/* Got EOF indicator.  */
-	  /* Got some data.  */
-	  return hex2bin (rs->buf, readbuf, len);
-	}
-      return -1;
+      gdb_assert (annex == NULL);
+      return remote_read_qxfer (ops, "auxv", annex, readbuf, offset, len,
+				&remote_protocol_packets[PACKET_qXfer_auxv]);
 
     default:
       return -1;
@@ -5913,8 +6025,8 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
   add_packet_config_cmd (&remote_protocol_packets[PACKET_Z4],
 			 "Z4", "access-watchpoint", 0);
 
-  add_packet_config_cmd (&remote_protocol_packets[PACKET_qPart_auxv],
-			 "qPart:auxv", "read-aux-vector", 0);
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_auxv],
+			 "qXfer:auxv:read", "read-aux-vector", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qGetTLSAddr],
 			 "qGetTLSAddr", "get-thread-local-storage-address",

@@ -1,5 +1,22 @@
 2006-07-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* remote.c (PACKET_qXfer_auxv): New, renamed from PACKET_qPart_auxv.
+	(remote_supported_packet): Remove #if 0.
+	(remote_protocol_features): Add qPart:auxv:read.
+	(remote_unescape_input): New function.
+	(readchar): Don't mask off the high bit.
+	(read_frame): Use fputstrn_filtered for packet data.
+	(getpkt_sane): Return the number of bytes read or -1.  Use
+	fputstrn_unfiltered.
+	(remote_read_qxfer): New.
+	(remote_xfer_partial): Use it for TARGET_OBJECT_AUXV.
+	(_initialize_remote): Update packet registration.
+	* defs.h (fputstrn_filtered): New prototype.
+	* utils.c (fputstrn_filtered): New.
+	* NEWS: Mention qXfer.
+
+2006-07-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* target.c (target_read): Stop if target_read_partial returns 0
 	when some bytes have already been read.
 	(target_write): Likewise for target_write_partial.

@@ -1,3 +1,17 @@
+2006-07-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (OS Information): Update qPart reference to
+	qXfer.
+	(Remote configuration): Likewise.
+	(Overview): Move @cindex to the start of a paragraph.  Talk
+	about binary data encoding.
+	(Packets): Refer to the overview for the details of the X
+	packet encoding.
+	(General Query Packets): Remove qPart description.  Add qXfer
+	description.  Add an anchor to qSupported.  Correct feature
+	table title.  Add a new feature for qXfer:auxv:read.
+	(Interrupts): Add a missing parenthesis.
+
 2006-07-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* doc/gdb.texinfo (KOD): Remove node.

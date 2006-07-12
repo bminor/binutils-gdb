@@ -1544,6 +1544,15 @@ fputstr_unfiltered (const char *str, int quoter, struct ui_file *stream)
 }
 
 void
+fputstrn_filtered (const char *str, int n, int quoter,
+		   struct ui_file *stream)
+{
+  int i;
+  for (i = 0; i < n; i++)
+    printchar (str[i], fputs_filtered, fprintf_filtered, stream, quoter);
+}
+
+void
 fputstrn_unfiltered (const char *str, int n, int quoter,
 		     struct ui_file *stream)
 {

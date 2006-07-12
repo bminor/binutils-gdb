@@ -6597,7 +6597,7 @@ identified by an integer tag; the meanings are well-known but system-specific.
 Depending on the configuration and operating system facilities,
 @value{GDBN} may be able to show you this information.  For remote
 targets, this functionality may further depend on the remote stub's
-support of the @samp{qPart:auxv:read} packet, see @ref{Remote
+support of the @samp{qXfer:auxv:read} packet, see @ref{Remote
 configuration, auxiliary vector}.
 
 @table @code
@@ -12655,16 +12655,16 @@ downloads.
 @item set remote read-aux-vector-packet
 @cindex auxiliary vector of remote target
 @cindex @code{auxv}, and remote targets
-Set the use of the remote protocol's @samp{qPart:auxv:read} (target
-auxiliary vector read) request.  This request is used to fetch the
+Set the use of the remote protocol's @samp{qXfer:auxv:read} (target
+auxiliary vector) request.  This request is used to fetch the
 remote target's @dfn{auxiliary vector}, see @ref{OS Information,
 Auxiliary Vector}.  The default setting depends on the remote stub's
 support of this request (@value{GDBN} queries the stub when this
-request is first required).  @xref{General Query Packets, qPart}, for
+request is first required).  @xref{General Query Packets, qXfer}, for
 more information about this request.
 
 @item show remote read-aux-vector-packet
-Show the current setting of use of the @samp{qPart:auxv:read} request.
+Show the current setting of use of the @samp{qXfer:auxv:read} request.
 
 @item set remote symbol-lookup-packet
 @cindex remote symbol lookup request
@@ -22563,14 +22563,34 @@ when the operation has completed (the target has again stopped).
 exception of @samp{#} and @samp{$} (see @samp{X} packet for additional
 exceptions).
 
-Fields within the packet should be separated using @samp{,} @samp{;} or
 @cindex remote protocol, field separator
+Fields within the packet should be separated using @samp{,} @samp{;} or
 @samp{:}.  Except where otherwise noted all numbers are represented in
 @sc{hex} with leading zeros suppressed.
 
 Implementors should note that prior to @value{GDBN} 5.0, the character
 @samp{:} could not appear as the third character in a packet (as it
 would potentially conflict with the @var{sequence-id}).
+
+@cindex remote protocol, binary data
+@anchor{Binary Data}
+Binary data in most packets is encoded either as two hexadecimal
+digits per byte of binary data.  This allowed the traditional remote
+protocol to work over connections which were only seven-bit clean.
+Some packets designed more recently assume an eight-bit clean
+connection, and use a more efficient encoding to send and receive
+binary data.
+
+The binary data representation uses @code{7d} (@sc{ascii} @samp{@}})
+as an escape character.  Any escaped byte is transmitted as the escape
+character followed by the original character XORed with @code{0x20}.
+For example, the byte @code{0x7d} would be transmitted as the two
+bytes @code{0x7d 0x5d}.  The bytes @code{0x23} (@sc{ascii} @samp{#}),
+@code{0x24} (@sc{ascii} @samp{$}), and @code{0x7d} (@sc{ascii}
+@samp{@}}) must always be escaped.  Responses sent by the stub
+must also escape @code{0x2a} (@sc{ascii} @samp{*}), so that it
+is not interpreted as the start of a run-length encoded sequence
+(described next).
 
 Response @var{data} can be run-length encoded to save space.  A @samp{*}
 means that the next character is an @sc{ascii} encoding giving a repeat count
@@ -22980,12 +23000,7 @@ The @samp{vCont} packet is not supported.
 @cindex @samp{X} packet
 Write data to memory, where the data is transmitted in binary.
 @var{addr} is address, @var{length} is number of bytes,
-@samp{@var{XX}@dots{}} is binary data.  The bytes @code{0x23}
-(@sc{ascii} @samp{#}), @code{0x24} (@sc{ascii} @samp{$}), and
-@code{0x7d} (@sc{ascii} @samp{@}}) are escaped using @code{0x7d}
-(@sc{ascii} @samp{@}}), and then XORed with @code{0x20}.  For example,
-the byte @code{0x7d} would be transmitted as the two bytes @code{0x7d
-0x5d}.
+@samp{@var{XX}@dots{}} is binary data (@pxref{Binary Data}).
 
 Reply:
 @table @samp
@@ -23381,87 +23396,6 @@ Don't use this packet; use the @samp{qThreadExtraInfo} query instead
 
 Reply: see @code{remote.c:remote_unpack_thread_info_response()}.
 
-@item qPart:@var{object}:read:@var{annex}:@var{offset},@var{length}
-@cindex read special object, remote request
-@cindex @samp{qPart} packet
-Read uninterpreted bytes from the target's special data area
-identified by the keyword @var{object}.  Request @var{length} bytes
-starting at @var{offset} bytes into the data.  The content and
-encoding of @var{annex} is specific to the object; it can supply
-additional details about what data to access.
-
-Since this packet is ambiguous with the older @code{qP} packet, we
-plan to rename it.
-
-Here are the specific requests of this form defined so far.  All
-@samp{qPart:@var{object}:read:@dots{}} requests use the same reply
-formats, listed below.
-
-@table @samp
-@item qPart:auxv:read::@var{offset},@var{length}
-Access the target's @dfn{auxiliary vector}.  @xref{OS Information,
-auxiliary vector}, and see @ref{Remote configuration,
-read-aux-vector-packet}.  Note @var{annex} must be empty.
-@end table
-
-Reply:
-@table @samp
-@item OK
-The @var{offset} in the request is at the end of the data.
-There is no more data to be read.
-
-@item @var{XX}@dots{}
-Hex encoded data bytes read.
-This may be fewer bytes than the @var{length} in the request.
-
-@item E00
-The request was malformed, or @var{annex} was invalid.
-
-@item E @var{nn}
-The offset was invalid, or there was an error encountered reading the data.
-@var{nn} is a hex-encoded @code{errno} value.
-
-@item
-An empty reply indicates the @var{object} or @var{annex} string was not
-recognized by the stub.
-@end table
-
-@item qPart:@var{object}:write:@var{annex}:@var{offset}:@var{data}@dots{}
-@cindex write data into object, remote request
-Write uninterpreted bytes into the target's special data area
-identified by the keyword @var{object}, starting at @var{offset} bytes
-into the data.  @samp{@var{data}@dots{}} is the hex-encoded data to be
-written.  The content and encoding of @var{annex} is specific to the
-object; it can supply additional details about what data to access.
-
-No requests of this form are presently in use.  This specification
-serves as a placeholder to document the common format that new
-specific request specifications ought to use.
-
-Reply:
-@table @samp
-@item @var{nn}
-@var{nn} (hex encoded) is the number of bytes written.
-This may be fewer bytes than supplied in the request.
-
-@item E00
-The request was malformed, or @var{annex} was invalid.
-
-@item E @var{nn}
-The offset was invalid, or there was an error encountered writing the data.
-@var{nn} is a hex-encoded @code{errno} value.
-
-@item
-An empty reply indicates the @var{object} or @var{annex} string was not
-recognized by the stub, or that the object does not support writing.
-@end table
-
-@item qPart:@var{object}:@var{operation}:@dots{}
-Requests of this form may be added in the future.  When a stub does
-not recognize the @var{object} keyword, or its support for
-@var{object} does not recognize the @var{operation} keyword, the stub
-must respond with an empty packet.
-
 @item qRcmd,@var{command}
 @cindex execute remote command, remote request
 @cindex @samp{qRcmd} packet
@@ -23493,6 +23427,7 @@ packets.)
 @cindex supported packets, remote query
 @cindex features of the remote protocol
 @cindex @samp{qSupported} packet
+@anchor{qSupported}
 Tell the remote stub about features supported by @value{GDBN}, and
 query the stub for features it supports.  This packet allows
 @value{GDBN} and the remote stub to take advantage of each others'
@@ -23584,7 +23519,7 @@ These are the currently defined stub features and their properties:
 @multitable @columnfractions 0.25 0.2 0.2 0.2
 @c NOTE: The first row should be @headitem, but we do not yet require
 @c a new enough version of Texinfo (4.7) to use @headitem.
-@item Packet Name
+@item Feature Name
 @tab Value Required
 @tab Default
 @tab Probe Allowed
@@ -23593,6 +23528,11 @@ These are the currently defined stub features and their properties:
 @tab Yes
 @tab @samp{-}
 @tab No
+
+@item @samp{qXfer:auxv:read}
+@tab No
+@tab @samp{-}
+@tab Yes
 
 @end multitable
 
@@ -23609,6 +23549,10 @@ There is no trailing NUL byte in a remote protocol packet; if the stub
 stores packets in a NUL-terminated format, it should allow an extra
 byte in its buffer for the NUL.  If this stub feature is not supported,
 @value{GDBN} guesses based on the size of the @samp{g} packet response.
+
+@item qXfer:auxv:read
+The remote stub understands the @samp{qXfer:auxv:read} packet
+(@pxref{qXfer auxiliary vector read}).
 
 @end table
 
@@ -23683,6 +23627,98 @@ packets.)
 @itemx QTro       
 @itemx qTStatus   
 @xref{Tracepoint Packets}.
+
+@item qXfer:@var{object}:read:@var{annex}:@var{offset},@var{length}
+@cindex read special object, remote request
+@cindex @samp{qXfer} packet
+Read uninterpreted bytes from the target's special data area
+identified by the keyword @var{object}.  Request @var{length} bytes
+starting at @var{offset} bytes into the data.  The content and
+encoding of @var{annex} is specific to the object; it can supply
+additional details about what data to access.
+
+Here are the specific requests of this form defined so far.  All
+@samp{qXfer:@var{object}:read:@dots{}} requests use the same reply
+formats, listed below.
+
+@table @samp
+@item qXfer:auxv:read::@var{offset},@var{length}
+@anchor{qXfer auxiliary vector read}
+Access the target's @dfn{auxiliary vector}.  @xref{OS Information,
+auxiliary vector}, and @ref{Remote configuration,
+read-aux-vector-packet}.  Note @var{annex} must be empty.
+
+This packet is not probed by default; the remote stub must request it,
+by suppling an appropriate @samp{qSupported} response (@pxref{qSupported}).
+@end table
+
+Reply:
+@table @samp
+@item m @var{data}
+Data @var{data} (@pxref{Binary Data}) has been read from the
+target.  There may be more data at a higher address (although
+it is permitted to return @samp{m} even for the last valid
+block of data, as long as at least one byte of data was read).
+@var{data} may have fewer bytes than the @var{length} in the
+request.
+
+@item l @var{data}
+Data @var{data} (@pxref{Binary Data}) has been read from the target.
+There is no more data to be read.  @var{data} may have fewer bytes
+than the @var{length} in the request.
+
+@item l
+The @var{offset} in the request is at the end of the data.
+There is no more data to be read.
+
+@item E00
+The request was malformed, or @var{annex} was invalid.
+
+@item E @var{nn}
+The offset was invalid, or there was an error encountered reading the data.
+@var{nn} is a hex-encoded @code{errno} value.
+
+@item
+An empty reply indicates the @var{object} string was not recognized by
+the stub, or that the object does not support reading.
+@end table
+
+@item qXfer:@var{object}:write:@var{annex}:@var{offset}:@var{data}@dots{}
+@cindex write data into object, remote request
+Write uninterpreted bytes into the target's special data area
+identified by the keyword @var{object}, starting at @var{offset} bytes
+into the data.  @samp{@var{data}@dots{}} is the binary-encoded data
+(@pxref{Binary Data}) to be written.  The content and encoding of @var{annex}
+is specific to the object; it can supply additional details about what data
+to access.
+
+No requests of this form are presently in use.  This specification
+serves as a placeholder to document the common format that new
+specific request specifications ought to use.
+
+Reply:
+@table @samp
+@item @var{nn}
+@var{nn} (hex encoded) is the number of bytes written.
+This may be fewer bytes than supplied in the request.
+
+@item E00
+The request was malformed, or @var{annex} was invalid.
+
+@item E @var{nn}
+The offset was invalid, or there was an error encountered writing the data.
+@var{nn} is a hex-encoded @code{errno} value.
+
+@item
+An empty reply indicates the @var{object} string was not
+recognized by the stub, or that the object does not support writing.
+@end table
+
+@item qXfer:@var{object}:@var{operation}:@dots{}
+Requests of this form may be added in the future.  When a stub does
+not recognize the @var{object} keyword, or its support for
+@var{object} does not recognize the @var{operation} keyword, the stub
+must respond with an empty packet.
 
 @end table
 
@@ -23898,7 +23934,7 @@ transport mechanisms.  It is represented by sending the single byte
 the Overview section (@pxref{Overview}).  When a @code{0x03} byte is
 transmitted as part of a packet, it is considered to be packet data
 and does @emph{not} represent an interrupt.  E.g., an @samp{X} packet
-(@pxref{X packet}, used for binary downloads, may include an unescaped
+(@pxref{X packet}), used for binary downloads, may include an unescaped
 @code{0x03} as part of its packet.
 
 Stubs are not required to recognize these interrupt mechanisms and the

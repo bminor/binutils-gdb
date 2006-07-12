@@ -91,9 +91,48 @@ attach_inferior (int pid, char *statusptr, int *sigptr)
 
 extern int remote_debug;
 
+/* Decode a qXfer read request.  Return 0 if everything looks OK,
+   or -1 otherwise.  */
+
+static int
+decode_xfer_read (char *buf, char **annex, CORE_ADDR *ofs, unsigned int *len)
+{
+  /* Extract and NUL-terminate the annex.  */
+  *annex = buf;
+  while (*buf && *buf != ':')
+    buf++;
+  if (*buf == '\0')
+    return -1;
+  *buf++ = 0;
+
+  /* After the read/write marker and annex, qXfer looks like a
+     traditional 'm' packet.  */
+  decode_m_packet (buf, ofs, len);
+
+  return 0;
+}
+
+/* Write the response to a successful qXfer read.  Returns the
+   length of the (binary) data stored in BUF, corresponding
+   to as much of DATA/LEN as we could fit.  IS_MORE controls
+   the first character of the response.  */
+static int
+write_qxfer_response (char *buf, unsigned char *data, int len, int is_more)
+{
+  int out_len;
+
+  if (is_more)
+    buf[0] = 'm';
+  else
+    buf[0] = 'l';
+
+  return remote_escape_output (data, len, (unsigned char *) buf + 1, &out_len,
+			       PBUFSIZ - 2) + 1;
+}
+
 /* Handle all of the extended 'q' packets.  */
 void
-handle_query (char *own_buf)
+handle_query (char *own_buf, int *new_packet_len_p)
 {
   static struct inferior_list_entry *thread_ptr;
 
@@ -144,22 +183,35 @@ handle_query (char *own_buf)
     }
 
   if (the_target->read_auxv != NULL
-      && strncmp ("qPart:auxv:read::", own_buf, 17) == 0)
+      && strncmp ("qXfer:auxv:read:", own_buf, 16) == 0)
     {
-      unsigned char data[(PBUFSIZ - 1) / 2];
+      unsigned char *data;
+      int n;
       CORE_ADDR ofs;
       unsigned int len;
-      int n;
-      decode_m_packet (&own_buf[17], &ofs, &len); /* "OFS,LEN" */
-      if (len > sizeof data)
-	len = sizeof data;
-      n = (*the_target->read_auxv) (ofs, data, len);
-      if (n == 0)
-	write_ok (own_buf);
-      else if (n < 0)
-	write_enn (own_buf);
+      char *annex;
+
+      /* Reject any annex; grab the offset and length.  */
+      if (decode_xfer_read (own_buf + 16, &annex, &ofs, &len) < 0
+	  || annex[0] != '\0')
+	{
+	  strcpy (own_buf, "E00");
+	  return;
+	}
+
+      /* Read one extra byte, as an indicator of whether there is
+	 more.  */
+      if (len > PBUFSIZ - 2)
+	len = PBUFSIZ - 2;
+      data = malloc (len + 1);
+      n = (*the_target->read_auxv) (ofs, data, len + 1);
+      if (n > len)
+	*new_packet_len_p = write_qxfer_response (own_buf, data, len, 1);
       else
-	convert_int_to_ascii (data, own_buf, n);
+	*new_packet_len_p = write_qxfer_response (own_buf, data, n, 0);
+
+      free (data);
+
       return;
     }
 
@@ -168,6 +220,10 @@ handle_query (char *own_buf)
       && (own_buf[10] == ':' || own_buf[10] == '\0'))
     {
       sprintf (own_buf, "PacketSize=%x", PBUFSIZ - 1);
+
+      if (the_target->read_auxv != NULL)
+	strcat (own_buf, ";qPart:auxv:read+");
+
       return;
     }
 
@@ -455,7 +511,7 @@ main (int argc, char *argv[])
 	  switch (ch)
 	    {
 	    case 'q':
-	      handle_query (own_buf);
+	      handle_query (own_buf, &new_packet_len);
 	      break;
 	    case 'd':
 	      remote_debug = !remote_debug;

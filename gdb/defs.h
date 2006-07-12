@@ -510,6 +510,8 @@ extern void fputstr_filtered (const char *str, int quotr, struct ui_file * strea
 
 extern void fputstr_unfiltered (const char *str, int quotr, struct ui_file * stream);
 
+extern void fputstrn_filtered (const char *str, int n, int quotr, struct ui_file * stream);
+
 extern void fputstrn_unfiltered (const char *str, int n, int quotr, struct ui_file * stream);
 
 /* Display the host ADDR on STREAM formatted as ``0x%x''. */

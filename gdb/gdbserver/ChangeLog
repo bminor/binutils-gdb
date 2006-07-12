@@ -1,3 +1,11 @@
+2006-07-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* server.c (decode_xfer_read, write_qxfer_response): New.
+	(handle_query): Take a packet length argument.  Handle
+	qXfer:auxv:read instead of qPart:auxv:read.  Mention it in
+	the qSupported response.
+	(main): Update call to handle_query.
+
 2006-06-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote-utils.c (remote_escape_output, remote_unescape_input): New.
