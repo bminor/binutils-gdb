@@ -1,3 +1,7 @@
+2006-07-12  Matthew R. Dempsky  <mrd@alkemio.org>
+
+	* cpu-m68k.c (bfd_m68k_compatible): Handle CPU32.
+
 2006-06-23  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.am: Clear RELEASE.

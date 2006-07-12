@@ -1,3 +1,8 @@
+2006-07-12  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-m68k/merge-ok-1c.d: New test.
+	* ld-m68k/m68k.exp: Run it.
+
 2006-07-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	Backport:
