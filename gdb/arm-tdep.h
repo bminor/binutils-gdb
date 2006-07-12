@@ -18,6 +18,9 @@
    Foundation, Inc., 51 Franklin Street, Fifth Floor,
    Boston, MA 02110-1301, USA.  */
 
+/* Forward declarations.  */
+struct regset;
+
 /* Register numbers of various important registers.  Note that some of
    these values are "real" register numbers, and correspond to the
    general registers of the machine, and some are "phony" register
@@ -143,6 +146,9 @@ struct gdbarch_tdep
 				   If this is negative, longjmp support
 				   will be disabled.  */
   size_t jb_elt_size;		/* And the size of each entry in the buf.  */
+
+  /* Cached core file helpers.  */
+  struct regset *gregset, *fpregset;
 };
 
 #ifndef LOWEST_PC

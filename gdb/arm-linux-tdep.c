@@ -31,13 +31,17 @@
 #include "doublest.h"
 #include "solib-svr4.h"
 #include "osabi.h"
+#include "regset.h"
 #include "trad-frame.h"
 #include "tramp-frame.h"
 
 #include "arm-tdep.h"
+#include "arm-linux-tdep.h"
 #include "glibc-tdep.h"
 
 #include "gdb_string.h"
+
+extern int arm_apcs_32;
 
 /* Under ARM GNU/Linux the traditional way of performing a breakpoint
    is to execute a particular software interrupt, rather than use a
@@ -378,6 +382,217 @@ static struct tramp_frame arm_eabi_linux_rt_sigreturn_tramp_frame = {
   arm_linux_rt_sigreturn_init
 };
 
+/* Core file and register set support.  */
+
+#define ARM_LINUX_SIZEOF_GREGSET (18 * INT_REGISTER_SIZE)
+
+void
+arm_linux_supply_gregset (const struct regset *regset,
+			  struct regcache *regcache,
+			  int regnum, const void *gregs_buf, size_t len)
+{
+  const gdb_byte *gregs = gregs_buf;
+  int regno;
+  CORE_ADDR reg_pc;
+  gdb_byte pc_buf[INT_REGISTER_SIZE];
+
+  for (regno = ARM_A1_REGNUM; regno < ARM_PC_REGNUM; regno++)
+    if (regnum == -1 || regnum == regno)
+      regcache_raw_supply (regcache, regno,
+			   gregs + INT_REGISTER_SIZE * regno);
+
+  if (regnum == ARM_PS_REGNUM || regnum == -1)
+    {
+      if (arm_apcs_32)
+	regcache_raw_supply (regcache, ARM_PS_REGNUM,
+			     gregs + INT_REGISTER_SIZE * ARM_CPSR_REGNUM);
+      else
+	regcache_raw_supply (regcache, ARM_PS_REGNUM,
+			     gregs + INT_REGISTER_SIZE * ARM_PC_REGNUM);
+    }
+
+  if (regnum == ARM_PC_REGNUM || regnum == -1)
+    {
+      reg_pc = extract_unsigned_integer (gregs
+					 + INT_REGISTER_SIZE * ARM_PC_REGNUM,
+					 INT_REGISTER_SIZE);
+      reg_pc = ADDR_BITS_REMOVE (reg_pc);
+      store_unsigned_integer (pc_buf, INT_REGISTER_SIZE, reg_pc);
+      regcache_raw_supply (regcache, ARM_PC_REGNUM, pc_buf);
+    }
+}
+
+void
+arm_linux_collect_gregset (const struct regset *regset,
+			   const struct regcache *regcache,
+			   int regnum, void *gregs_buf, size_t len)
+{
+  gdb_byte *gregs = gregs_buf;
+  int regno;
+
+  for (regno = ARM_A1_REGNUM; regno < ARM_PC_REGNUM; regno++)
+    if (regnum == -1 || regnum == regno)
+      regcache_raw_collect (regcache, regno,
+			    gregs + INT_REGISTER_SIZE * regno);
+
+  if (regnum == ARM_PS_REGNUM || regnum == -1)
+    {
+      if (arm_apcs_32)
+	regcache_raw_collect (regcache, ARM_PS_REGNUM,
+			      gregs + INT_REGISTER_SIZE * ARM_CPSR_REGNUM);
+      else
+	regcache_raw_collect (regcache, ARM_PS_REGNUM,
+			      gregs + INT_REGISTER_SIZE * ARM_PC_REGNUM);
+    }
+
+  if (regnum == ARM_PC_REGNUM || regnum == -1)
+    regcache_raw_collect (regcache, ARM_PC_REGNUM,
+			  gregs + INT_REGISTER_SIZE * ARM_PC_REGNUM);
+}
+
+/* Support for register format used by the NWFPE FPA emulator.  */
+
+#define typeNone		0x00
+#define typeSingle		0x01
+#define typeDouble		0x02
+#define typeExtended		0x03
+
+void
+supply_nwfpe_register (struct regcache *regcache, int regno,
+		       const gdb_byte *regs)
+{
+  const gdb_byte *reg_data;
+  gdb_byte reg_tag;
+  gdb_byte buf[FP_REGISTER_SIZE];
+
+  reg_data = regs + (regno - ARM_F0_REGNUM) * FP_REGISTER_SIZE;
+  reg_tag = regs[(regno - ARM_F0_REGNUM) + NWFPE_TAGS_OFFSET];
+  memset (buf, 0, FP_REGISTER_SIZE);
+
+  switch (reg_tag)
+    {
+    case typeSingle:
+      memcpy (buf, reg_data, 4);
+      break;
+    case typeDouble:
+      memcpy (buf, reg_data + 4, 4);
+      memcpy (buf + 4, reg_data, 4);
+      break;
+    case typeExtended:
+      /* We want sign and exponent, then least significant bits,
+	 then most significant.  NWFPE does sign, most, least.  */
+      memcpy (buf, reg_data, 4);
+      memcpy (buf + 4, reg_data + 8, 4);
+      memcpy (buf + 8, reg_data + 4, 4);
+      break;
+    default:
+      break;
+    }
+
+  regcache_raw_supply (regcache, regno, buf);
+}
+
+void
+collect_nwfpe_register (const struct regcache *regcache, int regno,
+			gdb_byte *regs)
+{
+  gdb_byte *reg_data;
+  gdb_byte reg_tag;
+  gdb_byte buf[FP_REGISTER_SIZE];
+
+  regcache_raw_collect (regcache, regno, buf);
+
+  /* NOTE drow/2006-06-07: This code uses the tag already in the
+     register buffer.  I've preserved that when moving the code
+     from the native file to the target file.  But this doesn't
+     always make sense.  */
+
+  reg_data = regs + (regno - ARM_F0_REGNUM) * FP_REGISTER_SIZE;
+  reg_tag = regs[(regno - ARM_F0_REGNUM) + NWFPE_TAGS_OFFSET];
+
+  switch (reg_tag)
+    {
+    case typeSingle:
+      memcpy (reg_data, buf, 4);
+      break;
+    case typeDouble:
+      memcpy (reg_data, buf + 4, 4);
+      memcpy (reg_data + 4, buf, 4);
+      break;
+    case typeExtended:
+      memcpy (reg_data, buf, 4);
+      memcpy (reg_data + 4, buf + 8, 4);
+      memcpy (reg_data + 8, buf + 4, 4);
+      break;
+    default:
+      break;
+    }
+}
+
+void
+arm_linux_supply_nwfpe (const struct regset *regset,
+			struct regcache *regcache,
+			int regnum, const void *regs_buf, size_t len)
+{
+  const gdb_byte *regs = regs_buf;
+  int regno;
+
+  if (regnum == ARM_FPS_REGNUM || regnum == -1)
+    regcache_raw_supply (regcache, ARM_FPS_REGNUM,
+			 regs + NWFPE_FPSR_OFFSET);
+
+  for (regno = ARM_F0_REGNUM; regno <= ARM_F7_REGNUM; regno++)
+    if (regnum == -1 || regnum == regno)
+      supply_nwfpe_register (regcache, regno, regs);
+}
+
+void
+arm_linux_collect_nwfpe (const struct regset *regset,
+			 const struct regcache *regcache,
+			 int regnum, void *regs_buf, size_t len)
+{
+  gdb_byte *regs = regs_buf;
+  int regno;
+
+  for (regno = ARM_F0_REGNUM; regno <= ARM_F7_REGNUM; regno++)
+    if (regnum == -1 || regnum == regno)
+      collect_nwfpe_register (regcache, regno, regs);
+
+  if (regnum == ARM_FPS_REGNUM || regnum == -1)
+    regcache_raw_collect (regcache, ARM_FPS_REGNUM,
+			  regs + INT_REGISTER_SIZE * ARM_FPS_REGNUM);
+}
+
+/* Return the appropriate register set for the core section identified
+   by SECT_NAME and SECT_SIZE.  */
+
+static const struct regset *
+arm_linux_regset_from_core_section (struct gdbarch *gdbarch,
+				    const char *sect_name, size_t sect_size)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (strcmp (sect_name, ".reg") == 0
+      && sect_size == ARM_LINUX_SIZEOF_GREGSET)
+    {
+      if (tdep->gregset == NULL)
+        tdep->gregset = regset_alloc (gdbarch, arm_linux_supply_gregset,
+                                      arm_linux_collect_gregset);
+      return tdep->gregset;
+    }
+
+  if (strcmp (sect_name, ".reg2") == 0
+      && sect_size == ARM_LINUX_SIZEOF_NWFPE)
+    {
+      if (tdep->fpregset == NULL)
+        tdep->fpregset = regset_alloc (gdbarch, arm_linux_supply_nwfpe,
+                                       arm_linux_collect_nwfpe);
+      return tdep->fpregset;
+    }
+
+  return NULL;
+}
+
 static void
 arm_linux_init_abi (struct gdbarch_info info,
 		    struct gdbarch *gdbarch)
@@ -432,6 +647,10 @@ arm_linux_init_abi (struct gdbarch_info info,
 				&arm_eabi_linux_sigreturn_tramp_frame);
   tramp_frame_prepend_unwinder (gdbarch,
 				&arm_eabi_linux_rt_sigreturn_tramp_frame);
+
+  /* Core file support.  */
+  set_gdbarch_regset_from_core_section (gdbarch,
+					arm_linux_regset_from_core_section);
 }
 
 void

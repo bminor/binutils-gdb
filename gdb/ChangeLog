@@ -1,3 +1,34 @@
+2006-07-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (arm_linux_tdep_h): New variable.
+	(arm-linux-nat.o, arm-linux-tdep.o): Update.
+	* arm-linux-nat.c: Include "arm-linux-tdep.h".
+	(typeNone, typeSingle, typeDouble, typeExtended)
+	(FPWORDS, ARM_CPSR_REGNUM, FPREG, FPA11)
+	(fetch_nwfpe_single, fetch_nwfpe_double, fetch_nwfpe_none)
+	(fetch_nwfpe_extended, fetch_nwfpe_register, store_nwfpe_single)
+	(store_nwfpe_double, store_nwfpe_extended, store_nwfpe_register):
+	Delete.
+	(fetch_fpregister, fetch_fpregs, store_fpregister, store_fpregs):
+	Use gdb_byte buffers, NWFPE_FPSR_OFFSET, supply_nwfpe_register,
+	and collect_nwfpe_register.
+	(fill_gregset, supply_gregset, fill_fpregset, supply_fpregset): Use
+	new regset functions.
+	* arm-linux-tdep.c: Include "regset.h" and "arm-linux-tdep.h".
+	(arm_apcs_32): New declaration.
+	(ARM_LINUX_SIZEOF_GREGSET, arm_linux_supply_gregset)
+	(arm_linux_collect_gregset, typeNone, typeSingle, typeDouble)
+	(typeExtended, supply_nwfpe_register, collect_nwfpe_register)
+	(arm_linux_supply_nwfpe, arm_linux_collect_nwfpe)
+	(arm_linux_regset_from_core_section): New.
+	(arm_linux_init_abi): Register arm_linux_regset_from_core_section.
+	* arm-linux-tdep.h: New file.
+	* arm-tdep.h (struct regset): Declare.
+	(struct gdbarch_tdep): Add gregset, fpregset members.
+	* config/arm/linux.mh (NATDEPFILES): Remove corelow.o and
+	core-regset.o.
+	* config/arm/linux.mt (TDEPFILES): Add corelow.o.
+
 2006-07-12  Jan Kratochvil  <lace@jankratochvil.net>
 
 	* infrun.c (handle_inferior_event): Fixed typos in printf.
