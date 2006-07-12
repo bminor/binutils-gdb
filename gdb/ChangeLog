@@ -1,5 +1,11 @@
 2006-07-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* dwarf2read.c (dwarf2_symbol_mark_computed): Handle corrupted
+	or missing location list information.  Suggested by Jan
+	Kratochvil <lace@jankratochvil.net>.
+
+2006-07-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* Makefile.in (arm_linux_tdep_h): New variable.
 	(arm-linux-nat.o, arm-linux-tdep.o): Update.
 	* arm-linux-nat.c: Include "arm-linux-tdep.h".
