@@ -1151,7 +1151,9 @@ init.c: $(INIT_FILES)
 	@rm -f init.c-tmp init.l-tmp
 	@touch init.c-tmp
 	@echo gdbtypes > init.l-tmp
-	@-echo $(INIT_FILES) | \
+	@-LANG=c ; export LANG ; \
+	LC_ALL=c ; export LC_ALL ; \
+	echo $(INIT_FILES) | \
 	tr ' ' '\012' | \
 	sed \
 	    -e '/^gdbtypes.[co]$$/d' \

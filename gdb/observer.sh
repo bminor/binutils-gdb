@@ -1,5 +1,10 @@
 #!/bin/sh -e
 
+# Make certain that the script is not running in an internationalized
+# environment.
+LANG=c ; export LANG
+LC_ALL=c ; export LC_ALL
+
 if test $# -ne 3
 then
     echo "Usage: $0 <h|inc> <observer.texi> <observer.out>" 1>&2

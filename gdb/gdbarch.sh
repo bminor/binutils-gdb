@@ -22,7 +22,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor,
 # Boston, MA 02110-1301, USA.
 
-# Make certain that the script is running in an internationalized
+# Make certain that the script is not running in an internationalized
 # environment.
 LANG=c ; export LANG
 LC_ALL=c ; export LC_ALL

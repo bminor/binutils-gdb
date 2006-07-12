@@ -3,6 +3,11 @@
 # Try to find a GNU indent.  There could be a BSD indent in front of a
 # GNU gindent so when indent is found, keep looking.
 
+# Make certain that the script is not running in an internationalized
+# environment.
+LANG=c ; export LANG
+LC_ALL=c ; export LC_ALL
+
 gindent=
 indent=
 paths=`echo $PATH | sed \
