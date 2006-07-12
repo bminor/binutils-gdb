@@ -4080,6 +4080,11 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     }
   if (max != 0 && (val < min || val > max))
     as_bad_where (fixP->fx_file, fixP->fx_line, _("offset out of range"));
+  else if (max != 0)
+    /* Stop the generic code from trying to overlow check the value as well.
+       It may not have the correct value anyway, as we do not store val back
+       into *valP.  */
+    fixP->fx_no_overflow = 1;
 
   if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
     fixP->fx_done = 1;

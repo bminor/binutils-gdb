@@ -1,3 +1,9 @@
+2006-07-12  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-sh.c (md_apply_fix): Do not allow the generic code in
+	fixup_segment() to repeat a range check on a value that have
+	already been checked here.
+
 2006-07-07  James E Wilson  <wilson@specifix.com>
 
 	* config/tc-mips.c (mips_cpu_info_table): Add sb1a.

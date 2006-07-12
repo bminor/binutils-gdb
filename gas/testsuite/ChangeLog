@@ -1,3 +1,10 @@
+2006-07-12  Nick Clifton  <nickc@redhat.com>
+
+	* gas/sh/basic.exp: Run "too_large" dump test.
+	* gas/sh/too_large.s: New test file.  Check that .byte directives
+	do not generate a bogus overflow message.
+	* gas/sh/too_large.s: New test control file.
+
 2006-07-05  Julian Brown  <julian@codesourcery.com>
 
 	* gas/arm/vfp-neon-syntax.d: Tweak expected fmsrr syntax.
