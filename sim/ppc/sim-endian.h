@@ -94,7 +94,6 @@ INLINE_PSIM_ENDIAN(unsigned_8) endian_le2h_8(unsigned_8 x);
 
 #if defined(__linux__)
 # include <endian.h>
-# include <asm/byteorder.h>
 # if defined(__LITTLE_ENDIAN) && !defined(LITTLE_ENDIAN)
 #  define LITTLE_ENDIAN __LITTLE_ENDIAN
 # endif
