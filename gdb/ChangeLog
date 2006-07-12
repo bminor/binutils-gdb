@@ -1,3 +1,7 @@
+2006-07-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* MAINTAINERS: Add Alfred Szmidt for the Hurd.
+
 2006-07-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* alpha-tdep.h (ALPHA_INSN_SIZE): New define.
