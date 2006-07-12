@@ -1341,3 +1341,123 @@ proc run_ld_link_exec_tests { targets_to_xfail ldtests } {
 	}
     }
 }
+
+# List contains test-items with 3 items followed by 2 lists, one item and
+# one optional item:
+# 0:name 1:link options 2:compile options
+# 3:filenames of assembler files 4: action and options. 5: name of output file
+#
+# Actions:
+# objdump: Apply objdump options on result.  Compare with regex (last arg).
+# nm: Apply nm options on result.  Compare with regex (last arg).
+# readelf: Apply readelf options on result.  Compare with regex (last arg).
+#
+proc run_cc_link_tests { ldtests } {
+    global nm
+    global objdump
+    global READELF
+    global srcdir
+    global subdir
+    global env
+    global CC
+    global CFLAGS
+
+    foreach testitem $ldtests {
+	set testname [lindex $testitem 0]
+	set ldflags [lindex $testitem 1]
+	set cflags [lindex $testitem 2]
+	set src_files  [lindex $testitem 3]
+	set actions [lindex $testitem 4]
+	set binfile tmpdir/[lindex $testitem 5]
+	set objfiles {}
+	set is_unresolved 0
+	set failed 0
+
+	# Compile each file in the test.
+	foreach src_file $src_files {
+	    set objfile "tmpdir/[file rootname $src_file].o"
+	    lappend objfiles $objfile
+
+	    # We ignore warnings since some compilers may generate
+	    # incorrect section attributes and the assembler will warn
+	    # them.
+	    ld_compile "$CC -c $CFLAGS $cflags" $srcdir/$subdir/$src_file $objfile
+	}
+
+	# Clear error and warning counts.
+	reset_vars
+
+	if ![ld_simple_link $CC $binfile "-L$srcdir/$subdir $ldflags $objfiles"] {
+	    fail $testname
+	} else {
+	    set failed 0
+	    foreach actionlist $actions {
+		set action [lindex $actionlist 0]
+		set progopts [lindex $actionlist 1]
+
+		# There are actions where we run regexp_diff on the
+		# output, and there are other actions (presumably).
+		# Handling of the former look the same.
+		set dump_prog ""
+		switch -- $action {
+		    objdump
+		        { set dump_prog $objdump }
+		    nm
+		        { set dump_prog $nm }
+		    readelf
+		        { set dump_prog $READELF }
+		    default
+			{
+			    perror "Unrecognized action $action"
+			    set is_unresolved 1
+			    break
+			}
+		    }
+
+		if { $dump_prog != "" } {
+		    set dumpfile [lindex $actionlist 2]
+		    set binary $dump_prog
+
+		    # Ensure consistent sorting of symbols
+		    if {[info exists env(LC_ALL)]} {
+			set old_lc_all $env(LC_ALL)
+		    }
+		    set env(LC_ALL) "C"
+		    set cmd "$binary $progopts $binfile > dump.out"
+		    send_log "$cmd\n"
+		    catch "exec $cmd" comp_output
+		    if {[info exists old_lc_all]} {
+			set env(LC_ALL) $old_lc_all
+		    } else {
+			unset env(LC_ALL)
+		    }
+		    set comp_output [prune_warnings $comp_output]
+
+		    if ![string match "" $comp_output] then {
+			send_log "$comp_output\n"
+			set failed 1
+			break
+		    }
+
+		    if { [regexp_diff "dump.out" "$srcdir/$subdir/$dumpfile"] } then {
+			verbose "output is [file_contents "dump.out"]" 2
+			set failed 1
+			break
+		    }
+		}
+	    }
+
+	    if { $failed != 0 } {
+		fail $testname
+	    } else { if { $is_unresolved == 0 } {
+		pass $testname
+	    } }
+	}
+
+	# Catch action errors.
+	if { $is_unresolved != 0 } {
+	    unresolved $testname
+	    continue
+	}
+    }
+}

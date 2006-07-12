@@ -1025,7 +1025,41 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	 relocatable file and the old definition comes from a dynamic
 	 object, we remove the old definition.  */
       if ((*sym_hash)->root.type == bfd_link_hash_indirect)
-	h = *sym_hash;
+	{
+	  /* Handle the case where the old dynamic definition is
+	     default versioned.  We need to copy the symbol info from
+	     the symbol with default version to the normal one if it
+	     was referenced before.  */
+	  if (h->ref_regular)
+	    {
+	      const struct elf_backend_data *bed
+		= get_elf_backend_data (abfd);
+	      struct elf_link_hash_entry *vh = *sym_hash;
+	      vh->root.type = h->root.type;
+	      h->root.type = bfd_link_hash_indirect;
+	      (*bed->elf_backend_copy_indirect_symbol) (info, vh, h);
+	      /* Protected symbols will override the dynamic definition
+		 with default version.  */
+	      if (ELF_ST_VISIBILITY (sym->st_other) == STV_PROTECTED)
+		{
+		  h->root.u.i.link = (struct bfd_link_hash_entry *) vh;
+		  vh->dynamic_def = 1;
+		  vh->ref_dynamic = 1;
+		}
+	      else
+		{
+		  h->root.type = vh->root.type;
+		  vh->ref_dynamic = 0;
+		  /* We have to hide it here since it was made dynamic
+		     global with extra bits when the symbol info was
+		     copied from the old dynamic definition.  */
+		  (*bed->elf_backend_hide_symbol) (info, vh, TRUE);
+		}
+	      h = vh;
+	    }
+	  else
+	    h = *sym_hash;
+	}
 
       if ((h->root.u.undef.next || info->hash->undefs_tail == &h->root)
 	  && bfd_is_und_section (sec))

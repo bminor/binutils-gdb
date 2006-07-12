@@ -1,3 +1,11 @@
+2006-07-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/2884
+	* elflink.c (_bfd_elf_merge_symbol): Copy the symbol info from
+	the old versioned dynamic definition to the new one with
+	non-default visibility.  Hide the symbol if it is hidden or
+	internal.
+
 2006-07-12  Matthew R. Dempsky  <mrd@alkemio.org>
 
 	* cpu-m68k.c (bfd_m68k_compatible): Handle CPU32.
