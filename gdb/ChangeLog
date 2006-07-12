@@ -1,3 +1,7 @@
+2006-07-12  Jan Kratochvil  <lace@jankratochvil.net>
+
+	* infrun.c (handle_inferior_event): Fixed typos in printf.
+
 2006-07-12  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Nathan Sidwell  <nathan@codesourcery.com>
 
