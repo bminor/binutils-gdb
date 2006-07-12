@@ -223,9 +223,10 @@ arm_linux_extract_return_value (struct type *type,
 #define ARM_LINUX_SIGRETURN_INSTR	0xef900077
 #define ARM_LINUX_RT_SIGRETURN_INSTR	0xef9000ad
 
-/* For ARM EABI, recognize the pattern that glibc uses...  alternatively,
-   we could arrange to do this by function name, but they are not always
-   exported.  */
+/* For ARM EABI, the syscall number is not in the SWI instruction
+   (instead it is loaded into r7).  We recognize the pattern that
+   glibc uses...  alternatively, we could arrange to do this by
+   function name, but they are not always exported.  */
 #define ARM_SET_R7_SIGRETURN		0xe3a07077
 #define ARM_SET_R7_RT_SIGRETURN		0xe3a070ad
 #define ARM_EABI_SYSCALL		0xef000000
@@ -251,14 +252,67 @@ arm_linux_sigtramp_cache (struct frame_info *next_frame,
   trad_frame_set_id (this_cache, frame_id_build (sp, func));
 }
 
+/* There are a couple of different possible stack layouts that
+   we need to support.
+
+   Before version 2.6.18, the kernel used completely independent
+   layouts for non-RT and RT signals.  For non-RT signals the stack
+   began directly with a struct sigcontext.  For RT signals the stack
+   began with two redundant pointers (to the siginfo and ucontext),
+   and then the siginfo and ucontext.
+
+   As of version 2.6.18, the non-RT signal frame layout starts with
+   a ucontext and the RT signal frame starts with a siginfo and then
+   a ucontext.  Also, the ucontext now has a designated save area
+   for coprocessor registers.
+
+   For RT signals, it's easy to tell the difference: we look for
+   pinfo, the pointer to the siginfo.  If it has the expected
+   value, we have an old layout.  If it doesn't, we have the new
+   layout.
+
+   For non-RT signals, it's a bit harder.  We need something in one
+   layout or the other with a recognizable offset and value.  We can't
+   use the return trampoline, because ARM usually uses SA_RESTORER,
+   in which case the stack return trampoline is not filled in.
+   We can't use the saved stack pointer, because sigaltstack might
+   be in use.  So for now we guess the new layout...  */
+
+/* There are three words (trap_no, error_code, oldmask) in
+   struct sigcontext before r0.  */
+#define ARM_SIGCONTEXT_R0 0xc
+
+/* There are five words (uc_flags, uc_link, and three for uc_stack)
+   in the ucontext_t before the sigcontext.  */
+#define ARM_UCONTEXT_SIGCONTEXT 0x14
+
+/* There are three elements in an rt_sigframe before the ucontext:
+   pinfo, puc, and info.  The first two are pointers and the third
+   is a struct siginfo, with size 128 bytes.  We could follow puc
+   to the ucontext, but it's simpler to skip the whole thing.  */
+#define ARM_OLD_RT_SIGFRAME_SIGINFO 0x8
+#define ARM_OLD_RT_SIGFRAME_UCONTEXT 0x88
+
+#define ARM_NEW_RT_SIGFRAME_UCONTEXT 0x80
+
+#define ARM_NEW_SIGFRAME_MAGIC 0x5ac3c35a
+
 static void
 arm_linux_sigreturn_init (const struct tramp_frame *self,
 			  struct frame_info *next_frame,
 			  struct trad_frame_cache *this_cache,
 			  CORE_ADDR func)
 {
-  arm_linux_sigtramp_cache (next_frame, this_cache, func,
-			    0x0c /* Offset to registers.  */);
+  CORE_ADDR sp = frame_unwind_register_unsigned (next_frame, ARM_SP_REGNUM);
+  ULONGEST uc_flags = read_memory_unsigned_integer (sp, 4);
+
+  if (uc_flags == ARM_NEW_SIGFRAME_MAGIC)
+    arm_linux_sigtramp_cache (next_frame, this_cache, func,
+			      ARM_UCONTEXT_SIGCONTEXT
+			      + ARM_SIGCONTEXT_R0);
+  else
+    arm_linux_sigtramp_cache (next_frame, this_cache, func,
+			      ARM_SIGCONTEXT_R0);
 }
 
 static void
@@ -267,10 +321,19 @@ arm_linux_rt_sigreturn_init (const struct tramp_frame *self,
 			  struct trad_frame_cache *this_cache,
 			  CORE_ADDR func)
 {
-  arm_linux_sigtramp_cache (next_frame, this_cache, func,
-			    0x88 /* Offset to ucontext_t.  */
-			    + 0x14 /* Offset to sigcontext.  */
-			    + 0x0c /* Offset to registers.  */);
+  CORE_ADDR sp = frame_unwind_register_unsigned (next_frame, ARM_SP_REGNUM);
+  ULONGEST pinfo = read_memory_unsigned_integer (sp, 4);
+
+  if (pinfo == sp + ARM_OLD_RT_SIGFRAME_SIGINFO)
+    arm_linux_sigtramp_cache (next_frame, this_cache, func,
+			      ARM_OLD_RT_SIGFRAME_UCONTEXT
+			      + ARM_UCONTEXT_SIGCONTEXT
+			      + ARM_SIGCONTEXT_R0);
+  else
+    arm_linux_sigtramp_cache (next_frame, this_cache, func,
+			      ARM_NEW_RT_SIGFRAME_UCONTEXT
+			      + ARM_UCONTEXT_SIGCONTEXT
+			      + ARM_SIGCONTEXT_R0);
 }
 
 static struct tramp_frame arm_linux_sigreturn_tramp_frame = {

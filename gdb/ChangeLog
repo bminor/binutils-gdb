@@ -1,3 +1,13 @@
+2006-07-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-linux-tdep.c: Doc fixes.
+	(ARM_SIGCONTEXT_R0, ARM_UCONTEXT_SIGCONTEXT)
+	(ARM_OLD_RT_SIGFRAME_SIGINFO, ARM_OLD_RT_SIGFRAME_UCONTEXT)
+	(ARM_NEW_RT_SIGFRAME_UCONTEXT, ARM_NEW_SIGFRAME_MAGIC): New
+	constants.
+	(arm_linux_sigreturn_init, arm_linux_rt_sigreturn_init): Support
+	the new signal frame layouts.
+
 2006-07-12  Mike Frysinger  <vapier@gentoo.org>:
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 
