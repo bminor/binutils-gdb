@@ -1,5 +1,26 @@
 2006-07-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* target.c (target_read): Stop if target_read_partial returns 0
+	when some bytes have already been read.
+	(target_write): Likewise for target_write_partial.
+	(target_read_partial, target_write_partial): Make static.
+	(target_read_alloc): New.
+	* target.h: Doc fixes.
+	(target_read_partial, target_write_partial): Delete prototypes.
+	(target_read_alloc): New prototype.
+
+	* auxv.c (target_auxv_read): Delete.
+	(target_auxv_search, fprint_target_auxv): Use target_read_alloc.
+	* auxv.h (target_auxv_read): Delete prototype.
+	* avr-tdep.c (avr_io_reg_read_command): Use target_read_alloc.
+	* ia64-tdep.c (getunwind_table, get_kernel_table): Likewise.
+	* linux-nat.c (linux_nat_make_corefile_notes): Likewise.
+	* procfs.c (procfs_make_note_section): Likewise.
+	* remote.c (remote_xfer_partial): Don't loop here.
+	* sparc-tdep.c (sparc_fetch_wcookie): Use target_read.
+
+2006-07-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* arm-linux-tdep.c: Doc fixes.
 	(ARM_SIGCONTEXT_R0, ARM_UCONTEXT_SIGCONTEXT)
 	(ARM_OLD_RT_SIGFRAME_SIGINFO, ARM_OLD_RT_SIGFRAME_UCONTEXT)

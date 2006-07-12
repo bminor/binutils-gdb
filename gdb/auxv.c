@@ -1,6 +1,6 @@
 /* Auxiliary vector support for GDB, the GNU debugger.
 
-   Copyright (C) 2004 Free Software Foundation, Inc.
+   Copyright (C) 2004, 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -76,43 +76,6 @@ procfs_xfer_auxv (struct target_ops *ops,
   return n;
 }
 
-/* Read all the auxv data into a contiguous xmalloc'd buffer,
-   stored in *DATA.  Return the size in bytes of this data.
-   If zero, there is no data and *DATA is null.
-   if < 0, there was an error and *DATA is null.  */
-LONGEST
-target_auxv_read (struct target_ops *ops, gdb_byte **data)
-{
-  size_t auxv_alloc = 512, auxv_pos = 0;
-  gdb_byte *auxv = xmalloc (auxv_alloc);
-  int n;
-
-  while (1)
-    {
-      n = target_read_partial (ops, TARGET_OBJECT_AUXV,
-			       NULL, &auxv[auxv_pos], 0,
-			       auxv_alloc - auxv_pos);
-      if (n <= 0)
-	break;
-      auxv_pos += n;
-      if (auxv_pos < auxv_alloc) /* Read all there was.  */
-	break;
-      gdb_assert (auxv_pos == auxv_alloc);
-      auxv_alloc *= 2;
-      auxv = xrealloc (auxv, auxv_alloc);
-    }
-
-  if (auxv_pos == 0)
-    {
-      xfree (auxv);
-      *data = NULL;
-      return n;
-    }
-
-  *data = auxv;
-  return auxv_pos;
-}
-
 /* Read one auxv entry from *READPTR, not reading locations >= ENDPTR.
    Return 0 if *READPTR is already at the end of the buffer.
    Return -1 if there is insufficient buffer for a whole entry.
@@ -148,7 +111,7 @@ target_auxv_search (struct target_ops *ops, CORE_ADDR match, CORE_ADDR *valp)
 {
   CORE_ADDR type, val;
   gdb_byte *data;
-  int n = target_auxv_read (ops, &data);
+  LONGEST n = target_read_alloc (ops, TARGET_OBJECT_AUXV, NULL, &data);
   gdb_byte *ptr = data;
   int ents = 0;
 
@@ -184,7 +147,8 @@ fprint_target_auxv (struct ui_file *file, struct target_ops *ops)
 {
   CORE_ADDR type, val;
   gdb_byte *data;
-  int len = target_auxv_read (ops, &data);
+  LONGEST len = target_read_alloc (ops, TARGET_OBJECT_AUXV, NULL,
+				   &data);
   gdb_byte *ptr = data;
   int ents = 0;
 

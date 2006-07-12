@@ -1341,7 +1341,7 @@ default_xfer_partial (struct target_ops *ops, enum target_object object,
    (inbuf, outbuf)", instead of separate read/write methods, make life
    easier.  */
 
-LONGEST
+static LONGEST
 target_read_partial (struct target_ops *ops,
 		     enum target_object object,
 		     const char *annex, gdb_byte *buf,
@@ -1350,7 +1350,7 @@ target_read_partial (struct target_ops *ops,
   return target_xfer_partial (ops, object, annex, buf, NULL, offset, len);
 }
 
-LONGEST
+static LONGEST
 target_write_partial (struct target_ops *ops,
 		      enum target_object object,
 		      const char *annex, const gdb_byte *buf,
@@ -1373,8 +1373,9 @@ target_read (struct target_ops *ops,
 					  (gdb_byte *) buf + xfered,
 					  offset + xfered, len - xfered);
       /* Call an observer, notifying them of the xfer progress?  */
-      if (xfer <= 0)
-	/* Call memory_error?  */
+      if (xfer == 0)
+	return xfered;
+      if (xfer < 0)
 	return -1;
       xfered += xfer;
       QUIT;
@@ -1395,13 +1396,80 @@ target_write (struct target_ops *ops,
 					   (gdb_byte *) buf + xfered,
 					   offset + xfered, len - xfered);
       /* Call an observer, notifying them of the xfer progress?  */
-      if (xfer <= 0)
-	/* Call memory_error?  */
+      if (xfer == 0)
+	return xfered;
+      if (xfer < 0)
 	return -1;
       xfered += xfer;
       QUIT;
     }
   return len;
+}
+
+/* Wrapper to perform a full read of unknown size.  OBJECT/ANNEX will
+   be read using OPS.  The return value will be -1 if the transfer
+   fails or is not supported; 0 if the object is empty; or the length
+   of the object otherwise.  If a positive value is returned, a
+   sufficiently large buffer will be allocated using xmalloc and
+   returned in *BUF_P containing the contents of the object.
+
+   This method should be used for objects sufficiently small to store
+   in a single xmalloc'd buffer, when no fixed bound on the object's
+   size is known in advance.  Don't try to read TARGET_OBJECT_MEMORY
+   through this function.  */
+
+LONGEST
+target_read_alloc (struct target_ops *ops,
+		   enum target_object object,
+		   const char *annex, gdb_byte **buf_p)
+{
+  size_t buf_alloc, buf_pos;
+  gdb_byte *buf;
+  LONGEST n;
+
+  /* This function does not have a length parameter; it reads the
+     entire OBJECT).  Also, it doesn't support objects fetched partly
+     from one target and partly from another (in a different stratum,
+     e.g. a core file and an executable).  Both reasons make it
+     unsuitable for reading memory.  */
+  gdb_assert (object != TARGET_OBJECT_MEMORY);
+
+  /* Start by reading up to 4K at a time.  The target will throttle
+     this number down if necessary.  */
+  buf_alloc = 4096;
+  buf = xmalloc (buf_alloc);
+  buf_pos = 0;
+  while (1)
+    {
+      n = target_read_partial (ops, object, annex, &buf[buf_pos],
+			       buf_pos, buf_alloc - buf_pos);
+      if (n < 0)
+	{
+	  /* An error occurred.  */
+	  xfree (buf);
+	  return -1;
+	}
+      else if (n == 0)
+	{
+	  /* Read all there was.  */
+	  if (buf_pos == 0)
+	    xfree (buf);
+	  else
+	    *buf_p = buf;
+	  return buf_pos;
+	}
+
+      buf_pos += n;
+
+      /* If the buffer is filling up, expand it.  */
+      if (buf_alloc < buf_pos * 2)
+	{
+	  buf_alloc *= 2;
+	  buf = xrealloc (buf, buf_alloc);
+	}
+
+      QUIT;
+    }
 }
 
 /* Memory transfer methods.  */

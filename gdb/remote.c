@@ -5147,35 +5147,23 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
     case TARGET_OBJECT_AUXV:
       if (remote_protocol_packets[PACKET_qPart_auxv].support != PACKET_DISABLE)
 	{
-	  unsigned int total = 0;
-	  while (len > 0)
-	    {
-	      LONGEST n = min ((get_remote_packet_size () - 2) / 2, len);
-	      snprintf (rs->buf, get_remote_packet_size (),
-			"qPart:auxv:read::%s,%s",
-			phex_nz (offset, sizeof offset),
-			phex_nz (n, sizeof n));
-	      i = putpkt (rs->buf);
-	      if (i < 0)
-		return total > 0 ? total : i;
-	      rs->buf[0] = '\0';
-	      getpkt (&rs->buf, &rs->buf_size, 0);
-	      if (packet_ok (rs->buf, &remote_protocol_packets[PACKET_qPart_auxv])
-		  != PACKET_OK)
-		return total > 0 ? total : -1;
-	      if (strcmp (rs->buf, "OK") == 0)
-		break;		/* Got EOF indicator.  */
-	      /* Got some data.  */
-	      i = hex2bin (rs->buf, readbuf, len);
-	      if (i > 0)
-		{
-		  readbuf = (void *) ((char *) readbuf + i);
-		  offset += i;
-		  len -= i;
-		  total += i;
-		}
-	    }
-	  return total;
+	  LONGEST n = min ((get_remote_packet_size () - 2) / 2, len);
+	  snprintf (rs->buf, get_remote_packet_size (),
+		    "qPart:auxv:read::%s,%s",
+		    phex_nz (offset, sizeof offset),
+		    phex_nz (n, sizeof n));
+	  i = putpkt (rs->buf);
+	  if (i < 0)
+	    return i;
+	  rs->buf[0] = '\0';
+	  getpkt (&rs->buf, &rs->buf_size, 0);
+	  if (packet_ok (rs->buf, &remote_protocol_packets[PACKET_qPart_auxv])
+	      != PACKET_OK)
+	    return -1;
+	  if (strcmp (rs->buf, "OK") == 0)
+	    return 0;		/* Got EOF indicator.  */
+	  /* Got some data.  */
+	  return hex2bin (rs->buf, readbuf, len);
 	}
       return -1;
 

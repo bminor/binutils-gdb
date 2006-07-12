@@ -1,7 +1,7 @@
 /* Target-dependent code for the IA-64 for GDB, the GNU debugger.
 
-   Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software
-   Foundation, Inc.
+   Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -2458,8 +2458,8 @@ ia64_access_mem (unw_addr_space_t as,
 }
 
 /* Call low-level function to access the kernel unwind table.  */
-static int
-getunwind_table (void *buf, size_t len)
+static LONGEST
+getunwind_table (gdb_byte **buf_p)
 {
   LONGEST x;
 
@@ -2470,10 +2470,11 @@ getunwind_table (void *buf, size_t len)
      we want to preserve fall back to the running kernel's table, then
      we should find a way to override the corefile layer's
      xfer_partial method.  */
-  x = target_read_partial (&current_target, TARGET_OBJECT_UNWIND_TABLE, NULL,
-			   buf, 0, len);
 
-  return (int)x;
+  x = target_read_alloc (&current_target, TARGET_OBJECT_UNWIND_TABLE,
+			 NULL, buf_p);
+
+  return x;
 }
 
 /* Get the kernel unwind table.  */				 
@@ -2484,14 +2485,15 @@ get_kernel_table (unw_word_t ip, unw_dyn_info_t *di)
 
   if (!ktab) 
     {
+      gdb_byte *ktab_buf;
       size_t size;
-      size = getunwind_table (NULL, 0);
-      if ((int)size < 0)
-        return -UNW_ENOINFO;
-      ktab_size = size;
-      ktab = xmalloc (ktab_size);
-      getunwind_table (ktab, ktab_size);
-		          
+
+      ktab_size = getunwind_table (&ktab_buf);
+      if (ktab_size <= 0)
+	return -UNW_ENOINFO;
+      else
+	ktab = (struct ia64_table_entry *) ktab_buf;
+
       for (etab = ktab; etab->start_offset; ++etab)
         etab->info_offset += KERNEL_START;
     }
