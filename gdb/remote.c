@@ -60,6 +60,18 @@
 
 #include "remote-fileio.h"
 
+/* The size to align memory write packets, when practical.  The protocol
+   does not guarantee any alignment, and gdb will generate short
+   writes and unaligned writes, but even as a best-effort attempt this
+   can improve bulk transfers.  For instance, if a write is misaligned
+   relative to the target's data bus, the stub may need to make an extra
+   round trip fetching data from the target.  This doesn't make a
+   huge difference, but it's easy to do, so we try to be helpful.
+
+   The alignment chosen is arbitrary; usually data bus width is
+   important here, not the possibly larger cache line size.  */
+enum { REMOTE_ALIGN_WRITES = 16 };
+
 /* Prototypes for local functions.  */
 static void cleanup_sigint_signal_handler (void *dummy);
 static void initialize_sigint_signal_handler (void);
@@ -3851,7 +3863,7 @@ remote_write_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
   int todo;
   int nr_bytes;
   int payload_size;
-  char *payload_start;
+  int payload_length;
 
   /* Verify that the target can support a binary download.  */
   check_binary_download (memaddr);
@@ -3899,6 +3911,11 @@ remote_write_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
     internal_error (__FILE__, __LINE__,
 		    _("minumum packet size too small to write data"));
 
+  /* If we already need another packet, then try to align the end
+     of this packet to a useful boundary.  */
+  if (todo > 2 * REMOTE_ALIGN_WRITES && todo < len)
+    todo = ((memaddr + todo) & ~(REMOTE_ALIGN_WRITES - 1)) - memaddr;
+
   /* Append "<memaddr>".  */
   memaddr = remote_address_masked (memaddr);
   p += hexnumstr (p, (ULONGEST) memaddr);
@@ -3917,14 +3934,30 @@ remote_write_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
   *p = '\0';
 
   /* Append the packet body.  */
-  payload_start = p;
   switch (remote_protocol_packets[PACKET_X].support)
     {
     case PACKET_ENABLE:
       /* Binary mode.  Send target system values byte by byte, in
 	 increasing byte addresses.  Only escape certain critical
 	 characters.  */
-      p += remote_escape_output (myaddr, todo, p, &nr_bytes, payload_size);
+      payload_length = remote_escape_output (myaddr, todo, p, &nr_bytes,
+					     payload_size);
+
+      /* If not all TODO bytes fit, then we'll need another packet.  Make
+	 a second try to keep the end of the packet aligned.  */
+      if (nr_bytes < todo)
+	{
+	  int new_nr_bytes;
+
+	  new_nr_bytes = (((memaddr + nr_bytes) & ~(REMOTE_ALIGN_WRITES - 1))
+			  - memaddr);
+	  if (new_nr_bytes != nr_bytes)
+	    payload_length = remote_escape_output (myaddr, new_nr_bytes,
+						   p, &nr_bytes,
+						   payload_size);
+	}
+
+      p += payload_length;
       if (nr_bytes < todo)
 	{
 	  /* Escape chars have filled up the buffer prematurely,

@@ -1,4 +1,11 @@
 2006-07-12  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Nathan Sidwell  <nathan@codesourcery.com>
+
+	* remote.c (REMOTE_ALIGN_WRITES): New.
+	(remote_write_bytes): Align large write packets.  Remove unused
+	payload_start variable.
+
+2006-07-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote.c (PACKET_qXfer_auxv): New, renamed from PACKET_qPart_auxv.
 	(remote_supported_packet): Remove #if 0.
