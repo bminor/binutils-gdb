@@ -202,6 +202,9 @@ bfd_m68k_compatible (const bfd_arch_info_type *a,
   if (a->mach <= bfd_mach_m68060 && b->mach <= bfd_mach_m68060)
     /* Merge m68k machine. */
     return a->mach > b->mach ? a : b;
+  else if (a->mach == bfd_mach_cpu32 && b->mach == bfd_mach_cpu32)
+    /* CPU32 is compatible with itself. */
+    return a;
   else if (a->mach >= bfd_mach_mcf_isa_a_nodiv
 	   && b->mach >= bfd_mach_mcf_isa_a_nodiv)
     {

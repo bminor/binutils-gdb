@@ -53,6 +53,7 @@ run_dump_test "merge-error-1d"
 run_dump_test "merge-error-1e"
 run_dump_test "merge-ok-1a"
 run_dump_test "merge-ok-1b"
+run_dump_test "merge-ok-1c"
 
 foreach { id sources } { a { plt1.s } b { plt1-empty.s plt1.s } } {
     foreach arch { 68020 cpu32 isab } {
