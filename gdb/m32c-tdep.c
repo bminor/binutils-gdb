@@ -340,6 +340,14 @@ m32c_read_flg (struct regcache *cache)
 }
 
 
+/* Evaluate the real register number of a banked register.  */
+static struct m32c_reg *
+m32c_banked_register (struct m32c_reg *reg, struct regcache *cache)
+{
+  return ((m32c_read_flg (cache) & reg->n) ? reg->ry : reg->rx);
+}
+
+
 /* Move the value of a banked register from CACHE to BUF.
    If the value of the 'flg' register in CACHE has any of the bits
    masked in REG->n set, then read REG->ry.  Otherwise, read
@@ -347,8 +355,7 @@ m32c_read_flg (struct regcache *cache)
 static void
 m32c_banked_read (struct m32c_reg *reg, struct regcache *cache, void *buf)
 {
-  struct m32c_reg *bank_reg
-    = ((m32c_read_flg (cache) & reg->n) ? reg->ry : reg->rx);
+  struct m32c_reg *bank_reg = m32c_banked_register (reg, cache);
   regcache_raw_read (cache, bank_reg->num, buf);
 }
 
@@ -360,8 +367,7 @@ m32c_banked_read (struct m32c_reg *reg, struct regcache *cache, void *buf)
 static void
 m32c_banked_write (struct m32c_reg *reg, struct regcache *cache, void *buf)
 {
-  struct m32c_reg *bank_reg
-    = ((m32c_read_flg (cache) & reg->n) ? reg->ry : reg->rx);
+  struct m32c_reg *bank_reg = m32c_banked_register (reg, cache);
   regcache_raw_write (cache, bank_reg->num, (const void *) buf);
 }
 
@@ -2475,6 +2481,40 @@ m32c_m16c_pointer_to_address (struct type *type, const gdb_byte *buf)
   return ptr;
 }
 
+void
+m32c_virtual_frame_pointer (CORE_ADDR pc,
+			    int *frame_regnum,
+			    LONGEST *frame_offset)
+{
+  char *name;
+  CORE_ADDR func_addr, func_end, sal_end;
+  struct m32c_prologue p;
+
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  
+  if (!find_pc_partial_function (pc, &name, &func_addr, &func_end))
+    internal_error (__FILE__, __LINE__, _("No virtual frame pointer available"));
+
+  m32c_analyze_prologue (current_gdbarch, func_addr, pc, &p);
+  switch (p.kind)
+    {
+    case prologue_with_frame_ptr:
+      *frame_regnum = m32c_banked_register (tdep->fb, current_regcache)->num;
+      *frame_offset = p.frame_ptr_offset;
+      break;
+    case prologue_sans_frame_ptr:
+      *frame_regnum = m32c_banked_register (tdep->sp, current_regcache)->num;
+      *frame_offset = p.frame_size;
+      break;
+    default:
+      *frame_regnum = m32c_banked_register (tdep->sp, current_regcache)->num;
+      *frame_offset = 0;
+      break;
+    }
+  /* Sanity check */
+  if (*frame_regnum > NUM_REGS)
+    internal_error (__FILE__, __LINE__, _("No virtual frame pointer available"));
+}
 
 
 /* Initialization.  */
@@ -2538,6 +2578,8 @@ m32c_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Trampolines.  */
   set_gdbarch_skip_trampoline_code (arch, m32c_skip_trampoline_code);
+
+  set_gdbarch_virtual_frame_pointer (arch, m32c_virtual_frame_pointer);
 
   return arch;
 }
