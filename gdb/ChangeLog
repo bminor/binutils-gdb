@@ -1,3 +1,8 @@
+2006-07-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/alpha/tm-nbsd.h: Remove file.
+	* config/alpha/nbsd.mt (DEPRECATED_TM_FILE): Remove.
+
 2006-07-13  Corinna Vinschen  <vinschen@redhat.com>
 
 	* mips-tdep.c (mips_integer_to_address): Simplify be calling
