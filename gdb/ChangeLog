@@ -1,3 +1,15 @@
+2006-07-13  Paul N. Hilfinger  <Hilfinger@adacore.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* infcall.c (value_arg_coerce): Use value_cast_pointers for
+	references.  Avoid value_cast to a reference type.  Don't silently
+	convert pointers to references.
+	* valops.c (value_cast_pointers): New, based on value_cast.
+	(value_cast): Use it.  Reject reference types.
+	(value_ref): New.
+	(typecmp): Use it.
+	* value.h (value_cast_pointers, value_ref): New prototypes.
+
 2006-07-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote.c (unpack_varlen_hex): Correct type of retval.

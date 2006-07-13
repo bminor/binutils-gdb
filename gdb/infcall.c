@@ -109,14 +109,20 @@ value_arg_coerce (struct value *arg, struct type *param_type,
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_REF:
-      if (TYPE_CODE (arg_type) != TYPE_CODE_REF
-	  && TYPE_CODE (arg_type) != TYPE_CODE_PTR)
-	{
-	  arg = value_addr (arg);
-	  deprecated_set_value_type (arg, param_type);
-	  return arg;
-	}
-      break;
+      {
+	struct value *new_value;
+
+	if (TYPE_CODE (arg_type) == TYPE_CODE_REF)
+	  return value_cast_pointers (type, arg);
+
+	/* Cast the value to the reference's target type, and then
+	   convert it back to a reference.  This will issue an error
+	   if the value was not previously in memory - in some cases
+	   we should clearly be allowing this, but how?  */
+	new_value = value_cast (TYPE_TARGET_TYPE (type), arg);
+	new_value = value_ref (new_value);
+	return new_value;
+      }
     case TYPE_CODE_INT:
     case TYPE_CODE_CHAR:
     case TYPE_CODE_BOOL:

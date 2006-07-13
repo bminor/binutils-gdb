@@ -1,3 +1,10 @@
+2006-07-13  Paul N. Hilfinger  <Hilfinger@adacore.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.cp/ref-params.exp: New test.
+	* gdb.cp/ref-params.cc: New source file.
+	* gdb.cp/Makefile.in (EXECUTABLES): Add ref-params.
+
 2006-07-08  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.arch/alpha-step.exp (test_stepi): Do not include trailing

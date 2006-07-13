@@ -201,6 +201,70 @@ allocate_space_in_inferior (int len)
   return value_as_long (value_allocate_space_in_inferior (len));
 }
 
+/* Cast one pointer or reference type to another.  Both TYPE and
+   the type of ARG2 should be pointer types, or else both should be
+   reference types.  Returns the new pointer or reference.  */
+
+struct value *
+value_cast_pointers (struct type *type, struct value *arg2)
+{
+  struct type *type2 = check_typedef (value_type (arg2));
+  struct type *t1 = check_typedef (TYPE_TARGET_TYPE (type));
+  struct type *t2 = check_typedef (TYPE_TARGET_TYPE (type2));
+
+  if (TYPE_CODE (t1) == TYPE_CODE_STRUCT
+      && TYPE_CODE (t2) == TYPE_CODE_STRUCT
+      && !value_logical_not (arg2))
+    {
+      struct value *v;
+
+      /* Look in the type of the source to see if it contains the
+	 type of the target as a superclass.  If so, we'll need to
+	 offset the pointer rather than just change its type.  */
+      if (TYPE_NAME (t1) != NULL)
+	{
+	  struct value *v2;
+
+	  if (TYPE_CODE (type2) == TYPE_CODE_REF)
+	    v2 = coerce_ref (arg2);
+	  else
+	    v2 = value_ind (arg2);
+	  v = search_struct_field (type_name_no_tag (t1),
+				   v2, 0, t2, 1);
+	  if (v)
+	    {
+	      v = value_addr (v);
+	      deprecated_set_value_type (v, type);
+	      return v;
+	    }
+	}
+
+      /* Look in the type of the target to see if it contains the
+	 type of the source as a superclass.  If so, we'll need to
+	 offset the pointer rather than just change its type.
+	 FIXME: This fails silently with virtual inheritance.  */
+      if (TYPE_NAME (t2) != NULL)
+	{
+	  v = search_struct_field (type_name_no_tag (t2),
+				   value_zero (t1, not_lval), 0, t1, 1);
+	  if (v)
+	    {
+	      CORE_ADDR addr2 = value_as_address (arg2);
+	      addr2 -= (VALUE_ADDRESS (v)
+			+ value_offset (v)
+			+ value_embedded_offset (v));
+	      return value_from_pointer (type, addr2);
+	    }
+	}
+    }
+
+  /* No superclass found, just change the pointer type.  */
+  deprecated_set_value_type (arg2, type);
+  arg2 = value_change_enclosing_type (arg2, type);
+  set_value_pointed_to_offset (arg2, 0);	/* pai: chk_val */
+  return arg2;
+}
+
 /* Cast value ARG2 to type TYPE and return as a value.
    More general than a C cast: accepts any two types of the same length,
    and if ARG2 is an lvalue it can be cast into anything at all.  */
@@ -223,6 +287,10 @@ value_cast (struct type *type, struct value *arg2)
   code1 = TYPE_CODE (type);
   arg2 = coerce_ref (arg2);
   type2 = check_typedef (value_type (arg2));
+
+  /* You can't cast to a reference type.  See value_cast_pointers
+     instead.  */
+  gdb_assert (code1 != TYPE_CODE_REF);
 
   /* A cast to an undetermined-length array_type, such as (TYPE [])OBJECT,
      is treated like a cast to (TYPE [N])OBJECT,
@@ -369,50 +437,8 @@ value_cast (struct type *type, struct value *arg2)
   else if (TYPE_LENGTH (type) == TYPE_LENGTH (type2))
     {
       if (code1 == TYPE_CODE_PTR && code2 == TYPE_CODE_PTR)
-	{
-	  struct type *t1 = check_typedef (TYPE_TARGET_TYPE (type));
-	  struct type *t2 = check_typedef (TYPE_TARGET_TYPE (type2));
-	  if (TYPE_CODE (t1) == TYPE_CODE_STRUCT
-	      && TYPE_CODE (t2) == TYPE_CODE_STRUCT
-	      && !value_logical_not (arg2))
-	    {
-	      struct value *v;
+	return value_cast_pointers (type, arg2);
 
-	      /* Look in the type of the source to see if it contains the
-	         type of the target as a superclass.  If so, we'll need to
-	         offset the pointer rather than just change its type.  */
-	      if (TYPE_NAME (t1) != NULL)
-		{
-		  v = search_struct_field (type_name_no_tag (t1),
-					   value_ind (arg2), 0, t2, 1);
-		  if (v)
-		    {
-		      v = value_addr (v);
-		      deprecated_set_value_type (v, type);
-		      return v;
-		    }
-		}
-
-	      /* Look in the type of the target to see if it contains the
-	         type of the source as a superclass.  If so, we'll need to
-	         offset the pointer rather than just change its type.
-	         FIXME: This fails silently with virtual inheritance.  */
-	      if (TYPE_NAME (t2) != NULL)
-		{
-		  v = search_struct_field (type_name_no_tag (t2),
-				       value_zero (t1, not_lval), 0, t1, 1);
-		  if (v)
-		    {
-                      CORE_ADDR addr2 = value_as_address (arg2);
-                      addr2 -= (VALUE_ADDRESS (v)
-                                + value_offset (v)
-                                + value_embedded_offset (v));
-                      return value_from_pointer (type, addr2);
-		    }
-		}
-	    }
-	  /* No superclass found, just fall through to change ptr type.  */
-	}
       deprecated_set_value_type (arg2, type);
       arg2 = value_change_enclosing_type (arg2, type);
       set_value_pointed_to_offset (arg2, 0);	/* pai: chk_val */
@@ -886,6 +912,22 @@ value_addr (struct value *arg1)
   return arg2;
 }
 
+/* Return a reference value for the object for which ARG1 is the contents.  */
+
+struct value *
+value_ref (struct value *arg1)
+{
+  struct value *arg2;
+
+  struct type *type = check_typedef (value_type (arg1));
+  if (TYPE_CODE (type) == TYPE_CODE_REF)
+    return arg1;
+
+  arg2 = value_addr (arg1);
+  deprecated_set_value_type (arg2, lookup_reference_type (type));
+  return arg2;
+}
+
 /* Given a value of a pointer type, apply the C unary * operator to it.  */
 
 struct value *
@@ -1106,7 +1148,7 @@ typecmp (int staticp, int varargs, int nargs,
 	  if (TYPE_CODE (tt2) == TYPE_CODE_ARRAY)
 	    t2[i] = value_coerce_array (t2[i]);
 	  else
-	    t2[i] = value_addr (t2[i]);
+	    t2[i] = value_ref (t2[i]);
 	  continue;
 	}
 
