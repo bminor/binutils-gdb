@@ -2510,8 +2510,9 @@ _bfd_sh_align_load_span (abfd, sec, contents, swap, relocs,
 
 		  next2_insn = bfd_get_16 (abfd, contents + i + 4);
 		  next2_op = sh_insn_info (next2_insn);
-		  if ((next2_op->flags & (LOAD | STORE)) == 0
-		      && sh_load_use (insn, op, next2_insn, next2_op))
+		  if (next2_op == NULL
+		      || ((next2_op->flags & (LOAD | STORE)) == 0
+			  && sh_load_use (insn, op, next2_insn, next2_op)))
 		    ok = FALSE;
 		}
 
