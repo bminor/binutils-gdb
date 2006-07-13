@@ -1,3 +1,8 @@
+2006-07-13  Nick Roberts  <nickrob@snap.net.nz>
+
+	* annotate.c (annotate_frame_begin): Re-instate frame-begin
+	annotation for level 3 annotations.
+
 2006-07-13  Paul N. Hilfinger  <Hilfinger@adacore.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 
