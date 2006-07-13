@@ -1,5 +1,10 @@
 2006-07-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* remote.c (unpack_varlen_hex): Correct type of retval.
+	Reported by Zhigang Gong <zhigang.gong@gmail.com>.
+
+2006-07-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* dwarf2read.c (dwarf2_symbol_mark_computed): Handle corrupted
 	or missing location list information.  Suggested by Jan
 	Kratochvil <lace@jankratochvil.net>.

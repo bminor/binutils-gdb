@@ -1188,7 +1188,7 @@ unpack_varlen_hex (char *buff,	/* packet to parse */
 		   ULONGEST *result)
 {
   int nibble;
-  int retval = 0;
+  ULONGEST retval = 0;
 
   while (ishex (*buff, &nibble))
     {
