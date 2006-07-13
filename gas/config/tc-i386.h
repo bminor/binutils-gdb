@@ -91,8 +91,8 @@ extern const char extra_symbol_chars[];
 extern const char *i386_comment_chars;
 #define tc_comment_chars i386_comment_chars
 
-#define MAX_OPERANDS 3		/* max operands per insn */
-#define MAX_IMMEDIATE_OPERANDS 2/* max immediates per insn (lcall, ljmp) */
+#define MAX_OPERANDS 4		/* max operands per insn */
+#define MAX_IMMEDIATE_OPERANDS 2/* max immediates per insn (lcall, ljmp, insertq, extrq) */
 #define MAX_MEMORY_OPERANDS 2	/* max memory refs per insn (string ops) */
 
 /* Prefixes will be emitted in the order defined below.
@@ -185,6 +185,9 @@ typedef struct
 #define CpuSVME	      0x80000	/* AMD Secure Virtual Machine Ext-s required */
 #define CpuVMX	     0x100000	/* VMX Instructions required */
 #define CpuMNI	     0x200000	/* Merom New Instructions required */
+#define CpuSSE4a     0x400000   /* SSE4a New Instuctions required */ 
+#define CpuABM       0x800000   /* ABM New Instructions required */
+#define CpuAmdFam10 0x1000000   /* AmdFam10 New instructions required */
 
   /* These flags are set by gas depending on the flag_code.  */
 #define Cpu64	     0x4000000   /* 64bit support required  */
@@ -192,8 +195,8 @@ typedef struct
 
   /* The default value for unknown CPUs - enable all features to avoid problems.  */
 #define CpuUnknownFlags (Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686 \
-	|CpuP4|CpuSledgehammer|CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuPNI|CpuVMX \
-	|Cpu3dnow|Cpu3dnowA|CpuK6|CpuAthlon|CpuPadLock|CpuSVME|CpuMNI)
+	|CpuP4|CpuSledgehammer|CpuAmdFam10|CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuPNI|CpuVMX \
+	|Cpu3dnow|Cpu3dnowA|CpuK6|CpuAthlon|CpuPadLock|CpuSVME|CpuMNI|CpuABM|CpuSSE4a)
 
   /* the bits in opcode_modifier are used to generate the final opcode from
      the base_opcode.  These bits also are used to detect alternate forms of
@@ -240,7 +243,7 @@ typedef struct
      by OR'ing together all of the possible type masks.  (e.g.
      'operand_types[i] = Reg|Imm' specifies that operand i can be
      either a register or an immediate operand.  */
-  unsigned int operand_types[3];
+  unsigned int operand_types[4];
 
   /* operand_types[i] bits */
   /* register */
@@ -391,7 +394,8 @@ enum processor_type
   PROCESSOR_ATHLON,
   PROCESSOR_K8,
   PROCESSOR_GENERIC32,
-  PROCESSOR_GENERIC64
+  PROCESSOR_GENERIC64,
+  PROCESSOR_AMDFAM10
 };
 
 /* x86 arch names, types and features */

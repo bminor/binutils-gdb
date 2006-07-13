@@ -1,3 +1,17 @@
+2006-07-13 Dwarakanath Rajagopal	<dwarak.rajagopal@amd.com>
+	   Michael Meissner		<michael.meissner@amd.com>
+
+	* config/tc-i386.h (PROCESSOR_AMDFAM10): New processor_type.
+	(CpuSSE4a, CpuABM, CpuAmdFam10): New Cpu directives.
+	* config/tc-i386.c (cpu_arch): Add support for AmdFam10
+	architecture.
+	(i386_align_code): Ditto.
+	(md_assemble_code): Add support for insertq/extrq instructions,
+	swapping as needed for intel syntax.
+	(swap_imm_operands): New function to swap immediate operands.
+	(swap_operands): Deal with 4 operand instructions.
+	(build_modrm_byte): Add support for insertq instruction.
+
 2006-07-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.h (Size64): Fix a typo in comment.

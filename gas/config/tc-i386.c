@@ -89,6 +89,7 @@ static const reg_entry *parse_register PARAMS ((char *reg_string,
 static char *parse_insn PARAMS ((char *, char *));
 static char *parse_operands PARAMS ((char *, const char *));
 static void swap_operands PARAMS ((void));
+static void swap_imm_operands PARAMS ((void));
 static void optimize_imm PARAMS ((void));
 static void optimize_disp PARAMS ((void));
 static int match_template PARAMS ((void));
@@ -491,6 +492,9 @@ static const arch_entry cpu_arch[] =
   {"k8", PROCESSOR_K8,
    Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuAthlon
    |CpuSledgehammer|CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2},
+  {"amdfam10", PROCESSOR_AMDFAM10,
+   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuAthlon
+   |CpuSledgehammer|CpuAmdFam10|CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2|CpuSSE3|CpuSSE4a|CpuABM},
   {".mmx", PROCESSOR_UNKNOWN,
    CpuMMX},
   {".sse", PROCESSOR_UNKNOWN,
@@ -508,7 +512,11 @@ static const arch_entry cpu_arch[] =
   {".pacifica", PROCESSOR_UNKNOWN,
    CpuSVME},
   {".svme", PROCESSOR_UNKNOWN,
-   CpuSVME}
+   CpuSVME},
+  {".sse4a", PROCESSOR_UNKNOWN,
+   CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3|CpuSSE4a},
+  {".abm", PROCESSOR_UNKNOWN,
+   CpuABM}
 };
 
 const pseudo_typeS md_pseudo_table[] =
@@ -741,7 +749,7 @@ i386_align_code (fragP, count)
   
      1. For PROCESSOR_I486, PROCESSOR_PENTIUM and PROCESSOR_GENERIC32,
      f32_patt will be used.
-     2. For PROCESSOR_K8 in 64bit, NOPs with 0x66 prefixe will be used.
+     2. For PROCESSOR_K8 and PROCESSOR_AMDFAM10 in 64bit, NOPs with 0x66 prefix will be used.
      3. For PROCESSOR_MEROM, alt_long_patt will be used.
      4. For PROCESSOR_PENTIUMPRO, PROCESSOR_PENTIUM4, PROCESSOR_NOCONA,
      PROCESSOR_YONAH, PROCESSOR_MEROM, PROCESSOR_K6, PROCESSOR_ATHLON
@@ -812,6 +820,7 @@ i386_align_code (fragP, count)
 	    case PROCESSOR_ATHLON:
 	    case PROCESSOR_K8:
 	    case PROCESSOR_GENERIC64:
+	    case PROCESSOR_AMDFAM10:  
 	      patt = alt_short_patt;
 	      break;
 	    case PROCESSOR_I486:
@@ -840,6 +849,7 @@ i386_align_code (fragP, count)
 	    case PROCESSOR_K6:
 	    case PROCESSOR_ATHLON:
 	    case PROCESSOR_K8:
+            case PROCESSOR_AMDFAM10:
 	    case PROCESSOR_GENERIC32:
 	      /* We use cpu_arch_isa_flags to check if we CAN optimize
 		 for Cpu686.  */
@@ -1733,15 +1743,27 @@ md_assemble (line)
   if (line == NULL)
     return;
 
+  /* The order of the immediates should be reversed 
+     for 2 immediates extrq and insertq instructions */
+  if ((i.imm_operands == 2) && 
+      ((strcmp (mnemonic, "extrq") == 0) 
+       || (strcmp (mnemonic, "insertq") == 0)))
+    {
+      swap_imm_operands ();  
+      /* "extrq" and insertq" are the only two instructions whose operands 
+	 have to be reversed even though they have two immediate operands.
+      */
+      if (intel_syntax)
+	swap_operands ();
+    }
+
   /* Now we've parsed the mnemonic into a set of templates, and have the
      operands at hand.  */
 
   /* All intel opcodes have reversed operands except for "bound" and
      "enter".  We also don't reverse intersegment "jmp" and "call"
      instructions with 2 immediate operands so that the immediate segment
-     precedes the offset, as it does when in AT&T mode.  "enter" and the
-     intersegment "jmp" and "call" instructions are the only ones that
-     have two immediate operands.  */
+     precedes the offset, as it does when in AT&T mode. */
   if (intel_syntax && i.operands > 1
       && (strcmp (mnemonic, "bound") != 0)
       && (strcmp (mnemonic, "invlpga") != 0)
@@ -2272,6 +2294,27 @@ parse_operands (l, mnemonic)
 }
 
 static void
+swap_imm_operands ()
+{
+  union i386_op temp_op;
+  unsigned int temp_type;
+  enum bfd_reloc_code_real temp_reloc;
+  int xchg1 = 0;
+  int xchg2 = 1;
+  
+  temp_type = i.types[xchg2];
+  i.types[xchg2] = i.types[xchg1];
+  i.types[xchg1] = temp_type;
+  temp_op = i.op[xchg2];
+  i.op[xchg2] = i.op[xchg1];
+  i.op[xchg1] = temp_op;
+  temp_reloc = i.reloc[xchg2];
+  i.reloc[xchg2] = i.reloc[xchg1];
+  i.reloc[xchg1] = temp_reloc;
+}
+
+
+static void
 swap_operands ()
 {
   union i386_op temp_op;
@@ -2279,6 +2322,26 @@ swap_operands ()
   enum bfd_reloc_code_real temp_reloc;
   int xchg1 = 0;
   int xchg2 = 0;
+
+  if (i.operands == 4)
+    /* There will be two exchanges in a 4 operand instruction.
+       First exchange is the done inside this block.(1st and 4rth operand) 
+       The next exchange is done outside this block.(2nd and 3rd operand) */
+    {
+      xchg1 = 0;
+      xchg2 = 3;
+      temp_type = i.types[xchg2];
+      i.types[xchg2] = i.types[xchg1];
+      i.types[xchg1] = temp_type;
+      temp_op = i.op[xchg2];
+      i.op[xchg2] = i.op[xchg1];
+      i.op[xchg1] = temp_op;
+      temp_reloc = i.reloc[xchg2];
+      i.reloc[xchg2] = i.reloc[xchg1];
+      i.reloc[xchg1] = temp_reloc;
+      xchg1 = 1;
+      xchg2 = 2;
+    }
 
   if (i.operands == 2)
     {
@@ -3281,6 +3344,10 @@ build_modrm_byte ()
 		    | SReg2 | SReg3
 		    | Control | Debug | Test))
 		? 0 : 1);
+
+      /* In 4 operands instructions with 2 immediate operands, the first two are immediate
+	 bytes and hence source operand will be in the next byte after the immediates */
+      if ((i.operands == 4)&&(i.imm_operands=2)) source++; 
       dest = source + 1;
 
       i.rm.mode = 3;

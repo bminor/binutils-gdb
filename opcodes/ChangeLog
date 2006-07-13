@@ -1,3 +1,13 @@
+2006-07-10 Dwarakanath Rajagopal	<dwarak.rajagopal@amd.com>
+	   Michael Meissner		<michael.meissner@amd.com>
+
+	* i386-dis.c (dis386): Add support for 4 operand instructions. Add
+	support for amdfam10 SSE4a/ABM instructions. Modify all
+	initializer macros to have additional arguments. Disallow REP
+	prefix for non-string instructions.
+	(print_insn): Ditto.
+
+
 2006-07-05  Julian Brown  <julian@codesourcery.com>
 
 	* arm-dis.c (coprocessor): Alter fmsrr disassembly syntax.

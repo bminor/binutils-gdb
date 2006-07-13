@@ -1,3 +1,11 @@
+2006-07-13 Dwarakanath Rajagopal	<dwarak.rajagopal@amd.com>
+	   Michael Meissner		<michael.meissner@amd.com>
+
+	* gas/i386/amdfam10.s: New file for amdfam10 instructions.
+	* gam/i386/amdfam10.d: Ditto.
+	* gas/i386/x86-64-amdfam10.s: Ditto.
+	* gam/i386/x86-64-amdfam10.d: Ditto.
+
 2006-07-12  Nick Clifton  <nickc@redhat.com>
 
 	* gas/sh/basic.exp: Run "too_large" dump test.
