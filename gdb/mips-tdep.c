@@ -4647,19 +4647,14 @@ mips_register_sim_regno (int regnum)
 }
 
 
-/* Convert an integer into an address.  By first converting the value
-   into a pointer and then extracting it signed, the address is
-   guarenteed to be correctly sign extended.  */
+/* Convert an integer into an address.  Extracting the value signed
+   guarantees a correctly sign extended address.  */
 
 static CORE_ADDR
 mips_integer_to_address (struct gdbarch *gdbarch,
 			 struct type *type, const gdb_byte *buf)
 {
-  gdb_byte *tmp = alloca (TYPE_LENGTH (builtin_type_void_data_ptr));
-  LONGEST val = unpack_long (type, buf);
-  store_signed_integer (tmp, TYPE_LENGTH (builtin_type_void_data_ptr), val);
-  return extract_signed_integer (tmp,
-				 TYPE_LENGTH (builtin_type_void_data_ptr));
+  return (CORE_ADDR) extract_signed_integer (buf, TYPE_LENGTH (type));
 }
 
 static void
