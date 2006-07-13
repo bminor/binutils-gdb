@@ -413,6 +413,16 @@ m68k_svr4_return_value (struct gdbarch *gdbarch, struct type *type,
 }
 
 
+/* Always align the frame to a 4-byte boundary.  This is required on
+   coldfire and harmless on the rest.  */
+
+static CORE_ADDR
+m68k_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
+{
+  /* Align the stack to four bytes.  */
+  return sp & ~3;
+}
+
 static CORE_ADDR
 m68k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
@@ -1155,6 +1165,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Stack grows down. */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
+  set_gdbarch_frame_align (gdbarch, m68k_frame_align);
 
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
   set_gdbarch_decr_pc_after_break (gdbarch, 2);
