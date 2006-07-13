@@ -218,7 +218,7 @@ typedef struct
 #define Seg3ShortForm	0x1000	/* fs/gs segment register insns.  */
 #define Size16		0x2000	/* needs size prefix if in 32-bit mode */
 #define Size32		0x4000	/* needs size prefix if in 16-bit mode */
-#define Size64		0x8000	/* needs size prefix if in 16-bit mode */
+#define Size64		0x8000	/* needs size prefix if in 64-bit mode */
 #define IgnoreSize     0x10000  /* instruction ignores operand size prefix */
 #define DefaultSize    0x20000  /* default insn size depends on mode */
 #define No_bSuf	       0x40000	/* b suffix on instruction illegal */

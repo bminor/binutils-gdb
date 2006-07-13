@@ -1,3 +1,7 @@
+2006-07-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.h (Size64): Fix a typo in comment.
+
 2006-07-12  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-sh.c (md_apply_fix): Do not allow the generic code in
