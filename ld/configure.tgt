@@ -472,6 +472,9 @@ sh-*-rtemscoff*)	targ_emul=sh; targ_extra_emuls=shl ;;
 sh-*-elf* | sh[1234]*-*-elf | sh-*-rtems* | sh-*-kaos* | sh-*-vxworks)
 			targ_emul=shelf
 			targ_extra_emuls="shlelf sh shl" ;;
+sh-*-uclinux* | sh[12]-*-uclinux*)
+			targ_emul=shelf_uclinux
+			targ_extra_emuls="shelf shlelf sh shl" ;;
 sh-*-nto*)		targ_emul=shelf_nto
 			targ_extra_emuls=shlelf_nto ;;
 sh-*-pe)		targ_emul=shpe ;

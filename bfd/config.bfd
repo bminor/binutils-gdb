@@ -1131,6 +1131,14 @@ case "${targ}" in
     targ_selvecs=bfd_elf32_shblin_vec
     ;;
 
+  sh-*-uclinux* | sh[12]-*-uclinux*)
+    targ_defvec=bfd_elf32_sh_vec
+    targ_selvecs="bfd_elf32_shblin_vec bfd_elf32_shlin_vec"
+#ifdef BFD64
+    targ_selvecs="${targ_selvecs} bfd_elf32_sh64lin_vec bfd_elf32_sh64blin_vec bfd_elf64_sh64lin_vec bfd_elf64_sh64blin_vec"
+#endif
+    ;;
+
 #ifdef BFD64
   sh5le-*-netbsd*)
     targ_defvec=bfd_elf32_sh64lnbsd_vec

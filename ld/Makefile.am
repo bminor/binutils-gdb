@@ -351,6 +351,7 @@ ALL_EMULATIONS = \
 	eshlelf_nbsd.o \
 	eshelf_nto.o \
 	eshlelf_nto.o \
+	eshelf_uclinux.o \
 	eshl.o \
 	eshlelf.o \
 	eshlsymbian.o \
@@ -1465,6 +1466,9 @@ eshlelf_nbsd.c: $(srcdir)/emulparams/shlelf_nbsd.sh \
 eshlelf_nto.c: $(srcdir)/emulparams/shlelf_nto.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} shlelf_nto "$(tdir_shlelf_nto)"
+eshelf_uclinux.c: $(srcdir)/emulparams/shelf_uclinux.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} shelf_uclinux "$(tdir_shelf_uclinux)"
 eshlelf.c: $(srcdir)/emulparams/shlelf.sh \
   $(srcdir)/emulparams/shelf.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
