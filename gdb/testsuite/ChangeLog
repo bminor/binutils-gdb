@@ -1,3 +1,8 @@
+2006-07-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/help.exp: Adjust "help unset" test to accept
+	any list of unset commands.
+
 2006-07-13  Paul N. Hilfinger  <Hilfinger@adacore.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 

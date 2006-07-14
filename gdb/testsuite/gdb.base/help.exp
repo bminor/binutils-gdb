@@ -572,7 +572,7 @@ gdb_test "help undisplay" "Cancel some expressions to be displayed when program 
 # test help unset environment
 gdb_test "help unset environment" "Cancel environment variable VAR for the program\.\[\r\n\]+This does not affect the program until the next \"run\" command\." "help unset environment"
 # test help unset
-gdb_test "help unset" "Complement to certain \"set\" commands\.\[\r\n\]+List of unset subcommands:\[\r\n\]+unset environment -- Cancel environment variable VAR for the program\[\r\n\]+Type \"help unset\" followed by unset subcommand name for full documentation\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\." "help unset"
+gdb_test "help unset" "Complement to certain \"set\" commands\.\[\r\n\]+List of unset subcommands:\[\r\n\]+.*Type \"help unset\" followed by unset subcommand name for full documentation\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\." "help unset"
 # test help up
 gdb_test "help up" "Select and print stack frame that called this one\.\[\r\n\]+An argument says how many frames up to go\." "help up"
 # test help up-silently
