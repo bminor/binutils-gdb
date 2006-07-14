@@ -1,3 +1,8 @@
+2006-07-14  Michael Wetherell  <mike.wetherell@ntlworld.com>
+
+	* configure.tgt (i[3-7]86-*-solaris2*, i[3-7]86-*-solaris*): Correct
+	typo setting targ_extra_libpath.
+
 2006-07-10  Jakub Jelinek  <jakub@redhat.com>
 
 	* scripttempl/elf.sc: Add .gnu.hash section.
