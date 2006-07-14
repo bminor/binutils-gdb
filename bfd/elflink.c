@@ -6060,8 +6060,8 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 	    }
 	  else
 	    {
-	      BFD_ASSERT (cinfo.min_dynindx != -1);
 	      unsigned long int maskwords, maskbitslog2;
+	      BFD_ASSERT (cinfo.min_dynindx != -1);
 
 	      maskbitslog2 = bfd_log2 (cinfo.nsyms) + 1;
 	      if (maskbitslog2 < 3)

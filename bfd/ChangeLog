@@ -1,3 +1,8 @@
+2006-07-14  Mark Kettenis  <kettenis@gnu.org>
+
+	* elflink.c (bfd_elf_size_dynsym_hash_dynstr): Move declarations
+	to the start of a block.
+
 2006-07-13  Nick Clifton  <nickc@redhat.com>
 
 	* coff-sh.c (_bfd_sh_align_load_span): Catch sh_insn_info()
