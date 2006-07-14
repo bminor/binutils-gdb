@@ -1,3 +1,7 @@
+2006-07-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* PROBLEMS: Document threads/2137.
+
 2006-07-13  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/alpha/tm-nbsd.h: Remove file.
