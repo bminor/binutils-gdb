@@ -6079,7 +6079,7 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 	      else
 		cinfo.shift1 = 5;
 	      cinfo.mask = (1 << cinfo.shift1) - 1;
-	      cinfo.shift2 = maskbitslog2 + cinfo.shift1;
+	      cinfo.shift2 = maskbitslog2;
 	      cinfo.maskbits = 1 << maskbitslog2;
 	      maskwords = 1 << (maskbitslog2 - cinfo.shift1);
 	      amt = bucketcount * sizeof (unsigned long int) * 2;
