@@ -1,3 +1,10 @@
+2006-07-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* armnbsd-tdep.c: Don't include "nbsd-tdep.h".
+	* config/arm/nbsd.mt (TDEPFILES): Remove nbsd-tdep.o.
+	(DEPRECATED_TM_FILE): Remove.
+	* Makefile.in (armnbsd-tdep.o): Update dependencies.
+	
 2006-07-14  Joel Brobecker  <brobecker@adacore.com>
 
 	* PROBLEMS: Document threads/2137.
