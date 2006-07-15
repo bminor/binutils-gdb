@@ -1,3 +1,20 @@
+2006-07-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/2829
+	* i386-dis.c (GRP11_C6): NEW.
+	(GRP11_C7): Likewise.
+	(GRP12): Updated.
+	(GRP13): Likewise.
+	(GRP14): Likewise.
+	(GRP15): Likewise.
+	(GRP16): Likewise.
+	(GRPAMD): Likewise.
+	(GRPPADLCK1): Likewise.
+	(GRPPADLCK2): Likewise.
+	(dis386): Use GRP11_C6 and GRP11_C7 for entres 0xc6 and 0xc7,
+	respectively.
+	(grps): Add entries for GRP11_C6 and GRP11_C7.
+
 2006-07-10 Dwarakanath Rajagopal	<dwarak.rajagopal@amd.com>
 	   Michael Meissner		<michael.meissner@amd.com>
 
