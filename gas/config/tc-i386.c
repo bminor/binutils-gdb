@@ -434,67 +434,67 @@ const relax_typeS md_relax_table[] =
 static const arch_entry cpu_arch[] =
 {
   {"generic32", PROCESSOR_GENERIC32,
-   Cpu086|Cpu186|Cpu286|Cpu386},
+   Cpu186|Cpu286|Cpu386},
   {"generic64", PROCESSOR_GENERIC64,
-   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX
+   Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX
    |CpuMMX2|CpuSSE|CpuSSE2},
   {"i8086", PROCESSOR_UNKNOWN,
-   Cpu086},
+   0},
   {"i186", PROCESSOR_UNKNOWN,
-   Cpu086|Cpu186},
+   Cpu186},
   {"i286", PROCESSOR_UNKNOWN,
-   Cpu086|Cpu186|Cpu286},
+   Cpu186|Cpu286},
   {"i386", PROCESSOR_GENERIC32,
-   Cpu086|Cpu186|Cpu286|Cpu386},
+   Cpu186|Cpu286|Cpu386},
   {"i486", PROCESSOR_I486,
-   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486},
+   Cpu186|Cpu286|Cpu386|Cpu486},
   {"i586", PROCESSOR_PENTIUM,
-   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586},
+   Cpu186|Cpu286|Cpu386|Cpu486|Cpu586},
   {"i686", PROCESSOR_PENTIUMPRO,
-   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686},
+   Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686},
   {"pentium", PROCESSOR_PENTIUM,
-   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586},
+   Cpu186|Cpu286|Cpu386|Cpu486|Cpu586},
   {"pentiumpro",PROCESSOR_PENTIUMPRO,
-   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686},
+   Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686},
   {"pentiumii",	PROCESSOR_PENTIUMPRO,
-   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuMMX},
+   Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuMMX},
   {"pentiumiii",PROCESSOR_PENTIUMPRO,
-   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuMMX|CpuMMX2
-   |CpuSSE},
+   Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuMMX|CpuMMX2|CpuSSE},
   {"pentium4", PROCESSOR_PENTIUM4,
-   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX
+   Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX
    |CpuMMX2|CpuSSE|CpuSSE2},
   {"prescott", PROCESSOR_NOCONA,
-   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX
+   Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX
    |CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3},
   {"nocona", PROCESSOR_NOCONA,
-   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX
+   Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX
    |CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3},
   {"yonah", PROCESSOR_YONAH,
-   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX
+   Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX
    |CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3},
   {"merom", PROCESSOR_MEROM,
-   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX
+   Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX
    |CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3|CpuMNI},
   {"k6", PROCESSOR_K6,
-   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuK6|CpuMMX},
+   Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuK6|CpuMMX},
   {"k6_2", PROCESSOR_K6,
-   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuK6|CpuMMX|Cpu3dnow},
+   Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuK6|CpuMMX|Cpu3dnow},
   {"athlon", PROCESSOR_ATHLON,
-   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuAthlon
+   Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6
    |CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA},
   {"sledgehammer", PROCESSOR_K8,
-   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuAthlon
+   Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6
    |CpuSledgehammer|CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2},
   {"opteron", PROCESSOR_K8,
-   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuAthlon
+   Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6
    |CpuSledgehammer|CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2},
   {"k8", PROCESSOR_K8,
-   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuAthlon
+   Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6
    |CpuSledgehammer|CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2},
   {"amdfam10", PROCESSOR_AMDFAM10,
-   Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuAthlon
-   |CpuSledgehammer|CpuAmdFam10|CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2|CpuSSE3|CpuSSE4a|CpuABM},
+   Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuSledgehammer
+   |CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2|CpuSSE3|CpuSSE4a
+   |CpuABM},
   {".mmx", PROCESSOR_UNKNOWN,
    CpuMMX},
   {".sse", PROCESSOR_UNKNOWN,
@@ -936,7 +936,7 @@ static int
 smallest_imm_type (num)
      offsetT num;
 {
-  if (cpu_arch_flags != (Cpu086 | Cpu186 | Cpu286 | Cpu386 | Cpu486 | CpuNo64))
+  if (cpu_arch_flags != (Cpu186 | Cpu286 | Cpu386 | Cpu486 | CpuNo64))
     {
       /* This code is disabled on the 486 because all the Imm1 forms
 	 in the opcode table are slower on the i486.  They're the
@@ -5942,11 +5942,11 @@ i386_target_format ()
     {
       set_code_flag (CODE_64BIT);
       if (cpu_arch_isa_flags == 0)
-	cpu_arch_isa_flags = Cpu086|Cpu186|Cpu286|Cpu386|Cpu486
+	cpu_arch_isa_flags = Cpu186|Cpu286|Cpu386|Cpu486
 			     |Cpu586|Cpu686|CpuP4|CpuMMX|CpuMMX2
 			     |CpuSSE|CpuSSE2;
       if (cpu_arch_tune_flags == 0)
-	cpu_arch_tune_flags = Cpu086|Cpu186|Cpu286|Cpu386|Cpu486
+	cpu_arch_tune_flags = Cpu186|Cpu286|Cpu386|Cpu486
 			      |Cpu586|Cpu686|CpuP4|CpuMMX|CpuMMX2
 			      |CpuSSE|CpuSSE2;
     }
@@ -5954,9 +5954,9 @@ i386_target_format ()
     {
       set_code_flag (CODE_32BIT);
       if (cpu_arch_isa_flags == 0)
-	cpu_arch_isa_flags = Cpu086|Cpu186|Cpu286|Cpu386;
+	cpu_arch_isa_flags = Cpu186|Cpu286|Cpu386;
       if (cpu_arch_tune_flags == 0)
-	cpu_arch_tune_flags = Cpu086|Cpu186|Cpu286|Cpu386;
+	cpu_arch_tune_flags = Cpu186|Cpu286|Cpu386;
     }
   else
     as_fatal (_("Unknown architecture"));

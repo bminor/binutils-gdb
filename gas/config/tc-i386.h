@@ -162,41 +162,38 @@ typedef struct
 
   /* cpu feature flags */
   unsigned int cpu_flags;
-#define Cpu086		  0x1	/* Any old cpu will do, 0 does the same */
-#define Cpu186		  0x2	/* i186 or better required */
-#define Cpu286		  0x4	/* i286 or better required */
-#define Cpu386		  0x8	/* i386 or better required */
-#define Cpu486		 0x10	/* i486 or better required */
-#define Cpu586		 0x20	/* i585 or better required */
-#define Cpu686		 0x40	/* i686 or better required */
-#define CpuP4		 0x80	/* Pentium4 or better required */
-#define CpuK6		0x100	/* AMD K6 or better required*/
-#define CpuAthlon	0x200	/* AMD Athlon or better required*/
-#define CpuSledgehammer 0x400	/* Sledgehammer or better required */
-#define CpuMMX		0x800	/* MMX support required */
-#define CpuMMX2	       0x1000	/* extended MMX support (with SSE or 3DNow!Ext) required */
-#define CpuSSE	       0x2000	/* Streaming SIMD extensions required */
-#define CpuSSE2	       0x4000	/* Streaming SIMD extensions 2 required */
-#define Cpu3dnow       0x8000	/* 3dnow! support required */
-#define Cpu3dnowA     0x10000	/* 3dnow!Extensions support required */
-#define CpuSSE3	      0x20000	/* Streaming SIMD extensions 3 required */
+#define Cpu186		  0x1	/* i186 or better required */
+#define Cpu286		  0x2	/* i286 or better required */
+#define Cpu386		  0x4	/* i386 or better required */
+#define Cpu486		  0x8	/* i486 or better required */
+#define Cpu586		 0x10	/* i585 or better required */
+#define Cpu686		 0x20	/* i686 or better required */
+#define CpuP4		 0x40	/* Pentium4 or better required */
+#define CpuK6		 0x80	/* AMD K6 or better required*/
+#define CpuSledgehammer 0x100	/* Sledgehammer or better required */
+#define CpuMMX		0x200	/* MMX support required */
+#define CpuMMX2		0x400	/* extended MMX support (with SSE or 3DNow!Ext) required */
+#define CpuSSE		0x800	/* Streaming SIMD extensions required */
+#define CpuSSE2	       0x1000	/* Streaming SIMD extensions 2 required */
+#define Cpu3dnow       0x2000	/* 3dnow! support required */
+#define Cpu3dnowA      0x4000	/* 3dnow!Extensions support required */
+#define CpuSSE3	       0x8000	/* Streaming SIMD extensions 3 required */
 #define CpuPNI	      CpuSSE3	/* Prescott New Instructions required */
-#define CpuPadLock    0x40000	/* VIA PadLock required */
-#define CpuSVME	      0x80000	/* AMD Secure Virtual Machine Ext-s required */
-#define CpuVMX	     0x100000	/* VMX Instructions required */
-#define CpuMNI	     0x200000	/* Merom New Instructions required */
-#define CpuSSE4a     0x400000   /* SSE4a New Instuctions required */ 
-#define CpuABM       0x800000   /* ABM New Instructions required */
-#define CpuAmdFam10 0x1000000   /* AmdFam10 New instructions required */
+#define CpuPadLock    0x10000	/* VIA PadLock required */
+#define CpuSVME	      0x20000	/* AMD Secure Virtual Machine Ext-s required */
+#define CpuVMX	      0x40000	/* VMX Instructions required */
+#define CpuMNI	      0x80000	/* Merom New Instructions required */
+#define CpuSSE4a     0x100000   /* SSE4a New Instuctions required */ 
+#define CpuABM       0x200000   /* ABM New Instructions required */
 
   /* These flags are set by gas depending on the flag_code.  */
 #define Cpu64	     0x4000000   /* 64bit support required  */
 #define CpuNo64      0x8000000   /* Not supported in the 64bit mode  */
 
   /* The default value for unknown CPUs - enable all features to avoid problems.  */
-#define CpuUnknownFlags (Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686 \
-	|CpuP4|CpuSledgehammer|CpuAmdFam10|CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuPNI|CpuVMX \
-	|Cpu3dnow|Cpu3dnowA|CpuK6|CpuAthlon|CpuPadLock|CpuSVME|CpuMNI|CpuABM|CpuSSE4a)
+#define CpuUnknownFlags (Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686 \
+	|CpuP4|CpuSledgehammer|CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuPNI|CpuVMX \
+	|Cpu3dnow|Cpu3dnowA|CpuK6|CpuPadLock|CpuSVME|CpuMNI|CpuABM|CpuSSE4a)
 
   /* the bits in opcode_modifier are used to generate the final opcode from
      the base_opcode.  These bits also are used to detect alternate forms of

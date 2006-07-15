@@ -1,3 +1,13 @@
+2006-07-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Remove Cpu086, CpuAthlon and
+	CpuAmdFam10.
+	(smallest_imm_type): Remove Cpu086.
+	(i386_target_format): Likewise.
+
+	* config/tc-i386.h: Remove Cpu086, CpuAthlon and CpuAmdFam10.
+	Update CpuXXX.
+
 2006-07-13 Dwarakanath Rajagopal	<dwarak.rajagopal@amd.com>
 	   Michael Meissner		<michael.meissner@amd.com>
 
