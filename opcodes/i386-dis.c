@@ -419,14 +419,16 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define GRP7	  NULL, NULL, USE_GROUPS, NULL, 14, NULL, 0, NULL, 0
 #define GRP8	  NULL, NULL, USE_GROUPS, NULL, 15, NULL, 0, NULL, 0
 #define GRP9	  NULL, NULL, USE_GROUPS, NULL, 16, NULL, 0, NULL, 0
-#define GRP12	  NULL, NULL, USE_GROUPS, NULL, 17, NULL, 0, NULL, 0
-#define GRP13	  NULL, NULL, USE_GROUPS, NULL, 18, NULL, 0, NULL, 0
-#define GRP14	  NULL, NULL, USE_GROUPS, NULL, 19, NULL, 0, NULL, 0
-#define GRP15	  NULL, NULL, USE_GROUPS, NULL, 20, NULL, 0, NULL, 0
-#define GRP16	  NULL, NULL, USE_GROUPS, NULL, 21, NULL, 0, NULL, 0
-#define GRPAMD	  NULL, NULL, USE_GROUPS, NULL, 22, NULL, 0, NULL, 0
-#define GRPPADLCK1 NULL, NULL, USE_GROUPS, NULL, 23, NULL, 0, NULL, 0
-#define GRPPADLCK2 NULL, NULL, USE_GROUPS, NULL, 24, NULL, 0, NULL, 0
+#define GRP11_C6	  NULL, NULL, USE_GROUPS, NULL, 17, NULL, 0, NULL, 0
+#define GRP11_C7	  NULL, NULL, USE_GROUPS, NULL, 18, NULL, 0, NULL, 0
+#define GRP12	  NULL, NULL, USE_GROUPS, NULL, 19, NULL, 0, NULL, 0
+#define GRP13	  NULL, NULL, USE_GROUPS, NULL, 20, NULL, 0, NULL, 0
+#define GRP14	  NULL, NULL, USE_GROUPS, NULL, 21, NULL, 0, NULL, 0
+#define GRP15	  NULL, NULL, USE_GROUPS, NULL, 22, NULL, 0, NULL, 0
+#define GRP16	  NULL, NULL, USE_GROUPS, NULL, 23, NULL, 0, NULL, 0
+#define GRPAMD	  NULL, NULL, USE_GROUPS, NULL, 24, NULL, 0, NULL, 0
+#define GRPPADLCK1 NULL, NULL, USE_GROUPS, NULL, 25, NULL, 0, NULL, 0
+#define GRPPADLCK2 NULL, NULL, USE_GROUPS, NULL, 26, NULL, 0, NULL, 0
 
 #define PREGRP0   NULL, NULL, USE_PREFIX_USER_TABLE, NULL,  0, NULL, 0, NULL, 0
 #define PREGRP1   NULL, NULL, USE_PREFIX_USER_TABLE, NULL,  1, NULL, 0, NULL, 0
@@ -746,8 +748,8 @@ static const struct dis386 dis386[] = {
   { "retT",		XX, XX, XX, XX },
   { "les{S|}",		Gv, Mp, XX, XX },
   { "ldsS",		Gv, Mp, XX, XX },
-  { "movA",		Eb, Ib, XX, XX },
-  { "movQ",		Ev, Iv, XX, XX },
+  { GRP11_C6 },
+  { GRP11_C7 },
   /* c8 */
   { "enterT",		Iw, Ib, XX, XX },
   { "leaveT",		XX, XX, XX, XX },
@@ -1437,6 +1439,28 @@ static const struct dis386 grps[][8] = {
     { "(bad)",	XX, XX, XX, XX },
     { "",	VM, XX, XX, XX },		/* See OP_VMX.  */
     { "vmptrst", Eq, XX, XX, XX },
+  },
+  /* GRP11_C6 */
+  {
+    { "movA",	Eb, Ib, XX, XX },
+    { "(bad)",	XX, XX, XX, XX },
+    { "(bad)",	XX, XX, XX, XX },
+    { "(bad)",	XX, XX, XX, XX },
+    { "(bad)",	XX, XX, XX, XX },
+    { "(bad)",	XX, XX, XX, XX },
+    { "(bad)",	XX, XX, XX, XX },
+    { "(bad)",	XX, XX, XX, XX },
+  },
+  /* GRP11_C7 */
+  {
+    { "movQ",	Ev, Iv, XX, XX },
+    { "(bad)",	XX, XX, XX, XX },
+    { "(bad)",	XX, XX, XX, XX },
+    { "(bad)",	XX, XX, XX, XX },
+    { "(bad)",	XX, XX, XX, XX },
+    { "(bad)",	XX, XX, XX, XX },
+    { "(bad)",	XX, XX, XX, XX },
+    { "(bad)",	XX, XX, XX, XX },
   },
   /* GRP12 */
   {
