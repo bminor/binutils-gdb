@@ -1,4 +1,4 @@
-/* Target-specific functions for NetBSD/arm.
+/* Target-dependent code for NetBSD/arm.
 
    Copyright (C) 2002, 2003, 2004, 2006 Free Software Foundation, Inc.
 
@@ -82,7 +82,7 @@ arm_netbsd_aout_init_abi (struct gdbarch_info info,
 }
 
 static void
-arm_netbsd_elf_init_abi (struct gdbarch_info info, 
+arm_netbsd_elf_init_abi (struct gdbarch_info info,
 			 struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -93,7 +93,7 @@ arm_netbsd_elf_init_abi (struct gdbarch_info info,
 
   /* NetBSD ELF uses SVR4-style shared libraries.  */
   set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_lp64_fetch_link_map_offsets);
+    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 }
 
 static enum gdb_osabi
