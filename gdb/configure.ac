@@ -280,6 +280,34 @@ if test "$enable_profiling" = yes ; then
   CFLAGS="$OLD_CFLAGS"
 fi
 
+# The trailing component of the string reported as the version number
+# by gdb. For an official FSF release, it is empty.
+AC_ARG_WITH(versuffix,
+  AS_HELP_STRING([--with-versuffix=SFX],
+                 [Append SFX to the version string]),
+  [case "$withval" in
+    yes) AC_MSG_ERROR([version suffix not specified]) ;;
+    no)  VERSUFFIX=" (CodeSourcery Unofficial)" ;;
+    *)   VERSUFFIX=" ($withval)" ;;
+   esac],
+  VERSUFFIX=
+)
+AC_SUBST(VERSUFFIX)   
+
+# The location to which bugs should be reported.
+AC_ARG_WITH(bugurl,
+  AS_HELP_STRING([--with-bugurl=URL],
+                 [Direct users to URL to report a bug]),
+  [case "$withval" in
+    yes) AC_MSG_ERROR([bug URL not specified]) ;;
+    no)  BUGURL="" ;;
+    *)   BUGURL="<URL:$withval>" ;;
+   esac],
+   BUGURL=""
+)
+AC_SUBST(BUGURL)
+
+
 # --------------------- #
 # Checks for programs.  #
 # --------------------- #
