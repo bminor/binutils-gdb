@@ -1,5 +1,11 @@
 2006-07-16  Mark Kettenis  <kettenis@gnu.org>
 
+	* armobsd-tdep.c: New file.
+	* Makefile.in (ALLDEPFILES): Add armobsd-tdep.c.
+	(armobsd-tdep.o): New dependency.
+	* config/arm/obsd.mt: New file.
+	* configure.tgt: (arm*-*-openbsd*): Set gdb_target to obsd.
+
 	* gdbarch.sh (deprecated_saved_pc_after_call): Delete.
 	* gdbarch.h, gdbarch.c: Re-generate.
 
