@@ -1,7 +1,7 @@
 2006-07-16  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdbarch.sh (deprecated_saved_pc_after_call): Delete.
-        * gdbarch.h, gdbarch.c: Re-generate.
+	* gdbarch.h, gdbarch.c: Re-generate.
 
 	* arm-tdep.c (arm_saved_pc_after_call): Delete.
 	(arm_gdbarch_init): Do not set deprecated_saved_pc_after_call.
