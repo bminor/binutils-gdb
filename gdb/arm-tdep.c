@@ -212,17 +212,6 @@ arm_smash_text_address (CORE_ADDR val)
   return val & ~1;
 }
 
-/* Immediately after a function call, return the saved pc.  Can't
-   always go through the frames for this because on some machines the
-   new frame is not set up until the new function executes some
-   instructions.  */
-
-static CORE_ADDR
-arm_saved_pc_after_call (struct frame_info *frame)
-{
-  return ADDR_BITS_REMOVE (read_register (ARM_LR_REGNUM));
-}
-
 /* A typical Thumb prologue looks like this:
    push    {r7, lr}
    add     sp, sp, #-28
@@ -2763,9 +2752,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Advance PC across function entry code.  */
   set_gdbarch_skip_prologue (gdbarch, arm_skip_prologue);
-
-  /* Get the PC when a frame might not be available.  */
-  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, arm_saved_pc_after_call);
 
   /* The stack grows downward.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);

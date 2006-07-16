@@ -1,3 +1,8 @@
+2006-07-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* arm-tdep.c (arm_saved_pc_after_call): Delete.
+	(arm_gdbarch_init): Do not set deprecated_saved_pc_after_call.
+
 2006-07-16  Alfred M. Szmidt  <ams@gnu.org>
 	
 	* gnu-nat.c: Undefine _process_user_ before including
