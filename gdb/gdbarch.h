@@ -1001,31 +1001,6 @@ extern void set_gdbarch_unwind_sp (struct gdbarch *gdbarch, gdbarch_unwind_sp_ft
 /* DEPRECATED_FRAME_LOCALS_ADDRESS as been replaced by the per-frame
    frame-base.  Enable frame-base before frame-unwind. */
 
-#if defined (DEPRECATED_SAVED_PC_AFTER_CALL)
-/* Legacy for systems yet to multi-arch DEPRECATED_SAVED_PC_AFTER_CALL */
-#if !defined (DEPRECATED_SAVED_PC_AFTER_CALL_P)
-#define DEPRECATED_SAVED_PC_AFTER_CALL_P() (1)
-#endif
-#endif
-
-extern int gdbarch_deprecated_saved_pc_after_call_p (struct gdbarch *gdbarch);
-#if !defined (GDB_TM_FILE) && defined (DEPRECATED_SAVED_PC_AFTER_CALL_P)
-#error "Non multi-arch definition of DEPRECATED_SAVED_PC_AFTER_CALL"
-#endif
-#if !defined (DEPRECATED_SAVED_PC_AFTER_CALL_P)
-#define DEPRECATED_SAVED_PC_AFTER_CALL_P() (gdbarch_deprecated_saved_pc_after_call_p (current_gdbarch))
-#endif
-
-typedef CORE_ADDR (gdbarch_deprecated_saved_pc_after_call_ftype) (struct frame_info *frame);
-extern CORE_ADDR gdbarch_deprecated_saved_pc_after_call (struct gdbarch *gdbarch, struct frame_info *frame);
-extern void set_gdbarch_deprecated_saved_pc_after_call (struct gdbarch *gdbarch, gdbarch_deprecated_saved_pc_after_call_ftype *deprecated_saved_pc_after_call);
-#if !defined (GDB_TM_FILE) && defined (DEPRECATED_SAVED_PC_AFTER_CALL)
-#error "Non multi-arch definition of DEPRECATED_SAVED_PC_AFTER_CALL"
-#endif
-#if !defined (DEPRECATED_SAVED_PC_AFTER_CALL)
-#define DEPRECATED_SAVED_PC_AFTER_CALL(frame) (gdbarch_deprecated_saved_pc_after_call (current_gdbarch, frame))
-#endif
-
 #if defined (FRAME_NUM_ARGS)
 /* Legacy for systems yet to multi-arch FRAME_NUM_ARGS */
 #if !defined (FRAME_NUM_ARGS_P)

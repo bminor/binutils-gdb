@@ -573,7 +573,6 @@ M::CORE_ADDR:unwind_pc:struct frame_info *next_frame:next_frame
 M::CORE_ADDR:unwind_sp:struct frame_info *next_frame:next_frame
 # DEPRECATED_FRAME_LOCALS_ADDRESS as been replaced by the per-frame
 # frame-base.  Enable frame-base before frame-unwind.
-F:=:CORE_ADDR:deprecated_saved_pc_after_call:struct frame_info *frame:frame
 F:=:int:frame_num_args:struct frame_info *frame:frame
 #
 # DEPRECATED_STACK_ALIGN has been replaced by an initial aligning call
