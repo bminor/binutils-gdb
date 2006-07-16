@@ -1,3 +1,13 @@
+2006-07-16  Alfred M. Szmidt  <ams@gnu.org>
+	
+	* gnu-nat.c: Undefine _process_user_ before including
+	<hurd/process_request.h>.
+	(gnu_resume): Supply missing argument to error().
+	(gnu_read_inferior): Add extra parenthesis around arithmetic
+	expression to silence warnings from GCC.
+	(gnu_write_inferior): Likewise.
+	(gnu_xfer_memory): Changed type of MYADDR to `gdb_byte *'.
+
 2006-07-16  Mark Kettenis  <kettenis@gnu.org>
 
 	* armnbsd-tdep.c (arm_netbsd_elf_init_abi): Use
