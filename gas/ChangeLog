@@ -1,3 +1,11 @@
+2006-07-16  Thiemo Seufer  <ths@mips.com>
+            David Ung  <davidu@mips.com>
+
+	* read.c (s_struct): Handle ELF section changing.
+	* config/tc-mips.c (s_align): Leave enabling auto-align to the
+	generic code.
+	(s_change_sec): Try section changing only if we output ELF.
+
 2006-07-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (cpu_arch): Remove Cpu086, CpuAthlon and

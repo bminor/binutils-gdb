@@ -3132,6 +3132,12 @@ s_struct (int ignore ATTRIBUTE_UNUSED)
   if (flag_mri)
     stop = mri_comment_field (&stopc);
   abs_section_offset = get_absolute_expression ();
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+  /* The ELF backend needs to know that we are changing sections, so
+     that .previous works correctly. */
+  if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+    obj_elf_section_change_hook ();
+#endif
   subseg_set (absolute_section, 0);
   demand_empty_rest_of_line ();
   if (flag_mri)
