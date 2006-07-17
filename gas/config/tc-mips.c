@@ -1838,7 +1838,7 @@ md_begin (void)
   bfd_set_gp_size (stdoutput, g_switch_value);
 
 #ifdef OBJ_ELF
-  if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+  if (IS_ELF)
     {
       /* On a native system other than VxWorks, sections must be aligned
 	 to 16 byte boundaries.  When configured for an embedded ELF
@@ -1911,7 +1911,7 @@ md_begin (void)
 					  SEC_HAS_CONTENTS | SEC_READONLY);
 	    (void) bfd_set_section_alignment (stdoutput, sec, 2);
 	  }
-	else if (OUTPUT_FLAVOR == bfd_target_elf_flavour && mips_flag_pdr)
+	else if (mips_flag_pdr)
 	  {
 	    pdr_seg = subseg_new (".pdr", (subsegT) 0);
 	    (void) bfd_set_section_flags (stdoutput, pdr_seg,
@@ -2182,7 +2182,7 @@ mips16_mark_labels (void)
       symbolS *label = l->label;
 
 #if defined(OBJ_ELF) || defined(OBJ_MAYBE_ELF)
-      if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+      if (IS_ELF)
 	S_SET_OTHER (label, STO_MIPS16);
 #endif
       if ((S_GET_VALUE (label) & 1) == 0
@@ -9428,15 +9428,14 @@ do_msbd:
 			break;
 		      }
 		    new_seg = subseg_new (newname, (subsegT) 0);
-		    if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+		    if (IS_ELF)
 		      bfd_set_section_flags (stdoutput, new_seg,
 					     (SEC_ALLOC
 					      | SEC_LOAD
 					      | SEC_READONLY
 					      | SEC_DATA));
 		    frag_align (*args == 'l' ? 2 : 3, 0, 0);
-		    if (OUTPUT_FLAVOR == bfd_target_elf_flavour
-			&& strcmp (TARGET_OS, "elf") != 0)
+		    if (IS_ELF && strcmp (TARGET_OS, "elf") != 0)
 		      record_alignment (new_seg, 4);
 		    else
 		      record_alignment (new_seg, *args == 'l' ? 2 : 3);
@@ -11171,7 +11170,7 @@ md_parse_option (int c, char *arg)
 	 select SVR4_PIC, and -non_shared to select no PIC.  This is
 	 intended to be compatible with Irix 5.  */
     case OPTION_CALL_SHARED:
-      if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+      if (!IS_ELF)
 	{
 	  as_bad (_("-call_shared is supported only for ELF format"));
 	  return 0;
@@ -11181,7 +11180,7 @@ md_parse_option (int c, char *arg)
       break;
 
     case OPTION_NON_SHARED:
-      if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+      if (!IS_ELF)
 	{
 	  as_bad (_("-non_shared is supported only for ELF format"));
 	  return 0;
@@ -11207,7 +11206,7 @@ md_parse_option (int c, char *arg)
       /* The -32, -n32 and -64 options are shortcuts for -mabi=32, -mabi=n32
 	 and -mabi=64.  */
     case OPTION_32:
-      if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+      if (!IS_ELF)
 	{
 	  as_bad (_("-32 is supported for ELF format only"));
 	  return 0;
@@ -11216,7 +11215,7 @@ md_parse_option (int c, char *arg)
       break;
 
     case OPTION_N32:
-      if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+      if (!IS_ELF)
 	{
 	  as_bad (_("-n32 is supported for ELF format only"));
 	  return 0;
@@ -11225,13 +11224,13 @@ md_parse_option (int c, char *arg)
       break;
 
     case OPTION_64:
-      if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+      if (!IS_ELF)
 	{
 	  as_bad (_("-64 is supported for ELF format only"));
 	  return 0;
 	}
       mips_abi = N64_ABI;
-      if (! support_64bit_objects())
+      if (!support_64bit_objects())
 	as_fatal (_("No compiled in support for 64 bit object file format"));
       break;
 #endif /* OBJ_ELF */
@@ -11254,7 +11253,7 @@ md_parse_option (int c, char *arg)
 
 #ifdef OBJ_ELF
     case OPTION_MABI:
-      if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+      if (!IS_ELF)
 	{
 	  as_bad (_("-mabi is supported for ELF format only"));
 	  return 0;
@@ -12031,7 +12030,8 @@ s_change_sec (int sec)
      as it would not be appropriate to use it in the section changing
      functions in read.c, since obj-elf.c intercepts those.  FIXME:
      This should be cleaner, somehow.  */
-  obj_elf_section_change_hook ();
+  if (IS_ELF)
+    obj_elf_section_change_hook ();
 #endif
 
   mips_emit_delays ();
@@ -12051,7 +12051,7 @@ s_change_sec (int sec)
     case 'r':
       seg = subseg_new (RDATA_SECTION_NAME,
 			(subsegT) get_absolute_expression ());
-      if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+      if (IS_ELF)
 	{
 	  bfd_set_section_flags (stdoutput, seg, (SEC_ALLOC | SEC_LOAD
 						  | SEC_READONLY | SEC_RELOC
@@ -12064,7 +12064,7 @@ s_change_sec (int sec)
 
     case 's':
       seg = subseg_new (".sdata", (subsegT) get_absolute_expression ());
-      if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+      if (IS_ELF)
 	{
 	  bfd_set_section_flags (stdoutput, seg,
 				 SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA);
@@ -12090,7 +12090,7 @@ s_change_section (int ignore ATTRIBUTE_UNUSED)
   int section_entry_size;
   int section_alignment;
 
-  if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+  if (!IS_ELF)
     return;
 
   section_name = input_line_pointer;
@@ -13182,8 +13182,7 @@ pic_need_relax (symbolS *sym, asection *segtype)
 	  && !s_is_linkonce (sym, segtype)
 #ifdef OBJ_ELF
 	  /* A global or weak symbol is treated as external.  */
-	  && (OUTPUT_FLAVOR != bfd_target_elf_flavour
-	      || (! S_IS_WEAK (sym) && ! S_IS_EXTERNAL (sym)))
+	  && (!IS_ELF || (! S_IS_WEAK (sym) && ! S_IS_EXTERNAL (sym)))
 #endif
 	  );
 }
@@ -13535,7 +13534,7 @@ mips_fix_adjustable (fixS *fixp)
 #ifdef OBJ_ELF
   /* Don't adjust relocations against mips16 symbols, so that the linker
      can find them if it needs to set up a stub.  */
-  if (OUTPUT_FLAVOR == bfd_target_elf_flavour
+  if (IS_ELF
       && S_GET_OTHER (fixp->fx_addsy) == STO_MIPS16
       && fixp->fx_subsy == NULL)
     return 0;
@@ -13567,7 +13566,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
       /* At this point, fx_addnumber is "symbol offset - pcrel address".
 	 Relocations want only the symbol offset.  */
       reloc->addend = fixp->fx_addnumber + reloc->address;
-      if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+      if (!IS_ELF)
 	{
 	  /* A gruesome hack which is a result of the gruesome gas
 	     reloc handling.  What's worse, for COFF (as opposed to
@@ -14006,7 +14005,7 @@ mips_frob_file_after_relocs (void)
   asymbol **syms;
   unsigned int count, i;
 
-  if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+  if (!IS_ELF)
     return;
 
   syms = bfd_get_outsymbols (stdoutput);
@@ -14362,8 +14361,7 @@ s_mips_end (int x ATTRIBUTE_UNUSED)
     }
 
   /* Generate a .pdr section.  */
-  if (OUTPUT_FLAVOR == bfd_target_elf_flavour && ! ECOFF_DEBUGGING
-      && mips_flag_pdr)
+  if (IS_ELF && !ECOFF_DEBUGGING && mips_flag_pdr)
     {
       segT saved_seg = now_seg;
       subsegT saved_subseg = now_subseg;
@@ -14457,7 +14455,7 @@ static void
 s_mips_frame (int ignore ATTRIBUTE_UNUSED)
 {
 #ifdef OBJ_ELF
-  if (OUTPUT_FLAVOR == bfd_target_elf_flavour && ! ECOFF_DEBUGGING)
+  if (IS_ELF && !ECOFF_DEBUGGING)
     {
       long val;
 
@@ -14500,7 +14498,7 @@ static void
 s_mips_mask (int reg_type)
 {
 #ifdef OBJ_ELF
-  if (OUTPUT_FLAVOR == bfd_target_elf_flavour && ! ECOFF_DEBUGGING)
+  if (IS_ELF && !ECOFF_DEBUGGING)
     {
       long mask, off;
 

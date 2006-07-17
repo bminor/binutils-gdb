@@ -1,3 +1,11 @@
+2006-07-17  Thiemo Seufer  <ths@mips.com>
+
+	* read.c (s_struct): Use IS_ELF.
+	* config/tc-mips.c (md_begin, mips16_mark_labels, mips_ip,
+	md_parse_option, s_change_sec, pic_need_relax, mips_fix_adjustable,
+	tc_gen_reloc, mips_frob_file_after_relocs, s_mips_end, s_mips_frame,
+	s_mips_mask): Likewise.
+
 2006-07-16  Thiemo Seufer  <ths@mips.com>
             David Ung  <davidu@mips.com>
 
