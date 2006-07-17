@@ -1,3 +1,9 @@
+2006-07-17  Mark Kettenis  <kettenis@gnu.org>
+
+	* armobsd-tdep.c (armobsd_init_abi): Set skip_solib_resolver.
+	* Makefile.in (armobsd-tdep.o): Update dependencies.
+	* config/arm/obsd.mt (TDEPFILES): Add obsd-tdep.o.
+
 2006-07-16  Mark Kettenis  <kettenis@gnu.org>
 
 	* armobsd-tdep.c: New file.

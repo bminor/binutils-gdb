@@ -22,6 +22,7 @@
 #include "defs.h"
 #include "osabi.h"
 
+#include "obsd-tdep.h"
 #include "arm-tdep.h"
 #include "solib-svr4.h"
 
@@ -37,6 +38,7 @@ armobsd_init_abi (struct gdbarch_info info,
   /* OpenBSD/arm uses SVR4-style shared libraries.  */
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+  set_gdbarch_skip_solib_resolver (gdbarch, obsd_skip_solib_resolver);
 
   tdep->jb_pc = 24;
   tdep->jb_elt_size = 4;
