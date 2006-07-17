@@ -925,13 +925,11 @@ report_op_error (symbolS *symp, symbolS *left, symbolS *right)
 	  && seg_right != undefined_section)
 	{
 	  if (right)
-	    as_bad_where (file, line,
-			  _("invalid sections for operation on `%s' and `%s' setting `%s'"),
-			  S_GET_NAME (left), S_GET_NAME (right), S_GET_NAME (symp));
+	    as_bad (_("invalid sections for operation on `%s' and `%s' setting `%s'"),
+		    S_GET_NAME (left), S_GET_NAME (right), S_GET_NAME (symp));
 	  else
-	    as_bad_where (file, line,
-			  _("invalid section for operation on `%s' setting `%s'"),
-			  S_GET_NAME (left), S_GET_NAME (symp));
+	    as_bad (_("invalid section for operation on `%s' setting `%s'"),
+		    S_GET_NAME (left), S_GET_NAME (symp));
 	}
     }
 }

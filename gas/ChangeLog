@@ -1,3 +1,8 @@
+2006-07-17  Mat Hostetter  <mat@lcs.mit.edu>
+
+	* symbols.c (report_op_error): Fix pasto.  Don't use as_bad_where
+	when file and line unknown.
+
 2006-07-17  Thiemo Seufer  <ths@mips.com>
 
 	* read.c (s_struct): Use IS_ELF.
