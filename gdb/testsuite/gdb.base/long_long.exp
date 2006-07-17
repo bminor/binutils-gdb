@@ -207,10 +207,11 @@ if { $sizeof_double == 8 || $sizeof_long_double == 8 } {
     # EABI targets default to natural-endian VFP format.
 
     if { ([istarget "arm*-*-*"] || \
-	    [istarget "xscale*-*-*"] || \
-	    [istarget "strongarm*-*-*"]) \
-	  && !([istarget "*-*-*eabi"] || \
-		[istarget "*-*-symbianelf"]) } then {
+	  [istarget "xscale*-*-*"] || \
+	  [istarget "strongarm*-*-*"]) \
+	 && !([istarget "*-*-*eabi"] || \
+	      [istarget "*-*-openbsd*"] || \
+	      [istarget "*-*-symbianelf"]) } then {
 	# assume the long long represents a floating point double in ARM format
 	gdb_test "p/f val.oct" "2.1386676354387559e\\+265"
     } else {
