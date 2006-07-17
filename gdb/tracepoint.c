@@ -1,7 +1,7 @@
 /* Tracing functionality for remote targets in custom GDB protocol
 
-   Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free
-   Software Foundation, Inc.
+   Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+   2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -68,7 +68,6 @@
 extern void (*deprecated_readline_begin_hook) (char *, ...);
 extern char *(*deprecated_readline_hook) (char *);
 extern void (*deprecated_readline_end_hook) (void);
-extern void x_command (char *, int);
 extern int addressprint;	/* Print machine addresses? */
 
 /* GDB commands implemented in other modules:

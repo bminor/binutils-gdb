@@ -1,5 +1,19 @@
 2006-07-17  Mark Kettenis  <kettenis@gnu.org>
 
+	* printcmd.c: Coding style fixes: add missing spaces in comments
+	and wrapping long lines.
+	(delete_display, enable_display_command, disable_display_command)
+	(printf_command, display_info, undisplay_command, free_display)
+	(display_command, x_command, address_info, set_command)
+	(inspect_command, call_command, print_command, print_command_1)
+	(validate_format, print_formatted, decode_format, sym_format):
+	Remove prototypes.
+	(x_command): Make static.
+	(printf_command): Convert error into internal consistency check.
+	(address_info): Avoid assignment within function call.
+	(printf_command): Avoid redundant cast.
+	* tracepoint.c (x_command): Remove extern prototype.
+
 	* armobsd-tdep.c (armobsd_init_abi): Set skip_solib_resolver.
 	* Makefile.in (armobsd-tdep.o): Update dependencies.
 	* config/arm/obsd.mt (TDEPFILES): Add obsd-tdep.o.

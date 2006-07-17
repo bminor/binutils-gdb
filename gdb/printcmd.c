@@ -148,45 +148,7 @@ void _initialize_printcmd (void);
 
 /* Prototypes for local functions. */
 
-static void delete_display (int);
-
-static void enable_display (char *, int);
-
-static void disable_display_command (char *, int);
-
-static void printf_command (char *, int);
-
-static void display_info (char *, int);
-
 static void do_one_display (struct display *);
-
-static void undisplay_command (char *, int);
-
-static void free_display (struct display *);
-
-static void display_command (char *, int);
-
-void x_command (char *, int);
-
-static void address_info (char *, int);
-
-static void set_command (char *, int);
-
-static void call_command (char *, int);
-
-static void inspect_command (char *, int);
-
-static void print_command (char *, int);
-
-static void print_command_1 (char *, int, int);
-
-static void validate_format (struct format_data, char *);
-
-static void print_formatted (struct value *, int, int, struct ui_file *);
-
-static struct format_data decode_format (char **, int, int);
-
-static void sym_info (char *, int);
 
 
 /* Decode a format specification.  *STRING_PTR should point to it.
@@ -257,8 +219,9 @@ decode_format (char **string_ptr, int oformat, int osize)
 	else if (TARGET_PTR_BIT == 16)
 	  val.size = osize ? 'h' : osize;
 	else
-	  /* Bad value for TARGET_PTR_BIT */
-	  internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
+	  /* Bad value for TARGET_PTR_BIT.  */
+	  internal_error (__FILE__, __LINE__,
+			  _("failed internal consistency check"));
 	break;
       case 'f':
 	/* Floating point has to be word or giantword.  */
@@ -295,9 +258,7 @@ print_formatted (struct value *val, int format, int size,
   int len = TYPE_LENGTH (type);
 
   if (VALUE_LVAL (val) == lval_memory)
-    {
-      next_address = VALUE_ADDRESS (val) + len;
-    }
+    next_address = VALUE_ADDRESS (val) + len;
 
   switch (format)
     {
@@ -327,16 +288,13 @@ print_formatted (struct value *val, int format, int size,
 	  || TYPE_CODE (type) == TYPE_CODE_STRUCT
 	  || TYPE_CODE (type) == TYPE_CODE_UNION
 	  || TYPE_CODE (type) == TYPE_CODE_NAMESPACE)
-	/* If format is 0, use the 'natural' format for
-	 * that type of value.  If the type is non-scalar,
-	 * we have to use language rules to print it as
-	 * a series of scalars.
-	 */
+	/* If format is 0, use the 'natural' format for that type of
+	   value.  If the type is non-scalar, we have to use language
+	   rules to print it as a series of scalars.  */
 	value_print (val, stream, format, Val_pretty_default);
       else
-	/* User specified format, so don't look to the
-	 * the type to tell us what to do.
-	 */
+	/* User specified format, so don't look to the the type to
+	   tell us what to do.  */
 	print_scalar_formatted (value_contents (val), type,
 				format, size, stream);
     }
@@ -406,7 +364,7 @@ print_scalar_formatted (const void *valaddr, struct type *type,
     case 'x':
       if (!size)
 	{
-	  /* no size specified, like in print.  Print varying # of digits. */
+	  /* No size specified, like in print.  Print varying # of digits.  */
 	  print_longest (stream, 'x', 1, val_long);
 	}
       else
@@ -461,7 +419,8 @@ print_scalar_formatted (const void *valaddr, struct type *type,
       break;
 
     case 0:
-      internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
+      internal_error (__FILE__, __LINE__,
+		      _("failed internal consistency check"));
 
     case 't':
       /* Binary; 't' stands for "two".  */
@@ -516,7 +475,7 @@ print_scalar_formatted (const void *valaddr, struct type *type,
 }
 
 /* Specify default address for `x' command.
-   `info lines' uses this.  */
+   The `info lines' command uses this.  */
 
 void
 set_next_address (CORE_ADDR addr)
@@ -538,8 +497,8 @@ set_next_address (CORE_ADDR addr)
    settings of the demangle and asm_demangle variables.  */
 
 void
-print_address_symbolic (CORE_ADDR addr, struct ui_file *stream, int do_demangle,
-			char *leadin)
+print_address_symbolic (CORE_ADDR addr, struct ui_file *stream,
+			int do_demangle, char *leadin)
 {
   char *name = NULL;
   char *filename = NULL;
@@ -547,11 +506,12 @@ print_address_symbolic (CORE_ADDR addr, struct ui_file *stream, int do_demangle,
   int offset = 0;
   int line = 0;
 
-  /* throw away both name and filename */
+  /* Throw away both name and filename.  */
   struct cleanup *cleanup_chain = make_cleanup (free_current_contents, &name);
   make_cleanup (free_current_contents, &filename);
 
-  if (build_address_symbolic (addr, do_demangle, &name, &offset, &filename, &line, &unmapped))
+  if (build_address_symbolic (addr, do_demangle, &name, &offset,
+			      &filename, &line, &unmapped))
     {
       do_cleanups (cleanup_chain);
       return;
@@ -605,11 +565,11 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
   asection *section = 0;
   char *name_temp = "";
   
-  /* Let's say it is unmapped. */
+  /* Let's say it is unmapped.  */
   *unmapped = 0;
 
   /* Determine if the address is in an overlay, and whether it is
-     mapped. */
+     mapped.  */
   if (overlay_debugging)
     {
       section = find_pc_overlay (addr);
@@ -734,7 +694,8 @@ print_address (CORE_ADDR addr, struct ui_file *stream)
    or not.  */
 
 void
-print_address_demangle (CORE_ADDR addr, struct ui_file *stream, int do_demangle)
+print_address_demangle (CORE_ADDR addr, struct ui_file *stream,
+			int do_demangle)
 {
   if (addr == 0)
     {
@@ -858,10 +819,9 @@ validate_format (struct format_data fmt, char *cmdname)
 	   fmt.format, cmdname);
 }
 
-/*  Evaluate string EXP as an expression in the current language and
+/* Evaluate string EXP as an expression in the current language and
    print the resulting value.  EXP may contain a format specifier as the
-   first argument ("/x myvar" for example, to print myvar in hex).
- */
+   first argument ("/x myvar" for example, to print myvar in hex).  */
 
 static void
 print_command_1 (char *exp, int inspect, int voidprint)
@@ -873,7 +833,8 @@ print_command_1 (char *exp, int inspect, int voidprint)
   struct format_data fmt;
   int cleanup = 0;
 
-  /* Pass inspect flag to the rest of the print routines in a global (sigh). */
+  /* Pass inspect flag to the rest of the print routines in a global
+     (sigh).  */
   inspect_it = inspect;
 
   if (exp && *exp == '/')
@@ -912,7 +873,8 @@ print_command_1 (char *exp, int inspect, int voidprint)
 	annotate_value_begin (value_type (val));
 
       if (inspect)
-	printf_unfiltered ("\031(gdb-makebuffer \"%s\"  %d '(\"", exp, histindex);
+	printf_unfiltered ("\031(gdb-makebuffer \"%s\"  %d '(\"",
+			   exp, histindex);
       else if (histindex >= 0)
 	printf_filtered ("$%d = ", histindex);
 
@@ -933,7 +895,7 @@ print_command_1 (char *exp, int inspect, int voidprint)
 
   if (cleanup)
     do_cleanups (old_chain);
-  inspect_it = 0;		/* Reset print routines to normal */
+  inspect_it = 0;		/* Reset print routines to normal.  */
 }
 
 static void
@@ -942,7 +904,7 @@ print_command (char *exp, int from_tty)
   print_command_1 (exp, 0, 1);
 }
 
-/* Same as print, except in epoch, it gets its own window */
+/* Same as print, except in epoch, it gets its own window.  */
 static void
 inspect_command (char *exp, int from_tty)
 {
@@ -951,7 +913,7 @@ inspect_command (char *exp, int from_tty)
   print_command_1 (exp, epoch_interface, 1);
 }
 
-/* Same as print, except it doesn't print void results. */
+/* Same as print, except it doesn't print void results.  */
 static void
 call_command (char *exp, int from_tty)
 {
@@ -1181,7 +1143,8 @@ address_info (char *exp, int from_tty)
       break;
 
     case LOC_REGPARM_ADDR:
-      printf_filtered (_("address of an argument in register %s"), REGISTER_NAME (val));
+      printf_filtered (_("address of an argument in register %s"),
+		       REGISTER_NAME (val));
       break;
 
     case LOC_ARG:
@@ -1216,8 +1179,8 @@ address_info (char *exp, int from_tty)
 
     case LOC_BLOCK:
       printf_filtered (_("a function at address "));
-      deprecated_print_address_numeric (load_addr = BLOCK_START (SYMBOL_BLOCK_VALUE (sym)),
-			     1, gdb_stdout);
+      load_addr = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
+      deprecated_print_address_numeric (load_addr, 1, gdb_stdout);
       if (section_is_overlay (section))
 	{
 	  load_addr = overlay_unmapped_address (load_addr, section);
@@ -1238,8 +1201,8 @@ address_info (char *exp, int from_tty)
 	  {
 	    section = SYMBOL_BFD_SECTION (msym);
 	    printf_filtered (_("static storage at address "));
-	    deprecated_print_address_numeric (load_addr = SYMBOL_VALUE_ADDRESS (msym),
-				   1, gdb_stdout);
+	    load_addr = SYMBOL_VALUE_ADDRESS (msym);
+	    deprecated_print_address_numeric (load_addr, 1, gdb_stdout);
 	    if (section_is_overlay (section))
 	      {
 		load_addr = overlay_unmapped_address (load_addr, section);
@@ -1252,9 +1215,9 @@ address_info (char *exp, int from_tty)
       break;
 
     case LOC_HP_THREAD_LOCAL_STATIC:
-      printf_filtered (
-			"a thread-local variable at offset %ld from the thread base register %s",
-			val, REGISTER_NAME (basereg));
+      printf_filtered (_("\
+a thread-local variable at offset %ld from the thread base register %s"),
+		       val, REGISTER_NAME (basereg));
       break;
 
     case LOC_OPTIMIZED_OUT:
@@ -1268,7 +1231,8 @@ address_info (char *exp, int from_tty)
   printf_filtered (".\n");
 }
 
-void
+
+static void
 x_command (char *exp, int from_tty)
 {
   struct expression *expr;
@@ -1291,9 +1255,9 @@ x_command (char *exp, int from_tty)
   if (exp != 0 && *exp != 0)
     {
       expr = parse_expression (exp);
-      /* Cause expression not to be there any more
-         if this command is repeated with Newline.
-         But don't clobber a user-defined command's definition.  */
+      /* Cause expression not to be there any more if this command is
+         repeated with Newline.  But don't clobber a user-defined
+         command's definition.  */
       if (from_tty)
 	*exp = 0;
       old_chain = make_cleanup (free_current_contents, &expr);
@@ -1313,7 +1277,8 @@ x_command (char *exp, int from_tty)
 
   do_examine (fmt, next_address);
 
-  /* If the examine succeeds, we remember its size and format for next time.  */
+  /* If the examine succeeds, we remember its size and format for next
+     time.  */
   last_size = fmt.size;
   last_format = fmt.format;
 
@@ -1328,9 +1293,10 @@ x_command (char *exp, int from_tty)
 		       value_from_pointer (pointer_type,
 					   last_examine_address));
 
-      /* Make contents of last address examined available to the user as $__. */
-      /* If the last value has not been fetched from memory then don't
-         fetch it now - instead mark it by voiding the $__ variable. */
+      /* Make contents of last address examined available to the user
+	 as $__.  If the last value has not been fetched from memory
+	 then don't fetch it now; instead mark it by voiding the $__
+	 variable.  */
       if (value_lazy (last_examine_value))
 	set_internalvar (lookup_internalvar ("__"),
 			 allocate_value (builtin_type_void));
@@ -1409,9 +1375,8 @@ free_display (struct display *d)
   xfree (d);
 }
 
-/* Clear out the display_chain.
-   Done when new symtabs are loaded, since this invalidates
-   the types stored in many expressions.  */
+/* Clear out the display_chain.  Done when new symtabs are loaded,
+   since this invalidates the types stored in many expressions.  */
 
 void
 clear_displays (void)
@@ -1615,7 +1580,8 @@ disable_current_display (void)
   if (current_display_number >= 0)
     {
       disable_display (current_display_number);
-      fprintf_unfiltered (gdb_stderr, "Disabling display %d to avoid infinite recursion.\n",
+      fprintf_unfiltered (gdb_stderr, _("\
+Disabling display %d to avoid infinite recursion.\n"),
 			  current_display_number);
     }
   current_display_number = -1;
@@ -1716,8 +1682,8 @@ disable_display_command (char *args, int from_tty)
 }
 
 
-/* Print the value in stack frame FRAME of a variable
-   specified by a struct symbol.  */
+/* Print the value in stack frame FRAME of a variable specified by a
+   struct symbol.  */
 
 void
 print_variable_value (struct symbol *var, struct frame_info *frame,
@@ -1741,8 +1707,7 @@ printf_command (char *arg, int from_tty)
   int allocated_args = 20;
   struct cleanup *old_cleanups;
 
-  val_args = (struct value **) xmalloc (allocated_args
-					* sizeof (struct value *));
+  val_args = xmalloc (allocated_args * sizeof (struct value *));
   old_cleanups = make_cleanup (free_current_contents, &val_args);
 
   if (s == 0)
@@ -1752,7 +1717,7 @@ printf_command (char *arg, int from_tty)
   while (*s == ' ' || *s == '\t')
     s++;
 
-  /* A format string should follow, enveloped in double quotes */
+  /* A format string should follow, enveloped in double quotes.  */
   if (*s++ != '"')
     error (_("Bad format string, missing '\"'."));
 
@@ -2112,8 +2077,9 @@ printf_command (char *arg, int from_tty)
 	      printf_filtered (current_substring, val);
 	      break;
 	    }
-	  default:		/* purecov: deadcode */
-	    error (_("internal error in printf_command"));		/* purecov: deadcode */
+	  default:
+	    internal_error (__FILE__, __LINE__,
+			    _("failed internal consitency check"));
 	  }
 	/* Skip to the next substring.  */
 	current_substring += strlen (current_substring) + 1;
