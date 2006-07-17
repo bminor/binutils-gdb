@@ -1,3 +1,8 @@
+2006-07-13  Denis PILAT  <denis.pilat@st.com>
+
+	* interps.c (interpreter_completer): Allocate one more item to the
+	'matches' list and set them all to 0 with a xcalloc.
+
 2006-06-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set version to 6.5.0.<date>-cvs now that release
