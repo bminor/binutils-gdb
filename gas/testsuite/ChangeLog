@@ -1,3 +1,9 @@
+2006-07-18  Maciej W. Rozycki  <macro@mips.com>
+
+	* gas/mips/mips4.s, gas/mips/mips4.d: Enable the "pref" test.  Change
+	arguments for "madd.s" so that the instruction is correct for mips1
+	and still matches "bc3*".
+
 2006-07-13 Dwarakanath Rajagopal	<dwarak.rajagopal@amd.com>
 	   Michael Meissner		<michael.meissner@amd.com>
 
