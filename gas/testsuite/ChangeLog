@@ -1,3 +1,8 @@
+2006-07-18  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb2_add.d: New test.
+	* gas/arm/thumb2_add.s: New test.
+
 2006-07-18  Maciej W. Rozycki  <macro@mips.com>
 
 	* gas/mips/mips4.s, gas/mips/mips4.d: Enable the "pref" test.  Change

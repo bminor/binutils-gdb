@@ -1,3 +1,11 @@
+2006-07-18  Paul Brook  <paul@codesourcery.com>
+
+	* tc-arm.c (do_t_add_sub): Use addw/subw when source is PC.
+	(md_convert_frag): Use correct reloc for add_pc.  Use
+	BFD_RELOC_ARM_T32_ADD_IMM for normal add/sum.
+	(md_apply_fix): Handle BFD_RELOC_ARM_T32_ADD_IMM.
+	(arm_force_relocation): Handle BFD_RELOC_ARM_T32_ADD_IMM.
+
 2006-07-17  Mat Hostetter  <mat@lcs.mit.edu>
 
 	* symbols.c (report_op_error): Fix pasto.  Don't use as_bad_where
