@@ -1,3 +1,7 @@
+2006-07-18  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* target.c (tcomplain): Mark with ATTR_NORETURN.
+
 2006-07-17  Mark Kettenis  <kettenis@gnu.org>
 
 	* printcmd.c: Coding style fixes: add missing spaces in comments
