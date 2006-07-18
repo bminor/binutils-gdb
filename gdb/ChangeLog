@@ -1,3 +1,16 @@
+2006-07-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-thread-db.c (td_thr_getfpregs_p, td_thr_getgregs_p)
+	(td_thr_setfpregs_p, td_thr_setgregs_p, thread_db_get_info)
+	(thread_db_fetch_registers, thread_db_store_registers)
+	(thread_db_thread_alive, thread_db_state_str): Delete.
+	(thread_db_load): Don't look up regset functions.
+	(thread_db_pid_to_str): Simplify.
+	(thread_db_extra_thread_info): New.
+	(init_thread_db_ops): Do not set to_fetch_registers,
+	to_store_registers, or to_thread_alive.  Set to_extra_thread_info.
+	* Makefile.in: Remove linux-thread-db.o rule.
+
 2006-07-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* armobsd-tdep.c: Include "trad-frame.h" and "tramp-frame.h".

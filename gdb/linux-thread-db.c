@@ -105,14 +105,6 @@ static td_err_e (*td_ta_event_getmsg_p) (const td_thragent_t *ta,
 static td_err_e (*td_thr_validate_p) (const td_thrhandle_t *th);
 static td_err_e (*td_thr_get_info_p) (const td_thrhandle_t *th,
 				      td_thrinfo_t *infop);
-static td_err_e (*td_thr_getfpregs_p) (const td_thrhandle_t *th,
-				       gdb_prfpregset_t *regset);
-static td_err_e (*td_thr_getgregs_p) (const td_thrhandle_t *th,
-				      prgregset_t gregs);
-static td_err_e (*td_thr_setfpregs_p) (const td_thrhandle_t *th,
-				       const gdb_prfpregset_t *fpregs);
-static td_err_e (*td_thr_setgregs_p) (const td_thrhandle_t *th,
-				      prgregset_t gregs);
 static td_err_e (*td_thr_event_enable_p) (const td_thrhandle_t *th,
 					  int event);
 
@@ -220,31 +212,6 @@ thread_db_err_str (td_err_e err)
       return buf;
     }
 }
-
-static char *
-thread_db_state_str (td_thr_state_e state)
-{
-  static char buf[64];
-
-  switch (state)
-    {
-    case TD_THR_STOPPED:
-      return "stopped by debugger";
-    case TD_THR_RUN:
-      return "runnable";
-    case TD_THR_ACTIVE:
-      return "active";
-    case TD_THR_ZOMBIE:
-      return "zombie";
-    case TD_THR_SLEEP:
-      return "sleeping";
-    case TD_THR_STOPPED_ASLEEP:
-      return "stopped by debugger AND blocked";
-    default:
-      snprintf (buf, sizeof (buf), "unknown thread_db state %d", state);
-      return buf;
-    }
-}
 
 /* A callback function for td_ta_thr_iter, which we use to map all
    threads to LWPs.
@@ -329,27 +296,6 @@ thread_db_map_id2thr (struct thread_info *thread_info, int fatal)
     }
   else
     thread_info->private->th_valid = 1;
-}
-
-static td_thrinfo_t *
-thread_db_get_info (struct thread_info *thread_info)
-{
-  td_err_e err;
-
-  if (thread_info->private->ti_valid)
-    return &thread_info->private->ti;
-
-  if (!thread_info->private->th_valid)
-    thread_db_map_id2thr (thread_info, 1);
-
-  err =
-    td_thr_get_info_p (&thread_info->private->th, &thread_info->private->ti);
-  if (err != TD_OK)
-    error (_("thread_db_get_info: cannot get thread info: %s"),
-	   thread_db_err_str (err));
-
-  thread_info->private->ti_valid = 1;
-  return &thread_info->private->ti;
 }
 
 /* Convert between user-level thread ids and LWP ids.  */
@@ -459,22 +405,6 @@ thread_db_load (void)
 
   td_thr_get_info_p = verbose_dlsym (handle, "td_thr_get_info");
   if (td_thr_get_info_p == NULL)
-    return 0;
-
-  td_thr_getfpregs_p = verbose_dlsym (handle, "td_thr_getfpregs");
-  if (td_thr_getfpregs_p == NULL)
-    return 0;
-
-  td_thr_getgregs_p = verbose_dlsym (handle, "td_thr_getgregs");
-  if (td_thr_getgregs_p == NULL)
-    return 0;
-
-  td_thr_setfpregs_p = verbose_dlsym (handle, "td_thr_setfpregs");
-  if (td_thr_setfpregs_p == NULL)
-    return 0;
-
-  td_thr_setgregs_p = verbose_dlsym (handle, "td_thr_setgregs");
-  if (td_thr_setgregs_p == NULL)
     return 0;
 
   /* Initialize the library.  */
@@ -991,81 +921,6 @@ thread_db_xfer_partial (struct target_ops *ops, enum target_object object,
 }
 
 static void
-thread_db_fetch_registers (int regno)
-{
-  struct thread_info *thread_info;
-  prgregset_t gregset;
-  gdb_prfpregset_t fpregset;
-  td_err_e err;
-
-  if (!is_thread (inferior_ptid))
-    {
-      /* Pass the request to the target beneath us.  */
-      target_beneath->to_fetch_registers (regno);
-      return;
-    }
-
-  thread_info = find_thread_pid (inferior_ptid);
-  thread_db_map_id2thr (thread_info, 1);
-
-  err = td_thr_getgregs_p (&thread_info->private->th, gregset);
-  if (err != TD_OK)
-    error (_("Cannot fetch general-purpose registers for thread %ld: %s"),
-	   (long) GET_THREAD (inferior_ptid), thread_db_err_str (err));
-
-  err = td_thr_getfpregs_p (&thread_info->private->th, &fpregset);
-  if (err != TD_OK)
-    error (_("Cannot get floating-point registers for thread %ld: %s"),
-	   (long) GET_THREAD (inferior_ptid), thread_db_err_str (err));
-
-  /* Note that we must call supply_gregset after calling the thread_db
-     routines because the thread_db routines call ps_lgetgregs and
-     friends which clobber GDB's register cache.  */
-  supply_gregset ((gdb_gregset_t *) gregset);
-  supply_fpregset (&fpregset);
-}
-
-static void
-thread_db_store_registers (int regno)
-{
-  prgregset_t gregset;
-  gdb_prfpregset_t fpregset;
-  td_err_e err;
-  struct thread_info *thread_info;
-
-  if (!is_thread (inferior_ptid))
-    {
-      /* Pass the request to the target beneath us.  */
-      target_beneath->to_store_registers (regno);
-      return;
-    }
-
-  thread_info = find_thread_pid (inferior_ptid);
-  thread_db_map_id2thr (thread_info, 1);
-
-  if (regno != -1)
-    {
-      gdb_byte raw[MAX_REGISTER_SIZE];
-
-      regcache_raw_collect (current_regcache, regno, raw);
-      thread_db_fetch_registers (-1);
-      regcache_raw_supply (current_regcache, regno, raw);
-    }
-
-  fill_gregset ((gdb_gregset_t *) gregset, -1);
-  fill_fpregset (&fpregset, -1);
-
-  err = td_thr_setgregs_p (&thread_info->private->th, gregset);
-  if (err != TD_OK)
-    error (_("Cannot store general-purpose registers for thread %ld: %s"),
-	   (long) GET_THREAD (inferior_ptid), thread_db_err_str (err));
-  err = td_thr_setfpregs_p (&thread_info->private->th, &fpregset);
-  if (err != TD_OK)
-    error (_("Cannot store floating-point registers  for thread %ld: %s"),
-	   (long) GET_THREAD (inferior_ptid), thread_db_err_str (err));
-}
-
-static void
 thread_db_kill (void)
 {
   /* There's no need to save & restore inferior_ptid here, since the
@@ -1117,48 +972,6 @@ thread_db_mourn_inferior (void)
 }
 
 static int
-thread_db_thread_alive (ptid_t ptid)
-{
-  td_thrhandle_t th;
-  td_err_e err;
-
-  if (is_thread (ptid))
-    {
-      struct thread_info *thread_info;
-      thread_info = find_thread_pid (ptid);
-
-      thread_db_map_id2thr (thread_info, 0);
-      if (!thread_info->private->th_valid)
-	return 0;
-
-      err = td_thr_validate_p (&thread_info->private->th);
-      if (err != TD_OK)
-	return 0;
-
-      if (!thread_info->private->ti_valid)
-	{
-	  err =
-	    td_thr_get_info_p (&thread_info->private->th,
-			       &thread_info->private->ti);
-	  if (err != TD_OK)
-	    return 0;
-	  thread_info->private->ti_valid = 1;
-	}
-
-      if (thread_info->private->ti.ti_state == TD_THR_UNKNOWN
-	  || thread_info->private->ti.ti_state == TD_THR_ZOMBIE)
-	return 0;		/* A zombie thread.  */
-
-      return 1;
-    }
-
-  if (target_beneath->to_thread_alive)
-    return target_beneath->to_thread_alive (ptid);
-
-  return 0;
-}
-
-static int
 find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
 {
   td_thrinfo_t ti;
@@ -1200,32 +1013,15 @@ thread_db_pid_to_str (ptid_t ptid)
   if (is_thread (ptid))
     {
       static char buf[64];
-      td_thrinfo_t *ti_p;
-      td_err_e err;
       struct thread_info *thread_info;
 
       thread_info = find_thread_pid (ptid);
-      thread_db_map_id2thr (thread_info, 0);
-      if (!thread_info->private->th_valid)
-	{
-	  snprintf (buf, sizeof (buf), "Thread %ld (Missing)",
-		    GET_THREAD (ptid));
-	  return buf;
-	}
-
-      ti_p = thread_db_get_info (thread_info);
-
-      if (ti_p->ti_state == TD_THR_ACTIVE && ti_p->ti_lid != 0)
-	{
-	  snprintf (buf, sizeof (buf), "Thread %ld (LWP %d)",
-		    (long) ti_p->ti_tid, ti_p->ti_lid);
-	}
+      if (thread_info == NULL)
+	snprintf (buf, sizeof (buf), "Thread %ld (LWP %ld) (Missing)",
+		  GET_THREAD (ptid), GET_LWP (ptid));
       else
-	{
-	  snprintf (buf, sizeof (buf), "Thread %ld (%s)",
-		    (long) ti_p->ti_tid,
-		    thread_db_state_str (ti_p->ti_state));
-	}
+	snprintf (buf, sizeof (buf), "Thread %ld (LWP %ld)",
+		  GET_THREAD (ptid), GET_LWP (ptid));
 
       return buf;
     }
@@ -1234,6 +1030,18 @@ thread_db_pid_to_str (ptid_t ptid)
     return target_beneath->to_pid_to_str (ptid);
 
   return normal_pid_to_str (ptid);
+}
+
+/* Return a string describing the state of the thread specified by
+   INFO.  */
+
+static char *
+thread_db_extra_thread_info (struct thread_info *info)
+{
+  if (info->private->dying)
+    return "Exiting";
+
+  return NULL;
 }
 
 /* Get the address of the thread local variable in load module LM which
@@ -1306,20 +1114,18 @@ init_thread_db_ops (void)
   thread_db_ops.to_detach = thread_db_detach;
   thread_db_ops.to_resume = thread_db_resume;
   thread_db_ops.to_wait = thread_db_wait;
-  thread_db_ops.to_fetch_registers = thread_db_fetch_registers;
-  thread_db_ops.to_store_registers = thread_db_store_registers;
   thread_db_ops.to_xfer_partial = thread_db_xfer_partial;
   thread_db_ops.to_kill = thread_db_kill;
   thread_db_ops.to_create_inferior = thread_db_create_inferior;
   thread_db_ops.to_post_startup_inferior = thread_db_post_startup_inferior;
   thread_db_ops.to_mourn_inferior = thread_db_mourn_inferior;
-  thread_db_ops.to_thread_alive = thread_db_thread_alive;
   thread_db_ops.to_find_new_threads = thread_db_find_new_threads;
   thread_db_ops.to_pid_to_str = thread_db_pid_to_str;
   thread_db_ops.to_stratum = thread_stratum;
   thread_db_ops.to_has_thread_control = tc_schedlock;
   thread_db_ops.to_get_thread_local_address
     = thread_db_get_thread_local_address;
+  thread_db_ops.to_extra_thread_info = thread_db_extra_thread_info;
   thread_db_ops.to_magic = OPS_MAGIC;
 }
 
