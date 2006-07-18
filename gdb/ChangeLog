@@ -1,3 +1,11 @@
+2006-07-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* armobsd-tdep.c: Include "trad-frame.h" and "tramp-frame.h".
+	(armobsd_sigframe_init): New function.
+	(armobsd_sigframe): New variable.
+	(armobsd_init_abi): Prepend armobsd_sigframe unwinder.
+	* Makefile.in (armobsd-tdep.o): Update dependencies.
+
 2006-07-18  Denis PILAT  <denis.pilat@st.com>
 
 	* monitor.c: Remove unused prototypes.
