@@ -8135,13 +8135,13 @@ do_t_add_sub (void)
 	narrow = (current_it_mask != 0);
       if (!inst.operands[2].isreg)
 	{
+	  int add;
+
+	  add = (inst.instruction == T_MNEM_add
+		 || inst.instruction == T_MNEM_adds);
 	  opcode = 0;
 	  if (inst.size_req != 4)
 	    {
-	      int add;
-
-	      add = (inst.instruction == T_MNEM_add
-		     || inst.instruction == T_MNEM_adds);
 	      /* Attempt to use a narrow opcode, with relaxation if
 	         appropriate.  */
 	      if (Rd == REG_SP && Rs == REG_SP && !flags)
@@ -8171,12 +8171,24 @@ do_t_add_sub (void)
 	  if (inst.size_req == 4
 	      || (inst.size_req != 2 && !opcode))
 	    {
-	      /* ??? Convert large immediates to addw/subw.  */
-	      inst.instruction = THUMB_OP32 (inst.instruction);
-	      inst.instruction = (inst.instruction & 0xe1ffffff) | 0x10000000;
+	      if (Rs == REG_PC)
+		{
+		  /* Always use addw/subw.  */
+		  inst.instruction = add ? 0xf20f0000 : 0xf2af0000;
+		  inst.reloc.type = BFD_RELOC_ARM_T32_IMM12;
+		}
+	      else
+		{
+		  inst.instruction = THUMB_OP32 (inst.instruction);
+		  inst.instruction = (inst.instruction & 0xe1ffffff)
+				     | 0x10000000;
+		  if (flags)
+		    inst.reloc.type = BFD_RELOC_ARM_T32_IMMEDIATE;
+		  else
+		    inst.reloc.type = BFD_RELOC_ARM_T32_ADD_IMM;
+		}
 	      inst.instruction |= inst.operands[0].reg << 8;
 	      inst.instruction |= inst.operands[1].reg << 16;
-	      inst.reloc.type = BFD_RELOC_ARM_T32_IMMEDIATE;
 	    }
 	}
       else
@@ -16067,7 +16079,10 @@ md_convert_frag (bfd *abfd, segT asec ATTRIBUTE_UNUSED, fragS *fragp)
 	  insn = THUMB_OP32 (opcode);
 	  insn |= (old_op & 0xf0) << 4;
 	  put_thumb32_insn (buf, insn);
-	  reloc_type = BFD_RELOC_ARM_T32_IMMEDIATE;
+	  if (opcode == T_MNEM_add_pc)
+	    reloc_type = BFD_RELOC_ARM_T32_IMM12;
+	  else
+	    reloc_type = BFD_RELOC_ARM_T32_ADD_IMM;
 	}
       else
 	reloc_type = BFD_RELOC_ARM_THUMB_ADD;
@@ -16084,7 +16099,10 @@ md_convert_frag (bfd *abfd, segT asec ATTRIBUTE_UNUSED, fragS *fragp)
 	  insn |= (old_op & 0xf0) << 4;
 	  insn |= (old_op & 0xf) << 16;
 	  put_thumb32_insn (buf, insn);
-	  reloc_type = BFD_RELOC_ARM_T32_IMMEDIATE;
+	  if (insn & (1 << 20))
+	    reloc_type = BFD_RELOC_ARM_T32_ADD_IMM;
+	  else
+	    reloc_type = BFD_RELOC_ARM_T32_IMMEDIATE;
 	}
       else
 	reloc_type = BFD_RELOC_ARM_THUMB_ADD;
@@ -17475,6 +17493,7 @@ md_apply_fix (fixS *	fixP,
       break;
 
     case BFD_RELOC_ARM_T32_IMMEDIATE:
+    case BFD_RELOC_ARM_T32_ADD_IMM:
     case BFD_RELOC_ARM_T32_IMM12:
     case BFD_RELOC_ARM_T32_ADD_PC12:
       /* We claim that this fixup has been processed here,
@@ -17495,15 +17514,21 @@ md_apply_fix (fixS *	fixP,
       newval <<= 16;
       newval |= md_chars_to_number (buf+2, THUMB_SIZE);
 
-      /* FUTURE: Implement analogue of negate_data_op for T32.  */
-      if (fixP->fx_r_type == BFD_RELOC_ARM_T32_IMMEDIATE)
+      newimm = FAIL;
+      if (fixP->fx_r_type == BFD_RELOC_ARM_T32_IMMEDIATE
+	  || fixP->fx_r_type == BFD_RELOC_ARM_T32_ADD_IMM)
 	{
 	  newimm = encode_thumb32_immediate (value);
 	  if (newimm == (unsigned int) FAIL)
 	    newimm = thumb32_negate_data_op (&newval, value);
 	}
-      else
+      if (fixP->fx_r_type != BFD_RELOC_ARM_T32_IMMEDIATE
+	  && newimm == (unsigned int) FAIL)
 	{
+	  /* Turn add/sum into addw/subw.  */
+	  if (fixP->fx_r_type == BFD_RELOC_ARM_T32_ADD_IMM)
+	    newval = (newval & 0xfeffffff) | 0x02000000;
+
 	  /* 12 bit immediate for addw/subw.  */
 	  if (value < 0)
 	    {
@@ -18518,6 +18543,7 @@ arm_force_relocation (struct fix * fixp)
   if (fixp->fx_r_type == BFD_RELOC_ARM_IMMEDIATE
       || fixp->fx_r_type == BFD_RELOC_ARM_OFFSET_IMM
       || fixp->fx_r_type == BFD_RELOC_ARM_ADRL_IMMEDIATE
+      || fixp->fx_r_type == BFD_RELOC_ARM_T32_ADD_IMM
       || fixp->fx_r_type == BFD_RELOC_ARM_T32_IMMEDIATE
       || fixp->fx_r_type == BFD_RELOC_ARM_T32_IMM12
       || fixp->fx_r_type == BFD_RELOC_ARM_T32_ADD_PC12)
