@@ -938,36 +938,39 @@ remote_fileio_func_lseek (char *buf)
 static void
 remote_fileio_func_rename (char *buf)
 {
-  CORE_ADDR ptrval;
-  int length, retlength;
+  CORE_ADDR old_ptr, new_ptr;
+  int old_len, new_len, retlength;
   char *oldpath, *newpath;
   int ret, of, nf;
   struct stat ost, nst;
 
   /* 1. Parameter: Ptr to oldpath / length incl. trailing zero */
-  if (remote_fileio_extract_ptr_w_len (&buf, &ptrval, &length))
+  if (remote_fileio_extract_ptr_w_len (&buf, &old_ptr, &old_len))
     {
       remote_fileio_ioerror ();
       return;
     }
-  /* Request oldpath using 'm' packet */
-  oldpath = alloca (length);
-  retlength = remote_read_bytes (ptrval, (gdb_byte *) oldpath, length);
-  if (retlength != length)
-    {
-      remote_fileio_ioerror ();
-      return;
-    }
+  
   /* 2. Parameter: Ptr to newpath / length incl. trailing zero */
-  if (remote_fileio_extract_ptr_w_len (&buf, &ptrval, &length))
+  if (remote_fileio_extract_ptr_w_len (&buf, &new_ptr, &new_len))
     {
       remote_fileio_ioerror ();
       return;
     }
+  
+  /* Request oldpath using 'm' packet */
+  oldpath = alloca (old_len);
+  retlength = remote_read_bytes (old_ptr, (gdb_byte *) oldpath, old_len);
+  if (retlength != old_len)
+    {
+      remote_fileio_ioerror ();
+      return;
+    }
+  
   /* Request newpath using 'm' packet */
-  newpath = alloca (length);
-  retlength = remote_read_bytes (ptrval, (gdb_byte *) newpath, length);
-  if (retlength != length)
+  newpath = alloca (new_len);
+  retlength = remote_read_bytes (new_ptr, (gdb_byte *) newpath, new_len);
+  if (retlength != new_len)
     {
       remote_fileio_ioerror ();
       return;
@@ -1070,23 +1073,15 @@ remote_fileio_func_unlink (char *buf)
 static void
 remote_fileio_func_stat (char *buf)
 {
-  CORE_ADDR ptrval;
-  int ret, length, retlength;
+  CORE_ADDR statptr, nameptr;
+  int ret, namelength, retlength;
   char *pathname;
   LONGEST lnum;
   struct stat st;
   struct fio_stat fst;
 
   /* 1. Parameter: Ptr to pathname / length incl. trailing zero */
-  if (remote_fileio_extract_ptr_w_len (&buf, &ptrval, &length))
-    {
-      remote_fileio_ioerror ();
-      return;
-    }
-  /* Request pathname using 'm' packet */
-  pathname = alloca (length);
-  retlength = remote_read_bytes (ptrval, (gdb_byte *) pathname, length);
-  if (retlength != length)
+  if (remote_fileio_extract_ptr_w_len (&buf, &nameptr, &namelength))
     {
       remote_fileio_ioerror ();
       return;
@@ -1098,7 +1093,16 @@ remote_fileio_func_stat (char *buf)
       remote_fileio_ioerror ();
       return;
     }
-  ptrval = (CORE_ADDR) lnum;
+  statptr = (CORE_ADDR) lnum;
+  
+  /* Request pathname using 'm' packet */
+  pathname = alloca (namelength);
+  retlength = remote_read_bytes (nameptr, (gdb_byte *) pathname, namelength);
+  if (retlength != namelength)
+    {
+      remote_fileio_ioerror ();
+      return;
+    }
 
   remote_fio_no_longjmp = 1;
   ret = stat (pathname, &st);
@@ -1114,12 +1118,13 @@ remote_fileio_func_stat (char *buf)
       remote_fileio_reply (-1, FILEIO_EACCES);
       return;
     }
-  if (ptrval)
+  if (statptr)
     {
       remote_fileio_to_fio_stat (&st, &fst);
       remote_fileio_to_fio_uint (0, fst.fst_dev);
       
-      retlength = remote_fileio_write_bytes (ptrval, (gdb_byte *) &fst, sizeof fst);
+      retlength = remote_fileio_write_bytes (statptr,
+					     (gdb_byte *) &fst, sizeof fst);
       if (retlength != sizeof fst)
 	{
 	  remote_fileio_return_errno (-1);
