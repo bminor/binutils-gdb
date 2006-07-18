@@ -1,3 +1,10 @@
+2006-07-18  Nick Clifton  <nickc@redhat.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_common_definition): New function.
+	Consider SHN_MIPS_ACOMMON and SHN_MIPS_SCOMMON as being common
+	sections.
+	* elfxx-mips.h 	(_bfd_mips_elf_common_definition): Prototype.
+
 2006-07-14  Jakub Jelinek  <jakub@redhat.com>
 
 	* elflink.c (bfd_elf_size_dynsym_hash_dynstr): Fix cinfo.shift2 value.
