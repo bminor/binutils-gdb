@@ -568,5 +568,15 @@ foo:
 
  xchg   %ax,%ax
 
+ sldt	%eax
+ sldt	%ax
+ sldt	(%eax)
+ smsw	%eax
+ smsw	%ax
+ smsw	(%eax)
+ str	%eax
+ str	%ax
+ str	(%eax)
+
 # Force a good alignment.
  .p2align 4,0

@@ -1398,8 +1398,8 @@ static const struct dis386 grps[][8] = {
   },
   /* GRP6 */
   {
-    { "sldtQ",	Ev, XX, XX, XX },
-    { "strQ",	Ev, XX, XX, XX },
+    { "sldt",	Ev, XX, XX, XX },
+    { "str",	Ev, XX, XX, XX },
     { "lldt",	Ew, XX, XX, XX },
     { "ltr",	Ew, XX, XX, XX },
     { "verr",	Ew, XX, XX, XX },
@@ -1413,7 +1413,7 @@ static const struct dis386 grps[][8] = {
     { "sidt{Q|IQ||}", PNI_Fixup, 0, XX, XX, XX },
     { "lgdt{Q|Q||}",	 M, XX, XX, XX },
     { "lidt{Q|Q||}",	 SVME_Fixup, 0, XX, XX, XX },
-    { "smswQ",	Ev, XX, XX, XX },
+    { "smsw",	Ev, XX, XX, XX },
     { "(bad)",	XX, XX, XX, XX },
     { "lmsw",	Ew, XX, XX, XX },
     { "invlpg",	INVLPG_Fixup, w_mode, XX, XX, XX },

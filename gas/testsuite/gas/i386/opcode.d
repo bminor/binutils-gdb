@@ -573,4 +573,13 @@ Disassembly of section .text:
  9bf:	66 0f be 90 90 90 90 90 [ 	]*movsbw 0x90909090\(%eax\),%dx
  9c7:	66 0f c1 90 90 90 90 90 [ 	]*xadd   %dx,0x90909090\(%eax\)
  9cf:	66 90 [ 	]*xchg   %ax,%ax
+ 9d1:	0f 00 c0 [ 	]*sldt   %eax
+ 9d4:	66 0f 00 c0 [ 	]*sldt   %ax
+ 9d8:	0f 00 00 [ 	]*sldt   \(%eax\)
+ 9db:	0f 01 e0 [ 	]*smsw   %eax
+ 9de:	66 0f 01 e0 [ 	]*smsw   %ax
+ 9e2:	0f 01 20 [ 	]*smsw   \(%eax\)
+ 9e5:	0f 00 c8 [ 	]*str    %eax
+ 9e8:	66 0f 00 c8 [ 	]*str    %ax
+ 9ec:	0f 00 08 [ 	]*str    \(%eax\)
 	\.\.\.

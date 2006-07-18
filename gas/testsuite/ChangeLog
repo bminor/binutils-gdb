@@ -1,3 +1,11 @@
+2006-07-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/opcode.s: Add sldt, smsw and str.
+	* gas/i386/x86-64-opcode.s: Likewise.
+
+	* gas/i386/opcode.d: Updated.
+	* gas/i386/x86-64-opcode.d: Likewise.
+
 2006-07-18  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/thumb2_add.d: New test.

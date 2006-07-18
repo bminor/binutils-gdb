@@ -1,3 +1,8 @@
+2006-07-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (grps): Change "sldtQ", "strQ" and "smswQ" to
+	"sldt", "str" and "smsw".
+
 2006-07-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/2829
