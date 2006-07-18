@@ -60,49 +60,14 @@
 static char *dev_name;
 static struct target_ops *targ_ops;
 
-static void monitor_vsprintf (char *sndbuf, char *pattern, va_list args);
-
-static int readchar (int timeout);
-
-static void monitor_fetch_register (int regno);
-static void monitor_store_register (int regno);
-
-static void monitor_printable_string (char *newstr, char *oldstr, int len);
-static void monitor_error (char *function, char *message, CORE_ADDR memaddr, int len, char *string, int final_char);
-static void monitor_detach (char *args, int from_tty);
-static void monitor_resume (ptid_t ptid, int step, enum target_signal sig);
-static void monitor_interrupt (int signo);
-static void monitor_interrupt_twice (int signo);
 static void monitor_interrupt_query (void);
-static void monitor_wait_cleanup (void *old_timeout);
-
-static ptid_t monitor_wait (ptid_t ptid, struct target_waitstatus *status);
-static void monitor_fetch_registers (int regno);
-static void monitor_store_registers (int regno);
-static void monitor_prepare_to_store (void);
-static int monitor_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
-				int write, 
-				struct mem_attrib *attrib,
-				struct target_ops *target);
-static void monitor_files_info (struct target_ops *ops);
-static void monitor_kill (void);
-static void monitor_load (char *file, int from_tty);
-static void monitor_mourn_inferior (void);
+static void monitor_interrupt_twice (int);
 static void monitor_stop (void);
-
-static int monitor_read_memory (CORE_ADDR addr, char *myaddr, int len);
-static int monitor_write_memory (CORE_ADDR addr, char *myaddr, int len);
-static int monitor_write_memory_bytes (CORE_ADDR addr, char *myaddr, int len);
-static int monitor_write_memory_block (CORE_ADDR memaddr,
-				       char *myaddr, int len);
-static int monitor_expect_regexp (struct re_pattern_buffer *pat,
-				  char *buf, int buflen);
 static void monitor_dump_regs (void);
+
 #if 0
 static int from_hex (int a);
-static unsigned long get_hex_word (void);
 #endif
-static void parse_register_dump (char *, int);
 
 static struct monitor_ops *current_monitor;
 

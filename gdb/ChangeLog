@@ -1,3 +1,7 @@
+2006-07-18  Denis PILAT  <denis.pilat@st.com>
+
+	* monitor.c: Remove unused prototypes.
+
 2006-07-18  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* target.c (tcomplain): Mark with ATTR_NORETURN.
