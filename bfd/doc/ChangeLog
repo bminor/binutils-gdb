@@ -1,3 +1,7 @@
+2006-07-18  Nigel Stephens  <nigel@mips.com>
+
+	* bfd.texinfo: Add @section for "What to Put Where".
+
 2006-06-07  Joseph S. Myers  <joseph@codesourcery.com>
 
 	* bfd.texinfo: Remove local @tex code.

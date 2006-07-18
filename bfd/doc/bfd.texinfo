@@ -294,6 +294,7 @@ structures.
 @end ignore
 @end menu
 @node What to Put Where, aout, BFD back ends, BFD back ends
+@section What to Put Where
 All of BFD lives in one directory.
 
 @node aout, coff, What to Put Where, BFD back ends
