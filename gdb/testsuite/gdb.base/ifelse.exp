@@ -30,8 +30,8 @@ gdb_start
 
 #    with true condition
 set message "if 1 with empty body"
-gdb_test_multiple "if 1\nend\necho got here\\n" $message {
-    -re ".*got here.*$gdb_prompt $" {pass $message}
+gdb_test_multiple "if 1\nend" $message {
+    -re "$gdb_prompt $" {pass $message}
     eof {
 	fail "$message (crashed)"
 	gdb_exit
@@ -41,8 +41,8 @@ gdb_test_multiple "if 1\nend\necho got here\\n" $message {
 
 #    with false condition
 set message "if 0 with empty body"
-gdb_test_multiple "if 0\nend\necho got here\\n" $message {
-    -re ".*got here.*$gdb_prompt $" {pass $message}
+gdb_test_multiple "if 0\nend" $message {
+    -re "$gdb_prompt $" {pass $message}
     eof {
 	fail "$message (crashed)"
 	gdb_exit
@@ -62,8 +62,8 @@ gdb_test "if 1\necho true\\n\nelse\necho false\\n\nend" "true" ""
 
 #    with true condition
 set message "if 1 .. else with empty body"
-gdb_test_multiple "if 1\nelse\nend\necho got here\\n" $message {
-    -re ".*got here.*$gdb_prompt $" {pass $message}
+gdb_test_multiple "if 1\nelse\nend" $message {
+    -re "$gdb_prompt $" {pass $message}
     eof {
 	fail "$message (crashed)"
 	gdb_exit
@@ -76,8 +76,8 @@ gdb_test "if 1\necho true\\n\nelse\necho false\\n\nend" "true" ""
 
 #    with false condition
 set message "if 0 .. else with empty body"
-gdb_test_multiple "if 0\nelse\nend\necho got here\\n" $message {
-    -re ".*got here.*$gdb_prompt $" {pass $message}
+gdb_test_multiple "if 0\nelse\nend" $message {
+    -re "$gdb_prompt $" {pass $message}
     eof {
 	fail "$message (crashed)"
 	gdb_exit
