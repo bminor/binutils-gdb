@@ -1,3 +1,7 @@
+2006-07-19  Paul Brook  <paul@codesourcery.com>
+
+	* armd-dis.c (arm_opcodes): Fix rbit opcode.
+
 2006-07-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (grps): Change "sldtQ", "strQ" and "smswQ" to

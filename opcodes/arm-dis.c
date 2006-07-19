@@ -761,7 +761,7 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_EXT_V6T2, 0x00300090, 0x0f300090, "ldr%c%6's%5?hbt\t%12-15r, %s"},
   {ARM_EXT_V6T2, 0x03000000, 0x0ff00000, "movw%c\t%12-15r, %V"},
   {ARM_EXT_V6T2, 0x03400000, 0x0ff00000, "movt%c\t%12-15r, %V"},
-  {ARM_EXT_V6T2, 0x03ff0f30, 0x0fff0ff0, "rbit%c\t%12-15r, %0-3r"},
+  {ARM_EXT_V6T2, 0x06ff0f30, 0x0fff0ff0, "rbit%c\t%12-15r, %0-3r"},
   {ARM_EXT_V6T2, 0x07a00050, 0x0fa00070, "%22?usbfx%c\t%12-15r, %0-3r, #%7-11d, #%16-20W"},
 
   /* ARM V6Z instructions.  */

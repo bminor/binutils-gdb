@@ -1,3 +1,7 @@
+2006-07-19  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (insns): Fix rbit Arm opcode.
+
 2006-07-18  Paul Brook  <paul@codesourcery.com>
 
 	* tc-arm.c (do_t_add_sub): Use addw/subw when source is PC.

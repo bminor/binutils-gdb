@@ -1,3 +1,7 @@
+2006-07-19  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/archv6t2.d: Adjust expected output for rbit.
+
 2006-07-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/opcode.s: Add sldt, smsw and str.
