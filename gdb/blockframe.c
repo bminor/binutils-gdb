@@ -280,27 +280,34 @@ find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
   cache_pc_function_name = DEPRECATED_SYMBOL_NAME (msymbol);
   cache_pc_function_section = section;
 
-  /* Use the lesser of the next minimal symbol in the same section, or
-     the end of the section, as the end of the function.  */
+  /* If the minimal symbol has a size, use it for the cache.
+     Otherwise use the lesser of the next minimal symbol in the same
+     section, or the end of the section, as the end of the
+     function.  */
 
-  /* Step over other symbols at this same address, and symbols in
-     other sections, to find the next symbol in this section with
-     a different address.  */
-
-  for (i = 1; DEPRECATED_SYMBOL_NAME (msymbol + i) != NULL; i++)
-    {
-      if (SYMBOL_VALUE_ADDRESS (msymbol + i) != SYMBOL_VALUE_ADDRESS (msymbol)
-	  && SYMBOL_BFD_SECTION (msymbol + i) == SYMBOL_BFD_SECTION (msymbol))
-	break;
-    }
-
-  if (DEPRECATED_SYMBOL_NAME (msymbol + i) != NULL
-      && SYMBOL_VALUE_ADDRESS (msymbol + i) < osect->endaddr)
-    cache_pc_function_high = SYMBOL_VALUE_ADDRESS (msymbol + i);
+  if (MSYMBOL_SIZE (msymbol) != 0)
+    cache_pc_function_high = cache_pc_function_low + MSYMBOL_SIZE (msymbol);
   else
-    /* We got the start address from the last msymbol in the objfile.
-       So the end address is the end of the section.  */
-    cache_pc_function_high = osect->endaddr;
+    {
+      /* Step over other symbols at this same address, and symbols in
+	 other sections, to find the next symbol in this section with
+	 a different address.  */
+
+      for (i = 1; DEPRECATED_SYMBOL_NAME (msymbol + i) != NULL; i++)
+	{
+	  if (SYMBOL_VALUE_ADDRESS (msymbol + i) != SYMBOL_VALUE_ADDRESS (msymbol)
+	      && SYMBOL_BFD_SECTION (msymbol + i) == SYMBOL_BFD_SECTION (msymbol))
+	    break;
+	}
+
+      if (DEPRECATED_SYMBOL_NAME (msymbol + i) != NULL
+	  && SYMBOL_VALUE_ADDRESS (msymbol + i) < osect->endaddr)
+	cache_pc_function_high = SYMBOL_VALUE_ADDRESS (msymbol + i);
+      else
+	/* We got the start address from the last msymbol in the objfile.
+	   So the end address is the end of the section.  */
+	cache_pc_function_high = osect->endaddr;
+    }
 
  return_cached_value:
 

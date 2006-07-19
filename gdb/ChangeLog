@@ -1,5 +1,12 @@
 2006-07-18  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* blockframe.c (find_pc_partial_function): Use the minimal symbol
+	size to control the cache entry, if available.
+	* minsyms.c (lookup_minimal_symbol_by_pc_section): Handle minimal
+	symbols with zero and non-zero sizes differently.
+
+2006-07-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* linux-thread-db.c (td_thr_getfpregs_p, td_thr_getgregs_p)
 	(td_thr_setfpregs_p, td_thr_setgregs_p, thread_db_get_info)
 	(thread_db_fetch_registers, thread_db_store_registers)

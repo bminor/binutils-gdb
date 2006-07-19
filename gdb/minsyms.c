@@ -412,6 +412,8 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc, asection *section)
 
       if (objfile->minimal_symbol_count > 0)
 	{
+	  int best_zero_sized = -1;
+
           msymbol = objfile->msymbols;
 	  lo = 0;
 	  hi = objfile->minimal_symbol_count - 1;
@@ -461,33 +463,90 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc, asection *section)
 			 == SYMBOL_VALUE_ADDRESS (&msymbol[hi + 1])))
 		hi++;
 
+	      /* Skip various undesirable symbols.  */
+	      while (hi >= 0)
+		{
+		  /* Skip any absolute symbols.  This is apparently
+		     what adb and dbx do, and is needed for the CM-5.
+		     There are two known possible problems: (1) on
+		     ELF, apparently end, edata, etc. are absolute.
+		     Not sure ignoring them here is a big deal, but if
+		     we want to use them, the fix would go in
+		     elfread.c.  (2) I think shared library entry
+		     points on the NeXT are absolute.  If we want
+		     special handling for this it probably should be
+		     triggered by a special mst_abs_or_lib or some
+		     such.  */
+
+		  if (msymbol[hi].type == mst_abs)
+		    {
+		      hi--;
+		      continue;
+		    }
+
+		  /* If SECTION was specified, skip any symbol from
+		     wrong section.  */
+		  if (section
+		      /* Some types of debug info, such as COFF,
+			 don't fill the bfd_section member, so don't
+			 throw away symbols on those platforms.  */
+		      && SYMBOL_BFD_SECTION (&msymbol[hi]) != NULL
+		      && SYMBOL_BFD_SECTION (&msymbol[hi]) != section)
+		    {
+		      hi--;
+		      continue;
+		    }
+
+		  /* If the minimal symbol has a zero size, save it
+		     but keep scanning backwards looking for one with
+		     a non-zero size.  A zero size may mean that the
+		     symbol isn't an object or function (e.g. a
+		     label), or it may just mean that the size was not
+		     specified.  */
+		  if (MSYMBOL_SIZE (&msymbol[hi]) == 0
+		      && best_zero_sized == -1)
+		    {
+		      best_zero_sized = hi;
+		      hi--;
+		      continue;
+		    }
+
+		  /* Otherwise, this symbol must be as good as we're going
+		     to get.  */
+		  break;
+		}
+
+	      /* If HI has a zero size, and best_zero_sized is set,
+		 then we had two or more zero-sized symbols; prefer
+		 the first one we found (which may have a higher
+		 address).  Also, if we ran off the end, be sure
+		 to back up.  */
+	      if (best_zero_sized != -1
+		  && (hi < 0 || MSYMBOL_SIZE (&msymbol[hi]) == 0))
+		hi = best_zero_sized;
+
+	      /* If the minimal symbol has a non-zero size, and this
+		 PC appears to be outside the symbol's contents, then
+		 refuse to use this symbol.  If we found a zero-sized
+		 symbol with an address greater than this symbol's,
+		 use that instead.  We assume that if symbols have
+		 specified sizes, they do not overlap.  */
+
+	      if (hi >= 0
+		  && MSYMBOL_SIZE (&msymbol[hi]) != 0
+		  && pc >= (SYMBOL_VALUE_ADDRESS (&msymbol[hi])
+			    + MSYMBOL_SIZE (&msymbol[hi])))
+		{
+		  if (best_zero_sized != -1)
+		    hi = best_zero_sized;
+		  else
+		    /* Go on to the next object file.  */
+		    continue;
+		}
+
 	      /* The minimal symbol indexed by hi now is the best one in this
 	         objfile's minimal symbol table.  See if it is the best one
 	         overall. */
-
-	      /* Skip any absolute symbols.  This is apparently what adb
-	         and dbx do, and is needed for the CM-5.  There are two
-	         known possible problems: (1) on ELF, apparently end, edata,
-	         etc. are absolute.  Not sure ignoring them here is a big
-	         deal, but if we want to use them, the fix would go in
-	         elfread.c.  (2) I think shared library entry points on the
-	         NeXT are absolute.  If we want special handling for this
-	         it probably should be triggered by a special
-	         mst_abs_or_lib or some such.  */
-	      while (hi >= 0
-		     && msymbol[hi].type == mst_abs)
-		--hi;
-
-	      /* If "section" specified, skip any symbol from wrong section */
-	      /* This is the new code that distinguishes it from the old function */
-	      if (section)
-		while (hi >= 0
-		       /* Some types of debug info, such as COFF,
-			  don't fill the bfd_section member, so don't
-			  throw away symbols on those platforms.  */
-		       && SYMBOL_BFD_SECTION (&msymbol[hi]) != NULL
-		       && SYMBOL_BFD_SECTION (&msymbol[hi]) != section)
-		  --hi;
 
 	      if (hi >= 0
 		  && ((best_symbol == NULL) ||
