@@ -1712,7 +1712,8 @@ alphanbsd-tdep.o: alphanbsd-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
 	$(gdb_assert_h) $(alpha_tdep_h) $(alphabsd_tdep_h) $(nbsd_tdep_h) \
 	$(solib_svr4_h)
 alphaobsd-tdep.o: alphaobsd-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
-	$(osabi_h) $(alpha_tdep_h) $(alphabsd_tdep_h) $(solib_svr4_h)
+	$(osabi_h) $(obsd_tdep_h) $(alpha_tdep_h) $(alphabsd_tdep_h) \
+	$(solib_svr4_h)
 alpha-osf1-tdep.o: alpha-osf1-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
 	$(value_h) $(osabi_h) $(gdb_string_h) $(objfiles_h) $(alpha_tdep_h)
 alpha-tdep.o: alpha-tdep.c $(defs_h) $(doublest_h) $(frame_h) \

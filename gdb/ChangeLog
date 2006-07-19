@@ -1,5 +1,10 @@
 2006-07-19  Mark Kettenis  <kettenis@gnu.org>
 
+	* alphaobsd-tdep.c: Include "obsd-tdep.h".
+	(alphaobsd_init_abi): Set skip_solib_resolver.
+	* Makefile.in (alphaobsd-tdep.o): Update dependencies.
+	* config/alpha/obsd.mt (TDEPFILES): Add obsd-tdep.o.
+
 	* arm-tdep.c (arm_gdbarch_init): Get default floating-point model
 	from ELF flags for binaries produced by the GNU toolchain.
 
