@@ -1,3 +1,8 @@
+2006-07-19  Mat Hostetter  <mat@lcs.mit.edu>
+
+	* symbols.c (report_op_error): Fix pasto.  Don't use as_bad_where
+	when file and line unknown.
+
 2006-06-07  Joseph S. Myers  <joseph@codesourcery.com>
 
 	* po/Make-in (pdf, ps): New dummy targets.
