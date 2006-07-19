@@ -14689,7 +14689,7 @@ static const struct asm_opcode insns[] =
  TCE(mls,	0600090, fb000010, 4, (RRnpc, RRnpc, RRnpc, RRnpc), mlas, t_mla),
  TCE(movw,	3000000, f2400000, 2, (RRnpc, HALF),		    mov16, t_mov16),
  TCE(movt,	3400000, f2c00000, 2, (RRnpc, HALF),		    mov16, t_mov16),
- TCE(rbit,	3ff0f30, fa90f0a0, 2, (RR, RR),			    rd_rm, t_rbit),
+ TCE(rbit,	6ff0f30, fa90f0a0, 2, (RR, RR),			    rd_rm, t_rbit),
 
  TC3(ldrht,	03000b0, f8300e00, 2, (RR, ADDR), ldsttv4, t_ldstt),
  TC3(ldrsht,	03000f0, f9300e00, 2, (RR, ADDR), ldsttv4, t_ldstt),
