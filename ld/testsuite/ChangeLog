@@ -1,3 +1,7 @@
+2006-07-19  Thiemo Seufer  <ths@mips.com>
+
+	* ld-selective/selective.exp: Fix selective testcases for MIPS.
+
 2006-07-13  Thiemo Seufer  <ths@mips.com>
 
 	* ld-mips-elf/tlslib-o32-ver.got, ld-mips-elf/tlslib-o32.got:
