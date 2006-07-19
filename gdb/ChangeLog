@@ -1,3 +1,9 @@
+2006-07-18  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* remote-fileio.c (remote_fileio_func_rename): Reorder to process
+	input buffer before reading memory.
+	(remote_fileio_func_stat): Likewise.
+
 2006-07-18  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* blockframe.c (find_pc_partial_function): Use the minimal symbol
