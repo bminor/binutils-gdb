@@ -1,3 +1,10 @@
+2006-07-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* bfd-in.h (enum notice_asneeded_action): Define.
+	* bfd-in2.h: Regenerate.
+	* elflink.c (elf_link_add_object_symbols): Call linker "notice"
+	function with NULL name for as-needed handling.
+
 2006-07-18  Paul Brook  <paul@codesourcery.com>
 
 	* bfd-in2.h: Regenerate.

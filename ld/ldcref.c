@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. 
 #include "sysdep.h"
 #include "bfdlink.h"
 #include "libiberty.h"
+#include "objalloc.h"
 
 #include "ld.h"
 #include "ldmain.h"
@@ -101,6 +102,16 @@ static bfd_boolean cref_initialized;
 
 static size_t cref_symcount;
 
+/* Used to take a snapshot of the cref hash table when starting to
+   add syms from an as-needed library.  */
+static struct bfd_hash_entry **old_table;
+static unsigned int old_size;
+static unsigned int old_count;
+static void *old_tab;
+static void *alloc_mark;
+static size_t tabsize, entsize, refsize;
+static size_t old_symcount;
+
 /* Create an entry in a cref hash table.  */
 
 static struct bfd_hash_entry *
@@ -165,7 +176,9 @@ add_cref (const char *name,
 
   if (r == NULL)
     {
-      r = xmalloc (sizeof *r);
+      r = bfd_hash_allocate (&cref_table.root, sizeof *r);
+      if (r == NULL)
+	einfo (_("%X%P: cref alloc failed: %E\n"));
       r->next = h->refs;
       h->refs = r;
       r->abfd = abfd;
@@ -180,6 +193,125 @@ add_cref (const char *name,
     r->common = TRUE;
   else
     r->def = TRUE;
+}
+
+/* Called before loading an as-needed library to take a snapshot of
+   the cref hash table, and after we have loaded or found that the
+   library was not needed.  */
+
+bfd_boolean
+handle_asneeded_cref (bfd *abfd ATTRIBUTE_UNUSED,
+		      enum notice_asneeded_action act)
+{
+  unsigned int i;
+
+  if (!cref_initialized)
+    return TRUE;
+
+  if (act == notice_as_needed)
+    {
+      char *old_ent, *old_ref;
+
+      for (i = 0; i < cref_table.root.size; i++)
+	{
+	  struct bfd_hash_entry *p;
+	  struct cref_hash_entry *c;
+	  struct cref_ref *r;
+
+	  for (p = cref_table.root.table[i]; p != NULL; p = p->next)
+	    {
+	      entsize += cref_table.root.entsize;
+	      c = (struct cref_hash_entry *) p;
+	      for (r = c->refs; r != NULL; r = r->next)
+		refsize += sizeof (struct cref_hash_entry);
+	    }
+	}
+
+      tabsize = cref_table.root.size * sizeof (struct bfd_hash_entry *);
+      old_tab = xmalloc (tabsize + entsize + refsize);
+
+      alloc_mark = bfd_hash_allocate (&cref_table.root, 1);
+      if (alloc_mark == NULL)
+	return FALSE;
+
+      memcpy (old_tab, cref_table.root.table, tabsize);
+      old_ent = (char *) old_tab + tabsize;
+      old_ref = (char *) old_ent + entsize;
+      old_table = cref_table.root.table;
+      old_size = cref_table.root.size;
+      old_count = cref_table.root.count;
+      old_symcount = cref_symcount;
+
+      for (i = 0; i < cref_table.root.size; i++)
+	{
+	  struct bfd_hash_entry *p;
+	  struct cref_hash_entry *c;
+	  struct cref_ref *r;
+
+	  for (p = cref_table.root.table[i]; p != NULL; p = p->next)
+	    {
+	      memcpy (old_ent, p, cref_table.root.entsize);
+	      old_ent = (char *) old_ent + cref_table.root.entsize;
+	      c = (struct cref_hash_entry *) p;
+	      for (r = c->refs; r != NULL; r = r->next)
+		{
+		  memcpy (old_ref, r, sizeof (struct cref_hash_entry));
+		  old_ref = (char *) old_ref + sizeof (struct cref_hash_entry);
+		}
+	    }
+	}
+      return TRUE;
+    }
+
+  if (act == notice_not_needed)
+    {
+      char *old_ent, *old_ref;
+
+      if (old_tab == NULL)
+	{
+	  /* The only way old_tab can be NULL is if the cref hash table
+	     had not been initialised when notice_as_needed.  */
+	  bfd_hash_table_free (&cref_table.root);
+	  cref_initialized = FALSE;
+	  return TRUE;
+	}
+
+      old_ent = (char *) old_tab + tabsize;
+      old_ref = (char *) old_ent + entsize;
+      cref_table.root.table = old_table;
+      cref_table.root.size = old_size;
+      cref_table.root.count = old_count;
+      memcpy (cref_table.root.table, old_tab, tabsize);
+      cref_symcount = old_symcount;
+
+      for (i = 0; i < cref_table.root.size; i++)
+	{
+	  struct bfd_hash_entry *p;
+	  struct cref_hash_entry *c;
+	  struct cref_ref *r;
+
+	  for (p = cref_table.root.table[i]; p != NULL; p = p->next)
+	    {
+	      memcpy (p, old_ent, cref_table.root.entsize);
+	      old_ent = (char *) old_ent + cref_table.root.entsize;
+	      c = (struct cref_hash_entry *) p;
+	      for (r = c->refs; r != NULL; r = r->next)
+		{
+		  memcpy (r, old_ref, sizeof (struct cref_hash_entry));
+		  old_ref = (char *) old_ref + sizeof (struct cref_hash_entry);
+		}
+	    }
+	}
+
+      objalloc_free_block ((struct objalloc *) cref_table.root.memory,
+			   alloc_mark);
+    }
+  else if (act != notice_needed)
+    return FALSE;
+
+  free (old_tab);
+  old_tab = NULL;
+  return TRUE;
 }
 
 /* Copy the addresses of the hash table entries into an array.  This

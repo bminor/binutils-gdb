@@ -1523,6 +1523,13 @@ notice (struct bfd_link_info *info,
 	asection *section,
 	bfd_vma value)
 {
+  if (name == NULL)
+    {
+      if (command_line.cref || nocrossref_list != NULL)
+	return handle_asneeded_cref (abfd, value);
+      return TRUE;
+    }
+
   if (! info->notice_all
       || (info->notice_hash != NULL
 	  && bfd_hash_lookup (info->notice_hash, name, FALSE, FALSE) != NULL))

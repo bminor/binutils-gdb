@@ -645,6 +645,12 @@ enum dynamic_lib_link_class {
   DYN_NO_NEEDED = 8
 };
 
+enum notice_asneeded_action {
+  notice_as_needed,
+  notice_not_needed,
+  notice_needed
+};
+
 extern bfd_boolean bfd_elf_record_link_assignment
   (bfd *, struct bfd_link_info *, const char *, bfd_boolean,
    bfd_boolean);

@@ -1,6 +1,6 @@
 /* ld.h -- general linker header file
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005
+   2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
@@ -288,6 +288,7 @@ extern int parsing_defsym;
 
 extern int yyparse (void);
 extern void add_cref (const char *, bfd *, asection *, bfd_vma);
+extern bfd_boolean handle_asneeded_cref (bfd *, enum notice_asneeded_action);
 extern void output_cref (FILE *);
 extern void check_nocrossrefs (void);
 extern void ld_abort (const char *, int, const char *) ATTRIBUTE_NORETURN;
