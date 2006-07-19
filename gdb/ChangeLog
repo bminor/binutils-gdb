@@ -1,3 +1,8 @@
+2006-07-19  Mark Kettenis  <kettenis@gnu.org>
+
+	* arm-tdep.c (arm_gdbarch_init): Get default floating-point model
+	from ELF flags for binaries produced by the GNU toolchain.
+
 2006-07-18  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* remote-fileio.c (remote_fileio_func_rename): Reorder to process

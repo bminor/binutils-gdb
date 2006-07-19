@@ -2594,7 +2594,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   if (arm_abi == ARM_ABI_AUTO && info.abfd != NULL)
     {
-      int ei_osabi;
+      int ei_osabi, e_flags;
 
       switch (bfd_get_flavour (info.abfd))
 	{
@@ -2611,19 +2611,18 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 	case bfd_target_elf_flavour:
 	  ei_osabi = elf_elfheader (info.abfd)->e_ident[EI_OSABI];
+	  e_flags = elf_elfheader (info.abfd)->e_flags;
+
 	  if (ei_osabi == ELFOSABI_ARM)
 	    {
 	      /* GNU tools used to use this value, but do not for EABI
-		 objects.  There's nowhere to tag an EABI version anyway,
-		 so assume APCS.  */
+		 objects.  There's nowhere to tag an EABI version
+		 anyway, so assume APCS.  */
 	      arm_abi = ARM_ABI_APCS;
 	    }
 	  else if (ei_osabi == ELFOSABI_NONE)
 	    {
-	      int e_flags, eabi_ver;
-
-	      e_flags = elf_elfheader (info.abfd)->e_flags;
-	      eabi_ver = EF_ARM_EABI_VERSION (e_flags);
+	      int eabi_ver = EF_ARM_EABI_VERSION (e_flags);
 
 	      switch (eabi_ver)
 		{
@@ -2640,8 +2639,32 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		  break;
 
 		default:
+		  /* Leave it as "auto".  */
 		  warning (_("unknown ARM EABI version 0x%x"), eabi_ver);
-		  arm_abi = ARM_ABI_APCS;
+		  break;
+		}
+	    }
+
+	  if (fp_model == ARM_FLOAT_AUTO)
+	    {
+	      int e_flags = elf_elfheader (info.abfd)->e_flags;
+
+	      switch (e_flags & (EF_ARM_SOFT_FLOAT | EF_ARM_VFP_FLOAT))
+		{
+		case 0:
+		  /* Leave it as "auto".  Strictly speaking this case
+		     means FPA, but almost nobody uses that now, and
+		     many toolchains fail to set the appropriate bits
+		     for the floating-point model they use.  */
+		  break;
+		case EF_ARM_SOFT_FLOAT:
+		  fp_model = ARM_FLOAT_SOFT_FPA;
+		  break;
+		case EF_ARM_VFP_FLOAT:
+		  fp_model = ARM_FLOAT_VFP;
+		  break;
+		case EF_ARM_SOFT_FLOAT | EF_ARM_VFP_FLOAT:
+		  fp_model = ARM_FLOAT_SOFT_VFP;
 		  break;
 		}
 	    }
