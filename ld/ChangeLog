@@ -1,3 +1,13 @@
+2006-07-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld.h (handle_asneeded_cref): Declare.
+	* ldcref.c: Include objalloc.h.
+	(old_table, old_tab, alloc_mark): New variables.
+	(tabsize, entsize, refsize, old_symcount): Likewise.
+	(add_cref): Use bfd_hash_allocate for refs.
+	(handle_asneeded_cref): New function.
+	* ldmain.c (notice): Call handle_asneeded_cref for NULL name.
+
 2006-07-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	Backport:
