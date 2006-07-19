@@ -1018,7 +1018,7 @@ decode (SIM_DESC sd, int addr, unsigned char *data, decoded_inst *dst)
 			    p->literal = 0;
 			    if (OP_KIND (q->how) == O_JSR ||
 				OP_KIND (q->how) == O_JMP)
-			      if (lvalue (sd, p->type, p->reg, &p->type))
+			      if (lvalue (sd, p->type, p->reg, (unsigned int *)&p->type))
 				goto end;
 			  }
 			else if ((x & MODE) == ABS)
@@ -1050,7 +1050,7 @@ decode (SIM_DESC sd, int addr, unsigned char *data, decoded_inst *dst)
 			    p->literal = cst[opnum];
 			    if (OP_KIND (q->how) == O_JSR ||
 				OP_KIND (q->how) == O_JMP)
-			      if (lvalue (sd, p->type, p->reg, &p->type))
+			      if (lvalue (sd, p->type, p->reg, (unsigned int *)&p->type))
 				goto end;
 			  }
 			else if ((x & MODE) == PCREL)
@@ -1891,7 +1891,7 @@ case O (name, SB):				\
       goto end;					\
   if (fetch (sd, &code->src, &tmp))		\
     goto end;					\
-  m = 1 << tmp;					\
+  m = 1 << (tmp & 7);				\
   op;						\
   if (s)					\
     if (store (sd, &code->dst,ea))		\
