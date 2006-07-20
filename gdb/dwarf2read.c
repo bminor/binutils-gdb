@@ -9304,7 +9304,11 @@ static void
 dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
 			     struct dwarf2_cu *cu)
 {
-  if (attr->form == DW_FORM_data4 || attr->form == DW_FORM_data8)
+  if ((attr->form == DW_FORM_data4 || attr->form == DW_FORM_data8)
+      /* ".debug_loc" may not exist at all, or the offset may be outside
+	 the section.  If so, fall through to the complaint in the
+	 other branch.  */
+      && DW_UNSND (attr) < dwarf2_per_objfile->loc_size)
     {
       struct dwarf2_loclist_baton *baton;
 

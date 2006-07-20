@@ -1,3 +1,9 @@
+2006-07-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf2read.c (dwarf2_symbol_mark_computed): Handle corrupted
+	or missing location list information.  Suggested by Jan
+	Kratochvil <lace@jankratochvil.net>.
+
 2006-07-13  Denis PILAT  <denis.pilat@st.com>
 
 	* interps.c (interpreter_completer): Allocate one more item to the
