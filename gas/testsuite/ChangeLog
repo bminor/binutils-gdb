@@ -1,3 +1,12 @@
+2006-07-20 Dwarakanath Rajagopal	<dwarak.rajagopal@amd.com>
+	   Michael Meissner		<michael.meissner@amd.com>
+
+	* gas/i386/amdfam10.s: Add .p2align 4,0 to make sure segment is
+	aligned on all systems.
+	* gas/i386/x86-64-amdfam10.s: Likewise.
+	* gas/i386/amdfam10.d: Adjust output for alignment.
+	* gas/i386/x86-64-amdfam10.d: Likewise.
+
 2006-07-19  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/archv6t2.d: Adjust expected output for rbit.

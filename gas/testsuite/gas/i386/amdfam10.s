@@ -16,3 +16,6 @@ foo:
 	insertq	$4,$2,%xmm2,%xmm1
 	movntsd	%xmm1,(%ecx)
 	movntss %xmm1,(%ecx)
+
+	# Force a good alignment.
+	.p2align	4,0

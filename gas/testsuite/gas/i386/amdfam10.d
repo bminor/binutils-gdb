@@ -20,3 +20,5 @@ Disassembly of section .text:
   2e:	f2 0f 78 ca 02 04[ 	]*insertq \$0x4,\$0x2,%xmm2,%xmm1
   34:	f2 0f 2b 09[ 	]+movntsd %xmm1,\(%ecx\)
   38:	f3 0f 2b 09[ 	]+movntss %xmm1,\(%ecx\)
+  3c:	00 00 [ 	]+add    %al,\(%eax\)
+	...
