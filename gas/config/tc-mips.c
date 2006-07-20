@@ -13498,11 +13498,6 @@ md_estimate_size_before_relax (fragS *fragp, asection *segtype)
 int
 mips_fix_adjustable (fixS *fixp)
 {
-  /* Don't adjust MIPS16 jump relocations, so we don't have to worry
-     about the format of the offset in the .o file. */
-  if (fixp->fx_r_type == BFD_RELOC_MIPS16_JMP)
-    return 0;
-
   if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 0;
@@ -13577,6 +13572,10 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
     }
   else
     reloc->addend = fixp->fx_addnumber;
+
+  /* Handle relocs adjusted against a section symbol.  */
+  if (fixp->fx_r_type == BFD_RELOC_MIPS16_JMP)
+    reloc->addend += fixp->fx_offset;
 
   /* Since the old MIPS ELF ABI uses Rel instead of Rela, encode the vtable
      entry to be used in the relocation's section offset.  */

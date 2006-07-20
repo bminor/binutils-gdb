@@ -1,3 +1,11 @@
+2006-07-20  Thiemo Seufer  <ths@mips.com>
+
+	* ld-mips-elf/mips16-call-global-1.s,
+	ld-mips-elf/mips16-call-global-2.s,
+	ld-mips-elf/mips16-call-global-3.s, ld-mips-elf/mips16-call-global.d:
+	Test linking of external mips16 jumps.
+	* ld-mips-elf/mips-elf.exp: Run new test.
+
 2006-07-19  Thiemo Seufer  <ths@mips.com>
 
 	* ld-selective/selective.exp: Fix selective testcases for MIPS.

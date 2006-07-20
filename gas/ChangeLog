@@ -1,3 +1,8 @@
+2006-07-20  Thiemo Seufer  <ths@mips.com>
+
+	* config/tc-mips.c (mips_fix_adjustable): Handle BFD_RELOC_MIPS16_JMP.
+	(tc_gen_reloc): Handle mips16 jumps to section symbol offsets.
+
 2006-07-19  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (insns): Fix rbit Arm opcode.

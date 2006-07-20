@@ -243,3 +243,12 @@ if {[istarget mips*-*-linux*]} {
     run_ld_link_tests $mips_tls_tests
 }
 
+set mips16_call_global_test {
+    {"Global calls from mips16"
+     ""
+     "-mips32r2" {mips16-call-global-1.s mips16-call-global-2.s mips16-call-global-3.s}
+     {{objdump -dr mips16-call-global.d}}
+     "mips16-call-global"}
+}
+
+run_ld_link_tests $mips16_call_global_test

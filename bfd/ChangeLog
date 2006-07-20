@@ -1,3 +1,12 @@
+2006-07-20  Thiemo Seufer  <ths@mips.com>
+
+	* elf32-mips.c (mips16_jump_reloc): Remove function.
+	(elf_mips16_howto_table_rel): Use _bfd_mips_elf_generic_reloc
+	instead of mips16_jump_reloc.
+	* elf64_mips.c, wlfn32-mips.c (mips16_jump_reloc): Remove function.
+	(elf_mips16_howto_table_rel, elf_mips16_howto_table_rela): Use
+	_bfd_mips_elf_generic_reloc instead of mips16_jump_reloc.
+
 2006-07-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* bfd-in.h (enum notice_asneeded_action): Define.

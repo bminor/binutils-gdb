@@ -61,8 +61,6 @@ static bfd_reloc_status_type gprel32_with_gp
   (bfd *, asymbol *, arelent *, asection *, bfd_boolean, void *, bfd_vma);
 static bfd_reloc_status_type mips_elf_shift6_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
-static bfd_reloc_status_type mips16_jump_reloc
-  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type mips16_gprel_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
@@ -1444,7 +1442,7 @@ static reloc_howto_type elf_mips16_howto_table_rel[] =
 	 			/* This needs complex overflow
 				   detection, because the upper four
 				   bits must match the PC.  */
-	 mips16_jump_reloc,	/* special_function */
+	 _bfd_mips_elf_generic_reloc, /* special_function */
 	 "R_MIPS16_26",		/* name */
 	 TRUE,			/* partial_inplace */
 	 0x3ffffff,		/* src_mask */
@@ -1516,7 +1514,7 @@ static reloc_howto_type elf_mips16_howto_table_rela[] =
 	 			/* This needs complex overflow
 				   detection, because the upper four
 				   bits must match the PC.  */
-	 mips16_jump_reloc,	/* special_function */
+	 _bfd_mips_elf_generic_reloc, /* special_function */
 	 "R_MIPS16_26",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0x3ffffff,		/* src_mask */
@@ -1901,28 +1899,6 @@ mips_elf_shift6_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 				      error_message);
 }
 
-/* Handle a mips16 jump.  */
-
-static bfd_reloc_status_type
-mips16_jump_reloc (bfd *abfd ATTRIBUTE_UNUSED,
-		   arelent *reloc_entry ATTRIBUTE_UNUSED,
-		   asymbol *symbol ATTRIBUTE_UNUSED,
-		   void *data ATTRIBUTE_UNUSED,
-		   asection *input_section, bfd *output_bfd ATTRIBUTE_UNUSED,
-		   char **error_message ATTRIBUTE_UNUSED)
-{
-  static bfd_boolean warned = FALSE;
-
-  /* FIXME.  */
-  if (! warned)
-    (*_bfd_error_handler)
-      (_("Linking mips16 objects into %s format is not supported"),
-       bfd_get_target (input_section->output_section->owner));
-  warned = TRUE;
-
-  return bfd_reloc_undefined;
-}
-
 /* Handle a mips16 GP relative reloc.  */
 
 static bfd_reloc_status_type
