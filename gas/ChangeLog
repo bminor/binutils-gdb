@@ -1,4 +1,10 @@
 2006-07-20  Thiemo Seufer  <ths@mips.com>
+            Nigel Stephens  <nigel@mips.com>
+
+	* config/tc-mips.c (md_parse_option): Don't infer optimisation
+	options from debug options.
+
+2006-07-20  Thiemo Seufer  <ths@mips.com>
 
 	* config/tc-mips.c (mips_fix_adjustable): Handle BFD_RELOC_MIPS16_JMP.
 	(tc_gen_reloc): Handle mips16 jumps to section symbol offsets.

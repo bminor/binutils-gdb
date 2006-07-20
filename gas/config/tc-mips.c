@@ -10992,11 +10992,6 @@ md_parse_option (int c, char *arg)
 	mips_debug = 2;
       else
 	mips_debug = atoi (arg);
-      /* When the MIPS assembler sees -g or -g2, it does not do
-         optimizations which limit full symbolic debugging.  We take
-         that to be equivalent to -O0.  */
-      if (mips_debug == 2)
-	mips_optimize = 1;
       break;
 
     case OPTION_MIPS1:
