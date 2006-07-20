@@ -1,3 +1,7 @@
+2006-07-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* eval.c (evaluate_struct_tuple): Skip static fields.
+
 2006-07-19  Mark Kettenis  <kettenis@gnu.org>
 
 	* alphaobsd-tdep.c: Include "obsd-tdep.h".
