@@ -1,3 +1,8 @@
+2006-07-21  Nick Clifton  <nickc@redhat.com>
+
+	* ld-sh/arch/arch.exp (test_arch): Set the endian flag to suit the
+	multilib being tested.
+
 2006-07-20  Thiemo Seufer  <ths@mips.com>
 
 	* ld-mips-elf/mips16-call-global-1.s,
