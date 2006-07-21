@@ -1,3 +1,29 @@
+2006-07-21  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* cli/cli-cmds.c (source_verbose, trace_commands): New variables.
+	(source_script): New function.
+	(source_verbose_cleanup): New function.
+	(source_command): Move old contents to source_script.
+	Make function static. Parse -v option and call source_script.
+	(init_cli_cmds): Update source command help.
+	Add 'set trace-commands' command.
+	* cli/cli-script.c (command_next_depth): New static variable.
+	(suppress_next_print_command_trace): New static variable.
+	(reset_command_nest_depth): New function.
+	(print_command_trace): New function.
+	(execute_control_command): Split the continue_control and break_control
+	cases, add calls to print_command_trace and count the nest depth.
+	(while_command): Set suppress_next_print_command_trace.
+	(if_command): Likewise.
+	* top.c (execute_command): Call print_command_trace.
+	* cli/cli-cmds.h (source_verbose, trace_commands): New extern variables.
+	(source_command): Change to source_script.
+	* main.c (captued_main): Use source_script instead of source_command.
+	* top.h (source_command): Change to source_script.
+	* event-top.c (display_gdb_prompt): Call reset_command_nest_depth.
+	* cli/cli-script.h (print_command_trace): Export.
+	(reset_command_nest_depth): Likewise.
+
 2006-07-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* eval.c (evaluate_struct_tuple): Skip static fields.

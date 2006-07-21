@@ -53,4 +53,12 @@ struct cleanup *make_cleanup_free_command_lines (struct command_line **arg);
 
 extern void execute_user_command (struct cmd_list_element *c, char *args);
 
+/* Exported to top.c */
+
+extern void print_command_trace (const char *cmd);
+
+/* Exported to event-top.c */
+
+extern void reset_command_nest_depth (void);
+
 #endif /* !defined (CLI_SCRIPT_H) */

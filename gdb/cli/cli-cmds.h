@@ -115,11 +115,16 @@ extern void cd_command (char *, int);
 
 extern void quit_command (char *, int);
 
-extern void source_command (char *, int);
+extern void source_script (char *, int);
 
 /* Used everywhere whenever at least one parameter is required and
   none is specified. */
 
 extern NORETURN void error_no_arg (char *) ATTR_NORETURN;
+
+/* Command tracing state.  */
+
+extern int source_verbose;
+extern int trace_commands;
 
 #endif /* !defined (CLI_CMDS_H) */

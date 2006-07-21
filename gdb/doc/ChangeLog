@@ -1,3 +1,9 @@
+2006-07-21  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* gdb.texinfo (Optional warnings and messages): Add
+	'set/show trace-commands'.
+	(Command files): Add '-v' to source command.
+
 2006-07-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (OS Information): Update qPart reference to

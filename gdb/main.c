@@ -643,7 +643,7 @@ extern int gdbtk_test (char *);
 
       if (!inhibit_gdbinit)
 	{
-	  catch_command_errors (source_command, homeinit, 0, RETURN_MASK_ALL);
+	  catch_command_errors (source_script, homeinit, 0, RETURN_MASK_ALL);
 	}
 
       /* Do stats; no need to do them elsewhere since we'll only
@@ -730,7 +730,7 @@ extern int gdbtk_test (char *);
       || memcmp ((char *) &homebuf, (char *) &cwdbuf, sizeof (struct stat)))
     if (!inhibit_gdbinit)
       {
-	catch_command_errors (source_command, gdbinit, 0, RETURN_MASK_ALL);
+	catch_command_errors (source_script, gdbinit, 0, RETURN_MASK_ALL);
       }
 
   for (i = 0; i < ncmd; i++)
@@ -748,12 +748,12 @@ extern int gdbtk_test (char *);
 	    read_command_file (stdin);
 	  else
 #endif
-	    source_command (cmdarg[i], !batch);
+	    source_script (cmdarg[i], !batch);
 	  do_cleanups (ALL_CLEANUPS);
 	}
 #endif
       if (cmdarg[i].type == CMDARG_FILE)
-        catch_command_errors (source_command, cmdarg[i].string,
+        catch_command_errors (source_script, cmdarg[i].string,
 			      !batch, RETURN_MASK_ALL);
       else  /* cmdarg[i].type == CMDARG_COMMAND */
         catch_command_errors (execute_command, cmdarg[i].string,
