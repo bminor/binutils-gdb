@@ -1,3 +1,8 @@
+2006-07-21  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-sh.c (md_longopts): Add -EL and -EB for use by the
+	linker testsuite.
+
 2006-07-20  Thiemo Seufer  <ths@mips.com>
             Nigel Stephens  <nigel@mips.com>
 

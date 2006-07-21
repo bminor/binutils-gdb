@@ -3063,6 +3063,10 @@ struct option md_longopts[] =
   {"relax", no_argument, NULL, OPTION_RELAX},
   {"big", no_argument, NULL, OPTION_BIG},
   {"little", no_argument, NULL, OPTION_LITTLE},
+  /* The next two switches are here because the
+     generic parts of the linker testsuite uses them.  */
+  {"EB", no_argument, NULL, OPTION_BIG},
+  {"EL", no_argument, NULL, OPTION_LITTLE},
   {"small", no_argument, NULL, OPTION_SMALL},
   {"dsp", no_argument, NULL, OPTION_DSP},
   {"isa", required_argument, NULL, OPTION_ISA},
