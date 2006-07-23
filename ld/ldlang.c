@@ -45,6 +45,15 @@
 #define offsetof(TYPE, MEMBER) ((size_t) & (((TYPE*) 0)->MEMBER))
 #endif
 
+/* Binary search tree structure to
+   efficiently sort sections by name.  */
+typedef struct lang_section_bst
+{
+  asection *section;
+  struct lang_section_bst *left;
+  struct lang_section_bst *right;
+} lang_section_bst_type;
+
 /* Locals variables.  */
 static struct obstack stat_obstack;
 static struct obstack map_obstack;
@@ -314,6 +323,124 @@ match_simple_wild (const char *pattern, const char *name)
       return FALSE;
 
   return TRUE;
+}
+
+/* Compare sections ASEC and BSEC according to SORT.  */
+
+static int
+compare_section (sort_type sort, asection *asec, asection *bsec)
+{
+  int ret;
+
+  switch (sort)
+    {
+    default:
+      abort ();
+
+    case by_alignment_name:
+      ret = (bfd_section_alignment (bsec->owner, bsec)
+	     - bfd_section_alignment (asec->owner, asec));
+      if (ret)
+	break;
+      /* Fall through.  */
+
+    case by_name:
+      ret = strcmp (bfd_get_section_name (asec->owner, asec),
+		    bfd_get_section_name (bsec->owner, bsec));
+      break;
+
+    case by_name_alignment:
+      ret = strcmp (bfd_get_section_name (asec->owner, asec),
+		    bfd_get_section_name (bsec->owner, bsec));
+      if (ret)
+	break;
+      /* Fall through.  */
+
+    case by_alignment:
+      ret = (bfd_section_alignment (bsec->owner, bsec)
+	     - bfd_section_alignment (asec->owner, asec));
+      break;
+    }
+
+  return ret;
+}
+
+/* Build a Binary Search Tree to sort sections, unlike insertion sort 
+   used in wild_sort(). BST is considerably faster if the number of
+   of sections are large.  */
+
+static lang_section_bst_type **
+wild_sort_fast (lang_wild_statement_type *wild,
+                struct wildcard_list *sec,
+                lang_input_statement_type *file ATTRIBUTE_UNUSED,
+                asection *section) 
+{
+  lang_section_bst_type **tree
+    = (lang_section_bst_type **) (&(wild->handler_data[1]));
+
+  if (!wild->filenames_sorted
+      && (sec == NULL || sec->spec.sorted == none)) 
+    {
+      /* Append at the right end of tree.  */
+      while (*tree)
+        tree = &((*tree)->right);
+      return tree;
+    }
+
+  while (*tree) 
+    {
+      /* Find the correct node to append this section.  */
+      if (compare_section (sec->spec.sorted, section, (*tree)->section) < 0) 
+        tree = &((*tree)->left);
+      else 
+        tree = &((*tree)->right);
+    }
+
+  return tree;
+}
+
+/* Use wild_sort_fast to build a BST to sort sections.  */
+
+static void
+output_section_callback_fast (lang_wild_statement_type *ptr,
+                              struct wildcard_list *sec,
+                              asection *section,
+                              lang_input_statement_type *file,
+                              void *output ATTRIBUTE_UNUSED) 
+{
+  lang_section_bst_type *node;
+  lang_section_bst_type **tree;
+
+  if (unique_section_p (section))
+    return;
+
+  node = xmalloc (sizeof (lang_section_bst_type));
+  node->left = 0;
+  node->right = 0;
+  node->section = section;
+
+  tree = wild_sort_fast (ptr, sec, file, section);
+  if (tree != NULL)
+    *tree = node;
+}
+
+/* Convert a sorted sections' BST back to list form.  */
+
+static void
+output_section_callback_tree_to_list (lang_wild_statement_type *ptr, 
+                                      lang_section_bst_type *tree, 
+                                      void *output) 
+{
+  if (tree->left)
+    output_section_callback_tree_to_list (ptr, tree->left, output);
+
+  lang_add_section (& ptr->children, tree->section,
+                    (lang_output_section_statement_type *) output);
+
+  if (tree->right)
+    output_section_callback_tree_to_list (ptr, tree->right, output);
+
+  free (tree);
 }
 
 /* Specialized, optimized routines for handling different kinds of
@@ -608,6 +735,10 @@ analyze_walk_wild_section_handler (lang_wild_statement_type *ptr)
      given order, because we've already determined that no section
      will match more than one spec.  */
   data_counter = 0;
+  ptr->handler_data[0] = NULL;
+  ptr->handler_data[1] = NULL;
+  ptr->handler_data[2] = NULL;
+  ptr->handler_data[3] = NULL;
   for (sec = ptr->section_list; sec != NULL; sec = sec->next)
     if (!wildcardp (sec->spec.name))
       ptr->handler_data[data_counter++] = sec;
@@ -2003,46 +2134,6 @@ lang_add_section (lang_statement_list_type *ptr,
     }
 }
 
-/* Compare sections ASEC and BSEC according to SORT.  */
-
-static int
-compare_section (sort_type sort, asection *asec, asection *bsec)
-{
-  int ret;
-
-  switch (sort)
-    {
-    default:
-      abort ();
-
-    case by_alignment_name:
-      ret = (bfd_section_alignment (bsec->owner, bsec)
-	     - bfd_section_alignment (asec->owner, asec));
-      if (ret)
-	break;
-      /* Fall through.  */
-
-    case by_name:
-      ret = strcmp (bfd_get_section_name (asec->owner, asec),
-		    bfd_get_section_name (bsec->owner, bsec));
-      break;
-
-    case by_name_alignment:
-      ret = strcmp (bfd_get_section_name (asec->owner, asec),
-		    bfd_get_section_name (bsec->owner, bsec));
-      if (ret)
-	break;
-      /* Fall through.  */
-
-    case by_alignment:
-      ret = (bfd_section_alignment (bsec->owner, bsec)
-	     - bfd_section_alignment (asec->owner, asec));
-      break;
-    }
-
-  return ret;
-}
-
 /* Handle wildcard sorting.  This returns the lang_input_section which
    should follow the one we are going to create for SECTION and FILE,
    based on the sorting requirements of WILD.  It returns NULL if the
@@ -2461,7 +2552,20 @@ wild (lang_wild_statement_type *s,
 {
   struct wildcard_list *sec;
 
-  walk_wild (s, output_section_callback, output);
+  if (s->handler_data[0]
+      && (s->handler_data[0]->spec.sorted == by_name) 
+      && !s->filenames_sorted)
+    {
+      walk_wild (s, output_section_callback_fast, output);
+
+      if (s->handler_data[1]) 
+        output_section_callback_tree_to_list (s, 
+                                              (lang_section_bst_type *) s->handler_data[1], 
+                                              output);
+      s->handler_data[1] = NULL;
+    }
+  else 
+    walk_wild (s, output_section_callback, output);
 
   if (default_common_section == NULL)
     for (sec = s->section_list; sec != NULL; sec = sec->next)

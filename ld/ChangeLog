@@ -1,3 +1,18 @@
+2006-07-23  Sonal Santan  <sonal.santan@xilinx.com>
+
+	* ldlang.c (lang_section_bst): New structure for sorting sections
+	by name.
+	(wild_sort_fast): New function: Insert a section into a binary
+	search tree.
+	(output_section_callback_fast): New function: Store a section in
+	BST.
+	(output_section_callback_tree_to_list): New function: Convert a
+	BST into a list.
+	(analyze_walk_wild_section_handler): Initialize handler_data
+	elements.
+	(wild): If the data is sorted by name use the BST method to sort
+	the names.
+
 2006-07-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld.h (handle_asneeded_cref): Declare.
