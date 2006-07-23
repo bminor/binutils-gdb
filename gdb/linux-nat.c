@@ -3180,8 +3180,6 @@ linux_target (void)
 void
 linux_nat_add_target (struct target_ops *t)
 {
-  extern void thread_db_init (struct target_ops *);
-
   /* Save the provided single-threaded target.  We save this in a separate
      variable because another target we've inherited from (e.g. inf-ptrace)
      may have saved a pointer to T; we want to use it for the final

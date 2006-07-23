@@ -1,3 +1,8 @@
+2006-07-23  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-nat.c (linux_nat_add_target): Remove extern.
+	* linux-nat.h (thread_db_init): New prototype.
+
 2006-07-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* configure.tgt: Build gdbserver for Cygwin and mingw32.
