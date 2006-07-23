@@ -1,5 +1,9 @@
 2006-07-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* configure.tgt: Build gdbserver for Cygwin and mingw32.
+
+2006-07-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* config/i386/cygwin.mt (DEPRECATED_TM_FILE): Delete.
 	* config/i386/nm-cygwin.h: Add contents of tm-cygwin.h.
 	* config/i386/tm-cygwin.h: Delete file.

@@ -81,9 +81,11 @@ struct target_ops
 
   /* Wait for the inferior process to change state.
 
-     STATUSP will be filled in with a response code to send to GDB.
+     STATUS will be filled in with a response code to send to GDB.
 
-     Returns the signal which caused the process to stop.  */
+     Returns the signal which caused the process to stop, in the
+     remote protocol numbering (e.g. TARGET_SIGNAL_STOP), or the
+     exit code as an integer if *STATUS is 'W'.  */
 
   unsigned char (*wait) (char *status);
 

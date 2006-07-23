@@ -24,7 +24,9 @@
 
 #include <unistd.h>
 #include <signal.h>
+#if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
+#endif
 
 unsigned long cont_thread;
 unsigned long general_thread;
@@ -46,17 +48,22 @@ unsigned long signal_pid;
 static int
 start_inferior (char *argv[], char *statusptr)
 {
+#ifdef SIGTTOU
   signal (SIGTTOU, SIG_DFL);
   signal (SIGTTIN, SIG_DFL);
+#endif
 
   signal_pid = create_inferior (argv[0], argv);
 
   fprintf (stderr, "Process %s created; pid = %ld\n", argv[0],
 	   signal_pid);
+  fflush (stderr);
 
+#ifdef SIGTTOU
   signal (SIGTTOU, SIG_IGN);
   signal (SIGTTIN, SIG_IGN);
   tcsetpgrp (fileno (stderr), signal_pid);
+#endif
 
   /* Wait till we are at 1st instruction in program, return signal number.  */
   return mywait (statusptr, 0);
@@ -72,6 +79,7 @@ attach_inferior (int pid, char *statusptr, int *sigptr)
     return -1;
 
   fprintf (stderr, "Attached; pid = %d\n", pid);
+  fflush (stderr);
 
   /* FIXME - It may be that we should get the SIGNAL_PID from the
      attach function, so that it can be the main thread instead of
@@ -83,8 +91,8 @@ attach_inferior (int pid, char *statusptr, int *sigptr)
   /* GDB knows to ignore the first SIGSTOP after attaching to a running
      process using the "attach" command, but this is different; it's
      just using "target remote".  Pretend it's just starting up.  */
-  if (*statusptr == 'T' && *sigptr == SIGSTOP)
-    *sigptr = SIGTRAP;
+  if (*statusptr == 'T' && *sigptr == TARGET_SIGNAL_STOP)
+    *sigptr = TARGET_SIGNAL_TRAP;
 
   return 0;
 }
@@ -516,6 +524,9 @@ main (int argc, char *argv[])
 	    case 'd':
 	      remote_debug = !remote_debug;
 	      break;
+#ifndef USE_WIN32API
+	    /* Skip "detach" support on mingw32, since we don't have
+	       waitpid.  */
 	    case 'D':
 	      fprintf (stderr, "Detaching from inferior\n");
 	      detach_inferior ();
@@ -537,6 +548,7 @@ main (int argc, char *argv[])
 		}
 
 	      exit (0);
+#endif
 
 	    case '!':
 	      if (attached == 0)
@@ -794,8 +806,9 @@ main (int argc, char *argv[])
 	    fprintf (stderr,
 		     "\nChild exited with status %d\n", signal);
 	  if (status == 'X')
-	    fprintf (stderr, "\nChild terminated with signal = 0x%x\n",
-		     signal);
+	    fprintf (stderr, "\nChild terminated with signal = 0x%x (%s)\n",
+		     target_signal_to_host (signal),
+		     target_signal_to_name (signal));
 	  if (status == 'W' || status == 'X')
 	    {
 	      if (extended_protocol)

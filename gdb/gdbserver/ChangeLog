@@ -1,3 +1,35 @@
+2006-07-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* configure.ac: Check for more headers which are missing on
+	Windows.  Automatically supply -lwsock32 and USE_WIN32API.
+	* configure.srv: Add Cygwin and mingw32.
+	* remote-utils.c: Don't include headers unconditionally which
+	are missing on mingw32.  Include <winsock.h> for mingw32.
+	(remote_open): Adjust for mingw32 support.  Flush
+	standard error after writing to it.
+	(remote_close, putpkt_binary, input_interrupt, block_async_io)
+	(unblock_async_io, enable_async_io, disable_async_io)
+	(readchar, getpkt): Update for Winsock support.
+	(prepare_resume_reply): Expect a protocol signal number.
+	* server.c: Disable <sys/wait.h> on mingw32.
+	(start_inferior): Adjust for mingw32 support.  Flush
+	standard error after writing to it.
+	(attach_inferior): Likewise.  Use protocol signal
+	numbers.
+	(main): Skip 'D' packet on mingw32.  Use protocol signal numbers
+	and names.
+	* win32-i386-low.c: New file.
+	* Makefile.in (XM_CLIBS): Set.
+	(gdbserver, gdbreplay): Use $(INTERNAL_CFLAGS).
+	(win32-i386-low.o): New dependency rule.
+	* linux-low.c (linux_wait): Use target signal numbers.
+	* target.h (struct target_ops): Doc fix.
+	* server.h (target_signal_to_name): New prototype.
+	* gdbreplay.c: Don't include headers unconditionally which
+	are missing on mingw32.  Include <winsock.h> for mingw32.
+	(remote_close, remote_open): Adjust for Winsock support.
+	* configure, config.in: Regenerated.
+
 2006-07-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* server.c (decode_xfer_read, write_qxfer_response): New.

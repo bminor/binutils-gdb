@@ -21,21 +21,41 @@
    Boston, MA 02110-1301, USA.  */
 
 #include "server.h"
+#if HAVE_TERMINAL_H
 #include "terminal.h"
+#endif
 #include <stdio.h>
 #include <string.h>
+#if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif
 #include <sys/file.h>
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#if HAVE_NETDB_H
 #include <netdb.h>
+#endif
+#if HAVE_NETINET_TCP_H
 #include <netinet/tcp.h>
+#endif
+#if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif
 #include <signal.h>
 #include <fcntl.h>
 #include <sys/time.h>
 #include <unistd.h>
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
+#endif
+
+#if USE_WIN32API
+#include <winsock.h>
+#endif
 
 #ifndef HAVE_SOCKLEN_T
 typedef int socklen_t;
@@ -71,10 +91,15 @@ extern int debug_threads;
 void
 remote_open (char *name)
 {
+#if defined(F_SETFL) && defined (FASYNC)
   int save_fcntl_flags;
+#endif
   
   if (!strchr (name, ':'))
     {
+#ifdef USE_WIN32API
+      error ("Only <host>:<port> is supported on this platform.");
+#else
       remote_desc = open (name, O_RDWR);
       if (remote_desc < 0)
 	perror_with_name ("Could not open remote device");
@@ -124,9 +149,13 @@ remote_open (char *name)
 #endif
 
       fprintf (stderr, "Remote debugging using %s\n", name);
+#endif /* USE_WIN32API */
     }
   else
     {
+#ifdef USE_WIN32API
+      static int winsock_initialized;
+#endif
       char *port_str;
       int port;
       struct sockaddr_in sockaddr;
@@ -137,7 +166,17 @@ remote_open (char *name)
 
       port = atoi (port_str + 1);
 
-      tmp_desc = socket (PF_INET, SOCK_STREAM, 0);
+#ifdef USE_WIN32API
+      if (!winsock_initialized)
+	{
+	  WSADATA wsad;
+
+	  WSAStartup (MAKEWORD (1, 0), &wsad);
+	  winsock_initialized = 1;
+	}
+#endif
+
+      tmp_desc = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP);
       if (tmp_desc < 0)
 	perror_with_name ("Can't open socket");
 
@@ -155,6 +194,7 @@ remote_open (char *name)
 	perror_with_name ("Can't bind address");
 
       fprintf (stderr, "Listening on port %d\n", port);
+      fflush (stderr);
 
       tmp = sizeof (sockaddr);
       remote_desc = accept (tmp_desc, (struct sockaddr *) &sockaddr, &tmp);
@@ -171,10 +211,15 @@ remote_open (char *name)
       setsockopt (remote_desc, IPPROTO_TCP, TCP_NODELAY,
 		  (char *) &tmp, sizeof (tmp));
 
+
+#ifndef USE_WIN32API
       close (tmp_desc);		/* No longer need this */
 
       signal (SIGPIPE, SIG_IGN);	/* If we don't do this, then gdbserver simply
 					   exits when the remote side dies.  */
+#else
+      closesocket (tmp_desc);	/* No longer need this */
+#endif
 
       /* Convert IP address to string.  */
       fprintf (stderr, "Remote debugging from host %s\n", 
@@ -194,7 +239,11 @@ remote_open (char *name)
 void
 remote_close (void)
 {
+#ifdef USE_WIN32API
+  closesocket (remote_desc);
+#else
   close (remote_desc);
+#endif
 }
 
 /* Convert hex digit A to a number.  */
@@ -395,7 +444,7 @@ putpkt_binary (char *buf, int cnt)
     {
       int cc;
 
-      if (write (remote_desc, buf2, p - buf2) != p - buf2)
+      if (send (remote_desc, buf2, p - buf2, 0) != p - buf2)
 	{
 	  perror ("putpkt(write)");
 	  return -1;
@@ -406,7 +455,7 @@ putpkt_binary (char *buf, int cnt)
 	  fprintf (stderr, "putpkt (\"%s\"); [looking for ack]\n", buf2);
 	  fflush (stderr);
 	}
-      cc = read (remote_desc, buf3, 1);
+      cc = recv (remote_desc, buf3, 1, 0);
       if (remote_debug)
 	{
 	  fprintf (stderr, "[received '%c' (0x%x)]\n", buf3[0], buf3[0]);
@@ -444,6 +493,7 @@ putpkt (char *buf)
   return putpkt_binary (buf, strlen (buf));
 }
 
+#ifndef USE_WIN32API
 
 /* Come here when we get an input interrupt from the remote side.  This
    interrupt should only be active while we are waiting for the child to do
@@ -466,7 +516,7 @@ input_interrupt (int unused)
       int cc;
       char c = 0;
       
-      cc = read (remote_desc, &c, 1);
+      cc = recv (remote_desc, &c, 1, 0);
 
       if (cc != 1 || c != '\003')
 	{
@@ -478,28 +528,33 @@ input_interrupt (int unused)
       (*the_target->send_signal) (SIGINT);
     }
 }
+#endif
+
+/* Asynchronous I/O support.  SIGIO must be enabled when waiting, in order to
+   accept Control-C from the client, and must be disabled when talking to
+   the client.  */
 
 void
 block_async_io (void)
 {
+#ifndef USE_WIN32API
   sigset_t sigio_set;
   sigemptyset (&sigio_set);
   sigaddset (&sigio_set, SIGIO);
   sigprocmask (SIG_BLOCK, &sigio_set, NULL);
+#endif
 }
 
 void
 unblock_async_io (void)
 {
+#ifndef USE_WIN32API
   sigset_t sigio_set;
   sigemptyset (&sigio_set);
   sigaddset (&sigio_set, SIGIO);
   sigprocmask (SIG_UNBLOCK, &sigio_set, NULL);
+#endif
 }
-
-/* Asynchronous I/O support.  SIGIO must be enabled when waiting, in order to
-   accept Control-C from the client, and must be disabled when talking to
-   the client.  */
 
 /* Current state of asynchronous I/O.  */
 static int async_io_enabled;
@@ -511,7 +566,9 @@ enable_async_io (void)
   if (async_io_enabled)
     return;
 
+#ifndef USE_WIN32API
   signal (SIGIO, input_interrupt);
+#endif
   async_io_enabled = 1;
 }
 
@@ -522,7 +579,9 @@ disable_async_io (void)
   if (!async_io_enabled)
     return;
 
+#ifndef USE_WIN32API
   signal (SIGIO, SIG_IGN);
+#endif
   async_io_enabled = 0;
 }
 
@@ -538,7 +597,7 @@ readchar (void)
   if (bufcnt-- > 0)
     return *bufp++;
 
-  bufcnt = read (remote_desc, buf, sizeof (buf));
+  bufcnt = recv (remote_desc, buf, sizeof (buf), 0);
 
   if (bufcnt <= 0)
     {
@@ -605,7 +664,7 @@ getpkt (char *buf)
 
       fprintf (stderr, "Bad checksum, sentsum=0x%x, csum=0x%x, buf=%s\n",
 	       (c1 << 4) + c2, csum, buf);
-      write (remote_desc, "-", 1);
+      send (remote_desc, "-", 1, 0);
     }
 
   if (remote_debug)
@@ -614,7 +673,7 @@ getpkt (char *buf)
       fflush (stderr);
     }
 
-  write (remote_desc, "+", 1);
+  send (remote_desc, "+", 1, 0);
 
   if (remote_debug)
     {
@@ -723,13 +782,11 @@ dead_thread_notify (int id)
 }
 
 void
-prepare_resume_reply (char *buf, char status, unsigned char signo)
+prepare_resume_reply (char *buf, char status, unsigned char sig)
 {
-  int nib, sig;
+  int nib;
 
   *buf++ = status;
-
-  sig = (int)target_signal_from_host (signo);
 
   nib = ((sig & 0xf0) >> 4);
   *buf++ = tohex (nib);

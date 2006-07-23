@@ -171,6 +171,7 @@ int look_up_one_symbol (const char *name, CORE_ADDR *addrp);
 enum target_signal target_signal_from_host (int hostsig);
 int target_signal_to_host_p (enum target_signal oursig);
 int target_signal_to_host (enum target_signal oursig);
+char *target_signal_to_name (enum target_signal);
 
 /* Functions from utils.c */
 
