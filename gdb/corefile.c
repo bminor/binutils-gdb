@@ -156,8 +156,8 @@ reopen_exec_file (void)
   struct stat st;
   long mtime;
 
-  /* Don't do anything if the current target isn't exec. */
-  if (exec_bfd == NULL || strcmp (target_shortname, "exec") != 0)
+  /* Don't do anything if there isn't an exec file. */
+  if (exec_bfd == NULL)
     return;
 
   /* If the timestamp of the exec file has changed, reopen it. */
@@ -167,9 +167,7 @@ reopen_exec_file (void)
   res = stat (filename, &st);
 
   if (mtime && mtime != st.st_mtime)
-    {
-      exec_open (filename, 0);
-    }
+    exec_file_attach (filename, 0);
 #endif
 }
 

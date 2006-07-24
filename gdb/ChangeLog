@@ -1,4 +1,13 @@
-2006-07-21  Frederic Riss  <frederic.riss@st.com>
+2006-07-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* corefile.c (reopen_exec_file): Only check for an open exec file.
+	Use exec_file_attach.
+	* exec.c (exec_open): Make static.
+	(exec_file_command): Don't use target_preopen.  Query directly about
+	changing the file.
+	* gdbcore.h (exec_open): Remove prototype.
+
+2006-07-24  Frederic Riss  <frederic.riss@st.com>
 
 	* regcache.c (struct regcache): Make register_valid_p a signed char 
 	array.

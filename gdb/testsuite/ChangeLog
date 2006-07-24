@@ -1,3 +1,10 @@
+2006-07-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/completion.exp: Update for change in "file" behavior.
+	* gdb.stabs/weird.exp: Likewise.
+	* lib/mi-support.exp (mi_gdb_file_cmd): Likewise.
+	* lib/gdb.exp (gdb_file_cmd): Likewise.  Kill the program explicitly.
+
 2006-07-24  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* gdb.base/auxv.exp: Skip on non-linux, non-solaris targets.
