@@ -34,17 +34,15 @@ if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+gdb_file_cmd ${binfile}
 gdb_test "set listsize 1" \
     ".*"
-gdb_test "break main" ".*Breakpoint.* at .*" "set breakpoint at main"
-gdb_run_cmd
 
 # initial sal should be first statement in main
 gdb_test "list" \
     "v0 = 0;" \
     "list before run"
-
+gdb_load
 if {! [runto_main]} {
     return -1
 }

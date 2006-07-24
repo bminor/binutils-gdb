@@ -262,7 +262,6 @@ proc gdb_file_cmd {arg} {
 #
 proc test_breakpoints { } {
     gdb_test "stop in main" "Breakpoint.*at.*: file.*average\.c, line 38\."
-    gdb_run_cmd
     gdb_test "status" "Num.*Type.*Disp.*Enb.*Address.*What\r\n1\[ \r\]+breakpoint\[ \r\]+keep y.*in main at.*average\.c:38.*"
     gdb_test "stop at 43" "Breakpoint.*at.*: file.*average\.c, line 43.*"
     gdb_test "stop in 43" "Usage: stop in <function . address>"
