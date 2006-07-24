@@ -1,3 +1,13 @@
+2006-07-24  Frederic Riss  <frederic.riss@st.com>
+
+	* dwarf2read.c (struct dwarf2_per_objfile): Add has_section_at_zero 
+	field.
+	(dwarf2_locate_sections): Initialize 
+	dwarf2_per_objfile->has_section_at_zero.
+	(dwarf2_get_pc_bounds): Use dwarf2_per_objfile->has_section_at_zero 
+	instead of HAS_RELOC test.
+	(read_partial_die): Ditto.
+
 2006-07-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* corefile.c (reopen_exec_file): Only check for an open exec file.

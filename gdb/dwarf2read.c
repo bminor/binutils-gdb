@@ -180,6 +180,10 @@ struct dwarf2_per_objfile
   /* A chain of compilation units that are currently read in, so that
      they can be freed later.  */
   struct dwarf2_per_cu_data *read_in_chain;
+
+  /* A flag indicating wether this objfile has a section loaded at a
+     VMA of 0.  */
+  int has_section_at_zero;
 };
 
 static struct dwarf2_per_objfile *dwarf2_per_objfile;
@@ -1109,7 +1113,7 @@ dwarf2_has_info (struct objfile *objfile)
    in.  */
 
 static void
-dwarf2_locate_sections (bfd *ignore_abfd, asection *sectp, void *ignore_ptr)
+dwarf2_locate_sections (bfd *abfd, asection *sectp, void *ignore_ptr)
 {
   if (strcmp (sectp->name, INFO_SECTION) == 0)
     {
@@ -1170,6 +1174,10 @@ dwarf2_locate_sections (bfd *ignore_abfd, asection *sectp, void *ignore_ptr)
       dwarf2_per_objfile->ranges_size = bfd_get_section_size (sectp);
       dwarf_ranges_section = sectp;
     }
+  
+  if ((bfd_get_section_flags (abfd, sectp) & SEC_LOAD)
+      && bfd_section_vma (abfd, sectp) == 0)
+    dwarf2_per_objfile->has_section_at_zero = 1;
 }
 
 /* Build a partial symbol table.  */
@@ -3177,7 +3185,7 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
      labels are not in the output, so the relocs get a value of 0.
      If this is a discarded function, mark the pc bounds as invalid,
      so that GDB will ignore it.  */
-  if (low == 0 && (bfd_get_file_flags (obfd) & HAS_RELOC) == 0)
+  if (low == 0 && !dwarf2_per_objfile->has_section_at_zero)
     return 0;
 
   *lowpc = low;
@@ -5505,7 +5513,7 @@ read_partial_die (struct partial_die_info *part_die,
   if (has_low_pc_attr && has_high_pc_attr
       && part_die->lowpc < part_die->highpc
       && (part_die->lowpc != 0
-	  || (bfd_get_file_flags (abfd) & HAS_RELOC)))
+	  || dwarf2_per_objfile->has_section_at_zero))
     part_die->has_pc_info = 1;
   return info_ptr;
 }
