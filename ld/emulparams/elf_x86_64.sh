@@ -22,7 +22,7 @@ if [ "x${host}" = "x${target}" ]; then
   esac
 fi
 
-# Linux modify the default library search path to first include
+# Linux/Solaris modify the default library search path to first include
 # a 64-bit specific directory.
 case "$target" in
   x86_64*-linux*)
@@ -30,4 +30,8 @@ case "$target" in
       *64*) LIBPATH_SUFFIX=64 ;;
     esac
     ;;
+  *-*-solaris2*) 
+    LIBPATH_SUFFIX=/amd64
+    ELF_INTERPRETER_NAME=\"/lib/amd64/ld.so.1\"
+  ;;
 esac

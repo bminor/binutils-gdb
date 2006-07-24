@@ -2201,11 +2201,20 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	     "`%s' [0x%8x]"),
 	   abfd, name, hdr->sh_type);
       else if (hdr->sh_type >= SHT_LOOS && hdr->sh_type <= SHT_HIOS)
-	/* FIXME: We should handle this section.  */
-	(*_bfd_error_handler)
-	  (_("%B: don't know how to handle OS specific section "
-	     "`%s' [0x%8x]"),
-	   abfd, name, hdr->sh_type);
+	{
+	  /* Unrecognised OS-specific sections.  */
+	  if ((hdr->sh_flags & SHF_OS_NONCONFORMING) != 0)
+	    /* SHF_OS_NONCONFORMING indicates that special knowledge is
+	       required to correctly process the section and the file should 
+	       be rejected with an error message.  */
+	    (*_bfd_error_handler)
+	      (_("%B: don't know how to handle OS specific section "
+		 "`%s' [0x%8x]"),
+	       abfd, name, hdr->sh_type);
+	  else
+	    /* Otherwise it should be processed.  */
+	    return _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex);
+	}
       else
 	/* FIXME: We should handle this section.  */
 	(*_bfd_error_handler)
