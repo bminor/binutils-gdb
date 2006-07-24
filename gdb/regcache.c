@@ -186,7 +186,11 @@ struct regcache
      full [0 .. NUM_REGS + NUM_PSEUDO_REGS) while a read/write
      register cache can only hold [0 .. NUM_REGS).  */
   gdb_byte *registers;
-  gdb_byte *register_valid_p;
+  /* Register cache status:
+     register_valid_p[REG] == 0 if REG value is not in the cache
+                            > 0 if REG value is in the cache
+                            < 0 if REG value is permanently unavailable */
+  signed char *register_valid_p;
   /* Is this a read-only cache?  A read-only cache is used for saving
      the target's register state (e.g, across an inferior function
      call or just before forcing a function return).  A read-only
