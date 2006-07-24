@@ -889,7 +889,7 @@ Display symbols which have a target-specific special meaning.  These
 symbols are usually used by the target for some special processing and
 are not normally helpful when included included in the normal symbol
 lists.  For example for ARM targets this option would skip the mapping
-symbols used to mark transistions between ARM code, THUMB code and
+symbols used to mark transitions between ARM code, THUMB code and
 data.
 
 @item -t @var{radix}
@@ -1478,7 +1478,7 @@ optional.  You could instead do this:
 @item Run @code{objcopy --add-gnu-debuglink=foo.full foo}
 @end enumerate
 
-i.e. the file pointed to by the @option{--add-gnu-debuglink} can be the
+i.e., the file pointed to by the @option{--add-gnu-debuglink} can be the
 full executable.  It does not have to be a file created by the
 @option{--only-keep-debug} switch.
 
@@ -1766,15 +1766,15 @@ disassembly of BookE instructions.  @option{32} and @option{64} select
 PowerPC and PowerPC64 disassembly, respectively.  @option{e300} selects
 disassembly for the e300 family.
 
-For MIPS, this option controls the printing of instruction mneumonic
+For MIPS, this option controls the printing of instruction mnemonic
 names and register names in disassembled instructions.  Multiple
 selections from the following may be specified as a comma separated
 string, and invalid options are ignored:
 
 @table @code
 @item no-aliases
-Print the 'raw' instruction mneumonic instead of some pseudo
-instruction mneumonic.  I.E. print 'daddu' or 'or' instead of 'move',
+Print the 'raw' instruction mnemonic instead of some pseudo
+instruction mnemonic.  I.e., print 'daddu' or 'or' instead of 'move',
 'sll' instead of 'nop', etc.
 
 @item gpr-names=@var{ABI}
@@ -1817,7 +1817,7 @@ For VAX, you can specify function entry addresses with @option{-M
 entry:0xf00ba}.  You can use this multiple times to properly
 disassemble VAX binary files that don't contain symbol tables (like
 ROM dumps).  In these cases, the function entry mask would otherwise
-be decoded as VAX instructions, which would probably lead the the rest
+be decoded as VAX instructions, which would probably lead the rest
 of the function being wrongly disassembled.
 
 @item -p
@@ -2464,7 +2464,7 @@ names from the standard input instead.  All the results are printed on
 the standard output.  The difference between reading names from the
 command line versus reading names from the standard input is that
 command line arguments are expected to be just mangled names and no
-checking is performed to seperate them from surrounding text.  Thus
+checking is performed to separate them from surrounding text.  Thus
 for example:
 
 @smallexample
@@ -2578,7 +2578,7 @@ the Info entries for @file{binutils}.
 @quotation
 @emph{Warning:} @command{c++filt} is a new utility, and the details of its
 user interface are subject to change in future releases.  In particular,
-a command-line option may be required in the the future to decode a name
+a command-line option may be required in the future to decode a name
 passed as an argument on the command line; in other words, 
 
 @example
@@ -2892,7 +2892,7 @@ The name of the output file.  If this option is not used, then
 for the input file name, as the output file name.  If there is no
 non-option argument, then @command{windres} will write to standard output.
 @command{windres} can not write a COFF file to standard output.  Note,
-for compatability with @command{rc} the option @option{-fo} is also
+for compatibility with @command{rc} the option @option{-fo} is also
 accepted, but its use is not recommended.
 
 @item -J @var{format}
@@ -2929,7 +2929,7 @@ Specify an include directory to use when reading an @code{rc} file.
 @command{windres} will pass this to the preprocessor as an @option{-I}
 option.  @command{windres} will also search this directory when looking for
 files named in the @code{rc} file.  If the argument passed to this command
-matches any of the supported @var{formats} (as descrived in the @option{-J} 
+matches any of the supported @var{formats} (as described in the @option{-J} 
 option), it will issue a deprecation warning, and behave just like the
 @option{-J} option.  New programs should not use this behaviour.  If a
 directory happens to match a @var{format}, simple prefix it with @samp{./}
@@ -3837,7 +3837,7 @@ a chance to make a mistake.
 
 Even if the problem you experience is a fatal signal, you should still
 say so explicitly.  Suppose something strange is going on, such as your
-copy of the utility is out of synch, or you have encountered a bug in
+copy of the utility is out of sync, or you have encountered a bug in
 the C library on your system.  (This has happened!)  Your copy might
 crash and ours would not.  If you told us to expect a crash, then when
 ours fails to crash, we would know that the bug was not happening for

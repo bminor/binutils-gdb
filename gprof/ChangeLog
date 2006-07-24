@@ -1,3 +1,7 @@
+2006-07-24  Ralk Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* gprof.texi: Fix some typos.
+
 2006-06-07  Joseph S. Myers  <joseph@codesourcery.com>
 
 	* po/Make-in (pdf, ps): New dummy targets.

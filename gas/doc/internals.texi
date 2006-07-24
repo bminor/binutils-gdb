@@ -838,7 +838,7 @@ GAS will call @code{md_parse_option} whenever @code{getopt} returns an
 unrecognized code, presumably indicating a special code value which appears in
 @code{md_longopts}.  This function should return non-zero if it handled the
 option and zero otherwise.  There is no need to print a message about an option
-not being recognised.  This will be handled by the generic code.
+not being recognized.  This will be handled by the generic code.
 
 GAS will call @code{md_show_usage} when a usage message is printed; it should
 print a description of the machine specific options. @code{md_after_pase_args},
@@ -891,7 +891,7 @@ If this macro is defined, GAS will use it instead of @code{comment_chars}.
 @cindex tc_symbol_chars
 If this macro is defined, it is a pointer to a null terminated list of
 characters which may appear in an operand.  GAS already assumes that all
-alphanumberic characters, and @samp{$}, @samp{.}, and @samp{_} may appear in an
+alphanumeric characters, and @samp{$}, @samp{.}, and @samp{_} may appear in an
 operand (see @samp{symbol_chars} in @file{app.c}).  This macro may be defined
 to treat additional characters as appearing in an operand.  This affects the
 way in which GAS removes whitespace before passing the string to
@@ -1609,7 +1609,7 @@ symbol's flags.
 
 @item obj_clear_weak_hook
 @cindex obj_clear_weak_hook
-If you define this macro, @code{S_CLEAR_WEAKREFD} will call it after clearning
+If you define this macro, @code{S_CLEAR_WEAKREFD} will call it after cleaning
 the @code{weakrefd} flag, but before modifying any other flags.
 
 @item obj_frob_file

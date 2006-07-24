@@ -130,7 +130,7 @@ notice identical to this one except for the removal of this paragraph
 @subtitle Version @value{VERSION}
 @sp 1
 @sp 13
-The Free Software Foundation Inc.  thanks The Nice Computer
+The Free Software Foundation Inc.@: thanks The Nice Computer
 Company of Australia for loaning Dean Elsner to write the
 first (Vax) version of @command{as} for Project @sc{gnu}.
 The proprietors, management and staff of TNCCA thank FSF for
@@ -1181,13 +1181,13 @@ Assemble all undocumented Z80 instructions without warning.
 Issue a warning for undocumented Z80 instructions that also work on R800.
 @item  -warn-unportable-instructions 
 @itemx -Wup
-Issue a warning for undocumented Z80 instructions that do notwork on R800.  
+Issue a warning for undocumented Z80 instructions that do not work on R800.  
 @item  -forbid-undocumented-instructions 
 @itemx -Fud
 Treat all undocumented instructions as errors.
 @item  -forbid-unportable-instructions 
 @itemx -Fup
-Treat undocumented Z80 intructions that do notwork on R800 as errors.
+Treat undocumented Z80 instructions that do not work on R800 as errors.
 @end table
 @end ifset
 
@@ -2678,7 +2678,7 @@ independently of any floating point hardware in the computer running
 @cindex bit fields
 @cindex constants, bit field
 You can also define numeric constants as @dfn{bit fields}.
-specify two numbers separated by a colon---
+Specify two numbers separated by a colon---
 @example
 @var{mask}:@var{value}
 @end example
@@ -3276,7 +3276,7 @@ of the same name.  The character has ASCII value of @samp{\002} (control-B).
 This is a serial number to keep the labels distinct.  The first definition of
 @samp{0:} gets the number @samp{1}.  The 15th definition of @samp{0:} gets the 
 number @samp{15}, and so on.  Likewise the first definition of @samp{1:} gets
-the number @samp{1} and its 15th defintion gets @samp{15} as well.
+the number @samp{1} and its 15th definition gets @samp{15} as well.
 @end table
 
 So for example, the first @code{1:} is named @code{L1@kbd{C-B}1}, the 44th
@@ -3298,7 +3298,7 @@ dollar sign.  eg @samp{@b{55$}}.
 
 They can also be distinguished from ordinary local labels by their transformed
 name which uses ASCII character @samp{\001} (control-A) as the magic character
-to distinguish them from ordinary labels.  Thus the 5th defintion of @samp{6$}
+to distinguish them from ordinary labels.  Thus the 5th definition of @samp{6$}
 is named @samp{L6@kbd{C-A}5}.
 
 @node Dot
@@ -4078,7 +4078,7 @@ Don't forget to close the function by
 @cindex @code{cfi_endproc} directive
 @code{.cfi_endproc} is used at the end of a function where it closes its
 unwind entry previously opened by
-@code{.cfi_startproc}. and emits it to @code{.eh_frame}.
+@code{.cfi_startproc}, and emits it to @code{.eh_frame}.
 
 @section @code{.cfi_def_cfa @var{register}, @var{offset}}
 @code{.cfi_def_cfa} defines a rule for computing CFA as: @i{take 
@@ -4129,9 +4129,9 @@ to the @code{.debug_line} file name table.  The @var{fileno} operand should
 be a unique positive integer to use as the index of the entry in the table.
 The @var{filename} operand is a C string literal.
 
-The detail of filename indicies is exposed to the user because the filename
+The detail of filename indices is exposed to the user because the filename
 table is shared with the @code{.debug_info} section of the dwarf2 debugging
-information, and thus the user must know the exact indicies that table
+information, and thus the user must know the exact indices that table
 entries will have.
 
 @section @code{.loc @var{fileno} @var{lineno} [@var{column}] [@var{options}]}
@@ -5079,7 +5079,7 @@ You can write strings delimited in these other ways besides
 
 @table @code
 @item '@var{string}'
-You can delimit strings with single-quote charaters.
+You can delimit strings with single-quote characters.
 
 @item <@var{string}>
 You can delimit strings with matching angle brackets.
@@ -6051,7 +6051,7 @@ This directive finds or creates a symbol @code{table} and creates a
 This directive finds the symbol @code{child} and finds or creates the symbol
 @code{parent} and then creates a @code{VTABLE_INHERIT} relocation for the
 parent whose addend is the value of the child symbol.  As a special case the
-parent name of @code{0} is treated as refering the @code{*ABS*} section.
+parent name of @code{0} is treated as referring the @code{*ABS*} section.
 @end ifset
 
 @node Warning
@@ -6607,7 +6607,7 @@ make a mistake.
 
 Even if the problem you experience is a fatal signal, you should still say so
 explicitly.  Suppose something strange is going on, such as, your copy of
-@command{@value{AS}} is out of synch, or you have encountered a bug in the C
+@command{@value{AS}} is out of sync, or you have encountered a bug in the C
 library on your system.  (This has happened!)  Your copy might crash and ours
 would not.  If you told us to expect a crash, then when ours fails to crash, we
 would know that the bug was not happening for us.  If you had not told us to
@@ -6760,7 +6760,7 @@ Timothy Wall, Michael Hayes, and Greg Smart contributed to the various tic*
 flavors.
 
 David Heine, Sterling Augustine, Bob Wilson and John Ruttenberg from Tensilica,
-Inc. added support for Xtensa processors.
+Inc.@: added support for Xtensa processors.
 
 Several engineers at Cygnus Support have also provided many small bug fixes and
 configuration enhancements.

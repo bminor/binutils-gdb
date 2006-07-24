@@ -1,3 +1,8 @@
+2006-07-24  Ralk Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* bfd..texinfo: Fix spelling mistakes.
+	* bfdint.texinfo: Likewise.
+
 2006-07-18  Nigel Stephens  <nigel@mips.com>
 
 	* bfd.texinfo: Add @section for "What to Put Where".

@@ -1,6 +1,6 @@
 \input texinfo
 @c Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
-@c 2000, 2001, 2002, 2003, 2004
+@c 2000, 2001, 2002, 2003, 2004, 2006
 @c Free Software Foundation, Inc.
 @setfilename bfdint.info
 
@@ -189,7 +189,7 @@ and handle it using the special hooks.
 
 In some cases there is also implicit information which BFD can not
 represent.  For example, the MIPS processor distinguishes small and
-large symbols, and requires that all small symbls be within 32K of the
+large symbols, and requires that all small symbols be within 32K of the
 GP register.  This means that the MIPS assembler must be able to mark
 variables as either small or large, and the MIPS linker must know to put
 small symbols within range of the GP register.  Since BFD can not
@@ -230,7 +230,7 @@ Follow the GNU coding standards.
 Avoid global variables.  We ideally want BFD to be fully reentrant, so
 that it can be used in multiple threads.  All uses of global or static
 variables interfere with that.  Initialized constant variables are OK,
-and they should be explicitly marked with const.  Instead of global
+and they should be explicitly marked with @samp{const}.  Instead of global
 variables, use data attached to a BFD or to a linker hash table.
 
 @item
@@ -1391,7 +1391,7 @@ constants used by the generic support.
 @subsection ELF sections and segments
 
 The ELF ABI permits a file to have either sections or segments or both.
-Relocateable object files conventionally have only sections.
+Relocatable object files conventionally have only sections.
 Executables conventionally have both.  Core files conventionally have
 only program segments.
 

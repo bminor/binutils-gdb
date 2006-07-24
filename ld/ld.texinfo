@@ -1461,7 +1461,7 @@ SunOS, the linker will form a runtime search patch out of all the
 runtime search path will be formed exclusively using the @option{-rpath}
 options, ignoring the @option{-L} options.  This can be useful when using
 gcc, which adds many @option{-L} options which may be on NFS mounted
-filesystems.
+file systems.
 
 For compatibility with other ELF linkers, if the @option{-R} option is
 followed by a directory name, rather than a file name, it is treated as
@@ -2037,9 +2037,9 @@ symbols before they are exported.
 
 @kindex --large-address-aware
 @item --large-address-aware
-If given, the appropriate bit in the ``Charateristics'' field of the COFF
+If given, the appropriate bit in the ``Characteristics'' field of the COFF
 header is set to indicate that this executable supports virtual addresses
-greater than 2 gigabytes.  This should be used in conjuction with the /3GB
+greater than 2 gigabytes.  This should be used in conjunction with the /3GB
 or /USERVA=@var{value} megabytes switch in the ``[operating systems]''
 section of the BOOT.INI.  Otherwise, this bit has no effect.
 [This option is specific to PE targeted ports of the linker]
@@ -2681,7 +2681,7 @@ setting afterwards.
 
 @item OUTPUT(@var{filename})
 @kindex OUTPUT(@var{filename})
-@cindex output file name in linker scripot
+@cindex output file name in linker script
 The @code{OUTPUT} command names the output file.  Using
 @code{OUTPUT(@var{filename})} in the linker script is exactly like using
 @samp{-o @var{filename}} on the command line (@pxref{Options,,Command
@@ -5200,7 +5200,7 @@ page of memory, and changes them to use the 8 bit address form.
 the top page of memory).
 
 @item system control instructions
-@command{ld} finds all @code{ldc.w, stc.w} instrcutions which use the 
+@command{ld} finds all @code{ldc.w, stc.w} instructions which use the 
 32 bit absolute address form, but refer to the top page of memory, and 
 changes them to use 16 bit address form.
 (That is: the linker turns @samp{ldc.w @code{@@}@var{aa}:32,ccr} into
@@ -5345,7 +5345,7 @@ point to the function trampoline.
 @cindex ARM interworking support
 @kindex --support-old-code
 For the ARM, @command{ld} will generate code stubs to allow functions calls
-betweem ARM and Thumb code.  These stubs only work with code that has
+between ARM and Thumb code.  These stubs only work with code that has
 been compiled and assembled with the @samp{-mthumb-interwork} command
 line option.  If it is necessary to link with old ARM object files or
 libraries, which have not been compiled with the -mthumb-interwork
@@ -5745,7 +5745,7 @@ header format depends on the default specified by the specific target.
 @section @command{ld} and WIN32 (cygwin/mingw)
 
 This section describes some of the win32 specific @command{ld} issues. 
-See @ref{Options,,Command Line Options} for detailed decription of the
+See @ref{Options,,Command Line Options} for detailed description of the
 command line options mentioned here.
 
 @table @emph
@@ -5822,8 +5822,8 @@ The optional @code{LIBRARY <name>} command indicates the @emph{internal}
 name of the output DLL. If @samp{<name>} does not include a suffix,
 the default library suffix, @samp{.DLL} is appended.
 
-When the .DEF file is used to build an application. rather than a
-library, the @code{NAME <name>} command shoud be used instead of
+When the .DEF file is used to build an application, rather than a
+library, the @code{NAME <name>} command should be used instead of
 @code{LIBRARY}. If @samp{<name>} does not include a suffix, the default
 executable suffix, @samp{.EXE} is appended. 
 
@@ -5917,7 +5917,7 @@ code the header must declare them as dllimport.  There are a number
 of idioms that are typically used to do this; often client code can 
 omit the __declspec() declaration completely.  See
 @samp{--enable-auto-import} and @samp{automatic data imports} for more
-imformation.
+information.
 @end table 
 
 @cindex automatic data imports
@@ -5929,7 +5929,7 @@ issue.  This increases the effort necessary to port existing Un*x
 code to these platforms, especially for large
 c++ libraries and applications.  The auto-import feature, which was
 initially provided by Paul Sokolovsky, allows one to omit the 
-decorations to archieve a behavior that conforms to that on POSIX/Un*x
+decorations to achieve a behavior that conforms to that on POSIX/Un*x
 platforms. This feature is enabled with the @samp{--enable-auto-import} 
 command-line option, although it is enabled by default on cygwin/mingw.
 The @samp{--enable-auto-import} option itself now serves mainly to
@@ -5973,7 +5973,7 @@ enabled as needed.
 The cygwin/mingw ports of @command{ld} support the direct linking,
 including data symbols, to a dll without the usage of any import
 libraries.  This is much faster and uses much less memory than does the
-traditional import library method, expecially when linking large
+traditional import library method, especially when linking large
 libraries or applications.  When @command{ld} creates an import lib, each 
 function or variable exported from the dll is stored in its own bfd, even 
 though a single bfd could contain many exports.  The overhead involved in 
@@ -6454,7 +6454,7 @@ a chance to make a mistake.
 
 Even if the problem you experience is a fatal signal, you should still
 say so explicitly.  Suppose something strange is going on, such as, your
-copy of @command{ld} is out of synch, or you have encountered a bug in the
+copy of @command{ld} is out of sync, or you have encountered a bug in the
 C library on your system.  (This has happened!)  Your copy might crash
 and ours would not.  If you told us to expect a crash, then when ours
 fails to crash, we would know that the bug was not happening for us.  If

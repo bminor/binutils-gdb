@@ -1,3 +1,12 @@
+2006-07-24  Ralk Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* doc/all.texi, doc/as.texinfo, doc/c-arc.texi, doc/c-arm.texi,
+	doc/c-avr.texi, doc/c-bfin.texi, doc/c-i386.texi,
+	doc/c-i960.texi, doc/c-m32r.texi, doc/c-m68k.texi,
+	doc/c-mmix.texi, doc/c-pdp11.texi, doc/c-ppc.texi,
+	doc/c-tic54x.texi, doc/c-v850.texi, doc/c-xtensa.texi,
+	doc/c-z80.texi, doc/internals.texi: Fix some typos.
+
 2006-07-21  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-sh.c (md_longopts): Add -EL and -EB for use by the

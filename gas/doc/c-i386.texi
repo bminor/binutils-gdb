@@ -647,7 +647,7 @@ then stores the result in the 4 byte location @samp{mem})
 @code{@value{AS}} supports Intel's MMX instruction set (SIMD
 instructions for integer data), available on Intel's Pentium MMX
 processors and Pentium II processors, AMD's K6 and K6-2 processors,
-Cyrix' M2 processor, and probably others.  It also supports AMD's 3DNow!
+Cyrix' M2 processor, and probably others.  It also supports AMD's 3DNow!@:
 instruction set (SIMD instructions for 32-bit floating point data)
 available on AMD's K6-2 processor and possibly others in the future.
 
@@ -710,7 +710,7 @@ value @samp{4} onto the stack, decrementing @samp{%esp} by 2.
 @end smallexample
 
 The same code in a 16-bit code section would generate the machine
-opcode bytes @samp{6a 04} (ie. without the operand size prefix), which
+opcode bytes @samp{6a 04} (i.e., without the operand size prefix), which
 is correct since the processor default operand size is assumed to be 16
 bits in a 16-bit code section.
 

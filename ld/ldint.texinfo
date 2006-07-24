@@ -179,10 +179,10 @@ as well as some conventional shell variables interpreted by the
 @item SCRIPT_NAME
 This is the name of the @file{scripttempl} script to use.  If
 @code{SCRIPT_NAME} is set to @var{script}, @file{genscripts.sh} will use
-the script @file{scriptteml/@var{script}.sc}.
+the script @file{scripttempl/@var{script}.sc}.
 
 @item TEMPLATE_NAME
-This is the name of the @file{emultemlp} script to use.  If
+This is the name of the @file{emultempl} script to use.  If
 @code{TEMPLATE_NAME} is set to @var{template}, @file{genscripts.sh} will
 use the script @file{emultempl/@var{template}.em}.  If this variable is
 not set, the default value is @samp{generic}.
@@ -290,7 +290,7 @@ option.  The output has an extension of
 The @file{scripttempl} script is only invoked with @code{LD_FLAG} set to
 this value if @code{GENERATE_COMBRELOC_SCRIPT} is defined in the
 @file{emulparams} file or if @code{SCRIPT_NAME} is @code{elf} and
-@code{GENERATE_SHLIB_SCRIPT} is defined in the @file{emulparms} file.
+@code{GENERATE_SHLIB_SCRIPT} is defined in the @file{emulparams} file.
 The @file{emultempl} script must arrange to use this script at the
 appropriate time, normally when the linker is invoked with the @code{-shared
 -z combreloc} option.  The output has an extension of @file{.xsc}.
@@ -644,7 +644,7 @@ Motivation
 The obvious and only way to get rid of dllimport insanity is 
 to make client access variable directly in the DLL, bypassing 
 the extra dereference imposed by ordinary DLL runtime linking.
-I.e., whenever client contains someting like
+I.e., whenever client contains something like
 
 @code{mov dll_var,%eax,}
 
@@ -653,7 +653,7 @@ into loaded DLL. The aim is to make OS loader do so, and than
 make ld help with that.  Import section of PE made following 
 way: there's a vector of structures each describing imports 
 from particular DLL. Each such structure points to two other 
-parellel vectors: one holding imported names, and one which 
+parallel vectors: one holding imported names, and one which 
 will hold address of corresponding imported name. So, the 
 solution is de-vectorize these structures, making import 
 locations be sparse and pointing directly into code.

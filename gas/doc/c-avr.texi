@@ -109,7 +109,7 @@ statements.
 @cindex AVR register names
 @cindex register names, AVR
 
-The AVR has 32 x 8-bit general purpouse working registers @samp{r0},
+The AVR has 32 x 8-bit general purpose working registers @samp{r0},
 @samp{r1}, ... @samp{r31}.
 Six of the 32 registers can be used as three 16-bit indirect address
 register pointers for Data Space addressing. One of the these address

@@ -428,7 +428,7 @@ The @code{L8UI} machine instruction can only be used with immediate
 offsets in the range from 0 to 255. The @code{L16SI} and @code{L16UI}
 machine instructions can only be used with offsets from 0 to 510.  The
 @code{L32I} machine instruction can only be used with offsets from 0 to
-1020.  A load offset outside these ranges can be materalized with
+1020.  A load offset outside these ranges can be materialized with
 an @code{L32R} instruction if the destination register of the load
 is different than the source address register.  For example:
 
@@ -489,7 +489,7 @@ is assembled into the following:
 @cindex Xtensa directives
 @cindex directives, Xtensa
 
-The Xtensa assember supports a region-based directive syntax:
+The Xtensa assembler supports a region-based directive syntax:
 
 @smallexample
     .begin @var{directive} [@var{options}]

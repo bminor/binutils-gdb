@@ -254,7 +254,7 @@ and
 @item -meabi=@var{ver}
 This option specifies which EABI version the produced object files should
 conform to.
-The following values are recognised:
+The following values are recognized:
 @code{gnu},
 @code{4}
 and
@@ -358,7 +358,7 @@ For compatibility with older toolchains the assembler also accepts
 @cindex MOVW and MOVT relocations, ARM
 Relocations for @samp{MOVW} and @samp{MOVT} instructions can be generated
 by prefixing the value with @samp{#:lower16:} and @samp{#:upper16}
-respectively.  For example to load the 32-bit addresss of foo into r0:
+respectively.  For example to load the 32-bit address of foo into r0:
 
 @smallexample
         MOVW r0, #:lower16:foo

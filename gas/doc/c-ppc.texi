@@ -95,10 +95,10 @@ Allow symbolic names for registers.
 Do not allow symbolic names for registers.
 
 @item -mrelocatable
-Support for GCC's -mrelocatble option.
+Support for GCC's -mrelocatable option.
 
 @item -mrelocatable-lib
-Support for GCC's -mrelocatble-lib option.
+Support for GCC's -mrelocatable-lib option.
 
 @item -memb
 Set PPC_EMB bit in ELF flags.

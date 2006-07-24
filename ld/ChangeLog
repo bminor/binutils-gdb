@@ -1,3 +1,8 @@
+2006-07-24  Ralk Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* ld.texinfo: Fix spelling mistakes.
+	* ldint.texinfo: Likewise.
+
 2006-07-23  Sonal Santan  <sonal.santan@xilinx.com>
 
 	* ldlang.c (lang_section_bst): New structure for sorting sections

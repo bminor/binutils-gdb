@@ -442,7 +442,7 @@ The order of these options does not matter.
 
 @menu
 * Output Options::      Controlling @code{gprof}'s output style
-* Analysis Options::    Controlling how @code{gprof} analyses its data
+* Analysis Options::    Controlling how @code{gprof} analyzes its data
 * Miscellaneous Options::
 * Deprecated Options::  Options you no longer need to use, but which
                             have been retained for compatibility
@@ -559,7 +559,7 @@ Normally, @code{gprof} prints annotated source files
 to standard-output.  If this option is specified,
 annotated source for a file named @file{path/@var{filename}}
 is generated in the file @file{@var{filename}-ann}.  If the underlying
-filesystem would truncate @file{@var{filename}-ann} so that it
+file system would truncate @file{@var{filename}-ann} so that it
 overwrites the original @file{@var{filename}}, @code{gprof} generates
 annotated source in the file @file{@var{filename}.ann} instead (if the
 original file name has an extension, that extension is @emph{replaced}
@@ -654,7 +654,7 @@ The @samp{-a} option causes @code{gprof} to suppress the printing of
 statically declared (private) functions.  (These are functions whose
 names are not listed as global, and which are not visible outside the
 file/function/block where they were defined.)  Time spent in these
-functions, calls to/from them, etc, will all be attributed to the
+functions, calls to/from them, etc., will all be attributed to the
 function that was loaded directly before it in the executable file.
 @c This is compatible with Unix @code{gprof}, but a bad idea.  
 This option affects both the flat profile and the call graph.
@@ -1685,7 +1685,7 @@ Because @code{gprof} can only report call times and counts by function,
 the best way to get finer-grained information on where the program
 is spending its time is to re-factor large functions into sequences
 of calls to smaller ones.  Beware however that this can introduce
-artifical hot spots since compiling with @samp{-pg} adds a significant
+artificial hot spots since compiling with @samp{-pg} adds a significant
 overhead to function calls.  An alternative solution is to use a
 non-intrusive profiler, e.g.@: oprofile.
 
@@ -1722,7 +1722,7 @@ gprof fastprog gmon.sum
 @end example
 
 If your program is completely deterministic, all the call counts
-will be simple multiples of 100 (i.e. a function called once in
+will be simple multiples of 100 (i.e., a function called once in
 each run will appear with a call count of 100).
 
 @end table
