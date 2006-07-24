@@ -1950,6 +1950,7 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 {
   struct coff_link_hash_entry *h1;
   struct bfd_link_info *info = pfinfo->info;
+  bfd_boolean result = TRUE;
 
   /* There are a few fields that need to be filled in now while we
      have symbol table access.
@@ -1963,49 +1964,103 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 			      ".idata$2", FALSE, FALSE, TRUE);
   if (h1 != NULL)
     {
-      pe_data (abfd)->pe_opthdr.DataDirectory[1].VirtualAddress =
-	(h1->root.u.def.value
-	 + h1->root.u.def.section->output_section->vma
-	 + h1->root.u.def.section->output_offset);
+      /* PR ld/2729: We cannot rely upon all the output sections having been 
+	 created properly, so check before referencing them.  Issue a warning
+	 message for any sections tht could not be found.  */
+      if (h1->root.u.def.section != NULL
+	  && h1->root.u.def.section->output_section != NULL)
+	pe_data (abfd)->pe_opthdr.DataDirectory[1].VirtualAddress =
+	  (h1->root.u.def.value
+	   + h1->root.u.def.section->output_section->vma
+	   + h1->root.u.def.section->output_offset);
+      else
+	{
+	  _bfd_error_handler
+	    (_("%B: unable to fill in DataDictionary[1] because .idata$2 is missing"), 
+	     abfd);
+	  result = FALSE;
+	}
+
       h1 = coff_link_hash_lookup (coff_hash_table (info),
 				  ".idata$4", FALSE, FALSE, TRUE);
-      pe_data (abfd)->pe_opthdr.DataDirectory[1].Size =
-	((h1->root.u.def.value
-	  + h1->root.u.def.section->output_section->vma
-	  + h1->root.u.def.section->output_offset)
-	 - pe_data (abfd)->pe_opthdr.DataDirectory[1].VirtualAddress);
+      if (h1 != NULL
+	  && h1->root.u.def.section != NULL
+	  && h1->root.u.def.section->output_section != NULL)
+	pe_data (abfd)->pe_opthdr.DataDirectory[1].Size =
+	  ((h1->root.u.def.value
+	    + h1->root.u.def.section->output_section->vma
+	    + h1->root.u.def.section->output_offset)
+	   - pe_data (abfd)->pe_opthdr.DataDirectory[1].VirtualAddress);
+      else
+	{
+	  _bfd_error_handler
+	    (_("%B: unable to fill in DataDictionary[1] because .idata$4 is missing"), 
+	     abfd);
+	  result = FALSE;
+	}
 
       /* The import address table.  This is the size/address of
          .idata$5.  */
       h1 = coff_link_hash_lookup (coff_hash_table (info),
 				  ".idata$5", FALSE, FALSE, TRUE);
-      pe_data (abfd)->pe_opthdr.DataDirectory[12].VirtualAddress =
-	(h1->root.u.def.value
-	 + h1->root.u.def.section->output_section->vma
-	 + h1->root.u.def.section->output_offset);
+      if (h1 != NULL
+	  && h1->root.u.def.section != NULL
+	  && h1->root.u.def.section->output_section != NULL)
+	pe_data (abfd)->pe_opthdr.DataDirectory[12].VirtualAddress =
+	  (h1->root.u.def.value
+	   + h1->root.u.def.section->output_section->vma
+	   + h1->root.u.def.section->output_offset);
+      else
+	{
+	  _bfd_error_handler
+	    (_("%B: unable to fill in DataDictionary[12] because .idata$5 is missing"), 
+	     abfd);
+	  result = FALSE;
+	}
+
       h1 = coff_link_hash_lookup (coff_hash_table (info),
 				  ".idata$6", FALSE, FALSE, TRUE);
-      pe_data (abfd)->pe_opthdr.DataDirectory[12].Size =
-	((h1->root.u.def.value
-	  + h1->root.u.def.section->output_section->vma
-	  + h1->root.u.def.section->output_offset)
-	 - pe_data (abfd)->pe_opthdr.DataDirectory[12].VirtualAddress);      
+      if (h1 != NULL
+	  && h1->root.u.def.section != NULL
+	  && h1->root.u.def.section->output_section != NULL)
+	pe_data (abfd)->pe_opthdr.DataDirectory[12].Size =
+	  ((h1->root.u.def.value
+	    + h1->root.u.def.section->output_section->vma
+	    + h1->root.u.def.section->output_offset)
+	   - pe_data (abfd)->pe_opthdr.DataDirectory[12].VirtualAddress);      
+      else
+	{
+	  _bfd_error_handler
+	    (_("%B: unable to fill in DataDictionary[12] because .idata$6 is missing"), 
+	     abfd);
+	  result = FALSE;
+	}
     }
 
   h1 = coff_link_hash_lookup (coff_hash_table (info),
 			      "__tls_used", FALSE, FALSE, TRUE);
   if (h1 != NULL)
     {
-      pe_data (abfd)->pe_opthdr.DataDirectory[9].VirtualAddress =
-	(h1->root.u.def.value
-	 + h1->root.u.def.section->output_section->vma
-	 + h1->root.u.def.section->output_offset
-	 - pe_data (abfd)->pe_opthdr.ImageBase);
+      if (h1->root.u.def.section != NULL
+	  && h1->root.u.def.section->output_section != NULL)
+	pe_data (abfd)->pe_opthdr.DataDirectory[9].VirtualAddress =
+	  (h1->root.u.def.value
+	   + h1->root.u.def.section->output_section->vma
+	   + h1->root.u.def.section->output_offset
+	   - pe_data (abfd)->pe_opthdr.ImageBase);
+      else
+	{
+	  _bfd_error_handler
+	    (_("%B: unable to fill in DataDictionary[9] because __tls_used is missing"), 
+	     abfd);
+	  result = FALSE;
+	}
+
       pe_data (abfd)->pe_opthdr.DataDirectory[9].Size = 0x18;
     }
 
   /* If we couldn't find idata$2, we either have an excessively
      trivial program or are in DEEP trouble; we have to assume trivial
      program....  */
-  return TRUE;
+  return result;
 }

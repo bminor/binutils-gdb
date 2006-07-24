@@ -1,3 +1,10 @@
+2006-07-24  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/2729
+	* peXXigen.c (_bfd_XXi_final_link_postscript): Check for the
+	existance of output sections before putting their entries into the
+	DataDictionary.
+
 2006-07-20  Thiemo Seufer  <ths@mips.com>
 
 	* elf32-mips.c (mips16_jump_reloc): Remove function.
