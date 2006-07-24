@@ -1007,10 +1007,14 @@ read_a_source_file (char *name)
 	      unsigned int new_length;
 	      char *tmp_buf = 0;
 
-	      bump_line_counters ();
 	      s = input_line_pointer;
 	      if (strncmp (s, "APP\n", 4))
-		continue;	/* We ignore it */
+		{
+		  /* We ignore it.  */
+		  ignore_rest_of_line ();
+		  continue;
+		}
+	      bump_line_counters ();
 	      s += 4;
 
 	      sb_new (&sbuf);
@@ -1109,7 +1113,7 @@ read_a_source_file (char *name)
 	    continue;
 #endif
 	  input_line_pointer--;
-	  /* Report unknown char as ignored.  */
+	  /* Report unknown char as error.  */
 	  demand_empty_rest_of_line ();
 	}
 
