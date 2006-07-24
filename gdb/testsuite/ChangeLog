@@ -1,3 +1,8 @@
+2006-07-24  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gdb.base/auxv.exp: Skip on non-linux, non-solaris targets.
+	* gdb.base/cursal.exp: Use gdb_file_cmd first, then separate gdb_load.
+
 2006-07-21  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* gdb.base/default.exp: Update source command error message.

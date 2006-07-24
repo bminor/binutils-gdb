@@ -23,6 +23,11 @@
 # This file is based on corefile.exp which was written by Fred
 # Fish. (fnf@cygnus.com)
 
+if { ! [istarget "*-*-linux*"] && ! [istarget "*-*-solaris*"] } {
+    verbose "Skipping auxv.exp because of lack of support."
+    return
+}
+
 if $tracelevel then {
 	strace $tracelevel
 }
