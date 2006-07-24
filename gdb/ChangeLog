@@ -1,3 +1,9 @@
+2006-07-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-thread-db.c (thread_db_wait): Remove libthread_db
+	after exec events.
+
 2006-07-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* NEWS: Mention Windows cross debugging support.

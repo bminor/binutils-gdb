@@ -875,6 +875,15 @@ thread_db_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   if (ourstatus->kind == TARGET_WAITKIND_EXITED)
     return pid_to_ptid (-1);
 
+  if (ourstatus->kind == TARGET_WAITKIND_EXECD)
+    {
+      remove_thread_event_breakpoints ();
+      unpush_target (&thread_db_ops);
+      using_thread_db = 0;
+
+      return pid_to_ptid (GET_PID (ptid));
+    }
+
   if (ourstatus->kind == TARGET_WAITKIND_STOPPED
       && ourstatus->value.sig == TARGET_SIGNAL_TRAP)
     /* Check for a thread event.  */
