@@ -62,12 +62,12 @@ struct lm_info
 
 typedef struct
 {
-  char b[4];
+  gdb_byte b[4];
 }
 gdb_int32_bytes;
 typedef struct
 {
-  char b[8];
+  gdb_byte b[8];
 }
 gdb_int64_bytes;
 
@@ -152,7 +152,7 @@ fetch_lm_info (CORE_ADDR addr)
      being at the end of a page or the like.)  */
   read_memory (addr, (char *) &buf, sizeof (buf.ol32));
 
-  if (extract_unsigned_integer (&buf.magic, sizeof (buf.magic)) != 0xffffffff)
+  if (extract_unsigned_integer (buf.magic.b, sizeof (buf.magic)) != 0xffffffff)
     {
       /* Use buf.ol32... */
       char obj_buf[432];
@@ -168,7 +168,7 @@ fetch_lm_info (CORE_ADDR addr)
 	- extract_mips_address (&obj_buf[248], 4);
 
     }
-  else if (extract_unsigned_integer (&buf.oi32.oi_size,
+  else if (extract_unsigned_integer (buf.oi32.oi_size.b,
 				     sizeof (buf.oi32.oi_size))
 	   == sizeof (buf.oi32))
     {
@@ -188,11 +188,11 @@ fetch_lm_info (CORE_ADDR addr)
 				sizeof (buf.oi32.oi_orig_ehdr));
       li.pathname_addr = extract_mips_address (&buf.oi32.oi_pathname,
 					       sizeof (buf.oi32.oi_pathname));
-      li.pathname_len = extract_unsigned_integer (&buf.oi32.oi_pathname_len,
+      li.pathname_len = extract_unsigned_integer (buf.oi32.oi_pathname_len.b,
 						  sizeof (buf.oi32.
 							  oi_pathname_len));
     }
-  else if (extract_unsigned_integer (&buf.oi64.oi_size,
+  else if (extract_unsigned_integer (buf.oi64.oi_size.b,
 				     sizeof (buf.oi64.oi_size))
 	   == sizeof (buf.oi64))
     {
@@ -212,7 +212,7 @@ fetch_lm_info (CORE_ADDR addr)
 				sizeof (buf.oi64.oi_orig_ehdr));
       li.pathname_addr = extract_mips_address (&buf.oi64.oi_pathname,
 					       sizeof (buf.oi64.oi_pathname));
-      li.pathname_len = extract_unsigned_integer (&buf.oi64.oi_pathname_len,
+      li.pathname_len = extract_unsigned_integer (buf.oi64.oi_pathname_len.b,
 						  sizeof (buf.oi64.
 							  oi_pathname_len));
     }

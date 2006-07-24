@@ -1,3 +1,12 @@
+2006-07-24  Roger Sayle  <roger@eyesopen.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* solib-irix.c (gdb_int32_bytes): Use gdb_byte instead of char.
+	(gdb_int64_bytes): Likewise.
+	(fetch_lm_info): Use .b fields of gdb_int32_bytes and gdb_int64_bytes
+	as first argument to extract_unsigned_integer to silence compiler
+	warnings.
+
 2006-07-24  Frederic Riss  <frederic.riss@st.com>
 
 	* dwarf2read.c (struct dwarf2_per_objfile): Add has_section_at_zero 
