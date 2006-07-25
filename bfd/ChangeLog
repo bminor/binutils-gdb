@@ -1,3 +1,8 @@
+2006-07-25  Thiemo Seufer  <ths@networkno.de>
+
+	* elfxx-mips.c (mips_elf_next_relocation): Tighten check to test
+	also for same symbol.
+
 2006-07-25  Thiemo Seufer  <ths@mips.com>
 
 	* elfxx-mips.c (mips_elf_calculate_relocation): Remove magic constant.

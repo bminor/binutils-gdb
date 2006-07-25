@@ -3583,9 +3583,12 @@ mips_elf_next_relocation (bfd *abfd ATTRIBUTE_UNUSED, unsigned int r_type,
 			  const Elf_Internal_Rela *relocation,
 			  const Elf_Internal_Rela *relend)
 {
+  unsigned long r_symndx = ELF_R_SYM (abfd, relocation->r_info);
+
   while (relocation < relend)
     {
-      if (ELF_R_TYPE (abfd, relocation->r_info) == r_type)
+      if (ELF_R_TYPE (abfd, relocation->r_info) == r_type
+	  && ELF_R_SYM (abfd, relocation->r_info) == r_symndx)
 	return relocation;
 
       ++relocation;
