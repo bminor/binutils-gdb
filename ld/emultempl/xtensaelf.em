@@ -1200,7 +1200,7 @@ is_inconsistent_linkonce_section (asection *sec)
 {
   bfd *abfd = sec->owner;
   const char *sec_name = bfd_get_section_name (abfd, sec);
-  char *prop_tag = 0;
+  const char *name = 0;
 
   if ((bfd_get_section_flags (abfd, sec) & SEC_LINK_ONCE) == 0
       || strncmp (sec_name, ".gnu.linkonce.", linkonce_len) != 0)
@@ -1208,20 +1208,20 @@ is_inconsistent_linkonce_section (asection *sec)
 
   /* Check if this is an Xtensa property section.  */
   if (strncmp (sec_name + linkonce_len, "p.", 2) == 0)
-    prop_tag = "p.";
+    name = sec_name + linkonce_len + 2;
   else if (strncmp (sec_name + linkonce_len, "prop.", 5) == 0)
-    prop_tag = "prop.";
-  if (prop_tag)
+    name = strchr (sec_name + linkonce_len + 5, '.') + 1;
+
+  if (name)
     {
-      int tag_len = strlen (prop_tag);
-      char *dep_sec_name = xmalloc (strlen (sec_name));
+      char *dep_sec_name = xmalloc (strlen (sec_name) + 1);
       asection *dep_sec;
 
       /* Get the associated linkonce text section and check if it is
 	 included in the link.  If not, this section is inconsistent
 	 and should be stripped.  */
-      strcpy (dep_sec_name, ".gnu.linkonce.");
-      strcat (dep_sec_name, sec_name + linkonce_len + tag_len);
+      strcpy (dep_sec_name, ".gnu.linkonce.t.");
+      strcat (dep_sec_name, name);
       dep_sec = bfd_get_section_by_name (abfd, dep_sec_name);
       if (dep_sec == NULL || ! input_section_linked (dep_sec))
 	{
