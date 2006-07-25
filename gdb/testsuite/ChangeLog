@@ -1,3 +1,8 @@
+2006-07-25  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.cp/userdef.cc, gdb.cp/userdef.exp: New tests for unary
+	operator*.
+
 2006-07-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/completion.exp: Update for change in "file" behavior.

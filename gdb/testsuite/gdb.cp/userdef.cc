@@ -1,6 +1,6 @@
 /* This test script is part of GDB, the GNU debugger.
 
-   Copyright 1999, 2002, 2003, 2004, 2005
+   Copyright 1999, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -306,12 +306,31 @@ A2 A2::operator+()
   return A2 ();
 }
 
+class Member
+{
+public:
+  int z;
+};
+
+class Container
+{
+public:
+  Member m;
+
+  Member& operator* ();
+};
+
+Member& Container::operator* ()
+{
+  return this->m;
+}
 
 int main (void)
 {
  A1 one(2,3);
  A1 two(4,5);
  A1 three(0,0);
+ Container c;
  int val;
  
  marker1(); // marker1-returns-here
@@ -378,6 +397,8 @@ int main (void)
  cout << "predec " << three;
  ++three;
  cout << "preinc " << three;
+
+ (*c).z = 1;
 
  return 0;
 
