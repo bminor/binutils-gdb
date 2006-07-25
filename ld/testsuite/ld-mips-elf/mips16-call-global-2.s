@@ -1,4 +1,4 @@
-	.set mips16
+	.set	mips16
 
 	.globl	x
 	.ent	x
