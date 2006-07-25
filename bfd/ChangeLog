@@ -1,5 +1,10 @@
 2006-07-25  Thiemo Seufer  <ths@networkno.de>
 
+	* elfxx-mips.c (_bfd_mips_elf_merge_private_bfd_data): Allow
+	linking of objects for compatible machine types.
+
+2006-07-25  Thiemo Seufer  <ths@networkno.de>
+
 	* elfxx-mips.c (mips_elf_next_relocation): Tighten check to test
 	also for same symbol.
 

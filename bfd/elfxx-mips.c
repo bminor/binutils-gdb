@@ -10854,7 +10854,9 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	= elf_elfheader (ibfd)->e_ident[EI_CLASS];
 
       if (bfd_get_arch (obfd) == bfd_get_arch (ibfd)
-	  && bfd_get_arch_info (obfd)->the_default)
+	  && (bfd_get_arch_info (obfd)->the_default
+	      || mips_mach_extends_p (bfd_get_mach (obfd), 
+				      bfd_get_mach (ibfd))))
 	{
 	  if (! bfd_set_arch_mach (obfd, bfd_get_arch (ibfd),
 				   bfd_get_mach (ibfd)))
