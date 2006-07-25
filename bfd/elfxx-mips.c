@@ -4471,7 +4471,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
     case R_MIPS_GNU_REL16_S2:
       value = symbol + _bfd_mips_elf_sign_extend (addend, 18) - p;
       overflowed_p = mips_elf_overflow_p (value, 18);
-      value = (value >> 2) & howto->dst_mask;
+      value >>= howto->rightshift;
+      value &= howto->dst_mask;
       break;
 
     case R_MIPS_GOT_HI16:
