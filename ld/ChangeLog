@@ -1,3 +1,8 @@
+2006-07-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (analyze_walk_wild_section_handler): Init handler_data
+	earlier.
+
 2006-07-24  Bob Wilson  <bob.wilson@acm.org>
 
 	* emultempl/xtensaelf.em (is_inconsistent_linkonce_section): Add space

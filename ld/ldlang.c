@@ -670,6 +670,10 @@ analyze_walk_wild_section_handler (lang_wild_statement_type *ptr)
   int data_counter;
 
   ptr->walk_wild_section_handler = walk_wild_section_general;
+  ptr->handler_data[0] = NULL;
+  ptr->handler_data[1] = NULL;
+  ptr->handler_data[2] = NULL;
+  ptr->handler_data[3] = NULL;
 
   /* Count how many wildcard_specs there are, and how many of those
      actually use wildcards in the name.  Also, bail out if any of the
@@ -735,10 +739,6 @@ analyze_walk_wild_section_handler (lang_wild_statement_type *ptr)
      given order, because we've already determined that no section
      will match more than one spec.  */
   data_counter = 0;
-  ptr->handler_data[0] = NULL;
-  ptr->handler_data[1] = NULL;
-  ptr->handler_data[2] = NULL;
-  ptr->handler_data[3] = NULL;
   for (sec = ptr->section_list; sec != NULL; sec = sec->next)
     if (!wildcardp (sec->spec.name))
       ptr->handler_data[data_counter++] = sec;
