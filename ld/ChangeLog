@@ -1,5 +1,11 @@
 2006-07-26  Alan Modra  <amodra@bigpond.net.au>
 
+	* emultempl/elf-generic.em (map_segments): Reorganise loop so that
+	layout happens before segment map.  Don't do segment map on
+	relocatable link.
+
+2006-07-26  Alan Modra  <amodra@bigpond.net.au>
+
 	* ldexp.c (fold_name <LOADADDR>): Use the lma.
 	* ldlang.h (lang_memory_region_type): Delete old_length.  Add
 	last_os.

@@ -28,9 +28,26 @@ gld${EMULATION_NAME}_map_segments (bfd_boolean need_layout)
 {
   int tries = 10;
 
-  while (tries)
+  do
     {
-      if (output_bfd->xvec->flavour == bfd_target_elf_flavour)
+      if (need_layout)
+	{
+	  lang_reset_memory_regions ();
+
+	  /* Resize the sections.  */
+	  lang_size_sections (NULL, TRUE);
+
+	  /* Redo special stuff.  */
+	  ldemul_after_allocation ();
+
+	  /* Do the assignments again.  */
+	  lang_do_assignments ();
+
+	  need_layout = FALSE;
+	}
+
+      if (output_bfd->xvec->flavour == bfd_target_elf_flavour
+	  && !link_info.relocatable)
 	{
 	  bfd_size_type phdr_size;
 
@@ -45,24 +62,8 @@ gld${EMULATION_NAME}_map_segments (bfd_boolean need_layout)
 	  if (phdr_size != elf_tdata (output_bfd)->program_header_size)
 	    need_layout = TRUE;
 	}
-
-      if (!need_layout)
-	break;
-
-      lang_reset_memory_regions ();
-
-      /* Resize the sections.  */
-      lang_size_sections (NULL, TRUE);
-
-      /* Redo special stuff.  */
-      ldemul_after_allocation ();
-
-      /* Do the assignments again.  */
-      lang_do_assignments ();
-
-      need_layout = FALSE;
-      --tries;
     }
+  while (need_layout && --tries);
 
   if (tries == 0)
     einfo (_("%P%F: looping in map_segments"));
