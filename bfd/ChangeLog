@@ -1,3 +1,7 @@
+2006-07-26  Andreas Schwab  <schwab@suse.de>
+
+	* elfxx-ia64.c (elfNN_ia64_choose_gp): Use rawsize if set.
+
 2006-07-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (elf_modify_segment_map): Delete empty PT_LOAD segments.

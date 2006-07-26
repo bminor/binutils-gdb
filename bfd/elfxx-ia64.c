@@ -4366,7 +4366,7 @@ elfNN_ia64_choose_gp (abfd, info)
 	continue;
 
       lo = os->vma;
-      hi = os->vma + os->size;
+      hi = os->vma + (os->rawsize ? os->rawsize : os->size);
       if (hi < lo)
 	hi = (bfd_vma) -1;
 
