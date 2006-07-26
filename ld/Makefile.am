@@ -100,7 +100,12 @@ man_MANS = ld.1
 AM_MAKEINFOFLAGS = -I $(srcdir) -I $(BFDDIR)/doc
 TEXI2DVI = texi2dvi -I $(srcdir) -I $(BFDDIR)/doc
 
-INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) -I$(top_srcdir)/../intl -I../intl $(HDEFINES) $(CFLAGS) -DLOCALEDIR="\"$(datadir)/locale\""
+REPORT_BUGS_TO_s := "\"@REPORT_BUGS_TO@\""
+
+INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
+	-I$(top_srcdir)/../intl -I../intl $(HDEFINES) $(CFLAGS) \
+	-DREPORT_BUGS_TO=$(REPORT_BUGS_TO_s) \
+	-DLOCALEDIR="\"$(datadir)/locale\""
 
 BFDLIB = ../bfd/libbfd.la
 LIBIBERTY = ../libiberty/libiberty.a

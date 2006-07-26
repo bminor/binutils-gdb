@@ -40,6 +40,19 @@ esac])dnl
 
 using_cgen=no
 
+# The location to which bugs should be reported.
+AC_ARG_WITH(bugurl,
+  AS_HELP_STRING([--with-bugurl=URL],
+                 [Direct users to URL to report a bug]),
+  [case "$withval" in
+    yes) AC_MSG_ERROR([bug URL not specified]) ;;
+    no)  REPORT_BUGS_TO="" ;;
+    *)   REPORT_BUGS_TO="<URL:$withval>" ;;
+   esac],
+   REPORT_BUGS_TO=""
+)
+AC_SUBST(REPORT_BUGS_TO)
+
 AM_BINUTILS_WARNINGS
 
 # Generate a header file

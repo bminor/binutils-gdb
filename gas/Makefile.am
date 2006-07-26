@@ -459,18 +459,26 @@ BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
 INCDIR = $(BASEDIR)/include
 
+REPORT_BUGS_TO_s := "\"@REPORT_BUGS_TO@\""
+
 # This is the variable actually used when we compile.
 # Specify the directories to be searched for header files.
 # Both . and srcdir are used, in that order,
 # so that tm.h and config.h will be found in the compilation
 # subdirectory rather than in the source directory.
-INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(srcdir)/config -I$(INCDIR) -I$(srcdir)/.. -I$(BFDDIR) -I$(srcdir)/../intl -I../intl -DLOCALEDIR="\"$(datadir)/locale\""
+INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(srcdir)/config \
+	-I$(INCDIR) -I$(srcdir)/.. -I$(BFDDIR) -I$(srcdir)/../intl -I../intl \
+	-DREPORT_BUGS_TO=$(REPORT_BUGS_TO_s) \
+	-DLOCALEDIR="\"$(datadir)/locale\""
 
 # This should be parallel to INCLUDES, but should replace $(srcdir)
 # with $${srcdir}, and should work in a subdirectory.  This is used
 # when building dependencies, because the dependency building is done
 # in a subdirectory.
-DEP_INCLUDES = -D_GNU_SOURCE -I.. -I$${srcdir} -I../../bfd -I$${srcdir}/config -I$${srcdir}/../include -I$${srcdir}/.. -I$${srcdir}/../bfd -I$${srcdir}/../intl -I../../intl -DLOCALEDIR="\"$(datadir)/locale\""
+DEP_INCLUDES = -D_GNU_SOURCE -I.. -I$${srcdir} -I../../bfd -I$${srcdir}/config \
+	-I$${srcdir}/../include -I$${srcdir}/.. -I$${srcdir}/../bfd -I$${srcdir}/../intl -I../../intl  \
+	-DREPORT_BUGS_TO=$(REPORT_BUGS_TO_s) \
+	-DLOCALEDIR="\"$(datadir)/locale\""
 
 DEP_FLAGS = -DOBJ_MAYBE_ELF \
 	-I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES)

@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE LN_S RANLIB ac_ct_RANLIB LIBTOOL use_sysroot TARGET_SYSTEM_ROOT TARGET_SYSTEM_ROOT_DEFINE WARN_CFLAGS NO_WERROR CPP EGREP ALLOCA USE_NLS MSGFMT GMSGFMT XGETTEXT USE_INCLUDED_LIBINTL CATALOGS CATOBJEXT DATADIRNAME GMOFILES INSTOBJEXT INTLDEPS INTLLIBS INTLOBJS POFILES POSUB INCLUDE_LOCALE_H GT_NO GT_YES MKINSTALLDIRS l YACC LEX LEXLIB LEX_OUTPUT_ROOT MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT HDEFINES HOSTING_CRT0 HOSTING_LIBS NATIVE_LIB_DIRS STRINGIFY EMUL EMULATION_OFILES EMUL_EXTRA_OFILES LIB_PATH EMULATION_LIBPATH TESTBFDLIB datarootdir docdir htmldir LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE LN_S RANLIB ac_ct_RANLIB LIBTOOL use_sysroot TARGET_SYSTEM_ROOT TARGET_SYSTEM_ROOT_DEFINE REPORT_BUGS_TO WARN_CFLAGS NO_WERROR CPP EGREP ALLOCA USE_NLS MSGFMT GMSGFMT XGETTEXT USE_INCLUDED_LIBINTL CATALOGS CATOBJEXT DATADIRNAME GMOFILES INSTOBJEXT INTLDEPS INTLLIBS INTLOBJS POFILES POSUB INCLUDE_LOCALE_H GT_NO GT_YES MKINSTALLDIRS l YACC LEX LEXLIB LEX_OUTPUT_ROOT MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT HDEFINES HOSTING_CRT0 HOSTING_LIBS NATIVE_LIB_DIRS STRINGIFY EMUL EMULATION_OFILES EMUL_EXTRA_OFILES LIB_PATH EMULATION_LIBPATH TESTBFDLIB datarootdir docdir htmldir LIBOBJS LTLIBOBJS'
 ac_subst_files='TDIRS'
 
 # Initialize some variables set by options.
@@ -871,6 +871,7 @@ Optional Packages:
   --with-pic              try to use only PIC/non-PIC objects default=use both
   --with-lib-path=dir1:dir2...  set default LIB_PATH
   --with-sysroot=DIR Search for usr/lib et al within DIR.
+  --with-bugurl=URL       Direct users to URL to report a bug
   --with-included-gettext use the GNU gettext library included here
 
 Some influential environment variables:
@@ -3869,7 +3870,7 @@ test x"$pic_mode" = xno && libtool_flags="$libtool_flags --prefer-non-pic"
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 3872 "configure"' > conftest.$ac_ext
+  echo '#line 3873 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -4225,6 +4226,24 @@ else
 fi;
 
 
+
+
+# The location to which bugs should be reported.
+
+# Check whether --with-bugurl or --without-bugurl was given.
+if test "${with_bugurl+set}" = set; then
+  withval="$with_bugurl"
+  case "$withval" in
+    yes) { { echo "$as_me:$LINENO: error: bug URL not specified" >&5
+echo "$as_me: error: bug URL not specified" >&2;}
+   { (exit 1); exit 1; }; } ;;
+    no)  REPORT_BUGS_TO="" ;;
+    *)   REPORT_BUGS_TO="<URL:$withval>" ;;
+   esac
+else
+  REPORT_BUGS_TO=""
+
+fi;
 
 
 
@@ -10505,6 +10524,7 @@ s,@LIBTOOL@,$LIBTOOL,;t t
 s,@use_sysroot@,$use_sysroot,;t t
 s,@TARGET_SYSTEM_ROOT@,$TARGET_SYSTEM_ROOT,;t t
 s,@TARGET_SYSTEM_ROOT_DEFINE@,$TARGET_SYSTEM_ROOT_DEFINE,;t t
+s,@REPORT_BUGS_TO@,$REPORT_BUGS_TO,;t t
 s,@WARN_CFLAGS@,$WARN_CFLAGS,;t t
 s,@NO_WERROR@,$NO_WERROR,;t t
 s,@CPP@,$CPP,;t t

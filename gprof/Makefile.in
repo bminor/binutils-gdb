@@ -178,12 +178,14 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 POFILES = @POFILES@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
+REPORT_BUGS_TO = @REPORT_BUGS_TO@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
+VERSUFFIX = @VERSUFFIX@
 WARN_CFLAGS = @WARN_CFLAGS@
 XGETTEXT = @XGETTEXT@
 ac_ct_CC = @ac_ct_CC@
@@ -240,7 +242,14 @@ BFDDIR = $(BASEDIR)/bfd
 INCDIR = $(BASEDIR)/include
 AM_CFLAGS = $(WARN_CFLAGS)
 MKDEP = gcc -MM
-INCLUDES = -D_GNU_SOURCE -DDEBUG -I../bfd -I$(srcdir)/../include -I$(srcdir)/../bfd -I$(srcdir)/../intl -I../intl -I. -DLOCALEDIR="\"$(datadir)/locale\""
+VERSUFFIX_s := "\"@VERSUFFIX@\""
+REPORT_BUGS_TO_s := "\"@REPORT_BUGS_TO@\""
+INCLUDES = -D_GNU_SOURCE -DDEBUG -I../bfd -I$(srcdir)/../include \
+	-I$(srcdir)/../bfd -I$(srcdir)/../intl -I../intl -I.  \
+	-DVERSUFFIX=$(VERSUFFIX_s) \
+	-DREPORT_BUGS_TO=$(REPORT_BUGS_TO_s) \
+	-DLOCALEDIR="\"$(datadir)/locale\""
+
 sources = basic_blocks.c call_graph.c cg_arcs.c cg_dfn.c \
 	cg_print.c corefile.c gmon_io.c gprof.c hertz.c hist.c source.c \
 	search_list.c symtab.c sym_ids.c utils.c \

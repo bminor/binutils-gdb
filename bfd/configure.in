@@ -63,6 +63,20 @@ if test $use_secureplt = true; then
     [Define if we should default to creating read-only plt entries])
 fi
 
+# The trailing component of the string reported as the version number
+# by gdb. For an official FSF release, it is empty.
+AC_ARG_WITH(versuffix,
+  AS_HELP_STRING([--with-versuffix=SFX],
+                 [Append SFX to the version string]),
+  [case "$withval" in
+    yes) AC_MSG_ERROR([version suffix not specified]) ;;
+    no)  VERSUFFIX=" (CodeSourcery Unofficial)" ;;
+    *)   VERSUFFIX=" ($withval)" ;;
+   esac],
+  VERSUFFIX=
+)
+AC_SUBST(VERSUFFIX)   
+
 AM_BINUTILS_WARNINGS
 
 AM_CONFIG_HEADER(config.h:config.in)

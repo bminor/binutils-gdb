@@ -13,6 +13,34 @@ AM_INIT_AUTOMAKE(gprof, ${BFD_VERSION})
 
 AM_PROG_LIBTOOL
 
+# The trailing component of the string reported as the version number
+# by gdb. For an official FSF release, it is empty.
+AC_ARG_WITH(versuffix,
+  AS_HELP_STRING([--with-versuffix=SFX],
+                 [Append SFX to the version string]),
+  [case "$withval" in
+    yes) AC_MSG_ERROR([version suffix not specified]) ;;
+    no)  VERSUFFIX=" (CodeSourcery Unofficial)" ;;
+    *)   VERSUFFIX=" ($withval)" ;;
+   esac],
+  VERSUFFIX=
+)
+AC_SUBST(VERSUFFIX)   
+
+
+# The location to which bugs should be reported.
+AC_ARG_WITH(bugurl,
+  AS_HELP_STRING([--with-bugurl=URL],
+                 [Direct users to URL to report a bug]),
+  [case "$withval" in
+    yes) AC_MSG_ERROR([bug URL not specified]) ;;
+    no)  REPORT_BUGS_TO="" ;;
+    *)   REPORT_BUGS_TO="<URL:$withval>" ;;
+   esac],
+   REPORT_BUGS_TO=""
+)
+AC_SUBST(REPORT_BUGS_TO)
+
 dnl For simplicity, we use the BFD configuration file for most
 dnl things.  However, we also need our own configuration file for
 dnl the automake PACKAGE and VERSION macros.  We don't name it

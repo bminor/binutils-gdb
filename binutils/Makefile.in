@@ -309,6 +309,7 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 POFILES = @POFILES@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
+REPORT_BUGS_TO = @REPORT_BUGS_TO@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -402,11 +403,13 @@ BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
 INCDIR = $(BASEDIR)/include
 MKDEP = gcc -MM
+REPORT_BUGS_TO_s := "\"@REPORT_BUGS_TO@\""
 INCLUDES = -D_GNU_SOURCE \
 	 -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
 	 @HDEFINES@ \
 	 -I$(srcdir)/../intl -I../intl \
 	 -DLOCALEDIR="\"$(datadir)/locale\"" \
+	 -DREPORT_BUGS_TO=$(REPORT_BUGS_TO_s) \
 	 -Dbin_dummy_emulation=$(EMULATION_VECTOR)
 
 HFILES = \
