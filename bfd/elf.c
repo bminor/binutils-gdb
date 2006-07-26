@@ -3736,41 +3736,41 @@ _bfd_elf_make_dynamic_segment (bfd *abfd, asection *dynsec)
 static bfd_boolean
 elf_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
 {
-  struct elf_segment_map *m;
+  struct elf_segment_map **m;
   const struct elf_backend_data *bed;
 
   /* The placement algorithm assumes that non allocated sections are
      not in PT_LOAD segments.  We ensure this here by removing such
      sections from the segment map.  We also remove excluded
-     sections.  */
-  for (m = elf_tdata (abfd)->segment_map;
-       m != NULL;
-       m = m->next)
+     sections.  Finally, any PT_LOAD segment without sections is
+     removed.  */
+  m = &elf_tdata (abfd)->segment_map;
+  while (*m)
     {
       unsigned int i, new_count;
 
-      new_count = 0;
-      for (i = 0; i < m->count; i ++)
+      for (new_count = 0, i = 0; i < (*m)->count; i++)
 	{
-	  if ((m->sections[i]->flags & SEC_EXCLUDE) == 0
-	      && ((m->sections[i]->flags & SEC_ALLOC) != 0
-		  || m->p_type != PT_LOAD))
+	  if (((*m)->sections[i]->flags & SEC_EXCLUDE) == 0
+	      && (((*m)->sections[i]->flags & SEC_ALLOC) != 0
+		  || (*m)->p_type != PT_LOAD))
 	    {
-	      if (i != new_count)
-		m->sections[new_count] = m->sections[i];
-
-	      new_count ++;
+	      (*m)->sections[new_count] = (*m)->sections[i];
+	      new_count++;
 	    }
 	}
+      (*m)->count = new_count;
 
-      if (new_count != m->count)
-	m->count = new_count;
+      if ((*m)->p_type == PT_LOAD && (*m)->count == 0)
+	*m = (*m)->next;
+      else
+	m = &(*m)->next;
     }
 
   bed = get_elf_backend_data (abfd);
   if (bed->elf_backend_modify_segment_map != NULL)
     {
-      if (! (*bed->elf_backend_modify_segment_map) (abfd, info))
+      if (!(*bed->elf_backend_modify_segment_map) (abfd, info))
 	return FALSE;
     }
 
@@ -4379,7 +4379,8 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		 .tbss, we need to look at the next section to decide
 		 whether the segment has any loadable sections.  */
 	      i = 0;
-	      while ((m->sections[i]->flags & SEC_LOAD) == 0)
+	      while ((m->sections[i]->flags & SEC_LOAD) == 0
+		     && (m->sections[i]->flags & SEC_HAS_CONTENTS) == 0)
 		{
 		  if ((m->sections[i]->flags & SEC_THREAD_LOCAL) == 0
 		      || ++i >= m->count)
@@ -4548,7 +4549,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	    {
 	      if (p->p_type == PT_LOAD)
 		{
-		  sec->filepos = off;
+		  sec->filepos = off + voff;
 		  /* FIXME: The SEC_HAS_CONTENTS test here dates back to
 		     1997, and the exact reason for it isn't clear.  One
 		     plausible explanation is that it is to work around
@@ -4640,7 +4641,9 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 
       hdr = *hdrpp;
       if (hdr->bfd_section != NULL
-	  && hdr->bfd_section->filepos != 0)
+	  && (hdr->bfd_section->filepos != 0
+	      || (hdr->sh_type == SHT_NOBITS
+		  && hdr->contents == NULL)))
 	hdr->sh_offset = hdr->bfd_section->filepos;
       else if ((hdr->sh_flags & SHF_ALLOC) != 0)
 	{

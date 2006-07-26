@@ -1525,31 +1525,6 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 }
 
 
-/* Remove any PT_LOAD segments with no allocated sections.  Prior to
-   binutils 2.13, this function used to remove the non-SEC_ALLOC
-   sections from PT_LOAD segments, but that task has now been moved
-   into elf.c.  We still need this function to remove any empty
-   segments that result, but there's nothing Xtensa-specific about
-   this and it probably ought to be moved into elf.c as well.  */
-
-static bfd_boolean
-elf_xtensa_modify_segment_map (bfd *abfd,
-			       struct bfd_link_info *info ATTRIBUTE_UNUSED)
-{
-  struct elf_segment_map **m_p;
-
-  m_p = &elf_tdata (abfd)->segment_map;
-  while (*m_p)
-    {
-      if ((*m_p)->p_type == PT_LOAD && (*m_p)->count == 0)
-	*m_p = (*m_p)->next;
-      else
-	m_p = &(*m_p)->next;
-    }
-  return TRUE;
-}
-
-
 /* Perform the specified relocation.  The instruction at (contents + address)
    is modified to set one operand to represent the value in "relocation".  The
    operand position is determined by the relocation type recorded in the
@@ -9823,7 +9798,6 @@ static const struct bfd_elf_special_section elf_xtensa_special_sections[] =
 #define elf_backend_grok_prstatus	     elf_xtensa_grok_prstatus
 #define elf_backend_grok_psinfo		     elf_xtensa_grok_psinfo
 #define elf_backend_hide_symbol		     elf_xtensa_hide_symbol
-#define elf_backend_modify_segment_map	     elf_xtensa_modify_segment_map
 #define elf_backend_object_p		     elf_xtensa_object_p
 #define elf_backend_reloc_type_class	     elf_xtensa_reloc_type_class
 #define elf_backend_relocate_section	     elf_xtensa_relocate_section
