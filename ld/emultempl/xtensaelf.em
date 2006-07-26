@@ -1249,6 +1249,7 @@ xtensa_strip_inconsistent_linkonce_sections (lang_statement_list_type *slist)
 	case lang_input_section_enum:
 	  if (is_inconsistent_linkonce_section (s->input_section.section))
 	    {
+	      s->input_section.section->output_section = bfd_abs_section_ptr;
 	      *s_p = s_next;
 	      continue;
 	    }
