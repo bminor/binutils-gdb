@@ -1,3 +1,7 @@
+2006-07-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-scripts/overlay-size-map.d: Update.
+
 2006-07-25  Thiemo Seufer  <ths@mips.com>
 
 	* ld-mips-elf/mips16-call-global-2.s,
