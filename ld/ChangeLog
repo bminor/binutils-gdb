@@ -1,3 +1,7 @@
+2006-07-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c: Formatting.
+
 2006-07-25  Bob Wilson  <bob.wilson@acm.org>
 
 	* emultempl/xtensaelf.em (xtensa_strip_inconsistent_linkonce_sections):

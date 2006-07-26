@@ -288,7 +288,7 @@ find_section (lang_input_statement_type *file,
 {
   section_iterator_callback_data cb_data = { NULL, FALSE };
 
-  bfd_get_section_by_name_if (file->the_bfd, sec->spec.name, 
+  bfd_get_section_by_name_if (file->the_bfd, sec->spec.name,
 			      section_iterator_callback, &cb_data);
   *multiple_sections_found = cb_data.multiple_sections_found;
   return cb_data.found_section;
@@ -365,35 +365,35 @@ compare_section (sort_type sort, asection *asec, asection *bsec)
   return ret;
 }
 
-/* Build a Binary Search Tree to sort sections, unlike insertion sort 
+/* Build a Binary Search Tree to sort sections, unlike insertion sort
    used in wild_sort(). BST is considerably faster if the number of
    of sections are large.  */
 
 static lang_section_bst_type **
 wild_sort_fast (lang_wild_statement_type *wild,
-                struct wildcard_list *sec,
-                lang_input_statement_type *file ATTRIBUTE_UNUSED,
-                asection *section) 
+		struct wildcard_list *sec,
+		lang_input_statement_type *file ATTRIBUTE_UNUSED,
+		asection *section)
 {
-  lang_section_bst_type **tree
-    = (lang_section_bst_type **) (&(wild->handler_data[1]));
+  lang_section_bst_type **tree;
 
+  tree = (lang_section_bst_type **) &wild->handler_data[1];
   if (!wild->filenames_sorted
-      && (sec == NULL || sec->spec.sorted == none)) 
+      && (sec == NULL || sec->spec.sorted == none))
     {
       /* Append at the right end of tree.  */
       while (*tree)
-        tree = &((*tree)->right);
+	tree = &((*tree)->right);
       return tree;
     }
 
-  while (*tree) 
+  while (*tree)
     {
       /* Find the correct node to append this section.  */
-      if (compare_section (sec->spec.sorted, section, (*tree)->section) < 0) 
-        tree = &((*tree)->left);
-      else 
-        tree = &((*tree)->right);
+      if (compare_section (sec->spec.sorted, section, (*tree)->section) < 0)
+	tree = &((*tree)->left);
+      else
+	tree = &((*tree)->right);
     }
 
   return tree;
@@ -403,10 +403,10 @@ wild_sort_fast (lang_wild_statement_type *wild,
 
 static void
 output_section_callback_fast (lang_wild_statement_type *ptr,
-                              struct wildcard_list *sec,
-                              asection *section,
-                              lang_input_statement_type *file,
-                              void *output ATTRIBUTE_UNUSED) 
+			      struct wildcard_list *sec,
+			      asection *section,
+			      lang_input_statement_type *file,
+			      void *output ATTRIBUTE_UNUSED)
 {
   lang_section_bst_type *node;
   lang_section_bst_type **tree;
@@ -427,15 +427,15 @@ output_section_callback_fast (lang_wild_statement_type *ptr,
 /* Convert a sorted sections' BST back to list form.  */
 
 static void
-output_section_callback_tree_to_list (lang_wild_statement_type *ptr, 
-                                      lang_section_bst_type *tree, 
-                                      void *output) 
+output_section_callback_tree_to_list (lang_wild_statement_type *ptr,
+				      lang_section_bst_type *tree,
+				      void *output)
 {
   if (tree->left)
     output_section_callback_tree_to_list (ptr, tree->left, output);
 
-  lang_add_section (& ptr->children, tree->section,
-                    (lang_output_section_statement_type *) output);
+  lang_add_section (&ptr->children, tree->section,
+		    (lang_output_section_statement_type *) output);
 
   if (tree->right)
     output_section_callback_tree_to_list (ptr, tree->right, output);
@@ -1014,7 +1014,7 @@ static struct bfd_hash_table output_section_statement_table;
    initialize the table, fill in an entry and remove the table.  */
 
 static struct bfd_hash_entry *
-output_section_statement_newfunc (struct bfd_hash_entry *entry, 
+output_section_statement_newfunc (struct bfd_hash_entry *entry,
 				  struct bfd_hash_table *table,
 				  const char *string)
 {
@@ -1578,15 +1578,15 @@ lang_insert_orphan (asection *s,
       as = *place->section;
 
       if (!as)
-        {
-          /* Put the section at the end of the list.  */
+	{
+	  /* Put the section at the end of the list.  */
 
 	  /* Unlink the section.  */
 	  bfd_section_list_remove (output_bfd, snew);
 
 	  /* Now tack it back on in the right place.  */
 	  bfd_section_list_append (output_bfd, snew);
-        }
+	}
       else if (as != snew && as->prev != snew)
 	{
 	  /* Unlink the section.  */
@@ -2365,7 +2365,7 @@ add_excluded_libs (const char *list)
       entry->name[end - p] = '\0';
       excluded_libs = entry;
       if (*end == '\0')
-        break;
+	break;
       p = end + 1;
     }
 }
@@ -2553,18 +2553,19 @@ wild (lang_wild_statement_type *s,
   struct wildcard_list *sec;
 
   if (s->handler_data[0]
-      && (s->handler_data[0]->spec.sorted == by_name) 
+      && s->handler_data[0]->spec.sorted == by_name
       && !s->filenames_sorted)
     {
+      lang_section_bst_type *tree;
+
       walk_wild (s, output_section_callback_fast, output);
 
-      if (s->handler_data[1]) 
-        output_section_callback_tree_to_list (s, 
-                                              (lang_section_bst_type *) s->handler_data[1], 
-                                              output);
+      tree = (lang_section_bst_type *) s->handler_data[1];
+      if (tree)
+	output_section_callback_tree_to_list (s, tree, output);
       s->handler_data[1] = NULL;
     }
-  else 
+  else
     walk_wild (s, output_section_callback, output);
 
   if (default_common_section == NULL)
@@ -3289,7 +3290,7 @@ map_input_to_output_sections
 	  FAIL ();
 	  break;
 	case lang_address_statement_enum:
-	  /* Mark the specified section with the supplied address.  
+	  /* Mark the specified section with the supplied address.
 
 	     If this section was actually a segment marker, then the
 	     directive is ignored if the linker script explicitly
@@ -3299,13 +3300,13 @@ map_input_to_output_sections
 	     section directive semantics for backwards compatibilty;
 	     linker scripts that do not specifically check for
 	     SEGMENT_START automatically get the old semantics.  */
-	  if (!s->address_statement.segment 
+	  if (!s->address_statement.segment
 	      || !s->address_statement.segment->used)
 	    {
 	      lang_output_section_statement_type *aos
 		= (lang_output_section_statement_lookup
 		   (s->address_statement.section_name));
-	      
+
 	      if (aos->bfd_section == NULL)
 		init_os (aos, NULL);
 	      aos->addr_tree = s->address_statement.address;
@@ -3440,7 +3441,7 @@ print_output_section_statement
    correct expression, since the value of DST that is used on
    the right hand side will be its final value, not its value
    just before this expression is evaluated.  */
-   
+
 static bfd_boolean
 scan_for_self_assignment (const char * dst, etree_type * rhs)
 {
@@ -4146,7 +4147,7 @@ lang_check_section_addresses (void)
       sections[count] = s;
       count++;
     }
-  
+
   if (count <= 1)
     return;
 
@@ -4163,7 +4164,7 @@ lang_check_section_addresses (void)
 	 addresses because overlay sections can have overlapping VMAs
 	 but they must have distinct LMAs.  */
       os = s;
-      os_start = s_start; 
+      os_start = s_start;
       os_end = s_end;
       s = *spp++;
       s_start = bfd_section_lma (output_bfd, s);
@@ -5536,7 +5537,7 @@ relax_sections (void)
 
   do
     {
-      relax_again = FALSE; 
+      relax_again = FALSE;
 
       /* Note: pe-dll.c does something like this also.  If you find
 	 you need to change this code, you probably need to change
