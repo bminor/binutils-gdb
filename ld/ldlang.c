@@ -1164,15 +1164,16 @@ lang_memory_region_lookup (const char *const name, bfd_boolean create)
 
   new->name = xstrdup (name);
   new->next = NULL;
+  new->origin = 0;
+  new->length = ~(bfd_size_type) 0;
+  new->current = 0;
+  new->last_os = NULL;
+  new->flags = 0;
+  new->not_flags = 0;
+  new->had_full_message = FALSE;
 
   *lang_memory_region_list_tail = new;
   lang_memory_region_list_tail = &new->next;
-  new->origin = 0;
-  new->flags = 0;
-  new->not_flags = 0;
-  new->length = ~(bfd_size_type) 0;
-  new->current = 0;
-  new->had_full_message = FALSE;
 
   return new;
 }
@@ -1462,7 +1463,6 @@ lang_insert_orphan (asection *s,
   lang_statement_list_type *old;
   lang_statement_list_type add;
   const char *ps;
-  etree_type *load_base;
   lang_output_section_statement_type *os;
   lang_output_section_statement_type **os_tail;
 
@@ -1506,20 +1506,10 @@ lang_insert_orphan (asection *s,
   if (link_info.relocatable || (s->flags & (SEC_LOAD | SEC_ALLOC)) == 0)
     address = exp_intop (0);
 
-  load_base = NULL;
-  if (after != NULL && after->load_base != NULL)
-    {
-      etree_type *lma_from_vma;
-      lma_from_vma = exp_binop ('-', after->load_base,
-				exp_nameop (ADDR, after->name));
-      load_base = exp_binop ('+', lma_from_vma,
-			     exp_nameop (ADDR, secname));
-    }
-
   os_tail = ((lang_output_section_statement_type **)
 	     lang_output_section_statement.tail);
   os = lang_enter_output_section_statement (secname, address, 0, NULL, NULL,
-					    load_base, 0);
+					    NULL, 0);
 
   if (add_child == NULL)
     add_child = &os->children;
@@ -4417,20 +4407,16 @@ lang_size_sections_1
 		  os_region_check (os, os->region, os->addr_tree,
 				   os->bfd_section->vma);
 
-		/* If there's no load address specified, use the run
-		   region as the load region.  */
-		if (os->lma_region == NULL && os->load_base == NULL)
-		  os->lma_region = os->region;
-
 		if (os->lma_region != NULL && os->lma_region != os->region)
 		  {
 		    /* Set load_base, which will be handled later.  */
 		    os->load_base = exp_intop (os->lma_region->current);
 		    os->lma_region->current +=
 		      TO_ADDR (os->bfd_section->size);
+
 		    if (check_regions)
 		      os_region_check (os, os->lma_region, NULL,
-				       os->bfd_section->lma);
+				       os->lma_region->current);
 		  }
 	      }
 	  }
@@ -4709,11 +4695,10 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
 /* Worker function for lang_do_assignments.  Recursiveness goes here.  */
 
 static bfd_vma
-lang_do_assignments_1
-  (lang_statement_union_type *s,
-   lang_output_section_statement_type *output_section_statement,
-   fill_type *fill,
-   bfd_vma dot)
+lang_do_assignments_1 (lang_statement_union_type *s,
+		       lang_output_section_statement_type *current_os,
+		       fill_type *fill,
+		       bfd_vma dot)
 {
   for (; s != NULL; s = s->header.next)
     {
@@ -4721,9 +4706,7 @@ lang_do_assignments_1
 	{
 	case lang_constructors_statement_enum:
 	  dot = lang_do_assignments_1 (constructor_list.head,
-				       output_section_statement,
-				       fill,
-				       dot);
+				       current_os, fill, dot);
 	  break;
 
 	case lang_output_section_statement_enum:
@@ -4733,22 +4716,61 @@ lang_do_assignments_1
 	    os = &(s->output_section_statement);
 	    if (os->bfd_section != NULL && !os->ignored)
 	      {
+		lang_memory_region_type *r;
+
 		dot = os->bfd_section->vma;
-		lang_do_assignments_1 (os->children.head, os, os->fill, dot);
+		r = os->region;
+		if (r == NULL)
+		  r = lang_memory_region_lookup (DEFAULT_MEMORY_REGION, FALSE);
+
+		if (os->load_base)
+		  os->bfd_section->lma
+		    = exp_get_abs_int (os->load_base, 0, "load base");
+		else if (r->last_os != NULL)
+		  {
+		    asection *last;
+		    bfd_vma lma;
+
+		    last = r->last_os->output_section_statement.bfd_section;
+
+		    /* If the current vma overlaps the previous section,
+		       then set the current lma to that at the end of
+		       the previous section.  The previous section was
+		       probably an overlay.  */
+		    if ((dot >= last->vma
+			 && dot < last->vma + last->size)
+			|| (last->vma >= dot
+			    && last->vma < dot + os->bfd_section->size))
+		      lma = last->lma + last->size;
+
+		    /* Otherwise, keep the same lma to vma relationship
+		       as the previous section.  */
+		    else
+		      lma = dot + last->lma - last->vma;
+
+		    if (os->section_alignment != -1)
+		      lma = align_power (lma, os->section_alignment);
+		    os->bfd_section->lma = lma;
+		  }
+
+		lang_do_assignments_1 (os->children.head,
+				       os, os->fill, dot);
+
 		/* .tbss sections effectively have zero size.  */
 		if ((os->bfd_section->flags & SEC_HAS_CONTENTS) != 0
 		    || (os->bfd_section->flags & SEC_THREAD_LOCAL) == 0
 		    || link_info.relocatable)
-		  dot += TO_ADDR (os->bfd_section->size);
-	      }
-	    if (os->load_base)
-	      {
-		/* If nothing has been placed into the output section then
-		   it won't have a bfd_section.  */
-		if (os->bfd_section && !os->ignored)
 		  {
-		    os->bfd_section->lma
-		      = exp_get_abs_int (os->load_base, 0, "load base");
+		    dot += TO_ADDR (os->bfd_section->size);
+
+		    /* Keep track of normal sections using the default
+		       lma region.  We use this to set the lma for
+		       following sections.  Overlays or other linker
+		       script assignment to lma might mean that the
+		       default lma == vma is incorrect.  */
+		    if (!link_info.relocatable
+			&& os->lma_region == NULL)
+		      r->last_os = s;
 		  }
 	      }
 	  }
@@ -4757,8 +4779,7 @@ lang_do_assignments_1
 	case lang_wild_statement_enum:
 
 	  dot = lang_do_assignments_1 (s->wild_statement.children.head,
-				       output_section_statement,
-				       fill, dot);
+				       current_os, fill, dot);
 	  break;
 
 	case lang_object_symbols_statement_enum:
@@ -4827,7 +4848,7 @@ lang_do_assignments_1
 
 	case lang_assignment_statement_enum:
 	  exp_fold_tree (s->assignment_statement.exp,
-			 output_section_statement->bfd_section,
+			 current_os->bfd_section,
 			 &dot);
 	  break;
 
@@ -4837,8 +4858,7 @@ lang_do_assignments_1
 
 	case lang_group_statement_enum:
 	  dot = lang_do_assignments_1 (s->group_statement.children.head,
-				       output_section_statement,
-				       fill, dot);
+				       current_os, fill, dot);
 	  break;
 
 	default:
@@ -5423,8 +5443,8 @@ lang_reset_memory_regions (void)
 
   for (p = lang_memory_region_list; p != NULL; p = p->next)
     {
-      p->old_length = (bfd_size_type) (p->current - p->origin);
       p->current = p->origin;
+      p->last_os = NULL;
     }
 
   for (os = &lang_output_section_statement.head->output_section_statement;
@@ -6350,10 +6370,6 @@ lang_leave_overlay (etree_type *lma_expr,
 	 an LMA region was specified.  */
       if (l->next == 0)
 	l->os->load_base = lma_expr;
-      else if (lma_region == 0)
-	l->os->load_base = exp_binop ('+',
-				      exp_nameop (LOADADDR, l->next->os->name),
-				      exp_nameop (SIZEOF, l->next->os->name));
 
       if (phdrs != NULL && l->os->phdrs == NULL)
 	l->os->phdrs = phdrs;

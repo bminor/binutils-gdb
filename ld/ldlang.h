@@ -54,7 +54,7 @@ typedef struct memory_region_struct
   bfd_vma origin;
   bfd_size_type length;
   bfd_vma current;
-  bfd_size_type old_length;
+  union lang_statement_union *last_os;
   flagword flags;
   flagword not_flags;
   bfd_boolean had_full_message;

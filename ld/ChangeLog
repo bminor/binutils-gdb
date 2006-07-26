@@ -1,5 +1,17 @@
 2006-07-26  Alan Modra  <amodra@bigpond.net.au>
 
+	* ldexp.c (fold_name <LOADADDR>): Use the lma.
+	* ldlang.h (lang_memory_region_type): Delete old_length.  Add
+	last_os.
+	* ldlang.c (lang_memory_region_lookup): Init new field.
+	(lang_reset_memory_regions): Reset new field.
+	(lang_insert_orphan): Don't set load_base.
+	(lang_leave_overlay): Likewise.
+	(lang_size_sections_1): Delete unnecessary code setting lma_region
+	to region.  Correct lma region check.
+	(lang_do_assignments_1): Rename output_section_statement parm
+	to current_os.  Set lma from previous section in region.
+
 	* ldlang.c: Formatting.
 
 2006-07-25  Bob Wilson  <bob.wilson@acm.org>
