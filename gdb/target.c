@@ -1406,22 +1406,15 @@ target_write (struct target_ops *ops,
   return len;
 }
 
-/* Wrapper to perform a full read of unknown size.  OBJECT/ANNEX will
-   be read using OPS.  The return value will be -1 if the transfer
-   fails or is not supported; 0 if the object is empty; or the length
-   of the object otherwise.  If a positive value is returned, a
-   sufficiently large buffer will be allocated using xmalloc and
-   returned in *BUF_P containing the contents of the object.
+/* Read OBJECT/ANNEX using OPS.  Store the result in *BUF_P and return
+   the size of the transferred data.  PADDING additional bytes are
+   available in *BUF_P.  This is a helper function for
+   target_read_alloc; see the declaration of that function for more
+   information.  */
 
-   This method should be used for objects sufficiently small to store
-   in a single xmalloc'd buffer, when no fixed bound on the object's
-   size is known in advance.  Don't try to read TARGET_OBJECT_MEMORY
-   through this function.  */
-
-LONGEST
-target_read_alloc (struct target_ops *ops,
-		   enum target_object object,
-		   const char *annex, gdb_byte **buf_p)
+static LONGEST
+target_read_alloc_1 (struct target_ops *ops, enum target_object object,
+		     const char *annex, gdb_byte **buf_p, int padding)
 {
   size_t buf_alloc, buf_pos;
   gdb_byte *buf;
@@ -1442,7 +1435,7 @@ target_read_alloc (struct target_ops *ops,
   while (1)
     {
       n = target_read_partial (ops, object, annex, &buf[buf_pos],
-			       buf_pos, buf_alloc - buf_pos);
+			       buf_pos, buf_alloc - buf_pos - padding);
       if (n < 0)
 	{
 	  /* An error occurred.  */
@@ -1470,6 +1463,47 @@ target_read_alloc (struct target_ops *ops,
 
       QUIT;
     }
+}
+
+/* Read OBJECT/ANNEX using OPS.  Store the result in *BUF_P and return
+   the size of the transferred data.  See the declaration in "target.h"
+   function for more information about the return value.  */
+
+LONGEST
+target_read_alloc (struct target_ops *ops, enum target_object object,
+		   const char *annex, gdb_byte **buf_p)
+{
+  return target_read_alloc_1 (ops, object, annex, buf_p, 0);
+}
+
+/* Read OBJECT/ANNEX using OPS.  The result is NUL-terminated and
+   returned as a string, allocated using xmalloc.  If an error occurs
+   or the transfer is unsupported, NULL is returned.  Empty objects
+   are returned as allocated but empty strings.  A warning is issued
+   if the result contains any embedded NUL bytes.  */
+
+char *
+target_read_stralloc (struct target_ops *ops, enum target_object object,
+		      const char *annex)
+{
+  gdb_byte *buffer;
+  LONGEST transferred;
+
+  transferred = target_read_alloc_1 (ops, object, annex, &buffer, 1);
+
+  if (transferred < 0)
+    return NULL;
+
+  if (transferred == 0)
+    return xstrdup ("");
+
+  buffer[transferred] = 0;
+  if (strlen (buffer) < transferred)
+    warning (_("target object %d, annex %s, "
+	       "contained unexpected null characters"),
+	     (int) object, annex ? annex : "(none)");
+
+  return (char *) buffer;
 }
 
 /* Memory transfer methods.  */

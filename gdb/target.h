@@ -236,6 +236,16 @@ extern LONGEST target_read_alloc (struct target_ops *ops,
 				  enum target_object object,
 				  const char *annex, gdb_byte **buf_p);
 
+/* Read OBJECT/ANNEX using OPS.  The result is NUL-terminated and
+   returned as a string, allocated using xmalloc.  If an error occurs
+   or the transfer is unsupported, NULL is returned.  Empty objects
+   are returned as allocated but empty strings.  A warning is issued
+   if the result contains any embedded NUL bytes.  */
+
+extern char *target_read_stralloc (struct target_ops *ops,
+				   enum target_object object,
+				   const char *annex);
+
 /* Wrappers to target read/write that perform memory transfers.  They
    throw an error if the memory transfer fails.
 

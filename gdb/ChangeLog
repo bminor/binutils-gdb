@@ -1,3 +1,11 @@
+2006-07-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* target.h (target_read_stralloc): New prototype.
+	* target.c (target_read_alloc_1): Renamed from target_read_alloc.
+	Take new PADDING argument.
+	(target_read_alloc): Use it.
+	(target_read_stralloc): New function.
+
 2006-07-26  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote.c (remote_protocol_features): Correct qPart to qXfer.
