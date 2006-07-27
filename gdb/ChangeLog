@@ -1,5 +1,9 @@
 2006-07-27  Bob Wilson  <bob.wilson@acm.org>
 
+	* MAINTAINERS (Write After Approval): Add myself.
+
+2006-07-27  Bob Wilson  <bob.wilson@acm.org>
+
 	* main.c (captured_main): Print a newline after calling
 	print_gdb_version instead of waiting until after the symbol file
 	has been read.  Adjust error_pre_print, quit_pre_print, and
