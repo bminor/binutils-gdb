@@ -1,3 +1,7 @@
+2006-07-26  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c (remote_protocol_features): Correct qPart to qXfer.
+
 2006-07-25  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* eval.c (evaluate_subexp_for_address): Don't incorrectly discard

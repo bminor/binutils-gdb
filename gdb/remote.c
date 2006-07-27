@@ -2176,7 +2176,7 @@ remote_packet_size (const struct protocol_feature *feature,
 
 static struct protocol_feature remote_protocol_features[] = {
   { "PacketSize", PACKET_DISABLE, remote_packet_size, -1 },
-  { "qPart:auxv:read", PACKET_DISABLE, remote_supported_packet,
+  { "qXfer:auxv:read", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_auxv }
 };
 
