@@ -589,6 +589,7 @@ extern int gdbtk_test (char *);
       if (symarg)
 	printf_filtered ("..");
       wrap_here ("");
+      printf_filtered ("\n");
       gdb_flush (gdb_stdout);	/* Force to screen during slow operations */
     }
 
@@ -623,13 +624,13 @@ extern int gdbtk_test (char *);
       if (symarg)
 	printf_filtered ("..");
       wrap_here ("");
+      printf_filtered ("\n");
       gdb_flush (gdb_stdout);	/* Force to screen during slow operations */
     }
 
-  error_pre_print = "\n\n";
+  /* Set off error and warning messages with a blank line.  */
+  error_pre_print = "\n";
   quit_pre_print = error_pre_print;
-
-  /* We may get more than one warning, don't double space all of them... */
   warning_pre_print = _("\nwarning: ");
 
   /* Read and execute $HOME/.gdbinit file, if it exists.  This is done
@@ -687,15 +688,6 @@ extern int gdbtk_test (char *);
       if (symarg != NULL)
 	catch_command_errors (symbol_file_add_main, symarg, 0, RETURN_MASK_ALL);
     }
-
-  /* After the symbol file has been read, print a newline to get us
-     beyond the copyright line...  But errors should still set off
-     the error message with a (single) blank line.  */
-  if (!quiet)
-    printf_filtered ("\n");
-  error_pre_print = "\n";
-  quit_pre_print = error_pre_print;
-  warning_pre_print = _("\nwarning: ");
 
   if (corearg != NULL)
     {

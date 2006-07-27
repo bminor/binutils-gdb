@@ -1,3 +1,10 @@
+2006-07-27  Bob Wilson  <bob.wilson@acm.org>
+
+	* main.c (captured_main): Print a newline after calling
+	print_gdb_version instead of waiting until after the symbol file
+	has been read.  Adjust error_pre_print, quit_pre_print, and
+	warning_pre_print values.
+
 2006-07-27  Roger Sayle  <roger@eyesopen.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 
