@@ -230,7 +230,7 @@ handle_query (char *own_buf, int *new_packet_len_p)
       sprintf (own_buf, "PacketSize=%x", PBUFSIZ - 1);
 
       if (the_target->read_auxv != NULL)
-	strcat (own_buf, ";qPart:auxv:read+");
+	strcat (own_buf, ";qXfer:auxv:read+");
 
       return;
     }
