@@ -1,7 +1,7 @@
 /* Native support for the SGI Iris running IRIX version 5, for GDB.
 
    Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1998, 1999, 2000, 2001, 2002, 2004 Free Software Foundation, Inc.
+   1998, 1999, 2000, 2001, 2002, 2004, 2006 Free Software Foundation, Inc.
 
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
@@ -242,38 +242,21 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 		      int which, CORE_ADDR reg_addr)
 {
   char *srcp = core_reg_sect;
+  int regsize = mips_isa_regsize (current_gdbarch);
   int regno;
 
-  if (core_reg_size == deprecated_register_bytes ())
-    {
-      for (regno = 0; regno < NUM_REGS; regno++)
-        {
-          regcache_raw_write (current_regcache, regno, srcp);
-          srcp += register_size (current_gdbarch, regno);
-        }
-    }
-  else if (mips_isa_regsize (current_gdbarch) == 4 &&
-	   core_reg_size == (2 * mips_isa_regsize (current_gdbarch)) * NUM_REGS)
-    {
-      /* This is a core file from a N32 executable, 64 bits are saved
-         for all registers.  */
-      for (regno = 0; regno < NUM_REGS; regno++)
-	{
-	  if (regno >= FP0_REGNUM && regno < (FP0_REGNUM + 32))
-	    {
-              regcache_raw_write (current_regcache, regno, srcp);
-	    }
-	  else
-	    {
-              regcache_raw_write (current_regcache, regno, srcp + 4);
-	    }
-          srcp += 8;
-	}
-    }
-  else
+  /* If regsize is 8, this is a N32 or N64 core file.
+     If regsize is 4, this is an O32 core file.  */
+  if (core_reg_size != regsize * NUM_REGS)
     {
       warning (_("wrong size gregset struct in core file"));
       return;
+    }
+
+  for (regno = 0; regno < NUM_REGS; regno++)
+    {
+      regcache_raw_write (current_regcache, regno, srcp);
+      srcp += regsize;
     }
 }
 
