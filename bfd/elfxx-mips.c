@@ -10007,6 +10007,21 @@ _bfd_mips_elf_print_private_bfd_data (bfd *abfd, void *ptr)
   else
     fprintf (file, _(" [not 32bitmode]"));
 
+  if (elf_elfheader (abfd)->e_flags & EF_MIPS_NOREORDER)
+    fprintf (file, _(" [.noreorder]"));
+
+  if (elf_elfheader (abfd)->e_flags & EF_MIPS_PIC)
+    fprintf (file, _(" [PIC]"));
+
+  if (elf_elfheader (abfd)->e_flags & EF_MIPS_CPIC)
+    fprintf (file, _(" [CPIC]"));
+
+  if (elf_elfheader (abfd)->e_flags & EF_MIPS_XGOT)
+    fprintf (file, _(" [XGOT]"));
+
+  if (elf_elfheader (abfd)->e_flags & EF_MIPS_UCODE)
+    fprintf (file, _(" [UCODE]"));
+
   fputc ('\n', file);
 
   return TRUE;
