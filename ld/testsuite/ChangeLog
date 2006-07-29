@@ -1,3 +1,9 @@
+2006-07-29  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-mips-elf/hash1.s, ld-mips-elf/hash1a.d,
+	* ld-mips-elf/hash1b.d, ld-mips-elf/hash1c.d: New tests.
+	* ld-mips-elf/mips-elf.exp: Run them.
+
 2006-07-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-scripts/overlay-size-map.d: Update.

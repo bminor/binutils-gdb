@@ -137,6 +137,10 @@ if $has_newabi {
     run_dump_test "emit-relocs-1"
 }
 
+run_dump_test "hash1a"
+run_dump_test "hash1b"
+run_dump_test "hash1c"
+
 if {[istarget mips*-*-linux*]} {
      # The number of symbols that are always included in the symbol table
      # for these tests.  The 5 are:

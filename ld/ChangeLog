@@ -1,3 +1,36 @@
+2006-07-29  Richard Sandiford  <richard@codesourcery.com>
+
+	* Makefile.am (eelf32b4300.c): Update dependencies.
+	(eelf32bmip.c): Likewise.
+	(eelf32bsmip.c): Likewise.
+	(eelf32btsmip.c): Likewise.
+	(eelf32btsmipn32.c): Likewise.
+	(eelf32ltsmip.c): Likewise.
+	(eelf32ltsmipn32.c): Likewise.
+	(eelf32ebmip.c): Likewise.
+	(eelf32ebmipvxworks.c): Likewise.
+	(eelf32elmip.c): Likewise.
+	(eelf32elmipvxworks.c): Likewise.
+	(eelf32bmipn32.c): Likewise.
+	(eelf32lmip.c): Likewise.
+	(eelf32mipswindiss.c): Likewise.
+	(eelf32lsmip.c): Likewise.
+	(eelf64bmip.c): Likewise.
+	(eelf64btsmip.c): Likewise.
+	(eelf64ltsmip.c): Likewise.
+	(emipsbig.c): Likewise.  Canonicalize ${GENSCRIPTS} line.
+	(emipsbsd.c): Likewise.
+	(emipsidt.c): Update dependencies.
+	(emipsidtl.c): Likewise.
+	(emipslit.c): Likewise.
+	(emipslnews.c): Likewise.
+	(emipspe.c): Likewise.  Fix ${GENSCRIPTS} invocation.
+	* Makefile.in: Regenerate.
+	* emulparams/elf32bmip.sh (EXTRA_EM_FILE): Define.
+	* emulparams/elf32bmipn32-defs.sh (EXTRA_EM_FILE): Likewise.
+	* emultempl/irix.em: Include emultempl/mipself.em.
+	* emultempl/mipself.em: New file.
+
 2006-07-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/elf-generic.em (map_segments): Reorganise loop so that
