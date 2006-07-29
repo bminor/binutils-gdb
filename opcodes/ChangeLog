@@ -1,3 +1,8 @@
+2006-07-29  Richard Sandiford  <richard@codesourcery.com>
+
+	* m68k-opc.c (m68k_opcodes): Fix operand specificer in the Coldfire
+	"fdaddl" entry.
+
 2006-07-19  Paul Brook  <paul@codesourcery.com>
 
 	* armd-dis.c (arm_opcodes): Fix rbit opcode.
