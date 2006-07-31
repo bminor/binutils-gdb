@@ -1,3 +1,8 @@
+2006-07-31  Thiemo Seufer  <ths@mips.com>
+
+	* config/tc-mips.c (md_apply_fix, tc_gen_reloc): Remove special
+	handling for BFD_RELOC_MIPS16_JMP.
+
 2006-07-24  Andreas Schwab  <schwab@suse.de>
 
 	PR/2756

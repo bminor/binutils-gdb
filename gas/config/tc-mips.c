@@ -11787,14 +11787,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_MIPS16_GPREL:
     case BFD_RELOC_MIPS16_HI16:
     case BFD_RELOC_MIPS16_HI16_S:
-      /* Nothing needed to do. The value comes from the reloc entry */
-      break;
-
     case BFD_RELOC_MIPS16_JMP:
-      /* We currently always generate a reloc against a symbol, which
-         means that we don't want an addend even if the symbol is
-         defined.  */
-      *valP = 0;
+      /* Nothing needed to do. The value comes from the reloc entry */
       break;
 
     case BFD_RELOC_64:
@@ -13567,10 +13561,6 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
     }
   else
     reloc->addend = fixp->fx_addnumber;
-
-  /* Handle relocs adjusted against a section symbol.  */
-  if (fixp->fx_r_type == BFD_RELOC_MIPS16_JMP)
-    reloc->addend += fixp->fx_offset;
 
   /* Since the old MIPS ELF ABI uses Rel instead of Rela, encode the vtable
      entry to be used in the relocation's section offset.  */
