@@ -1694,7 +1694,8 @@ aix-thread.o: aix-thread.c $(defs_h) $(gdb_assert_h) $(gdbthread_h) \
 	$(target_h) $(inferior_h) $(regcache_h) $(gdbcmd_h) $(ppc_tdep_h) \
 	$(gdb_string_h)
 alphabsd-nat.o: alphabsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
-	$(alpha_tdep_h) $(alphabsd_tdep_h) $(inf_ptrace_h) $(gregset_h)
+	$(alpha_tdep_h) $(alphabsd_tdep_h) $(inf_ptrace_h) $(gregset_h) \
+	$(bsd_kvm_h)
 alphabsd-tdep.o: alphabsd-tdep.c $(defs_h) $(alpha_tdep_h) \
 	$(alphabsd_tdep_h)
 alphafbsd-tdep.o: alphafbsd-tdep.c $(defs_h) $(value_h) $(osabi_h) \

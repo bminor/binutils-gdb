@@ -1,6 +1,7 @@
 /* Native-dependent code for Alpha BSD's.
 
-   Copyright (C) 2000, 2001, 2002, 2004, 2005 Free Software Foundation, Inc.
+   Copyright (C) 2000, 2001, 2002, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -150,6 +151,40 @@ alphabsd_store_inferior_registers (int regno)
 	perror_with_name (_("Couldn't write floating point status"));
     }
 }
+
+
+/* Support for debugging kernel virtual memory images.  */
+
+#include <sys/types.h>
+#include <sys/signal.h>
+#include <machine/pcb.h>
+
+#include "bsd-kvm.h"
+
+static int
+alphabsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
+{
+  int regnum;
+
+  /* The following is true for OpenBSD 3.9:
+
+     The pcb contains the register state at the context switch inside
+     cpu_switch().  */
+
+  /* The stack pointer shouldn't be zero.  */
+  if (pcb->pcb_hw.apcb_ksp == 0)
+    return 0;
+
+  regcache_raw_supply (regcache, ALPHA_SP_REGNUM, &pcb->pcb_hw.apcb_ksp);
+
+  for (regnum = ALPHA_S0_REGNUM; regnum < ALPHA_A0_REGNUM; regnum++)
+    regcache_raw_supply (regcache, regnum,
+			 &pcb->pcb_context[regnum - ALPHA_S0_REGNUM]);
+  regcache_raw_supply (regcache, ALPHA_RA_REGNUM, &pcb->pcb_context[7]);
+
+  return 1;
+}
+
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_alphabsd_nat (void);
@@ -163,4 +198,7 @@ _initialize_alphabsd_nat (void)
   t->to_fetch_registers = alphabsd_fetch_inferior_registers;
   t->to_store_registers = alphabsd_store_inferior_registers;
   add_target (t);
+
+  /* Support debugging kernel virtual memory images.  */
+  bsd_kvm_add_target (alphabsd_supply_pcb);
 }
