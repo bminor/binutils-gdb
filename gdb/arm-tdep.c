@@ -855,7 +855,7 @@ arm_make_prologue_cache (struct frame_info *next_frame)
   struct arm_prologue_cache *cache;
   CORE_ADDR unwound_fp;
 
-  cache = frame_obstack_zalloc (sizeof (struct arm_prologue_cache));
+  cache = FRAME_OBSTACK_ZALLOC (struct arm_prologue_cache);
   cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
   arm_scan_prologue (next_frame, cache);
@@ -962,7 +962,7 @@ arm_make_stub_cache (struct frame_info *next_frame)
   struct arm_prologue_cache *cache;
   CORE_ADDR unwound_fp;
 
-  cache = frame_obstack_zalloc (sizeof (struct arm_prologue_cache));
+  cache = FRAME_OBSTACK_ZALLOC (struct arm_prologue_cache);
   cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
   cache->prev_sp = frame_unwind_register_unsigned (next_frame, ARM_SP_REGNUM);

@@ -946,7 +946,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 			  paddr_nz (addr), paddr_nz (pc));
     }
 
-  fi = frame_obstack_zalloc (sizeof (struct frame_info));
+  fi = FRAME_OBSTACK_ZALLOC (struct frame_info);
 
   fi->next = create_sentinel_frame (current_regcache);
 
