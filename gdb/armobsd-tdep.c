@@ -88,6 +88,9 @@ armobsd_init_abi (struct gdbarch_info info,
 
   tdep->jb_pc = 24;
   tdep->jb_elt_size = 4;
+
+  /* OpenBSD/arm uses -fpcc-struct-return by default.  */
+  tdep->struct_return = pcc_struct_return;
 }
 
 void

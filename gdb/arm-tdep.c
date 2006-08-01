@@ -2259,11 +2259,14 @@ arm_return_value (struct gdbarch *gdbarch, struct type *valtype,
 		  struct regcache *regcache, gdb_byte *readbuf,
 		  const gdb_byte *writebuf)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
   if (TYPE_CODE (valtype) == TYPE_CODE_STRUCT
       || TYPE_CODE (valtype) == TYPE_CODE_UNION
       || TYPE_CODE (valtype) == TYPE_CODE_ARRAY)
     {
-      if (arm_return_in_memory (gdbarch, valtype))
+      if (tdep->struct_return == pcc_struct_return
+	  || arm_return_in_memory (gdbarch, valtype))
 	return RETURN_VALUE_STRUCT_CONVENTION;
     }
 
@@ -2756,6 +2759,10 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* This should be low enough for everything.  */
   tdep->lowest_pc = 0x20;
   tdep->jb_pc = -1;	/* Longjump support not enabled by default.  */
+
+  /* The default, for both APCS and AAPCS, is to return small
+     structures in registers.  */
+  tdep->struct_return = reg_struct_return;
 
   set_gdbarch_push_dummy_call (gdbarch, arm_push_dummy_call);
   set_gdbarch_frame_align (gdbarch, arm_frame_align);

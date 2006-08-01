@@ -125,6 +125,14 @@ enum arm_abi_kind
   ARM_ABI_LAST
 };
 
+/* Convention for returning structures.  */
+
+enum struct_return
+{
+  pcc_struct_return,		/* Return "short" structures in memory.  */
+  reg_struct_return		/* Return "short" structures in registers.  */
+};
+
 /* Target-dependent structure in gdbarch.  */
 struct gdbarch_tdep
 {
@@ -147,9 +155,14 @@ struct gdbarch_tdep
 				   will be disabled.  */
   size_t jb_elt_size;		/* And the size of each entry in the buf.  */
 
+  /* Convention for returning structures.  */
+  enum struct_return struct_return;
+
   /* Cached core file helpers.  */
   struct regset *gregset, *fpregset;
 };
+
+
 
 #ifndef LOWEST_PC
 #define LOWEST_PC (gdbarch_tdep (current_gdbarch)->lowest_pc)

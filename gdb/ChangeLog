@@ -1,3 +1,13 @@
+2006-08-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* arm-tdep.h (enum struct_return): New.
+	(struct gdbarch_tdep): Add struct_return member.
+	* arm-tdep.c (arm_return_value): Return
+	RETURN_VALUE_STRUCT_CONVENTION for aggregates when the ABI uses
+	pcc_struct_return.
+	(arm_gdbarch_init): Default to reg_struct_return.
+	* armobsd-tdep.c (armobsd_init_abi): Set pcc_struct_return.
+
 2006-07-31  Mark Kettenis  <kettenis@gnu.org>
 
 	* alpha-tdep.h (ALPHA_S0_REGNUM): New define.
