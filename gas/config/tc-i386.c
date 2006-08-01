@@ -1945,9 +1945,6 @@ md_assemble (line)
   if (i.rex != 0)
     add_prefix (REX_OPCODE | i.rex);
 
-  /* Record what ISA we have generated so far.  */
-  cpu_arch_isa_flags |= i.tm.cpu_flags;
-
   /* We are ready to output the insn.  */
   output_insn ();
 }

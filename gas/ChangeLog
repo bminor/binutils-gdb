@@ -1,3 +1,8 @@
+2006-08-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (md_assemble): Don't update
+	cpu_arch_isa_flags.
+
 2006-08-01  Thiemo Seufer  <ths@mips.com>
 
 	* config/tc-mips.c (md_section_align): Check ELF-ness at runtime.
