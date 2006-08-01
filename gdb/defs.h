@@ -1163,6 +1163,10 @@ extern int use_windows;
 # define DIRNAME_SEPARATOR ';'
 #endif
 
+#if !defined (__CYGWIN__) && defined (_WIN32)
+# define DIRNAME_SEPARATOR ';'
+#endif
+
 #ifndef DIRNAME_SEPARATOR
 #define DIRNAME_SEPARATOR ':'
 #endif
