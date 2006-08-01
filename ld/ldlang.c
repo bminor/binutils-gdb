@@ -1859,7 +1859,8 @@ sort_def_symbol (hash_entry, info)
 /* Initialize an output section.  */
 
 static void
-init_os (lang_output_section_statement_type *s, asection *isec)
+init_os (lang_output_section_statement_type *s, asection *isec,
+	 flagword flags)
 {
   if (s->bfd_section != NULL)
     return;
@@ -1869,7 +1870,8 @@ init_os (lang_output_section_statement_type *s, asection *isec)
 
   s->bfd_section = bfd_get_section_by_name (output_bfd, s->name);
   if (s->bfd_section == NULL)
-    s->bfd_section = bfd_make_section (output_bfd, s->name);
+    s->bfd_section = bfd_make_section_with_flags (output_bfd, s->name,
+						  flags);
   if (s->bfd_section == NULL)
     {
       einfo (_("%P%F: output format %s cannot represent section called %s\n"),
@@ -1947,7 +1949,7 @@ exp_init_os (etree_type *exp)
 
 	    os = lang_output_section_find (exp->name.name);
 	    if (os != NULL && os->bfd_section == NULL)
-	      init_os (os, NULL);
+	      init_os (os, NULL, 0);
 	  }
 	}
       break;
@@ -2022,8 +2024,32 @@ lang_add_section (lang_statement_list_type *ptr,
       lang_input_section_type *new;
       flagword flags;
 
+      flags = section->flags;
+
+      /* We don't copy the SEC_NEVER_LOAD flag from an input section
+	 to an output section, because we want to be able to include a
+	 SEC_NEVER_LOAD section in the middle of an otherwise loaded
+	 section (I don't know why we want to do this, but we do).
+	 build_link_order in ldwrite.c handles this case by turning
+	 the embedded SEC_NEVER_LOAD section into a fill.  */
+
+      flags &= ~ SEC_NEVER_LOAD;
+
+      switch (output->sectype)
+	{
+	case normal_section:
+	  break;
+	case noalloc_section:
+	  flags &= ~SEC_ALLOC;
+	  break;
+	case noload_section:
+	  flags &= ~SEC_LOAD;
+	  flags |= SEC_NEVER_LOAD;
+	  break;
+	}
+
       if (output->bfd_section == NULL)
-	init_os (output, section);
+	init_os (output, section, flags);
 
       first = ! output->bfd_section->linker_has_input;
       output->bfd_section->linker_has_input = 1;
@@ -2046,17 +2072,6 @@ lang_add_section (lang_statement_list_type *ptr,
 
       new->section = section;
       section->output_section = output->bfd_section;
-
-      flags = section->flags;
-
-      /* We don't copy the SEC_NEVER_LOAD flag from an input section
-	 to an output section, because we want to be able to include a
-	 SEC_NEVER_LOAD section in the middle of an otherwise loaded
-	 section (I don't know why we want to do this, but we do).
-	 build_link_order in ldwrite.c handles this case by turning
-	 the embedded SEC_NEVER_LOAD section into a fill.  */
-
-      flags &= ~ SEC_NEVER_LOAD;
 
       /* If final link, don't copy the SEC_LINK_ONCE flags, they've
 	 already been processed.  One reason to do this is that on pe
@@ -2093,19 +2108,6 @@ lang_add_section (lang_statement_list_type *ptr,
 	 it from the output section.  */
       if ((section->flags & SEC_READONLY) == 0)
 	output->bfd_section->flags &= ~SEC_READONLY;
-
-      switch (output->sectype)
-	{
-	case normal_section:
-	  break;
-	case noalloc_section:
-	  output->bfd_section->flags &= ~SEC_ALLOC;
-	  break;
-	case noload_section:
-	  output->bfd_section->flags &= ~SEC_LOAD;
-	  output->bfd_section->flags |= SEC_NEVER_LOAD;
-	  break;
-	}
 
       /* Copy over SEC_SMALL_DATA.  */
       if (section->flags & SEC_SMALL_DATA)
@@ -3201,6 +3203,8 @@ map_input_to_output_sections
   (lang_statement_union_type *s, const char *target,
    lang_output_section_statement_type *os)
 {
+  flagword flags;
+
   for (; s != NULL; s = s->header.next)
     {
       switch (s->header.type)
@@ -3250,13 +3254,15 @@ map_input_to_output_sections
 	  /* Make sure that any sections mentioned in the expression
 	     are initialized.  */
 	  exp_init_os (s->data_statement.exp);
-	  if (os != NULL && os->bfd_section == NULL)
-	    init_os (os, NULL);
+	  flags = SEC_HAS_CONTENTS;
 	  /* The output section gets contents, and then we inspect for
 	     any flags set in the input script which override any ALLOC.  */
-	  os->bfd_section->flags |= SEC_HAS_CONTENTS;
 	  if (!(os->flags & SEC_NEVER_LOAD))
-	    os->bfd_section->flags |= SEC_ALLOC | SEC_LOAD;
+	    flags |= SEC_ALLOC | SEC_LOAD;
+	  if (os->bfd_section == NULL)
+	    init_os (os, NULL, flags);
+	  else
+	    os->bfd_section->flags |= flags;
 	  break;
 	case lang_input_section_enum:
 	  break;
@@ -3266,11 +3272,11 @@ map_input_to_output_sections
 	case lang_padding_statement_enum:
 	case lang_input_statement_enum:
 	  if (os != NULL && os->bfd_section == NULL)
-	    init_os (os, NULL);
+	    init_os (os, NULL, 0);
 	  break;
 	case lang_assignment_statement_enum:
 	  if (os != NULL && os->bfd_section == NULL)
-	    init_os (os, NULL);
+	    init_os (os, NULL, 0);
 
 	  /* Make sure that any sections mentioned in the assignment
 	     are initialized.  */
@@ -3298,7 +3304,7 @@ map_input_to_output_sections
 		   (s->address_statement.section_name));
 
 	      if (aos->bfd_section == NULL)
-		init_os (aos, NULL);
+		init_os (aos, NULL, 0);
 	      aos->addr_tree = s->address_statement.address;
 	    }
 	  break;

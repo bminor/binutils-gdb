@@ -1,3 +1,11 @@
+2006-08-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldlang.c (init_os): Add flags. Replace bfd_make_section with
+	bfd_make_section_with_flags.
+	(exp_init_os): Updated.
+	(lang_add_section): Call init_os with flags.
+	(map_input_to_output_sections): Likewise.
+
 2006-07-29  Richard Sandiford  <richard@codesourcery.com>
 
 	* Makefile.am (eelf32b4300.c): Update dependencies.
