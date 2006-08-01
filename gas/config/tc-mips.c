@@ -3719,7 +3719,7 @@ macro_build_lui (expressionS *ep, int regnum)
 
   if (high_expr.X_op == O_constant)
     {
-      /* we can compute the instruction now without a relocation entry */
+      /* We can compute the instruction now without a relocation entry.  */
       high_expr.X_add_number = ((high_expr.X_add_number + 0x8000)
 				>> 16) & 0xffff;
       *r = BFD_RELOC_UNUSED;
@@ -11788,7 +11788,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_MIPS16_HI16:
     case BFD_RELOC_MIPS16_HI16_S:
     case BFD_RELOC_MIPS16_JMP:
-      /* Nothing needed to do. The value comes from the reloc entry */
+      /* Nothing needed to do.  The value comes from the reloc entry.  */
       break;
 
     case BFD_RELOC_64:
@@ -11816,18 +11816,12 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 
     case BFD_RELOC_RVA:
     case BFD_RELOC_32:
-      /* If we are deleting this reloc entry, we must fill in the
-	 value now.  This can happen if we have a .word which is not
-	 resolved when it appears but is later defined.   */
-      if (fixP->fx_done)
-	md_number_to_chars ((char *) buf, *valP, 4);
-      break;
-
     case BFD_RELOC_16:
       /* If we are deleting this reloc entry, we must fill in the
-         value now.  */
+	 value now.  This can happen if we have a .word which is not
+	 resolved when it appears but is later defined.  */
       if (fixP->fx_done)
-	md_number_to_chars ((char *) buf, *valP, 2);
+	md_number_to_chars ((char *) buf, *valP, fixP->fx_size);
       break;
 
     case BFD_RELOC_LO16:
@@ -11852,15 +11846,13 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("Branch to misaligned address (%lx)"), (long) *valP);
 
-      /*
-       * We need to save the bits in the instruction since fixup_segment()
-       * might be deleting the relocation entry (i.e., a branch within
-       * the current segment).
-       */
+      /* We need to save the bits in the instruction since fixup_segment()
+	 might be deleting the relocation entry (i.e., a branch within
+	 the current segment).  */
       if (! fixP->fx_done)
 	break;
 
-      /* update old instruction data */
+      /* Update old instruction data.  */
       if (target_big_endian)
 	insn = (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
       else
@@ -11964,17 +11956,13 @@ s_align (int x ATTRIBUTE_UNUSED)
   long temp_fill;
   long max_alignment = 15;
 
-  /*
-
-    o  Note that the assembler pulls down any immediately preceding label
+  /* o Note that the assembler pulls down any immediately preceding label
        to the aligned address.
-    o  It's not documented but auto alignment is reinstated by
+     o It's not documented but auto alignment is reinstated by
        a .align pseudo instruction.
-    o  Note also that after auto alignment is turned off the mips assembler
+     o Note also that after auto alignment is turned off the mips assembler
        issues an error on attempt to assemble an improperly aligned data item.
-       We don't.
-
-    */
+       We don't.  */
 
   temp = get_absolute_expression ();
   if (temp > max_alignment)
@@ -11995,7 +11983,7 @@ s_align (int x ATTRIBUTE_UNUSED)
     {
       segment_info_type *si = seg_info (now_seg);
       struct insn_label_list *l = si->label_list;
-      /* Auto alignment should be switched on by next section change */
+      /* Auto alignment should be switched on by next section change.  */
       auto_align = 1;
       mips_align (temp, (int) temp_fill, l != NULL ? l->label : NULL);
     }
@@ -12635,8 +12623,7 @@ s_cpload (int ignore ATTRIBUTE_UNUSED)
 
    The -mno-shared option replaces the last three instructions with
 	lui	$gp,%hi(_gp)
-	addiu	$gp,$gp,%lo(_gp)
-   */
+	addiu	$gp,$gp,%lo(_gp)  */
 
 static void
 s_cpsetup (int ignore ATTRIBUTE_UNUSED)
@@ -12738,7 +12725,7 @@ static void
 s_cplocal (int ignore ATTRIBUTE_UNUSED)
 {
   /* If we are not generating SVR4 PIC code, or if this is not NewABI code,
-   .cplocal is ignored.  */
+     .cplocal is ignored.  */
   if (mips_pic != SVR4_PIC || ! HAVE_NEWABI)
     {
       s_ignore (0);
@@ -12787,8 +12774,8 @@ s_cprestore (int ignore ATTRIBUTE_UNUSED)
      ld		$gp, offset($sp)
 
    If a register $reg2 was given there, it results in:
-     daddu	$gp, $reg2, $0
- */
+     daddu	$gp, $reg2, $0  */
+
 static void
 s_cpreturn (int ignore ATTRIBUTE_UNUSED)
 {
@@ -12982,8 +12969,7 @@ s_mips_stab (int type)
   s_stab (type);
 }
 
-/* Handle the .weakext pseudo-op as defined in Kane and Heinrich.
- */
+/* Handle the .weakext pseudo-op as defined in Kane and Heinrich.  */
 
 static void
 s_mips_weakext (int ignore ATTRIBUTE_UNUSED)
@@ -13681,14 +13667,14 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 
 		case 0:
 		  /* bltz	0x04000000	bgez	0x04010000
-		     bltzal	0x04100000	bgezal	0x04110000 */
+		     bltzal	0x04100000	bgezal	0x04110000  */
 		  assert ((insn & 0xfc0e0000) == 0x04000000);
 		  insn ^= 0x00010000;
 		  break;
 
 		case 1:
 		  /* beq	0x10000000	bne	0x14000000
-		     blez	0x18000000	bgtz	0x1c000000 */
+		     blez	0x18000000	bgtz	0x1c000000  */
 		  insn ^= 0x04000000;
 		  break;
 
@@ -13702,8 +13688,8 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	      /* Clear the and-link bit.  */
 	      assert ((insn & 0xfc1c0000) == 0x04100000);
 
-	      /* bltzal	0x04100000	bgezal	0x04110000
-		bltzall	0x04120000     bgezall	0x04130000 */
+	      /* bltzal		0x04100000	bgezal	0x04110000
+		 bltzall	0x04120000	bgezall	0x04130000  */
 	      insn &= ~0x00100000;
 	    }
 
@@ -13728,7 +13714,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	  md_number_to_chars ((char *) buf, insn, 4);
 	  buf += 4;
 
-	  /* Nop */
+	  /* nop */
 	  md_number_to_chars ((char *) buf, 0, 4);
 	  buf += 4;
 
@@ -14188,7 +14174,7 @@ md_obj_begin (void)
 static void
 md_obj_end (void)
 {
-  /* check for premature end, nesting errors, etc */
+  /* Check for premature end, nesting errors, etc.  */
   if (cur_proc_ptr)
     as_warn (_("missing .end at end of assembly"));
 }

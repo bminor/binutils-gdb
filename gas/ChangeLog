@@ -1,3 +1,11 @@
+2006-08-01  Thiemo Seufer  <ths@mips.com>
+
+	* config/tc-mips.c (macro_build_lui): Fix comment formatting.
+	(md_apply_fix): Likewise. Unify handling of BFD_RELOC_RVA,
+	BFD_RELOC_32 and BFD_RELOC_16.
+	(s_align, s_cpload, s_cplocal, s_cprestore, s_mips_stab,
+	md_convert_frag, md_obj_end): Fix comment formatting.
+
 2006-07-31  Thiemo Seufer  <ths@mips.com>
 
 	* config/tc-mips.c (md_apply_fix, tc_gen_reloc): Remove special
