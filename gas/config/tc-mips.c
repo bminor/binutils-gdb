@@ -13042,16 +13042,17 @@ md_section_align (asection *seg, valueT addr)
 {
   int align = bfd_get_section_alignment (stdoutput, seg);
 
-#ifdef OBJ_ELF
-  /* We don't need to align ELF sections to the full alignment.
-     However, Irix 5 may prefer that we align them at least to a 16
-     byte boundary.  We don't bother to align the sections if we are
-     targeted for an embedded system.  */
-  if (strcmp (TARGET_OS, "elf") == 0)
-    return addr;
-  if (align > 4)
-    align = 4;
-#endif
+  if (IS_ELF)
+    {
+      /* We don't need to align ELF sections to the full alignment.
+	 However, Irix 5 may prefer that we align them at least to a 16
+	 byte boundary.  We don't bother to align the sections if we
+	 are targeted for an embedded system.  */
+      if (strcmp (TARGET_OS, "elf") == 0)
+        return addr;
+      if (align > 4)
+        align = 4;
+    }
 
   return ((addr + (1 << align) - 1) & (-1 << align));
 }

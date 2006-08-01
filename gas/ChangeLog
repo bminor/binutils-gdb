@@ -1,5 +1,9 @@
 2006-08-01  Thiemo Seufer  <ths@mips.com>
 
+	* config/tc-mips.c (md_section_align): Check ELF-ness at runtime.
+
+2006-08-01  Thiemo Seufer  <ths@mips.com>
+
 	* config/tc-mips.c (macro_build_lui): Fix comment formatting.
 	(md_apply_fix): Likewise. Unify handling of BFD_RELOC_RVA,
 	BFD_RELOC_32 and BFD_RELOC_16.
