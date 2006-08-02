@@ -1206,6 +1206,12 @@ dump_relocations (FILE *file,
 			sec_name = "ABS";
 		      else if (psym->st_shndx == SHN_COMMON)
 			sec_name = "COMMON";
+		      else if (elf_header.e_machine == EM_MIPS
+			       && psym->st_shndx == SHN_MIPS_SCOMMON)
+			sec_name = "SCOMMON";
+		      else if (elf_header.e_machine == EM_MIPS
+			       && psym->st_shndx == SHN_MIPS_SUNDEFINED)
+			sec_name = "SUNDEF";
 		      else if (elf_header.e_machine == EM_X86_64
 			       && psym->st_shndx == SHN_X86_64_LCOMMON)
 			sec_name = "LARGE_COMMON";
@@ -6872,6 +6878,12 @@ get_symbol_index_type (unsigned int type)
       else if (elf_header.e_machine == EM_X86_64
 	       && type == SHN_X86_64_LCOMMON)
 	return "LARGE_COM";
+      else if (type == SHN_MIPS_SCOMMON
+	       && elf_header.e_machine == EM_MIPS)
+	return "SCOM";
+      else if (type == SHN_MIPS_SUNDEFINED
+	       && elf_header.e_machine == EM_MIPS)
+	return "SUND";
       else if (type >= SHN_LOPROC && type <= SHN_HIPROC)
 	sprintf (buff, "PRC[0x%04x]", type);
       else if (type >= SHN_LOOS && type <= SHN_HIOS)

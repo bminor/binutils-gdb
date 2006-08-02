@@ -1,3 +1,10 @@
+2006-08-02  Thiemo Seufer  <ths@mips.com>
+            Nigel Stephens  <nigel@mips.com>
+
+	* readelf.c (dump_relocations): Handle MIPS-specific
+	SHN_MIPS_SCOMMON and SHN_MIPS_SUNDEFINED. 
+	(get_symbol_index_type): Similarly.
+
 2006-07-24  Ralk Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* doc/binutils.texinfo: Fix spelling mistakes.
