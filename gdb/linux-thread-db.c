@@ -1080,7 +1080,8 @@ thread_db_get_thread_local_address (ptid_t ptid,
       thread_db_map_id2thr (thread_info, 1);
 
       /* Finally, get the address of the variable.  */
-      err = td_thr_tls_get_addr_p (&thread_info->private->th, (void *) lm,
+      err = td_thr_tls_get_addr_p (&thread_info->private->th,
+				   (void *)(size_t) lm,
 				   offset, &address);
 
 #ifdef THREAD_DB_HAS_TD_NOTALLOC
