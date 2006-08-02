@@ -1,3 +1,7 @@
+2006-08-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* cursal.exp: Pass binfile to gdb_load.
+
 2006-08-01  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* gdb.base/cursal.exp: Add "" to gdb_load call.

@@ -42,7 +42,8 @@ gdb_test "set listsize 1" \
 gdb_test "list" \
     "v0 = 0;" \
     "list before run"
-gdb_load ""
+
+gdb_load ${binfile}
 if {! [runto_main]} {
     return -1
 }
