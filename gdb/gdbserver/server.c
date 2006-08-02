@@ -43,6 +43,20 @@ jmp_buf toplevel;
 
 unsigned long signal_pid;
 
+/* A file descriptor for the controlling terminal.  */
+int terminal_fd;
+
+/* TERMINAL_FD's original foreground group.  */
+pid_t old_foreground_pgrp;
+
+/* Hand back terminal ownership to the original foreground group.  */
+
+static void
+restore_old_foreground_pgrp (void)
+{
+  tcsetpgrp (terminal_fd, old_foreground_pgrp);
+}
+
 static int
 start_inferior (char *argv[], char *statusptr)
 {
@@ -56,7 +70,10 @@ start_inferior (char *argv[], char *statusptr)
 
   signal (SIGTTOU, SIG_IGN);
   signal (SIGTTIN, SIG_IGN);
-  tcsetpgrp (fileno (stderr), signal_pid);
+  terminal_fd = fileno (stderr);
+  old_foreground_pgrp = tcgetpgrp (terminal_fd);
+  tcsetpgrp (terminal_fd, signal_pid);
+  atexit (restore_old_foreground_pgrp);
 
   /* Wait till we are at 1st instruction in program, return signal number.  */
   return mywait (statusptr, 0);
