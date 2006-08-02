@@ -858,8 +858,6 @@ func_mod:	'(' ')'
    is a pointer to member type.  Stroustrup loses again!  */
 
 type	:	ptype
-	|	typebase COLONCOLON '*'
-			{ $$ = lookup_member_type (builtin_type_int, $1); }
 	;
 
 typebase  /* Implements (approximately): (type-qualifier)* type-specifier.  */

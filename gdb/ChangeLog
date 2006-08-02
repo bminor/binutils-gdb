@@ -1,3 +1,9 @@
+2006-08-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* c-exp.y (type): Remove incorrect pointer to member case.
+	* objc-exp.y (type): Likewise.
+	* p-exp.y (type): Likewise.
+
 2006-08-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* arm-tdep.h (enum struct_return): New.
