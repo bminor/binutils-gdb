@@ -6214,8 +6214,9 @@ INCINTL=
 XGETTEXT=
 GMSGFMT=
 POSUB=
-if test -f ../intl/config.intl; then
-  . ../intl/config.intl
+
+if test -f  ../intl/config.intl; then
+  .  ../intl/config.intl
 fi
 echo "$as_me:$LINENO: checking whether NLS is requested" >&5
 echo $ECHO_N "checking whether NLS is requested... $ECHO_C" >&6
@@ -8831,6 +8832,16 @@ _ACEOF
 fi
 
 
+
+
+case "${host}" in
+*-*-msdos* | *-*-go32* | *-*-mingw32* | *-*-cygwin* | *-*-windows*)
+
+cat >>confdefs.h <<\_ACEOF
+#define USE_BINARY_FOPEN 1
+_ACEOF
+ ;;
+esac
 
 
 

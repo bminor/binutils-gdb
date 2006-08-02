@@ -4,6 +4,16 @@ sinclude(../config/nls.m4)
 sinclude(../config/po.m4)
 sinclude(../config/progtest.m4)
 
+dnl See whether we need to use fopen-bin.h rather than fopen-same.h.
+AC_DEFUN([BFD_BINARY_FOPEN],
+[AC_REQUIRE([AC_CANONICAL_TARGET])
+case "${host}" in
+changequote(,)dnl
+*-*-msdos* | *-*-go32* | *-*-mingw32* | *-*-cygwin* | *-*-windows*)
+changequote([,])dnl
+  AC_DEFINE(USE_BINARY_FOPEN, 1, [Use b modifier when opening binary files?]) ;;
+esac])dnl
+
 dnl GAS_CHECK_DECL_NEEDED(name, typedefname, typedef, headers)
 AC_DEFUN([GAS_CHECK_DECL_NEEDED],[
 AC_MSG_CHECKING(whether declaration is required for $1)

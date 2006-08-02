@@ -660,6 +660,8 @@ GAS_CHECK_DECL_NEEDED(strstr, f, char *(*f)(), $gas_test_headers)
 
 AC_CHECK_DECLS([vsnprintf])
 
+BFD_BINARY_FOPEN
+
 dnl Required for html and install-html targets.
 AC_SUBST(datarootdir)
 AC_SUBST(docdir)

@@ -1,3 +1,13 @@
+2006-08-02  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/2991
+	* acinclude.m4 (BFD_BINARY_FOPEN): Import this function from
+	bfd/aclocal.m4.
+	* configure.in: Run BFD_BINARY_FOPEN.
+	* configure: Regenerate.
+	* as.h: Look at USE_BINARY_FOPEN to decide which fopen-*.h header
+	file to include.
+
 2006-08-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (md_assemble): Don't update
