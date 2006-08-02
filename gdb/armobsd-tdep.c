@@ -24,6 +24,8 @@
 #include "trad-frame.h"
 #include "tramp-frame.h"
 
+#include "gdb_string.h"
+
 #include "obsd-tdep.h"
 #include "arm-tdep.h"
 #include "solib-svr4.h"
@@ -89,13 +91,30 @@ armobsd_init_abi (struct gdbarch_info info,
   tdep->jb_pc = 24;
   tdep->jb_elt_size = 4;
 
+  set_gdbarch_regset_from_core_section
+    (gdbarch, armbsd_regset_from_core_section);
+
   /* OpenBSD/arm uses -fpcc-struct-return by default.  */
   tdep->struct_return = pcc_struct_return;
+}
+
+
+static enum gdb_osabi
+armobsd_core_osabi_sniffer (bfd *abfd)
+{
+  if (strcmp (bfd_get_target (abfd), "netbsd-core") == 0)
+    return GDB_OSABI_OPENBSD_ELF;
+
+  return GDB_OSABI_UNKNOWN;
 }
 
 void
 _initialize_armobsd_tdep (void)
 {
+  /* BFD doesn't set a flavour for NetBSD style a.out core files.  */
+  gdbarch_register_osabi_sniffer (bfd_arch_arm, bfd_target_unknown_flavour,
+                                  armobsd_core_osabi_sniffer);
+
   gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_OPENBSD_ELF,
 			  armobsd_init_abi);
 }

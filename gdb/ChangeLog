@@ -1,3 +1,18 @@
+2006-08-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* arm-tdep.h: Add multiple inclusion protection.
+	(struct gdbarch): Add forward declaration.
+	(armobsd_regset_from_core_section): New prototype.
+	* armbsd-tdep.c: New file.
+	* armobsd-tdep.c: Include "gdb_string.h".
+	(armobsd_init_abi): Set regset_from_core_section.
+	(armobsd_core_osabi_sniffer): New function.
+	(_initialize_armobsd_tdep): Register armobsd_core_osabi_sniffer.
+	* Makefile.in (ALLDEPFILES): Add armbsd-tdep.c.
+	(armbsd-tdep.o): New dependency.
+	(armnbsd-tdep.o): Update dependencies.
+	* config/arm/obsd.mt (TDEPFILES): Add armbsd-tdep.o and corelow.o.
+
 2006-08-02  Thiemo Seufer  <ths@mips.com>
 
 	* linux-thread-db.c (thread_db_get_thread_local_address): Fix type
