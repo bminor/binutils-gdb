@@ -5819,7 +5819,7 @@ md_parse_option (int c, char *arg)
 
 	list = bfd_target_list ();
 	for (l = list; *l != NULL; l++)
-	  if (strcmp (*l, "elf64-x86-64") == 0)
+	  if (strncmp (*l, "elf64-x86-64", 12) == 0)
 	    {
 	      default_arch = "x86_64";
 	      break;
@@ -5975,7 +5975,7 @@ i386_target_format ()
 	    object_64bit = 1;
 	    use_rela_relocations = 1;
 	  }
-	return flag_code == CODE_64BIT ? "elf64-x86-64" : ELF_TARGET_FORMAT;
+	return flag_code == CODE_64BIT ? ELF_TARGET_FORMAT64 : ELF_TARGET_FORMAT;
       }
 #endif
     default:

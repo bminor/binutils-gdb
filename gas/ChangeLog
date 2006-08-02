@@ -1,3 +1,12 @@
+2006-08-02  Petr Salinger  <Petr.Salinger@seznam.cz>
+
+	PR binutils/2983
+	* config/tc-i386.c (md_parse_option): Treat any target starting
+	with elf64_x86_64 as a viable target for the -64 switch.
+	(i386_target_format): For 64-bit ELF flavoured output use
+	ELF_TARGET_FORMAT64.
+	* config/tc-i386.h (ELF_TARGET_FORMAT64): Define.
+
 2006-08-02  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/2991

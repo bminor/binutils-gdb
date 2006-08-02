@@ -1,3 +1,14 @@
+2006-08-02  Petr Salinger  <Petr.Salinger@seznam.cz>
+
+	PR binutils/2983
+	* elf64-x86-64.c: Add FreeBSD support.
+	(elf64_x86_64_fbsd_post_process_headers): New function.
+	* targets.c (_bfd_target_vector): Add bfd_elf64_x86_64_freebsd_vec.
+	* config.bfd (x64_64-*-freebsd*): Add bfd_elf64_x86_64_freebsd_vec
+	to the targ_selvecs.
+	* configure.in: Add entry for bfd_elf64_x86_64_freebsd_vec.
+	* configure: Regenerate.
+
 2006-07-26  Andreas Schwab  <schwab@suse.de>
 
 	* elfxx-ia64.c (elfNN_ia64_choose_gp): Use rawsize if set.
