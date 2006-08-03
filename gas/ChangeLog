@@ -1,3 +1,9 @@
+2006-08-03  Joseph Myers  <joseph@codesourcery.com>
+
+	* config/tc-arm.c (enum operand_parse_code): Add OP_RIWC_RIWG.
+	(parse_operands): Handle it.
+	(insns): Use it for tmcr and tmrc.
+
 2006-08-02  Petr Salinger  <Petr.Salinger@seznam.cz>
 
 	PR binutils/2983

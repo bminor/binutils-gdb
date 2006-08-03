@@ -5370,6 +5370,7 @@ enum operand_parse_code
   OP_RR_EXi,	/* ARM register or expression with imm prefix */
   OP_RF_IF,	/* FPA register or immediate */
   OP_RIWR_RIWC, /* iWMMXt R or C reg */
+  OP_RIWC_RIWG, /* iWMMXt wC or wCG reg */
 
   /* Optional operands.	 */
   OP_oI7b,	 /* immediate, prefix optional, 0 .. 7 */
@@ -5757,6 +5758,21 @@ parse_operands (char *str, const unsigned char *pattern)
 	      }
 	    inst.operands[i].reg = rege->number;
 	    inst.operands[i].isreg = (rege->type == REG_TYPE_MMXWR);
+	  }
+	  break;
+
+	case OP_RIWC_RIWG:
+	  {
+	    struct reg_entry *rege = arm_reg_parse_multi (&str);
+	    if (!rege
+		|| (rege->type != REG_TYPE_MMXWC
+		    && rege->type != REG_TYPE_MMXWCG))
+	      {
+		inst.error = _("iWMMXt control register expected");
+		goto failure;
+	      }
+	    inst.operands[i].reg = rege->number;
+	    inst.operands[i].isreg = 1;
 	  }
 	  break;
 
@@ -15712,7 +15728,7 @@ static const struct asm_opcode insns[] =
  cCE(tinsrb,	e600010, 3, (RIWR, RR, I7),	    iwmmxt_tinsr),
  cCE(tinsrh,	e600050, 3, (RIWR, RR, I7),	    iwmmxt_tinsr),
  cCE(tinsrw,	e600090, 3, (RIWR, RR, I7),	    iwmmxt_tinsr),
- cCE(tmcr,	e000110, 2, (RIWC, RR),		    rn_rd),
+ cCE(tmcr,	e000110, 2, (RIWC_RIWG, RR),	    rn_rd),
  cCE(tmcrr,	c400000, 3, (RIWR, RR, RR),	    rm_rd_rn),
  cCE(tmia,	e200010, 3, (RIWR, RR, RR),	    iwmmxt_tmia),
  cCE(tmiaph,	e280010, 3, (RIWR, RR, RR),	    iwmmxt_tmia),
@@ -15723,7 +15739,7 @@ static const struct asm_opcode insns[] =
  cCE(tmovmskb,	e100030, 2, (RR, RIWR),		    rd_rn),
  cCE(tmovmskh,	e500030, 2, (RR, RIWR),		    rd_rn),
  cCE(tmovmskw,	e900030, 2, (RR, RIWR),		    rd_rn),
- cCE(tmrc,	e100110, 2, (RR, RIWC),		    rd_rn),
+ cCE(tmrc,	e100110, 2, (RR, RIWC_RIWG),	    rd_rn),
  cCE(tmrrc,	c500000, 3, (RR, RR, RIWR),	    rd_rn_rm),
  cCE(torcb,	e13f150, 1, (RR),		    iwmmxt_tandorc),
  cCE(torch,	e53f150, 1, (RR),		    iwmmxt_tandorc),
