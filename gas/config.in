@@ -211,6 +211,9 @@
 /* Target vendor. */
 #undef TARGET_VENDOR
 
+/* Use b modifier when opening binary files? */
+#undef USE_BINARY_FOPEN
+
 /* Use emulation support? */
 #undef USE_EMULATIONS
 
