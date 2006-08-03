@@ -5749,9 +5749,10 @@ parse_operands (char *str, const unsigned char *pattern)
 	case OP_RIWR_RIWC:
 	  {
 	    struct reg_entry *rege = arm_reg_parse_multi (&str);
-	    if (rege->type != REG_TYPE_MMXWR
-		&& rege->type != REG_TYPE_MMXWC
-		&& rege->type != REG_TYPE_MMXWCG)
+	    if (!rege
+		|| (rege->type != REG_TYPE_MMXWR
+		    && rege->type != REG_TYPE_MMXWC
+		    && rege->type != REG_TYPE_MMXWCG))
 	      {
 		inst.error = _("iWMMXt data or control register expected");
 		goto failure;

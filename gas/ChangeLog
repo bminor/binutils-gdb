@@ -1,5 +1,10 @@
 2006-08-03  Joseph Myers  <joseph@codesourcery.com>
 
+	* config/tc-arm.c (parse_operands): Handle invalid register name
+	for OP_RIWR_RIWC. 
+
+2006-08-03  Joseph Myers  <joseph@codesourcery.com>
+
 	* config/tc-arm.c (enum operand_parse_code): Add OP_RIWC_RIWG.
 	(parse_operands): Handle it.
 	(insns): Use it for tmcr and tmrc.

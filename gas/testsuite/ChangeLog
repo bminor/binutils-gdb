@@ -1,5 +1,11 @@
 2006-08-03  Joseph Myers  <joseph@codesourcery.com>
 
+	* gas/arm/iwmmxt-bad.s: Test invalid register names for wldrw and
+	wstrw.
+	* gas/arm/iwmmxt-bad.l: Update.
+
+2006-08-03  Joseph Myers  <joseph@codesourcery.com>
+
 	* gas/arm/iwmmxt.s: Test tmcr and tmrc with wcgr registers.
 	* gas/arm/iwmmxt.d: Update.
 
