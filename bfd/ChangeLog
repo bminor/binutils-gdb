@@ -1,3 +1,116 @@
+2006-08-04  Richard Sandiford  <richard@codesourcery.com>
+	    Kazu Hirata  <kazu@codesourcery.com>
+	    Phil Edwards  <phil@codesourcery.com>
+	    Nathan Sidwell  <nathan@codesourcery.com>
+
+	* config.bfd (sh-*-vxworks): Use bfd_elf32_shvxworks_vec and
+	bfd_elf32_shlvxworks_vec.
+	* configure.in (bfd_elf32_sh64_vec): Add elf-vxworks.lo.
+	(bfd_elf32_sh64l_vec, bfd_elf32_sh64lin_vec): Likewise.
+	(bfd_elf32_sh64blin_vec, bfd_elf32_sh64lnbsd_vec): Likewise.
+	(bfd_elf32_sh64nbsd_vec, bfd_elf32_sh_vec): Likewise.
+	(bfd_elf32_shblin_vec, bfd_elf32_shl_vec): Likewise.
+	(bfd_elf32_shl_symbian_vec, bfd_elf32_shlin_vec): Likewise.
+	(bfd_elf32_shlnbsd_vec, bfd_elf32_shnbsd_vec): Likewise.
+	(bfd_elf32_shlvxworks_vec, bfd_elf32_shvxworks_vec): New stanzas.
+	* configure: Regenerate.
+	* Makefile.am: Regenerate dependencies.
+	* Makefile.in: Regenerate.
+	* elf-vxworks.c (elf_vxworks_gott_symbol_p): New function.
+	(elf_vxworks_add_symbol_hook): Use it.
+	(elf_vxworks_link_output_symbol_hook): Likewise.  Use the hash
+	table entry to check for weak undefined symbols and to obtain
+	the original bfd.
+	(elf_vxworks_emit_relocs): Use target_index instead of this_idx.
+	* elf32-sh-relocs.h: New file, split from elf32-sh.c.
+	(R_SH_DIR32): Use SH_PARTIAL32 for the partial_inplace field,
+	SH_SRC_MASK32 for the src_mask field, and SH_ELF_RELOC for the
+	special_function field.
+	(R_SH_REL32): Use SH_PARTIAL32 and SH_SRC_MASK32 here too.
+	(R_SH_REL32, R_SH_TLS_GD_32, R_SH_TLS_LD_32): Likewise.
+	(R_SH_TLS_LDO_32, R_SH_TLS_IE_32, R_SH_TLS_LE_32): Likewise.
+	(R_SH_TLS_DTPMOD32, R_SH_TLS_DTPOFF32, R_SH_TLS_TPOFF32): Likewise.
+	(R_SH_GOT32, R_SH_PLT32, R_SH_COPY, R_SH_GLOB_DAT): Likewise.
+	(R_SH_JMP_SLOT, R_SH_RELATIVE, R_SH_GOTOFF, R_SH_GOTPC): Likewise.
+	(SH_PARTIAL32, SH_SRC_MASK32, SH_ELF_RELOC): Undefine at end of file.
+	* elf32-sh.c: Include elf32-vxworks.h.
+	(MINUS_ONE): Define.
+	(sh_elf_howto_table): Include elf32-sh-relocs.h with SH_PARTIAL32
+	set to TRUE, SH_SRC_MASK32 set to 0xffffffff, and SH_ELF_RELOC set
+	to sh_elf_reloc.
+	(sh_vxworks_howto_table): New variable.  Include elf32-sh-relocs.h
+	with SH_PARTIAL32 set to FALSE, SH_SRC_MASK32 set to 0, and
+	SH_ELF_RELOC set to bfd_elf_generic_reloc.
+	(vxworks_object_p, get_howto_table): New functions.
+	(sh_elf_reloc_type_lookup): Fix typo.  Use get_howto_table.
+	(sh_elf_info_to_howto): Use get_howto_table.
+	(sh_elf_relax_section): Honor the partial_inplace field of the
+	R_SH_DIR32 howto.
+	(sh_elf_relax_delete_bytes): Likewise.
+	(elf_sh_plt_info): New structure.
+	(PLT_ENTRY_SIZE): Replace both definitions with...
+	(ELF_PLT_ENTRY_SIZE): ...this new macro, with separate definitions for
+	INCLUDE_SHMEDIA and !INCLUDE_SHMEDIA.
+	(elf_sh_plt0_entry_be): Update sizes of both definitions accordingly.
+	(elf_sh_plt0_entry_le): Likewise.
+	(elf_sh_plt_entry_be, elf_sh_plt_entry_le): Likewise.
+	(elf_sh_pic_plt_entry_be, elf_sh_pic_plt_entry_le): Likewise.
+	(elf_sh_plts): New structure, with separate definitions for
+	INCLUDE_SHMEDIA and !INCLUDE_SHMEDIA.
+	(elf_sh_plt0_entry): Delete both definitions.
+	(elf_sh_plt_entry, elf_sh_pic_plt_entry): Likewise.
+	(elf_sh_sizeof_plt, elf_sh_plt_plt0_offset): Likewise.
+	(elf_sh_plt_temp_offset, elf_sh_plt_symbol_offset): Likewise.
+	(elf_sh_plt_reloc_offset): Likewise.
+	(movi_shori_putval): Delete in favor of...
+	(install_plt_field): ...this new function, with separate definitions
+	for INCLUDE_SHMEDIA and !INCLUDE_SHMEDIA.
+	(get_plt_info): New function, with separate definitions
+	for INCLUDE_SHMEDIA and !INCLUDE_SHMEDIA.
+	(elf_sh_plt0_linker_offset, elf_sh_plt0_gotid_offset): Delete.
+	(VXWORKS_PLT_HEADER_SIZE, VXWORKS_PLT_ENTRY_SIZE): New macros.
+	(vxworks_sh_plt0_entry_be, vxworks_sh_plt0_entry_le): New constants.
+	(vxworks_sh_plt_entry_be, vxworks_sh_plt_entry_le): Likewise.
+	(vxworks_sh_pic_plt_entry_be, vxworks_sh_pic_plt_entry_le): Likewise.
+	(get_plt_index, get_plt_offset): New functions.
+	(elf_sh_link_hash_table): Add srelplt2, plt_info and vxworks_p fields.
+	(sh_elf_link_hash_table_create): Initialize them.
+	(sh_elf_create_dynamic_sections): Call
+	elf_vxworks_create_dynamic_sections for VxWorks.
+	(allocate_dynrelocs): Use htab->plt_info to get the size of PLT
+	entries.  Allocate relocation entries in .rela.plt.unloaded if
+	generating a VxWorks executable.
+	(sh_elf_always_size_sections): New function.
+	(sh_elf_size_dynamic_sections): Extend .rela.plt handling to
+	.rela.plt.unloaded.
+	(sh_elf_relocate_section): Use get_howto_table.  Honor
+	partial_inplace when calculating the addend for dynamic
+	relocations.  Use get_plt_index.
+	(sh_elf_finish_dynamic_symbol): Use get_plt_index, install_plt_field
+	and htab->plt_info.  Fill in the bra .plt offset for VxWorks
+	executables.  Populate .rela.plt.unloaded.  Do not make
+	_GLOBAL_OFFSET_TABLE_ absolute on VxWorks.
+	(sh_elf_finish_dynamic_sections): Use install_plt_field and
+	htab->plt_info.  Handle cases where there is no special PLT header.
+	Populate the first relocation in .rela.plt.unloaded and fix up
+	the remaining entries.
+	(sh_elf_plt_sym_val): Use get_plt_info.
+	(elf_backend_always_size_sections): Define.
+	(TARGET_BIG_SYM, TARGET_BIG_NAME): Override for VxWorks.
+	(TARGET_LITTLE_SYM, TARGET_BIG_SYM): Likewise.
+	(elf32_bed, elf_backend_want_plt_sym): Likewise.
+	(elf_symbol_leading_char, elf_backend_want_got_underscore): Likewise.
+	(elf_backend_grok_prstatus, elf_backend_grok_psinfo): Likewise.
+	(elf_backend_add_symbol_hook): Likewise.
+	(elf_backend_link_output_symbol_hook): Likewise.
+	(elf_backend_emit_relocs): Likewise.
+	(elf_backend_final_write_processing): Likewise.
+	(ELF_MAXPAGESIZE, ELF_COMMONPAGESIZE): Likewise.
+	* targets.c (bfd_elf32_shlvxworks_vec): Declare.
+	(bfd_elf32_shvxworks_vec): Likewise.
+	(_bfd_target_vector): Include bfd_elf32_shlvxworks_vec and
+	bfd_elf32_shvxworks_vec.
+
 2006-08-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.in (arm-*-openbsd*): Set COREFILE to netbsd-core.lo.

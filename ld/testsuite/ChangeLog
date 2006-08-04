@@ -1,3 +1,21 @@
+2006-08-04  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-sh/rd-sh.exp: Treat vxworks1-static.d specially.
+	* ld-sh/sh-vxworks.exp: New file.
+	* ld-sh/sh.exp: Extend sh-linux SIZEOF_HEADERS handling to
+	sh-*-vxworks.
+	* ld-sh/vxworks1-le.dd, ld-sh/vxworks1-lib-le.dd,
+	* ld-sh/vxworks1-lib.dd, ld-sh/vxworks1-lib.nd,
+	* ld-sh/vxworks1-lib.rd, ld-sh/vxworks1-lib.s,
+	* ld-sh/vxworks1-static.d, ld-sh/vxworks1.dd,
+	* ld-sh/vxworks1.ld, ld-sh/vxworks1.rd, ld-sh/vxworks1.s,
+	* ld-sh/vxworks2-static.sd, ld-sh/vxworks2.s,
+	* ld-sh/vxworks2.sd, ld-sh/vxworks3-le.dd,
+	* ld-sh/vxworks3-lib-le.dd, ld-sh/vxworks3-lib.dd,
+	* ld-sh/vxworks3-lib.s, ld-sh/vxworks3.dd, ld-sh/vxworks3.s,
+	* ld-sh/vxworks4.d, ld-sh/vxworks4a.s, ld-sh/vxworks4b.s,
+	* ld-sh/reloc1.s, ld-sh/reloc1.d: New tests.
+
 2006-08-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/noload-1.d: New.

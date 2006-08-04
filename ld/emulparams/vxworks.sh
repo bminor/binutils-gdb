@@ -17,12 +17,12 @@ FINI_START='_fini = .;
             KEEP (*(.fini$0[1-9]));
             KEEP (*(.fini$[1-8][0-9]));
             KEEP (*(.fini$9[0-8]));'
-FINI_END='KEEP (*(.fini$99));
-          PROVIDE (_etext = .);'
+FINI_END="KEEP (*(.fini\$99));
+          PROVIDE (${SYMPREFIX}_etext = .);"
 
 ETEXT_NAME=etext_unrelocated
-OTHER_SYMBOLS="PROVIDE (_ehdr = ${TEXT_START_ADDR});"
-DATA_END_SYMBOLS=".edata : { PROVIDE (_edata = .); }"
+OTHER_END_SYMBOLS="PROVIDE (${SYMPREFIX}_ehdr = ${TEXT_START_ADDR});"
+DATA_END_SYMBOLS=".edata : { PROVIDE (${SYMPREFIX}_edata = .); }"
 VXWORKS_BASE_EM_FILE=$EXTRA_EM_FILE
 EXTRA_EM_FILE=vxworks
 unset EMBEDDED

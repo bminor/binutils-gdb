@@ -3782,6 +3782,28 @@ sh_elf_final_processing (void)
 }
 #endif
 
+/* Apply fixup FIXP to SIZE-byte field BUF given that VAL is its
+   assembly-time value.  If we're generating a reloc for FIXP,
+   see whether the addend should be stored in-place or whether
+   it should be in an ELF r_addend field.  */
+
+static void
+apply_full_field_fix (fixS *fixP, char *buf, bfd_vma val, int size)
+{
+  reloc_howto_type *howto;
+
+  if (fixP->fx_addsy != NULL || fixP->fx_pcrel)
+    {
+      howto = bfd_reloc_type_lookup (stdoutput, fixP->fx_r_type);
+      if (howto && !howto->partial_inplace)
+	{
+	  fixP->fx_addnumber = val;
+	  return;
+	}
+    }
+  md_number_to_chars (buf, val, size);
+}
+
 /* Apply a fixup to the object file.  */
 
 void
@@ -3982,11 +4004,11 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 
     case BFD_RELOC_32:
     case BFD_RELOC_32_PCREL:
-      md_number_to_chars (buf, val, 4);
+      apply_full_field_fix (fixP, buf, val, 4);
       break;
 
     case BFD_RELOC_16:
-      md_number_to_chars (buf, val, 2);
+      apply_full_field_fix (fixP, buf, val, 2);
       break;
 
     case BFD_RELOC_SH_USES:
@@ -4018,8 +4040,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       val = fixP->fx_offset;
       if (fixP->fx_subsy)
 	val -= S_GET_VALUE (fixP->fx_subsy);
-      fixP->fx_addnumber = val;
-      md_number_to_chars (buf, val, 4);
+      apply_full_field_fix (fixP, buf, val, 4);
       break;
 
     case BFD_RELOC_SH_GOTPC:
@@ -4040,7 +4061,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
          was used to store the correction, but since the expression is
          not pcrel, I felt it would be confusing to do it this way.  */
       * valP -= 1;
-      md_number_to_chars (buf, val, 4);
+      apply_full_field_fix (fixP, buf, val, 4);
       break;
 
     case BFD_RELOC_SH_TLS_GD_32:
@@ -4051,7 +4072,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_32_GOT_PCREL:
     case BFD_RELOC_SH_GOTPLT32:
       * valP = 0; /* Fully resolved at runtime.  No addend.  */
-      md_number_to_chars (buf, 0, 4);
+      apply_full_field_fix (fixP, buf, 0, 4);
       break;
 
     case BFD_RELOC_SH_TLS_LDO_32:
@@ -4059,7 +4080,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       S_SET_THREAD_LOCAL (fixP->fx_addsy);
       /* Fallthrough */
     case BFD_RELOC_32_GOTOFF:
-      md_number_to_chars (buf, val, 4);
+      apply_full_field_fix (fixP, buf, val, 4);
       break;
 #endif
 
@@ -4262,12 +4283,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
   else if (shmedia_init_reloc (rel, fixp))
     ;
 #endif
-  else if (fixp->fx_pcrel)
-    rel->addend = fixp->fx_addnumber;
-  else if (r_type == BFD_RELOC_32 || r_type == BFD_RELOC_32_GOTOFF)
-    rel->addend = fixp->fx_addnumber;
   else
-    rel->addend = 0;
+    rel->addend = fixp->fx_addnumber;
 
   rel->howto = bfd_reloc_type_lookup (stdoutput, r_type);
 

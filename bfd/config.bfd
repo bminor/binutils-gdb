@@ -1252,8 +1252,8 @@ case "${targ}" in
     targ_underscore=yes
     ;;
   sh-*-vxworks)
-    targ_defvec=bfd_elf32_sh_vec
-    targ_selvecs="bfd_elf32_shl_vec"
+    targ_defvec=bfd_elf32_shvxworks_vec
+    targ_selvecs="bfd_elf32_shlvxworks_vec"
     # FIXME None of the following are actually used on this target, but
     # they're necessary for coff-sh.c (which is unconditionally used) to be
     # compiled correctly.

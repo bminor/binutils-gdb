@@ -472,9 +472,11 @@ shle*-*-elf* | sh[1234]*le*-*-elf | shle*-*-kaos*)
 			targ_emul=shlelf
 			targ_extra_emuls="shelf shl sh"	;;
 sh-*-rtemscoff*)	targ_emul=sh; targ_extra_emuls=shl ;;
-sh-*-elf* | sh[1234]*-*-elf | sh-*-rtems* | sh-*-kaos* | sh-*-vxworks)
+sh-*-elf* | sh[1234]*-*-elf | sh-*-rtems* | sh-*-kaos*)
 			targ_emul=shelf
 			targ_extra_emuls="shlelf sh shl" ;;
+sh-*-vxworks)		targ_emul=shelf_vxworks
+			targ_extra_emuls=shlelf_vxworks ;;
 sh-*-nto*)		targ_emul=shelf_nto
 			targ_extra_emuls=shlelf_nto ;;
 sh-*-pe)		targ_emul=shpe ;

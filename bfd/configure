@@ -10872,19 +10872,21 @@ do
     # FIXME: We include cofflink.lo not because it's needed for
     # bfd_elf32_sh64[l]_vec, but because we include bfd_elf32_sh[l]_vec
     # which needs it but does not list it.  Should be fixed in right place.
-    bfd_elf32_sh64_vec)		tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf32.lo $elf cofflink.lo" target_size=64 ;;
-    bfd_elf32_sh64l_vec)	tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf32.lo $elf cofflink.lo" target_size=64 ;;
-    bfd_elf32_sh64lin_vec)	tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf32.lo $elf cofflink.lo" target_size=64 ;;
-    bfd_elf32_sh64blin_vec)	tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf32.lo $elf cofflink.lo" target_size=64 ;;
-    bfd_elf32_sh64lnbsd_vec)	tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf32.lo $elf cofflink.lo" ;;
-    bfd_elf32_sh64nbsd_vec)	tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf32.lo $elf cofflink.lo" ;;
-    bfd_elf32_sh_vec)		tb="$tb elf32-sh.lo elf32.lo $elf coff-sh.lo" ;;
-    bfd_elf32_shblin_vec)	tb="$tb elf32-sh.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
-    bfd_elf32_shl_vec)		tb="$tb elf32-sh.lo elf32.lo $elf coff-sh.lo" ;;
-    bfd_elf32_shl_symbian_vec)	tb="$tb elf32-sh-symbian.lo elf32-sh64-com.lo elf32.lo $elf coff-sh.lo" ;;
-    bfd_elf32_shlin_vec)	tb="$tb elf32-sh.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
-    bfd_elf32_shlnbsd_vec)	tb="$tb elf32-sh.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
-    bfd_elf32_shnbsd_vec)	tb="$tb elf32-sh.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
+    bfd_elf32_sh64_vec)		tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf-vxworks.lo elf32.lo $elf cofflink.lo" target_size=64 ;;
+    bfd_elf32_sh64l_vec)	tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf-vxworks.lo elf32.lo $elf cofflink.lo" target_size=64 ;;
+    bfd_elf32_sh64lin_vec)	tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf-vxworks.lo elf32.lo $elf cofflink.lo" target_size=64 ;;
+    bfd_elf32_sh64blin_vec)	tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf-vxworks.lo elf32.lo $elf cofflink.lo" target_size=64 ;;
+    bfd_elf32_sh64lnbsd_vec)	tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf-vxworks.lo elf32.lo $elf cofflink.lo" ;;
+    bfd_elf32_sh64nbsd_vec)	tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf-vxworks.lo elf32.lo $elf cofflink.lo" ;;
+    bfd_elf32_sh_vec)		tb="$tb elf32-sh.lo elf-vxworks.lo elf32.lo $elf coff-sh.lo" ;;
+    bfd_elf32_shblin_vec)	tb="$tb elf32-sh.lo elf-vxworks.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
+    bfd_elf32_shl_vec)		tb="$tb elf32-sh.lo elf-vxworks.lo elf32.lo $elf coff-sh.lo" ;;
+    bfd_elf32_shl_symbian_vec)	tb="$tb elf32-sh-symbian.lo elf32-sh64-com.lo elf-vxworks.lo elf32.lo $elf coff-sh.lo" ;;
+    bfd_elf32_shlin_vec)	tb="$tb elf32-sh.lo elf-vxworks.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
+    bfd_elf32_shlnbsd_vec)	tb="$tb elf32-sh.lo elf-vxworks.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
+    bfd_elf32_shlvxworks_vec)	tb="$tb elf32-sh.lo elf-vxworks.lo elf32.lo $elf coff-sh.lo" ;;
+    bfd_elf32_shnbsd_vec)	tb="$tb elf32-sh.lo elf-vxworks.lo elf32.lo$elf coff-sh.lo cofflink.lo" ;;
+    bfd_elf32_shvxworks_vec)	tb="$tb elf32-sh.lo elf-vxworks.lo elf32.lo $elf coff-sh.lo" ;;
     bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.lo elfxx-sparc.lo elf-vxworks.lo elf32.lo $elf" ;;
     bfd_elf32_sparc_vxworks_vec) tb="$tb elf32-sparc.lo elfxx-sparc.lo elf-vxworks.lo elf32.lo $elf" ;;
     bfd_elf32_tradbigmips_vec)  tb="$tb elf32-mips.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo" ;;

@@ -149,6 +149,8 @@ extern int target_big_endian;
 #define TARGET_FORMAT (!target_big_endian ? "elf32-shl-nbsd" : "elf32-sh-nbsd")
 #elif defined TARGET_SYMBIAN
 #define TARGET_FORMAT (!target_big_endian ? "elf32-shl-symbian" : "elf32-sh-symbian")
+#elif defined (TE_VXWORKS)
+#define TARGET_FORMAT (!target_big_endian ? "elf32-shl-vxworks" : "elf32-sh-vxworks")
 #else
 #define TARGET_FORMAT (!target_big_endian ? "elf32-shl" : "elf32-sh")
 #endif

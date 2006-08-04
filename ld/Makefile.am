@@ -353,6 +353,8 @@ ALL_EMULATIONS = \
 	eshlelf_nbsd.o \
 	eshelf_nto.o \
 	eshlelf_nto.o \
+	eshelf_vxworks.o \
+	eshlelf_vxworks.o \
 	eshl.o \
 	eshlelf.o \
 	eshlsymbian.o \
@@ -1504,6 +1506,10 @@ eshelf_nbsd.c: $(srcdir)/emulparams/shelf_nbsd.sh \
 eshelf_nto.c: $(srcdir)/emulparams/shelf_nto.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} shelf_nto "$(tdir_shelf_nto)"
+eshelf_vxworks.c: $(srcdir)/emulparams/shelf_vxworks.sh \
+  $(srcdir)/emulparams/vxworks.sh $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc \
+  $(srcdir)/emultempl/vxworks.em ${GEN_DEPENDS}
+	${GENSCRIPTS} shelf_vxworks "$(tdir_shelf_vxworks)"
 eshlelf_nbsd.c: $(srcdir)/emulparams/shlelf_nbsd.sh \
   $(srcdir)/emulparams/shelf_nbsd.sh \
   $(srcdir)/emulparams/shelf.sh \
@@ -1512,6 +1518,11 @@ eshlelf_nbsd.c: $(srcdir)/emulparams/shlelf_nbsd.sh \
 eshlelf_nto.c: $(srcdir)/emulparams/shlelf_nto.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} shlelf_nto "$(tdir_shlelf_nto)"
+eshlelf_vxworks.c: $(srcdir)/emulparams/shlelf_vxworks.sh \
+  $(srcdir)/emulparams/shelf_vxworks.sh $(srcdir)/emulparams/vxworks.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc $(srcdir)/emultempl/vxworks.em \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} shlelf_vxworks "$(tdir_shlelf_vxworks)"
 eshlelf.c: $(srcdir)/emulparams/shlelf.sh \
   $(srcdir)/emulparams/shelf.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}

@@ -1,3 +1,21 @@
+2006-08-04  Richard Sandiford  <richard@codesourcery.com>
+	    Kazu Hirata  <kazu@codesourcery.com>
+	    Phil Edwards  <phil@codesourcery.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add eshelf_vxworks.o and
+	eshlelf_vxworks.o.
+	(eshelf_vxworks.c, eshlelf_vxworks.c): New rules.
+	* Makefile.in: Regenerate.
+	* configure.tgt (sh-*-vxworks): Use shelf_vxworks and
+	shlelf_vxworks.
+	* emulparams/shelf_vxworks.sh: New file.
+	* emulparams/shlelf_vxworks.sh: Likewise.
+	* emulparams/vxworks.sh (FINI): Prefix _etext with ${SYMPREFIX}.
+	(OTHER_END_SYMBOLS): Likewise _ehdr.
+	(DATA_END_SYMBOLS): Likewise _edata.
+	* emultempl/vxworks.em (vxworks_after_open): Check whether output_bfd
+	is indeed an ELF file before dealing with --force-dynamic.
+
 2006-08-02  Petr Salinger  <Petr.Salinger@seznam.cz>
 
 	PR binutils/2983

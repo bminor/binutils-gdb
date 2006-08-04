@@ -1,3 +1,11 @@
+2006-08-04  Richard Sandiford  <richard@codesourcery.com>
+
+	* config/tc-sh.c (apply_full_field_fix): New function.
+	(md_apply_fix): Use it instead of md_number_to_chars.  Do not fill
+	in fx_addnumber for BFD_RELOC_32_PLT_PCREL.
+	(tc_gen_reloc): Use fx_addnumber rather than 0 as the default case.
+	* config/tc-sh.h (TARGET_FORMAT): Override for TE_VXWORKS.
+
 2006-08-03  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/2991
