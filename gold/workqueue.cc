@@ -1,6 +1,9 @@
 // workqueue.cc -- the workqueue for gold
 
 #include "gold.h"
+
+#include <cassert>
+
 #include "workqueue.h"
 
 namespace gold

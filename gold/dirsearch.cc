@@ -3,6 +3,7 @@
 #include "gold.h"
 
 #include <cerrno>
+#include <cassert>
 #include <sys/types.h>
 #include <dirent.h>
 
