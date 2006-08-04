@@ -124,6 +124,8 @@ enum option_values
   OPTION_FORCE_EXE_SUFFIX,
   OPTION_GC_SECTIONS,
   OPTION_NO_GC_SECTIONS,
+  OPTION_PRINT_GC_SECTIONS,
+  OPTION_NO_PRINT_GC_SECTIONS,
   OPTION_HASH_SIZE,
   OPTION_CHECK_SECTIONS,
   OPTION_NO_CHECK_SECTIONS,
@@ -369,6 +371,12 @@ static const struct ld_option ld_options[] =
     TWO_DASHES },
   { {"no-gc-sections", no_argument, NULL, OPTION_NO_GC_SECTIONS},
     '\0', NULL, N_("Don't remove unused sections (default)"),
+    TWO_DASHES },
+  { {"print-gc-sections", no_argument, NULL, OPTION_PRINT_GC_SECTIONS},
+    '\0', NULL, N_("List removed unused sections on stderr"),
+    TWO_DASHES },
+  { {"no-print-gc-sections", no_argument, NULL, OPTION_NO_PRINT_GC_SECTIONS},
+    '\0', NULL, N_("Do not list removed unused sections"),
     TWO_DASHES },
   { {"hash-size=<NUMBER>", required_argument, NULL, OPTION_HASH_SIZE},
     '\0', NULL, N_("Set default hash table size close to <NUMBER>"),
@@ -812,6 +820,9 @@ parse_args (unsigned argc, char **argv)
 	case OPTION_GC_SECTIONS:
 	  link_info.gc_sections = TRUE;
 	  break;
+	case OPTION_PRINT_GC_SECTIONS:
+	  link_info.print_gc_sections = TRUE;
+	  break;
 	case OPTION_HELP:
 	  help ();
 	  xexit (0);
@@ -854,6 +865,9 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_NO_GC_SECTIONS:
 	  link_info.gc_sections = FALSE;
+	  break;
+	case OPTION_NO_PRINT_GC_SECTIONS:
+	  link_info.print_gc_sections = FALSE;
 	  break;
 	case OPTION_NO_KEEP_MEMORY:
 	  link_info.keep_memory = FALSE;

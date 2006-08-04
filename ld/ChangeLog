@@ -1,3 +1,12 @@
+2006-08-04  Marcelo Tosatti  <marcelo@kvack.org>
+
+	* ldmain.c (main): Initialise print_gc_sections field of link_info
+	structure.
+	* lexsup.c: Add --print-gc-sections and --no-print-gc-sections
+	switches.
+	* ld.texinfo: Document new switches.
+	* NEWS: Mention new switches.
+
 2006-08-04  Richard Sandiford  <richard@codesourcery.com>
 	    Kazu Hirata  <kazu@codesourcery.com>
 	    Phil Edwards  <phil@codesourcery.com>

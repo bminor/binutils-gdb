@@ -9356,7 +9356,8 @@ _bfd_elf_gc_mark (struct bfd_link_info *info,
 
 /* Sweep symbols in swept sections.  Called via elf_link_hash_traverse.  */
 
-struct elf_gc_sweep_symbol_info {
+struct elf_gc_sweep_symbol_info
+{
   struct bfd_link_info *info;
   void (*hide_symbol) (struct bfd_link_info *, struct elf_link_hash_entry *,
 		       bfd_boolean);
@@ -9418,6 +9419,9 @@ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
 	  /* Since this is early in the link process, it is simple
 	     to remove a section from the output.  */
 	  o->flags |= SEC_EXCLUDE;
+
+	  if (info->print_gc_sections == TRUE)
+	    _bfd_error_handler (_("Removing unused section '%s' in file '%B'"), sub, o->name);
 
 	  /* But we also have to update some of the relocation
 	     info we collected before.  */

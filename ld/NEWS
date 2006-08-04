@@ -1,4 +1,8 @@
 -*- text -*-
+* New switch: --print-gc-sections to list any sections removed by garabge
+  collection.
+
+Changes in 2.17:
 
 * Support for the Infineon XC16X has been added by KPIT Cummins Infosystems.
 

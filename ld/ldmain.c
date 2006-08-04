@@ -318,6 +318,7 @@ main (int argc, char **argv)
   link_info.relax_pass = 1;
   link_info.warn_shared_textrel = FALSE;
   link_info.gc_sections = FALSE;
+  link_info.print_gc_sections = FALSE;
 
   config.maxpagesize = 0;
   config.commonpagesize = 0;

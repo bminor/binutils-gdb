@@ -1230,13 +1230,25 @@ it ends in a @code{.exe} suffix.
 @kindex --gc-sections
 @kindex --no-gc-sections
 @cindex garbage collection
-@item --no-gc-sections
-@itemx --gc-sections
+@item --gc-sections
+@itemx --no-gc-sections
 Enable garbage collection of unused input sections.  It is ignored on
 targets that do not support this option.  This option is not compatible
 with @samp{-r}. The default behaviour (of not performing this garbage
 collection) can be restored by specifying @samp{--no-gc-sections} on
 the command line.
+
+@kindex --print-gc-sections
+@kindex --no-print-gc-sections
+@cindex garbage collection
+@item --print-gc-sections
+@itemx --no-print-gc-sections
+List all sections removed by garbage collection.  The listing is
+printed on stderr.  This option is only effective if garbage
+collection has been enabled via the @samp{--gc-sections}) option.  The
+default behaviour (of not listing the sections that are removed) can
+be restored by specifying @samp{--no-print-gc-sections} on the command
+line.
 
 @cindex help
 @cindex usage

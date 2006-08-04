@@ -1,3 +1,8 @@
+2006-08-04  Marcelo Tosatti  <marcelo@kvack.org>
+
+	* elflink.c (elf_gc_sweep): If info.print_gc_sections is true,
+	list removed sections to stderr.
+
 2006-08-04  Richard Sandiford  <richard@codesourcery.com>
 	    Kazu Hirata  <kazu@codesourcery.com>
 	    Phil Edwards  <phil@codesourcery.com>
