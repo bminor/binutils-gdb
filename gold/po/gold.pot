@@ -1,0 +1,216 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2006-08-04 14:23-0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: dirsearch.cc:50
+#, c-format
+msgid "can not read directory %s"
+msgstr ""
+
+#: fileread.cc:56
+#, c-format
+msgid "%s: warning: close(%s) failed: %s"
+msgstr ""
+
+#: fileread.cc:131
+#, c-format
+msgid "%s: %s: lseek to %lld failed: %s"
+msgstr ""
+
+#: fileread.cc:141
+#, c-format
+msgid "%s: %s: read failed: %s\n"
+msgstr ""
+
+#: fileread.cc:151
+#, c-format
+msgid "%s: %s: file too short: read only %lld of %lld bytes at %lld\n"
+msgstr ""
+
+#: fileread.cc:267
+#, c-format
+msgid "%s: cannot find %s"
+msgstr ""
+
+#: fileread.cc:275
+#, c-format
+msgid "%s: cannot open %s: %s"
+msgstr ""
+
+#: gold.cc:71
+msgid "no input files"
+msgstr ""
+
+#: gold-threads.cc:48
+msgid "pthead_mutextattr_init failed"
+msgstr ""
+
+#: gold-threads.cc:51
+msgid "pthread_mutextattr_settype failed"
+msgstr ""
+
+#: gold-threads.cc:55
+msgid "pthread_mutex_init failed"
+msgstr ""
+
+#: gold-threads.cc:58
+msgid "pthread_mutexattr_destroy failed"
+msgstr ""
+
+#: gold-threads.cc:64
+msgid "pthread_mutex_destroy failed"
+msgstr ""
+
+#: gold-threads.cc:71
+msgid "pthread_mutex_lock failed"
+msgstr ""
+
+#: gold-threads.cc:78
+msgid "pthread_mutex_unlock failed"
+msgstr ""
+
+#: gold-threads.cc:159
+msgid "pthread_cond_init failed"
+msgstr ""
+
+#: gold-threads.cc:165
+msgid "pthread_cond_destroy failed"
+msgstr ""
+
+#: gold-threads.cc:172
+msgid "pthread_cond_wait failed"
+msgstr ""
+
+#: gold-threads.cc:179
+msgid "pthread_cond_signal failed"
+msgstr ""
+
+#: object.cc:56
+#, c-format
+msgid "%s: %s: bad e_ehsize field (%d != %d)\n"
+msgstr ""
+
+#: object.cc:63
+#, c-format
+msgid "%s: %s: bad e_shentsize field (%d != %d)\n"
+msgstr ""
+
+#: object.cc:154
+#, c-format
+msgid "%s: %s: invalid symbol table name index: %u\n"
+msgstr ""
+
+#: object.cc:164
+#, c-format
+msgid "%s: %s: symbol table name section has wrong type: %u\n"
+msgstr ""
+
+#: object.cc:206
+#, c-format
+msgid "%s: %s: invalid symbol name offset %u for symbol %d\n"
+msgstr ""
+
+#. elfcpp::ET_DYN
+#: object.cc:249
+#, c-format
+msgid "%s: %s: dynamic objects are not yet supported\n"
+msgstr ""
+
+#: object.cc:273 object.cc:326 object.cc:347
+#, c-format
+msgid "%s: %s: ELF file too short\n"
+msgstr ""
+
+#: object.cc:282
+#, c-format
+msgid "%s: %s: invalid ELF version 0\n"
+msgstr ""
+
+#: object.cc:285
+#, c-format
+msgid "%s: %s: unsupported ELF version %d\n"
+msgstr ""
+
+#: object.cc:293
+#, c-format
+msgid "%s: %s: invalid ELF class 0\n"
+msgstr ""
+
+#: object.cc:300
+#, c-format
+msgid "%s: %s: unsupported ELF class %d\n"
+msgstr ""
+
+#: object.cc:308
+#, c-format
+msgid "%s: %s: invalid ELF data encoding\n"
+msgstr ""
+
+#: object.cc:315
+#, c-format
+msgid "%s: %s: unsupported ELF data encoding %d\n"
+msgstr ""
+
+#: options.cc:84
+#, c-format
+msgid ""
+"Usage: %s [options] file...\n"
+"Options:\n"
+msgstr ""
+
+#: options.cc:193
+msgid "Add directory to search path"
+msgstr ""
+
+#: options.cc:194
+msgid "-L DIR, --library-path DIR"
+msgstr ""
+
+#: options.cc:196
+msgid "Generate relocatable output"
+msgstr ""
+
+#: options.cc:198
+msgid "Do not link against shared libraries"
+msgstr ""
+
+#: options.cc:200
+msgid "Report usage information"
+msgstr ""
+
+#: options.cc:294 options.cc:345
+msgid "missing argument"
+msgstr ""
+
+#: options.cc:307 options.cc:354
+msgid "unknown option"
+msgstr ""
+
+#: options.cc:393
+#, c-format
+msgid "%s: use the --help option for usage information\n"
+msgstr ""
+
+#: options.cc:402
+#, c-format
+msgid "%s: %s: %s\n"
+msgstr ""
+
+#: options.cc:411
+#, c-format
+msgid "%s: -%c: %s\n"
+msgstr ""
