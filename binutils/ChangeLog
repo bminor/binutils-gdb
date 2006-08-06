@@ -1,3 +1,23 @@
+2006-08-06  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/3001
+	* addr2line.c (process_file): Change function from void to
+	returning an int.  Return 0 upon success, 1 otherwise.
+	(main): Use return value from process_file as the exit value.
+	* ar.c (ranlib_only):  Change function from void to returning an
+	int.  Return 0 upon success, 1 otherwise.
+	(ranlib_touch): Likewise.
+	(main): Use return value from ranlib functions as exit value.
+	* objcopy.c (add_specific_symbol): Set status to 1 if get_file_size
+	fails.
+	(copy_file): Likewise.
+	(strip_main): Likewise.
+	(copy_main): Likewise.
+	* objdump.c (display_file): Set exit_status to 1 if get_file_size
+	fails.
+	* size.c (display_file): Set return_code to 1 if get_file_size
+	fails.
+
 2006-08-02  Thiemo Seufer  <ths@mips.com>
             Nigel Stephens  <nigel@mips.com>
 

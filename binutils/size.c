@@ -1,6 +1,6 @@
 /* size.c -- report size of various sections of an executable file.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -346,7 +346,10 @@ display_file (char *filename)
   bfd *file;
 
   if (get_file_size (filename) < 1)
-    return;
+    {
+      return_code = 1;
+      return;
+    }
 
   file = bfd_openr (filename, target);
   if (file == NULL)

@@ -653,7 +653,10 @@ add_specific_symbols (const char *filename, struct symlist **list)
 
   size = get_file_size (filename);
   if (size == 0)
-    return;
+    {
+      status = 1;
+      return;
+    }
 
   buffer = xmalloc (size + 2);
   f = fopen (filename, FOPEN_RT);
@@ -1889,7 +1892,6 @@ copy_file (const char *input_filename, const char *output_filename,
 
   if (get_file_size (input_filename) < 1)
     {
-      non_fatal (_("error: the input file '%s' is empty"), input_filename);
       status = 1;
       return;
     }
@@ -2612,7 +2614,10 @@ strip_main (int argc, char *argv[])
       char *tmpname;
 
       if (get_file_size (argv[i]) < 1)
-	continue;
+	{
+	  status = 1;
+	  continue;
+	}
 
       if (preserve_dates)
 	/* No need to check the return value of stat().
@@ -2623,8 +2628,8 @@ strip_main (int argc, char *argv[])
 	tmpname = output_file;
       else
 	tmpname = make_tempname (argv[i]);
-      status = 0;
 
+      status = 0;
       copy_file (argv[i], tmpname, input_target, output_target);
       if (status == 0)
 	{
@@ -2640,7 +2645,7 @@ strip_main (int argc, char *argv[])
 	free (tmpname);
     }
 
-  return 0;
+  return status;
 }
 
 static int
@@ -2809,7 +2814,10 @@ copy_main (int argc, char *argv[])
 
 	    size = get_file_size (s + 1);
 	    if (size < 1)
-	      break;
+	      {
+		status = 1;
+		break;
+	      }
 
 	    pa = xmalloc (sizeof (struct section_add));
 

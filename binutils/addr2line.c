@@ -68,7 +68,6 @@ static void slurp_symtab (bfd *);
 static void find_address_in_section (bfd *, asection *, void *);
 static void find_offset_in_section (bfd *, asection *);
 static void translate_addresses (bfd *, asection *);
-static void process_file (const char *, const char *, const char *);
 
 /* Print a usage message to STREAM and exit with STATUS.  */
 
@@ -261,9 +260,9 @@ translate_addresses (bfd *abfd, asection *section)
     }
 }
 
-/* Process a file.  */
+/* Process a file.  Returns an exit value for main().  */
 
-static void
+static int
 process_file (const char *file_name, const char *section_name,
 	      const char *target)
 {
@@ -272,7 +271,7 @@ process_file (const char *file_name, const char *section_name,
   char **matching;
 
   if (get_file_size (file_name) < 1)
-    return;
+    return 1;
 
   abfd = bfd_openr (file_name, target);
   if (abfd == NULL)
@@ -312,6 +311,8 @@ process_file (const char *file_name, const char *section_name,
     }
 
   bfd_close (abfd);
+
+  return 0;
 }
 
 int
@@ -401,7 +402,5 @@ main (int argc, char **argv)
   addr = argv + optind;
   naddr = argc - optind;
 
-  process_file (file_name, section_name, target);
-
-  return 0;
+  return process_file (file_name, section_name, target);
 }

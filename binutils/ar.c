@@ -1,6 +1,6 @@
 /* ar.c - Archive modify and extract.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005
+   2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -68,8 +68,8 @@ static void replace_members
   (bfd *, char **files_to_replace, bfd_boolean quick);
 static void print_descr (bfd * abfd);
 static void write_archive (bfd *);
-static void ranlib_only (const char *archname);
-static void ranlib_touch (const char *archname);
+static int  ranlib_only (const char *archname);
+static int  ranlib_touch (const char *archname);
 static void usage (int);
 
 /** Globals and flags */
@@ -420,6 +420,7 @@ main (int argc, char **argv)
 
   if (is_ranlib)
     {
+      int status = 0;
       bfd_boolean touch = FALSE;
 
       if (argc < 2
@@ -440,12 +441,12 @@ main (int argc, char **argv)
       while (arg_index < argc)
 	{
 	  if (! touch)
-	    ranlib_only (argv[arg_index]);
+	    status |= ranlib_only (argv[arg_index]);
 	  else
-	    ranlib_touch (argv[arg_index]);
+	    status |= ranlib_touch (argv[arg_index]);
 	  ++arg_index;
 	}
-      xexit (0);
+      xexit (status);
     }
 
   if (argc == 2 && strcmp (argv[1], "-M") == 0)
@@ -597,10 +598,7 @@ main (int argc, char **argv)
 
       if ((operation == none || operation == print_table)
 	  && write_armap == 1)
-	{
-	  ranlib_only (argv[arg_index]);
-	  xexit (0);
-	}
+	xexit (ranlib_only (argv[arg_index]));
 
       if (operation == none)
 	fatal (_("no operation specified"));
@@ -1193,23 +1191,24 @@ replace_members (bfd *arch, char **files_to_move, bfd_boolean quick)
     output_filename = NULL;
 }
 
-static void
+static int
 ranlib_only (const char *archname)
 {
   bfd *arch;
 
   if (get_file_size (archname) < 1)
-    return;
+    return 1;
   write_armap = 1;
   arch = open_inarch (archname, (char *) NULL);
   if (arch == NULL)
     xexit (1);
   write_archive (arch);
+  return 0;
 }
 
 /* Update the timestamp of the symbol map of an archive.  */
 
-static void
+static int
 ranlib_touch (const char *archname)
 {
 #ifdef __GO32__
@@ -1221,7 +1220,7 @@ ranlib_touch (const char *archname)
   char **matching;
 
   if (get_file_size (archname) < 1)
-    return;
+    return 1;
   f = open (archname, O_RDWR | O_BINARY, 0);
   if (f < 0)
     {
@@ -1252,6 +1251,7 @@ ranlib_touch (const char *archname)
   if (! bfd_close (arch))
     bfd_fatal (archname);
 #endif
+  return 0;
 }
 
 /* Things which are interesting to map over all or some of the files: */

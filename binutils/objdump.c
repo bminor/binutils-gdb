@@ -2902,7 +2902,10 @@ display_file (char *filename, char *target)
   bfd *arfile = NULL;
 
   if (get_file_size (filename) < 1)
-    return;
+    {
+      exit_status = 1;
+      return;
+    }
 
   file = bfd_openr (filename, target);
   if (file == NULL)
