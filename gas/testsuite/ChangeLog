@@ -1,3 +1,8 @@
+2006-08-04 Pedro Alves <pedro_alves@portugalmail.pt>
+
+	* gas/arm/wince.s: New test.
+	* gas/arm/wince.d: New test.
+
 2006-08-03  Joseph Myers  <joseph@codesourcery.com>
 
 	* gas/arm/iwmmxt-bad.s: Test invalid register names for wldrw and
