@@ -1,3 +1,8 @@
+2006-08-05  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* ld-pe/pe.exp: Enable tests on arm-wince-pe.
+	* ld-pe/secrel.d: Adjust test to work on arm-wince-pe too.
+
 2006-08-04  Richard Sandiford  <richard@codesourcery.com>
 
 	* ld-sh/rd-sh.exp: Treat vxworks1-static.d specially.

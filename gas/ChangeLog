@@ -1,3 +1,27 @@
+2006-08-05  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* config/tc-arm.c: Move "dwarf2dbg.h" inclusion out of OBJ_ELF
+	only block.
+	(pe_directive_secrel) [TE_PE]: New function.
+	(md_pseudo_table) [!OBJ_ELF]: Handle 2byte, 4byte, 8byte, file,
+	loc, loc_mark_labels.
+	[TE_PE]: Handle secrel32.
+	(output_relax_insn): Remove OBJ_ELF around dwarf2_emit_insn
+	call.
+	(output_inst): Remove OBJ_ELF around dwarf2_emit_insn call.
+	(arm_frob_label): Remove OBJ_ELF around dwarf2_emit_label call.
+	(md_section_align): Only round section sizes here for AOUT
+	targets.
+	(tc_arm_regname_to_dw2regnum): Move out for OBJ_ELF only block.
+	(tc_pe_dwarf2_emit_offset): New function.
+	(md_apply_fix) [TE_PE]: Handle BFD_RELOC_32_SECREL.
+	(cons_fix_new_arm): Handle O_secrel.
+	* config/tc-arm.h : Move DWARF2_LINE_MIN_INSN_LENGTH,
+	DWARF2_DEFAULT_RETURN_COLUMN and DWARF2_CIE_DATA_ALIGNMENT out
+	of OBJ_ELF only block.
+	[TE_PE]: Define O_secrel, TC_DWARF2_EMIT_OFFSET, and declare
+	tc_pe_dwarf2_emit_offset.
+
 2006-08-04  Richard Sandiford  <richard@codesourcery.com>
 
 	* config/tc-sh.c (apply_full_field_fix): New function.

@@ -37,9 +37,10 @@
 
 #ifdef OBJ_ELF
 #include "elf/arm.h"
-#include "dwarf2dbg.h"
 #include "dw2gencfi.h"
 #endif
+
+#include "dwarf2dbg.h"
 
 /* XXX Set this to 1 after the next binutils release.  */
 #define WARN_DEPRECATED 0
@@ -3878,6 +3879,28 @@ static void s_arm_arch (int);
 static void s_arm_cpu (int);
 static void s_arm_fpu (int);
 
+#ifdef TE_PE
+
+static void
+pe_directive_secrel (int dummy ATTRIBUTE_UNUSED) 
+{
+  expressionS exp;
+
+  do
+    {
+      expression (&exp);
+      if (exp.X_op == O_symbol)
+	exp.X_op = O_secrel;
+
+      emit_expr (&exp, 4);
+    }
+  while (*input_line_pointer++ == ',');
+
+  input_line_pointer--;
+  demand_empty_rest_of_line ();
+}
+#endif /* TE_PE */
+
 /* This table describes all the machine specific pseudo-ops the assembler
    has to support.  The fields are:
      pseudo-op name without dot
@@ -3926,10 +3949,22 @@ const pseudo_typeS md_pseudo_table[] =
   { "eabi_attribute",	s_arm_eabi_attribute,	0 },
 #else
   { "word",	   cons, 4},
+
+  /* These are used for dwarf.  */
+  {"2byte", cons, 2},
+  {"4byte", cons, 4},
+  {"8byte", cons, 8},
+  /* These are used for dwarf2.  */
+  { "file", (void (*) (int)) dwarf2_directive_file, 0 },
+  { "loc",  dwarf2_directive_loc,  0 },
+  { "loc_mark_labels", dwarf2_directive_loc_mark_labels, 0 },
 #endif
   { "extend",	   float_cons, 'x' },
   { "ldouble",	   float_cons, 'x' },
   { "packed",	   float_cons, 'p' },
+#ifdef TE_PE
+  {"secrel32", pe_directive_secrel, 0},
+#endif
   { 0, 0, 0 }
 };
 
@@ -13381,11 +13416,9 @@ output_relax_insn (void)
   symbolS *sym;
   int offset;
 
-#ifdef OBJ_ELF
   /* The size of the instruction is unknown, so tie the debug info to the
      start of the instruction.  */
   dwarf2_emit_insn (0);
-#endif
 
   switch (inst.reloc.exp.X_op)
     {
@@ -13453,9 +13486,7 @@ output_inst (const char * str)
 		 inst.size, & inst.reloc.exp, inst.reloc.pc_rel,
 		 inst.reloc.type);
 
-#ifdef OBJ_ELF
   dwarf2_emit_insn (inst.size);
-#endif
 }
 
 /* Tag values used in struct asm_opcode's tag field.  */
@@ -13906,9 +13937,7 @@ arm_frob_label (symbolS * sym)
       label_is_thumb_function_name = FALSE;
     }
 
-#ifdef OBJ_ELF
   dwarf2_emit_label (sym);
-#endif
 }
 
 int
@@ -16379,12 +16408,22 @@ valueT
 md_section_align (segT	 segment ATTRIBUTE_UNUSED,
 		  valueT size)
 {
-#ifdef OBJ_ELF
-  return size;
-#else
-  /* Round all sects to multiple of 4.	*/
-  return (size + 3) & ~3;
+#if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT))
+  if (OUTPUT_FLAVOR == bfd_target_aout_flavour)
+    {
+      /* For a.out, force the section size to be aligned.  If we don't do
+	 this, BFD will align it for us, but it will not write out the
+	 final bytes of the section.  This may be a bug in BFD, but it is
+	 easier to fix it here since that is how the other a.out targets
+	 work.  */
+      int align;
+
+      align = bfd_get_section_alignment (stdoutput, segment);
+      size = ((size + (1 << align) - 1) & ((valueT) -1 << align));
+    }
 #endif
+
+  return size;
 }
 
 /* This is called from HANDLE_ALIGN in write.c.	 Fill in the contents
@@ -16884,6 +16923,16 @@ create_unwind_entry (int have_data)
   return 0;
 }
 
+
+/* Initialize the DWARF-2 unwind information for this procedure.  */
+
+void
+tc_arm_frame_initial_instructions (void)
+{
+  cfi_add_CFA_def_cfa (REG_SP, 0);
+}
+#endif /* OBJ_ELF */
+
 /* Convert REGNAME to a DWARF-2 register number.  */
 
 int
@@ -16897,15 +16946,18 @@ tc_arm_regname_to_dw2regnum (char *regname)
   return reg;
 }
 
-/* Initialize the DWARF-2 unwind information for this procedure.  */
-
+#ifdef TE_PE
 void
-tc_arm_frame_initial_instructions (void)
+tc_pe_dwarf2_emit_offset (symbolS *symbol, unsigned int size)
 {
-  cfi_add_CFA_def_cfa (REG_SP, 0);
-}
-#endif /* OBJ_ELF */
+  expressionS expr;
 
+  expr.X_op = O_secrel;
+  expr.X_add_symbol = symbol;
+  expr.X_add_number = 0;
+  emit_expr (&expr, size);
+}
+#endif
 
 /* MD interface: Symbol and relocation handling.  */
 
@@ -17897,6 +17949,9 @@ md_apply_fix (fixS *	fixP,
     case BFD_RELOC_ARM_ROSEGREL32:
     case BFD_RELOC_ARM_SBREL32:
     case BFD_RELOC_32_PCREL:
+#ifdef TE_PE
+    case BFD_RELOC_32_SECREL:
+#endif
       if (fixP->fx_done || !seg->use_rela_p)
 #ifdef TE_WINCE
 	/* For WinCE we only do this for pcrel fixups.  */
@@ -18435,6 +18490,9 @@ tc_gen_reloc (asection *section, fixS *fixp)
     case BFD_RELOC_THUMB_PCREL_BLX:
     case BFD_RELOC_VTABLE_ENTRY:
     case BFD_RELOC_VTABLE_INHERIT:
+#ifdef TE_PE
+    case BFD_RELOC_32_SECREL:
+#endif
       code = fixp->fx_r_type;
       break;
 
@@ -18616,6 +18674,14 @@ cons_fix_new_arm (fragS *	frag,
       type = BFD_RELOC_64;
       break;
     }
+
+#ifdef TE_PE
+  if (exp->X_op == O_secrel)
+  {
+    exp->X_op = O_symbol;
+    type = BFD_RELOC_32_SECREL;
+  }
+#endif
 
   fix_new_exp (frag, where, (int) size, exp, pcrel, type);
 }

@@ -883,7 +883,9 @@ bfd_get_sign_extend_vma (bfd *abfd)
      a place will have to be found.  Until then, this hack will do.  */
   if (strncmp (name, "coff-go32", sizeof ("coff-go32") - 1) == 0
       || strcmp (name, "pe-i386") == 0
-      || strcmp (name, "pei-i386") == 0)
+      || strcmp (name, "pei-i386") == 0
+      || strcmp (name, "pe-arm-little") == 0
+      || strcmp (name, "pei-arm-little") == 0)
     return 1;
 
   bfd_set_error (bfd_error_wrong_format);

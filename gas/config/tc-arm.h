@@ -175,8 +175,15 @@ extern void arm_md_end (void);
       goto LABEL;								\
     }
 
+#define DWARF2_LINE_MIN_INSN_LENGTH 	2
+
+/* The lr register is r14.  */
+#define DWARF2_DEFAULT_RETURN_COLUMN  14
+
+/* Registers are generally saved at negative offsets to the CFA.  */
+#define DWARF2_CIE_DATA_ALIGNMENT     -4
+
 #ifdef OBJ_ELF
-# define DWARF2_LINE_MIN_INSN_LENGTH 	2
 # define obj_frob_symbol(sym, punt)	armelf_frob_symbol ((sym), & (punt))
 # define md_elf_section_change_hook()	arm_elf_change_section ()
 # define md_elf_section_type(str, len)	arm_elf_section_type (str, len)
@@ -199,12 +206,6 @@ struct arm_segment_info_type
 
 /* We want .cfi_* pseudo-ops for generating unwind info.  */
 #define TARGET_USE_CFIPOP              1
-
-/* The lr register is r14.  */
-#define DWARF2_DEFAULT_RETURN_COLUMN  14
-
-/* Registers are generally saved at negative offsets to the CFA.  */
-#define DWARF2_CIE_DATA_ALIGNMENT     -4
 
 /* CFI hooks.  */
 #define tc_regname_to_dw2regnum            tc_arm_regname_to_dw2regnum
@@ -246,3 +247,12 @@ extern bfd_boolean arm_fix_adjustable (struct fix *);
 extern int arm_elf_section_type (const char *, size_t);
 extern int tc_arm_regname_to_dw2regnum (char *regname);
 extern void tc_arm_frame_initial_instructions (void);
+
+#ifdef TE_PE
+
+#define O_secrel O_md1
+
+#define TC_DWARF2_EMIT_OFFSET  tc_pe_dwarf2_emit_offset
+void tc_pe_dwarf2_emit_offset (symbolS *, unsigned int);
+
+#endif /* TE_PE */

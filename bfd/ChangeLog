@@ -1,3 +1,16 @@
+2006-08-05  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* bfd.c (bfd_get_sign_extend_vma): Add cases for pe-arm-little
+	and pei-arm-little.
+	* coff-arm.c (coff_arm_rtype_to_howto) [COFF_WITH_PE]: Handle
+	ARM_SECREL.
+	(coff_arm_reloc_type_lookup): Map BFD_RELOC_32_SECREL to
+	ARM_SECREL.
+	* pe-arm.c [COFF_SECTION_ALIGNMENT_ENTRIES]: Define.
+	* pei-arm.c [TARGET_UNDERSCORE]: Define for ARM_WINCE like in
+	pe-arm.c.
+	[COFF_SECTION_ALIGNMENT_ENTRIES]: Define.
+
 2006-08-04  Marcelo Tosatti  <marcelo@kvack.org>
 
 	* elflink.c (elf_gc_sweep): If info.print_gc_sections is true,

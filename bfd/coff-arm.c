@@ -539,6 +539,32 @@ coff_arm_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
   if (rel->r_type == ARM_RVA32)
     *addendp -= pe_data (sec->output_section->owner)->pe_opthdr.ImageBase;
 
+#ifdef COFF_WITH_PE
+  if (rel->r_type == ARM_SECREL)
+    {
+      bfd_vma osect_vma;
+
+      if (h && (h->type == bfd_link_hash_defined
+		|| h->type == bfd_link_hash_defweak))
+	osect_vma = h->root.u.def.section->output_section->vma;
+      else
+	{
+	  asection *sec;
+	  int i;
+
+	  /* Sigh, the only way to get the section to offset against
+	     is to find it the hard way.  */
+
+	  for (sec = abfd->sections, i = 1; i < sym->n_scnum; i++)
+	    sec = sec->next;
+
+	  osect_vma = sec->output_section->vma;
+	}
+
+      *addendp -= osect_vma;
+    }
+#endif
+
   return howto;
 }
 
@@ -808,6 +834,7 @@ coff_arm_reloc_type_lookup (bfd * abfd, bfd_reloc_code_real_type code)
       ASTD (BFD_RELOC_RVA,                  ARM_RVA32);
       ASTD (BFD_RELOC_ARM_PCREL_BRANCH,     ARM_26);
       ASTD (BFD_RELOC_THUMB_PCREL_BRANCH12, ARM_THUMB12);
+      ASTD (BFD_RELOC_32_SECREL,            ARM_SECREL);
 #else
       ASTD (BFD_RELOC_8,                    ARM_8);
       ASTD (BFD_RELOC_16,                   ARM_16);
