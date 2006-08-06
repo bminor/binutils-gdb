@@ -1,3 +1,13 @@
+2006-08-04  Nick Clifton  <nickc@redhat.com>
+	    Mike Frysinger  <michael.frysing@analog.com>
+
+	* scripttempl/elf.sc (USER_LABEL_PREFIX): Define.
+	(__preinit_array_start, __preinit_array_end, __init_array_start,
+	__init_array_end, __fini_array_start, __fini_array_end, edata, end):
+	Use ${USER_LABEL_PREFIX}.
+	* emulparams/bfin.sh (DATA_END_SYMBOLS,END_SYMBOLS): Unset.
+	(USER_LABEL_PREFIX): Set.
+
 2006-08-04  Marcelo Tosatti  <marcelo@kvack.org>
 
 	* ldmain.c (main): Initialise print_gc_sections field of link_info

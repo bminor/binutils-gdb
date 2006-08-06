@@ -10,5 +10,4 @@ ENTRY=__start
 TEMPLATE_NAME=elf32
 GENERATE_SHLIB_SCRIPT=yes
 EMBEDDED=yes
-DATA_END_SYMBOLS="__edata = .; PROVIDE (_edata = .);"
-END_SYMBOLS="__end = .; PROVIDE (_end = .);"
+USER_LABEL_PREFIX=_
