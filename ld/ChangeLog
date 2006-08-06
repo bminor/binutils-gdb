@@ -1,5 +1,5 @@
 2006-08-04  Nick Clifton  <nickc@redhat.com>
-	    Mike Frysinger  <michael.frysing@analog.com>
+	    Mike Frysinger  <michael.frysinger@analog.com>
 
 	* scripttempl/elf.sc (USER_LABEL_PREFIX): Define.
 	(__preinit_array_start, __preinit_array_end, __init_array_start,
