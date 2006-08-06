@@ -4,7 +4,6 @@
 	.global	thumb2_add
 	.thumb
 	.thumb_func
-	.type	thumb2_add, %function
 thumb2_add:
 	add r0, pc, #0x800
 	add r9, pc, #0

@@ -3,6 +3,9 @@
 	* gas/arm/wince.s: New test.
 	* gas/arm/wince.d: New test.
 
+	* gas/arm/thumb2_add.s: Don't use elf specific ".type"
+	pseudo-op.
+
 2006-08-03  Joseph Myers  <joseph@codesourcery.com>
 
 	* gas/arm/iwmmxt-bad.s: Test invalid register names for wldrw and
