@@ -10885,7 +10885,7 @@ do
     bfd_elf32_shlin_vec)	tb="$tb elf32-sh.lo elf-vxworks.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
     bfd_elf32_shlnbsd_vec)	tb="$tb elf32-sh.lo elf-vxworks.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
     bfd_elf32_shlvxworks_vec)	tb="$tb elf32-sh.lo elf-vxworks.lo elf32.lo $elf coff-sh.lo" ;;
-    bfd_elf32_shnbsd_vec)	tb="$tb elf32-sh.lo elf-vxworks.lo elf32.lo$elf coff-sh.lo cofflink.lo" ;;
+    bfd_elf32_shnbsd_vec)	tb="$tb elf32-sh.lo elf-vxworks.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
     bfd_elf32_shvxworks_vec)	tb="$tb elf32-sh.lo elf-vxworks.lo elf32.lo $elf coff-sh.lo" ;;
     bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.lo elfxx-sparc.lo elf-vxworks.lo elf32.lo $elf" ;;
     bfd_elf32_sparc_vxworks_vec) tb="$tb elf32-sparc.lo elfxx-sparc.lo elf-vxworks.lo elf32.lo $elf" ;;

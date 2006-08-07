@@ -1,5 +1,10 @@
 2006-08-07  Nick Clifton  <nickc@redhat.com>
 
+	* configure.in (bfd_elf32_shnbsd_vec): Fix typo.
+	* configure: Regenerate.
+
+2006-08-07  Nick Clifton  <nickc@redhat.com>
+
 	* coff-arm.c (coff_arm_rtype_to_howto): Only check for ARM_SECREL
 	relocation types if the target is ARM_WINCE.
 
