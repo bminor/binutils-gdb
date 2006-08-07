@@ -1,3 +1,8 @@
+2006-08-06  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* expprint.c (print_subexp_standard, dump_subexp_body_standard): Add
+	support for member pointers.
+
 2006-08-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* arm-tdep.h: Add multiple inclusion protection.
