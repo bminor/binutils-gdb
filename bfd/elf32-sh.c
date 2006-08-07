@@ -74,13 +74,17 @@ static reloc_howto_type sh_vxworks_howto_table[] =
 /* Return true if OUTPUT_BFD is a VxWorks object.  */
 
 static bfd_boolean
-vxworks_object_p (bfd *abfd)
+vxworks_object_p (bfd *abfd ATTRIBUTE_UNUSED)
 {
+#if !defined INCLUDE_SHMEDIA && !defined SH_TARGET_ALREADY_DEFINED
   extern const bfd_target bfd_elf32_shlvxworks_vec;
   extern const bfd_target bfd_elf32_shvxworks_vec;
 
   return (abfd->xvec == &bfd_elf32_shlvxworks_vec
 	  || abfd->xvec == &bfd_elf32_shvxworks_vec);
+#else
+  return FALSE;
+#endif
 }
 
 /* Return the howto table for ABFD.  */

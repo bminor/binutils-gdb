@@ -1,5 +1,10 @@
 2006-08-07  Nick Clifton  <nickc@redhat.com>
 
+	* elf32-sh.c (vxworks_object_p): Only check for vxworks target
+	vectors if they are going to be created.
+
+2006-08-07  Nick Clifton  <nickc@redhat.com>
+
 	* configure.in (bfd_elf32_shnbsd_vec): Fix typo.
 	* configure: Regenerate.
 
