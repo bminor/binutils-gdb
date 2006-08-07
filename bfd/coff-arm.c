@@ -539,7 +539,7 @@ coff_arm_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
   if (rel->r_type == ARM_RVA32)
     *addendp -= pe_data (sec->output_section->owner)->pe_opthdr.ImageBase;
 
-#ifdef COFF_WITH_PE
+#if defined COFF_WITH_PE && defined ARM_WINCE
   if (rel->r_type == ARM_SECREL)
     {
       bfd_vma osect_vma;

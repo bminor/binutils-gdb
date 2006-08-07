@@ -1,3 +1,8 @@
+2006-08-07  Nick Clifton  <nickc@redhat.com>
+
+	* coff-arm.c (coff_arm_rtype_to_howto): Only check for ARM_SECREL
+	relocation types if the target is ARM_WINCE.
+
 2006-08-05  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* bfd.c (bfd_get_sign_extend_vma): Add cases for pe-arm-little
