@@ -88,6 +88,13 @@
 #define DL_FILES	1
 #define DL_BODY		2
 
+/* If linker relaxation might change offsets in the code, the DWARF special
+   opcodes and variable-length operands cannot be used.  If this macro is
+   nonzero, use the DW_LNS_fixed_advance_pc opcode instead.  */
+#ifndef DWARF2_USE_FIXED_ADVANCE_PC
+# define DWARF2_USE_FIXED_ADVANCE_PC	0
+#endif
+
 /* First special line opcde - leave room for the standard opcodes.
    Note: If you want to change this, you'll have to update the
    "standard_opcode_lengths" table that is emitted below in
@@ -191,11 +198,13 @@ static void out_two (int);
 static void out_four (int);
 static void out_abbrev (int, int);
 static void out_uleb128 (addressT);
+static void out_sleb128 (addressT);
 static offsetT get_frag_fix (fragS *, segT);
 static void out_set_addr (symbolS *);
 static int size_inc_line_addr (int, addressT);
 static void emit_inc_line_addr (int, addressT, char *, int);
 static void out_inc_line_addr (int, addressT);
+static void out_fixed_inc_line_addr (int, symbolS *, symbolS *);
 static void relax_inc_line_addr (int, symbolS *, symbolS *);
 static void process_entries (segT, struct line_entry *);
 static void out_file_list (void);
@@ -744,6 +753,14 @@ out_uleb128 (addressT value)
   output_leb128 (frag_more (sizeof_leb128 (value, 0)), value, 0);
 }
 
+/* Emit a signed "little-endian base 128" number.  */
+
+static void
+out_sleb128 (addressT value)
+{
+  output_leb128 (frag_more (sizeof_leb128 (value, 1)), value, 1);
+}
+
 /* Emit a tuple for .debug_abbrev.  */
 
 static inline void
@@ -977,6 +994,45 @@ out_inc_line_addr (int line_delta, addressT addr_delta)
   emit_inc_line_addr (line_delta, addr_delta, frag_more (len), len);
 }
 
+/* Write out an alternative form of line and address skips using
+   DW_LNS_fixed_advance_pc opcodes.  This uses more space than the default
+   line and address information, but it helps support linker relaxation that
+   changes the code offsets.  */
+
+static void
+out_fixed_inc_line_addr (int line_delta, symbolS *to_sym, symbolS *from_sym)
+{
+  expressionS expr;
+
+  /* INT_MAX is a signal that this is actually a DW_LNE_end_sequence.  */
+  if (line_delta == INT_MAX)
+    {
+      out_opcode (DW_LNS_fixed_advance_pc);
+      expr.X_op = O_subtract;
+      expr.X_add_symbol = to_sym;
+      expr.X_op_symbol = from_sym;
+      expr.X_add_number = 0;
+      emit_expr (&expr, 2);
+
+      out_opcode (DW_LNS_extended_op);
+      out_byte (1);
+      out_opcode (DW_LNE_end_sequence);
+      return;
+    }
+
+  out_opcode (DW_LNS_advance_line);
+  out_sleb128 (line_delta);
+
+  out_opcode (DW_LNS_fixed_advance_pc);
+  expr.X_op = O_subtract;
+  expr.X_add_symbol = to_sym;
+  expr.X_op_symbol = from_sym;
+  expr.X_add_number = 0;
+  emit_expr (&expr, 2);
+
+  out_opcode (DW_LNS_copy);
+}
+
 /* Generate a variant frag that we can use to relax address/line
    increments between fragments of the target segment.  */
 
@@ -1127,6 +1183,8 @@ process_entries (segT seg, struct line_entry *e)
 	  out_set_addr (lab);
 	  out_inc_line_addr (line_delta, 0);
 	}
+      else if (DWARF2_USE_FIXED_ADVANCE_PC)
+	out_fixed_inc_line_addr (line_delta, lab, last_lab);
       else if (frag == last_frag)
 	out_inc_line_addr (line_delta, frag_ofs - last_frag_ofs);
       else
@@ -1146,7 +1204,12 @@ process_entries (segT seg, struct line_entry *e)
   /* Emit a DW_LNE_end_sequence for the end of the section.  */
   frag = last_frag_for_seg (seg);
   frag_ofs = get_frag_fix (frag, seg);
-  if (frag == last_frag)
+  if (DWARF2_USE_FIXED_ADVANCE_PC)
+    {
+      lab = symbol_temp_new (seg, frag_ofs, frag);
+      out_fixed_inc_line_addr (INT_MAX, lab, last_lab);
+    }
+  else if (frag == last_frag)
     out_inc_line_addr (INT_MAX, frag_ofs - last_frag_ofs);
   else
     {

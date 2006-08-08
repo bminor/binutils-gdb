@@ -1,3 +1,12 @@
+2006-08-08  Bob Wilson  <bob.wilson@acm.org>
+
+	* dwarf2dbg.c (DWARF2_USE_FIXED_ADVANCE_PC): New.
+	(out_sleb128): New.
+	(out_fixed_inc_line_addr): New.
+	(process_entries): Use out_fixed_inc_line_addr when
+	DWARF2_USE_FIXED_ADVANCE_PC is set.
+	* config/tc-xtensa.h (DWARF2_USE_FIXED_ADVANCE_PC): Define.
+
 2006-08-08  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-sh.c (sh_frob_section): Canonicalize pointers to local

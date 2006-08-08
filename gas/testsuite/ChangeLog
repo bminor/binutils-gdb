@@ -1,3 +1,8 @@
+2006-08-08  Bob Wilson  <bob.wilson@acm.org>
+
+	* gas/lns/lns-common-1-alt.d: New file.
+	* gas/lns/lns.exp: Use lns-common-1-alt.d for xtensa targets.
+
 2006-08-04 Pedro Alves <pedro_alves@portugalmail.pt>
 
 	* gas/arm/wince.s: New test.

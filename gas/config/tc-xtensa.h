@@ -371,6 +371,9 @@ extern char *xtensa_section_rename (char *);
 #define MD_APPLY_SYM_VALUE(FIX) 0
 #define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) 0
 
+/* Use line number format that is amenable to linker relaxation.  */
+#define DWARF2_USE_FIXED_ADVANCE_PC (linkrelax != 0)
+
 
 /* Resource reservation info functions.  */
 

@@ -23,5 +23,10 @@ run_list_test "lns-diag-1" ""
 # defined a macro...
 if { ![istarget ia64*-*-*] && ![istarget i370-*-*] && ![istarget i960-*-*]
      && ![istarget or32-*-*] && ![istarget s390*-*-*] } {
-  run_dump_test "lns-common-1"
+  # Use alternate file for targets using DW_LNS_fixed_advance_pc opcodes.
+  if { [istarget xtensa-*-*] } {
+    run_dump_test "lns-common-1-alt"
+  } else {
+    run_dump_test "lns-common-1"
+  }
 }
