@@ -614,7 +614,11 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
 		 + sec->output_section->vma
 		 + sec->output_offset
 		 + 4));
-      if (foff < -0x1000 || foff >= 0x1000)
+      /* A branch to an address beyond ours might be increased by an
+	 .align that doesn't move when bytes behind us are deleted.
+	 So, we add some slop in this calculation to allow for
+	 that.  */
+      if (foff < -0x1000 || foff >= 0x1000 - 8)
 	{
 	  /* After all that work, we can't shorten this function call.  */
 	  continue;
@@ -651,6 +655,12 @@ sh_elf_relax_section (bfd *abfd, asection *sec,
       bfd_put_16 (abfd, (bfd_vma) 0xb000, contents + irel->r_offset);
 
       irel->r_addend = -4;
+
+      /* When we calculated the symbol "value" we had an offset in the
+	 DIR32's word in memory (we read and add it above).  However,
+	 the jsr we create does NOT have this offset encoded, so we
+	 have to add it to the addend to preserve it.  */
+      irel->r_addend += bfd_get_32 (abfd, contents + paddr);
 
       /* See if there is another R_SH_USES reloc referring to the same
 	 register load.  */

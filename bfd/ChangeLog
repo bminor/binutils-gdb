@@ -1,3 +1,9 @@
+2006-08-08  DJ Delorie  <dj@redhat.com>
+
+	* elf32-sh.c (sh_elf_relax_section): Allow for branches across
+	non-moving .align directives.  Preserve any DIR32 offset when
+	converting bsr's to jsr's.
+
 2006-08-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_build_stubs): Clear relbrlt reloc_count
