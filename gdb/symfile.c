@@ -51,6 +51,7 @@
 #include "block.h"
 #include "observer.h"
 #include "exec.h"
+#include "parser-defs.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -2518,6 +2519,12 @@ clear_symtab_users (void)
   clear_pc_function_cache ();
   if (deprecated_target_new_objfile_hook)
     deprecated_target_new_objfile_hook (NULL);
+
+  /* Clear globals which might have pointed into a removed objfile.
+     FIXME: It's not clear which of these are supposed to persist
+     between expressions and which ought to be reset each time.  */
+  expression_context_block = NULL;
+  innermost_block = NULL;
 }
 
 static void

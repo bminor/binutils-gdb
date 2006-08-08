@@ -1,3 +1,11 @@
+2006-08-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (objfiles.o, symfile.o): Update.
+	* objfiles.c: Include "expression.h" and "parser-defs.h".
+	(free_objfile): Clear global blocks.
+	* symfile.c: Include "parser-defs.h".
+	(clear_symtab_users): Clear global blocks.
+
 2006-08-08  Thiemo Seufer  <ths@mips.com>
 
 	* breakpoint.c (update_breakpoints_after_exec): Fix type mismatch.
