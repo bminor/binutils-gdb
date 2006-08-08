@@ -1,3 +1,8 @@
+2006-08-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/step-bt.c: New file.
+	* gdb.base/step-bt.exp: New testcase.
+
 2006-08-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* config/monitor.exp (gdb_load): Remove support for obsolete
