@@ -1,5 +1,24 @@
 2006-08-08  Joel Brobecker  <brobecker@adacore.com>
 
+	* source.c: #include gdb_assert.h.
+	(substitute_path_rule): New struct.
+	(substitute_path_rules): New static global variable.
+	(substitute_path_rule_matches): New function.
+	(get_substitute_path_rule): New function.
+	(rewrite_source_path): New function.
+	(find_and_open_source): Add source path rewriting support.
+	(strip_trailing_directory_separator): New function.
+	(find_substitute_path_rule): New function.
+	(add_substitute_path_rule): New function.
+	(delete_substitute_path_rule): New function.
+	(show_substitute_path_command): New function.
+	(unset_substitute_path_command): New function.
+	(set_substitute_path_command): New function.
+	(_initialize_source): Add new substitute-path commands.
+	* Makefile.in (source.o): Add dependency on gdb_assert.h.
+
+2006-08-08  Joel Brobecker  <brobecker@adacore.com>
+
 	* i386-tdep.c (i386_follow_jump): Use read_memory_nobpt to read
 	instructions.
 	(i386_analyze_struct_return): Likewise.
