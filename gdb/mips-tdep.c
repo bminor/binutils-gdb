@@ -858,7 +858,7 @@ mips_fetch_instruction (CORE_ADDR addr)
     }
   else
     instlen = MIPS_INSN32_SIZE;
-  status = deprecated_read_memory_nobpt (addr, buf, instlen);
+  status = read_memory_nobpt (addr, buf, instlen);
   if (status)
     memory_error (status, addr);
   return extract_unsigned_integer (buf, instlen);

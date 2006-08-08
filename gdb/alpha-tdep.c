@@ -644,7 +644,7 @@ alpha_read_insn (CORE_ADDR pc)
   char buf[4];
   int status;
 
-  status = deprecated_read_memory_nobpt (pc, buf, 4);
+  status = read_memory_nobpt (pc, buf, 4);
   if (status)
     memory_error (status, pc);
   return extract_unsigned_integer (buf, 4);

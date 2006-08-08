@@ -639,8 +639,7 @@ commands_command (char *arg, int from_tty)
    shadow contents, not the breakpoints themselves.  From breakpoint.c.  */
 
 int
-deprecated_read_memory_nobpt (CORE_ADDR memaddr, gdb_byte *myaddr,
-			      unsigned len)
+read_memory_nobpt (CORE_ADDR memaddr, gdb_byte *myaddr, unsigned len)
 {
   int status;
   struct bp_location *b;
@@ -702,7 +701,7 @@ deprecated_read_memory_nobpt (CORE_ADDR memaddr, gdb_byte *myaddr,
       if (bp_addr > memaddr)
 	{
 	  /* Copy the section of memory before the breakpoint.  */
-	  status = deprecated_read_memory_nobpt (memaddr, myaddr, bp_addr - memaddr);
+	  status = read_memory_nobpt (memaddr, myaddr, bp_addr - memaddr);
 	  if (status != 0)
 	    return status;
 	}
@@ -710,7 +709,7 @@ deprecated_read_memory_nobpt (CORE_ADDR memaddr, gdb_byte *myaddr,
       if (bp_addr + bp_size < memaddr + len)
 	{
 	  /* Copy the section of memory after the breakpoint.  */
-	  status = deprecated_read_memory_nobpt (bp_addr + bp_size,
+	  status = read_memory_nobpt (bp_addr + bp_size,
 				      myaddr + bp_addr + bp_size - memaddr,
 				      memaddr + len - (bp_addr + bp_size));
 	  if (status != 0)

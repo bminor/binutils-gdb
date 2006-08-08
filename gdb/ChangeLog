@@ -1,3 +1,22 @@
+2006-08-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbcore.h (read_memory_nobpt): New function name instead of
+	deprecated_read_memory_nobpt.
+	* breakpoint.c (read_memory_nobpt): New function name instead
+	of deprecated_read_memory_nobpt.
+	Adjust calls to old deprecated_read_memory_nobpt accordingly.
+	* alpha-tdep.c: Adjust calls to deprecated_read_memory_nobpt
+	accordingly.
+	* alphanbsd-tdep.c: Likewise.
+	* frame.c: Likewise.
+	* frv-tdep.c: Likewise.
+	* hppa-linux-tdep.c: Likewise.
+	* hppa-tdep.c: Likewise.
+	* i386-linux-nat.c: Likewise.
+	* m68klinux-tdep.c: Likewise.
+	* mips-tdep.c: Likewise.
+	* s390-tdep.c: Likewise.
+
 2006-08-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* configure.ac: Check for expat.
