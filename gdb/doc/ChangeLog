@@ -1,3 +1,9 @@
+2006-08-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (Installing GDB): Update menu.  Move text to...
+	(Running Configure): ...here.
+	(Requirements): New node.  Mention expat.
+
 2006-08-08  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (Target Commands): Remove 

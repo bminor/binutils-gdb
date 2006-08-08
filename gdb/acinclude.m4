@@ -12,6 +12,11 @@ sinclude(../config/stdint.m4)
 
 sinclude(../config/gettext-sister.m4)
 
+dnl For AC_LIB_HAVE_LINKFLAGS.
+sinclude(../config/lib-ld.m4)
+sinclude(../config/lib-prefix.m4)
+sinclude(../config/lib-link.m4)
+
 dnl CYGNUS LOCAL: This gets the right posix flag for gcc
 AC_DEFUN([CY_AC_TCL_LYNX_POSIX],
 [AC_REQUIRE([AC_PROG_CC])AC_REQUIRE([AC_PROG_CPP])

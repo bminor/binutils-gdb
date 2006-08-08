@@ -1,3 +1,12 @@
+2006-08-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* configure.ac: Check for expat.
+	* acinclude.m4: Include AC_LIB_HAVE_LINKFLAGS dependencies.
+	* Makefile.in (LIBEXPAT): New.
+	(CLIBS): Include $(LIBEXPAT).
+	* README: Mention expat.
+	* configure, config.in: Regenerated.
+
 2006-08-08  Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* config/sparc/embed.mt: New file.

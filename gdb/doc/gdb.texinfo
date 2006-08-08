@@ -21891,10 +21891,49 @@ Then give @file{gdb.dvi} to your @sc{dvi} printing program.
 
 @node Installing GDB
 @appendix Installing @value{GDBN}
-@cindex configuring @value{GDBN}
 @cindex installation
-@cindex configuring @value{GDBN}, and source tree subdirectories
 
+@menu
+* Requirements::                Requirements for building @value{GDBN}
+* Running Configure::           Invoking the @value{GDBN} @code{configure} script
+* Separate Objdir::             Compiling @value{GDBN} in another directory
+* Config Names::                Specifying names for hosts and targets
+* Configure Options::           Summary of options for configure
+@end menu
+
+@node Requirements
+@section Requirements for building @value{GDBN}
+@cindex building @value{GDBN}, requirements for
+
+Building @value{GDBN} requires various tools and packages to be available.
+Other packages will be used only if they are found.
+
+@heading Tools/packages necessary for building @value{GDBN}
+@table @asis
+@item ISO C90 compiler
+@value{GDBN} is written in ISO C90.  It should be buildable with any
+working C90 compiler, e.g.@: GCC.
+
+@end table
+
+@heading Tools/packages optional for building @value{GDBN}
+@table @asis
+@item Expat
+@value{GDBN} can use the Expat XML parsing library.  This library may be
+included with your operating system distribution; if it is not, you
+can get the latest version from @url{http://expat.sourceforge.net}.
+The @code{configure} script will search for this library in several
+standard locations; if it is installed in an unusual path, you can
+use the @option{--with-libexpat-prefix} option to specify its location.
+
+Expat is used currently only used to implement some remote-specific
+features.
+
+@end table
+
+@node Running Configure
+@section Invoking the @value{GDBN} @code{configure} script
+@cindex configuring @value{GDBN}
 @value{GDBN} comes with a @code{configure} script that automates the process
 of preparing @value{GDBN} for installation; you can then use @code{make} to
 build the @code{gdb} program.
@@ -21999,12 +22038,6 @@ However, you should make sure that the shell on your path (named by
 the @samp{SHELL} environment variable) is publicly readable.  Remember
 that @value{GDBN} uses the shell to start your program---some systems refuse to
 let @value{GDBN} debug child processes whose programs are not readable.
-
-@menu
-* Separate Objdir::             Compiling @value{GDBN} in another directory
-* Config Names::                Specifying names for hosts and targets
-* Configure Options::           Summary of options for configure
-@end menu
 
 @node Separate Objdir
 @section Compiling @value{GDBN} in another directory

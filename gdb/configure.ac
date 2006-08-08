@@ -315,6 +315,12 @@ if test "$ac_cv_search_tgetent" = no; then
   AC_MSG_ERROR([no termcap library found])
 fi
 
+AC_LIB_HAVE_LINKFLAGS([expat], [], [#include "expat.h"],
+		      [XML_Parser p = XML_ParserCreate (0);])
+if test "$HAVE_LIBEXPAT" != yes; then
+  AC_MSG_WARN([expat is missing or unusable; some features may be disabled.])
+fi
+
 # ------------------------- #
 # Checks for header files.  #
 # ------------------------- #
