@@ -1,3 +1,12 @@
+2006-08-08  Richard Sandiford  <richard@codesourcery.com>
+
+	* server.c (terminal_fd): New variable.
+	(old_foreground_pgrp): Likewise.
+	(restore_old_foreground_pgrp): New function.
+	(start_inferior): Record the terminal file descriptor in terminal_fd
+	and its original foreground group in old_foreground_pgrp.  Register
+	restore_old_foreground_pgrp with atexit().
+
 2006-07-26  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* server.c (handle_query): Correct qPart to qXfer.
