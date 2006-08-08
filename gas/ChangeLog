@@ -1,3 +1,14 @@
+2006-08-08  Sterling Augustine  <sterling@tensilica.com>
+
+	* dwarf2dbg.c (out_debug_info): Add new parameter ranges_seg
+	and emit DW_AT_ranges when code in compilation unit is not
+	contiguous.
+	(out_debug_abbrev): Emit DW_AT_ranges abbreviation if code in
+	is not contiguous.
+	(dwarf2_finish): Create and pass ranges_seg to out_debug_info.
+	(out_debug_ranges): New function to emit .debug_ranges section
+	when code is not contiguous.
+
 2006-08-08  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (WARN_DEPRECATED): Enable.

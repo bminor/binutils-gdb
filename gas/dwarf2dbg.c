@@ -202,11 +202,9 @@ static void out_file_list (void);
 static void out_debug_line (segT);
 static void out_debug_aranges (segT, segT);
 static void out_debug_abbrev (segT);
-static void out_debug_info (segT, segT, segT);
 
 #ifndef TC_DWARF2_EMIT_OFFSET
-# define TC_DWARF2_EMIT_OFFSET  generic_dwarf2_emit_offset
-static void generic_dwarf2_emit_offset (symbolS *, unsigned int);
+#define TC_DWARF2_EMIT_OFFSET  generic_dwarf2_emit_offset
 
 /* Create an offset to .dwarf2_*.  */
 
@@ -1290,6 +1288,54 @@ out_debug_line (segT line_seg)
   symbol_set_value_now (line_end);
 }
 
+static void
+out_debug_ranges (segT ranges_seg)
+{
+  unsigned int addr_size = sizeof_address;
+  struct line_seg *s;
+  expressionS expr;
+  unsigned int i;
+
+  subseg_set (ranges_seg, 0);
+
+  /* Base Address Entry.  */
+  for (i = 0; i < addr_size; i++) 
+    out_byte (0xff);
+  for (i = 0; i < addr_size; i++) 
+    out_byte (0);
+
+  /* Range List Entry.  */
+  for (s = all_segs; s; s = s->next)
+    {
+      fragS *frag;
+      symbolS *beg, *end;
+
+      frag = first_frag_for_seg (s->seg);
+      beg = symbol_temp_new (s->seg, 0, frag);
+      s->text_start = beg;
+
+      frag = last_frag_for_seg (s->seg);
+      end = symbol_temp_new (s->seg, get_frag_fix (frag, s->seg), frag);
+      s->text_end = end;
+
+      expr.X_op = O_symbol;
+      expr.X_add_symbol = beg;
+      expr.X_add_number = 0;
+      emit_expr (&expr, addr_size);
+
+      expr.X_op = O_symbol;
+      expr.X_add_symbol = end;
+      expr.X_add_number = 0;
+      emit_expr (&expr, addr_size);
+    }
+
+  /* End of Range Entry.   */
+  for (i = 0; i < addr_size; i++) 
+    out_byte (0);
+  for (i = 0; i < addr_size; i++) 
+    out_byte (0);
+}
+
 /* Emit data for .debug_aranges.  */
 
 static void
@@ -1382,6 +1428,13 @@ out_debug_abbrev (segT abbrev_seg)
       out_abbrev (DW_AT_low_pc, DW_FORM_addr);
       out_abbrev (DW_AT_high_pc, DW_FORM_addr);
     }
+  else
+    {
+      if (DWARF2_FORMAT () == dwarf2_format_32bit)
+	out_abbrev (DW_AT_ranges, DW_FORM_data4);
+      else
+	out_abbrev (DW_AT_ranges, DW_FORM_data8);
+    }
   out_abbrev (DW_AT_name, DW_FORM_string);
   out_abbrev (DW_AT_comp_dir, DW_FORM_string);
   out_abbrev (DW_AT_producer, DW_FORM_string);
@@ -1395,7 +1448,7 @@ out_debug_abbrev (segT abbrev_seg)
 /* Emit a description of this compilation unit for .debug_info.  */
 
 static void
-out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg)
+out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT ranges_seg)
 {
   char producer[128];
   char *comp_dir;
@@ -1458,8 +1511,7 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg)
   /* ??? sizeof_offset */
   TC_DWARF2_EMIT_OFFSET (section_symbol (line_seg), 4);
 
-  /* These two attributes may only be emitted if all of the code is
-     contiguous.  Multiple sections are not that.  */
+  /* These two attributes are emitted if all of the code is contiguous.  */
   if (all_segs->next == NULL)
     {
       /* DW_AT_low_pc */
@@ -1471,6 +1523,16 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg)
       /* DW_AT_high_pc */
       expr.X_op = O_symbol;
       expr.X_add_symbol = all_segs->text_end;
+      expr.X_add_number = 0;
+      emit_expr (&expr, sizeof_address);
+    }
+  else
+    {
+      /* This attributes is emitted if the code is disjoint.  */
+      
+      /* DW_AT_ranges */
+      expr.X_op = O_symbol;
+      expr.X_add_symbol = section_symbol (ranges_seg);
       expr.X_add_number = 0;
       emit_expr (&expr, sizeof_address);
     }
@@ -1564,6 +1626,7 @@ dwarf2_finish (void)
     {
       segT abbrev_seg;
       segT aranges_seg;
+      segT ranges_seg;
 
       assert (all_segs);
       
@@ -1580,8 +1643,19 @@ dwarf2_finish (void)
 
       record_alignment (aranges_seg, ffs (2 * sizeof_address) - 1);
 
+      if (all_segs->next == NULL)
+	ranges_seg = NULL;
+      else
+	{
+	  ranges_seg = subseg_new (".debug_ranges", 0);
+	  bfd_set_section_flags (stdoutput, ranges_seg, 
+				 SEC_READONLY | SEC_DEBUGGING);
+	  record_alignment (ranges_seg, ffs (2 * sizeof_address) - 1);
+	  out_debug_ranges (ranges_seg);
+	}
+
       out_debug_aranges (aranges_seg, info_seg);
       out_debug_abbrev (abbrev_seg);
-      out_debug_info (info_seg, abbrev_seg, line_seg);
+      out_debug_info (info_seg, abbrev_seg, line_seg, ranges_seg);
     }
 }
