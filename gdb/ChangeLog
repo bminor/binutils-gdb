@@ -1,5 +1,16 @@
 2006-08-08  Joel Brobecker  <brobecker@adacore.com>
 
+	* i386-tdep.c (i386_follow_jump): Use read_memory_nobpt to read
+	instructions.
+	(i386_analyze_struct_return): Likewise.
+	(i386_skip_probe): Likewise.
+	(i386_match_insn): Likewise.
+	(i386_analyze_frame_setup): Likewise.
+	(i386_analyze_register_saves): Likewise.
+	(i386_skip_prologue): Likewise.
+
+2006-08-08  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdbcore.h (read_memory_nobpt): New function name instead of
 	deprecated_read_memory_nobpt.
 	* breakpoint.c (read_memory_nobpt): New function name instead

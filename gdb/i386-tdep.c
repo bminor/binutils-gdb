@@ -354,7 +354,7 @@ i386_follow_jump (CORE_ADDR pc)
   long delta = 0;
   int data16 = 0;
 
-  op = read_memory_unsigned_integer (pc, 1);
+  read_memory_nobpt (pc, &op, 1);
   if (op == 0x66)
     {
       data16 = 1;
@@ -420,12 +420,12 @@ i386_analyze_struct_return (CORE_ADDR pc, CORE_ADDR current_pc,
   if (current_pc <= pc)
     return pc;
 
-  op = read_memory_unsigned_integer (pc, 1);
+  read_memory_nobpt (pc, &op, 1);
 
   if (op != 0x58)		/* popl %eax */
     return pc;
 
-  read_memory (pc + 1, buf, 4);
+  read_memory_nobpt (pc + 1, buf, 4);
   if (memcmp (buf, proto1, 3) != 0 && memcmp (buf, proto2, 4) != 0)
     return pc;
 
@@ -464,7 +464,7 @@ i386_skip_probe (CORE_ADDR pc)
   gdb_byte buf[8];
   gdb_byte op;
 
-  op = read_memory_unsigned_integer (pc, 1);
+  read_memory_nobpt (pc, &op, 1);
 
   if (op == 0x68 || op == 0x6a)
     {
@@ -535,7 +535,7 @@ i386_match_insn (CORE_ADDR pc, struct i386_insn *skip_insns)
   struct i386_insn *insn;
   gdb_byte op;
 
-  op = read_memory_unsigned_integer (pc, 1);
+  read_memory_nobpt (pc, &op, 1);
 
   for (insn = skip_insns; insn->len > 0; insn++)
     {
@@ -548,7 +548,7 @@ i386_match_insn (CORE_ADDR pc, struct i386_insn *skip_insns)
 	  gdb_assert (insn->len > 1);
 	  gdb_assert (insn->len <= I386_MAX_INSN_LEN);
 
-	  read_memory (pc + 1, buf, insn->len - 1);
+	  read_memory_nobpt (pc + 1, buf, insn->len - 1);
 	  for (i = 1; i < insn->len; i++)
 	    {
 	      if ((buf[i - 1] & insn->mask[i]) != insn->insn[i])
@@ -634,7 +634,7 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR limit,
   if (limit <= pc)
     return limit;
 
-  op = read_memory_unsigned_integer (pc, 1);
+  read_memory_nobpt (pc, &op, 1);
 
   if (op == 0x55)		/* pushl %ebp */
     {
@@ -669,7 +669,7 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR limit,
       if (limit <= pc + skip)
 	return limit;
 
-      op = read_memory_unsigned_integer (pc + skip, 1);
+      read_memory_nobpt (pc + skip, &op, 1);
 
       /* Check for `movl %esp, %ebp' -- can be written in two ways.  */
       switch (op)
@@ -703,7 +703,7 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR limit,
 
 	 NOTE: You can't subtract a 16-bit immediate from a 32-bit
 	 reg, so we don't have to worry about a data16 prefix.  */
-      op = read_memory_unsigned_integer (pc, 1);
+      read_memory_nobpt (pc, &op, 1);
       if (op == 0x83)
 	{
 	  /* `subl' with 8-bit immediate.  */
@@ -759,7 +759,7 @@ i386_analyze_register_saves (CORE_ADDR pc, CORE_ADDR current_pc,
     offset -= cache->locals;
   for (i = 0; i < 8 && pc < current_pc; i++)
     {
-      op = read_memory_unsigned_integer (pc, 1);
+      read_memory_nobpt (pc, &op, 1);
       if (op < 0x50 || op > 0x57)
 	break;
 
@@ -848,7 +848,7 @@ i386_skip_prologue (CORE_ADDR start_pc)
 
   for (i = 0; i < 6; i++)
     {
-      op = read_memory_unsigned_integer (pc + i, 1);
+      read_memory_nobpt (pc + i, &op, 1);
       if (pic_pat[i] != op)
 	break;
     }
@@ -856,7 +856,7 @@ i386_skip_prologue (CORE_ADDR start_pc)
     {
       int delta = 6;
 
-      op = read_memory_unsigned_integer (pc + delta, 1);
+      read_memory_nobpt (pc + delta, &op, 1);
 
       if (op == 0x89)		/* movl %ebx, x(%ebp) */
 	{
@@ -869,7 +869,7 @@ i386_skip_prologue (CORE_ADDR start_pc)
 	  else			/* Unexpected instruction.  */
 	    delta = 0;
 
-	  op = read_memory_unsigned_integer (pc + delta, 1);
+          read_memory_nobpt (pc + delta, &op, 1);
 	}
 
       /* addl y,%ebx */
