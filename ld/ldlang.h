@@ -305,6 +305,15 @@ typedef void (*walk_wild_section_handler_t) (lang_wild_statement_type *,
 typedef bfd_boolean (*lang_match_sec_type_func) (bfd *, const asection *,
 						 bfd *, const asection *);
 
+/* Binary search tree structure to efficiently sort sections by
+   name.  */
+typedef struct lang_section_bst
+{
+  asection *section;
+  struct lang_section_bst *left;
+  struct lang_section_bst *right;
+} lang_section_bst_type;
+
 struct lang_wild_statement_struct
 {
   lang_statement_header_type header;
@@ -316,6 +325,7 @@ struct lang_wild_statement_struct
 
   walk_wild_section_handler_t walk_wild_section_handler;
   struct wildcard_list *handler_data[4];
+  lang_section_bst_type *tree;
 };
 
 typedef struct lang_address_statement_struct

@@ -1,5 +1,17 @@
 2006-08-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/3006
+	* ldlang.c (lang_section_bst_type): Moved to ...
+	* ldlang.h: Here.
+
+	* ldlang.h (lang_wild_statement_struct): Add a tree field.
+
+	* ldlang.c (wild_sort_fast): Use the tree field for BST.
+	(wild): Likeise.
+	(analyze_walk_wild_section_handler): Initialize the tree field.
+
+2006-08-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/3009
 	* ldlang.c (update_wild_statements): Update the whole wild
 	section list.

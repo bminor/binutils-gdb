@@ -45,15 +45,6 @@
 #define offsetof(TYPE, MEMBER) ((size_t) & (((TYPE*) 0)->MEMBER))
 #endif
 
-/* Binary search tree structure to
-   efficiently sort sections by name.  */
-typedef struct lang_section_bst
-{
-  asection *section;
-  struct lang_section_bst *left;
-  struct lang_section_bst *right;
-} lang_section_bst_type;
-
 /* Locals variables.  */
 static struct obstack stat_obstack;
 static struct obstack map_obstack;
@@ -377,7 +368,7 @@ wild_sort_fast (lang_wild_statement_type *wild,
 {
   lang_section_bst_type **tree;
 
-  tree = (lang_section_bst_type **) &wild->handler_data[1];
+  tree = &wild->tree;
   if (!wild->filenames_sorted
       && (sec == NULL || sec->spec.sorted == none))
     {
@@ -674,6 +665,7 @@ analyze_walk_wild_section_handler (lang_wild_statement_type *ptr)
   ptr->handler_data[1] = NULL;
   ptr->handler_data[2] = NULL;
   ptr->handler_data[3] = NULL;
+  ptr->tree = NULL;
 
   /* Count how many wildcard_specs there are, and how many of those
      actually use wildcards in the name.  Also, bail out if any of the
@@ -2552,10 +2544,12 @@ wild (lang_wild_statement_type *s,
 
       walk_wild (s, output_section_callback_fast, output);
 
-      tree = (lang_section_bst_type *) s->handler_data[1];
+      tree = s->tree;
       if (tree)
-	output_section_callback_tree_to_list (s, tree, output);
-      s->handler_data[1] = NULL;
+	{
+	  output_section_callback_tree_to_list (s, tree, output);
+	  s->tree = NULL;
+	}
     }
   else
     walk_wild (s, output_section_callback, output);
