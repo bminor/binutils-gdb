@@ -1,3 +1,10 @@
+2006-08-08  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/2768
+	* dwarf.c (display_debug_aranges): When the address size is
+	greater than 4 display addresses and lengths as 16 hex digits,
+	otherwise use 8 hex digits.
+
 2006-08-06  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/3001

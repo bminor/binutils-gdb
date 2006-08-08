@@ -2577,7 +2577,10 @@ display_debug_aranges (struct dwarf_section *section,
 	  break;
 	}
       
-      printf (_("\n    Address  Length\n"));
+      if (address_size > 4)
+	printf (_("\n    Address            Length\n"));
+      else
+	printf (_("\n    Address    Length\n"));
 
       ranges = hdrptr;
 
@@ -2598,7 +2601,10 @@ display_debug_aranges (struct dwarf_section *section,
 
 	  ranges += address_size;
 
-	  printf ("    %8.8lx %lu\n", address, length);
+	  if (address_size > 4)
+	    printf ("    0x%16.16lx 0x%lx\n", address, length);
+	  else
+	    printf ("    0x%8.8lx 0x%lx\n", address, length);	    
 	}
     }
 
