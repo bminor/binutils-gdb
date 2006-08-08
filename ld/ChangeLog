@@ -1,3 +1,9 @@
+2006-08-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/3009
+	* ldlang.c (update_wild_statements): Update the whole wild
+	section list.
+
 2006-08-04  Nick Clifton  <nickc@redhat.com>
 	    Mike Frysinger  <michael.frysinger@analog.com>
 

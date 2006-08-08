@@ -1,3 +1,12 @@
+2006-08-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/3009
+	* ld-scripts/sort.t: New file.
+	* ld-scripts/sort_b_a-1.d: Likewise.
+	* ld-scripts/sort_b_a-1.s: Likewise.
+	* ld-scripts/sort_b_n-1.d: Likewise.
+	* ld-scripts/sort_b_n-1.s: Likewise.
+
 2006-08-05  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* ld-pe/pe.exp: Enable tests on arm-wince-pe.
