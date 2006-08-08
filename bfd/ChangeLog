@@ -1,3 +1,9 @@
+2006-08-08  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/2724
+	* coffcode.h (coff_new_section_hook): Only modify the section
+	symbol of sections which were created by the user.
+
 2006-07-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* bfd-in.h (enum notice_asneeded_action): Define.

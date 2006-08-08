@@ -1546,9 +1546,6 @@ static const unsigned int coff_section_alignment_table_size =
 static bfd_boolean
 coff_new_section_hook (bfd * abfd, asection * section)
 {
-  combined_entry_type *native;
-  bfd_size_type amt;
-
   section->alignment_power = COFF_DEFAULT_SECTION_ALIGNMENT_POWER;
 
 #ifdef RS6000COFF_C
@@ -1560,27 +1557,34 @@ coff_new_section_hook (bfd * abfd, asection * section)
     section->alignment_power = bfd_xcoff_data_align_power (abfd);
 #endif
 
-  /* Allocate aux records for section symbols, to store size and
-     related info.
+  /* PR binutils/2724: Only real sections have a symbol that
+     has the coff_symbol_type structure allocated for it.  */
+  if (! bfd_is_const_section (section))
+    {
+      combined_entry_type *native;
+      bfd_size_type amt;
 
-     @@ The 10 is a guess at a plausible maximum number of aux entries
-     (but shouldn't be a constant).  */
-  amt = sizeof (combined_entry_type) * 10;
-  native = bfd_zalloc (abfd, amt);
-  if (native == NULL)
-    return FALSE;
+      /* Allocate aux records for section symbols, to store size and
+	 related info.
 
-  /* We don't need to set up n_name, n_value, or n_scnum in the native
-     symbol information, since they'll be overridden by the BFD symbol
-     anyhow.  However, we do need to set the type and storage class,
-     in case this symbol winds up getting written out.  The value 0
-     for n_numaux is already correct.  */
+	 @@ The 10 is a guess at a plausible maximum number of aux entries
+	 (but shouldn't be a constant).  */
+      amt = sizeof (combined_entry_type) * 10;
+      native = bfd_zalloc (abfd, amt);
+      if (native == NULL)
+	return FALSE;
 
-  native->u.syment.n_type = T_NULL;
-  native->u.syment.n_sclass = C_STAT;
+      /* We don't need to set up n_name, n_value, or n_scnum in the native
+	 symbol information, since they'll be overridden by the BFD symbol
+	 anyhow.  However, we do need to set the type and storage class,
+	 in case this symbol winds up getting written out.  The value 0
+	 for n_numaux is already correct.  */
+      native->u.syment.n_type = T_NULL;
+      native->u.syment.n_sclass = C_STAT;
 
-  coffsymbol (section->symbol)->native = native;
-
+      coffsymbol (section->symbol)->native = native;
+    }
+  
   coff_set_custom_section_alignment (abfd, section,
 				     coff_section_alignment_table,
 				     coff_section_alignment_table_size);
