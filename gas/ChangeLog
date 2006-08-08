@@ -1,3 +1,7 @@
+2006-08-08  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (WARN_DEPRECATED): Enable.
+
 2006-08-05  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* config/tc-arm.c: Move "dwarf2dbg.h" inclusion out of OBJ_ELF

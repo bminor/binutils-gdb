@@ -42,8 +42,7 @@
 
 #include "dwarf2dbg.h"
 
-/* XXX Set this to 1 after the next binutils release.  */
-#define WARN_DEPRECATED 0
+#define WARN_DEPRECATED 1
 
 #ifdef OBJ_ELF
 /* Must be at least the size of the largest unwind opcode (currently two).  */
