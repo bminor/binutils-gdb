@@ -9561,6 +9561,9 @@ ppc64_elf_build_stubs (bfd_boolean emit_stub_syms,
   /* Build the stubs as directed by the stub hash table.  */
   bfd_hash_traverse (&htab->stub_hash_table, ppc_build_one_stub, info);
 
+  if (htab->relbrlt != NULL)
+    htab->relbrlt->reloc_count = 0;
+
   for (stub_sec = htab->stub_bfd->sections;
        stub_sec != NULL;
        stub_sec = stub_sec->next)
