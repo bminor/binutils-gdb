@@ -5033,6 +5033,53 @@ To add other directories, use the @code{directory} command.
 The search path is used to find both program source files and @value{GDBN}
 script files (read using the @samp{-command} option and @samp{source} command).
 
+In addition to the source path, @value{GDBN} provides a set of commands
+that manage a list of source path substitution rules.  A @dfn{substitution
+rule} specifies how to rewrite source directories stored in the program's
+debug information in case the sources were moved to a different
+directory between compilation and debugging.  A rule is made of
+two strings, the first specifying what needs to be rewritten in
+the path, and the second specifying how it should be rewritten.
+In @ref{set substitute-path}, we name these two parts @var{from} and
+@var{to} respectively.  @value{GDBN} does a simple string replacement
+of @var{from} with @var{to} at the start of the directory part of the
+source file name, and uses that result instead of the original file
+name to look up the sources.
+
+Using the previous example, suppose the @file{foo-1.0} tree has been
+moved from @file{/usr/src} to @file{/mnt/cross}, then you can tell
+GDB to replace @file{/usr/src} in all source path names with
+@file{/mnt/cross}.  The first lookup will then be
+@file{/mnt/cross/foo-1.0/lib/foo.c} in place of the original location
+of @file{/usr/src/foo-1.0/lib/foo.c}.  To define a source path
+substitution rule, use the @code{set substitute-path} command
+(@pxref{set substitute-path}).
+
+To avoid unexpected substitution results, a rule is applied only if the
+@var{from} part of the directory name ends at a directory separator.
+For instance, a rule substituting  @file{/usr/source} into
+@file{/mnt/cross} will be applied to @file{/usr/source/foo-1.0} but
+not to @file{/usr/sourceware/foo-2.0}.  And because the substitution
+is applied only at the begining of the directory name, this rule will
+not be applied to @file{/root/usr/source/baz.c} either.
+
+In many cases, you can achieve the same result using the @code{directory}
+command.  However, @code{set substitute-path} can be more efficient in
+the case where the sources are organized in a complex tree with multiple
+subdirectories.  With the @code{directory} command, you need to add each
+subdirectory of your project.  If you moved the entire tree while
+preserving its internal organization, then @code{set substitute-path}
+allows you to direct the debugger to all the sources with one single
+command.
+
+@code{set substitute-path} is also more than just a shortcut command.
+The source path is only used if the file at the original location no
+longer exists.  On the other hand, @code{set substitute-path} modifies
+the debugger behavior to look at the rewritten location instead.  So, if
+for any reason a source file that is not relevant to your executable is
+located at the original location, a substitution rule is the only
+method available to point GDB at the new location.
+
 @table @code
 @item directory @var{dirname} @dots{}
 @item dir @var{dirname} @dots{}
@@ -5068,6 +5115,61 @@ Reset the source path to its default value (@samp{$cdir:$cwd} on Unix systems). 
 @item show directories
 @kindex show directories
 Print the source path: show which directories it contains.
+
+@anchor{set substitute-path}
+@item set substitute-path @var{from} @var{to}
+@kindex set substitute-path
+Define a source path substitution rule, and add it at the end of the
+current list of existing substitution rules.  If a rule with the same
+@var{from} was already defined, then the old rule is also deleted.
+
+For example, if the file @file{/foo/bar/baz.c} was moved to
+@file{/mnt/cross/baz.c}, then the command
+
+@smallexample
+(@value{GDBP}) set substitute-path /usr/src /mnt/cross
+@end smallexample
+
+@noindent
+will tell @value{GDBN} to replace @samp{/usr/src} with
+@samp{/mnt/cross}, which will allow @value{GDBN} to find the file
+@file{baz.c} even though it was moved.
+
+In the case when more than one substitution rule have been defined,
+the rules are evaluated one by one in the order where they have been
+defined.  The first one matching, if any, is selected to perform
+the substitution.
+
+For instance, if we had entered the following commands:
+
+@smallexample
+(@value{GDBP}) set substitute-path /usr/src/include /mnt/include
+(@value{GDBP}) set substitute-path /usr/src /mnt/src
+@end smallexample
+
+@noindent
+@value{GDBN} would then rewrite @file{/usr/src/include/defs.h} into
+@file{/mnt/include/defs.h} by using the first rule.  However, it would
+use the second rule to rewrite @file{/usr/src/lib/foo.c} into
+@file{/mnt/src/lib/foo.c}.
+
+
+@item unset substitute-path [path]
+@kindex unset substitute-path
+If a path is specified, search the current list of substitution rules
+for a rule that would rewrite that path.  Delete that rule if found.
+A warning is emitted by the debugger if no rule could be found.
+
+If no path is specified, then all substitution rules are deleted.
+
+@item show substitute-path [path]
+@kindex show substitute-path
+If a path is specified, then print the source path substitution rule
+which would rewrite that path, if any.
+
+If no path is specified, then print all existing source path substitution
+rules.
+
 @end table
 
 If your source path is cluttered with directories that are no longer of

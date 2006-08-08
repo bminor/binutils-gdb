@@ -1,3 +1,8 @@
+2006-08-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Source Path): Add documentation for new
+	substitute-path commands.
+
 2006-08-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (Installing GDB): Update menu.  Move text to...
