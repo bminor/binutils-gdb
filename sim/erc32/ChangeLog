@@ -1,3 +1,11 @@
+2006-08-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (func.o, help.o): Correct dependencies.
+
+2006-08-08  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* Makefile.in (install-sis): Honor DESTDIR.
+
 2006-06-13  Richard Earnshaw  <rearnsha@arm.com>
 
 	* configure: Regenerated.

@@ -115,6 +115,11 @@ if test "${enable_sim}" != no; then
 	   testsuite=yes
 	   common=yes
 	   ;;
+       sparc-*-rtems*|sparc-*-elf*)
+	   AC_CONFIG_SUBDIRS(erc32)
+	   testsuite=yes
+	   common=yes
+	   ;;
        powerpc*-*-* )
            AC_CONFIG_SUBDIRS(ppc)
 	   common=yes

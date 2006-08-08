@@ -1,3 +1,9 @@
+2006-08-08  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* configure.ac (sparc-*-rtems*|sparc-*-elf*): Enable erc32 simulator.
+	* Makefile.in (FLAGS_TO_PASS): Include libdir.
+	* configure: Regenerated.
+
 2006-06-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* cris/configure: Regenerated.

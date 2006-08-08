@@ -53,7 +53,7 @@ end.h: end
 # Copy the files into directories where they will be run.
 install-sis: installdirs
 	n=`echo sis | sed '$(program_transform_name)'`; \
-	$(INSTALL_PROGRAM) sis$(EXEEXT) $(bindir)/$$n$(EXEEXT)
+	$(INSTALL_PROGRAM) sis$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT)
 
 clean-sis:
 	rm -f sis end end.h
@@ -69,7 +69,7 @@ configure:
 erc32.o: erc32.c sis.h end.h
 exec.o: exec.c sis.h end.h
 float.o: float.c sis.h end.h
-func.o: func.c
-help.o: help.c
+func.o: func.c sis.h end.h
+help.o: help.c sis.h end.h
 interf.o: interf.c sis.h end.h 
 sis.o: sis.c sis.h end.h

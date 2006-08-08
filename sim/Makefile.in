@@ -84,6 +84,7 @@ FLAGS_TO_PASS = \
 	"exec_prefix=$(exec_prefix)" \
 	"bindir=$(bindir)" \
 	"mandir=$(mandir)" \
+	"libdir=$(libdir)" \
 	"against=$(against)" \
 	"AR=$(AR)" \
 	"AR_FLAGS=$(AR_FLAGS)" \

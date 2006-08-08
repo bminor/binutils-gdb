@@ -286,6 +286,7 @@ ac_subdirs_all="$ac_subdirs_all mips"
 ac_subdirs_all="$ac_subdirs_all mn10300"
 ac_subdirs_all="$ac_subdirs_all sh64"
 ac_subdirs_all="$ac_subdirs_all sh"
+ac_subdirs_all="$ac_subdirs_all erc32"
 ac_subdirs_all="$ac_subdirs_all ppc"
 ac_subdirs_all="$ac_subdirs_all v850"
 ac_subdirs_all="$ac_subdirs_all testsuite"
@@ -3521,6 +3522,14 @@ subdirs="$subdirs sh64"
 
 
 subdirs="$subdirs sh"
+
+	   testsuite=yes
+	   common=yes
+	   ;;
+       sparc-*-rtems*|sparc-*-elf*)
+
+
+subdirs="$subdirs erc32"
 
 	   testsuite=yes
 	   common=yes
