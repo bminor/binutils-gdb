@@ -1,3 +1,9 @@
+2006-08-08  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-sh.c (sh_frob_section): Canonicalize pointers to local
+	vs full symbols so that we never have more than one pointer value
+	for any given symbol in our symbol table.
+
 2006-08-08  Sterling Augustine  <sterling@tensilica.com>
 
 	* dwarf2dbg.c (out_debug_info): Add new parameter ranges_seg

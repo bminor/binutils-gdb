@@ -3318,6 +3318,21 @@ sh_frob_section (bfd *abfd ATTRIBUTE_UNUSED, segT sec,
   for (fix = seginfo->fix_root; fix != NULL; fix = fix->fx_next)
     {
       symbolS *sym;
+
+      sym = fix->fx_addsy;
+      /* Check for a local_symbol.  */
+      if (sym && sym->bsym == NULL)
+	{
+	  struct local_symbol *ls = (struct local_symbol *)sym;
+	  /* See if it's been converted.  If so, canonicalize.  */
+	  if (local_symbol_converted_p (ls))
+	    fix->fx_addsy = local_symbol_get_real_symbol (ls);
+	}
+    }
+
+  for (fix = seginfo->fix_root; fix != NULL; fix = fix->fx_next)
+    {
+      symbolS *sym;
       bfd_vma val;
       fixS *fscan;
       struct sh_count_relocs info;
