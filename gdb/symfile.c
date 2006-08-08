@@ -1521,15 +1521,6 @@ load_command (char *arg, int from_tty)
    we don't want to run a subprocess.  On the other hand, I'm not sure how
    performance compares.  */
 
-static int download_write_size = 512;
-static void
-show_download_write_size (struct ui_file *file, int from_tty,
-			  struct cmd_list_element *c, const char *value)
-{
-  fprintf_filtered (file, _("\
-The write size used when downloading a program is %s.\n"),
-		    value);
-}
 static int validate_download = 0;
 
 /* Callback service function for generic_load (bfd_map_over_sections).  */
@@ -1570,11 +1561,6 @@ load_section_callback (bfd *abfd, asection *asec, void *data)
 	  const char *sect_name = bfd_get_section_name (abfd, asec);
 	  bfd_size_type sent;
 
-	  if (download_write_size > 0 && size > download_write_size)
-	    block_size = download_write_size;
-	  else
-	    block_size = size;
-
 	  buffer = xmalloc (size);
 	  old_chain = make_cleanup (xfree, buffer);
 
@@ -1591,8 +1577,6 @@ load_section_callback (bfd *abfd, asection *asec, void *data)
 	      int len;
 	      bfd_size_type this_transfer = size - sent;
 
-	      if (this_transfer >= block_size)
-		this_transfer = block_size;
 	      len = target_write_memory_partial (lma, buffer,
 						 this_transfer, &err);
 	      if (err)
@@ -3805,19 +3789,6 @@ Usage: set extension-language .foo bar"),
 
   add_info ("extensions", info_ext_lang_command,
 	    _("All filename extensions associated with a source language."));
-
-  add_setshow_integer_cmd ("download-write-size", class_obscure,
-			   &download_write_size, _("\
-Set the write size used when downloading a program."), _("\
-Show the write size used when downloading a program."), _("\
-Only used when downloading a program onto a remote\n\
-target. Specify zero, or a negative value, to disable\n\
-blocked writes. The actual size of each transfer is also\n\
-limited by the size of the target packet and the memory\n\
-cache."),
-			   NULL,
-			   show_download_write_size,
-			   &setlist, &showlist);
 
   debug_file_directory = xstrdup (DEBUGDIR);
   add_setshow_optional_filename_cmd ("debug-file-directory", class_support,

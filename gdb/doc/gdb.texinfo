@@ -12133,22 +12133,9 @@ your configuration may have more or fewer targets.
 
 Many remote targets require you to download the executable's code once
 you've successfully established a connection.  You may wish to control
-various aspects of this process, such as the size of the data chunks
-used by @value{GDBN} to download program parts to the remote target.
+various aspects of this process.
 
 @table @code
-@kindex set download-write-size
-@item set download-write-size @var{size}
-Set the write size used when downloading a program.  Only used when
-downloading a program onto a remote target.  Specify zero or a
-negative value to disable blocked writes.  The actual size of each
-transfer is also limited by the size of the target packet and the
-memory cache.
-
-@kindex show download-write-size
-@item show download-write-size
-@kindex show download-write-size
-Show the current value of the write size.
 
 @item set hash
 @kindex set hash@r{, for remote monitors}

@@ -18,6 +18,8 @@ The ARM Demon monitor support (RDP protocol, "target rdp").
 Kernel Object Display, an embedded debugging feature which only worked with
 an obsolete version of Cisco IOS.
 
+The 'set download-write-size' and 'show download-write-size' commands.
+
 * New remote packets
 
 qSupported:

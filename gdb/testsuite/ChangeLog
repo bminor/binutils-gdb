@@ -1,3 +1,10 @@
+2006-08-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* config/monitor.exp (gdb_load): Remove support for obsolete
+	download-write-size.
+	* gdb.base/remote.exp: Likewise.  Update all callers of
+	gdb_timed_load.
+
 2006-08-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* cursal.exp: Pass binfile to gdb_load.

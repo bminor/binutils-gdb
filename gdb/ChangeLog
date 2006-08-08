@@ -1,3 +1,11 @@
+2006-08-08  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* symfile.c (download_write_size): Remove.
+	(show_download_write_size): Remove.
+	(load_section_callback): Don't use download_write_size.
+	(_initialize_symfile): Don't register download_write_size.
+	* NEWS: Mention 'download-write-size' removal.
+
 2006-08-06  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* expprint.c (print_subexp_standard, dump_subexp_body_standard): Add
