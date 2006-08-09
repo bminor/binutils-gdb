@@ -11,6 +11,16 @@ running on a Windows system over TCP/IP to debug Windows programs.
 Cygwin debugging.  Both single-threaded and multi-threaded programs are
 supported.
 
+* New commands
+
+set substitute-path
+unset substitute-path
+show substitute-path
+  Manage a list of substitution rules that GDB uses to rewrite the name
+  of the directories where the sources are located. This can be useful
+  for instance when the sources were moved to a different location
+  between compilation and debugging.
+
 * REMOVED features
 
 The ARM Demon monitor support (RDP protocol, "target rdp").
