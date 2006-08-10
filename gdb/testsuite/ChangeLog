@@ -1,3 +1,7 @@
+2006-08-10  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* gdb.base/trace-commands.exp: New file.
+
 2006-08-10  Joel Brobecker  <brobecker@adacore.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 

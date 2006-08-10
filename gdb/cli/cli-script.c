@@ -286,6 +286,7 @@ execute_user_command (struct cmd_list_element *c, char *args)
      not confused with Insight.  */
   in_user_command = 1;
 
+  command_nest_depth++;
   while (cmdlines)
     {
       ret = execute_control_command (cmdlines);
@@ -296,6 +297,7 @@ execute_user_command (struct cmd_list_element *c, char *args)
 	}
       cmdlines = cmdlines->next;
     }
+  command_nest_depth--;
   do_cleanups (old_chain);
 }
 
