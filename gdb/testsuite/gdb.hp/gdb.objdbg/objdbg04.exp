@@ -25,7 +25,8 @@ if {!$hp_aCC_compiler && !$hp_cc_compiler} {
 }
 
 if { [gdb_compile "${toolssubdir}/test-objdbg.cc" "${objdbgdir}/test-objdbg.o" object "debug c++ {additional_flags=-I${toolssubdir} +objdebug}"] != "" } {
-    gdb_suppress_entire_file "WARNING: +objdebug option is not supported in this compiler version, test ignored."
+    untested objdbg04.exp
+    return -1
 }
 
 if { [gdb_compile "${srcsubdir}/x1.cc" "${objdbgdir}/x1.o" object "debug c++ {additional_flags=-I${srcsubdir} +objdebug}"] != "" } {

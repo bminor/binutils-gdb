@@ -46,7 +46,8 @@ if [get_compiler_info ${binfile}] {
 }
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable debug ] != "" } {
-    gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+    untested constvars.exp
+    return -1
 }
 
 gdb_exit

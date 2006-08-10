@@ -39,7 +39,8 @@ set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 # Note we have to compile WITH optimization and WITHOUT debugging information to expose the bug.
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {"additional_flags=-O2"}] != "" } {
-    gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+    untested gdb1558.exp
+    return -1
 }
 
 gdb_exit

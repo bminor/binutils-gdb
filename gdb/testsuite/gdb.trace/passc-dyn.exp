@@ -43,7 +43,8 @@ if [istarget "m68k-*-elf"] then {
     send_gdb "compare-sections CS\n"
     gdb_expect {
 	-re "MIS-MATCHED.*$gdb_prompt $" {
-	    gdb_suppress_entire_file "Symbol file does not match target!
+	    untested passc-dyn.exp
+	    return -1
 	    all tests in this module will fail.";
 	}
 	-re ".*$gdb_prompt $" { }
@@ -54,7 +55,8 @@ if [istarget "m68k-*-elf"] then {
     set binfile $objdir/$subdir/$testfile
     if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 	    executable {debug nowarnings}] != "" } {
-	gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+	untested passc-dyn.exp
+	return -1
     }
     gdb_load $binfile
     gdb_test "tstop"       "" ""
@@ -142,32 +144,38 @@ if [istarget "m68k-*-elf"] then {
 
 gdb_test "tfind none" "" ""
 if [gdb_test "printf \"x \%d x\\n\", \$trace_frame" "x -1 x" ""] {
-    gdb_suppress_entire_file "0: tfind none failed"
+    untested passc-dyn.exp
+    return -1
 }
 
 gdb_test "tfind tracepoint $tdp2" "" ""
 if [gdb_test "printf \"x \%d x\\n\", \$trace_frame" "x 0 x" ""] {
-    gdb_suppress_entire_file "1: first tfind failed"
+    untested passc-dyn.exp
+    return -1
 }
 
 gdb_test "tfind tracepoint $tdp3" "" ""
 if [gdb_test "printf \"x \%d x\\n\", \$trace_frame" "x 1 x" ""] {
-    gdb_suppress_entire_file "2: second tfind failed"
+    untested passc-dyn.exp
+    return -1
 }
 
 gdb_test "tfind tracepoint $tdp4" "" ""
 if [gdb_test "printf \"x \%d x\\n\", \$trace_frame" "x 2 x" ""] {
-    gdb_suppress_entire_file "3: third tfind failed"
+    untested passc-dyn.exp
+    return -1
 }
 
 gdb_test "tfind tracepoint $tdp2" "" ""
 if [gdb_test "printf \"x \%d x\\n\", \$trace_frame" "x 3 x" ""] {
-    gdb_suppress_entire_file "4: fourth tfind failed"
+    untested passc-dyn.exp
+    return -1
 }
 
 gdb_test "tfind tracepoint $tdp3" "" ""
 if [gdb_test "printf \"x \%d x\\n\", \$trace_frame" "x 4 x" ""] {
-    gdb_suppress_entire_file "5: fifth tfind failed"
+    untested passc-dyn.exp
+    return -1
 }
 
 ## We should now be at the last frame, because this frame's passcount

@@ -38,7 +38,8 @@ gdb_start
 
 set result [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}]
 if {$result != "" } then {
-    gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+    untested remote.exp
+    return -1
 }
 
 

@@ -34,19 +34,23 @@ if [is_remote host] {
 
 
 if  { [gdb_compile "${srcdir}/${subdir}/langs0.c" "${binfile}0.o" object {debug}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested langs.exp
+     return -1
 }
 
 if  { [gdb_compile "${srcdir}/${subdir}/langs1.c" "${binfile}1.o" object {debug}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested langs.exp
+     return -1
 }
 
 if  { [gdb_compile "${srcdir}/${subdir}/langs2.c" "${binfile}2.o" object {debug}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested langs.exp
+     return -1
 }
 
 if  { [gdb_compile "${binfile}0.o ${binfile}1.o ${binfile}2.o" ${binfile} executable {debug}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested langs.exp
+     return -1
 }
 
 set oldtimeout $timeout

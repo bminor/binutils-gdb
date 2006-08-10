@@ -76,7 +76,8 @@ proc start_structs_test { types } {
 	# built the second test case since we can't use prototypes
 	warning "Prototypes not supported, rebuilding with -DNO_PROTOTYPES"
 	if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable "${flags} additional_flags=-DNO_PROTOTYPES"] != "" } {
-	    gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+	    untested structs.exp
+	    return -1
 	}
     }
 

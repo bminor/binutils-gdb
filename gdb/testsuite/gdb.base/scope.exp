@@ -32,15 +32,18 @@ set binfile ${objdir}/${subdir}/${testfile}
 
 
 if  { [gdb_compile "${srcdir}/${subdir}/scope0.c" "${binfile}0.o" object {debug}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested scope.exp
+     return -1
 }
 
 if  { [gdb_compile "${srcdir}/${subdir}/scope1.c" "${binfile}1.o" object {debug}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested scope.exp
+     return -1
 }
 
 if  { [gdb_compile "${binfile}0.o ${binfile}1.o" ${binfile} executable {debug}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested scope.exp
+     return -1
 }
 
 # Create and source the file that provides information about the compiler

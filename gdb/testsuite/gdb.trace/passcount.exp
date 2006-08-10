@@ -39,7 +39,8 @@ if [istarget "m68k-*-elf"] then {
     set binfile $objdir/$subdir/$testfile
     if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 	    executable {debug nowarnings}] != "" } {
-	gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+	untested passcount.exp
+	return -1
     }
 }
 gdb_reinitialize_dir $srcdir/$subdir

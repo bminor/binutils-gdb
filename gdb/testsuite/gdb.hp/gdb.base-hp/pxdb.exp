@@ -52,7 +52,8 @@ if { $gcc_compiled } then { continue }
 #
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${objfile}" object {debug}] != "" } {
-    gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+    untested pxdb.exp
+    return -1
 }
 
 #

@@ -49,7 +49,8 @@ if { $gcc_compiled } then { continue }
 # Vanilla -O, which is the same as +O2
 #
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug optimize=+O2}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested optimize.exp
+     return -1
 }
 
 
@@ -113,7 +114,8 @@ gdb_exit
 # +O4, don't use -g
 #
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {optimize=+O4}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested optimize.exp
+     return -1
 }
 
 gdb_start

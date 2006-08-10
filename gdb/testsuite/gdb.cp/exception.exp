@@ -49,7 +49,8 @@ set srcfile ${testfile}.cc
 set binfile ${objdir}/${subdir}/${testfile}
  
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested exception.exp
+     return -1
 }
 
 # Start with a fresh gdb

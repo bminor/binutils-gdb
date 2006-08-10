@@ -40,23 +40,28 @@ set objfile3 "${testfile}3.o"
 set binfile  "${objdir}/${subdir}/${testfile}"
 
 if { [gdb_compile "$srcdir/$subdir/$srcfile" "$objdir/$subdir/$objfile" object {debug c++}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested ctti.exp
+     return -1
 }
 
 if { [gdb_compile "$srcdir/$subdir/$srcfile1" "$objdir/$subdir/$objfile1" object {debug c++}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested ctti.exp
+     return -1
 }
 
 if { [gdb_compile "$srcdir/$subdir/$srcfile2" "$objdir/$subdir/$objfile2" object {debug c++}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested ctti.exp
+     return -1
 }
 
 if { [gdb_compile "$srcdir/$subdir/$srcfile3" "$objdir/$subdir/$objfile3" object {debug c++}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested ctti.exp
+     return -1
 }
 
 if { [gdb_compile "$objdir/$subdir/$objfile $objdir/$subdir/$objfile1 $objdir/$subdir/$objfile2 $objdir/$subdir/$objfile3" "${binfile}" executable {debug c++}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested ctti.exp
+     return -1
 }
 
 if [get_compiler_info ${binfile} "c++"] {

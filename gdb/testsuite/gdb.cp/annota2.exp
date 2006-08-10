@@ -35,7 +35,8 @@ set srcfile ${testfile}.cc
 set binfile ${objdir}/${subdir}/${testfile}
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++ nowarnings}] != "" } {
-    gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+    untested annota2.exp
+    return -1
 }
 
 # are we on a target board? If so, don't run these tests.

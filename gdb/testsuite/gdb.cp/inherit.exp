@@ -35,7 +35,8 @@ set srcfile misc.cc
 set binfile ${objdir}/${subdir}/${testfile}
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested inherit.exp
+     return -1
 }
 
 # Single inheritance, print type definitions.

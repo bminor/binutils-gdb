@@ -50,7 +50,8 @@ if { $gcc_compiled } then { continue }
 if {$hp_aCC_compiler} {continue}
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested sized-enum.exp
+     return -1
 }
 
 gdb_exit

@@ -30,7 +30,8 @@ set testfile "return2"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested return2.exp
+     return -1
 }
 
 proc return_1 { type } {
@@ -101,7 +102,8 @@ proc return2_tests { } {
     global gdb_prompt
 
     if { ! [ runto_main ] } then {
-	gdb_suppress_entire_file "Run to main failed, so all tests in this file will automatically fail."
+	untested return2.exp
+	return -1
     }
 
     return_void

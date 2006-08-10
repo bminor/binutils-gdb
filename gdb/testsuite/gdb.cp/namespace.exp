@@ -47,15 +47,18 @@ if [get_compiler_info ${binfile} c++] {
 }
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${objfile}" object {debug c++}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested namespace.exp
+     return -1
 }
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${objfile1}" object {debug c++}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested namespace.exp
+     return -1
 }
 
 if  { [gdb_compile "${objfile} ${objfile1}" "${binfile}" executable {debug c++}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested namespace.exp
+     return -1
 }
 
 gdb_exit

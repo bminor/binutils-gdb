@@ -193,15 +193,18 @@ if [get_compiler_info ${binfile} "c++"] {
 }
 
 if  { [gdb_compile "${srcdir}/${subdir}/${testfile}1.cc" "${testfile}1.o" object {debug c++}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested psmang.exp
+     return -1
 }
 
 if  { [gdb_compile "${srcdir}/${subdir}/${testfile}2.cc" "${testfile}2.o" object {debug c++}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested psmang.exp
+     return -1
 }
 
 if  { [gdb_compile "${testfile}1.o ${testfile}2.o" ${binfile} executable {debug c++}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested psmang.exp
+     return -1
 }
 
 

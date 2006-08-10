@@ -49,26 +49,33 @@ set binfile ${objdir}/${subdir}/${testfile}
 set srcfile ${testfile}.c
 
 if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${testfile}.o" object {debug}] != ""} then {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested overlays.exp
+     return -1
 }
 if {[gdb_compile "${srcdir}/${subdir}/ovlymgr.c" ovlymgr.o object {debug}] != ""} then {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested overlays.exp
+     return -1
 }
 if {[gdb_compile "${srcdir}/${subdir}/foo.c" foo.o object {debug} ] != ""} then {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested overlays.exp
+     return -1
 }
 
 if {[gdb_compile "${srcdir}/${subdir}/bar.c" bar.o object {debug}] != ""} then {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested overlays.exp
+     return -1
 }
 if {[gdb_compile "${srcdir}/${subdir}/baz.c" baz.o object {debug}] != ""} then {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested overlays.exp
+     return -1
 }
 if {[gdb_compile "${srcdir}/${subdir}/grbx.c" grbx.o object {debug}] != ""} then {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested overlays.exp
+     return -1
 }
 if  {[gdb_compile "${testfile}.o ovlymgr.o foo.o bar.o baz.o grbx.o" ${binfile} executable "ldscript=-Wl,-T$linker_script"] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested overlays.exp
+     return -1
 }
 
 remote_exec build "mv ${testfile}.o foo.o bar.o baz.o grbx.o ovlymgr.o ${objdir}/${subdir}"

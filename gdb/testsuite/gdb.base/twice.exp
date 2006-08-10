@@ -37,7 +37,8 @@ close $fileid;
 remote_download host ${srcdir}/${subdir}/twice.c twice.c
 
 if  { [gdb_compile "${objdir}/${subdir}/${srcfile}" "${binfile}" executable $options] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested twice.exp
+     return -1
 }
 
 # Start with a fresh gdb.

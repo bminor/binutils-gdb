@@ -39,11 +39,13 @@ if [get_compiler_info ${binfile}] {
 
 if { [test_compiler_info gcc-*-*] } then {
     if  { [gdb_compile "${srcdir}/$subdir/${srcfile}" "${binfile}" executable {debug additional_flags=-O2}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested mips_pro.exp
+     return -1
     }
 } else {
     if  { [gdb_compile "${srcdir}/$subdir/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested mips_pro.exp
+     return -1
     }
 }
 
