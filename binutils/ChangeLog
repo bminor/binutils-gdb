@@ -1,3 +1,10 @@
+2006-08-10  J"orn Rennecke  <joern.rennecke@st.com>
+
+	PR binutils/3017
+	* doc/Makefile.am: Use single quotes inside backquotes for
+	date command while generating config.texi.
+	* doc/Makefile.in: Regenerate.
+
 2006-08-08  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/2768
