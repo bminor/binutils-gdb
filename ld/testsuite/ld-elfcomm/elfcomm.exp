@@ -45,7 +45,7 @@ proc dump_common1 { testname } {
 
     send_log "$READELF -s tmpdir/common1.o | grep foo\n"
     catch "exec $READELF -s tmpdir/common1.o | grep foo" exec_output
-    if { ![regexp "(\[ 	\]*)(\[0-9\]+):(\[ 	\]*)(\[0\]*)80(\[ 	\]+)4(\[ 	\]+)OBJECT(\[ 	\]+)GLOBAL(\[ 	\]+)DEFAULT(\[ 	\]+)(PRC\\\[0xff03\\\]|COM)(\[ 	\]+)_?foo2" $exec_output]
+    if { ![regexp "(\[ 	\]*)(\[0-9\]+):(\[ 	\]*)(\[0\]*)80(\[ 	\]+)4(\[ 	\]+)OBJECT(\[ 	\]+)GLOBAL(\[ 	\]+)DEFAULT(\[ 	\]+)(PRC\\\[0xff03\\\]|COM|SCOM)(\[ 	\]+)_?foo2" $exec_output]
  	 || ![regexp "(\[ 	\]*)(\[0-9\]+):(\[ 	\]*)(\[0-9\]+)(\[ 	\]+)21(\[ 	\]+)OBJECT(\[ 	\]+)GLOBAL(\[ 	\]+)DEFAULT(\[ 	\]+)(\[0-9\]+)(\[ 	\]+)_?foo1" $exec_output] } {
 	send_log "$exec_output\n"
 	verbose $exec_output
