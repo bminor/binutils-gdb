@@ -21,6 +21,12 @@ show substitute-path
   for instance when the sources were moved to a different location
   between compilation and debugging.
 
+set trace-commands
+show trace-commands
+  Print each CLI command as it is executed.  Each command is prefixed with
+  a number of `+' symbols representing the nesting depth.
+  The source command now has a `-v' option to enable the same feature.
+
 * REMOVED features
 
 The ARM Demon monitor support (RDP protocol, "target rdp").
