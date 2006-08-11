@@ -8789,11 +8789,10 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 	  MIPS_ELF_PUT_WORD (output_bfd, (bfd_vma) 0x80000000,
 			     sgot->contents + MIPS_ELF_GOT_SIZE (output_bfd));
 	}
-    }
 
-  if (sgot != NULL)
-    elf_section_data (sgot->output_section)->this_hdr.sh_entsize
-      = MIPS_ELF_GOT_SIZE (output_bfd);
+      elf_section_data (sgot->output_section)->this_hdr.sh_entsize
+	 = MIPS_ELF_GOT_SIZE (output_bfd);
+    }
 
   /* Generate dynamic relocations for the non-primary gots.  */
   if (gg != NULL && gg->next)

@@ -1,3 +1,8 @@
+2006-08-11  Thiemo Seufer  <ths@mips.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_sections): Set
+	sh_entsize only when sgot was already initialized.
+
 2006-08-08  DJ Delorie  <dj@redhat.com>
 
 	* elf32-sh.c (sh_elf_relax_section): Allow for branches across
