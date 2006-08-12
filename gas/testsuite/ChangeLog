@@ -1,3 +1,7 @@
+2006-08-12  Thiemo Seufer  <ths@networkno.de>
+
+	* gas/mips/mips16-save.d: Fix testcase.
+
 2006-08-08  Bob Wilson  <bob.wilson@acm.org>
 
 	* gas/lns/lns-common-1-alt.d: New file.

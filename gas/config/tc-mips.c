@@ -10201,7 +10201,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 		      {
 			if (reg1 >= 4 && reg1 <= 7)
 			  {
-			    if (c == 'm' && !seen_framesz)
+			    if (!seen_framesz)
 				/* args $a0-$a3 */
 				args |= 1 << (reg1 - 4);
 			    else
