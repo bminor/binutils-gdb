@@ -61,16 +61,16 @@ Disassembly of section .text:
 [ 	]+f5:	f2 0f c2 f8 07[ 	]+cmpordsd %xmm0,%xmm7
 [ 	]+fa:	66 0f 2f c1[ 	]+comisd %xmm1,%xmm0
 [ 	]+fe:	66 0f 2f 0a[ 	]+comisd \(%edx\),%xmm1
- 102:	66 0f 2a d3[ 	]+cvtpi2pd %xmm3,%xmm2
+ 102:	66 0f 2a d3[ 	]+cvtpi2pd %mm3,%xmm2
  106:	66 0f 2a 1c 24[ 	]+cvtpi2pd \(%esp\),%xmm3
  10b:	f2 0f 2a e5[ 	]+cvtsi2sd %ebp,%xmm4
  10f:	f2 0f 2a 2e[ 	]+cvtsi2sd \(%esi\),%xmm5
- 113:	66 0f 2d f7[ 	]+cvtpd2pi %xmm7,%xmm6
- 117:	66 0f 2d 38[ 	]+cvtpd2pi \(%eax\),%xmm7
+ 113:	66 0f 2d f7[ 	]+cvtpd2pi %xmm7,%mm6
+ 117:	66 0f 2d 38[ 	]+cvtpd2pi \(%eax\),%mm7
  11b:	f2 0f 2d 01[ 	]+cvtsd2si \(%ecx\),%eax
  11f:	f2 0f 2d ca[ 	]+cvtsd2si %xmm2,%ecx
- 123:	66 0f 2c 13[ 	]+cvttpd2pi \(%ebx\),%xmm2
- 127:	66 0f 2c dc[ 	]+cvttpd2pi %xmm4,%xmm3
+ 123:	66 0f 2c 13[ 	]+cvttpd2pi \(%ebx\),%mm2
+ 127:	66 0f 2c dc[ 	]+cvttpd2pi %xmm4,%mm3
  12b:	f2 0f 2c 65 00[ 	]+cvttsd2si 0x0\(%ebp\),%esp
  130:	f2 0f 2c ee[ 	]+cvttsd2si %xmm6,%ebp
  134:	66 0f 5e c1[ 	]+divpd[ 	]+%xmm1,%xmm0

@@ -85,6 +85,8 @@ static void OP_MMX (int, int);
 static void OP_XMM (int, int);
 static void OP_EM (int, int);
 static void OP_EX (int, int);
+static void OP_EMC (int,int);
+static void OP_MXC (int,int);
 static void OP_MS (int, int);
 static void OP_XS (int, int);
 static void OP_M (int, int);
@@ -312,6 +314,8 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EX OP_EX, v_mode
 #define MS OP_MS, v_mode
 #define XS OP_XS, v_mode
+#define EMC OP_EMC, v_mode
+#define MXC OP_MXC, 0
 #define VM OP_VMX, q_mode
 #define OPSUF OP_3DNowSuffix, 0
 #define OPSIMD OP_SIMD_Suffix, 0
@@ -1569,23 +1573,23 @@ static const struct dis386 prefix_user_table[][4] = {
   },
   /* PREGRP2 */
   {
-    { "cvtpi2ps", XM, EM, XX, XX },
+    { "cvtpi2ps", XM, EMC, XX, XX },
     { "cvtsi2ssY", XM, Ev, XX, XX },
-    { "cvtpi2pd", XM, EM, XX, XX },
+    { "cvtpi2pd", XM, EMC, XX, XX },
     { "cvtsi2sdY", XM, Ev, XX, XX },
   },
   /* PREGRP3 */
   {
-    { "cvtps2pi", MX, EX, XX, XX },
+    { "cvtps2pi", MXC, EX, XX, XX },
     { "cvtss2siY", Gv, EX, XX, XX },
-    { "cvtpd2pi", MX, EX, XX, XX },
+    { "cvtpd2pi", MXC, EX, XX, XX },
     { "cvtsd2siY", Gv, EX, XX, XX },
   },
   /* PREGRP4 */
   {
-    { "cvttps2pi", MX, EX, XX, XX },
+    { "cvttps2pi", MXC, EX, XX, XX },
     { "cvttss2siY", Gv, EX, XX, XX },
-    { "cvttpd2pi", MX, EX, XX, XX },
+    { "cvttpd2pi", MXC, EX, XX, XX },
     { "cvttsd2siY", Gv, EX, XX, XX },
   },
   /* PREGRP5 */
@@ -4359,6 +4363,41 @@ OP_EM (int bytemode, int sizeflag)
     }
   else
     sprintf (scratchbuf, "%%mm%d", rm);
+  oappend (scratchbuf + intel_syntax);
+}
+
+/* cvt* are the only instructions in sse2 which have 
+   both SSE and MMX operands and also have 0x66 prefix 
+   in their opcode. 0x66 was originally used to differentiate 
+   between SSE and MMX instruction(operands). So we have to handle the 
+   cvt* separately using OP_EMC and OP_MXC */
+static void
+OP_EMC (int bytemode, int sizeflag)
+{
+  if (mod != 3)
+    {
+      if (intel_syntax && bytemode == v_mode)
+	{
+	  bytemode = (prefixes & PREFIX_DATA) ? x_mode : q_mode;
+	  used_prefixes |= (prefixes & PREFIX_DATA);
+ 	}
+      OP_E (bytemode, sizeflag);
+      return;
+    }
+  
+  /* Skip mod/rm byte.  */
+  MODRM_CHECK;
+  codep++;
+  used_prefixes |= (prefixes & PREFIX_DATA);
+  sprintf (scratchbuf, "%%mm%d", rm);
+  oappend (scratchbuf + intel_syntax);
+}
+
+static void
+OP_MXC (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
+{
+  used_prefixes |= (prefixes & PREFIX_DATA);
+  sprintf (scratchbuf, "%%mm%d", reg);
   oappend (scratchbuf + intel_syntax);
 }
 

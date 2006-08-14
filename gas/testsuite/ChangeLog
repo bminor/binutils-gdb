@@ -1,3 +1,8 @@
+2006-08-04	Dwarakanath Rajagopal	<dwarak.rajagopal@amd.com>
+
+	* sse2.d : Fixed the correct result for cvtpi2pd,cvtpd2pi 
+	and cvttpd2pi.
+
 2006-08-12  Thiemo Seufer  <ths@networkno.de>
 
 	* gas/mips/mips16-save.d: Fix testcase.
