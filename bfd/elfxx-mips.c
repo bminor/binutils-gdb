@@ -5095,6 +5095,7 @@ _bfd_mips_elf_symbol_processing (bfd *abfd, asymbol *asym)
       /* Common symbols less than the GP size are automatically
 	 treated as SHN_MIPS_SCOMMON symbols on IRIX5.  */
       if (asym->value > elf_gp_size (abfd)
+	  || ELF_ST_TYPE (elfsym->internal_elf_sym.st_info) == STT_TLS
 	  || IRIX_COMPAT (abfd) == ict_irix6)
 	break;
       /* Fall through.  */
@@ -5735,6 +5736,7 @@ _bfd_mips_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
       /* Common symbols less than the GP size are automatically
 	 treated as SHN_MIPS_SCOMMON symbols.  */
       if (sym->st_size > elf_gp_size (abfd)
+	  || ELF_ST_TYPE (sym->st_info) == STT_TLS
 	  || IRIX_COMPAT (abfd) == ict_irix6)
 	break;
       /* Fall through.  */
