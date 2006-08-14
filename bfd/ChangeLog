@@ -1,3 +1,15 @@
+2006-08-14  DJ Delorie  <dj@redhat.com>
+
+	* elf-m10300.c (elf32_mn10300_link_hash_entry): Add value.
+	(elf32_mn10300_count_hash_table_entries): New.
+	(elf32_mn10300_list_hash_table_entries): New.
+	(sort_by_value): New.
+	(mn10300_elf_relax_section): Don't skip data sections; restrict
+	code-specific tests to code-specific areas so that potential
+	indirect calls can be detected.  Check for multiple local symbols
+	at the same address and merge their flags.
+	(elf32_mn10300_link_hash_newfunc): Initialize value.
+
 2006-08-14  Thiemo Seufer  <ths@mips.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_symbol_processing,

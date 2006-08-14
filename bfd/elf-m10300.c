@@ -85,6 +85,9 @@ struct elf32_mn10300_link_hash_entry {
    prologue deleted.  */
 #define MN10300_DELETED_PROLOGUE_BYTES 0x2
   unsigned char flags;
+
+  /* Calculated value.  */
+  bfd_vma value;
 };
 
 /* We derive a hash table from the main elf linker hash table so
@@ -1602,6 +1605,42 @@ elf32_mn10300_finish_hash_table_entry (gen_entry, in_args)
   return TRUE;
 }
 
+/* Used to count hash table entries.  */
+static bfd_boolean
+elf32_mn10300_count_hash_table_entries (struct bfd_hash_entry *gen_entry ATTRIBUTE_UNUSED,
+					PTR in_args)
+{
+  int *count = (int *)in_args;
+
+  (*count) ++;
+  return TRUE;
+}
+
+/* Used to enumerate hash table entries into a linear array.  */
+static bfd_boolean
+elf32_mn10300_list_hash_table_entries (struct bfd_hash_entry *gen_entry,
+				       PTR in_args)
+{
+  struct bfd_hash_entry ***ptr = (struct bfd_hash_entry ***) in_args;
+
+  **ptr = gen_entry;
+  (*ptr) ++;
+  return TRUE;
+}
+
+/* Used to sort the array created by the above.  */
+static int
+sort_by_value (const void *va, const void *vb)
+{
+  struct elf32_mn10300_link_hash_entry *a
+    = *(struct elf32_mn10300_link_hash_entry **)va;
+  struct elf32_mn10300_link_hash_entry *b
+    = *(struct elf32_mn10300_link_hash_entry **)vb;
+
+  return a->value - b->value;
+}
+
+
 /* This function handles relaxing for the mn10300.
 
    There are quite a few relaxing opportunities available on the mn10300:
@@ -1697,9 +1736,10 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	      char *new_name;
 
 	      /* If there's nothing to do in this section, skip it.  */
-	      if (! (((section->flags & SEC_RELOC) != 0
-		      && section->reloc_count != 0)
-		     || (section->flags & SEC_CODE) != 0))
+	      if (! ((section->flags & SEC_RELOC) != 0
+		     && section->reloc_count != 0))
+		continue;
+	      if ((section->flags & SEC_ALLOC) == 0)
 		continue;
 
 	      /* Get cached copy of section contents if it exists.  */
@@ -1802,13 +1842,17 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 				   elf_sym_hashes (input_bfd)[r_index];
 			}
 
-		      /* If this is not a "call" instruction, then we
-			 should convert "call" instructions to "calls"
-			 instructions.  */
-		      code = bfd_get_8 (input_bfd,
-					contents + irel->r_offset - 1);
-		      if (code != 0xdd && code != 0xcd)
-			hash->flags |= MN10300_CONVERT_CALL_TO_CALLS;
+		      sym_name = hash->root.root.root.string;
+		      if ((section->flags & SEC_CODE) != 0)
+			{
+			  /* If this is not a "call" instruction, then we
+			     should convert "call" instructions to "calls"
+			     instructions.  */
+			  code = bfd_get_8 (input_bfd,
+					    contents + irel->r_offset - 1);
+			  if (code != 0xdd && code != 0xcd)
+			    hash->flags |= MN10300_CONVERT_CALL_TO_CALLS;
+			}
 
 		      /* If this is a jump/call, then bump the
 			 direct_calls counter.  Else force "call" to
@@ -1901,6 +1945,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 			  free (new_name);
 			  compute_function_info (input_bfd, hash,
 						 isym->st_value, contents);
+			  hash->value = isym->st_value;
 			}
 		    }
 
@@ -1961,6 +2006,44 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
       elf32_mn10300_link_hash_traverse (hash_table->static_hash_table,
 					elf32_mn10300_finish_hash_table_entry,
 					link_info);
+
+      {
+	/* This section of code collects all our local symbols, sorts
+	   them by value, and looks for multiple symbols referring to
+	   the same address.  For those symbols, the flags are merged.
+	   At this point, the only flag that can be set is
+	   MN10300_CONVERT_CALL_TO_CALLS, so we simply OR the flags
+	   together.  */
+	int static_count = 0, i;
+	struct elf32_mn10300_link_hash_entry **entries;
+	struct elf32_mn10300_link_hash_entry **ptr;
+
+	elf32_mn10300_link_hash_traverse (hash_table->static_hash_table,
+					  elf32_mn10300_count_hash_table_entries,
+					  &static_count);
+
+	entries = (struct elf32_mn10300_link_hash_entry **)
+	  bfd_malloc (static_count * sizeof (struct elf32_mn10300_link_hash_entry *));
+
+	ptr = entries;
+	elf32_mn10300_link_hash_traverse (hash_table->static_hash_table,
+					  elf32_mn10300_list_hash_table_entries,
+					  &ptr);
+
+	qsort (entries, static_count, sizeof(entries[0]), sort_by_value);
+
+	for (i=0; i<static_count-1; i++)
+	  if (entries[i]->value && entries[i]->value == entries[i+1]->value)
+	    {
+	      int v = entries[i]->flags;
+	      int j;
+	      for (j=i+1; j<static_count && entries[j]->value == entries[i]->value; j++)
+		v |= entries[j]->flags;
+	      for (j=i; j<static_count && entries[j]->value == entries[i]->value; j++)
+		entries[j]->flags = v;
+	      i = j-1;
+	    }
+      }
 
       /* All entries in the hash table are fully initialized.  */
       hash_table->flags |= MN10300_HASH_ENTRIES_INITIALIZED;
@@ -2795,8 +2878,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	 into a 16bit immediate, displacement or absolute address.  */
       if (ELF32_R_TYPE (irel->r_info) == (int) R_MN10300_32
 	  || ELF32_R_TYPE (irel->r_info) == (int) R_MN10300_GOT32
-	  || ELF32_R_TYPE (irel->r_info) == (int) R_MN10300_GOTOFF32
-	  || ELF32_R_TYPE (irel->r_info) == (int) R_MN10300_GOTPC32)
+	  || ELF32_R_TYPE (irel->r_info) == (int) R_MN10300_GOTOFF32)
 	{
 	  bfd_vma value = symval;
 
@@ -3677,6 +3759,7 @@ elf32_mn10300_link_hash_newfunc (entry, table, string)
       ret->movm_args = 0;
       ret->movm_stack_size = 0;
       ret->flags = 0;
+      ret->value = 0;
     }
 
   return (struct bfd_hash_entry *) ret;
