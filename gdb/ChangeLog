@@ -1,5 +1,7 @@
 2006-08-15  Nick Roberts  <nickrob@snap.net.nz>
 
+	* version.in: Remove spurious " character.
+
 	* Makefile.in: Commit the changes described but not committed
 	on 2006-05-13.
 
