@@ -1869,7 +1869,7 @@ stab_tag_type (void *p, const char *name, unsigned int id,
 {
   struct stab_write_handle *info = (struct stab_write_handle *) p;
   long index;
-  unsigned int size;
+  unsigned int size = 0;
 
   index = stab_get_struct_index (info, name, id, kind, &size);
   if (index < 0)

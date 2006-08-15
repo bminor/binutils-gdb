@@ -1,3 +1,8 @@
+2006-08-15  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/3039
+	* wrstabs.c (stab_tag_type): Initialize 'size'.
+
 2006-06-07  Joseph S. Myers  <joseph@codesourcery.com>
 
 	* po/Make-in (pdf, ps): New dummy targets.
