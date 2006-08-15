@@ -3853,7 +3853,7 @@ check_binary_download (CORE_ADDR addr)
    error.  Only transfer a single packet.  */
 
 int
-remote_write_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
+remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
 {
   struct remote_state *rs = get_remote_state ();
   char *buf;
@@ -3864,6 +3864,15 @@ remote_write_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
   int nr_bytes;
   int payload_size;
   int payload_length;
+
+  /* Should this be the selected frame?  */
+  gdbarch_remote_translate_xfer_address (current_gdbarch,
+					 current_regcache,
+					 memaddr, len,
+					 &memaddr, &len);
+
+  if (len <= 0)
+    return 0;
 
   /* Verify that the target can support a binary download.  */
   check_binary_download (memaddr);
@@ -4023,6 +4032,15 @@ remote_read_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
   int max_buf_size;		/* Max size of packet output buffer.  */
   int origlen;
 
+  /* Should this be the selected frame?  */
+  gdbarch_remote_translate_xfer_address (current_gdbarch,
+					 current_regcache,
+					 memaddr, len,
+					 &memaddr, &len);
+
+  if (len <= 0)
+    return 0;
+
   max_buf_size = get_memory_read_packet_size ();
   /* The packet buffer will be large enough for the payload;
      get_memory_packet_size ensures this.  */
@@ -4090,22 +4108,12 @@ remote_xfer_memory (CORE_ADDR mem_addr, gdb_byte *buffer, int mem_len,
 		    int should_write, struct mem_attrib *attrib,
 		    struct target_ops *target)
 {
-  CORE_ADDR targ_addr;
-  int targ_len;
   int res;
 
-  /* Should this be the selected frame?  */
-  gdbarch_remote_translate_xfer_address (current_gdbarch, 
-					 current_regcache,
-					 mem_addr, mem_len,
-					 &targ_addr, &targ_len);
-  if (targ_len <= 0)
-    return 0;
-
   if (should_write)
-    res = remote_write_bytes (targ_addr, buffer, targ_len);
+    res = remote_write_bytes (mem_addr, buffer, mem_len);
   else
-    res = remote_read_bytes (targ_addr, buffer, targ_len);
+    res = remote_read_bytes (mem_addr, buffer, mem_len);
 
   return res;
 }
@@ -5270,22 +5278,16 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
   char *p2;
   char query_type;
 
-  /* Handle memory using remote_xfer_memory.  */
+  /* Handle memory using the standard memory routines.  */
   if (object == TARGET_OBJECT_MEMORY)
     {
       int xfered;
       errno = 0;
 
       if (writebuf != NULL)
-	{
-	  void *buffer = xmalloc (len);
-	  struct cleanup *cleanup = make_cleanup (xfree, buffer);
-	  memcpy (buffer, writebuf, len);
-	  xfered = remote_xfer_memory (offset, buffer, len, 1, NULL, ops);
-	  do_cleanups (cleanup);
-	}
+	xfered = remote_write_bytes (offset, writebuf, len);
       else
-	xfered = remote_xfer_memory (offset, readbuf, len, 0, NULL, ops);
+	xfered = remote_read_bytes (offset, readbuf, len);
 
       if (xfered > 0)
 	return xfered;

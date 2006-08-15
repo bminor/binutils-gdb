@@ -1,3 +1,14 @@
+2006-08-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c (remote_write_bytes): Take a const buffer argument.
+	Do the checks from remote_xfer_memory.
+	(remote_read_bytes): Do the checks from remote_xfer_memory.
+	(remote_xfer_memory): Remove checks pushed into lower level
+	functions.
+	(remote_xfer_partial): Call remote_write_bytes and remote_read_bytes
+	directly.
+	* remote.h (remote_write_bytes): Update prototype.
+
 2006-08-11  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* NEWS: Add 'set trace-commands' command.
