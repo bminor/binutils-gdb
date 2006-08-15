@@ -1540,7 +1540,60 @@ struct load_section_data {
   unsigned long write_count;
   unsigned long data_count;
   bfd_size_type total_size;
+
+  /* Per-section data for load_progress.  */
+  const char *section_name;
+  ULONGEST section_sent;
+  ULONGEST section_size;
+  CORE_ADDR lma;
+  gdb_byte *buffer;
 };
+
+/* Target write callback routine for load_section_callback.  */
+
+static void
+load_progress (ULONGEST bytes, void *untyped_arg)
+{
+  struct load_section_data *args = untyped_arg;
+
+  if (validate_download)
+    {
+      /* Broken memories and broken monitors manifest themselves here
+	 when bring new computers to life.  This doubles already slow
+	 downloads.  */
+      /* NOTE: cagney/1999-10-18: A more efficient implementation
+	 might add a verify_memory() method to the target vector and
+	 then use that.  remote.c could implement that method using
+	 the ``qCRC'' packet.  */
+      gdb_byte *check = xmalloc (bytes);
+      struct cleanup *verify_cleanups = make_cleanup (xfree, check);
+
+      if (target_read_memory (args->lma, check, bytes) != 0)
+	error (_("Download verify read failed at 0x%s"),
+	       paddr (args->lma));
+      if (memcmp (args->buffer, check, bytes) != 0)
+	error (_("Download verify compare failed at 0x%s"),
+	       paddr (args->lma));
+      do_cleanups (verify_cleanups);
+    }
+  args->data_count += bytes;
+  args->lma += bytes;
+  args->buffer += bytes;
+  args->write_count += 1;
+  args->section_sent += bytes;
+  if (quit_flag
+      || (deprecated_ui_load_progress_hook != NULL
+	  && deprecated_ui_load_progress_hook (args->section_name,
+					       args->section_sent)))
+    error (_("Canceled the download"));
+
+  if (deprecated_show_load_progress != NULL)
+    deprecated_show_load_progress (args->section_name,
+				   args->section_sent,
+				   args->section_size,
+				   args->data_count,
+				   args->total_size);
+}
 
 /* Callback service function for generic_load (bfd_map_over_sections).  */
 
@@ -1548,85 +1601,43 @@ static void
 load_section_callback (bfd *abfd, asection *asec, void *data)
 {
   struct load_section_data *args = data;
+  bfd_size_type size = bfd_get_section_size (asec);
+  gdb_byte *buffer;
+  struct cleanup *old_chain;
+  const char *sect_name = bfd_get_section_name (abfd, asec);
+  LONGEST transferred;
 
-  if (bfd_get_section_flags (abfd, asec) & SEC_LOAD)
-    {
-      bfd_size_type size = bfd_get_section_size (asec);
-      if (size > 0)
-	{
-	  gdb_byte *buffer;
-	  struct cleanup *old_chain;
-	  CORE_ADDR lma = bfd_section_lma (abfd, asec) + args->load_offset;
-	  bfd_size_type block_size;
-	  int err;
-	  const char *sect_name = bfd_get_section_name (abfd, asec);
-	  bfd_size_type sent;
+  if ((bfd_get_section_flags (abfd, asec) & SEC_LOAD) == 0)
+    return;
 
-	  buffer = xmalloc (size);
-	  old_chain = make_cleanup (xfree, buffer);
+  if (size == 0)
+    return;
 
-	  /* Is this really necessary?  I guess it gives the user something
-	     to look at during a long download.  */
-	  ui_out_message (uiout, 0, "Loading section %s, size 0x%s lma 0x%s\n",
-			  sect_name, paddr_nz (size), paddr_nz (lma));
+  buffer = xmalloc (size);
+  old_chain = make_cleanup (xfree, buffer);
 
-	  bfd_get_section_contents (abfd, asec, buffer, 0, size);
+  args->section_name = sect_name;
+  args->section_sent = 0;
+  args->section_size = size;
+  args->lma = bfd_section_lma (abfd, asec) + args->load_offset;
+  args->buffer = buffer;
 
-	  sent = 0;
-	  do
-	    {
-	      int len;
-	      bfd_size_type this_transfer = size - sent;
+  /* Is this really necessary?  I guess it gives the user something
+     to look at during a long download.  */
+  ui_out_message (uiout, 0, "Loading section %s, size 0x%s lma 0x%s\n",
+		  sect_name, paddr_nz (size), paddr_nz (args->lma));
 
-	      len = target_write_memory_partial (lma, buffer,
-						 this_transfer, &err);
-	      if (err)
-		break;
-	      if (validate_download)
-		{
-		  /* Broken memories and broken monitors manifest
-		     themselves here when bring new computers to
-		     life.  This doubles already slow downloads.  */
-		  /* NOTE: cagney/1999-10-18: A more efficient
-		     implementation might add a verify_memory()
-		     method to the target vector and then use
-		     that.  remote.c could implement that method
-		     using the ``qCRC'' packet.  */
-		  gdb_byte *check = xmalloc (len);
-		  struct cleanup *verify_cleanups =
-		    make_cleanup (xfree, check);
+  bfd_get_section_contents (abfd, asec, buffer, 0, size);
 
-		  if (target_read_memory (lma, check, len) != 0)
-		    error (_("Download verify read failed at 0x%s"),
-			   paddr (lma));
-		  if (memcmp (buffer, check, len) != 0)
-		    error (_("Download verify compare failed at 0x%s"),
-			   paddr (lma));
-		  do_cleanups (verify_cleanups);
-		}
-	      args->data_count += len;
-	      lma += len;
-	      buffer += len;
-	      args->write_count += 1;
-	      sent += len;
-	      if (quit_flag
-		  || (deprecated_ui_load_progress_hook != NULL
-		      && deprecated_ui_load_progress_hook (sect_name, sent)))
-		error (_("Canceled the download"));
+  transferred = target_write_with_progress (&current_target,
+					    TARGET_OBJECT_MEMORY,
+					    NULL, buffer, args->lma,
+					    size, load_progress, args);
+  if (transferred < size)
+    error (_("Memory access error while loading section %s."),
+	   sect_name);
 
-	      if (deprecated_show_load_progress != NULL)
-		deprecated_show_load_progress (sect_name, sent, size,
-					       args->data_count,
-					       args->total_size);
-	    }
-	  while (sent < size);
-
-	  if (err != 0)
-	    error (_("Memory access error while loading section %s."), sect_name);
-
-	  do_cleanups (old_chain);
-	}
-    }
+  do_cleanups (old_chain);
 }
 
 void

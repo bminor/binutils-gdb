@@ -1,5 +1,35 @@
 2006-08-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	PR remote/1966
+	* dcache.c (dcache_write_line): Use target_write.
+	(dcache_read_line): Use target_read.
+	* mi/mi-main.c (mi_cmd_data_read_memory): Use target_read.
+	* symfile.c (struct load_section_data): Add new per-section
+	members.
+	(load_progress): New function.
+	(load_section_callback): Pass load_progress to the new
+	target_write_with_progress.
+	* target.c (current_xfer_partial, memory_xfer_partial): New.
+	(target_xfer_partial): New prototype.
+	(target_xfer_memory, target_xfer_partial_p, xfer_using_stratum)
+	(do_xfer_memory, target_xfer_memory_partial)
+	(target_read_memory_partial, target_write_memory_partial): Delete.
+	(trust_readonly): Move higher in the file.
+	(update_current_target): Use current_xer_partial.
+	(target_xfer_partial): Use memory_xfer_partial.  Handle
+	TARGET_OBJECT_RAW_MEMORY specially.
+	(target_read_memory): Use target_read.
+	(target_write_memory): Use target_write.
+	(default_xfer_partial): Call to_xfer_partial directly.
+	(target_write_with_progress): New function, based on target_write.
+	(target_write): Call it.
+	* target.h (enum target_object): Add TARGET_OBJECT_RAW_MEMORY.
+	(target_write_with_progress): New prototype.
+	(do_xfer_memory, target_read_memory_partial)
+	(target_write_memory_partial): Delete prototypes.
+
+2006-08-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* remote.c (remote_write_bytes): Take a const buffer argument.
 	Do the checks from remote_xfer_memory.
 	(remote_read_bytes): Do the checks from remote_xfer_memory.

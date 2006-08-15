@@ -189,6 +189,10 @@ enum target_object
   TARGET_OBJECT_AVR,
   /* Transfer up-to LEN bytes of memory starting at OFFSET.  */
   TARGET_OBJECT_MEMORY,
+  /* Memory, avoiding GDB's data cache and trusting the executable.
+     Target implementations of to_xfer_partial never need to handle
+     this object, and most callers should not use it.  */
+  TARGET_OBJECT_RAW_MEMORY,
   /* Kernel Unwind Table.  See "ia64-tdep.c".  */
   TARGET_OBJECT_UNWIND_TABLE,
   /* Transfer auxilliary vector.  */
@@ -219,6 +223,18 @@ extern LONGEST target_write (struct target_ops *ops,
 			     enum target_object object,
 			     const char *annex, const gdb_byte *buf,
 			     ULONGEST offset, LONGEST len);
+
+/* Similar to target_write, except that it also calls PROGRESS
+   with the number of bytes written and the opaque BATON after
+   every partial write.  This is useful for progress reporting
+   and user interaction while writing data.  To abort the transfer,
+   the progress callback can throw an exception.  */
+LONGEST target_write_with_progress (struct target_ops *ops,
+				    enum target_object object,
+				    const char *annex, const gdb_byte *buf,
+				    ULONGEST offset, LONGEST len,
+				    void (*progress) (ULONGEST, void *),
+				    void *baton);
 
 /* Wrapper to perform a full read of unknown size.  OBJECT/ANNEX will
    be read using OPS.  The return value will be -1 if the transfer
@@ -547,9 +563,6 @@ extern void target_disconnect (char *, int);
 
 extern DCACHE *target_dcache;
 
-extern int do_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
-			   int write, struct mem_attrib *attrib);
-
 extern int target_read_string (CORE_ADDR, char **, int, int *);
 
 extern int target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len);
@@ -562,18 +575,6 @@ extern int xfer_memory (CORE_ADDR, gdb_byte *, int, int,
 
 extern int child_xfer_memory (CORE_ADDR, gdb_byte *, int, int,
 			      struct mem_attrib *, struct target_ops *);
-
-/* Make a single attempt at transfering LEN bytes.  On a successful
-   transfer, the number of bytes actually transfered is returned and
-   ERR is set to 0.  When a transfer fails, -1 is returned (the number
-   of bytes actually transfered is not defined) and ERR is set to a
-   non-zero error indication.  */
-
-extern int target_read_memory_partial (CORE_ADDR addr, gdb_byte *buf,
-				       int len, int *err);
-
-extern int target_write_memory_partial (CORE_ADDR addr, gdb_byte *buf,
-					int len, int *err);
 
 extern char *child_pid_to_exec_file (int);
 
