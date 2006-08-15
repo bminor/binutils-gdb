@@ -3280,7 +3280,57 @@ s_arm_unwind_save_fpa (int reg)
 }
 
 
-/* Parse a directive saving VFP registers.  */
+/* Parse a directive saving VFP registers for ARMv6 and above.  */
+
+static void
+s_arm_unwind_save_vfp_armv6 (void)
+{
+  int count;
+  unsigned int start;
+  valueT op;
+  int num_vfpv3_regs = 0;
+  int num_regs_below_16;
+
+  count = parse_vfp_reg_list (&input_line_pointer, &start, REGLIST_VFP_D);
+  if (count == FAIL)
+    {
+      as_bad (_("expected register list"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  demand_empty_rest_of_line ();
+
+  /* We always generate FSTMD/FLDMD-style unwinding opcodes (rather
+     than FSTMX/FLDMX-style ones).  */
+
+  /* Generate opcode for (VFPv3) registers numbered in the range 16 .. 31.  */
+  if (start >= 16)
+    num_vfpv3_regs = count;
+  else if (start + count > 16)
+    num_vfpv3_regs = start + count - 16;
+
+  if (num_vfpv3_regs > 0)
+    {
+      int start_offset = start > 16 ? start - 16 : 0;
+      op = 0xc800 | (start_offset << 4) | (num_vfpv3_regs - 1);
+      add_unwind_opcode (op, 2);
+    }
+
+  /* Generate opcode for registers numbered in the range 0 .. 15.  */
+  num_regs_below_16 = num_vfpv3_regs > 0 ? 16 - (int) start : count;
+  assert (num_regs_below_16 + num_vfpv3_regs == count);
+  if (num_regs_below_16 > 0)
+    {
+      op = 0xc900 | (start << 4) | (num_regs_below_16 - 1);
+      add_unwind_opcode (op, 2);
+    }
+
+  unwind.frame_size += count * 8;
+}
+
+
+/* Parse a directive saving VFP registers for pre-ARMv6.  */
 
 static void
 s_arm_unwind_save_vfp (void)
@@ -3518,10 +3568,11 @@ error:
 }
 
 
-/* Parse an unwind_save directive.  */
+/* Parse an unwind_save directive.
+   If the argument is non-zero, this is a .vsave directive.  */
 
 static void
-s_arm_unwind_save (int ignored ATTRIBUTE_UNUSED)
+s_arm_unwind_save (int arch_v6)
 {
   char *peek;
   struct reg_entry *reg;
@@ -3558,7 +3609,12 @@ s_arm_unwind_save (int ignored ATTRIBUTE_UNUSED)
       return;
 
     case REG_TYPE_RN:	  s_arm_unwind_save_core ();   return;
-    case REG_TYPE_VFD:	   s_arm_unwind_save_vfp ();	return;
+    case REG_TYPE_VFD:
+      if (arch_v6)
+        s_arm_unwind_save_vfp_armv6 ();
+      else
+        s_arm_unwind_save_vfp ();
+      return;
     case REG_TYPE_MMXWR:  s_arm_unwind_save_mmxwr ();  return;
     case REG_TYPE_MMXWCG: s_arm_unwind_save_mmxwcg (); return;
 
@@ -3865,6 +3921,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "personalityindex",	s_arm_unwind_personalityindex, 0 },
   { "handlerdata",	s_arm_unwind_handlerdata, 0 },
   { "save",		s_arm_unwind_save,	0 },
+  { "vsave",		s_arm_unwind_save,	1 },
   { "movsp",		s_arm_unwind_movsp,	0 },
   { "pad",		s_arm_unwind_pad,	0 },
   { "setfp",		s_arm_unwind_setfp,	0 },

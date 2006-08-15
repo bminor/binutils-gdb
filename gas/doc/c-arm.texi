@@ -535,7 +535,7 @@ instruction.
   sfmfd f4, 2, [sp]!
 @exdent @emph{VFP registers}
   .save @{d8, d9, d10@}
-  fstmdf sp!, @{d8, d9, d10@}
+  fstmdx sp!, @{d8, d9, d10@}
 @exdent @emph{iWMMXt registers}
   .save @{wr10, wr11@}
   wstrd wr11, [sp, #-8]!
@@ -546,6 +546,26 @@ or
   .save wr10
   wstrd wr10, [sp, #-8]!
 @end smallexample
+
+@cindex @code{.vsave} directive, ARM
+@item .vsave @var{vfp-reglist}
+Generate unwinder annotations to restore the VFP registers in @var{vfp-reglist}
+using FLDMD.  Also works for VFPv3 registers
+that are to be restored using VLDM.
+The format of @var{vfp-reglist} is the same as the corresponding store-multiple
+instruction.
+
+@smallexample
+@exdent @emph{VFP registers}
+  .vsave @{d8, d9, d10@}
+  fstmdd sp!, @{d8, d9, d10@}
+@exdent @emph{VFPv3 registers}
+  .vsave @{d15, d16, d17@}
+  vstm sp!, @{d15, d16, d17@}
+@end smallexample
+
+Since FLDMX and FSTMX are now deprecated, this directive should be
+used in favour of @code{.save} for saving VFP registers for ARMv6 and above.
 
 @cindex @code{.pad} directive, ARM
 @item .pad #@var{count}
