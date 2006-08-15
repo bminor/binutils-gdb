@@ -1,3 +1,10 @@
+2006-08-15  Thiemo Seufer  <ths@mips.com>
+            Nigel Stephens  <nigel@mips.com>
+            David Ung  <davidu@mips.com>
+
+	* config.bfd: Add configurations for mips*el-sde-elf* and
+	mips*-sde-elf*.
+
 2006-08-14  DJ Delorie  <dj@redhat.com>
 
 	* elf-m10300.c (elf32_mn10300_link_hash_entry): Add value.

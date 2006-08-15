@@ -402,7 +402,7 @@ if { [istarget mips*-*-vxworks*] } {
     set addr32 [expr [istarget mipstx39*-*-*] || [istarget mips-*-linux*] || [istarget mipsel-*-linux*]]
     set has_newabi [expr [istarget *-*-irix6*] || [istarget mips64*-*-linux*]]
 
-    if { [istarget "mips*-*-*linux*"] } then {
+    if { [istarget "mips*-*-*linux*"] || [istarget "mips*-sde-elf*"] } then {
 	set tmips "t"
     } else {
 	set tmips ""
