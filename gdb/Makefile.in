@@ -641,6 +641,8 @@ amd64_tdep_h = amd64-tdep.h $(i386_tdep_h)
 annotate_h = annotate.h $(symtab_h) $(gdbtypes_h)
 arch_utils_h = arch-utils.h
 arm_tdep_h = arm-tdep.h
+async_nat_inferior_h = async-nat-inferior.h
+async_nat_sigthread_h = async-nat-sigthread.h
 auxv_h = auxv.h
 ax_gdb_h = ax-gdb.h
 ax_h = ax.h $(doublest_h)
@@ -909,6 +911,7 @@ TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	version.o \
 	annotate.o \
+	async-nat-inferior.o async-nat-sigthread.o \
 	auxv.o \
 	bfd-target.o \
 	blockframe.o breakpoint.o findvar.o regcache.o \
@@ -1202,13 +1205,13 @@ gdb$(EXEEXT): gdb.o libgdb.a $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
 	rm -f gdb$(EXEEXT)
 	$(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
 		-o gdb$(EXEEXT) gdb.o libgdb.a \
-		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
+		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES) -lpthread
 
 $(TUI)$(EXEEXT): tui-main.o libgdb.a $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
 	rm -f $(TUI)$(EXEEXT)
 	$(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
 		-o $(TUI)$(EXEEXT) tui-main.o libgdb.a \
-		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
+		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES) -lpthread
 
 # Create a library of the gdb object files and build GDB by linking
 # against that.
@@ -1766,6 +1769,8 @@ arm-tdep.o: arm-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(gdbcmd_h) \
 	$(gdb_sim_arm_h) $(elf_bfd_h) $(coff_internal_h) $(elf_arm_h) \
 	$(gdb_assert_h) $(bfd_in2_h) $(libcoff_h) $(objfiles_h) \
 	$(dwarf2_frame_h)
+async-nat-inferior.o: async-nat-inferior.c $(defs_h) $(async_nat_inferior_h)
+async-nat-sigthread.o: async-nat-sigthread.c $(defs_h) $(async_nat_sigthread_h)
 auxv.o: auxv.c $(defs_h) $(target_h) $(gdbtypes_h) $(command_h) \
 	$(inferior_h) $(valprint_h) $(gdb_assert_h) $(auxv_h) \
 	$(elf_common_h)
@@ -1940,7 +1945,7 @@ exceptions.o: exceptions.c $(defs_h) $(exceptions_h) $(breakpoint_h) \
 exec.o: exec.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) $(gdbcmd_h) \
 	$(language_h) $(symfile_h) $(objfiles_h) $(completer_h) $(value_h) \
 	$(exec_h) $(readline_h) $(gdb_string_h) $(gdbcore_h) $(gdb_stat_h) \
-	$(xcoffsolib_h) $(observer_h)
+	$(xcoffsolib_h) $(observer_h) $(async_nat_inferior_h)
 expprint.o: expprint.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
 	$(value_h) $(language_h) $(parser_defs_h) $(user_regs_h) $(target_h) \
 	$(gdb_string_h) $(block_h)
@@ -2070,7 +2075,7 @@ i386gnu-tdep.o: i386gnu-tdep.c $(defs_h) $(osabi_h) $(i386_tdep_h)
 i386-linux-nat.o: i386-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(regcache_h) $(linux_nat_h) $(gdb_assert_h) $(gdb_string_h) \
 	$(gregset_h) $(i387_tdep_h) $(i386_tdep_h) $(i386_linux_tdep_h) \
-	$(gdb_proc_service_h) $(target_h)
+	$(gdb_proc_service_h) $(target_h) $(async_nat_inferior_h)
 i386-linux-tdep.o: i386-linux-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
 	$(value_h) $(regcache_h) $(inferior_h) $(osabi_h) $(reggroups_h) \
 	$(dwarf2_frame_h) $(gdb_string_h) $(i386_tdep_h) \
@@ -2142,6 +2147,7 @@ inflow.o: inflow.c $(defs_h) $(frame_h) $(inferior_h) $(command_h) \
 inf-ptrace.o: inf-ptrace.c $(defs_h) $(command_h) $(inferior_h) $(inflow_h) \
 	$(gdbcore_h) $(regcache_h) $(gdb_assert_h) \
 	$(gdb_string_h) $(gdb_ptrace_h) $(gdb_wait_h) $(inf_child_h)
+	$(async_nat_inferior_h)
 infptrace.o: infptrace.c $(defs_h) $(command_h) $(frame_h) $(gdbcore_h) \
 	$(inferior_h) $(regcache_h) $(target_h) $(gdb_assert_h) \
 	$(gdb_wait_h) $(gdb_string_h) $(gdb_dirent_h) $(gdb_ptrace_h)
@@ -2200,7 +2206,7 @@ linux-nat.o: linux-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdb_string_h) \
 	$(gdb_wait_h) $(gdb_assert_h) $(linux_nat_h) $(gdbthread_h) \
 	$(gdbcmd_h) $(regcache_h) $(regset_h) $(inf_ptrace_h) $(auxv_h) \
 	$(elf_bfd_h) $(gregset_h) $(gdbcore_h) $(gdbthread_h) $(gdb_stat_h) \
-	$(linux_fork_h)
+	$(linux_fork_h) $(async_nat_inferior_h)
 linux-thread-db.o: linux-thread-db.c $(defs_h) $(gdb_assert_h) \
 	$(gdb_proc_service_h) $(gdb_thread_db_h) $(bfd_h) $(exceptions_h) \
 	$(gdbthread_h) $(inferior_h) $(symfile_h) $(objfiles_h) $(target_h) \
