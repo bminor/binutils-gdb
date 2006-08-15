@@ -4058,13 +4058,13 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	    isym->st_other = (STV_HIDDEN
 			      | (isym->st_other & ~ELF_ST_VISIBILITY (-1)));
 
-	  if (isym->st_other != 0 && !dynamic)
+	  if (ELF_ST_VISIBILITY (isym->st_other) != 0 && !dynamic)
 	    {
 	      unsigned char hvis, symvis, other, nvis;
 
-	      /* Take the balance of OTHER from the definition.  */
-	      other = (definition ? isym->st_other : h->other);
-	      other &= ~ ELF_ST_VISIBILITY (-1);
+	      /* Only merge the visibility. Leave the remainder of the
+		 st_other field to elf_backend_merge_symbol_attribute.  */
+	      other = h->other & ~ELF_ST_VISIBILITY (-1);
 
 	      /* Combine visibilities, using the most constraining one.  */
 	      hvis   = ELF_ST_VISIBILITY (h->other);

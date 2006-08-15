@@ -1,5 +1,14 @@
 2006-08-15  Thiemo Seufer  <ths@mips.com>
             Nigel Stephens  <nigel@mips.com>
+
+	* elf32-mips.c, elf64-mips.c, elfn32-mips.c
+	(elf_backend_merge_symbol_attribute): Define.
+	* elflink.c (elf_link_add_object_symbols): Merge only the ELF
+	visibility flags.
+	* elfxx-mips.c (_bfd_mips_elf_merge_symbol_attribute): New function.
+
+2006-08-15  Thiemo Seufer  <ths@mips.com>
+            Nigel Stephens  <nigel@mips.com>
             David Ung  <davidu@mips.com>
 
 	* config.bfd: Add configurations for mips*el-sde-elf* and
