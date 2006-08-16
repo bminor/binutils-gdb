@@ -1,3 +1,7 @@
+2006-08-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-scripts/overlay-size-map.d: Update.
+
 2006-08-11  Thiemo Seufer  <ths@mips.com>
 
 	* ld-elfcomm/elfcomm.exp (dump_common1): Extend regexp to match also
@@ -46,10 +50,6 @@
 	* ld-mips-elf/hash1.s, ld-mips-elf/hash1a.d,
 	* ld-mips-elf/hash1b.d, ld-mips-elf/hash1c.d: New tests.
 	* ld-mips-elf/mips-elf.exp: Run them.
-
-2006-07-26  Alan Modra  <amodra@bigpond.net.au>
-
-	* ld-scripts/overlay-size-map.d: Update.
 
 2006-07-25  Thiemo Seufer  <ths@mips.com>
 

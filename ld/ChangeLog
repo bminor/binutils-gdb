@@ -1,3 +1,14 @@
+2006-08-16  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 3052
+	* ldlang.h (lang_output_section_statement_type): Replace
+	"processed" field with "processed_vma" and "processed_lma".
+	* ldlang.c (lang_do_assignments_1): Move lma setting code..
+	(lang_size_sections_1): ..to here.
+	(lang_reset_memory_regions): Adjust for
+	lang_output_section_statement_type change.
+	* ldexp.c (fold_name): Likewise.
+
 2006-08-08  Peter S. Mazinger  <ps.m@gmx.net>
 
 	* emulparams/armelf.sh (MAXPAGESIZE): Changed to

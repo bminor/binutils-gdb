@@ -563,7 +563,7 @@ fold_name (etree_type *tree)
 	  lang_output_section_statement_type *os;
 
 	  os = lang_output_section_find (tree->name.name);
-	  if (os != NULL && os->processed)
+	  if (os != NULL && os->processed_vma)
 	    new_rel (0, NULL, os->bfd_section);
 	}
       break;
@@ -574,7 +574,7 @@ fold_name (etree_type *tree)
 	  lang_output_section_statement_type *os;
 
 	  os = lang_output_section_find (tree->name.name);
-	  if (os != NULL && os->processed)
+	  if (os != NULL && os->processed_lma)
 	    {
 	      if (os->load_base == NULL)
 		new_rel (os->bfd_section->lma - os->bfd_section->vma,
@@ -594,7 +594,7 @@ fold_name (etree_type *tree)
 	  os = lang_output_section_find (tree->name.name);
 	  if (os == NULL)
 	    new_abs (0);
-	  else if (os->processed)
+	  else if (os->processed_vma)
 	    new_abs (os->bfd_section->size / opb);
 	}
       break;

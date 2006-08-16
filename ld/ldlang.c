@@ -4228,11 +4228,12 @@ lang_size_sections_1
 	  {
 	    bfd_vma newdot, after;
 	    lang_output_section_statement_type *os;
+	    lang_memory_region_type *r;
 
 	    os = &s->output_section_statement;
 	    if (os->addr_tree != NULL)
 	      {
-		os->processed = FALSE;
+		os->processed_vma = FALSE;
 		exp_fold_tree (os->addr_tree, bfd_abs_section_ptr, &dot);
 
 		if (!expld.result.valid_p
@@ -4361,24 +4362,90 @@ lang_size_sections_1
 	    lang_size_sections_1 (os->children.head, os, &os->children.head,
 				  os->fill, newdot, relax, check_regions);
 
-	    os->processed = TRUE;
+	    os->processed_vma = TRUE;
 
 	    if (bfd_is_abs_section (os->bfd_section) || os->ignored)
+	      ASSERT (os->bfd_section->size == 0);
+	    else
 	      {
-		ASSERT (os->bfd_section->size == 0);
-		break;
+		dot = os->bfd_section->vma;
+
+		/* Put the section within the requested block size, or
+		   align at the block boundary.  */
+		after = ((dot
+			  + TO_ADDR (os->bfd_section->size)
+			  + os->block_value - 1)
+			 & - (bfd_vma) os->block_value);
+
+		os->bfd_section->size = TO_SIZE (after - os->bfd_section->vma);
 	      }
 
-	    dot = os->bfd_section->vma;
+	    /* Set section lma.  */
+	    r = os->region;
+	    if (r == NULL)
+	      r = lang_memory_region_lookup (DEFAULT_MEMORY_REGION, FALSE);
 
-	    /* Put the section within the requested block size, or
-	       align at the block boundary.  */
-	    after = ((dot
-		      + TO_ADDR (os->bfd_section->size)
-		      + os->block_value - 1)
-		     & - (bfd_vma) os->block_value);
+	    if (os->load_base)
+	      {
+		bfd_vma lma = exp_get_abs_int (os->load_base, 0, "load base");
+		os->bfd_section->lma = lma;
+	      }
+	    else if (os->region != NULL
+		     && os->lma_region != NULL
+		     && os->lma_region != os->region)
+	      {
+		bfd_vma lma = os->lma_region->current;
 
-	    os->bfd_section->size = TO_SIZE (after - os->bfd_section->vma);
+		if (os->section_alignment != -1)
+		  lma = align_power (lma, os->section_alignment);
+		os->bfd_section->lma = lma;
+	      }
+	    else if (r->last_os != NULL)
+	      {
+		bfd_vma lma;
+		asection *last;
+
+		last = r->last_os->output_section_statement.bfd_section;
+		/* If dot moved backwards (which is invalid according
+		   to ld docs) then leave lma equal to vma.  This
+		   keeps users of buggy ld scripts happy.  */
+		if (dot >= last->vma)
+		  {
+		    /* If the current vma overlaps the previous section,
+		       then set the current lma to that at the end of
+		       the previous section.  The previous section was
+		       probably an overlay.  */
+		    if ((dot >= last->vma
+			 && dot < last->vma + last->size)
+			|| (last->vma >= dot
+			    && last->vma < dot + os->bfd_section->size))
+		      lma = last->lma + last->size;
+
+		    /* Otherwise, keep the same lma to vma relationship
+		       as the previous section.  */
+		    else
+		      lma = dot + last->lma - last->vma;
+
+		    if (os->section_alignment != -1)
+		      lma = align_power (lma, os->section_alignment);
+		    os->bfd_section->lma = lma;
+		  }
+	      }
+	    os->processed_lma = TRUE;
+
+	    if (bfd_is_abs_section (os->bfd_section) || os->ignored)
+	      break;
+
+	    /* Keep track of normal sections using the default
+	       lma region.  We use this to set the lma for
+	       following sections.  Overlays or other linker
+	       script assignment to lma might mean that the
+	       default lma == vma is incorrect.  */
+	    if (((os->bfd_section->flags & SEC_HAS_CONTENTS) != 0
+		 || (os->bfd_section->flags & SEC_THREAD_LOCAL) == 0)
+		&& os->lma_region == NULL
+		&& !link_info.relocatable)
+	      r->last_os = s;
 
 	    /* .tbss sections effectively have zero size.  */
 	    if ((os->bfd_section->flags & SEC_HAS_CONTENTS) != 0
@@ -4410,14 +4477,12 @@ lang_size_sections_1
 
 		if (os->lma_region != NULL && os->lma_region != os->region)
 		  {
-		    /* Set load_base, which will be handled later.  */
-		    os->load_base = exp_intop (os->lma_region->current);
-		    os->lma_region->current +=
-		      TO_ADDR (os->bfd_section->size);
+		    os->lma_region->current
+		      = os->bfd_section->lma + TO_ADDR (os->bfd_section->size);
 
 		    if (check_regions)
 		      os_region_check (os, os->lma_region, NULL,
-				       os->lma_region->current);
+				       os->bfd_section->lma);
 		  }
 	      }
 	  }
@@ -4717,62 +4782,15 @@ lang_do_assignments_1 (lang_statement_union_type *s,
 	    os = &(s->output_section_statement);
 	    if (os->bfd_section != NULL && !os->ignored)
 	      {
-		lang_memory_region_type *r;
-
 		dot = os->bfd_section->vma;
-		r = os->region;
-		if (r == NULL)
-		  r = lang_memory_region_lookup (DEFAULT_MEMORY_REGION, FALSE);
 
-		if (os->load_base)
-		  os->bfd_section->lma
-		    = exp_get_abs_int (os->load_base, 0, "load base");
-		else if (r->last_os != NULL)
-		  {
-		    asection *last;
-		    bfd_vma lma;
-
-		    last = r->last_os->output_section_statement.bfd_section;
-
-		    /* If the current vma overlaps the previous section,
-		       then set the current lma to that at the end of
-		       the previous section.  The previous section was
-		       probably an overlay.  */
-		    if ((dot >= last->vma
-			 && dot < last->vma + last->size)
-			|| (last->vma >= dot
-			    && last->vma < dot + os->bfd_section->size))
-		      lma = last->lma + last->size;
-
-		    /* Otherwise, keep the same lma to vma relationship
-		       as the previous section.  */
-		    else
-		      lma = dot + last->lma - last->vma;
-
-		    if (os->section_alignment != -1)
-		      lma = align_power (lma, os->section_alignment);
-		    os->bfd_section->lma = lma;
-		  }
-
-		lang_do_assignments_1 (os->children.head,
-				       os, os->fill, dot);
+		lang_do_assignments_1 (os->children.head, os, os->fill, dot);
 
 		/* .tbss sections effectively have zero size.  */
 		if ((os->bfd_section->flags & SEC_HAS_CONTENTS) != 0
 		    || (os->bfd_section->flags & SEC_THREAD_LOCAL) == 0
 		    || link_info.relocatable)
-		  {
-		    dot += TO_ADDR (os->bfd_section->size);
-
-		    /* Keep track of normal sections using the default
-		       lma region.  We use this to set the lma for
-		       following sections.  Overlays or other linker
-		       script assignment to lma might mean that the
-		       default lma == vma is incorrect.  */
-		    if (!link_info.relocatable
-			&& os->lma_region == NULL)
-		      r->last_os = s;
-		  }
+		  dot += TO_ADDR (os->bfd_section->size);
 	      }
 	  }
 	  break;
@@ -5451,7 +5469,10 @@ lang_reset_memory_regions (void)
   for (os = &lang_output_section_statement.head->output_section_statement;
        os != NULL;
        os = os->next)
-    os->processed = FALSE;
+    {
+      os->processed_vma = FALSE;
+      os->processed_lma = FALSE;
+    }
 
   for (o = output_bfd->sections; o != NULL; o = o->next)
     {

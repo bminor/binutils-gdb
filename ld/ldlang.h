@@ -150,7 +150,8 @@ typedef struct lang_output_section_statement_struct
   int constraint;
   flagword flags;
   enum section_type sectype;
-  unsigned int processed : 1;
+  unsigned int processed_vma : 1;
+  unsigned int processed_lma : 1;
   unsigned int all_input_readonly : 1;
   unsigned int ignored : 1; 
 } lang_output_section_statement_type;
