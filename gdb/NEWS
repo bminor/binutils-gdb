@@ -11,6 +11,9 @@ running on a Windows system over TCP/IP to debug Windows programs.
 Cygwin debugging.  Both single-threaded and multi-threaded programs are
 supported.
 
+* The "set trust-readonly-sections" command works again.  This command was
+broken in GDB 6.3, 6.4, and 6.5.
+
 * New commands
 
 set substitute-path
