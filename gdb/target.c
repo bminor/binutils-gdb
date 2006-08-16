@@ -167,7 +167,7 @@ static void debug_to_stop (void);
 struct target_ops deprecated_child_ops;
 
 /* Pointer to array of target architecture structures; the size of the
-   array; the current index into the array; the allocated size of the 
+   array; the current index into the array; the allocated size of the
    array.  */
 struct target_ops **target_structs;
 unsigned target_struct_size;
@@ -475,44 +475,44 @@ update_current_target (void)
   if (!current_target.field)               \
     current_target.field = value
 
-  de_fault (to_open, 
-	    (void (*) (char *, int)) 
+  de_fault (to_open,
+	    (void (*) (char *, int))
 	    tcomplain);
-  de_fault (to_close, 
-	    (void (*) (int)) 
+  de_fault (to_close,
+	    (void (*) (int))
 	    target_ignore);
-  de_fault (to_attach, 
+  de_fault (to_attach,
 	    maybe_kill_then_attach);
-  de_fault (to_post_attach, 
-	    (void (*) (int)) 
+  de_fault (to_post_attach,
+	    (void (*) (int))
 	    target_ignore);
-  de_fault (to_detach, 
-	    (void (*) (char *, int)) 
+  de_fault (to_detach,
+	    (void (*) (char *, int))
 	    target_ignore);
-  de_fault (to_resume, 
-	    (void (*) (ptid_t, int, enum target_signal)) 
+  de_fault (to_resume,
+	    (void (*) (ptid_t, int, enum target_signal))
 	    noprocess);
-  de_fault (to_wait, 
-	    (ptid_t (*) (ptid_t, struct target_waitstatus *)) 
+  de_fault (to_wait,
+	    (ptid_t (*) (ptid_t, struct target_waitstatus *))
 	    noprocess);
-  de_fault (to_fetch_registers, 
-	    (void (*) (int)) 
+  de_fault (to_fetch_registers,
+	    (void (*) (int))
 	    target_ignore);
-  de_fault (to_store_registers, 
-	    (void (*) (int)) 
+  de_fault (to_store_registers,
+	    (void (*) (int))
 	    noprocess);
-  de_fault (to_prepare_to_store, 
-	    (void (*) (void)) 
+  de_fault (to_prepare_to_store,
+	    (void (*) (void))
 	    noprocess);
-  de_fault (deprecated_xfer_memory, 
-	    (int (*) (CORE_ADDR, gdb_byte *, int, int, struct mem_attrib *, struct target_ops *)) 
+  de_fault (deprecated_xfer_memory,
+	    (int (*) (CORE_ADDR, gdb_byte *, int, int, struct mem_attrib *, struct target_ops *))
 	    nomemory);
-  de_fault (to_files_info, 
-	    (void (*) (struct target_ops *)) 
+  de_fault (to_files_info,
+	    (void (*) (struct target_ops *))
 	    target_ignore);
-  de_fault (to_insert_breakpoint, 
+  de_fault (to_insert_breakpoint,
 	    memory_insert_breakpoint);
-  de_fault (to_remove_breakpoint, 
+  de_fault (to_remove_breakpoint,
 	    memory_remove_breakpoint);
   de_fault (to_can_use_hw_breakpoint,
 	    (int (*) (int, int, int))
@@ -537,105 +537,105 @@ update_current_target (void)
 	    return_zero);
   de_fault (to_region_ok_for_hw_watchpoint,
 	    default_region_ok_for_hw_watchpoint);
-  de_fault (to_terminal_init, 
-	    (void (*) (void)) 
+  de_fault (to_terminal_init,
+	    (void (*) (void))
 	    target_ignore);
-  de_fault (to_terminal_inferior, 
-	    (void (*) (void)) 
+  de_fault (to_terminal_inferior,
+	    (void (*) (void))
 	    target_ignore);
-  de_fault (to_terminal_ours_for_output, 
-	    (void (*) (void)) 
+  de_fault (to_terminal_ours_for_output,
+	    (void (*) (void))
 	    target_ignore);
-  de_fault (to_terminal_ours, 
-	    (void (*) (void)) 
+  de_fault (to_terminal_ours,
+	    (void (*) (void))
 	    target_ignore);
-  de_fault (to_terminal_save_ours, 
-	    (void (*) (void)) 
+  de_fault (to_terminal_save_ours,
+	    (void (*) (void))
 	    target_ignore);
-  de_fault (to_terminal_info, 
+  de_fault (to_terminal_info,
 	    default_terminal_info);
-  de_fault (to_kill, 
-	    (void (*) (void)) 
+  de_fault (to_kill,
+	    (void (*) (void))
 	    noprocess);
-  de_fault (to_load, 
-	    (void (*) (char *, int)) 
+  de_fault (to_load,
+	    (void (*) (char *, int))
 	    tcomplain);
-  de_fault (to_lookup_symbol, 
-	    (int (*) (char *, CORE_ADDR *)) 
+  de_fault (to_lookup_symbol,
+	    (int (*) (char *, CORE_ADDR *))
 	    nosymbol);
-  de_fault (to_create_inferior, 
+  de_fault (to_create_inferior,
 	    maybe_kill_then_create_inferior);
-  de_fault (to_post_startup_inferior, 
-	    (void (*) (ptid_t)) 
+  de_fault (to_post_startup_inferior,
+	    (void (*) (ptid_t))
 	    target_ignore);
-  de_fault (to_acknowledge_created_inferior, 
-	    (void (*) (int)) 
+  de_fault (to_acknowledge_created_inferior,
+	    (void (*) (int))
 	    target_ignore);
-  de_fault (to_insert_fork_catchpoint, 
-	    (void (*) (int)) 
+  de_fault (to_insert_fork_catchpoint,
+	    (void (*) (int))
 	    tcomplain);
-  de_fault (to_remove_fork_catchpoint, 
-	    (int (*) (int)) 
+  de_fault (to_remove_fork_catchpoint,
+	    (int (*) (int))
 	    tcomplain);
-  de_fault (to_insert_vfork_catchpoint, 
-	    (void (*) (int)) 
+  de_fault (to_insert_vfork_catchpoint,
+	    (void (*) (int))
 	    tcomplain);
-  de_fault (to_remove_vfork_catchpoint, 
-	    (int (*) (int)) 
+  de_fault (to_remove_vfork_catchpoint,
+	    (int (*) (int))
 	    tcomplain);
-  de_fault (to_insert_exec_catchpoint, 
-	    (void (*) (int)) 
+  de_fault (to_insert_exec_catchpoint,
+	    (void (*) (int))
 	    tcomplain);
-  de_fault (to_remove_exec_catchpoint, 
-	    (int (*) (int)) 
+  de_fault (to_remove_exec_catchpoint,
+	    (int (*) (int))
 	    tcomplain);
-  de_fault (to_reported_exec_events_per_exec_call, 
-	    (int (*) (void)) 
+  de_fault (to_reported_exec_events_per_exec_call,
+	    (int (*) (void))
 	    return_one);
-  de_fault (to_has_exited, 
-	    (int (*) (int, int, int *)) 
+  de_fault (to_has_exited,
+	    (int (*) (int, int, int *))
 	    return_zero);
-  de_fault (to_mourn_inferior, 
-	    (void (*) (void)) 
+  de_fault (to_mourn_inferior,
+	    (void (*) (void))
 	    noprocess);
-  de_fault (to_can_run, 
+  de_fault (to_can_run,
 	    return_zero);
-  de_fault (to_notice_signals, 
-	    (void (*) (ptid_t)) 
+  de_fault (to_notice_signals,
+	    (void (*) (ptid_t))
 	    target_ignore);
-  de_fault (to_thread_alive, 
-	    (int (*) (ptid_t)) 
+  de_fault (to_thread_alive,
+	    (int (*) (ptid_t))
 	    return_zero);
-  de_fault (to_find_new_threads, 
-	    (void (*) (void)) 
+  de_fault (to_find_new_threads,
+	    (void (*) (void))
 	    target_ignore);
-  de_fault (to_extra_thread_info, 
-	    (char *(*) (struct thread_info *)) 
+  de_fault (to_extra_thread_info,
+	    (char *(*) (struct thread_info *))
 	    return_zero);
-  de_fault (to_stop, 
-	    (void (*) (void)) 
+  de_fault (to_stop,
+	    (void (*) (void))
 	    target_ignore);
   current_target.to_xfer_partial = current_xfer_partial;
-  de_fault (to_rcmd, 
-	    (void (*) (char *, struct ui_file *)) 
+  de_fault (to_rcmd,
+	    (void (*) (char *, struct ui_file *))
 	    tcomplain);
-  de_fault (to_enable_exception_callback, 
-	    (struct symtab_and_line * (*) (enum exception_event_kind, int)) 
+  de_fault (to_enable_exception_callback,
+	    (struct symtab_and_line * (*) (enum exception_event_kind, int))
 	    nosupport_runtime);
-  de_fault (to_get_current_exception_event, 
-	    (struct exception_event_record * (*) (void)) 
+  de_fault (to_get_current_exception_event,
+	    (struct exception_event_record * (*) (void))
 	    nosupport_runtime);
-  de_fault (to_pid_to_exec_file, 
-	    (char *(*) (int)) 
+  de_fault (to_pid_to_exec_file,
+	    (char *(*) (int))
 	    return_zero);
-  de_fault (to_can_async_p, 
-	    (int (*) (void)) 
+  de_fault (to_can_async_p,
+	    (int (*) (void))
 	    return_zero);
-  de_fault (to_is_async_p, 
-	    (int (*) (void)) 
+  de_fault (to_is_async_p,
+	    (int (*) (void))
 	    return_zero);
-  de_fault (to_async, 
-	    (void (*) (void (*) (enum inferior_event_type, void*), void*)) 
+  de_fault (to_async,
+	    (void (*) (void (*) (enum inferior_event_type, void*), void*))
 	    tcomplain);
 #undef de_fault
 
@@ -703,7 +703,7 @@ push_target (struct target_ops *t)
   return (t != target_stack);
 }
 
-/* Remove a target_ops vector from the stack, wherever it may be. 
+/* Remove a target_ops vector from the stack, wherever it may be.
    Return how many times it was removed (0 or 1).  */
 
 int
@@ -986,7 +986,7 @@ target_xfer_partial (struct target_ops *ops,
       if (retval > 0 && myaddr != NULL)
 	{
 	  int i;
-	  
+
 	  fputs_unfiltered (", bytes =", gdb_stdlog);
 	  for (i = 0; i < retval; i++)
 	    {
@@ -999,11 +999,11 @@ target_xfer_partial (struct target_ops *ops,
 		    }
 		  fprintf_unfiltered (gdb_stdlog, "\n");
 		}
-	      
+
 	      fprintf_unfiltered (gdb_stdlog, " %02x", myaddr[i] & 0xff);
 	    }
 	}
-      
+
       fputc_unfiltered ('\n', gdb_stdlog);
     }
   return retval;
@@ -1068,7 +1068,7 @@ Mode for reading from readonly sections is %s.\n"),
 
 static LONGEST
 default_xfer_partial (struct target_ops *ops, enum target_object object,
-		      const char *annex, gdb_byte *readbuf, 
+		      const char *annex, gdb_byte *readbuf,
 		      const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
 {
   if (object == TARGET_OBJECT_MEMORY
@@ -1547,7 +1547,7 @@ target_resize_to_sections (struct target_ops *target, int num_added)
 
   /* Check to see if anyone else was pointing to this structure.
      If old_value was null, then no one was. */
-     
+
   if (old_value)
     {
       for (t = target_structs; t < target_structs + target_struct_size;
@@ -1567,7 +1567,7 @@ target_resize_to_sections (struct target_ops *target, int num_added)
 	  current_target.to_sections_end = target->to_sections_end;
 	}
     }
-  
+
   return old_count;
 
 }
@@ -1960,7 +1960,7 @@ deprecated_debug_xfer_memory (CORE_ADDR memaddr, bfd_byte *myaddr, int len,
 		}
 	      fprintf_unfiltered (gdb_stdlog, "\n");
 	    }
-	  
+
 	  fprintf_unfiltered (gdb_stdlog, " %02x", myaddr[i] & 0xff);
 	}
     }
@@ -2512,7 +2512,7 @@ command."),
 			    show_targetdebug,
 			    &setdebuglist, &showdebuglist);
 
-  add_setshow_boolean_cmd ("trust-readonly-sections", class_support, 
+  add_setshow_boolean_cmd ("trust-readonly-sections", class_support,
 			   &trust_readonly, _("\
 Set mode for reading from readonly sections."), _("\
 Show mode for reading from readonly sections."), _("\

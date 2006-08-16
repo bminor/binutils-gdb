@@ -1,3 +1,7 @@
+2006-08-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c, target.c: Strip trailing whitespace.
+
 2006-08-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	PR remote/1966

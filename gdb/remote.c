@@ -255,7 +255,7 @@ struct packet_reg
   long regnum; /* GDB's internal register number.  */
   LONGEST pnum; /* Remote protocol register number.  */
   int in_g_packet; /* Always part of G packet.  */
-  /* long size in bytes;  == register_size (current_gdbarch, regnum); 
+  /* long size in bytes;  == register_size (current_gdbarch, regnum);
      at present.  */
   /* char *name; == REGISTER_NAME (regnum); at present.  */
 };
@@ -1041,12 +1041,12 @@ typedef int gdb_threadref;	/* Internal GDB thread reference.  */
 struct gdb_ext_thread_info
   {
     threadref threadid;		/* External form of thread reference.  */
-    int active;			/* Has state interesting to GDB? 
+    int active;			/* Has state interesting to GDB?
 				   regs, stack.  */
-    char display[256];		/* Brief state display, name, 
+    char display[256];		/* Brief state display, name,
 				   blocked/suspended.  */
     char shortname[32];		/* To be used to name threads.  */
-    char more_display[256];	/* Long info, statistics, queue depth, 
+    char more_display[256];	/* Long info, statistics, queue depth,
 				   whatever.  */
   };
 
@@ -1092,7 +1092,7 @@ static void copy_threadref (threadref *dest, threadref *src);
 
 static int threadmatch (threadref *dest, threadref *src);
 
-static char *pack_threadinfo_request (char *pkt, int mode, 
+static char *pack_threadinfo_request (char *pkt, int mode,
 				      threadref *id);
 
 static int remote_unpack_thread_info_response (char *pkt,
@@ -1101,7 +1101,7 @@ static int remote_unpack_thread_info_response (char *pkt,
 					       *info);
 
 
-static int remote_get_threadinfo (threadref *threadid, 
+static int remote_get_threadinfo (threadref *threadid,
 				  int fieldset,	/*TAG mask */
 				  struct gdb_ext_thread_info *info);
 
@@ -1112,14 +1112,14 @@ static char *pack_threadlist_request (char *pkt, int startflag,
 static int parse_threadlist_response (char *pkt,
 				      int result_limit,
 				      threadref *original_echo,
-				      threadref *resultlist, 
+				      threadref *resultlist,
 				      int *doneflag);
 
 static int remote_get_threadlist (int startflag,
 				  threadref *nextthread,
 				  int result_limit,
 				  int *done,
-				  int *result_count, 
+				  int *result_count,
 				  threadref *threadlist);
 
 typedef int (*rmt_thread_action) (threadref *ref, void *context);
@@ -1819,13 +1819,13 @@ remote_threads_extra_info (struct thread_info *tp)
     if (threadinfo.active)
       {
 	if (*threadinfo.shortname)
-	  n += xsnprintf (&display_buf[0], sizeof (display_buf) - n, 
+	  n += xsnprintf (&display_buf[0], sizeof (display_buf) - n,
 			  " Name: %s,", threadinfo.shortname);
 	if (*threadinfo.display)
-	  n += xsnprintf (&display_buf[n], sizeof (display_buf) - n, 
+	  n += xsnprintf (&display_buf[n], sizeof (display_buf) - n,
 			  " State: %s,", threadinfo.display);
 	if (*threadinfo.more_display)
-	  n += xsnprintf (&display_buf[n], sizeof (display_buf) - n, 
+	  n += xsnprintf (&display_buf[n], sizeof (display_buf) - n,
 			  " Priority: %s", threadinfo.more_display);
 
 	if (n > 0)
@@ -1853,7 +1853,7 @@ extended_remote_restart (void)
   putpkt (rs->buf);
 
   remote_fileio_reset ();
-  
+
   /* Now query for status so this looks just like we restarted
      gdbserver from scratch.  */
   putpkt ("?");
@@ -2813,10 +2813,10 @@ cleanup_sigint_signal_handler (void *dummy)
 {
   signal (SIGINT, handle_sigint);
   if (sigint_remote_twice_token)
-    delete_async_signal_handler ((struct async_signal_handler **) 
+    delete_async_signal_handler ((struct async_signal_handler **)
 				 &sigint_remote_twice_token);
   if (sigint_remote_token)
-    delete_async_signal_handler ((struct async_signal_handler **) 
+    delete_async_signal_handler ((struct async_signal_handler **)
 				 &sigint_remote_token);
 }
 
@@ -3069,18 +3069,18 @@ Packet: '%s'\n"),
 			     phex_nz (pnum, 0), p, buf);
 
 		    fieldsize = hex2bin (p, regs,
-					 register_size (current_gdbarch, 
+					 register_size (current_gdbarch,
 							reg->regnum));
 		    p += 2 * fieldsize;
-		    if (fieldsize < register_size (current_gdbarch, 
+		    if (fieldsize < register_size (current_gdbarch,
 						   reg->regnum))
 		      warning (_("Remote reply is too short: %s"), buf);
-		    regcache_raw_supply (current_regcache, 
+		    regcache_raw_supply (current_regcache,
 					 reg->regnum, regs);
 		  }
 
 		if (*p++ != ';')
-		  error (_("Remote register badly formatted: %s\nhere: %s"), 
+		  error (_("Remote register badly formatted: %s\nhere: %s"),
 			 buf, p);
 	      }
 	  }
@@ -3265,10 +3265,10 @@ Packet: '%s'\n"),
 			     pnum, p, buf);
 
 		    fieldsize = hex2bin (p, regs,
-					 register_size (current_gdbarch, 
+					 register_size (current_gdbarch,
 							reg->regnum));
 		    p += 2 * fieldsize;
-		    if (fieldsize < register_size (current_gdbarch, 
+		    if (fieldsize < register_size (current_gdbarch,
 						   reg->regnum))
 		      warning (_("Remote reply is too short: %s"), buf);
 		    regcache_raw_supply (current_regcache, reg->regnum, regs);
@@ -3878,7 +3878,7 @@ remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
   check_binary_download (memaddr);
 
   payload_size = get_memory_write_packet_size ();
-  
+
   /* The packet buffer will be large enough for the payload;
      get_memory_packet_size ensures this.  */
   buf = rs->buf;
@@ -4274,7 +4274,7 @@ putpkt_binary (char *buf, int cnt)
 	    case '$':
 	      {
 	        if (remote_debug)
-		  fprintf_unfiltered (gdb_stdlog, 
+		  fprintf_unfiltered (gdb_stdlog,
 				      "Packet instead of Ack, ignoring it\n");
 		/* It's probably an old response sent because an ACK
 		   was lost.  Gobble up the packet and ack it so it
@@ -4400,14 +4400,14 @@ read_frame (char **buf_p,
 	    if (check_0 == SERIAL_TIMEOUT || check_1 == SERIAL_TIMEOUT)
 	      {
 		if (remote_debug)
-		  fputs_filtered ("Timeout in checksum, retrying\n", 
+		  fputs_filtered ("Timeout in checksum, retrying\n",
 				  gdb_stdlog);
 		return -1;
 	      }
 	    else if (check_0 < 0 || check_1 < 0)
 	      {
 		if (remote_debug)
-		  fputs_filtered ("Communication error in checksum\n", 
+		  fputs_filtered ("Communication error in checksum\n",
 				  gdb_stdlog);
 		return -1;
 	      }
@@ -4574,7 +4574,7 @@ getpkt_sane (char **buf, long *sizeof_buf, int forever)
       serial_write (remote_desc, "-", 1);
     }
 
-  /* We have tried hard enough, and just can't receive the packet.  
+  /* We have tried hard enough, and just can't receive the packet.
      Give up.  */
 
   printf_unfiltered (_("Ignoring packet error, continuing...\n"));
@@ -4989,7 +4989,7 @@ remote_insert_hw_breakpoint (struct bp_target_info *bp_tgt)
 
   if (remote_protocol_packets[PACKET_Z1].support == PACKET_DISABLE)
     return -1;
-  
+
   *(p++) = 'Z';
   *(p++) = '1';
   *(p++) = ',';
@@ -5733,7 +5733,7 @@ remote_is_async_p (void)
    will be able to delay notifying the client of an event until the
    point where an entire packet has been received.  */
 
-static void (*async_client_callback) (enum inferior_event_type event_type, 
+static void (*async_client_callback) (enum inferior_event_type event_type,
 				      void *context);
 static void *async_client_context;
 static serial_event_ftype remote_async_serial_handler;
@@ -5747,7 +5747,7 @@ remote_async_serial_handler (struct serial *scb, void *context)
 }
 
 static void
-remote_async (void (*callback) (enum inferior_event_type event_type, 
+remote_async (void (*callback) (enum inferior_event_type event_type,
 				void *context), void *context)
 {
   if (current_target.to_async_mask_value == 0)
@@ -5774,7 +5774,7 @@ static void
 init_remote_async_ops (void)
 {
   remote_async_ops.to_shortname = "async";
-  remote_async_ops.to_longname = 
+  remote_async_ops.to_longname =
     "Remote serial target in async version of the gdb-specific protocol";
   remote_async_ops.to_doc =
     "Use a remote computer via a serial line, using a gdb-specific protocol.\n\
@@ -5902,7 +5902,7 @@ _initialize_remote (void)
   struct remote_state *rs;
 
   /* architecture specific data */
-  remote_gdbarch_data_handle = 
+  remote_gdbarch_data_handle =
     gdbarch_data_register_post_init (init_remote_state);
 
   /* Old tacky stuff.  NOTE: This comes after the remote protocol so
