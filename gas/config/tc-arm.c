@@ -13556,11 +13556,14 @@ opcode_lookup (char **str)
   const struct asm_opcode *opcode;
   const struct asm_cond *cond;
   char save[2];
+  bfd_boolean neon_supported;
+  
+  neon_supported = ARM_CPU_HAS_FEATURE (cpu_variant, fpu_neon_ext_v1);
 
   /* Scan up to the end of the mnemonic, which must end in white space,
-     '.' (in unified mode only), or end of string.  */
+     '.' (in unified mode, or for Neon instructions), or end of string.  */
   for (base = end = *str; *end != '\0'; end++)
-    if (*end == ' ' || (unified_syntax && *end == '.'))
+    if (*end == ' ' || ((unified_syntax || neon_supported) && *end == '.'))
       break;
 
   if (end == base)
@@ -13571,9 +13574,11 @@ opcode_lookup (char **str)
     {
       int offset = 2;
       
-      if (end[1] == 'w')
+      /* The .w and .n suffixes are only valid if the unified syntax is in
+         use.  */
+      if (unified_syntax && end[1] == 'w')
 	inst.size_req = 4;
-      else if (end[1] == 'n')
+      else if (unified_syntax && end[1] == 'n')
 	inst.size_req = 2;
       else
         offset = 0;
@@ -13584,7 +13589,8 @@ opcode_lookup (char **str)
 
       if (end[offset] == '.')      
 	{
-	  /* See if we have a Neon type suffix.  */
+	  /* See if we have a Neon type suffix (possible in either unified or
+             non-unified ARM syntax mode).  */
           if (parse_neon_type (&inst.vectype, str) == FAIL)
 	    return 0;
         }
