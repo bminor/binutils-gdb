@@ -13809,7 +13809,7 @@ md_assemble (char *str)
 	ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used,
 				arm_ext_v6t2);
     }
-  else
+  else if (ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v1))
     {
       /* Check that this instruction is supported for this CPU.  */
       if (!opcode->avariant ||
@@ -13841,6 +13841,12 @@ md_assemble (char *str)
       else
 	ARM_MERGE_FEATURE_SETS (arm_arch_used, arm_arch_used,
 				*opcode->avariant);
+    }
+  else
+    {
+      as_bad (_("attempt to use an ARM instruction on a Thumb-only processor "
+		"-- `%s'"), str);
+      return;
     }
   output_inst (str);
 }
@@ -18846,6 +18852,16 @@ set_constant_flonums (void)
       abort ();
 }
 
+/* Auto-select Thumb mode if it's the only available instruction set for the
+   given architecture.  */
+
+static void
+autoselect_thumb_from_cpu_variant (void)
+{
+  if (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v1))
+    opcode_select (16);
+}
+
 void
 md_begin (void)
 {
@@ -18945,6 +18961,8 @@ md_begin (void)
 #endif
 
   ARM_MERGE_FEATURE_SETS (cpu_variant, *mcpu_cpu_opt, *mfpu_opt);
+
+  autoselect_thumb_from_cpu_variant ();
 
   arm_arch_used = thumb_arch_used = arm_arch_none;
 
