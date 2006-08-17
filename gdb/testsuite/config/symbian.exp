@@ -1,0 +1,234 @@
+load_lib gdb.exp
+
+proc epoc_run { outvar args } {
+    global env
+    global epocpaths
+
+    upvar $outvar output
+
+    set oldpath $env(PATH)
+    set env(PATH) "$epocpaths:$env(PATH)"
+
+    set result [catch { eval $args } output]
+
+    set env(PATH) $oldpath
+
+    return $result
+}
+
+proc symbian_compile { sources destfile type options } {
+    global object_map
+    global epocroot
+
+    if { $type == "object" } {
+	# We can't really do this.  Instead, queue up the objects
+	# for later.  Discard the options and hope the right ones
+	# are around later.
+
+	set object_map($destfile) $sources
+	return ""
+    }
+
+    if { $type == "preprocess" } {
+	# GDB just uses this for version information, so don't
+	# worry about getting the right compiler options.
+
+	# Hack: We're Cygwin, the SymbianOS GNU toolchain is mingw32.
+	# Modify sources.
+	set mysources ""
+	foreach source $sources {
+	    lappend mysources [exec cygpath -w "$source"]
+	}
+
+	epoc_run output default_target_compile $mysources $destfile $type $options
+	return $output
+    }
+
+    if { $type != "executable" } {
+	return "unsupported compile type: $type"
+    }
+
+    set mysources ""
+    foreach source $sources {
+	if { [info exists object_map($source)] } {
+	    lappend mysources $object_map($source)
+	    unset object_map($source)
+	} else {
+	    lappend mysources $source
+	}
+    }
+
+    # By default use the non-debuggable copy.
+    set reldir "urel"
+
+    set allflags ""
+    foreach option $options {
+	# send_user "option: $option\n"
+	if { $option == "debug" } {
+	    set reldir "udeb"
+	} elseif { [regexp -all {additional_flags=(.*)} $option dummy flags] } {
+	    append allflags " $flags"
+	} else {
+	    warning "Compilation option $option not supported"
+	}
+    }
+
+    set proj [file tail $destfile]
+
+    # Write out a new bld.inf.  Puts sticks a newline at the end
+    # of each string; we have extras because we want blank line
+    # separators.
+    set inffile [open "bld.inf" "w"]
+    puts $inffile "PRJ_PLATFORMS\n"
+    puts $inffile "BASEDEFAULT GCCE\n"
+    puts $inffile "PRJ_EXPORTS\n"
+    puts $inffile "PRJ_MMPFILES\n${proj}.mmp"
+    close $inffile
+
+    set bldfile [open "${proj}.mmp" "w"]
+    puts $bldfile "TARGET ${proj}.exe"
+    puts $bldfile "TARGETTYPE EXE"
+    puts $bldfile "SOURCEPATH \\."
+    foreach source $mysources {
+	set result [file native [file normalize $source]]
+	if { [string first "C:" $result] != -1 } {
+	    set result [string map {C: ""} $result]
+	} else {
+	    # This appears to be a Unix-thinking sort of TCL.
+	    set result "\\cygwin[string map {/ \\} $result]"
+	}
+	# send_user "orig source $source, new source $result\n"
+	puts $bldfile "SOURCE $result"
+    }
+    puts $bldfile "LIBRARY EUSER.LIB"
+    puts $bldfile "LIBRARY ESTLIB.LIB"
+    puts $bldfile "STATICLIBRARY MYECRT0.LIB"
+    puts $bldfile "SYSTEMINCLUDE \\EPOC32\\INCLUDE\\LIBC"
+    puts $bldfile "SYSTEMINCLUDE \\EPOC32\\INCLUDE"
+    # Request these capabilities to match ESTLIB.LIB; if we ask for
+    # ALL, SymbianOS will refuse to launch us.
+    puts $bldfile "CAPABILITY All -Tcb"
+    puts $bldfile "VENDORID 0x70000001"
+    if { $allflags != "" } {
+	puts $bldfile "OPTION GCCE $allflags"
+    }
+    close $bldfile
+
+    epoc_run output exec "bldmake.bat" "bldfiles" "GCCE"
+    # send_user "bldmake output: $output END\n"
+
+    epoc_run output exec "./ABLD.BAT" "REALLYCLEAN" "GCCE"
+    # send_user "abld clean output: $output END\n"
+
+    if { [file exists "$epocroot/epoc32/release/gcce/${reldir}/${proj}.exe"] } {
+	perror "abld reallyclean has failed to remove ${proj}.exe"
+    }
+
+    epoc_run output exec "./ABLD.BAT" "BUILD" "GCCE"
+    # send_user "abld build output: $output END\n"
+
+    if { ! [file exists "$epocroot/epoc32/release/gcce/${reldir}/${proj}.exe"] } {
+	# Build must have failed.  Exit codes appear to be useless
+	# for these tools.
+	return "$output"
+    }
+
+    file copy -force -- "$epocroot/epoc32/release/gcce/${reldir}/${proj}.exe" ${destfile}.exe
+    file copy -force -- "$epocroot/epoc32/release/gcce/${reldir}/${proj}.sym" ${destfile}
+
+    # file delete "bld.inf"
+    # file delete "${proj}.mmp"
+    epoc_run output exec "./ABLD.BAT" "REALLYCLEAN" "GCCE"
+    # send_user "abld clean output: $output END\n"
+
+    return ""
+}
+
+proc gdb_target_symbian {} {
+    global gdb_prompt
+    global timeout
+
+    if { [target_info exists baudrate] } {
+	gdb_test "set remotebaud [target_info baudrate]" "" ""
+    }
+
+    set prev_timeout $timeout
+    set timeout 60
+    verbose "Timeout is now $timeout seconds" 2
+    gdb_test_multiple "target extended-remote [target_info netport]" "" {
+        -re ".*\[Ee\]rror.*$gdb_prompt $" {
+            perror "Couldn't set target for remote board."
+            cleanup
+            gdb_exit
+        }
+        -re "Remote debugging using.*$gdb_prompt" {
+            verbose "Set target to [target_info netport]"
+        }
+        timeout {
+            perror "Couldn't set target for remote board."
+            cleanup
+            gdb_exit
+        }
+    }
+    set timeout $prev_timeout
+    verbose "Timeout is now $timeout seconds" 2
+
+    # TEMPORARY
+    # gdb_test "set debug remote 1" "" ""
+}
+
+proc infer_host_exec { } {
+    set host_exec ""
+
+    send_gdb "info files\n"
+    gdb_expect 30 {
+	-re "Symbols from \"(\[^\"\]+)\"" {
+	    set host_exec $expect_out(1,string)
+	    exp_continue
+	}
+	-re "Local exec file:\[\r\n\]+\[ \t\]*`(\[^'\]+)'," {
+	    set host_exec $expect_out(1,string)
+	    exp_continue
+	}
+	-re "$gdb_prompt $" { }
+    }
+
+    return $host_exec
+}
+
+set saved_host_exec ""
+
+proc gdb_load { arg } {
+    global exec_downloaded
+    global saved_host_exec
+
+    set board_exec [target_info exec_file]
+
+    gdb_target_symbian
+
+    gdb_test "kill" "" "" "Kill the program being debugged.*y or n. $" "y"
+
+    set quoted_board_exec [string map {\\ \\\\} $board_exec]
+    gdb_test "set remote exec-file \"$quoted_board_exec\"" "" ""
+
+    # If we weren't passed an explicit binary, try to reuse the current
+    # one.  If we were, be sure to redownload it.
+
+    if { $arg == "" && $saved_host_exec == "" } {
+	set saved_host_exec [infer_host_exec]
+    } elseif { $arg != "" } {
+        set saved_host_exec $arg
+        if [info exists exec_downloaded] { unset exec_downloaded }
+	if [gdb_file_cmd $arg] { return -1 }
+    }
+
+    if { ! [info exists exec_downloaded] } {
+	global timeout
+	set prev_timeout $timeout
+	set timeout 60
+	gdb_test "remote-download ${saved_host_exec}.exe $quoted_board_exec" "" ""
+	set timeout $prev_timeout
+
+	set exec_downloaded 1
+    }
+}
