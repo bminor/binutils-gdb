@@ -135,30 +135,29 @@ static bfd_vma opd_entry_value
 #define BCTR		0x4e800420	/* bctr			     */
 
 
+#define ADDIS_R12_R12	0x3d8c0000	/* addis %r12,%r12,off@ha  */
 #define ADDIS_R2_R2	0x3c420000	/* addis %r2,%r2,off@ha  */
 #define ADDI_R2_R2	0x38420000	/* addi  %r2,%r2,off@l   */
 
 #define LD_R2_40R1	0xe8410028	/* ld    %r2,40(%r1)     */
 
-/* glink call stub instructions.  We enter with the index in R0, and the
-   address of glink entry in CTR.  From that, we can calculate PLT0.  */
+/* glink call stub instructions.  We enter with the index in R0.  */
 #define GLINK_CALL_STUB_SIZE (16*4)
-#define MFCTR_R12	0x7d8902a6	/* mfctr  %r12			*/
-#define SLDI_R11_R0_3	0x780b1f24	/* sldi	  %r11,%r0,3		*/
-#define ADDIC_R2_R0_32K 0x34408000	/* addic. %r2,%r0,-32768	*/
-#define SUB_R12_R12_R11 0x7d8b6050	/* sub	  %r12,%r12,%r11	*/
-#define SRADI_R2_R2_63	0x7c42fe76	/* sradi  %r2,%r2,63		*/
-#define SLDI_R11_R0_2	0x780b1764	/* sldi	  %r11,%r0,2		*/
-#define AND_R2_R2_R11	0x7c425838	/* and	  %r2,%r2,%r11		*/
-					/* sub	  %r12,%r12,%r11	*/
-#define ADD_R12_R12_R2	0x7d8c1214	/* add	  %r12,%r12,%r2		*/
-#define ADDIS_R12_R12	0x3d8c0000	/* addis  %r12,%r12,xxx@ha	*/
-					/* ld	  %r11,xxx@l(%r12)	*/
-#define ADDI_R12_R12	0x398c0000	/* addi	  %r12,%r12,xxx@l	*/
-					/* ld	  %r2,8(%r12)		*/
-					/* mtctr  %r11			*/
-					/* ld	  %r11,16(%r12)		*/
-					/* bctr				*/
+					/* 0:				*/
+					/*  .quad plt0-1f		*/
+					/* __glink:			*/
+#define MFLR_R12	0x7d8802a6	/*  mflr %12			*/
+#define BCL_20_31	0x429f0005	/*  bcl 20,31,1f		*/
+					/* 1:				*/
+#define MFLR_R11	0x7d6802a6	/*  mflr %11			*/
+#define LD_R2_M16R11	0xe84bfff0	/*  ld %2,(0b-1b)(%11)		*/
+#define MTLR_R12	0x7d8803a6	/*  mtlr %12			*/
+#define ADD_R12_R2_R11	0x7d825a14	/*  add %12,%2,%11		*/
+					/*  ld %11,0(%12)		*/
+					/*  ld %2,8(%12)		*/
+					/*  mtctr %11			*/
+					/*  ld %11,16(%12)		*/
+					/*  bctr			*/
 
 /* Pad with this.  */
 #define NOP		0x60000000
@@ -3728,7 +3727,7 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
   htab->glink = bfd_make_section_anyway_with_flags (dynobj, ".glink",
 						    flags);
   if (htab->glink == NULL
-      || ! bfd_set_section_alignment (dynobj, htab->glink, 2))
+      || ! bfd_set_section_alignment (dynobj, htab->glink, 3))
     return FALSE;
 
   /* Create branch lookup table for plt_branch stubs.  */
@@ -9458,18 +9457,6 @@ ppc64_elf_build_stubs (bfd_boolean emit_stub_syms,
       bfd_vma plt0;
 
       /* Build the .glink plt call stub.  */
-      plt0 = (htab->plt->output_section->vma
-	      + htab->plt->output_offset
-	      - (htab->glink->output_section->vma
-		 + htab->glink->output_offset
-		 + GLINK_CALL_STUB_SIZE));
-      if (plt0 + 0x80008000 > 0xffffffff)
-	{
-	  (*_bfd_error_handler) (_(".glink and .plt too far apart"));
-	  bfd_set_error (bfd_error_bad_value);
-	  return FALSE;
-	}
-
       if (htab->emit_stub_syms)
 	{
 	  struct elf_link_hash_entry *h;
@@ -9480,7 +9467,7 @@ ppc64_elf_build_stubs (bfd_boolean emit_stub_syms,
 	    {
 	      h->root.type = bfd_link_hash_defined;
 	      h->root.u.def.section = htab->glink;
-	      h->root.u.def.value = 0;
+	      h->root.u.def.value = 8;
 	      h->ref_regular = 1;
 	      h->def_regular = 1;
 	      h->ref_regular_nonweak = 1;
@@ -9489,29 +9476,26 @@ ppc64_elf_build_stubs (bfd_boolean emit_stub_syms,
 	    }
 	}
       p = htab->glink->contents;
-      bfd_put_32 (htab->glink->owner, MFCTR_R12, p);
+      plt0 = (htab->plt->output_section->vma
+	      + htab->plt->output_offset
+	      - (htab->glink->output_section->vma
+		 + htab->glink->output_offset
+		 + 16));
+      bfd_put_64 (htab->glink->owner, plt0, p);
+      p += 8;
+      bfd_put_32 (htab->glink->owner, MFLR_R12, p);
       p += 4;
-      bfd_put_32 (htab->glink->owner, SLDI_R11_R0_3, p);
+      bfd_put_32 (htab->glink->owner, BCL_20_31, p);
       p += 4;
-      bfd_put_32 (htab->glink->owner, ADDIC_R2_R0_32K, p);
+      bfd_put_32 (htab->glink->owner, MFLR_R11, p);
       p += 4;
-      bfd_put_32 (htab->glink->owner, SUB_R12_R12_R11, p);
+      bfd_put_32 (htab->glink->owner, LD_R2_M16R11, p);
       p += 4;
-      bfd_put_32 (htab->glink->owner, SRADI_R2_R2_63, p);
+      bfd_put_32 (htab->glink->owner, MTLR_R12, p);
       p += 4;
-      bfd_put_32 (htab->glink->owner, SLDI_R11_R0_2, p);
+      bfd_put_32 (htab->glink->owner, ADD_R12_R2_R11, p);
       p += 4;
-      bfd_put_32 (htab->glink->owner, AND_R2_R2_R11, p);
-      p += 4;
-      bfd_put_32 (htab->glink->owner, SUB_R12_R12_R11, p);
-      p += 4;
-      bfd_put_32 (htab->glink->owner, ADD_R12_R12_R2, p);
-      p += 4;
-      bfd_put_32 (htab->glink->owner, ADDIS_R12_R12 | PPC_HA (plt0), p);
-      p += 4;
-      bfd_put_32 (htab->glink->owner, LD_R11_0R12 | PPC_LO (plt0), p);
-      p += 4;
-      bfd_put_32 (htab->glink->owner, ADDI_R12_R12 | PPC_LO (plt0), p);
+      bfd_put_32 (htab->glink->owner, LD_R11_0R12, p);
       p += 4;
       bfd_put_32 (htab->glink->owner, LD_R2_0R12 | 8, p);
       p += 4;
@@ -9521,6 +9505,11 @@ ppc64_elf_build_stubs (bfd_boolean emit_stub_syms,
       p += 4;
       bfd_put_32 (htab->glink->owner, BCTR, p);
       p += 4;
+      while (p - htab->glink->contents < GLINK_CALL_STUB_SIZE)
+	{
+	  bfd_put_32 (htab->glink->owner, NOP, p);
+	  p += 4;
+	}
 
       /* Build the .glink lazy link call stubs.  */
       indx = 0;
@@ -9539,7 +9528,7 @@ ppc64_elf_build_stubs (bfd_boolean emit_stub_syms,
 	      p += 4;
 	    }
 	  bfd_put_32 (htab->glink->owner,
-		      B_DOT | ((htab->glink->contents - p) & 0x3fffffc), p);
+		      B_DOT | ((htab->glink->contents - p + 8) & 0x3fffffc), p);
 	  indx++;
 	  p += 4;
 	}

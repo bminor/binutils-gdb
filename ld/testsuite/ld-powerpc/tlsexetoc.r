@@ -16,7 +16,7 @@ Section Headers:
  +\[ 4\] \.dynstr +.*
  +\[ 5\] \.rela\.dyn +.*
  +\[ 6\] \.rela\.plt +.*
- +\[ 7\] \.text +PROGBITS .* 0+bc 0+ +AX +0 +0 +4
+ +\[ 7\] \.text +PROGBITS .* 0+c0 0+ +AX +0 +0 +8
  +\[ 8\] \.rodata +PROGBITS .* 0+ 0+ +A +0 +0 +8
  +\[ 9\] \.tdata +PROGBITS .* 0+38 0+ WAT +0 +0 +8
  +\[10\] \.tbss +NOBITS .* 0+38 0+ WAT +0 +0 +8

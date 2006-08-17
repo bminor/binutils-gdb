@@ -1,5 +1,10 @@
 2006-08-17  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (create_linkage_sections): Align .glink to 8 bytes.
+	(ppc64_elf_build_stubs): Use new lazy linking stub.
+
+2006-08-17  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf64-ppc.c (ppc64_elf_size_stubs): Ignore non-code sections.
 
 2006-08-16  H.J. Lu  <hongjiu.lu@intel.com>
