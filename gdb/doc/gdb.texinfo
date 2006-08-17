@@ -23293,14 +23293,17 @@ components.
 
 @item S @var{AA}
 The program received signal number @var{AA} (a two-digit hexidecimal
-number).
+number).  This is equivalent to a @samp{T} response with no
+@var{n}:@var{r} pairs.
 
 @item T @var{AA} @var{n1}:@var{r1};@var{n2}:@var{r2};@dots{}
 @cindex @samp{T} packet reply
 The program received signal number @var{AA} (a two-digit hexidecimal
-number).  Single-step and breakpoint traps are reported this way.  The
-@samp{@var{n}:@var{r}} pairs give the values of important registers or
-other information:
+number).  This is equivalent to an @samp{S} response, except that the
+@samp{@var{n}:@var{r}} pairs can carry values of important registers
+and other information directly in the stop reply packet, reducing
+round-trip latency.  Single-step and breakpoint traps are reported
+this way.  Each @samp{@var{n}:@var{r}} pair is interpreted as follows:
 @enumerate
 @item
 If @var{n} is a hexidecimal number, it is a register number, and the
