@@ -3622,6 +3622,13 @@ get_program_header_size (bfd *abfd, struct bfd_link_info *info)
     {
       /* We need a PT_DYNAMIC segment.  */
       ++segs;
+      
+      if (elf_tdata (abfd)->relro)
+	{
+	  /* We need a PT_GNU_RELRO segment only when there is a
+	     PT_DYNAMIC segment.  */
+	  ++segs;
+	}
     }
 
   if (elf_tdata (abfd)->eh_frame_hdr)
@@ -3633,12 +3640,6 @@ get_program_header_size (bfd *abfd, struct bfd_link_info *info)
   if (elf_tdata (abfd)->stack_flags)
     {
       /* We need a PT_GNU_STACK segment.  */
-      ++segs;
-    }
-
-  if (elf_tdata (abfd)->relro)
-    {
-      /* We need a PT_GNU_RELRO segment.  */
       ++segs;
     }
 
@@ -4110,8 +4111,10 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	  pm = &m->next;
 	}
 
-      if (elf_tdata (abfd)->relro)
+      if (dynsec != NULL && elf_tdata (abfd)->relro)
 	{
+	  /* We make a PT_GNU_RELRO segment only when there is a
+	     PT_DYNAMIC segment.  */
 	  amt = sizeof (struct elf_segment_map);
 	  m = bfd_zalloc (abfd, amt);
 	  if (m == NULL)
@@ -4591,9 +4594,11 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		    p->p_memsz += o->offset + o->size;
 		}
 
-	      if (align > p->p_align
-		  && (p->p_type != PT_LOAD
-		      || (abfd->flags & D_PAGED) == 0))
+	      if (p->p_type == PT_GNU_RELRO)
+		p->p_align = 1;
+	      else if (align > p->p_align
+		       && (p->p_type != PT_LOAD
+			   || (abfd->flags & D_PAGED) == 0))
 		p->p_align = align;
 	    }
 

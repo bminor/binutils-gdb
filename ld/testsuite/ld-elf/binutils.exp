@@ -101,6 +101,11 @@ binutils_test strip "-shared" maxpage1
 binutils_test objcopy "" maxpage1
 binutils_test objcopy "-shared" maxpage1
 
+binutils_test strip "-z relro" maxpage1
+binutils_test strip "-z relro -shared" maxpage1
+binutils_test objcopy "-z relro" maxpage1
+binutils_test objcopy "-z relro -shared" maxpage1
+
 binutils_test objcopy "" tbss1
 binutils_test objcopy "-shared" tbss1
 binutils_test objcopy "-z max-page-size=0x100000" tbss1

@@ -1,3 +1,12 @@
+2006-08-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/3015
+	* elf.c (get_program_header_size): Add a PT_GNU_RELRO segment
+	only if there is a PT_DYNAMIC segment.
+	(_bfd_elf_map_sections_to_segments): Likewise.
+	(assign_file_positions_for_load_sections): Set PT_GNU_RELRO
+	segment alignment to 1.
+
 2006-08-15  Thiemo Seufer  <ths@mips.com>
             Nigel Stephens  <nigel@mips.com>
 
