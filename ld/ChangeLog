@@ -1,3 +1,9 @@
+2006-08-17  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* pe-dll.c (autofilter_symbolprefixlist): Remove .idata$.
+	(generate_reloc): Revert to skipping sections without a SEC_LOAD flag,
+	and to not skipping .idata* sections.
+
 2006-08-16  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 3052

@@ -296,7 +296,6 @@ static autofilter_entry_type autofilter_symbolprefixlist[] =
   { "__imp_", 6 },
   /* Do __imp_ explicitly to save time.  */
   { "__rtti_", 7 },
-  { ".idata$", 7 },
   /* Don't re-export auto-imported symbols.  */
   { "_nm_", 4 },
   { "__builtin_", 10 },
@@ -1155,12 +1154,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 	  int nsyms, symsize;
 
 	  /* If it's not loaded, we don't need to relocate it this way.  */
-#if 0	  /* Some toolchains can generate .data sections without a SEC_LOAD flag but with relocs.  */
 	  if (!(s->output_section->flags & SEC_LOAD))
-	    continue;
-#endif
-	  /* Huh ?  */
-	  if (strncmp (bfd_get_section_name (abfd, s), ".idata",6) == 0)
 	    continue;
 
 	  /* I don't know why there would be a reloc for these, but I've
