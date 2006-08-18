@@ -3390,6 +3390,8 @@ elf32_arm_begin_write_processing (bfd *abfd ATTRIBUTE_UNUSED,
     return;
 
   globals = elf32_arm_hash_table (link_info);
+  /* If blx is available then exported Thumb symbols are OK and there is
+     nothing to do.  */
   if (globals->use_blx)
     return;
 
