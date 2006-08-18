@@ -1,3 +1,7 @@
+2006-08-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-nat.c (sparc_xfer_wcookie): Signal EOF.  Tweak comment.
+
 2006-08-18  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2read.c (quirk_gcc_member_function_pointer): New.
