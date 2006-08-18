@@ -2089,6 +2089,10 @@ struct elf32_arm_link_hash_entry
 #define GOT_TLS_GD	2
 #define GOT_TLS_IE	4
     unsigned char tls_type;
+
+    /* The symbol marking the real symbol location for exported thumb
+       symbols with Arm stubs.  */
+    struct elf_link_hash_entry *export_glue;
   };
 
 /* Traverse an arm ELF linker hash table.  */
@@ -2200,6 +2204,7 @@ elf32_arm_link_hash_newfunc (struct bfd_hash_entry * entry,
       ret->tls_type = GOT_UNKNOWN;
       ret->plt_thumb_refcount = 0;
       ret->plt_got_offset = -1;
+      ret->export_glue = NULL;
     }
 
   return (struct bfd_hash_entry *) ret;
@@ -2578,7 +2583,9 @@ bfd_elf32_arm_allocate_interworking_sections (struct bfd_link_info * info)
   return TRUE;
 }
 
-static void
+/* Allocate space and symbols for calling a Thumb function from Arm mode.
+   returns the symbol identifying teh stub.  */
+static struct elf_link_hash_entry *
 record_arm_to_thumb_glue (struct bfd_link_info * link_info,
 			  struct elf_link_hash_entry * h)
 {
@@ -2613,7 +2620,7 @@ record_arm_to_thumb_glue (struct bfd_link_info * link_info,
     {
       /* We've already seen this guy.  */
       free (tmp_name);
-      return;
+      return myh;
     }
 
   /* The only trick here is using hash_table->arm_glue_size as the value.
@@ -2636,7 +2643,7 @@ record_arm_to_thumb_glue (struct bfd_link_info * link_info,
   else
     globals->arm_glue_size += ARM2THUMB_STATIC_GLUE_SIZE;
 
-  return;
+  return myh;
 }
 
 static void
@@ -3191,30 +3198,25 @@ elf32_thumb_to_arm_stub (struct bfd_link_info * info,
   return TRUE;
 }
 
-/* Arm code calling a Thumb function.  */
+/* Populate an Arm to Thumb stub.  Returns the stub symbol.  */
 
-static int
-elf32_arm_to_thumb_stub (struct bfd_link_info * info,
-			 const char *           name,
-			 bfd *                  input_bfd,
-			 bfd *                  output_bfd,
-			 asection *             input_section,
-			 bfd_byte *             hit_data,
-			 asection *             sym_sec,
-			 bfd_vma                offset,
-			 bfd_signed_vma         addend,
-			 bfd_vma                val)
+static struct elf_link_hash_entry *
+elf32_arm_create_thumb_stub (struct bfd_link_info * info,
+			     const char *           name,
+			     bfd *                  input_bfd,
+			     bfd *                  output_bfd,
+			     asection *             sym_sec,
+			     bfd_vma                val,
+			     asection		    *s)
 {
-  unsigned long int tmp;
   bfd_vma my_offset;
-  asection * s;
   long int ret_offset;
   struct elf_link_hash_entry * myh;
   struct elf32_arm_link_hash_table * globals;
 
   myh = find_arm_glue (info, name, input_bfd);
   if (myh == NULL)
-    return FALSE;
+    return NULL;
 
   globals = elf32_arm_hash_table (info);
 
@@ -3222,11 +3224,6 @@ elf32_arm_to_thumb_stub (struct bfd_link_info * info,
   BFD_ASSERT (globals->bfd_of_glue_owner != NULL);
 
   my_offset = myh->root.u.def.value;
-  s = bfd_get_section_by_name (globals->bfd_of_glue_owner,
-			       ARM2THUMB_GLUE_SECTION_NAME);
-  BFD_ASSERT (s != NULL);
-  BFD_ASSERT (s->contents != NULL);
-  BFD_ASSERT (s->output_section != NULL);
 
   if ((my_offset & 0x01) == 0x01)
     {
@@ -3280,6 +3277,47 @@ elf32_arm_to_thumb_stub (struct bfd_link_info * info,
 
   BFD_ASSERT (my_offset <= globals->arm_glue_size);
 
+  return myh;
+}
+
+/* Arm code calling a Thumb function.  */
+
+static int
+elf32_arm_to_thumb_stub (struct bfd_link_info * info,
+			 const char *           name,
+			 bfd *                  input_bfd,
+			 bfd *                  output_bfd,
+			 asection *             input_section,
+			 bfd_byte *             hit_data,
+			 asection *             sym_sec,
+			 bfd_vma                offset,
+			 bfd_signed_vma         addend,
+			 bfd_vma                val)
+{
+  unsigned long int tmp;
+  bfd_vma my_offset;
+  asection * s;
+  long int ret_offset;
+  struct elf_link_hash_entry * myh;
+  struct elf32_arm_link_hash_table * globals;
+
+  globals = elf32_arm_hash_table (info);
+
+  BFD_ASSERT (globals != NULL);
+  BFD_ASSERT (globals->bfd_of_glue_owner != NULL);
+
+  s = bfd_get_section_by_name (globals->bfd_of_glue_owner,
+			       ARM2THUMB_GLUE_SECTION_NAME);
+  BFD_ASSERT (s != NULL);
+  BFD_ASSERT (s->contents != NULL);
+  BFD_ASSERT (s->output_section != NULL);
+
+  myh = elf32_arm_create_thumb_stub (info, name, input_bfd, output_bfd,
+				     sym_sec, val, s);
+  if (!myh)
+    return FALSE;
+
+  my_offset = myh->root.u.def.value;
   tmp = bfd_get_32 (input_bfd, hit_data);
   tmp = tmp & 0xFF000000;
 
@@ -3297,6 +3335,63 @@ elf32_arm_to_thumb_stub (struct bfd_link_info * info,
   bfd_put_32 (output_bfd, (bfd_vma) tmp, hit_data - input_section->vma);
 
   return TRUE;
+}
+
+/* Populate Arm stub for an exported Thumb function.  */
+
+static bfd_boolean
+elf32_arm_to_thumb_export_stub (struct elf_link_hash_entry *h, void * inf)
+{
+  struct bfd_link_info * info = (struct bfd_link_info *) inf;
+  asection * s;
+  struct elf_link_hash_entry * myh;
+  struct elf32_arm_link_hash_entry *eh;
+  struct elf32_arm_link_hash_table * globals;
+  asection *sec;
+  bfd_vma val;
+
+  eh = elf32_arm_hash_entry(h);
+  /* Allocate stubs for exported Thumb functions on v4t.  */
+  if (eh->export_glue == NULL)
+    return TRUE;
+
+  globals = elf32_arm_hash_table (info);
+
+  BFD_ASSERT (globals != NULL);
+  BFD_ASSERT (globals->bfd_of_glue_owner != NULL);
+
+  s = bfd_get_section_by_name (globals->bfd_of_glue_owner,
+			       ARM2THUMB_GLUE_SECTION_NAME);
+  BFD_ASSERT (s != NULL);
+  BFD_ASSERT (s->contents != NULL);
+  BFD_ASSERT (s->output_section != NULL);
+
+  sec = eh->export_glue->root.u.def.section;
+  val = eh->export_glue->root.u.def.value + sec->output_offset
+	+ sec->output_section->vma;
+  myh = elf32_arm_create_thumb_stub (info, h->root.root.string,
+				     h->root.u.def.section->owner,
+				     globals->obfd, sec, val, s);
+  BFD_ASSERT (myh);
+  return TRUE;
+}
+
+/* Generate Arm stubs for exported Thumb symbols.  */
+static void
+elf32_arm_begin_write_processing (bfd *abfd ATTRIBUTE_UNUSED, 
+				  struct bfd_link_info *link_info)
+{
+  struct elf32_arm_link_hash_table * globals;
+
+  if (!link_info)
+    return;
+
+  globals = elf32_arm_hash_table (link_info);
+  if (globals->use_blx)
+    return;
+
+  elf_link_hash_traverse (&globals->root, elf32_arm_to_thumb_export_stub,
+			  link_info);
 }
 
 /* Some relocations map to different relocations depending on the
@@ -7462,6 +7557,36 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   else
     h->got.offset = (bfd_vma) -1;
 
+  /* Allocate stubs for exported Thumb functions on v4t.  */
+  if (!htab->use_blx && h->dynindx != -1
+      && ELF_ST_TYPE (h->type) == STT_ARM_TFUNC
+      && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
+    {
+      struct elf_link_hash_entry * th;
+      struct bfd_link_hash_entry * bh;
+      struct elf_link_hash_entry * myh;
+      char name[1024];
+      asection *s;
+      bh = NULL;
+      /* Create a new symbol to regist the real location of the function.  */
+      s = h->root.u.def.section;
+      sprintf(name, "__real_%s", h->root.root.string);
+      _bfd_generic_link_add_one_symbol (info, s->owner,
+					name, BSF_GLOBAL, s,
+					h->root.u.def.value,
+					NULL, TRUE, FALSE, &bh);
+
+      myh = (struct elf_link_hash_entry *) bh;
+      myh->type = ELF_ST_INFO (STB_LOCAL, STT_ARM_TFUNC);
+      myh->forced_local = 1;
+      eh->export_glue = myh;
+      th = record_arm_to_thumb_glue (info, h);
+      /* Point the symbol at the stub.  */
+      h->type = ELF_ST_INFO (ELF_ST_BIND (h->type), STT_FUNC);
+      h->root.u.def.section = th->root.u.def.section;
+      h->root.u.def.value = th->root.u.def.value & ~1;
+    }
+
   if (eh->relocs_copied == NULL)
     return TRUE;
 
@@ -9304,6 +9429,8 @@ const struct elf_size_info elf32_arm_size_info = {
   elf32_arm_additional_program_headers
 #define elf_backend_output_arch_local_syms \
   elf32_arm_output_arch_local_syms
+#define elf_backend_begin_write_processing \
+    elf32_arm_begin_write_processing
 
 #define elf_backend_can_refcount    1
 #define elf_backend_can_gc_sections 1
@@ -9445,8 +9572,7 @@ elf32_arm_symbian_special_sections[] =
 
 static void
 elf32_arm_symbian_begin_write_processing (bfd *abfd, 
-					  struct bfd_link_info *link_info
-					    ATTRIBUTE_UNUSED)
+					  struct bfd_link_info *link_info)
 {
   /* BPABI objects are never loaded directly by an OS kernel; they are
      processed by a postlinker first, into an OS-specific format.  If
@@ -9457,6 +9583,7 @@ elf32_arm_symbian_begin_write_processing (bfd *abfd,
      recognize that the program headers should not be mapped into any
      loadable segment.  */
   abfd->flags &= ~D_PAGED;
+  elf32_arm_begin_write_processing(abfd, link_info);
 }
 
 static bfd_boolean

@@ -103,9 +103,6 @@ arm_elf_before_allocation (void)
 {
   bfd *tem;
 
-  /* Call the standard elf routine.  */
-  gld${EMULATION_NAME}_before_allocation ();
-
   if (link_info.input_bfds != NULL)
     {
       /* The interworking bfd must be the last one in the link.  */
@@ -125,6 +122,9 @@ arm_elf_before_allocation (void)
 	bfd_elf32_arm_get_bfd_for_interworking (bfd_for_interwork, &link_info);
     }
   /* We should be able to set the size of the interworking stub section.  */
+
+  /* Call the standard elf routine.  */
+  gld${EMULATION_NAME}_before_allocation ();
 
   /* Here we rummage through the found bfds to collect glue information.  */
   /* FIXME: should this be based on a command line option? krk@cygnus.com  */
