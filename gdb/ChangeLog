@@ -1,3 +1,8 @@
+2006-08-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf2read.c (quirk_gcc_member_function_pointer): New.
+	(read_structure_type): Call it.
+
 2006-08-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* NEWS: Mention "set trust-readonly-sections" fix.
