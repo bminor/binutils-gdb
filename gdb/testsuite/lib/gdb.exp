@@ -1188,7 +1188,7 @@ proc skip_altivec_tests {} {
     # Some simulators are known to not support VMX instructions.
     if { [istarget powerpc-*-eabi] || [istarget powerpc*-*-eabispe] } {
         verbose "$me:  target known to not support VMX, returning 1" 2
-        return [set $skip_vmx_tests_saved 1]
+        return [set skip_vmx_tests_saved 1]
     }
 
     # Make sure we have a compiler that understands altivec.
