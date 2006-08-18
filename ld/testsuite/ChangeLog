@@ -1,3 +1,12 @@
+2006-08-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/3052
+	* ld-elf/loadaddr.s: New file.
+	* ld-elf/loadaddr1.d: Likewise.
+	* ld-elf/loadaddr1.t: Likewise.
+	* ld-elf/loadaddr2.d: Likewise.
+	* ld-elf/loadaddr2.t: Likewise.
+
 2006-08-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/tlsexe.d: Update for lazy link stub change.
