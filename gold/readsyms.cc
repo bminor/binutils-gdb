@@ -73,7 +73,8 @@ Read_symbols::run(Workqueue* workqueue)
 					p, bytes);
 					
 	  Read_symbols_data sd = obj->read_symbols();
-	  workqueue->queue(new Add_symbols(obj, sd, this->this_blocker_,
+	  workqueue->queue(new Add_symbols(this->symtab_, obj, sd,
+					   this->this_blocker_,
 					   this->next_blocker_));
 
 	  // Opening the file locked it, so now we need to unlock it.
@@ -117,7 +118,7 @@ Add_symbols::locks(Workqueue* workqueue)
 void
 Add_symbols::run(Workqueue*)
 {
-  this->object_->add_symbols(this->sd_);
+  this->object_->add_symbols(this->symtab_, this->sd_);
 }
 
 } // End namespace gold.

@@ -3,10 +3,12 @@
 #ifndef GOLD_OBJECT_H
 #define GOLD_OBJECT_H
 
+#include <cassert>
+
 #include "elfcpp.h"
-#include "targetsize.h"
-#include "target.h"
 #include "fileread.h"
+#include "target.h"
+#include "symtab.h"
 
 namespace gold
 {
@@ -26,8 +28,9 @@ struct Read_symbols_data
 };
 
 // Object is an interface which represents either a 32-bit or a 64-bit
-// object file.  The actual instantiations are Sized_object<32> and
-// Sized_object<64>
+// input object.  This can be a regular object file (ET_REL) or a
+// shared object (ET_DYN).  The actual instantiations are
+// Sized_object<32> and Sized_object<64>
 
 class Object
 {
@@ -36,16 +39,24 @@ class Object
   // (e.g., libfoo.a(bar.o) if this is in an archive.  INPUT_FILE is
   // used to read the file.  OFFSET is the offset within the input
   // file--0 for a .o or .so file, something else for a .a file.
-  Object(const std::string& name, Input_file* input_file, off_t offset = 0)
-    : name_(name), input_file_(input_file), offset_(offset)
+  Object(const std::string& name, Input_file* input_file, bool is_dynamic,
+	 off_t offset = 0)
+    : name_(name), input_file_(input_file), offset_(offset),
+      is_dynamic_(is_dynamic), target_(NULL)
   { }
 
   virtual ~Object()
   { }
 
+  // Return the name of the object as we would report it to the tuser.
   const std::string&
   name() const
   { return this->name_; }
+
+  // Return whether this is a dynamic object.
+  bool
+  is_dynamic() const
+  { return this->is_dynamic_; }
 
   // Read the symbol and relocation information.
   Read_symbols_data
@@ -54,8 +65,20 @@ class Object
 
   // Add symbol information to the global symbol table.
   void
-  add_symbols(Read_symbols_data rd)
-  { this->do_add_symbols(rd); }
+  add_symbols(Symbol_table* symtab, Read_symbols_data rd)
+  { this->do_add_symbols(symtab, rd); }
+
+  // Return the target structure associated with this object.
+  Target*
+  target()
+  { return this->target_; }
+
+  // Return the sized target structure associated with this object.
+  // This is like the target method but it returns a pointer of
+  // appropriate checked type.
+  template<int size, bool big_endian>
+  Sized_target<size, big_endian>*
+  sized_target();
 
  protected:
   // Read the symbols--implemented by child class.
@@ -65,7 +88,7 @@ class Object
   // Add symbol information to the global symbol table--implemented by
   // child class.
   virtual void
-  do_add_symbols(Read_symbols_data) = 0;
+  do_add_symbols(Symbol_table*, Read_symbols_data) = 0;
 
   // Get the file.
   Input_file*
@@ -80,6 +103,11 @@ class Object
   // Get a view into the underlying file.
   const unsigned char*
   get_view(off_t start, off_t size);
+
+  // Set the target.
+  void
+  set_target(Target* target)
+  { this->target_ = target; }
 
   // Read data from the underlying file.
   void
@@ -101,9 +129,25 @@ class Object
   // Offset within the file--0 for an object file, non-0 for an
   // archive.
   off_t offset_;
+  // Whether this is a dynamic object.
+  bool is_dynamic_;
+  // Target functions--may be NULL if the target is not known.
+  Target* target_;
 };
 
-// The functions of Object which are size specific.
+// Implement sized_target inline for efficiency.  This approach breaks
+// static type checking, but is made safe using asserts.
+
+template<int size, bool big_endian>
+inline Sized_target<size, big_endian>*
+Object::sized_target()
+{
+  assert(this->target_->get_size() == size);
+  assert(this->target_->is_big_endian() ? big_endian : !big_endian);
+  return static_cast<Sized_target<size, big_endian>*>(this->target_);
+}
+
+// A regular object file.  This is size and endian specific.
 
 template<int size, bool big_endian>
 class Sized_object : public Object
@@ -121,7 +165,11 @@ class Sized_object : public Object
   do_read_symbols();
 
   void
-  do_add_symbols(Read_symbols_data);
+  do_add_symbols(Symbol_table*, Read_symbols_data);
+
+  Sized_target<size, big_endian>*
+  sized_target()
+  { return this->Object::sized_target<size, big_endian>(); }
 
  private:
   // This object may not be copied.
@@ -136,8 +184,6 @@ class Sized_object : public Object
   elfcpp::Elf_Half machine_;
   // ELF file header e_flags field.
   unsigned int flags_;
-  // Target functions--may be NULL.
-  Target* target_;
   // File offset of section header table.
   off_t shoff_;
   // Number of input sections.
@@ -146,6 +192,8 @@ class Sized_object : public Object
   unsigned int shstrndx_;
   // Index of SHT_SYMTAB section.
   unsigned int symtab_shnum_;
+  // The entries in the symbol table for the external symbols.
+  Symbol** symbols_;
 };
 
 // Return an Object appropriate for the input file.  P is BYTES long,

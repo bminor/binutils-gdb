@@ -396,6 +396,25 @@ enum STT
   STT_HIPROC = 15
 };
 
+inline STB
+elf_st_bind(unsigned char info)
+{
+  return static_cast<STB>(info >> 4);
+}
+
+inline STT
+elf_st_type(unsigned char info)
+{
+  return static_cast<STT>(info & 0xf);
+}
+
+inline unsigned char
+elf_st_info(STB bind, STT type)
+{
+  return ((static_cast<unsigned char>(bind) << 4)
+	  + (static_cast<unsigned char>(type) & 0xf));
+}
+
 // Symbol visibility from Sym st_other field.
 
 enum STV
@@ -405,6 +424,18 @@ enum STV
   STV_HIDDEN = 2,
   STV_PROTECTED = 3
 };
+
+inline STV
+elf_st_visibility(unsigned char other)
+{
+  return static_cast<STV>(other & 0x3);
+}
+
+inline unsigned char
+elf_st_nonvis(unsigned char other)
+{
+  return static_cast<STV>(other >> 2);
+}
 
 } // End namespace elfcpp.
 
@@ -576,15 +607,31 @@ class Sym
 
   typename Elf_types<size>::Elf_WXword
   get_st_size() const
-  { return internal::convert_wxword<big_endian>(this->p_->st_size); }
+  { return internal::convert_wxword<size, big_endian>(this->p_->st_size); }
 
   unsigned char
   get_st_info() const
   { return this->p_->st_info; }
 
+  STB
+  get_st_bind() const
+  { return elf_st_bind(this->get_st_info()); }
+
+  STT
+  get_st_type() const
+  { return elf_st_type(this->get_st_info()); }
+
   unsigned char
   get_st_other() const
   { return this->p_->st_other; }
+
+  STV
+  get_st_visibility() const
+  { return elf_st_visibility(this->get_st_other()); }
+
+  unsigned char
+  get_st_nonvis() const
+  { return elf_st_nonvis(this->get_st_other()); }
 
   Elf_Half
   get_st_shndx() const

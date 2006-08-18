@@ -7,6 +7,7 @@
 #include <cassert>
 
 #include "object.h"
+#include "target-select.h"
 
 namespace gold
 {
@@ -40,16 +41,16 @@ Sized_object<size, big_endian>::Sized_object(
     Input_file* input_file,
     off_t offset,
     const elfcpp::Ehdr<size, big_endian>& ehdr)
-  : Object(name, input_file, offset),
+  : Object(name, input_file, false, offset),
     osabi_(ehdr.get_e_ident()[elfcpp::EI_OSABI]),
     abiversion_(ehdr.get_e_ident()[elfcpp::EI_ABIVERSION]),
     machine_(ehdr.get_e_machine()),
     flags_(ehdr.get_e_flags()),
-    target_(NULL),
     shoff_(ehdr.get_e_shoff()),
     shnum_(0),
     shstrndx_(0),
-    symtab_shnum_(0)
+    symtab_shnum_(0),
+    symbols_(NULL)
 {
   if (ehdr.get_e_ehsize() != elfcpp::Elf_sizes<size>::ehdr_size)
     {
@@ -80,8 +81,15 @@ void
 Sized_object<size, big_endian>::setup(
     const elfcpp::Ehdr<size, big_endian>& ehdr)
 {
-  //  this->target_ = select_target(this->machine_, size, big_endian,
-  //				this->osabi_, this->abiversion_);
+  Target* target = select_target(this->machine_, size, big_endian,
+				 this->osabi_, this->abiversion_);
+  if (target == NULL)
+    {
+      fprintf(stderr, _("%s: %s: unsupported ELF machine number %d\n"),
+	      program_name, this->name().c_str(), this->machine_);
+      gold_exit(false);
+    }
+  this->set_target(target);
   unsigned int shnum = ehdr.get_e_shnum();
   unsigned int shstrndx = ehdr.get_e_shstrndx();
   if ((shnum == 0 || shstrndx == elfcpp::SHN_XINDEX)
@@ -143,9 +151,14 @@ Sized_object<size, big_endian>::do_read_symbols()
   elfcpp::Shdr<size, big_endian> symtabshdr(psymtabshdr);
   assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
 
+  // We only need the external symbols.
+  int sym_size = elfcpp::Elf_sizes<size>::sym_size;
+  off_t locsize = symtabshdr.get_sh_info() * sym_size;
+  off_t extoff = symtabshdr.get_sh_offset() + locsize;
+  off_t extsize = symtabshdr.get_sh_size() - locsize;
+
   // Read the symbol table.
-  File_view* fvsymtab = this->get_lasting_view(symtabshdr.get_sh_offset(),
-					       symtabshdr.get_sh_size());
+  File_view* fvsymtab = this->get_lasting_view(extoff, extsize);
 
   // Read the section header for the symbol names.
   unsigned int strtab_shnum = symtabshdr.get_sh_link();
@@ -173,7 +186,7 @@ Sized_object<size, big_endian>::do_read_symbols()
 
   Read_symbols_data ret;
   ret.symbols = fvsymtab;
-  ret.symbols_size = symtabshdr.get_sh_size();
+  ret.symbols_size = extsize;
   ret.symbol_names = fvstrtab;
   ret.symbol_names_size = strtabshdr.get_sh_size();
 
@@ -184,7 +197,8 @@ Sized_object<size, big_endian>::do_read_symbols()
 
 template<int size, bool big_endian>
 void
-Sized_object<size, big_endian>::do_add_symbols(Read_symbols_data sd)
+Sized_object<size, big_endian>::do_add_symbols(Symbol_table* symtab,
+					       Read_symbols_data sd)
 {
   if (sd.symbols == NULL)
     {
@@ -192,25 +206,24 @@ Sized_object<size, big_endian>::do_add_symbols(Read_symbols_data sd)
       return;
     }
 
-  int sym_size = elfcpp::Elf_sizes<size>::sym_size;
-  const unsigned char* symstart = sd.symbols->data();
-  const unsigned char* symend = symstart + sd.symbols_size;
-  for (const unsigned char* p = symstart; p < symend; p += sym_size)
+  unsigned int sym_size = elfcpp::Elf_sizes<size>::sym_size;
+  size_t symcount = sd.symbols_size / sym_size;
+  if (symcount * sym_size != sd.symbols_size)
     {
-      elfcpp::Sym<size, big_endian> sym(p);
-
-      unsigned int nameoff = sym.get_st_name();
-      if (nameoff >= sd.symbol_names_size)
-	{
-	  fprintf(stderr,
-		  _("%s: %s: invalid symbol name offset %u for symbol %d\n"),
-		  program_name, this->name().c_str(), nameoff,
-		  (p - symstart) / sym_size);
-	  gold_exit(false);
-	}
-      const unsigned char* name = sd.symbol_names->data() + nameoff;
-      printf("%s\n", name);
+      fprintf(stderr,
+	      _("%s: %s: size of symbols is not multiple of symbol size\n"),
+	      program_name, this->name().c_str());
+      gold_exit(false);
     }
+
+  this->symbols_ = new Symbol*[symcount];
+
+  const elfcpp::Sym<size, big_endian>* syms =
+    reinterpret_cast<const elfcpp::Sym<size, big_endian>*>(sd.symbols->data());
+  const char* sym_names =
+    reinterpret_cast<const char*>(sd.symbol_names->data());
+  symtab->add_from_object(this, syms, symcount, sym_names, 
+			  sd.symbol_names_size,  this->symbols_);
 }
 
 } // End namespace gold.

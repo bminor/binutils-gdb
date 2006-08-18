@@ -26,10 +26,10 @@ class Read_symbols : public Task
   // associated Add_symbols task from running before the previous one
   // has completed; it will be NULL for the first task.  NEXT_BLOCKER
   // is used to block the next input file from adding symbols.
-  Read_symbols(const General_options& options, const Dirsearch& dirpath,
-	       const Input_argument& input, Task_token* this_blocker,
-	       Task_token* next_blocker)
-    : options_(options), dirpath_(dirpath), input_(input),
+  Read_symbols(const General_options& options, Symbol_table* symtab,
+	       const Dirsearch& dirpath, const Input_argument& input,
+	       Task_token* this_blocker, Task_token* next_blocker)
+    : options_(options), symtab_(symtab), dirpath_(dirpath), input_(input),
       this_blocker_(this_blocker), next_blocker_(next_blocker)
   { }
 
@@ -48,6 +48,7 @@ class Read_symbols : public Task
 
  private:
   const General_options& options_;
+  Symbol_table* symtab_;
   const Dirsearch& dirpath_;
   const Input_argument& input_;
   Task_token* this_blocker_;
@@ -64,9 +65,9 @@ class Add_symbols : public Task
   // THIS_BLOCKER is used to prevent this task from running before the
   // one for the previous input file.  NEXT_BLOCKER is used to prevent
   // the next task from running.
-  Add_symbols(Object* object, Read_symbols_data sd, Task_token* this_blocker,
-	      Task_token* next_blocker)
-    : object_(object), sd_(sd), this_blocker_(this_blocker),
+  Add_symbols(Symbol_table* symtab, Object* object, Read_symbols_data sd,
+	      Task_token* this_blocker, Task_token* next_blocker)
+    : symtab_(symtab), object_(object), sd_(sd), this_blocker_(this_blocker),
       next_blocker_(next_blocker)
   { }
 
@@ -84,6 +85,7 @@ class Add_symbols : public Task
   run(Workqueue*);
 
 private:
+  Symbol_table* symtab_;
   Object* object_;
   Read_symbols_data sd_;
   Task_token* this_blocker_;

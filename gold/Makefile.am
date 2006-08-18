@@ -17,7 +17,7 @@ INCLUDES = -D_GNU_SOURCE \
 
 noinst_PROGRAMS = ld-new
 
-CFILES = \
+CCFILES = \
 	dirsearch.cc \
 	fileread.cc \
 	gold.cc \
@@ -25,6 +25,10 @@ CFILES = \
 	object.cc \
 	options.cc \
 	readsyms.cc \
+	resolve.cc \
+	symtab.cc \
+	stringpool.cc \
+	target-select.cc \
 	workqueue.cc
 
 HFILES = \
@@ -35,20 +39,25 @@ HFILES = \
 	object.h \
 	options.h \
 	readsyms.h \
+	stringpool.h \
 	symtab.h \
 	target.h \
 	targetsize.h \
+	target-select.h \
 	workqueue.h
+
+TARGETFILES = \
+	i386.cc
 
 OFILES = gold.o options.o
 
-POTFILES= $(CFILES) $(HFILES)
+POTFILES= $(CCFILES) $(HFILES) $(TARGETFILES)
 
 po/POTFILES.in: @MAINT@ Makefile
 	for f in $(POTFILES); do echo $$f; done | LC_COLLATE= sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
 
-ld_new_SOURCES = $(CFILES) $(HFILES)
+ld_new_SOURCES = $(CCFILES) $(HFILES) $(TARGETFILES)
 ld_new_DEPENDENCIES = $(LIBINTL_DEP)
 ld_new_LDADD = $(LIBINTL)
 
