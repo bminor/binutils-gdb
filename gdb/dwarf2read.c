@@ -3711,7 +3711,10 @@ is_vtable_name (const char *name, struct dwarf2_cu *cu)
 /* GCC outputs unnamed structures that are really pointers to member
    functions, with the ABI-specified layout.  If DIE (from CU) describes
    such a structure, set its type, and return nonzero.  Otherwise return
-   zero.  */
+   zero.
+
+   GCC shouldn't do this; it should just output pointer to member DIEs.
+   This is GCC PR debug/28767.  */
 
 static int
 quirk_gcc_member_function_pointer (struct die_info *die, struct dwarf2_cu *cu)
