@@ -1,3 +1,10 @@
+2006-08-18  Paul Brook  <paul@codesourcery.com>
+
+	* ld-arm/arm-elf.exp (armelftests): Add armthumb-lib.so.  Add
+	-use-blx to mixed-lib.so
+	* ld-arm/armthumb-lib.d: New file.
+	* ld-arm/armthumb-lib.sym: New file.
+
 2006-08-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/3052

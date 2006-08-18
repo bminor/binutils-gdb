@@ -1,3 +1,17 @@
+2006-08-18  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_link_hash_entry): Add export_glue.
+	(elf32_arm_link_hash_newfunc): Initialize export_glue.
+	(record_arm_to_thumb_glue): Return stub symbol.
+	(elf32_arm_create_thumb_stub): New function.
+	(elf32_arm_to_thumb_stub): Use it.
+	(elf32_arm_to_thumb_export_stub): New function.
+	(elf32_arm_begin_write_processing): New function.
+	(allocate_dynrelocs): Allocate Arm stubs.
+	(elf_backend_begin_write_processing): Define.
+	(elf32_arm_symbian_begin_write_processing): Remove ATTRIBUTE_UNUSED.
+	Call elf32_arm_begin_write_processing.
+
 2006-08-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (create_linkage_sections): Align .glink to 8 bytes.

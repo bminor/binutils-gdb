@@ -1,3 +1,8 @@
+2006-08-18  Paul Brook  <paul@codesourcery.com>
+
+	* emultempl/armelf.em (arm_elf_before_allocation): Call
+	gld${EMULATION_NAME}_before_allocation after setting interworking bfd.
+
 2006-08-17  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* pe-dll.c (autofilter_symbolprefixlist): Remove .idata$.
