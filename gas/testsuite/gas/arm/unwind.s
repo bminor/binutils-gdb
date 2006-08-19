@@ -27,6 +27,8 @@ foo2:	@ Custom personality routine
 	.fnend
 foo3:	@ Saving iwmmxt registers
 	.fnstart
+	.save {wr12}
+	.save {wr13}
 	.save {wr11}
 	.save {wr10}
 	.save {wr10, wr11}

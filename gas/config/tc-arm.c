@@ -3454,7 +3454,7 @@ s_arm_unwind_save_mmxwr (void)
 
 	      op = 0xffff << (reg - 1);
 	      if (reg > 0
-		  || ((mask & op) == (1u << (reg - 1))))
+		  && ((mask & op) == (1u << (reg - 1))))
 		{
 		  op = (1 << (reg + i + 1)) - 1;
 		  op &= ~((1 << reg) - 1);
