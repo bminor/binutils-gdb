@@ -129,7 +129,7 @@ static struct amd64_register_info const amd64_register_info[] =
 
 /* Return the name of register REGNUM.  */
 
-static const char *
+const char *
 amd64_register_name (int regnum)
 {
   if (regnum >= 0 && regnum < AMD64_NUM_REGS)
@@ -141,7 +141,7 @@ amd64_register_name (int regnum)
 /* Return the GDB type object for the "standard" data type of data in
    register REGNUM. */
 
-static struct type *
+struct type *
 amd64_register_type (struct gdbarch *gdbarch, int regnum)
 {
   gdb_assert (regnum >= 0 && regnum < AMD64_NUM_REGS);

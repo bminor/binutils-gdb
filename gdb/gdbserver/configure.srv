@@ -97,7 +97,7 @@ case "${target}" in
 			srv_linux_usrregs=yes
 			srv_linux_thread_db=yes
 			;;
-  x86_64-*-linux*)	srv_regobj=reg-x86-64.o
+  x86_64-*-linux*)	srv_regobj=reg-x86-64-linux.o
 			srv_tgtobj="linux-low.o linux-x86-64-low.o i387-fp.o"
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes

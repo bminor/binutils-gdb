@@ -1,3 +1,12 @@
+2006-08-19  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (clean): Clean reg-x86-64-linux.c.
+	(reg-x86-64-linux.o, reg-x86-64-linux.c): New.
+	* configure.srv (x86_64-*-linux*): Use reg-x86-64-linux.o.
+	* linux-x86-64-low.c (x86_64_regmap): Include ORIG_RAX.
+	(x86_64_fill_gregset, x86_64_store_gregset): Skip floating
+	point registers.
+
 2006-08-08  Richard Sandiford  <richard@codesourcery.com>
 
 	* server.c (terminal_fd): New variable.

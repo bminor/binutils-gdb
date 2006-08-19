@@ -1,3 +1,22 @@
+2006-08-19  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (amd64_linux_tdep_h): New.
+	(amd64-linux-nat.o, amd64-linux-tdep.o): Update.
+	* amd64-linux-nat.c (amd64_linux_gregset64_reg_offset): Add
+	ORIG_RAX.
+	(_initialize_amd64_linux_nat): Set amd64_native_gregset64_num_regs.
+	* amd64-linux-tdep.c (amd64_linux_register_name)
+	(amd64_linux_register_type, amd64_linux_register_reggroup_p)
+	(amd64_linux_write_pc): New.
+	(amd64_linux_init_abi): Use them, and update num_regs.
+	* amd64-linux-tdep.h: New file.
+	* amd64-tdep.c (amd64_register_name, amd64_register_type): Make
+	public.
+	* amd64-tdep.h (amd64_register_name, amd64_register_type): New
+	prototypes.
+
+	* regformats/reg-x86-64-linux.dat: New file.
+
 2006-08-18  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* infrun.c (handle_inferior_event): Check the current frame ID

@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux x86-64.
 
-   Copyright (C) 2001, 2003, 2004, 2005 Free Software Foundation, Inc.
+   Copyright (C) 2001, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
    Contributed by Jiri Smid, SuSE Labs.
 
    This file is part of GDB.
@@ -26,6 +26,9 @@
 #include "regcache.h"
 #include "osabi.h"
 #include "symtab.h"
+#include "gdbtypes.h"
+#include "reggroups.h"
+#include "amd64-linux-tdep.h"
 
 #include "gdb_string.h"
 
@@ -199,6 +202,61 @@ static int amd64_linux_sc_reg_offset[] =
   -1				/* %gs */
 };
 
+/* Replacement register functions which know about %orig_rax.  */
+
+static const char *
+amd64_linux_register_name (int reg)
+{
+  if (reg == AMD64_LINUX_ORIG_RAX_REGNUM)
+    return "orig_rax";
+
+  return amd64_register_name (reg);
+}
+
+static struct type *
+amd64_linux_register_type (struct gdbarch *gdbarch, int reg)
+{
+  if (reg == AMD64_LINUX_ORIG_RAX_REGNUM)
+    return builtin_type_int64;
+
+  return amd64_register_type (gdbarch, reg);
+}
+
+static int
+amd64_linux_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
+				 struct reggroup *group)
+{ 
+  if (regnum == AMD64_LINUX_ORIG_RAX_REGNUM)
+    return (group == system_reggroup
+            || group == save_reggroup
+            || group == restore_reggroup);
+  return default_register_reggroup_p (gdbarch, regnum, group);
+}
+
+/* Set the program counter for process PTID to PC.  */
+
+static void
+amd64_linux_write_pc (CORE_ADDR pc, ptid_t ptid)
+{
+  write_register_pid (AMD64_RIP_REGNUM, pc, ptid);
+
+  /* We must be careful with modifying the program counter.  If we
+     just interrupted a system call, the kernel might try to restart
+     it when we resume the inferior.  On restarting the system call,
+     the kernel will try backing up the program counter even though it
+     no longer points at the system call.  This typically results in a
+     SIGSEGV or SIGILL.  We can prevent this by writing `-1' in the
+     "orig_rax" pseudo-register.
+
+     Note that "orig_rax" is saved when setting up a dummy call frame.
+     This means that it is properly restored when that frame is
+     popped, and that the interrupted system call will be restarted
+     when we resume the inferior on return from a function call from
+     within GDB.  In all other cases the system call will not be
+     restarted.  */
+  write_register_pid (AMD64_LINUX_ORIG_RAX_REGNUM, -1, ptid);
+}
+
 static void
 amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -218,6 +276,13 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* GNU/Linux uses SVR4-style shared libraries.  */
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_lp64_fetch_link_map_offsets);
+
+  /* Add the %orig_rax register used for syscall restarting.  */
+  set_gdbarch_write_pc (gdbarch, amd64_linux_write_pc);
+  set_gdbarch_num_regs (gdbarch, AMD64_LINUX_NUM_REGS);
+  set_gdbarch_register_name (gdbarch, amd64_linux_register_name);
+  set_gdbarch_register_type (gdbarch, amd64_linux_register_type);
+  set_gdbarch_register_reggroup_p (gdbarch, amd64_linux_register_reggroup_p);
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,

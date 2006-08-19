@@ -206,7 +206,7 @@ clean:
 	rm -f gdbserver gdbreplay core make.log
 	rm -f reg-arm.c reg-i386.c reg-ia64.c reg-m32r.c reg-m68k.c reg-mips.c
 	rm -f reg-ppc.c reg-sh.c reg-x86-64.c reg-i386-linux.c
-	rm -f reg-cris.c reg-crisv32.c
+	rm -f reg-cris.c reg-crisv32.c reg-x86-64-linux.c
 
 maintainer-clean realclean distclean: clean
 	rm -f nm.h tm.h xm.h config.status config.h stamp-h config.log
@@ -334,5 +334,8 @@ reg-sh.c : $(srcdir)/../regformats/reg-sh.dat $(regdat_sh)
 reg-x86-64.o : reg-x86-64.c $(regdef_h)
 reg-x86-64.c : $(srcdir)/../regformats/reg-x86-64.dat $(regdat_sh)
 	sh $(regdat_sh) $(srcdir)/../regformats/reg-x86-64.dat reg-x86-64.c
+reg-x86-64-linux.o : reg-x86-64-linux.c $(regdef_h)
+reg-x86-64-linux.c : $(srcdir)/../regformats/reg-x86-64-linux.dat $(regdat_sh)
+	sh $(regdat_sh) $(srcdir)/../regformats/reg-x86-64-linux.dat reg-x86-64-linux.c
 
 # This is the end of "Makefile.in".
