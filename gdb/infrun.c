@@ -2368,12 +2368,16 @@ process_event_stop_test:
       return;
     }
 
-  /* Check for subroutine calls.
+  /* Check for subroutine calls.  The check for the current frame
+     equalling the step ID is not necessary - the check of the
+     previous frame's ID is sufficient - but it is a common case and
+     cheaper than checking the previous frame's ID.
 
      NOTE: frame_id_eq will never report two invalid frame IDs as
      being equal, so to get into this block, both the current and
      previous frame must have valid frame IDs.  */
-  if (frame_id_eq (frame_unwind_id (get_current_frame ()), step_frame_id))
+  if (!frame_id_eq (get_frame_id (get_current_frame ()), step_frame_id)
+      && frame_id_eq (frame_unwind_id (get_current_frame ()), step_frame_id))
     {
       CORE_ADDR real_stop_pc;
 

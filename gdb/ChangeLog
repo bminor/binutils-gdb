@@ -1,5 +1,10 @@
 2006-08-18  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* infrun.c (handle_inferior_event): Check the current frame ID
+	before unwinding to the previous frame.
+
+2006-08-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* dwarf2read.c (quirk_gcc_member_function_pointer): Add GCC PR
 	number in a comment.
 
