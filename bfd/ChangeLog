@@ -1,3 +1,8 @@
+2006-08-21  Mark Shinwell  <shinwell@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_link_hash_table): Correct typo in
+	comment for target1_is_rel.
+
 2006-08-21  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* Makefile.am: Add rules to build pe-arm-wince.lo
