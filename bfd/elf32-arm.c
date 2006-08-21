@@ -2125,7 +2125,7 @@ struct elf32_arm_link_hash_table
     int byteswap_code;
 
     /* Zero if R_ARM_TARGET1 means R_ARM_ABS32.
-       Nonzero if R_ARM_TARGET1 means R_ARM_ABS32.  */
+       Nonzero if R_ARM_TARGET1 means R_ARM_REL32.  */
     int target1_is_rel;
 
     /* The relocation to use for R_ARM_TARGET2 relocations.  */
