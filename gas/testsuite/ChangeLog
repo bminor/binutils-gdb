@@ -1,3 +1,9 @@
+2006-08-21  Joseph Myers  <joseph@codesourcery.com>
+
+	* gas/arm/unwind.s: Test not merging iWMMXt register save with
+	previous long opcode.
+	* gas/arm/unwind.d, gas/arm/unwind_vxworks.d: Update.
+
 2006-08-16  Julian Brown  <julian@codesourcery.com>
 
 	* gas/arm/noarm.s: Add test for disabled ARM insns.

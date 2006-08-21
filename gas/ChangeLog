@@ -1,3 +1,8 @@
+2006-08-21  Joseph Myers  <joseph@codesourcery.com>
+
+	* config/tc-arm.c (s_arm_unwind_save_mmxwr): Correct condition for
+	merging with previous long opcode.
+
 2006-08-22  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* Makefile.am (TARG_ENV_HFILES): Add te-wince-pe.h.
