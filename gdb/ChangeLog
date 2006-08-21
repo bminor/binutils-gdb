@@ -1,3 +1,12 @@
+2006-08-21  Nick Roberts  <nickrob@snap.net.nz>
+
+	* Makefile.in (inf-ptrace.o): Add missing backslash.
+
+	* linux-nat.c (linux_nat_wait): Commit the changes described but
+	not committed on 2006-05-13.
+
+	* inf-ptrace.c (inf_ptrace_target): Ditto.
+
 2006-08-15  Nick Roberts  <nickrob@snap.net.nz>
 
 	* version.in: Remove spurious " character.
@@ -18,7 +27,7 @@
 	* exec.c(init_exec_ops): Only initialise async methods with async
 	option.
 
-	* inf-ptrace.c (inf_ptrace_him): Only reate a signal thread with
+	* inf-ptrace.c (inf_ptrace_him): Only create a signal thread with
 	async option.
 
 	* README.async, TODO.async, PROBLEMS.async: New files.
