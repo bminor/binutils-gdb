@@ -2146,7 +2146,7 @@ inflow.o: inflow.c $(defs_h) $(frame_h) $(inferior_h) $(command_h) \
 	$(inflow_h) $(gdb_select_h)
 inf-ptrace.o: inf-ptrace.c $(defs_h) $(command_h) $(inferior_h) $(inflow_h) \
 	$(gdbcore_h) $(regcache_h) $(gdb_assert_h) \
-	$(gdb_string_h) $(gdb_ptrace_h) $(gdb_wait_h) $(inf_child_h)
+	$(gdb_string_h) $(gdb_ptrace_h) $(gdb_wait_h) $(inf_child_h) \
 	$(async_nat_inferior_h)
 infptrace.o: infptrace.c $(defs_h) $(command_h) $(frame_h) $(gdbcore_h) \
 	$(inferior_h) $(regcache_h) $(target_h) $(gdb_assert_h) \
