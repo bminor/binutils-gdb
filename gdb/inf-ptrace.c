@@ -27,6 +27,8 @@
 #include "inflow.h"
 #include "gdbcore.h"
 #include "regcache.h"
+#include "inf-loop.h"
+#include "async-nat-inferior.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
@@ -115,6 +117,19 @@ inf_ptrace_him (int pid)
      call basically gives permission for the child to exec.  */
 
   target_acknowledge_created_inferior (pid);
+
+  if (target_can_async_p ())
+    {
+      gdb_create_inferior (gdb_status, pid);
+
+      gdb_signal_thread_create (&gdb_status->signal_status, pid);
+
+      gdb_status->attached_in_ptrace = 1;
+      gdb_status->stopped_in_ptrace = 0;
+      gdb_status->stopped_in_softexc = 0;
+
+      gdb_status->suspend_count = 0;
+    }
 
   /* START_INFERIOR_TRAPS_EXPECTED is defined in inferior.h, and will
      be 1 or 2 depending on whether we're starting without or with a
