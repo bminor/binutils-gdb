@@ -163,6 +163,19 @@ coff_arm_reloc (bfd *abfd,
 
 /* These most certainly belong somewhere else. Just had to get rid of
    the manifest constants in the code.  */
+
+#ifdef ARM_WINCE
+
+#define ARM_26D      0
+#define ARM_32       1
+#define ARM_RVA32    2
+#define ARM_26	     3
+#define ARM_THUMB12  4
+#define ARM_SECTION  14
+#define ARM_SECREL   15
+
+#else
+
 #define ARM_8        0
 #define ARM_16       1
 #define ARM_32       2
@@ -179,20 +192,6 @@ coff_arm_reloc (bfd *abfd,
 #define ARM_THUMB12 13
 #define ARM_THUMB23 14
 
-#ifdef ARM_WINCE
-#undef  ARM_32
-#undef  ARM_RVA32
-#undef  ARM_26
-#undef  ARM_THUMB12
-#undef  ARM_26D
-
-#define ARM_26D      0
-#define ARM_32       1
-#define ARM_RVA32    2
-#define ARM_26	     3
-#define ARM_THUMB12  4
-#define ARM_SECTION  14
-#define ARM_SECREL   15
 #endif
 
 static bfd_reloc_status_type aoutarm_fix_pcrel_26_done

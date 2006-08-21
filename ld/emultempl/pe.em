@@ -37,15 +37,18 @@ cat >>e${EMULATION_NAME}.c <<EOF
 #define TARGET_IS_${EMULATION_NAME}
 
 /* Do this before including bfd.h, so we prototype the right functions.  */
-#ifdef TARGET_IS_arm_epoc_pe
-#define bfd_arm_pe_allocate_interworking_sections \
-	bfd_arm_epoc_pe_allocate_interworking_sections
-#define bfd_arm_pe_get_bfd_for_interworking \
-	bfd_arm_epoc_pe_get_bfd_for_interworking
-#define bfd_arm_pe_process_before_allocation \
-	bfd_arm_epoc_pe_process_before_allocation
-#endif
 
+#if defined(TARGET_IS_armpe) \
+    || defined(TARGET_IS_arm_epoc_pe) \
+    || defined(TARGET_IS_arm_wince_pe)
+#define bfd_arm_allocate_interworking_sections \
+	bfd_${EMULATION_NAME}_allocate_interworking_sections
+#define bfd_arm_get_bfd_for_interworking \
+	bfd_${EMULATION_NAME}_get_bfd_for_interworking
+#define bfd_arm_process_before_allocation \
+	bfd_${EMULATION_NAME}_process_before_allocation
+#endif
+ 
 #include "bfd.h"
 #include "sysdep.h"
 #include "bfdlink.h"
@@ -85,10 +88,12 @@ cat >>e${EMULATION_NAME}.c <<EOF
 #define PE_DEF_SECTION_ALIGNMENT ${OVERRIDE_SECTION_ALIGNMENT}
 #endif
 
-#if defined(TARGET_IS_i386pe)
-#define DLL_SUPPORT
-#endif
-#if defined(TARGET_IS_shpe) || defined(TARGET_IS_mipspe) || defined(TARGET_IS_armpe)
+#if defined(TARGET_IS_i386pe) \
+    || defined(TARGET_IS_shpe) \
+    || defined(TARGET_IS_mipspe) \
+    || defined(TARGET_IS_armpe) \
+    || defined(TARGET_IS_arm_epoc_pe) \
+    || defined(TARGET_IS_arm_wince_pe)
 #define DLL_SUPPORT
 #endif
 
@@ -99,7 +104,8 @@ cat >>e${EMULATION_NAME}.c <<EOF
 #undef PE_DEF_SECTION_ALIGNMENT
 #undef PE_DEF_FILE_ALIGNMENT
 #define NT_EXE_IMAGE_BASE		0x00010000
-#ifdef TARGET_IS_armpe
+
+#if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_wince_pe)
 #define PE_DEF_SECTION_ALIGNMENT	0x00001000
 #define	PE_DEF_SUBSYSTEM		9
 #else
@@ -139,7 +145,7 @@ gld_${EMULATION_NAME}_before_parse (void)
   link_info.pei386_runtime_pseudo_reloc = -1;
 
 #if (PE_DEF_SUBSYSTEM == 9) || (PE_DEF_SUBSYSTEM == 2)
-#if defined TARGET_IS_mipspe || defined TARGET_IS_armpe
+#if defined TARGET_IS_mipspe || defined TARGET_IS_armpe || defined TARGET_IS_arm_wince_pe
   lang_default_entry ("WinMainCRTStartup");
 #else
   lang_default_entry ("_WinMainCRTStartup");
@@ -282,7 +288,7 @@ static definfo init[] =
   D(MinorOperatingSystemVersion,"__minor_os_version__", 0),
   D(MajorImageVersion,"__major_image_version__", 1),
   D(MinorImageVersion,"__minor_image_version__", 0),
-#ifdef TARGET_IS_armpe
+#if defined(TARGET_IS_armpe)  || defined(TARGET_IS_arm_wince_pe)
   D(MajorSubsystemVersion,"__major_subsystem_version__", 3),
 #else
   D(MajorSubsystemVersion,"__major_subsystem_version__", 4),
@@ -997,22 +1003,21 @@ gld_${EMULATION_NAME}_after_open (void)
 
   pe_find_data_imports ();
 
-#if ! (defined (TARGET_IS_i386pe) || defined (TARGET_IS_armpe))
-  if (link_info.shared)
-#else
+#if defined (TARGET_IS_i386pe) \
+    || defined (TARGET_IS_armpe) \
+    || defined (TARGET_IS_arm_epoc_pe) \
+    || defined (TARGET_IS_arm_wince_pe)
   if (!link_info.relocatable)
-#endif
     pe_dll_build_sections (output_bfd, &link_info);
-
-#ifndef TARGET_IS_i386pe
-#ifndef TARGET_IS_armpe
   else
     pe_exe_build_sections (output_bfd, &link_info);
+#else
+  if (link_info.shared)
+    pe_dll_build_sections (output_bfd, &link_info);
 #endif
-#endif
-#endif
+#endif /* DLL_SUPPORT */
 
-#if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe)
+#if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe) || defined(TARGET_IS_arm_wince_pe)
   if (strstr (bfd_get_target (output_bfd), "arm") == NULL)
     {
       /* The arm backend needs special fields in the output hash structure.
@@ -1026,7 +1031,7 @@ gld_${EMULATION_NAME}_after_open (void)
     /* Find a BFD that can hold the interworking stubs.  */
     LANG_FOR_EACH_INPUT_STATEMENT (is)
       {
-	if (bfd_arm_pe_get_bfd_for_interworking (is->the_bfd, & link_info))
+	if (bfd_arm_get_bfd_for_interworking (is->the_bfd, & link_info))
 	  break;
       }
   }
@@ -1267,7 +1272,7 @@ gld_${EMULATION_NAME}_before_allocation (void)
   ppc_allocate_toc_section (&link_info);
 #endif /* TARGET_IS_ppcpe */
 
-#if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe)
+#if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe) || defined(TARGET_IS_arm_wince_pe)
   /* FIXME: we should be able to set the size of the interworking stub
      section.
 
@@ -1277,7 +1282,7 @@ gld_${EMULATION_NAME}_before_allocation (void)
   {
     LANG_FOR_EACH_INPUT_STATEMENT (is)
       {
-	if (! bfd_arm_pe_process_before_allocation
+	if (! bfd_arm_process_before_allocation
 	    (is->the_bfd, & link_info, support_old_code))
 	  {
 	    /* xgettext:c-format */
@@ -1288,8 +1293,8 @@ gld_${EMULATION_NAME}_before_allocation (void)
   }
 
   /* We have seen it all. Allocate it, and carry on.  */
-  bfd_arm_pe_allocate_interworking_sections (& link_info);
-#endif /* TARGET_IS_armpe */
+  bfd_arm_allocate_interworking_sections (& link_info);
+#endif /* TARGET_IS_armpe || TARGET_IS_arm_epoc_pe || TARGET_IS_arm_wince_pe */
 
   before_allocation_default ();
 }
@@ -1404,6 +1409,12 @@ gld_${EMULATION_NAME}_recognized_file (lang_input_statement_type *entry ATTRIBUT
 #ifdef TARGET_IS_armpe
   pe_dll_id_target ("pei-arm-little");
 #endif
+#ifdef TARGET_IS_arm_epoc_pe
+  pe_dll_id_target ("epoc-pei-arm-little");
+#endif
+#ifdef TARGET_IS_arm_wince_pe
+  pe_dll_id_target ("pei-arm-wince-little");
+#endif
   if (bfd_get_format (entry->the_bfd) == bfd_object)
     {
       char fbuf[LD_PATHMAX + 1];
@@ -1424,7 +1435,7 @@ gld_${EMULATION_NAME}_recognized_file (lang_input_statement_type *entry ATTRIBUT
 static void
 gld_${EMULATION_NAME}_finish (void)
 {
-#if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe)
+#if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe) || defined(TARGET_IS_arm_wince_pe)
   struct bfd_link_hash_entry * h;
 
   if (thumb_entry_symbol != NULL)
@@ -1464,7 +1475,7 @@ gld_${EMULATION_NAME}_finish (void)
       else
 	einfo (_("%P: warning: connot find thumb start symbol %s\n"), thumb_entry_symbol);
     }
-#endif /* defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe) */
+#endif /* defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe) || defined(TARGET_IS_arm_wince_pe) */
 
   finish_default ();
 

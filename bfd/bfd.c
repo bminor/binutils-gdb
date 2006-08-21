@@ -876,7 +876,7 @@ bfd_get_sign_extend_vma (bfd *abfd)
 
   name = bfd_get_target (abfd);
 
-  /* Return a proper value for DJGPP & PE COFF (x86 COFF variants).
+  /* Return a proper value for DJGPP & PE COFF.
      This function is required for DWARF2 support, but there is
      no place to store this information in the COFF back end.
      Should enough other COFF targets add support for DWARF2,
@@ -884,8 +884,8 @@ bfd_get_sign_extend_vma (bfd *abfd)
   if (strncmp (name, "coff-go32", sizeof ("coff-go32") - 1) == 0
       || strcmp (name, "pe-i386") == 0
       || strcmp (name, "pei-i386") == 0
-      || strcmp (name, "pe-arm-little") == 0
-      || strcmp (name, "pei-arm-little") == 0)
+      || strcmp (name, "pe-arm-wince-little") == 0
+      || strcmp (name, "pei-arm-wince-little") == 0)
     return 1;
 
   bfd_set_error (bfd_error_wrong_format);

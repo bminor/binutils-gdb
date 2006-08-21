@@ -1,3 +1,10 @@
+2006-08-21  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* configure.in: Split arm-pe and arm-wince-pe. Build dlltool
+	with -DDLLTOOL_ARM_WINCE for Windows CE case.
+	* configure: Regenerate.
+	* dlltool.c: Add support for arm-wince.
+
 2006-08-15  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/3039

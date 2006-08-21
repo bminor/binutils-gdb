@@ -385,8 +385,10 @@ static FILE *output_def;
 static FILE *base_file;
 
 #ifdef DLLTOOL_ARM
-#ifdef DLLTOOL_ARM_EPOC
+#if defined(DLLTOOL_ARM_EPOC)
 static const char *mname = "arm-epoc";
+#elif defined(DLLTOOL_ARM_WINCE)
+static const char *mname = "arm-wince";
 #else
 static const char *mname = "arm";
 #endif
@@ -629,6 +631,15 @@ mtable[] =
     arm_jtab, sizeof (arm_jtab), 8
   }
   ,
+  {
+#define MARM_WINCE 10
+    "arm-wince", ".byte", ".short", ".long", ".asciz", "@",
+    "ldr\tip,[pc]\n\tldr\tpc,[ip]\n\t.long",
+    ".global", ".space", ".align\t2",".align\t4", "-mapcs-32",
+    "pe-arm-wince-little", bfd_arch_arm,
+    arm_jtab, sizeof (arm_jtab), 8
+  }
+  ,
   { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 };
 
@@ -760,6 +771,7 @@ rvaafter (int machine)
     case MMCORE_ELF:
     case MMCORE_ELF_LE:
     case MARM_EPOC:
+    case MARM_WINCE:
       break;
     default:
       /* xgettext:c-format */
@@ -784,6 +796,7 @@ rvabefore (int machine)
     case MMCORE_ELF:
     case MMCORE_ELF_LE:
     case MARM_EPOC:
+    case MARM_WINCE:
       return ".rva\t";
     default:
       /* xgettext:c-format */
@@ -807,6 +820,7 @@ asm_prefix (int machine, const char *name)
     case MMCORE_ELF:
     case MMCORE_ELF_LE:
     case MARM_EPOC:
+    case MARM_WINCE:
       break;
     case M386:
       /* Symbol names starting with ? do not have a leading underscore. */

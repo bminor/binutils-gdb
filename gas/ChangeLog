@@ -1,3 +1,10 @@
+2006-08-22  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* Makefile.am (TARG_ENV_HFILES): Add te-wince-pe.h.
+	* Makefile.in: Regenerate.
+	* config/tc-arm.h [TARGET_FORMAT]: ARM wince bfd names were
+	renamed. Adjust.
+
 2006-08-16  Julian Brown  <julian@codesourcery.com>
 
 	* config/tc-arm.c (md_assemble): Improve diagnostic when attempting

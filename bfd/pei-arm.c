@@ -32,10 +32,6 @@ Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. 
 #define PCRELOFFSET        TRUE
 #define COFF_LONG_SECTION_NAMES
 
-#ifdef ARM_WINCE
-# define TARGET_UNDERSCORE 0
-#endif
-
 #define COFF_SECTION_ALIGNMENT_ENTRIES \
 { COFF_SECTION_NAME_EXACT_MATCH (".bss"), \
   COFF_ALIGNMENT_FIELD_EMPTY, COFF_ALIGNMENT_FIELD_EMPTY, 2 }, \

@@ -10783,6 +10783,10 @@ do
     arm_epoc_pe_little_vec)	tb="$tb epoc-pe-arm.lo peigen.lo cofflink.lo " ;;
     arm_epoc_pei_big_vec)	tb="$tb epoc-pei-arm.lo peigen.lo cofflink.lo " ;;
     arm_epoc_pei_little_vec)	tb="$tb epoc-pei-arm.lo peigen.lo cofflink.lo " ;;
+    arm_wince_pe_big_vec)	tb="$tb pe-arm-wince.lo pe-arm.lo peigen.lo cofflink.lo " ;;
+    arm_wince_pe_little_vec)	tb="$tb pe-arm-wince.lo pe-arm.lo peigen.lo cofflink.lo " ;;
+    arm_wince_pei_big_vec)	tb="$tb pei-arm-wince.lo pei-arm.lo peigen.lo cofflink.lo " ;;
+    arm_wince_pei_little_vec)	tb="$tb pei-arm-wince.lo pei-arm.lo peigen.lo cofflink.lo " ;;
     armcoff_big_vec)		tb="$tb coff-arm.lo cofflink.lo " ;;
     armcoff_little_vec)		tb="$tb coff-arm.lo cofflink.lo " ;;
     armnetbsd_vec)		tb="$tb armnetbsd.lo aout32.lo" ;;

@@ -207,6 +207,7 @@ static autofilter_entry_type autofilter_symbollist_i386[] =
 #define PE_ARCH_mips	 3
 #define PE_ARCH_arm	 4
 #define PE_ARCH_arm_epoc 5
+#define PE_ARCH_arm_wince 6
 
 static pe_details_type pe_detail_list[] =
 {
@@ -251,6 +252,15 @@ static pe_details_type pe_detail_list[] =
     "epoc-pe-arm-little",
     11 /* ARM_RVA32 */,
     PE_ARCH_arm_epoc,
+    bfd_arch_arm,
+    FALSE,
+    autofilter_symbollist_generic
+  },
+  {
+    "pei-arm-wince-little",
+    "pe-arm-wince-little",
+    2,  /* ARM_RVA32 on Windows CE, see bfd/coff-arm.c.  */
+    PE_ARCH_arm_wince,
     bfd_arch_arm,
     FALSE,
     autofilter_symbollist_generic
@@ -1837,6 +1847,8 @@ make_one (def_file_export *exp, bfd *parent)
       jmp_byte_count = sizeof (jmp_mips_bytes);
       break;
     case PE_ARCH_arm:
+    case PE_ARCH_arm_epoc:
+    case PE_ARCH_arm_wince:
       jmp_bytes = jmp_arm_bytes;
       jmp_byte_count = sizeof (jmp_arm_bytes);
       break;
@@ -1914,6 +1926,8 @@ make_one (def_file_export *exp, bfd *parent)
 	  quick_reloc (abfd, 4, BFD_RELOC_LO16, 2);
 	  break;
 	case PE_ARCH_arm:
+ 	case PE_ARCH_arm_epoc:
+ 	case PE_ARCH_arm_wince:
 	  quick_reloc (abfd, 8, BFD_RELOC_32, 2);
 	  break;
 	default:

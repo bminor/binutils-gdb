@@ -1,3 +1,21 @@
+2006-08-22  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* Makefile.am: Split arm-wince into its own emulation.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Set targ_emul to arm_wince_pe for ARM Windows
+	CE targets.
+	* pe-dll.c : Define PE_ARCH_arm_wince.
+	(pe_detail_list): Add PE_ARCH_arm_wince case.
+	(make_one): Handle PE_ARCH_arm_epoc and PE_ARCH_arm_wince cases.
+	* emulparams/arm_wince_pe.sh: New file.
+	* emultempl/pe.em: Handle new TARGET_IS_arm_wince_pe define.
+	Remap bfd_arm_allocate_interworking_sections,
+	bfd_arm_get_bfd_for_interworking and
+	bfd_arm_process_before_allocation for arm-pe and arm-wince-pe    
+	targets too.
+	(gld_${EMULATION_NAME}_recognized_file): Handle arm-wince and    
+	arm-epoc bfd format names.
+
 2006-08-18  Paul Brook  <paul@codesourcery.com>
 
 	* emultempl/armelf.em (arm_elf_before_allocation): Call

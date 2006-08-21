@@ -323,6 +323,8 @@ BFD32_BACKENDS = \
 	pef.lo \
 	pe-arm.lo \
 	pei-arm.lo \
+	pe-arm-wince.lo \
+	pei-arm-wince.lo \
 	pe-i386.lo \
 	pei-i386.lo \
 	pe-mcore.lo \
@@ -495,6 +497,8 @@ BFD32_BACKENDS_CFILES = \
 	pef.c \
 	pe-arm.c \
 	pei-arm.c \
+	pe-arm-wince.c \
+	pei-arm-wince.c \
 	pe-i386.c \
 	pei-i386.c \
 	pe-mcore.c \
@@ -1622,6 +1626,16 @@ pei-arm.lo: pei-arm.c $(INCDIR)/filenames.h coff-arm.c \
   $(INCDIR)/hashtab.h $(INCDIR)/coff/arm.h $(INCDIR)/coff/external.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
   $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
+pe-arm-wince.lo: pe-arm-wince.c pe-arm.c $(INCDIR)/filenames.h \
+  coff-arm.c $(INCDIR)/hashtab.h $(INCDIR)/coff/arm.h \
+  $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h coffcode.h \
+  peicode.h libpei.h
+pei-arm-wince.lo: pei-arm-wince.c pei-arm.c $(INCDIR)/filenames.h \
+  coff-arm.c $(INCDIR)/hashtab.h $(INCDIR)/coff/arm.h \
+  $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h coffcode.h \
+  peicode.h libpei.h
 pe-i386.lo: pe-i386.c $(INCDIR)/filenames.h coff-i386.c \
   $(INCDIR)/hashtab.h $(INCDIR)/coff/i386.h $(INCDIR)/coff/external.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \

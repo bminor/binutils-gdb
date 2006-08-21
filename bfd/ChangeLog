@@ -1,3 +1,28 @@
+2006-08-21  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* Makefile.am: Add rules to build pe-arm-wince.lo
+	and pei-arm-wince.lo objects.
+	* Makefile.in: Regenerate.
+	* pe-arm-wince.c: New file.
+	* pei-arm-wince.c: New file.
+	* pei-arm.c: Remove ARM_WINCE block.
+	* pe-arm.c: Remove ARM_WINCE block. Rename
+	bfd_arm_pe_allocate_interworking_sections,
+	bfd_arm_pe_get_bfd_for_interworking, and
+	bfd_arm_pe_process_before_allocation to        
+	bfd_armpe_allocate_interworking_sections,
+	bfd_armpe_get_bfd_for_interworking, and
+	bfd_armpe_process_before_allocation. Move them before
+	including bfd.h.
+	* bfd.c: ARM wince bfd format names were renamed. Adjust.
+	* coff-arm.c [ARM_WINCE]: Adjust so Windows CE doesn't end up
+	with unexpected/conflicting relocs.
+	* targets.c: The arm-wince-pe target got its own new vector.
+	Adjust.
+	* config.bfd: Likewise.
+	* configure.in: Likewise.
+	* configure: Regenerate.
+
 2006-08-18  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_link_hash_entry): Add export_glue.

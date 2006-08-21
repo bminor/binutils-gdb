@@ -541,6 +541,10 @@ extern const bfd_target arm_epoc_pe_big_vec;
 extern const bfd_target arm_epoc_pe_little_vec;
 extern const bfd_target arm_epoc_pei_big_vec;
 extern const bfd_target arm_epoc_pei_little_vec;
+extern const bfd_target arm_wince_pe_big_vec;
+extern const bfd_target arm_wince_pe_little_vec;
+extern const bfd_target arm_wince_pei_big_vec;
+extern const bfd_target arm_wince_pei_little_vec;
 extern const bfd_target armcoff_big_vec;
 extern const bfd_target armcoff_little_vec;
 extern const bfd_target armnetbsd_vec;
@@ -844,6 +848,10 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&arm_epoc_pe_little_vec,
 	&arm_epoc_pei_big_vec,
 	&arm_epoc_pei_little_vec,
+	&arm_wince_pe_big_vec,
+	&arm_wince_pe_little_vec,
+	&arm_wince_pei_big_vec,
+	&arm_wince_pei_little_vec,
 	&armcoff_big_vec,
 	&armcoff_little_vec,
 	&armnetbsd_vec,

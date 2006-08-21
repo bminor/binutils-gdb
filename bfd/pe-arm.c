@@ -17,6 +17,17 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
 
+/* Do this before including bfd.h, so we prototype the right functions.  */
+
+#ifndef bfd_arm_allocate_interworking_sections
+#define bfd_arm_allocate_interworking_sections \
+  bfd_armpe_allocate_interworking_sections
+#define bfd_arm_get_bfd_for_interworking \
+  bfd_armpe_get_bfd_for_interworking
+#define bfd_arm_process_before_allocation \
+  bfd_armpe_process_before_allocation
+#endif
+
 #include "bfd.h"
 #include "sysdep.h"
 
@@ -30,19 +41,6 @@ Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. 
 #define COFF_WITH_PE
 #define PCRELOFFSET          TRUE
 #define COFF_LONG_SECTION_NAMES
-
-#ifndef bfd_arm_allocate_interworking_sections
-#define bfd_arm_allocate_interworking_sections \
-	bfd_arm_pe_allocate_interworking_sections
-#define bfd_arm_get_bfd_for_interworking \
-	bfd_arm_pe_get_bfd_for_interworking
-#define bfd_arm_process_before_allocation \
-	bfd_arm_pe_process_before_allocation
-#endif
-
-#ifdef ARM_WINCE
-#define TARGET_UNDERSCORE 0
-#endif
 
 #define COFF_SECTION_ALIGNMENT_ENTRIES \
 { COFF_SECTION_NAME_EXACT_MATCH (".bss"), \

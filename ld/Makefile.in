@@ -332,6 +332,7 @@ ALL_EMULATIONS = \
 	ealpha.o \
 	earcelf.o \
 	earm_epoc_pe.o \
+	earm_wince_pe.o \
 	earmaoutb.o \
 	earmaoutl.o \
 	earmcoff.o \
@@ -1380,6 +1381,9 @@ earmnto.c: $(srcdir)/emulparams/armnto.sh \
 earm_epoc_pe.c: $(srcdir)/emulparams/arm_epoc_pe.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/epocpe.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} arm_epoc_pe "$(tdir_armpe)"
+earm_wince_pe.c: $(srcdir)/emulparams/arm_wince_pe.sh \
+  $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/pe.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} arm_wince_pe "$(tdir_armpe)"
 earmpe.c: $(srcdir)/emulparams/armpe.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/pe.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armpe "$(tdir_armpe)"

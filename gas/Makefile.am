@@ -381,7 +381,8 @@ TARG_ENV_HFILES = \
 	config/te-sun3.h \
 	config/te-svr4.h \
 	config/te-symbian.h \
-	config/te-tmips.h
+	config/te-tmips.h \
+	config/te-wince-pe.h
 
 # Multi files in config
 

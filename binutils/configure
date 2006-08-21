@@ -5308,8 +5308,9 @@ INCINTL=
 XGETTEXT=
 GMSGFMT=
 POSUB=
-if test -f ../intl/config.intl; then
-  . ../intl/config.intl
+
+if test -f  ../intl/config.intl; then
+  .  ../intl/config.intl
 fi
 echo "$as_me:$LINENO: checking whether NLS is requested" >&5
 echo $ECHO_N "checking whether NLS is requested... $ECHO_C" >&6
@@ -8429,7 +8430,12 @@ do
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_ARM_EPOC -DDLLTOOL_ARM"
 	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
 	  ;;
-	arm-*-pe* | arm-*-wince)
+	arm-wince-pe* | arm-*-wince)
+  	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
+	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_ARM_WINCE -DDLLTOOL_ARM"
+	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
+	  ;;
+	arm-*-pe*)
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_ARM"
 	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
