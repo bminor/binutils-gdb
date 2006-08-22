@@ -1,3 +1,13 @@
+2006-08-23  Nick Roberts  <nickrob@snap.net.nz>
+
+	* mi/gdb-mi.el (gdbmi): Remove gdb-force-update, initialize
+	other variables.
+	(gdbmi-send): Ensure any text properties can be removed.
+	(gdbmi-prompt1): Update to gdb-ui.el
+	(gud-gdbmi-marker-filter): Defer setting of gud-running.
+	Keep gdb-done-regexp for partial-output-buffer.
+	(gdb-stack-list-frames-handler): Add face to function names.
+
 2006-08-22  Mark Kettenis  <kettenis@gnu.org>
 
 	* valprint.c (val_print_type_code_flags): Fix GNU coding standards
