@@ -1,5 +1,8 @@
 2006-08-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* valprint.c (val_print_type_code_flags): Fix GNU coding standards
+	violation.
+
 	* alpha-tdep.c (alpha_register_to_value, alpha_value_to_register)
 	(alpha_push_dummy_call, alpha_extract_return_value)
 	(alpha_breakpoint_from_pc, alpha_read_insn)
