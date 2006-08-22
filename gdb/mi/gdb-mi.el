@@ -36,6 +36,11 @@
 ;; development and is part of a process to migrate Emacs from annotations (as
 ;; used in gdb-ui.el) to GDB/MI.  It runs gdb with GDB/MI (-interp=mi) and
 ;; access CLI using "-interpreter-exec console cli-command".
+
+;; This mode acts on top of gdb-ui.el.  After the release of 22.0,
+;; mainline Emacs in the CVS repository will have a file also called gdb-mi.el
+;; which will *replace* gdb-ui.el.  If you are interested in developing
+;; this mode you should get this version.
 ;;
 ;; Known Bugs:
 ;;
@@ -177,7 +182,6 @@ detailed description of this mode.
         gdb-selected-frame nil
         gdb-frame-number nil
         gdb-var-list nil
-	gdb-force-update t
         gdb-prompting nil
         gdb-input-queue nil
         gdb-current-item nil
@@ -190,6 +194,10 @@ detailed description of this mode.
         gdb-last-command nil
 	gdb-prompt-name nil
 	gdb-buffer-fringe-width (car (window-fringes)))
+	gdb-debug-ring nil
+	gdb-source-window nil
+	gdb-inferior-status nil
+	gdb-continuation nil
   ;;
   (setq gdb-buffer-type 'gdbmi)
   ;;
@@ -221,12 +229,13 @@ detailed description of this mode.
   (if gud-running
       (process-send-string proc (concat string "\n"))
     (with-current-buffer gud-comint-buffer
-      (remove-text-properties (point-min) (point-max) '(face)))
+      (let ((inhibit-read-only t))
+	(remove-text-properties (point-min) (point-max) '(face))))
     (setq gdb-output-sink 'user)
     (setq gdb-prompting nil)
     ;; mimic <RET> key to repeat previous command in GDB
     (if (not (string-match "^\\s+$" string))
-	(setq gdb-last-command string)
+        (setq gdb-last-command string)
       (if gdb-last-command (setq string gdb-last-command)))
     (if gdb-enable-debug
 	(push (cons 'mi-send (concat string "\n")) gdb-debug-ring))
@@ -267,17 +276,14 @@ detailed description of this mode.
 (defun gdbmi-prompt1 ()
   "Queue any GDB commands that the user interface needs."
   (unless gdb-pending-triggers
-    (when (and (boundp 'speedbar-frame) (frame-live-p speedbar-frame))
-      (setq gdb-force-update t)
-      (dolist (var gdb-var-list)
-	(setcar (nthcdr 5 var) nil))
-      (gdb-var-update-1))
     (gdbmi-get-selected-frame)
     (gdbmi-invalidate-frames)
     (gdbmi-invalidate-breakpoints)
     (gdb-get-changed-registers)
     (gdb-invalidate-registers-1)
-    (gdb-invalidate-locals-1)))
+    (gdb-invalidate-locals-1)
+    (if (and (boundp 'speedbar-frame) (frame-live-p speedbar-frame))
+	(gdb-var-update-1))))
 
 (defun gdbmi-prompt2 ()
   "Handle any output and send next GDB command."
@@ -304,14 +310,14 @@ detailed description of this mode.
     ;; Recall the left over gud-marker-acc from last time
     (setq gud-marker-acc (concat gud-marker-acc string))
     ;; Start accumulating output for the GUD buffer
-    (let ((output ""))
+    (let ((output "") running)
 
       (if (string-match gdb-running-regexp gud-marker-acc) 
 	  (setq
 	   gud-marker-acc
 	   (concat (substring gud-marker-acc 0 (match-beginning 0))
 		   (substring gud-marker-acc (match-end 0)))
-		gud-running t))
+	   running t))
 
       (if (string-match gdb-stopped-regexp gud-marker-acc)
 	  (setq
@@ -327,19 +333,19 @@ detailed description of this mode.
 
       ;; Filter error messages going to GUD buffer and
       ;; display in minibuffer.
-      (if (eq gdb-output-sink 'user)
-	  (while (string-match gdb-error-regexp gud-marker-acc)
-	    (message (read (match-string 1 gud-marker-acc)))
-	    (setq 
-	     gud-marker-acc
-	     (concat (substring gud-marker-acc 0 (match-beginning 0))
-		     (substring gud-marker-acc (match-end 0))))))
-
-      (if (string-match gdb-done-regexp gud-marker-acc)
+      (when (eq gdb-output-sink 'user)
+	(while (string-match gdb-error-regexp gud-marker-acc)
+	  (message (read (match-string 1 gud-marker-acc)))
 	  (setq 
 	   gud-marker-acc
 	   (concat (substring gud-marker-acc 0 (match-beginning 0))
 		   (substring gud-marker-acc (match-end 0)))))
+
+	(if (string-match gdb-done-regexp gud-marker-acc)
+	    (setq 
+	     gud-marker-acc
+	     (concat (substring gud-marker-acc 0 (match-beginning 0))
+		     (substring gud-marker-acc (match-end 0))))))
 
       (when (string-match gdb-gdb-regexp gud-marker-acc)
 	(setq 
@@ -375,7 +381,8 @@ detailed description of this mode.
 	(gdbmi-prompt1)
 	(unless gdb-input-queue
 	  (setq output (concat output gdb-prompt-name)))
-	(gdbmi-prompt2))
+	(gdbmi-prompt2)
+	(setq gud-running running))
 
       (when gud-running
 	(setq output (gdbmi-concat-output output gud-marker-acc))
@@ -509,7 +516,8 @@ from=\"\\(.*?\\)\"\\)")
 		      (concat
 		       (nth 0 frame) "\t"
 		       (nth 1 frame) "\t"
-		       (nth 2 frame) "\t"
+		       (propertize (nth 2 frame)
+				   'face font-lock-function-name-face) "\t"
 		       (if (nth 3 frame)
 			   (concat "at "(nth 3 frame) ":" (nth 4 frame) "\n")
 			 (concat "from " (nth 5 frame) "\n")))))
