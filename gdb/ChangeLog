@@ -1,3 +1,7 @@
+2006-08-22  Nick Roberts  <nickrob@snap.net.nz>
+
+	* inf-ptrace.c (inf_ptrace_wait):  Add extra argument.
+
 2006-08-21  Nick Roberts  <nickrob@snap.net.nz>
 
 	* Makefile.in (inf-ptrace.o): Add missing backslash.
