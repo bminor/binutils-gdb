@@ -878,7 +878,7 @@ init_flags_type (char *name, int length)
   type = init_type (TYPE_CODE_FLAGS, length, TYPE_FLAG_UNSIGNED, name, NULL);
   TYPE_NFIELDS (type) = nfields;
   TYPE_FIELDS (type) = TYPE_ALLOC (type, nfields * sizeof (struct field));
-  memset (TYPE_FIELDS (type), 0, sizeof (struct field));
+  memset (TYPE_FIELDS (type), 0, nfields * sizeof (struct field));
 
   return type;
 }
