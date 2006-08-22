@@ -363,7 +363,8 @@ inf_ptrace_resume (ptid_t ptid, int step, enum target_signal signal)
    the status in *OURSTATUS.  */
 
 static ptid_t
-inf_ptrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
+inf_ptrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus,
+		 gdb_client_data client_data)
 {
   pid_t pid;
   int status, save_errno;
