@@ -1,3 +1,8 @@
+2006-08-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_copy_indirect_symbol): Only copy
+	plt_thumb_refcount from indirect symbols.
+
 2006-08-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): Correct GOT and PLT HA

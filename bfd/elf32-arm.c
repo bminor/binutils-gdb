@@ -2356,15 +2356,17 @@ elf32_arm_copy_indirect_symbol (struct bfd_link_info *info,
       eind->relocs_copied = NULL;
     }
 
-  /* Copy over PLT info.  */
-  edir->plt_thumb_refcount += eind->plt_thumb_refcount;
-  eind->plt_thumb_refcount = 0;
-
-  if (ind->root.type == bfd_link_hash_indirect
-      && dir->got.refcount <= 0)
+  if (ind->root.type == bfd_link_hash_indirect)
     {
-      edir->tls_type = eind->tls_type;
-      eind->tls_type = GOT_UNKNOWN;
+      /* Copy over PLT info.  */
+      edir->plt_thumb_refcount += eind->plt_thumb_refcount;
+      eind->plt_thumb_refcount = 0;
+
+      if (dir->got.refcount <= 0)
+	{
+	  edir->tls_type = eind->tls_type;
+	  eind->tls_type = GOT_UNKNOWN;
+	}
     }
 
   _bfd_elf_link_hash_copy_indirect (info, dir, ind);
