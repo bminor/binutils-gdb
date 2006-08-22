@@ -162,7 +162,7 @@ Fred Fish			fnf@ninemoons.com
 Daniel Jacobowitz		dan@debian.org
 Mark Kettenis           	kettenis@gnu.org
 Stan Shebs			shebs@apple.com
-Michael Snyder			msnyder@redhat.com
+Michael Snyder			Michael.Snyder@PalmSource.com
 Elena Zannoni			ezannoni@redhat.com
 Eli Zaretskii			eliz@gnu.org
 
@@ -285,7 +285,7 @@ the native maintainer when resolving ABI issues.
 
 	mn10300		--target=mn10300-elf broken
 			(sim/ dies with make -j)
-			Michael Snyder		msnyder@redhat.com
+			Michael Snyder		Michael.Snyder@PalmSource.com
 
 	ms1		--target=ms1-elf ,-Werror
 			Kevin Buettner		kevinb@redhat.com
@@ -346,8 +346,8 @@ FreeBSD native & host	Mark Kettenis		kettenis@gnu.org
 
 Core: Generic components used by all of GDB
 
-tracing			Michael Snyder		msnyder@redhat.com
-threads			Michael Snyder		msnyder@redhat.com
+tracing			Michael Snyder		Michael.Snyder@PalmSource.com
+threads			Michael Snyder		Michael.Snyder@PalmSource.com
 			Mark Kettenis		kettenis@gnu.org
 language support
   C++			Daniel Jacobowitz	dan@debian.org
@@ -358,8 +358,8 @@ documentation		Eli Zaretskii		eliz@gnu.org
   (including NEWS)
 testsuite
   gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
-  threads (gdb.threads) Michael Snyder          msnyder@redhat.com
-  trace (gdb.trace)     Michael Snyder          msnyder@redhat.com
+  threads (gdb.threads) Michael Snyder          Michael.Snyder@PalmSource.com
+  trace (gdb.trace)     Michael Snyder          Michael.Snyder@PalmSource.com
 
 
 UI: External (user) interfaces.
@@ -532,7 +532,7 @@ Jiri Smid					smid@suse.cz
 David Smith					dsmith@redhat.com
 Stephen P. Smith				ischis2@cox.net
 Jackie Smith Cashion				jsmith@redhat.com
-Michael Snyder					msnyder@redhat.com
+Michael Snyder					Michael.Snyder@PalmSource.com
 Petr Sorfa					petrs@caldera.com
 Andrew Stubbs					andrew.stubbs@st.com
 Ian Lance Taylor				ian@airs.com

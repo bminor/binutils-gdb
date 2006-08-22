@@ -1,3 +1,7 @@
+2006-08-22  Michael Snyder  <Michael.Snyder@PalmSource.com>
+
+	* MAINTAINERS: Update my email address.
+
 2006-08-19  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (amd64_linux_tdep_h): New.
