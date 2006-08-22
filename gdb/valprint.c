@@ -341,13 +341,14 @@ void
 val_print_type_code_flags (struct type *type, const gdb_byte *valaddr,
 			   struct ui_file *stream)
 {
-  LONGEST val = unpack_long (type, valaddr);
+  ULONGEST val = unpack_long (type, valaddr);
   int bitpos, nfields = TYPE_NFIELDS (type);
 
   fputs_filtered ("[ ", stream);
   for (bitpos = 0; bitpos < nfields; bitpos++)
     {
-      if (TYPE_FIELD_BITPOS (type, bitpos) != -1 && (val & (1 << bitpos)))
+      if (TYPE_FIELD_BITPOS (type, bitpos) != -1 &&
+	  (val & ((ULONGEST)1 << bitpos)))
 	{
 	  if (TYPE_FIELD_NAME (type, bitpos))
 	    fprintf_filtered (stream, "%s ", TYPE_FIELD_NAME (type, bitpos));

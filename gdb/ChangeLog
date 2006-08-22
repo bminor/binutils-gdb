@@ -1,5 +1,8 @@
 2006-08-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* valprint.c (val_print_type_code_flags): Fix for bitfields larger
+	than 32 bits.
+
 	* gdbtypes.c (init_flags_type): Set all fields to zero instead of
 	just the first one.
 
