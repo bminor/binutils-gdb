@@ -1,5 +1,13 @@
 2006-08-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc64-tdep.c (sparc64_pstate_type, sparc64_fsr_type)
+	(sparc64_fprs_type): New variables.
+	(sparc64_init_types): New function.:
+	(sparc64_register_info): Use appropriate flag types for %fsr and
+	%fprs.
+	(sparc64_pseudo_register_info): Use appropriate type for %pstate.
+	(_initialize_sparc64_tdep): New function.
+
 	* valprint.c (val_print_type_code_flags): Fix for bitfields larger
 	than 32 bits.
 
