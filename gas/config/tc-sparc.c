@@ -334,6 +334,10 @@ sparc_target_format ()
 #endif
 #endif
 
+#ifdef TE_VXWORKS
+  return "elf32-sparc-vxworks";
+#endif
+
 #ifdef OBJ_ELF
   return sparc_arch_size == 64 ? "elf64-sparc" : "elf32-sparc";
 #endif
@@ -3528,6 +3532,10 @@ tc_gen_reloc (section, fixp)
 #else
 #define GOT_NAME "__GLOBAL_OFFSET_TABLE_"
 #endif
+#ifdef TE_VXWORKS
+#define GOTT_BASE "__GOTT_BASE__"
+#define GOTT_INDEX "__GOTT_INDEX__"
+#endif
 
   /* This code must be parallel to the OBJ_ELF tc_fix_adjustable.  */
 
@@ -3540,18 +3548,30 @@ tc_gen_reloc (section, fixp)
 	    code = BFD_RELOC_SPARC_WPLT30;
 	  break;
 	case BFD_RELOC_HI22:
-	  if (fixp->fx_addsy != NULL
-	      && strcmp (S_GET_NAME (fixp->fx_addsy), GOT_NAME) == 0)
-	    code = BFD_RELOC_SPARC_PC22;
-	  else
-	    code = BFD_RELOC_SPARC_GOT22;
+	  code = BFD_RELOC_SPARC_GOT22;
+	  if (fixp->fx_addsy != NULL)
+	    {
+	      if (strcmp (S_GET_NAME (fixp->fx_addsy), GOT_NAME) == 0)
+		code = BFD_RELOC_SPARC_PC22;
+#ifdef TE_VXWORKS
+	      if (strcmp (S_GET_NAME (fixp->fx_addsy), GOTT_BASE) == 0
+		  || strcmp (S_GET_NAME (fixp->fx_addsy), GOTT_INDEX) == 0)
+		code = BFD_RELOC_HI22; /* Unchanged.  */
+#endif
+	    }
 	  break;
 	case BFD_RELOC_LO10:
-	  if (fixp->fx_addsy != NULL
-	      && strcmp (S_GET_NAME (fixp->fx_addsy), GOT_NAME) == 0)
-	    code = BFD_RELOC_SPARC_PC10;
-	  else
-	    code = BFD_RELOC_SPARC_GOT10;
+	  code = BFD_RELOC_SPARC_GOT10;
+	  if (fixp->fx_addsy != NULL)
+	    {
+	      if (strcmp (S_GET_NAME (fixp->fx_addsy), GOT_NAME) == 0)
+		code = BFD_RELOC_SPARC_PC10;
+#ifdef TE_VXWORKS
+	      if (strcmp (S_GET_NAME (fixp->fx_addsy), GOTT_BASE) == 0
+		  || strcmp (S_GET_NAME (fixp->fx_addsy), GOTT_INDEX) == 0)
+		code = BFD_RELOC_LO10; /* Unchanged.  */
+#endif
+	    }
 	  break;
 	case BFD_RELOC_SPARC13:
 	  code = BFD_RELOC_SPARC_GOT13;

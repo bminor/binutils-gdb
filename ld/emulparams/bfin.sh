@@ -10,6 +10,5 @@ ENTRY=__start
 TEMPLATE_NAME=elf32
 GENERATE_SHLIB_SCRIPT=yes
 EMBEDDED=yes
-EXTRA_EM_FILE=bfin
 DATA_END_SYMBOLS="__edata = .; PROVIDE (_edata = .);"
 END_SYMBOLS="__end = .; PROVIDE (_end = .);"

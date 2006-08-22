@@ -8,7 +8,7 @@ CONFIG=all
 # Options to extract the man page from as.texinfo
 MANCONF = -Dman
 
-TEXI2POD = perl $(top_srcdir)/../etc/texi2pod.pl
+TEXI2POD = perl $(BASEDIR)/etc/texi2pod.pl $(AM_MAKEINFOFLAGS)
 
 POD2MAN = pod2man --center="GNU Development Tools" \
 	--release="binutils-$(VERSION)" --section=1
@@ -17,11 +17,13 @@ man_MANS = as.1
 
 info_TEXINFOS = as.texinfo 
 
+AM_MAKEINFOFLAGS = -I "$(srcdir)" -I "$(top_srcdir)/../libiberty"
+TEXI2DVI = texi2dvi -I "$(srcdir)" -I "$(top_srcdir)/../libiberty"
+
 asconfig.texi: $(CONFIG).texi
 	rm -f asconfig.texi
 	cp $(srcdir)/$(CONFIG).texi ./asconfig.texi
 	chmod u+w ./asconfig.texi
-	echo "@set top_srcdir $(top_srcdir)" >> ./asconfig.texi
 
 CPU_DOCS = \
 	c-alpha.texi \

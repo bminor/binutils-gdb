@@ -75,6 +75,9 @@ enum mips_pic_level
 
   /* Generate PIC code as in the SVR4 MIPS ABI.  */
   SVR4_PIC,
+
+  /* VxWorks's PIC model.  */
+  VXWORKS_PIC
 };
 
 extern enum mips_pic_level mips_pic;

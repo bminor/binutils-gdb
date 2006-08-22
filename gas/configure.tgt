@@ -335,7 +335,7 @@ case ${generic_target} in
 
   sparc-*-rtems*)			fmt=elf ;;
   sparc-*-sunos4*)			fmt=aout em=sun3 ;;
-  sparc-*-aout | sparc*-*-vxworks*)	fmt=aout em=sparcaout ;;
+  sparc-*-aout)				fmt=aout em=sparcaout ;;
   sparc-*-coff)				fmt=coff ;;
   sparc-*-linux*aout*)			fmt=aout em=linux ;;
   sparc-*-linux-*)			fmt=elf em=linux ;;

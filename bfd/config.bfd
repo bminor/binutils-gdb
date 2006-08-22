@@ -313,7 +313,8 @@ case "${targ}" in
 
   bfin-*-*)
     targ_defvec=bfd_elf32_bfin_vec
-    tar_underscore=yes
+    targ_selvecs=bfd_elf32_bfinfdpic_vec
+    targ_underscore=yes
     ;;
 
   c30-*-*aout* | tic30-*-*aout*)
@@ -868,6 +869,16 @@ case "${targ}" in
     targ_defvec=ecoff_big_vec
     targ_selvecs=ecoff_little_vec
     ;;
+#ifdef BFD64
+  mips*el-*-vxworks*)
+    targ_defvec=bfd_elf32_littlemips_vxworks_vec
+    targ_selvecs="bfd_elf32_littlemips_vec bfd_elf32_bigmips_vxworks_vec bfd_elf32_bigmips_vec bfd_elf64_bigmips_vec bfd_elf64_littlemips_vec"
+    ;;
+  mips*-*-vxworks*)
+    targ_defvec=bfd_elf32_bigmips_vxworks_vec
+    targ_selvecs="bfd_elf32_bigmips_vec bfd_elf32_littlemips_vxworks_vec bfd_elf32_bigmips_vec bfd_elf64_bigmips_vec bfd_elf64_littlemips_vec"
+    ;;
+#endif
   mips*el-*-elf* | mips*el-*-vxworks* | mips*-*-chorus*)
     targ_defvec=bfd_elf32_littlemips_vec
     targ_selvecs="bfd_elf32_bigmips_vec bfd_elf64_bigmips_vec bfd_elf64_littlemips_vec"
@@ -1280,6 +1291,10 @@ case "${targ}" in
 #endif
   sparc-*-sysv4*)
     targ_defvec=bfd_elf32_sparc_vec
+    ;;
+  sparc-*-vxworks*)
+    targ_defvec=bfd_elf32_sparc_vxworks_vec
+    targ_selvecs="bfd_elf32_sparc_vec sunos_big_vec"
     ;;
   sparc-*-netware*)
     targ_defvec=bfd_elf32_sparc_vec

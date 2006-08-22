@@ -69,6 +69,8 @@ struct pex_obj
   struct pex_time *time;
   /* Number of children we have already waited for.  */
   int number_waited;
+  /* FILE created by pex_input_file.  */
+  FILE *input_file;
   /* FILE created by pex_read_output.  */
   FILE *read_output;
   /* Number of temporary files to remove.  */

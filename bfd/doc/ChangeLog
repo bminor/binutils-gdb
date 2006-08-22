@@ -1,3 +1,13 @@
+2006-06-07  Joseph S. Myers  <joseph@codesourcery.com>
+
+	* bfd.texinfo: Remove local @tex code.
+
+2006-04-06  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* Makefile.am: Add install-html and install-html-am targets. 
+	Define datarootdir, docdir and htmldir.
+	* Makefile.in: Regenerate.
+
 2006-02-27  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* Makefile.am: Add html target.

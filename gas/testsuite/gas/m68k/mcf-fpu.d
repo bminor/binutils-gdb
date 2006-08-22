@@ -816,3 +816,11 @@ Disassembly of section .text:
 [ 0-9a-f]+:	f222 5838      	fcmpb %a2@-,%fp0
 [ 0-9a-f]+:	f22e 5838 0008 	fcmpb %fp@\(8\),%fp0
 [ 0-9a-f]+:	f23a 5838 1234 	fcmpb %pc@\(.*\),%fp0
+[ 0-9a-f]+:	f22e f0f2 0008 	fmovemd %fp0-%fp3/%fp6,%fp@\(8\)
+[ 0-9a-f]+:	f22e d02c 0008 	fmovemd %fp@\(8\),%fp2/%fp4-%fp5
+[ 0-9a-f]+:	f22e f027 0008 	fmovemd %fp2/%fp5-%fp7,%fp@\(8\)
+[ 0-9a-f]+:	f22e d0e1 0008 	fmovemd %fp@\(8\),%fp0-%fp2/%fp7
+[ 0-9a-f]+:	f22e f0f2 0008 	fmovemd %fp0-%fp3/%fp6,%fp@\(8\)
+[ 0-9a-f]+:	f22e d02c 0008 	fmovemd %fp@\(8\),%fp2/%fp4-%fp5
+[ 0-9a-f]+:	f22e f027 0008 	fmovemd %fp2/%fp5-%fp7,%fp@\(8\)
+[ 0-9a-f]+:	f22e d0e1 0008 	fmovemd %fp@\(8\),%fp0-%fp2/%fp7

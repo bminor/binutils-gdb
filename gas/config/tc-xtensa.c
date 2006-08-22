@@ -566,6 +566,7 @@ static bfd_boolean workaround_short_loop = FALSE;
 static bfd_boolean maybe_has_short_loop = FALSE;
 static bfd_boolean workaround_close_loop_end = FALSE;
 static bfd_boolean maybe_has_close_loop_end = FALSE;
+static bfd_boolean enforce_three_byte_loop_align = FALSE;
 
 /* When workaround_short_loops is TRUE, all loops with early exits must
    have at least 3 instructions.  workaround_all_short_loops is a modifier
@@ -590,6 +591,7 @@ xtensa_setup_hw_workarounds (int earliest, int latest)
       workaround_short_loop |= TRUE;
       workaround_close_loop_end |= TRUE;
       workaround_all_short_loops |= TRUE;
+      enforce_three_byte_loop_align = TRUE;
     }
 }
 
@@ -3978,7 +3980,6 @@ xtensa_create_literal_symbol (segT sec, fragS *frag)
 
   xtensa_add_literal_sym (symbolP);
 
-  frag->tc_frag_data.is_literal = TRUE;
   lit_num++;
   return symbolP;
 }
@@ -4044,7 +4045,6 @@ xg_assemble_literal (/* const */ TInsn *insn)
   frag_now->tc_frag_data.literal_frag = get_literal_pool_location (now_seg);
   frag_now->fr_symbol = xtensa_create_literal_symbol (now_seg, frag_now);
   lit_sym = frag_now->fr_symbol;
-  frag_now->tc_frag_data.is_literal = TRUE;
 
   /* Go back.  */
   xtensa_restore_emit_state (&state);
@@ -4073,7 +4073,6 @@ xg_assemble_literal_space (/* const */ int size, int slot)
 
   lit_saved_frag = frag_now;
   frag_now->tc_frag_data.literal_frag = get_literal_pool_location (now_seg);
-  frag_now->tc_frag_data.is_literal = TRUE;
   frag_now->fr_symbol = xtensa_create_literal_symbol (now_seg, frag_now);
   xg_finish_frag (0, RELAX_LITERAL, 0, size, FALSE);
 
@@ -4228,7 +4227,6 @@ xg_resolve_labels (TInsn *insn, symbolS *label_sym)
 {
   symbolS *sym = get_special_label_symbol ();
   int i;
-  /* assert (!insn->is_literal); */
   for (i = 0; i < insn->ntok; i++)
     if (insn->tok[i].X_add_symbol == sym)
       insn->tok[i].X_add_symbol = label_sym;
@@ -4427,6 +4425,26 @@ next_frag_format_size (const fragS *fragP)
 {
   const fragS *next_fragP = next_non_empty_frag (fragP);
   return frag_format_size (next_fragP);
+}
+
+
+/* In early Xtensa Processors, for reasons that are unclear, the ISA
+   required two-byte instructions to be treated as three-byte instructions
+   for loop instruction alignment.  This restriction was removed beginning
+   with Xtensa LX.  Now the only requirement on loop instruction alignment
+   is that the first instruction of the loop must appear at an address that
+   does not cross a fetch boundary.  */
+
+static int
+get_loop_align_size (int insn_size)
+{
+  if (insn_size == XTENSA_UNDEFINED)
+    return xtensa_fetch_width;
+
+  if (enforce_three_byte_loop_align && insn_size == 2)
+    return 3;
+
+  return insn_size;
 }
 
 
@@ -6551,7 +6569,8 @@ emit_single_op (TInsn *orig_insn)
        || orig_insn->opcode == xtensa_movi_n_opcode)
       && !cur_vinsn.inside_bundle
       && (orig_insn->tok[1].X_op == O_symbol
-	  || orig_insn->tok[1].X_op == O_pltrel))
+	  || orig_insn->tok[1].X_op == O_pltrel)
+      && !orig_insn->is_specific_opcode && use_transform ())
     xg_assembly_relax (&istack, orig_insn, now_seg, frag_now, 0, 1, 0);
   else
     if (xg_expand_assembly_insn (&istack, orig_insn))
@@ -6702,6 +6721,14 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
     {
       int max_fill;
 
+      /* Remember the symbol that marks the end of the loop in the frag
+	 that marks the start of the loop.  This way we can easily find
+	 the end of the loop at the beginning, without adding special code
+	 to mark the loop instructions themselves.  */
+      symbolS *target_sym = NULL;
+      if (vinsn->slots[0].tok[1].X_op == O_symbol)
+	target_sym = vinsn->slots[0].tok[1].X_add_symbol;
+
       xtensa_set_frag_assembly_state (frag_now);
       frag_now->tc_frag_data.is_insn = TRUE;
 
@@ -6711,13 +6738,10 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
 
       if (use_transform ())
 	frag_var (rs_machine_dependent, max_fill, max_fill,
-		  RELAX_ALIGN_NEXT_OPCODE,
-		  frag_now->fr_symbol,
-		  frag_now->fr_offset,
-		  NULL);
+		  RELAX_ALIGN_NEXT_OPCODE, target_sym, 0, NULL);
       else
 	frag_var (rs_machine_dependent, 0, 0,
-		  RELAX_CHECK_ALIGN_NEXT_OPCODE, 0, 0, NULL);
+		  RELAX_CHECK_ALIGN_NEXT_OPCODE, target_sym, 0, NULL);
       xtensa_set_frag_assembly_state (frag_now);
 
       xtensa_move_labels (frag_now, 0, FALSE);
@@ -6918,7 +6942,8 @@ xtensa_end (void)
 
   if (workaround_short_loop && maybe_has_short_loop)
     xtensa_fix_short_loop_frags ();
-  xtensa_mark_narrow_branches ();
+  if (align_targets)
+    xtensa_mark_narrow_branches ();
   xtensa_mark_zcl_first_insns ();
 
   xtensa_sanity_check ();
@@ -7113,7 +7138,24 @@ xtensa_mark_zcl_first_insns (void)
 	      /* Of course, sometimes (mostly for toy test cases) a
 		 zero-cost loop instruction is the last in a section.  */
 	      if (targ_frag)
-		targ_frag->tc_frag_data.is_first_loop_insn = TRUE;
+		{
+		  targ_frag->tc_frag_data.is_first_loop_insn = TRUE;
+		  /* Do not widen a frag that is the first instruction of a
+		     zero-cost loop.  It makes that loop harder to align.  */
+		  if (targ_frag->fr_type == rs_machine_dependent
+		      && targ_frag->fr_subtype == RELAX_SLOTS
+		      && (targ_frag->tc_frag_data.slot_subtypes[0]
+			  == RELAX_NARROW))
+		    {
+		      if (targ_frag->tc_frag_data.is_aligning_branch)
+			targ_frag->tc_frag_data.slot_subtypes[0] = RELAX_IMMED;
+		      else
+			{
+			  frag_wane (targ_frag);
+			  targ_frag->tc_frag_data.slot_subtypes[0] = 0;
+			}
+		    }
+		}
 	      if (fragP->fr_subtype == RELAX_CHECK_ALIGN_NEXT_OPCODE)
 		frag_wane (fragP);
 	    }
@@ -7301,7 +7343,7 @@ next_instr_is_loop_end (fragS *fragP)
    .fill 0.  */
 
 static offsetT min_bytes_to_other_loop_end
-  (fragS *, fragS *, offsetT, offsetT);
+  (fragS *, fragS *, offsetT);
 
 static void
 xtensa_fix_close_loop_end_frags (void)
@@ -7315,32 +7357,14 @@ xtensa_fix_close_loop_end_frags (void)
       fragS *fragP;
 
       fragS *current_target = NULL;
-      offsetT current_offset = 0;
 
       /* Walk over all of the fragments in a subsection.  */
       for (fragP = frchP->frch_root; fragP; fragP = fragP->fr_next)
 	{
 	  if (fragP->fr_type == rs_machine_dependent
-	      && ((fragP->fr_subtype == RELAX_IMMED)
-		  || ((fragP->fr_subtype == RELAX_SLOTS)
-		      && (fragP->tc_frag_data.slot_subtypes[0]
-			  == RELAX_IMMED))))
-	    {
-	      /* Read it.  If the instruction is a loop, get the target.  */
-	      TInsn t_insn;
-	      tinsn_from_chars (&t_insn, fragP->fr_opcode, 0);
-	      if (xtensa_opcode_is_loop (xtensa_default_isa,
-					 t_insn.opcode) == 1)
-		{
-		  /* Get the current fragment target.  */
-		  if (fragP->tc_frag_data.slot_symbols[0])
-		    {
-		      symbolS *sym = fragP->tc_frag_data.slot_symbols[0];
-		      current_target = symbol_get_frag (sym);
-		      current_offset = fragP->fr_offset;
-		    }
-		}
-	    }
+	      && ((fragP->fr_subtype == RELAX_ALIGN_NEXT_OPCODE)
+		  || (fragP->fr_subtype == RELAX_CHECK_ALIGN_NEXT_OPCODE)))
+	      current_target = symbol_get_frag (fragP->fr_symbol);
 
 	  if (current_target
 	      && fragP->fr_type == rs_machine_dependent
@@ -7352,8 +7376,7 @@ xtensa_fix_close_loop_end_frags (void)
 #define REQUIRED_LOOP_DIVIDING_BYTES 12
 	      /* Max out at 12.  */
 	      min_bytes = min_bytes_to_other_loop_end
-		(fragP->fr_next, current_target, current_offset,
-		 REQUIRED_LOOP_DIVIDING_BYTES);
+		(fragP->fr_next, current_target, REQUIRED_LOOP_DIVIDING_BYTES);
 
 	      if (min_bytes < REQUIRED_LOOP_DIVIDING_BYTES)
 		{
@@ -7394,7 +7417,6 @@ static offsetT unrelaxed_frag_min_size (fragS *);
 static offsetT
 min_bytes_to_other_loop_end (fragS *fragP,
 			     fragS *current_target,
-			     offsetT current_offset,
 			     offsetT max_size)
 {
   offsetT offset = 0;
@@ -7406,11 +7428,11 @@ min_bytes_to_other_loop_end (fragS *fragP,
     {
       if (current_fragP->tc_frag_data.is_loop_target
 	  && current_fragP != current_target)
-	return offset + current_offset;
+	return offset;
 
       offset += unrelaxed_frag_min_size (current_fragP);
 
-      if (offset + current_offset >= max_size)
+      if (offset >= max_size)
 	return max_size;
     }
   return max_size;
@@ -7497,35 +7519,22 @@ xtensa_fix_short_loop_frags (void)
     {
       fragS *fragP;
       fragS *current_target = NULL;
-      offsetT current_offset = 0;
       xtensa_opcode current_opcode = XTENSA_UNDEFINED;
 
       /* Walk over all of the fragments in a subsection.  */
       for (fragP = frchP->frch_root; fragP; fragP = fragP->fr_next)
 	{
-	  /* Check on the current loop.  */
 	  if (fragP->fr_type == rs_machine_dependent
-	      && ((fragP->fr_subtype == RELAX_IMMED)
-		  || ((fragP->fr_subtype == RELAX_SLOTS)
-		      && (fragP->tc_frag_data.slot_subtypes[0]
-			  == RELAX_IMMED))))
+	      && ((fragP->fr_subtype == RELAX_ALIGN_NEXT_OPCODE)
+		  || (fragP->fr_subtype == RELAX_CHECK_ALIGN_NEXT_OPCODE)))
 	    {
 	      TInsn t_insn;
-
-	      /* Read it.  If the instruction is a loop, get the target.  */
-	      tinsn_from_chars (&t_insn, fragP->fr_opcode, 0);
-	      if (xtensa_opcode_is_loop (xtensa_default_isa,
-					 t_insn.opcode) == 1)
-		{
-		  /* Get the current fragment target.  */
-		  if (fragP->tc_frag_data.slot_symbols[0])
-		    {
-		      symbolS *sym = fragP->tc_frag_data.slot_symbols[0];
-		      current_target = symbol_get_frag (sym);
-		      current_offset = fragP->fr_offset;
-		      current_opcode = t_insn.opcode;
-		    }
-		}
+	      fragS *loop_frag = next_non_empty_frag (fragP);
+	      tinsn_from_chars (&t_insn, loop_frag->fr_opcode, 0);
+	      current_target = symbol_get_frag (fragP->fr_symbol);
+	      current_opcode = t_insn.opcode;
+	      assert (xtensa_opcode_is_loop (xtensa_default_isa,
+					     current_opcode));
 	    }
 
 	  if (fragP->fr_type == rs_machine_dependent
@@ -7835,16 +7844,10 @@ is_local_forward_loop (const TInsn *insn, fragS *fragP)
 static int
 get_text_align_power (unsigned target_size)
 {
-  int i = 0;
-  unsigned power = 1;
-
-  assert (target_size <= INT_MAX);
-  while (target_size > power)
-    {
-      power <<= 1;
-      i += 1;
-    }
-  return i;
+  if (target_size <= 4)
+    return 2;
+  assert (target_size == 8);
+  return 3;
 }
 
 
@@ -8038,14 +8041,9 @@ get_noop_aligned_address (fragS *fragP, addressT address)
      instruction following the loop, not the LOOP instruction.  */
 
   if (first_insn == NULL)
-    return address;
-
-  assert (first_insn->tc_frag_data.is_first_loop_insn);
-
-  first_insn_size = frag_format_size (first_insn);
-
-  if (first_insn_size == 2 || first_insn_size == XTENSA_UNDEFINED)
-    first_insn_size = 3;	/* ISA specifies this */
+    first_insn_size = xtensa_fetch_width;
+  else
+    first_insn_size = get_loop_align_size (frag_format_size (first_insn));
 
   /* If it was 8, then we'll need a larger alignment for the section.  */
   align_power = get_text_align_power (first_insn_size);
@@ -8108,7 +8106,7 @@ get_aligned_diff (fragS *fragP, addressT address, offsetT *max_diff)
       return opt_diff;
 
     case RELAX_ALIGN_NEXT_OPCODE:
-      target_size = next_frag_format_size (fragP);
+      target_size = get_loop_align_size (next_frag_format_size (fragP));
       loop_insn_offset = 0;
       is_loop = next_frag_opcode_is_loop (fragP, &loop_opcode);
       assert (is_loop);
@@ -8118,9 +8116,6 @@ get_aligned_diff (fragS *fragP, addressT address, offsetT *max_diff)
       if (next_non_empty_frag(fragP)->tc_frag_data.slot_subtypes[0]
 	  != RELAX_IMMED)
 	loop_insn_offset = get_expanded_loop_offset (loop_opcode);
-
-      if (target_size == 2)
-	target_size = 3; /* ISA specifies this */
 
       /* In an ideal world, which is what we are shooting for here,
 	 we wouldn't need to use any NOPs immediately prior to the
@@ -8725,7 +8720,7 @@ bytes_to_stretch (fragS *this_frag,
       /* We will need a NOP no matter what, but should we widen
 	 this instruction to help?
 
-	 This is a RELAX_FRAG_NARROW frag.  */
+	 This is a RELAX_NARROW frag.  */
       switch (desired_diff)
 	{
 	case 1:
@@ -10826,8 +10821,11 @@ init_op_placement_info_table (void)
 		  opi->issuef++;
 		  set_bit (fmt, opi->formats);
 		  set_bit (slot, opi->slots[fmt]);
-		  /* opi->slot_count[fmt]++; */
-		  if (fmt_length < opi->narrowest_size)
+		  if (fmt_length < opi->narrowest_size
+		      || (fmt_length == opi->narrowest_size
+			  && (xtensa_format_num_slots (isa, fmt)
+			      < xtensa_format_num_slots (isa,
+							 opi->narrowest))))
 		    {
 		      opi->narrowest = fmt;
 		      opi->narrowest_size = fmt_length;

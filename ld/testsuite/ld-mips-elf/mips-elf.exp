@@ -16,6 +16,34 @@
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
+if {[istarget "mips*-*-vxworks"]} {
+    set mipsvxtests {
+	{"VxWorks shared library test 1" "-shared -Tvxworks1.ld"
+	 "-mips2" {vxworks1-lib.s}
+	 {{readelf --relocs vxworks1-lib.rd} {objdump -dr vxworks1-lib.dd}
+	  {readelf --symbols vxworks1-lib.nd}}
+	 "libvxworks1.so"}
+	{"VxWorks executable test 1 (dynamic)" \
+	 "tmpdir/libvxworks1.so -Tvxworks1.ld -q --force-dynamic"
+	 "-mips2" {vxworks1.s}
+	 {{readelf --relocs vxworks1.rd} {objdump -dr vxworks1.dd}}
+	 "vxworks1"}
+	{"VxWorks executable test 2 (dynamic)" \
+	 "-Tvxworks1.ld -q --force-dynamic"
+	 "-mips2" {vxworks2.s}
+	 {{readelf --segments vxworks2.sd}}
+	 "vxworks2"}
+	{"VxWorks executable test 2 (static)"
+	 "-Tvxworks1.ld"
+	 "-mips2" {vxworks2.s}
+	 {{readelf --segments vxworks2-static.sd}}
+	 "vxworks2"}
+    }
+    run_ld_link_tests $mipsvxtests
+    run_dump_test "vxworks1-static"
+    return
+}
+
 if {![istarget mips*-*-*] || ![is_elf_format]} {
     return
 }
@@ -109,6 +137,33 @@ if $has_newabi {
     run_dump_test "emit-relocs-1"
 }
 
+if {[istarget mips*-*-linux*]} {
+     # The number of symbols that are always included in the symbol table
+     # for these tests.  The 5 are:
+     #
+     #     the null symbol entry
+     #     the .MIPS.stubs section symbol
+     #     the .text section symbol
+     #     _gp
+     #     _GLOBAL_OFFSET_TABLE_
+     set base_syms 5
+     foreach dynsym { 7fff 8000 fff0 10000 2fe80 } {
+	 run_ld_link_tests \
+	     [list [list \
+			"Stub for dynsym 0x$dynsym" \
+			"-shared -melf32btsmip -T stub-dynsym-1.ld" \
+			[concat \
+			     "-EB -march=mips1 -32 -KPIC" \
+			     "--defsym base_syms=$base_syms" \
+			     "--defsym dynsym=0x$dynsym"] \
+			[list "stub-dynsym-1.s"] \
+			[list [list \
+				   "objdump" "-dz" \
+				   "stub-dynsym-1-$dynsym.d"]] \
+			"stub-dynsym-1-$dynsym"]]
+     }
+ }
+
 # For tests which may involve multiple files, use run_ld_link_tests.
 
 # List contains test-items with 3 items followed by 2 lists:
@@ -171,6 +226,17 @@ set mips_tls_tests {
      "-EB -march=mips1 -32 -KPIC" {tls-hidden2a.s tls-hidden2b.s}
      {{objdump -drj.text tls-hidden2.d} {objdump -sj.got tls-hidden2-got.d}}
      "tls-hidden2.so"}
+    {"Shared library with TLS and hidden symbols (3)"
+     "-shared -melf32btsmip -T tls-hidden3.ld"
+     "-EB -march=mips2 -32 -KPIC" {tls-hidden3a.s tls-hidden3b.s}
+     {{objdump -dj.text tls-hidden3.d} {objdump -sj.got tls-hidden3.got}
+      {readelf --relocs tls-hidden3.r}}
+     "tls-hidden3.so"}
+    {"Shared library with TLS and hidden symbols (4)"
+     "-shared -melf32btsmip -T tls-hidden3.ld"
+     "-EB -march=mips2 -32 -KPIC" {tls-hidden4a.s tls-hidden4b.s}
+     {{objdump -sj.got tls-hidden4.got} {readelf --relocs tls-hidden4.r}}
+     "tls-hidden4.so"}
 }
 
 if {[istarget mips*-*-linux*]} {

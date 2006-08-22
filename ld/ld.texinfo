@@ -40,6 +40,8 @@
 @set MSP430
 @set PDP11
 @set PJ
+@set POWERPC
+@set POWERPC64
 @set SH
 @set SPARC
 @set TIC54X
@@ -155,6 +157,12 @@ section entitled ``GNU Free Documentation License''.
 @end ifset
 @ifset M68HC11
 * M68HC11/68HC12::              ld and the Motorola 68HC11 and 68HC12 families
+@end ifset
+@ifset POWERPC
+* PowerPC ELF32::               ld and PowerPC 32-bit ELF Support
+@end ifset
+@ifset POWERPC64
+* PowerPC64 ELF64::             ld and PowerPC64 64-bit ELF Support
 @end ifset
 @ifset TICOFF
 * TI COFF::                     ld and the TI COFF
@@ -342,7 +350,7 @@ Here is a table of the generic command line switches accepted by the GNU
 linker:
 
 @table @gcctabopt
-@include @value{top_srcdir}/../libiberty/at-file.texi
+@include at-file.texi
 
 @kindex -a@var{keyword}
 @item -a@var{keyword}
@@ -1117,7 +1125,7 @@ platforms which support shared libraries.
 @item --check-sections
 @itemx --no-check-sections
 Asks the linker @emph{not} to check section addresses after they have
-been assigned to see if there any overlaps.  Normally the linker will
+been assigned to see if there are any overlaps.  Normally the linker will
 perform this check, and if it finds any overlaps it will produce
 suitable error messages.  The linker does know about, and does make
 allowances for sections in overlays.  The default behaviour can be
@@ -1382,6 +1390,9 @@ This option is only supported on a few targets.
 @end ifset
 @ifset M68HC11
 @xref{M68HC11/68HC12,,@command{ld} and the 68HC11 and 68HC12}.
+@end ifset
+@ifset POWERPC
+@xref{PowerPC ELF32,,@command{ld} and PowerPC 32-bit ELF Support}.
 @end ifset
 
 On some platforms, the @samp{--relax} option performs global
@@ -5111,6 +5122,12 @@ functionality are not listed.
 @ifset M68HC11
 * M68HC11/68HC12::		@code{ld} and the Motorola 68HC11 and 68HC12 families
 @end ifset
+@ifset POWERPC
+* PowerPC ELF32::		@command{ld} and PowerPC 32-bit ELF Support
+@end ifset
+@ifset POWERPC64
+* PowerPC64 ELF64::		@command{ld} and PowerPC64 64-bit ELF Support
+@end ifset
 @ifset TICOFF
 * TI COFF::                     @command{ld} and TI COFF
 @end ifset
@@ -5502,6 +5519,183 @@ The last two sections are used by gcc.
 @end ifclear
 @end ifset
 
+@ifset POWERPC
+@ifclear GENERIC
+@raisesections
+@end ifclear
+
+@node PowerPC ELF32
+@section @command{ld} and PowerPC 32-bit ELF Support
+@cindex PowerPC long branches
+@kindex --relax on PowerPC
+Branches on PowerPC processors are limited to a signed 26-bit
+displacement, which may result in @command{ld} giving
+@samp{relocation truncated to fit} errors with very large programs.
+@samp{--relax} enables the generation of trampolines that can access
+the entire 32-bit address space.  These trampolines are inserted at
+section boundaries, so may not themselves be reachable if an input
+section exceeds 33M in size.
+
+@cindex PowerPC ELF32 options
+@table @option
+@cindex PowerPC PLT
+@kindex --bss-plt
+@item --bss-plt
+Current PowerPC GCC accepts a @samp{-msecure-plt} option that
+generates code capable of using a newer PLT and GOT layout that has
+the security advantage of no executable section ever needing to be
+writable and no writable section ever being executable.  PowerPC
+@command{ld} will generate this layout, including stubs to access the
+PLT, if all input files (including startup and static libraries) were
+compiled with @samp{-msecure-plt}.  @samp{--bss-plt} forces the old
+BSS PLT (and GOT layout) which can give slightly better performance.
+
+@cindex PowerPC GOT
+@kindex --sdata-got
+@item --sdata-got
+The new secure PLT and GOT are placed differently relative to other
+sections compared to older BSS PLT and GOT placement.  The location of
+@code{.plt} must change because the new secure PLT is an initialized
+section while the old PLT is uninitialized.  The reason for the
+@code{.got} change is more subtle:  The new placement allows
+@code{.got} to be read-only in applications linked with
+@samp{-z relro -z now}.  However, this placement means that
+@code{.sdata} cannot always be used in shared libraries, because the
+PowerPC ABI accesses @code{.sdata} in shared libraries from the GOT
+pointer.  @samp{--sdata-got} forces the old GOT placement.  PowerPC
+GCC doesn't use @code{.sdata} in shared libraries, so this option is
+really only useful for other compilers that may do so.
+
+@cindex PowerPC stub symbols
+@kindex --emit-stub-syms
+@item --emit-stub-syms
+This option causes @command{ld} to label linker stubs with a local
+symbol that encodes the stub type and destination.
+
+@cindex PowerPC TLS optimization
+@kindex --no-tls-optimize
+@item --no-tls-optimize
+PowerPC @command{ld} normally performs some optimization of code
+sequences used to access Thread-Local Storage.  Use this option to
+disable the optimization.
+@end table
+
+@ifclear GENERIC
+@lowersections
+@end ifclear
+@end ifset
+
+@ifset POWERPC64
+@ifclear GENERIC
+@raisesections
+@end ifclear
+
+@node PowerPC64 ELF64
+@section @command{ld} and PowerPC64 64-bit ELF Support
+
+@cindex PowerPC64 ELF64 options
+@table @option
+@cindex PowerPC64 stub grouping
+@kindex --stub-group-size
+@item --stub-group-size
+Long branch stubs, PLT call stubs  and TOC adjusting stubs are placed
+by @command{ld} in stub sections located between groups of input sections.
+@samp{--stub-group-size} specifies the maximum size of a group of input
+sections handled by one stub section.  Since branch offsets are signed,
+a stub section may serve two groups of input sections, one group before
+the stub section, and one group after it.  However, when using
+conditional branches that require stubs, it may be better (for branch
+prediction) that stub sections only serve one group of input sections.
+A negative value for @samp{N} chooses this scheme, ensuring that
+branches to stubs always use a negative offset.  Two special values of
+@samp{N} are recognized, @samp{1} and @samp{-1}.  These both instruct
+@command{ld} to automatically size input section groups for the branch types
+detected, with the same behaviour regarding stub placement as other
+positive or negative values of @samp{N} respectively.
+
+Note that @samp{--stub-group-size} does not split input sections.  A
+single input section larger than the group size specified will of course
+create a larger group (of one section).  If input sections are too
+large, it may not be possible for a branch to reach its stub.
+
+@cindex PowerPC64 stub symbols
+@kindex --emit-stub-syms
+@item --emit-stub-syms
+This option causes @command{ld} to label linker stubs with a local
+symbol that encodes the stub type and destination.
+
+@cindex PowerPC64 dot symbols
+@kindex --dotsyms
+@kindex --no-dotsyms
+@item --dotsyms, --no-dotsyms
+These two options control how @command{ld} interprets version patterns
+in a version script.  Older PowerPC64 compilers emitted both a
+function descriptor symbol with the same name as the function, and a
+code entry symbol with the name prefixed by a dot (@samp{.}).  To
+properly version a function @samp{foo}, the version script thus needs
+to control both @samp{foo} and @samp{.foo}.  The option
+@samp{--dotsyms}, on by default, automatically adds the required
+dot-prefixed patterns.  Use @samp{--no-dotsyms} to disable this
+feature.
+
+@cindex PowerPC64 TLS optimization
+@kindex --no-tls-optimize
+@item --no-tls-optimize
+PowerPC64 @command{ld} normally performs some optimization of code
+sequences used to access Thread-Local Storage.  Use this option to
+disable the optimization.
+
+@cindex PowerPC64 OPD optimization
+@kindex --no-opd-optimize
+@item --no-opd-optimize
+PowerPC64 @command{ld} normally removes @code{.opd} section entries
+corresponding to deleted link-once functions, or functions removed by
+the action of @samp{--gc-sections} or linker scrip @code{/DISCARD/}.
+Use this option to disable @code{.opd} optimization.
+
+@cindex PowerPC64 OPD spacing
+@kindex --non-overlapping-opd
+@item --non-overlapping-opd
+Some PowerPC64 compilers have an option to generate compressed
+@code{.opd} entries spaced 16 bytes apart, overlapping the third word,
+the static chain pointer (unused in C) with the first word of the next
+entry.  This option expands such entries to the full 24 bytes.
+
+@cindex PowerPC64 TOC optimization
+@kindex --no-toc-optimize
+@item --no-toc-optimize
+PowerPC64 @command{ld} normally removes unused @code{.toc} section
+entries.  Such entries are detected by examining relocations that
+reference the TOC in code sections.  A reloc in a deleted code section
+marks a TOC word as unneeded, while a reloc in a kept code section
+marks a TOC word as needed.  Since the TOC may reference itself, TOC
+relocs are also examined.  TOC words marked as both needed and
+unneeded will of course be kept.  TOC words without any referencing
+reloc are assumed to be part of a multi-word entry, and are kept or
+discarded as per the nearest marked preceding word.  This works
+reliably for compiler generated code, but may be incorrect if assembly
+code is used to insert TOC entries.  Use this option to disable the
+optimization.
+
+@cindex PowerPC64 multi-TOC
+@kindex --no-multi-toc
+@item --no-multi-toc
+By default, PowerPC64 GCC generates code for a TOC model where TOC
+entries are accessed with a 16-bit offset from r2.  This limits the
+total TOC size to 64K.  PowerPC64 @command{ld} extends this limit by
+grouping code sections such that each group uses less than 64K for its
+TOC entries, then inserts r2 adjusting stubs between inter-group
+calls.  @command{ld} does not split apart input sections, so cannot
+help if a single input file has a @code{.toc} section that exceeds
+64K, most likely from linking multiple files with @command{ld -r}.
+Use this option to turn off this feature.
+@end table
+
+@ifclear GENERIC
+@lowersections
+@end ifclear
+@end ifset
+
 @ifset TICOFF
 @ifclear GENERIC
 @raisesections
@@ -5618,7 +5812,8 @@ specification @code{BASE = <number>} may be used to specify a
 non-default base address for the image. 
 
 If neither @code{LIBRARY <name>} nor  @code{NAME <name>} is specified,
-the internal name is the same as the filename specified on the command line. 
+or they specify an empty string, the internal name is the same as the
+filename specified on the command line.
 
 The complete specification of an export symbol is:
 

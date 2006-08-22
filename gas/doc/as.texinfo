@@ -451,7 +451,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @c man begin OPTIONS
 
 @table @gcctabopt
-@include @value{top_srcdir}/../libiberty/at-file.texi
+@include at-file.texi
 
 @item -a[cdhlmns]
 Turn on listings, in any of a variety of ways:

@@ -30,7 +30,7 @@
 
 /* Extract 'n_bits' from 'a' starting from offset 'offs'.  */
 #define EXTRACT(a, offs, n_bits)	    \
-  (n_bits == 32 ? (((a) >> (offs)) & ~0L)   \
+  (n_bits == 32 ? (((a) >> (offs)) & 0xffffffffL)   \
   : (((a) >> (offs)) & ((1 << (n_bits)) -1)))
 
 /* Set Bit Mask - a mask to set all bits starting from offset 'offs'.  */

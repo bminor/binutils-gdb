@@ -83,8 +83,8 @@ xscale-*-elf)		targ_emul=armelf
 avr-*-*)		targ_emul=avr2
 			targ_extra_emuls="avr1 avr3 avr4 avr5"
 			;;
-bfin-*-elf)		targ_emul=elf32bfin ;;
-bfin-*-uclinux*)	targ_emul=elf32bfin ;;
+bfin-*-elf)		targ_emul=elf32bfin; targ_extra_emuls="elf32bfinfd" ;;
+bfin-*-uclinux*)	targ_emul=elf32bfin; targ_extra_emuls="elf32bfinfd" ;;
 cr16c-*-elf*)           targ_emul=elf32cr16c
 			;;
 cris-*-*aout*)		targ_emul=crisaout
@@ -324,9 +324,10 @@ mips*vr5000-*-elf*)	targ_emul=elf32b4300 ;;
 mips*el-*-elf*)		targ_emul=elf32elmip ;;
 mips*-*-elf*)		targ_emul=elf32ebmip ;;
 mips*-*-rtems*)		targ_emul=elf32ebmip ;;
-mips*el-*-vxworks*)	targ_emul=elf32elmip ;;
-mips*-*-vxworks*)	targ_emul=elf32ebmip
-		        targ_extra_emuls="elf32elmip" ;;
+mips*el-*-vxworks*)	targ_emul=elf32elmipvxworks
+			targ_extra_emuls="elf32ebmipvxworks" ;;
+mips*-*-vxworks*)	targ_emul=elf32ebmipvxworks
+		        targ_extra_emuls="elf32elmipvxworks" ;;
 mips*-*-windiss)	targ_emul=elf32mipswindiss ;;
 mips64*el-*-linux-*)	targ_emul=elf32ltsmipn32
 			targ_extra_emuls="elf32btsmipn32 elf32ltsmip elf32btsmip elf64ltsmip elf64btsmip"
@@ -496,6 +497,7 @@ sparc*-*-aout)		targ_emul=sparcaout ;;
 sparc*-*-coff)		targ_emul=coff_sparc ;;
 sparc*-*-elf)		targ_emul=elf32_sparc ;;
 sparc*-*-sysv4*)	targ_emul=elf32_sparc ;;
+sparc*-*-vxworks*)	targ_emul=elf32_sparc_vxworks ;;
 sparc64-*-freebsd* | sparcv9-*-freebsd* | sparc64-*-kfreebsd*-gnu | sparcv9-*-kfreebsd*-gnu)
 			targ_emul=elf64_sparc_fbsd
 			targ_extra_emuls="elf64_sparc elf32_sparc"

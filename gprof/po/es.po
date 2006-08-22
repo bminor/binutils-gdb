@@ -1,13 +1,13 @@
-# Mensajes en español para gprof 2.15.96.
-# Copyright (C) 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
-# Cristian Othón Martínez Vera <cfuga@itam.mx>, 2002, 2003, 2004, 2005.
+# Mensajes en español para gprof 2.16.93.
+# Copyright (C) 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
+# Cristian Othón Martínez Vera <cfuga@itam.mx>, 2002, 2003, 2004, 2005, 2006.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: gprof 2.15.96\n"
+"Project-Id-Version: gprof 2.16.93\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-03-03 21:05+1030\n"
-"PO-Revision-Date: 2005-03-14 17:12-0600\n"
+"POT-Creation-Date: 2005-10-01 07:23+0930\n"
+"PO-Revision-Date: 2006-05-26 13:16-0500\n"
 "Last-Translator: Cristian Othón Martínez Vera <cfuga@itam.mx>\n"
 "Language-Team: Spanish <es@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -44,16 +44,16 @@ msgid "%s: warning: ignoring basic-block exec counts (use -l or --line)\n"
 msgstr "%s: aviso: ignorando las cuentas de ejecución de bloques básicos (use -l o --line)\n"
 
 #. FIXME: This only works if bfd_vma is unsigned long.
-#: basic_blocks.c:287 basic_blocks.c:297
+#: basic_blocks.c:289 basic_blocks.c:299
 #, c-format
 msgid "%s:%d: (%s:0x%lx) %lu executions\n"
 msgstr "%s:%d: (%s:0x%lx) %lu ejecuciones\n"
 
-#: basic_blocks.c:288 basic_blocks.c:298
+#: basic_blocks.c:290 basic_blocks.c:300
 msgid "<unknown>"
 msgstr "<desconocido>"
 
-#: basic_blocks.c:541
+#: basic_blocks.c:543
 #, c-format
 msgid ""
 "\n"
@@ -70,7 +70,7 @@ msgstr ""
 "     Línea     Cuenta\n"
 "\n"
 
-#: basic_blocks.c:565
+#: basic_blocks.c:567
 #, c-format
 msgid ""
 "\n"
@@ -81,22 +81,22 @@ msgstr ""
 "Resumen de Ejecución:\n"
 "\n"
 
-#: basic_blocks.c:566
+#: basic_blocks.c:568
 #, c-format
 msgid "%9ld   Executable lines in this file\n"
 msgstr "%9ld   Líneas ejecutables en este fichero\n"
 
-#: basic_blocks.c:568
+#: basic_blocks.c:570
 #, c-format
 msgid "%9ld   Lines executed\n"
 msgstr "%9ld   Líneas ejecutadas\n"
 
-#: basic_blocks.c:569
+#: basic_blocks.c:571
 #, c-format
 msgid "%9.2f   Percent of the file executed\n"
 msgstr "%9.2f   Porcentaje ejecutado del fichero\n"
 
-#: basic_blocks.c:573
+#: basic_blocks.c:575
 #, c-format
 msgid ""
 "\n"
@@ -105,7 +105,7 @@ msgstr ""
 "\n"
 "%9lu   Número total de ejecuciones de línea\n"
 
-#: basic_blocks.c:575
+#: basic_blocks.c:577
 #, c-format
 msgid "%9.2f   Average executions per line\n"
 msgstr "%9.2f   Ejecuciones promedio por línea\n"
@@ -241,37 +241,37 @@ msgstr "%s: no se puede abrir %s.\n"
 msgid "%s: unable to parse mapping file %s.\n"
 msgstr "%s: no se puede decodificar el fichero de mapeo %s.\n"
 
-#: corefile.c:155
+#: corefile.c:158
 #, c-format
 msgid "%s: %s: not in a.out format\n"
 msgstr "%s: %s: no está en el formato a.out\n"
 
-#: corefile.c:166
+#: corefile.c:169
 #, c-format
 msgid "%s: can't find .text section in %s\n"
 msgstr "%s: no se puede encontrar la sección .text en %s\n"
 
-#: corefile.c:224
+#: corefile.c:244
 #, c-format
 msgid "%s: ran out room for %lu bytes of text space\n"
 msgstr "%s: se terminó el espacio para %lu bytes de espacio de texto\n"
 
-#: corefile.c:238
+#: corefile.c:258
 #, c-format
 msgid "%s: can't do -c\n"
 msgstr "%s: no se puede hacer -c\n"
 
-#: corefile.c:272
+#: corefile.c:292
 #, c-format
 msgid "%s: -c not supported on architecture %s\n"
 msgstr "%s: -c no tiene soporte en la arquitectura %s\n"
 
-#: corefile.c:437
+#: corefile.c:457
 #, c-format
 msgid "%s: file `%s' has no symbols\n"
 msgstr "%s: el fichero `%s' no tiene símbolos\n"
 
-#: corefile.c:751
+#: corefile.c:771
 #, c-format
 msgid "%s: somebody miscounted: ltab.len=%d instead of %ld\n"
 msgstr "%s: alguien contó mal: ltab.len=%d en lugar de %ld\n"
@@ -281,94 +281,94 @@ msgstr "%s: alguien contó mal: ltab.len=%d en lugar de %ld\n"
 msgid "%s: address size has unexpected value of %u\n"
 msgstr "%s: el tamaño de la dirección tiene un valor inesperado de %u\n"
 
-#: gmon_io.c:317 gmon_io.c:413
+#: gmon_io.c:320 gmon_io.c:416
 #, c-format
 msgid "%s: file too short to be a gmon file\n"
 msgstr "%s: el fichero es muy corto para ser un fichero gmon\n"
 
-#: gmon_io.c:327 gmon_io.c:456
+#: gmon_io.c:330 gmon_io.c:459
 #, c-format
 msgid "%s: file `%s' has bad magic cookie\n"
 msgstr "%s: el fichero `%s' tiene una galleta mágica errónea\n"
 
-#: gmon_io.c:338
+#: gmon_io.c:341
 #, c-format
 msgid "%s: file `%s' has unsupported version %d\n"
 msgstr "%s: el fichero `%s' tiene la version %d que no tiene soporte\n"
 
-#: gmon_io.c:368
+#: gmon_io.c:371
 #, c-format
 msgid "%s: %s: found bad tag %d (file corrupted?)\n"
 msgstr "%s: %s: se encontró la marca errónea %d (¿fichero corrupto?)\n"
 
-#: gmon_io.c:435
+#: gmon_io.c:438
 #, c-format
 msgid "%s: profiling rate incompatible with first gmon file\n"
 msgstr "%s: tasa de análisis de perfil incompatible con el primer fichero gmon\n"
 
-#: gmon_io.c:483
+#: gmon_io.c:486
 #, c-format
 msgid "%s: incompatible with first gmon file\n"
 msgstr "%s: incompatible con el primer fichero gmon\n"
 
-#: gmon_io.c:511
+#: gmon_io.c:514
 #, c-format
 msgid "%s: file '%s' does not appear to be in gmon.out format\n"
 msgstr "%s: el fichero '%s' no parece estar en el formato gmon.out\n"
 
 # FIXME: comprobar con el código si bins es abreviatura de binarios o
 # se refiere a la denominación inglesa de 'papelera'. cfuga
-#: gmon_io.c:532
+#: gmon_io.c:535
 #, c-format
 msgid "%s: unexpected EOF after reading %d/%d bins\n"
 msgstr "%s: fin de fichero inesperado después de leer %d/%d binarios\n"
 
-#: gmon_io.c:565
+#: gmon_io.c:568
 #, c-format
 msgid "time is in ticks, not seconds\n"
 msgstr "el tiempo está en tics, no en segundos\n"
 
-#: gmon_io.c:571 gmon_io.c:747
+#: gmon_io.c:574 gmon_io.c:750
 #, c-format
 msgid "%s: don't know how to deal with file format %d\n"
 msgstr "%s: se desconoce cómo lidiar con el fichero de formato %d\n"
 
-#: gmon_io.c:578
+#: gmon_io.c:581
 #, c-format
 msgid "File `%s' (version %d) contains:\n"
 msgstr "El fichero `%s' (versión %d) contiene:\n"
 
-#: gmon_io.c:581
+#: gmon_io.c:584
 #, c-format
 msgid "\t%d histogram record\n"
 msgstr "\t%d registro de histograma\n"
 
-#: gmon_io.c:582
+#: gmon_io.c:585
 #, c-format
 msgid "\t%d histogram records\n"
 msgstr "\t%d registros de histogramas\n"
 
-#: gmon_io.c:584
+#: gmon_io.c:587
 #, c-format
 msgid "\t%d call-graph record\n"
 msgstr "\t%d registro de gráfico de llamadas\n"
 
-#: gmon_io.c:585
+#: gmon_io.c:588
 #, c-format
 msgid "\t%d call-graph records\n"
 msgstr "\t%d registros de gráficos de llamadas\n"
 
-#: gmon_io.c:587
+#: gmon_io.c:590
 #, c-format
 msgid "\t%d basic-block count record\n"
 msgstr "\t%d registro de cuenta de bloques básicos\n"
 
-#: gmon_io.c:588
+#: gmon_io.c:591
 #, c-format
 msgid "\t%d basic-block count records\n"
 msgstr "\t%d registros de cuentas de bloques básicos\n"
 
-#: gprof.c:160
+#: gprof.c:158
 #, c-format
 msgid ""
 "Usage: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n"
@@ -399,58 +399,58 @@ msgstr ""
 "\t[--demangle[=ESTILO]] [--no-demangle]\n"
 "\t[fichero-imagen] [fichero-perfil...]\n"
 
-#: gprof.c:176
+#: gprof.c:174
 #, c-format
 msgid "Report bugs to %s\n"
 msgstr "Reportar bichos a %s\n"
 
-#: gprof.c:248
+#: gprof.c:250
 #, c-format
 msgid "%s: debugging not supported; -d ignored\n"
 msgstr "%s: no hay soporte para depuración; se ignora -d\n"
 
-#: gprof.c:328
+#: gprof.c:330
 #, c-format
 msgid "%s: unknown file format %s\n"
 msgstr "%s: formato de fichero %s desconocido\n"
 
 #. This output is intended to follow the GNU standards document.
-#: gprof.c:412
+#: gprof.c:414
 #, c-format
 msgid "GNU gprof %s\n"
 msgstr "GNU gprof %s\n"
 
-#: gprof.c:413
+#: gprof.c:415
 #, c-format
 msgid "Based on BSD gprof, copyright 1983 Regents of the University of California.\n"
 msgstr "Basado en gprof de BSD, copyright 1983 Regents of the University of California.\n"
 
-#: gprof.c:414
+#: gprof.c:416
 #, c-format
 msgid "This program is free software.  This program has absolutely no warranty.\n"
 msgstr "Este programa es software libre.  Este programa no tiene ninguna garantía en lo absoluto.\n"
 
-#: gprof.c:455
+#: gprof.c:457
 #, c-format
 msgid "%s: unknown demangling style `%s'\n"
 msgstr "%s: estilo de desenredo desconocido `%s'\n"
 
-#: gprof.c:475
+#: gprof.c:477
 #, c-format
 msgid "%s: Only one of --function-ordering and --file-ordering may be specified.\n"
 msgstr "%s: Sólo se puede especificar uno de --function-ordering y --file-ordering.\n"
 
-#: gprof.c:525
+#: gprof.c:527
 #, c-format
 msgid "%s: sorry, file format `prof' is not yet supported\n"
 msgstr "%s: perdón, el formato de fichero `prof' aún no tiene soporte\n"
 
-#: gprof.c:574
+#: gprof.c:576
 #, c-format
 msgid "%s: gmon.out file is missing histogram\n"
 msgstr "%s: al fichero gmon.out le falta el histograma\n"
 
-#: gprof.c:581
+#: gprof.c:583
 #, c-format
 msgid "%s: gmon.out file is missing call-graph data\n"
 msgstr "%s: al fichero gmon.out le falta los datos del gráfico de llamadas\n"

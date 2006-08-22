@@ -856,7 +856,7 @@ Optional Features:
   --enable-static=PKGS  build static libraries default=yes
   --enable-fast-install=PKGS  optimize for fast installation default=yes
   --disable-libtool-lock  avoid locking (might break parallel builds)
-    targets            alternative target configurations besides the primary
+   --enable-targets       alternative target configurations besides the primary
   --enable-commonbfdlib   build shared BFD/opcodes/libiberty library
   --enable-werror    treat compile warnings as errors
   --enable-build-warnings Enable build-time compiler warnings

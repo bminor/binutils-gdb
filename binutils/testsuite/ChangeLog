@@ -3,6 +3,10 @@
 	* binutils-all/localize-hidden-1.d: Use objdump --syms instead
 	of readelf.
 
+2006-04-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* lib/utils-lib.exp (default_binutils_run): Check exit status.
+
 2005-12-24  Ben Elliston  <bje@gnu.org>
 
 	* config/default.exp: Do not load the unneeded util-defs.exp.

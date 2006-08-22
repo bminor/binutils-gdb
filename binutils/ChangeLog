@@ -1,3 +1,97 @@
+2006-06-07  Joseph S. Myers  <joseph@codesourcery.com>
+
+	* po/Make-in (pdf, ps): New dummy targets.
+
+2006-06-02  Joseph S. Myers  <joseph@codesourcery.com>
+
+	* doc/Makefile.am (TEXI2DVI): Define.
+	* doc/Makefile.in: Regenerate.
+
+2006-06-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	Backport:
+	2006-05-19  Andreas Schwab  <schwab@suse.de>
+	* doc/Makefile.am (addr2line.1): Depend on $(binutils_TEXINFOS).
+	(ar.1): Likewise.
+	(dlltool.1): Likewise.
+	(nlmconv.1): Likewise.
+	(nm.1): Likewise.
+	(objcopy.1): Likewise.
+	(objdump.1): Likewise.
+	(ranlib.1): Likewise.
+	(readelf.1): Likewise.
+	(size.1): Likewise.
+	(strings.1): Likewise.
+	(strip.1): Likewise.
+	(windres.1): Likewise.
+	(cxxfilt.man): Likewise.
+	* doc/Makefile.in: Regenerated.
+
+2006-05-30  Nick Clifton  <nickc@redhat.com>
+
+	* po/es.po: Updated Spanish translation.
+
+2006-05-24  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+
+2006-05-23  Nick Clifton  <nickc@redhat.com>
+
+	* po/vi.po: Updated Vietnamese translation.
+
+2006-05-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* po/ru.po: Updated translation.
+
+2006-05-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* doc/Makefile.am (AM_MAKEINFOFLAGS): New.
+	(TEXI2POD): Use AM_MAKEINFOFLAGS.
+	(config.texi): Don't set top_srcdir.
+	* doc/binutils.texi: Don't use top_srcdir.
+	* aclocal.m4, Makefile.in, doc/Makefile.in: Regenerated.
+
+2006-04-12  Nick Clifton  <nickc@redhat.com>
+
+	* objdump.c (objdump_symbol_at_address): Fix typo in comment.
+
+2006-04-10  Ben Elliston  <bje@gnu.org>
+
+	* MAINTAINERS (CGEN Maintainers): Remove myself.
+
+2006-04-06  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* po/Make-in: Add install-html target.
+	* Makefile.am: Add install-html and install-html-recursive targets.
+	* Makefile.in: Regenerate.
+	* configure.in: AC_SUBST datarootdir, docdir and htmldir.
+	* configure: Regenerate.
+	* doc/Makefile.am: Add install-html and install-html-am targets.
+	* doc/Makefile.in: Regenerate.
+
+2006-04-05  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* addr2line.c (long_options): Add new option 'section'.
+	(usage): Document new -j/--section option.
+	(find_offset_in_section): New function.
+	(translate_addresses): Add 'section' parameter.
+	If it is non-null, call find_offset_in_section on it.
+	(process_file): Add 'section_name' parameter.
+	If it is non-null, look for the section in the BFD object.
+	Pass the section to translate_addresses.
+	(main): Handle new -j option.
+	Pass the section name to process_file.
+	* doc/binutils.texi (addr2line): Document new -j/--section option.
+
+2006-03-29  Ben Elliston  <bje@au.ibm.com>
+
+	* resbin.c: Avoid duplicating constants in calls to reswr_alloc.
+
+2006-03-20  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* BRANCHES: Remove binutils-csl-arm-2006q1-branch.  Document
+	binutils-csl-2_17-branch instead.
+
 2006-03-20  Paul Brook  <paul@codesourcery.com>
 
 	* BRANCHES: Mention binutils-csl-arm-2006q1-branch.

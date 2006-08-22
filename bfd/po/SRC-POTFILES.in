@@ -115,6 +115,7 @@ cpu-v850.c
 cpu-vax.c
 cpu-w65.c
 cpu-we32k.c
+cpu-xc16x.c
 cpu-xstormy16.c
 cpu-xtensa.c
 cpu-z80.c
@@ -174,6 +175,7 @@ elf32-sh-symbian.c
 elf32-sparc.c
 elf32-v850.c
 elf32-vax.c
+elf32-xc16x.c
 elf32-xstormy16.c
 elf32-xtensa.c
 elf64-alpha.c

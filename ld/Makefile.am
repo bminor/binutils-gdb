@@ -46,7 +46,7 @@ DOCVER = gen
 # Options to extract the man page from ld.texinfo
 MANCONF = -Dman
 
-TEXI2POD = perl $(BASEDIR)/etc/texi2pod.pl
+TEXI2POD = perl $(BASEDIR)/etc/texi2pod.pl $(AM_MAKEINFOFLAGS)
 
 POD2MAN = pod2man --center="GNU Development Tools" \
 	--release="binutils-$(VERSION)" --section=1
@@ -97,8 +97,8 @@ info_TEXINFOS = ld.texinfo
 noinst_TEXINFOS = ldint.texinfo
 man_MANS = ld.1
 
-AM_MAKEINFOFLAGS = -I $(srcdir) -I $(BFDDIR)/doc
-TEXI2DVI = texi2dvi -I $(srcdir) -I $(BFDDIR)/doc
+AM_MAKEINFOFLAGS = -I $(srcdir) -I $(BFDDIR)/doc -I $(top_srcdir)/../libiberty
+TEXI2DVI = texi2dvi -I $(srcdir) -I $(BFDDIR)/doc -I $(top_srcdir)/../libiberty
 
 REPORT_BUGS_TO_s := "\"@REPORT_BUGS_TO@\""
 
@@ -152,8 +152,10 @@ ALL_EMULATIONS = \
 	eelf32_i960.o \
 	eelf32_i860.o \
 	eelf32_sparc.o \
+	eelf32_sparc_vxworks.o \
 	eelf32b4300.o \
 	eelf32bfin.o \
+	eelf32bfinfd.o \
 	eelf32cr16c.o \
 	eelf32bmip.o \
 	eelf32bmipn32.o \
@@ -163,7 +165,9 @@ ALL_EMULATIONS = \
 	eelf32ltsmip.o \
 	eelf32ltsmipn32.o \
 	eelf32ebmip.o \
+	eelf32ebmipvxworks.o \
 	eelf32elmip.o \
+	eelf32elmipvxworks.o \
 	eelf32fr30.o \
 	eelf32frv.o \
 	eelf32i370.o \
@@ -420,7 +424,7 @@ CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 
 HFILES = ld.h ldctor.h ldemul.h ldexp.h ldfile.h \
 	ldlang.h ldlex.h ldmain.h ldmisc.h ldver.h \
-	ldwrite.h mri.h deffile.h pe-dll.h
+	ldwrite.h mri.h deffile.h pe-dll.h elf-hints-local.h
 
 GENERATED_CFILES = ldgram.c ldlex.c deffilep.c
 GENERATED_HFILES = ldgram.h ldemul-list.h deffilep.h
@@ -477,7 +481,7 @@ stringify.sed: ${srcdir}/emultempl/$(STRINGIFY)
 
 # These all start with e so 'make clean' can find them.
 
-GENSCRIPTS = LIB_PATH='${LIB_PATH}' $(SHELL) $(srcdir)/genscripts.sh ${srcdir} ${libdir} "${exec_prefix}" @host@ @target@ @target_alias@ "@EMULATION_LIBPATH@" "@NATIVE_LIB_DIRS@" @use_sysroot@
+GENSCRIPTS = LIB_PATH='${LIB_PATH}' $(SHELL) $(srcdir)/genscripts.sh "${srcdir}" "${libdir}" "${prefix}" "${exec_prefix}" @host@ @target@ @target_alias@ "@EMULATION_LIBPATH@" "@NATIVE_LIB_DIRS@" @use_sysroot@
 GEN_DEPENDS = $(srcdir)/genscripts.sh stringify.sed
 
 @TDIRS@
@@ -628,9 +632,13 @@ edelta68.c: $(srcdir)/emulparams/delta68.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/delta68.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} delta68 "$(tdir_delta68)"
 eelf32bfin.c: $(srcdir)/emulparams/bfin.sh \
-  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/bfin.em \
+  $(srcdir)/emultempl/elf32.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32bfin "$(tdir_elf32bfin)" bfin
+eelf32bfinfd.c: $(srcdir)/emulparams/elf32bfinfd.sh $(srcdir)/emulparams/bfin.sh \
+  $(srcdir)/emultempl/elf32.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32bfinfd "$(tdir_elf32bfinfd)" elf32bfinfd
 eelf32_dlx.c: $(srcdir)/emulparams/elf32_dlx.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/dlx.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_dlx "$(tdir_elf32_dlx)"
@@ -686,6 +694,11 @@ em32rlelf_linux.c: $(srcdir)/emulparams/m32rlelf_linux.sh \
 eelf32_sparc.c: $(srcdir)/emulparams/elf32_sparc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_sparc "$(tdir_elf32_sparc)"
+eelf32_sparc_vxworks.c: $(srcdir)/emulparams/elf32_sparc_vxworks.sh \
+  $(srcdir)/emulparams/vxworks.sh $(srcdir)/emulparams/elf32_sparc.sh \
+  $(srcdir)/emultempl/vxworks.em $(srcdir)/emultempl/elf32.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32_sparc_vxworks "$(tdir_elf32_sparc_vxworks)"
 eelf32_i860.c: $(srcdir)/emulparams/elf32_i860.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_i860 "$(tdir_elf32_i860)"
@@ -731,10 +744,20 @@ eelf32ebmip.c: $(srcdir)/emulparams/elf32ebmip.sh \
   $(srcdir)/emulparams/elf32bmip.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ebmip "$(tdir_elf32ebmip)"
+eelf32ebmipvxworks.c: $(srcdir)/emulparams/elf32ebmipvxworks.sh \
+  $(srcdir)/emulparams/elf32ebmip.sh $(srcdir)/emulparams/vxworks.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/vxworks.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32ebmipvxworks "$(tdir_elf32ebmipvxworks)"
 eelf32elmip.c: $(srcdir)/emulparams/elf32elmip.sh \
   $(srcdir)/emulparams/elf32lmip.sh $(srcdir)/emulparams/elf32bmip.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32elmip "$(tdir_elf32elmip)"
+eelf32elmipvxworks.c: $(srcdir)/emulparams/elf32elmipvxworks.sh \
+  $(srcdir)/emulparams/elf32elmip.sh $(srcdir)/emulparams/vxworks.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/vxworks.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32elmipvxworks "$(tdir_elf32elmipvxworks)"
 eelf32bmipn32.c: $(srcdir)/emulparams/elf32bmipn32.sh \
   $(srcdir)/emultempl/irix.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
@@ -1688,7 +1711,6 @@ bootstrap: ld3$(EXEEXT)
 configdoc.texi:	${DOCVER}-doc.texi
 	cp ${srcdir}/${DOCVER}-doc.texi ./configdoc.texi
 	chmod u+w ./configdoc.texi
-	echo "@set top_srcdir $(top_srcdir)" >> ./configdoc.texi
 
 ldver.texi: $(srcdir)/../bfd/configure
 	rm -f $@

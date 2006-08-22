@@ -482,6 +482,22 @@ m32c_elf_relocate_section
 		relocation = (splt->output_section->vma
 			      + splt->output_offset
 			      + (*plt_offset & -2));
+		if (name)
+		{
+		  char *newname = bfd_malloc (strlen(name)+5);
+		  strcpy (newname, name);
+		  strcat(newname, ".plt");
+		  _bfd_generic_link_add_one_symbol (info,
+						    input_bfd,
+						    newname,
+						    BSF_FUNCTION | BSF_WEAK,
+						    splt,
+						    (*plt_offset & -2),
+						    0,
+						    1,
+						    0,
+						    0);
+		}
 	      }
 	  }
 	  break;

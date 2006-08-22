@@ -81,6 +81,7 @@ static void print_statement (lang_statement_union_type *,
 static void print_statement_list (lang_statement_union_type *,
 				  lang_output_section_statement_type *);
 static void print_statements (void);
+static void print_input_section (asection *);
 static bfd_boolean lang_one_common (struct bfd_link_hash_entry *, void *);
 static void lang_record_phdrs (void);
 static void lang_do_version_exports_section (void);
@@ -869,26 +870,26 @@ lang_add_input_file (const char *name,
   return new_afile (name, file_type, target, TRUE);
 }
 
-struct output_statement_hash_entry
+struct out_section_hash_entry
 {
   struct bfd_hash_entry root;
-  lang_output_section_statement_type os;
+  lang_statement_union_type s;
 };
 
 /* The hash table.  */
 
-static struct bfd_hash_table output_statement_table;
+static struct bfd_hash_table output_section_statement_table;
 
 /* Support routines for the hash table used by lang_output_section_find,
    initialize the table, fill in an entry and remove the table.  */
 
 static struct bfd_hash_entry *
-output_statement_newfunc (struct bfd_hash_entry *entry, 
-			  struct bfd_hash_table *table,
-			  const char *string)
+output_section_statement_newfunc (struct bfd_hash_entry *entry, 
+				  struct bfd_hash_table *table,
+				  const char *string)
 {
   lang_output_section_statement_type **nextp;
-  struct output_statement_hash_entry *ret;
+  struct out_section_hash_entry *ret;
 
   if (entry == NULL)
     {
@@ -901,49 +902,48 @@ output_statement_newfunc (struct bfd_hash_entry *entry,
   if (entry == NULL)
     return entry;
 
-  ret = (struct output_statement_hash_entry *) entry;
-  memset (&ret->os, 0, sizeof (ret->os));
-  ret->os.header.type = lang_output_section_statement_enum;
-  ret->os.subsection_alignment = -1;
-  ret->os.section_alignment = -1;
-  ret->os.block_value = 1;
-  lang_list_init (&ret->os.children);
-  lang_statement_append (stat_ptr,
-			 (lang_statement_union_type *) &ret->os,
-			 &ret->os.header.next);
+  ret = (struct out_section_hash_entry *) entry;
+  memset (&ret->s, 0, sizeof (ret->s));
+  ret->s.header.type = lang_output_section_statement_enum;
+  ret->s.output_section_statement.subsection_alignment = -1;
+  ret->s.output_section_statement.section_alignment = -1;
+  ret->s.output_section_statement.block_value = 1;
+  lang_list_init (&ret->s.output_section_statement.children);
+  lang_statement_append (stat_ptr, &ret->s, &ret->s.header.next);
 
   /* For every output section statement added to the list, except the
      first one, lang_output_section_statement.tail points to the "next"
      field of the last element of the list.  */
   if (lang_output_section_statement.head != NULL)
-    ret->os.prev = (lang_output_section_statement_type *)
-      ((char *) lang_output_section_statement.tail
-       - offsetof (lang_output_section_statement_type, next));
+    ret->s.output_section_statement.prev
+      = ((lang_output_section_statement_type *)
+	 ((char *) lang_output_section_statement.tail
+	  - offsetof (lang_output_section_statement_type, next)));
 
   /* GCC's strict aliasing rules prevent us from just casting the
      address, so we store the pointer in a variable and cast that
      instead.  */
-  nextp = &ret->os.next;
+  nextp = &ret->s.output_section_statement.next;
   lang_statement_append (&lang_output_section_statement,
-			 (lang_statement_union_type *) &ret->os,
+			 &ret->s,
 			 (lang_statement_union_type **) nextp);
   return &ret->root;
 }
 
 static void
-output_statement_table_init (void)
+output_section_statement_table_init (void)
 {
-  if (!bfd_hash_table_init_n (&output_statement_table,
-			      output_statement_newfunc,
-			      sizeof (struct output_statement_hash_entry),
+  if (!bfd_hash_table_init_n (&output_section_statement_table,
+			      output_section_statement_newfunc,
+			      sizeof (struct out_section_hash_entry),
 			      61))
     einfo (_("%P%F: can not create hash table: %E\n"));
 }
 
 static void
-output_statement_table_free (void)
+output_section_statement_table_free (void)
 {
-  bfd_hash_table_free (&output_statement_table);
+  bfd_hash_table_free (&output_section_statement_table);
 }
 
 /* Build enough state so that the parser can build its tree.  */
@@ -955,7 +955,7 @@ lang_init (void)
 
   stat_ptr = &statement_list;
 
-  output_statement_table_init ();
+  output_section_statement_table_init ();
 
   lang_list_init (stat_ptr);
 
@@ -985,7 +985,7 @@ lang_init (void)
 void
 lang_finish (void)
 {
-  output_statement_table_free ();
+  output_section_statement_table_free ();
 }
 
 /*----------------------------------------------------------------------
@@ -1072,24 +1072,25 @@ lang_memory_default (asection *section)
 lang_output_section_statement_type *
 lang_output_section_find (const char *const name)
 {
-  struct output_statement_hash_entry *entry;
+  struct out_section_hash_entry *entry;
   unsigned long hash;
 
-  entry = ((struct output_statement_hash_entry *)
-	   bfd_hash_lookup (&output_statement_table, name, FALSE, FALSE));
+  entry = ((struct out_section_hash_entry *)
+	   bfd_hash_lookup (&output_section_statement_table, name,
+			    FALSE, FALSE));
   if (entry == NULL)
     return NULL;
 
   hash = entry->root.hash;
   do
     {
-      if (entry->os.constraint != -1)
-	return &entry->os;
-      entry = (struct output_statement_hash_entry *) entry->root.next;
+      if (entry->s.output_section_statement.constraint != -1)
+	return &entry->s.output_section_statement;
+      entry = (struct out_section_hash_entry *) entry->root.next;
     }
   while (entry != NULL
 	 && entry->root.hash == hash
-	 && strcmp (name, entry->os.name) == 0);
+	 && strcmp (name, entry->s.output_section_statement.name) == 0);
 
   return NULL;
 }
@@ -1097,39 +1098,43 @@ lang_output_section_find (const char *const name)
 static lang_output_section_statement_type *
 lang_output_section_statement_lookup_1 (const char *const name, int constraint)
 {
-  struct output_statement_hash_entry *entry;
-  struct output_statement_hash_entry *last_ent;
+  struct out_section_hash_entry *entry;
+  struct out_section_hash_entry *last_ent;
   unsigned long hash;
 
-  entry = ((struct output_statement_hash_entry *)
-	   bfd_hash_lookup (&output_statement_table, name, TRUE, FALSE));
+  entry = ((struct out_section_hash_entry *)
+	   bfd_hash_lookup (&output_section_statement_table, name,
+			    TRUE, FALSE));
   if (entry == NULL)
     {
       einfo (_("%P%F: failed creating section `%s': %E\n"), name);
       return NULL;
     }
 
-  if (entry->os.name != NULL)
+  if (entry->s.output_section_statement.name != NULL)
     {
       /* We have a section of this name, but it might not have the correct
 	 constraint.  */
       hash = entry->root.hash;
       do
 	{
-	  if (entry->os.constraint != -1
+	  if (entry->s.output_section_statement.constraint != -1
 	      && (constraint == 0
-		  || (constraint == entry->os.constraint
+		  || (constraint == entry->s.output_section_statement.constraint
 		      && constraint != SPECIAL)))
-	    return &entry->os;
+	    return &entry->s.output_section_statement;
 	  last_ent = entry;
-	  entry = (struct output_statement_hash_entry *) entry->root.next;
+	  entry = (struct out_section_hash_entry *) entry->root.next;
 	}
       while (entry != NULL
 	     && entry->root.hash == hash
-	     && strcmp (name, entry->os.name) == 0);
+	     && strcmp (name, entry->s.output_section_statement.name) == 0);
 
-      entry = ((struct output_statement_hash_entry *)
-	       output_statement_newfunc (NULL, &output_statement_table, name));
+      entry
+	= ((struct out_section_hash_entry *)
+	   output_section_statement_newfunc (NULL,
+					     &output_section_statement_table,
+					     name));
       if (entry == NULL)
 	{
 	  einfo (_("%P%F: failed creating section `%s': %E\n"), name);
@@ -1139,9 +1144,9 @@ lang_output_section_statement_lookup_1 (const char *const name, int constraint)
       last_ent->root.next = &entry->root;
     }
 
-  entry->os.name = name;
-  entry->os.constraint = constraint;
-  return &entry->os;
+  entry->s.output_section_statement.name = name;
+  entry->s.output_section_statement.constraint = constraint;
+  return &entry->s.output_section_statement;
 }
 
 lang_output_section_statement_type *
@@ -1607,7 +1612,30 @@ void
 lang_map (void)
 {
   lang_memory_region_type *m;
+  bfd_boolean dis_header_printed = FALSE;
   bfd *p;
+
+  LANG_FOR_EACH_INPUT_STATEMENT (file)
+    {
+      asection *s;
+
+      if ((file->the_bfd->flags & (BFD_LINKER_CREATED | DYNAMIC)) != 0
+	  || file->just_syms_flag)
+	continue;
+
+      for (s = file->the_bfd->sections; s != NULL; s = s->next)
+	if (s->output_section == NULL
+	    || s->output_section->owner != output_bfd)
+	  {
+	    if (! dis_header_printed)
+	      {
+		fprintf (config.map_file, _("\nDiscarded input sections\n\n"));
+		dis_header_printed = TRUE;
+	      }
+
+	    print_input_section (s);
+	  }
+    }
 
   minfo (_("\nMemory Configuration\n\n"));
   fprintf (config.map_file, "%-16s %-18s %-18s %s\n",
@@ -2310,6 +2338,7 @@ load_symbols (lang_input_statement_type *entry,
       lang_statement_list_type *hold;
       bfd_boolean bad_load = TRUE;
       bfd_boolean save_ldlang_sysrooted_script;
+      bfd_boolean save_as_needed, save_add_needed;
 
       err = bfd_get_error ();
 
@@ -2343,6 +2372,10 @@ load_symbols (lang_input_statement_type *entry,
       stat_ptr = place;
       save_ldlang_sysrooted_script = ldlang_sysrooted_script;
       ldlang_sysrooted_script = entry->sysrooted;
+      save_as_needed = as_needed;
+      as_needed = entry->as_needed;
+      save_add_needed = add_needed;
+      add_needed = entry->add_needed;
 
       ldfile_assumed_script = TRUE;
       parser_input = input_script;
@@ -2353,6 +2386,8 @@ load_symbols (lang_input_statement_type *entry,
       ldfile_assumed_script = FALSE;
 
       ldlang_sysrooted_script = save_ldlang_sysrooted_script;
+      as_needed = save_as_needed;
+      add_needed = save_add_needed;
       stat_ptr = hold;
 
       return ! bad_load;
@@ -3486,13 +3521,12 @@ print_all_symbols (sec)
 /* Print information about an input section to the map file.  */
 
 static void
-print_input_section (lang_input_section_type *in)
+print_input_section (asection *i)
 {
-  asection *i = in->section;
   bfd_size_type size = i->size;
 
   init_opb ();
-  if (size != 0)
+
     {
       int len;
       bfd_vma addr;
@@ -3512,7 +3546,7 @@ print_input_section (lang_input_section_type *in)
 	  ++len;
 	}
 
-      if (i->output_section != NULL && (i->flags & SEC_EXCLUDE) == 0)
+      if (i->output_section != NULL && i->output_section->owner == output_bfd)
 	addr = i->output_section->vma + i->output_offset;
       else
 	{
@@ -3539,7 +3573,7 @@ print_input_section (lang_input_section_type *in)
 	  minfo (_("%W (size before relaxing)\n"), i->rawsize);
 	}
 
-      if (i->output_section != NULL && (i->flags & SEC_EXCLUDE) == 0)
+      if (i->output_section != NULL && i->output_section->owner == output_bfd)
 	{
 	  if (command_line.reduce_memory_overheads)
 	    bfd_link_hash_traverse (link_info.hash, print_one_symbol, i);
@@ -3808,7 +3842,7 @@ print_statement (lang_statement_union_type *s,
       print_reloc_statement (&s->reloc_statement);
       break;
     case lang_input_section_enum:
-      print_input_section (&s->input_section);
+      print_input_section (s->input_section.section);
       break;
     case lang_padding_statement_enum:
       print_padding_statement (&s->padding_statement);
@@ -5399,6 +5433,37 @@ lang_gc_sections (void)
     bfd_gc_sections (output_bfd, &link_info);
 }
 
+/* Relax all sections until bfd_relax_section gives up.  */
+
+static void
+relax_sections (void)
+{
+  /* Keep relaxing until bfd_relax_section gives up.  */
+  bfd_boolean relax_again;
+
+  do
+    {
+      relax_again = FALSE; 
+
+      /* Note: pe-dll.c does something like this also.  If you find
+	 you need to change this code, you probably need to change
+	 pe-dll.c also.  DJ  */
+
+      /* Do all the assignments with our current guesses as to
+	 section sizes.  */
+      lang_do_assignments ();
+
+      /* We must do this after lang_do_assignments, because it uses
+	 size.  */
+      lang_reset_memory_regions ();
+
+      /* Perform another relax pass - this time we know where the
+	 globals are, so can make a better guess.  */
+      lang_size_sections (&relax_again, FALSE);
+    }
+  while (relax_again);
+}
+
 void
 lang_process (void)
 {
@@ -5495,38 +5560,17 @@ lang_process (void)
   /* Now run around and relax if we can.  */
   if (command_line.relax)
     {
-      /* Keep relaxing until bfd_relax_section gives up.  */
-      bfd_boolean relax_again;
+      /* We may need more than one relaxation pass.  */
+      int i = link_info.relax_pass;
 
-      do
+      /* The backend can use it to determine the current pass.  */
+      link_info.relax_pass = 0;
+
+      while (i--)
 	{
-	  relax_again = FALSE;
-
-	  /* Note: pe-dll.c does something like this also.  If you find
-	     you need to change this code, you probably need to change
-	     pe-dll.c also.  DJ  */
-
-	  /* Do all the assignments with our current guesses as to
-	     section sizes.  */
-	  lang_do_assignments ();
-
-	  /* We must do this after lang_do_assignments, because it uses
-	     size.  */
-	  lang_reset_memory_regions ();
-
-	  /* Perform another relax pass - this time we know where the
-	     globals are, so can make a better guess.  */
-	  lang_size_sections (&relax_again, FALSE);
-
-	  /* If the normal relax is done and the relax finalize pass
-	     is not performed yet, we perform another relax pass.  */
-	  if (!relax_again && link_info.need_relax_finalize)
-	    {
-	      link_info.need_relax_finalize = FALSE;
-	      relax_again = TRUE;
-	    }
+	  relax_sections ();
+	  link_info.relax_pass++;
 	}
-      while (relax_again);
 
       /* Final extra sizing to report errors.  */
       lang_do_assignments ();

@@ -1,5 +1,5 @@
 #objdump: -dr -mmips:isa32 -mmips:16
-#as: -march=mips32 -mips16
+#as: -march=mips32 -mips16 -32
 #name: mips16e jalrc/jrc
 
 .*: +file format .*mips.*

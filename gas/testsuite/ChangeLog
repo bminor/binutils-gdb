@@ -1,3 +1,81 @@
+2006-06-14  Thiemo Seufer  <ths@mips.com>
+
+	* gas/mips/mips16e-jrc.d, gas/mips/mips16e-save.d,
+	gas/mips/mips32-dsp.d, gas/mips/mips32-mt.d: Explicitly specify
+	o32 ABI.
+
+2006-05-26  Richard Sandiford  <richard@codesourcery.com>
+
+	* gas/m68k/mcf-fpu.s: Add fmovemd and fmovem instructions.
+	* gas/m68k/mcf-fpu.d: Adjust accordingly.
+
+2006-05-22  Nick Clifton  <nickc@redhat.com>
+
+	* gas/mips/mips32-dsp.l: Fix expected unsigned decoding of -1 in
+	warning messages.
+	* gas/mips/mips32-mt.l: Likewise.
+
+2006-05-19  Thiemo Seufer  <ths@mips.com>
+
+	* gas/mips/vxworks1-el.d, gas/mips/vxworks1-xgot-el.d: Add little
+	endian testcases.
+	* gas/mips/vxworks1.d, gas/mips/vxworks1-xgot.d: Build as big endian.
+	* gas/mips/mips.exp: Run new testcases.
+
+2006-05-11  Thiemo Seufer  <ths@mips.com>
+
+	* gas/mips/jal-range.l: Don't check the range of j or jal
+	addresses.
+
+2006-05-04  Thiemo Seufer  <ths@mips.com>
+
+	* gas/mips/mips32-mt.d: Fix mftr argument order.
+
+2006-05-02  Joseph Myers  <joseph@codesourcery.com>
+
+	* gas/arm/iwmmxt.s: Increase offsets for wstrb and wstrh.
+	* gas/arm/iwmmxt.d: Update expected results.
+	* gas/arm/iwmmxt-bad2.s: Test wstrb, wstrh, wldrb and wldrh.
+	* gas/arm/iwmmxt-bad2.l: Update expected error messages.
+
+2006-04-16  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/arch7.d: Skip test for non-ELF targets.
+	* gas/arm/blx-local.d: Likewise.
+	* gas/arm/svc.d: Likewise.
+	* gas/arm/thumb2_bcond.d: Likewise.
+	* gas/arm/thumb2_it_bad.d: Likewise.
+
+2006-04-07  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/blx-local.d: New test.
+	* gas/arm/blx-local.d: New test.
+
+2006-04-07  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb2_pool.d: New test.
+	* gas/arm/thumb2_pool.s: New test.
+
+2006-04-05  Richard Sandiford  <richard@codesourcery.com>
+
+	* gas/sparc/vxworks-pic.s, gas/sparc/vxworks-pic.d: New test.
+	* gas/sparc/sparc.exp: Run it.  Remove sparc*-*-vxworks* XFAILs.
+
+2006-03-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/rep.s: Pad with .p2align.
+	* gas/i386/rep.d: Adjust.
+
+2006-03-22  Richard Sandiford  <richard@codesourcery.com>
+
+	* gas/mips/vxworks1.s, gas/mips/vxworks1.d,
+	* gas/mips/vxworks1-xgot.d: New tests.
+	* gas/mips/mips.exp: Run them.  Do not run other tests on VxWorks.
+	
+2006-03-21  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb32.d: Correct expected output.
+
 2006-03-20  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/thumb2_bcond.d: New test.

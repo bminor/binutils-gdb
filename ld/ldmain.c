@@ -313,7 +313,7 @@ main (int argc, char **argv)
   link_info.spare_dynamic_tags = 5;
   link_info.flags = 0;
   link_info.flags_1 = 0;
-  link_info.need_relax_finalize = FALSE;
+  link_info.relax_pass = 1;
   link_info.warn_shared_textrel = FALSE;
   link_info.gc_sections = FALSE;
 

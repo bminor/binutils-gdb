@@ -48,3 +48,4 @@ Disassembly of section .text:
   6e:	f3 67 ab[ 	]+rep addr16 stos %eax,%es:\(%di\)
   71:	f3 67 a7[ 	]+repz addr16 cmpsl %es:\(%di\),%ds:\(%si\)
   74:	f3 67 af[ 	]+repz addr16 scas %es:\(%di\),%eax
+	...

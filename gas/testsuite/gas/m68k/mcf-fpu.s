@@ -811,3 +811,11 @@
 	fcmpb	%a2@-,%fp0
 	fcmpb	%fp@(8),%fp0
 	fcmpb	%pc@(.+0x1238),%fp0
+	fmovemd	%fp0-%fp3/%fp6,%fp@(8)
+	fmovemd	%fp@(8),%fp5/%fp4/%fp2
+	fmovemd	#0x27,%fp@(8)
+	fmovemd	%fp@(8),#0xe1
+	fmovem	%fp0-%fp3/%fp6,%fp@(8)
+	fmovem	%fp@(8),%fp5/%fp4/%fp2
+	fmovem	#0x27,%fp@(8)
+	fmovem	%fp@(8),#0xe1

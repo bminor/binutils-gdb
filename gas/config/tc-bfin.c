@@ -28,6 +28,9 @@
 #ifdef OBJ_ELF
 #include "dwarf2dbg.h"
 #endif
+#include "libbfd.h"
+#include "elf/common.h"
+#include "elf/bfin.h"
 
 extern int yyparse (void);
 struct yy_buffer_state;
@@ -44,6 +47,12 @@ int last_insn_size;
 
 extern struct obstack mempool;
 FILE *errorf;
+
+/* Flags to set in the elf header */
+#define DEFAULT_FLAGS 0
+
+static flagword bfin_flags = DEFAULT_FLAGS;
+static const char *bfin_pic_flag = (const char *)0;
 
 /* Registers list.  */
 struct bfin_reg_entry
@@ -202,21 +211,57 @@ static const struct bfin_reg_entry bfin_reg_info[] = {
   {0, 0}
 };
 
+/* Blackfin specific function to handle FD-PIC pointer initializations.  */
 
-const pseudo_typeS md_pseudo_table[] = {
-  {"align", s_align_bytes, 0},
-  {"byte2", cons, 2},
-  {"byte4", cons, 4},
-  {"code", obj_elf_section, 0},
-  {"db", cons, 1},
-  {"dd", cons, 4},
-  {"dw", cons, 2},
-  {"p", s_ignore, 0},
-  {"pdata", s_ignore, 0},
-  {"var", s_ignore, 0},
-  {"bss", bfin_s_bss, 0},
-  {0, 0, 0}
-};
+static void
+bfin_pic_ptr (int nbytes)
+{
+  expressionS exp;
+  char *p;
+
+  if (nbytes != 4)
+    abort ();
+
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
+  if (is_it_end_of_statement ())
+    {
+      demand_empty_rest_of_line ();
+      return;
+    }
+
+#ifdef md_cons_align
+  md_cons_align (nbytes);
+#endif
+
+  do
+    {
+      bfd_reloc_code_real_type reloc_type = BFD_RELOC_BFIN_FUNCDESC;
+      
+      if (strncasecmp (input_line_pointer, "funcdesc(", 9) == 0)
+	{
+	  input_line_pointer += 9;
+	  expression (&exp);
+	  if (*input_line_pointer == ')')
+	    input_line_pointer++;
+	  else
+	    as_bad ("missing ')'");
+	}
+      else
+	error ("missing funcdesc in picptr");
+
+      p = frag_more (4);
+      memset (p, 0, 4);
+      fix_new_exp (frag_now, p - frag_now->fr_literal, 4, &exp, 0,
+		   reloc_type);
+    }
+  while (*input_line_pointer++ == ',');
+
+  input_line_pointer--;			/* Put terminator back into stream. */
+  demand_empty_rest_of_line ();
+}
 
 static void
 bfin_s_bss (int ignore ATTRIBUTE_UNUSED)
@@ -228,6 +273,21 @@ bfin_s_bss (int ignore ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
+const pseudo_typeS md_pseudo_table[] = {
+  {"align", s_align_bytes, 0},
+  {"byte2", cons, 2},
+  {"byte4", cons, 4},
+  {"picptr", bfin_pic_ptr, 4},
+  {"code", obj_elf_section, 0},
+  {"db", cons, 1},
+  {"dd", cons, 4},
+  {"dw", cons, 2},
+  {"p", s_ignore, 0},
+  {"pdata", s_ignore, 0},
+  {"var", s_ignore, 0},
+  {"bss", bfin_s_bss, 0},
+  {0, 0, 0}
+};
 
 /* Characters that are used to denote comments and line separators. */
 const char comment_chars[] = "";
@@ -245,16 +305,32 @@ const char FLT_CHARS[] = "fFdDxX";
 /* Define bfin-specific command-line options (there are none). */
 const char *md_shortopts = "";
 
-struct option md_longopts[] = {
-  {NULL, no_argument, NULL, 0}
+#define OPTION_FDPIC		(OPTION_MD_BASE)
+
+struct option md_longopts[] =
+{
+  { "mfdpic",		no_argument,		NULL, OPTION_FDPIC	   },
+  { NULL,		no_argument,		NULL, 0                 },
 };
+
 size_t md_longopts_size = sizeof (md_longopts);
 
 
 int
 md_parse_option (int c ATTRIBUTE_UNUSED, char *arg ATTRIBUTE_UNUSED)
 {
-  return 0;
+  switch (c)
+    {
+    default:
+      return 0;
+
+    case OPTION_FDPIC:
+      bfin_flags |= EF_BFIN_FDPIC;
+      bfin_pic_flag = "-mfdpic";
+      break;
+    }
+
+  return 1;
 }
 
 void
@@ -267,6 +343,10 @@ md_show_usage (FILE * stream ATTRIBUTE_UNUSED)
 void
 md_begin ()
 {
+  /* Set the ELF flags if desired. */
+  if (bfin_flags)
+    bfd_set_private_flags (stdoutput, bfin_flags);
+
   /* Set the default machine type. */
   if (!bfd_set_arch_mach (stdoutput, bfd_arch_bfin, 0))
     as_warn ("Could not set architecture and machine.");
@@ -476,6 +556,8 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
   switch (fixP->fx_r_type)
     {
     case BFD_RELOC_BFIN_GOT:
+    case BFD_RELOC_BFIN_GOT17M4:
+    case BFD_RELOC_BFIN_FUNCDESC_GOT17M4:
       fixP->fx_no_overflow = 1;
       newval = md_chars_to_number (where, 2);
       newval |= 0x0 & 0x7f;
@@ -579,6 +661,7 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
       md_number_to_chars (where, value, 2);
       break;
 
+    case BFD_RELOC_BFIN_FUNCDESC:
     case BFD_RELOC_VTABLE_INHERIT:
     case BFD_RELOC_VTABLE_ENTRY:
       fixP->fx_done = FALSE;
@@ -725,8 +808,10 @@ bfin_fix_adjustable (fixS *fixP)
   switch (fixP->fx_r_type)
     {     
   /* Adjust_reloc_syms doesn't know about the GOT.  */
-    case BFD_RELOC_BFIN_GOT :
-    case BFD_RELOC_BFIN_PLTPC :
+    case BFD_RELOC_BFIN_GOT:
+    case BFD_RELOC_BFIN_GOT17M4:
+    case BFD_RELOC_BFIN_FUNCDESC_GOT17M4:
+    case BFD_RELOC_BFIN_PLTPC:
   /* We need the symbol name for the VTABLE entries.  */
     case BFD_RELOC_VTABLE_INHERIT:
     case BFD_RELOC_VTABLE_ENTRY:
@@ -982,6 +1067,8 @@ Expr_Node_Gen_Reloc (Expr_Node * head, int parent_reloc)
 	  break;
 	case BFD_RELOC_16:
 	case BFD_RELOC_BFIN_GOT:
+	case BFD_RELOC_BFIN_GOT17M4:
+	case BFD_RELOC_BFIN_FUNCDESC_GOT17M4:
 	  note1 = conscode (gencode (value), NULL_CODE);
 	  pcrel = 0;
 	  break;
@@ -1356,8 +1443,6 @@ bfin_gen_ldimmhalf (REG_T reg, int H, int S, int Z, Expr_Node * phword, int relo
 INSTR_T
 bfin_gen_ldstidxi (REG_T ptr, REG_T reg, int W, int sz, int Z, Expr_Node * poffset)
 {
-  int offset;
-  int value = 0;
   INIT (LDSTidxI);
 
   if (!IS_PREG (*ptr) || (!IS_DREG (*reg) && !Z))
@@ -1370,44 +1455,51 @@ bfin_gen_ldstidxi (REG_T ptr, REG_T reg, int W, int sz, int Z, Expr_Node * poffs
   ASSIGN_R (reg);
   ASSIGN (W);
   ASSIGN (sz);
-  switch (sz)
-    {
-    case 0:
-      value = EXPR_VALUE (poffset) >> 2;
-      break;
-    case 1:
-      value = EXPR_VALUE (poffset) >> 1;
-      break;
-    case 2:
-      value = EXPR_VALUE (poffset);
-      break;
-    }
-
 
   ASSIGN (Z);
 
-  offset = (value & 0xffff);
-  ASSIGN (offset);
-  /* TODO : test if you need to check this here.
-     The reloc case should automatically generate instruction
-     if constant.  */
-  if(poffset->type != Expr_Node_Constant){
-    /* A GOT relocation such as R0 = [P5 + symbol@GOT].
-       Distinguish between R0 = [P5 + symbol@GOT] and
-       P5 = [P5 + _current_shared_library_p5_offset_].  */
-    if(!strcmp(poffset->value.s_value, "_current_shared_library_p5_offset_")){
-      return  conscode (gencode (HI (c_code.opcode)),
-			Expr_Node_Gen_Reloc(poffset, BFD_RELOC_16));
-    }
-    else
+  if (poffset->type != Expr_Node_Constant)
     {
-      return  conscode (gencode (HI (c_code.opcode)),
-			Expr_Node_Gen_Reloc(poffset, BFD_RELOC_BFIN_GOT));
+      /* a GOT relocation such as R0 = [P5 + symbol@GOT] */
+      /* distinguish between R0 = [P5 + symbol@GOT] and
+	 P5 = [P5 + _current_shared_library_p5_offset_]
+      */
+      if (poffset->type == Expr_Node_Reloc
+	  && !strcmp (poffset->value.s_value,
+		      "_current_shared_library_p5_offset_"))
+	{
+	  return  conscode (gencode (HI (c_code.opcode)),
+			    Expr_Node_Gen_Reloc(poffset, BFD_RELOC_16));
+	}
+      else if (poffset->type != Expr_Node_GOT_Reloc)
+	abort ();
+
+      return conscode (gencode (HI (c_code.opcode)),
+		       Expr_Node_Gen_Reloc(poffset->Left_Child,
+					   poffset->value.i_value));
     }
-  }
-  else{
-    return GEN_OPCODE32 ();
-  }
+  else
+    {
+      int value, offset;
+      switch (sz)
+	{				// load/store access size
+	case 0:			// 32 bit
+	  value = EXPR_VALUE (poffset) >> 2;
+	  break;
+	case 1:			// 16 bit
+	  value = EXPR_VALUE (poffset) >> 1;
+	  break;
+	case 2:			// 8 bit
+	  value = EXPR_VALUE (poffset);
+	  break;
+	default:
+	  abort ();
+	}
+
+      offset = (value & 0xffff);
+      ASSIGN (offset);
+      return GEN_OPCODE32 ();
+    }
 }
 
 

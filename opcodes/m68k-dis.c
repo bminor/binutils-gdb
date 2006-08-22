@@ -1341,8 +1341,10 @@ match_insn_m68k (bfd_vma memaddr,
   return p - buffer;
 }
 
-/* Like print_m68k_insn, but restrict the opcode search to the features
-   specified by ARCH_MASK.  */
+/* Try to interpret the instruction at address MEMADDR as one that
+   can execute on a processor with the features given by ARCH_MASK.
+   If successful, print the instruction to INFO->STREAM and return
+   its length in bytes.  Return 0 otherwise.  */
 
 static int
 m68k_scan_mask (bfd_vma memaddr, disassemble_info *info,

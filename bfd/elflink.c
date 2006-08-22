@@ -889,6 +889,26 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	    && h->root.type != bfd_link_hash_undefweak
 	    && h->root.type != bfd_link_hash_common);
 
+  /* When we try to create a default indirect symbol from the dynamic
+     definition with the default version, we skip it if its type and
+     the type of existing regular definition mismatch.  We only do it
+     if the existing regular definition won't be dynamic.  */
+  if (pold_alignment == NULL
+      && !info->shared
+      && !info->export_dynamic
+      && !h->ref_dynamic
+      && newdyn
+      && newdef
+      && !olddyn
+      && (olddef || h->root.type == bfd_link_hash_common)
+      && ELF_ST_TYPE (sym->st_info) != h->type
+      && ELF_ST_TYPE (sym->st_info) != STT_NOTYPE
+      && h->type != STT_NOTYPE)
+    {
+      *skip = TRUE;
+      return TRUE;
+    }
+
   /* Check TLS symbol.  We don't check undefined symbol introduced by
      "ld -u".  */
   if ((ELF_ST_TYPE (sym->st_info) == STT_TLS || h->type == STT_TLS)
@@ -2789,10 +2809,6 @@ _bfd_elf_add_dynamic_entry (struct bfd_link_info *info,
   hash_table = elf_hash_table (info);
   if (! is_elf_hash_table (hash_table))
     return FALSE;
-
-  if (info->warn_shared_textrel && info->shared && tag == DT_TEXTREL)
-    _bfd_error_handler
-      (_("warning: creating a DT_TEXTREL in a shared object."));
 
   bed = get_elf_backend_data (hash_table->dynobj);
   s = bfd_get_section_by_name (hash_table->dynobj, ".dynamic");
@@ -6184,6 +6200,24 @@ elf_link_output_sym (struct elf_final_link_info *finfo,
   return TRUE;
 }
 
+/* Return TRUE if the dynamic symbol SYM in ABFD is supported.  */
+
+static bfd_boolean
+check_dynsym (bfd *abfd, Elf_Internal_Sym *sym)
+{
+  if (sym->st_shndx > SHN_HIRESERVE)
+    {
+      /* The gABI doesn't support dynamic symbols in output sections
+         beyond 64k.  */
+      (*_bfd_error_handler)
+	(_("%B: Too many sections: %d (>= %d)"),
+	 abfd, bfd_count_sections (abfd), SHN_LORESERVE);
+      bfd_set_error (bfd_error_nonrepresentable_section);
+      return FALSE;
+    }
+  return TRUE;
+}
+
 /* For DSOs loaded in via a DT_NEEDED entry, emulate ld.so in
    allowing an unsatisfied unversioned symbol in the DSO to match a
    versioned symbol that would normally require an explicit version.
@@ -6616,6 +6650,11 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
 
       sym.st_name = h->dynstr_index;
       esym = finfo->dynsym_sec->contents + h->dynindx * bed->s->sizeof_sym;
+      if (! check_dynsym (finfo->output_bfd, &sym))
+	{
+	  eoinfo->failed = TRUE;
+	  return FALSE;
+	}
       bed->s->swap_symbol_out (finfo->output_bfd, &sym, esym, 0);
 
       bucketcount = elf_hash_table (finfo->info)->bucketcount;
@@ -6715,7 +6754,7 @@ unsigned int
 _bfd_elf_default_action_discarded (asection *sec)
 {
   if (sec->flags & SEC_DEBUGGING)
-    return 0;
+    return PRETEND;
 
   if (strcmp (".eh_frame", sec->name) == 0)
     return 0;
@@ -6739,6 +6778,7 @@ match_group_member (asection *sec, asection *group)
       if (bfd_elf_match_symbols_in_sections (s, sec))
 	return s;
 
+      s = elf_next_in_group (s);
       if (s == first)
 	break;
     }
@@ -7665,7 +7705,7 @@ elf_fixup_link_order (bfd *abfd, asection *o)
   struct bfd_link_order *p;
   bfd *sub;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-  int elfsec;
+  unsigned elfsec;
   struct bfd_link_order **sections;
   asection *s, *other_sec, *linkorder_sec;
   bfd_vma offset;
@@ -7682,7 +7722,8 @@ elf_fixup_link_order (bfd *abfd, asection *o)
 	  sub = s->owner;
 	  if (bfd_get_flavour (sub) == bfd_target_elf_flavour
 	      && elf_elfheader (sub)->e_ident[EI_CLASS] == bed->s->elfclass
-	      && (elfsec = _bfd_elf_section_from_bfd_section (sub, s)) != -1
+	      && (elfsec = _bfd_elf_section_from_bfd_section (sub, s))
+	      && elfsec < elf_numsections (sub)
 	      && elf_elfsections (sub)[elfsec]->sh_flags & SHF_LINK_ORDER)
 	    {
 	      seen_linkorder++;
@@ -8305,6 +8346,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      indx = elf_section_data (s)->this_idx;
 	      BFD_ASSERT (indx > 0);
 	      sym.st_shndx = indx;
+	      if (! check_dynsym (abfd, &sym))
+		return FALSE;
 	      sym.st_value = s->vma;
 	      dest = dynsym + dynindx * bed->s->sizeof_sym;
 	      if (last_local < dynindx)
@@ -8339,6 +8382,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
 		  sym.st_shndx =
 		    elf_section_data (s->output_section)->this_idx;
+		  if (! check_dynsym (abfd, &sym))
+		    return FALSE;
 		  sym.st_value = (s->output_section->vma
 				  + s->output_offset
 				  + e->isym.st_value);
@@ -8618,6 +8663,32 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
     {
       if (! (*bed->elf_backend_finish_dynamic_sections) (abfd, info))
 	goto error_return;
+
+      /* Check for DT_TEXTREL (late, in case the backend removes it).  */
+      if (info->warn_shared_textrel && info->shared)
+	{
+	  bfd_byte *dyncon, *dynconend;
+
+	  /* Fix up .dynamic entries.  */
+	  o = bfd_get_section_by_name (dynobj, ".dynamic");
+	  BFD_ASSERT (o != NULL);
+
+	  dyncon = o->contents;
+	  dynconend = o->contents + o->size;
+	  for (; dyncon < dynconend; dyncon += bed->s->sizeof_dyn)
+	    {
+	      Elf_Internal_Dyn dyn;
+
+	      bed->s->swap_dyn_in (dynobj, dyncon, &dyn);
+
+	      if (dyn.d_tag == DT_TEXTREL)
+		{
+		  _bfd_error_handler
+		    (_("warning: creating a DT_TEXTREL in a shared object."));
+		  break;
+		}
+	    }
+	}
 
       for (o = dynobj->sections; o != NULL; o = o->next)
 	{
@@ -8929,7 +9000,7 @@ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
 	{
 	  /* Keep debug and special sections.  */
 	  if ((o->flags & (SEC_DEBUGGING | SEC_LINKER_CREATED)) != 0
-	      || (o->flags & (SEC_ALLOC | SEC_LOAD)) == 0)
+	      || (o->flags & (SEC_ALLOC | SEC_LOAD | SEC_RELOC)) == 0)
 	    o->gc_mark = 1;
 
 	  if (o->gc_mark)

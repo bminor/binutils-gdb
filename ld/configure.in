@@ -112,7 +112,7 @@ AC_SUBST(HOSTING_CRT0)
 AC_SUBST(HOSTING_LIBS)
 AC_SUBST(NATIVE_LIB_DIRS)
 
-AC_CHECK_HEADERS(string.h strings.h stdlib.h unistd.h)
+AC_CHECK_HEADERS(string.h strings.h stdlib.h unistd.h elf-hints.h)
 AC_CHECK_FUNCS(sbrk realpath glob)
 AC_HEADER_DIRENT
 

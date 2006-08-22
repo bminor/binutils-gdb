@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE AR ac_ct_AR RANLIB ac_ct_RANLIB LN_S LIBTOOL VERSUFFIX REPORT_BUGS_TO WARN_CFLAGS NO_WERROR MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT INSTALL_LIBBFD_TRUE INSTALL_LIBBFD_FALSE host_noncanonical target_noncanonical bfdlibdir bfdincludedir CPP EGREP ALLOCA USE_NLS MSGFMT GMSGFMT XGETTEXT USE_INCLUDED_LIBINTL CATALOGS CATOBJEXT DATADIRNAME GMOFILES INSTOBJEXT INTLDEPS INTLLIBS INTLOBJS POFILES POSUB INCLUDE_LOCALE_H GT_NO GT_YES MKINSTALLDIRS l HDEFINES BFD_HOST_64BIT_LONG BFD_HOST_LONG_LONG BFD_HOST_64_BIT_DEFINED BFD_HOST_64_BIT BFD_HOST_U_64_BIT CC_FOR_BUILD EXEEXT_FOR_BUILD COREFILE COREFLAG WIN32LDFLAGS WIN32LIBADD TDEFINES wordsize bfd_libs all_backends bfd_backends bfd_machines bfd_default_target_size bfd_file_ptr bfd_ufile_ptr tdefaults datarootdir docdir htmldir LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE AR ac_ct_AR RANLIB ac_ct_RANLIB LN_S LIBTOOL VERSUFFIX WARN_CFLAGS NO_WERROR MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT INSTALL_LIBBFD_TRUE INSTALL_LIBBFD_FALSE host_noncanonical target_noncanonical bfdlibdir bfdincludedir CPP EGREP ALLOCA USE_NLS MSGFMT GMSGFMT XGETTEXT USE_INCLUDED_LIBINTL CATALOGS CATOBJEXT DATADIRNAME GMOFILES INSTOBJEXT INTLDEPS INTLLIBS INTLOBJS POFILES POSUB INCLUDE_LOCALE_H GT_NO GT_YES MKINSTALLDIRS l HDEFINES BFD_HOST_64BIT_LONG BFD_HOST_LONG_LONG BFD_HOST_64_BIT_DEFINED BFD_HOST_64_BIT BFD_HOST_U_64_BIT CC_FOR_BUILD EXEEXT_FOR_BUILD COREFILE COREFLAG WIN32LDFLAGS WIN32LIBADD TDEFINES wordsize bfd_libs all_backends bfd_backends bfd_machines bfd_default_target_size bfd_file_ptr bfd_ufile_ptr tdefaults datarootdir docdir htmldir LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -874,7 +874,6 @@ Optional Packages:
   --with-pic              try to use only PIC/non-PIC objects default=use both
   --with-mmap             try using mmap for BFD input files if available
   --with-versuffix=SFX    Append SFX to the version string
-  --with-bugurl=URL       Direct users to URL to report a bug
   --with-included-gettext use the GNU gettext library included here
 
 Some influential environment variables:
@@ -2838,7 +2837,7 @@ fi
 
 # Define the identity of the package.
  PACKAGE=bfd
- VERSION=2.16.91
+ VERSION=2.17
 
 
 cat >>confdefs.h <<_ACEOF
@@ -4034,7 +4033,7 @@ test x"$pic_mode" = xno && libtool_flags="$libtool_flags --prefer-non-pic"
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 4037 "configure"' > conftest.$ac_ext
+  echo '#line 4036 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -4403,24 +4402,6 @@ echo "$as_me: error: version suffix not specified" >&2;}
    esac
 else
   VERSUFFIX=
-
-fi;
-
-
-# The location to which bugs should be reported.
-
-# Check whether --with-bugurl or --without-bugurl was given.
-if test "${with_bugurl+set}" = set; then
-  withval="$with_bugurl"
-  case "$withval" in
-    yes) { { echo "$as_me:$LINENO: error: bug URL not specified" >&5
-echo "$as_me: error: bug URL not specified" >&2;}
-   { (exit 1); exit 1; }; } ;;
-    no)  REPORT_BUGS_TO="" ;;
-    *)   REPORT_BUGS_TO="<URL:$withval>" ;;
-   esac
-else
-  REPORT_BUGS_TO=""
 
 fi;
 
@@ -13110,6 +13091,7 @@ do
     bfd_elf32_am33lin_vec)	tb="$tb elf32-am33lin.lo elf32.lo $elf" ;;
     bfd_elf32_avr_vec)		tb="$tb elf32-avr.lo elf32.lo $elf" ;;
     bfd_elf32_bfin_vec)		tb="$tb elf32-bfin.lo elf32.lo $elf" ;;
+    bfd_elf32_bfinfdpic_vec)	tb="$tb elf32-bfin.lo elf32.lo $elf" ;;
     bfd_elf32_big_generic_vec) 	tb="$tb elf32-gen.lo elf32.lo $elf" ;;
     bfd_elf32_bigarc_vec)	tb="$tb elf32-arc.lo elf32.lo $elf" ;;
     bfd_elf32_bigarm_vec)	tb="$tb elf32-arm.lo elf32.lo elf-vxworks.lo $elf" ;;
@@ -13117,7 +13099,9 @@ do
                                 tb="$tb elf32-arm.lo elf32.lo elf-vxworks.lo $elf" ;;
     bfd_elf32_bigarm_vxworks_vec)
                                 tb="$tb elf32-arm.lo elf32.lo elf-vxworks.lo $elf" ;;
-    bfd_elf32_bigmips_vec) 	tb="$tb elf32-mips.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo" ;;
+    bfd_elf32_bigmips_vec) 	tb="$tb elf32-mips.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo" ;;
+    bfd_elf32_bigmips_vxworks_vec)
+			 	tb="$tb elf32-mips.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo" ;;
     bfd_elf32_cr16c_vec)	tb="$tb elf32-cr16c.lo elf32.lo $elf" ;;
     bfd_elf32_cris_vec)		tb="$tb elf32-cris.lo elf32.lo $elf" ;;
     bfd_elf32_crx_vec)          tb="$tb elf32-crx.lo elf32.lo $elf" ;;
@@ -13149,7 +13133,9 @@ do
     bfd_elf32_littlearm_vxworks_vec)
                                 tb="$tb elf32-arm.lo elf32.lo elf-vxworks.lo $elf" ;;
     bfd_elf32_littlearm_vec)	tb="$tb elf32-arm.lo elf32.lo elf-vxworks.lo $elf" ;;
-    bfd_elf32_littlemips_vec) 	tb="$tb elf32-mips.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo" ;;
+    bfd_elf32_littlemips_vec) 	tb="$tb elf32-mips.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo" ;;
+    bfd_elf32_littlemips_vxworks_vec)
+			 	tb="$tb elf32-mips.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo" ;;
     bfd_elf32_m32c_vec)         tb="$tb elf32-m32c.lo elf32.lo $elf" ;;
     bfd_elf32_m32r_vec)		tb="$tb elf32-m32r.lo elf32.lo $elf" ;;
     bfd_elf32_m32rle_vec)       tb="$tb elf32-m32r.lo elf32.lo $elf" ;;
@@ -13165,10 +13151,10 @@ do
     bfd_elf32_mn10300_vec)	tb="$tb elf-m10300.lo elf32.lo $elf" ;;
     bfd_elf32_mt_vec)           tb="$tb elf32-mt.lo elf32.lo $elf" ;;
     bfd_elf32_msp430_vec)	tb="$tb elf32-msp430.lo elf32.lo $elf" ;;
-    bfd_elf32_nbigmips_vec)	tb="$tb elfn32-mips.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
-    bfd_elf32_nlittlemips_vec)	tb="$tb elfn32-mips.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
-    bfd_elf32_ntradbigmips_vec)	tb="$tb elfn32-mips.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
-    bfd_elf32_ntradlittlemips_vec) tb="$tb elfn32-mips.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
+    bfd_elf32_nbigmips_vec)	tb="$tb elfn32-mips.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
+    bfd_elf32_nlittlemips_vec)	tb="$tb elfn32-mips.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
+    bfd_elf32_ntradbigmips_vec)	tb="$tb elfn32-mips.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
+    bfd_elf32_ntradlittlemips_vec) tb="$tb elfn32-mips.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
     bfd_elf32_openrisc_vec)	tb="$tb elf32-openrisc.lo elf32.lo $elf" ;;
     bfd_elf32_or32_big_vec)	tb="$tb elf32-or32.lo elf32.lo $elf" ;;
     bfd_elf32_pj_vec)           tb="$tb elf32-pj.lo elf32.lo $elf";;
@@ -13193,9 +13179,10 @@ do
     bfd_elf32_shlin_vec)	tb="$tb elf32-sh.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
     bfd_elf32_shlnbsd_vec)	tb="$tb elf32-sh.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
     bfd_elf32_shnbsd_vec)	tb="$tb elf32-sh.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
-    bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.lo elfxx-sparc.lo elf32.lo $elf" ;;
-    bfd_elf32_tradbigmips_vec)  tb="$tb elf32-mips.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo" ;;
-    bfd_elf32_tradlittlemips_vec) tb="$tb elf32-mips.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo" ;;
+    bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.lo elfxx-sparc.lo elf-vxworks.lo elf32.lo $elf" ;;
+    bfd_elf32_sparc_vxworks_vec) tb="$tb elf32-sparc.lo elfxx-sparc.lo elf-vxworks.lo elf32.lo $elf" ;;
+    bfd_elf32_tradbigmips_vec)  tb="$tb elf32-mips.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo" ;;
+    bfd_elf32_tradlittlemips_vec) tb="$tb elf32-mips.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo" ;;
     bfd_elf32_us_cris_vec)	tb="$tb elf32-cris.lo elf32.lo $elf" ;;
     bfd_elf32_v850_vec)		tb="$tb elf32-v850.lo elf32.lo $elf" ;;
     bfd_elf32_vax_vec)		tb="$tb elf32-vax.lo elf32.lo $elf" ;;
@@ -13206,14 +13193,14 @@ do
     bfd_elf64_alpha_freebsd_vec) tb="$tb elf64-alpha.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_alpha_vec)	tb="$tb elf64-alpha.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_big_generic_vec) 	tb="$tb elf64-gen.lo elf64.lo $elf"; target_size=64 ;;
-    bfd_elf64_bigmips_vec) 	tb="$tb elf64-mips.lo elf64.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
+    bfd_elf64_bigmips_vec) 	tb="$tb elf64-mips.lo elf64.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
     bfd_elf64_hppa_linux_vec)	tb="$tb elf64-hppa.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_hppa_vec)		tb="$tb elf64-hppa.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_ia64_big_vec)	tb="$tb elf64-ia64.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_ia64_hpux_big_vec) tb="$tb elf64-ia64.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_ia64_little_vec)	tb="$tb elf64-ia64.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_little_generic_vec) tb="$tb elf64-gen.lo elf64.lo $elf"; target_size=64 ;;
-    bfd_elf64_littlemips_vec) 	tb="$tb elf64-mips.lo elf64.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
+    bfd_elf64_littlemips_vec) 	tb="$tb elf64-mips.lo elf64.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
     bfd_elf64_mmix_vec) 	tb="$tb elf64-mmix.lo elf64.lo $elf" target_size=64 ;;
     bfd_elf64_powerpc_vec)	tb="$tb elf64-ppc.lo elf64-gen.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_powerpcle_vec)	tb="$tb elf64-ppc.lo elf64-gen.lo elf64.lo $elf" target_size=64 ;;
@@ -13224,9 +13211,9 @@ do
     bfd_elf64_sh64blin_vec)	tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
     bfd_elf64_sh64lnbsd_vec)	tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
     bfd_elf64_sh64nbsd_vec)	tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
-    bfd_elf64_sparc_vec)	tb="$tb elf64-sparc.lo elfxx-sparc.lo elf64.lo $elf"; target_size=64 ;;
-    bfd_elf64_tradbigmips_vec)	tb="$tb elf64-mips.lo elf64.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
-    bfd_elf64_tradlittlemips_vec) tb="$tb elf64-mips.lo elf64.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
+    bfd_elf64_sparc_vec)	tb="$tb elf64-sparc.lo elfxx-sparc.lo elf-vxworks.lo elf64.lo $elf"; target_size=64 ;;
+    bfd_elf64_tradbigmips_vec)	tb="$tb elf64-mips.lo elf64.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
+    bfd_elf64_tradlittlemips_vec) tb="$tb elf64-mips.lo elf64.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
     bfd_elf64_x86_64_vec)	tb="$tb elf64-x86-64.lo elf64.lo $elf"; target_size=64 ;;
     bfd_mmo_vec)		tb="$tb mmo.lo" target_size=64 ;;
     bfd_powerpc_pe_vec)         tb="$tb pe-ppc.lo peigen.lo cofflink.lo" ;;
@@ -15277,7 +15264,6 @@ s,@ac_ct_RANLIB@,$ac_ct_RANLIB,;t t
 s,@LN_S@,$LN_S,;t t
 s,@LIBTOOL@,$LIBTOOL,;t t
 s,@VERSUFFIX@,$VERSUFFIX,;t t
-s,@REPORT_BUGS_TO@,$REPORT_BUGS_TO,;t t
 s,@WARN_CFLAGS@,$WARN_CFLAGS,;t t
 s,@NO_WERROR@,$NO_WERROR,;t t
 s,@MAINTAINER_MODE_TRUE@,$MAINTAINER_MODE_TRUE,;t t

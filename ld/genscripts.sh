@@ -4,6 +4,7 @@
 # Usage: genscripts_extra.sh \
 #          srcdir \
 #          libdir \
+#          prefix \
 #          exec_prefix \
 #          host \
 #          target \
@@ -21,6 +22,7 @@
 #   genscripts_extra.sh \
 #    /sources/ld \
 #    /usr/local/lib \
+#    /usr/local \
 #    /usr/local \
 #    sparc-sun-sunos4.1.3 \
 #    sparc-sun-sunos4.1.3 \
@@ -59,17 +61,18 @@
 
 srcdir=$1
 libdir=$2
-exec_prefix=$3
-host=$4
-target=$5
-target_alias=$6
-EMULATION_LIBPATH=$7
-NATIVE_LIB_DIRS=$8
-use_sysroot=$9
+prefix=$3
+exec_prefix=$4
+host=$5
+target=$6
+target_alias=$7
+EMULATION_LIBPATH=$8
+NATIVE_LIB_DIRS=$9
 shift 9
-EMULATION_NAME=$1
-TOOL_LIB=$2
-CUSTOMIZER_SCRIPT=$3
+use_sysroot=$1
+EMULATION_NAME=$2
+TOOL_LIB=$3
+CUSTOMIZER_SCRIPT=$4
 
 # Can't use ${TOOL_LIB:-$target_alias} here due to an Ultrix shell bug.
 if [ "x${TOOL_LIB}" = "x" ] ; then

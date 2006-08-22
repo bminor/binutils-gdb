@@ -1,6 +1,5 @@
 .*: Assembler messages:
 .*:29: Error: .*
-.*:33: Error: .*
 .*:35: Error: .*
 .*:36: Error: .*
 .*:37: Error: .*
@@ -50,8 +49,6 @@
 .*:123: Error: .*
 .*:125: Error: .*
 .*:126: Error: .*
-.*:131: Error: .*
-.*:133: Error: .*
 .*:136: Error: .*
 .*:137: Error: .*
 .*:138: Error: .*

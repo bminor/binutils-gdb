@@ -1,3 +1,115 @@
+2006-06-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	Backport:
+	2006-04-29  H.J. Lu  <hongjiu.lu@intel.com>
+	* ld-elfvers/vers.exp: Xfail vers7a, vers7, vers23a, vers23b,
+	vers23c, vers23d, vers23, vers25a, vers25b1, vers25b2, vers27a,
+	vers27b, vers27c1, vers27c2, vers27d4 and vers27d5 if PIC is
+	required.
+
+2006-06-11  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-mips-elf/stub-dynsym-1.s,
+	* ld-mips-elf/stub-dynsym-1.ld,
+	* ld-mips-elf/stub-dynsym-1-7fff.d,
+	* ld-mips-elf/stub-dynsym-1-8000.d,
+	* ld-mips-elf/stub-dynsym-1-fff0.d,
+	* ld-mips-elf/stub-dynsym-1-10000.d,
+	* ld-mips-elf/stub-dynsym-1-2fe80.d: New test.
+	* ld-mips-elf/mips-elf.exp: Run it.
+
+2006-06-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	Backport:
+	2006-05-23  H.J. Lu  <hongjiu.lu@intel.com>
+	PR ld/2655
+	PR ld/2657
+	* ld-elf/eh1.d: New file.
+	* ld-elf/eh1.s: Likewise.
+	* ld-elf/eh1a.s: Likewise.
+	* ld-elf/eh2.d: Likewise.
+	* ld-elf/eh2a.s: Likewise.
+	* ld-elf/eh3.d: Likewise.
+	* ld-elf/eh3.s: Likewise.
+	* ld-elf/eh3a.s: Likewise.
+
+2006-05-22  Nick Clifton  <nickc@redhat.com>
+
+	* ld-elf/start.s (start): Add this symbol for SH targets.
+	(main): Add this symbol for HPPA targets.
+
+2006-05-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	Backport:
+	2006-05-02  H.J. Lu  <hongjiu.lu@intel.com>
+	* ld-cdtest/cdtest-foo.cc (Foo::Foo): Add const to char *.
+	* ld-cdtest/cdtest-foo.h (Foo::Foo): Likewise.
+	* ld-srec/sr3.cc (Foo::Foo): Likewise.
+
+2006-05-17  Thiemo Seufer  <ths@mips.com>
+
+	* ld-elfweak/size2.d, ld-elfweak/size2a.s, ld-elfweak/size2b.s:
+	Add __start as entry symbol.
+
+2006-05-16  Thiemo Seufer  <ths@mips.com>
+
+	* ld-elf/orphan.ld: Add placement for MIPS .reginfo section.
+
+2006-05-10  Thiemo Seufer  <ths@debian.org>
+
+	* ld-elf/sec64k.exp: Extend for MIPS ELF.
+
+2006-05-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/tlsexetoc.r: Update for correction to tls optimization.
+	* ld-powerpc/tlsexetoc.g: Likewise.
+
+2006-05-02  Paul Brook  <paul@codesourcery.com>
+
+	* ld-arm/arm-elf.exp: Add thumb-rel32.
+	* ld-arm/thumb-rel32.d: New test.
+	* ld-arm/thumb-rel32.s: New test.
+
+2006-04-05  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-sparc/vxworks1.dd, ld-sparc/vxworks1.ld, ld-sparc/vxworks1-lib.dd,
+	* ld-sparc/vxworks1-lib.nd, ld-sparc/vxworks1-lib.rd,
+	* ld-sparc/vxworks1-lib.s, ld-sparc/vxworks1.rd, ld-sparc/vxworks1.s,
+	* ld-sparc/vxworks1-static.d, ld-sparc/vxworks2.s,
+	* ld-sparc/vxworks2.sd, ld-sparc/vxworks2-static.sd: New tests.
+	* ld-sparc/sparc.exp: Run them.
+
+2006-04-05  Ben Elliston  <bje@au.ibm.com>
+
+	* lib/ld-lib.exp: Comment cleanups.
+
+2006-03-27  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-mips-elf/tls-hidden3a.s, ld-mips-elf/tls-hidden3b.s,
+	* ld-mips-elf/tls-hidden3.d, ld-mips-elf/tls-hidden3.got,
+	* ld-mips-elf/tls-hidden3.ld, ld-mips-elf/tls-hidden3.r,
+	* ld-mips-elf/tls-hidden4a.s, ld-mips-elf/tls-hidden4b.s,
+	* ld-mips-elf/tls-hidden4.got, ld-mips-elf/tls-hidden4.r: New tests.
+	* ld-mips-elf/mips-elf.exp: Run them.
+
+2006-03-25  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-m68k/merge-error-1a.s, ld-m68k/merge-error-1b.s,
+	* ld-m68k/merge-error-1a.d, ld-m68k/merge-error-1b.d,
+	* ld-m68k/merge-error-1c.d, ld-m68k/merge-error-1d.d,
+	* ld-m68k/merge-error-1e.d, ld-m68k/merge-ok-1a.d,
+	* ld-m68k/merge-ok-1b.d: New tests.
+	* ld-m68k/m68k.exp: Run them.
+
+2006-03-22  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-mips/vxworks1.dd, ld-mips/vxworks1.ld, ld-mips/vxworks1-lib.dd,
+	* ld-mips/vxworks1-lib.nd, ld-mips/vxworks1-lib.rd,
+	* ld-mips/vxworks1-lib.s, ld-mips/vxworks1.rd, ld-mips/vxworks1.s,
+	* ld-mips/vxworks1-static.d, ld-mips/vxworks2.s, ld-mips/vxworks2.sd,
+	* ld-mips/vxworks2-static.sd: New tests.
+	* ld-mips/mips-elf.exp: Run them.
+
 2006-03-17  Alexandre Oliva  <aoliva@redhat.com>
 
 	* ld-powerpc/tls32.s: Verify that +32768 @plt addend is

@@ -2607,6 +2607,7 @@ addr2line [@option{-b} @var{bfdname}|@option{--target=}@var{bfdname}]
           [@option{-e} @var{filename}|@option{--exe=}@var{filename}]
           [@option{-f}|@option{--functions}] [@option{-s}|@option{--basename}]
           [@option{-i}|@option{--inlines}]
+          [@option{-j}|@option{--section=}@var{name}]
           [@option{-H}|@option{--help}] [@option{-V}|@option{--version}]
           [addr addr @dots{}]
 @c man end
@@ -2614,13 +2615,14 @@ addr2line [@option{-b} @var{bfdname}|@option{--target=}@var{bfdname}]
 
 @c man begin DESCRIPTION addr2line
 
-@command{addr2line} translates program addresses into file names and line
-numbers.  Given an address and an executable, it uses the debugging
-information in the executable to figure out which file name and line
-number are associated with a given address.
+@command{addr2line} translates addresses into file names and line numbers.
+Given an address in an executable or an offset in a section of a relocatable
+object, it uses the debugging information to figure out which file name and
+line number are associated with it.
 
-The executable to use is specified with the @option{-e} option.  The
-default is the file @file{a.out}.
+The executable or relocatable object to use is specified with the @option{-e}
+option.  The default is the file @file{a.out}.  The section in the relocatable
+object to use is specified with the @option{-j} option.
 
 @command{addr2line} has two modes of operation.
 
@@ -2688,6 +2690,10 @@ function will also be printed.  For example, if @code{main} inlines
 @code{callee1} which inlines @code{callee2}, and address is from
 @code{callee2}, the source information for @code{callee1} and @code{main}
 will also be printed.
+
+@item -j
+@itemx --section
+Read offsets relative to the specified section instead of absolute addresses.
 @end table
 
 @c man end
@@ -3525,7 +3531,7 @@ programs described in this manual.
 
 @c man begin OPTIONS
 @table @env
-@include @value{top_srcdir}/../libiberty/at-file.texi
+@include at-file.texi
 @c man end
 
 @item --help

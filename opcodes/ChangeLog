@@ -1,3 +1,74 @@
+2006-06-09  Nick Clifton  <nickc@redhat.com>
+
+	* po/fi.po: Updated Finnish translation.
+
+2006-06-07  Joseph S. Myers  <joseph@codesourcery.com>
+
+	* po/Make-in (pdf, ps): New dummy targets.
+
+2006-05-30  Nick Clifton  <nickc@redhat.com>
+
+	* po/es.po: Updated Spanish translation.
+
+2006-05-26  Richard Sandiford  <richard@codesourcery.com>
+
+	* m68k-opc.c (m68k_opcodes): Fix the masks of the Coldfire fmovemd
+	and fmovem entries.  Put register list entries before immediate
+	mask entries.  Use "l" rather than "L" in the fmovem entries.
+	* m68k-dis.c (match_insn_m68k): Remove the PRIV argument and work it
+	out from INFO.
+	(m68k_scan_mask): New function, split out from...
+	(print_insn_m68k): ...here.  If no architecture has been set,
+	first try printing an m680x0 instruction, then try a Coldfire one.
+
+2006-05-24  Nick Clifton  <nickc@redhat.com>
+
+	* po/ga.po: Updated Irish translation.
+
+2006-05-22  Nick Clifton  <nickc@redhat.com>
+
+	* crx-dis.c (EXTRACT): Make macro work on 64-bit hosts.
+
+2006-05-22  Nick Clifton  <nickc@redhat.com>
+
+	* po/nl.po: Updated translation.
+
+2006-05-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* avr-dis.c (avr_operand): Warning fix.
+
+2006-05-04  Thiemo Seufer  <ths@mips.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Fix mftr argument order.
+
+2006-04-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* po/POTFILES.in: Regenerated.
+
+2006-04-12   Hochstein  <hochstein@algo.informatik.tu-darmstadt.de>
+
+	PR binutils/2454
+	* avr-dis.c (avr_operand): Arrange for a comment to appear before
+	the symolic form of an address, so that the output of objdump -d
+	can be reassembled.
+
+2006-04-10  DJ Delorie  <dj@redhat.com>
+
+	* m32c-asm.c: Regenerate.
+
+2006-04-06  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* Makefile.am: Add install-html target.
+	* Makefile.in: Regenerate.
+
+2006-04-06  Nick Clifton  <nickc@redhat.com>
+
+	* po/vi/po: Updated Vietnamese translation.
+
+2006-03-31  Paul Koning  <ni1d@arrl.net>
+
+	* pdp11-opc.c (pdp11_opcodes): Fix opcode for SEC instruction.
+
 2006-03-16  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	* bfin-dis.c (decode_dsp32shiftimm_0): Simplify and correct the
@@ -90,7 +161,7 @@
 	New cases '$' and '%' for read/write hyperprivileged register.
 	* sparc-opc.c (sparc_opcodes): Add new entries for UA2005
 	window handling and rdhpr/wrhpr instructions.
-	
+
 2006-02-24  DJ Delorie  <dj@redhat.com>
 
 	* m32c-desc.c: Regenerate with linker relaxation attributes.
@@ -143,13 +214,13 @@
 
 	* xc16x-desc.h: New file
 	* xc16x-desc.c: New file
-	* xc16x-opc.h: New file	
+	* xc16x-opc.h: New file
 	* xc16x-opc.c: New file
 	* xc16x-ibld.c: New file
 	* xc16x-asm.c: New file
 	* xc16x-dis.c: New file
-	* Makefile.am: Entries for xc16x 
-	* Makefile.in: Regenerate 
+	* Makefile.am: Entries for xc16x
+	* Makefile.in: Regenerate
 	* cofigure.in: Add xc16x target information.
 	* configure: Regenerate.
 	* disassemble.c: Add xc16x target information.
@@ -184,7 +255,7 @@
 
 	* z80-dis.c (struct buffer, prt_d, prt_d_n, arit_d, ld_r_d,
 	ld_d_r, pref_xd_cb): Use signed char to hold data to be
-	disassembled.	
+	disassembled.
 	* z80-dis.c (TXTSIZ): Increase buffer size to 24, this fixes
 	buffer overflows when disassembling instructions like
 	ld (ix+123),0x23

@@ -241,6 +241,8 @@ abort                                   return ABORT;
 [aA]0"."[wW]    _REG.regno = REG_A0w; return REG;
 [aA]0           _REG.regno = REG_A0;  return REG_A_DOUBLE_ZERO;
 [Gg][Oo][Tt]	return GOT;
+[Gg][Oo][Tt]"17"[Mm]"4" return GOT17M4;
+[Ff][Uu][Nn][Cc][Dd][Ee][Ss][Cc]"_"[Gg][Oo][Tt]"17"[Mm]"4" return FUNCDESC_GOT17M4;
 [Pp][Ll][Tt][Pp][Cc]	return PLTPC;
 
 
