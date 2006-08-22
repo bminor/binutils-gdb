@@ -1,4 +1,10 @@
 -*- text -*-
+* The default output section LMA has changed for allocatable sections from
+  being equal to VMA, to keeping the difference between LMA and VMA the same as
+  the previous output section in the same region.  This is a more useful
+  default when using overlays and other cases where you specify an LMA
+  differing from the VMA for some sections.
+
 * New switch: --print-gc-sections to list any sections removed by garabge
   collection.
 

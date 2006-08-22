@@ -3764,15 +3764,20 @@ Every section has a virtual address (VMA) and a load address (LMA); see
 an output section description sets the VMA (@pxref{Output Section
 Address}).
 
-The linker will normally set the LMA equal to the VMA.  You can change
-that by using the @code{AT} keyword.  The expression @var{lma} that
-follows the @code{AT} keyword specifies the load address of the
-section.
+The expression @var{lma} that follows the @code{AT} keyword specifies
+the load address of the section.
 
 Alternatively, with @samp{AT>@var{lma_region}} expression, you may
 specify a memory region for the section's load address. @xref{MEMORY}.
 Note that if the section has not had a VMA assigned to it then the
 linker will use the @var{lma_region} as the VMA region as well.
+
+If neither @code{AT} nor @code{AT>} is specified for an allocatable
+section, the linker will set the LMA such that the difference between
+VMA and LMA for the section is the same as the preceding output
+section in the same region.  If there is no preceding output section
+or the section is not allocatable, the linker will set the LMA equal
+to the VMA.
 @xref{Output Section Region}.
 
 @cindex ROM initialized data
@@ -4586,7 +4591,9 @@ anywhere that an ordinary symbol is allowed in an expression.
 @cindex holes
 Assigning a value to @code{.} will cause the location counter to be
 moved.  This may be used to create holes in the output section.  The
-location counter may never be moved backwards.
+location counter may not be moved backwards inside an output section,
+and may not be moved backwards outside of an output section if so
+doing creates areas with overlapping LMAs.
 
 @smallexample
 SECTIONS

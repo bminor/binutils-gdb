@@ -4400,16 +4400,30 @@ lang_size_sections_1
 		  lma = align_power (lma, os->section_alignment);
 		os->bfd_section->lma = lma;
 	      }
-	    else if (r->last_os != NULL)
+	    else if (r->last_os != NULL
+		     && (os->bfd_section->flags & SEC_ALLOC) != 0)
 	      {
 		bfd_vma lma;
 		asection *last;
 
 		last = r->last_os->output_section_statement.bfd_section;
-		/* If dot moved backwards (which is invalid according
-		   to ld docs) then leave lma equal to vma.  This
-		   keeps users of buggy ld scripts happy.  */
-		if (dot >= last->vma)
+
+		/* A backwards move of dot should be accompanied by
+		   an explicit assignment to the section LMA (ie.
+		   os->load_base set) because backwards moves normally
+		   create overlapping LMAs.  */
+		if (dot < last->vma)
+		  {
+		    einfo (_("%P: warning: dot moved backwards before `%s'\n"),
+			   os->name);
+
+		    /* If dot moved backwards then leave lma equal to
+		       vma.  This is the old default lma, which might
+		       just happen to work when the backwards move is
+		       sufficiently large.  Nag anyway, so people fix
+		       their linker scripts.  */
+		  }
+		else
 		  {
 		    /* If the current vma overlaps the previous section,
 		       then set the current lma to that at the end of
@@ -4440,9 +4454,16 @@ lang_size_sections_1
 	       lma region.  We use this to set the lma for
 	       following sections.  Overlays or other linker
 	       script assignment to lma might mean that the
-	       default lma == vma is incorrect.  */
+	       default lma == vma is incorrect.
+	       To avoid warnings about dot moving backwards when using
+	       -Ttext, don't start tracking sections until we find one
+	       of non-zero size or with lma set differently to vma.  */
 	    if (((os->bfd_section->flags & SEC_HAS_CONTENTS) != 0
 		 || (os->bfd_section->flags & SEC_THREAD_LOCAL) == 0)
+		&& (os->bfd_section->flags & SEC_ALLOC) != 0
+		&& (os->bfd_section->size != 0
+		    || os->bfd_section->vma != os->bfd_section->lma
+		    || r->last_os != NULL)
 		&& os->lma_region == NULL
 		&& !link_info.relocatable)
 	      r->last_os = s;

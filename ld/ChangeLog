@@ -1,3 +1,11 @@
+2006-08-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* NEWS: Mention LMA default change.
+	* ld.texinfo (Output Section LMA): Update default description.
+	(Location Counter): Clarify backward movement.
+	* ldlang.c (lang_size_sections_1): Leave non-alloc sections with
+	default lma equal to vma.  Warn on backward movement of dot.
+
 2006-08-22  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* Makefile.am: Split arm-wince into its own emulation.
