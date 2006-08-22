@@ -1,7 +1,7 @@
 /* Target-dependent code for the ALPHA architecture, for GDB, the GNU Debugger.
 
    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2005 Free Software Foundation, Inc.
+   2002, 2003, 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -208,7 +208,8 @@ static void
 alpha_register_to_value (struct frame_info *frame, int regnum,
 			 struct type *valtype, gdb_byte *out)
 {
-  char in[MAX_REGISTER_SIZE];
+  gdb_byte in[MAX_REGISTER_SIZE];
+
   frame_register_read (frame, regnum, in);
   switch (TYPE_LENGTH (valtype))
     {
@@ -227,7 +228,8 @@ static void
 alpha_value_to_register (struct frame_info *frame, int regnum,
 			 struct type *valtype, const gdb_byte *in)
 {
-  char out[MAX_REGISTER_SIZE];
+  gdb_byte out[MAX_REGISTER_SIZE];
+
   switch (TYPE_LENGTH (valtype))
     {
     case 4:
@@ -265,14 +267,14 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int accumulate_size = struct_return ? 8 : 0;
   struct alpha_arg
     {
-      char *contents;
+      gdb_byte *contents;
       int len;
       int offset;
     };
   struct alpha_arg *alpha_args
     = (struct alpha_arg *) alloca (nargs * sizeof (struct alpha_arg));
   struct alpha_arg *m_arg;
-  char arg_reg_buffer[ALPHA_REGISTER_SIZE * ALPHA_NUM_ARG_REGS];
+  gdb_byte arg_reg_buffer[ALPHA_REGISTER_SIZE * ALPHA_NUM_ARG_REGS];
   int required_arg_regs;
   CORE_ADDR func_addr = find_function_addr (function, NULL);
 
@@ -385,7 +387,7 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* `Push' arguments on the stack.  */
   for (i = nargs; m_arg--, --i >= 0;)
     {
-      char *contents = m_arg->contents;
+      gdb_byte *contents = m_arg->contents;
       int offset = m_arg->offset;
       int len = m_arg->len;
 
@@ -436,7 +438,7 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
 			    gdb_byte *valbuf)
 {
   int length = TYPE_LENGTH (valtype);
-  char raw_buffer[ALPHA_REGISTER_SIZE];
+  gdb_byte raw_buffer[ALPHA_REGISTER_SIZE];
   ULONGEST l;
 
   switch (TYPE_CODE (valtype))
@@ -473,8 +475,7 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
 
 	case 16:
 	  regcache_cooked_read (regcache, ALPHA_FP0_REGNUM, valbuf);
-	  regcache_cooked_read (regcache, ALPHA_FP0_REGNUM+1,
-				(char *)valbuf + 8);
+	  regcache_cooked_read (regcache, ALPHA_FP0_REGNUM + 1, valbuf + 8);
 	  break;
 
 	case 32:
@@ -503,7 +504,7 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
 			  const gdb_byte *valbuf)
 {
   int length = TYPE_LENGTH (valtype);
-  char raw_buffer[ALPHA_REGISTER_SIZE];
+  gdb_byte raw_buffer[ALPHA_REGISTER_SIZE];
   ULONGEST l;
 
   switch (TYPE_CODE (valtype))
@@ -541,8 +542,7 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
 
 	case 16:
 	  regcache_cooked_write (regcache, ALPHA_FP0_REGNUM, valbuf);
-	  regcache_cooked_write (regcache, ALPHA_FP0_REGNUM+1,
-				 (const char *)valbuf + 8);
+	  regcache_cooked_write (regcache, ALPHA_FP0_REGNUM + 1, valbuf + 8);
 	  break;
 
 	case 32:
@@ -604,14 +604,13 @@ alpha_return_in_memory_always (struct type *type)
   return 1;
 }
 
-static const unsigned char *
-alpha_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
+static const gdb_byte *
+alpha_breakpoint_from_pc (CORE_ADDR *pc, int *len)
 {
-  static const unsigned char alpha_breakpoint[] =
-    { 0x80, 0, 0, 0 };	/* call_pal bpt */
+  static const gdb_byte break_insn[] = { 0x80, 0, 0, 0 }; /* call_pal bpt */
 
-  *lenptr = sizeof(alpha_breakpoint);
-  return (alpha_breakpoint);
+  *len = sizeof(break_insn);
+  return break_insn;
 }
 
 
@@ -641,7 +640,7 @@ alpha_after_prologue (CORE_ADDR pc)
 unsigned int
 alpha_read_insn (CORE_ADDR pc)
 {
-  char buf[4];
+  gdb_byte buf[4];
   int status;
 
   status = read_memory_nobpt (pc, buf, 4);
@@ -663,7 +662,7 @@ alpha_skip_prologue (CORE_ADDR pc)
   unsigned long inst;
   int offset;
   CORE_ADDR post_prologue_pc;
-  char buf[4];
+  gdb_byte buf[4];
 
   /* Silently return the unaltered pc upon memory errors.
      This could happen on OSF/1 if decode_line_1 tries to skip the
@@ -728,7 +727,7 @@ alpha_get_longjmp_target (CORE_ADDR *pc)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   CORE_ADDR jb_addr;
-  char raw_buffer[ALPHA_REGISTER_SIZE];
+  gdb_byte raw_buffer[ALPHA_REGISTER_SIZE];
 
   jb_addr = read_register (ALPHA_A0_REGNUM);
 
@@ -1292,11 +1291,12 @@ void
 alpha_supply_int_regs (int regno, const void *r0_r30,
 		       const void *pc, const void *unique)
 {
+  const gdb_byte *regs = r0_r30;
   int i;
 
   for (i = 0; i < 31; ++i)
     if (regno == i || regno == -1)
-      regcache_raw_supply (current_regcache, i, (const char *)r0_r30 + i*8);
+      regcache_raw_supply (current_regcache, i, regs + i * 8);
 
   if (regno == ALPHA_ZERO_REGNUM || regno == -1)
     regcache_raw_supply (current_regcache, ALPHA_ZERO_REGNUM, NULL);
@@ -1311,11 +1311,12 @@ alpha_supply_int_regs (int regno, const void *r0_r30,
 void
 alpha_fill_int_regs (int regno, void *r0_r30, void *pc, void *unique)
 {
+  gdb_byte *regs = r0_r30;
   int i;
 
   for (i = 0; i < 31; ++i)
     if (regno == i || regno == -1)
-      regcache_raw_collect (current_regcache, i, (char *)r0_r30 + i*8);
+      regcache_raw_collect (current_regcache, i, regs + i * 8);
 
   if (regno == ALPHA_PC_REGNUM || regno == -1)
     regcache_raw_collect (current_regcache, ALPHA_PC_REGNUM, pc);
@@ -1327,12 +1328,13 @@ alpha_fill_int_regs (int regno, void *r0_r30, void *pc, void *unique)
 void
 alpha_supply_fp_regs (int regno, const void *f0_f30, const void *fpcr)
 {
+  const gdb_byte *regs = f0_f30;
   int i;
 
   for (i = ALPHA_FP0_REGNUM; i < ALPHA_FP0_REGNUM + 31; ++i)
     if (regno == i || regno == -1)
       regcache_raw_supply (current_regcache, i,
-			   (const char *)f0_f30 + (i - ALPHA_FP0_REGNUM) * 8);
+			   regs + (i - ALPHA_FP0_REGNUM) * 8);
 
   if (regno == ALPHA_FPCR_REGNUM || regno == -1)
     regcache_raw_supply (current_regcache, ALPHA_FPCR_REGNUM, fpcr);
@@ -1341,12 +1343,13 @@ alpha_supply_fp_regs (int regno, const void *f0_f30, const void *fpcr)
 void
 alpha_fill_fp_regs (int regno, void *f0_f30, void *fpcr)
 {
+  gdb_byte *regs = f0_f30;
   int i;
 
   for (i = ALPHA_FP0_REGNUM; i < ALPHA_FP0_REGNUM + 31; ++i)
     if (regno == i || regno == -1)
       regcache_raw_collect (current_regcache, i,
-			    (char *)f0_f30 + (i - ALPHA_FP0_REGNUM) * 8);
+			    regs + (i - ALPHA_FP0_REGNUM) * 8);
 
   if (regno == ALPHA_FPCR_REGNUM || regno == -1)
     regcache_raw_collect (current_regcache, ALPHA_FPCR_REGNUM, fpcr);
@@ -1393,7 +1396,7 @@ alpha_next_pc (CORE_ADDR pc)
   int regno;
   int offset;
   LONGEST rav;
-  char reg[8];
+  gdb_byte reg[8];
 
   insn = alpha_read_insn (pc);
 

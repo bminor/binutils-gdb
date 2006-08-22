@@ -1,5 +1,13 @@
 2006-08-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* alpha-tdep.c (alpha_register_to_value, alpha_value_to_register)
+	(alpha_push_dummy_call, alpha_extract_return_value)
+	(alpha_breakpoint_from_pc, alpha_read_insn)
+	(alpha_get_longjmp_target, alpha_supply_int_regs)
+	(alpha_fill_int_regs, alpha_supply_fp_regs, alpha_fill_fp_regs)
+	(alpha_next_pc): Use gdb_byte instead of (unsigned) char where
+	appropriate.
+
 	* sparc64-tdep.c (sparc64_pstate_type, sparc64_fsr_type)
 	(sparc64_fprs_type): New variables.
 	(sparc64_init_types): New function.:
