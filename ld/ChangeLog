@@ -8,10 +8,13 @@
 
 2006-08-22  Pedro Alves  <pedro_alves@portugalmail.pt>
 
+	* configure.tgt: Set targ_emul to arm_wince_pe for ARM
+	Windows CE targets.
+
+2006-08-22  Pedro Alves  <pedro_alves@portugalmail.pt>
+
 	* Makefile.am: Split arm-wince into its own emulation.
 	* Makefile.in: Regenerate.
-	* configure.tgt: Set targ_emul to arm_wince_pe for ARM Windows
-	CE targets.
 	* pe-dll.c : Define PE_ARCH_arm_wince.
 	(pe_detail_list): Add PE_ARCH_arm_wince case.
 	(make_one): Handle PE_ARCH_arm_epoc and PE_ARCH_arm_wince cases.
