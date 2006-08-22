@@ -6609,25 +6609,28 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
 	case R_PPC_ADDR16_HA:
 	case R_PPC_REL16_HA:
-	case R_PPC_GOT16_HA:
-	case R_PPC_PLT16_HA:
 	case R_PPC_SECTOFF_HA:
 	case R_PPC_TPREL16_HA:
 	case R_PPC_DTPREL16_HA:
-	case R_PPC_GOT_TLSGD16_HA:
-	case R_PPC_GOT_TLSLD16_HA:
-	case R_PPC_GOT_TPREL16_HA:
-	case R_PPC_GOT_DTPREL16_HA:
 	case R_PPC_EMB_NADDR16_HA:
 	case R_PPC_EMB_RELST_HA:
 	  /* It's just possible that this symbol is a weak symbol
 	     that's not actually defined anywhere.  In that case,
 	     'sec' would be NULL, and we should leave the symbol
 	     alone (it will be set to zero elsewhere in the link).  */
-	  if (sec != NULL)
-	    /* Add 0x10000 if sign bit in 0:15 is set.
-	       Bits 0:15 are not used.  */
-	    addend += 0x8000;
+	  if (sec == NULL)
+	    break;
+	  /* Fall thru */
+
+	case R_PPC_PLT16_HA:
+	case R_PPC_GOT16_HA:
+	case R_PPC_GOT_TLSGD16_HA:
+	case R_PPC_GOT_TLSLD16_HA:
+	case R_PPC_GOT_TPREL16_HA:
+	case R_PPC_GOT_DTPREL16_HA:
+	  /* Add 0x10000 if sign bit in 0:15 is set.
+	     Bits 0:15 are not used.  */
+	  addend += 0x8000;
 	  break;
 	}
 

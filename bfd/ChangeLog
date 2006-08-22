@@ -1,3 +1,9 @@
+2006-08-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_relocate_section): Correct GOT and PLT HA
+	reloc handling.
+	* elf64-ppc.c (ppc64_elf_relocate_section): Likewise.
+
 2006-08-21  Mark Shinwell  <shinwell@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_link_hash_table): Correct typo in

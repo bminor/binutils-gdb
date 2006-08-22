@@ -10928,17 +10928,10 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_ADDR16_HA:
 	case R_PPC64_ADDR16_HIGHERA:
 	case R_PPC64_ADDR16_HIGHESTA:
-	case R_PPC64_GOT16_HA:
-	case R_PPC64_PLTGOT16_HA:
-	case R_PPC64_PLT16_HA:
 	case R_PPC64_TOC16_HA:
 	case R_PPC64_SECTOFF_HA:
 	case R_PPC64_TPREL16_HA:
 	case R_PPC64_DTPREL16_HA:
-	case R_PPC64_GOT_TLSGD16_HA:
-	case R_PPC64_GOT_TLSLD16_HA:
-	case R_PPC64_GOT_TPREL16_HA:
-	case R_PPC64_GOT_DTPREL16_HA:
 	case R_PPC64_TPREL16_HIGHER:
 	case R_PPC64_TPREL16_HIGHERA:
 	case R_PPC64_TPREL16_HIGHEST:
@@ -10951,10 +10944,20 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	     that's not actually defined anywhere. In that case,
 	     'sec' would be NULL, and we should leave the symbol
 	     alone (it will be set to zero elsewhere in the link).  */
-	  if (sec != NULL)
-	    /* Add 0x10000 if sign bit in 0:15 is set.
-	       Bits 0:15 are not used.  */
-	    addend += 0x8000;
+	  if (sec == NULL)
+	    break;
+	  /* Fall thru */
+
+	case R_PPC64_GOT16_HA:
+	case R_PPC64_PLTGOT16_HA:
+	case R_PPC64_PLT16_HA:
+	case R_PPC64_GOT_TLSGD16_HA:
+	case R_PPC64_GOT_TLSLD16_HA:
+	case R_PPC64_GOT_TPREL16_HA:
+	case R_PPC64_GOT_DTPREL16_HA:
+	  /* Add 0x10000 if sign bit in 0:15 is set.
+	     Bits 0:15 are not used.  */
+	  addend += 0x8000;
 	  break;
 
 	case R_PPC64_ADDR16_DS:
