@@ -1,5 +1,11 @@
 2006-08-23  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/3052
+	* ld-elf/loadaddr1.t: Add "AT (ADDR(.data))".
+	* ld-elf/loadaddr2.t: Likewise.
+
+2006-08-23  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/3103
 	* ld-elf/overlay.d: New file.
 	* ld-elf/overlay.s: Likewise.

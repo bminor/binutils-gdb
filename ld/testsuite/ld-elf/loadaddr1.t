@@ -8,6 +8,6 @@ SECTIONS
     { *(.bar) }
   . = LOADADDR(.bar) + 4096;
   . = ALIGN(8192);
-  .data : { *(.data) }
+  .data : AT (ADDR(.data)) { *(.data) }
   /DISCARD/ : { *(.*) }
 }
