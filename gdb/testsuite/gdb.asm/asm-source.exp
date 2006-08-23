@@ -230,10 +230,12 @@ regsub "--" "-gstabs\[+\]" "${debug-flags}" "-gstabs" debug-flags
 regsub "--" "-g\[0-9\]" "${debug-flags}" "" debug-flags
 
 if {[target_assemble ${srcdir}/${subdir}/${srcfile1} asmsrc1.o "${asm-flags} ${debug-flags}"] != ""} then {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+    untested asm-source.exp
+    return -1
 }
 if {[target_assemble ${srcdir}/${subdir}/${srcfile2} asmsrc2.o "${asm-flags} ${debug-flags}"] != ""} then {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+    untested asm-source.exp
+    return -1
 }
 
 # We deliberately don't use gdb_compile here to link together the

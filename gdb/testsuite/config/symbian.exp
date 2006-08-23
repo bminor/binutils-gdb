@@ -70,6 +70,7 @@ proc symbian_compile { sources destfile type options } {
 	    append allflags " $flags"
 	} else {
 	    warning "Compilation option $option not supported"
+	    return -1
 	}
     }
 
@@ -134,7 +135,19 @@ proc symbian_compile { sources destfile type options } {
     }
 
     file copy -force -- "$epocroot/epoc32/release/gcce/${reldir}/${proj}.exe" ${destfile}.exe
-    file copy -force -- "$epocroot/epoc32/release/gcce/${reldir}/${proj}.sym" ${destfile}
+
+    # Don't look for a .sym file in that same directory; UDEB has one but
+    # UREL doesn't.  Grab the .exe from the temporary build directory instead.
+    # file copy -force -- "$epocroot/epoc32/release/gcce/${reldir}/${proj}.sym" ${destfile}
+
+    set result [file native [file normalize [pwd]]]
+    if { [string first "C:" $result] != -1 } {
+	set result [string map {C: ""} $result]
+    } else {
+	# This appears to be a Unix-thinking sort of TCL.
+	set result "/cygwin/$result"
+    }
+    file copy -force -- "$epocroot/epoc32/BUILD$result/${proj}/gcce/${reldir}/${proj}.exe" ${destfile}
 
     # file delete "bld.inf"
     # file delete "${proj}.mmp"
