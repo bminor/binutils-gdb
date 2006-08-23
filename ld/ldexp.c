@@ -577,8 +577,7 @@ fold_name (etree_type *tree)
 	  if (os != NULL && os->processed_lma)
 	    {
 	      if (os->load_base == NULL)
-		new_rel (os->bfd_section->lma - os->bfd_section->vma,
-			 NULL, os->bfd_section);
+		new_abs (os->bfd_section->lma);
 	      else
 		exp_fold_tree_1 (os->load_base);
 	    }

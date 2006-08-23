@@ -1,3 +1,8 @@
+2006-08-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldexp.c (fold_name <LOADADDR>): Return an absolute value
+        rather than a section relative value.
+
 2006-08-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* NEWS: Mention LMA default change.
