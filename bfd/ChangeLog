@@ -1,3 +1,8 @@
+2006-08-23  Frediano Ziglio  <Frediano.Ziglio@vodafone.com>
+
+	* archive.c (hpux_uid_gid_encode): Fix thinko decrementing "cnt"
+	variable.
+
 2006-08-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_copy_indirect_symbol): Only copy

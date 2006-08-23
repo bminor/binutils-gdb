@@ -1336,7 +1336,7 @@ hpux_uid_gid_encode (char str[6], long int id)
   str[5] = '@' + (id & 3);
   id >>= 2;
 
-  for (cnt = 4; cnt >= 0; ++cnt, id >>= 6)
+  for (cnt = 4; cnt >= 0; --cnt, id >>= 6)
     str[cnt] = ' ' + (id & 0x3f);
 }
 #endif	/* HPUX_LARGE_AR_IDS */
