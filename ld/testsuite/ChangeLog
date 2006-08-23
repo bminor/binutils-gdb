@@ -1,3 +1,10 @@
+2006-08-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/3103
+	* ld-elf/overlay.d: New file.
+	* ld-elf/overlay.s: Likewise.
+	* ld-elf/overlay.t: Likewise.
+
 2006-08-18  Paul Brook  <paul@codesourcery.com>
 
 	* ld-arm/arm-elf.exp (armelftests): Add armthumb-lib.so.  Add
