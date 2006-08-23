@@ -37,7 +37,7 @@
 ;; used in gdb-ui.el) to GDB/MI.  It runs gdb with GDB/MI (-interp=mi) and
 ;; access CLI using "-interpreter-exec console cli-command".
 
-;; This mode acts on top of gdb-ui.el.  After the release of 22.0,
+;; This mode acts on top of gdb-ui.el.  After the release of 22.1,
 ;; mainline Emacs in the CVS repository will have a file also called gdb-mi.el
 ;; which will *replace* gdb-ui.el.  If you are interested in developing
 ;; this mode you should get this version.
