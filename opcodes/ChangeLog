@@ -1,10 +1,14 @@
-2006-08-04	Dwarakanath Rajagopal	<dwarak.rajagopal@amd.com>
+2006-08-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (three_byte_table): Expand to 256 elements.
+
+2006-08-04  Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
 
 	* i386-dis.c (MXC,EMC): Define.
 	(OP_MXC): New function to handle cvt* (convert instructions) between
 	%xmm and %mm register correctly.
 	(OP_EMC): ditto.	
-	(prefix_user_table): Modified  cvtpi2pd,cvtpd2pi and cvttpd2pi 
+	(prefix_user_table): Modified cvtpi2pd,cvtpd2pi and cvttpd2pi 
 	instruction operands in PREGRP2,PREGRP3,PREGRP4 appropriately 
 	with EMC/MXC.
 
