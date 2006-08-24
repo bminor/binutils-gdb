@@ -1853,7 +1853,7 @@ add_symbol_file_command (char *args, int from_tty)
                to load the program. */
 	    sect_opts[section_index].name = ".text";
 	    sect_opts[section_index].value = arg;
-	    if (++section_index > num_sect_opts)
+	    if (++section_index >= num_sect_opts)
 	      {
 		num_sect_opts *= 2;
 		sect_opts = ((struct sect_opt *)
@@ -1889,7 +1889,7 @@ add_symbol_file_command (char *args, int from_tty)
 		    {
 		      sect_opts[section_index].value = arg;
 		      expecting_sec_addr = 0;
-		      if (++section_index > num_sect_opts)
+		      if (++section_index >= num_sect_opts)
 			{
 			  num_sect_opts *= 2;
 			  sect_opts = ((struct sect_opt *)
