@@ -217,11 +217,10 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 	 0xffffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* FIXME: Has two more bits of offset in Thumb32.  */
   HOWTO (R_ARM_THM_CALL,	/* type */
 	 1,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 23,			/* bitsize */
+	 25,			/* bitsize */
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed,/* complain_on_overflow */
@@ -3527,6 +3526,14 @@ identify_add_or_sub(bfd_vma insn)
   return 0;
 }
 
+/* Determine if we're dealing with a Thumb-2 object.  */
+
+static int using_thumb2 (struct elf32_arm_link_hash_table *globals)
+{
+  int arch = elf32_arm_get_eabi_attr_int (globals->obfd, Tag_CPU_arch);
+  return arch == 8 || arch >= 10;
+}
+
 /* Perform a relocation as part of a final link.  */
 
 static bfd_reloc_status_type
@@ -3956,22 +3963,33 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
       /* Thumb BL (branch long instruction).  */
       {
 	bfd_vma relocation;
+        bfd_vma reloc_sign;
 	bfd_boolean overflow = FALSE;
 	bfd_vma upper_insn = bfd_get_16 (input_bfd, hit_data);
 	bfd_vma lower_insn = bfd_get_16 (input_bfd, hit_data + 2);
-	bfd_signed_vma reloc_signed_max = ((1 << (howto->bitsize - 1)) - 1) >> howto->rightshift;
-	bfd_signed_vma reloc_signed_min = ~ reloc_signed_max;
+	bfd_signed_vma reloc_signed_max;
+	bfd_signed_vma reloc_signed_min;
 	bfd_vma check;
 	bfd_signed_vma signed_check;
+	int bitsize;
+	int thumb2 = using_thumb2 (globals);
 
-	/* Need to refetch the addend and squish the two 11 bit pieces
-	   together.  */
+	/* Fetch the addend.  We use the Thumb-2 encoding (backwards compatible
+           with Thumb-1) involving the J1 and J2 bits.  */
 	if (globals->use_rel)
 	  {
-	    bfd_vma upper = upper_insn & 0x7ff;
-	    bfd_vma lower = lower_insn & 0x7ff;
-	    upper = (upper ^ 0x400) - 0x400; /* Sign extend.  */
-	    addend = (upper << 12) | (lower << 1);
+            bfd_vma s = (upper_insn & (1 << 10)) >> 10;
+            bfd_vma upper = upper_insn & 0x3ff;
+            bfd_vma lower = lower_insn & 0x7ff;
+	    bfd_vma j1 = (lower_insn & (1 << 13)) >> 13;
+	    bfd_vma j2 = (lower_insn & (1 << 11)) >> 11;
+            bfd_vma i1 = j1 ^ s ? 0 : 1;
+            bfd_vma i2 = j2 ^ s ? 0 : 1;
+
+            addend = (i1 << 23) | (i2 << 22) | (upper << 12) | (lower << 1);
+            /* Sign extend.  */
+            addend = (addend | ((s ? 0 : 1) << 24)) - (1 << 24);
+
 	    signed_addend = addend;
 	  }
 
@@ -4048,6 +4066,15 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	else
 	  signed_check = check | ~((bfd_vma) -1 >> howto->rightshift);
 
+	/* Calculate the permissable maximum and minimum values for
+	   this relocation according to whether we're relocating for
+	   Thumb-2 or not.  */
+	bitsize = howto->bitsize;
+	if (!thumb2)
+	  bitsize -= 2;
+	reloc_signed_max = ((1 << (bitsize - 1)) - 1) >> howto->rightshift;
+	reloc_signed_min = ~reloc_signed_max;
+
 	/* Assumes two's complement.  */
 	if (signed_check > reloc_signed_max || signed_check < reloc_signed_min)
 	  overflow = TRUE;
@@ -4059,9 +4086,17 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	     1 of the base address.  */
 	  relocation = (relocation + 2) & ~ 3;
 
-	/* Put RELOCATION back into the insn.  */
-	upper_insn = (upper_insn & ~(bfd_vma) 0x7ff) | ((relocation >> 12) & 0x7ff);
-	lower_insn = (lower_insn & ~(bfd_vma) 0x7ff) | ((relocation >> 1) & 0x7ff);
+	/* Put RELOCATION back into the insn.  Assumes two's complement.
+	   We use the Thumb-2 encoding, which is safe even if dealing with
+	   a Thumb-1 instruction by virtue of our overflow check above.  */
+        reloc_sign = (signed_check < 0) ? 1 : 0;
+	upper_insn = (upper_insn & ~(bfd_vma) 0x7ff)
+                     | ((relocation >> 12) & 0x3ff)
+                     | (reloc_sign << 10);
+	lower_insn = (lower_insn & ~(bfd_vma) 0x2fff) 
+                     | (((!((relocation >> 23) & 1)) ^ reloc_sign) << 13)
+                     | (((!((relocation >> 22) & 1)) ^ reloc_sign) << 11)
+                     | ((relocation >> 1) & 0x7ff);
 
 	/* Put the relocated value back in the object file:  */
 	bfd_put_16 (input_bfd, upper_insn, hit_data);
