@@ -3619,7 +3619,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 
     case R_ARM_PC24:
     case R_ARM_ABS32:
+    case R_ARM_ABS32_NOI:
     case R_ARM_REL32:
+    case R_ARM_REL32_NOI:
     case R_ARM_CALL:
     case R_ARM_JUMP24:
     case R_ARM_XPC25:
@@ -3635,7 +3637,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	 will use the symbol's value, which may point to a PLT entry, but we
 	 don't need to handle that here.  If we created a PLT entry, all
 	 branches in this object should go to it.  */
-      if ((r_type != R_ARM_ABS32 && r_type != R_ARM_REL32)
+      if ((r_type != R_ARM_ABS32 && r_type != R_ARM_REL32
+           && r_type != R_ARM_ABS32_NOI && r_type != R_ARM_REL32_NOI)
 	  && h != NULL
 	  && splt != NULL
 	  && h->plt.offset != (bfd_vma) -1)
@@ -3659,7 +3662,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	 run time.  */
       if ((info->shared || globals->root.is_relocatable_executable)
 	  && (input_section->flags & SEC_ALLOC)
-	  && (r_type != R_ARM_REL32
+	  && ((r_type != R_ARM_REL32 && r_type != R_ARM_REL32_NOI)
 	      || !SYMBOL_CALLS_LOCAL (info, h))
 	  && (h == NULL
 	      || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
@@ -3873,10 +3876,20 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	    value |= 1;
 	  break;
 
+	case R_ARM_ABS32_NOI:
+	  value += addend;
+	  break;
+
 	case R_ARM_REL32:
 	  value += addend;
 	  if (sym_flags == STT_ARM_TFUNC)
 	    value |= 1;
+	  value -= (input_section->output_section->vma
+		    + input_section->output_offset + rel->r_offset);
+	  break;
+
+	case R_ARM_REL32_NOI:
+	  value += addend;
 	  value -= (input_section->output_section->vma
 		    + input_section->output_offset + rel->r_offset);
 	  break;
@@ -6705,7 +6718,9 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd,
 	  break;
 
 	case R_ARM_ABS32:
+	case R_ARM_ABS32_NOI:
 	case R_ARM_REL32:
+	case R_ARM_REL32_NOI:
 	case R_ARM_PC24:
 	case R_ARM_PLT32:
 	case R_ARM_CALL:
@@ -6738,14 +6753,17 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd,
 		}
 
 	      if (r_type == R_ARM_ABS32
-		  || r_type == R_ARM_REL32)
+		  || r_type == R_ARM_REL32
+                  || r_type == R_ARM_ABS32_NOI
+                  || r_type == R_ARM_REL32_NOI)
 		{
 		  for (pp = &eh->relocs_copied; (p = *pp) != NULL;
 		       pp = &p->next)
 		  if (p->section == sec)
 		    {
 		      p->count -= 1;
-		      if (ELF32_R_TYPE (rel->r_info) == R_ARM_REL32)
+		      if (ELF32_R_TYPE (rel->r_info) == R_ARM_REL32
+                          || ELF32_R_TYPE (rel->r_info) == R_ARM_REL32_NOI)
 			p->pc_count -= 1;
 		      if (p->count == 0)
 			*pp = p->next;
@@ -6923,7 +6941,9 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    /* Fall through */
 
 	  case R_ARM_ABS32:
+	  case R_ARM_ABS32_NOI:
 	  case R_ARM_REL32:
+	  case R_ARM_REL32_NOI:
 	  case R_ARM_PC24:
 	  case R_ARM_PLT32:
 	  case R_ARM_CALL:
@@ -6954,7 +6974,10 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		   refers to is in a different object.  We can't tell for
 		   sure yet, because something later might force the
 		   symbol local.  */
-		if (r_type != R_ARM_ABS32 && r_type != R_ARM_REL32)
+		if (r_type != R_ARM_ABS32
+                    && r_type != R_ARM_REL32
+                    && r_type != R_ARM_ABS32_NOI
+                    && r_type != R_ARM_REL32_NOI)
 		  h->needs_plt = 1;
 
 		/* If we create a PLT entry, this relocation will reference
@@ -6979,7 +7002,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
                relocs_copied field of the hash table entry.  */
 	    if ((info->shared || htab->root.is_relocatable_executable)
 		&& (sec->flags & SEC_ALLOC) != 0
-		&& (r_type == R_ARM_ABS32
+		&& ((r_type == R_ARM_ABS32 || r_type == R_ARM_ABS32_NOI)
 		    || (h != NULL && ! h->needs_plt
 			&& (! info->symbolic || ! h->def_regular))))
 	      {
@@ -7063,7 +7086,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		    p->pc_count = 0;
 		  }
 
-		if (r_type == R_ARM_REL32)
+		if (r_type == R_ARM_REL32 || r_type == R_ARM_REL32_NOI)
 		  p->pc_count += 1;
 		p->count += 1;
 	      }
@@ -7598,12 +7621,12 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 
   if (info->shared || htab->root.is_relocatable_executable)
     {
-      /* The only reloc that uses pc_count is R_ARM_REL32, which will
-	 appear on something like ".long foo - .".  We want calls to
-	 protected symbols to resolve directly to the function rather
-	 than going via the plt.  If people want function pointer
-	 comparisons to work as expected then they should avoid
-	 writing assembly like ".long foo - .".  */
+      /* The only relocs that use pc_count are R_ARM_REL32 and
+         R_ARM_REL32_NOI, which will appear on something like
+         ".long foo - .".  We want calls to protected symbols to resolve
+         directly to the function rather than going via the plt.  If people
+         want function pointer comparisons to work as expected then they
+         should avoid writing assembly like ".long foo - .".  */
       if (SYMBOL_CALLS_LOCAL (info, h))
 	{
 	  struct elf32_arm_relocs_copied **pp;
