@@ -1,3 +1,9 @@
+2006-08-24  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* ldlang.c (lang_size_sections_1, lang_assignment_statement_enum):
+	Adjust the current address of DEFAULT_MEMORY_REGION even
+	when dot hasn't changed.
+
 2006-08-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldexp.c (fold_name <LOADADDR>): Return an absolute value
