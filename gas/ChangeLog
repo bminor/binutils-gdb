@@ -1,3 +1,10 @@
+2006-08-25  Sterling Augustine  <sterling@tensilica.com>
+	    Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (xtensa_mark_literal_pool_location): Do not check
+	the state of the absolute_literals directive.  Remove align frag at
+	the start of the literal pool position.
+
 2006-08-25  Bob Wilson  <bob.wilson@acm.org>
 
 	* doc/c-xtensa.texi: Add @group commands in examples.

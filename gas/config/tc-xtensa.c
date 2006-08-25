@@ -4516,11 +4516,8 @@ xtensa_mark_literal_pool_location (void)
   emit_state s;
   fragS *pool_location;
 
-  if (use_literal_section && !directive_state[directive_absolute_literals])
+  if (use_literal_section)
     return;
-
-  frag_align (2, 0, 0);
-  record_alignment (now_seg, 2);
 
   /* We stash info in these frags so we can later move the literal's
      fixes into this frchain's fix list.  */
