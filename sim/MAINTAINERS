@@ -14,6 +14,7 @@ frv		Dave Brolley <brolley@redhat.com>
 igen		(igen simulators)
 ppc		Andrew Cagney <ac131313@redhat.com>
 m68hc11		Stephane Carrez <stcarrez@nerim.fr>
+mips		Thiemo Seufer <ths@networkno.de>
 sh		(global maintainers)
 m32c		DJ Delorie <dj@redhat.com>
 common		Ben Elliston <bje@gnu.org>
