@@ -1,3 +1,7 @@
+2006-08-25  Bob Wilson  <bob.wilson@acm.org>
+
+	* doc/c-xtensa.texi: Add @group commands in examples.
+
 2006-08-24  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (FINI_LITERAL_SECTION_NAME): Delete.

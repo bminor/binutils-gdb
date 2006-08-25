@@ -116,13 +116,17 @@ instruction, are specified by enclosing the bundled opcodes inside
 braces:
 
 @smallexample
+@group
 @{
 [@var{format}]
 @var{opcode0} [@var{operands}]
+@end group
 @var{opcode1} [@var{operands}]
+@group
 @var{opcode2} [@var{operands}]
 @dots{}
 @}
+@end group
 @end smallexample
 
 The opcodes in a FLIX instruction are listed in the same order as the
@@ -326,9 +330,11 @@ replace the branch with a branch around a jump.  For example,
 may result in:
 
 @smallexample
+@group
     bnez.n  a2, M
     j L
 M:
+@end group
 @end smallexample
 
 (The @code{BNEZ.N} instruction would be used in this example only if the
@@ -370,9 +376,11 @@ and then using a @code{CALLX} instruction.  So, for example:
 might be relaxed to:
 
 @smallexample
+@group
     .literal .L1, func
     l32r    a8, .L1
     callx8  a8
+@end group
 @end smallexample
 
 Because the addresses of targets of function calls are not generally
@@ -413,8 +421,10 @@ materialized with @code{L32R} instructions.  Thus:
 is assembled into the following machine code:
 
 @smallexample
+@group
     .literal .L1, 100000
     l32r a0, .L1
+@end group
 @end smallexample
 
 @cindex @code{L8UI} instructions, relaxation
@@ -440,10 +450,14 @@ is different than the source address register.  For example:
 is translated to:
 
 @smallexample
+@group
     .literal .L1, 2040
     l32r a1, .L1
+@end group
+@group
     addi a1, a0, a1
     l32i a1, a1, 0
+@end group
 @end smallexample
 
 @noindent
@@ -467,22 +481,30 @@ with a literal allocated from the literal pool.
 For example:
 
 @smallexample
+@group
     addi    a5, a6, 0
     addi    a5, a6, 512
+@end group
+@group
     addi    a5, a6, 513
     addi    a5, a6, 50000
+@end group
 @end smallexample
 
 is assembled into the following:
 
 @smallexample
+@group
     .literal .L1, 50000
     mov.n   a5, a6
+@end group
     addmi   a5, a6, 0x200
     addmi   a5, a6, 0x200
     addi    a5, a5, 1
+@group
     l32r    a5, .L1
     add     a5, a6, a5
+@end group
 @end smallexample
 
 @node Xtensa Directives
@@ -493,9 +515,11 @@ is assembled into the following:
 The Xtensa assembler supports a region-based directive syntax:
 
 @smallexample
+@group
     .begin @var{directive} [@var{options}]
     @dots{}
     .end @var{directive}
+@end group
 @end smallexample
 
 All the Xtensa-specific directives that apply to a region of code use
@@ -509,13 +533,17 @@ change the state of the directive without having to be aware of its
 outer state.  For example, consider:
 
 @smallexample
+@group
     .begin no-transform
 L:  add a0, a1, a2
+@end group
     .begin transform
 M:  add a0, a1, a2
     .end transform
+@group
 N:  add a0, a1, a2
     .end no-transform
+@end group
 @end smallexample
 
 The @code{ADD} opcodes at @code{L} and @code{N} in the outer
@@ -546,8 +574,10 @@ The @code{schedule} directive is recognized only for compatibility with
 Tensilica's assembler.
 
 @smallexample
+@group
     .begin [no-]schedule
     .end [no-]schedule
+@end group
 @end smallexample
 
 This directive is ignored and has no effect on @command{@value{AS}}.
@@ -561,8 +591,10 @@ The @code{longcalls} directive enables or disables function call
 relaxation.  @xref{Xtensa Call Relaxation, ,Function Call Relaxation}.
 
 @smallexample
+@group
     .begin [no-]longcalls
     .end [no-]longcalls
+@end group
 @end smallexample
 
 Call relaxation is disabled by default unless the @samp{--longcalls}
@@ -579,8 +611,10 @@ including relaxation (@pxref{Xtensa Relaxation, ,Xtensa Relaxation}) and
 optimization (@pxref{Xtensa Optimizations, ,Xtensa Optimizations}).
 
 @smallexample
+@group
     .begin [no-]transform
     .end [no-]transform
+@end group
 @end smallexample
 
 Transformations are enabled by default unless the @samp{--no-transform}
@@ -608,9 +642,11 @@ the literal data in the most appropriate place and possibly to combine
 identical literals.  For example, the code:
 
 @smallexample
+@group
     entry sp, 40
     .literal .L1, sym
     l32r    a4, .L1
+@end group
 @end smallexample
 
 can be used to load a pointer to the symbol @code{sym} into register
@@ -708,13 +744,17 @@ for @samp{M} will automatically be aligned correctly and is placed after
 the unconditional jump.
 
 @smallexample
+@group
     .global M
 code_start:
+@end group
     j continue
     .literal_position
     .align 4
+@group
 continue:
     movi    a4, M
+@end group
 @end smallexample
 
 @node Literal Prefix Directive
@@ -726,8 +766,10 @@ literal section names, which are derived from the names of the sections
 where the literals are defined.
 
 @smallexample
+@group
     .begin literal_prefix [@var{name}]
     .end literal_prefix
+@end group
 @end smallexample
 
 For literals defined within the delimited region, the literal section
@@ -750,8 +792,10 @@ instructions.  These are relevant only for Xtensa configurations that
 include the absolute addressing option for @code{L32R} instructions.
 
 @smallexample
+@group
     .begin [no-]absolute-literals
     .end [no-]absolute-literals
+@end group
 @end smallexample
 
 These directives do not change the @code{L32R} mode---they only cause
