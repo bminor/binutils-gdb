@@ -309,7 +309,7 @@ cat <<EOF
     ${RELOCATING+${INIT_END}}
 
     ${RELOCATING+${TEXT_START_SYMBOLS}}
-    *(.literal .text .stub${RELOCATING+ .text.* .gnu.linkonce.literal.* .gnu.linkonce.t.*.literal .gnu.linkonce.t.*})
+    *(.literal .text .stub${RELOCATING+ .literal.* .text.* .gnu.linkonce.literal.* .gnu.linkonce.t.*.literal .gnu.linkonce.t.*})
     KEEP (*(.text.*personality*))
     /* .gnu.warning sections are handled specially by elf32.em.  */
     *(.gnu.warning)

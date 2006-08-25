@@ -106,7 +106,7 @@ static bfd_boolean xtensa_is_property_section (asection *);
 static bfd_boolean xtensa_is_littable_section (asection *);
 static int internal_reloc_compare (const void *, const void *);
 static int internal_reloc_matches (const void *, const void *);
-extern char *xtensa_get_property_section_name (asection *, const char *);
+extern asection *xtensa_get_property_section (asection *, const char *);
 static flagword xtensa_get_property_predef_flags (asection *);
 
 /* Other functions called directly by the linker.  */
@@ -571,7 +571,6 @@ xtensa_read_table_entries (bfd *abfd,
 			   bfd_boolean output_addr)
 {
   asection *table_section;
-  char *table_section_name;
   bfd_size_type table_size = 0;
   bfd_byte *table_data;
   property_table_entry *blocks;
@@ -590,9 +589,7 @@ xtensa_read_table_entries (bfd *abfd,
       return 0;
     }
 
-  table_section_name = xtensa_get_property_section_name (section, sec_name);
-  table_section = bfd_get_section_by_name (abfd, table_section_name);
-  free (table_section_name);
+  table_section = xtensa_get_property_section (section, sec_name);
   if (table_section)
     table_size = table_section->size;
 
@@ -8857,7 +8854,8 @@ relax_property_section (bfd *abfd,
     }
 
   is_full_prop_section =
-    ((strcmp (sec->name, XTENSA_PROP_SEC_NAME) == 0)
+    ((strncmp (sec->name, XTENSA_PROP_SEC_NAME,
+	       sizeof (XTENSA_PROP_SEC_NAME) - 1) == 0)
      || (strncmp (sec->name, ".gnu.linkonce.prop.",
 		  sizeof ".gnu.linkonce.prop." - 1) == 0));
 
@@ -9593,13 +9591,42 @@ internal_reloc_matches (const void *ap, const void *bp)
 }
 
 
-char *
-xtensa_get_property_section_name (asection *sec, const char *base_name)
+/* Predicate function used to look up a section in a particular group.  */
+
+static bfd_boolean
+match_section_group (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
 {
-  if (strncmp (sec->name, ".gnu.linkonce.", linkonce_len) == 0)
+  const char *gname = inf;
+  const char *group_name = elf_group_name (sec);
+  
+  return (group_name == gname
+	  || (group_name != NULL
+	      && gname != NULL
+	      && strcmp (group_name, gname) == 0));
+}
+
+
+asection *
+xtensa_get_property_section (asection *sec, const char *base_name)
+{
+  const char *suffix, *group_name;
+  char *prop_sec_name;
+  asection *prop_sec;
+
+  group_name = elf_group_name (sec);
+  if (group_name)
     {
-      char *prop_sec_name;
-      const char *suffix;
+      suffix = strrchr (sec->name, '.');
+      if (suffix == sec->name)
+	suffix = 0;
+      prop_sec_name = (char *) bfd_malloc (strlen (base_name) + 1
+					   + (suffix ? strlen (suffix) : 0));
+      strcpy (prop_sec_name, base_name);
+      if (suffix)
+	strcat (prop_sec_name, suffix);
+    }
+  else if (strncmp (sec->name, ".gnu.linkonce.", linkonce_len) == 0)
+    {
       char *linkonce_kind = 0;
 
       if (strcmp (base_name, XTENSA_INSN_SEC_NAME) == 0) 
@@ -9622,18 +9649,39 @@ xtensa_get_property_section_name (asection *sec, const char *base_name)
       if (strncmp (suffix, "t.", 2) == 0 && linkonce_kind[1] == '.')
         suffix += 2;
       strcat (prop_sec_name + linkonce_len, suffix);
+    }
+  else
+    prop_sec_name = strdup (base_name);
 
-      return prop_sec_name;
+  /* Check if the section already exists.  */
+  prop_sec = bfd_get_section_by_name_if (sec->owner, prop_sec_name,
+					 match_section_group,
+					 (void *) group_name);
+  /* If not, create it.  */
+  if (! prop_sec)
+    {
+      flagword flags = (SEC_RELOC | SEC_HAS_CONTENTS | SEC_READONLY);
+      flags |= (bfd_get_section_flags (sec->owner, sec)
+		& (SEC_LINK_ONCE | SEC_LINK_DUPLICATES));
+
+      prop_sec = bfd_make_section_anyway_with_flags
+	(sec->owner, strdup (prop_sec_name), flags);
+      if (! prop_sec)
+	return 0;
+
+      elf_group_name (prop_sec) = group_name;
     }
 
-  return strdup (base_name);
+  free (prop_sec_name);
+  return prop_sec;
 }
 
 
 flagword
 xtensa_get_property_predef_flags (asection *sec)
 {
-  if (strcmp (sec->name, XTENSA_INSN_SEC_NAME) == 0
+  if (strncmp (sec->name, XTENSA_INSN_SEC_NAME,
+	       sizeof (XTENSA_INSN_SEC_NAME) - 1) == 0
       || strncmp (sec->name, ".gnu.linkonce.x.",
 		  sizeof ".gnu.linkonce.x." - 1) == 0)
     return (XTENSA_PROP_INSN

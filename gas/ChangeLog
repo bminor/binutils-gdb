@@ -1,3 +1,42 @@
+2006-08-24  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (FINI_LITERAL_SECTION_NAME): Delete.
+	(INIT_LITERAL_SECTION_NAME): Delete.
+	(lit_state struct): Remove segment names, init_lit_seg, and
+	fini_lit_seg.  Add lit_prefix and current_text_seg.
+	(init_literal_head_h, init_literal_head): Delete.
+	(fini_literal_head_h, fini_literal_head): Delete.
+	(xtensa_begin_directive): Move argument parsing to
+	xtensa_literal_prefix function.
+	(xtensa_end_directive): Deallocate lit_prefix field of lit_state.
+	(xtensa_literal_prefix): Parse the directive argument here and
+	record it in the lit_prefix field.  Remove code to derive literal
+	section names.
+	(linkonce_len): New.
+	(get_is_linkonce_section): Use linkonce_len.  Check for any
+	".gnu.linkonce.*" section, not just text sections.
+	(md_begin): Remove initialization of deleted lit_state fields.
+	(xtensa_reorder_segments, xtensa_post_relax_hook): Remove references
+	to init_literal_head and fini_literal_head.
+	(xtensa_move_literals): Likewise.  Skip literals for .init and .fini
+	when traversing literal_head list.
+	(match_section_group): New.
+	(cache_literal_section): Rewrite to determine the literal section
+	name on the fly, create the section and return it.
+	(xtensa_switch_to_literal_fragment): Adjust for cache_literal_section.
+	(xtensa_switch_to_non_abs_literal_fragment): Likewise.
+	(xtensa_create_property_segments, xtensa_create_xproperty_segments):
+	Use xtensa_get_property_section from bfd.
+	(retrieve_xtensa_section): Delete.
+	* doc/c-xtensa.texi (Xtensa Options): Fix --text-section-literals
+	description to refer to plural literal sections and add xref to
+	the Literal Directive section.
+	(Literal Directive): Describe new rules for deriving literal section
+	names.  Add footnote for special case of .init/.fini with
+	--text-section-literals.
+	(Literal Prefix Directive): Replace old naming rules with xref to the
+	Literal Directive section.
+
 2006-08-21  Joseph Myers  <joseph@codesourcery.com>
 
 	* config/tc-arm.c (s_arm_unwind_save_mmxwr): Correct condition for

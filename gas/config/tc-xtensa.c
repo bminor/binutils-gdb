@@ -95,33 +95,32 @@ static bfd_boolean past_xtensa_end = FALSE;
 
 #define LITERAL_SECTION_NAME		xtensa_section_rename (".literal")
 #define LIT4_SECTION_NAME		xtensa_section_rename (".lit4")
-#define FINI_SECTION_NAME		xtensa_section_rename (".fini")
 #define INIT_SECTION_NAME		xtensa_section_rename (".init")
-#define FINI_LITERAL_SECTION_NAME	xtensa_section_rename (".fini.literal")
-#define INIT_LITERAL_SECTION_NAME	xtensa_section_rename (".init.literal")
+#define FINI_SECTION_NAME		xtensa_section_rename (".fini")
 
 
 /* This type is used for the directive_stack to keep track of the
-   state of the literal collection pools.  */
+   state of the literal collection pools.  If lit_prefix is set, it is
+   used to determine the literal section names; otherwise, the literal
+   sections are determined based on the current text section.  The
+   lit_seg and lit4_seg fields cache these literal sections, with the
+   current_text_seg field used a tag to indicate whether the cached
+   values are valid.  */
 
 typedef struct lit_state_struct
 {
-  const char *lit_seg_name;
-  const char *lit4_seg_name;
-  const char *init_lit_seg_name;
-  const char *fini_lit_seg_name;
+  char *lit_prefix;
+  segT current_text_seg;
   segT lit_seg;
   segT lit4_seg;
-  segT init_lit_seg;
-  segT fini_lit_seg;
 } lit_state;
 
 static lit_state default_lit_sections;
 
 
-/* We keep lists of literal segments.  The seg_list type is the node
-   for such a list.  The *_literal_head locals are the heads of the
-   various lists.  All of these lists have a dummy node at the start.  */
+/* We keep a list of literal segments.  The seg_list type is the node
+   for this list.  The literal_head pointer is the head of the list,
+   with the literal_head_h dummy node at the start.  */
 
 typedef struct seg_list_struct
 {
@@ -131,10 +130,6 @@ typedef struct seg_list_struct
 
 static seg_list literal_head_h;
 static seg_list *literal_head = &literal_head_h;
-static seg_list init_literal_head_h;
-static seg_list *init_literal_head = &init_literal_head_h;
-static seg_list fini_literal_head_h;
-static seg_list *fini_literal_head = &fini_literal_head_h;
 
 
 /* Lists of symbols.  We keep a list of symbols that label the current
@@ -414,7 +409,7 @@ bfd_boolean directive_state[] =
 
 static void xtensa_begin_directive (int);
 static void xtensa_end_directive (int);
-static void xtensa_literal_prefix (char const *, int);
+static void xtensa_literal_prefix (void);
 static void xtensa_literal_position (int);
 static void xtensa_literal_pseudo (int);
 static void xtensa_frequency_pseudo (int);
@@ -463,12 +458,11 @@ static void xtensa_switch_to_literal_fragment (emit_state *);
 static void xtensa_switch_to_non_abs_literal_fragment (emit_state *);
 static void xtensa_switch_section_emit_state (emit_state *, segT, subsegT);
 static void xtensa_restore_emit_state (emit_state *);
-static void cache_literal_section
-  (seg_list *, const char *, segT *, bfd_boolean);
+static segT cache_literal_section (bfd_boolean);
 
 /* Import from elf32-xtensa.c in BFD library.  */
 
-extern char *xtensa_get_property_section_name (asection *, const char *);
+extern asection *xtensa_get_property_section (asection *, const char *);
 
 /* op_placement_info functions.  */
 
@@ -1173,7 +1167,6 @@ xtensa_begin_directive (int ignore ATTRIBUTE_UNUSED)
   directiveE directive;
   bfd_boolean negated;
   emit_state *state;
-  int len;
   lit_state *ls;
 
   get_directive (&directive, &negated);
@@ -1220,20 +1213,10 @@ xtensa_begin_directive (int ignore ATTRIBUTE_UNUSED)
       assert (ls);
 
       *ls = default_lit_sections;
-
       directive_push (directive_literal_prefix, negated, ls);
 
-      /* Parse the new prefix from the input_line_pointer.  */
-      SKIP_WHITESPACE ();
-      len = strspn (input_line_pointer,
-		    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-		    "abcdefghijklmnopqrstuvwxyz_/0123456789.$");
-
       /* Process the new prefix.  */
-      xtensa_literal_prefix (input_line_pointer, len);
-
-      /* Skip the name in the input line.  */
-      input_line_pointer += len;
+      xtensa_literal_prefix ();
       break;
 
     case directive_freeregs:
@@ -1353,10 +1336,10 @@ xtensa_end_directive (int ignore ATTRIBUTE_UNUSED)
 	      /* Restore the default collection sections from saved state.  */
 	      s = (lit_state *) state;
 	      assert (s);
-
 	      default_lit_sections = *s;
 
-	      /* free the state storage */
+	      /* Free the state storage.  */
+	      free (s->lit_prefix);
 	      free (s);
 	      break;
 
@@ -1463,62 +1446,31 @@ xtensa_literal_pseudo (int ignored ATTRIBUTE_UNUSED)
 
 
 static void
-xtensa_literal_prefix (char const *start, int len)
+xtensa_literal_prefix (void)
 {
-  char *name, *linkonce_suffix;
-  char *newname, *newname4;
-  size_t linkonce_len;
+  char *name;
+  int len;
+
+  /* Parse the new prefix from the input_line_pointer.  */
+  SKIP_WHITESPACE ();
+  len = strspn (input_line_pointer,
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		"abcdefghijklmnopqrstuvwxyz_/0123456789.$");
 
   /* Get a null-terminated copy of the name.  */
   name = xmalloc (len + 1);
   assert (name);
-
-  strncpy (name, start, len);
+  strncpy (name, input_line_pointer, len);
   name[len] = 0;
 
-  /* Allocate the sections (interesting note: the memory pointing to
-     the name is actually used for the name by the new section). */
+  /* Skip the name in the input line.  */
+  input_line_pointer += len;
 
-  newname = xmalloc (len + strlen (".literal") + 1);
-  newname4 = xmalloc (len + strlen (".lit4") + 1);
+  default_lit_sections.lit_prefix = name;
 
-  linkonce_len = sizeof (".gnu.linkonce.") - 1;
-  if (strncmp (name, ".gnu.linkonce.", linkonce_len) == 0
-      && (linkonce_suffix = strchr (name + linkonce_len, '.')) != 0)
-    {
-      strcpy (newname, ".gnu.linkonce.literal");
-      strcpy (newname4, ".gnu.linkonce.lit4");
-
-      strcat (newname, linkonce_suffix);
-      strcat (newname4, linkonce_suffix);
-    }
-  else
-    {
-      int suffix_pos = len;
-
-      /* If the section name ends with ".text", then replace that suffix
-	 instead of appending an additional suffix.  */
-      if (len >= 5 && strcmp (name + len - 5, ".text") == 0)
-	suffix_pos -= 5;
-
-      strcpy (newname, name);
-      strcpy (newname4, name);
-
-      strcpy (newname + suffix_pos, ".literal");
-      strcpy (newname4 + suffix_pos, ".lit4");
-    }
-
-  /* Note that cache_literal_section does not create a segment if
-     it already exists.  */
+  /* Clear cached literal sections, since the prefix has changed.  */
   default_lit_sections.lit_seg = NULL;
   default_lit_sections.lit4_seg = NULL;
-
-  /* Canonicalizing section names allows renaming literal
-     sections to occur correctly.  */
-  default_lit_sections.lit_seg_name = tc_canonicalize_symbol_name (newname);
-  default_lit_sections.lit4_seg_name = tc_canonicalize_symbol_name (newname4);
-
-  free (name);
 }
 
 
@@ -3921,7 +3873,9 @@ xg_expand_assembly_insn (IStack *istack, TInsn *orig_insn)
 
 
 /* Return TRUE if the section flags are marked linkonce
-   or the name is .gnu.linkonce*.  */
+   or the name is .gnu.linkonce.*.  */
+
+static int linkonce_len = sizeof (".gnu.linkonce.") - 1;
 
 static bfd_boolean
 get_is_linkonce_section (bfd *abfd ATTRIBUTE_UNUSED, segT sec)
@@ -3932,13 +3886,10 @@ get_is_linkonce_section (bfd *abfd ATTRIBUTE_UNUSED, segT sec)
   link_once_flags = (flags & SEC_LINK_ONCE);
 
   /* Flags might not be set yet.  */
-  if (!link_once_flags)
-    {
-      static size_t len = sizeof ".gnu.linkonce.t.";
+  if (!link_once_flags
+      && strncmp (segment_name (sec), ".gnu.linkonce.", linkonce_len) == 0)
+    link_once_flags = SEC_LINK_ONCE;
 
-      if (strncmp (segment_name (sec), ".gnu.linkonce.t.", len - 1) == 0)
-	link_once_flags = SEC_LINK_ONCE;
-    }
   return (link_once_flags != 0);
 }
 
@@ -4946,12 +4897,8 @@ md_begin (void)
 
   linkrelax = 1;
 
-  /* Set up the .literal, .fini.literal and .init.literal sections.  */
+  /* Set up the literal sections.  */
   memset (&default_lit_sections, 0, sizeof (default_lit_sections));
-  default_lit_sections.init_lit_seg_name = INIT_LITERAL_SECTION_NAME;
-  default_lit_sections.fini_lit_seg_name = FINI_LITERAL_SECTION_NAME;
-  default_lit_sections.lit_seg_name = LITERAL_SECTION_NAME;
-  default_lit_sections.lit4_seg_name = LIT4_SECTION_NAME;
 
   subseg_set (current_section, current_subsec);
 
@@ -9694,15 +9641,17 @@ xtensa_move_literals (void)
   sym_list *lit;
 
   mark_literal_frags (literal_head->next);
-  mark_literal_frags (init_literal_head->next);
-  mark_literal_frags (fini_literal_head->next);
 
   if (use_literal_section)
     return;
 
-  segment = literal_head->next;
-  while (segment)
+  for (segment = literal_head->next; segment; segment = segment->next)
     {
+      /* Keep the literals for .init and .fini in separate sections.  */
+      if (!strcmp (segment_name (segment->seg), INIT_SECTION_NAME)
+	  || !strcmp (segment_name (segment->seg), FINI_SECTION_NAME))
+	continue;
+
       frchain_from = seg_info (segment->seg)->frchainP;
       search_frag = frchain_from->frch_root;
       literal_pool = NULL;
@@ -9786,7 +9735,6 @@ xtensa_move_literals (void)
 	}
       frchain_from->fix_tail = NULL;
       xtensa_restore_emit_state (&state);
-      segment = segment->next;
     }
 
   /* Now fix up the SEGMENT value for all the literal symbols.  */
@@ -9867,8 +9815,6 @@ xtensa_reorder_segments (void)
   /* Now that we have the last section, push all the literal
      sections to the end.  */
   xtensa_reorder_seg_list (literal_head, last_sec);
-  xtensa_reorder_seg_list (init_literal_head, last_sec);
-  xtensa_reorder_seg_list (fini_literal_head, last_sec);
 
   /* Now perform the final error check.  */
   for (sec = stdoutput->sections; sec != NULL; sec = sec->next)
@@ -9886,10 +9832,8 @@ xtensa_switch_to_literal_fragment (emit_state *result)
 {
   if (directive_state[directive_absolute_literals])
     {
-      cache_literal_section (0, default_lit_sections.lit4_seg_name,
-			     &default_lit_sections.lit4_seg, FALSE);
-      xtensa_switch_section_emit_state (result,
-					default_lit_sections.lit4_seg, 0);
+      segT lit4_seg = cache_literal_section (TRUE);
+      xtensa_switch_section_emit_state (result, lit4_seg, 0);
     }
   else
     xtensa_switch_to_non_abs_literal_fragment (result);
@@ -9903,17 +9847,11 @@ xtensa_switch_to_literal_fragment (emit_state *result)
 static void
 xtensa_switch_to_non_abs_literal_fragment (emit_state *result)
 {
-  /* When we mark a literal pool location, we want to put a frag in
-     the literal pool that points to it.  But to do that, we want to
-     switch_to_literal_fragment.  But literal sections don't have
-     literal pools, so their location is always null, so we would
-     recurse forever.  This is kind of hacky, but it works.  */
-
   static bfd_boolean recursive = FALSE;
   fragS *pool_location = get_literal_pool_location (now_seg);
+  segT lit_seg;
   bfd_boolean is_init =
     (now_seg && !strcmp (segment_name (now_seg), INIT_SECTION_NAME));
-
   bfd_boolean is_fini =
     (now_seg && !strcmp (segment_name (now_seg), FINI_SECTION_NAME));
 
@@ -9923,39 +9861,20 @@ xtensa_switch_to_non_abs_literal_fragment (emit_state *result)
       && !is_init && ! is_fini)
     {
       as_bad (_("literal pool location required for text-section-literals; specify with .literal_position"));
+
+      /* When we mark a literal pool location, we want to put a frag in
+	 the literal pool that points to it.  But to do that, we want to
+	 switch_to_literal_fragment.  But literal sections don't have
+	 literal pools, so their location is always null, so we would
+	 recurse forever.  This is kind of hacky, but it works.  */
+
       recursive = TRUE;
       xtensa_mark_literal_pool_location ();
       recursive = FALSE;
     }
 
-  /* Special case: If we are in the ".fini" or ".init" section, then
-     we will ALWAYS be generating to the ".fini.literal" and
-     ".init.literal" sections.  */
-
-  if (is_init)
-    {
-      cache_literal_section (init_literal_head,
-			     default_lit_sections.init_lit_seg_name,
-			     &default_lit_sections.init_lit_seg, TRUE);
-      xtensa_switch_section_emit_state (result,
-					default_lit_sections.init_lit_seg, 0);
-    }
-  else if (is_fini)
-    {
-      cache_literal_section (fini_literal_head,
-			     default_lit_sections.fini_lit_seg_name,
-			     &default_lit_sections.fini_lit_seg, TRUE);
-      xtensa_switch_section_emit_state (result,
-					default_lit_sections.fini_lit_seg, 0);
-    }
-  else
-    {
-      cache_literal_section (literal_head,
-			     default_lit_sections.lit_seg_name,
-			     &default_lit_sections.lit_seg, TRUE);
-      xtensa_switch_section_emit_state (result,
-					default_lit_sections.lit_seg, 0);
-    }
+  lit_seg = cache_literal_section (FALSE);
+  xtensa_switch_section_emit_state (result, lit_seg, 0);
 
   if (!use_literal_section
       && !is_init && !is_fini
@@ -9999,49 +9918,129 @@ xtensa_restore_emit_state (emit_state *state)
 }
 
 
-/* Get a segment of a given name.  If the segment is already
-   present, return it; otherwise, create a new one.  */
+/* Predicate function used to look up a section in a particular group.  */
 
-static void
-cache_literal_section (seg_list *head,
-		       const char *name,
-		       segT *pseg,
-		       bfd_boolean is_code)
+static bfd_boolean
+match_section_group (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
 {
-  segT current_section = now_seg;
-  int current_subsec = now_subseg;
-  segT seg;
+  const char *gname = inf;
+  const char *group_name = elf_group_name (sec);
+  
+  return (group_name == gname
+	  || (group_name != NULL
+	      && gname != NULL
+	      && strcmp (group_name, gname) == 0));
+}
 
-  if (*pseg != 0)
-    return;
 
-  /* Check if the named section exists.  */
-  for (seg = stdoutput->sections; seg; seg = seg->next)
+/* Get the literal section to be used for the current text section.
+   The result may be cached in the default_lit_sections structure.  */
+
+static segT
+cache_literal_section (bfd_boolean use_abs_literals)
+{
+  const char *text_name, *group_name = 0;
+  char *base_name, *name, *suffix;
+  segT *pcached;
+  segT seg, current_section;
+  int current_subsec;
+  bfd_boolean linkonce = FALSE;
+
+  /* Save the current section/subsection.  */
+  current_section = now_seg;
+  current_subsec = now_subseg;
+
+  /* Clear the cached values if they are no longer valid.  */
+  if (now_seg != default_lit_sections.current_text_seg)
     {
-      if (!strcmp (segment_name (seg), name))
-	break;
+      default_lit_sections.current_text_seg = now_seg;
+      default_lit_sections.lit_seg = NULL;
+      default_lit_sections.lit4_seg = NULL;
     }
 
-  if (!seg)
+  /* Check if the literal section is already cached.  */
+  if (use_abs_literals)
+    pcached = &default_lit_sections.lit4_seg;
+  else
+    pcached = &default_lit_sections.lit_seg;
+
+  if (*pcached)
+    return *pcached;
+  
+  text_name = default_lit_sections.lit_prefix;
+  if (! text_name || ! *text_name)
     {
-      /* Create a new literal section.  */
-      seg = subseg_new (name, (subsegT) 0);
-      if (head)
+      text_name = segment_name (current_section);
+      group_name = elf_group_name (current_section);
+      linkonce = (current_section->flags & SEC_LINK_ONCE) != 0;
+    }
+
+  base_name = use_abs_literals ? ".lit4" : ".literal";
+  if (group_name)
+    {
+      name = xmalloc (strlen (base_name) + strlen (group_name) + 2);
+      sprintf (name, "%s.%s", base_name, group_name);
+    }
+  else if (strncmp (text_name, ".gnu.linkonce.", linkonce_len) == 0)
+    {
+      suffix = strchr (text_name + linkonce_len, '.');
+
+      name = xmalloc (linkonce_len + strlen (base_name) + 1
+		      + (suffix ? strlen (suffix) : 0));
+      strcpy (name, ".gnu.linkonce");
+      strcat (name, base_name);
+      if (suffix)
+	strcat (name, suffix);
+      linkonce = TRUE;
+    }
+  else
+    {
+      /* If the section name ends with ".text", then replace that suffix
+	 instead of appending an additional suffix.  */
+      size_t len = strlen (text_name);
+      if (len >= 5 && strcmp (text_name + len - 5, ".text") == 0)
+	len -= 5;
+
+      name = xmalloc (len + strlen (base_name) + 1);
+      strcpy (name, text_name);
+      strcpy (name + len, base_name);
+    }
+
+  /* Canonicalize section names to allow renaming literal sections.
+     The group name, if any, came from the current text section and
+     has already been canonicalized.  */
+  name = tc_canonicalize_symbol_name (name);
+
+  seg = bfd_get_section_by_name_if (stdoutput, name, match_section_group,
+				    (void *) group_name);
+  if (! seg)
+    {
+      flagword flags;
+
+      seg = subseg_force_new (name, 0);
+
+      if (! use_abs_literals)
 	{
-	  /* Add the newly created literal segment to the specified list.  */
+	  /* Add the newly created literal segment to the list.  */
 	  seg_list *n = (seg_list *) xmalloc (sizeof (seg_list));
 	  n->seg = seg;
-	  n->next = head->next;
-	  head->next = n;
+	  n->next = literal_head->next;
+	  literal_head->next = n;
 	}
-      bfd_set_section_flags (stdoutput, seg, SEC_HAS_CONTENTS |
-			     SEC_READONLY | SEC_ALLOC | SEC_LOAD
-			     | (is_code ? SEC_CODE : SEC_DATA));
+
+      flags = (SEC_HAS_CONTENTS | SEC_READONLY | SEC_ALLOC | SEC_LOAD
+	       | (linkonce ? (SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD) : 0)
+	       | (use_abs_literals ? SEC_DATA : SEC_CODE));
+
+      elf_group_name (seg) = group_name;
+
+      bfd_set_section_flags (stdoutput, seg, flags);
       bfd_set_section_alignment (stdoutput, seg, 2);
     }
 
-  *pseg = seg;
+  *pcached = seg;
   subseg_set (current_section, current_subsec);
+  return seg;
 }
 
 
@@ -10060,7 +10059,6 @@ static void xtensa_create_property_segments
 static void xtensa_create_xproperty_segments
   (frag_flags_fn, const char *, xt_section_type);
 static segment_info_type *retrieve_segment_info (segT);
-static segT retrieve_xtensa_section (char *);
 static bfd_boolean section_has_property (segT, frag_predicate);
 static bfd_boolean section_has_xproperty (segT, frag_flags_fn);
 static void add_xt_block_frags
@@ -10078,8 +10076,6 @@ void
 xtensa_post_relax_hook (void)
 {
   xtensa_move_seg_list_to_beginning (literal_head);
-  xtensa_move_seg_list_to_beginning (init_literal_head);
-  xtensa_move_seg_list_to_beginning (fini_literal_head);
 
   xtensa_find_unmarked_state_frags ();
 
@@ -10135,9 +10131,8 @@ xtensa_create_property_segments (frag_predicate property_function,
 
       if (section_has_property (sec, property_function))
 	{
-	  char *property_section_name =
-	    xtensa_get_property_section_name (sec, section_name_base);
-	  segT insn_sec = retrieve_xtensa_section (property_section_name);
+	  segT insn_sec = 
+	    xtensa_get_property_section (sec, section_name_base);
 	  segment_info_type *xt_seg_info = retrieve_segment_info (insn_sec);
 	  xtensa_block_info **xt_blocks =
 	    &xt_seg_info->tc_segment_info_data.blocks[sec_type];
@@ -10268,9 +10263,8 @@ xtensa_create_xproperty_segments (frag_flags_fn flag_fn,
 
       if (section_has_xproperty (sec, flag_fn))
 	{
-	  char *property_section_name =
-	    xtensa_get_property_section_name (sec, section_name_base);
-	  segT insn_sec = retrieve_xtensa_section (property_section_name);
+	  segT insn_sec =
+	    xtensa_get_property_section (sec, section_name_base);
 	  segment_info_type *xt_seg_info = retrieve_segment_info (insn_sec);
 	  xtensa_block_info **xt_blocks =
 	    &xt_seg_info->tc_segment_info_data.blocks[sec_type];
@@ -10411,29 +10405,6 @@ retrieve_segment_info (segT seg)
     }
 
   return seginfo;
-}
-
-
-static segT
-retrieve_xtensa_section (char *sec_name)
-{
-  bfd *abfd = stdoutput;
-  flagword flags, out_flags, link_once_flags;
-  segT s;
-
-  flags = bfd_get_section_flags (abfd, now_seg);
-  link_once_flags = (flags & SEC_LINK_ONCE);
-  if (link_once_flags)
-    link_once_flags |= (flags & SEC_LINK_DUPLICATES);
-  out_flags = (SEC_RELOC | SEC_HAS_CONTENTS | SEC_READONLY | link_once_flags);
-
-  s = bfd_make_section_old_way (abfd, sec_name);
-  if (s == NULL)
-    as_bad (_("could not create section %s"), sec_name);
-  if (!bfd_set_section_flags (abfd, s, out_flags))
-    as_bad (_("invalid flag combination on section %s"), sec_name);
-
-  return s;
 }
 
 

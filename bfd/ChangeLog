@@ -1,3 +1,12 @@
+2006-08-24  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (xtensa_get_property_section_name): Delete.
+	(xtensa_get_property_section): New.
+	(xtensa_read_table_entries): Use xtensa_get_property_section.
+	(relax_property_section, xtensa_get_property_predef_flags): Handle
+	group name suffixes in property section names.
+	(match_section_group): New.
+
 2006-08-23  Frediano Ziglio  <Frediano.Ziglio@vodafone.com>
 
 	* archive.c (hpux_uid_gid_encode): Fix thinko decrementing "cnt"
