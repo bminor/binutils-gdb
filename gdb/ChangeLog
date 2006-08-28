@@ -1,3 +1,9 @@
+2006-08-28  DJ Delorie  <dj@redhat.com>
+
+	* m32c-tdep.c (m32c_decode_srcdest4): Initialize fields in sd
+	that may not be initialized elsewhere.
+	(m32c_decode_sd23): Likewise.
+
 2006-08-25  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* buildsym.c (finish_block): Don't adjust the boundaries of
