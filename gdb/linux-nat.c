@@ -1005,35 +1005,38 @@ linux_nat_attach (char *args, int from_tty)
      attach all of them.  */
   linux_ops->to_attach (args, from_tty);
 
-  /* Add the initial process as the first LWP to the list.  */
-  inferior_ptid = BUILD_LWP (GET_PID (inferior_ptid), GET_PID (inferior_ptid));
-  lp = add_lwp (inferior_ptid);
-
-  /* Make sure the initial process is stopped.  The user-level threads
-     layer might want to poke around in the inferior, and that won't
-     work if things haven't stabilized yet.  */
-  pid = my_waitpid (GET_PID (inferior_ptid), &status, 0);
-  if (pid == -1 && errno == ECHILD)
+  if (!target_can_async_p ())
     {
-      warning (_("%s is a cloned process"), target_pid_to_str (inferior_ptid));
+      /* Add the initial process as the first LWP to the list.  */
+      inferior_ptid = BUILD_LWP (GET_PID (inferior_ptid), GET_PID (inferior_ptid));
+      lp = add_lwp (inferior_ptid);
 
-      /* Try again with __WCLONE to check cloned processes.  */
-      pid = my_waitpid (GET_PID (inferior_ptid), &status, __WCLONE);
-      lp->cloned = 1;
-    }
+      /* Make sure the initial process is stopped.  The user-level threads
+	 layer might want to poke around in the inferior, and that won't
+	 work if things haven't stabilized yet.  */
+      pid = my_waitpid (GET_PID (inferior_ptid), &status, 0);
+      if (pid == -1 && errno == ECHILD)
+	{
+	  warning (_("%s is a cloned process"), target_pid_to_str (inferior_ptid));
 
-  gdb_assert (pid == GET_PID (inferior_ptid)
-	      && WIFSTOPPED (status) && WSTOPSIG (status) == SIGSTOP);
+	  /* Try again with __WCLONE to check cloned processes.  */
+	  pid = my_waitpid (GET_PID (inferior_ptid), &status, __WCLONE);
+	  lp->cloned = 1;
+	}
 
-  lp->stopped = 1;
+      gdb_assert (pid == GET_PID (inferior_ptid)
+		  && WIFSTOPPED (status) && WSTOPSIG (status) == SIGSTOP);
 
-  /* Fake the SIGSTOP that core GDB expects.  */
-  lp->status = W_STOPCODE (SIGSTOP);
-  lp->resumed = 1;
-  if (debug_linux_nat)
-    {
-      fprintf_unfiltered (gdb_stdlog,
-			  "LLA: waitpid %ld, faking SIGSTOP\n", (long) pid);
+      lp->stopped = 1;
+
+      /* Fake the SIGSTOP that core GDB expects.  */
+      lp->status = W_STOPCODE (SIGSTOP);
+      lp->resumed = 1;
+      if (debug_linux_nat)
+	{
+	  fprintf_unfiltered (gdb_stdlog,
+			      "LLA: waitpid %ld, faking SIGSTOP\n", (long) pid);
+	}
     }
 }
 
@@ -1099,15 +1102,18 @@ detach_callback (struct lwp_info *lp, void *data)
 static void
 linux_nat_detach (char *args, int from_tty)
 {
-  iterate_over_lwps (detach_callback, NULL);
+  if (!target_can_async_p ())
+    {
+      iterate_over_lwps (detach_callback, NULL);
 
-  /* Only the initial process should be left right now.  */
-  gdb_assert (num_lwps == 1);
+      /* Only the initial process should be left right now.  */
+      gdb_assert (num_lwps == 1);
 
-  trap_ptid = null_ptid;
+      trap_ptid = null_ptid;
 
-  /* Destroy LWP info; it's no longer valid.  */
-  init_lwp_list ();
+      /* Destroy LWP info; it's no longer valid.  */
+      init_lwp_list ();
+    }
 
   /* Restore the original signal mask.  */
   sigprocmask (SIG_SETMASK, &normal_mask, NULL);

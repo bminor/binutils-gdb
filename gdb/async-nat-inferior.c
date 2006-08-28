@@ -117,8 +117,9 @@ static void gdb_inferior_reset (gdb_inferior_status *s);
 
 static void gdb_inferior_destroy (gdb_inferior_status *s);
 
-static void gdb_handle_signal (gdb_signal_thread_message *msg,
-			       struct target_waitstatus *status)
+static void
+gdb_handle_signal (gdb_signal_thread_message *msg,
+		   struct target_waitstatus *status)
 {
   //CHECK_FATAL (gdb_status != NULL);
 
@@ -381,28 +382,6 @@ gdb_process_events (struct gdb_inferior_status *inferior,
       gdb_add_to_pending_events (source, buf);
     }
 
-  for (;;)
-    {
-      source = gdb_fetch_event (inferior, buf, sizeof (buf),
-                                   NEXT_SOURCE_ALL, 0);
-      if (source == NEXT_SOURCE_NONE)
-        {
-          break;
-        }
-      else
-        {
-          event_count++;
-
-          /* Stuff the remaining events onto the pending_events queue.
-             These will be dispatched when we run again. */
-          /* PENDING_EVENTS */
-          gdb_add_to_pending_events (source, buf);
-        }
-    }
-
-  /*inferior_debug (2,
-          "gdb_process_events: returning with (status->kind == %d)\n",
-	  status->kind); */
   return event_count;
 }
 
@@ -417,7 +396,7 @@ gdb_process_pending_event (struct gdb_inferior_status *ns,
   //inferior_debug (1, "Processing pending event type: %d\n", event->type);
   gdb_service_event (event->type, (unsigned char *) event->buf, status);
 
-  return ptid_build (gdb_status->pid, 0, gdb_status->last_thread);
+  return pid_to_ptid (gdb_status->pid);
 }
 
 void
@@ -577,8 +556,6 @@ gdb_inferior_reset (gdb_inferior_status *s)
   s->stopped_in_softexc = 0;
 
   s->suspend_count = 0;
-
-  s->last_thread = 0;
 
   gdb_signal_thread_init (&s->signal_status);
 

@@ -17,8 +17,6 @@ struct gdb_inferior_status
 
   unsigned int suspend_count;
 
-  int last_thread;
-
   gdb_signal_thread_status signal_status;
 };
 typedef struct gdb_inferior_status gdb_inferior_status;

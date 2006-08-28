@@ -194,10 +194,10 @@ inf_child_target (void)
   t->to_insert_breakpoint = memory_insert_breakpoint;
   t->to_remove_breakpoint = memory_remove_breakpoint;
   t->to_terminal_init = terminal_init_inferior;
-  t->to_terminal_inferior = async_terminal_inferior;
+  t->to_terminal_inferior = terminal_inferior;
   t->to_terminal_ours_for_output = terminal_ours_for_output;
   t->to_terminal_save_ours = terminal_save_ours;
-  t->to_terminal_ours = async_terminal_ours;
+  t->to_terminal_ours = terminal_ours;
   t->to_terminal_info = child_terminal_info;
   t->to_post_startup_inferior = inf_child_post_startup_inferior;
   t->to_acknowledge_created_inferior = inf_child_acknowledge_created_inferior;
