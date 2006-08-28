@@ -1,3 +1,23 @@
+2006-08-28  Nick Roberts  <nickrob@snap.net.nz>
+
+	* linux-nat.c (linux_nat_attach, linux_nat_detach): Make attach/
+	detach work asynchronously.
+
+	* inf-ptrace.c (inf_ptrace_attach): Ditto.
+
+	* infcmd.c (attach_command): Ditto.
+
+	* inf-child.c (inf_child_target): Reset to_terminal_inferior/
+	to_terminal_ours to synchronous methods.
+
+	* async-nat-inferior.c (gdb_process_events): Don't poll for
+	exceptions.
+	(gdb_process_pending_event): Use pid_to_ptid.
+	(gdb_inferior_reset): Remove last_thread component.
+
+	* async-nat-inferior.h (struct gdb_inferior_status): Remove
+	last_thread component.
+
 2006-08-22  Nick Roberts  <nickrob@snap.net.nz>
 
 	* inf-ptrace.c (inf_ptrace_wait):  Add extra argument.
