@@ -32,7 +32,8 @@ set testfile "run"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/commands
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DFAKEARGV}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested commands.exp
+     return -1
 }
 
 gdb_exit

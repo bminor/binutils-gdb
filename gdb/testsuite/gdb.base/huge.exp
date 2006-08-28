@@ -36,8 +36,15 @@ if [target_info exists gdb,skip_huge_test] {
 set testfile "huge"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+
+for { set size [expr 2 * 1024 * 1024] } { $size > 10 } { set size [expr $size / 2] } {
+  if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
+	    executable [list debug "additional_flags=-DCRASH_GDB=$size"]] \
+      == "" } break
+}
+if { $size < 10 } {
+     untested huge.exp
+     return -1
 }
 
 # Start with a fresh gdb.
@@ -50,7 +57,8 @@ gdb_load ${binfile}
 set timeout 30
 
 if { ! [ runto_main ] } then {
-    gdb_suppress_entire_file "Run to main failed, so all tests in this file will automatically fail."
+    untested huge.exp
+    return -1
 }
 
 gdb_test "print a" ".1 = .0 .repeats \[0123456789\]+ times.." "print a very large data object"

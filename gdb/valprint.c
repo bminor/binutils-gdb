@@ -34,6 +34,7 @@
 #include "valprint.h"
 #include "floatformat.h"
 #include "doublest.h"
+#include "exceptions.h"
 
 #include <errno.h>
 
@@ -205,6 +206,9 @@ val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	   CORE_ADDR address, struct ui_file *stream, int format,
 	   int deref_ref, int recurse, enum val_prettyprint pretty)
 {
+  volatile struct gdb_exception except;
+  int ret = 0;
+
   struct type *real_type = check_typedef (type);
   if (pretty == Val_pretty_default)
     {
@@ -224,8 +228,15 @@ val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       return (0);
     }
 
-  return (LA_VAL_PRINT (type, valaddr, embedded_offset, address,
-			stream, format, deref_ref, recurse, pretty));
+  TRY_CATCH (except, RETURN_MASK_ERROR)
+    {
+      ret = LA_VAL_PRINT (type, valaddr, embedded_offset, address,
+			  stream, format, deref_ref, recurse, pretty);
+    }
+  if (except.reason < 0)
+    fprintf_filtered (stream, _("<error reading variable>"));
+
+  return ret;
 }
 
 /* Check whether the value VAL is printable.  Return 1 if it is;
@@ -330,13 +341,14 @@ void
 val_print_type_code_flags (struct type *type, const gdb_byte *valaddr,
 			   struct ui_file *stream)
 {
-  LONGEST val = unpack_long (type, valaddr);
+  ULONGEST val = unpack_long (type, valaddr);
   int bitpos, nfields = TYPE_NFIELDS (type);
 
   fputs_filtered ("[ ", stream);
   for (bitpos = 0; bitpos < nfields; bitpos++)
     {
-      if (TYPE_FIELD_BITPOS (type, bitpos) != -1 && (val & (1 << bitpos)))
+      if (TYPE_FIELD_BITPOS (type, bitpos) != -1
+	  && (val & ((ULONGEST)1 << bitpos)))
 	{
 	  if (TYPE_FIELD_NAME (type, bitpos))
 	    fprintf_filtered (stream, "%s ", TYPE_FIELD_NAME (type, bitpos));

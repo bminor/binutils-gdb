@@ -411,11 +411,6 @@ proc mi_gdb_file_cmd { arg } {
             perror "$arg wasn't compiled with \"-g\""
             return -1
         }
-        -re "A program is being debugged already.*Kill it.*y or n. $" {
-            send_gdb "y\n"
-                verbose "\t\tKilling previous program being debugged"
-            exp_continue
-        }
         -re "Load new symbol table from \".*\".*y or n. $" {
             send_gdb "y\n"
             gdb_expect 120 {

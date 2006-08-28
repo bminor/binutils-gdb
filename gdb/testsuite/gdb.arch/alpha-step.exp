@@ -63,7 +63,7 @@ proc test_stepi {function } {
     # Extra check to make sure we stopped on the FP branch instruction.
     
     gdb_test "x /i \$pc" \
-             "0x\[0-9a-fA-F\]+ <.*>:\[ \t\]+fb$function\[ \t\]+.*" \
+             "0x\[0-9a-fA-F\]+ <.*>:\[ \t\]+fb$function.*" \
              "Check breakpoint on fb$function instruction (first call)"
     
     # Step test, followed by the check that we landed on the expected
@@ -75,7 +75,7 @@ proc test_stepi {function } {
              "stepi on fb$function (first call)"
     
     gdb_test "x /i \$pc" \
-             "0x\[0-9a-fA-F\]+ <.*>:\[ \t\]+ret\[ \t\]+.*" \
+             "0x\[0-9a-fA-F\]+ <.*>:\[ \t\]+ret.*" \
              "Check stepi over fb$function stopped on ret"
     
     # Continue again. FUNCTION should be called a second time, this time
@@ -88,7 +88,7 @@ proc test_stepi {function } {
     # Extra check to make sure we stopped on the FP branch instruction.
     
     gdb_test "x /i \$pc" \
-             "0x\[0-9a-fA-F\]+ <.*>:\[ \t\]+fb$function\[ \t\]+.*" \
+             "0x\[0-9a-fA-F\]+ <.*>:\[ \t\]+fb$function.*" \
              "Check breakpoint on fb$function instruction (second call)"
     
     # Step test, branch should not be taken.
@@ -100,7 +100,7 @@ proc test_stepi {function } {
     # Extra check to verify that we landed on the instruction we expected.
     
     gdb_test "x /i \$pc" \
-             "0x\[0-9a-fA-F\]+ <.*>:\[ \t\]+fneg\[ \t\]+.*" \
+             "0x\[0-9a-fA-F\]+ <.*>:\[ \t\]+fneg.*" \
              "Check stepi over fb$function stopped on fneg instruction"
 
 }

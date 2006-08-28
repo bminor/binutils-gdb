@@ -38,24 +38,14 @@ gdb_start
 
 set result [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}]
 if {$result != "" } then {
-    gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+    untested remote.exp
+    return -1
 }
 
 
 #
 # Part ONE: Check the down load commands
 #
-
-gdb_test "show download-write-size" \
-	"The write size used when downloading a program is 512." \
-	"download limit default"
-
-gdb_test "set download-write-size" "Argument required.*"
-
-gdb_test "set download-write-size 0" ""
-gdb_test "show download-write-size" \
-	"The write size used when downloading a program is unlimited." \
-	"set download limit - unlimited"
 
 gdb_test "show remote memory-write-packet-size" \
 	"The memory-write-packet-size is 0. Packets are limited to \[0-9\]+ bytes." \
@@ -65,35 +55,28 @@ gdb_test "set remote memory-write-packet-size" \
 	"Argument required .integer, `fixed' or `limited'.\." \
 	"set write-packet - NULL"
 
-gdb_test "set remote memory-write-packet-size 16" ""
+gdb_test "set remote memory-write-packet-size 20" ""
 gdb_test "show remote memory-write-packet-size" \
-	"The memory-write-packet-size is 16. Packets are limited to 16 bytes." \
+	"The memory-write-packet-size is 20. Packets are limited to 20 bytes." \
 	"set write-packet - small"
 
 gdb_test "set remote memory-write-packet-size 1" ""
 gdb_test "show remote memory-write-packet-size" \
-	"The memory-write-packet-size is 1. Packets are limited to 16 bytes." \
+	"The memory-write-packet-size is 1. Packets are limited to 20 bytes." \
 	"set write-packet - very-small"
 
 #
 # Part TWO: Check the download behavour
 #
 
-proc gdb_load_timed {executable downloadsize class writesize} {
+proc gdb_load_timed {executable class writesize} {
     global test gdb_prompt
-    set test "timed download `[file tail $executable]' - $downloadsize, $class, $writesize"
+    set test "timed download `[file tail $executable]' - $class, $writesize"
 
     if {$writesize != ""} then {
 	gdb_test "set remote memory-write-packet-size $writesize" \
 		"" "$test - set packet size"
-    }
 
-    if {$downloadsize != ""} then {
-	gdb_test "set download-write-size $downloadsize" \
-		"" "$test - set download size"
-    }
-
-    if {$downloadsize != ""} then {
 	send_gdb "set remote memory-write-packet-size $class\n"
 	gdb_expect 5 {
 	    -re ".*Change the packet size.*$" {
@@ -127,18 +110,18 @@ proc gdb_load_timed {executable downloadsize class writesize} {
     pass $test
 }
 
-gdb_load_timed $binfile {} "" {}
+gdb_load_timed $binfile "" {}
 
 # Typically about 400-1 bytes can be downloaded
-gdb_load_timed $binfile 0 "limit" 398
-gdb_load_timed $binfile 0 "limit" 400
+gdb_load_timed $binfile "limit" 398
+gdb_load_timed $binfile "limit" 400
 
 # Absolute max is 16384
-gdb_load_timed $binfile 0 "fixed" 0
-gdb_load_timed $binfile 0 "fixed" 16385
+gdb_load_timed $binfile "fixed" 0
+gdb_load_timed $binfile "fixed" 16385
 
 # fall back to the default
-gdb_load_timed $binfile 0 "limit" 0
+gdb_load_timed $binfile "limit" 0
 
 # Get size of data uploaded
 
@@ -191,7 +174,7 @@ if {$sizeof_random_data > 16380 } then {
 gdb_test "set remote memory-read-packet-size 16" \
 	""
 gdb_test "show remote memory-read-packet-size" \
-	"The memory-read-packet-size is 16. Packets are limited to 16 bytes."
+	"The memory-read-packet-size is 16. Packets are limited to 20 bytes."
 gdb_test "x/17ub random_data" \
 	"<random_data>:\[ \t\]+60\[ \t\]+74\[ \t\]+216\[ \t\]+38\[ \t\]+149\[ \t\]+49\[ \t\]+207\[ \t\]+44.*<random_data\\+8>:\[ \t\]+124\[ \t\]+38\[ \t\]+93\[ \t\]+125\[ \t\]+232\[ \t\]+67\[ \t\]+228\[ \t\]+56.*<random_data\\+16>:\[ \t\]+161"
 

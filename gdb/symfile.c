@@ -51,6 +51,7 @@
 #include "block.h"
 #include "observer.h"
 #include "exec.h"
+#include "parser-defs.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -1500,6 +1501,11 @@ load_command (char *arg, int from_tty)
 	}
     }
 
+  /* The user might be reloading because the binary has changed.  Take
+     this opportunity to check.  */
+  reopen_exec_file ();
+  reread_symbols ();
+
   target_load (arg, from_tty);
 
   /* After re-loading the executable, we don't really know which
@@ -1516,15 +1522,6 @@ load_command (char *arg, int from_tty)
    we don't want to run a subprocess.  On the other hand, I'm not sure how
    performance compares.  */
 
-static int download_write_size = 512;
-static void
-show_download_write_size (struct ui_file *file, int from_tty,
-			  struct cmd_list_element *c, const char *value)
-{
-  fprintf_filtered (file, _("\
-The write size used when downloading a program is %s.\n"),
-		    value);
-}
 static int validate_download = 0;
 
 /* Callback service function for generic_load (bfd_map_over_sections).  */
@@ -1543,7 +1540,60 @@ struct load_section_data {
   unsigned long write_count;
   unsigned long data_count;
   bfd_size_type total_size;
+
+  /* Per-section data for load_progress.  */
+  const char *section_name;
+  ULONGEST section_sent;
+  ULONGEST section_size;
+  CORE_ADDR lma;
+  gdb_byte *buffer;
 };
+
+/* Target write callback routine for load_section_callback.  */
+
+static void
+load_progress (ULONGEST bytes, void *untyped_arg)
+{
+  struct load_section_data *args = untyped_arg;
+
+  if (validate_download)
+    {
+      /* Broken memories and broken monitors manifest themselves here
+	 when bring new computers to life.  This doubles already slow
+	 downloads.  */
+      /* NOTE: cagney/1999-10-18: A more efficient implementation
+	 might add a verify_memory() method to the target vector and
+	 then use that.  remote.c could implement that method using
+	 the ``qCRC'' packet.  */
+      gdb_byte *check = xmalloc (bytes);
+      struct cleanup *verify_cleanups = make_cleanup (xfree, check);
+
+      if (target_read_memory (args->lma, check, bytes) != 0)
+	error (_("Download verify read failed at 0x%s"),
+	       paddr (args->lma));
+      if (memcmp (args->buffer, check, bytes) != 0)
+	error (_("Download verify compare failed at 0x%s"),
+	       paddr (args->lma));
+      do_cleanups (verify_cleanups);
+    }
+  args->data_count += bytes;
+  args->lma += bytes;
+  args->buffer += bytes;
+  args->write_count += 1;
+  args->section_sent += bytes;
+  if (quit_flag
+      || (deprecated_ui_load_progress_hook != NULL
+	  && deprecated_ui_load_progress_hook (args->section_name,
+					       args->section_sent)))
+    error (_("Canceled the download"));
+
+  if (deprecated_show_load_progress != NULL)
+    deprecated_show_load_progress (args->section_name,
+				   args->section_sent,
+				   args->section_size,
+				   args->data_count,
+				   args->total_size);
+}
 
 /* Callback service function for generic_load (bfd_map_over_sections).  */
 
@@ -1551,92 +1601,43 @@ static void
 load_section_callback (bfd *abfd, asection *asec, void *data)
 {
   struct load_section_data *args = data;
+  bfd_size_type size = bfd_get_section_size (asec);
+  gdb_byte *buffer;
+  struct cleanup *old_chain;
+  const char *sect_name = bfd_get_section_name (abfd, asec);
+  LONGEST transferred;
 
-  if (bfd_get_section_flags (abfd, asec) & SEC_LOAD)
-    {
-      bfd_size_type size = bfd_get_section_size (asec);
-      if (size > 0)
-	{
-	  gdb_byte *buffer;
-	  struct cleanup *old_chain;
-	  CORE_ADDR lma = bfd_section_lma (abfd, asec) + args->load_offset;
-	  bfd_size_type block_size;
-	  int err;
-	  const char *sect_name = bfd_get_section_name (abfd, asec);
-	  bfd_size_type sent;
+  if ((bfd_get_section_flags (abfd, asec) & SEC_LOAD) == 0)
+    return;
 
-	  if (download_write_size > 0 && size > download_write_size)
-	    block_size = download_write_size;
-	  else
-	    block_size = size;
+  if (size == 0)
+    return;
 
-	  buffer = xmalloc (size);
-	  old_chain = make_cleanup (xfree, buffer);
+  buffer = xmalloc (size);
+  old_chain = make_cleanup (xfree, buffer);
 
-	  /* Is this really necessary?  I guess it gives the user something
-	     to look at during a long download.  */
-	  ui_out_message (uiout, 0, "Loading section %s, size 0x%s lma 0x%s\n",
-			  sect_name, paddr_nz (size), paddr_nz (lma));
+  args->section_name = sect_name;
+  args->section_sent = 0;
+  args->section_size = size;
+  args->lma = bfd_section_lma (abfd, asec) + args->load_offset;
+  args->buffer = buffer;
 
-	  bfd_get_section_contents (abfd, asec, buffer, 0, size);
+  /* Is this really necessary?  I guess it gives the user something
+     to look at during a long download.  */
+  ui_out_message (uiout, 0, "Loading section %s, size 0x%s lma 0x%s\n",
+		  sect_name, paddr_nz (size), paddr_nz (args->lma));
 
-	  sent = 0;
-	  do
-	    {
-	      int len;
-	      bfd_size_type this_transfer = size - sent;
+  bfd_get_section_contents (abfd, asec, buffer, 0, size);
 
-	      if (this_transfer >= block_size)
-		this_transfer = block_size;
-	      len = target_write_memory_partial (lma, buffer,
-						 this_transfer, &err);
-	      if (err)
-		break;
-	      if (validate_download)
-		{
-		  /* Broken memories and broken monitors manifest
-		     themselves here when bring new computers to
-		     life.  This doubles already slow downloads.  */
-		  /* NOTE: cagney/1999-10-18: A more efficient
-		     implementation might add a verify_memory()
-		     method to the target vector and then use
-		     that.  remote.c could implement that method
-		     using the ``qCRC'' packet.  */
-		  gdb_byte *check = xmalloc (len);
-		  struct cleanup *verify_cleanups =
-		    make_cleanup (xfree, check);
+  transferred = target_write_with_progress (&current_target,
+					    TARGET_OBJECT_MEMORY,
+					    NULL, buffer, args->lma,
+					    size, load_progress, args);
+  if (transferred < size)
+    error (_("Memory access error while loading section %s."),
+	   sect_name);
 
-		  if (target_read_memory (lma, check, len) != 0)
-		    error (_("Download verify read failed at 0x%s"),
-			   paddr (lma));
-		  if (memcmp (buffer, check, len) != 0)
-		    error (_("Download verify compare failed at 0x%s"),
-			   paddr (lma));
-		  do_cleanups (verify_cleanups);
-		}
-	      args->data_count += len;
-	      lma += len;
-	      buffer += len;
-	      args->write_count += 1;
-	      sent += len;
-	      if (quit_flag
-		  || (deprecated_ui_load_progress_hook != NULL
-		      && deprecated_ui_load_progress_hook (sect_name, sent)))
-		error (_("Canceled the download"));
-
-	      if (deprecated_show_load_progress != NULL)
-		deprecated_show_load_progress (sect_name, sent, size,
-					       args->data_count,
-					       args->total_size);
-	    }
-	  while (sent < size);
-
-	  if (err != 0)
-	    error (_("Memory access error while loading section %s."), sect_name);
-
-	  do_cleanups (old_chain);
-	}
-    }
+  do_cleanups (old_chain);
 }
 
 void
@@ -1852,7 +1853,7 @@ add_symbol_file_command (char *args, int from_tty)
                to load the program. */
 	    sect_opts[section_index].name = ".text";
 	    sect_opts[section_index].value = arg;
-	    if (++section_index > num_sect_opts)
+	    if (++section_index >= num_sect_opts)
 	      {
 		num_sect_opts *= 2;
 		sect_opts = ((struct sect_opt *)
@@ -1888,7 +1889,7 @@ add_symbol_file_command (char *args, int from_tty)
 		    {
 		      sect_opts[section_index].value = arg;
 		      expecting_sec_addr = 0;
-		      if (++section_index > num_sect_opts)
+		      if (++section_index >= num_sect_opts)
 			{
 			  num_sect_opts *= 2;
 			  sect_opts = ((struct sect_opt *)
@@ -2529,6 +2530,12 @@ clear_symtab_users (void)
   clear_pc_function_cache ();
   if (deprecated_target_new_objfile_hook)
     deprecated_target_new_objfile_hook (NULL);
+
+  /* Clear globals which might have pointed into a removed objfile.
+     FIXME: It's not clear which of these are supposed to persist
+     between expressions and which ought to be reset each time.  */
+  expression_context_block = NULL;
+  innermost_block = NULL;
 }
 
 static void
@@ -3800,19 +3807,6 @@ Usage: set extension-language .foo bar"),
 
   add_info ("extensions", info_ext_lang_command,
 	    _("All filename extensions associated with a source language."));
-
-  add_setshow_integer_cmd ("download-write-size", class_obscure,
-			   &download_write_size, _("\
-Set the write size used when downloading a program."), _("\
-Show the write size used when downloading a program."), _("\
-Only used when downloading a program onto a remote\n\
-target. Specify zero, or a negative value, to disable\n\
-blocked writes. The actual size of each transfer is also\n\
-limited by the size of the target packet and the memory\n\
-cache."),
-			   NULL,
-			   show_download_write_size,
-			   &setlist, &showlist);
 
   debug_file_directory = xstrdup (DEBUGDIR);
   add_setshow_optional_filename_cmd ("debug-file-directory", class_support,

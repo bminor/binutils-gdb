@@ -714,7 +714,7 @@ retry:
 	  clear_inferiors ();
 	  free (all_processes.head);
 	  all_processes.head = all_processes.tail = NULL;
-	  return ((unsigned char) WEXITSTATUS (w));
+	  return WEXITSTATUS (w);
 	}
       else if (!WIFSTOPPED (w))
 	{
@@ -723,7 +723,7 @@ retry:
 	  clear_inferiors ();
 	  free (all_processes.head);
 	  all_processes.head = all_processes.tail = NULL;
-	  return ((unsigned char) WTERMSIG (w));
+	  return target_signal_from_host (WTERMSIG (w));
 	}
     }
   else
@@ -733,7 +733,7 @@ retry:
     }
 
   *status = 'T';
-  return ((unsigned char) WSTOPSIG (w));
+  return target_signal_from_host (WSTOPSIG (w));
 }
 
 /* Send a signal to an LWP.  For LinuxThreads, kill is enough; however, if

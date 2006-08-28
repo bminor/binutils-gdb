@@ -1,6 +1,6 @@
-/* Target-specific functions for ARM running under NetBSD.
+/* Target-dependent code for NetBSD/arm.
 
-   Copyright (C) 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright (C) 2002, 2003, 2004, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,7 +25,6 @@
 #include "gdb_string.h"
 
 #include "arm-tdep.h"
-#include "nbsd-tdep.h"
 #include "solib-svr4.h"
 
 /* Description of the longjmp buffer.  */
@@ -83,18 +82,18 @@ arm_netbsd_aout_init_abi (struct gdbarch_info info,
 }
 
 static void
-arm_netbsd_elf_init_abi (struct gdbarch_info info, 
+arm_netbsd_elf_init_abi (struct gdbarch_info info,
 			 struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   arm_netbsd_init_abi_common (info, gdbarch);
-
-  set_solib_svr4_fetch_link_map_offsets (gdbarch,
-                                nbsd_ilp32_solib_svr4_fetch_link_map_offsets);
-
   if (tdep->fp_model == ARM_FLOAT_AUTO)
     tdep->fp_model = ARM_FLOAT_SOFT_VFP;
+
+  /* NetBSD ELF uses SVR4-style shared libraries.  */
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 }
 
 static enum gdb_osabi

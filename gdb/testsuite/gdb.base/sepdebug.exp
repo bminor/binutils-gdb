@@ -43,7 +43,8 @@ set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug nowarnings}] != "" } {
-    gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+    untested sepdebug.exp
+    return -1
 }
 
 # FIXME: this is nasty. We need to check for the stabs debug format.

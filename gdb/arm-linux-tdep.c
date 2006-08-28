@@ -31,13 +31,17 @@
 #include "doublest.h"
 #include "solib-svr4.h"
 #include "osabi.h"
+#include "regset.h"
 #include "trad-frame.h"
 #include "tramp-frame.h"
 
 #include "arm-tdep.h"
+#include "arm-linux-tdep.h"
 #include "glibc-tdep.h"
 
 #include "gdb_string.h"
+
+extern int arm_apcs_32;
 
 /* Under ARM GNU/Linux the traditional way of performing a breakpoint
    is to execute a particular software interrupt, rather than use a
@@ -223,9 +227,10 @@ arm_linux_extract_return_value (struct type *type,
 #define ARM_LINUX_SIGRETURN_INSTR	0xef900077
 #define ARM_LINUX_RT_SIGRETURN_INSTR	0xef9000ad
 
-/* For ARM EABI, recognize the pattern that glibc uses...  alternatively,
-   we could arrange to do this by function name, but they are not always
-   exported.  */
+/* For ARM EABI, the syscall number is not in the SWI instruction
+   (instead it is loaded into r7).  We recognize the pattern that
+   glibc uses...  alternatively, we could arrange to do this by
+   function name, but they are not always exported.  */
 #define ARM_SET_R7_SIGRETURN		0xe3a07077
 #define ARM_SET_R7_RT_SIGRETURN		0xe3a070ad
 #define ARM_EABI_SYSCALL		0xef000000
@@ -251,14 +256,67 @@ arm_linux_sigtramp_cache (struct frame_info *next_frame,
   trad_frame_set_id (this_cache, frame_id_build (sp, func));
 }
 
+/* There are a couple of different possible stack layouts that
+   we need to support.
+
+   Before version 2.6.18, the kernel used completely independent
+   layouts for non-RT and RT signals.  For non-RT signals the stack
+   began directly with a struct sigcontext.  For RT signals the stack
+   began with two redundant pointers (to the siginfo and ucontext),
+   and then the siginfo and ucontext.
+
+   As of version 2.6.18, the non-RT signal frame layout starts with
+   a ucontext and the RT signal frame starts with a siginfo and then
+   a ucontext.  Also, the ucontext now has a designated save area
+   for coprocessor registers.
+
+   For RT signals, it's easy to tell the difference: we look for
+   pinfo, the pointer to the siginfo.  If it has the expected
+   value, we have an old layout.  If it doesn't, we have the new
+   layout.
+
+   For non-RT signals, it's a bit harder.  We need something in one
+   layout or the other with a recognizable offset and value.  We can't
+   use the return trampoline, because ARM usually uses SA_RESTORER,
+   in which case the stack return trampoline is not filled in.
+   We can't use the saved stack pointer, because sigaltstack might
+   be in use.  So for now we guess the new layout...  */
+
+/* There are three words (trap_no, error_code, oldmask) in
+   struct sigcontext before r0.  */
+#define ARM_SIGCONTEXT_R0 0xc
+
+/* There are five words (uc_flags, uc_link, and three for uc_stack)
+   in the ucontext_t before the sigcontext.  */
+#define ARM_UCONTEXT_SIGCONTEXT 0x14
+
+/* There are three elements in an rt_sigframe before the ucontext:
+   pinfo, puc, and info.  The first two are pointers and the third
+   is a struct siginfo, with size 128 bytes.  We could follow puc
+   to the ucontext, but it's simpler to skip the whole thing.  */
+#define ARM_OLD_RT_SIGFRAME_SIGINFO 0x8
+#define ARM_OLD_RT_SIGFRAME_UCONTEXT 0x88
+
+#define ARM_NEW_RT_SIGFRAME_UCONTEXT 0x80
+
+#define ARM_NEW_SIGFRAME_MAGIC 0x5ac3c35a
+
 static void
 arm_linux_sigreturn_init (const struct tramp_frame *self,
 			  struct frame_info *next_frame,
 			  struct trad_frame_cache *this_cache,
 			  CORE_ADDR func)
 {
-  arm_linux_sigtramp_cache (next_frame, this_cache, func,
-			    0x0c /* Offset to registers.  */);
+  CORE_ADDR sp = frame_unwind_register_unsigned (next_frame, ARM_SP_REGNUM);
+  ULONGEST uc_flags = read_memory_unsigned_integer (sp, 4);
+
+  if (uc_flags == ARM_NEW_SIGFRAME_MAGIC)
+    arm_linux_sigtramp_cache (next_frame, this_cache, func,
+			      ARM_UCONTEXT_SIGCONTEXT
+			      + ARM_SIGCONTEXT_R0);
+  else
+    arm_linux_sigtramp_cache (next_frame, this_cache, func,
+			      ARM_SIGCONTEXT_R0);
 }
 
 static void
@@ -267,10 +325,19 @@ arm_linux_rt_sigreturn_init (const struct tramp_frame *self,
 			  struct trad_frame_cache *this_cache,
 			  CORE_ADDR func)
 {
-  arm_linux_sigtramp_cache (next_frame, this_cache, func,
-			    0x88 /* Offset to ucontext_t.  */
-			    + 0x14 /* Offset to sigcontext.  */
-			    + 0x0c /* Offset to registers.  */);
+  CORE_ADDR sp = frame_unwind_register_unsigned (next_frame, ARM_SP_REGNUM);
+  ULONGEST pinfo = read_memory_unsigned_integer (sp, 4);
+
+  if (pinfo == sp + ARM_OLD_RT_SIGFRAME_SIGINFO)
+    arm_linux_sigtramp_cache (next_frame, this_cache, func,
+			      ARM_OLD_RT_SIGFRAME_UCONTEXT
+			      + ARM_UCONTEXT_SIGCONTEXT
+			      + ARM_SIGCONTEXT_R0);
+  else
+    arm_linux_sigtramp_cache (next_frame, this_cache, func,
+			      ARM_NEW_RT_SIGFRAME_UCONTEXT
+			      + ARM_UCONTEXT_SIGCONTEXT
+			      + ARM_SIGCONTEXT_R0);
 }
 
 static struct tramp_frame arm_linux_sigreturn_tramp_frame = {
@@ -314,6 +381,217 @@ static struct tramp_frame arm_eabi_linux_rt_sigreturn_tramp_frame = {
   },
   arm_linux_rt_sigreturn_init
 };
+
+/* Core file and register set support.  */
+
+#define ARM_LINUX_SIZEOF_GREGSET (18 * INT_REGISTER_SIZE)
+
+void
+arm_linux_supply_gregset (const struct regset *regset,
+			  struct regcache *regcache,
+			  int regnum, const void *gregs_buf, size_t len)
+{
+  const gdb_byte *gregs = gregs_buf;
+  int regno;
+  CORE_ADDR reg_pc;
+  gdb_byte pc_buf[INT_REGISTER_SIZE];
+
+  for (regno = ARM_A1_REGNUM; regno < ARM_PC_REGNUM; regno++)
+    if (regnum == -1 || regnum == regno)
+      regcache_raw_supply (regcache, regno,
+			   gregs + INT_REGISTER_SIZE * regno);
+
+  if (regnum == ARM_PS_REGNUM || regnum == -1)
+    {
+      if (arm_apcs_32)
+	regcache_raw_supply (regcache, ARM_PS_REGNUM,
+			     gregs + INT_REGISTER_SIZE * ARM_CPSR_REGNUM);
+      else
+	regcache_raw_supply (regcache, ARM_PS_REGNUM,
+			     gregs + INT_REGISTER_SIZE * ARM_PC_REGNUM);
+    }
+
+  if (regnum == ARM_PC_REGNUM || regnum == -1)
+    {
+      reg_pc = extract_unsigned_integer (gregs
+					 + INT_REGISTER_SIZE * ARM_PC_REGNUM,
+					 INT_REGISTER_SIZE);
+      reg_pc = ADDR_BITS_REMOVE (reg_pc);
+      store_unsigned_integer (pc_buf, INT_REGISTER_SIZE, reg_pc);
+      regcache_raw_supply (regcache, ARM_PC_REGNUM, pc_buf);
+    }
+}
+
+void
+arm_linux_collect_gregset (const struct regset *regset,
+			   const struct regcache *regcache,
+			   int regnum, void *gregs_buf, size_t len)
+{
+  gdb_byte *gregs = gregs_buf;
+  int regno;
+
+  for (regno = ARM_A1_REGNUM; regno < ARM_PC_REGNUM; regno++)
+    if (regnum == -1 || regnum == regno)
+      regcache_raw_collect (regcache, regno,
+			    gregs + INT_REGISTER_SIZE * regno);
+
+  if (regnum == ARM_PS_REGNUM || regnum == -1)
+    {
+      if (arm_apcs_32)
+	regcache_raw_collect (regcache, ARM_PS_REGNUM,
+			      gregs + INT_REGISTER_SIZE * ARM_CPSR_REGNUM);
+      else
+	regcache_raw_collect (regcache, ARM_PS_REGNUM,
+			      gregs + INT_REGISTER_SIZE * ARM_PC_REGNUM);
+    }
+
+  if (regnum == ARM_PC_REGNUM || regnum == -1)
+    regcache_raw_collect (regcache, ARM_PC_REGNUM,
+			  gregs + INT_REGISTER_SIZE * ARM_PC_REGNUM);
+}
+
+/* Support for register format used by the NWFPE FPA emulator.  */
+
+#define typeNone		0x00
+#define typeSingle		0x01
+#define typeDouble		0x02
+#define typeExtended		0x03
+
+void
+supply_nwfpe_register (struct regcache *regcache, int regno,
+		       const gdb_byte *regs)
+{
+  const gdb_byte *reg_data;
+  gdb_byte reg_tag;
+  gdb_byte buf[FP_REGISTER_SIZE];
+
+  reg_data = regs + (regno - ARM_F0_REGNUM) * FP_REGISTER_SIZE;
+  reg_tag = regs[(regno - ARM_F0_REGNUM) + NWFPE_TAGS_OFFSET];
+  memset (buf, 0, FP_REGISTER_SIZE);
+
+  switch (reg_tag)
+    {
+    case typeSingle:
+      memcpy (buf, reg_data, 4);
+      break;
+    case typeDouble:
+      memcpy (buf, reg_data + 4, 4);
+      memcpy (buf + 4, reg_data, 4);
+      break;
+    case typeExtended:
+      /* We want sign and exponent, then least significant bits,
+	 then most significant.  NWFPE does sign, most, least.  */
+      memcpy (buf, reg_data, 4);
+      memcpy (buf + 4, reg_data + 8, 4);
+      memcpy (buf + 8, reg_data + 4, 4);
+      break;
+    default:
+      break;
+    }
+
+  regcache_raw_supply (regcache, regno, buf);
+}
+
+void
+collect_nwfpe_register (const struct regcache *regcache, int regno,
+			gdb_byte *regs)
+{
+  gdb_byte *reg_data;
+  gdb_byte reg_tag;
+  gdb_byte buf[FP_REGISTER_SIZE];
+
+  regcache_raw_collect (regcache, regno, buf);
+
+  /* NOTE drow/2006-06-07: This code uses the tag already in the
+     register buffer.  I've preserved that when moving the code
+     from the native file to the target file.  But this doesn't
+     always make sense.  */
+
+  reg_data = regs + (regno - ARM_F0_REGNUM) * FP_REGISTER_SIZE;
+  reg_tag = regs[(regno - ARM_F0_REGNUM) + NWFPE_TAGS_OFFSET];
+
+  switch (reg_tag)
+    {
+    case typeSingle:
+      memcpy (reg_data, buf, 4);
+      break;
+    case typeDouble:
+      memcpy (reg_data, buf + 4, 4);
+      memcpy (reg_data + 4, buf, 4);
+      break;
+    case typeExtended:
+      memcpy (reg_data, buf, 4);
+      memcpy (reg_data + 4, buf + 8, 4);
+      memcpy (reg_data + 8, buf + 4, 4);
+      break;
+    default:
+      break;
+    }
+}
+
+void
+arm_linux_supply_nwfpe (const struct regset *regset,
+			struct regcache *regcache,
+			int regnum, const void *regs_buf, size_t len)
+{
+  const gdb_byte *regs = regs_buf;
+  int regno;
+
+  if (regnum == ARM_FPS_REGNUM || regnum == -1)
+    regcache_raw_supply (regcache, ARM_FPS_REGNUM,
+			 regs + NWFPE_FPSR_OFFSET);
+
+  for (regno = ARM_F0_REGNUM; regno <= ARM_F7_REGNUM; regno++)
+    if (regnum == -1 || regnum == regno)
+      supply_nwfpe_register (regcache, regno, regs);
+}
+
+void
+arm_linux_collect_nwfpe (const struct regset *regset,
+			 const struct regcache *regcache,
+			 int regnum, void *regs_buf, size_t len)
+{
+  gdb_byte *regs = regs_buf;
+  int regno;
+
+  for (regno = ARM_F0_REGNUM; regno <= ARM_F7_REGNUM; regno++)
+    if (regnum == -1 || regnum == regno)
+      collect_nwfpe_register (regcache, regno, regs);
+
+  if (regnum == ARM_FPS_REGNUM || regnum == -1)
+    regcache_raw_collect (regcache, ARM_FPS_REGNUM,
+			  regs + INT_REGISTER_SIZE * ARM_FPS_REGNUM);
+}
+
+/* Return the appropriate register set for the core section identified
+   by SECT_NAME and SECT_SIZE.  */
+
+static const struct regset *
+arm_linux_regset_from_core_section (struct gdbarch *gdbarch,
+				    const char *sect_name, size_t sect_size)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (strcmp (sect_name, ".reg") == 0
+      && sect_size == ARM_LINUX_SIZEOF_GREGSET)
+    {
+      if (tdep->gregset == NULL)
+        tdep->gregset = regset_alloc (gdbarch, arm_linux_supply_gregset,
+                                      arm_linux_collect_gregset);
+      return tdep->gregset;
+    }
+
+  if (strcmp (sect_name, ".reg2") == 0
+      && sect_size == ARM_LINUX_SIZEOF_NWFPE)
+    {
+      if (tdep->fpregset == NULL)
+        tdep->fpregset = regset_alloc (gdbarch, arm_linux_supply_nwfpe,
+                                       arm_linux_collect_nwfpe);
+      return tdep->fpregset;
+    }
+
+  return NULL;
+}
 
 static void
 arm_linux_init_abi (struct gdbarch_info info,
@@ -369,6 +647,10 @@ arm_linux_init_abi (struct gdbarch_info info,
 				&arm_eabi_linux_sigreturn_tramp_frame);
   tramp_frame_prepend_unwinder (gdbarch,
 				&arm_eabi_linux_rt_sigreturn_tramp_frame);
+
+  /* Core file support.  */
+  set_gdbarch_regset_from_core_section (gdbarch,
+					arm_linux_regset_from_core_section);
 }
 
 void

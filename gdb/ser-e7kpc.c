@@ -33,6 +33,10 @@
 #include <sys/dos.h>
 #endif
 
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
+
 static int e7000pc_open (struct serial *scb, const char *name);
 static void e7000pc_raw (struct serial *scb);
 static int e7000pc_readchar (struct serial *scb, int timeout);

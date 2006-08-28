@@ -30,58 +30,28 @@ set libfile gdb1555
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 
+set libsrc "${srcdir}/${subdir}/${libfile}.c"
+set libobj "${objdir}/${subdir}/${libfile}.so"
+set execsrc "${srcdir}/${subdir}/${srcfile}"
+
 remote_exec build "rm -f ${binfile}"
+
+# Are we on a target board?  No support for downloading shared libraries
+# to a target yet.
+if ![isnative] then {
+    return 0
+}
 
 # get the value of gcc_compiled
 if [get_compiler_info ${binfile}] {
     return -1
 }
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}.o" object {debug}] != "" } {
+if { [gdb_compile_shlib $libsrc $libobj {debug}] != ""
+     || [gdb_compile $execsrc ${binfile} executable \
+	     [list debug shlib=${libobj}]] != "" } {
     return -1
 }
-
-# Build the shared libraries this test case needs.
-#
-
-if {$gcc_compiled == 0} {
-    if [istarget "hppa*-hp-hpux*"] then {
-        set additional_flags "additional_flags=+z"
-    } elseif { [istarget "mips-sgi-irix*"] } {
-        # Disable SGI compiler's implicit -Dsgi
-        set additional_flags "additional_flags=-Usgi"
-    } else {
-        # don't know what the compiler is...
-        set additional_flags ""
-    }
-} else {
-    if { ([istarget "powerpc*-*-aix*"]
-    || [istarget "rs6000*-*-aix*"]) } {
-        set additional_flags ""
-    } else {
-        set additional_flags "additional_flags=-fpic"
-    }
-}
-
-set additional_flags "$additional_flags -shared"
-if {[gdb_compile "${srcdir}/${subdir}/${libfile}.c" "${objdir}/${subdir}/${libfile}.so" executable [list debug $additional_flags "incdir=${objdir}"]] != ""} {
-    return -1
-}
-
-if { ($gcc_compiled 
-&&  ([istarget "powerpc*-*-aix*"]
-|| [istarget "rs6000*-*-aix*"] )) } {
-    set additional_flags "additional_flags=-L${objdir}/${subdir}"
-} elseif { [istarget "mips-sgi-irix*"] } {
-    set additional_flags "additional_flags=-rpath ${objdir}/${subdir}"
-} else {
-    set additional_flags ""
-}
-
-if {[gdb_compile "${objdir}/${subdir}/${testfile}.o ${objdir}/${subdir}/${libfile}.so" "${binfile}" executable [list debug $additional_flags]] != ""} {
-    return -1
-}
-
 
 gdb_exit
 gdb_start

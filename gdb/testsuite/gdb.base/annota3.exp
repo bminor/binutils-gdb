@@ -42,7 +42,8 @@ set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug nowarnings}] != "" } {
-    gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+    untested annota3.exp
+    return -1
 }
 
 
@@ -121,7 +122,9 @@ gdb_expect_list "run until main breakpoint" "$gdb_prompt$" {
     "\r\n\032\032starting\r\n"
     "\r\n\032\032breakpoint 1\r\n"
     "\r\n"
-    "Breakpoint 1, main \\(\\) at .*annota3.c:32\r\n"
+    "Breakpoint 1, "
+    "\r\n\032\032frame-begin 0 0x\[0-9a-z\]+\r\n"
+    "main \\(\\) at .*annota3.c:32\r\n"
     "\r\n\032\032source.*annota3.c:32:.*:beg:0x\[0-9a-z\]+\r\n"
     "\r\n\032\032stopped\r\n"
 }
@@ -222,7 +225,10 @@ if [target_info exists gdb,nosignals] {
 	"Continuing with signal SIGUSR1.\r\n"
 	"\r\n\032\032starting\r\n"
 	"\r\n\032\032breakpoint 2\r\n"
-	"Breakpoint 2, handle_USR1 \\(sig=\[0-9\]+\\) at .*annota3.c:\[0-9\]+\r\n"
+	"\r\n"
+	"Breakpoint 2, "
+	"\r\n\032\032frame-begin 0 0x\[0-9a-z\]+\r\n"
+	"handle_USR1 \\(sig=\[0-9\]+\\) at .*annota3.c:\[0-9\]+\r\n"
 	"\r\n\032\032source .*annota3.c:\[0-9\]+:\[0-9\]+:beg:0x\[0-9a-z\]+\r\n"
 	"\r\n\032\032stopped\r\n"
     }
@@ -324,7 +330,10 @@ send_gdb "continue\n"
 gdb_expect_list "annotate ignore count change" "$gdb_prompt$" {
     "\r\n\032\032post-prompt\r\n"
     "\r\n\032\032breakpoint 5\r\n"
-    "Breakpoint 5, main \\(\\) at .*annota3.c:46\r\n"
+    "\r\n"
+    "Breakpoint 5, "
+    "\r\n\032\032frame-begin 0 0x\[0-9a-z\]+\r\n"
+    "main \\(\\) at .*annota3.c:46\r\n"
     "\r\n\032\032source .*annota3.c:46:\[0-9\]+:beg:0x\[0-9a-z\]+\r\n"
     "1: value = 11\r\n"
     "\r\n\032\032stopped\r\n"

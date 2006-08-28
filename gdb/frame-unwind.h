@@ -72,7 +72,7 @@ typedef int (frame_sniffer_ftype) (const struct frame_unwind *self,
 
    THIS_PROLOGUE_CACHE can be used to share any prolog analysis data
    with the other unwind methods.  Memory for that cache should be
-   allocated using frame_obstack_zalloc().  */
+   allocated using FRAME_OBSTACK_ZALLOC().  */
 
 typedef void (frame_this_id_ftype) (struct frame_info *next_frame,
 				    void **this_prologue_cache,
@@ -108,7 +108,7 @@ typedef void (frame_this_id_ftype) (struct frame_info *next_frame,
 
    THIS_PROLOGUE_CACHE can be used to share any prolog analysis data
    with the other unwind methods.  Memory for that cache should be
-   allocated using frame_obstack_zalloc().  */
+   allocated using FRAME_OBSTACK_ZALLOC().  */
 
 typedef void (frame_prev_register_ftype) (struct frame_info *next_frame,
 					  void **this_prologue_cache,

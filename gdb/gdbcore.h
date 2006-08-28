@@ -49,8 +49,8 @@ extern int have_core_file_p (void);
    the get_frame_memory methods, code reading from an exec can use the
    target methods.  */
 
-extern int deprecated_read_memory_nobpt (CORE_ADDR memaddr, gdb_byte *myaddr,
-					 unsigned len);
+extern int read_memory_nobpt (CORE_ADDR memaddr, gdb_byte *myaddr,
+			      unsigned len);
 
 /* Report a memory error with error().  */
 
@@ -122,8 +122,6 @@ extern bfd *exec_bfd;
 extern int write_files;
 
 extern void core_file_command (char *filename, int from_tty);
-
-extern void exec_open (char *filename, int from_tty);
 
 extern void exec_file_attach (char *filename, int from_tty);
 

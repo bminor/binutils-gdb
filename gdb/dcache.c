@@ -302,19 +302,15 @@ dcache_write_line (DCACHE *dcache, struct dcache_block *db)
 	  }
 
 	  dirty_len = e - s;
-	  while (dirty_len > 0)
-	    {
-	      res = do_xfer_memory(memaddr, myaddr, dirty_len, 1,
-				   &region->attrib);
-	      if (res <= 0)
-		return 0;
+	  res = target_write (&current_target, TARGET_OBJECT_RAW_MEMORY,
+			      NULL, myaddr, memaddr, dirty_len);
+	  if (res < dirty_len)
+	    return 0;
 
-	      memset (&db->state[XFORM(memaddr)], ENTRY_OK, res);
-	      memaddr   += res;
-	      myaddr    += res;
-	      len       -= res;
-	      dirty_len -= res;
-	    }
+	  memset (&db->state[XFORM(memaddr)], ENTRY_OK, res);
+	  memaddr += res;
+	  myaddr += res;
+	  len -= res;
 	}
     }
 
@@ -361,18 +357,14 @@ dcache_read_line (DCACHE *dcache, struct dcache_block *db)
 	  continue;
 	}
       
-      while (reg_len > 0)
-	{
-	  res = do_xfer_memory (memaddr, myaddr, reg_len, 0,
-				&region->attrib);
-	  if (res <= 0)
-	    return 0;
+      res = target_read (&current_target, TARGET_OBJECT_RAW_MEMORY,
+			 NULL, myaddr, memaddr, reg_len);
+      if (res < reg_len)
+	return 0;
 
-	  memaddr += res;
-	  myaddr  += res;
-	  len     -= res;
-	  reg_len -= res;
-	}
+      memaddr += res;
+      myaddr += res;
+      len -= res;
     }
 
   memset (db->state, ENTRY_OK, sizeof (db->data));

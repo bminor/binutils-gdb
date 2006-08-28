@@ -32,6 +32,7 @@
 #include "symtab.h"
 #include "objfiles.h"
 #include "regcache.h"
+#include "value.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
@@ -68,6 +69,9 @@ struct dwarf2_cie
 
   /* True if a 'z' augmentation existed.  */
   unsigned char saw_z_augmentation;
+
+  /* True if an 'S' augmentation existed.  */
+  unsigned char signal_frame;
 
   struct dwarf2_cie *next;
 };
@@ -218,7 +222,13 @@ read_reg (void *baton, int reg)
 
   buf = alloca (register_size (gdbarch, regnum));
   frame_unwind_register (next_frame, regnum, buf);
-  return extract_typed_address (buf, builtin_type_void_data_ptr);
+
+  /* Convert the register to an integer.  This returns a LONGEST
+     rather than a CORE_ADDR, but unpack_pointer does the same thing
+     under the covers, and this makes more sense for non-pointer
+     registers.  Maybe read_reg and the associated interfaces should
+     deal with "struct value" instead of CORE_ADDR.  */
+  return unpack_long (register_type (gdbarch, regnum), buf);
 }
 
 static void
@@ -469,6 +479,34 @@ bad CFI data; mismatched DW_CFA_restore_state at 0x%s"), paddr (fs->pc));
 	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
 	      fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_OFFSET;
 	      fs->regs.reg[reg].loc.offset = offset;
+	      break;
+
+	    case DW_CFA_val_offset:
+	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &reg);
+	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
+	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &utmp);
+	      offset = utmp * fs->data_align;
+	      fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_VAL_OFFSET;
+	      fs->regs.reg[reg].loc.offset = offset;
+	      break;
+
+	    case DW_CFA_val_offset_sf:
+	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &reg);
+	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
+	      insn_ptr = read_sleb128 (insn_ptr, insn_end, &offset);
+	      offset *= fs->data_align;
+	      fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_VAL_OFFSET;
+	      fs->regs.reg[reg].loc.offset = offset;
+	      break;
+
+	    case DW_CFA_val_expression:
+	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &reg);
+	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
+	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &utmp);
+	      fs->regs.reg[reg].loc.exp = insn_ptr;
+	      fs->regs.reg[reg].exp_len = utmp;
+	      fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_VAL_EXP;
+	      insn_ptr += utmp;
 	      break;
 
 	    case DW_CFA_def_cfa_sf:
@@ -955,6 +993,28 @@ dwarf2_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 	}
       break;
 
+    case DWARF2_FRAME_REG_SAVED_VAL_OFFSET:
+      *optimizedp = 0;
+      *lvalp = not_lval;
+      *addrp = 0;
+      *realnump = -1;
+      if (valuep)
+	store_unsigned_integer (valuep, register_size (gdbarch, regnum),
+				cache->cfa + cache->reg[regnum].loc.offset);
+      break;
+
+    case DWARF2_FRAME_REG_SAVED_VAL_EXP:
+      *optimizedp = 0;
+      *lvalp = not_lval;
+      *addrp = 0;
+      *realnump = -1;
+      if (valuep)
+	store_unsigned_integer (valuep, register_size (gdbarch, regnum),
+				execute_stack_op (cache->reg[regnum].loc.exp,
+						  cache->reg[regnum].exp_len,
+						  next_frame, cache->cfa));
+      break;
+
     case DWARF2_FRAME_REG_UNSPECIFIED:
       /* GCC, in its infinite wisdom decided to not provide unwind
 	 information for registers that are "same value".  Since
@@ -1046,15 +1106,17 @@ dwarf2_frame_sniffer (struct frame_info *next_frame)
      function.  frame_pc_unwind(), for a no-return next function, can
      end up returning something past the end of this function's body.  */
   CORE_ADDR block_addr = frame_unwind_address_in_block (next_frame);
-  if (!dwarf2_frame_find_fde (&block_addr))
+  struct dwarf2_fde *fde = dwarf2_frame_find_fde (&block_addr);
+  if (!fde)
     return NULL;
 
   /* On some targets, signal trampolines may have unwind information.
      We need to recognize them so that we set the frame type
      correctly.  */
 
-  if (dwarf2_frame_signal_frame_p (get_frame_arch (next_frame),
-				   next_frame))
+  if (fde->cie->signal_frame
+      || dwarf2_frame_signal_frame_p (get_frame_arch (next_frame),
+				      next_frame))
     return &dwarf2_signal_frame_unwind;
 
   return &dwarf2_frame_unwind;
@@ -1514,6 +1576,10 @@ decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p)
          depends on the target address size.  */
       cie->encoding = DW_EH_PE_absptr;
 
+      /* We'll determine the final value later, but we need to
+	 initialize it conservatively.  */
+      cie->signal_frame = 0;
+
       /* Check version number.  */
       cie_version = read_1_byte (unit->abfd, buf);
       if (cie_version != 1 && cie_version != 3)
@@ -1594,6 +1660,17 @@ decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p)
 	      gdb_byte encoding = (*buf++) & ~DW_EH_PE_indirect;
 	      read_encoded_value (unit, encoding, buf, &bytes_read);
 	      buf += bytes_read;
+	      augmentation++;
+	    }
+
+	  /* "S" indicates a signal frame, such that the return
+	     address must not be decremented to locate the call frame
+	     info for the previous frame; it might even be the first
+	     instruction of a function, so decrementing it would take
+	     us to a different function.  */
+	  else if (*augmentation == 'S')
+	    {
+	      cie->signal_frame = 1;
 	      augmentation++;
 	    }
 

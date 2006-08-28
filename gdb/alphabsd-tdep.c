@@ -1,5 +1,6 @@
-/* Common target dependent code for GDB on Alpha systems running BSD.
-   Copyright (C) 2000, 2001, 2002 Free Software Foundation, Inc.
+/* Common target dependent code Alpha BSD's.
+
+   Copyright (C) 2000, 2001, 2002, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,26 +31,26 @@ void
 alphabsd_supply_reg (char *regs, int regno)
 {
   /* PC is at slot 32; UNIQUE not present.  */
-  alpha_supply_int_regs (regno, regs, regs + 31*8, NULL);
+  alpha_supply_int_regs (regno, regs, regs + 31 * 8, NULL);
 }
 
 void
 alphabsd_fill_reg (char *regs, int regno)
 {
   /* PC is at slot 32; UNIQUE not present.  */
-  alpha_fill_int_regs (regno, regs, regs + 31*8, NULL);
+  alpha_fill_int_regs (regno, regs, regs + 31 * 8, NULL);
 }
 
 void
 alphabsd_supply_fpreg (char *fpregs, int regno)
 {
   /* FPCR is at slot 33; slot 32 unused.  */
-  alpha_supply_fp_regs (regno, fpregs, fpregs + 32*8);
+  alpha_supply_fp_regs (regno, fpregs, fpregs + 32 * 8);
 }
 
 void
 alphabsd_fill_fpreg (char *fpregs, int regno)
 {
   /* FPCR is at slot 33; slot 32 unused.  */
-  alpha_fill_fp_regs (regno, fpregs, fpregs + 32*8);
+  alpha_fill_fp_regs (regno, fpregs, fpregs + 32 * 8);
 }

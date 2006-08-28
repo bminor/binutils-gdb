@@ -41,11 +41,13 @@ set link-flags "-m h8300sxelf";
 
 
 if {[target_assemble $srcfile $objfile "${asm-flags}"] != ""} then {
-     gdb_suppress_entire_file "Testcase assembly failed, so all tests in this file will automatically fail."
+     untested t10_and.exp
+     return -1
 }
 
 if {[target_link $objfile $binfile "${link-flags}"] != ""} then {
-     gdb_suppress_entire_file "Testcase link failed, so all tests in this file will automatically fail."
+     untested t10_and.exp
+     return -1
 }
 
 gdb_start

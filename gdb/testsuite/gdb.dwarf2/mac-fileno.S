@@ -206,10 +206,10 @@ func_cu1:
 
 	.section	.debug_macinfo,"",@progbits
 .Ldebug_macinfo0:
-	.byte	0x3	# Start new file
-	.uleb128 0x0	# Included from line number 0
-	.uleb128 0x2	# Filename we just started (bug: number too large)
-	.byte	0x3	# Start new file
-	.uleb128 0x0	# Included from line number 0
-	.uleb128 0x0	# Filename we just started (bug: number too small)
-        .byte   0x0     # end of CU's macro information
+	.byte	0x3	/* Start new file */
+	.uleb128 0x0	/* Included from line number 0 */
+	.uleb128 0x2	/* Filename we just started (bug: number too large) */
+	.byte	0x3	/* Start new file */
+	.uleb128 0x0	/* Included from line number 0 */
+	.uleb128 0x0	/* Filename we just started (bug: number too small) */
+        .byte   0x0     /* end of CU's macro information */

@@ -400,9 +400,14 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 #if 1
 	  /* Check to be sure the blocks are nested as we receive
 	     them. If the compiler/assembler/linker work, this just
-	     burns a small amount of time.  */
-	  if (BLOCK_START (pblock->block) < BLOCK_START (block) ||
-	      BLOCK_END (pblock->block) > BLOCK_END (block))
+	     burns a small amount of time.
+
+	     Skip blocks which correspond to a function; they're not
+	     physically nested inside this other blocks, only
+	     lexically nested.  */
+	  if (BLOCK_FUNCTION (pblock->block) == NULL
+	      && (BLOCK_START (pblock->block) < BLOCK_START (block)
+		  || BLOCK_END (pblock->block) > BLOCK_END (block)))
 	    {
 	      if (symbol)
 		{

@@ -40,6 +40,7 @@
 #include "trad-frame.h"
 #include "objfiles.h"
 #include "dwarf2-frame.h"
+#include "gdbtypes.h"
 
 #include "arm-tdep.h"
 #include "gdb/sim-arm.h"
@@ -209,17 +210,6 @@ static CORE_ADDR
 arm_smash_text_address (CORE_ADDR val)
 {
   return val & ~1;
-}
-
-/* Immediately after a function call, return the saved pc.  Can't
-   always go through the frames for this because on some machines the
-   new frame is not set up until the new function executes some
-   instructions.  */
-
-static CORE_ADDR
-arm_saved_pc_after_call (struct frame_info *frame)
-{
-  return ADDR_BITS_REMOVE (read_register (ARM_LR_REGNUM));
 }
 
 /* A typical Thumb prologue looks like this:
@@ -865,7 +855,7 @@ arm_make_prologue_cache (struct frame_info *next_frame)
   struct arm_prologue_cache *cache;
   CORE_ADDR unwound_fp;
 
-  cache = frame_obstack_zalloc (sizeof (struct arm_prologue_cache));
+  cache = FRAME_OBSTACK_ZALLOC (struct arm_prologue_cache);
   cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
   arm_scan_prologue (next_frame, cache);
@@ -972,7 +962,7 @@ arm_make_stub_cache (struct frame_info *next_frame)
   struct arm_prologue_cache *cache;
   CORE_ADDR unwound_fp;
 
-  cache = frame_obstack_zalloc (sizeof (struct arm_prologue_cache));
+  cache = FRAME_OBSTACK_ZALLOC (struct arm_prologue_cache);
   cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
   cache->prev_sp = frame_unwind_register_unsigned (next_frame, ARM_SP_REGNUM);
@@ -1356,8 +1346,12 @@ arm_register_type (struct gdbarch *gdbarch, int regnum)
       else
 	return builtin_type_arm_ext_littlebyte_bigword;
     }
+  else if (regnum == ARM_SP_REGNUM)
+    return builtin_type_void_data_ptr;
+  else if (regnum == ARM_PC_REGNUM)
+    return builtin_type_void_func_ptr;
   else
-    return builtin_type_int32;
+    return builtin_type_uint32;
 }
 
 /* Index within `registers' of the first byte of the space for
@@ -1964,11 +1958,6 @@ static const char arm_default_thumb_be_breakpoint[] = THUMB_BE_BREAKPOINT;
    necessary) to point to the actual memory location where the
    breakpoint should be inserted.  */
 
-/* XXX ??? from old tm-arm.h: if we're using RDP, then we're inserting
-   breakpoints and storing their handles instread of what was in
-   memory.  It is nice that this is the same size as a handle -
-   otherwise remote-rdp will have to change.  */
-
 static const unsigned char *
 arm_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
@@ -2270,11 +2259,14 @@ arm_return_value (struct gdbarch *gdbarch, struct type *valtype,
 		  struct regcache *regcache, gdb_byte *readbuf,
 		  const gdb_byte *writebuf)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
   if (TYPE_CODE (valtype) == TYPE_CODE_STRUCT
       || TYPE_CODE (valtype) == TYPE_CODE_UNION
       || TYPE_CODE (valtype) == TYPE_CODE_ARRAY)
     {
-      if (arm_return_in_memory (gdbarch, valtype))
+      if (tdep->struct_return == pcc_struct_return
+	  || arm_return_in_memory (gdbarch, valtype))
 	return RETURN_VALUE_STRUCT_CONVENTION;
     }
 
@@ -2605,7 +2597,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   if (arm_abi == ARM_ABI_AUTO && info.abfd != NULL)
     {
-      int ei_osabi;
+      int ei_osabi, e_flags;
 
       switch (bfd_get_flavour (info.abfd))
 	{
@@ -2622,19 +2614,18 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 	case bfd_target_elf_flavour:
 	  ei_osabi = elf_elfheader (info.abfd)->e_ident[EI_OSABI];
+	  e_flags = elf_elfheader (info.abfd)->e_flags;
+
 	  if (ei_osabi == ELFOSABI_ARM)
 	    {
 	      /* GNU tools used to use this value, but do not for EABI
-		 objects.  There's nowhere to tag an EABI version anyway,
-		 so assume APCS.  */
+		 objects.  There's nowhere to tag an EABI version
+		 anyway, so assume APCS.  */
 	      arm_abi = ARM_ABI_APCS;
 	    }
 	  else if (ei_osabi == ELFOSABI_NONE)
 	    {
-	      int e_flags, eabi_ver;
-
-	      e_flags = elf_elfheader (info.abfd)->e_flags;
-	      eabi_ver = EF_ARM_EABI_VERSION (e_flags);
+	      int eabi_ver = EF_ARM_EABI_VERSION (e_flags);
 
 	      switch (eabi_ver)
 		{
@@ -2651,8 +2642,32 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		  break;
 
 		default:
+		  /* Leave it as "auto".  */
 		  warning (_("unknown ARM EABI version 0x%x"), eabi_ver);
-		  arm_abi = ARM_ABI_APCS;
+		  break;
+		}
+	    }
+
+	  if (fp_model == ARM_FLOAT_AUTO)
+	    {
+	      int e_flags = elf_elfheader (info.abfd)->e_flags;
+
+	      switch (e_flags & (EF_ARM_SOFT_FLOAT | EF_ARM_VFP_FLOAT))
+		{
+		case 0:
+		  /* Leave it as "auto".  Strictly speaking this case
+		     means FPA, but almost nobody uses that now, and
+		     many toolchains fail to set the appropriate bits
+		     for the floating-point model they use.  */
+		  break;
+		case EF_ARM_SOFT_FLOAT:
+		  fp_model = ARM_FLOAT_SOFT_FPA;
+		  break;
+		case EF_ARM_VFP_FLOAT:
+		  fp_model = ARM_FLOAT_VFP;
+		  break;
+		case EF_ARM_SOFT_FLOAT | EF_ARM_VFP_FLOAT:
+		  fp_model = ARM_FLOAT_SOFT_VFP;
 		  break;
 		}
 	    }
@@ -2745,6 +2760,10 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->lowest_pc = 0x20;
   tdep->jb_pc = -1;	/* Longjump support not enabled by default.  */
 
+  /* The default, for both APCS and AAPCS, is to return small
+     structures in registers.  */
+  tdep->struct_return = reg_struct_return;
+
   set_gdbarch_push_dummy_call (gdbarch, arm_push_dummy_call);
   set_gdbarch_frame_align (gdbarch, arm_frame_align);
 
@@ -2763,9 +2782,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Advance PC across function entry code.  */
   set_gdbarch_skip_prologue (gdbarch, arm_skip_prologue);
-
-  /* Get the PC when a frame might not be available.  */
-  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, arm_saved_pc_after_call);
 
   /* The stack grows downward.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);

@@ -32,6 +32,7 @@
 #include "interps.h"
 #include <signal.h>
 #include "exceptions.h"
+#include "cli/cli-script.h"     /* for reset_command_nest_depth */
 
 /* For dont_repeat() */
 #include "gdbcmd.h"
@@ -260,6 +261,9 @@ display_gdb_prompt (char *new_prompt)
   int prompt_length = 0;
   char *gdb_prompt = get_prompt ();
   static int stdin_handler_removed = 0;
+
+  /* Reset the nesting depth used when trace-commands is set.  */
+  reset_command_nest_depth ();
 
   /* Each interpreter has its own rules on displaying the command
      prompt.  */

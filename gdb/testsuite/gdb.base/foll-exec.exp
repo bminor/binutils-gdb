@@ -37,11 +37,13 @@ set binfile2 ${objdir}/${subdir}/${testfile2}
 
 # build the first test case
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${binfile2}" executable {debug}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested foll-exec.exp
+     return -1
 }
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested foll-exec.exp
+     return -1
 }
 
 

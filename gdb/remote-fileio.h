@@ -30,6 +30,9 @@ struct cmd_list_element;
    remote_wait () and remote_async_wait () */
 extern void remote_fileio_request (char *buf);
 
+/* Cleanup any remote fileio state.  */
+extern void remote_fileio_reset (void);
+
 /* Called from _initialize_remote () */
 extern void initialize_remote_fileio (
   struct cmd_list_element *remote_set_cmdlist,

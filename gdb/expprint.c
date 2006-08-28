@@ -346,6 +346,18 @@ print_subexp_standard (struct expression *exp, int *pos,
       fputs_filtered (&exp->elts[pc + 2].string, stream);
       return;
 
+    case STRUCTOP_MEMBER:
+      print_subexp (exp, pos, stream, PREC_SUFFIX);
+      fputs_filtered (".*", stream);
+      print_subexp (exp, pos, stream, PREC_SUFFIX);
+      return;
+
+    case STRUCTOP_MPTR:
+      print_subexp (exp, pos, stream, PREC_SUFFIX);
+      fputs_filtered ("->*", stream);
+      print_subexp (exp, pos, stream, PREC_SUFFIX);
+      return;
+
     case BINOP_SUBSCRIPT:
       print_subexp (exp, pos, stream, PREC_SUFFIX);
       fputs_filtered ("[", stream);
@@ -873,6 +885,8 @@ dump_subexp_body_standard (struct expression *exp,
     case BINOP_IN:
     case BINOP_RANGE:
     case BINOP_END:
+    case STRUCTOP_MEMBER:
+    case STRUCTOP_MPTR:
       elt = dump_subexp (exp, stream, elt);
     case UNOP_NEG:
     case UNOP_LOGICAL_NOT:
@@ -1026,8 +1040,6 @@ dump_subexp_body_standard (struct expression *exp,
       break;
     default:
     case OP_NULL:
-    case STRUCTOP_MEMBER:
-    case STRUCTOP_MPTR:
     case MULTI_SUBSCRIPT:
     case OP_F77_UNDETERMINED_ARGLIST:
     case OP_COMPLEX:

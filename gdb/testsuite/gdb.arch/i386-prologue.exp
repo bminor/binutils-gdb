@@ -47,7 +47,8 @@ if [istarget "i?86-*-cygwin*"] then {
 # Don't use "debug", so that we don't have line information for the assembly
 # fragments.
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list $additional_flags]] != "" } {
-    gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+    untested i386-prologue.exp
+    return -1
 }
 
 

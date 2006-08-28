@@ -1,3 +1,175 @@
+2006-08-17  Jim Blandy  <jimb@codesourcery.com>
+
+	* gdb.texinfo (Stop Reply Packets): Note similarity of 'S' and 'T'
+	responses.
+
+2006-08-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Source Path): Add documentation for new
+	substitute-path commands.
+
+2006-08-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (Installing GDB): Update menu.  Move text to...
+	(Running Configure): ...here.
+	(Requirements): New node.  Mention expat.
+
+2006-08-08  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.texinfo (Target Commands): Remove 
+	'set download-write-size' and 'show download-write-size'.
+
+2006-08-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* stabs.texinfo (Member Type Descriptor): Correct example for
+	pointer to member types.
+
+2006-07-21  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* gdb.texinfo (Optional warnings and messages): Add
+	'set/show trace-commands'.
+	(Command files): Add '-v' to source command.
+
+2006-07-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (OS Information): Update qPart reference to
+	qXfer.
+	(Remote configuration): Likewise.
+	(Overview): Move @cindex to the start of a paragraph.  Talk
+	about binary data encoding.
+	(Packets): Refer to the overview for the details of the X
+	packet encoding.
+	(General Query Packets): Remove qPart description.  Add qXfer
+	description.  Add an anchor to qSupported.  Correct feature
+	table title.  Add a new feature for qXfer:auxv:read.
+	(Interrupts): Add a missing parenthesis.
+
+2006-07-05  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* doc/gdb.texinfo (KOD): Remove node.
+	(GDB/MI Kod Commands): Remove commented out node.
+
+2006-07-01  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (GDB/MI Output Syntax, GDB/MI Simple Examples)
+	(GDB/MI Breakpoint Commands, GDB/MI Program Context)
+	(GDB/MI Thread Commands, GDB/MI Program Execution)
+	(GDB/MI Stack Manipulation, GDB/MI Variable Objects)
+	(GDB/MI Data Manipulation, GDB/MI Symbol Query)
+	(GDB/MI File Commands, GDB/MI Target Manipulation)
+	(GDB/MI Miscellaneous Commands): Change (@value{GDBP})->(gdb),
+	since the MI prompt is hard-wired into the code.
+
+2006-07-01  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.texinfo (GDB/MI Compatibility with CLI): Qualify more carefully.
+	(GDB/MI Simple Examples): Use @subheading for "A Bad Command".
+	(GDB/MI Data Manipulation): Remove description of unimplemented
+	display related commands as variable objects perform this function
+	and are superior: -display-delete, -display-disable,
+	-display-enable, -display-insert and -display-list.  Move
+	-environment-cd, -environment-directory, -environment-path
+	and -environment-pwd to "Program Context".
+	(GDB/MI Program Control): Rename to "Program Execution".  Move
+	-exec-arguments -exec-abort to...
+	(GDB/MI Program Context): ...here.  New node split from "Data
+	 Manipulation".
+
+2006-06-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (Remote configuration): Document set / show
+	remote supported-packets.
+	(General Query Packets): Document qSupported packet.
+
+2006-06-10  Sandra Loosemore <sandra@codesourcery.com>
+
+	* gdb.texinfo (File-I/O overview): Copy edit for grammar, spelling,
+	and font markup.
+	(Protocol basics): Likewise.
+	(The F request packet): Likewise.
+	(The F reply packet): Likewise.
+	(Memory transfer): Move this node to be a subsubsection of
+	"Protocol specific representation of datatypes".
+	(The Ctrl-C message): More copy editing.
+	(Console I/O): Likewise.
+	(The isatty call): Delete this node, and merge its content into
+	the "isatty" node.  Fixed references elsewhere.
+	(The system call): Delete this node, and merge its content into
+	the "system" node.  Fixed references elsewhere.
+	(open): Reformat to use @table, and add appropriate font markup.
+	(close): Likewise.
+	(read): Likewise.
+	(write): Likewise.
+	(lseek): Likewise.
+	(rename): Likewise.
+	(unlink): Likewise.
+	(stat/fstat): Likewise.
+	(gettimeofday): Likewise.
+	(isatty): Likewise.
+	(system): Likewise, plus minor changes to fix confusing wording.
+	(Integral datatypes): Fix font markup.
+	(Pointer values): Likewise.
+	(struct stat): Fix markup to use @table, plus minor copy editing.
+	(struct timeval): Fix font markup, plus minor copy editing.
+	(Constants): Minor copy editing.
+	(Errno values): Add font markup.
+	(File-I/O Examples): Likewise.
+
+2006-06-10  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.texinfo (GDB/MI): Remove duplicate acknowledgements.
+	(GDB/MI Simple Examples): Move node up one level.  Use real
+	examples.
+	(GDB/MI Compatibility with CLI): Update.
+	(GDB/MI Result Records): Add "connected" and "exit" result
+	classes.
+	(GDB/MI Stream Records): Clarify target output.
+	(GDB/MI Command Description Format): Modify example description.
+	(GDB/MI Breakpoint Table Commands): Rename to...
+	(GDB/MI Breakpoint Commands): ...this
+	(GDB/MI Breakpoint Commands): Add optional thread field.
+	(GDB/MI Program Control): Add an introduction.  Move "Program
+	termination" examples into exec-run description.
+	(GDB/MI File Commands): Mention similar CLI commands.
+	(GDB/MI Miscellaneous Commands): Move to end.  Mention "show version"
+	is similar to "-gdb-version".
+
+2006-06-09  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Symbols): Fix "(gdb)"=>"(@value{GDBP})".
+
+2006-06-02  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.texinfo (GDB/MI Development and Front Ends): Use
+	sourceware.org for mailing lists.
+	(GDB/MI File Commands): New node split from Program Control.
+
+2006-06-01  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.texinfo (GDB/MI Development and Front Ends): New node.
+
+2006-05-22  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Cygwin Native): Fix last change.
+
+2006-05-22  Christopher Faylor  <cgf@timesys.com>
+
+	* gdb.texinfo (Cygwin Native): Document set/show cygwin-exceptions.
+
+2006-05-15  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdbint.texinfo (Algorithms): Correct spelling and punctuation.
+	(Releasing GDB, Testsuite): Remove details for including DejaGnu.
+
+2006-05-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (General Query Packets): Recommend not starting
+	new packets with qC and clarify.
+
+2006-05-13  Gaius Mulley  <gaius@glam.ac.uk>
+
+	* gdb.texinfo (M2 Types): New section.
+
 2006-05-10  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* agentexpr.texi: Add a copyright and license notice.

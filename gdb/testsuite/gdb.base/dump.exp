@@ -46,7 +46,8 @@ if {[istarget "ia64*-*-*"] || [istarget "hppa64-*-*"]} then {
 }
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable ${options}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested dump.exp
+     return -1
 }
 
 # Start with a fresh gdb.
@@ -65,7 +66,8 @@ remote_exec build "rm -f intarr1.bin intarr1b.bin intarr1.ihex intarr1.srec inta
 # Run target program until data structs are initialized.
 
 if { ! [ runto checkpoint1 ] } then {
-    gdb_suppress_entire_file "Program failed to run, so all tests in this file will automatically fail."
+    untested dump.exp
+    return -1
 }
 
 # Now generate some dump files.
@@ -276,7 +278,8 @@ gdb_load ${binfile}
 
 # Run to main.
 if { ! [ runto_main ] } then {
-    gdb_suppress_entire_file "Program failed to run, so remaining tests in this file will automatically fail."
+    untested dump.exp
+    return -1
 }
 
 if { ![string compare $array_val \

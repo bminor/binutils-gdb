@@ -1,5 +1,6 @@
 # Tests of overloaded operators resolution.
-# Copyright 1998, 1999, 2002, 2004, 2005 Free Software Foundation, Inc.
+# Copyright 1998, 1999, 2002, 2004, 2005, 2006
+# Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,7 +32,8 @@ set srcfile ${testfile}.cc
 set binfile ${objdir}/${subdir}/${testfile}
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested userdef.exp
+     return -1
 }
 
 
@@ -142,6 +144,12 @@ gdb_test "print two = one" "\\\$\[0-9\]* = {x = 9, y = 10}"
 # Check that GDB tolerates whitespace in operator names.
 gdb_test "break A2::'operator+'" ".*Breakpoint $decimal at.*"
 gdb_test "break A2::'operator +'" ".*Breakpoint $decimal at.*"
+
+# Check that GDB handles operator* correctly.
+gdb_test "print c" "\\\$\[0-9\]* = {m = {z = .*}}"
+gdb_test "print *c" "\\\$\[0-9\]* = \\(Member &\\) @$hex: {z = .*}"
+gdb_test "print &*c" "\\\$\[0-9\]* = \\(Member \\*\\) $hex"
+gdb_test "ptype &*c" "type = struct Member {\[\r\n \]+int z;\[\r\n\]+} &\\*"
 
 gdb_exit
 return 0

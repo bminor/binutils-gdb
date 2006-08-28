@@ -946,6 +946,7 @@ void handle_inferior_event (struct execution_control_state *ecs);
 
 static void step_into_function (struct execution_control_state *ecs);
 static void insert_step_resume_breakpoint_at_frame (struct frame_info *step_frame);
+static void insert_step_resume_breakpoint_at_caller (struct frame_info *);
 static void insert_step_resume_breakpoint_at_sal (struct symtab_and_line sr_sal,
 						  struct frame_id sr_id);
 static void stop_stepping (struct execution_control_state *ecs);
@@ -1432,7 +1433,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
     case TARGET_WAITKIND_EXECD:
       if (debug_infrun)
-        fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_EXECED\n");
+        fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_EXECD\n");
       stop_signal = TARGET_SIGNAL_TRAP;
 
       /* NOTE drow/2002-12-05: This code should be pushed down into the
@@ -2026,7 +2027,7 @@ process_event_stop_test:
 	   duration of this command.  Then, install a temporary
 	   breakpoint at the target of the jmp_buf. */
         if (debug_infrun)
-	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTATE_WHAT_SET_LONGJMP_RESUME\n");
+	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME\n");
 	disable_longjmp_breakpoint ();
 	remove_breakpoints ();
 	breakpoints_inserted = 0;
@@ -2051,7 +2052,7 @@ process_event_stop_test:
       case BPSTAT_WHAT_CLEAR_LONGJMP_RESUME:
       case BPSTAT_WHAT_CLEAR_LONGJMP_RESUME_SINGLE:
         if (debug_infrun)
-	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTATE_WHAT_CLEAR_LONGJMP_RESUME\n");
+	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_CLEAR_LONGJMP_RESUME\n");
 	remove_breakpoints ();
 	breakpoints_inserted = 0;
 	disable_longjmp_breakpoint ();
@@ -2062,7 +2063,7 @@ process_event_stop_test:
 
       case BPSTAT_WHAT_SINGLE:
         if (debug_infrun)
-	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTATE_WHAT_SINGLE\n");
+	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_SINGLE\n");
 	if (breakpoints_inserted)
 	  {
 	    remove_breakpoints ();
@@ -2075,7 +2076,7 @@ process_event_stop_test:
 
       case BPSTAT_WHAT_STOP_NOISY:
         if (debug_infrun)
-	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTATE_WHAT_STOP_NOISY\n");
+	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_STOP_NOISY\n");
 	stop_print_frame = 1;
 
 	/* We are about to nuke the step_resume_breakpointt via the
@@ -2086,7 +2087,7 @@ process_event_stop_test:
 
       case BPSTAT_WHAT_STOP_SILENT:
         if (debug_infrun)
-	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTATE_WHAT_STOP_SILENT\n");
+	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_STOP_SILENT\n");
 	stop_print_frame = 0;
 
 	/* We are about to nuke the step_resume_breakpoin via the
@@ -2114,7 +2115,7 @@ process_event_stop_test:
 	   the one deleted is the one currently stopped at.  MVS  */
 
         if (debug_infrun)
-	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTATE_WHAT_STEP_RESUME\n");
+	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_STEP_RESUME\n");
 
 	if (step_resume_breakpoint == NULL)
 	  {
@@ -2138,7 +2139,7 @@ process_event_stop_test:
 
       case BPSTAT_WHAT_THROUGH_SIGTRAMP:
         if (debug_infrun)
-	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTATE_WHAT_THROUGH_SIGTRAMP\n");
+	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_THROUGH_SIGTRAMP\n");
 	/* If were waiting for a trap, hitting the step_resume_break
 	   doesn't count as getting it.  */
 	if (trap_expected)
@@ -2152,7 +2153,7 @@ process_event_stop_test:
 	  int solib_changed = 0;
 
 	  if (debug_infrun)
-	    fprintf_unfiltered (gdb_stdlog, "infrun: BPSTATE_WHAT_CHECK_SHLIBS\n");
+	    fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_CHECK_SHLIBS\n");
 	  /* Remove breakpoints, we eventually want to step over the
 	     shlib event breakpoint, and SOLIB_ADD might adjust
 	     breakpoint addresses via breakpoint_re_set.  */
@@ -2381,9 +2382,17 @@ process_event_stop_test:
       return;
     }
 
-  if (frame_id_eq (frame_unwind_id (get_current_frame ()), step_frame_id))
+  /* Check for subroutine calls.  The check for the current frame
+     equalling the step ID is not necessary - the check of the
+     previous frame's ID is sufficient - but it is a common case and
+     cheaper than checking the previous frame's ID.
+
+     NOTE: frame_id_eq will never report two invalid frame IDs as
+     being equal, so to get into this block, both the current and
+     previous frame must have valid frame IDs.  */
+  if (!frame_id_eq (get_frame_id (get_current_frame ()), step_frame_id)
+      && frame_id_eq (frame_unwind_id (get_current_frame ()), step_frame_id))
     {
-      /* It's a subroutine call.  */
       CORE_ADDR real_stop_pc;
 
       if (debug_infrun)
@@ -2410,7 +2419,7 @@ process_event_stop_test:
 	  /* We're doing a "next", set a breakpoint at callee's return
 	     address (the address at which the caller will
 	     resume).  */
-	  insert_step_resume_breakpoint_at_frame (get_prev_frame (get_current_frame ()));
+	  insert_step_resume_breakpoint_at_caller (get_current_frame ());
 	  keep_going (ecs);
 	  return;
 	}
@@ -2473,7 +2482,7 @@ process_event_stop_test:
 
       /* Set a breakpoint at callee's return address (the address at
          which the caller will resume).  */
-      insert_step_resume_breakpoint_at_frame (get_prev_frame (get_current_frame ()));
+      insert_step_resume_breakpoint_at_caller (get_current_frame ());
       keep_going (ecs);
       return;
     }
@@ -2527,8 +2536,11 @@ process_event_stop_test:
          and no line number corresponding to the address where the
          inferior stopped).  Since we want to skip this kind of code,
          we keep going until the inferior returns from this
-         function.  */
-      if (step_stop_if_no_debug)
+         function - unless the user has asked us not to (via
+         set step-mode) or we no longer know how to get back
+         to the call site.  */
+      if (step_stop_if_no_debug
+	  || !frame_id_p (frame_unwind_id (get_current_frame ())))
 	{
 	  /* If we have no line number and the step-stop-if-no-debug
 	     is set, we stop the step so that the user has a chance to
@@ -2542,7 +2554,7 @@ process_event_stop_test:
 	{
 	  /* Set a breakpoint at callee's return address (the address
 	     at which the caller will resume).  */
-	  insert_step_resume_breakpoint_at_frame (get_prev_frame (get_current_frame ()));
+	  insert_step_resume_breakpoint_at_caller (get_current_frame ());
 	  keep_going (ecs);
 	  return;
 	}
@@ -2749,20 +2761,13 @@ insert_step_resume_breakpoint_at_sal (struct symtab_and_line sr_sal,
   if (breakpoints_inserted)
     insert_breakpoints ();
 }
-				      
+
 /* Insert a "step resume breakpoint" at RETURN_FRAME.pc.  This is used
-   to skip a function (next, skip-no-debug) or signal.  It's assumed
-   that the function/signal handler being skipped eventually returns
-   to the breakpoint inserted at RETURN_FRAME.pc.
+   to skip a potential signal handler.
 
-   For the skip-function case, the function may have been reached by
-   either single stepping a call / return / signal-return instruction,
-   or by hitting a breakpoint.  In all cases, the RETURN_FRAME belongs
-   to the skip-function's caller.
-
-   For the signals case, this is called with the interrupted
-   function's frame.  The signal handler, when it returns, will resume
-   the interrupted function at RETURN_FRAME.pc.  */
+   This is called with the interrupted function's frame.  The signal
+   handler, when it returns, will resume the interrupted function at
+   RETURN_FRAME.pc.  */
 
 static void
 insert_step_resume_breakpoint_at_frame (struct frame_info *return_frame)
@@ -2775,6 +2780,38 @@ insert_step_resume_breakpoint_at_frame (struct frame_info *return_frame)
   sr_sal.section = find_pc_overlay (sr_sal.pc);
 
   insert_step_resume_breakpoint_at_sal (sr_sal, get_frame_id (return_frame));
+}
+
+/* Similar to insert_step_resume_breakpoint_at_frame, except
+   but a breakpoint at the previous frame's PC.  This is used to
+   skip a function after stepping into it (for "next" or if the called
+   function has no debugging information).
+
+   The current function has almost always been reached by single
+   stepping a call or return instruction.  NEXT_FRAME belongs to the
+   current function, and the breakpoint will be set at the caller's
+   resume address.
+
+   This is a separate function rather than reusing
+   insert_step_resume_breakpoint_at_frame in order to avoid
+   get_prev_frame, which may stop prematurely (see the implementation
+   of frame_unwind_id for an example).  */
+
+static void
+insert_step_resume_breakpoint_at_caller (struct frame_info *next_frame)
+{
+  struct symtab_and_line sr_sal;
+
+  /* We shouldn't have gotten here if we don't know where the call site
+     is.  */
+  gdb_assert (frame_id_p (frame_unwind_id (next_frame)));
+
+  init_sal (&sr_sal);		/* initialize to zeros */
+
+  sr_sal.pc = ADDR_BITS_REMOVE (frame_pc_unwind (next_frame));
+  sr_sal.section = find_pc_overlay (sr_sal.pc);
+
+  insert_step_resume_breakpoint_at_sal (sr_sal, frame_unwind_id (next_frame));
 }
 
 static void

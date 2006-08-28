@@ -1008,6 +1008,20 @@ proc gdb_file_cmd { arg } {
 	}
     }
 
+    # The file command used to kill the remote target.  For the benefit
+    # of the testsuite, preserve this behavior.
+    send_gdb "kill\n"
+    gdb_expect 120 {
+	-re "Kill the program being debugged. .y or n. $" {
+	    send_gdb "y\n"
+	    verbose "\t\tKilling previous program being debugged"
+	    exp_continue
+	}
+	-re "$gdb_prompt $" {
+	    # OK.
+	}
+    }
+
     send_gdb "file $arg\n"
     gdb_expect 120 {
 	-re "Reading symbols from.*no debugging symbols found.*done.*$gdb_prompt $" {
@@ -1019,11 +1033,6 @@ proc gdb_file_cmd { arg } {
             verbose "\t\tLoaded $arg into the $GDB"
 	    set gdb_file_cmd_debug_info "debug"
 	    return 0
-        }
-        -re "A program is being debugged already.*Kill it.*y or n. $" {
-            send_gdb "y\n"
-	    verbose "\t\tKilling previous program being debugged"
-            exp_continue
         }
         -re "Load new symbol table from \".*\".*y or n. $" {
             send_gdb "y\n"
@@ -1179,7 +1188,7 @@ proc skip_altivec_tests {} {
     # Some simulators are known to not support VMX instructions.
     if { [istarget powerpc-*-eabi] || [istarget powerpc*-*-eabispe] } {
         verbose "$me:  target known to not support VMX, returning 1" 2
-        return [set $skip_vmx_tests_saved 1]
+        return [set skip_vmx_tests_saved 1]
     }
 
     # Make sure we have a compiler that understands altivec.
@@ -1864,6 +1873,50 @@ proc gdb_start { } {
 
 proc gdb_exit { } {
     catch default_gdb_exit
+}
+
+#
+# gdb_load_cmd -- load a file into the debugger.
+#		  ARGS - additional args to load command.
+#                 return a -1 if anything goes wrong.
+#
+proc gdb_load_cmd { args } {
+    global gdb_prompt
+
+    if [target_info exists gdb_load_timeout] {
+	set loadtimeout [target_info gdb_load_timeout]
+    } else {
+	set loadtimeout 1600
+    }
+    send_gdb "load $args\n"
+    verbose "Timeout is now $timeout seconds" 2
+    gdb_expect $loadtimeout {
+	-re "Loading section\[^\r\]*\r\n" {
+	    exp_continue
+	}
+	-re "Start address\[\r\]*\r\n" {
+	    exp_continue
+	}
+	-re "Transfer rate\[\r\]*\r\n" {
+	    exp_continue
+	}
+	-re "Memory access error\[^\r\]*\r\n" {
+	    perror "Failed to load program"
+	    return -1
+	}
+	-re "$gdb_prompt $" {
+	    return 0
+	}
+	-re "(.*)\r\n$gdb_prompt " {
+	    perror "Unexpected reponse from 'load' -- $expect_out(1,string)"
+	    return -1
+	}
+	timeout {
+	    perror "Timed out trying to load $arg."
+	    return -1
+	}
+    }
+    return -1
 }
 
 #

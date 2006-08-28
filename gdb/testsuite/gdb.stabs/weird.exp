@@ -290,7 +290,8 @@ if { [lindex $exec_output 0] != 0 } {
 }
 
 if  { [gdb_compile "${srcfile}" "${binfile}" object ""] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested weird.exp
+     return -1
 }
 
 remote_file build delete ${srcfile}
@@ -313,7 +314,7 @@ gdb_expect 60 {
     -re "^file (\[^ \]| +\008)*\r*\n" {
 	exp_continue
     }
-    -re "A program is being debugged already.  Kill it\\? \\(y or n\\)" {
+    -re "A program is being debugged already.\[\r\n\]+Are you sure you want to change the file\\? \\(y or n\\)" {
 	send_gdb "y\n"
 	exp_continue
     }

@@ -37,7 +37,8 @@ set testfile "am33"
 set srcfile ${srcdir}/${subdir}/${testfile}.s
 set binfile ${objdir}/${subdir}/${testfile}
 if  { [gdb_compile "${srcfile}" "${binfile}" object ""] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested am33.exp
+     return -1
 }
 
 proc call_tests { } {

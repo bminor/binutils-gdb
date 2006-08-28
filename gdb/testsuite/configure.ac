@@ -26,6 +26,8 @@ AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
 
+ACX_NONCANONICAL_TARGET
+
 # Add HP-specific tests when appropriate.
 case $target in
   hppa*-*-hpux*)

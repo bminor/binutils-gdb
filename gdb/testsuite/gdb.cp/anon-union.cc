@@ -52,4 +52,5 @@ int main()
 
   w = 45;
 
+  int j = 0;
 }

@@ -444,10 +444,11 @@ interpreter_completer (char *text, char *word)
   struct interp *interp;
 
   /* We expect only a very limited number of interpreters, so just
-     allocate room for all of them. */
+     allocate room for all of them plus one for the last that must be NULL
+     to correctly end the list. */
   for (interp = interp_list; interp != NULL; interp = interp->next)
     ++alloced;
-  matches = (char **) xmalloc (alloced * sizeof (char *));
+  matches = (char **) xcalloc (alloced + 1, sizeof (char *));
 
   num_matches = 0;
   textlen = strlen (text);
@@ -479,12 +480,6 @@ interpreter_completer (char *text, char *word)
     {
       xfree (matches);
       matches = NULL;
-    }
-  else if (num_matches < alloced)
-    {
-      matches = (char **) xrealloc ((char *) matches, ((num_matches + 1)
-						       * sizeof (char *)));
-      matches[num_matches] = NULL;
     }
 
   return matches;

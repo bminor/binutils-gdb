@@ -27,7 +27,7 @@
 #include "solib-svr4.h"
 
 static int
-alphafbsd_use_struct_convention (int gcc_p, struct type *type)
+alphafbsd_return_in_memory (struct type *type)
 {
   enum type_code code;
   int i;
@@ -104,12 +104,10 @@ alphafbsd_init_abi (struct gdbarch_info info,
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_lp64_fetch_link_map_offsets);
 
-  set_gdbarch_deprecated_use_struct_convention
-    (gdbarch, alphafbsd_use_struct_convention);
-
   tdep->dynamic_sigtramp_offset = alphafbsd_sigtramp_offset;
   tdep->sigcontext_addr = alphafbsd_sigcontext_addr;
   tdep->pc_in_sigtramp = alphafbsd_pc_in_sigtramp;
+  tdep->return_in_memory = alphafbsd_return_in_memory;
   tdep->sc_pc_offset = 288;
   tdep->sc_regs_offset = 24;
   tdep->sc_fpregs_offset = 320;

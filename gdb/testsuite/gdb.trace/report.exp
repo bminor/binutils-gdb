@@ -44,7 +44,8 @@ if [istarget "m68k-*-elf"] then {
     send_gdb "compare-sections CS\n"
     gdb_expect {
 	-re "MIS-MATCHED.*$gdb_prompt $" {
-	    gdb_suppress_entire_file "Symbol file does not match target!
+	    untested report.exp
+	    return -1
 	    all tests in this module will fail.";
 	}
 	-re ".*$gdb_prompt $" { }
@@ -55,7 +56,8 @@ if [istarget "m68k-*-elf"] then {
     set binfile $objdir/$subdir/$testfile
     if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 	     executable {debug nowarnings}] != "" } {
-	gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+	untested report.exp
+	return -1
     }
     gdb_load $binfile
     gdb_test "tstop"       "" ""
@@ -129,12 +131,14 @@ gdb_expect {
     }
     -re ".*$gdb_prompt $" {
 	if { ($testline1 == 0) || ($testline2 == 0) || ($testline3 == 0) || ($testline4 == 0) || ($testline5 == 0) || ($testline6 == 0) } {
-	    gdb_suppress_entire_file "failed to locate test source lines:
+	    untested report.exp
+	    return -1
 all tests in this module will fail."
 	}
     }
     default {
-	    gdb_suppress_entire_file "failed to locate test source lines (def):
+	    untested report.exp
+	    return -1
 all tests in this module will fail."
     } 
 }

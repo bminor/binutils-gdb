@@ -89,6 +89,11 @@ C compiler for your system, you may be able to download and install
 the GNU CC compiler.  It is available via anonymous FTP from the
 directory `ftp://ftp.gnu.org/pub/gnu/gcc'.
 
+   GDB uses Expat, an XML parsing library, to implement some target-specific
+features.  Expat will be linked in if it is available at build time, or
+those features will be disabled.  The latest version of Expat should be
+available from `http://expat.sourceforge.net'.
+
    GDB can be used as a cross-debugger, running on a machine of one
 type while debugging a program running on a machine of another type.
 See below.
@@ -454,7 +459,6 @@ monitors and other hardware:
 	remote-est.c	 EST emulator
 	remote-hms.c	 Renesas Micro Systems H8/300 monitor
 	remote-mips.c	 MIPS remote debugging protocol
-	remote-rdp.c	 ARM with Demon monitor
 	remote-sds.c	 PowerPC SDS monitor
 	remote-sim.c	 Generalized simulator protocol
 	remote-st.c	 Tandem ST-2000 monitor

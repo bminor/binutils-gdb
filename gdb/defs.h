@@ -510,6 +510,8 @@ extern void fputstr_filtered (const char *str, int quotr, struct ui_file * strea
 
 extern void fputstr_unfiltered (const char *str, int quotr, struct ui_file * stream);
 
+extern void fputstrn_filtered (const char *str, int n, int quotr, struct ui_file * stream);
+
 extern void fputstrn_unfiltered (const char *str, int n, int quotr, struct ui_file * stream);
 
 /* Display the host ADDR on STREAM formatted as ``0x%x''. */
@@ -563,7 +565,13 @@ extern void symbol_file_command (char *, int);
 /* Remote targets may wish to use this as their load function.  */
 extern void generic_load (char *name, int from_tty);
 
-/* Summarise a download */
+/* Report on STREAM the performance of memory transfer operation,
+   such as 'load'. 
+   DATA_COUNT is the number of bytes transferred.
+   WRITE_COUNT is the number of separate write operations, or 0,
+   if that information is not available.
+   START_TIME is the time at which an operation was started.
+   END_TIME is the time at which an operation ended.  */
 struct timeval;
 extern void print_transfer_performance (struct ui_file *stream,
 					unsigned long data_count,
@@ -1167,6 +1175,10 @@ extern int use_windows;
 #ifdef __MSDOS__
 # define CANT_FORK
 # define GLOBAL_CURDIR
+# define DIRNAME_SEPARATOR ';'
+#endif
+
+#if !defined (__CYGWIN__) && defined (_WIN32)
 # define DIRNAME_SEPARATOR ';'
 #endif
 

@@ -24,7 +24,9 @@
 
 #include <unistd.h>
 #include <signal.h>
+#if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
+#endif
 
 unsigned long cont_thread;
 unsigned long general_thread;
@@ -43,20 +45,44 @@ jmp_buf toplevel;
 
 unsigned long signal_pid;
 
+#ifdef SIGTTOU
+/* A file descriptor for the controlling terminal.  */
+int terminal_fd;
+
+/* TERMINAL_FD's original foreground group.  */
+pid_t old_foreground_pgrp;
+
+/* Hand back terminal ownership to the original foreground group.  */
+
+static void
+restore_old_foreground_pgrp (void)
+{
+  tcsetpgrp (terminal_fd, old_foreground_pgrp);
+}
+#endif
+
 static int
 start_inferior (char *argv[], char *statusptr)
 {
+#ifdef SIGTTOU
   signal (SIGTTOU, SIG_DFL);
   signal (SIGTTIN, SIG_DFL);
+#endif
 
   signal_pid = create_inferior (argv[0], argv);
 
   fprintf (stderr, "Process %s created; pid = %ld\n", argv[0],
 	   signal_pid);
+  fflush (stderr);
 
+#ifdef SIGTTOU
   signal (SIGTTOU, SIG_IGN);
   signal (SIGTTIN, SIG_IGN);
-  tcsetpgrp (fileno (stderr), signal_pid);
+  terminal_fd = fileno (stderr);
+  old_foreground_pgrp = tcgetpgrp (terminal_fd);
+  tcsetpgrp (terminal_fd, signal_pid);
+  atexit (restore_old_foreground_pgrp);
+#endif
 
   /* Wait till we are at 1st instruction in program, return signal number.  */
   return mywait (statusptr, 0);
@@ -72,6 +98,7 @@ attach_inferior (int pid, char *statusptr, int *sigptr)
     return -1;
 
   fprintf (stderr, "Attached; pid = %d\n", pid);
+  fflush (stderr);
 
   /* FIXME - It may be that we should get the SIGNAL_PID from the
      attach function, so that it can be the main thread instead of
@@ -83,17 +110,56 @@ attach_inferior (int pid, char *statusptr, int *sigptr)
   /* GDB knows to ignore the first SIGSTOP after attaching to a running
      process using the "attach" command, but this is different; it's
      just using "target remote".  Pretend it's just starting up.  */
-  if (*statusptr == 'T' && *sigptr == SIGSTOP)
-    *sigptr = SIGTRAP;
+  if (*statusptr == 'T' && *sigptr == TARGET_SIGNAL_STOP)
+    *sigptr = TARGET_SIGNAL_TRAP;
 
   return 0;
 }
 
 extern int remote_debug;
 
+/* Decode a qXfer read request.  Return 0 if everything looks OK,
+   or -1 otherwise.  */
+
+static int
+decode_xfer_read (char *buf, char **annex, CORE_ADDR *ofs, unsigned int *len)
+{
+  /* Extract and NUL-terminate the annex.  */
+  *annex = buf;
+  while (*buf && *buf != ':')
+    buf++;
+  if (*buf == '\0')
+    return -1;
+  *buf++ = 0;
+
+  /* After the read/write marker and annex, qXfer looks like a
+     traditional 'm' packet.  */
+  decode_m_packet (buf, ofs, len);
+
+  return 0;
+}
+
+/* Write the response to a successful qXfer read.  Returns the
+   length of the (binary) data stored in BUF, corresponding
+   to as much of DATA/LEN as we could fit.  IS_MORE controls
+   the first character of the response.  */
+static int
+write_qxfer_response (char *buf, unsigned char *data, int len, int is_more)
+{
+  int out_len;
+
+  if (is_more)
+    buf[0] = 'm';
+  else
+    buf[0] = 'l';
+
+  return remote_escape_output (data, len, (unsigned char *) buf + 1, &out_len,
+			       PBUFSIZ - 2) + 1;
+}
+
 /* Handle all of the extended 'q' packets.  */
 void
-handle_query (char *own_buf)
+handle_query (char *own_buf, int *new_packet_len_p)
 {
   static struct inferior_list_entry *thread_ptr;
 
@@ -144,22 +210,47 @@ handle_query (char *own_buf)
     }
 
   if (the_target->read_auxv != NULL
-      && strncmp ("qPart:auxv:read::", own_buf, 17) == 0)
+      && strncmp ("qXfer:auxv:read:", own_buf, 16) == 0)
     {
-      unsigned char data[(PBUFSIZ - 1) / 2];
+      unsigned char *data;
+      int n;
       CORE_ADDR ofs;
       unsigned int len;
-      int n;
-      decode_m_packet (&own_buf[17], &ofs, &len); /* "OFS,LEN" */
-      if (len > sizeof data)
-	len = sizeof data;
-      n = (*the_target->read_auxv) (ofs, data, len);
-      if (n == 0)
-	write_ok (own_buf);
-      else if (n < 0)
-	write_enn (own_buf);
+      char *annex;
+
+      /* Reject any annex; grab the offset and length.  */
+      if (decode_xfer_read (own_buf + 16, &annex, &ofs, &len) < 0
+	  || annex[0] != '\0')
+	{
+	  strcpy (own_buf, "E00");
+	  return;
+	}
+
+      /* Read one extra byte, as an indicator of whether there is
+	 more.  */
+      if (len > PBUFSIZ - 2)
+	len = PBUFSIZ - 2;
+      data = malloc (len + 1);
+      n = (*the_target->read_auxv) (ofs, data, len + 1);
+      if (n > len)
+	*new_packet_len_p = write_qxfer_response (own_buf, data, len, 1);
       else
-	convert_int_to_ascii (data, own_buf, n);
+	*new_packet_len_p = write_qxfer_response (own_buf, data, n, 0);
+
+      free (data);
+
+      return;
+    }
+
+  /* Protocol features query.  */
+  if (strncmp ("qSupported", own_buf, 10) == 0
+      && (own_buf[10] == ':' || own_buf[10] == '\0'))
+    {
+      sprintf (own_buf, "PacketSize=%x", PBUFSIZ - 1);
+
+      if (the_target->read_auxv != NULL)
+	strcat (own_buf, ";qXfer:auxv:read+");
+
       return;
     }
 
@@ -432,19 +523,29 @@ main (int argc, char *argv[])
 
     restart:
       setjmp (toplevel);
-      while (getpkt (own_buf) > 0)
+      while (1)
 	{
 	  unsigned char sig;
+	  int packet_len;
+	  int new_packet_len = -1;
+
+	  packet_len = getpkt (own_buf);
+	  if (packet_len <= 0)
+	    break;
+
 	  i = 0;
 	  ch = own_buf[i++];
 	  switch (ch)
 	    {
 	    case 'q':
-	      handle_query (own_buf);
+	      handle_query (own_buf, &new_packet_len);
 	      break;
 	    case 'd':
 	      remote_debug = !remote_debug;
 	      break;
+#ifndef USE_WIN32API
+	    /* Skip "detach" support on mingw32, since we don't have
+	       waitpid.  */
 	    case 'D':
 	      fprintf (stderr, "Detaching from inferior\n");
 	      detach_inferior ();
@@ -466,6 +567,7 @@ main (int argc, char *argv[])
 		}
 
 	      exit (0);
+#endif
 
 	    case '!':
 	      if (attached == 0)
@@ -538,6 +640,14 @@ main (int argc, char *argv[])
 		write_ok (own_buf);
 	      else
 		write_enn (own_buf);
+	      break;
+	    case 'X':
+	      if (decode_X_packet (&own_buf[1], packet_len - 1,
+				   &mem_addr, &len, mem_buf) < 0
+		  || write_inferior_memory (mem_addr, mem_buf, len) != 0)
+		write_enn (own_buf);
+	      else
+		write_ok (own_buf);
 	      break;
 	    case 'C':
 	      convert_ascii_to_int (own_buf + 1, &sig, 1);
@@ -706,14 +816,18 @@ main (int argc, char *argv[])
 	      break;
 	    }
 
-	  putpkt (own_buf);
+	  if (new_packet_len != -1)
+	    putpkt_binary (own_buf, new_packet_len);
+	  else
+	    putpkt (own_buf);
 
 	  if (status == 'W')
 	    fprintf (stderr,
 		     "\nChild exited with status %d\n", signal);
 	  if (status == 'X')
-	    fprintf (stderr, "\nChild terminated with signal = 0x%x\n",
-		     signal);
+	    fprintf (stderr, "\nChild terminated with signal = 0x%x (%s)\n",
+		     target_signal_to_host (signal),
+		     target_signal_to_name (signal));
 	  if (status == 'W' || status == 'X')
 	    {
 	      if (extended_protocol)

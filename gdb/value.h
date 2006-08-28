@@ -325,6 +325,8 @@ extern struct value *value_ind (struct value *arg1);
 
 extern struct value *value_addr (struct value *arg1);
 
+extern struct value *value_ref (struct value *arg1);
+
 extern struct value *value_assign (struct value *toval,
 				   struct value *fromval);
 
@@ -366,6 +368,8 @@ extern struct type *value_rtti_target_type (struct value *, int *, int *,
 
 extern struct value *value_full_object (struct value *, struct type *, int,
 					int, int);
+
+extern struct value *value_cast_pointers (struct type *, struct value *);
 
 extern struct value *value_cast (struct type *type, struct value *arg2);
 

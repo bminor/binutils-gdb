@@ -1,5 +1,5 @@
 /* Replay a remote debug session logfile for GDB.
-   Copyright (C) 1996, 1998, 1999, 2000, 2002, 2003, 2005
+   Copyright (C) 1996, 1998, 1999, 2000, 2002, 2003, 2005, 2006
    Free Software Foundation, Inc.
    Written by Fred Fish (fnf@cygnus.com) from pieces of gdbserver.
 
@@ -23,10 +23,6 @@
 #include "config.h"
 #include <stdio.h>
 #include <sys/file.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <netinet/tcp.h>
 #include <signal.h>
 #include <ctype.h>
 #include <fcntl.h>
@@ -40,6 +36,22 @@
 #endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#if HAVE_NETDB_H
+#include <netdb.h>
+#endif
+#if HAVE_NETINET_TCP_H
+#include <netinet/tcp.h>
+#endif
+
+#if USE_WIN32API
+#include <winsock.h>
 #endif
 
 #ifndef HAVE_SOCKLEN_T
@@ -90,7 +102,11 @@ sync_error (FILE *fp, char *desc, int expect, int got)
 static void
 remote_close (void)
 {
+#ifdef USE_WIN32API
+  closesocket (remote_desc);
+#else
   close (remote_desc);
+#endif
 }
 
 /* Open a connection to a remote debugger.
@@ -107,6 +123,9 @@ remote_open (char *name)
     }
   else
     {
+#ifdef USE_WIN32API
+      static int winsock_initialized;
+#endif
       char *port_str;
       int port;
       struct sockaddr_in sockaddr;
@@ -116,6 +135,16 @@ remote_open (char *name)
       port_str = strchr (name, ':');
 
       port = atoi (port_str + 1);
+
+#ifdef USE_WIN32API
+      if (!winsock_initialized)
+	{
+	  WSADATA wsad;
+
+	  WSAStartup (MAKEWORD (1, 0), &wsad);
+	  winsock_initialized = 1;
+	}
+#endif
 
       tmp_desc = socket (PF_INET, SOCK_STREAM, 0);
       if (tmp_desc < 0)
@@ -151,11 +180,19 @@ remote_open (char *name)
 
       close (tmp_desc);		/* No longer need this */
 
+#ifndef USE_WIN32API
+      close (tmp_desc);		/* No longer need this */
+
       signal (SIGPIPE, SIG_IGN);	/* If we don't do this, then gdbreplay simply
 					   exits when the remote side dies.  */
+#else
+      closesocket (tmp_desc);	/* No longer need this */
+#endif
     }
 
+#if defined(F_SETFL) && defined (FASYNC)
   fcntl (remote_desc, F_SETFL, FASYNC);
+#endif
 
   fprintf (stderr, "Replay logfile using %s\n", name);
   fflush (stderr);

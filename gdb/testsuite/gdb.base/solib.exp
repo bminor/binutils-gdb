@@ -45,7 +45,8 @@ set binfile ${objdir}/${subdir}/${testfile}
 
 # build the first test case
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested solib.exp
+     return -1
 }
 
 if [get_compiler_info ${binfile}] {
@@ -105,7 +106,8 @@ if { [istarget "hppa*-*-hpux*"] } {
 if { [istarget "hppa*-*-hpux*"] } {
     set additional_flags "-Wl,-u,main"
     if { [gdb_compile "${binfile}_sl.sl" "${binfile}_sl" executable [list debug $additional_flags]] != "" } {
-        gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+        untested solib.exp
+        return -1
     }
 } else {
     # FIXME: need to fill this part in for non-HP build

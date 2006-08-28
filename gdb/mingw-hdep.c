@@ -105,8 +105,8 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 	 if something starts using it.  */
       gdb_assert (!writefds || !FD_ISSET (fd, writefds));
 
-      if (!FD_ISSET (fd, readfds)
-	  && !FD_ISSET (fd, exceptfds))
+      if ((!readfds || !FD_ISSET (fd, readfds))
+	  && (!exceptfds || !FD_ISSET (fd, exceptfds)))
 	continue;
       h = (HANDLE) _get_osfhandle (fd);
 
@@ -124,13 +124,13 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 	  except = never_handle;
 	}
 
-      if (FD_ISSET (fd, readfds))
+      if (readfds && FD_ISSET (fd, readfds))
 	{
 	  gdb_assert (num_handles < MAXIMUM_WAIT_OBJECTS);
 	  handles[num_handles++] = read;
 	}
 
-      if (FD_ISSET (fd, exceptfds))
+      if (exceptfds && FD_ISSET (fd, exceptfds))
 	{
 	  gdb_assert (num_handles < MAXIMUM_WAIT_OBJECTS);
 	  handles[num_handles++] = except;
@@ -169,10 +169,11 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
       HANDLE fd_h;
       struct serial *scb;
 
-      if (!FD_ISSET (fd, readfds) && !FD_ISSET (fd, writefds))
+      if ((!readfds || !FD_ISSET (fd, readfds))
+	  && (!exceptfds || !FD_ISSET (fd, exceptfds)))
 	continue;
 
-      if (FD_ISSET (fd, readfds))
+      if (readfds && FD_ISSET (fd, readfds))
 	{
 	  fd_h = handles[indx++];
 	  /* This handle might be ready, even though it wasn't the handle
@@ -183,7 +184,7 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 	    num_ready++;
 	}
 
-      if (FD_ISSET (fd, exceptfds))
+      if (exceptfds && FD_ISSET (fd, exceptfds))
 	{
 	  fd_h = handles[indx++];
 	  /* This handle might be ready, even though it wasn't the handle

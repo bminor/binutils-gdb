@@ -1,3 +1,434 @@
+2006-08-18  Fred Fish  <fnf@specifix.com>
+
+	* lib/gdb.exp (skip_altivec_tests): Fix apparent typo,
+	'$' in front of skip_vmx_tests_saved when setting that.
+
+2006-08-10  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* gdb.base/trace-commands.exp: New file.
+
+2006-08-10  Joel Brobecker  <brobecker@adacore.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/step-bt.exp: Make hexadecimal address optional in
+	expected output of the backtrace commands.
+
+2006-08-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.arch/altivec-abi.exp: Replace gdb_suppress_entire_file with
+	untested followed by return combination.
+	* gdb.arch/altivec-regs.exp: Likewise.
+	* gdb.arch/e500-abi.exp: Likewise.
+	* gdb.arch/e500-regs.exp: Likewise.
+	* gdb.arch/gdb1291.exp: Likewise.
+	* gdb.arch/gdb1431.exp: Likewise.
+	* gdb.arch/gdb1558.exp: Likewise.
+	* gdb.arch/i386-prologue.exp: Likewise.
+	* gdb.arch/i386-unwind.exp: Likewise.
+	* gdb.asm/asm-source.exp: Likewise.
+	* gdb.base/a2-run.exp: Likewise.
+	* gdb.base/advance.exp: Likewise.
+	* gdb.base/all-bin.exp: Likewise.
+	* gdb.base/annota1.exp: Likewise.
+	* gdb.base/annota3.exp: Likewise.
+	* gdb.base/args.exp: Likewise.
+	* gdb.base/arithmet.exp: Likewise.
+	* gdb.base/assign.exp: Likewise.
+	* gdb.base/async.exp: Likewise.
+	* gdb.base/attach.exp: Likewise.
+	* gdb.base/bang.exp: Likewise.
+	* gdb.base/bigcore.exp: Likewise.
+	* gdb.base/bitfields.exp: Likewise.
+	* gdb.base/bitfields2.exp: Likewise.
+	* gdb.base/break.exp: Likewise.
+	* gdb.base/call-sc.exp: Likewise.
+	* gdb.base/call-strs.exp: Likewise.
+	* gdb.base/callfuncs.exp: Likewise.
+	* gdb.base/checkpoint.exp: Likewise.
+	* gdb.base/chng-syms.exp: Likewise.
+	* gdb.base/code-expr.exp: Likewise.
+	* gdb.base/commands.exp: Likewise.
+	* gdb.base/completion.exp: Likewise.
+	* gdb.base/cond-expr.exp: Likewise.
+	* gdb.base/condbreak.exp: Likewise.
+	* gdb.base/consecutive.exp: Likewise.
+	* gdb.base/constvars.exp: Likewise.
+	* gdb.base/corefile.exp: Likewise.
+	* gdb.base/cvexpr.exp: Likewise.
+	* gdb.base/dbx.exp: Likewise.
+	* gdb.base/define.exp: Likewise.
+	* gdb.base/detach.exp: Likewise.
+	* gdb.base/display.exp: Likewise.
+	* gdb.base/dump.exp: Likewise.
+	* gdb.base/ena-dis-br.exp: Likewise.
+	* gdb.base/ending-run.exp: Likewise.
+	* gdb.base/environ.exp: Likewise.
+	* gdb.base/eval-skip.exp: Likewise.
+	* gdb.base/exprs.exp: Likewise.
+	* gdb.base/fileio.exp: Likewise.
+	* gdb.base/finish.exp: Likewise.
+	* gdb.base/float.exp: Likewise.
+	* gdb.base/foll-exec.exp: Likewise.
+	* gdb.base/foll-fork.exp: Likewise.
+	* gdb.base/foll-vfork.exp: Likewise.
+	* gdb.base/freebpcmd.exp: Likewise.
+	* gdb.base/funcargs.exp: Likewise.
+	* gdb.base/gcore.exp: Likewise.
+	* gdb.base/gdb1090.exp: Likewise.
+	* gdb.base/gdb1250.exp: Likewise.
+	* gdb.base/huge.exp: Likewise.
+	* gdb.base/info-proc.exp: Likewise.
+	* gdb.base/interrupt.exp: Likewise.
+	* gdb.base/jump.exp: Likewise.
+	* gdb.base/langs.exp: Likewise.
+	* gdb.base/lineinc.exp: Likewise.
+	* gdb.base/list.exp: Likewise.
+	* gdb.base/logical.exp: Likewise.
+	* gdb.base/long_long.exp: Likewise.
+	* gdb.base/macscp.exp: Likewise.
+	* gdb.base/maint.exp: Likewise.
+	* gdb.base/mips_pro.exp: Likewise.
+	* gdb.base/miscexprs.exp: Likewise.
+	* gdb.base/multi-forks.exp: Likewise.
+	* gdb.base/opaque.exp: Likewise.
+	* gdb.base/overlays.exp: Likewise.
+	* gdb.base/pc-fp.exp: Likewise.
+	* gdb.base/pointers.exp: Likewise.
+	* gdb.base/printcmds.exp: Likewise.
+	* gdb.base/psymtab.exp: Likewise.
+	* gdb.base/ptype.exp: Likewise.
+	* gdb.base/recurse.exp: Likewise.
+	* gdb.base/relational.exp: Likewise.
+	* gdb.base/relocate.exp: Likewise.
+	* gdb.base/remote.exp: Likewise.
+	* gdb.base/reread.exp: Likewise.
+	* gdb.base/restore.exp: Likewise.
+	* gdb.base/return.exp: Likewise.
+	* gdb.base/return2.exp: Likewise.
+	* gdb.base/scope.exp: Likewise.
+	* gdb.base/sect-cmd.exp: Likewise.
+	* gdb.base/sep.exp: Likewise.
+	* gdb.base/sepdebug.exp: Likewise.
+	* gdb.base/setshow.exp: Likewise.
+	* gdb.base/setvar.exp: Likewise.
+	* gdb.base/sigall.exp: Likewise.
+	* gdb.base/sigbpt.exp: Likewise.
+	* gdb.base/signals.exp: Likewise.
+	* gdb.base/signull.exp: Likewise.
+	* gdb.base/sizeof.exp: Likewise.
+	* gdb.base/solib.exp: Likewise.
+	* gdb.base/step-line.exp: Likewise.
+	* gdb.base/step-test.exp: Likewise.
+	* gdb.base/structs.exp: Likewise.
+	* gdb.base/structs2.exp: Likewise.
+	* gdb.base/term.exp: Likewise.
+	* gdb.base/twice.exp: Likewise.
+	* gdb.base/until.exp: Likewise.
+	* gdb.base/varargs.exp: Likewise.
+	* gdb.base/volatile.exp: Likewise.
+	* gdb.base/watchpoint.exp: Likewise.
+	* gdb.base/whatis-exp.exp: Likewise.
+	* gdb.base/whatis.exp: Likewise.
+	* gdb.cp/ambiguous.exp: Likewise.
+	* gdb.cp/annota2.exp: Likewise.
+	* gdb.cp/annota3.exp: Likewise.
+	* gdb.cp/bool.exp: Likewise.
+	* gdb.cp/breakpoint.exp: Likewise.
+	* gdb.cp/casts.exp: Likewise.
+	* gdb.cp/class2.exp: Likewise.
+	* gdb.cp/classes.exp: Likewise.
+	* gdb.cp/cplusfuncs.exp: Likewise.
+	* gdb.cp/ctti.exp: Likewise.
+	* gdb.cp/derivation.exp: Likewise.
+	* gdb.cp/exception.exp: Likewise.
+	* gdb.cp/gdb1355.exp: Likewise.
+	* gdb.cp/hang.exp: Likewise.
+	* gdb.cp/inherit.exp: Likewise.
+	* gdb.cp/local.exp: Likewise.
+	* gdb.cp/m-data.exp: Likewise.
+	* gdb.cp/m-static.exp: Likewise.
+	* gdb.cp/member-ptr.exp: Likewise.
+	* gdb.cp/method.exp: Likewise.
+	* gdb.cp/misc.exp: Likewise.
+	* gdb.cp/namespace.exp: Likewise.
+	* gdb.cp/overload.exp: Likewise.
+	* gdb.cp/ovldbreak.exp: Likewise.
+	* gdb.cp/pr-1023.exp: Likewise.
+	* gdb.cp/pr-1210.exp: Likewise.
+	* gdb.cp/pr-574.exp: Likewise.
+	* gdb.cp/printmethod.exp: Likewise.
+	* gdb.cp/psmang.exp: Likewise.
+	* gdb.cp/ref-params.exp: Likewise.
+	* gdb.cp/ref-types.exp: Likewise.
+	* gdb.cp/rtti.exp: Likewise.
+	* gdb.cp/templates.exp: Likewise.
+	* gdb.cp/try_catch.exp: Likewise.
+	* gdb.cp/userdef.exp: Likewise.
+	* gdb.cp/virtfunc.exp: Likewise.
+	* gdb.disasm/am33.exp: Likewise.
+	* gdb.disasm/h8300s.exp: Likewise.
+	* gdb.disasm/mn10300.exp: Likewise.
+	* gdb.disasm/sh3.exp: Likewise.
+	* gdb.disasm/t01_mov.exp: Likewise.
+	* gdb.disasm/t02_mova.exp: Likewise.
+	* gdb.disasm/t03_add.exp: Likewise.
+	* gdb.disasm/t04_sub.exp: Likewise.
+	* gdb.disasm/t05_cmp.exp: Likewise.
+	* gdb.disasm/t06_ari2.exp: Likewise.
+	* gdb.disasm/t07_ari3.exp: Likewise.
+	* gdb.disasm/t08_or.exp: Likewise.
+	* gdb.disasm/t09_xor.exp: Likewise.
+	* gdb.disasm/t10_and.exp: Likewise.
+	* gdb.disasm/t11_logs.exp: Likewise.
+	* gdb.disasm/t12_bit.exp: Likewise.
+	* gdb.disasm/t13_otr.exp: Likewise.
+	* gdb.hp/gdb.aCC/optimize.exp: Likewise.
+	* gdb.hp/gdb.aCC/watch-cmd.exp: Likewise.
+	* gdb.hp/gdb.base-hp/callfwmall.exp: Likewise.
+	* gdb.hp/gdb.base-hp/dollar.exp: Likewise.
+	* gdb.hp/gdb.base-hp/hwwatchbus.exp: Likewise.
+	* gdb.hp/gdb.base-hp/pxdb.exp: Likewise.
+	* gdb.hp/gdb.base-hp/reg-pa64.exp: Likewise.
+	* gdb.hp/gdb.base-hp/reg.exp: Likewise.
+	* gdb.hp/gdb.base-hp/sized-enum.exp: Likewise.
+	* gdb.hp/gdb.compat/xdb1.exp: Likewise.
+	* gdb.hp/gdb.compat/xdb3.exp: Likewise.
+	* gdb.hp/gdb.objdbg/objdbg01.exp: Likewise.
+	* gdb.hp/gdb.objdbg/objdbg02.exp: Likewise.
+	* gdb.hp/gdb.objdbg/objdbg03.exp: Likewise.
+	* gdb.hp/gdb.objdbg/objdbg04.exp: Likewise.
+	* gdb.mi/gdb701.exp: Likewise.
+	* gdb.mi/gdb792.exp: Likewise.
+	* gdb.mi/mi-basics.exp: Likewise.
+	* gdb.mi/mi-break.exp: Likewise.
+	* gdb.mi/mi-cli.exp: Likewise.
+	* gdb.mi/mi-console.exp: Likewise.
+	* gdb.mi/mi-disassemble.exp: Likewise.
+	* gdb.mi/mi-eval.exp: Likewise.
+	* gdb.mi/mi-file.exp: Likewise.
+	* gdb.mi/mi-read-memory.exp: Likewise.
+	* gdb.mi/mi-regs.exp: Likewise.
+	* gdb.mi/mi-return.exp: Likewise.
+	* gdb.mi/mi-simplerun.exp: Likewise.
+	* gdb.mi/mi-stack.exp: Likewise.
+	* gdb.mi/mi-stepi.exp: Likewise.
+	* gdb.mi/mi-syn-frame.exp: Likewise.
+	* gdb.mi/mi-until.exp: Likewise.
+	* gdb.mi/mi-var-block.exp: Likewise.
+	* gdb.mi/mi-var-child.exp: Likewise.
+	* gdb.mi/mi-var-cmd.exp: Likewise.
+	* gdb.mi/mi-var-display.exp: Likewise.
+	* gdb.mi/mi-watch.exp: Likewise.
+	* gdb.mi/mi2-basics.exp: Likewise.
+	* gdb.mi/mi2-break.exp: Likewise.
+	* gdb.mi/mi2-cli.exp: Likewise.
+	* gdb.mi/mi2-console.exp: Likewise.
+	* gdb.mi/mi2-disassemble.exp: Likewise.
+	* gdb.mi/mi2-eval.exp: Likewise.
+	* gdb.mi/mi2-file.exp: Likewise.
+	* gdb.mi/mi2-read-memory.exp: Likewise.
+	* gdb.mi/mi2-regs.exp: Likewise.
+	* gdb.mi/mi2-return.exp: Likewise.
+	* gdb.mi/mi2-simplerun.exp: Likewise.
+	* gdb.mi/mi2-stack.exp: Likewise.
+	* gdb.mi/mi2-stepi.exp: Likewise.
+	* gdb.mi/mi2-syn-frame.exp: Likewise.
+	* gdb.mi/mi2-until.exp: Likewise.
+	* gdb.mi/mi2-var-block.exp: Likewise.
+	* gdb.mi/mi2-var-child.exp: Likewise.
+	* gdb.mi/mi2-var-cmd.exp: Likewise.
+	* gdb.mi/mi2-var-display.exp: Likewise.
+	* gdb.mi/mi2-watch.exp: Likewise.
+	* gdb.stabs/exclfwd.exp: Likewise.
+	* gdb.stabs/weird.exp: Likewise.
+	* gdb.threads/gcore-thread.exp: Likewise.
+	* gdb.trace/actions.exp: Likewise.
+	* gdb.trace/backtrace.exp: Likewise.
+	* gdb.trace/circ.exp: Likewise.
+	* gdb.trace/collection.exp: Likewise.
+	* gdb.trace/deltrace.exp: Likewise.
+	* gdb.trace/infotrace.exp: Likewise.
+	* gdb.trace/limits.exp: Likewise.
+	* gdb.trace/packetlen.exp: Likewise.
+	* gdb.trace/passc-dyn.exp: Likewise.
+	* gdb.trace/passcount.exp: Likewise.
+	* gdb.trace/report.exp: Likewise.
+	* gdb.trace/save-trace.exp: Likewise.
+	* gdb.trace/tfind.exp: Likewise.
+	* gdb.trace/tracecmd.exp: Likewise.
+	* gdb.trace/while-dyn.exp: Likewise.
+	* gdb.trace/while-stepping.exp: Likewise.
+
+2006-08-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/step-bt.c: New file.
+	* gdb.base/step-bt.exp: New testcase.
+
+2006-08-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* config/monitor.exp (gdb_load): Remove support for obsolete
+	download-write-size.
+	* gdb.base/remote.exp: Likewise.  Update all callers of
+	gdb_timed_load.
+
+2006-08-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* cursal.exp: Pass binfile to gdb_load.
+
+2006-08-01  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gdb.base/cursal.exp: Add "" to gdb_load call.
+
+2006-07-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.asm/asm-source.exp: Add alpha-*-netbsd* to the list of
+	NetBSD/ELF targets.
+
+2006-07-25  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.cp/userdef.cc, gdb.cp/userdef.exp: New tests for unary
+	operator*.
+
+2006-07-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/completion.exp: Update for change in "file" behavior.
+	* gdb.stabs/weird.exp: Likewise.
+	* lib/mi-support.exp (mi_gdb_file_cmd): Likewise.
+	* lib/gdb.exp (gdb_file_cmd): Likewise.  Kill the program explicitly.
+
+2006-07-24  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gdb.base/auxv.exp: Skip on non-linux, non-solaris targets.
+	* gdb.base/cursal.exp: Use gdb_file_cmd first, then separate gdb_load.
+
+2006-07-21  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* gdb.base/default.exp: Update source command error message.
+	* gdb.base/help.exp: Update 'help source' message.
+
+2006-07-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.cp/bs15503.exp: Update comment for no longer crashing
+	test.
+
+2006-07-19  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* gdb.base/ifelse.exp: Remove troublesome 'got here' messages.
+
+2006-07-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.arch/i386-size.c, gdb.arch/i386-size.exp: New files.
+
+2006-07-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.threads/print-threads.exp: Use gdb_breakpoint.
+
+2006-07-17  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/long_long.exp (gdb_test_long_long): Exclude
+	*-*-openbsd* from targets for wich we expect ARM FPA floating
+	point format.
+
+2006-07-17  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.cp/annota3.exp: Expect frame-begin annotation.
+
+2006-07-17  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/annota3.exp: Expect frame-begin annotation.
+
+2006-07-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/help.exp: Adjust "help unset" test to accept
+	any list of unset commands.
+
+2006-07-13  Paul N. Hilfinger  <Hilfinger@adacore.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.cp/ref-params.exp: New test.
+	* gdb.cp/ref-params.cc: New source file.
+	* gdb.cp/Makefile.in (EXECUTABLES): Add ref-params.
+
+2006-07-08  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.arch/alpha-step.exp (test_stepi): Do not include trailing
+	spaces/tabs in regular expressions since they might not be there.
+
+2006-07-07  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* gdb.base/ifelse.exp: New file.
+
+2006-07-04  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gdb.base/huge.c: Allow CRASH_GDB to be set from command
+	line.
+	* gdb.base/huge.exp: Loop over compilation to find a size that
+	is acceptable.
+	* gdb.base/remote.exp: Correct expected strings.
+	* gdb.dwarf2/mac-fileno.S: Avoid # comments.
+
+2006-06-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/store.exp: Don't use gdb_suppress_entire_file.
+
+2006-06-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/gdb1555.exp: Use gdb_compile_shlib.  Skip if not
+	native.
+
+2006-06-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.stabs/exclfwd.exp: Skip the test if configure did not
+	enable stabs testing.
+
+2006-06-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/auxv.exp: Intercept undefined command messages before
+	gdb_test_multiple does.
+
+2006-06-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (host_alias): Remove.
+	(target_alias): Use @target_noncanonical@.
+	(site.exp): Don't set host_alias.
+	* aclocal.m4: Remove contents.  Include acx.m4.
+	* configure: Regenerated.
+	* configure.ac: Use ACX_NONCANONICAL_TARGET.
+
+2006-06-13  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* lib/gdb.exp (gdb_load_cmd): New.
+
+	* gdb.base/fileio.c: Add system(NULL) test.
+	* gdb.base/fileio.exp: Check it.
+
+	* gdb.base/break.c: Add 10a breakpoint at }
+	* gdb.base/break.exp: Add test for breakpoint at }
+	* gdb.cp/anon-union.cc: Add code at end of function.
+	* gdb.cp/anon-union.exp: Adjust end of function breakpoint.
+	* gdb.mi/var-cmd.c: Add code at end of function.
+	* gdb.mi/mi-var-display.exp: Adjust end of next.
+	* gdb.mi/mi2-var-display.exp: Likewise.
+	* gdb.base/fileio.c: Add stop function and insert calls at
+	stopping places.
+	* gdb.base/fileio.exp: Breakpoint stop function and remove
+	explicit line number references.
+
+2006-05-19  Joel Brobecker  <brobecker@adacore.com>
+
+        * gdb.base/del.exp (test_delete_alias): New function.
+        Now check that both "del" and "d" work as aliases for "delete".
+
+2006-05-18  Fred Fish  <fnf@specifix.com>
+
+	* gdb.base/a2-run.exp: Allow part of test to run when args aren't
+	required.  Check for spurious output after program exits normally.
+
+2006-05-17  Fred Fish  <fnf@specifix.com>
+
+	* gdb.base/relocate.exp: Use gdb_file_cmd rather than
+	gdb_load, so it works in the simulator.
+
 2006-05-11  Fred Fish  <fnf@specifix.com>
 
 	* gdb.base/bang.exp: Ignore unexpected output between the

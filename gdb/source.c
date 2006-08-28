@@ -29,6 +29,7 @@
 #include "gdbcmd.h"
 #include "frame.h"
 #include "value.h"
+#include "gdb_assert.h"
 
 #include <sys/types.h>
 #include "gdb_string.h"
@@ -72,6 +73,17 @@ static void show_directories (char *, int);
    Same format as the PATH environment variable's value.  */
 
 char *source_path;
+
+/* Support for source path substitution commands.  */
+
+struct substitute_path_rule
+{
+  char *from;
+  char *to;
+  struct substitute_path_rule *next;
+};
+
+static struct substitute_path_rule *substitute_path_rules = NULL;
 
 /* Symtab of default file for listing lines of.  */
 
@@ -139,7 +151,7 @@ get_lines_to_list (void)
 struct symtab_and_line
 get_current_source_symtab_and_line (void)
 {
-  struct symtab_and_line cursal = { };
+  struct symtab_and_line cursal = { 0 };
 
   cursal.symtab = current_source_symtab;
   cursal.line = current_source_line;
@@ -178,7 +190,7 @@ set_default_source_symtab_and_line (void)
 struct symtab_and_line
 set_current_source_symtab_and_line (const struct symtab_and_line *sal)
 {
-  struct symtab_and_line cursal = { };
+  struct symtab_and_line cursal = { 0 };
   
   cursal.symtab = current_source_symtab;
   cursal.line = current_source_line;
@@ -828,6 +840,85 @@ source_full_path_of (char *filename, char **full_pathname)
   return 1;
 }
 
+/* Return non-zero if RULE matches PATH, that is if the rule can be
+   applied to PATH.  */
+
+static int
+substitute_path_rule_matches (const struct substitute_path_rule *rule,
+                              const char *path)
+{
+  const int from_len = strlen (rule->from);
+  const int path_len = strlen (path);
+  char *path_start;
+
+  if (path_len < from_len)
+    return 0;
+
+  /* The substitution rules are anchored at the start of the path,
+     so the path should start with rule->from.  There is no filename
+     comparison routine, so we need to extract the first FROM_LEN
+     characters from PATH first and use that to do the comparison.  */
+
+  path_start = alloca (from_len + 1);
+  strncpy (path_start, path, from_len);
+  path_start[from_len] = '\0';
+
+  if (FILENAME_CMP (path_start, rule->from) != 0)
+    return 0;
+
+  /* Make sure that the region in the path that matches the substitution
+     rule is immediately followed by a directory separator (or the end of
+     string character).  */
+  
+  if (path[from_len] != '\0' && !IS_DIR_SEPARATOR (path[from_len]))
+    return 0;
+
+  return 1;
+}
+
+/* Find the substitute-path rule that applies to PATH and return it.
+   Return NULL if no rule applies.  */
+
+static struct substitute_path_rule *
+get_substitute_path_rule (const char *path)
+{
+  struct substitute_path_rule *rule = substitute_path_rules;
+
+  while (rule != NULL && !substitute_path_rule_matches (rule, path))
+    rule = rule->next;
+
+  return rule;
+}
+
+/* If the user specified a source path substitution rule that applies
+   to PATH, then apply it and return the new path.  This new path must
+   be deallocated afterwards.  
+   
+   Return NULL if no substitution rule was specified by the user,
+   or if no rule applied to the given PATH.  */
+   
+static char *
+rewrite_source_path (const char *path)
+{
+  const struct substitute_path_rule *rule = get_substitute_path_rule (path);
+  char *new_path;
+  int from_len;
+  
+  if (rule == NULL)
+    return NULL;
+
+  from_len = strlen (rule->from);
+
+  /* Compute the rewritten path and return it.  */
+
+  new_path =
+    (char *) xmalloc (strlen (path) + 1 + strlen (rule->to) - from_len);
+  strcpy (new_path, rule->to);
+  strcat (new_path, path + from_len);
+
+  return new_path;
+}
+
 /* This function is capable of finding the absolute path to a
    source file, and opening it, provided you give it an 
    OBJFILE and FILENAME. Both the DIRNAME and FULLNAME are only
@@ -844,7 +935,7 @@ source_full_path_of (char *filename, char **full_pathname)
      FULLNAME is set to the absolute path to the file just opened.
 
    On Failure
-     A non valid file descriptor is returned. ( the return value is negitive ) 
+     An invalid file descriptor is returned. ( the return value is negative ) 
      FULLNAME is set to NULL.  */
 int
 find_and_open_source (struct objfile *objfile,
@@ -857,8 +948,20 @@ find_and_open_source (struct objfile *objfile,
   int result;
 
   /* Quick way out if we already know its full name */
+
   if (*fullname)
     {
+      /* The user may have requested that source paths be rewritten
+         according to substitution rules he provided.  If a substitution
+         rule applies to this path, then apply it.  */
+      char *rewritten_fullname = rewrite_source_path (*fullname);
+
+      if (rewritten_fullname != NULL)
+        {
+          xfree (*fullname);
+          *fullname = rewritten_fullname;
+        }
+
       result = open (*fullname, OPEN_MODE);
       if (result >= 0)
 	return result;
@@ -869,6 +972,17 @@ find_and_open_source (struct objfile *objfile,
 
   if (dirname != NULL)
     {
+      /* If necessary, rewrite the compilation directory name according
+         to the source path substitution rules specified by the user.  */
+
+      char *rewritten_dirname = rewrite_source_path (dirname);
+
+      if (rewritten_dirname != NULL)
+        {
+          make_cleanup (xfree, rewritten_dirname);
+          dirname = rewritten_dirname;
+        }
+      
       /* Replace a path entry of  $cdir  with the compilation directory name */
 #define	cdir_len	5
       /* We cast strstr's result in case an ANSIhole has made it const,
@@ -1587,6 +1701,220 @@ reverse_search_command (char *regex, int from_tty)
   fclose (stream);
   return;
 }
+
+/* If the last character of PATH is a directory separator, then strip it.  */
+
+static void
+strip_trailing_directory_separator (char *path)
+{
+  const int last = strlen (path) - 1;
+
+  if (last < 0)
+    return;  /* No stripping is needed if PATH is the empty string.  */
+
+  if (IS_DIR_SEPARATOR (path[last]))
+    path[last] = '\0';
+}
+
+/* Return the path substitution rule that matches FROM.
+   Return NULL if no rule matches.  */
+
+static struct substitute_path_rule *
+find_substitute_path_rule (const char *from)
+{
+  struct substitute_path_rule *rule = substitute_path_rules;
+
+  while (rule != NULL)
+    {
+      if (FILENAME_CMP (rule->from, from) == 0)
+        return rule;
+      rule = rule->next;
+    }
+
+  return NULL;
+}
+
+/* Add a new substitute-path rule at the end of the current list of rules.
+   The new rule will replace FROM into TO.  */
+
+static void
+add_substitute_path_rule (char *from, char *to)
+{
+  struct substitute_path_rule *rule;
+  struct substitute_path_rule *new_rule;
+
+  new_rule = xmalloc (sizeof (struct substitute_path_rule));
+  new_rule->from = xstrdup (from);
+  new_rule->to = xstrdup (to);
+  new_rule->next = NULL;
+
+  /* If the list of rules are empty, then insert the new rule
+     at the head of the list.  */
+
+  if (substitute_path_rules == NULL)
+    {
+      substitute_path_rules = new_rule;
+      return;
+    }
+
+  /* Otherwise, skip to the last rule in our list and then append
+     the new rule.  */
+
+  rule = substitute_path_rules;
+  while (rule->next != NULL)
+    rule = rule->next;
+
+  rule->next = new_rule;
+}
+
+/* Remove the given source path substitution rule from the current list
+   of rules.  The memory allocated for that rule is also deallocated.  */
+
+static void
+delete_substitute_path_rule (struct substitute_path_rule *rule)
+{
+  if (rule == substitute_path_rules)
+    substitute_path_rules = rule->next;
+  else
+    {
+      struct substitute_path_rule *prev = substitute_path_rules;
+
+      while (prev != NULL && prev->next != rule)
+        prev = prev->next;
+
+      gdb_assert (prev != NULL);
+
+      prev->next = rule->next;
+    }
+
+  xfree (rule->from);
+  xfree (rule->to);
+  xfree (rule);
+}
+
+/* Implement the "show substitute-path" command.  */
+
+static void
+show_substitute_path_command (char *args, int from_tty)
+{
+  struct substitute_path_rule *rule = substitute_path_rules;
+  char **argv;
+  char *from = NULL;
+  
+  argv = buildargv (args);
+  make_cleanup_freeargv (argv);
+
+  /* We expect zero or one argument.  */
+
+  if (argv != NULL && argv[0] != NULL && argv[1] != NULL)
+    error (_("Too many arguments in command"));
+
+  if (argv != NULL && argv[0] != NULL)
+    from = argv[0];
+
+  /* Print the substitution rules.  */
+
+  if (from != NULL)
+    printf_filtered
+      (_("Source path substitution rule matching `%s':\n"), from);
+  else
+    printf_filtered (_("List of all source path substitution rules:\n"));
+
+  while (rule != NULL)
+    {
+      if (from == NULL || FILENAME_CMP (rule->from, from) == 0)
+        printf_filtered ("  `%s' -> `%s'.\n", rule->from, rule->to);
+      rule = rule->next;
+    }
+}
+
+/* Implement the "unset substitute-path" command.  */
+
+static void
+unset_substitute_path_command (char *args, int from_tty)
+{
+  struct substitute_path_rule *rule = substitute_path_rules;
+  char **argv = buildargv (args);
+  char *from = NULL;
+  int rule_found = 0;
+
+  /* This function takes either 0 or 1 argument.  */
+
+  if (argv != NULL && argv[0] != NULL && argv[1] != NULL)
+    error (_("Incorrect usage, too many arguments in command"));
+
+  if (argv != NULL && argv[0] != NULL)
+    from = argv[0];
+
+  /* If the user asked for all the rules to be deleted, ask him
+     to confirm and give him a chance to abort before the action
+     is performed.  */
+
+  if (from == NULL
+      && !query (_("Delete all source path substitution rules? ")))
+    error (_("Canceled"));
+
+  /* Delete the rule matching the argument.  No argument means that
+     all rules should be deleted.  */
+
+  while (rule != NULL)
+    {
+      struct substitute_path_rule *next = rule->next;
+
+      if (from == NULL || FILENAME_CMP (from, rule->from) == 0)
+        {
+          delete_substitute_path_rule (rule);
+          rule_found = 1;
+        }
+
+      rule = next;
+    }
+  
+  /* If the user asked for a specific rule to be deleted but
+     we could not find it, then report an error.  */
+
+  if (from != NULL && !rule_found)
+    error (_("No substitution rule defined for `%s'"), from);
+}
+
+/* Add a new source path substitution rule.  */
+
+static void
+set_substitute_path_command (char *args, int from_tty)
+{
+  char *from_path, *to_path;
+  char **argv;
+  struct substitute_path_rule *rule;
+  
+  argv = buildargv (args);
+  make_cleanup_freeargv (argv);
+
+  if (argv == NULL || argv[0] == NULL || argv [1] == NULL)
+    error (_("Incorrect usage, too few arguments in command"));
+
+  if (argv[2] != NULL)
+    error (_("Incorrect usage, too many arguments in command"));
+
+  if (*(argv[0]) == '\0')
+    error (_("First argument must be at least one character long"));
+
+  /* Strip any trailing directory separator character in either FROM
+     or TO.  The substitution rule already implicitly contains them.  */
+  strip_trailing_directory_separator (argv[0]);
+  strip_trailing_directory_separator (argv[1]);
+
+  /* If a rule with the same "from" was previously defined, then
+     delete it.  This new rule replaces it.  */
+
+  rule = find_substitute_path_rule (argv[0]);
+  if (rule != NULL)
+    delete_substitute_path_rule (rule);
+      
+  /* Insert the new substitution rule.  */
+
+  add_substitute_path_rule (argv[0], argv[1]);
+}
+
 
 void
 _initialize_source (void)
@@ -1666,4 +1994,19 @@ Show number of source lines gdb will list by default."), NULL,
 			    NULL,
 			    show_lines_to_list,
 			    &setlist, &showlist);
+
+  add_cmd ("substitute-path", class_files, set_substitute_path_command,
+           _("\
+Add a source path substitution rule.  If a substitution rule was previously\n\
+set, it is overridden."), &setlist);
+
+  add_cmd ("substitute-path", class_files, unset_substitute_path_command,
+           _("\
+Remove the current source path substitution rule.  This has no effect\n\
+if no path substitution rule was previously specified."),
+           &unsetlist);
+
+  add_cmd ("substitute-path", class_files, show_substitute_path_command,
+           _("Show the current source path substitution rule."),
+           &showlist);
 }

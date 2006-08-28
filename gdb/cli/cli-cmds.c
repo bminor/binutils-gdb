@@ -173,6 +173,11 @@ struct cmd_list_element *showdebuglist;
 struct cmd_list_element *setchecklist;
 
 struct cmd_list_element *showchecklist;
+
+/* Command tracing state.  */
+
+int source_verbose = 0;
+int trace_commands = 0;
 
 /* Utility used everywhere when at least one argument is needed and
    none is supplied. */
@@ -424,17 +429,16 @@ cd_command (char *dir, int from_tty)
 }
 
 void
-source_command (char *args, int from_tty)
+source_script (char *file, int from_tty)
 {
   FILE *stream;
   struct cleanup *old_cleanups;
-  char *file = args;
   char *full_pathname = NULL;
   int fd;
 
-  if (file == NULL)
+  if (file == NULL || *file == 0)
     {
-      error (_("source command requires pathname of file to source."));
+      error (_("source command requires file name of file to source."));
     }
 
   file = tilde_expand (file);
@@ -464,6 +468,51 @@ source_command (char *args, int from_tty)
 
   do_cleanups (old_cleanups);
 }
+
+/* Return the source_verbose global variable to its previous state
+   on exit from the source command, by whatever means.  */
+static void
+source_verbose_cleanup (void *old_value)
+{
+  source_verbose = *(int *)old_value;
+  xfree (old_value);
+}
+
+static void
+source_command (char *args, int from_tty)
+{
+  struct cleanup *old_cleanups;
+  char *file = args;
+  int *old_source_verbose = xmalloc (sizeof(int));
+
+  *old_source_verbose = source_verbose;
+  old_cleanups = make_cleanup (source_verbose_cleanup, old_source_verbose);
+
+  /* -v causes the source command to run in verbose mode.
+     We still have to be able to handle filenames with spaces in a
+     backward compatible way, so buildargv is not appropriate.  */
+
+  if (args)
+    {
+      /* Make sure leading white space does not break the comparisons.  */
+      while (isspace(args[0]))
+	args++;
+
+      /* Is -v the first thing in the string?  */
+      if (args[0] == '-' && args[1] == 'v' && isspace (args[2]))
+	{
+	  source_verbose = 1;
+
+	  /* Trim -v and whitespace from the filename.  */
+	  file = &args[3];
+	  while (isspace (file[0]))
+	    file++;
+	}
+    }
+
+  return source_script (file, from_tty);
+}
+
 
 static void
 echo_command (char *text, int from_tty)
@@ -667,9 +716,9 @@ static void
 list_command (char *arg, int from_tty)
 {
   struct symtabs_and_lines sals, sals_end;
-  struct symtab_and_line sal = { };
-  struct symtab_and_line sal_end = { };
-  struct symtab_and_line cursal = { };
+  struct symtab_and_line sal = { 0 };
+  struct symtab_and_line sal_end = { 0 };
+  struct symtab_and_line cursal = { 0 };
   struct symbol *sym;
   char *arg1;
   int no_end = 1;
@@ -1182,8 +1231,10 @@ Commands defined in this way may have up to ten arguments."));
 
   source_help_text = xstrprintf (_("\
 Read commands from a file named FILE.\n\
+Optional -v switch (before the filename) causes each command in\n\
+FILE to be echoed as it is executed.\n\
 Note that the file \"%s\" is read automatically in this way\n\
-when gdb is started."), gdbinit);
+when GDB is started."), gdbinit);
   c = add_cmd ("source", class_support, source_command,
 	       source_help_text, &cmdlist);
   set_cmd_completer (c, filename_completer);
@@ -1363,5 +1414,13 @@ Set the max call depth for user-defined commands."), _("\
 Show the max call depth for user-defined commands."), NULL,
 			   NULL,
 			   show_max_user_call_depth,
+			   &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("trace-commands", no_class, &trace_commands, _("\
+Set tracing of GDB CLI commands."), _("\
+Show state of GDB CLI command tracing."), _("\
+When 'on', each command is displayed as it is executed."),
+			   NULL,
+			   NULL,
 			   &setlist, &showlist);
 }

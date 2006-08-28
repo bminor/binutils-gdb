@@ -264,14 +264,16 @@ sparc_xfer_wcookie (struct target_ops *ops, enum target_object object,
   gdb_assert (object == TARGET_OBJECT_WCOOKIE);
   gdb_assert (readbuf && writebuf == NULL);
 
-  if (offset >= sizeof (unsigned long))
+  if (offset == sizeof (unsigned long))
+    return 0;			/* Signal EOF.  */
+  if (offset > sizeof (unsigned long))
     return -1;
 
 #ifdef PT_WCOOKIE
   /* If PT_WCOOKIE is defined (by <sys/ptrace.h>), assume we're
      running on an OpenBSD release that uses StackGhost (3.1 or
-     later).  As of release 3.4, OpenBSD doesn't use a randomized
-     cookie yet, but a future release probably will.  */
+     later).  Since release 3.6, OpenBSD uses a fully randomized
+     cookie.  */
   {
     int pid;
 

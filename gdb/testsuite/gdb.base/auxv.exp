@@ -23,6 +23,11 @@
 # This file is based on corefile.exp which was written by Fred
 # Fish. (fnf@cygnus.com)
 
+if { ! [istarget "*-*-linux*"] && ! [istarget "*-*-solaris*"] } {
+    verbose "Skipping auxv.exp because of lack of support."
+    return
+}
+
 if $tracelevel then {
 	strace $tracelevel
 }
@@ -137,6 +142,9 @@ gdb_test_multiple "gcore $gcorefile" "gcore" {
 	set gcore_works 1
     }
     -re "Can't create a corefile\[\r\n\]+$gdb_prompt $" {
+	unsupported "gcore"
+    }
+    -re "Undefined command: .*\[\r\n\]+$gdb_prompt $" {
 	unsupported "gcore"
     }
 }

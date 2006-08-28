@@ -1,7 +1,7 @@
 /* Target-dependent code for Atmel AVR, for GDB.
 
    Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005 Free Software Foundation, Inc.
+   2005, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1323,35 +1323,22 @@ static void
 avr_io_reg_read_command (char *args, int from_tty)
 {
   LONGEST bufsiz = 0;
-  char buf[400];
+  gdb_byte *buf;
   char query[400];
   char *p;
   unsigned int nreg = 0;
   unsigned int val;
   int i, j, k, step;
 
-  /* Just get the maximum buffer size. */
-  bufsiz = target_read_partial (&current_target, TARGET_OBJECT_AVR,
-				NULL, NULL, 0, 0);
-  if (bufsiz < 0)
+  /* Find out how many io registers the target has. */
+  bufsiz = target_read_alloc (&current_target, TARGET_OBJECT_AVR,
+			      "avr.io_reg", &buf);
+
+  if (bufsiz <= 0)
     {
       fprintf_unfiltered (gdb_stderr,
 			  _("ERR: info io_registers NOT supported "
 			    "by current target\n"));
-      return;
-    }
-  if (bufsiz > sizeof (buf))
-    bufsiz = sizeof (buf);
-
-  /* Find out how many io registers the target has. */
-  strcpy (query, "avr.io_reg");
-  target_read_partial (&current_target, TARGET_OBJECT_AVR, query, buf, 0,
-		       bufsiz);
-
-  if (strncmp (buf, "", bufsiz) == 0)
-    {
-      fprintf_unfiltered (gdb_stderr,
-			  _("info io_registers NOT supported by target\n"));
       return;
     }
 
@@ -1359,8 +1346,11 @@ avr_io_reg_read_command (char *args, int from_tty)
     {
       fprintf_unfiltered (gdb_stderr,
 			  _("Error fetching number of io registers\n"));
+      xfree (buf);
       return;
     }
+
+  xfree (buf);
 
   reinitialize_more_filter ();
 
@@ -1377,8 +1367,8 @@ avr_io_reg_read_command (char *args, int from_tty)
         j = nreg - i;           /* last block is less than 8 registers */
 
       snprintf (query, sizeof (query) - 1, "avr.io_reg:%x,%x", i, j);
-      target_read_partial (&current_target, TARGET_OBJECT_AVR, query, buf,
-			   0, bufsiz);
+      bufsiz = target_read_alloc (&current_target, TARGET_OBJECT_AVR,
+				  query, &buf);
 
       p = buf;
       for (k = i; k < (i + j); k++)
@@ -1393,6 +1383,8 @@ avr_io_reg_read_command (char *args, int from_tty)
 		break;
 	    }
 	}
+
+      xfree (buf);
     }
 }
 

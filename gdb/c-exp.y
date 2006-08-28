@@ -790,7 +790,7 @@ func_mod:	'(' ')'
 			{ free ($2); $$ = 0; }
 	;
 
-/* We used to try to recognize more pointer to member types here, but
+/* We used to try to recognize pointer to member types here, but
    that didn't work (shift/reduce conflicts meant that these rules never
    got executed).  The problem is that
      int (foo::bar::baz::bizzle)
@@ -799,8 +799,6 @@ func_mod:	'(' ')'
    is a pointer to member type.  Stroustrup loses again!  */
 
 type	:	ptype
-	|	typebase COLONCOLON '*'
-			{ $$ = lookup_member_type (builtin_type (current_gdbarch)->builtin_int, $1); }
 	;
 
 typebase  /* Implements (approximately): (type-qualifier)* type-specifier */

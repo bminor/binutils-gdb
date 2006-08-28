@@ -40,6 +40,7 @@
 
 #define ALPHA_V0_REGNUM	     0  /* Function integer return value */
 #define ALPHA_T7_REGNUM	     8  /* Return address register for OSF/1 __add* */
+#define ALPHA_S0_REGNUM      9	/* First saved register */
 #define ALPHA_GCC_FP_REGNUM 15  /* Used by gcc as frame register */
 #define ALPHA_A0_REGNUM     16  /* Loc of first arg during a subr call */
 #define ALPHA_T9_REGNUM     23  /* Return address register for OSF/1 __div* */
@@ -53,6 +54,9 @@
 #define ALPHA_FPCR_REGNUM   63  /* Floating point control register */
 #define ALPHA_PC_REGNUM     64  /* Contains program counter */
 #define ALPHA_UNIQUE_REGNUM 66	/* PAL_rduniq value */
+
+/* Instruction size.  */
+#define ALPHA_INSN_SIZE	4
 
 /* The alpha has two different virtual pointers for arguments and locals.
    
@@ -87,6 +91,9 @@ struct gdbarch_tdep
      look at tramp-frame.h and other simplier per-architecture
      sigtramp unwinders.  */
   int (*pc_in_sigtramp) (CORE_ADDR pc, char *name);
+
+  /* If TYPE will be returned in memory, return true.  */
+  int (*return_in_memory) (struct type *type);
 
   /* Offset of registers in `struct sigcontext'.  */
   int sc_pc_offset;

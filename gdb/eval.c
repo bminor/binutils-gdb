@@ -283,6 +283,10 @@ evaluate_struct_tuple (struct value *struct_val,
 	      if (variantno < 0)
 		{
 		  fieldno++;
+		  /* Skip static fields.  */
+		  while (fieldno < TYPE_NFIELDS (struct_type)
+			 && TYPE_FIELD_STATIC_KIND (struct_type, fieldno))
+		    fieldno++;
 		  subfieldno = fieldno;
 		  if (fieldno >= TYPE_NFIELDS (struct_type))
 		    error (_("too many initializers"));
@@ -2128,6 +2132,7 @@ evaluate_subexp_for_address (struct expression *exp, int *pos,
   enum exp_opcode op;
   int pc;
   struct symbol *var;
+  struct value *x;
 
   pc = (*pos);
   op = exp->elts[pc].opcode;
@@ -2136,7 +2141,24 @@ evaluate_subexp_for_address (struct expression *exp, int *pos,
     {
     case UNOP_IND:
       (*pos)++;
-      return evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      x = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+
+      /* We can't optimize out "&*" if there's a user-defined operator*.  */
+      if (unop_user_defined_p (op, x))
+	{
+	  x = value_x_unop (x, op, noside);
+	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	    {
+	      if (VALUE_LVAL (x) == lval_memory)
+		return value_zero (lookup_pointer_type (value_type (x)),
+				   not_lval);
+	      else
+		error (_("Attempt to take address of non-lval"));
+	    }
+	  return value_addr (x);
+	}
+
+      return x;
 
     case UNOP_MEMVAL:
       (*pos) += 3;
@@ -2175,16 +2197,16 @@ evaluate_subexp_for_address (struct expression *exp, int *pos,
 
     default:
     default_case:
+      x = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	{
-	  struct value *x = evaluate_subexp (NULL_TYPE, exp, pos, noside);
 	  if (VALUE_LVAL (x) == lval_memory)
 	    return value_zero (lookup_pointer_type (value_type (x)),
 			       not_lval);
 	  else
 	    error (_("Attempt to take address of non-lval"));
 	}
-      return value_addr (evaluate_subexp (NULL_TYPE, exp, pos, noside));
+      return value_addr (x);
     }
 }
 

@@ -533,7 +533,7 @@ gdb_test "help stepi" "Step one instruction exactly\.\[\r\n\]+Argument N means d
 gdb_test "help signal" "Continue program giving it signal.*" "help signal"
 # test help source
 # vxgdb reads .vxgdbinit
-gdb_test "help source" "Read commands from a file named FILE\.\[\r\n\]+Note that the file \"\[^\"\]*\" is read automatically in this way\[\r\n\]+when gdb is started\." "help source"
+gdb_test "help source" "Read commands from a file named FILE\.\[\r\n\]+Optional -v switch \\(before the filename\\) causes each command in\[\r\n\]+FILE to be echoed as it is executed\.\[\r\n\]+Note that the file \"\[^\"\]*\" is read automatically in this way\[\r\n\]+when GDB is started\." "help source"
 # test help stack
 gdb_test "help stack" "Examining the stack\..*\[\r\n\]+When the program being debugged stops, gdb selects the innermost frame\.\[\r\n\]+The commands below can be used to select other frames by number or address\.\[\r\n\]+List of commands:\[\r\n\]+backtrace -- Print backtrace of all stack frames\[\r\n\]+bt -- Print backtrace of all stack frames\[\r\n\]+down -- Select and print stack frame called by this one\[\r\n\]+frame -- Select and print a stack frame\[\r\n\]+return -- Make selected stack frame return to its caller\[\r\n\]+select-frame -- Select a stack frame without printing anything\[\r\n\]+up -- Select and print stack frame that called this one\[\r\n\]+Type \"help\" followed by command name for full documentation\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\." "help stack"
 # test help status
@@ -572,7 +572,7 @@ gdb_test "help undisplay" "Cancel some expressions to be displayed when program 
 # test help unset environment
 gdb_test "help unset environment" "Cancel environment variable VAR for the program\.\[\r\n\]+This does not affect the program until the next \"run\" command\." "help unset environment"
 # test help unset
-gdb_test "help unset" "Complement to certain \"set\" commands\.\[\r\n\]+List of unset subcommands:\[\r\n\]+unset environment -- Cancel environment variable VAR for the program\[\r\n\]+Type \"help unset\" followed by unset subcommand name for full documentation\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\." "help unset"
+gdb_test "help unset" "Complement to certain \"set\" commands\.\[\r\n\]+List of unset subcommands:\[\r\n\]+.*Type \"help unset\" followed by unset subcommand name for full documentation\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\." "help unset"
 # test help up
 gdb_test "help up" "Select and print stack frame that called this one\.\[\r\n\]+An argument says how many frames up to go\." "help up"
 # test help up-silently

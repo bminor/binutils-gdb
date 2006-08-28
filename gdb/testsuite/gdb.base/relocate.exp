@@ -30,7 +30,8 @@ set binfile ${objdir}/${subdir}/${testfile}.o
 
 remote_exec build "rm -f ${binfile}"
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" object {debug}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested relocate.exp
+     return -1
 }
 
 proc get_var_address { var } {
@@ -137,7 +138,7 @@ if { "${function_foo_addr}" == "${new_function_foo_addr}" } {
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+gdb_file_cmd ${binfile}
 
 # Check the values of the variables.
 gdb_test "print static_foo" "\\\$$decimal = 1"

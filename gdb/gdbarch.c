@@ -206,7 +206,6 @@ struct gdbarch
   CORE_ADDR frame_args_skip;
   gdbarch_unwind_pc_ftype *unwind_pc;
   gdbarch_unwind_sp_ftype *unwind_sp;
-  gdbarch_deprecated_saved_pc_after_call_ftype *deprecated_saved_pc_after_call;
   gdbarch_frame_num_args_ftype *frame_num_args;
   gdbarch_deprecated_stack_align_ftype *deprecated_stack_align;
   gdbarch_frame_align_ftype *frame_align;
@@ -332,7 +331,6 @@ struct gdbarch startup_gdbarch =
   0,  /* frame_args_skip */
   0,  /* unwind_pc */
   0,  /* unwind_sp */
-  0,  /* deprecated_saved_pc_after_call */
   0,  /* frame_num_args */
   0,  /* deprecated_stack_align */
   0,  /* frame_align */
@@ -586,7 +584,6 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of frame_args_skip, invalid_p == 0 */
   /* Skip verify of unwind_pc, has predicate */
   /* Skip verify of unwind_sp, has predicate */
-  /* Skip verify of deprecated_saved_pc_after_call, has predicate */
   /* Skip verify of frame_num_args, has predicate */
   /* Skip verify of deprecated_stack_align, has predicate */
   /* Skip verify of frame_align, has predicate */
@@ -921,24 +918,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: deprecated_register_size = %s\n",
                       paddr_d (current_gdbarch->deprecated_register_size));
-#ifdef DEPRECATED_SAVED_PC_AFTER_CALL_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_SAVED_PC_AFTER_CALL_P()",
-                      XSTRING (DEPRECATED_SAVED_PC_AFTER_CALL_P ()));
-#endif
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: gdbarch_deprecated_saved_pc_after_call_p() = %d\n",
-                      gdbarch_deprecated_saved_pc_after_call_p (current_gdbarch));
-#ifdef DEPRECATED_SAVED_PC_AFTER_CALL
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_SAVED_PC_AFTER_CALL(frame)",
-                      XSTRING (DEPRECATED_SAVED_PC_AFTER_CALL (frame)));
-#endif
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: deprecated_saved_pc_after_call = <0x%lx>\n",
-                      (long) current_gdbarch->deprecated_saved_pc_after_call);
 #ifdef DEPRECATED_STACK_ALIGN_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -3105,30 +3084,6 @@ set_gdbarch_unwind_sp (struct gdbarch *gdbarch,
                        gdbarch_unwind_sp_ftype unwind_sp)
 {
   gdbarch->unwind_sp = unwind_sp;
-}
-
-int
-gdbarch_deprecated_saved_pc_after_call_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_saved_pc_after_call != NULL;
-}
-
-CORE_ADDR
-gdbarch_deprecated_saved_pc_after_call (struct gdbarch *gdbarch, struct frame_info *frame)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->deprecated_saved_pc_after_call != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_saved_pc_after_call called\n");
-  return gdbarch->deprecated_saved_pc_after_call (frame);
-}
-
-void
-set_gdbarch_deprecated_saved_pc_after_call (struct gdbarch *gdbarch,
-                                            gdbarch_deprecated_saved_pc_after_call_ftype deprecated_saved_pc_after_call)
-{
-  gdbarch->deprecated_saved_pc_after_call = deprecated_saved_pc_after_call;
 }
 
 int

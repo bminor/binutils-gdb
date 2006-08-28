@@ -191,6 +191,7 @@ void
 write_exp_elt_opcode (enum exp_opcode expelt)
 {
   union exp_element tmp;
+  memset (&tmp, 0, sizeof (union exp_element));
 
   tmp.opcode = expelt;
 
@@ -201,6 +202,7 @@ void
 write_exp_elt_sym (struct symbol *expelt)
 {
   union exp_element tmp;
+  memset (&tmp, 0, sizeof (union exp_element));
 
   tmp.symbol = expelt;
 
@@ -211,6 +213,7 @@ void
 write_exp_elt_block (struct block *b)
 {
   union exp_element tmp;
+  memset (&tmp, 0, sizeof (union exp_element));
   tmp.block = b;
   write_exp_elt (tmp);
 }
@@ -219,6 +222,7 @@ void
 write_exp_elt_longcst (LONGEST expelt)
 {
   union exp_element tmp;
+  memset (&tmp, 0, sizeof (union exp_element));
 
   tmp.longconst = expelt;
 
@@ -229,6 +233,7 @@ void
 write_exp_elt_dblcst (DOUBLEST expelt)
 {
   union exp_element tmp;
+  memset (&tmp, 0, sizeof (union exp_element));
 
   tmp.doubleconst = expelt;
 
@@ -239,6 +244,7 @@ void
 write_exp_elt_type (struct type *expelt)
 {
   union exp_element tmp;
+  memset (&tmp, 0, sizeof (union exp_element));
 
   tmp.type = expelt;
 
@@ -249,6 +255,7 @@ void
 write_exp_elt_intern (struct internalvar *expelt)
 {
   union exp_element tmp;
+  memset (&tmp, 0, sizeof (union exp_element));
 
   tmp.internalvar = expelt;
 

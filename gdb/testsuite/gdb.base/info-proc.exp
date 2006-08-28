@@ -35,15 +35,18 @@ set srcfile1 ${testfile}1.c
 set binfile ${objdir}/${subdir}/${testfile}
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}0.o" object {debug nowarnings}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested info-proc.exp
+     return -1
 }
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${binfile}1.o" object {debug nowarnings}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested info-proc.exp
+     return -1
 }
 
 if  { [gdb_compile "${binfile}0.o ${binfile}1.o" "${binfile}" executable {debug nowarnings}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested info-proc.exp
+     return -1
 }
 
 # Start with a fresh gdb.
@@ -75,7 +78,8 @@ gdb_expect {
 gdb_test "info proc" "No current process.*" "info proc without a process"
 
 if { ! [ runto_main ] } then {
-    gdb_suppress_entire_file "Run to main failed, so all tests in this file will automatically fail."
+    untested info-proc.exp
+    return -1
 }
 
 gdb_test "info proc" "process ${decimal}.*" "info proc with process"

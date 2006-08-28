@@ -157,11 +157,13 @@ switch -glob -- [istarget] {
 }
 
 if { "${asm-arch}" == "" } {
-    gdb_suppress_entire_file "Assembly source test -- not implemented for this target."
+    untested asm-source.exp
+    return -1
 }
 
 # On NetBSD/ELF we need a special NetBSD-identifying note section.
 if { [istarget "*-*-netbsdelf*"]
+     || [istarget "alpha-*-netbsd*"]
      || [istarget "mips*-*-netbsd*"]
      || [istarget "powerpc-*-netbsd*"]
      || [istarget "x86_64-*-netbsd*"] } then {
@@ -185,7 +187,8 @@ set dest [target_info name]
 if [board_info $dest exists multilib_flags] {
 	set multilib_flags [board_info $dest multilib_flags]
 	if { "${multilib_flags}" != "" } {
-	   gdb_suppress_entire_file "Assembly source test -- multilibs not supported by this test."
+	   untested asm-source.exp
+	   return -1
 	   return;
 	 }
 }
@@ -234,10 +237,12 @@ regsub "--" "-gstabs\[+\]" "${debug-flags}" "-gstabs" debug-flags
 regsub "--" "-g\[0-9\]" "${debug-flags}" "" debug-flags
 
 if {[target_assemble ${srcdir}/${subdir}/${srcfile1} asmsrc1.o "${asm-flags} ${debug-flags}"] != ""} then {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested asm-source.exp
+     return -1
 }
 if {[target_assemble ${srcdir}/${subdir}/${srcfile2} asmsrc2.o "${asm-flags} ${debug-flags}"] != ""} then {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested asm-source.exp
+     return -1
 }
 
 # We deliberately don't use gdb_compile here to link together the
@@ -247,7 +252,8 @@ if {[target_assemble ${srcdir}/${subdir}/${srcfile2} asmsrc2.o "${asm-flags} ${d
 # also avoids a lot of problems on many systems, most notably on
 # *-*-*bsd* and *-*-solaris2*.
 if {[target_link "asmsrc1.o asmsrc2.o" "${binfile}" ${link-flags}] != "" } then {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested asm-source.exp
+     return -1
 }
 
 # Restore the target board linker script for HC11/HC12.

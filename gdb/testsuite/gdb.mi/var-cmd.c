@@ -278,6 +278,7 @@ do_children_tests (void)
   snp0.long_ptr = &y3;
   snp1.long_ptr = &x3;
   snp2.long_ptr = &z3;
+  {int a = 0;}
 }
 
 void

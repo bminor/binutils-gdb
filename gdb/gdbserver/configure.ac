@@ -38,7 +38,9 @@ AC_HEADER_STDC
 
 AC_CHECK_HEADERS(sgtty.h termio.h termios.h sys/reg.h string.h dnl
 		 proc_service.h sys/procfs.h thread_db.h linux/elf.h dnl
-		 stdlib.h unistd.h)
+		 stdlib.h unistd.h dnl
+		 terminal.h sys/ioctl.h netinet/in.h sys/socket.h netdb.h dnl
+		 netinet/tcp.h arpa/inet.h sys/wait.h)
 
 AC_CHECK_DECLS(strerror)
 
@@ -47,6 +49,15 @@ AC_CHECK_TYPES(socklen_t, [], [],
 #include <sys/socket.h>
 ])
 . ${srcdir}/configure.srv
+
+if test "${srv_mingw}" = "yes"; then
+  LIBS="$LIBS -lwsock32"
+  AC_DEFINE(USE_WIN32API, 1,
+	    [Define if we should use the Windows API, instead of the
+	     POSIX API.  On Windows, we use the Windows API when
+	     building for MinGW, but the POSIX API when building
+	     for Cygwin.])
+fi
 
 if test "${srv_linux_usrregs}" = "yes"; then
   AC_DEFINE(HAVE_LINUX_USRREGS, 1,

@@ -1,7 +1,64 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 6.4
+*** Changes since GDB 6.5
+
+* GDB can now be configured as a cross-debugger targeting native Windows
+(mingw32) or Cygwin.  It can communicate with a remote debugging stub
+running on a Windows system over TCP/IP to debug Windows programs.
+
+* The GDB remote stub, gdbserver, has been updated to support Windows and
+Cygwin debugging.  Both single-threaded and multi-threaded programs are
+supported.
+
+* The "set trust-readonly-sections" command works again.  This command was
+broken in GDB 6.3, 6.4, and 6.5.
+
+* New commands
+
+set substitute-path
+unset substitute-path
+show substitute-path
+  Manage a list of substitution rules that GDB uses to rewrite the name
+  of the directories where the sources are located. This can be useful
+  for instance when the sources were moved to a different location
+  between compilation and debugging.
+
+set trace-commands
+show trace-commands
+  Print each CLI command as it is executed.  Each command is prefixed with
+  a number of `+' symbols representing the nesting depth.
+  The source command now has a `-v' option to enable the same feature.
+
+* REMOVED features
+
+The ARM Demon monitor support (RDP protocol, "target rdp").
+
+Kernel Object Display, an embedded debugging feature which only worked with
+an obsolete version of Cisco IOS.
+
+The 'set download-write-size' and 'show download-write-size' commands.
+
+* New remote packets
+
+qSupported:
+  Tell a stub about GDB client features, and request remote target features.
+  The first feature implemented is PacketSize, which allows the target to
+  specify the size of packets it can handle - to minimize the number of
+  packets required and improve performance when connected to a remote
+  target.
+
+qXfer:auxv:read:
+  Fetch an OS auxilliary vector from the remote stub.  This packet is a
+  more efficient replacement for qPart:auxv:read.
+
+* Removed remote packets
+
+qPart:auxv:read:
+  This packet has been replaced by qXfer:auxv:read.  Only GDB 6.4 and 6.5
+  used it, and only gdbserver implemented it.
+
+*** Changes in GDB 6.5
 
 * New targets
 
@@ -52,6 +109,15 @@ Morpho Technologies ms2		ms1-elf
 GDB now builds as a cross debugger hosted on i686-mingw32, including
 native console support, and remote communications using either
 network sockets or serial ports.
+
+* Improved Modula-2 language support
+
+GDB can now print most types in the Modula-2 syntax.  This includes:
+basic types, set types, record types, enumerated types, range types,
+pointer types and ARRAY types.  Procedure var parameters are correctly
+printed and hexadecimal addresses and character constants are also
+written in the Modula-2 syntax.  Best results can be obtained by using
+GNU Modula-2 together with the -gdwarf-2 command line option.
 
 * REMOVED features
 

@@ -53,7 +53,8 @@ set srcfile1 ${testfile}1.c
 set binfile ${objdir}/${subdir}/${testfile}
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested freebpcmd.exp
+     return -1
 }
 
 gdb_exit

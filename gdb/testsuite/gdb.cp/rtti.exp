@@ -47,15 +47,18 @@ set objfile2 "${testfile}2.o"
 set binfile  "${objdir}/${subdir}/${testfile}"
 
 if  { [gdb_compile "$srcdir/$subdir/$srcfile1" "$objdir/$subdir/$objfile1" object {debug c++}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested rtti.exp
+     return -1
 }
 
 if  { [gdb_compile "$srcdir/$subdir/$srcfile2" "$objdir/$subdir/$objfile2" object {debug c++}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested rtti.exp
+     return -1
 }
 
 if  { [gdb_compile "$objdir/$subdir/$objfile1 $objdir/$subdir/$objfile2" "${binfile}" executable {debug c++}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested rtti.exp
+     return -1
 }
 
 if [get_compiler_info ${binfile} "c++"] {

@@ -2742,8 +2742,8 @@ compiler it can also be used in other contexts.
 @node Member Type Descriptor
 @section The @samp{@@} Type Descriptor
 
-The @samp{@@} type descriptor is used together with the @samp{*} type
-descriptor for a pointer-to-non-static-member-data type.  It is followed
+The @samp{@@} type descriptor is used for a
+pointer-to-non-static-member-data type.  It is followed
 by type information for the class (or union), a comma, and type
 information for the member data.
 
@@ -2756,7 +2756,7 @@ typedef int A::*int_in_a;
 generates the following stab:
 
 @smallexample
-.stabs "int_in_a:t20=*21=@@19,1",128,0,0,0
+.stabs "int_in_a:t20=21=@@19,1",128,0,0,0
 @end smallexample
 
 Note that there is a conflict between this and type attributes

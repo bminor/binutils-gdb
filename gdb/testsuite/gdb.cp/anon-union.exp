@@ -288,7 +288,7 @@ gdb_expect {
 # Step over next assignment to w
 send_gdb "next\n"
 gdb_expect {
-   -re "55\[ \t\]*\}\r\n$gdb_prompt $" {
+    -re "55\[ \t\]*int j = 0;\r\n$gdb_prompt $" {
       pass "next 4"
     }
     -re ".*$gdb_prompt $" { fail "next 4" }

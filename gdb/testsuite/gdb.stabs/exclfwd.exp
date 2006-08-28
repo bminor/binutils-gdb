@@ -21,6 +21,12 @@ if $tracelevel {
     strace $tracelevel
 }
 
+# If the test directory was not created by configure then skip
+# this test.
+if ![file isdirectory ${objdir}/${subdir}] then {
+    return 0
+}
+
 #
 # test running programs
 #
@@ -32,12 +38,14 @@ set binfile ${objdir}/${subdir}/${testfile}
 
 foreach file {exclfwd1 exclfwd2} {
     if {[gdb_compile "${srcdir}/${subdir}/${file}.c" "${file}.o" object {debug}] != ""} {
-        gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+        untested exclfwd.exp
+        return -1
     }
 }
 
 if {[gdb_compile "exclfwd1.o exclfwd2.o" ${binfile} executable {debug}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     untested exclfwd.exp
+     return -1
 }
 
 gdb_exit

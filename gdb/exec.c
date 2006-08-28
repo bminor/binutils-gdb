@@ -127,7 +127,7 @@ show_write_files (struct ui_file *file, int from_tty,
 
 struct vmap *vmap;
 
-void
+static void
 exec_open (char *args, int from_tty)
 {
   target_preopen (from_tty);
@@ -328,8 +328,11 @@ exec_file_command (char *args, int from_tty)
 {
   char **argv;
   char *filename;
-  
-  target_preopen (from_tty);
+
+  if (from_tty && target_has_execution
+      && !query (_("A program is being debugged already.\n"
+		   "Are you sure you want to change the file? ")))
+    error (_("File not changed."));
 
   if (args)
     {

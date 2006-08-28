@@ -946,7 +946,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 			  paddr_nz (addr), paddr_nz (pc));
     }
 
-  fi = frame_obstack_zalloc (sizeof (struct frame_info));
+  fi = FRAME_OBSTACK_ZALLOC (struct frame_info);
 
   fi->next = create_sentinel_frame (current_regcache);
 
@@ -1514,8 +1514,8 @@ int
 safe_frame_unwind_memory (struct frame_info *this_frame,
 			  CORE_ADDR addr, gdb_byte *buf, int len)
 {
-  /* NOTE: deprecated_read_memory_nobpt returns zero on success!  */
-  return !deprecated_read_memory_nobpt (addr, buf, len);
+  /* NOTE: read_memory_nobpt returns zero on success!  */
+  return !read_memory_nobpt (addr, buf, len);
 }
 
 /* Architecture method.  */

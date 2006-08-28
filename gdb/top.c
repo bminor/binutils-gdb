@@ -421,6 +421,9 @@ execute_command (char *p, int from_tty)
       char *arg;
       line = p;
 
+      /* If trace-commands is set then this will print this command.  */
+      print_command_trace (p);
+
       c = lookup_cmd (&p, cmdlist, "", 0, 1);
 
       /* If the target is running, we allow only a limited set of

@@ -1,6 +1,6 @@
 /* Remote utility routines for the remote server for GDB.
    Copyright (C) 1986, 1989, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005
+   2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -21,21 +21,41 @@
    Boston, MA 02110-1301, USA.  */
 
 #include "server.h"
+#if HAVE_TERMINAL_H
 #include "terminal.h"
+#endif
 #include <stdio.h>
 #include <string.h>
+#if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif
 #include <sys/file.h>
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#if HAVE_NETDB_H
 #include <netdb.h>
+#endif
+#if HAVE_NETINET_TCP_H
 #include <netinet/tcp.h>
+#endif
+#if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif
 #include <signal.h>
 #include <fcntl.h>
 #include <sys/time.h>
 #include <unistd.h>
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
+#endif
+
+#if USE_WIN32API
+#include <winsock.h>
+#endif
 
 #ifndef HAVE_SOCKLEN_T
 typedef int socklen_t;
@@ -52,6 +72,10 @@ struct sym_cache
 /* The symbol cache.  */
 static struct sym_cache *symbol_cache;
 
+/* If this flag has been set, assume cache misses are
+   failures.  */
+int all_symbols_looked_up;
+
 int remote_debug = 0;
 struct ui_file *gdb_stdlog;
 
@@ -67,10 +91,15 @@ extern int debug_threads;
 void
 remote_open (char *name)
 {
+#if defined(F_SETFL) && defined (FASYNC)
   int save_fcntl_flags;
+#endif
   
   if (!strchr (name, ':'))
     {
+#ifdef USE_WIN32API
+      error ("Only <host>:<port> is supported on this platform.");
+#else
       remote_desc = open (name, O_RDWR);
       if (remote_desc < 0)
 	perror_with_name ("Could not open remote device");
@@ -120,9 +149,13 @@ remote_open (char *name)
 #endif
 
       fprintf (stderr, "Remote debugging using %s\n", name);
+#endif /* USE_WIN32API */
     }
   else
     {
+#ifdef USE_WIN32API
+      static int winsock_initialized;
+#endif
       char *port_str;
       int port;
       struct sockaddr_in sockaddr;
@@ -133,7 +166,17 @@ remote_open (char *name)
 
       port = atoi (port_str + 1);
 
-      tmp_desc = socket (PF_INET, SOCK_STREAM, 0);
+#ifdef USE_WIN32API
+      if (!winsock_initialized)
+	{
+	  WSADATA wsad;
+
+	  WSAStartup (MAKEWORD (1, 0), &wsad);
+	  winsock_initialized = 1;
+	}
+#endif
+
+      tmp_desc = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP);
       if (tmp_desc < 0)
 	perror_with_name ("Can't open socket");
 
@@ -151,6 +194,7 @@ remote_open (char *name)
 	perror_with_name ("Can't bind address");
 
       fprintf (stderr, "Listening on port %d\n", port);
+      fflush (stderr);
 
       tmp = sizeof (sockaddr);
       remote_desc = accept (tmp_desc, (struct sockaddr *) &sockaddr, &tmp);
@@ -167,10 +211,15 @@ remote_open (char *name)
       setsockopt (remote_desc, IPPROTO_TCP, TCP_NODELAY,
 		  (char *) &tmp, sizeof (tmp));
 
+
+#ifndef USE_WIN32API
       close (tmp_desc);		/* No longer need this */
 
       signal (SIGPIPE, SIG_IGN);	/* If we don't do this, then gdbserver simply
 					   exits when the remote side dies.  */
+#else
+      closesocket (tmp_desc);	/* No longer need this */
+#endif
 
       /* Convert IP address to string.  */
       fprintf (stderr, "Remote debugging from host %s\n", 
@@ -190,7 +239,11 @@ remote_open (char *name)
 void
 remote_close (void)
 {
+#ifdef USE_WIN32API
+  closesocket (remote_desc);
+#else
   close (remote_desc);
+#endif
 }
 
 /* Convert hex digit A to a number.  */
@@ -272,17 +325,98 @@ hexify (char *hex, const char *bin, int count)
   return i;
 }
 
-/* Send a packet to the remote machine, with error checking.
-   The data of the packet is in BUF.  Returns >= 0 on success, -1 otherwise. */
+/* Convert BUFFER, binary data at least LEN bytes long, into escaped
+   binary data in OUT_BUF.  Set *OUT_LEN to the length of the data
+   encoded in OUT_BUF, and return the number of bytes in OUT_BUF
+   (which may be more than *OUT_LEN due to escape characters).  The
+   total number of bytes in the output buffer will be at most
+   OUT_MAXLEN.  */
 
 int
-putpkt (char *buf)
+remote_escape_output (const gdb_byte *buffer, int len,
+		      gdb_byte *out_buf, int *out_len,
+		      int out_maxlen)
+{
+  int input_index, output_index;
+
+  output_index = 0;
+  for (input_index = 0; input_index < len; input_index++)
+    {
+      gdb_byte b = buffer[input_index];
+
+      if (b == '$' || b == '#' || b == '}' || b == '*')
+	{
+	  /* These must be escaped.  */
+	  if (output_index + 2 > out_maxlen)
+	    break;
+	  out_buf[output_index++] = '}';
+	  out_buf[output_index++] = b ^ 0x20;
+	}
+      else
+	{
+	  if (output_index + 1 > out_maxlen)
+	    break;
+	  out_buf[output_index++] = b;
+	}
+    }
+
+  *out_len = input_index;
+  return output_index;
+}
+
+/* Convert BUFFER, escaped data LEN bytes long, into binary data
+   in OUT_BUF.  Return the number of bytes written to OUT_BUF.
+   Raise an error if the total number of bytes exceeds OUT_MAXLEN.
+
+   This function reverses remote_escape_output.  It allows more
+   escaped characters than that function does, in particular because
+   '*' must be escaped to avoid the run-length encoding processing
+   in reading packets.  */
+
+static int
+remote_unescape_input (const gdb_byte *buffer, int len,
+		       gdb_byte *out_buf, int out_maxlen)
+{
+  int input_index, output_index;
+  int escaped;
+
+  output_index = 0;
+  escaped = 0;
+  for (input_index = 0; input_index < len; input_index++)
+    {
+      gdb_byte b = buffer[input_index];
+
+      if (output_index + 1 > out_maxlen)
+	error ("Received too much data from the target.");
+
+      if (escaped)
+	{
+	  out_buf[output_index++] = b ^ 0x20;
+	  escaped = 0;
+	}
+      else if (b == '}')
+	escaped = 1;
+      else
+	out_buf[output_index++] = b;
+    }
+
+  if (escaped)
+    error ("Unmatched escape character in target response.");
+
+  return output_index;
+}
+
+/* Send a packet to the remote machine, with error checking.
+   The data of the packet is in BUF, and the length of the
+   packet is in CNT.  Returns >= 0 on success, -1 otherwise.  */
+
+int
+putpkt_binary (char *buf, int cnt)
 {
   int i;
   unsigned char csum = 0;
   char *buf2;
   char buf3[1];
-  int cnt = strlen (buf);
   char *p;
 
   buf2 = malloc (PBUFSIZ);
@@ -310,7 +444,7 @@ putpkt (char *buf)
     {
       int cc;
 
-      if (write (remote_desc, buf2, p - buf2) != p - buf2)
+      if (send (remote_desc, buf2, p - buf2, 0) != p - buf2)
 	{
 	  perror ("putpkt(write)");
 	  return -1;
@@ -321,7 +455,7 @@ putpkt (char *buf)
 	  fprintf (stderr, "putpkt (\"%s\"); [looking for ack]\n", buf2);
 	  fflush (stderr);
 	}
-      cc = read (remote_desc, buf3, 1);
+      cc = recv (remote_desc, buf3, 1, 0);
       if (remote_debug)
 	{
 	  fprintf (stderr, "[received '%c' (0x%x)]\n", buf3[0], buf3[0]);
@@ -349,6 +483,18 @@ putpkt (char *buf)
   return 1;			/* Success! */
 }
 
+/* Send a packet to the remote machine, with error checking.  The data
+   of the packet is in BUF, and the packet should be a NUL-terminated
+   string.  Returns >= 0 on success, -1 otherwise.  */
+
+int
+putpkt (char *buf)
+{
+  return putpkt_binary (buf, strlen (buf));
+}
+
+#ifndef USE_WIN32API
+
 /* Come here when we get an input interrupt from the remote side.  This
    interrupt should only be active while we are waiting for the child to do
    something.  About the only thing that should come through is a ^C, which
@@ -370,7 +516,7 @@ input_interrupt (int unused)
       int cc;
       char c = 0;
       
-      cc = read (remote_desc, &c, 1);
+      cc = recv (remote_desc, &c, 1, 0);
 
       if (cc != 1 || c != '\003')
 	{
@@ -382,28 +528,33 @@ input_interrupt (int unused)
       (*the_target->send_signal) (SIGINT);
     }
 }
+#endif
+
+/* Asynchronous I/O support.  SIGIO must be enabled when waiting, in order to
+   accept Control-C from the client, and must be disabled when talking to
+   the client.  */
 
 void
 block_async_io (void)
 {
+#ifndef USE_WIN32API
   sigset_t sigio_set;
   sigemptyset (&sigio_set);
   sigaddset (&sigio_set, SIGIO);
   sigprocmask (SIG_BLOCK, &sigio_set, NULL);
+#endif
 }
 
 void
 unblock_async_io (void)
 {
+#ifndef USE_WIN32API
   sigset_t sigio_set;
   sigemptyset (&sigio_set);
   sigaddset (&sigio_set, SIGIO);
   sigprocmask (SIG_UNBLOCK, &sigio_set, NULL);
+#endif
 }
-
-/* Asynchronous I/O support.  SIGIO must be enabled when waiting, in order to
-   accept Control-C from the client, and must be disabled when talking to
-   the client.  */
 
 /* Current state of asynchronous I/O.  */
 static int async_io_enabled;
@@ -415,7 +566,9 @@ enable_async_io (void)
   if (async_io_enabled)
     return;
 
+#ifndef USE_WIN32API
   signal (SIGIO, input_interrupt);
+#endif
   async_io_enabled = 1;
 }
 
@@ -426,7 +579,9 @@ disable_async_io (void)
   if (!async_io_enabled)
     return;
 
+#ifndef USE_WIN32API
   signal (SIGIO, SIG_IGN);
+#endif
   async_io_enabled = 0;
 }
 
@@ -435,14 +590,14 @@ disable_async_io (void)
 static int
 readchar (void)
 {
-  static char buf[BUFSIZ];
+  static unsigned char buf[BUFSIZ];
   static int bufcnt = 0;
-  static char *bufp;
+  static unsigned char *bufp;
 
   if (bufcnt-- > 0)
-    return *bufp++ & 0x7f;
+    return *bufp++;
 
-  bufcnt = read (remote_desc, buf, sizeof (buf));
+  bufcnt = recv (remote_desc, buf, sizeof (buf), 0);
 
   if (bufcnt <= 0)
     {
@@ -509,7 +664,7 @@ getpkt (char *buf)
 
       fprintf (stderr, "Bad checksum, sentsum=0x%x, csum=0x%x, buf=%s\n",
 	       (c1 << 4) + c2, csum, buf);
-      write (remote_desc, "-", 1);
+      send (remote_desc, "-", 1, 0);
     }
 
   if (remote_debug)
@@ -518,7 +673,7 @@ getpkt (char *buf)
       fflush (stderr);
     }
 
-  write (remote_desc, "+", 1);
+  send (remote_desc, "+", 1, 0);
 
   if (remote_debug)
     {
@@ -627,13 +782,11 @@ dead_thread_notify (int id)
 }
 
 void
-prepare_resume_reply (char *buf, char status, unsigned char signo)
+prepare_resume_reply (char *buf, char status, unsigned char sig)
 {
-  int nib, sig;
+  int nib;
 
   *buf++ = status;
-
-  sig = (int)target_signal_from_host (signo);
 
   nib = ((sig & 0xf0) >> 4);
   *buf++ = tohex (nib);
@@ -751,6 +904,33 @@ decode_M_packet (char *from, CORE_ADDR *mem_addr_ptr, unsigned int *len_ptr,
   convert_ascii_to_int (&from[i++], to, *len_ptr);
 }
 
+int
+decode_X_packet (char *from, int packet_len, CORE_ADDR *mem_addr_ptr,
+		 unsigned int *len_ptr, unsigned char *to)
+{
+  int i = 0;
+  char ch;
+  *mem_addr_ptr = *len_ptr = 0;
+
+  while ((ch = from[i++]) != ',')
+    {
+      *mem_addr_ptr = *mem_addr_ptr << 4;
+      *mem_addr_ptr |= fromhex (ch) & 0x0f;
+    }
+
+  while ((ch = from[i++]) != ':')
+    {
+      *len_ptr = *len_ptr << 4;
+      *len_ptr |= fromhex (ch) & 0x0f;
+    }
+
+  if (remote_unescape_input ((const gdb_byte *) &from[i], packet_len - i,
+			     to, *len_ptr) != *len_ptr)
+    return -1;
+
+  return 0;
+}
+
 /* Ask GDB for the address of NAME, and return it in ADDRP if found.
    Returns 1 if the symbol is found, 0 if it is not, -1 on error.  */
 
@@ -768,6 +948,14 @@ look_up_one_symbol (const char *name, CORE_ADDR *addrp)
 	*addrp = sym->addr;
 	return 1;
       }
+
+  /* If we've passed the call to thread_db_look_up_symbols, then
+     anything not in the cache must not exist; we're not interested
+     in any libraries loaded after that point, only in symbols in
+     libpthread.so.  It might not be an appropriate time to look
+     up a symbol, e.g. while we're trying to fetch registers.  */
+  if (all_symbols_looked_up)
+    return 0;
 
   /* Send the request.  */
   strcpy (own_buf, "qSymbol:");

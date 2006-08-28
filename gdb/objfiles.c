@@ -34,6 +34,9 @@
 #include "target.h"
 #include "bcache.h"
 #include "mdebugread.h"
+#include "expression.h"
+#include "parser-defs.h"
+
 #include "gdb_assert.h"
 #include <sys/types.h>
 #include "gdb_stat.h"
@@ -440,6 +443,12 @@ free_objfile (struct objfile *objfile)
   /* Not all our callers call clear_symtab_users (objfile_purge_solibs,
      for example), so we need to call this here.  */
   clear_pc_function_cache ();
+
+  /* Clear globals which might have pointed into a removed objfile.
+     FIXME: It's not clear which of these are supposed to persist
+     between expressions and which ought to be reset each time.  */
+  expression_context_block = NULL;
+  innermost_block = NULL;
 
   /* Check to see if the current_source_symtab belongs to this objfile,
      and if so, call clear_current_source_symtab_and_line. */

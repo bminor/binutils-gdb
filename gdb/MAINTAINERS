@@ -162,7 +162,7 @@ Fred Fish			fnf@ninemoons.com
 Daniel Jacobowitz		dan@debian.org
 Mark Kettenis           	kettenis@gnu.org
 Stan Shebs			shebs@apple.com
-Michael Snyder			msnyder@redhat.com
+Michael Snyder			Michael.Snyder@PalmSource.com
 Elena Zannoni			ezannoni@redhat.com
 Eli Zaretskii			eliz@gnu.org
 
@@ -285,7 +285,7 @@ the native maintainer when resolving ABI issues.
 
 	mn10300		--target=mn10300-elf broken
 			(sim/ dies with make -j)
-			Michael Snyder		msnyder@redhat.com
+			Michael Snyder		Michael.Snyder@PalmSource.com
 
 	ms1		--target=ms1-elf ,-Werror
 			Kevin Buettner		kevinb@redhat.com
@@ -332,6 +332,7 @@ their platform.
 AIX			Joel Brobecker		brobecker@adacore.com
 
 djgpp native		Eli Zaretskii		eliz@gnu.org
+GNU Hurd		Alfred M. Szmidt	ams@gnu.org
 MS Windows (NT, '00, 9x, Me, XP) host & native
 			Chris Faylor		cgf@alum.bu.edu
 GNU/Linux/x86 native & host
@@ -345,8 +346,8 @@ FreeBSD native & host	Mark Kettenis		kettenis@gnu.org
 
 Core: Generic components used by all of GDB
 
-tracing			Michael Snyder		msnyder@redhat.com
-threads			Michael Snyder		msnyder@redhat.com
+tracing			Michael Snyder		Michael.Snyder@PalmSource.com
+threads			Michael Snyder		Michael.Snyder@PalmSource.com
 			Mark Kettenis		kettenis@gnu.org
 language support
   C++			Daniel Jacobowitz	dan@debian.org
@@ -357,8 +358,8 @@ documentation		Eli Zaretskii		eliz@gnu.org
   (including NEWS)
 testsuite
   gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
-  threads (gdb.threads) Michael Snyder          msnyder@redhat.com
-  trace (gdb.trace)     Michael Snyder          msnyder@redhat.com
+  threads (gdb.threads) Michael Snyder          Michael.Snyder@PalmSource.com
+  trace (gdb.trace)     Michael Snyder          Michael.Snyder@PalmSource.com
 
 
 UI: External (user) interfaces.
@@ -418,10 +419,10 @@ dwarf readers		Elena Zannoni		ezannoni@redhat.com
 elf reader		Elena Zannoni		ezannoni@redhat.com
 stabs reader		Elena Zannoni		ezannoni@redhat.com
 readline/		Elena Zannoni		ezannoni@redhat.com
-Kernel Object Display	Fernando Nasser		fnasser@redhat.com
 NetBSD native & host	Jason Thorpe		thorpej@netbsd.org
 Pascal support		Pierre Muller		muller@sources.redhat.com
 avr			Theodore A. Roth	troth@openavr.org
+Modula-2 support	Gaius Mulley		gaius@glam.ac.uk
 
 
 			Write After Approval
@@ -441,6 +442,7 @@ Per Bothner					per@bothner.com
 Joel Brobecker					brobecker@adacore.com
 Dave Brolley					brolley@redhat.com
 Paul Brook					paul@codesourcery.com
+Julian Brown					julian@codesourcery.com
 Kevin Buettner					kevinb@redhat.com
 Andrew Cagney					cagney@gnu.org
 David Carlton					carlton@bactrian.org
@@ -503,6 +505,7 @@ Marko Mlinar                                    markom@opencores.org
 Alan Modra					amodra@bigpond.net.au
 Jason Molenda					jmolenda@apple.com
 Pierre Muller					muller@sources.redhat.com
+Gaius Mulley                                    gaius@glam.ac.uk
 Joseph Myers					joseph@codesourcery.com
 Fernando Nasser					fnasser@redhat.com
 Nathanael Nerode				neroden@gcc.gnu.org
@@ -529,7 +532,7 @@ Jiri Smid					smid@suse.cz
 David Smith					dsmith@redhat.com
 Stephen P. Smith				ischis2@cox.net
 Jackie Smith Cashion				jsmith@redhat.com
-Michael Snyder					msnyder@redhat.com
+Michael Snyder					Michael.Snyder@PalmSource.com
 Petr Sorfa					petrs@caldera.com
 Andrew Stubbs					andrew.stubbs@st.com
 Ian Lance Taylor				ian@airs.com
@@ -543,6 +546,7 @@ Keith Walker					keith.walker@arm.com
 Kris Warkentin					kewarken@qnx.com
 Ulrich Weigand					uweigand@de.ibm.com
 Nathan Williams					nathanw@wasabisystems.com
+Bob Wilson					bob.wilson@acm.org
 Jim Wilson					wilson@specifixinc.com
 Elena Zannoni					ezannoni@redhat.com
 Eli Zaretskii					eliz@gnu.org
@@ -565,7 +569,7 @@ J.T. Conklin (dcache, NetBSD, remote, global)	jtc at acorntoolworks dot com
 Frank Ch. Eigler (sim)				fche at redhat dot com
 Per Bothner (Java)				per at bothner dot com
 Anthony Green (Java)				green at redhat dot com
-Fernando Nasser (testsuite/, mi, cli)           fnasser at redhat dot com
+Fernando Nasser (testsuite/, mi, cli, KOD)      fnasser at redhat dot com
 Mark Salter (testsuite/lib+config)		msalter at redhat dot com
 Jim Kingdon (web pages)				kingdon at panix dot com
 Jim Ingham (gdbtk, libgui)			jingham at apple dot com

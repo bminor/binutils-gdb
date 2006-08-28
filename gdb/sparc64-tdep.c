@@ -1,6 +1,6 @@
 /* Target-dependent code for UltraSPARC.
 
-   Copyright (C) 2003, 2004, 2005 Free Software Foundation, Inc.
+   Copyright (C) 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -120,6 +120,62 @@ sparc64_structure_or_union_p (const struct type *type)
 
   return 0;
 }
+
+
+/* Type for %pstate.  */
+struct type *sparc64_pstate_type;
+
+/* Type for %fsr.  */
+struct type *sparc64_fsr_type;
+
+/* Type for %fprs.  */
+struct type *sparc64_fprs_type;
+
+/* Construct types for ISA-specific registers.  */
+
+static void
+sparc64_init_types (void)
+{
+  struct type *type;
+
+  type = init_flags_type ("builtin_type_sparc64_pstate", 8);
+  append_flags_type_flag (type, 0, "AG");
+  append_flags_type_flag (type, 1, "IE");
+  append_flags_type_flag (type, 2, "PRIV");
+  append_flags_type_flag (type, 3, "AM");
+  append_flags_type_flag (type, 4, "PEF");
+  append_flags_type_flag (type, 5, "RED");
+  append_flags_type_flag (type, 8, "TLE");
+  append_flags_type_flag (type, 9, "CLE");
+  append_flags_type_flag (type, 10, "PID0");
+  append_flags_type_flag (type, 11, "PID1");
+  sparc64_pstate_type = type;
+
+  type = init_flags_type ("builtin_type_sparc64_fsr", 8);
+  append_flags_type_flag (type, 0, "NXA");
+  append_flags_type_flag (type, 1, "DZA");
+  append_flags_type_flag (type, 2, "UFA");
+  append_flags_type_flag (type, 3, "OFA");
+  append_flags_type_flag (type, 4, "NVA");
+  append_flags_type_flag (type, 5, "NXC");
+  append_flags_type_flag (type, 6, "DZC");
+  append_flags_type_flag (type, 7, "UFC");
+  append_flags_type_flag (type, 8, "OFC");
+  append_flags_type_flag (type, 9, "NVC");
+  append_flags_type_flag (type, 22, "NS");
+  append_flags_type_flag (type, 23, "NXM");
+  append_flags_type_flag (type, 24, "DZM");
+  append_flags_type_flag (type, 25, "UFM");
+  append_flags_type_flag (type, 26, "OFM");
+  append_flags_type_flag (type, 27, "NVM");
+  sparc64_fsr_type = type;
+
+  type = init_flags_type ("builtin_type_sparc64_fprs", 8);
+  append_flags_type_flag (type, 0, "DL");
+  append_flags_type_flag (type, 1, "DU");
+  append_flags_type_flag (type, 2, "FEF");
+  sparc64_fprs_type = type;
+}
 
 /* Register information.  */
 
@@ -224,8 +280,8 @@ static struct sparc64_register_info sparc64_register_info[] =
   /* FIXME: Give it a name until we start using register groups.  */
   { "state", &builtin_type_int64 },
 
-  { "fsr", &builtin_type_int64 },
-  { "fprs", &builtin_type_int64 },
+  { "fsr", &sparc64_fsr_type },
+  { "fprs", &sparc64_fprs_type },
 
   /* "Although Y is a 64-bit register, its high-order 32 bits are
      reserved and always read as 0."  */
@@ -241,7 +297,7 @@ static struct sparc64_register_info sparc64_register_info[] =
 static struct sparc64_register_info sparc64_pseudo_register_info[] =
 {
   { "cwp", &builtin_type_int64 },
-  { "pstate", &builtin_type_int64 },
+  { "pstate", &sparc64_pstate_type },
   { "asi", &builtin_type_int64 },
   { "ccr", &builtin_type_int64 },
 
@@ -1478,4 +1534,15 @@ sparc64_collect_fpregset (const struct regcache *regcache,
 	regcache_raw_collect (regcache, SPARC64_FSR_REGNUM,
 			      regs + (32 * 4) + (16 * 8));
     }
+}
+
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+void _initialize_sparc64_tdep (void);
+
+void
+_initialize_sparc64_tdep (void)
+{
+  /* Initialize the UltraSPARC-specific register types.  */
+  sparc64_init_types();
 }

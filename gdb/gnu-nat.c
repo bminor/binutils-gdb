@@ -45,6 +45,9 @@
 #include <hurd/msg.h>
 #include <hurd/msg_request.h>
 #include <hurd/process.h>
+/* Defined in <hurd/process.h>, but we need forward declarations from
+   <hurd/process_request.h> as well.  */
+#undef _process_user_
 #include <hurd/process_request.h>
 #include <hurd/signal.h>
 #include <hurd/sigpreempt.h>
@@ -1978,7 +1981,7 @@ gnu_resume (ptid_t tid, int step, enum target_signal sig)
     {
       struct proc *thread = inf_tid_to_thread (inf, PIDGET (tid));
       if (!thread)
-	error (_("Can't run single thread id %d: no such thread!"));
+	error (_("Can't run single thread id %d: no such thread!"), inf->pid);
       inf_debug (inf, "running one thread: %d/%d", inf->pid, thread->tid);
       inf_set_threads_resume_sc (inf, thread, 0);
     }
@@ -2257,7 +2260,7 @@ gnu_read_inferior (task_t task, CORE_ADDR addr, char *myaddr, int length)
   if (err)
     return 0;
 
-  err = hurd_safe_copyin (myaddr, (void *) addr - low_address + copied, length);
+  err = hurd_safe_copyin (myaddr, (void *) (addr - low_address + copied), length);
   if (err)
     {
       warning (_("Read from inferior faulted: %s"), safe_strerror (err));
@@ -2312,7 +2315,7 @@ gnu_write_inferior (task_t task, CORE_ADDR addr, char *myaddr, int length)
 
   deallocate++;
 
-  err = hurd_safe_copyout ((void *) addr - low_address + copied,
+  err = hurd_safe_copyout ((void *) (addr - low_address + copied),
 			   myaddr, length);
   CHK_GOTO_OUT ("Write to inferior faulted", err);
 
@@ -2445,7 +2448,7 @@ out:
 /* Return 0 on failure, number of bytes handled otherwise.  TARGET
    is ignored. */
 static int
-gnu_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+gnu_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 		 struct mem_attrib *attrib,
 		 struct target_ops *target)
 {

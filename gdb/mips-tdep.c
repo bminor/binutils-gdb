@@ -858,7 +858,7 @@ mips_fetch_instruction (CORE_ADDR addr)
     }
   else
     instlen = MIPS_INSN32_SIZE;
-  status = deprecated_read_memory_nobpt (addr, buf, instlen);
+  status = read_memory_nobpt (addr, buf, instlen);
   if (status)
     memory_error (status, addr);
   return extract_unsigned_integer (buf, instlen);
@@ -887,8 +887,8 @@ mips32_relative_offset (ULONGEST inst)
   return ((itype_immediate (inst) ^ 0x8000) - 0x8000) << 2;
 }
 
-/* Determine whate to set a single step breakpoint while considering
-   branch prediction */
+/* Determine where to set a single step breakpoint while considering
+   branch prediction.  */
 static CORE_ADDR
 mips32_next_pc (CORE_ADDR pc)
 {
@@ -2323,7 +2323,7 @@ struct mips_objfile_private
 
 /* According to the current ABI, should the type be passed in a
    floating-point register (assuming that there is space)?  When there
-   is no FPU, FP are not even considered as possibile candidates for
+   is no FPU, FP are not even considered as possible candidates for
    FP registers and, consequently this returns false - forces FP
    arguments into integer registers. */
 
@@ -2335,7 +2335,8 @@ fp_register_arg_p (enum type_code typecode, struct type *arg_type)
 	       && (typecode == TYPE_CODE_STRUCT
 		   || typecode == TYPE_CODE_UNION)
 	       && TYPE_NFIELDS (arg_type) == 1
-	       && TYPE_CODE (TYPE_FIELD_TYPE (arg_type, 0)) == TYPE_CODE_FLT))
+	       && TYPE_CODE (check_typedef (TYPE_FIELD_TYPE (arg_type, 0))) 
+	       == TYPE_CODE_FLT))
 	  && MIPS_FPU_TYPE != MIPS_FPU_NONE);
 }
 
@@ -2494,7 +2495,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       if (fp_register_arg_p (typecode, arg_type)
 	  && float_argreg <= MIPS_LAST_FP_ARG_REGNUM)
 	{
-	  if (mips_abi_regsize (gdbarch) < 8 && len == 8)
+	  if (register_size (gdbarch, float_argreg) < 8 && len == 8)
 	    {
 	      int low_offset = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 4 : 0;
 	      unsigned long regval;
@@ -2644,7 +2645,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   return sp;
 }
 
-/* Determin the return value convention being used.  */
+/* Determine the return value convention being used.  */
 
 static enum return_value_convention
 mips_eabi_return_value (struct gdbarch *gdbarch,
@@ -3118,7 +3119,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       if (fp_register_arg_p (typecode, arg_type)
 	  && float_argreg <= MIPS_LAST_FP_ARG_REGNUM)
 	{
-	  if (mips_abi_regsize (gdbarch) < 8 && len == 8)
+	  if (register_size (gdbarch, float_argreg) < 8 && len == 8)
 	    {
 	      int low_offset = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 4 : 0;
 	      unsigned long regval;
@@ -4646,19 +4647,14 @@ mips_register_sim_regno (int regnum)
 }
 
 
-/* Convert an integer into an address.  By first converting the value
-   into a pointer and then extracting it signed, the address is
-   guarenteed to be correctly sign extended.  */
+/* Convert an integer into an address.  Extracting the value signed
+   guarantees a correctly sign extended address.  */
 
 static CORE_ADDR
 mips_integer_to_address (struct gdbarch *gdbarch,
 			 struct type *type, const gdb_byte *buf)
 {
-  gdb_byte *tmp = alloca (TYPE_LENGTH (builtin_type_void_data_ptr));
-  LONGEST val = unpack_long (type, buf);
-  store_signed_integer (tmp, TYPE_LENGTH (builtin_type_void_data_ptr), val);
-  return extract_signed_integer (tmp,
-				 TYPE_LENGTH (builtin_type_void_data_ptr));
+  return (CORE_ADDR) extract_signed_integer (buf, TYPE_LENGTH (type));
 }
 
 static void
@@ -4687,6 +4683,20 @@ mips_find_abi_section (bfd *abfd, asection *sect, void *obj)
     *abip = MIPS_ABI_EABI64;
   else
     warning (_("unsupported ABI %s."), name + 8);
+}
+
+static void
+mips_find_long_section (bfd *abfd, asection *sect, void *obj)
+{
+  int *lbp = (int *) obj;
+  const char *name = bfd_get_section_name (abfd, sect);
+
+  if (strncmp (name, ".gcc_compiled_long32", 20) == 0)
+    *lbp = 32;
+  else if (strncmp (name, ".gcc_compiled_long64", 20) == 0)
+    *lbp = 64;
+  else if (strncmp (name, ".gcc_compiled_long", 18) == 0)
+    warning (_("unrecognized .gcc_compiled_longXX"));
 }
 
 static enum mips_abi
@@ -5008,6 +5018,58 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       internal_error (__FILE__, __LINE__, _("unknown ABI in switch"));
     }
 
+  /* GCC creates a pseudo-section whose name specifies the size of
+     longs, since -mlong32 or -mlong64 may be used independent of
+     other options.  How those options affect pointer sizes is ABI and
+     architecture dependent, so use them to override the default sizes
+     set by the ABI.  This table shows the relationship between ABI,
+     -mlongXX, and size of pointers:
+
+     ABI		-mlongXX	ptr bits
+     ---		--------	--------
+     o32		32		32
+     o32		64		32
+     n32		32		32
+     n32		64		64
+     o64		32		32
+     o64		64		64
+     n64		32		32
+     n64		64		64
+     eabi32		32		32
+     eabi32		64		32
+     eabi64		32		32
+     eabi64		64		64
+
+    Note that for o32 and eabi32, pointers are always 32 bits
+    regardless of any -mlongXX option.  For all others, pointers and
+    longs are the same, as set by -mlongXX or set by defaults.
+ */
+
+  if (info.abfd != NULL)
+    {
+      int long_bit = 0;
+
+      bfd_map_over_sections (info.abfd, mips_find_long_section, &long_bit);
+      if (long_bit)
+	{
+	  set_gdbarch_long_bit (gdbarch, long_bit);
+	  switch (mips_abi)
+	    {
+	    case MIPS_ABI_O32:
+	    case MIPS_ABI_EABI32:
+	      break;
+	    case MIPS_ABI_N32:
+	    case MIPS_ABI_O64:
+	    case MIPS_ABI_N64:
+	    case MIPS_ABI_EABI64:
+	      set_gdbarch_ptr_bit (gdbarch, long_bit);
+	      break;
+	    default:
+	      internal_error (__FILE__, __LINE__, _("unknown ABI in switch"));
+	    }
+	}
+    }
+
   /* FIXME: jlarmour/2000-04-07: There *is* a flag EF_MIPS_32BIT_MODE
      that could indicate -gp32 BUT gas/config/tc-mips.c contains the
      comment:
@@ -5163,7 +5225,7 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
     {
       int ef_mips_arch;
       int ef_mips_32bitmode;
-      /* determine the ISA */
+      /* Determine the ISA.  */
       switch (tdep->elf_flags & EF_MIPS_ARCH)
 	{
 	case E_MIPS_ARCH_1:
@@ -5182,7 +5244,7 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 	  ef_mips_arch = 0;
 	  break;
 	}
-      /* determine the size of a pointer */
+      /* Determine the size of a pointer.  */
       ef_mips_32bitmode = (tdep->elf_flags & EF_MIPS_32BITMODE);
       fprintf_unfiltered (file,
 			  "mips_dump_tdep: tdep->elf_flags = 0x%x\n",

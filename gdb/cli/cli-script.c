@@ -46,8 +46,14 @@ static struct cleanup * setup_user_args (char *p);
 
 static void validate_comname (char *);
 
-/* Level of control structure.  */
+/* Level of control structure when reading.  */
 static int control_level;
+
+/* Level of control structure when executing.  */
+static int command_nest_depth = 1;
+
+/* This is to prevent certain commands being printed twice.  */
+static int suppress_next_print_command_trace = 0;
 
 /* Structure for arguments to user defined functions.  */
 #define MAXUSERARGS 10
@@ -280,6 +286,7 @@ execute_user_command (struct cmd_list_element *c, char *args)
      not confused with Insight.  */
   in_user_command = 1;
 
+  command_nest_depth++;
   while (cmdlines)
     {
       ret = execute_control_command (cmdlines);
@@ -290,7 +297,48 @@ execute_user_command (struct cmd_list_element *c, char *args)
 	}
       cmdlines = cmdlines->next;
     }
+  command_nest_depth--;
   do_cleanups (old_chain);
+}
+
+/* This function is called every time GDB prints a prompt.
+   It ensures that errors and the like to not confuse the command tracing.  */
+
+void
+reset_command_nest_depth (void)
+{
+  command_nest_depth = 1;
+
+  /* Just in case.  */
+  suppress_next_print_command_trace = 0;
+}
+
+/* Print the command, prefixed with '+' to represent the call depth.
+   This is slightly complicated because this function may be called
+   from execute_command and execute_control_command.  Unfortunately
+   execute_command also prints the top level control commands.
+   In these cases execute_command will call execute_control_command
+   via while_command or if_command.  Inner levels of 'if' and 'while'
+   are dealt with directly.  Therefore we can use these functions
+   to determine whether the command has been printed already or not.  */
+void
+print_command_trace (const char *cmd)
+{
+  int i;
+
+  if (suppress_next_print_command_trace)
+    {
+      suppress_next_print_command_trace = 0;
+      return;
+    }
+
+  if (!source_verbose && !trace_commands)
+    return;
+
+  for (i=0; i < command_nest_depth; i++)
+    printf_filtered ("+");
+
+  printf_filtered ("%s\n", cmd);
 }
 
 enum command_control_type
@@ -322,7 +370,16 @@ execute_control_command (struct command_line *cmd)
       break;
 
     case continue_control:
+      print_command_trace ("loop_continue");
+
+      /* Return for "continue", and "break" so we can either
+         continue the loop at the top, or break out.  */
+      ret = cmd->control_type;
+      break;
+
     case break_control:
+      print_command_trace ("loop_break");
+
       /* Return for "continue", and "break" so we can either
          continue the loop at the top, or break out.  */
       ret = cmd->control_type;
@@ -330,6 +387,10 @@ execute_control_command (struct command_line *cmd)
 
     case while_control:
       {
+	char *buffer = alloca (strlen (cmd->line) + 7);
+	sprintf (buffer, "while %s", cmd->line);
+	print_command_trace (buffer);
+
 	/* Parse the loop control expression for the while statement.  */
 	new_line = insert_args (cmd->line);
 	if (!new_line)
@@ -362,7 +423,9 @@ execute_control_command (struct command_line *cmd)
 	    current = *cmd->body_list;
 	    while (current)
 	      {
+		command_nest_depth++;
 		ret = execute_control_command (current);
+		command_nest_depth--;
 
 		/* If we got an error, or a "break" command, then stop
 		   looping.  */
@@ -391,6 +454,10 @@ execute_control_command (struct command_line *cmd)
 
     case if_control:
       {
+	char *buffer = alloca (strlen (cmd->line) + 4);
+	sprintf (buffer, "if %s", cmd->line);
+	print_command_trace (buffer);
+
 	new_line = insert_args (cmd->line);
 	if (!new_line)
 	  break;
@@ -417,7 +484,9 @@ execute_control_command (struct command_line *cmd)
 	/* Execute commands in the given arm.  */
 	while (current)
 	  {
+	    command_nest_depth++;
 	    ret = execute_control_command (current);
+	    command_nest_depth--;
 
 	    /* If we got an error, get out.  */
 	    if (ret != simple_control)
@@ -454,6 +523,7 @@ while_command (char *arg, int from_tty)
   if (command == NULL)
     return;
 
+  suppress_next_print_command_trace = 1;
   execute_control_command (command);
   free_command_lines (&command);
 }
@@ -472,6 +542,7 @@ if_command (char *arg, int from_tty)
   if (command == NULL)
     return;
 
+  suppress_next_print_command_trace = 1;
   execute_control_command (command);
   free_command_lines (&command);
 }
@@ -701,6 +772,7 @@ realloc_body_list (struct command_line *command, int new_length)
     xmalloc (sizeof (struct command_line *) * new_length);
 
   memcpy (body_list, command->body_list, sizeof (struct command_line *) * n);
+  memset (body_list + n, 0, sizeof (struct command_line *) * (new_length - n));
 
   xfree (command->body_list);
   command->body_list = body_list;

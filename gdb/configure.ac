@@ -48,49 +48,13 @@ CONFIG_CLEAN=
 CONFIG_INSTALL=
 CONFIG_UNINSTALL=
 
-dnl Set up for gettext.  PACKAGE is used when we call bindtextdomain.
-
-CY_GNU_GETTEXT
+dnl Set up for gettext.
+ZW_GNU_GETTEXT_SISTER_DIR
 
 localedir='${datadir}/locale'
 AC_SUBST(localedir)
 
-if test "x$POSUB" != x; then
-
-  dnl Lifted from GCC's config/gettext.m4.
-  AC_MSG_CHECKING(for catalogs to be installed)
-  # Look for .po and .gmo files in the source directory.
-  CATALOGS=  AC_SUBST(CATALOGS)
-  XLINGUAS=
-  for cat in $srcdir/po/*.gmo $srcdir/po/*.po; do
-    # If there aren't any .gmo files the shell will give us the
-    # literal string "../path/to/srcdir/po/*.gmo" which has to be
-    # weeded out.
-    case "$cat" in *\**)
-      continue;;
-    esac
-    # The quadruple backslash is collapsed to a double backslash
-    # by the backticks, then collapsed again by the double quotes,
-    # leaving us with one backslash in the sed expression (right
-    # before the dot that mustn't act as a wildcard).
-    cat=`echo $cat | sed -e "s!$srcdir/!!" -e "s!\\\\.po!.gmo!"`
-    lang=`echo $cat | sed -e 's!po/!!' -e "s!\\\\.gmo!!"`
-    # The user is allowed to set LINGUAS to a list of languages to
-    # install catalogs for.  If it's empty that means "all of them."
-    if test "x$LINGUAS" = x; then
-      CATALOGS="$CATALOGS $cat"
-      XLINGUAS="$XLINGUAS $lang"
-    else
-      case "$LINGUAS" in *$lang*)
-        CATALOGS="$CATALOGS $cat"
-        XLINGUAS="$XLINGUAS $lang"
-        ;;
-      esac
-    fi
-  done
-  LINGUAS="$XLINGUAS"
-  AC_MSG_RESULT($LINGUAS)
-
+if test x"$USE_NLS" = xyes; then
    CONFIG_ALL="$CONFIG_ALL all-po"
    CONFIG_CLEAN="$CONFIG_CLEAN clean-po"		   
    CONFIG_INSTALL="$CONFIG_INSTALL install-po"
@@ -351,6 +315,12 @@ if test "$ac_cv_search_tgetent" = no; then
   AC_MSG_ERROR([no termcap library found])
 fi
 
+AC_LIB_HAVE_LINKFLAGS([expat], [], [#include "expat.h"],
+		      [XML_Parser p = XML_ParserCreate (0);])
+if test "$HAVE_LIBEXPAT" != yes; then
+  AC_MSG_WARN([expat is missing or unusable; some features may be disabled.])
+fi
+
 # ------------------------- #
 # Checks for header files.  #
 # ------------------------- #
@@ -421,6 +391,9 @@ AC_CHECK_HEADERS(term.h, [], [],
 # FIXME: kettenis/20030102: In most cases we include these
 # unconditionally, so what's the point in checking these?
 AC_CHECK_HEADERS(ctype.h time.h)
+
+# Create a header we can use portably to get the standard integer types.
+GCC_HEADER_STDINT(gdb_stdint.h)
 
 # ------------------------- #
 # Checks for declarations.  #

@@ -1,6 +1,6 @@
 /* Target-dependent code for OpenBSD/powerpc.
 
-   Copyright (C) 2004, 2005 Free Software Foundation, Inc.
+   Copyright (C) 2004, 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -39,6 +39,7 @@
 
 /* Register offsets from <machine/reg.h>.  */
 struct ppc_reg_offsets ppcobsd_reg_offsets;
+struct ppc_reg_offsets ppcobsd_fpreg_offsets;
 
 
 /* Core file support.  */
@@ -100,6 +101,12 @@ struct regset ppcobsd_gregset =
 {
   &ppcobsd_reg_offsets,
   ppcobsd_supply_gregset
+};
+
+struct regset ppcobsd_fpregset =
+{
+  &ppcobsd_fpreg_offsets,
+  ppc_supply_fpregset
 };
 
 /* Return the appropriate register set for the core section identified
@@ -340,5 +347,12 @@ _initialize_ppcobsd_tdep (void)
       ppcobsd_reg_offsets.vr0_offset = 0;
       ppcobsd_reg_offsets.vscr_offset = 512;
       ppcobsd_reg_offsets.vrsave_offset = 520;
+    }
+
+  if (ppcobsd_fpreg_offsets.fpscr_offset == 0)
+    {
+      /* Floating-point registers.  */
+      ppcobsd_reg_offsets.f0_offset = 0;
+      ppcobsd_reg_offsets.fpscr_offset = 256;
     }
 }

@@ -929,36 +929,39 @@ remote_fileio_func_lseek (char *buf)
 static void
 remote_fileio_func_rename (char *buf)
 {
-  CORE_ADDR ptrval;
-  int length, retlength;
+  CORE_ADDR old_ptr, new_ptr;
+  int old_len, new_len, retlength;
   char *oldpath, *newpath;
   int ret, of, nf;
   struct stat ost, nst;
 
   /* 1. Parameter: Ptr to oldpath / length incl. trailing zero */
-  if (remote_fileio_extract_ptr_w_len (&buf, &ptrval, &length))
+  if (remote_fileio_extract_ptr_w_len (&buf, &old_ptr, &old_len))
     {
       remote_fileio_ioerror ();
       return;
     }
-  /* Request oldpath using 'm' packet */
-  oldpath = alloca (length);
-  retlength = remote_read_bytes (ptrval, (gdb_byte *) oldpath, length);
-  if (retlength != length)
-    {
-      remote_fileio_ioerror ();
-      return;
-    }
+  
   /* 2. Parameter: Ptr to newpath / length incl. trailing zero */
-  if (remote_fileio_extract_ptr_w_len (&buf, &ptrval, &length))
+  if (remote_fileio_extract_ptr_w_len (&buf, &new_ptr, &new_len))
     {
       remote_fileio_ioerror ();
       return;
     }
+  
+  /* Request oldpath using 'm' packet */
+  oldpath = alloca (old_len);
+  retlength = remote_read_bytes (old_ptr, (gdb_byte *) oldpath, old_len);
+  if (retlength != old_len)
+    {
+      remote_fileio_ioerror ();
+      return;
+    }
+  
   /* Request newpath using 'm' packet */
-  newpath = alloca (length);
-  retlength = remote_read_bytes (ptrval, (gdb_byte *) newpath, length);
-  if (retlength != length)
+  newpath = alloca (new_len);
+  retlength = remote_read_bytes (new_ptr, (gdb_byte *) newpath, new_len);
+  if (retlength != new_len)
     {
       remote_fileio_ioerror ();
       return;
@@ -1061,23 +1064,15 @@ remote_fileio_func_unlink (char *buf)
 static void
 remote_fileio_func_stat (char *buf)
 {
-  CORE_ADDR ptrval;
-  int ret, length, retlength;
+  CORE_ADDR statptr, nameptr;
+  int ret, namelength, retlength;
   char *pathname;
   LONGEST lnum;
   struct stat st;
   struct fio_stat fst;
 
   /* 1. Parameter: Ptr to pathname / length incl. trailing zero */
-  if (remote_fileio_extract_ptr_w_len (&buf, &ptrval, &length))
-    {
-      remote_fileio_ioerror ();
-      return;
-    }
-  /* Request pathname using 'm' packet */
-  pathname = alloca (length);
-  retlength = remote_read_bytes (ptrval, (gdb_byte *) pathname, length);
-  if (retlength != length)
+  if (remote_fileio_extract_ptr_w_len (&buf, &nameptr, &namelength))
     {
       remote_fileio_ioerror ();
       return;
@@ -1089,7 +1084,16 @@ remote_fileio_func_stat (char *buf)
       remote_fileio_ioerror ();
       return;
     }
-  ptrval = (CORE_ADDR) lnum;
+  statptr = (CORE_ADDR) lnum;
+  
+  /* Request pathname using 'm' packet */
+  pathname = alloca (namelength);
+  retlength = remote_read_bytes (nameptr, (gdb_byte *) pathname, namelength);
+  if (retlength != namelength)
+    {
+      remote_fileio_ioerror ();
+      return;
+    }
 
   remote_fio_no_longjmp = 1;
   ret = stat (pathname, &st);
@@ -1105,12 +1109,13 @@ remote_fileio_func_stat (char *buf)
       remote_fileio_reply (-1, FILEIO_EACCES);
       return;
     }
-  if (ptrval)
+  if (statptr)
     {
       remote_fileio_to_fio_stat (&st, &fst);
       remote_fileio_to_fio_uint (0, fst.fst_dev);
       
-      retlength = remote_fileio_write_bytes (ptrval, (gdb_byte *) &fst, sizeof fst);
+      retlength = remote_fileio_write_bytes (statptr,
+					     (gdb_byte *) &fst, sizeof fst);
       if (retlength != sizeof fst)
 	{
 	  remote_fileio_return_errno (-1);
@@ -1278,16 +1283,7 @@ remote_fileio_func_system (char *buf)
 {
   CORE_ADDR ptrval;
   int ret, length, retlength;
-  char *cmdline;
-
-  /* Check if system(3) has been explicitely allowed using the
-     `set remote system-call-allowed 1' command.  If not, return
-     EPERM */
-  if (!remote_fio_system_call_allowed)
-    {
-      remote_fileio_reply (-1, FILEIO_EPERM);
-      return;
-    }
+  char *cmdline = NULL;
 
   /* Parameter: Ptr to commandline / length incl. trailing zero */
   if (remote_fileio_extract_ptr_w_len (&buf, &ptrval, &length))
@@ -1295,19 +1291,38 @@ remote_fileio_func_system (char *buf)
       remote_fileio_ioerror ();
       return;
     }
-  /* Request commandline using 'm' packet */
-  cmdline = alloca (length);
-  retlength = remote_read_bytes (ptrval, (gdb_byte *) cmdline, length);
-  if (retlength != length)
+
+  if (length)
     {
-      remote_fileio_ioerror ();
+      /* Request commandline using 'm' packet */
+      cmdline = alloca (length);
+      retlength = remote_read_bytes (ptrval, (gdb_byte *) cmdline, length);
+      if (retlength != length)
+	{
+	  remote_fileio_ioerror ();
+	  return;
+	}
+    }
+  
+  /* Check if system(3) has been explicitely allowed using the
+     `set remote system-call-allowed 1' command.  If length is 0,
+     indicating a NULL parameter to the system call, return zero to
+     indicate a shell is not available.  Otherwise fail with EPERM.  */
+  if (!remote_fio_system_call_allowed)
+    {
+      if (!length)
+	remote_fileio_return_success (0);
+      else
+	remote_fileio_reply (-1, FILEIO_EPERM);
       return;
     }
 
   remote_fio_no_longjmp = 1;
   ret = system (cmdline);
 
-  if (ret == -1)
+  if (!length)
+    remote_fileio_return_success (ret);
+  else if (ret == -1)
     remote_fileio_return_errno (-1);
   else
     remote_fileio_return_success (WEXITSTATUS (ret));
@@ -1353,6 +1368,28 @@ do_remote_fileio_request (struct ui_out *uiout, void *buf_arg)
     return RETURN_ERROR;
   remote_fio_func_map[idx].func (c);
   return 0;
+}
+
+/* Close any open descriptors, and reinitialize the file mapping.  */
+
+void
+remote_fileio_reset (void)
+{
+  int ix;
+
+  for (ix = 0; ix != remote_fio_data.fd_map_size; ix++)
+    {
+      int fd = remote_fio_data.fd_map[ix];
+
+      if (fd >= 0)
+	close (fd);
+    }
+  if (remote_fio_data.fd_map)
+    {
+      free (remote_fio_data.fd_map);
+      remote_fio_data.fd_map = NULL;
+      remote_fio_data.fd_map_size = 0;
+    }
 }
 
 void

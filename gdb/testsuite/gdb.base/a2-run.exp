@@ -20,13 +20,6 @@
 
 # This file was written by Rob Savoye. (rob@cygnus.com)
 
-# These tests don't work for targets can't take arguments...
-
-if [target_info exists noargs] then {
-    verbose "Skipping a2-run.exp because of noargs."
-    return
-}
-
 # Can't do this test without stdio support.
 if [gdb_skip_stdio_test "a2run.exp"] {
     return
@@ -46,7 +39,8 @@ set testfile "run"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+    untested a2-run.exp
+    return -1
 }
 
 gdb_exit
@@ -77,11 +71,21 @@ if [istarget "*-*-vxworks*"] then {
     gdb_expect -re "$gdb_prompt $" {}
 } else {
     gdb_expect {
+	-re ".*usage:  factorial <number>.*Program exited with code 01\.\r\n$gdb_prompt $" {
+	    pass "run \"$testfile\" with no args"
+	    pass "no spurious messages at program exit"
+	}
 	-re ".*usage:  factorial <number>.*Program exited with code 01.*$gdb_prompt $" {
 	    pass "run \"$testfile\" with no args"
+	    fail "no spurious messages at program exit"
+	}
+	-re ".*usage:  factorial <number>.* EXIT code 1.*Program exited normally\.\r\n$gdb_prompt $" {
+	    pass "run \"$testfile\" with no args (exit wrapper)"
+	    pass "no spurious messages at program exit"
 	}
 	-re ".*usage:  factorial <number>.* EXIT code 1.*Program exited normally.*$gdb_prompt $" {
 	    pass "run \"$testfile\" with no args (exit wrapper)"
+	    fail "no spurious messages at program exit"
 	}
 	-re ".*$gdb_prompt $" {
 	    fail "run \"$testfile\" with no args"
@@ -92,6 +96,14 @@ if [istarget "*-*-vxworks*"] then {
 	}
     }
 }
+
+# The remaining tests don't work for targets can't take arguments...
+
+if [target_info exists noargs] then {
+    verbose "Skipping rest of a2-run.exp because of noargs."
+    return
+}
+
 # Now run with some arguments
 if [istarget "*-*-vxworks*"] then {
     send_gdb "run vxmain \"5\"\n"

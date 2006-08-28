@@ -20,7 +20,8 @@
 /* Define to BFD's default target vector. */
 #undef DEFAULT_BFD_VEC
 
-/* Define to 1 if NLS is requested */
+/* Define to 1 if translation of program messages to the user's native
+   language is requested. */
 #undef ENABLE_NLS
 
 /* Define to be a string naming the default host character set. */
@@ -54,9 +55,6 @@
    */
 #undef HAVE_ALLOCA_H
 
-/* Define to 1 if you have the <argz.h> header file. */
-#undef HAVE_ARGZ_H
-
 /* Define to 1 if you have the `canonicalize_file_name' function. */
 #undef HAVE_CANONICALIZE_FILE_NAME
 
@@ -68,9 +66,6 @@
 
 /* Define to 1 if you have the <curses.h> header file. */
 #undef HAVE_CURSES_H
-
-/* Define to 1 if you have the `dcgettext' function. */
-#undef HAVE_DCGETTEXT
 
 /* Define to 1 if you have the declaration of `free', and to 0 if you don't.
    */
@@ -118,17 +113,11 @@
 /* Define if <sys/procfs.h> has fpregset_t. */
 #undef HAVE_FPREGSET_T
 
-/* Define to 1 if you have the `getcwd' function. */
-#undef HAVE_GETCWD
-
 /* Define to 1 if you have the `getgid' function. */
 #undef HAVE_GETGID
 
 /* Define to 1 if you have the `getpagesize' function. */
 #undef HAVE_GETPAGESIZE
-
-/* Define as 1 if you have gettext and don't want to use GNU gettext. */
-#undef HAVE_GETTEXT
 
 /* Define to 1 if you have the `getuid' function. */
 #undef HAVE_GETUID
@@ -148,11 +137,11 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
-/* Define if your locale.h file contains LC_MESSAGES. */
-#undef HAVE_LC_MESSAGES
-
 /* Define to 1 if you have the `dl' library (-ldl). */
 #undef HAVE_LIBDL
+
+/* Define if you have the expat library. */
+#undef HAVE_LIBEXPAT
 
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
@@ -169,14 +158,8 @@
 /* Define to 1 if you have the `w' library (-lw). */
 #undef HAVE_LIBW
 
-/* Define to 1 if you have the <limits.h> header file. */
-#undef HAVE_LIMITS_H
-
 /* Define to 1 if you have the <link.h> header file. */
 #undef HAVE_LINK_H
-
-/* Define to 1 if you have the <locale.h> header file. */
-#undef HAVE_LOCALE_H
 
 /* Define to 1 if the compiler supports long double. */
 #undef HAVE_LONG_DOUBLE
@@ -187,9 +170,6 @@
 /* Define to 1 if you have the <machine/reg.h> header file. */
 #undef HAVE_MACHINE_REG_H
 
-/* Define to 1 if you have the <malloc.h> header file. */
-#undef HAVE_MALLOC_H
-
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
@@ -198,9 +178,6 @@
 
 /* Define to 1 if you have the `monstartup' function. */
 #undef HAVE_MONSTARTUP
-
-/* Define to 1 if you have the `munmap' function. */
-#undef HAVE_MUNMAP
 
 /* Define to 1 if you have the <ncurses.h> header file. */
 #undef HAVE_NCURSES_H
@@ -216,9 +193,6 @@
 
 /* Define to 1 if you have the <nlist.h> header file. */
 #undef HAVE_NLIST_H
-
-/* Define to 1 if you have the <nl_types.h> header file. */
-#undef HAVE_NL_TYPES_H
 
 /* Define to 1 if you have the `poll' function. */
 #undef HAVE_POLL
@@ -283,20 +257,11 @@
 /* Define if sys/ptrace.h defines the PT_GETXMMREGS request. */
 #undef HAVE_PT_GETXMMREGS
 
-/* Define to 1 if you have the `putenv' function. */
-#undef HAVE_PUTENV
-
 /* Define to 1 if you have the `realpath' function. */
 #undef HAVE_REALPATH
 
 /* Define to 1 if you have the `sbrk' function. */
 #undef HAVE_SBRK
-
-/* Define to 1 if you have the `setenv' function. */
-#undef HAVE_SETENV
-
-/* Define to 1 if you have the `setlocale' function. */
-#undef HAVE_SETLOCALE
 
 /* Define to 1 if you have the `setpgid' function. */
 #undef HAVE_SETPGID
@@ -333,15 +298,6 @@
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
-
-/* Define if you have the stpcpy function */
-#undef HAVE_STPCPY
-
-/* Define to 1 if you have the `strcasecmp' function. */
-#undef HAVE_STRCASECMP
-
-/* Define to 1 if you have the `strchr' function. */
-#undef HAVE_STRCHR
 
 /* Define to 1 if you have the <strings.h> header file. */
 #undef HAVE_STRINGS_H
@@ -477,9 +433,6 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* Define to 1 if you have the <values.h> header file. */
-#undef HAVE_VALUES_H
-
 /* Define to 1 if you have the `vfork' function. */
 #undef HAVE_VFORK
 
@@ -503,15 +456,6 @@
 
 /* Define to 1 if you have the `_mcleanup' function. */
 #undef HAVE__MCLEANUP
-
-/* Define to 1 if you have the `__argz_count' function. */
-#undef HAVE___ARGZ_COUNT
-
-/* Define to 1 if you have the `__argz_next' function. */
-#undef HAVE___ARGZ_NEXT
-
-/* Define to 1 if you have the `__argz_stringify' function. */
-#undef HAVE___ARGZ_STRINGIFY
 
 /* Define as const if the declaration of iconv() needs const. */
 #undef ICONV_CONST
@@ -568,6 +512,21 @@
 
 /* Define to 1 if the `setpgrp' function takes no argument. */
 #undef SETPGRP_VOID
+
+/* The size of a `char', as computed by sizeof. */
+#undef SIZEOF_CHAR
+
+/* The size of a `int', as computed by sizeof. */
+#undef SIZEOF_INT
+
+/* The size of a `long', as computed by sizeof. */
+#undef SIZEOF_LONG
+
+/* The size of a `short', as computed by sizeof. */
+#undef SIZEOF_SHORT
+
+/* The size of a `void *', as computed by sizeof. */
+#undef SIZEOF_VOID_P
 
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be
@@ -632,14 +591,8 @@
 #undef inline
 #endif
 
-/* Define to `long' if <sys/types.h> does not define. */
-#undef off_t
-
 /* Define to `int' if <sys/types.h> does not define. */
 #undef pid_t
-
-/* Define to `unsigned' if <sys/types.h> does not define. */
-#undef size_t
 
 /* Define on a GNU/Linux system to work around problems in sys/procfs.h. */
 #undef sys_quotactl

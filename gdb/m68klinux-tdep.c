@@ -68,7 +68,7 @@ m68k_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
   char buf[12];
   unsigned long insn0, insn1, insn2;
 
-  if (deprecated_read_memory_nobpt (pc - 4, buf, sizeof (buf)))
+  if (read_memory_nobpt (pc - 4, buf, sizeof (buf)))
     return 0;
   insn1 = extract_unsigned_integer (buf + 4, 4);
   insn2 = extract_unsigned_integer (buf + 8, 4);
@@ -286,7 +286,7 @@ m68k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->jb_elt_size = M68K_LINUX_JB_ELEMENT_SIZE;
 
   /* GNU/Linux uses a calling convention that's similar to SVR4.  It
-     returns integer values in %d0/%di, pointer values in %a0 and
+     returns integer values in %d0/%d1, pointer values in %a0 and
      floating values in %fp0, just like SVR4, but uses %a1 to pass the
      address to store a structure value.  It also returns small
      structures in registers instead of memory.  */

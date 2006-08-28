@@ -279,7 +279,7 @@ registers.  A prologue analyzer disassembles the function's machine
 code starting from its entry point, and looks for instructions that
 allocate frame space, save the stack pointer in a frame pointer
 register, save registers, and so on.  Obviously, this can't be done
-accurately in general, but it's tractible to do well enough to be very
+accurately in general, but it's tractable to do well enough to be very
 helpful.  Prologue analysis predates the GNU toolchain's support for
 CFI; at one time, prologue analysis was the only mechanism
 @value{GDBN} used for stack unwinding at all, when the function
@@ -405,7 +405,7 @@ and maintain.  In the approach described above:
 
 @item
 It's easier to see that the analyzer is correct: you just see
-whether the analyzer properly (albiet conservatively) simulates
+whether the analyzer properly (albeit conservatively) simulates
 the effect of each instruction.
 
 @item
@@ -918,7 +918,7 @@ registers and memory, and may include external state such as the state
 of open files and devices.
 
 There are a number of ways in which checkpoints may be implemented
-in gdb, eg. as corefiles, as forked processes, and as some opaque
+in gdb, e.g.@: as corefiles, as forked processes, and as some opaque
 method implemented on the target side.
 
 A corefile can be used to save an image of target memory and register
@@ -931,7 +931,7 @@ as well as some subset of external (kernel) state.  This method
 is used to implement checkpoints on Linux, and in principle might
 be used on other systems.
 
-Some targets, eg.@: simulators, might have their own built-in 
+Some targets, e.g.@: simulators, might have their own built-in 
 method for saving checkpoints, and gdb might be able to take
 advantage of that capability without necessarily knowing any
 details of how it is done.
@@ -6026,15 +6026,15 @@ $  D=`date -u +%Y-%m-%d`
 $  echo $u $V $D
 5.1 5_2 2002-03-03
 $  echo cvs -f -d :ext:sources.redhat.com:/cvs/src rtag \
--D $D-gmt gdb_$V-$D-branchpoint insight+dejagnu
+-D $D-gmt gdb_$V-$D-branchpoint insight
 cvs -f -d :ext:sources.redhat.com:/cvs/src rtag
--D 2002-03-03-gmt gdb_5_2-2002-03-03-branchpoint insight+dejagnu
+-D 2002-03-03-gmt gdb_5_2-2002-03-03-branchpoint insight
 $  ^echo ^^
 ...
 $  echo cvs -f -d :ext:sources.redhat.com:/cvs/src rtag \
--b -r gdb_$V-$D-branchpoint gdb_$V-branch insight+dejagnu
+-b -r gdb_$V-$D-branchpoint gdb_$V-branch insight
 cvs -f -d :ext:sources.redhat.com:/cvs/src rtag \
--b -r gdb_5_2-2002-03-03-branchpoint gdb_5_2-branch insight+dejagnu
+-b -r gdb_5_2-2002-03-03-branchpoint gdb_5_2-branch insight
 $  ^echo ^^
 ...
 $
@@ -6042,16 +6042,16 @@ $
 
 @itemize @bullet
 @item
-by using @kbd{-D YYYY-MM-DD-gmt} the branch is forced to an exact
+By using @kbd{-D YYYY-MM-DD-gmt}, the branch is forced to an exact
 date/time.
 @item
-the trunk is first taged so that the branch point can easily be found
+The trunk is first tagged so that the branch point can easily be found.
 @item
-Insight (which includes GDB) and dejagnu are all tagged at the same time
+Insight, which includes @value{GDBN}, is tagged at the same time.
 @item
-@file{version.in} gets bumped to avoid version number conflicts
+@file{version.in} gets bumped to avoid version number conflicts.
 @item
-the reading of @file{.cvsrc} is disabled using @file{-f}
+The reading of @file{.cvsrc} is disabled using @file{-f}.
 @end itemize
 
 @subheading Update @file{version.in}
@@ -6079,10 +6079,10 @@ $  cvs -f commit version.in
 @itemize @bullet
 @item
 @file{0000-00-00} is used as a date to pump prime the version.in update
-mechanism
+mechanism.
 @item
 @file{.90} and the previous branch version are used as fairly arbitrary
-initial branch version number
+initial branch version number.
 @end itemize
 
 
@@ -6097,9 +6097,9 @@ This file needs to be updated so that:
 
 @itemize @bullet
 @item
-a daily timestamp is added to the file @file{version.in}
+A daily timestamp is added to the file @file{version.in}.
 @item
-the new branch is included in the snapshot process
+The new branch is included in the snapshot process.
 @end itemize
 
 @noindent
@@ -6140,14 +6140,13 @@ The announcement should include:
 
 @itemize @bullet
 @item
-the branch tag
+The branch tag.
 @item
-how to check out the branch using CVS
+How to check out the branch using CVS.
 @item
-the date/number of weeks until the release
+The date/number of weeks until the release.
 @item
-the branch commit policy
-still holds.
+The branch commit policy still holds.
 @end itemize
 
 @section Stabilize the branch
@@ -6206,7 +6205,7 @@ unlikely that a system installed version of @code{autoconf} (e.g.,
 @subsubheading Check out the relevant modules:
 
 @smallexample
-$  for m in gdb insight dejagnu
+$  for m in gdb insight
 do
 ( mkdir -p $m && cd $m && cvs -q -f -d /cvs/src co -P -r $b $m )
 done
@@ -6250,11 +6249,11 @@ You'll need to update:
 
 @itemize @bullet
 @item
-the version
+The version.
 @item
-the update date
+The update date.
 @item
-who did it
+Who did it.
 @end itemize
 
 @smallexample
@@ -6290,24 +6289,6 @@ $  cp gdb/src/gdb/version.in insight/src/gdb/version.in
 $  cp gdb/src/gdb/ChangeLog insight/src/gdb/ChangeLog 
 @end smallexample
 
-@item dejagnu/src/dejagnu/configure.in
-
-Dejagnu is more complicated.  The version number is a parameter to
-@code{AM_INIT_AUTOMAKE}.  Tweak it to read something like gdb-5.1.91.
-
-Don't forget to re-generate @file{configure}.
-
-Don't forget to include a @file{ChangeLog} entry.
-
-@smallexample
-$  emacs dejagnu/src/dejagnu/configure.in
-...
-c-x 4 a
-...
-c-x c-s c-x c-c
-$  ( cd  dejagnu/src/dejagnu && autoconf )
-@end smallexample
-
 @end table
 
 @subsubheading Do the dirty work
@@ -6319,7 +6300,6 @@ $  for m in gdb insight
 do
 ( cd $m/src && gmake -f src-release $m.tar )
 done
-$  ( m=dejagnu; cd $m/src && gmake -f src-release $m.tar.bz2 )
 @end smallexample
 
 If the top level source directory does not have @file{src-release}
@@ -6330,7 +6310,6 @@ $  for m in gdb insight
 do
 ( cd $m/src && gmake -f Makefile.in $m.tar )
 done
-$  ( m=dejagnu; cd $m/src && gmake -f Makefile.in $m.tar.bz2 )
 @end smallexample
 
 @subsubheading Check the source files
@@ -6365,7 +6344,7 @@ didn't get supressed).  Fixing it would be nice though.}
 $  cp */src/*.tar .
 $  cp */src/*.bz2 .
 $  ls -F
-dejagnu/ dejagnu-gdb-5.2.tar.bz2 gdb/ gdb-5.2.tar insight/ insight-5.2.tar
+gdb/ gdb-5.2.tar insight/ insight-5.2.tar
 $  for m in gdb insight
 do
 bzip2 -v -9 -c $m-$v.tar > $m-$v.tar.bz2
@@ -6470,12 +6449,12 @@ $  ln README .message
 This file, which is posted as the official announcement, includes:
 @itemize @bullet
 @item
-General announcement
+General announcement.
 @item
 News.  If making an @var{M}.@var{N}.1 release, retain the news from
 earlier @var{M}.@var{N} release.
 @item
-Errata
+Errata.
 @end itemize
 
 @item htdocs/index.html
@@ -6484,9 +6463,9 @@ Errata
 These files include:
 @itemize @bullet
 @item
-announcement of the most recent release
+Announcement of the most recent release.
 @item
-news entry (remember to update both the top level and the news directory).
+News entry (remember to update both the top level and the news directory).
 @end itemize
 These pages also need to be regenerate using @code{index.sh}.
 
@@ -6573,8 +6552,7 @@ $  ( cd insight/src && cvs -f -q tag gdb_5_2-$d-release )
 @end smallexample
 
 Insight is used since that contains more of the release than
-@value{GDBN} (@code{dejagnu} doesn't get tagged but I think we can live
-with that).
+@value{GDBN}.
 
 @subsubheading Mention the release on the trunk
 
@@ -6627,10 +6605,9 @@ this is rarely sufficient; users typically use only a small subset of
 the available commands, and it has proven all too common for a change
 to cause a significant regression that went unnoticed for some time.
 
-The @value{GDBN} testsuite uses the DejaGNU testing framework.
-DejaGNU is built using @code{Tcl} and @code{expect}.  The tests
-themselves are calls to various @code{Tcl} procs; the framework runs all the
-procs and summarizes the passes and fails.
+The @value{GDBN} testsuite uses the DejaGNU testing framework.  The
+tests themselves are calls to various @code{Tcl} procs; the framework
+runs all the procs and summarizes the passes and fails.
 
 @section Using the Testsuite
 

@@ -1,5 +1,6 @@
 /* Common definitions for remote server for GDB.
-   Copyright (C) 1993, 1995, 1997, 1998, 1999, 2000, 2002, 2003, 2004, 2005
+   Copyright (C) 1993, 1995, 1997, 1998, 1999, 2000, 2002, 2003, 2004, 2005,
+   2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -55,6 +56,9 @@ extern char *strerror (int);	/* X3.159-1989  4.11.6.2 */
 #define ATTR_FORMAT(type, x, y) /* nothing */
 #endif
 #endif
+
+/* A type used for binary buffers.  */
+typedef unsigned char gdb_byte;
 
 /* FIXME: This should probably be autoconf'd for.  It's an integer type at
    least the size of a (void *).  */
@@ -127,9 +131,12 @@ extern int server_waiting;
 
 extern jmp_buf toplevel;
 
-/* Functions from remote-utils.c */
+/* From remote-utils.c */
+
+extern int all_symbols_looked_up;
 
 int putpkt (char *buf);
+int putpkt_binary (char *buf, int len);
 int getpkt (char *buf);
 void remote_open (char *name);
 void remote_close (void);
@@ -149,9 +156,14 @@ void decode_m_packet (char *from, CORE_ADDR * mem_addr_ptr,
 		      unsigned int *len_ptr);
 void decode_M_packet (char *from, CORE_ADDR * mem_addr_ptr,
 		      unsigned int *len_ptr, unsigned char *to);
+int decode_X_packet (char *from, int packet_len, CORE_ADDR * mem_addr_ptr,
+		     unsigned int *len_ptr, unsigned char *to);
 
 int unhexify (char *bin, const char *hex, int count);
 int hexify (char *hex, const char *bin, int count);
+int remote_escape_output (const gdb_byte *buffer, int len,
+			  gdb_byte *out_buf, int *out_len,
+			  int out_maxlen);
 
 int look_up_one_symbol (const char *name, CORE_ADDR *addrp);
 
@@ -159,6 +171,7 @@ int look_up_one_symbol (const char *name, CORE_ADDR *addrp);
 enum target_signal target_signal_from_host (int hostsig);
 int target_signal_to_host_p (enum target_signal oursig);
 int target_signal_to_host (enum target_signal oursig);
+char *target_signal_to_name (enum target_signal);
 
 /* Functions from utils.c */
 

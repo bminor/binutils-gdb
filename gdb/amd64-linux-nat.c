@@ -26,6 +26,7 @@
 #include "gdbcore.h"
 #include "regcache.h"
 #include "linux-nat.h"
+#include "amd64-linux-tdep.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
@@ -68,7 +69,12 @@ static int amd64_linux_gregset64_reg_offset[] =
   RIP * 8, EFLAGS * 8,		/* %rip, %eflags */
   CS * 8, SS * 8,		/* %cs, %ss */
   DS * 8, ES * 8,		/* %ds, %es */
-  FS * 8, GS * 8		/* %fs, %gs */
+  FS * 8, GS * 8,		/* %fs, %gs */
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  ORIG_RAX * 8
 };
 
 
@@ -382,6 +388,7 @@ _initialize_amd64_linux_nat (void)
   amd64_native_gregset32_reg_offset = amd64_linux_gregset32_reg_offset;
   amd64_native_gregset32_num_regs = I386_LINUX_NUM_REGS;
   amd64_native_gregset64_reg_offset = amd64_linux_gregset64_reg_offset;
+  amd64_native_gregset64_num_regs = AMD64_LINUX_NUM_REGS;
 
   gdb_assert (ARRAY_SIZE (amd64_linux_gregset32_reg_offset)
 	      == amd64_native_gregset32_num_regs);

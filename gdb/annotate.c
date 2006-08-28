@@ -430,7 +430,7 @@ annotate_source (char *filename, int line, int character, int mid, CORE_ADDR pc)
 void
 annotate_frame_begin (int level, CORE_ADDR pc)
 {
-  if (annotation_level == 2)
+  if (annotation_level > 1)
     {
       printf_filtered (("\n\032\032frame-begin %d 0x"), level);
       deprecated_print_address_numeric (pc, 0, gdb_stdout);

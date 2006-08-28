@@ -180,52 +180,19 @@ extern char *target_signal_to_name (enum target_signal);
 /* Given a name (SIGHUP, etc.), return its signal.  */
 enum target_signal target_signal_from_name (char *);
 
-/* Request the transfer of up to LEN 8-bit bytes of the target's
-   OBJECT.  The OFFSET, for a seekable object, specifies the starting
-   point.  The ANNEX can be used to provide additional data-specific
-   information to the target.
-
-   Return the number of bytes actually transfered, zero when no
-   further transfer is possible, and -1 when the transfer is not
-   supported.
-
-   NOTE: cagney/2003-10-17: The current interface does not support a
-   "retry" mechanism.  Instead it assumes that at least one byte will
-   be transfered on each call.
-
-   NOTE: cagney/2003-10-17: The current interface can lead to
-   fragmented transfers.  Lower target levels should not implement
-   hacks, such as enlarging the transfer, in an attempt to compensate
-   for this.  Instead, the target stack should be extended so that it
-   implements supply/collect methods and a look-aside object cache.
-   With that available, the lowest target can safely and freely "push"
-   data up the stack.
-
-   NOTE: cagney/2003-10-17: Unlike the old query and the memory
-   transfer mechanisms, these methods are explicitly parameterized by
-   the target that it should be applied to.
-
-   NOTE: cagney/2003-10-17: Just like the old query and memory xfer
-   methods, these new methods perform partial transfers.  The only
-   difference is that these new methods thought to include "partial"
-   in the name.  The old code's failure to do this lead to much
-   confusion and duplication of effort as each target object attempted
-   to locally take responsibility for something it didn't have to
-   worry about.
-
-   NOTE: cagney/2003-10-17: With a TARGET_OBJECT_KOD object, for
-   backward compatibility with the "target_query" method that this
-   replaced, when OFFSET and LEN are both zero, return the "minimum"
-   buffer size.  See "remote.c" for further information.  */
+/* Target objects which can be transfered using target_read,
+   target_write, et cetera.  */
 
 enum target_object
 {
-  /* Kernel Object Display transfer.  See "kod.c" and "remote.c".  */
-  TARGET_OBJECT_KOD,
   /* AVR target specific transfer.  See "avr-tdep.c" and "remote.c".  */
   TARGET_OBJECT_AVR,
   /* Transfer up-to LEN bytes of memory starting at OFFSET.  */
   TARGET_OBJECT_MEMORY,
+  /* Memory, avoiding GDB's data cache and trusting the executable.
+     Target implementations of to_xfer_partial never need to handle
+     this object, and most callers should not use it.  */
+  TARGET_OBJECT_RAW_MEMORY,
   /* Kernel Unwind Table.  See "ia64-tdep.c".  */
   TARGET_OBJECT_UNWIND_TABLE,
   /* Transfer auxilliary vector.  */
@@ -236,17 +203,17 @@ enum target_object
   /* Possible future objects: TARGET_OBJECT_FILE, TARGET_OBJECT_PROC, ... */
 };
 
-extern LONGEST target_read_partial (struct target_ops *ops,
-				    enum target_object object,
-				    const char *annex, gdb_byte *buf,
-				    ULONGEST offset, LONGEST len);
+/* Request that OPS transfer up to LEN 8-bit bytes of the target's
+   OBJECT.  The OFFSET, for a seekable object, specifies the
+   starting point.  The ANNEX can be used to provide additional
+   data-specific information to the target.
 
-extern LONGEST target_write_partial (struct target_ops *ops,
-				     enum target_object object,
-				     const char *annex, const gdb_byte *buf,
-				     ULONGEST offset, LONGEST len);
+   Return the number of bytes actually transfered, or -1 if the
+   transfer is not supported or otherwise fails.  Return of a positive
+   value less than LEN indicates that no further transfer is possible.
+   Unlike the raw to_xfer_partial interface, callers of these
+   functions do not need to retry partial transfers.  */
 
-/* Wrappers to perform the full transfer.  */
 extern LONGEST target_read (struct target_ops *ops,
 			    enum target_object object,
 			    const char *annex, gdb_byte *buf,
@@ -256,6 +223,44 @@ extern LONGEST target_write (struct target_ops *ops,
 			     enum target_object object,
 			     const char *annex, const gdb_byte *buf,
 			     ULONGEST offset, LONGEST len);
+
+/* Similar to target_write, except that it also calls PROGRESS
+   with the number of bytes written and the opaque BATON after
+   every partial write.  This is useful for progress reporting
+   and user interaction while writing data.  To abort the transfer,
+   the progress callback can throw an exception.  */
+LONGEST target_write_with_progress (struct target_ops *ops,
+				    enum target_object object,
+				    const char *annex, const gdb_byte *buf,
+				    ULONGEST offset, LONGEST len,
+				    void (*progress) (ULONGEST, void *),
+				    void *baton);
+
+/* Wrapper to perform a full read of unknown size.  OBJECT/ANNEX will
+   be read using OPS.  The return value will be -1 if the transfer
+   fails or is not supported; 0 if the object is empty; or the length
+   of the object otherwise.  If a positive value is returned, a
+   sufficiently large buffer will be allocated using xmalloc and
+   returned in *BUF_P containing the contents of the object.
+
+   This method should be used for objects sufficiently small to store
+   in a single xmalloc'd buffer, when no fixed bound on the object's
+   size is known in advance.  Don't try to read TARGET_OBJECT_MEMORY
+   through this function.  */
+
+extern LONGEST target_read_alloc (struct target_ops *ops,
+				  enum target_object object,
+				  const char *annex, gdb_byte **buf_p);
+
+/* Read OBJECT/ANNEX using OPS.  The result is NUL-terminated and
+   returned as a string, allocated using xmalloc.  If an error occurs
+   or the transfer is unsupported, NULL is returned.  Empty objects
+   are returned as allocated but empty strings.  A warning is issued
+   if the result contains any embedded NUL bytes.  */
+
+extern char *target_read_stralloc (struct target_ops *ops,
+				   enum target_object object,
+				   const char *annex);
 
 /* Wrappers to target read/write that perform memory transfers.  They
    throw an error if the memory transfer fails.
@@ -416,9 +421,33 @@ struct target_ops
 					      CORE_ADDR load_module_addr,
 					      CORE_ADDR offset);
 
-    /* Perform partial transfers on OBJECT.  See target_read_partial
-       and target_write_partial for details of each variant.  One, and
-       only one, of readbuf or writebuf must be non-NULL.  */
+    /* Request that OPS transfer up to LEN 8-bit bytes of the target's
+       OBJECT.  The OFFSET, for a seekable object, specifies the
+       starting point.  The ANNEX can be used to provide additional
+       data-specific information to the target.
+
+       Return the number of bytes actually transfered, zero when no
+       further transfer is possible, and -1 when the transfer is not
+       supported.  Return of a positive value smaller than LEN does
+       not indicate the end of the object, only the end of the
+       transfer; higher level code should continue transferring if
+       desired.  This is handled in target.c.
+
+       The interface does not support a "retry" mechanism.  Instead it
+       assumes that at least one byte will be transfered on each
+       successful call.
+
+       NOTE: cagney/2003-10-17: The current interface can lead to
+       fragmented transfers.  Lower target levels should not implement
+       hacks, such as enlarging the transfer, in an attempt to
+       compensate for this.  Instead, the target stack should be
+       extended so that it implements supply/collect methods and a
+       look-aside object cache.  With that available, the lowest
+       target can safely and freely "push" data up the stack.
+
+       See target_read and target_write for more information.  One,
+       and only one, of readbuf or writebuf must be non-NULL.  */
+
     LONGEST (*to_xfer_partial) (struct target_ops *ops,
 				enum target_object object, const char *annex,
 				gdb_byte *readbuf, const gdb_byte *writebuf,
@@ -534,9 +563,6 @@ extern void target_disconnect (char *, int);
 
 extern DCACHE *target_dcache;
 
-extern int do_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
-			   int write, struct mem_attrib *attrib);
-
 extern int target_read_string (CORE_ADDR, char **, int, int *);
 
 extern int target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len);
@@ -549,18 +575,6 @@ extern int xfer_memory (CORE_ADDR, gdb_byte *, int, int,
 
 extern int child_xfer_memory (CORE_ADDR, gdb_byte *, int, int,
 			      struct mem_attrib *, struct target_ops *);
-
-/* Make a single attempt at transfering LEN bytes.  On a successful
-   transfer, the number of bytes actually transfered is returned and
-   ERR is set to 0.  When a transfer fails, -1 is returned (the number
-   of bytes actually transfered is not defined) and ERR is set to a
-   non-zero error indication.  */
-
-extern int target_read_memory_partial (CORE_ADDR addr, gdb_byte *buf,
-				       int len, int *err);
-
-extern int target_write_memory_partial (CORE_ADDR addr, gdb_byte *buf,
-					int len, int *err);
 
 extern char *child_pid_to_exec_file (int);
 

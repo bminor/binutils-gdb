@@ -2732,7 +2732,8 @@ linux_nat_make_corefile_notes (bfd *obfd, int *note_size)
       note_data = thread_args.note_data;
     }
 
-  auxv_len = target_auxv_read (&current_target, &auxv);
+  auxv_len = target_read_alloc (&current_target, TARGET_OBJECT_AUXV,
+				NULL, &auxv);
   if (auxv_len > 0)
     {
       note_data = elfcore_write_note (obfd, note_data, note_size,
@@ -3214,8 +3215,6 @@ linux_target (void)
 void
 linux_nat_add_target (struct target_ops *t)
 {
-  extern void thread_db_init (struct target_ops *);
-
   /* Save the provided single-threaded target.  We save this in a separate
      variable because another target we've inherited from (e.g. inf-ptrace)
      may have saved a pointer to T; we want to use it for the final

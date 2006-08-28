@@ -7,12 +7,15 @@ sinclude(../bfd/bfd.m4)
 dnl This gets the standard macros, like the TCL, TK, etc ones.
 sinclude(../config/acinclude.m4)
 
-sinclude(../gettext.m4)
-dnl The lines below arrange for aclocal not to bring gettext.m4's
-dnl CY_GNU_GETTEXT into aclocal.m4.
-ifelse(yes,no,[
-AC_DEFUN([CY_GNU_GETTEXT],)
-])
+dnl This gets GCC_HEADER_STDINT.
+sinclude(../config/stdint.m4)
+
+sinclude(../config/gettext-sister.m4)
+
+dnl For AC_LIB_HAVE_LINKFLAGS.
+sinclude(../config/lib-ld.m4)
+sinclude(../config/lib-prefix.m4)
+sinclude(../config/lib-link.m4)
 
 dnl CYGNUS LOCAL: This gets the right posix flag for gcc
 AC_DEFUN([CY_AC_TCL_LYNX_POSIX],

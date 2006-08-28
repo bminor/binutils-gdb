@@ -1,3 +1,95 @@
+2006-08-19  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (clean): Clean reg-x86-64-linux.c.
+	(reg-x86-64-linux.o, reg-x86-64-linux.c): New.
+	* configure.srv (x86_64-*-linux*): Use reg-x86-64-linux.o.
+	* linux-x86-64-low.c (x86_64_regmap): Include ORIG_RAX.
+	(x86_64_fill_gregset, x86_64_store_gregset): Skip floating
+	point registers.
+
+2006-08-08  Richard Sandiford  <richard@codesourcery.com>
+
+	* server.c (terminal_fd): New variable.
+	(old_foreground_pgrp): Likewise.
+	(restore_old_foreground_pgrp): New function.
+	(start_inferior): Record the terminal file descriptor in terminal_fd
+	and its original foreground group in old_foreground_pgrp.  Register
+	restore_old_foreground_pgrp with atexit().
+
+2006-07-26  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* server.c (handle_query): Correct qPart to qXfer.
+
+2006-07-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* configure.ac: Check for more headers which are missing on
+	Windows.  Automatically supply -lwsock32 and USE_WIN32API.
+	* configure.srv: Add Cygwin and mingw32.
+	* remote-utils.c: Don't include headers unconditionally which
+	are missing on mingw32.  Include <winsock.h> for mingw32.
+	(remote_open): Adjust for mingw32 support.  Flush
+	standard error after writing to it.
+	(remote_close, putpkt_binary, input_interrupt, block_async_io)
+	(unblock_async_io, enable_async_io, disable_async_io)
+	(readchar, getpkt): Update for Winsock support.
+	(prepare_resume_reply): Expect a protocol signal number.
+	* server.c: Disable <sys/wait.h> on mingw32.
+	(start_inferior): Adjust for mingw32 support.  Flush
+	standard error after writing to it.
+	(attach_inferior): Likewise.  Use protocol signal
+	numbers.
+	(main): Skip 'D' packet on mingw32.  Use protocol signal numbers
+	and names.
+	* win32-i386-low.c: New file.
+	* Makefile.in (XM_CLIBS): Set.
+	(gdbserver, gdbreplay): Use $(INTERNAL_CFLAGS).
+	(win32-i386-low.o): New dependency rule.
+	* linux-low.c (linux_wait): Use target signal numbers.
+	* target.h (struct target_ops): Doc fix.
+	* server.h (target_signal_to_name): New prototype.
+	* gdbreplay.c: Don't include headers unconditionally which
+	are missing on mingw32.  Include <winsock.h> for mingw32.
+	(remote_close, remote_open): Adjust for Winsock support.
+	* configure, config.in: Regenerated.
+
+2006-07-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* server.c (decode_xfer_read, write_qxfer_response): New.
+	(handle_query): Take a packet length argument.  Handle
+	qXfer:auxv:read instead of qPart:auxv:read.  Mention it in
+	the qSupported response.
+	(main): Update call to handle_query.
+
+2006-06-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote-utils.c (remote_escape_output, remote_unescape_input): New.
+	(putpkt_binary): Renamed from putpkt and adjusted for binary
+	data.
+	(putpkt): New wrapper for putpkt_binary.
+	(readchar): Don't mask off the high bit.
+	(decode_X_packet): New function.
+	* server.c (main): Call putpkt_binary if a handler sets the packet
+	length.  Save the length of the incoming packet.  Handle 'X'.
+	* server.h (gdb_byte, remote_escape_output, decode_X_packet): New.
+
+2006-06-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* server.c (handle_query): Handle qSupported.
+
+2006-05-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote-utils.c (all_symbols_looked_up): New variable.
+	(look_up_one_symbol): Check it.
+	* server.h (look_up_one_symbol): New declaration.
+	* thread-db.c (thread_db_init): Set all_symbols_looked_up.
+
+2006-05-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (linux-arm-low.o): Update dependencies.
+	* linux-arm-low.c: Include "gdb_proc_service.h".
+	(PTRACE_GET_THREAD_AREA): Define.
+	(ps_get_thread_area): New function.
+
 2006-05-09  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* configure.srv (m68k*-*-uclinux*): New target.

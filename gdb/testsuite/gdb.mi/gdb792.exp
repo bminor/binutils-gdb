@@ -40,7 +40,8 @@ if [get_compiler_info ${binfile} "c++"] {
 }
 
 if {[gdb_compile $srcdir/$subdir/$srcfile $binfile executable {debug c++}] != ""} {
-  gdb_suppress_entire_file "Testcase compile failed, so all test in this file will automatically fail."
+  untested gdb792.exp
+  return -1
 }
 
 # Test that children of classes are properly reported

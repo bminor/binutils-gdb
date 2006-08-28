@@ -18,6 +18,13 @@
    Foundation, Inc., 51 Franklin Street, Fifth Floor,
    Boston, MA 02110-1301, USA.  */
 
+#ifndef ARM_TDEP_H
+#define ARM_TDEP_H
+
+/* Forward declarations.  */
+struct gdbarch;
+struct regset;
+
 /* Register numbers of various important registers.  Note that some of
    these values are "real" register numbers, and correspond to the
    general registers of the machine, and some are "phony" register
@@ -122,6 +129,14 @@ enum arm_abi_kind
   ARM_ABI_LAST
 };
 
+/* Convention for returning structures.  */
+
+enum struct_return
+{
+  pcc_struct_return,		/* Return "short" structures in memory.  */
+  reg_struct_return		/* Return "short" structures in registers.  */
+};
+
 /* Target-dependent structure in gdbarch.  */
 struct gdbarch_tdep
 {
@@ -143,7 +158,15 @@ struct gdbarch_tdep
 				   If this is negative, longjmp support
 				   will be disabled.  */
   size_t jb_elt_size;		/* And the size of each entry in the buf.  */
+
+  /* Convention for returning structures.  */
+  enum struct_return struct_return;
+
+  /* Cached core file helpers.  */
+  struct regset *gregset, *fpregset;
 };
+
+
 
 #ifndef LOWEST_PC
 #define LOWEST_PC (gdbarch_tdep (current_gdbarch)->lowest_pc)
@@ -157,3 +180,14 @@ int arm_pc_is_thumb (CORE_ADDR);
 CORE_ADDR thumb_get_next_pc (CORE_ADDR);
 
 CORE_ADDR arm_get_next_pc (CORE_ADDR);
+
+/* Functions exported from armbsd-tdep.h.  */
+
+/* Return the appropriate register set for the core section identified
+   by SECT_NAME and SECT_SIZE.  */
+
+extern const struct regset *
+  armbsd_regset_from_core_section (struct gdbarch *gdbarch,
+				   const char *sect_name, size_t sect_size);
+
+#endif /* arm-tdep.h */

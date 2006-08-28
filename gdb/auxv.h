@@ -1,6 +1,6 @@
 /* Auxiliary vector support for GDB, the GNU debugger.
 
-   Copyright (C) 2004 Free Software Foundation, Inc.
+   Copyright (C) 2004, 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,12 +30,6 @@
    used in NATIVE_XFER_AUXV.  */
 struct target_ops;		/* Forward declaration.  */
 
-
-/* Read all the auxv data into a contiguous xmalloc'd buffer,
-   stored in *DATA.  Return the size in bytes of this data.
-   If zero, there is no data and *DATA is null.
-   if < 0, there was an error and *DATA is null.  */
-extern LONGEST target_auxv_read (struct target_ops *ops, gdb_byte **data);
 
 /* Read one auxv entry from *READPTR, not reading locations >= ENDPTR.
    Return 0 if *READPTR is already at the end of the buffer.
