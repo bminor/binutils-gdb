@@ -213,7 +213,11 @@ pack_fpu (const sim_fpu *src,
       /* force fraction to correct class */
       fraction = src->fraction;
       fraction >>= NR_GUARDS;
+#ifdef SIM_QUIET_NAN_NEGATED
+      fraction |= QUIET_NAN;
+#else
       fraction &= ~QUIET_NAN;
+#endif
       break;
     case sim_fpu_class_infinity:
       sign = src->sign;
