@@ -1861,7 +1861,7 @@ convert_iif (void)
 			      size = 4;
 			    else
 			      {
-				as_bad (_("Displacement to large for :d"));
+				as_bad (_("Displacement too large for :d"));
 				size = 4;
 			      }
 			  }

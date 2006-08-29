@@ -1533,7 +1533,7 @@ shmedia_check_limits (offsetT *valp, bfd_reloc_code_real_type reloc,
 
     case BFD_RELOC_SH_IMMU16:
       if (val < 0 || val > (1 << 16) - 1)
-	msg = _("invalid operand, not an 16-bit unsigned value: %d");
+	msg = _("invalid operand, not a 16-bit unsigned value: %d");
       break;
 
     case BFD_RELOC_SH_PT_16:

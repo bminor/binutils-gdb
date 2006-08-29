@@ -1,3 +1,9 @@
+2006-08-29  Malcolm Parsons  <malcolm.parsons@gmail.com>
+
+	* ecoff.c (ecoff_directive_val): Fix message typo.
+	* config/tc-ns32k.c (convert_iif): Likewise.
+	* config/tc-sh64.c (shmedia_check_limits): Likewise.
+
 2006-08-25  Sterling Augustine  <sterling@tensilica.com>
 	    Bob Wilson  <bob.wilson@acm.org>
 
