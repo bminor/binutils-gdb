@@ -1,5 +1,9 @@
 2006-08-28  Nick Roberts  <nickrob@snap.net.nz>
 
+	* nickrob-async-20060828-mergepoint.
+
+2006-08-28  Nick Roberts  <nickrob@snap.net.nz>
+
 	* linux-nat.c (linux_nat_attach, linux_nat_detach): Make attach/
 	detach work asynchronously.
 
