@@ -1,3 +1,11 @@
+2006-08-29  Nick Clifton  <nickc@redhat.com>
+
+	* read.c (s_align): Initialize the 'stopc' variable to prevent
+	compiler complaints about it being used without being
+	initialized.
+	(s_comm_internal, s_mri_common, s_fail, s_globl, s_space,
+	s_float_space, s_struct, cons_worker, equals): Likewise.
+
 2006-08-29  Malcolm Parsons  <malcolm.parsons@gmail.com>
 
 	* ecoff.c (ecoff_directive_val): Fix message typo.

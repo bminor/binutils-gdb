@@ -1282,7 +1282,7 @@ s_align (int arg, int bytes_p)
   unsigned int align_limit = ALIGN_LIMIT;
   unsigned int align;
   char *stop = NULL;
-  char stopc;
+  char stopc = 0;
   offsetT fill = 0;
   int max;
   int fill_p;
@@ -1426,7 +1426,7 @@ s_comm_internal (int param,
   offsetT temp, size;
   symbolS *symbolP = NULL;
   char *stop = NULL;
-  char stopc;
+  char stopc = 0;
   expressionS exp;
 
   if (flag_mri)
@@ -1538,7 +1538,7 @@ s_mri_common (int small ATTRIBUTE_UNUSED)
   symbolS *sym;
   offsetT align;
   char *stop = NULL;
-  char stopc;
+  char stopc = 0;
 
   if (!flag_mri)
     {
@@ -1807,7 +1807,7 @@ s_fail (int ignore ATTRIBUTE_UNUSED)
 {
   offsetT temp;
   char *stop = NULL;
-  char stopc;
+  char stopc = 0;
 
   if (flag_mri)
     stop = mri_comment_field (&stopc);
@@ -1929,7 +1929,7 @@ s_globl (int ignore ATTRIBUTE_UNUSED)
   int c;
   symbolS *symbolP;
   char *stop = NULL;
-  char stopc;
+  char stopc = 0;
 
   if (flag_mri)
     stop = mri_comment_field (&stopc);
@@ -2878,7 +2878,7 @@ s_space (int mult)
   expressionS val;
   char *p = 0;
   char *stop = NULL;
-  char stopc;
+  char stopc = 0;
   int bytes;
 
 #ifdef md_flush_pending_output
@@ -3054,7 +3054,7 @@ s_float_space (int float_type)
   int flen;
   char temp[MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT];
   char *stop = NULL;
-  char stopc;
+  char stopc = 0;
 
   if (flag_mri)
     stop = mri_comment_field (&stopc);
@@ -3131,7 +3131,7 @@ void
 s_struct (int ignore ATTRIBUTE_UNUSED)
 {
   char *stop = NULL;
-  char stopc;
+  char stopc = 0;
 
   if (flag_mri)
     stop = mri_comment_field (&stopc);
@@ -3514,7 +3514,7 @@ cons_worker (register int nbytes,	/* 1=.byte, 2=.word, 4=.long.  */
   int c;
   expressionS exp;
   char *stop = NULL;
-  char stopc;
+  char stopc = 0;
 
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
@@ -5010,7 +5010,7 @@ void
 equals (char *sym_name, int reassign)
 {
   char *stop = NULL;
-  char stopc;
+  char stopc = 0;
 
   input_line_pointer++;
   if (*input_line_pointer == '=')
