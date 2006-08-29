@@ -72,6 +72,7 @@
 :model:::mips3d:mips3d:			// mips3d.igen
 :model:::mdmx:mdmx:			// mdmx.igen
 :model:::dsp:dsp:			// dsp.igen
+:model:::smartmips:smartmips:		// smartmips.igen
 
 //  Vendor Extensions
 //
@@ -2457,6 +2458,7 @@
   TRACE_ALU_INPUT2 (GPR[RS], GPR[RT]);
   temp = (U8_4 (VL4_8 (HI), VL4_8 (LO))
           + ((unsigned64) VL4_8 (GPR[RS]) * (unsigned64) VL4_8 (GPR[RT])));
+  ACX += U8_4 (VL4_8 (HI), VL4_8 (LO)) < temp;  /* SmartMIPS */ 
   LO = EXTEND32 (temp);
   HI = EXTEND32 (VH4_8 (temp));
   TRACE_ALU_RESULT2 (HI, LO);
@@ -2658,6 +2660,7 @@
 	  * ((signed64)(signed32) GPR[rt]));
   LO = EXTEND32 (VL4_8 (prod));
   HI = EXTEND32 (VH4_8 (prod));
+  ACX = 0;  /* SmartMIPS */
   if (rd != 0)
     GPR[rd] = LO;
   TRACE_ALU_RESULT2 (HI, LO);
@@ -2850,6 +2853,7 @@
 "ror r<RD>, r<RT>, <SHIFT>"
 *mips32r2:
 *mips64r2:
+*smartmips:
 *vr5400:
 *vr5500:
 {
@@ -2860,6 +2864,7 @@
 "rorv r<RD>, r<RT>, r<RS>"
 *mips32r2:
 *mips64r2:
+*smartmips:
 *vr5400:
 *vr5500:
 {
@@ -5683,4 +5688,5 @@
 :include:::tx.igen
 :include:::vr.igen
 :include:::dsp.igen
+:include:::smartmips.igen
 
