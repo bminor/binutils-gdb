@@ -1,3 +1,15 @@
+2006-08-29  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-elf/loadaddr3.t: New.
+	* ld-elf/loadaddr3a.d: New.
+	* ld-elf/loadaddr3b.d: New.
+
+2006-08-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/plt1.s: New.
+	* ld-powerpc/plt1.d: New.
+	* ld-powerpc/powerpc.exp: Run it.
+
 2006-08-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/3052

@@ -1,0 +1,9 @@
+#source: loadaddr.s
+#ld: -T loadaddr3.t -z max-page-size=0x200000
+#readelf: -l --wide
+#target: *-*-elf*
+
+#...
+  LOAD +0x000000 0x0*00000000 0x0*00000000 0x0*0101 0x0*0101 R E 0x.*
+  LOAD +0x000200 0x0*00000200 0x0*00000101 0x0*0001 0x0*0001 RW  0x.*
+#pass
