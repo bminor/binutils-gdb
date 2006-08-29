@@ -578,7 +578,14 @@ fold_name (etree_type *tree)
 	      if (os->load_base == NULL)
 		new_rel (0, NULL, os->bfd_section);
 	      else
-		exp_fold_tree_1 (os->load_base);
+		{
+		  exp_fold_tree_1 (os->load_base);
+		  /* If this section has a load region, the expression
+		     will be absolute.  */
+		  if (os->lma_region && expld.result.valid_p)
+		    expld.result.section = bfd_abs_section_ptr;
+		}
+	      
 	    }
 	}
       break;
