@@ -669,7 +669,7 @@ walk_wild (lang_wild_statement_type *s, callback_t callback, void *data)
     {
       LANG_FOR_EACH_INPUT_STATEMENT (f)
 	{
-	  if (fnmatch (file_spec, f->filename, FNM_FILE_NAME) == 0)
+	  if (fnmatch (file_spec, f->filename, 0) == 0)
 	    walk_wild_file (s, f, callback, data);
 	}
     }
