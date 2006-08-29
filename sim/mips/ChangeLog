@@ -1,3 +1,10 @@
+2006-08-29  Thiemo Seufer  <ths@mips.com>
+            David Ung  <davidu@mips.com>
+
+	* Makefile.in (IGEN_INCLUDE): Add missing includes for m16e.igen and
+	mips3264r2.igen. Add missing dependency rules.
+	* m16e.igen: Support for mips16e save/restore instructions.
+
 2006-06-13  Richard Earnshaw  <rearnsha@arm.com>
 
 	* configure: Regenerated.

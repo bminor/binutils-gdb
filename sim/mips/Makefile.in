@@ -92,12 +92,14 @@ IGEN_DC=$(srcdir)/mips.dc
 M16_DC=$(srcdir)/m16.dc
 IGEN_INCLUDE=\
 	$(srcdir)/m16.igen \
+	$(srcdir)/m16e.igen \
 	$(srcdir)/mdmx.igen \
 	$(srcdir)/mips3d.igen \
 	$(srcdir)/sb1.igen \
 	$(srcdir)/tx.igen \
 	$(srcdir)/vr.igen \
 	$(srcdir)/dsp.igen \
+	$(srcdir)/mips3264r2.igen \
 
 # NB:	Since these can be built by a number of generators, care
 #	must be taken to ensure that they are only dependant on
@@ -184,8 +186,15 @@ support.o: sim-main.h support.c $(SIM_EXTRA_DEPS)
 idecode.o: sim-main.h idecode.c $(SIM_EXTRA_DEPS)
 itable.o: sim-main.h itable.c $(SIM_EXTRA_DEPS)
 
+m16_semantics.o: sim-main.h m16_semantics.c $(SIM_EXTRA_DEPS)
+m16_support.o: sim-main.h m16_support.c $(SIM_EXTRA_DEPS)
+m16_idecode.o: sim-main.h m16_idecode.c $(SIM_EXTRA_DEPS)
+m16_icache.o: sim-main.h m16_icache.c $(SIM_EXTRA_DEPS)
 
-
+m32_semantics.o: sim-main.h m32_semantics.c $(SIM_EXTRA_DEPS)
+m32_support.o: sim-main.h m32_support.c $(SIM_EXTRA_DEPS)
+m32_idecode.o: sim-main.h m32_idecode.c $(SIM_EXTRA_DEPS)
+m32_icache.o: sim-main.h m32_icache.c $(SIM_EXTRA_DEPS)
 
 BUILT_SRC_FROM_M16 = \
 	m16_icache.h \
