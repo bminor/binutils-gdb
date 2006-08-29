@@ -1,7 +1,7 @@
 #source: loadaddr.s
 #ld: -T loadaddr3.t -z max-page-size=0x200000
 #readelf: -l --wide
-#target: *-*-elf*
+#target: *-*-linux*
 
 #...
   LOAD +0x000000 0x0*00000000 0x0*00000000 0x0*0101 0x0*0101 R E 0x.*

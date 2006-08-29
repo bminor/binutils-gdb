@@ -1,3 +1,8 @@
+2006-08-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elf/loadaddr3a.d: Adjust target test.
+	* ld-elf/loadaddr3b.d: Likewise.
+
 2006-08-29  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-elf/loadaddr3.t: New.
