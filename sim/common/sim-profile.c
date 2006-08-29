@@ -519,7 +519,7 @@ profile_pc_init (SIM_DESC sd)
 	  int bucket_size;
 	  /* fill in the frequency if not specified */
 	  if (PROFILE_PC_FREQ (data) == 0)
-	    PROFILE_PC_FREQ (data) = 256;
+	    PROFILE_PC_FREQ (data) = 257;
 	  /* fill in the start/end if not specified */
 	  if (PROFILE_PC_END (data) == 0)
 	    {
@@ -700,6 +700,7 @@ profile_print_pc (sim_cpu *cpu, int verbose)
 	      sample = 0xffff;
 	    else
 	      sample = PROFILE_PC_COUNT (profile) [loop];
+ 	    H2T (sample);
 	    ok = fwrite (&sample, sizeof (sample), 1, pf);
 	  }
 	if (ok == 0)

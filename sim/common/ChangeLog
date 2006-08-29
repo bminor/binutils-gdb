@@ -1,3 +1,10 @@
+2006-08-29  Nigel Stephens  <nigel@mips.com>
+
+	* sim-profile.c (profile_pc_init): Initialise default profiling
+	frequency to a prime number.
+	(profile_print_pc): Convert gmon.out sample data into target
+	byte order.
+
 2006-06-13  Richard Earnshaw  <rearnsha@arm.com>
 
 	* aclocal.m4: Pass ../../intl to ZW_GNU_GETTEXT_SISTER_DIR.
