@@ -1,3 +1,7 @@
+2006-08-08  Chris Dearman  <chris@mips.com>
+
+	* testutils.inc (setup): __start is also a valid start symbol.
+
 2006-05-15  Chao-ying Fu  <fu@mips.com>
 
 	* mips32-dsp.s: Add some tests for shra_r.ph, shrav_r.ph, shra_r.w,
