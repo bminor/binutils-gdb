@@ -1,5 +1,9 @@
 2006-08-30  Nick Roberts  <nickrob@snap.net.nz>
 
+	* main.c (captured_main): Condition --async option on ASYNC.
+
+	* config/i386/nm-linux.h: Add ASYNC macro definition.
+
 	* Makefile.in: Add link flag for pthread library...
 
 	* config/i386/linux.mh (LOADLIBES): here.
