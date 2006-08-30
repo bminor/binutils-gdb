@@ -263,8 +263,10 @@ captured_main (void *data)
     };
     static struct option long_options[] =
     {
+#ifdef ASYNC
       {"async", no_argument, &event_loop_p, 1},
       {"noasync", no_argument, &event_loop_p, 0},
+#endif
 #if defined(TUI)
       {"tui", no_argument, 0, OPT_TUI},
 #endif
