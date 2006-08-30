@@ -2186,13 +2186,13 @@ remote_start_remote (struct ui_out *uiout, void *target_)
   if (target)
     {
       struct remote_state *rs = get_remote_state ();
-      char *buf = alloca (rs->remote_packet_size);
+      char *buf = rs->buf;
 
       /* In extended mode, check whether the target is running now.  This
          duplicates the ? request/response, which is a shame; a FIXME
 	 is to cache the response for later.  */
       putpkt ("?");
-      getpkt (&buf, &rs->buf_size, 0);
+      getpkt (&rs->buf, &rs->buf_size, 0);
 
       if (buf[0] == 'W' || buf[0] == 'X')
 	{
@@ -2655,7 +2655,7 @@ extended_remote_attach_1 (struct target_ops *target, char *args, int from_tty)
 {
   struct remote_state *rs = get_remote_state ();
   pid_t pid;
-  char *dummy, *buf;
+  char *dummy;
 
   if (!args)
     error_no_arg (_("process-id to attach"));
@@ -2669,12 +2669,11 @@ extended_remote_attach_1 (struct target_ops *target, char *args, int from_tty)
   if (remote_protocol_packets[PACKET_vAttach].support == PACKET_DISABLE)
     error (_("This target does not support attaching to a process"));
 
-  buf = alloca (rs->remote_packet_size);
-  sprintf (buf, "vAttach;%x", pid);
-  putpkt (buf);
+  sprintf (rs->buf, "vAttach;%x", pid);
+  putpkt (rs->buf);
   getpkt (&rs->buf, &rs->buf_size, 0);
 
-  if (packet_ok (buf, &remote_protocol_packets[PACKET_vAttach]) == PACKET_OK)
+  if (packet_ok (rs->buf, &remote_protocol_packets[PACKET_vAttach]) == PACKET_OK)
     {
       if (from_tty)
 	printf_unfiltered (_("Attached to %s\n"),
@@ -4955,7 +4954,6 @@ static void
 extended_remote_mourn_1 (struct target_ops *target)
 {
   struct remote_state *rs = get_remote_state ();
-  char *buf = alloca (rs->remote_packet_size);
 
   /* Unlike "target remote", we do not want to unpush the target; then
      the next time the user says "run", we won't be connected.  */
@@ -4968,7 +4966,7 @@ extended_remote_mourn_1 (struct target_ops *target)
   putpkt ("?");
   getpkt (&rs->buf, &rs->buf_size, 0);
 
-  if (buf[0] == 'S' || buf[0] == 'T')
+  if (rs->buf[0] == 'S' || rs->buf[0] == 'T')
     {
       /* Assume that the target has been restarted.  Set inferior_ptid
 	 so that bits of core GDB realizes there's something here, e.g.,
@@ -4999,17 +4997,15 @@ int
 extended_remote_run (char *args)
 {
   struct remote_state *rs = get_remote_state ();
-  char *buf, *p;
+  char *p;
   int len;
 
-  buf = alloca (rs->remote_packet_size);
-
-  strcpy (buf, "vRun;");
-  len = strlen (buf);
+  strcpy (rs->buf, "vRun;");
+  len = strlen (rs->buf);
 
   if (strlen (remote_exec_file) * 2 + len >= rs->remote_packet_size)
     error (_("Remote file name too long for run packet"));
-  len += 2 * bin2hex ((gdb_byte *) remote_exec_file, buf + len, 0);
+  len += 2 * bin2hex ((gdb_byte *) remote_exec_file, rs->buf + len, 0);
 
   if (*args)
     {
@@ -5023,18 +5019,18 @@ extended_remote_run (char *args)
 	{
 	  if (strlen (argv[i]) * 2 + 1 + len >= rs->remote_packet_size)
 	    error (_("Argument list too long for run packet"));
-	  buf[len++] = ';';
-	  len += 2 * bin2hex ((gdb_byte *) argv[i], buf + len, 0);
+	  rs->buf[len++] = ';';
+	  len += 2 * bin2hex ((gdb_byte *) argv[i], rs->buf + len, 0);
 	}
       do_cleanups (back_to);
     }
 
-  buf[len++] = '\0';
+  rs->buf[len++] = '\0';
 
-  putpkt (buf);
+  putpkt (rs->buf);
   getpkt (&rs->buf, &rs->buf_size, 0);
 
-  if (packet_ok (buf, &remote_protocol_packets[PACKET_vRun]) == PACKET_OK)
+  if (packet_ok (rs->buf, &remote_protocol_packets[PACKET_vRun]) == PACKET_OK)
     {
       /* We have a wait response; we don't need it, though.  All is well.  */
       return 0;
