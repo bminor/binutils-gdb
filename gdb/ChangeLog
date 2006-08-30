@@ -1,3 +1,9 @@
+2006-08-30  Nick Roberts  <nickrob@snap.net.nz>
+
+	* Makefile.in: Add link flag for pthread library...
+
+	* config/i386/linux.mh (LOADLIBES): here.
+
 2006-08-28  Nick Roberts  <nickrob@snap.net.nz>
 
 	* nickrob-async-20060828-mergepoint.
