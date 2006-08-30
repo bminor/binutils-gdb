@@ -4732,6 +4732,13 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
     case R_ARM_MOVT_ABS:
     case R_ARM_MOVW_PREL_NC:
     case R_ARM_MOVT_PREL:
+    /* Until we properly support segment-base-relative addressing then
+       we assume the segment base to be zero, as for the group relocations.
+       Thus R_ARM_MOVW_BREL_NC has the same semantics as R_ARM_MOVW_ABS_NC
+       and R_ARM_MOVT_BREL has the same semantics as R_ARM_MOVT_ABS.  */
+    case R_ARM_MOVW_BREL_NC:
+    case R_ARM_MOVW_BREL:
+    case R_ARM_MOVT_BREL:
       {
 	bfd_vma insn = bfd_get_32 (input_bfd, hit_data);
 
@@ -4740,15 +4747,21 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	    addend = ((insn >> 4) & 0xf000) | (insn & 0xfff);
 	    signed_addend = (addend ^ 0x10000) - 0x10000;
 	  }
+
 	value += signed_addend;
-	if (sym_flags == STT_ARM_TFUNC)
-	  value |= 1;
 
 	if (r_type == R_ARM_MOVW_PREL_NC || r_type == R_ARM_MOVT_PREL)
 	  value -= (input_section->output_section->vma
 		    + input_section->output_offset + rel->r_offset);
 
-	if (r_type == R_ARM_MOVT_ABS || r_type == R_ARM_MOVT_PREL)
+	if (r_type == R_ARM_MOVW_BREL && value >= 0x10000)
+          return bfd_reloc_overflow;
+
+	if (sym_flags == STT_ARM_TFUNC)
+	  value |= 1;
+
+	if (r_type == R_ARM_MOVT_ABS || r_type == R_ARM_MOVT_PREL
+            || r_type == R_ARM_MOVT_BREL)
 	  value >>= 16;
 
 	insn &= 0xfff0f000;
@@ -4762,6 +4775,14 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
     case R_ARM_THM_MOVT_ABS:
     case R_ARM_THM_MOVW_PREL_NC:
     case R_ARM_THM_MOVT_PREL:
+    /* Until we properly support segment-base-relative addressing then
+       we assume the segment base to be zero, as for the above relocations.
+       Thus R_ARM_THM_MOVW_BREL_NC has the same semantics as
+       R_ARM_THM_MOVW_ABS_NC and R_ARM_THM_MOVT_BREL has the same semantics
+       as R_ARM_THM_MOVT_ABS.  */
+    case R_ARM_THM_MOVW_BREL_NC:
+    case R_ARM_THM_MOVW_BREL:
+    case R_ARM_THM_MOVT_BREL:
       {
 	bfd_vma insn;
 	
@@ -4776,15 +4797,21 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		   | (insn         & 0x00ff);
 	    signed_addend = (addend ^ 0x10000) - 0x10000;
 	  }
+
 	value += signed_addend;
-	if (sym_flags == STT_ARM_TFUNC)
-	  value |= 1;
 
 	if (r_type == R_ARM_THM_MOVW_PREL_NC || r_type == R_ARM_THM_MOVT_PREL)
 	  value -= (input_section->output_section->vma
 		    + input_section->output_offset + rel->r_offset);
 
-	if (r_type == R_ARM_THM_MOVT_ABS || r_type == R_ARM_THM_MOVT_PREL)
+	if (r_type == R_ARM_THM_MOVW_BREL && value >= 0x10000)
+          return bfd_reloc_overflow;
+
+	if (sym_flags == STT_ARM_TFUNC)
+	  value |= 1;
+
+	if (r_type == R_ARM_THM_MOVT_ABS || r_type == R_ARM_THM_MOVT_PREL
+            || r_type == R_ARM_THM_MOVT_BREL)
 	  value >>= 16;
 
 	insn &= 0xfbf08f00;
