@@ -7,5 +7,5 @@ NATDEPFILES= inf-ptrace.o fork-child.o corelow.o \
 	linux-nat.o linux-fork.o
 
 # The dynamically loaded libthread_db needs access to symbols in the
-# gdb executable.
-LOADLIBES = -ldl -rdynamic
+# gdb executable.  Asynchronous operation needs libpthread.
+LOADLIBES = -ldl -rdynamic -lpthread
