@@ -80,4 +80,7 @@ extern int cannot_store_register (int regno);
 #define FILL_FPXREGSET
 #endif
 
+/* gdb --async works for this case */
+#define ASYNC
+
 #endif /* nm-linux.h */
