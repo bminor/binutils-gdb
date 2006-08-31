@@ -1,3 +1,16 @@
+2006-08-31  Nick Roberts  <nickrob@snap.net.nz>
+
+	* Makefile.in (COMMON_OBS): Move async-nat-sigthread.o
+	async-nat-sigthread.o to...
+	 
+	* config/i386/linux.mh (NATDEPFILES): ...here. 
+
+	* async-nat-sigthread.c: Modify commentary at start.
+
+	* async-nat-inferior.c: Modify commentary at start.
+	Remove (duplicated/unnecessary?) remote functions.
+
+
 2006-08-30  Nick Roberts  <nickrob@snap.net.nz>
 
 	* main.c (captured_main): Condition --async option on ASYNC.
@@ -6,7 +19,7 @@
 
 	* Makefile.in: Add link flag for pthread library...
 
-	* config/i386/linux.mh (LOADLIBES): here.
+	* config/i386/linux.mh (LOADLIBES): ...here.
 
 2006-08-28  Nick Roberts  <nickrob@snap.net.nz>
 
