@@ -104,6 +104,8 @@ if [string match "" $exec_output] then {
     }
 }
 
+setup_xfail mips*-*-linux*
+
 # Check cross references for ld -r
 
 if { ![ld_compile $CC "$srcdir/$subdir/cross4.c" tmpdir/cross4.o] } {
