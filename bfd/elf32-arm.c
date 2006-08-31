@@ -834,12 +834,12 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 	 13,			/* bitsize */
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_signed,/* complain_on_overflow */
+	 complain_overflow_dont,/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_ARM_THM_ALU_PREL_11_0",/* name */
 	 FALSE,			/* partial_inplace */
-	 0x040070ff,		/* src_mask */
-	 0x040070ff,		/* dst_mask */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
 	 TRUE),			/* pcrel_offset */
 
   HOWTO (R_ARM_THM_PC12,	/* type */
@@ -848,12 +848,12 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 	 13,			/* bitsize */
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_signed,/* complain_on_overflow */
+	 complain_overflow_dont,/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_ARM_THM_PC12",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0x040070ff,		/* src_mask */
-	 0x040070ff,		/* dst_mask */
+	 0x0fffffff,		/* src_mask */
+	 0x0fffffff,		/* dst_mask */
 	 TRUE),			/* pcrel_offset */
 
   HOWTO (R_ARM_ABS32_NOI,	/* type */
@@ -3957,6 +3957,81 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
       value |= bfd_get_16 (input_bfd, hit_data) & 0xf83f;
       bfd_put_16 (input_bfd, value, hit_data);
       return bfd_reloc_ok;
+
+    case R_ARM_THM_ALU_PREL_11_0:
+      /* Corresponds to: addw.w reg, pc, #offset (and similarly for subw).  */
+      {
+	bfd_vma insn;
+	bfd_signed_vma relocation;
+
+	insn = (bfd_get_16 (input_bfd, hit_data) << 16)
+             | bfd_get_16 (input_bfd, hit_data + 2);
+
+        if (globals->use_rel)
+          {
+            signed_addend = (insn & 0xff) | ((insn & 0x7000) >> 4)
+                          | ((insn & (1 << 26)) >> 15);
+            if (insn & 0xf00000)
+              signed_addend = -signed_addend;
+          }
+
+	relocation = value + signed_addend;
+	relocation -= (input_section->output_section->vma
+		       + input_section->output_offset
+		       + rel->r_offset);
+
+        value = abs (relocation);
+
+        if (value >= 0x1000)
+          return bfd_reloc_overflow;
+
+	insn = (insn & 0xfb0f8f00) | (value & 0xff)
+             | ((value & 0x700) << 4)
+             | ((value & 0x800) << 15);
+        if (relocation < 0)
+          insn |= 0xa00000;
+
+	bfd_put_16 (input_bfd, insn >> 16, hit_data);
+	bfd_put_16 (input_bfd, insn & 0xffff, hit_data + 2);
+
+        return bfd_reloc_ok;
+      }
+
+    case R_ARM_THM_PC12:
+      /* Corresponds to: ldr.w reg, [pc, #offset].  */
+      {
+	bfd_vma insn;
+	bfd_signed_vma relocation;
+
+	insn = (bfd_get_16 (input_bfd, hit_data) << 16)
+             | bfd_get_16 (input_bfd, hit_data + 2);
+
+        if (globals->use_rel)
+          {
+            signed_addend = insn & 0xfff;
+            if (!(insn & (1 << 23)))
+              signed_addend = -signed_addend;
+          }
+
+	relocation = value + signed_addend;
+	relocation -= (input_section->output_section->vma
+		       + input_section->output_offset
+		       + rel->r_offset);
+
+        value = abs (relocation);
+
+        if (value >= 0x1000)
+          return bfd_reloc_overflow;
+
+	insn = (insn & 0xff7ff000) | value;
+        if (relocation >= 0)
+          insn |= (1 << 23);
+
+	bfd_put_16 (input_bfd, insn >> 16, hit_data);
+	bfd_put_16 (input_bfd, insn & 0xffff, hit_data + 2);
+
+        return bfd_reloc_ok;
+      }
 
     case R_ARM_THM_XPC22:
     case R_ARM_THM_CALL:
