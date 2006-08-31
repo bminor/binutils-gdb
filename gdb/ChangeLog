@@ -1,5 +1,8 @@
 2006-08-31  Nick Roberts  <nickrob@snap.net.nz>
 
+	* mi/gdb-mi.el: Update to Emacs 22.
+	Numerous changes (prehistory).
+
 	* Makefile.in (COMMON_OBS): Move async-nat-sigthread.o
 	async-nat-sigthread.o to...
 	 
@@ -9,7 +12,6 @@
 
 	* async-nat-inferior.c: Modify commentary at start.
 	Remove (duplicated/unnecessary?) remote functions.
-
 
 2006-08-30  Nick Roberts  <nickrob@snap.net.nz>
 
