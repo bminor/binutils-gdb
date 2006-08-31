@@ -1,8 +1,9 @@
 /* Async support for GDB, the GNU debugger.
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2006
    Free Software Foundation, Inc.
 
-   Contributed by Apple Computer, Inc.
+   Original code from Apple Computer, Inc.
+   Modified by Nick Roberts <nickrob@snap.net.nz>
 
    This file is part of GDB.
 
