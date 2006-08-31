@@ -1,8 +1,9 @@
 /* Async support for GDB, the GNU debugger.
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2004
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2004, 2006
    Free Software Foundation, Inc.
 
-   Contributed by Apple Computer, Inc.
+   Original code from Apple Computer, Inc.
+   Modified by Nick Roberts <nickrob@snap.net.nz>
 
    This file is part of GDB.
 
@@ -416,102 +417,6 @@ gdb_create_inferior (struct gdb_inferior_status *inferior,  int pid)
   inferior->suspend_count = 0;
 }
 
-static int remote_async_terminal_ours_p = 1;
-static void (*ofunc) (int);
-static PTR sigint_remote_twice_token;
-static PTR sigint_remote_token;
-
-static void remote_interrupt_twice (int signo);
-static void remote_interrupt (int signo);
-static void handle_remote_sigint_twice (int sig);
-static void handle_remote_sigint (int sig);
-static void async_remote_interrupt_twice (gdb_client_data arg);
-static void async_remote_interrupt (gdb_client_data arg);
-
-static void
-interrupt_query (void)
-{
-  target_terminal_ours ();
-
-  if (query ("Interrupted while waiting for the program.\n\
-Give up (and stop debugging it)? "))
-    {
-      target_mourn_inferior ();
-      deprecated_throw_reason (RETURN_QUIT);
-    }
-
-  target_terminal_inferior ();
-}
-
-static void
-remote_interrupt_twice (int signo)
-{
-  signal (signo, ofunc);
-  interrupt_query ();
-  signal (signo, remote_interrupt);
-}
-
-static void
-remote_interrupt (int signo)
-{
-  signal (signo, remote_interrupt_twice);
-  target_stop ();
-}
-
-static void
-handle_remote_sigint_twice (int sig)
-{
-  signal (sig, handle_sigint);
-  sigint_remote_twice_token =
-    create_async_signal_handler (inferior_event_handler_wrapper, NULL);
-  mark_async_signal_handler_wrapper (sigint_remote_twice_token);
-}
-
-static void
-handle_remote_sigint (int sig)
-{
-  signal (sig, handle_remote_sigint_twice);
-  sigint_remote_twice_token =
-    create_async_signal_handler (async_remote_interrupt_twice, NULL);
-  mark_async_signal_handler_wrapper (sigint_remote_token);
-}
-
-static void
-async_remote_interrupt_twice (gdb_client_data arg)
-{
-  if (target_executing)
-    {
-      interrupt_query ();
-      signal (SIGINT, handle_remote_sigint);
-    }
-}
-
-static void
-async_remote_interrupt (gdb_client_data arg)
-{
-  target_stop ();
-}
-
-static void
-cleanup_sigint_signal_handler (void *dummy)
-{
-  signal (SIGINT, handle_sigint);
-  if (sigint_remote_twice_token)
-    delete_async_signal_handler ((struct async_signal_handler **)
-                                 &sigint_remote_twice_token);
-  if (sigint_remote_token)
-    delete_async_signal_handler ((struct async_signal_handler **)
-                                 &sigint_remote_token);
-}
-
-static void
-initialize_sigint_signal_handler (void)
-{
-  sigint_remote_token =
-    create_async_signal_handler (async_remote_interrupt, NULL);
-  signal (SIGINT, handle_remote_sigint);
-}
-
 void
 async_terminal_inferior (void)
 {
@@ -519,13 +424,7 @@ async_terminal_inferior (void)
 
   if (!sync_execution)
     return;
-  if (!remote_async_terminal_ours_p)
-    return;
-  //  CHECK_FATAL (sync_execution);
-  //  CHECK_FATAL (remote_async_terminal_ours_p);
   delete_file_handler (input_fd);
-  remote_async_terminal_ours_p = 0;
-  initialize_sigint_signal_handler ();
 }
 
 void
@@ -535,15 +434,8 @@ async_terminal_ours (void)
 
   if (!sync_execution)
     return;
-  if (remote_async_terminal_ours_p)
-    return;
-  //  CHECK_FATAL (sync_execution);
-  //  CHECK_FATAL (!remote_async_terminal_ours_p);
-  cleanup_sigint_signal_handler (NULL);
 
   add_file_handler (input_fd, stdin_event_handler, 0);
-
-  remote_async_terminal_ours_p = 1;
 }
 
 static void
