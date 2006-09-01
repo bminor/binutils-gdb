@@ -1,3 +1,10 @@
+2006-09-01  Nick Roberts  <nickrob@snap.net.nz>
+
+	* mi/gdb-mi.el (gdb-force-mode-line-update): New function.
+	(gdbmi): Stop execution from tool bar with -exec-interrupt.
+	(gdb-stopped-regexp): Generalise for other stopping reasons.
+	(gud-gdbmi-marker-filter): Report execution status on modeline.
+
 2006-08-31  Nick Roberts  <nickrob@snap.net.nz>
 
 	* mi/gdb-mi.el: Update to Emacs 22.
