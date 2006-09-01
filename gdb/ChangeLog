@@ -1,3 +1,9 @@
+2006-09-01  Mark Kettenis  <kettenis@gnu.org>
+
+	Committed by Joel Brobecker  <brobecker@adacore.com>
+	* gdbtypes.c (init_flags_type): Set all fields to zero instead of
+	just the first one.
+
 2006-07-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2read.c (dwarf2_symbol_mark_computed): Handle corrupted
