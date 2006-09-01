@@ -1162,7 +1162,7 @@ static char *magick[] = {
 	      gud-running nil)
 	(setq gdb-inferior-status (if reason reason "unknown"))
 	(gdb-force-mode-line-update
-	 (propertize gdb-inferior-status 'face font-lock-warning-face)))))
+	 (propertize gdb-inferior-status 'face font-lock-warning-face))))
 
     ;; process command outputs one by one.
     (while (string-match gdb-gdb-regexp gud-marker-acc)
@@ -2092,10 +2092,10 @@ is set in them."
     `(menu-item "GDB-Windows" ,menu
 		:visible (eq gud-minor-mode 'gdbmi)))
   (define-key menu [gdb] '("Gdb" . gdb-display-gdb-buffer))
-  (define-key menu [threads] '("Threads" . gdb-display-threads-buffer))
-  (define-key menu [memory] '("Memory" . gdb-display-memory-buffer))
-  (define-key menu [disassembly]
-    '("Disassembly" . gdb-display-assembler-buffer))
+;  (define-key menu [threads] '("Threads" . gdb-display-threads-buffer))
+;  (define-key menu [memory] '("Memory" . gdb-display-memory-buffer))
+;  (define-key menu [disassembly]
+;    '("Disassembly" . gdb-display-assembler-buffer))
   (define-key menu [registers] '("Registers" . gdb-display-registers-buffer))
   (define-key menu [inferior]
     '(menu-item "Separate IO" gdb-display-separate-io-buffer
@@ -2110,9 +2110,9 @@ is set in them."
     `(menu-item "GDB-Frames" ,menu
 		:visible (eq gud-minor-mode 'gdbmi)))
   (define-key menu [gdb] '("Gdb" . gdb-frame-gdb-buffer))
-  (define-key menu [threads] '("Threads" . gdb-frame-threads-buffer))
-  (define-key menu [memory] '("Memory" . gdb-frame-memory-buffer))
-  (define-key menu [disassembly] '("Disassembly" . gdb-frame-assembler-buffer))
+;  (define-key menu [threads] '("Threads" . gdb-frame-threads-buffer))
+;  (define-key menu [memory] '("Memory" . gdb-frame-memory-buffer))
+;  (define-key menu [disassembly] '("Disassembly" . gdb-frame-assembler-buffer))
   (define-key menu [registers] '("Registers" . gdb-frame-registers-buffer))
   (define-key menu [inferior]
     '(menu-item "Separate IO" gdb-frame-separate-io-buffer
