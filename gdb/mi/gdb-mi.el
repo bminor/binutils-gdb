@@ -36,14 +36,14 @@
 ;; development and is part of a process to migrate Emacs from annotations (as
 ;; used in gdb-ui.el) to GDB/MI.  It runs gdb with GDB/MI (-interp=mi) and
 ;; access CLI using "-interpreter-exec console-quoted cli-command".  This code
-;; works without gdb-ui.el and uses MI TOKENS INSTEAD OF QUEUES. Eventually MI
-;; should be asynchronous.
+;; works without gdb-ui.el and uses MI TOKENS instead of queues.
 
 ;; This file uses GDB/MI as the primary interface to GDB. It is still under
 ;; development and is part of a process to migrate Emacs from annotations
 ;; (as used in gdb-ui.el) to GDB/MI.
 ;;
-;; This mode ONLY WORKS WITH THE nickrob-async-20060513 BRANCH (post GDB 6.4).
+;; This mode ONLY WORKS WITH THE nickrob-async-20060513 branch using
+;; "gdb --async -i=mi" for asynchronous interaction.
 ;;
 ;; Windows Platforms:
 ;;
@@ -86,7 +86,6 @@ Set to \"main\" at start if gdb-show-main is t.")
 (defvar gdb-memory-address "main")
 (defvar gdb-previous-frame nil)
 (defvar gdb-selected-frame nil)
-(defvar gdb-current-frame nil)
 (defvar gdb-frame-number nil)
 (defvar gdb-current-language nil)
 (defvar gdb-var-list nil
@@ -116,6 +115,7 @@ and #define directives otherwise.")
 (defvar gdb-source-file-list nil)
 (defvar gdb-first-done-or-error t)
 (defvar gdb-source-window nil)
+(defvar gdb-inferior-status nil)
 (defvar gdb-continuation nil)
 
 (defvar gdb-buffer-type nil
@@ -186,6 +186,16 @@ Also display the main routine in the disassembly buffer if present."
   :type 'boolean
   :group 'gud
   :version "22.1")
+
+(defun gdb-force-mode-line-update (status)
+  (let ((buffer gud-comint-buffer))
+    (if (and buffer (buffer-name buffer))
+	(with-current-buffer buffer
+	  (setq mode-line-process
+		(format ":%s [%s]"
+			(process-status (get-buffer-process buffer)) status))
+	  ;; Force mode line redisplay soon.
+	  (force-mode-line-update)))))
 
 (defun gdb-use-separate-io-buffer (arg)
   "Toggle separate IO for debugged program.
@@ -347,6 +357,11 @@ detailed description of this mode.
 			(gdb-find-watch-expression) "%e")) arg)
 	   nil   "Print the emacs s-expression.")
 
+  ;; temporary hack - this will override previous definition.
+  (defun gud-stop-subjob ()
+    (interactive)
+    (gdb-input (list "-exec-interrupt\n" 'ignore)))
+
   (define-key gud-minor-mode-map [left-margin mouse-1]
     'gdb-mouse-set-clear-breakpoint)
   (define-key gud-minor-mode-map [left-fringe mouse-1]
@@ -382,7 +397,6 @@ detailed description of this mode.
 	gdb-memory-address "main"
 	gdb-previous-frame nil
 	gdb-selected-frame nil
-	gdb-current-frame nil
 	gdb-frame-number nil
 	gdb-var-list nil
 	gdb-pending-triggers nil
@@ -397,10 +411,14 @@ detailed description of this mode.
 	gdb-first-done-or-error t
 	gdb-buffer-fringe-width (car (window-fringes))
 	gdb-source-window nil
+	gdb-inferior-status nil
 	gdb-continuation nil)
   ;;
   (setq gdb-buffer-type 'gdbmi)
   ;;
+  (gdb-force-mode-line-update 
+   (propertize "initializing..." 'face font-lock-variable-name-face))
+
   (when gdb-use-separate-io-buffer
     (gdb-get-buffer-create 'gdb-inferior-io)
     (gdb-clear-inferior-io)
@@ -1058,8 +1076,8 @@ static char *magick[] = {
 
 ;; fullname added GDB 6.4+.
 (defconst gdb-stopped-regexp
-  "\\*stopped,reason=\"\\(.*?\\)\",\\(exit-code=.*?\\|\
-.*?file=\".*?\",fullname=\"\\(.*?\\)\",line=\"\\(.*?\\)\"\\).*?\n")
+  "\\*stopped,\\(reason=\"\\(.*?\\)\",\\)?\\(exit-code=.*?\\|\
+.*?file=\".*?\",fullname=\"\\(.*?\\)\",line=\"\\(.*?\\)\"\\)?.*?\n")
 
 (defconst gdb-console-regexp "~\\(\".*?[^\\]\"\\)\n")
 
@@ -1120,23 +1138,31 @@ static char *magick[] = {
   ;; Start accumulating output for the GUD buffer
   (let ((output "") (output-record) (preamble))
 
-    (if (string-match gdb-running-regexp gud-marker-acc) 
-	(setq gud-marker-acc (substring gud-marker-acc (match-end 0))
-	      gud-running t))
+    (when (string-match gdb-running-regexp gud-marker-acc) 
+      (setq gud-marker-acc (substring gud-marker-acc (match-end 0))
+	    gud-running t)
+      (setq gdb-inferior-status "running")
+      (gdb-force-mode-line-update
+       (propertize gdb-inferior-status 'face font-lock-type-face)))
 
     (when (string-match gdb-stopped-regexp gud-marker-acc)
-	(unless (string-equal (match-string 1 gud-marker-acc) "exited")
+      (let ((reason (match-string 2 gud-marker-acc))
+	    (file (match-string 4 gud-marker-acc)))
+	(when file
 	  (setq
 	   ;; Extract the frame position from the marker.
-	   gud-last-frame (cons (match-string 3 gud-marker-acc)
+	   gud-last-frame (cons file
 				(string-to-number
-				 (match-string 4 gud-marker-acc))))
+				 (match-string 5 gud-marker-acc))))
 	  (gdbmi-update))
 
 	(setq gud-marker-acc
 	      (concat (substring gud-marker-acc 0 (match-beginning 0))
 		      (substring gud-marker-acc (match-end 0)))
-	      gud-running nil))
+	      gud-running nil)
+	(setq gdb-inferior-status (if reason reason "unknown"))
+	(gdb-force-mode-line-update
+	 (propertize gdb-inferior-status 'face font-lock-warning-face)))))
 
     ;; process command outputs one by one.
     (while (string-match gdb-gdb-regexp gud-marker-acc)
@@ -1984,7 +2010,9 @@ is set in them."
 	(when gud-tooltip-mode
 	  (make-local-variable 'gdb-define-alist)
 	  (gdb-create-define-alist)
-	  (add-hook 'after-save-hook 'gdb-create-define-alist nil t))))))
+	  (add-hook 'after-save-hook 'gdb-create-define-alist nil t)))))
+  (gdb-force-mode-line-update
+   (propertize "ready" 'face font-lock-variable-name-face)))
 
 (defun gdbmi-get-selected-frame ()
   (if (not (member 'gdbmi-get-selected-frame gdb-pending-triggers))
