@@ -1,3 +1,9 @@
+2006-09-01  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/3146
+	* readelf.c (dump_relocations): Check for a NULL value in rtype
+	before using it.
+
 2006-08-21  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* configure.in: Split arm-pe and arm-wince-pe. Build dlltool

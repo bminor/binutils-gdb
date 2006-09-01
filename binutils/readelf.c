@@ -1148,6 +1148,7 @@ dump_relocations (FILE *file,
 	printf (do_wide ? "%-22.22s" : "%-17.17s", rtype);
 
       if (elf_header.e_machine == EM_ALPHA
+	  && rtype != NULL
 	  && streq (rtype, "R_ALPHA_LITUSE")
 	  && is_rela)
 	{
@@ -1246,7 +1247,9 @@ dump_relocations (FILE *file,
 	  print_vma (rels[i].r_addend, LONG_HEX);
 	}
 
-      if (elf_header.e_machine == EM_SPARCV9 && streq (rtype, "R_SPARC_OLO10"))
+      if (elf_header.e_machine == EM_SPARCV9
+	  && rtype != NULL
+	  && streq (rtype, "R_SPARC_OLO10"))
 	printf (" + %lx", (unsigned long) ELF64_R_TYPE_DATA (info));
 
       putchar ('\n');
