@@ -112,11 +112,7 @@ static void gdb_add_to_pending_events (enum gdb_source_type,
 
 static void gdb_pending_event_handler (void *data);
 
-void gdb_clear_pending_events ();
-
 static void gdb_inferior_reset (gdb_inferior_status *s);
-
-static void gdb_inferior_destroy (gdb_inferior_status *s);
 
 static void
 gdb_handle_signal (gdb_signal_thread_message *msg,
@@ -453,7 +449,7 @@ gdb_inferior_reset (gdb_inferior_status *s)
 
 }
 
-static void
+void
 gdb_inferior_destroy (gdb_inferior_status *s)
 {
   gdb_signal_thread_destroy (&s->signal_status);
