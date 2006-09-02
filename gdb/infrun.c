@@ -1693,6 +1693,13 @@ handle_inferior_event (struct execution_control_state *ecs)
       if (deprecated_context_hook)
 	deprecated_context_hook (pid_to_thread_id (ecs->ptid));
 
+      if (ui_out_is_mi_like_p (uiout))
+	{
+	  target_terminal_ours_for_output ();
+	  printf_filtered ("[Switching to %s]\n",
+			   target_pid_or_tid_to_str (inferior_ptid));
+	}
+
       flush_cached_frames ();
     }
 
