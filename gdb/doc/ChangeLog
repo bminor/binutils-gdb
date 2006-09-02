@@ -1,3 +1,8 @@
+2006-09-02  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdbint.texinfo (Overall Structure): New section "Source Tree
+	Structure".
+
 2006-08-17  Jim Blandy  <jimb@codesourcery.com>
 
 	* gdb.texinfo (Stop Reply Packets): Note similarity of 'S' and 'T'

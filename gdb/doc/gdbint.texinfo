@@ -212,6 +212,54 @@ file handling and @code{setjmp} handling are two common cases.
 When you want to make @value{GDBN} work ``native'' on a particular machine, you
 have to include all three kinds of information.
 
+@section Source Tree Structure
+@cindex @value{GDBN} source tree structure
+
+The @value{GDBN} source directory has a mostly flat structure---there
+are only a few subdirectories.  A file's name usually gives a hint as
+to what it does; for example, @file{stabsread.c} reads stabs,
+@file{dwarfread.c} reads DWARF, etc.
+
+Files that are related to some common task have names that share
+common substrings.  For example, @file{*-thread.c} files deal with
+debugging threads on various platforms; @file{*read.c} files deal with
+reading various kinds of symbol and object files; @file{inf*.c} files
+deal with direct control of the @dfn{inferior program} (@value{GDBN}
+parlance for the program being debugged).
+
+There are several dozens of files in the @file{*-tdep.c} family.
+@samp{tdep} stands for @dfn{target-dependent code}---each of these
+files implements debug support for a specific target architecture
+(sparc, mips, etc).  Usually, only one of these will be used in a
+specific @value{GDBN} configuration (sometimes two, closely related).
+
+Similarly, there are many @file{*-nat.c} files, each one for native
+debugging on a specific system (e.g., @file{sparc-linux-nat.c} is for
+native debugging of Sparc machines running the Linux kernel).
+
+The few subdirectories of the source tree are:
+
+@table @file
+@item cli
+Code that implements @dfn{CLI}, the @value{GDBN} Command-Line
+Interpreter.  @xref{User Interface, Command Interpreter}.
+
+@item gdbserver
+Code for the @value{GDBN} remote server.
+
+@item gdbtk
+Code for Insight, the @value{GDBN} TK-based GUI front-end.
+
+@item mi
+The @dfn{GDB/MI}, the @value{GDBN} Machine Interface interpreter.
+
+@item signals
+Target signal translation code.
+
+@item tui
+Code for @dfn{TUI}, the @value{GDBN} Text-mode full-screen User
+Interface.  @xref{User Interface, TUI}.
+@end table
 
 @node Algorithms
 
