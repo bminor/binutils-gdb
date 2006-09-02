@@ -2381,6 +2381,9 @@ linux_nat_mourn_inferior (void)
 {
   trap_ptid = null_ptid;
 
+  if (target_can_async_p ())
+    gdb_inferior_destroy (gdb_status);
+
   /* Destroy LWP info; it's no longer valid.  */
   init_lwp_list ();
 
@@ -2396,6 +2399,8 @@ linux_nat_mourn_inferior (void)
        there are other viable forks to debug.  Delete the exiting
        one and context-switch to the first available.  */
     linux_fork_mourn_inferior ();
+
+  if (target_can_async_p ()) gdb_clear_pending_events ();
 }
 
 static LONGEST
