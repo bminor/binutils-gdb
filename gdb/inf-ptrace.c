@@ -182,7 +182,8 @@ inf_ptrace_mourn_inferior (void)
      Do not check whether this succeeds though, since we may be
      dealing with a process that we attached to.  Such a process will
      only report its exit status to its original parent.  */
-  waitpid (ptid_get_pid (inferior_ptid), &status, 0);
+  if (!target_can_async_p ())
+    waitpid (ptid_get_pid (inferior_ptid), &status, 0);
 
   unpush_target (ptrace_ops_hack);
   generic_mourn_inferior ();
@@ -209,6 +210,9 @@ inf_ptrace_attach (char *args, int from_tty)
 
   if (pid == getpid ())		/* Trying to masturbate?  */
     error (_("I refuse to debug myself!"));
+
+  if (target_can_async_p ())
+    gdb_inferior_destroy (gdb_status);
 
   if (from_tty)
     {
