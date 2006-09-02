@@ -1,3 +1,18 @@
+2006-09-02  Nick Roberts  <nickrob@snap.net.nz>
+
+	* infrun.c (handle_inferior_event): Take terminal.
+
+	* linux-nat.c (linux_nat_mourn_inferior): Destroy thread.
+	Clear any pending events
+
+	* inf-ptrace.c (inf_ptrace_attach): Destroy any existing thread.
+	(inf_ptrace_mourn_inferior): Only wait if synchronous.
+	
+	* async-nat-inferior.c (gdb_inferior_destroy): Make global.
+
+	* async-nat-inferior.h: Declare gdb_inferior_destroy and
+	gdb_clear_pending_events here.
+
 2006-09-01  Nick Roberts  <nickrob@snap.net.nz>
 
 	* mi/gdb-mi.el (gdb-force-mode-line-update): New function.
