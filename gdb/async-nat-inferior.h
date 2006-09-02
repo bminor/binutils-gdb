@@ -53,4 +53,8 @@ void async_terminal_inferior (void);
 
 void async_terminal_ours (void);
 
+void gdb_inferior_destroy (gdb_inferior_status *s);
+
+void gdb_clear_pending_events ();
+
 #endif /* __ASYNC_NAT_INFERIOR_H__ */
