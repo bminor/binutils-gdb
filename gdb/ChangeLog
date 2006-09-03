@@ -1,5 +1,8 @@
 2006-09-04  Nick Roberts  <nickrob@snap.net.nz>
 
+	* linux-nat.c (linux_nat_wait): Add inferior to LWP list for
+	async too and includ lwp no in return value.
+
 	* testsuite/gdb.mi/mi-async.exp: New file.  Test asynchronous
 	Machine Interface (MI) operations.
 
