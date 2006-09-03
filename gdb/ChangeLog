@@ -1,5 +1,10 @@
-2006-09-02  Nick Roberts  <nickrob@snap.net.nz>
+2006-09-04  Nick Roberts  <nickrob@snap.net.nz>
 
+	* testsuite/gdb.mi/mi-async.exp: New file.  Test asynchronous
+	Machine Interface (MI) operations.
+
+2006-09-02  Nick Roberts  <nickrob@snap.net.nz>
+	
 	* infrun.c (handle_inferior_event): Take terminal.
 
 	* linux-nat.c (linux_nat_mourn_inferior): Destroy thread.
