@@ -1846,6 +1846,34 @@ static ptid_t
 linux_nat_wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 		gdb_client_data client_data)
 {
+  struct lwp_info *lp = NULL;
+  int options = 0;
+  int status = 0;
+  pid_t pid = PIDGET (ptid);
+  sigset_t flush_mask;
+
+  /* The first time we get here after starting a new inferior, we may
+     not have added it to the LWP list yet - this is the earliest
+     moment at which we know its PID.  */
+  if (num_lwps == 0)
+    {
+      gdb_assert (!is_lwp (inferior_ptid));
+
+      inferior_ptid = BUILD_LWP (GET_PID (inferior_ptid),
+				 GET_PID (inferior_ptid));
+      lp = add_lwp (inferior_ptid);
+      lp->resumed = 1;
+      
+    }
+
+  sigemptyset (&flush_mask);
+
+  /* Make sure SIGCHLD is blocked.  */
+  if (!sigismember (&blocked_mask, SIGCHLD))
+    {
+      sigaddset (&blocked_mask, SIGCHLD);
+      sigprocmask (SIG_BLOCK, &blocked_mask, NULL);
+    }
 
   if (target_can_async_p ())
     {
@@ -1856,7 +1884,6 @@ linux_nat_wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 				   attached process.  */
       set_sigio_trap ();
 
-      ourstatus->kind = TARGET_WAITKIND_IGNORE;
       ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
       while (ourstatus->kind == TARGET_WAITKIND_SPURIOUS)
       	gdb_process_events (gdb_status, ourstatus, -1, 1);
@@ -1868,38 +1895,10 @@ linux_nat_wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	  || (ourstatus->kind == TARGET_WAITKIND_SIGNALLED))
 	return null_ptid;
 
-      return pid_to_ptid (gdb_status->pid);
+      return BUILD_LWP (gdb_status->pid, gdb_status->pid);
     }
   else
     {
-      struct lwp_info *lp = NULL;
-      int options = 0;
-      int status = 0;
-      pid_t pid = PIDGET (ptid);
-      sigset_t flush_mask;
-
-      /* The first time we get here after starting a new inferior, we may
-	 not have added it to the LWP list yet - this is the earliest
-	 moment at which we know its PID.  */
-      if (num_lwps == 0)
-	{
-	  gdb_assert (!is_lwp (inferior_ptid));
-
-	  inferior_ptid = BUILD_LWP (GET_PID (inferior_ptid),
-				     GET_PID (inferior_ptid));
-	  lp = add_lwp (inferior_ptid);
-	  lp->resumed = 1;
-	}
-
-      sigemptyset (&flush_mask);
-
-      /* Make sure SIGCHLD is blocked.  */
-      if (!sigismember (&blocked_mask, SIGCHLD))
-	{
-	  sigaddset (&blocked_mask, SIGCHLD);
-	  sigprocmask (SIG_BLOCK, &blocked_mask, NULL);
-	}
-
     retry:
 
       /* Make sure there is at least one LWP that has been resumed.  */
