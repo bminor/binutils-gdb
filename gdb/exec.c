@@ -33,8 +33,6 @@
 #include "value.h"
 #include "exec.h"
 #include "observer.h"
-#include "event-loop.h"
-#include "async-nat-inferior.h"
 
 #include <fcntl.h>
 #include "readline/readline.h"
@@ -48,32 +46,9 @@
 #include "xcoffsolib.h"
 
 static void
-async_file_handler (int error, gdb_client_data client_data)
-{
-  async_client_callback (INF_REG_EVENT, async_client_context);
-}
-
-static void
 standard_async (void (*callback) (enum inferior_event_type event_type, 
 				  void *context), void *context)
 {
-  if (current_target.to_async_mask_value == 0)
-    internal_error (__FILE__, __LINE__,
-                    "Calling remote_async when async is masked");
-
-  if (callback != NULL)
-    {
-      async_client_callback = callback;
-      async_client_context = context;
-      if (gdb_status->signal_status.receive_fd > 0)
-        add_file_handler (gdb_status->signal_status.receive_fd,
-                          async_file_handler, NULL);
-    }
-  else
-    {
-      if (gdb_status->signal_status.receive_fd > 0)
-        delete_file_handler (gdb_status->signal_status.receive_fd);
-    }
   return;
 }
 
@@ -123,7 +98,6 @@ show_write_files (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("Writing into executable and core files is %s.\n"),
 		    value);
 }
-
 
 struct vmap *vmap;
 
@@ -782,8 +756,6 @@ Specify the filename of the executable file.";
       exec_ops.to_is_async_p = standard_is_async_p;
       exec_ops.to_async = standard_async;
       exec_ops.to_async_mask_value = 1;
-      exec_ops.to_terminal_inferior = async_terminal_inferior;
-      exec_ops.to_terminal_ours = async_terminal_ours;
     }
 }
 
