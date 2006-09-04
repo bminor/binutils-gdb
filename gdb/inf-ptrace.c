@@ -37,10 +37,44 @@
 #include <signal.h>
 
 #include "inf-child.h"
+#include "event-loop.h"
+
+extern int standard_is_async_p (void);
+extern int standard_can_async_p (void);
 
 /* HACK: Save the ptrace ops returned by inf_ptrace_target.  */
 static struct target_ops *ptrace_ops_hack;
 
+
+static void
+async_file_handler (int error, gdb_client_data client_data)
+{
+  async_client_callback (INF_REG_EVENT, async_client_context);
+}
+
+static void
+inf_ptrace_async (void (*callback) (enum inferior_event_type event_type, 
+				  void *context), void *context)
+{
+  if (current_target.to_async_mask_value == 0)
+    internal_error (__FILE__, __LINE__,
+                    "Calling remote_async when async is masked");
+
+  if (callback != NULL)
+    {
+      async_client_callback = callback;
+      async_client_context = context;
+      if (gdb_status->signal_status.receive_fd > 0)
+        add_file_handler (gdb_status->signal_status.receive_fd,
+                          async_file_handler, NULL);
+    }
+  else
+    {
+      if (gdb_status->signal_status.receive_fd > 0)
+        delete_file_handler (gdb_status->signal_status.receive_fd);
+    }
+  return;
+}
 
 #ifdef PT_GET_PROCESS_STATE
 
@@ -639,6 +673,16 @@ inf_ptrace_target (void)
   t->to_pid_to_str = normal_pid_to_str;
   t->to_stop = inf_ptrace_stop;
   t->to_xfer_partial = inf_ptrace_xfer_partial;
+
+  if (event_loop_p)
+    {
+      t->to_can_async_p = standard_can_async_p;
+      t->to_is_async_p = standard_is_async_p;
+      t->to_async = inf_ptrace_async;
+      t->to_async_mask_value = 1;
+      t->to_terminal_inferior = async_terminal_inferior;
+      t->to_terminal_ours = async_terminal_ours;
+    }
 
   ptrace_ops_hack = t;
   return t;
