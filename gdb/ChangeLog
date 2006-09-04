@@ -1,7 +1,19 @@
 2006-09-04  Nick Roberts  <nickrob@snap.net.nz>
 
+	* mi/mi-main.c (captured_mi_execute_command): Give
+	current_command_token a value.
+
+	* exec.c (standard_async): Make it a no-op.
+	(async_file_handler): Move to to inf-ptrace.c.
+	(init_exec_ops): Move async_terminal target methods to...
+
+	* inf-ptrace.c (inf_ptrace_target): ...here.  Add async methods.
+	(inf_ptrace_async): New function (was old standard_async).
+
+2006-09-04  Nick Roberts  <nickrob@snap.net.nz>
+
 	* linux-nat.c (linux_nat_wait): Add inferior to LWP list for
-	async too and includ lwp no in return value.
+	async too and include lwp no in return value.
 
 	* testsuite/gdb.mi/mi-async.exp: New file.  Test asynchronous
 	Machine Interface (MI) operations.
