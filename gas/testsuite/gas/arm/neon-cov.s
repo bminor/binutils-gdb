@@ -87,6 +87,8 @@
 	regs2i_1 \op \opq \imm .i8
 	regs2i_1 \op \opq \imm .i16
 	regs2i_1 \op \opq \imm .i32
+	regs2i_1 \op \opq \imm .s32
+	regs2i_1 \op \opq \imm .u32
 	regs2i_1 \op \opq \imm .i64
 	.endm
 
@@ -111,6 +113,8 @@
 
 	.macro logic_imm op opq
 	logic_imm_1 \op \opq 0x000000ff .i32
+	logic_imm_1 \op \opq 0x000000ff .s32
+	logic_imm_1 \op \opq 0x000000ff .u32
 	logic_imm_1 \op \opq 0x0000ff00 .i32
 	logic_imm_1 \op \opq 0x00ff0000 .i32
 	logic_imm_1 \op \opq 0xff000000 .i32
@@ -123,6 +127,8 @@
 
 	.macro logic_inv_imm op opq
 	logic_imm_1 \op \opq 0xffffff00 .i32
+	logic_imm_1 \op \opq 0xffffff00 .s32
+	logic_imm_1 \op \opq 0xffffff00 .u32
 	logic_imm_1 \op \opq 0xffff00ff .i32
 	logic_imm_1 \op \opq 0xff00ffff .i32
 	logic_imm_1 \op \opq 0x00ffffff .i32
@@ -151,6 +157,8 @@
 	regs3_1 \op \opq .i8
 	regs3_1 \op \opq .i16
 	regs3_1 \op \opq .i32
+	regs3_1 \op \opq .s32
+	regs3_1 \op \opq .u32
 	regs3_1 \op \opq .f32
 	.endm
 
@@ -181,6 +189,8 @@
 	regs2i_1 \op \opq 0 .i8
 	regs2i_1 \op \opq 0 .i16
 	regs2i_1 \op \opq 0 .i32
+	regs2i_1 \op \opq 0 .s32
+	regs2i_1 \op \opq 0 .u32
 	regs2i_1 \op \opq 0 .f32
 	.endm
 
@@ -215,9 +225,13 @@
 	regs3_1 \op \opq .i8
 	regs3_1 \op \opq .i16
 	regs3_1 \op \opq .i32
+	regs3_1 \op \opq .s32
+	regs3_1 \op \opq .u32
 	regs3_1 \op \opq .f32
 	sclr21_1 \op \opq .i16
 	sclr21_1 \op \opq .i32
+	sclr21_1 \op \opq .s32
+	sclr21_1 \op \opq .u32
 	sclr21_1 \op \opq .f32
 	.endm
 
@@ -228,6 +242,8 @@
 	dregs3_1 \op .i8
 	dregs3_1 \op .i16
 	dregs3_1 \op .i32
+	dregs3_1 \op .s32
+	dregs3_1 \op .u32
 	dregs3_1 \op .f32
 	.endm
 
@@ -237,6 +253,8 @@
 	regs3_1 \op \opq .i8
 	regs3_1 \op \opq .i16
 	regs3_1 \op \opq .i32
+	regs3_1 \op \opq .s32
+	regs3_1 \op \opq .u32
 	regs3_1 \op \opq .i64
 	regs3_1 \op \opq .f32
 	.endm
@@ -256,6 +274,8 @@
         regs3_1 \op \opq .i8
 	regs3_1 \op \opq .i16
 	regs3_1 \op \opq .i32
+	regs3_1 \op \opq .s32
+	regs3_1 \op \opq .u32
 	regs3_1 \op \opq .f32
 	regs3_1 \op \opq .p8
 	.endm
@@ -338,6 +358,8 @@
 	.macro qrshifti_imm op
 	regn3_1 \op 7 .i16
 	regn3_1 \op 15 .i32
+	regn3_1 \op 15 .s32
+	regn3_1 \op 15 .u32
 	regn3_1 \op 31 .i64
 	.endm
 
@@ -359,6 +381,8 @@
 	regl3_1 vshll 8 .i8
 	regl3_1 vshll 16 .i16
 	regl3_1 vshll 32 .i32
+	regl3_1 vshll 32 .s32
+	regl3_1 vshll 32 .u32
 
 	.macro convert op opr arg="" t1=".s32.f32" t2=".u32.f32" t3=".f32.s32" t4=".f32.u32"
 	\op\t1 \opr,\opr\arg
@@ -393,7 +417,11 @@
 	.endm
 
 	mov_imm vmov 0x00000077 .i32
+	mov_imm vmov 0x00000077 .s32
+	mov_imm vmov 0x00000077 .u32
 	mov_imm vmvn 0x00000077 .i32
+	mov_imm vmvn 0x00000077 .s32
+	mov_imm vmvn 0x00000077 .u32
 	mov_imm vmov 0x00007700 .i32
 	mov_imm vmvn 0x00007700 .i32
 	mov_imm vmov 0x00770000 .i32
@@ -461,6 +489,8 @@
 	.macro narr_ops op
 	regn3_1 \op q0 .i16
 	regn3_1 \op q0 .i32
+	regn3_1 \op q0 .s32
+	regn3_1 \op q0 .u32
 	regn3_1 \op q0 .i64
 	.endm
 
@@ -531,6 +561,8 @@
 	binop_3typ vmovl q0 d0 .s8 .s16 .s32
 	binop_3typ vmovl q0 d0 .u8 .u16 .u32
 	binop_3typ vmovn d0 q0 .i16 .i32 .i64
+	vmovn.s32 d0, q0
+	vmovn.u32 d0, q0
 	binop_3typ vqmovn d0 q0 .s16 .s32 .s64
 	binop_3typ vqmovn d0 q0 .u16 .u32 .u64
 	binop_3typ vqmovun d0 q0 .s16 .s32 .s64
@@ -580,6 +612,8 @@
 	binops \op \opq .i8
 	binops \op \opq .i16
 	binops \op \opq .i32
+	binops \op \opq .s32
+	binops \op \opq .u32
 	.endm
 
 	regs2_i_32 vclz vclzq

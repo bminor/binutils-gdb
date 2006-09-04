@@ -11590,15 +11590,11 @@ do_neon_dyadic_if_su_d (void)
 }
 
 static void
-do_neon_dyadic_if_i (void)
-{
-  neon_dyadic_misc (NT_unsigned, N_IF_32, 0);
-}
-
-static void
 do_neon_dyadic_if_i_d (void)
 {
-  neon_dyadic_misc (NT_unsigned, N_IF_32, 0);
+  /* The "untyped" case can't happen. Do this to stop the "U" bit being
+     affected if we specify unsigned args.  */
+  neon_dyadic_misc (NT_untyped, N_IF_32, 0);
 }
 
 enum vfp_or_neon_is_neon_bits
@@ -11813,7 +11809,11 @@ do_neon_mac_maybe_scalar (void)
       neon_mul_mac (et, neon_quad (rs));
     }
   else
-    do_neon_dyadic_if_i ();
+    {
+      /* The "untyped" case can't happen.  Do this to stop the "U" bit being
+	 affected if we specify unsigned args.  */
+      neon_dyadic_misc (NT_untyped, N_IF_32, 0);
+    }
 }
 
 static void
@@ -12464,6 +12464,9 @@ do_neon_dyadic_narrow (void)
 {
   struct neon_type_el et = neon_check_type (3, NS_QDD,
     N_EQK | N_DBL, N_EQK, N_I16 | N_I32 | N_I64 | N_KEY);
+  /* Operand sign is unimportant, and the U bit is part of the opcode,
+     so force the operand type to integer.  */
+  et.type = NT_integer;
   neon_mixed_length (et, et.size / 2);
 }
 
@@ -15493,14 +15496,13 @@ static const struct asm_opcode insns[] =
  nUF(vcltq,     vclt,    3, (RNQ,  oRNQ,  RNDQ_I0), neon_cmp_inv),
  nUF(vcle,      vcle,    3, (RNDQ, oRNDQ, RNDQ_I0), neon_cmp_inv),
  nUF(vcleq,     vcle,    3, (RNQ,  oRNQ,  RNDQ_I0), neon_cmp_inv),
-  /* Comparison. Type I8 I16 I32 F32. Non-immediate -> neon_dyadic_if_i.  */
+  /* Comparison. Type I8 I16 I32 F32.  */
  nUF(vceq,      vceq,    3, (RNDQ, oRNDQ, RNDQ_I0), neon_ceq),
  nUF(vceqq,     vceq,    3, (RNQ,  oRNQ,  RNDQ_I0), neon_ceq),
   /* As above, D registers only.  */
  nUF(vpmax,     vpmax,   3, (RND, oRND, RND), neon_dyadic_if_su_d),
  nUF(vpmin,     vpmin,   3, (RND, oRND, RND), neon_dyadic_if_su_d),
   /* Int and float variants, signedness unimportant.  */
-  /* If not scalar, fall back to neon_dyadic_if_i.  */
  nUF(vmlaq,     vmla,    3, (RNQ,  oRNQ,  RNDQ_RNSC), neon_mac_maybe_scalar),
  nUF(vmlsq,     vmls,    3, (RNQ,  oRNQ,  RNDQ_RNSC), neon_mac_maybe_scalar),
  nUF(vpadd,     vpadd,   3, (RND,  oRND,  RND),       neon_dyadic_if_i_d),
