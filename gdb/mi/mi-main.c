@@ -1086,6 +1086,8 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
       args->action = EXECUTE_COMMAND_DISPLAY_PROMPT;
       args->rc = mi_cmd_execute (context);
 
+      current_command_token = context->token;
+
       if (!target_can_async_p () || !target_executing)
 	{
 	  /* print the result if there were no errors
