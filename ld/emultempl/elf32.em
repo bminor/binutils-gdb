@@ -1859,10 +1859,18 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	  link_info.noexecstack = TRUE;
 	  link_info.execstack = FALSE;
 	}
+EOF
+
+  if test -n "$COMMONPAGESIZE"; then
+cat >>e${EMULATION_NAME}.c <<EOF
       else if (strcmp (optarg, "relro") == 0)
 	link_info.relro = TRUE;
       else if (strcmp (optarg, "norelro") == 0)
 	link_info.relro = FALSE;
+EOF
+  fi
+
+cat >>e${EMULATION_NAME}.c <<EOF
       else if (strncmp (optarg, "max-page-size=", 14) == 0)
 	{
 	  char *end;
@@ -1928,10 +1936,26 @@ cat >>e${EMULATION_NAME}.c <<EOF
   fprintf (file, _("  -z nodlopen\t\tMark DSO not available to dlopen\n"));
   fprintf (file, _("  -z nodump\t\tMark DSO not available to dldump\n"));
   fprintf (file, _("  -z noexecstack\tMark executable as not requiring executable stack\n"));
+EOF
+
+  if test -n "$COMMONPAGESIZE"; then
+cat >>e${EMULATION_NAME}.c <<EOF
   fprintf (file, _("  -z norelro\t\tDon't create RELRO program header\n"));
+EOF
+  fi
+
+cat >>e${EMULATION_NAME}.c <<EOF
   fprintf (file, _("  -z now\t\tMark object non-lazy runtime binding\n"));
   fprintf (file, _("  -z origin\t\tMark object requiring immediate \$ORIGIN processing\n\t\t\t  at runtime\n"));
+EOF
+
+  if test -n "$COMMONPAGESIZE"; then
+cat >>e${EMULATION_NAME}.c <<EOF
   fprintf (file, _("  -z relro\t\tCreate RELRO program header\n"));
+EOF
+  fi
+
+cat >>e${EMULATION_NAME}.c <<EOF
   fprintf (file, _("  -z max-page-size=SIZE\tSet maximum page size to SIZE\n"));
   fprintf (file, _("  -z common-page-size=SIZE\n\t\t\tSet common page size to SIZE\n"));
   fprintf (file, _("  -z KEYWORD\t\tIgnored for Solaris compatibility\n"));

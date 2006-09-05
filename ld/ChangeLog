@@ -1,3 +1,9 @@
+2006-09-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/3015
+	* emultempl/elf32.em: Enable "-z relro" only if $COMMONPAGESIZE
+	is defined.
+
 2006-08-29  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ldlang.c (walk_wild): Allow * to glob '/' in wildcarded match.
