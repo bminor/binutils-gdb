@@ -61,9 +61,6 @@
 #define EXC_SOFT_SIGNAL 0
 #endif
 
-extern int standard_is_async_p (void);
-extern int standard_can_async_p (void);
-
 extern bfd *exec_bfd;
 
 gdb_inferior_status *gdb_status = NULL;
