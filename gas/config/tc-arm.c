@@ -4121,9 +4121,32 @@ static unsigned
 parse_qfloat_immediate (char **ccp, int *immed)
 {
   char *str = *ccp;
+  char *fpnum = str;
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
+  int found_fpchar = 0;
   
   skip_past_char (&str, '#');
+  
+  /* We must not accidentally parse an integer as a floating-point number. Make
+     sure that the value we parse is not an integer by checking for special
+     characters '.' or 'e'.
+     FIXME: This is a horrible hack, but doing better is tricky because type
+     information isn't in a very usable state at parse time.  A better solution
+     should be implemented as part of the fix for allowing the full range of
+     pseudo-instructions to be used in VMOV, etc.  */
+  skip_whitespace (fpnum);
+  if (strncmp (fpnum, "0x", 2) != 0)
+    {
+      for (; *fpnum != '\0' && *fpnum != ' ' && *fpnum != '\n'; fpnum++)
+        if (*fpnum == '.' || *fpnum == 'e' || *fpnum == 'E')
+          {
+            found_fpchar = 1;
+            break;
+          }
+
+      if (!found_fpchar)
+        return FAIL;
+    }
   
   if ((str = atof_ieee (str, 's', words)) != NULL)
     {
