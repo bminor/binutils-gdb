@@ -54,7 +54,7 @@ proc linux_async_tests {} {
 
     send_gdb "start\n"
     gdb_expect {
-	-re "\\^running\r\n\\^done\r\n$mi_gdb_prompt" {
+	-re ".*\\^running\r\n\\^done\r\n$mi_gdb_prompt" {
 	    gdb_expect {
 		-re "\\*stopped,thread-id=\"0\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*basics.c\",line=\"$line_main_body\"\}\r\n$mi_gdb_prompt$" {
 		    pass "Asynchronous response after start command"
@@ -93,10 +93,31 @@ proc linux_async_tests {} {
 	}
 	timeout {fail "Asynchronous response after next command (timeout 1)"}
     }
+
+    send_gdb "start\n"
+    gdb_expect {
+	-re ".*\\^running\r\n\\^done\r\n$mi_gdb_prompt" {
+	    gdb_expect {
+		-re "\\*stopped,thread-id=\"0\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*basics.c\",line=\"$line_main_body\"\}\r\n$mi_gdb_prompt$" {
+		    pass "Asynchronous response after (re) start"
+		}
+		-re ".*$mi_gdb_prompt$" {
+		    fail "Asynchronous response after (re) start (2)"
+		}
+		timeout	{
+		    fail "Asynchronous response after (re) start (timeout 2)"
+		}
+	    }
+	}
+	-re ".*$mi_gdb_prompt$" {
+	    fail "Asynchronous response after (re) start (1)"
+	}
+	timeout {fail "Asynchronous response after (re) start (timeout 1)"}
+    }
 }
 
 
-#if [istarget "i386-*-linux"] then {
+#if [istarget "i386-*-linux-gnu"] then {
     linux_async_tests
 #}
 
