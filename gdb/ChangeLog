@@ -1,3 +1,23 @@
+2006-09-05  Nick Roberts  <nickrob@snap.net.nz>
+
+	* PROBLEMS.async: Update.
+
+	* testsuite/gdb.mi/mi-async.exp: Add a new test for restarting
+	inferior.
+
+	* mi/mi-main.c: Replace last_async_command with
+	current_command_token.  Rename previous_async_command to
+	previous_command_token.
+	(captured_mi_execute_command): Reset current_command_token to
+	NULL when executing a CLI command.
+
+	* cli/cli-interp.c (_initialize_cli_interp): Change interpreter
+	names: console -> console-unquoted, console-quoted -> console
+	for backward compatiblity.
+
+	* async-nat-inferior.c: Remove declarations for
+	standard_is_async_p standard_can_async_p.
+
 2006-09-04  Nick Roberts  <nickrob@snap.net.nz>
 
 	* mi/mi-main.c (captured_mi_execute_command): Give
