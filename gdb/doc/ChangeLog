@@ -1,3 +1,8 @@
+2006-09-02  Bob Wilson  <bob.wilson@acm.org>
+
+	* gdb.texinfo (Packets, Stop Reply Packets, General Query Packets,
+	Register Packet Format, Tracepoint Packets): Fix spelling errors.
+
 2006-09-02  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdbint.texinfo (Overall Structure): New section "Source Tree

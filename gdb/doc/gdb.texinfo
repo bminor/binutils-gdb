@@ -22987,7 +22987,7 @@ suitable for accessing memory-mapped I/O devices.
 Reply:
 @table @samp
 @item @var{XX@dots{}}
-Memory contents; each byte is transmitted as a two-digit hexidecimal
+Memory contents; each byte is transmitted as a two-digit hexadecimal
 number.  The reply may contain fewer bytes than requested if the
 server was able to read only part of the region of memory.
 @item E @var{NN}
@@ -22998,7 +22998,7 @@ server was able to read only part of the region of memory.
 @cindex @samp{M} packet
 Write @var{length} bytes of memory starting at address @var{addr}.
 @var{XX@dots{}} is the data; each byte is transmitted as a two-digit
-hexidecimal number.
+hexadecimal number.
 
 Reply:
 @table @samp
@@ -23029,7 +23029,7 @@ Indicating an unrecognized @var{query}.
 @anchor{write register packet}
 @cindex @samp{P} packet
 Write register @var{n@dots{}} with value @var{r@dots{}}.  The register
-number @var{n} is in hexidecimal, and @var{r@dots{}} contains two hex
+number @var{n} is in hexadecimal, and @var{r@dots{}} contains two hex
 digits for each byte in the register (target byte order).
 
 Reply:
@@ -23292,13 +23292,13 @@ components.
 @table @samp
 
 @item S @var{AA}
-The program received signal number @var{AA} (a two-digit hexidecimal
+The program received signal number @var{AA} (a two-digit hexadecimal
 number).  This is equivalent to a @samp{T} response with no
 @var{n}:@var{r} pairs.
 
 @item T @var{AA} @var{n1}:@var{r1};@var{n2}:@var{r2};@dots{}
 @cindex @samp{T} packet reply
-The program received signal number @var{AA} (a two-digit hexidecimal
+The program received signal number @var{AA} (a two-digit hexadecimal
 number).  This is equivalent to an @samp{S} response, except that the
 @samp{@var{n}:@var{r}} pairs can carry values of important registers
 and other information directly in the stop reply packet, reducing
@@ -23306,7 +23306,7 @@ round-trip latency.  Single-step and breakpoint traps are reported
 this way.  Each @samp{@var{n}:@var{r}} pair is interpreted as follows:
 @enumerate
 @item
-If @var{n} is a hexidecimal number, it is a register number, and the
+If @var{n} is a hexadecimal number, it is a register number, and the
 corresponding @var{r} gives that register's value.  @var{r} is a
 series of bytes in target byte order, with each byte given by a
 two-digit hex number.
@@ -23413,7 +23413,7 @@ Return the current thread id.
 Reply:
 @table @samp
 @item QC @var{pid}
-Where @var{pid} is an unsigned hexidecimal process id.
+Where @var{pid} is an unsigned hexadecimal process id.
 @item @r{(anything else)}
 Any other reply implies the old pid.
 @end table
@@ -23874,21 +23874,21 @@ must respond with an empty packet.
 The following @code{g}/@code{G} packets have previously been defined.
 In the below, some thirty-two bit registers are transferred as
 sixty-four bits.  Those registers should be zero/sign extended (which?)
-to fill the space allocated.  Register bytes are transfered in target
-byte order.  The two nibbles within a register byte are transfered
+to fill the space allocated.  Register bytes are transferred in target
+byte order.  The two nibbles within a register byte are transferred
 most-significant - least-significant.
 
 @table @r
 
 @item MIPS32
 
-All registers are transfered as thirty-two bit quantities in the order:
+All registers are transferred as thirty-two bit quantities in the order:
 32 general-purpose; sr; lo; hi; bad; cause; pc; 32 floating-point
 registers; fsr; fir; fp.
 
 @item MIPS64
 
-All registers are transfered as sixty-four bit quantities (including
+All registers are transferred as sixty-four bit quantities (including
 thirty-two bit registers such as @code{sr}).  The ordering is the same
 as @code{MIPS32}.
 
@@ -23944,7 +23944,7 @@ following forms:
 
 @item R @var{mask}
 Collect the registers whose bits are set in @var{mask}.  @var{mask} is
-a hexidecimal number whose @var{i}'th bit is set if register number
+a hexadecimal number whose @var{i}'th bit is set if register number
 @var{i} should be collected.  (The least significant bit is numbered
 zero.)  Note that @var{mask} may be any number of digits long; it may
 not fit in a 32-bit word.
@@ -23954,7 +23954,7 @@ Collect @var{len} bytes of memory starting at the address in register
 number @var{basereg}, plus @var{offset}.  If @var{basereg} is
 @samp{-1}, then the range has a fixed address: @var{offset} is the
 address of the lowest byte to collect.  The @var{basereg},
-@var{offset}, and @var{len} parameters are all unsigned hexidecimal
+@var{offset}, and @var{len} parameters are all unsigned hexadecimal
 values (the @samp{-1} value for @var{basereg} is a special case).
 
 @item X @var{len},@var{expr}
@@ -23997,29 +23997,29 @@ one of the following forms:
 @table @samp
 @item F @var{f}
 The selected frame is number @var{n} in the trace frame buffer;
-@var{f} is a hexidecimal number.  If @var{f} is @samp{-1}, then there
+@var{f} is a hexadecimal number.  If @var{f} is @samp{-1}, then there
 was no frame matching the criteria in the request packet.
 
 @item T @var{t}
 The selected trace frame records a hit of tracepoint number @var{t};
-@var{t} is a hexidecimal number.
+@var{t} is a hexadecimal number.
 
 @end table
 
 @item QTFrame:pc:@var{addr}
 Like @samp{QTFrame:@var{n}}, but select the first tracepoint frame after the
 currently selected frame whose PC is @var{addr};
-@var{addr} is a hexidecimal number.
+@var{addr} is a hexadecimal number.
 
 @item QTFrame:tdp:@var{t}
 Like @samp{QTFrame:@var{n}}, but select the first tracepoint frame after the
 currently selected frame that is a hit of tracepoint @var{t}; @var{t}
-is a hexidecimal number.
+is a hexadecimal number.
 
 @item QTFrame:range:@var{start}:@var{end}
 Like @samp{QTFrame:@var{n}}, but select the first tracepoint frame after the
 currently selected frame whose PC is between @var{start} (inclusive)
-and @var{end} (exclusive); @var{start} and @var{end} are hexidecimal
+and @var{end} (exclusive); @var{start} and @var{end} are hexadecimal
 numbers.
 
 @item QTFrame:outside:@var{start}:@var{end}
