@@ -4,7 +4,7 @@
 	.text
 	.syntax unified
 
-        vmov.f32 q0, 0
+        vmov.f32 q0, 0.0
 
 	vmov.f32 q0, 2.0
         vmov.f32 q0, 4.0
@@ -150,7 +150,7 @@
         vmov.f32 q0, 0.96875
         vmov.f32 q0, 1.9375
 
-        vmov.f32 q0, -0
+        vmov.f32 q0, -0.0
 
 	vmov.f32 q0, -2.0
         vmov.f32 q0, -4.0

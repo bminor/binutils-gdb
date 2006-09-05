@@ -4113,15 +4113,15 @@ is_quarter_float (unsigned imm)
 
 /* Parse an 8-bit "quarter-precision" floating point number of the form:
    0baBbbbbbc defgh000 00000000 00000000.
-   The minus-zero case needs special handling, since it can't be encoded in the
-   "quarter-precision" float format, but can nonetheless be loaded as an integer
-   constant.  */
+   The zero and minus-zero cases need special handling, since they can't be
+   encoded in the "quarter-precision" float format, but can nonetheless be
+   loaded as integer constants.  */
 
 static unsigned
 parse_qfloat_immediate (char **ccp, int *immed)
 {
   char *str = *ccp;
-  char *fpnum = str;
+  char *fpnum;
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
   int found_fpchar = 0;
   
@@ -4134,8 +4134,12 @@ parse_qfloat_immediate (char **ccp, int *immed)
      information isn't in a very usable state at parse time.  A better solution
      should be implemented as part of the fix for allowing the full range of
      pseudo-instructions to be used in VMOV, etc.  */
+  fpnum = str;
   skip_whitespace (fpnum);
-  if (strncmp (fpnum, "0x", 2) != 0)
+
+  if (strncmp (fpnum, "0x", 2) == 0)
+    return FAIL;
+  else
     {
       for (; *fpnum != '\0' && *fpnum != ' ' && *fpnum != '\n'; fpnum++)
         if (*fpnum == '.' || *fpnum == 'e' || *fpnum == 'E')
@@ -4160,7 +4164,7 @@ parse_qfloat_immediate (char **ccp, int *immed)
           fpword |= words[i];
         }
       
-      if (is_quarter_float (fpword) || fpword == 0x80000000)
+      if (is_quarter_float (fpword) || (fpword & 0x7fffffff) == 0)
         *immed = fpword;
       else
         return FAIL;
