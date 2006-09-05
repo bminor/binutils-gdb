@@ -3869,7 +3869,7 @@ coff_write_object_contents (bfd * abfd)
 
 #if defined(IA64)
 #define __A_MAGIC_SET__
-    internal_a.magic = ZMAGIC;
+    internal_a.magic = PE32PMAGIC;
 #endif /* IA64 */
 
 #if defined(SPARC)

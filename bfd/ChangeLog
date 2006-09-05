@@ -1,3 +1,9 @@
+2006-09-05  Bibo Mao  <bibo.mao@intel.com>
+
+	PR binutils/3171
+	* coffcode.h (coff_write_object_contents): Set the optional
+	header magic number to PE32PMAGIC instead of ZMAGIC for ia64.
+
 2006-09-04  Mark Shinwell  <shinwell@codesourcery.com>
 
         * elf32-arm.c (elf32_arm_howto_table_1): Adjust entries for
