@@ -110,7 +110,7 @@ cli_interpreter_exec (void *data, const char *command_str)
   /* We want 
      the person who set the interpreter to get the uiout right for that
      according to their lights.  If you don't do that, then you can't share
-     the cli_interpreter_exec between the console & console-quoted 
+     the cli_interpreter_exec between the console-unquoted & console 
      interpreters.  */
   result = safe_execute_command (uiout, str, 1);
 
@@ -141,7 +141,7 @@ safe_execute_command (struct ui_out *uiout, char *command, int from_tty)
 }
 
 /* This is the only new function needed for the 
-   console-quoted interpreter.  This outputs console text in 
+   console interpreter.  This outputs console text in 
    an mi-quoted form, so an mi-parser won't be fooled by spurious
    * at beginning of line goofs...  */
 
@@ -186,7 +186,7 @@ _initialize_cli_interp (void)
   };
   struct interp *cli_interp;
 
-  /* And here we initialize the console-quoted
+  /* And here we initialize the console
      interpreter.  */
   static const struct interp_procs quoted_procs = {
     cli_interpreter_init,	/* init_proc */
@@ -202,13 +202,13 @@ _initialize_cli_interp (void)
   
   /* Create a default uiout builder for the CLI.  */
   cli_uiout = cli_out_new (gdb_stdout);
-  cli_interp = interp_new (INTERP_CONSOLE, NULL, cli_uiout, &procs);
+  cli_interp = interp_new ("console-unquoted", NULL, cli_uiout, &procs);
 
   interp_add (cli_interp);
 
   raw_stdout = stdio_fileopen (stdout);
   tmp_ui_out = cli_quoted_out_new (raw_stdout);
-  cli_interp = interp_new ("console-quoted", NULL, tmp_ui_out,
+  cli_interp = interp_new (INTERP_CONSOLE, NULL, tmp_ui_out,
 			   &quoted_procs);
   interp_add (cli_interp); /* second call */
 }
