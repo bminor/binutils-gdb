@@ -91,12 +91,6 @@ static void free_continuation_arg (struct mi_continuation_arg *arg);
 int mi_debug_p;
 struct ui_file *raw_stdout;
 
-/* A pointer to the current mi_parse's command token.  This is needed
- because we can't pass the token down to the mi command levels.  This
- will get cleaned up once captured_mi_execute_command finishes, so 
- if you need it for a continuation, dup it.  */
-char *current_command_token;
-
 /* This is used to pass the current command timestamp
    down to continuation routines. */
 //struct mi_timestamp *current_command_ts;
@@ -106,9 +100,12 @@ char *current_command_token;
 /* Points to the current interpreter, used by the mi context callbacks.  */
 struct interp *mi_interp;
 
-/* The token of the last asynchronous command */
-static char *last_async_command;
-static char *previous_async_command;
+/* A pointer to the current mi_parse's command token.  This is needed
+ because we can't pass the token down to the mi command levels.  This
+ will get cleaned up once captured_mi_execute_command finishes, so 
+ if you need it for a continuation, dup it.  */
+char *current_command_token;
+static char *previous_command_token;
 char *mi_error_message;
 static char *old_regs;
 
@@ -139,8 +136,8 @@ enum mi_cmd_result
 mi_cmd_gdb_exit (char *command, char **argv, int argc)
 {
   /* We have to print everything right here because we never return */
-  if (last_async_command)
-    fputs_unfiltered (last_async_command, raw_stdout);
+  if (current_command_token)
+    fputs_unfiltered (current_command_token, raw_stdout);
   fputs_unfiltered ("^exit\n", raw_stdout);
   mi_out_put (uiout, raw_stdout);
   /* FIXME: The function called is not yet a formal libgdb function */
@@ -226,7 +223,7 @@ mi_cmd_exec_continue (char *args, int from_tty)
 }
 
 /* Interrupt the execution of the target. Note how we must play around
-   with the token varialbes, in order to display the current token in
+   with the token variables, in order to display the current token in
    the result of the interrupt command, and the previous execution
    token when the target finally stops. See comments in
    mi_cmd_execute. */
@@ -239,14 +236,14 @@ mi_cmd_exec_interrupt (char *args, int from_tty)
       return MI_CMD_ERROR;
     }
   interrupt_target_command (args, from_tty);
-  if (last_async_command)
-    fputs_unfiltered (last_async_command, raw_stdout);
+  if (current_command_token)
+    fputs_unfiltered (current_command_token, raw_stdout);
   fputs_unfiltered ("^done", raw_stdout);
-  xfree (last_async_command);
-  if (previous_async_command)
-    last_async_command = xstrdup (previous_async_command);
-  xfree (previous_async_command);
-  previous_async_command = NULL;
+  xfree (current_command_token);
+  if (previous_command_token)
+    current_command_token = xstrdup (previous_command_token);
+  xfree (previous_command_token);
+  previous_command_token = NULL;
   mi_out_put (uiout, raw_stdout);
   mi_out_rewind (uiout);
   fputs_unfiltered ("\n", raw_stdout);
@@ -751,8 +748,8 @@ mi_cmd_target_select (char *args, int from_tty)
   do_cleanups (old_cleanups);
 
   /* Issue the completion message here. */
-  if (last_async_command)
-    fputs_unfiltered (last_async_command, raw_stdout);
+  if (current_command_token)
+    fputs_unfiltered (current_command_token, raw_stdout);
   fputs_unfiltered ("^connected", raw_stdout);
   mi_out_put (uiout, raw_stdout);
   mi_out_rewind (uiout);
@@ -1086,8 +1083,6 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
       args->action = EXECUTE_COMMAND_DISPLAY_PROMPT;
       args->rc = mi_cmd_execute (context);
 
-      current_command_token = context->token;
-
       if (!target_can_async_p () || !target_executing)
 	{
 	  /* print the result if there were no errors
@@ -1139,6 +1134,7 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
 	/* Call the "console" interpreter.  */
 	argv[0] = "console";
 	argv[1] = context->command;
+	current_command_token = NULL;
 	args->rc = mi_cmd_interpreter_exec ("-interpreter-exec", argv, 2);
 
 	/* If we changed interpreters, DON'T print out anything.  */
@@ -1310,22 +1306,22 @@ mi_cmd_execute (struct mi_parse *parse)
       /* FIXME: We need to save the token because the command executed
          may be asynchronous and need to print the token again.
          In the future we can pass the token down to the func
-         and get rid of the last_async_command */
+         and get rid of the current_command_token */
       /* The problem here is to keep the token around when we launch
          the target, and we want to interrupt it later on.  The
          interrupt command will have its own token, but when the
          target stops, we must display the token corresponding to the
          last execution command given. So we have another string where
-         we copy the token (previous_async_command), if this was
+         we copy the token (previous_command_token), if this was
          indeed the token of an execution command, and when we stop we
          print that one. This is possible because the interrupt
          command, when over, will copy that token back into the
-         default token string (last_async_command). */
+         default token string (current_command_token). */
 
       if (target_executing)
 	{
-	  if (!previous_async_command)
-	    previous_async_command = xstrdup (last_async_command);
+	  if (!previous_command_token)
+	    previous_command_token = xstrdup (current_command_token);
 	  if (strcmp (parse->command, "exec-interrupt"))
 	    {
 	      fputs_unfiltered (parse->token, raw_stdout);
@@ -1337,8 +1333,8 @@ mi_cmd_execute (struct mi_parse *parse)
 	      return MI_CMD_ERROR;
 	    }
 	}
-      last_async_command = xstrdup (parse->token);
-      make_exec_cleanup (free_current_contents, &last_async_command);
+      current_command_token = xstrdup (parse->token);
+      make_exec_cleanup (free_current_contents, &current_command_token);
       /* FIXME: DELETE THIS! */
       if (parse->cmd->args_func != NULL)
 	return parse->cmd->args_func (parse->args, 0 /*from_tty */ );
@@ -1613,8 +1609,8 @@ mi_load_progress (const char *section_name,
       xfree (previous_sect_name);
       previous_sect_name = xstrdup (section_name);
 
-      if (last_async_command)
-	fputs_unfiltered (last_async_command, raw_stdout);
+      if (current_command_token)
+	fputs_unfiltered (current_command_token, raw_stdout);
       fputs_unfiltered ("+download", raw_stdout);
       cleanup_tuple = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
       ui_out_field_string (uiout, "section", section_name);
@@ -1632,8 +1628,8 @@ mi_load_progress (const char *section_name,
       struct cleanup *cleanup_tuple;
       last_update.tv_sec = time_now.tv_sec;
       last_update.tv_usec = time_now.tv_usec;
-      if (last_async_command)
-	fputs_unfiltered (last_async_command, raw_stdout);
+      if (current_command_token)
+	fputs_unfiltered (current_command_token, raw_stdout);
       fputs_unfiltered ("+download", raw_stdout);
       cleanup_tuple = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
       ui_out_field_string (uiout, "section", section_name);
