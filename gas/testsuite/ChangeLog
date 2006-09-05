@@ -1,3 +1,8 @@
+2006-09-04  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/neon-cov.s: Test .u and .s aliases for .i suffixes.
+	* gas/arm/neon-cov.d: Adjust expected output.
+
 2006-08-21  Joseph Myers  <joseph@codesourcery.com>
 
 	* gas/arm/unwind.s: Test not merging iWMMXt register save with

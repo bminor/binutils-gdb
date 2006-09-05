@@ -1,3 +1,11 @@
+2006-09-04  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (do_neon_dyadic_if_i): Remove.
+	(do_neon_dyadic_if_i_d): Avoid setting U bit.
+	(do_neon_mac_maybe_scalar): Ditto.
+	(do_neon_dyadic_narrow): Force operand type to NT_integer.
+	(insns): Remove out of date comments.
+
 2006-08-29  Nick Clifton  <nickc@redhat.com>
 
 	* read.c (s_align): Initialize the 'stopc' variable to prevent

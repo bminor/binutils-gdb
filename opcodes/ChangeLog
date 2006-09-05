@@ -1,3 +1,7 @@
+2006-09-04  Paul Brook  <paul@codesourcery.com>
+
+	* arm-dis.c (neon_opcode): Fix suffix on VMOVN.
+
 2006-08-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (three_byte_table): Expand to 256 elements.
