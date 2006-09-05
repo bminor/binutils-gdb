@@ -10097,8 +10097,8 @@ struct neon_tab_entry
   X(vcgt,	0x0000300, 0x1200e00, 0x1b10000),	\
   /* Register variants of the following two instructions are encoded as
      vcge / vcgt with the operands reversed. */  	\
-  X(vclt,	0x0000310, 0x1000e00, 0x1b10200),	\
-  X(vcle,	0x0000300, 0x1200e00, 0x1b10180),	\
+  X(vclt,	0x0000300, 0x1200e00, 0x1b10200),	\
+  X(vcle,	0x0000310, 0x1000e00, 0x1b10180),	\
   X(vmla,	0x0000900, 0x0000d10, 0x0800040),	\
   X(vmls,	0x1000900, 0x0200d10, 0x0800440),	\
   X(vmul,	0x0000910, 0x1000d10, 0x0800840),	\
@@ -15546,10 +15546,10 @@ static const struct asm_opcode insns[] =
  NUF(vacgeq,    0000e10,  3, (RNQ,  oRNQ,  RNQ),  neon_fcmp_absolute),
  NUF(vacgt,     0200e10,  3, (RNDQ, oRNDQ, RNDQ), neon_fcmp_absolute),
  NUF(vacgtq,    0200e10,  3, (RNQ,  oRNQ,  RNQ),  neon_fcmp_absolute),
- NUF(vaclt,     0000e10,  3, (RNDQ, oRNDQ, RNDQ), neon_fcmp_absolute_inv),
- NUF(vacltq,    0000e10,  3, (RNQ,  oRNQ,  RNQ),  neon_fcmp_absolute_inv),
- NUF(vacle,     0200e10,  3, (RNDQ, oRNDQ, RNDQ), neon_fcmp_absolute_inv),
- NUF(vacleq,    0200e10,  3, (RNQ,  oRNQ,  RNQ),  neon_fcmp_absolute_inv),
+ NUF(vaclt,     0200e10,  3, (RNDQ, oRNDQ, RNDQ), neon_fcmp_absolute_inv),
+ NUF(vacltq,    0200e10,  3, (RNQ,  oRNQ,  RNQ),  neon_fcmp_absolute_inv),
+ NUF(vacle,     0000e10,  3, (RNDQ, oRNDQ, RNDQ), neon_fcmp_absolute_inv),
+ NUF(vacleq,    0000e10,  3, (RNQ,  oRNQ,  RNQ),  neon_fcmp_absolute_inv),
  NUF(vrecps,    0000f10,  3, (RNDQ, oRNDQ, RNDQ), neon_step),
  NUF(vrecpsq,   0000f10,  3, (RNQ,  oRNQ,  RNQ),  neon_step),
  NUF(vrsqrts,   0200f10,  3, (RNDQ, oRNDQ, RNDQ), neon_step),
