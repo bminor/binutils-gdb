@@ -9452,8 +9452,6 @@ elf32_arm_swap_symbol_out (bfd *abfd,
           */
           newsym.st_value |= 1;
         }
-
-      newsym.st_value |= 1;
       
       src = &newsym;
     }
