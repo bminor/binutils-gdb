@@ -1,3 +1,11 @@
+2006-09-05  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/3166
+	* objcopy.c (is_strip_section): Do not treat group sections as
+	debugging sections.
+	* doc/binutils.texi (--only-keep-debug): Document that this switch
+	is only intended for use on fully linked files.
+
 2006-09-01  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/3146

@@ -1482,6 +1482,13 @@ i.e., the file pointed to by the @option{--add-gnu-debuglink} can be the
 full executable.  It does not have to be a file created by the
 @option{--only-keep-debug} switch.
 
+Note - this switch is only intended for use on fully linked files.  It
+does not make sense to use it on object files where the debugging
+information may be incomplete.  Besides the gnu_debuglink feature
+currently only supports the presence of one filename containing
+debugging information, not multiple filenames on a one-per-object-file
+basis.
+
 @item -V
 @itemx --version
 Show the version number of @command{objcopy}.
@@ -2390,6 +2397,13 @@ optional.  You could instead do this:
 ie the file pointed to by the @option{--add-gnu-debuglink} can be the
 full executable.  It does not have to be a file created by the
 @option{--only-keep-debug} switch.
+
+Note - this switch is only intended for use on fully linked files.  It
+does not make sense to use it on object files where the debugging
+information may be incomplete.  Besides the gnu_debuglink feature
+currently only supports the presence of one filename containing
+debugging information, not multiple filenames on a one-per-object-file
+basis.
 
 @item -V
 @itemx --version

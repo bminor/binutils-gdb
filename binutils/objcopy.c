@@ -815,6 +815,13 @@ is_strip_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 	return FALSE;
     }
 
+  /* PR binutils/3166
+     Group sections look like debugging sections but they are not.
+     (They have a non-zero size but they are not ALLOCated).  */
+  if ((bfd_get_section_flags (abfd, sec) & SEC_GROUP) != 0
+      && strip_symbols == STRIP_NONDEBUG)
+    return TRUE;
+
   return FALSE;
 }
 
