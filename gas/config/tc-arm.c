@@ -5565,6 +5565,7 @@ parse_operands (char *str, const unsigned char *pattern)
         case OP_NILO:
           {
             po_reg_or_goto (REG_TYPE_NDQ, try_imm);
+	    inst.operands[i].present = 1;
             i++;
             skip_past_comma (&str);
             po_reg_or_goto (REG_TYPE_NDQ, one_reg_only);
