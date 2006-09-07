@@ -1,3 +1,7 @@
+2006-09-07  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (parse_operands): Mark operand as present.
+
 2006-09-04  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (do_neon_dyadic_if_i): Remove.
