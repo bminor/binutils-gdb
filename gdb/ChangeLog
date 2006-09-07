@@ -1,3 +1,8 @@
+2006-09-07  Joel Brobecker  <brobecker@adacore.com>
+
+	From Stephan Springl  <springl-gdb@bfw-online.de>
+	* fork-child.c (fork_inferior): Fix typo.
+
 2006-08-28  DJ Delorie  <dj@redhat.com>
 
 	* m32c-tdep.c (m32c_decode_srcdest4): Initialize fields in sd

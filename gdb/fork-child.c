@@ -277,7 +277,7 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
     (*pre_trace_fun) ();
 
   /* Create the child process.  Since the child process is going to
-     exec(3) shortlty afterwards, try to reduce the overhead by
+     exec(3) shortly afterwards, try to reduce the overhead by
      calling vfork(2).  However, if PRE_TRACE_FUN is non-null, it's
      likely that this optimization won't work since there's too much
      work to do between the vfork(2) and the exec(3).  This is known
