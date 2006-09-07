@@ -14815,7 +14815,9 @@ static const struct asm_opcode insns[] =
 
   UT(cbnz,      b900,    2, (RR, EXP), t_czb),
   UT(cbz,       b100,    2, (RR, EXP), t_czb),
- /* ARM does not really have an IT instruction.  */
+ /* ARM does not really have an IT instruction, so always allow it.  */
+#undef ARM_VARIANT
+#define ARM_VARIANT &arm_ext_v1
  TUE(it,        0, bf08, 1, (COND),    it, t_it),
  TUE(itt,       0, bf0c, 1, (COND),    it, t_it),
  TUE(ite,       0, bf04, 1, (COND),    it, t_it),
