@@ -1,3 +1,9 @@
+2006-09-07  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Stack Manipulation): Mention that
+        -stack-list-locals HIGH_FRAME argument can be larger then the
+        actual number of frames.
+
 2006-09-02  Bob Wilson  <bob.wilson@acm.org>
 
 	* gdb.texinfo (Packets, Stop Reply Packets, General Query Packets,

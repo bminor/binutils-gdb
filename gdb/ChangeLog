@@ -1,3 +1,9 @@
+2006-09-07  Vladimir Prus  <vladimir@codesourcery.com>
+
+        * mi/mi-cmd-stack.c (mi_cmd_stack_list_frames): Don't emit 
+	error if high requested frame number is larger then number 
+	of available frames.
+	
 2006-09-07  Joel Brobecker  <brobecker@adacore.com>
 
 	From Stephan Springl  <springl-gdb@bfw-online.de>

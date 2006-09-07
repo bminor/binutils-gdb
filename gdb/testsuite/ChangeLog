@@ -1,3 +1,9 @@
+2006-09-07  Vladimir Prus  <ghost@vladimir@codesourcery.com>
+
+	* gdb.mi/mi-stack.exp (test_stack_frame_listing): Test that
+	HIGH_FRAME argument to -stack-list-locals can be larger than
+	the number of frames.
+	
 2006-08-18  Fred Fish  <fnf@specifix.com>
 
 	* lib/gdb.exp (skip_altivec_tests): Fix apparent typo,

@@ -19331,7 +19331,10 @@ Line number corresponding to the @code{$pc}.
 If invoked without arguments, this command prints a backtrace for the
 whole stack.  If given two integer arguments, it shows the frames whose
 levels are between the two arguments (inclusive).  If the two arguments
-are equal, it shows the single frame at the corresponding level.
+are equal, it shows the single frame at the corresponding level.  It is
+an error if @var{low-frame} is larger than the actual number of
+frames.  On the other hand, @var{high-frame} may be larger then the
+actual number of frames, in which case only existing frames will be returned.
 
 @subsubheading @value{GDBN} Command
 

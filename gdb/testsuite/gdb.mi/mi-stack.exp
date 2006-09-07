@@ -75,6 +75,10 @@ proc test_stack_frame_listing {} {
     mi_gdb_test "235-stack-info-frame" \
             "235\\^done,frame=\{level=\"0\",addr=\"$hex\",func=\"callee4\",file=\".*${srcfile}\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$line_callee4_body\"\}" \
 	       "selected frame listing"
+
+    mi_gdb_test "236-stack-list-frames 1 300" \
+	    "236\\^done,stack=\\\[frame=\{level=\"1\",addr=\"$hex\",func=\"callee3\",.*\},frame=\{level=\"2\",addr=\"$hex\",func=\"callee2\",.*\},frame=\{level=\"3\",addr=\"$hex\",func=\"callee1\",.*\}\\\]" \
+                "stack frame listing 1 300"
 }
 
 proc test_stack_args_listing {} {
