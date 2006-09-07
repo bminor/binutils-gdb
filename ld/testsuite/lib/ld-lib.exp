@@ -1246,14 +1246,15 @@ if ![string length [info proc prune_warnings]] {
 
 # targets_to_xfail is a list of target triplets to be xfailed.
 # ldtests contains test-items with 3 items followed by 1 lists, 2 items
-# and one optional item:
+# and 2 optional items:
 #   0:name
 #   1:ld options
 #   2:assembler options
-#   3:filenames of assembler files
+#   3:filenames of source files
 #   4:name of output file
 #   5:expected output
 #   6:compiler flags (optional)
+#   7:language (optional)
 
 proc run_ld_link_exec_tests { targets_to_xfail ldtests } {
     global ld
@@ -1262,6 +1263,7 @@ proc run_ld_link_exec_tests { targets_to_xfail ldtests } {
     global subdir
     global env
     global CC
+    global CXX
     global CFLAGS
     global errcnt
 
@@ -1276,6 +1278,7 @@ proc run_ld_link_exec_tests { targets_to_xfail ldtests } {
 	set binfile tmpdir/[lindex $testitem 4]
 	set expfile [lindex $testitem 5]
 	set cflags [lindex $testitem 6]
+	set lang [lindex $testitem 7]
 	set objfiles {}
 	set failed 0
 
@@ -1297,7 +1300,13 @@ proc run_ld_link_exec_tests { targets_to_xfail ldtests } {
 	    ld_compile "$CC -c $CFLAGS $cflags" $srcdir/$subdir/$src_file $objfile
 
 	    # We have to use $CC to build PIE and shared library.
-	    if { [ string match "-shared" $ld_options ] \
+	    if { [ string match "c" $lang ] } {
+		set link_proc ld_simple_link
+		set link_cmd $CC
+	    } elseif { [ string match "c++" $lang ] } {
+		set link_proc ld_simple_link
+		set link_cmd $CXX
+	    } elseif { [ string match "-shared" $ld_options ] \
 		 || [ string match "-pie" $ld_options ] } {
 		set link_proc ld_simple_link
 		set link_cmd $CC
@@ -1344,8 +1353,13 @@ proc run_ld_link_exec_tests { targets_to_xfail ldtests } {
 
 # List contains test-items with 3 items followed by 2 lists, one item and
 # one optional item:
-# 0:name 1:link options 2:compile options
-# 3:filenames of assembler files 4: action and options. 5: name of output file
+#  0:name
+#  1:link options
+#  2:compile options
+#  3:filenames of source files
+#  4:action and options.
+#  5:name of output file
+#  6:language (optional)
 #
 # Actions:
 # objdump: Apply objdump options on result.  Compare with regex (last arg).
@@ -1360,6 +1374,7 @@ proc run_cc_link_tests { ldtests } {
     global subdir
     global env
     global CC
+    global CXX
     global CFLAGS
 
     foreach testitem $ldtests {
@@ -1369,6 +1384,7 @@ proc run_cc_link_tests { ldtests } {
 	set src_files  [lindex $testitem 3]
 	set actions [lindex $testitem 4]
 	set binfile tmpdir/[lindex $testitem 5]
+	set lang [lindex $testitem 6]
 	set objfiles {}
 	set is_unresolved 0
 	set failed 0
@@ -1387,7 +1403,13 @@ proc run_cc_link_tests { ldtests } {
 	# Clear error and warning counts.
 	reset_vars
 
-	if ![ld_simple_link $CC $binfile "-L$srcdir/$subdir $ldflags $objfiles"] {
+	if { [ string match "c++" $lang ] } {
+	    set cc_cmd $CXX
+	} else {
+	    set cc_cmd $CC
+	}
+
+	if ![ld_simple_link $cc_cmd $binfile "-L$srcdir/$subdir $ldflags $objfiles"] {
 	    fail $testname
 	} else {
 	    set failed 0

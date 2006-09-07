@@ -38,7 +38,7 @@ set build_tests {
    {foo.c} {} "libfoo.so"}
   {"Build versioned libfoo.so"
    "-shared -Wl,--version-script=foo.map" "-fPIC"
-   {foo.c} {} "libfoov.so" "-fPIC"}
+   {foo.c} {} "libfoov.so"}
   {"Build libbar.so"
    "-shared" "-fPIC"
    {begin.c end.c} {} "libbar.so"}
@@ -66,6 +66,15 @@ set build_tests {
   {"Build protected libbar.so with versioned libfoo.so"
    "-shared tmpdir/begin.o tmpdir/libfoov.so" "-fPIC"
    {endprotected.c} {} "libbarpfoov.so"}
+  {"Build libdl1.so"
+   "-shared" "-fPIC"
+   {dl1.c} {} "libdl1.so"}
+  {"Build libdl2a.so with --dynamic-list=dl2.list"
+   "-shared -Wl,--dynamic-list=dl2.list" "-fPIC"
+   {dl2.c dl2xxx.c} {} "libdl2a.so"}
+  {"Build libdl2b.so with --dynamic-list=dl2.list and dl2xxx.list"
+   "-shared -Wl,--dynamic-list=dl2.list,--dynamic-list=dl2xxx.list" "-fPIC"
+   {dl2.c dl2xxx.c} {} "libdl2b.so"}
 }
 
 set run_tests {
@@ -105,8 +114,49 @@ set run_tests {
     {"Run hidden libbar.so with versioned libfoo.so"
      "tmpdir/libbarhfoov.so tmpdir/libfoov.so" ""
      {main.c} "hidden" "hidden.out"}
+    {"Run with dlopen on libdl1.so"
+     "--dynamic-list=dl1.list -ldl" ""
+     {dl1main.c} "dl1" "dl1.out"}
+    {"Run with libdl2a.so"
+     "tmpdir/libdl2a.so" ""
+     {dl2main.c} "dl2a" "dl2a.out"}
+    {"Run with libdl2b.so"
+     "tmpdir/libdl2b.so" ""
+     {dl2main.c} "dl2b" "dl2b.out"}
 }
 
 run_cc_link_tests $build_tests
 # NetBSD ELF systems do not currently support the .*_array sections.
 run_ld_link_exec_tests [list "*-*-netbsdelf*"] $run_tests
+
+# Check if compiler works
+if { [which $CXX] == 0 } {
+    return
+}
+
+set build_cxx_tests {
+  {"Build libdl3a.so with --dynamic-list=dl3.list"
+   "-shared -Wl,--dynamic-list=dl3.list" "-fPIC"
+   {dl3.cc} {} "libdl3a.so" "c++"}
+  {"Build libdl3b.so with -Bsymbolic"
+   "-shared -Wl,-Bsymbolic" "-fPIC"
+   {dl3.cc} {} "libdl3b.so" "c++"}
+  {"Build libdl3a.so with --dynamic-list-cpp-typeinfo"
+   "-shared -Wl,--dynamic-list-cpp-typeinfo" "-fPIC"
+   {dl3.cc} {} "libdl3c.so" "c++"}
+}
+
+set run_cxx_tests {
+    {"Run with libdl3a.so"
+     "tmpdir/libdl3a.so" ""
+     {dl3main.cc} "dl3a" "dl3a.out" "" "c++"}
+    {"Run with libdl3b.so"
+     "tmpdir/libdl3b.so" ""
+     {dl3main.cc} "dl3b" "dl3b.out" "" "c++"}
+    {"Run with libdl3c.so"
+     "tmpdir/libdl3c.so" ""
+     {dl3main.cc} "dl3c" "dl3a.out" "" "c++"}
+}
+
+run_cc_link_tests $build_cxx_tests
+run_ld_link_exec_tests [] $run_cxx_tests

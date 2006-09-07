@@ -156,6 +156,7 @@ static int error_index;
 %type <versyms> vers_defns
 %type <versnode> vers_tag
 %type <deflist> verdep
+%token INPUT_DYNAMIC_LIST
 
 %%
 
@@ -163,6 +164,7 @@ file:
 		INPUT_SCRIPT script_file
 	|	INPUT_MRI_SCRIPT mri_script_file
 	|	INPUT_VERSION_SCRIPT version_script_file
+	|	INPUT_DYNAMIC_LIST dynamic_list_file
 	|	INPUT_DEFSYM defsym_expr
 	;
 
@@ -1136,6 +1138,34 @@ phdr_val:
 	| '(' exp ')'
 		{
 		  $$ = $2;
+		}
+	;
+
+dynamic_list_file:
+		{
+		  ldlex_version_file ();
+		  PUSH_ERROR (_("dynamic list"));
+		}
+		dynamic_list_nodes
+		{
+		  ldlex_popstate ();
+		  POP_ERROR ();
+		}
+	;
+
+dynamic_list_nodes:
+		dynamic_list_node
+	|	dynamic_list_nodes dynamic_list_node
+	;
+
+dynamic_list_node:
+		'{' dynamic_list_tag '}' ';'
+	;
+
+dynamic_list_tag:
+		vers_defns ';'
+		{
+		  lang_append_dynamic_list ($1);
 		}
 	;
 

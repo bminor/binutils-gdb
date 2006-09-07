@@ -107,6 +107,8 @@ enum option_values
   OPTION_VERSION,
   OPTION_VERSION_SCRIPT,
   OPTION_VERSION_EXPORTS_SECTION,
+  OPTION_DYNAMIC_LIST,
+  OPTION_DYNAMIC_LIST_CPP_TYPEINFO,
   OPTION_WARN_COMMON,
   OPTION_WARN_CONSTRUCTORS,
   OPTION_WARN_FATAL,
@@ -501,6 +503,10 @@ static const struct ld_option ld_options[] =
      OPTION_VERSION_EXPORTS_SECTION },
     '\0', N_("SYMBOL"), N_("Take export symbols list from .exports, using\n"
 			   "\t\t\t\tSYMBOL as the version."), TWO_DASHES },
+  { {"dynamic-list-cpp-typeinfo", no_argument, NULL, OPTION_DYNAMIC_LIST_CPP_TYPEINFO},
+    '\0', NULL, N_("Use C++ typeinfo dynamic list"), TWO_DASHES },
+  { {"dynamic-list", required_argument, NULL, OPTION_DYNAMIC_LIST},
+    '\0', N_("FILE"), N_("Read dynamic list"), TWO_DASHES },
   { {"warn-common", no_argument, NULL, OPTION_WARN_COMMON},
     '\0', NULL, N_("Warn about duplicate common symbols"), TWO_DASHES },
   { {"warn-constructors", no_argument, NULL, OPTION_WARN_CONSTRUCTORS},
@@ -1235,6 +1241,23 @@ parse_args (unsigned argc, char **argv)
 	     symbols listed for export to be found in the object files
 	     .exports sections.  */
 	  command_line.version_exports_section = optarg;
+	  break;
+	case OPTION_DYNAMIC_LIST_CPP_TYPEINFO:
+	  lang_append_dynamic_list_cpp_typeinfo ();
+	  break;
+	case OPTION_DYNAMIC_LIST:
+	  /* This option indicates a small script that only specifies
+	     a dynamic list.  Read it, but don't assume that we've
+	     seen a linker script.  */
+	  {
+	    FILE *hold_script_handle;
+
+	    hold_script_handle = saved_script_handle;
+	    ldfile_open_command_file (optarg);
+	    saved_script_handle = hold_script_handle;
+	    parser_input = input_dynamic_list;
+	    yyparse ();
+	  }
 	  break;
 	case OPTION_WARN_COMMON:
 	  config.warn_common = TRUE;

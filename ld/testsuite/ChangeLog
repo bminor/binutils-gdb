@@ -1,3 +1,30 @@
+2006-09-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/dl1.c: New file.
+	* ld-elf/dl1.list: Likewise.
+	* ld-elf/dl1.out: Likewise.
+	* ld-elf/dl1main.c: Likewise.
+	* ld-elf/dl2.c: Likewise.
+	* ld-elf/dl2.list: Likewise.
+	* ld-elf/dl2a.out: Likewise.
+	* ld-elf/dl2b.out: Likewise.
+	* ld-elf/dl2main.c: Likewise.
+	* ld-elf/dl2xxx.c: Likewise.
+	* ld-elf/dl2xxx.list: Likewise.
+	* ld-elf/dl3.cc: Likewise.
+	* ld-elf/dl3.list: Likewise.
+	* ld-elf/dl3a.out: Likewise.
+	* ld-elf/dl3b.out: Likewise.
+	* ld-elf/dl3header.h: Likewise.
+	* ld-elf/dl3main.cc: Likewise.
+
+	* ld-elf/shared.exp: Updated.
+
+	* lib/ld-lib.exp (run_ld_link_exec_tests): Take an optional
+	argument for source language. Use CC/CXX for link, depending
+	on source language.
+	(run_cc_link_tests): Likewise.
+
 2006-08-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-elf/loadaddr3a.d: Adjust target test.

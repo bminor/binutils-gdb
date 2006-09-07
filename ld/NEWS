@@ -1,4 +1,9 @@
 -*- text -*-
+* ELF: Add --dynamic-list option to specify a list of global symbols
+  whose references shouldn't be bound to the definition within the
+  shared library, or a list of symbols which should be added to the
+  symbol table in the executable.
+
 * The default output section LMA has changed for allocatable sections from
   being equal to VMA, to keeping the difference between LMA and VMA the same as
   the previous output section in the same region.  This is a more useful

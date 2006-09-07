@@ -83,6 +83,8 @@ static void print_input_section (asection *);
 static bfd_boolean lang_one_common (struct bfd_link_hash_entry *, void *);
 static void lang_record_phdrs (void);
 static void lang_do_version_exports_section (void);
+static void lang_finalize_version_expr_head
+  (struct bfd_elf_version_expr_head *);
 
 /* Exported variables.  */
 lang_output_section_statement_type *abs_output_section;
@@ -5624,6 +5626,10 @@ relax_sections (void)
 void
 lang_process (void)
 {
+  /* Finalize dynamic list.  */
+  if (link_info.dynamic)
+    lang_finalize_version_expr_head (&link_info.dynamic->head);
+
   current_target = default_target;
 
   /* Open the output file.  */
@@ -6925,4 +6931,46 @@ lang_add_unique (const char *name)
   ent->name = xstrdup (name);
   ent->next = unique_section_list;
   unique_section_list = ent;
+}
+
+/* Append the list of dynamic symbols to the existing one.  */
+
+void
+lang_append_dynamic_list (struct bfd_elf_version_expr *dynamic)
+{
+  if (link_info.dynamic)
+    {
+      dynamic->next = link_info.dynamic->head.list;
+      link_info.dynamic->head.list = dynamic;
+    }
+  else
+    {
+      struct bfd_elf_dynamic_list *d;
+
+      d = xcalloc (1, sizeof *d);
+      d->head.list = dynamic;
+      d->match = lang_vers_match;
+      link_info.dynamic = d;
+    }
+}
+
+/* Append the list of C++ typeinfo dynamic symbols to the existing
+   one.  */
+
+void
+lang_append_dynamic_list_cpp_typeinfo (void)
+{
+  const char * symbols [] =
+    {
+      "typeinfo name for*",
+      "typeinfo for*"
+    };
+  struct bfd_elf_version_expr *dynamic = NULL;
+  unsigned int i;
+
+  for (i = 0; i < ARRAY_SIZE (symbols); i++)
+    dynamic = lang_new_vers_pattern (dynamic, symbols [i], "C++",
+				     FALSE);
+
+  lang_append_dynamic_list (dynamic);
 }

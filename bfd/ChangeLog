@@ -1,3 +1,27 @@
+2006-09-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (elf_link_hash_entry): Add a dynamic field.
+	(bfd_elf_link_mark_dynamic_symbol): New.
+	(SYMBOLIC_BIND): New.
+
+	* elf32-i386.c (elf_i386_check_relocs): Replace info->symbolic
+	with SYMBOLIC_BIND (info, h).
+	(elf_i386_relocate_section): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_check_relocs): Likewise.
+	(elf64_x86_64_relocate_section): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_check_relocs): Likewise.
+
+	* elflink.c (bfd_elf_link_mark_dynamic_symbol): New.
+	(bfd_elf_record_link_assignment): Call
+	bfd_elf_link_mark_dynamic_symbol on new entry.
+	(_bfd_elf_merge_symbol): Likewise.
+	(_bfd_elf_export_symbol): Return if the symbol isn't exported.
+	(_bfd_elf_fix_symbol_flags): Replace info->symbolic with
+	SYMBOLIC_BIND (info, h).
+	(_bfd_elf_dynamic_symbol_p): Likewise.
+	(_bfd_elf_symbol_refs_local_p): Likewise.
+	(bfd_elf_size_dynamic_sections): Updated.
+
 2006-09-05  Bibo Mao  <bibo.mao@intel.com>
 
 	PR binutils/3171

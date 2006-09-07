@@ -444,6 +444,21 @@ bfd_elf_link_record_dynamic_symbol (struct bfd_link_info *info,
   return TRUE;
 }
 
+/* Mark a symbol dynamic.  */
+
+void
+bfd_elf_link_mark_dynamic_symbol (struct bfd_link_info *info,
+				  struct elf_link_hash_entry *h)
+{
+  struct bfd_elf_dynamic_list *d = info->dynamic;
+
+  if (d == NULL || info->relocatable)
+    return;
+
+  if ((*d->match) (&d->head, NULL, h->root.root.string))
+    h->dynamic = 1;
+}
+
 /* Record an assignment to a symbol made by a linker script.  We need
    this in case some dynamic object refers to this symbol.  */
 
@@ -477,7 +492,10 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
     }
 
   if (h->root.type == bfd_link_hash_new)
-    h->non_elf = 0;
+    {
+      bfd_elf_link_mark_dynamic_symbol (info, h);
+      h->non_elf = 0;
+    }
 
   /* If this symbol is being provided by the linker script, and it is
      currently defined by a dynamic object, but not by a regular
@@ -840,6 +858,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
 
   if (h->root.type == bfd_link_hash_new)
     {
+      bfd_elf_link_mark_dynamic_symbol (info, h);
       h->non_elf = 0;
       return TRUE;
     }
@@ -1626,6 +1645,10 @@ _bfd_elf_export_symbol (struct elf_link_hash_entry *h, void *data)
 {
   struct elf_info_failed *eif = data;
 
+  /* Ignore this if we won't export it.  */
+  if (!eif->info->export_dynamic && !h->dynamic)
+    return TRUE;
+
   /* Ignore indirect symbols.  These are added by the versioning code.  */
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
@@ -2379,7 +2402,7 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
   if (h->needs_plt
       && eif->info->shared
       && is_elf_hash_table (eif->info->hash)
-      && (eif->info->symbolic
+      && (SYMBOLIC_BIND (eif->info, h)
 	  || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
       && h->def_regular)
     {
@@ -2608,7 +2631,7 @@ _bfd_elf_dynamic_symbol_p (struct elf_link_hash_entry *h,
 
   /* Identify the cases where name binding rules say that a
      visible symbol resolves locally.  */
-  binding_stays_local_p = info->executable || info->symbolic;
+  binding_stays_local_p = info->executable || SYMBOLIC_BIND (info, h);
 
   switch (ELF_ST_VISIBILITY (h->other))
     {
@@ -2671,7 +2694,7 @@ _bfd_elf_symbol_refs_local_p (struct elf_link_hash_entry *h,
   /* At this point, we know the symbol is defined and dynamic.  In an
      executable it must resolve locally, likewise when building symbolic
      shared libraries.  */
-  if (info->executable || info->symbolic)
+  if (info->executable || SYMBOLIC_BIND (info, h))
     return TRUE;
 
   /* Now deal with defined dynamic symbols in shared libraries.  Ones
@@ -5322,7 +5345,8 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 
       /* If we are supposed to export all symbols into the dynamic symbol
 	 table (this is not the normal case), then do so.  */
-      if (info->export_dynamic)
+      if (info->export_dynamic
+	  || (info->executable && info->dynamic))
 	{
 	  elf_link_hash_traverse (elf_hash_table (info),
 				  _bfd_elf_export_symbol,
