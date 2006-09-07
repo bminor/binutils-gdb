@@ -1,3 +1,10 @@
+2006-09-07  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* emulparams/h8300elf.sh: _tinydata should not be placed in
+	relocatables.
+	* emulparams/h8300.sh: Likewise.
+	* emulparams/h8300sxelf.sh: Likewise.
+
 2006-09-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/3015
