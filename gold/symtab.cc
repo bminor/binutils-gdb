@@ -15,10 +15,6 @@ namespace gold
 
 // Class Symbol.
 
-Symbol::~Symbol()
-{
-}
-
 // Initialize the fields in the base class Symbol.
 
 template<int size, bool big_endian>
@@ -34,9 +30,10 @@ Symbol::init_base(const char* name, const char* version, Object* object,
   this->binding_ = sym.get_st_bind();
   this->visibility_ = sym.get_st_visibility();
   this->other_ = sym.get_st_nonvis();
-  this->special_ = false;
-  this->def_ = false;
-  this->forwarder_ = false;
+  this->is_special_ = false;
+  this->is_def_ = false;
+  this->is_forwarder_ = false;
+  this->in_dyn_ = object->is_dynamic();
 }
 
 // Initialize the fields in Sized_symbol.
@@ -107,11 +104,22 @@ Symbol_table::resolve_forwards(Symbol* from) const
 // Resolve a Symbol with another Symbol.  This is only used in the
 // unusual case where there are references to both an unversioned
 // symbol and a symbol with a version, and we then discover that that
-// version is the default version.
+// version is the default version.  Because this is unusual, we do
+// this the slow way, by converting back to an ELF symbol.
 
+template<int size, bool big_endian>
 void
-Symbol_table::resolve(Symbol*, const Symbol*)
+Symbol_table::resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from)
 {
+  unsigned char buf[elfcpp::Elf_sizes<size>::sym_size];
+  elfcpp::Sym_write<size, big_endian> esym(buf);
+  // We don't bother to set the st_name field.
+  esym.put_st_value(from->value());
+  esym.put_st_size(from->symsize());
+  esym.put_st_info(from->binding(), from->type());
+  esym.put_st_other(from->visibility(), from->other());
+  esym.put_st_shndx(from->shnum());
+  Symbol_table::resolve(to, esym.sym(), from->object());
 }
 
 // Add one symbol from OBJECT to the symbol table.  NAME is symbol
@@ -162,11 +170,11 @@ Symbol_table::add_from_object(Sized_object<size, big_endian>* object,
   // ins.first->second: the value (Symbol*).
   // ins.second: true if new entry was inserted, false if not.
 
-  Symbol* ret;
+  Sized_symbol<size>* ret;
   if (!ins.second)
     {
       // We already have an entry for NAME/VERSION.
-      ret = ins.first->second;
+      ret = this->get_sized_symbol<size>(ins.first->second);
       assert(ret != NULL);
       Symbol_table::resolve(ret, sym, object);
 
@@ -182,7 +190,9 @@ Symbol_table::add_from_object(Sized_object<size, big_endian>* object,
 	    {
 	      // This is the unfortunate case where we already have
 	      // entries for both NAME/VERSION and NAME/NULL.
-	      Symbol_table::resolve(ret, insdef.first->second);
+	      const Sized_symbol<size>* sym2 =
+		this->get_sized_symbol<size>(insdef.first->second);
+	      Symbol_table::resolve<size, big_endian>(ret, sym2);
 	      this->make_forwarder(insdef.first->second, ret);
 	      insdef.first->second = ret;
 	    }
@@ -196,18 +206,19 @@ Symbol_table::add_from_object(Sized_object<size, big_endian>* object,
 	{
 	  // We already have an entry for NAME/NULL.  Make
 	  // NAME/VERSION point to it.
-	  ret = insdef.first->second;
+	  ret = this->get_sized_symbol<size>(insdef.first->second);
 	  Symbol_table::resolve(ret, sym, object);
 	  ins.first->second = ret;
 	}
       else
 	{
-	  Sized_symbol<size>* rs;
 	  Sized_target<size, big_endian>* target = object->sized_target();
-	  if (target->has_make_symbol())
+	  if (!target->has_make_symbol())
+	    ret = new Sized_symbol<size>();
+	  else
 	    {
-	      rs = target->make_symbol();
-	      if (rs == NULL)
+	      ret = target->make_symbol();
+	      if (ret == NULL)
 		{
 		  // This means that we don't want a symbol table
 		  // entry after all.
@@ -222,11 +233,9 @@ Symbol_table::add_from_object(Sized_object<size, big_endian>* object,
 		  return NULL;
 		}
 	    }
-	  else
-	    rs = new Sized_symbol<size>();
-	  rs->init(name, version, object, sym);
 
-	  ret = rs;
+	  ret->init(name, version, object, sym);
+
 	  ins.first->second = ret;
 	  if (def)
 	    {

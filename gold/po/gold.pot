@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-08-18 15:26-0700\n"
+"POT-Creation-Date: 2006-09-07 14:17-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -220,22 +220,22 @@ msgstr ""
 msgid "%s: -%c: %s\n"
 msgstr ""
 
-#: resolve.cc:103
+#: resolve.cc:135
 #, c-format
 msgid "%s: %s: invalid STB_LOCAL symbol %s in external symbols\n"
 msgstr ""
 
-#: resolve.cc:109
+#: resolve.cc:141
 #, c-format
 msgid "%s: %s: unsupported symbol binding %d for symbol %s\n"
 msgstr ""
 
-#: symtab.cc:262
+#: symtab.cc:271
 #, c-format
 msgid "%s: %s: mixing 32-bit and 64-bit ELF objects\n"
 msgstr ""
 
-#: symtab.cc:275
+#: symtab.cc:284
 #, c-format
 msgid "%s: %s: bad symbol name offset %u at %lu\n"
 msgstr ""

@@ -32,8 +32,6 @@ class Sized_target;
 class Symbol
 {
  public:
-  virtual ~Symbol();
-
   // Return the symbol name.
   const char*
   name() const
@@ -45,18 +43,6 @@ class Symbol
   version() const
   { return this->version_; }
 
-  // Return whether this symbol is a forwarder.  This will never be
-  // true of a symbol found in the hash table, but may be true of
-  // symbol pointers attached to object files.
-  bool
-  is_forwarder() const
-  { return this->forwarder_; }
-
-  // Mark this symbol as a forwarder.
-  void
-  set_forwarder()
-  { this->forwarder_ = true; }
-
   // Return the object with which this symbol is associated.
   Object*
   object() const
@@ -67,10 +53,47 @@ class Symbol
   binding() const
   { return this->binding_; }
 
+  // Return the symbol type.
+  elfcpp::STT
+  type() const
+  { return this->type_; }
+
+  // Return the symbol visibility.
+  elfcpp::STV
+  visibility() const
+  { return this->visibility_; }
+
+  // Return the non-visibility part of the st_other field.
+  unsigned char
+  other() const
+  { return this->other_; }
+
   // Return the section index.
   unsigned int
   shnum() const
   { return this->shnum_; }
+
+  // Return whether this symbol is a forwarder.  This will never be
+  // true of a symbol found in the hash table, but may be true of
+  // symbol pointers attached to object files.
+  bool
+  is_forwarder() const
+  { return this->is_forwarder_; }
+
+  // Mark this symbol as a forwarder.
+  void
+  set_forwarder()
+  { this->is_forwarder_ = true; }
+
+  // Return whether this symbol was seen in a dynamic object.
+  bool
+  in_dyn() const
+  { return this->in_dyn_; }
+
+  // Mark this symbol as seen in a dynamic object.
+  void
+  set_in_dyn()
+  { this->in_dyn_ = true; }
 
  protected:
   // Instances of this class should always be created at a specific
@@ -83,6 +106,11 @@ class Symbol
   void
   init_base(const char *name, const char* version, Object* object,
 	    const elfcpp::Sym<size, big_endian>&);
+
+  // Override existing symbol.
+  template<int size, bool big_endian>
+  void
+  override_base(const elfcpp::Sym<size, big_endian>&, Object* object);
 
  private:
   Symbol(const Symbol&);
@@ -107,9 +135,9 @@ class Symbol
   unsigned int other_ : 6;
   // True if this symbol always requires special target-specific
   // handling.
-  bool special_ : 1;
+  bool is_special_ : 1;
   // True if this is the default version of the symbol.
-  bool def_ : 1;
+  bool is_def_ : 1;
   // True if this symbol really forwards to another symbol.  This is
   // used when we discover after the fact that two different entries
   // in the hash table really refer to the same symbol.  This will
@@ -117,7 +145,9 @@ class Symbol
   // for a symbol found in the list of symbols attached to an Object.
   // It forwards to the symbol found in the forwarders_ map of
   // Symbol_table.
-  bool forwarder_ : 1;
+  bool is_forwarder_ : 1;
+  // True if we've seen this symbol in a dynamic object.
+  bool in_dyn_ : 1;
 };
 
 // The parts of a symbol which are size specific.  Using a template
@@ -127,6 +157,9 @@ template<int size>
 class Sized_symbol : public Symbol
 {
  public:
+  typedef typename elfcpp::Elf_types<size>::Elf_Addr Value_type;
+  typedef typename elfcpp::Elf_types<size>::Elf_WXword Size_type;
+
   Sized_symbol()
   { }
 
@@ -136,14 +169,30 @@ class Sized_symbol : public Symbol
   init(const char *name, const char* version, Object* object,
        const elfcpp::Sym<size, big_endian>&);
 
+  // Override existing symbol.
+  template<bool big_endian>
+  void
+  override(const elfcpp::Sym<size, big_endian>&, Object* object);
+
+  // Return the symbol's value.
+  Value_type
+  value() const
+  { return this->value_; }
+
+  // Return the symbol's size (we can't call this 'size' because that
+  // is a template parameter).
+  Size_type
+  symsize() const
+  { return this->size_; }
+
  private:
   Sized_symbol(const Sized_symbol&);
   Sized_symbol& operator=(const Sized_symbol&);
 
   // Symbol value.
-  typename elfcpp::Elf_types<size>::Elf_Addr value_;
+  Value_type value_;
   // Symbol size.
-  typename elfcpp::Elf_types<size>::Elf_WXword size_;
+  Size_type size_;
 };
 
 // The main linker symbol table.
@@ -153,7 +202,7 @@ class Symbol_table
  public:
   Symbol_table();
 
-  virtual ~Symbol_table();
+  ~Symbol_table();
 
   // Add COUNT external symbols from OBJECT to the symbol table.  SYMS
   // is the symbols, SYM_NAMES is their names, SYM_NAME_SIZE is the
@@ -174,6 +223,15 @@ class Symbol_table
   int
   get_size() const
   { return this->size_; }
+
+  // Return the sized version of a symbol in this table.
+  template<int size>
+  Sized_symbol<size>*
+  get_sized_symbol(Symbol*);
+
+  template<int size>
+  const Sized_symbol<size>*
+  get_sized_symbol(const Symbol*);
 
  private:
   Symbol_table(const Symbol_table&);
@@ -198,10 +256,13 @@ class Symbol_table
   // Resolve symbols.
   template<int size, bool big_endian>
   static void
-  resolve(Symbol* to, const elfcpp::Sym<size, big_endian>& sym, Object*);
+  resolve(Sized_symbol<size>* to,
+	  const elfcpp::Sym<size, big_endian>& sym,
+	  Object*);
 
+  template<int size, bool big_endian>
   static void
-  resolve(Symbol* to, const Symbol* from);
+  resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from);
 
   typedef std::pair<const char*, const char*> Symbol_table_key;
 
@@ -232,6 +293,24 @@ class Symbol_table
   // Forwarding symbols.
   Unordered_map<Symbol*, Symbol*> forwarders_;
 };
+
+// We inline get_sized_symbol for efficiency.
+
+template<int size>
+Sized_symbol<size>*
+Symbol_table::get_sized_symbol(Symbol* sym)
+{
+  assert(size == this->get_size());
+  return static_cast<Sized_symbol<size>*>(sym);
+}
+
+template<int size>
+const Sized_symbol<size>*
+Symbol_table::get_sized_symbol(const Symbol* sym)
+{
+  assert(size == this->get_size());
+  return static_cast<const Sized_symbol<size>*>(sym);
+}
 
 } // End namespace gold.
 

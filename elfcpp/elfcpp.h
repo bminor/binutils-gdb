@@ -437,6 +437,13 @@ elf_st_nonvis(unsigned char other)
   return static_cast<STV>(other >> 2);
 }
 
+inline unsigned char
+elf_st_other(STV vis, unsigned char nonvis)
+{
+  return ((nonvis << 2)
+	  + (static_cast<unsigned char>(vis) & 3));
+}
+
 } // End namespace elfcpp.
 
 // Include internal details after defining the types.
@@ -639,6 +646,56 @@ class Sym
 
  private:
   const internal::Sym_data<size>* p_;
+};
+
+// Writer class for an ELF symbol table entry.
+
+template<int size, bool big_endian>
+class Sym_write
+{
+ public:
+  Sym_write(unsigned char* p)
+    : p_(reinterpret_cast<internal::Sym_data<size>*>(p))
+  { }
+
+  void
+  put_st_name(Elf_Word v)
+  { this->p_->st_name = internal::convert_word<big_endian>(v); }
+
+  void
+  put_st_value(typename Elf_types<size>::Elf_Addr v)
+  { this->p_->st_value = internal::convert_addr<size, big_endian>(v); }
+
+  void
+  put_st_size(typename Elf_types<size>::Elf_WXword v)
+  { this->p_->st_size = internal::convert_wxword<size, big_endian>(v); }
+
+  void
+  put_st_info(unsigned char v)
+  { this->p_->st_info = v; }
+
+  void
+  put_st_info(STB bind, STT type)
+  { this->p_->st_info = elf_st_info(bind, type); }
+
+  void
+  put_st_other(unsigned char v)
+  { this->p_->st_other = v; }
+
+  void
+  put_st_other(STV vis, unsigned char nonvis)
+  { this->p_->st_other = elf_st_other(vis, nonvis); }
+
+  void
+  put_st_shndx(Elf_Half v)
+  { this->p_->st_shndx = internal::convert_half<big_endian>(v); }
+
+  Sym<size, big_endian>
+  sym()
+  { return Sym<size, big_endian>(reinterpret_cast<unsigned char*>(this->p_)); }
+
+ private:
+  internal::Sym_data<size>* p_;
 };
 
 } // End namespace elfcpp.

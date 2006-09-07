@@ -10,13 +10,43 @@
 namespace gold
 {
 
+// Symbol methods used in this file.
+
+// Override the fields in Symbol.
+
+template<int size, bool big_endian>
+void
+Symbol::override_base(const elfcpp::Sym<size, big_endian>& sym,
+		      Object* object)
+{
+  this->object_ = object;
+  this->shnum_ = sym.get_st_shndx(); // FIXME: Handle SHN_XINDEX.
+  this->type_ = sym.get_st_type();
+  this->binding_ = sym.get_st_bind();
+  this->visibility_ = sym.get_st_visibility();
+  this->other_ = sym.get_st_nonvis();
+}
+
+// Override the fields in Sized_symbol.
+
+template<int size>
+template<bool big_endian>
+void
+Sized_symbol<size>::override(const elfcpp::Sym<size, big_endian>& sym,
+			     Object* object)
+{
+  this->override_base(sym, object);
+  this->value_ = sym.get_st_value();
+  this->size_ = sym.get_st_size();
+}
+
 // Resolve a symbol.  This is called the second and subsequent times
 // we see a symbol.  TO is the pre-existing symbol.  SYM is the new
 // symbol, seen in OBJECT.
 
 template<int size, bool big_endian>
 void
-Symbol_table::resolve(Symbol* to,
+Symbol_table::resolve(Sized_symbol<size>* to,
 		      const elfcpp::Sym<size, big_endian>& sym,
 		      Object* object)
 {
@@ -84,6 +114,8 @@ Symbol_table::resolve(Symbol* to,
       break;
 
     default:
+      if (to->type() == elfcpp::STT_COMMON)
+	tobits |= (2 << 2);
       break;
     }
 
@@ -113,7 +145,12 @@ Symbol_table::resolve(Symbol* to,
     }
 
   if (object->is_dynamic())
-    frombits |= (1 << 1);
+    {
+      frombits |= (1 << 1);
+
+      // Record that we've seen this symbol in a dynamic object.
+      to->set_in_dyn();
+    }
 
   switch (sym.get_st_shndx())
     {
@@ -126,8 +163,12 @@ Symbol_table::resolve(Symbol* to,
       break;
 
     default:
+      if (sym.get_st_type() == elfcpp::STT_COMMON)
+	frombits |= (2 << 2);
       break;
     }
+
+  // FIXME: Warn if either but not both of TO and SYM are STT_TLS.
 
   // We use a giant switch table for symbol resolution.  This code is
   // unwieldy, but: 1) it is efficient; 2) we definitely handle all
@@ -147,64 +188,124 @@ Symbol_table::resolve(Symbol* to,
       return;
 
     case WEAK_DEF * 16 + DEF:
-      // In the original SVR4 linker, a weak definition followed by a
-      // regular definition was treated as a multiple definition
-      // error.  In the Solaris linker and the GNU linker, a weak
-      // definition followed by a regular definition causes the
-      // regular definition to be ignored.  We are currently
-      // compatible with the GNU linker.  In the future we should add
-      // a target specific option to change this.  FIXME.
+      // We've seen a weak definition, and now we see a strong
+      // definition.  In the original SVR4 linker, this was treated as
+      // a multiple definition error.  In the Solaris linker and the
+      // GNU linker, a weak definition followed by a regular
+      // definition causes the weak definition to be overridden.  We
+      // are currently compatible with the GNU linker.  In the future
+      // we should add a target specific option to change this.
+      // FIXME.
+      to->override(sym, object);
       return;
 
     case DYN_DEF * 16 + DEF:
     case DYN_WEAK_DEF * 16 + DEF:
+      // We've seen a definition in a dynamic object, and now we see a
+      // definition in a regular object.  The definition in the
+      // regular object overrides the definition in the dynamic
+      // object.
+      to->override(sym, object);
+      return;
+
     case UNDEF * 16 + DEF:
     case WEAK_UNDEF * 16 + DEF:
     case DYN_UNDEF * 16 + DEF:
     case DYN_WEAK_UNDEF * 16 + DEF:
+      // We've seen an undefined reference, and now we see a
+      // definition.  We use the definition.
+      to->override(sym, object);
+      return;
+
     case COMMON * 16 + DEF:
     case WEAK_COMMON * 16 + DEF:
     case DYN_COMMON * 16 + DEF:
     case DYN_WEAK_COMMON * 16 + DEF:
+      // We've seen a common symbol and now we see a definition.  The
+      // definition overrides.  FIXME: We should optionally issue a
+      // warning.
+      to->override(sym, object);
+      return;
 
     case DEF * 16 + WEAK_DEF:
     case WEAK_DEF * 16 + WEAK_DEF:
+      // We've seen a definition and now we see a weak definition.  We
+      // ignore the new weak definition.
+      return;
+
     case DYN_DEF * 16 + WEAK_DEF:
     case DYN_WEAK_DEF * 16 + WEAK_DEF:
+      // We've seen a dynamic definition and now we see a regular weak
+      // definition.  The regular weak definition overrides.
+      to->override(sym, object);
+      return;
+
     case UNDEF * 16 + WEAK_DEF:
     case WEAK_UNDEF * 16 + WEAK_DEF:
     case DYN_UNDEF * 16 + WEAK_DEF:
     case DYN_WEAK_UNDEF * 16 + WEAK_DEF:
+      // A weak definition of a currently undefined symbol.
+      to->override(sym, object);
+      return;
+
     case COMMON * 16 + WEAK_DEF:
     case WEAK_COMMON * 16 + WEAK_DEF:
+      // A weak definition does not override a common definition.
+      return;
+
     case DYN_COMMON * 16 + WEAK_DEF:
     case DYN_WEAK_COMMON * 16 + WEAK_DEF:
+      // A weak definition does override a definition in a dynamic
+      // object.  FIXME: We should optionally issue a warning.
+      to->override(sym, object);
+      return;
 
     case DEF * 16 + DYN_DEF:
     case WEAK_DEF * 16 + DYN_DEF:
     case DYN_DEF * 16 + DYN_DEF:
     case DYN_WEAK_DEF * 16 + DYN_DEF:
+      // Ignore a dynamic definition if we already have a definition.
+      return;
+
     case UNDEF * 16 + DYN_DEF:
     case WEAK_UNDEF * 16 + DYN_DEF:
     case DYN_UNDEF * 16 + DYN_DEF:
     case DYN_WEAK_UNDEF * 16 + DYN_DEF:
+      // Use a dynamic definition if we have a reference.
+      to->override(sym, object);
+      return;
+
     case COMMON * 16 + DYN_DEF:
     case WEAK_COMMON * 16 + DYN_DEF:
     case DYN_COMMON * 16 + DYN_DEF:
     case DYN_WEAK_COMMON * 16 + DYN_DEF:
+      // Ignore a dynamic definition if we already have a common
+      // definition.
+      return;
 
     case DEF * 16 + DYN_WEAK_DEF:
     case WEAK_DEF * 16 + DYN_WEAK_DEF:
     case DYN_DEF * 16 + DYN_WEAK_DEF:
     case DYN_WEAK_DEF * 16 + DYN_WEAK_DEF:
+      // Ignore a weak dynamic definition if we already have a
+      // definition.
+      return;
+
     case UNDEF * 16 + DYN_WEAK_DEF:
     case WEAK_UNDEF * 16 + DYN_WEAK_DEF:
     case DYN_UNDEF * 16 + DYN_WEAK_DEF:
     case DYN_WEAK_UNDEF * 16 + DYN_WEAK_DEF:
+      // Use a weak dynamic definition if we have a reference.
+      to->override(sym, object);
+      return;
+
     case COMMON * 16 + DYN_WEAK_DEF:
     case WEAK_COMMON * 16 + DYN_WEAK_DEF:
     case DYN_COMMON * 16 + DYN_WEAK_DEF:
     case DYN_WEAK_COMMON * 16 + DYN_WEAK_DEF:
+      // Ignore a weak dynamic definition if we already have a common
+      // definition.
+      return;
 
     case DEF * 16 + UNDEF:
     case WEAK_DEF * 16 + UNDEF:
@@ -218,6 +319,8 @@ Symbol_table::resolve(Symbol* to,
     case WEAK_COMMON * 16 + UNDEF:
     case DYN_COMMON * 16 + UNDEF:
     case DYN_WEAK_COMMON * 16 + UNDEF:
+      // A new undefined reference tells us nothing.
+      return;
 
     case DEF * 16 + WEAK_UNDEF:
     case WEAK_DEF * 16 + WEAK_UNDEF:
@@ -231,6 +334,8 @@ Symbol_table::resolve(Symbol* to,
     case WEAK_COMMON * 16 + WEAK_UNDEF:
     case DYN_COMMON * 16 + WEAK_UNDEF:
     case DYN_WEAK_COMMON * 16 + WEAK_UNDEF:
+      // A new weak undefined reference tells us nothing.
+      return;
 
     case DEF * 16 + DYN_UNDEF:
     case WEAK_DEF * 16 + DYN_UNDEF:
@@ -244,6 +349,8 @@ Symbol_table::resolve(Symbol* to,
     case WEAK_COMMON * 16 + DYN_UNDEF:
     case DYN_COMMON * 16 + DYN_UNDEF:
     case DYN_WEAK_COMMON * 16 + DYN_UNDEF:
+      // A new dynamic undefined reference tells us nothing.
+      return;
 
     case DEF * 16 + DYN_WEAK_UNDEF:
     case WEAK_DEF * 16 + DYN_WEAK_UNDEF:
@@ -257,15 +364,29 @@ Symbol_table::resolve(Symbol* to,
     case WEAK_COMMON * 16 + DYN_WEAK_UNDEF:
     case DYN_COMMON * 16 + DYN_WEAK_UNDEF:
     case DYN_WEAK_COMMON * 16 + DYN_WEAK_UNDEF:
+      // A new weak dynamic undefined reference tells us nothing.
+      return;
 
     case DEF * 16 + COMMON:
+      // A common symbol does not override a definition.
+      return;
+
     case WEAK_DEF * 16 + COMMON:
     case DYN_DEF * 16 + COMMON:
     case DYN_WEAK_DEF * 16 + COMMON:
+      // A common symbol does override a weak definition or a dynamic
+      // definition.
+      to->override(sym, object);
+      return;
+
     case UNDEF * 16 + COMMON:
     case WEAK_UNDEF * 16 + COMMON:
     case DYN_UNDEF * 16 + COMMON:
     case DYN_WEAK_UNDEF * 16 + COMMON:
+      // A common symbol is a definition for a reference.
+      to->override(sym, object);
+      return;
+
     case COMMON * 16 + COMMON:
     case WEAK_COMMON * 16 + COMMON:
     case DYN_COMMON * 16 + COMMON:
@@ -309,8 +430,11 @@ Symbol_table::resolve(Symbol* to,
     case WEAK_COMMON * 16 + DYN_WEAK_COMMON:
     case DYN_COMMON * 16 + DYN_WEAK_COMMON:
     case DYN_WEAK_COMMON * 16 + DYN_WEAK_COMMON:
-
+      abort();
       break;
+
+    default:
+      abort();
     }
 }
 
@@ -321,28 +445,28 @@ Symbol_table::resolve(Symbol* to,
 template
 void
 Symbol_table::resolve<32, true>(
-    Symbol* to,
+    Sized_symbol<32>* to,
     const elfcpp::Sym<32, true>& sym,
     Object* object);
 
 template
 void
 Symbol_table::resolve<32, false>(
-    Symbol* to,
+    Sized_symbol<32>* to,
     const elfcpp::Sym<32, false>& sym,
     Object* object);
 
 template
 void
 Symbol_table::resolve<64, true>(
-    Symbol* to,
+    Sized_symbol<64>* to,
     const elfcpp::Sym<64, true>& sym,
     Object* object);
 
 template
 void
 Symbol_table::resolve<64, false>(
-    Symbol* to,
+    Sized_symbol<64>* to,
     const elfcpp::Sym<64, false>& sym,
     Object* object);
 
