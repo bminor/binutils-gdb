@@ -1,3 +1,7 @@
+2006-09-08  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (insns): Allow ARM IT pseudo-insn on all cores.
+
 2006-09-07  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (parse_operands): Mark operand as present.

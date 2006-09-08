@@ -1,3 +1,8 @@
+2006-09-08  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/arm-it.s: New test.
+	* gas/arm/arm-it.d: New test.
+
 2006-09-07  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/neon-omit.s: Test three-argument variants.
