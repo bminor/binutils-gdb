@@ -161,6 +161,7 @@ static const arm_feature_set *mcpu_fpu_opt = NULL;
 static const arm_feature_set *march_cpu_opt = NULL;
 static const arm_feature_set *march_fpu_opt = NULL;
 static const arm_feature_set *mfpu_opt = NULL;
+static const arm_feature_set *object_arch = NULL;
 
 /* Constants for known architecture features.  */
 static const arm_feature_set fpu_default = FPU_DEFAULT;
@@ -3880,6 +3881,7 @@ bad:
 }
 
 static void s_arm_arch (int);
+static void s_arm_object_arch (int);
 static void s_arm_cpu (int);
 static void s_arm_fpu (int);
 #endif /* OBJ_ELF */
@@ -3928,6 +3930,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "unwind_raw",	s_arm_unwind_raw,	0 },
   { "cpu",		s_arm_cpu,		0 },
   { "arch",		s_arm_arch,		0 },
+  { "object_arch",	s_arm_object_arch,	0 },
   { "fpu",		s_arm_fpu,		0 },
   { "eabi_attribute",	s_arm_eabi_attribute,	0 },
 #else
@@ -19938,7 +19941,13 @@ aeabi_set_public_attributes (void)
   ARM_MERGE_FEATURE_SETS (flags, arm_arch_used, thumb_arch_used);
   ARM_MERGE_FEATURE_SETS (flags, flags, *mfpu_opt);
   ARM_MERGE_FEATURE_SETS (flags, flags, selected_cpu);
-    
+  /*Allow the user to override the reported architecture.  */
+  if (object_arch)
+    {
+      ARM_CLEAR_FEATURE (flags, flags, arm_arch_any);
+      ARM_MERGE_FEATURE_SETS (flags, flags, *object_arch);
+    }
+
   tmp = flags;
   arch = 0;
   for (p = cpu_arch_ver; p->val; p++)
@@ -20090,6 +20099,37 @@ s_arm_arch (int ignored ATTRIBUTE_UNUSED)
 	selected_cpu = opt->value;
 	strcpy(selected_cpu_name, opt->name);
 	ARM_MERGE_FEATURE_SETS (cpu_variant, *mcpu_cpu_opt, *mfpu_opt);
+	*input_line_pointer = saved_char;
+	demand_empty_rest_of_line ();
+	return;
+      }
+
+  as_bad (_("unknown architecture `%s'\n"), name);
+  *input_line_pointer = saved_char;
+  ignore_rest_of_line ();
+}
+
+
+/* Parse a .object_arch directive.  */
+
+static void
+s_arm_object_arch (int ignored ATTRIBUTE_UNUSED)
+{
+  const struct arm_arch_option_table *opt;
+  char saved_char;
+  char *name;
+
+  name = input_line_pointer;
+  while (*input_line_pointer && !ISSPACE(*input_line_pointer))
+    input_line_pointer++;
+  saved_char = *input_line_pointer;
+  *input_line_pointer = 0;
+
+  /* Skip the first "all" entry.  */
+  for (opt = arm_archs + 1; opt->name != NULL; opt++)
+    if (streq (opt->name, name))
+      {
+	object_arch = &opt->value;
 	*input_line_pointer = saved_char;
 	demand_empty_rest_of_line ();
 	return;

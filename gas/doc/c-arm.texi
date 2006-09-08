@@ -612,6 +612,12 @@ for the @option{-mcpu} commandline option.
 Select the target architecture.  Valid values for @var{name} are the same as
 for the @option{-march} commandline option.
 
+@cindex @code{.object_arch} directive, ARM
+@item .object_arch @var{name}
+Override the architecture recorded in the EABI object attribute section.
+Valid values for @var{name} are the same as for the @code{.arch} directive.
+Typically this is useful when code uses runtime detection of CPU features.
+
 @cindex @code{.fpu} directive, ARM
 @item .fpu @var{name}
 Select the floating point unit to assemble for.  Valid values for @var{name}
