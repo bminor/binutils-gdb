@@ -1,3 +1,7 @@
+2006-09-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld.texinfo: Document --dynamic-list-cpp-typeinfo.
+
 2006-09-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (CXX): Set to g++.

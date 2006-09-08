@@ -1143,6 +1143,10 @@ which support shared libraries.
 The format of the dynamic list is the same as the version node without
 scope and node name.  See @ref{VERSION} for more information.
 
+@kindex --dynamic-list-cpp-typeinfo
+@item --dynamic-list-cpp-typeinfo
+Provide the builtin dynamic list for C++ runtime type identification.
+
 @kindex --check-sections
 @kindex --no-check-sections
 @item --check-sections
