@@ -9385,14 +9385,12 @@ elf32_arm_swap_symbol_out (bfd *abfd,
              linker will simulate the work of dynamic linker of resolving
              symbols and will carry over the thumbness of found symbols to
              the output symbol table. It's not clear how it happens, but
-             the thumbness of underfined symbols can well be different at
+             the thumbness of undefined symbols can well be different at
              runtime, and writing '1' for them will be confusing for users
              and possibly for dynamic linker itself.
           */
           newsym.st_value |= 1;
         }
-
-      newsym.st_value |= 1;
       
       src = &newsym;
     }

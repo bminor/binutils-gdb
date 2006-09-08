@@ -1,3 +1,10 @@
+2006-09-08  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_swap_symbol_out): Remove
+	unconditional setting of low bit for Thumb symbol
+	mistakenly left behind after check for external
+	symbols was added.  Fix comment typo.
+
 2006-09-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-bfd.h (elf_link_hash_entry): Add a dynamic field.
