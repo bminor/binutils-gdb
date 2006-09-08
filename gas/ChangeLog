@@ -1,3 +1,9 @@
+2006-09-08  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/3129
+	* doc/as.texinfo (Macro): Improve documentation about separating
+	macro arguments from following text.
+
 2006-09-08  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (insns): Allow ARM IT pseudo-insn on all cores.
