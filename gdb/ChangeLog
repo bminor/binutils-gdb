@@ -1,3 +1,8 @@
+2006-09-10  Andreas Schwab  <schwab@suse.de>
+
+	* m68k-tdep.c (m68k_analyze_register_saves): Fix decoding of
+	`move.l %R,-(%sp)'.
+
 2006-09-07  Vladimir Prus  <vladimir@codesourcery.com>
 
         * mi/mi-cmd-stack.c (mi_cmd_stack_list_frames): Don't emit 

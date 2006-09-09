@@ -1,7 +1,7 @@
 /* Target-dependent code for the Motorola 68000 series.
 
    Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -677,10 +677,10 @@ m68k_analyze_register_saves (CORE_ADDR pc, CORE_ADDR current_pc,
 	      else
 		break;
 	    }
-	  else if ((op & 0170677) == P_MOVEL_SP)
+	  else if ((op & 0177760) == P_MOVEL_SP)
 	    {
 	      /* move.l %R,-(%sp) */
-	      regno = ((op & 07000) >> 9) | ((op & 0100) >> 3);
+	      regno = op & 017;
 	      cache->saved_regs[regno] = offset;
 	      offset -= 4;
 	      pc += 2;
