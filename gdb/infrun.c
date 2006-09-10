@@ -1411,6 +1411,12 @@ handle_inferior_event (struct execution_control_state *ecs)
       pending_follow.fork_event.parent_pid = PIDGET (ecs->ptid);
       pending_follow.fork_event.child_pid = ecs->ws.value.related_pid;
 
+      if (!ptid_equal (ecs->ptid, inferior_ptid))
+	{
+	  context_switch (ecs);
+	  flush_cached_frames ();
+	}
+
       stop_pc = read_pc ();
 
       stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid, 0);
@@ -1468,6 +1474,12 @@ handle_inferior_event (struct execution_control_state *ecs)
 
       ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
       inferior_ptid = ecs->saved_inferior_ptid;
+
+      if (!ptid_equal (ecs->ptid, inferior_ptid))
+	{
+	  context_switch (ecs);
+	  flush_cached_frames ();
+	}
 
       /* If no catchpoint triggered for this, then keep going.  */
       if (ecs->random_signal)

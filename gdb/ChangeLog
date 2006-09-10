@@ -1,5 +1,11 @@
 2006-09-10  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	PR threads/2149
+	* infrun.c (handle_inferior_event): Context switch after fork
+	and exec events.
+
+2006-09-10  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* infcall.c (call_function_by_hand): Check for function pointer
 	types.
 
