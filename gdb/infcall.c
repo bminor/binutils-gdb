@@ -336,6 +336,9 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   struct cleanup *caller_regcache_cleanup;
   struct frame_id dummy_id;
 
+  if (TYPE_CODE (ftype) == TYPE_CODE_PTR)
+    ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
+
   if (!target_has_execution)
     noprocess ();
 
