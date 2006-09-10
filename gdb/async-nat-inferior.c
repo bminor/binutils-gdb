@@ -390,7 +390,7 @@ gdb_process_pending_event (struct gdb_inferior_status *ns,
   //inferior_debug (1, "Processing pending event type: %d\n", event->type);
   gdb_service_event (event->type, (unsigned char *) event->buf, status);
 
-  return pid_to_ptid (gdb_status->pid);
+  return ptid_build (gdb_status->pid, gdb_status->pid, 0);
 }
 
 void
