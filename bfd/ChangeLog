@@ -1,3 +1,9 @@
+2006-09-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/3186
+	* elf.c (_bfd_elf_make_section_from_shdr): Correct length of
+	"gnu.linkonce.wi.".
+
 2006-09-08  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_swap_symbol_out): Remove

@@ -819,7 +819,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 	  { "debug",		 5  },	/* 'd' */
 	  { NULL,		 0  },	/* 'e' */
 	  { NULL,		 0  },	/* 'f' */
-	  { "gnu.linkonce.wi.", 17 },	/* 'g' */
+	  { "gnu.linkonce.wi.", 16 },	/* 'g' */
 	  { NULL,		 0  },	/* 'h' */
 	  { NULL,		 0  },	/* 'i' */
 	  { NULL,		 0  },	/* 'j' */
