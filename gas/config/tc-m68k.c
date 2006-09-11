@@ -180,6 +180,10 @@ static const enum m68k_register mcf5208_ctrl[] = {
   CACR, ACR0, ACR1, VBR, RAMBAR1,
   0
 };
+static const enum m68k_register mcf5210a_ctrl[] = {
+  VBR, CACR, ACR0, ACR1, ROMBAR, RAMBAR, MBAR,
+  0
+};
 static const enum m68k_register mcf5213_ctrl[] = {
   VBR, RAMBAR, FLASHBAR,
   0
@@ -500,6 +504,9 @@ static const struct m68k_cpu m68k_cpus[] =
   
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5208_ctrl, "5207", -1},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5208_ctrl, "5208", 0},
+  
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,	mcf5210a_ctrl, "5210a", 0},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,	mcf5210a_ctrl, "5211a", 1},
   
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,	mcf5213_ctrl, "5211", -1},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,	mcf5213_ctrl, "5212", -1},
