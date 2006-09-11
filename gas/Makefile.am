@@ -459,7 +459,7 @@ BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
 INCDIR = $(BASEDIR)/include
 
-REPORT_BUGS_TO_s := "\"@REPORT_BUGS_TO@\""
+REPORT_BUGS_TO = `test -z "@REPORT_BUGS_TO@" || echo "-DREPORT_BUGS_TO=\"@REPORT_BUGS_TO@\""`
 
 # This is the variable actually used when we compile.
 # Specify the directories to be searched for header files.
@@ -468,7 +468,7 @@ REPORT_BUGS_TO_s := "\"@REPORT_BUGS_TO@\""
 # subdirectory rather than in the source directory.
 INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(srcdir)/config \
 	-I$(INCDIR) -I$(srcdir)/.. -I$(BFDDIR) -I$(srcdir)/../intl -I../intl \
-	-DREPORT_BUGS_TO=$(REPORT_BUGS_TO_s) \
+	$(REPORT_BUGS_TO) \
 	-DLOCALEDIR="\"$(datadir)/locale\""
 
 # This should be parallel to INCLUDES, but should replace $(srcdir)
@@ -477,7 +477,7 @@ INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(srcdir)/config \
 # in a subdirectory.
 DEP_INCLUDES = -D_GNU_SOURCE -I.. -I$${srcdir} -I../../bfd -I$${srcdir}/config \
 	-I$${srcdir}/../include -I$${srcdir}/.. -I$${srcdir}/../bfd -I$${srcdir}/../intl -I../../intl  \
-	-DREPORT_BUGS_TO=$(REPORT_BUGS_TO_s) \
+	$(REPORT_BUGS_TO) \
 	-DLOCALEDIR="\"$(datadir)/locale\""
 
 DEP_FLAGS = -DOBJ_MAYBE_ELF \

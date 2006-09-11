@@ -16,13 +16,12 @@ AM_CFLAGS = $(WARN_CFLAGS)
 
 MKDEP = gcc -MM
 
-VERSUFFIX_s := "\"@VERSUFFIX@\""
-REPORT_BUGS_TO_s := "\"@REPORT_BUGS_TO@\""
+REPORT_BUGS_TO = `test -z "@REPORT_BUGS_TO"" || echo "-DREPORT_BUGS_TO=\"@REPORT_BUGS_TO@\""`
 
 INCLUDES = -D_GNU_SOURCE -DDEBUG -I../bfd -I$(srcdir)/../include \
 	-I$(srcdir)/../bfd -I$(srcdir)/../intl -I../intl -I.  \
 	-DVERSUFFIX=$(VERSUFFIX_s) \
-	-DREPORT_BUGS_TO=$(REPORT_BUGS_TO_s) \
+	$(REPORT_BUGS_TO) \
 	-DLOCALEDIR="\"$(datadir)/locale\""
 
 bin_PROGRAMS = gprof

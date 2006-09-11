@@ -72,14 +72,14 @@ INCDIR	= $(BASEDIR)/include
 
 MKDEP = gcc -MM
 
-REPORT_BUGS_TO_s := "\"@REPORT_BUGS_TO@\""
+REPORT_BUGS_TO = `test -z "@REPORT_BUGS_TO@" || echo "-DREPORT_BUGS_TO=\"@REPORT_BUGS_TO@\""`
 
 INCLUDES = -D_GNU_SOURCE \
 	 -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
 	 @HDEFINES@ \
 	 -I$(srcdir)/../intl -I../intl \
 	 -DLOCALEDIR="\"$(datadir)/locale\"" \
-	 -DREPORT_BUGS_TO=$(REPORT_BUGS_TO_s) \
+	 $(REPORT_BUGS_TO) \
 	 -Dbin_dummy_emulation=$(EMULATION_VECTOR)
 
 HFILES = \
@@ -121,7 +121,7 @@ LIBIBERTY = ../libiberty/libiberty.a
 .PHONY: install-html install-html-am install-html-recursive
 
 install-html:	install-html-recursive	
-	
+
 install-html-recursive:
 	@failcom='exit 1'; \
 	for f in x $$MAKEFLAGS; do \
