@@ -1,6 +1,6 @@
 /* This file is tc-arm.h
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004 Free Software Foundation, Inc.
+   2004, 2005, 2006 Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
 
@@ -183,7 +183,7 @@ extern void arm_md_end (void);
 #define DWARF2_DEFAULT_RETURN_COLUMN  14
 
 /* Registers are generally saved at negative offsets to the CFA.  */
-#define DWARF2_CIE_DATA_ALIGNMENT     -4
+#define DWARF2_CIE_DATA_ALIGNMENT     (-4)
 
 #ifdef OBJ_ELF
 # define obj_frob_symbol(sym, punt)	armelf_frob_symbol ((sym), & (punt))

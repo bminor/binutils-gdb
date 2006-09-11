@@ -1,3 +1,11 @@
+2006-09-11  Alan Modra  <amodra@bigpond.net.au>
+
+	PR gas/3165
+	* config/tc-mips.h (enum dwarf2_format): Forward declare.
+	(DWARF2_CIE_DATA_ALIGNMENT): Wrap negative number in parens.
+	* config/tc-alpha.h (DWARF2_CIE_DATA_ALIGNMENT): Likewise.
+	* config/tc-arm.h (DWARF2_CIE_DATA_ALIGNMENT): Likewise.
+
 2006-09-08  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/3129

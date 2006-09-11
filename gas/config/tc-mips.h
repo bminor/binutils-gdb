@@ -1,6 +1,6 @@
 /* tc-mips.h -- header file for tc-mips.c.
-   Copyright 1993, 1994, 1995, 1996, 1997, 2000, 2001, 2002, 2003, 2004
-   Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997, 2000, 2001, 2002, 2003, 2004,
+   2005, 2006 Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
    Modified for ECOFF support by Ian Lance Taylor of Cygnus Support.
@@ -152,6 +152,7 @@ extern void mips_emit_delays (void);
 extern void mips_enable_auto_align (void);
 #define md_elf_section_change_hook()	mips_enable_auto_align()
 
+enum dwarf2_format;
 extern enum dwarf2_format mips_dwarf2_format (void);
 #define DWARF2_FORMAT() mips_dwarf2_format ()
 
@@ -167,6 +168,6 @@ extern void mips_cfi_frame_initial_instructions (void);
 extern int tc_mips_regname_to_dw2regnum (char *regname);
 
 #define DWARF2_DEFAULT_RETURN_COLUMN 31
-#define DWARF2_CIE_DATA_ALIGNMENT -4
+#define DWARF2_CIE_DATA_ALIGNMENT (-4)
 
 #endif /* TC_MIPS */
