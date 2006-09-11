@@ -1,3 +1,9 @@
+2006-09-11  Tomas Frydrych  <dr.tomas@yahoo.co.uk>
+
+	PR gas/3172
+	* config/tc-arm.c (parse_typed_reg_or_scalar): Accept wCg class
+	registers as a sub-class of wC registers.
+
 2006-09-11  Alan Modra  <amodra@bigpond.net.au>
 
 	PR gas/3165

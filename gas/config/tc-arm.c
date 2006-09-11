@@ -1261,7 +1261,9 @@ parse_typed_reg_or_scalar (char **ccp, enum arm_reg_type type,
           && (reg->type == REG_TYPE_VFS || reg->type == REG_TYPE_VFD))
       || (type == REG_TYPE_NSDQ
           && (reg->type == REG_TYPE_VFS || reg->type == REG_TYPE_VFD
-              || reg->type == REG_TYPE_NQ)))
+              || reg->type == REG_TYPE_NQ))
+      || (type == REG_TYPE_MMXWC
+	  && (reg->type == REG_TYPE_MMXWCG)))
     type = reg->type;
 
   if (type != reg->type)
