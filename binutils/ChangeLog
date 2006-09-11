@@ -1,3 +1,13 @@
+2006-09-09  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/3110
+	* objcopy.c (copy_archive): Add new parameter:
+	force_output_target.  If not true, then perserve the file formats
+	of each copied archive element, otherwise force them to be one
+	specific file format.
+	(copy_file): Compute force_output_target parameter to pass to
+	copy_archive. 
+
 2006-09-05  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/3166

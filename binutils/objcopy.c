@@ -1730,10 +1730,14 @@ copy_object (bfd *ibfd, bfd *obfd)
 #endif
 
 /* Read each archive element in turn from IBFD, copy the
-   contents to temp file, and keep the temp file handle.  */
+   contents to temp file, and keep the temp file handle.
+   If 'force_output_target' is TRUE then make sure that
+   all elements in the new archive are of the type
+   'output_target'.  */
 
 static void
-copy_archive (bfd *ibfd, bfd *obfd, const char *output_target)
+copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
+	      bfd_boolean force_output_target)
 {
   struct name_list
     {
@@ -1789,7 +1793,6 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target)
 				bfd_get_filename (this_element), (char *) 0);
 	}
 
-      output_bfd = bfd_openw (output_name, output_target);
       if (preserve_dates)
 	{
 	  stat_status = bfd_stat_arch_elt (this_element, &buf);
@@ -1805,11 +1808,18 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target)
       l->obfd = NULL;
       list = l;
 
-      if (output_bfd == NULL)
-	RETURN_NONFATAL (output_name);
-
       if (bfd_check_format (this_element, bfd_object))
 	{
+	  /* PR binutils/3110: Cope with archives
+	     containing multiple target types.  */
+	  if (force_output_target)
+	    output_bfd = bfd_openw (output_name, output_target);
+	  else
+	    output_bfd = bfd_openw (output_name, bfd_get_target (this_element));
+
+	  if (output_bfd == NULL)
+	    RETURN_NONFATAL (output_name);
+
 	  delete = ! copy_object (this_element, output_bfd);
 
 	  if (! delete
@@ -1830,6 +1840,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target)
 	  non_fatal (_("Unable to recognise the format of the input file `%s'"),
 		     bfd_get_archive_filename (this_element));
 
+	  output_bfd = bfd_openw (output_name, output_target);
 copy_unknown_element:
 	  delete = !copy_unknown_object (this_element, output_bfd);
 	  if (!bfd_close_all_done (output_bfd))
@@ -1911,18 +1922,24 @@ copy_file (const char *input_filename, const char *output_filename,
 
   if (bfd_check_format (ibfd, bfd_archive))
     {
+      bfd_boolean force_output_target;
       bfd *obfd;
 
       /* bfd_get_target does not return the correct value until
          bfd_check_format succeeds.  */
       if (output_target == NULL)
-	output_target = bfd_get_target (ibfd);
+	{
+	  output_target = bfd_get_target (ibfd);
+	  force_output_target = FALSE;
+	}
+      else
+	force_output_target = TRUE;
 
       obfd = bfd_openw (output_filename, output_target);
       if (obfd == NULL)
 	RETURN_NONFATAL (output_filename);
 
-      copy_archive (ibfd, obfd, output_target);
+      copy_archive (ibfd, obfd, output_target, force_output_target);
     }
   else if (bfd_check_format_matches (ibfd, bfd_object, &obj_matching))
     {
