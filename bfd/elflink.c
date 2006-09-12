@@ -7061,8 +7061,6 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
   if (h->dynindx != -1
       && elf_hash_table (finfo->info)->dynamic_sections_created)
     {
-      size_t bucketcount;
-      size_t bucket;
       bfd_byte *esym;
 
       sym.st_name = h->dynstr_index;
@@ -7074,14 +7072,16 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
 	}
       bed->s->swap_symbol_out (finfo->output_bfd, &sym, esym, 0);
 
-      bucketcount = elf_hash_table (finfo->info)->bucketcount;
-      bucket = h->u.elf_hash_value % bucketcount;
-
       if (finfo->hash_sec != NULL)
 	{
 	  size_t hash_entry_size;
 	  bfd_byte *bucketpos;
 	  bfd_vma chain;
+	  size_t bucketcount;
+	  size_t bucket;
+
+	  bucketcount = elf_hash_table (finfo->info)->bucketcount;
+	  bucket = h->u.elf_hash_value % bucketcount;
 
 	  hash_entry_size
 	    = elf_section_data (finfo->hash_sec)->this_hdr.sh_entsize;

@@ -1,3 +1,8 @@
+2006-09-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/3197
+	* ld-elf/hash.d: New test.
+
 2006-09-04  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* ld-arm/use-thumb-lib.sym: Use regexps instead of

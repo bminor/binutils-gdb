@@ -1,3 +1,9 @@
+2006-09-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/3197
+	* elflink.c (elf_link_output_extsym): Compute bucket only if
+	needed.
+
 2006-09-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/3186
