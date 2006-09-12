@@ -1,3 +1,8 @@
+2006-09-12  Nick Roberts  <nickrob@snap.net.nz>
+
+	* cli/cli-interp.c (cli_interpreter_exec): Revert to version in
+	mainline but return exception_none.
+
 2006-09-11  Nick Roberts  <nickrob@snap.net.nz>
 
 	* async-nat-inferior.c (gdb_process_pending_event): Include lwp no
