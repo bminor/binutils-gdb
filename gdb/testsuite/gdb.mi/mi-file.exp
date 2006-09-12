@@ -75,7 +75,7 @@ proc test_file_list_exec_source_files {} {
 
     # get the path and absolute path to the current executable
     mi_gdb_test "222-file-list-exec-source-files" \
-	    "222\\\^done,files=\\\[\{file=\".*/${srcfile}\",fullname=\"$fullname_syntax${srcfile}\"\},\{file=\".*\"\},\{file=\".*\"\},\{file=\".*\"\},\{file=\".*\"\}\\\]" \
+	    "222\\\^done,files=\\\[\{file=\".*/${srcfile}\",fullname=\"$fullname_syntax${srcfile}\"\}.*]" \
               "Getting a list of source files."
 }
 
