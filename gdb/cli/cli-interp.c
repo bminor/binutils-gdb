@@ -97,24 +97,22 @@ cli_interpreter_display_prompt_p (void *data)
 static struct gdb_exception
 cli_interpreter_exec (void *data, const char *command_str)
 {
-  struct gdb_exception result;
+  struct ui_file *old_stream;
 
   /* FIXME: cagney/2003-02-01: Need to const char *propogate
      safe_execute_command.  */
   char *str = strcpy (alloca (strlen (command_str) + 1), command_str);
 
-  /* We don't need old_stream because we actually change the
-     interpreters when we do interpreter exec, then swap them back.
-     This code assumes that the interpreter is still the one that is
-     exec'ing in the cli interpreter, and we are just faking it up.  */
-  /* We want 
-     the person who set the interpreter to get the uiout right for that
-     according to their lights.  If you don't do that, then you can't share
-     the cli_interpreter_exec between the console-unquoted & console 
-     interpreters.  */
-  result = safe_execute_command (uiout, str, 1);
+  /* gdb_stdout could change between the time cli_uiout was initialized
+     and now. Since we're probably using a different interpreter which has
+     a new ui_file for gdb_stdout, use that one instead of the default.
 
-  return result;
+     It is important that it gets reset everytime, since the user could
+     set gdb to use a different interpreter.  */
+  old_stream = cli_out_set_stream (cli_uiout, gdb_stdout);
+  safe_execute_command (cli_uiout, str, 1);
+  cli_out_set_stream (cli_uiout, old_stream);
+  return exception_none;
 }
 
 static void
