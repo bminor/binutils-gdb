@@ -1,3 +1,8 @@
+2006-09-13  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.mi/mi-file.exp (test_file_list_exec_source_files): Just
+ 	check for one file.
+
 2006-09-07  Vladimir Prus  <ghost@vladimir@codesourcery.com>
 
 	* gdb.mi/mi-stack.exp (test_stack_frame_listing): Test that
