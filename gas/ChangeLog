@@ -1,3 +1,10 @@
+2006-09-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* input-file.c (input_file_open): Replace as_perror with as_bad
+	so that gas exits with error on file errors.  Correct error
+	message.
+	(input_file_get, input_file_give_next_buffer): Likewise.
+
 2006-09-11  Tomas Frydrych  <dr.tomas@yahoo.co.uk>
 
 	PR gas/3172

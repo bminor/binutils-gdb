@@ -140,8 +140,8 @@ input_file_open (char *filename, /* "" means use stdin. Must not be 0.  */
 
   if (f_in == NULL)
     {
-      bfd_set_error (bfd_error_system_call);
-      as_perror (_("Can't open %s for reading"), file_name);
+      as_bad (_("can't open %s for reading: %s"),
+	      file_name, xstrerror (errno));
       return;
     }
 
@@ -149,8 +149,8 @@ input_file_open (char *filename, /* "" means use stdin. Must not be 0.  */
 
   if (ferror (f_in))
     {
-      bfd_set_error (bfd_error_system_call);
-      as_perror (_("Can't open %s for reading"), file_name);
+      as_bad (_("can't read from %s: %s"),
+	      file_name, xstrerror (errno));
 
       fclose (f_in);
       f_in = NULL;
@@ -212,8 +212,7 @@ input_file_get (char *buf, int buflen)
   size = fread (buf, sizeof (char), buflen, f_in);
   if (size < 0)
     {
-      bfd_set_error (bfd_error_system_call);
-      as_perror (_("Can't read from %s"), file_name);
+      as_bad (_("can't read from %s: %s"), file_name, xstrerror (errno));
       size = 0;
     }
   return size;
@@ -239,8 +238,7 @@ input_file_give_next_buffer (char *where /* Where to place 1st character of new 
     size = fread (where, sizeof (char), BUFFER_SIZE, f_in);
   if (size < 0)
     {
-      bfd_set_error (bfd_error_system_call);
-      as_perror (_("Can't read from %s"), file_name);
+      as_bad (_("can't read from %s: %s"), file_name, xstrerror (errno));
       size = 0;
     }
   if (size)
@@ -248,10 +246,8 @@ input_file_give_next_buffer (char *where /* Where to place 1st character of new 
   else
     {
       if (fclose (f_in))
-	{
-	  bfd_set_error (bfd_error_system_call);
-	  as_perror (_("Can't close %s"), file_name);
-	}
+	as_bad (_("can't close %s: %s"), file_name, xstrerror (errno));
+
       f_in = (FILE *) 0;
       return_value = 0;
     }
