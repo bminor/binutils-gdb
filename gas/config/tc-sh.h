@@ -1,6 +1,6 @@
 /* This file is tc-sh.h
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -232,6 +232,6 @@ extern int sh_regname_to_dw2regnum (char *regname);
 /* All SH instructions are multiples of 16 bits.  */
 #define DWARF2_LINE_MIN_INSN_LENGTH 2
 #define DWARF2_DEFAULT_RETURN_COLUMN 17
-#define DWARF2_CIE_DATA_ALIGNMENT -4
+#define DWARF2_CIE_DATA_ALIGNMENT (-4)
 
 #endif /* OBJ_ELF */

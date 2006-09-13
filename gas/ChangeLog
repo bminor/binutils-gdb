@@ -1,5 +1,11 @@
 2006-09-13  Alan Modra  <amodra@bigpond.net.au>
 
+	PR gas/3165
+	* config/tc-sh (DWARF2_CIE_DATA_ALIGNMENT): Wrap negative number
+	in parens.
+
+2006-09-13  Alan Modra  <amodra@bigpond.net.au>
+
 	* input-file.c (input_file_open): Replace as_perror with as_bad
 	so that gas exits with error on file errors.  Correct error
 	message.
