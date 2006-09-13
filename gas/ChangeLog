@@ -4,6 +4,7 @@
 	so that gas exits with error on file errors.  Correct error
 	message.
 	(input_file_get, input_file_give_next_buffer): Likewise.
+	* input-file.h: Update comment.
 
 2006-09-11  Tomas Frydrych  <dr.tomas@yahoo.co.uk>
 
