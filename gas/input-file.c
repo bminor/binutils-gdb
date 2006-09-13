@@ -246,7 +246,7 @@ input_file_give_next_buffer (char *where /* Where to place 1st character of new 
   else
     {
       if (fclose (f_in))
-	as_bad (_("can't close %s: %s"), file_name, xstrerror (errno));
+	as_warn (_("can't close %s: %s"), file_name, xstrerror (errno));
 
       f_in = (FILE *) 0;
       return_value = 0;
