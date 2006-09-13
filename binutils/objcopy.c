@@ -1325,6 +1325,21 @@ copy_object (bfd *ibfd, bfd *obfd)
   isympp = NULL;
   osympp = NULL;
 
+  symsize = bfd_get_symtab_upper_bound (ibfd);
+  if (symsize < 0)
+    {
+      bfd_nonfatal (bfd_get_archive_filename (ibfd));
+      return FALSE;
+    }
+
+  osympp = isympp = xmalloc (symsize);
+  symcount = bfd_canonicalize_symtab (ibfd, isympp);
+  if (symcount < 0)
+    {
+      bfd_nonfatal (bfd_get_filename (ibfd));
+      return FALSE;
+    }
+
   /* BFD mandates that all output sections be created and sizes set before
      any output is done.  Thus, we traverse all sections multiple times.  */
   bfd_map_over_sections (ibfd, setup_section, obfd);
@@ -1544,21 +1559,6 @@ copy_object (bfd *ibfd, bfd *obfd)
   /* Symbol filtering must happen after the output sections
      have been created, but before their contents are set.  */
   dhandle = NULL;
-  symsize = bfd_get_symtab_upper_bound (ibfd);
-  if (symsize < 0)
-    {
-      bfd_nonfatal (bfd_get_archive_filename (ibfd));
-      return FALSE;
-    }
-
-  osympp = isympp = xmalloc (symsize);
-  symcount = bfd_canonicalize_symtab (ibfd, isympp);
-  if (symcount < 0)
-    {
-      bfd_nonfatal (bfd_get_filename (ibfd));
-      return FALSE;
-    }
-
   if (convert_debugging)
     dhandle = read_debugging_info (ibfd, isympp, symcount);
 
@@ -2213,6 +2213,22 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
     {
       err = _("private data");
       goto loser;
+    }
+  else if ((isection->flags & SEC_GROUP) != 0
+	   && bfd_get_flavour (ibfd) == bfd_target_elf_flavour)
+    {
+      Elf_Internal_Shdr *ghdr;
+
+      ghdr = &elf_section_data (isection)->this_hdr;
+      if (ghdr->sh_link < elf_numsections (ibfd))
+	{
+	  const struct elf_backend_data *bed = get_elf_backend_data (ibfd);
+	  Elf_Internal_Shdr *symhdr = elf_elfsections (ibfd) [ghdr->sh_link];
+
+	  if (symhdr->sh_type == SHT_SYMTAB
+	      && ghdr->sh_info < symhdr->sh_size / bed->s->sizeof_sym)
+	    isympp[ghdr->sh_info]->flags |= BSF_KEEP;
+	}
     }
 
   /* All went well.  */

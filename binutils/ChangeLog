@@ -1,3 +1,9 @@
+2006-09-14  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 3182
+	* objcopy.c (copy_object): Load symbols earlier.
+	(setup_section): Mark group signature symbols with BSF_KEEP.
+
 2006-09-09  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/3110
