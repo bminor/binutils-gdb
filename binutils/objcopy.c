@@ -785,6 +785,30 @@ is_specified_symbol (const char *name, struct symlist *list)
   return FALSE;
 }
 
+/* Return a pointer to the symbol used as a signature for GROUP.  */
+
+static asymbol *
+group_signature (asection *group)
+{
+  bfd *abfd = group->owner;
+  Elf_Internal_Shdr *ghdr;
+
+  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
+    return NULL;
+
+  ghdr = &elf_section_data (group)->this_hdr;
+  if (ghdr->sh_link < elf_numsections (abfd))
+    {
+      const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+      Elf_Internal_Shdr *symhdr = elf_elfsections (abfd) [ghdr->sh_link];
+
+      if (symhdr->sh_type == SHT_SYMTAB
+	  && ghdr->sh_info < symhdr->sh_size / bed->s->sizeof_sym)
+	return isympp[ghdr->sh_info];
+    }
+  return NULL;
+}
+
 /* See if a section is being removed.  */
 
 static bfd_boolean
@@ -815,12 +839,30 @@ is_strip_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 	return FALSE;
     }
 
-  /* PR binutils/3166
-     Group sections look like debugging sections but they are not.
-     (They have a non-zero size but they are not ALLOCated).  */
-  if ((bfd_get_section_flags (abfd, sec) & SEC_GROUP) != 0
-      && strip_symbols == STRIP_NONDEBUG)
-    return TRUE;
+  if ((bfd_get_section_flags (abfd, sec) & SEC_GROUP) != 0)
+    {
+      asymbol *gsym;
+      const char *gname;
+
+      /* PR binutils/3166
+	 Group sections look like debugging sections but they are not.
+	 (They have a non-zero size but they are not ALLOCated).  */
+      if (strip_symbols == STRIP_NONDEBUG)
+	return TRUE;
+
+      /* PR binutils/3181
+	 If we are going to strip the group signature symbol, then
+	 strip the group section too.  */
+      gsym = group_signature (sec);
+      if (gsym != NULL)
+	gname = gsym->name;
+      else
+	gname = sec->name;
+      if ((strip_symbols == STRIP_ALL
+	   && !is_specified_symbol (gname, keep_specific_list))
+	  || is_specified_symbol (gname, strip_specific_list))
+	return TRUE;
+    }
 
   return FALSE;
 }
@@ -2214,21 +2256,12 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
       err = _("private data");
       goto loser;
     }
-  else if ((isection->flags & SEC_GROUP) != 0
-	   && bfd_get_flavour (ibfd) == bfd_target_elf_flavour)
+  else if ((isection->flags & SEC_GROUP) != 0)
     {
-      Elf_Internal_Shdr *ghdr;
+      asymbol *gsym = group_signature (isection);
 
-      ghdr = &elf_section_data (isection)->this_hdr;
-      if (ghdr->sh_link < elf_numsections (ibfd))
-	{
-	  const struct elf_backend_data *bed = get_elf_backend_data (ibfd);
-	  Elf_Internal_Shdr *symhdr = elf_elfsections (ibfd) [ghdr->sh_link];
-
-	  if (symhdr->sh_type == SHT_SYMTAB
-	      && ghdr->sh_info < symhdr->sh_size / bed->s->sizeof_sym)
-	    isympp[ghdr->sh_info]->flags |= BSF_KEEP;
-	}
+      if (gsym != NULL)
+	gsym->flags |= BSF_KEEP;
     }
 
   /* All went well.  */

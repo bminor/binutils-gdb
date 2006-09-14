@@ -6012,6 +6012,8 @@ _bfd_elf_copy_private_section_data (bfd *ibfd,
 bfd_boolean
 _bfd_elf_copy_private_header_data (bfd *ibfd, bfd *obfd)
 {
+  asection *isec;
+
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return TRUE;
@@ -6026,6 +6028,27 @@ _bfd_elf_copy_private_header_data (bfd *ibfd, bfd *obfd)
       if (! copy_private_bfd_data (ibfd, obfd))
 	return FALSE;
     }
+
+  /* _bfd_elf_copy_private_section_data copied over the SHF_GROUP flag
+     but this might be wrong if we deleted the group section.  */
+  for (isec = ibfd->sections; isec != NULL; isec = isec->next)
+    if (elf_section_type (isec) == SHT_GROUP
+	&& isec->output_section == NULL)
+      {
+	asection *first = elf_next_in_group (isec);
+	asection *s = first;
+	while (s != NULL)
+	  {
+	    if (s->output_section != NULL)
+	      {
+		elf_section_flags (s->output_section) &= ~SHF_GROUP;
+		elf_group_name (s->output_section) = NULL;
+	      }
+	    s = elf_next_in_group (s);
+	    if (s == first)
+	      break;
+	  }
+      }
 
   return TRUE;
 }

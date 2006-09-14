@@ -1,6 +1,14 @@
 2006-09-14  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 3182
+	* objcopy.c (group_signature): New function, split out from..
+	(setup_section): ..here.
+	(is_strip_section): Return true for SHT_GROUP sections that are
+	going to lose their group signature symbol.
+
+2006-09-14  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 3182
 	* objcopy.c (copy_object): Load symbols earlier.
 	(setup_section): Mark group signature symbols with BSF_KEEP.
 
