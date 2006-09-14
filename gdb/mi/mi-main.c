@@ -1320,7 +1320,7 @@ mi_cmd_execute (struct mi_parse *parse)
 
       if (target_executing)
 	{
-	  if (!previous_command_token)
+	  if (!previous_command_token && current_command_token)
 	    previous_command_token = xstrdup (current_command_token);
 	  if (strcmp (parse->command, "exec-interrupt"))
 	    {
@@ -1387,7 +1387,6 @@ mi_execute_cli_command (const char *cmd, int args_p, const char *args)
       return;
     }
 }
-
 
 enum mi_cmd_result
 mi_execute_async_cli_command (char *mi, char *args, int from_tty)
@@ -1662,6 +1661,14 @@ _initialize_mi_main (void)
 }
 
 int mi_dont_register_continuation = 0;
+
+void
+mi_interpreter_exec_bp_cmd (char *command, char **argv, int argc)
+{
+  mi_dont_register_continuation = 1;
+  mi_cmd_interpreter_exec (command, argv, argc);
+  mi_dont_register_continuation = 0;
+}
 
 /* mi_setup_continuation_arg - sets up a continuation structure
    with the timer info and the command token, for use with
