@@ -48,6 +48,7 @@
 #include "gdbthread.h"		/* for struct thread_info etc. */
 #include "gdb_stat.h"		/* for struct stat */
 #include <fcntl.h>		/* for O_RDONLY */
+#include "inf-loop.h"
 #include "async-nat-inferior.h"
 
 #ifndef O_LARGEFILE
@@ -1005,19 +1006,20 @@ linux_nat_attach (char *args, int from_tty)
      attach all of them.  */
   linux_ops->to_attach (args, from_tty);
 
+  /* Add the initial process as the first LWP to the list.  */
+  inferior_ptid = BUILD_LWP (GET_PID (inferior_ptid), GET_PID (inferior_ptid));
+  lp = add_lwp (inferior_ptid);
+
   if (!target_can_async_p ())
     {
-      /* Add the initial process as the first LWP to the list.  */
-      inferior_ptid = BUILD_LWP (GET_PID (inferior_ptid), GET_PID (inferior_ptid));
-      lp = add_lwp (inferior_ptid);
-
       /* Make sure the initial process is stopped.  The user-level threads
 	 layer might want to poke around in the inferior, and that won't
 	 work if things haven't stabilized yet.  */
       pid = my_waitpid (GET_PID (inferior_ptid), &status, 0);
       if (pid == -1 && errno == ECHILD)
 	{
-	  warning (_("%s is a cloned process"), target_pid_to_str (inferior_ptid));
+	  warning (_("%s is a cloned process"),
+		   target_pid_to_str (inferior_ptid));
 
 	  /* Try again with __WCLONE to check cloned processes.  */
 	  pid = my_waitpid (GET_PID (inferior_ptid), &status, __WCLONE);
@@ -1162,6 +1164,7 @@ resume_set_callback (struct lwp_info *lp, void *data)
 static void
 linux_nat_resume (ptid_t ptid, int step, enum target_signal signo)
 {
+  struct target_waitstatus status;
   struct lwp_info *lp;
   int resume_all;
 
@@ -1251,6 +1254,26 @@ linux_nat_resume (ptid_t ptid, int step, enum target_signal signo)
     iterate_over_lwps (resume_callback, NULL);
 
   linux_ops->to_resume (ptid, step, signo);
+
+  if (target_can_async_p ())
+    {
+      status.kind = TARGET_WAITKIND_SPURIOUS;
+      gdb_process_events (gdb_status, &status, 0, 0);
+
+      if (gdb_post_pending_event ())
+	{
+	  /* QUESTION: Do I need to lie about target_executing here? */
+	  if (target_is_async_p ())
+	    target_executing = 1;
+	  return;
+	}
+
+      target_async (inferior_event_handler, 0);
+    }
+
+  if (target_is_async_p ())
+    target_executing = 1;
+
   if (debug_linux_nat)
     fprintf_unfiltered (gdb_stdlog,
 			"LLR: %s %s, %s (resume event thread)\n",
