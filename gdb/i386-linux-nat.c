@@ -26,8 +26,6 @@
 #include "regcache.h"
 #include "target.h"
 #include "linux-nat.h"
-#include "inf-loop.h"
-#include "async-nat-inferior.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
@@ -765,8 +763,6 @@ i386_linux_resume (ptid_t ptid, int step, enum target_signal signal)
 
   int request = PTRACE_CONT;
 
-  struct target_waitstatus status;
-
   if (pid == -1)
     /* Resume all threads.  */
     /* I think this only gets used in the non-threaded case, where "resume
@@ -817,23 +813,6 @@ i386_linux_resume (ptid_t ptid, int step, enum target_signal signal)
 
   if (ptrace (request, pid, 0, target_signal_to_host (signal)) == -1)
     perror_with_name (("ptrace"));
-
-  status.kind = TARGET_WAITKIND_SPURIOUS;
-  gdb_process_events (gdb_status, &status, 0, 0);
-
-  if (gdb_post_pending_event ())
-    {
-      /* QUESTION: Do I need to lie about target_executing here? */
-      if (target_is_async_p ())
-        target_executing = 1;
-      return;
-    }
-
-  if (target_can_async_p ())
-    target_async (inferior_event_handler, 0);
-
-  if (target_is_async_p ())
-    target_executing = 1;
 }
 
 static void (*super_post_startup_inferior) (ptid_t ptid);
