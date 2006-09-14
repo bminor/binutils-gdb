@@ -574,8 +574,10 @@ A positive value indicates the function prologue allocated stack space by
 decrementing the stack pointer.
 
 @cindex @code{.movsp} directive, ARM
-@item .movsp @var{reg}
-Tell the unwinder that @var{reg} contains the current stack pointer.
+@item .movsp @var{reg} [, #@var{offset}]
+Tell the unwinder that @var{reg} contains an offset from the current
+stack pointer.  If @var{offset} is not specified then it is assumed to be
+zero.
 
 @cindex @code{.setfp} directive, ARM
 @item .setfp @var{fpreg}, @var{spreg} [, #@var{offset}]
