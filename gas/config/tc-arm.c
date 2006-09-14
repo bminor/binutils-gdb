@@ -3946,13 +3946,13 @@ const pseudo_typeS md_pseudo_table[] =
 
 /* Generic immediate-value read function for use in insn parsing.
    STR points to the beginning of the immediate (the leading #);
-   VAL receives the value; if the value is outside [MIN, MAX]
-   issue an error.  PREFIX_OPT is true if the immediate prefix is
+   VAL receives the value; if the value is outside [MIN, MAX] and BOUNDED is
+   true, it issue an error.  PREFIX_OPT is true if the immediate prefix is
    optional.  */
 
 static int
-parse_immediate (char **str, int *val, int min, int max,
-		 bfd_boolean prefix_opt)
+parse_immediate_maybe_bounded (char **str, int *val, bfd_boolean bounded,
+			       int min, int max, bfd_boolean prefix_opt)
 {
   expressionS exp;
   my_get_expression (&exp, str, prefix_opt ? GE_OPT_PREFIX : GE_IMM_PREFIX);
@@ -3962,7 +3962,7 @@ parse_immediate (char **str, int *val, int min, int max,
       return FAIL;
     }
 
-  if (exp.X_add_number < min || exp.X_add_number > max)
+  if (bounded && (exp.X_add_number < min || exp.X_add_number > max))
     {
       inst.error = _("immediate value out of range");
       return FAIL;
@@ -3970,6 +3970,19 @@ parse_immediate (char **str, int *val, int min, int max,
 
   *val = exp.X_add_number;
   return SUCCESS;
+}
+
+static int
+parse_immediate_bounded (char **str, int *val, int min, int max,
+			 bfd_boolean prefix_opt)
+{
+  return parse_immediate_maybe_bounded (str, val, TRUE, min, max, prefix_opt);
+}
+
+static int
+parse_immediate_unbounded (char **str, int *val, bfd_boolean prefix_opt)
+{
+  return parse_immediate_maybe_bounded (str, val, FALSE, 0, 0, prefix_opt);
 }
 
 /* Less-generic immediate-value read function with the possibility of loading a
@@ -3985,7 +3998,18 @@ parse_big_immediate (char **str, int i)
   my_get_expression (&exp, &ptr, GE_OPT_PREFIX_BIG);
 
   if (exp.X_op == O_constant)
-    inst.operands[i].imm = exp.X_add_number;
+    {
+      inst.operands[i].imm = exp.X_add_number & 0xffffffff;
+      /* If we're on a 64-bit host, then a 64-bit number can be returned using
+	 O_constant.  We have to be careful not to break compilation for
+	 32-bit X_add_number, though.  */
+      if ((exp.X_add_number & ~0xffffffffl) != 0)
+	{
+          /* X >> 32 is illegal if sizeof (exp.X_add_number) == 4.  */
+	  inst.operands[i].reg = ((exp.X_add_number >> 16) >> 16) & 0xffffffff;
+	  inst.operands[i].regisimm = 1;
+	}
+    }
   else if (exp.X_op == O_big
            && LITTLENUM_NUMBER_OF_BITS * exp.X_add_number > 32
            && LITTLENUM_NUMBER_OF_BITS * exp.X_add_number <= 64)
@@ -4703,8 +4727,8 @@ parse_address_main (char **str, int i, int group_relocations,
       if (skip_past_char (&p, '{') == SUCCESS)
 	{
 	  /* [Rn], {expr} - unindexed, with option */
-	  if (parse_immediate (&p, &inst.operands[i].imm,
-			       0, 255, TRUE) == FAIL)
+	  if (parse_immediate_bounded (&p, &inst.operands[i].imm,
+				       0, 255, TRUE) == FAIL)
 	    return PARSE_OPERAND_FAIL;
 
 	  if (skip_past_char (&p, '}') == FAIL)
@@ -4975,7 +4999,7 @@ parse_ror (char **str)
       return FAIL;
     }
 
-  if (parse_immediate (&s, &rot, 0, 24, FALSE) == FAIL)
+  if (parse_immediate_bounded (&s, &rot, 0, 24, FALSE) == FAIL)
     return FAIL;
 
   switch (rot)
@@ -5482,7 +5506,13 @@ parse_operands (char *str, const unsigned char *pattern)
 } while (0)
 
 #define po_imm_or_fail(min, max, popt) do {			\
-  if (parse_immediate (&str, &val, min, max, popt) == FAIL)	\
+  if (parse_immediate_bounded (&str, &val, min, max, popt) == FAIL) \
+    goto failure;						\
+  inst.operands[i].imm = val;					\
+} while (0)
+
+#define po_imm_unb_or_fail(popt) do {				\
+  if (parse_immediate_unbounded (&str, &val, popt) == FAIL)	\
     goto failure;						\
   inst.operands[i].imm = val;					\
 } while (0)
@@ -5582,7 +5612,7 @@ parse_operands (char *str, const unsigned char *pattern)
             break;
             try_imm:
             /* Immediate gets verified properly later, so accept any now.  */
-            po_imm_or_fail (INT_MIN, INT_MAX, TRUE);
+            po_imm_unb_or_fail (TRUE);
           }
           break;
 
@@ -6031,6 +6061,7 @@ parse_operands (char *str, const unsigned char *pattern)
 #undef po_reg_or_fail
 #undef po_reg_or_goto
 #undef po_imm_or_fail
+#undef po_imm_unb_or_fail
 #undef po_scalar_or_fail
 
 /* Shorthand macro for instruction encoding functions issuing errors.  */
