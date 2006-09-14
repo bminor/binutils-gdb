@@ -35,6 +35,9 @@
 #include "cli/cli-script.h"
 #include "gdb_assert.h"
 
+extern void mi_interpreter_exec_bp_cmd (char *command, 
+					char **argv, int argc);
+
 /* Prototypes for local functions */
 
 static enum command_control_type
@@ -365,7 +368,32 @@ execute_control_command (struct command_line *cmd)
       if (!new_line)
 	break;
       make_cleanup (free_current_contents, &new_line);
-      execute_command (new_line, 0);
+
+      /* Control commands are only run when we are doing console
+       interpreter commands (either a breakpoint command, or a
+       while command in the command line.  In the mi interpreter
+       we need to use the mi interpreter-exec command to get all
+       the output right.
+
+       FIXME: Two things - 
+         1) We should have a way of specifying (at least for
+         breakpoint commands) what interpreter they are meant
+         for.
+         2) We should have a generic route to another interpreter
+         command which we can use here, rather than having to 
+         special case interpreters as we do here. */
+
+      if (ui_out_is_mi_like_p (uiout))
+	{
+	  char *argv[2];
+	  int argc = 2;
+	  argv[0] = "console";
+	  argv[1] = new_line;
+	  mi_interpreter_exec_bp_cmd (new_line, argv, argc);
+	}
+      else
+	execute_command (new_line, 0);
+
       ret = cmd->control_type;
       break;
 
