@@ -105,12 +105,6 @@ gdb_signal_thread_destroy (gdb_signal_thread_status *s)
 }
 
 void
-gdb_signal_thread_debug (FILE *f, gdb_signal_thread_status *s)
-{
-  fprintf (f, "                [SIGNAL THREAD]\n");
-}
-
-void
 gdb_signal_thread_debug_status (FILE *f, WAITSTATUS status)
 {
   if (WIFEXITED (status))

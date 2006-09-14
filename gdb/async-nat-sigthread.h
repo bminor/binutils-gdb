@@ -41,8 +41,6 @@ struct gdb_signal_thread_status
 typedef struct gdb_signal_thread_message gdb_signal_thread_message;
 typedef struct gdb_signal_thread_status gdb_signal_thread_status;
 
-void gdb_signal_thread_debug (FILE *f,
-                                 struct gdb_signal_thread_status *s);
 void gdb_signal_thread_debug_status (FILE *f, WAITSTATUS status);
 
 void gdb_signal_thread_init (gdb_signal_thread_status *s);
