@@ -271,10 +271,6 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
      changing the interpreter will clear out all the continuations for
      that interpreter... */
   
-  /* APPLE LOCAL: The FSF version leaves out the 
-     mi_dont_register_continuation.  Maybe this hadn't been added yet when
-     they adopted the code.  */
-  
   if (target_can_async_p () && target_executing
       && !mi_dont_register_continuation)
     {
