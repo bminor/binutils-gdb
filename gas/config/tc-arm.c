@@ -17215,11 +17215,11 @@ negate_data_op (unsigned long * instruction,
 /* Like negate_data_op, but for Thumb-2.   */
 
 static unsigned int
-thumb32_negate_data_op (offsetT *instruction, offsetT value)
+thumb32_negate_data_op (offsetT *instruction, unsigned int value)
 {
   int op, new_inst;
   int rd;
-  offsetT negated, inverted;
+  unsigned int negated, inverted;
 
   negated = encode_thumb32_immediate (-value);
   inverted = encode_thumb32_immediate (~value);
@@ -17280,7 +17280,7 @@ thumb32_negate_data_op (offsetT *instruction, offsetT value)
       return FAIL;
     }
 
-  if (value == FAIL)
+  if (value == (unsigned int)FAIL)
     return FAIL;
 
   *instruction &= T2_OPCODE_MASK;
