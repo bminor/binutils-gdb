@@ -1,3 +1,28 @@
+2006-09-14  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.mi/mi-cli.exp, gdb.mi/mi2-cli.exp: Update test to reflect
+	change in cli_interpreter_exec.
+
+	* async-nat-sigthread.c (gdb_signal_thread_debug),
+	* async-nat-sigthread.h: Remove redundant gdb_signal_thread_debug.
+
+	* i386-linux-nat.c (i386_linux_resume): Move async stuff for
+	i386_linux_resume into linux_nat_resume in linux-nat.c.  This
+	file is now the same as for mainline.
+
+	* linux-nat.c (linux_nat_resume): Move async stuff from
+	i386_linux_resume to here.
+	(linux_nat_attach): Add initial process for sync too.
+
+	* cli/cli-script.c (execute_control_command): Import stuff for
+	breakpoint commands from Apple's code.
+
+	* mi/mi-interp.c (mi_cmd_interpreter_exec): Remove out-of date
+	comment.
+
+	* mi/mi-main.c (mi_cmd_execute): Check for current_command_token.
+	(mi_interpreter_exec_bp_cmd): New function (from Apple).
+
 2006-09-12  Nick Roberts  <nickrob@snap.net.nz>
 
 	* cli/cli-interp.c (cli_interpreter_exec): Revert to version in
