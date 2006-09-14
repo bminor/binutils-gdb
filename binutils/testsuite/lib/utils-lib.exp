@@ -279,8 +279,8 @@ proc exe_ext {} {
 
 proc run_dump_test { name {extra_options {}} } {
     global subdir srcdir
-    global OBJDUMP NM OBJCOPY READELF
-    global OBJDUMPFLAGS NMFLAGS OBJCOPYFLAGS READELFFLAGS
+    global OBJDUMP NM OBJCOPY READELF STRIP
+    global OBJDUMPFLAGS NMFLAGS OBJCOPYFLAGS READELFFLAGS STRIPFLAGS
     global host_triplet
     global env
     global copyfile
@@ -362,11 +362,15 @@ proc run_dump_test { name {extra_options {}} } {
 	return
     }
 
+    set destopt ""
     switch -- $opts(PROG) {
 	ar	{ set program ar }
 	objcopy	{ set program objcopy }
 	ranlib	{ set program ranlib }
-	strip	{ set program strip }
+	strip	{
+	    set program strip
+	    set destopt "-o"
+	}
 	strings	{ set program strings }
 	default	{
 	    perror "unrecognized program option $opts(PROG) in $file.d"
@@ -470,7 +474,7 @@ proc run_dump_test { name {extra_options {}} } {
     eval set progopts \$[string toupper $program]FLAGS
     eval set binary \$[string toupper $program]
 
-    set exec_output [binutils_run $binary "$progopts $progopts1 $tempfile ${copyfile}.o"]
+    set exec_output [binutils_run $binary "$progopts $progopts1 $tempfile $destopt ${copyfile}.o"]
     if ![string match "" $exec_output] {
 	send_log "$exec_output\n"
 	verbose "$exec_output"

@@ -731,5 +731,7 @@ run_dump_test "copy-3"
 
 if [is_elf_format] {
     run_dump_test "localize-hidden-1"
+    run_dump_test "strip-1"
+    run_dump_test "strip-2"
 }
 run_dump_test "localize-hidden-2"

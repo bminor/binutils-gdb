@@ -1,3 +1,14 @@
+2006-09-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/3182
+	* binutils-all/objcopy.exp: Run strip-1 and strip-2 for ELF
+	targets.
+
+	* binutils-all/strip-1.d: New file.
+	* binutils-all/strip-2.d: Likewise.
+
+	* lib/utils-lib.exp (run_dump_test): Support strip.
+
 2006-08-15  Thiemo Seufer  <ths@mips.com>
             Nigel Stephens  <nigel@mips.com>
             David Ung  <davidu@mips.com>

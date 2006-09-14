@@ -1,3 +1,8 @@
+2006-09-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/3182
+	* objcopy.c (group_signature): Return proper group signature.
+
 2006-09-14  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 3182

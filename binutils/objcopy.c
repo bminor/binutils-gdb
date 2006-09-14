@@ -804,7 +804,7 @@ group_signature (asection *group)
 
       if (symhdr->sh_type == SHT_SYMTAB
 	  && ghdr->sh_info < symhdr->sh_size / bed->s->sizeof_sym)
-	return isympp[ghdr->sh_info];
+	return isympp[ghdr->sh_info - 1];
     }
   return NULL;
 }
