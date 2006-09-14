@@ -52,7 +52,7 @@ mi_gdb_test "-interpreter-exec bogus command" \
 
 set msg {Undefined command: \\\"bogus\\\"\.  Try \\\"help\\\"\.}
 mi_gdb_test "-interpreter-exec console bogus" \
-    "&\\\"$msg\\\\n\\\".*\\^error,msg=\\\"$msg\\\".*" \
+    "&\\\"$msg\\\\n\\\".*\\^done" \
   "-interpreter-exec console bogus"
 
 # NOTE: cagney/2003-02-03: Not yet.
