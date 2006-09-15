@@ -1,5 +1,9 @@
 2006-09-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-elf/hash.d: Don't run for mips targets.
+
+2006-09-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-elf/loadaddr.s: Pad sections to 16 bytes.
 	* ld-elf/loadaddr1.d: Updated.
 	* ld-elf/loadaddr2.d: Likewise.
