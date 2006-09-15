@@ -1,3 +1,10 @@
+2006-09-15  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/3107
+	* ldlang.c (lang_size_sections_1): Do not abort when encountering
+	a non-empty section that is ignored.  Instead produce a warning
+	message.
+
 2006-09-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld.texinfo: Document --dynamic-list-cpp-typeinfo.

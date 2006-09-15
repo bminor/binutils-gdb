@@ -4367,7 +4367,18 @@ lang_size_sections_1
 	    os->processed_vma = TRUE;
 
 	    if (bfd_is_abs_section (os->bfd_section) || os->ignored)
-	      ASSERT (os->bfd_section->size == 0);
+	      {
+		if (os->bfd_section->size > 0)
+		  {
+		    /* PR ld/3107:  Do not abort when a buggy linker script
+		       causes a non-empty section to be discarded.  */
+		    if (bfd_is_abs_section (os->bfd_section))
+		      einfo (_("%P%X: internal error: attempting to take the size of the non-section *ABS*\n"));
+		    else
+		      einfo (_("%P: warning: discarding non-empty, well known section %A\n"),
+			     os->bfd_section);
+		  }
+	      }
 	    else
 	      {
 		dot = os->bfd_section->vma;
