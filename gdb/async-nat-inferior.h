@@ -13,9 +13,6 @@ struct gdb_inferior_status
 
   int attached_in_ptrace;
   int stopped_in_ptrace;
-  int stopped_in_softexc;
-
-  unsigned int suspend_count;
 
   gdb_signal_thread_status signal_status;
 };
