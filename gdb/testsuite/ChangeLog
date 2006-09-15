@@ -1,3 +1,11 @@
+2006-09-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/args.c (main): Add breakpoint marker.
+	* gdb.base/args.exp: Use args_test for tests.  Add new tests which
+	really test empty arguments.
+	(args_load): Delete.
+	(args_test): New.
+
 2006-09-13  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdb.mi/mi-file.exp (test_file_list_exec_source_files): Just
