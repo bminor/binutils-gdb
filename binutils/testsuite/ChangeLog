@@ -1,6 +1,6 @@
 2006-09-14  H.J. Lu  <hongjiu.lu@intel.com>
 
-	PR binutils/3182
+	PR binutils/3181
 	* binutils-all/objcopy.exp: Run strip-1 and strip-2 for ELF
 	targets.
 

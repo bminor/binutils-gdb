@@ -1,11 +1,11 @@
 2006-09-14  H.J. Lu  <hongjiu.lu@intel.com>
 
-	PR binutils/3182
+	PR binutils/3181
 	* objcopy.c (group_signature): Return proper group signature.
 
 2006-09-14  Alan Modra  <amodra@bigpond.net.au>
 
-	PR 3182
+	PR 3181
 	* objcopy.c (group_signature): New function, split out from..
 	(setup_section): ..here.
 	(is_strip_section): Return true for SHT_GROUP sections that are
@@ -13,7 +13,7 @@
 
 2006-09-14  Alan Modra  <amodra@bigpond.net.au>
 
-	PR 3182
+	PR 3181
 	* objcopy.c (copy_object): Load symbols earlier.
 	(setup_section): Mark group signature symbols with BSF_KEEP.
 
