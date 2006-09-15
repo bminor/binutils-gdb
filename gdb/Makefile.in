@@ -2163,7 +2163,7 @@ ia64-tdep.o: ia64-tdep.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 infcall.o: infcall.c $(defs_h) $(breakpoint_h) $(target_h) $(regcache_h) \
 	$(inferior_h) $(gdb_assert_h) $(block_h) $(gdbcore_h) $(language_h) \
 	$(objfiles_h) $(gdbcmd_h) $(command_h) $(gdb_string_h) $(infcall_h) \
-	$(dummy_frame_h)
+	$(dummy_frame_h) $(async_nat_inferior_h) $(async_nat_sigthread_h)
 inf-child.o: inf-child.c $(defs_h) $(regcache_h) $(memattr_h) $(symtab_h) \
 	$(target_h) $(inferior_h) $(gdb_string_h)
 infcmd.o: infcmd.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
@@ -2171,7 +2171,8 @@ infcmd.o: infcmd.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(symfile_h) $(gdbcore_h) $(target_h) $(language_h) $(symfile_h) \
 	$(objfiles_h) $(completer_h) $(ui_out_h) $(event_top_h) \
 	$(parser_defs_h) $(regcache_h) $(reggroups_h) $(block_h) \
-	$(solib_h) $(gdb_assert_h) $(observer_h)
+	$(solib_h) $(gdb_assert_h) $(observer_h) $(async_nat_inferior_h) \
+	$(async_nat_sigthread_h)
 inf-loop.o: inf-loop.c $(defs_h) $(inferior_h) $(target_h) $(event_loop_h) \
 	$(event_top_h) $(inf_loop_h) $(remote_h) $(exceptions_h)
 inflow.o: inflow.c $(defs_h) $(frame_h) $(inferior_h) $(command_h) \
@@ -2236,7 +2237,7 @@ linux-nat.o: linux-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdb_string_h) \
 	$(gdb_wait_h) $(gdb_assert_h) $(linux_nat_h) $(gdbthread_h) \
 	$(gdbcmd_h) $(regcache_h) $(regset_h) $(inf_ptrace_h) $(auxv_h) \
 	$(elf_bfd_h) $(gregset_h) $(gdbcore_h) $(gdbthread_h) $(gdb_stat_h) \
-	$(linux_fork_h) $(async_nat_inferior_h)
+	$(linux_fork_h) $(inf_loop_h) $(async_nat_inferior_h)
 linux-thread-db.o: linux-thread-db.c $(defs_h) $(gdb_assert_h) \
 	$(gdb_proc_service_h) $(gdb_thread_db_h) $(bfd_h) $(exceptions_h) \
 	$(gdbthread_h) $(inferior_h) $(symfile_h) $(objfiles_h) $(target_h) \
