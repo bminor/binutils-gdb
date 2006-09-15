@@ -115,17 +115,6 @@ static void
 gdb_handle_signal (gdb_signal_thread_message *msg,
 		   struct target_waitstatus *status)
 {
-  //CHECK_FATAL (gdb_status != NULL);
-
-  //CHECK_FATAL (gdb_status->attached_in_ptrace);
-  //CHECK_FATAL (!gdb_status->stopped_in_ptrace);
-  /* CHECK_FATAL (! gdb_status->stopped_in_softexc); */
-
-  /* if (inferior_debug_flag)
-    {
-      gdb_signal_thread_debug_status (stderr, msg->status);
-      } */
-
   if (msg->pid != gdb_status->pid)
     {
       warning ("gdb_handle_signal: signal message was for pid %d, "
@@ -405,9 +394,6 @@ gdb_create_inferior (struct gdb_inferior_status *inferior,  int pid)
 
   inferior->attached_in_ptrace = 0;
   inferior->stopped_in_ptrace = 0;
-  inferior->stopped_in_softexc = 0;
-
-  inferior->suspend_count = 0;
 }
 
 void
@@ -438,9 +424,6 @@ gdb_inferior_reset (gdb_inferior_status *s)
 
   s->attached_in_ptrace = 0;
   s->stopped_in_ptrace = 0;
-  s->stopped_in_softexc = 0;
-
-  s->suspend_count = 0;
 
   gdb_signal_thread_init (&s->signal_status);
 
