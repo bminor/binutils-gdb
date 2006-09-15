@@ -278,6 +278,7 @@ linux_test_for_tracefork (int original_pid)
 	  ret = ptrace (PTRACE_KILL, second_pid, 0, 0);
 	  if (ret != 0)
 	    warning (_("linux_test_for_tracefork: failed to kill second child"));
+	  my_waitpid (second_pid, &status, 0);
 	}
     }
   else
@@ -1107,15 +1108,15 @@ linux_nat_detach (char *args, int from_tty)
   if (!target_can_async_p ())
     {
       iterate_over_lwps (detach_callback, NULL);
-
+      
       /* Only the initial process should be left right now.  */
       gdb_assert (num_lwps == 1);
-
-      trap_ptid = null_ptid;
-
-      /* Destroy LWP info; it's no longer valid.  */
-      init_lwp_list ();
     }
+
+  trap_ptid = null_ptid;
+
+  /* Destroy LWP info; it's no longer valid.  */
+  init_lwp_list ();
 
   /* Restore the original signal mask.  */
   sigprocmask (SIG_SETMASK, &normal_mask, NULL);
