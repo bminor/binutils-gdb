@@ -207,6 +207,10 @@ gdb_expect {
 		# another `next' is necessary.
 		gdb_test "next" ".*in start_l ().*" "step out of main (on sh)"
 	    }
+	    -re "E32Main (.*).*$gdb_prompt $" {
+		# On SymbianOS there's a different function which calls main.
+		pass "step out of main (on SymbianOS)"
+	    }
             -re ".*$gdb_prompt $" { fail "step out of main (at end 2)" }
 	    timeout { 
 		fail "step out of main (hang or timeout on step at end 2)" 

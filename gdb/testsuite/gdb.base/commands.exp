@@ -454,7 +454,7 @@ proc bp_deleted_in_command_test {} {
     # Create a breakpoint, and associate a command-list to it, with
     # one command that deletes this breakpoint.
     gdb_test "break factorial" \
-             "Breakpoint \[0-9\]+ at .*: file .*/run.c, line \[0-9\]+\." \
+             "Breakpoint \[0-9\]+ at .*: file .*run.c, line \[0-9\]+\." \
              "breakpoint in bp_deleted_in_command_test"
     
     send_gdb "commands\n"
@@ -495,7 +495,7 @@ proc bp_deleted_in_command_test {} {
 
     gdb_run_cmd
     gdb_expect {
-        -re ".*factorial command-list executed.*1.*$gdb_prompt $" {
+        -re ".*factorial command-list executed.*$gdb_prompt $" {
 	    pass "run factorial until breakpoint"
         }
 	-re ".*$gdb_prompt $" {
@@ -521,7 +521,7 @@ proc temporary_breakpoint_commands {} {
     # This test will verify that this commands list is executed when the
     # breakpoint is hit.
     gdb_test "tbreak factorial" \
-	    "Breakpoint \[0-9\]+ at .*: file .*/run.c, line \[0-9\]+\." \
+	    "Breakpoint \[0-9\]+ at .*: file .*run.c, line \[0-9\]+\." \
 	    "breakpoint in temporary_breakpoint_commands"
     
     send_gdb "commands\n"
@@ -557,7 +557,7 @@ proc temporary_breakpoint_commands {} {
 
     gdb_run_cmd
     gdb_expect {
-	-re ".*factorial tbreak commands executed.*1.*$gdb_prompt $" {
+	-re ".*factorial tbreak commands executed.*$gdb_prompt $" {
 	    pass "run factorial until temporary breakpoint"
 	}
 	timeout { fail "(timeout) run factorial until temporary breakpoint" }
