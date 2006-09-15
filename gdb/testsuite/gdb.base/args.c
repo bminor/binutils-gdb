@@ -8,5 +8,5 @@ main (int argc, char **argv)
   while (i < argc)
     printf ("%s\n", argv[i++]);
 
-  return 0;
+  return 0; /* set breakpoint here */
 }

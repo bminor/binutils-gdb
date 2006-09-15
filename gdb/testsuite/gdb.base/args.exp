@@ -31,15 +31,6 @@ if [target_info exists noargs] {
     return;
 }
 
-# No loading needs to be done when the target is `exec'.  Some targets
-# require that the program be loaded, however.
-proc args_load {} {
-    global binfile
-    if [target_info exists is_simulator] {
-	gdb_load ${binfile}
-    }
-}
-
 set testfile "args"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
@@ -48,42 +39,64 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
+proc args_test { name arglist } {
+    global srcdir
+    global subdir
+    global binfile
+    global hex
+    global decimal
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+
+    # No loading needs to be done when the target is `exec'.  Some targets
+    # require that the program be loaded, however, and it doesn't hurt
+    # for `exec'.
+    gdb_load $binfile
+
+    runto_main
+    gdb_breakpoint [gdb_get_line_number "set breakpoint here"]
+    gdb_continue_to_breakpoint "breakpoint for $name"
+
+    set expected_len [expr 1 + [llength $arglist]]
+    gdb_test "print argc" "\\\$$decimal = $expected_len" "argc for $name"
+
+    set i 1
+    foreach arg $arglist {
+	gdb_test "print argv\[$i\]" "\\\$$decimal = $hex \"$arg\"" \
+	    "argv\[$i\] for $name"
+	set i [expr $i + 1]
+    }
+}
+
 #
 # Test that the --args are processed correctly.
 #
 set old_gdbflags $GDBFLAGS
 set GDBFLAGS "--args $binfile 1 3"
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-args_load
-gdb_test "run" \
-	"Starting program.*args(\\.exe)? 1 3.*3\r\n.*args\r\n1\r\n3.*Program exited normally." \
-	"correct args printed"
+args_test basic {{1} {3}}
 
 #
 # Test that the --args are processed correctly even if one of them is empty.
+# The syntax needed is a little peculiar; DejaGNU treats the arguments as a
+# list and expands them itself, since no shell redirection is involved.
 #
-set GDBFLAGS "--args $binfile 1 '' 3"
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-args_load
-gdb_test "run" \
-	"Starting program.*args(\\.exe)? 1 \\\\'\\\\' 3.*4\r\n.*args\r\n1\r\n''\r\n3.*Program exited normally." \
-	"correct args printed, one empty"
+set GDBFLAGS "--args $binfile 1 {} 3"
+args_test "one empty" {{1} {} {3}}
 
 #
 # try with 2 empty args
 #
+set GDBFLAGS "--args $binfile 1 {} {} 3"
+args_test "two empty" {{1} {} {} 3}
+
+# Try with arguments containing literal single quotes.
+
+set GDBFLAGS "--args $binfile 1 '' 3"
+args_test "one empty" {{1} {''} {3}}
+
 set GDBFLAGS "--args $binfile 1 '' '' 3"
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-args_load
-gdb_test "run" \
-	"Starting program.*args(\\.exe)? 1 \\\\'\\\\' \\\\'\\\\' 3.*5\r\n.*args\r\n1\r\n''\r\n''\r\n3.*Program exited normally." \
-	"correct args printed, two empty"
+args_test "two empty" {{1} {''} {''} {3}}
 
 set GDBFLAGS $old_gdbflags
-
