@@ -470,7 +470,9 @@ proc mi_gdb_load { arg } {
     }
 
     # ``load''
-    if { [info procs gdbserver_gdb_load] != "" } {
+    if { [info procs mi_target_gdb_load] != "" } {
+	return [mi_target_gdb_load $arg]
+    } elseif { [info procs gdbserver_gdb_load] != "" } {
 	global last_mi_gdb_file
 	global last_mi_remote_file
 

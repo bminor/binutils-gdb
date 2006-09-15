@@ -191,6 +191,9 @@ proc gdb_target_symbian {} {
 }
 
 proc infer_host_exec { } {
+    global gdb_prompt
+    global mi_gdb_prompt
+
     set host_exec ""
 
     send_gdb "info files\n"
@@ -204,6 +207,7 @@ proc infer_host_exec { } {
 	    exp_continue
 	}
 	-re "$gdb_prompt $" { }
+	-re "$mi_gdb_prompt$" { }
     }
 
     return $host_exec
@@ -244,4 +248,48 @@ proc gdb_load { arg } {
 
 	set exec_downloaded 1
     }
+}
+
+proc mi_target_gdb_load { arg } {
+    global exec_downloaded
+    global saved_host_exec
+
+    set board_exec [target_info exec_file]
+
+    if { [target_info exists baudrate] } {
+	mi_gdb_test "-gdb-set remotebaud [target_info baudrate]" "" ""
+    }
+
+    if { [mi_gdb_target_cmd "extended-remote" "[target_info netport]"] != 0 } {
+	return -1
+    }
+
+    # Kill if something is running, but prevent a failure if nothing is.
+    set none_re "&\"The program is not being run.\\\\n\"\[\r\n\]+"
+    mi_gdb_test "kill" "&\"kill\\\\n\"\[\r\n\]+($none_re)?\\^done" ""
+
+    set quoted_board_exec [string map {\\ \\\\} $board_exec]
+    mi_gdb_test "-gdb-set remote exec-file \"$quoted_board_exec\"" "" ""
+
+    # If we weren't passed an explicit binary, try to reuse the current
+    # one.  If we were, be sure to redownload it.
+
+    if { $arg == "" && $saved_host_exec == "" } {
+	set saved_host_exec [infer_host_exec]
+    } elseif { $arg != "" } {
+        set saved_host_exec $arg
+        if [info exists exec_downloaded] { unset exec_downloaded }
+    }
+
+    if { ! [info exists exec_downloaded] } {
+	global timeout
+	set prev_timeout $timeout
+	set timeout 60
+	mi_gdb_test "remote-download ${saved_host_exec}.exe $quoted_board_exec" "" ""
+	set timeout $prev_timeout
+
+	set exec_downloaded 1
+    }
+
+    return 0
 }
