@@ -1,3 +1,22 @@
+2006-09-16  Nick Roberts  <nickrob@snap.net.nz>
+
+	* inf-ptrace.c (inf_ptrace_him): Don't set deleted members.
+	(inf_ptrace_attach): Don't call gdb_inferior_destroy as it
+	is called by gdb_create_inferior later. Merge async conditionals.
+	(inf_ptrace_detach): Delete signal thread.
+
+	* linux-nat.c (linux_test_for_tracefork): Re-insert call to
+	my_waitpid (removed inadvertantly).
+	(linux_nat_detach): Call init_lwp_list for asynchronous case too.
+
+	* infcall.c (call_function_by_hand): Destroy signal thread while
+	synchronous and then recreate.
+
+	* async-nat-inferior.h (struct gdb_inferior_status): Remove
+	unused members.
+
+	* Makefile.in: Add new header dependencies.
+
 2006-09-14  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdb.mi/mi-cli.exp, gdb.mi/mi2-cli.exp: Update test to reflect
