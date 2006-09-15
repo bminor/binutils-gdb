@@ -1,5 +1,9 @@
 2006-09-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-scripts/overlay-size.t: Discard .reginfo sections.
+
+2006-09-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-elf/hash.d: Don't run for mips targets.
 
 2006-09-15  H.J. Lu  <hongjiu.lu@intel.com>
