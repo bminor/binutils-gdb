@@ -4270,6 +4270,8 @@ value_match (Expr_Node *expr, int sz, int sign, int mul, int issigned)
 static Expr_Node *
 binary (Expr_Op_Type op, Expr_Node *x, Expr_Node *y)
 {
+  Expr_Node_Value val;
+
   if (x->type == Expr_Node_Constant && y->type == Expr_Node_Constant)
     {
       switch (op)
@@ -4319,13 +4321,26 @@ binary (Expr_Op_Type op, Expr_Node *x, Expr_Node *y)
 	}
       return x;
     }
-  else
+  /* Canonicalize order to EXPR OP CONSTANT.  */
+  if (x->type == Expr_Node_Constant)
     {
-    /* Create a new expression structure.  */
-    Expr_Node_Value val;
-    val.op_value = op;
-    return Expr_Node_Create (Expr_Node_Binop, val, x, y);
-  }
+      Expr_Node *t = x;
+      x = y;
+      y = t;
+    }
+  if (y->type == Expr_Node_Constant && x->type == Expr_Node_Binop
+      && x->Right_Child->type == Expr_Node_Constant)
+    {
+      if (op == x->value.op_value && x->value.op_value == Expr_Op_Type_Add)
+	{
+	  x->Right_Child->value.i_value += y->value.i_value;
+	  return x;
+	}
+    }
+
+  /* Create a new expression structure.  */
+  val.op_value = op;
+  return Expr_Node_Create (Expr_Node_Binop, val, x, y);
 }
 
 static Expr_Node *
