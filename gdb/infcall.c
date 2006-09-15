@@ -36,6 +36,8 @@
 #include "gdb_string.h"
 #include "infcall.h"
 #include "dummy-frame.h"
+#include "async-nat-inferior.h"
+#include "async-nat-sigthread.h"
 
 /* NOTE: cagney/2003-04-16: What's the future of this code?
 
@@ -714,7 +716,7 @@ You must use a pointer to function type variable. Command ignored."), arg_name);
    
      Otherwise, set RC to a non-zero value.  If the called function
      receives a random signal, we do not allow the user to continue
-     executing it as this may not work.  The dummy frame is poped and
+     executing it as this may not work.  The dummy frame is popped and
      we return 1.  If we hit a breakpoint, we leave the frame in place
      and return 2 (the frame will eventually be popped when we do hit
      the dummy end breakpoint).  */
@@ -732,15 +734,22 @@ You must use a pointer to function type variable. Command ignored."), arg_name);
     proceed_to_finish = 1;	/* We want stop_registers, please... */
 
     if (target_can_async_p ())
-      saved_async = target_async_mask (0);
-    
+      {
+	gdb_signal_thread_destroy (&gdb_status->signal_status);
+	saved_async = target_async_mask (0);
+      }
+
     proceed (real_pc, TARGET_SIGNAL_0, 0);
-    
+
     if (saved_async)
-      target_async_mask (saved_async);
-    
+      {
+	target_async_mask (saved_async);
+	gdb_signal_thread_create (&gdb_status->signal_status,
+				  ptid_get_pid (inferior_ptid));
+      }
+
     enable_watchpoints_after_interactive_call_stop ();
-      
+
     discard_cleanups (old_cleanups);
   }
 
