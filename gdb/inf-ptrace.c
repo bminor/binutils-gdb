@@ -155,14 +155,8 @@ inf_ptrace_him (int pid)
   if (target_can_async_p ())
     {
       gdb_create_inferior (gdb_status, pid);
-
       gdb_signal_thread_create (&gdb_status->signal_status, pid);
-
       gdb_status->attached_in_ptrace = 1;
-      gdb_status->stopped_in_ptrace = 0;
-      gdb_status->stopped_in_softexc = 0;
-
-      gdb_status->suspend_count = 0;
     }
 
   /* START_INFERIOR_TRAPS_EXPECTED is defined in inferior.h, and will
@@ -245,9 +239,6 @@ inf_ptrace_attach (char *args, int from_tty)
   if (pid == getpid ())		/* Trying to masturbate?  */
     error (_("I refuse to debug myself!"));
 
-  if (target_can_async_p ())
-    gdb_inferior_destroy (gdb_status);
-
   if (from_tty)
     {
       exec_file = get_exec_file (0);
@@ -262,10 +253,6 @@ inf_ptrace_attach (char *args, int from_tty)
       gdb_flush (gdb_stdout);
     }
 
-  if (target_can_async_p ())
-    gdb_create_inferior (gdb_status, pid);
-
-
 #ifdef PT_ATTACH
   errno = 0;
   ptrace (PT_ATTACH, pid, (PTRACE_TYPE_ARG3)0, 0);
@@ -276,20 +263,14 @@ inf_ptrace_attach (char *args, int from_tty)
   error (_("This system does not support attaching to a process"));
 #endif
 
-  if (target_can_async_p ())
-    {
-      gdb_status->attached_in_ptrace = 1;
-      gdb_status->stopped_in_ptrace = 0;
-      gdb_status->stopped_in_softexc = 0;
-
-      gdb_status->suspend_count = 0;
-    }
-
   inferior_ptid = pid_to_ptid (pid);
   push_target (ptrace_ops_hack);
 
-  if (target_can_async_p () && gdb_status->attached_in_ptrace)
+  if (target_can_async_p ())
     {
+      gdb_create_inferior (gdb_status, pid);
+      gdb_status->attached_in_ptrace = 1;
+      gdb_status->stopped_in_ptrace = 0;
       gdb_signal_thread_create (&gdb_status->signal_status, pid);
       stop_soon = STOP_QUIETLY;
       wait_for_inferior ();
@@ -347,6 +328,9 @@ inf_ptrace_detach (char *args, int from_tty)
 #else
   error (_("This system does not support detaching from a process"));
 #endif
+
+  if (target_can_async_p ())
+    gdb_inferior_destroy (gdb_status);
 
   inferior_ptid = null_ptid;
   unpush_target (ptrace_ops_hack);
