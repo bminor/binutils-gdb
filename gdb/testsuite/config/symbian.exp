@@ -16,6 +16,17 @@ proc epoc_run { outvar args } {
     return $result
 }
 
+proc cyg_to_win { source } {
+    set result [file native [file normalize $source]]
+    if { [string first "C:" $result] != -1 } {
+	set result [string map {C: ""} $result]
+    } else {
+	# This appears to be a Unix-thinking sort of TCL.
+	set result "\\cygwin[string map {/ \\} $result]"
+    }
+    return $result
+}
+
 proc symbian_compile { sources destfile type options } {
     global object_map
     global epocroot
@@ -62,12 +73,17 @@ proc symbian_compile { sources destfile type options } {
     set reldir "urel"
 
     set allflags ""
+    set incdirs {}
     foreach option $options {
 	# send_user "option: $option\n"
 	if { $option == "debug" } {
 	    set reldir "udeb"
+	} elseif { $option == "c++" } {
+	    # Nothing
 	} elseif { [regexp -all {additional_flags=(.*)} $option dummy flags] } {
 	    append allflags " $flags"
+	} elseif { [regexp -all {incdir=(.*)} $option dummy value] } {
+	    lappend incdirs $value
 	} else {
 	    warning "Compilation option $option not supported"
 	    return -1
@@ -91,15 +107,12 @@ proc symbian_compile { sources destfile type options } {
     puts $bldfile "TARGETTYPE EXE"
     puts $bldfile "SOURCEPATH \\."
     foreach source $mysources {
-	set result [file native [file normalize $source]]
-	if { [string first "C:" $result] != -1 } {
-	    set result [string map {C: ""} $result]
-	} else {
-	    # This appears to be a Unix-thinking sort of TCL.
-	    set result "\\cygwin[string map {/ \\} $result]"
-	}
+	set result [cyg_to_win $source]
 	# send_user "orig source $source, new source $result\n"
 	puts $bldfile "SOURCE $result"
+    }
+    foreach incdir $incdirs {
+	puts $bldfile "USERINCLUDE [cyg_to_win $incdir]"
     }
     puts $bldfile "LIBRARY EUSER.LIB"
     puts $bldfile "LIBRARY ESTLIB.LIB"
