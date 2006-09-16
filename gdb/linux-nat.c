@@ -276,6 +276,7 @@ linux_test_for_tracefork (int original_pid)
 	  ret = ptrace (PTRACE_KILL, second_pid, 0, 0);
 	  if (ret != 0)
 	    warning (_("linux_test_for_tracefork: failed to kill second child"));
+	  my_waitpid (second_pid, &status, 0);
 	}
     }
   else
