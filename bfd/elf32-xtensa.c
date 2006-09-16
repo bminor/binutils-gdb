@@ -1409,7 +1409,7 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	 of the dynobj section names depend upon the input files.  */
       name = bfd_get_section_name (dynobj, s);
 
-      if (strncmp (name, ".rela", 5) == 0)
+      if (CONST_STRNEQ (name, ".rela"))
 	{
 	  if (s->size != 0)
 	    {
@@ -1423,8 +1423,8 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      s->reloc_count = 0;
 	    }
 	}
-      else if (strncmp (name, ".plt.", 5) != 0
-	       && strncmp (name, ".got.plt.", 9) != 0
+      else if (! CONST_STRNEQ (name, ".plt.")
+	       && ! CONST_STRNEQ (name, ".got.plt.")
 	       && strcmp (name, ".got") != 0
 	       && strcmp (name, ".plt") != 0
 	       && strcmp (name, ".got.plt") != 0
@@ -8854,10 +8854,8 @@ relax_property_section (bfd *abfd,
     }
 
   is_full_prop_section =
-    ((strncmp (sec->name, XTENSA_PROP_SEC_NAME,
-	       sizeof (XTENSA_PROP_SEC_NAME) - 1) == 0)
-     || (strncmp (sec->name, ".gnu.linkonce.prop.",
-		  sizeof ".gnu.linkonce.prop." - 1) == 0));
+    (   CONST_STRNEQ (sec->name, XTENSA_PROP_SEC_NAME)
+     || CONST_STRNEQ (sec->name, ".gnu.linkonce.prop."));
 
   if (internal_relocs)
     {
@@ -9518,23 +9516,19 @@ pcrel_reloc_fits (xtensa_opcode opc,
 
 
 static int linkonce_len = sizeof (".gnu.linkonce.") - 1;
-static int insn_sec_len = sizeof (XTENSA_INSN_SEC_NAME) - 1;
-static int lit_sec_len = sizeof (XTENSA_LIT_SEC_NAME) - 1;
-static int prop_sec_len = sizeof (XTENSA_PROP_SEC_NAME) - 1;
-
 
 static bfd_boolean 
 xtensa_is_property_section (asection *sec)
 {
-  if (strncmp (XTENSA_INSN_SEC_NAME, sec->name, insn_sec_len) == 0
-      || strncmp (XTENSA_LIT_SEC_NAME, sec->name, lit_sec_len) == 0
-      || strncmp (XTENSA_PROP_SEC_NAME, sec->name, prop_sec_len) == 0)
+  if (CONST_STRNEQ (sec->name, XTENSA_INSN_SEC_NAME)
+      || CONST_STRNEQ (sec->name, XTENSA_LIT_SEC_NAME)
+      || CONST_STRNEQ (sec->name, XTENSA_PROP_SEC_NAME))
     return TRUE;
 
   if (strncmp (".gnu.linkonce.", sec->name, linkonce_len) == 0
-      && (strncmp (&sec->name[linkonce_len], "x.", 2) == 0
-	  || strncmp (&sec->name[linkonce_len], "p.", 2) == 0
-	  || strncmp (&sec->name[linkonce_len], "prop.", 5) == 0))
+      && (CONST_STRNEQ (&sec->name[linkonce_len], "x.")
+	  || CONST_STRNEQ (&sec->name[linkonce_len], "p.")
+	  || CONST_STRNEQ (&sec->name[linkonce_len], "prop.")))
     return TRUE;
 
   return FALSE;
@@ -9544,7 +9538,7 @@ xtensa_is_property_section (asection *sec)
 static bfd_boolean 
 xtensa_is_littable_section (asection *sec)
 {
-  if (strncmp (XTENSA_LIT_SEC_NAME, sec->name, lit_sec_len) == 0)
+  if (CONST_STRNEQ (sec->name, XTENSA_LIT_SEC_NAME))
     return TRUE;
 
   if (strncmp (".gnu.linkonce.", sec->name, linkonce_len) == 0
@@ -9646,7 +9640,7 @@ xtensa_get_property_section (asection *sec, const char *base_name)
       suffix = sec->name + linkonce_len;
       /* For backward compatibility, replace "t." instead of inserting
          the new linkonce_kind (but not for "prop" sections).  */
-      if (strncmp (suffix, "t.", 2) == 0 && linkonce_kind[1] == '.')
+      if (CONST_STRNEQ (suffix, "t.") && linkonce_kind[1] == '.')
         suffix += 2;
       strcat (prop_sec_name + linkonce_len, suffix);
     }
@@ -9680,10 +9674,8 @@ xtensa_get_property_section (asection *sec, const char *base_name)
 flagword
 xtensa_get_property_predef_flags (asection *sec)
 {
-  if (strncmp (sec->name, XTENSA_INSN_SEC_NAME,
-	       sizeof (XTENSA_INSN_SEC_NAME) - 1) == 0
-      || strncmp (sec->name, ".gnu.linkonce.x.",
-		  sizeof ".gnu.linkonce.x." - 1) == 0)
+  if (CONST_STRNEQ (sec->name, XTENSA_INSN_SEC_NAME)
+      || CONST_STRNEQ (sec->name, ".gnu.linkonce.x."))
     return (XTENSA_PROP_INSN
 	    | XTENSA_PROP_INSN_NO_TRANSFORM
 	    | XTENSA_PROP_INSN_NO_REORDER);
@@ -9717,7 +9709,7 @@ xtensa_callback_required_dependence (bfd *abfd,
   /* ".plt*" sections have no explicit relocations but they contain L32R
      instructions that reference the corresponding ".got.plt*" sections.  */
   if ((sec->flags & SEC_LINKER_CREATED) != 0
-      && strncmp (sec->name, ".plt", 4) == 0)
+      && CONST_STRNEQ (sec->name, ".plt"))
     {
       asection *sgotplt;
 
@@ -9794,10 +9786,10 @@ xtensa_callback_required_dependence (bfd *abfd,
    module loader so that the literals are not placed after the text.  */
 static const struct bfd_elf_special_section elf_xtensa_special_sections[] =
 {
-  { ".fini.literal", 13, 0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
-  { ".init.literal", 13, 0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
-  { ".literal",       8, 0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
-  { NULL,             0, 0, 0,            0 }
+  { STRING_COMMA_LEN (".fini.literal"), 0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
+  { STRING_COMMA_LEN (".init.literal"), 0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
+  { STRING_COMMA_LEN (".literal"),      0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
+  { NULL,                       0,      0, 0,            0 }
 };
 
 #ifndef ELF_ARCH

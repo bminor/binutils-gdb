@@ -2193,8 +2193,7 @@ mmix_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
       (*secp)->flags |= SEC_LINKER_CREATED;
     }
   else if ((*namep)[0] == '_' && (*namep)[1] == '_' && (*namep)[2] == '.'
-	   && strncmp (*namep, MMIX_LOC_SECTION_START_SYMBOL_PREFIX,
-		       strlen (MMIX_LOC_SECTION_START_SYMBOL_PREFIX)) == 0)
+	   && CONST_STRNEQ (*namep, MMIX_LOC_SECTION_START_SYMBOL_PREFIX))
     {
       /* See if we have another one.  */
       struct bfd_link_hash_entry *h = bfd_link_hash_lookup (info->hash,

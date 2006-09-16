@@ -94,8 +94,7 @@ m68klinux_write_object_contents (abfd)
 #define	GOT_REF_PREFIX	"__GOT_"
 #endif
 
-#define IS_GOT_SYM(name) \
-  (strncmp (name, GOT_REF_PREFIX, sizeof GOT_REF_PREFIX - 1) == 0)
+#define IS_GOT_SYM(name)  (CONST_STRNEQ (name, GOT_REF_PREFIX))
 
 /* See if a symbol name is a reference to the procedure linkage table.  */
 
@@ -103,8 +102,7 @@ m68klinux_write_object_contents (abfd)
 #define	PLT_REF_PREFIX	"__PLT_"
 #endif
 
-#define IS_PLT_SYM(name) \
-  (strncmp (name, PLT_REF_PREFIX, sizeof PLT_REF_PREFIX - 1) == 0)
+#define IS_PLT_SYM(name)  (CONST_STRNEQ (name, PLT_REF_PREFIX))
 
 /* This string is used to generate specialized error messages.  */
 
@@ -445,8 +443,7 @@ linux_tally_symbols (h, data)
     h = (struct linux_link_hash_entry *) h->root.root.u.i.link;
 
   if (h->root.root.type == bfd_link_hash_undefined
-      && strncmp (h->root.root.root.string, NEEDS_SHRLIB,
-		  sizeof NEEDS_SHRLIB - 1) == 0)
+      && CONST_STRNEQ (h->root.root.root.string, NEEDS_SHRLIB))
     {
       const char *name;
       char *p;

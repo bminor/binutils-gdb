@@ -1,6 +1,6 @@
 /* Print i386 instructions for GDB, the GNU debugger.
    Copyright 1988, 1989, 1991, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -2667,44 +2667,44 @@ print_insn (bfd_vma pc, disassemble_info *info)
 
   for (p = info->disassembler_options; p != NULL; )
     {
-      if (strncmp (p, "x86-64", 6) == 0)
+      if (CONST_STRNEQ (p, "x86-64"))
 	{
 	  address_mode = mode_64bit;
 	  priv.orig_sizeflag = AFLAG | DFLAG;
 	}
-      else if (strncmp (p, "i386", 4) == 0)
+      else if (CONST_STRNEQ (p, "i386"))
 	{
 	  address_mode = mode_32bit;
 	  priv.orig_sizeflag = AFLAG | DFLAG;
 	}
-      else if (strncmp (p, "i8086", 5) == 0)
+      else if (CONST_STRNEQ (p, "i8086"))
 	{
 	  address_mode = mode_16bit;
 	  priv.orig_sizeflag = 0;
 	}
-      else if (strncmp (p, "intel", 5) == 0)
+      else if (CONST_STRNEQ (p, "intel"))
 	{
 	  intel_syntax = 1;
 	}
-      else if (strncmp (p, "att", 3) == 0)
+      else if (CONST_STRNEQ (p, "att"))
 	{
 	  intel_syntax = 0;
 	}
-      else if (strncmp (p, "addr", 4) == 0)
+      else if (CONST_STRNEQ (p, "addr"))
 	{
 	  if (p[4] == '1' && p[5] == '6')
 	    priv.orig_sizeflag &= ~AFLAG;
 	  else if (p[4] == '3' && p[5] == '2')
 	    priv.orig_sizeflag |= AFLAG;
 	}
-      else if (strncmp (p, "data", 4) == 0)
+      else if (CONST_STRNEQ (p, "data"))
 	{
 	  if (p[4] == '1' && p[5] == '6')
 	    priv.orig_sizeflag &= ~DFLAG;
 	  else if (p[4] == '3' && p[5] == '2')
 	    priv.orig_sizeflag |= DFLAG;
 	}
-      else if (strncmp (p, "suffix", 6) == 0)
+      else if (CONST_STRNEQ (p, "suffix"))
 	priv.orig_sizeflag |= SUFFIX_ALWAYS;
 
       p = strchr (p, ',');
@@ -5207,9 +5207,9 @@ PNI_Fixup (int extrachar ATTRIBUTE_UNUSED, int sizeflag)
 	  && (prefixes & PREFIX_ADDR)
 	  && olen >= (4 + 7)
 	  && *(p - 1) == ' '
-	  && strncmp (p - 7, "addr", 4) == 0
-	  && (strncmp (p - 3, "16", 2) == 0
-	      || strncmp (p - 3, "32", 2) == 0))
+	  && CONST_STRNEQ (p - 7, "addr")
+	  && (CONST_STRNEQ (p - 3, "16")
+	      || CONST_STRNEQ (p - 3, "32")))
 	p -= 7;
 
       if (rm)

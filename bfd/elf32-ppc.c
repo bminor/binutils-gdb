@@ -1896,21 +1896,21 @@ ppc_elf_additional_program_headers (bfd *abfd,
 
 static const struct bfd_elf_special_section ppc_elf_special_sections[] =
 {
-  { ".plt",              4,  0, SHT_NOBITS,   SHF_ALLOC + SHF_EXECINSTR },
-  { ".sbss",             5, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
-  { ".sbss2",            6, -2, SHT_PROGBITS, SHF_ALLOC },
-  { ".sdata",            6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
-  { ".sdata2",           7, -2, SHT_PROGBITS, SHF_ALLOC },
-  { ".tags",             5,  0, SHT_ORDERED,  SHF_ALLOC },
-  { ".PPC.EMB.apuinfo", 16,  0, SHT_NOTE,     0 },
-  { ".PPC.EMB.sbss0",   14,  0, SHT_PROGBITS, SHF_ALLOC },
-  { ".PPC.EMB.sdata0",  15,  0, SHT_PROGBITS, SHF_ALLOC },
-  { NULL,                0,  0, 0,            0 }
+  { STRING_COMMA_LEN (".plt"),             0, SHT_NOBITS,   SHF_ALLOC + SHF_EXECINSTR },
+  { STRING_COMMA_LEN (".sbss"),           -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
+  { STRING_COMMA_LEN (".sbss2"),          -2, SHT_PROGBITS, SHF_ALLOC },
+  { STRING_COMMA_LEN (".sdata"),          -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { STRING_COMMA_LEN (".sdata2"),         -2, SHT_PROGBITS, SHF_ALLOC },
+  { STRING_COMMA_LEN (".tags"),            0, SHT_ORDERED,  SHF_ALLOC },
+  { STRING_COMMA_LEN (".PPC.EMB.apuinfo"), 0, SHT_NOTE,     0 },
+  { STRING_COMMA_LEN (".PPC.EMB.sbss0"),   0, SHT_PROGBITS, SHF_ALLOC },
+  { STRING_COMMA_LEN (".PPC.EMB.sdata0"),  0, SHT_PROGBITS, SHF_ALLOC },
+  { NULL,                              0,  0, 0,            0 }
 };
 
 /* This is what we want for new plt/got.  */
 static struct bfd_elf_special_section ppc_alt_plt =
-  { ".plt",              4,  0, SHT_PROGBITS, SHF_ALLOC };
+  { STRING_COMMA_LEN (".plt"),             0, SHT_PROGBITS, SHF_ALLOC };
 
 static const struct bfd_elf_special_section *
 ppc_elf_get_sec_type_attr (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
@@ -3436,7 +3436,7 @@ ppc_elf_check_relocs (bfd *abfd,
 		  if (name == NULL)
 		    return FALSE;
 
-		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
+		  BFD_ASSERT (CONST_STRNEQ (name, ".rela")
 			      && strcmp (bfd_get_section_name (abfd, sec),
 					 name + 5) == 0);
 
@@ -4864,7 +4864,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	{
 	  /* Strip these too.  */
 	}
-      else if (strncmp (bfd_get_section_name (dynobj, s), ".rela", 5) == 0)
+      else if (CONST_STRNEQ (bfd_get_section_name (dynobj, s), ".rela"))
 	{
 	  if (s->size != 0)
 	    {
@@ -6242,7 +6242,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  if (name == NULL)
 		    return FALSE;
 
-		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
+		  BFD_ASSERT (CONST_STRNEQ (name, ".rela")
 			      && strcmp (bfd_get_section_name (input_bfd,
 							       input_section),
 					 name + 5) == 0);
@@ -6445,9 +6445,9 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
 	    BFD_ASSERT (sec != NULL);
 	    name = bfd_get_section_name (abfd, sec->output_section);
-	    if (! ((strncmp (name, ".sdata", 6) == 0
+	    if (! ((CONST_STRNEQ (name, ".sdata")
 		    && (name[6] == 0 || name[6] == '.'))
-		   || (strncmp (name, ".sbss", 5) == 0
+		   || (CONST_STRNEQ (name, ".sbss")
 		       && (name[5] == 0 || name[5] == '.'))))
 	      {
 		(*_bfd_error_handler)
@@ -6473,8 +6473,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
 	    BFD_ASSERT (sec != NULL);
 	    name = bfd_get_section_name (abfd, sec->output_section);
-	    if (! (strncmp (name, ".sdata2", 7) == 0
-		   || strncmp (name, ".sbss2", 6) == 0))
+	    if (! (CONST_STRNEQ (name, ".sdata2")
+		   || CONST_STRNEQ (name, ".sbss2")))
 	      {
 		(*_bfd_error_handler)
 		  (_("%B: the target (%s) of a %s relocation is "
@@ -6505,9 +6505,9 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
 	    BFD_ASSERT (sec != NULL);
 	    name = bfd_get_section_name (abfd, sec->output_section);
-	    if (((strncmp (name, ".sdata", 6) == 0
+	    if (((CONST_STRNEQ (name, ".sdata")
 		  && (name[6] == 0 || name[6] == '.'))
-		 || (strncmp (name, ".sbss", 5) == 0
+		 || (CONST_STRNEQ (name, ".sbss")
 		     && (name[5] == 0 || name[5] == '.'))))
 	      {
 		reg = 13;
@@ -6517,8 +6517,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			   + sh->root.u.def.section->output_section->vma);
 	      }
 
-	    else if (strncmp (name, ".sdata2", 7) == 0
-		     || strncmp (name, ".sbss2", 6) == 0)
+	    else if (CONST_STRNEQ (name, ".sdata2")
+		     || CONST_STRNEQ (name, ".sbss2"))
 	      {
 		reg = 2;
 		sh = htab->sdata[1].sym;

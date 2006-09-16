@@ -1709,7 +1709,7 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		  if (name == NULL)
 		    return FALSE;
 
-		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
+		  BFD_ASSERT (CONST_STRNEQ (name, ".rela")
 			      && strcmp (bfd_get_section_name (input_bfd,
 							       input_section),
 					 name + 5) == 0);
@@ -2731,7 +2731,7 @@ sh_elf64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  if (name == NULL)
 		    return FALSE;
 
-		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
+		  BFD_ASSERT (CONST_STRNEQ (name, ".rela")
 			      && strcmp (bfd_get_section_name (abfd, sec),
 					 name + 5) == 0);
 
@@ -3591,7 +3591,7 @@ sh64_elf64_size_dynamic_sections (bfd *output_bfd,
 	  /* Remember whether there is a PLT.  */
 	  plt = s->size != 0;
 	}
-      else if (strncmp (name, ".rela", 5) == 0)
+      else if (CONST_STRNEQ (name, ".rela"))
 	{
 	  if (s->size != 0)
 	    {
@@ -3624,7 +3624,7 @@ sh64_elf64_size_dynamic_sections (bfd *output_bfd,
 	      s->reloc_count = 0;
 	    }
 	}
-      else if (strncmp (name, ".got", 4) != 0
+      else if (! CONST_STRNEQ (name, ".got")
 	       && strcmp (name, ".dynbss") != 0)
 	{
 	  /* It's not one of our sections, so don't allocate space.  */
@@ -4070,8 +4070,8 @@ sh64_elf64_merge_symbol_attribute (struct elf_link_hash_entry *h,
 
 static const struct bfd_elf_special_section sh64_elf64_special_sections[]=
 {
-  { ".cranges", 8, 0, SHT_PROGBITS, 0 },
-  { NULL,       0, 0, 0,            0 }
+  { STRING_COMMA_LEN (".cranges"), 0, SHT_PROGBITS, 0 },
+  { NULL,                       0, 0, 0,            0 }
 };
 
 #define TARGET_BIG_SYM		bfd_elf64_sh64_vec

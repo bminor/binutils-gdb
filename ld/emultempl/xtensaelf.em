@@ -267,8 +267,7 @@ replace_instruction_table_sections (bfd *abfd, asection *sec)
       insn_sec_name = INSN_SEC_BASE_NAME;
       prop_sec_name = PROP_SEC_BASE_NAME;
     }
-  else if (strncmp (sec_name, LINKONCE_SEC_OLD_TEXT_BASE_NAME,
-		    strlen (LINKONCE_SEC_OLD_TEXT_BASE_NAME)) == 0)
+  else if (CONST_STRNEQ (sec_name, LINKONCE_SEC_OLD_TEXT_BASE_NAME))
     {
       insn_sec_name = sec_name;
       owned_prop_sec_name = (char *) xmalloc (strlen (sec_name) + 20);
@@ -1207,9 +1206,9 @@ is_inconsistent_linkonce_section (asection *sec)
     return FALSE;
 
   /* Check if this is an Xtensa property section.  */
-  if (strncmp (sec_name + linkonce_len, "p.", 2) == 0)
+  if (CONST_STRNEQ (sec_name + linkonce_len, "p."))
     name = sec_name + linkonce_len + 2;
-  else if (strncmp (sec_name + linkonce_len, "prop.", 5) == 0)
+  else if (CONST_STRNEQ (sec_name + linkonce_len, "prop."))
     name = strchr (sec_name + linkonce_len + 5, '.') + 1;
 
   if (name)

@@ -1332,7 +1332,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	    DUMP_RELOC2 (howto->name, rel);
 
-	    if (strncmp(".idata$2",input_section->name,8) == 0 && first_thunk_address == 0)
+	    if (CONST_STRNEQ (input_section->name, ".idata$2") && first_thunk_address == 0)
 	      {
 		/* Set magic values.  */
 		int idata5offset;

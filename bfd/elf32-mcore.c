@@ -1,5 +1,5 @@
 /* Motorola MCore specific support for 32-bit ELF
-   Copyright 1994, 1995, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Copyright 1994, 1995, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -637,9 +637,9 @@ mcore_elf_check_relocs (bfd * abfd,
 
 static const struct bfd_elf_special_section mcore_elf_special_sections[]=
 {
-  { ".ctors",   6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
-  { ".dtors",   6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
-  { NULL,       0,  0, 0,            0 }
+  { STRING_COMMA_LEN (".ctors"), -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { STRING_COMMA_LEN (".dtors"), -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { NULL,                     0,  0, 0,            0 }
 };
 
 #define TARGET_BIG_SYM		bfd_elf32_mcore_big_vec

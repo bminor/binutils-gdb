@@ -2442,7 +2442,7 @@ elf32_hppa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       else if (sec == htab->sgot
 	       || sec == htab->sdynbss)
 	;
-      else if (strncmp (bfd_get_section_name (dynobj, sec), ".rela", 5) == 0)
+      else if (CONST_STRNEQ (bfd_get_section_name (dynobj, sec), ".rela"))
 	{
 	  if (sec->size != 0)
 	    {

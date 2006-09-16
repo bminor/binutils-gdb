@@ -575,7 +575,7 @@ parse_mips_dis_option (const char *option, unsigned int len)
   const struct mips_arch_choice *chosen_arch;
 
   /* Try to match options that are simple flags */
-  if (strncmp (option, "no-aliases", 10) == 0)
+  if (CONST_STRNEQ (option, "no-aliases"))
     {
       no_aliases = 1;
       return;

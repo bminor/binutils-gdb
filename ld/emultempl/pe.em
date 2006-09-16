@@ -925,8 +925,7 @@ pe_find_data_imports (void)
 
 	      for (i = 0; i < nsyms; i++)
 		{
-		  if (memcmp (symbols[i]->name, "__head_",
-			      sizeof ("__head_") - 1))
+		  if (! CONST_STRNEQ (symbols[i]->name, "__head_"))
 		    continue;
 
 		  if (pe_dll_extra_pe_debug)
@@ -1060,7 +1059,7 @@ gld_${EMULATION_NAME}_after_open (void)
 	      {
 		if (strcmp (sec->name, ".idata\$2") == 0)
 		  idata2 = 1;
-		if (strncmp (sec->name, ".idata\$", 7) == 0)
+		if (CONST_STRNEQ (sec->name, ".idata\$"))
 		  is_imp = 1;
 		reloc_count += sec->reloc_count;
 	      }

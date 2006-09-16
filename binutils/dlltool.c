@@ -1248,7 +1248,7 @@ scan_drectve_symbols (bfd *abfd)
   while (p < e)
     {
       if (p[0] == '-'
-	  && strncmp (p, "-export:", 8) == 0)
+	  && CONST_STRNEQ (p, "-export:"))
 	{
 	  char * name;
 	  char * c;
@@ -1266,7 +1266,7 @@ scan_drectve_symbols (bfd *abfd)
 	      char *tag_start = ++p;
 	      while (p < e && *p != ' ' && *p != '-')
 		p++;
-	      if (strncmp (tag_start, "data", 4) == 0)
+	      if (CONST_STRNEQ (tag_start, "data"))
 		flags &= ~BSF_FUNCTION;
 	    }
 

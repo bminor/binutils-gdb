@@ -5292,7 +5292,7 @@ bfin_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 
       strip = FALSE;
 
-       if (strncmp (name, ".rela", 5) == 0)
+       if (CONST_STRNEQ (name, ".rela"))
 	{
 	  if (s->size == 0)
 	    {
@@ -5316,7 +5316,7 @@ bfin_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 	      s->reloc_count = 0;
 	    }
 	}
-      else if (strncmp (name, ".got", 4) != 0)
+      else if (! CONST_STRNEQ (name, ".got"))
 	{
 	  /* It's not one of our sections, so don't allocate space.  */
 	  continue;

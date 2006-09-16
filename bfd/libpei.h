@@ -1,5 +1,5 @@
 /* Support for the generic parts of PE/PEI; common header information.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006
    Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
@@ -271,9 +271,9 @@
 #endif /* !COFF_WITH_pep */
 
 /* Macro: Returns true if the bfd is a PE executable as opposed to a PE object file.  */
-#define bfd_pe_executable_p(abfd) \
-  (strncmp ((abfd)->xvec->name, "pei-", 4) == 0		\
-   || strncmp ((abfd)->xvec->name, "efi-app-", 8) == 0)
+#define bfd_pe_executable_p(abfd)			\
+  (CONST_STRNEQ ((abfd)->xvec->name, "pei-")		\
+   || CONST_STRNEQ ((abfd)->xvec->name, "efi-app-"))
 
 /* These functions are architecture dependent, and are in peicode.h:
    coff_swap_reloc_in

@@ -912,12 +912,12 @@ bfd_slurp_armap (bfd *abfd)
   if (bfd_seek (abfd, (file_ptr) -16, SEEK_CUR) != 0)
     return FALSE;
 
-  if (!strncmp (nextname, "__.SYMDEF       ", 16)
-      || !strncmp (nextname, "__.SYMDEF/      ", 16)) /* old Linux archives */
+  if (CONST_STRNEQ (nextname, "__.SYMDEF       ")
+      || CONST_STRNEQ (nextname, "__.SYMDEF/      ")) /* Old Linux archives.  */
     return do_slurp_bsd_armap (abfd);
-  else if (!strncmp (nextname, "/               ", 16))
+  else if (CONST_STRNEQ (nextname, "/               "))
     return do_slurp_coff_armap (abfd);
-  else if (!strncmp (nextname, "/SYM64/         ", 16))
+  else if (CONST_STRNEQ (nextname, "/SYM64/         "))
     {
       /* 64bit ELF (Irix 6) archive.  */
 #ifdef BFD64
@@ -963,11 +963,11 @@ bfd_slurp_bsd_armap_f2 (bfd *abfd)
   if (bfd_seek (abfd, (file_ptr) -16, SEEK_CUR) != 0)
     return FALSE;
 
-  if (!strncmp (nextname, "__.SYMDEF       ", 16)
-      || !strncmp (nextname, "__.SYMDEF/      ", 16)) /* Old Linux archives.  */
+  if (CONST_STRNEQ (nextname, "__.SYMDEF       ")
+      || CONST_STRNEQ (nextname, "__.SYMDEF/      ")) /* Old Linux archives.  */
     return do_slurp_bsd_armap (abfd);
 
-  if (strncmp (nextname, "/               ", 16))
+  if (! CONST_STRNEQ (nextname, "/               "))
     {
       bfd_has_map (abfd) = FALSE;
       return TRUE;
@@ -1063,8 +1063,8 @@ _bfd_slurp_extended_name_table (bfd *abfd)
       if (bfd_seek (abfd, (file_ptr) -16, SEEK_CUR) != 0)
 	return FALSE;
 
-      if (strncmp (nextname, "ARFILENAMES/    ", 16) != 0 &&
-	  strncmp (nextname, "//              ", 16) != 0)
+      if (! CONST_STRNEQ (nextname, "ARFILENAMES/    ")
+	  && ! CONST_STRNEQ (nextname, "//              "))
 	{
 	  bfd_ardata (abfd)->extended_names = NULL;
 	  bfd_ardata (abfd)->extended_names_size = 0;

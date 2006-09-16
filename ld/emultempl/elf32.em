@@ -365,7 +365,7 @@ case ${target} in
 	    struct bfd_link_needed_list *l;
 
 	    for (l = needed; l != NULL; l = l->next)
-	      if (strncmp (l->name, "libc.so", 7) == 0)
+	      if (CONST_STRNEQ (l->name, "libc.so"))
 		break;
 	    if (l == NULL)
 	      {
@@ -698,7 +698,7 @@ gld${EMULATION_NAME}_parse_ld_so_conf
       if (p[0] == '\0')
 	continue;
 
-      if (!strncmp (p, "include", 7) && (p[7] == ' ' || p[7] == '\t'))
+      if (CONST_STRNEQ (p, "include") && (p[7] == ' ' || p[7] == '\t'))
 	{
 	  char *dir, c;
 	  p += 8;
@@ -1326,7 +1326,7 @@ output_rel_find (asection *sec, int isdyn)
        lookup = lookup->next)
     {
       if (lookup->constraint != -1
-	  && strncmp (".rel", lookup->name, 4) == 0)
+	  && CONST_STRNEQ (lookup->name, ".rel"))
 	{
 	  int lookrela = lookup->name[4] == 'a';
 
@@ -1435,7 +1435,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s)
 	  default:
 	    break;
 	  }
-      else if (strncmp (secname, ".rel", 4) == 0)
+      else if (CONST_STRNEQ (secname, ".rel"))
 	{
 	  secname = secname[4] == 'a' ? ".rela.dyn" : ".rel.dyn";
 	  isdyn = 1;
@@ -1483,7 +1483,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s)
      sections into the .text section to get them out of the way.  */
   if (link_info.executable
       && ! link_info.relocatable
-      && strncmp (secname, ".gnu.warning.", sizeof ".gnu.warning." - 1) == 0
+      && CONST_STRNEQ (secname, ".gnu.warning.")
       && hold[orphan_text].os != NULL)
     {
       lang_add_section (&hold[orphan_text].os->children, s,
@@ -1502,7 +1502,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s)
     ;
   else if ((s->flags & SEC_LOAD) != 0
 	   && ((iself && sh_type == SHT_NOTE)
-	       || (!iself && strncmp (secname, ".note", 5) == 0)))
+	       || (!iself && CONST_STRNEQ (secname, ".note"))))
     place = &hold[orphan_interp];
   else if ((s->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
     place = &hold[orphan_bss];
@@ -1511,7 +1511,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s)
   else if ((s->flags & SEC_READONLY) == 0)
     place = &hold[orphan_data];
   else if (((iself && (sh_type == SHT_RELA || sh_type == SHT_REL))
-	    || (!iself && strncmp (secname, ".rel", 4) == 0))
+	    || (!iself && CONST_STRNEQ (secname, ".rel")))
 	   && (s->flags & SEC_LOAD) != 0)
     place = &hold[orphan_rel];
   else if ((s->flags & SEC_CODE) == 0)
@@ -1871,15 +1871,16 @@ EOF
   fi
 
 cat >>e${EMULATION_NAME}.c <<EOF
-      else if (strncmp (optarg, "max-page-size=", 14) == 0)
+      else if (CONST_STRNEQ (optarg, "max-page-size="))
 	{
 	  char *end;
+
 	  config.maxpagesize = strtoul (optarg + 14, &end, 0);
 	  if (*end)
 	    einfo (_("%P%F: invalid maxium page size \`%s'\n"),
 		   optarg + 14);
 	}
-      else if (strncmp (optarg, "common-page-size=", 17) == 0)
+      else if (CONST_STRNEQ (optarg, "common-page-size="))
 	{
 	  char *end;
 	  config.commonpagesize = strtoul (optarg + 17, &end, 0);

@@ -1,3 +1,19 @@
+2006-09-16  Nick Clifton  <nickc@redhat.com>
+	    Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* ldctor.c: Make use of new STRING_COMMA_LEN and CONST_STRNEQ
+	macros defined in bfd.h.
+	* ldmain.c: Likewise.
+	* ldwrite.c: Likewise.
+	* lexsup.c: Likewise.
+	* pe-dll.c: Likewise.
+	* emultempl/aix.em: Likewise.
+	* emultempl/beos.em: Likewise.
+	* emultempl/elf32.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/sunos.em: Likewise.
+	* emultempl/xtensaelf.em: Likewise.
+
 2006-09-15  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/3107

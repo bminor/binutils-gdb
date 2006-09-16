@@ -144,7 +144,7 @@ thread_section_p (bfd *abfd ATTRIBUTE_UNUSED,
                   asection *sect,
                   void *obj ATTRIBUTE_UNUSED)
 {
-  return (strncmp (sect->name, ".reg/", 5) == 0);
+  return CONST_STRNEQ (sect->name, ".reg/");
 }
 
 /* this function builds a bfd target if the file is a corefile.

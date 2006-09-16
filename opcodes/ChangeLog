@@ -1,3 +1,14 @@
+2006-09-16  Nick Clifton  <nickc@redhat.com>
+	    Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* arm-dis.c: Make use of new STRING_COMMA_LEN and CONST_STRNEQ
+	macros defined in bfd.h.
+	* cris-dis.c: Likewise.
+	* h8300-dis.c: Likewise.
+	* i386-dis.c: Likewise.
+	* ia64-gen.c: Likewise.
+	* mips-dis: Likewise.
+
 2006-09-04  Paul Brook  <paul@codesourcery.com>
 
 	* arm-dis.c (neon_opcode): Fix suffix on VMOVN.

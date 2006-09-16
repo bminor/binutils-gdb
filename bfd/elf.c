@@ -816,22 +816,22 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 	  int len;
 	} debug_sections [] =
 	{
-	  { "debug",		 5  },	/* 'd' */
+	  { STRING_COMMA_LEN ("debug") },	/* 'd' */
 	  { NULL,		 0  },	/* 'e' */
 	  { NULL,		 0  },	/* 'f' */
-	  { "gnu.linkonce.wi.", 16 },	/* 'g' */
+	  { STRING_COMMA_LEN ("gnu.linkonce.wi.") },	/* 'g' */
 	  { NULL,		 0  },	/* 'h' */
 	  { NULL,		 0  },	/* 'i' */
 	  { NULL,		 0  },	/* 'j' */
 	  { NULL,		 0  },	/* 'k' */
-	  { "line",		 4  },	/* 'l' */
+	  { STRING_COMMA_LEN ("line") },	/* 'l' */
 	  { NULL,		 0  },	/* 'm' */
 	  { NULL,		 0  },	/* 'n' */
 	  { NULL,		 0  },	/* 'o' */
 	  { NULL,		 0  },	/* 'p' */
 	  { NULL,		 0  },	/* 'q' */
 	  { NULL,		 0  },	/* 'r' */
-	  { "stab",		 4  }	/* 's' */
+	  { STRING_COMMA_LEN ("stab") }	/* 's' */
 	};
       
       if (name [0] == '.')
@@ -852,7 +852,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
      The symbols will be defined as weak, so that multiple definitions
      are permitted.  The GNU linker extension is to actually discard
      all but one of the sections.  */
-  if (strncmp (name, ".gnu.linkonce", sizeof ".gnu.linkonce" - 1) == 0
+  if (CONST_STRNEQ (name, ".gnu.linkonce")
       && elf_next_in_group (newsect) == NULL)
     flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 
@@ -2281,109 +2281,109 @@ bfd_section_from_elf_index (bfd *abfd, unsigned int index)
 
 static const struct bfd_elf_special_section special_sections_b[] =
 {
-  { ".bss",            4, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
-  { NULL,              0,  0, 0,            0 }
+  { STRING_COMMA_LEN (".bss"), -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
+  { NULL,                   0,  0, 0,            0 }
 };
 
 static const struct bfd_elf_special_section special_sections_c[] =
 {
-  { ".comment",        8,  0, SHT_PROGBITS, 0 },
-  { NULL,              0,  0, 0,            0 }
+  { STRING_COMMA_LEN (".comment"), 0, SHT_PROGBITS, 0 },
+  { NULL,                       0, 0, 0,            0 }
 };
 
 static const struct bfd_elf_special_section special_sections_d[] =
 {
-  { ".data",           5, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
-  { ".data1",          6,  0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
-  { ".debug",          6,  0, SHT_PROGBITS, 0 },
-  { ".debug_line",    11,  0, SHT_PROGBITS, 0 },
-  { ".debug_info",    11,  0, SHT_PROGBITS, 0 },
-  { ".debug_abbrev",  13,  0, SHT_PROGBITS, 0 },
-  { ".debug_aranges", 14,  0, SHT_PROGBITS, 0 },
-  { ".dynamic",        8,  0, SHT_DYNAMIC,  SHF_ALLOC },
-  { ".dynstr",         7,  0, SHT_STRTAB,   SHF_ALLOC },
-  { ".dynsym",         7,  0, SHT_DYNSYM,   SHF_ALLOC },
-  { NULL,              0,  0, 0,            0 }
+  { STRING_COMMA_LEN (".data"),         -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { STRING_COMMA_LEN (".data1"),         0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { STRING_COMMA_LEN (".debug"),         0, SHT_PROGBITS, 0 },
+  { STRING_COMMA_LEN (".debug_line"),    0, SHT_PROGBITS, 0 },
+  { STRING_COMMA_LEN (".debug_info"),    0, SHT_PROGBITS, 0 },
+  { STRING_COMMA_LEN (".debug_abbrev"),  0, SHT_PROGBITS, 0 },
+  { STRING_COMMA_LEN (".debug_aranges"), 0, SHT_PROGBITS, 0 },
+  { STRING_COMMA_LEN (".dynamic"),       0, SHT_DYNAMIC,  SHF_ALLOC },
+  { STRING_COMMA_LEN (".dynstr"),        0, SHT_STRTAB,   SHF_ALLOC },
+  { STRING_COMMA_LEN (".dynsym"),        0, SHT_DYNSYM,   SHF_ALLOC },
+  { NULL,                      0,        0, 0,            0 }
 };
 
 static const struct bfd_elf_special_section special_sections_f[] =
 {
-  { ".fini",           5,  0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
-  { ".fini_array",    11,  0, SHT_FINI_ARRAY, SHF_ALLOC + SHF_WRITE },
-  { NULL,              0,  0, 0,            0 }
+  { STRING_COMMA_LEN (".fini"),       0, SHT_PROGBITS,   SHF_ALLOC + SHF_EXECINSTR },
+  { STRING_COMMA_LEN (".fini_array"), 0, SHT_FINI_ARRAY, SHF_ALLOC + SHF_WRITE },
+  { NULL,                          0, 0, 0,              0 }
 };
 
 static const struct bfd_elf_special_section special_sections_g[] =
 {
-  { ".gnu.linkonce.b",15, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
-  { ".got",            4,  0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
-  { ".gnu.version",   12,  0, SHT_GNU_versym, 0 },
-  { ".gnu.version_d", 14,  0, SHT_GNU_verdef, 0 },
-  { ".gnu.version_r", 14,  0, SHT_GNU_verneed, 0 },
-  { ".gnu.liblist",   12,  0, SHT_GNU_LIBLIST, SHF_ALLOC },
-  { ".gnu.conflict",  13,  0, SHT_RELA,     SHF_ALLOC },
-  { ".gnu.hash",       9,  0, SHT_GNU_HASH, SHF_ALLOC },
-  { NULL,              0,  0, 0,            0 }
+  { STRING_COMMA_LEN (".gnu.linkonce.b"), -2, SHT_NOBITS,      SHF_ALLOC + SHF_WRITE },
+  { STRING_COMMA_LEN (".got"),             0, SHT_PROGBITS,    SHF_ALLOC + SHF_WRITE },
+  { STRING_COMMA_LEN (".gnu.version"),     0, SHT_GNU_versym,  0 },
+  { STRING_COMMA_LEN (".gnu.version_d"),   0, SHT_GNU_verdef,  0 },
+  { STRING_COMMA_LEN (".gnu.version_r"),   0, SHT_GNU_verneed, 0 },
+  { STRING_COMMA_LEN (".gnu.liblist"),     0, SHT_GNU_LIBLIST, SHF_ALLOC },
+  { STRING_COMMA_LEN (".gnu.conflict"),    0, SHT_RELA,        SHF_ALLOC },
+  { STRING_COMMA_LEN (".gnu.hash"),        0, SHT_GNU_HASH,    SHF_ALLOC },
+  { NULL,                        0,        0, 0,               0 }
 };
 
 static const struct bfd_elf_special_section special_sections_h[] =
 {
-  { ".hash",           5,  0, SHT_HASH,     SHF_ALLOC },
-  { NULL,              0,  0, 0,            0 }
+  { STRING_COMMA_LEN (".hash"), 0, SHT_HASH,     SHF_ALLOC },
+  { NULL,                    0, 0, 0,            0 }
 };
 
 static const struct bfd_elf_special_section special_sections_i[] =
 {
-  { ".init",           5,  0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
-  { ".init_array",    11,  0, SHT_INIT_ARRAY, SHF_ALLOC + SHF_WRITE },
-  { ".interp",         7,  0, SHT_PROGBITS, 0 },
-  { NULL,              0,  0, 0,            0 }
+  { STRING_COMMA_LEN (".init"),       0, SHT_PROGBITS,   SHF_ALLOC + SHF_EXECINSTR },
+  { STRING_COMMA_LEN (".init_array"), 0, SHT_INIT_ARRAY, SHF_ALLOC + SHF_WRITE },
+  { STRING_COMMA_LEN (".interp"),     0, SHT_PROGBITS,   0 },
+  { NULL,                      0,     0, 0,              0 }
 };
 
 static const struct bfd_elf_special_section special_sections_l[] =
 {
-  { ".line",           5,  0, SHT_PROGBITS, 0 },
-  { NULL,              0,  0, 0,            0 }
+  { STRING_COMMA_LEN (".line"), 0, SHT_PROGBITS, 0 },
+  { NULL,                    0, 0, 0,            0 }
 };
 
 static const struct bfd_elf_special_section special_sections_n[] =
 {
-  { ".note.GNU-stack",15,  0, SHT_PROGBITS, 0 },
-  { ".note",           5, -1, SHT_NOTE,     0 },
-  { NULL,              0,  0, 0,            0 }
+  { STRING_COMMA_LEN (".note.GNU-stack"), 0, SHT_PROGBITS, 0 },
+  { STRING_COMMA_LEN (".note"),          -1, SHT_NOTE,     0 },
+  { NULL,                    0,           0, 0,            0 }
 };
 
 static const struct bfd_elf_special_section special_sections_p[] =
 {
-  { ".preinit_array", 14,  0, SHT_PREINIT_ARRAY, SHF_ALLOC + SHF_WRITE },
-  { ".plt",            4,  0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
-  { NULL,              0,  0, 0,            0 }
+  { STRING_COMMA_LEN (".preinit_array"), 0, SHT_PREINIT_ARRAY, SHF_ALLOC + SHF_WRITE },
+  { STRING_COMMA_LEN (".plt"),           0, SHT_PROGBITS,      SHF_ALLOC + SHF_EXECINSTR },
+  { NULL,                   0,           0, 0,                 0 }
 };
 
 static const struct bfd_elf_special_section special_sections_r[] =
 {
-  { ".rodata",         7, -2, SHT_PROGBITS, SHF_ALLOC },
-  { ".rodata1",        8,  0, SHT_PROGBITS, SHF_ALLOC },
-  { ".rela",           5, -1, SHT_RELA,     0 },
-  { ".rel",            4, -1, SHT_REL,      0 },
-  { NULL,              0,  0, 0,            0 }
+  { STRING_COMMA_LEN (".rodata"), -2, SHT_PROGBITS, SHF_ALLOC },
+  { STRING_COMMA_LEN (".rodata1"), 0, SHT_PROGBITS, SHF_ALLOC },
+  { STRING_COMMA_LEN (".rela"),   -1, SHT_RELA,     0 },
+  { STRING_COMMA_LEN (".rel"),    -1, SHT_REL,      0 },
+  { NULL,                   0,     0, 0,            0 }
 };
 
 static const struct bfd_elf_special_section special_sections_s[] =
 {
-  { ".shstrtab",       9,  0, SHT_STRTAB,   0 },
-  { ".strtab",         7,  0, SHT_STRTAB,   0 },
-  { ".symtab",         7,  0, SHT_SYMTAB,   0 },
-  { ".stabstr",        5,  3, SHT_STRTAB,   0 },
-  { NULL,              0,  0, 0,            0 }
+  { STRING_COMMA_LEN (".shstrtab"), 0, SHT_STRTAB, 0 },
+  { STRING_COMMA_LEN (".strtab"),   0, SHT_STRTAB, 0 },
+  { STRING_COMMA_LEN (".symtab"),   0, SHT_SYMTAB, 0 },
+  { STRING_COMMA_LEN (".stabstr"),  3, SHT_STRTAB, 0 },
+  { NULL,                       0,  0, 0,          0 }
 };
 
 static const struct bfd_elf_special_section special_sections_t[] =
 {
-  { ".text",           5, -2, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
-  { ".tbss",           5, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE + SHF_TLS },
-  { ".tdata",          6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE + SHF_TLS },
-  { NULL,              0,  0, 0,            0 }
+  { STRING_COMMA_LEN (".text"),  -2, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
+  { STRING_COMMA_LEN (".tbss"),  -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE + SHF_TLS },
+  { STRING_COMMA_LEN (".tdata"), -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE + SHF_TLS },
+  { NULL,                     0,  0, 0,            0 }
 };
 
 static const struct bfd_elf_special_section *special_sections[] =
@@ -3238,7 +3238,7 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 	     string section.  We look for a section with the same name
 	     but without the trailing ``str'', and set its sh_link
 	     field to point to this section.  */
-	  if (strncmp (sec->name, ".stab", sizeof ".stab" - 1) == 0
+	  if (CONST_STRNEQ (sec->name, ".stab")
 	      && strcmp (sec->name + strlen (sec->name) - 3, "str") == 0)
 	    {
 	      size_t len;
@@ -3646,7 +3646,7 @@ get_program_header_size (bfd *abfd, struct bfd_link_info *info)
   for (s = abfd->sections; s != NULL; s = s->next)
     {
       if ((s->flags & SEC_LOAD) != 0
-	  && strncmp (s->name, ".note", 5) == 0)
+	  && CONST_STRNEQ (s->name, ".note"))
 	{
 	  /* We need a PT_NOTE segment.  */
 	  ++segs;
@@ -4028,7 +4028,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
       for (s = abfd->sections; s != NULL; s = s->next)
 	{
 	  if ((s->flags & SEC_LOAD) != 0
-	      && strncmp (s->name, ".note", 5) == 0)
+	      && CONST_STRNEQ (s->name, ".note"))
 	    {
 	      amt = sizeof (struct elf_segment_map);
 	      m = bfd_zalloc (abfd, amt);
@@ -8291,12 +8291,12 @@ elfcore_read_notes (bfd *abfd, file_ptr offset, bfd_size_type size)
       in.descdata = in.namedata + BFD_ALIGN (in.namesz, 4);
       in.descpos = offset + (in.descdata - buf);
 
-      if (strncmp (in.namedata, "NetBSD-CORE", 11) == 0)
+      if (CONST_STRNEQ (in.namedata, "NetBSD-CORE"))
         {
           if (! elfcore_grok_netbsd_note (abfd, &in))
             goto error;
         }
-      else if (strncmp (in.namedata, "QNX", 3) == 0)
+      else if (CONST_STRNEQ (in.namedata, "QNX"))
 	{
 	  if (! elfcore_grok_nto_note (abfd, &in))
 	    goto error;
@@ -8675,10 +8675,8 @@ bfd_elf_match_symbols_in_sections (asection *sec1, asection *sec2)
 
   /* If both are .gnu.linkonce sections, they have to have the same
      section name.  */
-  if (strncmp (sec1->name, ".gnu.linkonce",
-	       sizeof ".gnu.linkonce" - 1) == 0
-      && strncmp (sec2->name, ".gnu.linkonce",
-		  sizeof ".gnu.linkonce" - 1) == 0)
+  if (CONST_STRNEQ (sec1->name, ".gnu.linkonce")
+      && CONST_STRNEQ (sec2->name, ".gnu.linkonce"))
     return strcmp (sec1->name + sizeof ".gnu.linkonce",
 		   sec2->name + sizeof ".gnu.linkonce") == 0;
 

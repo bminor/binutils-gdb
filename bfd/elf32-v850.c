@@ -3028,33 +3028,32 @@ v850_elf_relax_section (bfd *abfd,
 
 static const struct bfd_elf_special_section v850_elf_special_sections[] =
 {
-  { ".call_table_data", 16,  0, SHT_PROGBITS,     (SHF_ALLOC
-                                                   + SHF_WRITE) },
-  { ".call_table_text", 16,  0, SHT_PROGBITS,     (SHF_ALLOC + SHF_WRITE
-                                                   + SHF_EXECINSTR) },
-  { ".rosdata",          8, -2, SHT_PROGBITS,     (SHF_ALLOC
-                                                   + SHF_V850_GPREL) },
-  { ".rozdata",          8, -2, SHT_PROGBITS,     (SHF_ALLOC
-                                                   + SHF_V850_R0REL) },
-  { ".sbss",             5, -2, SHT_NOBITS,       (SHF_ALLOC + SHF_WRITE
-                                                   + SHF_V850_GPREL) },
-  { ".scommon",          8, -2, SHT_V850_SCOMMON, (SHF_ALLOC + SHF_WRITE
-                                                   + SHF_V850_GPREL) },
-  { ".sdata",            6, -2, SHT_PROGBITS,     (SHF_ALLOC + SHF_WRITE
-                                                   + SHF_V850_GPREL) },
-  { ".tbss",             5, -2, SHT_NOBITS,       (SHF_ALLOC + SHF_WRITE
-                                                   + SHF_V850_EPREL) },
-  { ".tcommon",          8, -2, SHT_V850_TCOMMON, (SHF_ALLOC + SHF_WRITE
-                                                   + SHF_V850_R0REL) },
-  { ".tdata",            6, -2, SHT_PROGBITS,     (SHF_ALLOC + SHF_WRITE
-                                                   + SHF_V850_EPREL) },
-  { ".zbss",             5, -2, SHT_NOBITS,       (SHF_ALLOC + SHF_WRITE
-                                                   + SHF_V850_R0REL) },
-  { ".zcommon",          8, -2, SHT_V850_ZCOMMON, (SHF_ALLOC + SHF_WRITE
-                                                   + SHF_V850_R0REL) },
-  { ".zdata",            6, -2, SHT_PROGBITS,     (SHF_ALLOC + SHF_WRITE
-                                                   + SHF_V850_R0REL) },
-  { NULL,        0, 0, 0,            0 }
+  { STRING_COMMA_LEN (".call_table_data"), 0, SHT_PROGBITS,     (SHF_ALLOC + SHF_WRITE) },
+  { STRING_COMMA_LEN (".call_table_text"), 0, SHT_PROGBITS,     (SHF_ALLOC + SHF_WRITE
+								 + SHF_EXECINSTR) },
+  { STRING_COMMA_LEN (".rosdata"),        -2, SHT_PROGBITS,     (SHF_ALLOC
+								 + SHF_V850_GPREL) },
+  { STRING_COMMA_LEN (".rozdata"),        -2, SHT_PROGBITS,     (SHF_ALLOC
+								 + SHF_V850_R0REL) },
+  { STRING_COMMA_LEN (".sbss"),           -2, SHT_NOBITS,       (SHF_ALLOC + SHF_WRITE
+								 + SHF_V850_GPREL) },
+  { STRING_COMMA_LEN (".scommon"),        -2, SHT_V850_SCOMMON, (SHF_ALLOC + SHF_WRITE
+								 + SHF_V850_GPREL) },
+  { STRING_COMMA_LEN (".sdata"),          -2, SHT_PROGBITS,     (SHF_ALLOC + SHF_WRITE
+								 + SHF_V850_GPREL) },
+  { STRING_COMMA_LEN (".tbss"),           -2, SHT_NOBITS,       (SHF_ALLOC + SHF_WRITE
+								 + SHF_V850_EPREL) },
+  { STRING_COMMA_LEN (".tcommon"),        -2, SHT_V850_TCOMMON, (SHF_ALLOC + SHF_WRITE
+								 + SHF_V850_R0REL) },
+  { STRING_COMMA_LEN (".tdata"),          -2, SHT_PROGBITS,     (SHF_ALLOC + SHF_WRITE
+								 + SHF_V850_EPREL) },
+  { STRING_COMMA_LEN (".zbss"),           -2, SHT_NOBITS,       (SHF_ALLOC + SHF_WRITE
+								 + SHF_V850_R0REL) },
+  { STRING_COMMA_LEN (".zcommon"),        -2, SHT_V850_ZCOMMON, (SHF_ALLOC + SHF_WRITE
+								 + SHF_V850_R0REL) },
+  { STRING_COMMA_LEN (".zdata"),          -2, SHT_PROGBITS,     (SHF_ALLOC + SHF_WRITE
+								 + SHF_V850_R0REL) },
+  { NULL,                     0,           0, 0,                0 }
 };
 
 #define TARGET_LITTLE_SYM			bfd_elf32_v850_vec

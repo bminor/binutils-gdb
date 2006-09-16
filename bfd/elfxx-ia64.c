@@ -1424,22 +1424,15 @@ elfNN_ia64_relax_ldxmov (contents, off)
 /* Return TRUE if NAME is an unwind table section name.  */
 
 static inline bfd_boolean
-is_unwind_section_name (abfd, name)
-	bfd *abfd;
-	const char *name;
+is_unwind_section_name (bfd *abfd, const char *name)
 {
-  size_t len1, len2, len3;
-
   if (elfNN_ia64_hpux_vec (abfd->xvec)
       && !strcmp (name, ELF_STRING_ia64_unwind_hdr))
     return FALSE;
 
-  len1 = sizeof (ELF_STRING_ia64_unwind) - 1;
-  len2 = sizeof (ELF_STRING_ia64_unwind_info) - 1;
-  len3 = sizeof (ELF_STRING_ia64_unwind_once) - 1;
-  return ((strncmp (name, ELF_STRING_ia64_unwind, len1) == 0
-	   && strncmp (name, ELF_STRING_ia64_unwind_info, len2) != 0)
-	  || strncmp (name, ELF_STRING_ia64_unwind_once, len3) == 0);
+  return ((CONST_STRNEQ (name, ELF_STRING_ia64_unwind)
+	   && ! CONST_STRNEQ (name, ELF_STRING_ia64_unwind_info))
+	  || CONST_STRNEQ (name, ELF_STRING_ia64_unwind_once));
 }
 
 /* Handle an IA-64 specific section when reading an object file.  This
@@ -2621,10 +2614,10 @@ get_reloc_section (abfd, ia64_info, sec, create)
   if (srel_name == NULL)
     return NULL;
 
-  BFD_ASSERT ((strncmp (srel_name, ".rela", 5) == 0
+  BFD_ASSERT ((CONST_STRNEQ (srel_name, ".rela")
 	       && strcmp (bfd_get_section_name (abfd, sec),
 			  srel_name+5) == 0)
-	      || (strncmp (srel_name, ".rel", 4) == 0
+	      || (CONST_STRNEQ (srel_name, ".rel")
 		  && strcmp (bfd_get_section_name (abfd, sec),
 			     srel_name+4) == 0));
 
@@ -3702,7 +3695,7 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
 
 	  if (strcmp (name, ".got.plt") == 0)
 	    strip = FALSE;
-	  else if (strncmp (name, ".rel", 4) == 0)
+	  else if (CONST_STRNEQ (name, ".rel"))
 	    {
 	      if (!strip)
 		{
@@ -5569,9 +5562,9 @@ elfNN_ia64_reloc_type_class (rela)
 
 static const struct bfd_elf_special_section elfNN_ia64_special_sections[] =
 {
-  { ".sbss",  5, -1, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE + SHF_IA_64_SHORT },
-  { ".sdata", 6, -1, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE + SHF_IA_64_SHORT },
-  { NULL,        0, 0, 0,            0 }
+  { STRING_COMMA_LEN (".sbss"),  -1, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE + SHF_IA_64_SHORT },
+  { STRING_COMMA_LEN (".sdata"), -1, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE + SHF_IA_64_SHORT },
+  { NULL,                    0,   0, 0,            0 }
 };
 
 static bfd_boolean
@@ -5598,7 +5591,7 @@ elfNN_ia64_object_p (bfd *abfd)
       if (elf_sec_group (sec) == NULL
 	  && ((sec->flags & (SEC_LINK_ONCE | SEC_CODE | SEC_GROUP))
 	      == (SEC_LINK_ONCE | SEC_CODE))
-	  && strncmp (sec->name, ".gnu.linkonce.t.", 16) == 0)
+	  && CONST_STRNEQ (sec->name, ".gnu.linkonce.t."))
 	{
 	  name = sec->name + 16;
 

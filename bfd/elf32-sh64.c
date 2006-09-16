@@ -759,8 +759,8 @@ sh64_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
 
 static const struct bfd_elf_special_section sh64_elf_special_sections[] =
 {
-  { ".cranges", 8, 0, SHT_PROGBITS, 0 },
-  { NULL,       0, 0, 0,            0 }
+  { STRING_COMMA_LEN (".cranges"), 0, SHT_PROGBITS, 0 },
+  { NULL,                       0, 0, 0,            0 }
 };
 
 #undef	TARGET_BIG_SYM

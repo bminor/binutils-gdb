@@ -1,6 +1,6 @@
 /* vms-hdr.c -- BFD back-end for VMS/VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006
    Free Software Foundation, Inc.
 
    HDR record handling functions
@@ -248,7 +248,7 @@ _bfd_vms_write_hdr (bfd *abfd, int objtype)
 
   /* LMN.  */
   _bfd_vms_output_begin (abfd, EOBJ_S_C_EMH, EMH_S_C_LNM);
-  _bfd_vms_output_dump (abfd, (unsigned char *)"GAS proGIS", 10);
+  _bfd_vms_output_dump (abfd, (unsigned char *) STRING_COMMA_LEN ("GAS proGIS"));
   _bfd_vms_output_flush (abfd);
 
   /* SRC.  */
@@ -260,7 +260,7 @@ _bfd_vms_write_hdr (bfd *abfd, int objtype)
 
       if (symbol->flags & BSF_FILE)
 	{
-	  if (strncmp ((char *)symbol->name, "<CASE:", 6) == 0)
+	  if (CONST_STRNEQ ((char *)symbol->name, "<CASE:"))
 	    {
 	      PRIV (flag_hash_long_names) = symbol->name[6] - '0';
 	      PRIV (flag_show_after_trunc) = symbol->name[7] - '0';
@@ -280,13 +280,13 @@ _bfd_vms_write_hdr (bfd *abfd, int objtype)
     }
 
   if (symnum == abfd->symcount)
-    _bfd_vms_output_dump (abfd, (unsigned char *)"noname", 6);
+    _bfd_vms_output_dump (abfd, (unsigned char *) STRING_COMMA_LEN ("noname"));
 
   _bfd_vms_output_flush (abfd);
 
   /* TTL.  */
   _bfd_vms_output_begin (abfd, EOBJ_S_C_EMH, EMH_S_C_TTL);
-  _bfd_vms_output_dump (abfd, (unsigned char *)"TTL", 3);
+  _bfd_vms_output_dump (abfd, (unsigned char *) STRING_COMMA_LEN ("TTL"));
   _bfd_vms_output_flush (abfd);
 
   /* CPR.  */

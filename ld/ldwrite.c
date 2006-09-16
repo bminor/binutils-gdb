@@ -1,6 +1,6 @@
 /* ldwrite.c -- write out the linked file
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000, 2002,
-   2003, 2004, 2005 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2006 Free Software Foundation, Inc.
    Written by Steve Chamberlain sac@cygnus.com
 
 This file is part of GLD, the Gnu Linker.
@@ -293,7 +293,7 @@ build_link_order (lang_statement_union_type *statement)
 static bfd_boolean
 unsplittable_name (const char *name)
 {
-  if (strncmp (name, ".stab", 5) == 0)
+  if (CONST_STRNEQ (name, ".stab"))
     {
       /* There are several stab like string sections. We pattern match on
 	 ".stab...str"  */
@@ -338,7 +338,7 @@ clone_section (bfd *abfd, asection *s, const char *name, int *count)
     {
       /* Some section names cannot be truncated, as the name is
 	 used to locate some other section.  */
-      if (strncmp (name, ".stab", 5) == 0
+      if (CONST_STRNEQ (name, ".stab")
 	  || strcmp (name, "$GDB_SYMBOLS$") == 0)
 	{
 	  einfo (_ ("%F%P: cannot create split section name for %s\n"), name);

@@ -263,6 +263,7 @@ static void (*byte_put) (unsigned char *, bfd_vma, int);
 /* This is just a bit of syntatic sugar.  */
 #define streq(a,b)	(strcmp ((a), (b)) == 0)
 #define strneq(a,b,n)	(strncmp ((a), (b), (n)) == 0)
+#define const_strneq(a,b) (strncmp ((a), (b), sizeof (b) - 1) == 0)
 
 static void *
 get_data (void *var, FILE *file, long offset, size_t size, size_t nmemb,
@@ -1135,7 +1136,6 @@ dump_relocations (FILE *file,
 	case EM_BLACKFIN:
 	  rtype = elf_bfin_reloc_type (type);
 	  break;
-
 	}
 
       if (rtype == NULL)
@@ -1968,7 +1968,7 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	      char const *isa = _("unknown");
 	      char const *mac = _("unknown mac");
 	      char const *additional = NULL;
-      
+
 	      switch (e_flags & EF_M68K_ISA_MASK)
 		{
 		case EF_M68K_ISA_A_NODIV:
@@ -2049,7 +2049,6 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	case EM_CYGNUS_M32R:
 	  if ((e_flags & EF_M32R_ARCH) == E_M32R_ARCH)
 	    strcat (buf, ", m32r");
-
 	  break;
 
 	case EM_MIPS:
@@ -4070,7 +4069,7 @@ process_section_headers (FILE *file)
 		|| do_debug_lines || do_debug_pubnames || do_debug_aranges
 		|| do_debug_frames || do_debug_macinfo || do_debug_str
 		|| do_debug_loc || do_debug_ranges)
-	       && strneq (name, ".debug_", 7))
+	       && const_strneq (name, ".debug_"))
 	{
 	  name += 7;
 
@@ -4090,7 +4089,7 @@ process_section_headers (FILE *file)
 	}
       /* linkonce section to be combined with .debug_info at link time.  */
       else if ((do_debugging || do_debug_info)
-	       && strneq (name, ".gnu.linkonce.wi.", 17))
+	       && const_strneq (name, ".gnu.linkonce.wi."))
 	request_dump (i, DEBUG_DUMP);
       else if (do_debug_frames && streq (name, ".eh_frame"))
 	request_dump (i, DEBUG_DUMP);
@@ -4926,7 +4925,7 @@ slurp_ia64_unwind_table (FILE *file,
 	      sym = aux->symtab + ELF64_R_SYM (rp->r_info);
 	    }
 
-	  if (! strneq (relname, "R_IA64_SEGREL", 13))
+	  if (! const_strneq (relname, "R_IA64_SEGREL"))
 	    {
 	      warn (_("Skipping unexpected relocation type %s\n"), relname);
 	      continue;
@@ -5339,7 +5338,7 @@ slurp_hppa_unwind_table (FILE *file,
 	    }
 
 	  /* R_PARISC_SEGREL32 or R_PARISC_SEGREL64.  */
-	  if (strncmp (relname, "R_PARISC_SEGREL", 15) != 0)
+	  if (! const_strneq (relname, "R_PARISC_SEGREL"))
 	    {
 	      warn (_("Skipping unexpected relocation type %s\n"), relname);
 	      continue;
@@ -7826,7 +7825,7 @@ display_debug_section (Elf_Internal_Shdr *section, FILE *file)
       return 0;
     }
 
-  if (strneq (name, ".gnu.linkonce.wi.", 17))
+  if (const_strneq (name, ".gnu.linkonce.wi."))
     name = ".debug_info";
 
   /* See if we know how to display the contents of this section.  */
@@ -8871,7 +8870,7 @@ process_note (Elf_Internal_Note *pnote)
        note type strings.  */
     nt = get_note_type (pnote->type);
 
-  else if (strneq (pnote->namedata, "NetBSD-CORE", 11))
+  else if (const_strneq (pnote->namedata, "NetBSD-CORE"))
     /* NetBSD-specific core file notes.  */
     nt = get_netbsd_elfcore_note_type (pnote->type);
 
@@ -9319,7 +9318,7 @@ process_archive (char *file_name, FILE *file)
       return 1;
     }
 
-  if (memcmp (arhdr.ar_name, "/               ", 16) == 0)
+  if (const_strneq (arhdr.ar_name, "/               "))
     {
       /* This is the archive symbol table.  Skip it.
 	 FIXME: We should have an option to dump it.  */
@@ -9341,7 +9340,7 @@ process_archive (char *file_name, FILE *file)
 	}
     }
 
-  if (memcmp (arhdr.ar_name, "//              ", 16) == 0)
+  if (const_strneq (arhdr.ar_name, "//              "))
     {
       /* This is the archive string table holding long member
 	 names.  */

@@ -2221,9 +2221,9 @@ reloc_section_p (struct elf32_arm_link_hash_table *htab,
 		 const char *name, asection *s)
 {
   if (htab->use_rel)
-    return strncmp (name, ".rel", 4) == 0 && strcmp (s->name, name + 4) == 0;
+    return CONST_STRNEQ (name, ".rel") && strcmp (s->name, name + 4) == 0;
   else
-    return strncmp (name, ".rela", 5) == 0 && strcmp (s->name, name + 5) == 0;
+    return CONST_STRNEQ (name, ".rela") && strcmp (s->name, name + 5) == 0;
 }
 
 /* Create .got, .gotplt, and .rel(a).got sections in DYNOBJ, and set up
@@ -7938,7 +7938,7 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 	  /* Remember whether there is a PLT.  */
 	  plt = s->size != 0;
 	}
-      else if (strncmp (name, ".rel", 4) == 0)
+      else if (CONST_STRNEQ (name, ".rel"))
 	{
 	  if (s->size != 0)
 	    {
@@ -7952,7 +7952,7 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 	      s->reloc_count = 0;
 	    }
 	}
-      else if (strncmp (name, ".got", 4) != 0
+      else if (! CONST_STRNEQ (name, ".got")
 	       && strcmp (name, ".dynbss") != 0)
 	{
 	  /* It's not one of our sections, so don't allocate space.  */
@@ -8680,12 +8680,8 @@ elf32_arm_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED
 static bfd_boolean
 is_arm_elf_unwind_section_name (bfd * abfd ATTRIBUTE_UNUSED, const char * name)
 {
-  size_t len1, len2;
-
-  len1 = sizeof (ELF_STRING_ARM_unwind) - 1;
-  len2 = sizeof (ELF_STRING_ARM_unwind_once) - 1;
-  return (strncmp (name, ELF_STRING_ARM_unwind, len1) == 0
-	  || strncmp (name, ELF_STRING_ARM_unwind_once, len2) == 0);
+  return (CONST_STRNEQ (name, ELF_STRING_ARM_unwind)
+	  || CONST_STRNEQ (name, ELF_STRING_ARM_unwind_once));
 }
 
 
@@ -9656,18 +9652,18 @@ elf32_arm_symbian_special_sections[] =
      the loadable read-only segment.  The post-linker may wish to
      refer to these sections, but they are not part of the final
      program image.  */
-  { ".dynamic",        8,  0, SHT_DYNAMIC,  0 },
-  { ".dynstr",         7,  0, SHT_STRTAB,   0 },
-  { ".dynsym",         7,  0, SHT_DYNSYM,   0 },
-  { ".got",            4,  0, SHT_PROGBITS, 0 },
-  { ".hash",           5,  0, SHT_HASH,     0 },
+  { STRING_COMMA_LEN (".dynamic"),       0, SHT_DYNAMIC,  0 },
+  { STRING_COMMA_LEN (".dynstr"),        0, SHT_STRTAB,   0 },
+  { STRING_COMMA_LEN (".dynsym"),        0, SHT_DYNSYM,   0 },
+  { STRING_COMMA_LEN (".got"),           0, SHT_PROGBITS, 0 },
+  { STRING_COMMA_LEN (".hash"),          0, SHT_HASH,     0 },
   /* These sections do not need to be writable as the SymbianOS
      postlinker will arrange things so that no dynamic relocation is
      required.  */
-  { ".init_array",    11,  0, SHT_INIT_ARRAY, SHF_ALLOC },
-  { ".fini_array",    11,  0, SHT_FINI_ARRAY, SHF_ALLOC },
-  { ".preinit_array", 14,  0, SHT_PREINIT_ARRAY, SHF_ALLOC },
-  { NULL,              0,  0, 0,            0 }
+  { STRING_COMMA_LEN (".init_array"),    0, SHT_INIT_ARRAY,    SHF_ALLOC },
+  { STRING_COMMA_LEN (".fini_array"),    0, SHT_FINI_ARRAY,    SHF_ALLOC },
+  { STRING_COMMA_LEN (".preinit_array"), 0, SHT_PREINIT_ARRAY, SHF_ALLOC },
+  { NULL,                             0, 0, 0,                 0 }
 };
 
 static void

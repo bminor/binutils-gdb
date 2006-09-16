@@ -2015,7 +2015,7 @@ dump_dwarf_section (bfd *abfd, asection *section,
   const char *match;
   enum dwarf_section_display_enum i;
 
-  if (strncmp (name, ".gnu.linkonce.wi.", 17) == 0)
+  if (CONST_STRNEQ (name, ".gnu.linkonce.wi."))
     match = ".debug_info";
   else
     match = name;

@@ -94,7 +94,7 @@ osf_core_core_file_p (abfd)
   if (val != sizeof core_header)
     return NULL;
 
-  if (strncmp (core_header.magic, "Core", 4) != 0)
+  if (! CONST_STRNEQ (core_header.magic, "Core"))
     return NULL;
 
   core_hdr (abfd) = (struct osf_core_struct *)

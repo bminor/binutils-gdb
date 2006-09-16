@@ -232,7 +232,7 @@ coff_link_check_ar_symbols (bfd *abfd,
 	  /* Auto import.  */
 	  if (!h
 	      && info->pei386_auto_import
-	      && !strncmp (name,"__imp_", 6))
+	      && CONST_STRNEQ (name, "__imp_"))
 	    h = bfd_link_hash_lookup (info->hash, name + 6, FALSE, FALSE, TRUE);
 
 	  /* We are only interested in symbols that are currently
@@ -439,7 +439,7 @@ coff_link_add_symbols (bfd *abfd,
 		  || classification == COFF_SYMBOL_PE_SECTION)
 	      && coff_section_data (abfd, section) != NULL
 	      && coff_section_data (abfd, section)->comdat != NULL
-	      && strncmp (name, "??_", 3) == 0
+	      && CONST_STRNEQ (name, "??_")
 	      && strcmp (name, coff_section_data (abfd, section)->comdat->name) == 0)
 	    {
 	      if (*sym_hash == NULL)
@@ -583,7 +583,7 @@ coff_link_add_symbols (bfd *abfd,
 	  asection *stab;
 	  
 	  for (stab = abfd->sections; stab; stab = stab->next)
-	    if (strncmp (".stab", stab->name, 5) == 0
+	    if (CONST_STRNEQ (".stab", stab->name)
 		&& (!stab->name[5]
 		    || (stab->name[5] == '.' && ISDIGIT (stab->name[6]))))
 	    {
@@ -1232,7 +1232,7 @@ process_embedded_commands (bfd *output_bfd,
 	  s++;
 	  continue;
 	}
-      if (strncmp (s, "-attr", 5) == 0)
+      if (CONST_STRNEQ (s, "-attr"))
 	{
 	  char *name;
 	  char *attribs;
@@ -1272,11 +1272,11 @@ process_embedded_commands (bfd *output_bfd,
 		asec->flags |= SEC_READONLY;
 	    }
 	}
-      else if (strncmp (s,"-heap", 5) == 0)
-	s = dores_com (s+5, output_bfd, 1);
+      else if (CONST_STRNEQ (s, "-heap"))
+	s = dores_com (s + 5, output_bfd, 1);
 
-      else if (strncmp (s,"-stack", 6) == 0)
-	s = dores_com (s+6, output_bfd, 0);
+      else if (CONST_STRNEQ (s, "-stack"))
+	s = dores_com (s + 6, output_bfd, 0);
 
       else
 	s++;

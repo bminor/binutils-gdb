@@ -1,5 +1,5 @@
 /* prdbg.c -- Print out generic debugging information.
-   Copyright 1995, 1996, 1999, 2002, 2003, 2004
+   Copyright 1995, 1996, 1999, 2002, 2003, 2004, 2006
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
    Tags style generation written by Salvador E. Tropea <set@computer.org>.
@@ -910,11 +910,10 @@ pr_method_type (void *p, bfd_boolean domain, int argcount, bfd_boolean varargs)
       domain_type = pop_type (info);
       if (domain_type == NULL)
 	return FALSE;
-      if (strncmp (domain_type, "class ", sizeof "class " - 1) == 0
+      if (CONST_STRNEQ (domain_type, "class ")
 	  && strchr (domain_type + sizeof "class " - 1, ' ') == NULL)
 	domain_type += sizeof "class " - 1;
-      else if (strncmp (domain_type, "union class ",
-			sizeof "union class ") == 0
+      else if (CONST_STRNEQ (domain_type, "union class ")
 	       && (strchr (domain_type + sizeof "union class " - 1, ' ')
 		   == NULL))
 	domain_type += sizeof "union class " - 1;
@@ -1317,7 +1316,7 @@ pr_class_baseclass (void *p, bfd_vma bitpos, bfd_boolean virtual,
   if (t == NULL)
     return FALSE;
 
-  if (strncmp (t, "class ", sizeof "class " - 1) == 0)
+  if (CONST_STRNEQ (t, "class "))
     t += sizeof "class " - 1;
 
   /* Push it back on to take advantage of the prepend_type and
@@ -2158,7 +2157,7 @@ tg_class_static_member (void *p, const char *name,
   if (! full_name)
     return FALSE;
   memcpy (full_name, info->stack->next->type, len_class);
-  memcpy (full_name + len_class, "::", 2);
+  memcpy (full_name + len_class, STRING_COMMA_LEN ("::"));
   memcpy (full_name + len_class + 2, name, len_var + 1);
 
   if (! substitute_type (info, full_name))
@@ -2199,7 +2198,7 @@ tg_class_baseclass (void *p, bfd_vma bitpos ATTRIBUTE_UNUSED,
   if (t == NULL)
     return FALSE;
 
-  if (strncmp (t, "class ", sizeof "class " - 1) == 0)
+  if (CONST_STRNEQ (t, "class "))
     t += sizeof "class " - 1;
 
   /* Push it back on to take advantage of the prepend_type and

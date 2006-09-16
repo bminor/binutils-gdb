@@ -4098,8 +4098,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	  sec = NULL;
 	  for (o = input_bfd->sections; o != NULL; o = o->next)
 	    {
-	      if (strncmp (bfd_get_section_name (input_bfd, o),
-			   CALL_FP_STUB, sizeof CALL_FP_STUB - 1) == 0)
+	      if (CONST_STRNEQ (bfd_get_section_name (input_bfd, o),
+				CALL_FP_STUB))
 		{
 		  sec = h->call_fp_stub;
 		  break;
@@ -4690,9 +4690,9 @@ mips_elf_stub_section_p (bfd *abfd ATTRIBUTE_UNUSED, asection *section)
 {
   const char *name = bfd_get_section_name (abfd, section);
 
-  return (strncmp (name, FN_STUB, sizeof FN_STUB - 1) == 0
-	  || strncmp (name, CALL_STUB, sizeof CALL_STUB - 1) == 0
-	  || strncmp (name, CALL_FP_STUB, sizeof CALL_FP_STUB - 1) == 0);
+  return (CONST_STRNEQ (name, FN_STUB)
+	  || CONST_STRNEQ (name, CALL_STUB)
+	  || CONST_STRNEQ (name, CALL_FP_STUB));
 }
 
 /* Add room for N relocations to the .rel(a).dyn section in ABFD.  */
@@ -5407,7 +5407,7 @@ _bfd_mips_elf_section_from_shdr (bfd *abfd,
 	return FALSE;
       break;
     case SHT_MIPS_GPTAB:
-      if (strncmp (name, ".gptab.", sizeof ".gptab." - 1) != 0)
+      if (! CONST_STRNEQ (name, ".gptab."))
 	return FALSE;
       break;
     case SHT_MIPS_UCODE:
@@ -5430,7 +5430,7 @@ _bfd_mips_elf_section_from_shdr (bfd *abfd,
 	return FALSE;
       break;
     case SHT_MIPS_CONTENT:
-      if (strncmp (name, ".MIPS.content", sizeof ".MIPS.content" - 1) != 0)
+      if (! CONST_STRNEQ (name, ".MIPS.content"))
 	return FALSE;
       break;
     case SHT_MIPS_OPTIONS:
@@ -5438,7 +5438,7 @@ _bfd_mips_elf_section_from_shdr (bfd *abfd,
 	return FALSE;
       break;
     case SHT_MIPS_DWARF:
-      if (strncmp (name, ".debug_", sizeof ".debug_" - 1) != 0)
+      if (! CONST_STRNEQ (name, ".debug_"))
 	return FALSE;
       break;
     case SHT_MIPS_SYMBOL_LIB:
@@ -5446,9 +5446,8 @@ _bfd_mips_elf_section_from_shdr (bfd *abfd,
 	return FALSE;
       break;
     case SHT_MIPS_EVENTS:
-      if (strncmp (name, ".MIPS.events", sizeof ".MIPS.events" - 1) != 0
-	  && strncmp (name, ".MIPS.post_rel",
-		      sizeof ".MIPS.post_rel" - 1) != 0)
+      if (! CONST_STRNEQ (name, ".MIPS.events")
+	  && ! CONST_STRNEQ (name, ".MIPS.post_rel"))
 	return FALSE;
       break;
     default:
@@ -5568,7 +5567,7 @@ _bfd_mips_elf_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
     }
   else if (strcmp (name, ".conflict") == 0)
     hdr->sh_type = SHT_MIPS_CONFLICT;
-  else if (strncmp (name, ".gptab.", sizeof ".gptab." - 1) == 0)
+  else if (CONST_STRNEQ (name, ".gptab."))
     {
       hdr->sh_type = SHT_MIPS_GPTAB;
       hdr->sh_entsize = sizeof (Elf32_External_gptab);
@@ -5625,7 +5624,7 @@ _bfd_mips_elf_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
       hdr->sh_type = SHT_MIPS_IFACE;
       hdr->sh_flags |= SHF_MIPS_NOSTRIP;
     }
-  else if (strncmp (name, ".MIPS.content", strlen (".MIPS.content")) == 0)
+  else if (CONST_STRNEQ (name, ".MIPS.content"))
     {
       hdr->sh_type = SHT_MIPS_CONTENT;
       hdr->sh_flags |= SHF_MIPS_NOSTRIP;
@@ -5637,7 +5636,7 @@ _bfd_mips_elf_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
       hdr->sh_entsize = 1;
       hdr->sh_flags |= SHF_MIPS_NOSTRIP;
     }
-  else if (strncmp (name, ".debug_", sizeof ".debug_" - 1) == 0)
+  else if (CONST_STRNEQ (name, ".debug_"))
     hdr->sh_type = SHT_MIPS_DWARF;
   else if (strcmp (name, ".MIPS.symlib") == 0)
     {
@@ -5645,9 +5644,8 @@ _bfd_mips_elf_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
       /* The sh_link and sh_info fields are set in
          final_write_processing.  */
     }
-  else if (strncmp (name, ".MIPS.events", sizeof ".MIPS.events" - 1) == 0
-	   || strncmp (name, ".MIPS.post_rel",
-		       sizeof ".MIPS.post_rel" - 1) == 0)
+  else if (CONST_STRNEQ (name, ".MIPS.events")
+	   || CONST_STRNEQ (name, ".MIPS.post_rel"))
     {
       hdr->sh_type = SHT_MIPS_EVENTS;
       hdr->sh_flags |= SHF_MIPS_NOSTRIP;
@@ -6118,7 +6116,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
   /* Check for the mips16 stub sections.  */
 
   name = bfd_get_section_name (abfd, sec);
-  if (strncmp (name, FN_STUB, sizeof FN_STUB - 1) == 0)
+  if (CONST_STRNEQ (name, FN_STUB))
     {
       unsigned long r_symndx;
 
@@ -6143,12 +6141,9 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      /* We can ignore stub sections when looking for relocs.  */
 	      if ((o->flags & SEC_RELOC) == 0
 		  || o->reloc_count == 0
-		  || strncmp (bfd_get_section_name (abfd, o), FN_STUB,
-			      sizeof FN_STUB - 1) == 0
-		  || strncmp (bfd_get_section_name (abfd, o), CALL_STUB,
-			      sizeof CALL_STUB - 1) == 0
-		  || strncmp (bfd_get_section_name (abfd, o), CALL_FP_STUB,
-			      sizeof CALL_FP_STUB - 1) == 0)
+		  || CONST_STRNEQ (bfd_get_section_name (abfd, o), FN_STUB)
+		  || CONST_STRNEQ (bfd_get_section_name (abfd, o), CALL_STUB)
+		  || CONST_STRNEQ (bfd_get_section_name (abfd, o), CALL_FP_STUB))
 		continue;
 
 	      sec_relocs
@@ -6224,8 +6219,8 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  mips_elf_hash_table (info)->mips16_stubs_seen = TRUE;
 	}
     }
-  else if (strncmp (name, CALL_STUB, sizeof CALL_STUB - 1) == 0
-	   || strncmp (name, CALL_FP_STUB, sizeof CALL_FP_STUB - 1) == 0)
+  else if (CONST_STRNEQ (name, CALL_STUB)
+	   || CONST_STRNEQ (name, CALL_FP_STUB))
     {
       unsigned long r_symndx;
       struct mips_elf_link_hash_entry *h;
@@ -6254,7 +6249,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
       /* H is the symbol this stub is for.  */
 
-      if (strncmp (name, CALL_FP_STUB, sizeof CALL_FP_STUB - 1) == 0)
+      if (CONST_STRNEQ (name, CALL_FP_STUB))
 	loc = &h->call_fp_stub;
       else
 	loc = &h->call_stub;
@@ -6639,12 +6634,9 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
          References from a stub section do not count.  */
       if (h != NULL
 	  && r_type != R_MIPS16_26
-	  && strncmp (bfd_get_section_name (abfd, sec), FN_STUB,
-		      sizeof FN_STUB - 1) != 0
-	  && strncmp (bfd_get_section_name (abfd, sec), CALL_STUB,
-		      sizeof CALL_STUB - 1) != 0
-	  && strncmp (bfd_get_section_name (abfd, sec), CALL_FP_STUB,
-		      sizeof CALL_FP_STUB - 1) != 0)
+	  && ! CONST_STRNEQ (bfd_get_section_name (abfd, sec), FN_STUB)
+	  && ! CONST_STRNEQ (bfd_get_section_name (abfd, sec), CALL_STUB)
+	  && ! CONST_STRNEQ (bfd_get_section_name (abfd, sec), CALL_FP_STUB))
 	{
 	  struct mips_elf_link_hash_entry *mh;
 
@@ -7292,7 +7284,7 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
       if ((s->flags & SEC_LINKER_CREATED) == 0)
 	continue;
 
-      if (strncmp (name, ".rel", 4) == 0)
+      if (CONST_STRNEQ (name, ".rel"))
 	{
 	  if (s->size != 0)
 	    {
@@ -7344,7 +7336,7 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	      mips_elf_allocate_dynamic_relocations (dynobj, info, count);
 	    }
 	}
-      else if (!htab->is_vxworks && strncmp (name, ".got", 4) == 0)
+      else if (!htab->is_vxworks && CONST_STRNEQ (name, ".got"))
 	{
 	  /* _bfd_mips_elf_always_size_sections() has already done
 	     most of the work, but some symbols may have been mapped
@@ -7420,16 +7412,16 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	}
       else if (! info->shared
 	       && ! mips_elf_hash_table (info)->use_rld_obj_head
-	       && strncmp (name, ".rld_map", 8) == 0)
+	       && CONST_STRNEQ (name, ".rld_map"))
 	{
 	  /* We add a room for __rld_map.  It will be filled in by the
 	     rtld to contain a pointer to the _r_debug structure.  */
 	  s->size += 4;
 	}
       else if (SGI_COMPAT (output_bfd)
-	       && strncmp (name, ".compact_rel", 12) == 0)
+	       && CONST_STRNEQ (name, ".compact_rel"))
 	s->size += mips_elf_hash_table (info)->compact_rel_size;
-      else if (strncmp (name, ".init", 5) != 0
+      else if (! CONST_STRNEQ (name, ".init")
 	       && s != htab->sgotplt
 	       && s != htab->splt)
 	{
@@ -9089,7 +9081,7 @@ _bfd_mips_elf_final_write_processing (bfd *abfd,
 	  BFD_ASSERT ((*hdrpp)->bfd_section != NULL);
 	  name = bfd_get_section_name (abfd, (*hdrpp)->bfd_section);
 	  BFD_ASSERT (name != NULL
-		      && strncmp (name, ".gptab.", sizeof ".gptab." - 1) == 0);
+		      && CONST_STRNEQ (name, ".gptab."));
 	  sec = bfd_get_section_by_name (abfd, name + sizeof ".gptab" - 1);
 	  BFD_ASSERT (sec != NULL);
 	  (*hdrpp)->sh_info = elf_section_data (sec)->this_idx;
@@ -9099,8 +9091,7 @@ _bfd_mips_elf_final_write_processing (bfd *abfd,
 	  BFD_ASSERT ((*hdrpp)->bfd_section != NULL);
 	  name = bfd_get_section_name (abfd, (*hdrpp)->bfd_section);
 	  BFD_ASSERT (name != NULL
-		      && strncmp (name, ".MIPS.content",
-				  sizeof ".MIPS.content" - 1) == 0);
+		      && CONST_STRNEQ (name, ".MIPS.content"));
 	  sec = bfd_get_section_by_name (abfd,
 					 name + sizeof ".MIPS.content" - 1);
 	  BFD_ASSERT (sec != NULL);
@@ -9120,13 +9111,12 @@ _bfd_mips_elf_final_write_processing (bfd *abfd,
 	  BFD_ASSERT ((*hdrpp)->bfd_section != NULL);
 	  name = bfd_get_section_name (abfd, (*hdrpp)->bfd_section);
 	  BFD_ASSERT (name != NULL);
-	  if (strncmp (name, ".MIPS.events", sizeof ".MIPS.events" - 1) == 0)
+	  if (CONST_STRNEQ (name, ".MIPS.events"))
 	    sec = bfd_get_section_by_name (abfd,
 					   name + sizeof ".MIPS.events" - 1);
 	  else
 	    {
-	      BFD_ASSERT (strncmp (name, ".MIPS.post_rel",
-				   sizeof ".MIPS.post_rel" - 1) == 0);
+	      BFD_ASSERT (CONST_STRNEQ (name, ".MIPS.post_rel"));
 	      sec = bfd_get_section_by_name (abfd,
 					     (name
 					      + sizeof ".MIPS.post_rel" - 1));
@@ -10435,7 +10425,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	  mdebug_sec = o;
 	}
 
-      if (strncmp (o->name, ".gptab.", sizeof ".gptab." - 1) == 0)
+      if (CONST_STRNEQ (o->name, ".gptab."))
 	{
 	  const char *subname;
 	  unsigned int c;
@@ -11106,13 +11096,13 @@ _bfd_mips_elf_print_private_bfd_data (bfd *abfd, void *ptr)
 
 const struct bfd_elf_special_section _bfd_mips_elf_special_sections[] =
 {
-  { ".lit4",   5,  0, SHT_PROGBITS,   SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
-  { ".lit8",   5,  0, SHT_PROGBITS,   SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
-  { ".mdebug", 7,  0, SHT_MIPS_DEBUG, 0 },
-  { ".sbss",   5, -2, SHT_NOBITS,     SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
-  { ".sdata",  6, -2, SHT_PROGBITS,   SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
-  { ".ucode",  6,  0, SHT_MIPS_UCODE, 0 },
-  { NULL,      0,  0, 0,              0 }
+  { STRING_COMMA_LEN (".lit4"),   0, SHT_PROGBITS,   SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
+  { STRING_COMMA_LEN (".lit8"),   0, SHT_PROGBITS,   SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
+  { STRING_COMMA_LEN (".mdebug"), 0, SHT_MIPS_DEBUG, 0 },
+  { STRING_COMMA_LEN (".sbss"),  -2, SHT_NOBITS,     SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
+  { STRING_COMMA_LEN (".sdata"), -2, SHT_PROGBITS,   SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
+  { STRING_COMMA_LEN (".ucode"),  0, SHT_MIPS_UCODE, 0 },
+  { NULL,                     0,  0, 0,              0 }
 };
 
 /* Merge non visibility st_other attributes.  Ensure that the

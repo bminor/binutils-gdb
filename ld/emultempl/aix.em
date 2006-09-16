@@ -10,7 +10,7 @@ cat >e${EMULATION_NAME}.c <<EOF
 
 /* AIX emulation code for ${EMULATION_NAME}
    Copyright 1991, 1993, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005
+   2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
    Written by Steve Chamberlain <sac@cygnus.com>
    AIX support by Ian Lance Taylor <ian@cygnus.com>
@@ -268,7 +268,7 @@ gld${EMULATION_NAME}_parse_args (int argc, char **argv)
   if (indx == 0)
     indx = 1;
 
-  if (indx < argc && strncmp (argv[indx], "-b", 2) == 0)
+  if (indx < argc && CONST_STRNEQ (argv[indx], "-b"))
     {
       char *s;
 

@@ -2181,7 +2181,7 @@ find_debug_info (bfd *abfd, asection *after_sec)
       if (strcmp (msec->name, DWARF2_DEBUG_INFO) == 0)
 	return msec;
 
-      if (strncmp (msec->name, GNU_LINKONCE_INFO, strlen (GNU_LINKONCE_INFO)) == 0)
+      if (CONST_STRNEQ (msec->name, GNU_LINKONCE_INFO))
 	return msec;
 
       msec = msec->next;

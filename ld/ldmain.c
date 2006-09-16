@@ -608,7 +608,7 @@ get_sysroot (int argc, char **argv)
   const char *path;
 
   for (i = 1; i < argc; i++)
-    if (strncmp (argv[i], "--sysroot=", strlen ("--sysroot=")) == 0)
+    if (CONST_STRNEQ (argv[i], "--sysroot="))
       return argv[i] + strlen ("--sysroot=");
 
   path = get_relative_sysroot (BINDIR);
@@ -637,7 +637,7 @@ get_emulation (int argc, char **argv)
 
   for (i = 1; i < argc; i++)
     {
-      if (!strncmp (argv[i], "-m", 2))
+      if (CONST_STRNEQ (argv[i], "-m"))
 	{
 	  if (argv[i][2] == '\0')
 	    {

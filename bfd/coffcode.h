@@ -427,7 +427,7 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
       styp_flags = STYP_LIT;
 #endif /* _LIT */
     }
-  else if (!strncmp (sec_name, DOT_DEBUG, sizeof (DOT_DEBUG) - 1))
+  else if (CONST_STRNEQ (sec_name, DOT_DEBUG))
     {
       /* Handle the XCOFF debug section and DWARF2 debug sections.  */
       if (!sec_name[6])
@@ -435,12 +435,12 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
       else
         styp_flags = STYP_DEBUG_INFO;
     }
-  else if (!strncmp (sec_name, ".stab", 5))
+  else if (CONST_STRNEQ (sec_name, ".stab"))
     {
       styp_flags = STYP_DEBUG_INFO;
     }
 #ifdef COFF_LONG_SECTION_NAMES
-  else if (!strncmp (sec_name, GNU_LINKONCE_WI, sizeof (GNU_LINKONCE_WI) - 1))
+  else if (CONST_STRNEQ (sec_name, GNU_LINKONCE_WI))
     {
       styp_flags = STYP_DEBUG_INFO;
     }
@@ -529,8 +529,8 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
      but there are more IMAGE_SCN_* flags.  */
 
   /* FIXME: There is no gas syntax to specify the debug section flag.  */
-  if (strncmp (sec_name, DOT_DEBUG, sizeof (DOT_DEBUG) - 1) == 0
-      || strncmp (sec_name, GNU_LINKONCE_WI, sizeof (GNU_LINKONCE_WI) - 1) == 0)
+  if (CONST_STRNEQ (sec_name, DOT_DEBUG)
+      || CONST_STRNEQ (sec_name, GNU_LINKONCE_WI))
     sec_flags = SEC_DEBUGGING;
 
   /* skip LOAD */
@@ -674,14 +674,14 @@ styp_to_sec_flags (bfd *abfd ATTRIBUTE_UNUSED,
 #endif
 	sec_flags |= SEC_ALLOC;
     }
-  else if (strncmp (name, DOT_DEBUG, sizeof (DOT_DEBUG) - 1) == 0
+  else if (CONST_STRNEQ (name, DOT_DEBUG)
 #ifdef _COMMENT
 	   || strcmp (name, _COMMENT) == 0
 #endif
 #ifdef COFF_LONG_SECTION_NAMES
-	   || strncmp (name, GNU_LINKONCE_WI, sizeof (GNU_LINKONCE_WI) - 1) == 0
+	   || CONST_STRNEQ (name, GNU_LINKONCE_WI)
 #endif
-	   || strncmp (name, ".stab", 5) == 0)
+	   || CONST_STRNEQ (name, ".stab"))
     {
 #ifdef COFF_PAGE_SIZE
       sec_flags |= SEC_DEBUGGING;
@@ -715,7 +715,7 @@ styp_to_sec_flags (bfd *abfd ATTRIBUTE_UNUSED,
      The symbols will be defined as weak, so that multiple definitions
      are permitted.  The GNU linker extension is to actually discard
      all but one of the sections.  */
-  if (strncmp (name, ".gnu.linkonce", sizeof ".gnu.linkonce" - 1) == 0)
+  if (CONST_STRNEQ (name, ".gnu.linkonce"))
     sec_flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 #endif
 
@@ -1071,7 +1071,7 @@ styp_to_sec_flags (bfd *abfd,
 	  /* The MS PE spec sets the DISCARDABLE flag on .reloc sections
 	     but we do not want them to be labelled as debug section, since
 	     then strip would remove them.  */
-	  if (strncmp (name, ".reloc", sizeof ".reloc" - 1) != 0)
+	  if (! CONST_STRNEQ (name, ".reloc"))
 	    sec_flags |= SEC_DEBUGGING;
 	  break;
 	case IMAGE_SCN_MEM_SHARED:
@@ -1126,7 +1126,7 @@ styp_to_sec_flags (bfd *abfd,
      The symbols will be defined as weak, so that multiple definitions
      are permitted.  The GNU linker extension is to actually discard
      all but one of the sections.  */
-  if (strncmp (name, ".gnu.linkonce", sizeof ".gnu.linkonce" - 1) == 0)
+  if (CONST_STRNEQ (name, ".gnu.linkonce"))
     sec_flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 #endif
 

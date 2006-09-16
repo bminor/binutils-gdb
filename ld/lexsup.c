@@ -1308,7 +1308,7 @@ parse_args (unsigned argc, char **argv)
 	  link_info.discard = discard_all;
 	  break;
 	case 'Y':
-	  if (strncmp (optarg, "P,", 2) == 0)
+	  if (CONST_STRNEQ (optarg, "P,"))
 	    optarg += 2;
 	  if (default_dirlist != NULL)
 	    free (default_dirlist);

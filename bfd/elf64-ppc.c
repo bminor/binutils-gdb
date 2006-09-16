@@ -2520,13 +2520,13 @@ ppc64_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 
 static const struct bfd_elf_special_section ppc64_elf_special_sections[]=
 {
-  { ".plt",     4,  0, SHT_NOBITS,   0 },
-  { ".sbss",    5, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
-  { ".sdata",   6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
-  { ".toc",     4,  0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
-  { ".toc1",    5,  0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
-  { ".tocbss",  7,  0, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
-  { NULL,       0,  0, 0,            0 }
+  { STRING_COMMA_LEN (".plt"),    0, SHT_NOBITS,   0 },
+  { STRING_COMMA_LEN (".sbss"),  -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
+  { STRING_COMMA_LEN (".sdata"), -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { STRING_COMMA_LEN (".toc"),    0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { STRING_COMMA_LEN (".toc1"),   0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { STRING_COMMA_LEN (".tocbss"), 0, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
+  { NULL,                     0,  0, 0,            0 }
 };
 
 struct _ppc64_elf_section_data
@@ -4575,7 +4575,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  || h == &htab->tls_get_addr_fd->elf)
 		sec->has_tls_reloc = 1;
 	      else if (htab->tls_get_addr == NULL
-		       && !strncmp (h->root.root.string, ".__tls_get_addr", 15)
+		       && CONST_STRNEQ (h->root.root.string, ".__tls_get_addr")
 		       && (h->root.root.string[15] == 0
 			   || h->root.root.string[15] == '@'))
 		{
@@ -4583,7 +4583,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  sec->has_tls_reloc = 1;
 		}
 	      else if (htab->tls_get_addr_fd == NULL
-		       && !strncmp (h->root.root.string, "__tls_get_addr", 14)
+		       && CONST_STRNEQ (h->root.root.string, "__tls_get_addr")
 		       && (h->root.root.string[14] == 0
 			   || h->root.root.string[14] == '@'))
 		{
@@ -4776,7 +4776,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  if (name == NULL)
 		    return FALSE;
 
-		  if (strncmp (name, ".rela", 5) != 0
+		  if (! CONST_STRNEQ (name, ".rela")
 		      || strcmp (bfd_get_section_name (abfd, sec),
 				 name + 5) != 0)
 		    {
@@ -7913,7 +7913,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
 	}
-      else if (strncmp (bfd_get_section_name (dynobj, s), ".rela", 5) == 0)
+      else if (CONST_STRNEQ (bfd_get_section_name (dynobj, s), ".rela"))
 	{
 	  if (s->size != 0)
 	    {

@@ -562,11 +562,11 @@ bfd_wrapped_link_hash_lookup (bfd *abfd,
 
 #undef WRAP
 
-#undef REAL
+#undef  REAL
 #define REAL "__real_"
 
       if (*l == '_'
-	  && strncmp (l, REAL, sizeof REAL - 1) == 0
+	  && CONST_STRNEQ (l, REAL)
 	  && bfd_hash_lookup (info->wrap_hash, l + sizeof REAL - 1,
 			      FALSE, FALSE) != NULL)
 	{
@@ -1659,8 +1659,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 		s = name + 1;
 		while (*s == '_')
 		  ++s;
-		if (s[0] == 'G'
-		    && strncmp (s, CONS_PREFIX, CONS_PREFIX_LEN - 1) == 0)
+		if (s[0] == 'G' && CONST_STRNEQ (s, CONS_PREFIX))
 		  {
 		    char c;
 

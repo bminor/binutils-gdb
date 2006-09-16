@@ -655,7 +655,7 @@ i370_elf_size_dynamic_sections (bfd *output_bfd,
 	  /* Remember whether there is a PLT.  */
 	  plt = s->size != 0;
 	}
-      else if (strncmp (name, ".rela", 5) == 0)
+      else if (CONST_STRNEQ (name, ".rela"))
 	{
 	  if (s->size != 0)
 	    {
@@ -867,7 +867,7 @@ i370_elf_check_relocs (bfd *abfd,
 	      if (name == NULL)
 		return FALSE;
 
-	      BFD_ASSERT (strncmp (name, ".rela", 5) == 0
+	      BFD_ASSERT (CONST_STRNEQ (name, ".rela")
 			  && strcmp (bfd_get_section_name (abfd, sec), name + 5) == 0);
 
 	      sreloc = bfd_get_section_by_name (dynobj, name);
@@ -1236,7 +1236,7 @@ i370_elf_relocate_section (bfd *output_bfd,
 		  if (name == NULL)
 		    return FALSE;
 
-		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
+		  BFD_ASSERT (CONST_STRNEQ (name, ".rela")
 			      && strcmp (bfd_get_section_name (input_bfd,
 							       input_section),
 					 name + 5) == 0);

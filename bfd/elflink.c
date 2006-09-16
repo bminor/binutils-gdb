@@ -3204,7 +3204,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  const char *name;
 
 	  name = bfd_get_section_name (abfd, s);
-	  if (strncmp (name, ".gnu.warning.", sizeof ".gnu.warning." - 1) == 0)
+	  if (CONST_STRNEQ (name, ".gnu.warning."))
 	    {
 	      char *msg;
 	      bfd_size_type sz;
@@ -4552,7 +4552,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  asection *stab;
 
 	  for (stab = abfd->sections; stab; stab = stab->next)
-	    if (strncmp (".stab", stab->name, 5) == 0
+	    if (CONST_STRNEQ (stab->name, ".stab")
 		&& (!stab->name[5] ||
 		    (stab->name[5] == '.' && ISDIGIT (stab->name[6])))
 		&& (stab->flags & SEC_MERGE) == 0
@@ -9694,7 +9694,7 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
       for (o = sub->sections; o != NULL; o = o->next)
 	if (!o->gc_mark && o->gc_mark_from_eh && (o->flags & SEC_CODE) == 0)
 	  {
-	    if (strncmp (o->name, ".gcc_except_table.", 18) == 0)
+	    if (CONST_STRNEQ (o->name, ".gcc_except_table."))
 	      {
 		unsigned long len;
 		char *fn_name;
@@ -9704,7 +9704,7 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
 		fn_name = bfd_malloc (len + 6);
 		if (fn_name == NULL)
 		  return FALSE;
-		memcpy (fn_name, ".text.", 6);
+		memcpy (fn_name, STRING_COMMA_LEN (".text."));
 		memcpy (fn_name + 6, o->name + 18, len);
 		fn_text = bfd_get_section_by_name (sub, fn_name);
 		free (fn_name);
@@ -10224,7 +10224,7 @@ _bfd_elf_section_already_linked (bfd *abfd, struct bfd_section * sec)
 
   name = bfd_get_section_name (abfd, sec);
 
-  if (strncmp (name, ".gnu.linkonce.", sizeof (".gnu.linkonce.") - 1) == 0
+  if (CONST_STRNEQ (name, ".gnu.linkonce.")
       && (p = strchr (name + sizeof (".gnu.linkonce.") - 1, '.')) != NULL)
     p++;
   else

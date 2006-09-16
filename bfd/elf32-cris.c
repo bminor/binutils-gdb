@@ -1388,7 +1388,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  if (name == NULL)
 		    return FALSE;
 
-		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
+		  BFD_ASSERT (CONST_STRNEQ (name, ".rela")
 			      && strcmp (bfd_get_section_name (input_bfd,
 							       input_section),
 					 name + 5) == 0);
@@ -2799,7 +2799,7 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 	      if (name == NULL)
 		return FALSE;
 
-	      BFD_ASSERT (strncmp (name, ".rela", 5) == 0
+	      BFD_ASSERT (CONST_STRNEQ (name, ".rela")
 			  && strcmp (bfd_get_section_name (abfd, sec),
 				     name + 5) == 0);
 
@@ -2962,7 +2962,7 @@ elf_cris_size_dynamic_sections (output_bfd, info)
 	  /* Remember whether there is a PLT.  */
 	  plt = s->size != 0;
 	}
-      else if (strncmp (name, ".rela", 5) == 0)
+      else if (CONST_STRNEQ (name, ".rela"))
 	{
 	  if (s->size != 0)
 	    {
@@ -2976,7 +2976,7 @@ elf_cris_size_dynamic_sections (output_bfd, info)
 	      s->reloc_count = 0;
 	    }
 	}
-      else if (strncmp (name, ".got", 4) != 0
+      else if (! CONST_STRNEQ (name, ".got")
 	       && strcmp (name, ".dynbss") != 0)
 	{
 	  /* It's not one of our sections, so don't allocate space.  */

@@ -164,42 +164,42 @@ pe_details_type;
 
 static autofilter_entry_type autofilter_symbollist_generic[] =
 {
-  { ".text", 5 },
+  { STRING_COMMA_LEN (".text") },
   /* Entry point symbols.  */
-  { "DllMain", 7 },
-  { "DllMainCRTStartup", 17 },
-  { "_DllMainCRTStartup", 18 },
+  { STRING_COMMA_LEN ("DllMain") },
+  { STRING_COMMA_LEN ("DllMainCRTStartup") },
+  { STRING_COMMA_LEN ("_DllMainCRTStartup") },
   /* Runtime pseudo-reloc.  */
-  { "_pei386_runtime_relocator", 25 },
-  { "do_pseudo_reloc", 15 },
-  { NULL, 0 }
+  { STRING_COMMA_LEN ("_pei386_runtime_relocator") },
+  { STRING_COMMA_LEN ("do_pseudo_reloc") },
+  { STRING_COMMA_LEN (NULL) }
 };
 
 static autofilter_entry_type autofilter_symbollist_i386[] =
 {
-  { ".text", 5 },
+  { STRING_COMMA_LEN (".text") },
   /* Entry point symbols, and entry hooks.  */
-  { "cygwin_crt0", 11 },
-  { "DllMain@12", 10 },
-  { "DllEntryPoint@0", 15 },
-  { "DllMainCRTStartup@12", 20 },
-  { "_cygwin_dll_entry@12", 20 },
-  { "_cygwin_crt0_common@8", 21 },
-  { "_cygwin_noncygwin_dll_entry@12", 30 },
-  { "cygwin_attach_dll", 17 },
-  { "cygwin_premain0", 15 },
-  { "cygwin_premain1", 15 },
-  { "cygwin_premain2", 15 },
-  { "cygwin_premain3", 15 },
+  { STRING_COMMA_LEN ("cygwin_crt0") },
+  { STRING_COMMA_LEN ("DllMain@12") },
+  { STRING_COMMA_LEN ("DllEntryPoint@0") },
+  { STRING_COMMA_LEN ("DllMainCRTStartup@12") },
+  { STRING_COMMA_LEN ("_cygwin_dll_entry@12") },
+  { STRING_COMMA_LEN ("_cygwin_crt0_common@8") },
+  { STRING_COMMA_LEN ("_cygwin_noncygwin_dll_entry@12") },
+  { STRING_COMMA_LEN ("cygwin_attach_dll") },
+  { STRING_COMMA_LEN ("cygwin_premain0") },
+  { STRING_COMMA_LEN ("cygwin_premain1") },
+  { STRING_COMMA_LEN ("cygwin_premain2") },
+  { STRING_COMMA_LEN ("cygwin_premain3") },
   /* Runtime pseudo-reloc.  */
-  { "_pei386_runtime_relocator", 25 },
-  { "do_pseudo_reloc", 15 },
+  { STRING_COMMA_LEN ("_pei386_runtime_relocator") },
+  { STRING_COMMA_LEN ("do_pseudo_reloc") },
   /* Global vars that should not be exported.  */
-  { "impure_ptr", 10 },
-  { "_impure_ptr", 11 },
-  { "_fmode", 6 },
-  { "environ", 7 },
-  { NULL, 0 }
+  { STRING_COMMA_LEN ("impure_ptr") },
+  { STRING_COMMA_LEN ("_impure_ptr") },
+  { STRING_COMMA_LEN ("_fmode") },
+  { STRING_COMMA_LEN ("environ") },
+  { STRING_COMMA_LEN (NULL) }
 };
 
 #define PE_ARCH_i386	 1
@@ -273,51 +273,51 @@ static pe_details_type *pe_details;
 /* Do not specify library suffix explicitly, to allow for dllized versions.  */
 static autofilter_entry_type autofilter_liblist[] =
 {
-  { "libcegcc", 8 },
-  { "libcygwin", 9 },
-  { "libgcc", 6 },
-  { "libstdc++", 9 },
-  { "libmingw32", 10 },
-  { "libmingwex", 10 },
-  { "libg2c", 6 },
-  { "libsupc++", 9 },
-  { "libobjc", 7 },
-  { "libgcj", 6 },
-  { NULL, 0 }
+  { STRING_COMMA_LEN ("libcegcc") },
+  { STRING_COMMA_LEN ("libcygwin") },
+  { STRING_COMMA_LEN ("libgcc") },
+  { STRING_COMMA_LEN ("libstdc++") },
+  { STRING_COMMA_LEN ("libmingw32") },
+  { STRING_COMMA_LEN ("libmingwex") },
+  { STRING_COMMA_LEN ("libg2c") },
+  { STRING_COMMA_LEN ("libsupc++") },
+  { STRING_COMMA_LEN ("libobjc") },
+  { STRING_COMMA_LEN ("libgcj") },
+  { STRING_COMMA_LEN (NULL) }
 };
 
 static autofilter_entry_type autofilter_objlist[] =
 {
-  { "crt0.o", 6 },
-  { "crt1.o", 6 },
-  { "crt2.o", 6 },
-  { "dllcrt1.o", 9 },
-  { "dllcrt2.o", 9 },
-  { "gcrt0.o", 7 },
-  { "gcrt1.o", 7 },
-  { "gcrt2.o", 7 },
-  { "crtbegin.o", 10 },
-  { "crtend.o", 8 },
-  { NULL, 0 }
+  { STRING_COMMA_LEN ("crt0.o") },
+  { STRING_COMMA_LEN ("crt1.o") },
+  { STRING_COMMA_LEN ("crt2.o") },
+  { STRING_COMMA_LEN ("dllcrt1.o") },
+  { STRING_COMMA_LEN ("dllcrt2.o") },
+  { STRING_COMMA_LEN ("gcrt0.o") },
+  { STRING_COMMA_LEN ("gcrt1.o") },
+  { STRING_COMMA_LEN ("gcrt2.o") },
+  { STRING_COMMA_LEN ("crtbegin.o") },
+  { STRING_COMMA_LEN ("crtend.o") },
+  { STRING_COMMA_LEN (NULL) }
 };
 
 static autofilter_entry_type autofilter_symbolprefixlist[] =
 {
-  { "__imp_", 6 },
+  { STRING_COMMA_LEN ("__imp_") },
   /* Do __imp_ explicitly to save time.  */
-  { "__rtti_", 7 },
+  { STRING_COMMA_LEN ("__rtti_") },
   /* Don't re-export auto-imported symbols.  */
-  { "_nm_", 4 },
-  { "__builtin_", 10 },
+  { STRING_COMMA_LEN ("_nm_") },
+  { STRING_COMMA_LEN ("__builtin_") },
   /* Don't export symbols specifying internal DLL layout.  */
-  { "_head_", 6 },
-  { NULL, 0 }
+  { STRING_COMMA_LEN ("_head_") },
+  { STRING_COMMA_LEN (NULL) }
 };
 
 static autofilter_entry_type autofilter_symbolsuffixlist[] =
 {
-  { "_iname", 6 },
-  { NULL, 0 }
+  { STRING_COMMA_LEN ("_iname") },
+  { STRING_COMMA_LEN (NULL) }
 };
 
 #define U(str) (pe_details->underscored ? "_" str : str)
@@ -432,7 +432,7 @@ auto_export (bfd *abfd, def_file *d, const char *n)
     libname = lbasename (abfd->my_archive->filename);
 
   /* We should not re-export imported stuff.  */
-  if (strncmp (n, "_imp_", 5) == 0)
+  if (CONST_STRNEQ (n, "_imp_"))
     return 0;
 
   for (i = 0; i < d->num_exports; i++)
@@ -2674,7 +2674,7 @@ pe_implied_import_dll (const char *filename)
 
       /* Skip unwanted symbols, which are
 	 exported in buggy auto-import releases.  */
-      if (strncmp (erva + name_rva, "_nm_", 4) != 0)
+      if (! CONST_STRNEQ (erva + name_rva, "_nm_"))
  	{
  	  /* is_data is true if the address is in the data, rdata or bss
 	     segment.  */

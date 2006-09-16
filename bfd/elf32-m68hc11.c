@@ -1,5 +1,5 @@
 /* Motorola 68HC11-specific support for 32-bit ELF
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2006
    Free Software Foundation, Inc.
    Contributed by Stephane Carrez (stcarrez@nerim.fr)
    (Heavily copied from the D10V port by Martin Hunt (hunt@cygnus.com))
@@ -1259,11 +1259,11 @@ m68hc11_elf_relax_delete_bytes (bfd *abfd, asection *sec,
      vectors.  */
 static const struct bfd_elf_special_section elf32_m68hc11_special_sections[] =
 {
-  { ".eeprom",   7, 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
-  { ".page0",    6, 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
-  { ".softregs", 9, 0, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
-  { ".vectors",  8, 0, SHT_PROGBITS, SHF_ALLOC },
-  { NULL,        0, 0, 0,            0 }
+  { STRING_COMMA_LEN (".eeprom"),   0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { STRING_COMMA_LEN (".page0"),    0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { STRING_COMMA_LEN (".softregs"), 0, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
+  { STRING_COMMA_LEN (".vectors"),  0, SHT_PROGBITS, SHF_ALLOC },
+  { NULL,                       0,  0, 0,            0 }
 };
 
 #define ELF_ARCH		bfd_arch_m68hc11

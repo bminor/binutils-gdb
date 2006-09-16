@@ -1177,7 +1177,7 @@ elf_i386_check_relocs (bfd *abfd,
 		  if (name == NULL)
 		    return FALSE;
 
-		  if (strncmp (name, ".rel", 4) != 0
+		  if (! CONST_STRNEQ (name, ".rel")
 		      || strcmp (bfd_get_section_name (abfd, sec),
 				 name + 4) != 0)
 		    {
@@ -2029,7 +2029,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  if (htab->elf.hplt != NULL)
 	    strip_section = FALSE;
 	}
-      else if (strncmp (bfd_get_section_name (dynobj, s), ".rel", 4) == 0)
+      else if (CONST_STRNEQ (bfd_get_section_name (dynobj, s), ".rel"))
 	{
 	  if (s->size != 0 && s != htab->srelplt && s != htab->srelplt2)
 	    relocs = TRUE;

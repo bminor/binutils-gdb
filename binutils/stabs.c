@@ -1,5 +1,5 @@
 /* stabs.c -- Parse stabs debugging information
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2006
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
@@ -1696,12 +1696,12 @@ parse_stab_range_type (void *dhandle, struct stab_handle *info, const char *type
 #define ULLHIGH "01777777777777777777777;"
       if (index_type == DEBUG_TYPE_NULL)
 	{
-	  if (strncmp (s2, LLLOW, sizeof LLLOW - 1) == 0
-	      && strncmp (s3, LLHIGH, sizeof LLHIGH - 1) == 0)
+	  if (CONST_STRNEQ (s2, LLLOW)
+	      && CONST_STRNEQ (s3, LLHIGH))
 	    return debug_make_int_type (dhandle, 8, FALSE);
 	  if (! ov2
 	      && n2 == 0
-	      && strncmp (s3, ULLHIGH, sizeof ULLHIGH - 1) == 0)
+	      && CONST_STRNEQ (s3, ULLHIGH))
 	    return debug_make_int_type (dhandle, 8, TRUE);
 	}
 
@@ -2832,7 +2832,7 @@ parse_stab_argtypes (void *dhandle, struct stab_handle *info,
 				   && (ISDIGIT (argtypes[2])
 				       || argtypes[2] == 'Q'
 				       || argtypes[2] == 't'))
-				  || strncmp (argtypes, "__ct", 4) == 0);
+				  || CONST_STRNEQ (argtypes, "__ct"));
 
   is_constructor = (is_full_physname_constructor
 		    || (tagname != NULL
@@ -2840,7 +2840,7 @@ parse_stab_argtypes (void *dhandle, struct stab_handle *info,
   is_destructor = ((argtypes[0] == '_'
 		    && (argtypes[1] == '$' || argtypes[1] == '.')
 		    && argtypes[2] == '_')
-		   || strncmp (argtypes, "__dt", 4) == 0);
+		   || CONST_STRNEQ (argtypes, "__dt"));
   is_v3 = argtypes[0] == '_' && argtypes[1] == 'Z';
 
   if (is_destructor || is_full_physname_constructor || is_v3)
@@ -3841,7 +3841,7 @@ stab_demangle_function_name (struct stab_demangle_info *minfo,
   *pp = scan + 2;
 
   if (*pp - name >= 5
-	   && strncmp (name, "type", 4) == 0
+	   && CONST_STRNEQ (name, "type")
 	   && (name[4] == '$' || name[4] == '.'))
     {
       const char *tem;

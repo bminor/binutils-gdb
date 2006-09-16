@@ -3653,7 +3653,7 @@ parse_arm_disassembler_option (char *option)
   if (option == NULL)
     return;
 
-  if (strneq (option, "reg-names-", 10))
+  if (CONST_STRNEQ (option, "reg-names-"))
     {
       int i;
 
@@ -3670,9 +3670,9 @@ parse_arm_disassembler_option (char *option)
 	/* XXX - should break 'option' at following delimiter.  */
 	fprintf (stderr, _("Unrecognised register name set: %s\n"), option);
     }
-  else if (strneq (option, "force-thumb", 11))
+  else if (CONST_STRNEQ (option, "force-thumb"))
     force_thumb = 1;
-  else if (strneq (option, "no-force-thumb", 14))
+  else if (CONST_STRNEQ (option, "no-force-thumb"))
     force_thumb = 0;
   else
     /* XXX - should break 'option' at following delimiter.  */

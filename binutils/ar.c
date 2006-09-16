@@ -430,7 +430,7 @@ main (int argc, char **argv)
 	usage (0);
       if (strcmp (argv[1], "-V") == 0
 	  || strcmp (argv[1], "-v") == 0
-	  || strncmp (argv[1], "--v", 3) == 0)
+	  || CONST_STRNEQ (argv[1], "--v"))
 	print_version ("ranlib");
       arg_index = 1;
       if (strcmp (argv[1], "-t") == 0)

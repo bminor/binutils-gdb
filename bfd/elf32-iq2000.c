@@ -1,5 +1,5 @@
 /* IQ2000-specific support for 32-bit ELF.
-   Copyright (C) 2003, 2004, 2005 Free Software Foundation, Inc.
+   Copyright (C) 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -452,9 +452,9 @@ iq2000_elf_check_relocs (bfd *abfd,
 
 	case R_IQ2000_32:
 	  /* For debug section, change to special harvard-aware relocations.  */
-	  if (memcmp (sec->name, ".debug", 6) == 0
-	      || memcmp (sec->name, ".stab", 5) == 0
-	      || memcmp (sec->name, ".eh_frame", 9) == 0)
+	  if (CONST_STRNEQ (sec->name, ".debug")
+	      || CONST_STRNEQ (sec->name, ".stab")
+	      || CONST_STRNEQ (sec->name, ".eh_frame"))
 	    {
 	      ((Elf_Internal_Rela *) rel)->r_info
 		= ELF32_R_INFO (ELF32_R_SYM (rel->r_info), R_IQ2000_32_DEBUG);

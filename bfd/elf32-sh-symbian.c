@@ -1,5 +1,5 @@
 /* Renesas / SuperH specific support for Symbian 32-bit ELF files
-   Copyright 2004, 2005
+   Copyright 2004, 2005, 2006
    Free Software Foundation, Inc.
    Contributed by Red Hat
 
@@ -225,7 +225,7 @@ sh_symbian_process_embedded_commands (struct bfd_link_info *info, bfd * abfd,
 	  break;
 
 	case 'I':
-	  if (strncmp (s, DIRECTIVE_IMPORT, strlen (DIRECTIVE_IMPORT)))
+	  if (! CONST_STRNEQ (s, DIRECTIVE_IMPORT))
 	    result = FALSE;
 	  else
 	    {
@@ -261,9 +261,9 @@ sh_symbian_process_embedded_commands (struct bfd_link_info *info, bfd * abfd,
 	      name_end_char = * new_name_end;
 	      * new_name_end = 0;
 
-	      /* Check to see if 'AS '... is present.  If se we have an IMPORT AS
-		 directive, otherwise we have an IMPORT directive.  */
-	      if (strncmp (s, DIRECTIVE_AS, strlen (DIRECTIVE_AS)))
+	      /* Check to see if 'AS '... is present.  If so we have an
+		 IMPORT AS directive, otherwise we have an IMPORT directive.  */
+	      if (! CONST_STRNEQ (s, DIRECTIVE_AS))
 		{
 		  /* Skip the new-line at the end of the name.  */
 		  if (SYMBIAN_DEBUG && name_end_char != '\n')
@@ -327,7 +327,7 @@ sh_symbian_process_embedded_commands (struct bfd_link_info *info, bfd * abfd,
 	  break;
 
 	case 'E':
-	  if (strncmp (s, DIRECTIVE_EXPORT, strlen (DIRECTIVE_EXPORT)))
+	  if (! CONST_STRNEQ (s, DIRECTIVE_EXPORT))
 	    result = FALSE;
 	  else
 	    {
