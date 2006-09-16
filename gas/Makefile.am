@@ -77,6 +77,7 @@ CPU_TYPES = \
 	pj \
 	ppc \
 	s390 \
+	score \
 	sh \
 	sh64 \
 	sparc \
@@ -264,6 +265,7 @@ TARGET_CPU_CFILES = \
 	config/tc-pj.c \
 	config/tc-ppc.c \
 	config/tc-s390.c \
+	config/tc-score.c \
 	config/tc-sh.c \
 	config/tc-sh64.c \
 	config/tc-sparc.c \
@@ -315,6 +317,7 @@ TARGET_CPU_HFILES = \
 	config/tc-pj.h \
 	config/tc-ppc.h \
 	config/tc-s390.h \
+	config/tc-score.h \
 	config/tc-sh.h \
 	config/tc-sh64.h \
 	config/tc-sparc.h \
@@ -1281,6 +1284,13 @@ DEPTC_s390_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
   struc-symbol.h dw2gencfi.h $(INCDIR)/elf/dwarf2.h $(INCDIR)/opcode/s390.h \
   $(INCDIR)/elf/s390.h $(INCDIR)/elf/reloc-macros.h
+DEPTC_score_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h  \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-score.h \
+  $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h  \
+  $(INCDIR)/elf/score.h $(INCDIR)/elf/reloc-macros.h \
+  dwarf2dbg.h dw2gencfi.h $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/opcode/score-inst.h $(INCDIR)/opcode/score-datadep.h
 DEPTC_sh_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-sh.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/sh.h $(INCDIR)/coff/external.h \
   $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h \

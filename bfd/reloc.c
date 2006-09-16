@@ -3966,6 +3966,43 @@ ENUMDOC
   Long displacement extension.
 
 ENUM
+  BFD_RELOC_SCORE_DUMMY1
+ENUMDOC
+  Score relocations
+ENUM
+  BFD_RELOC_SCORE_GPREL15
+ENUMDOC
+  Low 16 bit for load/store  
+ENUM
+  BFD_RELOC_SCORE_DUMMY2
+ENUMX
+  BFD_RELOC_SCORE_JMP
+ENUMDOC
+  This is a 24-bit reloc with the right 1 bit assumed to be 0
+ENUM
+  BFD_RELOC_SCORE_BRANCH
+ENUMDOC
+  This is a 19-bit reloc with the right 1 bit assumed to be 0
+ENUM
+  BFD_RELOC_SCORE16_JMP
+ENUMDOC
+  This is a 11-bit reloc with the right 1 bit assumed to be 0
+ENUM
+  BFD_RELOC_SCORE16_BRANCH
+ENUMDOC
+  This is a 8-bit reloc with the right 1 bit assumed to be 0
+ENUM
+  BFD_RELOC_SCORE_GOT15
+ENUMX
+  BFD_RELOC_SCORE_GOT_LO16
+ENUMX
+  BFD_RELOC_SCORE_CALL15
+ENUMX
+  BFD_RELOC_SCORE_DUMMY_HI16
+ENUMDOC
+  Undocumented Score relocs
+  
+ENUM
   BFD_RELOC_IP2K_FR9
 ENUMDOC
   Scenix IP2K - 9-bit register number / data address

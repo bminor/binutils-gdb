@@ -201,6 +201,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_romp_arch)		;;
 	bfd_rs6000_arch)	ta="$ta ppc-dis.lo ppc-opc.lo" ;;
 	bfd_s390_arch)		ta="$ta s390-dis.lo s390-opc.lo" ;;
+	bfd_score_arch)         ta="$ta score-dis.lo" ;;
 	bfd_sh_arch)
 	  # We can't decide what we want just from the CPU family.
 	  # We want SH5 support unless a specific version of sh is

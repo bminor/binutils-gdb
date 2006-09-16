@@ -1,3 +1,12 @@
+2006-09-17  Mei Ligang  <ligang@sunnorth.com.cn>
+
+	* config/tc-score.c: New file.
+	* config/tc-score.h: Newf file.
+	* configure.tgt: Add Score target.
+	* Makefile.am: Add Score files.
+	* Makefile.in: Regenerate.
+	* NEWS: Mention new target support.
+
 2006-09-16  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (s_arm_unwind_movsp): Add offset argument.

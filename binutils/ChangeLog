@@ -1,3 +1,9 @@
+2006-09-17  Mei Ligang  <ligang@sunnorth.com.cn>
+
+	* readelf.c: Add support for Score binaries.
+	* Makefile.am: Update readelf's dependencies.
+	* Makefile.in: Regenerate.
+
 2006-09-16  Nick Clifton  <nickc@redhat.com>
 	    Pedro Alves  <pedro_alves@portugalmail.pt>
 

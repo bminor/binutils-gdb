@@ -62,6 +62,8 @@ case ${cpu} in
   rs6000*)		cpu_type=ppc ;;
   s390x*)		cpu_type=s390 arch=s390x ;;
   s390*)		cpu_type=s390 arch=s390 ;;
+  score*l)              cpu_type=score endian=little ;;
+  score*)               cpu_type=score endian=big ;;
   sh5le*)		cpu_type=sh64 endian=little ;;
   sh5*)			cpu_type=sh64 endian=big ;;
   sh64le*)		cpu_type=sh64 endian=little ;;
@@ -314,6 +316,8 @@ case ${generic_target} in
 
   s390-*-linux-*)			fmt=elf em=linux ;;
   s390-*-tpf*)				fmt=elf ;;
+
+  score-*-elf)                          fmt=elf ;;
 
   sh*-*-linux*)				fmt=elf em=linux
     case ${cpu} in

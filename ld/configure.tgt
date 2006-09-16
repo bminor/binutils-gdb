@@ -445,6 +445,7 @@ s390-*-linux*)          targ_emul=elf_s390
 			  tdir_elf64_s390=`echo ${targ_alias} | sed -e 's/s390/s390x/'`
 			fi
 			;;
+score-*-elf)            targ_emul=scoreelf ;;
 sh-*-linux*)		targ_emul=shlelf_linux
 			targ_extra_emuls=shelf_linux
 			targ_extra_libpath=shelf_linux ;;

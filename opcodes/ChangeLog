@@ -1,3 +1,13 @@
+2006-09-17  Mei Ligang  <ligang@sunnorth.com.cn>
+
+	* score-dis.c: New file.
+	* score-opc.h: New file.
+	* Makefile.am: Add Score files.
+	* Makefile.in: Regenerate.
+	* configure.in: Add support for Score target.
+	* configure: Regenerate.
+	* disassemble.c: Add support for Score target.
+
 2006-09-16  Nick Clifton  <nickc@redhat.com>
 	    Pedro Alves  <pedro_alves@portugalmail.pt>
 

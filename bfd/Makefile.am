@@ -103,6 +103,7 @@ ALL_MACHINES = \
 	cpu-powerpc.lo \
 	cpu-rs6000.lo \
 	cpu-s390.lo \
+	cpu-score.lo \
 	cpu-sh.lo \
 	cpu-sparc.lo \
 	cpu-tic30.lo \
@@ -165,6 +166,7 @@ ALL_MACHINES_CFILES = \
 	cpu-powerpc.c \
 	cpu-rs6000.c \
 	cpu-s390.c \
+	cpu-score.c \
 	cpu-sh.c \
 	cpu-sparc.c \
 	cpu-tic30.c \
@@ -271,6 +273,7 @@ BFD32_BACKENDS = \
 	elf32-pj.lo \
 	elf32-ppc.lo \
 	elf32-s390.lo \
+	elf32-score.lo \
 	elf32-sh.lo \
 	elf32-sh-symbian.lo \
 	elf32-sh64.lo \
@@ -447,6 +450,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-sh64.c \
 	elf32-sh64-com.c \
 	elf32-s390.c \
+	elf32-score.c \
 	elf32-sh.c \
 	elf32-sh-symbian.c \
 	elfxx-sparc.c \
@@ -1058,6 +1062,7 @@ cpu-pj.lo: cpu-pj.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
 cpu-powerpc.lo: cpu-powerpc.c $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h
 cpu-rs6000.lo: cpu-rs6000.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
+cpu-score.lo: cpu-score.c $(INCDIR)/filenames.h
 cpu-s390.lo: cpu-s390.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
 cpu-sh.lo: cpu-sh.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(srcdir)/../opcodes/sh-opc.h
@@ -1436,6 +1441,10 @@ elf32-sh64-com.lo: elf32-sh64-com.c $(INCDIR)/filenames.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h elf32-sh64.h \
   $(srcdir)/../opcodes/sh64-opc.h
+elf32-score.lo: elf32-score.c $(INCDIR)/filenames.h \
+  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/elf/score.h \
+  $(INCDIR)/elf/reloc-macros.h elf32-target.h
 elf32-s390.lo: elf32-s390.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/hashtab.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/s390.h \

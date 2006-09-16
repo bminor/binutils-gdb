@@ -1968,6 +1968,7 @@ enum bfd_architecture
   bfd_arch_s390,      /* IBM s390 */
 #define bfd_mach_s390_31       31
 #define bfd_mach_s390_64       64
+  bfd_arch_score,     /* Sunplus score */ 
   bfd_arch_openrisc,  /* OpenRISC */
   bfd_arch_mmix,      /* Donald Knuth's educational processor.  */
   bfd_arch_xstormy16,
@@ -3759,6 +3760,31 @@ instructions  */
   BFD_RELOC_390_GOT20,
   BFD_RELOC_390_GOTPLT20,
   BFD_RELOC_390_TLS_GOTIE20,
+
+/* Score relocations  */
+  BFD_RELOC_SCORE_DUMMY1,
+
+/* Low 16 bit for load/store  */
+  BFD_RELOC_SCORE_GPREL15,
+
+/* This is a 24-bit reloc with the right 1 bit assumed to be 0  */
+  BFD_RELOC_SCORE_DUMMY2,
+  BFD_RELOC_SCORE_JMP,
+
+/* This is a 19-bit reloc with the right 1 bit assumed to be 0  */
+  BFD_RELOC_SCORE_BRANCH,
+
+/* This is a 11-bit reloc with the right 1 bit assumed to be 0  */
+  BFD_RELOC_SCORE16_JMP,
+
+/* This is a 8-bit reloc with the right 1 bit assumed to be 0  */
+  BFD_RELOC_SCORE16_BRANCH,
+
+/* Undocumented Score relocs  */
+  BFD_RELOC_SCORE_GOT15,
+  BFD_RELOC_SCORE_GOT_LO16,
+  BFD_RELOC_SCORE_CALL15,
+  BFD_RELOC_SCORE_DUMMY_HI16,
 
 /* Scenix IP2K - 9-bit register number / data address  */
   BFD_RELOC_IP2K_FR9,

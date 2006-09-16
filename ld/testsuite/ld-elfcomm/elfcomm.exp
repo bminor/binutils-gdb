@@ -1,5 +1,5 @@
 # Expect script for common symbol tests
-#   Copyright 2003, 2005 Free Software Foundation, Inc.
+#   Copyright 2003, 2005, 2006 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,6 +32,13 @@ set test1c1	"$test1 (change 1)"
 set test1c2	"$test1 (change 2)"
 
 if { [which $CC] == 0 } {
+    untested $test1w1
+    untested $test1w2
+    untested $test1c1
+    untested $test1c2
+    return
+}
+if { [istarget score-*-*] } {
     untested $test1w1
     untested $test1w2
     untested $test1c1

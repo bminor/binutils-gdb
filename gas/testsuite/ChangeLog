@@ -1,3 +1,9 @@
+2006-09-17  Mei Ligang  <ligang@sunnorth.com.cn>
+
+	* gas/score: New directory.
+	* gas/elf/section2.e-score: New file.
+	* gas/elf/elf.exp: Add special case for Score target.
+
 2006-09-16  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/unwind.s: Test two argument form of .movsp.

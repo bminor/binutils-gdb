@@ -1,3 +1,18 @@
+2006-09-17  Mei Ligang  <ligang@sunnorth.com.cn>
+
+	* cpu-score.c: New file.
+	* elf32-score.c: New file.
+	* config.bfd: Add Score target.
+	* Makefile.am: Add Score files.
+	* Makefile.in: Regenerate.
+	* archures.c: Add Score architecture.
+	* reloc.c: Add Score relocs.
+	* targets.c: Add Score target vectors.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* configure.in: Add Score target.
+	* configure: Regenerate.
+
 2006-09-16  Nick Clifton  <nickc@redhat.com>
 	    Pedro Alves  <pedro_alves@portugalmail.pt>
 

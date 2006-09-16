@@ -73,6 +73,7 @@
 #include "elf/avr.h"
 #include "elf/bfin.h"
 #include "elf/cris.h"
+#include "elf/crx.h"
 #include "elf/d10v.h"
 #include "elf/d30v.h"
 #include "elf/dlx.h"
@@ -86,6 +87,7 @@
 #include "elf/i960.h"
 #include "elf/ia64.h"
 #include "elf/ip2k.h"
+#include "elf/iq2000.h"
 #include "elf/m32c.h"
 #include "elf/m32r.h"
 #include "elf/m68k.h"
@@ -102,14 +104,13 @@
 #include "elf/ppc.h"
 #include "elf/ppc64.h"
 #include "elf/s390.h"
+#include "elf/score.h"
 #include "elf/sh.h"
 #include "elf/sparc.h"
 #include "elf/v850.h"
 #include "elf/vax.h"
 #include "elf/x86-64.h"
 #include "elf/xstormy16.h"
-#include "elf/crx.h"
-#include "elf/iq2000.h"
 #include "elf/xtensa.h"
 
 #include "aout/ar.h"
@@ -566,6 +567,7 @@ guess_is_rela (unsigned long e_machine)
     case EM_CYGNUS_D10V:
     case EM_MIPS:
     case EM_MIPS_RS3_LE:
+    case EM_SCORE:
       return FALSE;
 
       /* Targets that use RELA relocations.  */
@@ -1099,6 +1101,10 @@ dump_relocations (FILE *file,
 	  rtype = elf_s390_reloc_type (type);
 	  break;
 
+	case EM_SCORE:
+	  rtype = elf_score_reloc_type (type);
+	  break;
+
 	case EM_XSTORMY16:
 	  rtype = elf_xstormy16_reloc_type (type);
 	  break;
@@ -1432,6 +1438,23 @@ get_alpha_dynamic_type (unsigned long type)
 }
 
 static const char *
+get_score_dynamic_type (unsigned long type)
+{
+  switch (type)
+    {
+    case DT_SCORE_BASE_ADDRESS: return "SCORE_BASE_ADDRESS";
+    case DT_SCORE_LOCAL_GOTNO:  return "SCORE_LOCAL_GOTNO";
+    case DT_SCORE_SYMTABNO:     return "SCORE_SYMTABNO";
+    case DT_SCORE_GOTSYM:       return "SCORE_GOTSYM";
+    case DT_SCORE_UNREFEXTNO:   return "SCORE_UNREFEXTNO";
+    case DT_SCORE_HIPAGENO:     return "SCORE_HIPAGENO";
+    default:
+      return NULL;
+    }
+}
+
+
+static const char *
 get_dynamic_type (unsigned long type)
 {
   static char buff[64];
@@ -1538,6 +1561,9 @@ get_dynamic_type (unsigned long type)
 	      break;
 	    case EM_ALPHA:
 	      result = get_alpha_dynamic_type (type);
+	      break;
+	    case EM_SCORE:
+	      result = get_score_dynamic_type (type);
 	      break;
 	    default:
 	      result = NULL;
@@ -1693,6 +1719,7 @@ get_machine_name (unsigned e_machine)
     case EM_X86_64:		return "Advanced Micro Devices X86-64";
     case EM_S390_OLD:
     case EM_S390:		return "IBM S/390";
+    case EM_SCORE:		return "SUNPLUS S+Core";
     case EM_XSTORMY16:		return "Sanyo Xstormy16 CPU core";
     case EM_OPENRISC:
     case EM_OR32:		return "OpenRISC";

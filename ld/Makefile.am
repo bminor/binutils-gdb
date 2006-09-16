@@ -340,6 +340,7 @@ ALL_EMULATIONS = \
 	eppcpe.o \
 	eppclynx.o \
 	eriscix.o \
+	escoreelf.o \
 	esh.o \
 	eshelf32.o \
 	eshlelf32.o \
@@ -1466,6 +1467,10 @@ eppclynx.c: $(srcdir)/emulparams/ppclynx.sh \
 eriscix.c: $(srcdir)/emulparams/riscix.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} riscix "$(tdir_riscix)"
+escoreelf.c: $(srcdir)/emulparams/scoreelf.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/scoreelf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} scoreelf "$(tdir_scoreelf)"
 esh.c: $(srcdir)/emulparams/sh.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sh.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} sh "$(tdir_sh)"

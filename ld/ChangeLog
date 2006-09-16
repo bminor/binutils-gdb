@@ -1,3 +1,12 @@
+2006-09-17  Mei Ligang  <ligang@sunnorth.com.cn>
+
+	* emulparams/scoreelf.sh: New file.
+	* emultempl/scoreelf.em: New file.
+	* Makefile.am: Add Score files.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add Score target.
+	* NEWS: Mention new target support.
+	
 2006-09-16  Nick Clifton  <nickc@redhat.com>
 	    Pedro Alves  <pedro_alves@portugalmail.pt>
 

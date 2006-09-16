@@ -41,6 +41,7 @@ HFILES = \
 	mcore-opc.h \
 	mt-desc.h mt-opc.h \
 	openrisc-desc.h openrisc-opc.h \
+	score-opc.h \
 	sh-opc.h \
 	sh64-opc.h \
 	sysdep.h \
@@ -162,6 +163,7 @@ CFILES = \
 	s390-mkopc.c \
 	s390-opc.c \
 	s390-dis.c \
+	score-dis.c \
 	sh-dis.c \
 	sh64-dis.c \
 	sh64-opc.c \
@@ -293,6 +295,7 @@ ALL_MACHINES = \
 	ppc-opc.lo \
 	s390-dis.lo \
 	s390-opc.lo \
+	score-dis.lo \
 	sh-dis.lo \
 	sh64-dis.lo \
 	sh64-opc.lo \
@@ -936,6 +939,11 @@ s390-opc.lo: s390-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/s390.h \
 s390-dis.lo: s390-dis.c $(INCDIR)/ansidecl.h sysdep.h \
   config.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h \
   $(INCDIR)/opcode/s390.h
+score-dis.lo: score-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h score-opc.h \
+  $(INCDIR)/bfdlink.h opintl.h $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/score.h \
+  $(INCDIR)/elf/reloc-macros.h
 sh-dis.lo: sh-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   sh-opc.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/dis-asm.h
 sh64-dis.lo: sh64-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \

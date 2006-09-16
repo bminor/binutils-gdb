@@ -1,4 +1,6 @@
 -*- text -*-
+* Add support for Score target.
+
 * ELF: Add --dynamic-list option to specify a list of global symbols
   whose references shouldn't be bound to the definition within the
   shared library, or a list of symbols which should be added to the

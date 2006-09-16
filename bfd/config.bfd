@@ -1143,6 +1143,11 @@ case "${targ}" in
     ;;
 #endif
 
+  score*-*-elf*)
+    targ_defvec=bfd_elf32_bigscore_vec
+    targ_selvecs=bfd_elf32_littlescore_vec
+    ;;
+
 #ifdef BFD64
   sh64l*-*-elf*)
     targ_defvec=bfd_elf32_sh64l_vec

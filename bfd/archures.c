@@ -348,6 +348,7 @@ DESCRIPTION
 .  bfd_arch_s390,      {* IBM s390 *}
 .#define bfd_mach_s390_31       31
 .#define bfd_mach_s390_64       64
+.  bfd_arch_score,     {* Sunplus score *} 
 .  bfd_arch_openrisc,  {* OpenRISC *}
 .  bfd_arch_mmix,      {* Donald Knuth's educational processor.  *}
 .  bfd_arch_xstormy16,
@@ -466,6 +467,7 @@ extern const bfd_arch_info_type bfd_powerpc_archs[];
 #define bfd_powerpc_arch bfd_powerpc_archs[0]
 extern const bfd_arch_info_type bfd_rs6000_arch;
 extern const bfd_arch_info_type bfd_s390_arch;
+extern const bfd_arch_info_type bfd_score_arch;
 extern const bfd_arch_info_type bfd_sh_arch;
 extern const bfd_arch_info_type bfd_sparc_arch;
 extern const bfd_arch_info_type bfd_tic30_arch;
@@ -531,6 +533,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_powerpc_arch,
     &bfd_rs6000_arch,
     &bfd_s390_arch,
+    &bfd_score_arch,
     &bfd_sh_arch,
     &bfd_sparc_arch,
     &bfd_tic30_arch,

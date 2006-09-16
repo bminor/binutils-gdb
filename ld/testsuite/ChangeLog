@@ -1,3 +1,9 @@
+2006-09-17  Mei Ligang  <ligang@sunnorth.com.cn>
+
+	* ld-elf/merge.d: Add special case for Score target.
+	* ld-elfcomm/elfcomm.exp: Likewise.
+	* ld-srec/srec.exp: Likewise.
+
 2006-09-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-scripts/overlay-size.t: Discard .reginfo sections.
