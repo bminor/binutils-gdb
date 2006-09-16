@@ -402,9 +402,9 @@ interpreter_exec_cmd (char *args, int from_tty)
       if (e.reason < 0)
 	{
 	  interp_set (old_interp);
-	  interp_set_quiet (interp_to_use, old_quiet);
+	  interp_set_quiet (interp_to_use, use_quiet);
+	  interp_set_quiet (old_interp, old_quiet);
 	  error (_("error in command: \"%s\"."), prules[i]);
-	  break;
 	}
     }
 

@@ -1,3 +1,7 @@
+2006-09-16  Andrzej Zaborowski  <balrog@zabor.org>
+
+	* interps.c (interpreter_exec_cmd): Restore interpreter properties.
+
 2006-09-10  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	PR threads/2149
