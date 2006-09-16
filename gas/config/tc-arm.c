@@ -3628,6 +3628,7 @@ s_arm_unwind_movsp (int ignored ATTRIBUTE_UNUSED)
 {
   int reg;
   valueT op;
+  int offset;
 
   reg = arm_reg_parse (&input_line_pointer, REG_TYPE_RN);
   if (reg == FAIL)
@@ -3636,6 +3637,16 @@ s_arm_unwind_movsp (int ignored ATTRIBUTE_UNUSED)
       ignore_rest_of_line ();
       return;
     }
+
+  /* Optional constant.	 */
+  if (skip_past_comma (&input_line_pointer) != FAIL)
+    {
+      if (immediate_for_directive (&offset) == FAIL)
+	return;
+    }
+  else
+    offset = 0;
+
   demand_empty_rest_of_line ();
 
   if (reg == REG_SP || reg == REG_PC)
@@ -3653,7 +3664,7 @@ s_arm_unwind_movsp (int ignored ATTRIBUTE_UNUSED)
 
   /* Record the information for later.	*/
   unwind.fp_reg = reg;
-  unwind.fp_offset = unwind.frame_size;
+  unwind.fp_offset = unwind.frame_size - offset;
   unwind.sp_restored = 1;
 }
 

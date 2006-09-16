@@ -1,3 +1,9 @@
+2006-09-16  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/unwind.s: Test two argument form of .movsp.
+	* gas/arm/unwind.d: Update expected output.
+	* gas/arm/unwind_vxworks.d: Ditto.
+
 2006-09-08  Kazu Hirata  <kazu@codesourcery.com>
 
 	* lib/gas-dg.exp (gas-dg-test): Treat $dir as a literal.
