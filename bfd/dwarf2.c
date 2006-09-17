@@ -874,24 +874,45 @@ concat_filename (struct line_info_table *table, unsigned int file)
 
   filename = table->files[file - 1].name;
 
-  if (! IS_ABSOLUTE_PATH (filename))
+  if (!IS_ABSOLUTE_PATH (filename))
     {
-      char *dirname = (table->files[file - 1].dir
-		       ? table->dirs[table->files[file - 1].dir - 1]
-		       : table->comp_dir);
+      char *dirname = NULL;
+      char *subdirname = NULL;
+      char *name;
+      size_t len;
 
-      /* Not all tools set DW_AT_comp_dir, so dirname may be unknown.
-	 The best we can do is return the filename part.  */
-      if (dirname != NULL)
+      if (table->files[file - 1].dir)
+	subdirname = table->dirs[table->files[file - 1].dir - 1];
+
+      if (!subdirname || !IS_ABSOLUTE_PATH (subdirname))
+	dirname = table->comp_dir;
+
+      if (!dirname)
 	{
-	  unsigned int len = strlen (dirname) + strlen (filename) + 2;
-	  char * name;
+	  dirname = subdirname;
+	  subdirname = NULL;
+	}
 
+      if (!dirname)
+	return strdup (filename);
+
+      len = strlen (dirname) + strlen (filename) + 2;
+
+      if (subdirname)
+	{
+	  len += strlen (subdirname) + 1;
+	  name = bfd_malloc (len);
+	  if (name)
+	    sprintf (name, "%s/%s/%s", dirname, subdirname, filename);
+	}
+      else
+	{
 	  name = bfd_malloc (len);
 	  if (name)
 	    sprintf (name, "%s/%s", dirname, filename);
-	  return name;
 	}
+
+      return name;
     }
 
   return strdup (filename);

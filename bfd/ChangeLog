@@ -1,3 +1,9 @@
+2006-09-17  Anton Blanchard  <anton@samba.org>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* dwarf2.c (concat_filename): Apply DW_AT_comp_dir if dir table
+	entry isn't absolute.
+
 2006-09-17  Mei Ligang  <ligang@sunnorth.com.cn>
 
 	* cpu-score.c: New file.
