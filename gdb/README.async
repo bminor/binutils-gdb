@@ -42,12 +42,20 @@ n
 (gdb)
 
 (actually it generates an extra &"n\n" and ^done but with 
-"-interpreter-exec console" its identical.
+"-interpreter-exec console" it's identical.
 
 To help integration with HEAD I've re-instated the --async option so that
 --noasync (the default) *should* run as on the trunk.
 
 Bugs/Problems are in PROBLEMS.async
+
+Further tasks in TODO.async
+
+To run testsuite with asynchronous event loop put the line:
+
+  set GDBFLAGS "--async"
+
+at the bottom of site.exp.
 
 
 Nick Roberts
