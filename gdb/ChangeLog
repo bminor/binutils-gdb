@@ -1,3 +1,12 @@
+2006-09-18  Nick Roberts  <nickrob@snap.net.nz>
+
+	* async-nat-inferior.c, async-nat-inferior.c, async-nat-sigthread.c:
+	Copy code from Apple more carefully and remove redundant code
+
+	* linux-nat.c (linux_nat_resume): Call to_resume method later.
+
+	* inf-ptrace.c: Declare async_client_context as static here.
+
 2006-09-16  Nick Roberts  <nickrob@snap.net.nz>
 
 	* linux-nat.c (linux_nat_detach): Call init_lwp_list for
