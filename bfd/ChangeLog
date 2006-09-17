@@ -1,3 +1,8 @@
+2006-09-17  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf.c (special_sections_s): Revert last STRING_COMMA_LEN change
+	for .stabstr entry, explain why.
+
 2006-09-17  Anton Blanchard  <anton@samba.org>
 	    Alan Modra  <amodra@bigpond.net.au>
 

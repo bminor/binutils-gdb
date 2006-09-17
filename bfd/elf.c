@@ -2374,7 +2374,9 @@ static const struct bfd_elf_special_section special_sections_s[] =
   { STRING_COMMA_LEN (".shstrtab"), 0, SHT_STRTAB, 0 },
   { STRING_COMMA_LEN (".strtab"),   0, SHT_STRTAB, 0 },
   { STRING_COMMA_LEN (".symtab"),   0, SHT_SYMTAB, 0 },
-  { STRING_COMMA_LEN (".stabstr"),  3, SHT_STRTAB, 0 },
+  /* See struct bfd_elf_special_section declaration for the semantics of
+     this special case where .prefix_length != strlen (.prefix).  */
+  { ".stabstr",			5,  3, SHT_STRTAB, 0 },
   { NULL,                       0,  0, 0,          0 }
 };
 
