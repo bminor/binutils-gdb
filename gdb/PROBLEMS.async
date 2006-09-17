@@ -1,16 +1,1 @@
-The test mi-async.exp in gdb.mi works with `runtest gdb.mi/mi-async.exp' but not
-`make check RUNTESFLAGS=mi-async.exp'.  GDB doesn't always stop after
-`start' has been issued.  I have witnessed this sometimes when running
-the executable basics interactively with the start command.  I guess this is
-due to spurious other events but I don't know what they are.
-
-Failures in the gdb.mi testsuite when running asynchronously
-(set GDBFLAGS "-nw --async" in site.exp) are sometimes due to switching
-thread e.g.
-
-~"[Switching to process 7738]\n"
-*stopped,reason="breakpoint-hit",bkptno="1",thread-id="1",
-                                                      ^^^
-frame={addr="0x0804839a",func="callee4",args=[],file="../.././gdb/testsuite/gdb.mi/basics.c",fullname="/home/nickrob/src1/gdb/testsuite/gdb.mi/basics.c",line="30"}
-(gdb) 
-FAIL: gdb.mi/mi2-stack.exp: next in callee4 (timeout)
+1) Can't debug multi-threaded programs asynchronously (linux_nat_wait).
