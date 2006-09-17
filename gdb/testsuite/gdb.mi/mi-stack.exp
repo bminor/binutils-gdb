@@ -122,6 +122,10 @@ proc test_stack_args_listing {} {
     mi_gdb_test "234-stack-list-arguments" \
 	    "&.*234\\^error,msg=\"mi_cmd_stack_list_args: Usage.*PRINT_VALUES.*FRAME_LOW FRAME_HIGH.*\"" \
 	    "stack args listing wrong"
+
+    mi_gdb_test "235-stack-list-arguments 1 1 300" \
+	    "235\\^done,stack-args=\\\[frame=\{level=\"1\",args=\\\[\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\}\\\]\},frame=\{level=\"2\",args=\\\[\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\}\\\]\},frame=\{level=\"3\",args=\\\[\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\},\{name=\"fltarg\",value=\"3.5\"\}\\\]\},frame=\{level=\"4\",args=\\\[\\\]\}\\\]" \
+                "stack args listing 1 1 300"
 }
 
 proc test_stack_info_depth {} {
