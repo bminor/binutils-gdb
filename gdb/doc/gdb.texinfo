@@ -19230,8 +19230,12 @@ For a stack with frame levels 0 through 11:
 
 Display a list of the arguments for the frames between @var{low-frame}
 and @var{high-frame} (inclusive).  If @var{low-frame} and
-@var{high-frame} are not provided, list the arguments for the whole call
-stack.
+@var{high-frame} are not provided, list the arguments for the whole
+call stack.  If the two arguments are equal, show the single frame
+at the corresponding level.  It is an error if @var{low-frame} is
+larger than the actual number of frames.  On the other hand,
+@var{high-frame} may be larger than the actual number of frames, in
+which case only existing frames will be returned.
 
 The @var{show-values} argument must have a value of 0 or 1.  A value of
 0 means that only the names of the arguments are listed, a value of 1

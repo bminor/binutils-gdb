@@ -1,3 +1,9 @@
+2006-09-17  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Stack Manipulation): Mention that
+	-stack-list-arguments HIGH_FRAME argument can be larger then the
+	actual number of frames.
+
 2006-09-07  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (GDB/MI Stack Manipulation): Mention that
