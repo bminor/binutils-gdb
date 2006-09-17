@@ -583,7 +583,7 @@ coff_link_add_symbols (bfd *abfd,
 	  asection *stab;
 	  
 	  for (stab = abfd->sections; stab; stab = stab->next)
-	    if (CONST_STRNEQ (".stab", stab->name)
+	    if (CONST_STRNEQ (stab->name, ".stab")
 		&& (!stab->name[5]
 		    || (stab->name[5] == '.' && ISDIGIT (stab->name[6]))))
 	    {
