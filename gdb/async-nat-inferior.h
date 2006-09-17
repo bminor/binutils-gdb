@@ -44,8 +44,6 @@ int gdb_post_pending_event (void);
 void (*async_client_callback) (enum inferior_event_type event_type,
                                       void *context);
 
-void *async_client_context;
-
 void async_terminal_inferior (void);
 
 void async_terminal_ours (void);

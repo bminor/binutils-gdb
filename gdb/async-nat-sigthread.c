@@ -28,13 +28,8 @@
 #include "inferior.h"
 
 #include "async-nat-sigthread.h"
-//#include "macosx-nat-inferior.h"
-//#include "macosx-nat-mutils.h"
 
-#include <stdlib.h>
-#include <stdarg.h>
 #include <string.h>
-
 #include <sys/select.h>
 
 static FILE *sigthread_stderr_re = NULL;
@@ -74,7 +69,6 @@ gdb_signal_thread_create (gdb_signal_thread_status *s, int pid)
   int ret;
 
   ret = pipe (fd);
-  //  CHECK_FATAL (ret == 0);
 
   s->transmit_fd = fd[1];
   s->receive_fd = fd[0];
@@ -132,7 +126,6 @@ static void*
 gdb_signal_thread (void *arg)
 {
   gdb_signal_thread_status *s = (gdb_signal_thread_status *) arg;
-  //  CHECK_FATAL (s != NULL);
 
   for (;;)
     {
@@ -208,6 +201,13 @@ gdb_pthread_kill (pthread_t pthread)
   if (ret != 0)
     {
       warning ("Unable to cancel thread: %s (%d)", strerror (errno), errno);
+    }
+
+  ret = pthread_join (pthread, NULL);
+  if (ret != 0)
+    {
+      warning ("Unable to join to canceled thread: %s (%d)", strerror (errno),
+               errno);
     }
 }
 

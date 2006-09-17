@@ -23,61 +23,18 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include "top.h"
 #include "inferior.h"
-#include "target.h"
-#include "symfile.h"
-#include "symtab.h"
 #include "objfiles.h"
-#include "gdbcmd.h"
-#include "gdbcore.h"
-#include "gdbthread.h"
-#include "regcache.h"
-#include "environ.h"
 #include "event-top.h"
-#include "inf-loop.h"
-#include "gdb_stat.h"
-#include "exceptions.h"
-
-#include "bfd.h"
-
-#include <sys/ptrace.h>
-#include <sys/signal.h>
-#include <setjmp.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <signal.h>
-#include <string.h>
-#include <ctype.h>
-#include <sys/param.h>
-#include <sys/sysctl.h>
 
 #include "async-nat-inferior.h"
-/* classic-inferior-support */
-//#include "macosx-nat.h"
-//#include "macosx-nat-inferior-util.h"
-
-#ifndef EXC_SOFT_SIGNAL
-#define EXC_SOFT_SIGNAL 0
-#endif
-
-extern bfd *exec_bfd;
 
 gdb_inferior_status *gdb_status = NULL;
-
-int inferior_ptrace_flag = 1;
-int inferior_ptrace_on_attach_flag = 1;
-int inferior_bind_exception_port_flag = 1;
-int inferior_handle_exceptions_flag = 1;
-int inferior_handle_all_events_flag = 1;
 
 enum gdb_source_type
 {
   NEXT_SOURCE_NONE = 0x0,
-  NEXT_SOURCE_EXCEPTION = 0x1,
-  NEXT_SOURCE_SIGNAL = 0x2,
-  NEXT_SOURCE_CFM = 0x4,
-  NEXT_SOURCE_ALL = 0x7
+  NEXT_SOURCE_SIGNAL = 0x1,
 };
 
 struct gdb_pending_event
@@ -138,8 +95,6 @@ gdb_handle_signal (gdb_signal_thread_message *msg,
     }
 
   gdb_status->stopped_in_ptrace = 1;
-
-  //prepare_threads_after_stop (gdb_status);
 
   status->kind = TARGET_WAITKIND_STOPPED;
   status->value.sig = target_signal_from_host (WSTOPSIG (msg->status));
@@ -292,8 +247,6 @@ gdb_post_pending_event (void)
       if (pending_event_chain == NULL)
         pending_event_tail = NULL;
 
-      /*inferior_debug (1,
-	"gdb_post_pending_event: consuming event off queue\n"); */
       gdb_queue_event (gdb_pending_event_handler, (void *) event, HEAD);
 
       return 1;
@@ -303,7 +256,6 @@ gdb_post_pending_event (void)
 static void
 gdb_pending_event_handler (void *data)
 {
-  //inferior_debug (1, "Called in gdb_pending_event_handler\n");
   async_client_callback (INF_REG_EVENT, data);
 }
 
@@ -312,15 +264,7 @@ gdb_service_event (enum gdb_source_type source,
                       unsigned char *buf, struct target_waitstatus *status)
 {
  if (source == NEXT_SOURCE_SIGNAL)
-    {
-      // inferior_debug (1, "gdb_service_events: got signal message\n");
       gdb_handle_signal ((gdb_signal_thread_message *) buf, status);
-      //      CHECK_FATAL (status->kind != TARGET_WAITKIND_SPURIOUS);
-      if (!inferior_handle_all_events_flag)
-        {
-          return 1;
-        }
-    }
   else
     {
       error ("got message from unknown source: 0x%08x\n", source);
@@ -347,7 +291,7 @@ gdb_process_events (struct gdb_inferior_status *inferior,
   //  CHECK_FATAL (status->kind == TARGET_WAITKIND_SPURIOUS);
 
   source = gdb_fetch_event (inferior, buf, sizeof (buf),
-                               NEXT_SOURCE_ALL, timeout);
+                               NEXT_SOURCE_SIGNAL, timeout);
   if (source == NEXT_SOURCE_NONE)
     {
       return 0;
@@ -365,6 +309,32 @@ gdb_process_events (struct gdb_inferior_status *inferior,
       gdb_add_to_pending_events (source, buf);
     }
 
+  /* FIXME: we want to poll in gdb_fetch_event because otherwise we
+     arbitrarily wait however long the wait quanta for select is
+     (seemingly ~.01 sec).  However, if we do this we aren't giving
+     the mach exception thread a chance to run, and see if there are
+     any more exceptions available.  Normally this is okay, because
+     there really IS only one message, but to be correct we need to
+     use some thread synchronization. */
+  for (;;)
+    {
+      source = gdb_fetch_event (inferior, buf, sizeof (buf),
+                                   NEXT_SOURCE_SIGNAL, 0);
+      if (source == NEXT_SOURCE_NONE)
+        {
+          break;
+        }
+      else
+        {
+          event_count++;
+
+          /* Stuff the remaining events onto the pending_events queue.
+             These will be dispatched when we run again. */
+          /* PENDING_EVENTS */
+          gdb_add_to_pending_events (source, buf);
+        }
+    }
+
   return event_count;
 }
 
@@ -378,6 +348,7 @@ gdb_process_pending_event (struct gdb_inferior_status *ns,
 
   //inferior_debug (1, "Processing pending event type: %d\n", event->type);
   gdb_service_event (event->type, (unsigned char *) event->buf, status);
+  // printf ("IN GDB_PROCESS_PENDING_EVENT %s\n", event->buf);
 
   return ptid_build (gdb_status->pid, gdb_status->pid, 0);
 }
@@ -385,8 +356,6 @@ gdb_process_pending_event (struct gdb_inferior_status *ns,
 void
 gdb_create_inferior (struct gdb_inferior_status *inferior,  int pid)
 {
-  //  CHECK_FATAL (inferior != NULL);
-
   gdb_inferior_destroy (inferior);
   gdb_inferior_reset (inferior);
 
