@@ -1,3 +1,9 @@
+2006-09-17  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* mi/mi-cmd-stack.c (mi_cmd_stack_list_args): Don't emit error
+	if high requested frame number is larger then number of available 
+	frames.
+	
 2006-09-16  Nick Roberts  <nickrob@snap.net.nz>
 
 	* linux-nat.c (linux_test_for_tracefork): Don't leave zombie
@@ -25,7 +31,7 @@
 
 2006-09-07  Vladimir Prus  <vladimir@codesourcery.com>
 
-        * mi/mi-cmd-stack.c (mi_cmd_stack_list_frames): Don't emit 
+	* mi/mi-cmd-stack.c (mi_cmd_stack_list_frames): Don't emit 
 	error if high requested frame number is larger then number 
 	of available frames.
 	
