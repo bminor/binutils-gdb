@@ -1,6 +1,6 @@
 2006-09-18  Nick Roberts  <nickrob@snap.net.nz>
 
-	* PROBLEMS.async: Update.
+	* PROBLEMS.async, README.async: Update.
 
 	* async-nat-inferior.c, async-nat-inferior.c, async-nat-sigthread.c:
 	Copy code from Apple more carefully and remove redundant code
