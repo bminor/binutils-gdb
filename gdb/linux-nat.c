@@ -1254,10 +1254,13 @@ linux_nat_resume (ptid_t ptid, int step, enum target_signal signo)
   if (resume_all)
     iterate_over_lwps (resume_callback, NULL);
 
-  linux_ops->to_resume (ptid, step, signo);
-
   if (target_can_async_p ())
     {
+      /* Check for pending events.  If we find any, then we won't really
+     resume, but rather we will extract the first event from the pending events
+     queue, and post it to the gdb event queue, and then "pretend" that we have
+     in fact resumed. */
+
       status.kind = TARGET_WAITKIND_SPURIOUS;
       gdb_process_events (gdb_status, &status, 0, 0);
 
@@ -1268,9 +1271,12 @@ linux_nat_resume (ptid_t ptid, int step, enum target_signal signo)
 	    target_executing = 1;
 	  return;
 	}
-
-      target_async (inferior_event_handler, 0);
     }
+
+  linux_ops->to_resume (ptid, step, signo);
+
+  if (target_can_async_p ())
+      target_async (inferior_event_handler, 0);
 
   if (target_is_async_p ())
     target_executing = 1;
@@ -1917,7 +1923,9 @@ linux_nat_wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
       if ((ourstatus->kind == TARGET_WAITKIND_EXITED)
 	  || (ourstatus->kind == TARGET_WAITKIND_SIGNALLED))
-	return null_ptid;
+	{
+	  return null_ptid;
+	}
 
       return BUILD_LWP (gdb_status->pid, gdb_status->pid);
     }
