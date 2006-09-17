@@ -46,6 +46,8 @@ extern int standard_can_async_p (void);
 static struct target_ops *ptrace_ops_hack;
 
 
+static void *async_client_context;
+
 static void
 async_file_handler (int error, gdb_client_data client_data)
 {
