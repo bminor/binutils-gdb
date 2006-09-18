@@ -1,4 +1,10 @@
 2006-09-18  Thiemo Seufer  <ths@networkno.de>
+            Maciej W. Rozycki  <macro@mips.com>
+
+	* ld-mips-elf/mips-elf.exp: Add test for R_MIPS16_GPREL relocations.
+	* ld-mips-elf/reloc-3-n32.d, ld-mips-elf/reloc-3.d: New files.
+
+2006-09-18  Thiemo Seufer  <ths@networkno.de>
 
 	* ld-elfcomm/elfcomm.exp: Enable the alignment test for
 	mips*-*-*.
