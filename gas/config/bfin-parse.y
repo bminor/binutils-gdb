@@ -4328,6 +4328,12 @@ binary (Expr_Op_Type op, Expr_Node *x, Expr_Node *y)
       x = y;
       y = t;
     }
+  /* Canonicalize subtraction of const to addition of negated const.  */
+  if (op == Expr_Op_Type_Sub && y->type == Expr_Node_Constant)
+    {
+      op = Expr_Op_Type_Add;
+      y->value.i_value = -y->value.i_value;
+    }
   if (y->type == Expr_Node_Constant && x->type == Expr_Node_Binop
       && x->Right_Child->type == Expr_Node_Constant)
     {

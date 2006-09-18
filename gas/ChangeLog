@@ -1,3 +1,8 @@
+2006-09-18  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* config/bfin-parse.y (binary): Change sub of const to add of negated
+	const.
+
 2006-09-17  Mei Ligang  <ligang@sunnorth.com.cn>
 
 	* config/tc-score.c: New file.
