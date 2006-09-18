@@ -112,28 +112,46 @@
 	.endm
 
 	.macro logic_imm op opq
+	logic_imm_1 \op \opq 0x000000a5000000a5 .i64
+	logic_imm_1 \op \opq 0x0000a5000000a500 .i64
+	logic_imm_1 \op \opq 0x00a5000000a50000 .i64
+	logic_imm_1 \op \opq 0xa5000000a5000000 .i64
+	logic_imm_1 \op \opq 0x00a500a500a500a5 .i64
+	logic_imm_1 \op \opq 0xa500a500a500a500 .i64
 	logic_imm_1 \op \opq 0x000000ff .i32
 	logic_imm_1 \op \opq 0x000000ff .s32
 	logic_imm_1 \op \opq 0x000000ff .u32
 	logic_imm_1 \op \opq 0x0000ff00 .i32
 	logic_imm_1 \op \opq 0x00ff0000 .i32
 	logic_imm_1 \op \opq 0xff000000 .i32
+	logic_imm_1 \op \opq 0x00a500a5 .i32
+	logic_imm_1 \op \opq 0xa500a500 .i32
 	logic_imm_1 \op \opq 0x00ff .i16
 	logic_imm_1 \op \opq 0xff00 .i16
+	logic_imm_1 \op \opq 0x00 .i8
 	.endm
 
 	logic_imm vbic vbicq
 	logic_imm vorr vorrq
 
 	.macro logic_inv_imm op opq
+	logic_imm_1 \op \opq 0xffffff5affffff5a .i64
+	logic_imm_1 \op \opq 0xffff5affffff5aff .i64
+	logic_imm_1 \op \opq 0xff5affffff5affff .i64
+	logic_imm_1 \op \opq 0x5affffff5affffff .i64
+	logic_imm_1 \op \opq 0xff5aff5aff5aff5a .i64
+	logic_imm_1 \op \opq 0x5aff5aff5aff5aff .i64
 	logic_imm_1 \op \opq 0xffffff00 .i32
 	logic_imm_1 \op \opq 0xffffff00 .s32
 	logic_imm_1 \op \opq 0xffffff00 .u32
 	logic_imm_1 \op \opq 0xffff00ff .i32
 	logic_imm_1 \op \opq 0xff00ffff .i32
 	logic_imm_1 \op \opq 0x00ffffff .i32
+	logic_imm_1 \op \opq 0xff5aff5a .i32
+	logic_imm_1 \op \opq 0x5aff5aff .i32
 	logic_imm_1 \op \opq 0xff00 .i16
 	logic_imm_1 \op \opq 0x00ff .i16
+	logic_imm_1 \op \opq 0xff .i8
 	.endm
 
 	logic_inv_imm vand vandq
@@ -439,6 +457,24 @@
 	mov_imm vmov 0x77 .i8
 	mov_imm vmov 0xff0000ff000000ff .i64
 	mov_imm vmov 0x40880000 .f32
+
+	mov_imm vmov 0xa5a5 .i16
+	mov_imm vmvn 0xa5a5 .i16
+	mov_imm vmov 0xa5a5a5a5 .i32
+	mov_imm vmvn 0xa5a5a5a5 .i32
+	mov_imm vmov 0x00a500a5 .i32
+	mov_imm vmov 0xa500a500 .i32
+	mov_imm vmov 0xa5a5a5a5a5a5a5a5 .i64
+	mov_imm vmvn 0xa5a5a5a5a5a5a5a5 .i64
+	mov_imm vmov 0x00a500a500a500a5 .i64
+	mov_imm vmov 0xa500a500a500a500 .i64
+	mov_imm vmov 0x000000a5000000a5 .i64
+	mov_imm vmov 0x0000a5000000a500 .i64
+	mov_imm vmov 0x00a5000000a50000 .i64
+	mov_imm vmov 0xa5000000a5000000 .i64
+	mov_imm vmov 0x0000a5ff0000a5ff .i64
+	mov_imm vmov 0x00a5ffff00a5ffff .i64
+	mov_imm vmov 0xa5ffffffa5ffffff .i64
 
 	vmvn q0,q0
 	vmvnq q0,q0
