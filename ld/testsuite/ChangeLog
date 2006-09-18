@@ -1,3 +1,8 @@
+2006-09-18  Thiemo Seufer  <ths@networkno.de>
+
+	* ld-elfcomm/elfcomm.exp: Enable the alignment test for
+	mips*-*-*.
+
 2006-09-17  Mei Ligang  <ligang@sunnorth.com.cn>
 
 	* ld-elf/merge.d: Add special case for Score target.
