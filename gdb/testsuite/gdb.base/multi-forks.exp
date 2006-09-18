@@ -115,7 +115,8 @@ gdb_test "set detach off" "" "set detach off"
 for {set i 1} {$i <= 15} {incr i} {
   gdb_test "continue" "Breakpoint .* main .*exit.*" "Run to exit $i"
   gdb_test "info fork" " 4 .* 3 .* 2 .* 1 .*" "info fork $i"
-  gdb_test "restart $i" "(_dl_sysinfo_int80|fork).*" "restart $i"
+  gdb_test "restart $i" "(_dl_sysinfo_int80|fork|__kernel_vsyscall).*" \
+      "restart $i"
 }
 
 gdb_test "continue" "Breakpoint .* main .*exit.*" "Run to exit 16"
