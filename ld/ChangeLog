@@ -1,3 +1,8 @@
+2006-09-18  Thiemo Seufer  <ths@networkno.de>
+
+	* configure.tgt: Add mips*el-sde-elf* and mips*-sde-elf*
+	configurations.
+
 2006-09-17  Mei Ligang  <ligang@sunnorth.com.cn>
 
 	* emulparams/scoreelf.sh: New file.
