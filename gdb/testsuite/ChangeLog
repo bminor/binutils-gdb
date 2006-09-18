@@ -1,3 +1,7 @@
+2006-09-19  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.base/multi-forks.exp: Include __kernel_vsyscall in regexp.
+
 2006-09-17  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.mi/mi-stack.exp (test_stack_args_listing): Test that
