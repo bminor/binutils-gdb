@@ -1,3 +1,7 @@
+2006-09-19  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* gas/bfin/load.s, gas/bfin/load.d: Add constant folding tests.
+
 2006-09-17  Mei Ligang  <ligang@sunnorth.com.cn>
 
 	* gas/score: New directory.
