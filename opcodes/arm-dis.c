@@ -98,7 +98,11 @@ struct opcode16
    %L			print as an iWMMXt N/M width field.
    %Z			print the Immediate of a WSHUFH instruction.
    %l			like 'A' except use byte offsets for 'B' & 'H'
-			versions.  */
+			versions.
+   %i			print 5-bit immediate in bits 8,3..0
+			(print "32" when 0)
+   %r			print register offset address for wldt/wstr instruction
+*/
 
 /* Common coprocessor opcodes shared between Arm and Thumb-2.  */
 
@@ -113,7 +117,7 @@ static const struct opcode32 coprocessor_opcodes[] =
     
   /* Intel Wireless MMX technology instructions.  */
 #define FIRST_IWMMXT_INSN 0x0e130130
-#define IWMMXT_INSN_COUNT 47
+#define IWMMXT_INSN_COUNT 73
   {ARM_CEXT_IWMMXT, 0x0e130130, 0x0f3f0fff, "tandc%22-23w%c\t%12-15r"},
   {ARM_CEXT_XSCALE, 0x0e400010, 0x0ff00f3f, "tbcst%6-7w%c\t%16-19g, %12-15r"},
   {ARM_CEXT_XSCALE, 0x0e130170, 0x0f3f0ff8, "textrc%22-23w%c\t%12-15r, #%0-2d"},
@@ -128,37 +132,63 @@ static const struct opcode32 coprocessor_opcodes[] =
   {ARM_CEXT_XSCALE, 0x0e100110, 0x0ff00ff0, "tmrc%c\t%12-15r, %16-19G"},
   {ARM_CEXT_XSCALE, 0x0c500000, 0x0ff00ff0, "tmrrc%c\t%12-15r, %16-19r, %0-3g"},
   {ARM_CEXT_XSCALE, 0x0e130150, 0x0f3f0fff, "torc%22-23w%c\t%12-15r"},
+  {ARM_CEXT_XSCALE, 0x0e130190, 0x0f3f0fff, "torvsc%22-23w%c\t%12-15r"},
+  {ARM_CEXT_XSCALE, 0x0e2001c0, 0x0f300fff, "wabs%22-23w%c\t%12-15g, %16-19g"},
   {ARM_CEXT_XSCALE, 0x0e0001c0, 0x0f300fff, "wacc%22-23w%c\t%12-15g, %16-19g"},
   {ARM_CEXT_XSCALE, 0x0e000180, 0x0f000ff0, "wadd%20-23w%c\t%12-15g, %16-19g, %0-3g"},
+  {ARM_CEXT_XSCALE, 0x0e2001a0, 0x0f300ff0, "waddbhus%22?ml%c\t%12-15g, %16-19g, %0-3g"},
+  {ARM_CEXT_XSCALE, 0x0ea001a0, 0x0ff00ff0, "waddsubhx%c\t%12-15g, %16-19g, %0-3g"},
   {ARM_CEXT_XSCALE, 0x0e000020, 0x0f800ff0, "waligni%c\t%12-15g, %16-19g, %0-3g, #%20-22d"},
   {ARM_CEXT_XSCALE, 0x0e800020, 0x0fc00ff0, "walignr%20-21d%c\t%12-15g, %16-19g, %0-3g"},
   {ARM_CEXT_XSCALE, 0x0e200000, 0x0fe00ff0, "wand%20'n%c\t%12-15g, %16-19g, %0-3g"},
   {ARM_CEXT_XSCALE, 0x0e800000, 0x0fa00ff0, "wavg2%22?hb%20'r%c\t%12-15g, %16-19g, %0-3g"},
+  {ARM_CEXT_XSCALE, 0x0e400000, 0x0fe00ff0, "wavg4%20'r%c\t%12-15g, %16-19g, %0-3g"},
   {ARM_CEXT_XSCALE, 0x0e000060, 0x0f300ff0, "wcmpeq%22-23w%c\t%12-15g, %16-19g, %0-3g"},
   {ARM_CEXT_XSCALE, 0x0e100060, 0x0f100ff0, "wcmpgt%21?su%22-23w%c\t%12-15g, %16-19g, %0-3g"},
+  {ARM_CEXT_XSCALE, 0xfc500100, 0xfe500f00, "wldrd\t%12-15g, %r"},
   {ARM_CEXT_XSCALE, 0xfc100100, 0xfe500f00, "wldrw\t%12-15G, %A"},
   {ARM_CEXT_XSCALE, 0x0c100000, 0x0e100e00, "wldr%L%c\t%12-15g, %l"},
   {ARM_CEXT_XSCALE, 0x0e400100, 0x0fc00ff0, "wmac%21?su%20'z%c\t%12-15g, %16-19g, %0-3g"},
-  {ARM_CEXT_XSCALE, 0x0e800100, 0x0fd00ff0, "wmadd%21?su%c\t%12-15g, %16-19g, %0-3g"},
+  {ARM_CEXT_XSCALE, 0x0e800100, 0x0fc00ff0, "wmadd%21?su%20'x%c\t%12-15g, %16-19g, %0-3g"},
+  {ARM_CEXT_XSCALE, 0x0ec00100, 0x0fd00ff0, "wmadd%21?sun%c\t%12-15g, %16-19g, %0-3g"},
   {ARM_CEXT_XSCALE, 0x0e000160, 0x0f100ff0, "wmax%21?su%22-23w%c\t%12-15g, %16-19g, %0-3g"},
+  {ARM_CEXT_XSCALE, 0x0e000080, 0x0f100fe0, "wmerge%c\t%12-15g, %16-19g, %0-3g, #%21-23d"},
+  {ARM_CEXT_XSCALE, 0x0e0000a0, 0x0f800ff0, "wmia%21?tb%20?tb%22'n%c\t%12-15g, %16-19g, %0-3g"},
+  {ARM_CEXT_XSCALE, 0x0e800120, 0x0f800ff0, "wmiaw%21?tb%20?tb%22'n%c\t%12-15g, %16-19g, %0-3g"},
   {ARM_CEXT_XSCALE, 0x0e100160, 0x0f100ff0, "wmin%21?su%22-23w%c\t%12-15g, %16-19g, %0-3g"},
-  {ARM_CEXT_XSCALE, 0x0e000100, 0x0fc00ff0, "wmul%21?su%20?ml%c\t%12-15g, %16-19g, %0-3g"},
+  {ARM_CEXT_XSCALE, 0x0e000100, 0x0fc00ff0, "wmul%21?su%20?ml%23'r%c\t%12-15g, %16-19g, %0-3g"},
+  {ARM_CEXT_XSCALE, 0x0ed00100, 0x0fd00ff0, "wmul%21?sumr%c\t%12-15g, %16-19g, %0-3g"},
+  {ARM_CEXT_XSCALE, 0x0ee000c0, 0x0fe00ff0, "wmulwsm%20`r%c\t%12-15g, %16-19g, %0-3g"},
+  {ARM_CEXT_XSCALE, 0x0ec000c0, 0x0fe00ff0, "wmulwum%20`r%c\t%12-15g, %16-19g, %0-3g"},
+  {ARM_CEXT_XSCALE, 0x0eb000c0, 0x0ff00ff0, "wmulwl%c\t%12-15g, %16-19g, %0-3g"},
+  {ARM_CEXT_XSCALE, 0x0e8000a0, 0x0f800ff0, "wqmia%21?tb%20?tb%22'n%c\t%12-15g, %16-19g, %0-3g"},
+  {ARM_CEXT_XSCALE, 0x0e100080, 0x0fd00ff0, "wqmulm%21'r%c\t%12-15g, %16-19g, %0-3g"},
+  {ARM_CEXT_XSCALE, 0x0ec000e0, 0x0fd00ff0, "wqmulwm%21'r%c\t%12-15g, %16-19g, %0-3g"},
   {ARM_CEXT_XSCALE, 0x0e000000, 0x0ff00ff0, "wor%c\t%12-15g, %16-19g, %0-3g"},
   {ARM_CEXT_XSCALE, 0x0e000080, 0x0f000ff0, "wpack%20-23w%c\t%12-15g, %16-19g, %0-3g"},
-  {ARM_CEXT_XSCALE, 0x0e300040, 0x0f300ff0, "wror%22-23w%8'g%c\t%12-15g, %16-19g, %0-3g"},
-  {ARM_CEXT_XSCALE, 0x0e300148, 0x0f300ffc, "wror%22-23w%8'g%c\t%12-15g, %16-19g, %0-3G"},
+  {ARM_CEXT_XSCALE, 0xfe300040, 0xff300ef0, "wror%22-23w\t%12-15g, %16-19g, #%i"},
+  {ARM_CEXT_XSCALE, 0x0e300040, 0x0f300ff0, "wror%22-23w%c\t%12-15g, %16-19g, %0-3g"},
+  {ARM_CEXT_XSCALE, 0x0e300140, 0x0f300ff0, "wror%22-23wg%c\t%12-15g, %16-19g, %0-3G"},
   {ARM_CEXT_XSCALE, 0x0e000120, 0x0fa00ff0, "wsad%22?hb%20'z%c\t%12-15g, %16-19g, %0-3g"},
   {ARM_CEXT_XSCALE, 0x0e0001e0, 0x0f000ff0, "wshufh%c\t%12-15g, %16-19g, #%Z"},
+  {ARM_CEXT_XSCALE, 0xfe100040, 0xff300ef0, "wsll%22-23w\t%12-15g, %16-19g, #%i"},
   {ARM_CEXT_XSCALE, 0x0e100040, 0x0f300ff0, "wsll%22-23w%8'g%c\t%12-15g, %16-19g, %0-3g"},
   {ARM_CEXT_XSCALE, 0x0e100148, 0x0f300ffc, "wsll%22-23w%8'g%c\t%12-15g, %16-19g, %0-3G"},
+  {ARM_CEXT_XSCALE, 0xfe000040, 0xff300ef0, "wsra%22-23w\t%12-15g, %16-19g, #%i"},
   {ARM_CEXT_XSCALE, 0x0e000040, 0x0f300ff0, "wsra%22-23w%8'g%c\t%12-15g, %16-19g, %0-3g"},
   {ARM_CEXT_XSCALE, 0x0e000148, 0x0f300ffc, "wsra%22-23w%8'g%c\t%12-15g, %16-19g, %0-3G"},
+  {ARM_CEXT_XSCALE, 0xfe200040, 0xff300ef0, "wsrl%22-23w\t%12-15g, %16-19g, #%i"},
   {ARM_CEXT_XSCALE, 0x0e200040, 0x0f300ff0, "wsrl%22-23w%8'g%c\t%12-15g, %16-19g, %0-3g"},
   {ARM_CEXT_XSCALE, 0x0e200148, 0x0f300ffc, "wsrl%22-23w%8'g%c\t%12-15g, %16-19g, %0-3G"},
+  {ARM_CEXT_XSCALE, 0xfc400100, 0xfe500f00, "wstrd\t%12-15g, %r"},
   {ARM_CEXT_XSCALE, 0xfc000100, 0xfe500f00, "wstrw\t%12-15G, %A"},
   {ARM_CEXT_XSCALE, 0x0c000000, 0x0e100e00, "wstr%L%c\t%12-15g, %l"},
   {ARM_CEXT_XSCALE, 0x0e0001a0, 0x0f000ff0, "wsub%20-23w%c\t%12-15g, %16-19g, %0-3g"},
-  {ARM_CEXT_XSCALE, 0x0e0000c0, 0x0f100fff, "wunpckeh%21?su%22-23w%c\t%12-15g, %16-19g"},
+  {ARM_CEXT_XSCALE, 0x0ed001c0, 0x0ff00ff0, "wsubaddhx%c\t%12-15g, %16-19g, %0-3g"},
+  {ARM_CEXT_XSCALE, 0x0e1001c0, 0x0f300ff0, "wabsdiff%22-23w%c\t%12-15g, %16-19g, %0-3g"},
+  {ARM_CEXT_XSCALE, 0x0e0000c0, 0x0fd00fff, "wunpckeh%21?sub%c\t%12-15g, %16-19g"},
+  {ARM_CEXT_XSCALE, 0x0e4000c0, 0x0fd00fff, "wunpckeh%21?suh%c\t%12-15g, %16-19g"},
+  {ARM_CEXT_XSCALE, 0x0e8000c0, 0x0fd00fff, "wunpckeh%21?suw%c\t%12-15g, %16-19g"},
   {ARM_CEXT_XSCALE, 0x0e0000e0, 0x0f100fff, "wunpckel%21?su%22-23w%c\t%12-15g, %16-19g"},
   {ARM_CEXT_XSCALE, 0x0e1000c0, 0x0f300ff0, "wunpckih%22-23w%c\t%12-15g, %16-19g, %0-3g"},
   {ARM_CEXT_XSCALE, 0x0e1000e0, 0x0f300ff0, "wunpckil%22-23w%c\t%12-15g, %16-19g, %0-3g"},
@@ -1417,10 +1447,10 @@ static const char *const iwmmxt_wwnames[] =
 {"b", "h", "w", "d"};
 
 static const char *const iwmmxt_wwssnames[] =
-{"b", "bus", "b", "bss",
- "h", "hus", "h", "hss",
- "w", "wus", "w", "wss",
- "d", "dus", "d", "dss"
+{"b", "bus", "bc", "bss",
+ "h", "hus", "hc", "hss",
+ "w", "wus", "wc", "wss",
+ "d", "dus", "dc", "dss"
 };
 
 static const char *const iwmmxt_regnames[] =
@@ -1563,7 +1593,8 @@ print_insn_coprocessor (bfd_vma pc, struct disassemble_info *info, long given,
     {
       if (insn->value == FIRST_IWMMXT_INSN
 	  && info->mach != bfd_mach_arm_XScale
-	  && info->mach != bfd_mach_arm_iWMMXt)
+	  && info->mach != bfd_mach_arm_iWMMXt
+	  && info->mach != bfd_mach_arm_iWMMXt2)
 	insn = insn + IWMMXT_INSN_COUNT;
 
       mask = insn->mask;
@@ -1974,6 +2005,53 @@ print_insn_coprocessor (bfd_vma pc, struct disassemble_info *info, long given,
 			    }
 			  else
 			    func (stream, "]");
+			}
+			break;
+
+		      case 'r':
+			{
+			  int imm4 = (given >> 4) & 0xf;
+			  int puw_bits = ((given >> 22) & 6) | ((given >> 21) & 1);
+			  int ubit = (given >> 23) & 1;
+			  const char *rm = arm_regnames [given & 0xf];
+			  const char *rn = arm_regnames [(given >> 16) & 0xf];
+
+			  switch (puw_bits)
+			    {
+			    case 1:
+			      /* fall through */
+			    case 3:
+			      func (stream, "[%s], %c%s", rn, ubit ? '+' : '-', rm);
+			      if (imm4)
+				func (stream, ", lsl #%d", imm4);
+			      break;
+
+			    case 4:
+			      /* fall through */
+			    case 5:
+			      /* fall through */
+			    case 6:
+			      /* fall through */
+			    case 7:
+			      func (stream, "[%s, %c%s", rn, ubit ? '+' : '-', rm);
+			      if (imm4 > 0)
+				func (stream, ", lsl #%d", imm4);
+			      func (stream, "]");
+			      if (puw_bits == 5 || puw_bits == 7)
+				func (stream, "!");
+			      break;
+
+			    default:
+			      func (stream, "INVALID");
+			    }
+			}
+			break;
+
+		      case 'i':
+			{
+			  long imm5;
+			  imm5 = ((given & 0x100) >> 4) | (given & 0xf);
+			  func (stream, "%ld", (imm5 == 0) ? 32 : imm5);
 			}
 			break;
 
