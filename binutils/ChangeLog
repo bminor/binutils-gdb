@@ -1,3 +1,16 @@
+2006-09-20  Kai Tietz  <Kai.Tietz@onevision.com>
+
+	* configure.in: Add new target x86_64-pc-mingw64.
+	* configure: Regenerate.
+	* dlltool.c: Adjust include for this target.
+	(DLLTOOL_MX86_64): Added macro to handle target specific code.
+	(mname): Added default target static as "i386:x86-64".
+	(MX86):	Added macro for target ident.
+	(mtable): Added target specific definitions.
+	(rvaafter): Add handling of MX86.
+	(rvabefore): Add handling of MX86.
+	(asmprefix): Add handling of MX86.
+
 2006-09-17  Mei Ligang  <ligang@sunnorth.com.cn>
 
 	* readelf.c: Add support for Score binaries.

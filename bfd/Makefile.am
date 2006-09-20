@@ -563,7 +563,11 @@ BFD64_BACKENDS = \
 	mmo.lo \
 	nlm32-alpha.lo \
 	nlm64.lo \
-	pepigen.lo
+	coff-x86_64.lo \
+	pe-x86_64.lo \
+	pei-x86_64.lo \
+	pepigen.lo \
+	pex64igen.lo
 
 BFD64_BACKENDS_CFILES = \
 	aix5ppc-core.c \
@@ -586,7 +590,10 @@ BFD64_BACKENDS_CFILES = \
 	elf64.c \
 	mmo.c \
 	nlm32-alpha.c \
-	nlm64.c
+	nlm64.c \
+	coff-x86_64.c \
+	pe-x86_64.c \
+	pei-x86_64.c
 
 OPTIONAL_BACKENDS = \
 	aix386-core.lo \
@@ -636,7 +643,7 @@ SOURCE_CFILES = \
 	$(OPTIONAL_BACKENDS_CFILES)
 
 BUILD_CFILES = \
-	elf32-ia64.c elf64-ia64.c peigen.c pepigen.c
+	elf32-ia64.c elf64-ia64.c peigen.c pepigen.c pex64igen.c
 
 CFILES = $(SOURCE_CFILES) $(BUILD_CFILES)
 
@@ -793,6 +800,11 @@ pepigen.c : peXXigen.c
 	rm -f pepigen.c
 	sed -e s/XX/pep/g < $(srcdir)/peXXigen.c > pepigen.new
 	mv -f pepigen.new pepigen.c
+
+pex64igen.c: peXXigen.c
+	rm -f pex64igen.c
+	sed -e s/XX/pex64/g < $(srcdir)/peXXigen.c > pex64igen.new
+	mv -f pex64igen.new pex64igen.c
 
 BFD_H_DEPS= $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h
 LOCAL_H_DEPS= libbfd.h sysdep.h config.h
@@ -1860,5 +1872,8 @@ peigen.lo: peigen.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h libpei.h
 pepigen.lo: pepigen.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/ia64.h $(INCDIR)/coff/external.h \
+  $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h libpei.h
+pex64igen.lo: pex64igen.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/x86_64.h $(INCDIR)/coff/external.h \
   $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h libpei.h
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY

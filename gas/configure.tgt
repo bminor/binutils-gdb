@@ -79,7 +79,7 @@ case ${cpu} in
   strongarm*b)		cpu_type=arm endian=big ;;
   strongarm*)		cpu_type=arm endian=little ;;
   v850*)		cpu_type=v850 ;;
-  x86_64)		cpu_type=i386 arch=x86_64;;
+  x86_64*)		cpu_type=i386 arch=x86_64;;
   xscale*be|xscale*b)	cpu_type=arm endian=big ;;
   xscale*)		cpu_type=arm endian=little ;;
   xtensa*)		cpu_type=xtensa arch=xtensa ;;
@@ -212,6 +212,7 @@ case ${generic_target} in
   i386-*-cygwin*)			fmt=coff em=pe ;;
   i386-*-interix*)			fmt=coff em=interix ;;
   i386-*-mingw32*)			fmt=coff em=pe ;;
+  i386-*-mingw64*)			fmt=coff em=pep ;;
   i386-*-nto-qnx*)			fmt=elf ;;
   i386-*-*nt*)				fmt=coff em=pe ;;
   i386-*-chaos)				fmt=elf ;;

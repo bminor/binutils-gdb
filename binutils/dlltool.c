@@ -261,6 +261,9 @@
 #include "coff/arm.h"
 #include "coff/internal.h"
 #endif
+#ifdef DLLTOOL_MX86_64
+#include "coff/x86_64.h"
+#endif
 
 /* Forward references.  */
 static char *look_for_prog (const char *, const char *, int);
@@ -396,6 +399,10 @@ static const char *mname = "arm";
 
 #ifdef DLLTOOL_I386
 static const char *mname = "i386";
+#endif
+
+#ifdef DLLTOOL_MX86_64
+static const char *mname = "i386:x86-64";
 #endif
 
 #ifdef DLLTOOL_PPC
@@ -640,6 +647,14 @@ mtable[] =
     arm_jtab, sizeof (arm_jtab), 8
   }
   ,
+  {
+#define MX86 11
+    "i386:x86-64", ".byte", ".short", ".long", ".asciz", "#",
+    "jmp *", ".global", ".space", ".align\t2",".align\t4", "",
+    "pe-x86-64",bfd_arch_i386,
+    i386_jtab, sizeof (i386_jtab), 2
+  }
+  ,
   { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 };
 
@@ -763,6 +778,7 @@ rvaafter (int machine)
     {
     case MARM:
     case M386:
+    case MX86:
     case MPPC:
     case MTHUMB:
     case MARM_INTERWORK:
@@ -788,6 +804,7 @@ rvabefore (int machine)
     {
     case MARM:
     case M386:
+    case MX86:
     case MPPC:
     case MTHUMB:
     case MARM_INTERWORK:
@@ -823,6 +840,7 @@ asm_prefix (int machine, const char *name)
     case MARM_WINCE:
       break;
     case M386:
+    case MX86:
       /* Symbol names starting with ? do not have a leading underscore. */
       if (name && *name == '?')
         break;
@@ -1700,10 +1718,19 @@ generate_idata_ofile (FILE *filvar)
   for (headptr = import_list; headptr != NULL; headptr = headptr->next)
     {
       fprintf (filvar, "listone%d:\n", headindex);
-      for ( funcindex = 0; funcindex < headptr->nfuncs; funcindex++ )
+      for (funcindex = 0; funcindex < headptr->nfuncs; funcindex++)
+#ifdef DLLTOOL_MX86_64
+	fprintf (filvar, "\t%sfuncptr%d_%d%s\n%s\t0\n",
+		 ASM_RVA_BEFORE, headindex, funcindex, ASM_RVA_AFTER,ASM_LONG);
+#else
 	fprintf (filvar, "\t%sfuncptr%d_%d%s\n",
 		 ASM_RVA_BEFORE, headindex, funcindex, ASM_RVA_AFTER);
-      fprintf (filvar,"\t%s\t0\n", ASM_LONG); /* NULL terminating list */
+#endif
+#ifdef DLLTOOL_MX86_64
+      fprintf (filvar, "\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG); /* NULL terminating list.  */
+#else
+      fprintf (filvar, "\t%s\t0\n", ASM_LONG); /* NULL terminating list.  */
+#endif
       headindex++;
     }
 
@@ -1712,10 +1739,19 @@ generate_idata_ofile (FILE *filvar)
   for (headptr = import_list; headptr != NULL; headptr = headptr->next)
     {
       fprintf (filvar, "listtwo%d:\n", headindex);
-      for ( funcindex = 0; funcindex < headptr->nfuncs; funcindex++ )
+      for (funcindex = 0; funcindex < headptr->nfuncs; funcindex++)
+#ifdef DLLTOOL_MX86_64
+	fprintf (filvar, "\t%sfuncptr%d_%d%s\n%s\t0\n",
+		 ASM_RVA_BEFORE, headindex, funcindex, ASM_RVA_AFTER,ASM_LONG);
+#else
 	fprintf (filvar, "\t%sfuncptr%d_%d%s\n",
 		 ASM_RVA_BEFORE, headindex, funcindex, ASM_RVA_AFTER);
-      fprintf (filvar, "\t%s\t0\n", ASM_LONG); /* NULL terminating list */
+#endif
+#ifdef DLLTOOL_MX86_64
+      fprintf (filvar, "\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG); /* NULL terminating list.  */
+#else
+      fprintf (filvar, "\t%s\t0\n", ASM_LONG); /* NULL terminating list.  */
+#endif
       headindex++;
     }
 
@@ -2358,7 +2394,7 @@ make_one_lib_file (export_type *exp, int i)
 	      si->data = xmalloc (HOW_JTAB_SIZE);
 	      memcpy (si->data, HOW_JTAB, HOW_JTAB_SIZE);
 
-	      /* add the reloc into idata$5 */
+	      /* Add the reloc into idata$5.  */
 	      rel = xmalloc (sizeof (arelent));
 
 	      rpp = xmalloc (sizeof (arelent *) * 2);
@@ -2388,6 +2424,36 @@ make_one_lib_file (export_type *exp, int i)
 	  /* An idata$4 or idata$5 is one word long, and has an
 	     rva to idata$6.  */
 
+#ifdef DLLTOOL_MX86_64
+	  si->data = xmalloc (8);
+	  si->size = 8;
+
+	  if (exp->noname)
+	    {
+	      si->data[0] = exp->ordinal ;
+	      si->data[1] = exp->ordinal >> 8;
+	      si->data[2] = exp->ordinal >> 16;
+	      si->data[3] = exp->ordinal >> 24;
+	      si->data[4] = 0;
+	      si->data[5] = 0;
+	      si->data[6] = 0;
+	      si->data[7] = 0x80;
+	    }
+	  else
+	    {
+	      sec->reloc_count = 1;
+	      memset (si->data, 0, si->size);
+	      rel = xmalloc (sizeof (arelent));
+	      rpp = xmalloc (sizeof (arelent *) * 2);
+	      rpp[0] = rel;
+	      rpp[1] = 0;
+	      rel->address = 0;
+	      rel->addend = 0;
+	      rel->howto = bfd_reloc_type_lookup (abfd, BFD_RELOC_RVA);
+	      rel->sym_ptr_ptr = secdata[IDATA6].sympp;
+	      sec->orelocation = rpp;
+	    }
+#else
 	  si->data = xmalloc (4);
 	  si->size = 4;
 
@@ -2412,7 +2478,7 @@ make_one_lib_file (export_type *exp, int i)
 	      rel->sym_ptr_ptr = secdata[IDATA6].sympp;
 	      sec->orelocation = rpp;
 	    }
-
+#endif
 	  break;
 
 	case IDATA6:
@@ -2626,14 +2692,17 @@ make_head (void)
   if (!no_idata5)
     {
       fprintf (f, "\t.section\t.idata$5\n");
-      fprintf (f, "\t%s\t0\n", ASM_LONG);
+#ifdef DLLTOOL_MX86_64
+      fprintf (f,"\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG); /* NULL terminating list.  */
+#else
+      fprintf (f,"\t%s\t0\n", ASM_LONG); /* NULL terminating list.  */
+#endif
       fprintf (f, "fthunk:\n");
     }
 
   if (!no_idata4)
     {
       fprintf (f, "\t.section\t.idata$4\n");
-
       fprintf (f, "\t%s\t0\n", ASM_LONG);
       fprintf (f, "\t.section	.idata$4\n");
       fprintf (f, "hname:\n");
@@ -2660,13 +2729,21 @@ make_tail (void)
   if (!no_idata4)
     {
       fprintf (f, "\t.section	.idata$4\n");
-      fprintf (f, "\t%s\t0\n", ASM_LONG);
+#ifdef DLLTOOL_MX86_64
+      fprintf (f,"\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG); /* NULL terminating list.  */
+#else
+      fprintf (f,"\t%s\t0\n", ASM_LONG); /* NULL terminating list.  */
+#endif
     }
 
   if (!no_idata5)
     {
       fprintf (f, "\t.section	.idata$5\n");
-      fprintf (f, "\t%s\t0\n", ASM_LONG);
+#ifdef DLLTOOL_MX86_64
+      fprintf (f,"\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG); /* NULL terminating list.  */
+#else
+      fprintf (f,"\t%s\t0\n", ASM_LONG); /* NULL terminating list.  */
+#endif
     }
 
 #ifdef DLLTOOL_PPC

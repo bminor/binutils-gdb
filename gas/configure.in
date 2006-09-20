@@ -417,6 +417,19 @@ if test ${all_targets} = "yes"; then
       ;;
     esac
   ;;
+  x86_64)
+    case ${obj_format} in
+    aout)
+      emulations="$emulations i386coff i386elf"
+      ;;
+    coff)
+      emulations="$emulations i386aout i386elf"
+    ;;
+    elf)
+      emulations="$emulations i386aout i386coff"
+      ;;
+    esac
+  ;;
   esac
 fi
 
@@ -461,6 +474,7 @@ case ${obj_format} in
       i386) AC_DEFINE(I386COFF, 1, [Using i386 COFF?]) ;;
       m68k) AC_DEFINE(M68KCOFF, 1, [Using m68k COFF?]) ;;
       m88k) AC_DEFINE(M88KCOFF, 1, [Using m88k COFF?]) ;;
+      x86_64) AC_DEFINE(I386COFF, 1, [Using i386 COFF?]) ;;
     esac
     ;;
 esac

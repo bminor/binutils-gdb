@@ -1,3 +1,13 @@
+2006-09-20  Kai Tietz  <Kai.Tietz@onevision.com>
+
+	* binutils-all/copy-3.d: Add support for target x86_64-pc-mingw64.
+	* binutils-all/dlltool.exp: Likewise.
+	* binutils-all/objcopy.exp: Likewise.
+	* binutils-all/windres/windres.exp: Likewise.
+	* binutils-all/windres/lang.rc: xfail it as long as there is no windows.h.
+	* binutils-all/windres/strtab1.rc: Likewise.
+	* lib/utils-lib.exp: Adjust executable prefix detection (as .exe).
+
 2006-09-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/3181

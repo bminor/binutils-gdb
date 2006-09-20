@@ -1,3 +1,4 @@
+//#xfail *-*-mingw64
 #include "windows.h"
 
 LANGUAGE 0, 0

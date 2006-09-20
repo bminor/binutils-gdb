@@ -3921,7 +3921,7 @@ ia64-*-hpux*)
   rm -rf conftest*
   ;;
 
-x86_64-*linux*|ppc*-*linux*|powerpc*-*linux*|s390*-*linux*|sparc*-*linux*)
+x86_64-*linux*|x86_64-*mingw64*|ppc*-*linux*|powerpc*-*linux*|s390*-*linux*|sparc*-*linux*)
   # Find out which ABI we are using.
   echo 'int i;' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
@@ -3932,7 +3932,7 @@ x86_64-*linux*|ppc*-*linux*|powerpc*-*linux*|s390*-*linux*|sparc*-*linux*)
     case "`/usr/bin/file conftest.o`" in
     *32-bit*)
       case $host in
-        x86_64-*linux*)
+        x86_64-*linux*|x86_64-*mingw64*)
           LD="${LD-ld} -m elf_i386"
           ;;
         ppc64-*linux*|powerpc64-*linux*)
@@ -3948,7 +3948,7 @@ x86_64-*linux*|ppc*-*linux*|powerpc*-*linux*|s390*-*linux*|sparc*-*linux*)
       ;;
     *64-bit*)
       case $host in
-        x86_64-*linux*)
+        x86_64-*linux*|x86_64-*mingw64*)
           LD="${LD-ld} -m elf_x86_64"
           ;;
         ppc*-*linux*|powerpc*-*linux*)
@@ -4895,6 +4895,19 @@ if test ${all_targets} = "yes"; then
       ;;
     esac
   ;;
+  x86_64)
+    case ${obj_format} in
+    aout)
+      emulations="$emulations i386coff i386elf"
+      ;;
+    coff)
+      emulations="$emulations i386aout i386elf"
+    ;;
+    elf)
+      emulations="$emulations i386aout i386coff"
+      ;;
+    esac
+  ;;
   esac
 fi
 
@@ -4956,6 +4969,11 @@ _ACEOF
       m88k)
 cat >>confdefs.h <<\_ACEOF
 #define M88KCOFF 1
+_ACEOF
+ ;;
+      x86_64)
+cat >>confdefs.h <<\_ACEOF
+#define I386COFF 1
 _ACEOF
  ;;
     esac

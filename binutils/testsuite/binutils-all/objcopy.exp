@@ -1,5 +1,5 @@
 #   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-#   2004
+#   2004, 2006
 #   Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -443,7 +443,7 @@ strip_test_with_saving_a_symbol
 
 # Build a final executable.
 
-if { [istarget *-*-cygwin] || [istarget *-*-mingw32] } {
+if { [istarget *-*-cygwin] || [istarget *-*-mingw*] } {
     set test_prog "testprog.exe"
 } else {
     set test_prog "testprog"

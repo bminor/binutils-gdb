@@ -204,7 +204,39 @@
 #define PUT_SCNHDR_LNNOPTR H_PUT_32
 #endif
 
-#ifdef COFF_WITH_pep
+#ifdef COFF_WITH_pex64
+
+#define GET_OPTHDR_IMAGE_BASE            H_GET_64
+#define PUT_OPTHDR_IMAGE_BASE            H_PUT_64
+#define GET_OPTHDR_SIZE_OF_STACK_RESERVE H_GET_64
+#define PUT_OPTHDR_SIZE_OF_STACK_RESERVE H_PUT_64
+#define GET_OPTHDR_SIZE_OF_STACK_COMMIT  H_GET_64
+#define PUT_OPTHDR_SIZE_OF_STACK_COMMIT  H_PUT_64
+#define GET_OPTHDR_SIZE_OF_HEAP_RESERVE  H_GET_64
+#define PUT_OPTHDR_SIZE_OF_HEAP_RESERVE  H_PUT_64
+#define GET_OPTHDR_SIZE_OF_HEAP_COMMIT   H_GET_64
+#define PUT_OPTHDR_SIZE_OF_HEAP_COMMIT   H_PUT_64
+#define GET_PDATA_ENTRY                  bfd_get_32
+
+#define _bfd_XX_bfd_copy_private_bfd_data_common	_bfd_pex64_bfd_copy_private_bfd_data_common
+#define _bfd_XX_bfd_copy_private_section_data		_bfd_pex64_bfd_copy_private_section_data
+#define _bfd_XX_get_symbol_info				_bfd_pex64_get_symbol_info
+#define _bfd_XX_only_swap_filehdr_out			_bfd_pex64_only_swap_filehdr_out
+#define _bfd_XX_print_private_bfd_data_common		_bfd_pex64_print_private_bfd_data_common
+#define _bfd_XXi_final_link_postscript			_bfd_pex64i_final_link_postscript
+#define _bfd_XXi_final_link_postscript			_bfd_pex64i_final_link_postscript
+#define _bfd_XXi_only_swap_filehdr_out			_bfd_pex64i_only_swap_filehdr_out
+#define _bfd_XXi_swap_aouthdr_in			_bfd_pex64i_swap_aouthdr_in
+#define _bfd_XXi_swap_aouthdr_out			_bfd_pex64i_swap_aouthdr_out
+#define _bfd_XXi_swap_aux_in				_bfd_pex64i_swap_aux_in
+#define _bfd_XXi_swap_aux_out				_bfd_pex64i_swap_aux_out
+#define _bfd_XXi_swap_lineno_in				_bfd_pex64i_swap_lineno_in
+#define _bfd_XXi_swap_lineno_out			_bfd_pex64i_swap_lineno_out
+#define _bfd_XXi_swap_scnhdr_out			_bfd_pex64i_swap_scnhdr_out
+#define _bfd_XXi_swap_sym_in				_bfd_pex64i_swap_sym_in
+#define _bfd_XXi_swap_sym_out				_bfd_pex64i_swap_sym_out
+
+#elif defined COFF_WITH_pep
 
 #define GET_OPTHDR_IMAGE_BASE H_GET_64
 #define PUT_OPTHDR_IMAGE_BASE H_PUT_64

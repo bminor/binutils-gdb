@@ -1,4 +1,4 @@
-# Copyright 1993, 1994, 1995, 1996, 1997, 2000, 2001, 2003, 2004
+# Copyright 1993, 1994, 1995, 1996, 1997, 2000, 2001, 2003, 2004, 2006
 # Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -161,7 +161,7 @@ proc is_elf_format {} {
 #	Returns target executable extension, if any.
 #
 proc exe_ext {} {
-    if { [istarget *-*-mingw32] || [istarget *-*-cygwin*] } {
+    if { [istarget *-*-mingw*] || [istarget *-*-cygwin*] } {
         return ".exe"
     } else {
         return ""

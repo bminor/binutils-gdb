@@ -1,3 +1,36 @@
+2006-09-20  Kai Tietz  <Kai.Tietz@onevision.com>
+
+	* configure.in:	Added new target-vectors x86_64coff_vec,
+	x86_64pe_vec, and x86_64pei_vec.
+	* configure: Regenerate.
+	* config.bfd: Adjusted x86_64 target architecture detection.
+	* bfd.c: Add for new target "coff-x86-64"
+	(bfd_get_sign_extend): Add target vector idents for pe-x86-64. and pei-x86-64.
+	* coff-x86_64.c: Add new file for x86_64 (AMD64) coff support.
+	* libpei.h: Adjustments for COFF_WITH_pex64.
+	* coffcode.h: Add for new target machine, architecture, signature, and internal
+	signature handler.
+	* Makefile.am: Add new files to target-all and define make-rule for pex64igen.c
+	* Makefile.in: Regenerate.
+	* pe-x86_64.c: Add for new target "pe-x86-64".
+	* pei-x86_64.c:	Add for new target "pei-x86-64".
+	* peicode.h: Adjusts for new targets.
+	(coff_swap_filehdr_out): Set for this target to
+	_bfd_pex64_only_swap_filehdr_out.
+	(SIZEOF_IDATA4): Define it as 8 byte size for this target.
+	(SIZEOF_IDATA5): Define it as 8 byte size for this target.
+	(jump_table jtab): Add for AMD64MAGIC.
+	(pe_ILF_build_a_bfd): Adjusts for new size of SIZEOF_IDATA4 and SIZE_IDATA5.
+	(pe_ILF_object_p): Add coff image-file signature to internal
+	signature translation.
+	* peXXigen.c: Adjust proper include of target coff-header and
+	introduced target specific code
+	(COFF_WITH_pex64): New macro for this target.
+	(pe_print_idata): New dumping method for import section of PE+ files.
+	* targets.c: Add new target vectors declarations for x86_64 coff targets.
+	* coffcode.h: Support code to support the x86_64 PE magic number.
+	* coff-x86_64.c: New file.
+
 2006-09-17  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf.c (special_sections_s): Revert last STRING_COMMA_LEN change

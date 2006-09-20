@@ -52,8 +52,8 @@
    on this code has a chance of getting something accomplished without
    wasting too much time.  */
 
-/* This expands into COFF_WITH_pe or COFF_WITH_pep depending on whether
-   we're compiling for straight PE or PE+.  */
+/* This expands into COFF_WITH_pe, COFF_WITH_pep, or COFF_WITH_pex64
+   depending on whether we're compiling for straight PE or PE+.  */
 #define COFF_WITH_XX
 
 #include "bfd.h"
@@ -67,7 +67,9 @@
    within PE/PEI, so we get them from there.  FIXME: The lack of
    variance is an assumption which may prove to be incorrect if new
    PE/PEI targets are created.  */
-#ifdef COFF_WITH_pep
+#if defined COFF_WITH_pex64
+# include "coff/x86_64.h"
+#elif defined COFF_WITH_pep
 # include "coff/ia64.h"
 #else
 # include "coff/i386.h"
@@ -77,7 +79,7 @@
 #include "libcoff.h"
 #include "libpei.h"
 
-#ifdef COFF_WITH_pep
+#if defined COFF_WITH_pep || defined COFF_WITH_pex64
 # undef AOUTSZ
 # define AOUTSZ		PEPAOUTSZ
 # define PEAOUTHDR	PEPAOUTHDR
@@ -399,7 +401,7 @@ _bfd_XXi_swap_aouthdr_in (bfd * abfd,
   aouthdr_int->entry = GET_AOUTHDR_ENTRY (abfd, aouthdr_ext->entry);
   aouthdr_int->text_start =
     GET_AOUTHDR_TEXT_START (abfd, aouthdr_ext->text_start);
-#ifndef COFF_WITH_pep
+#if !defined(COFF_WITH_pep) && !defined(COFF_WITH_pex64)
   /* PE32+ does not have data_start member!  */
   aouthdr_int->data_start =
     GET_AOUTHDR_DATA_START (abfd, aouthdr_ext->data_start);
@@ -442,6 +444,7 @@ _bfd_XXi_swap_aouthdr_in (bfd * abfd,
         /* If data directory is empty, rva also should be 0.  */
 	int size =
 	  H_GET_32 (abfd, src->DataDirectory[idx][1]);
+
 	a->DataDirectory[idx].Size = size;
 
 	if (size)
@@ -455,7 +458,7 @@ _bfd_XXi_swap_aouthdr_in (bfd * abfd,
   if (aouthdr_int->entry)
     {
       aouthdr_int->entry += a->ImageBase;
-#ifndef COFF_WITH_pep
+#if !defined(COFF_WITH_pep) && !defined(COFF_WITH_pex64)
       aouthdr_int->entry &= 0xffffffff;
 #endif
     }
@@ -463,12 +466,12 @@ _bfd_XXi_swap_aouthdr_in (bfd * abfd,
   if (aouthdr_int->tsize)
     {
       aouthdr_int->text_start += a->ImageBase;
-#ifndef COFF_WITH_pep
+#if !defined(COFF_WITH_pep) && !defined(COFF_WITH_pex64)
       aouthdr_int->text_start &= 0xffffffff;
 #endif
     }
 
-#ifndef COFF_WITH_pep
+#if !defined(COFF_WITH_pep) && !defined(COFF_WITH_pex64)
   /* PE32+ does not have data_start member!  */
   if (aouthdr_int->dsize)
     {
@@ -548,7 +551,7 @@ _bfd_XXi_swap_aouthdr_out (bfd * abfd, void * in, void * out)
   if (aouthdr_in->tsize)
     {
       aouthdr_in->text_start -= ib;
-#ifndef COFF_WITH_pep
+#if !defined(COFF_WITH_pep) && !defined(COFF_WITH_pex64)
       aouthdr_in->text_start &= 0xffffffff;
 #endif
     }
@@ -556,7 +559,7 @@ _bfd_XXi_swap_aouthdr_out (bfd * abfd, void * in, void * out)
   if (aouthdr_in->dsize)
     {
       aouthdr_in->data_start -= ib;
-#ifndef COFF_WITH_pep
+#if !defined(COFF_WITH_pep) && !defined(COFF_WITH_pex64)
       aouthdr_in->data_start &= 0xffffffff;
 #endif
     }
@@ -564,7 +567,7 @@ _bfd_XXi_swap_aouthdr_out (bfd * abfd, void * in, void * out)
   if (aouthdr_in->entry)
     {
       aouthdr_in->entry -= ib;
-#ifndef COFF_WITH_pep
+#if !defined(COFF_WITH_pep) && !defined(COFF_WITH_pex64)
       aouthdr_in->entry &= 0xffffffff;
 #endif
     }
@@ -661,7 +664,7 @@ _bfd_XXi_swap_aouthdr_out (bfd * abfd, void * in, void * out)
   PUT_AOUTHDR_TEXT_START (abfd, aouthdr_in->text_start,
 			  aouthdr_out->standard.text_start);
 
-#ifndef COFF_WITH_pep
+#if !defined(COFF_WITH_pep) && !defined(COFF_WITH_pex64)
   /* PE32+ does not have data_start member!  */
   PUT_AOUTHDR_DATA_START (abfd, aouthdr_in->data_start,
 			  aouthdr_out->standard.data_start);
@@ -1262,6 +1265,38 @@ pe_print_idata (bfd * abfd, void * vfile)
 	    }
 
 	  /* Print HintName vector entries.  */
+#ifdef COFF_WITH_pex64
+	  for (j = 0; j < datasize; j += 8)
+	    {
+	      unsigned long member = bfd_get_32 (abfd, data + idx + j);
+	      unsigned long member_high = bfd_get_32 (abfd, data + idx + j + 4);
+
+	      if (!member && !member_high)
+		break;
+
+	      if (member_high & 0x80000000)
+		fprintf (file, "\t%lx%08lx\t %4lx%08lx  <none>",
+			 member_high,member, member_high & 0x7fffffff, member);
+	      else
+		{
+		  int ordinal;
+		  char *member_name;
+
+		  ordinal = bfd_get_16 (abfd, data + member - adj);
+		  member_name = (char *) data + member - adj + 2;
+		  fprintf (file, "\t%04lx\t %4d  %s",member, ordinal, member_name);
+		}
+
+	      /* If the time stamp is not zero, the import address
+		 table holds actual addresses.  */
+	      if (time_stamp != 0
+		  && first_thunk != 0
+		  && first_thunk != hint_addr)
+		fprintf (file, "\t%04lx",
+			 (long) bfd_get_32 (abfd, ft_data + ft_idx + j));
+	      fprintf (file, "\n");
+	    }
+#else
 	  for (j = 0; j < datasize; j += 4)
 	    {
 	      unsigned long member = bfd_get_32 (abfd, data + idx + j);
@@ -1294,7 +1329,7 @@ pe_print_idata (bfd * abfd, void * vfile)
 
 	      fprintf (file, "\n");
 	    }
-
+#endif
 	  if (ft_allocated)
 	    free (ft_data);
 	}
@@ -1534,10 +1569,10 @@ pe_print_edata (bfd * abfd, void * vfile)
 static bfd_boolean
 pe_print_pdata (bfd * abfd, void * vfile)
 {
-#ifdef COFF_WITH_pep
-# define PDATA_ROW_SIZE	(3*8)
+#if defined(COFF_WITH_pep) && !defined(COFF_WITH_pex64)
+# define PDATA_ROW_SIZE	(3 * 8)
 #else
-# define PDATA_ROW_SIZE	(5*4)
+# define PDATA_ROW_SIZE	(5 * 4)
 #endif
   FILE *file = (FILE *) vfile;
   bfd_byte *data = 0;
@@ -1560,7 +1595,7 @@ pe_print_pdata (bfd * abfd, void * vfile)
 
   fprintf (file,
 	   _("\nThe Function Table (interpreted .pdata section contents)\n"));
-#ifdef COFF_WITH_pep
+#if defined(COFF_WITH_pep) && !defined(COFF_WITH_pex64)
   fprintf (file,
 	   _(" vma:\t\t\tBegin Address    End Address      Unwind Info\n"));
 #else
@@ -1614,7 +1649,7 @@ pe_print_pdata (bfd * abfd, void * vfile)
       fprintf_vma (file, begin_addr); fputc (' ', file);
       fprintf_vma (file, end_addr); fputc (' ', file);
       fprintf_vma (file, eh_handler);
-#ifndef COFF_WITH_pep
+#if !defined(COFF_WITH_pep) || defined(COFF_WITH_pex64)
       fputc (' ', file);
       fprintf_vma (file, eh_data); fputc (' ', file);
       fprintf_vma (file, prolog_end_addr);

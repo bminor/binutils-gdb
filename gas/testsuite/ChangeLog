@@ -1,3 +1,18 @@
+2006-09-20  Kai Tietz  <Kai.Tietz@onevision.com>
+
+	* gas/all/gas.exp: Add support for x86_64-*-mingw64.
+	* gas/i386/immed64.d: Add #pass for avoid proplems with alignment paddings.
+	* gas/i386/rex.d: Changed for x86_64-mingw32 target matching and padding.
+	* gas/i386/i386.d: Likewise.
+	* gas/i386/x86-64-addr32.d: Likewise.
+	* gas/i386/x86-64-branch.d: Likewise.
+	* gas/i386/x86-64-crx-suffix.d: Likewise.
+	* gas/i386/x86-64-crx.d: Likewise.
+	* gas/i386/x86-64-drx-suffix.d: Likewise.
+	* gas/i386/x86-64-crx-suffix.d: Likewise.
+	* gas/i386/x86-64-opcode.d: Likewise.
+	* gas/i386/x86-64-pcrel.d: Likewise.
+
 2006-09-19  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	* gas/bfin/load.s, gas/bfin/load.d: Add constant folding tests.

@@ -5766,9 +5766,10 @@ const char *md_shortopts = "qn";
 #define OPTION_MARCH (OPTION_MD_BASE + 3)
 #define OPTION_MTUNE (OPTION_MD_BASE + 4)
 
-struct option md_longopts[] = {
+struct option md_longopts[] =
+{
   {"32", no_argument, NULL, OPTION_32},
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) || defined(TE_PEP)
   {"64", no_argument, NULL, OPTION_64},
 #endif
   {"divide", no_argument, NULL, OPTION_DIVIDE},
@@ -5812,14 +5813,18 @@ md_parse_option (int c, char *arg)
       /* -s: On i386 Solaris, this tells the native assembler to use
 	 .stab instead of .stab.excl.  We always use .stab anyhow.  */
       break;
-
+#endif
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) || defined(TE_PEP)
     case OPTION_64:
       {
 	const char **list, **l;
 
 	list = bfd_target_list ();
 	for (l = list; *l != NULL; l++)
-	  if (strncmp (*l, "elf64-x86-64", 12) == 0)
+	  if (   strncmp (*l, "elf64-x86-64", 12) == 0
+	      || strcmp (*l, "coff-x86-64") == 0
+	      || strcmp (*l, "pe-x86-64") == 0
+	      || strcmp (*l, "pei-x86-64") == 0)
 	    {
 	      default_arch = "x86_64";
 	      break;
@@ -5926,6 +5931,26 @@ md_show_usage (stream)
 			   yonah, merom, k6, athlon, k8, generic32, generic64\n"));
 
 }
+
+#if defined(TE_PEP)
+const char *
+x86_64_target_format (void)
+{
+  if (strcmp (default_arch, "x86_64") == 0)
+    {
+      set_code_flag (CODE_64BIT);
+      return COFF_TARGET_FORMAT;
+    }
+  else if (strcmp (default_arch, "i386") == 0)
+    {
+      set_code_flag (CODE_32BIT);
+      return "coff-i386";
+    }
+
+  as_fatal (_("Unknown architecture"));
+  return NULL;
+}
+#endif
 
 #if ((defined (OBJ_MAYBE_COFF) && defined (OBJ_MAYBE_AOUT)) \
      || defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF))

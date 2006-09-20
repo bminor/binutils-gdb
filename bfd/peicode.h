@@ -1,6 +1,6 @@
 /* Support for the generic parts of PE/PEI, for BFD.
    Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005 Free Software Foundation, Inc.
+   2005, 2006 Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -182,6 +182,10 @@ coff_swap_filehdr_in (bfd * abfd, void * src, void * dst)
 
 #ifdef COFF_IMAGE_WITH_PE
 # define coff_swap_filehdr_out _bfd_XXi_only_swap_filehdr_out
+#elif defined COFF_WITH_pex64
+# define coff_swap_filehdr_out _bfd_pex64_only_swap_filehdr_out
+#elif defined COFF_WITH_pep
+# define coff_swap_filehdr_out _bfd_pep_only_swap_filehdr_out
 #else
 # define coff_swap_filehdr_out _bfd_pe_only_swap_filehdr_out
 #endif
@@ -217,7 +221,10 @@ coff_swap_scnhdr_in (bfd * abfd, void * ext, void * in)
   if (scnhdr_int->s_vaddr != 0)
     {
       scnhdr_int->s_vaddr += pe_data (abfd)->pe_opthdr.ImageBase;
+      /* Do not cut upper 32-bits for 64-bit vma.  */
+#ifndef COFF_WITH_pex64
       scnhdr_int->s_vaddr &= 0xffffffff;
+#endif
     }
 
 #ifndef COFF_NO_HACK_SCNHDR_SIZE
@@ -405,8 +412,16 @@ pe_bfd_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 					+ NUM_ILF_SECTIONS * 9 \
 					+ STRING_SIZE_SIZE)
 #define SIZEOF_IDATA2		(5 * 4)
+
+/* For PEx64 idata4 & 5 have thumb size of 8 bytes.  */
+#ifdef COFF_WITH_pex64
+#define SIZEOF_IDATA4		(2 * 4)
+#define SIZEOF_IDATA5		(2 * 4)
+#else
 #define SIZEOF_IDATA4		(1 * 4)
 #define SIZEOF_IDATA5		(1 * 4)
+#endif
+
 #define SIZEOF_IDATA6		(2 + strlen (symbol_name) + 1 + 1)
 #define SIZEOF_IDATA7		(strlen (source_dll) + 1 + 1)
 #define SIZEOF_ILF_SECTIONS     (NUM_ILF_SECTIONS * sizeof (struct coff_section_tdata))
@@ -656,9 +671,20 @@ static jump_table jtab[] =
   },
 #endif
 
-#ifdef  MC68MAGIC
-  { MC68MAGIC, { /* XXX fill me in */ }, 0, 0 },
+#ifdef AMD64MAGIC
+  { AMD64MAGIC,
+    { 0xff, 0x25, 0x00, 0x00, 0x00, 0x00, 0x90, 0x90 },
+    8, 2
+  },
 #endif
+
+#ifdef  MC68MAGIC
+  { MC68MAGIC,
+    { /* XXX fill me in */ },
+    0, 0
+  },
+#endif
+
 #ifdef  MIPS_ARCH_MAGIC_WINCE
   { MIPS_ARCH_MAGIC_WINCE,
     { 0x00, 0x00, 0x08, 0x3c, 0x00, 0x00, 0x08, 0x8d,
@@ -830,8 +856,15 @@ pe_ILF_build_a_bfd (bfd *           abfd,
 	/* XXX - treat as IMPORT_NAME ??? */
 	abort ();
 
+#ifdef COFF_WITH_pex64
+      ((unsigned int *) id4->contents)[0] = ordinal;
+      ((unsigned int *) id4->contents)[1] = 0x80000000;
+      ((unsigned int *) id5->contents)[0] = ordinal;
+      ((unsigned int *) id5->contents)[1] = 0x80000000;
+#else
       * (unsigned int *) id4->contents = ordinal | 0x80000000;
       * (unsigned int *) id5->contents = ordinal | 0x80000000;
+#endif
     }
   else
     {
@@ -1068,6 +1101,12 @@ pe_ILF_object_p (bfd * abfd)
     case IMAGE_FILE_MACHINE_I386:
 #ifdef I386MAGIC
       magic = I386MAGIC;
+#endif
+      break;
+
+    case IMAGE_FILE_MACHINE_AMD64:
+#ifdef AMD64MAGIC
+      magic = AMD64MAGIC;
 #endif
       break;
 

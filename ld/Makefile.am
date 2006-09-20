@@ -240,6 +240,7 @@ ALL_EMULATIONS = \
 	ei386nw.o \
 	ei386pe.o \
 	ei386pe_posix.o \
+	ei386pep.o \
 	elnk960.o \
 	em32relf.o \
 	em32rlelf.o \
@@ -412,15 +413,16 @@ ALL_64_EMULATIONS = \
 
 ALL_EMUL_EXTRA_OFILES = \
 	deffilep.o \
-	pe-dll.o
+	pe-dll.o \
+	pep-dll.o
 
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
-	mri.c ldcref.c pe-dll.c
+	mri.c ldcref.c pe-dll.c pep-dll.c
 
 HFILES = ld.h ldctor.h ldemul.h ldexp.h ldfile.h \
 	ldlang.h ldlex.h ldmain.h ldmisc.h ldver.h \
-	ldwrite.h mri.h deffile.h pe-dll.h elf-hints-local.h
+	ldwrite.h mri.h deffile.h pe-dll.h pep-dll.h elf-hints-local.h
 
 GENERATED_CFILES = ldgram.c ldlex.c deffilep.c
 GENERATED_HFILES = ldgram.h ldemul-list.h deffilep.h
@@ -1103,6 +1105,9 @@ ei386pe.c: $(srcdir)/emulparams/i386pe.sh \
 ei386pe_posix.c: $(srcdir)/emulparams/i386pe_posix.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/pe.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386pe_posix "$(tdir_i386pe_posix)"
+ei386pep.c: $(srcdir)/emulparams/i386pep.sh \
+  $(srcdir)/emultempl/pep.em $(srcdir)/scripttempl/pep.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} i386pep "$(tdir_i386pe)"
 elnk960.c: $(srcdir)/emulparams/lnk960.sh \
   $(srcdir)/emultempl/lnk960.em $(srcdir)/scripttempl/i960.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} lnk960 "$(tdir_lnk960)"
@@ -1970,6 +1975,12 @@ pe-dll.o: pe-dll.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   ld.h $(INCDIR)/bin-bugs.h ldexp.h ldlang.h ldwrite.h \
   ldmisc.h ldgram.h ldmain.h ldfile.h ldemul.h $(INCDIR)/coff/internal.h \
   $(BFDDIR)/libcoff.h deffile.h pe-dll.h
+pep-dll.o: pep-dll.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h \
+  ld.h $(INCDIR)/bin-bugs.h ldexp.h ldlang.h ldwrite.h \
+  ldmisc.h ldgram.h ldmain.h ldfile.h ldemul.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h deffile.h pep-dll.h
 ldgram.o: ldgram.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/bfdlink.h ld.h $(INCDIR)/bin-bugs.h ldexp.h \

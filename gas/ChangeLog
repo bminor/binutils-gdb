@@ -1,3 +1,17 @@
+2006-09-20  Kai Tietz  <Kai.Tietz@onevision.com>
+
+	* configure.in: Add new target x86_64-pc-mingw64.
+	* configure: Regenerate.
+	* configure.tgt: Add new target x86_64-pc-mingw64.
+	* config/obj-coff.h: Add handling for TE_PEP target specific code and definitions.
+	* config/tc-i386.c: Add new targets.
+	(md_parse_option): Add targets to OPTION_64.
+	(x86_64_target_format): Add new method for setup proper default target cpu mode.
+	* config/te-pep.h: Add new target definition header.
+	(TE_PEP): New macro: Identifies new target architecture.
+	(COFF_WITH_pex64): Set proper includes in bfd.
+	* NEWS: Mention new target.
+
 2006-09-18  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	* config/bfin-parse.y (binary): Change sub of const to add of negated

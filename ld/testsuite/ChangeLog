@@ -1,3 +1,15 @@
+2006-09-20  Kai Tietz  <Kai.Tietz@onevision.com>
+
+	* bootstrap/bootstrap.exp: Fix x86_64-mingw32 target test.
+	* ld-fastcall/fastcall.exp: Likewise.
+	* ld-scripts/align.exp: Likewise.
+	* ld-scripts/align2a.d: Likewise.
+	* ld-scripts/defined.exp: Likewise.
+	* ld-scripts/provide.exp: Likewise.
+	* ld-scripts/script.exp: Likewise.
+	* ld-scripts/weak.exp: Likewise.
+	* lib/ld-lib.exp: Detect target as pecoff file format.
+
 2006-09-18  Thiemo Seufer  <ths@networkno.de>
             Maciej W. Rozycki  <macro@mips.com>
 

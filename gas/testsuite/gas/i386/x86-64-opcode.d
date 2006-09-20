@@ -2,7 +2,7 @@
 #objdump: -drw
 #name: x86-64 opcode
 
-.*: +file format elf64-x86-64
+.*: +file format .*
 
 Disassembly of section .text:
 

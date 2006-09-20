@@ -741,6 +741,7 @@ do
     i386aout_vec)		tb="$tb i386aout.lo aout32.lo" ;;
     i386bsd_vec)		tb="$tb i386bsd.lo aout32.lo" ;;
     i386coff_vec)		tb="$tb coff-i386.lo cofflink.lo" ;;
+    x86_64coff_vec)		tb="$tb coff-x86_64.lo cofflink.lo"; target_size=64 ;;
     i386dynix_vec)		tb="$tb i386dynix.lo aout32.lo" ;;
     i386freebsd_vec)		tb="$tb i386freebsd.lo aout32.lo" ;;
     i386linux_vec)		tb="$tb i386linux.lo aout32.lo" ;;
@@ -752,6 +753,8 @@ do
     i386os9k_vec)		tb="$tb i386os9k.lo aout32.lo" ;;
     i386pe_vec)			tb="$tb pe-i386.lo peigen.lo cofflink.lo" ;;
     i386pei_vec)		tb="$tb pei-i386.lo peigen.lo cofflink.lo" ;;
+    x86_64pe_vec)		tb="$tb pe-x86_64.lo pex64igen.lo cofflink.lo"; target_size=64 ;;
+    x86_64pei_vec)		tb="$tb pei-x86_64.lo pex64igen.lo cofflink.lo"; target_size=64 ;;
     i860coff_vec)		tb="$tb coff-i860.lo cofflink.lo" ;;
     icoff_big_vec)		tb="$tb coff-i960.lo cofflink.lo" ;;
     icoff_little_vec)		tb="$tb coff-i960.lo cofflink.lo" ;;

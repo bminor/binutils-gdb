@@ -6,7 +6,7 @@
 
 Disassembly of section .text:
 
-0+ <bar-0x1a7>:
+0+ <.*>:
 [ 	]+0:	01 ca[ 	]+add[ 	]+%ecx,%edx
 [ 	]+2:	44 01 ca[ 	]+add[ 	]+%r9d,%edx
 [ 	]+5:	41 01 ca[ 	]+add[ 	]+%ecx,%r10d
