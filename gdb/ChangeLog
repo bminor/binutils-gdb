@@ -1,3 +1,23 @@
+2006-09-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	PR remote/2154
+	* remote.c (remote_thread_alive): Remove local buf.
+	(remote_get_threadinfo): Remove local threadinfo_pkt.
+	(remote_get_threadlist): Remove unused threadlist_packet.
+	(remote_current_thread): Remove local buf.
+	(remote_threads_info): Set bufp after getpkt.
+	(remote_threads_extra_info): Remove local bufp.
+	(get_offsets): Set buf after getpkt.
+	(remote_check_symbols): Set reply after getpkt.
+	(remote_vcont_probe): Set buf after getpkt.
+	(remote_resume): Set buf after set_thread.
+	(remote_wait, remote_async_wait): Set buf after getpkt.
+	(fetch_register_using_p): Set buf after remote_send.
+	(remote_fetch_registers): Likewise.
+	(store_register_using_P): Don't use buf after remote_send.
+	(check_binary_download, remote_write_bytes)
+	(remote_read_bytes, remote_rcmd): Remove local buf.
+
 2006-09-17  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* mi/mi-cmd-stack.c (mi_cmd_stack_list_args): Don't emit error
