@@ -1,3 +1,8 @@
+2006-09-20  Michael Snyder  <michael.snyder@localhost.localdomain>
+
+	* abug.exp, cpu32bug.exp, est.exp hmsirom.exp, nind.exp:
+	Remove unused / obsolete files.
+
 2006-09-19  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdb.base/multi-forks.exp: Include __kernel_vsyscall in regexp.
