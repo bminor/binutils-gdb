@@ -1,3 +1,8 @@
+2006-09-20  Bob Wilson  <bob.wilson@acm.org>
+
+	* doc/as.texinfo: Fix cross reference usage, typos and grammar.
+	(Overview): Skip cross reference in man page.
+
 2006-09-20  Kai Tietz  <Kai.Tietz@onevision.com>
 
 	* configure.in: Add new target x86_64-pc-mingw64.

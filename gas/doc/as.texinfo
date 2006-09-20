@@ -209,7 +209,7 @@ code for @value{TARGET} architectures.
 @cindex option summary
 @cindex summary of options
 Here is a brief summary of how to invoke @command{@value{AS}}.  For details,
-@pxref{Invoking,,Command-Line Options}.
+see @ref{Invoking,,Command-Line Options}.
 
 @c man title AS the portable GNU assembler.
 
@@ -489,7 +489,10 @@ listing without forms processing.  The @samp{=file} option, if used, must be
 the last one.  By itself, @samp{-a} defaults to @samp{-ahls}.
 
 @item --alternate
-Begin in alternate macro mode, see @ref{Altmacro,,@code{.altmacro}}.
+Begin in alternate macro mode.
+@ifclear man
+@xref{Altmacro,,@code{.altmacro}}.
+@end ifclear
 
 @item -D
 Ignored.  This option is accepted for script compatibility with calls to
@@ -1512,7 +1515,8 @@ because many of them aren't supposed to happen.
 
 @cindex options, all versions of assembler
 This chapter describes command-line options available in @emph{all}
-versions of the @sc{gnu} assembler; @pxref{Machine Dependencies}, for options specific
+versions of the @sc{gnu} assembler; see @ref{Machine Dependencies},
+for options specific
 @ifclear GENERIC
 to the @value{TARGET} target.
 @end ifclear
@@ -1612,7 +1616,8 @@ listing-control directives have no effect.
 The letters after @samp{-a} may be combined into one option,
 @emph{e.g.}, @samp{-aln}.
 
-Note if the assembler source is coming from the standard input (eg because it
+Note if the assembler source is coming from the standard input (e.g.,
+because it
 is being created by @code{@value{GCC}} and the @samp{-pipe} command line switch
 is being used) then the listing will not contain any comments or preprocessor
 directives.  This is because the listing code buffers input source lines from
@@ -1682,8 +1687,8 @@ alteration on other platforms.
 @ifset DIFF-TBL-KLUGE
 @cindex difference tables, warning
 @cindex warning for altered difference tables
-@command{@value{AS}} sometimes alters the code emitted for directives of the form
-@samp{.word @var{sym1}-@var{sym2}}; @pxref{Word,,@code{.word}}.
+@command{@value{AS}} sometimes alters the code emitted for directives of the
+form @samp{.word @var{sym1}-@var{sym2}}.  @xref{Word,,@code{.word}}.
 You can use the @samp{-K} option if you want a warning issued when this
 is done.
 @end ifset
@@ -1716,9 +1721,11 @@ On the HPPA local labels begin with @samp{L$}.
 The listing feature of the assembler can be enabled via the command line switch
 @samp{-a} (@pxref{a}).  This feature combines the input source file(s) with a
 hex dump of the corresponding locations in the output object file, and displays
-them as a listing file.  The format of this listing can be controlled by pseudo
-ops inside the assembler source (@pxref{List} @pxref{Title} @pxref{Sbttl}
-@pxref{Psize} @pxref{Eject}) and also by the following switches:
+them as a listing file.  The format of this listing can be controlled by
+directives inside the assembler source (i.e., @code{.list} (@pxref{List}),
+@code{.title} (@pxref{Title}), @code{.sbttl} (@pxref{Sbttl}),
+@code{.psize} (@pxref{Psize}), and
+@code{.eject} (@pxref{Eject}) and also by the following switches:
 
 @table @gcctabopt
 @item --listing-lhs-width=@samp{number}
@@ -2080,7 +2087,7 @@ anything else you may get from your C compiler's preprocessor.  You can
 do include file processing with the @code{.include} directive
 (@pxref{Include,,@code{.include}}).  You can use the @sc{gnu} C compiler driver
 to get other ``CPP'' style preprocessing by giving the input file a
-@samp{.S} suffix.  @xref{Overall Options,, Options Controlling the Kind of
+@samp{.S} suffix.  @xref{Overall Options, ,Options Controlling the Kind of
 Output, gcc.info, Using GNU CC}.
 
 Excess whitespace, comments, and character constants
@@ -2217,7 +2224,7 @@ extends to the end of the line.
 To be compatible with past assemblers, lines that begin with @samp{#} have a
 special interpretation.  Following the @samp{#} should be an absolute
 expression (@pxref{Expressions}): the logical line number of the @emph{next}
-line.  Then a string (@pxref{Strings,, Strings}) is allowed: if present it is a
+line.  Then a string (@pxref{Strings, ,Strings}) is allowed: if present it is a
 new logical file name.  The rest of the line, if any, should be whitespace.
 
 If the first non-whitespace characters on the line are not numeric,
@@ -2292,8 +2299,8 @@ constants are an exception: they do not end statements.
 @end ifclear
 @ifset GENERIC
 A @dfn{statement} ends at a newline character (@samp{\n}) or line
-separator character.  (The line separator is usually @samp{;}, unless
-this conflicts with the comment character; @pxref{Machine Dependencies}.)  The
+separator character.  (The line separator is usually @samp{;}, unless this
+conflicts with the comment character; see @ref{Machine Dependencies}.)  The
 newline or separator character is considered part of the preceding
 statement.  Newlines and separators within character constants are an
 exception: they do not end statements.
@@ -3077,8 +3084,8 @@ You
 can also use the @code{.subsection} directive (@pxref{SubSection})
 to specify a subsection: @samp{.subsection @var{expression}}.
 @end ifset
-@var{Expression} should be an absolute expression.
-(@xref{Expressions}.)  If you just say @samp{.text} then @samp{.text 0}
+@var{Expression} should be an absolute expression
+(@pxref{Expressions}).  If you just say @samp{.text} then @samp{.text 0}
 is assumed.  Likewise @samp{.data} means @samp{.data 0}.  Assembly
 begins in @code{text 0}.  For instance:
 @smallexample
@@ -3117,7 +3124,7 @@ The @code{.lcomm} pseudo-op defines a symbol in the bss section; see
 @ref{Lcomm,,@code{.lcomm}}.
 
 The @code{.comm} pseudo-op may be used to declare a common symbol, which is
-another form of uninitialized symbol; see @xref{Comm,,@code{.comm}}.
+another form of uninitialized symbol; see @ref{Comm,,@code{.comm}}.
 
 @ifset GENERIC
 When assembling for a target which supports multiple sections, such as ELF or
@@ -3188,8 +3195,8 @@ equals sign @samp{=}@samp{=} here represents an equivalent of the
 Symbol names begin with a letter or with one of @samp{._}.  On most
 machines, you can also use @code{$} in symbol names; exceptions are
 noted in @ref{Machine Dependencies}.  That character may be followed by any
-string of digits, letters, dollar signs (unless otherwise noted in
-@ref{Machine Dependencies}), and underscores.
+string of digits, letters, dollar signs (unless otherwise noted for a
+particular target machine), and underscores.
 @end ifclear
 @ifset SPECIAL-SYMS
 @ifset H8
@@ -3220,7 +3227,7 @@ To define a local symbol, write a label of the form @samp{@b{N}:} (where @b{N}
 represents any positive integer).  To refer to the most recent previous
 definition of that symbol write @samp{@b{N}b}, using the same number as when
 you defined the label.  To refer to the next definition of a local label, write
-@samp{@b{N}f}--- The @samp{b} stands for``backwards'' and the @samp{f} stands
+@samp{@b{N}f}---the @samp{b} stands for ``backwards'' and the @samp{f} stands
 for ``forwards''.
 
 There is no restriction on how you can use these labels, and you can reuse them
@@ -3251,9 +3258,9 @@ label_4:  branch label_3
 
 Local symbol names are only a notational device.  They are immediately
 transformed into more conventional symbol names before the assembler uses them.
-The symbol names stored in the symbol table, appearing in error messages and
-optionally emitted to the object file.  The names are constructed using these
-parts:
+The symbol names are stored in the symbol table, appear in error messages, and
+are optionally emitted to the object file.  The names are constructed using
+these parts:
 
 @table @code
 @item L
@@ -3286,20 +3293,20 @@ So for example, the first @code{1:} is named @code{L1@kbd{C-B}1}, the 44th
 @cindex dollar local symbols
 
 @code{@value{AS}} also supports an even more local form of local labels called
-dollar labels.  These labels go out of scope (ie they become undefined) as soon
-as a non-local label is defined.  Thus they remain valid for only a small
+dollar labels.  These labels go out of scope (i.e., they become undefined) as
+soon as a non-local label is defined.  Thus they remain valid for only a small
 region of the input source code.  Normal local labels, by contrast, remain in
 scope for the entire file, or until they are redefined by another occurrence of
 the same local label.
 
 Dollar labels are defined in exactly the same way as ordinary local labels,
 except that instead of being terminated by a colon, they are terminated by a
-dollar sign.  eg @samp{@b{55$}}.
+dollar sign, e.g., @samp{@b{55$}}.
 
 They can also be distinguished from ordinary local labels by their transformed
-name which uses ASCII character @samp{\001} (control-A) as the magic character
-to distinguish them from ordinary labels.  Thus the 5th definition of @samp{6$}
-is named @samp{L6@kbd{C-A}5}.
+names which use ASCII character @samp{\001} (control-A) as the magic character
+to distinguish them from ordinary labels.  For example, the fifth definition of
+@samp{6$} is named @samp{L6@kbd{C-A}5}.
 
 @node Dot
 @section The Special Dot Symbol
@@ -3730,7 +3737,7 @@ Some machine configurations provide additional directives.
 @end ifset
 @ifclear GENERIC
 @ifset machine-directives
-@xref{Machine Dependencies} for additional directives.
+@xref{Machine Dependencies}, for additional directives.
 @end ifset
 @end ifclear
 
@@ -4270,7 +4277,7 @@ Force a page break at this point, when generating assembly listings.
 
 @cindex @code{else} directive
 @code{.else} is part of the @command{@value{AS}} support for conditional
-assembly; @pxref{If,,@code{.if}}.  It marks the beginning of a section
+assembly; see @ref{If,,@code{.if}}.  It marks the beginning of a section
 of code to be assembled if the condition for the preceding @code{.if}
 was false.
 
@@ -4279,7 +4286,7 @@ was false.
 
 @cindex @code{elseif} directive
 @code{.elseif} is part of the @command{@value{AS}} support for conditional
-assembly; @pxref{If,,@code{.if}}.  It is shorthand for beginning a new
+assembly; see @ref{If,,@code{.if}}.  It is shorthand for beginning a new
 @code{.if} block that would otherwise fill the entire @code{.else} section.
 
 @node End
@@ -4324,7 +4331,7 @@ conditionally.  @xref{If,,@code{.if}}.
 @cindex assigning values to symbols
 @cindex symbols, assigning values to
 This directive sets the value of @var{symbol} to @var{expression}.
-It is synonymous with @samp{.set}; @pxref{Set,,@code{.set}}.
+It is synonymous with @samp{.set}; see @ref{Set,,@code{.set}}.
 
 @ifset HPPA
 The syntax for @code{equ} on the HPPA is 
@@ -4335,8 +4342,8 @@ The syntax for @code{equ} on the HPPA is
 The syntax for @code{equ} on the Z80 is 
 @samp{@var{symbol} equ @var{expression}}. 
 On the Z80 it is an eror if @var{symbol} is already defined,
-but the symbol is not protected from later redefinition, 
-compare @xref{Equiv}.
+but the symbol is not protected from later redefinition. 
+Compare @ref{Equiv}.
 @end ifset
 
 @node Equiv
@@ -4492,7 +4499,7 @@ compatibility with other assemblers.
 @ifset HPPA
 On the HPPA, @code{.global} is not always enough to make it accessible to other
 partial programs.  You may need the HPPA-only @code{.EXPORT} directive as well.
-@xref{HPPA Directives,, HPPA Assembler Directives}.
+@xref{HPPA Directives, ,HPPA Assembler Directives}.
 @end ifset
 
 @ifset ELF
@@ -4729,8 +4736,7 @@ is equivalent to assembling
         move    d3,sp@@-
 @end example
 
-For some caveats with the spelling of @var{symbol}, see also the discussion
-at @xref{Macro}.
+For some caveats with the spelling of @var{symbol}, see also @ref{Macro}.
 
 @node Irpc
 @section @code{.irpc @var{symbol},@var{values}}@dots{}
@@ -4915,7 +4921,7 @@ the initial value of the listing counter is one.
 @section @code{.long @var{expressions}}
 
 @cindex @code{long} directive
-@code{.long} is the same as @samp{.int}, @pxref{Int,,@code{.int}}.
+@code{.long} is the same as @samp{.int}.  @xref{Int,,@code{.int}}.
 
 @ignore
 @c no one seems to know what this is for or whether this description is
@@ -4979,7 +4985,7 @@ indicate whether all invocations must specify a non-blank value (through
 (through @samp{:@code{vararg}}).  You can supply a default value for any
 macro argument by following the name with @samp{=@var{deflt}}.  You
 cannot define two macros with the same @var{macname} unless it has been
-subject to the @code{.purgem} directive (@xref{Purgem}.) between the two
+subject to the @code{.purgem} directive (@pxref{Purgem}) between the two
 definitions.  For example, these are all valid @code{.macro} statements:
 
 @table @code
@@ -5087,9 +5093,9 @@ l&:
 @end example
 @end table
 
-Note - this problem of correctly identifying string parameters to pseudo ops
-also applies to the identifiers used in @code{.irp} (@xref{Irp}.) 
-and @code{.irpc} (@xref{Irpc}.) as well.
+Note: this problem of correctly identifying string parameters to pseudo ops
+also applies to the identifiers used in @code{.irp} (@pxref{Irp}) 
+and @code{.irpc} (@pxref{Irpc}) as well.
 
 @item .endm
 @cindex @code{endm} directive
@@ -5150,7 +5156,7 @@ and use the result as a string.
 
 @node Noaltmacro
 @section @code{.noaltmacro}
-Disable alternate macro mode.  @ref{Altmacro}
+Disable alternate macro mode.  @xref{Altmacro}.
 
 @node Nolist
 @section @code{.nolist}
@@ -5547,7 +5553,7 @@ ARM) then another character is used instead.  For example the ARM port uses the
 @code{%} character.
 
 If @var{flags} contains the @code{M} symbol then the @var{type} argument must
-be specified as well as an extra argument - @var{entsize} - like this:
+be specified as well as an extra argument---@var{entsize}---like this:
 
 @smallexample
 .section @var{name} , "@var{flags}"M, @@@var{type}, @var{entsize}
@@ -5576,7 +5582,7 @@ indicates that only one copy of this section should be retained
 an alias for comdat
 @end table
 
-Note - if both the @var{M} and @var{G} flags are present then the fields for
+Note: if both the @var{M} and @var{G} flags are present then the fields for
 the Merge flag should come first, like this:
 
 @smallexample
@@ -5649,7 +5655,7 @@ On Z80 @code{set} is a real instruction, use
 @xref{Word,,@code{.word}}.
 
 In some configurations, however, @code{.short} and @code{.word} generate
-numbers of different lengths; @pxref{Machine Dependencies}.
+numbers of different lengths.  @xref{Machine Dependencies}.
 @end ifset
 @ifclear GENERIC
 @ifset W16
@@ -5732,7 +5738,7 @@ symbols.
 @cindex @code{sleb128} directive
 @var{sleb128} stands for ``signed little endian base 128.''  This is a 
 compact, variable length representation of numbers used by the DWARF
-symbolic debugging format.  @xref{Uleb128,@code{.uleb128}}.
+symbolic debugging format.  @xref{Uleb128, ,@code{.uleb128}}.
 
 @ifclear no-space-dir
 @node Skip
@@ -6060,7 +6066,7 @@ The syntaxes supported are:
 @cindex @code{uleb128} directive
 @var{uleb128} stands for ``unsigned little endian base 128.''  This is a 
 compact, variable length representation of numbers used by the DWARF
-symbolic debugging format.  @xref{Sleb128,@code{.sleb128}}.
+symbolic debugging format.  @xref{Sleb128, ,@code{.sleb128}}.
 
 @ifset COFF
 @node Val
@@ -6103,7 +6109,7 @@ This directive finds or creates a symbol @code{table} and creates a
 This directive finds the symbol @code{child} and finds or creates the symbol
 @code{parent} and then creates a @code{VTABLE_INHERIT} relocation for the
 parent whose addend is the value of the child symbol.  As a special case the
-parent name of @code{0} is treated as referring the @code{*ABS*} section.
+parent name of @code{0} is treated as referring to the @code{*ABS*} section.
 @end ifset
 
 @node Warning
