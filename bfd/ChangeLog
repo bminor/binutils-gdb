@@ -1,3 +1,10 @@
+2006-09-20  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* elf32-s390.c (elf_s390_relocate_section): Remove check for code
+	section in LD to LE linker relaxation for R_390_TLS_LDO32.
+	* elf64-s390.c (elf_s390_relocate_section): Likewise for
+	R_390_TLS_LDO64.
+
 2006-09-20  Kai Tietz  <Kai.Tietz@onevision.com>
 
 	* configure.in:	Added new target-vectors x86_64coff_vec,

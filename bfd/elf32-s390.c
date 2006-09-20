@@ -2927,7 +2927,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	  continue;
 
 	case R_390_TLS_LDO32:
-	  if (info->shared || (input_section->flags & SEC_CODE) == 0)
+	  if (info->shared)
 	    relocation -= dtpoff_base (info);
 	  else
 	    /* When converting LDO to LE, we must negate.  */
