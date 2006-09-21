@@ -1,5 +1,6 @@
 /* Memory attributes support, for GDB.
-   Copyright (C) 2001 Free Software Foundation, Inc.
+
+   Copyright (C) 2001, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,6 +21,8 @@
 
 #ifndef MEMATTR_H
 #define MEMATTR_H
+
+#include "vec.h"
 
 enum mem_access_mode
 {
@@ -67,12 +70,6 @@ struct mem_attrib
 
 struct mem_region 
 {
-  /* FIXME: memory regions are stored in an unsorted singly-linked
-     list.  This probably won't scale to handle hundreds of memory
-     regions --- that many could be needed to describe the allowed
-     access modes for memory mapped i/o device registers. */
-  struct mem_region *next;
-  
   CORE_ADDR lo;
   CORE_ADDR hi;
 
@@ -85,6 +82,12 @@ struct mem_region
   /* Attributes for this region */
   struct mem_attrib attrib;
 };
+
+/* Declare a vector type for a group of mem_region structures.  The
+   typedef is necessary because vec.h can not handle a struct tag.
+   Except during construction, these vectors are kept sorted.  */
+typedef struct mem_region mem_region_s;
+DEF_VEC_O(mem_region_s);
 
 extern struct mem_region *lookup_mem_region(CORE_ADDR);
 

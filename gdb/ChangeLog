@@ -1,3 +1,21 @@
+2006-09-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (memattr_h, memattr.o): Update.
+	* memattr.h: Include "vec.h".
+	(struct mem_region): Remove linked list pointer.
+	(mem_region_s): New typedef and corresponding vector.
+	* memattr.c: Include "vec.h".
+	(mem_region_chain): Delete.
+	(mem_region_list): New vector pointer.
+	(mem_region_lessthan): New function.
+	(create_mem_region): Remove unused return value.  Use vector
+	operations.  Remove linear search.
+	(delete_mem_region): Delete.
+	(lookup_mem_region): Use vector operations.  Add a FIXME.
+	(mem_info_command): Update to work with vectors.
+	(mem_enable, mem_enable_command, mem_disable, mem_disable_command)
+	(mem_free, mem_delete): Likewise.
+
 2006-09-21  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* vec.h: New file.

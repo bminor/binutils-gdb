@@ -1,6 +1,7 @@
 /* Memory attributes support, for GDB.
 
-   Copyright (C) 2001, 2002 Free Software Foundation, Inc.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,6 +27,7 @@
 #include "target.h"
 #include "value.h"
 #include "language.h"
+#include "vec.h"
 #include "gdb_string.h"
 
 const struct mem_attrib default_mem_attrib =
@@ -37,54 +39,66 @@ const struct mem_attrib default_mem_attrib =
   0				/* verify */
 };
 
-static struct mem_region *mem_region_chain = NULL;
+VEC(mem_region_s) *mem_region_list;
 static int mem_number = 0;
 
-static struct mem_region *
+/* Predicate function which returns true if LHS should sort before RHS
+   in a list of memory regions, useful for VEC_lower_bound.  */
+
+static int
+mem_region_lessthan (const struct mem_region *lhs,
+		     const struct mem_region *rhs)
+{
+  return lhs->lo < rhs->lo;
+}
+
+static void
 create_mem_region (CORE_ADDR lo, CORE_ADDR hi,
 		   const struct mem_attrib *attrib)
 {
-  struct mem_region *n, *new;
+  struct mem_region new;
+  int i, ix;
 
   /* lo == hi is a useless empty region */
   if (lo >= hi && hi != 0)
     {
       printf_unfiltered (_("invalid memory region: low >= high\n"));
-      return NULL;
+      return;
     }
 
-  n = mem_region_chain;
-  while (n)
+  new.lo = lo;
+  new.hi = hi;
+
+  ix = VEC_lower_bound (mem_region_s, mem_region_list, &new,
+			mem_region_lessthan);
+
+  /* Check for an overlapping memory region.  We only need to check
+     in the vicinity - at most one before and one after the
+     insertion point.  */
+  for (i = ix - 1; i < ix + 1; i++)
     {
-      /* overlapping node */
+      struct mem_region *n;
+
+      if (i < 0)
+	continue;
+      if (i >= VEC_length (mem_region_s, mem_region_list))
+	continue;
+
+      n = VEC_index (mem_region_s, mem_region_list, i);
+
       if ((lo >= n->lo && (lo < n->hi || n->hi == 0)) 
 	  || (hi > n->lo && (hi <= n->hi || n->hi == 0))
 	  || (lo <= n->lo && (hi >= n->hi || hi == 0)))
 	{
 	  printf_unfiltered (_("overlapping memory region\n"));
-	  return NULL;
+	  return;
 	}
-      n = n->next;
     }
 
-  new = xmalloc (sizeof (struct mem_region));
-  new->lo = lo;
-  new->hi = hi;
-  new->number = ++mem_number;
-  new->enabled_p = 1;
-  new->attrib = *attrib;
-
-  /* link in new node */
-  new->next = mem_region_chain;
-  mem_region_chain = new;
-
-  return new;
-}
-
-static void
-delete_mem_region (struct mem_region *m)
-{
-  xfree (m);
+  new.number = ++mem_number;
+  new.enabled_p = 1;
+  new.attrib = *attrib;
+  VEC_safe_insert (mem_region_s, mem_region_list, ix, &new);
 }
 
 /*
@@ -97,6 +111,7 @@ lookup_mem_region (CORE_ADDR addr)
   struct mem_region *m;
   CORE_ADDR lo;
   CORE_ADDR hi;
+  int ix;
 
   /* First we initialize LO and HI so that they describe the entire
      memory space.  As we process the memory region chain, they are
@@ -108,7 +123,10 @@ lookup_mem_region (CORE_ADDR addr)
   lo = (CORE_ADDR) 0;
   hi = (CORE_ADDR) ~ 0;
 
-  for (m = mem_region_chain; m; m = m->next)
+  /* If we ever want to support a huge list of memory regions, this
+     check should be replaced with a binary search (probably using
+     VEC_lower_bound).  */
+  for (ix = 0; VEC_iterate (mem_region_s, mem_region_list, ix, m); ix++)
     {
       if (m->enabled_p == 1)
 	{
@@ -215,8 +233,9 @@ mem_info_command (char *args, int from_tty)
 {
   struct mem_region *m;
   struct mem_attrib *attrib;
+  int ix;
 
-  if (!mem_region_chain)
+  if (!mem_region_list)
     {
       printf_unfiltered (_("There are no memory regions defined.\n"));
       return;
@@ -233,7 +252,7 @@ mem_info_command (char *args, int from_tty)
   printf_filtered ("Attrs ");
   printf_filtered ("\n");
 
-  for (m = mem_region_chain; m; m = m->next)
+  for (ix = 0; VEC_iterate (mem_region_s, mem_region_list, ix, m); ix++)
     {
       char *tmp;
       printf_filtered ("%-3d %-3c\t",
@@ -339,8 +358,9 @@ static void
 mem_enable (int num)
 {
   struct mem_region *m;
+  int ix;
 
-  for (m = mem_region_chain; m; m = m->next)
+  for (ix = 0; VEC_iterate (mem_region_s, mem_region_list, ix, m); ix++)
     if (m->number == num)
       {
 	m->enabled_p = 1;
@@ -356,12 +376,13 @@ mem_enable_command (char *args, int from_tty)
   char *p1;
   int num;
   struct mem_region *m;
+  int ix;
 
   dcache_invalidate (target_dcache);
 
   if (p == 0)
     {
-      for (m = mem_region_chain; m; m = m->next)
+      for (ix = 0; VEC_iterate (mem_region_s, mem_region_list, ix, m); ix++)
 	m->enabled_p = 1;
     }
   else
@@ -389,8 +410,9 @@ static void
 mem_disable (int num)
 {
   struct mem_region *m;
+  int ix;
 
-  for (m = mem_region_chain; m; m = m->next)
+  for (ix = 0; VEC_iterate (mem_region_s, mem_region_list, ix, m); ix++)
     if (m->number == num)
       {
 	m->enabled_p = 0;
@@ -406,12 +428,13 @@ mem_disable_command (char *args, int from_tty)
   char *p1;
   int num;
   struct mem_region *m;
+  int ix;
 
   dcache_invalidate (target_dcache);
 
   if (p == 0)
     {
-      for (m = mem_region_chain; m; m = m->next)
+      for (ix = 0; VEC_iterate (mem_region_s, mem_region_list, ix, m); ix++)
 	m->enabled_p = 0;
     }
   else
@@ -437,13 +460,7 @@ mem_disable_command (char *args, int from_tty)
 static void
 mem_clear (void)
 {
-  struct mem_region *m;
-
-  while ((m = mem_region_chain) != 0)
-    {
-      mem_region_chain = m->next;
-      delete_mem_region (m);
-    }
+  VEC_free (mem_region_s, mem_region_list);
 }
 
 /* Delete the memory region number NUM. */
@@ -452,30 +469,25 @@ static void
 mem_delete (int num)
 {
   struct mem_region *m1, *m;
+  int ix;
 
-  if (!mem_region_chain)
+  if (!mem_region_list)
     {
       printf_unfiltered (_("No memory region number %d.\n"), num);
       return;
     }
 
-  if (mem_region_chain->number == num)
+  for (ix = 0; VEC_iterate (mem_region_s, mem_region_list, ix, m); ix++)
+    if (m->number == num)
+      break;
+
+  if (m == NULL)
     {
-      m1 = mem_region_chain;
-      mem_region_chain = m1->next;
-      delete_mem_region (m1);
+      printf_unfiltered (_("No memory region number %d.\n"), num);
+      return;
     }
-  else
-    for (m = mem_region_chain; m->next; m = m->next)
-      {
-	if (m->next->number == num)
-	  {
-	    m1 = m->next;
-	    m->next = m1->next;
-	    delete_mem_region (m1);
-	    break;
-	  }
-      }
+
+  VEC_ordered_remove (mem_region_s, mem_region_list, ix);
 }
 
 static void
