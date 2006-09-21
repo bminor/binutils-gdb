@@ -1,5 +1,14 @@
 2006-09-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* ada-lex.l (HIGH_BYTE_POSN, is_digit_in_base, digit_to_int)
+	(strtoulst): Moved to ...
+	* utils.c (HIGH_BYTE_POSN, is_digit_in_base, digit_to_int)
+	(strtoulst): ... here.  Enhanced to behave more similarly
+	to strtoul.
+	* defs.h (strtoulst): New prototype.
+
+2006-09-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* Makefile.in (memattr_h, memattr.o): Update.
 	* memattr.h: Include "vec.h".
 	(struct mem_region): Remove linked list pointer.

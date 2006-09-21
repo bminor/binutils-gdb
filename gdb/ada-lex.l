@@ -296,68 +296,6 @@ canonicalizeNumeral (char *s1, const char *s2)
   s1[0] = '\000';
 }
 
-#define HIGH_BYTE_POSN ((sizeof (ULONGEST) - 1) * HOST_CHAR_BIT)
-
-/* True (non-zero) iff DIGIT is a valid digit in radix BASE,
-   where 2 <= BASE <= 16.  */
-
-static int
-is_digit_in_base (unsigned char digit, int base)
-{
-  if (!isxdigit (digit))
-    return 0;
-  if (base <= 10)
-    return (isdigit (digit) && digit < base + '0');
-  else
-    return (isdigit (digit) || tolower (digit) < base - 10 + 'a');
-}
-
-static int
-digit_to_int (unsigned char c)
-{
-  if (isdigit (c))
-    return c - '0';
-  else
-    return tolower (c) - 'a' + 10;
-}
-
-/* As for strtoul, but for ULONGEST results.  */
-
-ULONGEST
-strtoulst (const char *num, const char **trailer, int base)
-{
-  unsigned int high_part;
-  ULONGEST result;
-  int i;
-  unsigned char lim;
-
-  if (base < 2 || base > 16)
-    {
-      errno = EINVAL;
-      return 0;
-    }
-  lim = base - 1 + '0';
-
-  result = high_part = 0;
-  for (i = 0; is_digit_in_base (num[i], base); i += 1)
-    {
-      result = result*base + digit_to_int (num[i]);
-      high_part = high_part*base + (unsigned int) (result >> HIGH_BYTE_POSN);
-      result &= ((ULONGEST) 1 << HIGH_BYTE_POSN) - 1;
-      if (high_part > 0xff)
-	{
-	  errno = ERANGE;
-	  result = high_part = 0;
-	  break;
-	}
-    }
-
-  if (trailer != NULL)
-    *trailer = &num[i];
-
-  return result + ((ULONGEST) high_part << HIGH_BYTE_POSN);
-}
-
 /* Interprets the prefix of NUM that consists of digits of the given BASE
    as an integer of that BASE, with the string EXP as an exponent.
    Puts value in yylval, and returns INT, if the string is valid.  Causes

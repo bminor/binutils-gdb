@@ -415,6 +415,8 @@ extern char *xfullpath (const char *);
 extern unsigned long gnu_debuglink_crc32 (unsigned long crc,
                                           unsigned char *buf, size_t len);
 
+ULONGEST strtoulst (const char *num, const char **trailer, int base);
+
 /* From demangle.c */
 
 extern void set_demangling_style (char *);
