@@ -406,6 +406,50 @@ remote_unescape_input (const gdb_byte *buffer, int len,
   return output_index;
 }
 
+/* Look for a sequence of characters which can be run-length encoded.
+   If there are any, update *CSUM and *P.  Otherwise, output the
+   single character.  Return the number of characters consumed.  */
+
+static int
+try_rle (char *buf, int remaining, unsigned char *csum, char **p)
+{
+  int n;
+
+  /* Always output the character.  */
+  *csum += buf[0];
+  *(*p)++ = buf[0];
+
+  /* Don't go past '~'.  */
+  if (remaining > 97)
+    remaining = 97;
+
+  for (n = 1; n < remaining; n++)
+    if (buf[n] != buf[0])
+      break;
+
+  /* N is the index of the first character not the same as buf[0].
+     buf[0] is counted twice, so by decrementing N, we get the number
+     of characters the RLE sequence will replace.  */
+  n--;
+
+  if (n < 3)
+    return 1;
+
+  /* Skip the frame characters.  The manual says to skip '+' and '-'
+     also, but there's no reason to.  Unfortunately these two unusable
+     characters double the encoded length of a four byte zero
+     value.  */
+  while (n + 29 == '$' || n + 29 == '#')
+    n--;
+
+  *csum += '*';
+  *(*p)++ = '*';
+  *csum += n + 29;
+  *(*p)++ = n + 29;
+
+  return n + 1;
+}
+
 /* Send a packet to the remote machine, with error checking.
    The data of the packet is in BUF, and the length of the
    packet is in CNT.  Returns >= 0 on success, -1 otherwise.  */
@@ -427,11 +471,9 @@ putpkt_binary (char *buf, int cnt)
   p = buf2;
   *p++ = '$';
 
-  for (i = 0; i < cnt; i++)
-    {
-      csum += buf[i];
-      *p++ = buf[i];
-    }
+  for (i = 0; i < cnt;)
+    i += try_rle (buf + i, cnt - i, &csum, &p);
+
   *p++ = '#';
   *p++ = tohex ((csum >> 4) & 0xf);
   *p++ = tohex (csum & 0xf);

@@ -1,3 +1,8 @@
+2006-09-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote-utils.c (try_rle): New function.
+	(putpkt_binary): Use it.
+
 2006-08-19  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (clean): Clean reg-x86-64-linux.c.
