@@ -1256,6 +1256,9 @@ handle_inferior_event (struct execution_control_state *ecs)
   target_last_wait_ptid = ecs->ptid;
   target_last_waitstatus = *ecs->wp;
 
+  /* Always clear state belonging to the previous time we stopped.  */
+  stop_stack_dummy = 0;
+
   adjust_pc_after_break (ecs);
 
   switch (ecs->infwait_state)
@@ -1362,7 +1365,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	     gdb of events.  This allows the user to get control
 	     and place breakpoints in initializer routines for
 	     dynamically loaded objects (among other things).  */
-	  if (stop_on_solib_events || stop_stack_dummy)
+	  if (stop_on_solib_events)
 	    {
 	      stop_stepping (ecs);
 	      return;
@@ -1799,7 +1802,6 @@ handle_inferior_event (struct execution_control_state *ecs)
   ecs->another_trap = 0;
   bpstat_clear (&stop_bpstat);
   stop_step = 0;
-  stop_stack_dummy = 0;
   stop_print_frame = 1;
   ecs->random_signal = 0;
   stopped_by_random_signal = 0;
