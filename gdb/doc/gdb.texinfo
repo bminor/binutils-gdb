@@ -12291,6 +12291,9 @@ link the program; for other formats, like a.out, the object file format
 specifies a fixed address.
 @c FIXME! This would be a good place for an xref to the GNU linker doc.
 
+Depending on the remote side capabilities, @value{GDBN} may be able to
+load programs into flash memory.
+
 @code{load} does not repeat if you press @key{RET} again after using it.
 @end table
 
@@ -22654,6 +22657,7 @@ Show the current setting of the target wait timeout.
 * Interrupts::
 * Examples::
 * File-I/O remote protocol extension::
+* Memory map format::
 @end menu
 
 @node Overview
@@ -23151,6 +23155,58 @@ command in the @samp{vCont} packet.
 @item
 The @samp{vCont} packet is not supported.
 @end table
+
+@item vFlashErase:@var{addr},@var{length}
+@cindex @samp{vFlashErase} packet
+Direct the stub to erase @var{length} bytes of flash starting at
+@var{addr}.  The region may enclose any number of flash blocks, but
+its start and end must fall on block boundaries, as indicated by the
+flash block size appearing in the memory map (@pxref{Memory map
+format}).  @value{GDBN} groups flash memory programming operations
+together, and sends a @samp{vFlashDone} request after each group; the
+stub is allowed to delay erase operation until the @samp{vFlashDone}
+packet is received.
+
+Reply:
+@table @samp
+@item OK
+for success
+@item E @var{NN}
+for an error
+@end table
+
+@item vFlashWrite:@var{addr}:@var{XX@dots{}}
+@cindex @samp{vFlashWrite} packet
+Direct the stub to write data to flash address @var{addr}.  The data
+is passed in binary form using the same encoding as for the @samp{X}
+packet (@pxref{Binary Data}).  The memory ranges specified by
+@samp{vFlashWrite} packets preceding a @samp{vFlashDone} packet must
+not overlap, and must appear in order of increasing addresses
+(although @samp{vFlashErase} packets for higher addresses may already
+have been received; the ordering is guaranteed only between
+@samp{vFlashWrite} packets).  If a packet writes to an address that was
+neither erased by a preceding @samp{vFlashErase} packet nor by some other
+target-specific method, the results are unpredictable.
+
+
+Reply:
+@table @samp
+@item OK
+for success
+@item E.memtype
+for vFlashWrite addressing non-flash memory
+@item E @var{NN}
+for an error
+@end table
+
+@item vFlashDone
+@cindex @samp{vFlashDone} packet
+Indicate to the stub that flash programming operation is finished.
+The stub is permitted to delay or batch the effects of a group of
+@samp{vFlashErase} and @samp{vFlashWrite} packets until a
+@samp{vFlashDone} packet is received.  The contents of the affected
+regions of flash memory are unpredictable until the @samp{vFlashDone}
+request is completed.
 
 @item X @var{addr},@var{length}:@var{XX@dots{}}
 @anchor{X packet}
@@ -23694,6 +23750,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab Yes
 
+@item @samp{qXfer:memory-map:read}
+@tab No
+@tab @samp{-}
+@tab Yes
+
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -23791,6 +23852,7 @@ packets.)
 @item qXfer:@var{object}:read:@var{annex}:@var{offset},@var{length}
 @cindex read special object, remote request
 @cindex @samp{qXfer} packet
+@anchor{qXfer read}
 Read uninterpreted bytes from the target's special data area
 identified by the keyword @var{object}.  Request @var{length} bytes
 starting at @var{offset} bytes into the data.  The content and
@@ -23810,6 +23872,17 @@ read-aux-vector-packet}.  Note @var{annex} must be empty.
 
 This packet is not probed by default; the remote stub must request it,
 by suppling an appropriate @samp{qSupported} response (@pxref{qSupported}).
+@end table
+
+@table @samp
+@item qXfer:memory-map:read::@var{offset},@var{length}
+@anchor{qXfer memory map read}
+Access the target's @dfn{memory-map}.  @xref{Memory map format}.  The
+annex part of the generic @samp{qXfer} packet must be empty
+(@pxref{qXfer read}).
+
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
 @end table
 
 Reply:
@@ -25290,6 +25363,88 @@ host is called:
 <- @code{Fread,3,1234,6}
 -> @code{X1234,6:XXXXXX}
 <- @code{T02}
+@end smallexample
+
+@node Memory map format
+@section Memory map format
+@cindex memory map format
+
+To be able to write into flash memory, @value{GDBN} needs to obtain a
+memory map from the target.  This section describes the format of the
+memory map.
+
+The memory map is obtained using the @samp{qXfer:memory-map:read}
+(@pxref{qXfer memory map read}) packet and is an XML document that
+lists memory regions.  The top-level structure of the document is shown below:
+
+@smallexample
+<?xml version="1.0"?>
+<!DOCTYPE memory-map
+          PUBLIC "+//IDN gnu.org//DTD GDB Memory Map V1.0//EN"
+                 "http://sourceware.org/gdb/gdb-memory-map.dtd">
+<memory-map>
+    region...
+</memory-map>
+@end smallexample
+
+Each region can be either:
+
+@itemize
+
+@item
+A region of RAM starting at @var{addr} and extending for @var{length}
+bytes from there:
+
+@smallexample
+<memory type="ram" start="@var{addr}" length="@var{length}"/>
+@end smallexample
+
+
+@item
+A region of read-only memory:
+
+@smallexample
+<memory type="rom" start="@var{addr}" length="@var{length}"/>
+@end smallexample
+
+
+@item
+A region of flash memory, with erasure blocks @var{blocksize}
+bytes in length:
+
+@smallexample
+<memory type="flash" start="@var{addr}" length="@var{length}">
+  <property name="blocksize">@var{blocksize}</property>
+</memory>
+@end smallexample
+
+@end itemize
+
+Regions must not overlap.  @value{GDBN} assumes that areas of memory not covered
+by the memory map are RAM, and uses the ordinary @samp{M} and @samp{X}
+packets to write to addresses in such ranges.
+
+The formal DTD for memory map format is given below:
+
+@smallexample
+<!-- ................................................... -->
+<!-- Memory Map XML DTD ................................ -->
+<!-- File: memory-map.dtd .............................. -->
+<!-- .................................... .............. -->
+<!-- memory-map.dtd -->
+<!-- memory-map: Root element with versioning -->
+<!ELEMENT memory-map (memory | property)>
+<!ATTLIST memory-map    version CDATA   #FIXED  "1.0.0">
+<!ELEMENT memory (property)>
+<!-- memory: Specifies a memory region,
+             and its type, or device. -->
+<!ATTLIST memory        type    CDATA   #REQUIRED
+                        start   CDATA   #REQUIRED
+                        length  CDATA   #REQUIRED
+                        device  CDATA   #IMPLIED>
+<!-- property: Generic attribute tag -->
+<!ELEMENT property (#PCDATA | property)*>
+<!ATTLIST property      name    CDATA   #REQUIRED>
 @end smallexample
 
 @include agentexpr.texi

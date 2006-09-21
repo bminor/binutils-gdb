@@ -1,6 +1,16 @@
 2006-09-21  Vladimir Prus  <vladimir@codesourcery.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.texinfo (Packets): Document vFlashErase,
+	vFlashWrite and vFlashDone packets.
+	(General Query Packets): Document qXfer:memory-map:read.
+	Add a new feature for qXfer:memory-map:read.
+	(Memory map format): New section.
+	(Target Commands): Mention that gdb can write flash.
+
+2006-09-21  Vladimir Prus  <vladimir@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.texinfo (Memory Region Attributes): Mention target-supplied
 	memory regions and "mem auto".
 
