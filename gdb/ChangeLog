@@ -1,3 +1,12 @@
+2006-09-21  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* vec.h: New file.
+	* vec.c: New file.
+	* Makefile.in (SFILES): Add vec.c.
+	(vec_h): New.
+	(COMMON_OBJS): Add vec.o.
+	(vec.o): New target.
+
 2006-09-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	PR remote/2154

@@ -4913,6 +4913,181 @@ Regex conditionals.
 @item sparc
 @end table
 
+@section Array Containers
+@cindex Array Containers
+@cindex VEC
+
+Often it is necessary to manipulate a dynamic array of a set of
+objects.  C forces some bookkeeping on this, which can get cumbersome
+and repetative.  The @file{vec.h} file contains macros for defining
+and using a typesafe vector type.  The functions defined will be
+inlined when compiling, and so the abstraction cost should be zero.
+Domain checks are added to detect programming errors.
+
+An example use would be an array of symbols or section information.
+The array can be grown as symbols are read in (or preallocated), and
+the accessor macros provided keep care of all the necessary
+bookkeeping.  Because the arrays are type safe, there is no danger of
+accidentally mixing up the contents.  Think of these as C++ templates,
+but implemented in C.
+
+Because of the different behavior of structure objects, scalar objects
+and of pointers, there are three flavors of vector, one for each of
+these variants.  Both the structure object and pointer variants pass
+pointers to objects around --- in the former case the pointers are
+stored into the vector and in the latter case the pointers are
+dereferenced and the objects copied into the vector.  The scalar
+object variant is suitable for @code{int}-like objects, and the vector
+elements are returned by value.
+
+There are both @code{index} and @code{iterate} accessors.  The iterator
+returns a boolean iteration condition and updates the iteration
+variable passed by reference.  Because the iterator will be inlined,
+the address-of can be optimized away.
+
+The vectors are implemented using the trailing array idiom, thus they
+are not resizeable without changing the address of the vector object
+itself.  This means you cannot have variables or fields of vector type
+--- always use a pointer to a vector.  The one exception is the final
+field of a structure, which could be a vector type.  You will have to
+use the @code{embedded_size} & @code{embedded_init} calls to create
+such objects, and they will probably not be resizeable (so don't use
+the @dfn{safe} allocation variants).  The trailing array idiom is used
+(rather than a pointer to an array of data), because, if we allow
+@code{NULL} to also represent an empty vector, empty vectors occupy
+minimal space in the structure containing them.
+
+Each operation that increases the number of active elements is
+available in @dfn{quick} and @dfn{safe} variants.  The former presumes
+that there is sufficient allocated space for the operation to succeed
+(it dies if there is not).  The latter will reallocate the vector, if
+needed.  Reallocation causes an exponential increase in vector size.
+If you know you will be adding N elements, it would be more efficient
+to use the reserve operation before adding the elements with the
+@dfn{quick} operation.  This will ensure there are at least as many
+elements as you ask for, it will exponentially increase if there are
+too few spare slots.  If you want reserve a specific number of slots,
+but do not want the exponential increase (for instance, you know this
+is the last allocation), use a negative number for reservation.  You
+can also create a vector of a specific size from the get go.
+
+You should prefer the push and pop operations, as they append and
+remove from the end of the vector. If you need to remove several items
+in one go, use the truncate operation.  The insert and remove
+operations allow you to change elements in the middle of the vector.
+There are two remove operations, one which preserves the element
+ordering @code{ordered_remove}, and one which does not
+@code{unordered_remove}.  The latter function copies the end element
+into the removed slot, rather than invoke a memmove operation.  The
+@code{lower_bound} function will determine where to place an item in
+the array using insert that will maintain sorted order.
+
+If you need to directly manipulate a vector, then the @code{address}
+accessor will return the address of the start of the vector.  Also the
+@code{space} predicate will tell you whether there is spare capacity in the
+vector.  You will not normally need to use these two functions.
+
+Vector types are defined using a
+@code{DEF_VEC_@{O,P,I@}(@var{typename})} macro.  Variables of vector
+type are declared using a @code{VEC(@var{typename})} macro.  The
+characters @code{O}, @code{P} and @code{I} indicate whether
+@var{typename} is an object (@code{O}), pointer (@code{P}) or integral
+(@code{I}) type.  Be careful to pick the correct one, as you'll get an
+awkward and inefficient API if you use the wrong one.  There is a
+check, which results in a compile-time warning, for the @code{P} and
+@code{I} versions, but there is no check for the @code{O} versions, as
+that is not possible in plain C.
+
+An example of their use would be,
+
+@smallexample
+DEF_VEC_P(tree);   // non-managed tree vector.
+
+struct my_struct @{
+  VEC(tree) *v;      // A (pointer to) a vector of tree pointers.
+@};
+
+struct my_struct *s;
+
+if (VEC_length(tree, s->v)) @{ we have some contents @}
+VEC_safe_push(tree, s->v, decl); // append some decl onto the end
+for (ix = 0; VEC_iterate(tree, s->v, ix, elt); ix++)
+  @{ do something with elt @}
+
+@end smallexample
+
+The @file{vec.h} file provides details on how to invoke the various
+accessors provided.  They are enumerated here:
+
+@table @code
+@item VEC_length
+Return the number of items in the array,
+
+@item VEC_empty
+Return true if the array has no elements.
+
+@item VEC_last
+@itemx VEC_index
+Return the last or arbitrary item in the array.
+
+@item VEC_iterate
+Access an array element and indicate whether the array has been
+traversed.
+
+@item VEC_alloc
+@itemx VEC_free
+Create and destroy an array.
+
+@item VEC_embedded_size
+@itemx VEC_embedded_init
+Helpers for embedding an array as the final element of another struct.
+
+@item VEC_copy
+Duplicate an array.
+
+@item VEC_space
+Return the amount of free space in an array.
+
+@item VEC_reserve
+Ensure a certain amount of free space.
+
+@item VEC_quick_push
+@itemx VEC_safe_push
+Append to an array, either assuming the space is available, or making
+sure that it is.
+
+@item VEC_pop
+Remove the last item from an array.
+
+@item VEC_truncate
+Remove several items from the end of an array.
+
+@item VEC_safe_grow
+Add several items to the end of an array.
+
+@item VEC_replace
+Overwrite an item in the array.
+
+@item VEC_quick_insert
+@itemx VEC_safe_insert
+Insert an item into the middle of the array.  Either the space must
+already exist, or the space is created.
+
+@item VEC_ordered_remove
+@itemx VEC_unordered_remove
+Remove an item from the array, preserving order or not.
+
+@item VEC_block_remove
+Remove a set of items from the array.
+
+@item VEC_address
+Provide the address of the first element.
+
+@item VEC_lower_bound
+Binary search the array.
+
+@end table
+
 @section include
 
 @node Coding

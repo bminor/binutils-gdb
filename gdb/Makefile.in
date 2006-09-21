@@ -560,7 +560,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
 	typeprint.c \
 	ui-out.c utils.c ui-file.h ui-file.c \
 	user-regs.c \
-	valarith.c valops.c valprint.c value.c varobj.c \
+	valarith.c valops.c valprint.c value.c varobj.c vec.c \
 	wrapper.c
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
@@ -816,6 +816,7 @@ value_h = value.h $(doublest_h) $(frame_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h)
 varobj_h = varobj.h $(symtab_h) $(gdbtypes_h)
 vax_tdep_h = vax-tdep.h
+vec_h = vec.h $(gdb_assert_h) $(gdb_string_h)
 version_h = version.h
 wince_stub_h = wince-stub.h
 wrapper_h = wrapper.h $(gdb_h)
@@ -941,7 +942,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	dwarf2expr.o dwarf2loc.o dwarf2-frame.o \
 	ada-lang.o c-lang.o f-lang.o objc-lang.o \
 	ui-out.o cli-out.o \
-	varobj.o wrapper.o \
+	varobj.o vec.o wrapper.o \
 	jv-lang.o jv-valprint.o jv-typeprint.o \
 	m2-lang.o p-lang.o p-typeprint.o p-valprint.o \
 	scm-exp.o scm-lang.o scm-valprint.o \
@@ -2826,6 +2827,7 @@ vax-tdep.o: vax-tdep.c $(defs_h) $(arch_utils_h) $(dis_asm_h) \
 	$(float_format_h) $(frame_h) $(frame_base_h) $(frame_unwind_h) \
 	$(gdbcore_h) $(gdbtypes_h) $(osabi_h) $(regcache_h) $(regset_h) \
 	$(trad_frame_h) $(value_h) $(gdb_string_h) $(vax_tdep_h)
+vec.o: vec.c $(defs_h) $(vec_h)
 win32-nat.o: win32-nat.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
 	$(exceptions_h) $(gdbcore_h) $(command_h) $(completer_h) \
 	$(regcache_h) $(top_h) $(buildsym_h) $(symfile_h) $(objfiles_h) \

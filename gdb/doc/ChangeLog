@@ -1,3 +1,7 @@
+2006-09-21  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gdbint.texinfo (Array Containers): New section.
+
 2006-09-17  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (GDB/MI Stack Manipulation): Mention that
