@@ -202,6 +202,11 @@ enum target_object
   TARGET_OBJECT_WCOOKIE,
   /* Target memory map in XML format.  */
   TARGET_OBJECT_MEMORY_MAP,
+  /* Flash memory.  This object can be used to write contents to
+     a previously erased flash memory.  Using it without erasing
+     flash can have unexpected results.  Addresses are physical
+     address on target, and not relative to flash start.  */
+  TARGET_OBJECT_FLASH
 
   /* Possible future objects: TARGET_OBJECT_FILE, TARGET_OBJECT_PROC, ... */
 };
@@ -227,11 +232,13 @@ extern LONGEST target_write (struct target_ops *ops,
 			     const char *annex, const gdb_byte *buf,
 			     ULONGEST offset, LONGEST len);
 
-/* Similar to target_write, except that it also calls PROGRESS
-   with the number of bytes written and the opaque BATON after
-   every partial write.  This is useful for progress reporting
-   and user interaction while writing data.  To abort the transfer,
-   the progress callback can throw an exception.  */
+/* Similar to target_write, except that it also calls PROGRESS with
+   the number of bytes written and the opaque BATON after every
+   successful partial write (and before the first write).  This is
+   useful for progress reporting and user interaction while writing
+   data.  To abort the transfer, the progress callback can throw an
+   exception.  */
+
 LONGEST target_write_with_progress (struct target_ops *ops,
 				    enum target_object object,
 				    const char *annex, const gdb_byte *buf,
@@ -471,6 +478,20 @@ struct target_ops
        layers will re-fetch it.  */
     VEC(mem_region_s) *(*to_memory_map) (struct target_ops *);
 
+    /* Erases the region of flash memory starting at ADDRESS, of
+       length LENGTH.
+
+       Precondition: both ADDRESS and ADDRESS+LENGTH should be aligned
+       on flash block boundaries, as reported by 'to_memory_map'.  */
+    void (*to_flash_erase) (struct target_ops *,
+                           ULONGEST address, LONGEST length);
+
+    /* Finishes a flash memory write sequence.  After this operation
+       all flash memory should be available for writing and the result
+       of reading from areas written by 'to_flash_write' should be
+       equal to what was written.  */
+    void (*to_flash_done) (struct target_ops *);
+
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
      */
@@ -598,6 +619,56 @@ extern int child_xfer_memory (CORE_ADDR, gdb_byte *, int, int,
    and returned, after some consistency checking.  Otherwise, NULL
    is returned.  */
 VEC(mem_region_s) *target_memory_map (void);
+
+/* Erase the specified flash region.  */
+void target_flash_erase (ULONGEST address, LONGEST length);
+
+/* Finish a sequence of flash operations.  */
+void target_flash_done (void);
+
+/* Describes a request for a memory write operation.  */
+struct memory_write_request
+  {
+    /* Begining address that must be written. */
+    ULONGEST begin;
+    /* Past-the-end address. */
+    ULONGEST end;
+    /* The data to write. */
+    gdb_byte *data;
+    /* A callback baton for progress reporting for this request.  */
+    void *baton;
+  };
+typedef struct memory_write_request memory_write_request_s;
+DEF_VEC_O(memory_write_request_s);
+
+/* Enumeration specifying different flash preservation behaviour.  */
+enum flash_preserve_mode
+  {
+    flash_preserve,
+    flash_discard
+  };
+
+/* Write several memory blocks at once.  This version can be more
+   efficient than making several calls to target_write_memory, in
+   particular because it can optimize accesses to flash memory.
+
+   Moreover, this is currently the only memory access function in gdb
+   that supports writing to flash memory, and it should be used for
+   all cases where access to flash memory is desirable.
+
+   REQUESTS is the vector (see vec.h) of memory_write_request.
+   PRESERVE_FLASH_P indicates what to do with blocks which must be
+     erased, but not completely rewritten.
+   PROGRESS_CB is a function that will be periodically called to provide
+     feedback to user.  It will be called with the baton corresponding
+     to the request currently being written.  It may also be called
+     with a NULL baton, when preserved flash sectors are being rewritten.
+
+   The function returns 0 on success, and error otherwise.  */
+int target_write_memory_blocks (VEC(memory_write_request_s) *requests,
+				enum flash_preserve_mode preserve_flash_p,
+				void (*progress_cb) (ULONGEST, void *));
+
 
 extern char *child_pid_to_exec_file (int);
 

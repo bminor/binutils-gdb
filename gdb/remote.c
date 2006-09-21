@@ -753,12 +753,42 @@ add_packet_config_cmd (struct packet_config *config, const char *name,
 }
 
 static enum packet_result
-packet_ok (const char *buf, struct packet_config *config)
+packet_check_result (const char *buf)
 {
   if (buf[0] != '\0')
     {
       /* The stub recognized the packet request.  Check that the
 	 operation succeeded.  */
+      if (buf[0] == 'E'
+	  && isxdigit (buf[1]) && isxdigit (buf[2])
+	  && buf[3] == '\0')
+	/* "Enn"  - definitly an error.  */
+	return PACKET_ERROR;
+
+      /* Always treat "E." as an error.  This will be used for
+	 more verbose error messages, such as E.memtypes.  */
+      if (buf[0] == 'E' && buf[1] == '.')
+	return PACKET_ERROR;
+
+      /* The packet may or may not be OK.  Just assume it is.  */
+      return PACKET_OK;
+    }
+  else
+    /* The stub does not support the packet.  */
+    return PACKET_UNKNOWN;
+}
+
+static enum packet_result
+packet_ok (const char *buf, struct packet_config *config)
+{
+  enum packet_result result;
+
+  result = packet_check_result (buf);
+  switch (result)
+    {
+    case PACKET_OK:
+    case PACKET_ERROR:
+      /* The stub recognized the packet request.  */
       switch (config->support)
 	{
 	case PACKET_SUPPORT_UNKNOWN:
@@ -775,19 +805,8 @@ packet_ok (const char *buf, struct packet_config *config)
 	case PACKET_ENABLE:
 	  break;
 	}
-      if (buf[0] == 'O' && buf[1] == 'K' && buf[2] == '\0')
-	/* "OK" - definitly OK.  */
-	return PACKET_OK;
-      if (buf[0] == 'E'
-	  && isxdigit (buf[1]) && isxdigit (buf[2])
-	  && buf[3] == '\0')
-	/* "Enn"  - definitly an error.  */
-	return PACKET_ERROR;
-      /* The packet may or may not be OK.  Just assume it is.  */
-      return PACKET_OK;
-    }
-  else
-    {
+      break;
+    case PACKET_UNKNOWN:
       /* The stub does not support the packet.  */
       switch (config->support)
 	{
@@ -812,8 +831,10 @@ packet_ok (const char *buf, struct packet_config *config)
 	case PACKET_DISABLE:
 	  break;
 	}
-      return PACKET_UNKNOWN;
+      break;
     }
+
+  return result;
 }
 
 enum {
@@ -3852,24 +3873,44 @@ check_binary_download (CORE_ADDR addr)
 
 /* Write memory data directly to the remote machine.
    This does not inform the data cache; the data cache uses this.
+   HEADER is the starting part of the packet.
    MEMADDR is the address in the remote memory space.
    MYADDR is the address of the buffer in our space.
    LEN is the number of bytes.
+   PACKET_FORMAT should be either 'X' or 'M', and indicates if we
+   should send data as binary ('X'), or hex-encoded ('M').
+
+   The function creates packet of the form
+       <HEADER><ADDRESS>,<LENGTH>:<DATA>
+
+   where encoding of <DATA> is termined by PACKET_FORMAT.
+
+   If USE_LENGTH is 0, then the <LENGTH> field and the preceding comma
+   are omitted.
+
+   Returns the number of bytes transferred, or 0 (setting errno) for
 
    Returns number of bytes transferred, or 0 (setting errno) for
    error.  Only transfer a single packet.  */
 
-int
-remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
+static int
+remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
+			const gdb_byte *myaddr, int len,
+			char packet_format, int use_length)
 {
   struct remote_state *rs = get_remote_state ();
   char *p;
-  char *plen;
-  int plenlen;
+  char *plen = NULL;
+  int plenlen = 0;
   int todo;
   int nr_bytes;
   int payload_size;
   int payload_length;
+  int header_length;
+
+  if (packet_format != 'X' && packet_format != 'M')
+    internal_error (__FILE__, __LINE__,
+		    "remote_write_bytes_aux: bad packet format");
 
   /* Should this be the selected frame?  */
   gdbarch_remote_translate_xfer_address (current_gdbarch,
@@ -3880,47 +3921,46 @@ remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
   if (len <= 0)
     return 0;
 
-  /* Verify that the target can support a binary download.  */
-  check_binary_download (memaddr);
-
   payload_size = get_memory_write_packet_size ();
 
   /* The packet buffer will be large enough for the payload;
      get_memory_packet_size ensures this.  */
+  rs->buf[0] = '\0';
 
   /* Compute the size of the actual payload by subtracting out the
      packet header and footer overhead: "$M<memaddr>,<len>:...#nn".
      */
-  payload_size -= strlen ("$M,:#NN");
+  payload_size -= strlen ("$,:#NN");
+  if (!use_length)
+    /* The comma won't be used. */
+    payload_size += 1;
+  header_length = strlen (header);
+  payload_size -= header_length;
   payload_size -= hexnumlen (memaddr);
 
-  /* Construct the packet header: "[MX]<memaddr>,<len>:".   */
+  /* Construct the packet excluding the data: "<header><memaddr>,<len>:".  */
 
-  /* Append "[XM]".  Compute a best guess of the number of bytes
-     actually transfered.  */
-  p = rs->buf;
-  switch (remote_protocol_packets[PACKET_X].support)
+  strcat (rs->buf, header);
+  p = rs->buf + strlen (header);
+
+  /* Compute a best guess of the number of bytes actually transfered.  */
+  if (packet_format == 'X')
     {
-    case PACKET_ENABLE:
-      *p++ = 'X';
       /* Best guess at number of bytes that will fit.  */
       todo = min (len, payload_size);
-      payload_size -= hexnumlen (todo);
+      if (use_length)
+	payload_size -= hexnumlen (todo);
       todo = min (todo, payload_size);
-      break;
-    case PACKET_DISABLE:
-      *p++ = 'M';
+    }
+  else
+    {
       /* Num bytes that will fit.  */
       todo = min (len, payload_size / 2);
-      payload_size -= hexnumlen (todo);
+      if (use_length)
+	payload_size -= hexnumlen (todo);
       todo = min (todo, payload_size / 2);
-      break;
-    case PACKET_SUPPORT_UNKNOWN:
-      internal_error (__FILE__, __LINE__,
-		      _("remote_write_bytes: bad internal state"));
-    default:
-      internal_error (__FILE__, __LINE__, _("bad switch"));
     }
+
   if (todo <= 0)
     internal_error (__FILE__, __LINE__,
 		    _("minumum packet size too small to write data"));
@@ -3934,23 +3974,25 @@ remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
   memaddr = remote_address_masked (memaddr);
   p += hexnumstr (p, (ULONGEST) memaddr);
 
-  /* Append ",".  */
-  *p++ = ',';
+  if (use_length)
+    {
+      /* Append ",".  */
+      *p++ = ',';
 
-  /* Append <len>.  Retain the location/size of <len>.  It may need to
-     be adjusted once the packet body has been created.  */
-  plen = p;
-  plenlen = hexnumstr (p, (ULONGEST) todo);
-  p += plenlen;
+      /* Append <len>.  Retain the location/size of <len>.  It may need to
+	 be adjusted once the packet body has been created.  */
+      plen = p;
+      plenlen = hexnumstr (p, (ULONGEST) todo);
+      p += plenlen;
+    }
 
   /* Append ":".  */
   *p++ = ':';
   *p = '\0';
 
   /* Append the packet body.  */
-  switch (remote_protocol_packets[PACKET_X].support)
+  if (packet_format == 'X')
     {
-    case PACKET_ENABLE:
       /* Binary mode.  Send target system values byte by byte, in
 	 increasing byte addresses.  Only escape certain critical
 	 characters.  */
@@ -3972,7 +4014,7 @@ remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
 	}
 
       p += payload_length;
-      if (nr_bytes < todo)
+      if (use_length && nr_bytes < todo)
 	{
 	  /* Escape chars have filled up the buffer prematurely,
 	     and we have actually sent fewer bytes than planned.
@@ -3981,19 +4023,14 @@ remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
 	  plen += hexnumnstr (plen, (ULONGEST) nr_bytes, plenlen);
 	  *plen = ':';  /* overwrite \0 from hexnumnstr() */
 	}
-      break;
-    case PACKET_DISABLE:
+    }
+  else
+    {
       /* Normal mode: Send target system values byte by byte, in
 	 increasing byte addresses.  Each byte is encoded as a two hex
 	 value.  */
       nr_bytes = bin2hex (myaddr, p, todo);
       p += 2 * nr_bytes;
-      break;
-    case PACKET_SUPPORT_UNKNOWN:
-      internal_error (__FILE__, __LINE__,
-		      _("remote_write_bytes: bad internal state"));
-    default:
-      internal_error (__FILE__, __LINE__, _("bad switch"));
     }
 
   putpkt_binary (rs->buf, (int) (p - rs->buf));
@@ -4012,6 +4049,42 @@ remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
   /* Return NR_BYTES, not TODO, in case escape chars caused us to send
      fewer bytes than we'd planned.  */
   return nr_bytes;
+}
+
+/* Write memory data directly to the remote machine.
+   This does not inform the data cache; the data cache uses this.
+   MEMADDR is the address in the remote memory space.
+   MYADDR is the address of the buffer in our space.
+   LEN is the number of bytes.
+
+   Returns number of bytes transferred, or 0 (setting errno) for
+   error.  Only transfer a single packet.  */
+
+int
+remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
+{
+  char *packet_format = 0;
+
+  /* Check whether the target supports binary download.  */
+  check_binary_download (memaddr);
+
+  switch (remote_protocol_packets[PACKET_X].support)
+    {
+    case PACKET_ENABLE:
+      packet_format = "X";
+      break;
+    case PACKET_DISABLE:
+      packet_format = "M";
+      break;
+    case PACKET_SUPPORT_UNKNOWN:
+      internal_error (__FILE__, __LINE__,
+		      _("remote_write_bytes: bad internal state"));
+    default:
+      internal_error (__FILE__, __LINE__, _("bad switch"));
+    }
+
+  return remote_write_bytes_aux (packet_format,
+				 memaddr, myaddr, len, packet_format[0], 1);
 }
 
 /* Read memory data directly from the remote machine.
@@ -4119,6 +4192,111 @@ remote_xfer_memory (CORE_ADDR mem_addr, gdb_byte *buffer, int mem_len,
     res = remote_read_bytes (mem_addr, buffer, mem_len);
 
   return res;
+}
+
+/* Sends a packet with content determined by the printf format string
+   FORMAT and the remaining arguments, then gets the reply.  Returns
+   whether the packet was a success, a failure, or unknown.  */
+
+enum packet_result
+remote_send_printf (const char *format, ...)
+{
+  struct remote_state *rs = get_remote_state ();
+  int max_size = get_remote_packet_size ();
+
+  va_list ap;
+  va_start (ap, format);
+
+  rs->buf[0] = '\0';
+  if (vsnprintf (rs->buf, max_size, format, ap) >= max_size)
+    internal_error (__FILE__, __LINE__, "Too long remote packet.");
+
+  if (putpkt (rs->buf) < 0)
+    error (_("Communication problem with target."));
+
+  rs->buf[0] = '\0';
+  getpkt (&rs->buf, &rs->buf_size, 0);
+
+  return packet_check_result (rs->buf);
+}
+
+static void
+restore_remote_timeout (void *p)
+{
+  int value = *(int *)p;
+  remote_timeout = value;
+}
+
+/* Flash writing can take quite some time.  We'll set
+   effectively infinite timeout for flash operations.
+   In future, we'll need to decide on a better approach.  */
+static const int remote_flash_timeout = 1000;
+
+static void
+remote_flash_erase (struct target_ops *ops,
+                    ULONGEST address, LONGEST length)
+{
+  int saved_remote_timeout = remote_timeout;
+  enum packet_result ret;
+
+  struct cleanup *back_to = make_cleanup (restore_remote_timeout,
+                                          &saved_remote_timeout);
+  remote_timeout = remote_flash_timeout;
+
+  ret = remote_send_printf ("vFlashErase:%s,%s",
+			    paddr (address),
+			    phex (length, 4));
+  switch (ret)
+    {
+    case PACKET_UNKNOWN:
+      error (_("Remote target does not support flash erase"));
+    case PACKET_ERROR:
+      error (_("Error erasing flash with vFlashErase packet"));
+    default:
+      break;
+    }
+
+  do_cleanups (back_to);
+}
+
+static LONGEST
+remote_flash_write (struct target_ops *ops,
+                    ULONGEST address, LONGEST length,
+                    const gdb_byte *data)
+{
+  int saved_remote_timeout = remote_timeout;
+  int ret;
+  struct cleanup *back_to = make_cleanup (restore_remote_timeout,
+                                          &saved_remote_timeout);
+
+  remote_timeout = remote_flash_timeout;
+  ret = remote_write_bytes_aux ("vFlashWrite:", address, data, length, 'X', 0);
+  do_cleanups (back_to);
+
+  return ret;
+}
+
+static void
+remote_flash_done (struct target_ops *ops)
+{
+  int saved_remote_timeout = remote_timeout;
+  int ret;
+  struct cleanup *back_to = make_cleanup (restore_remote_timeout,
+                                          &saved_remote_timeout);
+
+  remote_timeout = remote_flash_timeout;
+  ret = remote_send_printf ("vFlashDone");
+  do_cleanups (back_to);
+
+  switch (ret)
+    {
+    case PACKET_UNKNOWN:
+      error (_("Remote target does not support vFlashDone"));
+    case PACKET_ERROR:
+      error (_("Error finishing flash operation"));
+    default:
+      break;
+    }
 }
 
 static void
@@ -5300,9 +5478,27 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
 	return -1;
     }
 
-  /* Only handle reads.  */
-  if (writebuf != NULL || readbuf == NULL)
-    return -1;
+  /* Only handle flash writes.  */
+  if (writebuf != NULL)
+    {
+      LONGEST xfered;
+
+      switch (object)
+	{
+	case TARGET_OBJECT_FLASH:
+	  xfered = remote_flash_write (ops, offset, len, writebuf);
+
+	  if (xfered > 0)
+	    return xfered;
+	  else if (xfered == 0 && errno == 0)
+	    return 0;
+	  else
+	    return -1;
+
+	default:
+	  return -1;
+	}
+    }
 
   /* Map pre-existing objects onto letters.  DO NOT do this for new
      objects!!!  Instead specify new query packets.  */
@@ -5722,6 +5918,8 @@ Specify the serial device it is connected to\n\
   remote_ops.to_has_thread_control = tc_schedlock;	/* can lock scheduler */
   remote_ops.to_magic = OPS_MAGIC;
   remote_ops.to_memory_map = remote_memory_map;
+  remote_ops.to_flash_erase = remote_flash_erase;
+  remote_ops.to_flash_done = remote_flash_done;
 }
 
 /* Set up the extended remote vector by making a copy of the standard
@@ -5852,6 +6050,8 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_async_ops.to_async_mask_value = 1;
   remote_async_ops.to_magic = OPS_MAGIC;
   remote_async_ops.to_memory_map = remote_memory_map;
+  remote_async_ops.to_flash_erase = remote_flash_erase;
+  remote_async_ops.to_flash_done = remote_flash_done;
 }
 
 /* Set up the async extended remote vector by making a copy of the standard

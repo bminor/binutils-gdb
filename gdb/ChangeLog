@@ -1,5 +1,50 @@
 2006-09-21  Vladimir Prus  <vladimir@codesourcery.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (SFILES): Add target-memory.c.
+	(COMMON_OBS): Add target-memory.o.
+	* memattr.c (lookup_mem_region): Adjust handling for
+	the top of memory.  Improve comments.
+	* remote.c (packet_check_result): New function, split out
+	from packet_ok.  Recognize "E." as an error prefix.
+	(packet_ok): Use it.
+	(remote_write_bytes_aux): New function, renamed from
+	remote_write_bytes.  Take packet header, packet format,
+	and length flag as arguments.
+	(remote_write_bytes): Rewrite to use remote_write_bytes_aux.
+	(remote_send_printf, restore_remote_timeout)
+	(remote_flash_timeout, remote_flash_erase, remote_flash_write)
+	(remote_flash_done): New.
+	(remote_xfer_partial): Handle flash writes.
+	(init_remote_ops, init_remote_async_ops): Set to_flash_erase
+	and to_flash_done.
+	* symfile.c (struct load_section_data): Include a pointer to
+	the cumulative stats and a request queue.  Move most members
+	to other types.
+	(struct load_progress_data, struct load_progress_section_data): New
+	types.
+	(load_progress): Handle a NULL baton and zero bytes.  Update for
+	type changes.
+	(load_section_callback): Create memory write requests instead of
+	writing to memory.  Don't print the progress message here.
+	(clear_memory_write_data): New function.
+	(generic_load): Use target_write_memory_blocks.
+	* target-memory.c: New file.
+	* target.c (update_current_target): Mention new uninherited methods.
+	(memory_xfer_partial): Issue an error for flash writes.
+	(target_flash_erase, target_flash_done): New functions.
+	(target_write_with_progress): Call the progress callback at the
+	start also.
+	* target.h (enum target_object): Add TARGET_OBJECT_FLASH.
+	(target_write_with_progress): Update comment.
+	(struct target_ops): Add to_flash_erase and to_flash_done.
+	(target_flash_erase, target_flash_done, struct memory_write_request)
+	(memory_write_request_s, enum flash_preserve_mode)
+	(target_write_memory_blocks): New, including a vector type
+	for memory_write_request_s.
+
+2006-09-21  Vladimir Prus  <vladimir@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
 	    Nathan Sidwell  <nathan@codesourcery.com>
 
 	* Makefile.in (SFILES): Add memory-map.c and xml-support.c.

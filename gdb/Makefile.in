@@ -554,7 +554,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
 	solib.c solib-null.c source.c \
 	stabsread.c stack.c std-regs.c symfile.c symfile-mem.c symmisc.c \
 	symtab.c \
-	target.c thread.c top.c tracepoint.c \
+	target.c target-memory.c thread.c top.c tracepoint.c \
 	trad-frame.c \
 	tramp-frame.c \
 	typeprint.c \
@@ -964,7 +964,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	trad-frame.o \
 	tramp-frame.o \
 	solib.o solib-null.o \
-	prologue-value.o memory-map.o xml-support.o
+	prologue-value.o memory-map.o xml-support.o target-memory.o
 
 TSOBS = inflow.o
 
@@ -2757,6 +2757,8 @@ symtab.o: symtab.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(gdbcore_h) \
 target.o: target.c $(defs_h) $(gdb_string_h) $(target_h) $(gdbcmd_h) \
 	$(symtab_h) $(inferior_h) $(bfd_h) $(symfile_h) $(objfiles_h) \
 	$(gdb_wait_h) $(dcache_h) $(regcache_h) $(gdb_assert_h) $(gdbcore_h)
+target-memory.o: target-memory.c $(defs_h) $(vec_h) $(target_h) \
+	$(memory_map_h) $(gdb_assert_h)
 thread.o: thread.c $(defs_h) $(symtab_h) $(frame_h) $(inferior_h) \
 	$(environ_h) $(value_h) $(target_h) $(gdbthread_h) $(exceptions_h) \
 	$(command_h) $(gdbcmd_h) $(regcache_h) $(gdb_h) $(gdb_string_h) \

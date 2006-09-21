@@ -465,6 +465,8 @@ update_current_target (void)
       INHERIT (to_get_thread_local_address, t);
       INHERIT (to_magic, t);
       /* Do not inherit to_memory_map.  */
+      /* Do not inherit to_flash_erase.  */
+      /* Do not inherit to_flash_done.  */
     }
 #undef INHERIT
 
@@ -892,6 +894,12 @@ memory_xfer_partial (struct target_ops *ops, void *readbuf, const void *writebuf
       if (readbuf != NULL)
 	return -1;
       break;
+
+    case MEM_FLASH:
+      /* We only support writing to flash during "load" for now.  */
+      if (writebuf != NULL)
+	error (_("Writing to flash memory forbidden in this context"));
+      break;
     }
 
   if (region->attrib.cache)
@@ -1089,6 +1097,39 @@ target_memory_map (void)
   return result;
 }
 
+void
+target_flash_erase (ULONGEST address, LONGEST length)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_flash_erase != NULL)
+	{
+	  if (targetdebug)
+	    fprintf_unfiltered (gdb_stdlog, "target_flash_erase (%s, %s)\n",
+                                paddr (address), phex (length, 0));
+	  return t->to_flash_erase (t, address, length);
+	}
+
+  tcomplain ();
+}
+
+void
+target_flash_done (void)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_flash_done != NULL)
+	{
+	  if (targetdebug)
+	    fprintf_unfiltered (gdb_stdlog, "target_flash_done\n");
+	  return t->to_flash_done (t);
+	}
+
+  tcomplain ();
+}
+
 #ifndef target_stopped_data_address_p
 int
 target_stopped_data_address_p (struct target_ops *target)
@@ -1229,6 +1270,11 @@ target_write_with_progress (struct target_ops *ops,
 			    void (*progress) (ULONGEST, void *), void *baton)
 {
   LONGEST xfered = 0;
+
+  /* Give the progress callback a chance to set up.  */
+  if (progress)
+    (*progress) (0, baton);
+
   while (xfered < len)
     {
       LONGEST xfer = target_write_partial (ops, object, annex,

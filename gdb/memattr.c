@@ -209,10 +209,11 @@ lookup_mem_region (CORE_ADDR addr)
      redefined to describe the minimal region containing ADDR.  LO
      and HI are used in the case where no memory region is defined
      that contains ADDR.  If a memory region is disabled, it is
-     treated as if it does not exist.  */
+     treated as if it does not exist.  The initial values for LO
+     and HI represent the bottom and top of memory.  */
 
-  lo = (CORE_ADDR) 0;
-  hi = (CORE_ADDR) ~ 0;
+  lo = 0;
+  hi = 0;
 
   /* If we ever want to support a huge list of memory regions, this
      check should be replaced with a binary search (probably using
@@ -224,10 +225,16 @@ lookup_mem_region (CORE_ADDR addr)
 	  if (addr >= m->lo && (addr < m->hi || m->hi == 0))
 	    return m;
 
+	  /* This (correctly) won't match if m->hi == 0, representing
+	     the top of the address space, because CORE_ADDR is unsigned;
+	     no value of LO is less than zero.  */
 	  if (addr >= m->hi && lo < m->hi)
 	    lo = m->hi;
 
-	  if (addr <= m->lo && hi > m->lo)
+	  /* This will never set HI to zero; if we're here and ADDR
+	     is at or below M, and the region starts at zero, then ADDR
+	     would have been in the region.  */
+	  if (addr <= m->lo && (hi == 0 || hi > m->lo))
 	    hi = m->lo;
 	}
     }
