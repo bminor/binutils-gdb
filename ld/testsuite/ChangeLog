@@ -1,3 +1,8 @@
+2006-09-21  Andreas Schwab  <schwab@suse.de>
+
+	* ld-m68k/plt1-68020.d: Fix patterns to match also for 64-bit
+	hosts.
+
 2006-09-20  Kai Tietz  <Kai.Tietz@onevision.com>
 
 	* bootstrap/bootstrap.exp: Fix x86_64-mingw32 target test.
