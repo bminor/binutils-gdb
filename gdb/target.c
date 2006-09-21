@@ -464,6 +464,7 @@ update_current_target (void)
       INHERIT (to_make_corefile_notes, t);
       INHERIT (to_get_thread_local_address, t);
       INHERIT (to_magic, t);
+      /* Do not inherit to_memory_map.  */
     }
 #undef INHERIT
 
@@ -1040,6 +1041,54 @@ target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
     return EIO;
 }
 
+/* Fetch the target's memory map.  */
+
+VEC(mem_region_s) *
+target_memory_map (void)
+{
+  VEC(mem_region_s) *result;
+  struct mem_region *last_one, *this_one;
+  int ix;
+  struct target_ops *t;
+
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog, "target_memory_map ()\n");
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_memory_map != NULL)
+      break;
+
+  if (t == NULL)
+    return NULL;
+
+  result = t->to_memory_map (t);
+  if (result == NULL)
+    return NULL;
+
+  qsort (VEC_address (mem_region_s, result),
+	 VEC_length (mem_region_s, result),
+	 sizeof (struct mem_region), mem_region_cmp);
+
+  /* Check that regions do not overlap.  Simultaneously assign
+     a numbering for the "mem" commands to use to refer to
+     each region.  */
+  last_one = NULL;
+  for (ix = 0; VEC_iterate (mem_region_s, result, ix, this_one); ix++)
+    {
+      this_one->number = ix;
+
+      if (last_one && last_one->hi > this_one->lo)
+	{
+	  warning (_("Overlapping regions in memory map: ignoring"));
+	  VEC_free (mem_region_s, result);
+	  return NULL;
+	}
+      last_one = this_one;
+    }
+
+  return result;
+}
+
 #ifndef target_stopped_data_address_p
 int
 target_stopped_data_address_p (struct target_ops *target)
@@ -1356,6 +1405,18 @@ target_info (char *args, int from_tty)
     }
 }
 
+/* This function is called before any new inferior is created, e.g.
+   by running a program, attaching, or connecting to a target.
+   It cleans up any state from previous invocations which might
+   change between runs.  This is a subset of what target_preopen
+   resets (things which might change between targets).  */
+
+void
+target_pre_inferior (int from_tty)
+{
+  invalidate_target_mem_regions ();
+}
+
 /* This is to be called by the open routine before it does
    anything.  */
 
@@ -1378,6 +1439,8 @@ target_preopen (int from_tty)
 
   if (target_has_execution)
     pop_target ();
+
+  target_pre_inferior (from_tty);
 }
 
 /* Detach a target after doing deferred register stores.  */

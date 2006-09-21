@@ -36,11 +36,22 @@ const struct mem_attrib default_mem_attrib =
   MEM_WIDTH_UNSPECIFIED,
   0,				/* hwbreak */
   0,				/* cache */
-  0				/* verify */
+  0,				/* verify */
+  -1 /* Flash blocksize not specified.  */
 };
 
-VEC(mem_region_s) *mem_region_list;
+VEC(mem_region_s) *mem_region_list, *target_mem_region_list;
 static int mem_number = 0;
+
+/* If this flag is set, the memory region list should be automatically
+   updated from the target.  If it is clear, the list is user-controlled
+   and should be left alone.  */
+static int mem_use_target = 1;
+
+/* If this flag is set, we have tried to fetch the target memory regions
+   since the last time it was invalidated.  If that list is still
+   empty, then the target can't supply memory regions.  */
+static int target_mem_regions_valid;
 
 /* Predicate function which returns true if LHS should sort before RHS
    in a list of memory regions, useful for VEC_lower_bound.  */
@@ -50,6 +61,84 @@ mem_region_lessthan (const struct mem_region *lhs,
 		     const struct mem_region *rhs)
 {
   return lhs->lo < rhs->lo;
+}
+
+/* A helper function suitable for qsort, used to sort a
+   VEC(mem_region_s) by starting address.  */
+
+int
+mem_region_cmp (const void *untyped_lhs, const void *untyped_rhs)
+{
+  const struct mem_region *lhs = untyped_lhs;
+  const struct mem_region *rhs = untyped_rhs;
+
+  if (lhs->lo < rhs->lo)
+    return -1;
+  else if (lhs->lo == rhs->lo)
+    return 0;
+  else
+    return 1;
+}
+
+/* Allocate a new memory region, with default settings.  */
+
+void
+mem_region_init (struct mem_region *new)
+{
+  memset (new, 0, sizeof (struct mem_region));
+  new->enabled_p = 1;
+  new->attrib = default_mem_attrib;
+}
+
+/* This function should be called before any command which would
+   modify the memory region list.  It will handle switching from
+   a target-provided list to a local list, if necessary.  */
+
+static void
+require_user_regions (int from_tty)
+{
+  struct mem_region *m;
+  int ix, length;
+
+  /* If we're already using a user-provided list, nothing to do.  */
+  if (!mem_use_target)
+    return;
+
+  /* Switch to a user-provided list (possibly a copy of the current
+     one).  */
+  mem_use_target = 0;
+
+  /* If we don't have a target-provided region list yet, then
+     no need to warn.  */
+  if (mem_region_list == NULL)
+    return;
+
+  /* Otherwise, let the user know how to get back.  */
+  if (from_tty)
+    warning (_("Switching to manual control of memory regions; use "
+	       "\"mem auto\" to fetch regions from the target again."));
+
+  /* And create a new list for the user to modify.  */
+  length = VEC_length (mem_region_s, target_mem_region_list);
+  mem_region_list = VEC_alloc (mem_region_s, length);
+  for (ix = 0; VEC_iterate (mem_region_s, target_mem_region_list, ix, m); ix++)
+    VEC_quick_push (mem_region_s, mem_region_list, m);
+}
+
+/* This function should be called before any command which would
+   read the memory region list, other than those which call
+   require_user_regions.  It will handle fetching the
+   target-provided list, if necessary.  */
+
+static void
+require_target_regions (void)
+{
+  if (mem_use_target && !target_mem_regions_valid)
+    {
+      target_mem_regions_valid = 1;
+      target_mem_region_list = target_memory_map ();
+      mem_region_list = target_mem_region_list;
+    }
 }
 
 static void
@@ -66,6 +155,7 @@ create_mem_region (CORE_ADDR lo, CORE_ADDR hi,
       return;
     }
 
+  mem_region_init (&new);
   new.lo = lo;
   new.hi = hi;
 
@@ -96,7 +186,6 @@ create_mem_region (CORE_ADDR lo, CORE_ADDR hi,
     }
 
   new.number = ++mem_number;
-  new.enabled_p = 1;
   new.attrib = *attrib;
   VEC_safe_insert (mem_region_s, mem_region_list, ix, &new);
 }
@@ -112,6 +201,8 @@ lookup_mem_region (CORE_ADDR addr)
   CORE_ADDR lo;
   CORE_ADDR hi;
   int ix;
+
+  require_target_regions ();
 
   /* First we initialize LO and HI so that they describe the entire
      memory space.  As we process the memory region chain, they are
@@ -148,6 +239,31 @@ lookup_mem_region (CORE_ADDR addr)
   region.attrib = default_mem_attrib;
   return &region;
 }
+
+/* Invalidate any memory regions fetched from the target.  */
+
+void
+invalidate_target_mem_regions (void)
+{
+  struct mem_region *m;
+  int ix;
+
+  if (!target_mem_regions_valid)
+    return;
+
+  target_mem_regions_valid = 0;
+  VEC_free (mem_region_s, target_mem_region_list);
+  if (mem_use_target)
+    mem_region_list = NULL;
+}
+
+/* Clear memory region list */
+
+static void
+mem_clear (void)
+{
+  VEC_free (mem_region_s, mem_region_list);
+}
 
 
 static void
@@ -159,6 +275,24 @@ mem_command (char *args, int from_tty)
 
   if (!args)
     error_no_arg (_("No mem"));
+
+  /* For "mem auto", switch back to using a target provided list.  */
+  if (strcmp (args, "auto") == 0)
+    {
+      if (mem_use_target)
+	return;
+
+      if (mem_region_list != target_mem_region_list)
+	{
+	  mem_clear ();
+	  mem_region_list = target_mem_region_list;
+	}
+
+      mem_use_target = 1;
+      return;
+    }
+
+  require_user_regions (from_tty);
 
   tok = strtok (args, " \t");
   if (!tok)
@@ -235,6 +369,13 @@ mem_info_command (char *args, int from_tty)
   struct mem_attrib *attrib;
   int ix;
 
+  if (mem_use_target)
+    printf_filtered (_("Using memory regions provided by the target.\n"));
+  else
+    printf_filtered (_("Using user-defined memory regions.\n"));
+
+  require_target_regions ();
+
   if (!mem_region_list)
     {
       printf_unfiltered (_("There are no memory regions defined.\n"));
@@ -305,6 +446,9 @@ mem_info_command (char *args, int from_tty)
 	  break;
 	case MEM_WO:
 	  printf_filtered ("wo ");
+	  break;
+	case MEM_FLASH:
+	  printf_filtered ("flash blocksize 0x%x ", attrib->blocksize);
 	  break;
 	}
 
@@ -378,6 +522,8 @@ mem_enable_command (char *args, int from_tty)
   struct mem_region *m;
   int ix;
 
+  require_user_regions (from_tty);
+
   dcache_invalidate (target_dcache);
 
   if (p == 0)
@@ -430,6 +576,8 @@ mem_disable_command (char *args, int from_tty)
   struct mem_region *m;
   int ix;
 
+  require_user_regions (from_tty);
+
   dcache_invalidate (target_dcache);
 
   if (p == 0)
@@ -453,14 +601,6 @@ mem_disable_command (char *args, int from_tty)
 	while (*p == ' ' || *p == '\t')
 	  p++;
       }
-}
-
-/* Clear memory region list */
-
-static void
-mem_clear (void)
-{
-  VEC_free (mem_region_s, mem_region_list);
 }
 
 /* Delete the memory region number NUM. */
@@ -497,6 +637,8 @@ mem_delete_command (char *args, int from_tty)
   char *p1;
   int num;
 
+  require_user_regions (from_tty);
+
   dcache_invalidate (target_dcache);
 
   if (p == 0)
@@ -532,8 +674,10 @@ void
 _initialize_mem (void)
 {
   add_com ("mem", class_vars, mem_command, _("\
-Define attributes for memory region.\n\
-Usage: mem <lo addr> <hi addr> [<mode> <width> <cache>], \n\
+Define attributes for memory region or reset memory region handling to\n\
+target-based.\n\
+Usage: mem auto\n\
+       mem <lo addr> <hi addr> [<mode> <width> <cache>], \n\
 where <mode>  may be rw (read/write), ro (read-only) or wo (write-only), \n\
       <width> may be 8, 16, 32, or 64, and \n\
       <cache> may be cache or nocache"));

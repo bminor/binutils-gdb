@@ -55,6 +55,7 @@ struct bp_target_info;
 #include "symtab.h"
 #include "dcache.h"
 #include "memattr.h"
+#include "vec.h"
 
 enum strata
   {
@@ -198,7 +199,9 @@ enum target_object
   /* Transfer auxilliary vector.  */
   TARGET_OBJECT_AUXV,
   /* StackGhost cookie.  See "sparc-tdep.c".  */
-  TARGET_OBJECT_WCOOKIE
+  TARGET_OBJECT_WCOOKIE,
+  /* Target memory map in XML format.  */
+  TARGET_OBJECT_MEMORY_MAP,
 
   /* Possible future objects: TARGET_OBJECT_FILE, TARGET_OBJECT_PROC, ... */
 };
@@ -453,6 +456,21 @@ struct target_ops
 				gdb_byte *readbuf, const gdb_byte *writebuf,
 				ULONGEST offset, LONGEST len);
 
+    /* Returns the memory map for the target.  A return value of NULL
+       means that no memory map is available.  If a memory address
+       does not fall within any returned regions, it's assumed to be
+       RAM.  The returned memory regions should not overlap.
+
+       The order of regions does not matter; target_memory_map will
+       sort regions by starting address. For that reason, this
+       function should not be called directly except via
+       target_memory_map.
+
+       This method should not cache data; if the memory map could
+       change unexpectedly, it should be invalidated, and higher
+       layers will re-fetch it.  */
+    VEC(mem_region_s) *(*to_memory_map) (struct target_ops *);
+
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
      */
@@ -575,6 +593,11 @@ extern int xfer_memory (CORE_ADDR, gdb_byte *, int, int,
 
 extern int child_xfer_memory (CORE_ADDR, gdb_byte *, int, int,
 			      struct mem_attrib *, struct target_ops *);
+
+/* Fetches the target's memory map.  If one is found it is sorted
+   and returned, after some consistency checking.  Otherwise, NULL
+   is returned.  */
+VEC(mem_region_s) *target_memory_map (void);
 
 extern char *child_pid_to_exec_file (int);
 
@@ -1126,6 +1149,8 @@ extern void add_target (struct target_ops *);
 extern int push_target (struct target_ops *);
 
 extern int unpush_target (struct target_ops *);
+
+extern void target_pre_inferior (int);
 
 extern void target_preopen (int);
 

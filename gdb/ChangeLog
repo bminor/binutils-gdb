@@ -1,3 +1,49 @@
+2006-09-21  Vladimir Prus  <vladimir@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+	    Nathan Sidwell  <nathan@codesourcery.com>
+
+	* Makefile.in (SFILES): Add memory-map.c and xml-support.c.
+	(memory_map_h, xml_support_h): New.
+	(target_h): Add vec_h dependency.
+	(COMMON_OBS): Add memory-map.o and xml-support.o.
+	(memory-map.o, xml-support.o): New rules.
+	(remote.o): Update.
+	* exceptions.h (enum errors): Add XML_PARSE_ERROR.
+	* infcmd.c (run_command_1, attach_command): Call target_pre_inferior.
+	* memattr.c (default_mem_attrib): Initialize blocksize.
+	(target_mem_region_list, mem_use_target)
+	(target_mem_regions_valid, mem_region_cmp, mem_region_init)
+	(require_user_regions, require_target_regions)
+	(invalidate_target_mem_regions): New.
+	(create_mem_region): Use mem_region_init.
+	(mem_clear): Move higher.	
+	(lookup_mem_region): Use require_target_regions.
+	(mem_command): Implement "mem auto".
+	(mem_info_command): Handle target-supplied regions and flash
+	attributes.
+	(mem_enable_command, mem_disable_command, mem_delete_command): Use
+	require_user_regions.
+	(_initialize_mem): Mention "mem auto" in help.
+	* memattr.h (enum mem_access_mode): Add MEM_FLASH.
+	(struct mem_attrib): Add blocksize.
+	(invalidate_target_mem_regions, mem_region_init, mem_region_cmp): New
+	prototypes.
+	* remote.c: Include "memory-map.h".
+	(PACKET_qXfer_memory_map): New enum value.
+	(remote_protocol_features): Add qXfer:memory-map:read.
+	(remote_xfer_partial): Handle memory maps.
+	(remote_memory_map): New.
+	(init_remote_ops, init_remote_async_ops): Set to_memory_map.
+	(_initialize_remote): Register qXfer:memory-map:read.
+	* target.c (update_current_target): Mention to_memory_map.
+	(target_memory_map, target_pre_inferior): New.
+	(target_preopen): Call target_pre_inferior.
+	* target.h: Include "vec.h".
+	(enum target_object): Add TARGET_OBJECT_MEMORY_MAP.
+	(struct target_ops): Add to_memory_map.
+	(target_memory_map, target_pre_inferior): New prototypes.
+	* memory-map.c, memory-map.h, xml-support.c, xml-support.h: New files.
+
 2006-09-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ada-lex.l (HIGH_BYTE_POSN, is_digit_in_base, digit_to_int)

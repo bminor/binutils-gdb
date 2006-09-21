@@ -28,7 +28,10 @@ enum mem_access_mode
 {
   MEM_RW,			/* read/write */
   MEM_RO,			/* read only */
-  MEM_WO			/* write only */
+  MEM_WO,			/* write only */
+
+  /* Read/write, but special steps are required to write to it.  */
+  MEM_FLASH
 };
 
 enum mem_access_width
@@ -66,6 +69,9 @@ struct mem_attrib
   /* enables memory verification.  after a write, memory is re-read
      to verify that the write was successful. */
   int verify; 
+
+  /* Block size.  Only valid if mode == MEM_FLASH.  */
+  int blocksize;
 };
 
 struct mem_region 
@@ -90,5 +96,11 @@ typedef struct mem_region mem_region_s;
 DEF_VEC_O(mem_region_s);
 
 extern struct mem_region *lookup_mem_region(CORE_ADDR);
+
+void invalidate_target_mem_regions (void);
+
+void mem_region_init (struct mem_region *);
+
+int mem_region_cmp (const void *, const void *);
 
 #endif	/* MEMATTR_H */

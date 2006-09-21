@@ -60,6 +60,8 @@
 
 #include "remote-fileio.h"
 
+#include "memory-map.h"
+
 /* The size to align memory write packets, when practical.  The protocol
    does not guarantee any alignment, and gdb will generate short
    writes and unaligned writes, but even as a best-effort attempt this
@@ -826,6 +828,7 @@ enum {
   PACKET_Z3,
   PACKET_Z4,
   PACKET_qXfer_auxv,
+  PACKET_qXfer_memory_map,
   PACKET_qGetTLSAddr,
   PACKET_qSupported,
   PACKET_MAX
@@ -2172,7 +2175,9 @@ remote_packet_size (const struct protocol_feature *feature,
 static struct protocol_feature remote_protocol_features[] = {
   { "PacketSize", PACKET_DISABLE, remote_packet_size, -1 },
   { "qXfer:auxv:read", PACKET_DISABLE, remote_supported_packet,
-    PACKET_qXfer_auxv }
+    PACKET_qXfer_auxv },
+  { "qXfer:memory-map:read", PACKET_DISABLE, remote_supported_packet,
+    PACKET_qXfer_memory_map }
 };
 
 static void
@@ -5312,6 +5317,11 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
       return remote_read_qxfer (ops, "auxv", annex, readbuf, offset, len,
 				&remote_protocol_packets[PACKET_qXfer_auxv]);
 
+    case TARGET_OBJECT_MEMORY_MAP:
+      gdb_assert (annex == NULL);
+      return remote_read_qxfer (ops, "memory-map", annex, readbuf, offset, len,
+				&remote_protocol_packets[PACKET_qXfer_memory_map]);
+
     default:
       return -1;
     }
@@ -5420,6 +5430,23 @@ remote_rcmd (char *command,
 	}
       break;
     }
+}
+
+static VEC(mem_region_s) *
+remote_memory_map (struct target_ops *ops)
+{
+  VEC(mem_region_s) *result = NULL;
+  char *text = target_read_stralloc (&current_target,
+				     TARGET_OBJECT_MEMORY_MAP, NULL);
+
+  if (text)
+    {
+      struct cleanup *back_to = make_cleanup (xfree, text);
+      result = parse_memory_map (text);
+      do_cleanups (back_to);
+    }
+
+  return result;
 }
 
 static void
@@ -5694,6 +5721,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_has_execution = 1;
   remote_ops.to_has_thread_control = tc_schedlock;	/* can lock scheduler */
   remote_ops.to_magic = OPS_MAGIC;
+  remote_ops.to_memory_map = remote_memory_map;
 }
 
 /* Set up the extended remote vector by making a copy of the standard
@@ -5823,6 +5851,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_async_ops.to_async = remote_async;
   remote_async_ops.to_async_mask_value = 1;
   remote_async_ops.to_magic = OPS_MAGIC;
+  remote_async_ops.to_memory_map = remote_memory_map;
 }
 
 /* Set up the async extended remote vector by making a copy of the standard
@@ -6062,6 +6091,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_auxv],
 			 "qXfer:auxv:read", "read-aux-vector", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_memory_map],
+			 "qXfer:memory-map:read", "memory-map", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qGetTLSAddr],
 			 "qGetTLSAddr", "get-thread-local-storage-address",

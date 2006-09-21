@@ -541,7 +541,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
 	language.c linespec.c \
 	m2-exp.y m2-lang.c m2-typeprint.c m2-valprint.c \
 	macrotab.c macroexp.c macrocmd.c macroscope.c main.c maint.c \
-	mdebugread.c memattr.c mem-break.c minsyms.c mipsread.c \
+	mdebugread.c memattr.c mem-break.c minsyms.c mipsread.c memory-map.c \
 	nlmread.c \
 	objc-exp.y objc-lang.c \
 	objfiles.c osabi.c observer.c \
@@ -561,7 +561,8 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
 	ui-out.c utils.c ui-file.h ui-file.c \
 	user-regs.c \
 	valarith.c valops.c valprint.c value.c varobj.c vec.c \
-	wrapper.c
+	wrapper.c \
+	xml-support.c
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
@@ -752,6 +753,7 @@ mips_linux_tdep_h = mips-linux-tdep.h
 mips_mdebug_tdep_h = mips-mdebug-tdep.h
 mipsnbsd_tdep_h = mipsnbsd-tdep.h
 mips_tdep_h = mips-tdep.h
+memory_map_h = memory-map.h $(memattr_h)
 mn10300_tdep_h = mn10300-tdep.h
 monitor_h = monitor.h
 nbsd_tdep_h = nbsd-tdep.h
@@ -801,7 +803,7 @@ stabsread_h = stabsread.h
 stack_h = stack.h
 symfile_h = symfile.h
 symtab_h = symtab.h
-target_h = target.h $(bfd_h) $(symtab_h) $(dcache_h) $(memattr_h)
+target_h = target.h $(bfd_h) $(symtab_h) $(dcache_h) $(memattr_h) $(vec_h)
 terminal_h = terminal.h
 top_h = top.h
 tracepoint_h = tracepoint.h
@@ -821,6 +823,7 @@ version_h = version.h
 wince_stub_h = wince-stub.h
 wrapper_h = wrapper.h $(gdb_h)
 xcoffsolib_h = xcoffsolib.h
+xml_support_h = xml-support.h
 
 #
 # gdb/cli/ headers
@@ -961,7 +964,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	trad-frame.o \
 	tramp-frame.o \
 	solib.o solib-null.o \
-	prologue-value.o
+	prologue-value.o memory-map.o xml-support.o
 
 TSOBS = inflow.o
 
@@ -2371,6 +2374,8 @@ mips-tdep.o: mips-tdep.c $(defs_h) $(gdb_string_h) $(gdb_assert_h) \
 	$(floatformat_h)
 mipsv4-nat.o: mipsv4-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(target_h) \
 	$(regcache_h) $(gregset_h)
+memory-map.o: memory-map.c $(defs_h) $(memory_map_h) $(xml_support_h) \
+	$(gdb_assert_h) $(exceptions_h) $(gdb_string_h)
 mn10300-linux-tdep.o: mn10300-linux-tdep.c $(defs_h) $(gdbcore_h) \
 	$(gdb_string_h) $(regcache_h) $(mn10300_tdep_h) $(gdb_assert_h) \
 	$(bfd_h) $(elf_bfd_h) $(osabi_h) $(regset_h) $(solib_svr4_h) \
@@ -2500,7 +2505,7 @@ remote.o: remote.c $(defs_h) $(gdb_string_h) $(inferior_h) $(bfd_h) \
 	$(gdb_stabs_h) $(gdbthread_h) $(remote_h) $(regcache_h) $(value_h) \
 	$(gdb_assert_h) $(event_loop_h) $(event_top_h) $(inf_loop_h) \
 	$(serial_h) $(gdbcore_h) $(remote_fileio_h) $(solib_h) $(observer_h) \
-	$(cli_decode_h) $(cli_setshow_h)
+	$(cli_decode_h) $(cli_setshow_h) $(memory_map_h)
 remote-e7000.o: remote-e7000.c $(defs_h) $(gdbcore_h) $(gdbarch_h) \
 	$(inferior_h) $(target_h) $(value_h) $(command_h) $(gdb_string_h) \
 	$(exceptions_h) $(gdbcmd_h) $(serial_h) $(remote_utils_h) \
@@ -2847,6 +2852,8 @@ xcoffread.o: xcoffread.c $(defs_h) $(bfd_h) $(gdb_string_h) $(gdb_stat_h) \
 	$(complaints_h) $(gdb_stabs_h) $(aout_stab_gnu_h)
 xcoffsolib.o: xcoffsolib.c $(defs_h) $(bfd_h) $(xcoffsolib_h) $(inferior_h) \
 	$(gdbcmd_h) $(symfile_h) $(frame_h) $(gdb_regex_h)
+xml-support.o: xml-support.c $(defs_h) $(xml_support_h) $(exceptions_h) \
+	$(gdb_string_h)
 xstormy16-tdep.o: xstormy16-tdep.c $(defs_h) $(frame_h) $(frame_base_h) \
 	$(frame_unwind_h) $(dwarf2_frame_h) $(symtab_h) $(gdbtypes_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(value_h) $(dis_asm_h) $(inferior_h) \
