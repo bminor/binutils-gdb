@@ -1,4 +1,4 @@
-2006-09-20  Michael Snyder  <michael.snyder@localhost.localdomain>
+2006-09-20  Michael Snyder  <michael.snyder@palmsource.com>
 
 	* abug.exp, cpu32bug.exp, est.exp hmsirom.exp, nind.exp:
 	Remove unused / obsolete files.
