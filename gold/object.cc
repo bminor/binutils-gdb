@@ -8,6 +8,7 @@
 
 #include "object.h"
 #include "target-select.h"
+#include "layout.h"
 
 namespace gold
 {
@@ -42,28 +43,24 @@ Sized_object<size, big_endian>::Sized_object(
     off_t offset,
     const elfcpp::Ehdr<size, big_endian>& ehdr)
   : Object(name, input_file, false, offset),
-    osabi_(ehdr.get_e_ident()[elfcpp::EI_OSABI]),
-    abiversion_(ehdr.get_e_ident()[elfcpp::EI_ABIVERSION]),
-    machine_(ehdr.get_e_machine()),
     flags_(ehdr.get_e_flags()),
     shoff_(ehdr.get_e_shoff()),
-    shnum_(0),
     shstrndx_(0),
     symtab_shnum_(0),
     symbols_(NULL)
 {
-  if (ehdr.get_e_ehsize() != elfcpp::Elf_sizes<size>::ehdr_size)
+  if (ehdr.get_e_ehsize() != This::ehdr_size)
     {
       fprintf(stderr, _("%s: %s: bad e_ehsize field (%d != %d)\n"),
 	      program_name, this->name().c_str(), ehdr.get_e_ehsize(),
-	      elfcpp::Elf_sizes<size>::ehdr_size);
+	      This::ehdr_size);
       gold_exit(false);
     }
-  if (ehdr.get_e_shentsize() != elfcpp::Elf_sizes<size>::shdr_size)
+  if (ehdr.get_e_shentsize() != This::shdr_size)
     {
       fprintf(stderr, _("%s: %s: bad e_shentsize field (%d != %d)\n"),
 	      program_name, this->name().c_str(), ehdr.get_e_shentsize(),
-	      elfcpp::Elf_sizes<size>::shdr_size);
+	      This::shdr_size);
       gold_exit(false);
     }
 }
@@ -81,12 +78,14 @@ void
 Sized_object<size, big_endian>::setup(
     const elfcpp::Ehdr<size, big_endian>& ehdr)
 {
-  Target* target = select_target(this->machine_, size, big_endian,
-				 this->osabi_, this->abiversion_);
+  int machine = ehdr.get_e_machine();
+  Target* target = select_target(machine, size, big_endian,
+				 ehdr.get_e_ident()[elfcpp::EI_OSABI],
+				 ehdr.get_e_ident()[elfcpp::EI_ABIVERSION]);
   if (target == NULL)
     {
       fprintf(stderr, _("%s: %s: unsupported ELF machine number %d\n"),
-	      program_name, this->name().c_str(), this->machine_);
+	      program_name, this->name().c_str(), machine);
       gold_exit(false);
     }
   this->set_target(target);
@@ -95,25 +94,24 @@ Sized_object<size, big_endian>::setup(
   if ((shnum == 0 || shstrndx == elfcpp::SHN_XINDEX)
       && this->shoff_ != 0)
     {
-      const unsigned char* p = this->get_view
-	(this->shoff_, elfcpp::Elf_sizes<size>::shdr_size);
+      const unsigned char* p = this->get_view (this->shoff_, This::shdr_size);
       elfcpp::Shdr<size, big_endian> shdr(p);
       if (shnum == 0)
 	shnum = shdr.get_sh_size();
       if (shstrndx == elfcpp::SHN_XINDEX)
 	shstrndx = shdr.get_sh_link();
     }
-  this->shnum_ = shnum;
+  this->set_shnum(shnum);
   this->shstrndx_ = shstrndx;
 
   if (shnum == 0)
     return;
 
   // Find the SHT_SYMTAB section.
-  const unsigned char* p = this->get_view
-    (this->shoff_, shnum * elfcpp::Elf_sizes<size>::shdr_size);
+  const unsigned char* p = this->get_view (this->shoff_,
+					   shnum * This::shdr_size);
   // Skip the first section, which is always empty.
-  p += elfcpp::Elf_sizes<size>::shdr_size;
+  p += This::shdr_size;
   for (unsigned int i = 1; i < shnum; ++i)
     {
       elfcpp::Shdr<size, big_endian> shdr(p);
@@ -122,7 +120,7 @@ Sized_object<size, big_endian>::setup(
 	  this->symtab_shnum_ = i;
 	  break;
 	}
-      p += elfcpp::Elf_sizes<size>::shdr_size;
+      p += This::shdr_size;
     }
 }
 
@@ -143,7 +141,7 @@ Sized_object<size, big_endian>::do_read_symbols()
       return ret;
     }
 
-  int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
+  const int shdr_size = This::shdr_size;
 
   // Read the symbol table section header.
   off_t symtabshdroff = this->shoff_ + (this->symtab_shnum_ * shdr_size);
@@ -152,7 +150,7 @@ Sized_object<size, big_endian>::do_read_symbols()
   assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
 
   // We only need the external symbols.
-  int sym_size = elfcpp::Elf_sizes<size>::sym_size;
+  const int sym_size = This::sym_size;
   off_t locsize = symtabshdr.get_sh_info() * sym_size;
   off_t extoff = symtabshdr.get_sh_offset() + locsize;
   off_t extsize = symtabshdr.get_sh_size() - locsize;
@@ -162,7 +160,7 @@ Sized_object<size, big_endian>::do_read_symbols()
 
   // Read the section header for the symbol names.
   unsigned int strtab_shnum = symtabshdr.get_sh_link();
-  if (strtab_shnum == 0 || strtab_shnum >= this->shnum_)
+  if (strtab_shnum == 0 || strtab_shnum >= this->shnum())
     {
       fprintf(stderr, _("%s: %s: invalid symbol table name index: %u\n"),
 	      program_name, this->name().c_str(), strtab_shnum);
@@ -206,7 +204,7 @@ Sized_object<size, big_endian>::do_add_symbols(Symbol_table* symtab,
       return;
     }
 
-  unsigned int sym_size = elfcpp::Elf_sizes<size>::sym_size;
+  const int sym_size = This::sym_size;
   size_t symcount = sd.symbols_size / sym_size;
   if (symcount * sym_size != sd.symbols_size)
     {
@@ -224,6 +222,226 @@ Sized_object<size, big_endian>::do_add_symbols(Symbol_table* symtab,
     reinterpret_cast<const char*>(sd.symbol_names->data());
   symtab->add_from_object(this, syms, symcount, sym_names, 
 			  sd.symbol_names_size,  this->symbols_);
+
+  delete sd.symbols;
+  delete sd.symbol_names;
+}
+
+// Return whether to include a section group in the link.  LAYOUT is
+// used to keep track of which section groups we have already seen.
+// INDEX is the index of the section group and SHDR is the section
+// header.  If we do not want to include this group, we set bits in
+// OMIT for each section which should be discarded.
+
+template<int size, bool big_endian>
+bool
+Sized_object<size, big_endian>::include_section_group(
+    Layout* layout,
+    unsigned int index,
+    const elfcpp::Shdr<size, big_endian>& shdr,
+    std::vector<bool>* omit)
+{
+  // Read the section contents.
+  const unsigned char* pcon = this->get_view(shdr.get_sh_offset(),
+					     shdr.get_sh_size());
+  const elfcpp::Elf_Word* pword =
+    reinterpret_cast<const elfcpp::Elf_Word*>(pcon);
+
+  // The first word contains flags.  We only care about COMDAT section
+  // groups.  Other section groups are always included in the link
+  // just like ordinary sections.
+  elfcpp::Elf_Word flags = elfcpp::read_elf_word<big_endian>(pword);
+  if ((flags & elfcpp::GRP_COMDAT) == 0)
+    return true;
+
+  // Look up the group signature, which is the name of a symbol.  This
+  // is a lot of effort to go to to read a string.  Why didn't they
+  // just use the name of the SHT_GROUP section as the group
+  // signature?
+
+  // Get the appropriate symbol table header (this will normally be
+  // the single SHT_SYMTAB section, but in principle it need not be).
+  if (shdr.get_sh_link() >= this->shnum())
+    {
+      fprintf(stderr, _("%s: %s: section group %u link %u out of range\n"),
+	      program_name, this->name().c_str(), index, shdr.get_sh_link());
+      gold_exit(false);
+    }
+  off_t off = this->shoff_ + shdr.get_sh_link() * This::shdr_size;
+  const unsigned char* psymshdr = this->get_view(off, This::shdr_size);
+  elfcpp::Shdr<size, big_endian> symshdr(psymshdr);
+
+  // Read the symbol table entry.
+  if (shdr.get_sh_info() >= symshdr.get_sh_size() / This::sym_size)
+    {
+      fprintf(stderr, _("%s: %s: section group %u info %u out of range\n"),
+	      program_name, this->name().c_str(), index, shdr.get_sh_info());
+      gold_exit(false);
+    }
+  off_t symoff = symshdr.get_sh_offset() + shdr.get_sh_info() * This::sym_size;
+  const unsigned char* psym = this->get_view(symoff, This::sym_size);
+  elfcpp::Sym<size, big_endian> sym(psym);
+
+  // Read the section header for the symbol table names.
+  if (symshdr.get_sh_link() >= this->shnum())
+    {
+      fprintf(stderr, _("%s; %s: symtab section %u link %u out of range\n"),
+	      program_name, this->name().c_str(), shdr.get_sh_link(),
+	      symshdr.get_sh_link());
+      gold_exit(false);
+    }
+  off_t symnameoff = this->shoff_ + symshdr.get_sh_link() * This::shdr_size;
+  const unsigned char* psymnamehdr = this->get_view(symnameoff,
+						    This::shdr_size);
+  elfcpp::Shdr<size, big_endian> symnamehdr(psymnamehdr);
+
+  // Read the symbol table names.
+  const unsigned char *psymnamesu = this->get_view(symnamehdr.get_sh_offset(),
+						   symnamehdr.get_sh_size());
+  const char* psymnames = reinterpret_cast<const char*>(psymnamesu);
+
+  // Get the section group signature.
+  if (sym.get_st_name() >= symnamehdr.get_sh_size())
+    {
+      fprintf(stderr, _("%s: %s: symbol %u name offset %u out of range\n"),
+	      program_name, this->name().c_str(), shdr.get_sh_info(),
+	      sym.get_st_name());
+      gold_exit(false);
+    }
+
+  const char* signature = psymnames + sym.get_st_name();
+
+  // Record this section group, and see whether we've already seen one
+  // with the same signature.
+  if (layout->add_comdat(signature, true))
+    return true;
+
+  // This is a duplicate.  We want to discard the sections in this
+  // group.
+  size_t count = shdr.get_sh_size() / sizeof(elfcpp::Elf_Word);
+  for (size_t i = 1; i < count; ++i)
+    {
+      elfcpp::Elf_Word secnum = elfcpp::read_elf_word<big_endian>(pword + i);
+      if (secnum >= this->shnum())
+	{
+	  fprintf(stderr,
+		  _("%s: %s: section %u in section group %u out of range"),
+		  program_name, this->name().c_str(), secnum,
+		  index);
+	  gold_exit(false);
+	}
+      (*omit)[secnum] = true;
+    }
+
+  return false;
+}
+
+// Whether to include a linkonce section in the link.  NAME is the
+// name of the section and SHDR is the section header.
+
+// Linkonce sections are a GNU extension implemented in the original
+// GNU linker before section groups were defined.  The semantics are
+// that we only include one linkonce section with a given name.  The
+// name of a linkonce section is normally .gnu.linkonce.T.SYMNAME,
+// where T is the type of section and SYMNAME is the name of a symbol.
+// In an attempt to make linkonce sections interact well with section
+// groups, we try to identify SYMNAME and use it like a section group
+// signature.  We want to block section groups with that signature,
+// but not other linkonce sections with that signature.  We also use
+// the full name of the linkonce section as a normal section group
+// signature.
+
+template<int size, bool big_endian>
+bool
+Sized_object<size, big_endian>::include_linkonce_section(
+    Layout* layout,
+    const char* name,
+    const elfcpp::Shdr<size, big_endian>&)
+{
+  const char* symname = strrchr(name, '.') + 1;
+  bool omit1 = layout->add_comdat(symname, false);
+  bool omit2 = layout->add_comdat(name, true);
+  return omit1 || omit2;
+}
+
+// Lay out the input sections.  We walk through the sections and check
+// whether they should be included in the link.  If they should, we
+// pass them to the Layout object, which will return an output section
+// and an offset.
+
+template<int size, bool big_endian>
+void
+Sized_object<size, big_endian>::do_layout(Layout* layout)
+{
+  // This is always called from the main thread.  Lock the file to
+  // keep the error checks happy.
+  Task_locker_obj<File_read> frl(this->input_file()->file());
+
+  // Get the section headers.
+  unsigned int shnum = this->shnum();
+  const unsigned char* pshdrs = this->get_view(this->shoff_,
+					       shnum * This::shdr_size);
+
+  // Get the section names.
+  const unsigned char* pshdrnames = pshdrs + this->shstrndx_ * This::shdr_size;
+  elfcpp::Shdr<size, big_endian> shdrnames(pshdrnames);
+  typename elfcpp::Elf_types<size>::Elf_WXword names_size =
+    shdrnames.get_sh_size();
+  const unsigned char* pnamesu = this->get_view(shdrnames.get_sh_offset(),
+						shdrnames.get_sh_size());
+  const char* pnames = reinterpret_cast<const char*>(pnamesu);
+
+  std::vector<Map_to_output>& map_sections(this->map_to_output());
+  map_sections.reserve(shnum);
+
+  // Keep track of which sections to omit.
+  std::vector<bool> omit(shnum, false);
+
+  for (unsigned int i = 0; i < shnum; ++i)
+    {
+      elfcpp::Shdr<size, big_endian> shdr(pshdrs);
+
+      if (shdr.get_sh_name() >= names_size)
+	{
+	  fprintf(stderr,
+		  _("%s: %s: bad section name offset for section %u: %lu\n"),
+		  program_name, this->name().c_str(), i,
+		  static_cast<unsigned long>(shdr.get_sh_name()));
+	  gold_exit(false);
+	}
+
+      const char* name = pnames + shdr.get_sh_name();
+
+      bool discard = omit[i];
+      if (!discard)
+	{
+	  if (shdr.get_sh_type() == elfcpp::SHT_GROUP)
+	    {
+	      if (!this->include_section_group(layout, i, shdr, &omit))
+		discard = true;
+	    }
+	  else if (Layout::is_linkonce(name))
+	    {
+	      if (!this->include_linkonce_section(layout, name, shdr))
+		discard = true;
+	    }
+	}
+
+      if (discard)
+	{
+	  // Do not include this section in the link.
+	  map_sections[i].output_section = NULL;
+	  continue;
+	}
+
+      off_t offset;
+      Output_section* os = layout->layout(this, name, shdr, &offset);
+
+      map_sections[i].output_section = os;
+      map_sections[i].offset = offset;
+
+      pshdrs += This::shdr_size;
+    }
 }
 
 } // End namespace gold.

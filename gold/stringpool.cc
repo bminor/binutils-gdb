@@ -101,7 +101,7 @@ Stringpool::add(const char* s)
 {
   // FIXME: This will look up the entry twice in the hash table.  The
   // problem is that we can't insert S before we canonicalize it.  I
-  // don't think there is a way to handle this correct with
+  // don't think there is a way to handle this correctly with
   // unordered_set, so this should be replaced with custom code to do
   // what we need, which is to return the empty slot.
 

@@ -173,22 +173,6 @@ class File_view
   const unsigned char* data_;
 };
 
-// An object which locks a file using RAII.
-
-class File_read_lock
-{
- public:
-  File_read_lock(File_read& file)
-    : file_(file)
-  { this->file_.lock(); }
-
-  ~File_read_lock()
-  { this->file_.unlock(); }
-
- private:
-  File_read& file_;
-};
-
 // All the information we hold for a single input file.  This can be
 // an object file, a shared library, or an archive.
 

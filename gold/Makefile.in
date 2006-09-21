@@ -66,10 +66,10 @@ CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = po/Makefile.in
 PROGRAMS = $(noinst_PROGRAMS)
 am__objects_1 = dirsearch.$(OBJEXT) fileread.$(OBJEXT) gold.$(OBJEXT) \
-	gold-threads.$(OBJEXT) object.$(OBJEXT) options.$(OBJEXT) \
-	readsyms.$(OBJEXT) resolve.$(OBJEXT) symtab.$(OBJEXT) \
-	stringpool.$(OBJEXT) target-select.$(OBJEXT) \
-	workqueue.$(OBJEXT)
+	gold-threads.$(OBJEXT) layout.$(OBJEXT) object.$(OBJEXT) \
+	options.$(OBJEXT) output.$(OBJEXT) readsyms.$(OBJEXT) \
+	resolve.$(OBJEXT) symtab.$(OBJEXT) stringpool.$(OBJEXT) \
+	target-select.$(OBJEXT) workqueue.$(OBJEXT)
 am__objects_2 =
 am__objects_3 = i386.$(OBJEXT)
 am_ld_new_OBJECTS = $(am__objects_1) $(am__objects_2) $(am__objects_3)
@@ -233,8 +233,10 @@ CCFILES = \
 	fileread.cc \
 	gold.cc \
 	gold-threads.cc \
+	layout.cc \
 	object.cc \
 	options.cc \
+	output.cc \
 	readsyms.cc \
 	resolve.cc \
 	symtab.cc \
@@ -247,13 +249,14 @@ HFILES = \
 	fileread.h \
 	gold.h \
 	gold-threads.h \
+	layout.h \
 	object.h \
 	options.h \
+	output.h \
 	readsyms.h \
 	stringpool.h \
 	symtab.h \
 	target.h \
-	targetsize.h \
 	target-select.h \
 	workqueue.h
 
@@ -340,8 +343,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gold-threads.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gold.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/i386.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/layout.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/object.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/options.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/output.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/readsyms.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resolve.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stringpool.Po@am__quote@

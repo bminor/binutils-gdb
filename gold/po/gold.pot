@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-09-07 14:17-0700\n"
+"POT-Creation-Date: 2006-09-21 13:30-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -51,7 +51,7 @@ msgstr ""
 msgid "%s: cannot open %s: %s"
 msgstr ""
 
-#: gold.cc:72
+#: gold.cc:74
 msgid "no input files"
 msgstr ""
 
@@ -99,73 +99,103 @@ msgstr ""
 msgid "pthread_cond_signal failed"
 msgstr ""
 
-#: object.cc:57
+#: object.cc:54
 #, c-format
 msgid "%s: %s: bad e_ehsize field (%d != %d)\n"
 msgstr ""
 
-#: object.cc:64
+#: object.cc:61
 #, c-format
 msgid "%s: %s: bad e_shentsize field (%d != %d)\n"
 msgstr ""
 
-#: object.cc:88
+#: object.cc:87
 #, c-format
 msgid "%s: %s: unsupported ELF machine number %d\n"
 msgstr ""
 
-#: object.cc:167
+#: object.cc:165
 #, c-format
 msgid "%s: %s: invalid symbol table name index: %u\n"
 msgstr ""
 
-#: object.cc:177
+#: object.cc:175
 #, c-format
 msgid "%s: %s: symbol table name section has wrong type: %u\n"
 msgstr ""
 
-#: object.cc:214
+#: object.cc:212
 #, c-format
 msgid "%s: %s: size of symbols is not multiple of symbol size\n"
 msgstr ""
 
-#. elfcpp::ET_DYN
-#: object.cc:262
+#: object.cc:266
 #, c-format
-msgid "%s: %s: dynamic objects are not yet supported\n"
+msgid "%s: %s: section group %u link %u out of range\n"
 msgstr ""
 
-#: object.cc:286 object.cc:339 object.cc:360
+#: object.cc:277
 #, c-format
-msgid "%s: %s: ELF file too short\n"
+msgid "%s: %s: section group %u info %u out of range\n"
 msgstr ""
 
-#: object.cc:295
+#: object.cc:288
 #, c-format
-msgid "%s: %s: invalid ELF version 0\n"
-msgstr ""
-
-#: object.cc:298
-#, c-format
-msgid "%s: %s: unsupported ELF version %d\n"
+msgid "%s; %s: symtab section %u link %u out of range\n"
 msgstr ""
 
 #: object.cc:306
 #, c-format
+msgid "%s: %s: symbol %u name offset %u out of range\n"
+msgstr ""
+
+#: object.cc:328
+#, c-format
+msgid "%s: %s: section %u in section group %u out of range"
+msgstr ""
+
+#: object.cc:407
+#, c-format
+msgid "%s: %s: bad section name offset for section %u: %lu\n"
+msgstr ""
+
+#. elfcpp::ET_DYN
+#: object.cc:480
+#, c-format
+msgid "%s: %s: dynamic objects are not yet supported\n"
+msgstr ""
+
+#: object.cc:504 object.cc:557 object.cc:578
+#, c-format
+msgid "%s: %s: ELF file too short\n"
+msgstr ""
+
+#: object.cc:513
+#, c-format
+msgid "%s: %s: invalid ELF version 0\n"
+msgstr ""
+
+#: object.cc:516
+#, c-format
+msgid "%s: %s: unsupported ELF version %d\n"
+msgstr ""
+
+#: object.cc:524
+#, c-format
 msgid "%s: %s: invalid ELF class 0\n"
 msgstr ""
 
-#: object.cc:313
+#: object.cc:531
 #, c-format
 msgid "%s: %s: unsupported ELF class %d\n"
 msgstr ""
 
-#: object.cc:321
+#: object.cc:539
 #, c-format
 msgid "%s: %s: invalid ELF data encoding\n"
 msgstr ""
 
-#: object.cc:328
+#: object.cc:546
 #, c-format
 msgid "%s: %s: unsupported ELF data encoding %d\n"
 msgstr ""
@@ -218,6 +248,11 @@ msgstr ""
 #: options.cc:411
 #, c-format
 msgid "%s: -%c: %s\n"
+msgstr ""
+
+#: output.cc:58
+#, c-format
+msgid "%s: %s: invalid alignment %lu for section \"%s\"\n"
 msgstr ""
 
 #: resolve.cc:135

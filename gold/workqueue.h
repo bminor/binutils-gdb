@@ -146,6 +146,27 @@ class Task_block_token
   Workqueue* workqueue_;
 };
 
+// An object which implements an RAII lock for any object which
+// supports lock and unlock methods.
+
+template<typename Obj>
+class Task_lock_obj
+{
+ public:
+  Task_lock_obj(Obj& obj)
+    : obj_(obj)
+  { this->obj_.lock(); }
+
+  ~Task_lock_obj()
+  { this->obj_.unlock(); }
+
+ private:
+  Task_lock_obj(const Task_lock_obj&);
+  Task_lock_obj& operator=(const Task_lock_obj&);
+
+  Obj& obj_;
+};
+
 // An abstract class used to lock Task_tokens using RAII.  A typical
 // implementation would simply have a set of members of type
 // Task_read_token, Task_write_token, and Task_block_token.
@@ -209,21 +230,22 @@ class Task_locker_block : public Task_locker
   Task_block_token block_token_;
 };
 
-// A version of Task_locker which may be used to hold a lock on a
-// File_read.
+// A version of Task_locker which may be used to hold a lock on any
+// object which supports lock() and unlock() methods.
 
-class Task_locker_file : public Task_locker
+template<typename Obj>
+class Task_locker_obj : public Task_locker
 {
  public:
-  Task_locker_file(File_read& file)
-    : file_lock_(file)
+  Task_locker_obj(Obj& obj)
+    : obj_lock_(obj)
   { }
 
  private:
-  Task_locker_file(const Task_locker_file&);
-  Task_locker_file& operator=(const Task_locker_file&);
+  Task_locker_obj(const Task_locker_obj&);
+  Task_locker_obj& operator=(const Task_locker_obj&);
 
-  File_read_lock file_lock_;
+  Task_lock_obj<Obj> obj_lock_;
 };
 
 // The superclass for tasks to be placed on the workqueue.  Each

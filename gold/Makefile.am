@@ -22,8 +22,10 @@ CCFILES = \
 	fileread.cc \
 	gold.cc \
 	gold-threads.cc \
+	layout.cc \
 	object.cc \
 	options.cc \
+	output.cc \
 	readsyms.cc \
 	resolve.cc \
 	symtab.cc \
@@ -36,13 +38,14 @@ HFILES = \
 	fileread.h \
 	gold.h \
 	gold-threads.h \
+	layout.h \
 	object.h \
 	options.h \
+	output.h \
 	readsyms.h \
 	stringpool.h \
 	symtab.h \
 	target.h \
-	targetsize.h \
 	target-select.h \
 	workqueue.h
 

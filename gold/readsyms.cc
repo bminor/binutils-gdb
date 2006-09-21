@@ -8,6 +8,7 @@
 #include "options.h"
 #include "dirsearch.h"
 #include "readsyms.h"
+#include "object.h"
 
 namespace gold
 {
@@ -49,8 +50,6 @@ Read_symbols::locks(Workqueue*)
 void
 Read_symbols::run(Workqueue* workqueue)
 {
-  // We don't keep track of Input_file objects, so this is a memory
-  // leak.
   Input_file* input_file = new Input_file(this->input_);
   input_file->open(this->options_, this->dirpath_);
 
@@ -71,7 +70,9 @@ Read_symbols::run(Workqueue* workqueue)
 	  // This is an ELF object.
 	  Object* obj = make_elf_object(this->input_.name(), input_file, 0,
 					p, bytes);
-					
+
+	  this->input_objects_->push_back(obj);
+
 	  Read_symbols_data sd = obj->read_symbols();
 	  workqueue->queue(new Add_symbols(this->symtab_, obj, sd,
 					   this->this_blocker_,
@@ -99,20 +100,37 @@ Add_symbols::~Add_symbols()
   // input file.
 }
 
-// We are blocked by this_blocker_.  We block next_blocker_.
+// We are blocked by this_blocker_.  We block next_blocker_.  We also
+// lock the file.
 
 Task::Is_runnable_type
 Add_symbols::is_runnable(Workqueue*)
 {
   if (this->this_blocker_ != NULL && this->this_blocker_->is_blocked())
     return IS_BLOCKED;
+  if (this->object_->is_locked())
+    return IS_LOCKED;
   return IS_RUNNABLE;
 }
+
+class Add_symbols::Add_symbols_locker : public Task_locker
+{
+ public:
+  Add_symbols_locker(Task_token& token, Workqueue* workqueue,
+		     Object* object)
+    : blocker_(token, workqueue), objlock_(*object)
+  { }
+
+ private:
+  Task_locker_block blocker_;
+  Task_locker_obj<Object> objlock_;
+};
 
 Task_locker*
 Add_symbols::locks(Workqueue* workqueue)
 {
-  return new Task_locker_block(*this->next_blocker_, workqueue);
+  return new Add_symbols_locker(*this->next_blocker_, workqueue,
+				this->object_);
 }
 
 void

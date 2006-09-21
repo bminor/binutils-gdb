@@ -4,6 +4,7 @@
 #define GOLD_OBJECT_H
 
 #include <cassert>
+#include <vector>
 
 #include "elfcpp.h"
 #include "fileread.h"
@@ -12,6 +13,9 @@
 
 namespace gold
 {
+
+class Output_section;
+class Layout;
 
 // Data to pass from read_symbols() to add_symbols().
 
@@ -42,7 +46,8 @@ class Object
   Object(const std::string& name, Input_file* input_file, bool is_dynamic,
 	 off_t offset = 0)
     : name_(name), input_file_(input_file), offset_(offset),
-      is_dynamic_(is_dynamic), target_(NULL)
+      shnum_(0), is_dynamic_(is_dynamic), target_(NULL),
+      map_to_output_()
   { }
 
   virtual ~Object()
@@ -58,6 +63,33 @@ class Object
   is_dynamic() const
   { return this->is_dynamic_; }
 
+  // Return the target structure associated with this object.
+  Target*
+  target() const
+  { return this->target_; }
+
+  // Lock the underlying file.
+  void
+  lock()
+  { this->input_file_->file().lock(); }
+
+  // Unlock the underlying file.
+  void
+  unlock()
+  { this->input_file_->file().unlock(); }
+
+  // Return whether the underlying file is locked.
+  bool
+  is_locked() const
+  { return this->input_file_->file().is_locked(); }
+
+  // Return the sized target structure associated with this object.
+  // This is like the target method but it returns a pointer of
+  // appropriate checked type.
+  template<int size, bool big_endian>
+  Sized_target<size, big_endian>*
+  sized_target();
+
   // Read the symbol and relocation information.
   Read_symbols_data
   read_symbols()
@@ -68,19 +100,25 @@ class Object
   add_symbols(Symbol_table* symtab, Read_symbols_data rd)
   { this->do_add_symbols(symtab, rd); }
 
-  // Return the target structure associated with this object.
-  Target*
-  target()
-  { return this->target_; }
-
-  // Return the sized target structure associated with this object.
-  // This is like the target method but it returns a pointer of
-  // appropriate checked type.
-  template<int size, bool big_endian>
-  Sized_target<size, big_endian>*
-  sized_target();
+  // Pass sections which should be included in the link to the Layout
+  // object, and record where the sections go in the output file.
+  void
+  layout(Layout* lay)
+  { this->do_layout(lay); }
 
  protected:
+  // What we need to know to map an input section to an output
+  // section.  We keep an array of these, one for each input section,
+  // indexed by the input section number.
+  struct Map_to_output
+  {
+    // The output section.  This is NULL if the input section is to be
+    // discarded.
+    Output_section* output_section;
+    // The offset within the output section.
+    off_t offset;
+  };
+
   // Read the symbols--implemented by child class.
   virtual Read_symbols_data
   do_read_symbols() = 0;
@@ -89,6 +127,10 @@ class Object
   // child class.
   virtual void
   do_add_symbols(Symbol_table*, Read_symbols_data) = 0;
+
+  // Lay out sections--implemented by child class.
+  virtual void
+  do_layout(Layout*) = 0;
 
   // Get the file.
   Input_file*
@@ -104,6 +146,16 @@ class Object
   const unsigned char*
   get_view(off_t start, off_t size);
 
+  // Get the number of sections.
+  unsigned int
+  shnum(void) const
+  { return this->shnum_; }
+
+  // Set the number of sections.
+  void
+  set_shnum(int shnum)
+  { this->shnum_ = shnum; }
+
   // Set the target.
   void
   set_target(Target* target)
@@ -117,6 +169,11 @@ class Object
   File_view*
   get_lasting_view(off_t start, off_t size);
 
+  // Return the vector mapping input sections to output sections.
+  std::vector<Map_to_output>&
+  map_to_output()
+  { return this->map_to_output_; }
+
  private:
   // This class may not be copied.
   Object(const Object&);
@@ -129,10 +186,14 @@ class Object
   // Offset within the file--0 for an object file, non-0 for an
   // archive.
   off_t offset_;
+  // Number of input sections.
+  unsigned int shnum_;
   // Whether this is a dynamic object.
   bool is_dynamic_;
   // Target functions--may be NULL if the target is not known.
   Target* target_;
+  // Mapping from input sections to output section.
+  std::vector<Map_to_output> map_to_output_;
 };
 
 // Implement sized_target inline for efficiency.  This approach breaks
@@ -158,15 +219,23 @@ class Sized_object : public Object
 
   ~Sized_object();
 
+  // Set up the object file based on the ELF header.
   void
   setup(const typename elfcpp::Ehdr<size, big_endian>&);
 
+  // Read the symbols.
   Read_symbols_data
   do_read_symbols();
 
+  // Add the symbols to the symbol table.
   void
   do_add_symbols(Symbol_table*, Read_symbols_data);
 
+  // Lay out the input sections.
+  void
+  do_layout(Layout*);
+
+  // Return the appropriate Sized_target structure.
   Sized_target<size, big_endian>*
   sized_target()
   { return this->Object::sized_target<size, big_endian>(); }
@@ -176,18 +245,27 @@ class Sized_object : public Object
   Sized_object(const Sized_object&);
   Sized_object& operator=(const Sized_object&);
 
-  // ELF file header EI_OSABI field.
-  unsigned char osabi_;
-  // ELF file header EI_ABIVERSION field.
-  unsigned char abiversion_;
-  // ELF file header e_machine field.
-  elfcpp::Elf_Half machine_;
+  // For convenience.
+  typedef Sized_object<size, big_endian> This;
+  static const int ehdr_size = elfcpp::Elf_sizes<size>::ehdr_size;
+  static const int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
+  static const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
+
+  // Whether to include a section group in the link.
+  bool
+  include_section_group(Layout*, unsigned int,
+			const elfcpp::Shdr<size, big_endian>&,
+			std::vector<bool>*);
+
+  // Whether to include a linkonce section in the link.
+  bool
+  include_linkonce_section(Layout*, const char*,
+			   const elfcpp::Shdr<size, big_endian>&);
+
   // ELF file header e_flags field.
   unsigned int flags_;
   // File offset of section header table.
   off_t shoff_;
-  // Number of input sections.
-  unsigned int shnum_;
   // Offset of SHT_STRTAB section holding section names.
   unsigned int shstrndx_;
   // Index of SHT_SYMTAB section.
@@ -195,6 +273,10 @@ class Sized_object : public Object
   // The entries in the symbol table for the external symbols.
   Symbol** symbols_;
 };
+
+// The type of the list of input objects.
+
+typedef std::list<Object*> Object_list;
 
 // Return an Object appropriate for the input file.  P is BYTES long,
 // and holds the ELF header.

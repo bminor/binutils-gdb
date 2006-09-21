@@ -7,7 +7,6 @@
 #include <utility>
 
 #include "elfcpp.h"
-#include "targetsize.h"
 #include "stringpool.h"
 
 #ifndef GOLD_SYMTAB_H

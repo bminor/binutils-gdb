@@ -14,8 +14,6 @@
 
 #include <list>
 
-#include "gold.h"
-
 namespace gold
 {
 

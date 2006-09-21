@@ -3,7 +3,6 @@
 #ifndef GOLD_READSYMS_H
 #define GOLD_READSYMS_H
 
-#include "targetsize.h"
 #include "workqueue.h"
 #include "object.h"
 
@@ -26,11 +25,13 @@ class Read_symbols : public Task
   // associated Add_symbols task from running before the previous one
   // has completed; it will be NULL for the first task.  NEXT_BLOCKER
   // is used to block the next input file from adding symbols.
-  Read_symbols(const General_options& options, Symbol_table* symtab,
-	       const Dirsearch& dirpath, const Input_argument& input,
+  Read_symbols(const General_options& options, Object_list* input_objects,
+	       Symbol_table* symtab, const Dirsearch& dirpath,
+	       const Input_argument& input,
 	       Task_token* this_blocker, Task_token* next_blocker)
-    : options_(options), symtab_(symtab), dirpath_(dirpath), input_(input),
-      this_blocker_(this_blocker), next_blocker_(next_blocker)
+    : options_(options), input_objects_(input_objects), symtab_(symtab),
+      dirpath_(dirpath), input_(input), this_blocker_(this_blocker),
+      next_blocker_(next_blocker)
   { }
 
   ~Read_symbols();
@@ -48,6 +49,7 @@ class Read_symbols : public Task
 
  private:
   const General_options& options_;
+  Object_list* input_objects_;
   Symbol_table* symtab_;
   const Dirsearch& dirpath_;
   const Input_argument& input_;
@@ -85,6 +87,8 @@ class Add_symbols : public Task
   run(Workqueue*);
 
 private:
+  class Add_symbols_locker;
+
   Symbol_table* symtab_;
   Object* object_;
   Read_symbols_data sd_;

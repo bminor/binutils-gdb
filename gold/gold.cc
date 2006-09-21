@@ -12,6 +12,7 @@
 #include "dirsearch.h"
 #include "readsyms.h"
 #include "symtab.h"
+#include "layout.h"
 
 namespace gold
 {
@@ -66,7 +67,8 @@ void
 queue_initial_tasks(const General_options& options,
 		    const Dirsearch& search_path,
 		    const Command_line::Input_argument_list& inputs,
-		    Workqueue* workqueue, Symbol_table* symtab)
+		    Workqueue* workqueue, Object_list* input_objects,
+		    Symbol_table* symtab)
 {
   if (inputs.empty())
     gold_fatal(_("no input files"), false);
@@ -82,12 +84,13 @@ queue_initial_tasks(const General_options& options,
     {
       Task_token* next_blocker = new Task_token();
       next_blocker->add_blocker();
-      workqueue->queue(new Read_symbols(options, symtab, search_path,
-					*p, this_blocker, next_blocker));
+      workqueue->queue(new Read_symbols(options, input_objects, symtab,
+					search_path, *p, this_blocker,
+					next_blocker));
       this_blocker = next_blocker;
     }
 
-  // workqueue->queue(new Layout(options, inputs, this_blocker));
+  workqueue->queue(new Layout_task(options, input_objects, this_blocker));
 }
 
 } // end anonymous namespace.
@@ -113,6 +116,9 @@ main(int argc, char** argv)
   // The work queue.
   gold::Workqueue workqueue(command_line.options());
 
+  // The list of input objects.
+  Object_list input_objects;
+
   // The symbol table.
   Symbol_table symtab;
 
@@ -122,7 +128,8 @@ main(int argc, char** argv)
 
   // Queue up the first set of tasks.
   queue_initial_tasks(command_line.options(), search_path,
-		      command_line.inputs(), &workqueue, &symtab);
+		      command_line.inputs(), &workqueue, &input_objects,
+		      &symtab);
 
   // Run the main task processing loop.
   workqueue.process();
