@@ -1,5 +1,9 @@
 2006-09-22  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-ppc.c (ppc_symbol_chars): Remove '+' and '-'.
+
+2006-09-22  Alan Modra  <amodra@bigpond.net.au>
+
 	* as.h (as_perror): Delete declaration.
 	* gdbinit.in (as_perror): Delete breakpoint.
 	* messages.c (as_perror): Delete function.
