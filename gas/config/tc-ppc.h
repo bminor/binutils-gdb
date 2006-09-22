@@ -1,6 +1,6 @@
 /* tc-ppc.h -- Header file for tc-ppc.c.
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005 Free Software Foundation, Inc.
+   2004, 2005, 2006 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -78,31 +78,12 @@ extern char *ppc_target_format PARAMS ((void));
 
 #define MAX_MEM_FOR_RS_ALIGN_CODE 4
 #define HANDLE_ALIGN(FRAGP)						\
-  if ((FRAGP)->fr_type == rs_align_code) 				\
-    {									\
-      valueT count = ((FRAGP)->fr_next->fr_address			\
-		      - ((FRAGP)->fr_address + (FRAGP)->fr_fix));	\
-      if (count != 0 && (count & 3) == 0)				\
-	{								\
-	  char *dest = (FRAGP)->fr_literal + (FRAGP)->fr_fix;		\
-									\
-	  (FRAGP)->fr_var = 4;						\
-	  if (target_big_endian)					\
-	    {								\
-	      *dest++ = 0x60;						\
-	      *dest++ = 0;						\
-	      *dest++ = 0;						\
-	      *dest++ = 0;						\
-	    }								\
-	  else								\
-	    {								\
-	      *dest++ = 0;						\
-	      *dest++ = 0;						\
-	      *dest++ = 0;						\
-	      *dest++ = 0x60;						\
-	    }								\
-	}								\
-    }
+  if ((FRAGP)->fr_type == rs_align_code)				\
+    ppc_handle_align (FRAGP);
+
+extern void ppc_handle_align (struct frag *);
+
+#define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) 0
 
 #define md_frag_check(FRAGP) \
   if ((FRAGP)->has_code							\

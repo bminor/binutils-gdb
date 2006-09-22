@@ -1,3 +1,10 @@
+2006-09-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (md_section_align): Don't round up address for ELF.
+	(ppc_handle_align): New function.
+	* config/tc-ppc.h (HANDLE_ALIGN): Use ppc_handle_align.
+	(SUB_SEGMENT_ALIGN): Define as zero.
+
 2006-09-20  Bob Wilson  <bob.wilson@acm.org>
 
 	* doc/as.texinfo: Fix cross reference usage, typos and grammar.
