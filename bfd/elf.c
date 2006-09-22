@@ -400,7 +400,15 @@ bfd_elf_get_elf_syms (bfd *ibfd,
   for (esym = extsym_buf, isym = intsym_buf, shndx = extshndx_buf;
        isym < isymend;
        esym += extsym_size, isym++, shndx = shndx != NULL ? shndx + 1 : NULL)
-    (*bed->s->swap_symbol_in) (ibfd, esym, shndx, isym);
+    if (!(*bed->s->swap_symbol_in) (ibfd, esym, shndx, isym))
+      {
+	symoffset += (esym - (bfd_byte *) extsym_buf) / extsym_size;
+	(*_bfd_error_handler) (_("%B symbol number %lu references "
+				 "nonexistent SHT_SYMTAB_SHNDX section"),
+			       ibfd, (unsigned long) symoffset);
+	intsym_buf = NULL;
+	goto out;
+      }
 
  out:
   if (alloc_ext != NULL)

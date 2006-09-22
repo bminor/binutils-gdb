@@ -468,7 +468,7 @@ struct elf_size_info {
     (*write_shdrs_and_ehdr) (bfd *);
   void (*write_relocs)
     (bfd *, asection *, void *);
-  void (*swap_symbol_in)
+  bfd_boolean (*swap_symbol_in)
     (bfd *, const void *, const void *, Elf_Internal_Sym *);
   void (*swap_symbol_out)
     (bfd *, const Elf_Internal_Sym *, void *, void *);
@@ -1744,7 +1744,7 @@ extern int bfd_elf32_core_file_failing_signal
 extern bfd_boolean bfd_elf32_core_file_matches_executable_p
   (bfd *, bfd *);
 
-extern void bfd_elf32_swap_symbol_in
+extern bfd_boolean bfd_elf32_swap_symbol_in
   (bfd *, const void *, const void *, Elf_Internal_Sym *);
 extern void bfd_elf32_swap_symbol_out
   (bfd *, const Elf_Internal_Sym *, void *, void *);
@@ -1786,7 +1786,7 @@ extern int bfd_elf64_core_file_failing_signal
 extern bfd_boolean bfd_elf64_core_file_matches_executable_p
   (bfd *, bfd *);
 
-extern void bfd_elf64_swap_symbol_in
+extern bfd_boolean bfd_elf64_swap_symbol_in
   (bfd *, const void *, const void *, Elf_Internal_Sym *);
 extern void bfd_elf64_swap_symbol_out
   (bfd *, const Elf_Internal_Sym *, void *, void *);

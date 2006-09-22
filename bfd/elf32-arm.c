@@ -9338,13 +9338,14 @@ elf32_arm_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* Mangle thumb function symbols as we read them in.  */
 
-static void
+static bfd_boolean
 elf32_arm_swap_symbol_in (bfd * abfd,
 			  const void *psrc,
 			  const void *pshn,
 			  Elf_Internal_Sym *dst)
 {
-  bfd_elf32_swap_symbol_in (abfd, psrc, pshn, dst);
+  if (!bfd_elf32_swap_symbol_in (abfd, psrc, pshn, dst))
+    return FALSE;
 
   /* New EABI objects mark thumb function symbols by setting the low bit of
      the address.  Turn these into STT_ARM_TFUNC.  */
@@ -9354,6 +9355,7 @@ elf32_arm_swap_symbol_in (bfd * abfd,
       dst->st_info = ELF_ST_INFO (ELF_ST_BIND (dst->st_info), STT_ARM_TFUNC);
       dst->st_value &= ~(bfd_vma) 1;
     }
+  return TRUE;
 }
 
 

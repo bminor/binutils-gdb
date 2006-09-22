@@ -1,3 +1,13 @@
+2006-09-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* elfcode.h (elf_swap_symbol_in): Return bfd_boolean.  Don't abort
+	on error.
+	* elf-bfd.h (elf_size_info <swap_symbol_in>): Adjust decl.
+	(bfd_elf32_swap_symbol_in, bfd_elf64_swap_symbol_in): Likewise.
+	* elf.c (bfd_elf_get_elf_syms): Test return of swap_symbol_in,
+	and report error.
+	* elf32-arm.c (elf32_arm_swap_symbol_in): Return bfd_boolean.
+
 2006-09-20  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* elf32-s390.c (elf_s390_relocate_section): Remove check for code

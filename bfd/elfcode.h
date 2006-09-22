@@ -166,7 +166,7 @@ static void elf_debug_file (Elf_Internal_Ehdr *);
 /* Translate an ELF symbol in external format into an ELF symbol in internal
    format.  */
 
-void
+bfd_boolean
 elf_swap_symbol_in (bfd *abfd,
 		    const void *psrc,
 		    const void *pshn,
@@ -188,9 +188,10 @@ elf_swap_symbol_in (bfd *abfd,
   if (dst->st_shndx == SHN_XINDEX)
     {
       if (shndx == NULL)
-	abort ();
+	return FALSE;
       dst->st_shndx = H_GET_32 (abfd, shndx->est_shndx);
     }
+  return TRUE;
 }
 
 /* Translate an ELF symbol in internal format into an ELF symbol in external
