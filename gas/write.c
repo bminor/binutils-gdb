@@ -1014,11 +1014,8 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
 					f->fr_literal, (file_ptr) offset,
 					(bfd_size_type) f->fr_fix);
 	  if (!x)
-	    {
-	      bfd_perror (stdoutput->filename);
-	      as_perror (_("FATAL: Can't write %s"), stdoutput->filename);
-	      exit (EXIT_FAILURE);
-	    }
+	    as_fatal (_("can't write %s: %s"), stdoutput->filename,
+		      bfd_errmsg (bfd_get_error ()));
 	  offset += f->fr_fix;
 	}
       fill_literal = f->fr_literal + f->fr_fix;
@@ -1038,12 +1035,8 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
 						(file_ptr) offset,
 						(bfd_size_type) fill_size);
 		  if (!x)
-		    {
-		      bfd_perror (stdoutput->filename);
-		      as_perror (_("FATAL: Can't write %s"),
-				 stdoutput->filename);
-		      exit (EXIT_FAILURE);
-		    }
+		    as_fatal (_("can't write %s: %s"), stdoutput->filename,
+			      bfd_errmsg (bfd_get_error ()));
 		  offset += fill_size;
 		}
 	    }

@@ -1,6 +1,6 @@
 \input texinfo
 @c  Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-@c  2001, 2002, 2003, 2004, 2005
+@c  2001, 2002, 2003, 2004, 2005, 2006
 @c  Free Software Foundation, Inc.
 @setfilename internals.info
 @node Top
@@ -1842,10 +1842,6 @@ This section describes basic internal functions used by GAS.
 @deftypefunx @{@} int had_errors (void)
 Returns non-zero if any warnings or errors, respectively, have been printed
 during this invocation.
-@end deftypefun
-
-@deftypefun @{@} void as_perror (const char *@var{gripe}, const char *@var{filename})
-Displays a BFD or system error, then clears the error status.
 @end deftypefun
 
 @deftypefun  @{@} void as_tsktsk (const char *@var{format}, ...)

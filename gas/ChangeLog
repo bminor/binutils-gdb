@@ -1,5 +1,18 @@
 2006-09-22  Alan Modra  <amodra@bigpond.net.au>
 
+	* as.h (as_perror): Delete declaration.
+	* gdbinit.in (as_perror): Delete breakpoint.
+	* messages.c (as_perror): Delete function.
+	* doc/internals.texi: Remove as_perror description.
+	* listing.c (listing_print: Don't use as_perror.
+	* output-file.c (output_file_create, output_file_close): Likewise.
+	* symbols.c (symbol_create, symbol_clone): Likewise.
+	* write.c (write_contents): Likewise.
+	* config/obj-som.c (obj_som_version, obj_som_copyright): Likewise.
+	* config/tc-tic54x.c (tic54x_mlib): Likewise.
+
+2006-09-22  Alan Modra  <amodra@bigpond.net.au>
+
 	* config/tc-ppc.c (md_section_align): Don't round up address for ELF.
 	(ppc_handle_align): New function.
 	* config/tc-ppc.h (HANDLE_ALIGN): Use ppc_handle_align.

@@ -2512,8 +2512,8 @@ tic54x_mlib (ignore)
   abfd = bfd_openr (path, NULL);
   if (!abfd)
     {
-      as_bad (_("Can't open macro library file '%s' for reading."), path);
-      as_perror ("%s", path);
+      as_bad (_("can't open macro library file '%s' for reading: %s"),
+	      path, bfd_errmsg (bfd_get_error ()));
       ignore_rest_of_line ();
       return;
     }

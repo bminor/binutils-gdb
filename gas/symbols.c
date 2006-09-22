@@ -1,6 +1,6 @@
 /* symbols.c -symbol table-
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -144,7 +144,7 @@ symbol_create (const char *name, /* It is copied, the caller can destroy/modify.
 
   symbolP->bsym = bfd_make_empty_symbol (stdoutput);
   if (symbolP->bsym == NULL)
-    as_perror ("%s", "bfd_make_empty_symbol");
+    as_fatal ("bfd_make_empty_symbol: %s", bfd_errmsg (bfd_get_error ()));
   symbolP->bsym->udata.p = (PTR) symbolP;
   S_SET_NAME (symbolP, preserved_copy_of_name);
 
@@ -570,7 +570,7 @@ symbol_clone (symbolS *orgsymP, int replace)
   *newsymP = *orgsymP;
   bsymnew = bfd_make_empty_symbol (bfd_asymbol_bfd (bsymorg));
   if (bsymnew == NULL)
-    as_perror ("%s", "bfd_make_empty_symbol");
+    as_fatal ("bfd_make_empty_symbol: %s", bfd_errmsg (bfd_get_error ()));
   newsymP->bsym = bsymnew;
   bsymnew->name = bsymorg->name;
   bsymnew->flags =  bsymorg->flags;

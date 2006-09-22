@@ -36,11 +36,12 @@ output_file_create (char *name)
 
   else if (!(stdoutput = bfd_openw (name, TARGET_FORMAT)))
     {
-      if (bfd_get_error () == bfd_error_invalid_target)
-	as_perror (_("Selected target format '%s' unknown"), TARGET_FORMAT);
+      bfd_error_type err = bfd_get_error ();
+
+      if (err == bfd_error_invalid_target)
+	as_fatal (_("selected target format '%s' unknown"), TARGET_FORMAT);
       else
-	as_perror (_("FATAL: can't create %s"), name);
-      exit (EXIT_FAILURE);
+	as_fatal (_("can't create %s: %s"), name, bfd_errmsg (err));
     }
 
   bfd_set_format (stdoutput, bfd_object);
@@ -53,11 +54,8 @@ void
 output_file_close (char *filename)
 {
   /* Close the bfd.  */
-  if (bfd_close (stdoutput) == 0)
-    {
-      bfd_perror (filename);
-      as_perror (_("FATAL: can't close %s\n"), filename);
-      exit (EXIT_FAILURE);
-    }
+  if (!bfd_close (stdoutput))
+    as_fatal (_("can't close %s: %s"), filename,
+	      bfd_errmsg (bfd_get_error ()));
   stdoutput = NULL;		/* Trust nobody!  */
 }
