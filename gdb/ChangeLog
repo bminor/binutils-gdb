@@ -1,3 +1,7 @@
+2006-09-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c (remote_write_bytes_aux): Doc fix.
+
 2006-09-21  Vladimir Prus  <vladimir@codesourcery.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 

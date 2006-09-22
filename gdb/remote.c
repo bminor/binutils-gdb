@@ -3889,8 +3889,6 @@ check_binary_download (CORE_ADDR addr)
    are omitted.
 
    Returns the number of bytes transferred, or 0 (setting errno) for
-
-   Returns number of bytes transferred, or 0 (setting errno) for
    error.  Only transfer a single packet.  */
 
 static int
