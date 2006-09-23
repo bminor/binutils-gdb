@@ -1,3 +1,10 @@
+2006-09-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/3235
+	* config/tc-i386.c (match_template): Check address size prefix
+	to turn Disp64/Disp32/Disp16 operand into Disp32/Disp16/Disp32
+	operand.
+
 2006-09-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (ppc_symbol_chars): Remove '+' and '-'.

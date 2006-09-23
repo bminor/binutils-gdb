@@ -1,3 +1,16 @@
+2006-09-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/3235
+	* gas/i386/addr16.d: New file.
+	* gas/i386/addr16.s: Likewise.
+	* gas/i386/addr32.d: Likewise.
+	* gas/i386/addr32.s: Likewise.
+
+	* gas/i386/i386.exp: Add "addr16" and "addr32".
+
+	* gas/i386/x86-64-addr32.s: Add tests for "add32 mov".
+	* gas/i386/x86-64-addr32.d: Updated.
+
 2006-09-20  Kai Tietz  <Kai.Tietz@onevision.com>
 
 	* gas/all/gas.exp: Add support for x86_64-*-mingw64.

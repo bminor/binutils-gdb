@@ -2563,6 +2563,8 @@ match_template ()
   unsigned int overlap0, overlap1, overlap2;
   unsigned int found_reverse_match;
   int suffix_check;
+  unsigned int operand_types [3];
+  int addr_prefix_disp;
 
 #define MATCH(overlap, given, template)				\
   ((overlap & ~JumpAbsolute)					\
@@ -2581,6 +2583,10 @@ match_template ()
   overlap1 = 0;
   overlap2 = 0;
   found_reverse_match = 0;
+  operand_types [0] = 0;
+  operand_types [1] = 0;
+  operand_types [2] = 0;
+  addr_prefix_disp = -1;
   suffix_check = (i.suffix == BYTE_MNEM_SUFFIX
 		  ? No_bSuf
 		  : (i.suffix == WORD_MNEM_SUFFIX
@@ -2596,6 +2602,8 @@ match_template ()
 
   for (t = current_templates->start; t < current_templates->end; t++)
     {
+      addr_prefix_disp = -1;
+
       /* Must have right number of operands.  */
       if (i.operands != t->operands)
 	continue;
@@ -2606,6 +2614,10 @@ match_template ()
 	       && (t->opcode_modifier & IgnoreSize)))
 	continue;
 
+      operand_types [0] = t->operand_types [0];
+      operand_types [1] = t->operand_types [1];
+      operand_types [2] = t->operand_types [2];
+
       /* In general, don't allow 64-bit operands in 32-bit mode.  */
       if (i.suffix == QWORD_MNEM_SUFFIX
 	  && flag_code != CODE_64BIT
@@ -2613,8 +2625,8 @@ match_template ()
 	      ? (!(t->opcode_modifier & IgnoreSize)
 		 && !intel_float_operand (t->name))
 	      : intel_float_operand (t->name) != 2)
-	  && (!(t->operand_types[0] & (RegMMX | RegXMM))
-	      || !(t->operand_types[t->operands > 1] & (RegMMX | RegXMM)))
+	  && (!(operand_types[0] & (RegMMX | RegXMM))
+	      || !(operand_types[t->operands > 1] & (RegMMX | RegXMM)))
 	  && (t->base_opcode != 0x0fc7
 	      || t->extension_opcode != 1 /* cmpxchg8b */))
 	continue;
@@ -2628,41 +2640,76 @@ match_template ()
 	  break;
 	}
 
-      overlap0 = i.types[0] & t->operand_types[0];
+      /* Address size prefix will turn Disp64/Disp32/Disp16 operand
+	 into Disp32/Disp16/Disp32 operand.  */
+      if (i.prefix[ADDR_PREFIX] != 0)
+	  {
+	    unsigned int j, DispOn = 0, DispOff = 0;
+
+	    switch (flag_code)
+	    {
+	    case CODE_16BIT:
+	      DispOn = Disp32;
+	      DispOff = Disp16;
+	      break;
+	    case CODE_32BIT:
+	      DispOn = Disp16;
+	      DispOff = Disp32;
+	      break;
+	    case CODE_64BIT:
+	      DispOn = Disp32;
+	      DispOff = Disp64;
+	      break;
+	    }
+
+	    for (j = 0; j < 3; j++)
+	      {
+		/* There should be only one Disp operand.  */
+		if ((operand_types[j] & DispOff))
+		  {
+		    addr_prefix_disp = j;
+		    operand_types[j] |= DispOn;
+		    operand_types[j] &= ~DispOff;
+		    break;
+		  }
+	      }
+	  }
+
+      overlap0 = i.types[0] & operand_types[0];
       switch (t->operands)
 	{
 	case 1:
-	  if (!MATCH (overlap0, i.types[0], t->operand_types[0]))
+	  if (!MATCH (overlap0, i.types[0], operand_types[0]))
 	    continue;
 	  break;
 	case 2:
 	case 3:
-	  overlap1 = i.types[1] & t->operand_types[1];
-	  if (!MATCH (overlap0, i.types[0], t->operand_types[0])
-	      || !MATCH (overlap1, i.types[1], t->operand_types[1])
+	  overlap1 = i.types[1] & operand_types[1];
+	  if (!MATCH (overlap0, i.types[0], operand_types[0])
+	      || !MATCH (overlap1, i.types[1], operand_types[1])
 	      /* monitor in SSE3 is a very special case.  The first
 		 register and the second register may have different
 		 sizes.  */
 	      || !((t->base_opcode == 0x0f01
 		    && t->extension_opcode == 0xc8)
 		   || CONSISTENT_REGISTER_MATCH (overlap0, i.types[0],
-						 t->operand_types[0],
+						 operand_types[0],
 						 overlap1, i.types[1],
-						 t->operand_types[1])))
+						 operand_types[1])))
 	    {
 	      /* Check if other direction is valid ...  */
 	      if ((t->opcode_modifier & (D | FloatD)) == 0)
 		continue;
 
 	      /* Try reversing direction of operands.  */
-	      overlap0 = i.types[0] & t->operand_types[1];
-	      overlap1 = i.types[1] & t->operand_types[0];
-	      if (!MATCH (overlap0, i.types[0], t->operand_types[1])
-		  || !MATCH (overlap1, i.types[1], t->operand_types[0])
+	      overlap0 = i.types[0] & operand_types[1];
+	      overlap1 = i.types[1] & operand_types[0];
+	      if (!MATCH (overlap0, i.types[0], operand_types[1])
+		  || !MATCH (overlap1, i.types[1], operand_types[0])
 		  || !CONSISTENT_REGISTER_MATCH (overlap0, i.types[0],
-						 t->operand_types[1],
+						 operand_types[1],
 						 overlap1, i.types[1],
-						 t->operand_types[0]))
+						 operand_types[0]))
 		{
 		  /* Does not match either direction.  */
 		  continue;
@@ -2678,12 +2725,12 @@ match_template ()
 		 reverse match 3 operand instructions, and all 3
 		 operand instructions only need to be checked for
 		 register consistency between operands 2 and 3.  */
-	      overlap2 = i.types[2] & t->operand_types[2];
-	      if (!MATCH (overlap2, i.types[2], t->operand_types[2])
+	      overlap2 = i.types[2] & operand_types[2];
+	      if (!MATCH (overlap2, i.types[2], operand_types[2])
 		  || !CONSISTENT_REGISTER_MATCH (overlap1, i.types[1],
-						 t->operand_types[1],
+						 operand_types[1],
 						 overlap2, i.types[2],
-						 t->operand_types[2]))
+						 operand_types[2]))
 
 		continue;
 	    }
@@ -2711,7 +2758,7 @@ match_template ()
     {
       if (!intel_syntax
 	  && ((i.types[0] & JumpAbsolute)
-	      != (t->operand_types[0] & JumpAbsolute)))
+	      != (operand_types[0] & JumpAbsolute)))
 	{
 	  as_warn (_("indirect %s without `*'"), t->name);
 	}
@@ -2727,6 +2774,11 @@ match_template ()
 
   /* Copy the template we found.  */
   i.tm = *t;
+
+  if (addr_prefix_disp != -1)
+    i.tm.operand_types[addr_prefix_disp]
+      = operand_types[addr_prefix_disp];
+
   if (found_reverse_match)
     {
       /* If we found a reverse match we must alter the opcode
@@ -2735,8 +2787,8 @@ match_template ()
 
       i.tm.base_opcode ^= found_reverse_match;
 
-      i.tm.operand_types[0] = t->operand_types[1];
-      i.tm.operand_types[1] = t->operand_types[0];
+      i.tm.operand_types[0] = operand_types[1];
+      i.tm.operand_types[1] = operand_types[0];
     }
 
   return 1;

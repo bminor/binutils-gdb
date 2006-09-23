@@ -4693,7 +4693,8 @@ OP_OFF64 (int bytemode, int sizeflag)
 {
   bfd_vma off;
 
-  if (address_mode != mode_64bit)
+  if (address_mode != mode_64bit
+      || (prefixes & PREFIX_ADDR))
     {
       OP_OFF (bytemode, sizeflag);
       return;

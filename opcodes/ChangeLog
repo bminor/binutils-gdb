@@ -1,3 +1,9 @@
+2006-09-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/3235
+	* i386-dis.c (OP_OFF64): Get 32bit offset if there is an
+	address size prefix.
+
 2006-09-17  Mei Ligang  <ligang@sunnorth.com.cn>
 
 	* score-dis.c: New file.
