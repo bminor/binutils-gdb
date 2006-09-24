@@ -35,6 +35,7 @@
 
 2006-08-04  Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
 
+	PR binutils/3000
 	* i386-dis.c (MXC,EMC): Define.
 	(OP_MXC): New function to handle cvt* (convert instructions) between
 	%xmm and %mm register correctly.
