@@ -148,7 +148,7 @@
 
 2006-09-14  Alan Modra  <amodra@bigpond.net.au>
 
-	PR 3182
+	PR 3181
 	* elf.c (_bfd_elf_copy_private_header_data): Fix group members
 	that have had their SHT_GROUP section removed.
 
