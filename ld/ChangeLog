@@ -1,3 +1,10 @@
+2006-09-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/3249
+	* scripttempl/elf.sc: Don't combine .gnu.linkonce.d.*personality*
+	and .gnu.linkonce.wi.* sections with .data and .debug_info for
+	relocatable link.
+
 2006-09-20  Kai Tietz  <Kai.Tietz@onevision.com>
 
 	* configure.in: Add new target x86_64-pc-mingw64.
