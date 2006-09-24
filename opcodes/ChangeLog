@@ -1,3 +1,10 @@
+2006-09-24  Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
+
+	PR binutils/3100
+	* i386-dis.c (prefix_user_table): Fix the second operand of
+	maskmovdqu instruction to allow only %xmm register instead of
+	both %xmm register and memory.
+
 2006-09-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/3235

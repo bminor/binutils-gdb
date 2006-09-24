@@ -1687,7 +1687,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "maskmovq", MX, MS, XX, XX },
     { "(bad)", XM, EX, XX, XX },
-    { "maskmovdqu", XM, EX, XX, XX },
+    { "maskmovdqu", XM, XS, XX, XX },
     { "(bad)", XM, EX, XX, XX },
   },
   /* PREGRP19 */
