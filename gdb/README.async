@@ -44,6 +44,18 @@ n
 (actually it generates an extra &"n\n" and ^done but with 
 "-interpreter-exec console" it's identical.
 
+To enter a GDB command while the target is running GDB needs a separate
+terminal to the inferior.  Currently only a few CLI commands can be entered
+e.g pwd see top.c.  Most CLI commands report:
+
+  Cannot execute this command while the target is running.
+
+and all MI commands apart from -exec-interrupt (see mi-main.c) report:
+
+  Cannot execute command interpreter-exec while target running
+
+but this can easily be changed.
+
 To help integration with HEAD I've re-instated the --async option so that
 --noasync (the default) *should* run as on the trunk.
 
