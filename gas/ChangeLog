@@ -1,3 +1,13 @@
+2006-09-25  Bob Wilson  <bob.wilson@acm.org>
+
+	* doc/as.texinfo (Overview): Revise description of --keep-locals.
+	Add xref to "Symbol Names".
+	(L): Refer to "local symbols" instead of "local labels".  Move
+	definition to "Symbol Names" section; add xref to that section.
+	(Symbol Names): Use "Local Symbol Names" section to define local
+	symbols.  Add "Local Labels" heading for description of temporary
+	forward/backward labels, and refer to those as "local labels".
+
 2006-09-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/3235

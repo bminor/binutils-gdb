@@ -551,9 +551,12 @@ Issue warnings when difference tables altered for long displacements.
 
 @item -L
 @itemx --keep-locals
-Keep (in the symbol table) local symbols.  On traditional a.out systems
-these start with @samp{L}, but different systems have different local
-label prefixes.
+Keep (in the symbol table) local symbols.  These symbols start with
+system-specific local label prefixes, typically @samp{.L} for ELF systems
+or @samp{L} for traditional a.out systems.
+@ifclear man
+@xref{Symbol Names}.
+@end ifclear
 
 @item --listing-lhs-width=@var{number}
 Set the maximum width, in words, of the output data column for an assembler
@@ -1561,7 +1564,7 @@ assembler.)
 * K::             -K for difference tables
 @end ifset
 
-* L::             -L to retain local labels
+* L::             -L to retain local symbols
 * listing::       --listing-XXX to configure listing output
 * M::		  -M or --mri to assemble in MRI compatibility mode
 * MD::            --MD for dependency tracking
@@ -1694,26 +1697,21 @@ is done.
 @end ifset
 
 @node L
-@section Include Local Labels: @option{-L}
+@section Include Local Symbols: @option{-L}
 
 @kindex -L
-@cindex local labels, retaining in output
-Labels beginning with @samp{L} (upper case only) are called @dfn{local
-labels}. @xref{Symbol Names}.  Normally you do not see such labels when
-debugging, because they are intended for the use of programs (like
-compilers) that compose assembler programs, not for your notice.
-Normally both @command{@value{AS}} and @code{@value{LD}} discard such labels, so you do not
-normally debug with them.
+@cindex local symbols, retaining in output
+Symbols beginning with system-specific local label prefixes, typically
+@samp{.L} for ELF systems or @samp{L} for traditional a.out systems, are
+called @dfn{local symbols}.  @xref{Symbol Names}.  Normally you do not see
+such symbols when debugging, because they are intended for the use of
+programs (like compilers) that compose assembler programs, not for your
+notice.  Normally both @command{@value{AS}} and @code{@value{LD}} discard
+such symbols, so you do not normally debug with them.
 
-This option tells @command{@value{AS}} to retain those @samp{L@dots{}} symbols
+This option tells @command{@value{AS}} to retain those local symbols
 in the object file.  Usually if you do this you also tell the linker
-@code{@value{LD}} to preserve symbols whose names begin with @samp{L}.
-
-By default, a local label is any label beginning with @samp{L}, but each
-target is allowed to redefine the local label prefix.
-@ifset HPPA
-On the HPPA local labels begin with @samp{L$}.
-@end ifset
+@code{@value{LD}} to preserve those symbols.
 
 @node listing
 @section Configuring listing output: @option{--listing}
@@ -3218,14 +3216,30 @@ in a program.
 
 @cindex local symbol names
 @cindex symbol names, local
+A local symbol is any symbol beginning with certain local label prefixes.
+By default, the local label prefix is @samp{.L} for ELF systems or
+@samp{L} for traditional a.out systems, but each target may have its own
+set of local label prefixes.
+@ifset HPPA
+On the HPPA local symbols begin with @samp{L$}.
+@end ifset
+
+Local symbols are defined and used within the assembler, but they are
+normally not saved in object files.  Thus, they are not visible when debugging.
+You may use the @samp{-L} option (@pxref{L, ,Include Local Symbols:
+@option{-L}}) to retain the local symbols in the object files.
+
+@subheading Local Labels
+
+@cindex local labels
 @cindex temporary symbol names
 @cindex symbol names, temporary
-Local symbols help compilers and programmers use names temporarily.
+Local labels help compilers and programmers use names temporarily.
 They create symbols which are guaranteed to be unique over the entire scope of
 the input source code and which can be referred to by a simple notation.
-To define a local symbol, write a label of the form @samp{@b{N}:} (where @b{N}
+To define a local label, write a label of the form @samp{@b{N}:} (where @b{N}
 represents any positive integer).  To refer to the most recent previous
-definition of that symbol write @samp{@b{N}b}, using the same number as when
+definition of that label write @samp{@b{N}b}, using the same number as when
 you defined the label.  To refer to the next definition of a local label, write
 @samp{@b{N}f}---the @samp{b} stands for ``backwards'' and the @samp{f} stands
 for ``forwards''.
@@ -3256,16 +3270,17 @@ label_3:  branch label_4
 label_4:  branch label_3
 @end smallexample
 
-Local symbol names are only a notational device.  They are immediately
+Local label names are only a notational device.  They are immediately
 transformed into more conventional symbol names before the assembler uses them.
 The symbol names are stored in the symbol table, appear in error messages, and
 are optionally emitted to the object file.  The names are constructed using
 these parts:
 
 @table @code
-@item L
-All local labels begin with @samp{L}. Normally both @command{@value{AS}} and
-@code{@value{LD}} forget symbols that start with @samp{L}. These labels are
+@item @emph{local label prefix}
+All local symbols begin with the system-specific local label prefix.
+Normally both @command{@value{AS}} and @code{@value{LD}} forget symbols
+that start with the local label prefix.  These labels are
 used for symbols you are never intended to see.  If you use the
 @samp{-L} option then @command{@value{AS}} retains these symbols in the
 object file. If you also instruct @code{@value{LD}} to retain these symbols,
@@ -3286,8 +3301,8 @@ number @samp{15}, and so on.  Likewise the first definition of @samp{1:} gets
 the number @samp{1} and its 15th definition gets @samp{15} as well.
 @end table
 
-So for example, the first @code{1:} is named @code{L1@kbd{C-B}1}, the 44th
-@code{3:} is named @code{L3@kbd{C-B}44}.
+So for example, the first @code{1:} may be named @code{.L1@kbd{C-B}1}, and
+the 44th @code{3:} may be named @code{.L3@kbd{C-B}44}.
 
 @subheading Dollar Local Labels
 @cindex dollar local symbols
@@ -3306,7 +3321,7 @@ dollar sign, e.g., @samp{@b{55$}}.
 They can also be distinguished from ordinary local labels by their transformed
 names which use ASCII character @samp{\001} (control-A) as the magic character
 to distinguish them from ordinary labels.  For example, the fifth definition of
-@samp{6$} is named @samp{L6@kbd{C-A}5}.
+@samp{6$} may be named @samp{.L6@kbd{C-A}5}.
 
 @node Dot
 @section The Special Dot Symbol
