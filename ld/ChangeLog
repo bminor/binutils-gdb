@@ -1,3 +1,7 @@
+2006-09-25  Bob Wilson  <bob.wilson@acm.org>
+
+	* ld.texinfo (Options): Update description of local symbols for -X.
+
 2006-09-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/3249

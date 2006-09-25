@@ -909,11 +909,11 @@ Delete all local symbols.
 @kindex -X
 @kindex --discard-locals
 @cindex local symbols, deleting
-@cindex L, deleting symbols beginning
 @item -X
 @itemx --discard-locals
-Delete all temporary local symbols.  For most targets, this is all local
-symbols whose names begin with @samp{L}.
+Delete all temporary local symbols.  (These symbols start with
+system-specific local label prefixes, typically @samp{.L} for ELF systems
+or @samp{L} for traditional a.out systems.)
 
 @kindex -y @var{symbol}
 @kindex --trace-symbol=@var{symbol}
