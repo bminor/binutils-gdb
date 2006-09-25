@@ -29,7 +29,8 @@ main (void)
 }
 
 /* Normally Thumb functions use r7 as the frame pointer.  However,
-   with the GCC option -mtpcs-frame, they may use fp instead.  */
+   with the GCC option -mtpcs-frame, they may use fp instead.  Make
+   sure that the prologue analyzer can handle this.  */
 
 asm(".text\n"
     "	.align 2\n"
@@ -51,8 +52,13 @@ asm(".text\n"
     "	mov	r7, sl\n"
     "	push	{r7}\n"
 
-    /* Trap.  */
-    "	.short	0xdffe\n"
+    /* We'll set a breakpoint at this call.  We can't hardcode a trap
+       instruction; the right instruction to use varies too much.  And
+       we can't use a global label, because GDB will think that's the
+       start of a new function.  So, this slightly convoluted
+       technique.  */
+    ".Ltpcs:\n"
+    "	nop\n"
 
     "	pop	{r2}\n"
     "	mov	sl, r2\n"
@@ -61,6 +67,11 @@ asm(".text\n"
     "	mov	fp, r1\n"
     "	mov	sp, r2\n"
     "	bx	lr\n"
+
+    "	.align 2\n"
+    "	.type tpcs_offset, %object\n"
+    "tpcs_offset:\n"
+    "	.word .Ltpcs - tpcs_frame_1\n"
 
     "	.align 2\n"
     "	.thumb_func\n"
@@ -81,7 +92,7 @@ asm(".text\n"
     "	mov	r7, sl\n"
     "	push	{r7}\n"
 
-    /* Clobber saved regs.  */
+    /* Clobber saved regs around the call.  */
     "	mov	r7, #0\n"
     "	mov	lr, r7\n"
     "	bl	tpcs_frame_1\n"
@@ -89,8 +100,9 @@ asm(".text\n"
     "	pop	{r2}\n"
     "	mov	sl, r2\n"
     "	pop	{r7}\n"
-    "	pop	{r1, r2}\n"
+    "	pop	{r1, r2, r3}\n"
     "	mov	fp, r1\n"
     "	mov	sp, r2\n"
+    "	mov	lr, r3\n"
     "	bx	lr\n"
 );

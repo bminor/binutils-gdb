@@ -48,7 +48,9 @@ if ![runto_main] then {
 
 # Testcase for TPCS prologue.
 
-gdb_test "continue" "Program received signal SIG.*" "continue to TPCS"
+gdb_breakpoint "* *(int *)tpcs_offset + (int) &tpcs_frame_1"
+gdb_test "continue" "Breakpoint .*, $hex in tpcs_frame_1 \\(\\)" \
+    "continue to TPCS"
 
 gdb_test "backtrace 10" \
 	"#0\[ \t\]*$hex in tpcs_frame_1 .*\r\n#1\[ \t\]*$hex in tpcs_frame .*\r\n#2\[ \t\]*$hex in main.*" \
