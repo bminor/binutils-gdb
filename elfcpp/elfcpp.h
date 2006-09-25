@@ -26,14 +26,7 @@ typedef int64_t Elf_Sxword;
 // template parameter should be 32 or 64.
 
 template<int size>
-struct Elf_types
-{
-  // Dummy types which should not be used.
-  typedef unsigned char Elf_Addr;
-  typedef unsigned char Elf_Off;
-  // WXword is for fields which are Elf32_Word and Elf64_Xword.
-  typedef unsigned char Elf_WXword;
-};
+struct Elf_types;
 
 template<>
 struct Elf_types<32>
@@ -49,9 +42,6 @@ struct Elf_types<64>
   typedef uint64_t Elf_Addr;
   typedef uint64_t Elf_Off;
   typedef uint64_t Elf_WXword;
-  static const int ehdr_size;
-  static const int shdr_size;
-  static const int sym_size;
 };
 
 // Offsets within the Ehdr e_ident field.
@@ -299,7 +289,7 @@ enum
 
 // The valid values found in the Shdr sh_type field.
 
-enum
+enum SHT
 {
   SHT_NULL = 0,
   SHT_PROGBITS = 1,
@@ -340,7 +330,7 @@ enum
 
 // The valid bit flags found in the Shdr sh_flags field.
 
-enum
+enum SHF
 {
   SHF_WRITE = 0x1,
   SHF_ALLOC = 0x2,
@@ -364,6 +354,43 @@ enum
   GRP_COMDAT = 0x1,
   GRP_MASKOS = 0x0ff00000,
   GRP_MASKPROC = 0xf0000000
+};
+
+// The valid values found in the Phdr p_type field.
+
+enum PT
+{
+  PT_NULL = 0,
+  PT_LOAD = 1,
+  PT_DYNAMIC = 2,
+  PT_INTERP = 3,
+  PT_NOTE = 4,
+  PT_SHLIB = 5,
+  PT_PHDR = 6,
+  PT_TLS = 7,
+  PT_LOOS = 0x60000000,
+  PT_HIOS = 0x6fffffff,
+  PT_LOPROC = 0x70000000,
+  PT_HIPROC = 0x7fffffff,
+  // The remaining values are not in the standard.
+  // Frame unwind information.
+  PT_GNU_EH_FRAME = 0x6474e550,
+  PT_SUNW_EH_FRAME = 0x6474e550,
+  // Stack flags.
+  PT_GNU_STACK = 0x6474e551,
+  // Read only after relocation.
+  PT_GNU_RELRO = 0x6474e552
+};
+
+// The valid bit flags found in the Phdr p_flags field.
+
+enum PF
+{
+  PF_X = 0x1,
+  PF_W = 0x2,
+  PF_R = 0x4,
+  PF_MASKOS = 0x0ff00000,
+  PF_MASKPROC = 0xf0000000
 };
 
 // Symbol binding from Sym st_info field.
@@ -468,6 +495,15 @@ struct Elf_sizes
   // Size of ELF symbol table entry.
   static const int sym_size = sizeof(internal::Sym_data<size>);
 };
+
+// Given the address of an Elf_Word, return the value.
+
+template<bool big_endian>
+inline Elf_Word
+read_elf_word(const Elf_Word* p)
+{
+  return internal::convert_word<big_endian>(*p);
+}
 
 // Accessor class for the ELF file header.
 
@@ -592,6 +628,52 @@ class Shdr
 
  private:
   const internal::Shdr_data<size>* p_;
+};
+
+// Accessor class for an ELF segment header.
+
+template<int size, bool big_endian>
+class Phdr
+{
+ public:
+  Phdr(const unsigned char* p)
+    : p_(reinterpret_cast<const internal::Phdr_data<size>*>(p))
+  { }
+
+  Elf_Word
+  get_p_type() const
+  { return internal::convert_word<big_endian>(this->p_->p_type); }
+
+  typename Elf_types<size>::Elf_Off
+  get_p_offset() const
+  { return internal::convert_off<size, big_endian>(this->p_->p_offset); }
+
+  typename Elf_types<size>::Elf_Addr
+  get_p_vaddr() const
+  { return internal::convert_addr<size, big_endian>(this->p_->p_vaddr); }
+
+  typename Elf_types<size>::Elf_Addr
+  get_p_paddr() const
+  { return internal::convert_addr<size, big_endian>(this->p_->p_paddr); }
+
+  typename Elf_types<size>::Elf_WXword
+  get_p_filesz() const
+  { return internal::convert_wxword<size, big_endian>(this->p_->p_filesz); }
+
+  typename Elf_types<size>::Elf_WXword
+  get_p_memsz() const
+  { return internal::convert_wxword<size, big_endian>(this->p_->p_memsz); }
+
+  Elf_Word
+  get_p_flags() const
+  { return internal::convert_word<big_endian>(this->p_->p_flags); }
+
+  typename Elf_types<size>::Elf_WXword
+  get_p_align() const
+  { return internal::convert_wxword<size, big_endian>(this->p_->p_align); }
+
+ private:
+  const internal::Phdr_data<size>* p_;
 };
 
 // Accessor class for an ELF symbol table entry.

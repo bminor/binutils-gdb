@@ -202,6 +202,39 @@ struct Shdr_data
   typename Elf_types<size>::Elf_WXword sh_entsize;
 };
 
+// An ELF segment header.  We use template specialization for the
+// 32-bit and 64-bit versions because the fields are in a different
+// order.
+
+template<int size>
+struct Phdr_data;
+
+template<>
+struct Phdr_data<32>
+{
+  Elf_Word p_type;
+  Elf_types<32>::Elf_Off p_offset;
+  Elf_types<32>::Elf_Addr p_vaddr;
+  Elf_types<32>::Elf_Addr p_paddr;
+  Elf_Word p_filesz;
+  Elf_Word p_memsz;
+  Elf_Word p_flags;
+  Elf_Word p_align;
+};
+
+template<>
+struct Phdr_data<64>
+{
+  Elf_Word p_type;
+  Elf_Word p_flags;
+  Elf_types<64>::Elf_Off p_offset;
+  Elf_types<64>::Elf_Addr p_vaddr;
+  Elf_types<64>::Elf_Addr p_paddr;
+  Elf_Xword p_filesz;
+  Elf_Xword p_memsz;
+  Elf_Xword p_align;
+};
+
 // An ELF symbol table entry.  We use template specialization for the
 // 32-bit and 64-bit versions because the fields are in a different
 // order.
