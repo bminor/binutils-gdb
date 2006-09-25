@@ -1,3 +1,14 @@
+2006-09-19  Bob Wilson  <bob.wilson@acm.org>
+
+	* gprof.texi: Use TeX-style quotes and em-dashes consistently.
+	Specify section names in cross references.  Fix typos.
+	Omit "next", "previous" and "up" fields from @node lines.
+	(SYNOPSIS): Show map_file argument to --file-ordering.
+	(Compiling): Remove extra, truncated lines from example output.
+	(Cycles): Fix references to "called" field.
+	(Internals): Allow hyphenation between file:function names.
+	(GNU Free Documentation License): Update formatting to match fdl.texi.
+
 2006-07-24  Ralk Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* gprof.texi: Fix some typos.
