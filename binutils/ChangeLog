@@ -1,3 +1,7 @@
+2006-09-26  Thiemo Seufer  <ths@networkno.de>
+
+	* configure.in: Remove broken changequote lines.
+
 2006-09-20  Kai Tietz  <Kai.Tietz@onevision.com>
 
 	* configure.in: Add new target x86_64-pc-mingw64.

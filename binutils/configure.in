@@ -258,13 +258,11 @@ changequote([,])dnl
 	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
 	  ;;
 	x86_64-*-mingw64*)
-changequote([,])dnl
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_MX86_64"
 	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
 	  BUILD_DLLWRAP='$(DLLWRAP_PROG)$(EXEEXT)'
 	  ;;
-changequote(,)dnl
 changequote(,)dnl
 	i[3-7]86-*-pe* | i[3-7]86-*-cygwin* | i[3-7]86-*-mingw32** | i[3-7]86-*-netbsdpe*)
 changequote([,])dnl
