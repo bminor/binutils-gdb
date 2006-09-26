@@ -1,3 +1,7 @@
+2006-09-26  Thiemo Seufer  <ths@networkno.de>
+
+	* gprof.texi: Fix install failure.
+
 2006-09-19  Bob Wilson  <bob.wilson@acm.org>
 
 	* gprof.texi: Use TeX-style quotes and em-dashes consistently.

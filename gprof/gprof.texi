@@ -2153,7 +2153,7 @@ followed by lower use functions, followed by unused functions
 at the end.
 
 @node Debugging
-@subsection Debugging @code{gprof}
+@section Debugging @code{gprof}
 
 If @code{gprof} was compiled with debugging enabled,
 the @samp{-d} option triggers debugging output
