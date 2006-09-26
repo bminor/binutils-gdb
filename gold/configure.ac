@@ -29,8 +29,18 @@ LFS_CXXFLAGS="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 AC_SUBST(LFS_CXXFLAGS)
 
 AC_LANG_PUSH(C++)
+
 AC_CHECK_HEADERS(tr1/unordered_set tr1/unordered_map)
 AC_CHECK_HEADERS(ext/hash_map ext/hash_set)
+
+dnl Test whether the compiler can specify a member templates to call.
+AC_COMPILE_IFELSE([
+class c { public: template<int i> void fn(); };
+template<int i> void foo(c cv) { cv.fn<i>(); }
+template void foo<1>(c cv);],
+[AC_DEFINE(HAVE_MEMBER_TEMPLATE_SPECIFICATIONS, [],
+  [Whether the C++ compiler can call a template member with no arguments])])
+
 AC_LANG_POP(C++)
 
 AM_MAINTAINER_MODE

@@ -25,7 +25,7 @@
 
 // Figure out how to get a hash set and a hash map.
 
-#if HAVE_TR1_UNORDERED_SET && HAVE_TR1_UNORDERED_MAP
+#if defined(HAVE_TR1_UNORDERED_SET) && defined(HAVE_TR1_UNORDERED_MAP)
 
 #include <tr1/unordered_set>
 #include <tr1/unordered_map>
@@ -35,7 +35,7 @@
 #define Unordered_set std::tr1::unordered_set
 #define Unordered_map std::tr1::unordered_map
 
-#elif HAVE_EXT_HASH_MAP && HAVE_EXT_HASH_SET
+#elif defined(HAVE_EXT_HASH_MAP) && defined(HAVE_EXT_HASH_SET)
 
 #include <ext/hash_map>
 #include <ext/hash_set>
