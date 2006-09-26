@@ -1,3 +1,17 @@
+2006-09-26  Mark Shinwell  <shinwell@codesourcery.com>
+            Joseph Myers  <joseph@codesourcery.com>
+            Ian Lance Taylor  <ian@wasabisystems.com>
+            Ben Elliston  <bje@wasabisystems.com>
+
+	* arm-dis.c (coprocessor_opcodes): The X-qualifier to WMADD may
+	only be used with the default multiply-add operation, so if N is
+	set, don't bother printing X.  Add new iwmmxt instructions.
+	(IWMMXT_INSN_COUNT): Update.
+	(iwmmxt_wwssnames): Qualify "wwss" names at index 2, 6, 10 and 14
+	with a 'c' suffix.
+	(print_insn_coprocessor): Check for iWMMXt2.  Handle format
+	specifiers 'r', 'i'.
+
 2006-09-24  Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
 
 	PR binutils/3100

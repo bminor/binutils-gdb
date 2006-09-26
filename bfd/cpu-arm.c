@@ -92,7 +92,8 @@ processors[] =
   { bfd_mach_arm_4,  "strongarm1100" },
   { bfd_mach_arm_XScale, "xscale" },
   { bfd_mach_arm_ep9312, "ep9312" },
-  { bfd_mach_arm_iWMMXt, "iwmmxt" }
+  { bfd_mach_arm_iWMMXt, "iwmmxt" },
+  { bfd_mach_arm_iWMMXt2, "iwmmxt2" }
 };
 
 static bfd_boolean
@@ -137,7 +138,8 @@ static const bfd_arch_info_type arch_info_struct[] =
   N (bfd_mach_arm_5TE,    "armv5te", FALSE, & arch_info_struct[9]),
   N (bfd_mach_arm_XScale, "xscale",  FALSE, & arch_info_struct[10]),
   N (bfd_mach_arm_ep9312, "ep9312",  FALSE, & arch_info_struct[11]),
-  N (bfd_mach_arm_iWMMXt,"iwmmxt",  FALSE, NULL)
+  N (bfd_mach_arm_iWMMXt, "iwmmxt",  FALSE, & arch_info_struct[12]),
+  N (bfd_mach_arm_iWMMXt2, "iwmmxt2", FALSE, NULL)
 };
 
 const bfd_arch_info_type bfd_arm_arch =
@@ -179,7 +181,9 @@ bfd_arm_merge_machines (bfd *ibfd, bfd *obfd)
      Intel XScale binary, since these architecture have co-processors which
      will not both be present on the same physical hardware.  */
   else if (in == bfd_mach_arm_ep9312
-	   && (out == bfd_mach_arm_XScale || out == bfd_mach_arm_iWMMXt))
+	   && (out == bfd_mach_arm_XScale
+	       || out == bfd_mach_arm_iWMMXt
+	       || out == bfd_mach_arm_iWMMXt2))
     {
       _bfd_error_handler (_("\
 ERROR: %B is compiled for the EP9312, whereas %B is compiled for XScale"),
@@ -188,7 +192,9 @@ ERROR: %B is compiled for the EP9312, whereas %B is compiled for XScale"),
       return FALSE;
     }
   else if (out == bfd_mach_arm_ep9312
-	   && (in == bfd_mach_arm_XScale || in == bfd_mach_arm_iWMMXt))
+	   && (in == bfd_mach_arm_XScale
+	       || in == bfd_mach_arm_iWMMXt
+	       || in == bfd_mach_arm_iWMMXt2))
     {
       _bfd_error_handler (_("\
 ERROR: %B is compiled for the EP9312, whereas %B is compiled for XScale"),
@@ -309,6 +315,7 @@ bfd_arm_update_notes (bfd *abfd, const char *note_section)
     case bfd_mach_arm_XScale:  expected = "XScale"; break;
     case bfd_mach_arm_ep9312:  expected = "ep9312"; break;
     case bfd_mach_arm_iWMMXt:  expected = "iWMMXt"; break;
+    case bfd_mach_arm_iWMMXt2: expected = "iWMMXt2"; break;
     }
 
   if (strcmp (arch_string, expected) != 0)
@@ -355,7 +362,8 @@ architectures[] =
   { "armv5te", bfd_mach_arm_5TE },
   { "XScale",  bfd_mach_arm_XScale },
   { "ep9312",  bfd_mach_arm_ep9312 },
-  { "iWMMXt",  bfd_mach_arm_iWMMXt }
+  { "iWMMXt",  bfd_mach_arm_iWMMXt },
+  { "iWMMXt2", bfd_mach_arm_iWMMXt2 }
 };
 
 /* Extract the machine number stored in a note section.  */
