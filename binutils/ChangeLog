@@ -1,3 +1,7 @@
+2006-09-26  Nick Clifton  <nickc@redhat.com>
+
+	* MAINTAINERS: Add Mei Ligang as maintainer of the Score port.
+
 2006-09-26  Thiemo Seufer  <ths@networkno.de>
 
 	* configure.in: Remove broken changequote lines.
