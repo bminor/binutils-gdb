@@ -5401,7 +5401,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	 all of the sections we have selected.  */
       amt = sizeof (struct elf_segment_map);
       amt += ((bfd_size_type) section_count - 1) * sizeof (asection *);
-      map = bfd_alloc (obfd, amt);
+      map = bfd_zalloc (obfd, amt);
       if (map == NULL)
 	return FALSE;
 
@@ -5796,7 +5796,7 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
       amt = sizeof (struct elf_segment_map);
       if (section_count != 0)
 	amt += ((bfd_size_type) section_count - 1) * sizeof (asection *);
-      map = bfd_alloc (obfd, amt);
+      map = bfd_zalloc (obfd, amt);
       if (map == NULL)
 	return FALSE;
 
