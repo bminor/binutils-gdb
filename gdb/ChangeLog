@@ -314,7 +314,7 @@
 	(cli_interpreter_resume, cli_interpreter_exec):
 	Make asynchronous.
 	(cli_quoted_interpreter_resume): New function.
-	(_initialize_cli_interp): Add li_command_loop to procs.
+	(_initialize_cli_interp): Add cli_command_loop to procs.
 	Initialize the console-quoted interpreter.
 
 	* tui/tui-hooks.c (tui_target_wait_hook): Add extra argument.
@@ -323,20 +323,20 @@
 	(current_command_token,  mi_interp, mi_interpreter_exec_continuation)
 	(mi_continuation_arg): New externs.
 	(mi_setup_continuation_arg): Declare.
-	
-	* mi/mi-main.c: Include wrapper.h.
-	(struct mi_continuation_arg): New structure.
-	(mi_interpreter_exec_continuation): Move to mi-interp.c.
-	(mi_execute_async_cli_command)
-	(mi_exec_async_cli_cmd_continuation): Make asynchronous.
-	(mi_setup_continuation_arg): New function.
 
 	* mi/mi-interp.c (mi_interpreter_exec_continuation): 
-	Move from mi-main.c
+	Move to mi-main.c
 	(mi_cmd_interpreter_exec): Switch interpreters.  Make
 	asynchronous.
 	(mi1_command_loop, mi2_command_loop, mi3_command_loop): 
 	Make argument void*.
+	
+	* mi/mi-main.c: Include wrapper.h.
+	(struct mi_continuation_arg): New structure.
+	(mi_interpreter_exec_continuation): Move from mi-interp.c.
+	(mi_execute_async_cli_command)
+	(mi_exec_async_cli_cmd_continuation): Make asynchronous.
+	(mi_setup_continuation_arg): New function.
 
 	* Makefile.in (async_nat_inferior_h, async_nat_sigthread_h): 
 	New variables.
