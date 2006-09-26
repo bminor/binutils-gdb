@@ -16,8 +16,11 @@
 namespace gold
 {
 
+class Input_objects;
 class Output_section;
+class Output_section_symtab;
 class Output_segment;
+class Output_data;
 
 // This Task handles mapping the input sections to output sections and
 // laying them out in memory.
@@ -28,7 +31,8 @@ class Layout_task : public Task
   // OPTIONS is the command line options, INPUT_OBJECTS is the list of
   // input objects, THIS_BLOCKER is a token which blocks this task
   // from executing until all the input symbols have been read.
-  Layout_task(const General_options& options, const Object_list* input_objects,
+  Layout_task(const General_options& options,
+	      const Input_objects* input_objects,
 	      Task_token* this_blocker)
     : options_(options), input_objects_(input_objects),
       this_blocker_(this_blocker)
@@ -52,7 +56,7 @@ class Layout_task : public Task
   Layout_task& operator=(const Layout_task&);
 
   const General_options& options_;
-  const Object_list* input_objects_;
+  const Input_objects* input_objects_;
   Task_token* this_blocker_;
 };
 
@@ -61,10 +65,11 @@ class Layout_task : public Task
 class Layout
 {
  public:
-  Layout(const General_options& options)
-    : options_(options), namepool_(), signatures_(),
-      section_name_map_(), segment_list_()
-  { }
+  Layout(const General_options& options);
+
+  // Initialize the object.
+  void
+  init();
 
   // Given an input section named NAME with data in SHDR from the
   // object file OBJECT, return the output section where this input
@@ -88,6 +93,22 @@ class Layout
   bool
   add_comdat(const char*, bool group);
 
+  // Finalize the layout after all the input sections have been added.
+  void
+  finalize(const Input_objects*);
+
+  // The list of segments.
+
+  typedef std::vector<Output_segment*> Segment_list;
+
+  // The list of sections not attached to a segment.
+
+  typedef std::list<Output_section*> Section_list;
+
+  // The list of information to write out which is not attached to
+  // either a section or a segment.
+  typedef std::list<Output_data*> Data_list;
+
  private:
   Layout(const Layout&);
   Layout& operator=(const Layout&);
@@ -101,6 +122,19 @@ class Layout
   };
   static const Linkonce_mapping linkonce_mapping[];
   static const int linkonce_mapping_count;
+
+  // Lay out the local symbols from a SHT_SYMTAB section.
+  template<int size, bool big_endian>
+  void
+  add_symtab_locals(Object* object, const elfcpp::Shdr<size, big_endian>&);
+
+  // Create the output sections for the symbol table.
+  void
+  create_symtab_sections();
+
+  // Finalize the symbol table.
+  void
+  finalize_symtab();
 
   // Return whether to include this section in the link.
   template<int size, bool big_endian>
@@ -153,14 +187,6 @@ class Layout
     { return Layout::segment_precedes(seg1, seg2); }
   };
 
-  // The list of segments.
-
-  typedef std::list<Output_segment*> Segment_list;
-
-  // The list of sections not attached to a segment.
-
-  typedef std::list<Output_section*> Section_list;
-
   // A reference to the options on the command line.
   const General_options& options_;
   // The output section names.
@@ -174,6 +200,9 @@ class Layout
   // The list of output sections which are not attached to any output
   // segment.
   Section_list section_list_;
+  // The list of output data objects which are not attached to any
+  // output section or output segment.
+  Data_list data_list_;
 };
 
 } // End namespace gold.

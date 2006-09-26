@@ -12,6 +12,7 @@
 #include "dirsearch.h"
 #include "readsyms.h"
 #include "symtab.h"
+#include "object.h"
 #include "layout.h"
 
 namespace gold
@@ -67,7 +68,7 @@ void
 queue_initial_tasks(const General_options& options,
 		    const Dirsearch& search_path,
 		    const Command_line::Input_argument_list& inputs,
-		    Workqueue* workqueue, Object_list* input_objects,
+		    Workqueue* workqueue, Input_objects* input_objects,
 		    Symbol_table* symtab)
 {
   if (inputs.empty())
@@ -117,7 +118,7 @@ main(int argc, char** argv)
   gold::Workqueue workqueue(command_line.options());
 
   // The list of input objects.
-  Object_list input_objects;
+  Input_objects input_objects;
 
   // The symbol table.
   Symbol_table symtab;

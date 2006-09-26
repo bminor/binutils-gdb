@@ -4,6 +4,7 @@
 
 #include <cassert>
 #include <cstring>
+#include <algorithm>
 #include <iostream>
 #include <utility>
 
@@ -45,13 +46,33 @@ void
 Layout_task::run(Workqueue*)
 {
   Layout layout(this->options_);
-  for (Object_list::const_iterator p = this->input_objects_->begin();
+  layout.init();
+  for (Input_objects::Object_list::const_iterator p =
+	 this->input_objects_->begin();
        p != this->input_objects_->end();
        ++p)
     (*p)->layout(&layout);
+  layout.finalize(this->input_objects_);
 }
 
 // Layout methods.
+
+Layout::Layout(const General_options& options)
+  : options_(options), namepool_(), signatures_(),
+    section_name_map_(), segment_list_(), section_list_(),
+    data_list_()
+{
+}
+
+// Prepare for doing layout.
+
+void
+Layout::init()
+{
+  // Make space for more than enough segments for a typical file.
+  // This is just for efficiency--it's OK if we wind up needing more.
+  segment_list_.reserve(12);
+}
 
 // Hash a key we use to look up an output section mapping.
 
@@ -269,8 +290,6 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
 	      && ((*p)->flags() & elfcpp::PF_W) == (seg_flags & elfcpp::PF_W))
 	    {
 	      (*p)->add_output_section(os);
-	      if ((*p)->flags() != seg_flags)
-		(*p)->update_flags(seg_flags);
 	      break;
 	    }
 	}
@@ -297,8 +316,6 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
 		      == (seg_flags & elfcpp::PF_W)))
 		{
 		  (*p)->add_output_section(os);
-		  if ((*p)->flags() != seg_flags)
-		    (*p)->update_flags(seg_flags);
 		  break;
 		}
 	    }
@@ -311,9 +328,94 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
 	      oseg->add_output_section(os);
 	    }
 	}
+
+      // If we see a loadable SHF_TLS section, we create a PT_TLS
+      // segment.
+      if ((flags & elfcpp::SHF_TLS) != 0)
+	{
+	  // See if we already have an equivalent PT_TLS segment.
+	  for (p = this->segment_list_.begin();
+	       p != segment_list_.end();
+	       ++p)
+	    {
+	      if ((*p)->type() == elfcpp::PT_TLS
+		  && (((*p)->flags() & elfcpp::PF_W)
+		      == (seg_flags & elfcpp::PF_W)))
+		{
+		  (*p)->add_output_section(os);
+		  break;
+		}
+	    }
+
+	  if (p == this->segment_list_.end())
+	    {
+	      Output_segment* oseg = new Output_segment(elfcpp::PT_TLS,
+							seg_flags);
+	      this->segment_list_.push_back(oseg);
+	      oseg->add_output_section(os);
+	    }
+	}
     }
 
   return os;
+}
+
+// Create the sections for the symbol table.
+
+void
+Layout::create_symtab_sections()
+{
+}
+
+// Finalize the layout.  When this is called, we have created all the
+// output sections and all the output segments which are based on
+// input sections.  We have several things to do, and we have to do
+// them in the right order, so that we get the right results correctly
+// and efficiently.
+
+// 1) Finalize the list of output segments and create the segment
+// table header.
+
+// 2) Finalize the dynamic symbol table and associated sections.
+
+// 3) Determine the final file offset of all the output segments.
+
+// 4) Determine the final file offset of all the SHF_ALLOC output
+// sections.
+
+// 5) Finalize the symbol table: set symbol values to their final
+// value and make a final determination of which symbols are going
+// into the output symbol table.
+
+// 6) Create the symbol table sections and the section name table
+// section.
+
+// 7) Create the section table header.
+
+// 8) Determine the final file offset of all the output sections which
+// are not SHF_ALLOC, including the section table header.
+
+// 9) Finalize the ELF file header.
+
+void
+Layout::finalize(const Input_objects* input_objects)
+{
+  if (input_objects->any_dynamic())
+    {
+      // If there are any dynamic objects in the link, then we need
+      // some additional segments: PT_PHDRS, PT_INTERP, and
+      // PT_DYNAMIC.  We also need to finalize the dynamic symbol
+      // table and create the dynamic hash table.
+      abort();
+    }
+
+  // FIXME: Handle PT_GNU_STACK.
+
+  std::sort(this->segment_list_.begin(), this->segment_list_.end(),
+	    Layout::Compare_segments());
+
+  Output_segment_headers* segment_headers;
+  segment_headers = new Output_segment_headers(this->segment_list_);
 }
 
 // The mapping of .gnu.linkonce section names to real section names.

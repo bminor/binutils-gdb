@@ -136,6 +136,7 @@ Sized_object<size, big_endian>::do_read_symbols()
       Read_symbols_data ret;
       ret.symbols = NULL;
       ret.symbols_size = 0;
+      ret.first_global = 0;
       ret.symbol_names = NULL;
       ret.symbol_names_size = 0;
       return ret;
@@ -149,14 +150,9 @@ Sized_object<size, big_endian>::do_read_symbols()
   elfcpp::Shdr<size, big_endian> symtabshdr(psymtabshdr);
   assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
 
-  // We only need the external symbols.
-  const int sym_size = This::sym_size;
-  off_t locsize = symtabshdr.get_sh_info() * sym_size;
-  off_t extoff = symtabshdr.get_sh_offset() + locsize;
-  off_t extsize = symtabshdr.get_sh_size() - locsize;
-
   // Read the symbol table.
-  File_view* fvsymtab = this->get_lasting_view(extoff, extsize);
+  File_view* fvsymtab = this->get_lasting_view(symtabshdr.get_sh_offset(),
+					       symtabshdr.get_sh_size());
 
   // Read the section header for the symbol names.
   unsigned int strtab_shnum = symtabshdr.get_sh_link();
@@ -184,7 +180,8 @@ Sized_object<size, big_endian>::do_read_symbols()
 
   Read_symbols_data ret;
   ret.symbols = fvsymtab;
-  ret.symbols_size = extsize;
+  ret.symbols_size = symtabshdr.get_sh_size();
+  ret.first_global = symtabshdr.get_sh_info();
   ret.symbol_names = fvstrtab;
   ret.symbol_names_size = strtabshdr.get_sh_size();
 
@@ -214,14 +211,29 @@ Sized_object<size, big_endian>::do_add_symbols(Symbol_table* symtab,
       gold_exit(false);
     }
 
-  this->symbols_ = new Symbol*[symcount];
-
-  const elfcpp::Sym<size, big_endian>* syms =
-    reinterpret_cast<const elfcpp::Sym<size, big_endian>*>(sd.symbols->data());
   const char* sym_names =
     reinterpret_cast<const char*>(sd.symbol_names->data());
-  symtab->add_from_object(this, syms, symcount, sym_names, 
-			  sd.symbol_names_size,  this->symbols_);
+
+  // We only add the global symbols to the symbol table.
+  if (symcount > sd.first_global)
+    {
+      this->symbols_ = new Symbol*[symcount - sd.first_global];
+
+      const unsigned char* symdata = sd.symbols->data();
+      symdata += sd.first_global * sym_size;
+      const elfcpp::Sym<size, big_endian>* syms =
+	reinterpret_cast<const elfcpp::Sym<size, big_endian>*>(symdata);
+
+      symtab->add_from_object(this, syms, symcount - sd.first_global,
+			      sym_names, sd.symbol_names_size, this->symbols_);
+    }
+
+  // Add the names of the local symbols.  FIXME: We shouldn't do this
+  // if we are stripping symbols.
+  const elfcpp::Sym<size, big_endian>* local_syms =
+    reinterpret_cast<const elfcpp::Sym<size, big_endian>*>(sd.symbols->data());
+  symtab->add_local_symbol_names(this, local_syms, sd.first_global,
+				 sym_names, sd.symbol_names_size);
 
   delete sd.symbols;
   delete sd.symbol_names;
@@ -442,6 +454,16 @@ Sized_object<size, big_endian>::do_layout(Layout* layout)
 
       pshdrs += This::shdr_size;
     }
+}
+
+// Input_objects methods.
+
+void
+Input_objects::add_object(Object* obj)
+{
+  this->object_list_.push_back(obj);
+  if (obj->is_dynamic())
+    this->any_dynamic_ = true;
 }
 
 } // End namespace gold.

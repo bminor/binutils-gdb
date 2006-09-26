@@ -9,6 +9,9 @@
 namespace gold
 {
 
+class Input_objects;
+class Symbol_table;
+
 // This Task is responsible for reading the symbols from an input
 // file.  This also includes reading the relocations so that we can
 // check for any that require a PLT and/or a GOT.  After the data has
@@ -25,7 +28,7 @@ class Read_symbols : public Task
   // associated Add_symbols task from running before the previous one
   // has completed; it will be NULL for the first task.  NEXT_BLOCKER
   // is used to block the next input file from adding symbols.
-  Read_symbols(const General_options& options, Object_list* input_objects,
+  Read_symbols(const General_options& options, Input_objects* input_objects,
 	       Symbol_table* symtab, const Dirsearch& dirpath,
 	       const Input_argument& input,
 	       Task_token* this_blocker, Task_token* next_blocker)
@@ -49,7 +52,7 @@ class Read_symbols : public Task
 
  private:
   const General_options& options_;
-  Object_list* input_objects_;
+  Input_objects* input_objects_;
   Symbol_table* symtab_;
   const Dirsearch& dirpath_;
   const Input_argument& input_;

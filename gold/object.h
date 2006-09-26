@@ -25,6 +25,8 @@ struct Read_symbols_data
   File_view* symbols;
   // Size of symbol data in bytes.
   off_t symbols_size;
+  // Index of first global symbol.
+  unsigned int first_global;
   // Symbol names.
   File_view* symbol_names;
   // Size of symbol name data in bytes.
@@ -274,9 +276,43 @@ class Sized_object : public Object
   Symbol** symbols_;
 };
 
-// The type of the list of input objects.
+// A class to manage the list of all objects.
 
-typedef std::list<Object*> Object_list;
+class Input_objects
+{
+ public:
+  Input_objects()
+    : object_list_()
+  { }
+
+  // The type of the list of input objects.
+  typedef std::list<Object*> Object_list;
+
+  // Add an object to the list.
+  void
+  add_object(Object*);
+
+  // Iterate over all objects.
+  Object_list::const_iterator
+  begin() const
+  { return this->object_list_.begin(); }
+
+  Object_list::const_iterator
+  end() const
+  { return this->object_list_.end(); }
+
+  // Return whether we have seen any dynamic objects.
+  bool
+  any_dynamic() const
+  { return this->any_dynamic_; }
+
+ private:
+  Input_objects(const Input_objects&);
+  Input_objects& operator=(const Input_objects&);
+
+  Object_list object_list_;
+  bool any_dynamic_;
+};
 
 // Return an Object appropriate for the input file.  P is BYTES long,
 // and holds the ELF header.

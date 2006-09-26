@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-09-21 13:30-0700\n"
+"POT-Creation-Date: 2006-09-26 13:58-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -51,7 +51,7 @@ msgstr ""
 msgid "%s: cannot open %s: %s"
 msgstr ""
 
-#: gold.cc:74
+#: gold.cc:75
 msgid "no input files"
 msgstr ""
 
@@ -114,88 +114,88 @@ msgstr ""
 msgid "%s: %s: unsupported ELF machine number %d\n"
 msgstr ""
 
-#: object.cc:165
+#: object.cc:161
 #, c-format
 msgid "%s: %s: invalid symbol table name index: %u\n"
 msgstr ""
 
-#: object.cc:175
+#: object.cc:171
 #, c-format
 msgid "%s: %s: symbol table name section has wrong type: %u\n"
 msgstr ""
 
-#: object.cc:212
+#: object.cc:209
 #, c-format
 msgid "%s: %s: size of symbols is not multiple of symbol size\n"
 msgstr ""
 
-#: object.cc:266
+#: object.cc:278
 #, c-format
 msgid "%s: %s: section group %u link %u out of range\n"
 msgstr ""
 
-#: object.cc:277
+#: object.cc:289
 #, c-format
 msgid "%s: %s: section group %u info %u out of range\n"
 msgstr ""
 
-#: object.cc:288
+#: object.cc:300
 #, c-format
 msgid "%s; %s: symtab section %u link %u out of range\n"
 msgstr ""
 
-#: object.cc:306
+#: object.cc:318
 #, c-format
 msgid "%s: %s: symbol %u name offset %u out of range\n"
 msgstr ""
 
-#: object.cc:328
+#: object.cc:340
 #, c-format
 msgid "%s: %s: section %u in section group %u out of range"
 msgstr ""
 
-#: object.cc:407
+#: object.cc:419
 #, c-format
 msgid "%s: %s: bad section name offset for section %u: %lu\n"
 msgstr ""
 
 #. elfcpp::ET_DYN
-#: object.cc:480
+#: object.cc:502
 #, c-format
 msgid "%s: %s: dynamic objects are not yet supported\n"
 msgstr ""
 
-#: object.cc:504 object.cc:557 object.cc:578
+#: object.cc:526 object.cc:579 object.cc:600
 #, c-format
 msgid "%s: %s: ELF file too short\n"
 msgstr ""
 
-#: object.cc:513
+#: object.cc:535
 #, c-format
 msgid "%s: %s: invalid ELF version 0\n"
 msgstr ""
 
-#: object.cc:516
+#: object.cc:538
 #, c-format
 msgid "%s: %s: unsupported ELF version %d\n"
 msgstr ""
 
-#: object.cc:524
+#: object.cc:546
 #, c-format
 msgid "%s: %s: invalid ELF class 0\n"
 msgstr ""
 
-#: object.cc:531
+#: object.cc:553
 #, c-format
 msgid "%s: %s: unsupported ELF class %d\n"
 msgstr ""
 
-#: object.cc:539
+#: object.cc:561
 #, c-format
 msgid "%s: %s: invalid ELF data encoding\n"
 msgstr ""
 
-#: object.cc:546
+#: object.cc:568
 #, c-format
 msgid "%s: %s: unsupported ELF data encoding %d\n"
 msgstr ""
@@ -250,7 +250,7 @@ msgstr ""
 msgid "%s: -%c: %s\n"
 msgstr ""
 
-#: output.cc:58
+#: output.cc:70
 #, c-format
 msgid "%s: %s: invalid alignment %lu for section \"%s\"\n"
 msgstr ""
@@ -270,7 +270,12 @@ msgstr ""
 msgid "%s: %s: mixing 32-bit and 64-bit ELF objects\n"
 msgstr ""
 
-#: symtab.cc:284
+#: symtab.cc:285
 #, c-format
-msgid "%s: %s: bad symbol name offset %u at %lu\n"
+msgid "%s: %s: bad global symbol name offset %u at %lu\n"
+msgstr ""
+
+#: symtab.cc:342
+#, c-format
+msgid "%s: %s: bad local symbol name offset %u at %lu\n"
 msgstr ""

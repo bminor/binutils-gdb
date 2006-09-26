@@ -6,6 +6,7 @@
 #include <list>
 
 #include "elfcpp.h"
+#include "layout.h"
 
 namespace gold
 {
@@ -13,8 +14,10 @@ namespace gold
 class Object;
 class Output_file;
 
-// An abtract class for data which has to go into the output file
-// which is not associated with any input section.
+template<int size, bool big_endian>
+class Sized_target;
+
+// An abtract class for data which has to go into the output file.
 
 class Output_data
 {
@@ -26,15 +29,27 @@ class Output_data
   virtual
   ~Output_data();
 
-  // Return the size of the data.
+  // Return the size of the data.  This can't be called "size" since
+  // that interferes with the widely used template parameter name.
   off_t
-  size()
+  get_size()
   { return this->size_; }
 
   // Write the data to the output file at the specified offset.  This
   // must be implemented by the real class.
   virtual void
   write(Output_file*, off_t off) = 0;
+
+  // Return whether this is an Output_section of the specified type.
+  virtual bool
+  is_section_type(elfcpp::Elf_Word)
+  { return false; }
+
+  // Return whether this is an Output_section with the specified flag
+  // set.
+  virtual bool
+  is_section_flag_set(elfcpp::Elf_Xword)
+  { return false; }
 
  protected:
   // Set the size of the data.
@@ -50,7 +65,7 @@ class Output_data
   off_t size_;
 };
 
-// A simple cass of Output_data in which we have constant data to
+// A simple case of Output_data in which we have constant data to
 // output.
 
 class Output_data_const : public Output_data
@@ -64,6 +79,7 @@ class Output_data_const : public Output_data
     : Output_data(len), data_(p, len)
   { }
 
+  // Write the data to the file.
   void
   write(Output_file* output, off_t off);
 
@@ -71,15 +87,74 @@ class Output_data_const : public Output_data
   std::string data_;
 };
 
+// Output the section headers.
+
+class Output_section_headers : public Output_data
+{
+ public:
+  Output_section_headers(const Layout::Segment_list&,
+			 const Layout::Section_list&);
+
+  // Write the data to the file.
+  void
+  write(Output_file*, off_t);
+
+ private:
+  const Layout::Segment_list& segment_list_;
+  const Layout::Section_list& section_list_;
+};
+
+// Output the segment headers.
+
+class Output_segment_headers : public Output_data
+{
+ public:
+  Output_segment_headers(const Layout::Segment_list& segment_list)
+    : segment_list_(segment_list)
+  { }
+
+  // Write the data to the file.
+  void
+  write(Output_file*, off_t);
+
+ private:
+  const Layout::Segment_list& segment_list_;
+};
+
+// Output the ELF file header.
+
+class Output_file_header : public Output_data
+{
+ public:
+  Output_file_header(const General_options&,
+		     const Target*,
+		     const Symbol_table*,
+		     const Output_segment_headers*,
+		     const Output_section_headers*,
+		     const Output_section* shstrtab);
+
+  // Write the data to the file.
+  void
+  write(Output_file*, off_t);
+
+ private:
+  const General_options& options_;
+  const Target* target_;
+  const Symbol_table* symtab_;
+  const Output_segment_headers* program_header_;
+  const Output_section_headers* section_header_;
+  const Output_section* shstrtab_;
+};
+
 // An output section.  We don't expect to have too many output
 // sections, so we don't bother to do a template on the size.
 
-class Output_section
+class Output_section : public Output_data
 {
  public:
   // Create an output section, giving the name, type, and flags.
   Output_section(const char* name, elfcpp::Elf_Word, elfcpp::Elf_Xword);
-  ~Output_section();
+  virtual ~Output_section();
 
   // Add a new input section named NAME with header SHDR from object
   // OBJECT.  Return the offset within the output section.
@@ -103,6 +178,23 @@ class Output_section
   flags() const
   { return this->flags_; }
 
+  // Write the data to the file.  For a typical Output_section, this
+  // does nothing.  We write out the data by looping over all the
+  // input sections.
+  virtual void
+  write(Output_file*, off_t)
+  { }
+
+  // Return whether this is a section of the specified type.
+  bool
+  is_section_type(elfcpp::Elf_Word type)
+  { return this->type_ == type; }
+
+  // Return whether the specified section flag is set.
+  bool
+  is_section_flag_set(elfcpp::Elf_Xword flag)
+  { return (this->flags_ & flag) != 0; }
+
  private:
   // Most of these fields are only valid after layout.
 
@@ -116,8 +208,6 @@ class Output_section
   uint64_t entsize_;
   // The file offset.
   off_t offset_;
-  // The section size.
-  off_t size_;
   // The section link field.
   unsigned int link_;
   // The section info field.
@@ -126,6 +216,16 @@ class Output_section
   elfcpp::Elf_Word type_;
   // The section flags.
   elfcpp::Elf_Xword flags_;
+};
+
+// A special Output_section which represents the symbol table
+// (SHT_SYMTAB).
+
+class Output_section_symtab : public Output_section
+{
+ public:
+  Output_section_symtab();
+  ~Output_section_symtab();
 };
 
 // An output segment.  PT_LOAD segments are built from collections of
@@ -162,20 +262,15 @@ class Output_segment
   void
   add_output_section(Output_section*);
 
-  // Update the segment flags to be compatible with FLAGS.
-  void
-  update_flags(elfcpp::Elf_Word flags)
-  { this->flags_ |= flags & (elfcpp::PF_R | elfcpp::PF_W | elfcpp::PF_X); }
-
  private:
   Output_segment(const Output_segment&);
   Output_segment& operator=(const Output_segment&);
 
-  typedef std::list<Output_section*> Section_list;
+  typedef std::list<Output_data*> Output_data_list;
 
   // The list of output sections attached to this segment.  This is
   // cleared after layout.
-  Section_list output_sections_;
+  Output_data_list output_data_;
   // The segment virtual address.
   uint64_t vaddr_;
   // The segment physical address.

@@ -71,7 +71,7 @@ Read_symbols::run(Workqueue* workqueue)
 	  Object* obj = make_elf_object(this->input_.name(), input_file, 0,
 					p, bytes);
 
-	  this->input_objects_->push_back(obj);
+	  this->input_objects_->add_object(obj);
 
 	  Read_symbols_data sd = obj->read_symbols();
 	  workqueue->queue(new Add_symbols(this->symtab_, obj, sd,

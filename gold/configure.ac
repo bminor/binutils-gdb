@@ -28,6 +28,11 @@ dnl host dependent.  If build == host, we can check getconf LFS_CFLAGS.
 LFS_CXXFLAGS="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 AC_SUBST(LFS_CXXFLAGS)
 
+AC_LANG_PUSH(C++)
+AC_CHECK_HEADERS(tr1/unordered_set tr1/unordered_map)
+AC_CHECK_HEADERS(ext/hash_map ext/hash_set)
+AC_LANG_POP(C++)
+
 AM_MAINTAINER_MODE
 
 AC_OUTPUT(Makefile po/Makefile.in:po/Make-in)

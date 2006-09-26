@@ -5,6 +5,7 @@
 
 #include <string>
 #include <utility>
+#include <cassert>
 
 #include "elfcpp.h"
 #include "stringpool.h"
@@ -19,9 +20,6 @@ class Object;
 
 template<int size, bool big_endian>
 class Sized_object;
-
-template<int size, bool big_endian>
-class Sized_target;
 
 // The base class of an entry in the symbol table.  The symbol table
 // can have a lot of entries, so we don't want this class to big.
@@ -226,11 +224,19 @@ class Symbol_table
   // Return the sized version of a symbol in this table.
   template<int size>
   Sized_symbol<size>*
-  get_sized_symbol(Symbol*);
+  get_sized_symbol(Symbol*) const;
 
   template<int size>
   const Sized_symbol<size>*
-  get_sized_symbol(const Symbol*);
+  get_sized_symbol(const Symbol*) const;
+
+  // Record the names of the local symbols for an object.
+  template<int size, bool big_endian>
+  void
+  add_local_symbol_names(Sized_object<size, big_endian>* object,
+			 const elfcpp::Sym<size, big_endian>* syms,
+			 size_t count, const char* sym_names,
+			 size_t sym_name_size);
 
  private:
   Symbol_table(const Symbol_table&);
@@ -263,6 +269,8 @@ class Symbol_table
   static void
   resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from);
 
+  // The type of the symbol hash table.
+
   typedef std::pair<const char*, const char*> Symbol_table_key;
 
   struct Symbol_table_hash
@@ -283,11 +291,17 @@ class Symbol_table
   // The size of the symbols in the symbol table (32 or 64).
   int size_;
 
-  // The symbol table itself.
+  // The symbol hash table.
   Symbol_table_type table_;
 
-  // A pool of symbol names.
+  // A pool of symbol names.  This is used for all global symbols.
+  // Entries in the hash table point into this pool.
   Stringpool namepool_;
+
+  // A pool of symbol names to go into the output file.  This is used
+  // for all symbols, global and local, but only the names of symbols
+  // which will definitely be output are added to this pool.
+  Stringpool output_pool_;
 
   // Forwarding symbols.
   Unordered_map<Symbol*, Symbol*> forwarders_;
@@ -297,7 +311,7 @@ class Symbol_table
 
 template<int size>
 Sized_symbol<size>*
-Symbol_table::get_sized_symbol(Symbol* sym)
+Symbol_table::get_sized_symbol(Symbol* sym) const
 {
   assert(size == this->get_size());
   return static_cast<Sized_symbol<size>*>(sym);
@@ -305,7 +319,7 @@ Symbol_table::get_sized_symbol(Symbol* sym)
 
 template<int size>
 const Sized_symbol<size>*
-Symbol_table::get_sized_symbol(const Symbol* sym)
+Symbol_table::get_sized_symbol(const Symbol* sym) const
 {
   assert(size == this->get_size());
   return static_cast<const Sized_symbol<size>*>(sym);

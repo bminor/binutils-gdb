@@ -52,7 +52,7 @@ Sized_symbol<size>::init(const char* name, const char* version, Object* object,
 // Class Symbol_table.
 
 Symbol_table::Symbol_table()
-  : size_(0), table_(), namepool_(), forwarders_()
+  : size_(0), table_(), namepool_(), output_pool_(), forwarders_()
 {
 }
 
@@ -281,7 +281,8 @@ Symbol_table::add_from_object(
       unsigned int st_name = sym.get_st_name();
       if (st_name >= sym_name_size)
 	{
-	  fprintf(stderr, _("%s: %s: bad symbol name offset %u at %lu\n"),
+	  fprintf(stderr,
+		  _("%s: %s: bad global symbol name offset %u at %lu\n"),
 		  program_name, object->name().c_str(), st_name,
 		  static_cast<unsigned long>(i));
 	  gold_exit(false);
@@ -317,6 +318,34 @@ Symbol_table::add_from_object(
       *sympointers++ = res;
 
       p += elfcpp::Elf_sizes<size>::sym_size;
+    }
+}
+
+// Record the names of the local symbols for an object.
+
+template<int size, bool big_endian>
+void
+Symbol_table::add_local_symbol_names(Sized_object<size, big_endian>* object,
+				     const elfcpp::Sym<size, big_endian>* syms,
+				     size_t count, const char* sym_names,
+				     size_t sym_name_size)
+{
+  const unsigned char* p = reinterpret_cast<const unsigned char*>(syms);
+  for (size_t i = 0; i < count; ++i)
+    {
+      elfcpp::Sym<size, big_endian> sym(p);
+
+      unsigned int st_name = sym.get_st_name();
+      if (st_name >= sym_name_size)
+	{
+	  fprintf(stderr,
+		  _("%s: %s: bad local symbol name offset %u at %lu\n"),
+		  program_name, object->name().c_str(), st_name,
+		  static_cast<unsigned long>(i));
+	  gold_exit(false);
+	}
+
+      this->output_pool_.add(sym_names + st_name);
     }
 }
 
@@ -363,5 +392,41 @@ Symbol_table::add_from_object<64, false>(
     const char* sym_names,
     size_t sym_name_size,
     Symbol** sympointers);
+
+template
+void
+Symbol_table::add_local_symbol_names<32, true>(
+    Sized_object<32, true>* object,
+    const elfcpp::Sym<32, true>* syms,
+    size_t count,
+    const char* sym_names,
+    size_t sym_name_size);
+
+template
+void
+Symbol_table::add_local_symbol_names<32, false>(
+    Sized_object<32, false>* object,
+    const elfcpp::Sym<32, false>* syms,
+    size_t count,
+    const char* sym_names,
+    size_t sym_name_size);
+
+template
+void
+Symbol_table::add_local_symbol_names<64, true>(
+    Sized_object<64, true>* object,
+    const elfcpp::Sym<64, true>* syms,
+    size_t count,
+    const char* sym_names,
+    size_t sym_name_size);
+
+template
+void
+Symbol_table::add_local_symbol_names<64, false>(
+    Sized_object<64, false>* object,
+    const elfcpp::Sym<64, false>* syms,
+    size_t count,
+    const char* sym_names,
+    size_t sym_name_size);
 
 } // End namespace gold.
