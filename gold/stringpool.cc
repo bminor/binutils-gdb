@@ -31,7 +31,7 @@ Stringpool::Stringpool_hash::operator()(const char* s) const
   // Fowler/Noll/Vo (FNV) hash (type FNV-1a).
   if (sizeof(size_t) == 8)
     {
-      size_t result = 14695981039346656037ULL;
+      size_t result = static_cast<size_t>(14695981039346656037ULL);
       while (*s != '\0')
 	{
 	  result &= (size_t) *s++;

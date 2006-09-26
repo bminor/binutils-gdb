@@ -154,8 +154,7 @@ class Layout
 
   // Return whether SEG1 comes before SEG2 in the output file.
   static bool
-  Layout::segment_precedes(const Output_segment* seg1,
-			   const Output_segment* seg2);
+  segment_precedes(const Output_segment* seg1, const Output_segment* seg2);
 
   // Map from section flags to segment flags.
   static elfcpp::Elf_Word
