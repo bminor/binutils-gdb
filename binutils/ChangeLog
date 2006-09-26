@@ -1,3 +1,8 @@
+2006-09-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/3257
+	* strings.c (main): Handle "-T format".
+
 2006-09-26  Nick Clifton  <nickc@redhat.com>
 
 	* MAINTAINERS: Add Mei Ligang as maintainer of the Score port.
