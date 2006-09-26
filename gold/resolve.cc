@@ -52,7 +52,16 @@ Symbol_table::resolve(Sized_symbol<size>* to,
 {
   if (object->target()->has_resolve())
     {
-      object->sized_target<size, big_endian>()->resolve(to, sym, object);
+      Sized_target<size, big_endian>* sized_target;
+#ifdef HAVE_MEMBER_TEMPLATE_SPECIFICATIONS
+      sized_target = object->sized_target<size, big_endian>();
+#else
+      Target* target = object->target();
+      assert(target->get_size() == size);
+      assert(target->is_big_endian() ? big_endian : !big_endian);
+      sized_target = static_cast<Sized_target<size, big_endian>*>(target);
+#endif
+      sized_target->resolve(to, sym, object);
       return;
     }
 

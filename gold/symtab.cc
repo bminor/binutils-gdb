@@ -107,6 +107,8 @@ Symbol_table::resolve_forwards(Symbol* from) const
 // version is the default version.  Because this is unusual, we do
 // this the slow way, by converting back to an ELF symbol.
 
+#ifdef HAVE_MEMBER_TEMPLATE_SPECIFICATIONS
+
 template<int size, bool big_endian>
 void
 Symbol_table::resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from)
@@ -121,6 +123,40 @@ Symbol_table::resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from)
   esym.put_st_shndx(from->shnum());
   Symbol_table::resolve(to, esym.sym(), from->object());
 }
+
+#else
+
+template<int size>
+void
+Symbol_table::resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from,
+                      bool big_endian)
+{
+  unsigned char buf[elfcpp::Elf_sizes<size>::sym_size];
+  if (big_endian)
+    {
+      elfcpp::Sym_write<size, true> esym(buf);
+      // We don't bother to set the st_name field.
+      esym.put_st_value(from->value());
+      esym.put_st_size(from->symsize());
+      esym.put_st_info(from->binding(), from->type());
+      esym.put_st_other(from->visibility(), from->other());
+      esym.put_st_shndx(from->shnum());
+      Symbol_table::resolve(to, esym.sym(), from->object());
+    }
+  else
+    {
+      elfcpp::Sym_write<size, false> esym(buf);
+      // We don't bother to set the st_name field.
+      esym.put_st_value(from->value());
+      esym.put_st_size(from->symsize());
+      esym.put_st_info(from->binding(), from->type());
+      esym.put_st_other(from->visibility(), from->other());
+      esym.put_st_shndx(from->shnum());
+      Symbol_table::resolve(to, esym.sym(), from->object());
+    }
+}
+
+#endif
 
 // Add one symbol from OBJECT to the symbol table.  NAME is symbol
 // name and VERSION is the version; both are canonicalized.  DEF is
@@ -174,7 +210,12 @@ Symbol_table::add_from_object(Sized_object<size, big_endian>* object,
   if (!ins.second)
     {
       // We already have an entry for NAME/VERSION.
+#ifdef HAVE_MEMBER_TEMPLATE_SPECIFICATIONS
       ret = this->get_sized_symbol<size>(ins.first->second);
+#else
+      assert(size == this->get_size());
+      ret = static_cast<Sized_symbol<size>*>(ins.first->second);
+#endif
       assert(ret != NULL);
       Symbol_table::resolve(ret, sym, object);
 
@@ -190,9 +231,14 @@ Symbol_table::add_from_object(Sized_object<size, big_endian>* object,
 	    {
 	      // This is the unfortunate case where we already have
 	      // entries for both NAME/VERSION and NAME/NULL.
-	      const Sized_symbol<size>* sym2 =
-		this->get_sized_symbol<size>(insdef.first->second);
+	      const Sized_symbol<size>* sym2;
+#ifdef HAVE_MEMBER_TEMPLATE_SPECIFICATIONS
+	      sym2 = this->get_sized_symbol<size>(insdef.first->second);
 	      Symbol_table::resolve<size, big_endian>(ret, sym2);
+#else
+	      sym2 = static_cast<Sized_symbol<size>*>(insdef.first->second);
+	      Symbol_table::resolve(ret, sym2, big_endian);
+#endif
 	      this->make_forwarder(insdef.first->second, ret);
 	      insdef.first->second = ret;
 	    }
@@ -206,7 +252,11 @@ Symbol_table::add_from_object(Sized_object<size, big_endian>* object,
 	{
 	  // We already have an entry for NAME/NULL.  Make
 	  // NAME/VERSION point to it.
+#ifdef HAVE_MEMBER_TEMPLATE_SPECIFICATIONS
 	  ret = this->get_sized_symbol<size>(insdef.first->second);
+#else
+          ret = static_cast<Sized_symbol<size>*>(insdef.first->second);
+#endif
 	  Symbol_table::resolve(ret, sym, object);
 	  ins.first->second = ret;
 	}

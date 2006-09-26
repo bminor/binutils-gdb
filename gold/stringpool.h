@@ -58,9 +58,15 @@ class Stringpool
     { return strcmp(p1, p2) == 0; }
   };
 
+#ifdef HAVE_TR1_UNORDERED_SET
   typedef Unordered_set<const char*, Stringpool_hash, Stringpool_eq,
 			std::allocator<const char*>,
 			true> String_set_type;
+#else
+  typedef Unordered_set<const char*, Stringpool_hash, Stringpool_eq,
+			std::allocator<const char*> > String_set_type;
+#endif
+
   String_set_type string_set_;
   std::list<stringdata*> strings_;
 };

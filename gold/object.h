@@ -92,8 +92,6 @@ class Object
   template<int size, bool big_endian>
   Sized_target<size, big_endian>*
   sized_target();
-#else
-  virtual Target* sized_target() = 0;
 #endif
 
   // Read the symbol and relocation information.
@@ -248,7 +246,13 @@ class Sized_object : public Object
   // Return the appropriate Sized_target structure.
   Sized_target<size, big_endian>*
   sized_target()
-  { return this->Object::sized_target<size, big_endian>(); }
+  {
+#ifdef HAVE_MEMBER_TEMPLATE_SPECIFICATIONS
+    return this->Object::sized_target<size, big_endian>();
+#else
+    return static_cast<Sized_target<size, big_endian>*>(this->target());
+#endif
+  }
 
  private:
   // This object may not be copied.
@@ -290,7 +294,7 @@ class Input_objects
 {
  public:
   Input_objects()
-    : object_list_()
+    : object_list_(), any_dynamic_(false)
   { }
 
   // The type of the list of input objects.

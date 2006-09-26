@@ -265,9 +265,16 @@ class Symbol_table
 	  const elfcpp::Sym<size, big_endian>& sym,
 	  Object*);
 
+#ifdef HAVE_MEMBER_TEMPLATE_SPECIFICATIONS
   template<int size, bool big_endian>
   static void
   resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from);
+#else
+  template<int size>
+  static void
+  resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from,
+          bool big_endian);
+#endif
 
   // The type of the symbol hash table.
 

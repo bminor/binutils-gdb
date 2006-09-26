@@ -39,9 +39,31 @@
 
 #include <ext/hash_map>
 #include <ext/hash_set>
+#include <string>
 
 #define Unordered_set __gnu_cxx::hash_set
 #define Unordered_map __gnu_cxx::hash_map
+
+namespace __gnu_cxx
+{
+
+template<>
+struct hash<std::string>
+{
+  size_t
+  operator()(std::string s) const
+  { return __stl_hash_string(s.c_str()); }
+};
+
+template<typename T>
+struct hash<T*>
+{
+  size_t
+  operator()(T* p) const
+  { return reinterpret_cast<size_t>(p); }
+};
+
+}
 
 #else
 

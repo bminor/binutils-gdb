@@ -50,16 +50,6 @@ class Target
   has_resolve() const
   { return this->has_resolve_; }
 
-  // Resolve a symbol.  This is called when we see a symbol with a
-  // target specific binding (STB_LOOS through STB_HIOS or STB_LOPROC
-  // through STB_HIPROC).  TO is a pre-existing symbol.  SYM is the
-  // new symbol, seen in OBJECT.  This returns true on success, false
-  // if the symbol can not be resolved.
-  template<int size, bool big_endian>
-  bool
-  resolve(Sized_symbol<size>* to, const elfcpp::Sym<size, big_endian>& sym,
-	  Object* object);
-
  protected:
   Target(int size, bool is_big_endian, bool has_make_symbol, bool has_resolve)
     : size_(size),
