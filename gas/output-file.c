@@ -53,9 +53,19 @@ output_file_create (char *name)
 void
 output_file_close (char *filename)
 {
+  bfd_boolean res;
+
+  if (stdoutput == NULL)
+    return;
+    
   /* Close the bfd.  */
-  if (!bfd_close (stdoutput))
+  res = bfd_close (stdoutput);
+
+  /* Prevent an infinite loop - if the close failed we will call as_fatal
+     which will call xexit() which may call this function again...  */
+  stdoutput = NULL;
+
+  if (! res)
     as_fatal (_("can't close %s: %s"), filename,
 	      bfd_errmsg (bfd_get_error ()));
-  stdoutput = NULL;		/* Trust nobody!  */
 }
