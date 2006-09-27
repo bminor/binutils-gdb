@@ -3688,7 +3688,7 @@ The linker will not create output section which do not have any
 contents.  This is for convenience when referring to input sections that
 may or may not be present in any of the input files.  For example:
 @smallexample
-.foo @{ *(.foo) @}
+.foo : @{ *(.foo) @}
 @end smallexample
 @noindent
 will only create a @samp{.foo} section in the output file if there is a
@@ -3697,6 +3697,8 @@ will only create a @samp{.foo} section in the output file if there is a
 If you use anything other than an input section description as an output
 section command, such as a symbol assignment, then the output section
 will always be created, even if there are no matching input sections.
+When a section is discarded, its address (@xref{Output Section Address})
+will also be ignored.
 
 @cindex /DISCARD/
 The special output section name @samp{/DISCARD/} may be used to discard

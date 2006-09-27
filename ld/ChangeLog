@@ -1,3 +1,16 @@
+2006-09-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/3223
+	PR ld/3267
+	* ld.texinfo: Updated Output Section Discarding.
+
+	* ldlang.h (lang_output_section_statement_type): Add
+	section_relative_symbol.
+	* ldlang.c (strip_excluded_output_sections): Don't strip a
+	section with a symbol relative to it.
+	(lang_size_sections_1): Mark if an output section has a symbol
+	symbol relative to it.
+
 2006-09-25  Bob Wilson  <bob.wilson@acm.org>
 
 	* ld.texinfo (Options): Update description of local symbols for -X.
