@@ -2308,9 +2308,13 @@ _bfd_score_elf_relocate_section (bfd *output_bfd,
         {
           sym = local_syms + r_symndx;
           sec = local_sections[r_symndx];
-          relocation = (sec->output_section->vma + sec->output_offset + sym->st_value);
+          relocation = (sec->output_section->vma
+			+ sec->output_offset
+			+ sym->st_value);
+          name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym, sec);
 
-          if ((sec->flags & SEC_MERGE) && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+          if ((sec->flags & SEC_MERGE)
+	      && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
             {
               asection *msec;
               bfd_vma addend, value;
@@ -2430,13 +2434,6 @@ _bfd_score_elf_relocate_section (bfd *output_bfd,
 		return bfd_reloc_undefined;
 	      relocation = 0;
 	    }
-        }
-
-      if (h == NULL)
-        {
-          name = (bfd_elf_string_from_elf_section (input_bfd, symtab_hdr->sh_link, sym->st_name));
-          if (name == NULL || *name == '\0')
-            name = bfd_section_name (input_bfd, sec);
         }
 
       r = score_elf_final_link_relocate (howto, input_bfd, output_bfd,

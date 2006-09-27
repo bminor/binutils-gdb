@@ -1,3 +1,9 @@
+2006-09-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-score.c (_bfd_score_elf_relocate_section): Move assignment
+	to "name" so that compiler realizes it is never uninitialized.
+	Use bfd_elf_sym_name.
+
 2006-09-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/3262
