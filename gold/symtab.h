@@ -182,6 +182,12 @@ class Sized_symbol : public Symbol
   symsize() const
   { return this->size_; }
 
+  // Set the symbol value.  This is called when we store the final
+  // values of the symbols into the symbol table.
+  void
+  set_value(Value_type value)
+  { this->value_ = value; }
+
  private:
   Sized_symbol(const Sized_symbol&);
   Sized_symbol& operator=(const Sized_symbol&);
@@ -230,13 +236,12 @@ class Symbol_table
   const Sized_symbol<size>*
   get_sized_symbol(const Symbol*) const;
 
-  // Record the names of the local symbols for an object.
-  template<int size, bool big_endian>
-  void
-  add_local_symbol_names(Sized_object<size, big_endian>* object,
-			 const elfcpp::Sym<size, big_endian>* syms,
-			 size_t count, const char* sym_names,
-			 size_t sym_name_size);
+  // Finalize the symbol table after we have set the final addresses
+  // of all the input sections.  This sets the final symbol values and
+  // adds the names to *POOL.  It records the file offset OFF, and
+  // returns the new file offset.
+  off_t
+  finalize(off_t, Stringpool*);
 
  private:
   Symbol_table(const Symbol_table&);
@@ -276,6 +281,11 @@ class Symbol_table
           bool big_endian);
 #endif
 
+  // Finalize symbols specialized for size.
+  template<int size>
+  off_t
+  sized_finalize(off_t, Stringpool*);
+
   // The type of the symbol hash table.
 
   typedef std::pair<const char*, const char*> Symbol_table_key;
@@ -298,17 +308,16 @@ class Symbol_table
   // The size of the symbols in the symbol table (32 or 64).
   int size_;
 
+  // The file offset within the output symtab section where we should
+  // write the table.
+  off_t offset_;
+
   // The symbol hash table.
   Symbol_table_type table_;
 
   // A pool of symbol names.  This is used for all global symbols.
   // Entries in the hash table point into this pool.
   Stringpool namepool_;
-
-  // A pool of symbol names to go into the output file.  This is used
-  // for all symbols, global and local, but only the names of symbols
-  // which will definitely be output are added to this pool.
-  Stringpool output_pool_;
 
   // Forwarding symbols.
   Unordered_map<Symbol*, Symbol*> forwarders_;

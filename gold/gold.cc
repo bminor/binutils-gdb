@@ -91,7 +91,8 @@ queue_initial_tasks(const General_options& options,
       this_blocker = next_blocker;
     }
 
-  workqueue->queue(new Layout_task(options, input_objects, this_blocker));
+  workqueue->queue(new Layout_task(options, input_objects, symtab,
+				   this_blocker));
 }
 
 } // end anonymous namespace.

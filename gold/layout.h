@@ -17,8 +17,10 @@ namespace gold
 {
 
 class Input_objects;
+class Symbol_table;
 class Output_section;
 class Output_section_symtab;
+class Output_section_headers;
 class Output_segment;
 class Output_data;
 
@@ -33,8 +35,9 @@ class Layout_task : public Task
   // from executing until all the input symbols have been read.
   Layout_task(const General_options& options,
 	      const Input_objects* input_objects,
+	      Symbol_table* symtab,
 	      Task_token* this_blocker)
-    : options_(options), input_objects_(input_objects),
+    : options_(options), input_objects_(input_objects), symtab_(symtab),
       this_blocker_(this_blocker)
   { }
 
@@ -57,6 +60,7 @@ class Layout_task : public Task
 
   const General_options& options_;
   const Input_objects* input_objects_;
+  Symbol_table* symtab_;
   Task_token* this_blocker_;
 };
 
@@ -94,8 +98,8 @@ class Layout
   add_comdat(const char*, bool group);
 
   // Finalize the layout after all the input sections have been added.
-  void
-  finalize(const Input_objects*);
+  off_t
+  finalize(const Input_objects*, Symbol_table*);
 
   // The list of segments.
 
@@ -123,18 +127,33 @@ class Layout
   static const Linkonce_mapping linkonce_mapping[];
   static const int linkonce_mapping_count;
 
-  // Lay out the local symbols from a SHT_SYMTAB section.
-  template<int size, bool big_endian>
-  void
-  add_symtab_locals(Object* object, const elfcpp::Shdr<size, big_endian>&);
+  // Find the first read-only PT_LOAD segment, creating one if
+  // necessary.
+  Output_segment*
+  find_first_load_seg();
+
+  // Set the final file offsets of all the segments.
+  off_t
+  set_segment_offsets(const Target*, Output_segment*);
+
+  // Set the final file offsets of all the sections not associated
+  // with a segment.
+  off_t
+  set_section_offsets(off_t);
 
   // Create the output sections for the symbol table.
   void
-  create_symtab_sections();
+  create_symtab_sections(const Input_objects*, Symbol_table*,
+			 Output_section** osymtab,
+			 Output_section** ostrtab);
 
-  // Finalize the symbol table.
-  void
-  finalize_symtab();
+  // Create the .shstrtab section.
+  Output_section*
+  create_shstrtab();
+
+  // Create the section header table.
+  Output_section_headers*
+  create_shdrs(int size, off_t);
 
   // Return whether to include this section in the link.
   template<int size, bool big_endian>
@@ -190,6 +209,8 @@ class Layout
   const General_options& options_;
   // The output section names.
   Stringpool namepool_;
+  // The output symbol names.
+  Stringpool sympool_;
   // The list of group sections and linkonce sections which we have seen.
   Signatures signatures_;
   // The mapping from input section name/type/flags to output sections.
@@ -199,9 +220,6 @@ class Layout
   // The list of output sections which are not attached to any output
   // segment.
   Section_list section_list_;
-  // The list of output data objects which are not attached to any
-  // output section or output segment.
-  Data_list data_list_;
 };
 
 } // End namespace gold.

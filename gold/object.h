@@ -14,6 +14,7 @@
 namespace gold
 {
 
+class Stringpool;
 class Output_section;
 class Layout;
 
@@ -25,8 +26,6 @@ struct Read_symbols_data
   File_view* symbols;
   // Size of symbol data in bytes.
   off_t symbols_size;
-  // Index of first global symbol.
-  unsigned int first_global;
   // Symbol names.
   File_view* symbol_names;
   // Size of symbol name data in bytes.
@@ -110,7 +109,13 @@ class Object
   layout(Layout* lay)
   { this->do_layout(lay); }
 
- protected:
+  // Initial local symbol processing: set the offset where local
+  // symbol information will be stored; add local symbol names to
+  // *POOL; return the offset following the local symbols.
+  off_t
+  finalize_local_symbols(off_t off, Stringpool* pool)
+  { return this->do_finalize_local_symbols(off, pool); }
+
   // What we need to know to map an input section to an output
   // section.  We keep an array of these, one for each input section,
   // indexed by the input section number.
@@ -123,6 +128,13 @@ class Object
     off_t offset;
   };
 
+  // Given a section index, return the corresponding Map_to_output
+  // information.
+  const Map_to_output*
+  section_output_info(unsigned int shnum) const
+  { return &this->map_to_output_[shnum]; }
+
+ protected:
   // Read the symbols--implemented by child class.
   virtual Read_symbols_data
   do_read_symbols() = 0;
@@ -135,6 +147,10 @@ class Object
   // Lay out sections--implemented by child class.
   virtual void
   do_layout(Layout*) = 0;
+
+  // Finalize local symbols--implemented by child class.
+  virtual off_t
+  do_finalize_local_symbols(off_t, Stringpool*) = 0;
 
   // Get the file.
   Input_file*
@@ -152,7 +168,7 @@ class Object
 
   // Get the number of sections.
   unsigned int
-  shnum(void) const
+  shnum() const
   { return this->shnum_; }
 
   // Set the number of sections.
@@ -243,6 +259,10 @@ class Sized_object : public Object
   void
   do_layout(Layout*);
 
+  // Finalize the local symbols.
+  off_t
+  do_finalize_local_symbols(off_t, Stringpool*);
+
   // Return the appropriate Sized_target structure.
   Sized_target<size, big_endian>*
   sized_target()
@@ -264,6 +284,11 @@ class Sized_object : public Object
   static const int ehdr_size = elfcpp::Elf_sizes<size>::ehdr_size;
   static const int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
   static const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
+  typedef elfcpp::Shdr<size, big_endian> Shdr;
+
+  // Read the section header for section SHNUM.
+  const unsigned char*
+  section_header(unsigned int shnum);
 
   // Whether to include a section group in the link.
   bool
@@ -286,6 +311,8 @@ class Sized_object : public Object
   unsigned int symtab_shnum_;
   // The entries in the symbol table for the external symbols.
   Symbol** symbols_;
+  // File offset for local symbols.
+  off_t local_symbol_offset_;
 };
 
 // A class to manage the list of all objects.
@@ -294,7 +321,7 @@ class Input_objects
 {
  public:
   Input_objects()
-    : object_list_(), any_dynamic_(false)
+    : object_list_(), target_(NULL), any_dynamic_(false)
   { }
 
   // The type of the list of input objects.
@@ -303,6 +330,11 @@ class Input_objects
   // Add an object to the list.
   void
   add_object(Object*);
+
+  // Get the target we should use for the output file.
+  Target*
+  target() const
+  { return this->target_; }
 
   // Iterate over all objects.
   Object_list::const_iterator
@@ -323,6 +355,7 @@ class Input_objects
   Input_objects& operator=(const Input_objects&);
 
   Object_list object_list_;
+  Target* target_;
   bool any_dynamic_;
 };
 

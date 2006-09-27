@@ -16,8 +16,22 @@ class Target_i386 : public Sized_target<32, false>
 {
  public:
   Target_i386()
-    : Sized_target<32, false>(false, false)
+    : Sized_target<32, false>(&i386_info)
   { }
+
+ private:
+  static const Target::Target_info i386_info;
+};
+
+const Target::Target_info Target_i386::i386_info =
+{
+  32,		// size
+  false,	// is_big_endian
+  false,	// has_make_symbol
+  false,	// has_resolve,
+  0x08048000,	// text_segment_address,
+  0x1000,	// abi_pagesize
+  0x1000	// common_pagesize
 };
 
 // The selector for i386 object files.

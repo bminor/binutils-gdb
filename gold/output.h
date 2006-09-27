@@ -3,6 +3,7 @@
 #ifndef GOLD_OUTPUT_H
 #define GOLD_OUTPUT_H
 
+#include <cassert>
 #include <list>
 
 #include "elfcpp.h"
@@ -22,47 +23,113 @@ class Sized_target;
 class Output_data
 {
  public:
-  Output_data(off_t size = 0)
-    : size_(size)
+  explicit Output_data(off_t data_size = 0)
+    : address_(0), data_size_(data_size), offset_(0)
   { }
 
   virtual
   ~Output_data();
 
-  // Return the size of the data.  This can't be called "size" since
-  // that interferes with the widely used template parameter name.
-  off_t
-  get_size()
-  { return this->size_; }
+  // Return the address.
+  uint64_t
+  address() const
+  { return this->address_; }
 
-  // Write the data to the output file at the specified offset.  This
-  // must be implemented by the real class.
-  virtual void
-  write(Output_file*, off_t off) = 0;
+  // Return the size of the data.
+  off_t
+  data_size() const
+  { return this->data_size_; }
+
+  // Return the file offset.
+  off_t
+  offset() const
+  { return this->offset_; }
+
+  // Return the required alignment.
+  uint64_t
+  addralign() const
+  { return this->do_addralign(); }
+
+  // Return whether this is an Output_section.
+  bool
+  is_section() const
+  { return this->do_is_section(); }
 
   // Return whether this is an Output_section of the specified type.
-  virtual bool
-  is_section_type(elfcpp::Elf_Word)
-  { return false; }
+  bool
+  is_section_type(elfcpp::Elf_Word stt) const
+  { return this->do_is_section_type(stt); }
 
   // Return whether this is an Output_section with the specified flag
   // set.
-  virtual bool
-  is_section_flag_set(elfcpp::Elf_Xword)
-  { return false; }
+  bool
+  is_section_flag_set(elfcpp::Elf_Xword shf) const
+  { return this->do_is_section_flag_set(shf); }
+
+  // Set the address and file offset of this data.
+  void
+  set_address(uint64_t addr, off_t off);
+
+  // Write the data to the output file.
+  void
+  write(Output_file* file)
+  { this->do_write(file); }
 
  protected:
+  // Functions that child classes may or in some cases must implement.
+
+  // Write the data to the output file.
+  virtual void
+  do_write(Output_file*) = 0;
+
+  // Return the required alignment.
+  virtual uint64_t
+  do_addralign() const = 0;
+
+  // Return whether this is an Output_section.
+  virtual bool
+  do_is_section() const
+  { return false; }
+
+  // Return whether this is an Output_section of the specified type.
+  // This only needs to be implement by Output_section.
+  virtual bool
+  do_is_section_type(elfcpp::Elf_Word) const
+  { return false; }
+
+  // Return whether this is an Output_section with the specific flag
+  // set.  This only needs to be implemented by Output_section.
+  virtual bool
+  do_is_section_flag_set(elfcpp::Elf_Xword) const
+  { return false; }
+
+  // Set the address and file offset of the data.  This only needs to
+  // be implemented if the child needs to know.
+  virtual void
+  do_set_address(uint64_t, off_t)
+  { }
+
+  // Functions that child classes may call.
+
   // Set the size of the data.
   void
-  set_size(off_t size)
-  { this->size_ = size; }
+  set_data_size(off_t data_size)
+  { this->data_size_ = data_size; }
+
+  // Return default alignment for a size--32 or 64.
+  static uint64_t
+  default_alignment(int size);
 
  private:
   Output_data(const Output_data&);
   Output_data& operator=(const Output_data&);
 
+  // Memory address in file (not always meaningful).
+  uint64_t address_;
   // Size of data in file.
-  off_t size_;
+  off_t data_size_;
+  // Offset within file.
+  off_t offset_;
 };
 
 // A simple case of Output_data in which we have constant data to
@@ -71,20 +138,26 @@ class Output_data
 class Output_data_const : public Output_data
 {
  public:
-  Output_data_const(const std::string& data)
-    : Output_data(data.size()), data_(data)
+  Output_data_const(const std::string& data, uint64_t addralign)
+    : Output_data(data.size()), data_(data), addralign_(addralign)
   { }
 
-  Output_data_const(const char* p, off_t len)
-    : Output_data(len), data_(p, len)
+  Output_data_const(const char* p, off_t len, uint64_t addralign)
+    : Output_data(len), data_(p, len), addralign_(addralign)
   { }
 
   // Write the data to the file.
   void
-  write(Output_file* output, off_t off);
+  do_write(Output_file* output);
+
+  // Return the required alignment.
+  uint64_t
+  do_addralign() const
+  { return this->addralign_; }
 
  private:
   std::string data_;
+  uint64_t addralign_;
 };
 
 // Output the section headers.
@@ -92,14 +165,21 @@ class Output_data_const : public Output_data
 class Output_section_headers : public Output_data
 {
  public:
-  Output_section_headers(const Layout::Segment_list&,
+  Output_section_headers(int size,
+			 const Layout::Segment_list&,
 			 const Layout::Section_list&);
 
   // Write the data to the file.
   void
-  write(Output_file*, off_t);
+  do_write(Output_file*);
+
+  // Return the required alignment.
+  uint64_t
+  do_addralign() const
+  { return Output_data::default_alignment(this->size_); }
 
  private:
+  int size_;
   const Layout::Segment_list& segment_list_;
   const Layout::Section_list& section_list_;
 };
@@ -109,15 +189,21 @@ class Output_section_headers : public Output_data
 class Output_segment_headers : public Output_data
 {
  public:
-  Output_segment_headers(const Layout::Segment_list& segment_list)
-    : segment_list_(segment_list)
+  Output_segment_headers(int size, const Layout::Segment_list& segment_list)
+    : size_(size), segment_list_(segment_list)
   { }
 
   // Write the data to the file.
   void
-  write(Output_file*, off_t);
+  do_write(Output_file*);
+
+  // Return the required alignment.
+  uint64_t
+  do_addralign() const
+  { return Output_data::default_alignment(this->size_); }
 
  private:
+  int size_;
   const Layout::Segment_list& segment_list_;
 };
 
@@ -126,18 +212,34 @@ class Output_segment_headers : public Output_data
 class Output_file_header : public Output_data
 {
  public:
-  Output_file_header(const General_options&,
+  Output_file_header(int size,
+		     const General_options&,
 		     const Target*,
 		     const Symbol_table*,
-		     const Output_segment_headers*,
-		     const Output_section_headers*,
-		     const Output_section* shstrtab);
+		     const Output_segment_headers*);
+
+  // Add information about the section headers.  We lay out the ELF
+  // file header before we create the section headers.
+  void set_section_info(const Output_section_headers*,
+			const Output_section* shstrtab);
 
   // Write the data to the file.
   void
-  write(Output_file*, off_t);
+  do_write(Output_file*);
+
+  // Return the required alignment.
+  uint64_t
+  do_addralign() const
+  { return Output_data::default_alignment(this->size_); }
+
+  // Set the address and offset--we only implement this for error
+  // checking.
+  void
+  do_set_address(uint64_t, off_t off) const
+  { assert(off == 0); }
 
  private:
+  int size_;
   const General_options& options_;
   const Target* target_;
   const Symbol_table* symtab_;
@@ -178,21 +280,36 @@ class Output_section : public Output_data
   flags() const
   { return this->flags_; }
 
+  // Return the address alignment.
+  uint64_t
+  addralign() const
+  { return this->addralign_; }
+
   // Write the data to the file.  For a typical Output_section, this
   // does nothing.  We write out the data by looping over all the
   // input sections.
   virtual void
-  write(Output_file*, off_t)
+  do_write(Output_file*)
   { }
+
+  // Return the address alignment--function required by parent class.
+  uint64_t
+  do_addralign() const
+  { return this->addralign_; }
+
+  // Return whether this is an Output_section.
+  bool
+  do_is_section() const
+  { return true; }
 
   // Return whether this is a section of the specified type.
   bool
-  is_section_type(elfcpp::Elf_Word type)
+  do_is_section_type(elfcpp::Elf_Word type) const
   { return this->type_ == type; }
 
   // Return whether the specified section flag is set.
   bool
-  is_section_flag_set(elfcpp::Elf_Xword flag)
+  do_is_section_flag_set(elfcpp::Elf_Xword flag) const
   { return (this->flags_ & flag) != 0; }
 
  private:
@@ -200,14 +317,12 @@ class Output_section : public Output_data
 
   // The name of the section.  This will point into a Stringpool.
   const char* name_;
-  // The section address.
-  uint64_t addr_;
+  // The section address is in the parent class.
   // The section alignment.
   uint64_t addralign_;
   // The section entry size.
   uint64_t entsize_;
-  // The file offset.
-  off_t offset_;
+  // The file offset is in the parent class.
   // The section link field.
   unsigned int link_;
   // The section info field.
@@ -224,8 +339,22 @@ class Output_section : public Output_data
 class Output_section_symtab : public Output_section
 {
  public:
-  Output_section_symtab();
-  ~Output_section_symtab();
+  Output_section_symtab(const char* name, off_t size);
+};
+
+// A special Output_section which holds a string table.
+
+class Output_section_strtab : public Output_section
+{
+ public:
+  Output_section_strtab(const char* name, Stringpool* contents);
+
+  // Write out the data.
+  void
+  do_write(Output_file*);
+
+ private:
+  Stringpool* contents_;
 };
 
 // An output segment.  PT_LOAD segments are built from collections of
@@ -258,9 +387,35 @@ class Output_segment
   flags() const
   { return this->flags_; }
 
+  // Return the maximum alignment of the Output_data.
+  uint64_t
+  max_data_align() const;
+
   // Add an Output_section to this segment.
   void
-  add_output_section(Output_section*);
+  add_output_section(Output_section*, elfcpp::Elf_Word seg_flags);
+
+  // Add an Output_data (which is not an Output_section) to the start
+  // of this segment.
+  void
+  add_initial_output_data(Output_data*);
+
+  // Set the address of the segment to ADDR and the offset to *POFF
+  // (aligned if necessary), and set the addresses and offsets of all
+  // contained output sections accordingly.  Return the address of the
+  // immediately following segment.  Update *POFF.  This should only
+  // be called for a PT_LOAD segment.
+  uint64_t
+  set_section_addresses(uint64_t addr, off_t* poff);
+
+  // Set the offset of this segment based on the section.  This should
+  // only be called for a non-PT_LOAD segment.
+  void
+  set_offset();
+
+  // Return the number of output sections.
+  unsigned int
+  output_section_count() const;
 
  private:
   Output_segment(const Output_segment&);
@@ -268,9 +423,18 @@ class Output_segment
 
   typedef std::list<Output_data*> Output_data_list;
 
-  // The list of output sections attached to this segment.  This is
-  // cleared after layout.
+  // Set the section addresses in an Output_data_list.
+  uint64_t
+  set_section_list_addresses(Output_data_list*, uint64_t addr, off_t* poff);
+
+  // Return the number of Output_sections in an Output_data_list.
+  unsigned int
+  output_section_count_list(const Output_data_list*) const;
+
+  // The list of output data with contents attached to this segment.
   Output_data_list output_data_;
+  // The list of output data without contents attached to this segment.
+  Output_data_list output_bss_;
   // The segment virtual address.
   uint64_t vaddr_;
   // The segment physical address.

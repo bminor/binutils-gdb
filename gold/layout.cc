@@ -52,15 +52,14 @@ Layout_task::run(Workqueue*)
        p != this->input_objects_->end();
        ++p)
     (*p)->layout(&layout);
-  layout.finalize(this->input_objects_);
+  layout.finalize(this->input_objects_, this->symtab_);
 }
 
 // Layout methods.
 
 Layout::Layout(const General_options& options)
-  : options_(options), namepool_(), signatures_(),
-    section_name_map_(), segment_list_(), section_list_(),
-    data_list_()
+  : options_(options), namepool_(), sympool_(), signatures_(),
+    section_name_map_(), segment_list_(), section_list_()
 {
 }
 
@@ -169,6 +168,233 @@ Layout::layout(Object* object, const char* name,
   return os;
 }
 
+// Map section flags to segment flags.
+
+elfcpp::Elf_Word
+Layout::section_flags_to_segment(elfcpp::Elf_Xword flags)
+{
+  elfcpp::Elf_Word ret = elfcpp::PF_R;
+  if ((flags & elfcpp::SHF_WRITE) != 0)
+    ret |= elfcpp::PF_W;
+  if ((flags & elfcpp::SHF_EXECINSTR) != 0)
+    ret |= elfcpp::PF_X;
+  return ret;
+}
+
+// Make a new Output_section, and attach it to segments as
+// appropriate.
+
+Output_section*
+Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
+			    elfcpp::Elf_Xword flags)
+{
+  Output_section* os = new Output_section(name, type, flags);
+
+  if ((flags & elfcpp::SHF_ALLOC) == 0)
+    this->section_list_.push_back(os);
+  else
+    {
+      // This output section goes into a PT_LOAD segment.
+
+      elfcpp::Elf_Word seg_flags = Layout::section_flags_to_segment(flags);
+
+      // The only thing we really care about for PT_LOAD segments is
+      // whether or not they are writable, so that is how we search
+      // for them.  People who need segments sorted on some other
+      // basis will have to wait until we implement a mechanism for
+      // them to describe the segments they want.
+
+      Segment_list::const_iterator p;
+      for (p = this->segment_list_.begin();
+	   p != this->segment_list_.end();
+	   ++p)
+	{
+	  if ((*p)->type() == elfcpp::PT_LOAD
+	      && ((*p)->flags() & elfcpp::PF_W) == (seg_flags & elfcpp::PF_W))
+	    {
+	      (*p)->add_output_section(os, seg_flags);
+	      break;
+	    }
+	}
+
+      if (p == this->segment_list_.end())
+	{
+	  Output_segment* oseg = new Output_segment(elfcpp::PT_LOAD,
+						    seg_flags);
+	  this->segment_list_.push_back(oseg);
+	  oseg->add_output_section(os, seg_flags);
+	}
+
+      // If we see a loadable SHT_NOTE section, we create a PT_NOTE
+      // segment.
+      if (type == elfcpp::SHT_NOTE)
+	{
+	  // See if we already have an equivalent PT_NOTE segment.
+	  for (p = this->segment_list_.begin();
+	       p != segment_list_.end();
+	       ++p)
+	    {
+	      if ((*p)->type() == elfcpp::PT_NOTE
+		  && (((*p)->flags() & elfcpp::PF_W)
+		      == (seg_flags & elfcpp::PF_W)))
+		{
+		  (*p)->add_output_section(os, seg_flags);
+		  break;
+		}
+	    }
+
+	  if (p == this->segment_list_.end())
+	    {
+	      Output_segment* oseg = new Output_segment(elfcpp::PT_NOTE,
+							seg_flags);
+	      this->segment_list_.push_back(oseg);
+	      oseg->add_output_section(os, seg_flags);
+	    }
+	}
+
+      // If we see a loadable SHF_TLS section, we create a PT_TLS
+      // segment.
+      if ((flags & elfcpp::SHF_TLS) != 0)
+	{
+	  // See if we already have an equivalent PT_TLS segment.
+	  for (p = this->segment_list_.begin();
+	       p != segment_list_.end();
+	       ++p)
+	    {
+	      if ((*p)->type() == elfcpp::PT_TLS
+		  && (((*p)->flags() & elfcpp::PF_W)
+		      == (seg_flags & elfcpp::PF_W)))
+		{
+		  (*p)->add_output_section(os, seg_flags);
+		  break;
+		}
+	    }
+
+	  if (p == this->segment_list_.end())
+	    {
+	      Output_segment* oseg = new Output_segment(elfcpp::PT_TLS,
+							seg_flags);
+	      this->segment_list_.push_back(oseg);
+	      oseg->add_output_section(os, seg_flags);
+	    }
+	}
+    }
+
+  return os;
+}
+
+// Find the first read-only PT_LOAD segment, creating one if
+// necessary.
+
+Output_segment*
+Layout::find_first_load_seg()
+{
+  for (Segment_list::const_iterator p = this->segment_list_.begin();
+       p != this->segment_list_.end();
+       ++p)
+    {
+      if ((*p)->type() == elfcpp::PT_LOAD
+	  && ((*p)->flags() & elfcpp::PF_R) != 0
+	  && ((*p)->flags() & elfcpp::PF_W) == 0)
+	return *p;
+    }
+
+  Output_segment* load_seg = new Output_segment(elfcpp::PT_LOAD, elfcpp::PF_R);
+  this->segment_list_.push_back(load_seg);
+  return load_seg;
+}
+
+// Finalize the layout.  When this is called, we have created all the
+// output sections and all the output segments which are based on
+// input sections.  We have several things to do, and we have to do
+// them in the right order, so that we get the right results correctly
+// and efficiently.
+
+// 1) Finalize the list of output segments and create the segment
+// table header.
+
+// 2) Finalize the dynamic symbol table and associated sections.
+
+// 3) Determine the final file offset of all the output segments.
+
+// 4) Determine the final file offset of all the SHF_ALLOC output
+// sections.
+
+// 5) Create the symbol table sections and the section name table
+// section.
+
+// 6) Finalize the symbol table: set symbol values to their final
+// value and make a final determination of which symbols are going
+// into the output symbol table.
+
+// 7) Create the section table header.
+
+// 8) Determine the final file offset of all the output sections which
+// are not SHF_ALLOC, including the section table header.
+
+// 9) Finalize the ELF file header.
+
+// This function returns the size of the output file.
+
+off_t
+Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
+{
+  if (input_objects->any_dynamic())
+    {
+      // If there are any dynamic objects in the link, then we need
+      // some additional segments: PT_PHDRS, PT_INTERP, and
+      // PT_DYNAMIC.  We also need to finalize the dynamic symbol
+      // table and create the dynamic hash table.
+      abort();
+    }
+
+  // FIXME: Handle PT_GNU_STACK.
+
+  Output_segment* load_seg = this->find_first_load_seg();
+
+  // Lay out the segment headers.
+  int size = input_objects->target()->get_size();
+  Output_segment_headers* segment_headers;
+  segment_headers = new Output_segment_headers(size, this->segment_list_);
+  load_seg->add_initial_output_data(segment_headers);
+  // FIXME: Attach them to PT_PHDRS if necessary.
+
+  // Lay out the file header.
+  Output_file_header* file_header;
+  file_header = new Output_file_header(size,
+				       this->options_,
+				       input_objects->target(),
+				       symtab,
+				       segment_headers);
+  load_seg->add_initial_output_data(file_header);
+
+  // Set the file offsets of all the segments.
+  off_t off = this->set_segment_offsets(input_objects->target(), load_seg);
+
+  // Create the symbol table sections.
+  // FIXME: We don't need to do this if we are stripping symbols.
+  Output_section* osymtab;
+  Output_section* ostrtab;
+  this->create_symtab_sections(input_objects, symtab, &osymtab, &ostrtab);
+
+  // Create the .shstrtab section.
+  Output_section* shstrtab_section = this->create_shstrtab();
+
+  // Set the file offsets of all the sections not associated with
+  // segments.
+  off = this->set_section_offsets(off);
+
+  // Create the section table header.
+  Output_section_headers* oshdrs = this->create_shdrs(size, off);
+  off += oshdrs->data_size();
+
+  file_header->set_section_info(oshdrs, shstrtab_section);
+
+  // Now we know exactly where everything goes in the output file.
+
+  return off;
+}
+
 // Return whether SEG1 should be before SEG2 in the output file.  This
 // is based entirely on the segment type and flags.  When this is
 // called the segment addresses has normally not yet been set.
@@ -245,177 +471,177 @@ Layout::segment_precedes(const Output_segment* seg1,
   return paddr1 < paddr2;
 }
 
-// Map section flags to segment flags.
+// Set the file offsets of all the segments.  They have all been
+// created.  LOAD_SEG must be be laid out first.  Return the offset of
+// the data to follow.
 
-elfcpp::Elf_Word
-Layout::section_flags_to_segment(elfcpp::Elf_Xword flags)
+off_t
+Layout::set_segment_offsets(const Target* target, Output_segment* load_seg)
 {
-  elfcpp::Elf_Word ret = elfcpp::PF_R;
-  if ((flags & elfcpp::SHF_WRITE) != 0)
-    ret |= elfcpp::PF_W;
-  if ((flags & elfcpp::SHF_EXECINSTR) != 0)
-    ret |= elfcpp::PF_X;
-  return ret;
-}
+  // Sort them into the final order.
+  std::sort(this->segment_list_.begin(), this->segment_list_.end(),
+	    Layout::Compare_segments());
 
-// Make a new Output_section, and attach it to segments as
-// appropriate.
-
-Output_section*
-Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
-			    elfcpp::Elf_Xword flags)
-{
-  Output_section* os = new Output_section(name, type, flags);
-
-  if ((flags & elfcpp::SHF_ALLOC) == 0)
-    this->section_list_.push_back(os);
-  else
+  // Find the PT_LOAD segments, and set their addresses and offsets
+  // and their section's addresses and offsets.
+  uint64_t addr = target->text_segment_address();
+  off_t off = 0;
+  bool was_readonly = false;
+  for (Segment_list::iterator p = this->segment_list_.begin();
+       p != this->segment_list_.end();
+       ++p)
     {
-      // This output section goes into a PT_LOAD segment.
-
-      elfcpp::Elf_Word seg_flags = Layout::section_flags_to_segment(flags);
-
-      // The only thing we really care about for PT_LOAD segments is
-      // whether or not they are writable, so that is how we search
-      // for them.  People who need segments sorted on some other
-      // basis will have to wait until we implement a mechanism for
-      // them to describe the segments they want.
-
-      Segment_list::const_iterator p;
-      for (p = this->segment_list_.begin();
-	   p != this->segment_list_.end();
-	   ++p)
+      if ((*p)->type() == elfcpp::PT_LOAD)
 	{
-	  if ((*p)->type() == elfcpp::PT_LOAD
-	      && ((*p)->flags() & elfcpp::PF_W) == (seg_flags & elfcpp::PF_W))
+	  if (load_seg != NULL && load_seg != *p)
+	    abort();
+	  load_seg = NULL;
+
+	  // If the last segment was readonly, and this one is not,
+	  // then skip the address forward one page, maintaining the
+	  // same position within the page.  This lets us store both
+	  // segments overlapping on a single page in the file, but
+	  // the loader will put them on different pages in memory.
+
+	  uint64_t orig_addr = addr;
+	  uint64_t orig_off = off;
+
+	  uint64_t aligned_addr = addr;
+	  uint64_t abi_pagesize = target->abi_pagesize();
+	  if (was_readonly && ((*p)->flags() & elfcpp::PF_W) != 0)
 	    {
-	      (*p)->add_output_section(os);
-	      break;
+	      uint64_t align = (*p)->max_data_align();
+
+	      addr = (addr + align - 1) & ~ (align - 1);
+	      aligned_addr = addr;
+	      if ((addr & (abi_pagesize - 1)) != 0)
+		addr = addr + abi_pagesize;
 	    }
-	}
 
-      if (p == this->segment_list_.end())
-	{
-	  Output_segment* oseg = new Output_segment(elfcpp::PT_LOAD,
-						    seg_flags);
-	  this->segment_list_.push_back(oseg);
-	  oseg->add_output_section(os);
-	}
+	  off = orig_off + ((addr - orig_addr) & (abi_pagesize - 1));
+	  uint64_t new_addr = (*p)->set_section_addresses(addr, &off);
 
-      // If we see a loadable SHT_NOTE section, we create a PT_NOTE
-      // segment.
-      if (type == elfcpp::SHT_NOTE)
-	{
-	  // See if we already have an equivalent PT_NOTE segment.
-	  for (p = this->segment_list_.begin();
-	       p != segment_list_.end();
-	       ++p)
+	  // Now that we know the size of this segment, we may be able
+	  // to save a page in memory, at the cost of wasting some
+	  // file space, by instead aligning to the start of a new
+	  // page.  Here we use the real machine page size rather than
+	  // the ABI mandated page size.
+
+	  if (aligned_addr != addr)
 	    {
-	      if ((*p)->type() == elfcpp::PT_NOTE
-		  && (((*p)->flags() & elfcpp::PF_W)
-		      == (seg_flags & elfcpp::PF_W)))
+	      uint64_t common_pagesize = target->common_pagesize();
+	      uint64_t first_off = (common_pagesize
+				    - (aligned_addr
+				       & (common_pagesize - 1)));
+	      uint64_t last_off = new_addr & (common_pagesize - 1);
+	      if (first_off > 0
+		  && last_off > 0
+		  && ((aligned_addr & ~ (common_pagesize - 1))
+		      != (new_addr & ~ (common_pagesize - 1)))
+		  && first_off + last_off <= common_pagesize)
 		{
-		  (*p)->add_output_section(os);
-		  break;
+		  addr = ((aligned_addr + common_pagesize - 1)
+			  & ~ (common_pagesize - 1));
+		  off = orig_off + ((addr - orig_addr) & (abi_pagesize - 1));
+		  new_addr = (*p)->set_section_addresses(addr, &off);
 		}
 	    }
 
-	  if (p == this->segment_list_.end())
-	    {
-	      Output_segment* oseg = new Output_segment(elfcpp::PT_NOTE,
-							seg_flags);
-	      this->segment_list_.push_back(oseg);
-	      oseg->add_output_section(os);
-	    }
-	}
+	  addr = new_addr;
 
-      // If we see a loadable SHF_TLS section, we create a PT_TLS
-      // segment.
-      if ((flags & elfcpp::SHF_TLS) != 0)
-	{
-	  // See if we already have an equivalent PT_TLS segment.
-	  for (p = this->segment_list_.begin();
-	       p != segment_list_.end();
-	       ++p)
-	    {
-	      if ((*p)->type() == elfcpp::PT_TLS
-		  && (((*p)->flags() & elfcpp::PF_W)
-		      == (seg_flags & elfcpp::PF_W)))
-		{
-		  (*p)->add_output_section(os);
-		  break;
-		}
-	    }
-
-	  if (p == this->segment_list_.end())
-	    {
-	      Output_segment* oseg = new Output_segment(elfcpp::PT_TLS,
-							seg_flags);
-	      this->segment_list_.push_back(oseg);
-	      oseg->add_output_section(os);
-	    }
+	  if (((*p)->flags() & elfcpp::PF_W) == 0)
+	    was_readonly = true;
 	}
     }
+
+  // Handle the non-PT_LOAD segments, setting their offsets from their
+  // section's offsets.
+  for (Segment_list::iterator p = this->segment_list_.begin();
+       p != this->segment_list_.end();
+       ++p)
+    {
+      if ((*p)->type() != elfcpp::PT_LOAD)
+	(*p)->set_offset();
+    }
+
+  return off;
+}
+
+// Set the file offset of all the sections not associated with a
+// segment.
+
+off_t
+Layout::set_section_offsets(off_t off)
+{
+  for (Layout::Section_list::iterator p = this->section_list_.begin();
+       p != this->section_list_.end();
+       ++p)
+    {
+      uint64_t addralign = (*p)->addralign();
+      off = (off + addralign - 1) & ~ (addralign - 1);
+      (*p)->set_address(0, off);
+      off += (*p)->data_size();
+    }
+  return off;
+}
+
+// Create the symbol table sections.
+
+void
+Layout::create_symtab_sections(const Input_objects* input_objects,
+			       Symbol_table* symtab,
+			       Output_section** posymtab,
+			       Output_section** postrtab)
+{
+  off_t off = 0;
+  for (Input_objects::Object_list::const_iterator p = input_objects->begin();
+       p != input_objects->end();
+       ++p)
+    {
+      Task_lock_obj<Object> tlo(**p);
+      off = (*p)->finalize_local_symbols(off, &this->sympool_);
+    }
+
+  off = symtab->finalize(off, &this->sympool_);
+
+  *posymtab = new Output_section_symtab(this->namepool_.add(".symtab"), off);
+  *postrtab = new Output_section_strtab(this->namepool_.add(".strtab"),
+					&this->sympool_);
+}
+
+// Create the .shstrtab section, which holds the names of the
+// sections.  At the time this is called, we have created all the
+// output sections except .shstrtab itself.
+
+Output_section*
+Layout::create_shstrtab()
+{
+  // FIXME: We don't need to create a .shstrtab section if we are
+  // stripping everything.
+
+  const char* name = this->namepool_.add(".shstrtab");
+
+  Output_section* os = new Output_section_strtab(name,
+						 &this->namepool_);
+
+  this->section_list_.push_back(os);
 
   return os;
 }
 
-// Create the sections for the symbol table.
+// Create the section headers.  SIZE is 32 or 64.  OFF is the file
+// offset.
 
-void
-Layout::create_symtab_sections()
+Output_section_headers*
+Layout::create_shdrs(int size, off_t off)
 {
-}
-
-// Finalize the layout.  When this is called, we have created all the
-// output sections and all the output segments which are based on
-// input sections.  We have several things to do, and we have to do
-// them in the right order, so that we get the right results correctly
-// and efficiently.
-
-// 1) Finalize the list of output segments and create the segment
-// table header.
-
-// 2) Finalize the dynamic symbol table and associated sections.
-
-// 3) Determine the final file offset of all the output segments.
-
-// 4) Determine the final file offset of all the SHF_ALLOC output
-// sections.
-
-// 5) Finalize the symbol table: set symbol values to their final
-// value and make a final determination of which symbols are going
-// into the output symbol table.
-
-// 6) Create the symbol table sections and the section name table
-// section.
-
-// 7) Create the section table header.
-
-// 8) Determine the final file offset of all the output sections which
-// are not SHF_ALLOC, including the section table header.
-
-// 9) Finalize the ELF file header.
-
-void
-Layout::finalize(const Input_objects* input_objects)
-{
-  if (input_objects->any_dynamic())
-    {
-      // If there are any dynamic objects in the link, then we need
-      // some additional segments: PT_PHDRS, PT_INTERP, and
-      // PT_DYNAMIC.  We also need to finalize the dynamic symbol
-      // table and create the dynamic hash table.
-      abort();
-    }
-
-  // FIXME: Handle PT_GNU_STACK.
-
-  std::sort(this->segment_list_.begin(), this->segment_list_.end(),
-	    Layout::Compare_segments());
-
-  Output_segment_headers* segment_headers;
-  segment_headers = new Output_segment_headers(this->segment_list_);
+  Output_section_headers* oshdrs;
+  oshdrs = new Output_section_headers(size, this->segment_list_,
+				      this->section_list_);
+  uint64_t addralign = oshdrs->addralign();
+  off = (off + addralign - 1) & ~ (addralign - 1);
+  oshdrs->set_address(0, off);
+  return oshdrs;
 }
 
 // The mapping of .gnu.linkonce section names to real section names.

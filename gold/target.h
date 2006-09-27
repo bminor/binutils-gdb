@@ -13,6 +13,8 @@
 #ifndef GOLD_TARGET_H
 #define GOLD_TARGET_H
 
+#include <cassert>
+
 #include "symtab.h"
 #include "elfcpp.h"
 
@@ -33,43 +35,70 @@ class Target
   // return 32 or 64.
   int
   get_size() const
-  { return this->size_; }
+  { return this->pti_->size; }
 
   // Return whether this target is big-endian.
   bool
   is_big_endian() const
-  { return this->is_big_endian_; }
+  { return this->pti_->is_big_endian; }
 
   // Whether this target has a specific make_symbol function.
   bool
   has_make_symbol() const
-  { return this->has_make_symbol_; }
+  { return this->pti_->has_make_symbol; }
 
   // Whether this target has a specific resolve function.
   bool
   has_resolve() const
-  { return this->has_resolve_; }
+  { return this->pti_->has_resolve; }
+
+  // Return the default address to use for the text segment.
+  uint64_t
+  text_segment_address() const
+  { return this->pti_->text_segment_address; }
+
+  // Return the ABI specified page size.
+  uint64_t
+  abi_pagesize() const
+  { return this->pti_->abi_pagesize; }
+
+  // Return the common page size used on actual systems.
+  uint64_t
+  common_pagesize() const
+  { return this->pti_->common_pagesize; }
 
  protected:
-  Target(int size, bool is_big_endian, bool has_make_symbol, bool has_resolve)
-    : size_(size),
-      is_big_endian_(is_big_endian),
-      has_make_symbol_(has_make_symbol),
-      has_resolve_(has_resolve)
+  // This struct holds the constant information for a child class.  We
+  // use a struct to avoid the overhead of virtual function calls for
+  // simple information.
+  struct Target_info
+  {
+    // Address size (32 or 64).
+    int size;
+    // Whether the target is big endian.
+    bool is_big_endian;
+    // Whether this target has a specific make_symbol function.
+    bool has_make_symbol;
+    // Whether this target has a specific resolve function.
+    bool has_resolve;
+    // The default text segment address.
+    uint64_t text_segment_address;
+    // The ABI specified page size.
+    uint64_t abi_pagesize;
+    // The common page size used by actual implementations.
+    uint64_t common_pagesize;
+  };
+
+  Target(const Target_info* pti)
+    : pti_(pti)
   { }
 
  private:
   Target(const Target&);
   Target& operator=(const Target&);
 
-  // The target size.
-  int size_;
-  // Whether this target is big endian.
-  bool is_big_endian_;
-  // Whether this target has a special make_symbol function.
-  bool has_make_symbol_;
-  // Whether this target has a special resolve function.
-  bool has_resolve_;
+  // The target information.
+  const Target_info* pti_;
 };
 
 // The abstract class for a specific size and endianness of target.
@@ -96,9 +125,12 @@ class Sized_target : public Target
   { abort(); }
 
  protected:
-  Sized_target(bool has_make_symbol, bool has_resolve)
-    : Target(size, big_endian, has_make_symbol, has_resolve)
-  { }
+  Sized_target(const Target::Target_info* pti)
+    : Target(pti)
+  {
+    assert(pti->size == size);
+    assert(pti->is_big_endian ? big_endian : !big_endian);
+  }
 };
 
 } // End namespace gold.

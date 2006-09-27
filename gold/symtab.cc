@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "object.h"
+#include "output.h"
 #include "symtab.h"
 
 namespace gold
@@ -52,7 +53,7 @@ Sized_symbol<size>::init(const char* name, const char* version, Object* object,
 // Class Symbol_table.
 
 Symbol_table::Symbol_table()
-  : size_(0), table_(), namepool_(), output_pool_(), forwarders_()
+  : size_(0), offset_(0), table_(), namepool_(), forwarders_()
 {
 }
 
@@ -371,32 +372,58 @@ Symbol_table::add_from_object(
     }
 }
 
-// Record the names of the local symbols for an object.
+// Set the final values for all the symbols.  Record the file offset
+// OFF.  Add their names to POOL.  Return the new file offset.
 
-template<int size, bool big_endian>
-void
-Symbol_table::add_local_symbol_names(Sized_object<size, big_endian>* object,
-				     const elfcpp::Sym<size, big_endian>* syms,
-				     size_t count, const char* sym_names,
-				     size_t sym_name_size)
+off_t
+Symbol_table::finalize(off_t off, Stringpool* pool)
 {
-  const unsigned char* p = reinterpret_cast<const unsigned char*>(syms);
-  for (size_t i = 0; i < count; ++i)
+  if (this->size_ == 32)
+    return this->sized_finalize<32>(off, pool);
+  else
+    return this->sized_finalize<64>(off, pool);
+}
+
+// Set the final value for all the symbols.
+
+template<int size>
+off_t
+Symbol_table::sized_finalize(off_t off, Stringpool* pool)
+{
+  off = (off + size - 1) & ~ (size - 1);
+  this->offset_ = off;
+
+  const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
+  Symbol_table_type::iterator p = this->table_.begin();
+  while (p != this->table_.end())
     {
-      elfcpp::Sym<size, big_endian> sym(p);
+      Sized_symbol<size>* sym = static_cast<Sized_symbol<size>*>(p->second);
 
-      unsigned int st_name = sym.get_st_name();
-      if (st_name >= sym_name_size)
+      // FIXME: Here we need to decide which symbols should go into
+      // the output file.
+
+      const Object::Map_to_output* mo =
+	sym->object()->section_output_info(sym->shnum());
+
+      if (mo->output_section == NULL)
 	{
-	  fprintf(stderr,
-		  _("%s: %s: bad local symbol name offset %u at %lu\n"),
-		  program_name, object->name().c_str(), st_name,
-		  static_cast<unsigned long>(i));
-	  gold_exit(false);
+	  // We should be able to erase this symbol from the symbol
+	  // table, but at least with gcc 4.0.2
+	  // std::unordered_map::erase doesn't appear to return the
+	  // new iterator.
+	  // p = this->table_.erase(p);
+	  ++p;
 	}
-
-      this->output_pool_.add(sym_names + st_name);
+      else
+	{
+	  sym->set_value(mo->output_section->address() + mo->offset);
+	  pool->add(sym->name());
+	  ++p;
+	  off += sym_size;
+	}
     }
+
+  return off;
 }
 
 // Instantiate the templates we need.  We could use the configure
@@ -442,41 +469,5 @@ Symbol_table::add_from_object<64, false>(
     const char* sym_names,
     size_t sym_name_size,
     Symbol** sympointers);
-
-template
-void
-Symbol_table::add_local_symbol_names<32, true>(
-    Sized_object<32, true>* object,
-    const elfcpp::Sym<32, true>* syms,
-    size_t count,
-    const char* sym_names,
-    size_t sym_name_size);
-
-template
-void
-Symbol_table::add_local_symbol_names<32, false>(
-    Sized_object<32, false>* object,
-    const elfcpp::Sym<32, false>* syms,
-    size_t count,
-    const char* sym_names,
-    size_t sym_name_size);
-
-template
-void
-Symbol_table::add_local_symbol_names<64, true>(
-    Sized_object<64, true>* object,
-    const elfcpp::Sym<64, true>* syms,
-    size_t count,
-    const char* sym_names,
-    size_t sym_name_size);
-
-template
-void
-Symbol_table::add_local_symbol_names<64, false>(
-    Sized_object<64, false>* object,
-    const elfcpp::Sym<64, false>* syms,
-    size_t count,
-    const char* sym_names,
-    size_t sym_name_size);
 
 } // End namespace gold.
