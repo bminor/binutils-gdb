@@ -1,3 +1,7 @@
+2006-09-28  Bridge Wu  <mingqiao.wu@gmail.com>
+
+	* config/tc-arm.c (md_apply_fix): Do not clear write_back bit.
+
 2006-09-27  Nick Clifton  <nickc@redhat.com>
 
 	* output-file.c (output_file_close): Prevent an infinite loop

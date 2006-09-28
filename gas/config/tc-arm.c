@@ -18162,8 +18162,6 @@ md_apply_fix (fixS *	fixP,
 	newval = get_thumb32_insn (buf);
       newval &= 0xff7fff00;
       newval |= (value >> 2) | (sign ? INDEX_UP : 0);
-      if (value == 0)
-	newval &= ~WRITE_BACK;
       if (fixP->fx_r_type == BFD_RELOC_ARM_CP_OFF_IMM
 	  || fixP->fx_r_type == BFD_RELOC_ARM_CP_OFF_IMM_S2)
 	md_number_to_chars (buf, newval, INSN_SIZE);

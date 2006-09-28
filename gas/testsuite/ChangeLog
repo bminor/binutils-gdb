@@ -1,3 +1,8 @@
+2006-09-28  Bridge Wu  <mingqiao.wu@gmail.com>
+
+	* gas/arm/iwmmxt-wldstbh.s: New file.
+	* gas/arm/iwmmxt-wldstbh.d: New file.
+
 2006-09-26  Mark Shinwell  <shinwell@codesourcery.com>
             Joseph Myers  <joseph@codesourcery.com>
             Ian Lance Taylor  <ian@wasabisystems.com>
