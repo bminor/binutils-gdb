@@ -57,6 +57,13 @@
 #include "cp-abi.h"
 #include "observer.h"
 
+#ifdef __CYGWIN__
+/* LOCAL: Hack for testing using a Windows compiler and a Cygwin GDB.  */
+int cygwin_filename_cmp (const char *lhs, const char *rhs);
+#undef FILENAME_CMP
+#define FILENAME_CMP cygwin_filename_cmp
+#endif
+
 /* Prototypes for local functions */
 
 static void completion_list_add_name (char *, char *, int, char *, char *);

@@ -846,7 +846,7 @@ static struct line_header *(dwarf_decode_line_header
 static void dwarf_decode_lines (struct line_header *, char *, bfd *,
 				struct dwarf2_cu *, struct partial_symtab *);
 
-static void dwarf2_start_subfile (char *, char *);
+static void dwarf2_start_subfile (char *, char *, char *);
 
 static struct symbol *new_symbol (struct die_info *, struct type *,
 				  struct dwarf2_cu *);
@@ -6523,13 +6523,12 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 	     directory and file name numbers in the statement program
 	     are 1-based.  */
           struct file_entry *fe = &lh->file_names[file - 1];
-          char *dir;
+          char *dir = NULL;
 
           if (fe->dir_index)
             dir = lh->include_dirs[fe->dir_index - 1];
-          else
-            dir = comp_dir;
-	  dwarf2_start_subfile (fe->name, dir);
+
+	  dwarf2_start_subfile (fe->name, dir, comp_dir);
 	}
 
       /* Decode the table.  */
@@ -6621,17 +6620,16 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
                    0-based, but the directory and file name numbers in
                    the statement program are 1-based.  */
                 struct file_entry *fe;
-                char *dir;
+                char *dir = NULL;
 
                 file = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
                 line_ptr += bytes_read;
                 fe = &lh->file_names[file - 1];
                 if (fe->dir_index)
                   dir = lh->include_dirs[fe->dir_index - 1];
-                else
-                  dir = comp_dir;
+
                 if (!decode_for_pst_p)
-                  dwarf2_start_subfile (fe->name, dir);
+                  dwarf2_start_subfile (fe->name, dir, comp_dir);
               }
 	      break;
 	    case DW_LNS_set_column:
@@ -6711,7 +6709,8 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 
 /* Start a subfile for DWARF.  FILENAME is the name of the file and
    DIRNAME the name of the source directory which contains FILENAME
-   or NULL if not known.
+   or NULL if not known.  COMP_DIR is the compilation directory for the
+   linetable's compilation unit or NULL if not known.
    This routine tries to keep line numbers from identical absolute and
    relative file names in a common subfile.
 
@@ -6727,31 +6726,35 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
    files.files[1].dir:  /srcdir
 
    The line number information for list0.c has to end up in a single
-   subfile, so that `break /srcdir/list0.c:1' works as expected.  */
+   subfile, so that `break /srcdir/list0.c:1' works as expected.
+   start_subfile will ensure that this happens provided that we pass the
+   concatenation of files.files[1].dir and files.files[1].name as the
+   subfile's name.  */
 
 static void
-dwarf2_start_subfile (char *filename, char *dirname)
+dwarf2_start_subfile (char *filename, char *dirname, char *comp_dir)
 {
-  /* If the filename isn't absolute, try to match an existing subfile
-     with the full pathname.  */
+  char *fullname;
+
+  /* While reading the DIEs, we call start_symtab(DW_AT_name, DW_AT_comp_dir).
+     `start_symtab' will always pass the contents of DW_AT_comp_dir as
+     second argument to start_subfile.  To be consistent, we do the
+     same here.  In order not to lose the line information directory,
+     we concatenate it to the filename when it makes sense.
+     Note that the Dwarf3 standard says (speaking of filenames in line
+     information): ``The directory index is ignored for file names
+     that represent full path names''.  Thus ignoring dirname in the
+     `else' branch below isn't an issue.  */
 
   if (!IS_ABSOLUTE_PATH (filename) && dirname != NULL)
-    {
-      struct subfile *subfile;
-      char *fullname = concat (dirname, "/", filename, (char *)NULL);
+    fullname = concat (dirname, SLASH_STRING, filename, (char *)NULL);
+  else
+    fullname = filename;
 
-      for (subfile = subfiles; subfile; subfile = subfile->next)
-	{
-	  if (FILENAME_CMP (subfile->name, fullname) == 0)
-	    {
-	      current_subfile = subfile;
-	      xfree (fullname);
-	      return;
-	    }
-	}
-      xfree (fullname);
-    }
-  start_subfile (filename, dirname);
+  start_subfile (fullname, comp_dir);
+
+  if (fullname != filename)
+    xfree (fullname);
 }
 
 static void

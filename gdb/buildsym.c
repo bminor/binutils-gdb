@@ -46,6 +46,13 @@
 #include "cp-support.h"
 #include "dictionary.h"
 
+#ifdef __CYGWIN__
+/* LOCAL: Hack for testing using a Windows compiler and a Cygwin GDB.  */
+int cygwin_filename_cmp (const char *lhs, const char *rhs);
+#undef FILENAME_CMP
+#define FILENAME_CMP cygwin_filename_cmp
+#endif
+
 /* Ask buildsym.h to define the vars it normally declares `extern'.  */
 #define	EXTERN
 /**/

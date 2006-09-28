@@ -3127,3 +3127,19 @@ dummy_obstack_deallocate (void *object, void *data)
 {
   return;
 }
+
+int
+cygwin_filename_cmp (const char *lhs, const char *rhs)
+{
+  for (; *lhs || *rhs; lhs++, rhs++)
+    {
+      if (tolower (*lhs) == tolower (*rhs))
+	continue;
+      if (*lhs == '/' && *rhs == '\\')
+	continue;
+      if (*lhs == '\\' && *rhs == '/')
+	continue;
+      return (int) *lhs - (int) *rhs;
+    }
+  return 0;
+}
