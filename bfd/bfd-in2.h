@@ -66,7 +66,12 @@ extern "C" {
    
    Note - these macros do NOT work if STR2 is not a constant string.  */
 #define CONST_STRNEQ(STR1,STR2) (strncmp ((STR1), (STR2), sizeof (STR2) - 1) == 0)
-#define CONST_STRNCPY(STR1,STR2) strncpy ((STR1), (STR2), sizeof (STR2) - 1)
+  /* strcpy() can have a similar problem, but since we know we are
+     copying a constant string, we can use memcpy which will be faster
+     since there is no need to check for a NUL byte inside STR.  We
+     can also save time if we do not need to copy the terminating NUL.  */
+#define LITMEMCPY(DEST,STR2) memcpy ((DEST), (STR2), sizeof (STR2) - 1)
+#define LITSTRCPY(DEST,STR2) memcpy ((DEST), (STR2), sizeof (STR2))
 
 
 /* The word size used by BFD on the host.  This may be 64 with a 32

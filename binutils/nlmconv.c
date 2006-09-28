@@ -737,7 +737,7 @@ main (int argc, char **argv)
 	      || ! bfd_set_section_flags (outbfd, help_section,
 					  SEC_HAS_CONTENTS))
 	    bfd_fatal (_("help section"));
-	  CONST_STRNCPY (nlm_extended_header (outbfd)->stamp, "MeSsAgEs");
+	  LITMEMCPY (nlm_extended_header (outbfd)->stamp, "MeSsAgEs");
 	}
     }
   if (message_file != NULL)
@@ -759,7 +759,7 @@ main (int argc, char **argv)
 	      || ! bfd_set_section_flags (outbfd, message_section,
 					  SEC_HAS_CONTENTS))
 	    bfd_fatal (_("message section"));
-	  CONST_STRNCPY (nlm_extended_header (outbfd)->stamp, "MeSsAgEs");
+	  LITMEMCPY (nlm_extended_header (outbfd)->stamp, "MeSsAgEs");
 	}
     }
   if (modules != NULL)
@@ -795,7 +795,7 @@ main (int argc, char **argv)
 	      || ! bfd_set_section_flags (outbfd, rpc_section,
 					  SEC_HAS_CONTENTS))
 	    bfd_fatal (_("rpc section"));
-	  CONST_STRNCPY (nlm_extended_header (outbfd)->stamp, "MeSsAgEs");
+	  LITMEMCPY (nlm_extended_header (outbfd)->stamp, "MeSsAgEs");
 	}
     }
   if (sharelib_file != NULL)
@@ -852,7 +852,7 @@ main (int argc, char **argv)
 		  || ! bfd_set_section_flags (outbfd, shared_section,
 					      SEC_HAS_CONTENTS))
 		bfd_fatal (_("shared section"));
-	      CONST_STRNCPY (nlm_extended_header (outbfd)->stamp, "MeSsAgEs");
+	      LITMEMCPY (nlm_extended_header (outbfd)->stamp, "MeSsAgEs");
 	    }
 	}
     }
@@ -863,9 +863,9 @@ main (int argc, char **argv)
 
   /* At least for now, always create an extended header, because that
      is what NLMLINK does.  */
-  CONST_STRNCPY (nlm_extended_header (outbfd)->stamp, "MeSsAgEs");
+  LITMEMCPY (nlm_extended_header (outbfd)->stamp, "MeSsAgEs");
 
-  CONST_STRNCPY (nlm_cygnus_ext_header (outbfd)->stamp, "CyGnUsEx");
+  LITMEMCPY (nlm_cygnus_ext_header (outbfd)->stamp, "CyGnUsEx");
 
   /* If the date was not given, force it in.  */
   if (nlm_version_header (outbfd)->month == 0
@@ -880,7 +880,7 @@ main (int argc, char **argv)
       nlm_version_header (outbfd)->month = ptm->tm_mon + 1;
       nlm_version_header (outbfd)->day = ptm->tm_mday;
       nlm_version_header (outbfd)->year = ptm->tm_year + 1900;
-      CONST_STRNCPY (version_hdr->stamp, "VeRsIoN#");
+      LITMEMCPY (version_hdr->stamp, "VeRsIoN#");
     }
 
 #ifdef NLMCONV_POWERPC
@@ -1747,9 +1747,9 @@ powerpc_build_stubs (bfd *inbfd, bfd *outbfd ATTRIBUTE_UNUSED,
 
       /* Make a new undefined symbol with the same name but without
 	 the leading `.'.  */
-      newsym = (asymbol *) xmalloc (sizeof (asymbol));
+      newsym = xmalloc (sizeof (asymbol));
       *newsym = *sym;
-      newname = (char *) xmalloc (strlen (bfd_asymbol_name (sym)));
+      newname = xmalloc (strlen (bfd_asymbol_name (sym)));
       strcpy (newname, bfd_asymbol_name (sym) + 1);
       newsym->name = newname;
 

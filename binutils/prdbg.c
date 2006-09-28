@@ -724,8 +724,8 @@ pr_function_type (void *p, int argcount, bfd_boolean varargs)
 
   /* Now the return type is on the top of the stack.  */
 
-  s = (char *) xmalloc (len);
-  strcpy (s, "(|) (");
+  s = xmalloc (len);
+  LITSTRCPY (s, "(|) (");
 
   if (argcount < 0)
     strcat (s, "/* unknown */");
@@ -2153,12 +2153,10 @@ tg_class_static_member (void *p, const char *name,
 
   len_var = strlen (name);
   len_class = strlen (info->stack->next->type);
-  full_name = (char *) xmalloc (len_var + len_class + 3);
+  full_name = xmalloc (len_var + len_class + 3);
   if (! full_name)
     return FALSE;
-  memcpy (full_name, info->stack->next->type, len_class);
-  memcpy (full_name + len_class, STRING_COMMA_LEN ("::"));
-  memcpy (full_name + len_class + 2, name, len_var + 1);
+  sprintf (full_name, "%s::%s", info->stack->next->type, name);
 
   if (! substitute_type (info, full_name))
     return FALSE;

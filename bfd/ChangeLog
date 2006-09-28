@@ -1,3 +1,13 @@
+2006-09-25 Pedro Alves <pedro_alves@portugalmail.pt>
+
+	* bfd-in.h (CONST_STRNCPY) : Delete.
+	(LITSTRCPY) : New.
+	(LITMEMCPY) : New.
+	* bfd-in2.h : Regenerate.
+	* elflink.c  (bfd_elf_gc_sections) : Use LITMEMCPY. Don't manually
+	calculate string lengths.
+	* nlmcode.h (nlm_swap_auxiliary_headers_in) : Use LITMEMCPY.
+
 2006-09-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/3223

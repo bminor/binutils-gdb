@@ -364,7 +364,7 @@ nlm_swap_auxiliary_headers_in (bfd *abfd)
 	      if (bfd_seek (abfd, pos, SEEK_SET) != 0)
 		return FALSE;
 
-	      memcpy (nlm_cygnus_ext_header (abfd), STRING_COMMA_LEN ("CyGnUsEx"));
+	      LITMEMCPY (nlm_cygnus_ext_header (abfd), "CyGnUsEx");
 	      nlm_cygnus_ext_header (abfd)->offset = dataOffset;
 	      nlm_cygnus_ext_header (abfd)->length = dataLength;
 
@@ -645,7 +645,7 @@ nlm_swap_auxiliary_headers_out (bfd *abfd)
     {
       Nlm_External_Version_Header thdr;
 
-      memcpy (thdr.stamp, STRING_COMMA_LEN ("VeRsIoN#"));
+      LITMEMCPY (thdr.stamp, "VeRsIoN#");
       put_word (abfd, (bfd_vma) nlm_version_header (abfd)->majorVersion,
 		(bfd_byte *) thdr.majorVersion);
       put_word (abfd, (bfd_vma) nlm_version_header (abfd)->minorVersion,
@@ -672,7 +672,7 @@ nlm_swap_auxiliary_headers_out (bfd *abfd)
     {
       Nlm_External_Copyright_Header thdr;
 
-      memcpy (thdr.stamp, STRING_COMMA_LEN ("CoPyRiGhT="));
+      LITMEMCPY (thdr.stamp, "CoPyRiGhT=");
       amt = sizeof (thdr.stamp);
       if (bfd_bwrite ((void *) thdr.stamp, amt, abfd) != amt)
 	return FALSE;
@@ -694,7 +694,7 @@ nlm_swap_auxiliary_headers_out (bfd *abfd)
     {
       Nlm_External_Extended_Header thdr;
 
-      memcpy (thdr.stamp, STRING_COMMA_LEN ("MeSsAgEs"));
+      LITMEMCPY (thdr.stamp, "MeSsAgEs");
       put_word (abfd,
 		(bfd_vma) nlm_extended_header (abfd)->languageID,
 		(bfd_byte *) thdr.languageID);
@@ -797,7 +797,7 @@ nlm_swap_auxiliary_headers_out (bfd *abfd)
 
       ds = find_nonzero (nlm_custom_header (abfd)->dataStamp,
 			 sizeof (nlm_custom_header (abfd)->dataStamp));
-      memcpy (thdr.stamp, STRING_COMMA_LEN ("CuStHeAd"));
+      LITMEMCPY (thdr.stamp, "CuStHeAd");
       hdrLength = (2 * NLM_TARGET_LONG_SIZE + (ds ? 8 : 0)
 		   + nlm_custom_header (abfd)->hdrLength);
       put_word (abfd, hdrLength, thdr.length);
@@ -831,14 +831,14 @@ nlm_swap_auxiliary_headers_out (bfd *abfd)
     {
       Nlm_External_Custom_Header thdr;
 
-      memcpy (thdr.stamp, STRING_COMMA_LEN ("CuStHeAd"));
+      LITMEMCPY (thdr.stamp, "CuStHeAd");
       put_word (abfd, (bfd_vma) 2 * NLM_TARGET_LONG_SIZE + 8,
 		(bfd_byte *) thdr.length);
       put_word (abfd, (bfd_vma) nlm_cygnus_ext_header (abfd)->offset,
 		(bfd_byte *) thdr.dataOffset);
       put_word (abfd, (bfd_vma) nlm_cygnus_ext_header (abfd)->length,
 		(bfd_byte *) thdr.dataLength);
-      memcpy (thdr.dataStamp, STRING_COMMA_LEN ("CyGnUsEx"));
+      LITMEMCPY (thdr.dataStamp, "CyGnUsEx");
       amt = sizeof (thdr);
       if (bfd_bwrite ((void *) &thdr, amt, abfd) != amt)
 	return FALSE;

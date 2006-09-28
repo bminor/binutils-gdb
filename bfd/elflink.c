@@ -9691,21 +9691,24 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
 	 easily due to needing special relocs to handle the
 	 difference of two symbols in separate sections.
 	 Don't keep code sections referenced by .eh_frame.  */
+#define TEXT_PREFIX			".text."
+#define GCC_EXCEPT_TABLE_PREFIX		".gcc_except_table."
       for (o = sub->sections; o != NULL; o = o->next)
 	if (!o->gc_mark && o->gc_mark_from_eh && (o->flags & SEC_CODE) == 0)
 	  {
-	    if (CONST_STRNEQ (o->name, ".gcc_except_table."))
+	    if (CONST_STRNEQ (o->name, GCC_EXCEPT_TABLE_PREFIX))
 	      {
-		unsigned long len;
 		char *fn_name;
+		const char *sec_name;
 		asection *fn_text;
+		unsigned o_name_prefix_len  = strlen (GCC_EXCEPT_TABLE_PREFIX);
+		unsigned fn_name_prefix_len = strlen (TEXT_PREFIX);
 
-		len = strlen (o->name + 18) + 1;
-		fn_name = bfd_malloc (len + 6);
+		sec_name = o->name + o_name_prefix_len;
+		fn_name = bfd_malloc (strlen (sec_name) + fn_name_prefix_len + 1);
 		if (fn_name == NULL)
 		  return FALSE;
-		memcpy (fn_name, STRING_COMMA_LEN (".text."));
-		memcpy (fn_name + 6, o->name + 18, len);
+		sprintf (fn_name, "%s%s", TEXT_PREFIX, sec_name);
 		fn_text = bfd_get_section_by_name (sub, fn_name);
 		free (fn_name);
 		if (fn_text == NULL || !fn_text->gc_mark)
