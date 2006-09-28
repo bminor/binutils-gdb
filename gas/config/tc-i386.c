@@ -469,12 +469,18 @@ static const arch_entry cpu_arch[] =
   {"nocona", PROCESSOR_NOCONA,
    Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX
    |CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3},
-  {"yonah", PROCESSOR_YONAH,
+  {"yonah", PROCESSOR_CORE,
    Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX
    |CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3},
-  {"merom", PROCESSOR_MEROM,
+  {"core", PROCESSOR_CORE,
    Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX
-   |CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3|CpuMNI},
+   |CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3},
+  {"merom", PROCESSOR_CORE2,
+   Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX
+   |CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3},
+  {"core2", PROCESSOR_CORE2,
+   Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX
+   |CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3},
   {"k6", PROCESSOR_K6,
    Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuK6|CpuMMX},
   {"k6_2", PROCESSOR_K6,
@@ -503,6 +509,8 @@ static const arch_entry cpu_arch[] =
    CpuMMX|CpuMMX2|CpuSSE|CpuSSE2},
   {".sse3", PROCESSOR_UNKNOWN,
    CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3},
+  {".ssse3", PROCESSOR_UNKNOWN,
+   CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3},
   {".3dnow", PROCESSOR_UNKNOWN,
    CpuMMX|Cpu3dnow},
   {".3dnowa", PROCESSOR_UNKNOWN,
@@ -750,9 +758,9 @@ i386_align_code (fragP, count)
      1. For PROCESSOR_I486, PROCESSOR_PENTIUM and PROCESSOR_GENERIC32,
      f32_patt will be used.
      2. For PROCESSOR_K8 and PROCESSOR_AMDFAM10 in 64bit, NOPs with 0x66 prefix will be used.
-     3. For PROCESSOR_MEROM, alt_long_patt will be used.
+     3. For PROCESSOR_CORE2, alt_long_patt will be used.
      4. For PROCESSOR_PENTIUMPRO, PROCESSOR_PENTIUM4, PROCESSOR_NOCONA,
-     PROCESSOR_YONAH, PROCESSOR_MEROM, PROCESSOR_K6, PROCESSOR_ATHLON
+     PROCESSOR_CORE, PROCESSOR_CORE2, PROCESSOR_K6, PROCESSOR_ATHLON
      and PROCESSOR_GENERIC64, alt_short_patt will be used.
 
      When -mtune= isn't used, alt_short_patt will be used if
@@ -809,13 +817,13 @@ i386_align_code (fragP, count)
 	      else
 		patt = f32_patt;
 	      break;
-	    case PROCESSOR_MEROM:
+	    case PROCESSOR_CORE2:
 	      patt = alt_long_patt;
 	      break;
 	    case PROCESSOR_PENTIUMPRO:
 	    case PROCESSOR_PENTIUM4:
 	    case PROCESSOR_NOCONA:
-	    case PROCESSOR_YONAH:
+	    case PROCESSOR_CORE:
 	    case PROCESSOR_K6:
 	    case PROCESSOR_ATHLON:
 	    case PROCESSOR_K8:
@@ -845,7 +853,7 @@ i386_align_code (fragP, count)
 	    case PROCESSOR_PENTIUMPRO:
 	    case PROCESSOR_PENTIUM4:
 	    case PROCESSOR_NOCONA:
-	    case PROCESSOR_YONAH:
+	    case PROCESSOR_CORE:
 	    case PROCESSOR_K6:
 	    case PROCESSOR_ATHLON:
 	    case PROCESSOR_K8:
@@ -858,7 +866,7 @@ i386_align_code (fragP, count)
 	      else
 		patt = f32_patt;
 	      break;
-	    case PROCESSOR_MEROM:
+	    case PROCESSOR_CORE2:
 	      if ((cpu_arch_isa_flags & Cpu686) != 0)
 		patt = alt_long_patt;
 	      else
@@ -3883,10 +3891,11 @@ output_insn ()
       unsigned char *q;
       unsigned int prefix;
 
-      /* All opcodes on i386 have either 1 or 2 bytes.  Merom New
-	 Instructions have 3 bytes.  We may use one more higher byte
-	 to specify a prefix the instruction requires.  */
-      if ((i.tm.cpu_flags & CpuMNI) != 0)
+      /* All opcodes on i386 have either 1 or 2 bytes.  Supplemental
+	 Streaming SIMD extensions 3 Instructions have 3 bytes.  We may
+	 use one more higher byte to specify a prefix the instruction
+	 requires.  */
+      if ((i.tm.cpu_flags & CpuSSSE3) != 0)
 	{
 	  if (i.tm.base_opcode & 0xff000000)
 	    {
@@ -3927,7 +3936,7 @@ output_insn ()
 	}
       else
 	{
-	  if ((i.tm.cpu_flags & CpuMNI) != 0)
+	  if ((i.tm.cpu_flags & CpuSSSE3) != 0)
 	    {
 	      p = frag_more (3);
 	      *p++ = (i.tm.base_opcode >> 16) & 0xff;
@@ -5980,7 +5989,7 @@ md_show_usage (stream)
   fprintf (stream, _("\
   -march=CPU/-mtune=CPU   generate code/optimize for CPU, where CPU is one of:\n\
                            i386, i486, pentium, pentiumpro, pentium4, nocona,\n\
-			   yonah, merom, k6, athlon, k8, generic32, generic64\n"));
+			   core, core2, k6, athlon, k8, generic32, generic64\n"));
 
 }
 

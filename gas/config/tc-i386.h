@@ -187,7 +187,7 @@ typedef struct
 #define CpuPadLock    0x10000	/* VIA PadLock required */
 #define CpuSVME	      0x20000	/* AMD Secure Virtual Machine Ext-s required */
 #define CpuVMX	      0x40000	/* VMX Instructions required */
-#define CpuMNI	      0x80000	/* Merom New Instructions required */
+#define CpuSSSE3      0x80000	/* Supplemental Streaming SIMD extensions 3 required */
 #define CpuSSE4a     0x100000   /* SSE4a New Instuctions required */ 
 #define CpuABM       0x200000   /* ABM New Instructions required */
 
@@ -198,7 +198,7 @@ typedef struct
   /* The default value for unknown CPUs - enable all features to avoid problems.  */
 #define CpuUnknownFlags (Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686 \
 	|CpuP4|CpuSledgehammer|CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuPNI|CpuVMX \
-	|Cpu3dnow|Cpu3dnowA|CpuK6|CpuPadLock|CpuSVME|CpuMNI|CpuABM|CpuSSE4a)
+	|Cpu3dnow|Cpu3dnowA|CpuK6|CpuPadLock|CpuSVME|CpuSSSE3|CpuABM|CpuSSE4a)
 
   /* the bits in opcode_modifier are used to generate the final opcode from
      the base_opcode.  These bits also are used to detect alternate forms of
@@ -390,8 +390,8 @@ enum processor_type
   PROCESSOR_PENTIUMPRO,
   PROCESSOR_PENTIUM4,
   PROCESSOR_NOCONA,
-  PROCESSOR_YONAH,
-  PROCESSOR_MEROM,
+  PROCESSOR_CORE,
+  PROCESSOR_CORE2,
   PROCESSOR_K6,
   PROCESSOR_ATHLON,
   PROCESSOR_K8,

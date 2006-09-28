@@ -95,8 +95,8 @@ instructions.  The following architectures are recognized:
 @code{pentium4},
 @code{prescott},
 @code{nocona},
-@code{yonah},
-@code{merom},
+@code{core},
+@code{core2},
 @code{k6},
 @code{k6_2},
 @code{athlon},
@@ -752,7 +752,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{i8086} @tab @samp{i186} @tab @samp{i286} @tab @samp{i386}
 @item @samp{i486} @tab @samp{i586} @tab @samp{i686} @tab @samp{pentium}
 @item @samp{pentiumpro} @tab @samp{pentiumii} @tab @samp{pentiumiii} @tab @samp{pentium4}
-@item @samp{prescott} @tab @samp{nocona} @tab @samp{yonah} @tab @samp{merom}
+@item @samp{prescott} @tab @samp{nocona} @tab @samp{core} @tab @samp{core2}
 @item @samp{k6} @tab @samp{athlon} @tab @samp{sledgehammer} @tab @samp{k8} 
 @item @samp{.mmx} @tab @samp{.sse} @tab @samp{.sse2} @tab @samp{.sse3}
 @item @samp{.3dnow} @tab @samp{.3dnowa} @tab @samp{.padlock} @tab @samp{.pacifica}

@@ -1,3 +1,15 @@
+2006-09-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.h (CpuMNI): Renamed to ...
+	(CpuSSSE3): This.
+	(CpuUnknownFlags): Updated.
+	(processor_type): Replace PROCESSOR_YONAH with PROCESSOR_CORE
+	and PROCESSOR_MEROM with PROCESSOR_CORE2.
+	* config/tc-i386.c: Updated.
+	* doc/c-i386.texi: Likewise.
+	
+	* config/tc-i386.c (cpu_arch): Add ".ssse3", "core" and "core2".
+
 2006-09-28  Bridge Wu  <mingqiao.wu@gmail.com>
 
 	* config/tc-arm.c (md_apply_fix): Do not clear write_back bit.
