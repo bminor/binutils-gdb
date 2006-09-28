@@ -1,3 +1,14 @@
+2006-09-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-low.c (PTRACE_GETSIGINFO, PTRACE_SETSIGINFO): Define.
+	(linux_resume_one_process): Take a siginfo_t *.  Update all
+	callers.  Queue it if necessary.  Use PTRACE_SETSIGINFO.
+	(struct pending_signals): Add a siginfo_t.
+	(linux_wait_for_process): Always set last_status.
+	(linux_wait_for_event): Use PTRACE_GETSIGINFO.
+	(linux_queue_one_thread): Use PTRACE_GETSIGINFO.
+	* linux-low.h (struct process_info): Add last_status.
+
 2006-09-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote-utils.c (try_rle): New function.

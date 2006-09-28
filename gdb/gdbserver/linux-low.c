@@ -38,6 +38,11 @@
 #include <errno.h>
 #include <sys/syscall.h>
 
+#ifndef PTRACE_GETSIGINFO
+# define PTRACE_GETSIGINFO 0x4202
+# define PTRACE_SETSIGINFO 0x4203
+#endif
+
 /* ``all_threads'' is keyed by the LWP ID - it should be the thread ID instead,
    however.  This requires changing the ID in place when we go from !using_threads
    to using_threads, immediately.
@@ -54,7 +59,7 @@ int stopping_threads;
 int using_threads;
 
 static void linux_resume_one_process (struct inferior_list_entry *entry,
-				      int step, int signal);
+				      int step, int signal, siginfo_t *info);
 static void linux_resume (struct thread_resume *resume_info);
 static void stop_all_processes (void);
 static int linux_wait_for_event (struct thread_info *child);
@@ -62,6 +67,7 @@ static int linux_wait_for_event (struct thread_info *child);
 struct pending_signals
 {
   int signal;
+  siginfo_t info;
   struct pending_signals *prev;
 };
 
@@ -366,7 +372,7 @@ status_pending_p (struct inferior_list_entry *entry, void *dummy)
 	   So instead of reporting the old SIGTRAP, pretend we got to
 	   the breakpoint just after it was removed instead of just
 	   before; resume the process.  */
-	linux_resume_one_process (&process->head, 0, 0);
+	linux_resume_one_process (&process->head, 0, 0, NULL);
 	return 0;
       }
 
@@ -418,6 +424,8 @@ linux_wait_for_process (struct process_info **childp, int *wstatp)
 
   (*childp)->stopped = 1;
   (*childp)->pending_is_breakpoint = 0;
+
+  (*childp)->last_status = *wstatp;
 
   if (debug_threads
       && WIFSTOPPED (*wstatp))
@@ -527,7 +535,7 @@ linux_wait_for_event (struct thread_info *child)
 		fprintf (stderr, "Expected stop.\n");
 	      event_child->stop_expected = 0;
 	      linux_resume_one_process (&event_child->head,
-					event_child->stepping, 0);
+					event_child->stepping, 0, NULL);
 	      continue;
 	    }
 
@@ -537,13 +545,20 @@ linux_wait_for_event (struct thread_info *child)
 	      && (WSTOPSIG (wstat) == __SIGRTMIN
 		  || WSTOPSIG (wstat) == __SIGRTMIN + 1))
 	    {
+	      siginfo_t info, *info_p;
+
 	      if (debug_threads)
 		fprintf (stderr, "Ignored signal %d for %ld (LWP %ld).\n",
 			 WSTOPSIG (wstat), event_child->tid,
 			 event_child->head.id);
+
+	      if (ptrace (PTRACE_GETSIGINFO, event_child->lwpid, 0, &info) == 0)
+		info_p = &info;
+	      else
+		info_p = NULL;
 	      linux_resume_one_process (&event_child->head,
 					event_child->stepping,
-					WSTOPSIG (wstat));
+					WSTOPSIG (wstat), info_p);
 	      continue;
 	    }
 	}
@@ -572,7 +587,7 @@ linux_wait_for_event (struct thread_info *child)
 	  event_child->bp_reinsert = 0;
 
 	  /* Clear the single-stepping flag and SIGTRAP as we resume.  */
-	  linux_resume_one_process (&event_child->head, 0, 0);
+	  linux_resume_one_process (&event_child->head, 0, 0, NULL);
 	  continue;
 	}
 
@@ -609,13 +624,13 @@ linux_wait_for_event (struct thread_info *child)
 	    {
 	      event_child->bp_reinsert = stop_pc;
 	      uninsert_breakpoint (stop_pc);
-	      linux_resume_one_process (&event_child->head, 1, 0);
+	      linux_resume_one_process (&event_child->head, 1, 0, NULL);
 	    }
 	  else
 	    {
 	      reinsert_breakpoint_by_bp
 		(stop_pc, (*the_low_target.breakpoint_reinsert_addr) ());
-	      linux_resume_one_process (&event_child->head, 0, 0);
+	      linux_resume_one_process (&event_child->head, 0, 0, NULL);
 	    }
 
 	  continue;
@@ -840,7 +855,7 @@ stop_all_processes (void)
 
 static void
 linux_resume_one_process (struct inferior_list_entry *entry,
-			  int step, int signal)
+			  int step, int signal, siginfo_t *info)
 {
   struct process_info *process = (struct process_info *) entry;
   struct thread_info *saved_inferior;
@@ -859,6 +874,10 @@ linux_resume_one_process (struct inferior_list_entry *entry,
       p_sig = malloc (sizeof (*p_sig));
       p_sig->prev = process->pending_signals;
       p_sig->signal = signal;
+      if (info == NULL)
+	memset (&p_sig->info, 0, sizeof (siginfo_t));
+      else
+	memcpy (&p_sig->info, info, sizeof (siginfo_t));
       process->pending_signals = p_sig;
     }
 
@@ -914,6 +933,9 @@ linux_resume_one_process (struct inferior_list_entry *entry,
 	p_sig = &(*p_sig)->prev;
 
       signal = (*p_sig)->signal;
+      if ((*p_sig)->info.si_signo != 0)
+	ptrace (PTRACE_SETSIGINFO, process->lwpid, 0, &(*p_sig)->info);
+
       free (*p_sig);
       *p_sig = NULL;
     }
@@ -980,7 +1002,7 @@ linux_continue_one_thread (struct inferior_list_entry *entry)
   else
     step = process->resume->step;
 
-  linux_resume_one_process (&process->head, step, process->resume->sig);
+  linux_resume_one_process (&process->head, step, process->resume->sig, NULL);
 
   process->resume = NULL;
 }
@@ -1011,6 +1033,16 @@ linux_queue_one_thread (struct inferior_list_entry *entry)
       p_sig = malloc (sizeof (*p_sig));
       p_sig->prev = process->pending_signals;
       p_sig->signal = process->resume->sig;
+      memset (&p_sig->info, 0, sizeof (siginfo_t));
+
+      /* If this is the same signal we were previously stopped by,
+	 make sure to queue its siginfo.  We can ignore the return
+	 value of ptrace; if it fails, we'll skip
+	 PTRACE_SETSIGINFO.  */
+      if (WIFSTOPPED (process->last_status)
+	  && WSTOPSIG (process->last_status) == process->resume->sig)
+	ptrace (PTRACE_GETSIGINFO, process->lwpid, 0, &p_sig->info);
+
       process->pending_signals = p_sig;
     }
 

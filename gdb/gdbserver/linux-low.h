@@ -92,6 +92,9 @@ struct process_info
      event already received in a wait()).  */
   int stopped;
 
+  /* When stopped is set, the last wait status recorded for this process.  */
+  int last_status;
+
   /* If this flag is set, we have sent a SIGSTOP to this process and are
      waiting for it to stop.  */
   int sigstop_sent;
