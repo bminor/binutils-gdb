@@ -134,9 +134,6 @@ static void mn10300_info_to_howto
 static bfd_boolean mn10300_elf_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
-static asection *mn10300_elf_gc_mark_hook
-  PARAMS ((asection *, struct bfd_link_info *info, Elf_Internal_Rela *,
-	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
 static bfd_boolean mn10300_elf_relax_delete_bytes
   PARAMS ((bfd *, asection *, bfd_vma, int));
 static bfd_boolean mn10300_elf_symbol_address_p
@@ -922,40 +919,21 @@ mn10300_elf_check_relocs (abfd, info, sec, relocs)
    relocation.  */
 
 static asection *
-mn10300_elf_gc_mark_hook (sec, info, rel, h, sym)
-     asection *sec;
-     struct bfd_link_info *info ATTRIBUTE_UNUSED;
-     Elf_Internal_Rela *rel;
-     struct elf_link_hash_entry *h;
-     Elf_Internal_Sym *sym;
+mn10300_elf_gc_mark_hook (asection *sec,
+			  struct bfd_link_info *info,
+			  Elf_Internal_Rela *rel,
+			  struct elf_link_hash_entry *h,
+			  Elf_Internal_Sym *sym)
 {
   if (h != NULL)
-    {
-      switch (ELF32_R_TYPE (rel->r_info))
-	{
-	case R_MN10300_GNU_VTINHERIT:
-	case R_MN10300_GNU_VTENTRY:
-	  break;
+    switch (ELF32_R_TYPE (rel->r_info))
+      {
+      case R_MN10300_GNU_VTINHERIT:
+      case R_MN10300_GNU_VTENTRY:
+	return NULL;
+      }
 
-	default:
-	  switch (h->root.type)
-	    {
-	    case bfd_link_hash_defined:
-	    case bfd_link_hash_defweak:
-	      return h->root.u.def.section;
-
-	    case bfd_link_hash_common:
-	      return h->root.u.c.p->section;
-
-	    default:
-	      break;
-	    }
-	}
-    }
-  else
-    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
-
-  return NULL;
+  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
 /* Perform a relocation as part of a final link.  */

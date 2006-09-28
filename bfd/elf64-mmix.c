@@ -187,14 +187,6 @@ static bfd_boolean mmix_elf_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 
-static asection * mmix_elf_gc_mark_hook
-  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
-	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
-
-static bfd_boolean mmix_elf_gc_sweep_hook
-  PARAMS ((bfd *, struct bfd_link_info *, asection *,
-	   const Elf_Internal_Rela *));
-
 static bfd_reloc_status_type mmix_final_link_relocate
   PARAMS ((reloc_howto_type *, asection *, bfd_byte *,
 	   bfd_vma, bfd_signed_vma, bfd_vma, const char *, asection *));
@@ -1744,40 +1736,21 @@ mmix_final_link_relocate (howto, input_section, contents,
    relocation.  */
 
 static asection *
-mmix_elf_gc_mark_hook (sec, info, rel, h, sym)
-     asection *sec;
-     struct bfd_link_info *info ATTRIBUTE_UNUSED;
-     Elf_Internal_Rela *rel;
-     struct elf_link_hash_entry *h;
-     Elf_Internal_Sym *sym;
+mmix_elf_gc_mark_hook (asection *sec,
+		       struct bfd_link_info *info,
+		       Elf_Internal_Rela *rel,
+		       struct elf_link_hash_entry *h,
+		       Elf_Internal_Sym *sym)
 {
   if (h != NULL)
-    {
-      switch (ELF64_R_TYPE (rel->r_info))
-	{
-	case R_MMIX_GNU_VTINHERIT:
-	case R_MMIX_GNU_VTENTRY:
-	  break;
+    switch (ELF64_R_TYPE (rel->r_info))
+      {
+      case R_MMIX_GNU_VTINHERIT:
+      case R_MMIX_GNU_VTENTRY:
+	return NULL;
+      }
 
-	default:
-	  switch (h->root.type)
-	    {
-	    case bfd_link_hash_defined:
-	    case bfd_link_hash_defweak:
-	      return h->root.u.def.section;
-
-	    case bfd_link_hash_common:
-	      return h->root.u.c.p->section;
-
-	    default:
-	      break;
-	    }
-	}
-    }
-  else
-    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
-
-  return NULL;
+  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
 /* Update relocation info for a GC-excluded section.  We could supposedly
@@ -1786,11 +1759,10 @@ mmix_elf_gc_mark_hook (sec, info, rel, h, sym)
    present.  Better to waste some memory and (perhaps) a little time.  */
 
 static bfd_boolean
-mmix_elf_gc_sweep_hook (abfd, info, sec, relocs)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     struct bfd_link_info *info ATTRIBUTE_UNUSED;
-     asection *sec ATTRIBUTE_UNUSED;
-     const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED;
+mmix_elf_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
+			struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			asection *sec,
+			const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED)
 {
   struct bpo_reloc_section_info *bpodata
     = mmix_elf_section_data (sec)->bpo.reloc;

@@ -1,5 +1,5 @@
 /* Ubicom IP2xxx specific support for 32-bit ELF
-   Copyright 2000, 2001, 2002, 2003, 2004, 2005
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1502,53 +1502,6 @@ ip2k_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
   return TRUE;
 }
 
-static asection *
-ip2k_elf_gc_mark_hook (asection *sec,
-		       struct bfd_link_info *info ATTRIBUTE_UNUSED,
-		       Elf_Internal_Rela *rel,
-		       struct elf_link_hash_entry *h,
-		       Elf_Internal_Sym *sym)
-{
-  if (h != NULL)
-    {
-      switch (ELF32_R_TYPE (rel->r_info))
-      {
-      default:
-        switch (h->root.type)
-          {
-          case bfd_link_hash_defined:
-          case bfd_link_hash_defweak:
-            return h->root.u.def.section;
-
-          case bfd_link_hash_common:
-            return h->root.u.c.p->section;
-
-          default:
-            break;
-          }
-       }
-     }
-   else
-     {
-       if (!(elf_bad_symtab (sec->owner)
-	     && ELF_ST_BIND (sym->st_info) != STB_LOCAL)
-	   && ! ((sym->st_shndx <= 0 || sym->st_shndx >= SHN_LORESERVE)
-		 && sym->st_shndx != SHN_COMMON))
-	 return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
-      }
-  return NULL;
-}
-
-static bfd_boolean
-ip2k_elf_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
-			struct bfd_link_info *info ATTRIBUTE_UNUSED,
-			asection *sec ATTRIBUTE_UNUSED,
-			const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED)
-{
-  /* We don't use got and plt entries for ip2k.  */
-  return TRUE;
-}
-
 #define TARGET_BIG_SYM	 bfd_elf32_ip2k_vec
 #define TARGET_BIG_NAME  "elf32-ip2k"
 
@@ -1562,8 +1515,6 @@ ip2k_elf_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
 
 #define elf_backend_can_gc_sections     	1
 #define elf_backend_rela_normal			1
-#define elf_backend_gc_mark_hook                ip2k_elf_gc_mark_hook
-#define elf_backend_gc_sweep_hook               ip2k_elf_gc_sweep_hook
 #define elf_backend_relocate_section		ip2k_elf_relocate_section
 
 #define elf_symbol_leading_char			'_'

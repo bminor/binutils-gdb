@@ -9372,7 +9372,7 @@ _bfd_mips_elf_modify_segment_map (bfd *abfd,
 
 asection *
 _bfd_mips_elf_gc_mark_hook (asection *sec,
-			    struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			    struct bfd_link_info *info,
 			    Elf_Internal_Rela *rel,
 			    struct elf_link_hash_entry *h,
 			    Elf_Internal_Sym *sym)
@@ -9380,32 +9380,14 @@ _bfd_mips_elf_gc_mark_hook (asection *sec,
   /* ??? Do mips16 stub sections need to be handled special?  */
 
   if (h != NULL)
-    {
-      switch (ELF_R_TYPE (sec->owner, rel->r_info))
-	{
-	case R_MIPS_GNU_VTINHERIT:
-	case R_MIPS_GNU_VTENTRY:
-	  break;
+    switch (ELF_R_TYPE (sec->owner, rel->r_info))
+      {
+      case R_MIPS_GNU_VTINHERIT:
+      case R_MIPS_GNU_VTENTRY:
+	return NULL;
+      }
 
-	default:
-	  switch (h->root.type)
-	    {
-	    case bfd_link_hash_defined:
-	    case bfd_link_hash_defweak:
-	      return h->root.u.def.section;
-
-	    case bfd_link_hash_common:
-	      return h->root.u.c.p->section;
-
-	    default:
-	      break;
-	    }
-	}
-    }
-  else
-    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
-
-  return NULL;
+  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
 /* Update the got entry reference counts for the section being removed.  */

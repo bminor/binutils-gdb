@@ -34,13 +34,6 @@ static struct bfd_hash_entry *elf_vax_link_hash_newfunc (struct bfd_hash_entry *
 static struct bfd_link_hash_table *elf_vax_link_hash_table_create (bfd *);
 static bfd_boolean elf_vax_check_relocs (bfd *, struct bfd_link_info *,
 					 asection *, const Elf_Internal_Rela *);
-static asection *elf_vax_gc_mark_hook (asection *, struct bfd_link_info *,
-				       Elf_Internal_Rela *,
-				       struct elf_link_hash_entry *,
-				       Elf_Internal_Sym *);
-static bfd_boolean elf_vax_gc_sweep_hook (bfd *, struct bfd_link_info *,
-					  asection *,
-					  const Elf_Internal_Rela *);
 static bfd_boolean elf_vax_adjust_dynamic_symbol (struct bfd_link_info *,
 						  struct elf_link_hash_entry *);
 static bfd_boolean elf_vax_size_dynamic_sections (bfd *, struct bfd_link_info *);
@@ -829,38 +822,20 @@ elf_vax_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 
 static asection *
 elf_vax_gc_mark_hook (asection *sec,
-		      struct bfd_link_info *info ATTRIBUTE_UNUSED,
+		      struct bfd_link_info *info,
 		      Elf_Internal_Rela *rel,
 		      struct elf_link_hash_entry *h,
 		      Elf_Internal_Sym *sym)
 {
   if (h != NULL)
-    {
-      switch (ELF32_R_TYPE (rel->r_info))
-	{
-	case R_VAX_GNU_VTINHERIT:
-	case R_VAX_GNU_VTENTRY:
-	  break;
+    switch (ELF32_R_TYPE (rel->r_info))
+      {
+      case R_VAX_GNU_VTINHERIT:
+      case R_VAX_GNU_VTENTRY:
+	return NULL;
+      }
 
-	default:
-	  switch (h->root.type)
-	    {
-	    default:
-	      break;
-
-	    case bfd_link_hash_defined:
-	    case bfd_link_hash_defweak:
-	      return h->root.u.def.section;
-
-	    case bfd_link_hash_common:
-	      return h->root.u.c.p->section;
-	    }
-	}
-    }
-  else
-    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
-
-  return NULL;
+  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
 /* Update the got entry reference counts for the section being removed.  */

@@ -526,37 +526,21 @@ mcore_elf_relocate_section (bfd * output_bfd,
    relocation.  */
 
 static asection *
-mcore_elf_gc_mark_hook (asection *                   sec,
-			struct bfd_link_info *       info ATTRIBUTE_UNUSED,
-			Elf_Internal_Rela *          rel,
-			struct elf_link_hash_entry * h,
-			Elf_Internal_Sym *           sym)
+mcore_elf_gc_mark_hook (asection *sec,
+			struct bfd_link_info *info,
+			Elf_Internal_Rela *rel,
+			struct elf_link_hash_entry *h,
+			Elf_Internal_Sym *sym)
 {
-  if (h == NULL)
-    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
+  if (h != NULL)
+    switch (ELF32_R_TYPE (rel->r_info))
+      {
+      case R_MCORE_GNU_VTINHERIT:
+      case R_MCORE_GNU_VTENTRY:
+	return NULL;
+      }
 
-  switch (ELF32_R_TYPE (rel->r_info))
-    {
-    case R_MCORE_GNU_VTINHERIT:
-    case R_MCORE_GNU_VTENTRY:
-      break;
-
-    default:
-      switch (h->root.type)
-	{
-	case bfd_link_hash_defined:
-	case bfd_link_hash_defweak:
-	  return h->root.u.def.section;
-
-	case bfd_link_hash_common:
-	  return h->root.u.c.p->section;
-
-	default:
-	  break;
-	}
-    }
-
-  return NULL;
+  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
 /* Update the got entry reference counts for the section being removed.  */

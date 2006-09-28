@@ -4515,42 +4515,20 @@ tpoff (struct bfd_link_info *info, bfd_vma address)
 
 static asection *
 sh_elf_gc_mark_hook (asection *sec,
-		     struct bfd_link_info *info ATTRIBUTE_UNUSED,
-		     Elf_Internal_Rela *rel, struct elf_link_hash_entry *h,
+		     struct bfd_link_info *info,
+		     Elf_Internal_Rela *rel,
+		     struct elf_link_hash_entry *h,
 		     Elf_Internal_Sym *sym)
 {
   if (h != NULL)
-    {
-      switch (ELF32_R_TYPE (rel->r_info))
-	{
-	case R_SH_GNU_VTINHERIT:
-	case R_SH_GNU_VTENTRY:
-	  break;
+    switch (ELF32_R_TYPE (rel->r_info))
+      {
+      case R_SH_GNU_VTINHERIT:
+      case R_SH_GNU_VTENTRY:
+	return NULL;
+      }
 
-	default:
-#ifdef INCLUDE_SHMEDIA
-	  while (h->root.type == bfd_link_hash_indirect
-		 && h->root.u.i.link)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-#endif
-	  switch (h->root.type)
-	    {
-	    case bfd_link_hash_defined:
-	    case bfd_link_hash_defweak:
-	      return h->root.u.def.section;
-
-	    case bfd_link_hash_common:
-	      return h->root.u.c.p->section;
-
-	    default:
-	      break;
-	    }
-	}
-    }
-  else
-    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
-
-  return NULL;
+  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
 /* Update the got entry reference counts for the section being removed.  */

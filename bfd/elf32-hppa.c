@@ -1588,38 +1588,20 @@ elf32_hppa_check_relocs (bfd *abfd,
 
 static asection *
 elf32_hppa_gc_mark_hook (asection *sec,
-			 struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			 struct bfd_link_info *info,
 			 Elf_Internal_Rela *rela,
 			 struct elf_link_hash_entry *hh,
 			 Elf_Internal_Sym *sym)
 {
   if (hh != NULL)
-    {
-      switch ((unsigned int) ELF32_R_TYPE (rela->r_info))
-	{
-	case R_PARISC_GNU_VTINHERIT:
-	case R_PARISC_GNU_VTENTRY:
-	  break;
+    switch ((unsigned int) ELF32_R_TYPE (rela->r_info))
+      {
+      case R_PARISC_GNU_VTINHERIT:
+      case R_PARISC_GNU_VTENTRY:
+	return NULL;
+      }
 
-	default:
-	  switch (hh->root.type)
-	    {
-	    case bfd_link_hash_defined:
-	    case bfd_link_hash_defweak:
-	      return hh->root.u.def.section;
-
-	    case bfd_link_hash_common:
-	      return hh->root.u.c.p->section;
-
-	    default:
-	      break;
-	    }
-	}
-    }
-  else
-    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
-
-  return NULL;
+  return _bfd_elf_gc_mark_hook (sec, info, rela, hh, sym);
 }
 
 /* Update the got and plt entry reference counts for the section being

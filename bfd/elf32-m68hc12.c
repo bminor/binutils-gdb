@@ -1,5 +1,6 @@
 /* Motorola 68HC12-specific support for 32-bit ELF
-   Copyright 1999, 2000, 2002, 2003, 2004, 2006 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
    Contributed by Stephane Carrez (stcarrez@nerim.fr)
    (Heavily copied from the D10V port by Martin Hunt (hunt@cygnus.com))
 
@@ -553,8 +554,6 @@ static const struct bfd_elf_special_section elf32_m68hc12_special_sections[] =
 
 #define elf_info_to_howto	0
 #define elf_info_to_howto_rel	m68hc11_info_to_howto_rel
-#define elf_backend_gc_mark_hook     elf32_m68hc11_gc_mark_hook
-#define elf_backend_gc_sweep_hook    elf32_m68hc11_gc_sweep_hook
 #define elf_backend_check_relocs     elf32_m68hc11_check_relocs
 #define elf_backend_relocate_section elf32_m68hc11_relocate_section
 #define elf_backend_object_p		m68hc12_elf_set_mach_from_flags

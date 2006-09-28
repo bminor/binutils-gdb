@@ -131,7 +131,7 @@
 #define elf_backend_gc_mark_dynamic_ref	bfd_elf_gc_mark_dynamic_ref_symbol
 #endif
 #ifndef elf_backend_gc_mark_hook
-#define elf_backend_gc_mark_hook	NULL
+#define elf_backend_gc_mark_hook	_bfd_elf_gc_mark_hook
 #endif
 #ifndef elf_backend_gc_sweep_hook
 #define elf_backend_gc_sweep_hook	NULL

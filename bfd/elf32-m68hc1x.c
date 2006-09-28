@@ -810,48 +810,6 @@ m68hc11_elf_special_reloc (bfd *abfd ATTRIBUTE_UNUSED,
   abort();
 }
 
-asection *
-elf32_m68hc11_gc_mark_hook (asection *sec,
-                            struct bfd_link_info *info ATTRIBUTE_UNUSED,
-                            Elf_Internal_Rela *rel,
-                            struct elf_link_hash_entry *h,
-                            Elf_Internal_Sym *sym)
-{
-  if (h != NULL)
-    {
-      switch (ELF32_R_TYPE (rel->r_info))
-	{
-	default:
-	  switch (h->root.type)
-	    {
-	    case bfd_link_hash_defined:
-	    case bfd_link_hash_defweak:
-	      return h->root.u.def.section;
-
-	    case bfd_link_hash_common:
-	      return h->root.u.c.p->section;
-
-	    default:
-	      break;
-	    }
-	}
-    }
-  else
-    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
-
-  return NULL;
-}
-
-bfd_boolean
-elf32_m68hc11_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
-                             struct bfd_link_info *info ATTRIBUTE_UNUSED,
-                             asection *sec ATTRIBUTE_UNUSED,
-                             const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED)
-{
-  /* We don't use got and plt entries for 68hc11/68hc12.  */
-  return TRUE;
-}
-
 /* Look through the relocs for a section during the first phase.
    Since we don't do .gots or .plts, we just need to consider the
    virtual table relocs for gc.  */

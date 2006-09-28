@@ -642,53 +642,25 @@ iq2000_elf_relocate_section (bfd *		     output_bfd ATTRIBUTE_UNUSED,
 }
 
 
-/* Update the got entry reference counts for the section being
-   removed.  */
-
-static bfd_boolean
-iq2000_elf_gc_sweep_hook (bfd *		            abfd ATTRIBUTE_UNUSED,
-			  struct bfd_link_info *    info ATTRIBUTE_UNUSED,
-			  asection *		    sec ATTRIBUTE_UNUSED,
-			  const Elf_Internal_Rela * relocs ATTRIBUTE_UNUSED)
-{
-  return TRUE;
-}
-
 /* Return the section that should be marked against GC for a given
    relocation.	*/
 
 static asection *
-iq2000_elf_gc_mark_hook (asection *		      sec,
-			 struct bfd_link_info *	      info ATTRIBUTE_UNUSED,
-			 Elf_Internal_Rela *	      rel,
-			 struct elf_link_hash_entry * h,
-			 Elf_Internal_Sym *	      sym)
+iq2000_elf_gc_mark_hook (asection *sec,
+			 struct bfd_link_info *info,
+			 Elf_Internal_Rela *rel,
+			 struct elf_link_hash_entry *h,
+			 Elf_Internal_Sym *sym)
 {
-  if (h == NULL)
-    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
+  if (h != NULL)
+    switch (ELF32_R_TYPE (rel->r_info))
+      {
+      case R_IQ2000_GNU_VTINHERIT:
+      case R_IQ2000_GNU_VTENTRY:
+	return NULL;
+      }
 
-  switch (ELF32_R_TYPE (rel->r_info))
-    {
-    case R_IQ2000_GNU_VTINHERIT:
-    case R_IQ2000_GNU_VTENTRY:
-      break;
-	  
-    default:
-      switch (h->root.type)
-	{
-	case bfd_link_hash_defined:
-	case bfd_link_hash_defweak:
-	  return h->root.u.def.section;
-	      
-	case bfd_link_hash_common:
-	  return h->root.u.c.p->section;
-	      
-	default:
-	  break;
-	}
-    }
-
-  return NULL;
+  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
 
@@ -874,7 +846,6 @@ iq2000_elf_object_p (bfd *abfd)
 #define elf_info_to_howto			iq2000_info_to_howto_rela
 #define elf_backend_relocate_section		iq2000_elf_relocate_section
 #define elf_backend_gc_mark_hook		iq2000_elf_gc_mark_hook
-#define elf_backend_gc_sweep_hook		iq2000_elf_gc_sweep_hook
 #define elf_backend_check_relocs		iq2000_elf_check_relocs
 #define elf_backend_object_p			iq2000_elf_object_p
 #define elf_backend_rela_normal			1

@@ -1279,38 +1279,20 @@ elf_i386_check_relocs (bfd *abfd,
 
 static asection *
 elf_i386_gc_mark_hook (asection *sec,
-		       struct bfd_link_info *info ATTRIBUTE_UNUSED,
+		       struct bfd_link_info *info,
 		       Elf_Internal_Rela *rel,
 		       struct elf_link_hash_entry *h,
 		       Elf_Internal_Sym *sym)
 {
   if (h != NULL)
-    {
-      switch (ELF32_R_TYPE (rel->r_info))
-	{
-	case R_386_GNU_VTINHERIT:
-	case R_386_GNU_VTENTRY:
-	  break;
+    switch (ELF32_R_TYPE (rel->r_info))
+      {
+      case R_386_GNU_VTINHERIT:
+      case R_386_GNU_VTENTRY:
+	return NULL;
+      }
 
-	default:
-	  switch (h->root.type)
-	    {
-	    case bfd_link_hash_defined:
-	    case bfd_link_hash_defweak:
-	      return h->root.u.def.section;
-
-	    case bfd_link_hash_common:
-	      return h->root.u.c.p->section;
-
-	    default:
-	      break;
-	    }
-	}
-    }
-  else
-    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
-
-  return NULL;
+  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
 /* Update the got entry reference counts for the section being removed.  */

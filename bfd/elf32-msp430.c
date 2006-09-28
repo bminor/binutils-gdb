@@ -1,5 +1,6 @@
 /*  MSP430-specific support for 32-bit ELF
-    Copyright (C) 2002, 2003, 2004 Free Software Foundation, Inc.
+    Copyright (C) 2002, 2003, 2004, 2005, 2006
+    Free Software Foundation, Inc.
     Contributed by Dmitry Diky <diwil@mail.ru>
 
     This file is part of BFD, the Binary File Descriptor library.
@@ -211,48 +212,6 @@ msp430_info_to_howto_rela (bfd * abfd ATTRIBUTE_UNUSED,
   r_type = ELF32_R_TYPE (dst->r_info);
   BFD_ASSERT (r_type < (unsigned int) R_MSP430_max);
   cache_ptr->howto = &elf_msp430_howto_table[r_type];
-}
-
-static asection *
-elf32_msp430_gc_mark_hook (asection * sec,
-			   struct bfd_link_info * info ATTRIBUTE_UNUSED,
-			   Elf_Internal_Rela * rel,
-			   struct elf_link_hash_entry * h,
-			   Elf_Internal_Sym * sym)
-{
-  if (h != NULL)
-    {
-      switch (ELF32_R_TYPE (rel->r_info))
-	{
-	default:
-	  switch (h->root.type)
-	    {
-	    case bfd_link_hash_defined:
-	    case bfd_link_hash_defweak:
-	      return h->root.u.def.section;
-
-	    case bfd_link_hash_common:
-	      return h->root.u.c.p->section;
-
-	    default:
-	      break;
-	    }
-	}
-    }
-  else
-    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
-
-  return NULL;
-}
-
-static bfd_boolean
-elf32_msp430_gc_sweep_hook (bfd * abfd ATTRIBUTE_UNUSED,
-			    struct bfd_link_info * info ATTRIBUTE_UNUSED,
-			    asection * sec ATTRIBUTE_UNUSED,
-			    const Elf_Internal_Rela * relocs ATTRIBUTE_UNUSED)
-{
-  /* We don't use got and plt entries for msp430.  */
-  return TRUE;
 }
 
 /* Look through the relocs for a section during the first phase.
@@ -1210,8 +1169,6 @@ error_return:
 #define elf_info_to_howto	             msp430_info_to_howto_rela
 #define elf_info_to_howto_rel	             NULL
 #define elf_backend_relocate_section         elf32_msp430_relocate_section
-#define elf_backend_gc_mark_hook             elf32_msp430_gc_mark_hook
-#define elf_backend_gc_sweep_hook            elf32_msp430_gc_sweep_hook
 #define elf_backend_check_relocs             elf32_msp430_check_relocs
 #define elf_backend_can_gc_sections          1
 #define elf_backend_final_write_processing   bfd_elf_msp430_final_write_processing

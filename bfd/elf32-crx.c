@@ -1,5 +1,5 @@
 /* BFD back-end for National Semiconductor's CRX ELF
-   Copyright 2004 Free Software Foundation, Inc.
+   Copyright 2004, 2005, 2006 Free Software Foundation, Inc.
    Written by Tomer Levi, NSC, Israel.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -38,12 +38,6 @@ static bfd_reloc_status_type crx_elf_final_link_relocate
 static bfd_boolean elf32_crx_relocate_section
   (bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
    Elf_Internal_Rela *, Elf_Internal_Sym *, asection **);
-static asection * elf32_crx_gc_mark_hook
-  (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
-   struct elf_link_hash_entry *, Elf_Internal_Sym *);
-static bfd_boolean elf32_crx_gc_sweep_hook
-  (bfd *, struct bfd_link_info *, asection *,
-   const Elf_Internal_Rela *);
 static bfd_boolean elf32_crx_relax_section
   (bfd *, asection *, struct bfd_link_info *, bfd_boolean *);
 static bfd_byte * elf32_crx_get_relocated_section_contents
@@ -1297,42 +1291,6 @@ elf32_crx_relax_section (bfd *abfd, asection *sec,
   return FALSE;
 }
 
-static asection *
-elf32_crx_gc_mark_hook (asection *sec,
-			struct bfd_link_info *info ATTRIBUTE_UNUSED,
-			Elf_Internal_Rela *rel ATTRIBUTE_UNUSED,
-			struct elf_link_hash_entry *h,
-			Elf_Internal_Sym *sym)
-{
-  if (h == NULL)
-    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
-
-  switch (h->root.type)
-    {
-    case bfd_link_hash_defined:
-    case bfd_link_hash_defweak:
-      return h->root.u.def.section;
-
-    case bfd_link_hash_common:
-      return h->root.u.c.p->section;
-
-    default:
-      return NULL;
-    }
-}
-
-/* Update the got entry reference counts for the section being removed.  */
-
-static bfd_boolean
-elf32_crx_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
-			 struct bfd_link_info *info ATTRIBUTE_UNUSED,
-			 asection *sec ATTRIBUTE_UNUSED,
-			 const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED)
-{
-  /* We don't support garbage collection of GOT and PLT relocs yet.  */
-  return TRUE;
-}
-
 /* Definitions for setting CRX target vector.  */
 #define TARGET_LITTLE_SYM		bfd_elf32_crx_vec
 #define TARGET_LITTLE_NAME		"elf32-crx"
@@ -1348,8 +1306,6 @@ elf32_crx_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
 #define bfd_elf32_bfd_relax_section	elf32_crx_relax_section
 #define bfd_elf32_bfd_get_relocated_section_contents \
 				elf32_crx_get_relocated_section_contents
-#define elf_backend_gc_mark_hook        elf32_crx_gc_mark_hook
-#define elf_backend_gc_sweep_hook       elf32_crx_gc_sweep_hook
 #define elf_backend_can_gc_sections     1
 #define elf_backend_rela_normal		1
 

@@ -1,5 +1,5 @@
 /* BFD back-end for National Semiconductor's CR16C ELF
-   Copyright 2004, 2005 Free Software Foundation, Inc.
+   Copyright 2004, 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -798,53 +798,6 @@ elf32_cr16c_relocate_section (bfd *output_bfd,
   return TRUE;
 }
 
-static asection *
-elf32_cr16c_gc_mark_hook (asection *sec,
-			  struct bfd_link_info *info ATTRIBUTE_UNUSED,
-			  Elf_Internal_Rela *rel,
-			  struct elf_link_hash_entry *h,
-			  Elf_Internal_Sym *sym)
-{
-  if (h != NULL)
-    {
-      switch (ELF32_R_TYPE (rel->r_info))
-	{
-
-	default:
-	  switch (h->root.type)
-	    {
-	    case bfd_link_hash_defined:
-	    case bfd_link_hash_defweak:
-	      return h->root.u.def.section;
-
-	    case bfd_link_hash_common:
-	      return h->root.u.c.p->section;
-
-	    default:
-	      break;
-	    }
-	}
-    }
-  else
-    {
-      return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
-    }
-
-  return NULL;
-}
-
-/* Update the got entry reference counts for the section being removed.  */
-
-static bfd_boolean
-elf32_cr16c_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
-			   struct bfd_link_info *info ATTRIBUTE_UNUSED,
-			   asection *sec ATTRIBUTE_UNUSED,
-			   const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED)
-{
-  /* We don't support garbage collection of GOT and PLT relocs yet.  */
-  return TRUE;
-}
-
 /* CR16C ELF uses three common sections:
    One is for default common symbols (placed in usual common section).
    Second is for near common symbols (placed in "ncommon" section).
@@ -991,8 +944,6 @@ elf32_cr16c_link_output_symbol_hook (struct bfd_link_info *info ATTRIBUTE_UNUSED
 #define elf_info_to_howto			elf_cr16c_info_to_howto
 #define elf_info_to_howto_rel			elf_cr16c_info_to_howto_rel
 #define elf_backend_relocate_section		elf32_cr16c_relocate_section
-#define elf_backend_gc_mark_hook        	elf32_cr16c_gc_mark_hook
-#define elf_backend_gc_sweep_hook       	elf32_cr16c_gc_sweep_hook
 #define elf_backend_symbol_processing		elf32_cr16c_symbol_processing
 #define elf_backend_section_from_bfd_section 	elf32_cr16c_section_from_bfd_section
 #define elf_backend_add_symbol_hook		elf32_cr16c_add_symbol_hook

@@ -1532,35 +1532,14 @@ _bfd_sparc_elf_gc_mark_hook (asection *sec,
 			     Elf_Internal_Sym *sym)
 {
   if (h != NULL)
-    {
-      struct _bfd_sparc_elf_link_hash_table *htab;
-
-      htab = _bfd_sparc_elf_hash_table (info);
-      switch (SPARC_ELF_R_TYPE (rel->r_info))
+    switch (SPARC_ELF_R_TYPE (rel->r_info))
       {
       case R_SPARC_GNU_VTINHERIT:
       case R_SPARC_GNU_VTENTRY:
-	break;
-
-      default:
-	switch (h->root.type)
-	  {
-	  case bfd_link_hash_defined:
-	  case bfd_link_hash_defweak:
-	    return h->root.u.def.section;
-
-	  case bfd_link_hash_common:
-	    return h->root.u.c.p->section;
-
-	  default:
-	    break;
-	  }
+	return NULL;
       }
-    }
-  else
-    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
 
-  return NULL;
+  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
 /* Update the got entry reference counts for the section being removed.  */

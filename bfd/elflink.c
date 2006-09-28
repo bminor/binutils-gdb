@@ -9248,13 +9248,43 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
 /* Garbage collect unused sections.  */
 
-/* The mark phase of garbage collection.  For a given section, mark
-   it and any sections in this section's group, and all the sections
-   which define symbols to which it refers.  */
-
 typedef asection * (*gc_mark_hook_fn)
   (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
    struct elf_link_hash_entry *, Elf_Internal_Sym *);
+
+/* Default gc_mark_hook.  */
+
+asection *
+_bfd_elf_gc_mark_hook (asection *sec,
+		       struct bfd_link_info *info ATTRIBUTE_UNUSED,
+		       Elf_Internal_Rela *rel ATTRIBUTE_UNUSED,
+		       struct elf_link_hash_entry *h,
+		       Elf_Internal_Sym *sym)
+{
+  if (h != NULL)
+    {
+      switch (h->root.type)
+	{
+	case bfd_link_hash_defined:
+	case bfd_link_hash_defweak:
+	  return h->root.u.def.section;
+
+	case bfd_link_hash_common:
+	  return h->root.u.c.p->section;
+
+	default:
+	  break;
+	}
+    }
+  else
+    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
+
+  return NULL;
+}
+
+/* The mark phase of garbage collection.  For a given section, mark
+   it and any sections in this section's group, and all the sections
+   which define symbols to which it refers.  */
 
 bfd_boolean
 _bfd_elf_gc_mark (struct bfd_link_info *info,

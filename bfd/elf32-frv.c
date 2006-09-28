@@ -57,12 +57,6 @@ static bfd_boolean elf32_frv_add_symbol_hook
 static bfd_reloc_status_type frv_final_link_relocate
   PARAMS ((reloc_howto_type *, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *, bfd_vma));
-static bfd_boolean elf32_frv_gc_sweep_hook
-  PARAMS ((bfd *, struct bfd_link_info *, asection *, const
-	   Elf_Internal_Rela *));
-static asection * elf32_frv_gc_mark_hook
-  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
-	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
 static bfd_boolean elf32_frv_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
@@ -4145,54 +4139,22 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
    relocation.  */
 
 static asection *
-elf32_frv_gc_mark_hook (sec, info, rel, h, sym)
-     asection *sec;
-     struct bfd_link_info *info ATTRIBUTE_UNUSED;
-     Elf_Internal_Rela *rel;
-     struct elf_link_hash_entry *h;
-     Elf_Internal_Sym *sym;
+elf32_frv_gc_mark_hook (asection *sec,
+			struct bfd_link_info *info,
+			Elf_Internal_Rela *rel,
+			struct elf_link_hash_entry *h,
+			Elf_Internal_Sym *sym)
 {
   if (h != NULL)
-    {
-      switch (ELF32_R_TYPE (rel->r_info))
-	{
-	case R_FRV_GNU_VTINHERIT:
-	case R_FRV_GNU_VTENTRY:
-	  break;
+    switch (ELF32_R_TYPE (rel->r_info))
+      {
+      case R_FRV_GNU_VTINHERIT:
+      case R_FRV_GNU_VTENTRY:
+	return NULL;
+      }
 
-	default:
-	  switch (h->root.type)
-	    {
-	    default:
-	      break;
-
-	    case bfd_link_hash_defined:
-	    case bfd_link_hash_defweak:
-	      return h->root.u.def.section;
-
-	    case bfd_link_hash_common:
-	      return h->root.u.c.p->section;
-	    }
-	}
-    }
-  else
-    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
-
-  return NULL;
+  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
-
-/* Update the got entry reference counts for the section being removed.  */
-
-static bfd_boolean
-elf32_frv_gc_sweep_hook (abfd, info, sec, relocs)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     struct bfd_link_info *info ATTRIBUTE_UNUSED;
-     asection *sec ATTRIBUTE_UNUSED;
-     const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED;
-{
-  return TRUE;
-}
-
 
 /* Hook called by the linker routine which adds symbols from an object
    file.  We use it to put .comm items in .scomm, and not .comm.  */
@@ -6911,7 +6873,6 @@ elf32_frv_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 #define elf_info_to_howto			frv_info_to_howto_rela
 #define elf_backend_relocate_section		elf32_frv_relocate_section
 #define elf_backend_gc_mark_hook		elf32_frv_gc_mark_hook
-#define elf_backend_gc_sweep_hook		elf32_frv_gc_sweep_hook
 #define elf_backend_check_relocs                elf32_frv_check_relocs
 #define elf_backend_object_p			elf32_frv_object_p
 #define elf_backend_add_symbol_hook             elf32_frv_add_symbol_hook
