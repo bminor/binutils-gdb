@@ -142,12 +142,15 @@ temp_file (struct pex_obj *obj, int flags, char *name)
   return name;
 }
 
-/* Run a program.  */
+
+/* As for pex_run (), but permits the environment for the child process
+   to be specified. */
 
 const char *
-pex_run (struct pex_obj *obj, int flags, const char *executable,
-	 char * const * argv, const char *orig_outname, const char *errname,
-	 int *err)
+pex_run_in_environment (struct pex_obj *obj, int flags, const char *executable,
+       	                char * const * argv, char * const * env,
+                        const char *orig_outname, const char *errname,
+                  	int *err)
 {
   const char *errmsg;
   int in, out, errdes;
@@ -298,8 +301,8 @@ pex_run (struct pex_obj *obj, int flags, const char *executable,
 
   /* Run the program.  */
 
-  pid = obj->funcs->exec_child (obj, flags, executable, argv, in, out, errdes,
-				&errmsg, err);
+  pid = obj->funcs->exec_child (obj, flags, executable, argv, env,
+                                in, out, errdes, &errmsg, err);
   if (p[WRITE_PORT] != -1)
     obj->funcs->close (obj, p[WRITE_PORT]);
   if (pid < 0)
@@ -367,6 +370,17 @@ pex_write_input (struct pex_obj *obj, int binary)
  usage_error:
   errno = EINVAL;
   return NULL;
+}
+
+/* Run a program.  */
+
+const char *
+pex_run (struct pex_obj *obj, int flags, const char *executable,
+       	 char * const * argv, const char *orig_outname, const char *errname,
+         int *err)
+{
+  return pex_run_in_environment (obj, flags, executable, argv, NULL,
+				 orig_outname, errname, err);
 }
 
 /* Return a FILE pointer for a temporary file to fill with input for
