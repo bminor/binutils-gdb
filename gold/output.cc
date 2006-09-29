@@ -140,7 +140,8 @@ Output_section_headers::do_sized_write(Output_file* of)
   for (Layout::Segment_list::const_iterator p = this->segment_list_.begin();
        p != this->segment_list_.end();
        ++p)
-    v = (*p)->write_section_headers<size, big_endian>(this->secnamepool_, v);
+    v = (*p)->write_section_headers SELECT_SIZE_ENDIAN_NAME (
+      this->secnamepool_, v SELECT_SIZE_ENDIAN(size, big_endian));
   for (Layout::Section_list::const_iterator p = this->section_list_.begin();
        p != this->section_list_.end();
        ++p)
@@ -324,7 +325,8 @@ Output_file_header::do_sized_write(Output_file* of)
   else
     {
       Sized_symbol<size>* ssym;
-      ssym = this->symtab_->get_sized_symbol<size>(sym);
+      ssym = this->symtab_->get_sized_symbol SELECT_SIZE_NAME (
+        sym SELECT_SIZE(size));
       v = ssym->value();
     }
   oehdr.put_e_entry(v);
@@ -715,14 +717,13 @@ Output_segment::write_header(elfcpp::Phdr_write<size, big_endian>* ophdr) const
 template<int size, bool big_endian>
 unsigned char*
 Output_segment::write_section_headers(const Stringpool* secnamepool,
-				      unsigned char* v) const
+				      unsigned char* v
+                                      ACCEPT_SIZE_ENDIAN) const
 {
-  v = this->write_section_headers_list<size, big_endian>(secnamepool,
-							 &this->output_data_,
-							 v);
-  v = this->write_section_headers_list<size, big_endian>(secnamepool,
-							 &this->output_bss_,
-							 v);
+  v = this->write_section_headers_list SELECT_SIZE_ENDIAN_NAME (
+    secnamepool, &this->output_data_, v SELECT_SIZE_ENDIAN(size, big_endian));
+  v = this->write_section_headers_list SELECT_SIZE_ENDIAN_NAME (
+    secnamepool, &this->output_bss_, v SELECT_SIZE_ENDIAN(size, big_endian));
   return v;
 }
 
@@ -730,7 +731,8 @@ template<int size, bool big_endian>
 unsigned char*
 Output_segment::write_section_headers_list(const Stringpool* secnamepool,
 					   const Output_data_list* pdl,
-					   unsigned char* v) const
+					   unsigned char* v
+                                           ACCEPT_SIZE_ENDIAN) const
 {
   const int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
   for (Output_data_list::const_iterator p = pdl->begin();
@@ -739,7 +741,7 @@ Output_segment::write_section_headers_list(const Stringpool* secnamepool,
     {
       if ((*p)->is_section())
 	{
-	  Output_section* ps = static_cast<const Output_section*>(*p);
+	  const Output_section* ps = static_cast<const Output_section*>(*p);
 	  elfcpp::Shdr_write<size, big_endian> oshdr(v);
 	  ps->write_header(secnamepool, &oshdr);
 	  v += shdr_size;

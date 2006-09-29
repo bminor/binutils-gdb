@@ -85,14 +85,12 @@ class Object
   is_locked() const
   { return this->input_file_->file().is_locked(); }
 
-#ifdef HAVE_MEMBER_TEMPLATE_SPECIFICATIONS
   // Return the sized target structure associated with this object.
   // This is like the target method but it returns a pointer of
   // appropriate checked type.
   template<int size, bool big_endian>
   Sized_target<size, big_endian>*
-  sized_target();
-#endif
+  sized_target(ACCEPT_SIZE_ENDIAN_ONLY);
 
   // Read the symbol and relocation information.
   Read_symbols_data
@@ -232,21 +230,17 @@ class Object
   std::vector<Map_to_output> map_to_output_;
 };
 
-#ifdef HAVE_MEMBER_TEMPLATE_SPECIFICATIONS
-
 // Implement sized_target inline for efficiency.  This approach breaks
 // static type checking, but is made safe using asserts.
 
 template<int size, bool big_endian>
 inline Sized_target<size, big_endian>*
-Object::sized_target()
+Object::sized_target(ACCEPT_SIZE_ENDIAN_ONLY)
 {
   assert(this->target_->get_size() == size);
   assert(this->target_->is_big_endian() ? big_endian : !big_endian);
   return static_cast<Sized_target<size, big_endian>*>(this->target_);
 }
-
-#endif
 
 // A regular object file.  This is size and endian specific.
 
@@ -288,11 +282,8 @@ class Sized_object : public Object
   Sized_target<size, big_endian>*
   sized_target()
   {
-#ifdef HAVE_MEMBER_TEMPLATE_SPECIFICATIONS
-    return this->Object::sized_target<size, big_endian>();
-#else
-    return static_cast<Sized_target<size, big_endian>*>(this->target());
-#endif
+    return this->Object::sized_target SELECT_SIZE_ENDIAN_NAME (
+      SELECT_SIZE_ENDIAN_ONLY(size, big_endian));
   }
 
  private:

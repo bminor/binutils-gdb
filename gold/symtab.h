@@ -236,11 +236,11 @@ class Symbol_table
   // Return the sized version of a symbol in this table.
   template<int size>
   Sized_symbol<size>*
-  get_sized_symbol(Symbol*) const;
+  get_sized_symbol(Symbol* ACCEPT_SIZE) const;
 
   template<int size>
   const Sized_symbol<size>*
-  get_sized_symbol(const Symbol*) const;
+  get_sized_symbol(const Symbol* ACCEPT_SIZE) const;
 
   // Finalize the symbol table after we have set the final addresses
   // of all the input sections.  This sets the final symbol values and
@@ -280,16 +280,10 @@ class Symbol_table
 	  const elfcpp::Sym<size, big_endian>& sym,
 	  Object*);
 
-#ifdef HAVE_MEMBER_TEMPLATE_SPECIFICATIONS
   template<int size, bool big_endian>
   static void
-  resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from);
-#else
-  template<int size>
-  static void
-  resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from,
-          bool big_endian);
-#endif
+  resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from
+          ACCEPT_SIZE_ENDIAN);
 
   // Finalize symbols specialized for size.
   template<int size>
@@ -345,7 +339,7 @@ class Symbol_table
 
 template<int size>
 Sized_symbol<size>*
-Symbol_table::get_sized_symbol(Symbol* sym) const
+Symbol_table::get_sized_symbol(Symbol* sym ACCEPT_SIZE) const
 {
   assert(size == this->get_size());
   return static_cast<Sized_symbol<size>*>(sym);
@@ -353,7 +347,7 @@ Symbol_table::get_sized_symbol(Symbol* sym) const
 
 template<int size>
 const Sized_symbol<size>*
-Symbol_table::get_sized_symbol(const Symbol* sym) const
+Symbol_table::get_sized_symbol(const Symbol* sym ACCEPT_SIZE) const
 {
   assert(size == this->get_size());
   return static_cast<const Sized_symbol<size>*>(sym);

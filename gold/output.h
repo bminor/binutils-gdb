@@ -481,7 +481,8 @@ class Output_segment
   // Write the section headers of associated sections into V.
   template<int size, bool big_endian>
   unsigned char*
-  write_section_headers(const Stringpool*, unsigned char* v) const;
+  write_section_headers(const Stringpool*,
+                        unsigned char* v ACCEPT_SIZE_ENDIAN) const;
 
  private:
   Output_segment(const Output_segment&);
@@ -501,7 +502,7 @@ class Output_segment
   template<int size, bool big_endian>
   unsigned char*
   write_section_headers_list(const Stringpool*, const Output_data_list*,
-			     unsigned char* v) const;
+			     unsigned char* v ACCEPT_SIZE_ENDIAN) const;
 
   // The list of output data with contents attached to this segment.
   Output_data_list output_data_;
