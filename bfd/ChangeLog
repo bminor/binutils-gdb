@@ -1,3 +1,8 @@
+2006-09-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/BLD-POTFILES.in: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
 2006-09-29  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	PR 3276

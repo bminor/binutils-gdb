@@ -1,3 +1,7 @@
+2006-09-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/POTFILES.in: Regenerate.
+
 2006-09-26  Mark Shinwell  <shinwell@codesourcery.com>
             Joseph Myers  <joseph@codesourcery.com>
             Ian Lance Taylor  <ian@wasabisystems.com>

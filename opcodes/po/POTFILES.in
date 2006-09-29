@@ -131,6 +131,8 @@ ppc-opc.c
 s390-dis.c
 s390-mkopc.c
 s390-opc.c
+score-dis.c
+score-opc.h
 sh64-dis.c
 sh64-opc.c
 sh64-opc.h

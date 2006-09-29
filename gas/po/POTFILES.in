@@ -100,6 +100,8 @@ config/tc-ppc.c
 config/tc-ppc.h
 config/tc-s390.c
 config/tc-s390.h
+config/tc-score.c
+config/tc-score.h
 config/tc-sh64.c
 config/tc-sh64.h
 config/tc-sh.c
