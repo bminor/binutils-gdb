@@ -257,7 +257,7 @@ usage (int help)
   -V --version                 Print version information\n"));
     }
 
-  list_supported_targets (program_name, stderr);
+  list_supported_targets (program_name, s);
 
   if (help)
     fprintf (s, _("Report bugs to %s\n"), REPORT_BUGS_TO);
