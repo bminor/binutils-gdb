@@ -65,9 +65,10 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = po/Makefile.in
 PROGRAMS = $(noinst_PROGRAMS)
-am__objects_1 = dirsearch.$(OBJEXT) fileread.$(OBJEXT) gold.$(OBJEXT) \
-	gold-threads.$(OBJEXT) layout.$(OBJEXT) object.$(OBJEXT) \
-	options.$(OBJEXT) output.$(OBJEXT) readsyms.$(OBJEXT) \
+am__objects_1 = archive.$(OBJEXT) dirsearch.$(OBJEXT) \
+	fileread.$(OBJEXT) gold.$(OBJEXT) gold-threads.$(OBJEXT) \
+	layout.$(OBJEXT) object.$(OBJEXT) options.$(OBJEXT) \
+	output.$(OBJEXT) readsyms.$(OBJEXT) reloc.$(OBJEXT) \
 	resolve.$(OBJEXT) symtab.$(OBJEXT) stringpool.$(OBJEXT) \
 	target-select.$(OBJEXT) workqueue.$(OBJEXT)
 am__objects_2 =
@@ -231,6 +232,7 @@ INCLUDES = -D_GNU_SOURCE \
 	@INCINTL@
 
 CCFILES = \
+	archive.cc \
 	dirsearch.cc \
 	fileread.cc \
 	gold.cc \
@@ -240,6 +242,7 @@ CCFILES = \
 	options.cc \
 	output.cc \
 	readsyms.cc \
+	reloc.cc \
 	resolve.cc \
 	symtab.cc \
 	stringpool.cc \
@@ -247,6 +250,7 @@ CCFILES = \
 	workqueue.cc
 
 HFILES = \
+	archive.h \
 	dirsearch.h \
 	fileread.h \
 	gold.h \
@@ -256,9 +260,11 @@ HFILES = \
 	options.h \
 	output.h \
 	readsyms.h \
+	reloc.h \
 	stringpool.h \
 	symtab.h \
 	target.h \
+	target-reloc.h \
 	target-select.h \
 	workqueue.h
 
@@ -340,6 +346,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/archive.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dirsearch.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fileread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gold-threads.Po@am__quote@
@@ -350,6 +357,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/options.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/output.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/readsyms.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reloc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resolve.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stringpool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/symtab.Po@am__quote@

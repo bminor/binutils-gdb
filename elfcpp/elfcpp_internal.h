@@ -158,8 +158,17 @@ convert_off(typename Elf_types<size>::Elf_Off v)
 // Convert Elf_WXword.
 
 template<int size, bool big_endian>
-inline typename Elf_types<size>::Elf_Off
-convert_wxword(typename Elf_types<size>::Elf_Off v)
+inline typename Elf_types<size>::Elf_WXword
+convert_wxword(typename Elf_types<size>::Elf_WXword v)
+{
+  return convert_addr_size<size, big_endian == host_big_endian>(v);
+}
+
+// Convert ELF_Swxword.
+
+template<int size, bool big_endian>
+inline typename Elf_types<size>::Elf_Swxword
+convert_swxword(typename Elf_types<size>::Elf_Swxword v)
 {
   return convert_addr_size<size, big_endian == host_big_endian>(v);
 }
@@ -262,6 +271,23 @@ struct Sym_data<64>
   Elf_Half st_shndx;
   Elf_types<64>::Elf_Addr st_value;
   Elf_Xword st_size;
+};
+
+// Elf relocation table entries.
+
+template<int size>
+struct Rel_data
+{
+  typename Elf_types<size>::Elf_Addr r_offset;
+  typename Elf_types<size>::Elf_WXword r_info;
+};
+
+template<int size>
+struct Rela_data
+{
+  typename Elf_types<size>::Elf_Addr r_offset;
+  typename Elf_types<size>::Elf_WXword r_info;
+  typename Elf_types<size>::Elf_Swxword r_addend;
 };
 
 } // End namespace internal.

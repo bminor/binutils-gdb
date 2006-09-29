@@ -7,8 +7,9 @@
 #include "elfcpp.h"
 #include "options.h"
 #include "dirsearch.h"
-#include "readsyms.h"
 #include "object.h"
+#include "archive.h"
+#include "readsyms.h"
 
 namespace gold
 {
@@ -85,9 +86,27 @@ Read_symbols::run(Workqueue* workqueue)
 	}
     }
 
+  if (bytes >= Archive::sarmag)
+    {
+      if (memcmp(p, Archive::armag, Archive::sarmag) == 0)
+	{
+	  // This is an archive.
+	  Archive* arch = new Archive(this->input_.name(), input_file);
+	  arch->setup();
+	  workqueue->queue(new Add_archive_symbols(this->symtab_,
+						   this->input_objects_,
+						   arch,
+						   this->this_blocker_,
+						   this->next_blocker_));
+	  return;
+	}
+    }
+
   // Here we have to handle archives and any other input file
   // types we need.
-  gold_fatal("only objects are currently supported", false);
+  fprintf(stderr, _("%s: %s: not an object or archive\n"),
+	  program_name, input_file->file().filename().c_str());
+  gold_exit(false);
 }
 
 // Class Add_symbols.

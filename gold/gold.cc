@@ -14,6 +14,7 @@
 #include "symtab.h"
 #include "object.h"
 #include "layout.h"
+#include "reloc.h"
 
 namespace gold
 {
@@ -96,6 +97,51 @@ queue_initial_tasks(const General_options& options,
 }
 
 } // end anonymous namespace.
+
+namespace gold
+{
+
+// Queue up the final set of tasks.  This is called at the end of
+// Layout_task.
+
+void
+queue_final_tasks(const General_options& options,
+		  const Input_objects* input_objects,
+		  const Symbol_table* symtab,
+		  const Layout* layout,
+		  Workqueue* workqueue,
+		  Output_file* of)
+{
+  // Use a blocker to block the final cleanup task.
+  Task_token* final_blocker = new Task_token();
+
+  // Queue a task for each input object to relocate the sections and
+  // write out the local symbols.
+  for (Input_objects::Object_list::const_iterator p = input_objects->begin();
+       p != input_objects->end();
+       ++p)
+    {
+      final_blocker->add_blocker();
+      workqueue->queue(new Relocate_task(options, symtab, layout->sympool(),
+					 *p, of, final_blocker));
+    }
+
+  // Queue a task to write out the symbol table.
+  final_blocker->add_blocker();
+  workqueue->queue(new Write_symbols_task(symtab, input_objects->target(),
+					  layout->sympool(), of,
+					  final_blocker));
+
+  // Queue a task to write out everything else.
+  final_blocker->add_blocker();
+  workqueue->queue(new Write_data_task(layout, of, final_blocker));
+
+  // Queue a task to close the output file.  This will be blocked by
+  // FINAL_BLOCKER.
+  workqueue->queue(new Close_task(of, final_blocker));
+}
+
+} // End namespace gold.
 
 int
 main(int argc, char** argv)

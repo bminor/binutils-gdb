@@ -9,6 +9,7 @@
 
 #include "object.h"
 #include "output.h"
+#include "target.h"
 #include "symtab.h"
 
 namespace gold
@@ -92,6 +93,8 @@ Symbol_table::make_forwarder(Symbol* from, Symbol* to)
   from->set_forwarder();
 }
 
+// Resolve the forwards from FROM, returning the real symbol.
+
 Symbol*
 Symbol_table::resolve_forwards(Symbol* from) const
 {
@@ -99,6 +102,28 @@ Symbol_table::resolve_forwards(Symbol* from) const
   Unordered_map<Symbol*, Symbol*>::const_iterator p =
     this->forwarders_.find(from);
   assert(p != this->forwarders_.end());
+  return p->second;
+}
+
+// Look up a symbol by name.
+
+Symbol*
+Symbol_table::lookup(const char* name, const char* version) const
+{
+  name = this->namepool_.find(name);
+  if (name == NULL)
+    return NULL;
+  if (version != NULL)
+    {
+      version = this->namepool_.find(version);
+      if (version == NULL)
+	return NULL;
+    }
+
+  Symbol_table_key key(name, version);
+  Symbol_table::Symbol_table_type::const_iterator p = this->table_.find(key);
+  if (p == this->table_.end())
+    return NULL;
   return p->second;
 }
 
@@ -380,8 +405,10 @@ Symbol_table::finalize(off_t off, Stringpool* pool)
 {
   if (this->size_ == 32)
     return this->sized_finalize<32>(off, pool);
-  else
+  else if (this->size_ == 64)
     return this->sized_finalize<64>(off, pool);
+  else
+    abort();
 }
 
 // Set the final value for all the symbols.
@@ -390,17 +417,25 @@ template<int size>
 off_t
 Symbol_table::sized_finalize(off_t off, Stringpool* pool)
 {
-  off = (off + size - 1) & ~ (size - 1);
+  off = (off + (size >> 3) - 1) & ~ ((size >> 3) - 1);
   this->offset_ = off;
 
   const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
   Symbol_table_type::iterator p = this->table_.begin();
+  size_t count = 0;
   while (p != this->table_.end())
     {
       Sized_symbol<size>* sym = static_cast<Sized_symbol<size>*>(p->second);
 
       // FIXME: Here we need to decide which symbols should go into
       // the output file.
+
+      // FIXME: This is wrong.
+      if (sym->shnum() >= elfcpp::SHN_LORESERVE)
+	{
+	  ++p;
+	  continue;
+	}
 
       const Object::Map_to_output* mo =
 	sym->object()->section_output_info(sym->shnum());
@@ -416,14 +451,87 @@ Symbol_table::sized_finalize(off_t off, Stringpool* pool)
 	}
       else
 	{
-	  sym->set_value(mo->output_section->address() + mo->offset);
+	  sym->set_value(sym->value()
+			 + mo->output_section->address()
+			 + mo->offset);
 	  pool->add(sym->name());
 	  ++p;
+	  ++count;
 	  off += sym_size;
 	}
     }
 
+  this->output_count_ = count;
+
   return off;
+}
+
+// Write out the global symbols.
+
+void
+Symbol_table::write_globals(const Target* target, const Stringpool* sympool,
+			    Output_file* of) const
+{
+  if (this->size_ == 32)
+    {
+      if (target->is_big_endian())
+	this->sized_write_globals<32, true>(target, sympool, of);
+      else
+	this->sized_write_globals<32, false>(target, sympool, of);
+    }
+  else if (this->size_ == 64)
+    {
+      if (target->is_big_endian())
+	this->sized_write_globals<64, true>(target, sympool, of);
+      else
+	this->sized_write_globals<64, false>(target, sympool, of);
+    }
+  else
+    abort();
+}
+
+// Write out the global symbols.
+
+template<int size, bool big_endian>
+void
+Symbol_table::sized_write_globals(const Target*,
+				  const Stringpool* sympool,
+				  Output_file* of) const
+{
+  const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
+  unsigned char* psyms = of->get_output_view(this->offset_,
+					     this->output_count_ * sym_size);
+  unsigned char* ps = psyms;
+  for (Symbol_table_type::const_iterator p = this->table_.begin();
+       p != this->table_.end();
+       ++p)
+    {
+      Sized_symbol<size>* sym = static_cast<Sized_symbol<size>*>(p->second);
+
+      // FIXME: This repeats sized_finalize().
+
+      // FIXME: This is wrong.
+      if (sym->shnum() >= elfcpp::SHN_LORESERVE)
+	continue;
+
+      const Object::Map_to_output* mo =
+	sym->object()->section_output_info(sym->shnum());
+
+      if (mo->output_section == NULL)
+	continue;
+
+      elfcpp::Sym_write<size, big_endian> osym(ps);
+      osym.put_st_name(sympool->get_offset(sym->name()));
+      osym.put_st_value(sym->value());
+      osym.put_st_size(sym->symsize());
+      osym.put_st_info(elfcpp::elf_st_info(sym->binding(), sym->type()));
+      osym.put_st_other(elfcpp::elf_st_other(sym->visibility(), sym->other()));
+      osym.put_st_shndx(mo->output_section->shndx());
+
+      ps += sym_size;
+    }
+
+  of->write_output_view(this->offset_, this->output_count_ * sym_size, psyms);
 }
 
 // Instantiate the templates we need.  We could use the configure

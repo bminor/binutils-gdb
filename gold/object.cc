@@ -9,6 +9,7 @@
 #include "object.h"
 #include "target-select.h"
 #include "layout.h"
+#include "output.h"
 
 namespace gold
 {
@@ -47,8 +48,11 @@ Sized_object<size, big_endian>::Sized_object(
     shoff_(ehdr.get_e_shoff()),
     shstrndx_(0),
     symtab_shnum_(0),
+    local_symbol_count_(0),
+    output_local_symbol_count_(0),
     symbols_(NULL),
-    local_symbol_offset_(0)
+    local_symbol_offset_(0),
+    values_(NULL)
 {
   if (ehdr.get_e_ehsize() != This::ehdr_size)
     {
@@ -77,6 +81,7 @@ template<int size, bool big_endian>
 const unsigned char*
 Sized_object<size, big_endian>::section_header(unsigned int shnum)
 {
+  assert(shnum < this->shnum());
   off_t symtabshdroff = this->shoff_ + shnum * This::shdr_size;
   return this->get_view(symtabshdroff, This::shdr_size);
 }
@@ -393,7 +398,7 @@ Sized_object<size, big_endian>::do_layout(Layout* layout)
   const char* pnames = reinterpret_cast<const char*>(pnamesu);
 
   std::vector<Map_to_output>& map_sections(this->map_to_output());
-  map_sections.reserve(shnum);
+  map_sections.resize(shnum);
 
   // Keep track of which sections to omit.
   std::vector<bool> omit(shnum, false);
@@ -446,16 +451,24 @@ Sized_object<size, big_endian>::do_layout(Layout* layout)
 }
 
 // Finalize the local symbols.  Here we record the file offset at
-// which they should be output and we add their names to *POOL.
-// Return the new file offset.  This function is always called from
-// the main thread.  The actual output of the local symbols will occur
-// in a separate task.
+// which they should be output, we add their names to *POOL, and we
+// add their values to THIS->VALUES_.  Return the new file offset.
+// This function is always called from the main thread.  The actual
+// output of the local symbols will occur in a separate task.
 
 template<int size, bool big_endian>
 off_t
 Sized_object<size, big_endian>::do_finalize_local_symbols(off_t off,
 							  Stringpool* pool)
 {
+  if (this->symtab_shnum_ == 0)
+    {
+      // This object has no symbols.  Weird but legal.
+      return off;
+    }
+
+  off = (off + (size >> 3) - 1) & ~ ((off_t) (size >> 3) - 1);
+
   this->local_symbol_offset_ = off;
 
   // Read the symbol table section header.
@@ -468,6 +481,10 @@ Sized_object<size, big_endian>::do_finalize_local_symbols(off_t off,
   off_t locsize = loccount * sym_size;
   const unsigned char* psyms = this->get_view(symtabshdr.get_sh_offset(),
 					      locsize);
+
+  this->local_symbol_count_ = loccount;
+
+  this->values_ = new typename elfcpp::Elf_types<size>::Elf_Addr[loccount];
 
   // Read the section header for the symbol names.
   typename This::Shdr strtabshdr(
@@ -483,9 +500,10 @@ Sized_object<size, big_endian>::do_finalize_local_symbols(off_t off,
 
   std::vector<Map_to_output>& mo(this->map_to_output());
   unsigned int shnum = this->shnum();
+  unsigned int count = 0;
   // Skip the first, dummy, symbol.
   psyms += sym_size;
-  for (unsigned int i = 1; i < loccount; ++i)
+  for (unsigned int i = 1; i < loccount; ++i, psyms += sym_size)
     {
       elfcpp::Sym<size, big_endian> sym(psyms);
 
@@ -493,15 +511,17 @@ Sized_object<size, big_endian>::do_finalize_local_symbols(off_t off,
 
       if (shndx >= elfcpp::SHN_LORESERVE)
 	{
-	  if (shndx != elfcpp::SHN_ABS)
+	  if (shndx == elfcpp::SHN_ABS)
+	    this->values_[i] = sym.get_st_value();
+	  else
 	    {
+	      // FIXME: Handle SHN_XINDEX.
 	      fprintf(stderr,
 		      _("%s: %s: unknown section index %u "
 			"for local symbol %u\n"),
 		      program_name, this->name().c_str(), shndx, i);
 	      gold_exit(false);
 	    }
-	  // FIXME: Handle SHN_XINDEX.
 	}
       else
 	{
@@ -515,16 +535,96 @@ Sized_object<size, big_endian>::do_finalize_local_symbols(off_t off,
 	    }
 
 	  if (mo[shndx].output_section == NULL)
-	    continue;
+	    {
+	      this->values_[i] = 0;
+	      continue;
+	    }
+
+	  this->values_[i] = (mo[shndx].output_section->address()
+			      + sym.get_st_value());
 	}
 
       pool->add(pnames + sym.get_st_name());
       off += sym_size;
-
-      psyms += sym_size;
+      ++count;
     }
 
+  this->output_local_symbol_count_ = count;
+
   return off;
+}
+
+// Write out the local symbols.
+
+template<int size, bool big_endian>
+void
+Sized_object<size, big_endian>::write_local_symbols(Output_file* of,
+						    const Stringpool* sympool)
+{
+  if (this->symtab_shnum_ == 0)
+    {
+      // This object has no symbols.  Weird but legal.
+      return;
+    }
+
+  // Read the symbol table section header.
+  typename This::Shdr symtabshdr(this->section_header(this->symtab_shnum_));
+  assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
+  unsigned int local_symbol_count = this->local_symbol_count_;
+  assert(local_symbol_count == symtabshdr.get_sh_info());
+
+  // Read the local symbols.
+  const int sym_size = This::sym_size;
+  off_t locsize = local_symbol_count * sym_size;
+  const unsigned char* psyms = this->get_view(symtabshdr.get_sh_offset(),
+					      locsize);
+
+  // Read the section header for the symbol names.
+  typename This::Shdr strtabshdr(
+    this->section_header(symtabshdr.get_sh_link()));
+  assert(strtabshdr.get_sh_type() == elfcpp::SHT_STRTAB);
+
+  // Read the symbol names.
+  const unsigned char* pnamesu = this->get_view(strtabshdr.get_sh_offset(),
+						strtabshdr.get_sh_size());
+  const char* pnames = reinterpret_cast<const char*>(pnamesu);
+
+  // Get a view into the output file.
+  off_t output_size = this->output_local_symbol_count_ * sym_size;
+  unsigned char* oview = of->get_output_view(this->local_symbol_offset_,
+					     output_size);
+
+  std::vector<Map_to_output>& mo(this->map_to_output());
+
+  psyms += sym_size;
+  unsigned char* ov = oview;
+  for (unsigned int i = 1; i < local_symbol_count; ++i, psyms += sym_size)
+    {
+      elfcpp::Sym<size, big_endian> isym(psyms);
+      elfcpp::Sym_write<size, big_endian> osym(ov);
+
+      unsigned int st_shndx = isym.get_st_shndx();
+      if (st_shndx < elfcpp::SHN_LORESERVE)
+	{
+	  assert(st_shndx < mo.size());
+	  if (mo[st_shndx].output_section == NULL)
+	    continue;
+	  st_shndx = mo[st_shndx].output_section->shndx();
+	}
+
+      osym.put_st_name(sympool->get_offset(pnames + isym.get_st_name()));
+      osym.put_st_value(this->values_[i]);
+      osym.put_st_size(isym.get_st_size());
+      osym.put_st_info(isym.get_st_info());
+      osym.put_st_other(isym.get_st_other());
+      osym.put_st_shndx(st_shndx);
+
+      ov += sym_size;
+    }
+
+  assert(ov - oview == output_size);
+
+  of->write_output_view(this->local_symbol_offset_, output_size, oview);
 }
 
 // Input_objects methods.

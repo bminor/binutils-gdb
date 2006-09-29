@@ -256,15 +256,15 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath)
   else
     {
       std::string n1("lib");
-      n1 += this->input_argument_.lib_basename();
+      n1 += this->input_argument_.name();
       std::string n2;
-      if (options.is_static())
+      if (!options.is_static())
 	n2 = n1 + ".so";
       n1 += ".a";
       name = dirpath.find(n1, n2);
       if (name.empty())
 	{
-	  fprintf(stderr, _("%s: cannot find %s"), program_name,
+	  fprintf(stderr, _("%s: cannot find %s\n"), program_name,
 		  this->input_argument_.name());
 	  gold_exit(false);
 	}
@@ -272,8 +272,8 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath)
 
   if (!this->file_.open(name))
     {
-      fprintf(stderr, _("%s: cannot open %s: %s"), program_name, name.c_str(),
-	      strerror(errno));
+      fprintf(stderr, _("%s: cannot open %s: %s\n"), program_name,
+	      name.c_str(), strerror(errno));
       gold_exit(false);
     }
 }

@@ -43,23 +43,34 @@ Layout_task::locks(Workqueue*)
 // have been read.
 
 void
-Layout_task::run(Workqueue*)
+Layout_task::run(Workqueue* workqueue)
 {
-  Layout layout(this->options_);
-  layout.init();
+  // Nothing ever frees this.
+  Layout* layout = new Layout(this->options_);
+  layout->init();
   for (Input_objects::Object_list::const_iterator p =
 	 this->input_objects_->begin();
        p != this->input_objects_->end();
        ++p)
-    (*p)->layout(&layout);
-  layout.finalize(this->input_objects_, this->symtab_);
+    (*p)->layout(layout);
+  off_t file_size = layout->finalize(this->input_objects_, this->symtab_);
+
+  // Now we know the final size of the output file and we know where
+  // each piece of information goes.
+  Output_file* of = new Output_file(this->options_);
+  of->open(file_size);
+
+  // Queue up the final set of tasks.
+  gold::queue_final_tasks(this->options_, this->input_objects_,
+			  this->symtab_, layout, workqueue, of);
 }
 
 // Layout methods.
 
 Layout::Layout(const General_options& options)
-  : options_(options), namepool_(), sympool_(), signatures_(),
-    section_name_map_(), segment_list_(), section_list_()
+  : options_(options), last_shndx_(0), namepool_(), sympool_(), signatures_(),
+    section_name_map_(), segment_list_(), section_list_(),
+    special_output_list_()
 {
 }
 
@@ -121,6 +132,10 @@ Output_section*
 Layout::layout(Object* object, const char* name,
 	       const elfcpp::Shdr<size, big_endian>& shdr, off_t* off)
 {
+  // We discard empty input sections.
+  if (shdr.get_sh_size() == 0)
+    return NULL;
+
   if (!this->include_section(object, name, shdr))
     return NULL;
 
@@ -188,7 +203,9 @@ Output_section*
 Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
 			    elfcpp::Elf_Xword flags)
 {
-  Output_section* os = new Output_section(name, type, flags);
+  ++this->last_shndx_;
+  Output_section* os = new Output_section(name, type, flags,
+					  this->last_shndx_);
 
   if ((flags & elfcpp::SHF_ALLOC) == 0)
     this->section_list_.push_back(os);
@@ -354,19 +371,24 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
 
   // Lay out the segment headers.
   int size = input_objects->target()->get_size();
+  bool big_endian = input_objects->target()->is_big_endian();
   Output_segment_headers* segment_headers;
-  segment_headers = new Output_segment_headers(size, this->segment_list_);
+  segment_headers = new Output_segment_headers(size, big_endian,
+					       this->segment_list_);
   load_seg->add_initial_output_data(segment_headers);
+  this->special_output_list_.push_back(segment_headers);
   // FIXME: Attach them to PT_PHDRS if necessary.
 
   // Lay out the file header.
   Output_file_header* file_header;
   file_header = new Output_file_header(size,
+				       big_endian,
 				       this->options_,
 				       input_objects->target(),
 				       symtab,
 				       segment_headers);
   load_seg->add_initial_output_data(file_header);
+  this->special_output_list_.push_back(file_header);
 
   // Set the file offsets of all the segments.
   off_t off = this->set_segment_offsets(input_objects->target(), load_seg);
@@ -375,7 +397,8 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
   // FIXME: We don't need to do this if we are stripping symbols.
   Output_section* osymtab;
   Output_section* ostrtab;
-  this->create_symtab_sections(input_objects, symtab, &osymtab, &ostrtab);
+  this->create_symtab_sections(size, input_objects, symtab, &off,
+			       &osymtab, &ostrtab);
 
   // Create the .shstrtab section.
   Output_section* shstrtab_section = this->create_shstrtab();
@@ -385,8 +408,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
   off = this->set_section_offsets(off);
 
   // Create the section table header.
-  Output_section_headers* oshdrs = this->create_shdrs(size, off);
-  off += oshdrs->data_size();
+  Output_section_headers* oshdrs = this->create_shdrs(size, big_endian, &off);
 
   file_header->set_section_info(oshdrs, shstrtab_section);
 
@@ -577,8 +599,11 @@ Layout::set_section_offsets(off_t off)
        p != this->section_list_.end();
        ++p)
     {
+      if ((*p)->offset() != -1)
+	continue;
       uint64_t addralign = (*p)->addralign();
-      off = (off + addralign - 1) & ~ (addralign - 1);
+      if (addralign != 0)
+	off = (off + addralign - 1) & ~ (addralign - 1);
       (*p)->set_address(0, off);
       off += (*p)->data_size();
     }
@@ -588,12 +613,35 @@ Layout::set_section_offsets(off_t off)
 // Create the symbol table sections.
 
 void
-Layout::create_symtab_sections(const Input_objects* input_objects,
+Layout::create_symtab_sections(int size, const Input_objects* input_objects,
 			       Symbol_table* symtab,
+			       off_t* poff,
 			       Output_section** posymtab,
 			       Output_section** postrtab)
 {
-  off_t off = 0;
+  int symsize;
+  unsigned int align;
+  if (size == 32)
+    {
+      symsize = elfcpp::Elf_sizes<32>::sym_size;
+      align = 4;
+    }
+  else if (size == 64)
+    {
+      symsize = elfcpp::Elf_sizes<64>::sym_size;
+      align = 8;
+    }
+  else
+    abort();
+
+  off_t off = *poff;
+  off = (off + align - 1) & ~ (align - 1);
+  off_t startoff = off;
+
+  // Save space for the dummy symbol at the start of the section.  We
+  // never bother to write this out--it will just be left as zero.
+  off += symsize;
+
   for (Input_objects::Object_list::const_iterator p = input_objects->begin();
        p != input_objects->end();
        ++p)
@@ -602,11 +650,37 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
       off = (*p)->finalize_local_symbols(off, &this->sympool_);
     }
 
+  unsigned int local_symcount = (off - startoff) / symsize;
+  assert(local_symcount * symsize == off - startoff);
+
   off = symtab->finalize(off, &this->sympool_);
 
-  *posymtab = new Output_section_symtab(this->namepool_.add(".symtab"), off);
-  *postrtab = new Output_section_strtab(this->namepool_.add(".strtab"),
-					&this->sympool_);
+  this->sympool_.set_string_offsets();
+
+  ++this->last_shndx_;
+  const char* symtab_name = this->namepool_.add(".symtab");
+  Output_section* osymtab = new Output_section_symtab(symtab_name,
+						      off - startoff,
+						      this->last_shndx_);
+  this->section_list_.push_back(osymtab);
+
+  ++this->last_shndx_;
+  const char* strtab_name = this->namepool_.add(".strtab");
+  Output_section *ostrtab = new Output_section_strtab(strtab_name,
+						      &this->sympool_,
+						      this->last_shndx_);
+  this->section_list_.push_back(ostrtab);
+  this->special_output_list_.push_back(ostrtab);
+
+  osymtab->set_address(0, startoff);
+  osymtab->set_link(ostrtab->shndx());
+  osymtab->set_info(local_symcount);
+  osymtab->set_entsize(symsize);
+  osymtab->set_addralign(align);
+
+  *poff = off;
+  *posymtab = osymtab;
+  *postrtab = ostrtab;
 }
 
 // Create the .shstrtab section, which holds the names of the
@@ -621,10 +695,15 @@ Layout::create_shstrtab()
 
   const char* name = this->namepool_.add(".shstrtab");
 
+  this->namepool_.set_string_offsets();
+
+  ++this->last_shndx_;
   Output_section* os = new Output_section_strtab(name,
-						 &this->namepool_);
+						 &this->namepool_,
+						 this->last_shndx_);
 
   this->section_list_.push_back(os);
+  this->special_output_list_.push_back(os);
 
   return os;
 }
@@ -633,14 +712,18 @@ Layout::create_shstrtab()
 // offset.
 
 Output_section_headers*
-Layout::create_shdrs(int size, off_t off)
+Layout::create_shdrs(int size, bool big_endian, off_t* poff)
 {
   Output_section_headers* oshdrs;
-  oshdrs = new Output_section_headers(size, this->segment_list_,
-				      this->section_list_);
+  oshdrs = new Output_section_headers(size, big_endian, this->segment_list_,
+				      this->section_list_,
+				      &this->namepool_);
   uint64_t addralign = oshdrs->addralign();
-  off = (off + addralign - 1) & ~ (addralign - 1);
+  off_t off = (*poff + addralign - 1) & ~ (addralign - 1);
   oshdrs->set_address(0, off);
+  off += oshdrs->data_size();
+  *poff = off;
+  this->special_output_list_.push_back(oshdrs);
   return oshdrs;
 }
 
@@ -731,6 +814,97 @@ Layout::add_comdat(const char* signature, bool group)
       // symbol name with different section types.
       return true;
     }
+}
+
+// Write out data not associated with a section or the symbol table.
+
+void
+Layout::write_data(Output_file* of) const
+{
+  for (Data_list::const_iterator p = this->special_output_list_.begin();
+       p != this->special_output_list_.end();
+       ++p)
+    (*p)->write(of);
+}
+
+// Write_data_task methods.
+
+// We can always run this task.
+
+Task::Is_runnable_type
+Write_data_task::is_runnable(Workqueue*)
+{
+  return IS_RUNNABLE;
+}
+
+// We need to unlock FINAL_BLOCKER when finished.
+
+Task_locker*
+Write_data_task::locks(Workqueue* workqueue)
+{
+  return new Task_locker_block(*this->final_blocker_, workqueue);
+}
+
+// Run the task--write out the data.
+
+void
+Write_data_task::run(Workqueue*)
+{
+  this->layout_->write_data(this->of_);
+}
+
+// Write_symbols_task methods.
+
+// We can always run this task.
+
+Task::Is_runnable_type
+Write_symbols_task::is_runnable(Workqueue*)
+{
+  return IS_RUNNABLE;
+}
+
+// We need to unlock FINAL_BLOCKER when finished.
+
+Task_locker*
+Write_symbols_task::locks(Workqueue* workqueue)
+{
+  return new Task_locker_block(*this->final_blocker_, workqueue);
+}
+
+// Run the task--write out the symbols.
+
+void
+Write_symbols_task::run(Workqueue*)
+{
+  this->symtab_->write_globals(this->target_, this->sympool_, this->of_);
+}
+
+// Close_task methods.
+
+// We can't run until FINAL_BLOCKER is unblocked.
+
+Task::Is_runnable_type
+Close_task::is_runnable(Workqueue*)
+{
+  if (this->final_blocker_->is_blocked())
+    return IS_BLOCKED;
+  return IS_RUNNABLE;
+}
+
+// We don't lock anything.
+
+Task_locker*
+Close_task::locks(Workqueue*)
+{
+  return NULL;
+}
+
+// Run the task--close the file.
+
+void
+Close_task::run(Workqueue*)
+{
+  this->of_->close();
 }
 
 // Instantiate the templates we need.  We could use the configure

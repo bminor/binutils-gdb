@@ -4,20 +4,23 @@
 
 #include <cassert>
 #include <cstring>
+#include <algorithm>
+#include <vector>
 
+#include "output.h"
 #include "stringpool.h"
 
 namespace gold
 {
 
 Stringpool::Stringpool()
-  : string_set_(), strings_()
+  : string_set_(), strings_(), strtab_size_(0)
 {
 }
 
 Stringpool::~Stringpool()
 {
-  for (std::list<stringdata*>::iterator p = this->strings_.begin();
+  for (std::list<Stringdata*>::iterator p = this->strings_.begin();
        p != this->strings_.end();
        ++p)
     delete[] reinterpret_cast<char*>(*p);
@@ -64,16 +67,16 @@ Stringpool::add_string(const char* s)
   bool front = true;
   if (len >= buffer_size)
     {
-      alc = sizeof(stringdata) + len;
+      alc = sizeof(Stringdata) + len;
       front = false;
     }
   else if (this->strings_.empty())
-    alc = sizeof(stringdata) + buffer_size;
+    alc = sizeof(Stringdata) + buffer_size;
   else
     {
-      stringdata *psd = this->strings_.front();
+      Stringdata *psd = this->strings_.front();
       if (len >= psd->alc - psd->len)
-	alc = sizeof(stringdata) + buffer_size;
+	alc = sizeof(Stringdata) + buffer_size;
       else
 	{
 	  char* ret = psd->data + psd->len;
@@ -83,8 +86,8 @@ Stringpool::add_string(const char* s)
 	}
     }
 
-  stringdata *psd = reinterpret_cast<stringdata*>(new char[alc]);
-  psd->alc = alc;
+  Stringdata *psd = reinterpret_cast<Stringdata*>(new char[alc]);
+  psd->alc = alc - sizeof(Stringdata);
   memcpy(psd->data, s, len + 1);
   psd->len = len + 1;
   if (front)
@@ -102,16 +105,17 @@ Stringpool::add(const char* s)
   // FIXME: This will look up the entry twice in the hash table.  The
   // problem is that we can't insert S before we canonicalize it.  I
   // don't think there is a way to handle this correctly with
-  // unordered_set, so this should be replaced with custom code to do
+  // unordered_map, so this should be replaced with custom code to do
   // what we need, which is to return the empty slot.
 
   String_set_type::const_iterator p = this->string_set_.find(s);
   if (p != this->string_set_.end())
-    return *p;
+    return p->first;
 
   const char* ret = this->add_string(s);
+  std::pair<const char*, off_t> val(ret, 0);
   std::pair<String_set_type::iterator, bool> ins =
-    this->string_set_.insert(ret);
+    this->string_set_.insert(val);
   assert(ins.second);
   return ret;
 }
@@ -125,6 +129,123 @@ Stringpool::add(const char* s, size_t len)
   // the hash table to avoid copying.
   std::string st(s, len);
   return this->add(st);
+}
+
+const char*
+Stringpool::find(const char* s) const
+{
+  String_set_type::const_iterator p = this->string_set_.find(s);
+  if (p == this->string_set_.end())
+    return NULL;
+  return p->first;
+}
+
+// Comparison routine used when sorting into an ELF strtab.  We want
+// to sort this so that when one string is a suffix of another, we
+// always see the shorter string immediately after the longer string.
+// For example, we want to see these strings in this order:
+//   abcd
+//   cd
+//   d
+// When strings are not suffixes, we don't care what order they are
+// in, but we need to ensure that suffixes wind up next to each other.
+// So we do a reversed lexicographic sort on the reversed string.
+
+bool
+Stringpool::Stringpool_sort_comparison::operator()(
+  String_set_type::iterator it1,
+  String_set_type::iterator it2) const
+{
+  const char* s1 = it1->first;
+  const char* s2 = it2->first;
+  int len1 = strlen(s1);
+  int len2 = strlen(s2);
+  int minlen = len1 < len2 ? len1 : len2;
+  const char* p1 = s1 + len1 - 1;
+  const char* p2 = s2 + len2 - 1;
+  for (int i = minlen - 1; i >= 0; --i, --p1, --p2)
+    {
+      if (*p1 != *p2)
+	return *p1 > *p2;
+    }
+  return len1 > len2;
+}
+
+// Return whether s1 is a suffix of s2.
+
+bool
+Stringpool::is_suffix(const char* s1, const char* s2)
+{
+  size_t len1 = strlen(s1);
+  size_t len2 = strlen(s2);
+  if (len1 > len2)
+    return false;
+  return strcmp(s1, s2 + len2 - len1) == 0;
+}
+
+// Turn the stringpool into an ELF strtab: determine the offsets of
+// each string in the table.
+
+void
+Stringpool::set_string_offsets()
+{
+  size_t count = this->string_set_.size();
+
+  std::vector<String_set_type::iterator> v;
+  v.reserve(count);
+
+  for (String_set_type::iterator p = this->string_set_.begin();
+       p != this->string_set_.end();
+       ++p)
+    v.push_back(p);
+
+  std::sort(v.begin(), v.end(), Stringpool_sort_comparison());
+
+  // Offset 0 is reserved for the empty string.
+  off_t offset = 1;
+  for (size_t i = 0; i < count; ++i)
+    {
+      if (v[i]->first[0] == '\0')
+	v[i]->second = 0;
+      else if (i > 0 && Stringpool::is_suffix(v[i]->first, v[i - 1]->first))
+	v[i]->second = (v[i - 1]->second
+			+ strlen(v[i - 1]->first)
+			- strlen(v[i]->first));
+      else
+	{
+	  v[i]->second = offset;
+	  offset += strlen(v[i]->first) + 1;
+	}
+    }
+
+  this->strtab_size_ = offset;
+}
+
+// Get the offset of a string in the ELF strtab.  The string must
+// exist.
+
+off_t
+Stringpool::get_offset(const char* s) const
+{
+  String_set_type::const_iterator p = this->string_set_.find(s);
+  if (p != this->string_set_.end())
+    return p->second;
+  abort();
+}
+
+// Write the ELF strtab into the output file at the specified offset.
+
+void
+Stringpool::write(Output_file* of, off_t offset)
+{
+  unsigned char* viewu = of->get_output_view(offset, this->strtab_size_);
+  char* view = reinterpret_cast<char*>(viewu);
+  view[0] = '\0';
+  for (String_set_type::const_iterator p = this->string_set_.begin();
+       p != this->string_set_.end();
+       ++p)
+    strcpy(view + p->second, p->first);
+  of->write_output_view(offset, this->strtab_size_, viewu);
 }
 
 } // End namespace gold.

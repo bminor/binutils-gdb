@@ -15,13 +15,15 @@
 
 #include <cassert>
 
-#include "symtab.h"
 #include "elfcpp.h"
+#include "symtab.h"
 
 namespace gold
 {
 
 class Object;
+template<int size, bool big_endian>
+class Sized_object;
 
 // The abstract class for target specific handling.
 
@@ -41,6 +43,11 @@ class Target
   bool
   is_big_endian() const
   { return this->pti_->is_big_endian; }
+
+  // Machine code to store in e_machine field of ELF header.
+  elfcpp::EM
+  machine_code() const
+  { return this->pti_->machine_code; }
 
   // Whether this target has a specific make_symbol function.
   bool
@@ -77,6 +84,8 @@ class Target
     int size;
     // Whether the target is big endian.
     bool is_big_endian;
+    // The code to store in the e_machine field of the ELF header.
+    elfcpp::EM machine_code;
     // Whether this target has a specific make_symbol function.
     bool has_make_symbol;
     // Whether this target has a specific resolve function.
@@ -122,6 +131,29 @@ class Sized_target : public Target
   // pre-existing symbol.  SYM is the new symbol, seen in OBJECT.
   virtual void
   resolve(Symbol*, const elfcpp::Sym<size, big_endian>&, Object*)
+  { abort(); }
+
+  // Relocate section data.  SYMTAB is the symbol table.  OBJECT is
+  // the object in which the section appears.  SH_TYPE is the type of
+  // the relocation section, SHT_REL or SHT_RELA.  PRELOCS points to
+  // the relocation information.  RELOC_COUNT is the number of relocs.
+  // LOCAL_COUNT is the number of local symbols.  The VALUES and
+  // GLOBAL_SYMS have symbol table information.  VIEW is a view into
+  // the output file holding the section contents, VIEW_ADDRESS is the
+  // virtual address of the view, and VIEW_SIZE is the size of the
+  // view.
+  virtual void
+  relocate_section(const Symbol_table*, // symtab
+		   Sized_object<size, big_endian>*, // object
+		   unsigned int, // sh_type
+		   const unsigned char*, // prelocs
+		   size_t, // reloc_count
+		   unsigned int, // local_count
+		   const typename elfcpp::Elf_types<size>::Elf_Addr*, // values
+		   Symbol**, // global_syms
+		   unsigned char*, // view
+		   typename elfcpp::Elf_types<size>::Elf_Addr, // view_address
+		   off_t) // view_size
   { abort(); }
 
  protected:

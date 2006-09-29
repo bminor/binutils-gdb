@@ -12,6 +12,7 @@
 namespace gold
 {
 
+class General_options;
 class Object;
 class Output_file;
 
@@ -24,7 +25,7 @@ class Output_data
 {
  public:
   explicit Output_data(off_t data_size = 0)
-    : address_(0), data_size_(data_size), offset_(0)
+    : address_(0), data_size_(data_size), offset_(-1)
   { }
 
   virtual
@@ -166,8 +167,10 @@ class Output_section_headers : public Output_data
 {
  public:
   Output_section_headers(int size,
+			 bool big_endian,
 			 const Layout::Segment_list&,
-			 const Layout::Section_list&);
+			 const Layout::Section_list&,
+			 const Stringpool*);
 
   // Write the data to the file.
   void
@@ -179,9 +182,16 @@ class Output_section_headers : public Output_data
   { return Output_data::default_alignment(this->size_); }
 
  private:
+  // Write the data to the file with the right size and endianness.
+  template<int size, bool big_endian>
+  void
+  do_sized_write(Output_file*);
+
   int size_;
+  bool big_endian_;
   const Layout::Segment_list& segment_list_;
   const Layout::Section_list& section_list_;
+  const Stringpool* secnamepool_;
 };
 
 // Output the segment headers.
@@ -189,9 +199,8 @@ class Output_section_headers : public Output_data
 class Output_segment_headers : public Output_data
 {
  public:
-  Output_segment_headers(int size, const Layout::Segment_list& segment_list)
-    : size_(size), segment_list_(segment_list)
-  { }
+  Output_segment_headers(int size, bool big_endian,
+			 const Layout::Segment_list& segment_list);
 
   // Write the data to the file.
   void
@@ -203,7 +212,13 @@ class Output_segment_headers : public Output_data
   { return Output_data::default_alignment(this->size_); }
 
  private:
+  // Write the data to the file with the right size and endianness.
+  template<int size, bool big_endian>
+  void
+  do_sized_write(Output_file*);
+
   int size_;
+  bool big_endian_;
   const Layout::Segment_list& segment_list_;
 };
 
@@ -213,6 +228,7 @@ class Output_file_header : public Output_data
 {
  public:
   Output_file_header(int size,
+		     bool big_endian,
 		     const General_options&,
 		     const Target*,
 		     const Symbol_table*,
@@ -239,11 +255,17 @@ class Output_file_header : public Output_data
   { assert(off == 0); }
 
  private:
+  // Write the data to the file with the right size and endianness.
+  template<int size, bool big_endian>
+  void
+  do_sized_write(Output_file*);
+
   int size_;
+  bool big_endian_;
   const General_options& options_;
   const Target* target_;
   const Symbol_table* symtab_;
-  const Output_segment_headers* program_header_;
+  const Output_segment_headers* segment_header_;
   const Output_section_headers* section_header_;
   const Output_section* shstrtab_;
 };
@@ -255,7 +277,8 @@ class Output_section : public Output_data
 {
  public:
   // Create an output section, giving the name, type, and flags.
-  Output_section(const char* name, elfcpp::Elf_Word, elfcpp::Elf_Xword);
+  Output_section(const char* name, elfcpp::Elf_Word, elfcpp::Elf_Xword,
+		 unsigned int shndx);
   virtual ~Output_section();
 
   // Add a new input section named NAME with header SHDR from object
@@ -285,6 +308,31 @@ class Output_section : public Output_data
   addralign() const
   { return this->addralign_; }
 
+  // Return the section index.
+  unsigned int
+  shndx() const
+  { return this->shndx_; }
+
+  // Set the entsize field.
+  void
+  set_entsize(uint64_t v)
+  { this->entsize_ = v; }
+
+  // Set the link field.
+  void
+  set_link(unsigned int v)
+  { this->link_ = v; }
+
+  // Set the info field.
+  void
+  set_info(unsigned int v)
+  { this->info_ = v; }
+
+  // Set the addralign field.
+  void
+  set_addralign(uint64_t v)
+  { this->addralign_ = v; }
+
   // Write the data to the file.  For a typical Output_section, this
   // does nothing.  We write out the data by looping over all the
   // input sections.
@@ -312,6 +360,11 @@ class Output_section : public Output_data
   do_is_section_flag_set(elfcpp::Elf_Xword flag) const
   { return (this->flags_ & flag) != 0; }
 
+  // Write the section header into *OPHDR.
+  template<int size, bool big_endian>
+  void
+  write_header(const Stringpool*, elfcpp::Shdr_write<size, big_endian>*) const;
+
  private:
   // Most of these fields are only valid after layout.
 
@@ -331,6 +384,8 @@ class Output_section : public Output_data
   elfcpp::Elf_Word type_;
   // The section flags.
   elfcpp::Elf_Xword flags_;
+  // The section index.
+  unsigned int shndx_;
 };
 
 // A special Output_section which represents the symbol table
@@ -339,7 +394,7 @@ class Output_section : public Output_data
 class Output_section_symtab : public Output_section
 {
  public:
-  Output_section_symtab(const char* name, off_t size);
+  Output_section_symtab(const char* name, off_t size, unsigned int shndx);
 };
 
 // A special Output_section which holds a string table.
@@ -347,7 +402,8 @@ class Output_section_symtab : public Output_section
 class Output_section_strtab : public Output_section
 {
  public:
-  Output_section_strtab(const char* name, Stringpool* contents);
+  Output_section_strtab(const char* name, Stringpool* contents,
+			unsigned int shndx);
 
   // Write out the data.
   void
@@ -417,6 +473,16 @@ class Output_segment
   unsigned int
   output_section_count() const;
 
+  // Write the segment header into *OPHDR.
+  template<int size, bool big_endian>
+  void
+  write_header(elfcpp::Phdr_write<size, big_endian>*) const;
+
+  // Write the section headers of associated sections into V.
+  template<int size, bool big_endian>
+  unsigned char*
+  write_section_headers(const Stringpool*, unsigned char* v) const;
+
  private:
   Output_segment(const Output_segment&);
   Output_segment& operator=(const Output_segment&);
@@ -430,6 +496,12 @@ class Output_segment
   // Return the number of Output_sections in an Output_data_list.
   unsigned int
   output_section_count_list(const Output_data_list*) const;
+
+  // Write the section headers in the list into V.
+  template<int size, bool big_endian>
+  unsigned char*
+  write_section_headers_list(const Stringpool*, const Output_data_list*,
+			     unsigned char* v) const;
 
   // The list of output data with contents attached to this segment.
   Output_data_list output_data_;
@@ -453,19 +525,55 @@ class Output_segment
   elfcpp::Elf_Word flags_;
 };
 
-// This class represents the output file.  The output file is a
-// collection of output segments and a collection of output sections
-// which are not associated with segments.
+// This class represents the output file.
 
 class Output_file
 {
  public:
-  Output_file();
-  ~Output_file();
+  Output_file(const General_options& options);
+
+  // Open the output file.  FILE_SIZE is the final size of the file.
+  void
+  open(off_t file_size);
+
+  // Close the output file and make sure there are no error.
+  void
+  close();
+
+  // We currently always use mmap which makes the view handling quite
+  // simple.  In the future we may support other approaches.
 
   // Write data to the output file.
   void
-  write(off_t off, const void* data, off_t len);
+  write(off_t offset, const void* data, off_t len)
+  { memcpy(this->base_ + offset, data, len); }
+
+  // Get a buffer to use to write to the file, given the offset into
+  // the file and the size.
+  unsigned char*
+  get_output_view(off_t start, off_t size)
+  {
+    assert(start >= 0 && size >= 0 && start + size <= this->file_size_);
+    return this->base_ + start;
+  }
+
+  // VIEW must have been returned by get_output_view.  Write the
+  // buffer to the file, passing in the offset and the size.
+  void
+  write_output_view(off_t, off_t, unsigned char*)
+  { }
+
+ private:
+  // General options.
+  const General_options& options_;
+  // File name.
+  const char* name_;
+  // File descriptor.
+  int o_;
+  // File size.
+  off_t file_size_;
+  // Base of file mapped into memory.
+  unsigned char* base_;
 };
 
 } // End namespace gold.

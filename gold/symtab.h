@@ -17,6 +17,8 @@ namespace gold
 {
 
 class Object;
+class Output_file;
+class Target;
 
 template<int size, bool big_endian>
 class Sized_object;
@@ -218,6 +220,10 @@ class Symbol_table
 		  size_t count, const char* sym_names, size_t sym_name_size,
 		  Symbol** sympointers);
 
+  // Look up a symbol.
+  Symbol*
+  lookup(const char*, const char* version = NULL) const;
+
   // Return the real symbol associated with the forwarder symbol FROM.
   Symbol*
   resolve_forwards(Symbol* from) const;
@@ -242,6 +248,10 @@ class Symbol_table
   // returns the new file offset.
   off_t
   finalize(off_t, Stringpool*);
+
+  // Write out the global symbols.
+  void
+  write_globals(const Target*, const Stringpool*, Output_file*) const;
 
  private:
   Symbol_table(const Symbol_table&);
@@ -286,6 +296,11 @@ class Symbol_table
   off_t
   sized_finalize(off_t, Stringpool*);
 
+  // Write globals specialized for size and endianness.
+  template<int size, bool big_endian>
+  void
+  sized_write_globals(const Target*, const Stringpool*, Output_file*) const;
+
   // The type of the symbol hash table.
 
   typedef std::pair<const char*, const char*> Symbol_table_key;
@@ -311,6 +326,9 @@ class Symbol_table
   // The file offset within the output symtab section where we should
   // write the table.
   off_t offset_;
+
+  // The number of global symbols we want to write out.
+  size_t output_count_;
 
   // The symbol hash table.
   Symbol_table_type table_;

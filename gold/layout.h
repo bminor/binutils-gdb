@@ -23,6 +23,7 @@ class Output_section_symtab;
 class Output_section_headers;
 class Output_segment;
 class Output_data;
+class Target;
 
 // This Task handles mapping the input sections to output sections and
 // laying them out in memory.
@@ -84,6 +85,11 @@ class Layout
   layout(Object *object, const char* name,
 	 const elfcpp::Shdr<size, big_endian>& shdr, off_t* offset);
 
+  // Return the Stringpool used for symbol names.
+  const Stringpool*
+  sympool() const
+  { return &this->sympool_; }
+
   // Return whether a section is a .gnu.linkonce section, given the
   // section name.
   static inline bool
@@ -100,6 +106,11 @@ class Layout
   // Finalize the layout after all the input sections have been added.
   off_t
   finalize(const Input_objects*, Symbol_table*);
+
+  // Write out data not associated with an input file or the symbol
+  // table.
+  void
+  write_data(Output_file*) const;
 
   // The list of segments.
 
@@ -143,7 +154,7 @@ class Layout
 
   // Create the output sections for the symbol table.
   void
-  create_symtab_sections(const Input_objects*, Symbol_table*,
+  create_symtab_sections(int size, const Input_objects*, Symbol_table*, off_t*,
 			 Output_section** osymtab,
 			 Output_section** ostrtab);
 
@@ -153,7 +164,7 @@ class Layout
 
   // Create the section header table.
   Output_section_headers*
-  create_shdrs(int size, off_t);
+  create_shdrs(int size, bool big_endian, off_t*);
 
   // Return whether to include this section in the link.
   template<int size, bool big_endian>
@@ -207,6 +218,8 @@ class Layout
 
   // A reference to the options on the command line.
   const General_options& options_;
+  // The index of the last output section.
+  unsigned int last_shndx_;
   // The output section names.
   Stringpool namepool_;
   // The output symbol names.
@@ -220,6 +233,93 @@ class Layout
   // The list of output sections which are not attached to any output
   // segment.
   Section_list section_list_;
+  // The list of sections which require special output because they
+  // are not comprised of input sections.
+  Data_list special_output_list_;
+};
+
+// This task handles writing out data which is not part of a section
+// or segment.
+
+class Write_data_task : public Task
+{
+ public:
+  Write_data_task(const Layout* layout, Output_file* of,
+		  Task_token* final_blocker)
+    : layout_(layout), of_(of), final_blocker_(final_blocker)
+  { }
+
+  // The standard Task methods.
+
+  Is_runnable_type
+  is_runnable(Workqueue*);
+
+  Task_locker*
+  locks(Workqueue*);
+
+  void
+  run(Workqueue*);
+
+ private:
+  const Layout* layout_;
+  Output_file* of_;
+  Task_token* final_blocker_;
+};
+
+// This task handles writing out the global symbols.
+
+class Write_symbols_task : public Task
+{
+ public:
+  Write_symbols_task(const Symbol_table* symtab, const Target* target,
+		     const Stringpool* sympool, Output_file* of,
+		     Task_token* final_blocker)
+    : symtab_(symtab), target_(target), sympool_(sympool), of_(of),
+      final_blocker_(final_blocker)
+  { }
+
+  // The standard Task methods.
+
+  Is_runnable_type
+  is_runnable(Workqueue*);
+
+  Task_locker*
+  locks(Workqueue*);
+
+  void
+  run(Workqueue*);
+
+ private:
+  const Symbol_table* symtab_;
+  const Target* target_;
+  const Stringpool* sympool_;
+  Output_file* of_;
+  Task_token* final_blocker_;
+};
+
+// This task handles closing the file.
+
+class Close_task : public Task
+{
+ public:
+  Close_task(Output_file* of, Task_token* final_blocker)
+    : of_(of), final_blocker_(final_blocker)
+  { }
+
+  // The standard task methods.
+
+  Is_runnable_type
+  is_runnable(Workqueue*);
+
+  Task_locker*
+  locks(Workqueue*);
+
+  void
+  run(Workqueue*);
+
+ private:
+  Output_file* of_;
+  Task_token* final_blocker_;
 };
 
 } // End namespace gold.

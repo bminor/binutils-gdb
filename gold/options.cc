@@ -5,9 +5,12 @@
 #include "gold.h"
 #include "options.h"
 
+namespace gold
+{
+
 // The information we keep for a single command line option.
 
-struct gold::options::One_option
+struct options::One_option
 {
   // The single character option name, or '\0' if this is only a long
   // option.
@@ -42,23 +45,23 @@ struct gold::options::One_option
   // be 0 if this function changes *argv.  ARG points to the location
   // in *ARGV where the option starts, which may be helpful for a
   // short option.
-  int (*special)(int argc, char** argv, char *arg, gold::Command_line*);
+  int (*special)(int argc, char** argv, char *arg, Command_line*);
 
   // If this is a position independent option which does not take an
   // argument, this is the member function to call to record it.
-  void (gold::General_options::*general_noarg)();
+  void (General_options::*general_noarg)();
 
   // If this is a position independent function which takes an
   // argument, this is the member function to call to record it.
-  void (gold::General_options::*general_arg)(const char*);
+  void (General_options::*general_arg)(const char*);
 
   // If this is a position dependent option which does not take an
   // argument, this is the member function to call to record it.
-  void (gold::Position_dependent_options::*dependent_noarg)();
+  void (Position_dependent_options::*dependent_noarg)();
 
   // If this is a position dependent option which takes an argument,
   // this is the member function to record it.
-  void (gold::Position_dependent_options::*dependent_arg)(const char*);
+  void (Position_dependent_options::*dependent_arg)(const char*);
 
   // Return whether this option takes an argument.
   bool
@@ -66,15 +69,25 @@ struct gold::options::One_option
   { return this->general_arg != NULL || this->dependent_arg != NULL; }
 };
 
-class gold::options::Command_line_options
+class options::Command_line_options
 {
  public:
   static const One_option options[];
   static const int options_size;
 };
 
+} // End namespace gold.
+
 namespace
 {
+
+// Handle the special -l option, which adds an input file.
+
+int
+library(int argc, char** argv, char* arg, gold::Command_line* cmdline)
+{
+  return cmdline->process_l_option(argc, argv, arg);
+}
 
 // Report usage information for ld --help, and exit.
 
@@ -162,7 +175,10 @@ help(int, char**, char*, gold::Command_line*)
   return 0;
 }
 
-} // End empty namespace.
+} // End anonymous namespace.
+
+namespace gold
+{
 
 // Helper macros used to specify the options.  We could also do this
 // using constructors, but then g++ would generate code to initialize
@@ -170,75 +186,84 @@ help(int, char**, char*, gold::Command_line*)
 // we get better startup time.
 
 #define GENERAL_NOARG(short_option, long_option, doc, help, dash, func)	\
-  { short_option, long_option, doc, help, gold::options::One_option::dash, \
+  { short_option, long_option, doc, help, options::One_option::dash, \
       NULL, func, NULL, NULL, NULL }
 #define GENERAL_ARG(short_option, long_option, doc, help, dash, func)	\
-  { short_option, long_option, doc, help, gold::options::One_option::dash, \
+  { short_option, long_option, doc, help, options::One_option::dash, \
       NULL, NULL, func, NULL, NULL }
 #define POSDEP_NOARG(short_option, long_option, doc, help, dash, func)	\
-  { short_option, long_option, doc, help, gold::options::One_option::dash, \
+  { short_option, long_option, doc, help, options::One_option::dash, \
       NULL,  NULL, NULL, func, NULL }
 #define POSDEP_ARG(short_option, long_option, doc, help, dash, func)	\
-  { short_option, long_option, doc, help, gold::options::One_option::dash, \
+  { short_option, long_option, doc, help, options::One_option::dash, \
       NULL, NULL, NULL, NULL, func }
 #define SPECIAL(short_option, long_option, doc, help, dash, func)	\
-  { short_option, long_option, doc, help, gold::options::One_option::dash, \
+  { short_option, long_option, doc, help, options::One_option::dash, \
       func, NULL, NULL, NULL, NULL }
 
 // Here is the actual list of options which we accept.
 
-const gold::options::One_option
-gold::options::Command_line_options::options[] =
+const options::One_option
+options::Command_line_options::options[] =
 {
+  SPECIAL('l', "library", N_("Search for library LIBNAME"),
+	  N_("-lLIBNAME --library LIBNAME"), TWO_DASHES,
+	  &library),
   GENERAL_ARG('L', "library-path", N_("Add directory to search path"),
 	      N_("-L DIR, --library-path DIR"), TWO_DASHES,
-	      &gold::General_options::add_to_search_path),
+	      &General_options::add_to_search_path),
+  GENERAL_ARG('o', "output", N_("Set output file name"),
+	      N_("-o FILE, --output FILE"), TWO_DASHES,
+	      &General_options::set_output_file_name),
   GENERAL_NOARG('r', NULL, N_("Generate relocatable output"), NULL,
-		ONE_DASH, &gold::General_options::set_relocatable),
+		ONE_DASH, &General_options::set_relocatable),
   GENERAL_NOARG('\0', "static", N_("Do not link against shared libraries"),
-		NULL, ONE_DASH, &gold::General_options::set_static),
+		NULL, ONE_DASH, &General_options::set_static),
   SPECIAL('\0', "help", N_("Report usage information"), NULL,
 	  TWO_DASHES, &help)
 };
 
-const int gold::options::Command_line_options::options_size =
+const int options::Command_line_options::options_size =
   sizeof (options) / sizeof (options[0]);
 
 // The default values for the general options.
 
-gold::General_options::General_options()
-  : is_relocatable_(false)
+General_options::General_options()
+  : search_path_(),
+    output_file_name_("a.out"),
+    is_relocatable_(false),
+    is_static_(false)
 {
 }
 
 // The default values for the position dependent options.
 
-gold::Position_dependent_options::Position_dependent_options()
+Position_dependent_options::Position_dependent_options()
   : do_static_search_(false)
 {
 }
 
 // Construct a Command_line.
 
-gold::Command_line::Command_line()
+Command_line::Command_line()
 {
 }
 
 // Process the command line options.
 
 void
-gold::Command_line::process(int argc, char** argv)
+Command_line::process(int argc, char** argv)
 {
-  const int options_size = gold::options::Command_line_options::options_size;
-  const gold::options::One_option* options =
-    gold::options::Command_line_options::options;
+  const int options_size = options::Command_line_options::options_size;
+  const options::One_option* options =
+    options::Command_line_options::options;
   bool no_more_options = false;
   int i = 0;
   while (i < argc)
     {
       if (argv[i][0] != '-' || no_more_options)
 	{
-	  this->inputs_.push_back(Input_argument(argv[i],
+	  this->inputs_.push_back(Input_argument(argv[i], false,
 						 this->position_options_));
 	  ++i;
 	  continue;
@@ -275,7 +300,7 @@ gold::Command_line::process(int argc, char** argv)
 	  if (options[j].long_option != NULL
 	      && (dashes == 2
 		  || (options[j].dash
-		      != gold::options::One_option::EXACTLY_TWO_DASHES))
+		      != options::One_option::EXACTLY_TWO_DASHES))
 	      && first == options[j].long_option[0]
 	      && strcmp(opt, options[j].long_option) == 0)
 	    {
@@ -356,13 +381,17 @@ gold::Command_line::process(int argc, char** argv)
 	  ++s;
 	}
     }
+
+  // FIXME: We should only do this when configured in native mode.
+  this->options_.add_to_search_path("/lib");
+  this->options_.add_to_search_path("/usr/lib");
 }
 
 // Apply a command line option.
 
 void
-gold::Command_line::apply_option(const gold::options::One_option& opt,
-				 const char* arg)
+Command_line::apply_option(const options::One_option& opt,
+			   const char* arg)
 {
   if (arg == NULL)
     {
@@ -371,7 +400,7 @@ gold::Command_line::apply_option(const gold::options::One_option& opt,
       else if (opt.dependent_noarg)
 	(this->position_options_.*(opt.dependent_noarg))();
       else
-	gold::gold_unreachable();
+	gold_unreachable();
     }
   else
     {
@@ -380,35 +409,63 @@ gold::Command_line::apply_option(const gold::options::One_option& opt,
       else if (opt.dependent_arg)
 	(this->position_options_.*(opt.dependent_arg))(arg);
       else
-	gold::gold_unreachable();
+	gold_unreachable();
     }
+}
+
+// Handle the -l option, which requires special treatment.
+
+int
+Command_line::process_l_option(int argc, char** argv, char* arg)
+{
+  int ret;
+  const char* libname;
+  if (arg[1] != '\0')
+    {
+      ret = 1;
+      libname = arg + 1;
+    }
+  else if (argc > 1)
+    {
+      ret = 2;
+      libname = argv[argc + 1];
+    }
+  else
+    this->usage(_("missing argument"), arg);
+
+  this->inputs_.push_back(Input_argument(libname, true,
+					 this->position_options_));
+
+  return ret;
 }
 
 // Report a usage error.  */
 
 void
-gold::Command_line::usage()
+Command_line::usage()
 {
   fprintf(stderr,
 	  _("%s: use the --help option for usage information\n"),
-	  gold::program_name);
-  gold::gold_exit(false);
+	  program_name);
+  gold_exit(false);
 }
 
 void
-gold::Command_line::usage(const char* msg, const char *opt)
+Command_line::usage(const char* msg, const char *opt)
 {
   fprintf(stderr,
 	  _("%s: %s: %s\n"),
-	  gold::program_name, opt, msg);
+	  program_name, opt, msg);
   this->usage();
 }
 
 void
-gold::Command_line::usage(const char* msg, char opt)
+Command_line::usage(const char* msg, char opt)
 {
   fprintf(stderr,
 	  _("%s: -%c: %s\n"),
-	  gold::program_name, opt, msg);
+	  program_name, opt, msg);
   this->usage();
 }
+
+} // End namespace gold.

@@ -13,6 +13,7 @@
 #define GOLD_OPTIONS_H
 
 #include <list>
+#include <string>
 
 namespace gold
 {
@@ -41,6 +42,11 @@ class General_options
   search_path() const
   { return this->search_path_; }
 
+  // -o: Output file name.
+  const char*
+  output_file_name() const
+  { return this->output_file_name_; }
+
   // -r: Whether we are doing a relocatable link.
   bool
   is_relocatable() const
@@ -60,6 +66,10 @@ class General_options
   { this->search_path_.push_back(arg); }
 
   void
+  set_output_file_name(const char* arg)
+  { this->output_file_name_ = arg; }
+
+  void
   set_relocatable()
   { this->is_relocatable_ = true; }
 
@@ -68,6 +78,7 @@ class General_options
   { this->is_static_ = true; }
 
   Dir_list search_path_;
+  const char* output_file_name_;
   bool is_relocatable_;
   bool is_static_;
 
@@ -109,8 +120,9 @@ class Position_dependent_options
 class Input_argument
 {
  public:
-  Input_argument(const char* name, const Position_dependent_options& options)
-    : name_(name), options_(options)
+  Input_argument(const char* name, bool is_lib,
+		 const Position_dependent_options& options)
+    : name_(name), is_lib_(is_lib), options_(options)
   { }
 
   const char*
@@ -123,14 +135,11 @@ class Input_argument
 
   bool
   is_lib() const
-  { return this->name_[0] == '-' && this->name_[1] == 'l'; }
-
-  const char*
-  lib_basename() const
-  { return this->name_ + 2; }
+  { return this->is_lib_; }
 
  private:
   const char* name_;
+  bool is_lib_;
   Position_dependent_options options_;
 };
 
@@ -146,12 +155,18 @@ class Command_line
   void
   process(int argc, char** argv);
 
+  // Handle a -l option.
+  int
+  process_l_option(int, char**, char*);
+
+  // Get the general options.
   const General_options&
   options() const
   { return this->options_; }
 
   typedef std::list<Input_argument> Input_argument_list;
 
+  // Get the list of input files.
   const Input_argument_list&
   inputs() const
   { return this->inputs_; }

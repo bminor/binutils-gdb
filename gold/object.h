@@ -15,8 +15,9 @@ namespace gold
 {
 
 class Stringpool;
-class Output_section;
 class Layout;
+class Output_section;
+class Output_file;
 
 // Data to pass from read_symbols() to add_symbols().
 
@@ -116,6 +117,12 @@ class Object
   finalize_local_symbols(off_t off, Stringpool* pool)
   { return this->do_finalize_local_symbols(off, pool); }
 
+  // Relocate the input sections and write out the local symbols.
+  void
+  relocate(const General_options& options, const Symbol_table* symtab,
+	   const Stringpool* sympool, Output_file* of)
+  { return this->do_relocate(options, symtab, sympool, of); }
+
   // What we need to know to map an input section to an output
   // section.  We keep an array of these, one for each input section,
   // indexed by the input section number.
@@ -132,7 +139,10 @@ class Object
   // information.
   const Map_to_output*
   section_output_info(unsigned int shnum) const
-  { return &this->map_to_output_[shnum]; }
+  {
+    assert(shnum < this->map_to_output_.size());
+    return &this->map_to_output_[shnum];
+  }
 
  protected:
   // Read the symbols--implemented by child class.
@@ -151,6 +161,12 @@ class Object
   // Finalize local symbols--implemented by child class.
   virtual off_t
   do_finalize_local_symbols(off_t, Stringpool*) = 0;
+
+  // Relocate the input sections and write out the local
+  // symbols--implemented by child class.
+  virtual void
+  do_relocate(const General_options& options, const Symbol_table* symtab,
+	      const Stringpool*, Output_file* of) = 0;
 
   // Get the file.
   Input_file*
@@ -199,7 +215,7 @@ class Object
   Object(const Object&);
   Object& operator=(const Object&);
 
-  // Name of object as printed to use.
+  // Name of object as printed to user.
   std::string name_;
   // For reading the file.
   Input_file* input_file_;
@@ -263,6 +279,11 @@ class Sized_object : public Object
   off_t
   do_finalize_local_symbols(off_t, Stringpool*);
 
+  // Relocate the input sections and write out the local symbols.
+  void
+  do_relocate(const General_options& options, const Symbol_table* symtab,
+	      const Stringpool*, Output_file* of);
+
   // Return the appropriate Sized_target structure.
   Sized_target<size, big_endian>*
   sized_target()
@@ -301,6 +322,30 @@ class Sized_object : public Object
   include_linkonce_section(Layout*, const char*,
 			   const elfcpp::Shdr<size, big_endian>&);
 
+  // Views and sizes when relocating.
+  struct View_size
+  {
+    unsigned char* view;
+    typename elfcpp::Elf_types<size>::Elf_Addr address;
+    off_t offset;
+    off_t view_size;
+  };
+
+  typedef std::vector<View_size> Views;
+
+  // Write section data to the output file.  Record the views and
+  // sizes in VIEWS for use when relocating.
+  void
+  write_sections(const unsigned char* pshdrs, Output_file*, Views*);
+
+  // Relocate the sections in the output file.
+  void
+  relocate_sections(const Symbol_table*, const unsigned char* pshdrs, Views*);
+
+  // Write out the local symbols.
+  void
+  write_local_symbols(Output_file*, const Stringpool*);
+
   // ELF file header e_flags field.
   unsigned int flags_;
   // File offset of section header table.
@@ -309,10 +354,16 @@ class Sized_object : public Object
   unsigned int shstrndx_;
   // Index of SHT_SYMTAB section.
   unsigned int symtab_shnum_;
+  // The number of local symbols.
+  unsigned int local_symbol_count_;
+  // The number of local symbols which go into the output file.
+  unsigned int output_local_symbol_count_;
   // The entries in the symbol table for the external symbols.
   Symbol** symbols_;
   // File offset for local symbols.
   off_t local_symbol_offset_;
+  // Values of local symbols.
+  typename elfcpp::Elf_types<size>::Elf_Addr *values_;
 };
 
 // A class to manage the list of all objects.
@@ -362,9 +413,10 @@ class Input_objects
 // Return an Object appropriate for the input file.  P is BYTES long,
 // and holds the ELF header.
 
-extern Object* make_elf_object(const std::string& name, Input_file*,
-			       off_t offset, const unsigned char* p,
-			       off_t bytes);
+extern Object*
+make_elf_object(const std::string& name, Input_file*,
+		off_t offset, const unsigned char* p,
+		off_t bytes);
 
 } // end namespace gold
 

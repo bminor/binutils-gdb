@@ -1,3 +1,5 @@
+archive.cc
+archive.h
 dirsearch.cc
 dirsearch.h
 fileread.cc
@@ -17,12 +19,15 @@ output.cc
 output.h
 readsyms.cc
 readsyms.h
+reloc.cc
+reloc.h
 resolve.cc
 stringpool.cc
 stringpool.h
 symtab.cc
 symtab.h
 target.h
+target-reloc.h
 target-select.cc
 target-select.h
 workqueue.cc

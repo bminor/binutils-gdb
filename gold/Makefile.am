@@ -18,6 +18,7 @@ INCLUDES = -D_GNU_SOURCE \
 noinst_PROGRAMS = ld-new
 
 CCFILES = \
+	archive.cc \
 	dirsearch.cc \
 	fileread.cc \
 	gold.cc \
@@ -27,6 +28,7 @@ CCFILES = \
 	options.cc \
 	output.cc \
 	readsyms.cc \
+	reloc.cc \
 	resolve.cc \
 	symtab.cc \
 	stringpool.cc \
@@ -34,6 +36,7 @@ CCFILES = \
 	workqueue.cc
 
 HFILES = \
+	archive.h \
 	dirsearch.h \
 	fileread.h \
 	gold.h \
@@ -43,9 +46,11 @@ HFILES = \
 	options.h \
 	output.h \
 	readsyms.h \
+	reloc.h \
 	stringpool.h \
 	symtab.h \
 	target.h \
+	target-reloc.h \
 	target-select.h \
 	workqueue.h
 

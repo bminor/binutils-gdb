@@ -80,6 +80,13 @@ struct hash<T*>
 namespace gold
 {
 
+class General_options;
+class Input_objects;
+class Symbol_table;
+class Layout;
+class Workqueue;
+class Output_file;
+
 // The name of the program as used in error messages.
 extern const char* program_name;
 
@@ -102,6 +109,14 @@ gold_nomem() ATTRIBUTE_NORETURN;
 // written correctly.
 extern void
 gold_unreachable() ATTRIBUTE_NORETURN;
+
+extern void
+queue_final_tasks(const General_options&,
+		  const Input_objects*,
+		  const Symbol_table*,
+		  const Layout*,
+		  Workqueue*,
+		  Output_file* of);
 
 } // End namespace gold.
 

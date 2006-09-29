@@ -34,6 +34,7 @@ struct Elf_types<32>
   typedef uint32_t Elf_Addr;
   typedef uint32_t Elf_Off;
   typedef uint32_t Elf_WXword;
+  typedef int32_t Elf_Swxword;
 };
 
 template<>
@@ -42,6 +43,7 @@ struct Elf_types<64>
   typedef uint64_t Elf_Addr;
   typedef uint64_t Elf_Off;
   typedef uint64_t Elf_WXword;
+  typedef int64_t Elf_Swxword;
 };
 
 // Offsets within the Ehdr e_ident field.
@@ -471,6 +473,62 @@ elf_st_other(STV vis, unsigned char nonvis)
 	  + (static_cast<unsigned char>(vis) & 3));
 }
 
+// Reloc information from Rel/Rela r_info field.
+
+template<int size>
+unsigned int
+elf_r_sym(typename Elf_types<size>::Elf_WXword);
+
+template<>
+inline unsigned int
+elf_r_sym<32>(Elf_Word v)
+{
+  return v >> 8;
+}
+
+template<>
+inline unsigned int
+elf_r_sym<64>(Elf_Xword v)
+{
+  return v >> 32;
+}
+
+template<int size>
+unsigned int
+elf_r_type(typename Elf_types<size>::Elf_WXword);
+
+template<>
+inline unsigned int
+elf_r_type<32>(Elf_Word v)
+{
+  return v & 0xff;
+}
+
+template<>
+inline unsigned int
+elf_r_type<64>(Elf_Xword v)
+{
+  return v & 0xffffffff;
+}
+
+template<int size>
+typename Elf_types<size>::Elf_WXword
+elf_r_info(unsigned int s, unsigned int t);
+
+template<>
+inline Elf_Word
+elf_r_info<32>(unsigned int s, unsigned int t)
+{
+  return (s << 8) + (t & 0xff);
+}
+
+template<>
+inline Elf_Xword
+elf_r_info<64>(unsigned int s, unsigned int t)
+{
+  return (static_cast<Elf_Xword>(s) << 32) + (t & 0xffffffff);
+}
+
 } // End namespace elfcpp.
 
 // Include internal details after defining the types.
@@ -490,10 +548,15 @@ struct Elf_sizes
 {
   // Size of ELF file header.
   static const int ehdr_size = sizeof(internal::Ehdr_data<size>);
+  // Size of ELF segment header.
+  static const int phdr_size = sizeof(internal::Phdr_data<size>);
   // Size of ELF section header.
   static const int shdr_size = sizeof(internal::Shdr_data<size>);
   // Size of ELF symbol table entry.
   static const int sym_size = sizeof(internal::Sym_data<size>);
+  // Sizes of ELF reloc entries.
+  static const int rel_size = sizeof(internal::Rel_data<size>);
+  static const int rela_size = sizeof(internal::Rela_data<size>);
 };
 
 // Given the address of an Elf_Word, return the value.
@@ -503,6 +566,15 @@ inline Elf_Word
 read_elf_word(const Elf_Word* p)
 {
   return internal::convert_word<big_endian>(*p);
+}
+
+// Store an Elf_Word into an address.
+
+template<bool big_endian>
+inline void
+write_elf_word(Elf_Word* p, Elf_Word v)
+{
+  *p = internal::convert_word<big_endian>(v);
 }
 
 // Accessor class for the ELF file header.
@@ -575,6 +647,76 @@ class Ehdr
   const internal::Ehdr_data<size>* p_;
 };
 
+// Write class for the ELF file header.
+
+template<int size, bool big_endian>
+class Ehdr_write
+{
+ public:
+  Ehdr_write(unsigned char* p)
+    : p_(reinterpret_cast<internal::Ehdr_data<size>*>(p))
+  { }
+
+  void
+  put_e_ident(const unsigned char v[EI_NIDENT]) const
+  { memcpy(this->p_->e_ident, v, EI_NIDENT); }
+
+  void
+  put_e_type(Elf_Half v)
+  { this->p_->e_type = internal::convert_half<big_endian>(v); }
+  
+  void
+  put_e_machine(Elf_Half v)
+  { this->p_->e_machine = internal::convert_half<big_endian>(v); }
+
+  void
+  put_e_version(Elf_Word v)
+  { this->p_->e_version = internal::convert_word<big_endian>(v); }
+
+  void
+  put_e_entry(typename Elf_types<size>::Elf_Addr v)
+  { this->p_->e_entry = internal::convert_addr<size, big_endian>(v); }
+
+  void
+  put_e_phoff(typename Elf_types<size>::Elf_Off v)
+  { this->p_->e_phoff = internal::convert_off<size, big_endian>(v); }
+
+  void
+  put_e_shoff(typename Elf_types<size>::Elf_Off v)
+  { this->p_->e_shoff = internal::convert_off<size, big_endian>(v); }
+
+  void
+  put_e_flags(Elf_Word v)
+  { this->p_->e_flags = internal::convert_word<big_endian>(v); }
+
+  void
+  put_e_ehsize(Elf_Half v)
+  { this->p_->e_ehsize = internal::convert_half<big_endian>(v); }
+
+  void
+  put_e_phentsize(Elf_Half v)
+  { this->p_->e_phentsize = internal::convert_half<big_endian>(v); }
+
+  void
+  put_e_phnum(Elf_Half v)
+  { this->p_->e_phnum = internal::convert_half<big_endian>(v); }
+
+  void
+  put_e_shentsize(Elf_Half v)
+  { this->p_->e_shentsize = internal::convert_half<big_endian>(v); }
+
+  void
+  put_e_shnum(Elf_Half v)
+  { this->p_->e_shnum = internal::convert_half<big_endian>(v); }
+
+  void
+  put_e_shstrndx(Elf_Half v)
+  { this->p_->e_shstrndx = internal::convert_half<big_endian>(v); }
+
+ private:
+  internal::Ehdr_data<size>* p_;
+};
+
 // Accessor class for an ELF section header.
 
 template<int size, bool big_endian>
@@ -630,6 +772,60 @@ class Shdr
   const internal::Shdr_data<size>* p_;
 };
 
+// Write class for an ELF section header.
+
+template<int size, bool big_endian>
+class Shdr_write
+{
+ public:
+  Shdr_write(unsigned char* p)
+    : p_(reinterpret_cast<internal::Shdr_data<size>*>(p))
+  { }
+
+  void
+  put_sh_name(Elf_Word v)
+  { this->p_->sh_name = internal::convert_word<big_endian>(v); }
+
+  void
+  put_sh_type(Elf_Word v)
+  { this->p_->sh_type = internal::convert_word<big_endian>(v); }
+
+  void
+  put_sh_flags(typename Elf_types<size>::Elf_WXword v)
+  { this->p_->sh_flags = internal::convert_wxword<size, big_endian>(v); }
+
+  void
+  put_sh_addr(typename Elf_types<size>::Elf_Addr v)
+  { this->p_->sh_addr = internal::convert_addr<size, big_endian>(v); }
+
+  void
+  put_sh_offset(typename Elf_types<size>::Elf_Off v)
+  { this->p_->sh_offset = internal::convert_off<size, big_endian>(v); }
+
+  void
+  put_sh_size(typename Elf_types<size>::Elf_WXword v)
+  { this->p_->sh_size = internal::convert_wxword<size, big_endian>(v); }
+
+  void
+  put_sh_link(Elf_Word v)
+  { this->p_->sh_link = internal::convert_word<big_endian>(v); }
+
+  void
+  put_sh_info(Elf_Word v)
+  { this->p_->sh_info = internal::convert_word<big_endian>(v); }
+
+  void
+  put_sh_addralign(typename Elf_types<size>::Elf_WXword v)
+  { this->p_->sh_addralign = internal::convert_wxword<size, big_endian>(v); }
+
+  void
+  put_sh_entsize(typename Elf_types<size>::Elf_WXword v)
+  { this->p_->sh_entsize = internal::convert_wxword<size, big_endian>(v); }
+
+ private:
+  internal::Shdr_data<size>* p_;
+};
+
 // Accessor class for an ELF segment header.
 
 template<int size, bool big_endian>
@@ -674,6 +870,52 @@ class Phdr
 
  private:
   const internal::Phdr_data<size>* p_;
+};
+
+// Write class for an ELF segment header.
+
+template<int size, bool big_endian>
+class Phdr_write
+{
+ public:
+  Phdr_write(unsigned char* p)
+    : p_(reinterpret_cast<internal::Phdr_data<size>*>(p))
+  { }
+
+  void
+  put_p_type(Elf_Word v)
+  { this->p_->p_type = internal::convert_word<big_endian>(v); }
+
+  void
+  put_p_offset(typename Elf_types<size>::Elf_Off v)
+  { this->p_->p_offset = internal::convert_off<size, big_endian>(v); }
+
+  void
+  put_p_vaddr(typename Elf_types<size>::Elf_Addr v)
+  { this->p_->p_vaddr = internal::convert_addr<size, big_endian>(v); }
+
+  void
+  put_p_paddr(typename Elf_types<size>::Elf_Addr v)
+  { this->p_->p_paddr = internal::convert_addr<size, big_endian>(v); }
+
+  void
+  put_p_filesz(typename Elf_types<size>::Elf_WXword v)
+  { this->p_->p_filesz = internal::convert_wxword<size, big_endian>(v); }
+
+  void
+  put_p_memsz(typename Elf_types<size>::Elf_WXword v)
+  { this->p_->p_memsz = internal::convert_wxword<size, big_endian>(v); }
+
+  void
+  put_p_flags(Elf_Word v)
+  { this->p_->p_flags = internal::convert_word<big_endian>(v); }
+
+  void
+  put_p_align(typename Elf_types<size>::Elf_WXword v)
+  { this->p_->p_align = internal::convert_wxword<size, big_endian>(v); }
+
+ private:
+  internal::Phdr_data<size>* p_;
 };
 
 // Accessor class for an ELF symbol table entry.
@@ -778,6 +1020,52 @@ class Sym_write
 
  private:
   internal::Sym_data<size>* p_;
+};
+
+// Accessor classes for Elf relocation table entries.
+
+template<int size, bool big_endian>
+class Rel
+{
+ public:
+  Rel(const unsigned char* p)
+    : p_(reinterpret_cast<const internal::Rel_data<size>*>(p))
+  { }
+
+  typename Elf_types<size>::Elf_Addr
+  get_r_offset() const
+  { return internal::convert_addr<size, big_endian>(this->p_->r_offset); }
+
+  typename Elf_types<size>::Elf_WXword
+  get_r_info() const
+  { return internal::convert_wxword<size, big_endian>(this->p_->r_info); }
+
+ private:
+  const internal::Rel_data<size>* p_;
+};
+
+template<int size, bool big_endian>
+class Rela
+{
+ public:
+  Rela(const unsigned char* p)
+    : p_(reinterpret_cast<const internal::Rela_data<size>*>(p))
+  { }
+
+  typename Elf_types<size>::Elf_Addr
+  get_r_offset() const
+  { return internal::convert_addr<size, big_endian>(this->p_->r_offset); }
+
+  typename Elf_types<size>::Elf_WXword
+  get_r_info() const
+  { return internal::convert_wxword<size, big_endian>(this->p_->r_info); }
+
+  typename Elf_types<size>::Elf_Swxword
+  get_r_addend() const
+  { return internal::convert_swxword<size, big_endian>(this->p_->r_addend); }
+
+ private:
+  const internal::Rela_data<size>* p_;
 };
 
 } // End namespace elfcpp.

@@ -190,10 +190,9 @@ Symbol_table::resolve(Sized_symbol<size>* to,
   switch (tobits * 16 + frombits)
     {
     case DEF * 16 + DEF:
-      // Two definitions of the same symbol.
-      fprintf(stderr, "%s: %s: multiple definition of %s\n",
-	      program_name, object->name().c_str(), to->name());
-      // FIXME: Report locations.  Record that we have seen an error.
+      // Two definitions of the same symbol.  We can't give an error
+      // here, because we have not yet discarded linkonce and comdat
+      // sections.  FIXME.
       return;
 
     case WEAK_DEF * 16 + DEF:
