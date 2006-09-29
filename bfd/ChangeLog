@@ -1,3 +1,9 @@
+2006-09-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/3283
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Don't ignore
+	relocation overflow on branches to undefweaks.
+
 2006-09-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/BLD-POTFILES.in: Regenerate.
