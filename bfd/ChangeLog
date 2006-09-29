@@ -1,3 +1,11 @@
+2006-09-29  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	PR 3276
+	* pei-i386.c (COFF_SECTION_ALIGNMENT_ENTRIES): Enable 16 byte
+	alignment for .data$, .rdata$ and .text$ sections so that sse
+	and sse2 code will work for linkonce sections too. 
+	* pe-i386.c (COFF_SECTION_ALIGNMENT_ENTRIES): Likewise.
+
 2006-09-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (_bfd_elf_gc_mark_hook): New function.
