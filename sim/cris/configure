@@ -4355,7 +4355,9 @@ sim_link_links="${sim_link_links} targ-vals.def"
 # For dv-rv and rvdummy.
 
 
-for ac_header in sys/socket.h sys/select.h
+
+
+for ac_header in sys/socket.h sys/select.h limits.h sys/param.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if eval "test \"\${$as_ac_Header+set}\" = set"; then

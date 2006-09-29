@@ -38,6 +38,21 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
+/* For PATH_MAX, originally. */
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
+
+/* From ld/sysdep.h.  */
+#ifdef PATH_MAX
+# define SIM_PATHMAX PATH_MAX
+#else
+# ifdef MAXPATHLEN
+#  define SIM_PATHMAX MAXPATHLEN
+# else
+#  define SIM_PATHMAX 1024
+# endif
+#endif
 
 /* The verbatim values are from asm-cris/unistd.h.  */
 
@@ -2413,8 +2428,8 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 	    USI buf = arg1;
 	    USI size = arg2;
 
-	    char *cwd = xmalloc (MAXPATHLEN);
-	    if (cwd != getcwd (cwd, MAXPATHLEN))
+	    char *cwd = xmalloc (SIM_PATHMAX);
+	    if (cwd != getcwd (cwd, SIM_PATHMAX))
 	      abort ();
 
 	    /* FIXME: When and if we support chdir, we need something
@@ -2440,8 +2455,8 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 	    SI path = arg1;
 	    SI buf = arg2;
 	    SI bufsiz = arg3;
-	    char *pbuf = xmalloc (MAXPATHLEN);
-	    char *lbuf = xmalloc (MAXPATHLEN);
+	    char *pbuf = xmalloc (SIM_PATHMAX);
+	    char *lbuf = xmalloc (SIM_PATHMAX);
 	    char *lbuf_alloc = lbuf;
 	    int nchars = -1;
 	    int i;
@@ -2453,7 +2468,7 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 		o += strlen (simulator_sysroot);
 	      }
 
-	    for (i = 0; i + o < MAXPATHLEN; i++)
+	    for (i = 0; i + o < SIM_PATHMAX; i++)
 	      {
 		pbuf[i + o]
 		  = sim_core_read_unaligned_1 (current_cpu, pc, 0, path + i);
@@ -2461,7 +2476,7 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 		  break;
 	      }
 
-	    if (i + o == MAXPATHLEN)
+	    if (i + o == SIM_PATHMAX)
 	      {
 		retval = -cb_host_to_target_errno (cb, ENAMETOOLONG);
 		break;
@@ -2497,8 +2512,8 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 		  }
 		else
 		  {
-		    if (getcwd (lbuf, MAXPATHLEN) != NULL
-			&& strlen (lbuf) + 2 + strlen (argv0) < MAXPATHLEN)
+		    if (getcwd (lbuf, SIM_PATHMAX) != NULL
+			&& strlen (lbuf) + 2 + strlen (argv0) < SIM_PATHMAX)
 		      {
 			if (strncmp (simulator_sysroot, lbuf,
 				     strlen (simulator_sysroot)) == 0)
@@ -2513,7 +2528,7 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 		  }
 	      }
 	    else
-	      nchars = readlink (pbuf, lbuf, MAXPATHLEN);
+	      nchars = readlink (pbuf, lbuf, SIM_PATHMAX);
 
 	    /* We trust that the readlink result returns a *relative*
 	       link, or one already adjusted for the file-path-prefix.

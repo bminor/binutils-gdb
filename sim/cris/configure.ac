@@ -10,7 +10,7 @@ sinclude(../common/aclocal.m4)
 sinclude(../common/common.m4)
 
 # For dv-rv and rvdummy.
-AC_CHECK_HEADERS(sys/socket.h sys/select.h)
+AC_CHECK_HEADERS(sys/socket.h sys/select.h limits.h sys/param.h)
 
 SIM_AC_OPTION_ALIGNMENT(NONSTRICT_ALIGNMENT)
 SIM_AC_OPTION_HOSTENDIAN
