@@ -240,6 +240,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define TARGET___WALL 0x40000000
 #define TARGET___WCLONE 0x80000000
 
+/* From linux/limits.h. */
+#define TARGET_PIPE_BUF 4096
+
 static const char stat_map[] =
 "st_dev,2:space,10:space,4:st_mode,4:st_nlink,4:st_uid,4"
 ":st_gid,4:st_rdev,2:space,10:st_size,8:st_blksize,4:st_blocks,4"
@@ -2971,13 +2974,14 @@ cris_pipe_nonempty (host_callback *cb ATTRIBUTE_UNUSED,
 
 static void
 cris_pipe_empty (host_callback *cb,
-		 int reader ATTRIBUTE_UNUSED,
+		 int reader,
 		 int writer)
 {
   int i;
   SIM_CPU *cpu = current_cpu_for_cb_callback;
   bfd_byte r10_buf[4];
-  int remaining = cb->pipe_buffer[writer].size;
+  int remaining
+    = cb->pipe_buffer[writer].size - cb->pipe_buffer[reader].size;
 
   /* We need to find the thread that waits for this pipe.  */
   for (i = 0; i < SIM_TARGET_MAX_THREADS; i++)
@@ -2985,6 +2989,7 @@ cris_pipe_empty (host_callback *cb,
 	&& cpu->thread_data[i].pipe_write_fd == writer)
       {
 	int retval;
+
 	/* Temporarily switch to this cpu context, so we can change the
 	   PC by ordinary calls.  */
 
@@ -2995,19 +3000,25 @@ cris_pipe_empty (host_callback *cb,
 		cpu->thread_data[i].cpu_context,
 		cpu->thread_cpu_data_size);
 
-	/* The return value is supposed to contain the number of written
-	   bytes, which is the number of bytes requested and returned at
-	   the write call.  We subtract the remaining bytes from that,
-	   but making sure we still get a positive number.
-	   The return value may also be a negative number; an error
-	   value.  We cover this case by comparing against remaining,
-	   which is always >= 0.  */
+	/* The return value is supposed to contain the number of
+	   written bytes, which is the number of bytes requested and
+	   returned at the write call.  You might think the right
+	   thing is to adjust the return-value to be only the
+	   *consumed* number of bytes, but it isn't.  We're only
+	   called if the pipe buffer is fully consumed or it is being
+	   closed, possibly with remaining bytes.  For the latter
+	   case, the writer is still supposed to see success for
+	   PIPE_BUF bytes (a constant which we happen to know and is
+	   unlikely to change).  The return value may also be a
+	   negative number; an error value.  This case is covered
+	   because "remaining" is always >= 0.  */
 	(*CPU_REG_FETCH (cpu)) (cpu, H_GR_R10, r10_buf, 4);
 	retval = (int) bfd_getl_signed_32 (r10_buf);
-	if (retval >= remaining)
-	  bfd_putl32 (retval - remaining, r10_buf);
-	(*CPU_REG_STORE (cpu)) (cpu, H_GR_R10, r10_buf, 4);
-
+	if (retval - remaining > TARGET_PIPE_BUF)
+	  {
+	    bfd_putl32 (retval - remaining, r10_buf);
+	    (*CPU_REG_STORE (cpu)) (cpu, H_GR_R10, r10_buf, 4);
+	  }
 	sim_pc_set (cpu, sim_pc_get (cpu) + 2);
 	memcpy (cpu->thread_data[i].cpu_context,
 		&cpu->cpu_data_placeholder,

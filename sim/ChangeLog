@@ -1,3 +1,10 @@
+2006-09-30  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris/traps.c (TARGET_PIPE_BUF): New macro.
+	(cris_pipe_empty): Correct initialization of "remaining".  Only
+	adjust the "write" return value if more than TARGET_PIPE_BUF bytes
+	are written.
+
 2006-09-29  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cris/configure.ac: Check for limits.h and sys/param.h.
