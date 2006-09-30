@@ -1,3 +1,12 @@
+2006-09-30  Hans-Peter Nilsson  <hp@axis.com>
+
+        * sim/cris/c/pipe2.c: Adjust expected output.
+	(process): Don't write as much to the pipe as to trig the
+	inordinate-amount test in the sim pipe machinery.  Correct test of
+	write return-value; check only that pipemax bytes were
+	successfully written.  For error-case, emit strerror as well.
+	(main): Add a second read.
+	
 2006-04-08  Hans-Peter Nilsson  <hp@axis.com>
 
 	* sim/cris/hw/rv-n-cris/irq6.ms: New test.

@@ -1,6 +1,6 @@
 /* Check that closing a pipe with a nonempty buffer works.
 #notarget: cris*-*-elf
-#output: got: a\nexit: 0\n
+#output: got: a\ngot: b\nexit: 0\n
 */
 
 
@@ -14,7 +14,7 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-
+#include <string.h>
 int pip[2];
 
 int pipemax;
@@ -23,7 +23,8 @@ int
 process (void *arg)
 {
   char *s = arg;
-  char *buf = malloc (pipemax * 100);
+  int lots = pipemax + 256;
+  char *buf = malloc (lots);
   int ret;
 
   if (buf == NULL)
@@ -37,12 +38,17 @@ process (void *arg)
 
   *buf = s[1];
 
-  /* The second write should only successful for at most the PIPE_MAX
-     part, but no error.  */
-  ret = write (pip[1], buf, pipemax * 10);
-  if (ret != 0 && ret != pipemax - 1 && ret != pipemax)
+  /* The second write may or may not be successful for the whole
+     write, but should be successful for at least the pipemax part.
+     As linux/limits.h clamps PIPE_BUF to 4096, but the page size is
+     actually 8k, we can get away with that much.  There should be no
+     error, though.  Doing this on host shows that for
+     x86_64-unknown-linux-gnu (2.6.14-1.1656_FC4) pipemax * 10 can be
+     successfully written, perhaps for similar reasons.  */
+  ret = write (pip[1], buf, lots);
+  if (ret < pipemax)
     {
-      fprintf (stderr, "ret: %d\n", ret);
+      fprintf (stderr, "ret: %d, %s, %d\n", ret, strerror (errno), pipemax);
       fflush (0);
       abort ();
     }
@@ -99,6 +105,19 @@ main (void)
   if (retcode != 1)
     {
       fprintf (stderr, "Bad read 1: %d\n", retcode);
+      abort ();
+    }
+
+  printf ("got: %c\n", buf[0]);
+
+  /* Need to read out something from the second write too before
+     closing, or the writer can get EPIPE. */
+  while ((retcode = read (pip[0], buf, 1)) == 0)
+    ;
+
+  if (retcode != 1)
+    {
+      fprintf (stderr, "Bad read 2: %d\n", retcode);
       abort ();
     }
 
