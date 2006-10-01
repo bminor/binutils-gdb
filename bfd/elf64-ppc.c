@@ -9451,7 +9451,7 @@ ppc64_elf_build_stubs (bfd_boolean emit_stub_syms,
 	stub_sec->size = 0;
       }
 
-  if (htab->plt != NULL)
+  if (htab->glink != NULL && htab->glink->size != 0)
     {
       unsigned int indx;
       bfd_vma plt0;
