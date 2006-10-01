@@ -1,3 +1,7 @@
+2006-09-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* MAINTAINERS: Add Dave Brolley for sh64.
+
 2006-09-30  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cris/traps.c (TARGET_PIPE_BUF): New macro.
