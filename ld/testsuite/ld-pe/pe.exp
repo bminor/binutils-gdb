@@ -18,8 +18,11 @@
 #
  
 # This test can only be run on PE/COFF platforms that support .secrel32.
-if { ![istarget i*86-*-cygwin*] && ![istarget i*86-*-pe]
-     && ![istarget i*86-*-mingw*] && ![istarget arm-wince-pe] } {
+if {    ![istarget i*86-*-cygwin*]
+     && ![istarget i*86-*-pe]
+     && ![istarget i*86-*-mingw*]
+     && ![istarget x86_64-*-mingw64*]
+     && ![istarget arm-wince-pe] } {
     return
 }
 

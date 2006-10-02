@@ -434,7 +434,7 @@ proc is_aout_format {} {
 # True if the object format is known to be PE COFF.
 #
 proc is_pecoff_format {} {
-    if { ![istarget *-*-mingw32*] \
+    if { ![istarget *-*-mingw*] \
 	 && ![istarget *-*-cygwin*] \
 	 && ![istarget *-*-pe*] } {
 	return 0

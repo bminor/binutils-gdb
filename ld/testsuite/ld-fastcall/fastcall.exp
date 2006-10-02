@@ -23,6 +23,7 @@ if {![istarget "i*86-*-*"] && ![istarget "x86_64-*-mingw64*"] } {
 
 if {  !([istarget "i*86-*-*pe*"] && ![istarget "i*86-*-opensd*"]) \
     && ![istarget "i*86-*-cygwin*"] \
+    && ![istarget "x86_64-*-mingw64"] \
     && ![istarget "i*86-*-mingw*"] } {
     return
 }
