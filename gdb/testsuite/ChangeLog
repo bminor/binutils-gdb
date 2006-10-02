@@ -1,3 +1,9 @@
+2006-10-02  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.mi/mi-basics.exp (test_path_specification): Pass orig_path
+        via string_to_regexp.
+	* gdb.mi/mi2-basics.exp: Likewise.
+	
 2006-09-20  Michael Snyder  <michael.snyder@palmsource.com>
 
 	* abug.exp, cpu32bug.exp, est.exp hmsirom.exp, nind.exp:

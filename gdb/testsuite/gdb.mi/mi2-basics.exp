@@ -222,6 +222,8 @@ proc test_path_specification {} {
 	}
     }
 
+    set orig_path [string_to_regexp ${orig_path}]
+
     mi_gdb_test "207-environment-path" \
              "207\\\^done,path=\"$orig_path\"" \
              "environment-path no-args operation"
