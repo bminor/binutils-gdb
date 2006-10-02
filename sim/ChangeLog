@@ -1,3 +1,19 @@
+2006-10-02  Edgar E. Iglesias  <edgar@axis.com>
+	    Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris/cris-sim.h (enum cris_unknown_syscall_action_type)
+	(cris_unknown_syscall_action): Declare.
+	* cris/sim-if.c (cris_unknown_syscall_action): Define.
+	(cris_options): Add cris-unknown-syscall option.
+	(cris_option_handler): Correct comment about and error message for
+	invalid --cris-cycles argument.  Handle --cris-unknown-syscall.
+	* cris/traps.c: Include stdarg.h
+	(cris_unknown_syscall): New function.
+	(cris_break_13_handler): Instead of sim_io_eprintf and
+	sim_engine_halt, call cris_unknown_syscall to handle more or less
+	unknown syscalls.  Adjust code as necessary to handle return
+	value.
+
 2006-09-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* MAINTAINERS: Add Dave Brolley for sh64.

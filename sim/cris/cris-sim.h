@@ -87,6 +87,9 @@ extern USI crisv32f_break_handler (SIM_CPU *, USI, USI);
 extern USI cris_break_13_handler (SIM_CPU *, USI, USI, USI, USI, USI, USI,
 				  USI, USI);
 extern char cris_have_900000xxif;
+enum cris_unknown_syscall_action_type
+  { CRIS_USYSC_MSG_STOP, CRIS_USYSC_MSG_ENOSYS, CRIS_USYSC_QUIET_ENOSYS };
+extern enum cris_unknown_syscall_action_type cris_unknown_syscall_action;
 enum cris_interrupt_type { CRIS_INT_NMI, CRIS_INT_RESET, CRIS_INT_INT };
 extern int crisv10deliver_interrupt (SIM_CPU *,
 				     enum cris_interrupt_type,

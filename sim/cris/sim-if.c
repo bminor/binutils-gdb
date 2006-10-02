@@ -80,6 +80,10 @@ static char cris_bare_iron = 0;
 /* Whether 0x9000000xx have simulator-specific meanings.  */
 char cris_have_900000xxif = 0;
 
+/* What to do when we face a more or less unknown syscall.  */
+enum cris_unknown_syscall_action_type cris_unknown_syscall_action
+  = CRIS_USYSC_MSG_STOP;
+
 /* Records simulator descriptor so utilities like cris_dump_regs can be
    called from gdb.  */
 SIM_DESC current_state;
@@ -90,6 +94,7 @@ typedef enum {
   OPTION_CRIS_TRACE,
   OPTION_CRIS_NAKED,
   OPTION_CRIS_900000XXIF,
+  OPTION_CRIS_UNKNOWN_SYSCALL
 } CRIS_OPTIONS;
 
 static const OPTION cris_options[] =
@@ -107,6 +112,10 @@ static const OPTION cris_options[] =
      cris_option_handler, NULL },
   { {"cris-900000xx", no_argument, NULL, OPTION_CRIS_900000XXIF},
      '\0', NULL, "Define addresses at 0x900000xx with simulator semantics",
+     cris_option_handler, NULL },
+  { {"cris-unknown-syscall", required_argument, NULL,
+     OPTION_CRIS_UNKNOWN_SYSCALL},
+     '\0', "stop|enosys|enosys-quiet", "Action at an unknown system call",
      cris_option_handler, NULL },
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL, NULL }
 };
@@ -152,9 +161,9 @@ cris_option_handler (SIM_DESC sd, sim_cpu *cpu ATTRIBUTE_UNUSED, int opt,
 	  *tracefp = FLAG_CRIS_MISC_PROFILE_ALL;
 	else
 	  {
-	    /* We'll actually never get here; the caller handles the
-	       error case.  */
-	    sim_io_eprintf (sd, "Unknown option `--cris-stats=%s'\n", arg);
+	    /* Beware; the framework does not handle the error case;
+	       we have to do it ourselves.  */
+	    sim_io_eprintf (sd, "Unknown option `--cris-cycles=%s'\n", arg);
 	    return SIM_RC_FAIL;
 	  }
 	break;
@@ -175,6 +184,21 @@ cris_option_handler (SIM_DESC sd, sim_cpu *cpu ATTRIBUTE_UNUSED, int opt,
 
       case OPTION_CRIS_900000XXIF:
 	cris_have_900000xxif = 1;
+	break;
+
+      case OPTION_CRIS_UNKNOWN_SYSCALL:
+	if (strcmp (arg, "enosys") == 0)
+	  cris_unknown_syscall_action = CRIS_USYSC_MSG_ENOSYS;
+	else if (strcmp (arg, "enosys-quiet") == 0)
+	  cris_unknown_syscall_action = CRIS_USYSC_QUIET_ENOSYS;
+	else if (strcmp (arg, "stop") == 0)
+	  cris_unknown_syscall_action = CRIS_USYSC_MSG_STOP;
+	else
+	  {
+	    sim_io_eprintf (sd, "Unknown option `--cris-unknown-syscall=%s'\n",
+			    arg);
+	    return SIM_RC_FAIL;
+	  }
 	break;
 
       default:

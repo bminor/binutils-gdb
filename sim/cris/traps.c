@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "bfd.h"
 /* FIXME: get rid of targ-vals.h usage everywhere else.  */
 
+#include <stdarg.h>
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
 #endif
@@ -1349,6 +1350,31 @@ make_first_thread (SIM_CPU *current_cpu)
     abort ();
 }
 
+/* Handle unknown system calls.  Returns (if it does) the syscall
+   return value.  */
+
+static USI
+cris_unknown_syscall (SIM_CPU *current_cpu, USI pc, char *s, ...)
+{
+  SIM_DESC sd = CPU_STATE (current_cpu);
+  host_callback *cb = STATE_CALLBACK (sd);
+
+  if (cris_unknown_syscall_action == CRIS_USYSC_MSG_STOP
+      || cris_unknown_syscall_action == CRIS_USYSC_MSG_ENOSYS)
+    {
+      va_list ap;
+
+      va_start (ap, s);
+      sim_io_evprintf (sd, s, ap);
+      va_end (ap);
+
+      if (cris_unknown_syscall_action == CRIS_USYSC_MSG_STOP)
+	sim_engine_halt (sd, current_cpu, NULL, pc, sim_stopped, SIM_SIGILL);
+    }
+
+  return -cb_host_to_target_errno (cb, ENOSYS);
+}
+
 /* Main function: the handler of the "break 13" syscall insn.  */
 
 USI
@@ -1467,16 +1493,17 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 		}
 	      /* FALLTHROUGH */
 	    default:
-	      /* Abort for all other cases.  */
-	      sim_io_eprintf (sd, "Unimplemented %s syscall "
-			      "(fd: 0x%lx: cmd: 0x%lx arg: 0x%lx)\n",
-			      callnum == TARGET_SYS_fcntl
-			      ? "fcntl" : "fcntl64",
-			      (unsigned long) (USI) arg1,
-			      (unsigned long) (USI) arg2,
-			      (unsigned long) (USI) arg3);
-	      sim_engine_halt (sd, current_cpu, NULL, pc, sim_stopped,
-			       SIM_SIGILL);
+	      /* Nothing else is implemented.  */
+	      retval
+		= cris_unknown_syscall (current_cpu, pc,
+					"Unimplemented %s syscall "
+					"(fd: 0x%lx: cmd: 0x%lx arg: "
+					"0x%lx)\n",
+					callnum == TARGET_SYS_fcntl
+					? "fcntl" : "fcntl64",
+					(unsigned long) (USI) arg1,
+					(unsigned long) (USI) arg2,
+					(unsigned long) (USI) arg3);
 	      break;
 	    }
 	  break;
@@ -1598,16 +1625,17 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 		|| (fd != (USI) -1 && prot != TARGET_PROT_READ)
 		|| pgoff != 0)
 	      {
-		sim_io_eprintf (sd, "Unimplemented mmap2 call "
-				"(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)\n",
-				(unsigned long) arg1,
-				(unsigned long) arg2,
-				(unsigned long) arg3,
-				(unsigned long) arg4,
-				(unsigned long) arg5,
-				(unsigned long) arg6);
-		sim_engine_halt (sd, current_cpu, NULL, pc, sim_stopped,
-				 SIM_SIGILL);
+		retval
+		  = cris_unknown_syscall (current_cpu, pc,
+						 "Unimplemented mmap2 call "
+						 "(0x%lx, 0x%lx, 0x%lx, "
+						 "0x%lx, 0x%lx, 0x%lx)\n",
+						 (unsigned long) arg1,
+						 (unsigned long) arg2,
+						 (unsigned long) arg3,
+						 (unsigned long) arg4,
+						 (unsigned long) arg5,
+						 (unsigned long) arg6);
 		break;
 	      }
 	    else if (fd != (USI) -1)
@@ -1701,13 +1729,13 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 		|| !is_mapped (sd, &current_cpu->highest_mmapped_page, addr,
 			       len))
 	      {
-		sim_io_eprintf (sd, "Unimplemented mprotect call "
-				"(0x%lx, 0x%lx, 0x%lx)\n",
-				(unsigned long) arg1,
-				(unsigned long) arg2,
-				(unsigned long) arg3);
-		sim_engine_halt (sd, current_cpu, NULL, pc, sim_stopped,
-				 SIM_SIGILL);
+		retval
+		  = cris_unknown_syscall (current_cpu, pc,
+					  "Unimplemented mprotect call "
+					  "(0x%lx, 0x%lx, 0x%lx)\n",
+					  (unsigned long) arg1,
+					  (unsigned long) arg2,
+					  (unsigned long) arg3);
 		break;
 	      }
 
@@ -1766,14 +1794,14 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 		|| rusagep != 0
 		|| current_cpu->thread_data == NULL)
 	      {
-		sim_io_eprintf (sd, "Unimplemented wait4 call "
-				"(0x%lx, 0x%lx, 0x%lx, 0x%lx)\n",
-				(unsigned long) arg1,
-				(unsigned long) arg2,
-				(unsigned long) arg3,
-				(unsigned long) arg4);
-		sim_engine_halt (sd, current_cpu, NULL, pc, sim_stopped,
-				 SIM_SIGILL);
+		retval
+		  = cris_unknown_syscall (current_cpu, pc,
+					  "Unimplemented wait4 call "
+					  "(0x%lx, 0x%lx, 0x%lx, 0x%lx)\n",
+					  (unsigned long) arg1,
+					  (unsigned long) arg2,
+					  (unsigned long) arg3,
+					  (unsigned long) arg4);
 		break;
 	      }
 
@@ -1879,19 +1907,22 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 		     && target_sa_flags != (TARGET_SA_RESTART|TARGET_SA_SIGINFO))
 		    || target_sa_handler == 0)
 		  {
-		    sim_io_eprintf (sd, "Unimplemented rt_sigaction "
-				    "syscall (0x%lx, "
-				    "0x%lx: [0x%x, 0x%x, 0x%x, "
-				    "{0x%x, 0x%x}], "
-				    "0x%lx)\n",
-				    (unsigned long) arg1,
-				    (unsigned long) arg2,
-				    target_sa_handler, target_sa_flags,
-				    target_sa_restorer,
-				    target_sa_mask_low, target_sa_mask_high,
-				    (unsigned long) arg3);
-		    sim_engine_halt (sd, current_cpu, NULL, pc, sim_stopped,
-				     SIM_SIGILL);
+		    retval
+		      = cris_unknown_syscall (current_cpu, pc,
+					      "Unimplemented rt_sigaction "
+					      "syscall "
+					      "(0x%lx, 0x%lx: "
+					      "[0x%x, 0x%x, 0x%x, "
+					      "{0x%x, 0x%x}], 0x%lx)\n",
+					      (unsigned long) arg1,
+					      (unsigned long) arg2,
+					      target_sa_handler,
+					      target_sa_flags,
+					      target_sa_restorer,
+					      target_sa_mask_low,
+					      target_sa_mask_high,
+					      (unsigned long) arg3);
+		    break;
 		  }
 
 		current_cpu->sighandler[signum] = target_sa_handler;
@@ -2012,11 +2043,14 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 		    || (buf.st_mode & S_IFIFO) == 0)
 		|| current_cpu->thread_data == NULL)
 	      {
-		sim_io_eprintf (sd, "Unimplemented poll syscall "
-				"(0x%lx: [0x%x, 0x%x, x], 0x%lx, 0x%lx)\n",
-				(unsigned long) arg1, fd, events,
-				(unsigned long) arg2, (unsigned long) arg3);
-		sim_engine_halt (sd, current_cpu, NULL, pc, sim_stopped, SIM_SIGILL);
+		retval
+		  = cris_unknown_syscall (current_cpu, pc,
+					  "Unimplemented poll syscall "
+					  "(0x%lx: [0x%x, 0x%x, x], "
+					  "0x%lx, 0x%lx)\n",
+					  (unsigned long) arg1, fd, events,
+					  (unsigned long) arg2,
+					  (unsigned long) arg3);
 		break;
 	      }
 
@@ -2108,12 +2142,13 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 	    if (!((offs_hi == 0 && offs_lo >= 0)
 		  || (offs_hi == -1 &&  offs_lo < 0)))
 	      {
-		sim_io_eprintf (sd,
-				"Unimplemented llseek offset,"
-				" fd %d: 0x%x:0x%x\n",
-				fd, (unsigned) arg2, (unsigned) arg3);
-		sim_engine_halt (sd, current_cpu, NULL, pc, sim_stopped,
-				 SIM_SIGILL);
+		retval
+		  = cris_unknown_syscall (current_cpu, pc,
+					  "Unimplemented llseek offset,"
+					  " fd %d: 0x%x:0x%x\n",
+					  fd, (unsigned) arg2,
+					  (unsigned) arg3);
+		break;
 	      }
 
 	    s.func = TARGET_SYS_lseek;
@@ -2191,11 +2226,11 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 		&& how != TARGET_SIG_SETMASK
 		&& how != TARGET_SIG_UNBLOCK)
 	      {
-		sim_io_eprintf (sd, "Unimplemented rt_sigprocmask syscall "
-			       "(0x%x, 0x%x, 0x%x)\n", arg1, arg2, arg3);
-		sim_engine_halt (sd, current_cpu, NULL, pc, sim_stopped,
-				 SIM_SIGILL);
-		retval = 0;
+		retval
+		  = cris_unknown_syscall (current_cpu, pc,
+					  "Unimplemented rt_sigprocmask "
+					  "syscall (0x%x, 0x%x, 0x%x)\n",
+					  arg1, arg2, arg3);
 		break;
 	      }
 
@@ -2266,17 +2301,19 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 		|| (current_cpu->thread_data[threadno].cpu_context_atsignal
 		    == NULL))
 	      {
-		sim_io_eprintf (sd, "Invalid sigreturn syscall: no signal"
-				" handler active "
-				"(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)\n",
-				(unsigned long) arg1,
-				(unsigned long) arg2,
-				(unsigned long) arg3,
-				(unsigned long) arg4,
-				(unsigned long) arg5,
-				(unsigned long) arg6);
-		sim_engine_halt (sd, current_cpu, NULL, pc, sim_stopped,
-				 SIM_SIGILL);
+		retval
+		  = cris_unknown_syscall (current_cpu, pc,
+					  "Invalid sigreturn syscall: "
+					  "no signal handler active "
+					  "(0x%lx, 0x%lx, 0x%lx, 0x%lx, "
+					  "0x%lx, 0x%lx)\n",
+					  (unsigned long) arg1,
+					  (unsigned long) arg2,
+					  (unsigned long) arg3,
+					  (unsigned long) arg4,
+					  (unsigned long) arg5,
+					  (unsigned long) arg6);
+		break;
 	      }
 
 	    was_sigsuspended
@@ -2342,11 +2379,13 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 
 	    if (setsize != 8)
 	      {
-		sim_io_eprintf (sd, "Unimplemented rt_sigsuspend syscall"
-			       " arguments (0x%lx, 0x%lx)\n",
-				(unsigned long) arg1, (unsigned long) arg2);
-		sim_engine_halt (sd, current_cpu, NULL, pc, sim_stopped,
-				 SIM_SIGILL);
+		retval
+		  = cris_unknown_syscall (current_cpu, pc,
+					  "Unimplemented rt_sigsuspend syscall"
+					  " arguments (0x%lx, 0x%lx)\n",
+					  (unsigned long) arg1,
+					  (unsigned long) arg2);
+		break;
 	      }
 
 	    /* Don't change the signal mask if we're already in
@@ -2496,12 +2535,12 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 
 		if (argv0 == NULL || *argv0 == '.')
 		  {
-		    sim_io_eprintf (sd, "Unimplemented readlink syscall "
-				    "(0x%lx: [\"%s\"], 0x%lx)\n",
-				    (unsigned long) arg1, pbuf,
-				    (unsigned long) arg2);
-		    sim_engine_halt (sd, current_cpu, NULL, pc, sim_stopped,
-				     SIM_SIGILL);
+		    retval
+		      = cris_unknown_syscall (current_cpu, pc,
+					      "Unimplemented readlink syscall "
+					      "(0x%lx: [\"%s\"], 0x%lx)\n",
+					      (unsigned long) arg1, pbuf,
+					      (unsigned long) arg2);
 		    break;
 		  }
 		else if (*argv0 == '/')
@@ -2734,19 +2773,19 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 		break;
 	      }
 
-	    sim_io_eprintf (sd, "Unimplemented _sysctl syscall "
-			    "(0x%lx: [0x%lx, 0x%lx],"
-			    " 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)\n",
-			    (unsigned long) name,
-			    (unsigned long) name0,
-			    (unsigned long) name1,
-			    (unsigned long) nlen,
-			    (unsigned long) oldval,
-			    (unsigned long) oldlenp,
-			    (unsigned long) newval,
-			    (unsigned long) newlen);
-	    sim_engine_halt (sd, current_cpu, NULL, pc, sim_stopped,
-			     SIM_SIGILL);
+	    retval
+	      = cris_unknown_syscall (current_cpu, pc,
+				      "Unimplemented _sysctl syscall "
+				      "(0x%lx: [0x%lx, 0x%lx],"
+				      " 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)\n",
+				      (unsigned long) name,
+				      (unsigned long) name0,
+				      (unsigned long) name1,
+				      (unsigned long) nlen,
+				      (unsigned long) oldval,
+				      (unsigned long) oldlenp,
+				      (unsigned long) newval,
+				      (unsigned long) newlen);
 	    break;
 	  }
 
@@ -2819,11 +2858,13 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 		 | TARGET_CLONE_SIGHAND)
 		|| newsp == 0)
 	      {
-		sim_io_eprintf (sd,
-				"Unimplemented clone syscall (0x%lx, 0x%lx)\n",
-				(unsigned long) arg1, (unsigned long) arg2);
-		sim_engine_halt (sd, current_cpu, NULL, pc, sim_stopped,
-				 SIM_SIGILL);
+		retval
+		  = cris_unknown_syscall (current_cpu, pc,
+					  "Unimplemented clone syscall "
+					  "(0x%lx, 0x%lx)\n",
+					  (unsigned long) arg1,
+					  (unsigned long) arg2);
+		break;
 	      }
 
 	    if (current_cpu->thread_data == NULL)
@@ -2886,11 +2927,12 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 
 	unimplemented_syscall:
 	default:
-	  sim_io_eprintf (sd, "Unimplemented syscall: %d "
-			  "(0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x)\n", callnum,
-			  arg1, arg2, arg3, arg4, arg5, arg6);
-	  sim_engine_halt (sd, current_cpu, NULL, pc, sim_stopped,
-			   SIM_SIGILL);
+	  retval
+	    = cris_unknown_syscall (current_cpu, pc,
+				    "Unimplemented syscall: %d "
+				    "(0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x)\n",
+				    callnum, arg1, arg2, arg3, arg4, arg5,
+				    arg6);
 	}
     }
 
@@ -2900,6 +2942,7 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
       current_cpu->last_open_fd = retval;
       current_cpu->last_open_flags = arg2;
     }
+
   current_cpu->last_syscall = callnum;
 
   /* A system call is a rescheduling point.  For the time being, we don't
