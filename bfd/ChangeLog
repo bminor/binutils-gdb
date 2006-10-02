@@ -1,3 +1,8 @@
+2006-10-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elflink.c (_bfd_elf_merge_symbol): Discard references to TLS
+	symbols from the --just-syms file.
+
 2006-10-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_build_stubs): Test glink size for
