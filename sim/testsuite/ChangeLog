@@ -1,3 +1,24 @@
+2006-10-02  Hans-Peter Nilsson  <hp@axis.com>
+	    Edgar E. Iglesias  <edgar@axis.com>
+
+	* sim/cris/c/clone5.c, sim/cris/c/mprotect1.c,
+	sim/cris/c/rtsigprocmask1.c, sim/cris/c/rtsigsuspend1.c,
+	sim/cris/c/sig7.c, sim/cris/c/sigreturn1.c,
+	sim/cris/c/sigreturn2.c, sim/cris/c/syscall1.c,
+	sim/cris/c/syscall2.c, sim/cris/c/sysctl2.c, sim/cris/c/fcntl1.c,
+	sim/cris/c/readlink2.c: Add code to print ENOSYS if syscall being
+	tested returns ENOSYS.  Add early exit where needed.  Change any
+	existing code to print "xyzzy", not "pass".
+	* sim/cris/asm/option3.ms, sim/cris/asm/option4.ms,
+	sim/cris/c/clone6.c, sim/cris/c/fcntl2.c,
+	sim/cris/c/mprotect2.c, sim/cris/c/readlink11.c,
+	sim/cris/c/rtsigprocmask2.c, sim/cris/c/rtsigsuspend2.c,
+	sim/cris/c/sig13.c, sim/cris/c/sigreturn3.c,
+	sim/cris/c/sigreturn4.c, sim/cris/c/syscall3.c,
+	sim/cris/c/syscall4.c, sim/cris/c/syscall5.c,
+	sim/cris/c/syscall6.c, sim/cris/c/syscall7.c,
+	sim/cris/c/syscall8.c, sim/cris/c/sysctl3.c: New tests.
+
 2006-09-30  Hans-Peter Nilsson  <hp@axis.com>
 
         * sim/cris/c/pipe2.c: Adjust expected output.

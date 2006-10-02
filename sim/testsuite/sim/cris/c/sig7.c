@@ -7,17 +7,20 @@
 #include <stdio.h>
 #include <signal.h>
 #include <stdlib.h>
+#include <errno.h>
 
 int
 main (void)
 {
   struct sigaction sa;
+  int err;
   sa.sa_sigaction = NULL;
   sa.sa_flags = SA_RESTART | SA_SIGINFO;
   sigemptyset (&sa.sa_mask);
 
-  if (sigaction (SIGFPE, &sa, NULL) != 0)
-    abort ();
+  err = sigaction (SIGFPE, &sa, NULL);
+  if (err == -1 && errno == ENOSYS)
+    printf ("ENOSYS\n");
 
   printf ("xyzzy\n");
   exit (0);

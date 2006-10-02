@@ -8,11 +8,16 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 
 int main (void)
 {
+  int err;
+
   /* Check special case of number 0 syscall.  */
-  syscall (0, 3, 2, 1, 4, 6, 5);
+  err = syscall (0, 3, 2, 1, 4, 6, 5);
+  if (err == -1 && errno == ENOSYS)
+    printf ("ENOSYS\n");
   printf ("xyzzy\n");
   exit (0);
 }

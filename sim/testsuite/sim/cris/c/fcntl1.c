@@ -7,10 +7,13 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 
 int main (void)
 {
-  fcntl (1, 42);
-  printf ("pass\n");
+  int err = fcntl (1, 42);
+  if (err == -1 && errno == ENOSYS)
+    printf ("ENOSYS\n");
+  printf ("xyzzy\n");
   exit (0);
 }
