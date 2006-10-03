@@ -1,3 +1,22 @@
+2006-10-03  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* pe-dll.c : Fix typo.
+	(autofilter_symbolprefixlist) : Remove __imp_.
+	(is_import) : New.
+	(auto-export) : Remove  re-import check. Moved to callers.
+	(process_def_file) : Check is symbol is an import. Always
+	underscore __imp_.
+	Only skip underscore on underscored targets.
+	(make_one) : Always underscore __imp_.
+	(pe_create_runtime_relocator_reference) : Only underscore
+	_pei386_runtime_relocator on underscored targets.
+	(pe_process_import_defs) : Always underscore __imp_.
+	* pe.em (U) : New macro.
+	(set_pe_subsystem) : Remove underscore from _WinMainCRTStartup
+	on wince subsystem case.
+	(pe_find_data_imports) : Use U on "_head_".
+	(gld_${EMULATION_NAME}_unrecognized_file) : Use U.
+
 2006-09-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/3223

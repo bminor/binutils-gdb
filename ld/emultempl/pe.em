@@ -115,6 +115,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
 #define PE_DEF_FILE_ALIGNMENT		0x00000200
 #endif
 
+#define U(S) ${INITIAL_SYMBOL_CHAR} S
 
 static struct internal_extra_pe_aouthdr pe;
 static int dll;
@@ -400,7 +401,7 @@ set_pe_subsystem (void)
       { "windows", 2, "WinMainCRTStartup" },
       { "console", 3, "mainCRTStartup" },
       { "posix",   7, "__PosixProcessStartup"},
-      { "wince",   9, "_WinMainCRTStartup" },
+      { "wince",   9, "WinMainCRTStartup" },
       { "xbox",   14, "mainCRTStartup" },
       { NULL, 0, NULL }
     };
@@ -925,14 +926,14 @@ pe_find_data_imports (void)
 
 	      for (i = 0; i < nsyms; i++)
 		{
-		  if (! CONST_STRNEQ (symbols[i]->name, "__head_"))
+		  if (! CONST_STRNEQ (symbols[i]->name, U ("_head_")))
 		    continue;
 
 		  if (pe_dll_extra_pe_debug)
 		    printf ("->%s\n", symbols[i]->name);
 
 		  pe_data_import_dll = (char*) (symbols[i]->name +
-						sizeof ("__head_") - 1);
+						sizeof (U ("_head_")) - 1);
 		  break;
 		}
 
@@ -1342,7 +1343,7 @@ gld_${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry ATTRIB
 	    {
 	      struct bfd_link_hash_entry *h;
 
-	      sprintf (buf, "_%s", pe_def_file->exports[i].internal_name);
+	      sprintf (buf, "%s%s", U (""), pe_def_file->exports[i].internal_name);
 
 	      h = bfd_link_hash_lookup (link_info.hash, buf, TRUE, TRUE, TRUE);
 	      if (h == (struct bfd_link_hash_entry *) NULL)
