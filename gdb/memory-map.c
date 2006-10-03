@@ -49,6 +49,11 @@ parse_memory_map (const char *memory_map)
 #include "xml-support.h"
 #include <expat.h>
 
+#ifndef XML_STATUS_OK
+# define XML_STATUS_OK    1
+# define XML_STATUS_ERROR 0
+#endif
+
 /* Internal parsing data passed to all Expat callbacks.  */
 struct memory_map_parsing_data
   {

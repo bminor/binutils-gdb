@@ -1,3 +1,9 @@
+2006-10-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* memory-map.c (XML_STATUS_OK, XML_STATUS_ERROR): Provide default
+	definitions.
+	* xml-support.c (XML_STATUS_OK, XML_STATUS_ERROR): Likewise.
+
 2006-09-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote.c (remote_write_bytes_aux): Doc fix.
