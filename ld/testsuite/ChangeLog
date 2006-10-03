@@ -1,3 +1,9 @@
+2006-10-03  Jakub Jelinek  <jakub@redhat.com>
+
+	* ld-elf/eh4.d: New test.
+	* ld-elf/eh4.s: New file.
+	* ld-elf/eh4a.s: New file.
+
 2006-10-02  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* ld-arm/use-thumb-lib.sym: Robustify, by ignoring symbols we're

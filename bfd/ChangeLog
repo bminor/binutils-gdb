@@ -1,3 +1,17 @@
+2006-10-03  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf-bfd.h (struct eh_cie_fde): Add set_loc pointer.
+	* elf-eh-frame.c (skip_cfa_op): Fix handling of DW_CFA_advance_loc.
+	Handle DW_CFA_{remember,restore}_state, DW_CFA_GNU_window_save,
+	DW_CFA_val_{offset{,_sf},expression}.
+	(skip_non_nops): Record number of DW_CFA_set_loc ops.
+	(_bfd_elf_discard_section_eh_frame): Require skip_non_nops recognizes
+	all ops.  If there are any DW_CFA_set_loc ops and they are pcrel
+	or going to be pcrel, compute set_loc array.
+	(_bfd_elf_eh_frame_section_offset): If make_relative, kill relocations
+	against DW_CFA_set_loc operands.
+	(_bfd_elf_write_section_eh_frame): Handle DW_CFA_set_loc adjusting.
+
 2006-10-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elflink.c (_bfd_elf_merge_symbol): Discard references to TLS
