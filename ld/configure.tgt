@@ -153,6 +153,7 @@ i[3-7]86-*-linux-*)	targ_emul=elf_i386
 			targ_extra_emuls=i386linux
 			if test x${want64} = xtrue; then
 			  targ_extra_emuls="$targ_extra_emuls elf_x86_64"
+			  targ_extra_libpath=elf_x86_64
 			fi
 			tdir_i386linux=${targ_alias}aout ;;
 x86_64-*-linux-*)	targ_emul=elf_x86_64
