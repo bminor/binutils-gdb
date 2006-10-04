@@ -7747,6 +7747,10 @@ debug_apply_rela_addends (void *file,
 
 	      if (ELF32_R_SYM (rp->r_info) != 0
 		  && ELF32_ST_TYPE (sym->st_info) != STT_SECTION
+		  /* Relocations against symbols without type can happen.
+		     Gcc -feliminate-dwarf2-dups may generate symbols
+		     without type for debug info.  */
+		  && ELF32_ST_TYPE (sym->st_info) != STT_NOTYPE
 		  /* Relocations against object symbols can happen,
 		     eg when referencing a global array.  For an
 		     example of this see the _clz.o binary in libgcc.a.  */
@@ -7776,6 +7780,7 @@ debug_apply_rela_addends (void *file,
 
 	      if (ELF64_R_SYM (rp->r_info) != 0
 		  && ELF64_ST_TYPE (sym->st_info) != STT_SECTION
+		  && ELF64_ST_TYPE (sym->st_info) != STT_NOTYPE
 		  && ELF64_ST_TYPE (sym->st_info) != STT_OBJECT)
 		{
 		  warn (_("skipping unexpected symbol type %s in relocation in section .rela.%s\n"),

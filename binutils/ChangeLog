@@ -1,3 +1,8 @@
+2006-10-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (debug_apply_rela_addends): Don't ignore relocation
+	against symbols without type.
+
 2006-09-25 Pedro Alves <pedro_alves@portugalmail.pt>
 
 	* nlmconv.c (main) : Use LITMEMCPY.
