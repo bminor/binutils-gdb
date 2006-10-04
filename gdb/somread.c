@@ -88,15 +88,22 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 
   number_of_symbols = bfd_get_symcount (abfd);
 
-  /* FIXME (alloca): could be quite large. */
-  buf = alloca (symsize * number_of_symbols);
+  /* Allocate a buffer to read in the debug info.
+     We avoid using alloca because the memory size could be so large
+     that we could hit the stack size limit.  */
+  buf = xmalloc (symsize * number_of_symbols);
+  make_cleanup (xfree, buf);
   bfd_seek (abfd, obj_som_sym_filepos (abfd), SEEK_SET);
   val = bfd_bread (buf, symsize * number_of_symbols, abfd);
   if (val != symsize * number_of_symbols)
     error (_("Couldn't read symbol dictionary!"));
 
-  /* FIXME (alloca): could be quite large. */
-  stringtab = alloca (obj_som_stringtab_size (abfd));
+  /* Allocate a buffer to read in the som stringtab section of
+     the debugging info.  Again, we avoid using alloca because
+     the data could be so large that we could potentially hit
+     the stack size limitat.  */
+  stringtab = xmalloc (obj_som_stringtab_size (abfd));
+  make_cleanup (xfree, stringtab);
   bfd_seek (abfd, obj_som_str_filepos (abfd), SEEK_SET);
   val = bfd_bread (stringtab, obj_som_stringtab_size (abfd), abfd);
   if (val != obj_som_stringtab_size (abfd))

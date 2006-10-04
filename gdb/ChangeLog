@@ -1,3 +1,8 @@
+2006-10-04  Joel Brobecker  <brobecker@adacore.com>
+
+	* somread.c (som_symtab_read): Avoid using alloca for potentially
+	large buffers.
+
 2006-10-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* arch-utils.h (gdbarch_info_fill): Remove duplicate prototype.
