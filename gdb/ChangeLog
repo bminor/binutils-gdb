@@ -1,3 +1,7 @@
+2006-10-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arch-utils.h (gdbarch_info_fill): Remove duplicate prototype.
+
 2006-10-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* memory-map.c (XML_STATUS_OK, XML_STATUS_ERROR): Provide default

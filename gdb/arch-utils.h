@@ -139,8 +139,6 @@ extern const char *selected_architecture_name (void);
    information and fills in any unspecified fields.  */
 
 extern void gdbarch_info_init (struct gdbarch_info *info);
-extern void gdbarch_info_fill (struct gdbarch *gdbarch,
-			       struct gdbarch_info *info);
 
 /* Similar to init, but this time fill in the blanks.  Information is
    obtained from the specified architecture, global "set ..." options,
