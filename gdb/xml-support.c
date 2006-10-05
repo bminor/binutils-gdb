@@ -29,14 +29,8 @@
 #include "exceptions.h"
 #include "xml-support.h"
 
-#include <expat.h>
-
+#include "gdb_expat.h"
 #include "gdb_string.h"
-
-#ifndef XML_STATUS_OK
-# define XML_STATUS_OK    1
-# define XML_STATUS_ERROR 0
-#endif
 
 /* Returns the value of attribute ATTR from expat attribute list
    ATTRLIST.  If not found, throws an exception.  */

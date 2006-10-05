@@ -701,6 +701,7 @@ gdb_curses_h = gdb_curses.h
 gdb_dirent_h = gdb_dirent.h
 gdb_events_h = gdb-events.h
 gdb_h = gdb.h
+gdb_expat_h = gdb_expat.h
 gdb_locale_h = gdb_locale.h
 gdb_obstack_h = gdb_obstack.h $(obstack_h)
 gdb_proc_service_h = gdb_proc_service.h $(gregset_h)
@@ -823,7 +824,7 @@ version_h = version.h
 wince_stub_h = wince-stub.h
 wrapper_h = wrapper.h $(gdb_h)
 xcoffsolib_h = xcoffsolib.h
-xml_support_h = xml-support.h
+xml_support_h = xml-support.h $(gdb_expat_h)
 
 #
 # gdb/cli/ headers
@@ -2375,7 +2376,7 @@ mips-tdep.o: mips-tdep.c $(defs_h) $(gdb_string_h) $(gdb_assert_h) \
 mipsv4-nat.o: mipsv4-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(target_h) \
 	$(regcache_h) $(gregset_h)
 memory-map.o: memory-map.c $(defs_h) $(memory_map_h) $(xml_support_h) \
-	$(gdb_assert_h) $(exceptions_h) $(gdb_string_h)
+	$(gdb_assert_h) $(exceptions_h) $(gdb_string_h) $(gdb_expat_h)
 mn10300-linux-tdep.o: mn10300-linux-tdep.c $(defs_h) $(gdbcore_h) \
 	$(gdb_string_h) $(regcache_h) $(mn10300_tdep_h) $(gdb_assert_h) \
 	$(bfd_h) $(elf_bfd_h) $(osabi_h) $(regset_h) $(solib_svr4_h) \
@@ -2855,7 +2856,7 @@ xcoffread.o: xcoffread.c $(defs_h) $(bfd_h) $(gdb_string_h) $(gdb_stat_h) \
 xcoffsolib.o: xcoffsolib.c $(defs_h) $(bfd_h) $(xcoffsolib_h) $(inferior_h) \
 	$(gdbcmd_h) $(symfile_h) $(frame_h) $(gdb_regex_h)
 xml-support.o: xml-support.c $(defs_h) $(xml_support_h) $(exceptions_h) \
-	$(gdb_string_h)
+	$(gdb_string_h) $(gdb_expat_h)
 xstormy16-tdep.o: xstormy16-tdep.c $(defs_h) $(frame_h) $(frame_base_h) \
 	$(frame_unwind_h) $(dwarf2_frame_h) $(symtab_h) $(gdbtypes_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(value_h) $(dis_asm_h) $(inferior_h) \

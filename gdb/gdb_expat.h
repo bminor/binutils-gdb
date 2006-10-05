@@ -1,4 +1,4 @@
-/* Helper routines for parsing XML using Expat.
+/* Slightly more portable version of <expat.h>.
 
    Copyright (C) 2006
    Free Software Foundation, Inc.
@@ -20,26 +20,16 @@
    Foundation, Inc., 51 Franklin Street, Fifth Floor,
    Boston, MA 02110-1301, USA.  */
 
+#if !defined(GDB_EXPAT_H)
+#define GDB_EXPAT_H
 
-#ifndef XML_SUPPORT_H
-#define XML_SUPPORT_H
+#include <expat.h>
 
-#include "gdb_expat.h"
-
-/* Helper functions for parsing XML documents.  See xml-support.c
-   for more information about these functions.  */
-
-const XML_Char *xml_get_required_attribute (const XML_Char **attrs,
-					    const XML_Char *attr);
-
-ULONGEST xml_get_integer_attribute (const XML_Char **attrs,
-				    const XML_Char *attr);
-
-int xml_get_enum_value (const XML_Char **attrs,
-			const XML_Char *attr,
-			const XML_Char **xml_names,
-			int *values);
-
-void make_cleanup_free_xml_parser (XML_Parser parser);
-
+/* Expat 1.95.x does not define these; this is the definition
+   recommended by the expat 2.0 headers.  */
+#ifndef XML_STATUS_OK
+# define XML_STATUS_OK    1
+# define XML_STATUS_ERROR 0
 #endif
+
+#endif /* !defined(GDB_EXPAT_H) */
