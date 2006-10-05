@@ -19,8 +19,8 @@
    Foundation, Inc., 51 Franklin Street, Fifth Floor,
    Boston, MA 02110-1301, USA.  */
 
-#include "vec.h"
 #include "defs.h"
+#include "vec.h"
 
 struct vec_prefix
 {
