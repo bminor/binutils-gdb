@@ -244,7 +244,7 @@ struct remote_state
 static struct remote_state remote_state;
 
 static struct remote_state *
-get_remote_state (void)
+get_remote_state_raw (void)
 {
   return &remote_state;
 }
@@ -294,11 +294,26 @@ get_remote_arch_state (void)
   return gdbarch_data (current_gdbarch, remote_gdbarch_data_handle);
 }
 
+/* Fetch the global remote target state.  */
+
+static struct remote_state *
+get_remote_state (void)
+{
+  /* Make sure that the remote architecture state has been
+     initialized, because doing so might reallocate rs->buf.  Any
+     function which calls getpkt also needs to be mindful of changes
+     to rs->buf, but this call limits the number of places which run
+     into trouble.  */
+  get_remote_arch_state ();
+
+  return get_remote_state_raw ();
+}
+
 static void *
 init_remote_state (struct gdbarch *gdbarch)
 {
   int regnum;
-  struct remote_state *rs = get_remote_state ();
+  struct remote_state *rs = get_remote_state_raw ();
   struct remote_arch_state *rsa;
 
   rsa = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct remote_arch_state);
@@ -6141,7 +6156,7 @@ _initialize_remote (void)
      of these, not one per target.  Only one target is active at a
      time.  The default buffer size is unimportant; it will be expanded
      whenever a larger buffer is needed.  */
-  rs = get_remote_state ();
+  rs = get_remote_state_raw ();
   rs->buf_size = 400;
   rs->buf = xmalloc (rs->buf_size);
 

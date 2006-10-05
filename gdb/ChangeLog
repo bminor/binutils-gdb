@@ -1,3 +1,9 @@
+2006-10-05  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c (get_remote_state_raw): Renamed from get_remote_state.
+	(get_remote_state): New function.
+	(init_remote_state, _initialize_remote): Use get_remote_state_raw.
+
 2006-10-04  Fred Fish  <fnf@specifix.com>
 
 	* vec.c: Include defs.h first.  This pulls in config.h which can
