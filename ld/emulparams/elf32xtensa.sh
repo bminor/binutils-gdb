@@ -1,7 +1,3 @@
-# First set some configuration-specific variables
-. ${srcdir}/emulparams/xtensa-config.sh
-
-# See genscripts.sh and ../scripttempl/elfxtensa.sc for the meaning of these.
 SCRIPT_NAME=elfxtensa
 TEMPLATE_NAME=elf32
 EXTRA_EM_FILE=xtensaelf
@@ -10,6 +6,7 @@ BIG_OUTPUT_FORMAT="elf32-xtensa-be"
 LITTLE_OUTPUT_FORMAT="elf32-xtensa-le"
 TEXT_START_ADDR=0x400000
 NONPAGED_TEXT_START_ADDR=0x400000
+MAXPAGESIZE="CONSTANT (MAXPAGESIZE)"
 ARCH=xtensa
 MACHINE=
 GENERATE_SHLIB_SCRIPT=yes

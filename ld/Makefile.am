@@ -671,8 +671,7 @@ eelf32am33lin.c: $(srcdir)/emulparams/elf32am33lin.sh \
 eelf32vax.c: $(srcdir)/emulparams/elf32vax.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32vax "$(tdir_elf32vax)"
-eelf32xtensa.c: $(srcdir)/emulparams/elf32xtensa.sh \
-  $(srcdir)/emulparams/xtensa-config.sh $(ELF_DEPS) \
+eelf32xtensa.c: $(srcdir)/emulparams/elf32xtensa.sh $(ELF_DEPS) \
   $(srcdir)/emultempl/xtensaelf.em $(INCDIR)/xtensa-config.h \
   $(BFDDIR)/elf-bfd.h $(BFDDIR)/libbfd.h $(INCDIR)/elf/xtensa.h \
   $(srcdir)/scripttempl/elfxtensa.sc ${GEN_DEPENDS}

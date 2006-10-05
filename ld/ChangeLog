@@ -1,3 +1,11 @@
+2006-10-04  Bob Wilson  <bob.wilson@acm.org>
+
+	* emulparams/xtensa-config.sh: Delete file.
+	* emulparams/elf32xtensa.sh: Set MAXPAGESIZE here instead of including
+	xtensa-config.sh.
+	* Makefile.am (eelf32xtensa.c): Remove dependency on xtensa-config.sh.
+	* Makefile.in: Regenerate.
+
 2006-10-03  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* pe-dll.c : Fix typo.
