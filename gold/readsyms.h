@@ -29,12 +29,12 @@ class Read_symbols : public Task
   // has completed; it will be NULL for the first task.  NEXT_BLOCKER
   // is used to block the next input file from adding symbols.
   Read_symbols(const General_options& options, Input_objects* input_objects,
-	       Symbol_table* symtab, const Dirsearch& dirpath,
+	       Symbol_table* symtab, Layout* layout, const Dirsearch& dirpath,
 	       const Input_argument& input,
 	       Task_token* this_blocker, Task_token* next_blocker)
     : options_(options), input_objects_(input_objects), symtab_(symtab),
-      dirpath_(dirpath), input_(input), this_blocker_(this_blocker),
-      next_blocker_(next_blocker)
+      layout_(layout), dirpath_(dirpath), input_(input),
+      this_blocker_(this_blocker), next_blocker_(next_blocker)
   { }
 
   ~Read_symbols();
@@ -54,6 +54,7 @@ class Read_symbols : public Task
   const General_options& options_;
   Input_objects* input_objects_;
   Symbol_table* symtab_;
+  Layout* layout_;
   const Dirsearch& dirpath_;
   const Input_argument& input_;
   Task_token* this_blocker_;
@@ -70,10 +71,11 @@ class Add_symbols : public Task
   // THIS_BLOCKER is used to prevent this task from running before the
   // one for the previous input file.  NEXT_BLOCKER is used to prevent
   // the next task from running.
-  Add_symbols(Symbol_table* symtab, Object* object, Read_symbols_data sd,
-	      Task_token* this_blocker, Task_token* next_blocker)
-    : symtab_(symtab), object_(object), sd_(sd), this_blocker_(this_blocker),
-      next_blocker_(next_blocker)
+  Add_symbols(Symbol_table* symtab, Layout* layout, Object* object,
+	      Read_symbols_data* sd, Task_token* this_blocker,
+	      Task_token* next_blocker)
+    : symtab_(symtab), layout_(layout), object_(object), sd_(sd),
+      this_blocker_(this_blocker), next_blocker_(next_blocker)
   { }
 
   ~Add_symbols();
@@ -93,8 +95,9 @@ private:
   class Add_symbols_locker;
 
   Symbol_table* symtab_;
+  Layout* layout_;
   Object* object_;
-  Read_symbols_data sd_;
+  Read_symbols_data* sd_;
   Task_token* this_blocker_;
   Task_token* next_blocker_;
 };

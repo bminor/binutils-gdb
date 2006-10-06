@@ -45,15 +45,8 @@ Layout_task::locks(Workqueue*)
 void
 Layout_task::run(Workqueue* workqueue)
 {
-  // Nothing ever frees this.
-  Layout* layout = new Layout(this->options_);
-  layout->init();
-  for (Input_objects::Object_list::const_iterator p =
-	 this->input_objects_->begin();
-       p != this->input_objects_->end();
-       ++p)
-    (*p)->layout(layout);
-  off_t file_size = layout->finalize(this->input_objects_, this->symtab_);
+  off_t file_size = this->layout_->finalize(this->input_objects_,
+					    this->symtab_);
 
   // Now we know the final size of the output file and we know where
   // each piece of information goes.
@@ -62,7 +55,7 @@ Layout_task::run(Workqueue* workqueue)
 
   // Queue up the final set of tasks.
   gold::queue_final_tasks(this->options_, this->input_objects_,
-			  this->symtab_, layout, workqueue, of);
+			  this->symtab_, this->layout_, workqueue, of);
 }
 
 // Layout methods.
@@ -71,13 +64,6 @@ Layout::Layout(const General_options& options)
   : options_(options), last_shndx_(0), namepool_(), sympool_(), signatures_(),
     section_name_map_(), segment_list_(), section_list_(),
     special_output_list_()
-{
-}
-
-// Prepare for doing layout.
-
-void
-Layout::init()
 {
   // Make space for more than enough segments for a typical file.
   // This is just for efficiency--it's OK if we wind up needing more.

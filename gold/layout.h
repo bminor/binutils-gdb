@@ -37,9 +37,10 @@ class Layout_task : public Task
   Layout_task(const General_options& options,
 	      const Input_objects* input_objects,
 	      Symbol_table* symtab,
+	      Layout* layout,
 	      Task_token* this_blocker)
     : options_(options), input_objects_(input_objects), symtab_(symtab),
-      this_blocker_(this_blocker)
+      layout_(layout), this_blocker_(this_blocker)
   { }
 
   ~Layout_task();
@@ -62,6 +63,7 @@ class Layout_task : public Task
   const General_options& options_;
   const Input_objects* input_objects_;
   Symbol_table* symtab_;
+  Layout* layout_;
   Task_token* this_blocker_;
 };
 
@@ -71,10 +73,6 @@ class Layout
 {
  public:
   Layout(const General_options& options);
-
-  // Initialize the object.
-  void
-  init();
 
   // Given an input section named NAME with data in SHDR from the
   // object file OBJECT, return the output section where this input

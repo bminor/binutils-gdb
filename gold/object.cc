@@ -44,6 +44,7 @@ Sized_object<size, big_endian>::Sized_object(
     off_t offset,
     const elfcpp::Ehdr<size, big_endian>& ehdr)
   : Object(name, input_file, false, offset),
+    section_headers_(NULL),
     flags_(ehdr.get_e_flags()),
     shoff_(ehdr.get_e_shoff()),
     shstrndx_(0),
@@ -105,6 +106,7 @@ Sized_object<size, big_endian>::setup(
       gold_exit(false);
     }
   this->set_target(target);
+
   unsigned int shnum = ehdr.get_e_shnum();
   unsigned int shstrndx = ehdr.get_e_shstrndx();
   if ((shnum == 0 || shstrndx == elfcpp::SHN_XINDEX)
@@ -122,12 +124,19 @@ Sized_object<size, big_endian>::setup(
   if (shnum == 0)
     return;
 
-  // Find the SHT_SYMTAB section.
-  const unsigned char* p = this->get_view (this->shoff_,
-					   shnum * This::shdr_size);
+  // We store the section headers in a File_view until do_read_symbols.
+  this->section_headers_ = this->get_lasting_view(this->shoff_,
+						  shnum * This::shdr_size);
+
+  // Find the SHT_SYMTAB section.  The ELF standard says that maybe in
+  // the future there can be more than one SHT_SYMTAB section.  Until
+  // somebody figures out how that could work, we assume there is only
+  // one.
+  const unsigned char* p = this->section_headers_->data();
+
   // Skip the first section, which is always empty.
   p += This::shdr_size;
-  for (unsigned int i = 1; i < shnum; ++i)
+  for (unsigned int i = 1; i < shnum; ++i, p += This::shdr_size)
     {
       typename This::Shdr shdr(p);
       if (shdr.get_sh_type() == elfcpp::SHT_SYMTAB)
@@ -135,29 +144,40 @@ Sized_object<size, big_endian>::setup(
 	  this->symtab_shnum_ = i;
 	  break;
 	}
-      p += This::shdr_size;
     }
 }
 
-// Read the symbols and relocations from an object file.
+// Read the sections and symbols from an object file.
 
 template<int size, bool big_endian>
-Read_symbols_data
-Sized_object<size, big_endian>::do_read_symbols()
+void
+Sized_object<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 {
+  // Transfer our view of the section headers to SD.
+  sd->section_headers = this->section_headers_;
+  this->section_headers_ = NULL;
+
+  // Read the section names.
+  const unsigned char* pshdrs = sd->section_headers->data();
+  const unsigned char* pshdrnames = pshdrs + this->shstrndx_ * This::shdr_size;
+  typename This::Shdr shdrnames(pshdrnames);
+  sd->section_names_size = shdrnames.get_sh_size();
+  sd->section_names = this->get_lasting_view(shdrnames.get_sh_offset(),
+					     sd->section_names_size);
+
   if (this->symtab_shnum_ == 0)
     {
       // No symbol table.  Weird but legal.
-      Read_symbols_data ret;
-      ret.symbols = NULL;
-      ret.symbols_size = 0;
-      ret.symbol_names = NULL;
-      ret.symbol_names_size = 0;
-      return ret;
+      sd->symbols = NULL;
+      sd->symbols_size = 0;
+      sd->symbol_names = NULL;
+      sd->symbol_names_size = 0;
+      return;
     }
 
-  // Read the symbol table section header.
-  typename This::Shdr symtabshdr(this->section_header(this->symtab_shnum_));
+  // Get the symbol table section header.
+  typename This::Shdr symtabshdr(pshdrs
+				 + this->symtab_shnum_ * This::shdr_size);
   assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
 
   // We only need the external symbols.
@@ -191,49 +211,10 @@ Sized_object<size, big_endian>::do_read_symbols()
   File_view* fvstrtab = this->get_lasting_view(strtabshdr.get_sh_offset(),
 					       strtabshdr.get_sh_size());
 
-  Read_symbols_data ret;
-  ret.symbols = fvsymtab;
-  ret.symbols_size = extsize;
-  ret.symbol_names = fvstrtab;
-  ret.symbol_names_size = strtabshdr.get_sh_size();
-
-  return ret;
-}
-
-// Add the symbols to the symbol table.
-
-template<int size, bool big_endian>
-void
-Sized_object<size, big_endian>::do_add_symbols(Symbol_table* symtab,
-					       Read_symbols_data sd)
-{
-  if (sd.symbols == NULL)
-    {
-      assert(sd.symbol_names == NULL);
-      return;
-    }
-
-  const int sym_size = This::sym_size;
-  size_t symcount = sd.symbols_size / sym_size;
-  if (symcount * sym_size != sd.symbols_size)
-    {
-      fprintf(stderr,
-	      _("%s: %s: size of symbols is not multiple of symbol size\n"),
-	      program_name, this->name().c_str());
-      gold_exit(false);
-    }
-
-  this->symbols_ = new Symbol*[symcount];
-
-  const elfcpp::Sym<size, big_endian>* syms =
-    reinterpret_cast<const elfcpp::Sym<size, big_endian>*>(sd.symbols->data());
-  const char* sym_names =
-    reinterpret_cast<const char*>(sd.symbol_names->data());
-  symtab->add_from_object(this, syms, symcount, sym_names, 
-			  sd.symbol_names_size,  this->symbols_);
-
-  delete sd.symbols;
-  delete sd.symbol_names;
+  sd->symbols = fvsymtab;
+  sd->symbols_size = extsize;
+  sd->symbol_names = fvstrtab;
+  sd->symbol_names_size = strtabshdr.get_sh_size();
 }
 
 // Return whether to include a section group in the link.  LAYOUT is
@@ -377,24 +358,18 @@ Sized_object<size, big_endian>::include_linkonce_section(
 
 template<int size, bool big_endian>
 void
-Sized_object<size, big_endian>::do_layout(Layout* layout)
+Sized_object<size, big_endian>::do_layout(Layout* layout,
+					  Read_symbols_data* sd)
 {
-  // This is always called from the main thread.  Lock the file to
-  // keep the error checks happy.
-  Task_locker_obj<File_read> frl(this->input_file()->file());
+  unsigned int shnum = this->shnum();
+  if (shnum == 0)
+    return;
 
   // Get the section headers.
-  unsigned int shnum = this->shnum();
-  const unsigned char* pshdrs = this->get_view(this->shoff_,
-					       shnum * This::shdr_size);
+  const unsigned char* pshdrs = sd->section_headers->data();
 
   // Get the section names.
-  const unsigned char* pshdrnames = pshdrs + this->shstrndx_ * This::shdr_size;
-  typename This::Shdr shdrnames(pshdrnames);
-  typename elfcpp::Elf_types<size>::Elf_WXword names_size =
-    shdrnames.get_sh_size();
-  const unsigned char* pnamesu = this->get_view(shdrnames.get_sh_offset(),
-						shdrnames.get_sh_size());
+  const unsigned char* pnamesu = sd->section_names->data();
   const char* pnames = reinterpret_cast<const char*>(pnamesu);
 
   std::vector<Map_to_output>& map_sections(this->map_to_output());
@@ -403,11 +378,11 @@ Sized_object<size, big_endian>::do_layout(Layout* layout)
   // Keep track of which sections to omit.
   std::vector<bool> omit(shnum, false);
 
-  for (unsigned int i = 0; i < shnum; ++i)
+  for (unsigned int i = 0; i < shnum; ++i, pshdrs += This::shdr_size)
     {
       typename This::Shdr shdr(pshdrs);
 
-      if (shdr.get_sh_name() >= names_size)
+      if (shdr.get_sh_name() >= sd->section_names_size)
 	{
 	  fprintf(stderr,
 		  _("%s: %s: bad section name offset for section %u: %lu\n"),
@@ -445,9 +420,51 @@ Sized_object<size, big_endian>::do_layout(Layout* layout)
 
       map_sections[i].output_section = os;
       map_sections[i].offset = offset;
-
-      pshdrs += This::shdr_size;
     }
+
+  delete sd->section_headers;
+  sd->section_headers = NULL;
+  delete sd->section_names;
+  sd->section_names = NULL;
+}
+
+// Add the symbols to the symbol table.
+
+template<int size, bool big_endian>
+void
+Sized_object<size, big_endian>::do_add_symbols(Symbol_table* symtab,
+					       Read_symbols_data* sd)
+{
+  if (sd->symbols == NULL)
+    {
+      assert(sd->symbol_names == NULL);
+      return;
+    }
+
+  const int sym_size = This::sym_size;
+  size_t symcount = sd->symbols_size / sym_size;
+  if (symcount * sym_size != sd->symbols_size)
+    {
+      fprintf(stderr,
+	      _("%s: %s: size of symbols is not multiple of symbol size\n"),
+	      program_name, this->name().c_str());
+      gold_exit(false);
+    }
+
+  this->symbols_ = new Symbol*[symcount];
+
+  const unsigned char* psyms = sd->symbols->data();
+  const elfcpp::Sym<size, big_endian>* syms =
+    reinterpret_cast<const elfcpp::Sym<size, big_endian>*>(psyms);
+  const char* sym_names =
+    reinterpret_cast<const char*>(sd->symbol_names->data());
+  symtab->add_from_object(this, syms, symcount, sym_names, 
+			  sd->symbol_names_size,  this->symbols_);
+
+  delete sd->symbols;
+  sd->symbols = NULL;
+  delete sd->symbol_names;
+  sd->symbol_names = NULL;
 }
 
 // Finalize the local symbols.  Here we record the file offset at

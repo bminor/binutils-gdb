@@ -70,7 +70,7 @@ queue_initial_tasks(const General_options& options,
 		    const Dirsearch& search_path,
 		    const Command_line::Input_argument_list& inputs,
 		    Workqueue* workqueue, Input_objects* input_objects,
-		    Symbol_table* symtab)
+		    Symbol_table* symtab, Layout* layout)
 {
   if (inputs.empty())
     gold_fatal(_("no input files"), false);
@@ -86,13 +86,13 @@ queue_initial_tasks(const General_options& options,
     {
       Task_token* next_blocker = new Task_token();
       next_blocker->add_blocker();
-      workqueue->queue(new Read_symbols(options, input_objects, symtab,
+      workqueue->queue(new Read_symbols(options, input_objects, symtab, layout,
 					search_path, *p, this_blocker,
 					next_blocker));
       this_blocker = next_blocker;
     }
 
-  workqueue->queue(new Layout_task(options, input_objects, symtab,
+  workqueue->queue(new Layout_task(options, input_objects, symtab, layout,
 				   this_blocker));
 }
 
@@ -170,6 +170,9 @@ main(int argc, char** argv)
   // The symbol table.
   Symbol_table symtab;
 
+  // The layout object.
+  Layout layout(command_line.options());
+
   // Get the search path from the -L options.
   Dirsearch search_path;
   search_path.add(&workqueue, command_line.options().search_path());
@@ -177,7 +180,7 @@ main(int argc, char** argv)
   // Queue up the first set of tasks.
   queue_initial_tasks(command_line.options(), search_path,
 		      command_line.inputs(), &workqueue, &input_objects,
-		      &symtab);
+		      &symtab, &layout);
 
   // Run the main task processing loop.
   workqueue.process();

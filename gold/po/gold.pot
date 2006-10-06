@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-09-29 12:54-0700\n"
+"POT-Creation-Date: 2006-10-04 08:37-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -51,7 +51,7 @@ msgstr ""
 msgid "%s: %s: bad extended name entry at header %ld\n"
 msgstr ""
 
-#: archive.cc:283 archive.cc:296
+#: archive.cc:284 archive.cc:297
 #, c-format
 msgid "%s: %s: member at %ld is not an ELF object"
 msgstr ""
@@ -149,113 +149,113 @@ msgstr ""
 msgid "%s: %s: unsupported RELA reloc section\n"
 msgstr ""
 
-#: object.cc:59
+#: object.cc:60
 #, c-format
 msgid "%s: %s: bad e_ehsize field (%d != %d)\n"
 msgstr ""
 
-#: object.cc:66
+#: object.cc:67
 #, c-format
 msgid "%s: %s: bad e_shentsize field (%d != %d)\n"
 msgstr ""
 
-#: object.cc:103
+#: object.cc:104
 #, c-format
 msgid "%s: %s: unsupported ELF machine number %d\n"
 msgstr ""
 
-#: object.cc:176
+#: object.cc:196
 #, c-format
 msgid "%s: %s: invalid symbol table name index: %u\n"
 msgstr ""
 
-#: object.cc:184
+#: object.cc:204
 #, c-format
 msgid "%s: %s: symbol table name section has wrong type: %u\n"
 msgstr ""
 
-#: object.cc:221
-#, c-format
-msgid "%s: %s: size of symbols is not multiple of symbol size\n"
-msgstr ""
-
-#: object.cc:275
+#: object.cc:256
 #, c-format
 msgid "%s: %s: section group %u link %u out of range\n"
 msgstr ""
 
-#: object.cc:285
+#: object.cc:266
 #, c-format
 msgid "%s: %s: section group %u info %u out of range\n"
 msgstr ""
 
-#: object.cc:296
+#: object.cc:277
 #, c-format
 msgid "%s; %s: symtab section %u link %u out of range\n"
 msgstr ""
 
-#: object.cc:312
+#: object.cc:293
 #, c-format
 msgid "%s: %s: symbol %u name offset %u out of range\n"
 msgstr ""
 
-#: object.cc:334
+#: object.cc:315
 #, c-format
 msgid "%s: %s: section %u in section group %u out of range"
 msgstr ""
 
-#: object.cc:413
+#: object.cc:388
 #, c-format
 msgid "%s: %s: bad section name offset for section %u: %lu\n"
 msgstr ""
 
-#: object.cc:520
+#: object.cc:449
+#, c-format
+msgid "%s: %s: size of symbols is not multiple of symbol size\n"
+msgstr ""
+
+#: object.cc:537
 #, c-format
 msgid "%s: %s: unknown section index %u for local symbol %u\n"
 msgstr ""
 
-#: object.cc:531
+#: object.cc:548
 #, c-format
 msgid "%s: %s: local symbol %u section index %u out of range\n"
 msgstr ""
 
 #. elfcpp::ET_DYN
-#: object.cc:684
+#: object.cc:701
 #, c-format
 msgid "%s: %s: dynamic objects are not yet supported\n"
 msgstr ""
 
-#: object.cc:708 object.cc:761 object.cc:782
+#: object.cc:725 object.cc:778 object.cc:799
 #, c-format
 msgid "%s: %s: ELF file too short\n"
 msgstr ""
 
-#: object.cc:717
+#: object.cc:734
 #, c-format
 msgid "%s: %s: invalid ELF version 0\n"
 msgstr ""
 
-#: object.cc:720
+#: object.cc:737
 #, c-format
 msgid "%s: %s: unsupported ELF version %d\n"
 msgstr ""
 
-#: object.cc:728
+#: object.cc:745
 #, c-format
 msgid "%s: %s: invalid ELF class 0\n"
 msgstr ""
 
-#: object.cc:735
+#: object.cc:752
 #, c-format
 msgid "%s: %s: unsupported ELF class %d\n"
 msgstr ""
 
-#: object.cc:743
+#: object.cc:760
 #, c-format
 msgid "%s: %s: invalid ELF data encoding\n"
 msgstr ""
 
-#: object.cc:750
+#: object.cc:767
 #, c-format
 msgid "%s: %s: unsupported ELF data encoding %d\n"
 msgstr ""
@@ -326,44 +326,44 @@ msgstr ""
 msgid "%s: -%c: %s\n"
 msgstr ""
 
-#: output.cc:383
+#: output.cc:385
 #, c-format
 msgid "%s: %s: invalid alignment %lu for section \"%s\"\n"
 msgstr ""
 
-#: output.cc:773
+#: output.cc:775
 #, c-format
 msgid "%s: %s: open: %s\n"
 msgstr ""
 
-#: output.cc:782
+#: output.cc:784
 #, c-format
 msgid "%s: %s: lseek: %s\n"
 msgstr ""
 
-#: output.cc:789
+#: output.cc:791
 #, c-format
 msgid "%s: %s: write: %s\n"
 msgstr ""
 
-#: output.cc:799
+#: output.cc:801
 #, c-format
 msgid "%s: %s: mmap: %s\n"
 msgstr ""
 
-#: output.cc:813
+#: output.cc:815
 #, c-format
 msgid "%s: %s: munmap: %s\n"
 msgstr ""
 
-#: output.cc:821
+#: output.cc:823
 #, c-format
 msgid "%s: %s: close: %s\n"
 msgstr ""
 
 #. Here we have to handle archives and any other input file
 #. types we need.
-#: readsyms.cc:107
+#: readsyms.cc:110
 #, c-format
 msgid "%s: %s: not an object or archive\n"
 msgstr ""
@@ -388,22 +388,22 @@ msgstr ""
 msgid "%s: %s: reloc section %u size %lu uneven"
 msgstr ""
 
-#: resolve.cc:144
+#: resolve.cc:138
 #, c-format
 msgid "%s: %s: invalid STB_LOCAL symbol %s in external symbols\n"
 msgstr ""
 
-#: resolve.cc:150
+#: resolve.cc:144
 #, c-format
 msgid "%s: %s: unsupported symbol binding %d for symbol %s\n"
 msgstr ""
 
-#: symtab.cc:347
+#: symtab.cc:303
 #, c-format
 msgid "%s: %s: mixing 32-bit and 64-bit ELF objects\n"
 msgstr ""
 
-#: symtab.cc:361
+#: symtab.cc:317
 #, c-format
 msgid "%s: %s: bad global symbol name offset %u at %lu\n"
 msgstr ""

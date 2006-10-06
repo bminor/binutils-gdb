@@ -74,8 +74,10 @@ Read_symbols::run(Workqueue* workqueue)
 
 	  this->input_objects_->add_object(obj);
 
-	  Read_symbols_data sd = obj->read_symbols();
-	  workqueue->queue(new Add_symbols(this->symtab_, obj, sd,
+	  Read_symbols_data* sd = new Read_symbols_data;
+	  obj->read_symbols(sd);
+	  workqueue->queue(new Add_symbols(this->symtab_, this->layout_,
+					   obj, sd,
 					   this->this_blocker_,
 					   this->next_blocker_));
 
@@ -94,6 +96,7 @@ Read_symbols::run(Workqueue* workqueue)
 	  Archive* arch = new Archive(this->input_.name(), input_file);
 	  arch->setup();
 	  workqueue->queue(new Add_archive_symbols(this->symtab_,
+						   this->layout_,
 						   this->input_objects_,
 						   arch,
 						   this->this_blocker_,
@@ -155,7 +158,10 @@ Add_symbols::locks(Workqueue* workqueue)
 void
 Add_symbols::run(Workqueue*)
 {
+  this->object_->layout(this->layout_, this->sd_);
   this->object_->add_symbols(this->symtab_, this->sd_);
+  delete this->sd_;
+  this->sd_ = NULL;
 }
 
 } // End namespace gold.

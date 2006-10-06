@@ -13,6 +13,7 @@ namespace gold
 
 class Input_file;
 class Input_objects;
+class Layout;
 class Symbol_table;
 
 // This class represents an archive--generally a libNAME.a file.
@@ -61,7 +62,7 @@ class Archive
   // Select members from the archive as needed and add them to the
   // link.
   void
-  add_symbols(Symbol_table*, Input_objects*);
+  add_symbols(Symbol_table*, Layout*, Input_objects*);
 
  private:
   Archive(const Archive&);
@@ -81,7 +82,7 @@ class Archive
 
   // Include an archive member in the link.
   void
-  include_member(Symbol_table*, Input_objects*, off_t off);
+  include_member(Symbol_table*, Layout*, Input_objects*, off_t off);
 
   // An entry in the archive map of symbols to object files.
   struct Armap_entry
@@ -108,11 +109,13 @@ class Archive
 class Add_archive_symbols : public Task
 {
  public:
-  Add_archive_symbols(Symbol_table* symtab, Input_objects* input_objects,
+  Add_archive_symbols(Symbol_table* symtab, Layout* layout,
+		      Input_objects* input_objects,
 		      Archive* archive, Task_token* this_blocker,
 		      Task_token* next_blocker)
-    : symtab_(symtab), input_objects_(input_objects), archive_(archive),
-      this_blocker_(this_blocker), next_blocker_(next_blocker)
+    : symtab_(symtab), layout_(layout), input_objects_(input_objects),
+      archive_(archive), this_blocker_(this_blocker),
+      next_blocker_(next_blocker)
   { }
 
   ~Add_archive_symbols();
@@ -132,6 +135,7 @@ class Add_archive_symbols : public Task
   class Add_archive_symbols_locker;
 
   Symbol_table* symtab_;
+  Layout* layout_;
   Input_objects* input_objects_;
   Archive* archive_;
   Task_token* this_blocker_;

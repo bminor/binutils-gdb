@@ -218,7 +218,8 @@ Archive::read_header(off_t off, std::string* pname)
 // may be satisfied by other objects in the archive.
 
 void
-Archive::add_symbols(Symbol_table* symtab, Input_objects* input_objects)
+Archive::add_symbols(Symbol_table* symtab, Layout* layout,
+		     Input_objects* input_objects)
 {
   size_t armap_size = this->armap_.size();
   std::vector<bool> seen;
@@ -253,7 +254,7 @@ Archive::add_symbols(Symbol_table* symtab, Input_objects* input_objects)
 
 	  // We want to include this object in the link.
 	  last = this->armap_[i].offset;
-	  this->include_member(symtab, input_objects, last);
+	  this->include_member(symtab, layout, input_objects, last);
 	  added_new_object = true;
 	}
     }
@@ -264,8 +265,8 @@ Archive::add_symbols(Symbol_table* symtab, Input_objects* input_objects)
 // the member header.
 
 void
-Archive::include_member(Symbol_table* symtab, Input_objects* input_objects,
-			off_t off)
+Archive::include_member(Symbol_table* symtab, Layout* layout,
+			Input_objects* input_objects, off_t off)
 {
   std::string n;
   this->read_header(off, &n);
@@ -305,8 +306,10 @@ Archive::include_member(Symbol_table* symtab, Input_objects* input_objects,
 
   input_objects->add_object(obj);
 
-  Read_symbols_data sd = obj->read_symbols();
-  obj->add_symbols(symtab, sd);
+  Read_symbols_data sd;
+  obj->read_symbols(&sd);
+  obj->layout(layout, &sd);
+  obj->add_symbols(symtab, &sd);
 }
 
 // Add_archive_symbols methods.
@@ -354,7 +357,8 @@ Add_archive_symbols::locks(Workqueue* workqueue)
 void
 Add_archive_symbols::run(Workqueue*)
 {
-  this->archive_->add_symbols(this->symtab_, this->input_objects_);
+  this->archive_->add_symbols(this->symtab_, this->layout_,
+			      this->input_objects_);
 }
 
 } // End namespace gold.

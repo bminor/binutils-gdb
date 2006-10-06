@@ -23,6 +23,12 @@ class Output_file;
 
 struct Read_symbols_data
 {
+  // Section headers.
+  File_view* section_headers;
+  // Section names.
+  File_view* section_names;
+  // Size of section name data in bytes.
+  off_t section_names_size;
   // Symbol data.
   File_view* symbols;
   // Size of symbol data in bytes.
@@ -93,20 +99,20 @@ class Object
   sized_target(ACCEPT_SIZE_ENDIAN_ONLY);
 
   // Read the symbol and relocation information.
-  Read_symbols_data
-  read_symbols()
-  { return this->do_read_symbols(); }
+  void
+  read_symbols(Read_symbols_data* sd)
+  { return this->do_read_symbols(sd); }
 
   // Add symbol information to the global symbol table.
   void
-  add_symbols(Symbol_table* symtab, Read_symbols_data rd)
-  { this->do_add_symbols(symtab, rd); }
+  add_symbols(Symbol_table* symtab, Read_symbols_data* sd)
+  { this->do_add_symbols(symtab, sd); }
 
   // Pass sections which should be included in the link to the Layout
   // object, and record where the sections go in the output file.
   void
-  layout(Layout* lay)
-  { this->do_layout(lay); }
+  layout(Layout* lay, Read_symbols_data* sd)
+  { this->do_layout(lay, sd); }
 
   // Initial local symbol processing: set the offset where local
   // symbol information will be stored; add local symbol names to
@@ -144,17 +150,17 @@ class Object
 
  protected:
   // Read the symbols--implemented by child class.
-  virtual Read_symbols_data
-  do_read_symbols() = 0;
+  virtual void
+  do_read_symbols(Read_symbols_data*) = 0;
 
   // Add symbol information to the global symbol table--implemented by
   // child class.
   virtual void
-  do_add_symbols(Symbol_table*, Read_symbols_data) = 0;
+  do_add_symbols(Symbol_table*, Read_symbols_data*) = 0;
 
   // Lay out sections--implemented by child class.
   virtual void
-  do_layout(Layout*) = 0;
+  do_layout(Layout*, Read_symbols_data*) = 0;
 
   // Finalize local symbols--implemented by child class.
   virtual off_t
@@ -258,16 +264,16 @@ class Sized_object : public Object
   setup(const typename elfcpp::Ehdr<size, big_endian>&);
 
   // Read the symbols.
-  Read_symbols_data
-  do_read_symbols();
-
-  // Add the symbols to the symbol table.
   void
-  do_add_symbols(Symbol_table*, Read_symbols_data);
+  do_read_symbols(Read_symbols_data*);
 
   // Lay out the input sections.
   void
-  do_layout(Layout*);
+  do_layout(Layout*, Read_symbols_data*);
+
+  // Add the symbols to the symbol table.
+  void
+  do_add_symbols(Symbol_table*, Read_symbols_data*);
 
   // Finalize the local symbols.
   off_t
@@ -337,6 +343,8 @@ class Sized_object : public Object
   void
   write_local_symbols(Output_file*, const Stringpool*);
 
+  // If non-NULL, a view of the section header data.
+  File_view* section_headers_;
   // ELF file header e_flags field.
   unsigned int flags_;
   // File offset of section header table.
