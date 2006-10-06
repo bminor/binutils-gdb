@@ -1,3 +1,7 @@
+2006-10-05  Joel Brobecker  <brobecker@adacore.com>
+
+        * blockframe.c (block_innermost_frame): Rewrite frame search logic.
+
 2006-10-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (gdb_expat_h): New.

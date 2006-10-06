@@ -358,14 +358,15 @@ block_innermost_frame (struct block *block)
   start = BLOCK_START (block);
   end = BLOCK_END (block);
 
-  frame = NULL;
-  while (1)
+  frame = get_current_frame ();
+  while (frame != NULL)
     {
-      frame = get_prev_frame (frame);
-      if (frame == NULL)
-	return NULL;
       calling_pc = get_frame_address_in_block (frame);
       if (calling_pc >= start && calling_pc < end)
 	return frame;
+
+      frame = get_prev_frame (frame);
     }
+
+  return NULL;
 }
