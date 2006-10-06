@@ -1,5 +1,9 @@
 2006-10-06  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.base/subst.exp: New testcase.
+
+2006-10-06  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/array_return/pck.ads: Add copyright notice.
 	* gdb.ada/array_return/pck.adb: Likewise.
 	* gdb.ada/array_return/p.adb: Likewise.
