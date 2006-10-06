@@ -1,3 +1,7 @@
+2006-10-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* genscripts.sh: Respect LIBPATH_SUFFIX when not using sysroot.
+
 2006-10-04  Bob Wilson  <bob.wilson@acm.org>
 
 	* emulparams/xtensa-config.sh: Delete file.
