@@ -1,5 +1,10 @@
 2006-10-06  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/arrayidx.exp: Remove calls to setup_kfail now that
+	the corresponding bug has been fixed in GDB (PR/2018).
+
+2006-10-06  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.base/subst.exp: New testcase.
 
 2006-10-06  Joel Brobecker  <brobecker@adacore.com>

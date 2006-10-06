@@ -49,22 +49,10 @@ gdb_test "print one_two_three" \
          "\\(1, 2, 3\\)" \
          "print one_two_three, indexes off"
 
-# There is a bug somewhere that causes the debugger to think that
-# this array is indexed by an integer subrange, which it is actually
-# indexed by an enumerated type. As a consequence, indexes for this
-# array will be printed using their underlying integer value instead
-# of their names. Also, even when printing this array without indexes,
-# because the underlying value of the first enumeration is zero, the
-# debugger ends up printing this index even when "array-indexes" are
-# off, just because the index of the first element is not an enumerated
-# type, and its value is not one.
-setup_kfail "*-*-*" gdb/2018
 gdb_test "print e_one_two_three" \
          "\\(1, 2, 3\\)" \
          "print e_one_two_three, indexes off"
 
-# Same as when printing e_one_two_three above.
-setup_kfail "*-*-*" gdb/2018
 gdb_test "print r_two_three" \
          "\\(two => 2, 3\\)" \
          "print r_two_three, indexes off"
@@ -99,16 +87,10 @@ gdb_test "print one_two_three" \
          "\\(1 => 1, 2 => 2, 3 => 3\\)" \
          "print one_two_three"
 
-# Same as first attempt at printing this array, we currently fail.
-# See details above.
-setup_kfail "*-*-*" gdb/2018
 gdb_test "print e_one_two_three" \
          "\\(one => 1, two => 2, three => 3\\)" \
          "print e_one_two_three"
 
-# Same as first attempt at printing this array, we currently fail.
-# See details above.
-setup_kfail "*-*-*" gdb/2018
 gdb_test "print r_two_three" \
          "\\(two => 2, three => 3\\)" \
          "print r_two_three"
