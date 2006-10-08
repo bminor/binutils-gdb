@@ -1,3 +1,11 @@
+2006-10-08  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (parse_big_immediate): 64-bit host fix.
+	(parse_operands): Use parse_big_immediate for OP_NILO.
+	(neon_cmode_for_logic_imm): Try smaller element sizes.
+	(neon_cmode_for_move_imm): Ditto.
+	(do_neon_logic): Handle .i64 pseudo-op.
+
 2006-09-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/POTFILES.in: Regenerate.

@@ -4013,7 +4013,7 @@ parse_immediate (char **str, int *val, int min, int max,
 }
 
 /* Less-generic immediate-value read function with the possibility of loading a
-   big (64-bit) immediate, as required by Neon VMOV and VMVN immediate
+   big (64-bit) immediate, as required by Neon VMOV, VMVN and logic immediate
    instructions. Puts the result directly in inst.operands[i].  */
 
 static int
@@ -4025,7 +4025,18 @@ parse_big_immediate (char **str, int i)
   my_get_expression (&exp, &ptr, GE_OPT_PREFIX_BIG);
 
   if (exp.X_op == O_constant)
-    inst.operands[i].imm = exp.X_add_number;
+    {
+      inst.operands[i].imm = exp.X_add_number & 0xffffffff;
+      /* If we're on a 64-bit host, then a 64-bit number can be returned using
+	 O_constant.  We have to be careful not to break compilation for
+	 32-bit X_add_number, though.  */
+      if ((exp.X_add_number & ~0xffffffffl) != 0)
+	{
+          /* X >> 32 is illegal if sizeof (exp.X_add_number) == 4.  */
+	  inst.operands[i].reg = ((exp.X_add_number >> 16) >> 16) & 0xffffffff;
+	  inst.operands[i].regisimm = 1;
+	}
+    }
   else if (exp.X_op == O_big
            && LITTLENUM_NUMBER_OF_BITS * exp.X_add_number > 32
            && LITTLENUM_NUMBER_OF_BITS * exp.X_add_number <= 64)
@@ -5595,8 +5606,13 @@ parse_operands (char *str, const unsigned char *pattern)
             inst.operands[i-1].present = 0;
             break;
             try_imm:
-            /* Immediate gets verified properly later, so accept any now.  */
-            po_imm_or_fail (INT_MIN, INT_MAX, TRUE);
+	    /* There's a possibility of getting a 64-bit immediate here, so
+	       we need special handling.  */
+	    if (parse_big_immediate (&str, i) == FAIL)
+	      {
+		inst.error = _("immediate value is out of range");
+		goto failure;
+	      }
           }
           break;
 
@@ -11397,45 +11413,52 @@ do_neon_qshl_imm (void)
 static int
 neon_cmode_for_logic_imm (unsigned immediate, unsigned *immbits, int size)
 {
-  /* Handle .I8 and .I64 as pseudo-instructions.  */
-  switch (size)
+  /* Handle .I8 pseudo-instructions.  */
+  if (size == 8)
     {
-    case 8:
       /* Unfortunately, this will make everything apart from zero out-of-range.
          FIXME is this the intended semantics? There doesn't seem much point in
          accepting .I8 if so.  */
       immediate |= immediate << 8;
       size = 16;
-      break;
-    case 64:
-      /* Similarly, anything other than zero will be replicated in bits [63:32],
-         which probably isn't want we want if we specified .I64.  */
-      if (immediate != 0)
-        goto bad_immediate;
-      size = 32;
-      break;
-    default: ;
+    }
+
+  if (size >= 32)
+    {
+      if (immediate == (immediate & 0x000000ff))
+	{
+	  *immbits = immediate;
+	  return 0x1;
+	}
+      else if (immediate == (immediate & 0x0000ff00))
+	{
+	  *immbits = immediate >> 8;
+	  return 0x3;
+	}
+      else if (immediate == (immediate & 0x00ff0000))
+	{
+	  *immbits = immediate >> 16;
+	  return 0x5;
+	}
+      else if (immediate == (immediate & 0xff000000))
+	{
+	  *immbits = immediate >> 24;
+	  return 0x7;
+	}
+      if ((immediate & 0xffff) != (immediate >> 16))
+	goto bad_immediate;
+      immediate &= 0xffff;
     }
 
   if (immediate == (immediate & 0x000000ff))
     {
       *immbits = immediate;
-      return (size == 16) ? 0x9 : 0x1;
+      return 0x9;
     }
   else if (immediate == (immediate & 0x0000ff00))
     {
       *immbits = immediate >> 8;
-      return (size == 16) ? 0xb : 0x3;
-    }
-  else if (immediate == (immediate & 0x00ff0000))
-    {
-      *immbits = immediate >> 16;
-      return 0x5;
-    }
-  else if (immediate == (immediate & 0xff000000))
-    {
-      *immbits = immediate >> 24;
-      return 0x7;
+      return 0xb;
     }
 
   bad_immediate:
@@ -11476,7 +11499,8 @@ neon_qfloat_bits (unsigned imm)
    the instruction. *OP is passed as the initial value of the op field, and
    may be set to a different value depending on the constant (i.e.
    "MOV I64, 0bAAAAAAAABBBB..." which uses OP = 1 despite being MOV not
-   MVN).  */
+   MVN).  If the immediate looks like a repeated parttern then also
+   try smaller element sizes.  */
 
 static int
 neon_cmode_for_move_imm (unsigned immlo, unsigned immhi, unsigned *immbits,
@@ -11489,63 +11513,87 @@ neon_cmode_for_move_imm (unsigned immlo, unsigned immhi, unsigned *immbits,
       *immbits = neon_qfloat_bits (immlo);
       return 0xf;
     }
-  else if (size == 64 && neon_bits_same_in_bytes (immhi)
-      && neon_bits_same_in_bytes (immlo))
+
+  if (size == 64)
     {
-      /* Check this one first so we don't have to bother with immhi in later
-         tests.  */
+      if (neon_bits_same_in_bytes (immhi)
+	  && neon_bits_same_in_bytes (immlo))
+	{
+	  if (*op == 1)
+	    return FAIL;
+	  *immbits = (neon_squash_bits (immhi) << 4)
+		     | neon_squash_bits (immlo);
+	  *op = 1;
+	  return 0xe;
+	}
+
+      if (immhi != immlo)
+	return FAIL;
+    }
+
+  if (size >= 32)
+    {
+      if (immlo == (immlo & 0x000000ff))
+	{
+	  *immbits = immlo;
+	  return 0x0;
+	}
+      else if (immlo == (immlo & 0x0000ff00))
+	{
+	  *immbits = immlo >> 8;
+	  return 0x2;
+	}
+      else if (immlo == (immlo & 0x00ff0000))
+	{
+	  *immbits = immlo >> 16;
+	  return 0x4;
+	}
+      else if (immlo == (immlo & 0xff000000))
+	{
+	  *immbits = immlo >> 24;
+	  return 0x6;
+	}
+      else if (immlo == ((immlo & 0x0000ff00) | 0x000000ff))
+	{
+	  *immbits = (immlo >> 8) & 0xff;
+	  return 0xc;
+	}
+      else if (immlo == ((immlo & 0x00ff0000) | 0x0000ffff))
+	{
+	  *immbits = (immlo >> 16) & 0xff;
+	  return 0xd;
+	}
+
+      if ((immlo & 0xffff) != (immlo >> 16))
+	return FAIL;
+      immlo &= 0xffff;
+    }
+
+  if (size >= 16)
+    {
+      if (immlo == (immlo & 0x000000ff))
+	{
+	  *immbits = immlo;
+	  return 0x8;
+	}
+      else if (immlo == (immlo & 0x0000ff00))
+	{
+	  *immbits = immlo >> 8;
+	  return 0xa;
+	}
+
+      if ((immlo & 0xff) != (immlo >> 8))
+	return FAIL;
+      immlo &= 0xff;
+    }
+
+  if (immlo == (immlo & 0x000000ff))
+    {
+      /* Don't allow MVN with 8-bit immediate.  */
       if (*op == 1)
-        return FAIL;
-      *immbits = (neon_squash_bits (immhi) << 4) | neon_squash_bits (immlo);
-      *op = 1;
-      return 0xe;
-    }
-  else if (immhi != 0)
-    return FAIL;
-  else if (immlo == (immlo & 0x000000ff))
-    {
-      /* 64-bit case was already handled. Don't allow MVN with 8-bit
-         immediate.  */
-      if ((size != 8 && size != 16 && size != 32)
-          || (size == 8 && *op == 1))
-        return FAIL;
+	return FAIL;
       *immbits = immlo;
-      return (size == 8) ? 0xe : (size == 16) ? 0x8 : 0x0;
-    }
-  else if (immlo == (immlo & 0x0000ff00))
-    {
-      if (size != 16 && size != 32)
-        return FAIL;
-      *immbits = immlo >> 8;
-      return (size == 16) ? 0xa : 0x2;
-    }
-  else if (immlo == (immlo & 0x00ff0000))
-    {
-      if (size != 32)
-        return FAIL;
-      *immbits = immlo >> 16;
-      return 0x4;
-    }
-  else if (immlo == (immlo & 0xff000000))
-    {
-      if (size != 32)
-        return FAIL;
-      *immbits = immlo >> 24;
-      return 0x6;
-    }
-  else if (immlo == ((immlo & 0x0000ff00) | 0x000000ff))
-    {
-      if (size != 32)
-        return FAIL;
-      *immbits = (immlo >> 8) & 0xff;
-      return 0xc;
-    }
-  else if (immlo == ((immlo & 0x00ff0000) | 0x0000ffff))
-    {
-      if (size != 32)
-        return FAIL;
-      *immbits = (immlo >> 16) & 0xff;
-      return 0xd;
+      return 0xe;
     }
 
   return FAIL;
@@ -11628,28 +11676,37 @@ do_neon_logic (void)
       
       inst.instruction = NEON_ENC_IMMED (inst.instruction);
 
+      immbits = inst.operands[1].imm;
+      if (et.size == 64)
+	{
+	  /* .i64 is a pseudo-op, so the immediate must be a repeating
+	     pattern.  */
+	  if (immbits != (inst.operands[1].regisimm ?
+			  inst.operands[1].reg : 0))
+	    {
+	      /* Set immbits to an invalid constant.  */
+	      immbits = 0xdeadbeef;
+	    }
+	}
+
       switch (opcode)
         {
         case N_MNEM_vbic:
-          cmode = neon_cmode_for_logic_imm (inst.operands[1].imm, &immbits,
-                                            et.size);
+          cmode = neon_cmode_for_logic_imm (immbits, &immbits, et.size);
           break;
         
         case N_MNEM_vorr:
-          cmode = neon_cmode_for_logic_imm (inst.operands[1].imm, &immbits,
-                                            et.size);
+          cmode = neon_cmode_for_logic_imm (immbits, &immbits, et.size);
           break;
         
         case N_MNEM_vand:
           /* Pseudo-instruction for VBIC.  */
-          immbits = inst.operands[1].imm;
           neon_invert_size (&immbits, 0, et.size);
           cmode = neon_cmode_for_logic_imm (immbits, &immbits, et.size);
           break;
         
         case N_MNEM_vorn:
           /* Pseudo-instruction for VORR.  */
-          immbits = inst.operands[1].imm;
           neon_invert_size (&immbits, 0, et.size);
           cmode = neon_cmode_for_logic_imm (immbits, &immbits, et.size);
           break;

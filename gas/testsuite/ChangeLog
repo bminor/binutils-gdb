@@ -1,3 +1,9 @@
+2006-10-08  Paul Brook  <paul@codesourcery.com>
+
+	* testsuite/gas/arm/neon-cov.s: Test pseudo-instruction forms of
+	vmov, vmvn and logic immediate instructions.
+	* testsuite/gas/arm/neon-cov.d: ditto.
+
 2006-09-28  Bridge Wu  <mingqiao.wu@gmail.com>
 
 	* gas/arm/iwmmxt-wldstbh.s: New file.
