@@ -1,16 +1,4 @@
+#...
+   ..  ..: 00000000     2    FUNC GLOBAL DEFAULT UND lib_func2
+#pass
 
-Symbol table for image:
-  Num Buc:    Value  Size   Type   Bind Vis      Ndx Name
-   11   0: [0-9a-f]*     0  NOTYPE GLOBAL DEFAULT ABS _edata
-   10   0: [0-9a-f]*    20    FUNC GLOBAL DEFAULT   6 foo
-    4   0: [0-9a-f]*     0  NOTYPE GLOBAL DEFAULT ABS __bss_start__
-   12   1: [0-9a-f]*     0  NOTYPE GLOBAL DEFAULT ABS _end
-    7   1: [0-9a-f]*     0  NOTYPE GLOBAL DEFAULT ABS __bss_end__
-    5   1: [0-9a-f]*     0  NOTYPE GLOBAL DEFAULT ABS __exidx_start
-   14   2: [0-9a-f]*     0  NOTYPE GLOBAL DEFAULT ABS __data_start
-   13   2: [0-9a-f]*     0  NOTYPE GLOBAL DEFAULT ABS _stack
-    9   2: [0-9a-f]*     0  NOTYPE GLOBAL DEFAULT ABS __end__
-    8   2: [0-9a-f]*     0  NOTYPE GLOBAL DEFAULT ABS __bss_start
-    6   2: 00000000     2    FUNC GLOBAL DEFAULT UND lib_func2
-    3   2: [0-9a-f]*     0  NOTYPE GLOBAL DEFAULT ABS _bss_end__
-    2   2: [0-9a-f]*     0  NOTYPE GLOBAL DEFAULT ABS __exidx_end
