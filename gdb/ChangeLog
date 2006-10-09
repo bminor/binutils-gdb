@@ -1,3 +1,7 @@
+2006-10-09  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* solib.c (solib_read_symbols): Stop if the file was not found.
+
 2006-10-09  Paul Pluzhnikov  <ppluzhnikov@charter.net>
 
 	PR c++/2116

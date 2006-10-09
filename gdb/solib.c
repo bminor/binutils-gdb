@@ -418,6 +418,11 @@ solib_read_symbols (struct so_list *so, int from_tty)
       if (from_tty)
 	printf_unfiltered (_("Symbols already loaded for %s\n"), so->so_name);
     }
+  else if (so->abfd == NULL)
+    {
+      if (from_tty)
+	printf_unfiltered (_("Symbol file not found for %s\n"), so->so_name);
+    }
   else
     {
       if (catch_errors (symbol_add_stub, so,
