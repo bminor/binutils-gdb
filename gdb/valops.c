@@ -1889,10 +1889,15 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
   else
     {
       const char *qualified_name = SYMBOL_CPLUS_DEMANGLED_NAME (fsym);
-      func_name	= cp_func_name (qualified_name);
 
-      /* If the name is NULL this must be a C-style function.
-         Just return the same symbol. */
+      /* If we have a C++ name, try to extract just the function
+	 part.  */
+      if (qualified_name)
+	func_name = cp_func_name (qualified_name);
+
+      /* If there was no C++ name, this must be a C-style function.
+	 Just return the same symbol.  Do the same if cp_func_name
+	 fails for some reason.  */
       if (func_name == NULL)
         {
 	  *symp = fsym;

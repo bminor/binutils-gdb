@@ -1,3 +1,8 @@
+2006-10-09  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	PR c++/2116
+	* gdb.cp/call-c.cc, gdb.cp/call-c.exp, gdb.cp/call-c-1.c: New.
+
 2006-10-06  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/arrayidx.exp: Remove calls to setup_kfail now that
