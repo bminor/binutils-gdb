@@ -146,13 +146,17 @@ solib_open (char *in_pathname, char **found_pathname)
   int found_file = -1;
   char *temp_pathname = NULL;
   char *p = in_pathname;
+  int solib_absolute_prefix_is_empty;
+
+  solib_absolute_prefix_is_empty = (solib_absolute_prefix == NULL
+                                    || *solib_absolute_prefix == 0);
 
   while (*p && !IS_DIR_SEPARATOR (*p))
     p++;
 
   if (*p)
     {
-      if (! IS_ABSOLUTE_PATH (in_pathname) || solib_absolute_prefix == NULL)
+      if (! IS_ABSOLUTE_PATH (in_pathname) || solib_absolute_prefix_is_empty)
         temp_pathname = in_pathname;
       else
 	{
@@ -208,14 +212,14 @@ solib_open (char *in_pathname, char **found_pathname)
 					   &temp_pathname);
 
   /* If not found, next search the inferior's $PATH environment variable. */
-  if (found_file < 0 && solib_absolute_prefix == NULL)
+  if (found_file < 0 && solib_absolute_prefix_is_empty)
     found_file = openp (get_in_environ (inferior_environ, "PATH"),
 			OPF_TRY_CWD_FIRST, in_pathname, O_RDONLY | O_BINARY, 0,
 			&temp_pathname);
 
   /* If not found, next search the inferior's $LD_LIBRARY_PATH 
      environment variable. */
-  if (found_file < 0 && solib_absolute_prefix == NULL)
+  if (found_file < 0 && solib_absolute_prefix_is_empty)
     found_file = openp (get_in_environ (inferior_environ, "LD_LIBRARY_PATH"),
 			OPF_TRY_CWD_FIRST, in_pathname, O_RDONLY | O_BINARY, 0,
 			&temp_pathname);

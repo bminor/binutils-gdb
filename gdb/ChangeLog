@@ -1,3 +1,8 @@
+2006-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* solib.c (solib_open): Handle an empty solib_absolute_prefix like a
+	missing one.
+
 2006-10-09  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* solib.c (solib_read_symbols): Stop if the file was not found.
