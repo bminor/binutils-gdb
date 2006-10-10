@@ -1,3 +1,9 @@
+2006-10-10  Bob Wilson  <bob.wilson@acm.org>
+
+	* gdb.texinfo (Command Syntax, Connecting, Remote configuration,
+	Renesas Boards, ST2000, TUI Keys, TUI Single Key Mode, TUI Commands,
+	Emacs, Console I/O): Fix @key and @kbd usage.
+
 2006-09-21  Vladimir Prus  <vladimir@codesourcery.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 

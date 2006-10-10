@@ -1413,7 +1413,7 @@ Files,,Command files}).
 @cindex repeating command sequences
 @kindex C-o @r{(operate-and-get-next)}
 The @kbd{C-o} binding is useful for repeating a complex sequence of
-commands.  This command accepts the current line, like @kbd{RET}, and
+commands.  This command accepts the current line, like @key{RET}, and
 then fetches the next line relative to the current line from the history
 for editing.
 
@@ -12470,7 +12470,7 @@ remote program.
 @cindex interrupting remote programs
 @cindex remote programs, interrupting
 Whenever @value{GDBN} is waiting for the remote program, if you type the
-interrupt character (often @key{C-C}), @value{GDBN} attempts to stop the
+interrupt character (often @kbd{C-c}), @value{GDBN} attempts to stop the
 program.  This may or may not succeed, depending in part on the hardware
 and the serial drivers the remote system uses.  If you type the
 interrupt character once again, @value{GDBN} displays this prompt:
@@ -12660,7 +12660,7 @@ Show the current speed of the remote connection.
 @cindex BREAK signal instead of Ctrl-C
 @anchor{set remotebreak}
 If set to on, @value{GDBN} sends a @code{BREAK} signal to the remote
-when you press the @key{Ctrl-C} key to interrupt the program running
+when you type @kbd{C-c} to interrupt the program running
 on the remote.  If set to off, @value{GDBN} sends the @samp{Ctrl-C}
 character instead.  The default is off, since most remote systems
 expect to see @samp{Ctrl-C} as the interrupt signal.
@@ -14461,7 +14461,7 @@ you can't send an interrupt---but you can press the @sc{reset} switch!
 Use the @sc{reset} button on the development board
 @itemize @bullet
 @item
-to interrupt your program (don't use @kbd{ctl-C} on the DOS host---it has
+to interrupt your program (don't use @kbd{C-c} on the DOS host---it has
 no way to pass an interrupt signal to the development board); and
 
 @item
@@ -15254,8 +15254,8 @@ manual for available commands.
 Connect the controlling terminal to the STDBUG command monitor.  When
 you are done interacting with STDBUG, typing either of two character
 sequences gets you back to the @value{GDBN} command prompt:
-@kbd{@key{RET}~.} (Return, followed by tilde and period) or
-@kbd{@key{RET}~@key{C-d}} (Return, followed by tilde and control-D).
+@kbd{@key{RET} ~ .} (Return, followed by tilde and period) or
+@kbd{@key{RET} ~ C-d} (Return, followed by tilde and control-D).
 @end table
 
 @node Z8000
@@ -16934,7 +16934,7 @@ In the TUI mode, the arrow keys are used by the active window
 for scrolling.  This means they are available for readline when the
 active window is the command window.  When the command window
 does not have the focus, it is necessary to use other readline
-key bindings such as @key{C-p}, @key{C-n}, @key{C-b} and @key{C-f}.
+key bindings such as @kbd{C-p}, @kbd{C-n}, @kbd{C-b} and @kbd{C-f}.
 
 @node TUI Single Key Mode
 @section TUI Single Key Mode
@@ -16992,7 +16992,7 @@ The key that was pressed is inserted in the editing buffer so that
 it is possible to type most @value{GDBN} commands without interaction
 with the TUI @emph{SingleKey} mode.  Once the command is entered the TUI
 @emph{SingleKey} mode is restored.  The only way to permanently leave
-this mode is by hitting @key{q} or @samp{@key{C-x} @key{s}}.
+this mode is by typing @kbd{q} or @kbd{C-x s}.
 
 
 @node TUI Commands
@@ -17037,7 +17037,7 @@ can be affected to another window.
 
 @item refresh
 @kindex refresh
-Refresh the screen.  This is similar to using @key{C-L} key.
+Refresh the screen.  This is similar to typing @kbd{C-L}.
 
 @item tui reg float
 @kindex tui reg
@@ -17241,7 +17241,7 @@ Go down the number of frames indicated by the numeric argument, like the
 @value{GDBN} @code{down} command.
 @end table
 
-In any source file, the Emacs command @kbd{C-x SPC} (@code{gud-break})
+In any source file, the Emacs command @kbd{C-x @key{SPC}} (@code{gud-break})
 tells @value{GDBN} to set a breakpoint on the source line point is on.
 
 If you type @kbd{M-x speedbar}, then Emacs displays a separate frame which
@@ -24458,16 +24458,16 @@ conditions is met:
 
 @itemize @bullet
 @item
-The user presses @kbd{Ctrl-C}.  The behaviour is as explained above, and the
+The user types @kbd{C-c}.  The behaviour is as explained above, and the
 @code{read}
 system call is treated as finished.
 
 @item
-The user presses @kbd{Enter}.  This is treated as end of input with a trailing
+The user presses @key{RET}.  This is treated as end of input with a trailing
 newline.
 
 @item
-The user presses @kbd{Ctrl-D}.  This is treated as end of input.  No trailing
+The user types @kbd{C-d}.  This is treated as end of input.  No trailing
 character (neither newline nor Ctrl-D) is appended to the input.
 
 @end itemize
