@@ -1227,6 +1227,9 @@ extern void target_preopen (int);
 
 extern void pop_target (void);
 
+extern CORE_ADDR target_translate_tls_address (struct objfile *objfile,
+					       CORE_ADDR offset);
+
 /* Struct section_table maps address ranges to file sections.  It is
    mostly used with BFD files, but can be used without (e.g. for handling
    raw disks, or files not in formats handled by BFD).  */

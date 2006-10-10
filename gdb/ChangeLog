@@ -1,4 +1,24 @@
 2006-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (expprint.o, parse.o, target.o): Update.
+	* dwarf2loc.c (dwarf_expr_tls_address): Move body to
+	target_translate_tls_address.  Call it.
+	* eval.c (evaluate_subexp_standard): Handle UNOP_MEMVAL_TLS.
+	* expprint.c (print_subexp_standard): Likewise.
+	(op_name_standard, dump_subexp_body_standard): Likewise.
+	* expression.h (enum exp_opcode): Add UNOP_MEMVAL_TLS.
+	(union exp_element): Add objfile.
+	* parse.c (write_exp_elt_objfile): New function.
+	(msym_tls_symbol_type): New.
+	(write_exp_msymbol): Handle TLS.
+	(operator_length_standard): Handle UNOP_MEMVAL_TLS.
+	(build_parse): Initialize msym_tls_symbol_type.
+	* parser-defs.h (write_exp_elt_objfile): New prototype.
+	* target.c (target_translate_tls_address): New.
+	* target.h (target_translate_tls_address): Add prototype.
+
+2006-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* solib.c (solib_open): Handle an empty solib_absolute_prefix like a
 	missing one.

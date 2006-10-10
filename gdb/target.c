@@ -39,6 +39,7 @@
 #include "regcache.h"
 #include "gdb_assert.h"
 #include "gdbcore.h"
+#include "exceptions.h"
 
 static void target_info (char *, int);
 
@@ -756,6 +757,92 @@ pop_target (void)
 		      "pop_target couldn't find target %s\n",
 		      current_target.to_shortname);
   internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
+}
+
+/* Using the objfile specified in BATON, find the address for the
+   current thread's thread-local storage with offset OFFSET.  */
+CORE_ADDR
+target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
+{
+  volatile CORE_ADDR addr = 0;
+
+  if (target_get_thread_local_address_p ()
+      && gdbarch_fetch_tls_load_module_address_p (current_gdbarch))
+    {
+      ptid_t ptid = inferior_ptid;
+      volatile struct gdb_exception ex;
+
+      TRY_CATCH (ex, RETURN_MASK_ALL)
+	{
+	  CORE_ADDR lm_addr;
+	  
+	  /* Fetch the load module address for this objfile.  */
+	  lm_addr = gdbarch_fetch_tls_load_module_address (current_gdbarch,
+	                                                   objfile);
+	  /* If it's 0, throw the appropriate exception.  */
+	  if (lm_addr == 0)
+	    throw_error (TLS_LOAD_MODULE_NOT_FOUND_ERROR,
+			 _("TLS load module not found"));
+
+	  addr = target_get_thread_local_address (ptid, lm_addr, offset);
+	}
+      /* If an error occurred, print TLS related messages here.  Otherwise,
+         throw the error to some higher catcher.  */
+      if (ex.reason < 0)
+	{
+	  int objfile_is_library = (objfile->flags & OBJF_SHARED);
+
+	  switch (ex.error)
+	    {
+	    case TLS_NO_LIBRARY_SUPPORT_ERROR:
+	      error (_("Cannot find thread-local variables in this thread library."));
+	      break;
+	    case TLS_LOAD_MODULE_NOT_FOUND_ERROR:
+	      if (objfile_is_library)
+		error (_("Cannot find shared library `%s' in dynamic"
+		         " linker's load module list"), objfile->name);
+	      else
+		error (_("Cannot find executable file `%s' in dynamic"
+		         " linker's load module list"), objfile->name);
+	      break;
+	    case TLS_NOT_ALLOCATED_YET_ERROR:
+	      if (objfile_is_library)
+		error (_("The inferior has not yet allocated storage for"
+		         " thread-local variables in\n"
+		         "the shared library `%s'\n"
+		         "for %s"),
+		       objfile->name, target_pid_to_str (ptid));
+	      else
+		error (_("The inferior has not yet allocated storage for"
+		         " thread-local variables in\n"
+		         "the executable `%s'\n"
+		         "for %s"),
+		       objfile->name, target_pid_to_str (ptid));
+	      break;
+	    case TLS_GENERIC_ERROR:
+	      if (objfile_is_library)
+		error (_("Cannot find thread-local storage for %s, "
+		         "shared library %s:\n%s"),
+		       target_pid_to_str (ptid),
+		       objfile->name, ex.message);
+	      else
+		error (_("Cannot find thread-local storage for %s, "
+		         "executable file %s:\n%s"),
+		       target_pid_to_str (ptid),
+		       objfile->name, ex.message);
+	      break;
+	    default:
+	      throw_exception (ex);
+	      break;
+	    }
+	}
+    }
+  /* It wouldn't be wrong here to try a gdbarch method, too; finding
+     TLS is an ABI-specific thing.  But we don't do that yet.  */
+  else
+    error (_("Cannot find thread-local variables on this target"));
+
+  return addr;
 }
 
 #undef	MIN

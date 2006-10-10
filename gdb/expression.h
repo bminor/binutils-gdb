@@ -234,6 +234,13 @@ enum exp_opcode
        following subexpression.  */
     UNOP_MEMVAL,
 
+    /* UNOP_MEMVAL_TLS is followed by a `struct objfile' pointer in the next
+       exp_element and a type pointer in the following exp_element.
+       With another UNOP_MEMVAL_TLS at the end, this makes four exp_elements.
+       It casts the contents of the word offsetted by the value of the
+       following subexpression from the TLS specified by `struct objfile'.  */
+    UNOP_MEMVAL_TLS,
+
     /* UNOP_... operate on one value from a following subexpression
        and replace it with a result.  They take no immediate arguments.  */
 
@@ -360,6 +367,7 @@ union exp_element
     struct type *type;
     struct internalvar *internalvar;
     struct block *block;
+    struct objfile *objfile;
   };
 
 struct expression

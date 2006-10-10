@@ -31,6 +31,7 @@
 #include "target.h"
 #include "gdb_string.h"
 #include "block.h"
+#include "objfiles.h"
 
 #ifdef HAVE_CTYPE_H
 #include <ctype.h>
@@ -414,6 +415,18 @@ print_subexp_standard (struct expression *exp, int *pos,
 	fputs_filtered (")", stream);
       return;
 
+    case UNOP_MEMVAL_TLS:
+      (*pos) += 3;
+      if ((int) prec > (int) PREC_PREFIX)
+	fputs_filtered ("(", stream);
+      fputs_filtered ("{", stream);
+      type_print (exp->elts[pc + 2].type, "", stream, 0);
+      fputs_filtered ("} ", stream);
+      print_subexp (exp, pos, stream, PREC_PREFIX);
+      if ((int) prec > (int) PREC_PREFIX)
+	fputs_filtered (")", stream);
+      return;
+
     case BINOP_ASSIGN_MODIFY:
       opcode = exp->elts[pc + 1].opcode;
       (*pos) += 2;
@@ -694,6 +707,8 @@ op_name_standard (enum exp_opcode opcode)
       return "UNOP_CAST";
     case UNOP_MEMVAL:
       return "UNOP_MEMVAL";
+    case UNOP_MEMVAL_TLS:
+      return "UNOP_MEMVAL_TLS";
     case UNOP_NEG:
       return "UNOP_NEG";
     case UNOP_LOGICAL_NOT:
@@ -998,6 +1013,16 @@ dump_subexp_body_standard (struct expression *exp,
       type_print (exp->elts[elt].type, NULL, stream, 0);
       fprintf_filtered (stream, ")");
       elt = dump_subexp (exp, stream, elt + 2);
+      break;
+    case UNOP_MEMVAL_TLS:
+      fprintf_filtered (stream, "TLS type @");
+      gdb_print_host_address (exp->elts[elt + 1].type, stream);
+      fprintf_filtered (stream, " (__thread /* \"%s\" */ ",
+                        (exp->elts[elt].objfile == NULL ? "(null)"
+			 : exp->elts[elt].objfile->name));
+      type_print (exp->elts[elt + 1].type, NULL, stream, 0);
+      fprintf_filtered (stream, ")");
+      elt = dump_subexp (exp, stream, elt + 3);
       break;
     case OP_TYPE:
       fprintf_filtered (stream, "Type @");

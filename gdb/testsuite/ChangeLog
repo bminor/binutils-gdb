@@ -1,3 +1,7 @@
+2006-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.threads/tls-nodebug.c, gdb.threads/tls-nodebug.exp: New test.
+
 2006-10-09  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	PR c++/2116

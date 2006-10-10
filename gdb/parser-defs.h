@@ -131,6 +131,8 @@ extern void write_exp_bitstring (struct stoken);
 
 extern void write_exp_elt_block (struct block *);
 
+extern void write_exp_elt_objfile (struct objfile *objfile);
+
 extern void write_exp_msymbol (struct minimal_symbol *,
 			       struct type *, struct type *);
 
