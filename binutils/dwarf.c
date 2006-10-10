@@ -2315,7 +2315,8 @@ display_debug_loc (struct dwarf_section *section, void *file)
     error (_("No location lists in .debug_info section!\n"));
 
   /* DWARF sections under Mach-O have non-zero addresses.  */
-  if (debug_information [first].loc_offsets [0] != section->address)
+  if (debug_information [first].num_loc_offsets > 0
+      && debug_information [first].loc_offsets [0] != section->address)
     warn (_("Location lists in %s section start at 0x%lx\n"),
 	  section->name, debug_information [first].loc_offsets [0]);
 
@@ -2686,7 +2687,8 @@ display_debug_ranges (struct dwarf_section *section,
     error (_("No range lists in .debug_info section!\n"));
 
   /* DWARF sections under Mach-O have non-zero addresses.  */
-  if (debug_information [first].range_lists [0] != section->address)
+  if (debug_information [first].num_range_lists > 0
+      && debug_information [first].range_lists [0] != section->address)
     warn (_("Range lists in %s section start at 0x%lx\n"),
 	  section->name, debug_information [first].range_lists [0]);
 

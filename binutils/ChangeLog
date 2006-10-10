@@ -1,3 +1,9 @@
+2006-10-10  Andreas Schwab  <schwab@suse.de>
+
+	* dwarf.c (display_debug_loc): Don't dereference loc_offsets when
+	there are no location lists.
+	(display_debug_ranges): Similar for range_lists.
+
 2006-10-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (debug_apply_rela_addends): Don't ignore relocation
