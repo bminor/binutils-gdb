@@ -346,9 +346,9 @@ Sized_object<size, big_endian>::include_linkonce_section(
     const elfcpp::Shdr<size, big_endian>&)
 {
   const char* symname = strrchr(name, '.') + 1;
-  bool omit1 = layout->add_comdat(symname, false);
-  bool omit2 = layout->add_comdat(name, true);
-  return omit1 || omit2;
+  bool include1 = layout->add_comdat(symname, false);
+  bool include2 = layout->add_comdat(name, true);
+  return include1 && include2;
 }
 
 // Lay out the input sections.  We walk through the sections and check

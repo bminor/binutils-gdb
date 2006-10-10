@@ -305,12 +305,15 @@ Symbol_table::add_from_object(
       gold_exit(false);
     }
 
+  const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
+
   const unsigned char* p = reinterpret_cast<const unsigned char*>(syms);
-  for (size_t i = 0; i < count; ++i)
+  for (size_t i = 0; i < count; ++i, p += sym_size)
     {
       elfcpp::Sym<size, big_endian> sym(p);
+      elfcpp::Sym<size, big_endian>* psym = &sym;
 
-      unsigned int st_name = sym.get_st_name();
+      unsigned int st_name = psym->get_st_name();
       if (st_name >= sym_name_size)
 	{
 	  fprintf(stderr,
@@ -318,6 +321,21 @@ Symbol_table::add_from_object(
 		  program_name, object->name().c_str(), st_name,
 		  static_cast<unsigned long>(i));
 	  gold_exit(false);
+	}
+
+      // A symbol defined in a section which we are not including must
+      // be treated as an undefined symbol.
+      unsigned char symbuf[sym_size];
+      elfcpp::Sym<size, big_endian> sym2(symbuf);
+      unsigned int st_shndx = psym->get_st_shndx();
+      if (st_shndx != elfcpp::SHN_UNDEF
+	  && st_shndx < elfcpp::SHN_LORESERVE
+	  && !object->is_section_included(st_shndx))
+	{
+	  memcpy(symbuf, p, sym_size);
+	  elfcpp::Sym_write<size, big_endian> sw(symbuf);
+	  sw.put_st_shndx(elfcpp::SHN_UNDEF);
+	  psym = &sym2;
 	}
 
       const char* name = sym_names + st_name;
@@ -331,7 +349,7 @@ Symbol_table::add_from_object(
       if (ver == NULL)
 	{
 	  name = this->namepool_.add(name);
-	  res = this->add_from_object(object, name, NULL, false, sym);
+	  res = this->add_from_object(object, name, NULL, false, *psym);
 	}
       else
 	{
@@ -344,12 +362,10 @@ Symbol_table::add_from_object(
 	      ++ver;
 	    }
 	  ver = this->namepool_.add(ver);
-	  res = this->add_from_object(object, name, ver, def, sym);
+	  res = this->add_from_object(object, name, ver, def, *psym);
 	}
 
       *sympointers++ = res;
-
-      p += elfcpp::Elf_sizes<size>::sym_size;
     }
 }
 
@@ -393,10 +409,11 @@ Symbol_table::sized_finalize(off_t off, Stringpool* pool)
 	  continue;
 	}
 
-      const Object::Map_to_output* mo =
-	sym->object()->section_output_info(sym->shnum());
+      off_t secoff;
+      Output_section* os = sym->object()->output_section(sym->shnum(),
+							 &secoff);
 
-      if (mo->output_section == NULL)
+      if (os == NULL)
 	{
 	  // We should be able to erase this symbol from the symbol
 	  // table, but at least with gcc 4.0.2
@@ -407,9 +424,7 @@ Symbol_table::sized_finalize(off_t off, Stringpool* pool)
 	}
       else
 	{
-	  sym->set_value(sym->value()
-			 + mo->output_section->address()
-			 + mo->offset);
+	  sym->set_value(sym->value() + os->address() + secoff);
 	  pool->add(sym->name());
 	  ++p;
 	  ++count;
@@ -470,10 +485,10 @@ Symbol_table::sized_write_globals(const Target*,
       if (sym->shnum() >= elfcpp::SHN_LORESERVE)
 	continue;
 
-      const Object::Map_to_output* mo =
-	sym->object()->section_output_info(sym->shnum());
-
-      if (mo->output_section == NULL)
+      off_t secoff;
+      Output_section* os = sym->object()->output_section(sym->shnum(),
+							 &secoff);
+      if (os == NULL)
 	continue;
 
       elfcpp::Sym_write<size, big_endian> osym(ps);
@@ -482,7 +497,7 @@ Symbol_table::sized_write_globals(const Target*,
       osym.put_st_size(sym->symsize());
       osym.put_st_info(elfcpp::elf_st_info(sym->binding(), sym->type()));
       osym.put_st_other(elfcpp::elf_st_other(sym->visibility(), sym->other()));
-      osym.put_st_shndx(mo->output_section->shndx());
+      osym.put_st_shndx(os->shndx());
 
       ps += sym_size;
     }

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-10-04 08:37-0700\n"
+"POT-Creation-Date: 2006-10-10 11:40-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -403,7 +403,7 @@ msgstr ""
 msgid "%s: %s: mixing 32-bit and 64-bit ELF objects\n"
 msgstr ""
 
-#: symtab.cc:317
+#: symtab.cc:320
 #, c-format
 msgid "%s: %s: bad global symbol name offset %u at %lu\n"
 msgstr ""
@@ -413,7 +413,7 @@ msgstr ""
 msgid "%s: %s: reloc %zu has bad offset %lu\n"
 msgstr ""
 
-#: target-reloc.h:106
+#: target-reloc.h:107
 #, c-format
 msgid "%s: %s: undefined reference to '%s'\n"
 msgstr ""

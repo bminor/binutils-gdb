@@ -94,6 +94,7 @@ relocate_section(
       else
 	{
 	  Symbol* gsym = global_syms[r_sym - local_count];
+	  assert(gsym != NULL);
 	  if (gsym->is_forwarder())
 	    gsym = symtab->resolve_forwards(gsym);
 

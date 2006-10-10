@@ -127,6 +127,21 @@ class Object
 	   const Stringpool* sympool, Output_file* of)
   { return this->do_relocate(options, symtab, sympool, of); }
 
+  // Return whether an input section is being included in the link.
+  bool
+  is_section_included(unsigned int shnum) const
+  {
+    assert(shnum < this->map_to_output_.size());
+    return this->map_to_output_[shnum].output_section != NULL;
+  }
+
+  // Given a section index, return the corresponding Output_section
+  // (which will be NULL if the section is not included in the link)
+  // and set *POFF to the offset within that section.
+  inline Output_section*
+  output_section(unsigned int shnum, off_t* poff);
+
+ protected:
   // What we need to know to map an input section to an output
   // section.  We keep an array of these, one for each input section,
   // indexed by the input section number.
@@ -139,16 +154,6 @@ class Object
     off_t offset;
   };
 
-  // Given a section index, return the corresponding Map_to_output
-  // information.
-  const Map_to_output*
-  section_output_info(unsigned int shnum) const
-  {
-    assert(shnum < this->map_to_output_.size());
-    return &this->map_to_output_[shnum];
-  }
-
- protected:
   // Read the symbols--implemented by child class.
   virtual void
   do_read_symbols(Read_symbols_data*) = 0;
@@ -246,6 +251,16 @@ Object::sized_target(ACCEPT_SIZE_ENDIAN_ONLY)
   assert(this->target_->get_size() == size);
   assert(this->target_->is_big_endian() ? big_endian : !big_endian);
   return static_cast<Sized_target<size, big_endian>*>(this->target_);
+}
+
+// Implement Object::output_section inline for efficiency.
+inline Output_section*
+Object::output_section(unsigned int shnum, off_t* poff)
+{
+  assert(shnum < this->map_to_output_.size());
+  const Map_to_output& mo(this->map_to_output_[shnum]);
+  *poff = mo.offset;
+  return mo.output_section;
 }
 
 // A regular object file.  This is size and endian specific.
