@@ -1,3 +1,10 @@
+2006-10-10  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ser-mingw.c (free_pipe_state, pipe_wait_handle): Update
+	for changes to pipe_select_thread.
+	(pipe_done_wait_handle): New.
+	(_initialize_ser_windows): Reference it.
+
 2006-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 
