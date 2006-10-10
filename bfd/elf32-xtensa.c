@@ -1123,8 +1123,7 @@ add_extra_plt_sections (bfd *dynobj, int count)
 
       sname = (char *) bfd_malloc (10);
       sprintf (sname, ".plt.%u", chunk);
-      s = bfd_make_section_with_flags (dynobj, sname,
-				       flags | SEC_CODE);
+      s = bfd_make_section_with_flags (dynobj, sname, flags | SEC_CODE);
       if (s == NULL
 	  || ! bfd_set_section_alignment (dynobj, s, 2))
 	return FALSE;
@@ -1471,7 +1470,7 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 #define add_dynamic_entry(TAG, VAL) \
   _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
-      if (! info->shared)
+      if (info->executable)
 	{
 	  if (!add_dynamic_entry (DT_DEBUG, 0))
 	    return FALSE;

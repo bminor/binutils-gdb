@@ -1,3 +1,8 @@
+2006-10-10  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (elf_xtensa_size_dynamic_sections): Add DT_DEBUG
+	for PIE executables.
+
 2006-10-03  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf-bfd.h (struct eh_cie_fde): Add set_loc pointer.
