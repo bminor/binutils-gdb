@@ -6625,6 +6625,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
   CORE_ADDR baseaddr;
   struct objfile *objfile = cu->objfile;
   const int decode_for_pst_p = (pst != NULL);
+  struct subfile *last_subfile = NULL;
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
@@ -6674,6 +6675,12 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
               lh->file_names[file - 1].included_p = 1;
               if (!decode_for_pst_p)
                 {
+		  if (last_subfile != current_subfile)
+		    {
+		      if (last_subfile)
+			record_line (last_subfile, 0, address);
+		      last_subfile = current_subfile;
+		    }
 	          /* Append row to matrix using current values.  */
 	          record_line (current_subfile, line, 
 	                       check_cu_functions (address, cu));
@@ -6728,8 +6735,16 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 	    case DW_LNS_copy:
               lh->file_names[file - 1].included_p = 1;
               if (!decode_for_pst_p)
-	        record_line (current_subfile, line, 
-	                     check_cu_functions (address, cu));
+		{
+		  if (last_subfile != current_subfile)
+		    {
+		      if (last_subfile)
+			record_line (last_subfile, 0, address);
+		      last_subfile = current_subfile;
+		    }
+		  record_line (current_subfile, line, 
+			       check_cu_functions (address, cu));
+		}
 	      basic_block = 0;
 	      break;
 	    case DW_LNS_advance_pc:
@@ -6756,7 +6771,10 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
                   dir = lh->include_dirs[fe->dir_index - 1];
 
                 if (!decode_for_pst_p)
-                  dwarf2_start_subfile (fe->name, dir, comp_dir);
+		  {
+		    last_subfile = current_subfile;
+		    dwarf2_start_subfile (fe->name, dir, comp_dir);
+		  }
               }
 	      break;
 	    case DW_LNS_set_column:
