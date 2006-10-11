@@ -1,3 +1,11 @@
+2006-10-11  Bob Wilson  <bob.wilson@acm.org>
+
+	* emulparams/elf32xtensa.sh (TEXT_PLT): Enable.
+	(OTHER_READONLY_SECTIONS): Add linkonce .xt_except_table sections.
+	(OTHER_READWRITE_SECTIONS): Add linkonce .xt_except_desc sections.
+	(OTHER_SDATA_SECTIONS): New.
+	* scripttempl/elfxtensa.sc: Import changes from elf.sc.
+
 2006-10-11  Jakub Jelinek  <jakub@redhat.com>
 
 	* ldlang.c (lang_append_dynamic_list): When appending, add all elements
