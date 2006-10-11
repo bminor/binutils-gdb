@@ -1,3 +1,10 @@
+2006-10-11  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (elf_xtensa_relocate_section): Return after
+	unresolvable relocation error.
+	(elf_xtensa_finish_dynamic_symbol): Set value of undefined, weak
+	symbols to zero.
+
 2006-10-10  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (elf_xtensa_size_dynamic_sections): Add DT_DEBUG

@@ -2259,13 +2259,16 @@ elf_xtensa_relocate_section (bfd *output_bfd,
       if (unresolved_reloc
 	  && !((input_section->flags & SEC_DEBUGGING) != 0
 	       && h->def_dynamic))
-	(*_bfd_error_handler)
-	  (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
-	   input_bfd,
-	   input_section,
-	   (long) rel->r_offset,
-	   howto->name,
-	   h->root.root.string);
+	{
+	  (*_bfd_error_handler)
+	    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
+	     input_bfd,
+	     input_section,
+	     (long) rel->r_offset,
+	     howto->name,
+	     h->root.root.string);
+	  return FALSE;
+	}
 
       /* There's no point in calling bfd_perform_relocation here.
 	 Just go directly to our "special function".  */
@@ -2326,12 +2329,17 @@ elf_xtensa_finish_dynamic_symbol (bfd *output_bfd ATTRIBUTE_UNUSED,
 				  struct elf_link_hash_entry *h,
 				  Elf_Internal_Sym *sym)
 {
-  if (h->needs_plt
-      && !h->def_regular)
+  if (h->needs_plt && !h->def_regular)
     {
       /* Mark the symbol as undefined, rather than as defined in
 	 the .plt section.  Leave the value alone.  */
       sym->st_shndx = SHN_UNDEF;
+      /* If the symbol is weak, we do need to clear the value.
+	 Otherwise, the PLT entry would provide a definition for
+	 the symbol even if the symbol wasn't defined anywhere,
+	 and so the symbol would never be NULL.  */
+      if (!h->ref_regular_nonweak)
+	sym->st_value = 0;
     }
 
   /* Mark _DYNAMIC and _GLOBAL_OFFSET_TABLE_ as absolute.  */
