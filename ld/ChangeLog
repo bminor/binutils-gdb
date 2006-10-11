@@ -1,3 +1,8 @@
+2006-10-11  Jakub Jelinek  <jakub@redhat.com>
+
+	* ldlang.c (lang_append_dynamic_list): When appending, add all elements
+	of the dynamic list rather than just the first entry.
+
 2006-10-10  Bob Wilson  <bob.wilson@acm.org>
 
 	* emulparams/elf32xtensa.sh (GENERATE_PIE_SCRIPT): Enable.

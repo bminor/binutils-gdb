@@ -6960,7 +6960,10 @@ lang_append_dynamic_list (struct bfd_elf_version_expr *dynamic)
 {
   if (link_info.dynamic)
     {
-      dynamic->next = link_info.dynamic->head.list;
+      struct bfd_elf_version_expr *tail;
+      for (tail = dynamic; tail->next != NULL; tail = tail->next)
+	;
+      tail->next = link_info.dynamic->head.list;
       link_info.dynamic->head.list = dynamic;
     }
   else
