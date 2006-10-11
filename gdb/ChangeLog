@@ -1,3 +1,8 @@
+2006-10-11  Denis Pilat  <denis.pilat@st.com>
+
+	* tui/tui-source.c (tui_set_source_content): handle source 
+	files that contain non unix end-of-line.
+	
 2006-10-10  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ser-mingw.c (free_pipe_state, pipe_wait_handle): Update
