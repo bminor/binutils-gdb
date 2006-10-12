@@ -2969,6 +2969,19 @@ elf_xtensa_ignore_discarded_relocs (asection *sec)
   return xtensa_is_property_section (sec);
 }
 
+
+static unsigned int
+elf_xtensa_action_discarded (asection *sec)
+{
+  if (strcmp (".xt_except_table", sec->name) == 0)
+    return 0;
+
+  if (strcmp (".xt_except_desc", sec->name) == 0)
+    return 0;
+
+  return _bfd_elf_default_action_discarded (sec);
+}
+
 
 /* Support for core dump NOTE sections.  */
 
@@ -9832,5 +9845,6 @@ static const struct bfd_elf_special_section elf_xtensa_special_sections[] =
 #define elf_backend_relocate_section	     elf_xtensa_relocate_section
 #define elf_backend_size_dynamic_sections    elf_xtensa_size_dynamic_sections
 #define elf_backend_special_sections	     elf_xtensa_special_sections
+#define elf_backend_action_discarded	     elf_xtensa_action_discarded
 
 #include "elf32-target.h"

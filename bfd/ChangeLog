@@ -1,3 +1,8 @@
+2006-10-12  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (elf_xtensa_action_discarded): New.
+	(elf_backend_action_discarded): Define.
+
 2006-10-11  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (elf_xtensa_relocate_section): Return after

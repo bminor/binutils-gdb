@@ -1,3 +1,8 @@
+2006-10-12  Bob Wilson  <bob.wilson@acm.org>
+
+	* emultempl/xtensaelf.em (is_inconsistent_linkonce_section): Check
+	for linkonce XCC exception tables (".e" and ".h").
+
 2006-10-11  Bob Wilson  <bob.wilson@acm.org>
 
 	* emulparams/elf32xtensa.sh (TEXT_PLT): Enable.

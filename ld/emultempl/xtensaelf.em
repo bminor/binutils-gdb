@@ -1184,7 +1184,7 @@ input_section_linked (asection *sec)
 }
 
 
-/* Strip out any linkonce literal sections or property tables where the
+/* Strip out any linkonce property tables or XCC exception tables where the
    associated linkonce text is from a different object file.  Normally,
    a matching set of linkonce sections is taken from the same object file,
    but sometimes the files are compiled differently so that some of the
@@ -1199,17 +1199,22 @@ is_inconsistent_linkonce_section (asection *sec)
 {
   bfd *abfd = sec->owner;
   const char *sec_name = bfd_get_section_name (abfd, sec);
-  const char *name = 0;
+  const char *name;
 
   if ((bfd_get_section_flags (abfd, sec) & SEC_LINK_ONCE) == 0
       || strncmp (sec_name, ".gnu.linkonce.", linkonce_len) != 0)
     return FALSE;
 
-  /* Check if this is an Xtensa property section.  */
-  if (CONST_STRNEQ (sec_name + linkonce_len, "p."))
-    name = sec_name + linkonce_len + 2;
-  else if (CONST_STRNEQ (sec_name + linkonce_len, "prop."))
-    name = strchr (sec_name + linkonce_len + 5, '.') + 1;
+  /* Check if this is an Xtensa property section or an exception table
+     for Tensilica's XCC compiler.  */
+  name = sec_name + linkonce_len;
+  if (CONST_STRNEQ (name, "prop."))
+    name = strchr (name + 5, '.') + 1;
+  else if (name[1] == '.'
+	   && (name[0] == 'p' || name[0] == 'e' || name[0] == 'h'))
+    name += 2;
+  else
+    name = 0;
 
   if (name)
     {
