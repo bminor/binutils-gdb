@@ -1,3 +1,7 @@
+2006-10-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/annota1.exp, gdb.base/maint.exp: Use string_to_regexp.
+
 2006-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.threads/tls-nodebug.c, gdb.threads/tls-nodebug.exp: New test.
