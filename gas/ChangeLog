@@ -1,3 +1,7 @@
+2006-10-13  Mei Ligang  <ligang@sunnorth.com.cn>
+
+	* config/tc-score.c (md_show_usage): Print -KPIC option usage.
+
 2006-10-08  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (parse_big_immediate): 64-bit host fix.

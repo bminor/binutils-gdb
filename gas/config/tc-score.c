@@ -5814,9 +5814,11 @@ md_show_usage (FILE * fp)
   fprintf (fp, _("\
         -USE_R1\t\tassemble code for no warning message when using temp register r1\n"));
   fprintf (fp, _("\
-        -O0\t\tassemble will not any optimization \n"));
+        -KPIC\t\tassemble code for PIC\n"));
   fprintf (fp, _("\
-        -G gpnum\tassemble code for setting gpsize and default is 8 byte \n"));
+        -O0\t\tassembler will not perform any optimizations\n"));
+  fprintf (fp, _("\
+        -G gpnum\tassemble code for setting gpsize and default is 8 byte\n"));
   fprintf (fp, _("\
         -V \t\tSunplus release version \n"));
 }
