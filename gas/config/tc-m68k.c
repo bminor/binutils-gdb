@@ -2084,29 +2084,31 @@ m68k_ip (char *instring)
 		if (!cpu->alias && (cpu->arch & ok_arch))
 		  {
 		    const struct m68k_cpu *alias;
-
+		    int seen_master = 0;
+		    
 		    if (any)
 		      APPEND (", ");
 		    any = 0;
 		    APPEND (cpu->name);
-		    APPEND (" [");
-		    if (cpu != m68k_cpus)
-		      for (alias = cpu - 1; alias->alias; alias--)
+		    for (alias = cpu; alias != m68k_cpus; alias--)
+		      if (alias[-1].alias >= 0)
+			break;
+		    for (; !seen_master || alias->alias > 0; alias++)
 			{
-			  if (any)
-			    APPEND (", ");
-			  APPEND (alias->name);
-			  any = 1;
+			  if (!alias->alias)
+			    seen_master = 1;
+			  else
+			    {
+			      if (any)
+				APPEND (", ");
+			      else
+				APPEND (" [");
+			      APPEND (alias->name);
+			      any = 1;
+			    }
 			}
-		    for (alias = cpu + 1; alias->alias; alias++)
-		      {
-			if (any)
-			  APPEND (", ");
-			APPEND (alias->name);
-			any = 1;
-		      }
-		    
-		    APPEND ("]");
+		    if (any)
+		      APPEND ("]");
 		    any = 1;
 		  }
 	      if (paren)
