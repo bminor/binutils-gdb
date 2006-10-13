@@ -1764,11 +1764,13 @@ copy_object (bfd *ibfd, bfd *obfd)
   return TRUE;
 }
 
+#if ! defined(HAVE_MKDTEMP)
 #undef MKDIR
 #if defined (_WIN32) && !defined (__CYGWIN32__)
 #define MKDIR(DIR, MODE) mkdir (DIR)
 #else
 #define MKDIR(DIR, MODE) mkdir (DIR, MODE)
+#endif
 #endif
 
 /* Read each archive element in turn from IBFD, copy the
@@ -1789,12 +1791,22 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
     } *list, *l;
   bfd **ptr = &obfd->archive_head;
   bfd *this_element;
-  char *dir = make_tempname (bfd_get_filename (obfd));
+  char * dir;
 
   /* Make a temp directory to hold the contents.  */
+#if defined(HAVE_MKDTEMP)
+  dir = make_tempdir (bfd_get_filename (obfd));
+
+  if (dir == NULL)
+      fatal (_("cannot create tempdir for archive copying (error: %s)"),
+	   strerror (errno));
+#else
+  dir = make_tempname (bfd_get_filename (obfd));
+
   if (MKDIR (dir, 0700) != 0)
     fatal (_("cannot mkdir %s for archive copying (error: %s)"),
 	   dir, strerror (errno));
+#endif
 
   obfd->has_armap = ibfd->has_armap;
 
@@ -1821,10 +1833,17 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
       /* If the file already exists, make another temp dir.  */
       if (stat (output_name, &buf) >= 0)
 	{
+#if defined(HAVE_MKDTEMP)
+	  output_name = make_tempdir (output_name);
+	  if (output_name == NULL)
+	    fatal (_("cannot create temporary dir '%s' for archive copying (error: %s)"),
+		   output_name, strerror (errno));
+#else
 	  output_name = make_tempname (output_name);
 	  if (MKDIR (output_name, 0700) != 0)
 	    fatal (_("cannot mkdir %s for archive copying (error: %s)"),
 		   output_name, strerror (errno));
+#endif
 
 	  l = xmalloc (sizeof (struct name_list));
 	  l->name = output_name;
@@ -2702,6 +2721,14 @@ strip_main (int argc, char *argv[])
       else
 	tmpname = make_tempname (argv[i]);
 
+      if (tmpname == NULL)
+	{
+	  non_fatal (_("could not create temporary file to hold stripped copy of '%s'"),
+		     argv[i]);
+	  status = 1;
+	  continue;
+	}
+
       status = 0;
       copy_file (argv[i], tmpname, input_target, output_target);
       if (status == 0)
@@ -3301,6 +3328,10 @@ copy_main (int argc, char *argv[])
   if (output_filename == NULL || strcmp (input_filename, output_filename) == 0)
     {
       char *tmpname = make_tempname (input_filename);
+
+      if (tmpname == NULL)
+	fatal (_("warning: could not create temporary file whilst copying '%s', (error: %s)"),
+	       input_filename, strerror (errno));
 
       copy_file (input_filename, tmpname, input_target, output_target);
       if (status == 0)

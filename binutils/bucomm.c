@@ -1,5 +1,5 @@
 /* bucomm.c -- Bin Utils COMmon code.
-   Copyright 1991, 1992, 1993, 1994, 1995, 1997, 1998, 2000, 2001, 2002, 2003
+   Copyright 1991, 1992, 1993, 1994, 1995, 1997, 1998, 2000, 2001, 2002, 2003, 2006
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -386,12 +386,17 @@ print_arelt_descr (FILE *file, bfd *abfd, bfd_boolean verbose)
   fprintf (file, "%s\n", bfd_get_filename (abfd));
 }
 
-/* Return the name of a temporary file in the same directory as FILENAME.  */
+/* Return the name of a created temporary file in the same directory as FILENAME.  */
 
 char *
 make_tempname (char *filename)
 {
+#if defined(HAVE_MKSTEMP)
+  static char template[] = "stXXXXXXXXXX";
+  int fd;
+#else
   static char template[] = "stXXXXXX";
+#endif
   char *tmpname;
   char *slash = strrchr (filename, '/');
 
@@ -399,6 +404,7 @@ make_tempname (char *filename)
   {
     /* We could have foo/bar\\baz, or foo\\bar, or d:bar.  */
     char *bslash = strrchr (filename, '\\');
+
     if (slash == NULL || (bslash != NULL && bslash > slash))
       slash = bslash;
     if (slash == NULL && filename[0] != '\0' && filename[1] == ':')
@@ -423,17 +429,68 @@ make_tempname (char *filename)
 #endif
       strcat (tmpname, "/");
       strcat (tmpname, template);
+#if defined(HAVE_MKSTEMP)
+      fd = mkstemp (tmpname);
+#else
       mktemp (tmpname);
+#endif
       *slash = c;
     }
   else
     {
       tmpname = xmalloc (sizeof (template));
       strcpy (tmpname, template);
-      mktemp (tmpname);
+#if defined(HAVE_MKSTEMP)
+      fd = mkstemp (tmpname);
+#endif
+    }
+#if defined(HAVE_MKSTEMP)
+  if (fd == -1)
+    return NULL;
+  close(fd);
+#endif
+  return tmpname;
+}
+
+#if defined(HAVE_MKDTEMP)
+/* Return the name of a created temporary directory inside the directory containing FILENAME.  */
+
+char *
+make_tempdir (char *filename)
+{
+  static char template[] = "stXXXXXXXXXX";
+  char *tmpname;
+  char *slash = strrchr (filename, '/');
+
+  if (slash != (char *) NULL)
+    {
+      char c;
+
+      c = *slash;
+      *slash = 0;
+      tmpname = xmalloc (strlen (filename) + sizeof (template) + 1);
+      strcpy (tmpname, filename);
+#ifdef HAVE_DOS_BASED_FILE_SYSTEM
+      /* If tmpname is "X:", appending a slash will make it a root
+         directory on drive X, which is NOT the same as the current
+         directory on drive X.  */
+      if (tmpname[1] == ':' && tmpname[2] == '\0')
+        strcat (tmpname, ".");
+#endif
+      strcat (tmpname, "/");
+      strcat (tmpname, template);
+      mkdtemp (tmpname);
+      *slash = c;
+   }
+  else
+    {
+      tmpname = xmalloc (sizeof (template));
+      strcpy (tmpname, template);
+      mkdtemp (tmpname);
     }
   return tmpname;
 }
+#endif /* HAVE_MKDTEMP */
 
 /* Parse a string into a VMA, with a fatal error if it can't be
    parsed.  */

@@ -1,3 +1,20 @@
+2006-10-13  Robert Connolly  <robert@linuxfromscratch.org>
+
+	PR binutils/2876
+	* configure.in: Check for the mkstemp and mkdtemp functions.
+	* configure: Regenerate.
+	* config.in (HAVE_MKDTEMP): New potential define.
+	(MAKE_MKSTEMP): Likewise.
+	* bucomm.c (make_tempname): Use mkstemp if it is available.
+	(make_tempdir): New function: Create a temporary directory using
+	mkdtemp, if it is available.
+	* bucomm.h (make_tempdir): New prototype.
+	* objcopy.c (copy_archive): Use make_tempdir if it is available.
+	(strip_main): Produce an warning message if a temporary file could
+	not be created.
+	(copy_main): Likewise.
+	* ar.c (write_archive): Likewise.
+
 2006-10-10  Andreas Schwab  <schwab@suse.de>
 
 	* dwarf.c (display_debug_loc): Don't dereference loc_offsets when

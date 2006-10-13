@@ -84,6 +84,12 @@ AC_CHECK_HEADERS(string.h strings.h stdlib.h unistd.h fcntl.h sys/file.h)
 AC_HEADER_SYS_WAIT
 AC_FUNC_ALLOCA
 AC_CHECK_FUNCS(sbrk utimes setmode getc_unlocked strcoll)
+AC_CHECK_FUNC([mkstemp],
+	      AC_DEFINE([HAVE_MKSTEMP], 1,
+	      [Define to 1 if you have the `mkstemp' function.]))
+AC_CHECK_FUNC([mkdtemp],
+              AC_DEFINE([HAVE_MKDTEMP], 1,
+              [Define to 1 if you have the `mkdtemp' function.]))
 
 # Check whether fopen64 is available and whether _LARGEFILE64_SOURCE
 # needs to be defined for it

@@ -922,6 +922,9 @@ write_archive (bfd *iarch)
   strcpy (old_name, bfd_get_filename (iarch));
   new_name = make_tempname (old_name);
 
+  if (new_name == NULL)
+    bfd_fatal ("could not create temporary file whilst writing archive");
+  
   output_filename = new_name;
 
   obfd = bfd_openw (new_name, bfd_get_target (iarch));
