@@ -1591,13 +1591,9 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT ranges_seg)
     }
   else
     {
-      /* This attributes is emitted if the code is disjoint.  */
-      
-      /* DW_AT_ranges */
-      expr.X_op = O_symbol;
-      expr.X_add_symbol = section_symbol (ranges_seg);
-      expr.X_add_number = 0;
-      emit_expr (&expr, sizeof_address);
+      /* This attribute is emitted if the code is disjoint.  */
+      /* DW_AT_ranges.  */
+      TC_DWARF2_EMIT_OFFSET (section_symbol (ranges_seg), sizeof_offset);
     }
 
   /* DW_AT_name.  We don't have the actual file name that was present
