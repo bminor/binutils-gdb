@@ -51,6 +51,7 @@
 
 2006-10-06 Joel Brobecker  <brobecker@adacore.com>
 
+	Fix PR symtab/2018
 	* dwarf2read.c (read_array_type): Set the type name if the name
 	attribute is present.
 
