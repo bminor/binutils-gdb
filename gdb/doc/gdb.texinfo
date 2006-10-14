@@ -4469,7 +4469,8 @@ Similar, but print only the outermost @var{n} frames.
 @itemx bt full
 @itemx bt full @var{n}
 @itemx bt full -@var{n}
-Print the values of the local variables also.
+Print the values of the local variables also.  @var{n} specifies the
+number of frames to print, like described above.
 @end table
 
 @kindex where
