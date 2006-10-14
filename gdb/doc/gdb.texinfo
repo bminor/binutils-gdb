@@ -4466,8 +4466,10 @@ Similar, but print only the innermost @var{n} frames.
 Similar, but print only the outermost @var{n} frames.
 
 @item backtrace full
-Print the values of the local variables also.
 @itemx bt full
+@itemx bt full @var{n}
+@itemx bt full -@var{n}
+Print the values of the local variables also.
 @end table
 
 @kindex where
