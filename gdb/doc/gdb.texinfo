@@ -2985,7 +2985,9 @@ The @code{rbreak} command can be used to set breakpoints in
 @itemx info break @r{[}@var{n}@r{]}
 @itemx info watchpoints @r{[}@var{n}@r{]}
 Print a table of all breakpoints, watchpoints, and catchpoints set and
-not deleted, with the following columns for each breakpoint:
+not deleted.  Optional argument @var{n} means print information only
+about the specified breakpoint (or watchpoint or catchpoint).  For
+each breakpoint, following columns are printed:
 
 @table @emph
 @item Breakpoint Numbers
@@ -3135,7 +3137,7 @@ by the program.
 Set a watchpoint that will break when @var{expr} is either read from
 or written into by the program.
 
-@kindex info watchpoints
+@kindex info watchpoints @r{[}@var{n}@r{]}
 @item info watchpoints
 This command prints a list of watchpoints, breakpoints, and catchpoints;
 it is the same as @code{info break} (@pxref{Set Breaks}).
@@ -4130,15 +4132,19 @@ Print a table of all the kinds of signals and how @value{GDBN} has been told to
 handle each one.  You can use this to see the signal numbers of all
 the defined types of signals.
 
+@item info signals @var{sig}
+Similar, but print information only about the specified signal number.
+
 @code{info handle} is an alias for @code{info signals}.
 
 @kindex handle
-@item handle @var{signal} @var{keywords}@dots{}
+@item handle @var{signal} @r{[}@var{keywords}@dots{}@r{]}
 Change the way @value{GDBN} handles signal @var{signal}.  @var{signal}
 can be the number of a signal or its name (with or without the
 @samp{SIG} at the beginning); a list of signal numbers of the form
 @samp{@var{low}-@var{high}}; or the word @samp{all}, meaning all the
-known signals.  The @var{keywords} say what change to make.
+known signals.  Optional arguments @var{keywords}, described below,
+say what change to make.
 @end table
 
 @c @group

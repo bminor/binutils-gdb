@@ -7,6 +7,9 @@
 	(File-I/O Examples): Put Ctrl-c in @kbd.
 	(Cygwin Native, File-I/O Overview, The Ctrl-C message)
 	(Console I/O): Use @samp with Ctrl-.
+	(Signals, Set Breaks, Set Watchpoints): Document optional
+	arguments to `info signals'  `handle', `info breakpoints', and
+	`info watchpoints'.
 
 2006-10-14  Eli Zaretskii  <eliz@gnu.org>
 
