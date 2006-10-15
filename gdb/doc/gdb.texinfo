@@ -537,7 +537,7 @@ $ @b{./m4}
 
 @b{define(baz,defn(<QUOTE>foo<UNQUOTE>))}
 @b{baz}
-@b{C-d}
+@b{Ctrl-d}
 m4: End of input: 0: fatal error: EOF in string
 @end smallexample
 
@@ -754,7 +754,7 @@ problem seems to have been just the two typos defining the wrong
 lengths.  We allow @code{m4} exit by giving it an EOF as input:
 
 @smallexample
-@b{C-d}
+@b{Ctrl-d}
 Program exited normally.
 @end smallexample
 
@@ -776,7 +776,7 @@ The essentials are:
 @item
 type @samp{@value{GDBP}} to start @value{GDBN}.
 @item
-type @kbd{quit} or @kbd{C-d} to exit.
+type @kbd{quit} or @kbd{Ctrl-d} to exit.
 @end itemize
 
 @menu
@@ -1277,14 +1277,14 @@ CISCO 68k: @file{.cisco-gdbinit}
 @item quit @r{[}@var{expression}@r{]}
 @itemx q
 To exit @value{GDBN}, use the @code{quit} command (abbreviated
-@code{q}), or type an end-of-file character (usually @kbd{C-d}).  If you
+@code{q}), or type an end-of-file character (usually @kbd{Ctrl-d}).  If you
 do not supply @var{expression}, @value{GDBN} will terminate normally;
 otherwise it will terminate using the result of @var{expression} as the
 error code.
 @end table
 
 @cindex interrupt
-An interrupt (often @kbd{C-c}) does not exit from @value{GDBN}, but rather
+An interrupt (often @kbd{Ctrl-c}) does not exit from @value{GDBN}, but rather
 terminates the action of any @value{GDBN} command that is in progress and
 returns to @value{GDBN} command level.  It is safe to type the interrupt
 character at any time because @value{GDBN} does not allow it to take effect
@@ -1411,8 +1411,8 @@ nothing.  This is useful mainly in command files (@pxref{Command
 Files,,Command files}).
 
 @cindex repeating command sequences
-@kindex C-o @r{(operate-and-get-next)}
-The @kbd{C-o} binding is useful for repeating a complex sequence of
+@kindex Ctrl-o @r{(operate-and-get-next)}
+The @kbd{Ctrl-o} binding is useful for repeating a complex sequence of
 commands.  This command accepts the current line, like @key{RET}, and
 then fetches the next line relative to the current line from the history
 for editing.
@@ -4096,7 +4096,7 @@ An argument is a repeat count, as in @code{next}.
 A signal is an asynchronous event that can happen in a program.  The
 operating system defines the possible kinds of signals, and gives each
 kind a name and a number.  For example, in Unix @code{SIGINT} is the
-signal a program gets when you type an interrupt character (often @kbd{C-c});
+signal a program gets when you type an interrupt character (often @kbd{Ctrl-c});
 @code{SIGSEGV} is the signal a program gets from referencing a place in
 memory far away from all the areas in use; @code{SIGALRM} occurs when
 the alarm clock timer goes off (which happens only if your program has
@@ -4455,7 +4455,7 @@ Print a backtrace of the entire stack: one line per frame for all
 frames in the stack.
 
 You can stop the backtrace at any time by typing the system interrupt
-character, normally @kbd{C-c}.
+character, normally @kbd{Ctrl-c}.
 
 @item backtrace @var{n}
 @itemx bt @var{n}
@@ -12473,7 +12473,7 @@ remote program.
 @cindex interrupting remote programs
 @cindex remote programs, interrupting
 Whenever @value{GDBN} is waiting for the remote program, if you type the
-interrupt character (often @kbd{C-c}), @value{GDBN} attempts to stop the
+interrupt character (often @kbd{Ctrl-c}), @value{GDBN} attempts to stop the
 program.  This may or may not succeed, depending in part on the hardware
 and the serial drivers the remote system uses.  If you type the
 interrupt character once again, @value{GDBN} displays this prompt:
@@ -12663,7 +12663,7 @@ Show the current speed of the remote connection.
 @cindex BREAK signal instead of Ctrl-C
 @anchor{set remotebreak}
 If set to on, @value{GDBN} sends a @code{BREAK} signal to the remote
-when you type @kbd{C-c} to interrupt the program running
+when you type @kbd{Ctrl-c} to interrupt the program running
 on the remote.  If set to off, @value{GDBN} sends the @samp{Ctrl-C}
 character instead.  The default is off, since most remote systems
 expect to see @samp{Ctrl-C} as the interrupt signal.
@@ -13617,7 +13617,7 @@ when the debuggee is started.
 This boolean value controls whether the debuggee should
 start a new group or stay in the same group as the debugger.
 This affects the way the Windows OS handles
-Ctrl-C.
+@samp{Ctrl-C}.
 
 @kindex show new-group
 @item show new-group
@@ -14464,7 +14464,7 @@ you can't send an interrupt---but you can press the @sc{reset} switch!
 Use the @sc{reset} button on the development board
 @itemize @bullet
 @item
-to interrupt your program (don't use @kbd{C-c} on the DOS host---it has
+to interrupt your program (don't use @kbd{Ctrl-c} on the DOS host---it has
 no way to pass an interrupt signal to the development board); and
 
 @item
@@ -24253,7 +24253,7 @@ or @samp{s} packets.  While @value{GDBN} handles the request for a system call,
 the target is stopped to allow deterministic access to the target's
 memory.  Therefore File-I/O is not interruptible by target signals.  On
 the other hand, it is possible to interrupt File-I/O by a user interrupt 
-(Ctrl-C) within @value{GDBN}.
+(@samp{Ctrl-C}) within @value{GDBN}.
 
 The target's request to perform a host system call does not finish
 the latest @samp{C}, @samp{c}, @samp{S} or @samp{s} action.  That means,
@@ -24409,16 +24409,16 @@ assuming 4 is the protocol specific representation of @code{EINTR}.
 
 
 @node The Ctrl-C message
-@subsection The Ctrl-C message
+@subsection The @samp{Ctrl-C} message
 @cindex ctrl-c message, in file-i/o protocol
 
-If the Ctrl-C flag is set in the @value{GDBN}
-reply packet (@pxref{The F reply packet}), 
+If the @samp{Ctrl-C} flag is set in the @value{GDBN}
+reply packet (@pxref{The F reply packet}),
 the target should behave as if it had
 gotten a break message.  The meaning for the target is ``system call
 interrupted by @code{SIGINT}''.  Consequentially, the target should actually stop
 (as with a break message) and return to @value{GDBN} with a @code{T02}
-packet.  
+packet.
 
 It's important for the target to know in which
 state the system call was interrupted.  There are two possible cases:
@@ -24461,7 +24461,7 @@ conditions is met:
 
 @itemize @bullet
 @item
-The user types @kbd{C-c}.  The behaviour is as explained above, and the
+The user types @kbd{Ctrl-c}.  The behaviour is as explained above, and the
 @code{read}
 system call is treated as finished.
 
@@ -24470,8 +24470,8 @@ The user presses @key{RET}.  This is treated as end of input with a trailing
 newline.
 
 @item
-The user types @kbd{C-d}.  This is treated as end of input.  No trailing
-character (neither newline nor Ctrl-D) is appended to the input.
+The user types @kbd{Ctrl-d}.  This is treated as end of input.  No trailing
+character (neither newline nor @samp{Ctrl-D}) is appended to the input.
 
 @end itemize
 
@@ -25350,7 +25350,7 @@ file descriptor (@code{EBADF}):
 -> @code{F-1,9}
 @end smallexample
 
-Example sequence of a read call, user presses Ctrl-C before syscall on
+Example sequence of a read call, user presses @kbd{Ctrl-c} before syscall on
 host is called:
 
 @smallexample
@@ -25359,7 +25359,7 @@ host is called:
 <- @code{T02}
 @end smallexample
 
-Example sequence of a read call, user presses Ctrl-C after syscall on
+Example sequence of a read call, user presses @kbd{Ctrl-c} after syscall on
 host is called:
 
 @smallexample

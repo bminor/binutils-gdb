@@ -1,3 +1,13 @@
+2006-10-15  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Sample Session, Invocation, Quitting GDB)
+	(Command Syntax, Signals, Backtrace, Connecting)
+	(Remote configuration, Renesas Boards, Console I/O): Fix last
+	change: use Ctrl- instead of C-, except wrt Emacs.
+	(File-I/O Examples): Put Ctrl-c in @kbd.
+	(Cygwin Native, File-I/O Overview, The Ctrl-C message)
+	(Console I/O): Use @samp with Ctrl-.
+
 2006-10-14  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Backtrace): Fix last change.
@@ -8,9 +18,9 @@
 
 2006-10-10  Bob Wilson  <bob.wilson@acm.org>
 
-	* gdb.texinfo (Command Syntax, Connecting, Remote configuration,
-	Renesas Boards, ST2000, TUI Keys, TUI Single Key Mode, TUI Commands,
-	Emacs, Console I/O): Fix @key and @kbd usage.
+	* gdb.texinfo (Command Syntax, Connecting, Remote configuration)
+	(Renesas Boards, ST2000, TUI Keys, TUI Single Key Mode)
+	(TUI Commands, Emacs, Console I/O): Fix @key and @kbd usage.
 
 2006-09-21  Vladimir Prus  <vladimir@codesourcery.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
