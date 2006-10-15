@@ -1,3 +1,10 @@
+2006-10-16  Jeff Johnston  <jjohnstn@redhat.com>
+ 
+	* linux-thread-db.c (thread_db_wait): Don't bother continuing if
+	the wait result indicates the program terminated with a
+	signal (from gdb-6.3-ia64-sigill-20051115.patch, a patch for
+	Fedora Core 5).
+	
 2006-10-11  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2read.c (dwarf_decode_lines): Call record_line upon
