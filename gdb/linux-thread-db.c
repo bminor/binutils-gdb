@@ -872,7 +872,8 @@ thread_db_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
        post-processing and bail out early.  */
     return ptid;
 
-  if (ourstatus->kind == TARGET_WAITKIND_EXITED)
+  if (ourstatus->kind == TARGET_WAITKIND_EXITED
+    || ourstatus->kind == TARGET_WAITKIND_SIGNALLED)
     return pid_to_ptid (-1);
 
   if (ourstatus->kind == TARGET_WAITKIND_EXECD)
