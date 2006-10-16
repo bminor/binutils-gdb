@@ -4,7 +4,7 @@
 #ld: -shared -melf32btsmipn32
 #readelf: -d
 
-Dynamic section at offset 0xb4 contains 18 entries:
+Dynamic section at offset .* contains 18 entries:
   Tag        Type                         Name/Value
  0x00000004 \(HASH\)                       0x[0-9a-f]*
  0x00000005 \(STRTAB\)                     0x[0-9a-f]*

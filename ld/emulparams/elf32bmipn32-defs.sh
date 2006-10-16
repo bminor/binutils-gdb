@@ -57,7 +57,7 @@ TEXT_START_SYMBOLS='_ftext = . ;'
 DATA_START_SYMBOLS='_fdata = . ;'
 OTHER_BSS_SYMBOLS='_fbss = .;'
 
-INITIAL_READONLY_SECTIONS=".MIPS.options : { *(.MIPS.options) }"
+INITIAL_READONLY_SECTIONS=".reginfo      ${RELOCATING-0} : { *(.reginfo) }"
 # Discard any .MIPS.content* or .MIPS.events* sections.  The linker
 # doesn't know how to adjust them.
 OTHER_SECTIONS="/DISCARD/ : { *(.MIPS.content*) *(.MIPS.events*) }"

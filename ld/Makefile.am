@@ -912,6 +912,7 @@ eelf64_sparc_fbsd.c: $(srcdir)/emulparams/elf64_sparc_fbsd.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64_sparc_fbsd "$(tdir_elf64_sparc_fbsd)"
 eelf64bmip.c: $(srcdir)/emulparams/elf64bmip.sh \
+  $(srcdir)/emulparams/elf64bmip-defs.sh \
   $(srcdir)/emulparams/elf32bmipn32-defs.sh $(ELF_DEPS) \
   $(srcdir)/emultempl/irix.em $(srcdir)/emultempl/mipself.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
@@ -926,11 +927,12 @@ emmo.c: $(srcdir)/emulparams/mmo.sh $(srcdir)/emultempl/mmix-elfnmmo.em \
   $(srcdir)/scripttempl/mmo.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} mmo "$(tdir_mmo)"
 eelf64btsmip.c: $(srcdir)/emulparams/elf64btsmip.sh \
+  $(srcdir)/emulparams/elf64bmip-defs.sh \
   $(srcdir)/emulparams/elf32bmipn32-defs.sh $(ELF_DEPS) \
   $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64btsmip "$(tdir_elf64btsmip)"
 eelf64ltsmip.c: $(srcdir)/emulparams/elf64ltsmip.sh \
-  $(srcdir)/emulparams/elf64btsmip.sh \
+  $(srcdir)/emulparams/elf64btsmip.sh $(srcdir)/emulparams/elf64bmip-defs.sh \
   $(srcdir)/emulparams/elf32bmipn32-defs.sh $(ELF_DEPS) \
   $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64ltsmip "$(tdir_elf64ltsmip)"

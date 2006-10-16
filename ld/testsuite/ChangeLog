@@ -1,3 +1,13 @@
+2006-10-16  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-mips-elf/branch-misc-1.d: Set the start address to 0x20000000.
+	* ld-mips-elf/jalbal.d: Likewise 0x200000a0.
+	* ld-mips-elf/jaloverflow-2.d: Likewise 0x20000000.
+	* ld-mips-elf/reloc-3-n32.d: Likewise.
+	* ld-mips-elf/reloc-3.d: Likewise.
+	* ld-mips-elf/textrel-1.d: Don't require a specific file offset for
+	.dynamic.
+
 2006-10-03  Jakub Jelinek  <jakub@redhat.com>
 
 	* ld-elf/eh4.d: New test.

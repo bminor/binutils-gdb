@@ -1,3 +1,15 @@
+2006-10-16  Richard Sandiford  <richard@codesourcery.com>
+
+	* Makefile.am (eelf64bmip.c): Depend on emulparams/elf64bmip-defs.sh.
+	(eelf64btsmip.c, eelf64ltsmip.c): Likewise.
+	* Makefile.in: Regenerate.
+	* emulparams/elf32bmipn32-defs.sh (INITIAL_READONLY_SECTIONS): Include
+	.reginfo rather than .MIPS.options.
+	* emulparams/elf64bmip-defs.sh: New file.
+	* emulparams/elf64bmip.sh: Include it.
+	(COMMONPAGESIZE): Delete.
+	* emulparams/elf64btsmip.sh: As for elf64bmip.sh.
+
 2006-10-12  Bob Wilson  <bob.wilson@acm.org>
 
 	* emultempl/xtensaelf.em (is_inconsistent_linkonce_section): Check
