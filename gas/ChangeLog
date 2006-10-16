@@ -1,3 +1,9 @@
+2006-10-16  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* input-scrub.c (input_scrub_next_buffer): Use TC_EOL_IN_INSN
+	in addition to testing for '\n'.
+	(TC_EOL_IN_INSN): Provide a default definition if necessary.
+
 2006-10-13  Sterling Augstine  <sterling@tensilica.com>
 
 	* dwarf2dbg.c (out_debug_info): Use TC_DWARF2_EMIT_OFFSET to emit
