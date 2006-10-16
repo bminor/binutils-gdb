@@ -2209,7 +2209,7 @@ addend_compare (const void *xp, const void *yp)
   const struct elfNN_ia64_dyn_sym_info *y
     = (const struct elfNN_ia64_dyn_sym_info *) yp;
 
-  return x->addend - y->addend;
+  return x->addend < y->addend ? -1 : x->addend > y->addend ? 1 : 0;
 }
 
 /* Sort elfNN_ia64_dyn_sym_info array and remove duplicates.  */

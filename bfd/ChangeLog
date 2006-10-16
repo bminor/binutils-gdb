@@ -1,3 +1,7 @@
+2006-10-16  Andreas Schwab  <schwab@suse.de>
+
+	* elfxx-ia64.c (addend_compare): Properly compute return value.
+
 2006-10-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/3314
