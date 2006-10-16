@@ -3531,7 +3531,7 @@ identify_add_or_sub(bfd_vma insn)
 static int using_thumb2 (struct elf32_arm_link_hash_table *globals)
 {
   int arch = elf32_arm_get_eabi_attr_int (globals->obfd, Tag_CPU_arch);
-  return arch == 8 || arch >= 10;
+  return arch == TAG_CPU_ARCH_V6T2 || arch >= TAG_CPU_ARCH_V7;
 }
 
 /* Perform a relocation as part of a final link.  */
