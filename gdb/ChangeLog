@@ -1,3 +1,9 @@
+2006-10-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	PR remote/2158
+	* remote.c (remote_write_bytes): Throttle packet alignment
+	for small packets.
+
 2006-10-16  Jeff Johnston  <jjohnstn@redhat.com>
  
 	* linux-thread-db.c (thread_db_wait): Don't bother continuing if

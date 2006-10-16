@@ -4013,8 +4013,9 @@ remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
 					     payload_size);
 
       /* If not all TODO bytes fit, then we'll need another packet.  Make
-	 a second try to keep the end of the packet aligned.  */
-      if (nr_bytes < todo)
+	 a second try to keep the end of the packet aligned.  Don't do
+	 this if the packet is tiny.  */
+      if (nr_bytes < todo && nr_bytes > 2 * REMOTE_ALIGN_WRITES)
 	{
 	  int new_nr_bytes;
 
