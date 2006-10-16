@@ -721,7 +721,7 @@ usage (FILE *stream, int status)
   -h --help                 Display this information\n\
   -v --version              Print the program's version number\n"));
   list_supported_targets (program_name, stream);
-  if (status == 0)
+  if (REPORT_BUGS_TO[0] && status == 0)
     fprintf (stream, _("Report bugs to %s\n"), REPORT_BUGS_TO);
   exit (status);
 }

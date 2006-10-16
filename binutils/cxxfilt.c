@@ -115,7 +115,7 @@ Options are:\n\
 Demangled names are displayed to stdout.\n\
 If a name cannot be demangled it is just echoed to stdout.\n\
 If no names are provided on the command line, stdin is read.\n");
-  if (status == 0)
+  if (REPORT_BUGS_TO[0] && status == 0)
     fprintf (stream, _("Report bugs to %s.\n"), REPORT_BUGS_TO);
   exit (status);
 }

@@ -26,7 +26,6 @@
 #include <sys/types.h>
 
 #include "config.h"
-#include "bin-bugs.h"
 
 #include <stdarg.h>
 

@@ -459,7 +459,7 @@ BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
 INCDIR = $(BASEDIR)/include
 
-REPORT_BUGS_TO = `test -z "@REPORT_BUGS_TO@" || echo "-DREPORT_BUGS_TO=\"@REPORT_BUGS_TO@\""`
+REPORT_BUGS_TO = "\"@REPORT_BUGS_TO@\""
 
 # This is the variable actually used when we compile.
 # Specify the directories to be searched for header files.
@@ -468,7 +468,7 @@ REPORT_BUGS_TO = `test -z "@REPORT_BUGS_TO@" || echo "-DREPORT_BUGS_TO=\"@REPORT
 # subdirectory rather than in the source directory.
 INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(srcdir)/config \
 	-I$(INCDIR) -I$(srcdir)/.. -I$(BFDDIR) -I$(srcdir)/../intl -I../intl \
-	$(REPORT_BUGS_TO) \
+	-DREPORT_BUGS_TO=$(REPORT_BUGS_TO) \
 	-DLOCALEDIR="\"$(datadir)/locale\""
 
 # This should be parallel to INCLUDES, but should replace $(srcdir)
@@ -477,7 +477,7 @@ INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(srcdir)/config \
 # in a subdirectory.
 DEP_INCLUDES = -D_GNU_SOURCE -I.. -I$${srcdir} -I../../bfd -I$${srcdir}/config \
 	-I$${srcdir}/../include -I$${srcdir}/.. -I$${srcdir}/../bfd -I$${srcdir}/../intl -I../../intl  \
-	$(REPORT_BUGS_TO) \
+	-DREPORT_BUGS_TO=$(REPORT_BUGS_TO) \
 	-DLOCALEDIR="\"$(datadir)/locale\""
 
 DEP_FLAGS = -DOBJ_MAYBE_ELF \
@@ -503,7 +503,7 @@ as_new_DEPENDENCIES = $(TARG_CPU_O) $(OBJ_FORMAT_O) $(ATOF_TARG_O) \
 
 # Stuff that every object file depends upon.  If anything is removed
 # from this list, remove it from dep-in.sed as well.
-$(OBJS): $(INCDIR)/bin-bugs.h $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
+$(OBJS): $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
 	$(INCDIR)/progress.h $(INCDIR)/fopen-same.h \
 	$(OBJ_FORMAT_H) $(TARG_CPU_H) $(TARG_ENV_H) \
 	as.h asintl.h bignum.h bit_fix.h config.h emul.h expr.h flonum.h \

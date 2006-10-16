@@ -4186,7 +4186,7 @@ echo "$as_me: error: bug URL not specified" >&2;}
     *)   REPORT_BUGS_TO="<URL:$withval>" ;;
    esac
 else
-  REPORT_BUGS_TO=""
+  REPORT_BUGS_TO="<URL:http://www.sourceware.org/bugzilla/>"
 
 fi;
 

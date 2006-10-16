@@ -200,7 +200,7 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 POFILES = @POFILES@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
-REPORT_BUGS_TO = `test -z "@REPORT_BUGS_TO@" || echo "-DREPORT_BUGS_TO=\"@REPORT_BUGS_TO@\""`
+REPORT_BUGS_TO = "\"@REPORT_BUGS_TO@\""
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRINGIFY = @STRINGIFY@
@@ -331,7 +331,7 @@ AM_MAKEINFOFLAGS = -I $(srcdir) -I $(BFDDIR)/doc -I $(top_srcdir)/../libiberty
 TEXI2DVI = texi2dvi -I $(srcdir) -I $(BFDDIR)/doc -I $(top_srcdir)/../libiberty
 INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
 	-I$(top_srcdir)/../intl -I../intl $(HDEFINES) $(CFLAGS) \
-	$(REPORT_BUGS_TO) \
+	-DREPORT_BUGS_TO=$(REPORT_BUGS_TO) \
 	-DLOCALEDIR="\"$(datadir)/locale\""
 
 BFDLIB = ../bfd/libbfd.la
@@ -2663,82 +2663,82 @@ dep-am: DEP
 # DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
 ldctor.o: ldctor.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h ld.h $(INCDIR)/bin-bugs.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h ld.h \
   ldexp.h ldlang.h ldmisc.h ldgram.h ldmain.h ldctor.h
 ldemul.o: ldemul.c config.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/bfdlink.h ld.h $(INCDIR)/bin-bugs.h ldmisc.h \
+  $(INCDIR)/bfdlink.h ld.h ldmisc.h \
   ldexp.h ldlang.h ldfile.h ldemul.h ldmain.h ldemul-list.h
 ldexp.o: ldexp.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/bfdlink.h ld.h $(INCDIR)/bin-bugs.h ldmain.h \
+  $(INCDIR)/bfdlink.h ld.h ldmain.h \
   ldmisc.h ldexp.h ldgram.h ldlang.h $(INCDIR)/libiberty.h \
   $(INCDIR)/safe-ctype.h
 ldfile.o: ldfile.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h ld.h $(INCDIR)/bin-bugs.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h ld.h \
   ldmisc.h ldexp.h ldlang.h ldfile.h ldmain.h ldgram.h \
   ldlex.h ldemul.h $(INCDIR)/libiberty.h $(INCDIR)/filenames.h
 ldlang.o: ldlang.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h $(INCDIR)/obstack.h \
-  $(INCDIR)/bfdlink.h ld.h $(INCDIR)/bin-bugs.h ldmain.h \
+  $(INCDIR)/bfdlink.h ld.h ldmain.h \
   ldexp.h ldlang.h ldgram.h ldlex.h ldmisc.h ldctor.h \
   ldfile.h ldemul.h $(INCDIR)/fnmatch.h $(INCDIR)/demangle.h \
   $(INCDIR)/hashtab.h
 ldmain.o: ldmain.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/safe-ctype.h $(INCDIR)/libiberty.h $(INCDIR)/progress.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/filenames.h ld.h $(INCDIR)/bin-bugs.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/filenames.h ld.h \
   ldmain.h ldmisc.h ldwrite.h ldexp.h ldlang.h ldgram.h \
   ldlex.h ldfile.h ldemul.h ldctor.h
 ldmisc.o: ldmisc.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h $(INCDIR)/bfdlink.h sysdep.h config.h \
   $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h $(INCDIR)/demangle.h \
-  ld.h $(INCDIR)/bin-bugs.h ldmisc.h ldexp.h ldlang.h \
+  ld.h ldmisc.h ldexp.h ldlang.h \
   ldgram.h ldlex.h ldmain.h ldfile.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h
 ldver.o: ldver.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h ../bfd/bfdver.h sysdep.h config.h \
-  $(INCDIR)/fopen-same.h ld.h $(INCDIR)/bin-bugs.h ldver.h \
+  $(INCDIR)/fopen-same.h ld.h ldver.h \
   ldexp.h ldlang.h ldfile.h ldemul.h ldmain.h
 ldwrite.o: ldwrite.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h \
-  ld.h $(INCDIR)/bin-bugs.h ldexp.h ldlang.h ldwrite.h \
+  ld.h ldexp.h ldlang.h ldwrite.h \
   ldmisc.h ldgram.h ldmain.h
 lexsup.o: lexsup.c config.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h $(INCDIR)/bfdlink.h \
-  ld.h $(INCDIR)/bin-bugs.h ldmain.h ldmisc.h ldexp.h \
+  ld.h ldmain.h ldmisc.h ldexp.h \
   ldlang.h ldgram.h ldlex.h ldfile.h ldver.h ldemul.h \
   $(INCDIR)/demangle.h
 mri.o: mri.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
-  sysdep.h config.h $(INCDIR)/fopen-same.h ld.h $(INCDIR)/bin-bugs.h \
+  sysdep.h config.h $(INCDIR)/fopen-same.h ld.h \
   ldexp.h ldlang.h ldmisc.h mri.h ldgram.h $(INCDIR)/libiberty.h
 ldcref.o: ldcref.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h ld.h $(INCDIR)/bin-bugs.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h ld.h \
   ldmain.h ldmisc.h ldexp.h ldlang.h
 pe-dll.o: pe-dll.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h \
-  ld.h $(INCDIR)/bin-bugs.h ldexp.h ldlang.h ldwrite.h \
+  ld.h ldexp.h ldlang.h ldwrite.h \
   ldmisc.h ldgram.h ldmain.h ldfile.h ldemul.h $(INCDIR)/coff/internal.h \
   $(BFDDIR)/libcoff.h deffile.h pe-dll.h
 ldgram.o: ldgram.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/bfdlink.h ld.h $(INCDIR)/bin-bugs.h ldexp.h \
+  $(INCDIR)/bfdlink.h ld.h ldexp.h \
   ldver.h ldlang.h ldfile.h ldemul.h ldmisc.h ldmain.h \
   mri.h ldctor.h ldlex.h
 ldlex.o: ldlex.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/safe-ctype.h $(INCDIR)/bfdlink.h ld.h $(INCDIR)/bin-bugs.h \
+  $(INCDIR)/safe-ctype.h $(INCDIR)/bfdlink.h ld.h \
   ldmisc.h ldexp.h ldlang.h ldgram.h ldfile.h ldlex.h \
   ldmain.h $(INCDIR)/libiberty.h
 deffilep.o: deffilep.c $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/safe-ctype.h ../bfd/bfd.h $(INCDIR)/symcat.h \
-  sysdep.h config.h $(INCDIR)/fopen-same.h ld.h $(INCDIR)/bin-bugs.h \
+  sysdep.h config.h $(INCDIR)/fopen-same.h ld.h \
   ldmisc.h deffile.h
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

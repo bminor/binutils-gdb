@@ -259,7 +259,7 @@ usage (int help)
 
   list_supported_targets (program_name, s);
 
-  if (help)
+  if (REPORT_BUGS_TO[0] && help)
     fprintf (s, _("Report bugs to %s\n"), REPORT_BUGS_TO);
 
   xexit (help ? 0 : 1);

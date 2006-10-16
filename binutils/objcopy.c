@@ -496,7 +496,7 @@ copy_usage (FILE *stream, int exit_status)
      --info                        List object formats & architectures supported\n\
 "));
   list_supported_targets (program_name, stream);
-  if (exit_status == 0)
+  if (REPORT_BUGS_TO[0] && exit_status == 0)
     fprintf (stream, _("Report bugs to %s\n"), REPORT_BUGS_TO);
   exit (exit_status);
 }
@@ -531,7 +531,7 @@ strip_usage (FILE *stream, int exit_status)
 "));
 
   list_supported_targets (program_name, stream);
-  if (exit_status == 0)
+  if (REPORT_BUGS_TO[0] && exit_status == 0)
     fprintf (stream, _("Report bugs to %s\n"), REPORT_BUGS_TO);
   exit (exit_status);
 }

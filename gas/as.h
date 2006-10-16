@@ -37,7 +37,6 @@
    If TEST is #defined, then we are testing a module: #define COMMON as "".  */
 
 #include "config.h"
-#include "bin-bugs.h"
 
 /* This is the code recommended in the autoconf documentation, almost
    verbatim.  If it doesn't work for you, let me know, and notify

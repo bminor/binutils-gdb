@@ -1728,7 +1728,7 @@ show_usage (FILE *file, int status)
   -h --help        Display this information\n\
   -v --version     Print the program's version number\n"));
 
-  if (status == 0)
+  if (REPORT_BUGS_TO[0] && status == 0)
     fprintf (file, _("Report bugs to %s\n"), REPORT_BUGS_TO);
   exit (status);
 }

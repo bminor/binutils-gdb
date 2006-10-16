@@ -462,7 +462,7 @@ show_usage (FILE *file, int status)
   -v --version           Display the program's version\n\
 \n"));
 
-  if (status == 0)
+  if (REPORT_BUGS_TO[0] && status == 0)
     fprintf (file, _("Report bugs to %s\n"), REPORT_BUGS_TO);
 
   exit (status);

@@ -75,7 +75,7 @@ AC_ARG_WITH(bugurl,
     no)  REPORT_BUGS_TO="" ;;
     *)   REPORT_BUGS_TO="<URL:$withval>" ;;
    esac],
-   REPORT_BUGS_TO=""
+   REPORT_BUGS_TO="<URL:http://www.sourceware.org/bugzilla/>"
 )
 AC_SUBST(REPORT_BUGS_TO)
 

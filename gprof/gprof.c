@@ -170,7 +170,7 @@ Usage: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n\
 	[--demangle[=STYLE]] [--no-demangle] [@FILE]\n\
 	[image-file] [profile-file...]\n"),
 	   whoami);
-  if (status == 0)
+  if (REPORT_BUGS_TO[0] && status == 0)
     fprintf (stream, _("Report bugs to %s\n"), REPORT_BUGS_TO);
   done (status);
 }

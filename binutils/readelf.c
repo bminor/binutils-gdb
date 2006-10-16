@@ -2661,11 +2661,11 @@ static struct option options[] =
 };
 
 static void
-usage (void)
+usage (FILE *stream)
 {
-  fprintf (stdout, _("Usage: readelf <option(s)> elf-file(s)\n"));
-  fprintf (stdout, _(" Display information about the contents of ELF format files\n"));
-  fprintf (stdout, _(" Options are:\n\
+  fprintf (stream, _("Usage: readelf <option(s)> elf-file(s)\n"));
+  fprintf (stream, _(" Display information about the contents of ELF format files\n"));
+  fprintf (stream, _(" Options are:\n\
   -a --all               Equivalent to: -h -l -S -s -r -d -V -A -I\n\
   -h --file-header       Display the ELF file header\n\
   -l --program-headers   Display the program headers\n\
@@ -2689,19 +2689,21 @@ usage (void)
   --debug-dump[=line,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=str,=loc,=Ranges]\n\
                          Display the contents of DWARF2 debug sections\n"));
 #ifdef SUPPORT_DISASSEMBLY
-  fprintf (stdout, _("\
+  fprintf (stream, _("\
   -i --instruction-dump=<number>\n\
                          Disassemble the contents of section <number>\n"));
 #endif
-  fprintf (stdout, _("\
+  fprintf (stream, _("\
   -I --histogram         Display histogram of bucket list lengths\n\
   -W --wide              Allow output width to exceed 80 characters\n\
   @<file>                Read options from <file>\n\
   -H --help              Display this information\n\
   -v --version           Display the version number of readelf\n"));
-  fprintf (stdout, _("Report bugs to %s\n"), REPORT_BUGS_TO);
+  
+  if (REPORT_BUGS_TO[0] && stream == stdout)
+    fprintf (stdout, _("Report bugs to %s\n"), REPORT_BUGS_TO);
 
-  exit (0);
+  exit (stream == stdout ? 0 : 1);
 }
 
 /* Record the fact that the user wants the contents of section number
@@ -2765,7 +2767,7 @@ parse_args (int argc, char **argv)
   int c;
 
   if (argc < 2)
-    usage ();
+    usage (stderr);
 
   while ((c = getopt_long
 	  (argc, argv, "ersuahnldSDAINtgw::x:i:vVWH", options, NULL)) != EOF)
@@ -2779,7 +2781,7 @@ parse_args (int argc, char **argv)
 	  /* Long options.  */
 	  break;
 	case 'H':
-	  usage ();
+	  usage (stdout);
 	  break;
 
 	case 'a':
@@ -3020,7 +3022,7 @@ parse_args (int argc, char **argv)
 	  error (_("Invalid option '-%c'\n"), c);
 	  /* Drop through.  */
 	case '?':
-	  usage ();
+	  usage (stderr);
 	}
     }
 
@@ -3028,11 +3030,11 @@ parse_args (int argc, char **argv)
       && !do_segments && !do_header && !do_dump && !do_version
       && !do_histogram && !do_debugging && !do_arch && !do_notes
       && !do_section_groups)
-    usage ();
+    usage (stderr);
   else if (argc < 3)
     {
       warn (_("Nothing to do.\n"));
-      usage ();
+      usage (stderr);
     }
 }
 
