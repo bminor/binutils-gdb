@@ -703,13 +703,13 @@ inaccuracies.
 This option affects execution count output only.
 Symbols that are executed less than @var{num} times are suppressed.
 
-@item -n[@var{symspec}]
-@itemx --time[=@var{symspec}]
+@item -n@var{symspec}
+@itemx --time=@var{symspec}
 The @samp{-n} option causes @code{gprof}, in its call graph analysis,
 to only propagate times for symbols matching @var{symspec}.
 
-@item -N[@var{symspec}]
-@itemx --no-time[=@var{symspec}]
+@item -N@var{symspec}
+@itemx --no-time=@var{symspec}
 The @samp{-n} option causes @code{gprof}, in its call graph analysis,
 not to propagate times for symbols matching @var{symspec}.
 

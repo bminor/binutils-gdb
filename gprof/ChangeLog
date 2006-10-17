@@ -1,5 +1,9 @@
 2006-10-16  Bob Wilson  <bob.wilson@acm.org>
 
+	* gprof.texi (Analysis Options): Argument for -n/-N is mandatory.
+
+2006-10-16  Bob Wilson  <bob.wilson@acm.org>
+
 	* gprof.c (main): Fix option string for -C, -n and -N.
 
 2006-09-26  Thiemo Seufer  <ths@networkno.de>
