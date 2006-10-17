@@ -999,6 +999,8 @@ xstormy16_elf_gc_mark_hook (asection *sec,
 #define elf_backend_check_relocs                xstormy16_elf_check_relocs
 #define elf_backend_always_size_sections \
   xstormy16_elf_always_size_sections
+#define elf_backend_omit_section_dynsym \
+  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
 #define elf_backend_finish_dynamic_sections \
   xstormy16_elf_finish_dynamic_sections
 

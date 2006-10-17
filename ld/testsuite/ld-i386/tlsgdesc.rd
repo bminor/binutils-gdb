@@ -45,25 +45,24 @@ Program Headers:
 
 Relocation section '.rel.dyn' at offset 0x[0-9a-f]+ contains 8 entries:
  Offset +Info +Type +Sym.Value +Sym. Name
-[0-9a-f]+ +0+225 R_386_TLS_TPOFF32 0+   sG3
-[0-9a-f]+ +0+30e R_386_TLS_TPOFF   0+   sG5
-[0-9a-f]+ +0+423 R_386_TLS_DTPMOD3 0+   sG2
-[0-9a-f]+ +0+424 R_386_TLS_DTPOFF3 0+   sG2
-[0-9a-f]+ +0+50e R_386_TLS_TPOFF   0+   sG4
-[0-9a-f]+ +0+725 R_386_TLS_TPOFF32 0+   sG6
-[0-9a-f]+ +0+923 R_386_TLS_DTPMOD3 0+   sG1
-[0-9a-f]+ +0+924 R_386_TLS_DTPOFF3 0+   sG1
+[0-9a-f ]+R_386_TLS_TPOFF32 0+   sG3
+[0-9a-f ]+R_386_TLS_TPOFF   0+   sG5
+[0-9a-f ]+R_386_TLS_DTPMOD3 0+   sG2
+[0-9a-f ]+R_386_TLS_DTPOFF3 0+   sG2
+[0-9a-f ]+R_386_TLS_TPOFF   0+   sG4
+[0-9a-f ]+R_386_TLS_TPOFF32 0+   sG6
+[0-9a-f ]+R_386_TLS_DTPMOD3 0+   sG1
+[0-9a-f ]+R_386_TLS_DTPOFF3 0+   sG1
 
 Relocation section '.rel.plt' at offset 0x[0-9a-f]+ contains 3 entries:
  Offset     Info    Type            Sym.Value  Sym. Name
-[0-9a-f]+  0+c07 R_386_JUMP_SLOT   0+   ___tls_get_addr
-[0-9a-f]+  0+929 R_386_TLS_DESC    0+   sG1
-[0-9a-f]+  0+429 R_386_TLS_DESC    0+   sG2
+[0-9a-f ]+R_386_JUMP_SLOT   0+   ___tls_get_addr
+[0-9a-f ]+R_386_TLS_DESC    0+   sG1
+[0-9a-f ]+R_386_TLS_DESC    0+   sG2
 
-Symbol table '.dynsym' contains 13 entries:
+Symbol table '.dynsym' contains [0-9]+ entries:
  +Num: + Value  Size Type + Bind +Vis +Ndx Name
  +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +7 *
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG3
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG5
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG2

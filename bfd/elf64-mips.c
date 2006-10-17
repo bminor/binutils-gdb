@@ -3034,6 +3034,7 @@ const struct elf_size_info mips_elf64_size_info =
 				_bfd_mips_elf_always_size_sections
 #define elf_backend_size_dynamic_sections \
 				_bfd_mips_elf_size_dynamic_sections
+#define elf_backend_init_index_section	_bfd_elf_init_1_index_section
 #define elf_backend_relocate_section    _bfd_mips_elf_relocate_section
 #define elf_backend_finish_dynamic_symbol \
 				_bfd_mips_elf_finish_dynamic_symbol

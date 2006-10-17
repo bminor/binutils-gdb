@@ -147,14 +147,13 @@ run_dump_test "hash1c"
 
 if {[istarget mips*-*-linux*]} {
      # The number of symbols that are always included in the symbol table
-     # for these tests.  The 5 are:
+     # for these tests.  The 4 are:
      #
      #     the null symbol entry
      #     the .MIPS.stubs section symbol
-     #     the .text section symbol
      #     _gp
      #     _GLOBAL_OFFSET_TABLE_
-     set base_syms 5
+     set base_syms 4
      foreach dynsym { 7fff 8000 fff0 10000 2fe80 } {
 	 run_ld_link_tests \
 	     [list [list \

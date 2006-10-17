@@ -49,41 +49,38 @@ Program Headers:
 
 Relocation section '.rel.dyn' at offset 0x[0-9a-f]+ contains 20 entries:
  Offset +Info +Type +Sym.Value +Sym. Name
-[0-9a-f]+ +0+25 R_386_TLS_TPOFF32
-[0-9a-f]+ +0+0e R_386_TLS_TPOFF *
-[0-9a-f]+ +0+25 R_386_TLS_TPOFF32
-[0-9a-f]+ +0+0e R_386_TLS_TPOFF *
-[0-9a-f]+ +0+0e R_386_TLS_TPOFF *
-[0-9a-f]+ +0+0e R_386_TLS_TPOFF *
-[0-9a-f]+ +0+25 R_386_TLS_TPOFF32
-[0-9a-f]+ +0+25 R_386_TLS_TPOFF32
-[0-9a-f]+ +0+0e R_386_TLS_TPOFF *
-[0-9a-f]+ +0+25 R_386_TLS_TPOFF32
-[0-9a-f]+ +0+0e R_386_TLS_TPOFF *
-[0-9a-f]+ +0+0e R_386_TLS_TPOFF *
-[0-9a-f]+ +0+0e R_386_TLS_TPOFF *
-[0-9a-f]+ +0+0e R_386_TLS_TPOFF *
-[0-9a-f]+ +0+25 R_386_TLS_TPOFF32
-[0-9a-f]+ +0+50e R_386_TLS_TPOFF   0+8   sg3
-[0-9a-f]+ +0+625 R_386_TLS_TPOFF32 0+c   sg4
-[0-9a-f]+ +0+60e R_386_TLS_TPOFF   0+c   sg4
-[0-9a-f]+ +0+70e R_386_TLS_TPOFF   0+10   sg5
-[0-9a-f]+ +0+b25 R_386_TLS_TPOFF32 0+4   sg2
+[0-9a-f ]+R_386_TLS_TPOFF32
+[0-9a-f ]+R_386_TLS_TPOFF *
+[0-9a-f ]+R_386_TLS_TPOFF32
+[0-9a-f ]+R_386_TLS_TPOFF *
+[0-9a-f ]+R_386_TLS_TPOFF *
+[0-9a-f ]+R_386_TLS_TPOFF *
+[0-9a-f ]+R_386_TLS_TPOFF32
+[0-9a-f ]+R_386_TLS_TPOFF32
+[0-9a-f ]+R_386_TLS_TPOFF *
+[0-9a-f ]+R_386_TLS_TPOFF32
+[0-9a-f ]+R_386_TLS_TPOFF *
+[0-9a-f ]+R_386_TLS_TPOFF *
+[0-9a-f ]+R_386_TLS_TPOFF *
+[0-9a-f ]+R_386_TLS_TPOFF *
+[0-9a-f ]+R_386_TLS_TPOFF32
+[0-9a-f ]+R_386_TLS_TPOFF   0+8   sg3
+[0-9a-f ]+R_386_TLS_TPOFF32 0+c   sg4
+[0-9a-f ]+R_386_TLS_TPOFF   0+c   sg4
+[0-9a-f ]+R_386_TLS_TPOFF   0+10   sg5
+[0-9a-f ]+R_386_TLS_TPOFF32 0+4   sg2
 
 Relocation section '.rel.plt' at offset 0x[0-9a-f]+ contains 5 entries:
  Offset     Info    Type            Sym.Value  Sym. Name
-[0-9a-f]+ +0+829 R_386_TLS_DESC * 0+   sg1
-[0-9a-f]+ +0+29 R_386_TLS_DESC *
-[0-9a-f]+ +0+29 R_386_TLS_DESC *
-[0-9a-f]+ +0+29 R_386_TLS_DESC *
-[0-9a-f]+ +0+29 R_386_TLS_DESC *
+[0-9a-f ]+R_386_TLS_DESC * 0+   sg1
+[0-9a-f ]+R_386_TLS_DESC *
+[0-9a-f ]+R_386_TLS_DESC *
+[0-9a-f ]+R_386_TLS_DESC *
+[0-9a-f ]+R_386_TLS_DESC *
 
-Symbol table '.dynsym' contains 16 entries:
+Symbol table '.dynsym' contains [0-9]+ entries:
  +Num: + Value  Size Type + Bind +Vis +Ndx Name
  +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +6 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +7 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +8 *
  +[0-9]+: 0+1c +0 TLS +GLOBAL DEFAULT +7 sg8
  +[0-9]+: 0+8 +0 TLS +GLOBAL DEFAULT +7 sg3
  +[0-9]+: 0+c +0 TLS +GLOBAL DEFAULT +7 sg4

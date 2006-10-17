@@ -81,12 +81,9 @@ Relocation section '.rel.plt' at offset 0x[0-9a-f]+ contains 1 entries:
  Offset +Info +Type +Sym.Value +Sym. Name
 [0-9a-f ]+R_386_JUMP_SLOT   0+   ___tls_get_addr
 
-Symbol table '.dynsym' contains 17 entries:
+Symbol table '.dynsym' contains [0-9]+ entries:
  +Num: +Value  Size Type +Bind +Vis +Ndx Name
  +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +7 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +8 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +9 *
  +[0-9]+: 0+1c +0 TLS +GLOBAL DEFAULT +8 sg8
  +[0-9]+: 0+8 +0 TLS +GLOBAL DEFAULT +8 sg3
  +[0-9]+: 0+c +0 TLS +GLOBAL DEFAULT +8 sg4

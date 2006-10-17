@@ -1680,9 +1680,21 @@ elf_vax_relocate_section (bfd *output_bfd,
 			{
 			  asection *osec;
 
+			  /* We are turning this relocation into one
+			     against a section symbol.  It would be
+			     proper to subtract the symbol's value,
+			     osec->vma, from the emitted reloc addend,
+			     but ld.so expects buggy relocs.  */
 			  osec = sec->output_section;
 			  indx = elf_section_data (osec)->dynindx;
-			  BFD_ASSERT (indx > 0);
+			  if (indx == 0)
+			    {
+			      struct elf_link_hash_table *htab;
+			      htab = elf_hash_table (info);
+			      osec = htab->text_index_section;
+			      indx = elf_section_data (osec)->dynindx;
+			    }
+			  BFD_ASSERT (indx != 0);
 			}
 
 		      outrel.r_info = ELF32_R_INFO (indx, r_type);
@@ -2062,6 +2074,7 @@ elf_vax_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 					elf_vax_adjust_dynamic_symbol
 #define elf_backend_size_dynamic_sections \
 					elf_vax_size_dynamic_sections
+#define elf_backend_init_index_section	_bfd_elf_init_1_index_section
 #define elf_backend_relocate_section	elf_vax_relocate_section
 #define elf_backend_finish_dynamic_symbol \
 					elf_vax_finish_dynamic_symbol

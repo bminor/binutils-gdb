@@ -2864,6 +2864,8 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		    {
 		      long indx;
 
+		      outrel.r_addend = relocation + rel->r_addend;
+
 		      if (is_plt)
 			sec = htab->splt;
 
@@ -2878,8 +2880,19 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			{
 			  asection *osec;
 
+			  /* We are turning this relocation into one
+			     against a section symbol.  It would be
+			     proper to subtract the symbol's value,
+			     osec->vma, from the emitted reloc addend,
+			     but ld.so expects buggy relocs.  */
 			  osec = sec->output_section;
 			  indx = elf_section_data (osec)->dynindx;
+
+			  if (indx == 0)
+			    {
+			      osec = htab->elf.text_index_section;
+			      indx = elf_section_data (osec)->dynindx;
+			    }
 
 			  /* FIXME: we really should be able to link non-pic
 			     shared libraries.  */
@@ -2894,8 +2907,8 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			    }
 			}
 
-		      outrel.r_info = SPARC_ELF_R_INFO (htab, rel, indx, r_type);
-		      outrel.r_addend = relocation + rel->r_addend;
+		      outrel.r_info = SPARC_ELF_R_INFO (htab, rel, indx,
+							r_type);
 		    }
 		}
 

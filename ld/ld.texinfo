@@ -3684,21 +3684,23 @@ scripts.
 @cindex discarding sections
 @cindex sections, discarding
 @cindex removing sections
-The linker will not create output section which do not have any
-contents.  This is for convenience when referring to input sections that
-may or may not be present in any of the input files.  For example:
+The linker will not create output sections with no contents.  This is
+for convenience when referring to input sections that may or may not
+be present in any of the input files.  For example:
 @smallexample
 .foo : @{ *(.foo) @}
 @end smallexample
 @noindent
 will only create a @samp{.foo} section in the output file if there is a
-@samp{.foo} section in at least one input file.
+@samp{.foo} section in at least one input file, and if the input
+sections are not all empty.  Other link script directives that allocate
+space in an output section will also create the output section.
 
-If you use anything other than an input section description as an output
-section command, such as a symbol assignment, then the output section
-will always be created, even if there are no matching input sections.
-When a section is discarded, its address (@xref{Output Section Address})
-will also be ignored.
+The linker will ignore address assignments (@xref{Output Section Address})
+on discarded output sections, except when the linker script defines
+symbols in the output section.  In that case the linker will obey
+the address assignments, possibly advancing dot and/or current lma
+even though the section is discarded.
 
 @cindex /DISCARD/
 The special output section name @samp{/DISCARD/} may be used to discard

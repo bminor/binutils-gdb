@@ -889,6 +889,8 @@ const struct elf_size_info elf64_sparc_size_info =
   _bfd_sparc_elf_gc_mark_hook
 #define elf_backend_gc_sweep_hook \
   _bfd_sparc_elf_gc_sweep_hook
+#define elf_backend_init_index_section \
+  _bfd_elf_init_1_index_section
 
 #define elf_backend_can_gc_sections 1
 #define elf_backend_can_refcount 1

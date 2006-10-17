@@ -154,45 +154,46 @@ gld${EMULATION_NAME}_after_open (void)
 static void
 gld${EMULATION_NAME}_finish (void)
 {
-  struct bfd_link_hash_entry * h;
-
-  if (thumb_entry_symbol == NULL)
-    return;
-
-  h = bfd_link_hash_lookup (link_info.hash, thumb_entry_symbol,
-			    FALSE, FALSE, TRUE);
-
-  if (h != (struct bfd_link_hash_entry *) NULL
-      && (h->type == bfd_link_hash_defined
-	  || h->type == bfd_link_hash_defweak)
-      && h->u.def.section->output_section != NULL)
+  if (thumb_entry_symbol != NULL)
     {
-      static char buffer[32];
-      bfd_vma val;
+      struct bfd_link_hash_entry * h;
 
-      /* Special procesing is required for a Thumb entry symbol.  The
-	 bottom bit of its address must be set.  */
-      val = (h->u.def.value
-	     + bfd_get_section_vma (output_bfd,
-				    h->u.def.section->output_section)
-	     + h->u.def.section->output_offset);
+      h = bfd_link_hash_lookup (link_info.hash, thumb_entry_symbol,
+				FALSE, FALSE, TRUE);
 
-      val |= 1;
+      if (h != (struct bfd_link_hash_entry *) NULL
+	  && (h->type == bfd_link_hash_defined
+	      || h->type == bfd_link_hash_defweak)
+	  && h->u.def.section->output_section != NULL)
+	{
+	  static char buffer[32];
+	  bfd_vma val;
 
-      /* Now convert this value into a string and store it in entry_symbol
-	 where the lang_finish() function will pick it up.  */
-      buffer[0] = '0';
-      buffer[1] = 'x';
+	  /* Special procesing is required for a Thumb entry symbol.  The
+	     bottom bit of its address must be set.  */
+	  val = (h->u.def.value
+		 + bfd_get_section_vma (output_bfd,
+					h->u.def.section->output_section)
+		 + h->u.def.section->output_offset);
 
-      sprintf_vma (buffer + 2, val);
+	  val |= 1;
 
-      if (entry_symbol.name != NULL && entry_from_cmdline)
-	einfo (_("%P: warning: '--thumb-entry %s' is overriding '-e %s'\n"),
-	       thumb_entry_symbol, entry_symbol.name);
-      entry_symbol.name = buffer;
+	  /* Now convert this value into a string and store it in entry_symbol
+	     where the lang_finish() function will pick it up.  */
+	  buffer[0] = '0';
+	  buffer[1] = 'x';
+
+	  sprintf_vma (buffer + 2, val);
+
+	  if (entry_symbol.name != NULL && entry_from_cmdline)
+	    einfo (_("%P: warning: '--thumb-entry %s' is overriding '-e %s'\n"),
+		   thumb_entry_symbol, entry_symbol.name);
+	  entry_symbol.name = buffer;
+	}
+      else
+	einfo (_("%P: warning: connot find thumb start symbol %s\n"),
+	       thumb_entry_symbol);
     }
-  else
-    einfo (_("%P: warning: connot find thumb start symbol %s\n"), thumb_entry_symbol);
 
   finish_default ();
 }

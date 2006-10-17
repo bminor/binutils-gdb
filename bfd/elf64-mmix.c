@@ -2916,6 +2916,8 @@ mmix_elf_relax_section (abfd, sec, link_info, again)
 
 #define elf_backend_check_relocs	mmix_elf_check_relocs
 #define elf_backend_symbol_processing	mmix_elf_symbol_processing
+#define elf_backend_omit_section_dynsym \
+  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
 
 #define bfd_elf64_bfd_is_local_label_name \
 	mmix_elf_is_local_label_name

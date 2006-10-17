@@ -6280,9 +6280,14 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			     but ld.so expects buggy relocs.  */
 			  osec = sec->output_section;
 			  indx = elf_section_data (osec)->dynindx;
-			  BFD_ASSERT (indx > 0);
+			  if (indx == 0)
+			    {
+			      osec = htab->elf.text_index_section;
+			      indx = elf_section_data (osec)->dynindx;
+			    }
+			  BFD_ASSERT (indx != 0);
 #ifdef DEBUG
-			  if (indx <= 0)
+			  if (indx == 0)
 			    printf ("indx=%ld section=%s flags=%08x name=%s\n",
 				    indx, osec->name, osec->flags,
 				    h->root.root.string);
@@ -7472,6 +7477,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 #define elf_backend_get_sec_type_attr		ppc_elf_get_sec_type_attr
 #define elf_backend_plt_sym_val			ppc_elf_plt_sym_val
 #define elf_backend_action_discarded		ppc_elf_action_discarded
+#define elf_backend_init_index_section		_bfd_elf_init_1_index_section
 
 #include "elf32-target.h"
 

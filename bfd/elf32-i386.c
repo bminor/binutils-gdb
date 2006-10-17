@@ -3872,6 +3872,8 @@ elf_i386_hash_symbol (struct elf_link_hash_entry *h)
 #define elf_backend_relocate_section	      elf_i386_relocate_section
 #define elf_backend_size_dynamic_sections     elf_i386_size_dynamic_sections
 #define elf_backend_always_size_sections      elf_i386_always_size_sections
+#define elf_backend_omit_section_dynsym \
+  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
 #define elf_backend_plt_sym_val		      elf_i386_plt_sym_val
 #define elf_backend_hash_symbol		      elf_i386_hash_symbol
 

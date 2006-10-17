@@ -4801,6 +4801,11 @@ mips_elf_create_dynamic_relocation (bfd *output_bfd,
 	{
 	  indx = elf_section_data (sec->output_section)->dynindx;
 	  if (indx == 0)
+	    {
+	      asection *osec = htab->root.text_index_section;
+	      indx = elf_section_data (osec)->dynindx;
+	    }
+	  if (indx == 0)
 	    abort ();
 	}
 

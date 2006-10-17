@@ -4024,17 +4024,22 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 		      && sym_sec->output_section != NULL
 		      && ! bfd_is_abs_section (sym_sec))
 		    {
-		      /* Skip this relocation if the output section has
-			 been discarded.  */
-		      if (bfd_is_abs_section (sym_sec->output_section))
-			break;
+		      asection *osec;
 
-		      indx = elf_section_data (sym_sec->output_section)->dynindx;
+		      osec = sym_sec->output_section;
+		      indx = elf_section_data (osec)->dynindx;
+		      if (indx == 0)
+			{
+			  osec = htab->etab.text_index_section;
+			  indx = elf_section_data (osec)->dynindx;
+			}
+		      BFD_ASSERT (indx != 0);
+
 		      /* We are turning this relocation into one
 			 against a section symbol, so subtract out the
 			 output section's address but not the offset
 			 of the input section in the output section.  */
-		      outrel.r_addend -= sym_sec->output_section->vma;
+		      outrel.r_addend -= osec->vma;
 		    }
 
 		  outrel.r_info = ELF32_R_INFO (indx, r_type);
@@ -4642,6 +4647,7 @@ elf32_hppa_elf_get_symbol_type (Elf_Internal_Sym *elf_sym, int type)
 #define elf_backend_finish_dynamic_symbol    elf32_hppa_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections  elf32_hppa_finish_dynamic_sections
 #define elf_backend_size_dynamic_sections    elf32_hppa_size_dynamic_sections
+#define elf_backend_init_index_section	     _bfd_elf_init_1_index_section
 #define elf_backend_gc_mark_hook	     elf32_hppa_gc_mark_hook
 #define elf_backend_gc_sweep_hook	     elf32_hppa_gc_sweep_hook
 #define elf_backend_grok_prstatus	     elf32_hppa_grok_prstatus

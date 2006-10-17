@@ -74,7 +74,6 @@ Symbol table '.dynsym' contains [0-9]+ entries:
 .* NOTYPE  LOCAL  DEFAULT  UND *
 .* SECTION LOCAL  DEFAULT +7 *
 .* SECTION LOCAL  DEFAULT +8 *
-.* SECTION LOCAL  DEFAULT +9 *
 .* TLS +GLOBAL DEFAULT +8 sg8
 .* TLS +GLOBAL DEFAULT +8 sg3
 .* TLS +GLOBAL DEFAULT +8 sg4

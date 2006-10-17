@@ -4141,6 +4141,8 @@ m32r_elf_reloc_type_class (const Elf_Internal_Rela *rela)
 #define elf_backend_create_dynamic_sections     m32r_elf_create_dynamic_sections
 #define bfd_elf32_bfd_link_hash_table_create    m32r_elf_link_hash_table_create
 #define elf_backend_size_dynamic_sections       m32r_elf_size_dynamic_sections
+#define elf_backend_omit_section_dynsym \
+  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
 #define elf_backend_finish_dynamic_sections     m32r_elf_finish_dynamic_sections
 #define elf_backend_adjust_dynamic_symbol       m32r_elf_adjust_dynamic_symbol
 #define elf_backend_finish_dynamic_symbol       m32r_elf_finish_dynamic_symbol

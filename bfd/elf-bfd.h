@@ -345,6 +345,10 @@ struct elf_link_hash_table
      when linking against or generating a shared object.  */
   bfd_boolean dynamic_sections_created;
 
+  /* True if this target has relocatable executables, so needs dynamic
+     section symbols.  */
+  bfd_boolean is_relocatable_executable;
+
   /* The BFD used to hold special sections created by the linker.
      This will be the first BFD found which requires these sections to
      be created.  */
@@ -378,6 +382,12 @@ struct elf_link_hash_table
      included in the link.  */
   struct bfd_link_needed_list *needed;
 
+  /* Sections in the output bfd that provides a section symbol
+     to be used by relocations emitted against local symbols.
+     Most targets will not use data_index_section.  */
+  asection *text_index_section;
+  asection *data_index_section;
+
   /* The _GLOBAL_OFFSET_TABLE_ symbol.  */
   struct elf_link_hash_entry *hgot;
 
@@ -406,10 +416,6 @@ struct elf_link_hash_table
 
   /* A linked list of BFD's loaded in the link.  */
   struct elf_link_loaded_list *loaded;
-
-  /* True if this target has relocatable executables, so needs dynamic
-     section symbols.  */
-  bfd_boolean is_relocatable_executable;
 };
 
 /* Look up an entry in an ELF linker hash table.  */
@@ -764,6 +770,11 @@ struct elf_backend_data
      .interp section and any sections created by the
      CREATE_DYNAMIC_SECTIONS entry point.  */
   bfd_boolean (*elf_backend_size_dynamic_sections)
+    (bfd *output_bfd, struct bfd_link_info *info);
+
+  /* Set TEXT_INDEX_SECTION and DATA_INDEX_SECTION, the output sections
+     we keep to use as a base for relocs and symbols.  */
+  void (*elf_backend_init_index_section)
     (bfd *output_bfd, struct bfd_link_info *info);
 
   /* The RELOCATE_SECTION function is called by the ELF backend linker
@@ -1697,6 +1708,10 @@ extern bfd_boolean _bfd_elf_create_got_section
   (bfd *, struct bfd_link_info *);
 extern struct elf_link_hash_entry *_bfd_elf_define_linkage_sym
   (bfd *, struct bfd_link_info *, asection *, const char *);
+extern void _bfd_elf_init_1_index_section
+  (bfd *, struct bfd_link_info *);
+extern void _bfd_elf_init_2_index_sections
+  (bfd *, struct bfd_link_info *);
 
 extern bfd_boolean _bfd_elfcore_make_pseudosection
   (bfd *, char *, size_t, ufile_ptr);

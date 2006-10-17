@@ -207,6 +207,7 @@ elf32_sparc_reloc_type_class (const Elf_Internal_Rela *rela)
 #define elf_backend_gc_mark_hook	_bfd_sparc_elf_gc_mark_hook
 #define elf_backend_gc_sweep_hook       _bfd_sparc_elf_gc_sweep_hook
 #define elf_backend_plt_sym_val		_bfd_sparc_elf_plt_sym_val
+#define elf_backend_init_index_section	_bfd_elf_init_1_index_section
 
 #define elf_backend_can_gc_sections 1
 #define elf_backend_can_refcount 1

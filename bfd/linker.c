@@ -3073,7 +3073,7 @@ _bfd_generic_section_already_linked (bfd *abfd, asection *sec)
   bfd_section_already_linked_table_insert (already_linked_list, sec);
 }
 
-/* Convert symbols in excluded output sections to absolute.  */
+/* Convert symbols in excluded output sections to use a kept section.  */
 
 static bfd_boolean
 fix_syms (struct bfd_link_hash_entry *h, void *data)
@@ -3092,8 +3092,27 @@ fix_syms (struct bfd_link_hash_entry *h, void *data)
 	  && (s->output_section->flags & SEC_EXCLUDE) != 0
 	  && bfd_section_removed_from_list (obfd, s->output_section))
 	{
+	  asection *op;
+	  for (op = s->output_section->prev; op != NULL; op = op->prev)
+	    if ((op->flags & SEC_EXCLUDE) == 0
+		&& !bfd_section_removed_from_list (obfd, op))
+	      break;
+	  if (op == NULL)
+	    {
+	      if (s->output_section->prev != NULL)
+		op = s->output_section->prev->next;
+	      else
+		op = s->output_section->owner->sections;
+	      for (; op != NULL; op = op->next)
+		if ((op->flags & SEC_EXCLUDE) == 0
+		    && !bfd_section_removed_from_list (obfd, op))
+		  break;
+	      if (op == NULL)
+		op = bfd_abs_section_ptr;
+	    }
 	  h->u.def.value += s->output_offset + s->output_section->vma;
-	  h->u.def.section = bfd_abs_section_ptr;
+	  h->u.def.value -= op->vma;
+	  h->u.def.section = op;
 	}
     }
 

@@ -1,3 +1,11 @@
+2006-10-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (strip_excluded_output_sections): Do strip sections
+	that define syms, but don't ignore them.
+	* ld.texinfo (Output Section Discarding): Revise.
+	* emultempl/armcoff.em (gld${EMULATION_NAME}_finish): Always call
+	finish_default.
+
 2006-10-16  Richard Sandiford  <richard@codesourcery.com>
 
 	* Makefile.am (eelf64bmip.c): Depend on emulparams/elf64bmip-defs.sh.

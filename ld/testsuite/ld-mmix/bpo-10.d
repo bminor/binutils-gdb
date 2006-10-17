@@ -16,7 +16,7 @@ SYMBOL TABLE:
 2000000000000000 g       \*ABS\*	0+ __bss_start
 2000000000000000 g       \*ABS\*	0+ _edata
 2000000000000000 g       \*ABS\*	0+ _end
-0+4 g       \*ABS\*	0+ _start\.
+0+4 g       \.init	0+ _start\.
 
 Contents of section \.init:
  0000 e37704a6                             .*

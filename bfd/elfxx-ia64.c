@@ -5762,6 +5762,8 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
 	elfNN_ia64_adjust_dynamic_symbol
 #define elf_backend_size_dynamic_sections \
 	elfNN_ia64_size_dynamic_sections
+#define elf_backend_omit_section_dynsym \
+  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
 #define elf_backend_relocate_section \
 	elfNN_ia64_relocate_section
 #define elf_backend_finish_dynamic_symbol \

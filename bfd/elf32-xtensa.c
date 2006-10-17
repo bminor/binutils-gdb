@@ -9844,6 +9844,8 @@ static const struct bfd_elf_special_section elf_xtensa_special_sections[] =
 #define elf_backend_reloc_type_class	     elf_xtensa_reloc_type_class
 #define elf_backend_relocate_section	     elf_xtensa_relocate_section
 #define elf_backend_size_dynamic_sections    elf_xtensa_size_dynamic_sections
+#define elf_backend_omit_section_dynsym \
+  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
 #define elf_backend_special_sections	     elf_xtensa_special_sections
 #define elf_backend_action_discarded	     elf_xtensa_action_discarded
 

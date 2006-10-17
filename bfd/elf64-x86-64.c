@@ -2457,9 +2457,19 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			{
 			  asection *osec;
 
+			  /* We are turning this relocation into one
+			     against a section symbol.  It would be
+			     proper to subtract the symbol's value,
+			     osec->vma, from the emitted reloc addend,
+			     but ld.so expects buggy relocs.  */
 			  osec = sec->output_section;
 			  sindx = elf_section_data (osec)->dynindx;
-			  BFD_ASSERT (sindx > 0);
+			  if (sindx == 0)
+			    {
+			      asection *oi = htab->elf.text_index_section;
+			      sindx = elf_section_data (oi)->dynindx;
+			    }
+			  BFD_ASSERT (sindx != 0);
 			}
 
 		      outrel.r_info = ELF64_R_INFO (sindx, r_type);
@@ -3657,6 +3667,7 @@ static const struct bfd_elf_special_section
 #define elf_backend_relocate_section	    elf64_x86_64_relocate_section
 #define elf_backend_size_dynamic_sections   elf64_x86_64_size_dynamic_sections
 #define elf_backend_always_size_sections    elf64_x86_64_always_size_sections
+#define elf_backend_init_index_section	    _bfd_elf_init_1_index_section
 #define elf_backend_plt_sym_val		    elf64_x86_64_plt_sym_val
 #define elf_backend_object_p		    elf64_x86_64_elf_object_p
 #define bfd_elf64_mkobject		    elf64_x86_64_mkobject

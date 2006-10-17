@@ -97,6 +97,7 @@ static bfd_vma opd_entry_value
 #define elf_backend_hide_symbol		      ppc64_elf_hide_symbol
 #define elf_backend_always_size_sections      ppc64_elf_func_desc_adjust
 #define elf_backend_size_dynamic_sections     ppc64_elf_size_dynamic_sections
+#define elf_backend_init_index_section	      _bfd_elf_init_2_index_sections
 #define elf_backend_action_discarded	      ppc64_elf_action_discarded
 #define elf_backend_relocate_section	      ppc64_elf_relocate_section
 #define elf_backend_finish_dynamic_symbol     ppc64_elf_finish_dynamic_symbol
@@ -10839,6 +10840,17 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
 			  osec = sec->output_section;
 			  indx = elf_section_data (osec)->dynindx;
+
+			  if (indx == 0)
+			    {
+			      if ((osec->flags & SEC_READONLY) == 0
+				  && htab->elf.data_index_section != NULL)
+				osec = htab->elf.data_index_section;
+			      else
+				osec = htab->elf.text_index_section;
+			      indx = elf_section_data (osec)->dynindx;
+			    }
+			  BFD_ASSERT (indx != 0);
 
 			  /* We are turning this relocation into one
 			     against a section symbol, so subtract out

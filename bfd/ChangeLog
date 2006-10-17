@@ -1,3 +1,55 @@
+2006-10-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (struct elf_link_hash_table): Reorder.  Add
+	text_index_section and data_index_section.
+	(struct elf_backend_data): Add elf_backend_init_index_section.
+	(_bfd_elf_init_1_index_section): Declare.
+	(_bfd_elf_init_2_index_sections): Declare.
+	* elfxx-target.h (elf_backend_init_index_section): Define.
+	(elfNN_bed): Init new field.
+	* elflink.c (_bfd_elf_link_omit_section_dynsym): Keep first tls
+	section and text_index_section plus data_index_section.
+	(_bfd_elf_link_renumber_dynsyms): Clear dynindx on omitted sections.
+	(_bfd_elf_init_1_index_section): New function.
+	(_bfd_elf_init_2_index_sections): New function.
+	(bfd_elf_size_dynsym_hash_dynstr): Call elf_backend_init_index_section.
+	(elf_link_input_bfd): When emitting relocs, use text_index_section
+	and data_index_section for removed sections.
+	* elf-m10300.c (elf_backend_omit_section_dynsym): Define.
+	* elf32-i386.c: Likewise.
+	* elf32-m32r.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-xstormy16.c: Likewise.
+	* elf32-xtensa.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-hppa.c: Likewise.
+	* elf64-mmix.c: Likewise.
+	* elf64-sh64.c: Likewise.
+	* elfxx-ia64.c: Likewise.
+	* elf32-arm.c (elf32_arm_final_link_relocate): Use text_index_section
+	and data_index_section sym for relocs against sections with no dynamic
+	section sym.
+	(elf_backend_init_index_section): Define.
+	* elf32-cris.c: Similarly.
+	* elf32-hppa.c: Similarly.
+	* elf32-i370.c: Similarly.
+	* elf32-m68k.c: Similarly.
+	* elf32-mips.c: Similarly.
+	* elf32-ppc.c: Similarly.
+	* elf32-s390.c: Similarly.
+	* elf32-sparc.c: Similarly.
+	* elf32-vax.c: Similarly.
+	* elf64-mips.c: Similarly.
+	* elf64-ppc.c: Similarly.
+	* elf64-s390.c: Similarly.
+	* elf64-sparc.c: Similarly.
+	* elf64-x86-64.c: Similarly.
+	* elfn32-mips.c: Similarly.
+	* elfxx-mips.c: Similarly.
+	* elfxx-sparc.c: Similarly.
+	* linker.c (fix_syms): Base symbols in removed sections on
+	previous section in preference to using absolute section.
+
 2006-10-16  Andreas Schwab  <schwab@suse.de>
 
 	* elfxx-ia64.c (addend_compare): Properly compute return value.

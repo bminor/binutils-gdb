@@ -49,9 +49,9 @@ Relocation section '\.rela\.dyn' at offset .* contains 16 entries:
 [0-9a-f ]+R_PPC64_TPREL16 +0+60 le0 \+ 0
 [0-9a-f ]+R_PPC64_TPREL16_HA +0+68 le1 \+ 0
 [0-9a-f ]+R_PPC64_TPREL16_LO +0+68 le1 \+ 0
-[0-9a-f ]+R_PPC64_TPREL16_DS +0+10630 \.tdata \+ 28
-[0-9a-f ]+R_PPC64_TPREL16_HA +0+10630 \.tdata \+ 30
-[0-9a-f ]+R_PPC64_TPREL16_LO +0+10630 \.tdata \+ 30
+[0-9a-f ]+R_PPC64_TPREL16_DS +0+105f8 \.tdata \+ 28
+[0-9a-f ]+R_PPC64_TPREL16_HA +0+105f8 \.tdata \+ 30
+[0-9a-f ]+R_PPC64_TPREL16_LO +0+105f8 \.tdata \+ 30
 [0-9a-f ]+R_PPC64_DTPMOD64 +0+
 [0-9a-f ]+R_PPC64_DTPMOD64 +0+
 [0-9a-f ]+R_PPC64_DTPREL64 +0+
@@ -72,8 +72,6 @@ Symbol table '\.dynsym' contains .* entries:
 .* NOTYPE +LOCAL +DEFAULT +UND 
 .* SECTION LOCAL +DEFAULT +6 
 .* SECTION LOCAL +DEFAULT +7 
-.* SECTION LOCAL +DEFAULT +8 
-.* SECTION LOCAL +DEFAULT +9 
 .* TLS +GLOBAL DEFAULT +UND gd
 .* TLS +GLOBAL DEFAULT +8 le0
 .* NOTYPE +GLOBAL DEFAULT +UND __tls_get_addr

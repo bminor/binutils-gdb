@@ -712,6 +712,8 @@ _bfd_elf_link_omit_section_dynsym (bfd *output_bfd ATTRIBUTE_UNUSED,
 				   struct bfd_link_info *info,
 				   asection *p)
 {
+  struct elf_link_hash_table *htab;
+
   switch (elf_section_data (p)->this_hdr.sh_type)
     {
     case SHT_PROGBITS:
@@ -719,15 +721,21 @@ _bfd_elf_link_omit_section_dynsym (bfd *output_bfd ATTRIBUTE_UNUSED,
       /* If sh_type is yet undecided, assume it could be
 	 SHT_PROGBITS/SHT_NOBITS.  */
     case SHT_NULL:
+      htab = elf_hash_table (info);
+      if (p == htab->tls_sec)
+	return FALSE;
+
+      if (htab->text_index_section != NULL)
+	return p != htab->text_index_section && p != htab->data_index_section;
+
       if (strcmp (p->name, ".got") == 0
 	  || strcmp (p->name, ".got.plt") == 0
 	  || strcmp (p->name, ".plt") == 0)
 	{
 	  asection *ip;
-	  bfd *dynobj = elf_hash_table (info)->dynobj;
 
-	  if (dynobj != NULL
-	      && (ip = bfd_get_section_by_name (dynobj, p->name)) != NULL
+	  if (htab->dynobj != NULL
+	      && (ip = bfd_get_section_by_name (htab->dynobj, p->name)) != NULL
 	      && (ip->flags & SEC_LINKER_CREATED)
 	      && ip->output_section == p)
 	    return TRUE;
@@ -763,6 +771,8 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
 	    && (p->flags & SEC_ALLOC) != 0
 	    && !(*bed->elf_backend_omit_section_dynsym) (output_bfd, info, p))
 	  elf_section_data (p)->dynindx = ++dynsymcount;
+	else
+	  elf_section_data (p)->dynindx = 0;
     }
   *section_sym_count = dynsymcount;
 
@@ -5932,16 +5942,65 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
   return TRUE;
 }
 
+/* Find the first non-excluded output section.  We'll use its
+   section symbol for some emitted relocs.  */
+void
+_bfd_elf_init_1_index_section (bfd *output_bfd, struct bfd_link_info *info)
+{
+  asection *s;
+
+  for (s = output_bfd->sections; s != NULL; s = s->next)
+    if ((s->flags & (SEC_EXCLUDE | SEC_ALLOC)) == SEC_ALLOC
+	&& !_bfd_elf_link_omit_section_dynsym (output_bfd, info, s))
+      {
+	elf_hash_table (info)->text_index_section = s;
+	break;
+      }
+}
+
+/* Find two non-excluded output sections, one for code, one for data.
+   We'll use their section symbols for some emitted relocs.  */
+void
+_bfd_elf_init_2_index_sections (bfd *output_bfd, struct bfd_link_info *info)
+{
+  asection *s;
+
+  for (s = output_bfd->sections; s != NULL; s = s->next)
+    if (((s->flags & (SEC_EXCLUDE | SEC_ALLOC | SEC_READONLY))
+	 == (SEC_ALLOC | SEC_READONLY))
+	&& !_bfd_elf_link_omit_section_dynsym (output_bfd, info, s))
+      {
+	elf_hash_table (info)->text_index_section = s;
+	break;
+      }
+
+  for (s = output_bfd->sections; s != NULL; s = s->next)
+    if (((s->flags & (SEC_EXCLUDE | SEC_ALLOC | SEC_READONLY)) == SEC_ALLOC)
+	&& !_bfd_elf_link_omit_section_dynsym (output_bfd, info, s))
+      {
+	elf_hash_table (info)->data_index_section = s;
+	break;
+      }
+
+  if (elf_hash_table (info)->text_index_section == NULL)
+    elf_hash_table (info)->text_index_section
+      = elf_hash_table (info)->data_index_section;
+}
+
 bfd_boolean
 bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 {
+  const struct elf_backend_data *bed;
+
   if (!is_elf_hash_table (info->hash))
     return TRUE;
+
+  bed = get_elf_backend_data (output_bfd);
+  (*bed->elf_backend_init_index_section) (output_bfd, info);
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       bfd *dynobj;
-      const struct elf_backend_data *bed;
       asection *s;
       bfd_size_type dynsymcount;
       unsigned long section_sym_count;
@@ -5980,7 +6039,6 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 	 section as we went along in elf_link_add_object_symbols.  */
       s = bfd_get_section_by_name (dynobj, ".dynsym");
       BFD_ASSERT (s != NULL);
-      bed = get_elf_backend_data (output_bfd);
       s->size = dynsymcount * bed->s->sizeof_sym;
 
       if (dynsymcount != 0)
@@ -7769,6 +7827,24 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 			  if (!bfd_is_abs_section (osec))
 			    {
 			      r_symndx = osec->target_index;
+			      if (r_symndx == 0)
+				{
+				  struct elf_link_hash_table *htab;
+				  asection *oi;
+
+				  htab = elf_hash_table (finfo->info);
+				  oi = htab->text_index_section;
+				  if ((osec->flags & SEC_READONLY) == 0
+				      && htab->data_index_section != NULL)
+				    oi = htab->data_index_section;
+
+				  if (oi != NULL)
+				    {
+				      irela->r_addend += osec->vma - oi->vma;
+				      r_symndx = oi->target_index;
+				    }
+				}
+
 			      BFD_ASSERT (r_symndx != 0);
 			    }
 			}

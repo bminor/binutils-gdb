@@ -64,7 +64,7 @@ Relocation section '.rel.dyn' at offset 0x[0-9a-f]+ contains 9 entries:
 0+804a0fc  00000825 R_386_TLS_TPOFF32 0+ +sG1
 0+804a100  00000b0e R_386_TLS_TPOFF +0+ +sG8
 
-Symbol table '.dynsym' contains 12 entries:
+Symbol table '.dynsym' contains [0-9]+ entries:
  +Num: +Value  Size Type +Bind +Vis +Ndx Name
  +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG3

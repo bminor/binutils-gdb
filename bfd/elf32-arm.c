@@ -3731,6 +3731,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		value |= 1;
 	      if (globals->symbian_p)
 		{
+		  asection *osec;
+
 		  /* On Symbian OS, the data segment and text segement
 		     can be relocated independently.  Therefore, we
 		     must indicate the segment to which this
@@ -3738,11 +3740,27 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		     use any symbol in the right segment; we just use
 		     the section symbol as it is convenient.  (We
 		     cannot use the symbol given by "h" directly as it
-		     will not appear in the dynamic symbol table.)  */
+		     will not appear in the dynamic symbol table.)
+
+		     Note that the dynamic linker ignores the section
+		     symbol value, so we don't subtract osec->vma
+		     from the emitted reloc addend.  */
 		  if (sym_sec)
-		    symbol = elf_section_data (sym_sec->output_section)->dynindx;
+		    osec = sym_sec->output_section;
 		  else
-		    symbol = elf_section_data (input_section->output_section)->dynindx;
+		    osec = input_section->output_section;
+		  symbol = elf_section_data (osec)->dynindx;
+		  if (symbol == 0)
+		    {
+		      struct elf_link_hash_table *htab = elf_hash_table (info);
+
+		      if ((osec->flags & SEC_READONLY) == 0
+			  && htab->data_index_section != NULL)
+			osec = htab->data_index_section;
+		      else
+			osec = htab->text_index_section;
+		      symbol = elf_section_data (osec)->dynindx;
+		    }
 		  BFD_ASSERT (symbol != 0);
 		}
 	      else
@@ -8551,7 +8569,8 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 
       /* UnixWare sets the entsize of .plt to 4, although that doesn't
 	 really seem like the right value.  */
-      elf_section_data (splt->output_section)->this_hdr.sh_entsize = 4;
+      if (splt->output_section->owner == output_bfd)
+	elf_section_data (splt->output_section)->this_hdr.sh_entsize = 4;
 
       if (htab->vxworks_p && !info->shared && htab->splt->size > 0)
 	{
@@ -9494,6 +9513,7 @@ const struct elf_size_info elf32_arm_size_info = {
 #define elf_backend_finish_dynamic_sections	elf32_arm_finish_dynamic_sections
 #define elf_backend_link_output_symbol_hook	elf32_arm_output_symbol_hook
 #define elf_backend_size_dynamic_sections	elf32_arm_size_dynamic_sections
+#define elf_backend_init_index_section		_bfd_elf_init_2_index_sections
 #define elf_backend_post_process_headers	elf32_arm_post_process_headers
 #define elf_backend_reloc_type_class		elf32_arm_reloc_type_class
 #define elf_backend_object_p			elf32_arm_object_p

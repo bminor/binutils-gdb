@@ -2611,14 +2611,19 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 
 			  osec = sec->output_section;
 			  sindx = elf_section_data (osec)->dynindx;
-			  BFD_ASSERT (sindx > 0);
+
+			  if (sindx == 0)
+			    {
+			      osec = htab->elf.text_index_section;
+			      sindx = elf_section_data (osec)->dynindx;
+			    }
+			  BFD_ASSERT (sindx != 0);
 
 			  /* We are turning this relocation into one
 			     against a section symbol, so subtract out
 			     the output section's address but not the
 			     offset of the input section in the output
 			     section.  */
-
 			  outrel.r_addend -= osec->vma;
 			}
 		      outrel.r_info = ELF64_R_INFO (sindx, r_type);
@@ -3449,6 +3454,7 @@ const struct elf_size_info s390_elf64_size_info =
 #define elf_backend_reloc_type_class	      elf_s390_reloc_type_class
 #define elf_backend_relocate_section	      elf_s390_relocate_section
 #define elf_backend_size_dynamic_sections     elf_s390_size_dynamic_sections
+#define elf_backend_init_index_section	      _bfd_elf_init_1_index_section
 #define elf_backend_reloc_type_class	      elf_s390_reloc_type_class
 #define elf_backend_plt_sym_val		      elf_s390_plt_sym_val
 

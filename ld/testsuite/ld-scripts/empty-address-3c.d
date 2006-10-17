@@ -6,5 +6,5 @@
 #...
 0+1010 A __data_end
 #...
-0+1010 D __data_start
+0+1010 [ADT] __data_start
 #pass

@@ -3342,7 +3342,6 @@ strip_excluded_output_sections (void)
 	continue;
 
       exclude = (output_section->rawsize == 0
-		 && !os->section_relative_symbol
 		 && (output_section->flags & SEC_KEEP) == 0
 		 && !bfd_section_removed_from_list (output_bfd,
 						    output_section));
@@ -3372,7 +3371,8 @@ strip_excluded_output_sections (void)
 	{
 	  /* We don't set bfd_section to NULL since bfd_section of the
 	     removed output section statement may still be used.  */
-	  os->ignored = TRUE;
+	  if (!os->section_relative_symbol)
+	    os->ignored = TRUE;
 	  output_section->flags |= SEC_EXCLUDE;
 	  bfd_section_list_remove (output_bfd, output_section);
 	  output_bfd->section_count--;

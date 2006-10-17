@@ -1,3 +1,30 @@
+2006-10-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-arm/mixed-app.sym, ld-cris/ldsym1.d, ld-cris/libdso-12.d,
+	* ld-cris/v32-ba-1.d, ld-elf/orphan.d, ld-elf/orphan2.d,
+	* ld-i386/tlsbin.rd, ld-i386/tlsbindesc.rd, ld-i386/tlsdesc.rd,
+	* ld-i386/tlsdesc.sd, ld-i386/tlsgdesc.rd, ld-i386/tlsnopic.rd,
+	* ld-i386/tlspic.rd, ld-ia64/tlspic.rd, ld-mips-elf/eh-frame1-n32.d,
+	* ld-mips-elf/eh-frame1-n64.d, ld-mips-elf/eh-frame2-n32.d,
+	* ld-mips-elf/eh-frame2-n64.d, ld-mips-elf/mips-elf.exp,
+	* ld-mips-elf/rel32-n32.d, ld-mips-elf/rel32-o32.d,
+	* ld-mips-elf/rel64.d, ld-mips-elf/tls-multi-got-1.got,
+	* ld-mips-elf/tls-multi-got-1.r, ld-mips-elf/tlsdyn-o32-1.d,
+	* ld-mips-elf/tlsdyn-o32-1.got, ld-mips-elf/tlsdyn-o32-2.d,
+	* ld-mips-elf/tlsdyn-o32-2.got, ld-mips-elf/tlsdyn-o32-3.d,
+	* ld-mips-elf/tlsdyn-o32-3.got, ld-mips-elf/tlsdyn-o32.d,
+	* ld-mips-elf/tlsdyn-o32.got, ld-mips-elf/tlslib-o32-hidden.got,
+	* ld-mips-elf/tlslib-o32-ver.got, ld-mips-elf/tlslib-o32.got,
+	* ld-mmix/bpo-10.d, ld-powerpc/tlsso.g, ld-powerpc/tlsso.r,
+	* ld-powerpc/tlsso32.d, ld-powerpc/tlsso32.g, ld-powerpc/tlsso32.r,
+	* ld-powerpc/tlstocso.g, ld-powerpc/tlstocso.r, ld-s390/tlspic.rd,
+	* ld-s390/tlspic_64.rd, ld-scripts/empty-address-1.d,
+	* ld-scripts/empty-address-3c.d, ld-scripts/empty-orphan.t,
+	* ld-sh/shared-1.d, ld-sh/tlspic-2.d, ld-sparc/tlssunbin32.rd,
+	* ld-sparc/tlssunbin64.rd, ld-sparc/tlssunpic32.rd,
+	* ld-sparc/tlssunpic64.rd, ld-x86-64/tlsdesc.pd, ld-x86-64/tlsdesc.rd,
+	* ld-x86-64/tlspic.rd: Update for section sym changes.
+
 2006-10-16  Richard Sandiford  <richard@codesourcery.com>
 
 	* ld-mips-elf/branch-misc-1.d: Set the start address to 0x20000000.

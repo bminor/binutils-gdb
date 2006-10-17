@@ -1430,11 +1430,12 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		}
 	      else
 		{
+		  outrel.r_addend = relocation + rel->r_addend;
+
 		  if (r_type == R_CRIS_32)
 		    {
 		      relocate = TRUE;
 		      outrel.r_info = ELF32_R_INFO (0, R_CRIS_RELATIVE);
-		      outrel.r_addend = relocation + rel->r_addend;
 		    }
 		  else
 		    {
@@ -1451,13 +1452,24 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			{
 			  asection *osec;
 
+			  /* We are turning this relocation into one
+			     against a section symbol.  It would be
+			     proper to subtract the symbol's value,
+			     osec->vma, from the emitted reloc addend,
+			     but ld.so expects buggy relocs.  */
 			  osec = sec->output_section;
 			  indx = elf_section_data (osec)->dynindx;
-			  BFD_ASSERT (indx > 0);
+			  if (indx == 0)
+			    {
+			      struct elf_cris_link_hash_table *htab;
+			      htab = elf_cris_hash_table (info);
+			      osec = htab->root.text_index_section;
+			      indx = elf_section_data (osec)->dynindx;
+			    }
+			  BFD_ASSERT (indx != 0);
 			}
 
 		      outrel.r_info = ELF32_R_INFO (indx, r_type);
-		      outrel.r_addend = relocation + rel->r_addend;
 		    }
 		}
 
@@ -3390,6 +3402,7 @@ elf_cris_reloc_type_class (rela)
 	elf_cris_adjust_dynamic_symbol
 #define elf_backend_size_dynamic_sections \
 	elf_cris_size_dynamic_sections
+#define elf_backend_init_index_section		_bfd_elf_init_1_index_section
 #define elf_backend_finish_dynamic_symbol \
 	elf_cris_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections \
