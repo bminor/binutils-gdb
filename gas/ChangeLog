@@ -1,3 +1,7 @@
+2006-10-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
 2006-10-16  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	* input-scrub.c (input_scrub_next_buffer): Use TC_EOL_IN_INSN

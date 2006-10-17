@@ -3921,7 +3921,7 @@ ia64-*-hpux*)
   rm -rf conftest*
   ;;
 
-x86_64-*linux*|x86_64-*mingw64*|ppc*-*linux*|powerpc*-*linux*|s390*-*linux*|sparc*-*linux*)
+x86_64-*linux*|ppc*-*linux*|powerpc*-*linux*|s390*-*linux*|sparc*-*linux*)
   # Find out which ABI we are using.
   echo 'int i;' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
@@ -3932,7 +3932,7 @@ x86_64-*linux*|x86_64-*mingw64*|ppc*-*linux*|powerpc*-*linux*|s390*-*linux*|spar
     case "`/usr/bin/file conftest.o`" in
     *32-bit*)
       case $host in
-        x86_64-*linux*|x86_64-*mingw64*)
+        x86_64-*linux*)
           LD="${LD-ld} -m elf_i386"
           ;;
         ppc64-*linux*|powerpc64-*linux*)
@@ -3948,7 +3948,7 @@ x86_64-*linux*|x86_64-*mingw64*|ppc*-*linux*|powerpc*-*linux*|s390*-*linux*|spar
       ;;
     *64-bit*)
       case $host in
-        x86_64-*linux*|x86_64-*mingw64*)
+        x86_64-*linux*)
           LD="${LD-ld} -m elf_x86_64"
           ;;
         ppc*-*linux*|powerpc*-*linux*)
