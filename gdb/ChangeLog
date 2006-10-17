@@ -1,3 +1,7 @@
+2006-10-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* breakpoint.c (free_valchain): Minor reformatting.
+
 2006-10-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* solib-svr4.c (LM_ADDR_CHECK): Suggest shared library mismatch.

@@ -749,7 +749,8 @@ insert_catchpoint (struct ui_out *uo, void *args)
 
 /* Helper routine: free the value chain for a breakpoint (watchpoint).  */
 
-static void free_valchain (struct bp_location *b)
+static void
+free_valchain (struct bp_location *b)
 {
   struct value *v;
   struct value *n;
