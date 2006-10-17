@@ -1,3 +1,20 @@
+2006-10-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* acinclude.m4 (SRV_CHECK_TLS_GET_ADDR): New.
+	* configure.ac: Use it.  Define HAVE_TD_THR_TLS_GET_ADDR.
+	* config.in, configure: Regenerated.
+	* inferiors.c (gdb_id_to_thread): New function.
+	(gdb_id_to_thread_id): Use it.
+	* linux-low.c (linux_target_ops): Use thread_db_get_tls_address.
+	* linux-low.h (struct process_info): Add th member.
+	(thread_db_get_tls_address): New prototype.
+	* remote-utils.c (decode_address): Make non-static.
+	* server.c (handle_query): Handle qGetTLSAddr.
+	* server.h (gdb_id_to_thread, decode_address): New prototypes.
+	* target.h (struct target_ops): Add get_tls_address.
+	* thread-db.c (maybe_attach_thread): Save the thread handle.
+	(thread_db_get_tls_address): New.
+
 2006-09-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-low.c (PTRACE_GETSIGINFO, PTRACE_SETSIGINFO): Define.

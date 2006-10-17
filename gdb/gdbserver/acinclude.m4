@@ -41,3 +41,23 @@ AC_DEFUN([SRV_CHECK_THREAD_DB],
   ])
  LIBS="$old_LIBS"
 ])])
+
+AC_DEFUN([SRV_CHECK_TLS_GET_ADDR],
+[AC_CACHE_CHECK([for thread_db_tls_get_addr],[srv_cv_tls_get_addr],
+ [old_LIBS="$LIBS"
+  LIBS="$LIBS $srv_cv_thread_db"
+  AC_TRY_LINK(
+   [void ps_pglobal_lookup() {}
+    void ps_pdread() {}
+    void ps_pdwrite() {}
+    void ps_lgetregs() {}
+    void ps_lsetregs() {}
+    void ps_lgetfpregs() {}
+    void ps_lsetfpregs() {}
+    void ps_get_thread_area() {}
+    void ps_getpid() {}],
+   [td_thr_tls_get_addr();],
+   [srv_cv_tls_get_addr=yes],
+   [srv_cv_tls_get_addr=no])
+  LIBS="$old_LIBS"
+])])

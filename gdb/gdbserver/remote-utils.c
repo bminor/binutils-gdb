@@ -279,7 +279,7 @@ unhexify (char *bin, const char *hex, int count)
   return i;
 }
 
-static void
+void
 decode_address (CORE_ADDR *addrp, const char *start, int len)
 {
   CORE_ADDR addr;

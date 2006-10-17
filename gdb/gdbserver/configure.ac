@@ -115,6 +115,7 @@ if test "$srv_linux_thread_db" = "yes"; then
     srv_linux_thread_db=no
   else
     srv_libs="$srv_cv_thread_db"
+    SRV_CHECK_TLS_GET_ADDR
   fi
   old_LDFLAGS="$LDFLAGS"
   LDFLAGS="$LDFLAGS -rdynamic"
@@ -132,6 +133,10 @@ if test "$srv_linux_thread_db" = "yes"; then
                   [gdbsrv_cv_have_td_version=no])])
   if test $gdbsrv_cv_have_td_version = yes; then
     AC_DEFINE(HAVE_TD_VERSION, 1, [Define if TD_VERSION is available.])
+  fi
+
+  if test "$srv_cv_tls_get_addr"; then
+    AC_DEFINE(HAVE_TD_THR_TLS_GET_ADDR, 1, [Define if td_thr_tls_get_addr is available.])
   fi
 fi
 

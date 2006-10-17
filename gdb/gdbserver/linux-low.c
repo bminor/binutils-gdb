@@ -1652,6 +1652,13 @@ static struct target_ops linux_target_ops = {
   linux_stopped_data_address,
 #if defined(__UCLIBC__) && !defined(__UCLIBC_HAS_MMU__)
   linux_read_offsets,
+#else
+  NULL,
+#endif
+#ifdef USE_THREAD_DB
+  thread_db_get_tls_address,
+#else
+  NULL,
 #endif
 };
 

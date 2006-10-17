@@ -163,6 +163,15 @@ struct target_ops
      time.  */
   
   int (*read_offsets) (CORE_ADDR *text, CORE_ADDR *data);
+
+  /* Fetch the address associated with a specific thread local storage
+     area, determined by the specified THREAD, OFFSET, and LOAD_MODULE.
+     Stores it in *ADDRESS and returns zero on success; otherwise returns
+     an error code.  A return value of -1 means this system does not
+     support the operation.  */
+
+  int (*get_tls_address) (struct thread_info *thread, CORE_ADDR offset,
+			  CORE_ADDR load_module, CORE_ADDR *address);
 };
 
 extern struct target_ops *the_target;

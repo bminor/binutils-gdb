@@ -144,8 +144,8 @@ thread_to_gdb_id (struct thread_info *thread)
   return thread->gdb_id;
 }
 
-unsigned long
-gdb_id_to_thread_id (unsigned int gdb_id)
+struct thread_info *
+gdb_id_to_thread (unsigned int gdb_id)
 {
   struct inferior_list_entry *inf = all_threads.head;
 
@@ -153,11 +153,19 @@ gdb_id_to_thread_id (unsigned int gdb_id)
     {
       struct thread_info *thread = get_thread (inf);
       if (thread->gdb_id == gdb_id)
-	return inf->id;
+	return thread;
       inf = inf->next;
     }
 
-  return 0;
+  return NULL;
+}
+
+unsigned long
+gdb_id_to_thread_id (unsigned int gdb_id)
+{
+  struct thread_info *thread = gdb_id_to_thread (gdb_id);
+
+  return thread ? thread->entry.id : 0;
 }
 
 static void

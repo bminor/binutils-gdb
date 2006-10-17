@@ -254,6 +254,65 @@ handle_query (char *own_buf, int *new_packet_len_p)
       return;
     }
 
+  /* Thread-local storage support.  */
+  if (the_target->get_tls_address != NULL
+      && strncmp ("qGetTLSAddr:", own_buf, 12) == 0)
+    {
+      char *p = own_buf + 12;
+      CORE_ADDR parts[3], address = 0;
+      int i, err;
+
+      for (i = 0; i < 3; i++)
+	{
+	  char *p2;
+	  int len;
+
+	  if (p == NULL)
+	    break;
+
+	  p2 = strchr (p, ',');
+	  if (p2)
+	    {
+	      len = p2 - p;
+	      p2++;
+	    }
+	  else
+	    {
+	      len = strlen (p);
+	      p2 = NULL;
+	    }
+
+	  decode_address (&parts[i], p, len);
+	  p = p2;
+	}
+
+      if (p != NULL || i < 3)
+	err = 1;
+      else
+	{
+	  struct thread_info *thread = gdb_id_to_thread (parts[0]);
+
+	  if (thread == NULL)
+	    err = 2;
+	  else
+	    err = the_target->get_tls_address (thread, parts[1], parts[2],
+					       &address);
+	}
+
+      if (err == 0)
+	{
+	  sprintf (own_buf, "%llx", address);
+	  return;
+	}
+      else if (err > 0)
+	{
+	  write_enn (own_buf);
+	  return;
+	}
+
+      /* Otherwise, pretend we do not understand this packet.  */
+    }
+
   /* Otherwise we didn't know what packet it was.  Say we didn't
      understand it.  */
   own_buf[0] = 0;

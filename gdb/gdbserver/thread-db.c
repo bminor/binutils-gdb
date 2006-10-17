@@ -266,6 +266,7 @@ found:
   process->lwpid = ti_p->ti_lid;
 
   process->thread_known = 1;
+  process->th = *th_p;
   err = td_thr_event_enable (th_p, 1);
   if (err != TD_OK)
     error ("Cannot enable thread event reporting for %d: %s",
@@ -317,6 +318,33 @@ thread_db_look_up_symbols (void)
 
   for (sym_list = td_symbol_list (); *sym_list; sym_list++)
     look_up_one_symbol (*sym_list, &unused);
+}
+
+int
+thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
+			   CORE_ADDR load_module, CORE_ADDR *address)
+{
+#if HAVE_TD_THR_TLS_GET_ADDR
+  psaddr_t addr;
+  td_err_e err;
+  struct process_info *process;
+
+  process = get_thread_process (thread);
+  if (!process->thread_known)
+    return TD_NOTHR;
+
+  err = td_thr_tls_get_addr (&process->th, (psaddr_t) load_module, offset,
+			     &addr);
+  if (err == TD_OK)
+    {
+      *address = (CORE_ADDR) addr;
+      return 0;
+    }
+  else
+    return err;
+#else
+  return -1;
+#endif
 }
 
 int

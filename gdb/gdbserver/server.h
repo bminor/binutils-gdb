@@ -105,6 +105,7 @@ void add_thread (unsigned long thread_id, void *target_data, unsigned int);
 unsigned int thread_id_to_gdb_id (unsigned long);
 unsigned int thread_to_gdb_id (struct thread_info *);
 unsigned long gdb_id_to_thread_id (unsigned int);
+struct thread_info *gdb_id_to_thread (unsigned int);
 void clear_inferiors (void);
 struct inferior_list_entry *find_inferior
      (struct inferior_list *,
@@ -152,6 +153,7 @@ void new_thread_notify (int id);
 void dead_thread_notify (int id);
 void prepare_resume_reply (char *buf, char status, unsigned char sig);
 
+void decode_address (CORE_ADDR *addrp, const char *start, int len);
 void decode_m_packet (char *from, CORE_ADDR * mem_addr_ptr,
 		      unsigned int *len_ptr);
 void decode_M_packet (char *from, CORE_ADDR * mem_addr_ptr,
