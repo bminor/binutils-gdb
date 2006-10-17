@@ -1,5 +1,13 @@
 2006-10-17  Alan Modra  <amodra@bigpond.net.au>
 
+	* scripttempl/elf.sc (INTERP): Delete.  Move definition to..
+	(INITIAL_READONLY_SECTIONS): ..here.
+	* emulparams/criself.sh (INITIAL_READONLY_SECTIONS): Include .interp.
+	* emulparams/elf32bmip.sh (INITIAL_READONLY_SECTIONS): Ditto.
+	* emulparams/elf32bmipn32-defs.sh (INITIAL_READONLY_SECTIONS): Ditto.
+
+2006-10-17  Alan Modra  <amodra@bigpond.net.au>
+
 	* ldlang.c (strip_excluded_output_sections): Do strip sections
 	that define syms, but don't ignore them.
 	* ld.texinfo (Output Section Discarding): Revise.
