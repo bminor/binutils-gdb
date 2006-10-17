@@ -1,3 +1,7 @@
+2006-10-16  Bob Wilson  <bob.wilson@acm.org>
+
+	* gdb.texinfo (ST2000): Use Ctrl- instead of C-.
+
 2006-10-15  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Sample Session, Invocation, Quitting GDB)

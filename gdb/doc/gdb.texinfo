@@ -15264,7 +15264,7 @@ Connect the controlling terminal to the STDBUG command monitor.  When
 you are done interacting with STDBUG, typing either of two character
 sequences gets you back to the @value{GDBN} command prompt:
 @kbd{@key{RET} ~ .} (Return, followed by tilde and period) or
-@kbd{@key{RET} ~ C-d} (Return, followed by tilde and control-D).
+@kbd{@key{RET} ~ Ctrl-d} (Return, followed by tilde and control-D).
 @end table
 
 @node Z8000
