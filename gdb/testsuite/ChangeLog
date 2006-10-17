@@ -1,3 +1,9 @@
+2006-10-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.threads/manythreads.c (thread_function, main): Don't cast
+	int to pointer or pointer to int.
+	* gdb.threads/manythreads.exp: Don't expect the string "LWP".
+
 2006-10-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/annota1.exp, gdb.base/maint.exp: Use string_to_regexp.

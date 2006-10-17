@@ -1,5 +1,5 @@
 /* Manythreads test program.
-   Copyright 2004
+   Copyright 2004, 2006
    Free Software Foundation, Inc.
 
    Written by Jeff Johnston <jjohnstn@redhat.com> 
@@ -29,7 +29,7 @@
 void *
 thread_function (void *arg)
 {
-  int x = (int)arg;
+  int x = * (int *) arg;
 
   printf ("Thread <%d> executing\n", x);
 
@@ -41,6 +41,7 @@ main (int argc, char **argv)
 {
   pthread_attr_t attr;
   pthread_t threads[256];
+  int args[256];
   int i, j;
 
   pthread_attr_init (&attr);
@@ -52,8 +53,8 @@ main (int argc, char **argv)
     {
       for (j = 0; j < 256; ++j)
 	{
-	  pthread_create (&threads[j], &attr, thread_function, 
-			  (void *)(i * 1000 + j));
+	  args[j] = i * 1000 + j;
+	  pthread_create (&threads[j], &attr, thread_function, &args[j]);
 	}
 
       for (j = 0; j < 256; ++j)
