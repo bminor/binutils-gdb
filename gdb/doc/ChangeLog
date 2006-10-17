@@ -1,3 +1,11 @@
+2006-10-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdbint.texinfo (Target Vector Definition): Move most
+	content into Existing Targets.  Add a menu.
+	(Existing Targets): New section, moved from Target Vector
+	Definition.  Use @subsection.
+	(Managing Execution State): New section.
+
 2006-10-16  Bob Wilson  <bob.wilson@acm.org>
 
 	* gdb.texinfo (ST2000): Use Ctrl- instead of C-.

@@ -4453,11 +4453,56 @@ actually exercises control over a process or a serial port.
 @value{GDBN} includes some 30-40 different target vectors; however,
 each configuration of @value{GDBN} includes only a few of them.
 
-@section File Targets
+@menu
+* Managing Execution State::
+* Existing Targets::
+@end menu
+
+@node Managing Execution State
+@section Managing Execution State
+@cindex execution state
+
+A target vector can be completely inactive (not pushed on the target
+stack), active but not running (pushed, but not connected to a fully
+manifested inferior), or completely active (pushed, with an accessible
+inferior).  Most targets are only completely inactive or completely
+active, but some support persistant connections to a target even
+when the target has exited or not yet started.
+
+For example, connecting to the simulator using @code{target sim} does
+not create a running program.  Neither registers nor memory are
+accessible until @code{run}.  Similarly, after @code{kill}, the
+program can not continue executing.  But in both cases @value{GDBN}
+remains connected to the simulator, and target-specific commands
+are directed to the simulator.
+
+A target which only supports complete activation should push itself
+onto the stack in its @code{to_open} routine (by calling
+@code{push_target}), and unpush itself from the stack in its
+@code{to_mourn_inferior} routine (by calling @code{unpush_target}).
+
+A target which supports both partial and complete activation should
+still call @code{push_target} in @code{to_open}, but not call
+@code{unpush_target} in @code{to_mourn_inferior}.  Instead, it should
+call either @code{target_mark_running} or @code{target_mark_exited}
+in its @code{to_open}, depending on whether the target is fully active
+after connection.  It should also call @code{target_mark_running} any
+time the inferior becomes fully active (e.g.@: in
+@code{to_create_inferior} and @code{to_attach}), and
+@code{target_mark_exited} when the inferior becomes inactive (in
+@code{to_mourn_inferior}).  The target should also make sure to call
+@code{target_mourn_inferior} from its @code{to_kill}, to return the
+target to inactive state.
+
+@node Existing Targets
+@section Existing Targets
+@cindex targets
+
+@subsection File Targets
 
 Both executables and core files have target vectors.
 
-@section Standard Protocol and Remote Stubs
+@subsection Standard Protocol and Remote Stubs
 
 @value{GDBN}'s file @file{remote.c} talks a serial protocol to code
 that runs in the target system.  @value{GDBN} provides several sample
@@ -4502,13 +4547,13 @@ of the debugger/stub.
 From reading the stub, it's probably not obvious how breakpoints work.
 They are simply done by deposit/examine operations from @value{GDBN}.
 
-@section ROM Monitor Interface
+@subsection ROM Monitor Interface
 
-@section Custom Protocols
+@subsection Custom Protocols
 
-@section Transport Layer
+@subsection Transport Layer
 
-@section Builtin Simulator
+@subsection Builtin Simulator
 
 
 @node Native Debugging

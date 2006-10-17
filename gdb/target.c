@@ -649,6 +649,56 @@ update_current_target (void)
   current_target.beneath = target_stack;
 }
 
+/* Mark OPS as a running target.  This reverses the effect
+   of target_mark_exited.  */
+
+void
+target_mark_running (struct target_ops *ops)
+{
+  struct target_ops *t;
+
+  for (t = target_stack; t != NULL; t = t->beneath)
+    if (t == ops)
+      break;
+  if (t == NULL)
+    internal_error (__FILE__, __LINE__,
+		    "Attempted to mark unpushed target \"%s\" as running",
+		    ops->to_shortname);
+
+  ops->to_has_execution = 1;
+  ops->to_has_all_memory = 1;
+  ops->to_has_memory = 1;
+  ops->to_has_stack = 1;
+  ops->to_has_registers = 1;
+
+  update_current_target ();
+}
+
+/* Mark OPS as a non-running target.  This reverses the effect
+   of target_mark_running.  */
+
+void
+target_mark_exited (struct target_ops *ops)
+{
+  struct target_ops *t;
+
+  for (t = target_stack; t != NULL; t = t->beneath)
+    if (t == ops)
+      break;
+  if (t == NULL)
+    internal_error (__FILE__, __LINE__,
+		    "Attempted to mark unpushed target \"%s\" as running",
+		    ops->to_shortname);
+
+  ops->to_has_execution = 0;
+  ops->to_has_all_memory = 0;
+  ops->to_has_memory = 0;
+  ops->to_has_stack = 0;
+  ops->to_has_registers = 0;
+
+  update_current_target ();
+}
+
 /* Push a new target type into the stack of the existing target accessors,
    possibly superseding some of the existing accessors.
 

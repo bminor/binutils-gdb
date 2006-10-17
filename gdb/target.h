@@ -967,11 +967,12 @@ int target_follow_fork (int follow_child);
      (current_target.to_has_registers)
 
 /* Does the target have execution?  Can we make it jump (through
-   hoops), or pop its stack a few times?  FIXME: If this is to work that
-   way, it needs to check whether an inferior actually exists.
-   remote-udi.c and probably other targets can be the current target
-   when the inferior doesn't actually exist at the moment.  Right now
-   this just tells us whether this target is *capable* of execution.  */
+   hoops), or pop its stack a few times?  This means that the current
+   target is currently executing; for some targets, that's the same as
+   whether or not the target is capable of execution, but there are
+   also targets which can be current while not executing.  In that
+   case this will become true after target_create_inferior or
+   target_attach.  */
 
 #define	target_has_execution	\
      (current_target.to_has_execution)
@@ -1229,6 +1230,13 @@ extern void pop_target (void);
 
 extern CORE_ADDR target_translate_tls_address (struct objfile *objfile,
 					       CORE_ADDR offset);
+
+/* Mark a pushed target as running or exited, for targets which do not
+   automatically pop when not active.  */
+
+void target_mark_running (struct target_ops *);
+
+void target_mark_exited (struct target_ops *);
 
 /* Struct section_table maps address ranges to file sections.  It is
    mostly used with BFD files, but can be used without (e.g. for handling

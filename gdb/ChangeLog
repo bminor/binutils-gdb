@@ -1,3 +1,17 @@
+2006-10-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote-sim.c (gdbsim_kill): Call target_mourn_inferior.
+	(gdbsim_load): Don't bother to adjust inferior_ptid here.
+	(gdbsim_create_inferior): Mark the simulator as running.
+	(gdbsim_open): Don't bother fetching registers.  Mark
+	the target as not running.
+	(gdbsim_xfer): When the program is not running, pass memory
+	requests down.
+	(gdbsim_mourn_inferior): Mark the target as not running.
+	* target.c (target_mark_running, target_mark_exited): New.
+	* target.h (target_has_execution): Update the comment.
+	(target_mark_running, target_mark_exited): New prototypes.
+
 2006-10-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* breakpoint.c (free_valchain): Minor reformatting.
