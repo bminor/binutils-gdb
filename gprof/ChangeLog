@@ -1,3 +1,7 @@
+2006-10-16  Bob Wilson  <bob.wilson@acm.org>
+
+	* gprof.c (main): Fix option string for -C, -n and -N.
+
 2006-09-26  Thiemo Seufer  <ths@networkno.de>
 
 	* gprof.texi: Fix install failure.
