@@ -2276,7 +2276,7 @@ proc gdb_skip_bogus_test { msg } {
 # Note: the procedure gdb_gnu_strip_debug will produce an executable called
 # ${binfile}.dbglnk, which is just like the executable ($binfile) but without
 # the debuginfo. Instead $binfile has a .gnu_debuglink section which contains
-# the name of a idebuginfo only file. This file will be stored in the 
+# the name of a debuginfo only file. This file will be stored in the 
 # gdb.base/.debug subdirectory.
 
 # Functions for separate debug info testing
@@ -2307,8 +2307,45 @@ proc separate_debug_filename { exec } {
     return $debug_file
 }
 
+# Create stripped files for DEST, replacing it.  If ARGS is passed, it is a
+# list of optional flags.  The only currently supported flag is no-main,
+# which removes the symbol entry for main from the separate debug file.
 
-proc gdb_gnu_strip_debug { dest } {
+proc gdb_gnu_strip_debug { dest args } {
+
+    # First, make sure that we can do this.  This is nasty. We need to
+    # check for the stabs debug format.  To do this we must run gdb on
+    # the unstripped executable, list 'main' (as to have a default
+    # source file), use get_debug_format (which does 'info source')
+    # and then see if the debug info is stabs. If so, we bail out.  We
+    # cannot do this any other way because get_debug_format finds out
+    # the debug format using gdb itself, and in case of stabs we get
+    # an error loading the program if it is already stripped.  An
+    # alternative would be to find out the debug info from the flags
+    # passed to dejagnu when the test is run.
+
+    gdb_exit
+    gdb_start
+    gdb_load ${dest}
+    gdb_test "list main" "" ""
+    get_debug_format
+    if { [test_debug_format "stabs"] } then {
+	# The separate debug info feature doesn't work well in
+	# binutils with stabs.  It produces a corrupted debug info
+	# only file, and gdb chokes on it.  It is almost impossible to
+	# capture the failing message out of gdb, because it happens
+	# inside gdb_load. At that point any error message is
+	# intercepted by dejagnu itself, and, because of the error
+	# threshold, any faulty test result is changed into an
+	# UNRESOLVED.  (see dejagnu/lib/framework.exp)
+	unsupported "no separate debug info handling with stabs"
+	return -1
+    } elseif { [test_debug_format "unknown"] } then {
+	# gdb doesn't know what the debug format is. We are out of luck here. 
+	unsupported "unknown debugging format"
+	return -1
+    }
+    gdb_exit
 
     set debug_file [separate_debug_filename $dest]
     set strip_to_file_program strip
@@ -2340,6 +2377,22 @@ proc gdb_gnu_strip_debug { dest } {
     verbose "output is $output"
     if {$result == 1} {
       return 1
+    }
+
+    # If no-main is passed, strip the symbol for main from the separate
+    # file.  This is to simulate the behavior of elfutils's eu-strip, which
+    # leaves the symtab in the original file only.  There's no way to get
+    # objcopy or strip to remove the symbol table without also removing the
+    # debugging sections, so this is as close as we can get.
+    if { [llength $args] == 1 && [lindex $args 0] == "no-main" } {
+	set result [catch "exec $objcopy_program -N main ${debug_file} ${debug_file}-tmp" output]
+	verbose "result is $result"
+	verbose "output is $output"
+	if {$result == 1} {
+	    return 1
+	}
+	file delete "${debug_file}"
+	file rename "${debug_file}-tmp" "${debug_file}"
     }
 
     # Link the two previous output files together, adding the .gnu_debuglink

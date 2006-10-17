@@ -983,6 +983,11 @@ sym_info (char *arg, int from_tty)
   addr = parse_and_eval_address (arg);
   ALL_OBJSECTIONS (objfile, osect)
   {
+    /* Only process each object file once, even if there's a separate
+       debug file.  */
+    if (objfile->separate_debug_objfile_backlink)
+      continue;
+
     sect = osect->the_bfd_section;
     sect_addr = overlay_mapped_address (addr, sect);
 

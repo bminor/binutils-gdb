@@ -1,5 +1,12 @@
 2006-10-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.base/sepdebug.exp: Remove debug format test.
+	* lib/gdb.exp (gdb_gnu_strip_debug): Perform debug format test.
+	Handle no-symtab.
+	* gdb.base/sepsymtab.c, gdb.base/sepsymtab.exp: New.
+
+2006-10-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.threads/manythreads.c (thread_function, main): Don't cast
 	int to pointer or pointer to int.
 	* gdb.threads/manythreads.exp: Don't expect the string "LWP".

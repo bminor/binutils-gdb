@@ -1316,6 +1316,8 @@ extern char **make_source_files_completion_list (char *, char *);
 
 /* symtab.c */
 
+int matching_bfd_sections (asection *, asection *);
+
 extern struct partial_symtab *find_main_psymtab (void);
 
 extern struct symtab *find_line_symtab (struct symtab *, int, int *, int *);

@@ -56,6 +56,7 @@
 #include <ctype.h>
 #include "cp-abi.h"
 #include "observer.h"
+#include "gdb_assert.h"
 
 /* Prototypes for local functions */
 
@@ -706,6 +707,64 @@ init_sal (struct symtab_and_line *sal)
 }
 
 
+/* Return 1 if the two sections are the same, or if they could
+   plausibly be copies of each other, one in an original object
+   file and another in a separated debug file.  */
+
+int
+matching_bfd_sections (asection *first, asection *second)
+{
+  struct objfile *obj;
+
+  /* If they're the same section, then they match.  */
+  if (first == second)
+    return 1;
+
+  /* If either is NULL, give up.  */
+  if (first == NULL || second == NULL)
+    return 0;
+
+  /* This doesn't apply to absolute symbols.  */
+  if (first->owner == NULL || second->owner == NULL)
+    return 0;
+
+  /* If they're in the same object file, they must be different sections.  */
+  if (first->owner == second->owner)
+    return 0;
+
+  /* Check whether the two sections are potentially corresponding.  They must
+     have the same size, address, and name.  We can't compare section indexes,
+     which would be more reliable, because some sections may have been
+     stripped.  */
+  if (bfd_get_section_size (first) != bfd_get_section_size (second))
+    return 0;
+
+  if (bfd_get_section_vma (first->owner, first)
+      != bfd_get_section_vma (second->owner, second))
+    return 0;
+
+  if (bfd_get_section_name (first->owner, first) == NULL
+      || bfd_get_section_name (second->owner, second) == NULL
+      || strcmp (bfd_get_section_name (first->owner, first),
+		 bfd_get_section_name (second->owner, second)) != 0)
+    return 0;
+
+  /* Otherwise check that they are in corresponding objfiles.  */
+
+  ALL_OBJFILES (obj)
+    if (obj->obfd == first->owner)
+      break;
+  gdb_assert (obj != NULL);
+
+  if (obj->separate_debug_objfile != NULL
+      && obj->separate_debug_objfile->obfd == second->owner)
+    return 1;
+  if (obj->separate_debug_objfile_backlink != NULL
+      && obj->separate_debug_objfile_backlink->obfd == second->owner)
+    return 1;
+
+  return 0;
+}
 
 /* Find which partial symtab contains PC and SECTION.  Return 0 if
    none.  We return the psymtab that contains a symbol whose address
@@ -845,7 +904,7 @@ find_pc_sect_psymbol (struct partial_symtab *psymtab, CORE_ADDR pc,
 	  if (section)		/* match on a specific section */
 	    {
 	      fixup_psymbol_section (p, psymtab->objfile);
-	      if (SYMBOL_BFD_SECTION (p) != section)
+	      if (!matching_bfd_sections (SYMBOL_BFD_SECTION (p), section))
 		continue;
 	    }
 	  best_pc = SYMBOL_VALUE_ADDRESS (p);
@@ -869,7 +928,7 @@ find_pc_sect_psymbol (struct partial_symtab *psymtab, CORE_ADDR pc,
 	  if (section)		/* match on a specific section */
 	    {
 	      fixup_psymbol_section (p, psymtab->objfile);
-	      if (SYMBOL_BFD_SECTION (p) != section)
+	      if (!matching_bfd_sections (SYMBOL_BFD_SECTION (p), section))
 		continue;
 	    }
 	  best_pc = SYMBOL_VALUE_ADDRESS (p);
@@ -1902,7 +1961,7 @@ find_pc_sect_symtab (CORE_ADDR pc, asection *section)
 	    ALL_BLOCK_SYMBOLS (b, iter, sym)
 	      {
 		fixup_symbol_section (sym, objfile);
-		if (section == SYMBOL_BFD_SECTION (sym))
+		if (matching_bfd_sections (SYMBOL_BFD_SECTION (sym), section))
 		  break;
 	      }
 	    if (sym == NULL)
