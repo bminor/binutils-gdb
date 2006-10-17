@@ -187,9 +187,6 @@ LM_ADDR_CHECK (struct so_list *so, bfd *abfd)
 
       if (dynaddr + l_addr != l_dynaddr)
 	{
-	  warning (_(".dynamic section for \"%s\" "
-		     "is not at the expected address"), so->so_name);
-
 	  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
 	    {
 	      Elf_Internal_Ehdr *ehdr = elf_tdata (abfd)->elf_header;
@@ -218,9 +215,16 @@ LM_ADDR_CHECK (struct so_list *so, bfd *abfd)
 	  if ((l_addr & align) == 0 && ((dynaddr - l_dynaddr) & align) == 0)
 	    {
 	      l_addr = l_dynaddr - dynaddr;
+
+	      warning (_(".dynamic section for \"%s\" "
+		     "is not at the expected address"), so->so_name);
 	      warning (_("difference appears to be caused by prelink, "
 			 "adjusting expectations"));
 	    }
+	  else
+	    warning (_(".dynamic section for \"%s\" "
+		       "is not at the expected address "
+		       "(wrong library or version mismatch?)"), so->so_name);
 	}
 
     set_addr:
