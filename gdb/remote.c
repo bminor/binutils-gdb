@@ -5834,7 +5834,7 @@ remote_pid_to_str (ptid_t ptid)
 {
   static char buf[32];
 
-  xsnprintf (buf, sizeof buf, "thread %d", ptid_get_pid (ptid));
+  xsnprintf (buf, sizeof buf, "Thread %d", ptid_get_pid (ptid));
   return buf;
 }
 

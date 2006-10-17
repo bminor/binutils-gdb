@@ -1,3 +1,7 @@
+2006-10-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c (remote_pid_to_str): Capitalize "Thread".
+
 2006-10-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	PR remote/2158
