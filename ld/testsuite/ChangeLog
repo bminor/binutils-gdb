@@ -1,3 +1,16 @@
+2006-10-17  Mark Shinwell  <shinwell@codesourcery.com>
+
+        * ld-arm/arm-elf.exp: Add thumb1-bl, thumb2-bl,
+	thumb2-bl-as-thumb1-bad and thumb2-bl-bad tests.
+        * ld-arm/thumb1-bl.d: New.
+        * ld-arm/thumb1-bl.s: New.
+        * ld-arm/thumb2-bl-as-thumb1-bad.d: New.
+        * ld-arm/thumb2-bl-as-thumb1-bad.s: New.
+        * ld-arm/thumb2-bl-bad.d: New.
+        * ld-arm/thumb2-bl-bad.s: New.
+        * ld-arm/thumb2-bl.d: New.
+        * ld-arm/thumb2-bl.s: New.
+
 2006-10-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-arm/mixed-app.sym, ld-cris/ldsym1.d, ld-cris/libdso-12.d,
