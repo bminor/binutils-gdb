@@ -1,5 +1,11 @@
 2006-10-18  Richard Sandiford  <richard@codesourcery.com>
 
+	* ld-mips-elf/rel32-n32.d: Bump addresses by 0x30 to account for
+	the fact that .reginfo is now placed before .text.  Change the
+	section number of .text accordingly.
+
+2006-10-18  Richard Sandiford  <richard@codesourcery.com>
+
 	* ld-mips-elf/elf-rel-got-n32.d: Adjust page gap from 0x100000
 	to 0x10000.  Move .reginfo before .text and bump .text addresses
 	by 0x10 to make room.  Move data segment down by 0x10 bytes to
