@@ -75,6 +75,12 @@ set build_tests {
   {"Build libdl2b.so with --dynamic-list=dl2.list and dl2xxx.list"
    "-shared -Wl,--dynamic-list=dl2.list,--dynamic-list=dl2xxx.list" "-fPIC"
    {dl2.c dl2xxx.c} {} "libdl2b.so"}
+  {"Build libdl4a.so with --dynamic-list=dl4.list"
+   "-shared -Wl,--dynamic-list=dl4.list" "-fPIC"
+   {dl4.c dl4xxx.c} {} "libdl4a.so"}
+  {"Build libdl4b.so with --dynamic-list=dl4.list and dl4xxx.list"
+   "-shared -Wl,--dynamic-list=dl4.list,--dynamic-list=dl4xxx.list" "-fPIC"
+   {dl4.c dl4xxx.c} {} "libdl4b.so"}
 }
 
 set run_tests {
@@ -123,6 +129,12 @@ set run_tests {
     {"Run with libdl2b.so"
      "tmpdir/libdl2b.so" ""
      {dl2main.c} "dl2b" "dl2b.out"}
+    {"Run with libdl4a.so"
+     "tmpdir/libdl4a.so" ""
+     {dl4main.c} "dl4a" "dl4a.out"}
+    {"Run with libdl4b.so"
+     "tmpdir/libdl4b.so" ""
+     {dl4main.c} "dl4b" "dl4b.out"}
 }
 
 run_cc_link_tests $build_tests

@@ -1,3 +1,17 @@
+2006-10-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/dl4.c: New file.
+	* ld-elf/dl4.list: Likewise.
+	* ld-elf/dl4a.out: Likewise.
+	* ld-elf/dl4b.out: Likewise.
+	* ld-elf/dl4main.c: Likewise.
+	* ld-elf/dl4xxx.c: Likewise.
+	* ld-elf/dl4xxx.list: Likewise.
+
+	* ld-elf/shared.exp (build_tests): Add libdl4a.so and
+	libdl4b.so.
+	(run_tests): Likewise.
+
 2006-10-18  Richard Sandiford  <richard@codesourcery.com>
 
 	* ld-mips-elf/reloc-1-n64.d: Match 16-character VMAs on LP64 hosts.
