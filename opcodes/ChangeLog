@@ -1,3 +1,8 @@
+2006-10-18  Dave Brolley  <brolley@redhat.com>
+
+	* configure.in (BFD_MACHINES): Add cgen-bitset.lo for bfd_sh_arch.
+	* configure: Regenerated.
+
 2006-09-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/POTFILES.in: Regenerate.
@@ -108,7 +113,6 @@
 	initializer macros to have additional arguments. Disallow REP
 	prefix for non-string instructions.
 	(print_insn): Ditto.
-
 
 2006-07-05  Julian Brown  <julian@codesourcery.com>
 

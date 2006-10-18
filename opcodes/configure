@@ -6587,7 +6587,7 @@ if test x${all_targets} = xfalse ; then
 				break;;
 	    esac;
 	  done
-				ta="$ta sh-dis.lo" ;;
+				ta="$ta sh-dis.lo cgen-bitset.lo" ;;
 	bfd_sparc_arch)		ta="$ta sparc-dis.lo sparc-opc.lo" ;;
 	bfd_tahoe_arch)		;;
 	bfd_tic30_arch)		ta="$ta tic30-dis.lo" ;;
