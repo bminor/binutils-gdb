@@ -1,3 +1,14 @@
+2006-10-18  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-mips-elf/elf-rel-got-n32.d: Adjust page gap from 0x100000
+	to 0x10000.  Move .reginfo before .text and bump .text addresses
+	by 0x10 to make room.  Move data segment down by 0x10 bytes to
+	account for new size of text segment.
+	* ld-mips-elf/elf-rel-xgot-n32.d: Likewise.
+	* ld-mips-elf/elf-rel-got-n64-linux.d: Adjust page gap from
+	0x100000 to 0x10000.
+	* ld-mips-elf/elf-rel-xgot-n64-linux.d: Likewise.
+
 2006-10-17  Mark Shinwell  <shinwell@codesourcery.com>
 
         * ld-arm/arm-elf.exp: Add thumb1-bl, thumb2-bl,
