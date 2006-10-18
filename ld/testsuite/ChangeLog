@@ -1,6 +1,6 @@
 2006-10-18  Richard Sandiford  <richard@codesourcery.com>
 
-	* ld-mips-elf/rel32-n32.d: Bump addresses by 0x30 to account for
+	* ld-mips-elf/rel32-n32.d: Bump addresses by 0x20 to account for
 	the fact that .reginfo is now placed before .text.  Change the
 	section number of .text accordingly.
 
