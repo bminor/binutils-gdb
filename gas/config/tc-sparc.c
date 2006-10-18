@@ -337,7 +337,7 @@ sparc_target_format ()
 #endif
 
 #ifdef OBJ_ELF
-  return sparc_arch_size == 64 ? "elf64-sparc" : "elf32-sparc";
+  return sparc_arch_size == 64 ? ELF64_TARGET_FORMAT : ELF_TARGET_FORMAT;
 #endif
 
   abort ();
@@ -545,12 +545,12 @@ md_parse_option (c, arg)
 	  {
 	    if (sparc_arch_size == 32)
 	      {
-		if (strcmp (*l, "elf32-sparc") == 0)
+		if (CONST_STRNEQ (*l, "elf32-sparc"))
 		  break;
 	      }
 	    else
 	      {
-		if (strcmp (*l, "elf64-sparc") == 0)
+		if (CONST_STRNEQ (*l, "elf64-sparc"))
 		  break;
 	      }
 	  }

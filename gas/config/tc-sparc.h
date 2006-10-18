@@ -31,6 +31,19 @@ struct frag;
 
 #define TARGET_ARCH bfd_arch_sparc
 
+#ifdef TE_FreeBSD
+#define ELF_TARGET_FORMAT	"elf32-sparc-freebsd"
+#define ELF64_TARGET_FORMAT	"elf64-sparc-freebsd"
+#endif
+
+#ifndef ELF_TARGET_FORMAT
+#define ELF_TARGET_FORMAT	"elf32-sparc"
+#endif
+
+#ifndef ELF64_TARGET_FORMAT
+#define ELF64_TARGET_FORMAT	"elf64-sparc"
+#endif
+
 extern const char *sparc_target_format PARAMS ((void));
 #define TARGET_FORMAT sparc_target_format ()
 

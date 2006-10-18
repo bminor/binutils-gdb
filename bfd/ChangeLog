@@ -1,3 +1,12 @@
+2006-10-18  Roy Marples  <uberlord@gentoo.org>
+
+	* elf64-sparc.c: Add FreeBSD support.
+	(elf64_sparc_fbsd_post_process_headers): New function.
+	* targets.c (_bfd_target_vector): Add bfd_elf64_sparc_freebsd_vec.
+	* config.bfd (sparc64-*-freebsd*): Set targ_defvec to bfd_elf64_sparc_freebsd_vec.
+	* configure.in: Add entry for bfd_elf64_sparc_freebsd_vec.
+	* configure: Regenerate.
+
 2006-10-17  Mark Shinwell  <shinwell@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_final_link_relocate): Add support for

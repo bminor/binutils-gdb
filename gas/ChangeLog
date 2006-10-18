@@ -1,3 +1,12 @@
+2006-10-18  Roy Marples  <uberlord@gentoo.org>
+
+	* config/tc-sparc.c (md_parse_option): Treat any target starting with
+	elf32-sparc as a viable target for the -32 switch and any target starting with
+	elf64-sparc as a viable target for the -64 switch.
+	(sparc_target_format): For 64-bit ELF flavoured output use ELF_TARGET_FORMAT64
+	while for 32-bit ELF flavoured output use ELF_TARGET_FORMAT.
+	* config/tc-sparc.h (ELF_TARGET_FORMAT, ELF_TARGET_FORMAT64): Define.
+
 2006-10-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.

@@ -1,3 +1,7 @@
+2006-10-18  Roy Marples  <uberlord@gentoo.org>
+
+	* emulparams/elf64_sparc_fbsd.sh (OUTPUT_FORMAT): Define as elf64-sparc-freebsd.
+
 2006-10-18  Joseph Myers  <joseph@codesourcery.com>
 
 	* configure.tgt (i[3-7]86-*-linux-*): Also define

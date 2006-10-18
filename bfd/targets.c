@@ -674,6 +674,7 @@ extern const bfd_target bfd_elf64_sh64blin_vec;
 extern const bfd_target bfd_elf64_sh64lnbsd_vec;
 extern const bfd_target bfd_elf64_sh64nbsd_vec;
 extern const bfd_target bfd_elf64_sparc_vec;
+extern const bfd_target bfd_elf64_sparc_freebsd_vec;
 extern const bfd_target bfd_elf64_tradbigmips_vec;
 extern const bfd_target bfd_elf64_tradlittlemips_vec;
 extern const bfd_target bfd_elf64_x86_64_freebsd_vec;
@@ -1002,6 +1003,7 @@ static const bfd_target * const _bfd_target_vector[] =
 	&bfd_elf64_sh64lin_vec,
 	&bfd_elf64_sh64blin_vec,
 	&bfd_elf64_sparc_vec,
+	&bfd_elf64_sparc_freebsd_vec,
 	&bfd_elf64_tradbigmips_vec,
 	&bfd_elf64_tradlittlemips_vec,
 	&bfd_elf64_x86_64_freebsd_vec,
