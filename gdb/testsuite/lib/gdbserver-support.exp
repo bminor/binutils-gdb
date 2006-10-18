@@ -1,4 +1,5 @@
-# Copyright 2000, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+# Copyright 2000, 2002, 2003, 2004, 2005, 2006
+# Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -51,32 +52,32 @@ proc gdb_target_cmd { targetname serialport } {
 		send_gdb "y\n"
 		exp_continue
 	    }
-	    -re "Couldn't establish connection to remote.*$gdb_prompt" {
+	    -re "Couldn't establish connection to remote.*$gdb_prompt $" {
 		verbose "Connection failed"
 	    }
 	    -re "Remote MIPS debugging.*$gdb_prompt" {
 		verbose "Set target to $targetname"
 		return 0
 	    }
-	    -re "Remote debugging using .*$serialport.*$gdb_prompt" {
+	    -re "Remote debugging using .*$serialport.*$gdb_prompt $" {
 		verbose "Set target to $targetname"
 		return 0
 	    }
-	    -re "Remote target $targetname connected to.*$gdb_prompt" {
+	    -re "Remote target $targetname connected to.*$gdb_prompt $" {
 		verbose "Set target to $targetname"
 		return 0
 	    }
-	    -re "Connected to.*$gdb_prompt" { 
+	    -re "Connected to.*$gdb_prompt $" { 
 		verbose "Set target to $targetname"
 		return 0
 	    }
-	    -re "Ending remote.*$gdb_prompt" { }
-	    -re "Connection refused.*$gdb_prompt" {
+	    -re "Ending remote.*$gdb_prompt $" { }
+	    -re "Connection refused.*$gdb_prompt $" {
 		verbose "Connection refused by remote target.  Pausing, and trying again."
 		sleep 30
 		continue
 	    }
-	    -re "Timeout reading from remote system.*$gdb_prompt" {
+	    -re "Timeout reading from remote system.*$gdb_prompt $" {
 		verbose "Got timeout error from gdb."
 	    }
 	    timeout {
