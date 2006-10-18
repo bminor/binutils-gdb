@@ -14,6 +14,9 @@ supported.
 * The "set trust-readonly-sections" command works again.  This command was
 broken in GDB 6.3, 6.4, and 6.5.
 
+* Support for GNU/Linux Thread Local Storage (TLS, per-thread variables) no
+longer requires symbolic debug information (e.g. DWARF-2).
+
 * New commands
 
 set substitute-path

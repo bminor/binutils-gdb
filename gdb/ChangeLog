@@ -1,5 +1,9 @@
 2006-10-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* NEWS: Mention support for TLS without debugging information.
+
+2006-10-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* remote-sim.c (gdbsim_kill): Call target_mourn_inferior.
 	(gdbsim_load): Don't bother to adjust inferior_ptid here.
 	(gdbsim_create_inferior): Mark the simulator as running.
