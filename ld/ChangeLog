@@ -1,3 +1,10 @@
+2006-10-18  Joseph Myers  <joseph@codesourcery.com>
+
+	* configure.tgt (i[3-7]86-*-linux-*): Also define
+	targ_extra_libpath in want64 case.
+	* emulparams/elf_x86_64.sh: Handle i[3-7]86-*-linux-* the same as
+	x86_64*-linux*.
+
 2006-10-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* scripttempl/elf.sc (INTERP): Delete.  Move definition to..
