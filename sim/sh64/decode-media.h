@@ -2,9 +2,9 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+Copyright 1996-2005 Free Software Foundation, Inc.
 
-This file is part of the GNU Simulators.
+This file is part of the GNU simulators.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
@@ -87,7 +87,7 @@ typedef enum sh64_media_insn_type {
  , SH64_MEDIA_INSN_STLOL, SH64_MEDIA_INSN_STLOQ, SH64_MEDIA_INSN_STXB, SH64_MEDIA_INSN_STXL
  , SH64_MEDIA_INSN_STXQ, SH64_MEDIA_INSN_STXW, SH64_MEDIA_INSN_SUB, SH64_MEDIA_INSN_SUBL
  , SH64_MEDIA_INSN_SWAPQ, SH64_MEDIA_INSN_SYNCI, SH64_MEDIA_INSN_SYNCO, SH64_MEDIA_INSN_TRAPA
- , SH64_MEDIA_INSN_XOR, SH64_MEDIA_INSN_XORI, SH64_MEDIA_INSN_MAX
+ , SH64_MEDIA_INSN_XOR, SH64_MEDIA_INSN_XORI, SH64_MEDIA_INSN__MAX
 } SH64_MEDIA_INSN_TYPE;
 
 /* Enum declaration for semantic formats in cpu family sh64.  */
@@ -96,23 +96,170 @@ typedef enum sh64_media_sfmt_type {
  , SH64_MEDIA_SFMT_BEQ, SH64_MEDIA_SFMT_BEQI, SH64_MEDIA_SFMT_BLINK, SH64_MEDIA_SFMT_BRK
  , SH64_MEDIA_SFMT_BYTEREV, SH64_MEDIA_SFMT_CMVEQ, SH64_MEDIA_SFMT_FABSD, SH64_MEDIA_SFMT_FABSS
  , SH64_MEDIA_SFMT_FADDD, SH64_MEDIA_SFMT_FADDS, SH64_MEDIA_SFMT_FCMPEQD, SH64_MEDIA_SFMT_FCMPEQS
- , SH64_MEDIA_SFMT_FCNVDS, SH64_MEDIA_SFMT_FCNVSD, SH64_MEDIA_SFMT_FIPRS, SH64_MEDIA_SFMT_FLDD
- , SH64_MEDIA_SFMT_FLDP, SH64_MEDIA_SFMT_FLDS, SH64_MEDIA_SFMT_FLDXD, SH64_MEDIA_SFMT_FLDXP
- , SH64_MEDIA_SFMT_FLDXS, SH64_MEDIA_SFMT_FMACS, SH64_MEDIA_SFMT_FMOVDQ, SH64_MEDIA_SFMT_FMOVLS
- , SH64_MEDIA_SFMT_FMOVQD, SH64_MEDIA_SFMT_FMOVSL, SH64_MEDIA_SFMT_FSTD, SH64_MEDIA_SFMT_FSTP
- , SH64_MEDIA_SFMT_FSTS, SH64_MEDIA_SFMT_FSTXD, SH64_MEDIA_SFMT_FSTXP, SH64_MEDIA_SFMT_FSTXS
- , SH64_MEDIA_SFMT_FTRVS, SH64_MEDIA_SFMT_GETCON, SH64_MEDIA_SFMT_GETTR, SH64_MEDIA_SFMT_LDB
- , SH64_MEDIA_SFMT_LDL, SH64_MEDIA_SFMT_LDQ, SH64_MEDIA_SFMT_LDUW, SH64_MEDIA_SFMT_LDXB
- , SH64_MEDIA_SFMT_MCMV, SH64_MEDIA_SFMT_MOVI, SH64_MEDIA_SFMT_MPERMW, SH64_MEDIA_SFMT_ORI
- , SH64_MEDIA_SFMT_PTA, SH64_MEDIA_SFMT_PTABS, SH64_MEDIA_SFMT_PTREL, SH64_MEDIA_SFMT_PUTCON
+ , SH64_MEDIA_SFMT_FCNVDS, SH64_MEDIA_SFMT_FCNVSD, SH64_MEDIA_SFMT_FGETSCR, SH64_MEDIA_SFMT_FIPRS
+ , SH64_MEDIA_SFMT_FLDD, SH64_MEDIA_SFMT_FLDP, SH64_MEDIA_SFMT_FLDS, SH64_MEDIA_SFMT_FLDXD
+ , SH64_MEDIA_SFMT_FLDXP, SH64_MEDIA_SFMT_FLDXS, SH64_MEDIA_SFMT_FMACS, SH64_MEDIA_SFMT_FMOVDQ
+ , SH64_MEDIA_SFMT_FMOVLS, SH64_MEDIA_SFMT_FMOVQD, SH64_MEDIA_SFMT_FMOVSL, SH64_MEDIA_SFMT_FPUTSCR
+ , SH64_MEDIA_SFMT_FSTD, SH64_MEDIA_SFMT_FSTS, SH64_MEDIA_SFMT_FSTXD, SH64_MEDIA_SFMT_FSTXS
+ , SH64_MEDIA_SFMT_FTRVS, SH64_MEDIA_SFMT_GETCFG, SH64_MEDIA_SFMT_GETCON, SH64_MEDIA_SFMT_GETTR
+ , SH64_MEDIA_SFMT_LDB, SH64_MEDIA_SFMT_LDL, SH64_MEDIA_SFMT_LDQ, SH64_MEDIA_SFMT_LDUW
+ , SH64_MEDIA_SFMT_LDHIL, SH64_MEDIA_SFMT_LDHIQ, SH64_MEDIA_SFMT_LDLOL, SH64_MEDIA_SFMT_LDLOQ
+ , SH64_MEDIA_SFMT_LDXB, SH64_MEDIA_SFMT_LDXL, SH64_MEDIA_SFMT_LDXQ, SH64_MEDIA_SFMT_LDXUB
+ , SH64_MEDIA_SFMT_LDXUW, SH64_MEDIA_SFMT_LDXW, SH64_MEDIA_SFMT_MCMV, SH64_MEDIA_SFMT_MOVI
+ , SH64_MEDIA_SFMT_MPERMW, SH64_MEDIA_SFMT_NOP, SH64_MEDIA_SFMT_ORI, SH64_MEDIA_SFMT_PTA
+ , SH64_MEDIA_SFMT_PTABS, SH64_MEDIA_SFMT_PTREL, SH64_MEDIA_SFMT_PUTCFG, SH64_MEDIA_SFMT_PUTCON
  , SH64_MEDIA_SFMT_SHARI, SH64_MEDIA_SFMT_SHARIL, SH64_MEDIA_SFMT_SHORI, SH64_MEDIA_SFMT_STB
  , SH64_MEDIA_SFMT_STL, SH64_MEDIA_SFMT_STQ, SH64_MEDIA_SFMT_STW, SH64_MEDIA_SFMT_STHIL
- , SH64_MEDIA_SFMT_STXB, SH64_MEDIA_SFMT_SWAPQ, SH64_MEDIA_SFMT_TRAPA, SH64_MEDIA_SFMT_XORI
+ , SH64_MEDIA_SFMT_STHIQ, SH64_MEDIA_SFMT_STLOL, SH64_MEDIA_SFMT_STLOQ, SH64_MEDIA_SFMT_STXB
+ , SH64_MEDIA_SFMT_STXL, SH64_MEDIA_SFMT_STXQ, SH64_MEDIA_SFMT_STXW, SH64_MEDIA_SFMT_SWAPQ
+ , SH64_MEDIA_SFMT_TRAPA, SH64_MEDIA_SFMT_XORI
 } SH64_MEDIA_SFMT_TYPE;
 
 /* Function unit handlers (user written).  */
 
+extern int sh64_model_sh5_u_ftrv (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*fvn*/);
+extern int sh64_model_sh5_u_fipr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*fvm*/, INT /*fvn*/);
+extern int sh64_model_sh5_u_ocb (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_mulr_gr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_u_mulr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_use_dr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*usereg*/);
+extern int sh64_model_sh5_u_load_dr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_u_set_dr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_u_fcnv (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_fcmp (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_fsqrt (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_u_fdiv (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_u_fpu_load_gr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_u_use_fpscr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_ldsl_fpscr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_lds_fpscr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_use_fpul (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_flds_fpul (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_load_fpul (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_set_fpul (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_fpu_memory_access (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_use_fr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*usereg*/);
+extern int sh64_model_sh5_u_set_fr_0 (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_u_set_fr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_u_load_fr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_u_maybe_fpu (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_fpu (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_trap (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_write_back (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_use_multiply_result (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_shift (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_tas (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_mulsw (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_mull (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_dmul (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_macl (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_macw (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_multiply (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_set_mac (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_load_mac (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_load_vbr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_load_gbr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_use_gr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*usereg*/);
+extern int sh64_model_sh5_u_load_gr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_u_stc_vbr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_ldcl_vbr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_ldcl (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_use_tbit (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_ldc_gbr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_ldc_sr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_set_sr_bit (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_use_pr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_load_pr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_sts_pr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_lds_pr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_memory_access (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_logic_b (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_jsr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_jmp (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_branch (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_u_sx (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
 extern int sh64_model_sh5_u_exec (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_putcfg (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_getcfg (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_pt (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*targetreg*/);
+extern int sh64_model_sh5_media_u_ftrvs (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_media_u_fsqrtd (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_media_u_fdivd (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_media_u_cond_branch (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*targetreg*/);
+extern int sh64_model_sh5_media_u_blink (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*targetreg*/);
+extern int sh64_model_sh5_media_u_use_tr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*usereg*/);
+extern int sh64_model_sh5_media_u_use_mtrx (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*usereg*/);
+extern int sh64_model_sh5_media_u_use_fv (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*usereg*/);
+extern int sh64_model_sh5_media_u_use_fp (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*usereg*/);
+extern int sh64_model_sh5_media_u_load_mtrx (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_media_u_load_fv (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_media_u_load_fp (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_media_u_set_mtrx (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_media_u_set_fv (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_media_u_set_fp (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_media_u_set_gr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_media_u_ftrv (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*fvn*/);
+extern int sh64_model_sh5_media_u_fipr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*fvm*/, INT /*fvn*/);
+extern int sh64_model_sh5_media_u_ocb (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_mulr_gr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_media_u_mulr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_use_dr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*usereg*/);
+extern int sh64_model_sh5_media_u_load_dr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_media_u_set_dr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_media_u_fcnv (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_fcmp (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_fsqrt (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_media_u_fdiv (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_media_u_fpu_load_gr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_media_u_use_fpscr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_ldsl_fpscr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_lds_fpscr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_use_fpul (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_flds_fpul (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_load_fpul (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_set_fpul (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_fpu_memory_access (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_use_fr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*usereg*/);
+extern int sh64_model_sh5_media_u_set_fr_0 (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_media_u_set_fr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_media_u_load_fr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_media_u_maybe_fpu (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_fpu (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_trap (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_write_back (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_use_multiply_result (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_shift (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_tas (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_mulsw (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_mull (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_dmul (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_macl (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_macw (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_multiply (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_set_mac (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_load_mac (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_load_vbr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_load_gbr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_use_gr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*usereg*/);
+extern int sh64_model_sh5_media_u_load_gr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/, INT /*loadreg*/);
+extern int sh64_model_sh5_media_u_stc_vbr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_ldcl_vbr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_ldcl (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_use_tbit (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_ldc_gbr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_ldc_sr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_set_sr_bit (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_use_pr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_load_pr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_sts_pr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_lds_pr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_memory_access (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_logic_b (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_jsr (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_jmp (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_branch (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_sx (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
+extern int sh64_model_sh5_media_u_exec (SIM_CPU *, const IDESC *, int /*unit_num*/, int /*referenced*/);
 
 /* Profiling before/after handlers (user written) */
 

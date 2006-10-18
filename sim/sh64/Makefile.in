@@ -104,50 +104,52 @@ stamp-all: stamp-arch stamp-desc stamp-cpu stamp-decode stamp-defs
 stamp-decode: stamp-decode-compact stamp-decode-media
 stamp-defs: stamp-defs-compact stamp-defs-media
 
-stamp-arch: $(CGEN_READ_SCM) $(CGEN_ARCH_SCM) $(CGEN_CPU_DIR)/sh.cpu $(CGEN_CPU_DIR)/sh.opc $(CGEN_CPU_DIR)/sh64-media.cpu $(CGEN_CPU_DIR)/sh64-compact.cpu Makefile
-	$(MAKE) cgen-arch $(CGEN_FLAGS_TO_PASS) mach=all isa=compact,media \
+stamp-arch: $(CGEN_READ_SCM) $(CGEN_ARCH_SCM) $(CGEN_CPU_DIR)/sh.cpu $(CGEN_CPU_DIR)/sh.opc $(CGEN_CPU_DIR)/sh64-media.cpu $(CGEN_CPU_DIR)/sh64-compact.cpu $(CGEN_CPU_DIR)/sh-sim.cpu Makefile
+	$(MAKE) cgen-arch $(CGEN_FLAGS_TO_PASS) mach=all isa=compact,media archfile=$(CGEN_CPU_DIR)/sh.cpu \
 	  FLAGS="with-scache"
 	touch $@
-arch.h arch.c cpuall.h: $(CGEN_MAINT) stamp-arch
+arch.h ${srcdir}/arch.c cpuall.h: $(CGEN_MAINT) stamp-arch
 	@true
 
-stamp-desc: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_CPU_DIR)/sh.cpu $(CGEN_CPU_DIR)/sh.opc $(CGEN_CPU_DIR)/sh64-compact.cpu $(CGEN_CPU_DIR)/sh64-media.cpu Makefile
-	$(MAKE) cgen-desc $(CGEN_FLAGS_TO_PASS) cpu=sh64 mach=all isa=compact,media
+stamp-desc: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_CPU_DIR)/sh.cpu $(CGEN_CPU_DIR)/sh.opc $(CGEN_CPU_DIR)/sh64-compact.cpu $(CGEN_CPU_DIR)/sh64-media.cpu $(CGEN_CPU_DIR)/sh-sim.cpu Makefile
+	$(MAKE) cgen-desc $(CGEN_FLAGS_TO_PASS) cpu=sh64 mach=all isa=compact,media archfile=$(CGEN_CPU_DIR)/sh.cpu 
 	touch $@
 desc.h: $(CGEN_MAINT) stamp-desc
 	@true
 
-stamp-cpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_CPU_DIR)/sh.cpu $(CGEN_CPU_DIR)/sh.opc $(CGEN_CPU_DIR)/sh64-compact.cpu $(CGEN_CPU_DIR)/sh64-media.cpu Makefile
+stamp-cpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_CPU_DIR)/sh.cpu $(CGEN_CPU_DIR)/sh.opc $(CGEN_CPU_DIR)/sh64-compact.cpu $(CGEN_CPU_DIR)/sh64-media.cpu $(CGEN_CPU_DIR)/sh-sim.cpu Makefile
 	$(MAKE) cgen-cpu $(CGEN_FLAGS_TO_PASS) \
-	  cpu=sh64 mach=sh4,sh5 isa=compact,media FLAGS="with-multiple-isa with-scache"
+	  cpu=sh64 mach=sh4,sh5 isa=compact,media FLAGS="with-multiple-isa with-scache" archfile=$(CGEN_CPU_DIR)/sh.cpu 
 	rm -f $(srcdir)/model.c
 	touch $@
 cpu.h: $(CGEN_MAINT) stamp-cpu
 	@true
 
-stamp-defs-compact: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_CPU_DIR)/sh.cpu $(CGEN_CPU_DIR)/sh.opc $(CGEN_CPU_DIR)/sh64-compact.cpu Makefile
+stamp-defs-compact: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_CPU_DIR)/sh.cpu $(CGEN_CPU_DIR)/sh.opc $(CGEN_CPU_DIR)/sh64-compact.cpu $(CGEN_CPU_DIR)/sh-sim.cpu Makefile
 	$(MAKE) cgen-defs $(CGEN_FLAGS_TO_PASS) \
-	  cpu=sh64 mach=sh5 isa=compact FLAGS="with-scache" SUFFIX="-compact"
+	  cpu=sh64 mach=sh5 isa=compact FLAGS="with-scache" SUFFIX="-compact" archfile=$(CGEN_CPU_DIR)/sh.cpu 
 	touch $@
 defs-compact.h: $(CGEN_MAINT) stamp-defs-compact
 	@true
 
-stamp-defs-media: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_CPU_DIR)/sh.cpu $(CGEN_CPU_DIR)/sh.opc $(CGEN_CPU_DIR)/sh64-media.cpu Makefile
+stamp-defs-media: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_CPU_DIR)/sh.cpu $(CGEN_CPU_DIR)/sh.opc $(CGEN_CPU_DIR)/sh64-media.cpu $(CGEN_CPU_DIR)/sh-sim.cpu Makefile
 	$(MAKE) cgen-defs $(CGEN_FLAGS_TO_PASS) \
-	  cpu=sh64 mach=sh5 isa=media FLAGS="with-scache" SUFFIX="-media"
+	  cpu=sh64 mach=sh5 isa=media FLAGS="with-scache" SUFFIX="-media" archfile=$(CGEN_CPU_DIR)/sh.cpu 
 	touch $@
 defs-media.h: $(CGEN_MAINT) stamp-defs-media
 
-stamp-decode-compact: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CGEN_CPU_DIR)/sh.cpu $(CGEN_CPU_DIR)/sh.opc $(CGEN_CPU_DIR)/sh64-compact.cpu Makefile
+stamp-decode-compact: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CGEN_CPU_DIR)/sh.cpu $(CGEN_CPU_DIR)/sh.opc $(CGEN_CPU_DIR)/sh64-compact.cpu $(CGEN_CPU_DIR)/sh-sim.cpu Makefile
 	$(MAKE) cgen-decode $(CGEN_FLAGS_TO_PASS) \
-	  cpu=sh64 mach=sh5 isa=compact FLAGS="with-scache" SUFFIX="-compact" EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"
+	  cpu=sh64 mach=sh5 isa=compact FLAGS="with-scache" SUFFIX="-compact" EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)" \
+	  archfile=$(CGEN_CPU_DIR)/sh.cpu
 	touch $@
-sem-compact.c sem-compact-switch.c decode-compact.c decode-compact.h: $(CGEN_MAINT) stamp-compact
+sem-compact.c sem-compact-switch.c decode-compact.c decode-compact.h: $(CGEN_MAINT) stamp-decode-compact
 	@true
 
-stamp-decode-media: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CGEN_CPU_DIR)/sh.cpu $(CGEN_CPU_DIR)/sh.opc $(CGEN_CPU_DIR)/sh64-media.cpu Makefile
+stamp-decode-media: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CGEN_CPU_DIR)/sh.cpu $(CGEN_CPU_DIR)/sh.opc $(CGEN_CPU_DIR)/sh64-media.cpu $(CGEN_CPU_DIR)/sh-sim.cpu Makefile
 	$(MAKE) cgen-decode $(CGEN_FLAGS_TO_PASS) \
-	  cpu=sh64 mach=sh5 isa=media FLAGS="with-scache" SUFFIX="-media" EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"
+	  cpu=sh64 mach=sh5 isa=media FLAGS="with-scache" SUFFIX="-media" EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)" \
+	  archfile=$(CGEN_CPU_DIR)/sh.cpu
 	touch $@
-sem-media.c sem-media-switch.c decode-media.c decode-media.h: $(CGEN_MAINT) stamp-media
+sem-media.c sem-media-switch.c decode-media.c decode-media.h: $(CGEN_MAINT) stamp-decode-media
 	@true

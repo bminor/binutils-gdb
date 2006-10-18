@@ -1,5 +1,5 @@
 /* collection of junk waiting time to sort out
-   Copyright (C) 2000 Free Software Foundation, Inc.
+   Copyright (C) 2000, 2006 Free Software Foundation, Inc.
    Contributed by Red Hat, Inc.
 
 This file is part of the GNU Simulators.
@@ -42,6 +42,7 @@ extern IDESC * sh64_idesc_compact;
 
 BI sh64_endian (SIM_CPU *);
 VOID sh64_break (SIM_CPU *, PCADDR);
+SI sh64_movua (SIM_CPU *, PCADDR, SI);
 VOID sh64_trapa (SIM_CPU *, DI, PCADDR);
 VOID sh64_compact_trapa (SIM_CPU *, UQI, PCADDR);
 
@@ -74,7 +75,12 @@ DF sh64_ftrcdq (SIM_CPU *, DF);
 SF sh64_ftrcsl (SIM_CPU *, SF);
 DF sh64_ftrcsq (SIM_CPU *, SF);
 VOID sh64_ftrvs (SIM_CPU *, unsigned, unsigned, unsigned);
-
+VOID sh64_fipr (SIM_CPU *cpu, unsigned m, unsigned n);
+SF sh64_fiprs (SIM_CPU *cpu, unsigned g, unsigned h);
+VOID sh64_fldp (SIM_CPU *cpu, PCADDR pc, DI rm, DI rn, unsigned f);
+VOID sh64_fstp (SIM_CPU *cpu, PCADDR pc, DI rm, DI rn, unsigned f);
+VOID sh64_ftrv (SIM_CPU *cpu, UINT ignored);
+VOID sh64_pref (SIM_CPU *cpu, SI addr);
 BI sh64_fcmpeqs (SIM_CPU *, SF, SF);
 BI sh64_fcmpeqd (SIM_CPU *, DF, DF);
 BI sh64_fcmpges (SIM_CPU *, SF, SF);

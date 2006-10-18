@@ -2,9 +2,9 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+Copyright 1996-2005 Free Software Foundation, Inc.
 
-This file is part of the GNU Simulators.
+This file is part of the GNU simulators.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
@@ -238,18 +238,18 @@ sh64_h_fr_set (SIM_CPU *current_cpu, UINT regno, SF newval)
 
 /* Get the value of h-fp.  */
 
-DF
+SF
 sh64_h_fp_get (SIM_CPU *current_cpu, UINT regno)
 {
-  return CPU (h_fp[regno]);
+  return GET_H_FP (regno);
 }
 
 /* Set a value for h-fp.  */
 
 void
-sh64_h_fp_set (SIM_CPU *current_cpu, UINT regno, DF newval)
+sh64_h_fp_set (SIM_CPU *current_cpu, UINT regno, SF newval)
 {
-  CPU (h_fp[regno]) = newval;
+  SET_H_FP (regno, newval);
 }
 
 /* Get the value of h-fv.  */
@@ -298,6 +298,38 @@ void
 sh64_h_dr_set (SIM_CPU *current_cpu, UINT regno, DF newval)
 {
   SET_H_DR (regno, newval);
+}
+
+/* Get the value of h-fsd.  */
+
+DF
+sh64_h_fsd_get (SIM_CPU *current_cpu, UINT regno)
+{
+  return GET_H_FSD (regno);
+}
+
+/* Set a value for h-fsd.  */
+
+void
+sh64_h_fsd_set (SIM_CPU *current_cpu, UINT regno, DF newval)
+{
+  SET_H_FSD (regno, newval);
+}
+
+/* Get the value of h-fmov.  */
+
+DF
+sh64_h_fmov_get (SIM_CPU *current_cpu, UINT regno)
+{
+  return GET_H_FMOV (regno);
+}
+
+/* Set a value for h-fmov.  */
+
+void
+sh64_h_fmov_set (SIM_CPU *current_cpu, UINT regno, DF newval)
+{
+  SET_H_FMOV (regno, newval);
 }
 
 /* Get the value of h-tr.  */
@@ -428,22 +460,6 @@ sh64_h_fvc_set (SIM_CPU *current_cpu, UINT regno, SF newval)
   SET_H_FVC (regno, newval);
 }
 
-/* Get the value of h-fpccr.  */
-
-SI
-sh64_h_fpccr_get (SIM_CPU *current_cpu)
-{
-  return GET_H_FPCCR ();
-}
-
-/* Set a value for h-fpccr.  */
-
-void
-sh64_h_fpccr_set (SIM_CPU *current_cpu, SI newval)
-{
-  SET_H_FPCCR (newval);
-}
-
 /* Get the value of h-gbr.  */
 
 SI
@@ -458,6 +474,22 @@ void
 sh64_h_gbr_set (SIM_CPU *current_cpu, SI newval)
 {
   SET_H_GBR (newval);
+}
+
+/* Get the value of h-vbr.  */
+
+SI
+sh64_h_vbr_get (SIM_CPU *current_cpu)
+{
+  return GET_H_VBR ();
+}
+
+/* Set a value for h-vbr.  */
+
+void
+sh64_h_vbr_set (SIM_CPU *current_cpu, SI newval)
+{
+  SET_H_VBR (newval);
 }
 
 /* Get the value of h-pr.  */

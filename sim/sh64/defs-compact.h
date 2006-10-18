@@ -2,9 +2,9 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+Copyright 1996-2005 Free Software Foundation, Inc.
 
-This file is part of the GNU Simulators.
+This file is part of the GNU simulators.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
@@ -32,25 +32,18 @@ union sem_fields {
     int empty;
   } fmt_empty;
   struct { /*  */
-    SI f_dn;
-  } sfmt_fcnvds_compact;
-  struct { /*  */
     IADDR i_disp12;
   } sfmt_bra_compact;
   struct { /*  */
     IADDR i_disp8;
   } sfmt_bf_compact;
   struct { /*  */
-    SI f_imm4x2;
-    UINT f_rm;
-  } sfmt_movw11_compact;
-  struct { /*  */
     SI f_imm8x2;
     UINT f_rn;
   } sfmt_movw10_compact;
   struct { /*  */
     SI f_imm4x2;
-    UINT f_rn;
+    UINT f_rm;
   } sfmt_movw5_compact;
   struct { /*  */
     SI f_imm8x4;
@@ -61,6 +54,10 @@ union sem_fields {
     UINT f_rm;
   } sfmt_movb5_compact;
   struct { /*  */
+    INT f_imm20;
+    UINT f_rn;
+  } sfmt_movi20_compact;
+  struct { /*  */
     SI f_vm;
     SI f_vn;
   } sfmt_fipr_compact;
@@ -69,10 +66,25 @@ union sem_fields {
     UINT f_rn;
   } sfmt_addi_compact;
   struct { /*  */
+    SI f_imm12x4;
+    UINT f_rm;
+    UINT f_rn;
+  } sfmt_movl12_compact;
+  struct { /*  */
     SI f_imm4x4;
     UINT f_rm;
     UINT f_rn;
   } sfmt_movl5_compact;
+  struct { /*  */
+    SI f_dm;
+    SI f_imm12x8;
+    UINT f_rn;
+  } sfmt_fmov9_compact;
+  struct { /*  */
+    SI f_dn;
+    SI f_imm12x8;
+    UINT f_rm;
+  } sfmt_fmov8_compact;
 #if WITH_SCACHE_PBB
   /* Writeback handler.  */
   struct {
@@ -141,10 +153,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_ADD_COMPACT_CODE \
   length = 2; \
-  f_op4 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
-  f_rn = EXTRACT_LSB0_UINT (insn, 16, 11, 4); \
-  f_rm = EXTRACT_LSB0_UINT (insn, 16, 7, 4); \
-  f_sub4 = EXTRACT_LSB0_UINT (insn, 16, 3, 4); \
+  f_op4 = EXTRACT_MSB0_UINT (insn, 16, 0, 4); \
+  f_rn = EXTRACT_MSB0_UINT (insn, 16, 4, 4); \
+  f_rm = EXTRACT_MSB0_UINT (insn, 16, 8, 4); \
+  f_sub4 = EXTRACT_MSB0_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_IFMT_ADDI_COMPACT_VARS \
   UINT f_op4; \
@@ -153,9 +165,9 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_ADDI_COMPACT_CODE \
   length = 2; \
-  f_op4 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
-  f_rn = EXTRACT_LSB0_UINT (insn, 16, 11, 4); \
-  f_imm8 = EXTRACT_LSB0_UINT (insn, 16, 7, 8); \
+  f_op4 = EXTRACT_MSB0_UINT (insn, 16, 0, 4); \
+  f_rn = EXTRACT_MSB0_UINT (insn, 16, 4, 4); \
+  f_imm8 = EXTRACT_MSB0_UINT (insn, 16, 8, 8); \
 
 #define EXTRACT_IFMT_AND_COMPACT_VARS \
   UINT f_op4; \
@@ -165,10 +177,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_AND_COMPACT_CODE \
   length = 2; \
-  f_op4 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
-  f_rn = EXTRACT_LSB0_UINT (insn, 16, 11, 4); \
-  f_rm = EXTRACT_LSB0_UINT (insn, 16, 7, 4); \
-  f_sub4 = EXTRACT_LSB0_UINT (insn, 16, 3, 4); \
+  f_op4 = EXTRACT_MSB0_UINT (insn, 16, 0, 4); \
+  f_rn = EXTRACT_MSB0_UINT (insn, 16, 4, 4); \
+  f_rm = EXTRACT_MSB0_UINT (insn, 16, 8, 4); \
+  f_sub4 = EXTRACT_MSB0_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_IFMT_ANDI_COMPACT_VARS \
   UINT f_op8; \
@@ -176,8 +188,8 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_ANDI_COMPACT_CODE \
   length = 2; \
-  f_op8 = EXTRACT_LSB0_UINT (insn, 16, 15, 8); \
-  f_imm8 = EXTRACT_LSB0_UINT (insn, 16, 7, 8); \
+  f_op8 = EXTRACT_MSB0_UINT (insn, 16, 0, 8); \
+  f_imm8 = EXTRACT_MSB0_UINT (insn, 16, 8, 8); \
 
 #define EXTRACT_IFMT_ANDB_COMPACT_VARS \
   UINT f_op8; \
@@ -185,8 +197,8 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_ANDB_COMPACT_CODE \
   length = 2; \
-  f_op8 = EXTRACT_LSB0_UINT (insn, 16, 15, 8); \
-  f_imm8 = EXTRACT_LSB0_UINT (insn, 16, 7, 8); \
+  f_op8 = EXTRACT_MSB0_UINT (insn, 16, 0, 8); \
+  f_imm8 = EXTRACT_MSB0_UINT (insn, 16, 8, 8); \
 
 #define EXTRACT_IFMT_BF_COMPACT_VARS \
   UINT f_op8; \
@@ -194,8 +206,8 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_BF_COMPACT_CODE \
   length = 2; \
-  f_op8 = EXTRACT_LSB0_UINT (insn, 16, 15, 8); \
-  f_disp8 = ((((EXTRACT_LSB0_INT (insn, 16, 7, 8)) << (1))) + (((pc) + (4)))); \
+  f_op8 = EXTRACT_MSB0_UINT (insn, 16, 0, 8); \
+  f_disp8 = ((((EXTRACT_MSB0_INT (insn, 16, 8, 8)) << (1))) + (((pc) + (4)))); \
 
 #define EXTRACT_IFMT_BRA_COMPACT_VARS \
   UINT f_op4; \
@@ -203,8 +215,8 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_BRA_COMPACT_CODE \
   length = 2; \
-  f_op4 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
-  f_disp12 = ((((EXTRACT_LSB0_INT (insn, 16, 11, 12)) << (1))) + (((pc) + (4)))); \
+  f_op4 = EXTRACT_MSB0_UINT (insn, 16, 0, 4); \
+  f_disp12 = ((((EXTRACT_MSB0_INT (insn, 16, 4, 12)) << (1))) + (((pc) + (4)))); \
 
 #define EXTRACT_IFMT_BRAF_COMPACT_VARS \
   UINT f_op4; \
@@ -213,16 +225,16 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_BRAF_COMPACT_CODE \
   length = 2; \
-  f_op4 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
-  f_rn = EXTRACT_LSB0_UINT (insn, 16, 11, 4); \
-  f_sub8 = EXTRACT_LSB0_UINT (insn, 16, 7, 8); \
+  f_op4 = EXTRACT_MSB0_UINT (insn, 16, 0, 4); \
+  f_rn = EXTRACT_MSB0_UINT (insn, 16, 4, 4); \
+  f_sub8 = EXTRACT_MSB0_UINT (insn, 16, 8, 8); \
 
 #define EXTRACT_IFMT_BRK_COMPACT_VARS \
   UINT f_op16; \
   unsigned int length;
 #define EXTRACT_IFMT_BRK_COMPACT_CODE \
   length = 2; \
-  f_op16 = EXTRACT_LSB0_UINT (insn, 16, 15, 16); \
+  f_op16 = EXTRACT_MSB0_UINT (insn, 16, 0, 16); \
 
 #define EXTRACT_IFMT_FABS_COMPACT_VARS \
   UINT f_op4; \
@@ -231,9 +243,9 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_FABS_COMPACT_CODE \
   length = 2; \
-  f_op4 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
-  f_rn = EXTRACT_LSB0_UINT (insn, 16, 11, 4); \
-  f_sub8 = EXTRACT_LSB0_UINT (insn, 16, 7, 8); \
+  f_op4 = EXTRACT_MSB0_UINT (insn, 16, 0, 4); \
+  f_rn = EXTRACT_MSB0_UINT (insn, 16, 4, 4); \
+  f_sub8 = EXTRACT_MSB0_UINT (insn, 16, 8, 8); \
 
 #define EXTRACT_IFMT_FADD_COMPACT_VARS \
   UINT f_op4; \
@@ -243,23 +255,23 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_FADD_COMPACT_CODE \
   length = 2; \
-  f_op4 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
-  f_rn = EXTRACT_LSB0_UINT (insn, 16, 11, 4); \
-  f_rm = EXTRACT_LSB0_UINT (insn, 16, 7, 4); \
-  f_sub4 = EXTRACT_LSB0_UINT (insn, 16, 3, 4); \
+  f_op4 = EXTRACT_MSB0_UINT (insn, 16, 0, 4); \
+  f_rn = EXTRACT_MSB0_UINT (insn, 16, 4, 4); \
+  f_rm = EXTRACT_MSB0_UINT (insn, 16, 8, 4); \
+  f_sub4 = EXTRACT_MSB0_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_IFMT_FCNVDS_COMPACT_VARS \
   UINT f_op4; \
   SI f_dn; \
-  UINT f_8_1; \
+  UINT f_7_1; \
   UINT f_sub8; \
   unsigned int length;
 #define EXTRACT_IFMT_FCNVDS_COMPACT_CODE \
   length = 2; \
-  f_op4 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
-  f_dn = ((EXTRACT_LSB0_UINT (insn, 16, 11, 3)) << (1)); \
-  f_8_1 = EXTRACT_LSB0_UINT (insn, 16, 8, 1); \
-  f_sub8 = EXTRACT_LSB0_UINT (insn, 16, 7, 8); \
+  f_op4 = EXTRACT_MSB0_UINT (insn, 16, 0, 4); \
+  f_dn = ((EXTRACT_MSB0_UINT (insn, 16, 4, 3)) << (1)); \
+  f_7_1 = EXTRACT_MSB0_UINT (insn, 16, 7, 1); \
+  f_sub8 = EXTRACT_MSB0_UINT (insn, 16, 8, 8); \
 
 #define EXTRACT_IFMT_FIPR_COMPACT_VARS \
   UINT f_op4; \
@@ -269,10 +281,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_FIPR_COMPACT_CODE \
   length = 2; \
-  f_op4 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
-  f_vn = ((EXTRACT_LSB0_UINT (insn, 16, 11, 2)) << (2)); \
-  f_vm = ((EXTRACT_LSB0_UINT (insn, 16, 9, 2)) << (2)); \
-  f_sub8 = EXTRACT_LSB0_UINT (insn, 16, 7, 8); \
+  f_op4 = EXTRACT_MSB0_UINT (insn, 16, 0, 4); \
+  f_vn = ((EXTRACT_MSB0_UINT (insn, 16, 4, 2)) << (2)); \
+  f_vm = ((EXTRACT_MSB0_UINT (insn, 16, 6, 2)) << (2)); \
+  f_sub8 = EXTRACT_MSB0_UINT (insn, 16, 8, 8); \
 
 #define EXTRACT_IFMT_FLDS_COMPACT_VARS \
   UINT f_op4; \
@@ -281,9 +293,9 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_FLDS_COMPACT_CODE \
   length = 2; \
-  f_op4 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
-  f_rn = EXTRACT_LSB0_UINT (insn, 16, 11, 4); \
-  f_sub8 = EXTRACT_LSB0_UINT (insn, 16, 7, 8); \
+  f_op4 = EXTRACT_MSB0_UINT (insn, 16, 0, 4); \
+  f_rn = EXTRACT_MSB0_UINT (insn, 16, 4, 4); \
+  f_sub8 = EXTRACT_MSB0_UINT (insn, 16, 8, 8); \
 
 #define EXTRACT_IFMT_FMAC_COMPACT_VARS \
   UINT f_op4; \
@@ -293,10 +305,23 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_FMAC_COMPACT_CODE \
   length = 2; \
-  f_op4 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
-  f_rn = EXTRACT_LSB0_UINT (insn, 16, 11, 4); \
-  f_rm = EXTRACT_LSB0_UINT (insn, 16, 7, 4); \
-  f_sub4 = EXTRACT_LSB0_UINT (insn, 16, 3, 4); \
+  f_op4 = EXTRACT_MSB0_UINT (insn, 16, 0, 4); \
+  f_rn = EXTRACT_MSB0_UINT (insn, 16, 4, 4); \
+  f_rm = EXTRACT_MSB0_UINT (insn, 16, 8, 4); \
+  f_sub4 = EXTRACT_MSB0_UINT (insn, 16, 12, 4); \
+
+#define EXTRACT_IFMT_FMOV1_COMPACT_VARS \
+  UINT f_op4; \
+  UINT f_rn; \
+  UINT f_rm; \
+  UINT f_sub4; \
+  unsigned int length;
+#define EXTRACT_IFMT_FMOV1_COMPACT_CODE \
+  length = 2; \
+  f_op4 = EXTRACT_MSB0_UINT (insn, 16, 0, 4); \
+  f_rn = EXTRACT_MSB0_UINT (insn, 16, 4, 4); \
+  f_rm = EXTRACT_MSB0_UINT (insn, 16, 8, 4); \
+  f_sub4 = EXTRACT_MSB0_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_IFMT_FMOV2_COMPACT_VARS \
   UINT f_op4; \
@@ -306,10 +331,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_FMOV2_COMPACT_CODE \
   length = 2; \
-  f_op4 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
-  f_rn = EXTRACT_LSB0_UINT (insn, 16, 11, 4); \
-  f_rm = EXTRACT_LSB0_UINT (insn, 16, 7, 4); \
-  f_sub4 = EXTRACT_LSB0_UINT (insn, 16, 3, 4); \
+  f_op4 = EXTRACT_MSB0_UINT (insn, 16, 0, 4); \
+  f_rn = EXTRACT_MSB0_UINT (insn, 16, 4, 4); \
+  f_rm = EXTRACT_MSB0_UINT (insn, 16, 8, 4); \
+  f_sub4 = EXTRACT_MSB0_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_IFMT_FMOV5_COMPACT_VARS \
   UINT f_op4; \
@@ -319,10 +344,48 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_FMOV5_COMPACT_CODE \
   length = 2; \
-  f_op4 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
-  f_rn = EXTRACT_LSB0_UINT (insn, 16, 11, 4); \
-  f_rm = EXTRACT_LSB0_UINT (insn, 16, 7, 4); \
-  f_sub4 = EXTRACT_LSB0_UINT (insn, 16, 3, 4); \
+  f_op4 = EXTRACT_MSB0_UINT (insn, 16, 0, 4); \
+  f_rn = EXTRACT_MSB0_UINT (insn, 16, 4, 4); \
+  f_rm = EXTRACT_MSB0_UINT (insn, 16, 8, 4); \
+  f_sub4 = EXTRACT_MSB0_UINT (insn, 16, 12, 4); \
+
+#define EXTRACT_IFMT_FMOV8_COMPACT_VARS \
+  UINT f_op4; \
+  SI f_dn; \
+  UINT f_7_1; \
+  UINT f_rm; \
+  UINT f_sub4; \
+  UINT f_16_4; \
+  SI f_imm12x8; \
+  unsigned int length;
+#define EXTRACT_IFMT_FMOV8_COMPACT_CODE \
+  length = 4; \
+  f_op4 = EXTRACT_MSB0_UINT (insn, 32, 0, 4); \
+  f_dn = ((EXTRACT_MSB0_UINT (insn, 32, 4, 3)) << (1)); \
+  f_7_1 = EXTRACT_MSB0_UINT (insn, 32, 7, 1); \
+  f_rm = EXTRACT_MSB0_UINT (insn, 32, 8, 4); \
+  f_sub4 = EXTRACT_MSB0_UINT (insn, 32, 12, 4); \
+  f_16_4 = EXTRACT_MSB0_UINT (insn, 32, 16, 4); \
+  f_imm12x8 = ((EXTRACT_MSB0_INT (insn, 32, 20, 12)) << (3)); \
+
+#define EXTRACT_IFMT_FMOV9_COMPACT_VARS \
+  UINT f_op4; \
+  UINT f_rn; \
+  SI f_dm; \
+  UINT f_11_1; \
+  UINT f_sub4; \
+  UINT f_16_4; \
+  SI f_imm12x8; \
+  unsigned int length;
+#define EXTRACT_IFMT_FMOV9_COMPACT_CODE \
+  length = 4; \
+  f_op4 = EXTRACT_MSB0_UINT (insn, 32, 0, 4); \
+  f_rn = EXTRACT_MSB0_UINT (insn, 32, 4, 4); \
+  f_dm = ((EXTRACT_MSB0_UINT (insn, 32, 8, 3)) << (1)); \
+  f_11_1 = EXTRACT_MSB0_UINT (insn, 32, 11, 1); \
+  f_sub4 = EXTRACT_MSB0_UINT (insn, 32, 12, 4); \
+  f_16_4 = EXTRACT_MSB0_UINT (insn, 32, 16, 4); \
+  f_imm12x8 = ((EXTRACT_MSB0_INT (insn, 32, 20, 12)) << (3)); \
 
 #define EXTRACT_IFMT_FTRV_COMPACT_VARS \
   UINT f_op4; \
@@ -331,9 +394,26 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_FTRV_COMPACT_CODE \
   length = 2; \
-  f_op4 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
-  f_vn = ((EXTRACT_LSB0_UINT (insn, 16, 11, 2)) << (2)); \
-  f_sub10 = EXTRACT_LSB0_UINT (insn, 16, 9, 10); \
+  f_op4 = EXTRACT_MSB0_UINT (insn, 16, 0, 4); \
+  f_vn = ((EXTRACT_MSB0_UINT (insn, 16, 4, 2)) << (2)); \
+  f_sub10 = EXTRACT_MSB0_UINT (insn, 16, 6, 10); \
+
+#define EXTRACT_IFMT_MOVI20_COMPACT_VARS \
+  UINT f_op4; \
+  UINT f_rn; \
+  INT f_imm20_hi; \
+  UINT f_imm20_lo; \
+  INT f_imm20; \
+  UINT f_sub4; \
+  unsigned int length;
+#define EXTRACT_IFMT_MOVI20_COMPACT_CODE \
+  length = 4; \
+  f_op4 = EXTRACT_MSB0_UINT (insn, 32, 0, 4); \
+  f_rn = EXTRACT_MSB0_UINT (insn, 32, 4, 4); \
+  f_imm20_hi = EXTRACT_MSB0_INT (insn, 32, 8, 4); \
+  f_imm20_lo = EXTRACT_MSB0_UINT (insn, 32, 16, 16); \
+  f_imm20 = ((((f_imm20_hi) << (16))) | (f_imm20_lo));\
+  f_sub4 = EXTRACT_MSB0_UINT (insn, 32, 12, 4); \
 
 #define EXTRACT_IFMT_MOVB5_COMPACT_VARS \
   UINT f_op8; \
@@ -342,9 +422,9 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_MOVB5_COMPACT_CODE \
   length = 2; \
-  f_op8 = EXTRACT_LSB0_UINT (insn, 16, 15, 8); \
-  f_rm = EXTRACT_LSB0_UINT (insn, 16, 7, 4); \
-  f_imm4 = EXTRACT_LSB0_UINT (insn, 16, 3, 4); \
+  f_op8 = EXTRACT_MSB0_UINT (insn, 16, 0, 8); \
+  f_rm = EXTRACT_MSB0_UINT (insn, 16, 8, 4); \
+  f_imm4 = EXTRACT_MSB0_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_IFMT_MOVL4_COMPACT_VARS \
   UINT f_op8; \
@@ -352,8 +432,8 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_MOVL4_COMPACT_CODE \
   length = 2; \
-  f_op8 = EXTRACT_LSB0_UINT (insn, 16, 15, 8); \
-  f_imm8x4 = ((EXTRACT_LSB0_UINT (insn, 16, 7, 8)) << (2)); \
+  f_op8 = EXTRACT_MSB0_UINT (insn, 16, 0, 8); \
+  f_imm8x4 = ((EXTRACT_MSB0_UINT (insn, 16, 8, 8)) << (2)); \
 
 #define EXTRACT_IFMT_MOVL5_COMPACT_VARS \
   UINT f_op4; \
@@ -363,10 +443,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_MOVL5_COMPACT_CODE \
   length = 2; \
-  f_op4 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
-  f_rn = EXTRACT_LSB0_UINT (insn, 16, 11, 4); \
-  f_rm = EXTRACT_LSB0_UINT (insn, 16, 7, 4); \
-  f_imm4x4 = ((EXTRACT_LSB0_UINT (insn, 16, 3, 4)) << (2)); \
+  f_op4 = EXTRACT_MSB0_UINT (insn, 16, 0, 4); \
+  f_rn = EXTRACT_MSB0_UINT (insn, 16, 4, 4); \
+  f_rm = EXTRACT_MSB0_UINT (insn, 16, 8, 4); \
+  f_imm4x4 = ((EXTRACT_MSB0_UINT (insn, 16, 12, 4)) << (2)); \
 
 #define EXTRACT_IFMT_MOVL10_COMPACT_VARS \
   UINT f_op4; \
@@ -375,9 +455,26 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_MOVL10_COMPACT_CODE \
   length = 2; \
-  f_op4 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
-  f_rn = EXTRACT_LSB0_UINT (insn, 16, 11, 4); \
-  f_imm8x4 = ((EXTRACT_LSB0_UINT (insn, 16, 7, 8)) << (2)); \
+  f_op4 = EXTRACT_MSB0_UINT (insn, 16, 0, 4); \
+  f_rn = EXTRACT_MSB0_UINT (insn, 16, 4, 4); \
+  f_imm8x4 = ((EXTRACT_MSB0_UINT (insn, 16, 8, 8)) << (2)); \
+
+#define EXTRACT_IFMT_MOVL12_COMPACT_VARS \
+  UINT f_op4; \
+  UINT f_rn; \
+  UINT f_rm; \
+  UINT f_sub4; \
+  UINT f_16_4; \
+  SI f_imm12x4; \
+  unsigned int length;
+#define EXTRACT_IFMT_MOVL12_COMPACT_CODE \
+  length = 4; \
+  f_op4 = EXTRACT_MSB0_UINT (insn, 32, 0, 4); \
+  f_rn = EXTRACT_MSB0_UINT (insn, 32, 4, 4); \
+  f_rm = EXTRACT_MSB0_UINT (insn, 32, 8, 4); \
+  f_sub4 = EXTRACT_MSB0_UINT (insn, 32, 12, 4); \
+  f_16_4 = EXTRACT_MSB0_UINT (insn, 32, 16, 4); \
+  f_imm12x4 = ((EXTRACT_MSB0_INT (insn, 32, 20, 12)) << (2)); \
 
 #define EXTRACT_IFMT_MOVW4_COMPACT_VARS \
   UINT f_op8; \
@@ -385,19 +482,19 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_MOVW4_COMPACT_CODE \
   length = 2; \
-  f_op8 = EXTRACT_LSB0_UINT (insn, 16, 15, 8); \
-  f_imm8x2 = ((EXTRACT_LSB0_UINT (insn, 16, 7, 8)) << (1)); \
+  f_op8 = EXTRACT_MSB0_UINT (insn, 16, 0, 8); \
+  f_imm8x2 = ((EXTRACT_MSB0_UINT (insn, 16, 8, 8)) << (1)); \
 
 #define EXTRACT_IFMT_MOVW5_COMPACT_VARS \
   UINT f_op8; \
-  UINT f_rn; \
+  UINT f_rm; \
   SI f_imm4x2; \
   unsigned int length;
 #define EXTRACT_IFMT_MOVW5_COMPACT_CODE \
   length = 2; \
-  f_op8 = EXTRACT_LSB0_UINT (insn, 16, 15, 8); \
-  f_rn = EXTRACT_LSB0_UINT (insn, 16, 11, 4); \
-  f_imm4x2 = ((EXTRACT_LSB0_UINT (insn, 16, 3, 4)) << (1)); \
+  f_op8 = EXTRACT_MSB0_UINT (insn, 16, 0, 8); \
+  f_rm = EXTRACT_MSB0_UINT (insn, 16, 8, 4); \
+  f_imm4x2 = ((EXTRACT_MSB0_UINT (insn, 16, 12, 4)) << (1)); \
 
 #define EXTRACT_IFMT_MOVW10_COMPACT_VARS \
   UINT f_op4; \
@@ -406,19 +503,8 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_MOVW10_COMPACT_CODE \
   length = 2; \
-  f_op4 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
-  f_rn = EXTRACT_LSB0_UINT (insn, 16, 11, 4); \
-  f_imm8x2 = ((EXTRACT_LSB0_UINT (insn, 16, 7, 8)) << (1)); \
-
-#define EXTRACT_IFMT_MOVW11_COMPACT_VARS \
-  UINT f_op8; \
-  UINT f_rm; \
-  SI f_imm4x2; \
-  unsigned int length;
-#define EXTRACT_IFMT_MOVW11_COMPACT_CODE \
-  length = 2; \
-  f_op8 = EXTRACT_LSB0_UINT (insn, 16, 15, 8); \
-  f_rm = EXTRACT_LSB0_UINT (insn, 16, 7, 4); \
-  f_imm4x2 = ((EXTRACT_LSB0_UINT (insn, 16, 3, 4)) << (1)); \
+  f_op4 = EXTRACT_MSB0_UINT (insn, 16, 0, 4); \
+  f_rn = EXTRACT_MSB0_UINT (insn, 16, 4, 4); \
+  f_imm8x2 = ((EXTRACT_MSB0_UINT (insn, 16, 8, 8)) << (1)); \
 
 #endif /* DEFS_SH64_COMPACT_H */

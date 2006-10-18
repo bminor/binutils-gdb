@@ -2,9 +2,9 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+Copyright 1996-2005 Free Software Foundation, Inc.
 
-This file is part of the GNU Simulators.
+This file is part of the GNU simulators.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
@@ -31,13 +31,34 @@ const MACH *sim_machs[] =
   & sh2_mach,
 #endif
 #ifdef HAVE_CPU_SH64
+  & sh2e_mach,
+#endif
+#ifdef HAVE_CPU_SH64
+  & sh2a_fpu_mach,
+#endif
+#ifdef HAVE_CPU_SH64
+  & sh2a_nofpu_mach,
+#endif
+#ifdef HAVE_CPU_SH64
   & sh3_mach,
 #endif
 #ifdef HAVE_CPU_SH64
   & sh3e_mach,
 #endif
 #ifdef HAVE_CPU_SH64
+  & sh4_nofpu_mach,
+#endif
+#ifdef HAVE_CPU_SH64
   & sh4_mach,
+#endif
+#ifdef HAVE_CPU_SH64
+  & sh4a_nofpu_mach,
+#endif
+#ifdef HAVE_CPU_SH64
+  & sh4a_mach,
+#endif
+#ifdef HAVE_CPU_SH64
+  & sh4al_mach,
 #endif
 #ifdef HAVE_CPU_SH64
   & sh5_mach,

@@ -1,5 +1,5 @@
 /* SH5 simulator support code
-   Copyright (C) 2000, 2001 Free Software Foundation, Inc.
+   Copyright (C) 2000, 2001, 2006 Free Software Foundation, Inc.
    Contributed by Red Hat, Inc.
 
 This file is part of the GNU simulators.
@@ -460,7 +460,7 @@ sh64_ftrcsq(SIM_CPU *current_cpu, SF frgh)
   return (DF) result;
 }
 
-void
+VOID
 sh64_ftrvs(SIM_CPU *cpu, unsigned g, unsigned h, unsigned f)
 {
   int i, j;
@@ -482,6 +482,52 @@ sh64_ftrvs(SIM_CPU *cpu, unsigned g, unsigned h, unsigned f)
       sim_fpu_to32 (&result, &sum);
       sh64_h_fr_set (cpu, f + i, result);
     }
+}
+
+VOID
+sh64_fipr (SIM_CPU *cpu, unsigned m, unsigned n)
+{
+  SF result = sh64_fmuls (cpu, sh64_h_fvc_get (cpu, m), sh64_h_fvc_get (cpu, n));
+  result = sh64_fadds (cpu, result, sh64_fmuls (cpu, sh64_h_frc_get (cpu, m + 1), sh64_h_frc_get (cpu, n + 1)));
+  result = sh64_fadds (cpu, result, sh64_fmuls (cpu, sh64_h_frc_get (cpu, m + 2), sh64_h_frc_get (cpu, n + 2)));
+  result = sh64_fadds (cpu, result, sh64_fmuls (cpu, sh64_h_frc_get (cpu, m + 3), sh64_h_frc_get (cpu, n + 3)));
+  sh64_h_frc_set (cpu, n + 3, result);
+}
+
+SF
+sh64_fiprs (SIM_CPU *cpu, unsigned g, unsigned h)
+{
+  SF temp = sh64_fmuls (cpu, sh64_h_fr_get (cpu, g), sh64_h_fr_get (cpu, h));
+  temp = sh64_fadds (cpu, temp, sh64_fmuls (cpu, sh64_h_fr_get (cpu, g + 1), sh64_h_fr_get (cpu, h + 1)));
+  temp = sh64_fadds (cpu, temp, sh64_fmuls (cpu, sh64_h_fr_get (cpu, g + 2), sh64_h_fr_get (cpu, h + 2)));
+  temp = sh64_fadds (cpu, temp, sh64_fmuls (cpu, sh64_h_fr_get (cpu, g + 3), sh64_h_fr_get (cpu, h + 3)));
+  return temp;
+}
+
+VOID
+sh64_fldp (SIM_CPU *cpu, PCADDR pc, DI rm, DI rn, unsigned f)
+{
+  sh64_h_fr_set (cpu, f,     GETMEMSF (cpu, pc, rm + rn));
+  sh64_h_fr_set (cpu, f + 1, GETMEMSF (cpu, pc, rm + rn + 4));
+}
+
+VOID
+sh64_fstp (SIM_CPU *cpu, PCADDR pc, DI rm, DI rn, unsigned f)
+{
+  SETMEMSF (cpu, pc, rm + rn,     sh64_h_fr_get (cpu, f));
+  SETMEMSF (cpu, pc, rm + rn + 4, sh64_h_fr_get (cpu, f + 1));
+}
+
+VOID
+sh64_ftrv (SIM_CPU *cpu, UINT ignored)
+{
+  /* TODO: Unimplemented.  */
+}
+
+VOID
+sh64_pref (SIM_CPU *cpu, SI addr)
+{
+  /* TODO: Unimplemented.  */
 }
 
 /* Count the number of arguments.  */
@@ -686,6 +732,22 @@ sh64_break (SIM_CPU *current_cpu, PCADDR pc)
 {
   SIM_DESC sd = CPU_STATE (current_cpu);
   sim_engine_halt (sd, current_cpu, NULL, pc, sim_stopped, SIM_SIGTRAP);
+}
+
+SI
+sh64_movua (SIM_CPU *current_cpu, PCADDR pc, SI rn)
+{
+  SI v;
+  int i;
+
+  /* Move the data one byte at a time to avoid alignment problems.
+     Be aware of endianness.  */
+  v = 0;
+  for (i = 0; i < 4; ++i)
+    v = (v << 8) | (GETMEMQI (current_cpu, pc, rn + i) & 0xff);
+
+  v = T2H_4 (v);
+  return v;
 }
 
 void
@@ -971,11 +1033,18 @@ sh64_model_init()
 
 static const MODEL sh_models [] =
 {
-  { "sh2",  & sh2_mach,  MODEL_SH5, NULL, sh64_model_init },
-  { "sh3",  & sh3_mach,  MODEL_SH5, NULL, sh64_model_init },
-  { "sh3e", & sh3_mach,  MODEL_SH5, NULL, sh64_model_init },
-  { "sh4",  & sh4_mach,  MODEL_SH5, NULL, sh64_model_init },
-  { "sh5",  & sh5_mach,  MODEL_SH5, NULL, sh64_model_init },
+  { "sh2",        & sh2_mach,         MODEL_SH5, NULL, sh64_model_init },
+  { "sh2e",       & sh2e_mach,        MODEL_SH5, NULL, sh64_model_init },
+  { "sh2a",       & sh2a_fpu_mach,    MODEL_SH5, NULL, sh64_model_init },
+  { "sh2a_nofpu", & sh2a_nofpu_mach,  MODEL_SH5, NULL, sh64_model_init },
+  { "sh3",        & sh3_mach,         MODEL_SH5, NULL, sh64_model_init },
+  { "sh3e",       & sh3_mach,         MODEL_SH5, NULL, sh64_model_init },
+  { "sh4",        & sh4_mach,         MODEL_SH5, NULL, sh64_model_init },
+  { "sh4_nofpu",  & sh4_nofpu_mach,   MODEL_SH5, NULL, sh64_model_init },
+  { "sh4a",       & sh4a_mach,        MODEL_SH5, NULL, sh64_model_init },
+  { "sh4a_nofpu", & sh4a_nofpu_mach,  MODEL_SH5, NULL, sh64_model_init },
+  { "sh4al",      & sh4al_mach,       MODEL_SH5, NULL, sh64_model_init },
+  { "sh5",        & sh5_mach,         MODEL_SH5, NULL, sh64_model_init },
   { 0 }
 };
 
@@ -997,10 +1066,34 @@ const MACH sh2_mach =
   sh64_prepare_run
 };
 
+const MACH sh2e_mach =
+{
+  "sh2e", "sh2e", MACH_SH5,
+  16, 16, &sh_models[1], &sh5_imp_properties,
+  shcompact_init_cpu,
+  sh64_prepare_run
+};
+
+const MACH sh2a_fpu_mach =
+{
+  "sh2a", "sh2a", MACH_SH5,
+  16, 16, &sh_models[2], &sh5_imp_properties,
+  shcompact_init_cpu,
+  sh64_prepare_run
+};
+
+const MACH sh2a_nofpu_mach =
+{
+  "sh2a_nofpu", "sh2a_nofpu", MACH_SH5,
+  16, 16, &sh_models[3], &sh5_imp_properties,
+  shcompact_init_cpu,
+  sh64_prepare_run
+};
+
 const MACH sh3_mach =
 {
   "sh3", "sh3", MACH_SH5,
-  16, 16, &sh_models[1], &sh5_imp_properties,
+  16, 16, &sh_models[4], &sh5_imp_properties,
   shcompact_init_cpu,
   sh64_prepare_run
 };
@@ -1008,7 +1101,7 @@ const MACH sh3_mach =
 const MACH sh3e_mach =
 {
   "sh3e", "sh3e", MACH_SH5,
-  16, 16, &sh_models[2], &sh5_imp_properties,
+  16, 16, &sh_models[5], &sh5_imp_properties,
   shcompact_init_cpu,
   sh64_prepare_run
 };
@@ -1016,7 +1109,39 @@ const MACH sh3e_mach =
 const MACH sh4_mach =
 {
   "sh4", "sh4", MACH_SH5,
-  16, 16, &sh_models[3], &sh5_imp_properties,
+  16, 16, &sh_models[6], &sh5_imp_properties,
+  shcompact_init_cpu,
+  sh64_prepare_run
+};
+
+const MACH sh4_nofpu_mach =
+{
+  "sh4_nofpu", "sh4_nofpu", MACH_SH5,
+  16, 16, &sh_models[7], &sh5_imp_properties,
+  shcompact_init_cpu,
+  sh64_prepare_run
+};
+
+const MACH sh4a_mach =
+{
+  "sh4a", "sh4a", MACH_SH5,
+  16, 16, &sh_models[8], &sh5_imp_properties,
+  shcompact_init_cpu,
+  sh64_prepare_run
+};
+
+const MACH sh4a_nofpu_mach =
+{
+  "sh4a_nofpu", "sh4a_nofpu", MACH_SH5,
+  16, 16, &sh_models[9], &sh5_imp_properties,
+  shcompact_init_cpu,
+  sh64_prepare_run
+};
+
+const MACH sh4al_mach =
+{
+  "sh4al", "sh4al", MACH_SH5,
+  16, 16, &sh_models[10], &sh5_imp_properties,
   shcompact_init_cpu,
   sh64_prepare_run
 };
@@ -1024,7 +1149,7 @@ const MACH sh4_mach =
 const MACH sh5_mach =
 {
   "sh5", "sh5", MACH_SH5,
-  32, 32, &sh_models[4], &sh5_imp_properties,
+  32, 32, &sh_models[11], &sh5_imp_properties,
   shmedia_init_cpu,
   sh64_prepare_run
 };

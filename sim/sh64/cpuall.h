@@ -2,9 +2,9 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+Copyright 1996-2005 Free Software Foundation, Inc.
 
-This file is part of the GNU Simulators.
+This file is part of the GNU simulators.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
@@ -35,9 +35,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 extern const MACH sh2_mach;
+extern const MACH sh2e_mach;
+extern const MACH sh2a_fpu_mach;
+extern const MACH sh2a_nofpu_mach;
 extern const MACH sh3_mach;
 extern const MACH sh3e_mach;
+extern const MACH sh4_nofpu_mach;
 extern const MACH sh4_mach;
+extern const MACH sh4a_nofpu_mach;
+extern const MACH sh4a_mach;
+extern const MACH sh4al_mach;
 extern const MACH sh5_mach;
 
 #ifndef WANT_CPU

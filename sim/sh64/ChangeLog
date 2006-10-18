@@ -1,3 +1,43 @@
+2006-10-18  Dave Brolley  <brolley@redhat.com>
+
+	* Contribute the following changes:
+
+	2006-06-14  Dave Brolley  <brolley@redhat.com>
+
+	* sh64-sim.h (sh64_fipr,sh64_fiprs,sh64_fldp,sh64_fstp,sh64_ftrv)
+	(sh64_fpref): New functions.
+	* sh64.c (sh64_fipr,sh64_fiprs,sh64_fldp,sh64_fstp,sh64_ftrv)
+	(sh64_fpref): New functions.
+	(sh_models): Add sh2e, sh2a, sh2a_nofpu, sh4_nofpu, sh4a,
+	sh4a_nofpu and sh4al.
+	(sh2e_mach): New MACH.
+	(sh2a_fpu_mach): New MACH.
+	(sh2a_nofpu_mach): New MACH.
+	(sh4_nofpu): New MACH.
+	(sh4a_mach): New MACH.
+	(sh4a_nofpu_mach): New MACH.
+	(sh4al_mach): New MACH.
+	* Makefile.in (stamp-*): Depend on $(CGEN_CPU_DIR)/sh-sim.cpu. Pass
+	archfile to CGEN script.
+	* arch.c: Regenerated.
+	* arch.h: Regenerated.
+	* cpu.c: Regenerated.
+	* cpu.h: Regenerated.
+	* cpuall.h: Regenerated.
+	* decode-compact.c: Regenerated.
+	* decode-compact.h: Regenerated.
+	* decode-media.c: Regenerated.
+	* decode-media.h: Regenerated.
+	* defs-compact.h: Regenerated.
+	* defs-media.h: Regenerated.
+	* sem-compact-switch.c: Regenerated.
+	* sem-compact.c: Regenerated.
+	* sem-media-switch.c: Regenerated.
+	* sem-media.c: Regenerated.
+	* sh-desc.c: Regenerated.
+	* sh-desc.h: Regenerated.
+	* sh-opc.h: Regenerated.
+
 2006-06-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* configure: Regenerated.
