@@ -1127,92 +1127,13 @@ gdb_print_host_address (const void *addr, struct ui_file *stream)
 
   fprintf_filtered (stream, "0x%lx", (unsigned long) addr);
 }
-
-/* Ask user a y-or-n question and return 1 iff answer is yes.
-   Takes three args which are given to printf to print the question.
-   The first, a control string, should end in "? ".
-   It should not say how to answer, because we do that.  */
-
-/* VARARGS */
-int
-query (const char *ctlstr, ...)
-{
-  va_list args;
-  int answer;
-  int ans2;
-  int retval;
-
-  /* Automatically answer "yes" if input is not from the user
-     directly, or if the user did not want prompts.  */
-  if (!input_from_terminal_p () || !caution)
-    return 1;
-
-  if (deprecated_query_hook)
-    {
-      va_start (args, ctlstr);
-      return deprecated_query_hook (ctlstr, args);
-    }
-
-  while (1)
-    {
-      wrap_here ("");		/* Flush any buffered output */
-      gdb_flush (gdb_stdout);
-
-      if (annotation_level > 1)
-	printf_filtered (("\n\032\032pre-query\n"));
-
-      va_start (args, ctlstr);
-      vfprintf_filtered (gdb_stdout, ctlstr, args);
-      va_end (args);
-      printf_filtered (_("(y or n) "));
-
-      if (annotation_level > 1)
-	printf_filtered (("\n\032\032query\n"));
-
-      wrap_here ("");
-      gdb_flush (gdb_stdout);
-
-      answer = fgetc (stdin);
-      clearerr (stdin);		/* in case of C-d */
-      if (answer == EOF)	/* C-d */
-	{
-	  retval = 1;
-	  break;
-	}
-      /* Eat rest of input line, to EOF or newline */
-      if (answer != '\n')
-	do
-	  {
-	    ans2 = fgetc (stdin);
-	    clearerr (stdin);
-	  }
-	while (ans2 != EOF && ans2 != '\n' && ans2 != '\r');
-
-      if (answer >= 'a')
-	answer -= 040;
-      if (answer == 'Y')
-	{
-	  retval = 1;
-	  break;
-	}
-      if (answer == 'N')
-	{
-	  retval = 0;
-	  break;
-	}
-      printf_filtered (_("Please answer y or n.\n"));
-    }
-
-  if (annotation_level > 1)
-    printf_filtered (("\n\032\032post-query\n"));
-  return retval;
-}
 
 
-/* This function supports the nquery() and yquery() functions.
+/* This function supports the query, nquery, and yquery functions.
    Ask user a y-or-n question and return 0 if answer is no, 1 if
-   answer is yes, or default the answer to the specified default.
-   DEFCHAR is either 'y' or 'n' and refers to the default answer.
+   answer is yes, or default the answer to the specified default
+   (for yquery or nquery).  DEFCHAR may be 'y' or 'n' to provide a
+   default answer, or '\0' for no default.
    CTLSTR is the control string and should end in "? ".  It should
    not say how to answer, because we do that.
    ARGS are the arguments passed along with the CTLSTR argument to
@@ -1226,10 +1147,18 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
   int retval;
   int def_value;
   char def_answer, not_def_answer;
-  char *y_string, *n_string;
+  char *y_string, *n_string, *question;
 
   /* Set up according to which answer is the default.  */
-  if (defchar == 'y')
+  if (defchar == '\0')
+    {
+      def_value = 1;
+      def_answer = 'Y';
+      not_def_answer = 'N';
+      y_string = "y";
+      n_string = "n";
+    }
+  else if (defchar == 'y')
     {
       def_value = 1;
       def_answer = 'Y';
@@ -1246,6 +1175,27 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
       n_string = "[n]";
     }
 
+  /* Automatically answer the default value if the user did not want
+     prompts.  */
+  if (! caution)
+    return def_value;
+
+  /* If input isn't coming from the user directly, just say what
+     question we're asking, and then answer "yes" automatically.  This
+     way, important error messages don't get lost when talking to GDB
+     over a pipe.  */
+  if (! input_from_terminal_p ())
+    {
+      wrap_here ("");
+      vfprintf_filtered (gdb_stdout, ctlstr, args);
+
+      printf_filtered (_("(%s or %s) [answered %c; input not from terminal]\n"),
+		       y_string, n_string, def_answer);
+      gdb_flush (gdb_stdout);
+
+      return def_value;
+    }
+
   /* Automatically answer the default value if input is not from the user
      directly, or if the user did not want prompts.  */
   if (!input_from_terminal_p () || !caution)
@@ -1256,6 +1206,9 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
       return deprecated_query_hook (ctlstr, args);
     }
 
+  /* Format the question outside of the loop, to avoid reusing args.  */
+  question = xstrvprintf (ctlstr, args);
+
   while (1)
     {
       wrap_here ("");		/* Flush any buffered output */
@@ -1264,7 +1217,7 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
       if (annotation_level > 1)
 	printf_filtered (("\n\032\032pre-query\n"));
 
-      vfprintf_filtered (gdb_stdout, ctlstr, args);
+      fputs_filtered (question, gdb_stdout);
       printf_filtered (_("(%s or %s) "), y_string, n_string);
 
       if (annotation_level > 1)
@@ -1298,10 +1251,12 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
 	  retval = !def_value;
 	  break;
 	}
-      /* Otherwise, for the default, the user may either specify
-         the required input or have it default by entering nothing.  */
-      if (answer == def_answer || answer == '\n' || 
-	  answer == '\r' || answer == EOF)
+      /* Otherwise, if a default was specified, the user may either
+         specify the required input or have it default by entering
+         nothing.  */
+      if (answer == def_answer
+	  || (defchar != '\0' &&
+	      (answer == '\n' || answer == '\r' || answer == EOF)))
 	{
 	  retval = def_value;
 	  break;
@@ -1311,6 +1266,7 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
 		       y_string, n_string);
     }
 
+  xfree (question);
   if (annotation_level > 1)
     printf_filtered (("\n\032\032post-query\n"));
   return retval;
@@ -1346,6 +1302,21 @@ yquery (const char *ctlstr, ...)
 
   va_start (args, ctlstr);
   return defaulted_query (ctlstr, 'y', args);
+  va_end (args);
+}
+
+/* Ask user a y-or-n question and return 1 iff answer is yes.
+   Takes three args which are given to printf to print the question.
+   The first, a control string, should end in "? ".
+   It should not say how to answer, because we do that.  */
+
+int
+query (const char *ctlstr, ...)
+{
+  va_list args;
+
+  va_start (args, ctlstr);
+  return defaulted_query (ctlstr, '\0', args);
   va_end (args);
 }
 

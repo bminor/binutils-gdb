@@ -1,3 +1,10 @@
+2006-10-18  Jim Blandy  <jimb@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* utils.c (query): Use defaulted_query.
+	(defaulted_query): Handle having no default answer.  Print out
+	messages even if we have no terminal.  Prevent memory corruption.
+
 2006-10-18  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* frame.c (struct frame_info): Add stop_reason.
