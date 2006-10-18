@@ -1,5 +1,17 @@
 2006-10-18  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* frame.c (struct frame_info): Add stop_reason.
+	(get_prev_frame_1): Set stop_reason.  Don't call error for
+	stop reasons.
+	(get_frame_unwind_stop_reason, frame_stop_reason_string): New.
+	* frame.h (enum unwind_stop_reason): New.
+	(get_frame_unwind_stop_reason, frame_stop_reason_string): New
+	prototypes.
+	* stack.c (frame_info): Print the stop reason.
+	(backtrace_command_1): Print the stop reason for errors.
+
+2006-10-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* inferior.h (start_remote): Update prototype.
 	* infrun.c (start_remote): Take FROM_TTY.  Call
 	post_create_inferior.

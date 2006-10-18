@@ -107,6 +107,10 @@ struct frame_info
   struct frame_info *next; /* down, inner, younger */
   int prev_p;
   struct frame_info *prev; /* up, outer, older */
+
+  /* The reason why we could not set PREV, or UNWIND_NO_REASON if we
+     could.  Only valid when PREV_P is set.  */
+  enum unwind_stop_reason stop_reason;
 };
 
 /* Flag to control debugging.  */
@@ -1055,6 +1059,7 @@ get_prev_frame_1 (struct frame_info *this_frame)
       return this_frame->prev;
     }
   this_frame->prev_p = 1;
+  this_frame->stop_reason = UNWIND_NO_REASON;
 
   /* Check that this frame's ID was valid.  If it wasn't, don't try to
      unwind to the prev frame.  Be careful to not apply this test to
@@ -1068,6 +1073,7 @@ get_prev_frame_1 (struct frame_info *this_frame)
 	  fprint_frame (gdb_stdlog, NULL);
 	  fprintf_unfiltered (gdb_stdlog, " // this ID is NULL }\n");
 	}
+      this_frame->stop_reason = UNWIND_NULL_ID;
       return NULL;
     }
 
@@ -1078,14 +1084,32 @@ get_prev_frame_1 (struct frame_info *this_frame)
   if (this_frame->next->level >= 0
       && this_frame->next->unwind->type != SIGTRAMP_FRAME
       && frame_id_inner (this_id, get_frame_id (this_frame->next)))
-    error (_("Previous frame inner to this frame (corrupt stack?)"));
+    {
+      if (frame_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, NULL);
+	  fprintf_unfiltered (gdb_stdlog, " // this frame ID is inner }\n");
+	}
+      this_frame->stop_reason = UNWIND_INNER_ID;
+      return NULL;
+    }
 
   /* Check that this and the next frame are not identical.  If they
      are, there is most likely a stack cycle.  As with the inner-than
      test above, avoid comparing the inner-most and sentinel frames.  */
   if (this_frame->level > 0
       && frame_id_eq (this_id, get_frame_id (this_frame->next)))
-    error (_("Previous frame identical to this frame (corrupt stack?)"));
+    {
+      if (frame_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, NULL);
+	  fprintf_unfiltered (gdb_stdlog, " // this frame has same ID }\n");
+	}
+      this_frame->stop_reason = UNWIND_SAME_ID;
+      return NULL;
+    }
 
   /* Allocate the new frame but do not wire it in to the frame chain.
      Some (bad) code in INIT_FRAME_EXTRA_INFO tries to look along
@@ -1554,6 +1578,45 @@ frame_sp_unwind (struct frame_info *next_frame)
       return sp;
     }
   internal_error (__FILE__, __LINE__, _("Missing unwind SP method"));
+}
+
+/* Return the reason why we can't unwind past FRAME.  */
+
+enum unwind_stop_reason
+get_frame_unwind_stop_reason (struct frame_info *frame)
+{
+  /* If we haven't tried to unwind past this point yet, then assume
+     that unwinding would succeed.  */
+  if (frame->prev_p == 0)
+    return UNWIND_NO_REASON;
+
+  /* Otherwise, we set a reason when we succeeded (or failed) to
+     unwind.  */
+  return frame->stop_reason;
+}
+
+/* Return a string explaining REASON.  */
+
+const char *
+frame_stop_reason_string (enum unwind_stop_reason reason)
+{
+  switch (reason)
+    {
+    case UNWIND_NULL_ID:
+      return _("unwinder did not report frame ID");
+
+    case UNWIND_INNER_ID:
+      return _("previous frame inner to this frame (corrupt stack?)");
+
+    case UNWIND_SAME_ID:
+      return _("previous frame identical to this frame (corrupt stack?)");
+
+    case UNWIND_NO_REASON:
+    case UNWIND_FIRST_ERROR:
+    default:
+      internal_error (__FILE__, __LINE__,
+		      "Invalid frame stop reason");
+    }
 }
 
 extern initialize_file_ftype _initialize_frame; /* -Wmissing-prototypes */

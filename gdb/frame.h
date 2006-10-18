@@ -394,6 +394,50 @@ enum frame_type
 };
 extern enum frame_type get_frame_type (struct frame_info *);
 
+/* For frames where we can not unwind further, describe why.  */
+
+enum unwind_stop_reason
+  {
+    /* No particular reason; either we haven't tried unwinding yet,
+       or we didn't fail.  */
+    UNWIND_NO_REASON,
+
+    /* The previous frame's analyzer returns an invalid result
+       from this_id.
+
+       FIXME drow/2006-08-16: This is how GDB used to indicate end of
+       stack.  We should migrate to a model where frames always have a
+       valid ID, and this becomes not just an error but an internal
+       error.  But that's a project for another day.  */
+    UNWIND_NULL_ID,
+
+    /* All the conditions after this point are considered errors;
+       abnormal stack termination.  If a backtrace stops for one
+       of these reasons, we'll let the user know.  This marker
+       is not a valid stop reason.  */
+    UNWIND_FIRST_ERROR,
+
+    /* This frame ID looks like it ought to belong to a NEXT frame,
+       but we got it for a PREV frame.  Normally, this is a sign of
+       unwinder failure.  It could also indicate stack corruption.  */
+    UNWIND_INNER_ID,
+
+    /* This frame has the same ID as the previous one.  That means
+       that unwinding further would almost certainly give us another
+       frame with exactly the same ID, so break the chain.  Normally,
+       this is a sign of unwinder failure.  It could also indicate
+       stack corruption.  */
+    UNWIND_SAME_ID,
+  };
+
+/* Return the reason why we can't unwind past this frame.  */
+
+enum unwind_stop_reason get_frame_unwind_stop_reason (struct frame_info *);
+
+/* Translate a reason code to an informative string.  */
+
+const char *frame_stop_reason_string (enum unwind_stop_reason);
+
 /* Unwind the stack frame so that the value of REGNUM, in the previous
    (up, older) frame is returned.  If VALUEP is NULL, don't
    fetch/compute the value.  Instead just return the location of the

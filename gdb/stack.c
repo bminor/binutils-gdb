@@ -923,6 +923,16 @@ frame_info (char *addr_exp, int from_tty)
   deprecated_print_address_numeric (frame_pc_unwind (fi), 1, gdb_stdout);
   printf_filtered ("\n");
 
+  if (calling_frame_info == NULL)
+    {
+      enum unwind_stop_reason reason;
+
+      reason = get_frame_unwind_stop_reason (fi);
+      if (reason != UNWIND_NO_REASON)
+	printf_filtered (_(" Outermost frame: %s\n"),
+			 frame_stop_reason_string (reason));
+    }
+
   if (calling_frame_info)
     {
       printf_filtered (" called by frame at ");
@@ -940,6 +950,7 @@ frame_info (char *addr_exp, int from_tty)
     }
   if (get_next_frame (fi) || calling_frame_info)
     puts_filtered ("\n");
+
   if (s)
     printf_filtered (" source language %s.\n",
 		     language_str (s->language));
@@ -1163,11 +1174,26 @@ backtrace_command_1 (char *count_exp, int show_locals, int from_tty)
       print_frame_info (fi, 1, LOCATION, 1);
       if (show_locals)
 	print_frame_local_vars (fi, 1, gdb_stdout);
+
+      /* Save the last frame to check for error conditions.  */
+      trailing = fi;
     }
 
   /* If we've stopped before the end, mention that.  */
   if (fi && from_tty)
     printf_filtered (_("(More stack frames follow...)\n"));
+
+  /* If we've run out of frames, and the reason appears to be an error
+     condition, print it.  */
+  if (fi == NULL && trailing != NULL)
+    {
+      enum unwind_stop_reason reason;
+
+      reason = get_frame_unwind_stop_reason (trailing);
+      if (reason > UNWIND_FIRST_ERROR)
+	printf_filtered (_("Backtrace stopped: %s\n"),
+			 frame_stop_reason_string (reason));
+    }
 }
 
 struct backtrace_command_args
