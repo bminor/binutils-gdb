@@ -1,4 +1,13 @@
-2006-10-17  Daniel Jacobowitz  <dan@codesourcery.com>
+2006-10-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* solib-svr4.c (debug_loader_offset_p, debug_loader_offset)
+	(debug_loader_name, svr4_default_sos): New.
+	(svr4_current_sos): Call svr4_default_sos.
+	(enable_break): Add a comment about AT_BASE.  Set the new
+	variables and retry solib_add.
+	(svr4_clear_solib): Clear the new variables.
+
+2006-10-18  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* NEWS: Mention support for TLS without debugging information.
 
