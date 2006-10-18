@@ -1987,20 +1987,13 @@ get_offsets (void)
   objfile_relocate (symfile_objfile, offs);
 }
 
-/* Stub for catch_errors.  */
-
-static int
-remote_start_remote_dummy (struct ui_out *uiout, void *dummy)
-{
-  start_remote ();		/* Initialize gdb process mechanisms.  */
-  /* NOTE: Return something >=0.  A -ve value is reserved for
-     catch_exceptions.  */
-  return 1;
-}
+/* Stub for catch_exception.  */
 
 static void
-remote_start_remote (struct ui_out *uiout, void *dummy)
+remote_start_remote (struct ui_out *uiout, void *from_tty_p)
 {
+  int from_tty = * (int *) from_tty_p;
+
   immediate_quit++;		/* Allow user to interrupt it.  */
 
   /* Ack any packet which the remote side has already sent.  */
@@ -2016,7 +2009,7 @@ remote_start_remote (struct ui_out *uiout, void *dummy)
   putpkt ("?");			/* Initiate a query from remote machine.  */
   immediate_quit--;
 
-  remote_start_remote_dummy (uiout, dummy);
+  start_remote (from_tty);	/* Initialize gdb process mechanisms.  */
 }
 
 /* Open a connection to a remote debugger.
@@ -2458,7 +2451,8 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
      function.  See cli-dump.c.  */
   {
     struct gdb_exception ex
-      = catch_exception (uiout, remote_start_remote, NULL, RETURN_MASK_ALL);
+      = catch_exception (uiout, remote_start_remote, &from_tty,
+			 RETURN_MASK_ALL);
     if (ex.reason < 0)
       {
 	pop_target ();
@@ -2477,8 +2471,6 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
       putpkt ("!");
       getpkt (&rs->buf, &rs->buf_size, 0);
     }
-
-  post_create_inferior (&current_target, from_tty);
 
   if (exec_bfd) 	/* No use without an exec file.  */
     remote_check_symbols (symfile_objfile);

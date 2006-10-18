@@ -812,7 +812,7 @@ monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
 
   monitor_printf (current_monitor->line_term);
 
-  start_remote ();
+  start_remote (from_tty);
 }
 
 /* Close out all files and local state before this target loses

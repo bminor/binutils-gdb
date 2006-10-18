@@ -148,8 +148,9 @@ sds_close (int quitting)
 /* Stub for catch_errors.  */
 
 static int
-sds_start_remote (void *dummy)
+sds_start_remote (void *from_tty_p)
 {
+  int from_tty = * (int *) from_tty;
   int c;
   unsigned char buf[200];
 
@@ -173,7 +174,7 @@ sds_start_remote (void *dummy)
 
   immediate_quit--;
 
-  start_remote ();		/* Initialize gdb process mechanisms */
+  start_remote (from_tty);	/* Initialize gdb process mechanisms */
   return 1;
 }
 
@@ -224,7 +225,7 @@ device is attached to the remote system (e.g. /dev/ttya).");
   /* Start the remote connection; if error (0), discard this target.
      In particular, if the user quits, be sure to discard it (we'd be
      in an inconsistent state otherwise).  */
-  if (!catch_errors (sds_start_remote, NULL,
+  if (!catch_errors (sds_start_remote, &from_tty,
 		     "Couldn't establish connection to remote target\n",
 		     RETURN_MASK_ALL))
     pop_target ();

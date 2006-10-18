@@ -1,5 +1,17 @@
 2006-10-18  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* inferior.h (start_remote): Update prototype.
+	* infrun.c (start_remote): Take FROM_TTY.  Call
+	post_create_inferior.
+	* monitor.c (monitor_open): Update call to start_remote.
+	* remote-sds.c (sds_start_remote, sds_open): Likewise.
+	* remote.c (remote_start_remote): Likewise.
+	(remote_start_remote_dummy): Removed.
+	(remote_open): Update call to remote_start_remote.  Do not call
+	post_create_inferior here.
+
+2006-10-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* solib-svr4.c (debug_loader_offset_p, debug_loader_offset)
 	(debug_loader_name, svr4_default_sos): New.
 	(svr4_current_sos): Call svr4_default_sos.

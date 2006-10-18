@@ -269,7 +269,7 @@ extern int gdb_has_a_terminal (void);
 
 /* From infrun.c */
 
-extern void start_remote (void);
+extern void start_remote (int from_tty);
 
 extern void normal_stop (void);
 

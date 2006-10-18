@@ -2,8 +2,9 @@
    process.
 
    Copyright (C) 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free
-   Software Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+   2006
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -832,7 +833,7 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
 /* Start remote-debugging of a machine over a serial link.  */
 
 void
-start_remote (void)
+start_remote (int from_tty)
 {
   init_thread_list ();
   init_wait_for_inferior ();
@@ -854,6 +855,12 @@ start_remote (void)
      is currently running and GDB state should be set to the same as
      for an async run. */
   wait_for_inferior ();
+
+  /* Now that the inferior has stopped, do any bookkeeping like
+     loading shared libraries.  We want to do this before normal_stop,
+     so that the displayed frame is up to date.  */
+  post_create_inferior (&current_target, from_tty);
+
   normal_stop ();
 }
 
