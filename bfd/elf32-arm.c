@@ -2565,7 +2565,7 @@ bfd_elf32_arm_allocate_interworking_sections (struct bfd_link_info * info)
 
       foo = bfd_alloc (globals->bfd_of_glue_owner, globals->arm_glue_size);
 
-      s->size = globals->arm_glue_size;
+      BFD_ASSERT (s->size == globals->arm_glue_size);
       s->contents = foo;
     }
 
@@ -2580,7 +2580,7 @@ bfd_elf32_arm_allocate_interworking_sections (struct bfd_link_info * info)
 
       foo = bfd_alloc (globals->bfd_of_glue_owner, globals->thumb_glue_size);
 
-      s->size = globals->thumb_glue_size;
+      BFD_ASSERT (s->size == globals->thumb_glue_size);
       s->contents = foo;
     }
 
@@ -2600,6 +2600,7 @@ record_arm_to_thumb_glue (struct bfd_link_info * link_info,
   struct bfd_link_hash_entry * bh;
   struct elf32_arm_link_hash_table * globals;
   bfd_vma val;
+  bfd_size_type size;
 
   globals = elf32_arm_hash_table (link_info);
 
@@ -2643,9 +2644,12 @@ record_arm_to_thumb_glue (struct bfd_link_info * link_info,
   free (tmp_name);
 
   if ((link_info->shared || globals->root.is_relocatable_executable))
-    globals->arm_glue_size += ARM2THUMB_PIC_GLUE_SIZE;
+    size = ARM2THUMB_PIC_GLUE_SIZE;
   else
-    globals->arm_glue_size += ARM2THUMB_STATIC_GLUE_SIZE;
+    size = ARM2THUMB_STATIC_GLUE_SIZE;
+
+  s->size += size;
+  globals->arm_glue_size += size;
 
   return myh;
 }
@@ -2721,6 +2725,7 @@ record_thumb_to_arm_glue (struct bfd_link_info *link_info,
 
   free (tmp_name);
 
+  s->size += THUMB2ARM_GLUE_SIZE;
   hash_table->thumb_glue_size += THUMB2ARM_GLUE_SIZE;
 
   return;
@@ -2748,7 +2753,8 @@ bfd_elf32_arm_add_glue_sections_to_bfd (bfd *abfd,
       /* Note: we do not include the flag SEC_LINKER_CREATED, as this
 	 will prevent elf_link_input_bfd() from processing the contents
 	 of this section.  */
-      flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_CODE | SEC_READONLY;
+      flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
+	       | SEC_CODE | SEC_READONLY);
 
       sec = bfd_make_section_with_flags (abfd,
 					 ARM2THUMB_GLUE_SECTION_NAME,
@@ -2767,8 +2773,8 @@ bfd_elf32_arm_add_glue_sections_to_bfd (bfd *abfd,
 
   if (sec == NULL)
     {
-      flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
-	| SEC_CODE | SEC_READONLY;
+      flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
+	       | SEC_CODE | SEC_READONLY);
 
       sec = bfd_make_section_with_flags (abfd,
 					 THUMB2ARM_GLUE_SECTION_NAME,
@@ -2863,6 +2869,9 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
   for (; sec != NULL; sec = sec->next)
     {
       if (sec->reloc_count == 0)
+	continue;
+
+      if ((sec->flags & SEC_EXCLUDE) != 0)
 	continue;
 
       symtab_hdr = &elf_tdata (abfd)->symtab_hdr;

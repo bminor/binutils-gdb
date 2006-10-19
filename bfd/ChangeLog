@@ -1,3 +1,12 @@
+2006-10-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-arm.c (bfd_elf32_arm_allocate_interworking_sect): Check,
+	don't set, glue section size.
+	(record_arm_to_thumb_glue): Set glue section size here.
+	(record_thumb_to_arm_glue): Likewise.
+	(bfd_elf32_arm_add_glue_sections_to_bfd): Formatting.
+	(bfd_elf32_arm_process_before_allocation): Ignore exluded sections.
+
 2006-10-18  Roy Marples  <uberlord@gentoo.org>
 
 	* elf64-sparc.c: Add FreeBSD support.

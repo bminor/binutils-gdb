@@ -1,6 +1,13 @@
+2006-10-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/armelf.em (arm_elf_before_allocation): Run
+	gld${EMULATION_NAME}_before_allocation later.
+	* ldlang.c (lang_size_sections_1): Revert 2006-09-15 change.
+
 2006-10-18  Roy Marples  <uberlord@gentoo.org>
 
-	* emulparams/elf64_sparc_fbsd.sh (OUTPUT_FORMAT): Define as elf64-sparc-freebsd.
+	* emulparams/elf64_sparc_fbsd.sh (OUTPUT_FORMAT): Define as
+	elf64-sparc-freebsd.
 
 2006-10-18  Joseph Myers  <joseph@codesourcery.com>
 
