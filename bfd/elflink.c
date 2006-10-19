@@ -4156,6 +4156,13 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		dynsym = TRUE;
 	    }
 
+	  if (definition && (sec->flags & SEC_DEBUGGING))
+	    {
+	      /* We don't want to make debug symbol dynamic.  */
+	      (*bed->elf_backend_hide_symbol) (info, h, TRUE);
+	      dynsym = FALSE;
+	    }
+
 	  /* Check to see if we need to add an indirect symbol for
 	     the default name.  */
 	  if (definition || h->root.type == bfd_link_hash_common)

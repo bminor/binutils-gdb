@@ -1,3 +1,9 @@
+2006-10-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/3290
+	* elflink.c (elf_link_add_object_symbols): Hide definitions in
+	debug sections.
+
 2006-10-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-arm.c (bfd_elf32_arm_allocate_interworking_sect): Check,
