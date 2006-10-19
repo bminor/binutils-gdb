@@ -60,11 +60,26 @@ arm-*-elf | arm*-*-eabi*)
 arm*-*-symbianelf*)     targ_emul=armsymbian;;
 arm-*-kaos*)		targ_emul=armelf ;;
 arm9e-*-elf)		targ_emul=armelf ;;
-arm*b-*-linux-*eabi)	targ_emul=armelfb_linux_eabi ;;
-arm*b-*-linux-*)	targ_emul=armelfb_linux; targ_extra_emuls=armelfb ;;
-arm*-*-linux-*eabi)	targ_emul=armelf_linux_eabi ;;
-arm*-*-linux-*)	        targ_emul=armelf_linux; targ_extra_emuls=armelf ;;
-arm*-*-uclinux*)	targ_emul=armelf_linux; targ_extra_emuls=armelf ;;
+arm*b-*-linux-*eabi)	targ_emul=armelfb_linux_eabi
+			targ_extra_emuls=armelf_linux_eabi
+			targ_extra_libpath=$targ_extra_emuls
+			;;
+arm*b-*-linux-*)	targ_emul=armelfb_linux
+			targ_extra_emuls="armelfb armelf armelf_linux"
+			targ_extra_libpath="armelf_linux"
+			;;
+arm*-*-linux-*eabi)	targ_emul=armelf_linux_eabi
+			targ_extra_emuls=armelfb_linux_eabi
+			targ_extra_libpath=$targ_extra_emuls
+			;;
+arm*-*-linux-*)	        targ_emul=armelf_linux
+			targ_extra_emuls="armelf armelfb armelfb_linux"
+			targ_extra_libpath="armelfb_linux"
+			;;
+arm*-*-uclinux*)	targ_emul=armelf_linux
+			targ_extra_emuls="armelf armelfb armelfb_linux"
+			targ_extra_libpath="armelfb_linux"
+			;;
 arm-*-vxworks)		targ_emul=armelf_vxworks ;;
 arm*-*-conix*)		targ_emul=armelf ;;
 thumb-*-linux-* | thumb-*-uclinux*)	targ_emul=armelf_linux; targ_extra_emuls=armelf ;;
