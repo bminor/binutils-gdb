@@ -1692,11 +1692,20 @@ sort_dynamic_relocs (const void *arg1, const void *arg2)
 {
   Elf_Internal_Rela int_reloc1;
   Elf_Internal_Rela int_reloc2;
+  int diff;
 
   bfd_elf32_swap_reloc_in (reldyn_sorting_bfd, arg1, &int_reloc1);
   bfd_elf32_swap_reloc_in (reldyn_sorting_bfd, arg2, &int_reloc2);
 
-  return ELF32_R_SYM (int_reloc1.r_info) - ELF32_R_SYM (int_reloc2.r_info);
+  diff = ELF32_R_SYM (int_reloc1.r_info) - ELF32_R_SYM (int_reloc2.r_info);
+  if (diff != 0)
+    return diff;
+
+  if (int_reloc1.r_offset < int_reloc2.r_offset)
+    return -1;
+  if (int_reloc1.r_offset > int_reloc2.r_offset)
+    return 1;
+  return 0;
 }
 
 /* Like sort_dynamic_relocs, but used for elf64 relocations.  */
@@ -1714,8 +1723,16 @@ sort_dynamic_relocs_64 (const void *arg1 ATTRIBUTE_UNUSED,
   (*get_elf_backend_data (reldyn_sorting_bfd)->s->swap_reloc_in)
     (reldyn_sorting_bfd, arg2, int_reloc2);
 
-  return (ELF64_R_SYM (int_reloc1[0].r_info)
-	  - ELF64_R_SYM (int_reloc2[0].r_info));
+  if (ELF64_R_SYM (int_reloc1[0].r_info) < ELF64_R_SYM (int_reloc2[0].r_info))
+    return -1;
+  if (ELF64_R_SYM (int_reloc1[0].r_info) > ELF64_R_SYM (int_reloc2[0].r_info))
+    return 1;
+
+  if (int_reloc1[0].r_offset < int_reloc2[0].r_offset)
+    return -1;
+  if (int_reloc1[0].r_offset > int_reloc2[0].r_offset)
+    return 1;
+  return 0;
 #else
   abort ();
 #endif

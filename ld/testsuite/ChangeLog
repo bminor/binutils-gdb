@@ -1,5 +1,13 @@
 2006-10-19  Richard Sandiford  <richard@codesourcery.com>
 
+	* ld-mips-elf/tlslib-o32-hidden.got: Sort relocations against the
+	same symbol in order of increasing r_offset.
+	* ld-mips-elf/tls-multi-got-1.got: Likewise.
+	* ld-mips-elf/tls-hidden3.r: Likewise.
+	* ld-mips-elf/tls-hidden4.r: Likewise.
+
+2006-10-19  Richard Sandiford  <richard@codesourcery.com>
+
 	* ld-mips-elf/multi-got-1.d: Remove DT_DEBUG tag.  Do not require
 	a specific file offset for .dynamic.  Reduce DT_HASH by 8 to account
 	for removed tag.

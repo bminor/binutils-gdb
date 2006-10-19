@@ -1,5 +1,12 @@
 2006-10-19  Richard Sandiford  <richard@codesourcery.com>
 
+	* elfxx-mips.c (sort_dynamic_relocs): Sort relocations against the
+	same symbol by increasing r_offset.
+	(sort_dynamic_relocs_64): Likewise.  Fix comparisons between very
+	large and very small symbol indexes.
+
+2006-10-19  Richard Sandiford  <richard@codesourcery.com>
+
 	* elfxx-mips.c (_bfd_mips_elf_size_dynamic_sections): Add DT_DEBUG
 	and DT_MIPS_RLD_MAP tags for position-independent executables.
 	Do not add DT_DEBUG to shared libraries for any MIPS target.
