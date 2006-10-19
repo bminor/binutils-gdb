@@ -7478,21 +7478,12 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	 must add the entries now so that we get the correct size for
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
-      if (! info->shared)
+      if (info->executable)
 	{
 	  /* SGI object has the equivalence of DT_DEBUG in the
 	     DT_MIPS_RLD_MAP entry.  */
 	  if (!MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_RLD_MAP, 0))
 	    return FALSE;
-	  if (!SGI_COMPAT (output_bfd))
-	    {
-	      if (!MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_DEBUG, 0))
-		return FALSE;
-	    }
-	}
-      else
-	{
-	  /* Shared libraries on traditional mips have DT_DEBUG.  */
 	  if (!SGI_COMPAT (output_bfd))
 	    {
 	      if (!MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_DEBUG, 0))

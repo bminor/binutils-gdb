@@ -1,14 +1,13 @@
 
-Dynamic section at offset 0xec contains 19 entries:
+Dynamic section at offset .* contains 18 entries:
   Tag        Type                         Name/Value
- 0x00000004 \(HASH\)                       0x1ac
+ 0x00000004 \(HASH\)                       0x1a4
  0x00000005 \(STRTAB\).*
  0x00000006 \(SYMTAB\).*
  0x0000000a \(STRSZ\)                      220091 \(bytes\)
  0x0000000b \(SYMENT\)                     16 \(bytes\)
- 0x00000015 \(DEBUG\)                      0x0
- 0x00000003 \(PLTGOT\)                     0x122410
- 0x00000011 \(REL\)                        0xa7960
+ 0x00000003 \(PLTGOT\)                     0x122400
+ 0x00000011 \(REL\)                        0xa7958
  0x00000012 \(RELSZ\)                      160072 \(bytes\)
  0x00000013 \(RELENT\)                     8 \(bytes\)
  0x70000001 \(MIPS_RLD_VERSION\)           1
@@ -32,9 +31,9 @@ Relocation section '\.rel\.dyn' at offset 0x[0-9a-f]+ contains 20031 entries:
 [0-9a-f ]+R_MIPS_TLS_DTPREL 00000000   tlsvar_gd
 [0-9a-f ]+R_MIPS_TLS_TPREL3 00000004   tlsvar_ie
 [0-9a-f ]+R_MIPS_TLS_TPREL3 00000004   tlsvar_ie
-[0-9a-f ]+R_MIPS_REL32      000d8038   sym_1_9526
-[0-9a-f ]+R_MIPS_REL32      000d6694   sym_1_7885
+[0-9a-f ]+R_MIPS_REL32      000d8028   sym_1_9526
+[0-9a-f ]+R_MIPS_REL32      000d6684   sym_1_7885
 #...
-[0-9a-f ]+R_MIPS_REL32      000cf2a4   sym_1_0465
-[0-9a-f ]+R_MIPS_REL32      000e0ee8   sym_2_8654
+[0-9a-f ]+R_MIPS_REL32      000cf294   sym_1_0465
+[0-9a-f ]+R_MIPS_REL32      000e0ed8   sym_2_8654
 #...

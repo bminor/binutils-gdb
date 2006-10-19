@@ -1,3 +1,9 @@
+2006-10-19  Richard Sandiford  <richard@codesourcery.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_size_dynamic_sections): Add DT_DEBUG
+	and DT_MIPS_RLD_MAP tags for position-independent executables.
+	Do not add DT_DEBUG to shared libraries for any MIPS target.
+
 2006-10-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/3290
