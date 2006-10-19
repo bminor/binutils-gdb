@@ -102,7 +102,7 @@ static void breakpoint_adjustment_warning (CORE_ADDR, CORE_ADDR, int, int);
 static CORE_ADDR adjust_breakpoint_address (CORE_ADDR bpaddr,
                                             enum bptype bptype);
 
-static void describe_other_breakpoints (CORE_ADDR, asection *);
+static void describe_other_breakpoints (CORE_ADDR, asection *, int);
 
 static void breakpoints_info (char *, int);
 
@@ -3782,7 +3782,7 @@ maintenance_info_breakpoints (char *bnum_exp, int from_tty)
 /* Print a message describing any breakpoints set at PC.  */
 
 static void
-describe_other_breakpoints (CORE_ADDR pc, asection *section)
+describe_other_breakpoints (CORE_ADDR pc, asection *section, int thread)
 {
   int others = 0;
   struct breakpoint *b;
@@ -3802,12 +3802,16 @@ describe_other_breakpoints (CORE_ADDR pc, asection *section)
 	  if (!b->pending && (!overlay_debugging || b->loc->section == section))
 	    {
 	      others--;
-	      printf_filtered ("%d%s%s ",
-			       b->number,
+	      printf_filtered ("%d", b->number);
+	      if (b->thread == -1 && thread != -1)
+		printf_filtered (" (all threads)");
+	      else if (b->thread != -1)
+		printf_filtered (" (thread %d)", b->thread);
+	      printf_filtered ("%s%s ",
 			       ((b->enable_state == bp_disabled || 
 				 b->enable_state == bp_shlib_disabled || 
 				 b->enable_state == bp_call_disabled) 
-				? " (disabled)" 
+				? " (disabled)"
 				: b->enable_state == bp_permanent 
 				? " (permanent)"
 				: ""),
@@ -4960,7 +4964,7 @@ create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
 	struct symtab_and_line sal = sals.sals[i];
 
 	if (from_tty)
-	  describe_other_breakpoints (sal.pc, sal.section);
+	  describe_other_breakpoints (sal.pc, sal.section, thread);
 	
 	b = set_raw_breakpoint (sal, type);
 	set_breakpoint_count (breakpoint_count + 1);
