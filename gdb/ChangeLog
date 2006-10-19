@@ -67,8 +67,8 @@
 2006-10-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (symtab.o): Update.
-	* symtab.h (matching_bfd_section): New prototype.
-	* symtab.c (matching_bfd_section): New.
+	* symtab.h (matching_bfd_sections): New prototype.
+	* symtab.c (matching_bfd_sections): New.
 	(find_pc_sect_psymbol, find_pc_sect_symtab): Use it.
 	* minsyms.c (lookup_minimal_symbol_by_pc_section): Likewise.
 	* printcmd.c (sym_info): Ignore separate debug objfiles.
