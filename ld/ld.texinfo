@@ -1251,9 +1251,9 @@ it ends in a @code{.exe} suffix.
 @itemx --no-gc-sections
 Enable garbage collection of unused input sections.  It is ignored on
 targets that do not support this option.  This option is not compatible
-with @samp{-r}. The default behaviour (of not performing this garbage
-collection) can be restored by specifying @samp{--no-gc-sections} on
-the command line.
+with @samp{-r} or @samp{--emit-relocs}. The default behaviour (of not
+performing this garbage collection) can be restored by specifying
+@samp{--no-gc-sections} on the command line.
 
 @kindex --print-gc-sections
 @kindex --no-print-gc-sections

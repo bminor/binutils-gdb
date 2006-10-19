@@ -3602,7 +3602,7 @@ build_relax_frag (struct score_it fix_insts[RELAX_INST_NUM], int fix_num ATTRIBU
   int i;
   char *p;
   fixS *fixp = NULL;
-  fixS *head_fixp = NULL;
+  fixS *cur_fixp = NULL;
   long where;
   struct score_it inst_main;
 
@@ -3638,19 +3638,11 @@ build_relax_frag (struct score_it fix_insts[RELAX_INST_NUM], int fix_num ATTRIBU
   md_number_to_chars (p, inst_main.instruction, inst_main.size);
 
   if (inst_main.reloc.type != BFD_RELOC_NONE)
-    {
-      fixp = fix_new_score (frag_now, p - frag_now->fr_literal, inst_main.size,
-                            &inst_main.reloc.exp, inst_main.reloc.pc_rel, inst_main.reloc.type);
-    }
+    fixp = fix_new_score (frag_now, p - frag_now->fr_literal, inst_main.size,
+			  &inst_main.reloc.exp, inst_main.reloc.pc_rel, inst_main.reloc.type);
 
-  head_fixp = xmalloc (sizeof (fixS *));
-  frag_now->tc_frag_data.fixp = head_fixp;
-
-  if (fixp)
-    {
-      head_fixp->fx_next = fixp;
-      head_fixp = head_fixp->fx_next;
-    }
+  frag_now->tc_frag_data.fixp = fixp;
+  cur_fixp = frag_now->tc_frag_data.fixp;
 
 #ifdef OBJ_ELF
   dwarf2_emit_insn (inst_main.size);
@@ -3669,15 +3661,19 @@ build_relax_frag (struct score_it fix_insts[RELAX_INST_NUM], int fix_num ATTRIBU
                                 var_insts[i].reloc.type);
           if (fixp)
             {
-              head_fixp->fx_next = fixp;
-              head_fixp = head_fixp->fx_next;
+              if (cur_fixp)
+                {
+                  cur_fixp->fx_next = fixp;
+                  cur_fixp = cur_fixp->fx_next;
+                }
+              else
+                {
+                  frag_now->tc_frag_data.fixp = fixp;
+                  cur_fixp = frag_now->tc_frag_data.fixp;
+                }
 	    }
         }
     }
-
-  head_fixp = frag_now->tc_frag_data.fixp;
-  frag_now->tc_frag_data.fixp = head_fixp->fx_next;
-  free (head_fixp);
 
   p = frag_var (rs_machine_dependent, inst_main.relax_size + RELAX_PAD_BYTE, 0,
                 RELAX_ENCODE (inst_main.size, inst_main.relax_size, inst_main.type,

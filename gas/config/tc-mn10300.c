@@ -691,7 +691,7 @@ void
 md_show_usage (stream)
      FILE *stream;
 {
-  fprintf (stream, _("MN10300 options:\n\
+  fprintf (stream, _("MN10300 assembler options:\n\
 none yet\n"));
 }
 

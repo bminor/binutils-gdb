@@ -1,3 +1,8 @@
+2006-10-19  Mei Ligang  <ligang@sunnorth.com.cn>
+
+	* config/tc-score.c (build_relax_frag): Compute correct
+	tc_frag_data.fixp.
+
 2006-10-18  Roy Marples  <uberlord@gentoo.org>
 
 	* config/tc-sparc.c (md_parse_option): Treat any target starting with

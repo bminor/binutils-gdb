@@ -1141,20 +1141,19 @@ score_elf_rel_dyn_section (bfd *dynobj, bfd_boolean create_p)
   sreloc = bfd_get_section_by_name (dynobj, dname);
   if (sreloc == NULL && create_p)
     {
-      sreloc = bfd_make_section (dynobj, dname);
+      sreloc = bfd_make_section_with_flags (dynobj, dname,
+                                            (SEC_ALLOC
+                                             | SEC_LOAD
+                                             | SEC_HAS_CONTENTS
+                                             | SEC_IN_MEMORY
+                                             | SEC_LINKER_CREATED
+                                             | SEC_READONLY));
       if (sreloc == NULL
-	  || ! bfd_set_section_flags (dynobj, sreloc,
-				      (SEC_ALLOC
-				       | SEC_LOAD
-				       | SEC_HAS_CONTENTS
-				       | SEC_IN_MEMORY
-				       | SEC_LINKER_CREATED
-				       | SEC_READONLY))
-	  || ! bfd_set_section_alignment (dynobj, sreloc, SCORE_ELF_LOG_FILE_ALIGN (dynobj)))
+	  || ! bfd_set_section_alignment (dynobj, sreloc,
+					  SCORE_ELF_LOG_FILE_ALIGN (dynobj)))
 	return NULL;
     }
-
-  return sreloc;
+  return sreloc; 
 }
 
 static void
@@ -1350,9 +1349,8 @@ score_elf_create_got_section (bfd *abfd,
 
   /* We have to use an alignment of 2**4 here because this is hardcoded
      in the function stub generation and in the linker script.  */
-  s = bfd_make_section (abfd, ".got");
-  if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, flags)
+  s = bfd_make_section_with_flags (abfd, ".got", flags);
+   if (s == NULL
       || ! bfd_set_section_alignment (abfd, s, 4))
     return FALSE;
 
@@ -1928,15 +1926,6 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
   r_symndx = ELF32_R_SYM (rel->r_info);
   r_type = ELF32_R_TYPE (rel->r_info);
   rel_addr = (input_section->output_section->vma + input_section->output_offset + rel->r_offset);
-
-  /* If the start address has been set, then set the EF_SCORE_HASENTRY
-     flag.  Setting this more than once is redundant, but the cost is
-     not too high, and it keeps the code simple.
-     The test is done  here, rather than somewhere else, because the
-     start address is only set just before the final link commences.
-     Note - if the user deliberately sets a start address of 0, the flag will not be set.  */
-  if (bfd_get_start_address (output_bfd) != 0)
-    elf_elfheader (output_bfd)->e_flags |= EF_SCORE_HASENTRY;
 
   if (r_type == R_SCORE_GOT15)
     {
@@ -3173,9 +3162,9 @@ _bfd_score_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   /* Create .stub section.  */
   if (bfd_get_section_by_name (abfd, SCORE_ELF_STUB_SECTION_NAME) == NULL)
     {
-      s = bfd_make_section (abfd, SCORE_ELF_STUB_SECTION_NAME);
+      s = bfd_make_section_with_flags (abfd, SCORE_ELF_STUB_SECTION_NAME,
+                                       flags | SEC_CODE);
       if (s == NULL
-          || !bfd_set_section_flags (abfd, s, flags | SEC_CODE)
           || !bfd_set_section_alignment (abfd, s, 2))
 
         return FALSE;
