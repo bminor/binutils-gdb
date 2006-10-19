@@ -615,6 +615,17 @@ update_solib_list (int from_tty, struct target_ops *target)
     }
 }
 
+/* Return non-zero if SO is the libpthread shared library.
+
+   Uses a fairly simplistic heuristic approach where we check
+   the file name against "/libpthread".  This can lead to false
+   positives, but this should be good enough in practice.  */
+
+static int
+libpthread_solib_p (struct so_list *so)
+{
+  return (strstr (so->so_name, "/libpthread") != NULL);
+}
 
 /* GLOBAL FUNCTION
 
@@ -661,8 +672,16 @@ solib_add (char *pattern, int from_tty, struct target_ops *target, int readsyms)
     for (gdb = so_list_head; gdb; gdb = gdb->next)
       if (! pattern || re_exec (gdb->so_name))
 	{
+          /* Normally, we would read the symbols from that library
+             only if READSYMS is set.  However, we're making a small
+             exception for the pthread library, because we sometimes
+             need the library symbols to be loaded in order to provide
+             thread support (x86-linux for instance).  */
+          const int add_this_solib =
+            (readsyms || libpthread_solib_p (gdb));
+
 	  any_matches = 1;
-	  if (readsyms && solib_read_symbols (gdb, from_tty))
+	  if (add_this_solib && solib_read_symbols (gdb, from_tty))
 	    loaded_any_symbols = 1;
 	}
 
