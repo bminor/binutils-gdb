@@ -1,3 +1,10 @@
+2005-10-19  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* configure.srv [s390-*-linux*, s390x-*-linux*]: Set srv_linux_regsets
+	and srv_linux_thread_db to yes.
+	* linux-s390-low.c (s390_fill_gregset): New function.
+	(target_regsets): Define data structure.
+
 2006-10-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* acinclude.m4 (SRV_CHECK_TLS_GET_ADDR): New.

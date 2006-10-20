@@ -1,6 +1,6 @@
 /* GNU/Linux S/390 specific low level interface, for the remote server
    for GDB.
-   Copyright (C) 2001, 2002, 2005
+   Copyright (C) 2001, 2002, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -74,6 +74,22 @@ s390_cannot_store_register (int regno)
 
   return 0;
 }
+
+/* Provide only a fill function for the general register set.  ps_lgetregs
+   will use this for NPTL support.  */
+
+static void s390_fill_gregset (void *buf)
+{
+  int i;
+
+  for (i = 0; i < 34; i++)
+    collect_register (i, (char *) buf + s390_regmap[i]);
+}
+
+struct regset_info target_regsets[] = {
+  { 0, 0, 0, GENERAL_REGS, s390_fill_gregset, NULL },
+  { 0, 0, -1, -1, NULL, NULL }
+};
 
 
 static const unsigned char s390_breakpoint[] = { 0, 1 };
