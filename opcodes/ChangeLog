@@ -1,3 +1,8 @@
+2006-10-20  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* sh-dis.c (print_insn_sh): Remove 0x from output to prevent GDB
+	duplicating it.
+
 2006-10-18  Dave Brolley  <brolley@redhat.com>
 
 	* configure.in (BFD_MACHINES): Add cgen-bitset.lo for bfd_sh_arch.

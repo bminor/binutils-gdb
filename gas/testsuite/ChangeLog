@@ -1,3 +1,14 @@
+2006-10-20  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* gas/sh/pcrel-coff.d: Update patterns (remove 0x on addresses).
+	* gas/sh/pcrel-hms.d: Likewise.
+	* gas/sh/pcrel.d: Likewise.
+	* gas/sh/pcrel2.d: Likewise.
+	* gas/sh/pic.d: Likewise.
+	* gas/sh/tlsd.d: Likewise.
+	* gas/sh/tlsdnopic.d: Likewise.
+	* gas/sh/tlsdpic.d: Likewise.
+
 2006-10-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Indent "x86-64-nops-1".
