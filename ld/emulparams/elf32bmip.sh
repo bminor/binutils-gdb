@@ -20,6 +20,13 @@ INITIAL_READONLY_SECTIONS="${INITIAL_READONLY_SECTIONS}
   .reginfo      ${RELOCATING-0} : { *(.reginfo) }
 "
 OTHER_TEXT_SECTIONS='*(.mips16.fn.*) *(.mips16.call.*)'
+# Unlike most targets, the MIPS backend puts all dynamic relocations
+# in a single dynobj section, which it also calls ".rel.dyn".  It does
+# this so that it can easily sort all dynamic relocations before the
+# output section has been populated.
+OTHER_GOT_RELOC_SECTIONS="
+  .rel.dyn      ${RELOCATING-0} : { *(.rel.dyn) }
+"
 # If the output has a GOT section, there must be exactly 0x7ff0 bytes
 # between .got and _gp.  The ". = ." below stops the orphan code from
 # inserting other sections between the assignment to _gp and the start

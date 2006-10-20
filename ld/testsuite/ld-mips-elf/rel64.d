@@ -1,7 +1,7 @@
 #name: MIPS rel64 n64
 #source: rel64.s
 #as: -KPIC -EB -64
-#readelf: -x 6 -r
+#readelf: -x .text -r
 #ld: -shared -melf64btsmip
 
 Relocation section '.rel.dyn' at offset .* contains 2 entries:

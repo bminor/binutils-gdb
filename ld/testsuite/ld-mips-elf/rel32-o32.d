@@ -1,7 +1,7 @@
 #name: MIPS rel32 o32
 #source: rel32.s
 #as: -KPIC -EB -32
-#readelf: -x 6 -r
+#readelf: -x .text -r
 #ld: -shared -melf32btsmip
 
 Relocation section '.rel.dyn' at offset .* contains 2 entries:

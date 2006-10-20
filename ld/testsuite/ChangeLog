@@ -1,3 +1,11 @@
+2006-10-20  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-mips-elf/rel32-o32.d: Bump the section number of .text by 1
+	to account for the fact that .rel.dyn is now before .text in the
+	section table.
+	* ld-mips-elf/rel32-n32.d: Likewise.
+	* ld-mips-elf/rel64.d: Likewise.
+
 2006-10-19  Richard Sandiford  <richard@codesourcery.com>
 
 	* ld-mips-elf/tlslib-o32-hidden.got: Sort relocations against the
