@@ -8873,6 +8873,10 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 				* (ABI_64_P (output_bfd)
 				   ? sizeof (Elf64_Mips_External_Rel)
 				   : sizeof (Elf32_External_Rel)));
+	      /* Adjust the section size too.  Tools like the prelinker
+		 can reasonably expect the values to the same.  */
+	      elf_section_data (s->output_section)->this_hdr.sh_size
+		= dyn.d_un.d_val;
 	      break;
 
 	    default:

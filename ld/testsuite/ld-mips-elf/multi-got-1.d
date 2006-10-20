@@ -25,7 +25,7 @@ Dynamic section at offset .* contains 17 entries:
  0x70000013 \(MIPS_GOTSYM\)                0x[0-9a-f]+
  0x00000000 \(NULL\)                       0x0
 
-Relocation section '\.rel\.dyn' at offset 0x[0-9a-f]+ contains 8203 entries:
+Relocation section '\.rel\.dyn' at offset 0x[0-9a-f]+ contains 8193 entries:
  Offset     Info    Type            Sym.Value  Sym. Name
 00000000  00000000 R_MIPS_NONE      
 ^[0-9a-f]+  [0-9a-f]+ R_MIPS_REL32      [0-9a-f]+   sym_2_[0-9]+
@@ -8220,13 +8220,3 @@ Relocation section '\.rel\.dyn' at offset 0x[0-9a-f]+ contains 8203 entries:
 ^[0-9a-f]+  [0-9a-f]+ R_MIPS_REL32      [0-9a-f]+   sym_2_[0-9]+
 ^[0-9a-f]+  [0-9a-f]+ R_MIPS_REL32      [0-9a-f]+   sym_2_[0-9]+
 ^[0-9a-f]+  [0-9a-f]+ R_MIPS_REL32      [0-9a-f]+   sym_2_[0-9]+
-00000000  00000000 R_MIPS_NONE      
-00000000  00000000 R_MIPS_NONE      
-00000000  00000000 R_MIPS_NONE      
-00000000  00000000 R_MIPS_NONE      
-00000000  00000000 R_MIPS_NONE      
-00000000  00000000 R_MIPS_NONE      
-00000000  00000000 R_MIPS_NONE      
-00000000  00000000 R_MIPS_NONE      
-00000000  00000000 R_MIPS_NONE      
-00000000  00000000 R_MIPS_NONE      

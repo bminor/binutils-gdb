@@ -1,5 +1,10 @@
 2006-10-20  Richard Sandiford  <richard@codesourcery.com>
 
+	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_sections): Make the
+	size of .rel.dyn reflect the value of DT_RELSZ.
+
+2006-10-20  Richard Sandiford  <richard@codesourcery.com>
+
 	* elfxx-mips.c (_bfd_mips_elf_additional_program_headers): Allocate
 	a PT_NULL header for dynamic objects.
 	(_bfd_mips_elf_modify_segment_map): Add it.

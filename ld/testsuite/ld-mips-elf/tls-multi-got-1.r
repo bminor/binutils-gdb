@@ -20,7 +20,7 @@ Dynamic section at offset .* contains 18 entries:
  0x0000001e \(FLAGS\)                      STATIC_TLS
  0x00000000 \(NULL\)                       0x0
 
-Relocation section '\.rel\.dyn' at offset 0x[0-9a-f]+ contains 20031 entries:
+Relocation section '\.rel\.dyn' at offset 0x[0-9a-f]+ contains 20009 entries:
  Offset     Info    Type            Sym.Value  Sym. Name
 [0-9a-f ]+R_MIPS_NONE      
 [0-9a-f ]+R_MIPS_TLS_DTPMOD
@@ -36,4 +36,3 @@ Relocation section '\.rel\.dyn' at offset 0x[0-9a-f]+ contains 20031 entries:
 #...
 [0-9a-f ]+R_MIPS_REL32      000cf2b4   sym_1_0465
 [0-9a-f ]+R_MIPS_REL32      000e0ef8   sym_2_8654
-#...

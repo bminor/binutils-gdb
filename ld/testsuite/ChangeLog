@@ -1,5 +1,11 @@
 2006-10-20  Richard Sandiford  <richard@codesourcery.com>
 
+	* ld-mips-elf/multi-got-1.d: Remove trailing R_MIPS_NONE entries.
+	* ld-mips-elf/tls-multi-got-1.got: Likewise.
+	* ld-mips-elf/tls-multi-got-1.r: Likewise.
+
+2006-10-20  Richard Sandiford  <richard@codesourcery.com>
+
 	* ld-mips-elf/multi-got-1.d: Do not expect a particular address
 	for DT_HASH.
 	* ld-mips-elf/rel32-o32.d: Bump addresses by 0x20 to account for
