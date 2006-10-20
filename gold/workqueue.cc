@@ -192,11 +192,22 @@ Workqueue::~Workqueue()
   assert(this->running_ == 0);
 }
 
+// Add a task to the queue.
+
 void
 Workqueue::queue(Task* t)
 {
   Hold_lock hl(this->tasks_lock_);
   this->tasks_.push_back(t);
+}
+
+// Add a task to the front of the queue.
+
+void
+Workqueue::queue_front(Task* t)
+{
+  Hold_lock hl(this->tasks_lock_);
+  this->tasks_.push_front(t);
 }
 
 // Clear the list of completed tasks.  Return whether we cleared

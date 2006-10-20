@@ -14,36 +14,13 @@
 namespace gold
 {
 
-// Layout_task methods.
-
-Layout_task::~Layout_task()
-{
-}
-
-// This task can be run when it is unblocked.
-
-Task::Is_runnable_type
-Layout_task::is_runnable(Workqueue*)
-{
-  if (this->this_blocker_->is_blocked())
-    return IS_BLOCKED;
-  return IS_RUNNABLE;
-}
-
-// We don't need to hold any locks for the duration of this task.  In
-// fact this task will be the only one running.
-
-Task_locker*
-Layout_task::locks(Workqueue*)
-{
-  return NULL;
-}
+// Layout_task_runner methods.
 
 // Lay out the sections.  This is called after all the input objects
 // have been read.
 
 void
-Layout_task::run(Workqueue* workqueue)
+Layout_task_runner::run(Workqueue* workqueue)
 {
   off_t file_size = this->layout_->finalize(this->input_objects_,
 					    this->symtab_);
@@ -63,7 +40,7 @@ Layout_task::run(Workqueue* workqueue)
 Layout::Layout(const General_options& options)
   : options_(options), last_shndx_(0), namepool_(), sympool_(), signatures_(),
     section_name_map_(), segment_list_(), section_list_(),
-    special_output_list_()
+    special_output_list_(), tls_segment_(NULL)
 {
   // Make space for more than enough segments for a typical file.
   // This is just for efficiency--it's OK if we wind up needing more.
@@ -256,30 +233,16 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
 	}
 
       // If we see a loadable SHF_TLS section, we create a PT_TLS
-      // segment.
+      // segment.  There can only be one such segment.
       if ((flags & elfcpp::SHF_TLS) != 0)
 	{
-	  // See if we already have an equivalent PT_TLS segment.
-	  for (p = this->segment_list_.begin();
-	       p != segment_list_.end();
-	       ++p)
+	  if (this->tls_segment_ == NULL)
 	    {
-	      if ((*p)->type() == elfcpp::PT_TLS
-		  && (((*p)->flags() & elfcpp::PF_W)
-		      == (seg_flags & elfcpp::PF_W)))
-		{
-		  (*p)->add_output_section(os, seg_flags);
-		  break;
-		}
+	      this->tls_segment_ = new Output_segment(elfcpp::PT_TLS,
+						      seg_flags);
+	      this->segment_list_.push_back(this->tls_segment_);
 	    }
-
-	  if (p == this->segment_list_.end())
-	    {
-	      Output_segment* oseg = new Output_segment(elfcpp::PT_TLS,
-							seg_flags);
-	      this->segment_list_.push_back(oseg);
-	      oseg->add_output_section(os, seg_flags);
-	    }
+	  this->tls_segment_->add_output_section(os, seg_flags);
 	}
     }
 
@@ -439,6 +402,14 @@ Layout::segment_precedes(const Output_segment* seg1,
     return true;
   if (type2 == elfcpp::PT_LOAD && type1 != elfcpp::PT_LOAD)
     return false;
+
+  // We put the PT_TLS segment last, because that is where the dynamic
+  // linker expects to find it (this is just for efficiency; other
+  // positions would also work correctly).
+  if (type1 == elfcpp::PT_TLS && type2 != elfcpp::PT_TLS)
+    return false;
+  if (type2 == elfcpp::PT_TLS && type1 != elfcpp::PT_TLS)
+    return true;
 
   const elfcpp::Elf_Word flags1 = seg1->flags();
   const elfcpp::Elf_Word flags2 = seg2->flags();
@@ -865,30 +836,12 @@ Write_symbols_task::run(Workqueue*)
   this->symtab_->write_globals(this->target_, this->sympool_, this->of_);
 }
 
-// Close_task methods.
-
-// We can't run until FINAL_BLOCKER is unblocked.
-
-Task::Is_runnable_type
-Close_task::is_runnable(Workqueue*)
-{
-  if (this->final_blocker_->is_blocked())
-    return IS_BLOCKED;
-  return IS_RUNNABLE;
-}
-
-// We don't lock anything.
-
-Task_locker*
-Close_task::locks(Workqueue*)
-{
-  return NULL;
-}
+// Close_task_runner methods.
 
 // Run the task--close the file.
 
 void
-Close_task::run(Workqueue*)
+Close_task_runner::run(Workqueue*)
 {
   this->of_->close();
 }

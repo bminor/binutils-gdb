@@ -56,19 +56,43 @@ gold_unreachable()
   abort();
 }
 
-} // End namespace gold.
+// This class arranges to run the functions done in the middle of the
+// link.  It is just a closure.
 
-namespace
+class Middle_runner : public Task_function_runner
 {
+ public:
+  Middle_runner(const General_options& options,
+		const Input_objects* input_objects,
+		Symbol_table* symtab,
+		Layout* layout)
+    : options_(options), input_objects_(input_objects), symtab_(symtab),
+      layout_(layout)
+  { }
 
-using namespace gold;
+  void
+  run(Workqueue*);
+
+ private:
+  const General_options& options_;
+  const Input_objects* input_objects_;
+  Symbol_table* symtab_;
+  Layout* layout_;
+};
+
+void
+Middle_runner::run(Workqueue* workqueue)
+{
+  queue_middle_tasks(this->options_, this->input_objects_, this->symtab_,
+		     this->layout_, workqueue);
+}
 
 // Queue up the initial set of tasks for this link job.
 
 void
 queue_initial_tasks(const General_options& options,
 		    const Dirsearch& search_path,
-		    const Command_line::Input_argument_list& inputs,
+		    const Input_argument_list& inputs,
 		    Workqueue* workqueue, Input_objects* input_objects,
 		    Symbol_table* symtab, Layout* layout)
 {
@@ -80,7 +104,7 @@ queue_initial_tasks(const General_options& options,
   // each input file.  We associate the blocker with the following
   // input file, to give us a convenient place to delete it.
   Task_token* this_blocker = NULL;
-  for (Command_line::Input_argument_list::const_iterator p = inputs.begin();
+  for (Input_argument_list::const_iterator p = inputs.begin();
        p != inputs.end();
        ++p)
     {
@@ -92,14 +116,65 @@ queue_initial_tasks(const General_options& options,
       this_blocker = next_blocker;
     }
 
-  workqueue->queue(new Layout_task(options, input_objects, symtab, layout,
-				   this_blocker));
+  workqueue->queue(new Task_function(new Middle_runner(options,
+						       input_objects,
+						       symtab,
+						       layout),
+				     this_blocker));
 }
 
-} // end anonymous namespace.
+// Queue up the middle set of tasks.  These are the tasks which run
+// after all the input objects have been found and all the symbols
+// have been read, but before we lay out the output file.
 
-namespace gold
+void
+queue_middle_tasks(const General_options& options,
+		   const Input_objects* input_objects,
+		   Symbol_table* symtab,
+		   Layout* layout,
+		   Workqueue* workqueue)
 {
+  // Read the relocations of the input files.  We do this to find
+  // which symbols are used by relocations which require a GOT and/or
+  // a PLT entry, or a COPY reloc.  When we implement garbage
+  // collection we will do it here by reading the relocations in a
+  // breadth first search by references.
+  //
+  // We could also read the relocations during the first pass, and
+  // mark symbols at that time.  That is how the old GNU linker works.
+  // Doing that is more complex, since we may later decide to discard
+  // some of the sections, and thus change our minds about the types
+  // of references made to the symbols.
+  Task_token* blocker = new Task_token();
+  Task_token* symtab_lock = new Task_token();
+  for (Input_objects::Object_list::const_iterator p = input_objects->begin();
+       p != input_objects->end();
+       ++p)
+    {
+      // We can read and process the relocations in any order.  But we
+      // only want one task to write to the symbol table at a time.
+      // So we queue up a task for each object to read the
+      // relocations.  That task will in turn queue a task to wait
+      // until it can write to the symbol table.
+      blocker->add_blocker();
+      workqueue->queue(new Read_relocs(options, symtab, *p, symtab_lock,
+				       blocker));
+    }
+
+  // Allocate common symbols.  This requires write access to the
+  // symbol table, but is independent of the relocation processing.
+  // blocker->add_blocker();
+  // workqueue->queue(new Allocate_commons_task(options, symtab, layout,
+  //					     symtab_lock, blocker));
+
+  // When all those tasks are complete, we can start laying out the
+  // output file.
+  workqueue->queue(new Task_function(new Layout_task_runner(options,
+							    input_objects,
+							    symtab,
+							    layout),
+				     blocker));
+}
 
 // Queue up the final set of tasks.  This is called at the end of
 // Layout_task.
@@ -122,8 +197,8 @@ queue_final_tasks(const General_options& options,
        ++p)
     {
       final_blocker->add_blocker();
-      workqueue->queue(new Relocate_task(options, symtab, layout->sympool(),
-					 *p, of, final_blocker));
+      workqueue->queue(new Relocate_task(options, symtab, layout, *p, of,
+					 final_blocker));
     }
 
   // Queue a task to write out the symbol table.
@@ -138,10 +213,13 @@ queue_final_tasks(const General_options& options,
 
   // Queue a task to close the output file.  This will be blocked by
   // FINAL_BLOCKER.
-  workqueue->queue(new Close_task(of, final_blocker));
+  workqueue->queue(new Task_function(new Close_task_runner(of),
+				     final_blocker));
 }
 
 } // End namespace gold.
+
+using namespace gold;
 
 int
 main(int argc, char** argv)

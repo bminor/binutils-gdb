@@ -10,6 +10,86 @@
 namespace gold
 {
 
+// Read_relocs methods.
+
+// These tasks just read the relocation information from the file.
+// After reading it, the start another task to process the
+// information.  These tasks requires access to the file.
+
+Task::Is_runnable_type
+Read_relocs::is_runnable(Workqueue*)
+{
+  return this->object_->is_locked() ? IS_LOCKED : IS_RUNNABLE;
+}
+
+// Lock the file.
+
+Task_locker*
+Read_relocs::locks(Workqueue*)
+{
+  return new Task_locker_obj<Object>(*this->object_);
+}
+
+// Read the relocations and then start a Scan_relocs_task.
+
+void
+Read_relocs::run(Workqueue* workqueue)
+{
+  Read_relocs_data *rd = new Read_relocs_data;
+  this->object_->read_relocs(rd);
+  workqueue->queue_front(new Scan_relocs(this->options_, this->symtab_,
+					 this->object_, rd, this->symtab_lock_,
+					 this->blocker_));
+}
+
+// Scan_relocs methods.
+
+// These tasks scan the relocations read by Read_relocs and mark up
+// the symbol table to indicate which relocations are required.  We
+// use a lock on the symbol table to keep them from interfering with
+// each other.
+
+Task::Is_runnable_type
+Scan_relocs::is_runnable(Workqueue*)
+{
+  return this->symtab_lock_->is_writable() ? IS_RUNNABLE : IS_LOCKED;
+}
+
+// Return the locks we hold: one on the file, one on the symbol table
+// and one blocker.
+
+class Scan_relocs::Scan_relocs_locker : public Task_locker
+{
+ public:
+  Scan_relocs_locker(Object* object, Task_token& symtab_lock, Task* task,
+		     Task_token& blocker, Workqueue* workqueue)
+    : objlock_(*object), symtab_locker_(symtab_lock, task),
+      blocker_(blocker, workqueue)
+  { }
+
+ private:
+  Task_locker_obj<Object> objlock_;
+  Task_locker_write symtab_locker_;
+  Task_locker_block blocker_;
+};
+
+Task_locker*
+Scan_relocs::locks(Workqueue* workqueue)
+{
+  return new Scan_relocs_locker(this->object_, *this->symtab_lock_, this,
+				*this->blocker_, workqueue);
+}
+
+// Scan the relocs.
+
+void
+Scan_relocs::run(Workqueue*)
+{
+  this->object_->scan_relocs(this->options_, this->symtab_, this->rd_);
+  delete this->rd_;
+  this->rd_ = NULL;
+}
+
 // Relocate_task methods.
 
 // These tasks are always runnable.
@@ -48,17 +128,154 @@ Relocate_task::locks(Workqueue* workqueue)
 void
 Relocate_task::run(Workqueue*)
 {
-  this->object_->relocate(this->options_, this->symtab_, this->sympool_,
+  this->object_->relocate(this->options_, this->symtab_, this->layout_,
 			  this->of_);
+}
+
+// Read the relocs and local symbols from the object file and store
+// the information in RD.
+
+template<int size, bool big_endian>
+void
+Sized_object<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
+{
+  rd->relocs.clear();
+
+  unsigned int shnum = this->shnum();
+  if (shnum == 0)
+    return;
+
+  rd->relocs.reserve(shnum / 2);
+
+  const unsigned char *pshdrs = this->get_view(this->shoff_,
+					       shnum * This::shdr_size);
+  // Skip the first, dummy, section.
+  const unsigned char *ps = pshdrs + This::shdr_size;
+  for (unsigned int i = 1; i < shnum; ++i, ps += This::shdr_size)
+    {
+      typename This::Shdr shdr(ps);
+
+      unsigned int sh_type = shdr.get_sh_type();
+      if (sh_type != elfcpp::SHT_REL && sh_type != elfcpp::SHT_RELA)
+	continue;
+
+      unsigned int shndx = shdr.get_sh_info();
+      if (shndx >= shnum)
+	{
+	  fprintf(stderr, _("%s: %s: relocation section %u has bad info %u\n"),
+		  program_name, this->name().c_str(), i, shndx);
+	  gold_exit(false);
+	}
+
+      if (!this->is_section_included(shndx))
+	continue;
+
+      if (shdr.get_sh_link() != this->symtab_shnum_)
+	{
+	  fprintf(stderr,
+		  _("%s: %s: relocation section %u uses unexpected "
+		    "symbol table %u\n"),
+		  program_name, this->name().c_str(), i, shdr.get_sh_link());
+	  gold_exit(false);
+	}
+
+      off_t sh_size = shdr.get_sh_size();
+
+      unsigned int reloc_size;
+      if (sh_type == elfcpp::SHT_REL)
+	reloc_size = elfcpp::Elf_sizes<size>::rel_size;
+      else
+	reloc_size = elfcpp::Elf_sizes<size>::rela_size;
+      if (reloc_size != shdr.get_sh_entsize())
+	{
+	  fprintf(stderr,
+		  _("%s: %s: unexpected entsize for reloc section %u: "
+		    "%lu != %u"),
+		  program_name, this->name().c_str(), i,
+		  static_cast<unsigned long>(shdr.get_sh_entsize()),
+		  reloc_size);
+	  gold_exit(false);
+	}
+
+      size_t reloc_count = sh_size / reloc_size;
+      if (reloc_count * reloc_size != sh_size)
+	{
+	  fprintf(stderr, _("%s: %s: reloc section %u size %lu uneven"),
+		  program_name, this->name().c_str(), i,
+		  static_cast<unsigned long>(sh_size));
+	  gold_exit(false);
+	}
+
+      rd->relocs.push_back(Section_relocs());
+      Section_relocs& sr(rd->relocs.back());
+      sr.reloc_shndx = i;
+      sr.data_shndx = shndx;
+      sr.contents = this->get_lasting_view(shdr.get_sh_offset(), sh_size);
+      sr.sh_type = sh_type;
+      sr.reloc_count = reloc_count;
+    }
+
+  // Read the local symbols.
+  if (this->symtab_shnum_ == 0 || this->local_symbol_count_ == 0)
+    rd->local_symbols = NULL;
+  else
+    {
+      typename This::Shdr symtabshdr(pshdrs
+				     + this->symtab_shnum_ * This::shdr_size);
+      assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
+      const int sym_size = This::sym_size;
+      const unsigned int loccount = this->local_symbol_count_;
+      assert(loccount == symtabshdr.get_sh_info());
+      off_t locsize = loccount * sym_size;
+      rd->local_symbols = this->get_lasting_view(symtabshdr.get_sh_offset(),
+						 locsize);
+    }
+}
+
+// Scan the relocs and adjust the symbol table.  This looks for
+// relocations which require GOT/PLT/COPY relocations.
+
+template<int size, bool big_endian>
+void
+Sized_object<size, big_endian>::do_scan_relocs(const General_options& options,
+					       Symbol_table* symtab,
+					       Read_relocs_data* rd)
+{
+  Sized_target<size, big_endian>* target = this->sized_target();
+
+  const unsigned char* local_symbols;
+  if (rd->local_symbols == NULL)
+    local_symbols = NULL;
+  else
+    local_symbols = rd->local_symbols->data();
+
+  for (Read_relocs_data::Relocs_list::iterator p = rd->relocs.begin();
+       p != rd->relocs.end();
+       ++p)
+    {
+      target->scan_relocs(options, symtab, this, p->sh_type,
+			  p->contents->data(), p->reloc_count,
+			  this->local_symbol_count_,
+			  local_symbols,
+			  this->symbols_);
+      delete p->contents;
+      p->contents = NULL;
+    }
+
+  if (rd->local_symbols != NULL)
+    {
+      delete rd->local_symbols;
+      rd->local_symbols = NULL;
+    }
 }
 
 // Relocate the input sections and write out the local symbols.
 
 template<int size, bool big_endian>
 void
-Sized_object<size, big_endian>::do_relocate(const General_options&,
+Sized_object<size, big_endian>::do_relocate(const General_options& options,
 					    const Symbol_table* symtab,
-					    const Stringpool* sympool,
+					    const Layout* layout,
 					    Output_file* of)
 {
   unsigned int shnum = this->shnum();
@@ -78,7 +295,7 @@ Sized_object<size, big_endian>::do_relocate(const General_options&,
 
   // Apply relocations.
 
-  this->relocate_sections(symtab, pshdrs, &views);
+  this->relocate_sections(options, symtab, layout, pshdrs, &views);
 
   // Write out the accumulated views.
   for (unsigned int i = 1; i < shnum; ++i)
@@ -89,7 +306,7 @@ Sized_object<size, big_endian>::do_relocate(const General_options&,
     }
 
   // Write out the local symbols.
-  this->write_local_symbols(of, sympool);
+  this->write_local_symbols(of, layout->sympool());
 }
 
 // Write section data to the output file.  PSHDRS points to the
@@ -127,9 +344,8 @@ Sized_object<size, big_endian>::write_sections(const unsigned char* pshdrs,
       off_t sh_size = shdr.get_sh_size();
 
       unsigned char* view = of->get_output_view(start, sh_size);
-      this->input_file()->file().read(shdr.get_sh_offset(),
-				      sh_size,
-				      view);
+      this->read(shdr.get_sh_offset(), sh_size, view);
+
       pvs->view = view;
       pvs->address = os->address() + map_sections[i].offset;
       pvs->offset = start;
@@ -142,13 +358,24 @@ Sized_object<size, big_endian>::write_sections(const unsigned char* pshdrs,
 
 template<int size, bool big_endian>
 void
-Sized_object<size, big_endian>::relocate_sections(const Symbol_table* symtab,
-						  const unsigned char* pshdrs,
-						  Views* pviews)
+Sized_object<size, big_endian>::relocate_sections(
+    const General_options& options,
+    const Symbol_table* symtab,
+    const Layout* layout,
+    const unsigned char* pshdrs,
+    Views* pviews)
 {
   unsigned int shnum = this->shnum();
-  std::vector<Map_to_output>& map_sections(this->map_to_output());
   Sized_target<size, big_endian>* target = this->sized_target();
+
+  Relocate_info<size, big_endian> relinfo;
+  relinfo.options = &options;
+  relinfo.symtab = symtab;
+  relinfo.layout = layout;
+  relinfo.object = this;
+  relinfo.local_symbol_count = this->local_symbol_count_;
+  relinfo.values = this->values_;
+  relinfo.symbols = this->symbols_;
 
   const unsigned char* p = pshdrs + This::shdr_size;
   for (unsigned int i = 1; i < shnum; ++i, p += This::shdr_size)
@@ -167,7 +394,7 @@ Sized_object<size, big_endian>::relocate_sections(const Symbol_table* symtab,
 	  gold_exit(false);
 	}
 
-      if (map_sections[index].output_section == NULL)
+      if (!this->is_section_included(index))
 	{
 	  // This relocation section is against a section which we
 	  // discarded.
@@ -215,10 +442,12 @@ Sized_object<size, big_endian>::relocate_sections(const Symbol_table* symtab,
 	  gold_exit(false);
 	}
 
-      target->relocate_section(symtab, this, sh_type, prelocs, reloc_count,
-			       this->local_symbol_count_,
-			       this->values_,
-			       this->symbols_,
+      relinfo.reloc_shndx = i;
+      relinfo.data_shndx = index;
+      target->relocate_section(&relinfo,
+			       sh_type,
+			       prelocs,
+			       reloc_count,
 			       (*pviews)[index].view,
 			       (*pviews)[index].address,
 			       (*pviews)[index].view_size);
@@ -230,30 +459,70 @@ Sized_object<size, big_endian>::relocate_sections(const Symbol_table* symtab,
 
 template
 void
+Sized_object<32, false>::do_read_relocs(Read_relocs_data* rd);
+
+template
+void
+Sized_object<32, true>::do_read_relocs(Read_relocs_data* rd);
+
+template
+void
+Sized_object<64, false>::do_read_relocs(Read_relocs_data* rd);
+
+template
+void
+Sized_object<64, true>::do_read_relocs(Read_relocs_data* rd);
+
+template
+void
+Sized_object<32, false>::do_scan_relocs(const General_options& options,
+					Symbol_table* symtab,
+					Read_relocs_data* rd);
+
+template
+void
+Sized_object<32, true>::do_scan_relocs(const General_options& options,
+				       Symbol_table* symtab,
+				       Read_relocs_data* rd);
+
+template
+void
+Sized_object<64, false>::do_scan_relocs(const General_options& options,
+					Symbol_table* symtab,
+					Read_relocs_data* rd);
+
+template
+void
+Sized_object<64, true>::do_scan_relocs(const General_options& options,
+				       Symbol_table* symtab,
+				       Read_relocs_data* rd);
+
+template
+void
 Sized_object<32, false>::do_relocate(const General_options& options,
 				     const Symbol_table* symtab,
-				     const Stringpool* sympool,
+				     const Layout* layout,
 				     Output_file* of);
 
 template
 void
 Sized_object<32, true>::do_relocate(const General_options& options,
 				    const Symbol_table* symtab,
-				    const Stringpool* sympool,
+				    const Layout* layout,
 				    Output_file* of);
 
 template
 void
 Sized_object<64, false>::do_relocate(const General_options& options,
 				     const Symbol_table* symtab,
-				     const Stringpool* sympool,
+				     const Layout* layout,
 				     Output_file* of);
 
 template
 void
 Sized_object<64, true>::do_relocate(const General_options& options,
 				    const Symbol_table* symtab,
-				    const Stringpool* sympool,
+				    const Layout* layout,
 				    Output_file* of);
 
 

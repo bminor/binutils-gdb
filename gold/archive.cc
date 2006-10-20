@@ -300,7 +300,7 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
       gold_exit(false);
     }
 
-  Object* obj = make_elf_object((std::string(this->input_file_->name())
+  Object* obj = make_elf_object((std::string(this->input_file_->filename())
 				 + "(" + n + ")"),
 				this->input_file_, memoff, p, bytes);
 

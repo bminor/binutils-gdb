@@ -288,6 +288,58 @@ class Task
   run(Workqueue*) = 0;
 };
 
+// A simple task which waits for a blocker and then runs a function.
+
+class Task_function_runner
+{
+ public:
+  virtual ~Task_function_runner()
+  { }
+
+  virtual void
+  run(Workqueue*) = 0;
+};
+
+class Task_function : public Task
+{
+ public:
+  // Both points should be allocated using new, and will be deleted
+  // after the task runs.
+  Task_function(Task_function_runner* runner, Task_token* blocker)
+    : runner_(runner), blocker_(blocker)
+  { }
+
+  ~Task_function()
+  {
+    delete this->runner_;
+    delete this->blocker_;
+  }
+
+  // The standard task methods.
+
+  // Wait until the task is unblocked.
+  Is_runnable_type
+  is_runnable(Workqueue*)
+  { return this->blocker_->is_blocked() ? IS_BLOCKED : IS_RUNNABLE; }
+
+  // This type of task does not normally hold any locks.
+  virtual Task_locker*
+  locks(Workqueue*)
+  { return NULL; }
+
+  // Run the action.
+  void
+  run(Workqueue* workqueue)
+  { this->runner_->run(workqueue); }
+
+ private:
+  Task_function(const Task_function&);
+  Task_function& operator=(const Task_function&);
+
+  Task_function_runner* runner_;
+  Task_token* blocker_;
+};
+
 // The workqueue
 
 class Workqueue_runner;
@@ -301,6 +353,11 @@ class Workqueue
   // Add a new task to the work queue.
   void
   queue(Task*);
+
+  // Add a new task to the front of the work queue.  It will be the
+  // next task to run if it is ready.
+  void
+  queue_front(Task*);
 
   // Process all the tasks on the work queue.
   void

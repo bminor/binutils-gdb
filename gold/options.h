@@ -14,6 +14,7 @@
 
 #include <list>
 #include <string>
+#include <vector>
 
 namespace gold
 {
@@ -52,6 +53,11 @@ class General_options
   is_relocatable() const
   { return this->is_relocatable_; }
 
+  // --shared: Whether generating a shared object.
+  bool
+  is_shared() const
+  { return this->is_shared_; }
+
   // --static: Whether doing a static link.
   bool
   is_static() const
@@ -74,12 +80,17 @@ class General_options
   { this->is_relocatable_ = true; }
 
   void
+  set_shared()
+  { this->is_shared_ = true; }
+
+  void
   set_static()
   { this->is_static_ = true; }
 
   Dir_list search_path_;
   const char* output_file_name_;
   bool is_relocatable_;
+  bool is_shared_;
   bool is_static_;
 
   // Don't copy this structure.
@@ -143,6 +154,11 @@ class Input_argument
   Position_dependent_options options_;
 };
 
+// A list of input files.
+class Input_argument_list : public std::vector<Input_argument>
+{
+};
+
 // All the information read from the command line.
 
 class Command_line
@@ -163,8 +179,6 @@ class Command_line
   const General_options&
   options() const
   { return this->options_; }
-
-  typedef std::list<Input_argument> Input_argument_list;
 
   // Get the list of input files.
   const Input_argument_list&

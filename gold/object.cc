@@ -87,6 +87,33 @@ Sized_object<size, big_endian>::section_header(unsigned int shnum)
   return this->get_view(symtabshdroff, This::shdr_size);
 }
 
+// Return the name of section SHNUM.
+
+template<int size, bool big_endian>
+std::string
+Sized_object<size, big_endian>::do_section_name(unsigned int shnum)
+{
+  Task_lock_obj<Object> tl(*this);
+
+  // Read the section names.
+  typename This::Shdr shdrnames(this->section_header(this->shstrndx_));
+  const unsigned char* pnamesu = this->get_view(shdrnames.get_sh_offset(),
+						shdrnames.get_sh_size());
+  const char* pnames = reinterpret_cast<const char*>(pnamesu);
+
+  typename This::Shdr shdr(this->section_header(shnum));
+  if (shdr.get_sh_name() >= shdrnames.get_sh_size())
+    {
+      fprintf(stderr,
+	      _("%s: %s: bad section name offset for section %u: %lu\n"),
+	      program_name, this->name().c_str(), shnum,
+	      static_cast<unsigned long>(shdr.get_sh_name()));
+      gold_exit(false);
+    }
+
+  return std::string(pnames + shdr.get_sh_name());
+}
+
 // Set up an object file bsaed on the file header.  This sets up the
 // target and reads the section information.
 
@@ -182,7 +209,9 @@ Sized_object<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 
   // We only need the external symbols.
   const int sym_size = This::sym_size;
-  off_t locsize = symtabshdr.get_sh_info() * sym_size;
+  const unsigned int loccount = symtabshdr.get_sh_info();
+  this->local_symbol_count_ = loccount;
+  off_t locsize = loccount * sym_size;
   off_t extoff = symtabshdr.get_sh_offset() + locsize;
   off_t extsize = symtabshdr.get_sh_size() - locsize;
 
@@ -190,14 +219,15 @@ Sized_object<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
   File_view* fvsymtab = this->get_lasting_view(extoff, extsize);
 
   // Read the section header for the symbol names.
+  unsigned int shnum = this->shnum();
   unsigned int strtab_shnum = symtabshdr.get_sh_link();
-  if (strtab_shnum == 0 || strtab_shnum >= this->shnum())
+  if (strtab_shnum == 0 || strtab_shnum >= shnum)
     {
       fprintf(stderr, _("%s: %s: invalid symbol table name index: %u\n"),
 	      program_name, this->name().c_str(), strtab_shnum);
       gold_exit(false);
     }
-  typename This::Shdr strtabshdr(this->section_header(strtab_shnum));
+  typename This::Shdr strtabshdr(pshdrs + strtab_shnum * This::shdr_size);
   if (strtabshdr.get_sh_type() != elfcpp::SHT_STRTAB)
     {
       fprintf(stderr,
@@ -493,13 +523,12 @@ Sized_object<size, big_endian>::do_finalize_local_symbols(off_t off,
   assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
 
   // Read the local symbols.
-  unsigned int loccount = symtabshdr.get_sh_info();
   const int sym_size = This::sym_size;
+  const unsigned int loccount = this->local_symbol_count_;
+  assert(loccount == symtabshdr.get_sh_info());
   off_t locsize = loccount * sym_size;
   const unsigned char* psyms = this->get_view(symtabshdr.get_sh_offset(),
 					      locsize);
-
-  this->local_symbol_count_ = loccount;
 
   this->values_ = new typename elfcpp::Elf_types<size>::Elf_Addr[loccount];
 
@@ -587,12 +616,12 @@ Sized_object<size, big_endian>::write_local_symbols(Output_file* of,
   // Read the symbol table section header.
   typename This::Shdr symtabshdr(this->section_header(this->symtab_shnum_));
   assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
-  unsigned int local_symbol_count = this->local_symbol_count_;
-  assert(local_symbol_count == symtabshdr.get_sh_info());
+  const unsigned int loccount = this->local_symbol_count_;
+  assert(loccount == symtabshdr.get_sh_info());
 
   // Read the local symbols.
   const int sym_size = This::sym_size;
-  off_t locsize = local_symbol_count * sym_size;
+  off_t locsize = loccount * sym_size;
   const unsigned char* psyms = this->get_view(symtabshdr.get_sh_offset(),
 					      locsize);
 
@@ -615,7 +644,7 @@ Sized_object<size, big_endian>::write_local_symbols(Output_file* of,
 
   psyms += sym_size;
   unsigned char* ov = oview;
-  for (unsigned int i = 1; i < local_symbol_count; ++i, psyms += sym_size)
+  for (unsigned int i = 1; i < loccount; ++i, psyms += sym_size)
     {
       elfcpp::Sym<size, big_endian> isym(psyms);
       elfcpp::Sym_write<size, big_endian> osym(ov);
@@ -663,6 +692,31 @@ Input_objects::add_object(Object* obj)
 
   if (obj->is_dynamic())
     this->any_dynamic_ = true;
+}
+
+// Relocate_info methods.
+
+// Return a string describing the location of a relocation.  This is
+// only used in error messages.
+
+template<int size, bool big_endian>
+std::string
+Relocate_info<size, big_endian>::location(size_t relnum, off_t) const
+{
+  std::string ret(this->object->name());
+  ret += ": reloc ";
+  char buf[100];
+  snprintf(buf, sizeof buf, "%zu", relnum);
+  ret += buf;
+  ret += " in reloc section ";
+  snprintf(buf, sizeof buf, "%u", this->reloc_shndx);
+  ret += buf;
+  ret += " (" + this->object->section_name(this->reloc_shndx);
+  ret += ") for section ";
+  snprintf(buf, sizeof buf, "%u", this->data_shndx);
+  ret += buf;
+  ret += " (" + this->object->section_name(this->data_shndx) + ")";
+  return ret;
 }
 
 } // End namespace gold.
@@ -829,5 +883,17 @@ class Sized_object<64, false>;
 
 template
 class Sized_object<64, true>;
+
+template
+struct Relocate_info<32, false>;
+
+template
+struct Relocate_info<32, true>;
+
+template
+struct Relocate_info<64, false>;
+
+template
+struct Relocate_info<64, true>;
 
 } // End namespace gold.

@@ -4,6 +4,8 @@
 #define GOLD_OBJECT_H
 
 #include <cassert>
+#include <list>
+#include <string>
 #include <vector>
 
 #include "elfcpp.h"
@@ -14,6 +16,7 @@
 namespace gold
 {
 
+class General_options;
 class Stringpool;
 class Layout;
 class Output_section;
@@ -37,6 +40,35 @@ struct Read_symbols_data
   File_view* symbol_names;
   // Size of symbol name data in bytes.
   off_t symbol_names_size;
+};
+
+// Data about a single relocation section.  This is read in
+// read_relocs and processed in scan_relocs.
+
+struct Section_relocs
+{
+  // Index of reloc section.
+  unsigned int reloc_shndx;
+  // Index of section that relocs apply to.
+  unsigned int data_shndx;
+  // Contents of reloc section.
+  File_view* contents;
+  // Reloc section type.
+  unsigned int sh_type;
+  // Number of reloc entries.
+  size_t reloc_count;
+};
+
+// Relocations in an object file.  This is read in read_relocs and
+// processed in scan_relocs.
+
+struct Read_relocs_data
+{
+  typedef std::vector<Section_relocs> Relocs_list;
+  // The relocations.
+  Relocs_list relocs;
+  // The local symbols.
+  File_view* local_symbols;
 };
 
 // Object is an interface which represents either a 32-bit or a 64-bit
@@ -98,21 +130,32 @@ class Object
   Sized_target<size, big_endian>*
   sized_target(ACCEPT_SIZE_ENDIAN_ONLY);
 
-  // Read the symbol and relocation information.
+  // Read the symbol information.
   void
   read_symbols(Read_symbols_data* sd)
   { return this->do_read_symbols(sd); }
-
-  // Add symbol information to the global symbol table.
-  void
-  add_symbols(Symbol_table* symtab, Read_symbols_data* sd)
-  { this->do_add_symbols(symtab, sd); }
 
   // Pass sections which should be included in the link to the Layout
   // object, and record where the sections go in the output file.
   void
   layout(Layout* lay, Read_symbols_data* sd)
   { this->do_layout(lay, sd); }
+
+  // Add symbol information to the global symbol table.
+  void
+  add_symbols(Symbol_table* symtab, Read_symbols_data* sd)
+  { this->do_add_symbols(symtab, sd); }
+
+  // Read the relocs.
+  void
+  read_relocs(Read_relocs_data* rd)
+  { return this->do_read_relocs(rd); }
+
+  // Scan the relocs and adjust the symbol table.
+  void
+  scan_relocs(const General_options& options, Symbol_table* symtab,
+	      Read_relocs_data* rd)
+  { return this->do_scan_relocs(options, symtab, rd); }
 
   // Initial local symbol processing: set the offset where local
   // symbol information will be stored; add local symbol names to
@@ -124,8 +167,8 @@ class Object
   // Relocate the input sections and write out the local symbols.
   void
   relocate(const General_options& options, const Symbol_table* symtab,
-	   const Stringpool* sympool, Output_file* of)
-  { return this->do_relocate(options, symtab, sympool, of); }
+	   const Layout* layout, Output_file* of)
+  { return this->do_relocate(options, symtab, layout, of); }
 
   // Return whether an input section is being included in the link.
   bool
@@ -140,6 +183,12 @@ class Object
   // and set *POFF to the offset within that section.
   inline Output_section*
   output_section(unsigned int shnum, off_t* poff);
+
+  // Return the name of a section given a section index.  This is only
+  // used for error messages.
+  std::string
+  section_name(unsigned int shnum)
+  { return this->do_section_name(shnum); }
 
  protected:
   // What we need to know to map an input section to an output
@@ -163,6 +212,14 @@ class Object
   virtual void
   do_add_symbols(Symbol_table*, Read_symbols_data*) = 0;
 
+  // Read the relocs--implemented by child class.
+  virtual void
+  do_read_relocs(Read_relocs_data*) = 0;
+
+  // Scan the relocs--implemented by child class.
+  virtual void
+  do_scan_relocs(const General_options&, Symbol_table*, Read_relocs_data*) = 0;
+
   // Lay out sections--implemented by child class.
   virtual void
   do_layout(Layout*, Read_symbols_data*) = 0;
@@ -175,7 +232,11 @@ class Object
   // symbols--implemented by child class.
   virtual void
   do_relocate(const General_options& options, const Symbol_table* symtab,
-	      const Stringpool*, Output_file* of) = 0;
+	      const Layout*, Output_file* of) = 0;
+
+  // Get the name of a section--implemented by child class.
+  virtual std::string
+  do_section_name(unsigned int shnum) = 0;
 
   // Get the file.
   Input_file*
@@ -282,13 +343,21 @@ class Sized_object : public Object
   void
   do_read_symbols(Read_symbols_data*);
 
-  // Lay out the input sections.
-  void
-  do_layout(Layout*, Read_symbols_data*);
-
   // Add the symbols to the symbol table.
   void
   do_add_symbols(Symbol_table*, Read_symbols_data*);
+
+  // Read the relocs.
+  void
+  do_read_relocs(Read_relocs_data*);
+
+  // Scan the relocs and adjust the symbol table.
+  void
+  do_scan_relocs(const General_options&, Symbol_table*, Read_relocs_data*);
+
+  // Lay out the input sections.
+  void
+  do_layout(Layout*, Read_symbols_data*);
 
   // Finalize the local symbols.
   off_t
@@ -297,7 +366,11 @@ class Sized_object : public Object
   // Relocate the input sections and write out the local symbols.
   void
   do_relocate(const General_options& options, const Symbol_table* symtab,
-	      const Stringpool*, Output_file* of);
+	      const Layout*, Output_file* of);
+
+  // Get the name of a section.
+  std::string
+  do_section_name(unsigned int shnum);
 
   // Return the appropriate Sized_target structure.
   Sized_target<size, big_endian>*
@@ -352,7 +425,8 @@ class Sized_object : public Object
 
   // Relocate the sections in the output file.
   void
-  relocate_sections(const Symbol_table*, const unsigned char* pshdrs, Views*);
+  relocate_sections(const General_options& options, const Symbol_table*,
+		    const Layout*, const unsigned char* pshdrs, Views*);
 
   // Write out the local symbols.
   void
@@ -422,6 +496,37 @@ class Input_objects
   Object_list object_list_;
   Target* target_;
   bool any_dynamic_;
+};
+
+// Some of the information we pass to the relocation routines.  We
+// group this together to avoid passing a dozen different arguments.
+
+template<int size, bool big_endian>
+struct Relocate_info
+{
+  // Command line options.
+  const General_options* options;
+  // Symbol table.
+  const Symbol_table* symtab;
+  // Layout.
+  const Layout* layout;
+  // Object being relocated.
+  Sized_object<size, big_endian>* object;
+  // Number of local symbols.
+  unsigned int local_symbol_count;
+  // Values of local symbols.
+  typename elfcpp::Elf_types<size>::Elf_Addr *values;
+  // Global symbols.
+  Symbol** symbols;
+  // Section index of relocation section.
+  unsigned int reloc_shndx;
+  // Section index of section being relocated.
+  unsigned int data_shndx;
+
+  // Return a string showing the location of a relocation.  This is
+  // only used for error messages.
+  std::string
+  location(size_t relnum, off_t reloffset) const;
 };
 
 // Return an Object appropriate for the input file.  P is BYTES long,

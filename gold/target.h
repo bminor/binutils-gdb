@@ -21,9 +21,12 @@
 namespace gold
 {
 
+class General_options;
 class Object;
 template<int size, bool big_endian>
 class Sized_object;
+template<int size, bool big_endian>
+struct Relocate_info;
 
 // The abstract class for target specific handling.
 
@@ -129,32 +132,45 @@ class Sized_target : public Target
   // Resolve a symbol for the target.  This should be overridden by a
   // target which needs to take special action.  TO is the
   // pre-existing symbol.  SYM is the new symbol, seen in OBJECT.
+  // This will only be called if has_resolve() returns true.
   virtual void
   resolve(Symbol*, const elfcpp::Sym<size, big_endian>&, Object*)
   { abort(); }
 
-  // Relocate section data.  SYMTAB is the symbol table.  OBJECT is
-  // the object in which the section appears.  SH_TYPE is the type of
-  // the relocation section, SHT_REL or SHT_RELA.  PRELOCS points to
-  // the relocation information.  RELOC_COUNT is the number of relocs.
-  // LOCAL_COUNT is the number of local symbols.  The VALUES and
-  // GLOBAL_SYMS have symbol table information.  VIEW is a view into
-  // the output file holding the section contents, VIEW_ADDRESS is the
-  // virtual address of the view, and VIEW_SIZE is the size of the
-  // view.
+  // Scan the relocs for a section, and record any information
+  // required for the symbol.  OPTIONS is the command line options.
+  // SYMTAB is the symbol table.  OBJECT is the object in which the
+  // section appears.  SH_TYPE is the type of the relocation section,
+  // SHT_REL or SHT_RELA.  PRELOCS points to the relocation data.
+  // RELOC_COUNT is the number of relocs.  LOCAL_SYMBOL_COUNT is the
+  // number of local symbols.  PLOCAL_SYMBOLS points to the local
+  // symbol data from OBJECT.  GLOBAL_SYMBOLS is the array of pointers
+  // to the global symbol table from OBJECT.
   virtual void
-  relocate_section(const Symbol_table*, // symtab
-		   Sized_object<size, big_endian>*, // object
-		   unsigned int, // sh_type
-		   const unsigned char*, // prelocs
-		   size_t, // reloc_count
-		   unsigned int, // local_count
-		   const typename elfcpp::Elf_types<size>::Elf_Addr*, // values
-		   Symbol**, // global_syms
-		   unsigned char*, // view
-		   typename elfcpp::Elf_types<size>::Elf_Addr, // view_address
-		   off_t) // view_size
-  { abort(); }
+  scan_relocs(const General_options& options,
+	      Symbol_table* symtab,
+	      Sized_object<size, big_endian>* object,
+	      unsigned int sh_type,
+	      const unsigned char* prelocs,
+	      size_t reloc_count,
+	      size_t local_symbol_count,
+	      const unsigned char* plocal_symbols,
+	      Symbol** global_symbols) = 0;
+
+  // Relocate section data.  SH_TYPE is the type of the relocation
+  // section, SHT_REL or SHT_RELA.  PRELOCS points to the relocation
+  // information.  RELOC_COUNT is the number of relocs.  VIEW is a
+  // view into the output file holding the section contents,
+  // VIEW_ADDRESS is the virtual address of the view, and VIEW_SIZE is
+  // the size of the view.
+  virtual void
+  relocate_section(const Relocate_info<size, big_endian>*,
+		   unsigned int sh_type,
+		   const unsigned char* prelocs,
+		   size_t reloc_count,
+		   unsigned char* view,
+		   typename elfcpp::Elf_types<size>::Elf_Addr view_address,
+		   off_t view_size) = 0;
 
  protected:
   Sized_target(const Target::Target_info* pti)

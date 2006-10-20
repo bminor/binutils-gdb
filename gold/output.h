@@ -443,6 +443,11 @@ class Output_segment
   flags() const
   { return this->flags_; }
 
+  // Return the memory size.
+  uint64_t
+  memsz() const
+  { return this->memsz_; }
+
   // Return the maximum alignment of the Output_data.
   uint64_t
   max_data_align() const;

@@ -76,10 +76,10 @@ Read_symbols::run(Workqueue* workqueue)
 
 	  Read_symbols_data* sd = new Read_symbols_data;
 	  obj->read_symbols(sd);
-	  workqueue->queue(new Add_symbols(this->symtab_, this->layout_,
-					   obj, sd,
-					   this->this_blocker_,
-					   this->next_blocker_));
+	  workqueue->queue_front(new Add_symbols(this->symtab_, this->layout_,
+						 obj, sd,
+						 this->this_blocker_,
+						 this->next_blocker_));
 
 	  // Opening the file locked it, so now we need to unlock it.
 	  input_file->file().unlock();
@@ -105,8 +105,7 @@ Read_symbols::run(Workqueue* workqueue)
 	}
     }
 
-  // Here we have to handle archives and any other input file
-  // types we need.
+  // Here we have to handle any other input file types we need.
   fprintf(stderr, _("%s: %s: not an object or archive\n"),
 	  program_name, input_file->file().filename().c_str());
   gold_exit(false);

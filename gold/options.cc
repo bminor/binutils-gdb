@@ -217,6 +217,8 @@ options::Command_line_options::options[] =
 	      &General_options::set_output_file_name),
   GENERAL_NOARG('r', NULL, N_("Generate relocatable output"), NULL,
 		ONE_DASH, &General_options::set_relocatable),
+  GENERAL_NOARG('\0', "shared", N_("Generate shared library"),
+		NULL, ONE_DASH, &General_options::set_shared),
   GENERAL_NOARG('\0', "static", N_("Do not link against shared libraries"),
 		NULL, ONE_DASH, &General_options::set_static),
   SPECIAL('\0', "help", N_("Report usage information"), NULL,
@@ -232,6 +234,7 @@ General_options::General_options()
   : search_path_(),
     output_file_name_("a.out"),
     is_relocatable_(false),
+    is_shared_(false),
     is_static_(false)
 {
 }

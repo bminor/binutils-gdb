@@ -25,46 +25,35 @@ class Output_segment;
 class Output_data;
 class Target;
 
-// This Task handles mapping the input sections to output sections and
-// laying them out in memory.
+// This task function handles mapping the input sections to output
+// sections and laying them out in memory.
 
-class Layout_task : public Task
+class Layout_task_runner : public Task_function_runner
 {
  public:
   // OPTIONS is the command line options, INPUT_OBJECTS is the list of
-  // input objects, THIS_BLOCKER is a token which blocks this task
-  // from executing until all the input symbols have been read.
-  Layout_task(const General_options& options,
-	      const Input_objects* input_objects,
-	      Symbol_table* symtab,
-	      Layout* layout,
-	      Task_token* this_blocker)
+  // input objects, SYMTAB is the symbol table, LAYOUT is the layout
+  // object.
+  Layout_task_runner(const General_options& options,
+		     const Input_objects* input_objects,
+		     Symbol_table* symtab,
+		     Layout* layout)
     : options_(options), input_objects_(input_objects), symtab_(symtab),
-      layout_(layout), this_blocker_(this_blocker)
+      layout_(layout)
   { }
 
-  ~Layout_task();
-
-  // The standard Task methods.
-
-  Is_runnable_type
-  is_runnable(Workqueue*);
-
-  Task_locker*
-  locks(Workqueue*);
-
+  // Run the operation.
   void
   run(Workqueue*);
 
  private:
-  Layout_task(const Layout_task&);
-  Layout_task& operator=(const Layout_task&);
+  Layout_task_runner(const Layout_task_runner&);
+  Layout_task_runner& operator=(const Layout_task_runner&);
 
   const General_options& options_;
   const Input_objects* input_objects_;
   Symbol_table* symtab_;
   Layout* layout_;
-  Task_token* this_blocker_;
 };
 
 // This class handles the details of laying out input sections.
@@ -104,6 +93,11 @@ class Layout
   // Finalize the layout after all the input sections have been added.
   off_t
   finalize(const Input_objects*, Symbol_table*);
+
+  // Return the TLS segment.
+  Output_segment*
+  tls_segment() const
+  { return this->tls_segment_; }
 
   // Write out data not associated with an input file or the symbol
   // table.
@@ -234,6 +228,8 @@ class Layout
   // The list of sections which require special output because they
   // are not comprised of input sections.
   Data_list special_output_list_;
+  // A pointer to the PT_TLS segment if there is one.
+  Output_segment* tls_segment_;
 };
 
 // This task handles writing out data which is not part of a section
@@ -295,29 +291,21 @@ class Write_symbols_task : public Task
   Task_token* final_blocker_;
 };
 
-// This task handles closing the file.
+// This task function handles closing the file.
 
-class Close_task : public Task
+class Close_task_runner : public Task_function_runner
 {
  public:
-  Close_task(Output_file* of, Task_token* final_blocker)
-    : of_(of), final_blocker_(final_blocker)
+  Close_task_runner(Output_file* of)
+    : of_(of)
   { }
 
-  // The standard task methods.
-
-  Is_runnable_type
-  is_runnable(Workqueue*);
-
-  Task_locker*
-  locks(Workqueue*);
-
+  // Run the operation.
   void
   run(Workqueue*);
 
  private:
   Output_file* of_;
-  Task_token* final_blocker_;
 };
 
 } // End namespace gold.

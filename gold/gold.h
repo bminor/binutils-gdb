@@ -137,6 +137,8 @@ namespace gold
 {
 
 class General_options;
+class Input_argument_list;
+class Dirsearch;
 class Input_objects;
 class Symbol_table;
 class Layout;
@@ -166,6 +168,25 @@ gold_nomem() ATTRIBUTE_NORETURN;
 extern void
 gold_unreachable() ATTRIBUTE_NORETURN;
 
+// Queue up the first set of tasks.
+extern void
+queue_initial_tasks(const General_options&,
+		    const Dirsearch&,
+		    const Input_argument_list&,
+		    Workqueue*,
+		    Input_objects*,
+		    Symbol_table*,
+		    Layout*);
+
+// Queue up the middle set of tasks.
+extern void
+queue_middle_tasks(const General_options&,
+		   const Input_objects*,
+		   Symbol_table*,
+		   Layout*,
+		   Workqueue*);
+
+// Queue up the final set of tasks.
 extern void
 queue_final_tasks(const General_options&,
 		  const Input_objects*,

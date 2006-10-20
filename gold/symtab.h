@@ -94,6 +94,12 @@ class Symbol
   set_in_dyn()
   { this->in_dyn_ = true; }
 
+  // Return whether this symbol needs an entry in the dynamic symbol
+  // table.  FIXME: Needs to be fleshed out.
+  bool
+  in_dynsym() const
+  { return this->in_dyn_; }
+
  protected:
   // Instances of this class should always be created at a specific
   // size.

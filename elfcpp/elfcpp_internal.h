@@ -16,7 +16,7 @@ namespace elfcpp
 namespace internal
 {
 
-#ifdef WORDS_BIG_ENDIAN
+#ifdef WORDS_BIGENDIAN
 const bool host_big_endian = true;
 #else
 const bool host_big_endian = false;
