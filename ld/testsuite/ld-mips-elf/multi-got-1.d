@@ -7,7 +7,7 @@
 
 Dynamic section at offset .* contains 17 entries:
   Tag        Type                         Name/Value
- 0x00000004 \(HASH\)                       0x17c
+ 0x00000004 \(HASH\)                       0x[0-9a-f]+
  0x00000005 \(STRTAB\)                     0x[0-9a-f]+
  0x00000006 \(SYMTAB\)                     0x[0-9a-f]+
  0x0000000a \(STRSZ\)                      [0-9]+ \(bytes\)

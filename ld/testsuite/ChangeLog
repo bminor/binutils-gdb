@@ -1,5 +1,31 @@
 2006-10-20  Richard Sandiford  <richard@codesourcery.com>
 
+	* ld-mips-elf/multi-got-1.d: Do not expect a particular address
+	for DT_HASH.
+	* ld-mips-elf/rel32-o32.d: Bump addresses by 0x20 to account for
+	the extra program header.
+	* ld-mips-elf/rel32-n32.d: Likewise.
+	* ld-mips-elf/tlslib-o32.got: Likewise.
+	* ld-mips-elf/tlslib-o32-hidden.got: Likewise.
+	* ld-mips-elf/tlslib-o32-ver.got: Likewise.
+	* ld-mips-elf/tls-multi-got-1.got: Likewise.
+	* ld-mips-elf/tls-multi-got-1.r: Likewise.
+	* ld-mips-elf/rel64.d: Bump addresses by 0x30 to account for the
+	extra program header.
+	* ld-mips-elf/tlsdyn-o32.d: Reduce the GOT offset by 32 to account
+	for the extra program header, and thus the shorter gap between the
+	text and data segments.
+	* ld-mips-elf/tlsdyn-o32-1.d: Likewise.
+	* ld-mips-elf/tlsdyn-o32-2.d: Likewise.
+	* ld-mips-elf/tlsdyn-o32-3.d: Likewise.
+	* ld-mips-elf/tlsdyn-o32.got: Bump GOT text addresses by 0x20
+	to account for the extra program header.
+	* ld-mips-elf/tlsdyn-o32-1.got: Likewise.
+	* ld-mips-elf/tlsdyn-o32-2.got: Likewise.
+	* ld-mips-elf/tlsdyn-o32-3.got: Likewise.
+
+2006-10-20  Richard Sandiford  <richard@codesourcery.com>
+
 	* ld-mips-elf/rel32-o32.d: Bump the section number of .text by 1
 	to account for the fact that .rel.dyn is now before .text in the
 	section table.

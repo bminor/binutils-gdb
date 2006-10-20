@@ -9169,6 +9169,12 @@ _bfd_mips_elf_additional_program_headers (bfd *abfd,
       && bfd_get_section_by_name (abfd, ".mdebug"))
     ++ret;
 
+  /* Allocate a PT_NULL header in dynamic objects.  See
+     _bfd_mips_elf_modify_segment_map for details.  */
+  if (!SGI_COMPAT (abfd)
+      && bfd_get_section_by_name (abfd, ".dynamic"))
+    ++ret;
+
   return ret;
 }
 
@@ -9374,6 +9380,38 @@ _bfd_mips_elf_modify_segment_map (bfd *abfd,
 	    }
 
 	  *pm = n;
+	}
+    }
+
+  /* Allocate a spare program header in dynamic objects so that tools
+     like the prelinker can add an extra PT_LOAD entry.
+
+     If the prelinker needs to make room for a new PT_LOAD entry, its
+     standard procedure is to move the first (read-only) sections into
+     the new (writable) segment.  However, the MIPS ABI requires
+     .dynamic to be in a read-only segment, and the section will often
+     start within sizeof (ElfNN_Phdr) bytes of the last program header.
+
+     Although the prelinker could in principle move .dynamic to a
+     writable segment, it seems better to allocate a spare program
+     header instead, and avoid the need to move any sections.
+     There is a long tradition of allocating spare dynamic tags,
+     so allocating a spare program header seems like a natural
+     extension.  */
+  if (!SGI_COMPAT (abfd)
+      && bfd_get_section_by_name (abfd, ".dynamic"))
+    {
+      for (pm = &elf_tdata (abfd)->segment_map; *pm != NULL; pm = &(*pm)->next)
+	if ((*pm)->p_type == PT_NULL)
+	  break;
+      if (*pm == NULL)
+	{
+	  m = bfd_zalloc (abfd, sizeof (*m));
+	  if (m == NULL)
+	    return FALSE;
+
+	  m->p_type = PT_NULL;
+	  *pm = m;
 	}
     }
 
