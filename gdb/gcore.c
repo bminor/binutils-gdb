@@ -1,6 +1,7 @@
 /* Generate a core file for the inferior process.
 
-   Copyright (C) 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,6 +31,11 @@
 #include "cli/cli-decode.h"
 
 #include "gdb_assert.h"
+
+/* The largest amount of memory to read from the target at once.  We
+   must throttle it to limit the amount of memory used by GDB during
+   generate-core-file for programs with large resident data.  */
+#define MAX_COPY_BYTES (1024 * 1024)
 
 static char *default_gcore_target (void);
 static enum bfd_architecture default_gcore_arch (void);
@@ -444,7 +450,8 @@ objfile_find_memory_regions (int (*func) (CORE_ADDR, unsigned long,
 static void
 gcore_copy_callback (bfd *obfd, asection *osec, void *ignored)
 {
-  bfd_size_type size = bfd_section_size (obfd, osec);
+  bfd_size_type size, total_size = bfd_section_size (obfd, osec);
+  file_ptr offset = 0;
   struct cleanup *old_chain = NULL;
   void *memhunk;
 
@@ -456,19 +463,35 @@ gcore_copy_callback (bfd *obfd, asection *osec, void *ignored)
   if (strncmp ("load", bfd_section_name (obfd, osec), 4) != 0)
     return;
 
+  size = min (total_size, MAX_COPY_BYTES);
   memhunk = xmalloc (size);
   /* ??? This is crap since xmalloc should never return NULL.  */
   if (memhunk == NULL)
     error (_("Not enough memory to create corefile."));
   old_chain = make_cleanup (xfree, memhunk);
 
-  if (target_read_memory (bfd_section_vma (obfd, osec),
-			  memhunk, size) != 0)
-    warning (_("Memory read failed for corefile section, %s bytes at 0x%s."),
-	     paddr_d (size), paddr (bfd_section_vma (obfd, osec)));
-  if (!bfd_set_section_contents (obfd, osec, memhunk, 0, size))
-    warning (_("Failed to write corefile contents (%s)."),
-	     bfd_errmsg (bfd_get_error ()));
+  while (total_size > 0)
+    {
+      if (size > total_size)
+	size = total_size;
+
+      if (target_read_memory (bfd_section_vma (obfd, osec) + offset,
+			      memhunk, size) != 0)
+	{
+	  warning (_("Memory read failed for corefile section, %s bytes at 0x%s."),
+		   paddr_d (size), paddr (bfd_section_vma (obfd, osec)));
+	  break;
+	}
+      if (!bfd_set_section_contents (obfd, osec, memhunk, offset, size))
+	{
+	  warning (_("Failed to write corefile contents (%s)."),
+		   bfd_errmsg (bfd_get_error ()));
+	  break;
+	}
+
+      total_size -= size;
+      offset += size;
+    }
 
   do_cleanups (old_chain);	/* Frees MEMHUNK.  */
 }

@@ -1,3 +1,8 @@
+2006-10-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gcore.c (MAX_COPY_BYTES): Define.
+	(gcore_copy_callback): Use it to limit allocation.
+
 2006-10-19  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* linux-thread-db.c (check_for_thread_db): Don't attempt to use
