@@ -9329,8 +9329,18 @@ _bfd_mips_elf_modify_segment_map (bfd *abfd,
 	      m->p_flags_valid = 1;
 	    }
 	}
-      if (m != NULL
-	  && m->count == 1 && strcmp (m->sections[0]->name, ".dynamic") == 0)
+      /* GNU/Linux binaries do not need the extended PT_DYNAMIC section.
+	 glibc's dynamic linker has traditionally derived the number of
+	 tags from the p_filesz field, and sometimes allocates stack
+	 arrays of that size.  An overly-big PT_DYNAMIC segment can
+	 be actively harmful in such cases.  Making PT_DYNAMIC contain
+	 other sections can also make life hard for the prelinker,
+	 which might move one of the other sections to a different
+	 PT_LOAD segment.  */
+      if (SGI_COMPAT (abfd)
+	  && m != NULL
+	  && m->count == 1
+	  && strcmp (m->sections[0]->name, ".dynamic") == 0)
 	{
 	  static const char *sec_names[] =
 	  {
