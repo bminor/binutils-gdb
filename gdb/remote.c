@@ -6126,8 +6126,7 @@ remote_new_objfile (struct objfile *objfile)
       remote_check_symbols (objfile);
     }
   /* Call predecessor on chain, if any.  */
-  if (remote_new_objfile_chain != 0 &&
-      remote_desc == 0)
+  if (remote_new_objfile_chain)
     remote_new_objfile_chain (objfile);
 }
 

@@ -1,3 +1,10 @@
+2006-10-19  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* linux-thread-db.c (check_for_thread_db): Don't attempt to use
+	thread_db for remote targets.
+	* remote.c (remote_new_objfile): Always call predecessor on
+	new_objfile event chain.
+
 2006-10-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* solib.c (libpthread_solib_p): New function.

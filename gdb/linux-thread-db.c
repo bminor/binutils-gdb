@@ -599,6 +599,10 @@ check_for_thread_db (void)
   if (!target_has_execution)
     return;
 
+  /* Don't attempt to use thread_db for remote targets.  */
+  if (!target_can_run (&current_target))
+    return;
+
   /* Initialize the structure that identifies the child process.  */
   proc_handle.pid = GET_PID (inferior_ptid);
 
