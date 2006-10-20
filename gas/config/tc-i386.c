@@ -5882,7 +5882,7 @@ md_parse_option (int c, char *arg)
 
 	list = bfd_target_list ();
 	for (l = list; *l != NULL; l++)
-	  if (   strncmp (*l, "elf64-x86-64", 12) == 0
+	  if (CONST_STRNEQ (*l, "elf64-x86-64")
 	      || strcmp (*l, "coff-x86-64") == 0
 	      || strcmp (*l, "pe-x86-64") == 0
 	      || strcmp (*l, "pei-x86-64") == 0)
@@ -7785,7 +7785,7 @@ x86_64_section_letter (int letter, char **ptr_msg)
 int
 x86_64_section_word (char *str, size_t len)
 {
-  if (len == 5 && flag_code == CODE_64BIT && strncmp (str, "large", 5) == 0)
+  if (len == 5 && flag_code == CODE_64BIT && CONST_STRNEQ (str, "large"))
     return SHF_X86_64_LARGE;
 
   return -1;
