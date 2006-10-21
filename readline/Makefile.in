@@ -446,6 +446,7 @@ util.o: rlprivate.h
 vi_mode.o: rlprivate.h
 
 bind.o: xmalloc.h
+callback.o: xmalloc.h
 complete.o: xmalloc.h
 display.o: xmalloc.h
 funmap.o: xmalloc.h
