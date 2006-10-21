@@ -21529,34 +21529,34 @@ features the following annotations:
 The input types are
 
 @table @code
-@findex pre-prompt
-@findex prompt
-@findex post-prompt
+@findex pre-prompt annotation
+@findex prompt annotation
+@findex post-prompt annotation
 @item prompt
 When @value{GDBN} is prompting for a command (the main @value{GDBN} prompt).
 
-@findex pre-commands
-@findex commands
-@findex post-commands
+@findex pre-commands annotation
+@findex commands annotation
+@findex post-commands annotation
 @item commands
 When @value{GDBN} prompts for a set of commands, like in the @code{commands}
 command.  The annotations are repeated for each command which is input.
 
-@findex pre-overload-choice
-@findex overload-choice
-@findex post-overload-choice
+@findex pre-overload-choice annotation
+@findex overload-choice annotation
+@findex post-overload-choice annotation
 @item overload-choice
 When @value{GDBN} wants the user to select between various overloaded functions.
 
-@findex pre-query
-@findex query
-@findex post-query
+@findex pre-query annotation
+@findex query annotation
+@findex post-query annotation
 @item query
 When @value{GDBN} wants the user to confirm a potentially dangerous operation.
 
-@findex pre-prompt-for-continue
-@findex prompt-for-continue
-@findex post-prompt-for-continue
+@findex pre-prompt-for-continue annotation
+@findex prompt-for-continue annotation
+@findex post-prompt-for-continue annotation
 @item prompt-for-continue
 When @value{GDBN} is asking the user to press return to continue.  Note: Don't
 expect this to work well; instead use @code{set height 0} to disable
@@ -21568,14 +21568,14 @@ presence of annotations.
 @section Errors
 @cindex annotations for errors, warnings and interrupts
 
-@findex quit
+@findex quit annotation
 @smallexample
 ^Z^Zquit
 @end smallexample
 
 This annotation occurs right before @value{GDBN} responds to an interrupt.
 
-@findex error
+@findex error annotation
 @smallexample
 ^Z^Zerror
 @end smallexample
@@ -21590,7 +21590,7 @@ cannot expect not to receive it either, however; an error annotation
 does not necessarily mean that @value{GDBN} is immediately returning all the way
 to the top level.
 
-@findex error-begin
+@findex error-begin annotation
 A quit or error annotation may be preceded by
 
 @smallexample
@@ -21612,13 +21612,13 @@ The following annotations say that certain pieces of state may have
 changed.
 
 @table @code
-@findex frames-invalid
+@findex frames-invalid annotation
 @item ^Z^Zframes-invalid
 
 The frames (for example, output from the @code{backtrace} command) may
 have changed.
 
-@findex breakpoints-invalid
+@findex breakpoints-invalid annotation
 @item ^Z^Zbreakpoints-invalid
 
 The breakpoints may have changed.  For example, the user just added or
@@ -21629,8 +21629,8 @@ deleted a breakpoint.
 @section Running the Program
 @cindex annotations for running programs
 
-@findex starting
-@findex stopping
+@findex starting annotation
+@findex stopping annotation
 When the program starts executing due to a @value{GDBN} command such as
 @code{step} or @code{continue},
 
@@ -21648,16 +21648,16 @@ is output.  Before the @code{stopped} annotation, a variety of
 annotations describe how the program stopped.
 
 @table @code
-@findex exited
+@findex exited annotation
 @item ^Z^Zexited @var{exit-status}
 The program exited, and @var{exit-status} is the exit status (zero for
 successful exit, otherwise nonzero).
 
-@findex signalled
-@findex signal-name
-@findex signal-name-end
-@findex signal-string
-@findex signal-string-end
+@findex signalled annotation
+@findex signal-name annotation
+@findex signal-name-end annotation
+@findex signal-string annotation
+@findex signal-string-end annotation
 @item ^Z^Zsignalled
 The program exited with a signal.  After the @code{^Z^Zsignalled}, the
 annotation continues:
@@ -21681,17 +21681,17 @@ as @code{Illegal Instruction} or @code{Segmentation fault}.
 @var{intro-text}, @var{middle-text}, and @var{end-text} are for the
 user's benefit and have no particular format.
 
-@findex signal
+@findex signal annotation
 @item ^Z^Zsignal
 The syntax of this annotation is just like @code{signalled}, but @value{GDBN} is
 just saying that the program received the signal, not that it was
 terminated with it.
 
-@findex breakpoint
+@findex breakpoint annotation
 @item ^Z^Zbreakpoint @var{number}
 The program hit breakpoint number @var{number}.
 
-@findex watchpoint
+@findex watchpoint annotation
 @item ^Z^Zwatchpoint @var{number}
 The program hit watchpoint number @var{number}.
 @end table
@@ -21700,7 +21700,7 @@ The program hit watchpoint number @var{number}.
 @section Displaying Source
 @cindex annotations for source display
 
-@findex source
+@findex source annotation
 The following annotation is used instead of displaying source code:
 
 @smallexample

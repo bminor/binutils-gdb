@@ -3,6 +3,10 @@
 	* gdb.texinfo (Breakpoints, Set Watchpoints): Elaborate and
 	clarify on the possible meanings of ``expression'' watched by
 	watchpoints.  Add indexing.
+	(Prompting, Errors, Invalidation, Annotations for Running)
+	(Source Annotations): Fix index entries by adding "annotation" to
+	them, to discriminate from index entries that point to the more
+	general topic descriptions.
 
 2006-10-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
