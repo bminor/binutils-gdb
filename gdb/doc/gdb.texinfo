@@ -2779,7 +2779,7 @@ call).
 @cindex breakpoint on variable modification
 A @dfn{watchpoint} is a special breakpoint that stops your program
 when the value of an expression changes.  The expression may be a value
-of a variable, or it could involve values of on or more variables
+of a variable, or it could involve values of one or more variables
 combined by operators, such as @samp{a + b}.  This is sometimes called
 @dfn{data breakpoints}.  You must use a different command to set
 watchpoints (@pxref{Set Watchpoints, ,Setting watchpoints}), but aside
