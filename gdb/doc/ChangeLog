@@ -1,3 +1,9 @@
+2006-10-21  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Breakpoints, Set Watchpoints): Elaborate and
+	clarify on the possible meanings of ``expression'' watched by
+	watchpoints.  Add indexing.
+
 2006-10-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdbint.texinfo (Target Vector Definition): Move most

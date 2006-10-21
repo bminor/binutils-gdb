@@ -2773,15 +2773,19 @@ in shared library routines that are not called directly by the program
 call).
 
 @cindex watchpoints
+@cindex data breakpoints
 @cindex memory tracing
 @cindex breakpoint on memory address
 @cindex breakpoint on variable modification
 A @dfn{watchpoint} is a special breakpoint that stops your program
-when the value of an expression changes.  You must use a different
-command to set watchpoints (@pxref{Set Watchpoints, ,Setting
-watchpoints}), but aside from that, you can manage a watchpoint like
-any other breakpoint: you enable, disable, and delete both breakpoints
-and watchpoints using the same commands.
+when the value of an expression changes.  The expression may be a value
+of a variable, or it could involve values of on or more variables
+combined by operators, such as @samp{a + b}.  This is sometimes called
+@dfn{data breakpoints}.  You must use a different command to set
+watchpoints (@pxref{Set Watchpoints, ,Setting watchpoints}), but aside
+from that, you can manage a watchpoint like any other breakpoint: you
+enable, disable, and delete both breakpoints and watchpoints using the
+same commands.
 
 You can arrange to have values from your program displayed automatically
 whenever @value{GDBN} stops at a breakpoint.  @xref{Auto Display,,
@@ -3106,7 +3110,24 @@ You can see these breakpoints with the @value{GDBN} maintenance command
 @cindex setting watchpoints
 You can use a watchpoint to stop execution whenever the value of an
 expression changes, without having to predict a particular place where
-this may happen.
+this may happen.  (This is sometimes called a @dfn{data breakpoint}.)
+The expression may be as simple as the value of a single variable, or
+as complex as many variables combined by operators.  Examples include:
+
+@itemize @bullet
+@item
+A reference to the value of a single variable.
+
+@item
+An address cast to an appropriate data type.  For example,
+@samp{*(int *)0x12345678} will watch a 4-byte region at the specified
+address (assuming an @code{int} occupies 4 bytes).
+
+@item
+An arbitrarily complex expression, such as @samp{a*b + c/d}.  The
+expression can use any operators valid in the program's native
+language (@pxref{Languages}).
+@end itemize
 
 @cindex software watchpoints
 @cindex hardware watchpoints
@@ -3124,8 +3145,14 @@ watchpoints, which do not slow down the running of your program.
 @table @code
 @kindex watch
 @item watch @var{expr}
-Set a watchpoint for an expression.  @value{GDBN} will break when @var{expr}
-is written into by the program and its value changes.
+Set a watchpoint for an expression.  @value{GDBN} will break when the
+expression @var{expr} is written into by the program and its value
+changes.  The simplest (and the most popular) use of this command is
+to watch the value of a single variable:
+
+@smallexample
+(@value{GDBP}) watch foo
+@end smallexample
 
 @kindex rwatch
 @item rwatch @var{expr}
@@ -3216,6 +3243,11 @@ Hardware watchpoint @var{num}: Could not insert watchpoint
 
 @noindent
 If this happens, delete or disable some of the watchpoints.
+
+Watching complex expressions that reference many variables can also
+exhaust the resources available for hardware-assisted watchpoints.
+That's because @value{GDBN} needs to watch every variable in the
+expression with separately allocated resources.
 
 The SPARClite DSU will generate traps when a program accesses some data
 or instruction address that is assigned to the debug registers.  For the
