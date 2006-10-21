@@ -3530,7 +3530,7 @@ remote_fetch_registers (int regnum)
       register_bytes_found = i;
       if (REGISTER_BYTES_OK_P ()
 	  && !REGISTER_BYTES_OK (i))
-	warning (_("Remote reply is too short: %s"), buf);
+	warning (_("Remote reply is wrong length: %s"), buf);
     }
 
  supply_them:

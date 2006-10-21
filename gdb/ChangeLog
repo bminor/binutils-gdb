@@ -1,3 +1,7 @@
+2006-10-21  Paul Brook  <paul@codesourcery.com>
+
+	* remote.c (remote_fetch_registers): Fix error message.
+
 2006-10-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gcore.c (MAX_COPY_BYTES): Define.
