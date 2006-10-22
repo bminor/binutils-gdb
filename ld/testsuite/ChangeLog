@@ -1,3 +1,14 @@
+2006-10-21  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* ld-sh/sh64/abi32.xd, ld-sh/sh64/abi64.xd, ld-sh/sh64/cmpct1.xd,
+	* ld-sh/sh64/crange1.rd, ld-sh/sh64/crange2.rd,
+	* ld-sh/sh64/crange3-cmpct.rd, ld-sh/sh64/crange3-media.rd,
+	* ld-sh/sh64/crange3.rd, ld-sh/sh64/crangerel1.rd,
+	* ld-sh/sh64/crangerel2.rd, ld-sh/sh64/mix1.xd,
+	* ld-sh/sh64/mix2.xd, ld-sh/sh64/rel32.xd, ld-sh/sh64/rel64.xd,
+	* ld-sh/sh64/reldl32.rd, ld-sh/sh64/reldl64.rd,
+	* ld-sh/sh64/shdl32.xd, ld-sh/sh64/shdl64.xd: Update.
+
 2006-10-20  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* ld-sh/tlsbin-1.d: Update.

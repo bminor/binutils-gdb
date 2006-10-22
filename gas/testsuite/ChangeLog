@@ -1,3 +1,7 @@
+2006-10-21  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* gas/sh/sh64/syntax-1.d: Update.
+
 2006-10-20  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* gas/sh/pcrel-coff.d: Update patterns (remove 0x on addresses).
