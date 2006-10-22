@@ -1,3 +1,9 @@
+2006-10-21  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* elf32-sh64.c (sh64_elf_merge_symbol_attribute): Do merging
+	only when the non visibility part of st_other is non-zero.
+	* elf64-sh64.c (sh64_elf64_merge_symbol_attribute): Likewise.
+
 2006-10-20  Richard Sandiford  <richard@codesourcery.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_modify_segment_map): Don't extend

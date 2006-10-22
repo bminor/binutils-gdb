@@ -742,9 +742,9 @@ static void
 sh64_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
 				 const Elf_Internal_Sym *isym,
 				 bfd_boolean definition,
-				 bfd_boolean dynamic)
+				 bfd_boolean dynamic ATTRIBUTE_UNUSED)
 {
-  if (isym->st_other != 0 && dynamic)
+  if ((isym->st_other & ~ELF_ST_VISIBILITY (-1)) != 0)
     {
       unsigned char other;
 
