@@ -3696,11 +3696,11 @@ will only create a @samp{.foo} section in the output file if there is a
 sections are not all empty.  Other link script directives that allocate
 space in an output section will also create the output section.
 
-The linker will ignore address assignments (@xref{Output Section Address})
+The linker will ignore address assignments (@pxref{Output Section Address})
 on discarded output sections, except when the linker script defines
 symbols in the output section.  In that case the linker will obey
-the address assignments, possibly advancing dot and/or current lma
-even though the section is discarded.
+the address assignments, possibly advancing dot even though the
+section is discarded.
 
 @cindex /DISCARD/
 The special output section name @samp{/DISCARD/} may be used to discard
