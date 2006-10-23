@@ -6608,7 +6608,7 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
 	      sec->contents = new_contents;
 	    }
 
-	  /* Fudge the size too, as this is used later in
+	  /* Fudge the header size too, as this is used later in
 	     elf_bfd_final_link if we are emitting relocs.  */
 	  elf_section_data (sec)->rel_hdr.sh_size
 	    = sec->reloc_count * elf_section_data (sec)->rel_hdr.sh_entsize;
