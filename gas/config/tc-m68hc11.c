@@ -1,5 +1,5 @@
 /* tc-m68hc11.c -- Assembler code for the Motorola 68HC11 & 68HC12.
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@nerim.fr)
 
@@ -2457,7 +2457,7 @@ md_assemble (char *str)
   char name[20];
   int nlen = 0;
   operand operands[M6811_MAX_OPERANDS];
-  int nb_operands;
+  int nb_operands = 0;
   int branch_optimize = 0;
   int alias_id = -1;
 
