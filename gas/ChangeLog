@@ -15,10 +15,11 @@
 2006-10-18  Roy Marples  <uberlord@gentoo.org>
 
 	* config/tc-sparc.c (md_parse_option): Treat any target starting with
-	elf32-sparc as a viable target for the -32 switch and any target starting with
-	elf64-sparc as a viable target for the -64 switch.
-	(sparc_target_format): For 64-bit ELF flavoured output use ELF_TARGET_FORMAT64
-	while for 32-bit ELF flavoured output use ELF_TARGET_FORMAT.
+	elf32-sparc as a viable target for the -32 switch and any target
+	starting with elf64-sparc as a viable target for the -64 switch.
+	(sparc_target_format): For 64-bit ELF flavoured output use
+	ELF_TARGET_FORMAT64 while for 32-bit ELF flavoured output use
+	ELF_TARGET_FORMAT.
 	* config/tc-sparc.h (ELF_TARGET_FORMAT, ELF_TARGET_FORMAT64): Define.
 
 2006-10-17  H.J. Lu  <hongjiu.lu@intel.com>
@@ -61,7 +62,7 @@
 	and PROCESSOR_MEROM with PROCESSOR_CORE2.
 	* config/tc-i386.c: Updated.
 	* doc/c-i386.texi: Likewise.
-	
+
 	* config/tc-i386.c (cpu_arch): Add ".ssse3", "core" and "core2".
 
 2006-09-28  Bridge Wu  <mingqiao.wu@gmail.com>
@@ -146,10 +147,12 @@
 	* configure.in: Add new target x86_64-pc-mingw64.
 	* configure: Regenerate.
 	* configure.tgt: Add new target x86_64-pc-mingw64.
-	* config/obj-coff.h: Add handling for TE_PEP target specific code and definitions.
+	* config/obj-coff.h: Add handling for TE_PEP target specific code
+	and definitions.
 	* config/tc-i386.c: Add new targets.
 	(md_parse_option): Add targets to OPTION_64.
-	(x86_64_target_format): Add new method for setup proper default target cpu mode.
+	(x86_64_target_format): Add new method for setup proper default
+	target cpu mode.
 	* config/te-pep.h: Add new target definition header.
 	(TE_PEP): New macro: Identifies new target architecture.
 	(COFF_WITH_pex64): Set proper includes in bfd.
@@ -409,7 +412,7 @@
 2006-08-03  Joseph Myers  <joseph@codesourcery.com>
 
 	* config/tc-arm.c (parse_operands): Handle invalid register name
-	for OP_RIWR_RIWC. 
+	for OP_RIWR_RIWC.
 
 2006-08-03  Joseph Myers  <joseph@codesourcery.com>
 
@@ -637,8 +640,8 @@
 2006-06-18  Joerg Wunsch <j.gnu@uriah.heep.sax.de>
 	    Anatoly Sokolov <aesok@post.ru>
 
-	* config/tc-avr.c (mcu_types): Add support for atmega165p, atmega169p 
-	and atmega644p devices. Rename atmega164/atmega324 devices to 
+	* config/tc-avr.c (mcu_types): Add support for atmega165p, atmega169p
+	and atmega644p devices. Rename atmega164/atmega324 devices to
 	atmega164p/atmega324p.
 	* doc/c-avr.texi: Document new mcu and arch options.
 
@@ -976,7 +979,7 @@
 	* doc/as.texinfo: Include c-avr.texi
 
 2006-05-28  Jie Zhang  <jie.zhang@analog.com>
- 
+
 	* config/bfin-parse.y (check_macfunc): Loose the condition of
 	calling check_multiply_halfregs ().
 
@@ -992,7 +995,7 @@
 
 2006-05-24  Carlos O'Donell  <carlos@systemhalted.org>
 	    Randolph Chung  <randolph@tausq.org>
-	    
+
 	* config/tc-hppa.c (is_tls_gdidx, is_tls_ldidx, is_tls_dtpoff,
 	is_tls_ieoff, is_tls_leoff): Define.
 	(fix_new_hppa): Handle TLS.
@@ -1001,7 +1004,7 @@
 	(md_apply_fix): Handle TLS relocs.
 	* config/tc-hppa.h (hppa_fix_adjustable): Handle TLS.
 
-2006-05-24  Bjoern Haase  <bjoern.m.haase@web.de> 
+2006-05-24  Bjoern Haase  <bjoern.m.haase@web.de>
 
 	* config/tc-avr.c: Add new cpu targets avr6, avr2560 and avr2561.
 
@@ -1103,7 +1106,7 @@
 
 2006-05-16  Bjoern Haase  <bjoern.m.haase@web.de>
 
-        * config/tc-avr.h (TC_VALIDATE_FIX): Allow fixups for immediate
+	* config/tc-avr.h (TC_VALIDATE_FIX): Allow fixups for immediate
 	constant values.
 
 2006-05-15  Paul Brook  <paul@codesourcery.com>
@@ -1153,7 +1156,7 @@
 2006-05-11  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* config/tc-arm.c (md_pcrel_from_section): Force a bias for
-	relocs against external symbols for WinCE targets. 
+	relocs against external symbols for WinCE targets.
 	(md_apply_fix): Likewise.
 
 2006-05-09  David Ung  <davidu@mips.com>
@@ -1793,7 +1796,7 @@
 	mcf5329_control_regs, mcf5249_control_regs, mcf528x_control_regs,
 	mcfv4e_control_regs, m68010_control_regs): Rename and reorder to ...
 	(m68000_ctrl, m68010_ctrl, m68020_ctrl, m68040_ctrl, m68060_ctrl,
-	mcf_ctrl, mcf5208_ctrl, mcf5213_ctrl, mcf5235_ctrl, mcf5249_ctrl, 
+	mcf_ctrl, mcf5208_ctrl, mcf5213_ctrl, mcf5235_ctrl, mcf5249_ctrl,
 	mcf5216_ctrl, mcf5250_ctrl, mcf5271_ctrl, mcf5272_ctrl,
 	mcf5282_ctrl, mcfv4e_ctrl): ... these.
 	(mcf5275_ctrl, mcf5329_ctrl, mcf5373_ctrl): New.
@@ -1993,15 +1996,15 @@
 
 	* config/tc-avr.c (avr_mod_hash_value): New function.
 	(md_apply_fix, exp_mod): Use BFD_RELOC_HH8_LDI and
-	BFD_RELOC_MS8_LDI for hlo8() and hhi8() 
+	BFD_RELOC_MS8_LDI for hlo8() and hhi8()
 	(md_begin): Set linkrelax variable to 1, use avr_mod_hash_value
 	instead of int avr_ldi_expression: use avr_mod_hash_value instead
 	of (int).
 	(tc_gen_reloc): Handle substractions of symbols, if possible do
-	fixups, abort otherwise.	
+	fixups, abort otherwise.
 	* config/tc-avr.h (TC_LINKRELAX_FIXUP, TC_VALIDATE_FIX,
 	tc_fix_adjustable): Define.
-	
+
 2006-03-02  James E Wilson  <wilson@specifix.com>
 
 	* config/tc-ia64.c (emit_one_bundle): For IA64_OPCODE_LAST, if we
@@ -2134,7 +2137,7 @@
 	* config/tc-xc16x.c: New file
 	* doc/c-xc16x.texi: New file for xc16x
 	* doc/all.texi: Entry for xc16x
-	* doc/Makefile.texi: Added c-xc16x.texi 
+	* doc/Makefile.texi: Added c-xc16x.texi
 	* NEWS: Announce the support for the new target.
 
 2006-02-16  Nick Hudson  <nick.hudson@dsl.pipex.com>
@@ -2172,7 +2175,7 @@
 	each relaxation step.
 
 2006-02-09  Eric Botcazou  <ebotcazou@libertysurf.fr>
-	
+
 	* configure.in (CHECK_DECLS): Add vsnprintf.
 	* configure: Regenerate.
 	* messages.c (errno.h, stdarg.h, varargs.h, va_list): Do not
@@ -2217,22 +2220,22 @@
 
 2006-02-05  Arnold Metselaar  <arnold.metselaar@planet.nl>
 
-	* config/tc-z80.c (z80_start_line_hook): allow .equ and .defl as 
-	synonyms for equ and defl. 
+	* config/tc-z80.c (z80_start_line_hook): allow .equ and .defl as
+	synonyms for equ and defl.
 	(z80_cons_fix_new): New function.
 	(emit_byte): Disallow relative jumps to absolute locations.
-	(emit_data): Only handle defb, prototype changed, because defb is 
+	(emit_data): Only handle defb, prototype changed, because defb is
 	now handled as pseudo-op rather than an instruction.
 	(instab): Entries for defb,defw,db,dw moved from here...
-	(md_pseudo_table): ... to here, use generic cons() for defw,dw. 
+	(md_pseudo_table): ... to here, use generic cons() for defw,dw.
 	Add entries for def24,def32,d24,d32.
 	(md_assemble): Improved error handling.
 	(md_apply_fix): New case BFD_RELOC_24, set fixP->fx_no_overflow to one.
 	* config/tc-z80.h (TC_CONS_FIX_NEW): Define.
 	(z80_cons_fix_new): Declare.
-	* doc/c-z80.texi (defb, db): Mention warning on overflow. 
+	* doc/c-z80.texi (defb, db): Mention warning on overflow.
 	(def24,d24,def32,d32): New pseudo-ops.
-	
+
 2006-02-02  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (do_shift): Remove Thumb-1 constraint.
