@@ -1,3 +1,8 @@
+2006-10-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* linker.c (fix_syms): Choose best of previous and next
+	section based on section flags and vma.
+
 2006-10-21  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* elf32-sh64.c (sh64_elf_merge_symbol_attribute): Do merging

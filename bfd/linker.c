@@ -3092,25 +3092,62 @@ fix_syms (struct bfd_link_hash_entry *h, void *data)
 	  && (s->output_section->flags & SEC_EXCLUDE) != 0
 	  && bfd_section_removed_from_list (obfd, s->output_section))
 	{
-	  asection *op;
-	  for (op = s->output_section->prev; op != NULL; op = op->prev)
+	  asection *op, *op1;
+
+	  h->u.def.value += s->output_offset + s->output_section->vma;
+
+	  /* Find preceding kept section.  */
+	  for (op1 = s->output_section->prev; op1 != NULL; op1 = op1->prev)
+	    if ((op1->flags & SEC_EXCLUDE) == 0
+		&& !bfd_section_removed_from_list (obfd, op1))
+	      break;
+
+	  /* Find following kept section.  Start at prev->next because
+	     other sections may have been added after S was removed.  */
+	  if (s->output_section->prev != NULL)
+	    op = s->output_section->prev->next;
+	  else
+	    op = s->output_section->owner->sections;
+	  for (; op != NULL; op = op->next)
 	    if ((op->flags & SEC_EXCLUDE) == 0
 		&& !bfd_section_removed_from_list (obfd, op))
 	      break;
-	  if (op == NULL)
+
+	  /* Choose better of two sections, based on flags.  The idea
+	     is to choose a section that will be in the same segment
+	     as S would have been if it was kept.  */
+	  if (op1 == NULL)
 	    {
-	      if (s->output_section->prev != NULL)
-		op = s->output_section->prev->next;
-	      else
-		op = s->output_section->owner->sections;
-	      for (; op != NULL; op = op->next)
-		if ((op->flags & SEC_EXCLUDE) == 0
-		    && !bfd_section_removed_from_list (obfd, op))
-		  break;
 	      if (op == NULL)
 		op = bfd_abs_section_ptr;
 	    }
-	  h->u.def.value += s->output_offset + s->output_section->vma;
+	  else if (op == NULL)
+	    op = op1;
+	  else if (((op1->flags ^ op->flags)
+		    & (SEC_ALLOC | SEC_THREAD_LOCAL)) != 0)
+	    {
+	      if (((op->flags ^ s->flags)
+		   & (SEC_ALLOC | SEC_THREAD_LOCAL)) != 0)
+		op = op1;
+	    }
+	  else if (((op1->flags ^ op->flags) & SEC_READONLY) != 0)
+	    {
+	      if (((op->flags ^ s->flags) & SEC_READONLY) != 0)
+		op = op1;
+	    }
+	  else if (((op1->flags ^ op->flags) & SEC_CODE) != 0)
+	    {
+	      if (((op->flags ^ s->flags) & SEC_CODE) != 0)
+		op = op1;
+	    }
+	  else
+	    {
+	      /* Flags we care about are the same.  Prefer the following
+		 section if that will result in a positive valued sym.  */
+	      if (h->u.def.value < op->vma)
+		op = op1;
+	    }
+
 	  h->u.def.value -= op->vma;
 	  h->u.def.section = op;
 	}
