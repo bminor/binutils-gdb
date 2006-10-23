@@ -1183,7 +1183,7 @@ score_elf_create_dynamic_relocation (bfd *output_bfd,
 				     struct bfd_link_info *info,
 				     const Elf_Internal_Rela *rel,
 				     struct score_elf_link_hash_entry *h,
-				     asection *sec, bfd_vma symbol,
+				     bfd_vma symbol,
 				     bfd_vma *addendp, asection *input_section)
 {
   Elf_Internal_Rela outrel[3];
@@ -1237,35 +1237,7 @@ score_elf_create_dynamic_relocation (bfd *output_bfd,
     }
   else
     {
-      if (sec != NULL && bfd_is_abs_section (sec))
-	indx = 0;
-      else if (sec == NULL || sec->owner == NULL)
-	{
-	  bfd_set_error (bfd_error_bad_value);
-	  return FALSE;
-	}
-      else
-	{
-	  indx = elf_section_data (sec->output_section)->dynindx;
-	  if (indx == 0)
-	    abort ();
-	}
-
-      /* Instead of generating a relocation using the section
-	 symbol, we may as well make it a fully relative
-	 relocation.  We want to avoid generating relocations to
-	 local symbols because we used to generate them
-	 incorrectly, without adding the original symbol value,
-	 which is mandated by the ABI for section symbols.  In
-	 order to give dynamic loaders and applications time to
-	 phase out the incorrect use, we refrain from emitting
-	 section-relative relocations.  It's not like they're
-	 useful, after all.  This should be a bit more efficient
-	 as well.  */
-      /* ??? Although this behavior is compatible with glibc's ld.so,
-	 the ABI says that relocations against STN_UNDEF should have
-	 a symbol value of 0.  Irix rld honors this, so relocations
-	 against STN_UNDEF have no effect.  */
+      indx = 0;
       defined_p = TRUE;
     }
 
@@ -1866,7 +1838,6 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
 			       Elf_Internal_Rela *relocs,
 			       bfd_vma symbol,
 			       struct bfd_link_info *info,
-			       asection *sym_sec,
 			       const char *sym_name ATTRIBUTE_UNUSED,
 			       int sym_flags ATTRIBUTE_UNUSED,
 			       struct score_elf_link_hash_entry *h,
@@ -2018,7 +1989,7 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
              to the dynamic linker.  */
 	  value = addend;
 	  if (!score_elf_create_dynamic_relocation (output_bfd, info, rel, h,
-						    sym_sec, symbol, &value,
+						    symbol, &value,
 						    input_section))
 	    return bfd_reloc_undefined;
 	}
@@ -2427,7 +2398,7 @@ _bfd_score_elf_relocate_section (bfd *output_bfd,
 
       r = score_elf_final_link_relocate (howto, input_bfd, output_bfd,
                                          input_section, contents, rel, relocs,
-                                         relocation, info, sec, name,
+                                         relocation, info, name,
                                          (h ? ELF_ST_TYPE ((unsigned int)h->root.root.type) :
 					 ELF_ST_TYPE ((unsigned int)sym->st_info)), h, local_sections,
                                          gp_disp_p);
@@ -3814,41 +3785,52 @@ elf32_score_new_section_hook (bfd *abfd, asection *sec)
 #define ELF_MACHINE_CODE                EM_SCORE
 #define ELF_MAXPAGESIZE                 0x8000
 
-#define elf_info_to_howto                             0
-#define elf_info_to_howto_rel                         _bfd_score_info_to_howto
-#define elf_backend_relocate_section                  _bfd_score_elf_relocate_section
-#define elf_backend_check_relocs                      _bfd_score_elf_check_relocs
-#define elf_backend_add_symbol_hook                   _bfd_score_elf_add_symbol_hook
-#define elf_backend_symbol_processing                 _bfd_score_elf_symbol_processing
-#define elf_backend_link_output_symbol_hook           _bfd_score_elf_link_output_symbol_hook
-#define elf_backend_section_from_bfd_section          _bfd_score_elf_section_from_bfd_section
-#define elf_backend_adjust_dynamic_symbol             _bfd_score_elf_adjust_dynamic_symbol
-#define elf_backend_always_size_sections              _bfd_score_elf_always_size_sections
-#define elf_backend_size_dynamic_sections             _bfd_score_elf_size_dynamic_sections
-#define elf_backend_create_dynamic_sections           _bfd_score_elf_create_dynamic_sections
-#define elf_backend_finish_dynamic_symbol             _bfd_score_elf_finish_dynamic_symbol
-#define elf_backend_finish_dynamic_sections           _bfd_score_elf_finish_dynamic_sections
-#define elf_backend_fake_sections                     _bfd_score_elf_fake_sections
-#define elf_backend_section_processing                _bfd_score_elf_section_processing
-#define elf_backend_write_section                     _bfd_score_elf_write_section
-#define elf_backend_copy_indirect_symbol              _bfd_score_elf_copy_indirect_symbol
-#define elf_backend_hide_symbol                       _bfd_score_elf_hide_symbol
-#define elf_backend_discard_info                      _bfd_score_elf_discard_info
-#define elf_backend_ignore_discarded_relocs           _bfd_score_elf_ignore_discarded_relocs
-#define elf_backend_gc_mark_hook                      _bfd_score_elf_gc_mark_hook
-#define elf_backend_grok_prstatus                     _bfd_score_elf_grok_prstatus
-#define elf_backend_grok_psinfo                       _bfd_score_elf_grok_psinfo
-#define elf_backend_can_gc_sections                   1
-#define elf_backend_want_plt_sym                      0
-#define elf_backend_got_header_size                   (4 * SCORE_RESERVED_GOTNO)
-#define elf_backend_plt_header_size                   0
-#define elf_backend_collect                           TRUE
-#define elf_backend_type_change_ok                    TRUE
+#define elf_info_to_howto               0
+#define elf_info_to_howto_rel           _bfd_score_info_to_howto
+#define elf_backend_relocate_section    _bfd_score_elf_relocate_section
+#define elf_backend_check_relocs        _bfd_score_elf_check_relocs
+#define elf_backend_add_symbol_hook     _bfd_score_elf_add_symbol_hook
+#define elf_backend_symbol_processing   _bfd_score_elf_symbol_processing
+#define elf_backend_link_output_symbol_hook \
+  _bfd_score_elf_link_output_symbol_hook
+#define elf_backend_section_from_bfd_section \
+  _bfd_score_elf_section_from_bfd_section
+#define elf_backend_adjust_dynamic_symbol \
+  _bfd_score_elf_adjust_dynamic_symbol
+#define elf_backend_always_size_sections \
+  _bfd_score_elf_always_size_sections
+#define elf_backend_size_dynamic_sections \
+  _bfd_score_elf_size_dynamic_sections
+#define elf_backend_omit_section_dynsym \
+  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
+#define elf_backend_create_dynamic_sections \
+  _bfd_score_elf_create_dynamic_sections
+#define elf_backend_finish_dynamic_symbol \
+  _bfd_score_elf_finish_dynamic_symbol
+#define elf_backend_finish_dynamic_sections \
+  _bfd_score_elf_finish_dynamic_sections
+#define elf_backend_fake_sections         _bfd_score_elf_fake_sections
+#define elf_backend_section_processing    _bfd_score_elf_section_processing
+#define elf_backend_write_section         _bfd_score_elf_write_section
+#define elf_backend_copy_indirect_symbol  _bfd_score_elf_copy_indirect_symbol
+#define elf_backend_hide_symbol           _bfd_score_elf_hide_symbol
+#define elf_backend_discard_info          _bfd_score_elf_discard_info
+#define elf_backend_ignore_discarded_relocs \
+  _bfd_score_elf_ignore_discarded_relocs
+#define elf_backend_gc_mark_hook          _bfd_score_elf_gc_mark_hook
+#define elf_backend_grok_prstatus         _bfd_score_elf_grok_prstatus
+#define elf_backend_grok_psinfo           _bfd_score_elf_grok_psinfo
+#define elf_backend_can_gc_sections       1
+#define elf_backend_want_plt_sym          0
+#define elf_backend_got_header_size       (4 * SCORE_RESERVED_GOTNO)
+#define elf_backend_plt_header_size       0
+#define elf_backend_collect               TRUE
+#define elf_backend_type_change_ok        TRUE
 
-#define bfd_elf32_bfd_reloc_type_lookup               elf32_score_reloc_type_lookup
-#define bfd_elf32_bfd_link_hash_table_create          elf32_score_link_hash_table_create
-#define bfd_elf32_bfd_print_private_bfd_data          elf32_score_print_private_bfd_data
-#define bfd_elf32_bfd_merge_private_bfd_data          elf32_score_merge_private_bfd_data
-#define bfd_elf32_new_section_hook                    elf32_score_new_section_hook
+#define bfd_elf32_bfd_reloc_type_lookup      elf32_score_reloc_type_lookup
+#define bfd_elf32_bfd_link_hash_table_create elf32_score_link_hash_table_create
+#define bfd_elf32_bfd_print_private_bfd_data elf32_score_print_private_bfd_data
+#define bfd_elf32_bfd_merge_private_bfd_data elf32_score_merge_private_bfd_data
+#define bfd_elf32_new_section_hook           elf32_score_new_section_hook
 
 #include "elf32-target.h"

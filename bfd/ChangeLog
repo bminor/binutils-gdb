@@ -1,5 +1,13 @@
 2006-10-23  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-score.c: Formatting.
+	(elf_backend_omit_section_dynsym): Define.
+	(score_elf_create_dynamic_relocation): Remove code copied from mips.
+	Don't use section syms in dynamic relocs.  Remove unused param.
+	(score_elf_final_link_relocate): Remove unused param.
+
+2006-10-23  Alan Modra  <amodra@bigpond.net.au>
+
 	* linker.c (fix_syms): Choose best of previous and next
 	section based on section flags and vma.
 
