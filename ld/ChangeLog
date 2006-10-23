@@ -1,5 +1,8 @@
 2006-10-23  Alan Modra  <amodra@bigpond.net.au>
 
+	* emulparams/h8300elf.sh (TINY_DATA_SECTION, TINY_BSS_SECTION): Don't
+	set section address on a relocatable link.
+
 	* ld.texinfo (Output Section Discarding): Fix xref.
 
 2006-10-21  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
@@ -165,7 +168,7 @@
 	* Makefile.in: Regenerate.
 	* configure.tgt: Add Score target.
 	* NEWS: Mention new target support.
-	
+
 2006-09-16  Nick Clifton  <nickc@redhat.com>
 	    Pedro Alves  <pedro_alves@portugalmail.pt>
 
@@ -272,7 +275,7 @@
 2006-08-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldexp.c (fold_name <LOADADDR>): Return an absolute value
-        rather than a section relative value.
+	rather than a section relative value.
 
 2006-08-22  Alan Modra  <amodra@bigpond.net.au>
 
@@ -298,9 +301,9 @@
 	* emultempl/pe.em: Handle new TARGET_IS_arm_wince_pe define.
 	Remap bfd_arm_allocate_interworking_sections,
 	bfd_arm_get_bfd_for_interworking and
-	bfd_arm_process_before_allocation for arm-pe and arm-wince-pe    
+	bfd_arm_process_before_allocation for arm-pe and arm-wince-pe
 	targets too.
-	(gld_${EMULATION_NAME}_recognized_file): Handle arm-wince and    
+	(gld_${EMULATION_NAME}_recognized_file): Handle arm-wince and
 	arm-epoc bfd format names.
 
 2006-08-18  Paul Brook  <paul@codesourcery.com>
@@ -558,7 +561,7 @@
 2006-06-23  Pedro Alves <pedro_alves@portugalmail.pt>
 
 	* pe-dll.c (pe_details_type): Add new pointer for symbols list
-	autofilter. 
+	autofilter.
 	(autofilter_symbollist): Split into autofilter_symbollist_generic
 	and autofilter_symbollist_i386.
 	(pe_detail_list): Add autofilter_symbollist_i386 to i386 case and
@@ -577,10 +580,10 @@
 
 2006-06-22  Danny Smith  <dannysmith@users.sourceforge.net>
 
-	* emultempl/pe.em (gld_${EMULATION_NAME}_open_dynamic_archive): 
+	* emultempl/pe.em (gld_${EMULATION_NAME}_open_dynamic_archive):
 	Restructure.  Add native "%s.lib" format to search list
 	* ld.texinfo (node WIN32): Update documentation on dynamic lib
-	search order. Add another reason for using import libs.	
+	search order. Add another reason for using import libs.
 
 2006-06-21  Mark Shinwell  <shinwell@codesourcery.com>
 
@@ -853,7 +856,7 @@
 
 	* po/vi.po: Updated Vietnamese translation.
 
-2006-05-24  Bjoern Haase  <bjoern.m.haase@web.de> 
+2006-05-24  Bjoern Haase  <bjoern.m.haase@web.de>
 
 	* configure.tgt: Add avr6 to emulation list.
 	* Makefile.am: Add eavr6.o and corresponding rule.
@@ -862,7 +865,7 @@
 	* emulparams/avrX.sh (TEMPLATE_NAME): Use elf32 instead of generic
 	for target option support.
 	(EXTRA_EM_FILE): Add reference to new em template file avrelf.
-	* scripttempl/avr.sc: Add ".trampolines" section.	
+	* scripttempl/avr.sc: Add ".trampolines" section.
 	* emultempl/avrelf.em: Add new file for target specific options.
 
 2006-05-22  Nick Clifton  <nickc@redhat.com>
@@ -881,7 +884,7 @@
 
 2006-05-11  Carlos O'Donell  <carlos@codesourcery.com>
 
-	* ld.texinfo: Rename "Index" to "LD Index" 
+	* ld.texinfo: Rename "Index" to "LD Index"
 
 2006-05-11  Pedro Alves  <pedro_alves@portugalmail.pt>
 
