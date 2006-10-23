@@ -471,6 +471,8 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define PREGRP34  NULL, NULL, USE_PREFIX_USER_TABLE, NULL, 34, NULL, 0, NULL, 0
 #define PREGRP35  NULL, NULL, USE_PREFIX_USER_TABLE, NULL, 35, NULL, 0, NULL, 0
 #define PREGRP36  NULL, NULL, USE_PREFIX_USER_TABLE, NULL, 36, NULL, 0, NULL, 0
+#define PREGRP37  NULL, NULL, USE_PREFIX_USER_TABLE, NULL, 37, NULL, 0, NULL, 0
+
 
 #define X86_64_0  NULL, NULL, X86_64_SPECIAL, NULL,  0, NULL, 0, NULL, 0
 
@@ -1028,7 +1030,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "movz{bR|x|bR|x}",	Gv, Eb, XX, XX },
   { "movz{wR|x|wR|x}",	Gv, Ew, XX, XX }, /* yes, there really is movzww ! */
   /* b8 */
-  { "popcntS",          Gv, Ev, XX, XX },
+  { PREGRP37 },
   { "ud2b",		XX, XX, XX, XX },
   { GRP8 },
   { "btcS",		Ev, Gv, XX, XX },
@@ -1820,6 +1822,13 @@ static const struct dis386 prefix_user_table[][4] = {
     { "(bad)",  XX, XX, XX, XX },
   },
 
+  /* PREGRP37 */
+  {
+    { "(bad)",  XX, XX, XX, XX },
+    { "popcntS",Gv, Ev, XX, XX },
+    { "(bad)",  XX, XX, XX, XX },
+    { "(bad)",  XX, XX, XX, XX },    
+  },
 };
 
 static const struct dis386 x86_64_table[][2] = {
@@ -2827,13 +2836,14 @@ print_insn (bfd_vma pc, disassemble_info *info)
       uses_LOCK_prefix = 0;
     }
   
-  /*"lzcnt"=0xBD is the only non-sse instruction which uses F3 in the opcode without any "rep(z|nz)"*/
-  if (!uses_SSE_prefix && (prefixes & PREFIX_REPZ) && *codep !=0xBD)
+  /*"lzcnt"=0xBD and "popcnt"=0xB8 are the only two non-sse 
+    instruction which uses F3 in the opcode without any "rep(z|nz)"*/
+  if (!uses_SSE_prefix && (prefixes & PREFIX_REPZ) && *codep != 0xBD && *codep != 0xB8)
     {
       oappend ("repz ");
       used_prefixes |= PREFIX_REPZ;
     }
-  if (!uses_SSE_prefix && (prefixes & PREFIX_REPNZ) && *codep !=0xBD)
+  if (!uses_SSE_prefix && (prefixes & PREFIX_REPNZ) && *codep != 0xBD && *codep != 0xB8)
     {
       oappend ("repnz ");
       used_prefixes |= PREFIX_REPNZ;

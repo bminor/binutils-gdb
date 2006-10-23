@@ -1,3 +1,9 @@
+2006-10-23  Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
+
+	* gas/i386/amdfam10.d : Modify to support for the change in POPCNT
+	opcode in amdfam10 architecture.
+	* gas/i386/x86-64-amdfam10.d : Ditto.
+
 2006-10-21  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* gas/sh/sh64/syntax-1.d: Update.

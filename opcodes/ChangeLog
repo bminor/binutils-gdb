@@ -1,3 +1,10 @@
+2006-10-23  Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
+
+	* i386-dis.c (dis386): Add support for the change in POPCNT opcode in 
+	amdfam10 architecture.
+	(PREGRP37): NEW.
+	(print_insn): Disallow REP prefix for POPCNT.
+	 
 2006-10-20  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* sh-dis.c (print_insn_sh): Remove 0x from output to prevent GDB
