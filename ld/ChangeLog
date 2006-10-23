@@ -1,3 +1,9 @@
+2006-10-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.in (AC_CHECK_HEADERS): Add limits.h and sys/param.h.
+	* configure: Regenerated.
+	* config.in: Likewise.
+
 2006-10-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* emulparams/h8300elf.sh (TINY_DATA_SECTION, TINY_BSS_SECTION): Don't
