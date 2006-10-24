@@ -2295,6 +2295,7 @@
 
 2006-03-27  Nick Roberts  <nickrob@snap.net.nz>
 
+	PR mi/1429
 	* varobj.c (c_name_of_child, c_value_of_child): Allow non-zero
 	offsets for languages like Fortran.
 

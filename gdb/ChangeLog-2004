@@ -14085,6 +14085,7 @@
 	type and value for simple data types and just the name and type
 	for complex ones, if required.
 
+	PR mi/1438
 	* mi/mi-cmd-var.c (mi_cmd_var_list_children): Print the values of the
 	children, if required.
 
