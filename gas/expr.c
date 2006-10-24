@@ -1785,7 +1785,9 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	    case O_bit_or_not:		resultP->X_add_number |= ~v; break;
 	    case O_bit_exclusive_or:	resultP->X_add_number ^= v; break;
 	    case O_bit_and:		resultP->X_add_number &= v; break;
-	    case O_add:			resultP->X_add_number += v; break;
+	      /* Constant + constant (O_add) is handled by the
+		 previous if statement for constant + X, so is omitted
+		 here.  */
 	    case O_subtract:		resultP->X_add_number -= v; break;
 	    case O_eq:
 	      resultP->X_add_number =
