@@ -680,6 +680,8 @@ parse_args (unsigned argc, char **argv)
 	{
 	case '?':
 	  einfo (_("%P: unrecognized option '%s'\n"), argv[last_optind]);
+	  /* Fall through.  */
+
 	default:
 	  einfo (_("%P%F: use the --help option for usage information\n"));
 

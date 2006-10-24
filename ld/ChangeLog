@@ -1,3 +1,7 @@
+2006-10-24  Ben Elliston  <bje@au.ibm.com>
+
+	* lexsup.c (parse_args): Add a comment noting a fall-through.
+
 2006-10-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.in (AC_CHECK_HEADERS): Add limits.h and sys/param.h.
