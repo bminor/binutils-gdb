@@ -1,3 +1,9 @@
+2006-10-24  Andrew Pinski  <andrew_pinski@playstation.sony.com>
+
+	* doc/c-ppc.texi (-mcell): Document.
+	* config/tc-ppc.c (parse_cpu): Parse -mcell.
+	(md_show_usage): Document -mcell.
+
 2006-10-23  Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
 
 	* doc/c-i386.texi : Document amdfam10,.sse4a and .abm in cpu_type.

@@ -1823,6 +1823,7 @@ extract_tbr (unsigned long insn,
 #define NOPOWER4 PPC_OPCODE_NOPOWER4 | PPCCOM
 #define POWER4	PPC_OPCODE_POWER4
 #define POWER5	PPC_OPCODE_POWER5
+#define CELL	PPC_OPCODE_CELL
 #define PPC32   PPC_OPCODE_32 | PPC_OPCODE_PPC
 #define PPC64   PPC_OPCODE_64 | PPC_OPCODE_PPC
 #define PPC403	PPC_OPCODE_403
@@ -3014,7 +3015,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "crand",   XL(19,257), XL_MASK,	COM,		{ BT, BA, BB } },
 
-{ "hrfid",   XL(19,274), 0xffffffff,	POWER5,		{ 0 } },
+{ "hrfid",   XL(19,274), 0xffffffff,	POWER5 | CELL,	{ 0 } },
 
 { "crset",   XL(19,289), XL_MASK,	PPCCOM,		{ BT, BAT, BBA } },
 { "creqv",   XL(19,289), XL_MASK,	COM,		{ BT, BA, BB } },
@@ -3622,7 +3623,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "lscbx",   XRC(31,277,0), X_MASK,	M601,		{ RT, RA, RB } },
 { "lscbx.",  XRC(31,277,1), X_MASK,	M601,		{ RT, RA, RB } },
 
-{ "dcbt",    X(31,278),	X_MASK,	PPC,			{ CT, RA, RB } },
+{ "dcbt",    X(31,278),	X_MASK,		PPC,		{ CT, RA, RB } },
 
 { "lhzx",    X(31,279),	X_MASK,		COM,		{ RT, RA0, RB } },
 
@@ -4206,6 +4207,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "clcs",    X(31,531), XRB_MASK,	M601,		{ RT, RA } },
 
+{ "ldbrx",   X(31,532),	X_MASK,		CELL,		{ RT, RA0, RB } },
+
 { "lswx",    X(31,533),	X_MASK,		PPCCOM,		{ RT, RA0, RB } },
 { "lsx",     X(31,533),	X_MASK,		PWRCOM,		{ RT, RA, RB } },
 
@@ -4264,6 +4267,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "lfduxe",  X(31,639), X_MASK,		BOOKE64,	{ FRT, RAS, RB } },
 
 { "mfsrin",  X(31,659), XRA_MASK,	PPC32,		{ RT, RB } },
+
+{ "stdbrx",  X(31,660), X_MASK,		CELL,		{ RS, RA0, RB } },
 
 { "stswx",   X(31,661), X_MASK,		PPCCOM,		{ RS, RA0, RB } },
 { "stsx",    X(31,661), X_MASK,		PWRCOM,		{ RS, RA0, RB } },
@@ -4422,6 +4427,16 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "stvewx",  X(31, 199), X_MASK,	PPCVEC,		{ VS, RA, RB } },
 { "stvx",    X(31, 231), X_MASK,	PPCVEC,		{ VS, RA, RB } },
 { "stvxl",   X(31, 487), X_MASK,	PPCVEC,		{ VS, RA, RB } },
+
+/* New load/store left/right index vector instructions that are in the Cell only.  */
+{ "lvlx",    X(31, 519), X_MASK,	CELL,		{ VD, RA0, RB } },
+{ "lvlxl",   X(31, 775), X_MASK,	CELL,		{ VD, RA0, RB } },
+{ "lvrx",    X(31, 551), X_MASK,	CELL,		{ VD, RA0, RB } },
+{ "lvrxl",   X(31, 807), X_MASK,	CELL,		{ VD, RA0, RB } },
+{ "stvlx",   X(31, 647), X_MASK,	CELL,		{ VS, RA0, RB } },
+{ "stvlxl",  X(31, 903), X_MASK,	CELL,		{ VS, RA0, RB } },
+{ "stvrx",   X(31, 679), X_MASK,	CELL,		{ VS, RA0, RB } },
+{ "stvrxl",  X(31, 935), X_MASK,	CELL,		{ VS, RA0, RB } },
 
 { "lwz",     OP(32),	OP_MASK,	PPCCOM,		{ RT, D, RA0 } },
 { "l",	     OP(32),	OP_MASK,	PWRCOM,		{ RT, D, RA0 } },

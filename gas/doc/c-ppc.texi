@@ -82,6 +82,9 @@ Generate code for Power5 architecture.
 @item -mpower6
 Generate code for Power6 architecture.
 
+@item -mcell
+Generate code for Cell Broadband Engine architecture.
+
 @item -mcom
 Generate code Power/PowerPC common instructions.
 

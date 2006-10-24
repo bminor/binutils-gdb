@@ -920,6 +920,12 @@ parse_cpu (const char *arg)
 		 | PPC_OPCODE_64 | PPC_OPCODE_POWER4
 		 | PPC_OPCODE_POWER5 | PPC_OPCODE_POWER6);
     }
+  else if (strcmp (arg, "cell") == 0)
+    {
+      ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
+		 | PPC_OPCODE_64 | PPC_OPCODE_POWER4
+		 | PPC_OPCODE_CELL);
+    }
   /* -mcom means assemble for the common intersection between Power
      and PowerPC.  At present, we just allow the union, rather
      than the intersection.  */
@@ -1116,6 +1122,7 @@ PowerPC options:\n\
 -mpower4		generate code for Power4 architecture\n\
 -mpower5		generate code for Power5 architecture\n\
 -mpower6		generate code for Power6 architecture\n\
+-mcell			generate code for Cell Broadband Engine architecture\n\
 -mcom			generate code Power/PowerPC common instructions\n\
 -many			generate code for any architecture (PWR/PWRX/PPC)\n"));
   fprintf (stream, _("\

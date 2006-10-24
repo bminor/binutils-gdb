@@ -1,3 +1,11 @@
+2006-10-24  Andrew Pinski  <andrew_pinski@playstation.sony.com>
+
+	* ppc-opc.c (CELL): New define.
+	(powerpc_opcodes): Enable hrfid for Cell.  Add ldbrx and stdbrx,
+	cell specific instructions.  Add {st,l}x{r,l}{,l} cell specific
+	VMX instructions.
+	* ppc-dis.c (powerpc_dialect): Handle cell.
+
 2006-10-23  Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
 
 	* i386-dis.c (dis386): Add support for the change in POPCNT opcode in 

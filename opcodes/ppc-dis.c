@@ -74,6 +74,10 @@ powerpc_dialect (struct disassemble_info *info)
     dialect |= PPC_OPCODE_POWER4 | PPC_OPCODE_POWER5;
 
   if (info->disassembler_options
+      && strstr (info->disassembler_options, "cell") != NULL)
+    dialect |= PPC_OPCODE_POWER4 | PPC_OPCODE_CELL | PPC_OPCODE_ALTIVEC;
+
+  if (info->disassembler_options
       && strstr (info->disassembler_options, "power6") != NULL)
     dialect |= PPC_OPCODE_POWER4 | PPC_OPCODE_POWER5 | PPC_OPCODE_POWER6 | PPC_OPCODE_ALTIVEC;
 

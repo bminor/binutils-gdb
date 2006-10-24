@@ -1,3 +1,9 @@
+2006-10-24  Andrew Pinski  <andrew_pinski@playstation.sony.com>
+
+	* gas/ppc/cell.s: New file.
+	* gas/ppc/cell.d: New file.
+	* gas/ppc/ppc.exp: Test cell.s.
+
 2006-10-23  Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
 
 	* gas/i386/amdfam10.d : Modify to support for the change in POPCNT
