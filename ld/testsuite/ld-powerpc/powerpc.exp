@@ -1,5 +1,5 @@
 # Expect script for ld-powerpc tests
-#   Copyright 2002, 2003, 2005 Free Software Foundation
+#   Copyright 2002, 2003, 2005, 2006 Free Software Foundation
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -143,4 +143,7 @@ run_ld_link_tests $ppcelftests
 
 if [ supports_ppc64 ] then {
     run_ld_link_tests $ppc64elftests
+    run_dump_test "relbrlt"
 }
+
+run_dump_test "plt1"
