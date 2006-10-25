@@ -1,11 +1,11 @@
 .arm
 .syntax unified
 	fconsts s17, #4
-	fconsts s18, #5
-	fconsts s19, #6
+	fconsts s18, #0xa5
+	fconsts s19, #0x40
 	fconstd d17, #4
-	fconstd d18, #5
-	fconstd d19, #6
+	fconstd d18, #0xa5
+	fconstd d19, #0x40
 	fshtos s17, 9
 	fshtod d17, 9
 	fsltos s17, 9

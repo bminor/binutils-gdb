@@ -7,8 +7,8 @@
 Disassembly of section \.text:
 0[0-9a-f]+ <[^>]+> eeb0 0a60 	fcpys	s0, s1
 0[0-9a-f]+ <[^>]+> eeb0 0b41 	fcpyd	d0, d1
-0[0-9a-f]+ <[^>]+> eeb0 0a05 	fconsts	s0, #80
-0[0-9a-f]+ <[^>]+> eeb0 0b07 	fconstd	d0, #112
+0[0-9a-f]+ <[^>]+> eeb5 0a00 	fconsts	s0, #80
+0[0-9a-f]+ <[^>]+> eeb7 0b00 	fconstd	d0, #112
 0[0-9a-f]+ <[^>]+> ee10 0a90 	fmrs	r0, s1
 0[0-9a-f]+ <[^>]+> ee00 1a10 	fmsr	s0, r1
 0[0-9a-f]+ <[^>]+> ec51 0a11 	fmrrs	r0, r1, {s2, s3}
@@ -16,8 +16,8 @@ Disassembly of section \.text:
 0[0-9a-f]+ <[^>]+> bf01      	itttt	eq
 0[0-9a-f]+ <[^>]+> eeb0 0a60 	fcpyseq	s0, s1
 0[0-9a-f]+ <[^>]+> eeb0 0b41 	fcpydeq	d0, d1
-0[0-9a-f]+ <[^>]+> eeb0 0a05 	fconstseq	s0, #80
-0[0-9a-f]+ <[^>]+> eeb0 0b07 	fconstdeq	d0, #112
+0[0-9a-f]+ <[^>]+> eeb5 0a00 	fconstseq	s0, #80
+0[0-9a-f]+ <[^>]+> eeb7 0b00 	fconstdeq	d0, #112
 0[0-9a-f]+ <[^>]+> bf01      	itttt	eq
 0[0-9a-f]+ <[^>]+> ee10 0a90 	fmrseq	r0, s1
 0[0-9a-f]+ <[^>]+> ee00 1a10 	fmsreq	s0, r1

@@ -7,16 +7,16 @@
 Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> eeb00a60 	fcpys	s0, s1
 0[0-9a-f]+ <[^>]+> eeb00b41 	fcpyd	d0, d1
-0[0-9a-f]+ <[^>]+> eeb00a05 	fconsts	s0, #80
-0[0-9a-f]+ <[^>]+> eeb00b07 	fconstd	d0, #112
+0[0-9a-f]+ <[^>]+> eeb50a00 	fconsts	s0, #80
+0[0-9a-f]+ <[^>]+> eeb70b00 	fconstd	d0, #112
 0[0-9a-f]+ <[^>]+> ee100a90 	fmrs	r0, s1
 0[0-9a-f]+ <[^>]+> ee001a10 	fmsr	s0, r1
 0[0-9a-f]+ <[^>]+> ec510a11 	fmrrs	r0, r1, {s2, s3}
 0[0-9a-f]+ <[^>]+> ec442a10 	fmsrr	{s0, s1}, r2, r4
 0[0-9a-f]+ <[^>]+> 0eb00a60 	fcpyseq	s0, s1
 0[0-9a-f]+ <[^>]+> 0eb00b41 	fcpydeq	d0, d1
-0[0-9a-f]+ <[^>]+> 0eb00a05 	fconstseq	s0, #80
-0[0-9a-f]+ <[^>]+> 0eb00b07 	fconstdeq	d0, #112
+0[0-9a-f]+ <[^>]+> 0eb50a00 	fconstseq	s0, #80
+0[0-9a-f]+ <[^>]+> 0eb70b00 	fconstdeq	d0, #112
 0[0-9a-f]+ <[^>]+> 0e100a90 	fmrseq	r0, s1
 0[0-9a-f]+ <[^>]+> 0e001a10 	fmsreq	s0, r1
 0[0-9a-f]+ <[^>]+> 0c510a11 	fmrrseq	r0, r1, {s2, s3}

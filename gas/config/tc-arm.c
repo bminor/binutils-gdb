@@ -7716,16 +7716,16 @@ static void
 do_vfp_sp_const (void)
 {
   encode_arm_vfp_reg (inst.operands[0].reg, VFP_REG_Sd);
-  inst.instruction |= (inst.operands[1].imm & 15) << 16;
-  inst.instruction |= (inst.operands[1].imm >> 4);
+  inst.instruction |= (inst.operands[1].imm & 0xf0) << 12;
+  inst.instruction |= (inst.operands[1].imm & 0x0f);
 }
 
 static void
 do_vfp_dp_const (void)
 {
   encode_arm_vfp_reg (inst.operands[0].reg, VFP_REG_Dd);
-  inst.instruction |= (inst.operands[1].imm & 15) << 16;
-  inst.instruction |= (inst.operands[1].imm >> 4);
+  inst.instruction |= (inst.operands[1].imm & 0xf0) << 12;
+  inst.instruction |= (inst.operands[1].imm & 0x0f);
 }
 
 static void
