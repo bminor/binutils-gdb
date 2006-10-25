@@ -107,6 +107,7 @@
 #include "elf/score.h"
 #include "elf/sh.h"
 #include "elf/sparc.h"
+#include "elf/spu.h"
 #include "elf/v850.h"
 #include "elf/vax.h"
 #include "elf/x86-64.h"
@@ -555,89 +556,90 @@ guess_is_rela (unsigned long e_machine)
   switch (e_machine)
     {
       /* Targets that use REL relocations.  */
-    case EM_ARM:
     case EM_386:
     case EM_486:
     case EM_960:
-    case EM_DLX:
-    case EM_OPENRISC:
-    case EM_OR32:
-    case EM_CYGNUS_M32R:
+    case EM_ARM:
     case EM_D10V:
     case EM_CYGNUS_D10V:
+    case EM_DLX:
     case EM_MIPS:
     case EM_MIPS_RS3_LE:
+    case EM_CYGNUS_M32R:
+    case EM_OPENRISC:
+    case EM_OR32:
     case EM_SCORE:
       return FALSE;
 
       /* Targets that use RELA relocations.  */
     case EM_68K:
-    case EM_H8_300:
-    case EM_H8_300H:
-    case EM_H8S:
-    case EM_SPARC32PLUS:
-    case EM_SPARCV9:
-    case EM_SPARC:
-    case EM_PPC:
-    case EM_PPC64:
-    case EM_V850:
-    case EM_CYGNUS_V850:
+    case EM_860:
+    case EM_ALPHA:
+    case EM_ALTERA_NIOS2:
+    case EM_AVR:
+    case EM_AVR_OLD:
+    case EM_BLACKFIN:
+    case EM_CRIS:
+    case EM_CRX:
     case EM_D30V:
     case EM_CYGNUS_D30V:
+    case EM_FR30:
+    case EM_CYGNUS_FR30:
+    case EM_CYGNUS_FRV:
+    case EM_H8S:
+    case EM_H8_300:
+    case EM_H8_300H:
+    case EM_IA_64:
+    case EM_IP2K:
+    case EM_IP2K_OLD:
+    case EM_IQ2000:
+    case EM_M32C:
+    case EM_M32R:
+    case EM_MCORE:
+    case EM_MMIX:
     case EM_MN10200:
     case EM_CYGNUS_MN10200:
     case EM_MN10300:
     case EM_CYGNUS_MN10300:
-    case EM_FR30:
-    case EM_CYGNUS_FR30:
-    case EM_CYGNUS_FRV:
-    case EM_SH:
-    case EM_ALPHA:
-    case EM_MCORE:
-    case EM_IA_64:
-    case EM_AVR:
-    case EM_AVR_OLD:
-    case EM_CRIS:
-    case EM_860:
-    case EM_X86_64:
-    case EM_S390:
-    case EM_S390_OLD:
-    case EM_MMIX:
     case EM_MSP430:
     case EM_MSP430_OLD:
-    case EM_XSTORMY16:
-    case EM_CRX:
+    case EM_MT:
+    case EM_NIOS32:
+    case EM_PPC64:
+    case EM_PPC:
+    case EM_S390:
+    case EM_S390_OLD:
+    case EM_SH:
+    case EM_SPARC:
+    case EM_SPARC32PLUS:
+    case EM_SPARCV9:
+    case EM_SPU:
+    case EM_V850:
+    case EM_CYGNUS_V850:
     case EM_VAX:
-    case EM_IP2K:
-    case EM_IP2K_OLD:
-    case EM_IQ2000:
+    case EM_X86_64:
+    case EM_XSTORMY16:
     case EM_XTENSA:
     case EM_XTENSA_OLD:
-    case EM_M32R:
-    case EM_M32C:
-    case EM_MT:
-    case EM_BLACKFIN:
-    case EM_NIOS32:
-    case EM_ALTERA_NIOS2:
       return TRUE;
 
+    case EM_68HC05:
+    case EM_68HC08:
+    case EM_68HC11:
+    case EM_68HC16:
+    case EM_FX66:
+    case EM_ME16:
     case EM_MMA:
-    case EM_PCP:
     case EM_NCPU:
     case EM_NDR1:
-    case EM_STARCORE:
-    case EM_ME16:
+    case EM_PCP:
     case EM_ST100:
-    case EM_TINYJ:
-    case EM_FX66:
-    case EM_ST9PLUS:
-    case EM_ST7:
-    case EM_68HC16:
-    case EM_68HC11:
-    case EM_68HC08:
-    case EM_68HC05:
-    case EM_SVX:
     case EM_ST19:
+    case EM_ST7:
+    case EM_ST9PLUS:
+    case EM_STARCORE:
+    case EM_SVX:
+    case EM_TINYJ:
     default:
       warn (_("Don't know about relocations on this machine architecture\n"));
       return FALSE;
@@ -970,6 +972,10 @@ dump_relocations (FILE *file,
 	case EM_SPARCV9:
 	case EM_SPARC:
 	  rtype = elf_sparc_reloc_type (type);
+	  break;
+
+	case EM_SPU:
+	  rtype = elf_spu_reloc_type (type);
 	  break;
 
 	case EM_V850:
@@ -1638,6 +1644,7 @@ get_machine_name (unsigned e_machine)
     case EM_NONE:		return _("None");
     case EM_M32:		return "WE32100";
     case EM_SPARC:		return "Sparc";
+    case EM_SPU:		return "SPU";
     case EM_386:		return "Intel 80386";
     case EM_68K:		return "MC68000";
     case EM_88K:		return "MC88000";

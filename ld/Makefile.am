@@ -134,6 +134,7 @@ ALL_EMULATIONS = \
 	eavr6.o \
 	ecoff_i860.o \
 	ecoff_sparc.o \
+	eelf32_spu.o \
 	ecrisaout.o \
 	ecriself.o \
 	ecrislinux.o \
@@ -414,7 +415,8 @@ ALL_64_EMULATIONS = \
 ALL_EMUL_EXTRA_OFILES = \
 	deffilep.o \
 	pe-dll.o \
-	pep-dll.o
+	pep-dll.o \
+	spu_inc.o
 
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
@@ -709,6 +711,17 @@ eelf32_sparc_vxworks.c: $(srcdir)/emulparams/elf32_sparc_vxworks.sh \
   $(srcdir)/emultempl/vxworks.em $(ELF_DEPS) \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_sparc_vxworks "$(tdir_elf32_sparc_vxworks)"
+eelf32_spu.c: $(srcdir)/emulparams/elf32_spu.sh $(srcdir)/emultempl/spuelf.em \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32_spu "$(tdir_elf32_spu)"
+spu_inc.o: $(srcdir)/emultempl/spu_inc.s $(srcdir)/emultempl/spu_ovl.o
+	$(CC) -c -Wa,-I,$(srcdir)/emultempl -o $@ $<
+$(srcdir)/emultempl/spu_ovl.o: @MAINT@ $(srcdir)/emultempl/spu_ovl.S
+	cpp -DOVLY_IRQ_SAVE $(srcdir)/emultempl/spu_ovl.S spu_ovl.s
+	if ../gas/as-new --version \
+		| grep 'target.*spu' >/dev/null 2>/dev/null; then \
+	  ../gas/as-new -o $@ spu_ovl.s; \
+	fi
 eelf32_i860.c: $(srcdir)/emulparams/elf32_i860.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_i860 "$(tdir_elf32_i860)"
@@ -1772,7 +1785,7 @@ MOSTLYCLEANFILES = $(STAGESTUFF) ld1$(EXEEXT) ld2$(EXEEXT) ld3$(EXEEXT) \
 	ldemul-list.h crtbegin.o crtend.o ld.log ld.sum
 mostlyclean-local:
 	-rm -rf tmpdir
-CLEANFILES = dep.sed DEP DEPA DEP1 DEP2
+CLEANFILES = dep.sed DEP DEPA DEP1 DEP2 spu_ovl.s
 
 .PHONY: install-html install-html-am install-html-recursive
 
@@ -1851,7 +1864,7 @@ install-data-local: install-info
 
 # Stuff that should be included in a distribution.  The diststuff
 # target is run by the taz target in ../Makefile.in.
-EXTRA_DIST = ldgram.c ldgram.h ldlex.c $(man_MANS)
+EXTRA_DIST = ldgram.c ldgram.h ldlex.c spu_ovl.o $(man_MANS)
 diststuff: info $(EXTRA_DIST)
 all: info ld.1
 

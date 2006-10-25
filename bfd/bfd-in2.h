@@ -1761,6 +1761,8 @@ enum bfd_architecture
 /* Nonzero if MACH is a 64 bit sparc architecture.  */
 #define bfd_mach_sparc_64bit_p(mach) \
   ((mach) >= bfd_mach_sparc_v9 && (mach) != bfd_mach_sparc_v8plusb)
+  bfd_arch_spu,       /* PowerPC SPU */
+#define bfd_mach_spu           256 
   bfd_arch_mips,      /* MIPS Rxxxx */
 #define bfd_mach_mips3000              3000
 #define bfd_mach_mips3900              3900
@@ -2451,6 +2453,20 @@ relocation types already defined.  */
   BFD_RELOC_SPARC_TLS_DTPOFF64,
   BFD_RELOC_SPARC_TLS_TPOFF32,
   BFD_RELOC_SPARC_TLS_TPOFF64,
+
+/* SPU Relocations.  */
+  BFD_RELOC_SPU_IMM7,
+  BFD_RELOC_SPU_IMM8,
+  BFD_RELOC_SPU_IMM10,
+  BFD_RELOC_SPU_IMM10W,
+  BFD_RELOC_SPU_IMM16,
+  BFD_RELOC_SPU_IMM16W,
+  BFD_RELOC_SPU_IMM18,
+  BFD_RELOC_SPU_PCREL9a,
+  BFD_RELOC_SPU_PCREL9b,
+  BFD_RELOC_SPU_PCREL16,
+  BFD_RELOC_SPU_LO16,
+  BFD_RELOC_SPU_HI16,
 
 /* Alpha ECOFF and ELF relocations.  Some of these treat the symbol or
 "addend" in some special way.

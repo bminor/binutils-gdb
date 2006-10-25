@@ -363,6 +363,8 @@ case ${generic_target} in
     esac ;;
   sparc-*-openbsd*)			fmt=elf em=nbsd ;;
 
+  spu-*-elf)				fmt=elf ;;
+
   tic30-*-*aout*)			fmt=aout bfd_gas=yes ;;
   tic30-*-*coff*)			fmt=coff bfd_gas=yes ;;
   tic4x-*-* | c4x-*-*)			fmt=coff bfd_gas=yes ;;

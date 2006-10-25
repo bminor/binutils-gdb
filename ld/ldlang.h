@@ -619,5 +619,7 @@ extern void lang_update_definedness
   (const char *, struct bfd_link_hash_entry *);
 
 extern void add_excluded_libs (const char *);
+extern bfd_boolean load_symbols
+  (lang_input_statement_type *, lang_statement_list_type *);
 
 #endif

@@ -548,6 +548,8 @@ sparc*-*-solaris2*)	targ_emul=elf32_sparc ;;
 sparc*-wrs-vxworks*)	targ_emul=sparcaout ;;
 sparc*-*-rtems*)        targ_emul=elf32_sparc
 			;;
+spu-*-elf*)		targ_emul=elf32_spu
+			targ_extra_ofiles="spu_inc.o" ;;
 tic30-*-*aout*)		targ_emul=tic30aout ;;
 tic30-*-*coff*)		targ_emul=tic30coff ;;
 tic4x-*-* | c4x-*-*)    targ_emul=tic4xcoff ; targ_extra_emuls="tic3xcoff tic3xcoff_onchip" ;;

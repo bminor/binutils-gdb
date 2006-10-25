@@ -6589,6 +6589,7 @@ if test x${all_targets} = xfalse ; then
 	  done
 				ta="$ta sh-dis.lo cgen-bitset.lo" ;;
 	bfd_sparc_arch)		ta="$ta sparc-dis.lo sparc-opc.lo" ;;
+	bfd_spu_arch)		ta="$ta spu-dis.lo spu-opc.lo" ;;
 	bfd_tahoe_arch)		;;
 	bfd_tic30_arch)		ta="$ta tic30-dis.lo" ;;
         bfd_tic4x_arch)         ta="$ta tic4x-dis.lo" ;;

@@ -643,6 +643,7 @@ extern const bfd_target bfd_elf32_shnbsd_vec;
 extern const bfd_target bfd_elf32_shvxworks_vec;
 extern const bfd_target bfd_elf32_sparc_vec;
 extern const bfd_target bfd_elf32_sparc_vxworks_vec;
+extern const bfd_target bfd_elf32_spu_vec;
 extern const bfd_target bfd_elf32_tradbigmips_vec;
 extern const bfd_target bfd_elf32_tradlittlemips_vec;
 extern const bfd_target bfd_elf32_us_cris_vec;
@@ -971,6 +972,7 @@ static const bfd_target * const _bfd_target_vector[] =
 #endif
 	&bfd_elf32_sparc_vec,
 	&bfd_elf32_sparc_vxworks_vec,
+	&bfd_elf32_spu_vec,
 	&bfd_elf32_tradbigmips_vec,
 	&bfd_elf32_tradlittlemips_vec,
 	&bfd_elf32_us_cris_vec,

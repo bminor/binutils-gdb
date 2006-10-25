@@ -1,3 +1,14 @@
+2006-10-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-spu/ovl.d: New file.
+	* ld-spu/ovl.lnk: New file.
+	* ld-spu/ovl.s: New file.
+	* ld-spu/spu.exp: New file.
+	* ld-elf/sec64k.exp: Tweak ld options for SPU.
+	* ld-scripts/empty-orphan.exp: Likewise.
+	* ld-scripts/phdrs.exp: Likewise.
+	* ld-scripts/phdrs2.exp: Likewise.
+
 2006-10-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/plt1.s: New.

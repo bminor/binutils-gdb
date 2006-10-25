@@ -1,3 +1,18 @@
+2006-10-25  Trevor Smigiel  <Trevor_Smigiel@playstation.sony.com>
+	    Yukishige Shibata  <shibata@rd.scei.sony.co.jp>
+	    Nobuhisa Fujinami  <fnami@rd.scei.sony.co.jp>
+	    Takeaki Fukuoka  <fukuoka@rd.scei.sony.co.jp>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* spu-dis.c: New file.
+	* spu-opc.c: New file.
+	* configure.in: Add SPU support.
+	* disassemble.c: Likewise.
+	* Makefile.am: Likewise.  Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2006-10-24  Andrew Pinski  <andrew_pinski@playstation.sony.com>
 
 	* ppc-opc.c (CELL): New define.

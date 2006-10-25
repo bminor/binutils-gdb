@@ -1,3 +1,24 @@
+2006-10-25  Alan Modra  <amodra@bigpond.net.au>
+	    Trevor Smigiel  <Trevor_Smigiel@playstation.sony.com>
+	    Yukishige Shibata  <shibata@rd.scei.sony.co.jp>
+	    Nobuhisa Fujinami  <fnami@rd.scei.sony.co.jp>
+	    Takeaki Fukuoka  <fukuoka@rd.scei.sony.co.jp>
+
+	* cpu-spu.c: New file.
+	* elf32-spu.c: New file.
+	* elf32-spu.h: New file.
+	* archures.c: Add SPU support.
+	* config.bfd: Likewise.
+	* configure.in: Likewise.
+	* reloc.c: Likewise.
+	* targets.c: Likewise.
+	* Makefile.am: Likewise.  Run "make dep-am".
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
 2006-10-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_edit_opd): Clarify comment.

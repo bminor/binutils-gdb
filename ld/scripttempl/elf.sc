@@ -14,6 +14,7 @@
 #		(e.g., .PARISC.global)
 #	OTHER_RELRO_SECTIONS - other than .data.rel.ro ...
 #		(e.g. PPC32 .fixup, .got[12])
+#	OTHER_BSS_SECTIONS - other than .bss .sbss ...
 #	OTHER_SECTIONS - at the end
 #	EXECUTABLE_SYMBOLS - symbols that must be defined for an
 #		executable (e.g., _DYNAMIC_LINK)
@@ -452,6 +453,7 @@ cat <<EOF
       pad the .data section.  */
    ${RELOCATING+. = ALIGN(. != 0 ? ${ALIGNMENT} : 1);}
   }
+  ${OTHER_BSS_SECTIONS}
   ${RELOCATING+${OTHER_BSS_END_SYMBOLS}}
   ${RELOCATING+. = ALIGN(${ALIGNMENT});}
   ${LARGE_SECTIONS}

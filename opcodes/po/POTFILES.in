@@ -140,6 +140,8 @@ sh-dis.c
 sh-opc.h
 sparc-dis.c
 sparc-opc.c
+spu-dis.c
+spu-opc.c
 sysdep.h
 tic30-dis.c
 tic4x-dis.c

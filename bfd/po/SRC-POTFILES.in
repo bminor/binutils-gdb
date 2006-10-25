@@ -109,6 +109,7 @@ cpu-s390.c
 cpu-score.c
 cpu-sh.c
 cpu-sparc.c
+cpu-spu.c
 cpu-tic30.c
 cpu-tic4x.c
 cpu-tic54x.c
@@ -176,6 +177,7 @@ elf32-sh64-com.c
 elf32-sh.c
 elf32-sh-symbian.c
 elf32-sparc.c
+elf32-spu.c
 elf32-v850.c
 elf32-vax.c
 elf32-xc16x.c

@@ -1,3 +1,13 @@
+2006-10-25  Trevor Smigiel  <Trevor_Smigiel@playstation.sony.com>
+	    Yukishige Shibata  <shibata@rd.scei.sony.co.jp>
+	    Nobuhisa Fujinami  <fnami@rd.scei.sony.co.jp>
+	    Takeaki Fukuoka  <fukuoka@rd.scei.sony.co.jp>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* readelf.c: Add SPU support.
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2006-10-13  Robert Connolly  <robert@linuxfromscratch.org>
 
 	PR binutils/2876

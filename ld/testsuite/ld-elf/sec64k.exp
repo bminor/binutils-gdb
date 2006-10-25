@@ -127,7 +127,11 @@ if [catch { set ofd [open "tmpdir/$test2.d" w] } x] {
     return
 }
 foreach sfile $sfiles { puts $ofd "#source: $sfile" }
-puts $ofd "#ld:"
+if { [istarget spu*-*-*] } {
+    puts $ofd "#ld: --local-store 0:0"
+} else {
+    puts $ofd "#ld:"
+}
 puts $ofd "#readelf: -W -Ss"
 puts $ofd "There are 660.. section headers.*:"
 puts $ofd "#..."

@@ -1,0 +1,13 @@
+SECTIONS
+{
+  . = SIZEOF_HEADERS;
+  .text : { *(.text) *(.stub) }
+
+  . = 0x400;
+  .ov_a1 : { *(.ov_a1) }
+  .ov_a2 ADDR (.ov_a1) : { *(.ov_a2) }
+  . = ADDR (.ov_a1) + MAX (SIZEOF (.ov_a1), SIZEOF (.ov_a2));
+
+  .data : { *(.data) *(.ovtab) }
+  .bss : { *(.bss) }
+}

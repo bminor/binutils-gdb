@@ -68,8 +68,6 @@ static struct bfd_hash_table lang_definedness_table;
 static void exp_init_os (etree_type *);
 static void init_map_userdata (bfd *, asection *, void *);
 static lang_input_statement_type *lookup_name (const char *);
-static bfd_boolean load_symbols (lang_input_statement_type *,
-				 lang_statement_list_type *);
 static struct bfd_hash_entry *lang_definedness_newfunc
  (struct bfd_hash_entry *, struct bfd_hash_table *, const char *);
 static void insert_undefined (const char *);
@@ -2387,7 +2385,7 @@ check_excluded_libs (bfd *abfd)
 
 /* Get the symbols for an input file.  */
 
-static bfd_boolean
+bfd_boolean
 load_symbols (lang_input_statement_type *entry,
 	      lang_statement_list_type *place)
 {
