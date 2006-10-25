@@ -1,3 +1,8 @@
+2006-10-25  Jim Blandy  <jimb@codesourcery.com>
+
+	* p-valprint.c (pascal_object_print_value): Add 'static' keyword
+	to function definition, to match declaration earlier in file.
+
 2006-10-21  Paul Brook  <paul@codesourcery.com>
 
 	* remote.c (remote_fetch_registers): Fix error message.

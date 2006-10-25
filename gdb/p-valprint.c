@@ -915,7 +915,7 @@ pascal_object_print_value_fields (struct type *type, const gdb_byte *valaddr,
 /* Special val_print routine to avoid printing multiple copies of virtual
    baseclasses.  */
 
-void
+static void
 pascal_object_print_value (struct type *type, const gdb_byte *valaddr,
 			   CORE_ADDR address, struct ui_file *stream,
 			   int format, int recurse,
