@@ -1,3 +1,3 @@
-#define BFD_VERSION_DATE 20061025
+#define BFD_VERSION_DATE 20061026
 #define BFD_VERSION @bfd_version@
 #define BFD_VERSION_STRING @bfd_version_string@
