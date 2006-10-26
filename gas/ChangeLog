@@ -1,3 +1,8 @@
+2006-10-26  Ben Elliston  <bje@au.ibm.com>
+
+	* dw2gencfi.c (cfi_add_CFA_offset):
+	Assert DWARF2_CIE_DATA_ALIGNMENT is non-zero.
+
 2006-10-25  Trevor Smigiel  <Trevor_Smigiel@playstation.sony.com>
 	    Yukishige Shibata  <shibata@rd.scei.sony.co.jp>
 	    Nobuhisa Fujinami  <fnami@rd.scei.sony.co.jp>
