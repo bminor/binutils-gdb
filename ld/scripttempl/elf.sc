@@ -177,13 +177,15 @@ test "${LARGE_SECTIONS}" = "yes" && REL_LARGE="
   .rela.lbss    ${RELOCATING-0} : { *(.rela.lbss${RELOCATING+ .rela.lbss.* .rela.gnu.linkonce.lb.*}) }
   .rel.lrodata  ${RELOCATING-0} : { *(.rel.lrodata${RELOCATING+ .rel.lrodata.* .rel.gnu.linkonce.lr.*}) }
   .rela.lrodata ${RELOCATING-0} : { *(.rela.lrodata${RELOCATING+ .rela.lrodata.* .rela.gnu.linkonce.lr.*}) }"
-test "${LARGE_SECTIONS}" = "yes" && LARGE_SECTIONS="
+test "${LARGE_SECTIONS}" = "yes" && OTHER_BSS_SECTIONS="
+  ${OTHER_BSS_SECTIONS}
   .lbss ${RELOCATING-0} :
   {
     *(.dynlbss)
     *(.lbss${RELOCATING+ .lbss.* .gnu.linkonce.lb.*})
     *(LARGE_COMMON)
-  }
+  }"
+test "${LARGE_SECTIONS}" = "yes" && LARGE_SECTIONS="
   .lrodata ${RELOCATING-0} ${RELOCATING+ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))} :
   {
     *(.lrodata${RELOCATING+ .lrodata.* .gnu.linkonce.lr.*})
