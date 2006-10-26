@@ -19089,7 +19089,7 @@ arm_adjust_symtab (void)
 	      if (THUMB_IS_FUNC (sym))
 		elf_sym->internal_elf_sym.st_info =
 		  ELF_ST_INFO (bind, STT_ARM_TFUNC);
-	      else
+	      else if (EF_ARM_EABI_VERSION (meabi_flags) < EF_ARM_EABI_VER4)
 		elf_sym->internal_elf_sym.st_info =
 		  ELF_ST_INFO (bind, STT_ARM_16BIT);
 	    }
