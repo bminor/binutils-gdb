@@ -1522,7 +1522,6 @@ _bfd_relocate_contents (reloc_howto_type *howto,
   switch (size)
     {
     default:
-    case 0:
       abort ();
     case 1:
       bfd_put_8 (input_bfd, x, location);

@@ -1,5 +1,7 @@
 2006-10-26  Ben Elliston  <bje@au.ibm.com>
 
+	* reloc.c (_bfd_relocate_contents): Remove explicit case 0.
+
 	* elf.c (bfd_section_from_shdr): Remove extraneous breaks.
 	* targets.c (find_target): Remove extraneous break.
 
