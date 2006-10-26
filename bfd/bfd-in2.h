@@ -693,7 +693,7 @@ extern void bfd_elf_set_dt_needed_name
 extern const char *bfd_elf_get_dt_soname
   (bfd *);
 extern void bfd_elf_set_dyn_lib_class
-  (bfd *, int);
+  (bfd *, enum dynamic_lib_link_class);
 extern int bfd_elf_get_dyn_lib_class
   (bfd *);
 extern struct bfd_link_needed_list *bfd_elf_get_runpath_list

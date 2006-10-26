@@ -1668,7 +1668,7 @@ bfd_elf_get_dyn_lib_class (bfd *abfd)
 }
 
 void
-bfd_elf_set_dyn_lib_class (bfd *abfd, int lib_class)
+bfd_elf_set_dyn_lib_class (bfd *abfd, enum dynamic_lib_link_class lib_class)
 {
   if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
       && bfd_get_format (abfd) == bfd_object)
