@@ -1,3 +1,8 @@
+2006-10-26  Joseph S. Myers  <joseph@codesourcery.com>
+            Mark Mitchell  <mark@codesourcery.com>
+
+	* configure.tgt (arm*linux*): Support both big- and little-endian.
+
 2006-10-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* emulparams/hppa64linux.sh (LARGE_SECTIONS): Renamed to ...
