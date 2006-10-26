@@ -1,3 +1,31 @@
+2006-10-26  Ben Elliston  <bje@au.ibm.com>
+	    Anton Blanchard  <anton@samba.org>
+	    Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (A_L, DCM, DGM, TE, RMC, R, SP, S, SH16, XRT_L, EH,
+	AFRALFRC_MASK, Z, ZRC, Z_MASK, XLRT_MASK, XEH_MASK): Define.
+	(POWER6): Define.
+	(powerpc_opcodes): Extend "lwarx", "ldarx", "dcbf", "fres", "fres.",
+	"frsqrtes", "frsqrtes." "fre", "fre.", "frsqrte" and "frsqrte.".
+	Add "doze", "nap", "sleep", "rvwinkle", "dcbfl", "prtyw", "prtyd",
+	"mfcfar", "cmpb", "lfdpx", "stfdpx", "mtcfar", "mffgpr", "mftgpr",
+	"lwzcix", "lhzcix", "lbzcix", "ldcix", "lfiwax", "stwcix", "sthcix",
+	"stbcix", "stdcix", "lfdp", "dadd", "dadd.", "dqua", "dqua.", "dmul",
+	"dmul.", "drrnd", "drrnd.", "dscli", "dscli.", "dquai", "dquai.",
+	"dscri", "dscri.", "drintx", "drintx.", "dcmpo", "dtstex", "dtstdc",
+	"dtstdg", "dtstsf", "drintn", "drintn.", "dctdp", "dctdp.", "dctfix",
+	"dctfix.", "ddedpd", "ddedpd.", "dxex", "dxex.", "dsub", "dsub.",
+	"ddiv", "ddiv.", "dcmpu", "drsp", "drsp.", "dcffix", "dcffix.",
+	"denbcd", "denbcd.", "diex", "diex.", "stfdp", "daddq", "daddq.",
+	"dquaq", "dquaq.", "fcpsgn", "fcpsgn.", "dmulq", "dmulq.",
+	"drrndq", "drrndq.", "dscliq", "dscliq.", "dquaiq", "dquaiq.",
+	"dscriq", "dscriq.", "drintxq", "drintxq.", "dcmpoq", "dtstexq",
+	"dtstdcq", "dtstdgq", "dtstsfq", "drintnq", "drintnq.",
+	"dctqpq", "dctqpq.", "dctfixq", "dctfixq.", "ddedpdq", "ddedpdq.",
+	"dxexq", "dxexq.", "dsubq", "dsubq.", "ddivq", "ddivq.", "dcmpuq",
+	"drdpq", "drdpq.", "dcffixq", "dcffixq.", "denbcdq", "denbcdq.",
+	"diexq" and "diexq." opcodes.
+
 2006-10-26  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* h8300-dis.c (bfd_h8_disassemble): Add missing consts.
