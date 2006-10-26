@@ -238,6 +238,12 @@ static int meabi_flags = EABI_DEFAULT;
 # else
 static int meabi_flags = EF_ARM_EABI_UNKNOWN;
 # endif
+
+bfd_boolean
+arm_is_eabi(void)
+{
+  return (EF_ARM_EABI_VERSION (meabi_flags) >= EF_ARM_EABI_VER4);
+}
 #endif
 
 #ifdef OBJ_ELF

@@ -98,6 +98,7 @@ extern int arm_optimize_expr (expressionS *, operatorT, expressionS *);
 #ifdef OBJ_ELF
 #define md_end arm_md_end
 extern void arm_md_end (void);
+bfd_boolean arm_is_eabi (void);
 #endif
 
 /* NOTE: The fake label creation in stabs.c:s_stab_generic() has
@@ -120,7 +121,19 @@ extern void arm_md_end (void);
 
 #define ARM_IS_THUMB(s)		(ARM_GET_FLAG (s) & ARM_FLAG_THUMB)
 #define ARM_IS_INTERWORK(s)	(ARM_GET_FLAG (s) & ARM_FLAG_INTERWORK)
+#ifdef OBJ_ELF
+
+/* For ELF objects THUMB_IS_FUNC is inferred from
+   ARM_IS_TUMB and the function type.  */
+#define THUMB_IS_FUNC(s) \
+  ((arm_is_eabi () \
+    && (ARM_IS_THUMB (s)) \
+    && (symbol_get_bfdsym (s)->flags & BSF_FUNCTION)) \
+   || (ARM_GET_FLAG (s) & THUMB_FLAG_FUNC))
+
+#else
 #define THUMB_IS_FUNC(s)	(ARM_GET_FLAG (s) & THUMB_FLAG_FUNC)
+#endif
 
 #define ARM_SET_THUMB(s,t)      ((t) ? ARM_SET_FLAG (s, ARM_FLAG_THUMB)     : ARM_RESET_FLAG (s, ARM_FLAG_THUMB))
 #define ARM_SET_INTERWORK(s,t)  ((t) ? ARM_SET_FLAG (s, ARM_FLAG_INTERWORK) : ARM_RESET_FLAG (s, ARM_FLAG_INTERWORK))

@@ -458,6 +458,9 @@ between Arm and Thumb instructions and should be used even if
 interworking is not going to be performed.  The presence of this
 directive also implies @code{.thumb}
 
+This directive is not neccessary when generating EABI objects.  On these
+targets the encoding is implicit when generating Thumb code.
+
 @cindex @code{thumb_set} directive, ARM
 @item .thumb_set
 This performs the equivalent of a @code{.set} directive in that it
