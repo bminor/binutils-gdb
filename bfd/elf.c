@@ -2126,13 +2126,11 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	abfd->flags |= HAS_RELOC;
 	return TRUE;
       }
-      break;
 
     case SHT_GNU_verdef:
       elf_dynverdef (abfd) = shindex;
       elf_tdata (abfd)->dynverdef_hdr = *hdr;
       return _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex);
-      break;
 
     case SHT_GNU_versym:
       if (hdr->sh_entsize != sizeof (Elf_External_Versym))

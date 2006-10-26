@@ -1290,7 +1290,6 @@ find_target (const char *name)
 	  while (match->vector == NULL)
 	    ++match;
 	  return match->vector;
-	  break;
 	}
     }
 

@@ -1,5 +1,10 @@
 2006-10-26  Ben Elliston  <bje@au.ibm.com>
 
+	* elf.c (bfd_section_from_shdr): Remove extraneous breaks.
+	* targets.c (find_target): Remove extraneous break.
+
+2006-10-26  Ben Elliston  <bje@au.ibm.com>
+
 	* coff-maxq.c (coff_maxq20_reloc): Remove unused variable `howto'.
 	(struct maxq_reloc_map): Unused; remove.
 	(maxq_reloc_map): Likewise.
