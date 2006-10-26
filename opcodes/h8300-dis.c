@@ -362,7 +362,7 @@ bfd_h8_disassemble (bfd_vma addr, disassemble_info *info, int mach)
   for (qi = h8_instructions; qi->opcode->name; qi++)
     {
       const struct h8_opcode *q = qi->opcode;
-      op_type *nib = q->data.nib;
+      const op_type *nib = q->data.nib;
       unsigned int len = 0;
 
       while (1)
@@ -640,7 +640,7 @@ bfd_h8_disassemble (bfd_vma addr, disassemble_info *info, int mach)
 		    }
 		  if (CONST_STRNEQ (q->name, "mova"))
 		    {
-		      op_type *args = q->args.nib;
+		      const op_type *args = q->args.nib;
 
 		      if (args[1] == (op_type) E)
 			{
@@ -666,7 +666,7 @@ bfd_h8_disassemble (bfd_vma addr, disassemble_info *info, int mach)
 		    }
 		  /* Fill in the args.  */
 		  {
-		    op_type *args = q->args.nib;
+		    const op_type *args = q->args.nib;
 		    int hadone = 0;
 		    int nargs;
 
