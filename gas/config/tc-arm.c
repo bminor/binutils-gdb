@@ -12688,7 +12688,7 @@ do_neon_ext (void)
   struct neon_type_el et = neon_check_type (3, rs,
     N_EQK, N_EQK, N_8 | N_16 | N_32 | N_64 | N_KEY);
   unsigned imm = (inst.operands[3].imm * et.size) / 8;
-  constraint (imm >= 8 * neon_quad (rs), _("shift out of range"));
+  constraint (imm >= (neon_quad (rs) ? 16 : 8), _("shift out of range"));
   inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
   inst.instruction |= HI1 (inst.operands[0].reg) << 22;
   inst.instruction |= LOW4 (inst.operands[1].reg) << 16;
