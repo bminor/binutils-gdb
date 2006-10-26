@@ -1748,11 +1748,13 @@ disassemble_section (bfd *abfd, asection *section, void *info)
 
 	  pinfo->symbols = sorted_syms + place;
 	  pinfo->num_symbols = x - place;
+	  pinfo->symtab_pos = place;
 	}
       else
 	{
 	  pinfo->symbols = NULL;
 	  pinfo->num_symbols = 0;
+	  pinfo->symtab_pos = -1;
 	}
 
       if (! prefix_addresses)
@@ -1945,6 +1947,8 @@ disassemble_data (bfd *abfd)
 		 compare_relocs);
 	}
     }
+  disasm_info.symtab = sorted_syms;
+  disasm_info.symtab_size = sorted_symcount;
 
   bfd_map_over_sections (abfd, disassemble_section, & disasm_info);
 

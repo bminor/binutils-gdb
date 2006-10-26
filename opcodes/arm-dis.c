@@ -1480,6 +1480,11 @@ static unsigned int ifthen_next_state;
 static bfd_vma ifthen_address;
 #define IFTHEN_COND ((ifthen_state >> 4) & 0xf)
 
+/* Cached Thumb state.  */
+int last_is_thumb;
+int last_mapping_sym = -1;
+bfd_vma last_mapping_addr = 0;
+
 
 /* Functions.  */
 int
@@ -3859,6 +3864,39 @@ find_ifthen_state (bfd_vma pc, struct disassemble_info *info,
     ifthen_state = 0;
 }
 
+/* Try to infer the code type (Arm or Thumb) from a symbol.
+   Returns nonzero if is_thumb was set.  */
+
+static int
+get_sym_code_type (struct disassemble_info *info, int n, int *is_thumb)
+{
+  elf_symbol_type *es;
+  unsigned int type;
+  const char *name;
+
+  es = *(elf_symbol_type **)(info->symbols);
+  type = ELF_ST_TYPE (es->internal_elf_sym.st_info);
+
+//printf("Scan %d %s\n", n, bfd_asymbol_name(info->symtab[n]));
+  /* If the symbol has function type then use that.  */
+  if (type == STT_FUNC || type == STT_ARM_TFUNC)
+    {
+      *is_thumb = (type == STT_ARM_TFUNC);
+      return TRUE;
+    }
+
+  /* Check for mapping symbols.  */
+  name = bfd_asymbol_name(info->symtab[n]);
+  if (name[0] == '$' && (name[1] == 'a' || name[1] == 't')
+      && (name[2] == 0 || name[2] == '.'))
+    {
+      *is_thumb = (name[1] == 't');
+      return TRUE;
+    }
+
+  return FALSE;
+}
+
 /* NOTE: There are no checks in these routines that
    the relevant number of data bytes exist.  */
 
@@ -3897,13 +3935,72 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
 	}
       else if (bfd_asymbol_flavour (*info->symbols) == bfd_target_elf_flavour)
 	{
-	  elf_symbol_type *  es;
-	  unsigned int       type;
+	  bfd_vma addr;
+	  int n;
+	  int last_sym;
+	  bfd_boolean found;
 
-	  es = *(elf_symbol_type **)(info->symbols);
-	  type = ELF_ST_TYPE (es->internal_elf_sym.st_info);
+	  if (info->symtab)
+	    {
+	      if (pc <= last_mapping_addr)
+		last_mapping_sym = -1;
+//printf("Mapping %d %d %d\n", last_mapping_sym, info->symtab_pos, info->symtab_size);
+	      is_thumb = last_is_thumb;
+	      found = FALSE;
+	      /* Start scanning at the start of the function, or wherever
+		 we finished last time.  */
+	      n = info->symtab_pos + 1;
+	      if (n < last_mapping_sym)
+		n = last_mapping_sym;
 
-	  is_thumb = (type == STT_ARM_TFUNC) || (type == STT_ARM_16BIT);
+	      /* Scan up to the location being disassembled.  */
+	      for (; n < info->symtab_size; n++)
+		{
+		  addr = bfd_asymbol_value (info->symtab[n]);
+		  if (addr > pc)
+		    break;
+		  if (get_sym_code_type (info, n, &is_thumb))
+		    found = TRUE;
+		}
+
+	      last_sym = n;
+	      if (!found)
+		{
+		  if (last_mapping_sym == -1)
+		    last_mapping_sym = 0;
+		  else
+		    found = TRUE;
+
+		  /* No mapping symbol found at this address.  Look backwards
+		     for a preceeding one.  */
+		  for (n = info->symtab_pos; n >= last_mapping_sym; n--)
+		    {
+		      if (get_sym_code_type (info, n, &is_thumb))
+			{
+			  found = TRUE;
+			  break;
+			}
+		    }
+		}
+
+	      last_mapping_sym = last_sym;
+	      last_is_thumb = is_thumb;
+	    }
+	  else
+	    found = FALSE;
+
+	  /* If no mapping symbol has been found then fall back to the type
+	     of the function symbol.  */
+	  if (!found)
+	    {
+	      elf_symbol_type *  es;
+	      unsigned int       type;
+
+	      es = *(elf_symbol_type **)(info->symbols);
+	      type = ELF_ST_TYPE (es->internal_elf_sym.st_info);
+
+	      is_thumb = (type == STT_ARM_TFUNC) || (type == STT_ARM_16BIT);
+	    }
 	}
     }
 
