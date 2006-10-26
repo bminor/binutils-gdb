@@ -1,5 +1,12 @@
 2006-10-26  Ben Elliston  <bje@au.ibm.com>
 
+	* coff-maxq.c (coff_maxq20_reloc): Remove unused variable `howto'.
+	(struct maxq_reloc_map): Unused; remove.
+	(maxq_reloc_map): Likewise.
+	(maxq_reloc_type_lookup): Remove loop over maxq_reloc_map.
+
+2006-10-26  Ben Elliston  <bje@au.ibm.com>	
+
 	* elf.c (bfd_elf_set_dyn_lib_class): Change second argument type
 	from int to enum dynamic_lib_link_class lib_class.
 	* bfd-in.h (bfd_elf_set_dyn_lib_class): Likewise.

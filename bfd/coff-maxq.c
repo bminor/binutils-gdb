@@ -82,7 +82,6 @@ coff_maxq20_reloc (bfd *      abfd,
 		   bfd *      output_bfd    ATTRIBUTE_UNUSED,
 		   char **    error_message ATTRIBUTE_UNUSED)
 {
-  reloc_howto_type *howto = NULL;
   unsigned char *addr = NULL;
   unsigned long x = 0;
   long call_addr = 0;
@@ -96,7 +95,6 @@ coff_maxq20_reloc (bfd *      abfd,
 
   if (data && reloc_entry)
     {
-      howto = reloc_entry->howto;
       addr = (unsigned char *) data + reloc_entry->address;
       call_addr = call_addr - call_addr;
       call_addr = get_symbol_value (symbol_in);
@@ -374,66 +372,39 @@ static reloc_howto_type howto_table[] =
   EMPTY_HOWTO (10),
 };
 
-/* Map BFD reloc types to MAXQ COFF reloc types.  */
-
-typedef struct maxq_reloc_map
-{
-  bfd_reloc_code_real_type  bfd_reloc_val;
-  unsigned int              maxq_reloc_val;
-  reloc_howto_type *        table;
-}
-reloc_map;
-
-static const reloc_map maxq_reloc_map[] =
-{
-  {BFD_RELOC_16_PCREL_S2, SHORT_JUMP, howto_table},
-  {BFD_RELOC_16,          LONG_JUMP,  howto_table},
-};
-
 static reloc_howto_type *
 maxq_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
 			bfd_reloc_code_real_type code)
 {
-  unsigned int i;
-
-  for (i = 0; i < ARRAY_SIZE (maxq_reloc_map); i++)
+  switch (code)
     {
-      const reloc_map *entry;
-
-      entry = maxq_reloc_map + i;
-
-      switch (code)
-	{
-	  /* SHORT JUMP */
-	case BFD_RELOC_16_PCREL_S2:
-	  return howto_table + 3;
-
-	  /* INTERSEGMENT JUMP */
-	case BFD_RELOC_24:
-	  return howto_table + 4;
-
-	  /* BYTE RELOC */
-	case BFD_RELOC_8:
-	  return howto_table + 7;
-
-	  /* WORD RELOC */
-	case BFD_RELOC_16:
-	  return howto_table + 5;
-
-	  /* LONG RELOC */
-	case BFD_RELOC_32:
-	  return howto_table + 2;
-
-	  /* LONG JUMP */
-	case BFD_RELOC_14:
-	  return howto_table + 6;
-
-	default:
-	  return NULL;
-	}
+      /* SHORT JUMP */
+    case BFD_RELOC_16_PCREL_S2:
+      return howto_table + 3;
+      
+      /* INTERSEGMENT JUMP */
+    case BFD_RELOC_24:
+      return howto_table + 4;
+      
+      /* BYTE RELOC */
+    case BFD_RELOC_8:
+      return howto_table + 7;
+      
+      /* WORD RELOC */
+    case BFD_RELOC_16:
+      return howto_table + 5;
+      
+      /* LONG RELOC */
+    case BFD_RELOC_32:
+      return howto_table + 2;
+      
+      /* LONG JUMP */
+    case BFD_RELOC_14:
+      return howto_table + 6;
+      
+    default:
+      return NULL;
     }
-
-  return NULL;
 }
 
 #define coff_bfd_reloc_type_lookup maxq_reloc_type_lookup
