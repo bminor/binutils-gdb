@@ -3,6 +3,9 @@
 	* dw2gencfi.c (cfi_add_CFA_offset):
 	Assert DWARF2_CIE_DATA_ALIGNMENT is non-zero.
 
+	* write.c (chain_frchains_together_1): Assert that this function
+	never returns a pointer to the auto variable `dummy'.
+
 2006-10-25  Trevor Smigiel  <Trevor_Smigiel@playstation.sony.com>
 	    Yukishige Shibata  <shibata@rd.scei.sony.co.jp>
 	    Nobuhisa Fujinami  <fnami@rd.scei.sony.co.jp>

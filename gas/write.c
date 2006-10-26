@@ -394,6 +394,7 @@ chain_frchains_together_1 (segT section, struct frchain *frchp)
 	}
     }
   assert (prev_frag->fr_type != 0);
+  assert (prev_frag != &dummy);
   prev_frag->fr_next = 0;
   return prev_frag;
 }
