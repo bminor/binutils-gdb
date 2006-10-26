@@ -12682,6 +12682,7 @@ do_neon_ext (void)
   struct neon_type_el et = neon_check_type (3, rs,
     N_EQK, N_EQK, N_8 | N_16 | N_32 | N_64 | N_KEY);
   unsigned imm = (inst.operands[3].imm * et.size) / 8;
+  constraint (imm >= 8 * neon_quad (rs), _("shift out of range"));
   inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
   inst.instruction |= HI1 (inst.operands[0].reg) << 22;
   inst.instruction |= LOW4 (inst.operands[1].reg) << 16;
@@ -15782,8 +15783,8 @@ static const struct asm_opcode insns[] =
  nUF(vmull,     vmull,   3, (RNQ, RND, RND_RNSC), neon_vmull),
 
   /* Extract. Size 8.  */
- NUF(vext,      0b00000, 4, (RNDQ, oRNDQ, RNDQ, I7), neon_ext),
- NUF(vextq,     0b00000, 4, (RNQ,  oRNQ,  RNQ,  I7), neon_ext),
+ NUF(vext,      0b00000, 4, (RNDQ, oRNDQ, RNDQ, I15), neon_ext),
+ NUF(vextq,     0b00000, 4, (RNQ,  oRNQ,  RNQ,  I15), neon_ext),
 
   /* Two registers, miscellaneous.  */
   /* Reverse. Sizes 8 16 32 (must be < size in opcode).  */
