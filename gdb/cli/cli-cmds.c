@@ -122,6 +122,10 @@ struct cmd_list_element *stoplist;
 
 struct cmd_list_element *deletelist;
 
+/* Chain containing all defined detach subcommands. */
+
+struct cmd_list_element *detachlist;
+
 /* Chain containing all defined "enable breakpoint" subcommands. */
 
 struct cmd_list_element *enablebreaklist;
@@ -1089,6 +1093,7 @@ init_cmd_lists (void)
   togglelist = NULL;
   stoplist = NULL;
   deletelist = NULL;
+  detachlist = NULL;
   enablebreaklist = NULL;
   setlist = NULL;
   unsetlist = NULL;

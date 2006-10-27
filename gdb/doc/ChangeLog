@@ -1,3 +1,7 @@
+2006-10-27  Andreas Schwab  <schwab@suse.de>
+
+	* gdb.texinfo (Processes): Rename "detach-fork" to "detach fork".
+
 2006-10-21  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Breakpoints, Set Watchpoints): Elaborate and

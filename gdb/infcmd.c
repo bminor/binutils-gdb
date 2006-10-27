@@ -2123,10 +2123,11 @@ directory, or (if not found there) using the source file search path\n\
 (see the \"directory\" command).  You can also use the \"file\" command\n\
 to specify the program, and to load its symbol table."));
 
-  add_com ("detach", class_run, detach_command, _("\
+  add_prefix_cmd ("detach", class_run, detach_command, _("\
 Detach a process or file previously attached.\n\
 If a process, it is no longer traced, and it continues its execution.  If\n\
-you were debugging a file, the file is closed and gdb no longer accesses it."));
+you were debugging a file, the file is closed and gdb no longer accesses it."),
+		  &detachlist, "detach ", 0, &cmdlist);
 
   add_com ("disconnect", class_run, disconnect_command, _("\
 Disconnect from a target.\n\

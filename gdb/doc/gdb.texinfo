@@ -2574,13 +2574,13 @@ as shown in the first field of the @samp{info forks} display.
 @end table
 
 To quit debugging one of the forked processes, you can either detach
-from it by using the @w{@code{detach-fork}} command (allowing it to
+from it by using the @w{@code{detach fork}} command (allowing it to
 run independently), or delete (and kill) it using the
 @w{@code{delete fork}} command.
 
 @table @code
-@kindex detach-fork @var{fork-id}
-@item detach-fork @var{fork-id}
+@kindex detach fork @var{fork-id}
+@item detach fork @var{fork-id}
 Detach from the process identified by @value{GDBN} fork number
 @var{fork-id}, and remove it from the fork list.  The process will be
 allowed to run independently.

@@ -693,11 +693,12 @@ Argument 'n' is checkpoint ID, as displayed by 'info checkpoints'."));
 Delete a fork/checkpoint (experimental)."),
 	   &deletelist);
 
-  /* Detach-checkpoint command: release the process to run independantly, 
+  /* Detach checkpoint command: release the process to run independently, 
      and remove it from the fork list.  */
 
-  add_com ("detach-checkpoint", class_obscure, detach_fork_command, _("\
-Detach from a fork/checkpoint (experimental)."));
+  add_cmd ("checkpoint", class_obscure, detach_fork_command, _("\
+Detach from a fork/checkpoint (experimental)."),
+	   &detachlist);
 
   /* Info checkpoints command: list all forks/checkpoints 
      currently under gdb's control.  */
@@ -709,7 +710,7 @@ Detach from a fork/checkpoint (experimental)."));
      interchangeably).  */
 
   add_alias_cmd ("fork", "checkpoint", class_obscure, 1, &deletelist);
-  add_com_alias ("detach-fork", "detach-checkpoint", class_obscure, 1);
+  add_alias_cmd ("fork", "checkpoint", class_obscure, 1, &detachlist);
   add_info_alias ("forks", "checkpoints", 0);
 
   /* "fork <n>" (by analogy to "thread <n>").  */

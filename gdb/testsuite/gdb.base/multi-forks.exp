@@ -128,14 +128,14 @@ gdb_test "restart 0" " main .*" "restart final"
 #
 
 # 
-# Test detach-fork
+# Test detach fork
 # 
 
 # [assumes we're at #0]
-gdb_test "detach-fork 1" "Detached .*" "Detach 1"
-gdb_test "detach-fork 2" "Detached .*" "Detach 2"
-gdb_test "detach-fork 3" "Detached .*" "Detach 3"
-gdb_test "detach-fork 4" "Detached .*" "Detach 4"
+gdb_test "detach fork 1" "Detached .*" "Detach 1"
+gdb_test "detach fork 2" "Detached .*" "Detach 2"
+gdb_test "detach fork 3" "Detached .*" "Detach 3"
+gdb_test "detach fork 4" "Detached .*" "Detach 4"
 
 # 
 # Test delete fork

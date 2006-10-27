@@ -50,6 +50,10 @@ extern struct cmd_list_element *disablelist;
 
 extern struct cmd_list_element *deletelist;
 
+/* Chain containing all defined detach subcommands.  */
+
+extern struct cmd_list_element *detachlist;
+
 /* Chain containing all defined toggle subcommands.  */
 
 extern struct cmd_list_element *togglelist;
