@@ -5950,9 +5950,17 @@ _bfd_elf_init_private_section_data (bfd *ibfd,
      output BFD section flags have been set to something different.
      elf_fake_sections will set ELF section type based on BFD
      section flags.  */
-  if (osec->flags == isec->flags
-      || (osec->flags == 0 && elf_section_type (osec) == SHT_NULL))
-    elf_section_type (osec) = elf_section_type (isec);
+  if (osec->flags == isec->flags || !osec->flags)
+    {
+      BFD_ASSERT (osec->flags == isec->flags 
+		  || (!osec->flags
+		      && elf_section_type (osec) == SHT_NULL));
+      elf_section_type (osec) = elf_section_type (isec);
+    }
+
+  /* FIXME: Is this correct for all OS/PROC specific flags?  */
+  elf_section_flags (osec) |= (elf_section_flags (isec)
+			       & (SHF_MASKOS | SHF_MASKPROC));
 
   /* Set things up for objcopy and relocatable link.  The output
      SHT_GROUP section will have its elf_next_in_group pointing back

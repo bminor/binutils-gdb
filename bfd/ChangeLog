@@ -1,3 +1,9 @@
+2006-10-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf.c (_bfd_elf_init_private_section_data): Assert output
+	section ELF type instead of check if it is SHT_NULL.  Copy
+	OS/PROC specific flags from input section to output section.
+
 2006-10-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* section.c (SEC_KEEP): Update comment.
