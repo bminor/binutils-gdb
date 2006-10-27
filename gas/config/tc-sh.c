@@ -2865,6 +2865,9 @@ md_assemble (char *str)
 	    as_bad (_("Delayed branches not available on SH1"));
 	  parse_exp (op_end + 1, &operand[0]);
 	  build_relax (opcode, &operand[0]);
+
+	  /* All branches are currently 16 bit.  */
+	  size = 2;
 	}
       else
 	{
