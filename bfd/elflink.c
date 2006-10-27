@@ -9794,7 +9794,7 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
 	continue;
 
       for (o = sub->sections; o != NULL; o = o->next)
-	if ((o->flags & SEC_KEEP) != 0 && !o->gc_mark)
+	if ((o->flags & (SEC_EXCLUDE | SEC_KEEP)) == SEC_KEEP && !o->gc_mark)
 	  if (!_bfd_elf_gc_mark (info, o, gc_mark_hook))
 	    return FALSE;
     }

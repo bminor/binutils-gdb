@@ -1214,7 +1214,7 @@ ${ELF_INTERPRETER_SET_DEFAULT}
 
 	/* Also set SEC_EXCLUDE, so that symbols defined in the warning
 	   section don't get copied to the output.  */
-	s->flags |= SEC_EXCLUDE;
+	s->flags |= SEC_EXCLUDE | SEC_KEEP;
       }
   }
 

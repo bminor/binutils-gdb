@@ -1,3 +1,11 @@
+2006-10-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (lang_map): Don't say SEC_LINKER_CREATED and SEC_KEEP
+	sections have been discarded.
+	(lang_do_version_exports_section): Set SEC_KEEP on export section.
+	* emultempl/elf32.em (before_allocation): Set SEC_KEEP on warning
+	sections.
+
 2006-10-26  Joseph S. Myers  <joseph@codesourcery.com>
             Mark Mitchell  <mark@codesourcery.com>
 

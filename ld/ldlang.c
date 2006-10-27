@@ -1736,8 +1736,9 @@ lang_map (void)
 	continue;
 
       for (s = file->the_bfd->sections; s != NULL; s = s->next)
-	if (s->output_section == NULL
-	    || s->output_section->owner != output_bfd)
+	if ((s->output_section == NULL
+	     || s->output_section->owner != output_bfd)
+	    && (s->flags & (SEC_LINKER_CREATED | SEC_KEEP)) == 0)
 	  {
 	    if (! dis_header_printed)
 	      {
@@ -4629,7 +4630,7 @@ lang_size_sections_1
 			   &newdot);
 
 	    /* This symbol is relative to this section.  */
-	    if ((tree->type.node_class == etree_provided 
+	    if ((tree->type.node_class == etree_provided
 		 || tree->type.node_class == etree_assign)
 		&& (tree->assign.dst [0] != '.'
 		    || tree->assign.dst [1] != '\0'))
@@ -6922,7 +6923,7 @@ lang_do_version_exports_section (void)
       /* Do not free the contents, as we used them creating the regex.  */
 
       /* Do not include this section in the link.  */
-      sec->flags |= SEC_EXCLUDE;
+      sec->flags |= SEC_EXCLUDE | SEC_KEEP;
     }
 
   lreg = lang_new_vers_pattern (NULL, "*", NULL, FALSE);

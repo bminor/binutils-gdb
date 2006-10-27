@@ -766,7 +766,7 @@ _bfd_merge_sections (bfd *abfd ATTRIBUTE_UNUSED,
 	   the hash table at all.  */
 	for (secinfo = sinfo->chain; secinfo; secinfo = secinfo->next)
 	  if (secinfo->first_str == NULL)
-	    secinfo->sec->flags |= SEC_EXCLUDE;
+	    secinfo->sec->flags |= SEC_EXCLUDE | SEC_KEEP;
     }
 
   return TRUE;

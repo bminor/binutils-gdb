@@ -1255,7 +1255,9 @@ typedef struct bfd_section
      else up the line will take care of it later.  */
 #define SEC_LINKER_CREATED 0x200000
 
-  /* This section should not be subject to garbage collection.  */
+  /* This section should not be subject to garbage collection.
+     Also set to inform the linker that this section should not be
+     listed in the link map as discarded.  */
 #define SEC_KEEP 0x400000
 
   /* This section contains "short" data, and should be placed

@@ -1,3 +1,12 @@
+2006-10-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* section.c (SEC_KEEP): Update comment.
+	* bfd-in2.h: Regenerate.
+	* elflink.c (bfd_elf_gc_sections): Ignore SEC_EXCLUDE sections.
+	* merge.c (_bfd_merge_sections): Set SEC_KEEP on excluded sections.
+	* stabs.c (_bfd_discard_section_stabs): Likewise.
+	(_bfd_link_section_stabs): Likewise.  Simplify abs_section check.
+
 2006-10-26  Ben Elliston  <bje@au.ibm.com>
 
 	* reloc.c (_bfd_relocate_contents): Remove explicit case 0.
@@ -12,7 +21,7 @@
 	(maxq_reloc_map): Likewise.
 	(maxq_reloc_type_lookup): Remove loop over maxq_reloc_map.
 
-2006-10-26  Ben Elliston  <bje@au.ibm.com>	
+2006-10-26  Ben Elliston  <bje@au.ibm.com>
 
 	* elf.c (bfd_elf_set_dyn_lib_class): Change second argument type
 	from int to enum dynamic_lib_link_class lib_class.
