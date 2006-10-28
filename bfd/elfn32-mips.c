@@ -754,6 +754,21 @@ static reloc_howto_type elf_mips_howto_table_rel[] =
 	 0x0000ffff,		/* src_mask */
 	 0x0000ffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
+
+  /* 32 bit relocation with no addend.  */
+  HOWTO (R_MIPS_GLOB_DAT,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 _bfd_mips_elf_generic_reloc, /* special_function */
+	 "R_MIPS_GLOB_DAT",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0x0,			/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 };
 
 /* The relocation table used for SHT_RELA sections.  */
@@ -1426,6 +1441,21 @@ static reloc_howto_type elf_mips_howto_table_rela[] =
 	 TRUE,			/* partial_inplace */
 	 0x0000ffff,		/* src_mask */
 	 0x0000ffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* 32 bit relocation with no addend.  */
+  HOWTO (R_MIPS_GLOB_DAT,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 _bfd_mips_elf_generic_reloc, /* special_function */
+	 "R_MIPS_GLOB_DAT",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0x0,			/* src_mask */
+	 0xffffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 };
 

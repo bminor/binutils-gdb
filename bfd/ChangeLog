@@ -1,3 +1,11 @@
+2006-10-28  Richard Sandiford  <richard@codesourcery.com>
+
+	* elf32-mips.c (elf_mips_howto_table_rel): Add R_MIPS_GLOB_DAT.
+	* elfn32-mips.c (elf_mips_howto_table_rel): Likewise.
+	(elf_mips_howto_table_rela): Likewise.
+	* elf64-mips.c (mips_elf64_howto_table_rel): Likewise.
+	(mips_elf64_howto_table_rela): Likewise.
+
 2006-10-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf.c (_bfd_elf_init_private_section_data): Assert output
