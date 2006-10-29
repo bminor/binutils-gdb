@@ -5997,8 +5997,8 @@ copy_eabi_attributes (bfd *ibfd, bfd *obfd)
   aeabi_attribute_list *list;
   int i;
 
-  in_attr = elf32_arm_tdata (ibfd)->known_eabi_attributes;
-  out_attr = elf32_arm_tdata (obfd)->known_eabi_attributes;
+  in_attr = &elf32_arm_tdata (ibfd)->known_eabi_attributes[4];
+  out_attr = &elf32_arm_tdata (obfd)->known_eabi_attributes[4];
   for (i = 4; i < NUM_KNOWN_ATTRIBUTES; i++)
     {
       out_attr->i = in_attr->i;
@@ -6129,16 +6129,17 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
   static const int order_312[3] = {3, 1, 2};
   int i;
 
-  if (!elf32_arm_tdata (ibfd)->known_eabi_attributes[0].i)
+  if (!elf32_arm_tdata (obfd)->known_eabi_attributes[0].i)
     {
       /* This is the first object.  Copy the attributes.  */
       copy_eabi_attributes (ibfd, obfd);
+
+      /* Use the Tag_null value to indicate the attributes have been
+	 initialized.  */
+      elf32_arm_tdata (obfd)->known_eabi_attributes[0].i = 1;
+
       return TRUE;
     }
-
-  /* Use the Tag_null value to indicate the attributes have been
-     initialized.  */
-  elf32_arm_tdata (ibfd)->known_eabi_attributes[0].i = 1;
 
   in_attr = elf32_arm_tdata (ibfd)->known_eabi_attributes;
   out_attr = elf32_arm_tdata (obfd)->known_eabi_attributes;
@@ -6164,8 +6165,11 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	{
 	case Tag_CPU_raw_name:
 	case Tag_CPU_name:
-	  /* Use whichever has the greatest architecture requirements.  */
-	  if (in_attr[Tag_CPU_arch].i > out_attr[Tag_CPU_arch].i)
+	  /* Use whichever has the greatest architecture requirements.  We
+	     won't necessarily have both the above tags, so make sure input
+	     name is non-NULL.  */
+	  if (in_attr[Tag_CPU_arch].i > out_attr[Tag_CPU_arch].i
+	      && in_attr[i].s)
 	    out_attr[i].s = attr_strdup(obfd, in_attr[i].s);
 	  break;
 
@@ -6217,7 +6221,8 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	    }
 	  break;
 	case Tag_ABI_PCS_R9_use:
-	  if (out_attr[i].i != AEABI_R9_unused
+	  if (in_attr[i].i != out_attr[i].i
+	      && out_attr[i].i != AEABI_R9_unused
 	      && in_attr[i].i != AEABI_R9_unused)
 	    {
 	      _bfd_error_handler
