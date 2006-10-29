@@ -2080,16 +2080,17 @@ make_singleton_name_thunk (const char *import, bfd *parent)
   quick_symbol (abfd, U ("_nm_thnk_"), import, "", id4, BSF_GLOBAL, 0);
   quick_symbol (abfd, U ("_nm_"), import, "", UNDSEC, BSF_GLOBAL, 0);
 
-  bfd_set_section_size (abfd, id4, PE_IDATA4_SIZE);
-  d4 = xmalloc (PE_IDATA4_SIZE);
+  /* We need space for the real thunk and for the null terminator.  */
+  bfd_set_section_size (abfd, id4, PE_IDATA4_SIZE * 2);
+  d4 = xmalloc (PE_IDATA4_SIZE * 2);
   id4->contents = d4;
-  memset (d4, 0, PE_IDATA4_SIZE);
+  memset (d4, 0, PE_IDATA4_SIZE * 2);
   quick_reloc (abfd, 0, BFD_RELOC_RVA, 2);
   save_relocs (id4);
 
   bfd_set_symtab (abfd, symtab, symptr);
 
-  bfd_set_section_contents (abfd, id4, d4, 0, PE_IDATA4_SIZE);
+  bfd_set_section_contents (abfd, id4, d4, 0, PE_IDATA4_SIZE * 2);
 
   bfd_make_readable (abfd);
   return abfd;
