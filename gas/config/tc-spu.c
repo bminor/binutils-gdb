@@ -333,7 +333,7 @@ md_assemble (char *op)
       const char *d = syntax_error_param;
       while (*d != '$')
 	d--;
-      as_warn (_("Treating '%-*s' as a symbol."), syntax_error_param - d, d);
+      as_warn (_("Treating '%-*s' as a symbol."), (int)(syntax_error_param - d), d);
     }
 
   /* grow the current frag and plop in the opcode */
