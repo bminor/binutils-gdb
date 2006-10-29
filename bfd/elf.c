@@ -8120,7 +8120,7 @@ elfcore_write_note (bfd  *abfd,
 
       namesz = strlen (name) + 1;
       bed = get_elf_backend_data (abfd);
-      pad = -namesz & ((1 << bed->s->log_file_align) - 1);
+      pad = -namesz & 3;
     }
 
   newspace = 12 + namesz + pad + size;

@@ -1,3 +1,7 @@
+2006-10-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (elfcore_write_note): Pad to 4-byte boundary.
+
 2006-10-28  Richard Sandiford  <richard@codesourcery.com>
 
 	* elf32-mips.c (elf_mips_howto_table_rel): Add R_MIPS_GLOB_DAT.
