@@ -1,3 +1,15 @@
+2006-10-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/3384
+	* configure.in (AC_CHECK_HEADERS): Add limits.h and sys/param.h.
+	* configure: Regenerated.
+	* config.in: Likewise.
+
+	* readelf.c: Include <limits.h> and <sys/param.h> for PATH_MAX.
+	(program_interpreter): Allocate PATH_MAX bytes instead of 64.
+	(process_program_headers): Don't assume that program interpreter
+	is shorter than 64 characters.
+
 2006-10-25  Trevor Smigiel  <Trevor_Smigiel@playstation.sony.com>
 	    Yukishige Shibata  <shibata@rd.scei.sony.co.jp>
 	    Nobuhisa Fujinami  <fnami@rd.scei.sony.co.jp>

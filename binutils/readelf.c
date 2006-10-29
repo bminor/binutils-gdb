@@ -47,6 +47,25 @@
 #include <stdio.h>
 #include <time.h>
 
+/* for PATH_MAX */
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
+
+#ifndef PATH_MAX
+/* for MAXPATHLEN */
+# ifdef HAVE_SYS_PARAM_H
+#  include <sys/param.h>
+# endif
+# ifndef PATH_MAX
+#  ifdef MAXPATHLEN
+#   define PATH_MAX MAXPATHLEN
+#  else
+#   define PATH_MAX 1024
+#  endif
+# endif
+#endif
+
 #if __GNUC__ >= 2
 /* Define BFD64 here, even if our default architecture is 32 bit ELF
    as this will allow us to read in and parse 64bit and 32bit ELF files.
@@ -135,7 +154,7 @@ static Elf_Internal_Sym *dynamic_symbols;
 static Elf_Internal_Syminfo *dynamic_syminfo;
 static unsigned long dynamic_syminfo_offset;
 static unsigned int dynamic_syminfo_nent;
-static char program_interpreter[64];
+static char program_interpreter[PATH_MAX];
 static bfd_vma dynamic_info[DT_JMPREL + 1];
 static bfd_vma dynamic_info_DT_GNU_HASH;
 static bfd_vma version_info[16];
@@ -3492,8 +3511,14 @@ process_program_headers (FILE *file)
 	    error (_("Unable to find program interpreter name\n"));
 	  else
 	    {
+	      char fmt [32];
+	      int ret = snprintf (fmt, sizeof (fmt), "%%%ds", PATH_MAX);
+
+	      if (ret >= (int) sizeof (fmt) || ret < 0)
+		error (_("Internal error: failed to create format string to display program interpreter"));
+
 	      program_interpreter[0] = 0;
-	      fscanf (file, "%63s", program_interpreter);
+	      fscanf (file, fmt, program_interpreter);
 
 	      if (do_segments)
 		printf (_("\n      [Requesting program interpreter: %s]"),
