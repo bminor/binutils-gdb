@@ -1,3 +1,14 @@
+2006-10-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/3111
+	* ld.h (args_type): Remove reduce_memory_overheads.
+
+	* ldlang.c (lang_map): Updated.
+	(section_already_linked): Likewise.
+	(print_input_section): Likewise.
+	* ldmain.c (main): Likewise.
+	* lexsup.c (parse_args): Likewise.
+
 2006-10-29  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* pe-dll.c (make_singleton_name_thunk): Re-add the NULL terminator.

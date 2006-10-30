@@ -1,3 +1,38 @@
+bfd/
+
+2006-10-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/3111
+	* elf-bfd.h (elf_obj_tdata): Add symbuf.
+	(_bfd_elf_section_already_linked): Add struct bfd_link_info *.
+	(_bfd_elf_check_kept_section): Likewise.
+	(bfd_elf_match_symbols_in_sections): Likewise.
+
+	* elf.c (assign_section_numbers): Updated to add
+	struct bfd_link_info *.
+	(bfd_elf_match_symbols_in_sections): Updated. Cache symbol
+	buffer if info->reduce_memory_overheads is false.
+
+	* elflink.c (match_group_member): Updated to add
+	struct bfd_link_info *.
+	(_bfd_elf_check_kept_section): Likewise.
+	(elf_link_input_bfd): Likewise.
+	(_bfd_elf_section_already_linked): Likewise.
+	(bfd_elf_final_link): Free symbol buffer if
+	info->reduce_memory_overheads is false.
+
+	* libbfd-in.h (_bfd_nolink_section_already_linked): Add
+	struct bfd_link_info *.
+	(_bfd_generic_section_already_linked): Likewise.
+	* libbfd.h: Regenerated.
+
+	* linker.c (bfd_section_already_linked): Add
+	struct bfd_link_info *.
+	(_bfd_generic_section_already_linked): Likewise.
+	* targets.c (bfd_target): Add struct bfd_link_info * to
+	_section_already_linked.
+	* bfd-in2.h: Regenerated.
+
 2006-10-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* bfd.c (bfd_error_type): Add bfd_error_on_input.

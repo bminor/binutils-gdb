@@ -256,7 +256,6 @@ main (int argc, char **argv)
   command_line.warn_mismatch = TRUE;
   command_line.check_section_addresses = TRUE;
   command_line.accept_unknown_input_arch = FALSE;
-  command_line.reduce_memory_overheads = FALSE;
 
   sort_section = none;
 
@@ -320,6 +319,7 @@ main (int argc, char **argv)
   link_info.gc_sections = FALSE;
   link_info.print_gc_sections = FALSE;
   link_info.dynamic = NULL;
+  link_info.reduce_memory_overheads = FALSE;
 
   config.maxpagesize = 0;
   config.commonpagesize = 0;
