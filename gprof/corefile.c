@@ -25,6 +25,7 @@
 #include "search_list.h"
 #include "source.h"
 #include "symtab.h"
+#include "hist.h"
 #include "corefile.h"
 
 bfd *core_bfd;
@@ -262,6 +263,11 @@ core_get_text_space (bfd *cbfd)
 void
 find_call (Sym *parent, bfd_vma p_lowpc, bfd_vma p_highpc)
 {
+  if (core_text_space == 0)
+    return;
+
+  hist_clip_symbol_address (&p_lowpc, &p_highpc);
+
   switch (bfd_get_arch (core_bfd))
     {
     case bfd_arch_i386:

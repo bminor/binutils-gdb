@@ -78,6 +78,7 @@ c54x*)		 targ_archs=bfd_tic54x_arch ;;
 crisv32)	 targ_archs=bfd_cris_arch ;;
 crx*)		 targ_archs=bfd_crx_arch ;;
 dlx*)		 targ_archs=bfd_dlx_arch ;;
+fido*)		 targ_archs=bfd_m68k_arch ;;
 hppa*)		 targ_archs=bfd_hppa_arch ;;
 i[3-7]86)	 targ_archs=bfd_i386_arch ;;
 i370)		 targ_archs=bfd_i370_arch ;;
@@ -363,6 +364,11 @@ case "${targ}" in
 
   d30v-*-*)
     targ_defvec=bfd_elf32_d30v_vec
+    ;;
+
+  fido-*-elf* )
+    targ_defvec=bfd_elf32_m68k_vec
+    targ_selvecs="m68kcoff_vec ieee_vec"
     ;;
 
   fr30-*-elf)

@@ -243,6 +243,10 @@ static const enum m68k_register mcfv4e_ctrl[] = {
   PCR3U0, PCR3L0, PCR3U1, PCR3L1,
   0
 };
+static const enum m68k_register fido_ctrl[] = {
+  SFC, DFC, USP, VBR, CAC, MBB,
+  0
+};
 #define cpu32_ctrl m68010_ctrl
 
 static const enum m68k_register *control_regs;
@@ -296,7 +300,7 @@ struct m68k_it
   reloc[5];			/* Five is enough???  */
 };
 
-#define cpu_of_arch(x)		((x) & (m68000up | mcfisa_a))
+#define cpu_of_arch(x)		((x) & (m68000up | mcfisa_a | fido_a))
 #define float_of_arch(x)	((x) & mfloat)
 #define mmu_of_arch(x)		((x) & mmmu)
 #define arch_coldfire_p(x)	((x) & mcfisa_a)
@@ -433,6 +437,7 @@ static const struct m68k_cpu m68k_archs[] =
   {m68040,					m68040_ctrl, "68040", 0},
   {m68060,					m68060_ctrl, "68060", 0},
   {cpu32|m68881,				cpu32_ctrl, "cpu32", 0},
+  {cpu32|fido_a,				fido_ctrl, "fidoa", 0},
   {mcfisa_a|mcfhwdiv,				NULL, "isaa", 0},
   {mcfisa_a|mcfhwdiv|mcfisa_aa|mcfusp,		NULL, "isaaplus", 0},
   {mcfisa_a|mcfhwdiv|mcfisa_b|mcfusp,		NULL, "isab", 0},
@@ -575,6 +580,8 @@ static const struct m68k_cpu m68k_cpus[] =
   {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5485", -1},
   {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "548x", 0},
   
+  {cpu32|fido_a,				fido_ctrl, "fido", 1},
+
   {0,NULL,NULL, 0}
   };
 
@@ -1153,6 +1160,21 @@ m68k_ip (char *instring)
   *p = '\0';
   opcode = (const struct m68k_incant *) hash_find (op_hash, instring);
   *p = c;
+
+  /* Fido does not support certain instructions.  Warn about uses
+     of those instructions.  */
+  if ((cpu_of_arch (current_architecture) & fido_a) != 0)
+    {
+      /* Recognize tbl[su]{n,}[bwl].  */
+      if (strncmp (instring, "tbl", 3) == 0
+	  && (instring[3] == 's' || instring[3] == 'u')
+	  && ((strchr ("bwl", instring[4]) != 0
+	       && instring[5] == '\0')
+	      || (instring[4] == 'n'
+		  && strchr ("bwl", instring[5]) != 0
+		  && instring[6] == '\0')))
+	as_warn (_("'%s' not supported on Fido"), instring);
+    }
 
   if (pdot != NULL)
     {
@@ -3094,6 +3116,12 @@ m68k_ip (char *instring)
             case PCR3U1:
               tmpreg = 0xD0F;
               break;
+            case CAC:
+              tmpreg = 0xFFE;
+              break;
+            case MBB:
+              tmpreg = 0xFFF;
+              break;
 	    default:
 	      abort ();
 	    }
@@ -3818,6 +3846,9 @@ static const struct init_entry init_table[] =
   { "rambar",   RAMBAR },  	/* mcf528x registers.  */
 
   { "mbar2",    MBAR2 },  	/* mcf5249 registers.  */
+
+  { "cac",    CAC },  		/* fido registers.  */
+  { "mbb",    MBB },  		/* fido registers.  */
   /* End of control registers.  */
 
   { "ac", AC },
