@@ -3366,6 +3366,9 @@ elf32_arm_to_thumb_export_stub (struct elf_link_hash_entry *h, void * inf)
   BFD_ASSERT (s->output_section != NULL);
 
   sec = eh->export_glue->root.u.def.section;
+
+  BFD_ASSERT (sec->output_section != NULL);
+
   val = eh->export_glue->root.u.def.value + sec->output_offset
 	+ sec->output_section->vma;
   myh = elf32_arm_create_thumb_stub (info, h->root.root.string,
@@ -7724,6 +7727,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 
   /* Allocate stubs for exported Thumb functions on v4t.  */
   if (!htab->use_blx && h->dynindx != -1
+      && h->def_regular
       && ELF_ST_TYPE (h->type) == STT_ARM_TFUNC
       && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
     {
