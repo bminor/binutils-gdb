@@ -1,5 +1,14 @@
 2006-10-30  Alan Modra  <amodra@bigpond.net.au>
 
+	* bfd.c (bfd_error_type): Add bfd_error_on_input.
+	(input_bfd, input_error): New static vars.
+	(bfd_set_error): Handle bfd_error_on_input.
+	(bfd_errmsg): Likewise.
+	(bfd_perror): Simplify.
+	* archive.c (_bfd_write_archive_contents): Report errors on input.
+
+2006-10-30  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf.c (elfcore_write_note): Pad to 4-byte boundary.
 
 2006-10-28  Richard Sandiford  <richard@codesourcery.com>

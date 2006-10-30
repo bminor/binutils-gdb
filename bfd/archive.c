@@ -1,6 +1,6 @@
 /* BFD back-end for archive files (libraries).
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005
+   2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
    Written by Cygnus Support.  Mostly Gumby Henkel-Wallace's fault.
 
@@ -1647,14 +1647,14 @@ _bfd_write_archive_contents (bfd *arch)
       if (bfd_write_p (current))
 	{
 	  bfd_set_error (bfd_error_invalid_operation);
-	  return FALSE;
+	  goto input_err;
 	}
       if (!current->arelt_data)
 	{
 	  current->arelt_data =
 	    bfd_ar_hdr_from_filesystem (arch, current->filename, current);
 	  if (!current->arelt_data)
-	    return FALSE;
+	    goto input_err;
 
 	  /* Put in the file name.  */
 	  BFD_SEND (arch, _bfd_truncate_arname,
@@ -1716,7 +1716,7 @@ _bfd_write_archive_contents (bfd *arch)
 	  != sizeof (*hdr))
 	return FALSE;
       if (bfd_seek (current, (file_ptr) 0, SEEK_SET) != 0)
-	return FALSE;
+	goto input_err;
       while (remaining)
 	{
 	  unsigned int amt = DEFAULT_BUFFERSIZE;
@@ -1726,8 +1726,8 @@ _bfd_write_archive_contents (bfd *arch)
 	  if (bfd_bread (buffer, amt, current) != amt)
 	    {
 	      if (bfd_get_error () != bfd_error_system_call)
-		bfd_set_error (bfd_error_malformed_archive);
-	      return FALSE;
+		bfd_set_error (bfd_error_file_truncated);
+	      goto input_err;
 	    }
 	  if (bfd_bwrite (buffer, amt, arch) != amt)
 	    return FALSE;
@@ -1760,6 +1760,10 @@ _bfd_write_archive_contents (bfd *arch)
     }
 
   return TRUE;
+
+ input_err:
+  bfd_set_error (bfd_error_on_input, current, bfd_get_error ());
+  return FALSE;
 }
 
 /* Note that the namidx for the first symbol is 0.  */
