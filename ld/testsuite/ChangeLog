@@ -1,3 +1,12 @@
+2006-10-29  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* ld-sh/sh64/abi32.xd, ld-sh/sh64/abi64.xd, ld-sh/sh64/cmpct1.xd,
+	* ld-sh/sh64/crange1.rd, ld-sh/sh64/crange2.rd,
+	* ld-sh/sh64/crange3-cmpct.rd, ld-sh/sh64/crange3-media.rd,
+	* ld-sh/sh64/crange3.rd, ld-sh/sh64/mix1.xd, ld-sh/sh64/mix2.xd,
+	* ld-sh/sh64/shdl32.xd, ld-sh/sh64/shdl64.xd: Update for removal
+	of empty sections.
+
 2006-10-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-spu/ovl.d: New file.

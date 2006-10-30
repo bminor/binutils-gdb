@@ -29,16 +29,16 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .*: 0000102c     0 NOTYPE  LOCAL  DEFAULT \[<other>: 4\]     2 sec2
 .*: 00001040     0 NOTYPE  LOCAL  DEFAULT    2 sec3
 .*: 00001048     0 NOTYPE  LOCAL  DEFAULT    2 sec4
-.*: 000010e0     0 NOTYPE  GLOBAL DEFAULT    2 ___dtors
+.*: 000010e0     0 NOTYPE  GLOBAL DEFAULT    .* ___dtors
 .*: 000010e0     0 NOTYPE  GLOBAL DEFAULT  ABS __bss_start
-.*: 000010e0     0 NOTYPE  GLOBAL DEFAULT    2 ___ctors_end
+.*: 000010e0     0 NOTYPE  GLOBAL DEFAULT    .* ___ctors_end
 .*: 00001004     0 NOTYPE  GLOBAL DEFAULT    2 diversion2
-.*: 000010e0     0 NOTYPE  GLOBAL DEFAULT    2 ___ctors
+.*: 000010e0     0 NOTYPE  GLOBAL DEFAULT    .* ___ctors
 .*: 000010e0     0 NOTYPE  GLOBAL DEFAULT  ABS _edata
 .*: 000010e0     0 NOTYPE  GLOBAL DEFAULT  ABS _end
 .*: 00001000     0 NOTYPE  GLOBAL DEFAULT \[<other>: 4\]     1 start
 .*: 00080000     0 NOTYPE  GLOBAL DEFAULT    3 _stack
-.*: 000010e0     0 NOTYPE  GLOBAL DEFAULT    2 ___dtors_end
+.*: 000010e0     0 NOTYPE  GLOBAL DEFAULT    .* ___dtors_end
 
 Hex dump of section '\.text':
   0x00001004 6ff0fff0 6ff0fff0 6ff0fff0 0000002a .*
