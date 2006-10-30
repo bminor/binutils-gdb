@@ -1,3 +1,15 @@
+2006-10-29  Randolph Chung  <tausq@debian.org>
+
+	* config/tc-hppa.c (hppa_cfi_frame_initial_instructions)
+	(hppa_regname_to_dw2regnum): New funcions.
+	* config/tc-hppa.h [OBJ_ELF] (TARGET_USE_CFIPOP): Define.
+	(tc_cfi_frame_initial_instructions)
+	(tc_regname_to_dw2regnum): Define.
+	(hppa_cfi_frame_initial_instructions)
+	(hppa_regname_to_dw2regnum): Declare.
+	(DWARF2_LINE_MIN_INSN_LENGTH, DWARF2_DEFAULT_RETURN_COLUMN)
+	(DWARF2_CIE_DATA_ALIGNMENT): Define.
+
 2006-10-29  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-spu.c (md_assemble): Cast printf string size parameter

@@ -25,6 +25,7 @@
 #include "as.h"
 #include "safe-ctype.h"
 #include "subsegs.h"
+#include "dw2gencfi.h"
 
 #include "bfd/libhppa.h"
 
@@ -8690,3 +8691,45 @@ const pseudo_typeS md_pseudo_table[] =
   {"word", pa_cons, 4},
   {NULL, 0, 0}
 };
+
+#ifdef OBJ_ELF
+void
+hppa_cfi_frame_initial_instructions (void)
+{
+  cfi_add_CFA_def_cfa (30, 0);
+}
+
+int
+hppa_regname_to_dw2regnum (char *regname)
+{
+  unsigned int regnum = -1;
+  unsigned int i;
+  const char *p;
+  char *q;
+  static struct { char *name; int dw2regnum; } regnames[] =
+    {
+      { "sp", 30 }, { "rp", 2 },
+    };
+
+  for (i = 0; i < ARRAY_SIZE (regnames); ++i)
+    if (strcmp (regnames[i].name, regname) == 0)
+      return regnames[i].dw2regnum;
+
+  if (regname[0] == 'r')
+    {
+      p = regname + 1;
+      regnum = strtoul (p, &q, 10);
+      if (p == q || *q || regnum >= 32)
+	return -1;
+    }
+  else if (regname[0] == 'f' && regname[1] == 'r')
+    {
+      p = regname + 2;
+      regnum = strtoul (p, &q, 10);
+      if (p == q || *q || regnum <= 4 || regnum >= 32)
+	return -1;
+      regnum += 32 - 4;
+    }
+  return regnum;
+}
+#endif

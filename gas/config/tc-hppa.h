@@ -201,4 +201,22 @@ int hppa_force_reg_syms_absolute (expressionS *, operatorT, expressionS *);
 #define TC_FIX_TYPE PTR
 #define TC_INIT_FIX_DATA(FIX) ((FIX)->tc_fix_data = NULL)
 
+#ifdef OBJ_ELF
+#define TARGET_USE_CFIPOP 1
+
+#define tc_cfi_frame_initial_instructions hppa_cfi_frame_initial_instructions
+extern void hppa_cfi_frame_initial_instructions (void);
+
+#define tc_regname_to_dw2regnum hppa_regname_to_dw2regnum
+extern int hppa_regname_to_dw2regnum (char *regname);
+
+#define DWARF2_LINE_MIN_INSN_LENGTH 4
+#define DWARF2_DEFAULT_RETURN_COLUMN 2
+#if TARGET_ARCH_SIZE == 64
+#define DWARF2_CIE_DATA_ALIGNMENT -8
+#else
+#define DWARF2_CIE_DATA_ALIGNMENT -4
+#endif
+#endif
+
 #endif /* _TC_HPPA_H */
