@@ -6,6 +6,7 @@
 	(bfd_errmsg): Likewise.
 	(bfd_perror): Simplify.
 	* archive.c (_bfd_write_archive_contents): Report errors on input.
+	* bfd-in2.h: Regenerate.
 
 2006-10-30  Alan Modra  <amodra@bigpond.net.au>
 
