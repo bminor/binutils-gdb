@@ -8973,7 +8973,7 @@ do_t_cpy (void)
 }
 
 static void
-do_t_czb (void)
+do_t_cbz (void)
 {
   constraint (current_it_mask, BAD_NOT_IT);
   constraint (inst.operands[0].reg > 7, BAD_HIREG);
@@ -14972,8 +14972,8 @@ static const struct asm_opcode insns[] =
  TC3(ldrsbt,	03000d0, f9100e00, 2, (RR, ADDR), ldsttv4, t_ldstt),
  TC3(strht,	02000b0, f8200e00, 2, (RR, ADDR), ldsttv4, t_ldstt),
 
-  UT(cbnz,      b900,    2, (RR, EXP), t_czb),
-  UT(cbz,       b100,    2, (RR, EXP), t_czb),
+  UT(cbnz,      b900,    2, (RR, EXP), t_cbz),
+  UT(cbz,       b100,    2, (RR, EXP), t_cbz),
  /* ARM does not really have an IT instruction, so always allow it.  */
 #undef ARM_VARIANT
 #define ARM_VARIANT &arm_ext_v1
@@ -17979,10 +17979,10 @@ md_apply_fix (fixS *	fixP,
 	}
       break;
 
-    case BFD_RELOC_THUMB_PCREL_BRANCH7: /* CZB */
-      /* CZB can only branch forward.  */
+    case BFD_RELOC_THUMB_PCREL_BRANCH7: /* CBZ */
+      /* CBZ can only branch forward.  */
 
-      /* Attempts to use CZB to branch to the next instruction
+      /* Attempts to use CBZ to branch to the next instruction
 	 (which, strictly speaking, are prohibited) will be turned into
 	 no-ops.  */
       if (value == -2)
