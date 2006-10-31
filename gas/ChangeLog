@@ -1,3 +1,12 @@
+2006-10-31  Paul Brook  <paul@codesourcery.com>
+
+	gas/
+	* config/tc-arm.c (object_arch): New variable.
+	(s_arm_object_arch): New function.
+	(md_pseudo_table): Add object_arch.
+	(aeabi_set_public_attributes): Obey object_arch.
+	* doc/c-arm.texi: Document .object_arch.
+
 2006-10-31  Mei Ligang  <ligang@sunnorth.com.cn>
 
 	* tc-score.c (data_op2): Check invalid operands.
