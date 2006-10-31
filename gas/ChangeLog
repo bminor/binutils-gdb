@@ -1,5 +1,10 @@
 2006-10-31  Paul Brook  <paul@codesourcery.com>
 
+	* config/tc-arm.c (arm_adjust_symtab): Don't use STT_ARM_16BIT
+	for EABIv4.
+
+2006-10-31  Paul Brook  <paul@codesourcery.com>
+
 	gas/
 	* config/tc-arm.c (object_arch): New variable.
 	(s_arm_object_arch): New function.
