@@ -469,8 +469,8 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
     {
       long other;
 
-      given = (given & 0xFFFF0000) >> 16;
       other = given & 0xFFFF;
+      given = (given & 0xFFFF0000) >> 16;
 
       status = print_insn_score16 (pc, info, given);
       print_insn_parallel_sym (info);

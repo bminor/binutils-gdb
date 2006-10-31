@@ -42,7 +42,6 @@
 #define INSN_SIZE       4
 #define INSN16_SIZE     2
 #define RELAX_INST_NUM  3
-#define Insn_PIC        123
 
 /* For score5u : div/mul will pop warning message, mmu/alw/asw will pop error message.  */
 #define BAD_ARGS 	          _("bad arguments to instruction")
@@ -779,12 +778,12 @@ static const struct asm_opcode score_insns[] =
   {"sh",        INSN_SH,    0x00000000, 0x200d,     Insn_Type_SYN,        do_macro_ldst_label},
   {"sw",        INSN_SW,    0x00000000, 0x200c,     Insn_Type_SYN,        do_macro_ldst_label},
   /* Assembler use internal.  */
-  {"ld_i32hi",  0x0a0c0000, 0x3e0e0000, 0x8000,     Rd_I16,               do_macro_rdi32hi},
-  {"ld_i32lo",  0x020a0000, 0x3e0e0001, 0x8000,     Rd_I16,               do_macro_rdi32lo},
-  {"ldis_pic",  0x0a0c0000, 0x3e0e0000, 0x5000,     Rd_I16,               do_rdi16_pic},
-  {"addi_s_pic",0x02000000, 0x3e0e0001, 0x8000,     Rd_SI16,              do_addi_s_pic},
-  {"addi_u_pic",0x02000000, 0x3e0e0001, 0x8000,     Rd_SI16,              do_addi_u_pic},
-  {"lw_pic",    0x20000000, 0x3e000000, 0x2008,     Rd_rvalueRs_SI15,     do_lw_pic},
+  {"ld_i32hi",  0x0a0c0000, 0x3e0e0000, 0x8000,     Insn_internal, do_macro_rdi32hi},
+  {"ld_i32lo",  0x020a0000, 0x3e0e0001, 0x8000,     Insn_internal, do_macro_rdi32lo},
+  {"ldis_pic",  0x0a0c0000, 0x3e0e0000, 0x5000,     Insn_internal, do_rdi16_pic},
+  {"addi_s_pic",0x02000000, 0x3e0e0001, 0x8000,     Insn_internal, do_addi_s_pic},
+  {"addi_u_pic",0x02000000, 0x3e0e0001, 0x8000,     Insn_internal, do_addi_u_pic},
+  {"lw_pic",    0x20000000, 0x3e000000, 0x2008,     Insn_internal, do_lw_pic},
 };
 
 /* Next free entry in the pool.  */
@@ -805,8 +804,7 @@ end_of_line (char *str)
       retval = (int) FAIL;
 
       if (!inst.error)
-        {
-        inst.error = BAD_GARBAGE}
+        inst.error = BAD_GARBAGE;
     }
 
   return retval;
@@ -989,6 +987,22 @@ my_get_expression (expressionS * ep, char **str)
       return (int) FAIL;
     }
 
+  if ((ep->X_add_symbol != NULL)
+      && (inst.type != PC_DISP19div2)
+      && (inst.type != PC_DISP8div2)
+      && (inst.type != PC_DISP24div2)
+      && (inst.type != PC_DISP11div2)
+      && (inst.type != Insn_Type_SYN)
+      && (inst.type != Rd_rvalueRs_SI15)
+      && (inst.type != Rd_lvalueRs_SI15)
+      && (inst.type != Insn_internal))
+    {
+      inst.error = BAD_ARGS;
+      *str = input_line_pointer;
+      input_line_pointer = save_in;
+      return (int) FAIL;
+    }
+
   *str = input_line_pointer;
   input_line_pointer = save_in;
   return SUCCESS;
@@ -1104,6 +1118,20 @@ data_op2 (char **str, int shift, enum score_data_type data_type)
           && (data_type != _GP_IMM15))
         {
           data_type += 24;
+        }
+
+      if ((inst.reloc.exp.X_add_number == 0)
+          && (inst.type != Insn_Type_SYN)
+          && (inst.type != Rd_rvalueRs_SI15)
+          && (inst.type != Rd_lvalueRs_SI15)
+          && (inst.type != Insn_internal)
+          && (((*dataptr >= 'a') && (*dataptr <= 'z'))
+             || ((*dataptr == '0') && (*(dataptr + 1) == 'x') && (*(dataptr + 2) != '0'))
+             || ((*dataptr == '+') && (*(dataptr + 1) != '0'))
+             || ((*dataptr == '-') && (*(dataptr + 1) != '0'))))
+        {
+          inst.error = BAD_ARGS;
+          return (int) FAIL;
         }
     }
 
@@ -2142,6 +2170,7 @@ get_insn_class_from_type (enum score_insn_type type)
     case Rd_rvalue32Rs:
     case Insn_GP:
     case Insn_PIC:
+    case Insn_internal:
       retval = INSN_CLASS_32;
       break;
     case Insn_Type_PCE:
@@ -2860,7 +2889,7 @@ do_ldst_insn (char *str)
                 {
                   char err_msg[255];
 
-                  if (data_type < 27)
+                  if (data_type < 30)
                     sprintf (err_msg,
                              "invalid constant: %d bit expression not in range %d..%d",
                              score_df_range[data_type].bits,
@@ -2868,9 +2897,9 @@ do_ldst_insn (char *str)
                   else
                     sprintf (err_msg,
                              "invalid constant: %d bit expression not in range %d..%d",
-                             score_df_range[data_type - 21].bits,
-                             score_df_range[data_type - 21].range[0],
-                             score_df_range[data_type - 21].range[1]);
+                             score_df_range[data_type - 24].bits,
+                             score_df_range[data_type - 24].range[0],
+                             score_df_range[data_type - 24].range[1]);
                   inst.error = _(err_msg);
                   return;
                 }
@@ -4276,12 +4305,14 @@ do_macro_ldst_label (char *str)
   /* Ld/st rD, [rA, imm]      ld/st rD, [rA]+, imm      ld/st rD, [rA, imm]+.  */
   if (*backup_str == '[')
     {
+      inst.type = Rd_rvalueRs_preSI12;
       do_ldst_insn (str);
       return;
     }
 
   /* Ld/st rD, imm.  */
   absolute_value = backup_str;
+  inst.type = Rd_rvalueRs_SI15;
   if ((my_get_expression (&inst.reloc.exp, &backup_str) == (int) FAIL)
       || (validate_immediate (inst.reloc.exp.X_add_number, _VALUE) == (int) FAIL)
       || (end_of_line (backup_str) == (int) FAIL))
@@ -4299,6 +4330,7 @@ do_macro_ldst_label (char *str)
     }
 
   /* Ld/st rD, label.  */
+  inst.type = Rd_rvalueRs_SI15;
   backup_str = absolute_value;
   if ((data_op2 (&backup_str, 1, _GP_IMM15) == (int) FAIL)
       || (end_of_line (backup_str) == (int) FAIL))

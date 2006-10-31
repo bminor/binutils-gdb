@@ -1,3 +1,13 @@
+2006-10-31  Mei Ligang  <ligang@sunnorth.com.cn>
+
+	* tc-score.c (data_op2): Check invalid operands.
+	(my_get_expression): Const operand of some instructions can not be
+	symbol in assembly.
+	(get_insn_class_from_type): Handle instruction type Insn_internal.
+	(do_macro_ldst_label): Modify inst.type.
+	(Insn_PIC): Delete.
+	(data_op2): The immediate value in lw is 15 bit signed.
+	
 2006-10-29  Randolph Chung  <tausq@debian.org>
 
 	* config/tc-hppa.c (hppa_cfi_frame_initial_instructions)

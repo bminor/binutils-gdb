@@ -1,3 +1,8 @@
+2006-10-31  Mei Ligang  <ligang@sunnorth.com.cn>
+
+	* score-dis.c (print_insn): Correct the error code to print
+	correct PCE instruction disassembly.
+
 2006-10-26  Ben Elliston  <bje@au.ibm.com>
 	    Anton Blanchard  <anton@samba.org>
 	    Peter Bergner  <bergner@vnet.ibm.com>
