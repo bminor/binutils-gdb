@@ -1,3 +1,8 @@
+2006-10-31  David Taylor  <dtaylor@emc.com>
+
+	* stabs.texinfo (Macro define and undefine): New node describing
+	stabs for #define and #undef.
+
 2006-10-27  Andreas Schwab  <schwab@suse.de>
 
 	* gdb.texinfo (Processes): Rename "detach-fork" to "detach fork".

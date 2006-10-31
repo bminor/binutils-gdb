@@ -67,6 +67,7 @@ This document describes the stabs debugging format.
 * Constants::			Constants
 * Variables::
 * Types::			Type definitions
+* Macro define and undefine::	Representation of #define and #undef
 * Symbol Tables::		Symbol information in symbol tables
 * Cplusplus::			Stabs specific to C++
 * Stab Types::			Symbol types in a.out files
@@ -2220,6 +2221,70 @@ generates the following code:
 The variable defines a new type, 24, which is a pointer to another new
 type, 25, which is a function returning @code{int}.
 
+@node Macro define and undefine
+@chapter Representation of #define and #undef
+
+This section describes the stabs support for macro define and undefine
+information, supported on some systems.  (e.g., with @option{-g3}
+@option{-gstabs} when using GCC).
+
+A @code{#define @var{macro-name} @var{macro-body}} is represented with
+an @code{N_MAC_DEFINE} stab with a string field of
+@code{@var{macro-name} @var{macro-body}}.
+@findex N_MAC_DEFINE
+
+An @code{#undef @var{macro-name}} is represented with an
+@code{N_MAC_UNDEF} stabs with a string field of simply
+@code{@var{macro-name}}.
+@findex N_MAC_UNDEF
+
+For both @code{N_MAC_DEFINE} and @code{N_MAC_UNDEF}, the desc field is
+the line number within the file where the corresponding @code{#define}
+or @code{#undef} occurred.
+
+For example, the following C code:
+
+@example
+    #define NONE	42
+    #define TWO(a, b)	(a + (a) + 2 * b)
+    #define ONE(c)	(c + 19)
+
+    main(int argc, char *argv[])
+    @{
+      func(NONE, TWO(10, 11));
+      func(NONE, ONE(23));
+
+    #undef ONE
+    #define ONE(c)	(c + 23)
+
+      func(NONE, ONE(-23));
+
+      return (0);
+    @}
+
+    int global;
+
+    func(int arg1, int arg2)
+    @{
+      global = arg1 + arg2;
+    @}
+@end example
+
+@noindent
+produces the following stabs (as well as many others):
+
+@example
+    .stabs	"NONE 42",54,0,1,0
+    .stabs	"TWO(a,b) (a + (a) + 2 * b)",54,0,2,0
+    .stabs	"ONE(c) (c + 19)",54,0,3,0
+    .stabs	"ONE",58,0,10,0
+    .stabs	"ONE(c) (c + 23)",54,0,11,0
+@end example
+
+@noindent
+NOTE: In the above example, @code{54} is @code{N_MAC_DEFINE} and
+@code{58} is @code{N_MAC_UNDEF}.
+
 @node Symbol Tables
 @chapter Symbol Information in Symbol Tables
 
@@ -3276,10 +3341,16 @@ Number of symbols (according to Ultrix V4.0); see @ref{N_NSYMS}.
 @item 0x34     N_NOMAP
 No DST map; see @ref{N_NOMAP}.
 
+@item 0x36     N_MAC_DEFINE
+Name and body of a @code{#define}d macro; see @ref{Macro define and undefine}.
+
 @c FIXME: describe this solaris feature in the body of the text (see
 @c comments in include/aout/stab.def).
 @item 0x38 N_OBJ
 Object file (Solaris2).
+
+@item 0x3a     N_MAC_UNDEF
+Name of an @code{#undef}ed macro; see @ref{Macro define and undefine}.
 
 @c See include/aout/stab.def for (a little) more info.
 @item 0x3c N_OPT
