@@ -1,3 +1,18 @@
+2006-10-31  Vladimir Prus  <vladimir@codesourcery.com>
+	
+	* commands.h (enum command_class): Use different
+	values for class_deprecated and class_run.
+	* cli/cli-decode.c: (print_help_for_command): New.
+	(apropos_cmd): Use the above.
+	(help_list): Mention 'help all'
+	and 'apropos' when printing top-level help.
+	(help_all): Print the class name before printing
+	commands in that class.  Don't print prefix commands
+	here, instead pass recurse flag to help_cmd_list.
+	Print list of unclassified commands at the end.
+	(help_cmd_list): When recursing, use all_commands class.
+	Recurse only if the class of the command matches.
+
 2006-10-27  Andreas Schwab  <schwab@suse.de>
 
 	* gdbcmd.h (detachlist): Declare.

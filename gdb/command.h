@@ -30,7 +30,7 @@
 enum command_class
 {
   /* Special args to help_list */
-  class_deprecated, all_classes = -2, all_commands = -1,
+  class_deprecated = -3, all_classes = -2, all_commands = -1,
   /* Classes of commands */
   no_class = -1, class_run = 0, class_vars, class_stack,
   class_files, class_support, class_info, class_breakpoint, class_trace,

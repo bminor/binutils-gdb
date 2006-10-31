@@ -46,6 +46,11 @@ static struct cmd_list_element *find_cmd (char *command,
 					  int *nfound);
 
 static void help_all (struct ui_file *stream);
+
+static void
+print_help_for_command (struct cmd_list_element *c, char *prefix, int recurse,
+			struct ui_file *stream);
+
 
 /* Set the callback function for the specified command.  For each both
    the commands callback and func() are set.  The latter set to a
@@ -687,14 +692,8 @@ apropos_cmd (struct ui_file *stream, struct cmd_list_element *commandlist,
 	  returnvalue=re_search(regex,c->name,strlen(c->name),0,strlen(c->name),NULL);
 	  if (returnvalue >= 0)
 	    {
-	      /* Stolen from help_cmd_list. We don't directly use
-	       * help_cmd_list because it doesn't let us print out
-	       * single commands
-	       */
-	      fprintf_filtered (stream, "%s%s -- ", prefix, c->name);
-	      print_doc_line (stream, c->doc);
-	      fputs_filtered ("\n", stream);
-	      returnvalue=0; /*Set this so we don't print it again.*/
+	      print_help_for_command (c, prefix, 
+				      0 /* don't recurse */, stream);
 	    }
 	}
       if (c->doc != NULL && returnvalue != 0)
@@ -702,13 +701,8 @@ apropos_cmd (struct ui_file *stream, struct cmd_list_element *commandlist,
 	  /* Try to match against documentation */
 	  if (re_search(regex,c->doc,strlen(c->doc),0,strlen(c->doc),NULL) >=0)
 	    {
-	      /* Stolen from help_cmd_list. We don't directly use
-	       * help_cmd_list because it doesn't let us print out
-	       * single commands
-	       */
-	      fprintf_filtered (stream, "%s%s -- ", prefix, c->name);
-	      print_doc_line (stream, c->doc);
-	      fputs_filtered ("\n", stream);
+	      print_help_for_command (c, prefix, 
+				      0 /* don't recurse */, stream);
 	    }
 	}
       /* Check if this command has subcommands */
@@ -845,6 +839,9 @@ Type \"help%s\" followed by a class name for a list of commands in ",
 			cmdtype1);
       wrap_here ("");
       fprintf_filtered (stream, "that class.");
+
+      fprintf_filtered (stream, "\n\
+Type \"help all\" for the list of all commands.");
     }
 
   fprintf_filtered (stream, "\nType \"help%s\" followed by %scommand name ",
@@ -855,6 +852,8 @@ Type \"help%s\" followed by a class name for a list of commands in ",
   fputs_filtered ("full ", stream);
   wrap_here ("");
   fputs_filtered ("documentation.\n", stream);
+  fputs_filtered ("Type \"apropos word\" to search "
+		  "for commands related to \"word\".\n", stream);		    
   fputs_filtered ("Command name abbreviations are allowed if unambiguous.\n",
 		  stream);
 }
@@ -864,19 +863,41 @@ help_all (struct ui_file *stream)
 {
   struct cmd_list_element *c;
   extern struct cmd_list_element *cmdlist;
+  int seen_unclassified = 0;
 
   for (c = cmdlist; c; c = c->next)
     {
       if (c->abbrev_flag)
         continue;
-      /* If this is a prefix command, print it's subcommands */
-      if (c->prefixlist)
-        help_cmd_list (*c->prefixlist, all_commands, c->prefixname, 0, stream);
-    
       /* If this is a class name, print all of the commands in the class */
-      else if (c->func == NULL)
-        help_cmd_list (cmdlist, c->class, "", 0, stream);
+
+      if (c->func == NULL)
+	{
+	  fprintf_filtered (stream, "\nCommand class: %s\n\n", c->name);
+	  help_cmd_list (cmdlist, c->class, "", 1, stream);
+	}
     }
+
+  /* While it's expected that all commands are in some class,
+     as a safety measure, we'll print commands outside of any
+     class at the end.  */
+
+  for (c = cmdlist; c; c = c->next)
+    {
+      if (c->abbrev_flag)
+        continue;
+
+      if (c->class == no_class)
+	{
+	  if (!seen_unclassified)
+	    {
+	      fprintf_filtered (stream, "\nUnclassified commands\n\n");
+	      seen_unclassified = 1;
+	    }
+	  print_help_for_command (c, "", 1, stream);
+	}
+    }
+
 }
 
 /* Print only the first line of STR on STREAM.  */
@@ -909,6 +930,26 @@ print_doc_line (struct ui_file *stream, char *str)
   ui_out_text (uiout, line_buffer);
 }
 
+/* Print one-line help for command C.
+   If RECURSE is non-zero, also print one-line descriptions
+   of all prefixed subcommands. */
+static void
+print_help_for_command (struct cmd_list_element *c, char *prefix, int recurse,
+			struct ui_file *stream)
+{
+  fprintf_filtered (stream, "%s%s -- ", prefix, c->name);
+  print_doc_line (stream, c->doc);
+  fputs_filtered ("\n", stream);
+  
+  if (recurse
+      && c->prefixlist != 0
+      && c->abbrev_flag == 0)
+    /* Subcommands of a prefix command typically have 'all_commands'
+       as class.  If we pass CLASS to recursive invocation,
+       most often we won't see anything. */
+    help_cmd_list (*c->prefixlist, all_commands, c->prefixname, 1, stream);
+}
+
 /*
  * Implement a help command on command list LIST.
  * RECURSE should be non-zero if this should be done recursively on
@@ -932,20 +973,14 @@ help_cmd_list (struct cmd_list_element *list, enum command_class class,
   struct cmd_list_element *c;
 
   for (c = list; c; c = c->next)
-    {
+    {      
       if (c->abbrev_flag == 0 &&
 	  (class == all_commands
 	   || (class == all_classes && c->func == NULL)
 	   || (class == c->class && c->func != NULL)))
 	{
-	  fprintf_filtered (stream, "%s%s -- ", prefix, c->name);
-	  print_doc_line (stream, c->doc);
-	  fputs_filtered ("\n", stream);
+	  print_help_for_command (c, prefix, recurse, stream);
 	}
-      if (recurse
-	  && c->prefixlist != 0
-	  && c->abbrev_flag == 0)
-	help_cmd_list (*c->prefixlist, class, c->prefixname, 1, stream);
     }
 }
 
