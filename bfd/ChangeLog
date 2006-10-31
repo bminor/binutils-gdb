@@ -1,4 +1,7 @@
-bfd/
+2006-10-31  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (elfcore_write_note): Pad note descriptor to 4-byte
+	boundary.  Tidy.  Comment.
 
 2006-10-30  H.J. Lu  <hongjiu.lu@intel.com>
 

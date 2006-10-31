@@ -8088,45 +8088,42 @@ elfcore_grok_nto_note (bfd *abfd, Elf_Internal_Note *note)
 /* Function: elfcore_write_note
 
    Inputs:
-     buffer to hold note
+     buffer to hold note, and current size of buffer
      name of note
      type of note
      data for note
      size of data for note
 
+   Writes note to end of buffer.  ELF64 notes are written exactly as
+   for ELF32, despite the current (as of 2006) ELF gabi specifying
+   that they ought to have 8-byte namesz and descsz field, and have
+   8-byte alignment.  Other writers, eg. Linux kernel, do the same.
+
    Return:
-   End of buffer containing note.  */
+   Pointer to realloc'd buffer, *BUFSIZ updated.  */
 
 char *
-elfcore_write_note (bfd  *abfd,
+elfcore_write_note (bfd *abfd,
 		    char *buf,
-		    int  *bufsiz,
+		    int *bufsiz,
 		    const char *name,
-		    int  type,
+		    int type,
 		    const void *input,
-		    int  size)
+		    int size)
 {
   Elf_External_Note *xnp;
   size_t namesz;
-  size_t pad;
   size_t newspace;
-  char *p, *dest;
+  char *dest;
 
   namesz = 0;
-  pad = 0;
   if (name != NULL)
-    {
-      const struct elf_backend_data *bed;
+    namesz = strlen (name) + 1;
 
-      namesz = strlen (name) + 1;
-      bed = get_elf_backend_data (abfd);
-      pad = -namesz & 3;
-    }
+  newspace = 12 + ((namesz + 3) & -4) + ((size + 3) & -4);
 
-  newspace = 12 + namesz + pad + size;
-
-  p = realloc (buf, *bufsiz + newspace);
-  dest = p + *bufsiz;
+  buf = realloc (buf, *bufsiz + newspace);
+  dest = buf + *bufsiz;
   *bufsiz += newspace;
   xnp = (Elf_External_Note *) dest;
   H_PUT_32 (abfd, namesz, xnp->namesz);
@@ -8137,14 +8134,20 @@ elfcore_write_note (bfd  *abfd,
     {
       memcpy (dest, name, namesz);
       dest += namesz;
-      while (pad != 0)
+      while (namesz & 3)
 	{
 	  *dest++ = '\0';
-	  --pad;
+	  ++namesz;
 	}
     }
   memcpy (dest, input, size);
-  return p;
+  dest += size;
+  while (size & 3)
+    {
+      *dest++ = '\0';
+      ++size;
+    }
+  return buf;
 }
 
 #if defined (HAVE_PRPSINFO_T) || defined (HAVE_PSINFO_T)
