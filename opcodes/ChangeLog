@@ -1,3 +1,9 @@
+2006-10-30  Paul Brook  <paul@codesourcery.com>
+
+	* arm-dis.c (last_is_thumb, last_mapping_sym, last_mapping_addr): New.
+	(get_sym_code_type): New function.
+	(print_insn): Search for mapping symbols.
+
 2006-10-31  Mei Ligang  <ligang@sunnorth.com.cn>
 
 	* score-dis.c (print_insn): Correct the error code to print

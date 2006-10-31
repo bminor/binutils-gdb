@@ -1,3 +1,8 @@
+2006-10-30  Paul Brook  <paul@codesourcery.com>
+
+	* objdump.c (disassemble_section): Set info->symtab_pos.
+	(disassemble_data): Set info->symtab and info->symtab_size.
+
 2006-10-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/3384
