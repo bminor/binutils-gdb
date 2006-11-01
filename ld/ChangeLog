@@ -1,3 +1,21 @@
+2006-10-31  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* pe-dll.c (autofilter_entry_type): Change name to const.
+	(pe_details_type) : Change target_name, object_target and
+	autofilter_symbollist to const.
+	(autofilter_symbollist_generic): Change to const.
+	(autofilter_symbollist_i386, pe_detail_list, pe_details,
+	autofilter_liblist, autofilter_objlist autofilter_symbolprefixlist,
+	autofilter_symbolsuffixlist): Likewise.
+	(is_import): Fix indentation.
+	(auto_export): Change afptr to const.  Move name declaration to
+	beginning of scope.
+	(make_tail): Clear undefined byte.
+	(jmp_ix86_bytes, jmp_sh_bytes, jmp_mips_bytes, jmp_arm_bytes): Change
+	to const.
+	(make_one): Change jmp_bytes to const.  Make idata$6 member size
+	arithmetic explicit and add comment.
+
 2006-10-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/3111

@@ -167,24 +167,24 @@ static int runtime_pseudo_relocs_created = 0;
 
 typedef struct
 {
-  char *name;
+  const char *name;
   int len;
 }
 autofilter_entry_type;
 
 typedef struct
 {
-  char *target_name;
-  char *object_target;
+  const char *target_name;
+  const char *object_target;
   unsigned int imagebase_reloc;
   int pe_arch;
   int bfd_arch;
   bfd_boolean underscored;
-  autofilter_entry_type* autofilter_symbollist; 
+  const autofilter_entry_type* autofilter_symbollist; 
 }
 pe_details_type;
 
-static autofilter_entry_type autofilter_symbollist_generic[] =
+static const autofilter_entry_type autofilter_symbollist_generic[] =
 {
   { STRING_COMMA_LEN (".text") },
   /* Entry point symbols.  */
@@ -197,7 +197,7 @@ static autofilter_entry_type autofilter_symbollist_generic[] =
   { STRING_COMMA_LEN (NULL) }
 };
 
-static autofilter_entry_type autofilter_symbollist_i386[] =
+static const autofilter_entry_type autofilter_symbollist_i386[] =
 {
   { STRING_COMMA_LEN (".text") },
   /* Entry point symbols, and entry hooks.  */
@@ -231,7 +231,7 @@ static autofilter_entry_type autofilter_symbollist_i386[] =
 #define PE_ARCH_arm_epoc 5
 #define PE_ARCH_arm_wince 6
 
-static pe_details_type pe_detail_list[] =
+static const pe_details_type pe_detail_list[] =
 {
   {
 #ifdef pe_use_x86_64
@@ -296,10 +296,10 @@ static pe_details_type pe_detail_list[] =
   { NULL, NULL, 0, 0, 0, FALSE, NULL }
 };
 
-static pe_details_type *pe_details;
+static const pe_details_type *pe_details;
 
 /* Do not specify library suffix explicitly, to allow for dllized versions.  */
-static autofilter_entry_type autofilter_liblist[] =
+static const autofilter_entry_type autofilter_liblist[] =
 {
   { STRING_COMMA_LEN ("libcegcc") },
   { STRING_COMMA_LEN ("libcygwin") },
@@ -314,7 +314,7 @@ static autofilter_entry_type autofilter_liblist[] =
   { STRING_COMMA_LEN (NULL) }
 };
 
-static autofilter_entry_type autofilter_objlist[] =
+static const autofilter_entry_type autofilter_objlist[] =
 {
   { STRING_COMMA_LEN ("crt0.o") },
   { STRING_COMMA_LEN ("crt1.o") },
@@ -329,7 +329,7 @@ static autofilter_entry_type autofilter_objlist[] =
   { STRING_COMMA_LEN (NULL) }
 };
 
-static autofilter_entry_type autofilter_symbolprefixlist[] =
+static const autofilter_entry_type autofilter_symbolprefixlist[] =
 {
   /* _imp_ is treated specially, as it is always underscored.  */
   /* { STRING_COMMA_LEN ("_imp_") },  */
@@ -343,7 +343,7 @@ static autofilter_entry_type autofilter_symbolprefixlist[] =
   { STRING_COMMA_LEN (NULL) }
 };
 
-static autofilter_entry_type autofilter_symbolsuffixlist[] =
+static const autofilter_entry_type autofilter_symbolsuffixlist[] =
 {
   { STRING_COMMA_LEN ("_iname") },
   { STRING_COMMA_LEN (NULL) }
@@ -449,7 +449,7 @@ pe_dll_add_excludes (const char *new_excludes, const int type)
 static bfd_boolean
 is_import (const char* n)
 {
-	return (CONST_STRNEQ (n, "__imp_"));
+  return (CONST_STRNEQ (n, "__imp_"));
 }
 
 /* abfd is a bfd containing n (or NULL)
@@ -460,7 +460,7 @@ auto_export (bfd *abfd, def_file *d, const char *n)
 {
   int i;
   struct exclude_list_struct *ex;
-  autofilter_entry_type *afptr;
+  const autofilter_entry_type *afptr;
   const char * libname = 0;
   if (abfd && abfd->my_archive)
     libname = lbasename (abfd->my_archive->filename);
@@ -619,10 +619,11 @@ process_def_file (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 
 		  /* We should not re-export imported stuff.  */
 		  {
+		    char *name;
 		    if (is_import (sn))
 			  continue;
 
-		    char *name = xmalloc (strlen ("__imp_") + strlen (sn) + 1);
+		    name = xmalloc (strlen ("__imp_") + strlen (sn) + 1);
 		    sprintf (name, "%s%s", "__imp_", sn);
 
 		    blhe = bfd_link_hash_lookup (info->hash, name,
@@ -1797,6 +1798,10 @@ make_tail (bfd *parent)
   d7 = xmalloc (len);
   id7->contents = d7;
   strcpy ((char *) d7, dll_filename);
+  /* If len was odd, the above
+     strcpy leaves behind an undefined byte. That is harmless,
+     but we set it to 0 just so the binary dumps are pretty.  */
+  d7[len - 1] = 0;
 
   bfd_set_symtab (abfd, symtab, symptr);
 
@@ -1829,7 +1834,7 @@ make_tail (bfd *parent)
  	.short		<hint>
  	.asciz		"function" xlate? (add underscore, kill at)  */
 
-static unsigned char jmp_ix86_bytes[] =
+static const unsigned char jmp_ix86_bytes[] =
 {
   0xff, 0x25, 0x00, 0x00, 0x00, 0x00, 0x90, 0x90
 };
@@ -1841,7 +1846,7 @@ static unsigned char jmp_ix86_bytes[] =
  	nop
  	.dw	__imp_function   */
 
-static unsigned char jmp_sh_bytes[] =
+static const unsigned char jmp_sh_bytes[] =
 {
   0x01, 0xd0, 0x02, 0x60, 0x2b, 0x40, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00
 };
@@ -1852,13 +1857,13 @@ static unsigned char jmp_sh_bytes[] =
  	jr	$t0
  	nop                              */
 
-static unsigned char jmp_mips_bytes[] =
+static const unsigned char jmp_mips_bytes[] =
 {
   0x00, 0x00, 0x08, 0x3c,  0x00, 0x00, 0x08, 0x8d,
   0x08, 0x00, 0x00, 0x01,  0x00, 0x00, 0x00, 0x00
 };
 
-static unsigned char jmp_arm_bytes[] =
+static const unsigned char jmp_arm_bytes[] =
 {
   0x00, 0xc0, 0x9f, 0xe5,	/* ldr  ip, [pc] */
   0x00, 0xf0, 0x9c, 0xe5,	/* ldr  pc, [ip] */
@@ -1874,7 +1879,7 @@ make_one (def_file_export *exp, bfd *parent)
   int len;
   char *oname;
   bfd *abfd;
-  unsigned char *jmp_bytes = NULL;
+  const unsigned char *jmp_bytes = NULL;
   int jmp_byte_count = 0;
 
   switch (pe_details->pe_arch)
@@ -2029,7 +2034,8 @@ make_one (def_file_export *exp, bfd *parent)
     }
   else
     {
-      len = strlen (exp->name) + 3;
+      /* { short, asciz }  */
+      len = 2 + strlen (exp->name) + 1;
       if (len & 1)
 	len++;
       bfd_set_section_size (abfd, id6, len);
