@@ -1,3 +1,8 @@
+2006-11-01  Mei Ligang  <ligang@sunnorth.com.cn>
+
+	* gas/score/rD_rA.d: Correct not! and not.c instruction disassembly.
+	* gas/score/b.d: Correct b! and b instruction disassembly.
+
 2006-10-29  Randolph Chung  <tausq@debian.org>
 
 	* gas/cfi/cfi.exp [hppa*-linux*]: Run hppa CFI test.
@@ -37,9 +42,9 @@
 
 2006-10-08  Paul Brook  <paul@codesourcery.com>
 
-	* testsuite/gas/arm/neon-cov.s: Test pseudo-instruction forms of
+	* gas/arm/neon-cov.s: Test pseudo-instruction forms of
 	vmov, vmvn and logic immediate instructions.
-	* testsuite/gas/arm/neon-cov.d: ditto.
+	* gas/arm/neon-cov.d: ditto.
 
 2006-09-28  Bridge Wu  <mingqiao.wu@gmail.com>
 
@@ -828,8 +833,8 @@
 
 2006-02-07  Nathan Sidwell  <nathan@codesourcery.com>
 
-	* testsuite/gas/m68k/all.exp: Add arch-cpu-1 test.
-	* testsuite/gas/m68k/arch-cpu-1.[sd]: New.
+	* gas/m68k/all.exp: Add arch-cpu-1 test.
+	* gas/m68k/arch-cpu-1.[sd]: New.
 
 2005-02-02  Paul Brook  <paul@codesourcery.com>
 
@@ -838,8 +843,8 @@
 
 2006-01-31  Paul Brook  <paul@codesourcery.com>
 
-	* gas/testsuite/gas/arm/iwmmxt-bad.s: Add check for bad register name.
-	* gas/testsuite/gas/arm/iwmmxt-bad.l: Ditto.
+	* gas/arm/iwmmxt-bad.s: Add check for bad register name.
+	* gas/arm/iwmmxt-bad.l: Ditto.
 
 2006-01-18  Arnold Metselaar  <arnoldm@sourceware.org>
 

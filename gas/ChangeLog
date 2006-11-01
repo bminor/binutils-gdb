@@ -1,3 +1,7 @@
+2006-11-01  Mei Ligang  <ligang@sunnorth.com.cn>
+
+	* tc-score.c (do16_rdrs): Handle not! instruction especially.
+
 2006-10-31  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (arm_adjust_symtab): Don't use STT_ARM_16BIT

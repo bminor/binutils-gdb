@@ -1761,6 +1761,11 @@ do16_rdrs (char *str)
           inst.relax_inst |= (((inst.instruction >> 8) & 0xf) << 15)
             | (((inst.instruction >> 4) & 0xf) << 10);
         }
+      else if ((inst.instruction & 0x700f) == 0x2006)   /* not!  */
+	{
+	  inst.relax_inst |= (((inst.instruction >> 8) & 0xf) << 20)
+	    | (((inst.instruction >> 4) & 0xf) << 15);
+	}
       else
         {
           inst.relax_inst |= (((inst.instruction >> 8) & 0xf) << 20)

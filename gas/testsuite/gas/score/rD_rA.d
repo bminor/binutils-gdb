@@ -49,11 +49,11 @@ Disassembly of section \.text:
   58:	807adc19 	cmp.c		r26, r23
   5c:	0000      	nop!
   5e:	0000      	nop!
-  60:	80008825 	not.c		r0, r0
+  60:	80028025 	not.c		r0, r2
   64:	82958025 	not.c		r20, r21
-  68:	81ef9025 	not.c		r15, r15
+  68:	81e48025 	not.c		r15, r4
   6c:	83358025 	not.c		r25, r21
-  70:	81ef8c25 	not.c		r15, r15
+  70:	81e38025 	not.c		r15, r3
   74:	83368025 	not.c		r25, r22
   78:	2836      	not!		r8, r3
   7a:	2836      	not!		r8, r3
