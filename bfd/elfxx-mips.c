@@ -3105,8 +3105,7 @@ mips_elf_merge_gots (void **bfd2got_, void *p)
   if (tcount > 0)
     {
       unsigned int primary_total = lcount + tcount + arg->global_count;
-      if (primary_total * MIPS_ELF_GOT_SIZE (bfd2got->bfd)
-	  >= MIPS_ELF_GOT_MAX_SIZE (arg->info))
+      if (primary_total > maxcnt)
 	too_many_for_tls = TRUE;
     }
 
