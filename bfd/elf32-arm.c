@@ -2934,9 +2934,19 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 	  if (h == NULL)
 	    continue;
 
-	  /* If the call will go through a PLT entry then we do not need
-	     glue.  */
-	  if (globals->splt != NULL && h->plt.offset != (bfd_vma) -1)
+	  /* If the call will go through a PLT entry then we do not
+	     need glue.  We have to do a fairly complicated check
+	     here, since we don't determine this finally (by setting
+	     plt.offset) until later; this test should be kept in sync
+	     with elf32_arm_adjust_dynamic_symbol.  */
+	  if (globals->splt != NULL
+	      && h->plt.refcount > 0
+	      && (h->type == STT_FUNC
+		  || h->type == STT_ARM_TFUNC
+		  || h->needs_plt)
+	      && !SYMBOL_CALLS_LOCAL (link_info, h)
+	      && !(ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+		   && h->root.type == bfd_link_hash_undefweak))
 	    continue;
 
 	  switch (r_type)
