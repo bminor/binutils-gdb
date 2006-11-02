@@ -389,7 +389,9 @@ struct dwarf2_per_cu_data
      it.  */
   htab_t type_hash;
 
-  /* The partial symbol table associated with this compilation unit.  */
+  /* The partial symbol table associated with this compilation unit,
+     or NULL for partial units (which do not have an associated
+     symtab).  */
   struct partial_symtab *psymtab;
 };
 
@@ -1066,7 +1068,8 @@ static void reset_die_and_siblings_types (struct die_info *,
 
 static void create_all_comp_units (struct objfile *);
 
-static struct dwarf2_cu *load_full_comp_unit (struct dwarf2_per_cu_data *);
+static struct dwarf2_cu *load_full_comp_unit (struct dwarf2_per_cu_data *,
+					      struct objfile *);
 
 static void process_full_comp_unit (struct dwarf2_per_cu_data *);
 
@@ -1469,6 +1472,14 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
       abbrev = peek_die_abbrev (info_ptr, &bytes_read, &cu);
       info_ptr = read_partial_die (&comp_unit_die, abbrev, bytes_read,
 				   abfd, info_ptr, &cu);
+
+      if (comp_unit_die.tag == DW_TAG_partial_unit)
+	{
+	  info_ptr = (beg_of_comp_unit + cu.header.length
+		      + cu.header.initial_length_size);
+	  do_cleanups (back_to_inner);
+	  continue;
+	}
 
       /* Set the language we're debugging */
       set_cu_language (comp_unit_die.language, &cu);
@@ -2386,14 +2397,14 @@ process_queue (struct objfile *objfile)
     {
       /* Read in this compilation unit.  This may add new items to
 	 the end of the queue.  */
-      load_full_comp_unit (item->per_cu);
+      load_full_comp_unit (item->per_cu, objfile);
 
       item->per_cu->cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
       dwarf2_per_objfile->read_in_chain = item->per_cu;
 
       /* If this compilation unit has already had full symbols created,
 	 reset the TYPE fields in each DIE.  */
-      if (item->per_cu->psymtab->readin)
+      if (item->per_cu->type_hash)
 	reset_die_and_siblings_types (item->per_cu->cu->dies,
 				      item->per_cu->cu);
     }
@@ -2402,7 +2413,7 @@ process_queue (struct objfile *objfile)
      them, one at a time, removing from the queue as we finish.  */
   for (item = dwarf2_queue; item != NULL; dwarf2_queue = item = next_item)
     {
-      if (!item->per_cu->psymtab->readin)
+      if (item->per_cu->psymtab && !item->per_cu->psymtab->readin)
 	process_full_comp_unit (item->per_cu);
 
       item->per_cu->queued = 0;
@@ -2495,10 +2506,9 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
 /* Load the DIEs associated with PST and PER_CU into memory.  */
 
 static struct dwarf2_cu *
-load_full_comp_unit (struct dwarf2_per_cu_data *per_cu)
+load_full_comp_unit (struct dwarf2_per_cu_data *per_cu, struct objfile *objfile)
 {
-  struct partial_symtab *pst = per_cu->psymtab;
-  bfd *abfd = pst->objfile->obfd;
+  bfd *abfd = objfile->obfd;
   struct dwarf2_cu *cu;
   unsigned long offset;
   gdb_byte *info_ptr;
@@ -2517,7 +2527,7 @@ load_full_comp_unit (struct dwarf2_per_cu_data *per_cu)
   /* If an error occurs while loading, release our storage.  */
   free_cu_cleanup = make_cleanup (free_one_comp_unit, cu);
 
-  cu->objfile = pst->objfile;
+  cu->objfile = objfile;
 
   /* read in the comp_unit header  */
   info_ptr = read_comp_unit_head (&cu->header, info_ptr, abfd);

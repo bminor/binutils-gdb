@@ -1,5 +1,13 @@
 2006-11-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* dwarf2read.c (struct dwarf2_per_cu_data): Update comment.
+	(load_full_comp_unit): Take OBJFILE argument and use it.
+	(dwarf2_build_psymtabs_hard): Skip partial units.
+	(process_queue): Pass OBJFILE to load_full_comp_unit.  Check
+	type_hash for read in CUs.  Test psymtab for NULL.
+
+2006-11-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* arm-tdep.c (arm_gdbarch_init): Handle EF_ARM_EABI_VER5.
 
 2006-10-31  Vladimir Prus  <vladimir@codesourcery.com>
