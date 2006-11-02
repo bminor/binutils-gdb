@@ -1,3 +1,7 @@
+2006-11-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* config/tc-h8300.c (build_bytes): Fix const warning.
+
 2006-11-01  Mei Ligang  <ligang@sunnorth.com.cn>
 
 	* tc-score.c (do16_rdrs): Handle not! instruction especially.

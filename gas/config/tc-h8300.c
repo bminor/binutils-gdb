@@ -1389,7 +1389,7 @@ build_bytes (const struct h8_instruction *this_try, struct h8_op *operand)
 {
   int i;
   char *output = frag_more (this_try->length);
-  op_type *nibble_ptr = this_try->opcode->data.nib;
+  const op_type *nibble_ptr = this_try->opcode->data.nib;
   op_type c;
   unsigned int nibble_count = 0;
   int op_at[3];
