@@ -1,3 +1,7 @@
+2006-11-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-tdep.c (arm_gdbarch_init): Handle EF_ARM_EABI_VER5.
+
 2006-10-31  Vladimir Prus  <vladimir@codesourcery.com>
 	
 	* commands.h (enum command_class): Use different

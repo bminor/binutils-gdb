@@ -2635,6 +2635,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		  break;
 
 		case EF_ARM_EABI_VER4:
+		case EF_ARM_EABI_VER5:
 		  arm_abi = ARM_ABI_AAPCS;
 		  /* EABI binaries default to VFP float ordering.  */
 		  if (fp_model == ARM_FLOAT_AUTO)
