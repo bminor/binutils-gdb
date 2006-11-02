@@ -1,3 +1,9 @@
+2006-11-01  Thiemo Seufer  <ths@mips.com>
+
+	* ld-mips-elf/mips16-intermix-1.s, ld-mips-elf/mips16-intermix-2.s,
+	ld-mips-elf/mips16-intermix.d: New testcase.
+	* ld-mips-elf/mips-elf.exp (mips16_intermix_test): Run new testcases.
+
 2006-10-29  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* ld-sh/sh64/abi32.xd, ld-sh/sh64/abi64.xd, ld-sh/sh64/cmpct1.xd,

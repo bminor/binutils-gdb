@@ -1353,6 +1353,7 @@ struct elf_obj_tdata
      MIPS ELF linker.  FIXME: We should figure out some way to only
      include this field for a MIPS ELF target.  */
   asection **local_stubs;
+  asection **local_call_stubs;
 
   /* Used to determine if PT_GNU_EH_FRAME segment header should be
      created.  */

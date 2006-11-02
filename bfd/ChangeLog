@@ -1,3 +1,15 @@
+2006-11-01  Thiemo Seufer  <ths@mips.com>
+            David Ung  <davidu@mips.com>
+
+	* elf-bfd.h (local_call_stubs): New member.
+	* elfxx-mips.c (FN_STUB_P, CALL_STUB_P, CALL_FP_STUB_P): New macros.
+	(mips_elf_calculate_relocation): Handle local mips16 call stubs.
+	(mips16_stub_section_p): Rename from mips_elf_stub_section_p, use
+	the new stub macros.
+	(_bfd_mips_elf_check_relocs): Handle call stubs for code which
+	mixes mips16 and mips32 functions. Use mips16_stub_section_p. Mark
+	used stubs with SEC_KEEP. Use the new stub macros.
+
 2006-11-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-arm.c (bfd_elf32_arm_process_before_allocation): Correct

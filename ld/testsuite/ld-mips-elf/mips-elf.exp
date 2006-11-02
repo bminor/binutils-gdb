@@ -259,3 +259,13 @@ set mips16_call_global_test {
 }
 
 run_ld_link_tests $mips16_call_global_test
+
+set mips16_intermix_test {
+    {"Intermixing mips32 and mips16 functions"
+     ""
+     "-mips32r2" {mips16-intermix-1.s mips16-intermix-2.s}
+     {{objdump -t mips16-intermix.d}}
+     "mips16-intermix"}
+}
+
+run_ld_link_tests $mips16_intermix_test

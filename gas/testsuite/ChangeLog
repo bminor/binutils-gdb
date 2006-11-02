@@ -1,3 +1,9 @@
+2006-11-01  Thiemo Seufer  <ths@mips.com>
+
+	* gas/mips/mips16-intermix.d, gas/mips/mips16-intermix.s: New
+	testcase.
+	* gas/mips/mips.exp: Run new testcase.
+
 2006-11-01  Mei Ligang  <ligang@sunnorth.com.cn>
 
 	* gas/score/rD_rA.d: Correct not! and not.c instruction disassembly.
