@@ -1,5 +1,11 @@
 2006-11-03  Thiemo Seufer  <ths@mips.com>
 
+	* config/tc-mips.c (md_pcrel_from_section): Disallow PC relative
+	MIPS16 instructions referencing other sections, unless they are
+	external branches.
+
+2006-11-03  Thiemo Seufer  <ths@mips.com>
+
 	* config/tc-mips.c (mips_cpu_info_table): The 25Kf is a MIPS64
 	release 1 CPU.
 
