@@ -55,8 +55,9 @@ Symbol_table::resolve(Sized_symbol<size>* to,
   if (object->target()->has_resolve())
     {
       Sized_target<size, big_endian>* sized_target;
-      sized_target = object->sized_target SELECT_SIZE_ENDIAN_NAME (
-	SELECT_SIZE_ENDIAN_ONLY(size, big_endian));
+      sized_target = object->sized_target
+                     SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
+                         SELECT_SIZE_ENDIAN_ONLY(size, big_endian));
       sized_target->resolve(to, sym, object);
       return;
     }

@@ -507,7 +507,8 @@ class Symbol_table
   // Define a special symbol.
   template<int size, bool big_endian>
   Sized_symbol<size>*
-  define_special_symbol(Target* target, const char* name, bool only_if_ref);
+  define_special_symbol(Target* target, const char* name, bool only_if_ref
+                        ACCEPT_SIZE_ENDIAN);
 
   // Define a special symbol based on an Output_data.  It is a
   // multiple definition error if this symbol is already defined.

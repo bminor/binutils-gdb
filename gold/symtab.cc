@@ -308,8 +308,8 @@ Symbol_table::add_from_object(Sized_object<size, big_endian>* object,
   if (!ins.second)
     {
       // We already have an entry for NAME/VERSION.
-      ret = this->get_sized_symbol SELECT_SIZE_NAME (ins.first->second
-                                                     SELECT_SIZE(size));
+      ret = this->get_sized_symbol SELECT_SIZE_NAME(size) (ins.first->second
+                                                           SELECT_SIZE(size));
       assert(ret != NULL);
 
       was_undefined = ret->is_undefined();
@@ -330,10 +330,10 @@ Symbol_table::add_from_object(Sized_object<size, big_endian>* object,
 	      // This is the unfortunate case where we already have
 	      // entries for both NAME/VERSION and NAME/NULL.
 	      const Sized_symbol<size>* sym2;
-	      sym2 = this->get_sized_symbol SELECT_SIZE_NAME (
+	      sym2 = this->get_sized_symbol SELECT_SIZE_NAME(size) (
 		insdef.first->second
                 SELECT_SIZE(size));
-	      Symbol_table::resolve SELECT_SIZE_ENDIAN_NAME (
+	      Symbol_table::resolve SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
 		ret, sym2 SELECT_SIZE_ENDIAN(size, big_endian));
 	      this->make_forwarder(insdef.first->second, ret);
 	      insdef.first->second = ret;
@@ -352,8 +352,9 @@ Symbol_table::add_from_object(Sized_object<size, big_endian>* object,
 	{
 	  // We already have an entry for NAME/NULL.  Make
 	  // NAME/VERSION point to it.
-	  ret = this->get_sized_symbol SELECT_SIZE_NAME (insdef.first->second
-                                                         SELECT_SIZE(size));
+	  ret = this->get_sized_symbol SELECT_SIZE_NAME(size) (
+              insdef.first->second
+              SELECT_SIZE(size));
 	  Symbol_table::resolve(ret, sym, object);
 	  ins.first->second = ret;
 	}
@@ -500,7 +501,8 @@ Symbol_table::add_from_object(
 template<int size, bool big_endian>
 Sized_symbol<size>*
 Symbol_table::define_special_symbol(Target* target, const char* name,
-				    bool only_if_ref)
+				    bool only_if_ref
+                                    ACCEPT_SIZE_ENDIAN)
 {
   assert(this->size_ == size);
 
@@ -562,8 +564,8 @@ Symbol_table::define_special_symbol(Target* target, const char* name,
     {
       assert(sym == NULL);
 
-      sym = this->get_sized_symbol SELECT_SIZE_NAME (oldsym
-						     SELECT_SIZE(size));
+      sym = this->get_sized_symbol SELECT_SIZE_NAME(size) (oldsym
+                                                           SELECT_SIZE(size));
       assert(sym->source() == Symbol::FROM_OBJECT);
       const int old_shnum = sym->shnum();
       if (old_shnum != elfcpp::SHN_UNDEF
@@ -628,9 +630,13 @@ Symbol_table::do_define_in_output_data(
   Sized_symbol<size>* sym;
 
   if (target->is_big_endian())
-    sym = this->define_special_symbol<size, true>(target, name, only_if_ref);
+    sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, true) (
+        target, name, only_if_ref
+        SELECT_SIZE_ENDIAN(size, true));
   else
-    sym = this->define_special_symbol<size, false>(target, name, only_if_ref);
+    sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, false) (
+        target, name, only_if_ref
+        SELECT_SIZE_ENDIAN(size, false));
 
   if (sym == NULL)
     return;
@@ -684,9 +690,13 @@ Symbol_table::do_define_in_output_segment(
   Sized_symbol<size>* sym;
 
   if (target->is_big_endian())
-    sym = this->define_special_symbol<size, true>(target, name, only_if_ref);
+    sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, true) (
+        target, name, only_if_ref
+        SELECT_SIZE_ENDIAN(size, true));
   else
-    sym = this->define_special_symbol<size, false>(target, name, only_if_ref);
+    sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, false) (
+        target, name, only_if_ref
+        SELECT_SIZE_ENDIAN(size, false));
 
   if (sym == NULL)
     return;
@@ -736,9 +746,13 @@ Symbol_table::do_define_as_constant(
   Sized_symbol<size>* sym;
 
   if (target->is_big_endian())
-    sym = this->define_special_symbol<size, true>(target, name, only_if_ref);
+    sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, true) (
+        target, name, only_if_ref
+        SELECT_SIZE_ENDIAN(size, true));
   else
-    sym = this->define_special_symbol<size, false>(target, name, only_if_ref);
+    sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, false) (
+        target, name, only_if_ref
+        SELECT_SIZE_ENDIAN(size, false));
 
   if (sym == NULL)
     return;

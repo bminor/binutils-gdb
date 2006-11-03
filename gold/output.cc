@@ -144,7 +144,7 @@ Output_section_headers::do_sized_write(Output_file* of)
   for (Layout::Segment_list::const_iterator p = this->segment_list_.begin();
        p != this->segment_list_.end();
        ++p)
-    v = (*p)->write_section_headers SELECT_SIZE_ENDIAN_NAME (
+    v = (*p)->write_section_headers SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
 	    this->secnamepool_, v, &shndx
 	    SELECT_SIZE_ENDIAN(size, big_endian));
   for (Layout::Section_list::const_iterator p = this->section_list_.begin();
@@ -333,7 +333,7 @@ Output_file_header::do_sized_write(Output_file* of)
   else
     {
       Sized_symbol<size>* ssym;
-      ssym = this->symtab_->get_sized_symbol SELECT_SIZE_NAME (
+      ssym = this->symtab_->get_sized_symbol SELECT_SIZE_NAME(size) (
         sym SELECT_SIZE(size));
       v = ssym->value();
     }
@@ -971,12 +971,14 @@ Output_segment::write_section_headers(const Stringpool* secnamepool,
   if (this->type_ != elfcpp::PT_LOAD)
     return v;
 
-  v = this->write_section_headers_list SELECT_SIZE_ENDIAN_NAME (
-	secnamepool, &this->output_data_, v, pshndx
-	SELECT_SIZE_ENDIAN(size, big_endian));
-  v = this->write_section_headers_list SELECT_SIZE_ENDIAN_NAME (
-	secnamepool, &this->output_bss_, v, pshndx
-	SELECT_SIZE_ENDIAN(size, big_endian));
+  v = this->write_section_headers_list
+      SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
+          secnamepool, &this->output_data_, v, pshndx
+          SELECT_SIZE_ENDIAN(size, big_endian));
+  v = this->write_section_headers_list
+      SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
+          secnamepool, &this->output_bss_, v, pshndx
+          SELECT_SIZE_ENDIAN(size, big_endian));
   return v;
 }
 

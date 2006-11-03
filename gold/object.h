@@ -392,8 +392,9 @@ class Sized_object : public Object
   Sized_target<size, big_endian>*
   sized_target()
   {
-    return this->Object::sized_target SELECT_SIZE_ENDIAN_NAME (
-      SELECT_SIZE_ENDIAN_ONLY(size, big_endian));
+    return this->Object::sized_target
+      SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
+          SELECT_SIZE_ENDIAN_ONLY(size, big_endian));
   }
 
  private:

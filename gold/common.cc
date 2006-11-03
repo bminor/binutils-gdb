@@ -84,11 +84,11 @@ Sort_commons<size>::operator()(const Symbol* pa, const Symbol* pb) const
 
   const Symbol_table* symtab = this->symtab_;
   const Sized_symbol<size>* psa;
-  psa = symtab->get_sized_symbol SELECT_SIZE_NAME (pa
-						   SELECT_SIZE(size));
+  psa = symtab->get_sized_symbol SELECT_SIZE_NAME(size) (pa
+                                                         SELECT_SIZE(size));
   const Sized_symbol<size>* psb;
-  psb = symtab->get_sized_symbol SELECT_SIZE_NAME (pb
-						   SELECT_SIZE(size));
+  psb = symtab->get_sized_symbol SELECT_SIZE_NAME(size) (pb
+                                                         SELECT_SIZE(size));
 
   typename Sized_symbol<size>::Size_type sa = psa->symsize();
   typename Sized_symbol<size>::Size_type sb = psb->symsize();
@@ -153,8 +153,9 @@ Symbol_table::do_allocate_commons(const General_options&,
 	{
 	  any = true;
 	  Sized_symbol<size>* ssym;
-	  ssym = this->get_sized_symbol SELECT_SIZE_NAME (sym
-							  SELECT_SIZE(size));
+	  ssym = this->get_sized_symbol SELECT_SIZE_NAME(size) (
+              sym
+              SELECT_SIZE(size));
 	  if (ssym->value() > addralign)
 	    addralign = ssym->value();
 	}
@@ -187,8 +188,8 @@ Symbol_table::do_allocate_commons(const General_options&,
 	break;
 
       Sized_symbol<size>* ssym;
-      ssym = this->get_sized_symbol SELECT_SIZE_NAME (sym
-						      SELECT_SIZE(size));
+      ssym = this->get_sized_symbol SELECT_SIZE_NAME(size) (sym
+                                                            SELECT_SIZE(size));
 
       off = align_address(off, ssym->value());
 
