@@ -102,18 +102,16 @@ File_read::is_locked()
 // See if we have a view which covers the file starting at START for
 // SIZE bytes.  Return a pointer to the View if found, NULL if not.
 
-File_read::View*
+inline File_read::View*
 File_read::find_view(off_t start, off_t size)
 {
-  for (std::list<File_read::View*>::iterator p = this->view_list_.begin();
-       p != this->view_list_.end();
-       ++p)
-    {
-      if ((*p)->start() <= start
-	  && (*p)->start() + (*p)->size() >= start + size)
-	return *p;
-    }
-  return NULL;
+  off_t page = File_read::page_offset(start);
+  Views::iterator p = this->views_.find(page);
+  if (p == this->views_.end())
+    return NULL;
+  if (p->second->size() - (start - page) < size)
+    return NULL;
+  return p->second;
 }
 
 // Read data from the file.  Return the number of bytes read.  If
@@ -184,15 +182,59 @@ File_read::find_or_make_view(off_t start, off_t size, off_t* pbytes)
 {
   assert(this->lock_count_ > 0);
 
-  File_read::View* pv = this->find_view(start, size);
-  if (pv != NULL)
-    return pv;
+  off_t poff = File_read::page_offset(start);
 
-  unsigned char* p = new unsigned char[size];
-  off_t bytes = this->do_read(start, size, p, pbytes);
-  pv = new File_read::View(start, bytes, p);
-  this->view_list_.push_back(pv);
-  return pv;
+  File_read::View* const vnull = NULL;
+  std::pair<Views::iterator, bool> ins =
+    this->views_.insert(std::make_pair(poff, vnull));
+
+  if (!ins.second)
+    {
+      // There was an existing view at this offset.
+      File_read::View* v = ins.first->second;
+      if (v->size() - (start - v->start()) >= size)
+	{
+	  if (pbytes != NULL)
+	    *pbytes = size;
+	  return v;
+	}
+
+      // This view is not large enough.
+      this->saved_views_.push_back(v);
+    }
+
+  // We need to read data from the file.
+
+  off_t psize = File_read::pages(size + (start - poff));
+  unsigned char* p = new unsigned char[psize];
+
+  off_t got_bytes;
+  off_t bytes = this->do_read(poff, psize, p, &got_bytes);
+
+  File_read::View* v = new File_read::View(poff, bytes, p);
+
+  ins.first->second = v;
+
+  if (bytes - (start - poff) >= size)
+    {
+      if (pbytes != NULL)
+	*pbytes = size;
+      return v;
+    }
+
+  if (pbytes != NULL)
+    {
+      *pbytes = bytes - (start - poff);
+      return v;
+    }
+
+  fprintf(stderr,
+	  _("%s: %s: file too short: read only %lld of %lld bytes at %lld\n"),
+	  program_name, this->filename().c_str(),
+	  static_cast<long long>(bytes - (start - poff)),
+	  static_cast<long long>(size),
+	  static_cast<long long>(start));
+  gold_exit(false);
 }
 
 // This implementation of get_view just reads into a memory buffer,
@@ -221,18 +263,32 @@ File_read::get_lasting_view(off_t start, off_t size, off_t* pbytes)
 void
 File_read::clear_views(bool destroying)
 {
-  std::list<File_read::View*>::iterator p = this->view_list_.begin();
-  while (p != this->view_list_.end())
+  for (Views::iterator p = this->views_.begin();
+       p != this->views_.end();
+       ++p)
     {
-      if ((*p)->is_locked())
+      if (!p->second->is_locked())
+	delete p->second;
+      else
 	{
 	  assert(!destroying);
-	  ++p;
+	  this->saved_views_.push_back(p->second);
+	}
+    }
+  this->views_.clear();
+
+  Saved_views::iterator p = this->saved_views_.begin();
+  while (p != this->saved_views_.end())
+    {
+      if (!(*p)->is_locked())
+	{
+	  delete *p;
+	  p = this->saved_views_.erase(p);
 	}
       else
 	{
-	  delete *p;
-	  p = this->view_list_.erase(p);
+	  assert(!destroying);
+	  ++p;
 	}
     }
 }

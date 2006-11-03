@@ -22,15 +22,16 @@ Read_symbols::~Read_symbols()
   // Add_symbols task.
 }
 
-// Return whether a Read_symbols task is runnable.  We need write
-// access to the symbol table.  We can read an ordinary input file
-// immediately.  For an archive specified using -l, we have to wait
-// until the search path is complete.
+// Return whether a Read_symbols task is runnable.  We can read an
+// ordinary input file immediately.  For an archive specified using
+// -l, we have to wait until the search path is complete.
 
 Task::Is_runnable_type
 Read_symbols::is_runnable(Workqueue*)
 {
-  if (this->input_.is_lib() && this->dirpath_.token().is_blocked())
+  if (this->input_.is_file()
+      && this->input_.file().is_lib()
+      && this->dirpath_.token().is_blocked())
     return IS_BLOCKED;
 
   return IS_RUNNABLE;
@@ -51,7 +52,14 @@ Read_symbols::locks(Workqueue*)
 void
 Read_symbols::run(Workqueue* workqueue)
 {
-  Input_file* input_file = new Input_file(this->input_);
+  if (this->input_.is_group())
+    {
+      assert(this->input_group_ == NULL);
+      this->do_group(workqueue);
+      return;
+    }
+
+  Input_file* input_file = new Input_file(this->input_.file());
   input_file->open(this->options_, this->dirpath_);
 
   // Read enough of the file to pick up the entire ELF header.
@@ -69,14 +77,22 @@ Read_symbols::run(Workqueue* workqueue)
       if (memcmp(p, elfmagic, 4) == 0)
 	{
 	  // This is an ELF object.
-	  Object* obj = make_elf_object(this->input_.name(), input_file, 0,
-					p, bytes);
 
-	  this->input_objects_->add_object(obj);
+	  if (this->input_group_ != NULL)
+	    {
+	      fprintf(stderr,
+		      _("%s: %s: ordinary object found in input group\n"),
+		      program_name, input_file->name());
+	      gold_exit(false);
+	    }
+
+	  Object* obj = make_elf_object(this->input_.file().name(),
+					input_file, 0, p, bytes);
 
 	  Read_symbols_data* sd = new Read_symbols_data;
 	  obj->read_symbols(sd);
-	  workqueue->queue_front(new Add_symbols(this->symtab_, this->layout_,
+	  workqueue->queue_front(new Add_symbols(this->input_objects_,
+						 this->symtab_, this->layout_,
 						 obj, sd,
 						 this->this_blocker_,
 						 this->next_blocker_));
@@ -93,12 +109,13 @@ Read_symbols::run(Workqueue* workqueue)
       if (memcmp(p, Archive::armag, Archive::sarmag) == 0)
 	{
 	  // This is an archive.
-	  Archive* arch = new Archive(this->input_.name(), input_file);
+	  Archive* arch = new Archive(this->input_.file().name(), input_file);
 	  arch->setup();
 	  workqueue->queue(new Add_archive_symbols(this->symtab_,
 						   this->layout_,
 						   this->input_objects_,
 						   arch,
+						   this->input_group_,
 						   this->this_blocker_,
 						   this->next_blocker_));
 	  return;
@@ -109,6 +126,46 @@ Read_symbols::run(Workqueue* workqueue)
   fprintf(stderr, _("%s: %s: not an object or archive\n"),
 	  program_name, input_file->file().filename().c_str());
   gold_exit(false);
+}
+
+// Handle a group.  We need to walk through the arguments over and
+// over until we don't see any new undefined symbols.  We do this by
+// setting off Read_symbols Tasks as usual, but recording the archive
+// entries instead of deleting them.  We also start a Finish_group
+// Task which runs after we've read all the symbols.  In that task we
+// process the archives in a loop until we are done.
+
+void
+Read_symbols::do_group(Workqueue* workqueue)
+{
+  Input_group* input_group = new Input_group();
+
+  const Input_file_group* group = this->input_.group();
+  Task_token* this_blocker = this->this_blocker_;
+  for (Input_file_group::const_iterator p = group->begin();
+       p != group->end();
+       ++p)
+    {
+      const Input_argument& arg(*p);
+      assert(arg.is_file());
+
+      Task_token* next_blocker = new Task_token();
+      next_blocker->add_blocker();
+      workqueue->queue(new Read_symbols(this->options_, this->input_objects_,
+					this->symtab_, this->layout_,
+					this->dirpath_, arg, input_group,
+					this_blocker, next_blocker));
+      this_blocker = next_blocker;
+    }
+
+  const int saw_undefined = this->symtab_->saw_undefined();
+  workqueue->queue(new Finish_group(this->input_objects_,
+				    this->symtab_,
+				    this->layout_,
+				    input_group,
+				    saw_undefined,
+				    this_blocker,
+				    this->next_blocker_));
 }
 
 // Class Add_symbols.
@@ -154,13 +211,71 @@ Add_symbols::locks(Workqueue* workqueue)
 				this->object_);
 }
 
+// Add the symbols in the object to the symbol table.
+
 void
 Add_symbols::run(Workqueue*)
 {
+  this->input_objects_->add_object(this->object_);
   this->object_->layout(this->layout_, this->sd_);
   this->object_->add_symbols(this->symtab_, this->sd_);
   delete this->sd_;
   this->sd_ = NULL;
+}
+
+// Class Finish_group.
+
+Finish_group::~Finish_group()
+{
+  if (this->this_blocker_ != NULL)
+    delete this->this_blocker_;
+  // next_blocker_ is deleted by the task associated with the next
+  // input file following the group.
+}
+
+// We need to wait for THIS_BLOCKER_ and unblock NEXT_BLOCKER_.
+
+Task::Is_runnable_type
+Finish_group::is_runnable(Workqueue*)
+{
+  if (this->this_blocker_ != NULL && this->this_blocker_->is_blocked())
+    return IS_BLOCKED;
+  return IS_RUNNABLE;
+}
+
+Task_locker*
+Finish_group::locks(Workqueue* workqueue)
+{
+  return new Task_locker_block(*this->next_blocker_, workqueue);
+}
+
+// Loop over the archives until there are no new undefined symbols.
+
+void
+Finish_group::run(Workqueue*)
+{
+  int saw_undefined = this->saw_undefined_;
+  while (saw_undefined != this->symtab_->saw_undefined())
+    {
+      saw_undefined = this->symtab_->saw_undefined();
+
+      for (Input_group::const_iterator p = this->input_group_->begin();
+	   p != this->input_group_->end();
+	   ++p)
+	{
+	  Task_lock_obj<Archive> tl(**p);
+
+	  (*p)->add_symbols(this->symtab_, this->layout_,
+			    this->input_objects_);
+	}
+    }
+
+  // Delete all the archives now that we no longer need them.
+  for (Input_group::const_iterator p = this->input_group_->begin();
+       p != this->input_group_->end();
+       ++p)
+    delete *p;
+  delete this->input_group_;
 }
 
 } // End namespace gold.

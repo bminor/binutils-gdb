@@ -154,8 +154,8 @@ class Object
   // Scan the relocs and adjust the symbol table.
   void
   scan_relocs(const General_options& options, Symbol_table* symtab,
-	      Read_relocs_data* rd)
-  { return this->do_scan_relocs(options, symtab, rd); }
+	      Layout* layout, Read_relocs_data* rd)
+  { return this->do_scan_relocs(options, symtab, layout, rd); }
 
   // Initial local symbol processing: set the offset where local
   // symbol information will be stored; add local symbol names to
@@ -183,6 +183,14 @@ class Object
   // and set *POFF to the offset within that section.
   inline Output_section*
   output_section(unsigned int shnum, off_t* poff);
+
+  // Set the offset of an input section within its output section.
+  void
+  set_section_offset(unsigned int shndx, off_t off)
+  {
+    assert(shndx < this->map_to_output_.size());
+    this->map_to_output_[shndx].offset = off;
+  }
 
   // Return the name of a section given a section index.  This is only
   // used for error messages.
@@ -218,7 +226,8 @@ class Object
 
   // Scan the relocs--implemented by child class.
   virtual void
-  do_scan_relocs(const General_options&, Symbol_table*, Read_relocs_data*) = 0;
+  do_scan_relocs(const General_options&, Symbol_table*, Layout*,
+		 Read_relocs_data*) = 0;
 
   // Lay out sections--implemented by child class.
   virtual void
@@ -250,7 +259,8 @@ class Object
 
   // Get a view into the underlying file.
   const unsigned char*
-  get_view(off_t start, off_t size);
+  get_view(off_t start, off_t size)
+  { return this->input_file_->file().get_view(start + this->offset_, size); }
 
   // Get the number of sections.
   unsigned int
@@ -269,11 +279,16 @@ class Object
 
   // Read data from the underlying file.
   void
-  read(off_t start, off_t size, void* p);
+  read(off_t start, off_t size, void* p)
+  { this->input_file_->file().read(start + this->offset_, size, p); }
 
   // Get a lasting view into the underlying file.
   File_view*
-  get_lasting_view(off_t start, off_t size);
+  get_lasting_view(off_t start, off_t size)
+  {
+    return this->input_file_->file().get_lasting_view(start + this->offset_,
+						      size);
+  }
 
   // Return the vector mapping input sections to output sections.
   std::vector<Map_to_output>&
@@ -353,7 +368,8 @@ class Sized_object : public Object
 
   // Scan the relocs and adjust the symbol table.
   void
-  do_scan_relocs(const General_options&, Symbol_table*, Read_relocs_data*);
+  do_scan_relocs(const General_options&, Symbol_table*, Layout*,
+		 Read_relocs_data*);
 
   // Lay out the input sections.
   void

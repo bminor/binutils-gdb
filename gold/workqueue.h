@@ -17,12 +17,12 @@
 #define GOLD_WORKQUEUE_H
 
 #include "gold-threads.h"
-#include "options.h"
 #include "fileread.h"
 
 namespace gold
 {
 
+class General_options;
 class Task;
 class Workqueue;
 
@@ -286,6 +286,10 @@ class Task
   // Run the task.
   virtual void
   run(Workqueue*) = 0;
+
+ private:
+  Task(const Task&);
+  Task& operator=(const Task&);
 };
 
 // A simple task which waits for a blocker and then runs a function.

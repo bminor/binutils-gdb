@@ -19,12 +19,14 @@ void
 Symbol::override_base(const elfcpp::Sym<size, big_endian>& sym,
 		      Object* object)
 {
-  this->object_ = object;
-  this->shnum_ = sym.get_st_shndx(); // FIXME: Handle SHN_XINDEX.
+  assert(this->source_ == FROM_OBJECT);
+  this->u_.from_object.object = object;
+  // FIXME: Handle SHN_XINDEX.
+  this->u_.from_object.shnum = sym.get_st_shndx();
   this->type_ = sym.get_st_type();
   this->binding_ = sym.get_st_bind();
   this->visibility_ = sym.get_st_visibility();
-  this->other_ = sym.get_st_nonvis();
+  this->nonvis_ = sym.get_st_nonvis();
 }
 
 // Override the fields in Sized_symbol.
@@ -37,7 +39,7 @@ Sized_symbol<size>::override(const elfcpp::Sym<size, big_endian>& sym,
 {
   this->override_base(sym, object);
   this->value_ = sym.get_st_value();
-  this->size_ = sym.get_st_size();
+  this->symsize_ = sym.get_st_size();
 }
 
 // Resolve a symbol.  This is called the second and subsequent times
@@ -315,9 +317,16 @@ Symbol_table::resolve(Sized_symbol<size>* to,
     case DYN_DEF * 16 + UNDEF:
     case DYN_WEAK_DEF * 16 + UNDEF:
     case UNDEF * 16 + UNDEF:
+      // A new undefined reference tells us nothing.
+      return;
+
     case WEAK_UNDEF * 16 + UNDEF:
     case DYN_UNDEF * 16 + UNDEF:
     case DYN_WEAK_UNDEF * 16 + UNDEF:
+      // A strong undef overrides a dynamic or weak undef.
+      to->override(sym, object);
+      return;
+
     case COMMON * 16 + UNDEF:
     case WEAK_COMMON * 16 + UNDEF:
     case DYN_COMMON * 16 + UNDEF:
@@ -391,50 +400,100 @@ Symbol_table::resolve(Sized_symbol<size>* to,
       return;
 
     case COMMON * 16 + COMMON:
+      // Set the size to the maximum.
+      if (sym.get_st_size() > to->symsize())
+	to->set_symsize(sym.get_st_size());
+      return;
+
     case WEAK_COMMON * 16 + COMMON:
+      // I'm not sure just what a weak common symbol means, but
+      // presumably it can be overridden by a regular common symbol.
+      to->override(sym, object);
+      return;
+
     case DYN_COMMON * 16 + COMMON:
     case DYN_WEAK_COMMON * 16 + COMMON:
+      {
+	// Use the real common symbol, but adjust the size if necessary.
+	typename Sized_symbol<size>::Size_type symsize = to->symsize();
+	to->override(sym, object);
+	if (to->symsize() < symsize)
+	  to->set_symsize(symsize);
+      }
+      return;
 
     case DEF * 16 + WEAK_COMMON:
     case WEAK_DEF * 16 + WEAK_COMMON:
     case DYN_DEF * 16 + WEAK_COMMON:
     case DYN_WEAK_DEF * 16 + WEAK_COMMON:
+      // Whatever a weak common symbol is, it won't override a
+      // definition.
+      return;
+
     case UNDEF * 16 + WEAK_COMMON:
     case WEAK_UNDEF * 16 + WEAK_COMMON:
     case DYN_UNDEF * 16 + WEAK_COMMON:
     case DYN_WEAK_UNDEF * 16 + WEAK_COMMON:
+      // A weak common symbol is better than an undefined symbol.
+      to->override(sym, object);
+      return;
+
     case COMMON * 16 + WEAK_COMMON:
     case WEAK_COMMON * 16 + WEAK_COMMON:
     case DYN_COMMON * 16 + WEAK_COMMON:
     case DYN_WEAK_COMMON * 16 + WEAK_COMMON:
+      // Ignore a weak common symbol in the presence of a real common
+      // symbol.
+      return;
 
     case DEF * 16 + DYN_COMMON:
     case WEAK_DEF * 16 + DYN_COMMON:
     case DYN_DEF * 16 + DYN_COMMON:
     case DYN_WEAK_DEF * 16 + DYN_COMMON:
+      // Ignore a dynamic common symbol in the presence of a
+      // definition.
+      return;
+
     case UNDEF * 16 + DYN_COMMON:
     case WEAK_UNDEF * 16 + DYN_COMMON:
     case DYN_UNDEF * 16 + DYN_COMMON:
     case DYN_WEAK_UNDEF * 16 + DYN_COMMON:
+      // A dynamic common symbol is a definition of sorts.
+      to->override(sym, object);
+      return;
+
     case COMMON * 16 + DYN_COMMON:
     case WEAK_COMMON * 16 + DYN_COMMON:
     case DYN_COMMON * 16 + DYN_COMMON:
     case DYN_WEAK_COMMON * 16 + DYN_COMMON:
+      // Set the size to the maximum.
+      if (sym.get_st_size() > to->symsize())
+	to->set_symsize(sym.get_st_size());
+      return;
 
     case DEF * 16 + DYN_WEAK_COMMON:
     case WEAK_DEF * 16 + DYN_WEAK_COMMON:
     case DYN_DEF * 16 + DYN_WEAK_COMMON:
     case DYN_WEAK_DEF * 16 + DYN_WEAK_COMMON:
+      // A common symbol is ignored in the face of a definition.
+      return;
+
     case UNDEF * 16 + DYN_WEAK_COMMON:
     case WEAK_UNDEF * 16 + DYN_WEAK_COMMON:
     case DYN_UNDEF * 16 + DYN_WEAK_COMMON:
     case DYN_WEAK_UNDEF * 16 + DYN_WEAK_COMMON:
+      // I guess a weak common symbol is better than a definition.
+      to->override(sym, object);
+      return;
+
     case COMMON * 16 + DYN_WEAK_COMMON:
     case WEAK_COMMON * 16 + DYN_WEAK_COMMON:
     case DYN_COMMON * 16 + DYN_WEAK_COMMON:
     case DYN_WEAK_COMMON * 16 + DYN_WEAK_COMMON:
-      abort();
-      break;
+      // Set the size to the maximum.
+      if (sym.get_st_size() > to->symsize())
+	to->set_symsize(sym.get_st_size());
+      return;
 
     default:
       abort();

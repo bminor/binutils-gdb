@@ -38,8 +38,8 @@ Read_relocs::run(Workqueue* workqueue)
   Read_relocs_data *rd = new Read_relocs_data;
   this->object_->read_relocs(rd);
   workqueue->queue_front(new Scan_relocs(this->options_, this->symtab_,
-					 this->object_, rd, this->symtab_lock_,
-					 this->blocker_));
+					 this->layout_, this->object_, rd,
+					 this->symtab_lock_, this->blocker_));
 }
 
 // Scan_relocs methods.
@@ -52,7 +52,9 @@ Read_relocs::run(Workqueue* workqueue)
 Task::Is_runnable_type
 Scan_relocs::is_runnable(Workqueue*)
 {
-  return this->symtab_lock_->is_writable() ? IS_RUNNABLE : IS_LOCKED;
+  if (!this->symtab_lock_->is_writable() || this->object_->is_locked())
+    return IS_LOCKED;
+  return IS_RUNNABLE;
 }
 
 // Return the locks we hold: one on the file, one on the symbol table
@@ -85,7 +87,8 @@ Scan_relocs::locks(Workqueue* workqueue)
 void
 Scan_relocs::run(Workqueue*)
 {
-  this->object_->scan_relocs(this->options_, this->symtab_, this->rd_);
+  this->object_->scan_relocs(this->options_, this->symtab_, this->layout_,
+			     this->rd_);
   delete this->rd_;
   this->rd_ = NULL;
 }
@@ -170,6 +173,14 @@ Sized_object<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
       if (!this->is_section_included(shndx))
 	continue;
 
+      // We are scanning relocations in order to fill out the GOT and
+      // PLT sections.  Relocations for sections which are not
+      // allocated (typically debugging sections) should not add new
+      // GOT and PLT entries.  So we skip them.
+      typename This::Shdr secshdr(pshdrs + shndx * This::shdr_size);
+      if ((secshdr.get_sh_flags() & elfcpp::SHF_ALLOC) == 0)
+	continue;
+
       if (shdr.get_sh_link() != this->symtab_shnum_)
 	{
 	  fprintf(stderr,
@@ -239,6 +250,7 @@ template<int size, bool big_endian>
 void
 Sized_object<size, big_endian>::do_scan_relocs(const General_options& options,
 					       Symbol_table* symtab,
+					       Layout* layout,
 					       Read_relocs_data* rd)
 {
   Sized_target<size, big_endian>* target = this->sized_target();
@@ -253,7 +265,7 @@ Sized_object<size, big_endian>::do_scan_relocs(const General_options& options,
        p != rd->relocs.end();
        ++p)
     {
-      target->scan_relocs(options, symtab, this, p->sh_type,
+      target->scan_relocs(options, symtab, layout, this, p->sh_type,
 			  p->contents->data(), p->reloc_count,
 			  this->local_symbol_count_,
 			  local_symbols,
@@ -338,10 +350,14 @@ Sized_object<size, big_endian>::write_sections(const unsigned char* pshdrs,
       if (shdr.get_sh_type() == elfcpp::SHT_NOBITS)
 	continue;
 
-      assert(map_sections[i].offset >= 0
-	     && map_sections[i].offset < os->data_size());
       off_t start = os->offset() + map_sections[i].offset;
       off_t sh_size = shdr.get_sh_size();
+
+      if (sh_size == 0)
+	continue;
+
+      assert(map_sections[i].offset >= 0
+	     && map_sections[i].offset + sh_size <= os->data_size());
 
       unsigned char* view = of->get_output_view(start, sh_size);
       this->read(shdr.get_sh_offset(), sh_size, view);
@@ -477,24 +493,28 @@ template
 void
 Sized_object<32, false>::do_scan_relocs(const General_options& options,
 					Symbol_table* symtab,
+					Layout* layout,
 					Read_relocs_data* rd);
 
 template
 void
 Sized_object<32, true>::do_scan_relocs(const General_options& options,
 				       Symbol_table* symtab,
+				       Layout* layout,
 				       Read_relocs_data* rd);
 
 template
 void
 Sized_object<64, false>::do_scan_relocs(const General_options& options,
 					Symbol_table* symtab,
+					Layout* layout,
 					Read_relocs_data* rd);
 
 template
 void
 Sized_object<64, true>::do_scan_relocs(const General_options& options,
 				       Symbol_table* symtab,
+				       Layout* layout,
 				       Read_relocs_data* rd);
 
 template

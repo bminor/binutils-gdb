@@ -9,6 +9,7 @@
 
 #include "elfcpp.h"
 #include "fileread.h"
+#include "readsyms.h"
 #include "symtab.h"
 #include "object.h"
 #include "archive.h"
@@ -46,14 +47,6 @@ const char Archive::armag[sarmag] =
 };
 
 const char Archive::arfmag[2] = { '`', '\n' };
-
-// Get a view into the underlying file.
-
-const unsigned char*
-Archive::get_view(off_t start, off_t size)
-{
-  return this->input_file_->file().get_view(start, size);
-}
 
 // Set up the archive: read the symbol map and the extended name
 // table.
@@ -112,6 +105,10 @@ Archive::setup()
       const char* px = reinterpret_cast<const char*>(p);
       this->extended_names_.assign(px, extended_size);
     }
+
+  // This array keeps track of which symbols are for archive elements
+  // which we have already included in the link.
+  this->seen_.resize(nsyms);
 
   // Opening the file locked it.  Unlock it now.
   this->input_file_->file().unlock();
@@ -221,10 +218,7 @@ void
 Archive::add_symbols(Symbol_table* symtab, Layout* layout,
 		     Input_objects* input_objects)
 {
-  size_t armap_size = this->armap_.size();
-  std::vector<bool> seen;
-  seen.resize(this->armap_.size());
-  seen.clear();
+  const size_t armap_size = this->armap_.size();
 
   bool added_new_object;
   do
@@ -233,20 +227,20 @@ Archive::add_symbols(Symbol_table* symtab, Layout* layout,
       off_t last = -1;
       for (size_t i = 0; i < armap_size; ++i)
 	{
-	  if (seen[i])
+	  if (this->seen_[i])
 	    continue;
 	  if (this->armap_[i].offset == last)
 	    {
-	      seen[i] = true;
+	      this->seen_[i] = true;
 	      continue;
 	    }
 
 	  Symbol* sym = symtab->lookup(this->armap_[i].name);
 	  if (sym == NULL)
 	    continue;
-	  else if (sym->shnum() != elfcpp::SHN_UNDEF)
+	  else if (!sym->is_undefined())
 	    {
-	      seen[i] = true;
+	      this->seen_[i] = true;
 	      continue;
 	    }
 	  else if (sym->binding() == elfcpp::STB_WEAK)
@@ -255,6 +249,7 @@ Archive::add_symbols(Symbol_table* symtab, Layout* layout,
 	  // We want to include this object in the link.
 	  last = this->armap_[i].offset;
 	  this->include_member(symtab, layout, input_objects, last);
+	  this->seen_[i] = true;
 	  added_new_object = true;
 	}
     }
@@ -337,13 +332,13 @@ class Add_archive_symbols::Add_archive_symbols_locker : public Task_locker
 {
  public:
   Add_archive_symbols_locker(Task_token& token, Workqueue* workqueue,
-			     Archive* archive)
-    : blocker_(token, workqueue), archlock_(*archive)
+			     File_read& file)
+    : blocker_(token, workqueue), filelock_(file)
   { }
 
  private:
   Task_locker_block blocker_;
-  Task_locker_obj<Archive> archlock_;			     
+  Task_locker_obj<File_read> filelock_;			     
 };
 
 Task_locker*
@@ -351,7 +346,7 @@ Add_archive_symbols::locks(Workqueue* workqueue)
 {
   return new Add_archive_symbols_locker(*this->next_blocker_,
 					workqueue,
-					this->archive_);
+					this->archive_->file());
 }
 
 void
@@ -359,6 +354,14 @@ Add_archive_symbols::run(Workqueue*)
 {
   this->archive_->add_symbols(this->symtab_, this->layout_,
 			      this->input_objects_);
+
+  if (this->input_group_ != NULL)
+    this->input_group_->add_archive(this->archive_);
+  else
+    {
+      // We no longer need to know about this archive.
+      delete this->archive_;
+    }
 }
 
 } // End namespace gold.

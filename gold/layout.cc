@@ -38,7 +38,7 @@ Layout_task_runner::run(Workqueue* workqueue)
 // Layout methods.
 
 Layout::Layout(const General_options& options)
-  : options_(options), last_shndx_(0), namepool_(), sympool_(), signatures_(),
+  : options_(options), namepool_(), sympool_(), signatures_(),
     section_name_map_(), segment_list_(), section_list_(),
     special_output_list_(), tls_segment_(NULL)
 {
@@ -86,64 +86,112 @@ Layout::include_section(Object*, const char*,
     }
 }
 
-// Return the output section to use for input section NAME, with
-// header HEADER, from object OBJECT.  Set *OFF to the offset of this
-// input section without the output section.
+// Return an output section named NAME, or NULL if there is none.
 
-template<int size, bool big_endian>
 Output_section*
-Layout::layout(Object* object, const char* name,
-	       const elfcpp::Shdr<size, big_endian>& shdr, off_t* off)
+Layout::find_output_section(const char* name) const
 {
-  // We discard empty input sections.
-  if (shdr.get_sh_size() == 0)
-    return NULL;
+  for (Section_name_map::const_iterator p = this->section_name_map_.begin();
+       p != this->section_name_map_.end();
+       ++p)
+    if (strcmp(p->first.first, name) == 0)
+      return p->second;
+  return NULL;
+}
 
-  if (!this->include_section(object, name, shdr))
-    return NULL;
+// Return an output segment of type TYPE, with segment flags SET set
+// and segment flags CLEAR clear.  Return NULL if there is none.
 
-  // Unless we are doing a relocateable link, .gnu.linkonce sections
-  // are laid out as though they were named for the sections are
-  // placed into.
-  if (!this->options_.is_relocatable() && Layout::is_linkonce(name))
-    name = Layout::linkonce_output_name(name);
+Output_segment*
+Layout::find_output_segment(elfcpp::PT type, elfcpp::Elf_Word set,
+			    elfcpp::Elf_Word clear) const
+{
+  for (Segment_list::const_iterator p = this->segment_list_.begin();
+       p != this->segment_list_.end();
+       ++p)
+    if (static_cast<elfcpp::PT>((*p)->type()) == type
+	&& ((*p)->flags() & set) == set
+	&& ((*p)->flags() & clear) == 0)
+      return *p;
+  return NULL;
+}
 
-  // FIXME: Handle SHF_OS_NONCONFORMING here.
+// Return the output section to use for section NAME with type TYPE
+// and section flags FLAGS.
 
-  // Canonicalize the section name.
-  name = this->namepool_.add(name);
+Output_section*
+Layout::get_output_section(const char* name, elfcpp::Elf_Word type,
+			   elfcpp::Elf_Xword flags)
+{
+  // We should ignore some flags.
+  flags &= ~ (elfcpp::SHF_INFO_LINK
+	      | elfcpp::SHF_LINK_ORDER
+	      | elfcpp::SHF_GROUP);
 
-  // Find the output section.  The output section is selected based on
-  // the section name, type, and flags.
-
-  // FIXME: If we want to do relaxation, we need to modify this
-  // algorithm.  We also build a list of input sections for each
-  // output section.  Then we relax all the input sections.  Then we
-  // walk down the list and adjust all the offsets.
-
-  elfcpp::Elf_Word type = shdr.get_sh_type();
-  elfcpp::Elf_Xword flags = shdr.get_sh_flags();
   const Key key(name, std::make_pair(type, flags));
   const std::pair<Key, Output_section*> v(key, NULL);
   std::pair<Section_name_map::iterator, bool> ins(
     this->section_name_map_.insert(v));
 
-  Output_section* os;
   if (!ins.second)
-    os = ins.first->second;
+    return ins.first->second;
   else
     {
       // This is the first time we've seen this name/type/flags
       // combination.
-      os = this->make_output_section(name, type, flags);
+      Output_section* os = this->make_output_section(name, type, flags);
       ins.first->second = os;
+      return os;
     }
+}
+
+// Return the output section to use for input section SHNDX, with name
+// NAME, with header HEADER, from object OBJECT.  Set *OFF to the
+// offset of this input section without the output section.
+
+template<int size, bool big_endian>
+Output_section*
+Layout::layout(Object* object, unsigned int shndx, const char* name,
+	       const elfcpp::Shdr<size, big_endian>& shdr, off_t* off)
+{
+  if (!this->include_section(object, name, shdr))
+    return NULL;
+
+  // If we are not doing a relocateable link, choose the name to use
+  // for the output section.
+  size_t len = strlen(name);
+  if (!this->options_.is_relocatable())
+    name = Layout::output_section_name(name, &len);
+
+  // FIXME: Handle SHF_OS_NONCONFORMING here.
+
+  // Canonicalize the section name.
+  name = this->namepool_.add(name, len);
+
+  // Find the output section.  The output section is selected based on
+  // the section name, type, and flags.
+  Output_section* os = this->get_output_section(name, shdr.get_sh_type(),
+						shdr.get_sh_flags());
 
   // FIXME: Handle SHF_LINK_ORDER somewhere.
 
-  *off = os->add_input_section(object, name, shdr);
+  *off = os->add_input_section(object, shndx, name, shdr);
 
   return os;
+}
+
+// Add POSD to an output section using NAME, TYPE, and FLAGS.
+
+void
+Layout::add_output_section_data(const char* name, elfcpp::Elf_Word type,
+				elfcpp::Elf_Xword flags,
+				Output_section_data* posd)
+{
+  // Canonicalize the name.
+  name = this->namepool_.add(name);
+
+  Output_section* os = this->get_output_section(name, type, flags);
+  os->add_output_section_data(posd);
 }
 
 // Map section flags to segment flags.
@@ -166,9 +214,7 @@ Output_section*
 Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
 			    elfcpp::Elf_Xword flags)
 {
-  ++this->last_shndx_;
-  Output_section* os = new Output_section(name, type, flags,
-					  this->last_shndx_);
+  Output_section* os = new Output_section(name, type, flags, true);
 
   if ((flags & elfcpp::SHF_ALLOC) == 0)
     this->section_list_.push_back(os);
@@ -339,8 +385,14 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
   load_seg->add_initial_output_data(file_header);
   this->special_output_list_.push_back(file_header);
 
-  // Set the file offsets of all the segments.
-  off_t off = this->set_segment_offsets(input_objects->target(), load_seg);
+  // We set the output section indexes in set_segment_offsets and
+  // set_section_offsets.
+  unsigned int shndx = 1;
+
+  // Set the file offsets of all the segments, and all the sections
+  // they contain.
+  off_t off = this->set_segment_offsets(input_objects->target(), load_seg,
+					&shndx);
 
   // Create the symbol table sections.
   // FIXME: We don't need to do this if we are stripping symbols.
@@ -354,7 +406,10 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
 
   // Set the file offsets of all the sections not associated with
   // segments.
-  off = this->set_section_offsets(off);
+  off = this->set_section_offsets(off, &shndx);
+
+  // Now the section index of OSTRTAB is set.
+  osymtab->set_link(ostrtab->out_shndx());
 
   // Create the section table header.
   Output_section_headers* oshdrs = this->create_shdrs(size, big_endian, &off);
@@ -450,12 +505,13 @@ Layout::segment_precedes(const Output_segment* seg1,
   return paddr1 < paddr2;
 }
 
-// Set the file offsets of all the segments.  They have all been
-// created.  LOAD_SEG must be be laid out first.  Return the offset of
-// the data to follow.
+// Set the file offsets of all the segments, and all the sections they
+// contain.  They have all been created.  LOAD_SEG must be be laid out
+// first.  Return the offset of the data to follow.
 
 off_t
-Layout::set_segment_offsets(const Target* target, Output_segment* load_seg)
+Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
+			    unsigned int *pshndx)
 {
   // Sort them into the final order.
   std::sort(this->segment_list_.begin(), this->segment_list_.end(),
@@ -489,16 +545,17 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg)
 	  uint64_t abi_pagesize = target->abi_pagesize();
 	  if (was_readonly && ((*p)->flags() & elfcpp::PF_W) != 0)
 	    {
-	      uint64_t align = (*p)->max_data_align();
+	      uint64_t align = (*p)->addralign();
 
-	      addr = (addr + align - 1) & ~ (align - 1);
+	      addr = align_address(addr, align);
 	      aligned_addr = addr;
 	      if ((addr & (abi_pagesize - 1)) != 0)
 		addr = addr + abi_pagesize;
 	    }
 
+	  unsigned int shndx_hold = *pshndx;
 	  off = orig_off + ((addr - orig_addr) & (abi_pagesize - 1));
-	  uint64_t new_addr = (*p)->set_section_addresses(addr, &off);
+	  uint64_t new_addr = (*p)->set_section_addresses(addr, &off, pshndx);
 
 	  // Now that we know the size of this segment, we may be able
 	  // to save a page in memory, at the cost of wasting some
@@ -519,10 +576,10 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg)
 		      != (new_addr & ~ (common_pagesize - 1)))
 		  && first_off + last_off <= common_pagesize)
 		{
-		  addr = ((aligned_addr + common_pagesize - 1)
-			  & ~ (common_pagesize - 1));
+		  *pshndx = shndx_hold;
+		  addr = align_address(aligned_addr, common_pagesize);
 		  off = orig_off + ((addr - orig_addr) & (abi_pagesize - 1));
-		  new_addr = (*p)->set_section_addresses(addr, &off);
+		  new_addr = (*p)->set_section_addresses(addr, &off, pshndx);
 		}
 	    }
 
@@ -550,17 +607,17 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg)
 // segment.
 
 off_t
-Layout::set_section_offsets(off_t off)
+Layout::set_section_offsets(off_t off, unsigned int* pshndx)
 {
   for (Layout::Section_list::iterator p = this->section_list_.begin();
        p != this->section_list_.end();
        ++p)
     {
+      (*p)->set_out_shndx(*pshndx);
+      ++*pshndx;
       if ((*p)->offset() != -1)
 	continue;
-      uint64_t addralign = (*p)->addralign();
-      if (addralign != 0)
-	off = (off + addralign - 1) & ~ (addralign - 1);
+      off = align_address(off, (*p)->addralign());
       (*p)->set_address(0, off);
       off += (*p)->data_size();
     }
@@ -592,7 +649,7 @@ Layout::create_symtab_sections(int size, const Input_objects* input_objects,
     abort();
 
   off_t off = *poff;
-  off = (off + align - 1) & ~ (align - 1);
+  off = align_address(off, align);
   off_t startoff = off;
 
   // Save space for the dummy symbol at the start of the section.  We
@@ -614,23 +671,18 @@ Layout::create_symtab_sections(int size, const Input_objects* input_objects,
 
   this->sympool_.set_string_offsets();
 
-  ++this->last_shndx_;
   const char* symtab_name = this->namepool_.add(".symtab");
   Output_section* osymtab = new Output_section_symtab(symtab_name,
-						      off - startoff,
-						      this->last_shndx_);
+						      off - startoff);
   this->section_list_.push_back(osymtab);
 
-  ++this->last_shndx_;
   const char* strtab_name = this->namepool_.add(".strtab");
   Output_section *ostrtab = new Output_section_strtab(strtab_name,
-						      &this->sympool_,
-						      this->last_shndx_);
+						      &this->sympool_);
   this->section_list_.push_back(ostrtab);
   this->special_output_list_.push_back(ostrtab);
 
   osymtab->set_address(0, startoff);
-  osymtab->set_link(ostrtab->shndx());
   osymtab->set_info(local_symcount);
   osymtab->set_entsize(symsize);
   osymtab->set_addralign(align);
@@ -654,10 +706,7 @@ Layout::create_shstrtab()
 
   this->namepool_.set_string_offsets();
 
-  ++this->last_shndx_;
-  Output_section* os = new Output_section_strtab(name,
-						 &this->namepool_,
-						 this->last_shndx_);
+  Output_section* os = new Output_section_strtab(name, &this->namepool_);
 
   this->section_list_.push_back(os);
   this->special_output_list_.push_back(os);
@@ -675,8 +724,7 @@ Layout::create_shdrs(int size, bool big_endian, off_t* poff)
   oshdrs = new Output_section_headers(size, big_endian, this->segment_list_,
 				      this->section_list_,
 				      &this->namepool_);
-  uint64_t addralign = oshdrs->addralign();
-  off_t off = (*poff + addralign - 1) & ~ (addralign - 1);
+  off_t off = align_address(*poff, oshdrs->addralign());
   oshdrs->set_address(0, off);
   off += oshdrs->data_size();
   *poff = off;
@@ -686,7 +734,7 @@ Layout::create_shdrs(int size, bool big_endian, off_t* poff)
 
 // The mapping of .gnu.linkonce section names to real section names.
 
-#define MAPPING_INIT(f, t) { f, sizeof(f) - 1, t }
+#define MAPPING_INIT(f, t) { f, sizeof(f) - 1, t, sizeof(t) - 1 }
 const Layout::Linkonce_mapping Layout::linkonce_mapping[] =
 {
   MAPPING_INIT("d.rel.ro", ".data.rel.ro"),	// Must be before "d".
@@ -713,10 +761,11 @@ const int Layout::linkonce_mapping_count =
 // Return the name of the output section to use for a .gnu.linkonce
 // section.  This is based on the default ELF linker script of the old
 // GNU linker.  For example, we map a name like ".gnu.linkonce.t.foo"
-// to ".text".
+// to ".text".  Set *PLEN to the length of the name.  *PLEN is
+// initialized to the length of NAME.
 
 const char*
-Layout::linkonce_output_name(const char* name)
+Layout::linkonce_output_name(const char* name, size_t *plen)
 {
   const char* s = name + sizeof(".gnu.linkonce") - 1;
   if (*s != '.')
@@ -726,8 +775,64 @@ Layout::linkonce_output_name(const char* name)
   for (int i = 0; i < linkonce_mapping_count; ++i, ++plm)
     {
       if (strncmp(s, plm->from, plm->fromlen) == 0 && s[plm->fromlen] == '.')
-	return plm->to;
+	{
+	  *plen = plm->tolen;
+	  return plm->to;
+	}
     }
+  return name;
+}
+
+// Choose the output section name to use given an input section name.
+// Set *PLEN to the length of the name.  *PLEN is initialized to the
+// length of NAME.
+
+const char*
+Layout::output_section_name(const char* name, size_t* plen)
+{
+  if (Layout::is_linkonce(name))
+    {
+      // .gnu.linkonce sections are laid out as though they were named
+      // for the sections are placed into.
+      return Layout::linkonce_output_name(name, plen);
+    }
+
+  // If the section name has no '.', or only an initial '.', we use
+  // the name unchanged (i.e., ".text" is unchanged).
+
+  // Otherwise, if the section name does not include ".rel", we drop
+  // the last '.'  and everything that follows (i.e., ".text.XXX"
+  // becomes ".text").
+
+  // Otherwise, if the section name has zero or one '.' after the
+  // ".rel", we use the name unchanged (i.e., ".rel.text" is
+  // unchanged).
+
+  // Otherwise, we drop the last '.' and everything that follows
+  // (i.e., ".rel.text.XXX" becomes ".rel.text").
+
+  const char* s = name;
+  if (*s == '.')
+    ++s;
+  const char* sdot = strchr(s, '.');
+  if (sdot == NULL)
+    return name;
+
+  const char* srel = strstr(s, ".rel");
+  if (srel == NULL)
+    {
+      *plen = sdot - name;
+      return name;
+    }
+
+  sdot = strchr(srel + 1, '.');
+  if (sdot == NULL)
+    return name;
+  sdot = strchr(sdot + 1, '.');
+  if (sdot == NULL)
+    return name;
+
+  *plen = sdot - name;
   return name;
 }
 
@@ -743,7 +848,7 @@ Layout::add_comdat(const char* signature, bool group)
 {
   std::string sig(signature);
   std::pair<Signatures::iterator, bool> ins(
-    this->signatures_.insert(std::make_pair(signature, group)));
+    this->signatures_.insert(std::make_pair(sig, group)));
 
   if (ins.second)
     {
@@ -851,22 +956,22 @@ Close_task_runner::run(Workqueue*)
 
 template
 Output_section*
-Layout::layout<32, false>(Object* object, const char* name,
+Layout::layout<32, false>(Object* object, unsigned int shndx, const char* name,
 			  const elfcpp::Shdr<32, false>& shdr, off_t*);
 
 template
 Output_section*
-Layout::layout<32, true>(Object* object, const char* name,
+Layout::layout<32, true>(Object* object, unsigned int shndx, const char* name,
 			 const elfcpp::Shdr<32, true>& shdr, off_t*);
 
 template
 Output_section*
-Layout::layout<64, false>(Object* object, const char* name,
+Layout::layout<64, false>(Object* object, unsigned int shndx, const char* name,
 			  const elfcpp::Shdr<64, false>& shdr, off_t*);
 
 template
 Output_section*
-Layout::layout<64, true>(Object* object, const char* name,
+Layout::layout<64, true>(Object* object, unsigned int shndx, const char* name,
 			 const elfcpp::Shdr<64, true>& shdr, off_t*);
 
 

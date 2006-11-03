@@ -149,6 +149,7 @@ class Sized_target : public Target
   virtual void
   scan_relocs(const General_options& options,
 	      Symbol_table* symtab,
+	      Layout* layout,
 	      Sized_object<size, big_endian>* object,
 	      unsigned int sh_type,
 	      const unsigned char* prelocs,

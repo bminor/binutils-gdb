@@ -36,11 +36,14 @@ struct Reloc_types<elfcpp::SHT_RELA, size, big_endian>
 // way to avoidmaking a function call for each relocation, and to
 // avoid repeating the generic code for each target.
 
-template<int size, bool big_endian, int sh_type, typename Scan>
+template<int size, bool big_endian, typename Target_type, int sh_type,
+	 typename Scan>
 inline void
 scan_relocs(
     const General_options& options,
     Symbol_table* symtab,
+    Layout* layout,
+    Target_type* target,
     Sized_object<size, big_endian>* object,
     const unsigned char* prelocs,
     size_t reloc_count,
@@ -68,6 +71,7 @@ scan_relocs(
 						      + r_sym * sym_size);
 	  const unsigned int shndx = lsym.get_st_shndx();
 	  if (shndx < elfcpp::SHN_LORESERVE
+	      && shndx != elfcpp::SHN_UNDEF
 	      && !object->is_section_included(lsym.get_st_shndx()))
 	    {
 	      // RELOC is a relocation against a local symbol in a
@@ -88,7 +92,8 @@ scan_relocs(
 	      continue;
 	    }
 
-	  scan.local(options, object, reloc, r_type, lsym);
+	  scan.local(options, symtab, layout, target, object, reloc, r_type,
+		     lsym);
 	}
       else
 	{
@@ -97,7 +102,8 @@ scan_relocs(
 	  if (gsym->is_forwarder())
 	    gsym = symtab->resolve_forwards(gsym);
 
-	  scan.global(options, object, reloc, r_type, gsym);
+	  scan.global(options, symtab, layout, target, object, reloc, r_type,
+		      gsym);
 	}
     }
 }
@@ -117,10 +123,12 @@ scan_relocs(
 // of relocs.  VIEW is the section data, VIEW_ADDRESS is its memory
 // address, and VIEW_SIZE is the size.
 
-template<int size, bool big_endian, int sh_type, typename Relocate>
+template<int size, bool big_endian, typename Target_type, int sh_type,
+	 typename Relocate>
 inline void
 relocate_section(
     const Relocate_info<size, big_endian>* relinfo,
+    Target_type* target,
     const unsigned char* prelocs,
     size_t reloc_count,
     unsigned char* view,
@@ -140,13 +148,6 @@ relocate_section(
       Reltype reloc(prelocs);
 
       off_t offset = reloc.get_r_offset();
-      if (offset < 0 || offset >= view_size)
-	{
-	  fprintf(stderr, _("%s: %s: reloc has bad offset %zu\n"),
-		  program_name, relinfo->location(i, offset).c_str(),
-		  static_cast<size_t>(offset));
-	  gold_exit(false);
-	}
 
       typename elfcpp::Elf_types<size>::Elf_WXword r_info = reloc.get_r_info();
       unsigned int r_sym = elfcpp::elf_r_sym<size>(r_info);
@@ -169,19 +170,29 @@ relocate_section(
 
 	  sym = static_cast<Sized_symbol<size>*>(gsym);
 	  value = sym->value();
-
-	  if (sym->shnum() == elfcpp::SHN_UNDEF
-	      && sym->binding() != elfcpp::STB_WEAK)
-	    {
-	      fprintf(stderr, _("%s: %s: undefined reference to '%s'\n"),
-		      program_name, relinfo->location(i, offset).c_str(),
-		      sym->name());
-	      // gold_exit(false);
-	    }
 	}
 
-      relocate.relocate(relinfo, i, reloc, r_type, sym, value, view + offset,
-			view_address + offset, view_size);
+      if (!relocate.relocate(relinfo, target, i, reloc, r_type, sym, value,
+			     view + offset, view_address + offset, view_size))
+	continue;
+
+      if (offset < 0 || offset >= view_size)
+	{
+	  fprintf(stderr, _("%s: %s: reloc has bad offset %zu\n"),
+		  program_name, relinfo->location(i, offset).c_str(),
+		  static_cast<size_t>(offset));
+	  gold_exit(false);
+	}
+
+      if (sym != NULL
+	  && sym->is_undefined()
+	  && sym->binding() != elfcpp::STB_WEAK)
+	{
+	  fprintf(stderr, _("%s: %s: undefined reference to '%s'\n"),
+		  program_name, relinfo->location(i, offset).c_str(),
+		  sym->name());
+	  // gold_exit(false);
+	}
     }
 }
 

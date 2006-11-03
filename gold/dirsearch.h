@@ -6,11 +6,12 @@
 #include <string>
 #include <list>
 
-#include "options.h"
 #include "workqueue.h"
 
 namespace gold
 {
+
+class General_options;
 
 // A simple interface to manage directories to be searched for
 // libraries.

@@ -12,9 +12,11 @@
 #include "dirsearch.h"
 #include "readsyms.h"
 #include "symtab.h"
+#include "common.h"
 #include "object.h"
 #include "layout.h"
 #include "reloc.h"
+#include "defstd.h"
 
 namespace gold
 {
@@ -92,11 +94,11 @@ Middle_runner::run(Workqueue* workqueue)
 void
 queue_initial_tasks(const General_options& options,
 		    const Dirsearch& search_path,
-		    const Input_argument_list& inputs,
+		    const Command_line& cmdline,
 		    Workqueue* workqueue, Input_objects* input_objects,
 		    Symbol_table* symtab, Layout* layout)
 {
-  if (inputs.empty())
+  if (cmdline.begin() == cmdline.end())
     gold_fatal(_("no input files"), false);
 
   // Read the input files.  We have to add the symbols to the symbol
@@ -104,14 +106,14 @@ queue_initial_tasks(const General_options& options,
   // each input file.  We associate the blocker with the following
   // input file, to give us a convenient place to delete it.
   Task_token* this_blocker = NULL;
-  for (Input_argument_list::const_iterator p = inputs.begin();
-       p != inputs.end();
+  for (Command_line::const_iterator p = cmdline.begin();
+       p != cmdline.end();
        ++p)
     {
       Task_token* next_blocker = new Task_token();
       next_blocker->add_blocker();
       workqueue->queue(new Read_symbols(options, input_objects, symtab, layout,
-					search_path, *p, this_blocker,
+					search_path, *p, NULL, this_blocker,
 					next_blocker));
       this_blocker = next_blocker;
     }
@@ -134,6 +136,10 @@ queue_middle_tasks(const General_options& options,
 		   Layout* layout,
 		   Workqueue* workqueue)
 {
+  // Predefine standard symbols.  This should be fast, so we don't
+  // bother to create a task for it.
+  define_standard_symbols(symtab, layout, input_objects->target());
+
   // Read the relocations of the input files.  We do this to find
   // which symbols are used by relocations which require a GOT and/or
   // a PLT entry, or a COPY reloc.  When we implement garbage
@@ -157,15 +163,15 @@ queue_middle_tasks(const General_options& options,
       // relocations.  That task will in turn queue a task to wait
       // until it can write to the symbol table.
       blocker->add_blocker();
-      workqueue->queue(new Read_relocs(options, symtab, *p, symtab_lock,
-				       blocker));
+      workqueue->queue(new Read_relocs(options, symtab, layout, *p,
+				       symtab_lock, blocker));
     }
 
   // Allocate common symbols.  This requires write access to the
   // symbol table, but is independent of the relocation processing.
-  // blocker->add_blocker();
-  // workqueue->queue(new Allocate_commons_task(options, symtab, layout,
-  //					     symtab_lock, blocker));
+  blocker->add_blocker();
+  workqueue->queue(new Allocate_commons_task(options, symtab, layout,
+  					     symtab_lock, blocker));
 
   // When all those tasks are complete, we can start laying out the
   // output file.
@@ -257,7 +263,7 @@ main(int argc, char** argv)
 
   // Queue up the first set of tasks.
   queue_initial_tasks(command_line.options(), search_path,
-		      command_line.inputs(), &workqueue, &input_objects,
+		      command_line, &workqueue, &input_objects,
 		      &symtab, &layout);
 
   // Run the main task processing loop.

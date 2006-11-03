@@ -17,28 +17,85 @@ namespace gold
 
 // Class Symbol.
 
-// Initialize the fields in the base class Symbol.
+// Initialize fields in Symbol.  This initializes everything except u_
+// and source_.
+
+void
+Symbol::init_fields(const char* name, const char* version,
+		    elfcpp::STT type, elfcpp::STB binding,
+		    elfcpp::STV visibility, unsigned char nonvis)
+{
+  this->name_ = name;
+  this->version_ = version;
+  this->got_offset_ = 0;
+  this->type_ = type;
+  this->binding_ = binding;
+  this->visibility_ = visibility;
+  this->nonvis_ = nonvis;
+  this->is_target_special_ = false;
+  this->is_def_ = false;
+  this->is_forwarder_ = false;
+  this->in_dyn_ = false;
+  this->has_got_offset_ = false;
+}
+
+// Initialize the fields in the base class Symbol for SYM in OBJECT.
 
 template<int size, bool big_endian>
 void
 Symbol::init_base(const char* name, const char* version, Object* object,
 		  const elfcpp::Sym<size, big_endian>& sym)
 {
-  this->name_ = name;
-  this->version_ = version;
-  this->object_ = object;
-  this->shnum_ = sym.get_st_shndx(); // FIXME: Handle SHN_XINDEX.
-  this->type_ = sym.get_st_type();
-  this->binding_ = sym.get_st_bind();
-  this->visibility_ = sym.get_st_visibility();
-  this->other_ = sym.get_st_nonvis();
-  this->is_special_ = false;
-  this->is_def_ = false;
-  this->is_forwarder_ = false;
+  this->init_fields(name, version, sym.get_st_type(), sym.get_st_bind(),
+		    sym.get_st_visibility(), sym.get_st_nonvis());
+  this->u_.from_object.object = object;
+  // FIXME: Handle SHN_XINDEX.
+  this->u_.from_object.shnum = sym.get_st_shndx();
+  this->source_ = FROM_OBJECT;
   this->in_dyn_ = object->is_dynamic();
 }
 
-// Initialize the fields in Sized_symbol.
+// Initialize the fields in the base class Symbol for a symbol defined
+// in an Output_data.
+
+void
+Symbol::init_base(const char* name, Output_data* od, elfcpp::STT type,
+		  elfcpp::STB binding, elfcpp::STV visibility,
+		  unsigned char nonvis, bool offset_is_from_end)
+{
+  this->init_fields(name, NULL, type, binding, visibility, nonvis);
+  this->u_.in_output_data.output_data = od;
+  this->u_.in_output_data.offset_is_from_end = offset_is_from_end;
+  this->source_ = IN_OUTPUT_DATA;
+}
+
+// Initialize the fields in the base class Symbol for a symbol defined
+// in an Output_segment.
+
+void
+Symbol::init_base(const char* name, Output_segment* os, elfcpp::STT type,
+		  elfcpp::STB binding, elfcpp::STV visibility,
+		  unsigned char nonvis, Segment_offset_base offset_base)
+{
+  this->init_fields(name, NULL, type, binding, visibility, nonvis);
+  this->u_.in_output_segment.output_segment = os;
+  this->u_.in_output_segment.offset_base = offset_base;
+  this->source_ = IN_OUTPUT_SEGMENT;
+}
+
+// Initialize the fields in the base class Symbol for a symbol defined
+// as a constant.
+
+void
+Symbol::init_base(const char* name, elfcpp::STT type,
+		  elfcpp::STB binding, elfcpp::STV visibility,
+		  unsigned char nonvis)
+{
+  this->init_fields(name, NULL, type, binding, visibility, nonvis);
+  this->source_ = CONSTANT;
+}
+
+// Initialize the fields in Sized_symbol for SYM in OBJECT.
 
 template<int size>
 template<bool big_endian>
@@ -48,13 +105,61 @@ Sized_symbol<size>::init(const char* name, const char* version, Object* object,
 {
   this->init_base(name, version, object, sym);
   this->value_ = sym.get_st_value();
-  this->size_ = sym.get_st_size();
+  this->symsize_ = sym.get_st_size();
+}
+
+// Initialize the fields in Sized_symbol for a symbol defined in an
+// Output_data.
+
+template<int size>
+void
+Sized_symbol<size>::init(const char* name, Output_data* od,
+			 Value_type value, Size_type symsize,
+			 elfcpp::STT type, elfcpp::STB binding,
+			 elfcpp::STV visibility, unsigned char nonvis,
+			 bool offset_is_from_end)
+{
+  this->init_base(name, od, type, binding, visibility, nonvis,
+		  offset_is_from_end);
+  this->value_ = value;
+  this->symsize_ = symsize;
+}
+
+// Initialize the fields in Sized_symbol for a symbol defined in an
+// Output_segment.
+
+template<int size>
+void
+Sized_symbol<size>::init(const char* name, Output_segment* os,
+			 Value_type value, Size_type symsize,
+			 elfcpp::STT type, elfcpp::STB binding,
+			 elfcpp::STV visibility, unsigned char nonvis,
+			 Segment_offset_base offset_base)
+{
+  this->init_base(name, os, type, binding, visibility, nonvis, offset_base);
+  this->value_ = value;
+  this->symsize_ = symsize;
+}
+
+// Initialize the fields in Sized_symbol for a symbol defined as a
+// constant.
+
+template<int size>
+void
+Sized_symbol<size>::init(const char* name, Value_type value, Size_type symsize,
+			 elfcpp::STT type, elfcpp::STB binding,
+			 elfcpp::STV visibility, unsigned char nonvis)
+{
+  this->init_base(name, type, binding, visibility, nonvis);
+  this->value_ = value;
+  this->symsize_ = symsize;
 }
 
 // Class Symbol_table.
 
 Symbol_table::Symbol_table()
-  : size_(0), offset_(0), table_(), namepool_(), forwarders_()
+  : size_(0), saw_undefined_(0), offset_(0), table_(), namepool_(),
+    forwarders_(), commons_()
 {
 }
 
@@ -144,7 +249,7 @@ Symbol_table::resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from
   esym.put_st_value(from->value());
   esym.put_st_size(from->symsize());
   esym.put_st_info(from->binding(), from->type());
-  esym.put_st_other(from->visibility(), from->other());
+  esym.put_st_other(from->visibility(), from->nonvis());
   esym.put_st_shndx(from->shnum());
   Symbol_table::resolve(to, esym.sym(), from->object());
 }
@@ -198,12 +303,18 @@ Symbol_table::add_from_object(Sized_object<size, big_endian>* object,
   // ins.second: true if new entry was inserted, false if not.
 
   Sized_symbol<size>* ret;
+  bool was_undefined;
+  bool was_common;
   if (!ins.second)
     {
       // We already have an entry for NAME/VERSION.
       ret = this->get_sized_symbol SELECT_SIZE_NAME (ins.first->second
                                                      SELECT_SIZE(size));
       assert(ret != NULL);
+
+      was_undefined = ret->is_undefined();
+      was_common = ret->is_common();
+
       Symbol_table::resolve(ret, sym, object);
 
       if (def)
@@ -233,6 +344,10 @@ Symbol_table::add_from_object(Sized_object<size, big_endian>* object,
     {
       // This is the first time we have seen NAME/VERSION.
       assert(ins.first->second == NULL);
+
+      was_undefined = false;
+      was_common = false;
+
       if (def && !insdef.second)
 	{
 	  // We already have an entry for NAME/NULL.  Make
@@ -278,6 +393,16 @@ Symbol_table::add_from_object(Sized_object<size, big_endian>* object,
 	    }
 	}
     }
+
+  // Record every time we see a new undefined symbol, to speed up
+  // archive groups.
+  if (!was_undefined && ret->is_undefined())
+    ++this->saw_undefined_;
+
+  // Keep track of common symbols, to speed up common symbol
+  // allocation.
+  if (!was_common && ret->is_common())
+    this->commons_.push_back(ret);
 
   return ret;
 }
@@ -369,6 +494,302 @@ Symbol_table::add_from_object(
     }
 }
 
+// Create and return a specially defined symbol.  If ONLY_IF_REF is
+// true, then only create the symbol if there is a reference to it.
+
+template<int size, bool big_endian>
+Sized_symbol<size>*
+Symbol_table::define_special_symbol(Target* target, const char* name,
+				    bool only_if_ref)
+{
+  assert(this->size_ == size);
+
+  Symbol* oldsym;
+  Sized_symbol<size>* sym;
+
+  if (only_if_ref)
+    {
+      oldsym = this->lookup(name, NULL);
+      if (oldsym == NULL)
+	return NULL;
+      sym = NULL;
+
+      // Canonicalize NAME.
+      name = oldsym->name();
+    }
+  else
+    {
+      // Canonicalize NAME.
+      name = this->namepool_.add(name);
+
+      Symbol* const snull = NULL;
+      const char* const vnull = NULL;
+      std::pair<typename Symbol_table_type::iterator, bool> ins =
+	this->table_.insert(std::make_pair(std::make_pair(name, vnull),
+					   snull));
+
+      if (!ins.second)
+	{
+	  // We already have a symbol table entry for NAME.
+	  oldsym = ins.first->second;
+	  assert(oldsym != NULL);
+	  sym = NULL;
+	}
+      else
+	{
+	  // We haven't seen this symbol before.
+	  assert(ins.first->second == NULL);
+
+	  if (!target->has_make_symbol())
+	    sym = new Sized_symbol<size>();
+	  else
+	    {
+	      assert(target->get_size() == size);
+	      assert(target->is_big_endian() ? big_endian : !big_endian);
+	      typedef Sized_target<size, big_endian> My_target;
+	      My_target* sized_target = static_cast<My_target*>(target);
+	      sym = sized_target->make_symbol();
+	      if (sym == NULL)
+		return NULL;
+	    }
+
+	  ins.first->second = sym;
+	  oldsym = NULL;
+	}
+    }
+
+  if (oldsym != NULL)
+    {
+      assert(sym == NULL);
+
+      sym = this->get_sized_symbol SELECT_SIZE_NAME (oldsym
+						     SELECT_SIZE(size));
+      assert(sym->source() == Symbol::FROM_OBJECT);
+      const int old_shnum = sym->shnum();
+      if (old_shnum != elfcpp::SHN_UNDEF
+	  && old_shnum != elfcpp::SHN_COMMON
+	  && !sym->object()->is_dynamic())
+	{
+	  fprintf(stderr, "%s: linker defined: multiple definition of %s\n",
+		  program_name, name);
+	  // FIXME: Report old location.  Record that we have seen an
+	  // error.
+	  return NULL;
+	}
+
+      // Our new definition is going to override the old reference.
+    }
+
+  return sym;
+}
+
+// Define a symbol based on an Output_data.
+
+void
+Symbol_table::define_in_output_data(Target* target, const char* name,
+				    Output_data* od,
+				    uint64_t value, uint64_t symsize,
+				    elfcpp::STT type, elfcpp::STB binding,
+				    elfcpp::STV visibility,
+				    unsigned char nonvis,
+				    bool offset_is_from_end,
+				    bool only_if_ref)
+{
+  assert(target->get_size() == this->size_);
+  if (this->size_ == 32)
+    this->do_define_in_output_data<32>(target, name, od, value, symsize,
+				       type, binding, visibility, nonvis,
+				       offset_is_from_end, only_if_ref);
+  else if (this->size_ == 64)
+    this->do_define_in_output_data<64>(target, name, od, value, symsize,
+				       type, binding, visibility, nonvis,
+				       offset_is_from_end, only_if_ref);
+  else
+    abort();
+}
+
+// Define a symbol in an Output_data, sized version.
+
+template<int size>
+void
+Symbol_table::do_define_in_output_data(
+    Target* target,
+    const char* name,
+    Output_data* od,
+    typename elfcpp::Elf_types<size>::Elf_Addr value,
+    typename elfcpp::Elf_types<size>::Elf_WXword symsize,
+    elfcpp::STT type,
+    elfcpp::STB binding,
+    elfcpp::STV visibility,
+    unsigned char nonvis,
+    bool offset_is_from_end,
+    bool only_if_ref)
+{
+  Sized_symbol<size>* sym;
+
+  if (target->is_big_endian())
+    sym = this->define_special_symbol<size, true>(target, name, only_if_ref);
+  else
+    sym = this->define_special_symbol<size, false>(target, name, only_if_ref);
+
+  if (sym == NULL)
+    return;
+
+  sym->init(name, od, value, symsize, type, binding, visibility, nonvis,
+	    offset_is_from_end);
+}
+
+// Define a symbol based on an Output_segment.
+
+void
+Symbol_table::define_in_output_segment(Target* target, const char* name,
+				       Output_segment* os,
+				       uint64_t value, uint64_t symsize,
+				       elfcpp::STT type, elfcpp::STB binding,
+				       elfcpp::STV visibility,
+				       unsigned char nonvis,
+				       Symbol::Segment_offset_base offset_base,
+				       bool only_if_ref)
+{
+  assert(target->get_size() == this->size_);
+  if (this->size_ == 32)
+    this->do_define_in_output_segment<32>(target, name, os, value, symsize,
+					  type, binding, visibility, nonvis,
+					  offset_base, only_if_ref);
+  else if (this->size_ == 64)
+    this->do_define_in_output_segment<64>(target, name, os, value, symsize,
+					  type, binding, visibility, nonvis,
+					  offset_base, only_if_ref);
+  else
+    abort();
+}
+
+// Define a symbol in an Output_segment, sized version.
+
+template<int size>
+void
+Symbol_table::do_define_in_output_segment(
+    Target* target,
+    const char* name,
+    Output_segment* os,
+    typename elfcpp::Elf_types<size>::Elf_Addr value,
+    typename elfcpp::Elf_types<size>::Elf_WXword symsize,
+    elfcpp::STT type,
+    elfcpp::STB binding,
+    elfcpp::STV visibility,
+    unsigned char nonvis,
+    Symbol::Segment_offset_base offset_base,
+    bool only_if_ref)
+{
+  Sized_symbol<size>* sym;
+
+  if (target->is_big_endian())
+    sym = this->define_special_symbol<size, true>(target, name, only_if_ref);
+  else
+    sym = this->define_special_symbol<size, false>(target, name, only_if_ref);
+
+  if (sym == NULL)
+    return;
+
+  sym->init(name, os, value, symsize, type, binding, visibility, nonvis,
+	    offset_base);
+}
+
+// Define a special symbol with a constant value.  It is a multiple
+// definition error if this symbol is already defined.
+
+void
+Symbol_table::define_as_constant(Target* target, const char* name,
+				 uint64_t value, uint64_t symsize,
+				 elfcpp::STT type, elfcpp::STB binding,
+				 elfcpp::STV visibility, unsigned char nonvis,
+				 bool only_if_ref)
+{
+  assert(target->get_size() == this->size_);
+  if (this->size_ == 32)
+    this->do_define_as_constant<32>(target, name, value, symsize,
+				    type, binding, visibility, nonvis,
+				    only_if_ref);
+  else if (this->size_ == 64)
+    this->do_define_as_constant<64>(target, name, value, symsize,
+				    type, binding, visibility, nonvis,
+				    only_if_ref);
+  else
+    abort();
+}
+
+// Define a symbol as a constant, sized version.
+
+template<int size>
+void
+Symbol_table::do_define_as_constant(
+    Target* target,
+    const char* name,
+    typename elfcpp::Elf_types<size>::Elf_Addr value,
+    typename elfcpp::Elf_types<size>::Elf_WXword symsize,
+    elfcpp::STT type,
+    elfcpp::STB binding,
+    elfcpp::STV visibility,
+    unsigned char nonvis,
+    bool only_if_ref)
+{
+  Sized_symbol<size>* sym;
+
+  if (target->is_big_endian())
+    sym = this->define_special_symbol<size, true>(target, name, only_if_ref);
+  else
+    sym = this->define_special_symbol<size, false>(target, name, only_if_ref);
+
+  if (sym == NULL)
+    return;
+
+  sym->init(name, value, symsize, type, binding, visibility, nonvis);
+}
+
+// Define a set of symbols in output sections.
+
+void
+Symbol_table::define_symbols(const Layout* layout, Target* target, int count,
+			     const Define_symbol_in_section* p)
+{
+  for (int i = 0; i < count; ++i, ++p)
+    {
+      Output_section* os = layout->find_output_section(p->output_section);
+      if (os != NULL)
+	this->define_in_output_data(target, p->name, os, p->value, p->size,
+				    p->type, p->binding, p->visibility,
+				    p->nonvis, p->offset_is_from_end,
+				    p->only_if_ref);
+      else
+	this->define_as_constant(target, p->name, 0, p->size, p->type,
+				 p->binding, p->visibility, p->nonvis,
+				 p->only_if_ref);
+    }
+}
+
+// Define a set of symbols in output segments.
+
+void
+Symbol_table::define_symbols(const Layout* layout, Target* target, int count,
+			     const Define_symbol_in_segment* p)
+{
+  for (int i = 0; i < count; ++i, ++p)
+    {
+      Output_segment* os = layout->find_output_segment(p->segment_type,
+						       p->segment_flags_set,
+						       p->segment_flags_clear);
+      if (os != NULL)
+	this->define_in_output_segment(target, p->name, os, p->value, p->size,
+				       p->type, p->binding, p->visibility,
+				       p->nonvis, p->offset_base,
+				       p->only_if_ref);
+      else
+	this->define_as_constant(target, p->name, 0, p->size, p->type,
+				 p->binding, p->visibility, p->nonvis,
+				 p->only_if_ref);
+    }
+}
+
 // Set the final values for all the symbols.  Record the file offset
 // OFF.  Add their names to POOL.  Return the new file offset.
 
@@ -383,13 +804,15 @@ Symbol_table::finalize(off_t off, Stringpool* pool)
     abort();
 }
 
-// Set the final value for all the symbols.
+// Set the final value for all the symbols.  This is called after
+// Layout::finalize, so all the output sections have their final
+// address.
 
 template<int size>
 off_t
 Symbol_table::sized_finalize(off_t off, Stringpool* pool)
 {
-  off = (off + (size >> 3) - 1) & ~ ((size >> 3) - 1);
+  off = align_address(off, size >> 3);
   this->offset_ = off;
 
   const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
@@ -402,34 +825,91 @@ Symbol_table::sized_finalize(off_t off, Stringpool* pool)
       // FIXME: Here we need to decide which symbols should go into
       // the output file.
 
-      // FIXME: This is wrong.
-      if (sym->shnum() >= elfcpp::SHN_LORESERVE)
+      typename Sized_symbol<size>::Value_type value;
+
+      switch (sym->source())
 	{
-	  ++p;
-	  continue;
+	case Symbol::FROM_OBJECT:
+	  {
+	    unsigned int shnum = sym->shnum();
+
+	    // FIXME: We need some target specific support here.
+	    if (shnum >= elfcpp::SHN_LORESERVE
+		&& shnum != elfcpp::SHN_ABS)
+	      {
+		fprintf(stderr, _("%s: %s: unsupported symbol section 0x%x\n"),
+			program_name, sym->name(), shnum);
+		gold_exit(false);
+	      }
+
+	    if (shnum == elfcpp::SHN_UNDEF)
+	      value = 0;
+	    else if (shnum == elfcpp::SHN_ABS)
+	      value = sym->value();
+	    else
+	      {
+		off_t secoff;
+		Output_section* os = sym->object()->output_section(shnum,
+								   &secoff);
+
+		if (os == NULL)
+		  {
+		    // We should be able to erase this symbol from the
+		    // symbol table, but at least with gcc 4.0.2
+		    // std::unordered_map::erase doesn't appear to return
+		    // the new iterator.
+		    // p = this->table_.erase(p);
+		    ++p;
+		    continue;
+		  }
+
+		value = sym->value() + os->address() + secoff;
+	      }
+	  }
+	  break;
+
+	case Symbol::IN_OUTPUT_DATA:
+	  {
+	    Output_data* od = sym->output_data();
+	    value = sym->value() + od->address();
+	    if (sym->offset_is_from_end())
+	      value += od->data_size();
+	  }
+	  break;
+
+	case Symbol::IN_OUTPUT_SEGMENT:
+	  {
+	    Output_segment* os = sym->output_segment();
+	    value = sym->value() + os->vaddr();
+	    switch (sym->offset_base())
+	      {
+	      case Symbol::SEGMENT_START:
+		break;
+	      case Symbol::SEGMENT_END:
+		value += os->memsz();
+		break;
+	      case Symbol::SEGMENT_BSS:
+		value += os->filesz();
+		break;
+	      default:
+		abort();
+	      }
+	  }
+	  break;
+
+	case Symbol::CONSTANT:
+	  value = sym->value();
+	  break;
+
+	default:
+	  abort();
 	}
 
-      off_t secoff;
-      Output_section* os = sym->object()->output_section(sym->shnum(),
-							 &secoff);
-
-      if (os == NULL)
-	{
-	  // We should be able to erase this symbol from the symbol
-	  // table, but at least with gcc 4.0.2
-	  // std::unordered_map::erase doesn't appear to return the
-	  // new iterator.
-	  // p = this->table_.erase(p);
-	  ++p;
-	}
-      else
-	{
-	  sym->set_value(sym->value() + os->address() + secoff);
-	  pool->add(sym->name());
-	  ++p;
-	  ++count;
-	  off += sym_size;
-	}
+      sym->set_value(value);
+      pool->add(sym->name());
+      ++count;
+      off += sym_size;
+      ++p;
     }
 
   this->output_count_ = count;
@@ -481,23 +961,61 @@ Symbol_table::sized_write_globals(const Target*,
 
       // FIXME: This repeats sized_finalize().
 
-      // FIXME: This is wrong.
-      if (sym->shnum() >= elfcpp::SHN_LORESERVE)
-	continue;
+      unsigned int shndx;
+      switch (sym->source())
+	{
+	case Symbol::FROM_OBJECT:
+	  {
+	    unsigned int shnum = sym->shnum();
 
-      off_t secoff;
-      Output_section* os = sym->object()->output_section(sym->shnum(),
-							 &secoff);
-      if (os == NULL)
-	continue;
+	    // FIXME: We need some target specific support here.
+	    if (shnum >= elfcpp::SHN_LORESERVE
+		&& shnum != elfcpp::SHN_ABS)
+	      {
+		fprintf(stderr, _("%s: %s: unsupported symbol section 0x%x\n"),
+			program_name, sym->name(), sym->shnum());
+		gold_exit(false);
+	      }
+
+	    if (shnum == elfcpp::SHN_UNDEF || shnum == elfcpp::SHN_ABS)
+	      shndx = shnum;
+	    else
+	      {
+		off_t secoff;
+		Output_section* os = sym->object()->output_section(shnum,
+								   &secoff);
+		if (os == NULL)
+		  continue;
+
+		shndx = os->out_shndx();
+	      }
+	  }
+	  break;
+
+	case Symbol::IN_OUTPUT_DATA:
+	  shndx = sym->output_data()->out_shndx();
+	  break;
+
+	case Symbol::IN_OUTPUT_SEGMENT:
+	  shndx = elfcpp::SHN_ABS;
+	  break;
+
+	case Symbol::CONSTANT:
+	  shndx = elfcpp::SHN_ABS;
+	  break;
+
+	default:
+	  abort();
+	}
 
       elfcpp::Sym_write<size, big_endian> osym(ps);
       osym.put_st_name(sympool->get_offset(sym->name()));
       osym.put_st_value(sym->value());
       osym.put_st_size(sym->symsize());
       osym.put_st_info(elfcpp::elf_st_info(sym->binding(), sym->type()));
-      osym.put_st_other(elfcpp::elf_st_other(sym->visibility(), sym->other()));
-      osym.put_st_shndx(os->shndx());
+      osym.put_st_other(elfcpp::elf_st_other(sym->visibility(),
+					     sym->nonvis()));
+      osym.put_st_shndx(shndx);
 
       ps += sym_size;
     }

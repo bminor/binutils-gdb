@@ -89,6 +89,24 @@ library(int argc, char** argv, char* arg, gold::Command_line* cmdline)
   return cmdline->process_l_option(argc, argv, arg);
 }
 
+// Handle the special --start-group option.
+
+int
+start_group(int, char**, char* arg, gold::Command_line* cmdline)
+{
+  cmdline->start_group(arg);
+  return 1;
+}
+
+// Handle the special --end-group option.
+
+int
+end_group(int, char**, char* arg, gold::Command_line* cmdline)
+{
+  cmdline->end_group(arg);
+  return 1;
+}
+
 // Report usage information for ld --help, and exit.
 
 int
@@ -209,6 +227,10 @@ options::Command_line_options::options[] =
   SPECIAL('l', "library", N_("Search for library LIBNAME"),
 	  N_("-lLIBNAME --library LIBNAME"), TWO_DASHES,
 	  &library),
+  SPECIAL('(', "start-group", N_("Start a library search group"), NULL,
+	  TWO_DASHES, &start_group),
+  SPECIAL(')', "end-group", N_("End a library search group"), NULL,
+	  TWO_DASHES, &end_group),
   GENERAL_ARG('L', "library-path", N_("Add directory to search path"),
 	      N_("-L DIR, --library-path DIR"), TWO_DASHES,
 	      &General_options::add_to_search_path),
@@ -246,9 +268,10 @@ Position_dependent_options::Position_dependent_options()
 {
 }
 
-// Construct a Command_line.
+// Command_line options.
 
 Command_line::Command_line()
+  : options_(), position_options_(), inputs_(), in_group_(false)
 {
 }
 
@@ -266,8 +289,7 @@ Command_line::process(int argc, char** argv)
     {
       if (argv[i][0] != '-' || no_more_options)
 	{
-	  this->inputs_.push_back(Input_argument(argv[i], false,
-						 this->position_options_));
+	  this->add_file(argv[i], false);
 	  ++i;
 	  continue;
 	}
@@ -385,6 +407,12 @@ Command_line::process(int argc, char** argv)
 	}
     }
 
+  if (this->in_group_)
+    {
+      fprintf(stderr, _("%s: missing group end"), program_name);
+      this->usage();
+    }
+
   // FIXME: We should only do this when configured in native mode.
   this->options_.add_to_search_path("/lib");
   this->options_.add_to_search_path("/usr/lib");
@@ -416,6 +444,22 @@ Command_line::apply_option(const options::One_option& opt,
     }
 }
 
+// Add an input file or library.
+
+void
+Command_line::add_file(const char* name, bool is_lib)
+{
+  Input_file_argument file(name, is_lib, this->position_options_);
+  if (!this->in_group_)
+    this->inputs_.push_back(Input_argument(file));
+  else
+    {
+      assert(!this->inputs_.empty());
+      assert(this->inputs_.back().is_group());
+      this->inputs_.back().group()->add_file(file);
+    }
+}
+
 // Handle the -l option, which requires special treatment.
 
 int
@@ -436,10 +480,34 @@ Command_line::process_l_option(int argc, char** argv, char* arg)
   else
     this->usage(_("missing argument"), arg);
 
-  this->inputs_.push_back(Input_argument(libname, true,
-					 this->position_options_));
+  this->add_file(libname, true);
 
   return ret;
+}
+
+// Handle the --start-group option.
+
+void
+Command_line::start_group(const char* arg)
+{
+  if (this->in_group_)
+    this->usage(_("may not nest groups"), arg);
+
+  // This object is leaked.
+  Input_file_group* group = new Input_file_group();
+  this->inputs_.push_back(Input_argument(group));
+
+  this->in_group_ = true;
+}
+
+// Handle the --end-group option.
+
+void
+Command_line::end_group(const char* arg)
+{
+  if (!this->in_group_)
+    this->usage(_("group end without group start"), arg);
+  this->in_group_ = false;
 }
 
 // Report a usage error.  */

@@ -5,8 +5,9 @@
 #ifndef GOLD_FILEREAD_H
 #define GOLD_FILEREAD_H
 
-#include <string>
 #include <list>
+#include <map>
+#include <string>
 
 #include "options.h"
 
@@ -14,7 +15,6 @@ namespace gold
 {
 
 class Dirsearch;
-
 class File_view;
 
 // File_read manages a file descriptor for a file we are reading.  We
@@ -123,22 +123,52 @@ class File_read
 
   friend class File_view;
 
+  // Find a view into the file.
   View*
   find_view(off_t start, off_t size);
 
+  // Read data from the file into a buffer.
   off_t
   do_read(off_t start, off_t size, void* p, off_t* pbytes);
 
+  // Find or make a view into the file.
   View*
   find_or_make_view(off_t start, off_t size, off_t* pbytes);
 
+  // Clear the file views.
   void
   clear_views(bool);
 
+  // The size of a file page for buffering data.
+  static const off_t page_size = 8192;
+
+  // Given a file offset, return the page offset.
+  static off_t
+  page_offset(off_t file_offset)
+  { return file_offset & ~ (page_size - 1); }
+
+  // Given a file size, return the size to read integral pages.
+  static off_t
+  pages(off_t file_size)
+  { return (file_size + (page_size - 1)) & ~ (page_size - 1); }
+
+  // The type of a mapping from page start to views.
+  typedef std::map<off_t, View*> Views;
+
+  // A simple list of Views.
+  typedef std::list<View*> Saved_views;
+
+  // File name.
   std::string name_;
+  // File descriptor.
   int descriptor_;
+  // Number of locks on the file.
   int lock_count_;
-  std::list<View*> view_list_;
+  // Buffered views into the file.
+  Views views_;
+  // List of views which were locked but had to be removed from views_
+  // because they were not large enough.
+  Saved_views saved_views_;
 };
 
 // A view of file data that persists even when the file is unlocked.
@@ -179,7 +209,7 @@ class File_view
 class Input_file
 {
  public:
-  Input_file(const Input_argument& input_argument)
+  Input_file(const Input_file_argument& input_argument)
     : input_argument_(input_argument)
   { }
 
@@ -201,7 +231,10 @@ class Input_file
   { return this->file_; }
 
  private:
-  const Input_argument& input_argument_;
+  Input_file(const Input_file&);
+  Input_file& operator=(const Input_file&);
+
+  const Input_file_argument& input_argument_;
   File_read file_;
 };
 

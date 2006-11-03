@@ -15,11 +15,13 @@
 #include <list>
 #include <string>
 #include <vector>
+#include <cassert>
 
 namespace gold
 {
 
 class Command_line;
+class Input_file_group;
 
 namespace options {
 
@@ -128,11 +130,15 @@ class Position_dependent_options
 
 // A single file or library argument from the command line.
 
-class Input_argument
+class Input_file_argument
 {
  public:
-  Input_argument(const char* name, bool is_lib,
-		 const Position_dependent_options& options)
+  Input_file_argument()
+    : name_(NULL), is_lib_(false), options_()
+  { }
+
+  Input_file_argument(const char* name, bool is_lib,
+		      const Position_dependent_options& options)
     : name_(name), is_lib_(is_lib), options_(options)
   { }
 
@@ -154,9 +160,90 @@ class Input_argument
   Position_dependent_options options_;
 };
 
-// A list of input files.
-class Input_argument_list : public std::vector<Input_argument>
+// A file or library, or a group, from the command line.
+
+class Input_argument
 {
+ public:
+  // Create a file or library argument.
+  explicit Input_argument(Input_file_argument file)
+    : is_file_(true), file_(file), group_(NULL)
+  { }
+
+  // Create a group argument.
+  explicit Input_argument(Input_file_group* group)
+    : is_file_(false), group_(group)
+  { }
+
+  // Return whether this is a file.
+  bool
+  is_file() const
+  { return this->is_file_; }
+
+  // Return whether this is a group.
+  bool
+  is_group() const
+  { return !this->is_file_; }
+
+  // Return the information about the file.
+  const Input_file_argument&
+  file() const
+  {
+    assert(this->is_file_);
+    return this->file_;
+  }
+
+  // Return the information about the group.
+  const Input_file_group*
+  group() const
+  {
+    assert(!this->is_file_);
+    return this->group_;
+  }
+
+  Input_file_group*
+  group()
+  {
+    assert(!this->is_file_);
+    return this->group_;
+  }
+
+ private:
+  bool is_file_;
+  Input_file_argument file_;
+  Input_file_group* group_;
+};
+
+// A group from the command line.  This is a set of arguments within
+// --start-group ... --end-group.
+
+class Input_file_group
+{
+ public:
+  typedef std::vector<Input_argument> Files;
+  typedef Files::const_iterator const_iterator;
+
+  Input_file_group()
+    : files_()
+  { }
+
+  // Add a file to the end of the group.
+  void
+  add_file(const Input_file_argument& arg)
+  { this->files_.push_back(Input_argument(arg)); }
+
+  // Iterators to iterate over the group contents.
+
+  const_iterator
+  begin() const
+  { return this->files_.begin(); }
+
+  const_iterator
+  end() const
+  { return this->files_.end(); }
+
+ private:
+  Files files_;
 };
 
 // All the information read from the command line.
@@ -164,6 +251,9 @@ class Input_argument_list : public std::vector<Input_argument>
 class Command_line
 {
  public:
+  typedef std::vector<Input_argument> Input_arguments;
+  typedef Input_arguments::const_iterator const_iterator;
+
   Command_line();
 
   // Process the command line options.  This will exit with an
@@ -175,25 +265,53 @@ class Command_line
   int
   process_l_option(int, char**, char*);
 
+  // Handle a --start-group option.
+  void
+  start_group(const char* arg);
+
+  // Handle a --end-group option.
+  void
+  end_group(const char* arg);
+
   // Get the general options.
   const General_options&
   options() const
   { return this->options_; }
 
-  // Get the list of input files.
-  const Input_argument_list&
-  inputs() const
-  { return this->inputs_; }
+  // Iterators to iterate over the list of input files.
+
+  const_iterator
+  begin() const
+  { return this->inputs_.begin(); }
+
+  const_iterator
+  end() const
+  { return this->inputs_.end(); }
 
  private:
-  void usage() ATTRIBUTE_NORETURN;
-  void usage(const char* msg, const char* opt) ATTRIBUTE_NORETURN;
-  void usage(const char* msg, char opt) ATTRIBUTE_NORETURN;
-  void apply_option(const gold::options::One_option&, const char*);
+  Command_line(const Command_line&);
+  Command_line& operator=(const Command_line&);
+
+  // Report usage error.
+  void
+  usage() ATTRIBUTE_NORETURN;
+  void
+  usage(const char* msg, const char* opt) ATTRIBUTE_NORETURN;
+  void
+  usage(const char* msg, char opt) ATTRIBUTE_NORETURN;
+
+  // Apply a command line option.
+  void
+  apply_option(const gold::options::One_option&, const char*);
+
+  // Add a file.
+  void
+  add_file(const char* name, bool is_lib);
 
   General_options options_;
   Position_dependent_options position_options_;
-  Input_argument_list inputs_;
+  Input_arguments inputs_;
+  bool in_group_;
 };
 
 } // End namespace gold.

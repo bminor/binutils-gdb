@@ -13,6 +13,7 @@ namespace gold
 class Object;
 class Read_relocs_data;
 class Stringpool;
+class Layout;
 
 // A class to read the relocations for an object file, and then queue
 // up a task to see if they require any GOT/PLT/COPY relocations in
@@ -24,9 +25,9 @@ class Read_relocs : public Task
   // SYMTAB_LOCK is used to lock the symbol table.  BLOCKER should be
   // unblocked when the Scan_relocs task completes.
   Read_relocs(const General_options& options, Symbol_table* symtab,
-	      Object* object, Task_token* symtab_lock,
+	      Layout* layout, Object* object, Task_token* symtab_lock,
 	      Task_token* blocker)
-    : options_(options), symtab_(symtab), object_(object),
+    : options_(options), symtab_(symtab), layout_(layout), object_(object),
       symtab_lock_(symtab_lock), blocker_(blocker)
   { }
 
@@ -44,6 +45,7 @@ class Read_relocs : public Task
  private:
   const General_options& options_;
   Symbol_table* symtab_;
+  Layout* layout_;
   Object* object_;
   Task_token* symtab_lock_;
   Task_token* blocker_;
@@ -58,10 +60,10 @@ class Scan_relocs : public Task
   // SYMTAB_LOCK is used to lock the symbol table.  BLOCKER should be
   // unblocked when the task completes.
   Scan_relocs(const General_options& options, Symbol_table* symtab,
-	      Object* object, Read_relocs_data* rd, Task_token* symtab_lock,
-	      Task_token* blocker)
-    : options_(options), symtab_(symtab), object_(object), rd_(rd),
-      symtab_lock_(symtab_lock), blocker_(blocker)
+	      Layout* layout, Object* object, Read_relocs_data* rd,
+	      Task_token* symtab_lock, Task_token* blocker)
+    : options_(options), symtab_(symtab), layout_(layout), object_(object),
+      rd_(rd), symtab_lock_(symtab_lock), blocker_(blocker)
   { }
 
   // The standard Task methods.
@@ -80,6 +82,7 @@ class Scan_relocs : public Task
 
   const General_options& options_;
   Symbol_table* symtab_;
+  Layout* layout_;
   Object* object_;
   Read_relocs_data* rd_;
   Task_token* symtab_lock_;

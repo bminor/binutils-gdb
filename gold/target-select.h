@@ -29,7 +29,7 @@ class Target_selector
 
   // If we can handle this target, return a pointer to a target
   // structure.  The size and endianness are known.
-  virtual Target* recognize(int machine, int osabi, int abiversion) const = 0;
+  virtual Target* recognize(int machine, int osabi, int abiversion) = 0;
 
   // Return the next Target_selector in the linked list.
   Target_selector*

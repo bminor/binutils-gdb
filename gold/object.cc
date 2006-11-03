@@ -16,25 +16,6 @@ namespace gold
 
 // Class Object.
 
-const unsigned char*
-Object::get_view(off_t start, off_t size)
-{
-  return this->input_file_->file().get_view(start + this->offset_, size);
-}
-
-void
-Object::read(off_t start, off_t size, void* p)
-{
-  this->input_file_->file().read(start + this->offset_, size, p);
-}
-
-File_view*
-Object::get_lasting_view(off_t start, off_t size)
-{
-  return this->input_file_->file().get_lasting_view(start + this->offset_,
-						    size);
-}
-
 // Class Sized_object.
 
 template<int size, bool big_endian>
@@ -79,7 +60,7 @@ Sized_object<size, big_endian>::~Sized_object()
 // Read the section header for section SHNUM.
 
 template<int size, bool big_endian>
-const unsigned char*
+inline const unsigned char*
 Sized_object<size, big_endian>::section_header(unsigned int shnum)
 {
   assert(shnum < this->shnum());
@@ -328,6 +309,32 @@ Sized_object<size, big_endian>::include_section_group(
 
   const char* signature = psymnames + sym.get_st_name();
 
+  // It seems that some versions of gas will create a section group
+  // associated with a section symbol, and then fail to give a name to
+  // the section symbol.  In such a case, use the name of the section.
+  // FIXME.
+  if (signature[0] == '\0'
+      && sym.get_st_type() == elfcpp::STT_SECTION
+      && sym.get_st_shndx() < this->shnum())
+    {
+      typename This::Shdr shdrnames(this->section_header(this->shstrndx_));
+      const unsigned char* pnamesu = this->get_view(shdrnames.get_sh_offset(),
+						    shdrnames.get_sh_size());
+      const char* pnames = reinterpret_cast<const char*>(pnamesu);
+      
+      typename This::Shdr sechdr(this->section_header(sym.get_st_shndx()));
+      if (sechdr.get_sh_name() >= shdrnames.get_sh_size())
+	{
+	  fprintf(stderr,
+		  _("%s: %s: bad section name offset for section %u: %lu\n"),
+		  program_name, this->name().c_str(), sym.get_st_shndx(),
+		  static_cast<unsigned long>(sechdr.get_sh_name()));
+	  gold_exit(false);
+	}
+
+      signature = pnames + sechdr.get_sh_name();
+    }
+
   // Record this section group, and see whether we've already seen one
   // with the same signature.
   if (layout->add_comdat(signature, true))
@@ -446,7 +453,7 @@ Sized_object<size, big_endian>::do_layout(Layout* layout,
 	}
 
       off_t offset;
-      Output_section* os = layout->layout(this, name, shdr, &offset);
+      Output_section* os = layout->layout(this, i, name, shdr, &offset);
 
       map_sections[i].output_section = os;
       map_sections[i].offset = offset;
@@ -514,7 +521,7 @@ Sized_object<size, big_endian>::do_finalize_local_symbols(off_t off,
       return off;
     }
 
-  off = (off + (size >> 3) - 1) & ~ ((off_t) (size >> 3) - 1);
+  off = align_address(off, size >> 3);
 
   this->local_symbol_offset_ = off;
 
@@ -587,6 +594,7 @@ Sized_object<size, big_endian>::do_finalize_local_symbols(off_t off,
 	    }
 
 	  this->values_[i] = (mo[shndx].output_section->address()
+			      + mo[shndx].offset
 			      + sym.get_st_value());
 	}
 
@@ -655,7 +663,7 @@ Sized_object<size, big_endian>::write_local_symbols(Output_file* of,
 	  assert(st_shndx < mo.size());
 	  if (mo[st_shndx].output_section == NULL)
 	    continue;
-	  st_shndx = mo[st_shndx].output_section->shndx();
+	  st_shndx = mo[st_shndx].output_section->out_shndx();
 	}
 
       osym.put_st_name(sympool->get_offset(pnames + isym.get_st_name()));

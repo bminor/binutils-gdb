@@ -8,7 +8,6 @@
 #include <utility>
 #include <vector>
 
-#include "options.h"
 #include "workqueue.h"
 #include "object.h"
 #include "stringpool.h"
@@ -16,8 +15,10 @@
 namespace gold
 {
 
+class General_options;
 class Input_objects;
 class Symbol_table;
+class Output_section_data;
 class Output_section;
 class Output_section_symtab;
 class Output_section_headers;
@@ -63,14 +64,21 @@ class Layout
  public:
   Layout(const General_options& options);
 
-  // Given an input section named NAME with data in SHDR from the
-  // object file OBJECT, return the output section where this input
-  // section should go.  Set *OFFSET to the offset within the output
-  // section.
+  // Given an input section SHNDX, named NAME, with data in SHDR, from
+  // the object file OBJECT, return the output section where this
+  // input section should go.  Set *OFFSET to the offset within the
+  // output section.
   template<int size, bool big_endian>
   Output_section*
-  layout(Object *object, const char* name,
+  layout(Object *object, unsigned int shndx, const char* name,
 	 const elfcpp::Shdr<size, big_endian>& shdr, off_t* offset);
+
+  // Add an Output_section_data to the layout.  This is used for
+  // special sections like the GOT section.
+  void
+  add_output_section_data(const char* name, elfcpp::Elf_Word type,
+			  elfcpp::Elf_Xword flags,
+			  Output_section_data*);
 
   // Return the Stringpool used for symbol names.
   const Stringpool*
@@ -104,6 +112,16 @@ class Layout
   void
   write_data(Output_file*) const;
 
+  // Return an output section named NAME, or NULL if there is none.
+  Output_section*
+  find_output_section(const char* name) const;
+
+  // Return an output segment of type TYPE, with segment flags SET set
+  // and segment flags CLEAR clear.  Return NULL if there is none.
+  Output_segment*
+  find_output_segment(elfcpp::PT type, elfcpp::Elf_Word set,
+		      elfcpp::Elf_Word clear) const;
+
   // The list of segments.
 
   typedef std::vector<Output_segment*> Segment_list;
@@ -126,6 +144,7 @@ class Layout
     const char* from;
     int fromlen;
     const char* to;
+    int tolen;
   };
   static const Linkonce_mapping linkonce_mapping[];
   static const int linkonce_mapping_count;
@@ -137,12 +156,12 @@ class Layout
 
   // Set the final file offsets of all the segments.
   off_t
-  set_segment_offsets(const Target*, Output_segment*);
+  set_segment_offsets(const Target*, Output_segment*, unsigned int* pshndx);
 
-  // Set the final file offsets of all the sections not associated
-  // with a segment.
+  // Set the final file offsets and section indices of all the
+  // sections not associated with a segment.
   off_t
-  set_section_offsets(off_t);
+  set_section_offsets(off_t, unsigned int *pshndx);
 
   // Create the output sections for the symbol table.
   void
@@ -164,10 +183,21 @@ class Layout
   include_section(Object* object, const char* name,
 		  const elfcpp::Shdr<size, big_endian>&);
 
-  // Return the output section name to use for a linkonce section
-  // name.
+  // Return the output section name to use given an input section
+  // name.  Set *PLEN to the length of the name.  *PLEN must be
+  // initialized to the length of NAME.
   static const char*
-  linkonce_output_name(const char* name);
+  output_section_name(const char* name, size_t* plen);
+
+  // Return the output section name to use for a linkonce section
+  // name.  PLEN is as for output_section_name.
+  static const char*
+  linkonce_output_name(const char* name, size_t* plen);
+
+  // Return the output section for NAME, TYPE and FLAGS.
+  Output_section*
+  get_output_section(const char* name, elfcpp::Elf_Word type,
+		     elfcpp::Elf_Xword flags);
 
   // Create a new Output_section.
   Output_section*
@@ -210,8 +240,6 @@ class Layout
 
   // A reference to the options on the command line.
   const General_options& options_;
-  // The index of the last output section.
-  unsigned int last_shndx_;
   // The output section names.
   Stringpool namepool_;
   // The output symbol names.
@@ -307,6 +335,16 @@ class Close_task_runner : public Task_function_runner
  private:
   Output_file* of_;
 };
+
+// A small helper function to align an address.
+
+inline uint64_t
+align_address(uint64_t address, uint64_t addralign)
+{
+  if (addralign != 0)
+    address = (address + addralign - 1) &~ (addralign - 1);
+  return address;
+}
 
 } // End namespace gold.
 

@@ -19,6 +19,8 @@ noinst_PROGRAMS = ld-new
 
 CCFILES = \
 	archive.cc \
+	common.cc \
+	defstd.cc \
 	dirsearch.cc \
 	fileread.cc \
 	gold.cc \
@@ -37,6 +39,8 @@ CCFILES = \
 
 HFILES = \
 	archive.h \
+	common.h \
+	defstd.h \
 	dirsearch.h \
 	fileread.h \
 	gold.h \

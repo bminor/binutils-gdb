@@ -13,6 +13,7 @@ namespace gold
 
 class Input_file;
 class Input_objects;
+class Input_group;
 class Layout;
 class Symbol_table;
 
@@ -44,6 +45,11 @@ class Archive
   void
   setup();
 
+  // Get a reference to the underlying file.
+  File_read&
+  file()
+  { return this->input_file_->file(); }
+
   // Lock the underlying file.
   void
   lock()
@@ -73,7 +79,8 @@ class Archive
 
   // Get a view into the underlying file.
   const unsigned char*
-  get_view(off_t start, off_t size);
+  get_view(off_t start, off_t size)
+  { return this->input_file_->file().get_view(start, size); }
 
   // Read an archive member header at OFF.  Return the size of the
   // member, and set *PNAME to the name.
@@ -101,6 +108,9 @@ class Archive
   std::vector<Armap_entry> armap_;
   // The extended name table.
   std::string extended_names_;
+  // Track which symbols in the archive map are for elements which
+  // have already been included in the link.
+  std::vector<bool> seen_;
 };
 
 // This class is used to read an archive and pick out the desired
@@ -111,11 +121,12 @@ class Add_archive_symbols : public Task
  public:
   Add_archive_symbols(Symbol_table* symtab, Layout* layout,
 		      Input_objects* input_objects,
-		      Archive* archive, Task_token* this_blocker,
+		      Archive* archive, Input_group* input_group,
+		      Task_token* this_blocker,
 		      Task_token* next_blocker)
     : symtab_(symtab), layout_(layout), input_objects_(input_objects),
-      archive_(archive), this_blocker_(this_blocker),
-      next_blocker_(next_blocker)
+      archive_(archive), input_group_(input_group),
+      this_blocker_(this_blocker), next_blocker_(next_blocker)
   { }
 
   ~Add_archive_symbols();
@@ -138,6 +149,7 @@ class Add_archive_symbols : public Task
   Layout* layout_;
   Input_objects* input_objects_;
   Archive* archive_;
+  Input_group* input_group_;
   Task_token* this_blocker_;
   Task_token* next_blocker_;
 };

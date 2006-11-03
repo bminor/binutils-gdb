@@ -34,7 +34,7 @@ extern Target*
 select_target(int machine, int size, bool big_endian, int osabi,
 	      int abiversion)
 {
-  for (const Target_selector* p = target_selectors; p != NULL; p = p->next())
+  for (Target_selector* p = target_selectors; p != NULL; p = p->next())
     {
       int pmach = p->machine();
       if ((pmach == machine || pmach == elfcpp::EM_NONE)

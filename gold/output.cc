@@ -10,6 +10,8 @@
 #include <algorithm>
 
 #include "object.h"
+#include "symtab.h"
+#include "reloc.h"
 #include "output.h"
 
 namespace gold
@@ -74,7 +76,8 @@ Output_section_headers::Output_section_headers(
   for (Layout::Segment_list::const_iterator p = segment_list.begin();
        p != segment_list.end();
        ++p)
-    count += (*p)->output_section_count();
+    if ((*p)->type() == elfcpp::PT_LOAD)
+      count += (*p)->output_section_count();
   count += section_list.size();
 
   int shdr_size;
@@ -137,18 +140,22 @@ Output_section_headers::do_sized_write(Output_file* of)
 
   v += shdr_size;
 
+  unsigned shndx = 1;
   for (Layout::Segment_list::const_iterator p = this->segment_list_.begin();
        p != this->segment_list_.end();
        ++p)
     v = (*p)->write_section_headers SELECT_SIZE_ENDIAN_NAME (
-      this->secnamepool_, v SELECT_SIZE_ENDIAN(size, big_endian));
+	    this->secnamepool_, v, &shndx
+	    SELECT_SIZE_ENDIAN(size, big_endian));
   for (Layout::Section_list::const_iterator p = this->section_list_.begin();
        p != this->section_list_.end();
        ++p)
     {
+      assert(shndx == (*p)->out_shndx());
       elfcpp::Shdr_write<size, big_endian> oshdr(v);
       (*p)->write_header(this->secnamepool_, &oshdr);
       v += shdr_size;
+      ++shndx;
     }
 
   of->write_output_view(this->offset(), all_shdrs_size, view);
@@ -318,6 +325,7 @@ Output_file_header::do_sized_write(Output_file* of)
   oehdr.put_e_machine(this->target_->machine_code());
   oehdr.put_e_version(elfcpp::EV_CURRENT);
 
+  // FIXME: Need to support -e, and target specific entry symbol.
   Symbol* sym = this->symtab_->lookup("_start");
   typename Sized_symbol<size>::Value_type v;
   if (sym == NULL)
@@ -344,9 +352,129 @@ Output_file_header::do_sized_write(Output_file* of)
   oehdr.put_e_shentsize(elfcpp::Elf_sizes<size>::shdr_size);
   oehdr.put_e_shnum(this->section_header_->data_size()
 		     / elfcpp::Elf_sizes<size>::shdr_size);
-  oehdr.put_e_shstrndx(this->shstrtab_->shndx());
+  oehdr.put_e_shstrndx(this->shstrtab_->out_shndx());
 
   of->write_output_view(0, ehdr_size, view);
+}
+
+// Output_section_got::Got_entry methods.
+
+// Write out the entry.
+
+template<int size, bool big_endian>
+void
+Output_section_got<size, big_endian>::Got_entry::write(unsigned char* pov)
+    const
+{
+  Valtype val = 0;
+
+  switch (this->local_sym_index_)
+    {
+    case GSYM_CODE:
+      {
+	Symbol* gsym = this->u_.gsym;
+
+	// If the symbol is resolved locally, we need to write out its
+	// value.  Otherwise we just write zero.  The target code is
+	// responsible for creating a relocation entry to fill in the
+	// value at runtime.
+	if (gsym->is_resolved_locally())
+	  {
+	    Sized_symbol<size>* sgsym;
+	    // This cast is a bit ugly.  We don't want to put a
+	    // virtual method in Symbol, because we want Symbol to be
+	    // as small as possible.
+	    sgsym = static_cast<Sized_symbol<size>*>(gsym);
+	    val = sgsym->value();
+	  }
+      }
+      break;
+
+    case CONSTANT_CODE:
+      val = this->u_.constant;
+      break;
+
+    default:
+      abort();
+    }
+
+  Valtype* povv = reinterpret_cast<Valtype*>(pov);
+  Swap<size, big_endian>::writeval(povv, val);
+}
+
+// Output_section_data methods.
+
+unsigned int
+Output_section_data::do_out_shndx() const
+{
+  assert(this->output_section_ != NULL);
+  return this->output_section_->out_shndx();
+}
+
+// Output_section_got methods.
+
+// Write out the GOT.
+
+template<int size, bool big_endian>
+void
+Output_section_got<size, big_endian>::do_write(Output_file* of)
+{
+  const int add = size / 8;
+
+  const off_t off = this->offset();
+  const off_t oview_size = this->entries_.size() * add;
+  unsigned char* const oview = of->get_output_view(off, oview_size);
+
+  unsigned char* pov = oview;
+  for (typename Got_entries::const_iterator p = this->entries_.begin();
+       p != this->entries_.end();
+       ++p)
+    {
+      p->write(pov);
+      pov += add;
+    }
+
+  of->write_output_view(off, oview_size, oview);
+
+  // We no longer need the GOT entries.
+  this->entries_.clear();
+}
+
+// Output_section::Input_section methods.
+
+// Return the data size.  For an input section we store the size here.
+// For an Output_section_data, we have to ask it for the size.
+
+off_t
+Output_section::Input_section::data_size() const
+{
+  if (this->is_input_section())
+    return this->data_size_;
+  else
+    return this->u_.posd->data_size();
+}
+
+// Set the address and file offset.
+
+void
+Output_section::Input_section::set_address(uint64_t addr, off_t off,
+					   off_t secoff)
+{
+  if (this->is_input_section())
+    this->u_.object->set_section_offset(this->shndx_, off - secoff);
+  else
+    this->u_.posd->set_address(addr, off);
+}
+
+// Write out the data.  We don't have to do anything for an input
+// section--they are handled via Object::relocate--but this is where
+// we write out the data for an Output_section_data.
+
+void
+Output_section::Input_section::write(Output_file* of)
+{
+  if (!this->is_input_section())
+    this->u_.posd->write(of);
 }
 
 // Output_section methods.
@@ -354,7 +482,7 @@ Output_file_header::do_sized_write(Output_file* of)
 // Construct an Output_section.  NAME will point into a Stringpool.
 
 Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
-			       elfcpp::Elf_Xword flags, unsigned int shndx)
+			       elfcpp::Elf_Xword flags, bool may_add_data)
   : name_(name),
     addralign_(0),
     entsize_(0),
@@ -362,7 +490,10 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
     info_(0),
     type_(type),
     flags_(flags),
-    shndx_(shndx)
+    out_shndx_(0),
+    input_sections_(),
+    first_input_offset_(0),
+    may_add_data_(may_add_data)
 {
 }
 
@@ -370,15 +501,20 @@ Output_section::~Output_section()
 {
 }
 
-// Add an input section to an Output_section.  We don't keep track of
+// Add the input section SHNDX, with header SHDR, named SECNAME, in
+// OBJECT, to the Output_section.  Return the offset of the input
+// section within the output section.  We don't always keep track of
 // input sections for an Output_section.  Instead, each Object keeps
 // track of the Output_section for each of its input sections.
 
 template<int size, bool big_endian>
 off_t
-Output_section::add_input_section(Object* object, const char* secname,
+Output_section::add_input_section(Object* object, unsigned int shndx,
+				  const char* secname,
 				  const elfcpp::Shdr<size, big_endian>& shdr)
 {
+  assert(this->may_add_data_);
+
   elfcpp::Elf_Xword addralign = shdr.get_sh_addralign();
   if ((addralign & (addralign - 1)) != 0)
     {
@@ -392,17 +528,54 @@ Output_section::add_input_section(Object* object, const char* secname,
     this->addralign_ = addralign;
 
   off_t ssize = this->data_size();
-  ssize = (ssize + addralign - 1) &~ (addralign - 1);
+  ssize = align_address(ssize, addralign);
+  this->set_data_size(ssize + shdr.get_sh_size());
 
-  // SHF_TLS/SHT_NOBITS sections are handled specially: they are
-  // treated as having no size and taking up no space.  We only use
-  // the real size when setting the pt_memsz field of the PT_TLS
-  // segment.
-  if ((this->flags_ & elfcpp::SHF_TLS) == 0
-      || this->type_ != elfcpp::SHT_NOBITS)
-    this->set_data_size(ssize + shdr.get_sh_size());
+  // We need to keep track of this section if we are already keeping
+  // track of sections, or if we are relaxing.  FIXME: Add test for
+  // relaxing.
+  if (! this->input_sections_.empty())
+    this->input_sections_.push_back(Input_section(object, shndx,
+						  shdr.get_sh_size(),
+						  addralign));
 
   return ssize;
+}
+
+// Add arbitrary data to an output section.
+
+void
+Output_section::add_output_section_data(Output_section_data* posd)
+{
+  if (this->input_sections_.empty())
+    this->first_input_offset_ = this->data_size();
+  this->input_sections_.push_back(Input_section(posd));
+  uint64_t addralign = posd->addralign();
+  if (addralign > this->addralign_)
+    this->addralign_ = addralign;
+  posd->set_output_section(this);
+}
+
+// Set the address of an Output_section.  This is where we handle
+// setting the addresses of any Output_section_data objects.
+
+void
+Output_section::do_set_address(uint64_t address, off_t startoff)
+{
+  if (this->input_sections_.empty())
+    return;
+
+  off_t off = startoff + this->first_input_offset_;
+  for (Input_section_list::iterator p = this->input_sections_.begin();
+       p != this->input_sections_.end();
+       ++p)
+    {
+      off = align_address(off, p->addralign());
+      p->set_address(address + (off - startoff), off, startoff);
+      off += p->data_size();
+    }
+
+  this->set_data_size(off - startoff);
 }
 
 // Write the section header to *OSHDR.
@@ -424,11 +597,23 @@ Output_section::write_header(const Stringpool* secnamepool,
   oshdr->put_sh_entsize(this->entsize_);
 }
 
+// Write out the data.  For input sections the data is written out by
+// Object::relocate, but we have to handle Output_section_data objects
+// here.
+
+void
+Output_section::do_write(Output_file* of)
+{
+  for (Input_section_list::iterator p = this->input_sections_.begin();
+       p != this->input_sections_.end();
+       ++p)
+    p->write(of);
+}
+
 // Output_section_symtab methods.
 
-Output_section_symtab::Output_section_symtab(const char* name, off_t size,
-					     unsigned int shndx)
-  : Output_section(name, elfcpp::SHT_SYMTAB, 0, shndx)
+Output_section_symtab::Output_section_symtab(const char* name, off_t size)
+  : Output_section(name, elfcpp::SHT_SYMTAB, 0, false)
 {
   this->set_data_size(size);
 }
@@ -436,9 +621,8 @@ Output_section_symtab::Output_section_symtab(const char* name, off_t size,
 // Output_section_strtab methods.
 
 Output_section_strtab::Output_section_strtab(const char* name,
-					     Stringpool* contents,
-					     unsigned int shndx)
-  : Output_section(name, elfcpp::SHT_STRTAB, 0, shndx),
+					     Stringpool* contents)
+  : Output_section(name, elfcpp::SHT_STRTAB, 0, false),
     contents_(contents)
 {
   this->set_data_size(contents->get_strtab_size());
@@ -462,7 +646,8 @@ Output_segment::Output_segment(elfcpp::Elf_Word type, elfcpp::Elf_Word flags)
     offset_(0),
     filesz_(0),
     type_(type),
-    flags_(flags)
+    flags_(flags),
+    is_align_known_(false)
 {
 }
 
@@ -473,12 +658,10 @@ Output_segment::add_output_section(Output_section* os,
 				   elfcpp::Elf_Word seg_flags)
 {
   assert((os->flags() & elfcpp::SHF_ALLOC) != 0);
+  assert(!this->is_align_known_);
 
-  // Update the segment flags and alignment.
+  // Update the segment flags.
   this->flags_ |= seg_flags;
-  uint64_t addralign = os->addralign();
-  if (addralign > this->align_)
-    this->align_ = addralign;
 
   Output_segment::Output_data_list* pdl;
   if (os->type() == elfcpp::SHT_NOBITS)
@@ -524,12 +707,28 @@ Output_segment::add_output_section(Output_section* os,
     {
       pdl = &this->output_data_;
       bool nobits = os->type() == elfcpp::SHT_NOBITS;
+      bool sawtls = false;
       Layout::Data_list::iterator p = pdl->end();
       do
 	{
 	  --p;
-	  if ((*p)->is_section_flag_set(elfcpp::SHF_TLS)
-	      && (nobits || !(*p)->is_section_type(elfcpp::SHT_NOBITS)))
+	  bool insert;
+	  if ((*p)->is_section_flag_set(elfcpp::SHF_TLS))
+	    {
+	      sawtls = true;
+	      // Put a NOBITS section after the first TLS section.
+	      // But a PROGBITS section after the first TLS/PROGBITS
+	      // section.
+	      insert = nobits || !(*p)->is_section_type(elfcpp::SHT_NOBITS);
+	    }
+	  else
+	    {
+	      // If we've gone past the TLS sections, but we've seen a
+	      // TLS section, then we need to insert this section now.
+	      insert = sawtls;
+	    }
+
+	  if (insert)
 	    {
 	      ++p;
 	      pdl->insert(p, os);
@@ -537,6 +736,9 @@ Output_segment::add_output_section(Output_section* os,
 	    }
 	}
       while (p != pdl->begin());
+
+      // There are no TLS sections yet; put this one at the end of the
+      // section list.
     }
 
   pdl->push_back(os);
@@ -548,28 +750,59 @@ Output_segment::add_output_section(Output_section* os,
 void
 Output_segment::add_initial_output_data(Output_data* od)
 {
-  uint64_t addralign = od->addralign();
-  if (addralign > this->align_)
-    this->align_ = addralign;
-
+  assert(!this->is_align_known_);
   this->output_data_.push_front(od);
 }
 
 // Return the maximum alignment of the Output_data in Output_segment.
-// We keep this up to date as we add Output_sections and Output_data.
+// Once we compute this, we prohibit new sections from being added.
 
 uint64_t
-Output_segment::max_data_align() const
+Output_segment::addralign()
 {
+  if (!this->is_align_known_)
+    {
+      uint64_t addralign;
+
+      addralign = Output_segment::maximum_alignment(&this->output_data_);
+      if (addralign > this->align_)
+	this->align_ = addralign;
+
+      addralign = Output_segment::maximum_alignment(&this->output_bss_);
+      if (addralign > this->align_)
+	this->align_ = addralign;
+
+      this->is_align_known_ = true;
+    }
+
   return this->align_;
 }
 
-// Set the section addresses for an Output_segment.  ADDR is the
-// address and *POFF is the file offset.  Return the address of the
-// immediately following segment.  Update *POFF.
+// Return the maximum alignment of a list of Output_data.
 
 uint64_t
-Output_segment::set_section_addresses(uint64_t addr, off_t* poff)
+Output_segment::maximum_alignment(const Output_data_list* pdl)
+{
+  uint64_t ret = 0;
+  for (Output_data_list::const_iterator p = pdl->begin();
+       p != pdl->end();
+       ++p)
+    {
+      uint64_t addralign = (*p)->addralign();
+      if (addralign > ret)
+	ret = addralign;
+    }
+  return ret;
+}
+
+// Set the section addresses for an Output_segment.  ADDR is the
+// address and *POFF is the file offset.  Set the section indexes
+// starting with *PSHNDX.  Return the address of the immediately
+// following segment.  Update *POFF and *PSHNDX.
+
+uint64_t
+Output_segment::set_section_addresses(uint64_t addr, off_t* poff,
+				      unsigned int* pshndx)
 {
   assert(this->type_ == elfcpp::PT_LOAD);
 
@@ -579,13 +812,16 @@ Output_segment::set_section_addresses(uint64_t addr, off_t* poff)
   off_t orig_off = *poff;
   this->offset_ = orig_off;
 
-  addr = this->set_section_list_addresses(&this->output_data_, addr, poff);
+  *poff = align_address(*poff, this->addralign());
+
+  addr = this->set_section_list_addresses(&this->output_data_, addr, poff,
+					  pshndx);
   this->filesz_ = *poff - orig_off;
 
   off_t off = *poff;
 
   uint64_t ret = this->set_section_list_addresses(&this->output_bss_, addr,
-						  poff);
+						  poff, pshndx);
   this->memsz_ = *poff - orig_off;
 
   // Ignore the file offset adjustments made by the BSS Output_data
@@ -599,26 +835,36 @@ Output_segment::set_section_addresses(uint64_t addr, off_t* poff)
 
 uint64_t
 Output_segment::set_section_list_addresses(Output_data_list* pdl,
-					   uint64_t addr, off_t* poff)
+					   uint64_t addr, off_t* poff,
+					   unsigned int* pshndx)
 {
-  off_t off = *poff;
+  off_t startoff = *poff;
 
+  off_t off = startoff;
   for (Output_data_list::iterator p = pdl->begin();
        p != pdl->end();
        ++p)
     {
-      uint64_t addralign = (*p)->addralign();
-      addr = (addr + addralign - 1) & ~ (addralign - 1);
-      off = (off + addralign - 1) & ~ (addralign - 1);
-      (*p)->set_address(addr, off);
+      off = align_address(off, (*p)->addralign());
+      (*p)->set_address(addr + (off - startoff), off);
 
-      uint64_t size = (*p)->data_size();
-      addr += size;
-      off += size;
+      // Unless this is a PT_TLS segment, we want to ignore the size
+      // of a SHF_TLS/SHT_NOBITS section.  Such a section does not
+      // affect the size of a PT_LOAD segment.
+      if (this->type_ == elfcpp::PT_TLS
+	  || !(*p)->is_section_flag_set(elfcpp::SHF_TLS)
+	  || !(*p)->is_section_type(elfcpp::SHT_NOBITS))
+	off += (*p)->data_size();
+
+      if ((*p)->is_section())
+	{
+	  (*p)->set_out_shndx(*pshndx);
+	  ++*pshndx;
+	}
     }
 
   *poff = off;
-  return addr;
+  return addr + (off - startoff);
 }
 
 // For a non-PT_LOAD segment, set the offset from the sections, if
@@ -667,8 +913,6 @@ Output_segment::set_offset()
   this->memsz_ = (last->address()
 		  + last->data_size()
 		  - this->vaddr_);
-
-  // this->align_ was set as we added items.
 }
 
 // Return the number of Output_sections in an Output_segment.
@@ -700,7 +944,7 @@ Output_segment::output_section_count_list(const Output_data_list* pdl) const
 
 template<int size, bool big_endian>
 void
-Output_segment::write_header(elfcpp::Phdr_write<size, big_endian>* ophdr) const
+Output_segment::write_header(elfcpp::Phdr_write<size, big_endian>* ophdr)
 {
   ophdr->put_p_type(this->type_);
   ophdr->put_p_offset(this->offset_);
@@ -709,7 +953,7 @@ Output_segment::write_header(elfcpp::Phdr_write<size, big_endian>* ophdr) const
   ophdr->put_p_filesz(this->filesz_);
   ophdr->put_p_memsz(this->memsz_);
   ophdr->put_p_flags(this->flags_);
-  ophdr->put_p_align(this->align_);
+  ophdr->put_p_align(this->addralign());
 }
 
 // Write the section headers into V.
@@ -717,13 +961,22 @@ Output_segment::write_header(elfcpp::Phdr_write<size, big_endian>* ophdr) const
 template<int size, bool big_endian>
 unsigned char*
 Output_segment::write_section_headers(const Stringpool* secnamepool,
-				      unsigned char* v
+				      unsigned char* v,
+				      unsigned int *pshndx
                                       ACCEPT_SIZE_ENDIAN) const
 {
+  // Every section that is attached to a segment must be attached to a
+  // PT_LOAD segment, so we only write out section headers for PT_LOAD
+  // segments.
+  if (this->type_ != elfcpp::PT_LOAD)
+    return v;
+
   v = this->write_section_headers_list SELECT_SIZE_ENDIAN_NAME (
-    secnamepool, &this->output_data_, v SELECT_SIZE_ENDIAN(size, big_endian));
+	secnamepool, &this->output_data_, v, pshndx
+	SELECT_SIZE_ENDIAN(size, big_endian));
   v = this->write_section_headers_list SELECT_SIZE_ENDIAN_NAME (
-    secnamepool, &this->output_bss_, v SELECT_SIZE_ENDIAN(size, big_endian));
+	secnamepool, &this->output_bss_, v, pshndx
+	SELECT_SIZE_ENDIAN(size, big_endian));
   return v;
 }
 
@@ -731,7 +984,8 @@ template<int size, bool big_endian>
 unsigned char*
 Output_segment::write_section_headers_list(const Stringpool* secnamepool,
 					   const Output_data_list* pdl,
-					   unsigned char* v
+					   unsigned char* v,
+					   unsigned int* pshndx
                                            ACCEPT_SIZE_ENDIAN) const
 {
   const int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
@@ -742,9 +996,11 @@ Output_segment::write_section_headers_list(const Stringpool* secnamepool,
       if ((*p)->is_section())
 	{
 	  const Output_section* ps = static_cast<const Output_section*>(*p);
+	  assert(*pshndx == ps->out_shndx());
 	  elfcpp::Shdr_write<size, big_endian> oshdr(v);
 	  ps->write_header(secnamepool, &oshdr);
 	  v += shdr_size;
+	  ++*pshndx;
 	}
     }
   return v;
@@ -834,6 +1090,7 @@ template
 off_t
 Output_section::add_input_section<32, false>(
     Object* object,
+    unsigned int shndx,
     const char* secname,
     const elfcpp::Shdr<32, false>& shdr);
 
@@ -841,6 +1098,7 @@ template
 off_t
 Output_section::add_input_section<32, true>(
     Object* object,
+    unsigned int shndx,
     const char* secname,
     const elfcpp::Shdr<32, true>& shdr);
 
@@ -848,6 +1106,7 @@ template
 off_t
 Output_section::add_input_section<64, false>(
     Object* object,
+    unsigned int shndx,
     const char* secname,
     const elfcpp::Shdr<64, false>& shdr);
 
@@ -855,7 +1114,24 @@ template
 off_t
 Output_section::add_input_section<64, true>(
     Object* object,
+    unsigned int shndx,
     const char* secname,
     const elfcpp::Shdr<64, true>& shdr);
+
+template
+void
+Output_section_got<32, false>::do_write(Output_file* of);
+
+template
+void
+Output_section_got<32, true>::do_write(Output_file* of);
+
+template
+void
+Output_section_got<64, false>::do_write(Output_file* of);
+
+template
+void
+Output_section_got<64, true>::do_write(Output_file* of);
 
 } // End namespace gold.
