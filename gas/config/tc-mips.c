@@ -14594,9 +14594,9 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "5kc",            0,			ISA_MIPS64,	CPU_MIPS64 },
   { "5kf",            0,			ISA_MIPS64,	CPU_MIPS64 },
   { "20kc",           MIPS_CPU_ASE_MIPS3D,	ISA_MIPS64,	CPU_MIPS64 },
+  { "25kf",           MIPS_CPU_ASE_MIPS3D,	ISA_MIPS64,     CPU_MIPS64 },
 
   /* MIPS 64 Release 2 */
-  { "25kf",           MIPS_CPU_ASE_MIPS3D,	ISA_MIPS64R2,   CPU_MIPS64R2 },
 
   /* Broadcom SB-1 CPU core */
   { "sb1",            MIPS_CPU_ASE_MIPS3D | MIPS_CPU_ASE_MDMX,
