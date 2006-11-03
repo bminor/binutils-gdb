@@ -4102,6 +4102,25 @@ Don't forget to close the function by
 unwind entry previously opened by
 @code{.cfi_startproc}, and emits it to @code{.eh_frame}.
 
+@section @code{.cfi_personality @var{encoding} [, @var{exp}]}
+@code{.cfi_personality} defines personality routine and its encoding.
+@var{encoding} must be a constant determining how the personality
+should be encoded.  If it is 255 (@code{DW_EH_PE_omit}), second
+argument is not present, otherwise second argument should be
+a constant or a symbol name.  When using indirect encodings,
+the symbol provided should be the location where personality
+can be loaded from, not the personality routine itself.
+The default after @code{.cfi_startproc} is @code{.cfi_personality 0xff},
+no personality routine.
+
+@section @code{.cfi_lsda @var{encoding} [, @var{exp}]}
+@code{.cfi_lsda} defines LSDA and its encoding.
+@var{encoding} must be a constant determining how the LSDA
+should be encoded.  If it is 255 (@code{DW_EH_PE_omit}), second
+argument is not present, otherwise second argument should be a constant
+or a symbol name.  The default after @code{.cfi_startproc} is @code{.cfi_lsda 0xff},
+no LSDA.
+
 @section @code{.cfi_def_cfa @var{register}, @var{offset}}
 @code{.cfi_def_cfa} defines a rule for computing CFA as: @i{take 
 address from @var{register} and add @var{offset} to it}.

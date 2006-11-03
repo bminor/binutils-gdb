@@ -1,5 +1,18 @@
 2006-11-03  Jakub Jelinek  <jakub@redhat.com>
 
+	* dw2gencfi.c (struct fde_entry): Add per_encoding, lsda_encoding,
+	personality and lsda.
+	(struct cie_entry): Add per_encoding, lsda_encoding and personality.
+	(alloc_fde_entry): Initialize per_encoding and lsda_encoding.
+	(cfi_pseudo_table): Handle .cfi_personality and .cfi_lsda.
+	(dot_cfi_personality, dot_cfi_lsda, encoding_size): New functions.
+	(output_cie): Output personality including its encoding and LSDA encoding.
+	(output_fde): Output LSDA.
+	(select_cie_for_fde): Don't share CIE if personality, its encoding or
+	LSDA encoding are different.  Copy the 3 fields from fde_entry to
+	cie_entry.
+	* doc/as.texinfo (.cfi_personality, .cfi_lsda): Document.
+
 	* subsegs.h (struct frchain): Add frch_cfi_data field.
 	* dw2gencfi.c: Include subsegs.h.
 	(cur_fde_data, last_address, cur_cfa_offset, cfa_save_stack): Removed.

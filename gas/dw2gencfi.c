@@ -88,6 +88,10 @@ struct fde_entry
   symbolS *end_address;
   struct cfi_insn_data *data;
   struct cfi_insn_data **last;
+  unsigned char per_encoding;
+  unsigned char lsda_encoding;
+  expressionS personality;
+  expressionS lsda;
   unsigned int return_column;
   unsigned int signal_frame;
 };
@@ -98,6 +102,9 @@ struct cie_entry
   symbolS *start_address;
   unsigned int return_column;
   unsigned int signal_frame;
+  unsigned char per_encoding;
+  unsigned char lsda_encoding;
+  expressionS personality;
   struct cfi_insn_data *first, *last;
 };
 
@@ -139,6 +146,8 @@ alloc_fde_entry (void)
 
   fde->last = &fde->data;
   fde->return_column = DWARF2_DEFAULT_RETURN_COLUMN;
+  fde->per_encoding = DW_EH_PE_omit;
+  fde->lsda_encoding = DW_EH_PE_omit;
 
   return fde;
 }
@@ -357,6 +366,8 @@ static void dot_cfi (int);
 static void dot_cfi_escape (int);
 static void dot_cfi_startproc (int);
 static void dot_cfi_endproc (int);
+static void dot_cfi_personality (int);
+static void dot_cfi_lsda (int);
 
 /* Fake CFI type; outside the byte range of any real CFI insn.  */
 #define CFI_adjust_cfa_offset	0x100
@@ -385,6 +396,8 @@ const pseudo_typeS cfi_pseudo_table[] =
     { "cfi_window_save", dot_cfi, DW_CFA_GNU_window_save },
     { "cfi_escape", dot_cfi_escape, 0 },
     { "cfi_signal_frame", dot_cfi, CFI_signal_frame },
+    { "cfi_personality", dot_cfi_personality, 0 },
+    { "cfi_lsda", dot_cfi_lsda, 0 },
     { NULL, NULL, 0 }
   };
 
@@ -611,6 +624,148 @@ dot_cfi_escape (int ignored ATTRIBUTE_UNUSED)
 }
 
 static void
+dot_cfi_personality (int ignored ATTRIBUTE_UNUSED)
+{
+  struct fde_entry *fde;
+  offsetT encoding;
+
+  if (frchain_now->frch_cfi_data == NULL)
+    {
+      as_bad (_("CFI instruction used without previous .cfi_startproc"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  fde = frchain_now->frch_cfi_data->cur_fde_data;
+  encoding = get_absolute_expression ();
+  if (encoding == DW_EH_PE_omit)
+    {
+      demand_empty_rest_of_line ();
+      fde->per_encoding = encoding;
+      return;
+    }
+
+  if ((encoding & 0xff) != encoding
+      || ((encoding & 0x70) != 0
+#if defined DIFF_EXPR_OK || defined tc_cfi_emit_pcrel_expr
+	  && (encoding & 0x70) != DW_EH_PE_pcrel
+#endif
+	  )
+	 /* leb128 can be handled, but does something actually need it?  */
+      || (encoding & 7) == DW_EH_PE_uleb128
+      || (encoding & 7) > DW_EH_PE_udata8)
+    {
+      as_bad (_("invalid or unsupported encoding in .cfi_personality"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  if (*input_line_pointer++ != ',')
+    {
+      as_bad (_(".cfi_personality requires encoding and symbol arguments"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  expression_and_evaluate (&fde->personality);
+  switch (fde->personality.X_op)
+    {
+    case O_symbol:
+      break;
+    case O_constant:
+      if ((encoding & 0x70) == DW_EH_PE_pcrel)
+	encoding = DW_EH_PE_omit;
+      break;
+    default:
+      encoding = DW_EH_PE_omit;
+      break;
+    }
+
+  fde->per_encoding = encoding;
+
+  if (encoding == DW_EH_PE_omit)
+    {
+      as_bad (_("wrong second argument to .cfi_personality"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  demand_empty_rest_of_line ();
+}
+
+static void
+dot_cfi_lsda (int ignored ATTRIBUTE_UNUSED)
+{
+  struct fde_entry *fde;
+  offsetT encoding;
+
+  if (frchain_now->frch_cfi_data == NULL)
+    {
+      as_bad (_("CFI instruction used without previous .cfi_startproc"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  fde = frchain_now->frch_cfi_data->cur_fde_data;
+  encoding = get_absolute_expression ();
+  if (encoding == DW_EH_PE_omit)
+    {
+      demand_empty_rest_of_line ();
+      fde->lsda_encoding = encoding;
+      return;
+    }
+
+  if ((encoding & 0xff) != encoding
+      || ((encoding & 0x70) != 0
+#if defined DIFF_EXPR_OK || defined tc_cfi_emit_pcrel_expr
+	  && (encoding & 0x70) != DW_EH_PE_pcrel
+#endif
+	  )
+	 /* leb128 can be handled, but does something actually need it?  */
+      || (encoding & 7) == DW_EH_PE_uleb128
+      || (encoding & 7) > DW_EH_PE_udata8)
+    {
+      as_bad (_("invalid or unsupported encoding in .cfi_lsda"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  if (*input_line_pointer++ != ',')
+    {
+      as_bad (_(".cfi_lsda requires encoding and symbol arguments"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  fde->lsda_encoding = encoding;
+
+  expression_and_evaluate (&fde->lsda);
+  switch (fde->lsda.X_op)
+    {
+    case O_symbol:
+      break;
+    case O_constant:
+      if ((encoding & 0x70) == DW_EH_PE_pcrel)
+	encoding = DW_EH_PE_omit;
+      break;
+    default:
+      encoding = DW_EH_PE_omit;
+      break;
+    }
+
+  fde->lsda_encoding = encoding;
+
+  if (encoding == DW_EH_PE_omit)
+    {
+      as_bad (_("wrong second argument to .cfi_lsda"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  demand_empty_rest_of_line ();
+}
+
+static void
 dot_cfi_startproc (int ignored ATTRIBUTE_UNUSED)
 {
   int simple = 0;
@@ -725,18 +880,18 @@ output_cfi_insn (struct cfi_insn_data *insn)
 	      out_one (DW_CFA_advance_loc + scaled);
 	    else if (delta <= 0xFF)
 	      {
-	        out_one (DW_CFA_advance_loc1);
-	        out_one (delta);
+		out_one (DW_CFA_advance_loc1);
+		out_one (delta);
 	      }
 	    else if (delta <= 0xFFFF)
 	      {
-	        out_one (DW_CFA_advance_loc2);
-	        out_two (delta);
+		out_one (DW_CFA_advance_loc2);
+		out_two (delta);
 	      }
 	    else
 	      {
-	        out_one (DW_CFA_advance_loc4);
-	        out_four (delta);
+		out_one (DW_CFA_advance_loc4);
+		out_four (delta);
 	      }
 	  }
 	else
@@ -861,12 +1016,33 @@ output_cfi_insn (struct cfi_insn_data *insn)
     }
 }
 
+static offsetT
+encoding_size (unsigned char encoding)
+{
+  if (encoding == DW_EH_PE_omit)
+    return 0;
+  switch (encoding & 0x7)
+    {
+    case 0:
+      return bfd_get_arch_size (stdoutput) == 64 ? 8 : 4;
+    case DW_EH_PE_udata2:
+      return 2;
+    case DW_EH_PE_udata4:
+      return 4;
+    case DW_EH_PE_udata8:
+      return 8;
+    default:
+      abort ();
+    }
+}
+
 static void
 output_cie (struct cie_entry *cie)
 {
   symbolS *after_size_address, *end_address;
   expressionS exp;
   struct cfi_insn_data *i;
+  offsetT augmentation_size;
 
   cie->start_address = symbol_temp_new_now ();
   after_size_address = symbol_temp_make ();
@@ -882,6 +1058,10 @@ output_cie (struct cie_entry *cie)
   out_four (0);					/* CIE id.  */
   out_one (DW_CIE_VERSION);			/* Version.  */
   out_one ('z');				/* Augmentation.  */
+  if (cie->per_encoding != DW_EH_PE_omit)
+    out_one ('P');
+  if (cie->lsda_encoding != DW_EH_PE_omit)
+    out_one ('L');
   out_one ('R');
   if (cie->signal_frame)
     out_one ('S');
@@ -892,7 +1072,32 @@ output_cie (struct cie_entry *cie)
     out_one (cie->return_column);
   else
     out_uleb128 (cie->return_column);
-  out_uleb128 (1);				/* Augmentation size.  */
+  augmentation_size = 1 + (cie->lsda_encoding != DW_EH_PE_omit);
+  if (cie->per_encoding != DW_EH_PE_omit)
+    augmentation_size += 1 + encoding_size (cie->per_encoding);
+  out_uleb128 (augmentation_size);		/* Augmentation size.  */
+  if (cie->per_encoding != DW_EH_PE_omit)
+    {
+      offsetT size = encoding_size (cie->per_encoding);
+      out_one (cie->per_encoding);
+      exp = cie->personality;
+      if ((cie->per_encoding & 0x70) == DW_EH_PE_pcrel)
+	{
+#ifdef DIFF_EXPR_OK
+	  exp.X_op = O_subtract;
+	  exp.X_op_symbol = symbol_temp_new_now ();
+	  emit_expr (&exp, size);
+#elif defined (tc_cfi_emit_pcrel_expr)
+	  tc_cfi_emit_pcrel_expr (&exp, size);
+#else
+	  abort ();
+#endif
+	}
+      else
+	emit_expr (&exp, size);
+    }
+  if (cie->lsda_encoding != DW_EH_PE_omit)
+    out_one (cie->lsda_encoding);
 #if defined DIFF_EXPR_OK || defined tc_cfi_emit_pcrel_expr
   out_one (DW_EH_PE_pcrel | DW_EH_PE_sdata4);
 #else
@@ -913,6 +1118,7 @@ output_fde (struct fde_entry *fde, struct cie_entry *cie,
 {
   symbolS *after_size_address, *end_address;
   expressionS exp;
+  offsetT augmentation_size;
 
   after_size_address = symbol_temp_make ();
   end_address = symbol_temp_make ();
@@ -928,7 +1134,7 @@ output_fde (struct fde_entry *fde, struct cie_entry *cie,
   exp.X_op_symbol = cie->start_address;
   emit_expr (&exp, 4);				/* CIE offset.  */
 
-#ifdef DIFF_EXPR_OK  
+#ifdef DIFF_EXPR_OK
   exp.X_add_symbol = fde->start_address;
   exp.X_op_symbol = symbol_temp_new_now ();
   emit_expr (&exp, 4);				/* Code offset.  */
@@ -948,7 +1154,27 @@ output_fde (struct fde_entry *fde, struct cie_entry *cie,
   exp.X_op_symbol = fde->start_address;		/* Code length.  */
   emit_expr (&exp, 4);
 
-  out_uleb128 (0);				/* Augmentation size.  */
+  augmentation_size = encoding_size (fde->lsda_encoding);
+  out_uleb128 (augmentation_size);		/* Augmentation size.  */
+
+  if (fde->lsda_encoding != DW_EH_PE_omit)
+    {
+      exp = fde->lsda;
+      if ((fde->lsda_encoding & 0x70) == DW_EH_PE_pcrel)
+	{
+#ifdef DIFF_EXPR_OK
+	  exp.X_op = O_subtract;
+	  exp.X_op_symbol = symbol_temp_new_now ();
+	  emit_expr (&exp, augmentation_size);
+#elif defined (tc_cfi_emit_pcrel_expr)
+	  tc_cfi_emit_pcrel_expr (&exp, augmentation_size);
+#else
+	  abort ();
+#endif
+	}
+      else
+	emit_expr (&exp, augmentation_size);
+    }
 
   for (; first; first = first->next)
     output_cfi_insn (first);
@@ -966,8 +1192,31 @@ select_cie_for_fde (struct fde_entry *fde, struct cfi_insn_data **pfirst)
   for (cie = cie_root; cie; cie = cie->next)
     {
       if (cie->return_column != fde->return_column
-	  || cie->signal_frame != fde->signal_frame)
+	  || cie->signal_frame != fde->signal_frame
+	  || cie->per_encoding != fde->per_encoding
+	  || cie->lsda_encoding != fde->lsda_encoding)
 	continue;
+      if (cie->per_encoding != DW_EH_PE_omit)
+	{
+	  if (cie->personality.X_op != fde->personality.X_op
+	      || cie->personality.X_add_number
+		 != fde->personality.X_add_number)
+	    continue;
+	  switch (cie->personality.X_op)
+	    {
+	    case O_constant:
+	      if (cie->personality.X_unsigned != fde->personality.X_unsigned)
+		continue;
+	      break;
+	    case O_symbol:
+	      if (cie->personality.X_add_symbol
+		  != fde->personality.X_add_symbol)
+		continue;
+	      break;
+	    default:
+	      abort ();
+	    }
+	}
       for (i = cie->first, j = fde->data;
 	   i != cie->last && j != NULL;
 	   i = i->next, j = j->next)
@@ -1040,6 +1289,9 @@ select_cie_for_fde (struct fde_entry *fde, struct cfi_insn_data **pfirst)
   cie_root = cie;
   cie->return_column = fde->return_column;
   cie->signal_frame = fde->signal_frame;
+  cie->per_encoding = fde->per_encoding;
+  cie->lsda_encoding = fde->lsda_encoding;
+  cie->personality = fde->personality;
   cie->first = fde->data;
 
   for (i = cie->first; i ; i = i->next)
