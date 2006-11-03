@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-11-03 10:39-0800\n"
+"POT-Creation-Date: 2006-11-03 10:45-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -338,61 +338,65 @@ msgid "-L DIR, --library-path DIR"
 msgstr ""
 
 #: options.cc:237
+msgid "Ignored for compatibility"
+msgstr ""
+
+#: options.cc:239
 msgid "Set output file name"
 msgstr ""
 
-#: options.cc:238
+#: options.cc:240
 msgid "-o FILE, --output FILE"
 msgstr ""
 
-#: options.cc:240
+#: options.cc:242
 msgid "Generate relocatable output"
 msgstr ""
 
-#: options.cc:242
+#: options.cc:244
 msgid "Generate shared library"
 msgstr ""
 
-#: options.cc:244
+#: options.cc:246
 msgid "Do not link against shared libraries"
 msgstr ""
 
-#: options.cc:246
+#: options.cc:248
 msgid "Report usage information"
 msgstr ""
 
-#: options.cc:344 options.cc:395 options.cc:481
+#: options.cc:346 options.cc:397 options.cc:483
 msgid "missing argument"
 msgstr ""
 
-#: options.cc:357 options.cc:404
+#: options.cc:359 options.cc:406
 msgid "unknown option"
 msgstr ""
 
-#: options.cc:412
+#: options.cc:414
 #, c-format
 msgid "%s: missing group end"
 msgstr ""
 
-#: options.cc:494
+#: options.cc:496
 msgid "may not nest groups"
 msgstr ""
 
-#: options.cc:509
+#: options.cc:511
 msgid "group end without group start"
 msgstr ""
 
-#: options.cc:519
+#: options.cc:521
 #, c-format
 msgid "%s: use the --help option for usage information\n"
 msgstr ""
 
-#: options.cc:528
+#: options.cc:530
 #, c-format
 msgid "%s: %s: %s\n"
 msgstr ""
 
-#: options.cc:537
+#: options.cc:539
 #, c-format
 msgid "%s: -%c: %s\n"
 msgstr ""

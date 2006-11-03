@@ -234,6 +234,8 @@ options::Command_line_options::options[] =
   GENERAL_ARG('L', "library-path", N_("Add directory to search path"),
 	      N_("-L DIR, --library-path DIR"), TWO_DASHES,
 	      &General_options::add_to_search_path),
+  GENERAL_ARG('m', NULL, N_("Ignored for compatibility"), NULL, ONE_DASH,
+	      &General_options::ignore),
   GENERAL_ARG('o', "output", N_("Set output file name"),
 	      N_("-o FILE, --output FILE"), TWO_DASHES,
 	      &General_options::set_output_file_name),

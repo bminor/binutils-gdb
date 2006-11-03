@@ -89,6 +89,10 @@ class General_options
   set_static()
   { this->is_static_ = true; }
 
+  void
+  ignore(const char*)
+  { }
+
   Dir_list search_path_;
   const char* output_file_name_;
   bool is_relocatable_;
