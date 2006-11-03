@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-11-03 10:04-0800\n"
+"POT-Creation-Date: 2006-11-03 10:39-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -402,32 +402,32 @@ msgstr ""
 msgid "%s: %s: invalid alignment %lu for section \"%s\"\n"
 msgstr ""
 
-#: output.cc:1031
+#: output.cc:1033
 #, c-format
 msgid "%s: %s: open: %s\n"
 msgstr ""
 
-#: output.cc:1040
+#: output.cc:1042
 #, c-format
 msgid "%s: %s: lseek: %s\n"
 msgstr ""
 
-#: output.cc:1047
+#: output.cc:1049
 #, c-format
 msgid "%s: %s: write: %s\n"
 msgstr ""
 
-#: output.cc:1057
+#: output.cc:1059
 #, c-format
 msgid "%s: %s: mmap: %s\n"
 msgstr ""
 
-#: output.cc:1071
+#: output.cc:1073
 #, c-format
 msgid "%s: %s: munmap: %s\n"
 msgstr ""
 
-#: output.cc:1079
+#: output.cc:1081
 #, c-format
 msgid "%s: %s: close: %s\n"
 msgstr ""
@@ -463,27 +463,27 @@ msgstr ""
 msgid "%s: %s: reloc section %u size %lu uneven"
 msgstr ""
 
-#: resolve.cc:140
+#: resolve.cc:141
 #, c-format
 msgid "%s: %s: invalid STB_LOCAL symbol %s in external symbols\n"
 msgstr ""
 
-#: resolve.cc:146
+#: resolve.cc:147
 #, c-format
 msgid "%s: %s: unsupported symbol binding %d for symbol %s\n"
 msgstr ""
 
-#: symtab.cc:428
+#: symtab.cc:429
 #, c-format
 msgid "%s: %s: mixing 32-bit and 64-bit ELF objects\n"
 msgstr ""
 
-#: symtab.cc:445
+#: symtab.cc:446
 #, c-format
 msgid "%s: %s: bad global symbol name offset %u at %lu\n"
 msgstr ""
 
-#: symtab.cc:840 symtab.cc:975
+#: symtab.cc:854 symtab.cc:989
 #, c-format
 msgid "%s: %s: unsupported symbol section 0x%x\n"
 msgstr ""
