@@ -114,9 +114,8 @@ struct dwarf_expr_baton
 
 /* Helper functions for dwarf2_evaluate_loc_desc.  */
 
-/* Using the frame specified in BATON, read register REGNUM.  The lval
-   type will be returned in LVALP, and for lval_memory the register
-   save address will be returned in ADDRP.  */
+/* Using the frame specified in BATON, return the value of register
+   REGNUM, treated as an unsigned integer.  */
 static CORE_ADDR
 dwarf_expr_read_reg (void *baton, int dwarf_regnum)
 {
@@ -130,8 +129,7 @@ dwarf_expr_read_reg (void *baton, int dwarf_regnum)
   regsize = register_size (current_gdbarch, regnum);
   buf = alloca (regsize);
 
-  frame_register (debaton->frame, regnum, &optimized, &lval_type, &save_addr,
-		  &realnum, buf);
+  frame_unwind_register (debaton->frame, regnum, buf);
   /* NOTE: cagney/2003-05-22: This extract is assuming that a DWARF 2
      address is always unsigned.  That may or may not be true.  */
   result = extract_unsigned_integer (buf, regsize);

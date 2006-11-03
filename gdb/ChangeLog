@@ -1,3 +1,8 @@
+2006-11-03  Jim Blandy  <jimb@codesourcery.com>
+
+         * dwarf2loc.c (dwarf_expr_read_reg): Use frame_unwind_register
+         instead of frame_register.  Doc fix.
+
 2006-11-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2read.c (struct dwarf2_per_cu_data): Update comment.
