@@ -1,3 +1,19 @@
+2006-11-03  Jakub Jelinek  <jakub@redhat.com>
+
+	* subsegs.h (struct frchain): Add frch_cfi_data field.
+	* dw2gencfi.c: Include subsegs.h.
+	(cur_fde_data, last_address, cur_cfa_offset, cfa_save_stack): Removed.
+	(struct frch_cfi_data): New type.
+	(unused_cfi_data): New variable.
+	(alloc_fde_entry): Move cur_fde_data, last_address, cur_cfa_offset
+	and cfa_save_stack static vars into a structure pointed from
+	each frchain.
+	(alloc_cfi_insn_data, cfi_new_fde, cfi_end_fde, cfi_set_return_column,
+	cfi_add_advance_loc, cfi_add_CFA_def_cfa, cfi_add_CFA_def_cfa_offset,
+	cfi_add_CFA_remember_state, cfi_add_CFA_restore_state, dot_cfi,
+	dot_cfi_escape, dot_cfi_startproc, dot_cfi_endproc, cfi_finish):
+	Likewise.
+
 2006-11-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* config/tc-h8300.c (build_bytes): Fix const warning.

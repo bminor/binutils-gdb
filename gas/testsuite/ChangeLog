@@ -1,3 +1,9 @@
+2006-11-03  Jakub Jelinek  <jakub@redhat.com>
+
+	* gas/cfi/cfi-common-5.d: New test.
+	* gas/cfi/cfi-common-5.s: New.
+	* gas/cfi/cfi.exp: Add cfi-common-5 test.
+
 2006-11-01  Thiemo Seufer  <ths@mips.com>
 
 	* gas/mips/mips16-intermix.d, gas/mips/mips16-intermix.s: New

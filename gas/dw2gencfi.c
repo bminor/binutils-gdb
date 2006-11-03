@@ -21,6 +21,7 @@
 
 #include "as.h"
 #include "dw2gencfi.h"
+#include "subsegs.h"
 
 
 /* We re-use DWARF2_LINE_MIN_INSN_LENGTH for the code alignment field
@@ -101,11 +102,6 @@ struct cie_entry
 };
 
 
-/* Current open FDE entry.  */
-static struct fde_entry *cur_fde_data;
-static symbolS *last_address;
-static offsetT cur_cfa_offset;
-
 /* List of FDE entries.  */
 static struct fde_entry *all_fde_data;
 static struct fde_entry **last_fde_data = &all_fde_data;
@@ -120,7 +116,14 @@ struct cfa_save_data
   offsetT cfa_offset;
 };
 
-static struct cfa_save_data *cfa_save_stack;
+/* Current open FDE entry.  */
+struct frch_cfi_data
+{
+  struct fde_entry *cur_fde_data;
+  symbolS *last_address;
+  offsetT cur_cfa_offset;
+  struct cfa_save_data *cfa_save_stack;
+};
 
 /* Construct a new FDE structure and add it to the end of the fde list.  */
 
@@ -129,7 +132,8 @@ alloc_fde_entry (void)
 {
   struct fde_entry *fde = xcalloc (1, sizeof (struct fde_entry));
 
-  cur_fde_data = fde;
+  frchain_now->frch_cfi_data = xcalloc (1, sizeof (struct frch_cfi_data));
+  frchain_now->frch_cfi_data->cur_fde_data = fde;
   *last_fde_data = fde;
   last_fde_data = &fde->next;
 
@@ -149,6 +153,7 @@ static struct cfi_insn_data *
 alloc_cfi_insn_data (void)
 {
   struct cfi_insn_data *insn = xcalloc (1, sizeof (struct cfi_insn_data));
+  struct fde_entry *cur_fde_data = frchain_now->frch_cfi_data->cur_fde_data;
 
   *cur_fde_data->last = insn;
   cur_fde_data->last = &insn->next;
@@ -163,7 +168,7 @@ cfi_new_fde (symbolS *label)
 {
   struct fde_entry *fde = alloc_fde_entry ();
   fde->start_address = label;
-  last_address = label;
+  frchain_now->frch_cfi_data->last_address = label;
 }
 
 /* End the currently open FDE.  */
@@ -171,8 +176,9 @@ cfi_new_fde (symbolS *label)
 void 
 cfi_end_fde (symbolS *label)
 {
-  cur_fde_data->end_address = label;
-  cur_fde_data = NULL;
+  frchain_now->frch_cfi_data->cur_fde_data->end_address = label;
+  free (frchain_now->frch_cfi_data);
+  frchain_now->frch_cfi_data = NULL;
 }
 
 /* Set the return column for the current FDE.  */
@@ -180,7 +186,7 @@ cfi_end_fde (symbolS *label)
 void
 cfi_set_return_column (unsigned regno)
 {
-  cur_fde_data->return_column = regno;
+  frchain_now->frch_cfi_data->cur_fde_data->return_column = regno;
 }
 
 /* Universal functions to store new instructions.  */
@@ -239,10 +245,10 @@ cfi_add_advance_loc (symbolS *label)
   struct cfi_insn_data *insn = alloc_cfi_insn_data ();
 
   insn->insn = DW_CFA_advance_loc;
-  insn->u.ll.lab1 = last_address;
+  insn->u.ll.lab1 = frchain_now->frch_cfi_data->last_address;
   insn->u.ll.lab2 = label;
 
-  last_address = label;
+  frchain_now->frch_cfi_data->last_address = label;
 }
 
 /* Add a DW_CFA_offset record to the CFI data.  */
@@ -267,7 +273,7 @@ void
 cfi_add_CFA_def_cfa (unsigned regno, offsetT offset)
 {
   cfi_add_CFA_insn_reg_offset (DW_CFA_def_cfa, regno, offset);
-  cur_cfa_offset = offset;
+  frchain_now->frch_cfi_data->cur_cfa_offset = offset;
 }
 
 /* Add a DW_CFA_register record to the CFI data.  */
@@ -292,7 +298,7 @@ void
 cfi_add_CFA_def_cfa_offset (offsetT offset)
 {
   cfi_add_CFA_insn_offset (DW_CFA_def_cfa_offset, offset);
-  cur_cfa_offset = offset;
+  frchain_now->frch_cfi_data->cur_cfa_offset = offset;
 }
 
 void
@@ -321,9 +327,9 @@ cfi_add_CFA_remember_state (void)
   cfi_add_CFA_insn (DW_CFA_remember_state);
 
   p = xmalloc (sizeof (*p));
-  p->cfa_offset = cur_cfa_offset;
-  p->next = cfa_save_stack;
-  cfa_save_stack = p;
+  p->cfa_offset = frchain_now->frch_cfi_data->cur_cfa_offset;
+  p->next = frchain_now->frch_cfi_data->cfa_save_stack;
+  frchain_now->frch_cfi_data->cfa_save_stack = p;
 }
 
 void
@@ -333,11 +339,11 @@ cfi_add_CFA_restore_state (void)
 
   cfi_add_CFA_insn (DW_CFA_restore_state);
 
-  p = cfa_save_stack;
+  p = frchain_now->frch_cfi_data->cfa_save_stack;
   if (p)
     {
-      cur_cfa_offset = p->cfa_offset;
-      cfa_save_stack = p->next;
+      frchain_now->frch_cfi_data->cur_cfa_offset = p->cfa_offset;
+      frchain_now->frch_cfi_data->cfa_save_stack = p->next;
       free (p);
     }
   else
@@ -449,7 +455,7 @@ dot_cfi (int arg)
   offsetT offset;
   unsigned reg1, reg2;
 
-  if (!cur_fde_data)
+  if (frchain_now->frch_cfi_data == NULL)
     {
       as_bad (_("CFI instruction used without previous .cfi_startproc"));
       ignore_rest_of_line ();
@@ -457,8 +463,9 @@ dot_cfi (int arg)
     }
 
   /* If the last address was not at the current PC, advance to current.  */
-  if (symbol_get_frag (last_address) != frag_now
-      || S_GET_VALUE (last_address) != frag_now_fix ())
+  if (symbol_get_frag (frchain_now->frch_cfi_data->last_address) != frag_now
+      || S_GET_VALUE (frchain_now->frch_cfi_data->last_address)
+	 != frag_now_fix ())
     cfi_add_advance_loc (symbol_temp_new_now ());
 
   switch (arg)
@@ -474,7 +481,8 @@ dot_cfi (int arg)
       reg1 = cfi_parse_reg ();
       cfi_parse_separator ();
       offset = cfi_parse_const ();
-      cfi_add_CFA_offset (reg1, offset - cur_cfa_offset);
+      cfi_add_CFA_offset (reg1,
+			  offset - frchain_now->frch_cfi_data->cur_cfa_offset);
       break;
 
     case DW_CFA_def_cfa:
@@ -503,7 +511,8 @@ dot_cfi (int arg)
 
     case CFI_adjust_cfa_offset:
       offset = cfi_parse_const ();
-      cfi_add_CFA_def_cfa_offset (cur_cfa_offset + offset);
+      cfi_add_CFA_def_cfa_offset (frchain_now->frch_cfi_data->cur_cfa_offset
+				  + offset);
       break;
 
     case DW_CFA_restore:
@@ -553,7 +562,7 @@ dot_cfi (int arg)
       break;
 
     case CFI_signal_frame:
-      cur_fde_data->signal_frame = 1;
+      frchain_now->frch_cfi_data->cur_fde_data->signal_frame = 1;
       break;
 
     default:
@@ -569,7 +578,7 @@ dot_cfi_escape (int ignored ATTRIBUTE_UNUSED)
   struct cfi_escape_data *head, **tail, *e;
   struct cfi_insn_data *insn;
 
-  if (!cur_fde_data)
+  if (frchain_now->frch_cfi_data == NULL)
     {
       as_bad (_("CFI instruction used without previous .cfi_startproc"));
       ignore_rest_of_line ();
@@ -577,8 +586,9 @@ dot_cfi_escape (int ignored ATTRIBUTE_UNUSED)
     }
 
   /* If the last address was not at the current PC, advance to current.  */
-  if (symbol_get_frag (last_address) != frag_now
-      || S_GET_VALUE (last_address) != frag_now_fix ())
+  if (symbol_get_frag (frchain_now->frch_cfi_data->last_address) != frag_now
+      || S_GET_VALUE (frchain_now->frch_cfi_data->last_address)
+	 != frag_now_fix ())
     cfi_add_advance_loc (symbol_temp_new_now ());
 
   tail = &head;
@@ -605,7 +615,7 @@ dot_cfi_startproc (int ignored ATTRIBUTE_UNUSED)
 {
   int simple = 0;
 
-  if (cur_fde_data)
+  if (frchain_now->frch_cfi_data != NULL)
     {
       as_bad (_("previous CFI entry not closed (missing .cfi_endproc)"));
       ignore_rest_of_line ();
@@ -632,7 +642,7 @@ dot_cfi_startproc (int ignored ATTRIBUTE_UNUSED)
     }
   demand_empty_rest_of_line ();
 
-  cur_cfa_offset = 0;
+  frchain_now->frch_cfi_data->cur_cfa_offset = 0;
   if (!simple)
     tc_cfi_frame_initial_instructions ();
 }
@@ -640,7 +650,7 @@ dot_cfi_startproc (int ignored ATTRIBUTE_UNUSED)
 static void
 dot_cfi_endproc (int ignored ATTRIBUTE_UNUSED)
 {
-  if (! cur_fde_data)
+  if (frchain_now->frch_cfi_data == NULL)
     {
       as_bad (_(".cfi_endproc without corresponding .cfi_startproc"));
       ignore_rest_of_line ();
@@ -1053,12 +1063,6 @@ cfi_finish (void)
   struct fde_entry *fde;
   int save_flag_traditional_format;
 
-  if (cur_fde_data)
-    {
-      as_bad (_("open CFI at the end of file; missing .cfi_endproc directive"));
-      cur_fde_data->end_address = cur_fde_data->start_address;
-    }
-
   if (all_fde_data == 0)
     return;
 
@@ -1077,6 +1081,12 @@ cfi_finish (void)
     {
       struct cfi_insn_data *first;
       struct cie_entry *cie;
+
+      if (fde->end_address == NULL)
+	{
+	  as_bad (_("open CFI at the end of file; missing .cfi_endproc directive"));
+	  fde->end_address = fde->start_address;
+	}
 
       cie = select_cie_for_fde (fde, &first);
       output_fde (fde, cie, first, fde->next == NULL ? EH_FRAME_ALIGNMENT : 2);
