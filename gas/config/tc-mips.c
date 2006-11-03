@@ -11544,7 +11544,7 @@ md_pcrel_from (fixS *fixP)
       /* Return the address of the delay slot.  */
       return addr + 4;
     default:
-      /* We have no relocation type for PC relative MIPS16 intructions.  */
+      /* We have no relocation type for PC relative MIPS16 instructions.  */
       if (fixP->fx_addsy && S_GET_SEGMENT (fixP->fx_addsy) != now_seg)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("PC relative MIPS16 instruction references a different section"));
