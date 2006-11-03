@@ -1,3 +1,7 @@
+2006-11-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-discard/zero-rel.d, ld-discard/zero-rel.s: New files.
+
 2006-11-01  Thiemo Seufer  <ths@mips.com>
 
 	* ld-mips-elf/mips16-intermix-1.s, ld-mips-elf/mips16-intermix-2.s,

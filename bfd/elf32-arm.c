@@ -3664,7 +3664,10 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	 from removed linkonce sections, or sections discarded by
 	 a linker script.  */
       if (r_symndx == 0)
-	return bfd_reloc_ok;
+	{
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  return bfd_reloc_ok;
+	}
 
       /* Handle relocations which should use the PLT entry.  ABS32/REL32
 	 will use the symbol's value, which may point to a PLT entry, but we

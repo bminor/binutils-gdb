@@ -4751,6 +4751,12 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_IA64_LTV32LSB:
 	case R_IA64_LTV64MSB:
 	case R_IA64_LTV64LSB:
+	  /* r_symndx will be zero only for relocs against symbols
+	     from removed linkonce sections, or sections discarded by
+	     a linker script.  */
+	  if (r_symndx == 0)
+	    value = 0;
+
 	  r = elfNN_ia64_install_value (hit_addr, value, r_type);
 	  break;
 

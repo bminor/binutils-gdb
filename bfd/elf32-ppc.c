@@ -6180,7 +6180,10 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	     a linker script.  */
 	dodyn:
 	  if (r_symndx == 0)
-	    break;
+	    {
+	      _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	      break;
+	    }
 	  /* Fall thru.  */
 
 	  if ((input_section->flags & SEC_ALLOC) == 0)

@@ -4323,6 +4323,11 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 						   input_section))
 	    return bfd_reloc_undefined;
 	}
+      else if (r_symndx == 0)
+	/* r_symndx will be zero only for relocs against symbols
+	   from removed linkonce sections, or sections discarded by
+	   a linker script.  */
+	value = 0;
       else
 	{
 	  if (r_type != R_MIPS_REL32)

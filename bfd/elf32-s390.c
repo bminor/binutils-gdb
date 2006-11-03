@@ -2543,8 +2543,13 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	  /* r_symndx will be zero only for relocs against symbols
 	     from removed linkonce sections, or sections discarded by
 	     a linker script.  */
-	  if (r_symndx == 0
-	      || (input_section->flags & SEC_ALLOC) == 0)
+	  if (r_symndx == 0)
+	    {
+	      _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	      break;
+	    }
+
+	  if ((input_section->flags & SEC_ALLOC) == 0)
 	    break;
 
 	  if ((info->shared

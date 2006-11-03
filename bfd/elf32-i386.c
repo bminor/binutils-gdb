@@ -2395,17 +2395,12 @@ elf_i386_relocate_section (bfd *output_bfd,
 
       if (r_symndx == 0)
 	{
-	/* r_symndx will be zero only for relocs against symbols from
-	   removed linkonce sections, or sections discarded by a linker
-	   script.  For these relocs, we just want the section contents
-	   zeroed.  Avoid any special processing in the switch below.  */
-	  r_type = R_386_NONE;
-
-	  relocation = 0;
-	  if (howto->pc_relative)
-	    relocation = (input_section->output_section->vma
-			  + input_section->output_offset
-			  + rel->r_offset);
+	  /* r_symndx will be zero only for relocs against symbols from
+	     removed linkonce sections, or sections discarded by a linker
+	     script.  For these relocs, we just want the section contents
+	     zeroed.  Avoid any special processing.  */
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  continue;
 	}
 
       switch (r_type)

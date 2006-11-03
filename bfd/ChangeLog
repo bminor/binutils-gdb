@@ -1,3 +1,27 @@
+2006-11-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* libbfd-in.h (_bfd_clear_contents): New prototype.
+	* reloc.c (_bfd_clear_contents): New.
+	* libbfd.h: Regenerated.
+
+	* elf32-arm.c (elf32_arm_final_link_relocate): Use
+	_bfd_clear_contents.
+	* elf32-d10v.c (elf32_d10v_relocate_section): Likewise.
+	* elf32-hppa.c (elf32_hppa_relocate_section): Likewise.
+	* elf32-i386.c (elf_i386_relocate_section): Likewise.
+	* elf32-ppc.c (ppc_elf_relocate_section): Likewise.
+	* elf32-s390.c (elf_s390_relocate_section): Likewise.
+	* elf32-sh.c (sh_elf_relocate_section): Likewise.
+	* elf32-xtensa.c (elf_xtensa_relocate_section): Likewise.
+	* elf64-ppc.c (ppc64_elf_relocate_section): Likewise.
+	* elf64-s390.c (elf_s390_relocate_section): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_relocate_section): Likewise.
+
+	* elfxx-ia64.c (elfNN_ia64_relocate_section): Set value to
+	zero for discarded symbols.
+	* elfxx-mips.c (mips_elf_calculate_relocation): Likewise.
+
 2006-11-01  Thiemo Seufer  <ths@mips.com>
             David Ung  <davidu@mips.com>
 

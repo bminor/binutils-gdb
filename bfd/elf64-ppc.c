@@ -10728,7 +10728,11 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	     a linker script.  */
 	dodyn:
 	  if (r_symndx == 0)
-	    break;
+	    {
+	      _bfd_clear_contents (ppc64_elf_howto_table[r_type], input_bfd,
+				   contents + rel->r_offset);
+	      break;
+	    }
 	  /* Fall thru.  */
 
 	dodyn2:

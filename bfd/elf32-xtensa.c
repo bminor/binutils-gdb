@@ -2270,6 +2270,16 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 	  return FALSE;
 	}
 
+      if (r_symndx == 0)
+	{
+	  /* r_symndx will be zero only for relocs against symbols from
+	     removed linkonce sections, or sections discarded by a linker
+	     script.  For these relocs, we just want the section contents
+	     zeroed.  Avoid any special processing.  */
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  continue;
+	}
+
       /* There's no point in calling bfd_perform_relocation here.
 	 Just go directly to our "special function".  */
       r = elf_xtensa_do_reloc (howto, input_bfd, input_section,
