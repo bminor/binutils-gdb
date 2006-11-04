@@ -1,3 +1,8 @@
+2006-11-04  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* serial.c (serial_open): Strip leading spaces from program 
+	name when opening pipe.
+
 2006-11-03  Jim Blandy  <jimb@codesourcery.com>
 
          * dwarf2loc.c (dwarf_expr_read_reg): Use frame_unwind_register
