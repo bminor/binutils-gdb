@@ -6,6 +6,7 @@
 #define ELFCPP_H
 
 #include "elfcpp_config.h"
+#include "elfcpp_swap.h"
 
 #include <stdint.h>
 
@@ -559,24 +560,6 @@ struct Elf_sizes
   static const int rela_size = sizeof(internal::Rela_data<size>);
 };
 
-// Given the address of an Elf_Word, return the value.
-
-template<bool big_endian>
-inline Elf_Word
-read_elf_word(const Elf_Word* p)
-{
-  return internal::convert_word<big_endian>(*p);
-}
-
-// Store an Elf_Word into an address.
-
-template<bool big_endian>
-inline void
-write_elf_word(Elf_Word* p, Elf_Word v)
-{
-  *p = internal::convert_word<big_endian>(v);
-}
-
 // Accessor class for the ELF file header.
 
 template<int size, bool big_endian>
@@ -593,55 +576,55 @@ class Ehdr
 
   Elf_Half
   get_e_type() const
-  { return internal::convert_half<big_endian>(this->p_->e_type); }
+  { return Convert<16, big_endian>::convert_host(this->p_->e_type); }
 
   Elf_Half
   get_e_machine() const
-  { return internal::convert_half<big_endian>(this->p_->e_machine); }
+  { return Convert<16, big_endian>::convert_host(this->p_->e_machine); }
 
   Elf_Word
   get_e_version() const
-  { return internal::convert_word<big_endian>(this->p_->e_version); }
+  { return Convert<32, big_endian>::convert_host(this->p_->e_version); }
 
   typename Elf_types<size>::Elf_Addr
   get_e_entry() const
-  { return internal::convert_addr<size, big_endian>(this->p_->e_entry); }
+  { return Convert<size, big_endian>::convert_host(this->p_->e_entry); }
 
   typename Elf_types<size>::Elf_Off
   get_e_phoff() const
-  { return internal::convert_off<size, big_endian>(this->p_->e_phoff); }
+  { return Convert<size, big_endian>::convert_host(this->p_->e_phoff); }
 
   typename Elf_types<size>::Elf_Off
   get_e_shoff() const
-  { return internal::convert_off<size, big_endian>(this->p_->e_shoff); }
+  { return Convert<size, big_endian>::convert_host(this->p_->e_shoff); }
 
   Elf_Word
   get_e_flags() const
-  { return internal::convert_word<big_endian>(this->p_->e_flags); }
+  { return Convert<32, big_endian>::convert_host(this->p_->e_flags); }
 
   Elf_Half
   get_e_ehsize() const
-  { return internal::convert_half<big_endian>(this->p_->e_ehsize); }
+  { return Convert<16, big_endian>::convert_host(this->p_->e_ehsize); }
 
   Elf_Half
   get_e_phentsize() const
-  { return internal::convert_half<big_endian>(this->p_->e_phentsize); }
+  { return Convert<16, big_endian>::convert_host(this->p_->e_phentsize); }
 
   Elf_Half
   get_e_phnum() const
-  { return internal::convert_half<big_endian>(this->p_->e_phnum); }
+  { return Convert<16, big_endian>::convert_host(this->p_->e_phnum); }
 
   Elf_Half
   get_e_shentsize() const
-  { return internal::convert_half<big_endian>(this->p_->e_shentsize); }
+  { return Convert<16, big_endian>::convert_host(this->p_->e_shentsize); }
 
   Elf_Half
   get_e_shnum() const
-  { return internal::convert_half<big_endian>(this->p_->e_shnum); }
+  { return Convert<16, big_endian>::convert_host(this->p_->e_shnum); }
 
   Elf_Half
   get_e_shstrndx() const
-  { return internal::convert_half<big_endian>(this->p_->e_shstrndx); }
+  { return Convert<16, big_endian>::convert_host(this->p_->e_shstrndx); }
 
  private:
   const internal::Ehdr_data<size>* p_;
@@ -663,55 +646,55 @@ class Ehdr_write
 
   void
   put_e_type(Elf_Half v)
-  { this->p_->e_type = internal::convert_half<big_endian>(v); }
+  { this->p_->e_type = Convert<16, big_endian>::convert_host(v); }
   
   void
   put_e_machine(Elf_Half v)
-  { this->p_->e_machine = internal::convert_half<big_endian>(v); }
+  { this->p_->e_machine = Convert<16, big_endian>::convert_host(v); }
 
   void
   put_e_version(Elf_Word v)
-  { this->p_->e_version = internal::convert_word<big_endian>(v); }
+  { this->p_->e_version = Convert<32, big_endian>::convert_host(v); }
 
   void
   put_e_entry(typename Elf_types<size>::Elf_Addr v)
-  { this->p_->e_entry = internal::convert_addr<size, big_endian>(v); }
+  { this->p_->e_entry = Convert<size, big_endian>::convert_host(v); }
 
   void
   put_e_phoff(typename Elf_types<size>::Elf_Off v)
-  { this->p_->e_phoff = internal::convert_off<size, big_endian>(v); }
+  { this->p_->e_phoff = Convert<size, big_endian>::convert_host(v); }
 
   void
   put_e_shoff(typename Elf_types<size>::Elf_Off v)
-  { this->p_->e_shoff = internal::convert_off<size, big_endian>(v); }
+  { this->p_->e_shoff = Convert<size, big_endian>::convert_host(v); }
 
   void
   put_e_flags(Elf_Word v)
-  { this->p_->e_flags = internal::convert_word<big_endian>(v); }
+  { this->p_->e_flags = Convert<32, big_endian>::convert_host(v); }
 
   void
   put_e_ehsize(Elf_Half v)
-  { this->p_->e_ehsize = internal::convert_half<big_endian>(v); }
+  { this->p_->e_ehsize = Convert<16, big_endian>::convert_host(v); }
 
   void
   put_e_phentsize(Elf_Half v)
-  { this->p_->e_phentsize = internal::convert_half<big_endian>(v); }
+  { this->p_->e_phentsize = Convert<16, big_endian>::convert_host(v); }
 
   void
   put_e_phnum(Elf_Half v)
-  { this->p_->e_phnum = internal::convert_half<big_endian>(v); }
+  { this->p_->e_phnum = Convert<16, big_endian>::convert_host(v); }
 
   void
   put_e_shentsize(Elf_Half v)
-  { this->p_->e_shentsize = internal::convert_half<big_endian>(v); }
+  { this->p_->e_shentsize = Convert<16, big_endian>::convert_host(v); }
 
   void
   put_e_shnum(Elf_Half v)
-  { this->p_->e_shnum = internal::convert_half<big_endian>(v); }
+  { this->p_->e_shnum = Convert<16, big_endian>::convert_host(v); }
 
   void
   put_e_shstrndx(Elf_Half v)
-  { this->p_->e_shstrndx = internal::convert_half<big_endian>(v); }
+  { this->p_->e_shstrndx = Convert<16, big_endian>::convert_host(v); }
 
  private:
   internal::Ehdr_data<size>* p_;
@@ -729,44 +712,44 @@ class Shdr
 
   Elf_Word
   get_sh_name() const
-  { return internal::convert_word<big_endian>(this->p_->sh_name); }
+  { return Convert<32, big_endian>::convert_host(this->p_->sh_name); }
 
   Elf_Word
   get_sh_type() const
-  { return internal::convert_word<big_endian>(this->p_->sh_type); }
+  { return Convert<32, big_endian>::convert_host(this->p_->sh_type); }
 
   typename Elf_types<size>::Elf_WXword
   get_sh_flags() const
-  { return internal::convert_wxword<size, big_endian>(this->p_->sh_flags); }
+  { return Convert<size, big_endian>::convert_host(this->p_->sh_flags); }
 
   typename Elf_types<size>::Elf_Addr
   get_sh_addr() const
-  { return internal::convert_addr<size, big_endian>(this->p_->sh_addr); }
+  { return Convert<size, big_endian>::convert_host(this->p_->sh_addr); }
 
   typename Elf_types<size>::Elf_Off
   get_sh_offset() const
-  { return internal::convert_off<size, big_endian>(this->p_->sh_offset); }
+  { return Convert<size, big_endian>::convert_host(this->p_->sh_offset); }
 
   typename Elf_types<size>::Elf_WXword
   get_sh_size() const
-  { return internal::convert_wxword<size, big_endian>(this->p_->sh_size); }
+  { return Convert<size, big_endian>::convert_host(this->p_->sh_size); }
 
   Elf_Word
   get_sh_link() const
-  { return internal::convert_word<big_endian>(this->p_->sh_link); }
+  { return Convert<32, big_endian>::convert_host(this->p_->sh_link); }
 
   Elf_Word
   get_sh_info() const
-  { return internal::convert_word<big_endian>(this->p_->sh_info); }
+  { return Convert<32, big_endian>::convert_host(this->p_->sh_info); }
 
   typename Elf_types<size>::Elf_WXword
   get_sh_addralign() const
   { return
-      internal::convert_wxword<size, big_endian>(this->p_->sh_addralign); }
+      Convert<size, big_endian>::convert_host(this->p_->sh_addralign); }
 
   typename Elf_types<size>::Elf_WXword
   get_sh_entsize() const
-  { return internal::convert_wxword<size, big_endian>(this->p_->sh_entsize); }
+  { return Convert<size, big_endian>::convert_host(this->p_->sh_entsize); }
 
  private:
   const internal::Shdr_data<size>* p_;
@@ -784,43 +767,43 @@ class Shdr_write
 
   void
   put_sh_name(Elf_Word v)
-  { this->p_->sh_name = internal::convert_word<big_endian>(v); }
+  { this->p_->sh_name = Convert<32, big_endian>::convert_host(v); }
 
   void
   put_sh_type(Elf_Word v)
-  { this->p_->sh_type = internal::convert_word<big_endian>(v); }
+  { this->p_->sh_type = Convert<32, big_endian>::convert_host(v); }
 
   void
   put_sh_flags(typename Elf_types<size>::Elf_WXword v)
-  { this->p_->sh_flags = internal::convert_wxword<size, big_endian>(v); }
+  { this->p_->sh_flags = Convert<size, big_endian>::convert_host(v); }
 
   void
   put_sh_addr(typename Elf_types<size>::Elf_Addr v)
-  { this->p_->sh_addr = internal::convert_addr<size, big_endian>(v); }
+  { this->p_->sh_addr = Convert<size, big_endian>::convert_host(v); }
 
   void
   put_sh_offset(typename Elf_types<size>::Elf_Off v)
-  { this->p_->sh_offset = internal::convert_off<size, big_endian>(v); }
+  { this->p_->sh_offset = Convert<size, big_endian>::convert_host(v); }
 
   void
   put_sh_size(typename Elf_types<size>::Elf_WXword v)
-  { this->p_->sh_size = internal::convert_wxword<size, big_endian>(v); }
+  { this->p_->sh_size = Convert<size, big_endian>::convert_host(v); }
 
   void
   put_sh_link(Elf_Word v)
-  { this->p_->sh_link = internal::convert_word<big_endian>(v); }
+  { this->p_->sh_link = Convert<32, big_endian>::convert_host(v); }
 
   void
   put_sh_info(Elf_Word v)
-  { this->p_->sh_info = internal::convert_word<big_endian>(v); }
+  { this->p_->sh_info = Convert<32, big_endian>::convert_host(v); }
 
   void
   put_sh_addralign(typename Elf_types<size>::Elf_WXword v)
-  { this->p_->sh_addralign = internal::convert_wxword<size, big_endian>(v); }
+  { this->p_->sh_addralign = Convert<size, big_endian>::convert_host(v); }
 
   void
   put_sh_entsize(typename Elf_types<size>::Elf_WXword v)
-  { this->p_->sh_entsize = internal::convert_wxword<size, big_endian>(v); }
+  { this->p_->sh_entsize = Convert<size, big_endian>::convert_host(v); }
 
  private:
   internal::Shdr_data<size>* p_;
@@ -838,35 +821,35 @@ class Phdr
 
   Elf_Word
   get_p_type() const
-  { return internal::convert_word<big_endian>(this->p_->p_type); }
+  { return Convert<32, big_endian>::convert_host(this->p_->p_type); }
 
   typename Elf_types<size>::Elf_Off
   get_p_offset() const
-  { return internal::convert_off<size, big_endian>(this->p_->p_offset); }
+  { return Convert<size, big_endian>::convert_host(this->p_->p_offset); }
 
   typename Elf_types<size>::Elf_Addr
   get_p_vaddr() const
-  { return internal::convert_addr<size, big_endian>(this->p_->p_vaddr); }
+  { return Convert<size, big_endian>::convert_host(this->p_->p_vaddr); }
 
   typename Elf_types<size>::Elf_Addr
   get_p_paddr() const
-  { return internal::convert_addr<size, big_endian>(this->p_->p_paddr); }
+  { return Convert<size, big_endian>::convert_host(this->p_->p_paddr); }
 
   typename Elf_types<size>::Elf_WXword
   get_p_filesz() const
-  { return internal::convert_wxword<size, big_endian>(this->p_->p_filesz); }
+  { return Convert<size, big_endian>::convert_host(this->p_->p_filesz); }
 
   typename Elf_types<size>::Elf_WXword
   get_p_memsz() const
-  { return internal::convert_wxword<size, big_endian>(this->p_->p_memsz); }
+  { return Convert<size, big_endian>::convert_host(this->p_->p_memsz); }
 
   Elf_Word
   get_p_flags() const
-  { return internal::convert_word<big_endian>(this->p_->p_flags); }
+  { return Convert<32, big_endian>::convert_host(this->p_->p_flags); }
 
   typename Elf_types<size>::Elf_WXword
   get_p_align() const
-  { return internal::convert_wxword<size, big_endian>(this->p_->p_align); }
+  { return Convert<size, big_endian>::convert_host(this->p_->p_align); }
 
  private:
   const internal::Phdr_data<size>* p_;
@@ -884,35 +867,35 @@ class Phdr_write
 
   void
   put_p_type(Elf_Word v)
-  { this->p_->p_type = internal::convert_word<big_endian>(v); }
+  { this->p_->p_type = Convert<32, big_endian>::convert_host(v); }
 
   void
   put_p_offset(typename Elf_types<size>::Elf_Off v)
-  { this->p_->p_offset = internal::convert_off<size, big_endian>(v); }
+  { this->p_->p_offset = Convert<size, big_endian>::convert_host(v); }
 
   void
   put_p_vaddr(typename Elf_types<size>::Elf_Addr v)
-  { this->p_->p_vaddr = internal::convert_addr<size, big_endian>(v); }
+  { this->p_->p_vaddr = Convert<size, big_endian>::convert_host(v); }
 
   void
   put_p_paddr(typename Elf_types<size>::Elf_Addr v)
-  { this->p_->p_paddr = internal::convert_addr<size, big_endian>(v); }
+  { this->p_->p_paddr = Convert<size, big_endian>::convert_host(v); }
 
   void
   put_p_filesz(typename Elf_types<size>::Elf_WXword v)
-  { this->p_->p_filesz = internal::convert_wxword<size, big_endian>(v); }
+  { this->p_->p_filesz = Convert<size, big_endian>::convert_host(v); }
 
   void
   put_p_memsz(typename Elf_types<size>::Elf_WXword v)
-  { this->p_->p_memsz = internal::convert_wxword<size, big_endian>(v); }
+  { this->p_->p_memsz = Convert<size, big_endian>::convert_host(v); }
 
   void
   put_p_flags(Elf_Word v)
-  { this->p_->p_flags = internal::convert_word<big_endian>(v); }
+  { this->p_->p_flags = Convert<32, big_endian>::convert_host(v); }
 
   void
   put_p_align(typename Elf_types<size>::Elf_WXword v)
-  { this->p_->p_align = internal::convert_wxword<size, big_endian>(v); }
+  { this->p_->p_align = Convert<size, big_endian>::convert_host(v); }
 
  private:
   internal::Phdr_data<size>* p_;
@@ -930,15 +913,15 @@ class Sym
 
   Elf_Word
   get_st_name() const
-  { return internal::convert_word<big_endian>(this->p_->st_name); }
+  { return Convert<32, big_endian>::convert_host(this->p_->st_name); }
 
   typename Elf_types<size>::Elf_Addr
   get_st_value() const
-  { return internal::convert_addr<size, big_endian>(this->p_->st_value); }
+  { return Convert<size, big_endian>::convert_host(this->p_->st_value); }
 
   typename Elf_types<size>::Elf_WXword
   get_st_size() const
-  { return internal::convert_wxword<size, big_endian>(this->p_->st_size); }
+  { return Convert<size, big_endian>::convert_host(this->p_->st_size); }
 
   unsigned char
   get_st_info() const
@@ -966,7 +949,7 @@ class Sym
 
   Elf_Half
   get_st_shndx() const
-  { return internal::convert_half<big_endian>(this->p_->st_shndx); }
+  { return Convert<16, big_endian>::convert_host(this->p_->st_shndx); }
 
  private:
   const internal::Sym_data<size>* p_;
@@ -984,15 +967,15 @@ class Sym_write
 
   void
   put_st_name(Elf_Word v)
-  { this->p_->st_name = internal::convert_word<big_endian>(v); }
+  { this->p_->st_name = Convert<32, big_endian>::convert_host(v); }
 
   void
   put_st_value(typename Elf_types<size>::Elf_Addr v)
-  { this->p_->st_value = internal::convert_addr<size, big_endian>(v); }
+  { this->p_->st_value = Convert<size, big_endian>::convert_host(v); }
 
   void
   put_st_size(typename Elf_types<size>::Elf_WXword v)
-  { this->p_->st_size = internal::convert_wxword<size, big_endian>(v); }
+  { this->p_->st_size = Convert<size, big_endian>::convert_host(v); }
 
   void
   put_st_info(unsigned char v)
@@ -1012,7 +995,7 @@ class Sym_write
 
   void
   put_st_shndx(Elf_Half v)
-  { this->p_->st_shndx = internal::convert_half<big_endian>(v); }
+  { this->p_->st_shndx = Convert<16, big_endian>::convert_host(v); }
 
   Sym<size, big_endian>
   sym()
@@ -1034,11 +1017,11 @@ class Rel
 
   typename Elf_types<size>::Elf_Addr
   get_r_offset() const
-  { return internal::convert_addr<size, big_endian>(this->p_->r_offset); }
+  { return Convert<size, big_endian>::convert_host(this->p_->r_offset); }
 
   typename Elf_types<size>::Elf_WXword
   get_r_info() const
-  { return internal::convert_wxword<size, big_endian>(this->p_->r_info); }
+  { return Convert<size, big_endian>::convert_host(this->p_->r_info); }
 
  private:
   const internal::Rel_data<size>* p_;
@@ -1054,15 +1037,15 @@ class Rela
 
   typename Elf_types<size>::Elf_Addr
   get_r_offset() const
-  { return internal::convert_addr<size, big_endian>(this->p_->r_offset); }
+  { return Convert<size, big_endian>::convert_host(this->p_->r_offset); }
 
   typename Elf_types<size>::Elf_WXword
   get_r_info() const
-  { return internal::convert_wxword<size, big_endian>(this->p_->r_info); }
+  { return Convert<size, big_endian>::convert_host(this->p_->r_info); }
 
   typename Elf_types<size>::Elf_Swxword
   get_r_addend() const
-  { return internal::convert_swxword<size, big_endian>(this->p_->r_addend); }
+  { return Convert<size, big_endian>::convert_host(this->p_->r_addend); }
 
  private:
   const internal::Rela_data<size>* p_;
