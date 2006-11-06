@@ -14580,19 +14580,20 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "4ksd",           MIPS_CPU_ASE_SMARTMIPS,	ISA_MIPS32R2,   CPU_MIPS32R2 },
   { "m4k",            0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
   { "m4kp",           0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
-  { "24k",            0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
   { "24kc",           0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
   { "24kf",           0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
   { "24kx",           0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
   /* 24ke is a 24k with DSP ASE, other ASEs are optional.  */
-  { "24ke",           MIPS_CPU_ASE_DSP,		ISA_MIPS32R2,	CPU_MIPS32R2 },
   { "24kec",          MIPS_CPU_ASE_DSP,		ISA_MIPS32R2,	CPU_MIPS32R2 },
   { "24kef",          MIPS_CPU_ASE_DSP,		ISA_MIPS32R2,	CPU_MIPS32R2 },
   { "24kex",          MIPS_CPU_ASE_DSP,		ISA_MIPS32R2,	CPU_MIPS32R2 },
-  /* 34k is a 24k with MT ASE, other ASEs are optional.  */
-  { "34kc",           MIPS_CPU_ASE_MT,		ISA_MIPS32R2,	CPU_MIPS32R2 },
-  { "34kf",           MIPS_CPU_ASE_MT,		ISA_MIPS32R2,	CPU_MIPS32R2 },
-  { "34kx",           MIPS_CPU_ASE_MT,		ISA_MIPS32R2,	CPU_MIPS32R2 },
+  /* 34k is a 24k with DSP and MT ASE, other ASEs are optional.  */
+  { "34kc",           MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_MT,
+						ISA_MIPS32R2,	CPU_MIPS32R2 },
+  { "34kf",           MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_MT,
+						ISA_MIPS32R2,	CPU_MIPS32R2 },
+  { "34kx",           MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_MT,
+						ISA_MIPS32R2,	CPU_MIPS32R2 },
 
   /* MIPS 64 */
   { "5kc",            0,			ISA_MIPS64,	CPU_MIPS64 },
