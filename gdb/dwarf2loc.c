@@ -120,16 +120,15 @@ static CORE_ADDR
 dwarf_expr_read_reg (void *baton, int dwarf_regnum)
 {
   struct dwarf_expr_baton *debaton = (struct dwarf_expr_baton *) baton;
-  CORE_ADDR result, save_addr;
-  enum lval_type lval_type;
+  CORE_ADDR result;
   gdb_byte *buf;
-  int optimized, regnum, realnum, regsize;
+  int regnum, regsize;
 
   regnum = DWARF2_REG_TO_REGNUM (dwarf_regnum);
   regsize = register_size (current_gdbarch, regnum);
   buf = alloca (regsize);
 
-  frame_unwind_register (debaton->frame, regnum, buf);
+  frame_register_read (debaton->frame, regnum, buf);
   /* NOTE: cagney/2003-05-22: This extract is assuming that a DWARF 2
      address is always unsigned.  That may or may not be true.  */
   result = extract_unsigned_integer (buf, regsize);
