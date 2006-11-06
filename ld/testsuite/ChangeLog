@@ -1,3 +1,9 @@
+2006-11-06  Vladimir Prus  <vladimir@codesourcery.com>  
+
+	* testsuite/ld-elf/warn2.d: New.
+	* testsuite/ld-elf/symbol2w.s: New.
+	* testsuite/ld-elf/symbol2ref.s: New.   
+
 2006-11-05  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/ldsym1.d: Adjust for semi-recent ld changes.
