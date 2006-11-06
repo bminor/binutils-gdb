@@ -1,5 +1,10 @@
 2006-11-06  Vladimir Prus  <vladimir@codesourcery.com>  
 
+	* testsuite/ld-elf/symbol1ref.s: Use ".dc.a" instead
+	of ".long".
+
+2006-11-06  Vladimir Prus  <vladimir@codesourcery.com>  
+
 	* testsuite/ld-elf/warn2.d: New.
 	* testsuite/ld-elf/symbol2w.s: New.
 	* testsuite/ld-elf/symbol2ref.s: New.   
