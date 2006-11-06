@@ -1,3 +1,7 @@
+2006-11-06  Troy Rollo  <troy@corvu.com.au>
+
+	* ppc-opc.c: Restore COM to mfcr wrongly removed 2003-07-04.
+
 2006-11-01  Mei Ligang  <ligang@sunnorth.com.cn>
 
 	* score-opc.h (score_opcodes): Delete modifier '0x'.

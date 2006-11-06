@@ -3383,7 +3383,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "isel",    XISEL(31,15),  XISEL_MASK,	PPCISEL,	{ RT, RA, RB, CRB } },
 
 { "mfocrf",  XFXM(31,19,0,1), XFXFXM_MASK, COM,		{ RT, FXM } },
-{ "mfcr",    X(31,19),	XRARB_MASK,	NOPOWER4,	{ RT } },
+{ "mfcr",    X(31,19),	XRARB_MASK,	NOPOWER4 | COM,	{ RT } },
 { "mfcr",    X(31,19),	XFXFXM_MASK,	POWER4,		{ RT, FXM4 } },
 
 { "lwarx",   X(31,20),	XEH_MASK,	PPC,		{ RT, RA0, RB, EH } },
