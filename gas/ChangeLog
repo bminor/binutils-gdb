@@ -1,5 +1,9 @@
 2006-11-06  Thiemo Seufer  <ths@mips.com>
 
+	* doc/c-mips.texi (-march): Document sb1a.
+
+2006-11-06  Thiemo Seufer  <ths@mips.com>
+
 	* config/tc-mips.c (mips_cpu_info_table): Remove 24k/24ke aliases.
 	34k always has DSP ASE.
 

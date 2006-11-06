@@ -242,7 +242,8 @@ m4kp,
 5kf,
 20kc,
 25kf,
-sb1
+sb1,
+sb1a
 @end quotation
 
 @item -mtune=@var{cpu}
