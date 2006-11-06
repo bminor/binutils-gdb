@@ -504,7 +504,7 @@ class Output_section : public Output_data
   // object OBJECT.  Return the offset within the output section.
   template<int size, bool big_endian>
   off_t
-  add_input_section(Object* object, unsigned int shndx, const char *name,
+  add_input_section(Relobj* object, unsigned int shndx, const char *name,
 		    const elfcpp::Shdr<size, big_endian>& shdr);
 
   // Add generated data ODATA to this output section.
@@ -613,7 +613,7 @@ class Output_section : public Output_data
       : shndx_(0), p2align_(0), data_size_(0)
     { this->u_.object = NULL; }
 
-    Input_section(Object* object, unsigned int shndx, off_t data_size,
+    Input_section(Relobj* object, unsigned int shndx, off_t data_size,
 		  uint64_t addralign)
       : shndx_(shndx),
 	p2align_(ffsll(static_cast<long long>(addralign))),
@@ -665,7 +665,7 @@ class Output_section : public Output_data
     {
       // If shndx_ != -1U, this points to the object which holds the
       // input section.
-      Object* object;
+      Relobj* object;
       // If shndx_ == -1U, this is the data to write out.
       Output_section_data* posd;
     } u_;

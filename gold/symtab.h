@@ -10,6 +10,7 @@
 
 #include "elfcpp.h"
 #include "stringpool.h"
+#include "object.h"
 
 #ifndef GOLD_SYMTAB_H
 #define GOLD_SYMTAB_H
@@ -18,13 +19,12 @@ namespace gold
 {
 
 class Object;
+class Relobj;
+class Dynobj;
 class Output_data;
 class Output_segment;
 class Output_file;
 class Target;
-
-template<int size, bool big_endian>
-class Sized_object;
 
 // The base class of an entry in the symbol table.  The symbol table
 // can have a lot of entries, so we don't want this class to big.
@@ -40,7 +40,8 @@ class Symbol
   // sources of symbols we support.
   enum Source
   {
-    // Symbol defined in an input file--this is the most common case.
+    // Symbol defined in a relocatable or dynamic input file--this is
+    // the most common case.
     FROM_OBJECT,
     // Symbol defined in an Output_data, a special section created by
     // the target.
@@ -89,7 +90,8 @@ class Symbol
     return this->u_.from_object.object;
   }
 
-  // Return the index of the section in the input object file.
+  // Return the index of the section in the input relocatable or
+  // dynamic object file.
   unsigned int
   shnum() const
   {
@@ -167,12 +169,12 @@ class Symbol
   set_forwarder()
   { this->is_forwarder_ = true; }
 
-  // Return whether this symbol was seen in a dynamic object.
+  // Return whether this symbol was ever seen in a dynamic object.
   bool
   in_dyn() const
   { return this->in_dyn_; }
 
-  // Mark this symbol as seen in a dynamic object.
+  // Mark this symbol as having been seen in a dynamic object.
   void
   set_in_dyn()
   { this->in_dyn_ = true; }
@@ -207,6 +209,16 @@ class Symbol
   is_resolved_locally() const
   { return !this->in_dyn_; }
 
+  // Return whether this is a defined symbol (not undefined or
+  // common).
+  bool
+  is_defined() const
+  {
+    return (this->source_ != FROM_OBJECT
+	    || (this->u_.from_object.shnum != elfcpp::SHN_UNDEF
+		&& this->u_.from_object.shnum != elfcpp::SHN_COMMON));
+  }
+
   // Return whether this is an undefined symbol.
   bool
   is_undefined() const
@@ -218,14 +230,27 @@ class Symbol
   bool
   is_common() const
   {
-    return this->source_ == FROM_OBJECT && this->shnum() == elfcpp::SHN_COMMON;
+    return (this->source_ == FROM_OBJECT
+	    && (this->u_.from_object.shnum == elfcpp::SHN_COMMON
+		|| this->type_ == elfcpp::STT_COMMON));
   }
+
+  // Return whether there should be a warning for references to this
+  // symbol.
+  bool
+  has_warning() const
+  { return this->has_warning_; }
+
+  // Mark this symbol as having a warning.
+  void
+  set_has_warning()
+  { this->has_warning_ = true; }
 
  protected:
   // Instances of this class should always be created at a specific
   // size.
   Symbol()
-  { }
+  { memset(this, 0, sizeof *this); }
 
   // Initialize the general fields.
   void
@@ -317,7 +342,7 @@ class Symbol
   // Rest of symbol st_other field.
   unsigned int nonvis_ : 6;
   // The type of symbol.
-  Source source_ : 2;
+  Source source_ : 3;
   // True if this symbol always requires special target-specific
   // handling.
   bool is_target_special_ : 1;
@@ -335,6 +360,8 @@ class Symbol
   bool in_dyn_ : 1;
   // True if the symbol has an entry in the GOT section.
   bool has_got_offset_ : 1;
+  // True if there is a warning for this symbol.
+  bool has_warning_ : 1;
 };
 
 // The parts of a symbol which are size specific.  Using a template
@@ -484,6 +511,78 @@ struct Define_symbol_in_segment
   bool only_if_ref;
 };
 
+// This class manages warnings.  Warnings are a GNU extension.  When
+// we see a section named .gnu.warning.SYM in an object file, and if
+// we wind using the definition of SYM from that object file, then we
+// will issue a warning for any relocation against SYM from a
+// different object file.  The text of the warning is the contents of
+// the section.  This is not precisely the definition used by the old
+// GNU linker; the old GNU linker treated an occurrence of
+// .gnu.warning.SYM as defining a warning symbol.  A warning symbol
+// would trigger a warning on any reference.  However, it was
+// inconsistent in that a warning in a dynamic object only triggered
+// if there was no definition in a regular object.  This linker is
+// different in that we only issue a warning if we use the symbol
+// definition from the same object file as the warning section.
+
+class Warnings
+{
+ public:
+  Warnings()
+    : warnings_()
+  { }
+
+  // Add a warning for symbol NAME in section SHNDX in object OBJ.
+  void
+  add_warning(Symbol_table* symtab, const char* name, Object* obj,
+	      unsigned int shndx);
+
+  // For each symbol for which we should give a warning, make a note
+  // on the symbol.
+  void
+  note_warnings(Symbol_table* symtab);
+
+  // Issue a warning for a reference to SYM at LOCATION.
+  void
+  issue_warning(Symbol* sym, const std::string& location) const;
+
+ private:
+  Warnings(const Warnings&);
+  Warnings& operator=(const Warnings&);
+
+  // What we need to know to get the warning text.
+  struct Warning_location
+  {
+    // The object the warning is in.
+    Object* object;
+    // The index of the warning section.
+    unsigned int shndx;
+    // The warning text if we have already loaded it.
+    std::string text;
+
+    Warning_location()
+      : object(NULL), shndx(0), text()
+    { }
+
+    void
+    set(Object* o, unsigned int s)
+    {
+      this->object = o;
+      this->shndx = s;
+    }
+
+    void
+    set_text(const char* t, off_t l)
+    { this->text.assign(t, l); }
+  };
+
+  // A mapping from warning symbol names (canonicalized in
+  // Symbol_table's namepool_ field) to 
+  typedef Unordered_map<const char*, Warning_location> Warning_table;
+
+  Warning_table warnings_;
+};
+
 // The main linker symbol table.
 
 class Symbol_table
@@ -493,14 +592,13 @@ class Symbol_table
 
   ~Symbol_table();
 
-  // Add COUNT external symbols from OBJECT to the symbol table.  SYMS
-  // is the symbols, SYM_NAMES is their names, SYM_NAME_SIZE is the
-  // size of SYM_NAMES.  This sets SYMPOINTERS to point to the symbols
-  // in the symbol table.
+  // Add COUNT external symbols from the relocatable object OBJECT to
+  // the symbol table.  SYMS is the symbols, SYM_NAMES is their names,
+  // SYM_NAME_SIZE is the size of SYM_NAMES.  This sets SYMPOINTERS to
+  // point to the symbols in the symbol table.
   template<int size, bool big_endian>
   void
-  add_from_object(Sized_object<size, big_endian>* object,
-		  const elfcpp::Sym<size, big_endian>* syms,
+  add_from_object(Relobj* object, const unsigned char* syms,
 		  size_t count, const char* sym_names, size_t sym_name_size,
 		  Symbol** sympointers);
 
@@ -577,6 +675,22 @@ class Symbol_table
   void
   allocate_commons(const General_options&, Layout*);
 
+  // Add a warning for symbol NAME in section SHNDX in object OBJ.
+  void
+  add_warning(const char* name, Object* obj, unsigned int shndx)
+  { this->warnings_.add_warning(this, name, obj, shndx); }
+
+  // Canonicalize a symbol name for use in the hash table.
+  const char*
+  canonicalize_name(const char* name)
+  { return this->namepool_.add(name); }
+
+  // Possibly issue a warning for a reference to SYM at LOCATION which
+  // is in OBJ.
+  void
+  issue_warning(Symbol* sym, const std::string& location) const
+  { this->warnings_.issue_warning(sym, location); }
+
   // Finalize the symbol table after we have set the final addresses
   // of all the input sections.  This sets the final symbol values and
   // adds the names to *POOL.  It records the file offset OFF, and
@@ -604,7 +718,7 @@ class Symbol_table
   // Add a symbol.
   template<int size, bool big_endian>
   Symbol*
-  add_from_object(Sized_object<size, big_endian>*, const char *name,
+  add_from_object(Object*, const char *name,
 		  const char *version, bool def,
 		  const elfcpp::Sym<size, big_endian>& sym);
 
@@ -720,6 +834,9 @@ class Symbol_table
   // symbol is no longer a common symbol.  It may also have become a
   // forwarder.
   Commons_type commons_;
+
+  // Manage symbol warnings.
+  Warnings warnings_;
 };
 
 // We inline get_sized_symbol for efficiency.

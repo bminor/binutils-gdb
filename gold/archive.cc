@@ -70,7 +70,7 @@ Archive::setup()
 
   // Numbers in the armap are always big-endian.
   const elfcpp::Elf_Word* pword = reinterpret_cast<const elfcpp::Elf_Word*>(p);
-  unsigned int nsyms = elfcpp::read_elf_word<true>(pword);
+  unsigned int nsyms = elfcpp::Swap<32, true>::readval(pword);
   ++pword;
 
   // Note that the addition is in units of sizeof(elfcpp::Elf_Word).
@@ -81,7 +81,7 @@ Archive::setup()
   for (unsigned int i = 0; i < nsyms; ++i)
     {
       this->armap_[i].name = pnames;
-      this->armap_[i].offset = elfcpp::read_elf_word<true>(pword);
+      this->armap_[i].offset = elfcpp::Swap<32, true>::readval(pword);
       pnames += strlen(pnames) + 1;
       ++pword;
     }
@@ -215,8 +215,8 @@ Archive::read_header(off_t off, std::string* pname)
 // may be satisfied by other objects in the archive.
 
 void
-Archive::add_symbols(Symbol_table* symtab, Layout* layout,
-		     Input_objects* input_objects)
+Archive::add_symbols(const General_options& options, Symbol_table* symtab,
+		     Layout* layout, Input_objects* input_objects)
 {
   const size_t armap_size = this->armap_.size();
 
@@ -248,7 +248,7 @@ Archive::add_symbols(Symbol_table* symtab, Layout* layout,
 
 	  // We want to include this object in the link.
 	  last = this->armap_[i].offset;
-	  this->include_member(symtab, layout, input_objects, last);
+	  this->include_member(options, symtab, layout, input_objects, last);
 	  this->seen_[i] = true;
 	  added_new_object = true;
 	}
@@ -260,8 +260,9 @@ Archive::add_symbols(Symbol_table* symtab, Layout* layout,
 // the member header.
 
 void
-Archive::include_member(Symbol_table* symtab, Layout* layout,
-			Input_objects* input_objects, off_t off)
+Archive::include_member(const General_options& options, Symbol_table* symtab,
+			Layout* layout, Input_objects* input_objects,
+			off_t off)
 {
   std::string n;
   this->read_header(off, &n);
@@ -303,7 +304,7 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
 
   Read_symbols_data sd;
   obj->read_symbols(&sd);
-  obj->layout(layout, &sd);
+  obj->layout(options, symtab, layout, &sd);
   obj->add_symbols(symtab, &sd);
 }
 
@@ -352,7 +353,7 @@ Add_archive_symbols::locks(Workqueue* workqueue)
 void
 Add_archive_symbols::run(Workqueue*)
 {
-  this->archive_->add_symbols(this->symtab_, this->layout_,
+  this->archive_->add_symbols(this->options_, this->symtab_, this->layout_,
 			      this->input_objects_);
 
   if (this->input_group_ != NULL)

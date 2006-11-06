@@ -37,6 +37,7 @@ Symbol::init_fields(const char* name, const char* version,
   this->is_forwarder_ = false;
   this->in_dyn_ = false;
   this->has_got_offset_ = false;
+  this->has_warning_ = false;
 }
 
 // Initialize the fields in the base class Symbol for SYM in OBJECT.
@@ -159,7 +160,7 @@ Sized_symbol<size>::init(const char* name, Value_type value, Size_type symsize,
 
 Symbol_table::Symbol_table()
   : size_(0), saw_undefined_(0), offset_(0), table_(), namepool_(),
-    forwarders_(), commons_()
+    forwarders_(), commons_(), warnings_()
 {
 }
 
@@ -279,7 +280,7 @@ Symbol_table::resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from
 
 template<int size, bool big_endian>
 Symbol*
-Symbol_table::add_from_object(Sized_object<size, big_endian>* object,
+Symbol_table::add_from_object(Object* object,
 			      const char *name,
 			      const char *version, bool def,
 			      const elfcpp::Sym<size, big_endian>& sym)
@@ -360,7 +361,9 @@ Symbol_table::add_from_object(Sized_object<size, big_endian>* object,
 	}
       else
 	{
-	  Sized_target<size, big_endian>* target = object->sized_target();
+	  Sized_target<size, big_endian>* target =
+	    object->sized_target SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
+		SELECT_SIZE_ENDIAN_ONLY(size, big_endian));
 	  if (!target->has_make_symbol())
 	    ret = new Sized_symbol<size>();
 	  else
@@ -408,13 +411,13 @@ Symbol_table::add_from_object(Sized_object<size, big_endian>* object,
   return ret;
 }
 
-// Add all the symbols in an object to the hash table.
+// Add all the symbols in a relocatable object to the hash table.
 
 template<int size, bool big_endian>
 void
 Symbol_table::add_from_object(
-    Sized_object<size, big_endian>* object,
-    const elfcpp::Sym<size, big_endian>* syms,
+    Relobj* object,
+    const unsigned char* syms,
     size_t count,
     const char* sym_names,
     size_t sym_name_size,
@@ -433,7 +436,7 @@ Symbol_table::add_from_object(
 
   const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
 
-  const unsigned char* p = reinterpret_cast<const unsigned char*>(syms);
+  const unsigned char* p = syms;
   for (size_t i = 0; i < count; ++i, p += sym_size)
     {
       elfcpp::Sym<size, big_endian> sym(p);
@@ -512,7 +515,7 @@ Symbol_table::define_special_symbol(Target* target, const char* name,
   if (only_if_ref)
     {
       oldsym = this->lookup(name, NULL);
-      if (oldsym == NULL)
+      if (oldsym == NULL || !oldsym->is_undefined())
 	return NULL;
       sym = NULL;
 
@@ -810,12 +813,20 @@ Symbol_table::define_symbols(const Layout* layout, Target* target, int count,
 off_t
 Symbol_table::finalize(off_t off, Stringpool* pool)
 {
+  off_t ret;
+
   if (this->size_ == 32)
-    return this->sized_finalize<32>(off, pool);
+    ret = this->sized_finalize<32>(off, pool);
   else if (this->size_ == 64)
-    return this->sized_finalize<64>(off, pool);
+    ret = this->sized_finalize<64>(off, pool);
   else
     abort();
+
+  // Now that we have the final symbol table, we can reliably note
+  // which symbols should get warnings.
+  this->warnings_.note_warnings(this);
+
+  return ret;
 }
 
 // Set the final value for all the symbols.  This is called after
@@ -856,15 +867,21 @@ Symbol_table::sized_finalize(off_t off, Stringpool* pool)
 		gold_exit(false);
 	      }
 
-	    if (shnum == elfcpp::SHN_UNDEF)
+	    Object* symobj = sym->object();
+	    if (symobj->is_dynamic())
+	      {
+		value = 0;
+		shnum = elfcpp::SHN_UNDEF;
+	      }
+	    else if (shnum == elfcpp::SHN_UNDEF)
 	      value = 0;
 	    else if (shnum == elfcpp::SHN_ABS)
 	      value = sym->value();
 	    else
 	      {
+		Relobj* relobj = static_cast<Relobj*>(symobj);
 		off_t secoff;
-		Output_section* os = sym->object()->output_section(shnum,
-								   &secoff);
+		Output_section* os = relobj->output_section(shnum, &secoff);
 
 		if (os == NULL)
 		  {
@@ -973,8 +990,6 @@ Symbol_table::sized_write_globals(const Target*,
     {
       Sized_symbol<size>* sym = static_cast<Sized_symbol<size>*>(p->second);
 
-      // FIXME: This repeats sized_finalize().
-
       unsigned int shndx;
       switch (sym->source())
 	{
@@ -991,13 +1006,19 @@ Symbol_table::sized_write_globals(const Target*,
 		gold_exit(false);
 	      }
 
-	    if (shnum == elfcpp::SHN_UNDEF || shnum == elfcpp::SHN_ABS)
+	    Object* symobj = sym->object();
+	    if (symobj->is_dynamic())
+	      {
+		// FIXME.
+		shndx = elfcpp::SHN_UNDEF;
+	      }
+	    else if (shnum == elfcpp::SHN_UNDEF || shnum == elfcpp::SHN_ABS)
 	      shndx = shnum;
 	    else
 	      {
+		Relobj* relobj = static_cast<Relobj*>(symobj);
 		off_t secoff;
-		Output_section* os = sym->object()->output_section(shnum,
-								   &secoff);
+		Output_section* os = relobj->output_section(shnum, &secoff);
 		if (os == NULL)
 		  continue;
 
@@ -1037,6 +1058,63 @@ Symbol_table::sized_write_globals(const Target*,
   of->write_output_view(this->offset_, this->output_count_ * sym_size, psyms);
 }
 
+// Warnings functions.
+
+// Add a new warning.
+
+void
+Warnings::add_warning(Symbol_table* symtab, const char* name, Object* obj,
+		      unsigned int shndx)
+{
+  name = symtab->canonicalize_name(name);
+  this->warnings_[name].set(obj, shndx);
+}
+
+// Look through the warnings and mark the symbols for which we should
+// warn.  This is called during Layout::finalize when we know the
+// sources for all the symbols.
+
+void
+Warnings::note_warnings(Symbol_table* symtab)
+{
+  for (Warning_table::iterator p = this->warnings_.begin();
+       p != this->warnings_.end();
+       ++p)
+    {
+      Symbol* sym = symtab->lookup(p->first, NULL);
+      if (sym != NULL
+	  && sym->source() == Symbol::FROM_OBJECT
+	  && sym->object() == p->second.object)
+	{
+	  sym->set_has_warning();
+
+	  // Read the section contents to get the warning text.  It
+	  // would be nicer if we only did this if we have to actually
+	  // issue a warning.  Unfortunately, warnings are issued as
+	  // we relocate sections.  That means that we can not lock
+	  // the object then, as we might try to issue the same
+	  // warning multiple times simultaneously.
+	  const unsigned char* c;
+	  off_t len;
+	  c = p->second.object->section_contents(p->second.shndx, &len);
+	  p->second.set_text(reinterpret_cast<const char*>(c), len);
+	}
+    }
+}
+
+// Issue a warning.  This is called when we see a relocation against a
+// symbol for which has a warning.
+
+void
+Warnings::issue_warning(Symbol* sym, const std::string& location) const
+{
+  assert(sym->has_warning());
+  Warning_table::const_iterator p = this->warnings_.find(sym->name());
+  assert(p != this->warnings_.end());
+  fprintf(stderr, _("%s: %s: warning: %s\n"), program_name, location.c_str(),
+	  p->second.text.c_str());
+}
+
 // Instantiate the templates we need.  We could use the configure
 // script to restrict this to only the ones needed for implemented
 // targets.
@@ -1044,8 +1122,8 @@ Symbol_table::sized_write_globals(const Target*,
 template
 void
 Symbol_table::add_from_object<32, true>(
-    Sized_object<32, true>* object,
-    const elfcpp::Sym<32, true>* syms,
+    Relobj* object,
+    const unsigned char* syms,
     size_t count,
     const char* sym_names,
     size_t sym_name_size,
@@ -1054,8 +1132,8 @@ Symbol_table::add_from_object<32, true>(
 template
 void
 Symbol_table::add_from_object<32, false>(
-    Sized_object<32, false>* object,
-    const elfcpp::Sym<32, false>* syms,
+    Relobj* object,
+    const unsigned char* syms,
     size_t count,
     const char* sym_names,
     size_t sym_name_size,
@@ -1064,8 +1142,8 @@ Symbol_table::add_from_object<32, false>(
 template
 void
 Symbol_table::add_from_object<64, true>(
-    Sized_object<64, true>* object,
-    const elfcpp::Sym<64, true>* syms,
+    Relobj* object,
+    const unsigned char* syms,
     size_t count,
     const char* sym_names,
     size_t sym_name_size,
@@ -1074,8 +1152,8 @@ Symbol_table::add_from_object<64, true>(
 template
 void
 Symbol_table::add_from_object<64, false>(
-    Sized_object<64, false>* object,
-    const elfcpp::Sym<64, false>* syms,
+    Relobj* object,
+    const unsigned char* syms,
     size_t count,
     const char* sym_names,
     size_t sym_name_size,

@@ -399,7 +399,7 @@ Output_section_got<size, big_endian>::Got_entry::write(unsigned char* pov)
     }
 
   Valtype* povv = reinterpret_cast<Valtype*>(pov);
-  Swap<size, big_endian>::writeval(povv, val);
+  elfcpp::Swap<size, big_endian>::writeval(povv, val);
 }
 
 // Output_section_data methods.
@@ -509,7 +509,7 @@ Output_section::~Output_section()
 
 template<int size, bool big_endian>
 off_t
-Output_section::add_input_section(Object* object, unsigned int shndx,
+Output_section::add_input_section(Relobj* object, unsigned int shndx,
 				  const char* secname,
 				  const elfcpp::Shdr<size, big_endian>& shdr)
 {
@@ -1091,7 +1091,7 @@ Output_file::close()
 template
 off_t
 Output_section::add_input_section<32, false>(
-    Object* object,
+    Relobj* object,
     unsigned int shndx,
     const char* secname,
     const elfcpp::Shdr<32, false>& shdr);
@@ -1099,7 +1099,7 @@ Output_section::add_input_section<32, false>(
 template
 off_t
 Output_section::add_input_section<32, true>(
-    Object* object,
+    Relobj* object,
     unsigned int shndx,
     const char* secname,
     const elfcpp::Shdr<32, true>& shdr);
@@ -1107,7 +1107,7 @@ Output_section::add_input_section<32, true>(
 template
 off_t
 Output_section::add_input_section<64, false>(
-    Object* object,
+    Relobj* object,
     unsigned int shndx,
     const char* secname,
     const elfcpp::Shdr<64, false>& shdr);
@@ -1115,7 +1115,7 @@ Output_section::add_input_section<64, false>(
 template
 off_t
 Output_section::add_input_section<64, true>(
-    Object* object,
+    Relobj* object,
     unsigned int shndx,
     const char* secname,
     const elfcpp::Shdr<64, true>& shdr);

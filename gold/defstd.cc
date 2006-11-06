@@ -94,9 +94,9 @@ const int in_section_count = sizeof in_section / sizeof in_section[0];
 const Define_symbol_in_segment in_segment[] =
 {
   {
-    "_end",			// name
+    "__executable_start",	// name
     elfcpp::PT_LOAD,		// segment_type
-    elfcpp::PF_W,		// segment_flags_set
+    elfcpp::PF(0),		// segment_flags_set
     elfcpp::PF(0),		// segment_flags_clear
     0,				// value
     0,				// size
@@ -104,7 +104,119 @@ const Define_symbol_in_segment in_segment[] =
     elfcpp::STB_GLOBAL,		// binding
     elfcpp::STV_DEFAULT,	// visibility
     0,				// nonvis
-    Symbol::SEGMENT_START,	// offset_from_bas
+    Symbol::SEGMENT_START,	// offset_from_base
+    true			// only_if_ref
+  },
+  {
+    "etext",			// name
+    elfcpp::PT_LOAD,		// segment_type
+    elfcpp::PF_X,		// segment_flags_set
+    elfcpp::PF_W,		// segment_flags_clear
+    0,				// value
+    0,				// size
+    elfcpp::STT_NOTYPE,		// type
+    elfcpp::STB_GLOBAL,		// binding
+    elfcpp::STV_DEFAULT,	// visibility
+    0,				// nonvis
+    Symbol::SEGMENT_END,	// offset_from_base
+    true			// only_if_ref
+  },
+  {
+    "_etext",			// name
+    elfcpp::PT_LOAD,		// segment_type
+    elfcpp::PF_X,		// segment_flags_set
+    elfcpp::PF_W,		// segment_flags_clear
+    0,				// value
+    0,				// size
+    elfcpp::STT_NOTYPE,		// type
+    elfcpp::STB_GLOBAL,		// binding
+    elfcpp::STV_DEFAULT,	// visibility
+    0,				// nonvis
+    Symbol::SEGMENT_END,	// offset_from_base
+    true			// only_if_ref
+  },
+  {
+    "__etext",			// name
+    elfcpp::PT_LOAD,		// segment_type
+    elfcpp::PF_X,		// segment_flags_set
+    elfcpp::PF_W,		// segment_flags_clear
+    0,				// value
+    0,				// size
+    elfcpp::STT_NOTYPE,		// type
+    elfcpp::STB_GLOBAL,		// binding
+    elfcpp::STV_DEFAULT,	// visibility
+    0,				// nonvis
+    Symbol::SEGMENT_END,	// offset_from_base
+    true			// only_if_ref
+  },
+  {
+    "_edata",			// name
+    elfcpp::PT_LOAD,		// segment_type
+    elfcpp::PF_X,		// segment_flags_set
+    elfcpp::PF(0),		// segment_flags_clear
+    0,				// value
+    0,				// size
+    elfcpp::STT_NOTYPE,		// type
+    elfcpp::STB_GLOBAL,		// binding
+    elfcpp::STV_DEFAULT,	// visibility
+    0,				// nonvis
+    Symbol::SEGMENT_BSS,	// offset_from_base
+    false			// only_if_ref
+  },
+  {
+    "edata",			// name
+    elfcpp::PT_LOAD,		// segment_type
+    elfcpp::PF_X,		// segment_flags_set
+    elfcpp::PF(0),		// segment_flags_clear
+    0,				// value
+    0,				// size
+    elfcpp::STT_NOTYPE,		// type
+    elfcpp::STB_GLOBAL,		// binding
+    elfcpp::STV_DEFAULT,	// visibility
+    0,				// nonvis
+    Symbol::SEGMENT_BSS,	// offset_from_base
+    true			// only_if_ref
+  },
+  {
+    "__bss_start",		// name
+    elfcpp::PT_LOAD,		// segment_type
+    elfcpp::PF_X,		// segment_flags_set
+    elfcpp::PF(0),		// segment_flags_clear
+    0,				// value
+    0,				// size
+    elfcpp::STT_NOTYPE,		// type
+    elfcpp::STB_GLOBAL,		// binding
+    elfcpp::STV_DEFAULT,	// visibility
+    0,				// nonvis
+    Symbol::SEGMENT_BSS,	// offset_from_base
+    false			// only_if_ref
+  },
+  {
+    "_end",			// name
+    elfcpp::PT_LOAD,		// segment_type
+    elfcpp::PF_X,		// segment_flags_set
+    elfcpp::PF(0),		// segment_flags_clear
+    0,				// value
+    0,				// size
+    elfcpp::STT_NOTYPE,		// type
+    elfcpp::STB_GLOBAL,		// binding
+    elfcpp::STV_DEFAULT,	// visibility
+    0,				// nonvis
+    Symbol::SEGMENT_START,	// offset_from_base
+    false			// only_if_ref
+  },
+  {
+    "end",			// name
+    elfcpp::PT_LOAD,		// segment_type
+    elfcpp::PF_X,		// segment_flags_set
+    elfcpp::PF(0),		// segment_flags_clear
+    0,				// value
+    0,				// size
+    elfcpp::STT_NOTYPE,		// type
+    elfcpp::STB_GLOBAL,		// binding
+    elfcpp::STV_DEFAULT,	// visibility
+    0,				// nonvis
+    Symbol::SEGMENT_START,	// offset_from_base
     false			// only_if_ref
   }
 };

@@ -4,14 +4,12 @@
 #define GOLD_OBJECT_H
 
 #include <cassert>
-#include <list>
 #include <string>
 #include <vector>
 
 #include "elfcpp.h"
 #include "fileread.h"
 #include "target.h"
-#include "symtab.h"
 
 namespace gold
 {
@@ -21,6 +19,7 @@ class Stringpool;
 class Layout;
 class Output_section;
 class Output_file;
+class Dynobj;
 
 // Data to pass from read_symbols() to add_symbols().
 
@@ -71,10 +70,9 @@ struct Read_relocs_data
   File_view* local_symbols;
 };
 
-// Object is an interface which represents either a 32-bit or a 64-bit
-// input object.  This can be a regular object file (ET_REL) or a
-// shared object (ET_DYN).  The actual instantiations are
-// Sized_object<32> and Sized_object<64>
+// Object is an abstract base class which represents either a 32-bit
+// or a 64-bit input object.  This can be a regular object file
+// (ET_REL) or a shared object (ET_DYN).
 
 class Object
 {
@@ -86,8 +84,7 @@ class Object
   Object(const std::string& name, Input_file* input_file, bool is_dynamic,
 	 off_t offset = 0)
     : name_(name), input_file_(input_file), offset_(offset),
-      shnum_(0), is_dynamic_(is_dynamic), target_(NULL),
-      map_to_output_()
+      is_dynamic_(is_dynamic), target_(NULL)
   { }
 
   virtual ~Object()
@@ -138,13 +135,123 @@ class Object
   // Pass sections which should be included in the link to the Layout
   // object, and record where the sections go in the output file.
   void
-  layout(Layout* lay, Read_symbols_data* sd)
-  { this->do_layout(lay, sd); }
+  layout(const General_options& options, Symbol_table* symtab,
+	 Layout* layout, Read_symbols_data* sd)
+  { this->do_layout(options, symtab, layout, sd); }
 
   // Add symbol information to the global symbol table.
   void
   add_symbols(Symbol_table* symtab, Read_symbols_data* sd)
   { this->do_add_symbols(symtab, sd); }
+
+  // Return a view of the contents of a section.  Set *PLEN to the
+  // size.
+  const unsigned char*
+  section_contents(unsigned int shnum, off_t* plen)
+  { return this->do_section_contents(shnum, plen); }
+
+  // Return the name of a section given a section index.  This is only
+  // used for error messages.
+  std::string
+  section_name(unsigned int shnum)
+  { return this->do_section_name(shnum); }
+
+ protected:
+  // Read the symbols--implemented by child class.
+  virtual void
+  do_read_symbols(Read_symbols_data*) = 0;
+
+  // Lay out sections--implemented by child class.
+  virtual void
+  do_layout(const General_options&, Symbol_table*, Layout*,
+	    Read_symbols_data*) = 0;
+
+  // Add symbol information to the global symbol table--implemented by
+  // child class.
+  virtual void
+  do_add_symbols(Symbol_table*, Read_symbols_data*) = 0;
+
+  // Return a view of the contents of a section.  Set *PLEN to the
+  // size.  Implemented by child class.
+  virtual const unsigned char*
+  do_section_contents(unsigned int shnum, off_t* plen) = 0;
+
+  // Get the name of a section--implemented by child class.
+  virtual std::string
+  do_section_name(unsigned int shnum) = 0;
+
+  // Get the file.
+  Input_file*
+  input_file() const
+  { return this->input_file_; }
+
+  // Get the offset into the file.
+  off_t
+  offset() const
+  { return this->offset_; }
+
+  // Get a view into the underlying file.
+  const unsigned char*
+  get_view(off_t start, off_t size)
+  { return this->input_file_->file().get_view(start + this->offset_, size); }
+
+  // Get a lasting view into the underlying file.
+  File_view*
+  get_lasting_view(off_t start, off_t size)
+  {
+    return this->input_file_->file().get_lasting_view(start + this->offset_,
+						      size);
+  }
+
+  // Read data from the underlying file.
+  void
+  read(off_t start, off_t size, void* p)
+  { this->input_file_->file().read(start + this->offset_, size, p); }
+
+  // Set the target.
+  void
+  set_target(Target* target)
+  { this->target_ = target; }
+
+ private:
+  // This class may not be copied.
+  Object(const Object&);
+  Object& operator=(const Object&);
+
+  // Name of object as printed to user.
+  std::string name_;
+  // For reading the file.
+  Input_file* input_file_;
+  // Offset within the file--0 for an object file, non-0 for an
+  // archive.
+  off_t offset_;
+  // Whether this is a dynamic object.
+  bool is_dynamic_;
+  // Target functions--may be NULL if the target is not known.
+  Target* target_;
+};
+
+// Implement sized_target inline for efficiency.  This approach breaks
+// static type checking, but is made safe using asserts.
+
+template<int size, bool big_endian>
+inline Sized_target<size, big_endian>*
+Object::sized_target(ACCEPT_SIZE_ENDIAN_ONLY)
+{
+  assert(this->target_->get_size() == size);
+  assert(this->target_->is_big_endian() ? big_endian : !big_endian);
+  return static_cast<Sized_target<size, big_endian>*>(this->target_);
+}
+
+// A regular object (ET_REL).  This is an abstract base class itself.
+// The implementations is the template class Sized_relobj.
+
+class Relobj : public Object
+{
+ public:
+  Relobj(const std::string& name, Input_file* input_file, off_t offset = 0)
+    : Object(name, input_file, false, offset)
+  { }
 
   // Read the relocs.
   void
@@ -192,12 +299,6 @@ class Object
     this->map_to_output_[shndx].offset = off;
   }
 
-  // Return the name of a section given a section index.  This is only
-  // used for error messages.
-  std::string
-  section_name(unsigned int shnum)
-  { return this->do_section_name(shnum); }
-
  protected:
   // What we need to know to map an input section to an output
   // section.  We keep an array of these, one for each input section,
@@ -211,15 +312,6 @@ class Object
     off_t offset;
   };
 
-  // Read the symbols--implemented by child class.
-  virtual void
-  do_read_symbols(Read_symbols_data*) = 0;
-
-  // Add symbol information to the global symbol table--implemented by
-  // child class.
-  virtual void
-  do_add_symbols(Symbol_table*, Read_symbols_data*) = 0;
-
   // Read the relocs--implemented by child class.
   virtual void
   do_read_relocs(Read_relocs_data*) = 0;
@@ -228,10 +320,6 @@ class Object
   virtual void
   do_scan_relocs(const General_options&, Symbol_table*, Layout*,
 		 Read_relocs_data*) = 0;
-
-  // Lay out sections--implemented by child class.
-  virtual void
-  do_layout(Layout*, Read_symbols_data*) = 0;
 
   // Finalize local symbols--implemented by child class.
   virtual off_t
@@ -243,25 +331,6 @@ class Object
   do_relocate(const General_options& options, const Symbol_table* symtab,
 	      const Layout*, Output_file* of) = 0;
 
-  // Get the name of a section--implemented by child class.
-  virtual std::string
-  do_section_name(unsigned int shnum) = 0;
-
-  // Get the file.
-  Input_file*
-  input_file() const
-  { return this->input_file_; }
-
-  // Get the offset into the file.
-  off_t
-  offset() const
-  { return this->offset_; }
-
-  // Get a view into the underlying file.
-  const unsigned char*
-  get_view(off_t start, off_t size)
-  { return this->input_file_->file().get_view(start + this->offset_, size); }
-
   // Get the number of sections.
   unsigned int
   shnum() const
@@ -272,66 +341,21 @@ class Object
   set_shnum(int shnum)
   { this->shnum_ = shnum; }
 
-  // Set the target.
-  void
-  set_target(Target* target)
-  { this->target_ = target; }
-
-  // Read data from the underlying file.
-  void
-  read(off_t start, off_t size, void* p)
-  { this->input_file_->file().read(start + this->offset_, size, p); }
-
-  // Get a lasting view into the underlying file.
-  File_view*
-  get_lasting_view(off_t start, off_t size)
-  {
-    return this->input_file_->file().get_lasting_view(start + this->offset_,
-						      size);
-  }
-
   // Return the vector mapping input sections to output sections.
   std::vector<Map_to_output>&
   map_to_output()
   { return this->map_to_output_; }
 
  private:
-  // This class may not be copied.
-  Object(const Object&);
-  Object& operator=(const Object&);
-
-  // Name of object as printed to user.
-  std::string name_;
-  // For reading the file.
-  Input_file* input_file_;
-  // Offset within the file--0 for an object file, non-0 for an
-  // archive.
-  off_t offset_;
   // Number of input sections.
   unsigned int shnum_;
-  // Whether this is a dynamic object.
-  bool is_dynamic_;
-  // Target functions--may be NULL if the target is not known.
-  Target* target_;
   // Mapping from input sections to output section.
   std::vector<Map_to_output> map_to_output_;
 };
 
-// Implement sized_target inline for efficiency.  This approach breaks
-// static type checking, but is made safe using asserts.
-
-template<int size, bool big_endian>
-inline Sized_target<size, big_endian>*
-Object::sized_target(ACCEPT_SIZE_ENDIAN_ONLY)
-{
-  assert(this->target_->get_size() == size);
-  assert(this->target_->is_big_endian() ? big_endian : !big_endian);
-  return static_cast<Sized_target<size, big_endian>*>(this->target_);
-}
-
 // Implement Object::output_section inline for efficiency.
 inline Output_section*
-Object::output_section(unsigned int shnum, off_t* poff)
+Relobj::output_section(unsigned int shnum, off_t* poff)
 {
   assert(shnum < this->map_to_output_.size());
   const Map_to_output& mo(this->map_to_output_[shnum]);
@@ -342,13 +366,13 @@ Object::output_section(unsigned int shnum, off_t* poff)
 // A regular object file.  This is size and endian specific.
 
 template<int size, bool big_endian>
-class Sized_object : public Object
+class Sized_relobj : public Relobj
 {
  public:
-  Sized_object(const std::string& name, Input_file* input_file, off_t offset,
+  Sized_relobj(const std::string& name, Input_file* input_file, off_t offset,
 	       const typename elfcpp::Ehdr<size, big_endian>&);
 
-  ~Sized_object();
+  ~Sized_relobj();
 
   // Set up the object file based on the ELF header.
   void
@@ -373,7 +397,8 @@ class Sized_object : public Object
 
   // Lay out the input sections.
   void
-  do_layout(Layout*, Read_symbols_data*);
+  do_layout(const General_options&, Symbol_table*, Layout*,
+	    Read_symbols_data*);
 
   // Finalize the local symbols.
   off_t
@@ -388,6 +413,11 @@ class Sized_object : public Object
   std::string
   do_section_name(unsigned int shnum);
 
+  // Return a view of the contents of a section.  Set *PLEN to the
+  // size.
+  const unsigned char*
+  do_section_contents(unsigned int shnum, off_t* plen);
+
   // Return the appropriate Sized_target structure.
   Sized_target<size, big_endian>*
   sized_target()
@@ -398,12 +428,8 @@ class Sized_object : public Object
   }
 
  private:
-  // This object may not be copied.
-  Sized_object(const Sized_object&);
-  Sized_object& operator=(const Sized_object&);
-
   // For convenience.
-  typedef Sized_object<size, big_endian> This;
+  typedef Sized_relobj<size, big_endian> This;
   static const int ehdr_size = elfcpp::Elf_sizes<size>::ehdr_size;
   static const int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
   static const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
@@ -477,11 +503,16 @@ class Input_objects
 {
  public:
   Input_objects()
-    : object_list_(), target_(NULL), any_dynamic_(false)
+    : relobj_list_(), target_(NULL)
   { }
 
-  // The type of the list of input objects.
-  typedef std::list<Object*> Object_list;
+  // The type of the list of input relocateable objects.
+  typedef std::vector<Relobj*> Relobj_list;
+  typedef Relobj_list::const_iterator Relobj_iterator;
+
+  // The type of the list of input dynamic objects.
+  typedef std::vector<Dynobj*> Dynobj_list;
+  typedef Dynobj_list::const_iterator Dynobj_iterator;
 
   // Add an object to the list.
   void
@@ -492,27 +523,38 @@ class Input_objects
   target() const
   { return this->target_; }
 
-  // Iterate over all objects.
-  Object_list::const_iterator
-  begin() const
-  { return this->object_list_.begin(); }
+  // Iterate over all regular objects.
 
-  Object_list::const_iterator
-  end() const
-  { return this->object_list_.end(); }
+  Relobj_iterator
+  relobj_begin() const
+  { return this->relobj_list_.begin(); }
+
+  Relobj_iterator
+  relobj_end() const
+  { return this->relobj_list_.end(); }
+
+  // Iterate over all dynamic objects.
+
+  Dynobj_iterator
+  dynobj_begin() const
+  { return this->dynobj_list_.begin(); }
+
+  Dynobj_iterator
+  dynobj_end() const
+  { return this->dynobj_list_.end(); }
 
   // Return whether we have seen any dynamic objects.
   bool
   any_dynamic() const
-  { return this->any_dynamic_; }
+  { return !this->dynobj_list_.empty(); }
 
  private:
   Input_objects(const Input_objects&);
   Input_objects& operator=(const Input_objects&);
 
-  Object_list object_list_;
+  Relobj_list relobj_list_;
+  Dynobj_list dynobj_list_;
   Target* target_;
-  bool any_dynamic_;
 };
 
 // Some of the information we pass to the relocation routines.  We
@@ -528,7 +570,7 @@ struct Relocate_info
   // Layout.
   const Layout* layout;
   // Object being relocated.
-  Sized_object<size, big_endian>* object;
+  Sized_relobj<size, big_endian>* object;
   // Number of local symbols.
   unsigned int local_symbol_count;
   // Values of local symbols.

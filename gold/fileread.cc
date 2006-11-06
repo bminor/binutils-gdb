@@ -314,9 +314,13 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath)
       std::string n1("lib");
       n1 += this->input_argument_.name();
       std::string n2;
-      if (!options.is_static())
-	n2 = n1 + ".so";
-      n1 += ".a";
+      if (options.is_static())
+	n1 += ".a";
+      else
+	{
+	  n2 = n1 + ".a";
+	  n1 += ".so";
+	}
       name = dirpath.find(n1, n2);
       if (name.empty())
 	{

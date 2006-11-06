@@ -6,25 +6,25 @@
 #include <cstring>
 #include <cassert>
 
-#include "object.h"
 #include "target-select.h"
 #include "layout.h"
 #include "output.h"
+#include "symtab.h"
+#include "object.h"
+#include "dynobj.h"
 
 namespace gold
 {
 
-// Class Object.
-
-// Class Sized_object.
+// Class Sized_relobj.
 
 template<int size, bool big_endian>
-Sized_object<size, big_endian>::Sized_object(
+Sized_relobj<size, big_endian>::Sized_relobj(
     const std::string& name,
     Input_file* input_file,
     off_t offset,
     const elfcpp::Ehdr<size, big_endian>& ehdr)
-  : Object(name, input_file, false, offset),
+  : Relobj(name, input_file, offset),
     section_headers_(NULL),
     flags_(ehdr.get_e_flags()),
     shoff_(ehdr.get_e_shoff()),
@@ -53,7 +53,7 @@ Sized_object<size, big_endian>::Sized_object(
 }
 
 template<int size, bool big_endian>
-Sized_object<size, big_endian>::~Sized_object()
+Sized_relobj<size, big_endian>::~Sized_relobj()
 {
 }
 
@@ -61,21 +61,20 @@ Sized_object<size, big_endian>::~Sized_object()
 
 template<int size, bool big_endian>
 inline const unsigned char*
-Sized_object<size, big_endian>::section_header(unsigned int shnum)
+Sized_relobj<size, big_endian>::section_header(unsigned int shnum)
 {
   assert(shnum < this->shnum());
   off_t symtabshdroff = this->shoff_ + shnum * This::shdr_size;
   return this->get_view(symtabshdroff, This::shdr_size);
 }
 
-// Return the name of section SHNUM.
+// Return the name of section SHNUM.  The object must already be
+// locked.
 
 template<int size, bool big_endian>
 std::string
-Sized_object<size, big_endian>::do_section_name(unsigned int shnum)
+Sized_relobj<size, big_endian>::do_section_name(unsigned int shnum)
 {
-  Task_lock_obj<Object> tl(*this);
-
   // Read the section names.
   typename This::Shdr shdrnames(this->section_header(this->shstrndx_));
   const unsigned char* pnamesu = this->get_view(shdrnames.get_sh_offset(),
@@ -95,12 +94,27 @@ Sized_object<size, big_endian>::do_section_name(unsigned int shnum)
   return std::string(pnames + shdr.get_sh_name());
 }
 
+// Return a view of the contents of section SHNUM.  The object does
+// not have to be locked.
+
+template<int size, bool big_endian>
+const unsigned char*
+Sized_relobj<size, big_endian>::do_section_contents(unsigned int shnum,
+						    off_t* plen)
+{
+  Task_locker_obj<Object> tl(*this);
+
+  typename This::Shdr shdr(this->section_header(shnum));
+  *plen = shdr.get_sh_size();
+  return this->get_view(shdr.get_sh_offset(), shdr.get_sh_size());
+}
+
 // Set up an object file bsaed on the file header.  This sets up the
 // target and reads the section information.
 
 template<int size, bool big_endian>
 void
-Sized_object<size, big_endian>::setup(
+Sized_relobj<size, big_endian>::setup(
     const elfcpp::Ehdr<size, big_endian>& ehdr)
 {
   int machine = ehdr.get_e_machine();
@@ -159,7 +173,7 @@ Sized_object<size, big_endian>::setup(
 
 template<int size, bool big_endian>
 void
-Sized_object<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
+Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 {
   // Transfer our view of the section headers to SD.
   sd->section_headers = this->section_headers_;
@@ -236,7 +250,7 @@ Sized_object<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 
 template<int size, bool big_endian>
 bool
-Sized_object<size, big_endian>::include_section_group(
+Sized_relobj<size, big_endian>::include_section_group(
     Layout* layout,
     unsigned int index,
     const elfcpp::Shdr<size, big_endian>& shdr,
@@ -251,7 +265,7 @@ Sized_object<size, big_endian>::include_section_group(
   // The first word contains flags.  We only care about COMDAT section
   // groups.  Other section groups are always included in the link
   // just like ordinary sections.
-  elfcpp::Elf_Word flags = elfcpp::read_elf_word<big_endian>(pword);
+  elfcpp::Elf_Word flags = elfcpp::Swap<32, big_endian>::readval(pword);
   if ((flags & elfcpp::GRP_COMDAT) == 0)
     return true;
 
@@ -345,7 +359,8 @@ Sized_object<size, big_endian>::include_section_group(
   size_t count = shdr.get_sh_size() / sizeof(elfcpp::Elf_Word);
   for (size_t i = 1; i < count; ++i)
     {
-      elfcpp::Elf_Word secnum = elfcpp::read_elf_word<big_endian>(pword + i);
+      elfcpp::Elf_Word secnum =
+	elfcpp::Swap<32, big_endian>::readval(pword + i);
       if (secnum >= this->shnum())
 	{
 	  fprintf(stderr,
@@ -377,7 +392,7 @@ Sized_object<size, big_endian>::include_section_group(
 
 template<int size, bool big_endian>
 bool
-Sized_object<size, big_endian>::include_linkonce_section(
+Sized_relobj<size, big_endian>::include_linkonce_section(
     Layout* layout,
     const char* name,
     const elfcpp::Shdr<size, big_endian>&)
@@ -395,7 +410,9 @@ Sized_object<size, big_endian>::include_linkonce_section(
 
 template<int size, bool big_endian>
 void
-Sized_object<size, big_endian>::do_layout(Layout* layout,
+Sized_relobj<size, big_endian>::do_layout(const General_options& options,
+					  Symbol_table* symtab,
+					  Layout* layout,
 					  Read_symbols_data* sd)
 {
   unsigned int shnum = this->shnum();
@@ -415,7 +432,12 @@ Sized_object<size, big_endian>::do_layout(Layout* layout,
   // Keep track of which sections to omit.
   std::vector<bool> omit(shnum, false);
 
-  for (unsigned int i = 0; i < shnum; ++i, pshdrs += This::shdr_size)
+  const char warn_prefix[] = ".gnu.warning.";
+  const int warn_prefix_len = sizeof warn_prefix - 1;
+
+  // Skip the first, dummy, section.
+  pshdrs += This::shdr_size;
+  for (unsigned int i = 1; i < shnum; ++i, pshdrs += This::shdr_size)
     {
       typename This::Shdr shdr(pshdrs);
 
@@ -429,6 +451,13 @@ Sized_object<size, big_endian>::do_layout(Layout* layout,
 	}
 
       const char* name = pnames + shdr.get_sh_name();
+
+      if (strncmp(name, warn_prefix, warn_prefix_len) == 0)
+	{
+	  symtab->add_warning(name + warn_prefix_len, this, i);
+	  if (!options.is_relocatable())
+	    omit[i] = true;
+	}
 
       bool discard = omit[i];
       if (!discard)
@@ -469,7 +498,7 @@ Sized_object<size, big_endian>::do_layout(Layout* layout,
 
 template<int size, bool big_endian>
 void
-Sized_object<size, big_endian>::do_add_symbols(Symbol_table* symtab,
+Sized_relobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
 					       Read_symbols_data* sd)
 {
   if (sd->symbols == NULL)
@@ -490,13 +519,12 @@ Sized_object<size, big_endian>::do_add_symbols(Symbol_table* symtab,
 
   this->symbols_ = new Symbol*[symcount];
 
-  const unsigned char* psyms = sd->symbols->data();
-  const elfcpp::Sym<size, big_endian>* syms =
-    reinterpret_cast<const elfcpp::Sym<size, big_endian>*>(psyms);
   const char* sym_names =
     reinterpret_cast<const char*>(sd->symbol_names->data());
-  symtab->add_from_object(this, syms, symcount, sym_names, 
-			  sd->symbol_names_size,  this->symbols_);
+  symtab->add_from_object<size, big_endian>(this, sd->symbols->data(),
+					    symcount, sym_names, 
+					    sd->symbol_names_size,
+					    this->symbols_);
 
   delete sd->symbols;
   sd->symbols = NULL;
@@ -512,7 +540,7 @@ Sized_object<size, big_endian>::do_add_symbols(Symbol_table* symtab,
 
 template<int size, bool big_endian>
 off_t
-Sized_object<size, big_endian>::do_finalize_local_symbols(off_t off,
+Sized_relobj<size, big_endian>::do_finalize_local_symbols(off_t off,
 							  Stringpool* pool)
 {
   if (this->symtab_shnum_ == 0)
@@ -598,9 +626,12 @@ Sized_object<size, big_endian>::do_finalize_local_symbols(off_t off,
 			      + sym.get_st_value());
 	}
 
-      pool->add(pnames + sym.get_st_name());
-      off += sym_size;
-      ++count;
+      if (sym.get_st_type() != elfcpp::STT_SECTION)
+	{
+	  pool->add(pnames + sym.get_st_name());
+	  off += sym_size;
+	  ++count;
+	}
     }
 
   this->output_local_symbol_count_ = count;
@@ -612,7 +643,7 @@ Sized_object<size, big_endian>::do_finalize_local_symbols(off_t off,
 
 template<int size, bool big_endian>
 void
-Sized_object<size, big_endian>::write_local_symbols(Output_file* of,
+Sized_relobj<size, big_endian>::write_local_symbols(Output_file* of,
 						    const Stringpool* sympool)
 {
   if (this->symtab_shnum_ == 0)
@@ -655,7 +686,9 @@ Sized_object<size, big_endian>::write_local_symbols(Output_file* of,
   for (unsigned int i = 1; i < loccount; ++i, psyms += sym_size)
     {
       elfcpp::Sym<size, big_endian> isym(psyms);
-      elfcpp::Sym_write<size, big_endian> osym(ov);
+
+      if (isym.get_st_type() == elfcpp::STT_SECTION)
+	continue;
 
       unsigned int st_shndx = isym.get_st_shndx();
       if (st_shndx < elfcpp::SHN_LORESERVE)
@@ -665,6 +698,8 @@ Sized_object<size, big_endian>::write_local_symbols(Output_file* of,
 	    continue;
 	  st_shndx = mo[st_shndx].output_section->out_shndx();
 	}
+
+      elfcpp::Sym_write<size, big_endian> osym(ov);
 
       osym.put_st_name(sympool->get_offset(pnames + isym.get_st_name()));
       osym.put_st_value(this->values_[i]);
@@ -683,10 +718,15 @@ Sized_object<size, big_endian>::write_local_symbols(Output_file* of,
 
 // Input_objects methods.
 
+// Add a regular relocatable object to the list.
+
 void
 Input_objects::add_object(Object* obj)
 {
-  this->object_list_.push_back(obj);
+  if (obj->is_dynamic())
+    this->dynobj_list_.push_back(static_cast<Dynobj*>(obj));
+  else
+    this->relobj_list_.push_back(static_cast<Relobj*>(obj));
 
   Target* target = obj->target();
   if (this->target_ == NULL)
@@ -697,9 +737,6 @@ Input_objects::add_object(Object* obj)
 	      program_name, obj->name().c_str());
       gold_exit(false);
     }
-
-  if (obj->is_dynamic())
-    this->any_dynamic_ = true;
 }
 
 // Relocate_info methods.
@@ -752,8 +789,8 @@ make_elf_sized_object(const std::string& name, Input_file* input_file,
 
   if (et == elfcpp::ET_REL)
     {
-      Sized_object<size, big_endian>* obj =
-	new Sized_object<size, big_endian>(name, input_file, offset, ehdr);
+      Sized_relobj<size, big_endian>* obj =
+	new Sized_relobj<size, big_endian>(name, input_file, offset, ehdr);
       obj->setup(ehdr);
       return obj;
     }
@@ -881,16 +918,16 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 // script to restrict this to only the ones for implemented targets.
 
 template
-class Sized_object<32, false>;
+class Sized_relobj<32, false>;
 
 template
-class Sized_object<32, true>;
+class Sized_relobj<32, true>;
 
 template
-class Sized_object<64, false>;
+class Sized_relobj<64, false>;
 
 template
-class Sized_object<64, true>;
+class Sized_relobj<64, true>;
 
 template
 struct Relocate_info<32, false>;

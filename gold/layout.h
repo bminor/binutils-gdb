@@ -70,7 +70,7 @@ class Layout
   // output section.
   template<int size, bool big_endian>
   Output_section*
-  layout(Object *object, unsigned int shndx, const char* name,
+  layout(Relobj *object, unsigned int shndx, const char* name,
 	 const elfcpp::Shdr<size, big_endian>& shdr, off_t* offset);
 
   // Add an Output_section_data to the layout.  This is used for

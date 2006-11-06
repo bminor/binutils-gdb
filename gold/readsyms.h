@@ -83,11 +83,12 @@ class Add_symbols : public Task
   // THIS_BLOCKER is used to prevent this task from running before the
   // one for the previous input file.  NEXT_BLOCKER is used to prevent
   // the next task from running.
-  Add_symbols(Input_objects* input_objects, Symbol_table* symtab,
-	      Layout* layout, Object* object, Read_symbols_data* sd,
-	      Task_token* this_blocker, Task_token* next_blocker)
-    : input_objects_(input_objects), symtab_(symtab), layout_(layout),
-      object_(object), sd_(sd), this_blocker_(this_blocker),
+  Add_symbols(const General_options& options, Input_objects* input_objects,
+	      Symbol_table* symtab, Layout* layout, Object* object,
+	      Read_symbols_data* sd, Task_token* this_blocker,
+	      Task_token* next_blocker)
+    : options_(options), input_objects_(input_objects), symtab_(symtab),
+      layout_(layout), object_(object), sd_(sd), this_blocker_(this_blocker),
       next_blocker_(next_blocker)
   { }
 
@@ -107,6 +108,7 @@ class Add_symbols : public Task
 private:
   class Add_symbols_locker;
 
+  const General_options& options_;
   Input_objects* input_objects_;
   Symbol_table* symtab_;
   Layout* layout_;
@@ -153,13 +155,14 @@ class Input_group
 class Finish_group : public Task
 {
  public:
-  Finish_group(Input_objects* input_objects, Symbol_table* symtab,
-	       Layout* layout, Input_group* input_group,
+  Finish_group(const General_options& options, Input_objects* input_objects,
+	       Symbol_table* symtab, Layout* layout, Input_group* input_group,
 	       int saw_undefined, Task_token* this_blocker,
 	       Task_token* next_blocker)
-    : input_objects_(input_objects), symtab_(symtab), layout_(layout),
-      input_group_(input_group), saw_undefined_(saw_undefined),
-      this_blocker_(this_blocker), next_blocker_(next_blocker)
+    : options_(options), input_objects_(input_objects), symtab_(symtab),
+      layout_(layout), input_group_(input_group),
+      saw_undefined_(saw_undefined), this_blocker_(this_blocker),
+      next_blocker_(next_blocker)
   { }
 
   ~Finish_group();
@@ -176,6 +179,7 @@ class Finish_group : public Task
   run(Workqueue*);
 
  private:
+  const General_options& options_;
   Input_objects* input_objects_;
   Symbol_table* symtab_;
   Layout* layout_;

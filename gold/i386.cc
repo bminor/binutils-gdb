@@ -35,7 +35,7 @@ class Target_i386 : public Sized_target<32, false>
   scan_relocs(const General_options& options,
 	      Symbol_table* symtab,
 	      Layout* layout,
-	      Sized_object<32, false>* object,
+	      Sized_relobj<32, false>* object,
 	      unsigned int sh_type,
 	      const unsigned char* prelocs,
 	      size_t reloc_count,
@@ -60,14 +60,14 @@ class Target_i386 : public Sized_target<32, false>
     inline void
     local(const General_options& options, Symbol_table* symtab,
 	  Layout* layout, Target_i386* target,
-	  Sized_object<32, false>* object,
+	  Sized_relobj<32, false>* object,
 	  const elfcpp::Rel<32, false>& reloc, unsigned int r_type,
 	  const elfcpp::Sym<32, false>& lsym);
 
     inline void
     global(const General_options& options, Symbol_table* symtab,
 	   Layout* layout, Target_i386* target,
-	   Sized_object<32, false>* object,
+	   Sized_relobj<32, false>* object,
 	   const elfcpp::Rel<32, false>& reloc, unsigned int r_type,
 	   Symbol* gsym);
   };
@@ -265,7 +265,7 @@ Target_i386::Scan::local(const General_options& options,
 			 Symbol_table* symtab,
 			 Layout* layout,
 			 Target_i386* target,
-			 Sized_object<32, false>* object,
+			 Sized_relobj<32, false>* object,
 			 const elfcpp::Rel<32, false>&, unsigned int r_type,
 			 const elfcpp::Sym<32, false>&)
 {
@@ -368,7 +368,7 @@ Target_i386::Scan::global(const General_options& options,
 			  Symbol_table* symtab,
 			  Layout* layout,
 			  Target_i386* target,
-			  Sized_object<32, false>* object,
+			  Sized_relobj<32, false>* object,
 			  const elfcpp::Rel<32, false>&, unsigned int r_type,
 			  Symbol* gsym)
 {
@@ -496,7 +496,7 @@ void
 Target_i386::scan_relocs(const General_options& options,
 			 Symbol_table* symtab,
 			 Layout* layout,
-			 Sized_object<32, false>* object,
+			 Sized_relobj<32, false>* object,
 			 unsigned int sh_type,
 			 const unsigned char* prelocs,
 			 size_t reloc_count,

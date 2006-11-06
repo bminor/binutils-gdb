@@ -7,6 +7,7 @@
 #include "workqueue.h"
 #include "layout.h"
 #include "output.h"
+#include "symtab.h"
 #include "common.h"
 
 namespace gold

@@ -16,7 +16,6 @@
 #include <cassert>
 
 #include "elfcpp.h"
-#include "symtab.h"
 
 namespace gold
 {
@@ -24,9 +23,13 @@ namespace gold
 class General_options;
 class Object;
 template<int size, bool big_endian>
-class Sized_object;
+class Sized_relobj;
 template<int size, bool big_endian>
 struct Relocate_info;
+class Symbol;
+template<int size>
+class Sized_symbol;
+class Symbol_table;
 
 // The abstract class for target specific handling.
 
@@ -150,7 +153,7 @@ class Sized_target : public Target
   scan_relocs(const General_options& options,
 	      Symbol_table* symtab,
 	      Layout* layout,
-	      Sized_object<size, big_endian>* object,
+	      Sized_relobj<size, big_endian>* object,
 	      unsigned int sh_type,
 	      const unsigned char* prelocs,
 	      size_t reloc_count,

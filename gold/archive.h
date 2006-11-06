@@ -11,6 +11,7 @@
 namespace gold
 {
 
+class General_options;
 class Input_file;
 class Input_objects;
 class Input_group;
@@ -68,14 +69,13 @@ class Archive
   // Select members from the archive as needed and add them to the
   // link.
   void
-  add_symbols(Symbol_table*, Layout*, Input_objects*);
+  add_symbols(const General_options&, Symbol_table*, Layout*, Input_objects*);
 
  private:
   Archive(const Archive&);
   Archive& operator=(const Archive&);
 
   struct Archive_header;
-  class Add_archive_symbols_locker;
 
   // Get a view into the underlying file.
   const unsigned char*
@@ -89,7 +89,8 @@ class Archive
 
   // Include an archive member in the link.
   void
-  include_member(Symbol_table*, Layout*, Input_objects*, off_t off);
+  include_member(const General_options&, Symbol_table*, Layout*,
+		 Input_objects*, off_t off);
 
   // An entry in the archive map of symbols to object files.
   struct Armap_entry
@@ -119,14 +120,15 @@ class Archive
 class Add_archive_symbols : public Task
 {
  public:
-  Add_archive_symbols(Symbol_table* symtab, Layout* layout,
-		      Input_objects* input_objects,
+  Add_archive_symbols(const General_options& options, Symbol_table* symtab,
+		      Layout* layout, Input_objects* input_objects,
 		      Archive* archive, Input_group* input_group,
 		      Task_token* this_blocker,
 		      Task_token* next_blocker)
-    : symtab_(symtab), layout_(layout), input_objects_(input_objects),
-      archive_(archive), input_group_(input_group),
-      this_blocker_(this_blocker), next_blocker_(next_blocker)
+    : options_(options), symtab_(symtab), layout_(layout),
+      input_objects_(input_objects), archive_(archive),
+      input_group_(input_group), this_blocker_(this_blocker),
+      next_blocker_(next_blocker)
   { }
 
   ~Add_archive_symbols();
@@ -145,6 +147,7 @@ class Add_archive_symbols : public Task
  private:
   class Add_archive_symbols_locker;
 
+  const General_options& options_;
   Symbol_table* symtab_;
   Layout* layout_;
   Input_objects* input_objects_;

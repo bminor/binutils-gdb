@@ -7,6 +7,7 @@
 #include "elfcpp.h"
 #include "options.h"
 #include "dirsearch.h"
+#include "symtab.h"
 #include "object.h"
 #include "archive.h"
 #include "readsyms.h"
@@ -91,7 +92,8 @@ Read_symbols::run(Workqueue* workqueue)
 
 	  Read_symbols_data* sd = new Read_symbols_data;
 	  obj->read_symbols(sd);
-	  workqueue->queue_front(new Add_symbols(this->input_objects_,
+	  workqueue->queue_front(new Add_symbols(this->options_,
+						 this->input_objects_,
 						 this->symtab_, this->layout_,
 						 obj, sd,
 						 this->this_blocker_,
@@ -111,7 +113,8 @@ Read_symbols::run(Workqueue* workqueue)
 	  // This is an archive.
 	  Archive* arch = new Archive(this->input_.file().name(), input_file);
 	  arch->setup();
-	  workqueue->queue(new Add_archive_symbols(this->symtab_,
+	  workqueue->queue(new Add_archive_symbols(this->options_,
+						   this->symtab_,
 						   this->layout_,
 						   this->input_objects_,
 						   arch,
@@ -159,7 +162,8 @@ Read_symbols::do_group(Workqueue* workqueue)
     }
 
   const int saw_undefined = this->symtab_->saw_undefined();
-  workqueue->queue(new Finish_group(this->input_objects_,
+  workqueue->queue(new Finish_group(this->options_,
+				    this->input_objects_,
 				    this->symtab_,
 				    this->layout_,
 				    input_group,
@@ -217,7 +221,8 @@ void
 Add_symbols::run(Workqueue*)
 {
   this->input_objects_->add_object(this->object_);
-  this->object_->layout(this->layout_, this->sd_);
+  this->object_->layout(this->options_, this->symtab_, this->layout_,
+			this->sd_);
   this->object_->add_symbols(this->symtab_, this->sd_);
   delete this->sd_;
   this->sd_ = NULL;
@@ -265,7 +270,7 @@ Finish_group::run(Workqueue*)
 	{
 	  Task_lock_obj<Archive> tl(**p);
 
-	  (*p)->add_symbols(this->symtab_, this->layout_,
+	  (*p)->add_symbols(this->options_, this->symtab_, this->layout_,
 			    this->input_objects_);
 	}
     }

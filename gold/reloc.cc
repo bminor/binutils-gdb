@@ -140,7 +140,7 @@ Relocate_task::run(Workqueue*)
 
 template<int size, bool big_endian>
 void
-Sized_object<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
+Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
 {
   rd->relocs.clear();
 
@@ -248,7 +248,7 @@ Sized_object<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
 
 template<int size, bool big_endian>
 void
-Sized_object<size, big_endian>::do_scan_relocs(const General_options& options,
+Sized_relobj<size, big_endian>::do_scan_relocs(const General_options& options,
 					       Symbol_table* symtab,
 					       Layout* layout,
 					       Read_relocs_data* rd)
@@ -285,7 +285,7 @@ Sized_object<size, big_endian>::do_scan_relocs(const General_options& options,
 
 template<int size, bool big_endian>
 void
-Sized_object<size, big_endian>::do_relocate(const General_options& options,
+Sized_relobj<size, big_endian>::do_relocate(const General_options& options,
 					    const Symbol_table* symtab,
 					    const Layout* layout,
 					    Output_file* of)
@@ -327,7 +327,7 @@ Sized_object<size, big_endian>::do_relocate(const General_options& options,
 
 template<int size, bool big_endian>
 void
-Sized_object<size, big_endian>::write_sections(const unsigned char* pshdrs,
+Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
 					       Output_file* of,
 					       Views* pviews)
 {
@@ -374,7 +374,7 @@ Sized_object<size, big_endian>::write_sections(const unsigned char* pshdrs,
 
 template<int size, bool big_endian>
 void
-Sized_object<size, big_endian>::relocate_sections(
+Sized_relobj<size, big_endian>::relocate_sections(
     const General_options& options,
     const Symbol_table* symtab,
     const Layout* layout,
@@ -475,72 +475,72 @@ Sized_object<size, big_endian>::relocate_sections(
 
 template
 void
-Sized_object<32, false>::do_read_relocs(Read_relocs_data* rd);
+Sized_relobj<32, false>::do_read_relocs(Read_relocs_data* rd);
 
 template
 void
-Sized_object<32, true>::do_read_relocs(Read_relocs_data* rd);
+Sized_relobj<32, true>::do_read_relocs(Read_relocs_data* rd);
 
 template
 void
-Sized_object<64, false>::do_read_relocs(Read_relocs_data* rd);
+Sized_relobj<64, false>::do_read_relocs(Read_relocs_data* rd);
 
 template
 void
-Sized_object<64, true>::do_read_relocs(Read_relocs_data* rd);
+Sized_relobj<64, true>::do_read_relocs(Read_relocs_data* rd);
 
 template
 void
-Sized_object<32, false>::do_scan_relocs(const General_options& options,
+Sized_relobj<32, false>::do_scan_relocs(const General_options& options,
 					Symbol_table* symtab,
 					Layout* layout,
 					Read_relocs_data* rd);
 
 template
 void
-Sized_object<32, true>::do_scan_relocs(const General_options& options,
+Sized_relobj<32, true>::do_scan_relocs(const General_options& options,
 				       Symbol_table* symtab,
 				       Layout* layout,
 				       Read_relocs_data* rd);
 
 template
 void
-Sized_object<64, false>::do_scan_relocs(const General_options& options,
+Sized_relobj<64, false>::do_scan_relocs(const General_options& options,
 					Symbol_table* symtab,
 					Layout* layout,
 					Read_relocs_data* rd);
 
 template
 void
-Sized_object<64, true>::do_scan_relocs(const General_options& options,
+Sized_relobj<64, true>::do_scan_relocs(const General_options& options,
 				       Symbol_table* symtab,
 				       Layout* layout,
 				       Read_relocs_data* rd);
 
 template
 void
-Sized_object<32, false>::do_relocate(const General_options& options,
+Sized_relobj<32, false>::do_relocate(const General_options& options,
 				     const Symbol_table* symtab,
 				     const Layout* layout,
 				     Output_file* of);
 
 template
 void
-Sized_object<32, true>::do_relocate(const General_options& options,
+Sized_relobj<32, true>::do_relocate(const General_options& options,
 				    const Symbol_table* symtab,
 				    const Layout* layout,
 				    Output_file* of);
 
 template
 void
-Sized_object<64, false>::do_relocate(const General_options& options,
+Sized_relobj<64, false>::do_relocate(const General_options& options,
 				     const Symbol_table* symtab,
 				     const Layout* layout,
 				     Output_file* of);
 
 template
 void
-Sized_object<64, true>::do_relocate(const General_options& options,
+Sized_relobj<64, true>::do_relocate(const General_options& options,
 				    const Symbol_table* symtab,
 				    const Layout* layout,
 				    Output_file* of);

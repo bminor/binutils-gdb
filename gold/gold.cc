@@ -153,8 +153,8 @@ queue_middle_tasks(const General_options& options,
   // of references made to the symbols.
   Task_token* blocker = new Task_token();
   Task_token* symtab_lock = new Task_token();
-  for (Input_objects::Object_list::const_iterator p = input_objects->begin();
-       p != input_objects->end();
+  for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
+       p != input_objects->relobj_end();
        ++p)
     {
       // We can read and process the relocations in any order.  But we
@@ -198,8 +198,8 @@ queue_final_tasks(const General_options& options,
 
   // Queue a task for each input object to relocate the sections and
   // write out the local symbols.
-  for (Input_objects::Object_list::const_iterator p = input_objects->begin();
-       p != input_objects->end();
+  for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
+       p != input_objects->relobj_end();
        ++p)
     {
       final_blocker->add_blocker();

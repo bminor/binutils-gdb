@@ -9,6 +9,7 @@
 #include <utility>
 
 #include "output.h"
+#include "symtab.h"
 #include "layout.h"
 
 namespace gold
@@ -151,7 +152,7 @@ Layout::get_output_section(const char* name, elfcpp::Elf_Word type,
 
 template<int size, bool big_endian>
 Output_section*
-Layout::layout(Object* object, unsigned int shndx, const char* name,
+Layout::layout(Relobj* object, unsigned int shndx, const char* name,
 	       const elfcpp::Shdr<size, big_endian>& shdr, off_t* off)
 {
   if (!this->include_section(object, name, shdr))
@@ -656,8 +657,8 @@ Layout::create_symtab_sections(int size, const Input_objects* input_objects,
   // never bother to write this out--it will just be left as zero.
   off += symsize;
 
-  for (Input_objects::Object_list::const_iterator p = input_objects->begin();
-       p != input_objects->end();
+  for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
+       p != input_objects->relobj_end();
        ++p)
     {
       Task_lock_obj<Object> tlo(**p);
@@ -956,22 +957,22 @@ Close_task_runner::run(Workqueue*)
 
 template
 Output_section*
-Layout::layout<32, false>(Object* object, unsigned int shndx, const char* name,
+Layout::layout<32, false>(Relobj* object, unsigned int shndx, const char* name,
 			  const elfcpp::Shdr<32, false>& shdr, off_t*);
 
 template
 Output_section*
-Layout::layout<32, true>(Object* object, unsigned int shndx, const char* name,
+Layout::layout<32, true>(Relobj* object, unsigned int shndx, const char* name,
 			 const elfcpp::Shdr<32, true>& shdr, off_t*);
 
 template
 Output_section*
-Layout::layout<64, false>(Object* object, unsigned int shndx, const char* name,
+Layout::layout<64, false>(Relobj* object, unsigned int shndx, const char* name,
 			  const elfcpp::Shdr<64, false>& shdr, off_t*);
 
 template
 Output_section*
-Layout::layout<64, true>(Object* object, unsigned int shndx, const char* name,
+Layout::layout<64, true>(Relobj* object, unsigned int shndx, const char* name,
 			 const elfcpp::Shdr<64, true>& shdr, off_t*);
 
 

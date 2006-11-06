@@ -44,7 +44,7 @@ scan_relocs(
     Symbol_table* symtab,
     Layout* layout,
     Target_type* target,
-    Sized_object<size, big_endian>* object,
+    Sized_relobj<size, big_endian>* object,
     const unsigned char* prelocs,
     size_t reloc_count,
     size_t local_count,
@@ -193,6 +193,9 @@ relocate_section(
 		  sym->name());
 	  // gold_exit(false);
 	}
+
+      if (sym != NULL && sym->has_warning())
+	relinfo->symtab->issue_warning(sym, relinfo->location(i, offset));
     }
 }
 
