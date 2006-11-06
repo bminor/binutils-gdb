@@ -232,7 +232,9 @@ handle_query (char *own_buf, int *new_packet_len_p)
 	len = PBUFSIZ - 2;
       data = malloc (len + 1);
       n = (*the_target->read_auxv) (ofs, data, len + 1);
-      if (n > len)
+      if (n < 0)
+	write_enn (own_buf);
+      else if (n > len)
 	*new_packet_len_p = write_qxfer_response (own_buf, data, len, 1);
       else
 	*new_packet_len_p = write_qxfer_response (own_buf, data, n, 0);
