@@ -1,3 +1,3 @@
 	.text
-	.long Foo
+	.dc.a Foo
 
