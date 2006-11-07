@@ -1,3 +1,17 @@
+2006-11-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (struct ppc64_elf_obj_tdata): Remove "has_dotsym"
+	and union.
+	(struct ppc_link_hash_entry): Add "next_dot_sym".
+	(struct ppc_link_hash_table): Add "dot_syms".
+	(link_hash_newfunc): Make list of syms starting with a dot.
+	(ppc_get_stub_entry, adjust_opd_syms): Adjust.
+	(ppc64_elf_add_symbol_hook): Don't set has_dotsym.
+	(struct add_symbol_adjust_data): Delete.
+	(add_symbol_adjust): Simplify params and return.
+	(ppc64_elf_check_directives): Just process the "dot_syms" lists,
+	not all syms.
+
 2006-11-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* libbfd-in.h (_bfd_clear_contents): New prototype.

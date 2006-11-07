@@ -2377,14 +2377,9 @@ struct ppc64_elf_obj_tdata
   asection *got;
   asection *relgot;
 
-  union {
-    /* Used during garbage collection.  We attach global symbols defined
-       on removed .opd entries to this section so that the sym is removed.  */
-    asection *deleted_section;
-
-    /* Used when adding symbols.  */
-    bfd_boolean has_dotsym;
-  } u;
+  /* Used during garbage collection.  We attach global symbols defined
+     on removed .opd entries to this section so that the sym is removed.  */
+  asection *deleted_section;
 
   /* TLS local dynamic got entry handling.  Suppose for multiple GOT
      sections means we potentially need one of these for each input bfd.  */
@@ -3241,9 +3236,14 @@ struct ppc_link_hash_entry
 {
   struct elf_link_hash_entry elf;
 
-  /* A pointer to the most recently used stub hash entry against this
-     symbol.  */
-  struct ppc_stub_hash_entry *stub_cache;
+  union {
+    /* A pointer to the most recently used stub hash entry against this
+       symbol.  */
+    struct ppc_stub_hash_entry *stub_cache;
+
+    /* A pointer to the next symbol starting with a '.'  */
+    struct ppc_link_hash_entry *next_dot_sym;
+  } u;
 
   /* Track dynamic relocs copied for this symbol.  */
   struct ppc_dyn_relocs *dyn_relocs;
@@ -3320,6 +3320,9 @@ struct ppc_link_hash_table
 
   /* Highest output section index.  */
   int top_index;
+
+  /* Used when adding symbols.  */
+  struct ppc_link_hash_entry *dot_syms;
 
   /* List of input sections for each output section.  */
   asection **input_list;
@@ -3477,9 +3480,34 @@ link_hash_newfunc (struct bfd_hash_entry *entry,
     {
       struct ppc_link_hash_entry *eh = (struct ppc_link_hash_entry *) entry;
 
-      memset (&eh->stub_cache, 0,
+      memset (&eh->u.stub_cache, 0,
 	      (sizeof (struct ppc_link_hash_entry)
-	       - offsetof (struct ppc_link_hash_entry, stub_cache)));
+	       - offsetof (struct ppc_link_hash_entry, u.stub_cache)));
+
+      /* When making function calls, old ABI code references function entry
+	 points (dot symbols), while new ABI code references the function
+	 descriptor symbol.  We need to make any combination of reference and
+	 definition work together, without breaking archive linking.
+
+	 For a defined function "foo" and an undefined call to "bar":
+	 An old object defines "foo" and ".foo", references ".bar" (possibly
+	 "bar" too).
+	 A new object defines "foo" and references "bar".
+
+	 A new object thus has no problem with its undefined symbols being
+	 satisfied by definitions in an old object.  On the other hand, the
+	 old object won't have ".bar" satisfied by a new object.
+
+	 Keep a list of newly added dot-symbols.  */
+
+      if (string[0] == '.')
+	{
+	  struct ppc_link_hash_table *htab;
+
+	  htab = (struct ppc_link_hash_table *) table;
+	  eh->u.next_dot_sym = htab->dot_syms;
+	  htab->dot_syms = eh;
+	}
     }
 
   return entry;
@@ -3625,11 +3653,11 @@ ppc_get_stub_entry (const asection *input_section,
      distinguish between them.  */
   id_sec = htab->stub_group[input_section->id].link_sec;
 
-  if (h != NULL && h->stub_cache != NULL
-      && h->stub_cache->h == h
-      && h->stub_cache->id_sec == id_sec)
+  if (h != NULL && h->u.stub_cache != NULL
+      && h->u.stub_cache->h == h
+      && h->u.stub_cache->id_sec == id_sec)
     {
-      stub_entry = h->stub_cache;
+      stub_entry = h->u.stub_cache;
     }
   else
     {
@@ -3642,7 +3670,7 @@ ppc_get_stub_entry (const asection *input_section,
       stub_entry = ppc_stub_hash_lookup (&htab->stub_hash_table,
 					 stub_name, FALSE, FALSE);
       if (h != NULL)
-	h->stub_cache = stub_entry;
+	h->u.stub_cache = stub_entry;
 
       free (stub_name);
     }
@@ -4051,29 +4079,14 @@ make_fdh (struct bfd_link_info *info,
   return fdh;
 }
 
-/* Hacks to support old ABI code.
-   When making function calls, old ABI code references function entry
-   points (dot symbols), while new ABI code references the function
-   descriptor symbol.  We need to make any combination of reference and
-   definition work together, without breaking archive linking.
-
-   For a defined function "foo" and an undefined call to "bar":
-   An old object defines "foo" and ".foo", references ".bar" (possibly
-   "bar" too).
-   A new object defines "foo" and references "bar".
-
-   A new object thus has no problem with its undefined symbols being
-   satisfied by definitions in an old object.  On the other hand, the
-   old object won't have ".bar" satisfied by a new object.  */
-
 /* Fix function descriptor symbols defined in .opd sections to be
    function type.  */
 
 static bfd_boolean
-ppc64_elf_add_symbol_hook (bfd *ibfd,
+ppc64_elf_add_symbol_hook (bfd *ibfd ATTRIBUTE_UNUSED,
 			   struct bfd_link_info *info ATTRIBUTE_UNUSED,
 			   Elf_Internal_Sym *isym,
-			   const char **name,
+			   const char **name ATTRIBUTE_UNUSED,
 			   flagword *flags ATTRIBUTE_UNUSED,
 			   asection **sec,
 			   bfd_vma *value ATTRIBUTE_UNUSED)
@@ -4081,12 +4094,6 @@ ppc64_elf_add_symbol_hook (bfd *ibfd,
   if (*sec != NULL
       && strcmp (bfd_get_section_name (ibfd, *sec), ".opd") == 0)
     isym->st_info = ELF_ST_INFO (ELF_ST_BIND (isym->st_info), STT_FUNC);
-
-  if ((*name)[0] == '.'
-      && ELF_ST_BIND (isym->st_info) == STB_GLOBAL
-      && ELF_ST_TYPE (isym->st_info) < STT_SECTION
-      && is_ppc64_elf_target (ibfd->xvec))
-    ppc64_elf_tdata (ibfd)->u.has_dotsym = 1;
 
   return TRUE;
 }
@@ -4136,35 +4143,25 @@ ppc64_elf_archive_symbol_lookup (bfd *abfd,
    most restrictive visibility of the function descriptor and the
    function entry symbol is used.  */
 
-struct add_symbol_adjust_data
-{
-  struct bfd_link_info *info;
-  bfd_boolean ok;
-};
-
 static bfd_boolean
-add_symbol_adjust (struct elf_link_hash_entry *h, void *inf)
+add_symbol_adjust (struct ppc_link_hash_entry *eh, struct bfd_link_info *info)
 {
-  struct add_symbol_adjust_data *data;
   struct ppc_link_hash_table *htab;
-  struct ppc_link_hash_entry *eh;
   struct ppc_link_hash_entry *fdh;
 
-  if (h->root.type == bfd_link_hash_indirect)
+  if (eh->elf.root.type == bfd_link_hash_indirect)
     return TRUE;
 
-  if (h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+  if (eh->elf.root.type == bfd_link_hash_warning)
+    eh = (struct ppc_link_hash_entry *) eh->elf.root.u.i.link;
 
-  if (h->root.root.string[0] != '.')
-    return TRUE;
+  if (eh->elf.root.root.string[0] != '.')
+    abort ();
 
-  data = inf;
-  htab = ppc_hash_table (data->info);
-  eh = (struct ppc_link_hash_entry *) h;
+  htab = ppc_hash_table (info);
   fdh = get_fdh (eh, htab);
   if (fdh == NULL
-      && !data->info->relocatable
+      && !info->relocatable
       && (eh->elf.root.type == bfd_link_hash_undefined
 	  || eh->elf.root.type == bfd_link_hash_undefweak)
       && eh->elf.ref_regular)
@@ -4172,9 +4169,9 @@ add_symbol_adjust (struct elf_link_hash_entry *h, void *inf)
       /* Make an undefweak function descriptor sym, which is enough to
 	 pull in an --as-needed shared lib, but won't cause link
 	 errors.  Archives are handled elsewhere.  */
-      fdh = make_fdh (data->info, eh);
+      fdh = make_fdh (info, eh);
       if (fdh == NULL)
-	data->ok = FALSE;
+	return FALSE;
       else
 	fdh->elf.ref_regular = 1;
     }
@@ -4200,26 +4197,37 @@ add_symbol_adjust (struct elf_link_hash_entry *h, void *inf)
   return TRUE;
 }
 
+/* Process list of dot-symbols we made in link_hash_newfunc.  */
+
 static bfd_boolean
-ppc64_elf_check_directives (bfd *abfd, struct bfd_link_info *info)
+ppc64_elf_check_directives (bfd *ibfd, struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab;
-  struct add_symbol_adjust_data data;
-
-  if (!is_ppc64_elf_target (abfd->xvec))
-    return TRUE;
-
-  if (!ppc64_elf_tdata (abfd)->u.has_dotsym)
-    return TRUE;
-  ppc64_elf_tdata (abfd)->u.deleted_section = NULL;
+  struct ppc_link_hash_entry **p, *eh;
 
   htab = ppc_hash_table (info);
   if (!is_ppc64_elf_target (htab->elf.root.creator))
     return TRUE;
 
-  data.info = info;
-  data.ok = TRUE;
-  elf_link_hash_traverse (&htab->elf, add_symbol_adjust, &data);
+  if (is_ppc64_elf_target (ibfd->xvec))
+    {
+      p = &htab->dot_syms;
+      while ((eh = *p) != NULL)
+	{
+	  *p = NULL;
+	  if (!add_symbol_adjust (eh, info))
+	    return FALSE;
+	  p = &eh->u.next_dot_sym;
+	}
+    }
+
+  /* Clear the list for non-ppc64 input files.  */
+  p = &htab->dot_syms;
+  while ((eh = *p) != NULL)
+    {
+      *p = NULL;
+      p = &eh->u.next_dot_sym;
+    }
 
   /* We need to fix the undefs list for any syms we have twiddled to
      undef_weak.  */
@@ -4228,7 +4236,7 @@ ppc64_elf_check_directives (bfd *abfd, struct bfd_link_info *info)
       bfd_link_repair_undef_list (&htab->elf.root);
       htab->twiddled_syms = 0;
     }
-  return data.ok;
+  return TRUE;
 }
 
 static bfd_boolean
@@ -6103,13 +6111,13 @@ adjust_opd_syms (struct elf_link_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
       if (adjust == -1)
 	{
 	  /* This entry has been deleted.  */
-	  asection *dsec = ppc64_elf_tdata (sym_sec->owner)->u.deleted_section;
+	  asection *dsec = ppc64_elf_tdata (sym_sec->owner)->deleted_section;
 	  if (dsec == NULL)
 	    {
 	      for (dsec = sym_sec->owner->sections; dsec; dsec = dsec->next)
 		if (elf_discarded_section (dsec))
 		  {
-		    ppc64_elf_tdata (sym_sec->owner)->u.deleted_section = dsec;
+		    ppc64_elf_tdata (sym_sec->owner)->deleted_section = dsec;
 		    break;
 		  }
 	    }
