@@ -1,5 +1,18 @@
 2006-11-07  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (enum _ppc64_sec_type): New.
+	(struct _ppc64_elf_section_data): Move "t_symndx" into opd union,
+	and rename fields.  Add sec_type and has_14bit_branch.
+	(struct ppc_link_hash_table): Remove has_14bit_branch.
+	(get_opd_info, get_tls_mask, ppc64_elf_edit_opd): Adjust.
+	(ppc64_elf_relocate_section): Likewise.
+	(ppc64_elf_check_relocs): Likewise.  Set per-section has_14bit_branch.
+	(ppc64_elf_size_stubs): Don't set default group size here.
+	(group_sections): Instead do so here, and group sections using
+	their individual requirements.
+
+2006-11-07  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf64-ppc.c (struct ppc64_elf_obj_tdata): Remove "has_dotsym"
 	and union.
 	(struct ppc_link_hash_entry): Add "next_dot_sym".

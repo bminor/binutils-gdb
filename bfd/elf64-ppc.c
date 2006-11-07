@@ -2525,6 +2525,12 @@ static const struct bfd_elf_special_section ppc64_elf_special_sections[]=
   { NULL,                     0,  0, 0,            0 }
 };
 
+enum _ppc64_sec_type {
+  sec_normal = 0,
+  sec_opd = 1,
+  sec_toc = 2
+};
+
 struct _ppc64_elf_section_data
 {
   struct bfd_elf_section_data elf;
@@ -2533,14 +2539,20 @@ struct _ppc64_elf_section_data
   union
   {
     /* Points to the function code section for local opd entries.  */
-    asection **func_sec;
+    asection **opd_func_sec;
     /* After editing .opd, adjust references to opd local syms.  */
-    long *adjust;
-  } opd;
+    long *opd_adjust;
 
-  /* An array for toc sections, indexed by offset/8.
-     Specifies the relocation symbol index used at a given toc offset.  */
-  unsigned *t_symndx;
+    /* An array for toc sections, indexed by offset/8.
+       Specifies the relocation symbol index used at a given toc offset.  */
+    unsigned *t_symndx;
+  } u;
+
+  enum _ppc64_sec_type sec_type:2;
+
+  /* Flag set when small branches are detected.  Used to
+     select suitable defaults for the stub group size.  */
+  unsigned int has_14bit_branch:1;
 };
 
 #define ppc64_elf_section_data(sec) \
@@ -2568,8 +2580,8 @@ get_opd_info (asection * sec)
 {
   if (sec != NULL
       && ppc64_elf_section_data (sec) != NULL
-      && ppc64_elf_section_data (sec)->opd.adjust != NULL)
-    return ppc64_elf_section_data (sec)->opd.adjust;
+      && ppc64_elf_section_data (sec)->sec_type == sec_opd)
+    return ppc64_elf_section_data (sec)->u.opd_adjust;
   return NULL;
 }
 
@@ -3357,10 +3369,6 @@ struct ppc_link_hash_table
 
   /* Set on error.  */
   unsigned int stub_error:1;
-
-  /* Flag set when small branches are detected.  Used to
-     select suitable defaults for the stub group size.  */
-  unsigned int has_14bit_branch:1;
 
   /* Temp used by ppc64_elf_check_directives.  */
   unsigned int twiddled_syms:1;
@@ -4373,7 +4381,9 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       opd_sym_map = bfd_zalloc (abfd, amt);
       if (opd_sym_map == NULL)
 	return FALSE;
-      ppc64_elf_section_data (sec)->opd.func_sec = opd_sym_map;
+      ppc64_elf_section_data (sec)->u.opd_func_sec = opd_sym_map;
+      BFD_ASSERT (ppc64_elf_section_data (sec)->sec_type == sec_normal);
+      ppc64_elf_section_data (sec)->sec_type = sec_opd;
     }
 
   if (htab->sfpr == NULL
@@ -4387,6 +4397,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       struct elf_link_hash_entry *h;
       enum elf_ppc64_reloc_type r_type;
       int tls_type = 0;
+      struct _ppc64_elf_section_data *ppc64_sec;
 
       r_symndx = ELF64_R_SYM (rel->r_info);
       if (r_symndx < symtab_hdr->sh_info)
@@ -4568,7 +4579,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      dest = bfd_section_from_r_symndx (abfd, &htab->sym_sec,
 						sec, r_symndx);
 	    if (dest != sec)
-	      htab->has_14bit_branch = 1;
+	      ppc64_elf_section_data (sec)->has_14bit_branch = 1;
 	  }
 	  /* Fall through.  */
 
@@ -4639,23 +4650,26 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 					rel->r_addend, tls_type))
 	      return FALSE;
 
-	  if (ppc64_elf_section_data (sec)->t_symndx == NULL)
+	  ppc64_sec = ppc64_elf_section_data (sec);
+	  if (ppc64_sec->sec_type != sec_toc)
 	    {
 	      /* One extra to simplify get_tls_mask.  */
 	      bfd_size_type amt = sec->size * sizeof (unsigned) / 8 + 1;
-	      ppc64_elf_section_data (sec)->t_symndx = bfd_zalloc (abfd, amt);
-	      if (ppc64_elf_section_data (sec)->t_symndx == NULL)
+	      ppc64_sec->u.t_symndx = bfd_zalloc (abfd, amt);
+	      if (ppc64_sec->u.t_symndx == NULL)
 		return FALSE;
+	      BFD_ASSERT (ppc64_sec->sec_type == sec_normal);
+	      ppc64_sec->sec_type = sec_toc;
 	    }
 	  BFD_ASSERT (rel->r_offset % 8 == 0);
-	  ppc64_elf_section_data (sec)->t_symndx[rel->r_offset / 8] = r_symndx;
+	  ppc64_sec->u.t_symndx[rel->r_offset / 8] = r_symndx;
 
 	  /* Mark the second slot of a GD or LD entry.
 	     -1 to indicate GD and -2 to indicate LD.  */
 	  if (tls_type == (TLS_EXPLICIT | TLS_TLS | TLS_GD))
-	    ppc64_elf_section_data (sec)->t_symndx[rel->r_offset / 8 + 1] = -1;
+	    ppc64_sec->u.t_symndx[rel->r_offset / 8 + 1] = -1;
 	  else if (tls_type == (TLS_EXPLICIT | TLS_TLS | TLS_LD))
-	    ppc64_elf_section_data (sec)->t_symndx[rel->r_offset / 8 + 1] = -2;
+	    ppc64_sec->u.t_symndx[rel->r_offset / 8 + 1] = -2;
 	  goto dodyn;
 
 	case R_PPC64_TPREL16:
@@ -6051,7 +6065,7 @@ get_tls_mask (char **tls_maskp, unsigned long *toc_symndx,
 
   if ((*tls_maskp != NULL && **tls_maskp != 0)
       || sec == NULL
-      || ppc64_elf_section_data (sec)->t_symndx == NULL)
+      || ppc64_elf_section_data (sec)->sec_type != sec_toc)
     return 1;
 
   /* Look inside a TOC section too.  */
@@ -6064,8 +6078,8 @@ get_tls_mask (char **tls_maskp, unsigned long *toc_symndx,
     off = sym->st_value;
   off += rel->r_addend;
   BFD_ASSERT (off % 8 == 0);
-  r_symndx = ppc64_elf_section_data (sec)->t_symndx[off / 8];
-  next_r = ppc64_elf_section_data (sec)->t_symndx[off / 8 + 1];
+  r_symndx = ppc64_elf_section_data (sec)->u.t_symndx[off / 8];
+  next_r = ppc64_elf_section_data (sec)->u.t_symndx[off / 8 + 1];
   if (!get_sym_h (&h, &sym, &sec, tls_maskp, locsymsp, r_symndx, ibfd))
     return 0;
   if (toc_symndx != NULL)
@@ -6306,7 +6320,9 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
 	  opd_adjust = bfd_alloc (obfd, amt);
 	  if (opd_adjust == NULL)
 	    return FALSE;
-	  ppc64_elf_section_data (sec)->opd.adjust = opd_adjust;
+	  ppc64_elf_section_data (sec)->u.opd_adjust = opd_adjust;
+	  BFD_ASSERT (ppc64_elf_section_data (sec)->sec_type == sec_normal);
+	  ppc64_elf_section_data (sec)->sec_type = sec_opd;
 	}
       memset (opd_adjust, 0, amt);
 
@@ -8940,7 +8956,29 @@ group_sections (struct ppc_link_hash_table *htab,
 		bfd_size_type stub_group_size,
 		bfd_boolean stubs_always_before_branch)
 {
-  asection **list = htab->input_list + htab->top_index;
+  asection **list;
+  bfd_size_type stub14_group_size;
+  bfd_boolean suppress_size_errors;
+
+  suppress_size_errors = FALSE;
+  stub14_group_size = stub_group_size;
+  if (stub_group_size == 1)
+    {
+      /* Default values.  */
+      if (stubs_always_before_branch)
+	{
+	  stub_group_size = 0x1e00000;
+	  stub14_group_size = 0x7800;
+	}
+      else
+	{
+	  stub_group_size = 0x1c00000;
+	  stub14_group_size = 0x7000;
+	}
+      suppress_size_errors = TRUE;
+    }
+
+  list = htab->input_list + htab->top_index;
   do
     {
       asection *tail = *list;
@@ -8954,15 +8992,17 @@ group_sections (struct ppc_link_hash_table *htab,
 
 	  curr = tail;
 	  total = tail->size;
-	  big_sec = total > stub_group_size;
-	  if (big_sec)
+	  big_sec = total > (ppc64_elf_section_data (tail)->has_14bit_branch
+			     ? stub14_group_size : stub_group_size);
+	  if (big_sec && !suppress_size_errors)
 	    (*_bfd_error_handler) (_("%B section %A exceeds stub group size"),
 				     tail->owner, tail);
 	  curr_toc = htab->stub_group[tail->id].toc_off;
 
 	  while ((prev = PREV_SEC (curr)) != NULL
 		 && ((total += curr->output_offset - prev->output_offset)
-		     < stub_group_size)
+		     < (ppc64_elf_section_data (prev)->has_14bit_branch
+			? stub14_group_size : stub_group_size))
 		 && htab->stub_group[prev->id].toc_off == curr_toc)
 	    curr = prev;
 
@@ -8994,7 +9034,8 @@ group_sections (struct ppc_link_hash_table *htab,
 	      total = 0;
 	      while (prev != NULL
 		     && ((total += tail->output_offset - prev->output_offset)
-			 < stub_group_size)
+			 < (ppc64_elf_section_data (prev)->has_14bit_branch
+			    ? stub14_group_size : stub_group_size))
 		     && htab->stub_group[prev->id].toc_off == curr_toc)
 		{
 		  tail = prev;
@@ -9035,22 +9076,6 @@ ppc64_elf_size_stubs (bfd *output_bfd,
     stub_group_size = -group_size;
   else
     stub_group_size = group_size;
-  if (stub_group_size == 1)
-    {
-      /* Default values.  */
-      if (stubs_always_before_branch)
-	{
-	  stub_group_size = 0x1e00000;
-	  if (htab->has_14bit_branch)
-	    stub_group_size = 0x7800;
-	}
-      else
-	{
-	  stub_group_size = 0x1c00000;
-	  if (htab->has_14bit_branch)
-	    stub_group_size = 0x7000;
-	}
-    }
 
   group_sections (htab, stub_group_size, stubs_always_before_branch);
 
@@ -9721,7 +9746,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
   TOCstart = elf_gp (output_bfd);
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
-  is_opd = ppc64_elf_section_data (input_section)->opd.adjust != NULL;
+  is_opd = ppc64_elf_section_data (input_section)->sec_type == sec_opd;
 
   rel = relocs;
   relend = relocs + input_section->reloc_count;
