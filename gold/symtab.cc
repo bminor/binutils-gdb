@@ -10,6 +10,7 @@
 #include "object.h"
 #include "output.h"
 #include "target.h"
+#include "workqueue.h"
 #include "symtab.h"
 
 namespace gold
@@ -1111,10 +1112,13 @@ Warnings::note_warnings(Symbol_table* symtab)
 	  // we relocate sections.  That means that we can not lock
 	  // the object then, as we might try to issue the same
 	  // warning multiple times simultaneously.
-	  const unsigned char* c;
-	  off_t len;
-	  c = p->second.object->section_contents(p->second.shndx, &len);
-	  p->second.set_text(reinterpret_cast<const char*>(c), len);
+	  {
+	    Task_locker_obj<Object> tl(*p->second.object);
+	    const unsigned char* c;
+	    off_t len;
+	    c = p->second.object->section_contents(p->second.shndx, &len);
+	    p->second.set_text(reinterpret_cast<const char*>(c), len);
+	  }
 	}
     }
 }

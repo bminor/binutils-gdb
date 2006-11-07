@@ -570,6 +570,12 @@ class Ehdr
     : p_(reinterpret_cast<const internal::Ehdr_data<size>*>(p))
   { }
 
+  template<typename File>
+  Ehdr(File* file, typename File::Location loc)
+    : p_(reinterpret_cast<const internal::Ehdr_data<size>*>(
+	   file->view(loc.file_offset, loc.data_size).data()))
+  { }
+
   const unsigned char*
   get_e_ident() const
   { return this->p_->e_ident; }
@@ -710,6 +716,12 @@ class Shdr
     : p_(reinterpret_cast<const internal::Shdr_data<size>*>(p))
   { }
 
+  template<typename File>
+  Shdr(File* file, typename File::Location loc)
+    : p_(reinterpret_cast<const internal::Shdr_data<size>*>(
+	   file->view(loc.file_offset, loc.data_size).data()))
+  { }
+
   Elf_Word
   get_sh_name() const
   { return Convert<32, big_endian>::convert_host(this->p_->sh_name); }
@@ -819,6 +831,12 @@ class Phdr
     : p_(reinterpret_cast<const internal::Phdr_data<size>*>(p))
   { }
 
+  template<typename File>
+  Phdr(File* file, typename File::Location loc)
+    : p_(reinterpret_cast<internal::Phdr_data<size>*>(
+	   file->view(loc.file_offset, loc.data_size).data()))
+  { }
+
   Elf_Word
   get_p_type() const
   { return Convert<32, big_endian>::convert_host(this->p_->p_type); }
@@ -909,6 +927,12 @@ class Sym
  public:
   Sym(const unsigned char* p)
     : p_(reinterpret_cast<const internal::Sym_data<size>*>(p))
+  { }
+
+  template<typename File>
+  Sym(File* file, typename File::Location loc)
+    : p_(reinterpret_cast<const internal::Sym_data<size>*>(
+	   file->view(loc.file_offset, loc.data_size).data()))
   { }
 
   Elf_Word
@@ -1015,6 +1039,12 @@ class Rel
     : p_(reinterpret_cast<const internal::Rel_data<size>*>(p))
   { }
 
+  template<typename File>
+  Rel(File* file, typename File::Location loc)
+    : p_(reinterpret_cast<const internal::Rel_data<size>*>(
+	   file->view(loc.file_offset, loc.data_size).data()))
+  { }
+
   typename Elf_types<size>::Elf_Addr
   get_r_offset() const
   { return Convert<size, big_endian>::convert_host(this->p_->r_offset); }
@@ -1033,6 +1063,12 @@ class Rela
  public:
   Rela(const unsigned char* p)
     : p_(reinterpret_cast<const internal::Rela_data<size>*>(p))
+  { }
+
+  template<typename File>
+  Rela(File* file, typename File::Location loc)
+    : p_(reinterpret_cast<const internal::Rela_data<size>*>(
+	   file->view(loc.file_offset, loc.data_size).data()))
   { }
 
   typename Elf_types<size>::Elf_Addr

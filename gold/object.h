@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "elfcpp.h"
+#include "elfcpp_file.h"
 #include "fileread.h"
 #include "target.h"
 
@@ -147,14 +148,59 @@ class Object
   // Return a view of the contents of a section.  Set *PLEN to the
   // size.
   const unsigned char*
-  section_contents(unsigned int shnum, off_t* plen)
-  { return this->do_section_contents(shnum, plen); }
+  section_contents(unsigned int shndx, off_t* plen);
 
   // Return the name of a section given a section index.  This is only
   // used for error messages.
   std::string
   section_name(unsigned int shnum)
   { return this->do_section_name(shnum); }
+
+  // Functions and types for the elfcpp::Elf_file interface.  This
+  // permit us to use Object as the File template parameter for
+  // elfcpp::Elf_file.
+
+  // The View class is returned by view.  It must support a single
+  // method, data().  This is trivial, because get_view does what we
+  // need.
+  class View
+  {
+   public:
+    View(const unsigned char* p)
+      : p_(p)
+    { }
+
+    const unsigned char*
+    data() const
+    { return this->p_; }
+
+   private:
+    const unsigned char* p_;
+  };
+
+  // Return a View.
+  View
+  view(off_t file_offset, off_t data_size)
+  { return View(this->get_view(file_offset, data_size)); }
+
+  // Report an error.
+  void
+  error(const char* format, ...) ATTRIBUTE_PRINTF_2;
+
+  // A location in the file.
+  struct Location
+  {
+    off_t file_offset;
+    off_t data_size;
+
+    Location(off_t fo, off_t ds)
+      : file_offset(fo), data_size(ds)
+    { }
+  };
+
+  // Get a View given a Location.
+  View view(Location loc)
+  { return View(this->get_view(loc.file_offset, loc.data_size)); }
 
  protected:
   // Read the symbols--implemented by child class.
@@ -171,10 +217,10 @@ class Object
   virtual void
   do_add_symbols(Symbol_table*, Read_symbols_data*) = 0;
 
-  // Return a view of the contents of a section.  Set *PLEN to the
-  // size.  Implemented by child class.
-  virtual const unsigned char*
-  do_section_contents(unsigned int shnum, off_t* plen) = 0;
+  // Return the location of the contents of a section.  Implemented by
+  // child class.
+  virtual Location
+  do_section_contents(unsigned int shnum) = 0;
 
   // Get the name of a section--implemented by child class.
   virtual std::string
@@ -411,12 +457,13 @@ class Sized_relobj : public Relobj
 
   // Get the name of a section.
   std::string
-  do_section_name(unsigned int shnum);
+  do_section_name(unsigned int shndx)
+  { return this->elf_file_.section_name(shndx); }
 
-  // Return a view of the contents of a section.  Set *PLEN to the
-  // size.
-  const unsigned char*
-  do_section_contents(unsigned int shnum, off_t* plen);
+  // Return the location of the contents of a section.
+  Location
+  do_section_contents(unsigned int shndx)
+  { return this->elf_file_.section_contents(shndx); }
 
   // Return the appropriate Sized_target structure.
   Sized_target<size, big_endian>*
@@ -434,10 +481,6 @@ class Sized_relobj : public Relobj
   static const int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
   static const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
   typedef elfcpp::Shdr<size, big_endian> Shdr;
-
-  // Read the section header for section SHNUM.
-  const unsigned char*
-  section_header(unsigned int shnum);
 
   // Whether to include a section group in the link.
   bool
@@ -475,16 +518,12 @@ class Sized_relobj : public Relobj
   void
   write_local_symbols(Output_file*, const Stringpool*);
 
+  // General access to the ELF file.
+  elfcpp::Elf_file<size, big_endian, Object> elf_file_;
   // If non-NULL, a view of the section header data.
   File_view* section_headers_;
-  // ELF file header e_flags field.
-  unsigned int flags_;
-  // File offset of section header table.
-  off_t shoff_;
-  // Offset of SHT_STRTAB section holding section names.
-  unsigned int shstrndx_;
   // Index of SHT_SYMTAB section.
-  unsigned int symtab_shnum_;
+  unsigned int symtab_shndx_;
   // The number of local symbols.
   unsigned int local_symbol_count_;
   // The number of local symbols which go into the output file.

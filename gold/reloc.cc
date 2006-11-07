@@ -150,7 +150,7 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
 
   rd->relocs.reserve(shnum / 2);
 
-  const unsigned char *pshdrs = this->get_view(this->shoff_,
+  const unsigned char *pshdrs = this->get_view(this->elf_file_.shoff(),
 					       shnum * This::shdr_size);
   // Skip the first, dummy, section.
   const unsigned char *ps = pshdrs + This::shdr_size;
@@ -181,7 +181,7 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
       if ((secshdr.get_sh_flags() & elfcpp::SHF_ALLOC) == 0)
 	continue;
 
-      if (shdr.get_sh_link() != this->symtab_shnum_)
+      if (shdr.get_sh_link() != this->symtab_shndx_)
 	{
 	  fprintf(stderr,
 		  _("%s: %s: relocation section %u uses unexpected "
@@ -227,12 +227,12 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
     }
 
   // Read the local symbols.
-  if (this->symtab_shnum_ == 0 || this->local_symbol_count_ == 0)
+  if (this->symtab_shndx_ == 0 || this->local_symbol_count_ == 0)
     rd->local_symbols = NULL;
   else
     {
       typename This::Shdr symtabshdr(pshdrs
-				     + this->symtab_shnum_ * This::shdr_size);
+				     + this->symtab_shndx_ * This::shdr_size);
       assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
       const int sym_size = This::sym_size;
       const unsigned int loccount = this->local_symbol_count_;
@@ -293,7 +293,7 @@ Sized_relobj<size, big_endian>::do_relocate(const General_options& options,
   unsigned int shnum = this->shnum();
 
   // Read the section headers.
-  const unsigned char* pshdrs = this->get_view(this->shoff_,
+  const unsigned char* pshdrs = this->get_view(this->elf_file_.shoff(),
 					       shnum * This::shdr_size);
 
   Views views;
@@ -419,7 +419,7 @@ Sized_relobj<size, big_endian>::relocate_sections(
 
       assert((*pviews)[index].view != NULL);
 
-      if (shdr.get_sh_link() != this->symtab_shnum_)
+      if (shdr.get_sh_link() != this->symtab_shndx_)
 	{
 	  fprintf(stderr,
 		  _("%s: %s: relocation section %u uses unexpected "

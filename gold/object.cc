@@ -5,6 +5,7 @@
 #include <cerrno>
 #include <cstring>
 #include <cassert>
+#include <cstdarg>
 
 #include "target-select.h"
 #include "layout.h"
@@ -16,6 +17,34 @@
 namespace gold
 {
 
+// Class Object.
+
+// Report an error for the elfcpp::Elf_file interface.
+
+void
+Object::error(const char* format, ...)
+{
+  va_list args;
+
+  fprintf(stderr, "%s: %s: ", program_name, this->name().c_str());
+  va_start(args, format);
+  vfprintf(stderr, format, args);
+  va_end(args);
+  putc('\n', stderr);
+
+  gold_exit(false);
+}
+
+// Return a view of the contents of a section.
+
+const unsigned char*
+Object::section_contents(unsigned int shndx, off_t* plen)
+{
+  Location loc(this->do_section_contents(shndx));
+  *plen = loc.data_size;
+  return this->get_view(loc.file_offset, loc.data_size);
+}
+
 // Class Sized_relobj.
 
 template<int size, bool big_endian>
@@ -25,31 +54,15 @@ Sized_relobj<size, big_endian>::Sized_relobj(
     off_t offset,
     const elfcpp::Ehdr<size, big_endian>& ehdr)
   : Relobj(name, input_file, offset),
+    elf_file_(this, ehdr),
     section_headers_(NULL),
-    flags_(ehdr.get_e_flags()),
-    shoff_(ehdr.get_e_shoff()),
-    shstrndx_(0),
-    symtab_shnum_(0),
+    symtab_shndx_(0),
     local_symbol_count_(0),
     output_local_symbol_count_(0),
     symbols_(NULL),
     local_symbol_offset_(0),
     values_(NULL)
 {
-  if (ehdr.get_e_ehsize() != This::ehdr_size)
-    {
-      fprintf(stderr, _("%s: %s: bad e_ehsize field (%d != %d)\n"),
-	      program_name, this->name().c_str(), ehdr.get_e_ehsize(),
-	      This::ehdr_size);
-      gold_exit(false);
-    }
-  if (ehdr.get_e_shentsize() != This::shdr_size)
-    {
-      fprintf(stderr, _("%s: %s: bad e_shentsize field (%d != %d)\n"),
-	      program_name, this->name().c_str(), ehdr.get_e_shentsize(),
-	      This::shdr_size);
-      gold_exit(false);
-    }
 }
 
 template<int size, bool big_endian>
@@ -57,59 +70,7 @@ Sized_relobj<size, big_endian>::~Sized_relobj()
 {
 }
 
-// Read the section header for section SHNUM.
-
-template<int size, bool big_endian>
-inline const unsigned char*
-Sized_relobj<size, big_endian>::section_header(unsigned int shnum)
-{
-  assert(shnum < this->shnum());
-  off_t symtabshdroff = this->shoff_ + shnum * This::shdr_size;
-  return this->get_view(symtabshdroff, This::shdr_size);
-}
-
-// Return the name of section SHNUM.  The object must already be
-// locked.
-
-template<int size, bool big_endian>
-std::string
-Sized_relobj<size, big_endian>::do_section_name(unsigned int shnum)
-{
-  // Read the section names.
-  typename This::Shdr shdrnames(this->section_header(this->shstrndx_));
-  const unsigned char* pnamesu = this->get_view(shdrnames.get_sh_offset(),
-						shdrnames.get_sh_size());
-  const char* pnames = reinterpret_cast<const char*>(pnamesu);
-
-  typename This::Shdr shdr(this->section_header(shnum));
-  if (shdr.get_sh_name() >= shdrnames.get_sh_size())
-    {
-      fprintf(stderr,
-	      _("%s: %s: bad section name offset for section %u: %lu\n"),
-	      program_name, this->name().c_str(), shnum,
-	      static_cast<unsigned long>(shdr.get_sh_name()));
-      gold_exit(false);
-    }
-
-  return std::string(pnames + shdr.get_sh_name());
-}
-
-// Return a view of the contents of section SHNUM.  The object does
-// not have to be locked.
-
-template<int size, bool big_endian>
-const unsigned char*
-Sized_relobj<size, big_endian>::do_section_contents(unsigned int shnum,
-						    off_t* plen)
-{
-  Task_locker_obj<Object> tl(*this);
-
-  typename This::Shdr shdr(this->section_header(shnum));
-  *plen = shdr.get_sh_size();
-  return this->get_view(shdr.get_sh_offset(), shdr.get_sh_size());
-}
-
-// Set up an object file bsaed on the file header.  This sets up the
+// Set up an object file based on the file header.  This sets up the
 // target and reads the section information.
 
 template<int size, bool big_endian>
@@ -129,25 +90,14 @@ Sized_relobj<size, big_endian>::setup(
     }
   this->set_target(target);
 
-  unsigned int shnum = ehdr.get_e_shnum();
-  unsigned int shstrndx = ehdr.get_e_shstrndx();
-  if ((shnum == 0 || shstrndx == elfcpp::SHN_XINDEX)
-      && this->shoff_ != 0)
-    {
-      typename This::Shdr shdr(this->section_header(0));
-      if (shnum == 0)
-	shnum = shdr.get_sh_size();
-      if (shstrndx == elfcpp::SHN_XINDEX)
-	shstrndx = shdr.get_sh_link();
-    }
+  unsigned int shnum = this->elf_file_.shnum();
   this->set_shnum(shnum);
-  this->shstrndx_ = shstrndx;
-
   if (shnum == 0)
     return;
 
   // We store the section headers in a File_view until do_read_symbols.
-  this->section_headers_ = this->get_lasting_view(this->shoff_,
+  off_t shoff = this->elf_file_.shoff();
+  this->section_headers_ = this->get_lasting_view(shoff,
 						  shnum * This::shdr_size);
 
   // Find the SHT_SYMTAB section.  The ELF standard says that maybe in
@@ -163,7 +113,7 @@ Sized_relobj<size, big_endian>::setup(
       typename This::Shdr shdr(p);
       if (shdr.get_sh_type() == elfcpp::SHT_SYMTAB)
 	{
-	  this->symtab_shnum_ = i;
+	  this->symtab_shndx_ = i;
 	  break;
 	}
     }
@@ -181,13 +131,15 @@ Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 
   // Read the section names.
   const unsigned char* pshdrs = sd->section_headers->data();
-  const unsigned char* pshdrnames = pshdrs + this->shstrndx_ * This::shdr_size;
+  const unsigned char* pshdrnames = (pshdrs
+				     + (this->elf_file_.shstrndx()
+					* This::shdr_size));
   typename This::Shdr shdrnames(pshdrnames);
   sd->section_names_size = shdrnames.get_sh_size();
   sd->section_names = this->get_lasting_view(shdrnames.get_sh_offset(),
 					     sd->section_names_size);
 
-  if (this->symtab_shnum_ == 0)
+  if (this->symtab_shndx_ == 0)
     {
       // No symbol table.  Weird but legal.
       sd->symbols = NULL;
@@ -199,7 +151,7 @@ Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 
   // Get the symbol table section header.
   typename This::Shdr symtabshdr(pshdrs
-				 + this->symtab_shnum_ * This::shdr_size);
+				 + this->symtab_shndx_ * This::shdr_size);
   assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
 
   // We only need the external symbols.
@@ -276,14 +228,8 @@ Sized_relobj<size, big_endian>::include_section_group(
 
   // Get the appropriate symbol table header (this will normally be
   // the single SHT_SYMTAB section, but in principle it need not be).
-  if (shdr.get_sh_link() >= this->shnum())
-    {
-      fprintf(stderr, _("%s: %s: section group %u link %u out of range\n"),
-	      program_name, this->name().c_str(), index, shdr.get_sh_link());
-      gold_exit(false);
-    }
-
-  typename This::Shdr symshdr(this->section_header(shdr.get_sh_link()));
+  const unsigned int link = shdr.get_sh_link();
+  typename This::Shdr symshdr(this, this->elf_file_.section_header(link));
 
   // Read the symbol table entry.
   if (shdr.get_sh_info() >= symshdr.get_sh_size() / This::sym_size)
@@ -296,24 +242,14 @@ Sized_relobj<size, big_endian>::include_section_group(
   const unsigned char* psym = this->get_view(symoff, This::sym_size);
   elfcpp::Sym<size, big_endian> sym(psym);
 
-  // Read the section header for the symbol table names.
-  if (symshdr.get_sh_link() >= this->shnum())
-    {
-      fprintf(stderr, _("%s; %s: symtab section %u link %u out of range\n"),
-	      program_name, this->name().c_str(), shdr.get_sh_link(),
-	      symshdr.get_sh_link());
-      gold_exit(false);
-    }
-
-  typename This::Shdr symnamehdr(this->section_header(symshdr.get_sh_link()));
-
   // Read the symbol table names.
-  const unsigned char *psymnamesu = this->get_view(symnamehdr.get_sh_offset(),
-						   symnamehdr.get_sh_size());
+  off_t symnamelen;
+  const unsigned char* psymnamesu;
+  psymnamesu = this->section_contents(symshdr.get_sh_link(), &symnamelen);
   const char* psymnames = reinterpret_cast<const char*>(psymnamesu);
 
   // Get the section group signature.
-  if (sym.get_st_name() >= symnamehdr.get_sh_size())
+  if (sym.get_st_name() >= symnamelen)
     {
       fprintf(stderr, _("%s: %s: symbol %u name offset %u out of range\n"),
 	      program_name, this->name().c_str(), shdr.get_sh_info(),
@@ -327,26 +263,11 @@ Sized_relobj<size, big_endian>::include_section_group(
   // associated with a section symbol, and then fail to give a name to
   // the section symbol.  In such a case, use the name of the section.
   // FIXME.
-  if (signature[0] == '\0'
-      && sym.get_st_type() == elfcpp::STT_SECTION
-      && sym.get_st_shndx() < this->shnum())
+  std::string secname;
+  if (signature[0] == '\0' && sym.get_st_type() == elfcpp::STT_SECTION)
     {
-      typename This::Shdr shdrnames(this->section_header(this->shstrndx_));
-      const unsigned char* pnamesu = this->get_view(shdrnames.get_sh_offset(),
-						    shdrnames.get_sh_size());
-      const char* pnames = reinterpret_cast<const char*>(pnamesu);
-      
-      typename This::Shdr sechdr(this->section_header(sym.get_st_shndx()));
-      if (sechdr.get_sh_name() >= shdrnames.get_sh_size())
-	{
-	  fprintf(stderr,
-		  _("%s: %s: bad section name offset for section %u: %lu\n"),
-		  program_name, this->name().c_str(), sym.get_st_shndx(),
-		  static_cast<unsigned long>(sechdr.get_sh_name()));
-	  gold_exit(false);
-	}
-
-      signature = pnames + sechdr.get_sh_name();
+      secname = this->section_name(sym.get_st_shndx());
+      signature = secname.c_str();
     }
 
   // Record this section group, and see whether we've already seen one
@@ -543,7 +464,7 @@ off_t
 Sized_relobj<size, big_endian>::do_finalize_local_symbols(off_t off,
 							  Stringpool* pool)
 {
-  if (this->symtab_shnum_ == 0)
+  if (this->symtab_shndx_ == 0)
     {
       // This object has no symbols.  Weird but legal.
       return off;
@@ -554,7 +475,9 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(off_t off,
   this->local_symbol_offset_ = off;
 
   // Read the symbol table section header.
-  typename This::Shdr symtabshdr(this->section_header(this->symtab_shnum_));
+  const unsigned int symtab_shndx = this->symtab_shndx_;
+  typename This::Shdr symtabshdr(this,
+				 this->elf_file_.section_header(symtab_shndx));
   assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
 
   // Read the local symbols.
@@ -567,14 +490,11 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(off_t off,
 
   this->values_ = new typename elfcpp::Elf_types<size>::Elf_Addr[loccount];
 
-  // Read the section header for the symbol names.
-  typename This::Shdr strtabshdr(
-    this->section_header(symtabshdr.get_sh_link()));
-  assert(strtabshdr.get_sh_type() == elfcpp::SHT_STRTAB);
-
   // Read the symbol names.
-  const unsigned char* pnamesu = this->get_view(strtabshdr.get_sh_offset(),
-						strtabshdr.get_sh_size());
+  const unsigned int strtab_shndx = symtabshdr.get_sh_link();
+  off_t strtab_size;
+  const unsigned char* pnamesu = this->section_contents(strtab_shndx,
+							&strtab_size);
   const char* pnames = reinterpret_cast<const char*>(pnamesu);
 
   // Loop over the local symbols.
@@ -628,6 +548,17 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(off_t off,
 
       if (sym.get_st_type() != elfcpp::STT_SECTION)
 	{
+	  if (sym.get_st_name() >= strtab_size)
+	    {
+	      fprintf(stderr,
+		      _("%s: %s: local symbol %u section name "
+			"out of range: %u >= %u\n"),
+		      program_name, this->name().c_str(),
+		      i, sym.get_st_name(),
+		      static_cast<unsigned int>(strtab_size));
+	      gold_exit(false);
+	    }
+
 	  pool->add(pnames + sym.get_st_name(), NULL);
 	  off += sym_size;
 	  ++count;
@@ -646,14 +577,16 @@ void
 Sized_relobj<size, big_endian>::write_local_symbols(Output_file* of,
 						    const Stringpool* sympool)
 {
-  if (this->symtab_shnum_ == 0)
+  if (this->symtab_shndx_ == 0)
     {
       // This object has no symbols.  Weird but legal.
       return;
     }
 
   // Read the symbol table section header.
-  typename This::Shdr symtabshdr(this->section_header(this->symtab_shnum_));
+  const unsigned int symtab_shndx = this->symtab_shndx_;
+  typename This::Shdr symtabshdr(this,
+				 this->elf_file_.section_header(symtab_shndx));
   assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
   const unsigned int loccount = this->local_symbol_count_;
   assert(loccount == symtabshdr.get_sh_info());
@@ -664,14 +597,11 @@ Sized_relobj<size, big_endian>::write_local_symbols(Output_file* of,
   const unsigned char* psyms = this->get_view(symtabshdr.get_sh_offset(),
 					      locsize);
 
-  // Read the section header for the symbol names.
-  typename This::Shdr strtabshdr(
-    this->section_header(symtabshdr.get_sh_link()));
-  assert(strtabshdr.get_sh_type() == elfcpp::SHT_STRTAB);
-
   // Read the symbol names.
-  const unsigned char* pnamesu = this->get_view(strtabshdr.get_sh_offset(),
-						strtabshdr.get_sh_size());
+  const unsigned int strtab_shndx = symtabshdr.get_sh_link();
+  off_t strtab_size;
+  const unsigned char* pnamesu = this->section_contents(strtab_shndx,
+							&strtab_size);
   const char* pnames = reinterpret_cast<const char*>(pnamesu);
 
   // Get a view into the output file.
@@ -701,6 +631,7 @@ Sized_relobj<size, big_endian>::write_local_symbols(Output_file* of,
 
       elfcpp::Sym_write<size, big_endian> osym(ov);
 
+      assert(isym.get_st_name() < strtab_size);
       osym.put_st_name(sympool->get_offset(pnames + isym.get_st_name()));
       osym.put_st_value(this->values_[i]);
       osym.put_st_size(isym.get_st_size());
