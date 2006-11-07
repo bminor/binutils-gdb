@@ -1,3 +1,7 @@
+2006-11-07  Thiemo Seufer  <ths@mips.com>
+
+	* dsp.igen (do_w_op): Fix compiler warning.
+
 2006-08-29  Thiemo Seufer  <ths@mips.com>
             David Ung  <davidu@mips.com>
 

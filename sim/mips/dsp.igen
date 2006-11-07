@@ -69,10 +69,10 @@
     h0 = (signed64)h1 + (signed64)h2;
   else // SUB
     h0 = (signed64)h1 - (signed64)h2;
-  if (((h0 & 0x100000000) >> 1) != (h0 & 0x80000000))
+  if (((h0 & 0x100000000LL) >> 1) != (h0 & 0x80000000))
     {
       DSPCR |= DSPCR_OUFLAG4;
-      if (h0 & 0x100000000)
+      if (h0 & 0x100000000LL)
 	h0 = 0x80000000;
       else
 	h0 = 0x7fffffff;
