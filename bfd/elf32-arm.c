@@ -2429,7 +2429,7 @@ elf32_arm_link_hash_table_create (bfd *abfd)
 static struct elf_link_hash_entry *
 find_thumb_glue (struct bfd_link_info *link_info,
 		 const char *name,
-		 bfd *input_bfd)
+		 char **error_message)
 {
   char *tmp_name;
   struct elf_link_hash_entry *hash;
@@ -2449,9 +2449,8 @@ find_thumb_glue (struct bfd_link_info *link_info,
     (&(hash_table)->root, tmp_name, FALSE, FALSE, TRUE);
 
   if (hash == NULL)
-    /* xgettext:c-format */
-    (*_bfd_error_handler) (_("%B: unable to find THUMB glue '%s' for `%s'"),
-			   input_bfd, tmp_name, name);
+    asprintf (error_message, _("unable to find THUMB glue '%s' for '%s'"),
+	      tmp_name, name);
 
   free (tmp_name);
 
@@ -2463,7 +2462,7 @@ find_thumb_glue (struct bfd_link_info *link_info,
 static struct elf_link_hash_entry *
 find_arm_glue (struct bfd_link_info *link_info,
 	       const char *name,
-	       bfd *input_bfd)
+	       char **error_message)
 {
   char *tmp_name;
   struct elf_link_hash_entry *myh;
@@ -2483,9 +2482,8 @@ find_arm_glue (struct bfd_link_info *link_info,
     (&(hash_table)->root, tmp_name, FALSE, FALSE, TRUE);
 
   if (myh == NULL)
-    /* xgettext:c-format */
-    (*_bfd_error_handler) (_("%B: unable to find ARM glue '%s' for `%s'"),
-			   input_bfd, tmp_name, name);
+    asprintf (error_message, _("unable to find ARM glue '%s' for '%s'"),
+	      tmp_name, name);
 
   free (tmp_name);
 
@@ -3126,7 +3124,8 @@ elf32_thumb_to_arm_stub (struct bfd_link_info * info,
 			 asection *             sym_sec,
 			 bfd_vma                offset,
 			 bfd_signed_vma         addend,
-			 bfd_vma                val)
+			 bfd_vma                val,
+			 char **error_message)
 {
   asection * s = 0;
   bfd_vma my_offset;
@@ -3135,7 +3134,7 @@ elf32_thumb_to_arm_stub (struct bfd_link_info * info,
   struct elf_link_hash_entry * myh;
   struct elf32_arm_link_hash_table * globals;
 
-  myh = find_thumb_glue (info, name, input_bfd);
+  myh = find_thumb_glue (info, name, error_message);
   if (myh == NULL)
     return FALSE;
 
@@ -3230,14 +3229,15 @@ elf32_arm_create_thumb_stub (struct bfd_link_info * info,
 			     bfd *                  output_bfd,
 			     asection *             sym_sec,
 			     bfd_vma                val,
-			     asection		    *s)
+			     asection		    *s,
+			     char **error_message)
 {
   bfd_vma my_offset;
   long int ret_offset;
   struct elf_link_hash_entry * myh;
   struct elf32_arm_link_hash_table * globals;
 
-  myh = find_arm_glue (info, name, input_bfd);
+  myh = find_arm_glue (info, name, error_message);
   if (myh == NULL)
     return NULL;
 
@@ -3315,7 +3315,8 @@ elf32_arm_to_thumb_stub (struct bfd_link_info * info,
 			 asection *             sym_sec,
 			 bfd_vma                offset,
 			 bfd_signed_vma         addend,
-			 bfd_vma                val)
+			 bfd_vma                val,
+			 char **error_message)
 {
   unsigned long int tmp;
   bfd_vma my_offset;
@@ -3336,7 +3337,7 @@ elf32_arm_to_thumb_stub (struct bfd_link_info * info,
   BFD_ASSERT (s->output_section != NULL);
 
   myh = elf32_arm_create_thumb_stub (info, name, input_bfd, output_bfd,
-				     sym_sec, val, s);
+				     sym_sec, val, s, error_message);
   if (!myh)
     return FALSE;
 
@@ -3372,6 +3373,7 @@ elf32_arm_to_thumb_export_stub (struct elf_link_hash_entry *h, void * inf)
   struct elf32_arm_link_hash_table * globals;
   asection *sec;
   bfd_vma val;
+  char *error_message;
 
   eh = elf32_arm_hash_entry(h);
   /* Allocate stubs for exported Thumb functions on v4t.  */
@@ -3394,7 +3396,8 @@ elf32_arm_to_thumb_export_stub (struct elf_link_hash_entry *h, void * inf)
 	+ sec->output_section->vma;
   myh = elf32_arm_create_thumb_stub (info, h->root.root.string,
 				     h->root.u.def.section->owner,
-				     globals->obfd, sec, val, s);
+				     globals->obfd, sec, val, s,
+				     &error_message);
   BFD_ASSERT (myh);
   return TRUE;
 }
@@ -3575,7 +3578,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 			       const char *                 sym_name,
 			       int		            sym_flags,
 			       struct elf_link_hash_entry * h,
-			       bfd_boolean *                unresolved_reloc_p)
+			       bfd_boolean *                unresolved_reloc_p,
+			       char **error_message)
 {
   unsigned long                 r_type = howto->type;
   unsigned long                 r_symndx;
@@ -3847,11 +3851,14 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	      /* Check for Arm calling Thumb function.  */
 	      if (sym_flags == STT_ARM_TFUNC)
 		{
-		  elf32_arm_to_thumb_stub (info, sym_name, input_bfd,
-					   output_bfd, input_section,
-					   hit_data, sym_sec, rel->r_offset,
-					   signed_addend, value);
-		  return bfd_reloc_ok;
+		  if (elf32_arm_to_thumb_stub (info, sym_name, input_bfd,
+					       output_bfd, input_section,
+					       hit_data, sym_sec, rel->r_offset,
+					       signed_addend, value,
+					       error_message))
+		    return bfd_reloc_ok;
+		  else
+		    return bfd_reloc_dangerous;
 		}
 	    }
 
@@ -4143,7 +4150,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		  }
 		else if (elf32_thumb_to_arm_stub
 		    (info, sym_name, input_bfd, output_bfd, input_section,
-		     hit_data, sym_sec, rel->r_offset, signed_addend, value))
+		     hit_data, sym_sec, rel->r_offset, signed_addend, value,
+		     error_message))
 		  return bfd_reloc_ok;
 		else
 		  return bfd_reloc_dangerous;
@@ -5654,6 +5662,7 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
       arelent                      bfd_reloc;
       char                         sym_type;
       bfd_boolean                  unresolved_reloc = FALSE;
+      char *error_message = NULL;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       r_type   = ELF32_R_TYPE (rel->r_info);
@@ -5787,7 +5796,7 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 					 relocation, info, sec, name,
 					 (h ? ELF_ST_TYPE (h->type) :
 					  ELF_ST_TYPE (sym->st_info)), h,
-					 &unresolved_reloc);
+					 &unresolved_reloc, &error_message);
 
       /* Dynamic relocs are not propagated for SEC_DEBUGGING sections
 	 because such sections are not SEC_ALLOC and thus ld.so will
@@ -5808,8 +5817,6 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 
       if (r != bfd_reloc_ok)
 	{
-	  const char * msg = (const char *) 0;
-
 	  switch (r)
 	    {
 	    case bfd_reloc_overflow:
@@ -5833,24 +5840,25 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 	      break;
 
 	    case bfd_reloc_outofrange:
-	      msg = _("internal error: out of range error");
+	      error_message = _("out of range");
 	      goto common_error;
 
 	    case bfd_reloc_notsupported:
-	      msg = _("internal error: unsupported relocation error");
+	      error_message = _("unsupported relocation");
 	      goto common_error;
 
 	    case bfd_reloc_dangerous:
-	      msg = _("internal error: dangerous error");
+	      /* error_message should already be set.  */
 	      goto common_error;
 
 	    default:
-	      msg = _("internal error: unknown error");
+	      error_message = _("unknown error");
 	      /* fall through */
 
 	    common_error:
-	      if (!((*info->callbacks->warning)
-		    (info, msg, name, input_bfd, input_section,
+	      BFD_ASSERT (error_message != NULL);
+	      if (!((*info->callbacks->reloc_dangerous)
+		    (info, error_message, input_bfd, input_section,
 		     rel->r_offset)))
 		return FALSE;
 	      break;

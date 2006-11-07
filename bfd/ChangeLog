@@ -1,3 +1,14 @@
+2006-11-07  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf32-arm.c (find_thumb_glue): Add ERROR_MESSAGE argument; set it
+	on error.
+	(find_arm_glue): Likewise.
+	(elf32_thumb_to_arm_stub, elf32_arm_create_thumb_stub)
+	(elf32_arm_to_thumb_stub, elf32_arm_final_link_relocate): Add
+	ERROR_MESSAGE argument and pass it through.
+	(elf32_arm_to_thumb_export_stub): Update.
+	(elf32_arm_relocate_section): Use ERROR_MESSAGE and reloc_dangerous.
+
 2006-11-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (enum _ppc64_sec_type): New.
