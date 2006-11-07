@@ -1,6 +1,7 @@
 /* Generate targ-vals.h and targ-map.c.  */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 struct tdefs {
   char *symbol;
