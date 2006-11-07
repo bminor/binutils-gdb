@@ -13153,6 +13153,9 @@ pic_need_relax (symbolS *sym, asection *segtype)
       sym = n;
     }
 
+  if (symbol_section_p (sym))
+    return TRUE;
+
   symsec = S_GET_SEGMENT (sym);
 
   /* This must duplicate the test in adjust_reloc_syms.  */

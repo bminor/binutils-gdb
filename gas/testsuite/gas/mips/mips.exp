@@ -687,6 +687,7 @@ if { [istarget mips*-*-vxworks*] } {
 
 	run_dump_test "elf-rel25"
 	run_dump_test "elf-rel25a"
+	run_dump_test "elf-rel26"
 
 	if { !$no_mips16 } {
 	    run_dump_test "${tmips}mips${el}16-e"
