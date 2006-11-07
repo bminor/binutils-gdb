@@ -181,13 +181,13 @@ typedef struct {
   /* The program's text section.  */
   struct bfd_section *text_section;
   /* Starting and ending text section addresses from the bfd.  */
-  SIM_ADDR text_start, text_end;
+  bfd_vma text_start, text_end;
 #define STATE_TEXT_SECTION(sd) ((sd)->base.text_section)
 #define STATE_TEXT_START(sd) ((sd)->base.text_start)
 #define STATE_TEXT_END(sd) ((sd)->base.text_end)
 
   /* Start address, set when the program is loaded from the bfd.  */
-  SIM_ADDR start_addr;
+  bfd_vma start_addr;
 #define STATE_START_ADDR(sd) ((sd)->base.start_addr)
 
   /* Size of the simulator's cache, if any.
