@@ -174,8 +174,7 @@ Symbol_table::~Symbol_table()
 size_t
 Symbol_table::Symbol_table_hash::operator()(const Symbol_table_key& key) const
 {
-  return (reinterpret_cast<size_t>(key.first)
-	  ^ reinterpret_cast<size_t>(key.second));
+  return key.first ^ key.second;
 }
 
 // The symbol table key equality function.  This is only called with
@@ -216,17 +215,20 @@ Symbol_table::resolve_forwards(Symbol* from) const
 Symbol*
 Symbol_table::lookup(const char* name, const char* version) const
 {
-  name = this->namepool_.find(name);
+  Stringpool::Key name_key;
+  name = this->namepool_.find(name, &name_key);
   if (name == NULL)
     return NULL;
+
+  Stringpool::Key version_key = 0;
   if (version != NULL)
     {
-      version = this->namepool_.find(version);
+      version = this->namepool_.find(version, &version_key);
       if (version == NULL)
 	return NULL;
     }
 
-  Symbol_table_key key(name, version);
+  Symbol_table_key key(name_key, version_key);
   Symbol_table::Symbol_table_type::const_iterator p = this->table_.find(key);
   if (p == this->table_.end())
     return NULL;
@@ -282,19 +284,24 @@ template<int size, bool big_endian>
 Symbol*
 Symbol_table::add_from_object(Object* object,
 			      const char *name,
-			      const char *version, bool def,
+			      Stringpool::Key name_key,
+			      const char *version,
+			      Stringpool::Key version_key,
+			      bool def,
 			      const elfcpp::Sym<size, big_endian>& sym)
 {
   Symbol* const snull = NULL;
   std::pair<typename Symbol_table_type::iterator, bool> ins =
-    this->table_.insert(std::make_pair(std::make_pair(name, version), snull));
+    this->table_.insert(std::make_pair(std::make_pair(name_key, version_key),
+				       snull));
 
   std::pair<typename Symbol_table_type::iterator, bool> insdef =
     std::make_pair(this->table_.end(), false);
   if (def)
     {
-      const char* const vnull = NULL;
-      insdef = this->table_.insert(std::make_pair(std::make_pair(name, vnull),
+      const Stringpool::Key vnull_key = 0;
+      insdef = this->table_.insert(std::make_pair(std::make_pair(name_key,
+								 vnull_key),
 						  snull));
     }
 
@@ -379,7 +386,8 @@ Symbol_table::add_from_object(Object* object,
 		    {
 		      this->table_.erase(insdef.first);
 		      // Inserting insdef invalidated ins.
-		      this->table_.erase(std::make_pair(name, version));
+		      this->table_.erase(std::make_pair(name_key,
+							version_key));
 		    }
 		  return NULL;
 		}
@@ -477,12 +485,16 @@ Symbol_table::add_from_object(
       Symbol* res;
       if (ver == NULL)
 	{
-	  name = this->namepool_.add(name);
-	  res = this->add_from_object(object, name, NULL, false, *psym);
+	  Stringpool::Key name_key;
+	  name = this->namepool_.add(name, &name_key);
+	  res = this->add_from_object(object, name, name_key, NULL, 0,
+				      false, *psym);
 	}
       else
 	{
-	  name = this->namepool_.add(name, ver - name);
+	  Stringpool::Key name_key;
+	  name = this->namepool_.add(name, ver - name, &name_key);
+
 	  bool def = false;
 	  ++ver;
 	  if (*ver == '@')
@@ -490,8 +502,12 @@ Symbol_table::add_from_object(
 	      def = true;
 	      ++ver;
 	    }
-	  ver = this->namepool_.add(ver);
-	  res = this->add_from_object(object, name, ver, def, *psym);
+
+	  Stringpool::Key ver_key;
+	  ver = this->namepool_.add(ver, &ver_key);
+
+	  res = this->add_from_object(object, name, name_key, ver, ver_key,
+				      def, *psym);
 	}
 
       *sympointers++ = res;
@@ -525,12 +541,13 @@ Symbol_table::define_special_symbol(Target* target, const char* name,
   else
     {
       // Canonicalize NAME.
-      name = this->namepool_.add(name);
+      Stringpool::Key name_key;
+      name = this->namepool_.add(name, &name_key);
 
       Symbol* const snull = NULL;
-      const char* const vnull = NULL;
+      const Stringpool::Key ver_key = 0;
       std::pair<typename Symbol_table_type::iterator, bool> ins =
-	this->table_.insert(std::make_pair(std::make_pair(name, vnull),
+	this->table_.insert(std::make_pair(std::make_pair(name_key, ver_key),
 					   snull));
 
       if (!ins.second)
@@ -937,7 +954,7 @@ Symbol_table::sized_finalize(off_t off, Stringpool* pool)
 	}
 
       sym->set_value(value);
-      pool->add(sym->name());
+      pool->add(sym->name(), NULL);
       ++count;
       off += sym_size;
       ++p;

@@ -53,7 +53,7 @@ Layout::Layout(const General_options& options)
 size_t
 Layout::Hash_key::operator()(const Layout::Key& k) const
 {
- return reinterpret_cast<size_t>(k.first) + k.second.first + k.second.second;
+ return k.first + k.second.first + k.second.second;
 }
 
 // Whether to include this section in the link.
@@ -95,7 +95,7 @@ Layout::find_output_section(const char* name) const
   for (Section_name_map::const_iterator p = this->section_name_map_.begin();
        p != this->section_name_map_.end();
        ++p)
-    if (strcmp(p->first.first, name) == 0)
+    if (strcmp(p->second->name(), name) == 0)
       return p->second;
   return NULL;
 }
@@ -121,15 +121,15 @@ Layout::find_output_segment(elfcpp::PT type, elfcpp::Elf_Word set,
 // and section flags FLAGS.
 
 Output_section*
-Layout::get_output_section(const char* name, elfcpp::Elf_Word type,
-			   elfcpp::Elf_Xword flags)
+Layout::get_output_section(const char* name, Stringpool::Key name_key,
+			   elfcpp::Elf_Word type, elfcpp::Elf_Xword flags)
 {
   // We should ignore some flags.
   flags &= ~ (elfcpp::SHF_INFO_LINK
 	      | elfcpp::SHF_LINK_ORDER
 	      | elfcpp::SHF_GROUP);
 
-  const Key key(name, std::make_pair(type, flags));
+  const Key key(name_key, std::make_pair(type, flags));
   const std::pair<Key, Output_section*> v(key, NULL);
   std::pair<Section_name_map::iterator, bool> ins(
     this->section_name_map_.insert(v));
@@ -167,11 +167,13 @@ Layout::layout(Relobj* object, unsigned int shndx, const char* name,
   // FIXME: Handle SHF_OS_NONCONFORMING here.
 
   // Canonicalize the section name.
-  name = this->namepool_.add(name, len);
+  Stringpool::Key name_key;
+  name = this->namepool_.add(name, len, &name_key);
 
   // Find the output section.  The output section is selected based on
   // the section name, type, and flags.
-  Output_section* os = this->get_output_section(name, shdr.get_sh_type(),
+  Output_section* os = this->get_output_section(name, name_key,
+						shdr.get_sh_type(),
 						shdr.get_sh_flags());
 
   // FIXME: Handle SHF_LINK_ORDER somewhere.
@@ -189,9 +191,10 @@ Layout::add_output_section_data(const char* name, elfcpp::Elf_Word type,
 				Output_section_data* posd)
 {
   // Canonicalize the name.
-  name = this->namepool_.add(name);
+  Stringpool::Key name_key;
+  name = this->namepool_.add(name, &name_key);
 
-  Output_section* os = this->get_output_section(name, type, flags);
+  Output_section* os = this->get_output_section(name, name_key, type, flags);
   os->add_output_section_data(posd);
 }
 
@@ -672,12 +675,12 @@ Layout::create_symtab_sections(int size, const Input_objects* input_objects,
 
   this->sympool_.set_string_offsets();
 
-  const char* symtab_name = this->namepool_.add(".symtab");
+  const char* symtab_name = this->namepool_.add(".symtab", NULL);
   Output_section* osymtab = new Output_section_symtab(symtab_name,
 						      off - startoff);
   this->section_list_.push_back(osymtab);
 
-  const char* strtab_name = this->namepool_.add(".strtab");
+  const char* strtab_name = this->namepool_.add(".strtab", NULL);
   Output_section *ostrtab = new Output_section_strtab(strtab_name,
 						      &this->sympool_);
   this->section_list_.push_back(ostrtab);
@@ -703,7 +706,7 @@ Layout::create_shstrtab()
   // FIXME: We don't need to create a .shstrtab section if we are
   // stripping everything.
 
-  const char* name = this->namepool_.add(".shstrtab");
+  const char* name = this->namepool_.add(".shstrtab", NULL);
 
   this->namepool_.set_string_offsets();
 

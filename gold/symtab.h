@@ -683,7 +683,7 @@ class Symbol_table
   // Canonicalize a symbol name for use in the hash table.
   const char*
   canonicalize_name(const char* name)
-  { return this->namepool_.add(name); }
+  { return this->namepool_.add(name, NULL); }
 
   // Possibly issue a warning for a reference to SYM at LOCATION which
   // is in OBJ.
@@ -718,9 +718,9 @@ class Symbol_table
   // Add a symbol.
   template<int size, bool big_endian>
   Symbol*
-  add_from_object(Object*, const char *name,
-		  const char *version, bool def,
-		  const elfcpp::Sym<size, big_endian>& sym);
+  add_from_object(Object*, const char *name, Stringpool::Key name_key,
+		  const char *version, Stringpool::Key version_key,
+		  bool def, const elfcpp::Sym<size, big_endian>& sym);
 
   // Resolve symbols.
   template<int size, bool big_endian>
@@ -783,7 +783,7 @@ class Symbol_table
 
   // The type of the symbol hash table.
 
-  typedef std::pair<const char*, const char*> Symbol_table_key;
+  typedef std::pair<Stringpool::Key, Stringpool::Key> Symbol_table_key;
 
   struct Symbol_table_hash
   {

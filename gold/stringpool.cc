@@ -14,7 +14,7 @@ namespace gold
 {
 
 Stringpool::Stringpool()
-  : string_set_(), strings_(), strtab_size_(0)
+  : string_set_(), strings_(), strtab_size_(0), next_index_(1)
 {
 }
 
@@ -55,12 +55,18 @@ Stringpool::Stringpool_hash::operator()(const char* s) const
 }
 
 // Add a string to the list of canonical strings.  Return a pointer to
-// the canonical string.
+// the canonical string.  If PKEY is not NULL, set *PKEY to the key.
 
 const char*
-Stringpool::add_string(const char* s)
+Stringpool::add_string(const char* s, Key* pkey)
 {
+  // The size we allocate for a new Stringdata.
   const size_t buffer_size = 1000;
+  // The amount we multiply the Stringdata index when calculating the
+  // key.
+  const size_t key_mult = 1024;
+  assert(key_mult >= buffer_size);
+
   size_t len = strlen(s);
 
   size_t alc;
@@ -81,7 +87,12 @@ Stringpool::add_string(const char* s)
 	{
 	  char* ret = psd->data + psd->len;
 	  memcpy(ret, s, len + 1);
+
+	  if (pkey != NULL)
+	    *pkey = psd->index * key_mult + psd->len;
+
 	  psd->len += len + 1;
+
 	  return ret;
 	}
     }
@@ -90,17 +101,24 @@ Stringpool::add_string(const char* s)
   psd->alc = alc - sizeof(Stringdata);
   memcpy(psd->data, s, len + 1);
   psd->len = len + 1;
+  psd->index = this->next_index_;
+  ++this->next_index_;
+
+  if (pkey != NULL)
+    *pkey = psd->index * key_mult;
+
   if (front)
     this->strings_.push_front(psd);
   else
     this->strings_.push_back(psd);
+
   return psd->data;
 }
 
 // Add a string to a string pool.
 
 const char*
-Stringpool::add(const char* s)
+Stringpool::add(const char* s, Key* pkey)
 {
   // FIXME: This will look up the entry twice in the hash table.  The
   // problem is that we can't insert S before we canonicalize it.  I
@@ -110,33 +128,48 @@ Stringpool::add(const char* s)
 
   String_set_type::const_iterator p = this->string_set_.find(s);
   if (p != this->string_set_.end())
-    return p->first;
+    {
+      if (pkey != NULL)
+	*pkey = p->second.first;
+      return p->first;
+    }
 
-  const char* ret = this->add_string(s);
-  std::pair<const char*, off_t> val(ret, 0);
+  Key k;
+  const char* ret = this->add_string(s, &k);
+
+  const off_t ozero = 0;
+  std::pair<const char*, Val> element(ret, std::make_pair(k, ozero));
   std::pair<String_set_type::iterator, bool> ins =
-    this->string_set_.insert(val);
+    this->string_set_.insert(element);
   assert(ins.second);
+
+  if (pkey != NULL)
+    *pkey = k;
+
   return ret;
 }
 
 // Add a prefix of a string to a string pool.
 
 const char*
-Stringpool::add(const char* s, size_t len)
+Stringpool::add(const char* s, size_t len, Key* pkey)
 {
   // FIXME: This implementation should be rewritten when we rewrite
   // the hash table to avoid copying.
   std::string st(s, len);
-  return this->add(st);
+  return this->add(st, pkey);
 }
 
 const char*
-Stringpool::find(const char* s) const
+Stringpool::find(const char* s, Key* pkey) const
 {
   String_set_type::const_iterator p = this->string_set_.find(s);
   if (p == this->string_set_.end())
     return NULL;
+
+  if (pkey != NULL)
+    *pkey = p->second.first;
+
   return p->first;
 }
 
@@ -206,14 +239,14 @@ Stringpool::set_string_offsets()
   for (size_t i = 0; i < count; ++i)
     {
       if (v[i]->first[0] == '\0')
-	v[i]->second = 0;
+	v[i]->second.second = 0;
       else if (i > 0 && Stringpool::is_suffix(v[i]->first, v[i - 1]->first))
-	v[i]->second = (v[i - 1]->second
-			+ strlen(v[i - 1]->first)
-			- strlen(v[i]->first));
+	v[i]->second.second = (v[i - 1]->second.second
+			       + strlen(v[i - 1]->first)
+			       - strlen(v[i]->first));
       else
 	{
-	  v[i]->second = offset;
+	  v[i]->second.second = offset;
 	  offset += strlen(v[i]->first) + 1;
 	}
     }
@@ -229,7 +262,7 @@ Stringpool::get_offset(const char* s) const
 {
   String_set_type::const_iterator p = this->string_set_.find(s);
   if (p != this->string_set_.end())
-    return p->second;
+    return p->second.second;
   abort();
 }
 
@@ -244,7 +277,7 @@ Stringpool::write(Output_file* of, off_t offset)
   for (String_set_type::const_iterator p = this->string_set_.begin();
        p != this->string_set_.end();
        ++p)
-    strcpy(view + p->second, p->first);
+    strcpy(view + p->second.second, p->first);
   of->write_output_view(offset, this->strtab_size_, viewu);
 }
 

@@ -196,8 +196,8 @@ class Layout
 
   // Return the output section for NAME, TYPE and FLAGS.
   Output_section*
-  get_output_section(const char* name, elfcpp::Elf_Word type,
-		     elfcpp::Elf_Xword flags);
+  get_output_section(const char* name, Stringpool::Key name_key,
+		     elfcpp::Elf_Word type, elfcpp::Elf_Xword flags);
 
   // Create a new Output_section.
   Output_section*
@@ -218,7 +218,7 @@ class Layout
   // Mapping from input section name/type/flags to output section.  We
   // use canonicalized strings here.
 
-  typedef std::pair<const char*,
+  typedef std::pair<Stringpool::Key,
 		    std::pair<elfcpp::Elf_Word, elfcpp::Elf_Xword> > Key;
 
   struct Hash_key

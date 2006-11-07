@@ -628,7 +628,7 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(off_t off,
 
       if (sym.get_st_type() != elfcpp::STT_SECTION)
 	{
-	  pool->add(pnames + sym.get_st_name());
+	  pool->add(pnames + sym.get_st_name(), NULL);
 	  off += sym_size;
 	  ++count;
 	}

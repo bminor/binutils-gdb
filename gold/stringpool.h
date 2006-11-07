@@ -17,34 +17,42 @@ class Output_file;
 class Stringpool
 {
  public:
+  // The type of a key into the stringpool.  A key value will always
+  // be the same during any run of the linker.  The string pointers
+  // may change when using address space randomization.  We use key
+  // values in order to get repeatable runs when the value is inserted
+  // into an unordered hash table.  Zero is never a valid key.
+  typedef size_t Key;
+
   Stringpool();
 
   ~Stringpool();
 
   // Add a string to the pool.  This returns a canonical permanent
-  // pointer to the string.
+  // pointer to the string.  If PKEY is not NULL, this sets *PKEY to
+  // the key for the string.
   const char*
-  add(const char*);
+  add(const char*, Key* pkey);
 
   const char*
-  add(const std::string& s)
-  { return this->add(s.c_str()); }
+  add(const std::string& s, Key* pkey)
+  { return this->add(s.c_str(), pkey); }
 
   // Add the prefix of a string to the pool.
   const char*
-  add(const char *, size_t);
+  add(const char *, size_t, Key* pkey);
 
   // If a string is present, return the canonical string.  Otherwise,
-  // return NULL.
+  // return NULL.  If PKEY is not NULL, set *PKEY to the key.
   const char*
-  find(const char*) const;
+  find(const char*, Key* pkey) const;
 
   // Turn the stringpool into an ELF strtab: determine the offsets of
   // all the strings.
   void
   set_string_offsets();
 
-  // Get the offset of a string.
+  // Get the offset of a string in an ELF strtab.
   off_t
   get_offset(const char*) const;
 
@@ -72,13 +80,15 @@ class Stringpool
     size_t len;
     // Allocated size of buffer.
     size_t alc;
+    // Buffer index.
+    unsigned int index;
     // Buffer.
     char data[1];
   };
 
   // Copy a string into the buffers, returning a canonical string.
   const char*
-  add_string(const char*);
+  add_string(const char*, Key*);
 
   struct Stringpool_hash
   {
@@ -96,16 +106,19 @@ class Stringpool
   // Return whether s1 is a suffix of s2.
   static bool is_suffix(const char* s1, const char* s2);
 
-  // The hash table is a map from string names to offsets.  We only
-  // use the offsets if we turn this into an ELF strtab section.
+  // The hash table is a map from string names to a pair of Key and
+  // ELF strtab offsets.  We only use the offsets if we turn this into
+  // an ELF strtab section.
+
+  typedef std::pair<Key, off_t> Val;
 
 #ifdef HAVE_TR1_UNORDERED_SET
-  typedef Unordered_map<const char*, off_t, Stringpool_hash,
+  typedef Unordered_map<const char*, Val, Stringpool_hash,
 			Stringpool_eq,
-			std::allocator<std::pair<const char* const, off_t> >,
+			std::allocator<std::pair<const char* const, Val> >,
 			true> String_set_type;
 #else
-  typedef Unordered_map<const char*, off_t, Stringpool_hash,
+  typedef Unordered_map<const char*, Val, Stringpool_hash,
 			Stringpool_eq> String_set_type;
 #endif
 
@@ -118,9 +131,17 @@ class Stringpool
 	       String_set_type::iterator) const;
   };
 
+  // List of Stringdata structures.
+  typedef std::list<Stringdata*> Stringdata_list;
+
+  // Mapping from const char* to namepool entry.
   String_set_type string_set_;
-  std::list<Stringdata*> strings_;
+  // List of buffers.
+  Stringdata_list strings_;
+  // Size of ELF strtab.
   off_t strtab_size_;
+  // Next Stringdata index.
+  unsigned int next_index_;
 };
 
 } // End namespace gold.
