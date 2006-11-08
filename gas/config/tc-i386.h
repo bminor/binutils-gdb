@@ -183,7 +183,6 @@ typedef struct
 #define Cpu3dnow       0x2000	/* 3dnow! support required */
 #define Cpu3dnowA      0x4000	/* 3dnow!Extensions support required */
 #define CpuSSE3	       0x8000	/* Streaming SIMD extensions 3 required */
-#define CpuPNI	      CpuSSE3	/* Prescott New Instructions required */
 #define CpuPadLock    0x10000	/* VIA PadLock required */
 #define CpuSVME	      0x20000	/* AMD Secure Virtual Machine Ext-s required */
 #define CpuVMX	      0x40000	/* VMX Instructions required */
@@ -197,7 +196,7 @@ typedef struct
 
   /* The default value for unknown CPUs - enable all features to avoid problems.  */
 #define CpuUnknownFlags (Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686 \
-	|CpuP4|CpuSledgehammer|CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuPNI|CpuVMX \
+	|CpuP4|CpuSledgehammer|CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3|CpuVMX \
 	|Cpu3dnow|Cpu3dnowA|CpuK6|CpuPadLock|CpuSVME|CpuSSSE3|CpuABM|CpuSSE4a)
 
   /* the bits in opcode_modifier are used to generate the final opcode from

@@ -1,3 +1,9 @@
+2006-11-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.h (CpuPNI): Removed.
+	(CpuUnknownFlags): Replace CpuPNI with CpuSSE3.
+	* config/tc-i386.c (md_assemble): Likewise.
+
 2006-11-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* symbols.c (symbol_create, symbol_clone): Don't set udata.p.

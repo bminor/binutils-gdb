@@ -1854,9 +1854,9 @@ md_assemble (line)
     {
       expressionS *exp;
 
-      if ((i.tm.cpu_flags & CpuPNI) && i.operands > 0)
+      if ((i.tm.cpu_flags & CpuSSE3) && i.operands > 0)
 	{
-	  /* These Intel Prescott New Instructions have the fixed
+	  /* Streaming SIMD extensions 3 Instructions have the fixed
 	     operands with an opcode suffix which is coded in the same
 	     place as an 8-bit immediate field would be. Here we check
 	     those operands and remove them afterwards.  */
