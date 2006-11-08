@@ -145,7 +145,6 @@ symbol_create (const char *name, /* It is copied, the caller can destroy/modify.
   symbolP->bsym = bfd_make_empty_symbol (stdoutput);
   if (symbolP->bsym == NULL)
     as_fatal ("bfd_make_empty_symbol: %s", bfd_errmsg (bfd_get_error ()));
-  symbolP->bsym->udata.p = (PTR) symbolP;
   S_SET_NAME (symbolP, preserved_copy_of_name);
 
   S_SET_SEGMENT (symbolP, segment);
@@ -575,7 +574,6 @@ symbol_clone (symbolS *orgsymP, int replace)
   bsymnew->name = bsymorg->name;
   bsymnew->flags =  bsymorg->flags;
   bsymnew->section =  bsymorg->section;
-  bsymnew->udata.p = (PTR) newsymP;
   bfd_copy_private_symbol_data (bfd_asymbol_bfd (bsymorg), bsymorg,
 				bfd_asymbol_bfd (bsymnew), bsymnew);
 
