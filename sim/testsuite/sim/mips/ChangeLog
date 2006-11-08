@@ -1,3 +1,9 @@
+2006-11-08  Thiemo Seufer  <ths@mips.com>
+
+	* basic.exp: Fix spelling in comment. Use canonical form of target
+	patterns. Run DSP test only for DSP-capable ISAs. Check also mips32r2
+	and mips64r2 if supported by the target.
+
 2006-08-08  Chris Dearman  <chris@mips.com>
 
 	* testutils.inc (setup): __start is also a valid start symbol.
