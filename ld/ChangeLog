@@ -1,7 +1,12 @@
+2006-11-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/elf32.em (gld*_before_allocation): Adjust output section
+	size for warning sections.
+
 2006-11-06  Vladimir Prus  <vladimir@codesourcery.com>
 
-	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation):
-	Don't prepend "warning" to the message.
+	* emultempl/elf32.em (gld*_before_allocation): Don't prepend
+	"warning" to the message.
 
 2006-10-31  Pedro Alves  <pedro_alves@portugalmail.pt>
 

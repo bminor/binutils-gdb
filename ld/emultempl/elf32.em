@@ -1204,12 +1204,19 @@ ${ELF_INTERPRETER_SET_DEFAULT}
 	ASSERT (ret);
 	free (msg);
 
-	/* Clobber the section size, so that we don't waste copying the
-	   warning into the output file.  */
+	/* Clobber the section size, so that we don't waste space
+	   copying the warning into the output file.  If we've already
+	   sized the output section, adjust its size.  The adjustment
+	   is on rawsize because targets that size sections early will
+	   have called lang_reset_memory_regions after sizing.  */
+	if (s->output_section != NULL
+	    && s->output_section->rawsize >= s->size)
+	  s->output_section->rawsize -= s->size;
+
 	s->size = 0;
 
-	/* Also set SEC_EXCLUDE, so that symbols defined in the warning
-	   section don't get copied to the output.  */
+	/* Also set SEC_EXCLUDE, so that local symbols defined in the
+	   warning section don't get copied to the output.  */
 	s->flags |= SEC_EXCLUDE | SEC_KEEP;
       }
   }

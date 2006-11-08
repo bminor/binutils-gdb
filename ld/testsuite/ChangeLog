@@ -1,7 +1,11 @@
+2006-11-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elf/group.ld: Handle .rodata.brlt for powerpc64.
+
 2006-11-07  Vladimir Prus  <vladimir@codesourcery.com>  
 
-	* testsuite/ld-elf/symbol2w.s: Use "%" instead
-	of "@" to avoid breakage on ARM.
+	* testsuite/ld-elf/symbol2w.s: Use "%" instead of "@" to avoid
+	breakage on ARM.
 
 2006-11-06  Vladimir Prus  <vladimir@codesourcery.com>  
 
