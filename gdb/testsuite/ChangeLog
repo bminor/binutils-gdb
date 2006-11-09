@@ -1,5 +1,10 @@
 2006-11-09  Vladimir Prus  <vladimir@codesourcery.com>
 
+	* gdb.stabs/weird.exp (print_weird_var): Use
+	gdb_test_multiple instead of gdb_expect.
+
+2006-11-09  Vladimir Prus  <vladimir@codesourcery.com>
+
 	* gdb.base/help.exp (help_test_raw): New.
 	(test_class_help): New.
 	(test_prefix_command_help): New.

@@ -228,16 +228,13 @@ proc print_weird_var { var } {
 
 	# Make sure that the variable gets printed out correctly, without
 	# any sort of warning message.
-	send_gdb "print $var\n"
-	gdb_expect {
+        gdb_test_multiple "print $var\n" "variable $var printed property" {  
 		-re "^print $var\r*\n.\[0-9\]* = 42.*$gdb_prompt $" {
 			pass "variable $var printed properly"
 		}
 		-re ".*$gdb_prompt $" {
 			fail "variable $var printed properly"
 		}
-		timeout { fail "variable $var printed properly (timeout)" }
-		eof { fail "variable $var printed properly (eof)" }
 	}
 
 	# Make sure that the stabs did get loaded in a sensible way.
