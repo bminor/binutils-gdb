@@ -1,3 +1,8 @@
+2006-11-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* sparc-tdep.c (sparc_fetch_instruction): Read instruction
+	using read_memory_nobpt.
+
 2006-11-06  Jim Blandy  <jimb@codesourcery.com>
 
 	* (dwarf_expr_read_reg): Use frame_register_read, not frame_register.
