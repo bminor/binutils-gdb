@@ -169,8 +169,8 @@ main (void)
   
   /* various structs with const members */
 
-  struct crass { char * const ptr; } crass;
-  struct crisp { char * const *ptr; } crisp;
+  struct crass { char * const ptr; } crass = { lamprey };
+  struct crisp { char * const *ptr; } crisp = { &lamprey };
 
   /* misc. references */
   /*

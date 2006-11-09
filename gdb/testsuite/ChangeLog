@@ -1,3 +1,8 @@
+2006-11-09  Christophe Lyon  <christophe.lyon@st.com>
+
+	* gdb.base/constvars.c (main): Write to crass and crips, so that
+	they are allocated by the compiler.
+
 2006-10-27  Andreas Schwab  <schwab@suse.de>
 
 	* gdb.base/multi-forks.exp: Use "detach fork" instead of
