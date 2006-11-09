@@ -1,3 +1,7 @@
+2006-11-09  Thiemo Seufer  <ths@mips.com>
+
+	* config/tc-mips.c: Fix outdated comment.
+
 2006-11-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.h (CpuPNI): Removed.

@@ -1072,8 +1072,7 @@ static const struct mips_cpu_info *mips_cpu_info_from_arch (int);
    The following pseudo-ops from the Kane and Heinrich MIPS book are
    not MIPS CPU specific, but are also not specific to the object file
    format.  This file is probably the best place to define them, but
-   they are not currently supported: .asm0, .endr, .lab, .repeat,
-   .struct.  */
+   they are not currently supported: .asm0, .endr, .lab, .struct.  */
 
 static const pseudo_typeS mips_pseudo_table[] =
 {
