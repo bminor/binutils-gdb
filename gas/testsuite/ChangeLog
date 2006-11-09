@@ -1,5 +1,10 @@
 2006-11-09  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* gas/i386/sse2.s: Test movdqa with memory destination.
+	* gas/i386/sse2.d: Updated.
+
+2006-11-09  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* gas/i386/sse2.s: Test movdqu with memory destination.
 	* gas/i386/sse2.d: Updated.
 
