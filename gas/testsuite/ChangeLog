@@ -1,3 +1,8 @@
+2006-11-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/sse2.s: Test movdqu with memory destination.
+	* gas/i386/sse2.d: Updated.
+
 2006-11-06  David Daney  <ddaney@avtrex.com>
 
 	* gas/mips/elf-rel26.s: New test.

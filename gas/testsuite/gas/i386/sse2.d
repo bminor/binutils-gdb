@@ -142,7 +142,7 @@ Disassembly of section .text:
  241:	66 0f 6f c8[ 	]+movdqa %xmm0,%xmm1
  245:	66 0f 6f c8[ 	]+movdqa %xmm0,%xmm1
  249:	f3 0f 6f c8[ 	]+movdqu %xmm0,%xmm1
- 24d:	f3 0f 6f c8[ 	]+movdqu %xmm0,%xmm1
+ 24d:	f3 0f 7f 06[ 	]+movdqu %xmm0,\(%esi\)
  251:	f2 0f d6 c8[ 	]+movdq2q %xmm0,%mm1
  255:	f3 0f d6 c8[ 	]+movq2dq %mm0,%xmm1
  259:	66 0f f4 c8[ 	]+pmuludq %xmm0,%xmm1
