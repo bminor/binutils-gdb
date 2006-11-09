@@ -1,3 +1,10 @@
+2006-11-09  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.base/help.exp (help_test_raw): New.
+	(test_class_help): New.
+	(test_prefix_command_help): New.
+	Adjust testcases.
+
 2006-11-09  Christophe Lyon  <christophe.lyon@st.com>
 
 	* gdb.base/constvars.c (main): Write to crass and crips, so that
