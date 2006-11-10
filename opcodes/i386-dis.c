@@ -3139,14 +3139,16 @@ print_insn (bfd_vma pc, disassemble_info *info)
 		index = 1;
 	      else
 		{
-		  used_prefixes |= (prefixes & PREFIX_DATA);
-		  if (prefixes & PREFIX_DATA)
-		    index = 2;
+		  /* We should check PREFIX_REPNZ and PREFIX_REPZ
+		     before PREFIX_DATA.  */
+		  used_prefixes |= (prefixes & PREFIX_REPNZ);
+		  if (prefixes & PREFIX_REPNZ)
+		    index = 3;
 		  else
 		    {
-		      used_prefixes |= (prefixes & PREFIX_REPNZ);
-		      if (prefixes & PREFIX_REPNZ)
-			index = 3;
+		      used_prefixes |= (prefixes & PREFIX_DATA);
+		      if (prefixes & PREFIX_DATA)
+			index = 2;
 		    }
 		}
 	      dp = &prefix_user_table[dp->bytemode2][index];

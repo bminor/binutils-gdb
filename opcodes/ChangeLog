@@ -1,5 +1,10 @@
 2006-11-09  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-dis.c (print_insn): Check PREFIX_REPNZ before
+	PREFIX_DATA when prefix user table is used.
+
+2006-11-09  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-dis.c (twobyte_uses_SSE_prefix): Renamed to ...
 	(twobyte_uses_DATA_prefix): This.
 	(twobyte_uses_REPNZ_prefix): New.
