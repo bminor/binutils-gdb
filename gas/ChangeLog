@@ -1,3 +1,9 @@
+2006-11-10  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/3456:
+	* config/obj-elf.c (obj_elf_version): Do not include the name
+	field's padding in the namesz value.
+
 2006-11-09  Thiemo Seufer  <ths@mips.com>
 
 	* config/tc-mips.c: Fix outdated comment.

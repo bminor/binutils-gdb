@@ -1419,11 +1419,12 @@ obj_elf_version (int ignore ATTRIBUTE_UNUSED)
   Elf_Internal_Note i_note;
   Elf_External_Note e_note;
   asection *note_secp = NULL;
-  int len;
 
   SKIP_WHITESPACE ();
   if (*input_line_pointer == '\"')
     {
+      unsigned int len;
+
       ++input_line_pointer;	/* -> 1st char of string.  */
       name = input_line_pointer;
 
@@ -1434,19 +1435,19 @@ obj_elf_version (int ignore ATTRIBUTE_UNUSED)
       *(input_line_pointer - 1) = '\0';
       *input_line_pointer = c;
 
-      /* create the .note section */
-
+      /* Create the .note section.  */
       note_secp = subseg_new (".note", 0);
       bfd_set_section_flags (stdoutput,
 			     note_secp,
 			     SEC_HAS_CONTENTS | SEC_READONLY);
 
-      /* process the version string */
+      /* Process the version string.  */
+      len = strlen (name) + 1;
 
-      len = strlen (name);
-
-      i_note.namesz = ((len + 1) + 3) & ~3; /* round this to word boundary */
-      i_note.descsz = 0;	/* no description */
+      /* PR 3456: Although the name field is padded out to an 4-byte
+	 boundary, the namesz field should not be adjusted.  */
+      i_note.namesz = len;
+      i_note.descsz = 0;	/* No description.  */
       i_note.type = NT_VERSION;
       p = frag_more (sizeof (e_note.namesz));
       md_number_to_chars (p, i_note.namesz, sizeof (e_note.namesz));
@@ -1454,7 +1455,7 @@ obj_elf_version (int ignore ATTRIBUTE_UNUSED)
       md_number_to_chars (p, i_note.descsz, sizeof (e_note.descsz));
       p = frag_more (sizeof (e_note.type));
       md_number_to_chars (p, i_note.type, sizeof (e_note.type));
-      p = frag_more (len + 1);
+      p = frag_more (len);
       strcpy (p, name);
 
       frag_align (2, 0, 0);
@@ -1462,9 +1463,8 @@ obj_elf_version (int ignore ATTRIBUTE_UNUSED)
       subseg_set (seg, subseg);
     }
   else
-    {
-      as_bad (_("expected quoted string"));
-    }
+    as_bad (_("expected quoted string"));
+
   demand_empty_rest_of_line ();
 }
 
