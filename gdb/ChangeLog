@@ -1,3 +1,33 @@
+2006-11-10  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arch-utils.c (target_byte_order_user): Renamed from
+	target_byte_order.
+	(target_byte_order_auto, selected_byte_order): Removed.
+	(show_endian): Check target_byte_order_user.
+	(set_endian): Always update the architecture.  Set
+	target_byte_order_user after success.
+	(target_architecture_auto): Removed.
+	(target_architecture_user): New.
+	(selected_architecture_name, show_architecture): Check it.
+	(set_architecture): Set target_architecture_user after success.
+	(gdbarch_from_bfd): Check the argument.
+	(default_byte_order): New.
+	(initialize_current_architecture): Set the global default
+	architecture and endianness.
+	(gdbarch_info_fill): Remove GDBARCH argument.  Do not check the
+	previous architecture.  Use exec_bfd, global selected architecture
+	and endianness, and global defaults.
+	* arch-utils.h (selected_byte_order): Remove prototype.
+	(gdbarch_info_fill): Update.
+	* exec.c (exec_file_attach): Update the architecture after removing
+	the current file.
+	* gdbarch.sh: Update comments.
+	(find_arch_by_info): Remove OLD_GDBARCH argument.  Update call to
+	gdbarch_info_fill.
+	(gdbarch_find_by_info): Update call to find_arch_by_info.
+	* gdbarch.h, gdbarch.c: Regenerated.
+	* remote-sim.c (gdbsim_open): Use TARGET_BYTE_ORDER.
+
 2006-11-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* sparc-tdep.c (sparc_fetch_instruction): Read instruction

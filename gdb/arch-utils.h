@@ -126,10 +126,6 @@ extern int generic_instruction_nullified (struct gdbarch *gdbarch,
 
 extern int legacy_register_sim_regno (int regnum);
 
-/* Return the selected byte order, or BFD_ENDIAN_UNKNOWN if no byte
-   order was explicitly selected.  */
-extern enum bfd_endian selected_byte_order (void);
-
 /* Return the selected architecture's name, or NULL if no architecture
    was explicitly selected.  */
 extern const char *selected_architecture_name (void);
@@ -141,10 +137,9 @@ extern const char *selected_architecture_name (void);
 extern void gdbarch_info_init (struct gdbarch_info *info);
 
 /* Similar to init, but this time fill in the blanks.  Information is
-   obtained from the specified architecture, global "set ..." options,
-   and explicitly initialized INFO fields.  */
-extern void gdbarch_info_fill (struct gdbarch *gdbarch,
-			       struct gdbarch_info *info);
+   obtained from the global "set ..." options and explicitly
+   initialized INFO fields.  */
+extern void gdbarch_info_fill (struct gdbarch_info *info);
 
 /* Return the architecture for ABFD.  If no suitable architecture
    could be find, return NULL.  */

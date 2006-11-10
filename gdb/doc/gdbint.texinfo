@@ -2722,6 +2722,41 @@ architecture, a warning will be issued and the debugging session will continue
 with the defaults already established for @var{gdbarch}.
 @end deftypefun
 
+@section Initializing a New Architecture
+
+Each @code{gdbarch} is associated with a single @sc{bfd} architecture,
+via a @code{bfd_arch_@var{arch}} constant.  The @code{gdbarch} is
+registered by a call to @code{register_gdbarch_init}, usually from
+the file's @code{_initialize_@var{filename}} routine, which will
+be automatically called during @value{GDBN} startup.  The arguments
+are a @sc{bfd} architecture constant and an initialization function.
+
+The initialization function has this type:
+
+@smallexample
+static struct gdbarch *
+@var{arch}_gdbarch_init (struct gdbarch_info @var{info},
+                         struct gdbarch_list *@var{arches})
+@end smallexample
+
+The @var{info} argument contains parameters used to select the correct
+architecture, and @var{arches} is a list of architectures which
+have already been created with the same @code{bfd_arch_@var{arch}}
+value.
+
+The initialization function should first make sure that @var{info}
+is acceptable, and return @code{NULL} if it is not.  Then, it should
+search through @var{arches} for an exact match to @var{info}, and
+return one if found.  Lastly, if no exact match was found, it should
+create a new architecture based on @var{info} and return it.
+
+Only information in @var{info} should be used to choose the new
+architecture.  Historically, @var{info} could be sparse, and
+defaults would be collected from the first element on @var{arches}.
+However, @value{GDBN} now fills in @var{info} more thoroughly,
+so new @code{gdbarch} initialization functions should not take
+defaults from @var{arches}.
+
 @section Registers and Memory
 
 @value{GDBN}'s model of the target machine is rather simple.

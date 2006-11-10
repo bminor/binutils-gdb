@@ -188,6 +188,8 @@ exec_file_attach (char *filename, int from_tty)
     {
       if (from_tty)
         printf_unfiltered (_("No executable file now.\n"));
+
+      set_gdbarch_from_file (NULL);
     }
   else
     {

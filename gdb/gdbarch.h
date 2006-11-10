@@ -1420,8 +1420,7 @@ extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
    ``struct gdbarch'' for this architecture.
 
    The INFO parameter is, as far as possible, be pre-initialized with
-   information obtained from INFO.ABFD or the previously selected
-   architecture.
+   information obtained from INFO.ABFD or the global defaults.
 
    The ARCHES parameter is a linked list (sorted most recently used)
    of all the previously created architures for this architecture

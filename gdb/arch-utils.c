@@ -335,24 +335,7 @@ generic_instruction_nullified (struct gdbarch *gdbarch,
 
 /* Functions to manipulate the endianness of the target.  */
 
-/* ``target_byte_order'' is only used when non- multi-arch.
-   Multi-arch targets obtain the current byte order using the
-   TARGET_BYTE_ORDER gdbarch method.
-
-   The choice of initial value is entirely arbitrary.  During startup,
-   the function initialize_current_architecture() updates this value
-   based on default byte-order information extracted from BFD.  */
-static int target_byte_order = BFD_ENDIAN_BIG;
-static int target_byte_order_auto = 1;
-
-enum bfd_endian
-selected_byte_order (void)
-{
-  if (target_byte_order_auto)
-    return BFD_ENDIAN_UNKNOWN;
-  else
-    return target_byte_order;
-}
+static int target_byte_order_user = BFD_ENDIAN_UNKNOWN;
 
 static const char endian_big[] = "big";
 static const char endian_little[] = "little";
@@ -372,7 +355,7 @@ static void
 show_endian (struct ui_file *file, int from_tty, struct cmd_list_element *c,
 	     const char *value)
 {
-  if (target_byte_order_auto)
+  if (target_byte_order_user != BFD_ENDIAN_UNKNOWN)
     if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
       fprintf_unfiltered (file, _("The target endianness is set automatically "
 				  "(currently big endian)\n"));
@@ -391,31 +374,37 @@ show_endian (struct ui_file *file, int from_tty, struct cmd_list_element *c,
 static void
 set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
 {
+  struct gdbarch_info info;
+
+  gdbarch_info_init (&info);
+
   if (set_endian_string == endian_auto)
     {
-      target_byte_order_auto = 1;
+      target_byte_order_user = BFD_ENDIAN_UNKNOWN;
+      if (! gdbarch_update_p (info))
+	internal_error (__FILE__, __LINE__,
+			_("set_endian: architecture update failed"));
     }
   else if (set_endian_string == endian_little)
     {
-      struct gdbarch_info info;
-      target_byte_order_auto = 0;
-      gdbarch_info_init (&info);
       info.byte_order = BFD_ENDIAN_LITTLE;
       if (! gdbarch_update_p (info))
 	printf_unfiltered (_("Little endian target not supported by GDB\n"));
+      else
+	target_byte_order_user = BFD_ENDIAN_LITTLE;
     }
   else if (set_endian_string == endian_big)
     {
-      struct gdbarch_info info;
-      target_byte_order_auto = 0;
-      gdbarch_info_init (&info);
       info.byte_order = BFD_ENDIAN_BIG;
       if (! gdbarch_update_p (info))
 	printf_unfiltered (_("Big endian target not supported by GDB\n"));
+      else
+	target_byte_order_user = BFD_ENDIAN_BIG;
     }
   else
     internal_error (__FILE__, __LINE__,
 		    _("set_endian: bad value"));
+
   show_endian (gdb_stdout, from_tty, NULL, NULL);
 }
 
@@ -423,14 +412,14 @@ set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
 
 enum set_arch { set_arch_auto, set_arch_manual };
 
-static int target_architecture_auto = 1;
+static const struct bfd_arch_info *target_architecture_user;
 
 static const char *set_architecture_string;
 
 const char *
 selected_architecture_name (void)
 {
-  if (target_architecture_auto)
+  if (target_architecture_user == NULL)
     return NULL;
   else
     return set_architecture_string;
@@ -445,7 +434,7 @@ show_architecture (struct ui_file *file, int from_tty,
 {
   const char *arch;
   arch = TARGET_ARCHITECTURE->printable_name;
-  if (target_architecture_auto)
+  if (target_architecture_user == NULL)
     fprintf_filtered (file, _("\
 The target architecture is set automatically (currently %s)\n"), arch);
   else
@@ -460,20 +449,25 @@ The target architecture is assumed to be %s\n"), arch);
 static void
 set_architecture (char *ignore_args, int from_tty, struct cmd_list_element *c)
 {
+  struct gdbarch_info info;
+
+  gdbarch_info_init (&info);
+
   if (strcmp (set_architecture_string, "auto") == 0)
     {
-      target_architecture_auto = 1;
+      target_architecture_user = NULL;
+      if (!gdbarch_update_p (info))
+	internal_error (__FILE__, __LINE__,
+			_("could not select an architecture automatically"));
     }
   else
     {
-      struct gdbarch_info info;
-      gdbarch_info_init (&info);
       info.bfd_arch_info = bfd_scan_arch (set_architecture_string);
       if (info.bfd_arch_info == NULL)
 	internal_error (__FILE__, __LINE__,
 			_("set_architecture: bfd_scan_arch failed"));
       if (gdbarch_update_p (info))
-	target_architecture_auto = 0;
+	target_architecture_user = info.bfd_arch_info;
       else
 	printf_unfiltered (_("Architecture `%s' not recognized.\n"),
 			   set_architecture_string);
@@ -530,6 +524,13 @@ gdbarch_from_bfd (bfd *abfd)
   struct gdbarch *new_gdbarch;
   struct gdbarch_info info;
 
+  /* If we call gdbarch_find_by_info without filling in info.abfd,
+     then it will use the global exec_bfd.  That's fine if we don't
+     have one of those either.  And that's the only time we should
+     reach here with a NULL ABFD argument - when we are discarding
+     the executable.  */
+  gdb_assert (abfd != NULL || exec_bfd == NULL);
+
   gdbarch_info_init (&info);
   info.abfd = abfd;
   return gdbarch_find_by_info (info);
@@ -567,6 +568,8 @@ static const bfd_target *default_bfd_vec = &DEFAULT_BFD_VEC;
 static const bfd_target *default_bfd_vec;
 #endif
 
+static int default_byte_order = BFD_ENDIAN_UNKNOWN;
+
 void
 initialize_current_architecture (void)
 {
@@ -577,10 +580,7 @@ initialize_current_architecture (void)
   gdbarch_info_init (&info);
   
   /* Find a default architecture. */
-  if (info.bfd_arch_info == NULL
-      && default_bfd_arch != NULL)
-    info.bfd_arch_info = default_bfd_arch;
-  if (info.bfd_arch_info == NULL)
+  if (default_bfd_arch == NULL)
     {
       /* Choose the architecture by taking the first one
 	 alphabetically. */
@@ -594,30 +594,32 @@ initialize_current_architecture (void)
       if (chosen == NULL)
 	internal_error (__FILE__, __LINE__,
 			_("initialize_current_architecture: No arch"));
-      info.bfd_arch_info = bfd_scan_arch (chosen);
-      if (info.bfd_arch_info == NULL)
+      default_bfd_arch = bfd_scan_arch (chosen);
+      if (default_bfd_arch == NULL)
 	internal_error (__FILE__, __LINE__,
 			_("initialize_current_architecture: Arch not found"));
     }
 
+  info.bfd_arch_info = default_bfd_arch;
+
   /* Take several guesses at a byte order.  */
-  if (info.byte_order == BFD_ENDIAN_UNKNOWN
+  if (default_byte_order == BFD_ENDIAN_UNKNOWN
       && default_bfd_vec != NULL)
     {
       /* Extract BFD's default vector's byte order. */
       switch (default_bfd_vec->byteorder)
 	{
 	case BFD_ENDIAN_BIG:
-	  info.byte_order = BFD_ENDIAN_BIG;
+	  default_byte_order = BFD_ENDIAN_BIG;
 	  break;
 	case BFD_ENDIAN_LITTLE:
-	  info.byte_order = BFD_ENDIAN_LITTLE;
+	  default_byte_order = BFD_ENDIAN_LITTLE;
 	  break;
 	default:
 	  break;
 	}
     }
-  if (info.byte_order == BFD_ENDIAN_UNKNOWN)
+  if (default_byte_order == BFD_ENDIAN_UNKNOWN)
     {
       /* look for ``*el-*'' in the target name. */
       const char *chp;
@@ -625,13 +627,15 @@ initialize_current_architecture (void)
       if (chp != NULL
 	  && chp - 2 >= target_name
 	  && strncmp (chp - 2, "el", 2) == 0)
-	info.byte_order = BFD_ENDIAN_LITTLE;
+	default_byte_order = BFD_ENDIAN_LITTLE;
     }
-  if (info.byte_order == BFD_ENDIAN_UNKNOWN)
+  if (default_byte_order == BFD_ENDIAN_UNKNOWN)
     {
       /* Wire it to big-endian!!! */
-      info.byte_order = BFD_ENDIAN_BIG;
+      default_byte_order = BFD_ENDIAN_BIG;
     }
+
+  info.byte_order = default_byte_order;
 
   if (! gdbarch_update_p (info))
     internal_error (__FILE__, __LINE__,
@@ -674,48 +678,46 @@ gdbarch_info_init (struct gdbarch_info *info)
 }
 
 /* Similar to init, but this time fill in the blanks.  Information is
-   obtained from the specified architecture, global "set ..." options,
-   and explicitly initialized INFO fields.  */
+   obtained from the global "set ..." options and explicitly
+   initialized INFO fields.  */
 
 void
-gdbarch_info_fill (struct gdbarch *gdbarch, struct gdbarch_info *info)
+gdbarch_info_fill (struct gdbarch_info *info)
 {
+  /* Check for the current file.  */
+  if (info->abfd == NULL)
+    info->abfd = exec_bfd;
+
   /* "(gdb) set architecture ...".  */
   if (info->bfd_arch_info == NULL
-      && !target_architecture_auto
-      && gdbarch != NULL)
-    info->bfd_arch_info = gdbarch_bfd_arch_info (gdbarch);
+      && target_architecture_user)
+    info->bfd_arch_info = target_architecture_user;
   if (info->bfd_arch_info == NULL
       && info->abfd != NULL
       && bfd_get_arch (info->abfd) != bfd_arch_unknown
       && bfd_get_arch (info->abfd) != bfd_arch_obscure)
     info->bfd_arch_info = bfd_get_arch_info (info->abfd);
-  if (info->bfd_arch_info == NULL
-      && gdbarch != NULL)
-    info->bfd_arch_info = gdbarch_bfd_arch_info (gdbarch);
+  /* From the default.  */
+  if (info->bfd_arch_info == NULL)
+    info->bfd_arch_info = default_bfd_arch;
 
   /* "(gdb) set byte-order ...".  */
   if (info->byte_order == BFD_ENDIAN_UNKNOWN
-      && !target_byte_order_auto
-      && gdbarch != NULL)
-    info->byte_order = gdbarch_byte_order (gdbarch);
+      && target_byte_order_user != BFD_ENDIAN_UNKNOWN)
+    info->byte_order = target_byte_order_user;
   /* From the INFO struct.  */
   if (info->byte_order == BFD_ENDIAN_UNKNOWN
       && info->abfd != NULL)
     info->byte_order = (bfd_big_endian (info->abfd) ? BFD_ENDIAN_BIG
-		       : bfd_little_endian (info->abfd) ? BFD_ENDIAN_LITTLE
-		       : BFD_ENDIAN_UNKNOWN);
-  /* From the current target.  */
-  if (info->byte_order == BFD_ENDIAN_UNKNOWN
-      && gdbarch != NULL)
-    info->byte_order = gdbarch_byte_order (gdbarch);
+			: bfd_little_endian (info->abfd) ? BFD_ENDIAN_LITTLE
+			: BFD_ENDIAN_UNKNOWN);
+  /* From the default.  */
+  if (info->byte_order == BFD_ENDIAN_UNKNOWN)
+    info->byte_order = default_byte_order;
 
   /* "(gdb) set osabi ...".  Handled by gdbarch_lookup_osabi.  */
   if (info->osabi == GDB_OSABI_UNINITIALIZED)
     info->osabi = gdbarch_lookup_osabi (info->abfd);
-  if (info->osabi == GDB_OSABI_UNINITIALIZED
-      && gdbarch != NULL)
-    info->osabi = gdbarch_osabi (gdbarch);
 
   /* Must have at least filled in the architecture.  */
   gdb_assert (info->bfd_arch_info != NULL);

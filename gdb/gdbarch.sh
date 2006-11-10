@@ -943,8 +943,7 @@ extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
    \`\`struct gdbarch'' for this architecture.
 
    The INFO parameter is, as far as possible, be pre-initialized with
-   information obtained from INFO.ABFD or the previously selected
-   architecture.
+   information obtained from INFO.ABFD or the global defaults.
 
    The ARCHES parameter is a linked list (sorted most recently used)
    of all the previously created architures for this architecture
@@ -2050,7 +2049,7 @@ gdbarch_list_lookup_by_info (struct gdbarch_list *arches,
    that there is no current architecture.  */
 
 static struct gdbarch *
-find_arch_by_info (struct gdbarch *old_gdbarch, struct gdbarch_info info)
+find_arch_by_info (struct gdbarch_info info)
 {
   struct gdbarch *new_gdbarch;
   struct gdbarch_registration *rego;
@@ -2060,9 +2059,9 @@ find_arch_by_info (struct gdbarch *old_gdbarch, struct gdbarch_info info)
   gdb_assert (current_gdbarch == NULL);
 
   /* Fill in missing parts of the INFO struct using a number of
-     sources: "set ..."; INFOabfd supplied; and the existing
-     architecture.  */
-  gdbarch_info_fill (old_gdbarch, &info);
+     sources: "set ..."; INFOabfd supplied; and the global
+     defaults.  */
+  gdbarch_info_fill (&info);
 
   /* Must have found some sort of architecture. */
   gdb_assert (info.bfd_arch_info != NULL);
@@ -2193,7 +2192,7 @@ gdbarch_find_by_info (struct gdbarch_info info)
   struct gdbarch *old_gdbarch = current_gdbarch_swap_out_hack ();
 
   /* Find the specified architecture.  */
-  struct gdbarch *new_gdbarch = find_arch_by_info (old_gdbarch, info);
+  struct gdbarch *new_gdbarch = find_arch_by_info (info);
 
   /* Restore the existing architecture.  */
   gdb_assert (current_gdbarch == NULL);

@@ -506,7 +506,7 @@ gdbsim_open (char *args, int from_tty)
   strcpy (arg_buf, "gdbsim");	/* 7 */
   /* Specify the byte order for the target when it is both selectable
      and explicitly specified by the user (not auto detected). */
-  switch (selected_byte_order ())
+  switch (TARGET_BYTE_ORDER)
     {
     case BFD_ENDIAN_BIG:
       strcat (arg_buf, " -E big");

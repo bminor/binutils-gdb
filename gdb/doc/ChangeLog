@@ -1,3 +1,8 @@
+2006-11-10  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Add new
+	Initializing a New Architecture section.
+
 2006-10-31  David Taylor  <dtaylor@emc.com>
 
 	* stabs.texinfo (Macro define and undefine): New node describing
