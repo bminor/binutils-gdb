@@ -1,3 +1,9 @@
+2006-11-10  Nick Clifton  <nickc@redhat.com>
+
+	* config.bfd: Move previously obsoleted targets to the REMOVED
+	list.
+	Add maxq-*-coff to the obsolete list.
+
 2006-11-10  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* pe-arm-wince.c (LOCAL_LABEL_PREFIX): Define as ".".
