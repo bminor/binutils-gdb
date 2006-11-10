@@ -73,4 +73,8 @@ run_dump_test "cfi-common-2"
 run_dump_test "cfi-common-3"
 run_dump_test "cfi-common-4"
 run_dump_test "cfi-common-5"
-run_dump_test "cfi-common-6"
+
+# MIPS doesn't support PC relative cfi directives
+if { ![istarget "mips*-*"] } then {
+    run_dump_test "cfi-common-6"
+}
