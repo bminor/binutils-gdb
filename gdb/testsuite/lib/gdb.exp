@@ -2409,3 +2409,61 @@ proc gdb_gnu_strip_debug { dest args } {
    return 0
 }
 
+# Test the output of GDB_COMMAND matches the pattern obtained
+# by concatenating all elements of EXPECTED_LINES.  This makes
+# it possible to split otherwise very long string into pieces.
+# If third argument is not empty, it's used as the name of the
+# test to be printed on pass/fail.
+proc help_test_raw { gdb_command expected_lines args } {
+    set message $gdb_command
+    if [llength $args]>0 then {
+	set message [lindex $args 0]
+    } 
+    set expected_output [join $expected_lines ""]
+    gdb_test "${gdb_command}" "${expected_output}" $message
+}
+
+# Test the output of "help COMMNAD_CLASS". EXPECTED_INITIAL_LINES
+# are regular expressions that should match the beginning of output,
+# before the list of commands in that class.  The presence of 
+# command list and standard epilogue will be tested automatically.
+proc test_class_help { command_class expected_initial_lines args } {
+    set l_stock_body {
+        "List of commands\:.*\[\r\n\]+"
+        "Type \"help\" followed by command name for full documentation\.\[\r\n\]+"
+        "Type \"apropos word\" to search for commands related to \"word\"\.[\r\n\]+"
+        "Command name abbreviations are allowed if unambiguous\." 
+    }
+    set l_entire_body [concat $expected_initial_lines $l_stock_body]
+
+    eval [list help_test_raw "help ${command_class}" $l_entire_body] $args
+}
+
+# COMMAND_LIST should have either one element -- command to test, or
+# two elements -- abbreviated command to test, and full command the first
+# element is abbreviation of.
+# The command must be a prefix command.  EXPECTED_INITIAL_LINES
+# are regular expressions that should match the beginning of output,
+# before the list of subcommands.  The presence of 
+# subcommand list and standard epilogue will be tested automatically.
+proc test_prefix_command_help { command_list expected_initial_lines args } {
+    set command [lindex $command_list 0]   
+    if {[llength $command_list]>1} {        
+        set full_command [lindex $command_list 1]
+    } else {
+        set full_command $command
+    }
+    # Use 'list' and not just {} because we want variables to
+    # be expanded in this list.
+    set l_stock_body [list\
+         "List of $full_command subcommands\:.*\[\r\n\]+"\
+         "Type \"help $full_command\" followed by $full_command subcommand name for full documentation\.\[\r\n\]+"\
+         "Type \"apropos word\" to search for commands related to \"word\"\.\[\r\n\]+"\
+         "Command name abbreviations are allowed if unambiguous\."]
+    set l_entire_body [concat $expected_initial_lines $l_stock_body]
+    if {[llength $args]>0} {
+        help_test_raw "help ${command}" $l_entire_body [lindex $args 0]
+    } else {
+        help_test_raw "help ${command}" $l_entire_body
+    }
+}

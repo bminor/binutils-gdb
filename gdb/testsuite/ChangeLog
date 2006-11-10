@@ -1,3 +1,14 @@
+2006-11-10  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.base/completion.exp: Fix completion tests for
+	'info' and 'info '.
+	* gdb.base/help.exp (help_test_raw, test_class_help)
+	(test_prefix_command_help): Move...
+	* lib/gdb.exp: Here.
+	* gdb.base/main.exp: Adjust.
+	* gdb.cp/maint.exp: Adjust.
+	* gdb.trace/tracecmd.exp: Use test_help_class.
+	
 2006-11-09  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.stabs/weird.exp (print_weird_var): Use

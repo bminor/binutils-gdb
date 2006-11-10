@@ -679,21 +679,16 @@ gdb_expect  {
         timeout         { fail "(timeout) help maint info" }
         }
 
-send_gdb "help maint print\n"
-gdb_expect  {
-        -re "Maintenance command for printing GDB internal state\\.\[\r\n\]+List of maintenance print subcommands:\[\r\n\]+maintenance print architecture -- Print the internal architecture configuration.*maintenance print msymbols -- Print dump of current minimal symbol definitions.*maintenance print objfiles -- Print dump of current object file definitions.*maintenance print psymbols -- Print dump of current partial symbol definitions.*maintenance print statistics -- Print statistics about internal gdb state.*maintenance print symbols -- Print dump of current symbol definitions.*maintenance print type -- Print a type chain for a given symbol.*Type .help maintenance print. followed by maintenance print subcommand name for full documentation\\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\\..*$gdb_prompt $"\
-                        { pass "help maint print" }
-        -re ".*$gdb_prompt $"       { fail "help maint print" }
-        timeout         { fail "(timeout) help maint print" }
-        }
+test_prefix_command_help {"maint print" "maintenance print"} {
+    "Maintenance command for printing GDB internal state\\.\[\r\n\]+"
+}
 
-send_gdb "help maint\n"
-gdb_expect  {
-        -re "Commands for use by GDB maintainers\\.\[\r\n\]+Includes commands to dump specific internal GDB structures in\[\r\n\]+a human readable form, to cause GDB to deliberately dump core,\[\r\n\]+to test internal functions such as the C\\+\\+/ObjC demangler, etc\\..*Type.*help maintenance.*followed by maintenance subcommand name for full documentation\\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\\..*$gdb_prompt $"\
-                        { pass "help maint" }
-        -re ".*$gdb_prompt $"       { fail "help maint" }
-        timeout         { fail "(timeout) help maint" }
-        }
+test_prefix_command_help {"maint" "maintenance"} {
+    "Commands for use by GDB maintainers\\.\[\r\n\]+"
+    "Includes commands to dump specific internal GDB structures in\[\r\n\]+"
+    "a human readable form, to cause GDB to deliberately dump core,\[\r\n\]+"
+    "to test internal functions such as the C\\+\\+/ObjC demangler, etc\\.\[\r\n\]+"
+}
 
 #set oldtimeout $timeout
 #set timeout [expr $timeout + 300]
