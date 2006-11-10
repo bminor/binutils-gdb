@@ -1,3 +1,9 @@
+2006-11-10  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* pe-arm-wince.c (LOCAL_LABEL_PREFIX): Define as ".".
+	* pei-arm-wince.c (LOCAL_LABEL_PREFIX): Likewise.
+	* coff-arm.c (LOCAL_LABEL_PREFIX): Only define if not defined before.
+
 2006-11-07  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf32-arm.c (find_thumb_glue): Add ERROR_MESSAGE argument; set it

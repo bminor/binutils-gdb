@@ -2424,7 +2424,9 @@ Warning: Clearing the interworking flag of %B because non-interworking code in %
 
 /* Note:  the definitions here of LOCAL_LABEL_PREFIX and USER_LABEL_PREIFX
    *must* match the definitions in gcc/config/arm/{coff|semi|aout}.h.  */
+#ifndef LOCAL_LABEL_PREFIX
 #define LOCAL_LABEL_PREFIX ""
+#endif
 #ifndef USER_LABEL_PREFIX
 #define USER_LABEL_PREFIX "_"
 #endif
