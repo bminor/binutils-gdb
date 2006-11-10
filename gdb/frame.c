@@ -1023,6 +1023,36 @@ reinit_frame_cache (void)
     }
 }
 
+/* Find where a register is saved (in memory or another register).
+   The result of frame_register_unwind is just where it is saved
+   relative to this particular frame.
+
+   FIXME: alpha, m32c, and h8300 actually do the transitive operation
+   themselves.  */
+
+static void
+frame_register_unwind_location (struct frame_info *this_frame, int regnum,
+				int *optimizedp, enum lval_type *lvalp,
+				CORE_ADDR *addrp, int *realnump)
+{
+  gdb_assert (this_frame == NULL || this_frame->level >= 0);
+
+  while (this_frame != NULL)
+    {
+      frame_register_unwind (this_frame, regnum, optimizedp, lvalp,
+			     addrp, realnump, NULL);
+
+      if (*optimizedp)
+	break;
+
+      if (*lvalp != lval_register)
+	break;
+
+      regnum = *realnump;
+      this_frame = get_next_frame (this_frame);
+    }
+}
+
 /* Return a "struct frame_info" corresponding to the frame that called
    THIS_FRAME.  Returns NULL if there is no such frame.
 
@@ -1109,6 +1139,42 @@ get_prev_frame_1 (struct frame_info *this_frame)
 	}
       this_frame->stop_reason = UNWIND_SAME_ID;
       return NULL;
+    }
+
+  /* Check that this and the next frame do not unwind the PC register
+     to the same memory location.  If they do, then even though they
+     have different frame IDs, the new frame will be bogus; two
+     functions can't share a register save slot for the PC.  This can
+     happen when the prologue analyzer finds a stack adjustment, but
+     no PC save.  This check does assume that the "PC register" is
+     roughly a traditional PC, even if the gdbarch_unwind_pc method
+     frobs it.  */
+  if (this_frame->level > 0
+      && get_frame_type (this_frame) == NORMAL_FRAME
+      && get_frame_type (this_frame->next) == NORMAL_FRAME)
+    {
+      int optimized, realnum;
+      enum lval_type lval, nlval;
+      CORE_ADDR addr, naddr;
+
+      frame_register_unwind_location (this_frame, PC_REGNUM, &optimized,
+				      &lval, &addr, &realnum);
+      frame_register_unwind_location (get_next_frame (this_frame), PC_REGNUM,
+				      &optimized, &nlval, &naddr, &realnum);
+
+      if (lval == lval_memory && lval == nlval && addr == naddr)
+	{
+	  if (frame_debug)
+	    {
+	      fprintf_unfiltered (gdb_stdlog, "-> ");
+	      fprint_frame (gdb_stdlog, NULL);
+	      fprintf_unfiltered (gdb_stdlog, " // no saved PC }\n");
+	    }
+
+	  this_frame->stop_reason = UNWIND_NO_SAVED_PC;
+	  this_frame->prev = NULL;
+	  return NULL;
+	}
     }
 
   /* Allocate the new frame but do not wire it in to the frame chain.
@@ -1610,6 +1676,9 @@ frame_stop_reason_string (enum unwind_stop_reason reason)
 
     case UNWIND_SAME_ID:
       return _("previous frame identical to this frame (corrupt stack?)");
+
+    case UNWIND_NO_SAVED_PC:
+      return _("frame did not save the PC");
 
     case UNWIND_NO_REASON:
     case UNWIND_FIRST_ERROR:

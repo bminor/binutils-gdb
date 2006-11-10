@@ -1,5 +1,12 @@
 2006-11-10  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* frame.c (frame_register_unwind_location): New function.
+	(get_prev_frame_1): Check for UNWIND_NO_SAVED_PC.
+	(frame_stop_reason_string): Handle UNWIND_NO_SAVED_PC.
+	* frame.h (enum unwind_stop_reason): Add UNWIND_NO_SAVED_PC.
+
+2006-11-10  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* arch-utils.c (target_byte_order_user): Renamed from
 	target_byte_order.
 	(target_byte_order_auto, selected_byte_order): Removed.

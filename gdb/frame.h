@@ -428,6 +428,10 @@ enum unwind_stop_reason
        this is a sign of unwinder failure.  It could also indicate
        stack corruption.  */
     UNWIND_SAME_ID,
+
+    /* The frame unwinder didn't find any saved PC, but we needed
+       one to unwind further.  */
+    UNWIND_NO_SAVED_PC,
   };
 
 /* Return the reason why we can't unwind past this frame.  */
