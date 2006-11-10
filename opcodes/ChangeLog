@@ -1,3 +1,18 @@
+2006-11-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (twobyte_uses_SSE_prefix): Renamed to ...
+	(twobyte_uses_DATA_prefix): This.
+	(twobyte_uses_REPNZ_prefix): New.
+	(twobyte_uses_REPZ_prefix): Likewise.
+	(threebyte_0x38_uses_DATA_prefix): Likewise.
+	(threebyte_0x38_uses_REPNZ_prefix): Likewise.
+	(threebyte_0x38_uses_REPZ_prefix): Likewise.
+	(threebyte_0x3a_uses_DATA_prefix): Likewise.
+	(threebyte_0x3a_uses_REPNZ_prefix): Likewise.
+	(threebyte_0x3a_uses_REPZ_prefix): Likewise.
+	(print_insn): Updated checking usages of DATA/REPNZ/REPZ
+	prefixes.
+
 2006-11-06  Troy Rollo  <troy@corvu.com.au>
 
 	* ppc-opc.c: Restore COM to mfcr wrongly removed 2003-07-04.
