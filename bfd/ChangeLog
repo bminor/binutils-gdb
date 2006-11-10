@@ -1,3 +1,8 @@
+2006-11-10  Thiemo Seufer  <ths@mips.com>
+
+	* config.bfd (mips*el-sde-elf*, mips*-sde-elf*): Drop ECOFF support
+	for SDE configs.
+
 2006-11-10  Nick Clifton  <nickc@redhat.com>
 
 	* config.bfd: Move previously obsoleted targets to the REMOVED
