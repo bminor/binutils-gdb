@@ -18959,36 +18959,7 @@ arm_force_relocation (struct fix * fixp)
   return generic_force_reloc (fixp);
 }
 
-#ifdef OBJ_COFF
-bfd_boolean
-arm_fix_adjustable (fixS * fixP)
-{
-  /* This is a little hack to help the gas/arm/adrl.s test.  It prevents
-     local labels from being added to the output symbol table when they
-     are used with the ADRL pseudo op.  The ADRL relocation should always
-     be resolved before the binbary is emitted, so it is safe to say that
-     it is adjustable.  */
-  if (fixP->fx_r_type == BFD_RELOC_ARM_ADRL_IMMEDIATE)
-    return 1;
-
-  /* This is a hack for the gas/all/redef2.s test.  This test causes symbols
-     to be cloned, and without this test relocs would still be generated
-     against the original, pre-cloned symbol.  Such symbols would not appear
-     in the symbol table however, and so a valid reloc could not be
-     generated.  So check to see if the fixup is against a symbol which has
-     been removed from the symbol chain, and if it is, then allow it to be
-     adjusted into a reloc against a section symbol. */
-  if (fixP->fx_addsy != NULL
-      && ! S_IS_LOCAL (fixP->fx_addsy)
-      && symbol_next (fixP->fx_addsy) == NULL
-      && symbol_next (fixP->fx_addsy) == symbol_previous (fixP->fx_addsy))
-    return 1;
-  
-  return 0;
-}
-#endif
-
-#ifdef OBJ_ELF
+#if defined (OBJ_ELF) || defined (OBJ_COFF)
 /* Relocations against function names must be left unadjusted,
    so that the linker can use this information to generate interworking
    stubs.  The MIPS version of this function
@@ -19041,6 +19012,9 @@ arm_fix_adjustable (fixS * fixP)
 
   return 1;
 }
+#endif /* defined (OBJ_ELF) || defined (OBJ_COFF) */
+
+#ifdef OBJ_ELF
 
 const char *
 elf32_arm_target_format (void)

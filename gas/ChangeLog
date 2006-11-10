@@ -1,3 +1,8 @@
+2006-11-10  Pedro Alves <pedro_alves@portugalmail.pt>
+
+	* config/tc-arm.c (arm_fix_adjustable) [OBJ_COFF]: Delete.
+	(arm_fix_adjustable) [OBJ_ELF]: Use it on coff targets too.
+
 2006-11-10  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/3456:

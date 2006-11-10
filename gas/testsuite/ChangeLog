@@ -3,6 +3,13 @@
 	* gas/arm/undefined.d: Run test on Windows CE.
 	* gas/arm/undefined_coff.d: Don't run test on Windows CE.
 
+	* gas/arm/local_label_coff.s: New test.
+	* gas/arm/local_label_coff.d: New test.
+	* gas/arm/local_label_elf.s: New test.
+	* gas/arm/local_label_elf.d: New test.
+	* gas/arm/local_label_wince.s: New test.
+	* gas/arm/local_label_wince.d: New test.
+
 2006-11-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/sse2.s: Test movdqa with memory destination.
