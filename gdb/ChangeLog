@@ -1,3 +1,7 @@
+2006-11-12  Ben Harris  <bjh21@NetBSD.org>
+
+	* arm-tdep.c (arm_unwind_pc): Use arm_addr_bits_remove.
+
 2006-11-10  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* frame.c (frame_register_unwind_location): New function.
