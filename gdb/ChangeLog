@@ -1,6 +1,7 @@
-2006-10-31  Paul Gilliam  <pgilliam@us.ibm.com>
+2006-11-13  Paul Gilliam  <pgilliam@us.ibm.com>
+
 	* ppc-linux-tdep.c (ppc_linux_sigtramp_cache): Don't futz with
-	        the floating point registers if there aren't any.
+	the floating point registers if there aren't any.
 
 2006-11-12  Ben Harris  <bjh21@NetBSD.org>
 
