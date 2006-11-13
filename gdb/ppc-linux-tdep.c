@@ -916,16 +916,18 @@ ppc_linux_sigtramp_cache (struct frame_info *next_frame,
   trad_frame_set_reg_addr (this_cache, tdep->ppc_cr_regnum,
 			   gpregs + 38 * tdep->wordsize);
 
-  if (ppc_floating_point_unit_p (gdbarch)) {
-         /* Floating point registers.  */
-         for (i = 0; i < 32; i++)
-         {
-                 int regnum = i + FP0_REGNUM;
-                 trad_frame_set_reg_addr (this_cache, regnum, fpregs + i * tdep->wordsize);
-         }
-         trad_frame_set_reg_addr (this_cache, tdep->ppc_fpscr_regnum,
+  if (ppc_floating_point_unit_p (gdbarch))
+    {
+      /* Floating point registers.  */
+      for (i = 0; i < 32; i++)
+	{
+	  int regnum = i + FP0_REGNUM;
+	  trad_frame_set_reg_addr (this_cache, regnum,
+				   fpregs + i * tdep->wordsize);
+	}
+      trad_frame_set_reg_addr (this_cache, tdep->ppc_fpscr_regnum,
                          fpregs + 32 * tdep->wordsize);
-  }
+    }
   trad_frame_set_id (this_cache, frame_id_build (base, func));
 }
 
