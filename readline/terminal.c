@@ -226,8 +226,8 @@ _rl_get_screen_size (tty, ignore_env)
       CONSOLE_SCREEN_BUFFER_INFO scr;
       if (GetConsoleScreenBufferInfo (hConOut, &scr))
 	{
-	  _rl_screenwidth = scr.dwSize.X;
-	  _rl_screenheight = scr.srWindow.Bottom - scr.srWindow.Top + 1;
+	  wc = scr.dwSize.X;
+	  wr = scr.srWindow.Bottom - scr.srWindow.Top + 1;
 	}
     }
 #endif
