@@ -216,6 +216,7 @@ BUILD_WINDRES=
 BUILD_DLLWRAP=
 BUILD_MISC=
 OBJDUMP_DEFS=
+TOOL_PROGS="nm-new strip-new ar ranlib dlltool objdump"
 
 for targ in $target $canon_targets
 do
@@ -224,6 +225,7 @@ do
 	BUILD_NLMCONV='$(NLMCONV_PROG)$(EXEEXT)'
 	BUILD_SRCONV='$(SRCONV_PROG)'
 	NLMCONV_DEFS="-DNLMCONV_I386 -DNLMCONV_ALPHA -DNLMCONV_POWERPC -DNLMCONV_SPARC"
+	TOOL_PROGS="$TOOL_PROGS objcopy"
     else
 	case $targ in
 changequote(,)dnl
@@ -310,12 +312,20 @@ changequote([,])dnl
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_MCORE_ELF"
 	  ;;
 	esac
+	case $targ in
+	*-uclinux)
+	  TOOL_PROGS="$TOOL_PROGS objcopy"
+	  ;;
+	esac
     fi
 done
 
 if test "${with_windres+set}" = set; then
 	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
 fi
+
+# Remove duplicates from TOOL_PROGS
+TOOL_PROGS="`echo $TOOL_PROGS | tr ' ' '\012' | sort -u | tr '\012' ' '`"
 
 AC_SUBST(NLMCONV_DEFS)
 AC_SUBST(BUILD_NLMCONV)
@@ -326,6 +336,7 @@ AC_SUBST(BUILD_WINDRES)
 AC_SUBST(BUILD_DLLWRAP)
 AC_SUBST(BUILD_MISC)
 AC_SUBST(OBJDUMP_DEFS)
+AC_SUBST(TOOL_PROGS)
 
 AC_DEFINE_UNQUOTED(TARGET, "${target}", [Configured target name.])
 

@@ -64,7 +64,7 @@ noinst_PROGRAMS = $(NM_PROG) $(STRIP_PROG) $(DEMANGLER_PROG)
 EXTRA_PROGRAMS = $(NLMCONV_PROG) srconv sysdump coffdump $(DLLTOOL_PROG) $(WINDRES_PROG) $(DLLWRAP_PROG)
 
 # Stuff that goes in tooldir/ if appropriate.
-TOOL_PROGS = nm-new strip-new ar ranlib dlltool objdump
+TOOL_PROGS = @TOOL_PROGS@
 
 BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
@@ -390,8 +390,8 @@ install-exec-local: install-binPROGRAMS $(bin_PROGRAMS) $(noinst_PROGRAMS)
 	  else :; fi; \
 	done
 	$(mkinstalldirs) $(DESTDIR)$(tooldir)/bin
-	for i in $(TOOL_PROGS); do \
-	  if [ -f $$i$(EXEEXT) ]; then \
+	for i in . $(TOOL_PROGS); do \
+	  if [ $$i != . ] && [ -f $$i$(EXEEXT) ]; then \
 	    j=`echo $$i | sed -e 's/-new//'`; \
 	    k=`echo $$j | sed '$(transform)'`; \
 	    if [ "$(bindir)/$$k" != "$(tooldir)/bin/$$j" ]; then \
