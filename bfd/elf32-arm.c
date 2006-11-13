@@ -2826,8 +2826,7 @@ static void check_use_blx(struct elf32_arm_link_hash_table *globals)
 
 bfd_boolean
 bfd_elf32_arm_process_before_allocation (bfd *abfd,
-					 struct bfd_link_info *link_info,
-					 int byteswap_code)
+					 struct bfd_link_info *link_info)
 {
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Rela *internal_relocs = NULL;
@@ -2850,13 +2849,12 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
   BFD_ASSERT (globals != NULL);
   BFD_ASSERT (globals->bfd_of_glue_owner != NULL);
 
-  if (byteswap_code && !bfd_big_endian (abfd))
+  if (globals->byteswap_code && !bfd_big_endian (abfd))
     {
       _bfd_error_handler (_("%B: BE8 images only valid in big-endian mode."),
 			  abfd);
       return FALSE;
     }
-  globals->byteswap_code = byteswap_code;
 
   /* Rummage around all the relocs and map the glue vectors.  */
   sec = abfd->sections;
@@ -2932,19 +2930,9 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 	  if (h == NULL)
 	    continue;
 
-	  /* If the call will go through a PLT entry then we do not
-	     need glue.  We have to do a fairly complicated check
-	     here, since we don't determine this finally (by setting
-	     plt.offset) until later; this test should be kept in sync
-	     with elf32_arm_adjust_dynamic_symbol.  */
-	  if (globals->splt != NULL
-	      && h->plt.refcount > 0
-	      && (h->type == STT_FUNC
-		  || h->type == STT_ARM_TFUNC
-		  || h->needs_plt)
-	      && !SYMBOL_CALLS_LOCAL (link_info, h)
-	      && !(ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-		   && h->root.type == bfd_link_hash_undefweak))
+	  /* If the call will go through a PLT entry then we do not need
+	     glue.  */
+	  if (globals->splt != NULL && h->plt.offset != (bfd_vma) -1)
 	    continue;
 
 	  switch (r_type)
@@ -7917,6 +7905,16 @@ elf32_arm_readonly_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
   return TRUE;
 }
 
+void
+bfd_elf32_arm_set_byteswap_code (struct bfd_link_info *info,
+				 int byteswap_code)
+{
+  struct elf32_arm_link_hash_table *globals;
+
+  globals = elf32_arm_hash_table (info);
+  globals->byteswap_code = byteswap_code;
+}
+
 /* Set the sizes of the dynamic sections.  */
 
 static bfd_boolean
@@ -8031,6 +8029,13 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
   /* Allocate global sym .plt and .got entries, and space for global
      sym dynamic relocs.  */
   elf_link_hash_traverse (& htab->root, allocate_dynrelocs, info);
+
+  /* Here we rummage through the found bfds to collect glue information.  */
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+    if (!bfd_elf32_arm_process_before_allocation (ibfd, info))
+      /* xgettext:c-format */
+      _bfd_error_handler (_("Errors encountered processing file %s"),
+			  ibfd->filename);
 
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate

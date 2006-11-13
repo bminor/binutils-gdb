@@ -875,7 +875,7 @@ extern bfd_boolean bfd_elf32_arm_allocate_interworking_sections
   (struct bfd_link_info *);
 
 extern bfd_boolean bfd_elf32_arm_process_before_allocation
-  (bfd *, struct bfd_link_info *, int);
+  (bfd *, struct bfd_link_info *);
 
 void bfd_elf32_arm_set_target_relocs
   (struct bfd_link_info *, int, char *, int, int);
@@ -893,6 +893,8 @@ extern bfd_boolean bfd_elf32_arm_add_glue_sections_to_bfd
 #define BFD_ARM_SPECIAL_SYM_TYPE_ANY	(~0)
 extern bfd_boolean bfd_is_arm_special_symbol_name
   (const char * name, int type);
+
+extern void bfd_elf32_arm_set_byteswap_code (struct bfd_link_info *, int);
 
 /* ARM Note section processing.  */
 extern bfd_boolean bfd_arm_merge_machines

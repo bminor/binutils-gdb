@@ -1,3 +1,8 @@
+2006-11-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* emultempl/armelf.em (arm_elf_before_allocation): Only call
+	bfd_elf32_arm_process_before_allocation if no dynamic sections.
+
 2006-11-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/elf32.em (gld*_before_allocation): Adjust output section

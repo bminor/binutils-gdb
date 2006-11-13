@@ -1,3 +1,15 @@
+2006-11-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* bfd-in.h (bfd_elf32_arm_process_before_allocation): Update
+	prototype.
+	(bfd_elf32_arm_set_byteswap_code): New prototype.
+	* bfd-in2.h: Regenerate.
+	* elf32-arm.c (bfd_elf32_arm_process_before_allocation): Don't take
+	byteswap_code as an argument.  Revert 2006-11-01 change.
+	(bfd_elf32_arm_set_byteswap_code): New.
+	(elf32_arm_size_dynamic_sections): Call
+	bfd_elf32_arm_process_before_allocation.
+
 2006-11-10  Thiemo Seufer  <ths@mips.com>
 
 	* config.bfd (mips*el-sde-elf*, mips*-sde-elf*): Drop ECOFF support

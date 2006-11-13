@@ -121,21 +121,22 @@ arm_elf_before_allocation (void)
       if (bfd_for_interwork != NULL)
 	bfd_elf32_arm_get_bfd_for_interworking (bfd_for_interwork, &link_info);
     }
-  /* We should be able to set the size of the interworking stub section.  */
 
-  /* Here we rummage through the found bfds to collect glue information.  */
-  /* FIXME: should this be based on a command line option? krk@cygnus.com  */
-  {
-    LANG_FOR_EACH_INPUT_STATEMENT (is)
-      {
-	if (!bfd_elf32_arm_process_before_allocation (is->the_bfd, & link_info,
-						      byteswap_code))
-	  {
+  bfd_elf32_arm_set_byteswap_code (&link_info, byteswap_code);
+
+  /* We should be able to set the size of the interworking stub section.  We
+     can't do it until later if we have dynamic sections, though.  */
+  if (! elf_hash_table (&link_info)->dynamic_sections_created)
+    {
+      /* Here we rummage through the found bfds to collect glue information.  */
+      LANG_FOR_EACH_INPUT_STATEMENT (is)
+	{
+	  if (!bfd_elf32_arm_process_before_allocation (is->the_bfd,
+							&link_info))
 	    /* xgettext:c-format */
 	    einfo (_("Errors encountered processing file %s"), is->filename);
-	  }
-      }
-  }
+	}
+    }
 
   /* Call the standard elf routine.  */
   gld${EMULATION_NAME}_before_allocation ();
