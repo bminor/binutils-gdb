@@ -34,7 +34,7 @@ Disassembly of section .text:
 .* <app_func>:
  .*:	e1a0c00d 	mov	ip, sp
  .*:	e92dd800 	stmdb	sp!, {fp, ip, lr, pc}
- .*:	ebfffff. 	bl	.*
+ .*:	ebffff.. 	bl	.*
  .*:	e89d6800 	ldmia	sp, {fp, sp, lr}
  .*:	e12fff1e 	bx	lr
  .*:	e1a00000 	nop			\(mov r0,r0\)

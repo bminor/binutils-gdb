@@ -1,3 +1,13 @@
+2006-11-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-arm/arm-dyn.ld, ld-arm/arm-lib.ld: Remove .stack.
+	* ld-arm/armthumb-lib.d, ld-arm/mixed-app.d, ld-arm/mixed-lib.d:
+	Allow smaller section gap.
+	* ld-arm/armthumb-lib.sym, ld-arm/mixed-lib.sym: Reorder.  Remove
+	_stack.
+	* ld-arm/mixed-app.sym: Remove _stack.
+	* ld-arm/tls-app.d: Update start address.
+
 2006-11-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-elf/group.ld: Handle .rodata.brlt for powerpc64.

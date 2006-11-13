@@ -20,7 +20,7 @@ Disassembly of section .text:
 .* <lib_func1>:
  .*:	e1a0c00d 	mov	ip, sp
  .*:	e92dd800 	stmdb	sp!, {fp, ip, lr, pc}
- .*:	ebfffff. 	bl	.* <.text-0x..>
+ .*:	ebfffff. 	bl	.* <.text-0x..?>
  .*:	e89d6800 	ldmia	sp, {fp, sp, lr}
  .*:	e12fff1e 	bx	lr
  .*:	e1a00000 	nop			\(mov r0,r0\)
@@ -38,7 +38,7 @@ Disassembly of section .text:
  .*:	46c0      	nop			\(mov r8, r8\)
 
 .* <lib_func2>:
- .*:	e59fc004 	ldr	ip, \[pc, #4\]	; 33c <lib_func2\+0xc>
+ .*:	e59fc004 	ldr	ip, \[pc, #4\]	; .* <lib_func2\+0xc>
  .*:	e08cc00f 	add	ip, ip, pc
  .*:	e12fff1c 	bx	ip
  .*:	ffffffe5 	.*
