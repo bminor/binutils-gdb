@@ -35,7 +35,7 @@ struct Ehdr_data
   Elf_Half e_shstrndx;
 };
 
-// An Elf section header.
+// An ELF section header.
 
 template<int size>
 struct Shdr_data
@@ -114,7 +114,7 @@ struct Sym_data<64>
   Elf_Xword st_size;
 };
 
-// Elf relocation table entries.
+// ELF relocation table entries.
 
 template<int size>
 struct Rel_data
@@ -129,6 +129,81 @@ struct Rela_data
   typename Elf_types<size>::Elf_Addr r_offset;
   typename Elf_types<size>::Elf_WXword r_info;
   typename Elf_types<size>::Elf_Swxword r_addend;
+};
+
+// An entry in the ELF SHT_DYNAMIC section aka PT_DYNAMIC segment.
+
+template<int size>
+struct Dyn_data
+{
+  typename Elf_types<size>::Elf_Swxword d_tag;
+  typename Elf_types<size>::Elf_WXword d_val;
+};
+
+// An entry in a SHT_GNU_verdef section.  This structure is the same
+// in 32-bit and 64-bit ELF files.
+
+struct Verdef_data
+{
+  // Version number of structure (VER_DEF_*).
+  Elf_Half vd_version;
+  // Bit flags (VER_FLG_*).
+  Elf_Half vd_flags;
+  // Version index.
+  Elf_Half vd_ndx;
+  // Number of auxiliary Verdaux entries.
+  Elf_Half vd_cnt;
+  // Hash of name.
+  Elf_Word vd_hash;
+  // Byte offset to first Verdaux entry.
+  Elf_Word vd_aux;
+  // Byte offset to next Verdef entry.
+  Elf_Word vd_next;
+};
+
+// An auxiliary entry in a SHT_GNU_verdef section.  This structure is
+// the same in 32-bit and 64-bit ELF files.
+
+struct Verdaux_data
+{
+  // Offset in string table of version name.
+  Elf_Word vda_name;
+  // Byte offset to next Verdaux entry.
+  Elf_Word vda_next;
+};
+
+// An entry in a SHT_GNU_verneed section.  This structure is the same
+// in 32-bit and 64-bit ELF files.
+
+struct Verneed_data
+{
+  // Version number of structure (VER_NEED_*).
+  Elf_Half vn_version;
+  // Number of auxiliary Vernaux entries.
+  Elf_Half vn_cnt;
+  // Offset in string table of library name.
+  Elf_Word vn_file;
+  // Byte offset to first Vernaux entry.
+  Elf_Word vn_aux;
+  // Byt eoffset to next Verneed entry.
+  Elf_Word vn_next;
+};
+
+// An auxiliary entry in a SHT_GNU_verneed section.  This structure is
+// the same in 32-bit and 64-bit ELF files.
+
+struct Vernaux_data
+{
+  // Hash of dependency name.
+  Elf_Word vna_hash;
+  // Bit flags (VER_FLG_*).
+  Elf_Half vna_flags;
+  // Version index used in SHT_GNU_versym entries.
+  Elf_Half vna_other;
+  // Offset in string table of version name.
+  Elf_Word vna_name;
+  // Byte offset to next Vernaux entry.
+  Elf_Word vna_next;
 };
 
 } // End namespace internal.

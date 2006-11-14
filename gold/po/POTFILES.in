@@ -6,6 +6,8 @@ defstd.cc
 defstd.h
 dirsearch.cc
 dirsearch.h
+dynobj.cc
+dynobj.h
 fileread.cc
 fileread.h
 gold.cc
@@ -26,6 +28,8 @@ readsyms.h
 reloc.cc
 reloc.h
 resolve.cc
+script.cc
+script.h
 stringpool.cc
 stringpool.h
 symtab.cc

@@ -20,7 +20,11 @@ namespace gold
 
 class Object;
 class Relobj;
+template<int size, bool big_endian>
+class Sized_relobj;
 class Dynobj;
+template<int size, bool big_endian>
+class Sized_dynobj;
 class Output_data;
 class Output_segment;
 class Output_file;
@@ -592,15 +596,28 @@ class Symbol_table
 
   ~Symbol_table();
 
-  // Add COUNT external symbols from the relocatable object OBJECT to
+  // Add COUNT external symbols from the relocatable object RELOBJ to
   // the symbol table.  SYMS is the symbols, SYM_NAMES is their names,
   // SYM_NAME_SIZE is the size of SYM_NAMES.  This sets SYMPOINTERS to
   // point to the symbols in the symbol table.
   template<int size, bool big_endian>
   void
-  add_from_object(Relobj* object, const unsigned char* syms,
-		  size_t count, const char* sym_names, size_t sym_name_size,
+  add_from_relobj(Sized_relobj<size, big_endian>* relobj,
+		  const unsigned char* syms, size_t count,
+		  const char* sym_names, size_t sym_name_size,
 		  Symbol** sympointers);
+
+  // Add COUNT dynamic symbols from the dynamic object DYNOBJ to the
+  // symbol table.  SYMS is the symbols.  SYM_NAMES is their names.
+  // SYM_NAME_SIZE is the size of SYM_NAMES.  The other parameters are
+  // symbol version data.
+  template<int size, bool big_endian>
+  void
+  add_from_dynobj(Sized_dynobj<size, big_endian>* dynobj,
+		  const unsigned char* syms, size_t count,
+		  const char* sym_names, size_t sym_name_size,
+		  const unsigned char* versym, size_t versym_size,
+		  const std::vector<const char*>*);
 
   // Define a special symbol.
   template<int size, bool big_endian>

@@ -40,6 +40,19 @@ struct Read_symbols_data
   File_view* symbol_names;
   // Size of symbol name data in bytes.
   off_t symbol_names_size;
+
+  // Version information.  This is only used on dynamic objects.
+  // Version symbol data (from SHT_GNU_versym section).
+  File_view* versym;
+  off_t versym_size;
+  // Version definition data (from SHT_GNU_verdef section).
+  File_view* verdef;
+  off_t verdef_size;
+  unsigned int verdef_info;
+  // Needed version data  (from SHT_GNU_verneed section).
+  File_view* verneed;
+  off_t verneed_size;
+  unsigned int verneed_info;
 };
 
 // Data about a single relocation section.  This is read in
@@ -84,7 +97,7 @@ class Object
   // file--0 for a .o or .so file, something else for a .a file.
   Object(const std::string& name, Input_file* input_file, bool is_dynamic,
 	 off_t offset = 0)
-    : name_(name), input_file_(input_file), offset_(offset),
+    : name_(name), input_file_(input_file), offset_(offset), shnum_(-1U),
       is_dynamic_(is_dynamic), target_(NULL)
   { }
 
@@ -256,8 +269,33 @@ class Object
 
   // Set the target.
   void
-  set_target(Target* target)
-  { this->target_ = target; }
+  set_target(int machine, int size, bool big_endian, int osabi,
+	     int abiversion);
+
+  // Get the number of sections.
+  unsigned int
+  shnum() const
+  { return this->shnum_; }
+
+  // Set the number of sections.
+  void
+  set_shnum(int shnum)
+  { this->shnum_ = shnum; }
+
+  // Functions used by both Sized_relobj and Sized_dynobj.
+
+  // Read the section data into a Read_symbols_data object.
+  template<int size, bool big_endian>
+  void
+  read_section_data(elfcpp::Elf_file<size, big_endian, Object>*,
+		    Read_symbols_data*);
+
+  // If NAME is the name of a special .gnu.warning section, arrange
+  // for the warning to be issued.  SHNDX is the section index.
+  // Return whether it is a warning section.
+  bool
+  handle_gnu_warning_section(const char* name, unsigned int shndx,
+			     Symbol_table*);
 
  private:
   // This class may not be copied.
@@ -271,6 +309,8 @@ class Object
   // Offset within the file--0 for an object file, non-0 for an
   // archive.
   off_t offset_;
+  // Number of input sections.
+  unsigned int shnum_;
   // Whether this is a dynamic object.
   bool is_dynamic_;
   // Target functions--may be NULL if the target is not known.
@@ -377,24 +417,12 @@ class Relobj : public Object
   do_relocate(const General_options& options, const Symbol_table* symtab,
 	      const Layout*, Output_file* of) = 0;
 
-  // Get the number of sections.
-  unsigned int
-  shnum() const
-  { return this->shnum_; }
-
-  // Set the number of sections.
-  void
-  set_shnum(int shnum)
-  { this->shnum_ = shnum; }
-
   // Return the vector mapping input sections to output sections.
   std::vector<Map_to_output>&
   map_to_output()
   { return this->map_to_output_; }
 
  private:
-  // Number of input sections.
-  unsigned int shnum_;
   // Mapping from input sections to output section.
   std::vector<Map_to_output> map_to_output_;
 };
@@ -428,6 +456,11 @@ class Sized_relobj : public Relobj
   void
   do_read_symbols(Read_symbols_data*);
 
+  // Lay out the input sections.
+  void
+  do_layout(const General_options&, Symbol_table*, Layout*,
+	    Read_symbols_data*);
+
   // Add the symbols to the symbol table.
   void
   do_add_symbols(Symbol_table*, Read_symbols_data*);
@@ -440,11 +473,6 @@ class Sized_relobj : public Relobj
   void
   do_scan_relocs(const General_options&, Symbol_table*, Layout*,
 		 Read_relocs_data*);
-
-  // Lay out the input sections.
-  void
-  do_layout(const General_options&, Symbol_table*, Layout*,
-	    Read_symbols_data*);
 
   // Finalize the local symbols.
   off_t
@@ -461,7 +489,7 @@ class Sized_relobj : public Relobj
   { return this->elf_file_.section_name(shndx); }
 
   // Return the location of the contents of a section.
-  Location
+  Object::Location
   do_section_contents(unsigned int shndx)
   { return this->elf_file_.section_contents(shndx); }
 
@@ -481,6 +509,10 @@ class Sized_relobj : public Relobj
   static const int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
   static const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
   typedef elfcpp::Shdr<size, big_endian> Shdr;
+
+  // Find the SHT_SYMTAB section, given the section headers.
+  void
+  find_symtab(const unsigned char* pshdrs);
 
   // Whether to include a section group in the link.
   bool
@@ -520,8 +552,6 @@ class Sized_relobj : public Relobj
 
   // General access to the ELF file.
   elfcpp::Elf_file<size, big_endian, Object> elf_file_;
-  // If non-NULL, a view of the section header data.
-  File_view* section_headers_;
   // Index of SHT_SYMTAB section.
   unsigned int symtab_shndx_;
   // The number of local symbols.

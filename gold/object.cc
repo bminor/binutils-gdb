@@ -19,6 +19,22 @@ namespace gold
 
 // Class Object.
 
+// Set the target based on fields in the ELF file header.
+
+void
+Object::set_target(int machine, int size, bool big_endian, int osabi,
+		   int abiversion)
+{
+  Target* target = select_target(machine, size, big_endian, osabi, abiversion);
+  if (target == NULL)
+    {
+      fprintf(stderr, _("%s: %s: unsupported ELF machine number %d\n"),
+	      program_name, this->name().c_str(), machine);
+      gold_exit(false);
+    }
+  this->target_ = target;
+}
+
 // Report an error for the elfcpp::Elf_file interface.
 
 void
@@ -45,6 +61,58 @@ Object::section_contents(unsigned int shndx, off_t* plen)
   return this->get_view(loc.file_offset, loc.data_size);
 }
 
+// Read the section data into SD.  This is code common to Sized_relobj
+// and Sized_dynobj, so we put it into Object.
+
+template<int size, bool big_endian>
+void
+Object::read_section_data(elfcpp::Elf_file<size, big_endian, Object>* elf_file,
+			  Read_symbols_data* sd)
+{
+  const int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
+
+  // Read the section headers.
+  const off_t shoff = elf_file->shoff();
+  const unsigned int shnum = this->shnum();
+  sd->section_headers = this->get_lasting_view(shoff, shnum * shdr_size);
+
+  // Read the section names.
+  const unsigned char* pshdrs = sd->section_headers->data();
+  const unsigned char* pshdrnames = pshdrs + elf_file->shstrndx() * shdr_size;
+  typename elfcpp::Shdr<size, big_endian> shdrnames(pshdrnames);
+
+  if (shdrnames.get_sh_type() != elfcpp::SHT_STRTAB)
+    {
+      fprintf(stderr,
+	      _("%s: %s: section name section has wrong type: %u\n"),
+	      program_name, this->name().c_str(),
+	      static_cast<unsigned int>(shdrnames.get_sh_type()));
+      gold_exit(false);
+    }
+
+  sd->section_names_size = shdrnames.get_sh_size();
+  sd->section_names = this->get_lasting_view(shdrnames.get_sh_offset(),
+					     sd->section_names_size);
+}
+
+// If NAME is the name of a special .gnu.warning section, arrange for
+// the warning to be issued.  SHNDX is the section index.  Return
+// whether it is a warning section.
+
+bool
+Object::handle_gnu_warning_section(const char* name, unsigned int shndx,
+				   Symbol_table* symtab)
+{
+  const char warn_prefix[] = ".gnu.warning.";
+  const int warn_prefix_len = sizeof warn_prefix - 1;
+  if (strncmp(name, warn_prefix, warn_prefix_len) == 0)
+    {
+      symtab->add_warning(name + warn_prefix_len, this, shndx);
+      return true;
+    }
+  return false;
+}
+
 // Class Sized_relobj.
 
 template<int size, bool big_endian>
@@ -55,8 +123,7 @@ Sized_relobj<size, big_endian>::Sized_relobj(
     const elfcpp::Ehdr<size, big_endian>& ehdr)
   : Relobj(name, input_file, offset),
     elf_file_(this, ehdr),
-    section_headers_(NULL),
-    symtab_shndx_(0),
+    symtab_shndx_(-1U),
     local_symbol_count_(0),
     output_local_symbol_count_(0),
     symbols_(NULL),
@@ -78,43 +145,41 @@ void
 Sized_relobj<size, big_endian>::setup(
     const elfcpp::Ehdr<size, big_endian>& ehdr)
 {
-  int machine = ehdr.get_e_machine();
-  Target* target = select_target(machine, size, big_endian,
-				 ehdr.get_e_ident()[elfcpp::EI_OSABI],
-				 ehdr.get_e_ident()[elfcpp::EI_ABIVERSION]);
-  if (target == NULL)
-    {
-      fprintf(stderr, _("%s: %s: unsupported ELF machine number %d\n"),
-	      program_name, this->name().c_str(), machine);
-      gold_exit(false);
-    }
-  this->set_target(target);
+  this->set_target(ehdr.get_e_machine(), size, big_endian,
+		   ehdr.get_e_ident()[elfcpp::EI_OSABI],
+		   ehdr.get_e_ident()[elfcpp::EI_ABIVERSION]);
 
-  unsigned int shnum = this->elf_file_.shnum();
+  const unsigned int shnum = this->elf_file_.shnum();
   this->set_shnum(shnum);
-  if (shnum == 0)
-    return;
+}
 
-  // We store the section headers in a File_view until do_read_symbols.
-  off_t shoff = this->elf_file_.shoff();
-  this->section_headers_ = this->get_lasting_view(shoff,
-						  shnum * This::shdr_size);
+// Find the SHT_SYMTAB section, given the section headers.  The ELF
+// standard says that maybe in the future there can be more than one
+// SHT_SYMTAB section.  Until somebody figures out how that could
+// work, we assume there is only one.
 
-  // Find the SHT_SYMTAB section.  The ELF standard says that maybe in
-  // the future there can be more than one SHT_SYMTAB section.  Until
-  // somebody figures out how that could work, we assume there is only
-  // one.
-  const unsigned char* p = this->section_headers_->data();
-
-  // Skip the first section, which is always empty.
-  p += This::shdr_size;
-  for (unsigned int i = 1; i < shnum; ++i, p += This::shdr_size)
+template<int size, bool big_endian>
+void
+Sized_relobj<size, big_endian>::find_symtab(const unsigned char* pshdrs)
+{
+  const unsigned int shnum = this->shnum();
+  this->symtab_shndx_ = 0;
+  if (shnum > 0)
     {
-      typename This::Shdr shdr(p);
-      if (shdr.get_sh_type() == elfcpp::SHT_SYMTAB)
+      // Look through the sections in reverse order, since gas tends
+      // to put the symbol table at the end.
+      const unsigned char* p = pshdrs + shnum * This::shdr_size;
+      unsigned int i = shnum;
+      while (i > 0)
 	{
-	  this->symtab_shndx_ = i;
-	  break;
+	  --i;
+	  p -= This::shdr_size;
+	  typename This::Shdr shdr(p);
+	  if (shdr.get_sh_type() == elfcpp::SHT_SYMTAB)
+	    {
+	      this->symtab_shndx_ = i;
+	      break;
+	    }
 	}
     }
 }
@@ -125,19 +190,11 @@ template<int size, bool big_endian>
 void
 Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 {
-  // Transfer our view of the section headers to SD.
-  sd->section_headers = this->section_headers_;
-  this->section_headers_ = NULL;
+  this->read_section_data(&this->elf_file_, sd);
 
-  // Read the section names.
-  const unsigned char* pshdrs = sd->section_headers->data();
-  const unsigned char* pshdrnames = (pshdrs
-				     + (this->elf_file_.shstrndx()
-					* This::shdr_size));
-  typename This::Shdr shdrnames(pshdrnames);
-  sd->section_names_size = shdrnames.get_sh_size();
-  sd->section_names = this->get_lasting_view(shdrnames.get_sh_offset(),
-					     sd->section_names_size);
+  const unsigned char* const pshdrs = sd->section_headers->data();
+
+  this->find_symtab(pshdrs);
 
   if (this->symtab_shndx_ == 0)
     {
@@ -166,15 +223,14 @@ Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
   File_view* fvsymtab = this->get_lasting_view(extoff, extsize);
 
   // Read the section header for the symbol names.
-  unsigned int shnum = this->shnum();
-  unsigned int strtab_shnum = symtabshdr.get_sh_link();
-  if (strtab_shnum == 0 || strtab_shnum >= shnum)
+  unsigned int strtab_shndx = symtabshdr.get_sh_link();
+  if (strtab_shndx >= this->shnum())
     {
       fprintf(stderr, _("%s: %s: invalid symbol table name index: %u\n"),
-	      program_name, this->name().c_str(), strtab_shnum);
+	      program_name, this->name().c_str(), strtab_shndx);
       gold_exit(false);
     }
-  typename This::Shdr strtabshdr(pshdrs + strtab_shnum * This::shdr_size);
+  typename This::Shdr strtabshdr(pshdrs + strtab_shndx * This::shdr_size);
   if (strtabshdr.get_sh_type() != elfcpp::SHT_STRTAB)
     {
       fprintf(stderr,
@@ -336,7 +392,7 @@ Sized_relobj<size, big_endian>::do_layout(const General_options& options,
 					  Layout* layout,
 					  Read_symbols_data* sd)
 {
-  unsigned int shnum = this->shnum();
+  const unsigned int shnum = this->shnum();
   if (shnum == 0)
     return;
 
@@ -352,9 +408,6 @@ Sized_relobj<size, big_endian>::do_layout(const General_options& options,
 
   // Keep track of which sections to omit.
   std::vector<bool> omit(shnum, false);
-
-  const char warn_prefix[] = ".gnu.warning.";
-  const int warn_prefix_len = sizeof warn_prefix - 1;
 
   // Skip the first, dummy, section.
   pshdrs += This::shdr_size;
@@ -373,9 +426,8 @@ Sized_relobj<size, big_endian>::do_layout(const General_options& options,
 
       const char* name = pnames + shdr.get_sh_name();
 
-      if (strncmp(name, warn_prefix, warn_prefix_len) == 0)
+      if (this->handle_gnu_warning_section(name, i, symtab))
 	{
-	  symtab->add_warning(name + warn_prefix_len, this, i);
 	  if (!options.is_relocatable())
 	    omit[i] = true;
 	}
@@ -442,10 +494,8 @@ Sized_relobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
 
   const char* sym_names =
     reinterpret_cast<const char*>(sd->symbol_names->data());
-  symtab->add_from_object<size, big_endian>(this, sd->symbols->data(),
-					    symcount, sym_names, 
-					    sd->symbol_names_size,
-					    this->symbols_);
+  symtab->add_from_relobj(this, sd->symbols->data(), symcount, sym_names, 
+			  sd->symbol_names_size, this->symbols_);
 
   delete sd->symbols;
   sd->symbols = NULL;
@@ -464,6 +514,7 @@ off_t
 Sized_relobj<size, big_endian>::do_finalize_local_symbols(off_t off,
 							  Stringpool* pool)
 {
+  assert(this->symtab_shndx_ != -1U);
   if (this->symtab_shndx_ == 0)
     {
       // This object has no symbols.  Weird but legal.
@@ -577,6 +628,7 @@ void
 Sized_relobj<size, big_endian>::write_local_symbols(Output_file* of,
 						    const Stringpool* sympool)
 {
+  assert(this->symtab_shndx_ != -1U);
   if (this->symtab_shndx_ == 0)
     {
       // This object has no symbols.  Weird but legal.
@@ -711,13 +763,6 @@ make_elf_sized_object(const std::string& name, Input_file* input_file,
 		      off_t offset, const elfcpp::Ehdr<size, big_endian>& ehdr)
 {
   int et = ehdr.get_e_type();
-  if (et != elfcpp::ET_REL && et != elfcpp::ET_DYN)
-    {
-      fprintf(stderr, "%s: %s: unsupported ELF type %d\n",
-	      program_name, name.c_str(), static_cast<int>(et));
-      gold_exit(false);
-    }
-
   if (et == elfcpp::ET_REL)
     {
       Sized_relobj<size, big_endian>* obj =
@@ -725,17 +770,18 @@ make_elf_sized_object(const std::string& name, Input_file* input_file,
       obj->setup(ehdr);
       return obj;
     }
+  else if (et == elfcpp::ET_DYN)
+    {
+      Sized_dynobj<size, big_endian>* obj =
+	new Sized_dynobj<size, big_endian>(name, input_file, offset, ehdr);
+      obj->setup(ehdr);
+      return obj;
+    }
   else
     {
-      // elfcpp::ET_DYN
-      fprintf(stderr, _("%s: %s: dynamic objects are not yet supported\n"),
-	      program_name, name.c_str());
+      fprintf(stderr, _("%s: %s: unsupported ELF file type %d\n"),
+	      program_name, name.c_str(), et);
       gold_exit(false);
-//       Sized_dynobj<size, big_endian>* obj =
-// 	new Sized_dynobj<size, big_endian>(this->input_.name(), input_file,
-// 					   offset, ehdr);
-//       obj->setup(ehdr);
-//       return obj;
     }
 }
 

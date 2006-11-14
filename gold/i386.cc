@@ -149,7 +149,7 @@ class Target_i386 : public Sized_target<32, false>
   optimize_tls_reloc(const General_options*, bool is_local, int r_type);
 
   // Get the GOT section, creating it if necessary.
-  Output_section_got<32, false>*
+  Output_data_got<32, false>*
   got_section(Symbol_table*, Layout*);
 
   // Information about this specific target which we pass to the
@@ -157,7 +157,7 @@ class Target_i386 : public Sized_target<32, false>
   static const Target::Target_info i386_info;
 
   // The GOT section.
-  Output_section_got<32, false>* got_;
+  Output_data_got<32, false>* got_;
 };
 
 const Target::Target_info Target_i386::i386_info =
@@ -166,20 +166,21 @@ const Target::Target_info Target_i386::i386_info =
   false,		// is_big_endian
   elfcpp::EM_386,	// machine_code
   false,		// has_make_symbol
-  false,		// has_resolve,
-  0x08048000,		// text_segment_address,
+  false,		// has_resolve
+  "/usr/lib/libc.so.1",	// dynamic_linker
+  0x08048000,		// text_segment_address
   0x1000,		// abi_pagesize
   0x1000		// common_pagesize
 };
 
 // Get the GOT section, creating it if necessary.
 
-Output_section_got<32, false>*
+Output_data_got<32, false>*
 Target_i386::got_section(Symbol_table* symtab, Layout* layout)
 {
   if (this->got_ == NULL)
     {
-      this->got_ = new Output_section_got<32, false>();
+      this->got_ = new Output_data_got<32, false>();
 
       assert(symtab != NULL && layout != NULL);
       layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
@@ -393,13 +394,8 @@ Target_i386::Scan::global(const General_options& options,
 
     case elfcpp::R_386_GOT32:
       // The symbol requires a GOT entry.
-      if (!gsym->has_got_offset())
+      if (target->got_section(symtab, layout)->add_global(gsym))
 	{
-	  Output_section_got<32, false>* got = target->got_section(symtab,
-								   layout);
-	  const unsigned int got_offset = got->add_global(gsym);
-	  gsym->set_got_offset(got_offset);
-
 	  // If this symbol is not resolved locally, we need to add a
 	  // dynamic relocation for it.
 	  if (!gsym->is_resolved_locally())

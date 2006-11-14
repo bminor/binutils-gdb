@@ -227,6 +227,7 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
     }
 
   // Read the local symbols.
+  assert(this->symtab_shndx_ != -1U);
   if (this->symtab_shndx_ == 0 || this->local_symbol_count_ == 0)
     rd->local_symbols = NULL;
   else

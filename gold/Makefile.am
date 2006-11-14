@@ -15,6 +15,8 @@ INCLUDES = -D_GNU_SOURCE \
 	-DLOCALEDIR="\"$(datadir)/locale\"" \
 	@INCINTL@
 
+YFLAGS = -d
+
 noinst_PROGRAMS = ld-new
 
 CCFILES = \
@@ -22,6 +24,7 @@ CCFILES = \
 	common.cc \
 	defstd.cc \
 	dirsearch.cc \
+	dynobj.cc \
 	fileread.cc \
 	gold.cc \
 	gold-threads.cc \
@@ -32,6 +35,7 @@ CCFILES = \
 	readsyms.cc \
 	reloc.cc \
 	resolve.cc \
+	script.cc \
 	symtab.cc \
 	stringpool.cc \
 	target-select.cc \
@@ -42,6 +46,7 @@ HFILES = \
 	common.h \
 	defstd.h \
 	dirsearch.h \
+	dynobj.h \
 	fileread.h \
 	gold.h \
 	gold-threads.h \
@@ -51,6 +56,7 @@ HFILES = \
 	output.h \
 	readsyms.h \
 	reloc.h \
+	script.h \
 	stringpool.h \
 	symtab.h \
 	target.h \
@@ -61,7 +67,10 @@ HFILES = \
 TARGETFILES = \
 	i386.cc
 
-OFILES = gold.o options.o
+YFILES = \
+	yyscript.y
+
+EXTRA_DIST = yyscript.c yyscript.h
 
 POTFILES= $(CCFILES) $(HFILES) $(TARGETFILES)
 
@@ -69,9 +78,12 @@ po/POTFILES.in: @MAINT@ Makefile
 	for f in $(POTFILES); do echo $$f; done | LC_COLLATE= sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
 
-ld_new_SOURCES = $(CCFILES) $(HFILES) $(TARGETFILES)
+ld_new_SOURCES = $(CCFILES) $(HFILES) $(TARGETFILES) $(YFILES)
 ld_new_DEPENDENCIES = $(LIBINTL_DEP)
 ld_new_LDADD = $(LIBINTL)
+
+# Use an explicit dependency for the bison generated header file.
+script.$(OBJEXT): yyscript.h
 
 .PHONY: install-exec-local
 

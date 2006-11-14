@@ -113,7 +113,7 @@ queue_initial_tasks(const General_options& options,
       Task_token* next_blocker = new Task_token();
       next_blocker->add_blocker();
       workqueue->queue(new Read_symbols(options, input_objects, symtab, layout,
-					search_path, *p, NULL, this_blocker,
+					search_path, &*p, NULL, this_blocker,
 					next_blocker));
       this_blocker = next_blocker;
     }

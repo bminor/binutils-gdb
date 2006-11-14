@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-11-07 10:50-0800\n"
+"POT-Creation-Date: 2006-11-14 11:17-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -59,6 +59,101 @@ msgstr ""
 #: dirsearch.cc:51
 #, c-format
 msgid "can not read directory %s"
+msgstr ""
+
+#: dynobj.cc:97
+#, c-format
+msgid "%s: %s: unexpected duplicate type %u section: %u, %u\n"
+msgstr ""
+
+#: dynobj.cc:138
+#, c-format
+msgid "%s: %s: unexpected link in section %u header: %u != %u\n"
+msgstr ""
+
+#: dynobj.cc:176
+#, c-format
+msgid "%s: %s: DYNAMIC section %u link out of range: %u\n"
+msgstr ""
+
+#: dynobj.cc:186
+#, c-format
+msgid "%s: %s: DYNAMIC section %u link %u is not a strtab\n"
+msgstr ""
+
+#: dynobj.cc:208
+#, c-format
+msgid "%s: %s: DT_SONAME value out of range: %lld >= %lld\n"
+msgstr ""
+
+#: dynobj.cc:225
+#, c-format
+msgid "%s: %s: missing DT_NULL in dynamic segment\n"
+msgstr ""
+
+#: dynobj.cc:273
+#, c-format
+msgid "%s: %s: invalid dynamic symbol table name index: %u\n"
+msgstr ""
+
+#: dynobj.cc:281
+#, c-format
+msgid "%s: %s: dynamic symbol table name section has wrong type: %u\n"
+msgstr ""
+
+#: dynobj.cc:356 object.cc:421
+#, c-format
+msgid "%s: %s: bad section name offset for section %u: %lu\n"
+msgstr ""
+
+#: dynobj.cc:386
+#, c-format
+msgid "%s: %s: duplicate definition for version %u\n"
+msgstr ""
+
+#: dynobj.cc:430 dynobj.cc:549
+#, c-format
+msgid "%s: %s: verdef vd_next field out of range: %u\n"
+msgstr ""
+
+#: dynobj.cc:454
+#, c-format
+msgid "%s: %s: verneed vn_aux field out of range: %u\n"
+msgstr ""
+
+#: dynobj.cc:473
+#, c-format
+msgid "%s: %s: verneed vna_next field out of range: %u\n"
+msgstr ""
+
+#: dynobj.cc:486
+#, c-format
+msgid "%s: %s: verneed vn_next field out of range: %u\n"
+msgstr ""
+
+#: dynobj.cc:516
+#, c-format
+msgid "%s: %s: verdef vd_cnt field too small: %u\n"
+msgstr ""
+
+#: dynobj.cc:525
+#, c-format
+msgid "%s: %s: verdef vd_aux field out of range: %u\n"
+msgstr ""
+
+#: dynobj.cc:537
+#, c-format
+msgid "%s: %s: verdaux vda_name field out of range: %u\n"
+msgstr ""
+
+#: dynobj.cc:579
+#, c-format
+msgid "%s: %s: vernaux vna_name field out of range: %u\n"
+msgstr ""
+
+#: dynobj.cc:615
+#, c-format
+msgid "%s: %s: size of dynamic symbols is not multiple of symbol size\n"
 msgstr ""
 
 #: fileread.cc:56
@@ -145,148 +240,147 @@ msgstr ""
 msgid "%s: missing expected TLS relocation\n"
 msgstr ""
 
-#: i386.cc:306 i386.cc:434 i386.cc:627
+#: i386.cc:307 i386.cc:430 i386.cc:623
 #, c-format
 msgid "%s: %s: unexpected reloc %u in object file\n"
 msgstr ""
 
-#: i386.cc:339 i386.cc:358
+#: i386.cc:340 i386.cc:359
 #, c-format
 msgid "%s: %s: unsupported reloc %u against local symbol\n"
 msgstr ""
 
-#: i386.cc:415 i386.cc:469 i386.cc:487
+#: i386.cc:411 i386.cc:465 i386.cc:483
 #, c-format
 msgid "%s: %s: unsupported reloc %u against global symbol %s\n"
 msgstr ""
 
-#: i386.cc:509
+#: i386.cc:505
 #, c-format
 msgid "%s: %s: unsupported RELA reloc section\n"
 msgstr ""
 
-#: i386.cc:548
+#: i386.cc:544
 #, c-format
 msgid "%s: %s: missing expected TLS relocation\n"
 msgstr ""
 
-#: i386.cc:594 i386.cc:659 i386.cc:732 i386.cc:743
+#: i386.cc:590 i386.cc:655 i386.cc:728 i386.cc:739
 #, c-format
 msgid "%s: %s: unsupported reloc %u\n"
 msgstr ""
 
-#: i386.cc:686
+#: i386.cc:682
 #, c-format
 msgid "%s: %s: TLS reloc but no TLS segment\n"
 msgstr ""
 
-#: i386.cc:717
+#: i386.cc:713
 #, c-format
 msgid "%s: %s: unsupported reloc type %u\n"
 msgstr ""
 
-#: i386.cc:926
+#: i386.cc:922
 #, c-format
 msgid "%s: %s: TLS relocation out of range\n"
 msgstr ""
 
-#: i386.cc:944
+#: i386.cc:940
 #, c-format
 msgid "%s: %s: TLS relocation against invalid instruction\n"
 msgstr ""
 
-#: object.cc:87
+#: object.cc:31
 #, c-format
 msgid "%s: %s: unsupported ELF machine number %d\n"
 msgstr ""
 
-#: object.cc:173
+#: object.cc:87
+#, c-format
+msgid "%s: %s: section name section has wrong type: %u\n"
+msgstr ""
+
+#: object.cc:229
 #, c-format
 msgid "%s: %s: invalid symbol table name index: %u\n"
 msgstr ""
 
-#: object.cc:181
+#: object.cc:237
 #, c-format
 msgid "%s: %s: symbol table name section has wrong type: %u\n"
 msgstr ""
 
-#: object.cc:237
+#: object.cc:293
 #, c-format
 msgid "%s: %s: section group %u info %u out of range\n"
 msgstr ""
 
-#: object.cc:254
+#: object.cc:310
 #, c-format
 msgid "%s: %s: symbol %u name offset %u out of range\n"
 msgstr ""
 
-#: object.cc:288
+#: object.cc:344
 #, c-format
 msgid "%s: %s: section %u in section group %u out of range"
 msgstr ""
 
-#: object.cc:368
-#, c-format
-msgid "%s: %s: bad section name offset for section %u: %lu\n"
-msgstr ""
-
-#: object.cc:436
+#: object.cc:488
 #, c-format
 msgid "%s: %s: size of symbols is not multiple of symbol size\n"
 msgstr ""
 
-#: object.cc:521
+#: object.cc:572
 #, c-format
 msgid "%s: %s: unknown section index %u for local symbol %u\n"
 msgstr ""
 
-#: object.cc:532
+#: object.cc:583
 #, c-format
 msgid "%s: %s: local symbol %u section index %u out of range\n"
 msgstr ""
 
-#: object.cc:554
+#: object.cc:605
 #, c-format
 msgid "%s: %s: local symbol %u section name out of range: %u >= %u\n"
 msgstr ""
 
-#. elfcpp::ET_DYN
-#: object.cc:731
+#: object.cc:782
 #, c-format
-msgid "%s: %s: dynamic objects are not yet supported\n"
+msgid "%s: %s: unsupported ELF file type %d\n"
 msgstr ""
 
-#: object.cc:755 object.cc:808 object.cc:829
+#: object.cc:801 object.cc:854 object.cc:875
 #, c-format
 msgid "%s: %s: ELF file too short\n"
 msgstr ""
 
-#: object.cc:764
+#: object.cc:810
 #, c-format
 msgid "%s: %s: invalid ELF version 0\n"
 msgstr ""
 
-#: object.cc:767
+#: object.cc:813
 #, c-format
 msgid "%s: %s: unsupported ELF version %d\n"
 msgstr ""
 
-#: object.cc:775
+#: object.cc:821
 #, c-format
 msgid "%s: %s: invalid ELF class 0\n"
 msgstr ""
 
-#: object.cc:782
+#: object.cc:828
 #, c-format
 msgid "%s: %s: unsupported ELF class %d\n"
 msgstr ""
 
-#: object.cc:790
+#: object.cc:836
 #, c-format
 msgid "%s: %s: invalid ELF data encoding\n"
 msgstr ""
 
-#: object.cc:797
+#: object.cc:843
 #, c-format
 msgid "%s: %s: unsupported ELF data encoding %d\n"
 msgstr ""
@@ -315,139 +409,160 @@ msgid "End a library search group"
 msgstr ""
 
 #: options.cc:234
-msgid "Add directory to search path"
+msgid "Set dynamic linker path"
 msgstr ""
 
 #: options.cc:235
-msgid "-L DIR, --library-path DIR"
+msgid "-I PROGRAM, --dynamic-linker PROGRAM"
 msgstr ""
 
 #: options.cc:237
-msgid "Ignored for compatibility"
+msgid "Add directory to search path"
 msgstr ""
 
-#: options.cc:239
-msgid "Set output file name"
+#: options.cc:238
+msgid "-L DIR, --library-path DIR"
 msgstr ""
 
 #: options.cc:240
-msgid "-o FILE, --output FILE"
+msgid "Ignored for compatibility"
 msgstr ""
 
 #: options.cc:242
+msgid "Set output file name"
+msgstr ""
+
+#: options.cc:243
+msgid "-o FILE, --output FILE"
+msgstr ""
+
+#: options.cc:245
 msgid "Generate relocatable output"
 msgstr ""
 
-#: options.cc:244
+#: options.cc:247
 msgid "Generate shared library"
 msgstr ""
 
-#: options.cc:246
+#: options.cc:249
 msgid "Do not link against shared libraries"
 msgstr ""
 
-#: options.cc:248
+#: options.cc:252
+msgid "Only set DT_NEEDED for following dynamic libs if used"
+msgstr ""
+
+#: options.cc:255
+msgid "Always DT_NEEDED for following dynamic libs (default)"
+msgstr ""
+
+#: options.cc:257
 msgid "Report usage information"
 msgstr ""
 
-#: options.cc:346 options.cc:397 options.cc:483
+#: options.cc:393 options.cc:444 options.cc:523
 msgid "missing argument"
 msgstr ""
 
-#: options.cc:359 options.cc:406
+#: options.cc:406 options.cc:453
 msgid "unknown option"
 msgstr ""
 
-#: options.cc:414
+#: options.cc:461
 #, c-format
 msgid "%s: missing group end"
 msgstr ""
 
-#: options.cc:496
+#: options.cc:536
 msgid "may not nest groups"
 msgstr ""
 
-#: options.cc:511
+#: options.cc:546
 msgid "group end without group start"
 msgstr ""
 
-#: options.cc:521
+#: options.cc:556
 #, c-format
 msgid "%s: use the --help option for usage information\n"
 msgstr ""
 
-#: options.cc:530
+#: options.cc:565 script.cc:1128
 #, c-format
 msgid "%s: %s: %s\n"
 msgstr ""
 
-#: options.cc:539
+#: options.cc:574
 #, c-format
 msgid "%s: -%c: %s\n"
 msgstr ""
 
-#: output.cc:521
+#: output.cc:538
 #, c-format
 msgid "%s: %s: invalid alignment %lu for section \"%s\"\n"
 msgstr ""
 
-#: output.cc:1033
+#: output.cc:1056
 #, c-format
 msgid "%s: %s: open: %s\n"
 msgstr ""
 
-#: output.cc:1042
+#: output.cc:1065
 #, c-format
 msgid "%s: %s: lseek: %s\n"
 msgstr ""
 
-#: output.cc:1049
+#: output.cc:1072
 #, c-format
 msgid "%s: %s: write: %s\n"
 msgstr ""
 
-#: output.cc:1059
+#: output.cc:1082
 #, c-format
 msgid "%s: %s: mmap: %s\n"
 msgstr ""
 
-#: output.cc:1073
+#: output.cc:1096
 #, c-format
 msgid "%s: %s: munmap: %s\n"
 msgstr ""
 
-#: output.cc:1081
+#: output.cc:1104
 #, c-format
 msgid "%s: %s: close: %s\n"
 msgstr ""
 
-#: readsyms.cc:85
+#: readsyms.cc:93
 #, c-format
 msgid "%s: %s: ordinary object found in input group\n"
 msgstr ""
 
+#: readsyms.cc:136
+#, c-format
+msgid "%s: %s: file is empty\n"
+msgstr ""
+
 #. Here we have to handle any other input file types we need.
-#: readsyms.cc:129
+#: readsyms.cc:149
 #, c-format
 msgid "%s: %s: not an object or archive\n"
 msgstr ""
 
-#: reloc.cc:168 reloc.cc:408
+#: reloc.cc:168 reloc.cc:409
 #, c-format
 msgid "%s: %s: relocation section %u has bad info %u\n"
 msgstr ""
 
-#: reloc.cc:187 reloc.cc:425
+#: reloc.cc:187 reloc.cc:426
 #, c-format
 msgid "%s: %s: relocation section %u uses unexpected symbol table %u\n"
 msgstr ""
 
-#: reloc.cc:203 reloc.cc:444
+#: reloc.cc:203 reloc.cc:445
 #, c-format
 msgid "%s: %s: unexpected entsize for reloc section %u: %lu != %u"
 msgstr ""
 
-#: reloc.cc:214 reloc.cc:455
+#: reloc.cc:214 reloc.cc:456
 #, c-format
 msgid "%s: %s: reloc section %u size %lu uneven"
 msgstr ""
@@ -462,22 +577,42 @@ msgstr ""
 msgid "%s: %s: unsupported symbol binding %d for symbol %s\n"
 msgstr ""
 
-#: symtab.cc:441
+#: symtab.cc:443 symtab.cc:540
 #, c-format
 msgid "%s: %s: mixing 32-bit and 64-bit ELF objects\n"
 msgstr ""
 
-#: symtab.cc:458
+#: symtab.cc:460
 #, c-format
 msgid "%s: %s: bad global symbol name offset %u at %lu\n"
 msgstr ""
 
-#: symtab.cc:883 symtab.cc:1022
+#: symtab.cc:547
+#, c-format
+msgid "%s: %s: too few symbol versions\n"
+msgstr ""
+
+#: symtab.cc:567
+#, c-format
+msgid "%s: %s: bad symbol name offset %u at %lu\n"
+msgstr ""
+
+#: symtab.cc:611
+#, c-format
+msgid "%s: %s: versym for symbol %zu out of range: %u\n"
+msgstr ""
+
+#: symtab.cc:619
+#, c-format
+msgid "%s: %s: versym for symbol %zu has no name: %u\n"
+msgstr ""
+
+#: symtab.cc:1010 symtab.cc:1149
 #, c-format
 msgid "%s: %s: unsupported symbol section 0x%x\n"
 msgstr ""
 
-#: symtab.cc:1135
+#: symtab.cc:1262
 #, c-format
 msgid "%s: %s: warning: %s\n"
 msgstr ""

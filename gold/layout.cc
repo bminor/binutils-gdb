@@ -355,13 +355,30 @@ Layout::find_first_load_seg()
 off_t
 Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
 {
+  const int size = input_objects->target()->get_size();
+
+  Output_segment* phdr_seg = NULL;
   if (input_objects->any_dynamic())
     {
-      // If there are any dynamic objects in the link, then we need
-      // some additional segments: PT_PHDRS, PT_INTERP, and
-      // PT_DYNAMIC.  We also need to finalize the dynamic symbol
-      // table and create the dynamic hash table.
-      abort();
+      // There was a dynamic object in the link.  We need to create
+      // some information for the dynamic linker.
+
+      // Create the PT_PHDR segment which will hold the program
+      // headers.
+      phdr_seg = new Output_segment(elfcpp::PT_PHDR, elfcpp::PF_R);
+      this->segment_list_.push_back(phdr_seg);
+
+      // Create the dynamic symbol table, including the hash table,
+      // the dynamic relocations, and the version sections.
+      this->create_dynamic_symtab(size, symtab);
+
+      // Create the .dynamic section to hold the dynamic data, and put
+      // it in a PT_DYNAMIC segment.
+      this->create_dynamic_section();
+
+      // Create the .interp section to hold the name of the
+      // interpreter, and put it in a PT_INTERP segment.
+      this->create_interp(input_objects->target());
     }
 
   // FIXME: Handle PT_GNU_STACK.
@@ -369,14 +386,14 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
   Output_segment* load_seg = this->find_first_load_seg();
 
   // Lay out the segment headers.
-  int size = input_objects->target()->get_size();
   bool big_endian = input_objects->target()->is_big_endian();
   Output_segment_headers* segment_headers;
   segment_headers = new Output_segment_headers(size, big_endian,
 					       this->segment_list_);
   load_seg->add_initial_output_data(segment_headers);
   this->special_output_list_.push_back(segment_headers);
-  // FIXME: Attach them to PT_PHDRS if necessary.
+  if (phdr_seg != NULL)
+    phdr_seg->add_initial_output_data(segment_headers);
 
   // Lay out the file header.
   Output_file_header* file_header;
@@ -734,6 +751,49 @@ Layout::create_shdrs(int size, bool big_endian, off_t* poff)
   *poff = off;
   this->special_output_list_.push_back(oshdrs);
   return oshdrs;
+}
+
+// Create the dynamic symbol table.
+
+void
+Layout::create_dynamic_symtab(int, Symbol_table*)
+{
+  abort();
+}
+
+// Create the .dynamic section and PT_DYNAMIC segment.
+
+void
+Layout::create_dynamic_section()
+{
+  abort();
+}
+
+// Create the .interp section and PT_INTERP segment.
+
+void
+Layout::create_interp(const Target* target)
+{
+  const char* interp = this->options_.dynamic_linker();
+  if (interp == NULL)
+    {
+      interp = target->dynamic_linker();
+      assert(interp != NULL);
+    }
+
+  size_t len = strlen(interp) + 1;
+
+  Output_section_data* odata = new Output_data_const(interp, len, 1);
+
+  const char* interp_name = this->namepool_.add(".interp", NULL);
+  Output_section* osec = this->make_output_section(interp_name,
+						   elfcpp::SHT_PROGBITS,
+						   elfcpp::SHF_ALLOC);
+  osec->add_output_section_data(odata);
+
+  Output_segment* oseg = new Output_segment(elfcpp::PT_INTERP, elfcpp::PF_R);
+  this->segment_list_.push_back(oseg);
+  oseg->add_initial_output_section(osec, elfcpp::PF_R);
 }
 
 // The mapping of .gnu.linkonce section names to real section names.

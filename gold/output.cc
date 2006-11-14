@@ -48,14 +48,6 @@ Output_data::default_alignment(int size)
     abort();
 }
 
-// Output_data_const methods.
-
-void
-Output_data_const::do_write(Output_file* output)
-{
-  output->write(this->offset(), data_.data(), data_.size());
-}
-
 // Output_section_header methods.  This currently assumes that the
 // segment and section lists are complete at construction time.
 
@@ -357,13 +349,30 @@ Output_file_header::do_sized_write(Output_file* of)
   of->write_output_view(0, ehdr_size, view);
 }
 
-// Output_section_got::Got_entry methods.
+// Output_data_const methods.
+
+void
+Output_data_const::do_write(Output_file* output)
+{
+  output->write(this->offset(), data_.data(), data_.size());
+}
+
+// Output_section_data methods.
+
+unsigned int
+Output_section_data::do_out_shndx() const
+{
+  assert(this->output_section_ != NULL);
+  return this->output_section_->out_shndx();
+}
+
+// Output_data_got::Got_entry methods.
 
 // Write out the entry.
 
 template<int size, bool big_endian>
 void
-Output_section_got<size, big_endian>::Got_entry::write(unsigned char* pov)
+Output_data_got<size, big_endian>::Got_entry::write(unsigned char* pov)
     const
 {
   Valtype val = 0;
@@ -402,22 +411,30 @@ Output_section_got<size, big_endian>::Got_entry::write(unsigned char* pov)
   elfcpp::Swap<size, big_endian>::writeval(povv, val);
 }
 
-// Output_section_data methods.
+// Output_data_got methods.
 
-unsigned int
-Output_section_data::do_out_shndx() const
+// Add an entry for a global symbol to the GOT.  This returns true if
+// this is a new GOT entry, false if the symbol already had a GOT
+// entry.
+
+template<int size, bool big_endian>
+bool
+Output_data_got<size, big_endian>::add_global(Symbol* gsym)
 {
-  assert(this->output_section_ != NULL);
-  return this->output_section_->out_shndx();
-}
+  if (gsym->has_got_offset())
+    return false;
 
-// Output_section_got methods.
+  this->entries_.push_back(Got_entry(gsym));
+  this->set_got_size();
+  gsym->set_got_offset(this->last_got_offset());
+  return true;
+}
 
 // Write out the GOT.
 
 template<int size, bool big_endian>
 void
-Output_section_got<size, big_endian>::do_write(Output_file* of)
+Output_data_got<size, big_endian>::do_write(Output_file* of)
 {
   const int add = size / 8;
 
@@ -655,7 +672,8 @@ Output_segment::Output_segment(elfcpp::Elf_Word type, elfcpp::Elf_Word flags)
 
 void
 Output_segment::add_output_section(Output_section* os,
-				   elfcpp::Elf_Word seg_flags)
+				   elfcpp::Elf_Word seg_flags,
+				   bool front)
 {
   assert((os->flags() & elfcpp::SHF_ALLOC) != 0);
   assert(!this->is_align_known_);
@@ -690,6 +708,7 @@ Output_segment::add_output_section(Output_section* os,
 	  --p;
 	  if ((*p)->is_section_type(elfcpp::SHT_NOTE))
 	    {
+	      // We don't worry about the FRONT parameter.
 	      ++p;
 	      pdl->insert(p, os);
 	      return;
@@ -730,6 +749,7 @@ Output_segment::add_output_section(Output_section* os,
 
 	  if (insert)
 	    {
+	      // We don't worry about the FRONT parameter.
 	      ++p;
 	      pdl->insert(p, os);
 	      return;
@@ -737,11 +757,14 @@ Output_segment::add_output_section(Output_section* os,
 	}
       while (p != pdl->begin());
 
-      // There are no TLS sections yet; put this one at the end of the
-      // section list.
+      // There are no TLS sections yet; put this one at the requested
+      // location in the section list.
     }
 
-  pdl->push_back(os);
+  if (front)
+    pdl->push_front(os);
+  else
+    pdl->push_back(os);
 }
 
 // Add an Output_data (which is not an Output_section) to the start of
@@ -1121,19 +1144,15 @@ Output_section::add_input_section<64, true>(
     const elfcpp::Shdr<64, true>& shdr);
 
 template
-void
-Output_section_got<32, false>::do_write(Output_file* of);
+class Output_data_got<32, false>;
 
 template
-void
-Output_section_got<32, true>::do_write(Output_file* of);
+class Output_data_got<32, true>;
 
 template
-void
-Output_section_got<64, false>::do_write(Output_file* of);
+class Output_data_got<64, false>;
 
 template
-void
-Output_section_got<64, true>::do_write(Output_file* of);
+class Output_data_got<64, true>;
 
 } // End namespace gold.

@@ -171,7 +171,7 @@ Symbol_table::do_allocate_commons(const General_options&,
 
   // Place them in a newly allocated .bss section.
 
-  Output_section_common *poc = new Output_section_common(addralign);
+  Output_data_common *poc = new Output_data_common(addralign);
 
   layout->add_output_section_data(".bss", elfcpp::SHT_NOBITS,
 				  elfcpp::SHF_WRITE | elfcpp::SHF_ALLOC,

@@ -160,34 +160,6 @@ class Output_data
   off_t offset_;
 };
 
-// A simple case of Output_data in which we have constant data to
-// output.
-
-class Output_data_const : public Output_data
-{
- public:
-  Output_data_const(const std::string& data, uint64_t addralign)
-    : Output_data(data.size()), data_(data), addralign_(addralign)
-  { }
-
-  Output_data_const(const char* p, off_t len, uint64_t addralign)
-    : Output_data(len), data_(p, len), addralign_(addralign)
-  { }
-
-  // Write the data to the file.
-  void
-  do_write(Output_file* output);
-
-  // Return the required alignment.
-  uint64_t
-  do_addralign() const
-  { return this->addralign_; }
-
- private:
-  std::string data_;
-  uint64_t addralign_;
-};
-
 // Output the section headers.
 
 class Output_section_headers : public Output_data
@@ -340,13 +312,40 @@ class Output_section_data : public Output_data
   uint64_t addralign_;
 };
 
-// Output_section_common is used to handle the common symbols.  This
-// is quite simple.
+// A simple case of Output_data in which we have constant data to
+// output.
 
-class Output_section_common : public Output_section_data
+class Output_data_const : public Output_section_data
 {
  public:
-  Output_section_common(uint64_t addralign)
+  Output_data_const(const std::string& data, uint64_t addralign)
+    : Output_section_data(data.size(), addralign), data_(data)
+  { }
+
+  Output_data_const(const char* p, off_t len, uint64_t addralign)
+    : Output_section_data(len, addralign), data_(p, len)
+  { }
+
+  Output_data_const(const unsigned char* p, off_t len, uint64_t addralign)
+    : Output_section_data(len, addralign),
+      data_(reinterpret_cast<const char*>(p), len)
+  { }
+
+  // Write the data to the file.
+  void
+  do_write(Output_file* output);
+
+ private:
+  std::string data_;
+};
+
+// Output_data_common is used to handle the common symbols.  This is
+// quite simple.
+
+class Output_data_common : public Output_section_data
+{
+ public:
+  Output_data_common(uint64_t addralign)
     : Output_section_data(addralign)
   { }
 
@@ -362,32 +361,26 @@ class Output_section_common : public Output_section_data
   { }
 };
 
-// Output_section_got is used to manage a GOT.  Each entry in the GOT
-// is for one symbol--either a global symbol or a local symbol in an
+// Output_data_got is used to manage a GOT.  Each entry in the GOT is
+// for one symbol--either a global symbol or a local symbol in an
 // object.  The target specific code adds entries to the GOT as
-// needed.  The GOT code is then responsible for writing out the data
-// and for generating relocs as required.
+// needed.
 
 template<int size, bool big_endian>
-class Output_section_got : public Output_section_data
+class Output_data_got : public Output_section_data
 {
  public:
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Valtype;
 
-  Output_section_got()
+  Output_data_got()
     : Output_section_data(Output_data::default_alignment(size)),
       entries_()
   { }
 
-  // Add an entry for a global symbol to the GOT.  This returns the
-  // offset of the new entry from the start of the GOT.
-  unsigned int
-  add_global(Symbol* gsym)
-  {
-    this->entries_.push_back(Got_entry(gsym));
-    this->set_got_size();
-    return this->last_got_offset();
-  }
+  // Add an entry for a global symbol to the GOT.  Return true if this
+  // is a new GOT entry, false if the symbol was already in the GOT.
+  bool
+  add_global(Symbol* gsym);
 
   // Add an entry for a local symbol to the GOT.  This returns the
   // offset of the new entry from the start of the GOT.
@@ -789,7 +782,13 @@ class Output_segment
 
   // Add an Output_section to this segment.
   void
-  add_output_section(Output_section*, elfcpp::Elf_Word seg_flags);
+  add_output_section(Output_section* os, elfcpp::Elf_Word seg_flags)
+  { this->add_output_section(os, seg_flags, false); }
+
+  // Add an Output_section to the start of this segment.
+  void
+  add_initial_output_section(Output_section* os, elfcpp::Elf_Word seg_flags)
+  { this->add_output_section(os, seg_flags, true); }
 
   // Add an Output_data (which is not an Output_section) to the start
   // of this segment.
@@ -831,6 +830,11 @@ class Output_segment
   Output_segment& operator=(const Output_segment&);
 
   typedef std::list<Output_data*> Output_data_list;
+
+  // Add an Output_section to this segment, specifying front or back.
+  void
+  add_output_section(Output_section*, elfcpp::Elf_Word seg_flags,
+		     bool front);
 
   // Find the maximum alignment in an Output_data_list.
   static uint64_t

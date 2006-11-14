@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "object.h"
+#include "dynobj.h"
 #include "output.h"
 #include "target.h"
 #include "workqueue.h"
@@ -194,6 +195,7 @@ Symbol_table::Symbol_table_eq::operator()(const Symbol_table_key& k1,
 void
 Symbol_table::make_forwarder(Symbol* from, Symbol* to)
 {
+  assert(from != to);
   assert(!from->is_forwarder() && !to->is_forwarder());
   this->forwarders_[from] = to;
   from->set_forwarder();
@@ -334,7 +336,7 @@ Symbol_table::add_from_object(Object* object,
 	      // NAME/NULL point to NAME/VERSION.
 	      insdef.first->second = ret;
 	    }
-	  else
+	  else if (insdef.first->second != ret)
 	    {
 	      // This is the unfortunate case where we already have
 	      // entries for both NAME/VERSION and NAME/NULL.
@@ -424,8 +426,8 @@ Symbol_table::add_from_object(Object* object,
 
 template<int size, bool big_endian>
 void
-Symbol_table::add_from_object(
-    Relobj* object,
+Symbol_table::add_from_relobj(
+    Sized_relobj<size, big_endian>* relobj,
     const unsigned char* syms,
     size_t count,
     const char* sym_names,
@@ -436,10 +438,10 @@ Symbol_table::add_from_object(
   if (this->get_size() == 0)
     this->set_size(size);
 
-  if (size != this->get_size() || size != object->target()->get_size())
+  if (size != this->get_size() || size != relobj->target()->get_size())
     {
       fprintf(stderr, _("%s: %s: mixing 32-bit and 64-bit ELF objects\n"),
-	      program_name, object->name().c_str());
+	      program_name, relobj->name().c_str());
       gold_exit(false);
     }
 
@@ -456,10 +458,12 @@ Symbol_table::add_from_object(
 	{
 	  fprintf(stderr,
 		  _("%s: %s: bad global symbol name offset %u at %lu\n"),
-		  program_name, object->name().c_str(), st_name,
+		  program_name, relobj->name().c_str(), st_name,
 		  static_cast<unsigned long>(i));
 	  gold_exit(false);
 	}
+
+      const char* name = sym_names + st_name;
 
       // A symbol defined in a section which we are not including must
       // be treated as an undefined symbol.
@@ -468,15 +472,13 @@ Symbol_table::add_from_object(
       unsigned int st_shndx = psym->get_st_shndx();
       if (st_shndx != elfcpp::SHN_UNDEF
 	  && st_shndx < elfcpp::SHN_LORESERVE
-	  && !object->is_section_included(st_shndx))
+	  && !relobj->is_section_included(st_shndx))
 	{
 	  memcpy(symbuf, p, sym_size);
 	  elfcpp::Sym_write<size, big_endian> sw(symbuf);
 	  sw.put_st_shndx(elfcpp::SHN_UNDEF);
 	  psym = &sym2;
 	}
-
-      const char* name = sym_names + st_name;
 
       // In an object file, an '@' in the name separates the symbol
       // name from the version name.  If there are two '@' characters,
@@ -488,7 +490,7 @@ Symbol_table::add_from_object(
 	{
 	  Stringpool::Key name_key;
 	  name = this->namepool_.add(name, &name_key);
-	  res = this->add_from_object(object, name, name_key, NULL, 0,
+	  res = this->add_from_object(relobj, name, name_key, NULL, 0,
 				      false, *psym);
 	}
       else
@@ -507,11 +509,136 @@ Symbol_table::add_from_object(
 	  Stringpool::Key ver_key;
 	  ver = this->namepool_.add(ver, &ver_key);
 
-	  res = this->add_from_object(object, name, name_key, ver, ver_key,
+	  res = this->add_from_object(relobj, name, name_key, ver, ver_key,
 				      def, *psym);
 	}
 
       *sympointers++ = res;
+    }
+}
+
+// Add all the symbols in a dynamic object to the hash table.
+
+template<int size, bool big_endian>
+void
+Symbol_table::add_from_dynobj(
+    Sized_dynobj<size, big_endian>* dynobj,
+    const unsigned char* syms,
+    size_t count,
+    const char* sym_names,
+    size_t sym_name_size,
+    const unsigned char* versym,
+    size_t versym_size,
+    const std::vector<const char*>* version_map)
+{
+  // We take the size from the first object we see.
+  if (this->get_size() == 0)
+    this->set_size(size);
+
+  if (size != this->get_size() || size != dynobj->target()->get_size())
+    {
+      fprintf(stderr, _("%s: %s: mixing 32-bit and 64-bit ELF objects\n"),
+	      program_name, dynobj->name().c_str());
+      gold_exit(false);
+    }
+
+  if (versym != NULL && versym_size / 2 < count)
+    {
+      fprintf(stderr, _("%s: %s: too few symbol versions\n"),
+	      program_name, dynobj->name().c_str());
+      gold_exit(false);
+    }
+
+  const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
+
+  const unsigned char* p = syms;
+  const unsigned char* vs = versym;
+  for (size_t i = 0; i < count; ++i, p += sym_size, vs += 2)
+    {
+      elfcpp::Sym<size, big_endian> sym(p);
+
+      // Ignore symbols with local binding.
+      if (sym.get_st_bind() == elfcpp::STB_LOCAL)
+	continue;
+
+      unsigned int st_name = sym.get_st_name();
+      if (st_name >= sym_name_size)
+	{
+	  fprintf(stderr, _("%s: %s: bad symbol name offset %u at %lu\n"),
+		  program_name, dynobj->name().c_str(), st_name,
+		  static_cast<unsigned long>(i));
+	  gold_exit(false);
+	}
+
+      const char* name = sym_names + st_name;
+
+      if (versym == NULL)
+	{
+	  Stringpool::Key name_key;
+	  name = this->namepool_.add(name, &name_key);
+	  this->add_from_object(dynobj, name, name_key, NULL, 0,
+				false, sym);
+	  continue;
+	}
+
+      // Read the version information.
+
+      unsigned int v = elfcpp::Swap<16, big_endian>::readval(vs);
+
+      bool hidden = (v & elfcpp::VERSYM_HIDDEN) != 0;
+      v &= elfcpp::VERSYM_VERSION;
+
+      if (v == static_cast<unsigned int>(elfcpp::VER_NDX_LOCAL))
+	{
+	  // This symbol should not be visible outside the object.
+	  continue;
+	}
+
+      // At this point we are definitely going to add this symbol.
+      Stringpool::Key name_key;
+      name = this->namepool_.add(name, &name_key);
+
+      if (v == static_cast<unsigned int>(elfcpp::VER_NDX_GLOBAL))
+	{
+	  // This symbol does not have a version.
+	  this->add_from_object(dynobj, name, name_key, NULL, 0, false, sym);
+	  continue;
+	}
+
+      if (v >= version_map->size())
+	{
+	  fprintf(stderr,
+		  _("%s: %s: versym for symbol %zu out of range: %u\n"),
+		  program_name, dynobj->name().c_str(), i, v);
+	  gold_exit(false);
+	}
+
+      const char* version = (*version_map)[v];
+      if (version == NULL)
+	{
+	  fprintf(stderr, _("%s: %s: versym for symbol %zu has no name: %u\n"),
+		  program_name, dynobj->name().c_str(), i, v);
+	  gold_exit(false);
+	}
+
+      Stringpool::Key version_key;
+      version = this->namepool_.add(version, &version_key);
+
+      // If this is an absolute symbol, and the version name and
+      // symbol name are the same, then this is the version definition
+      // symbol.  These symbols exist to support using -u to pull in
+      // particular versions.  We do not want to record a version for
+      // them.
+      if (sym.get_st_shndx() == elfcpp::SHN_ABS && name_key == version_key)
+	{
+	  this->add_from_object(dynobj, name, name_key, NULL, 0, false, sym);
+	  continue;
+	}
+
+      const bool def = !hidden && sym.get_st_shndx() != elfcpp::SHN_UNDEF;
+
+      this->add_from_object(dynobj, name, name_key, version, version_key,
+			    def, sym);
     }
 }
 
@@ -1142,8 +1269,8 @@ Warnings::issue_warning(Symbol* sym, const std::string& location) const
 
 template
 void
-Symbol_table::add_from_object<32, true>(
-    Relobj* object,
+Symbol_table::add_from_relobj<32, true>(
+    Sized_relobj<32, true>* relobj,
     const unsigned char* syms,
     size_t count,
     const char* sym_names,
@@ -1152,8 +1279,8 @@ Symbol_table::add_from_object<32, true>(
 
 template
 void
-Symbol_table::add_from_object<32, false>(
-    Relobj* object,
+Symbol_table::add_from_relobj<32, false>(
+    Sized_relobj<32, false>* relobj,
     const unsigned char* syms,
     size_t count,
     const char* sym_names,
@@ -1162,8 +1289,8 @@ Symbol_table::add_from_object<32, false>(
 
 template
 void
-Symbol_table::add_from_object<64, true>(
-    Relobj* object,
+Symbol_table::add_from_relobj<64, true>(
+    Sized_relobj<64, true>* relobj,
     const unsigned char* syms,
     size_t count,
     const char* sym_names,
@@ -1172,12 +1299,60 @@ Symbol_table::add_from_object<64, true>(
 
 template
 void
-Symbol_table::add_from_object<64, false>(
-    Relobj* object,
+Symbol_table::add_from_relobj<64, false>(
+    Sized_relobj<64, false>* relobj,
     const unsigned char* syms,
     size_t count,
     const char* sym_names,
     size_t sym_name_size,
     Symbol** sympointers);
+
+template
+void
+Symbol_table::add_from_dynobj<32, true>(
+    Sized_dynobj<32, true>* dynobj,
+    const unsigned char* syms,
+    size_t count,
+    const char* sym_names,
+    size_t sym_name_size,
+    const unsigned char* versym,
+    size_t versym_size,
+    const std::vector<const char*>* version_map);
+
+template
+void
+Symbol_table::add_from_dynobj<32, false>(
+    Sized_dynobj<32, false>* dynobj,
+    const unsigned char* syms,
+    size_t count,
+    const char* sym_names,
+    size_t sym_name_size,
+    const unsigned char* versym,
+    size_t versym_size,
+    const std::vector<const char*>* version_map);
+
+template
+void
+Symbol_table::add_from_dynobj<64, true>(
+    Sized_dynobj<64, true>* dynobj,
+    const unsigned char* syms,
+    size_t count,
+    const char* sym_names,
+    size_t sym_name_size,
+    const unsigned char* versym,
+    size_t versym_size,
+    const std::vector<const char*>* version_map);
+
+template
+void
+Symbol_table::add_from_dynobj<64, false>(
+    Sized_dynobj<64, false>* dynobj,
+    const unsigned char* syms,
+    size_t count,
+    const char* sym_names,
+    size_t sym_name_size,
+    const unsigned char* versym,
+    size_t versym_size,
+    const std::vector<const char*>* version_map);
 
 } // End namespace gold.

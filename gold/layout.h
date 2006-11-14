@@ -154,15 +154,6 @@ class Layout
   Output_segment*
   find_first_load_seg();
 
-  // Set the final file offsets of all the segments.
-  off_t
-  set_segment_offsets(const Target*, Output_segment*, unsigned int* pshndx);
-
-  // Set the final file offsets and section indices of all the
-  // sections not associated with a segment.
-  off_t
-  set_section_offsets(off_t, unsigned int *pshndx);
-
   // Create the output sections for the symbol table.
   void
   create_symtab_sections(int size, const Input_objects*, Symbol_table*, off_t*,
@@ -176,6 +167,18 @@ class Layout
   // Create the section header table.
   Output_section_headers*
   create_shdrs(int size, bool big_endian, off_t*);
+
+  // Create the dynamic symbol table.
+  void
+  create_dynamic_symtab(int size, Symbol_table*);
+
+  // Create the .dynamic section and PT_DYNAMIC segment.
+  void
+  create_dynamic_section();
+
+  // Create the .interp section and PT_INTERP segment.
+  void
+  create_interp(const Target* target);
 
   // Return whether to include this section in the link.
   template<int size, bool big_endian>
@@ -203,6 +206,15 @@ class Layout
   Output_section*
   make_output_section(const char* name, elfcpp::Elf_Word type,
 		      elfcpp::Elf_Xword flags);
+
+  // Set the final file offsets of all the segments.
+  off_t
+  set_segment_offsets(const Target*, Output_segment*, unsigned int* pshndx);
+
+  // Set the final file offsets and section indices of all the
+  // sections not associated with a segment.
+  off_t
+  set_section_offsets(off_t, unsigned int *pshndx);
 
   // Return whether SEG1 comes before SEG2 in the output file.
   static bool

@@ -530,6 +530,138 @@ elf_r_info<64>(unsigned int s, unsigned int t)
   return (static_cast<Elf_Xword>(s) << 32) + (t & 0xffffffff);
 }
 
+// Dynamic tags found in the PT_DYNAMIC segment.
+
+enum DT
+{
+  DT_NULL = 0,
+  DT_NEEDED = 1,
+  DT_PLTRELSZ = 2,
+  DT_PLTGOT = 3,
+  DT_HASH = 4,
+  DT_STRTAB = 5,
+  DT_SYMTAB = 6,
+  DT_RELA = 7,
+  DT_RELASZ = 8,
+  DT_RELAENT = 9,
+  DT_STRSZ = 10,
+  DT_SYMENT = 11,
+  DT_INIT = 12,
+  DT_FINI = 13,
+  DT_SONAME = 14,
+  DT_RPATH = 15,
+  DT_SYMBOLIC = 16,
+  DT_REL = 17,
+  DT_RELSZ = 18,
+  DT_RELENT = 19,
+  DT_PLTREL = 20,
+  DT_DEBUG = 21,
+  DT_TEXTREL = 22,
+  DT_JMPREL = 23,
+  DT_BIND_NOW = 24,
+  DT_INIT_ARRAY = 25,
+  DT_FINI_ARRAY = 26,
+  DT_INIT_ARRAYSZ = 27,
+  DT_FINI_ARRAYSZ = 28,
+  DT_RUNPATH = 29,
+  DT_FLAGS = 30,
+  DT_ENCODING = 32,
+  DT_PREINIT_ARRAY = 33,
+  DT_PREINIT_ARRAYSZ = 33,
+  DT_LOOS = 0x6000000d,
+  DT_HIOS = 0x6ffff000,
+  DT_LOPROC = 0x70000000,
+  DT_HIPROC = 0x7fffffff,
+
+  // The remaining values are extensions used by GNU or Solaris.
+  DT_VALRNGLO = 0x6ffffd00,
+  DT_GNU_PRELINKED = 0x6ffffdf5,
+  DT_GNU_CONFLICTSZ = 0x6ffffdf6,
+  DT_GNU_LIBLISTSZ = 0x6ffffdf7,
+  DT_CHECKSUM = 0x6ffffdf8,
+  DT_PLTPADSZ = 0x6ffffdf9,
+  DT_MOVEENT = 0x6ffffdfa,
+  DT_MOVESZ = 0x6ffffdfb,
+  DT_FEATURE = 0x6ffffdfc,
+  DT_POSFLAG_1 = 0x6ffffdfd,
+  DT_SYMINSZ = 0x6ffffdfe,
+  DT_SYMINENT = 0x6ffffdff,
+  DT_VALRNGHI = 0x6ffffdff,
+
+  DT_ADDRRNGLO = 0x6ffffe00,
+  DT_GNU_HASH = 0x6ffffef5,
+  DT_TLSDESC_PLT = 0x6ffffef6,
+  DT_TLSDESC_GOT = 0x6ffffef7,
+  DT_GNU_CONFLICT = 0x6ffffef8,
+  DT_GNU_LIBLIST = 0x6ffffef9,
+  DT_CONFIG = 0x6ffffefa,
+  DT_DEPAUDIT = 0x6ffffefb,
+  DT_AUDIT = 0x6ffffefc,
+  DT_PLTPAD = 0x6ffffefd,
+  DT_MOVETAB = 0x6ffffefe,
+  DT_SYMINFO = 0x6ffffeff,
+  DT_ADDRRNGHI = 0x6ffffeff,
+
+  DT_RELACOUNT = 0x6ffffff9,
+  DT_RELCOUNT = 0x6ffffffa,
+  DT_FLAGS_1 = 0x6ffffffb,
+  DT_VERDEF = 0x6ffffffc,
+  DT_VERDEFNUM = 0x6ffffffd,
+  DT_VERNEED = 0x6ffffffe,
+  DT_VERNEEDNUM = 0x6fffffff,
+
+  DT_VERSYM = 0x6ffffff0,
+
+  DT_AUXILIARY = 0x7ffffffd,
+  DT_USED = 0x7ffffffe,
+  DT_FILTER = 0x7fffffff
+};
+
+// Flags found in the DT_FLAGS dynamic element.
+
+enum DF
+{
+  DF_ORIGIN = 0x1,
+  DF_SYMBOLIC = 0x2,
+  DF_TEXTREL = 0x4,
+  DF_BIND_NOW = 0x8,
+  DF_STATIC_TLS = 0x10
+};
+
+// Version numbers which appear in the vd_version field of a Verdef
+// structure.
+
+const int VER_DEF_NONE = 0;
+const int VER_DEF_CURRENT = 1;
+
+// Version numbers which appear in the vn_version field of a Verneed
+// structure.
+
+const int VER_NEED_NONE = 0;
+const int VER_NEED_CURRENT = 1;
+
+// Bit flags which appear in vd_flags of Verdef and vna_flags of
+// Vernaux.
+
+const int VER_FLG_BASE = 0x1;
+const int VER_FLG_WEAK = 0x2;
+
+// Special constants found in the SHT_GNU_versym entries.
+
+const int VER_NDX_LOCAL = 0;
+const int VER_NDX_GLOBAL = 1;
+
+// A SHT_GNU_versym section holds 16-bit words.  This bit is set if
+// the symbol is hidden and can only be seen when referenced using an
+// explicit version number.  This is a GNU extension.
+
+const int VERSYM_HIDDEN = 0x8000;
+
+// This is the mask for the rest of the data in a word read from a
+// SHT_GNU_versym section.
+
+const int VERSYM_VERSION = 0x7fff;
+
 } // End namespace elfcpp.
 
 // Include internal details after defining the types.
@@ -558,6 +690,8 @@ struct Elf_sizes
   // Sizes of ELF reloc entries.
   static const int rel_size = sizeof(internal::Rel_data<size>);
   static const int rela_size = sizeof(internal::Rela_data<size>);
+  // Size of ELF dynamic entry.
+  static const int dyn_size = sizeof(internal::Dyn_data<size>);
 };
 
 // Accessor class for the ELF file header.
@@ -1086,6 +1220,198 @@ class Rela
  private:
   const internal::Rela_data<size>* p_;
 };
+
+// Accessor classes for entries in the ELF SHT_DYNAMIC section aka
+// PT_DYNAMIC segment.
+
+template<int size, bool big_endian>
+class Dyn
+{
+ public:
+  Dyn(const unsigned char* p)
+    : p_(reinterpret_cast<const internal::Dyn_data<size>*>(p))
+  { }
+
+  template<typename File>
+  Dyn(File* file, typename File::Location loc)
+    : p_(reinterpret_cast<const internal::Dyn_data<size>*>(
+	   file->view(loc.file_offset, loc.data_size).data()))
+  { }
+
+  typename Elf_types<size>::Elf_Swxword
+  get_d_tag() const
+  { return Convert<size, big_endian>::convert_host(this->p_->d_tag); }
+
+  typename Elf_types<size>::Elf_WXword
+  get_d_val() const
+  { return Convert<size, big_endian>::convert_host(this->p_->d_val); }
+
+  typename Elf_types<size>::Elf_Addr
+  get_d_ptr() const
+  { return Convert<size, big_endian>::convert_host(this->p_->d_val); }
+
+ private:
+  const internal::Dyn_data<size>* p_;
+};
+
+// Accessor classes for entries in the ELF SHT_GNU_verdef section.
+
+template<int size, bool big_endian>
+class Verdef
+{
+ public:
+  Verdef(const unsigned char* p)
+    : p_(reinterpret_cast<const internal::Verdef_data*>(p))
+  { }
+
+  template<typename File>
+  Verdef(File* file, typename File::Location loc)
+    : p_(reinterpret_cast<const internal::Verdef_data*>(
+	   file->view(loc.file_offset, loc.data_size).data()))
+  { }
+
+  Elf_Half
+  get_vd_version() const
+  { return Convert<16, big_endian>::convert_host(this->p_->vd_version); }
+
+  Elf_Half
+  get_vd_flags() const
+  { return Convert<16, big_endian>::convert_host(this->p_->vd_flags); }
+
+  Elf_Half
+  get_vd_ndx() const
+  { return Convert<16, big_endian>::convert_host(this->p_->vd_ndx); }
+
+  Elf_Half
+  get_vd_cnt() const
+  { return Convert<16, big_endian>::convert_host(this->p_->vd_cnt); }
+
+  Elf_Word
+  get_vd_hash() const
+  { return Convert<32, big_endian>::convert_host(this->p_->vd_hash); }
+
+  Elf_Word
+  get_vd_aux() const
+  { return Convert<32, big_endian>::convert_host(this->p_->vd_aux); }
+
+  Elf_Word
+  get_vd_next() const
+  { return Convert<32, big_endian>::convert_host(this->p_->vd_next); }
+
+ private:
+  const internal::Verdef_data* p_;
+};
+
+// Accessor classes for auxiliary entries in the ELF SHT_GNU_verdef
+// section.
+
+template<int size, bool big_endian>
+class Verdaux
+{
+ public:
+  Verdaux(const unsigned char* p)
+    : p_(reinterpret_cast<const internal::Verdaux_data*>(p))
+  { }
+
+  template<typename File>
+  Verdaux(File* file, typename File::Location loc)
+    : p_(reinterpret_cast<const internal::Verdaux_data*>(
+	   file->view(loc.file_offset, loc.data_size).data()))
+  { }
+
+  Elf_Word
+  get_vda_name() const
+  { return Convert<32, big_endian>::convert_host(this->p_->vda_name); }
+
+  Elf_Word
+  get_vda_next() const
+  { return Convert<32, big_endian>::convert_host(this->p_->vda_next); }
+
+ private:
+  const internal::Verdaux_data* p_;
+};
+
+// Accessor classes for entries in the ELF SHT_GNU_verneed section.
+
+template<int size, bool big_endian>
+class Verneed
+{
+ public:
+  Verneed(const unsigned char* p)
+    : p_(reinterpret_cast<const internal::Verneed_data*>(p))
+  { }
+
+  template<typename File>
+  Verneed(File* file, typename File::Location loc)
+    : p_(reinterpret_cast<const internal::Verneed_data*>(
+	   file->view(loc.file_offset, loc.data_size).data()))
+  { }
+
+  Elf_Half
+  get_vn_version() const
+  { return Convert<16, big_endian>::convert_host(this->p_->vn_version); }
+
+  Elf_Half
+  get_vn_cnt() const
+  { return Convert<16, big_endian>::convert_host(this->p_->vn_cnt); }
+
+  Elf_Word
+  get_vn_file() const
+  { return Convert<32, big_endian>::convert_host(this->p_->vn_file); }
+
+  Elf_Word
+  get_vn_aux() const
+  { return Convert<32, big_endian>::convert_host(this->p_->vn_aux); }
+
+  Elf_Word
+  get_vn_next() const
+  { return Convert<32, big_endian>::convert_host(this->p_->vn_next); }
+
+ private:
+  const internal::Verneed_data* p_;
+};
+
+// Accessor classes for auxiliary entries in the ELF SHT_GNU_verneed
+// section.
+
+template<int size, bool big_endian>
+class Vernaux
+{
+ public:
+  Vernaux(const unsigned char* p)
+    : p_(reinterpret_cast<const internal::Vernaux_data*>(p))
+  { }
+
+  template<typename File>
+  Vernaux(File* file, typename File::Location loc)
+    : p_(reinterpret_cast<const internal::Vernaux_data*>(
+	   file->view(loc.file_offset, loc.data_size).data()))
+  { }
+
+  Elf_Word
+  get_vna_hash() const
+  { return Convert<32, big_endian>::convert_host(this->p_->vna_hash); }
+
+  Elf_Half
+  get_vna_flags() const
+  { return Convert<16, big_endian>::convert_host(this->p_->vna_flags); }
+
+  Elf_Half
+  get_vna_other() const
+  { return Convert<16, big_endian>::convert_host(this->p_->vna_other); }
+
+  Elf_Word
+  get_vna_name() const
+  { return Convert<32, big_endian>::convert_host(this->p_->vna_name); }
+
+  Elf_Word
+  get_vna_next() const
+  { return Convert<32, big_endian>::convert_host(this->p_->vna_next); }
+
+ private:
+  const internal::Vernaux_data* p_;
+};
+
 
 } // End namespace elfcpp.
 

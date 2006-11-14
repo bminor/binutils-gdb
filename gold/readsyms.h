@@ -36,10 +36,10 @@ class Read_symbols : public Task
   // symbols.
   Read_symbols(const General_options& options, Input_objects* input_objects,
 	       Symbol_table* symtab, Layout* layout, const Dirsearch& dirpath,
-	       const Input_argument& input, Input_group* input_group,
+	       const Input_argument* input_argument, Input_group* input_group,
 	       Task_token* this_blocker, Task_token* next_blocker)
     : options_(options), input_objects_(input_objects), symtab_(symtab),
-      layout_(layout), dirpath_(dirpath), input_(input),
+      layout_(layout), dirpath_(dirpath), input_argument_(input_argument),
       input_group_(input_group), this_blocker_(this_blocker),
       next_blocker_(next_blocker)
   { }
@@ -67,7 +67,7 @@ class Read_symbols : public Task
   Symbol_table* symtab_;
   Layout* layout_;
   const Dirsearch& dirpath_;
-  const Input_argument& input_;
+  const Input_argument* input_argument_;
   Input_group* input_group_;
   Task_token* this_blocker_;
   Task_token* next_blocker_;

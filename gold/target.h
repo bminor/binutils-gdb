@@ -65,6 +65,11 @@ class Target
   has_resolve() const
   { return this->pti_->has_resolve; }
 
+  // Return the default name of the dynamic linker.
+  const char*
+  dynamic_linker() const
+  { return this->pti_->dynamic_linker; }
+
   // Return the default address to use for the text segment.
   uint64_t
   text_segment_address() const
@@ -96,6 +101,8 @@ class Target
     bool has_make_symbol;
     // Whether this target has a specific resolve function.
     bool has_resolve;
+    // The default dynamic linker name.
+    const char* dynamic_linker;
     // The default text segment address.
     uint64_t text_segment_address;
     // The ABI specified page size.

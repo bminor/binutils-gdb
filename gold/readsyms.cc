@@ -10,6 +10,7 @@
 #include "symtab.h"
 #include "object.h"
 #include "archive.h"
+#include "script.h"
 #include "readsyms.h"
 
 namespace gold
@@ -30,8 +31,8 @@ Read_symbols::~Read_symbols()
 Task::Is_runnable_type
 Read_symbols::is_runnable(Workqueue*)
 {
-  if (this->input_.is_file()
-      && this->input_.file().is_lib()
+  if (this->input_argument_->is_file()
+      && this->input_argument_->file().is_lib()
       && this->dirpath_.token().is_blocked())
     return IS_BLOCKED;
 
@@ -53,14 +54,14 @@ Read_symbols::locks(Workqueue*)
 void
 Read_symbols::run(Workqueue* workqueue)
 {
-  if (this->input_.is_group())
+  if (this->input_argument_->is_group())
     {
       assert(this->input_group_ == NULL);
       this->do_group(workqueue);
       return;
     }
 
-  Input_file* input_file = new Input_file(this->input_.file());
+  Input_file* input_file = new Input_file(this->input_argument_->file());
   input_file->open(this->options_, this->dirpath_);
 
   // Read enough of the file to pick up the entire ELF header.
@@ -79,16 +80,20 @@ Read_symbols::run(Workqueue* workqueue)
 	{
 	  // This is an ELF object.
 
-	  if (this->input_group_ != NULL)
+	  Object* obj = make_elf_object(input_file->filename(),
+					input_file, 0, p, bytes);
+
+	  // We don't have a way to record a non-archive in an input
+	  // group.  If this is an ordinary object file, we can't
+	  // include it more than once anyhow.  If this is a dynamic
+	  // object, then including it a second time changes nothing.
+	  if (this->input_group_ != NULL && !obj->is_dynamic())
 	    {
 	      fprintf(stderr,
 		      _("%s: %s: ordinary object found in input group\n"),
 		      program_name, input_file->name());
 	      gold_exit(false);
 	    }
-
-	  Object* obj = make_elf_object(this->input_.file().name(),
-					input_file, 0, p, bytes);
 
 	  Read_symbols_data* sd = new Read_symbols_data;
 	  obj->read_symbols(sd);
@@ -111,7 +116,8 @@ Read_symbols::run(Workqueue* workqueue)
       if (memcmp(p, Archive::armag, Archive::sarmag) == 0)
 	{
 	  // This is an archive.
-	  Archive* arch = new Archive(this->input_.file().name(), input_file);
+	  Archive* arch = new Archive(this->input_argument_->file().name(),
+				      input_file);
 	  arch->setup();
 	  workqueue->queue(new Add_archive_symbols(this->options_,
 						   this->symtab_,
@@ -124,6 +130,20 @@ Read_symbols::run(Workqueue* workqueue)
 	  return;
 	}
     }
+
+  if (bytes == 0)
+    {
+      fprintf(stderr, _("%s: %s: file is empty\n"),
+	      program_name, input_file->file().filename().c_str());
+      gold_exit(false);
+    }
+
+  // Try to parse this file as a script.
+  if (read_input_script(workqueue, this->options_, this->symtab_,
+			this->layout_, this->dirpath_, this->input_objects_,
+			this->input_group_, this->input_argument_, input_file,
+			p, bytes, this->this_blocker_, this->next_blocker_))
+    return;
 
   // Here we have to handle any other input file types we need.
   fprintf(stderr, _("%s: %s: not an object or archive\n"),
@@ -143,14 +163,14 @@ Read_symbols::do_group(Workqueue* workqueue)
 {
   Input_group* input_group = new Input_group();
 
-  const Input_file_group* group = this->input_.group();
+  const Input_file_group* group = this->input_argument_->group();
   Task_token* this_blocker = this->this_blocker_;
   for (Input_file_group::const_iterator p = group->begin();
        p != group->end();
        ++p)
     {
-      const Input_argument& arg(*p);
-      assert(arg.is_file());
+      const Input_argument* arg = &*p;
+      assert(arg->is_file());
 
       Task_token* next_blocker = new Task_token();
       next_blocker->add_blocker();

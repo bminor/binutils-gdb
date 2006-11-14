@@ -38,6 +38,11 @@ class General_options
  public:
   General_options();
 
+  // -I: dynamic linker name.
+  const char*
+  dynamic_linker() const
+  { return this->dynamic_linker_; }
+
   // -L: Library search path.
   typedef std::list<const char*> Dir_list;
 
@@ -66,8 +71,16 @@ class General_options
   { return this->is_static_; }
 
  private:
+  // Don't copy this structure.
+  General_options(const General_options&);
+  General_options& operator=(const General_options&);
+
   friend class Command_line;
   friend class options::Command_line_options;
+
+  void
+  set_dynamic_linker(const char* arg)
+  { this->dynamic_linker_ = arg; }
 
   void
   add_to_search_path(const char* arg)
@@ -93,15 +106,12 @@ class General_options
   ignore(const char*)
   { }
 
+  const char* dynamic_linker_;
   Dir_list search_path_;
   const char* output_file_name_;
   bool is_relocatable_;
   bool is_shared_;
   bool is_static_;
-
-  // Don't copy this structure.
-  General_options(const General_options&);
-  General_options& operator=(const General_options&);
 };
 
 // The current state of the position dependent options.
@@ -112,14 +122,16 @@ class Position_dependent_options
   Position_dependent_options();
 
   // -Bstatic: Whether we are searching for a static archive rather
-  // -than a shared object.
+  // than a shared object.
   bool
-  do_static_search()
+  do_static_search() const
   { return this->do_static_search_; }
 
- private:
-  friend class Command_line;
-  friend class options::Command_line_options;
+  // --as-needed: Whether to add a DT_NEEDED argument only if the
+  // dynamic object is used.
+  bool
+  as_needed() const
+  { return this->as_needed_; }
 
   void
   set_static_search()
@@ -129,7 +141,17 @@ class Position_dependent_options
   set_dynamic_search()
   { this->do_static_search_ = false; }
 
+  void
+  set_as_needed()
+  { this->as_needed_ = true; }
+
+  void
+  clear_as_needed()
+  { this->as_needed_ = false; }
+
+ private:
   bool do_static_search_;
+  bool as_needed_;
 };
 
 // A single file or library argument from the command line.
@@ -138,7 +160,7 @@ class Input_file_argument
 {
  public:
   Input_file_argument()
-    : name_(NULL), is_lib_(false), options_()
+    : name_(), is_lib_(false), options_()
   { }
 
   Input_file_argument(const char* name, bool is_lib,
@@ -148,7 +170,7 @@ class Input_file_argument
 
   const char*
   name() const
-  { return this->name_; }
+  { return this->name_.c_str(); }
 
   const Position_dependent_options&
   options() const
@@ -159,7 +181,10 @@ class Input_file_argument
   { return this->is_lib_; }
 
  private:
-  const char* name_;
+  // We use std::string, not const char*, here for convenience when
+  // using script files, so that we do not have to preserve the string
+  // in that case.
+  std::string name_;
   bool is_lib_;
   Position_dependent_options options_;
 };
@@ -250,12 +275,60 @@ class Input_file_group
   Files files_;
 };
 
+// A list of files from the command line or a script.
+
+class Input_arguments
+{
+ public:
+  typedef std::vector<Input_argument> Input_argument_list;
+  typedef Input_argument_list::const_iterator const_iterator;
+
+  Input_arguments()
+    : input_argument_list_(), in_group_(false)
+  { }
+
+  // Add a file.
+  void
+  add_file(const Input_file_argument& arg);
+
+  // Start a group (the --start-group option).
+  void
+  start_group();
+
+  // End a group (the --end-group option).
+  void
+  end_group();
+
+  // Return whether we are currently in a group.
+  bool
+  in_group() const
+  { return this->in_group_; }
+
+  // Iterators to iterate over the list of input files.
+
+  const_iterator
+  begin() const
+  { return this->input_argument_list_.begin(); }
+
+  const_iterator
+  end() const
+  { return this->input_argument_list_.end(); }
+
+  // Return whether the list is empty.
+  bool
+  empty() const
+  { return this->input_argument_list_.empty(); }
+
+ private:
+  Input_argument_list input_argument_list_;
+  bool in_group_;
+};
+
 // All the information read from the command line.
 
 class Command_line
 {
  public:
-  typedef std::vector<Input_argument> Input_arguments;
   typedef Input_arguments::const_iterator const_iterator;
 
   Command_line();
@@ -315,7 +388,6 @@ class Command_line
   General_options options_;
   Position_dependent_options position_options_;
   Input_arguments inputs_;
-  bool in_group_;
 };
 
 } // End namespace gold.

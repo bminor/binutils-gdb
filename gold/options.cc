@@ -231,6 +231,9 @@ options::Command_line_options::options[] =
 	  TWO_DASHES, &start_group),
   SPECIAL(')', "end-group", N_("End a library search group"), NULL,
 	  TWO_DASHES, &end_group),
+  GENERAL_ARG('I', "dynamic-linker", N_("Set dynamic linker path"),
+	      N_("-I PROGRAM, --dynamic-linker PROGRAM"), TWO_DASHES,
+	      &General_options::set_dynamic_linker),
   GENERAL_ARG('L', "library-path", N_("Add directory to search path"),
 	      N_("-L DIR, --library-path DIR"), TWO_DASHES,
 	      &General_options::add_to_search_path),
@@ -245,6 +248,12 @@ options::Command_line_options::options[] =
 		NULL, ONE_DASH, &General_options::set_shared),
   GENERAL_NOARG('\0', "static", N_("Do not link against shared libraries"),
 		NULL, ONE_DASH, &General_options::set_static),
+  POSDEP_NOARG('\0', "as-needed",
+	       N_("Only set DT_NEEDED for following dynamic libs if used"),
+	       NULL, TWO_DASHES, &Position_dependent_options::set_as_needed),
+  POSDEP_NOARG('\0', "no-as-needed",
+	       N_("Always DT_NEEDED for following dynamic libs (default)"),
+	       NULL, TWO_DASHES, &Position_dependent_options::clear_as_needed),
   SPECIAL('\0', "help", N_("Report usage information"), NULL,
 	  TWO_DASHES, &help)
 };
@@ -255,7 +264,8 @@ const int options::Command_line_options::options_size =
 // The default values for the general options.
 
 General_options::General_options()
-  : search_path_(),
+  : dynamic_linker_(NULL),
+    search_path_(),
     output_file_name_("a.out"),
     is_relocatable_(false),
     is_shared_(false),
@@ -270,10 +280,47 @@ Position_dependent_options::Position_dependent_options()
 {
 }
 
+// Input_arguments methods.
+
+// Add a file to the list.
+
+void
+Input_arguments::add_file(const Input_file_argument& file)
+{
+  if (!this->in_group_)
+    this->input_argument_list_.push_back(Input_argument(file));
+  else
+    {
+      assert(!this->input_argument_list_.empty());
+      assert(this->input_argument_list_.back().is_group());
+      this->input_argument_list_.back().group()->add_file(file);
+    }
+}
+
+// Start a group.
+
+void
+Input_arguments::start_group()
+{
+  assert(!this->in_group_);
+  Input_file_group* group = new Input_file_group();
+  this->input_argument_list_.push_back(Input_argument(group));
+  this->in_group_ = true;
+}
+
+// End a group.
+
+void
+Input_arguments::end_group()
+{
+  assert(this->in_group_);
+  this->in_group_ = false;
+}
+
 // Command_line options.
 
 Command_line::Command_line()
-  : options_(), position_options_(), inputs_(), in_group_(false)
+  : options_(), position_options_(), inputs_()
 {
 }
 
@@ -409,7 +456,7 @@ Command_line::process(int argc, char** argv)
 	}
     }
 
-  if (this->in_group_)
+  if (this->inputs_.in_group())
     {
       fprintf(stderr, _("%s: missing group end"), program_name);
       this->usage();
@@ -452,14 +499,7 @@ void
 Command_line::add_file(const char* name, bool is_lib)
 {
   Input_file_argument file(name, is_lib, this->position_options_);
-  if (!this->in_group_)
-    this->inputs_.push_back(Input_argument(file));
-  else
-    {
-      assert(!this->inputs_.empty());
-      assert(this->inputs_.back().is_group());
-      this->inputs_.back().group()->add_file(file);
-    }
+  this->inputs_.add_file(file);
 }
 
 // Handle the -l option, which requires special treatment.
@@ -492,14 +532,9 @@ Command_line::process_l_option(int argc, char** argv, char* arg)
 void
 Command_line::start_group(const char* arg)
 {
-  if (this->in_group_)
+  if (this->inputs_.in_group())
     this->usage(_("may not nest groups"), arg);
-
-  // This object is leaked.
-  Input_file_group* group = new Input_file_group();
-  this->inputs_.push_back(Input_argument(group));
-
-  this->in_group_ = true;
+  this->inputs_.start_group();
 }
 
 // Handle the --end-group option.
@@ -507,9 +542,9 @@ Command_line::start_group(const char* arg)
 void
 Command_line::end_group(const char* arg)
 {
-  if (!this->in_group_)
+  if (!this->inputs_.in_group())
     this->usage(_("group end without group start"), arg);
-  this->in_group_ = false;
+  this->inputs_.end_group();
 }
 
 // Report a usage error.  */

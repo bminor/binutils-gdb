@@ -45,7 +45,8 @@ DIST_COMMON = README $(am__configure_deps) $(srcdir)/../config.guess \
 	$(srcdir)/../install-sh $(srcdir)/../missing \
 	$(srcdir)/../mkinstalldirs $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.in \
-	$(top_srcdir)/configure $(top_srcdir)/po/Make-in
+	$(top_srcdir)/configure $(top_srcdir)/po/Make-in yyscript.c \
+	yyscript.h
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
@@ -63,29 +64,32 @@ CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = po/Makefile.in
 PROGRAMS = $(noinst_PROGRAMS)
 am__objects_1 = archive.$(OBJEXT) common.$(OBJEXT) defstd.$(OBJEXT) \
-	dirsearch.$(OBJEXT) fileread.$(OBJEXT) gold.$(OBJEXT) \
-	gold-threads.$(OBJEXT) layout.$(OBJEXT) object.$(OBJEXT) \
-	options.$(OBJEXT) output.$(OBJEXT) readsyms.$(OBJEXT) \
-	reloc.$(OBJEXT) resolve.$(OBJEXT) symtab.$(OBJEXT) \
-	stringpool.$(OBJEXT) target-select.$(OBJEXT) \
-	workqueue.$(OBJEXT)
+	dirsearch.$(OBJEXT) dynobj.$(OBJEXT) fileread.$(OBJEXT) \
+	gold.$(OBJEXT) gold-threads.$(OBJEXT) layout.$(OBJEXT) \
+	object.$(OBJEXT) options.$(OBJEXT) output.$(OBJEXT) \
+	readsyms.$(OBJEXT) reloc.$(OBJEXT) resolve.$(OBJEXT) \
+	script.$(OBJEXT) symtab.$(OBJEXT) stringpool.$(OBJEXT) \
+	target-select.$(OBJEXT) workqueue.$(OBJEXT)
 am__objects_2 =
 am__objects_3 = i386.$(OBJEXT)
-am_ld_new_OBJECTS = $(am__objects_1) $(am__objects_2) $(am__objects_3)
+am__objects_4 = yyscript.$(OBJEXT)
+am_ld_new_OBJECTS = $(am__objects_1) $(am__objects_2) $(am__objects_3) \
+	$(am__objects_4)
 ld_new_OBJECTS = $(am_ld_new_OBJECTS)
 am__DEPENDENCIES_1 =
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
 depcomp = $(SHELL) $(top_srcdir)/../depcomp
 am__depfiles_maybe = depfiles
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
-COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
-	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+YACCCOMPILE = $(YACC) $(YFLAGS) $(AM_YFLAGS)
 SOURCES = $(ld_new_SOURCES)
 DIST_SOURCES = $(ld_new_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -175,6 +179,7 @@ VERSION = @VERSION@
 WARN_CFLAGS = @WARN_CFLAGS@
 WARN_CXXFLAGS = @WARN_CXXFLAGS@
 XGETTEXT = @XGETTEXT@
+YACC = @YACC@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_STRIP = @ac_ct_STRIP@
@@ -229,11 +234,13 @@ INCLUDES = -D_GNU_SOURCE \
 	-DLOCALEDIR="\"$(datadir)/locale\"" \
 	@INCINTL@
 
+YFLAGS = -d
 CCFILES = \
 	archive.cc \
 	common.cc \
 	defstd.cc \
 	dirsearch.cc \
+	dynobj.cc \
 	fileread.cc \
 	gold.cc \
 	gold-threads.cc \
@@ -244,6 +251,7 @@ CCFILES = \
 	readsyms.cc \
 	reloc.cc \
 	resolve.cc \
+	script.cc \
 	symtab.cc \
 	stringpool.cc \
 	target-select.cc \
@@ -254,6 +262,7 @@ HFILES = \
 	common.h \
 	defstd.h \
 	dirsearch.h \
+	dynobj.h \
 	fileread.h \
 	gold.h \
 	gold-threads.h \
@@ -263,6 +272,7 @@ HFILES = \
 	output.h \
 	readsyms.h \
 	reloc.h \
+	script.h \
 	stringpool.h \
 	symtab.h \
 	target.h \
@@ -273,16 +283,19 @@ HFILES = \
 TARGETFILES = \
 	i386.cc
 
-OFILES = gold.o options.o
+YFILES = \
+	yyscript.y
+
+EXTRA_DIST = yyscript.c yyscript.h
 POTFILES = $(CCFILES) $(HFILES) $(TARGETFILES)
-ld_new_SOURCES = $(CCFILES) $(HFILES) $(TARGETFILES)
+ld_new_SOURCES = $(CCFILES) $(HFILES) $(TARGETFILES) $(YFILES)
 ld_new_DEPENDENCIES = $(LIBINTL_DEP)
 ld_new_LDADD = $(LIBINTL)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
 .SUFFIXES:
-.SUFFIXES: .cc .o .obj
+.SUFFIXES: .c .cc .o .obj .y
 am--refresh:
 	@:
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
@@ -338,6 +351,11 @@ po/Makefile.in: $(top_builddir)/config.status $(top_srcdir)/po/Make-in
 
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+yyscript.h: yyscript.c
+	@if test ! -f $@; then \
+	  rm -f yyscript.c; \
+	  $(MAKE) yyscript.c; \
+	else :; fi
 ld-new$(EXEEXT): $(ld_new_OBJECTS) $(ld_new_DEPENDENCIES) 
 	@rm -f ld-new$(EXEEXT)
 	$(CXXLINK) $(ld_new_LDFLAGS) $(ld_new_OBJECTS) $(ld_new_LDADD) $(LIBS)
@@ -352,6 +370,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/defstd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dirsearch.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dynobj.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fileread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gold-threads.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gold.Po@am__quote@
@@ -363,10 +382,26 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/readsyms.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reloc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resolve.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stringpool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/symtab.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/target-select.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/workqueue.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/yyscript.Po@am__quote@
+
+.c.o:
+@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c $<
+
+.c.obj:
+@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
 .cc.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -381,6 +416,27 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.y.c:
+	$(YACCCOMPILE) $<
+	if test -f y.tab.h; then \
+	  to=`echo "$*_H" | sed \
+                -e 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/' \
+                -e 's/[^ABCDEFGHIJKLMNOPQRSTUVWXYZ]/_/g'`; \
+	  sed -e "/^#/!b" -e "s/Y_TAB_H/$$to/g" -e "s|y\.tab\.h|$*.h|" \
+            y.tab.h >$*.ht; \
+	  rm -f y.tab.h; \
+	  if cmp -s $*.ht $*.h; then \
+	    rm -f $*.ht ;\
+	  else \
+	    mv $*.ht $*.h; \
+	  fi; \
+	fi
+	if test -f y.output; then \
+	  mv y.output $*.output; \
+	fi
+	sed '/^#/ s|y\.tab\.c|$@|' y.tab.c >$@t && mv $@t $@
+	rm -f y.tab.c
 uninstall-info-am:
 
 # This directory's subdirectories are mostly independent; you can cd
@@ -686,6 +742,8 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-rm -f yyscript.c
+	-rm -f yyscript.h
 clean: clean-recursive
 
 clean-am: clean-generic clean-noinstPROGRAMS mostlyclean-am
@@ -760,6 +818,9 @@ uninstall-info: uninstall-info-recursive
 po/POTFILES.in: @MAINT@ Makefile
 	for f in $(POTFILES); do echo $$f; done | LC_COLLATE= sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
+
+# Use an explicit dependency for the bison generated header file.
+script.$(OBJEXT): yyscript.h
 
 .PHONY: install-exec-local
 
