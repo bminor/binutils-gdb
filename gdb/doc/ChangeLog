@@ -1,3 +1,7 @@
+2006-11-14  Maxim Grigoriev  <maxim@tensilica.com>
+
+	* gdb.texinfo (Contributors): Add contributors of Xtensa port.
+
 2006-11-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (Remote configuration): Rewrite documentation for

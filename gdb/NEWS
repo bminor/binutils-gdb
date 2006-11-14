@@ -3,6 +3,10 @@
 
 *** Changes since GDB 6.5
 
+* New targets
+
+Xtensa				xtensa-elf
+
 * GDB can now be configured as a cross-debugger targeting native Windows
 (mingw32) or Cygwin.  It can communicate with a remote debugging stub
 running on a Windows system over TCP/IP to debug Windows programs.

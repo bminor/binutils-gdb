@@ -28,6 +28,7 @@ sh*)			gdb_target_cpu=sh ;;
 strongarm*)		gdb_target_cpu=arm ;;
 xscale*)		gdb_target_cpu=arm ;;
 x86_64*)		gdb_target_cpu=i386 ;;
+xtensa*)		gdb_target_cpu=xtensa ;;
 *)			gdb_target_cpu=$target_cpu ;;
 
 esac
@@ -223,6 +224,8 @@ x86_64-*-linux*)	gdb_target=linux64
 x86_64-*-netbsd* | x86_64-*-knetbsd*-gnu)
 			gdb_target=nbsd64 ;;
 x86_64-*-openbsd*)	gdb_target=obsd64 ;;
+
+xtensa*)		gdb_target=xtensa ;;
 
 esac
 

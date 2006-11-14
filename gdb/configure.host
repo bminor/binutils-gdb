@@ -28,6 +28,7 @@ sh*)			gdb_host_cpu=sh ;;
 x86_64*)		gdb_host_cpu=i386 ;;
 xscale*)		gdb_host_cpu=arm ;;
 m32r*)			gdb_host_cpu=m32r ;;
+xtensa*)		gdb_host_cpu=xtensa ;;
 *)			gdb_host_cpu=$host_cpu ;;
 
 esac
@@ -155,6 +156,8 @@ x86_64-*-netbsd* | x86_64-*-knetbsd*-gnu)
 x86_64-*-openbsd*)	gdb_host=obsd64 ;;
 
 m32r*-*-linux*)          gdb_host=linux ;;
+
+xtensa*-*-linux*)	gdb_host=linux ;;
 
 esac
 

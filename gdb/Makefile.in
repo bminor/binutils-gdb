@@ -825,6 +825,7 @@ wince_stub_h = wince-stub.h
 wrapper_h = wrapper.h $(gdb_h)
 xcoffsolib_h = xcoffsolib.h
 xml_support_h = xml-support.h $(gdb_expat_h)
+xtensa_tdep_h = xtensa-tdep.h 
 
 #
 # gdb/cli/ headers
@@ -1500,7 +1501,8 @@ ALLDEPFILES = \
 	vax-nat.c vax-tdep.c vaxbsd-nat.c vaxnbsd-tdep.c \
 	win32-nat.c \
 	xcoffread.c xcoffsolib.c \
-	xstormy16-tdep.c
+	xstormy16-tdep.c \
+	xtensa-tdep.c xtensa-config.c
 
 # Some files need explicit build rules (due to -Werror problems) or due
 # to sub-directory fun 'n' games.
@@ -2863,6 +2865,16 @@ xstormy16-tdep.o: xstormy16-tdep.c $(defs_h) $(frame_h) $(frame_base_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(value_h) $(dis_asm_h) $(inferior_h) \
 	$(gdb_string_h) $(gdb_assert_h) $(arch_utils_h) $(floatformat_h) \
 	$(regcache_h) $(doublest_h) $(osabi_h) $(objfiles_h)
+xtensa-linux-tdep.o: xtensa-linux-tdep.c $(defs_h) $(inferior_h) \
+	$(gdbcore_h) $(regcache_h) $(osabi_h) $(gdb_string_h) \
+	$(xtensa_tdep_h) $(xtensa_linux_tdep_h)
+xtensa-tdep.o: xtensa-tdep.c $(defs_h) $(doublest_h) $(frame_h) \
+	$(frame_unwind_h) $(frame_base_h) $(inferior_h) $(symtab_h) \
+	$(value_h) $(gdbcmd_h) $(gdbcore_h) $(dis_asm_h) $(symfile_h) \
+	$(objfiles_h) $(gdb_string_h) $(linespec_h) $(regcache_h) \
+	$(reggroups_h) $(arch_utils_h) $(osabi_h) $(block_h) $(gdb_assert_h) \
+	$(elf_bfd_h) $(xtensa_tdep_h) $(dwarf2_frame_h)
+xtensa-config.o: $(defs_h) $(xtensa_tdep_h)
 
 #
 # gdb/cli/ dependencies

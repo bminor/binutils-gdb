@@ -1,3 +1,14 @@
+2006-11-14  Maxim Grigoriev  <maxim@tensilica.com>
+
+	* NEWS: New port to Xtensa.
+	* Makefile.in: Add dependencies for Xtensa files.
+	* configure.tgt (xtensa*, xtensa*-*-elf*): New.
+	* configure.host (xtensa*-*-elf*): New.
+	* config/xtensa/xtensa.mt: New file.
+	* xtensa-config.c: New file.
+	* xtensa-tdep.h: New file.
+	* xtensa-tdep.c: New file.
+
 2006-11-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote.c (set_remote_cmd): Call help_list.

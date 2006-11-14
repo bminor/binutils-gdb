@@ -497,6 +497,11 @@ Jacobowitz, Jeff Johnston, Mark Kettenis, Theodore A. Roth, Kei
 Sakamoto, Yoshinori Sato, Michael Snyder, Corinna Vinschen, and Ulrich
 Weigand.
 
+Christian Zankel, Ross Morley, Bob Wilson, and Maxim Grigoriev from
+Tensilica, Inc.@: contributed support for Xtensa processors.  Others
+who have worked on the Xtensa port of @value{GDBN} in the past include
+Steve Tjiang, John Newlin, and Scott Foehner.
+
 @node Sample Session
 @chapter A Sample @value{GDBN} Session
 
