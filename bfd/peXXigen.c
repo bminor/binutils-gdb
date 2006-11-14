@@ -484,9 +484,9 @@ _bfd_XXi_swap_aouthdr_in (bfd * abfd,
   /* These three fields are normally set up by ppc_relocate_section.
      In the case of reading a file in, we can pick them up from the
      DataDirectory.  */
-  first_thunk_address = a->DataDirectory[12].VirtualAddress;
-  thunk_size = a->DataDirectory[12].Size;
-  import_table_size = a->DataDirectory[1].Size;
+  first_thunk_address = a->DataDirectory[PE_IMPORT_ADDRESS_TABLE].VirtualAddress;
+  thunk_size = a->DataDirectory[PE_IMPORT_ADDRESS_TABLE].Size;
+  import_table_size = a->DataDirectory[PE_IMPORT_TABLE].Size;
 #endif
 }
 
@@ -544,9 +544,9 @@ _bfd_XXi_swap_aouthdr_out (bfd * abfd, void * in, void * out)
   fa = extra->FileAlignment;
   ib = extra->ImageBase;
 
-  idata2 = pe->pe_opthdr.DataDirectory[1];
-  idata5 = pe->pe_opthdr.DataDirectory[12];
-  tls = pe->pe_opthdr.DataDirectory[9];
+  idata2 = pe->pe_opthdr.DataDirectory[PE_IMPORT_TABLE];
+  idata5 = pe->pe_opthdr.DataDirectory[PE_IMPORT_ADDRESS_TABLE];
+  tls = pe->pe_opthdr.DataDirectory[PE_TLS_TABLE];
   
   if (aouthdr_in->tsize)
     {
@@ -596,11 +596,11 @@ _bfd_XXi_swap_aouthdr_out (bfd * abfd, void * in, void * out)
 
      So - we copy the input values into the output values, and then, if
      a final link is going to be performed, it can overwrite them.  */
-  extra->DataDirectory[1]  = idata2;
-  extra->DataDirectory[12] = idata5;
-  extra->DataDirectory[9] = tls;
+  extra->DataDirectory[PE_IMPORT_TABLE]  = idata2;
+  extra->DataDirectory[PE_IMPORT_ADDRESS_TABLE] = idata5;
+  extra->DataDirectory[PE_TLS_TABLE] = tls;
 
-  if (extra->DataDirectory[1].VirtualAddress == 0)
+  if (extra->DataDirectory[PE_IMPORT_TABLE].VirtualAddress == 0)
     /* Until other .idata fixes are made (pending patch), the entry for
        .idata is needed for backwards compatibility.  FIXME.  */
     add_data_entry (abfd, extra, 1, ".idata", ib);
@@ -1021,7 +1021,7 @@ static char * dir_names[IMAGE_NUMBEROF_DIRECTORY_ENTRIES] =
   N_("Bound Import Directory"),
   N_("Import Address Table Directory"),
   N_("Delay Import Directory"),
-  N_("Reserved"),
+  N_("CLR Runtime Header"),
   N_("Reserved")
 };
 
@@ -1055,9 +1055,9 @@ pe_print_idata (bfd * abfd, void * vfile)
 
   bfd_vma addr;
 
-  addr = extra->DataDirectory[1].VirtualAddress;
+  addr = extra->DataDirectory[PE_IMPORT_TABLE].VirtualAddress;
 
-  if (addr == 0 && extra->DataDirectory[1].Size == 0)
+  if (addr == 0 && extra->DataDirectory[PE_IMPORT_TABLE].Size == 0)
     {
       /* Maybe the extra header isn't there.  Look for the section.  */
       section = bfd_get_section_by_name (abfd, ".idata");
@@ -1175,7 +1175,7 @@ pe_print_idata (bfd * abfd, void * vfile)
       bfd_size_type j;
       char *dll;
 
-      /* Print (i + extra->DataDirectory[1].VirtualAddress).  */
+      /* Print (i + extra->DataDirectory[PE_IMPORT_TABLE].VirtualAddress).  */
       fprintf (file, " %08lx\t", (unsigned long) (i + adj + dataoff));
       hint_addr = bfd_get_32 (abfd, data + i + dataoff);
       time_stamp = bfd_get_32 (abfd, data + i + 4 + dataoff);
@@ -1216,8 +1216,8 @@ pe_print_idata (bfd * abfd, void * vfile)
 	  ft_data = data;
 	  ft_idx = first_thunk - adj;
 	  ft_allocated = 0; 
-      
-	  if (first_thunk != hint_addr) 
+
+	  if (first_thunk != hint_addr)
 	    {
 	      /* Find the section which contains the first thunk.  */
 	      for (ft_section = abfd->sections;
@@ -1372,9 +1372,9 @@ pe_print_edata (bfd * abfd, void * vfile)
 
   bfd_vma addr;
 
-  addr = extra->DataDirectory[0].VirtualAddress;
+  addr = extra->DataDirectory[PE_EXPORT_TABLE].VirtualAddress;
 
-  if (addr == 0 && extra->DataDirectory[0].Size == 0)
+  if (addr == 0 && extra->DataDirectory[PE_EXPORT_TABLE].Size == 0)
     {
       /* Maybe the extra header isn't there.  Look for the section.  */
       section = bfd_get_section_by_name (abfd, ".edata");
@@ -1403,7 +1403,7 @@ pe_print_edata (bfd * abfd, void * vfile)
 	}
 
       dataoff = addr - section->vma;
-      datasize = extra->DataDirectory[0].Size;
+      datasize = extra->DataDirectory[PE_EXPORT_TABLE].Size;
       if (datasize > section->size - dataoff)
 	{
 	  fprintf (file,
@@ -1873,6 +1873,16 @@ _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
     case IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER:
       subsystem_name = "EFI runtime driver";
       break;
+    // These are from revision 8.0 of the MS PE/COFF spec
+    case IMAGE_SUBSYSTEM_EFI_ROM:
+      subsystem_name = "EFI ROM";
+      break;
+    case IMAGE_SUBSYSTEM_XBOX:
+      subsystem_name = "XBOX";
+      break;
+    // Added default case for clarity - subsystem_name is NULL anyway.
+    default:
+      subsystem_name = NULL;
     }
 
   fprintf (file, "Subsystem\t\t%08x", i->Subsystem);
@@ -1925,8 +1935,8 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
      if we don't remove this entry as well.  */
   if (! pe_data (obfd)->has_reloc_section)
     {
-      pe_data (obfd)->pe_opthdr.DataDirectory[5].VirtualAddress = 0;
-      pe_data (obfd)->pe_opthdr.DataDirectory[5].Size = 0;
+      pe_data (obfd)->pe_opthdr.DataDirectory[PE_BASE_RELOCATION_TABLE].VirtualAddress = 0;
+      pe_data (obfd)->pe_opthdr.DataDirectory[PE_BASE_RELOCATION_TABLE].Size = 0;
     }
   return TRUE;
 }
@@ -2004,7 +2014,7 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 	 message for any sections tht could not be found.  */
       if (h1->root.u.def.section != NULL
 	  && h1->root.u.def.section->output_section != NULL)
-	pe_data (abfd)->pe_opthdr.DataDirectory[1].VirtualAddress =
+	pe_data (abfd)->pe_opthdr.DataDirectory[PE_IMPORT_TABLE].VirtualAddress =
 	  (h1->root.u.def.value
 	   + h1->root.u.def.section->output_section->vma
 	   + h1->root.u.def.section->output_offset);
@@ -2021,11 +2031,11 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
       if (h1 != NULL
 	  && h1->root.u.def.section != NULL
 	  && h1->root.u.def.section->output_section != NULL)
-	pe_data (abfd)->pe_opthdr.DataDirectory[1].Size =
+	pe_data (abfd)->pe_opthdr.DataDirectory[PE_IMPORT_TABLE].Size =
 	  ((h1->root.u.def.value
 	    + h1->root.u.def.section->output_section->vma
 	    + h1->root.u.def.section->output_offset)
-	   - pe_data (abfd)->pe_opthdr.DataDirectory[1].VirtualAddress);
+	   - pe_data (abfd)->pe_opthdr.DataDirectory[PE_IMPORT_TABLE].VirtualAddress);
       else
 	{
 	  _bfd_error_handler
@@ -2041,7 +2051,7 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
       if (h1 != NULL
 	  && h1->root.u.def.section != NULL
 	  && h1->root.u.def.section->output_section != NULL)
-	pe_data (abfd)->pe_opthdr.DataDirectory[12].VirtualAddress =
+	pe_data (abfd)->pe_opthdr.DataDirectory[PE_IMPORT_ADDRESS_TABLE].VirtualAddress =
 	  (h1->root.u.def.value
 	   + h1->root.u.def.section->output_section->vma
 	   + h1->root.u.def.section->output_offset);
@@ -2058,15 +2068,15 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
       if (h1 != NULL
 	  && h1->root.u.def.section != NULL
 	  && h1->root.u.def.section->output_section != NULL)
-	pe_data (abfd)->pe_opthdr.DataDirectory[12].Size =
+	pe_data (abfd)->pe_opthdr.DataDirectory[PE_IMPORT_ADDRESS_TABLE].Size =
 	  ((h1->root.u.def.value
 	    + h1->root.u.def.section->output_section->vma
 	    + h1->root.u.def.section->output_offset)
-	   - pe_data (abfd)->pe_opthdr.DataDirectory[12].VirtualAddress);      
+	   - pe_data (abfd)->pe_opthdr.DataDirectory[PE_IMPORT_ADDRESS_TABLE].VirtualAddress);      
       else
 	{
 	  _bfd_error_handler
-	    (_("%B: unable to fill in DataDictionary[12] because .idata$6 is missing"), 
+	    (_("%B: unable to fill in DataDictionary[PE_IMPORT_ADDRESS_TABLE (12)] because .idata$6 is missing"), 
 	     abfd);
 	  result = FALSE;
 	}
@@ -2078,7 +2088,7 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
     {
       if (h1->root.u.def.section != NULL
 	  && h1->root.u.def.section->output_section != NULL)
-	pe_data (abfd)->pe_opthdr.DataDirectory[9].VirtualAddress =
+	pe_data (abfd)->pe_opthdr.DataDirectory[PE_TLS_TABLE].VirtualAddress =
 	  (h1->root.u.def.value
 	   + h1->root.u.def.section->output_section->vma
 	   + h1->root.u.def.section->output_offset
@@ -2091,7 +2101,7 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 	  result = FALSE;
 	}
 
-      pe_data (abfd)->pe_opthdr.DataDirectory[9].Size = 0x18;
+      pe_data (abfd)->pe_opthdr.DataDirectory[PE_TLS_TABLE].Size = 0x18;
     }
 
   /* If we couldn't find idata$2, we either have an excessively
