@@ -6082,13 +6082,14 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
 static void
 set_remote_cmd (char *args, int from_tty)
 {
+  help_list (remote_set_cmdlist, "set remote ", -1, gdb_stdout);
 }
 
 static void
 show_remote_cmd (char *args, int from_tty)
 {
   /* We can't just use cmd_show_list here, because we want to skip
-     the redundant "show remote Z-packet".  */
+     the redundant "show remote Z-packet" and the legacy aliases.  */
   struct cleanup *showlist_chain;
   struct cmd_list_element *list = remote_show_cmdlist;
 
@@ -6096,16 +6097,26 @@ show_remote_cmd (char *args, int from_tty)
   for (; list != NULL; list = list->next)
     if (strcmp (list->name, "Z-packet") == 0)
       continue;
-    else if (list->type == show_cmd)
+    else if (list->type == not_set_cmd)
+      /* Alias commands are exactly like the original, except they
+	 don't have the normal type.  */
+      continue;
+    else
       {
 	struct cleanup *option_chain
 	  = make_cleanup_ui_out_tuple_begin_end (uiout, "option");
 	ui_out_field_string (uiout, "name", list->name);
 	ui_out_text (uiout, ":  ");
-	do_setshow_command ((char *) NULL, from_tty, list);
+	if (list->type == show_cmd)
+	  do_setshow_command ((char *) NULL, from_tty, list);
+	else
+	  cmd_func (list, NULL, from_tty);
 	/* Close the tuple.  */
 	do_cleanups (option_chain);
       }
+
+  /* Close the tuple.  */
+  do_cleanups (showlist_chain);
 }
 
 static void

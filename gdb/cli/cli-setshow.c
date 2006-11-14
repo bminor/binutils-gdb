@@ -405,14 +405,17 @@ cmd_show_list (struct cmd_list_element *list, int from_tty, char *prefix)
 	  /* Close the tuple.  */
 	  do_cleanups (optionlist_chain);
 	}
-      if (list->type == show_cmd)
+      else
 	{
 	  struct cleanup *option_chain
 	    = make_cleanup_ui_out_tuple_begin_end (uiout, "option");
 	  ui_out_text (uiout, prefix);
 	  ui_out_field_string (uiout, "name", list->name);
 	  ui_out_text (uiout, ":  ");
-	  do_setshow_command ((char *) NULL, from_tty, list);
+	  if (list->type == show_cmd)
+	    do_setshow_command ((char *) NULL, from_tty, list);
+	  else
+	    cmd_func (list, NULL, from_tty);
           /* Close the tuple.  */
 	  do_cleanups (option_chain);
 	}

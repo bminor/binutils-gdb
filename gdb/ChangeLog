@@ -1,3 +1,10 @@
+2006-11-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c (set_remote_cmd): Call help_list.
+	(show_remote_cmd): Skip legacy aliases.  Handle non-show_cmd
+	entries.  Add missed cleanup.
+	* cli/cli-setshow.c (cmd_show_list): Handle non-show_cmd entries.
+
 2006-11-13  Paul Gilliam  <pgilliam@us.ibm.com>
 
 	* ppc-linux-tdep.c (ppc_linux_sigtramp_cache): Don't futz with

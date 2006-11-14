@@ -1,3 +1,11 @@
+2006-11-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (Remote configuration): Rewrite documentation for
+	packet configuration commands.
+	(OS Information): Adjust reference to qXfer:auxv:read.
+	(General Query Packets): Remove references to read-aux-vector-packet
+	and set remote get-thread-local-storage-address.
+
 2006-11-10  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Add new

@@ -6740,8 +6740,8 @@ identified by an integer tag; the meanings are well-known but system-specific.
 Depending on the configuration and operating system facilities,
 @value{GDBN} may be able to show you this information.  For remote
 targets, this functionality may further depend on the remote stub's
-support of the @samp{qXfer:auxv:read} packet, see @ref{Remote
-configuration, auxiliary vector}.
+support of the @samp{qXfer:auxv:read} packet, see
+@ref{qXfer auxiliary vector read}.
 
 @table @code
 @kindex info auxv
@@ -12760,133 +12760,83 @@ responses.
 @itemx set remote hardware-breakpoint-limit @var{limit}
 Restrict @value{GDBN} to using @var{limit} remote hardware breakpoint or
 watchpoints.  A limit of -1, the default, is treated as unlimited.
-
-@item set remote fetch-register-packet
-@itemx set remote set-register-packet
-@itemx set remote P-packet
-@itemx set remote p-packet
-@cindex P-packet
-@cindex fetch registers from remote targets
-@cindex set registers in remote targets
-Determine whether @value{GDBN} can set and fetch registers from the
-remote target using the @samp{P} packets.  The default depends on the
-remote stub's support of the @samp{P} packets (@value{GDBN} queries
-the stub when this packet is first required).
-
-@item show remote fetch-register-packet
-@itemx show remote set-register-packet
-@itemx show remote P-packet
-@itemx show remote p-packet
-Show the current setting of using the @samp{P} packets for setting and
-fetching registers from the remote target.
-
-@cindex binary downloads
-@cindex X-packet
-@item set remote binary-download-packet
-@itemx set remote X-packet
-Determine whether @value{GDBN} sends downloads in binary mode using
-the @samp{X} packets.  The default is on.
-
-@item show remote binary-download-packet
-@itemx show remote X-packet
-Show the current setting of using the @samp{X} packets for binary
-downloads.
-
-@item set remote read-aux-vector-packet
-@cindex auxiliary vector of remote target
-@cindex @code{auxv}, and remote targets
-Set the use of the remote protocol's @samp{qXfer:auxv:read} (target
-auxiliary vector) request.  This request is used to fetch the
-remote target's @dfn{auxiliary vector}, see @ref{OS Information,
-Auxiliary Vector}.  The default setting depends on the remote stub's
-support of this request (@value{GDBN} queries the stub when this
-request is first required).  @xref{General Query Packets, qXfer}, for
-more information about this request.
-
-@item show remote read-aux-vector-packet
-Show the current setting of use of the @samp{qXfer:auxv:read} request.
-
-@item set remote symbol-lookup-packet
-@cindex remote symbol lookup request
-Set the use of the remote protocol's @samp{qSymbol} (target symbol
-lookup) request.  This request is used to communicate symbol
-information to the remote target, e.g., whenever a new shared library
-is loaded by the remote (@pxref{Files, shared libraries}).  The
-default setting depends on the remote stub's support of this request
-(@value{GDBN} queries the stub when this request is first required).
-@xref{General Query Packets, qSymbol}, for more information about this
-request.
-
-@item show remote symbol-lookup-packet
-Show the current setting of use of the @samp{qSymbol} request.
-
-@item set remote verbose-resume-packet
-@cindex resume remote target
-@cindex signal thread, and remote targets
-@cindex single-step thread, and remote targets
-@cindex thread-specific operations on remote targets
-Set the use of the remote protocol's @samp{vCont} (descriptive resume)
-request.  This request is used to resume specific threads in the
-remote target, and to single-step or signal them.  The default setting
-depends on the remote stub's support of this request (@value{GDBN}
-queries the stub when this request is first required).  This setting
-affects debugging of multithreaded programs: if @samp{vCont} cannot be
-used, @value{GDBN} might be unable to single-step a specific thread,
-especially under @code{set scheduler-locking off}; it is also
-impossible to pause a specific thread.  @xref{Packets, vCont}, for
-more details.
-
-@item show remote verbose-resume-packet
-Show the current setting of use of the @samp{vCont} request
-
-@item set remote software-breakpoint-packet
-@itemx set remote hardware-breakpoint-packet
-@itemx set remote write-watchpoint-packet
-@itemx set remote read-watchpoint-packet
-@itemx set remote access-watchpoint-packet
-@itemx set remote Z-packet
-@cindex Z-packet
-@cindex remote hardware breakpoints and watchpoints
-These commands enable or disable the use of @samp{Z} packets for
-setting breakpoints and watchpoints in the remote target.  The default
-depends on the remote stub's support of the @samp{Z} packets
-(@value{GDBN} queries the stub when each packet is first required).
-The command @code{set remote Z-packet}, kept for back-compatibility,
-turns on or off all the features that require the use of @samp{Z}
-packets.
-
-@item show remote software-breakpoint-packet
-@itemx show remote hardware-breakpoint-packet
-@itemx show remote write-watchpoint-packet
-@itemx show remote read-watchpoint-packet
-@itemx show remote access-watchpoint-packet
-@itemx show remote Z-packet
-Show the current setting of @samp{Z} packets usage.
-
-@item set remote get-thread-local-storage-address
-@kindex set remote get-thread-local-storage-address
-@cindex thread local storage of remote targets
-This command enables or disables the use of the @samp{qGetTLSAddr}
-(Get Thread Local Storage Address) request packet.  The default
-depends on whether the remote stub supports this request.
-@xref{General Query Packets, qGetTLSAddr}, for more details about this
-packet.
-
-@item show remote get-thread-local-storage-address
-@kindex show remote get-thread-local-storage-address
-Show the current setting of @samp{qGetTLSAddr} packet usage.
-
-@item set remote supported-packets
-@kindex set remote supported-packets
-@cindex query supported packets of remote targets
-This command enables or disables the use of the @samp{qSupported}
-request packet.  @xref{General Query Packets, qSupported}, for more
-details about this packet.  The default is to use @samp{qSupported}.
-
-@item show remote supported-packets
-@kindex show remote supported-packets
-Show the current setting of @samp{qSupported} packet usage.
 @end table
+
+@cindex remote packets, enabling and disabling
+The @value{GDBN} remote protocol autodetects the packets supported by
+your debugging stub.  If you need to override the autodetection, you
+can use these commands to enable or disable individual packets.  Each
+packet can be set to @samp{on} (the remote target supports this
+packet), @samp{off} (the remote target does not support this packet),
+or @samp{auto} (detect remote target support for this packet).  They
+all default to @samp{auto}.  For more information about each packet,
+see @ref{Remote Protocol}.
+
+During normal use, you should not have to use any of these commands.
+If you do, that may be a bug in your remote debugging stub, or a bug
+in @value{GDBN}.  You may want to report the problem to the
+@value{GDBN} developers.
+
+The available settings are:
+
+@multitable @columnfractions 0.3 0.2 0.35
+@item Command Name
+@tab Remote Packet
+@tab Related Features
+
+@item @code{fetch-register-packet}
+@tab @code{p}
+@tab @code{info registers}
+
+@item @code{set-register-packet}
+@tab @code{P}
+@tab @code{set}
+
+@item @code{binary-download-packet}
+@tab @code{X}
+@tab @code{load}, @code{set}
+
+@item @code{read-aux-vector-packet}
+@tab @code{qXfer:auxv:read}
+@tab @code{info auxv}
+
+@item @code{symbol-lookup-packet}
+@tab @code{qSymbol}
+@tab Detecting multiple threads
+
+@item @code{verbose-resume-packet}
+@tab @code{vCont}
+@tab Stepping or resuming multiple threads
+
+@item @code{software-breakpoint-packet}
+@tab @code{Z0}
+@tab @code{break}
+
+@item @code{hardware-breakpoint-packet}
+@tab @code{Z1}
+@tab @code{hbreak}
+
+@item @code{write-watchpoint-packet}
+@tab @code{Z2}
+@tab @code{watch}
+
+@item @code{read-watchpoint-packet}
+@tab @code{Z3}
+@tab @code{rwatch}
+
+@item @code{access-watchpoint-packet}
+@tab @code{Z4}
+@tab @code{awatch}
+
+@item @code{get-thread-local-storage-address-packet}
+@tab @code{qGetTLSAddr}
+@tab Displaying @code{__thread} variables
+
+@item @code{supported-packets}
+@tab @code{qSupported}
+@tab Remote communications parameters
+
+@end multitable
 
 @node remote stub
 @section Implementing a remote stub
@@ -23604,10 +23554,6 @@ An error occurred.  @var{nn} are hex digits.
 An empty reply indicates that @samp{qGetTLSAddr} is not supported by the stub.
 @end table
 
-Use of this request packet is controlled by the @code{set remote
-get-thread-local-storage-address} command (@pxref{Remote
-configuration, set remote get-thread-local-storage-address}).
-
 @item qL @var{startflag} @var{threadcount} @var{nextthread}
 Obtain thread information from RTOS.  Where: @var{startflag} (one hex
 digit) is one to indicate the first query and zero to indicate a
@@ -23908,8 +23854,7 @@ formats, listed below.
 @item qXfer:auxv:read::@var{offset},@var{length}
 @anchor{qXfer auxiliary vector read}
 Access the target's @dfn{auxiliary vector}.  @xref{OS Information,
-auxiliary vector}, and @ref{Remote configuration,
-read-aux-vector-packet}.  Note @var{annex} must be empty.
+auxiliary vector}.  Note @var{annex} must be empty.
 
 This packet is not probed by default; the remote stub must request it,
 by suppling an appropriate @samp{qSupported} response (@pxref{qSupported}).
