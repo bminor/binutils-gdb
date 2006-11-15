@@ -1150,7 +1150,7 @@ elf_i386_check_relocs (bfd *abfd,
 	       && (sec->flags & SEC_ALLOC) != 0
 	       && (r_type != R_386_PC32
 		   || (h != NULL
-		       && (! SYMBOLIC_BIND (info, h)
+		       && (! info->symbolic
 			   || h->root.type == bfd_link_hash_defweak
 			   || !h->def_regular))))
 	      || (ELIMINATE_COPY_RELOCS
@@ -1177,7 +1177,7 @@ elf_i386_check_relocs (bfd *abfd,
 		  if (name == NULL)
 		    return FALSE;
 
-		  if (! CONST_STRNEQ (name, ".rel")
+		  if (strncmp (name, ".rel", 4) != 0
 		      || strcmp (bfd_get_section_name (abfd, sec),
 				 name + 4) != 0)
 		    {
@@ -1279,20 +1279,38 @@ elf_i386_check_relocs (bfd *abfd,
 
 static asection *
 elf_i386_gc_mark_hook (asection *sec,
-		       struct bfd_link_info *info,
+		       struct bfd_link_info *info ATTRIBUTE_UNUSED,
 		       Elf_Internal_Rela *rel,
 		       struct elf_link_hash_entry *h,
 		       Elf_Internal_Sym *sym)
 {
   if (h != NULL)
-    switch (ELF32_R_TYPE (rel->r_info))
-      {
-      case R_386_GNU_VTINHERIT:
-      case R_386_GNU_VTENTRY:
-	return NULL;
-      }
+    {
+      switch (ELF32_R_TYPE (rel->r_info))
+	{
+	case R_386_GNU_VTINHERIT:
+	case R_386_GNU_VTENTRY:
+	  break;
 
-  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+	default:
+	  switch (h->root.type)
+	    {
+	    case bfd_link_hash_defined:
+	    case bfd_link_hash_defweak:
+	      return h->root.u.def.section;
+
+	    case bfd_link_hash_common:
+	      return h->root.u.c.p->section;
+
+	    default:
+	      break;
+	    }
+	}
+    }
+  else
+    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
+
+  return NULL;
 }
 
 /* Update the got entry reference counts for the section being removed.  */
@@ -2011,7 +2029,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  if (htab->elf.hplt != NULL)
 	    strip_section = FALSE;
 	}
-      else if (CONST_STRNEQ (bfd_get_section_name (dynobj, s), ".rel"))
+      else if (strncmp (bfd_get_section_name (dynobj, s), ".rel", 4) == 0)
 	{
 	  if (s->size != 0 && s != htab->srelplt && s != htab->srelplt2)
 	    relocs = TRUE;
@@ -2395,12 +2413,17 @@ elf_i386_relocate_section (bfd *output_bfd,
 
       if (r_symndx == 0)
 	{
-	  /* r_symndx will be zero only for relocs against symbols from
-	     removed linkonce sections, or sections discarded by a linker
-	     script.  For these relocs, we just want the section contents
-	     zeroed.  Avoid any special processing.  */
-	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
-	  continue;
+	/* r_symndx will be zero only for relocs against symbols from
+	   removed linkonce sections, or sections discarded by a linker
+	   script.  For these relocs, we just want the section contents
+	   zeroed.  Avoid any special processing in the switch below.  */
+	  r_type = R_386_NONE;
+
+	  relocation = 0;
+	  if (howto->pc_relative)
+	    relocation = (input_section->output_section->vma
+			  + input_section->output_offset
+			  + rel->r_offset);
 	}
 
       switch (r_type)
@@ -2606,7 +2629,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		       && h->dynindx != -1
 		       && (r_type == R_386_PC32
 			   || !info->shared
-			   || !SYMBOLIC_BIND (info, h)
+			   || !info->symbolic
 			   || !h->def_regular))
 		outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
 	      else
@@ -3867,8 +3890,6 @@ elf_i386_hash_symbol (struct elf_link_hash_entry *h)
 #define elf_backend_relocate_section	      elf_i386_relocate_section
 #define elf_backend_size_dynamic_sections     elf_i386_size_dynamic_sections
 #define elf_backend_always_size_sections      elf_i386_always_size_sections
-#define elf_backend_omit_section_dynsym \
-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
 #define elf_backend_plt_sym_val		      elf_i386_plt_sym_val
 #define elf_backend_hash_symbol		      elf_i386_hash_symbol
 

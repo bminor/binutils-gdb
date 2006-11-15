@@ -389,9 +389,7 @@ struct dwarf2_per_cu_data
      it.  */
   htab_t type_hash;
 
-  /* The partial symbol table associated with this compilation unit,
-     or NULL for partial units (which do not have an associated
-     symtab).  */
+  /* The partial symbol table associated with this compilation unit.  */
   struct partial_symtab *psymtab;
 };
 
@@ -1068,8 +1066,7 @@ static void reset_die_and_siblings_types (struct die_info *,
 
 static void create_all_comp_units (struct objfile *);
 
-static struct dwarf2_cu *load_full_comp_unit (struct dwarf2_per_cu_data *,
-					      struct objfile *);
+static struct dwarf2_cu *load_full_comp_unit (struct dwarf2_per_cu_data *);
 
 static void process_full_comp_unit (struct dwarf2_per_cu_data *);
 
@@ -1472,14 +1469,6 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
       abbrev = peek_die_abbrev (info_ptr, &bytes_read, &cu);
       info_ptr = read_partial_die (&comp_unit_die, abbrev, bytes_read,
 				   abfd, info_ptr, &cu);
-
-      if (comp_unit_die.tag == DW_TAG_partial_unit)
-	{
-	  info_ptr = (beg_of_comp_unit + cu.header.length
-		      + cu.header.initial_length_size);
-	  do_cleanups (back_to_inner);
-	  continue;
-	}
 
       /* Set the language we're debugging */
       set_cu_language (comp_unit_die.language, &cu);
@@ -2397,14 +2386,14 @@ process_queue (struct objfile *objfile)
     {
       /* Read in this compilation unit.  This may add new items to
 	 the end of the queue.  */
-      load_full_comp_unit (item->per_cu, objfile);
+      load_full_comp_unit (item->per_cu);
 
       item->per_cu->cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
       dwarf2_per_objfile->read_in_chain = item->per_cu;
 
       /* If this compilation unit has already had full symbols created,
 	 reset the TYPE fields in each DIE.  */
-      if (item->per_cu->type_hash)
+      if (item->per_cu->psymtab->readin)
 	reset_die_and_siblings_types (item->per_cu->cu->dies,
 				      item->per_cu->cu);
     }
@@ -2413,7 +2402,7 @@ process_queue (struct objfile *objfile)
      them, one at a time, removing from the queue as we finish.  */
   for (item = dwarf2_queue; item != NULL; dwarf2_queue = item = next_item)
     {
-      if (item->per_cu->psymtab && !item->per_cu->psymtab->readin)
+      if (!item->per_cu->psymtab->readin)
 	process_full_comp_unit (item->per_cu);
 
       item->per_cu->queued = 0;
@@ -2506,9 +2495,10 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
 /* Load the DIEs associated with PST and PER_CU into memory.  */
 
 static struct dwarf2_cu *
-load_full_comp_unit (struct dwarf2_per_cu_data *per_cu, struct objfile *objfile)
+load_full_comp_unit (struct dwarf2_per_cu_data *per_cu)
 {
-  bfd *abfd = objfile->obfd;
+  struct partial_symtab *pst = per_cu->psymtab;
+  bfd *abfd = pst->objfile->obfd;
   struct dwarf2_cu *cu;
   unsigned long offset;
   gdb_byte *info_ptr;
@@ -2527,7 +2517,7 @@ load_full_comp_unit (struct dwarf2_per_cu_data *per_cu, struct objfile *objfile)
   /* If an error occurs while loading, release our storage.  */
   free_cu_cleanup = make_cleanup (free_one_comp_unit, cu);
 
-  cu->objfile = objfile;
+  cu->objfile = pst->objfile;
 
   /* read in the comp_unit header  */
   info_ptr = read_comp_unit_head (&cu->header, info_ptr, abfd);
@@ -4292,10 +4282,6 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
   if (attr)
     TYPE_FLAGS (type) |= TYPE_FLAG_VECTOR;
 
-  attr = dwarf2_attr (die, DW_AT_name, cu);
-  if (attr && DW_STRING (attr))
-    TYPE_NAME (type) = DW_STRING (attr);
-  
   do_cleanups (back_to);
 
   /* Install the type in the die. */
@@ -6635,7 +6621,6 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
   CORE_ADDR baseaddr;
   struct objfile *objfile = cu->objfile;
   const int decode_for_pst_p = (pst != NULL);
-  struct subfile *last_subfile = NULL;
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
@@ -6685,12 +6670,6 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
               lh->file_names[file - 1].included_p = 1;
               if (!decode_for_pst_p)
                 {
-		  if (last_subfile != current_subfile)
-		    {
-		      if (last_subfile)
-			record_line (last_subfile, 0, address);
-		      last_subfile = current_subfile;
-		    }
 	          /* Append row to matrix using current values.  */
 	          record_line (current_subfile, line, 
 	                       check_cu_functions (address, cu));
@@ -6745,16 +6724,8 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 	    case DW_LNS_copy:
               lh->file_names[file - 1].included_p = 1;
               if (!decode_for_pst_p)
-		{
-		  if (last_subfile != current_subfile)
-		    {
-		      if (last_subfile)
-			record_line (last_subfile, 0, address);
-		      last_subfile = current_subfile;
-		    }
-		  record_line (current_subfile, line, 
-			       check_cu_functions (address, cu));
-		}
+	        record_line (current_subfile, line, 
+	                     check_cu_functions (address, cu));
 	      basic_block = 0;
 	      break;
 	    case DW_LNS_advance_pc:
@@ -6781,10 +6752,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
                   dir = lh->include_dirs[fe->dir_index - 1];
 
                 if (!decode_for_pst_p)
-		  {
-		    last_subfile = current_subfile;
-		    dwarf2_start_subfile (fe->name, dir, comp_dir);
-		  }
+                  dwarf2_start_subfile (fe->name, dir, comp_dir);
               }
 	      break;
 	    case DW_LNS_set_column:

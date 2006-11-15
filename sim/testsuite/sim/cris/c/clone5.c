@@ -11,7 +11,6 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <errno.h>
 
 int pip[2];
 
@@ -27,9 +26,7 @@ main (void)
   int retcode;
   long stack[16384];
 
-  retcode = clone (process, (char *) stack + sizeof (stack) - 64, 0, "cba");
-  if (retcode == -1 && errno == ENOSYS)
-    printf ("ENOSYS\n");
+  clone (process, (char *) stack + sizeof (stack) - 64, 0, "cba");
   printf ("xyzzy\n");
   return 0;
 }

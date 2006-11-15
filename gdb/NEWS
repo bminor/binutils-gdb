@@ -3,10 +3,6 @@
 
 *** Changes since GDB 6.5
 
-* New targets
-
-Xtensa				xtensa-elf
-
 * GDB can now be configured as a cross-debugger targeting native Windows
 (mingw32) or Cygwin.  It can communicate with a remote debugging stub
 running on a Windows system over TCP/IP to debug Windows programs.
@@ -17,9 +13,6 @@ supported.
 
 * The "set trust-readonly-sections" command works again.  This command was
 broken in GDB 6.3, 6.4, and 6.5.
-
-* Support for GNU/Linux Thread Local Storage (TLS, per-thread variables) no
-longer requires symbolic debug information (e.g. DWARF-2).
 
 * New commands
 

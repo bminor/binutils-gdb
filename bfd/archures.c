@@ -136,8 +136,6 @@ DESCRIPTION
 .{* Nonzero if MACH is a 64 bit sparc architecture.  *}
 .#define bfd_mach_sparc_64bit_p(mach) \
 .  ((mach) >= bfd_mach_sparc_v9 && (mach) != bfd_mach_sparc_v8plusb)
-.  bfd_arch_spu,       {* PowerPC SPU *}
-.#define bfd_mach_spu		256 
 .  bfd_arch_mips,      {* MIPS Rxxxx *}
 .#define bfd_mach_mips3000		3000
 .#define bfd_mach_mips3900		3900
@@ -275,7 +273,6 @@ DESCRIPTION
 .#define bfd_mach_arm_XScale	10
 .#define bfd_mach_arm_ep9312	11
 .#define bfd_mach_arm_iWMMXt	12
-.#define bfd_mach_arm_iWMMXt2	13
 .  bfd_arch_ns32k,     {* National Semiconductors ns32000 *}
 .  bfd_arch_w65,       {* WDC 65816 *}
 .  bfd_arch_tic30,     {* Texas Instruments TMS320C30 *}
@@ -351,7 +348,6 @@ DESCRIPTION
 .  bfd_arch_s390,      {* IBM s390 *}
 .#define bfd_mach_s390_31       31
 .#define bfd_mach_s390_64       64
-.  bfd_arch_score,     {* Sunplus score *} 
 .  bfd_arch_openrisc,  {* OpenRISC *}
 .  bfd_arch_mmix,      {* Donald Knuth's educational processor.  *}
 .  bfd_arch_xstormy16,
@@ -470,10 +466,8 @@ extern const bfd_arch_info_type bfd_powerpc_archs[];
 #define bfd_powerpc_arch bfd_powerpc_archs[0]
 extern const bfd_arch_info_type bfd_rs6000_arch;
 extern const bfd_arch_info_type bfd_s390_arch;
-extern const bfd_arch_info_type bfd_score_arch;
 extern const bfd_arch_info_type bfd_sh_arch;
 extern const bfd_arch_info_type bfd_sparc_arch;
-extern const bfd_arch_info_type bfd_spu_arch;
 extern const bfd_arch_info_type bfd_tic30_arch;
 extern const bfd_arch_info_type bfd_tic4x_arch;
 extern const bfd_arch_info_type bfd_tic54x_arch;
@@ -537,10 +531,8 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_powerpc_arch,
     &bfd_rs6000_arch,
     &bfd_s390_arch,
-    &bfd_score_arch,
     &bfd_sh_arch,
     &bfd_sparc_arch,
-    &bfd_spu_arch,
     &bfd_tic30_arch,
     &bfd_tic4x_arch,
     &bfd_tic54x_arch,

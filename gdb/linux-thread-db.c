@@ -599,10 +599,6 @@ check_for_thread_db (void)
   if (!target_has_execution)
     return;
 
-  /* Don't attempt to use thread_db for remote targets.  */
-  if (!target_can_run (&current_target))
-    return;
-
   /* Initialize the structure that identifies the child process.  */
   proc_handle.pid = GET_PID (inferior_ptid);
 
@@ -876,8 +872,7 @@ thread_db_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
        post-processing and bail out early.  */
     return ptid;
 
-  if (ourstatus->kind == TARGET_WAITKIND_EXITED
-    || ourstatus->kind == TARGET_WAITKIND_SIGNALLED)
+  if (ourstatus->kind == TARGET_WAITKIND_EXITED)
     return pid_to_ptid (-1);
 
   if (ourstatus->kind == TARGET_WAITKIND_EXECD)

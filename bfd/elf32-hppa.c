@@ -1588,20 +1588,38 @@ elf32_hppa_check_relocs (bfd *abfd,
 
 static asection *
 elf32_hppa_gc_mark_hook (asection *sec,
-			 struct bfd_link_info *info,
+			 struct bfd_link_info *info ATTRIBUTE_UNUSED,
 			 Elf_Internal_Rela *rela,
 			 struct elf_link_hash_entry *hh,
 			 Elf_Internal_Sym *sym)
 {
   if (hh != NULL)
-    switch ((unsigned int) ELF32_R_TYPE (rela->r_info))
-      {
-      case R_PARISC_GNU_VTINHERIT:
-      case R_PARISC_GNU_VTENTRY:
-	return NULL;
-      }
+    {
+      switch ((unsigned int) ELF32_R_TYPE (rela->r_info))
+	{
+	case R_PARISC_GNU_VTINHERIT:
+	case R_PARISC_GNU_VTENTRY:
+	  break;
 
-  return _bfd_elf_gc_mark_hook (sec, info, rela, hh, sym);
+	default:
+	  switch (hh->root.type)
+	    {
+	    case bfd_link_hash_defined:
+	    case bfd_link_hash_defweak:
+	      return hh->root.u.def.section;
+
+	    case bfd_link_hash_common:
+	      return hh->root.u.c.p->section;
+
+	    default:
+	      break;
+	    }
+	}
+    }
+  else
+    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
+
+  return NULL;
 }
 
 /* Update the got and plt entry reference counts for the section being
@@ -2424,7 +2442,7 @@ elf32_hppa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       else if (sec == htab->sgot
 	       || sec == htab->sdynbss)
 	;
-      else if (CONST_STRNEQ (bfd_get_section_name (dynobj, sec), ".rela"))
+      else if (strncmp (bfd_get_section_name (dynobj, sec), ".rela", 5) == 0)
 	{
 	  if (sec->size != 0)
 	    {
@@ -3942,14 +3960,8 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 	  /* r_symndx will be zero only for relocs against symbols
 	     from removed linkonce sections, or sections discarded by
 	     a linker script.  */
-	  if (r_symndx == 0)
-	    {
-	      _bfd_clear_contents (elf_hppa_howto_table + r_type, input_bfd,
-				   contents + rela->r_offset);
-	      break;
-	    }
-
-	  if ((input_section->flags & SEC_ALLOC) == 0)
+	  if (r_symndx == 0
+	      || (input_section->flags & SEC_ALLOC) == 0)
 	    break;
 
 	  /* The reloc types handled here and this conditional
@@ -4030,22 +4042,17 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 		      && sym_sec->output_section != NULL
 		      && ! bfd_is_abs_section (sym_sec))
 		    {
-		      asection *osec;
+		      /* Skip this relocation if the output section has
+			 been discarded.  */
+		      if (bfd_is_abs_section (sym_sec->output_section))
+			break;
 
-		      osec = sym_sec->output_section;
-		      indx = elf_section_data (osec)->dynindx;
-		      if (indx == 0)
-			{
-			  osec = htab->etab.text_index_section;
-			  indx = elf_section_data (osec)->dynindx;
-			}
-		      BFD_ASSERT (indx != 0);
-
+		      indx = elf_section_data (sym_sec->output_section)->dynindx;
 		      /* We are turning this relocation into one
 			 against a section symbol, so subtract out the
 			 output section's address but not the offset
 			 of the input section in the output section.  */
-		      outrel.r_addend -= osec->vma;
+		      outrel.r_addend -= sym_sec->output_section->vma;
 		    }
 
 		  outrel.r_info = ELF32_R_INFO (indx, r_type);
@@ -4653,7 +4660,6 @@ elf32_hppa_elf_get_symbol_type (Elf_Internal_Sym *elf_sym, int type)
 #define elf_backend_finish_dynamic_symbol    elf32_hppa_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections  elf32_hppa_finish_dynamic_sections
 #define elf_backend_size_dynamic_sections    elf32_hppa_size_dynamic_sections
-#define elf_backend_init_index_section	     _bfd_elf_init_1_index_section
 #define elf_backend_gc_mark_hook	     elf32_hppa_gc_mark_hook
 #define elf_backend_gc_sweep_hook	     elf32_hppa_gc_sweep_hook
 #define elf_backend_grok_prstatus	     elf32_hppa_grok_prstatus

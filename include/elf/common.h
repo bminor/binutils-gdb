@@ -118,7 +118,6 @@
 #define EM_PPC		 20	/* PowerPC */
 #define EM_PPC64	 21	/* 64-bit PowerPC */
 #define EM_S390		 22	/* IBM S/390 */
-#define EM_SPU		 23	/* Sony/Toshiba/IBM SPU */
 
 #define EM_V800		 36	/* NEC V800 series */
 #define EM_FR20		 37	/* Fujitsu FR20 */
@@ -186,7 +185,6 @@
 #define EM_BLACKFIN	106	/* ADI Blackfin */
 #define EM_ALTERA_NIOS2	113	/* Altera Nios II soft-core processor */
 #define EM_CRX		114	/* National Semiconductor CRX */
-#define EM_SCORE        135     /* Sunplus Score */ 
 
 /* If it is necessary to assign new unofficial EM_* values, please pick large
    random numbers (0x8523, 0xa7f2, etc.) to minimize the chances of collision

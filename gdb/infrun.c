@@ -2,9 +2,8 @@
    process.
 
    Copyright (C) 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006
-   Free Software Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -833,7 +832,7 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
 /* Start remote-debugging of a machine over a serial link.  */
 
 void
-start_remote (int from_tty)
+start_remote (void)
 {
   init_thread_list ();
   init_wait_for_inferior ();
@@ -855,12 +854,6 @@ start_remote (int from_tty)
      is currently running and GDB state should be set to the same as
      for an async run. */
   wait_for_inferior ();
-
-  /* Now that the inferior has stopped, do any bookkeeping like
-     loading shared libraries.  We want to do this before normal_stop,
-     so that the displayed frame is up to date.  */
-  post_create_inferior (&current_target, from_tty);
-
   normal_stop ();
 }
 
@@ -1418,12 +1411,6 @@ handle_inferior_event (struct execution_control_state *ecs)
       pending_follow.fork_event.parent_pid = PIDGET (ecs->ptid);
       pending_follow.fork_event.child_pid = ecs->ws.value.related_pid;
 
-      if (!ptid_equal (ecs->ptid, inferior_ptid))
-	{
-	  context_switch (ecs);
-	  flush_cached_frames ();
-	}
-
       stop_pc = read_pc ();
 
       stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid, 0);
@@ -1481,12 +1468,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 
       ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
       inferior_ptid = ecs->saved_inferior_ptid;
-
-      if (!ptid_equal (ecs->ptid, inferior_ptid))
-	{
-	  context_switch (ecs);
-	  flush_cached_frames ();
-	}
 
       /* If no catchpoint triggered for this, then keep going.  */
       if (ecs->random_signal)

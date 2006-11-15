@@ -37,6 +37,12 @@ static struct bfd_link_hash_table *elf_m68k_link_hash_table_create
 static bfd_boolean elf_m68k_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
+static asection *elf_m68k_gc_mark_hook
+  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
+	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
+static bfd_boolean elf_m68k_gc_sweep_hook
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
+	   const Elf_Internal_Rela *));
 static bfd_boolean elf_m68k_adjust_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 static bfd_boolean elf_m68k_size_dynamic_sections
@@ -858,7 +864,7 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 		  if (name == NULL)
 		    return FALSE;
 
-		  BFD_ASSERT (CONST_STRNEQ (name, ".rela")
+		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
 			      && strcmp (bfd_get_section_name (abfd, sec),
 					 name + 5) == 0);
 
@@ -974,30 +980,50 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
    relocation.  */
 
 static asection *
-elf_m68k_gc_mark_hook (asection *sec,
-		       struct bfd_link_info *info,
-		       Elf_Internal_Rela *rel,
-		       struct elf_link_hash_entry *h,
-		       Elf_Internal_Sym *sym)
+elf_m68k_gc_mark_hook (sec, info, rel, h, sym)
+     asection *sec;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     Elf_Internal_Rela *rel;
+     struct elf_link_hash_entry *h;
+     Elf_Internal_Sym *sym;
 {
   if (h != NULL)
-    switch (ELF32_R_TYPE (rel->r_info))
-      {
-      case R_68K_GNU_VTINHERIT:
-      case R_68K_GNU_VTENTRY:
-	return NULL;
-      }
+    {
+      switch (ELF32_R_TYPE (rel->r_info))
+	{
+	case R_68K_GNU_VTINHERIT:
+	case R_68K_GNU_VTENTRY:
+	  break;
 
-  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+	default:
+	  switch (h->root.type)
+	    {
+	    default:
+	      break;
+
+	    case bfd_link_hash_defined:
+	    case bfd_link_hash_defweak:
+	      return h->root.u.def.section;
+
+	    case bfd_link_hash_common:
+	      return h->root.u.c.p->section;
+	    }
+	}
+    }
+  else
+    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
+
+  return NULL;
 }
 
 /* Update the got entry reference counts for the section being removed.  */
 
 static bfd_boolean
-elf_m68k_gc_sweep_hook (bfd *abfd,
-			struct bfd_link_info *info,
-			asection *sec,
-			const Elf_Internal_Rela *relocs)
+elf_m68k_gc_sweep_hook (abfd, info, sec, relocs)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     asection *sec;
+     const Elf_Internal_Rela *relocs;
 {
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
@@ -1376,7 +1402,7 @@ elf_m68k_size_dynamic_sections (output_bfd, info)
 	  /* Remember whether there is a PLT.  */
 	  plt = s->size != 0;
 	}
-      else if (CONST_STRNEQ (name, ".rela"))
+      else if (strncmp (name, ".rela", 5) == 0)
 	{
 	  if (s->size != 0)
 	    {
@@ -1387,7 +1413,7 @@ elf_m68k_size_dynamic_sections (output_bfd, info)
 	      s->reloc_count = 0;
 	    }
 	}
-      else if (! CONST_STRNEQ (name, ".got")
+      else if (strncmp (name, ".got", 4) != 0
 	       && strcmp (name, ".dynbss") != 0)
 	{
 	  /* It's not one of our sections, so don't allocate space.  */
@@ -1833,12 +1859,11 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 	      else
 		{
 		  /* This symbol is local, or marked to become local.  */
-		  outrel.r_addend = relocation + rel->r_addend;
-
 		  if (r_type == R_68K_32)
 		    {
 		      relocate = TRUE;
 		      outrel.r_info = ELF32_R_INFO (0, R_68K_RELATIVE);
+		      outrel.r_addend = relocation + rel->r_addend;
 		    }
 		  else
 		    {
@@ -1855,24 +1880,13 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 			{
 			  asection *osec;
 
-			  /* We are turning this relocation into one
-			     against a section symbol.  It would be
-			     proper to subtract the symbol's value,
-			     osec->vma, from the emitted reloc addend,
-			     but ld.so expects buggy relocs.  */
 			  osec = sec->output_section;
 			  indx = elf_section_data (osec)->dynindx;
-			  if (indx == 0)
-			    {
-			      struct elf_link_hash_table *htab;
-			      htab = elf_hash_table (info);
-			      osec = htab->text_index_section;
-			      indx = elf_section_data (osec)->dynindx;
-			    }
-			  BFD_ASSERT (indx != 0);
+			  BFD_ASSERT (indx > 0);
 			}
 
 		      outrel.r_info = ELF32_R_INFO (indx, r_type);
+		      outrel.r_addend = relocation + rel->r_addend;
 		    }
 		}
 
@@ -2430,7 +2444,6 @@ elf_m68k_plt_sym_val (bfd_vma i, const asection *plt,
 					elf_m68k_adjust_dynamic_symbol
 #define elf_backend_size_dynamic_sections \
 					elf_m68k_size_dynamic_sections
-#define elf_backend_init_index_section	_bfd_elf_init_1_index_section
 #define elf_backend_relocate_section	elf_m68k_relocate_section
 #define elf_backend_finish_dynamic_symbol \
 					elf_m68k_finish_dynamic_symbol

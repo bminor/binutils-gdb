@@ -1709,7 +1709,7 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		  if (name == NULL)
 		    return FALSE;
 
-		  BFD_ASSERT (CONST_STRNEQ (name, ".rela")
+		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
 			      && strcmp (bfd_get_section_name (input_bfd,
 							       input_section),
 					 name + 5) == 0);
@@ -2366,20 +2366,53 @@ sh_elf64_merge_private_data (bfd *ibfd, bfd *obfd)
 
 static asection *
 sh_elf64_gc_mark_hook (asection *sec,
-		       struct bfd_link_info *info,
+		       struct bfd_link_info *info ATTRIBUTE_UNUSED,
 		       Elf_Internal_Rela *rel,
 		       struct elf_link_hash_entry *h,
 		       Elf_Internal_Sym *sym)
 {
   if (h != NULL)
-    switch (ELF64_R_TYPE (rel->r_info))
-      {
-      case R_SH_GNU_VTINHERIT:
-      case R_SH_GNU_VTENTRY:
-	return NULL;
-      }
+    {
+      switch (ELF64_R_TYPE (rel->r_info))
+	{
+	case R_SH_GNU_VTINHERIT:
+	case R_SH_GNU_VTENTRY:
+	  break;
 
-  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+	default:
+	  while (h->root.type == bfd_link_hash_indirect
+		 && h->root.u.i.link)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	  switch (h->root.type)
+	    {
+	    case bfd_link_hash_defined:
+	    case bfd_link_hash_defweak:
+	      return h->root.u.def.section;
+
+	    case bfd_link_hash_common:
+	      return h->root.u.c.p->section;
+
+	    default:
+	      break;
+	    }
+	}
+    }
+  else
+    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
+
+  return NULL;
+}
+
+/* Update the got entry reference counts for the section being removed.  */
+
+static bfd_boolean
+sh_elf64_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
+			struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			asection *sec ATTRIBUTE_UNUSED,
+			const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED)
+{
+  /* No got and plt entries for 64-bit SH at present.  */
+  return TRUE;
 }
 
 /* Look through the relocs for a section during the first phase.
@@ -2698,7 +2731,7 @@ sh_elf64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  if (name == NULL)
 		    return FALSE;
 
-		  BFD_ASSERT (CONST_STRNEQ (name, ".rela")
+		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
 			      && strcmp (bfd_get_section_name (abfd, sec),
 					 name + 5) == 0);
 
@@ -3558,7 +3591,7 @@ sh64_elf64_size_dynamic_sections (bfd *output_bfd,
 	  /* Remember whether there is a PLT.  */
 	  plt = s->size != 0;
 	}
-      else if (CONST_STRNEQ (name, ".rela"))
+      else if (strncmp (name, ".rela", 5) == 0)
 	{
 	  if (s->size != 0)
 	    {
@@ -3591,7 +3624,7 @@ sh64_elf64_size_dynamic_sections (bfd *output_bfd,
 	      s->reloc_count = 0;
 	    }
 	}
-      else if (! CONST_STRNEQ (name, ".got")
+      else if (strncmp (name, ".got", 4) != 0
 	       && strcmp (name, ".dynbss") != 0)
 	{
 	  /* It's not one of our sections, so don't allocate space.  */
@@ -4020,9 +4053,9 @@ static void
 sh64_elf64_merge_symbol_attribute (struct elf_link_hash_entry *h,
 				   const Elf_Internal_Sym *isym,
 				   bfd_boolean definition,
-				   bfd_boolean dynamic ATTRIBUTE_UNUSED)
+				   bfd_boolean dynamic)
 {
-  if ((isym->st_other & ~ELF_ST_VISIBILITY (-1)) != 0)
+  if (isym->st_other != 0 && dynamic)
     {
       unsigned char other;
 
@@ -4037,8 +4070,8 @@ sh64_elf64_merge_symbol_attribute (struct elf_link_hash_entry *h,
 
 static const struct bfd_elf_special_section sh64_elf64_special_sections[]=
 {
-  { STRING_COMMA_LEN (".cranges"), 0, SHT_PROGBITS, 0 },
-  { NULL,                       0, 0, 0,            0 }
+  { ".cranges", 8, 0, SHT_PROGBITS, 0 },
+  { NULL,       0, 0, 0,            0 }
 };
 
 #define TARGET_BIG_SYM		bfd_elf64_sh64_vec
@@ -4069,6 +4102,7 @@ static const struct bfd_elf_special_section sh64_elf64_special_sections[]=
 #define elf_backend_fake_sections	sh64_elf64_fake_sections
 
 #define elf_backend_gc_mark_hook        sh_elf64_gc_mark_hook
+#define elf_backend_gc_sweep_hook       sh_elf64_gc_sweep_hook
 #define elf_backend_check_relocs        sh_elf64_check_relocs
 
 #define elf_backend_can_gc_sections	1
@@ -4094,8 +4128,6 @@ static const struct bfd_elf_special_section sh64_elf64_special_sections[]=
 					sh64_elf64_adjust_dynamic_symbol
 #define elf_backend_size_dynamic_sections \
 					sh64_elf64_size_dynamic_sections
-#define elf_backend_omit_section_dynsym \
-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
 #define elf_backend_finish_dynamic_symbol \
 					sh64_elf64_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections \

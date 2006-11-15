@@ -1,5 +1,5 @@
 /* D10V-specific support for 32-bit ELF
-   Copyright 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
    Contributed by Martin Hunt (hunt@cygnus.com).
 
@@ -219,20 +219,48 @@ d10v_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
 
 static asection *
 elf32_d10v_gc_mark_hook (asection *sec,
-			 struct bfd_link_info *info,
+			 struct bfd_link_info *info ATTRIBUTE_UNUSED,
 			 Elf_Internal_Rela *rel,
 			 struct elf_link_hash_entry *h,
 			 Elf_Internal_Sym *sym)
 {
   if (h != NULL)
-    switch (ELF32_R_TYPE (rel->r_info))
+    {
+      switch (ELF32_R_TYPE (rel->r_info))
       {
       case R_D10V_GNU_VTINHERIT:
       case R_D10V_GNU_VTENTRY:
-	return NULL;
-      }
+        break;
 
-  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+      default:
+        switch (h->root.type)
+          {
+          case bfd_link_hash_defined:
+          case bfd_link_hash_defweak:
+            return h->root.u.def.section;
+
+          case bfd_link_hash_common:
+            return h->root.u.c.p->section;
+
+	  default:
+	    break;
+          }
+       }
+     }
+   else
+     return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
+
+  return NULL;
+}
+
+static bfd_boolean
+elf32_d10v_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
+			  struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			  asection *sec ATTRIBUTE_UNUSED,
+			  const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED)
+{
+  /* We don't use got and plt entries for d10v.  */
+  return TRUE;
 }
 
 /* Look through the relocs for a section during the first phase.
@@ -469,16 +497,6 @@ elf32_d10v_relocate_section (bfd *output_bfd,
 				   unresolved_reloc, warned);
 	}
 
-      if (r_symndx == 0)
-	{
-	  /* r_symndx will be zero only for relocs against symbols from
-	     removed linkonce sections, or sections discarded by a linker
-	     script.  For these relocs, we just want the section contents
-	     zeroed.  Avoid any special processing.  */
-	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
-	  continue;
-	}
-
       if (h != NULL)
 	name = h->root.root.string;
       else
@@ -555,6 +573,7 @@ elf32_d10v_relocate_section (bfd *output_bfd,
 #define elf_backend_object_p	             0
 #define elf_backend_final_write_processing   0
 #define elf_backend_gc_mark_hook             elf32_d10v_gc_mark_hook
+#define elf_backend_gc_sweep_hook            elf32_d10v_gc_sweep_hook
 #define elf_backend_check_relocs             elf32_d10v_check_relocs
 #define elf_backend_relocate_section         elf32_d10v_relocate_section
 #define elf_backend_can_gc_sections          1

@@ -189,10 +189,7 @@ serial_open (const char *name)
   else if (strncmp (name, "|", 1) == 0)
     {
       ops = serial_interface_lookup ("pipe");
-      /* Discard ``|'' and any space before the command itself.  */
-      ++open_name;
-      while (isspace (*open_name))
-	++open_name;
+      open_name = name + 1; /* discard ``|'' */
     }
   /* Check for a colon, suggesting an IP address/port pair.
      Do this *after* checking for all the interesting prefixes.  We

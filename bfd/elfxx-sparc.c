@@ -1430,7 +1430,7 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  if (name == NULL)
 		    return FALSE;
 
-		  BFD_ASSERT (CONST_STRNEQ (name, ".rela")
+		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
 			      && strcmp (bfd_get_section_name (abfd, sec),
 					 name + 5) == 0);
 
@@ -1532,14 +1532,35 @@ _bfd_sparc_elf_gc_mark_hook (asection *sec,
 			     Elf_Internal_Sym *sym)
 {
   if (h != NULL)
-    switch (SPARC_ELF_R_TYPE (rel->r_info))
+    {
+      struct _bfd_sparc_elf_link_hash_table *htab;
+
+      htab = _bfd_sparc_elf_hash_table (info);
+      switch (SPARC_ELF_R_TYPE (rel->r_info))
       {
       case R_SPARC_GNU_VTINHERIT:
       case R_SPARC_GNU_VTENTRY:
-	return NULL;
-      }
+	break;
 
-  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+      default:
+	switch (h->root.type)
+	  {
+	  case bfd_link_hash_defined:
+	  case bfd_link_hash_defweak:
+	    return h->root.u.def.section;
+
+	  case bfd_link_hash_common:
+	    return h->root.u.c.p->section;
+
+	  default:
+	    break;
+	  }
+      }
+    }
+  else
+    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
+
+  return NULL;
 }
 
 /* Update the got entry reference counts for the section being removed.  */
@@ -2269,7 +2290,7 @@ _bfd_sparc_elf_size_dynamic_sections (bfd *output_bfd,
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
 	}
-      else if (CONST_STRNEQ (s->name, ".rela"))
+      else if (strncmp (s->name, ".rela", 5) == 0)
 	{
 	  if (s->size != 0)
 	    {
@@ -2755,13 +2776,8 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  /* r_symndx will be zero only for relocs against symbols
 	     from removed linkonce sections, or sections discarded by
 	     a linker script.  */
-	  if (r_symndx == 0)
-	    {
-	      _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
-	      break;
-	    }
-
-	  if ((input_section->flags & SEC_ALLOC) == 0)
+	  if (r_symndx == 0
+	      || (input_section->flags & SEC_ALLOC) == 0)
 	    break;
 
 	  if ((info->shared
@@ -2869,8 +2885,6 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		    {
 		      long indx;
 
-		      outrel.r_addend = relocation + rel->r_addend;
-
 		      if (is_plt)
 			sec = htab->splt;
 
@@ -2885,19 +2899,8 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			{
 			  asection *osec;
 
-			  /* We are turning this relocation into one
-			     against a section symbol.  It would be
-			     proper to subtract the symbol's value,
-			     osec->vma, from the emitted reloc addend,
-			     but ld.so expects buggy relocs.  */
 			  osec = sec->output_section;
 			  indx = elf_section_data (osec)->dynindx;
-
-			  if (indx == 0)
-			    {
-			      osec = htab->elf.text_index_section;
-			      indx = elf_section_data (osec)->dynindx;
-			    }
 
 			  /* FIXME: we really should be able to link non-pic
 			     shared libraries.  */
@@ -2912,8 +2915,8 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			    }
 			}
 
-		      outrel.r_info = SPARC_ELF_R_INFO (htab, rel, indx,
-							r_type);
+		      outrel.r_info = SPARC_ELF_R_INFO (htab, rel, indx, r_type);
+		      outrel.r_addend = relocation + rel->r_addend;
 		    }
 		}
 
@@ -4084,8 +4087,7 @@ _bfd_sparc_elf_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *i
 	}
 
       elf_section_data (splt->output_section)->this_hdr.sh_entsize
-	= (htab->is_vxworks || !ABI_64_P (output_bfd))
-	  ? 0 : htab->plt_entry_size;
+	= htab->plt_entry_size;
     }
 
   /* Set the first entry in the global offset table to the address of

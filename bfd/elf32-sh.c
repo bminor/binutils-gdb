@@ -3042,7 +3042,7 @@ sh_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
 	}
-      else if (CONST_STRNEQ (bfd_get_section_name (dynobj, s), ".rela"))
+      else if (strncmp (bfd_get_section_name (dynobj, s), ".rela", 5) == 0)
 	{
 	  if (s->size != 0 && s != htab->srelplt && s != htab->srelplt2)
 	    relocs = TRUE;
@@ -3557,15 +3557,6 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	case R_SH_IMM_MEDHI16_PCREL:
 	case R_SH_IMM_HI16_PCREL:
 #endif
-	  /* r_symndx will be zero only for relocs against symbols
-	     from removed linkonce sections, or sections discarded by
-	     a linker script.  */
-	  if (r_symndx == 0)
-	    {
-	      _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
-	      continue;
-	    }
-
 	  if (info->shared
 	      && (h == NULL
 		  || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
@@ -3594,7 +3585,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  if (name == NULL)
 		    return FALSE;
 
-		  BFD_ASSERT (CONST_STRNEQ (name, ".rela")
+		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
 			      && strcmp (bfd_get_section_name (input_bfd,
 							       input_section),
 					 name + 5) == 0);
@@ -4320,7 +4311,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		if (name == NULL)
 		  return FALSE;
 
-		BFD_ASSERT (CONST_STRNEQ (name, ".rela")
+		BFD_ASSERT (strncmp (name, ".rela", 5) == 0
 			    && strcmp (bfd_get_section_name (input_bfd,
 							     input_section),
 				       name + 5) == 0);
@@ -4524,20 +4515,42 @@ tpoff (struct bfd_link_info *info, bfd_vma address)
 
 static asection *
 sh_elf_gc_mark_hook (asection *sec,
-		     struct bfd_link_info *info,
-		     Elf_Internal_Rela *rel,
-		     struct elf_link_hash_entry *h,
+		     struct bfd_link_info *info ATTRIBUTE_UNUSED,
+		     Elf_Internal_Rela *rel, struct elf_link_hash_entry *h,
 		     Elf_Internal_Sym *sym)
 {
   if (h != NULL)
-    switch (ELF32_R_TYPE (rel->r_info))
-      {
-      case R_SH_GNU_VTINHERIT:
-      case R_SH_GNU_VTENTRY:
-	return NULL;
-      }
+    {
+      switch (ELF32_R_TYPE (rel->r_info))
+	{
+	case R_SH_GNU_VTINHERIT:
+	case R_SH_GNU_VTENTRY:
+	  break;
 
-  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+	default:
+#ifdef INCLUDE_SHMEDIA
+	  while (h->root.type == bfd_link_hash_indirect
+		 && h->root.u.i.link)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+#endif
+	  switch (h->root.type)
+	    {
+	    case bfd_link_hash_defined:
+	    case bfd_link_hash_defweak:
+	      return h->root.u.def.section;
+
+	    case bfd_link_hash_common:
+	      return h->root.u.c.p->section;
+
+	    default:
+	      break;
+	    }
+	}
+    }
+  else
+    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
+
+  return NULL;
 }
 
 /* Update the got entry reference counts for the section being removed.  */
@@ -5187,7 +5200,7 @@ sh_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 		  if (name == NULL)
 		    return FALSE;
 
-		  BFD_ASSERT (CONST_STRNEQ (name, ".rela")
+		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
 			      && strcmp (bfd_get_section_name (abfd, sec),
 					 name + 5) == 0);
 
@@ -6037,8 +6050,6 @@ sh_elf_plt_sym_val (bfd_vma i, const asection *plt,
 					sh_elf_always_size_sections
 #define elf_backend_size_dynamic_sections \
 					sh_elf_size_dynamic_sections
-#define elf_backend_omit_section_dynsym \
-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
 #define elf_backend_finish_dynamic_symbol \
 					sh_elf_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections \

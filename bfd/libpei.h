@@ -1,5 +1,5 @@
 /* Support for the generic parts of PE/PEI; common header information.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005
    Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
@@ -204,39 +204,7 @@
 #define PUT_SCNHDR_LNNOPTR H_PUT_32
 #endif
 
-#ifdef COFF_WITH_pex64
-
-#define GET_OPTHDR_IMAGE_BASE            H_GET_64
-#define PUT_OPTHDR_IMAGE_BASE            H_PUT_64
-#define GET_OPTHDR_SIZE_OF_STACK_RESERVE H_GET_64
-#define PUT_OPTHDR_SIZE_OF_STACK_RESERVE H_PUT_64
-#define GET_OPTHDR_SIZE_OF_STACK_COMMIT  H_GET_64
-#define PUT_OPTHDR_SIZE_OF_STACK_COMMIT  H_PUT_64
-#define GET_OPTHDR_SIZE_OF_HEAP_RESERVE  H_GET_64
-#define PUT_OPTHDR_SIZE_OF_HEAP_RESERVE  H_PUT_64
-#define GET_OPTHDR_SIZE_OF_HEAP_COMMIT   H_GET_64
-#define PUT_OPTHDR_SIZE_OF_HEAP_COMMIT   H_PUT_64
-#define GET_PDATA_ENTRY                  bfd_get_32
-
-#define _bfd_XX_bfd_copy_private_bfd_data_common	_bfd_pex64_bfd_copy_private_bfd_data_common
-#define _bfd_XX_bfd_copy_private_section_data		_bfd_pex64_bfd_copy_private_section_data
-#define _bfd_XX_get_symbol_info				_bfd_pex64_get_symbol_info
-#define _bfd_XX_only_swap_filehdr_out			_bfd_pex64_only_swap_filehdr_out
-#define _bfd_XX_print_private_bfd_data_common		_bfd_pex64_print_private_bfd_data_common
-#define _bfd_XXi_final_link_postscript			_bfd_pex64i_final_link_postscript
-#define _bfd_XXi_final_link_postscript			_bfd_pex64i_final_link_postscript
-#define _bfd_XXi_only_swap_filehdr_out			_bfd_pex64i_only_swap_filehdr_out
-#define _bfd_XXi_swap_aouthdr_in			_bfd_pex64i_swap_aouthdr_in
-#define _bfd_XXi_swap_aouthdr_out			_bfd_pex64i_swap_aouthdr_out
-#define _bfd_XXi_swap_aux_in				_bfd_pex64i_swap_aux_in
-#define _bfd_XXi_swap_aux_out				_bfd_pex64i_swap_aux_out
-#define _bfd_XXi_swap_lineno_in				_bfd_pex64i_swap_lineno_in
-#define _bfd_XXi_swap_lineno_out			_bfd_pex64i_swap_lineno_out
-#define _bfd_XXi_swap_scnhdr_out			_bfd_pex64i_swap_scnhdr_out
-#define _bfd_XXi_swap_sym_in				_bfd_pex64i_swap_sym_in
-#define _bfd_XXi_swap_sym_out				_bfd_pex64i_swap_sym_out
-
-#elif defined COFF_WITH_pep
+#ifdef COFF_WITH_pep
 
 #define GET_OPTHDR_IMAGE_BASE H_GET_64
 #define PUT_OPTHDR_IMAGE_BASE H_PUT_64
@@ -303,9 +271,9 @@
 #endif /* !COFF_WITH_pep */
 
 /* Macro: Returns true if the bfd is a PE executable as opposed to a PE object file.  */
-#define bfd_pe_executable_p(abfd)			\
-  (CONST_STRNEQ ((abfd)->xvec->name, "pei-")		\
-   || CONST_STRNEQ ((abfd)->xvec->name, "efi-app-"))
+#define bfd_pe_executable_p(abfd) \
+  (strncmp ((abfd)->xvec->name, "pei-", 4) == 0		\
+   || strncmp ((abfd)->xvec->name, "efi-app-", 8) == 0)
 
 /* These functions are architecture dependent, and are in peicode.h:
    coff_swap_reloc_in

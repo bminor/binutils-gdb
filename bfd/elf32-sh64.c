@@ -742,9 +742,9 @@ static void
 sh64_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
 				 const Elf_Internal_Sym *isym,
 				 bfd_boolean definition,
-				 bfd_boolean dynamic ATTRIBUTE_UNUSED)
+				 bfd_boolean dynamic)
 {
-  if ((isym->st_other & ~ELF_ST_VISIBILITY (-1)) != 0)
+  if (isym->st_other != 0 && dynamic)
     {
       unsigned char other;
 
@@ -759,8 +759,8 @@ sh64_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
 
 static const struct bfd_elf_special_section sh64_elf_special_sections[] =
 {
-  { STRING_COMMA_LEN (".cranges"), 0, SHT_PROGBITS, 0 },
-  { NULL,                       0, 0, 0,            0 }
+  { ".cranges", 8, 0, SHT_PROGBITS, 0 },
+  { NULL,       0, 0, 0,            0 }
 };
 
 #undef	TARGET_BIG_SYM

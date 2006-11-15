@@ -1,6 +1,6 @@
 /* Select disassembly routine for specified architecture.
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006 Free Software Foundation, Inc.
+   2004, 2005 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -64,10 +64,8 @@
 #define ARCH_powerpc
 #define ARCH_rs6000
 #define ARCH_s390
-#define ARCH_score
 #define ARCH_sh
 #define ARCH_sparc
-#define ARCH_spu
 #define ARCH_tic30
 #define ARCH_tic4x
 #define ARCH_tic54x
@@ -328,14 +326,6 @@ disassembler (abfd)
       disassemble = print_insn_s390;
       break;
 #endif
-#ifdef ARCH_score
-    case bfd_arch_score:
-      if (bfd_big_endian (abfd))
-        disassemble = print_insn_big_score;      
-      else
-        disassemble = print_insn_little_score; 
-     break;
-#endif
 #ifdef ARCH_sh
     case bfd_arch_sh:
       disassemble = print_insn_sh;
@@ -344,11 +334,6 @@ disassembler (abfd)
 #ifdef ARCH_sparc
     case bfd_arch_sparc:
       disassemble = print_insn_sparc;
-      break;
-#endif
-#ifdef ARCH_spu
-    case bfd_arch_spu:
-      disassemble = print_insn_spu;
       break;
 #endif
 #ifdef ARCH_tic30

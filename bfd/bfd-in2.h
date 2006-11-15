@@ -50,30 +50,6 @@ extern "C" {
 #endif
 #endif
 
-/* This is a utility macro to handle the situation where the code
-   wants to place a constant string into the code, followed by a
-   comma and then the length of the string.  Doing this by hand
-   is error prone, so using this macro is safer.  The macro will
-   also safely handle the case where a NULL is passed as the arg.  */
-#define STRING_COMMA_LEN(STR) (STR), ((STR) ? sizeof (STR) - 1 : 0)
-/* Unfortunately it is not possible to use the STRING_COMMA_LEN macro
-   to create the arguments to another macro, since the preprocessor
-   will mis-count the number of arguments to the outer macro (by not
-   evaluating STRING_COMMA_LEN and so missing the comma).  This is a
-   problem for example when trying to use STRING_COMMA_LEN to build
-   the arguments to the strncmp() macro.  Hence this alternative
-   definition of strncmp is provided here.
-   
-   Note - these macros do NOT work if STR2 is not a constant string.  */
-#define CONST_STRNEQ(STR1,STR2) (strncmp ((STR1), (STR2), sizeof (STR2) - 1) == 0)
-  /* strcpy() can have a similar problem, but since we know we are
-     copying a constant string, we can use memcpy which will be faster
-     since there is no need to check for a NUL byte inside STR.  We
-     can also save time if we do not need to copy the terminating NUL.  */
-#define LITMEMCPY(DEST,STR2) memcpy ((DEST), (STR2), sizeof (STR2) - 1)
-#define LITSTRCPY(DEST,STR2) memcpy ((DEST), (STR2), sizeof (STR2))
-
-
 /* The word size used by BFD on the host.  This may be 64 with a 32
    bit target if the host is 64 bit, or if other 64 bit targets have
    been selected with --enable-targets, or if --enable-64-bit-bfd.  */
@@ -693,7 +669,7 @@ extern void bfd_elf_set_dt_needed_name
 extern const char *bfd_elf_get_dt_soname
   (bfd *);
 extern void bfd_elf_set_dyn_lib_class
-  (bfd *, enum dynamic_lib_link_class);
+  (bfd *, int);
 extern int bfd_elf_get_dyn_lib_class
   (bfd *);
 extern struct bfd_link_needed_list *bfd_elf_get_runpath_list
@@ -875,7 +851,7 @@ extern bfd_boolean bfd_elf32_arm_allocate_interworking_sections
   (struct bfd_link_info *);
 
 extern bfd_boolean bfd_elf32_arm_process_before_allocation
-  (bfd *, struct bfd_link_info *);
+  (bfd *, struct bfd_link_info *, int);
 
 void bfd_elf32_arm_set_target_relocs
   (struct bfd_link_info *, int, char *, int, int);
@@ -893,8 +869,6 @@ extern bfd_boolean bfd_elf32_arm_add_glue_sections_to_bfd
 #define BFD_ARM_SPECIAL_SYM_TYPE_ANY	(~0)
 extern bfd_boolean bfd_is_arm_special_symbol_name
   (const char * name, int type);
-
-extern void bfd_elf32_arm_set_byteswap_code (struct bfd_link_info *, int);
 
 /* ARM Note section processing.  */
 extern bfd_boolean bfd_arm_merge_machines
@@ -1257,9 +1231,7 @@ typedef struct bfd_section
      else up the line will take care of it later.  */
 #define SEC_LINKER_CREATED 0x200000
 
-  /* This section should not be subject to garbage collection.
-     Also set to inform the linker that this section should not be
-     listed in the link map as discarded.  */
+  /* This section should not be subject to garbage collection.  */
 #define SEC_KEEP 0x400000
 
   /* This section contains "short" data, and should be placed
@@ -1765,8 +1737,6 @@ enum bfd_architecture
 /* Nonzero if MACH is a 64 bit sparc architecture.  */
 #define bfd_mach_sparc_64bit_p(mach) \
   ((mach) >= bfd_mach_sparc_v9 && (mach) != bfd_mach_sparc_v8plusb)
-  bfd_arch_spu,       /* PowerPC SPU */
-#define bfd_mach_spu           256 
   bfd_arch_mips,      /* MIPS Rxxxx */
 #define bfd_mach_mips3000              3000
 #define bfd_mach_mips3900              3900
@@ -1904,7 +1874,6 @@ enum bfd_architecture
 #define bfd_mach_arm_XScale    10
 #define bfd_mach_arm_ep9312    11
 #define bfd_mach_arm_iWMMXt    12
-#define bfd_mach_arm_iWMMXt2   13
   bfd_arch_ns32k,     /* National Semiconductors ns32000 */
   bfd_arch_w65,       /* WDC 65816 */
   bfd_arch_tic30,     /* Texas Instruments TMS320C30 */
@@ -1980,7 +1949,6 @@ enum bfd_architecture
   bfd_arch_s390,      /* IBM s390 */
 #define bfd_mach_s390_31       31
 #define bfd_mach_s390_64       64
-  bfd_arch_score,     /* Sunplus score */ 
   bfd_arch_openrisc,  /* OpenRISC */
   bfd_arch_mmix,      /* Donald Knuth's educational processor.  */
   bfd_arch_xstormy16,
@@ -2457,20 +2425,6 @@ relocation types already defined.  */
   BFD_RELOC_SPARC_TLS_DTPOFF64,
   BFD_RELOC_SPARC_TLS_TPOFF32,
   BFD_RELOC_SPARC_TLS_TPOFF64,
-
-/* SPU Relocations.  */
-  BFD_RELOC_SPU_IMM7,
-  BFD_RELOC_SPU_IMM8,
-  BFD_RELOC_SPU_IMM10,
-  BFD_RELOC_SPU_IMM10W,
-  BFD_RELOC_SPU_IMM16,
-  BFD_RELOC_SPU_IMM16W,
-  BFD_RELOC_SPU_IMM18,
-  BFD_RELOC_SPU_PCREL9a,
-  BFD_RELOC_SPU_PCREL9b,
-  BFD_RELOC_SPU_PCREL16,
-  BFD_RELOC_SPU_LO16,
-  BFD_RELOC_SPU_HI16,
 
 /* Alpha ECOFF and ELF relocations.  Some of these treat the symbol or
 "addend" in some special way.
@@ -3787,31 +3741,6 @@ instructions  */
   BFD_RELOC_390_GOTPLT20,
   BFD_RELOC_390_TLS_GOTIE20,
 
-/* Score relocations  */
-  BFD_RELOC_SCORE_DUMMY1,
-
-/* Low 16 bit for load/store  */
-  BFD_RELOC_SCORE_GPREL15,
-
-/* This is a 24-bit reloc with the right 1 bit assumed to be 0  */
-  BFD_RELOC_SCORE_DUMMY2,
-  BFD_RELOC_SCORE_JMP,
-
-/* This is a 19-bit reloc with the right 1 bit assumed to be 0  */
-  BFD_RELOC_SCORE_BRANCH,
-
-/* This is a 11-bit reloc with the right 1 bit assumed to be 0  */
-  BFD_RELOC_SCORE16_JMP,
-
-/* This is a 8-bit reloc with the right 1 bit assumed to be 0  */
-  BFD_RELOC_SCORE16_BRANCH,
-
-/* Undocumented Score relocs  */
-  BFD_RELOC_SCORE_GOT15,
-  BFD_RELOC_SCORE_GOT_LO16,
-  BFD_RELOC_SCORE_CALL15,
-  BFD_RELOC_SCORE_DUMMY_HI16,
-
 /* Scenix IP2K - 9-bit register number / data address  */
   BFD_RELOC_IP2K_FR9,
 
@@ -4647,14 +4576,13 @@ typedef enum bfd_error
   bfd_error_bad_value,
   bfd_error_file_truncated,
   bfd_error_file_too_big,
-  bfd_error_on_input,
   bfd_error_invalid_error_code
 }
 bfd_error_type;
 
 bfd_error_type bfd_get_error (void);
 
-void bfd_set_error (bfd_error_type error_tag, ...);
+void bfd_set_error (bfd_error_type error_tag);
 
 const char *bfd_errmsg (bfd_error_type error_tag);
 
@@ -5203,8 +5131,7 @@ typedef struct bfd_target
 
   /* Check if SEC has been already linked during a reloceatable or
      final link.  */
-  void (*_section_already_linked) (bfd *, struct bfd_section *,
-                                   struct bfd_link_info *);
+  void (*_section_already_linked) (bfd *, struct bfd_section *);
 
   /* Routines to handle dynamic symbols and relocs.  */
 #define BFD_JUMP_TABLE_DYNAMIC(NAME) \
@@ -5264,11 +5191,10 @@ bfd_boolean bfd_link_split_section (bfd *abfd, asection *sec);
 #define bfd_link_split_section(abfd, sec) \
        BFD_SEND (abfd, _bfd_link_split_section, (abfd, sec))
 
-void bfd_section_already_linked (bfd *abfd, asection *sec,
-    struct bfd_link_info *info);
+void bfd_section_already_linked (bfd *abfd, asection *sec);
 
-#define bfd_section_already_linked(abfd, sec, info) \
-       BFD_SEND (abfd, _section_already_linked, (abfd, sec, info))
+#define bfd_section_already_linked(abfd, sec) \
+       BFD_SEND (abfd, _section_already_linked, (abfd, sec))
 
 /* Extracted from simple.c.  */
 bfd_byte *bfd_simple_get_relocated_section_contents

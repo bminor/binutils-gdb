@@ -1,28 +1,3 @@
-2006-10-28  Richard Sandiford  <richard@codesourcery.com>
-
-	* mips.h (R_MIPS_GLOB_DAT): Define
-	(R_MIPS_max): Bump by 1.
-
-2006-10-25  Trevor Smigiel  <Trevor_Smigiel@playstation.sony.com>
-	    Yukishige Shibata  <shibata@rd.scei.sony.co.jp>
-	    Nobuhisa Fujinami  <fnami@rd.scei.sony.co.jp>
-	    Takeaki Fukuoka  <fukuoka@rd.scei.sony.co.jp>
-	    Alan Modra  <amodra@bigpond.net.au>
-
-	* common.h (EM_SPU): Define.
-	* spu.h: New file.
-
-2006-10-19  Mei Ligang  <ligang@sunnorth.com.cn>
-
-	* score.h (EF_SCORE_PIC): Redefine EF_SCORE_PIC as 0x80000000.
-	(EF_SCORE_FIXDEP): Redefine EF_SCORE_FIXDEP as 0x40000000.
-	(EF_SCORE_HASENTRY): Delete.
-
-2006-09-17  Mei Ligang  <ligang@sunnorth.com.cn>
-
-	* score.h: New file.
-	* common.h: Add Score machine number.
-
 2006-07-10  Jakub Jelinek  <jakub@redhat.com>
 
 	* common.h (SHT_GNU_HASH, DT_GNU_HASH): Define.

@@ -997,7 +997,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 		    && (r_type != R_X86_64_PC32)
 		    && (r_type != R_X86_64_PC64))
 		   || (h != NULL
-		       && (! SYMBOLIC_BIND (info, h)
+		       && (! info->symbolic
 			   || h->root.type == bfd_link_hash_defweak
 			   || !h->def_regular))))
 	      || (ELIMINATE_COPY_RELOCS
@@ -1025,7 +1025,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 		  if (name == NULL)
 		    return FALSE;
 
-		  if (! CONST_STRNEQ (name, ".rela")
+		  if (strncmp (name, ".rela", 5) != 0
 		      || strcmp (bfd_get_section_name (abfd, sec),
 				 name + 5) != 0)
 		    {
@@ -1134,20 +1134,38 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 
 static asection *
 elf64_x86_64_gc_mark_hook (asection *sec,
-			   struct bfd_link_info *info,
+			   struct bfd_link_info *info ATTRIBUTE_UNUSED,
 			   Elf_Internal_Rela *rel,
 			   struct elf_link_hash_entry *h,
 			   Elf_Internal_Sym *sym)
 {
   if (h != NULL)
-    switch (ELF64_R_TYPE (rel->r_info))
-      {
-      case R_X86_64_GNU_VTINHERIT:
-      case R_X86_64_GNU_VTENTRY:
-	return NULL;
-      }
+    {
+      switch (ELF64_R_TYPE (rel->r_info))
+	{
+	case R_X86_64_GNU_VTINHERIT:
+	case R_X86_64_GNU_VTENTRY:
+	  break;
 
-  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+	default:
+	  switch (h->root.type)
+	    {
+	    case bfd_link_hash_defined:
+	    case bfd_link_hash_defweak:
+	      return h->root.u.def.section;
+
+	    case bfd_link_hash_common:
+	      return h->root.u.c.p->section;
+
+	    default:
+	      break;
+	    }
+	}
+    }
+  else
+    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
+
+  return NULL;
 }
 
 /* Update the got entry reference counts for the section being removed.	 */
@@ -1865,7 +1883,7 @@ elf64_x86_64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
 	}
-      else if (CONST_STRNEQ (bfd_get_section_name (dynobj, s), ".rela"))
+      else if (strncmp (bfd_get_section_name (dynobj, s), ".rela", 5) == 0)
 	{
 	  if (s->size != 0 && s != htab->srelplt)
 	    relocs = TRUE;
@@ -2370,13 +2388,8 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  /* r_symndx will be zero only for relocs against symbols
 	     from removed linkonce sections, or sections discarded by
 	     a linker script.  */
-	  if (r_symndx == 0)
-	    {
-	      _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
-	      break;
-	    }
-
-	  if ((input_section->flags & SEC_ALLOC) == 0)
+	  if (r_symndx == 0
+	      || (input_section->flags & SEC_ALLOC) == 0)
 	    break;
 
 	  if ((info->shared
@@ -2432,7 +2445,7 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			   || r_type == R_X86_64_PC32
 			   || r_type == R_X86_64_PC64
 			   || !info->shared
-			   || !SYMBOLIC_BIND (info, h)
+			   || !info->symbolic
 			   || !h->def_regular))
 		{
 		  outrel.r_info = ELF64_R_INFO (h->dynindx, r_type);
@@ -2462,19 +2475,9 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			{
 			  asection *osec;
 
-			  /* We are turning this relocation into one
-			     against a section symbol.  It would be
-			     proper to subtract the symbol's value,
-			     osec->vma, from the emitted reloc addend,
-			     but ld.so expects buggy relocs.  */
 			  osec = sec->output_section;
 			  sindx = elf_section_data (osec)->dynindx;
-			  if (sindx == 0)
-			    {
-			      asection *oi = htab->elf.text_index_section;
-			      sindx = elf_section_data (oi)->dynindx;
-			    }
-			  BFD_ASSERT (sindx != 0);
+			  BFD_ASSERT (sindx > 0);
 			}
 
 		      outrel.r_info = ELF64_R_INFO (sindx, r_type);
@@ -3032,6 +3035,12 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 	  if (r == bfd_reloc_overflow)
 	    {
+	      if (h != NULL
+		  && h->root.type == bfd_link_hash_undefweak
+		  && howto->pc_relative)
+		/* Ignore reloc overflow on branches to undefweak syms.  */
+		continue;
+
 	      if (! ((*info->callbacks->reloc_overflow)
 		     (info, (h ? &h->root : NULL), name, howto->name,
 		      (bfd_vma) 0, input_bfd, input_section,
@@ -3627,13 +3636,13 @@ elf64_x86_64_hash_symbol (struct elf_link_hash_entry *h)
 static const struct bfd_elf_special_section 
   elf64_x86_64_special_sections[]=
 {
-  { STRING_COMMA_LEN (".gnu.linkonce.lb"), -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE + SHF_X86_64_LARGE},
-  { STRING_COMMA_LEN (".gnu.linkonce.lr"), -2, SHT_PROGBITS, SHF_ALLOC + SHF_X86_64_LARGE},
-  { STRING_COMMA_LEN (".gnu.linkonce.lt"), -2, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR + SHF_X86_64_LARGE},
-  { STRING_COMMA_LEN (".lbss"),	           -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE + SHF_X86_64_LARGE},
-  { STRING_COMMA_LEN (".ldata"),	   -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE + SHF_X86_64_LARGE},
-  { STRING_COMMA_LEN (".lrodata"),	   -2, SHT_PROGBITS, SHF_ALLOC + SHF_X86_64_LARGE},
-  { NULL,	                0,          0, 0,            0 }
+  { ".gnu.linkonce.lb",	16, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE + SHF_X86_64_LARGE},
+  { ".gnu.linkonce.lr",	16, -2, SHT_PROGBITS, SHF_ALLOC + SHF_X86_64_LARGE},
+  { ".gnu.linkonce.lt",	16, -2, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR + SHF_X86_64_LARGE},
+  { ".lbss",	5, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE + SHF_X86_64_LARGE},
+  { ".ldata",	6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE + SHF_X86_64_LARGE},
+  { ".lrodata",	8, -2, SHT_PROGBITS, SHF_ALLOC + SHF_X86_64_LARGE},
+  { NULL,	0,  0, 0,            0 }
 };
 
 #define TARGET_LITTLE_SYM		    bfd_elf64_x86_64_vec
@@ -3672,7 +3681,6 @@ static const struct bfd_elf_special_section
 #define elf_backend_relocate_section	    elf64_x86_64_relocate_section
 #define elf_backend_size_dynamic_sections   elf64_x86_64_size_dynamic_sections
 #define elf_backend_always_size_sections    elf64_x86_64_always_size_sections
-#define elf_backend_init_index_section	    _bfd_elf_init_1_index_section
 #define elf_backend_plt_sym_val		    elf64_x86_64_plt_sym_val
 #define elf_backend_object_p		    elf64_x86_64_elf_object_p
 #define bfd_elf64_mkobject		    elf64_x86_64_mkobject

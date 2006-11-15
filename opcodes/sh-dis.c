@@ -924,11 +924,11 @@ print_insn_sh (bfd_vma memaddr, struct disassemble_info *info)
 		}
 	      if ((*info->symbol_at_address_func) (val, info))
 		{
-		  fprintf_fn (stream, "\t! ");
+		  fprintf_fn (stream, "\t! 0x");
 		  (*info->print_address_func) (val, info);
 		}
 	      else
-		fprintf_fn (stream, "\t! %x", val);
+		fprintf_fn (stream, "\t! 0x%x", val);
 	    }
 	}
 

@@ -9,13 +9,10 @@
 #include <sys/syscall.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
 
 int main (void)
 {
-  int err = syscall (SYS_rt_sigsuspend, 1, 2);
-  if (err == -1 && errno == ENOSYS)
-    printf ("ENOSYS\n");
+  syscall (SYS_rt_sigsuspend, 1, 2);
   printf ("xyzzy\n");
   exit (0);
 }

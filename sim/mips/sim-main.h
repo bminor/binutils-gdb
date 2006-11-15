@@ -348,7 +348,6 @@ struct _sim_cpu {
 #define Debug	(REGISTERS[86])
 #define DEPC	(REGISTERS[87])
 #define EPC	(REGISTERS[88])
-#define ACX	(REGISTERS[89])
 
 #define AC0LOIDX	(33)	/* Must be the same register as LO */
 #define AC0HIIDX	(34)	/* Must be the same register as HI */

@@ -175,8 +175,10 @@ _bfd_link_section_stabs (bfd *abfd,
        prepared to handle them.  */
     return TRUE;
 
-  if (bfd_is_abs_section (stabsec->output_section)
-      || bfd_is_abs_section (stabstrsec->output_section))
+  if ((stabsec->output_section != NULL
+       && bfd_is_abs_section (stabsec->output_section))
+      || (stabstrsec->output_section != NULL
+	  && bfd_is_abs_section (stabstrsec->output_section)))
     /* At least one of the sections is being discarded from the
        link, so we should just ignore them.  */
     return TRUE;
@@ -431,7 +433,7 @@ _bfd_link_section_stabs (bfd *abfd,
 		    ++nest;
 		  else if (incl_type == (int) N_EXCL)
 		    /* Keep existing exclusion marks.  */
-		    continue;
+		    continue;   
 		  else if (nest == 0)
 		    {
 		      *incl_pstridx = (bfd_size_type) -1;
@@ -456,8 +458,8 @@ _bfd_link_section_stabs (bfd *abfd,
      for that section.  */
   stabsec->size = (count - skip) * STABSIZE;
   if (stabsec->size == 0)
-    stabsec->flags |= SEC_EXCLUDE | SEC_KEEP;
-  stabstrsec->flags |= SEC_EXCLUDE | SEC_KEEP;
+    stabsec->flags |= SEC_EXCLUDE;
+  stabstrsec->flags |= SEC_EXCLUDE;
   sinfo->stabstr->size = _bfd_stringtab_size (sinfo->strings);
 
   /* Calculate the `cumulative_skips' array now that stabs have been
@@ -609,7 +611,7 @@ _bfd_discard_section_stabs (bfd *abfd,
   /* Shrink the stabsec as needed.  */
   stabsec->size -= skip * STABSIZE;
   if (stabsec->size == 0)
-    stabsec->flags |= SEC_EXCLUDE | SEC_KEEP;
+    stabsec->flags |= SEC_EXCLUDE;
 
   /* Recalculate the `cumulative_skips' array now that stabs have been
      deleted for this section.  */

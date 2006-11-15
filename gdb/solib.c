@@ -146,17 +146,13 @@ solib_open (char *in_pathname, char **found_pathname)
   int found_file = -1;
   char *temp_pathname = NULL;
   char *p = in_pathname;
-  int solib_absolute_prefix_is_empty;
-
-  solib_absolute_prefix_is_empty = (solib_absolute_prefix == NULL
-                                    || *solib_absolute_prefix == 0);
 
   while (*p && !IS_DIR_SEPARATOR (*p))
     p++;
 
   if (*p)
     {
-      if (! IS_ABSOLUTE_PATH (in_pathname) || solib_absolute_prefix_is_empty)
+      if (! IS_ABSOLUTE_PATH (in_pathname) || solib_absolute_prefix == NULL)
         temp_pathname = in_pathname;
       else
 	{
@@ -212,14 +208,14 @@ solib_open (char *in_pathname, char **found_pathname)
 					   &temp_pathname);
 
   /* If not found, next search the inferior's $PATH environment variable. */
-  if (found_file < 0 && solib_absolute_prefix_is_empty)
+  if (found_file < 0 && solib_absolute_prefix == NULL)
     found_file = openp (get_in_environ (inferior_environ, "PATH"),
 			OPF_TRY_CWD_FIRST, in_pathname, O_RDONLY | O_BINARY, 0,
 			&temp_pathname);
 
   /* If not found, next search the inferior's $LD_LIBRARY_PATH 
      environment variable. */
-  if (found_file < 0 && solib_absolute_prefix_is_empty)
+  if (found_file < 0 && solib_absolute_prefix == NULL)
     found_file = openp (get_in_environ (inferior_environ, "LD_LIBRARY_PATH"),
 			OPF_TRY_CWD_FIRST, in_pathname, O_RDONLY | O_BINARY, 0,
 			&temp_pathname);
@@ -422,11 +418,6 @@ solib_read_symbols (struct so_list *so, int from_tty)
       if (from_tty)
 	printf_unfiltered (_("Symbols already loaded for %s\n"), so->so_name);
     }
-  else if (so->abfd == NULL)
-    {
-      if (from_tty)
-	printf_unfiltered (_("Symbol file not found for %s\n"), so->so_name);
-    }
   else
     {
       if (catch_errors (symbol_add_stub, so,
@@ -615,17 +606,6 @@ update_solib_list (int from_tty, struct target_ops *target)
     }
 }
 
-/* Return non-zero if SO is the libpthread shared library.
-
-   Uses a fairly simplistic heuristic approach where we check
-   the file name against "/libpthread".  This can lead to false
-   positives, but this should be good enough in practice.  */
-
-static int
-libpthread_solib_p (struct so_list *so)
-{
-  return (strstr (so->so_name, "/libpthread") != NULL);
-}
 
 /* GLOBAL FUNCTION
 
@@ -672,16 +652,8 @@ solib_add (char *pattern, int from_tty, struct target_ops *target, int readsyms)
     for (gdb = so_list_head; gdb; gdb = gdb->next)
       if (! pattern || re_exec (gdb->so_name))
 	{
-          /* Normally, we would read the symbols from that library
-             only if READSYMS is set.  However, we're making a small
-             exception for the pthread library, because we sometimes
-             need the library symbols to be loaded in order to provide
-             thread support (x86-linux for instance).  */
-          const int add_this_solib =
-            (readsyms || libpthread_solib_p (gdb));
-
 	  any_matches = 1;
-	  if (add_this_solib && solib_read_symbols (gdb, from_tty))
+	  if (readsyms && solib_read_symbols (gdb, from_tty))
 	    loaded_any_symbols = 1;
 	}
 

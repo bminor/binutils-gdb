@@ -1,5 +1,5 @@
 /* Motorola MCore specific support for 32-bit ELF
-   Copyright 1994, 1995, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright 1994, 1995, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -526,21 +526,37 @@ mcore_elf_relocate_section (bfd * output_bfd,
    relocation.  */
 
 static asection *
-mcore_elf_gc_mark_hook (asection *sec,
-			struct bfd_link_info *info,
-			Elf_Internal_Rela *rel,
-			struct elf_link_hash_entry *h,
-			Elf_Internal_Sym *sym)
+mcore_elf_gc_mark_hook (asection *                   sec,
+			struct bfd_link_info *       info ATTRIBUTE_UNUSED,
+			Elf_Internal_Rela *          rel,
+			struct elf_link_hash_entry * h,
+			Elf_Internal_Sym *           sym)
 {
-  if (h != NULL)
-    switch (ELF32_R_TYPE (rel->r_info))
-      {
-      case R_MCORE_GNU_VTINHERIT:
-      case R_MCORE_GNU_VTENTRY:
-	return NULL;
-      }
+  if (h == NULL)
+    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
 
-  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+  switch (ELF32_R_TYPE (rel->r_info))
+    {
+    case R_MCORE_GNU_VTINHERIT:
+    case R_MCORE_GNU_VTENTRY:
+      break;
+
+    default:
+      switch (h->root.type)
+	{
+	case bfd_link_hash_defined:
+	case bfd_link_hash_defweak:
+	  return h->root.u.def.section;
+
+	case bfd_link_hash_common:
+	  return h->root.u.c.p->section;
+
+	default:
+	  break;
+	}
+    }
+
+  return NULL;
 }
 
 /* Update the got entry reference counts for the section being removed.  */
@@ -621,9 +637,9 @@ mcore_elf_check_relocs (bfd * abfd,
 
 static const struct bfd_elf_special_section mcore_elf_special_sections[]=
 {
-  { STRING_COMMA_LEN (".ctors"), -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
-  { STRING_COMMA_LEN (".dtors"), -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
-  { NULL,                     0,  0, 0,            0 }
+  { ".ctors",   6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { ".dtors",   6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { NULL,       0,  0, 0,            0 }
 };
 
 #define TARGET_BIG_SYM		bfd_elf32_mcore_big_vec

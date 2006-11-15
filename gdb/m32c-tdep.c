@@ -1196,9 +1196,6 @@ m32c_decode_srcdest4 (struct m32c_pv_state *st,
   else
     sd.kind = srcdest_mem;
 
-  sd.addr = pv_unknown ();
-  sd.reg = 0;
-
   switch (code)
     {
     case 0x0: sd.reg = (size == 1 ? &st->r0 : &st->r0); break;
@@ -1234,9 +1231,6 @@ static struct srcdest
 m32c_decode_sd23 (struct m32c_pv_state *st, int code, int size, int ind)
 {
   struct srcdest sd;
-
-  sd.addr = pv_unknown ();
-  sd.reg = 0;
 
   switch (code)
     {

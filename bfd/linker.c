@@ -562,11 +562,11 @@ bfd_wrapped_link_hash_lookup (bfd *abfd,
 
 #undef WRAP
 
-#undef  REAL
+#undef REAL
 #define REAL "__real_"
 
       if (*l == '_'
-	  && CONST_STRNEQ (l, REAL)
+	  && strncmp (l, REAL, sizeof REAL - 1) == 0
 	  && bfd_hash_lookup (info->wrap_hash, l + sizeof REAL - 1,
 			      FALSE, FALSE) != NULL)
 	{
@@ -1659,7 +1659,8 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 		s = name + 1;
 		while (*s == '_')
 		  ++s;
-		if (s[0] == 'G' && CONST_STRNEQ (s, CONS_PREFIX))
+		if (s[0] == 'G'
+		    && strncmp (s, CONS_PREFIX, CONS_PREFIX_LEN - 1) == 0)
 		  {
 		    char c;
 
@@ -2876,15 +2877,14 @@ FUNCTION
 	bfd_section_already_linked
 
 SYNOPSIS
-        void bfd_section_already_linked (bfd *abfd, asection *sec,
-					 struct bfd_link_info *info);
+        void bfd_section_already_linked (bfd *abfd, asection *sec);
 
 DESCRIPTION
 	Check if @var{sec} has been already linked during a reloceatable
 	or final link.
 
-.#define bfd_section_already_linked(abfd, sec, info) \
-.       BFD_SEND (abfd, _section_already_linked, (abfd, sec, info))
+.#define bfd_section_already_linked(abfd, sec) \
+.       BFD_SEND (abfd, _section_already_linked, (abfd, sec))
 .
 
 */
@@ -2970,8 +2970,7 @@ bfd_section_already_linked_table_free (void)
 /* This is used on non-ELF inputs.  */
 
 void
-_bfd_generic_section_already_linked (bfd *abfd, asection *sec,
-				     struct bfd_link_info *info ATTRIBUTE_UNUSED)
+_bfd_generic_section_already_linked (bfd *abfd, asection *sec)
 {
   flagword flags;
   const char *name;
@@ -3075,7 +3074,7 @@ _bfd_generic_section_already_linked (bfd *abfd, asection *sec,
   bfd_section_already_linked_table_insert (already_linked_list, sec);
 }
 
-/* Convert symbols in excluded output sections to use a kept section.  */
+/* Convert symbols in excluded output sections to absolute.  */
 
 static bfd_boolean
 fix_syms (struct bfd_link_hash_entry *h, void *data)
@@ -3094,64 +3093,8 @@ fix_syms (struct bfd_link_hash_entry *h, void *data)
 	  && (s->output_section->flags & SEC_EXCLUDE) != 0
 	  && bfd_section_removed_from_list (obfd, s->output_section))
 	{
-	  asection *op, *op1;
-
 	  h->u.def.value += s->output_offset + s->output_section->vma;
-
-	  /* Find preceding kept section.  */
-	  for (op1 = s->output_section->prev; op1 != NULL; op1 = op1->prev)
-	    if ((op1->flags & SEC_EXCLUDE) == 0
-		&& !bfd_section_removed_from_list (obfd, op1))
-	      break;
-
-	  /* Find following kept section.  Start at prev->next because
-	     other sections may have been added after S was removed.  */
-	  if (s->output_section->prev != NULL)
-	    op = s->output_section->prev->next;
-	  else
-	    op = s->output_section->owner->sections;
-	  for (; op != NULL; op = op->next)
-	    if ((op->flags & SEC_EXCLUDE) == 0
-		&& !bfd_section_removed_from_list (obfd, op))
-	      break;
-
-	  /* Choose better of two sections, based on flags.  The idea
-	     is to choose a section that will be in the same segment
-	     as S would have been if it was kept.  */
-	  if (op1 == NULL)
-	    {
-	      if (op == NULL)
-		op = bfd_abs_section_ptr;
-	    }
-	  else if (op == NULL)
-	    op = op1;
-	  else if (((op1->flags ^ op->flags)
-		    & (SEC_ALLOC | SEC_THREAD_LOCAL)) != 0)
-	    {
-	      if (((op->flags ^ s->flags)
-		   & (SEC_ALLOC | SEC_THREAD_LOCAL)) != 0)
-		op = op1;
-	    }
-	  else if (((op1->flags ^ op->flags) & SEC_READONLY) != 0)
-	    {
-	      if (((op->flags ^ s->flags) & SEC_READONLY) != 0)
-		op = op1;
-	    }
-	  else if (((op1->flags ^ op->flags) & SEC_CODE) != 0)
-	    {
-	      if (((op->flags ^ s->flags) & SEC_CODE) != 0)
-		op = op1;
-	    }
-	  else
-	    {
-	      /* Flags we care about are the same.  Prefer the following
-		 section if that will result in a positive valued sym.  */
-	      if (h->u.def.value < op->vma)
-		op = op1;
-	    }
-
-	  h->u.def.value -= op->vma;
-	  h->u.def.section = op;
+	  h->u.def.section = bfd_abs_section_ptr;
 	}
     }
 

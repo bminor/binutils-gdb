@@ -88,6 +88,8 @@ mi_cmd_stack_list_frames (char *command, char **argv, int argc)
     }
 
   do_cleanups (cleanup_stack);
+  if (i < frame_high)
+    error (_("mi_cmd_stack_list_frames: Not enough frames in stack."));
 
   return MI_CMD_DONE;
 }
@@ -205,6 +207,8 @@ mi_cmd_stack_list_args (char *command, char **argv, int argc)
     }
 
   do_cleanups (cleanup_stack_args);
+  if (i < frame_high)
+    error (_("mi_cmd_stack_list_args: Not enough frames in stack."));
 
   return MI_CMD_DONE;
 }

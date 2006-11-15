@@ -71,9 +71,6 @@ enum errors {
      more detail.  */
   TLS_GENERIC_ERROR,
 
-  /* Problem parsing an XML document.  */
-  XML_PARSE_ERROR,
-
   /* Add more errors here.  */
   NR_ERRORS
 };

@@ -1901,7 +1901,7 @@ elf64_alpha_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      if (rel_sec_name == NULL)
 		return FALSE;
 
-	      BFD_ASSERT (CONST_STRNEQ (rel_sec_name, ".rela")
+	      BFD_ASSERT (strncmp (rel_sec_name, ".rela", 5) == 0
 			  && strcmp (bfd_get_section_name (abfd, sec),
 				     rel_sec_name+5) == 0);
 	    }
@@ -2761,7 +2761,7 @@ elf64_alpha_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	 of the dynobj section names depend upon the input files.  */
       name = bfd_get_section_name (dynobj, s);
 
-      if (CONST_STRNEQ (name, ".rela"))
+      if (strncmp (name, ".rela", 5) == 0)
 	{
 	  if (s->size != 0)
 	    {
@@ -2773,7 +2773,7 @@ elf64_alpha_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      s->reloc_count = 0;
 	    }
 	}
-      else if (! CONST_STRNEQ (name, ".got")
+      else if (strncmp (name, ".got", 4) != 0
 	       && strcmp (name, ".plt") != 0
 	       && strcmp (name, ".dynbss") != 0)
 	{
@@ -5148,9 +5148,9 @@ elf64_alpha_reloc_type_class (const Elf_Internal_Rela *rela)
 
 static const struct bfd_elf_special_section elf64_alpha_special_sections[] =
 {
-  { STRING_COMMA_LEN (".sbss"),  -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE + SHF_ALPHA_GPREL },
-  { STRING_COMMA_LEN (".sdata"), -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE + SHF_ALPHA_GPREL },
-  { NULL,                     0,  0, 0,            0 }
+  { ".sbss",  5, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE + SHF_ALPHA_GPREL },
+  { ".sdata", 6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE + SHF_ALPHA_GPREL },
+  { NULL,     0,  0, 0,            0 }
 };
 
 /* ECOFF swapping routines.  These are used when dealing with the
@@ -5275,8 +5275,6 @@ static const struct elf_size_info alpha_elf_size_info =
   elf64_alpha_always_size_sections
 #define elf_backend_size_dynamic_sections \
   elf64_alpha_size_dynamic_sections
-#define elf_backend_omit_section_dynsym \
-  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
 #define elf_backend_relocate_section \
   elf64_alpha_relocate_section
 #define elf_backend_finish_dynamic_symbol \

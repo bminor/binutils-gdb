@@ -194,14 +194,6 @@ tui_set_source_content (struct symtab *s, int line_no, int noerror)
                                            chars until we do  */
 				  while (c != EOF && c != '\n' && c != '\r')
 				    c = fgetc (stream);
-				  /* Handle non-'\n' end-of-line.  */
-				  if (c == '\r' &&
-				     (c = fgetc (stream)) != '\n' && c != EOF)
-				    {
-				       ungetc (c, stream);
-				       c = '\r';
-				    }
-				  
 				}
 			    }
 			  while (c != EOF && c != '\n' && c != '\r' &&

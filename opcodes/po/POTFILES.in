@@ -131,8 +131,6 @@ ppc-opc.c
 s390-dis.c
 s390-mkopc.c
 s390-opc.c
-score-dis.c
-score-opc.h
 sh64-dis.c
 sh64-opc.c
 sh64-opc.h
@@ -140,8 +138,6 @@ sh-dis.c
 sh-opc.h
 sparc-dis.c
 sparc-opc.c
-spu-dis.c
-spu-opc.c
 sysdep.h
 tic30-dis.c
 tic4x-dis.c

@@ -271,7 +271,6 @@ CODE_FRAGMENT
 .  bfd_error_bad_value,
 .  bfd_error_file_truncated,
 .  bfd_error_file_too_big,
-.  bfd_error_on_input,
 .  bfd_error_invalid_error_code
 .}
 .bfd_error_type;
@@ -279,8 +278,6 @@ CODE_FRAGMENT
 */
 
 static bfd_error_type bfd_error = bfd_error_no_error;
-static bfd *input_bfd = NULL;
-static bfd_error_type input_error = bfd_error_no_error;
 
 const char *const bfd_errmsgs[] =
 {
@@ -303,7 +300,6 @@ const char *const bfd_errmsgs[] =
   N_("Bad value"),
   N_("File truncated"),
   N_("File too big"),
-  N_("Error reading %s: %s"),
   N_("#<Invalid error code>")
 };
 
@@ -329,32 +325,16 @@ FUNCTION
 	bfd_set_error
 
 SYNOPSIS
-	void bfd_set_error (bfd_error_type error_tag, ...);
+	void bfd_set_error (bfd_error_type error_tag);
 
 DESCRIPTION
 	Set the BFD error condition to be @var{error_tag}.
-	If @var{error_tag} is bfd_error_on_input, then this function
-	takes two more parameters, the input bfd where the error
-	occurred, and the bfd_error_type error.
 */
 
 void
-bfd_set_error (bfd_error_type error_tag, ...)
+bfd_set_error (bfd_error_type error_tag)
 {
   bfd_error = error_tag;
-  if (error_tag == bfd_error_on_input)
-    {
-      /* This is an error that occurred during bfd_close when
-	 writing an archive, but on one of the input files.  */
-      va_list ap;
-
-      va_start (ap, error_tag);
-      input_bfd = va_arg (ap, bfd *);
-      input_error = va_arg (ap, int);
-      if (input_error >= bfd_error_on_input)
-	abort ();
-      va_end (ap);
-    }
 }
 
 /*
@@ -375,19 +355,6 @@ bfd_errmsg (bfd_error_type error_tag)
 #ifndef errno
   extern int errno;
 #endif
-  if (error_tag == bfd_error_on_input)
-    {
-      char *buf;
-      const char *msg = bfd_errmsg (input_error);
-
-      if (asprintf (&buf, _(bfd_errmsgs [error_tag]), input_bfd->filename, msg)
-	  != -1)
-	return buf;
-
-      /* Ick, what to do on out of memory?  */
-      return msg;
-    }
-
   if (error_tag == bfd_error_system_call)
     return xstrerror (errno);
 
@@ -415,10 +382,16 @@ DESCRIPTION
 void
 bfd_perror (const char *message)
 {
-  if (message == NULL || *message == '\0')
-    fprintf (stderr, "%s\n", bfd_errmsg (bfd_get_error ()));
+  if (bfd_get_error () == bfd_error_system_call)
+    /* Must be a system error then.  */
+    perror ((char *) message);
   else
-    fprintf (stderr, "%s: %s\n", message, bfd_errmsg (bfd_get_error ()));
+    {
+      if (message == NULL || *message == '\0')
+	fprintf (stderr, "%s\n", bfd_errmsg (bfd_get_error ()));
+      else
+	fprintf (stderr, "%s: %s\n", message, bfd_errmsg (bfd_get_error ()));
+    }
 }
 
 /*
@@ -908,7 +881,7 @@ bfd_get_sign_extend_vma (bfd *abfd)
      no place to store this information in the COFF back end.
      Should enough other COFF targets add support for DWARF2,
      a place will have to be found.  Until then, this hack will do.  */
-  if (CONST_STRNEQ (name, "coff-go32")
+  if (strncmp (name, "coff-go32", sizeof ("coff-go32") - 1) == 0
       || strcmp (name, "pe-i386") == 0
       || strcmp (name, "pei-i386") == 0
       || strcmp (name, "pe-arm-wince-little") == 0

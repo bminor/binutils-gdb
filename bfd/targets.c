@@ -481,8 +481,7 @@ BFD_JUMP_TABLE macros.
 .
 .  {* Check if SEC has been already linked during a reloceatable or
 .     final link.  *}
-.  void (*_section_already_linked) (bfd *, struct bfd_section *,
-.				    struct bfd_link_info *);
+.  void (*_section_already_linked) (bfd *, struct bfd_section *);
 .
 .  {* Routines to handle dynamic symbols and relocs.  *}
 .#define BFD_JUMP_TABLE_DYNAMIC(NAME) \
@@ -625,8 +624,6 @@ extern const bfd_target bfd_elf32_powerpc_vec;
 extern const bfd_target bfd_elf32_powerpcle_vec;
 extern const bfd_target bfd_elf32_powerpc_vxworks_vec;
 extern const bfd_target bfd_elf32_s390_vec;
-extern const bfd_target bfd_elf32_bigscore_vec;
-extern const bfd_target bfd_elf32_littlescore_vec;
 extern const bfd_target bfd_elf32_sh64_vec;
 extern const bfd_target bfd_elf32_sh64l_vec;
 extern const bfd_target bfd_elf32_sh64lin_vec;
@@ -644,7 +641,6 @@ extern const bfd_target bfd_elf32_shnbsd_vec;
 extern const bfd_target bfd_elf32_shvxworks_vec;
 extern const bfd_target bfd_elf32_sparc_vec;
 extern const bfd_target bfd_elf32_sparc_vxworks_vec;
-extern const bfd_target bfd_elf32_spu_vec;
 extern const bfd_target bfd_elf32_tradbigmips_vec;
 extern const bfd_target bfd_elf32_tradlittlemips_vec;
 extern const bfd_target bfd_elf32_us_cris_vec;
@@ -676,7 +672,6 @@ extern const bfd_target bfd_elf64_sh64blin_vec;
 extern const bfd_target bfd_elf64_sh64lnbsd_vec;
 extern const bfd_target bfd_elf64_sh64nbsd_vec;
 extern const bfd_target bfd_elf64_sparc_vec;
-extern const bfd_target bfd_elf64_sparc_freebsd_vec;
 extern const bfd_target bfd_elf64_tradbigmips_vec;
 extern const bfd_target bfd_elf64_tradlittlemips_vec;
 extern const bfd_target bfd_elf64_x86_64_freebsd_vec;
@@ -792,9 +787,6 @@ extern const bfd_target vms_alpha_vec;
 extern const bfd_target vms_vax_vec;
 extern const bfd_target w65_vec;
 extern const bfd_target we32kcoff_vec;
-extern const bfd_target x86_64pe_vec;
-extern const bfd_target x86_64pei_vec;
-extern const bfd_target x86_64coff_vec;
 extern const bfd_target z80coff_vec;
 extern const bfd_target z8kcoff_vec;
 
@@ -819,8 +811,8 @@ extern const bfd_target sco5_core_vec;
 extern const bfd_target trad_core_vec;
 
 extern const bfd_target bfd_elf32_am33lin_vec;
-static const bfd_target * const _bfd_target_vector[] =
-{
+static const bfd_target * const _bfd_target_vector[] = {
+
 #ifdef SELECT_VECS
 
 	SELECT_VECS,
@@ -952,8 +944,6 @@ static const bfd_target * const _bfd_target_vector[] =
 	&bfd_elf32_powerpc_vxworks_vec,
 	&bfd_elf32_powerpcle_vec,
 	&bfd_elf32_s390_vec,
-	&bfd_elf32_bigscore_vec,
-	&bfd_elf32_littlescore_vec, 
         &bfd_elf32_sh_vec,
         &bfd_elf32_shblin_vec,
         &bfd_elf32_shl_vec,
@@ -973,7 +963,6 @@ static const bfd_target * const _bfd_target_vector[] =
 #endif
 	&bfd_elf32_sparc_vec,
 	&bfd_elf32_sparc_vxworks_vec,
-	&bfd_elf32_spu_vec,
 	&bfd_elf32_tradbigmips_vec,
 	&bfd_elf32_tradlittlemips_vec,
 	&bfd_elf32_us_cris_vec,
@@ -1006,7 +995,6 @@ static const bfd_target * const _bfd_target_vector[] =
 	&bfd_elf64_sh64lin_vec,
 	&bfd_elf64_sh64blin_vec,
 	&bfd_elf64_sparc_vec,
-	&bfd_elf64_sparc_freebsd_vec,
 	&bfd_elf64_tradbigmips_vec,
 	&bfd_elf64_tradlittlemips_vec,
 	&bfd_elf64_x86_64_freebsd_vec,
@@ -1062,11 +1050,6 @@ static const bfd_target * const _bfd_target_vector[] =
 	&i386os9k_vec,
 	&i386pe_vec,
 	&i386pei_vec,
-#ifdef BFD64
-	&x86_64coff_vec,
-	&x86_64pe_vec,
-	&x86_64pei_vec,
-#endif
 	&i860coff_vec,
 	&icoff_big_vec,
 	&icoff_little_vec,
@@ -1291,6 +1274,7 @@ find_target (const char *name)
 	  while (match->vector == NULL)
 	    ++match;
 	  return match->vector;
+	  break;
 	}
     }
 

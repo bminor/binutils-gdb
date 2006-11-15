@@ -427,7 +427,7 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
       styp_flags = STYP_LIT;
 #endif /* _LIT */
     }
-  else if (CONST_STRNEQ (sec_name, DOT_DEBUG))
+  else if (!strncmp (sec_name, DOT_DEBUG, sizeof (DOT_DEBUG) - 1))
     {
       /* Handle the XCOFF debug section and DWARF2 debug sections.  */
       if (!sec_name[6])
@@ -435,12 +435,12 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
       else
         styp_flags = STYP_DEBUG_INFO;
     }
-  else if (CONST_STRNEQ (sec_name, ".stab"))
+  else if (!strncmp (sec_name, ".stab", 5))
     {
       styp_flags = STYP_DEBUG_INFO;
     }
 #ifdef COFF_LONG_SECTION_NAMES
-  else if (CONST_STRNEQ (sec_name, GNU_LINKONCE_WI))
+  else if (!strncmp (sec_name, GNU_LINKONCE_WI, sizeof (GNU_LINKONCE_WI) - 1))
     {
       styp_flags = STYP_DEBUG_INFO;
     }
@@ -529,8 +529,8 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
      but there are more IMAGE_SCN_* flags.  */
 
   /* FIXME: There is no gas syntax to specify the debug section flag.  */
-  if (CONST_STRNEQ (sec_name, DOT_DEBUG)
-      || CONST_STRNEQ (sec_name, GNU_LINKONCE_WI))
+  if (strncmp (sec_name, DOT_DEBUG, sizeof (DOT_DEBUG) - 1) == 0
+      || strncmp (sec_name, GNU_LINKONCE_WI, sizeof (GNU_LINKONCE_WI) - 1) == 0)
     sec_flags = SEC_DEBUGGING;
 
   /* skip LOAD */
@@ -674,14 +674,14 @@ styp_to_sec_flags (bfd *abfd ATTRIBUTE_UNUSED,
 #endif
 	sec_flags |= SEC_ALLOC;
     }
-  else if (CONST_STRNEQ (name, DOT_DEBUG)
+  else if (strncmp (name, DOT_DEBUG, sizeof (DOT_DEBUG) - 1) == 0
 #ifdef _COMMENT
 	   || strcmp (name, _COMMENT) == 0
 #endif
 #ifdef COFF_LONG_SECTION_NAMES
-	   || CONST_STRNEQ (name, GNU_LINKONCE_WI)
+	   || strncmp (name, GNU_LINKONCE_WI, sizeof (GNU_LINKONCE_WI) - 1) == 0
 #endif
-	   || CONST_STRNEQ (name, ".stab"))
+	   || strncmp (name, ".stab", 5) == 0)
     {
 #ifdef COFF_PAGE_SIZE
       sec_flags |= SEC_DEBUGGING;
@@ -715,7 +715,7 @@ styp_to_sec_flags (bfd *abfd ATTRIBUTE_UNUSED,
      The symbols will be defined as weak, so that multiple definitions
      are permitted.  The GNU linker extension is to actually discard
      all but one of the sections.  */
-  if (CONST_STRNEQ (name, ".gnu.linkonce"))
+  if (strncmp (name, ".gnu.linkonce", sizeof ".gnu.linkonce" - 1) == 0)
     sec_flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 #endif
 
@@ -1071,7 +1071,7 @@ styp_to_sec_flags (bfd *abfd,
 	  /* The MS PE spec sets the DISCARDABLE flag on .reloc sections
 	     but we do not want them to be labelled as debug section, since
 	     then strip would remove them.  */
-	  if (! CONST_STRNEQ (name, ".reloc"))
+	  if (strncmp (name, ".reloc", sizeof ".reloc" - 1) != 0)
 	    sec_flags |= SEC_DEBUGGING;
 	  break;
 	case IMAGE_SCN_MEM_SHARED:
@@ -1126,7 +1126,7 @@ styp_to_sec_flags (bfd *abfd,
      The symbols will be defined as weak, so that multiple definitions
      are permitted.  The GNU linker extension is to actually discard
      all but one of the sections.  */
-  if (CONST_STRNEQ (name, ".gnu.linkonce"))
+  if (strncmp (name, ".gnu.linkonce", sizeof ".gnu.linkonce" - 1) == 0)
     sec_flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 #endif
 
@@ -1882,15 +1882,9 @@ coff_set_arch_mach_hook (bfd *abfd, void * filehdr)
 #ifdef I386MAGIC
     case I386MAGIC:
     case I386PTXMAGIC:
-    case I386AIXMAGIC:		/* Danbury PS/2 AIX C Compiler.  */
-    case LYNXCOFFMAGIC:		/* Shadows the m68k Lynx number below, sigh.  */
+    case I386AIXMAGIC:		/* Danbury PS/2 AIX C Compiler */
+    case LYNXCOFFMAGIC:	/* shadows the m68k Lynx number below, sigh */
       arch = bfd_arch_i386;
-      break;
-#endif
-#ifdef AMD64MAGIC
-    case AMD64MAGIC:
-      arch = bfd_arch_i386;
-      machine = bfd_mach_x86_64;
       break;
 #endif
 #ifdef IA64MAGIC
@@ -2727,17 +2721,12 @@ coff_set_flags (bfd * abfd,
       return TRUE;
 #endif
 
-#if defined(I386MAGIC) || defined(AMD64MAGIC)
+#ifdef I386MAGIC
     case bfd_arch_i386:
-#if defined(I386MAGIC)
       *magicp = I386MAGIC;
-#endif
-#if defined LYNXOS
+#ifdef LYNXOS
       /* Just overwrite the usual value if we're doing Lynx.  */
       *magicp = LYNXCOFFMAGIC;
-#endif
-#if defined AMD64MAGIC
-      *magicp = AMD64MAGIC;
 #endif
       return TRUE;
 #endif
@@ -3770,7 +3759,6 @@ coff_write_object_contents (bfd * abfd)
     internal_f.f_flags |= IMAGE_FILE_LARGE_ADDRESS_AWARE;
 #endif
 
-#ifndef COFF_WITH_pex64
 #ifdef COFF_WITH_PE
   internal_f.f_flags |= IMAGE_FILE_32BIT_MACHINE;
 #else
@@ -3778,7 +3766,6 @@ coff_write_object_contents (bfd * abfd)
     internal_f.f_flags |= F_AR32WR;
   else
     internal_f.f_flags |= F_AR32W;
-#endif
 #endif
 
 #ifdef TI_TARGET_ID
@@ -3873,18 +3860,16 @@ coff_write_object_contents (bfd * abfd)
 
 #if defined(I386)
 #define __A_MAGIC_SET__
-#if defined LYNXOS
+#if defined(LYNXOS)
     internal_a.magic = LYNXCOFFMAGIC;
-#elif defined AMD64
-    internal_a.magic = IMAGE_NT_OPTIONAL_HDR64_MAGIC;
-#else
+#else  /* LYNXOS */
     internal_a.magic = ZMAGIC;
-#endif
+#endif /* LYNXOS */
 #endif /* I386 */
 
 #if defined(IA64)
 #define __A_MAGIC_SET__
-    internal_a.magic = PE32PMAGIC;
+    internal_a.magic = ZMAGIC;
 #endif /* IA64 */
 
 #if defined(SPARC)

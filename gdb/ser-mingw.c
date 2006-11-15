@@ -658,19 +658,16 @@ free_pipe_state (struct pipe_state *ps)
   int saved_errno = errno;
 
   if (ps->wait.read_event != INVALID_HANDLE_VALUE)
-    {
-      SetEvent (ps->wait.exit_select);
+    CloseHandle (ps->wait.read_event);
+  if (ps->wait.except_event != INVALID_HANDLE_VALUE)
+    CloseHandle (ps->wait.except_event);
+  if (ps->wait.start_select != INVALID_HANDLE_VALUE)
+    CloseHandle (ps->wait.start_select);
 
-      WaitForSingleObject (ps->wait.thread, INFINITE);
-
-      CloseHandle (ps->wait.start_select);
-      CloseHandle (ps->wait.stop_select);
-      CloseHandle (ps->wait.exit_select);
-      CloseHandle (ps->wait.have_stopped);
-
-      CloseHandle (ps->wait.read_event);
-      CloseHandle (ps->wait.except_event);
-    }
+  /* If we have a select thread running, let the select thread free
+     the stop event.  */
+  if (ps->wait.stop_select != INVALID_HANDLE_VALUE)
+    SetEvent (ps->wait.stop_select);
 
   /* Close the pipe to the child.  We must close the pipe before
      calling pex_free because pex_free will wait for the child to exit
@@ -815,16 +812,9 @@ pipe_wait_handle (struct serial *scb, HANDLE *read, HANDLE *except)
     {
       DWORD threadId;
 
-      /* Create auto reset events to wake, stop, and exit the select
-	 thread.  */
+      /* Create auto reset events to wake and terminate the select thread.  */
       ps->wait.start_select = CreateEvent (0, FALSE, FALSE, 0);
       ps->wait.stop_select = CreateEvent (0, FALSE, FALSE, 0);
-      ps->wait.exit_select = CreateEvent (0, FALSE, FALSE, 0);
-
-      /* Create a manual reset event to signal whether the thread is
-	 stopped.  This must be manual reset, because we may wait on
-	 it multiple times without ever starting the thread.  */
-      ps->wait.have_stopped = CreateEvent (0, TRUE, FALSE, 0);
 
       /* Create our own events to report read and exceptions separately.
 	 The exception event is currently never used.  */
@@ -835,30 +825,15 @@ pipe_wait_handle (struct serial *scb, HANDLE *read, HANDLE *except)
       CreateThread (NULL, 0, pipe_select_thread, scb, 0, &threadId);
     }
 
-  *read = ps->wait.read_event;
-  *except = ps->wait.except_event;
-
-  /* Start from a blank state.  */
   ResetEvent (ps->wait.read_event);
   ResetEvent (ps->wait.except_event);
-  ResetEvent (ps->wait.stop_select);
 
-  /* Start the select thread.  */
   SetEvent (ps->wait.start_select);
+
+  *read = ps->wait.read_event;
+  *except = ps->wait.except_event;
 }
 
-static void
-pipe_done_wait_handle (struct serial *scb)
-{
-  struct pipe_state *ps = scb->state;
-
-  /* Have we allocated our events yet?  */
-  if (ps->wait.read_event == INVALID_HANDLE_VALUE)
-    return;
-
-  SetEvent (ps->wait.stop_select);
-  WaitForSingleObject (ps->wait.have_stopped, INFINITE);
-}
 
 struct net_windows_state
 {
@@ -1158,7 +1133,6 @@ _initialize_ser_windows (void)
   ops->read_prim = pipe_windows_read;
   ops->write_prim = pipe_windows_write;
   ops->wait_handle = pipe_wait_handle;
-  ops->done_wait_handle = pipe_done_wait_handle;
 
   serial_add_interface (ops);
 

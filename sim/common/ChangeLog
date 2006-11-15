@@ -1,25 +1,3 @@
-2006-11-07  Thiemo Seufer  <ths@mips.com>
-
-	* gentmap.c: Fix compile time warning.
-
-2006-11-07  Thiemo Seufer  <ths@mips.com>
-
-	* sim-base.h (text_start, text_end, start_addr): Use bfd_vma type
-	for bfd text addresses.
-
-2006-08-29  Thiemo Seufer  <ths@mips.com>
-            Nigel Stephens  <nigel@mips.com>
-
-	* sim-fpu.c (pack_fpu): Handle QUIET_NAN correctly for
-	SIM_QUIET_NAN_NEGATED.
-
-2006-08-29  Nigel Stephens  <nigel@mips.com>
-
-	* sim-profile.c (profile_pc_init): Initialise default profiling
-	frequency to a prime number.
-	(profile_print_pc): Convert gmon.out sample data into target
-	byte order.
-
 2006-06-13  Richard Earnshaw  <rearnsha@arm.com>
 
 	* aclocal.m4: Pass ../../intl to ZW_GNU_GETTEXT_SISTER_DIR.

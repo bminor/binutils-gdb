@@ -8,15 +8,12 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
 
 int main (void)
 {
   /* The number 166 is chosen because there's a gap for that number in
      the CRIS asm/unistd.h.  */
-  int err = syscall (166, 1, 2, 3, 4, 5, 6);
-  if (err == -1 && errno == ENOSYS)
-    printf ("ENOSYS\n");
+  syscall (166, 1, 2, 3, 4, 5, 6);
   printf ("xyzzy\n");
   exit (0);
 }

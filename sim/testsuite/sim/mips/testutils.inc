@@ -47,10 +47,8 @@
 	.macro setup
 
 	.global _start
-	.global __start
 	.ent _start
 _start:
-__start:
 	.set push
 	.set noreorder
 	j	DIAG

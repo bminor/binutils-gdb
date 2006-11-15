@@ -1537,23 +1537,11 @@ add_section_size_callback (bfd *abfd, asection *asec, void *data)
 /* Opaque data for load_section_callback.  */
 struct load_section_data {
   unsigned long load_offset;
-  struct load_progress_data *progress_data;
-  VEC(memory_write_request_s) *requests;
-};
-
-/* Opaque data for load_progress.  */
-struct load_progress_data {
-  /* Cumulative data.  */
   unsigned long write_count;
   unsigned long data_count;
   bfd_size_type total_size;
-};
 
-/* Opaque data for load_progress for a single section.  */
-struct load_progress_section_data {
-  struct load_progress_data *cumulative;
-
-  /* Per-section data.  */
+  /* Per-section data for load_progress.  */
   const char *section_name;
   ULONGEST section_sent;
   ULONGEST section_size;
@@ -1561,30 +1549,12 @@ struct load_progress_section_data {
   gdb_byte *buffer;
 };
 
-/* Target write callback routine for progress reporting.  */
+/* Target write callback routine for load_section_callback.  */
 
 static void
 load_progress (ULONGEST bytes, void *untyped_arg)
 {
-  struct load_progress_section_data *args = untyped_arg;
-  struct load_progress_data *totals;
-
-  if (args == NULL)
-    /* Writing padding data.  No easy way to get at the cumulative
-       stats, so just ignore this.  */
-    return;
-
-  totals = args->cumulative;
-
-  if (bytes == 0 && args->section_sent == 0)
-    {
-      /* The write is just starting.  Let the user know we've started
-	 this section.  */
-      ui_out_message (uiout, 0, "Loading section %s, size 0x%s lma 0x%s\n",
-		      args->section_name, paddr_nz (args->section_size),
-		      paddr_nz (args->lma));
-      return;
-    }
+  struct load_section_data *args = untyped_arg;
 
   if (validate_download)
     {
@@ -1606,10 +1576,10 @@ load_progress (ULONGEST bytes, void *untyped_arg)
 	       paddr (args->lma));
       do_cleanups (verify_cleanups);
     }
-  totals->data_count += bytes;
+  args->data_count += bytes;
   args->lma += bytes;
   args->buffer += bytes;
-  totals->write_count += 1;
+  args->write_count += 1;
   args->section_sent += bytes;
   if (quit_flag
       || (deprecated_ui_load_progress_hook != NULL
@@ -1621,8 +1591,8 @@ load_progress (ULONGEST bytes, void *untyped_arg)
     deprecated_show_load_progress (args->section_name,
 				   args->section_sent,
 				   args->section_size,
-				   totals->data_count,
-				   totals->total_size);
+				   args->data_count,
+				   args->total_size);
 }
 
 /* Callback service function for generic_load (bfd_map_over_sections).  */
@@ -1630,12 +1600,12 @@ load_progress (ULONGEST bytes, void *untyped_arg)
 static void
 load_section_callback (bfd *abfd, asection *asec, void *data)
 {
-  struct memory_write_request *new_request;
   struct load_section_data *args = data;
-  struct load_progress_section_data *section_data;
   bfd_size_type size = bfd_get_section_size (asec);
   gdb_byte *buffer;
+  struct cleanup *old_chain;
   const char *sect_name = bfd_get_section_name (abfd, asec);
+  LONGEST transferred;
 
   if ((bfd_get_section_flags (abfd, asec) & SEC_LOAD) == 0)
     return;
@@ -1643,63 +1613,49 @@ load_section_callback (bfd *abfd, asection *asec, void *data)
   if (size == 0)
     return;
 
-  new_request = VEC_safe_push (memory_write_request_s,
-			       args->requests, NULL);
-  memset (new_request, 0, sizeof (struct memory_write_request));
-  section_data = xcalloc (1, sizeof (struct load_progress_section_data));
-  new_request->begin = bfd_section_lma (abfd, asec) + args->load_offset;
-  new_request->end = new_request->begin + size; /* FIXME Should size be in instead?  */
-  new_request->data = xmalloc (size);
-  new_request->baton = section_data;
+  buffer = xmalloc (size);
+  old_chain = make_cleanup (xfree, buffer);
 
-  buffer = new_request->data;
+  args->section_name = sect_name;
+  args->section_sent = 0;
+  args->section_size = size;
+  args->lma = bfd_section_lma (abfd, asec) + args->load_offset;
+  args->buffer = buffer;
 
-  section_data->cumulative = args->progress_data;
-  section_data->section_name = sect_name;
-  section_data->section_size = size;
-  section_data->lma = new_request->begin;
-  section_data->buffer = buffer;
+  /* Is this really necessary?  I guess it gives the user something
+     to look at during a long download.  */
+  ui_out_message (uiout, 0, "Loading section %s, size 0x%s lma 0x%s\n",
+		  sect_name, paddr_nz (size), paddr_nz (args->lma));
 
   bfd_get_section_contents (abfd, asec, buffer, 0, size);
-}
 
-/* Clean up an entire memory request vector, including load
-   data and progress records.  */
+  transferred = target_write_with_progress (&current_target,
+					    TARGET_OBJECT_MEMORY,
+					    NULL, buffer, args->lma,
+					    size, load_progress, args);
+  if (transferred < size)
+    error (_("Memory access error while loading section %s."),
+	   sect_name);
 
-static void
-clear_memory_write_data (void *arg)
-{
-  VEC(memory_write_request_s) **vec_p = arg;
-  VEC(memory_write_request_s) *vec = *vec_p;
-  int i;
-  struct memory_write_request *mr;
-
-  for (i = 0; VEC_iterate (memory_write_request_s, vec, i, mr); ++i)
-    {
-      xfree (mr->data);
-      xfree (mr->baton);
-    }
-  VEC_free (memory_write_request_s, vec);
+  do_cleanups (old_chain);
 }
 
 void
 generic_load (char *args, int from_tty)
 {
+  asection *s;
   bfd *loadfile_bfd;
   struct timeval start_time, end_time;
   char *filename;
   struct cleanup *old_cleanups = make_cleanup (null_cleanup, 0);
   struct load_section_data cbdata;
-  struct load_progress_data total_progress;
-
   CORE_ADDR entry;
   char **argv;
 
-  memset (&cbdata, 0, sizeof (cbdata));
-  memset (&total_progress, 0, sizeof (total_progress));
-  cbdata.progress_data = &total_progress;
-
-  make_cleanup (clear_memory_write_data, &cbdata.requests);
+  cbdata.load_offset = 0;	/* Offset to add to vma for each section. */
+  cbdata.write_count = 0;	/* Number of writes needed. */
+  cbdata.data_count = 0;	/* Number of bytes written to target memory. */
+  cbdata.total_size = 0;	/* Total size of all bfd sectors. */
 
   argv = buildargv (args);
 
@@ -1746,15 +1702,11 @@ generic_load (char *args, int from_tty)
     }
 
   bfd_map_over_sections (loadfile_bfd, add_section_size_callback,
-			 (void *) &total_progress.total_size);
-
-  bfd_map_over_sections (loadfile_bfd, load_section_callback, &cbdata);
+			 (void *) &cbdata.total_size);
 
   gettimeofday (&start_time, NULL);
 
-  if (target_write_memory_blocks (cbdata.requests, flash_discard,
-				  load_progress) != 0)
-    error (_("Load failed"));
+  bfd_map_over_sections (loadfile_bfd, load_section_callback, &cbdata);
 
   gettimeofday (&end_time, NULL);
 
@@ -1762,7 +1714,7 @@ generic_load (char *args, int from_tty)
   ui_out_text (uiout, "Start address ");
   ui_out_field_fmt (uiout, "address", "0x%s", paddr_nz (entry));
   ui_out_text (uiout, ", load size ");
-  ui_out_field_fmt (uiout, "load-size", "%lu", total_progress.data_count);
+  ui_out_field_fmt (uiout, "load-size", "%lu", cbdata.data_count);
   ui_out_text (uiout, "\n");
   /* We were doing this in remote-mips.c, I suspect it is right
      for other targets too.  */
@@ -1774,9 +1726,8 @@ generic_load (char *args, int from_tty)
      file is loaded in.  Some targets do (e.g., remote-vx.c) but
      others don't (or didn't - perhaps they have all been deleted).  */
 
-  print_transfer_performance (gdb_stdout, total_progress.data_count,
-			      total_progress.write_count,
-			      &start_time, &end_time);
+  print_transfer_performance (gdb_stdout, cbdata.data_count,
+			      cbdata.write_count, &start_time, &end_time);
 
   do_cleanups (old_cleanups);
 }

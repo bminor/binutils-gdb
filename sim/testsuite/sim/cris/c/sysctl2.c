@@ -10,7 +10,6 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
 
 int main (void)
 {
@@ -33,9 +32,7 @@ int main (void)
      (void *) -1, &x, NULL, 0
    };
 
-  int err = syscall (SYS__sysctl, &scargs);
-  if (err == -1 && errno == ENOSYS)
-    printf ("ENOSYS\n");
+ syscall (SYS__sysctl, &scargs);
  printf ("xyzzy\n");
  exit (0);
 }

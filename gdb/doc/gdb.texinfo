@@ -497,11 +497,6 @@ Jacobowitz, Jeff Johnston, Mark Kettenis, Theodore A. Roth, Kei
 Sakamoto, Yoshinori Sato, Michael Snyder, Corinna Vinschen, and Ulrich
 Weigand.
 
-Christian Zankel, Ross Morley, Bob Wilson, and Maxim Grigoriev from
-Tensilica, Inc.@: contributed support for Xtensa processors.  Others
-who have worked on the Xtensa port of @value{GDBN} in the past include
-Steve Tjiang, John Newlin, and Scott Foehner.
-
 @node Sample Session
 @chapter A Sample @value{GDBN} Session
 
@@ -542,7 +537,7 @@ $ @b{./m4}
 
 @b{define(baz,defn(<QUOTE>foo<UNQUOTE>))}
 @b{baz}
-@b{Ctrl-d}
+@b{C-d}
 m4: End of input: 0: fatal error: EOF in string
 @end smallexample
 
@@ -759,7 +754,7 @@ problem seems to have been just the two typos defining the wrong
 lengths.  We allow @code{m4} exit by giving it an EOF as input:
 
 @smallexample
-@b{Ctrl-d}
+@b{C-d}
 Program exited normally.
 @end smallexample
 
@@ -781,7 +776,7 @@ The essentials are:
 @item
 type @samp{@value{GDBP}} to start @value{GDBN}.
 @item
-type @kbd{quit} or @kbd{Ctrl-d} to exit.
+type @kbd{quit} or @kbd{C-d} to exit.
 @end itemize
 
 @menu
@@ -1282,14 +1277,14 @@ CISCO 68k: @file{.cisco-gdbinit}
 @item quit @r{[}@var{expression}@r{]}
 @itemx q
 To exit @value{GDBN}, use the @code{quit} command (abbreviated
-@code{q}), or type an end-of-file character (usually @kbd{Ctrl-d}).  If you
+@code{q}), or type an end-of-file character (usually @kbd{C-d}).  If you
 do not supply @var{expression}, @value{GDBN} will terminate normally;
 otherwise it will terminate using the result of @var{expression} as the
 error code.
 @end table
 
 @cindex interrupt
-An interrupt (often @kbd{Ctrl-c}) does not exit from @value{GDBN}, but rather
+An interrupt (often @kbd{C-c}) does not exit from @value{GDBN}, but rather
 terminates the action of any @value{GDBN} command that is in progress and
 returns to @value{GDBN} command level.  It is safe to type the interrupt
 character at any time because @value{GDBN} does not allow it to take effect
@@ -1416,9 +1411,9 @@ nothing.  This is useful mainly in command files (@pxref{Command
 Files,,Command files}).
 
 @cindex repeating command sequences
-@kindex Ctrl-o @r{(operate-and-get-next)}
-The @kbd{Ctrl-o} binding is useful for repeating a complex sequence of
-commands.  This command accepts the current line, like @key{RET}, and
+@kindex C-o @r{(operate-and-get-next)}
+The @kbd{C-o} binding is useful for repeating a complex sequence of
+commands.  This command accepts the current line, like @kbd{RET}, and
 then fetches the next line relative to the current line from the history
 for editing.
 
@@ -2579,13 +2574,13 @@ as shown in the first field of the @samp{info forks} display.
 @end table
 
 To quit debugging one of the forked processes, you can either detach
-from it by using the @w{@code{detach fork}} command (allowing it to
+from it by using the @w{@code{detach-fork}} command (allowing it to
 run independently), or delete (and kill) it using the
 @w{@code{delete fork}} command.
 
 @table @code
-@kindex detach fork @var{fork-id}
-@item detach fork @var{fork-id}
+@kindex detach-fork @var{fork-id}
+@item detach-fork @var{fork-id}
 Detach from the process identified by @value{GDBN} fork number
 @var{fork-id}, and remove it from the fork list.  The process will be
 allowed to run independently.
@@ -2778,19 +2773,15 @@ in shared library routines that are not called directly by the program
 call).
 
 @cindex watchpoints
-@cindex data breakpoints
 @cindex memory tracing
 @cindex breakpoint on memory address
 @cindex breakpoint on variable modification
 A @dfn{watchpoint} is a special breakpoint that stops your program
-when the value of an expression changes.  The expression may be a value
-of a variable, or it could involve values of one or more variables
-combined by operators, such as @samp{a + b}.  This is sometimes called
-@dfn{data breakpoints}.  You must use a different command to set
-watchpoints (@pxref{Set Watchpoints, ,Setting watchpoints}), but aside
-from that, you can manage a watchpoint like any other breakpoint: you
-enable, disable, and delete both breakpoints and watchpoints using the
-same commands.
+when the value of an expression changes.  You must use a different
+command to set watchpoints (@pxref{Set Watchpoints, ,Setting
+watchpoints}), but aside from that, you can manage a watchpoint like
+any other breakpoint: you enable, disable, and delete both breakpoints
+and watchpoints using the same commands.
 
 You can arrange to have values from your program displayed automatically
 whenever @value{GDBN} stops at a breakpoint.  @xref{Auto Display,,
@@ -2994,9 +2985,7 @@ The @code{rbreak} command can be used to set breakpoints in
 @itemx info break @r{[}@var{n}@r{]}
 @itemx info watchpoints @r{[}@var{n}@r{]}
 Print a table of all breakpoints, watchpoints, and catchpoints set and
-not deleted.  Optional argument @var{n} means print information only
-about the specified breakpoint (or watchpoint or catchpoint).  For
-each breakpoint, following columns are printed:
+not deleted, with the following columns for each breakpoint:
 
 @table @emph
 @item Breakpoint Numbers
@@ -3115,24 +3104,7 @@ You can see these breakpoints with the @value{GDBN} maintenance command
 @cindex setting watchpoints
 You can use a watchpoint to stop execution whenever the value of an
 expression changes, without having to predict a particular place where
-this may happen.  (This is sometimes called a @dfn{data breakpoint}.)
-The expression may be as simple as the value of a single variable, or
-as complex as many variables combined by operators.  Examples include:
-
-@itemize @bullet
-@item
-A reference to the value of a single variable.
-
-@item
-An address cast to an appropriate data type.  For example,
-@samp{*(int *)0x12345678} will watch a 4-byte region at the specified
-address (assuming an @code{int} occupies 4 bytes).
-
-@item
-An arbitrarily complex expression, such as @samp{a*b + c/d}.  The
-expression can use any operators valid in the program's native
-language (@pxref{Languages}).
-@end itemize
+this may happen.
 
 @cindex software watchpoints
 @cindex hardware watchpoints
@@ -3150,14 +3122,8 @@ watchpoints, which do not slow down the running of your program.
 @table @code
 @kindex watch
 @item watch @var{expr}
-Set a watchpoint for an expression.  @value{GDBN} will break when the
-expression @var{expr} is written into by the program and its value
-changes.  The simplest (and the most popular) use of this command is
-to watch the value of a single variable:
-
-@smallexample
-(@value{GDBP}) watch foo
-@end smallexample
+Set a watchpoint for an expression.  @value{GDBN} will break when @var{expr}
+is written into by the program and its value changes.
 
 @kindex rwatch
 @item rwatch @var{expr}
@@ -3169,7 +3135,7 @@ by the program.
 Set a watchpoint that will break when @var{expr} is either read from
 or written into by the program.
 
-@kindex info watchpoints @r{[}@var{n}@r{]}
+@kindex info watchpoints
 @item info watchpoints
 This command prints a list of watchpoints, breakpoints, and catchpoints;
 it is the same as @code{info break} (@pxref{Set Breaks}).
@@ -3248,11 +3214,6 @@ Hardware watchpoint @var{num}: Could not insert watchpoint
 
 @noindent
 If this happens, delete or disable some of the watchpoints.
-
-Watching complex expressions that reference many variables can also
-exhaust the resources available for hardware-assisted watchpoints.
-That's because @value{GDBN} needs to watch every variable in the
-expression with separately allocated resources.
 
 The SPARClite DSU will generate traps when a program accesses some data
 or instruction address that is assigned to the debug registers.  For the
@@ -4135,7 +4096,7 @@ An argument is a repeat count, as in @code{next}.
 A signal is an asynchronous event that can happen in a program.  The
 operating system defines the possible kinds of signals, and gives each
 kind a name and a number.  For example, in Unix @code{SIGINT} is the
-signal a program gets when you type an interrupt character (often @kbd{Ctrl-c});
+signal a program gets when you type an interrupt character (often @kbd{C-c});
 @code{SIGSEGV} is the signal a program gets from referencing a place in
 memory far away from all the areas in use; @code{SIGALRM} occurs when
 the alarm clock timer goes off (which happens only if your program has
@@ -4169,19 +4130,15 @@ Print a table of all the kinds of signals and how @value{GDBN} has been told to
 handle each one.  You can use this to see the signal numbers of all
 the defined types of signals.
 
-@item info signals @var{sig}
-Similar, but print information only about the specified signal number.
-
 @code{info handle} is an alias for @code{info signals}.
 
 @kindex handle
-@item handle @var{signal} @r{[}@var{keywords}@dots{}@r{]}
+@item handle @var{signal} @var{keywords}@dots{}
 Change the way @value{GDBN} handles signal @var{signal}.  @var{signal}
 can be the number of a signal or its name (with or without the
 @samp{SIG} at the beginning); a list of signal numbers of the form
 @samp{@var{low}-@var{high}}; or the word @samp{all}, meaning all the
-known signals.  Optional arguments @var{keywords}, described below,
-say what change to make.
+known signals.  The @var{keywords} say what change to make.
 @end table
 
 @c @group
@@ -4498,7 +4455,7 @@ Print a backtrace of the entire stack: one line per frame for all
 frames in the stack.
 
 You can stop the backtrace at any time by typing the system interrupt
-character, normally @kbd{Ctrl-c}.
+character, normally @kbd{C-c}.
 
 @item backtrace @var{n}
 @itemx bt @var{n}
@@ -4509,11 +4466,8 @@ Similar, but print only the innermost @var{n} frames.
 Similar, but print only the outermost @var{n} frames.
 
 @item backtrace full
+Print the values of the local variables also.
 @itemx bt full
-@itemx bt full @var{n}
-@itemx bt full -@var{n}
-Print the values of the local variables also.  @var{n} specifies the
-number of frames to print, as described above.
 @end table
 
 @kindex where
@@ -6745,8 +6699,8 @@ identified by an integer tag; the meanings are well-known but system-specific.
 Depending on the configuration and operating system facilities,
 @value{GDBN} may be able to show you this information.  For remote
 targets, this functionality may further depend on the remote stub's
-support of the @samp{qXfer:auxv:read} packet, see
-@ref{qXfer auxiliary vector read}.
+support of the @samp{qXfer:auxv:read} packet, see @ref{Remote
+configuration, auxiliary vector}.
 
 @table @code
 @kindex info auxv
@@ -6766,12 +6720,9 @@ an unrecognized tag.
 @cindex memory region attributes
 
 @dfn{Memory region attributes} allow you to describe special handling
-required by regions of your target's memory.  @value{GDBN} uses
-attributes to determine whether to allow certain types of memory
-accesses; whether to use specific width accesses; and whether to cache
-target memory.  By default the description of memory regions is
-fetched from the target (if the current target supports this), but the
-user can override the fetched regions.
+required by regions of your target's memory.  @value{GDBN} uses attributes
+to determine whether to allow certain types of memory accesses; whether to
+use specific width accesses; and whether to cache target memory.
 
 Defined memory regions can be individually enabled and disabled.  When a
 memory region is disabled, @value{GDBN} uses the default attributes when
@@ -6790,10 +6741,6 @@ attributes @var{attributes}@dots{}, and add it to the list of regions
 monitored by @value{GDBN}.  Note that @var{upper} == 0 is a special
 case: it is treated as the the target's maximum memory address.
 (0xffff on 16 bit targets, 0xffffffff on 32 bit targets, etc.)
-
-@item mem auto
-Discard any user changes to the memory regions and use target-supplied
-regions, if available, or no regions if the target does not support.
 
 @kindex delete mem
 @item delete mem @var{nums}@dots{}
@@ -12337,9 +12284,6 @@ link the program; for other formats, like a.out, the object file format
 specifies a fixed address.
 @c FIXME! This would be a good place for an xref to the GNU linker doc.
 
-Depending on the remote side capabilities, @value{GDBN} may be able to
-load programs into flash memory.
-
 @code{load} does not repeat if you press @key{RET} again after using it.
 @end table
 
@@ -12516,7 +12460,7 @@ remote program.
 @cindex interrupting remote programs
 @cindex remote programs, interrupting
 Whenever @value{GDBN} is waiting for the remote program, if you type the
-interrupt character (often @kbd{Ctrl-c}), @value{GDBN} attempts to stop the
+interrupt character (often @key{C-C}), @value{GDBN} attempts to stop the
 program.  This may or may not succeed, depending in part on the hardware
 and the serial drivers the remote system uses.  If you type the
 interrupt character once again, @value{GDBN} displays this prompt:
@@ -12706,7 +12650,7 @@ Show the current speed of the remote connection.
 @cindex BREAK signal instead of Ctrl-C
 @anchor{set remotebreak}
 If set to on, @value{GDBN} sends a @code{BREAK} signal to the remote
-when you type @kbd{Ctrl-c} to interrupt the program running
+when you press the @key{Ctrl-C} key to interrupt the program running
 on the remote.  If set to off, @value{GDBN} sends the @samp{Ctrl-C}
 character instead.  The default is off, since most remote systems
 expect to see @samp{Ctrl-C} as the interrupt signal.
@@ -12765,83 +12709,133 @@ responses.
 @itemx set remote hardware-breakpoint-limit @var{limit}
 Restrict @value{GDBN} to using @var{limit} remote hardware breakpoint or
 watchpoints.  A limit of -1, the default, is treated as unlimited.
+
+@item set remote fetch-register-packet
+@itemx set remote set-register-packet
+@itemx set remote P-packet
+@itemx set remote p-packet
+@cindex P-packet
+@cindex fetch registers from remote targets
+@cindex set registers in remote targets
+Determine whether @value{GDBN} can set and fetch registers from the
+remote target using the @samp{P} packets.  The default depends on the
+remote stub's support of the @samp{P} packets (@value{GDBN} queries
+the stub when this packet is first required).
+
+@item show remote fetch-register-packet
+@itemx show remote set-register-packet
+@itemx show remote P-packet
+@itemx show remote p-packet
+Show the current setting of using the @samp{P} packets for setting and
+fetching registers from the remote target.
+
+@cindex binary downloads
+@cindex X-packet
+@item set remote binary-download-packet
+@itemx set remote X-packet
+Determine whether @value{GDBN} sends downloads in binary mode using
+the @samp{X} packets.  The default is on.
+
+@item show remote binary-download-packet
+@itemx show remote X-packet
+Show the current setting of using the @samp{X} packets for binary
+downloads.
+
+@item set remote read-aux-vector-packet
+@cindex auxiliary vector of remote target
+@cindex @code{auxv}, and remote targets
+Set the use of the remote protocol's @samp{qXfer:auxv:read} (target
+auxiliary vector) request.  This request is used to fetch the
+remote target's @dfn{auxiliary vector}, see @ref{OS Information,
+Auxiliary Vector}.  The default setting depends on the remote stub's
+support of this request (@value{GDBN} queries the stub when this
+request is first required).  @xref{General Query Packets, qXfer}, for
+more information about this request.
+
+@item show remote read-aux-vector-packet
+Show the current setting of use of the @samp{qXfer:auxv:read} request.
+
+@item set remote symbol-lookup-packet
+@cindex remote symbol lookup request
+Set the use of the remote protocol's @samp{qSymbol} (target symbol
+lookup) request.  This request is used to communicate symbol
+information to the remote target, e.g., whenever a new shared library
+is loaded by the remote (@pxref{Files, shared libraries}).  The
+default setting depends on the remote stub's support of this request
+(@value{GDBN} queries the stub when this request is first required).
+@xref{General Query Packets, qSymbol}, for more information about this
+request.
+
+@item show remote symbol-lookup-packet
+Show the current setting of use of the @samp{qSymbol} request.
+
+@item set remote verbose-resume-packet
+@cindex resume remote target
+@cindex signal thread, and remote targets
+@cindex single-step thread, and remote targets
+@cindex thread-specific operations on remote targets
+Set the use of the remote protocol's @samp{vCont} (descriptive resume)
+request.  This request is used to resume specific threads in the
+remote target, and to single-step or signal them.  The default setting
+depends on the remote stub's support of this request (@value{GDBN}
+queries the stub when this request is first required).  This setting
+affects debugging of multithreaded programs: if @samp{vCont} cannot be
+used, @value{GDBN} might be unable to single-step a specific thread,
+especially under @code{set scheduler-locking off}; it is also
+impossible to pause a specific thread.  @xref{Packets, vCont}, for
+more details.
+
+@item show remote verbose-resume-packet
+Show the current setting of use of the @samp{vCont} request
+
+@item set remote software-breakpoint-packet
+@itemx set remote hardware-breakpoint-packet
+@itemx set remote write-watchpoint-packet
+@itemx set remote read-watchpoint-packet
+@itemx set remote access-watchpoint-packet
+@itemx set remote Z-packet
+@cindex Z-packet
+@cindex remote hardware breakpoints and watchpoints
+These commands enable or disable the use of @samp{Z} packets for
+setting breakpoints and watchpoints in the remote target.  The default
+depends on the remote stub's support of the @samp{Z} packets
+(@value{GDBN} queries the stub when each packet is first required).
+The command @code{set remote Z-packet}, kept for back-compatibility,
+turns on or off all the features that require the use of @samp{Z}
+packets.
+
+@item show remote software-breakpoint-packet
+@itemx show remote hardware-breakpoint-packet
+@itemx show remote write-watchpoint-packet
+@itemx show remote read-watchpoint-packet
+@itemx show remote access-watchpoint-packet
+@itemx show remote Z-packet
+Show the current setting of @samp{Z} packets usage.
+
+@item set remote get-thread-local-storage-address
+@kindex set remote get-thread-local-storage-address
+@cindex thread local storage of remote targets
+This command enables or disables the use of the @samp{qGetTLSAddr}
+(Get Thread Local Storage Address) request packet.  The default
+depends on whether the remote stub supports this request.
+@xref{General Query Packets, qGetTLSAddr}, for more details about this
+packet.
+
+@item show remote get-thread-local-storage-address
+@kindex show remote get-thread-local-storage-address
+Show the current setting of @samp{qGetTLSAddr} packet usage.
+
+@item set remote supported-packets
+@kindex set remote supported-packets
+@cindex query supported packets of remote targets
+This command enables or disables the use of the @samp{qSupported}
+request packet.  @xref{General Query Packets, qSupported}, for more
+details about this packet.  The default is to use @samp{qSupported}.
+
+@item show remote supported-packets
+@kindex show remote supported-packets
+Show the current setting of @samp{qSupported} packet usage.
 @end table
-
-@cindex remote packets, enabling and disabling
-The @value{GDBN} remote protocol autodetects the packets supported by
-your debugging stub.  If you need to override the autodetection, you
-can use these commands to enable or disable individual packets.  Each
-packet can be set to @samp{on} (the remote target supports this
-packet), @samp{off} (the remote target does not support this packet),
-or @samp{auto} (detect remote target support for this packet).  They
-all default to @samp{auto}.  For more information about each packet,
-see @ref{Remote Protocol}.
-
-During normal use, you should not have to use any of these commands.
-If you do, that may be a bug in your remote debugging stub, or a bug
-in @value{GDBN}.  You may want to report the problem to the
-@value{GDBN} developers.
-
-The available settings are:
-
-@multitable @columnfractions 0.3 0.2 0.35
-@item Command Name
-@tab Remote Packet
-@tab Related Features
-
-@item @code{fetch-register-packet}
-@tab @code{p}
-@tab @code{info registers}
-
-@item @code{set-register-packet}
-@tab @code{P}
-@tab @code{set}
-
-@item @code{binary-download-packet}
-@tab @code{X}
-@tab @code{load}, @code{set}
-
-@item @code{read-aux-vector-packet}
-@tab @code{qXfer:auxv:read}
-@tab @code{info auxv}
-
-@item @code{symbol-lookup-packet}
-@tab @code{qSymbol}
-@tab Detecting multiple threads
-
-@item @code{verbose-resume-packet}
-@tab @code{vCont}
-@tab Stepping or resuming multiple threads
-
-@item @code{software-breakpoint-packet}
-@tab @code{Z0}
-@tab @code{break}
-
-@item @code{hardware-breakpoint-packet}
-@tab @code{Z1}
-@tab @code{hbreak}
-
-@item @code{write-watchpoint-packet}
-@tab @code{Z2}
-@tab @code{watch}
-
-@item @code{read-watchpoint-packet}
-@tab @code{Z3}
-@tab @code{rwatch}
-
-@item @code{access-watchpoint-packet}
-@tab @code{Z4}
-@tab @code{awatch}
-
-@item @code{get-thread-local-storage-address-packet}
-@tab @code{qGetTLSAddr}
-@tab Displaying @code{__thread} variables
-
-@item @code{supported-packets}
-@tab @code{qSupported}
-@tab Remote communications parameters
-
-@end multitable
 
 @node remote stub
 @section Implementing a remote stub
@@ -13610,7 +13604,7 @@ when the debuggee is started.
 This boolean value controls whether the debuggee should
 start a new group or stay in the same group as the debugger.
 This affects the way the Windows OS handles
-@samp{Ctrl-C}.
+Ctrl-C.
 
 @kindex show new-group
 @item show new-group
@@ -14457,7 +14451,7 @@ you can't send an interrupt---but you can press the @sc{reset} switch!
 Use the @sc{reset} button on the development board
 @itemize @bullet
 @item
-to interrupt your program (don't use @kbd{Ctrl-c} on the DOS host---it has
+to interrupt your program (don't use @kbd{ctl-C} on the DOS host---it has
 no way to pass an interrupt signal to the development board); and
 
 @item
@@ -15250,8 +15244,8 @@ manual for available commands.
 Connect the controlling terminal to the STDBUG command monitor.  When
 you are done interacting with STDBUG, typing either of two character
 sequences gets you back to the @value{GDBN} command prompt:
-@kbd{@key{RET} ~ .} (Return, followed by tilde and period) or
-@kbd{@key{RET} ~ Ctrl-d} (Return, followed by tilde and control-D).
+@kbd{@key{RET}~.} (Return, followed by tilde and period) or
+@kbd{@key{RET}~@key{C-d}} (Return, followed by tilde and control-D).
 @end table
 
 @node Z8000
@@ -16930,7 +16924,7 @@ In the TUI mode, the arrow keys are used by the active window
 for scrolling.  This means they are available for readline when the
 active window is the command window.  When the command window
 does not have the focus, it is necessary to use other readline
-key bindings such as @kbd{C-p}, @kbd{C-n}, @kbd{C-b} and @kbd{C-f}.
+key bindings such as @key{C-p}, @key{C-n}, @key{C-b} and @key{C-f}.
 
 @node TUI Single Key Mode
 @section TUI Single Key Mode
@@ -16988,7 +16982,7 @@ The key that was pressed is inserted in the editing buffer so that
 it is possible to type most @value{GDBN} commands without interaction
 with the TUI @emph{SingleKey} mode.  Once the command is entered the TUI
 @emph{SingleKey} mode is restored.  The only way to permanently leave
-this mode is by typing @kbd{q} or @kbd{C-x s}.
+this mode is by hitting @key{q} or @samp{@key{C-x} @key{s}}.
 
 
 @node TUI Commands
@@ -17033,7 +17027,7 @@ can be affected to another window.
 
 @item refresh
 @kindex refresh
-Refresh the screen.  This is similar to typing @kbd{C-L}.
+Refresh the screen.  This is similar to using @key{C-L} key.
 
 @item tui reg float
 @kindex tui reg
@@ -17237,7 +17231,7 @@ Go down the number of frames indicated by the numeric argument, like the
 @value{GDBN} @code{down} command.
 @end table
 
-In any source file, the Emacs command @kbd{C-x @key{SPC}} (@code{gud-break})
+In any source file, the Emacs command @kbd{C-x SPC} (@code{gud-break})
 tells @value{GDBN} to set a breakpoint on the source line point is on.
 
 If you type @kbd{M-x speedbar}, then Emacs displays a separate frame which
@@ -19236,12 +19230,8 @@ For a stack with frame levels 0 through 11:
 
 Display a list of the arguments for the frames between @var{low-frame}
 and @var{high-frame} (inclusive).  If @var{low-frame} and
-@var{high-frame} are not provided, list the arguments for the whole
-call stack.  If the two arguments are equal, show the single frame
-at the corresponding level.  It is an error if @var{low-frame} is
-larger than the actual number of frames.  On the other hand,
-@var{high-frame} may be larger than the actual number of frames, in
-which case only existing frames will be returned.
+@var{high-frame} are not provided, list the arguments for the whole call
+stack.
 
 The @var{show-values} argument must have a value of 0 or 1.  A value of
 0 means that only the names of the arguments are listed, a value of 1
@@ -19341,10 +19331,7 @@ Line number corresponding to the @code{$pc}.
 If invoked without arguments, this command prints a backtrace for the
 whole stack.  If given two integer arguments, it shows the frames whose
 levels are between the two arguments (inclusive).  If the two arguments
-are equal, it shows the single frame at the corresponding level.  It is
-an error if @var{low-frame} is larger than the actual number of
-frames.  On the other hand, @var{high-frame} may be larger than the
-actual number of frames, in which case only existing frames will be returned.
+are equal, it shows the single frame at the corresponding level.
 
 @subsubheading @value{GDBN} Command
 
@@ -21484,34 +21471,34 @@ features the following annotations:
 The input types are
 
 @table @code
-@findex pre-prompt annotation
-@findex prompt annotation
-@findex post-prompt annotation
+@findex pre-prompt
+@findex prompt
+@findex post-prompt
 @item prompt
 When @value{GDBN} is prompting for a command (the main @value{GDBN} prompt).
 
-@findex pre-commands annotation
-@findex commands annotation
-@findex post-commands annotation
+@findex pre-commands
+@findex commands
+@findex post-commands
 @item commands
 When @value{GDBN} prompts for a set of commands, like in the @code{commands}
 command.  The annotations are repeated for each command which is input.
 
-@findex pre-overload-choice annotation
-@findex overload-choice annotation
-@findex post-overload-choice annotation
+@findex pre-overload-choice
+@findex overload-choice
+@findex post-overload-choice
 @item overload-choice
 When @value{GDBN} wants the user to select between various overloaded functions.
 
-@findex pre-query annotation
-@findex query annotation
-@findex post-query annotation
+@findex pre-query
+@findex query
+@findex post-query
 @item query
 When @value{GDBN} wants the user to confirm a potentially dangerous operation.
 
-@findex pre-prompt-for-continue annotation
-@findex prompt-for-continue annotation
-@findex post-prompt-for-continue annotation
+@findex pre-prompt-for-continue
+@findex prompt-for-continue
+@findex post-prompt-for-continue
 @item prompt-for-continue
 When @value{GDBN} is asking the user to press return to continue.  Note: Don't
 expect this to work well; instead use @code{set height 0} to disable
@@ -21523,14 +21510,14 @@ presence of annotations.
 @section Errors
 @cindex annotations for errors, warnings and interrupts
 
-@findex quit annotation
+@findex quit
 @smallexample
 ^Z^Zquit
 @end smallexample
 
 This annotation occurs right before @value{GDBN} responds to an interrupt.
 
-@findex error annotation
+@findex error
 @smallexample
 ^Z^Zerror
 @end smallexample
@@ -21545,7 +21532,7 @@ cannot expect not to receive it either, however; an error annotation
 does not necessarily mean that @value{GDBN} is immediately returning all the way
 to the top level.
 
-@findex error-begin annotation
+@findex error-begin
 A quit or error annotation may be preceded by
 
 @smallexample
@@ -21567,13 +21554,13 @@ The following annotations say that certain pieces of state may have
 changed.
 
 @table @code
-@findex frames-invalid annotation
+@findex frames-invalid
 @item ^Z^Zframes-invalid
 
 The frames (for example, output from the @code{backtrace} command) may
 have changed.
 
-@findex breakpoints-invalid annotation
+@findex breakpoints-invalid
 @item ^Z^Zbreakpoints-invalid
 
 The breakpoints may have changed.  For example, the user just added or
@@ -21584,8 +21571,8 @@ deleted a breakpoint.
 @section Running the Program
 @cindex annotations for running programs
 
-@findex starting annotation
-@findex stopping annotation
+@findex starting
+@findex stopping
 When the program starts executing due to a @value{GDBN} command such as
 @code{step} or @code{continue},
 
@@ -21603,16 +21590,16 @@ is output.  Before the @code{stopped} annotation, a variety of
 annotations describe how the program stopped.
 
 @table @code
-@findex exited annotation
+@findex exited
 @item ^Z^Zexited @var{exit-status}
 The program exited, and @var{exit-status} is the exit status (zero for
 successful exit, otherwise nonzero).
 
-@findex signalled annotation
-@findex signal-name annotation
-@findex signal-name-end annotation
-@findex signal-string annotation
-@findex signal-string-end annotation
+@findex signalled
+@findex signal-name
+@findex signal-name-end
+@findex signal-string
+@findex signal-string-end
 @item ^Z^Zsignalled
 The program exited with a signal.  After the @code{^Z^Zsignalled}, the
 annotation continues:
@@ -21636,17 +21623,17 @@ as @code{Illegal Instruction} or @code{Segmentation fault}.
 @var{intro-text}, @var{middle-text}, and @var{end-text} are for the
 user's benefit and have no particular format.
 
-@findex signal annotation
+@findex signal
 @item ^Z^Zsignal
 The syntax of this annotation is just like @code{signalled}, but @value{GDBN} is
 just saying that the program received the signal, not that it was
 terminated with it.
 
-@findex breakpoint annotation
+@findex breakpoint
 @item ^Z^Zbreakpoint @var{number}
 The program hit breakpoint number @var{number}.
 
-@findex watchpoint annotation
+@findex watchpoint
 @item ^Z^Zwatchpoint @var{number}
 The program hit watchpoint number @var{number}.
 @end table
@@ -21655,7 +21642,7 @@ The program hit watchpoint number @var{number}.
 @section Displaying Source
 @cindex annotations for source display
 
-@findex source annotation
+@findex source
 The following annotation is used instead of displaying source code:
 
 @smallexample
@@ -22653,7 +22640,6 @@ Show the current setting of the target wait timeout.
 * Interrupts::
 * Examples::
 * File-I/O remote protocol extension::
-* Memory map format::
 @end menu
 
 @node Overview
@@ -23001,7 +22987,7 @@ suitable for accessing memory-mapped I/O devices.
 Reply:
 @table @samp
 @item @var{XX@dots{}}
-Memory contents; each byte is transmitted as a two-digit hexadecimal
+Memory contents; each byte is transmitted as a two-digit hexidecimal
 number.  The reply may contain fewer bytes than requested if the
 server was able to read only part of the region of memory.
 @item E @var{NN}
@@ -23012,7 +22998,7 @@ server was able to read only part of the region of memory.
 @cindex @samp{M} packet
 Write @var{length} bytes of memory starting at address @var{addr}.
 @var{XX@dots{}} is the data; each byte is transmitted as a two-digit
-hexadecimal number.
+hexidecimal number.
 
 Reply:
 @table @samp
@@ -23043,7 +23029,7 @@ Indicating an unrecognized @var{query}.
 @anchor{write register packet}
 @cindex @samp{P} packet
 Write register @var{n@dots{}} with value @var{r@dots{}}.  The register
-number @var{n} is in hexadecimal, and @var{r@dots{}} contains two hex
+number @var{n} is in hexidecimal, and @var{r@dots{}} contains two hex
 digits for each byte in the register (target byte order).
 
 Reply:
@@ -23151,58 +23137,6 @@ command in the @samp{vCont} packet.
 @item
 The @samp{vCont} packet is not supported.
 @end table
-
-@item vFlashErase:@var{addr},@var{length}
-@cindex @samp{vFlashErase} packet
-Direct the stub to erase @var{length} bytes of flash starting at
-@var{addr}.  The region may enclose any number of flash blocks, but
-its start and end must fall on block boundaries, as indicated by the
-flash block size appearing in the memory map (@pxref{Memory map
-format}).  @value{GDBN} groups flash memory programming operations
-together, and sends a @samp{vFlashDone} request after each group; the
-stub is allowed to delay erase operation until the @samp{vFlashDone}
-packet is received.
-
-Reply:
-@table @samp
-@item OK
-for success
-@item E @var{NN}
-for an error
-@end table
-
-@item vFlashWrite:@var{addr}:@var{XX@dots{}}
-@cindex @samp{vFlashWrite} packet
-Direct the stub to write data to flash address @var{addr}.  The data
-is passed in binary form using the same encoding as for the @samp{X}
-packet (@pxref{Binary Data}).  The memory ranges specified by
-@samp{vFlashWrite} packets preceding a @samp{vFlashDone} packet must
-not overlap, and must appear in order of increasing addresses
-(although @samp{vFlashErase} packets for higher addresses may already
-have been received; the ordering is guaranteed only between
-@samp{vFlashWrite} packets).  If a packet writes to an address that was
-neither erased by a preceding @samp{vFlashErase} packet nor by some other
-target-specific method, the results are unpredictable.
-
-
-Reply:
-@table @samp
-@item OK
-for success
-@item E.memtype
-for vFlashWrite addressing non-flash memory
-@item E @var{NN}
-for an error
-@end table
-
-@item vFlashDone
-@cindex @samp{vFlashDone} packet
-Indicate to the stub that flash programming operation is finished.
-The stub is permitted to delay or batch the effects of a group of
-@samp{vFlashErase} and @samp{vFlashWrite} packets until a
-@samp{vFlashDone} packet is received.  The contents of the affected
-regions of flash memory are unpredictable until the @samp{vFlashDone}
-request is completed.
 
 @item X @var{addr},@var{length}:@var{XX@dots{}}
 @anchor{X packet}
@@ -23358,13 +23292,13 @@ components.
 @table @samp
 
 @item S @var{AA}
-The program received signal number @var{AA} (a two-digit hexadecimal
+The program received signal number @var{AA} (a two-digit hexidecimal
 number).  This is equivalent to a @samp{T} response with no
 @var{n}:@var{r} pairs.
 
 @item T @var{AA} @var{n1}:@var{r1};@var{n2}:@var{r2};@dots{}
 @cindex @samp{T} packet reply
-The program received signal number @var{AA} (a two-digit hexadecimal
+The program received signal number @var{AA} (a two-digit hexidecimal
 number).  This is equivalent to an @samp{S} response, except that the
 @samp{@var{n}:@var{r}} pairs can carry values of important registers
 and other information directly in the stop reply packet, reducing
@@ -23372,7 +23306,7 @@ round-trip latency.  Single-step and breakpoint traps are reported
 this way.  Each @samp{@var{n}:@var{r}} pair is interpreted as follows:
 @enumerate
 @item
-If @var{n} is a hexadecimal number, it is a register number, and the
+If @var{n} is a hexidecimal number, it is a register number, and the
 corresponding @var{r} gives that register's value.  @var{r} is a
 series of bytes in target byte order, with each byte given by a
 two-digit hex number.
@@ -23479,7 +23413,7 @@ Return the current thread id.
 Reply:
 @table @samp
 @item QC @var{pid}
-Where @var{pid} is an unsigned hexadecimal process id.
+Where @var{pid} is an unsigned hexidecimal process id.
 @item @r{(anything else)}
 Any other reply implies the old pid.
 @end table
@@ -23558,6 +23492,10 @@ An error occurred.  @var{nn} are hex digits.
 @item
 An empty reply indicates that @samp{qGetTLSAddr} is not supported by the stub.
 @end table
+
+Use of this request packet is controlled by the @code{set remote
+get-thread-local-storage-address} command (@pxref{Remote
+configuration, set remote get-thread-local-storage-address}).
 
 @item qL @var{startflag} @var{threadcount} @var{nextthread}
 Obtain thread information from RTOS.  Where: @var{startflag} (one hex
@@ -23742,11 +23680,6 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab Yes
 
-@item @samp{qXfer:memory-map:read}
-@tab No
-@tab @samp{-}
-@tab Yes
-
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -23844,7 +23777,6 @@ packets.)
 @item qXfer:@var{object}:read:@var{annex}:@var{offset},@var{length}
 @cindex read special object, remote request
 @cindex @samp{qXfer} packet
-@anchor{qXfer read}
 Read uninterpreted bytes from the target's special data area
 identified by the keyword @var{object}.  Request @var{length} bytes
 starting at @var{offset} bytes into the data.  The content and
@@ -23859,21 +23791,11 @@ formats, listed below.
 @item qXfer:auxv:read::@var{offset},@var{length}
 @anchor{qXfer auxiliary vector read}
 Access the target's @dfn{auxiliary vector}.  @xref{OS Information,
-auxiliary vector}.  Note @var{annex} must be empty.
+auxiliary vector}, and @ref{Remote configuration,
+read-aux-vector-packet}.  Note @var{annex} must be empty.
 
 This packet is not probed by default; the remote stub must request it,
 by suppling an appropriate @samp{qSupported} response (@pxref{qSupported}).
-@end table
-
-@table @samp
-@item qXfer:memory-map:read::@var{offset},@var{length}
-@anchor{qXfer memory map read}
-Access the target's @dfn{memory-map}.  @xref{Memory map format}.  The
-annex part of the generic @samp{qXfer} packet must be empty
-(@pxref{qXfer read}).
-
-This packet is not probed by default; the remote stub must request it,
-by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
 @end table
 
 Reply:
@@ -23952,21 +23874,21 @@ must respond with an empty packet.
 The following @code{g}/@code{G} packets have previously been defined.
 In the below, some thirty-two bit registers are transferred as
 sixty-four bits.  Those registers should be zero/sign extended (which?)
-to fill the space allocated.  Register bytes are transferred in target
-byte order.  The two nibbles within a register byte are transferred
+to fill the space allocated.  Register bytes are transfered in target
+byte order.  The two nibbles within a register byte are transfered
 most-significant - least-significant.
 
 @table @r
 
 @item MIPS32
 
-All registers are transferred as thirty-two bit quantities in the order:
+All registers are transfered as thirty-two bit quantities in the order:
 32 general-purpose; sr; lo; hi; bad; cause; pc; 32 floating-point
 registers; fsr; fir; fp.
 
 @item MIPS64
 
-All registers are transferred as sixty-four bit quantities (including
+All registers are transfered as sixty-four bit quantities (including
 thirty-two bit registers such as @code{sr}).  The ordering is the same
 as @code{MIPS32}.
 
@@ -24022,7 +23944,7 @@ following forms:
 
 @item R @var{mask}
 Collect the registers whose bits are set in @var{mask}.  @var{mask} is
-a hexadecimal number whose @var{i}'th bit is set if register number
+a hexidecimal number whose @var{i}'th bit is set if register number
 @var{i} should be collected.  (The least significant bit is numbered
 zero.)  Note that @var{mask} may be any number of digits long; it may
 not fit in a 32-bit word.
@@ -24032,7 +23954,7 @@ Collect @var{len} bytes of memory starting at the address in register
 number @var{basereg}, plus @var{offset}.  If @var{basereg} is
 @samp{-1}, then the range has a fixed address: @var{offset} is the
 address of the lowest byte to collect.  The @var{basereg},
-@var{offset}, and @var{len} parameters are all unsigned hexadecimal
+@var{offset}, and @var{len} parameters are all unsigned hexidecimal
 values (the @samp{-1} value for @var{basereg} is a special case).
 
 @item X @var{len},@var{expr}
@@ -24075,29 +23997,29 @@ one of the following forms:
 @table @samp
 @item F @var{f}
 The selected frame is number @var{n} in the trace frame buffer;
-@var{f} is a hexadecimal number.  If @var{f} is @samp{-1}, then there
+@var{f} is a hexidecimal number.  If @var{f} is @samp{-1}, then there
 was no frame matching the criteria in the request packet.
 
 @item T @var{t}
 The selected trace frame records a hit of tracepoint number @var{t};
-@var{t} is a hexadecimal number.
+@var{t} is a hexidecimal number.
 
 @end table
 
 @item QTFrame:pc:@var{addr}
 Like @samp{QTFrame:@var{n}}, but select the first tracepoint frame after the
 currently selected frame whose PC is @var{addr};
-@var{addr} is a hexadecimal number.
+@var{addr} is a hexidecimal number.
 
 @item QTFrame:tdp:@var{t}
 Like @samp{QTFrame:@var{n}}, but select the first tracepoint frame after the
 currently selected frame that is a hit of tracepoint @var{t}; @var{t}
-is a hexadecimal number.
+is a hexidecimal number.
 
 @item QTFrame:range:@var{start}:@var{end}
 Like @samp{QTFrame:@var{n}}, but select the first tracepoint frame after the
 currently selected frame whose PC is between @var{start} (inclusive)
-and @var{end} (exclusive); @var{start} and @var{end} are hexadecimal
+and @var{end} (exclusive); @var{start} and @var{end} are hexidecimal
 numbers.
 
 @item QTFrame:outside:@var{start}:@var{end}
@@ -24241,7 +24163,7 @@ or @samp{s} packets.  While @value{GDBN} handles the request for a system call,
 the target is stopped to allow deterministic access to the target's
 memory.  Therefore File-I/O is not interruptible by target signals.  On
 the other hand, it is possible to interrupt File-I/O by a user interrupt 
-(@samp{Ctrl-C}) within @value{GDBN}.
+(Ctrl-C) within @value{GDBN}.
 
 The target's request to perform a host system call does not finish
 the latest @samp{C}, @samp{c}, @samp{S} or @samp{s} action.  That means,
@@ -24397,16 +24319,16 @@ assuming 4 is the protocol specific representation of @code{EINTR}.
 
 
 @node The Ctrl-C message
-@subsection The @samp{Ctrl-C} message
+@subsection The Ctrl-C message
 @cindex ctrl-c message, in file-i/o protocol
 
-If the @samp{Ctrl-C} flag is set in the @value{GDBN}
-reply packet (@pxref{The F reply packet}),
+If the Ctrl-C flag is set in the @value{GDBN}
+reply packet (@pxref{The F reply packet}), 
 the target should behave as if it had
 gotten a break message.  The meaning for the target is ``system call
 interrupted by @code{SIGINT}''.  Consequentially, the target should actually stop
 (as with a break message) and return to @value{GDBN} with a @code{T02}
-packet.
+packet.  
 
 It's important for the target to know in which
 state the system call was interrupted.  There are two possible cases:
@@ -24449,17 +24371,17 @@ conditions is met:
 
 @itemize @bullet
 @item
-The user types @kbd{Ctrl-c}.  The behaviour is as explained above, and the
+The user presses @kbd{Ctrl-C}.  The behaviour is as explained above, and the
 @code{read}
 system call is treated as finished.
 
 @item
-The user presses @key{RET}.  This is treated as end of input with a trailing
+The user presses @kbd{Enter}.  This is treated as end of input with a trailing
 newline.
 
 @item
-The user types @kbd{Ctrl-d}.  This is treated as end of input.  No trailing
-character (neither newline nor @samp{Ctrl-D}) is appended to the input.
+The user presses @kbd{Ctrl-D}.  This is treated as end of input.  No trailing
+character (neither newline nor Ctrl-D) is appended to the input.
 
 @end itemize
 
@@ -25338,7 +25260,7 @@ file descriptor (@code{EBADF}):
 -> @code{F-1,9}
 @end smallexample
 
-Example sequence of a read call, user presses @kbd{Ctrl-c} before syscall on
+Example sequence of a read call, user presses Ctrl-C before syscall on
 host is called:
 
 @smallexample
@@ -25347,95 +25269,13 @@ host is called:
 <- @code{T02}
 @end smallexample
 
-Example sequence of a read call, user presses @kbd{Ctrl-c} after syscall on
+Example sequence of a read call, user presses Ctrl-C after syscall on
 host is called:
 
 @smallexample
 <- @code{Fread,3,1234,6}
 -> @code{X1234,6:XXXXXX}
 <- @code{T02}
-@end smallexample
-
-@node Memory map format
-@section Memory map format
-@cindex memory map format
-
-To be able to write into flash memory, @value{GDBN} needs to obtain a
-memory map from the target.  This section describes the format of the
-memory map.
-
-The memory map is obtained using the @samp{qXfer:memory-map:read}
-(@pxref{qXfer memory map read}) packet and is an XML document that
-lists memory regions.  The top-level structure of the document is shown below:
-
-@smallexample
-<?xml version="1.0"?>
-<!DOCTYPE memory-map
-          PUBLIC "+//IDN gnu.org//DTD GDB Memory Map V1.0//EN"
-                 "http://sourceware.org/gdb/gdb-memory-map.dtd">
-<memory-map>
-    region...
-</memory-map>
-@end smallexample
-
-Each region can be either:
-
-@itemize
-
-@item
-A region of RAM starting at @var{addr} and extending for @var{length}
-bytes from there:
-
-@smallexample
-<memory type="ram" start="@var{addr}" length="@var{length}"/>
-@end smallexample
-
-
-@item
-A region of read-only memory:
-
-@smallexample
-<memory type="rom" start="@var{addr}" length="@var{length}"/>
-@end smallexample
-
-
-@item
-A region of flash memory, with erasure blocks @var{blocksize}
-bytes in length:
-
-@smallexample
-<memory type="flash" start="@var{addr}" length="@var{length}">
-  <property name="blocksize">@var{blocksize}</property>
-</memory>
-@end smallexample
-
-@end itemize
-
-Regions must not overlap.  @value{GDBN} assumes that areas of memory not covered
-by the memory map are RAM, and uses the ordinary @samp{M} and @samp{X}
-packets to write to addresses in such ranges.
-
-The formal DTD for memory map format is given below:
-
-@smallexample
-<!-- ................................................... -->
-<!-- Memory Map XML DTD ................................ -->
-<!-- File: memory-map.dtd .............................. -->
-<!-- .................................... .............. -->
-<!-- memory-map.dtd -->
-<!-- memory-map: Root element with versioning -->
-<!ELEMENT memory-map (memory | property)>
-<!ATTLIST memory-map    version CDATA   #FIXED  "1.0.0">
-<!ELEMENT memory (property)>
-<!-- memory: Specifies a memory region,
-             and its type, or device. -->
-<!ATTLIST memory        type    CDATA   #REQUIRED
-                        start   CDATA   #REQUIRED
-                        length  CDATA   #REQUIRED
-                        device  CDATA   #IMPLIED>
-<!-- property: Generic attribute tag -->
-<!ELEMENT property (#PCDATA | property)*>
-<!ATTLIST property      name    CDATA   #REQUIRED>
 @end smallexample
 
 @include agentexpr.texi

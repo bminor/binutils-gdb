@@ -889,8 +889,6 @@ const struct elf_size_info elf64_sparc_size_info =
   _bfd_sparc_elf_gc_mark_hook
 #define elf_backend_gc_sweep_hook \
   _bfd_sparc_elf_gc_sweep_hook
-#define elf_backend_init_index_section \
-  _bfd_elf_init_1_index_section
 
 #define elf_backend_can_gc_sections 1
 #define elf_backend_can_refcount 1
@@ -904,33 +902,3 @@ const struct elf_size_info elf64_sparc_size_info =
 #define elf_backend_plt_alignment 8
 
 #include "elf64-target.h"
-
-/* FreeBSD support */
-#undef  TARGET_BIG_SYM
-#define TARGET_BIG_SYM bfd_elf64_sparc_freebsd_vec
-#undef  TARGET_BIG_NAME
-#define TARGET_BIG_NAME "elf64-sparc-freebsd"
-
-/* The kernel recognizes executables as valid only if they carry a
-   "FreeBSD" label in the ELF header.  So we put this label on all
-   executables and (for simplicity) also all other object files.  */
-
-static void
-elf64_sparc_fbsd_post_process_headers (bfd *abfd,
-                                       struct bfd_link_info *info ATTRIBUTE_UNUSED)
-{
-  Elf_Internal_Ehdr *i_ehdrp;	/* ELF file header, internal form.  */
-
-  i_ehdrp = elf_elfheader (abfd);
-
-  /* Put an ABI label supported by FreeBSD >= 4.1 */
-  i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_FREEBSD;
-}
-
-#undef  elf_backend_post_process_headers
-#define elf_backend_post_process_headers	elf64_sparc_fbsd_post_process_headers
-#undef  elf64_bed
-#define elf64_bed				elf64_sparc_fbsd_bed
-
-#include "elf64-target.h"
-

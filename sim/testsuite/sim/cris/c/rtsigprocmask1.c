@@ -13,7 +13,6 @@
 #include <unistd.h>
 #include <signal.h>
 #include <pthread.h>
-#include <errno.h>
 
 static void *
 process (void *arg)
@@ -39,13 +38,8 @@ main (void)
     abort ();
 
   /* An invalid parameter 1 should cause this to halt the simulator.  */
-  retcode
-    = pthread_sigmask (SIG_BLOCK + SIG_UNBLOCK + SIG_SETMASK, NULL, &sigs);
-  /* Direct return of the error number; i.e. not using -1 and errno,
-     is the actual documented behavior.  */
-  if (retcode == ENOSYS)
-    printf ("ENOSYS\n");
-
+  pthread_sigmask (SIG_BLOCK + SIG_UNBLOCK + SIG_SETMASK,
+		   NULL, &sigs);
   printf ("xyzzy\n");
   return 0;
 }

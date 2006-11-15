@@ -655,7 +655,7 @@ i370_elf_size_dynamic_sections (bfd *output_bfd,
 	  /* Remember whether there is a PLT.  */
 	  plt = s->size != 0;
 	}
-      else if (CONST_STRNEQ (name, ".rela"))
+      else if (strncmp (name, ".rela", 5) == 0)
 	{
 	  if (s->size != 0)
 	    {
@@ -867,7 +867,7 @@ i370_elf_check_relocs (bfd *abfd,
 	      if (name == NULL)
 		return FALSE;
 
-	      BFD_ASSERT (CONST_STRNEQ (name, ".rela")
+	      BFD_ASSERT (strncmp (name, ".rela", 5) == 0
 			  && strcmp (bfd_get_section_name (abfd, sec), name + 5) == 0);
 
 	      sreloc = bfd_get_section_by_name (dynobj, name);
@@ -1236,7 +1236,7 @@ i370_elf_relocate_section (bfd *output_bfd,
 		  if (name == NULL)
 		    return FALSE;
 
-		  BFD_ASSERT (CONST_STRNEQ (name, ".rela")
+		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
 			      && strcmp (bfd_get_section_name (input_bfd,
 							       input_section),
 					 name + 5) == 0);
@@ -1290,21 +1290,9 @@ i370_elf_relocate_section (bfd *output_bfd,
 			{
 			  asection *osec;
 
-			  /* We are turning this relocation into one
-			     against a section symbol.  It would be
-			     proper to subtract the symbol's value,
-			     osec->vma, from the emitted reloc addend,
-			     but ld.so expects buggy relocs.  */
 			  osec = sec->output_section;
 			  indx = elf_section_data (osec)->dynindx;
-			  if (indx == 0)
-			    {
-			      struct elf_link_hash_table *htab;
-			      htab = elf_hash_table (info);
-			      osec = htab->text_index_section;
-			      indx = elf_section_data (osec)->dynindx;
-			    }
-			  BFD_ASSERT (indx != 0);
+			  BFD_ASSERT(indx > 0);
 #ifdef DEBUG
 			  if (indx <= 0)
 			    {
@@ -1439,7 +1427,6 @@ i370_elf_post_process_headers (bfd * abfd,
    link glibc's ld.so without errors.  */
 #define elf_backend_create_dynamic_sections	i370_elf_create_dynamic_sections
 #define elf_backend_size_dynamic_sections	i370_elf_size_dynamic_sections
-#define elf_backend_init_index_section		_bfd_elf_init_1_index_section
 #define elf_backend_finish_dynamic_sections	i370_elf_finish_dynamic_sections
 #define elf_backend_fake_sections		i370_elf_fake_sections
 #define elf_backend_section_from_shdr		i370_elf_section_from_shdr

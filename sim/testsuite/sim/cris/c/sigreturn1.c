@@ -9,13 +9,10 @@
 #include <sys/syscall.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
 
 int main (void)
 {
-  int err = syscall (SYS_sigreturn, 1, 2, 3, 4, 5, 6);
-  if (err == -1 && errno == ENOSYS)
-    printf ("ENOSYS\n");
+  syscall (SYS_sigreturn, 1, 2, 3, 4, 5, 6);
   printf ("xyzzy\n");
   exit (0);
 }

@@ -383,8 +383,8 @@ gdbsim_kill (void)
     printf_filtered ("gdbsim_kill\n");
 
   /* There is no need to `kill' running simulator - the simulator is
-     not running.  Mourning it is enough.  */
-  target_mourn_inferior ();
+     not running */
+  inferior_ptid = null_ptid;
 }
 
 /* Load an executable file into the target process.  This is expected to
@@ -409,6 +409,8 @@ gdbsim_load (char *args, int fromtty)
 
   if (sr_get_debug ())
     printf_filtered ("gdbsim_load: prog \"%s\"\n", prog);
+
+  inferior_ptid = null_ptid;
 
   /* FIXME: We will print two messages on error.
      Need error to either not print anything if passed NULL or need
@@ -467,7 +469,6 @@ gdbsim_create_inferior (char *exec_file, char *args, char **env, int from_tty)
   sim_create_inferior (gdbsim_desc, exec_bfd, argv, env);
 
   inferior_ptid = pid_to_ptid (42);
-  target_mark_running (&gdbsim_ops);
   insert_breakpoints ();	/* Needed to get correct instruction in cache */
 
   clear_proceed_status ();
@@ -506,7 +507,7 @@ gdbsim_open (char *args, int from_tty)
   strcpy (arg_buf, "gdbsim");	/* 7 */
   /* Specify the byte order for the target when it is both selectable
      and explicitly specified by the user (not auto detected). */
-  switch (TARGET_BYTE_ORDER)
+  switch (selected_byte_order ())
     {
     case BFD_ENDIAN_BIG:
       strcat (arg_buf, " -E big");
@@ -542,12 +543,8 @@ gdbsim_open (char *args, int from_tty)
     error (_("unable to create simulator instance"));
 
   push_target (&gdbsim_ops);
+  target_fetch_registers (-1);
   printf_filtered ("Connected to the simulator.\n");
-
-  /* There's nothing running after "target sim" or "load"; not until
-     "run".  */
-  inferior_ptid = null_ptid;
-  target_mark_exited (&gdbsim_ops);
 }
 
 /* Does whatever cleanup is required for a target that we are no longer
@@ -750,12 +747,6 @@ gdbsim_xfer_inferior_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
 			     int write, struct mem_attrib *attrib,
 			     struct target_ops *target)
 {
-  /* If no program is running yet, then ignore the simulator for
-     memory.  Pass the request down to the next target, hopefully
-     an exec file.  */
-  if (!target_has_execution)
-    return 0;
-
   if (!program_loaded)
     error (_("No program loaded."));
 
@@ -811,7 +802,6 @@ gdbsim_mourn_inferior (void)
     printf_filtered ("gdbsim_mourn_inferior:\n");
 
   remove_breakpoints ();
-  target_mark_exited (&gdbsim_ops);
   generic_mourn_inferior ();
 }
 

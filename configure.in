@@ -279,7 +279,7 @@ case "${host}" in
     ;;
   i[[3456789]]86-*-mingw32*)
     # noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr uudecode dejagnu diff guile perl itcl gnuserv"
-    noconfigdirs="$noconfigdirs expect dejagnu autoconf automake send-pr rcs guile perl texinfo libtool newlib"
+    noconfigdirs="$noconfigdirs expect dejagnu autoconf automake send-pr rcs guile perl texinfo libtool"
     ;;
   i[[3456789]]86-*-beos*)
     noconfigdirs="$noconfigdirs tk itcl libgui gdb"
@@ -507,7 +507,7 @@ case "${target}" in
     noconfigdirs="$noconfigdirs target-libiberty target-libstdc++-v3 ${libgcj}"
     ;;
   bfin-*-*)
-    noconfigdirs="$noconfigdirs gdb"
+    noconfigdirs="$noconfigdirs target-libgloss gdb"
     if test x${is_cross_compiler} != xno ; then
       target_configdirs="${target_configdirs} target-bsp target-cygmon"
     fi
@@ -615,17 +615,17 @@ case "${target}" in
     # 'target-newlib' will appear in skipdirs.
     ;;
   i[[3456789]]86-*-mingw32*)
-    target_configdirs="$target_configdirs target-winsup"
-    noconfigdirs="$noconfigdirs expect target-libgloss target-newlib ${libgcj}"
+    target_configdirs="$target_configdirs target-mingw"
+    noconfigdirs="$noconfigdirs expect target-libgloss ${libgcj}"
     ;;    
   *-*-cygwin*)
     target_configdirs="$target_configdirs target-libtermcap target-winsup"
     noconfigdirs="$noconfigdirs target-gperf target-libgloss ${libgcj}"
     # always build newlib if winsup directory is present.
-    if test -d "$srcdir/winsup/cygwin"; then
+    if test -d "$srcdir/winsup"; then
       skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
     elif test -d "$srcdir/newlib"; then
-      echo "Warning: winsup/cygwin is missing so newlib can't be built."
+      echo "Warning: winsup is missing so newlib can't be built."
     fi
     ;;    
   i[[3456789]]86-moss-msdos | i[[3456789]]86-*-moss* | \
@@ -728,11 +728,17 @@ case "${target}" in
     # <oldham@codesourcery.com>
     noconfigdirs="$noconfigdirs gprof target-libgloss ${libgcj}"
     ;;
+  mips*-dec-bsd*)
+    noconfigdirs="$noconfigdirs gprof target-libgloss ${libgcj}"
+    ;;
   mips*-*-bsd*)
     noconfigdirs="$noconfigdirs gprof target-libgloss ${libgcj}"
     ;;
+  mipstx39-*-*)
+    noconfigdirs="$noconfigdirs gprof ${libgcj}"   # same as generic mips
+    ;;
   mips64*-*-linux*)
-    noconfigdirs="$noconfigdirs target-newlib target-libgloss ${libgcj}"
+    noconfigdirs="$noconfigdirs target-newlib ${libgcj}"
     ;;
   mips*-*-linux*)
     noconfigdirs="$noconfigdirs target-newlib target-libgloss"
@@ -1097,33 +1103,23 @@ CFLAGS="$CFLAGS $gmpinc"
 # Check GMP actually works
 AC_MSG_CHECKING([for correct version of gmp.h])
 AC_TRY_COMPILE([#include "gmp.h"],[
-#if __GNU_MP_VERSION < 4 || (__GNU_MP_VERSION == 4 && __GNU_MP_VERSION_MINOR < 1)
+#if __GNU_MP_VERSION < 3
 choke me
 #endif
-], [AC_MSG_RESULT([yes])], [AC_MSG_RESULT([no]); have_gmp=no])
+], [AC_MSG_RESULT([yes])],
+  [AC_MSG_RESULT([no]); have_gmp=no])
 
 if test x"$have_gmp" = xyes; then
+  AC_MSG_CHECKING([for MPFR])
+
   saved_LIBS="$LIBS"
   LIBS="$LIBS $gmplibs"
-  AC_MSG_CHECKING([for correct version of mpfr.h])
   AC_TRY_LINK([#include <gmp.h>
-#include <mpfr.h>],[
-#if MPFR_VERSION_MAJOR < 2 || (MPFR_VERSION_MAJOR == 2 && MPFR_VERSION_MINOR < 2)
-  choke me
-#endif
-  mpfr_t n; mpfr_init(n);
-], [AC_MSG_RESULT([yes])], [AC_MSG_RESULT([no]); have_gmp=no])
+#include <mpfr.h>], [mpfr_t n; mpfr_init(n);],
+    [AC_MSG_RESULT([yes])],  [AC_MSG_RESULT([no]); have_gmp=no])
   LIBS="$saved_LIBS"
 fi
 CFLAGS="$saved_CFLAGS"
-
-if test -d ${srcdir}/gcc && test x$have_gmp != xyes; then
-  AC_MSG_ERROR([Building GCC requires GMP 4.1+ and MPFR 2.2+.
-Try the --with-gmp and/or --with-mpfr options to specify their locations.
-Copies of these libraries' source code can be found at their respective
-hosting sites as well as at ftp://gcc.gnu.org/pub/gcc/infrastructure/.
-See also http://gcc.gnu.org/install/prerequisites.html for additional info.])
-fi
 
 # Flags needed for both GMP and/or MPFR
 AC_SUBST(gmplibs)
@@ -1212,6 +1208,7 @@ if test -d ${srcdir}/gcc; then
         subdir_requires=
         boot_language=
         build_by_default=
+        need_gmp=
         . ${lang_frag}
         potential_languages="${potential_languages},${language}"
         # This is quite sensitive to the ordering of the case statement arms.
@@ -1256,6 +1253,18 @@ if test -d ${srcdir}/gcc; then
               ;;
           esac
 	done
+
+        # Disable languages that need GMP if it isn't available.
+        case ,${enable_languages},:${have_gmp}:${need_gmp} in
+          *,${language},*:no:yes)
+            # Specifically requested language; tell them.
+            AC_MSG_ERROR([GMP with MPFR support is required to build $language])
+            ;;
+          *:no:yes)
+            # Silently disable.
+            add_this_lang=no
+            ;;
+        esac
 
 	# Disable a language that is unsupported by the target.
 	case " $unsupported_languages " in
@@ -2112,11 +2121,6 @@ case " $target_configdirs " in
   esac
   ;;
 esac
-case "$target" in
-*-mingw*)
-  # Can't be handled as Cygwin above since Mingw does not use newlib.
-  FLAGS_FOR_TARGET=$FLAGS_FOR_TARGET' -L$$r/$(TARGET_SUBDIR)/winsup/mingw -L$$r/$(TARGET_SUBDIR)/winsup/w32api/lib -isystem $$s/winsup/mingw/include -isystem $$s/winsup/w32api/include' ;;
-esac
 
 # Allow the user to override the flags for
 # our build compiler if desired.
@@ -2249,7 +2253,7 @@ esac
 AC_CHECK_PROGS(RUNTEST, runtest, runtest)
 case " $configdirs " in
   *" dejagnu "*)
-    test $host = $build && RUNTEST='$$s/$(HOST_SUBDIR)/dejagnu/runtest'
+    test $host = $build && RUNTEST='$$r/$(HOST_SUBDIR)/dejagnu/runtest'
     ;;
 esac
 

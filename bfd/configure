@@ -10873,8 +10873,6 @@ do
     bfd_elf32_powerpcle_vec)	tb="$tb elf32-ppc.lo elf-vxworks.lo elf32.lo $elf" ;;
     bfd_elf32_powerpc_vxworks_vec) tb="$tb elf32-ppc.lo elf-vxworks.lo elf32.lo $elf" ;;
     bfd_elf32_s390_vec)		tb="$tb elf32-s390.lo elf32.lo $elf" ;;
-    bfd_elf32_bigscore_vec)     tb="$tb elf32-score.lo elf32.lo $elf" ;;
-    bfd_elf32_littlescore_vec)  tb="$tb elf32-score.lo elf32.lo $elf" ;;
     # FIXME: We include cofflink.lo not because it's needed for
     # bfd_elf32_sh64[l]_vec, but because we include bfd_elf32_sh[l]_vec
     # which needs it but does not list it.  Should be fixed in right place.
@@ -10895,7 +10893,6 @@ do
     bfd_elf32_shvxworks_vec)	tb="$tb elf32-sh.lo elf-vxworks.lo elf32.lo $elf coff-sh.lo" ;;
     bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.lo elfxx-sparc.lo elf-vxworks.lo elf32.lo $elf" ;;
     bfd_elf32_sparc_vxworks_vec) tb="$tb elf32-sparc.lo elfxx-sparc.lo elf-vxworks.lo elf32.lo $elf" ;;
-    bfd_elf32_spu_vec)		tb="$tb elf32-spu.lo elf32.lo $elf" ;;
     bfd_elf32_tradbigmips_vec)  tb="$tb elf32-mips.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo" ;;
     bfd_elf32_tradlittlemips_vec) tb="$tb elf32-mips.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo" ;;
     bfd_elf32_us_cris_vec)	tb="$tb elf32-cris.lo elf32.lo $elf" ;;
@@ -10927,7 +10924,6 @@ do
     bfd_elf64_sh64lnbsd_vec)	tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
     bfd_elf64_sh64nbsd_vec)	tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
     bfd_elf64_sparc_vec)	tb="$tb elf64-sparc.lo elfxx-sparc.lo elf-vxworks.lo elf64.lo $elf"; target_size=64 ;;
-    bfd_elf64_sparc_freebsd_vec) tb="$tb elf64-sparc.lo elfxx-sparc.lo elf-vxworks.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_tradbigmips_vec)	tb="$tb elf64-mips.lo elf64.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
     bfd_elf64_tradlittlemips_vec) tb="$tb elf64-mips.lo elf64.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
     bfd_elf64_x86_64_freebsd_vec) tb="$tb elf64-x86-64.lo elf64.lo $elf"; target_size=64 ;;
@@ -10953,7 +10949,6 @@ do
     i386aout_vec)		tb="$tb i386aout.lo aout32.lo" ;;
     i386bsd_vec)		tb="$tb i386bsd.lo aout32.lo" ;;
     i386coff_vec)		tb="$tb coff-i386.lo cofflink.lo" ;;
-    x86_64coff_vec)		tb="$tb coff-x86_64.lo cofflink.lo"; target_size=64 ;;
     i386dynix_vec)		tb="$tb i386dynix.lo aout32.lo" ;;
     i386freebsd_vec)		tb="$tb i386freebsd.lo aout32.lo" ;;
     i386linux_vec)		tb="$tb i386linux.lo aout32.lo" ;;
@@ -10965,8 +10960,6 @@ do
     i386os9k_vec)		tb="$tb i386os9k.lo aout32.lo" ;;
     i386pe_vec)			tb="$tb pe-i386.lo peigen.lo cofflink.lo" ;;
     i386pei_vec)		tb="$tb pei-i386.lo peigen.lo cofflink.lo" ;;
-    x86_64pe_vec)		tb="$tb pe-x86_64.lo pex64igen.lo cofflink.lo"; target_size=64 ;;
-    x86_64pei_vec)		tb="$tb pei-x86_64.lo pex64igen.lo cofflink.lo"; target_size=64 ;;
     i860coff_vec)		tb="$tb coff-i860.lo cofflink.lo" ;;
     icoff_big_vec)		tb="$tb coff-i960.lo cofflink.lo" ;;
     icoff_little_vec)		tb="$tb coff-i960.lo cofflink.lo" ;;

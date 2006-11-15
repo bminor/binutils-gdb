@@ -1,13 +1,3 @@
-2006-11-13  Denis Pilat  <denis.pilat@st.com>
-
-	* terminal.c (_rl_get_screen_size): use wr and wc variable to store
-	window size.
-
-2006-10-21  Ulrich Weigand  <uweigand@de.ibm.com>
-
-	* callback.c: Include "xmalloc.h".
-	* Makefile.in: Add dependency.
-
 2006-04-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	Imported readline 5.1, and upstream patches 001-004.

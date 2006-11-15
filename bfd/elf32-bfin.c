@@ -3106,20 +3106,51 @@ bfin_relocate_section (bfd * output_bfd,
 
 static asection *
 bfin_gc_mark_hook (asection * sec,
-		   struct bfd_link_info *info,
+		   struct bfd_link_info *info ATTRIBUTE_UNUSED,
 		   Elf_Internal_Rela * rel,
 		   struct elf_link_hash_entry *h,
                    Elf_Internal_Sym * sym)
 {
   if (h != NULL)
-    switch (ELF32_R_TYPE (rel->r_info))
-      {
-      case R_BFIN_GNU_VTINHERIT:
-      case R_BFIN_GNU_VTENTRY:
-	return NULL;
-      }
+    {
+      switch (ELF32_R_TYPE (rel->r_info))
+	{
 
-  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+	case R_BFIN_GNU_VTINHERIT:
+	case R_BFIN_GNU_VTENTRY:
+	  break;
+
+	default:
+	  switch (h->root.type)
+	    {
+	    default:
+	      break;
+
+	    case bfd_link_hash_defined:
+	    case bfd_link_hash_defweak:
+	      return h->root.u.def.section;
+
+	    case bfd_link_hash_common:
+	      return h->root.u.c.p->section;
+	    }
+	}
+    }
+  else
+    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
+
+  return NULL;
+}
+
+
+/* Update the got entry reference counts for the section being removed.  */
+
+static bfd_boolean
+bfinfdpic_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
+			 struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			 asection *sec ATTRIBUTE_UNUSED,
+			 const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED)
+{
+  return TRUE;
 }
 
 /* Update the got entry reference counts for the section being removed.  */
@@ -5261,7 +5292,7 @@ bfin_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 
       strip = FALSE;
 
-       if (CONST_STRNEQ (name, ".rela"))
+       if (strncmp (name, ".rela", 5) == 0)
 	{
 	  if (s->size == 0)
 	    {
@@ -5285,7 +5316,7 @@ bfin_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 	      s->reloc_count = 0;
 	    }
 	}
-      else if (! CONST_STRNEQ (name, ".got"))
+      else if (strncmp (name, ".got", 4) != 0)
 	{
 	  /* It's not one of our sections, so don't allocate space.  */
 	  continue;
@@ -5533,6 +5564,7 @@ error_return:
 #define	elf32_bed		elf32_bfinfdpic_bed
 
 #undef elf_backend_gc_sweep_hook
+#define elf_backend_gc_sweep_hook       bfinfdpic_gc_sweep_hook
 
 #undef elf_backend_got_header_size
 #define elf_backend_got_header_size     0

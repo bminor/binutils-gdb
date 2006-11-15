@@ -18,10 +18,6 @@
    Foundation, Inc., 51 Franklin Street, Fifth Floor,
    Boston, MA 02110-1301, USA.  */
 
-#ifdef HAVE_THREAD_DB_H
-#include <thread_db.h>
-#endif
-
 #ifdef HAVE_LINUX_REGSETS
 typedef void (*regset_fill_func) (void *);
 typedef void (*regset_store_func) (const void *);
@@ -96,9 +92,6 @@ struct process_info
      event already received in a wait()).  */
   int stopped;
 
-  /* When stopped is set, the last wait status recorded for this process.  */
-  int last_status;
-
   /* If this flag is set, we have sent a SIGSTOP to this process and are
      waiting for it to stop.  */
   int sigstop_sent;
@@ -128,11 +121,6 @@ struct process_info
      and then processed and cleared in linux_resume_one_process.  */
 
   struct thread_resume *resume;
-
-#ifdef HAVE_THREAD_DB_H
-  /* The thread handle, used for e.g. TLS access.  */
-  td_thrhandle_t th;
-#endif
 };
 
 extern struct inferior_list all_processes;
@@ -140,5 +128,3 @@ extern struct inferior_list all_processes;
 void linux_attach_lwp (unsigned long pid, unsigned long tid);
 
 int thread_db_init (void);
-int thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
-			       CORE_ADDR load_module, CORE_ADDR *address);

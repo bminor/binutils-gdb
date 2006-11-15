@@ -1,6 +1,6 @@
 /* Utilities to execute a program in a subprocess (possibly linked by pipes
    with other subprocesses), and wait for it.  Generic Win32 specialization.
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004, 2005, 2006
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
 This file is part of the libiberty library.
@@ -358,7 +358,7 @@ argv_to_cmdline (char *const *argv)
       cmdline_len += j;
       cmdline_len += 3;  /* for leading and trailing quotes and space */
     }
-  cmdline = XNEWVEC (char, cmdline_len);
+  cmdline = xmalloc (cmdline_len);
   p = cmdline;
   for (i = 0; argv[i]; i++)
     {
@@ -382,18 +382,16 @@ argv_to_cmdline (char *const *argv)
   return cmdline;
 }
 
-/* We'll try the passed filename with all the known standard
-   extensions, and then without extension.  We try no extension
-   last so that we don't try to run some random extension-less
-   file that might be hanging around.  We try both extension
-   and no extension so that we don't need any fancy logic
-   to determine if a file has extension.  */
 static const char *const
 std_suffixes[] = {
   ".com",
   ".exe",
   ".bat",
   ".cmd",
+  0
+};
+static const char *const
+no_suffixes[] = {
   "",
   0
 };
@@ -411,6 +409,7 @@ find_executable (const char *program, BOOL search)
   const char *const *ext;
   const char *p, *q;
   size_t proglen = strlen (program);
+  int has_extension = !!strchr (program, '.');
   int has_slash = (strchr (program, '/') || strchr (program, '\\'));
   HANDLE h;
 
@@ -433,8 +432,8 @@ find_executable (const char *program, BOOL search)
       if (*q == ';')
 	q++;
     }
-  fe_len = fe_len + 1 + proglen + 5 /* space for extension */;
-  full_executable = XNEWVEC (char, fe_len);
+  fe_len = fe_len + 1 + proglen + (has_extension ? 1 : 5);
+  full_executable = xmalloc (fe_len);
 
   p = path;
   do
@@ -459,7 +458,7 @@ find_executable (const char *program, BOOL search)
 
       /* At this point, e points to the terminating NUL character for
          full_executable.  */
-      for (ext = std_suffixes; *ext; ext++)
+      for (ext = has_extension ? no_suffixes : std_suffixes; *ext; ext++)
 	{
 	  /* Remove any current extension.  */
 	  *e = '\0';
@@ -558,14 +557,14 @@ win32_spawn (const char *executable,
     
           /* Windows needs the members of the block to be sorted by variable
              name.  */
-          env_copy = (char **) alloca (sizeof (char *) * env_size);
+          env_copy = alloca (sizeof (char *) * env_size);
           memcpy (env_copy, env, sizeof (char *) * env_size);
           qsort (env_copy, env_size, sizeof (char *), env_compare);
     
           for (var = 0; var < env_size; var++)
             total_size += strlen (env[var]) + 1;
     
-          env_block = XNEWVEC (char, total_size);
+          env_block = malloc (total_size);
           bufptr = env_block;
           for (var = 0; var < env_size; var++)
             bufptr = stpcpy (bufptr, env_copy[var]) + 1;

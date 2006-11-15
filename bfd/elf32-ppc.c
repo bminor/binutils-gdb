@@ -1896,21 +1896,21 @@ ppc_elf_additional_program_headers (bfd *abfd,
 
 static const struct bfd_elf_special_section ppc_elf_special_sections[] =
 {
-  { STRING_COMMA_LEN (".plt"),             0, SHT_NOBITS,   SHF_ALLOC + SHF_EXECINSTR },
-  { STRING_COMMA_LEN (".sbss"),           -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
-  { STRING_COMMA_LEN (".sbss2"),          -2, SHT_PROGBITS, SHF_ALLOC },
-  { STRING_COMMA_LEN (".sdata"),          -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
-  { STRING_COMMA_LEN (".sdata2"),         -2, SHT_PROGBITS, SHF_ALLOC },
-  { STRING_COMMA_LEN (".tags"),            0, SHT_ORDERED,  SHF_ALLOC },
-  { STRING_COMMA_LEN (".PPC.EMB.apuinfo"), 0, SHT_NOTE,     0 },
-  { STRING_COMMA_LEN (".PPC.EMB.sbss0"),   0, SHT_PROGBITS, SHF_ALLOC },
-  { STRING_COMMA_LEN (".PPC.EMB.sdata0"),  0, SHT_PROGBITS, SHF_ALLOC },
-  { NULL,                              0,  0, 0,            0 }
+  { ".plt",              4,  0, SHT_NOBITS,   SHF_ALLOC + SHF_EXECINSTR },
+  { ".sbss",             5, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
+  { ".sbss2",            6, -2, SHT_PROGBITS, SHF_ALLOC },
+  { ".sdata",            6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { ".sdata2",           7, -2, SHT_PROGBITS, SHF_ALLOC },
+  { ".tags",             5,  0, SHT_ORDERED,  SHF_ALLOC },
+  { ".PPC.EMB.apuinfo", 16,  0, SHT_NOTE,     0 },
+  { ".PPC.EMB.sbss0",   14,  0, SHT_PROGBITS, SHF_ALLOC },
+  { ".PPC.EMB.sdata0",  15,  0, SHT_PROGBITS, SHF_ALLOC },
+  { NULL,                0,  0, 0,            0 }
 };
 
 /* This is what we want for new plt/got.  */
 static struct bfd_elf_special_section ppc_alt_plt =
-  { STRING_COMMA_LEN (".plt"),             0, SHT_PROGBITS, SHF_ALLOC };
+  { ".plt",              4,  0, SHT_PROGBITS, SHF_ALLOC };
 
 static const struct bfd_elf_special_section *
 ppc_elf_get_sec_type_attr (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
@@ -3436,7 +3436,7 @@ ppc_elf_check_relocs (bfd *abfd,
 		  if (name == NULL)
 		    return FALSE;
 
-		  BFD_ASSERT (CONST_STRNEQ (name, ".rela")
+		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
 			      && strcmp (bfd_get_section_name (abfd, sec),
 					 name + 5) == 0);
 
@@ -3653,20 +3653,38 @@ ppc_elf_select_plt_layout (bfd *output_bfd ATTRIBUTE_UNUSED,
 
 static asection *
 ppc_elf_gc_mark_hook (asection *sec,
-		      struct bfd_link_info *info,
+		      struct bfd_link_info *info ATTRIBUTE_UNUSED,
 		      Elf_Internal_Rela *rel,
 		      struct elf_link_hash_entry *h,
 		      Elf_Internal_Sym *sym)
 {
   if (h != NULL)
-    switch (ELF32_R_TYPE (rel->r_info))
-      {
-      case R_PPC_GNU_VTINHERIT:
-      case R_PPC_GNU_VTENTRY:
-	return NULL;
-      }
+    {
+      switch (ELF32_R_TYPE (rel->r_info))
+	{
+	case R_PPC_GNU_VTINHERIT:
+	case R_PPC_GNU_VTENTRY:
+	  break;
 
-  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+	default:
+	  switch (h->root.type)
+	    {
+	    case bfd_link_hash_defined:
+	    case bfd_link_hash_defweak:
+	      return h->root.u.def.section;
+
+	    case bfd_link_hash_common:
+	      return h->root.u.c.p->section;
+
+	    default:
+	      break;
+	    }
+	}
+    }
+  else
+    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
+
+  return NULL;
 }
 
 /* Update the got, plt and dynamic reloc reference counts for the
@@ -4846,7 +4864,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	{
 	  /* Strip these too.  */
 	}
-      else if (CONST_STRNEQ (bfd_get_section_name (dynobj, s), ".rela"))
+      else if (strncmp (bfd_get_section_name (dynobj, s), ".rela", 5) == 0)
 	{
 	  if (s->size != 0)
 	    {
@@ -6180,10 +6198,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	     a linker script.  */
 	dodyn:
 	  if (r_symndx == 0)
-	    {
-	      _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
-	      break;
-	    }
+	    break;
 	  /* Fall thru.  */
 
 	  if ((input_section->flags & SEC_ALLOC) == 0)
@@ -6227,7 +6242,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  if (name == NULL)
 		    return FALSE;
 
-		  BFD_ASSERT (CONST_STRNEQ (name, ".rela")
+		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
 			      && strcmp (bfd_get_section_name (input_bfd,
 							       input_section),
 					 name + 5) == 0);
@@ -6283,14 +6298,9 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			     but ld.so expects buggy relocs.  */
 			  osec = sec->output_section;
 			  indx = elf_section_data (osec)->dynindx;
-			  if (indx == 0)
-			    {
-			      osec = htab->elf.text_index_section;
-			      indx = elf_section_data (osec)->dynindx;
-			    }
-			  BFD_ASSERT (indx != 0);
+			  BFD_ASSERT (indx > 0);
 #ifdef DEBUG
-			  if (indx == 0)
+			  if (indx <= 0)
 			    printf ("indx=%ld section=%s flags=%08x name=%s\n",
 				    indx, osec->name, osec->flags,
 				    h->root.root.string);
@@ -6435,9 +6445,9 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
 	    BFD_ASSERT (sec != NULL);
 	    name = bfd_get_section_name (abfd, sec->output_section);
-	    if (! ((CONST_STRNEQ (name, ".sdata")
+	    if (! ((strncmp (name, ".sdata", 6) == 0
 		    && (name[6] == 0 || name[6] == '.'))
-		   || (CONST_STRNEQ (name, ".sbss")
+		   || (strncmp (name, ".sbss", 5) == 0
 		       && (name[5] == 0 || name[5] == '.'))))
 	      {
 		(*_bfd_error_handler)
@@ -6463,8 +6473,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
 	    BFD_ASSERT (sec != NULL);
 	    name = bfd_get_section_name (abfd, sec->output_section);
-	    if (! (CONST_STRNEQ (name, ".sdata2")
-		   || CONST_STRNEQ (name, ".sbss2")))
+	    if (! (strncmp (name, ".sdata2", 7) == 0
+		   || strncmp (name, ".sbss2", 6) == 0))
 	      {
 		(*_bfd_error_handler)
 		  (_("%B: the target (%s) of a %s relocation is "
@@ -6495,9 +6505,9 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
 	    BFD_ASSERT (sec != NULL);
 	    name = bfd_get_section_name (abfd, sec->output_section);
-	    if (((CONST_STRNEQ (name, ".sdata")
+	    if (((strncmp (name, ".sdata", 6) == 0
 		  && (name[6] == 0 || name[6] == '.'))
-		 || (CONST_STRNEQ (name, ".sbss")
+		 || (strncmp (name, ".sbss", 5) == 0
 		     && (name[5] == 0 || name[5] == '.'))))
 	      {
 		reg = 13;
@@ -6507,8 +6517,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			   + sh->root.u.def.section->output_section->vma);
 	      }
 
-	    else if (CONST_STRNEQ (name, ".sdata2")
-		     || CONST_STRNEQ (name, ".sbss2"))
+	    else if (strncmp (name, ".sdata2", 7) == 0
+		     || strncmp (name, ".sbss2", 6) == 0)
 	      {
 		reg = 2;
 		sh = htab->sdata[1].sym;
@@ -7480,7 +7490,6 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 #define elf_backend_get_sec_type_attr		ppc_elf_get_sec_type_attr
 #define elf_backend_plt_sym_val			ppc_elf_plt_sym_val
 #define elf_backend_action_discarded		ppc_elf_action_discarded
-#define elf_backend_init_index_section		_bfd_elf_init_1_index_section
 
 #include "elf32-target.h"
 

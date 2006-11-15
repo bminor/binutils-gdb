@@ -39,7 +39,6 @@
 #include "regcache.h"
 #include "gdb_assert.h"
 #include "gdbcore.h"
-#include "exceptions.h"
 
 static void target_info (char *, int);
 
@@ -465,9 +464,6 @@ update_current_target (void)
       INHERIT (to_make_corefile_notes, t);
       INHERIT (to_get_thread_local_address, t);
       INHERIT (to_magic, t);
-      /* Do not inherit to_memory_map.  */
-      /* Do not inherit to_flash_erase.  */
-      /* Do not inherit to_flash_done.  */
     }
 #undef INHERIT
 
@@ -649,56 +645,6 @@ update_current_target (void)
   current_target.beneath = target_stack;
 }
 
-/* Mark OPS as a running target.  This reverses the effect
-   of target_mark_exited.  */
-
-void
-target_mark_running (struct target_ops *ops)
-{
-  struct target_ops *t;
-
-  for (t = target_stack; t != NULL; t = t->beneath)
-    if (t == ops)
-      break;
-  if (t == NULL)
-    internal_error (__FILE__, __LINE__,
-		    "Attempted to mark unpushed target \"%s\" as running",
-		    ops->to_shortname);
-
-  ops->to_has_execution = 1;
-  ops->to_has_all_memory = 1;
-  ops->to_has_memory = 1;
-  ops->to_has_stack = 1;
-  ops->to_has_registers = 1;
-
-  update_current_target ();
-}
-
-/* Mark OPS as a non-running target.  This reverses the effect
-   of target_mark_running.  */
-
-void
-target_mark_exited (struct target_ops *ops)
-{
-  struct target_ops *t;
-
-  for (t = target_stack; t != NULL; t = t->beneath)
-    if (t == ops)
-      break;
-  if (t == NULL)
-    internal_error (__FILE__, __LINE__,
-		    "Attempted to mark unpushed target \"%s\" as running",
-		    ops->to_shortname);
-
-  ops->to_has_execution = 0;
-  ops->to_has_all_memory = 0;
-  ops->to_has_memory = 0;
-  ops->to_has_stack = 0;
-  ops->to_has_registers = 0;
-
-  update_current_target ();
-}
-
 /* Push a new target type into the stack of the existing target accessors,
    possibly superseding some of the existing accessors.
 
@@ -807,92 +753,6 @@ pop_target (void)
 		      "pop_target couldn't find target %s\n",
 		      current_target.to_shortname);
   internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
-}
-
-/* Using the objfile specified in BATON, find the address for the
-   current thread's thread-local storage with offset OFFSET.  */
-CORE_ADDR
-target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
-{
-  volatile CORE_ADDR addr = 0;
-
-  if (target_get_thread_local_address_p ()
-      && gdbarch_fetch_tls_load_module_address_p (current_gdbarch))
-    {
-      ptid_t ptid = inferior_ptid;
-      volatile struct gdb_exception ex;
-
-      TRY_CATCH (ex, RETURN_MASK_ALL)
-	{
-	  CORE_ADDR lm_addr;
-	  
-	  /* Fetch the load module address for this objfile.  */
-	  lm_addr = gdbarch_fetch_tls_load_module_address (current_gdbarch,
-	                                                   objfile);
-	  /* If it's 0, throw the appropriate exception.  */
-	  if (lm_addr == 0)
-	    throw_error (TLS_LOAD_MODULE_NOT_FOUND_ERROR,
-			 _("TLS load module not found"));
-
-	  addr = target_get_thread_local_address (ptid, lm_addr, offset);
-	}
-      /* If an error occurred, print TLS related messages here.  Otherwise,
-         throw the error to some higher catcher.  */
-      if (ex.reason < 0)
-	{
-	  int objfile_is_library = (objfile->flags & OBJF_SHARED);
-
-	  switch (ex.error)
-	    {
-	    case TLS_NO_LIBRARY_SUPPORT_ERROR:
-	      error (_("Cannot find thread-local variables in this thread library."));
-	      break;
-	    case TLS_LOAD_MODULE_NOT_FOUND_ERROR:
-	      if (objfile_is_library)
-		error (_("Cannot find shared library `%s' in dynamic"
-		         " linker's load module list"), objfile->name);
-	      else
-		error (_("Cannot find executable file `%s' in dynamic"
-		         " linker's load module list"), objfile->name);
-	      break;
-	    case TLS_NOT_ALLOCATED_YET_ERROR:
-	      if (objfile_is_library)
-		error (_("The inferior has not yet allocated storage for"
-		         " thread-local variables in\n"
-		         "the shared library `%s'\n"
-		         "for %s"),
-		       objfile->name, target_pid_to_str (ptid));
-	      else
-		error (_("The inferior has not yet allocated storage for"
-		         " thread-local variables in\n"
-		         "the executable `%s'\n"
-		         "for %s"),
-		       objfile->name, target_pid_to_str (ptid));
-	      break;
-	    case TLS_GENERIC_ERROR:
-	      if (objfile_is_library)
-		error (_("Cannot find thread-local storage for %s, "
-		         "shared library %s:\n%s"),
-		       target_pid_to_str (ptid),
-		       objfile->name, ex.message);
-	      else
-		error (_("Cannot find thread-local storage for %s, "
-		         "executable file %s:\n%s"),
-		       target_pid_to_str (ptid),
-		       objfile->name, ex.message);
-	      break;
-	    default:
-	      throw_exception (ex);
-	      break;
-	    }
-	}
-    }
-  /* It wouldn't be wrong here to try a gdbarch method, too; finding
-     TLS is an ABI-specific thing.  But we don't do that yet.  */
-  else
-    error (_("Cannot find thread-local variables on this target"));
-
-  return addr;
 }
 
 #undef	MIN
@@ -1030,12 +890,6 @@ memory_xfer_partial (struct target_ops *ops, void *readbuf, const void *writebuf
     case MEM_WO:
       if (readbuf != NULL)
 	return -1;
-      break;
-
-    case MEM_FLASH:
-      /* We only support writing to flash during "load" for now.  */
-      if (writebuf != NULL)
-	error (_("Writing to flash memory forbidden in this context"));
       break;
     }
 
@@ -1186,87 +1040,6 @@ target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
     return EIO;
 }
 
-/* Fetch the target's memory map.  */
-
-VEC(mem_region_s) *
-target_memory_map (void)
-{
-  VEC(mem_region_s) *result;
-  struct mem_region *last_one, *this_one;
-  int ix;
-  struct target_ops *t;
-
-  if (targetdebug)
-    fprintf_unfiltered (gdb_stdlog, "target_memory_map ()\n");
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_memory_map != NULL)
-      break;
-
-  if (t == NULL)
-    return NULL;
-
-  result = t->to_memory_map (t);
-  if (result == NULL)
-    return NULL;
-
-  qsort (VEC_address (mem_region_s, result),
-	 VEC_length (mem_region_s, result),
-	 sizeof (struct mem_region), mem_region_cmp);
-
-  /* Check that regions do not overlap.  Simultaneously assign
-     a numbering for the "mem" commands to use to refer to
-     each region.  */
-  last_one = NULL;
-  for (ix = 0; VEC_iterate (mem_region_s, result, ix, this_one); ix++)
-    {
-      this_one->number = ix;
-
-      if (last_one && last_one->hi > this_one->lo)
-	{
-	  warning (_("Overlapping regions in memory map: ignoring"));
-	  VEC_free (mem_region_s, result);
-	  return NULL;
-	}
-      last_one = this_one;
-    }
-
-  return result;
-}
-
-void
-target_flash_erase (ULONGEST address, LONGEST length)
-{
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_flash_erase != NULL)
-	{
-	  if (targetdebug)
-	    fprintf_unfiltered (gdb_stdlog, "target_flash_erase (%s, %s)\n",
-                                paddr (address), phex (length, 0));
-	  return t->to_flash_erase (t, address, length);
-	}
-
-  tcomplain ();
-}
-
-void
-target_flash_done (void)
-{
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_flash_done != NULL)
-	{
-	  if (targetdebug)
-	    fprintf_unfiltered (gdb_stdlog, "target_flash_done\n");
-	  return t->to_flash_done (t);
-	}
-
-  tcomplain ();
-}
-
 #ifndef target_stopped_data_address_p
 int
 target_stopped_data_address_p (struct target_ops *target)
@@ -1407,11 +1180,6 @@ target_write_with_progress (struct target_ops *ops,
 			    void (*progress) (ULONGEST, void *), void *baton)
 {
   LONGEST xfered = 0;
-
-  /* Give the progress callback a chance to set up.  */
-  if (progress)
-    (*progress) (0, baton);
-
   while (xfered < len)
     {
       LONGEST xfer = target_write_partial (ops, object, annex,
@@ -1588,18 +1356,6 @@ target_info (char *args, int from_tty)
     }
 }
 
-/* This function is called before any new inferior is created, e.g.
-   by running a program, attaching, or connecting to a target.
-   It cleans up any state from previous invocations which might
-   change between runs.  This is a subset of what target_preopen
-   resets (things which might change between targets).  */
-
-void
-target_pre_inferior (int from_tty)
-{
-  invalidate_target_mem_regions ();
-}
-
 /* This is to be called by the open routine before it does
    anything.  */
 
@@ -1622,8 +1378,6 @@ target_preopen (int from_tty)
 
   if (target_has_execution)
     pop_target ();
-
-  target_pre_inferior (from_tty);
 }
 
 /* Detach a target after doing deferred register stores.  */

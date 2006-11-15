@@ -7,13 +7,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/mman.h>
-#include <errno.h>
 
 int main (int argc, char *argv[])
 {
-  int err = mprotect (0, 8193, PROT_EXEC);
-  if (err == -1 && errno == ENOSYS)
-    printf ("ENOSYS\n");
+  mprotect (0, 8193, PROT_EXEC);
   printf ("xyzzy\n");
   exit (0);
 }

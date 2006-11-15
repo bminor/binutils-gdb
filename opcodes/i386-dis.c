@@ -1,6 +1,6 @@
 /* Print i386 instructions for GDB, the GNU debugger.
    Copyright 1988, 1989, 1991, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2001, 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -471,8 +471,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define PREGRP34  NULL, NULL, USE_PREFIX_USER_TABLE, NULL, 34, NULL, 0, NULL, 0
 #define PREGRP35  NULL, NULL, USE_PREFIX_USER_TABLE, NULL, 35, NULL, 0, NULL, 0
 #define PREGRP36  NULL, NULL, USE_PREFIX_USER_TABLE, NULL, 36, NULL, 0, NULL, 0
-#define PREGRP37  NULL, NULL, USE_PREFIX_USER_TABLE, NULL, 37, NULL, 0, NULL, 0
-
 
 #define X86_64_0  NULL, NULL, X86_64_SPECIAL, NULL,  0, NULL, 0, NULL, 0
 
@@ -1030,7 +1028,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "movz{bR|x|bR|x}",	Gv, Eb, XX, XX },
   { "movz{wR|x|wR|x}",	Gv, Ew, XX, XX }, /* yes, there really is movzww ! */
   /* b8 */
-  { PREGRP37 },
+  { "popcntS",          Gv, Ev, XX, XX },
   { "ud2b",		XX, XX, XX, XX },
   { GRP8 },
   { "btcS",		Ev, Gv, XX, XX },
@@ -1158,7 +1156,7 @@ static const unsigned char twobyte_has_modrm[256] = {
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
 };
 
-static const unsigned char twobyte_uses_DATA_prefix[256] = {
+static const unsigned char twobyte_uses_SSE_prefix[256] = {
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
   /*       -------------------------------        */
   /* 00 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0f */
@@ -1177,196 +1175,6 @@ static const unsigned char twobyte_uses_DATA_prefix[256] = {
   /* d0 */ 1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0, /* df */
   /* e0 */ 0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0, /* ef */
   /* f0 */ 1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0  /* ff */
-  /*       -------------------------------        */
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-};
-
-static const unsigned char twobyte_uses_REPNZ_prefix[256] = {
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-  /*       -------------------------------        */
-  /* 00 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0f */
-  /* 10 */ 1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 1f */
-  /* 20 */ 0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0, /* 2f */
-  /* 30 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 3f */
-  /* 40 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
-  /* 50 */ 0,1,0,0,0,0,0,0,1,1,1,0,1,1,1,1, /* 5f */
-  /* 60 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 6f */
-  /* 70 */ 1,0,0,0,0,0,0,0,1,1,0,0,1,1,0,0, /* 7f */
-  /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
-  /* 90 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 9f */
-  /* a0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* af */
-  /* b0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* bf */
-  /* c0 */ 0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0, /* cf */
-  /* d0 */ 1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0, /* df */
-  /* e0 */ 0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0, /* ef */
-  /* f0 */ 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ff */
-  /*       -------------------------------        */
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-};
-
-static const unsigned char twobyte_uses_REPZ_prefix[256] = {
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-  /*       -------------------------------        */
-  /* 00 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0f */
-  /* 10 */ 1,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0, /* 1f */
-  /* 20 */ 0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0, /* 2f */
-  /* 30 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 3f */
-  /* 40 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
-  /* 50 */ 0,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1, /* 5f */
-  /* 60 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1, /* 6f */
-  /* 70 */ 1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1, /* 7f */
-  /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
-  /* 90 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 9f */
-  /* a0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* af */
-  /* b0 */ 0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0, /* bf */
-  /* c0 */ 0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0, /* cf */
-  /* d0 */ 0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0, /* df */
-  /* e0 */ 0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0, /* ef */
-  /* f0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ff */
-  /*       -------------------------------        */
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-};
-
-/* This is used to determine if opcode 0f 38 XX uses DATA prefix.  */ 
-static const unsigned char threebyte_0x38_uses_DATA_prefix[256] = {
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-  /*       -------------------------------        */
-  /* 00 */ 1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0, /* 0f */
-  /* 10 */ 0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0, /* 1f */
-  /* 20 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 2f */
-  /* 30 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 3f */
-  /* 40 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
-  /* 50 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 5f */
-  /* 60 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 6f */
-  /* 70 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 7f */
-  /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
-  /* 90 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 9f */
-  /* a0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* af */
-  /* b0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* bf */
-  /* c0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* cf */
-  /* d0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* df */
-  /* e0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ef */
-  /* f0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ff */
-  /*       -------------------------------        */
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-};
-
-/* This is used to determine if opcode 0f 38 XX uses REPNZ prefix.  */ 
-static const unsigned char threebyte_0x38_uses_REPNZ_prefix[256] = {
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-  /*       -------------------------------        */
-  /* 00 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0f */
-  /* 10 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 1f */
-  /* 20 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 2f */
-  /* 30 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 3f */
-  /* 40 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
-  /* 50 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 5f */
-  /* 60 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 6f */
-  /* 70 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 7f */
-  /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
-  /* 90 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 9f */
-  /* a0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* af */
-  /* b0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* bf */
-  /* c0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* cf */
-  /* d0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* df */
-  /* e0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ef */
-  /* f0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ff */
-  /*       -------------------------------        */
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-};
-
-/* This is used to determine if opcode 0f 38 XX uses REPZ prefix.  */ 
-static const unsigned char threebyte_0x38_uses_REPZ_prefix[256] = {
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-  /*       -------------------------------        */
-  /* 00 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0f */
-  /* 10 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 1f */
-  /* 20 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 2f */
-  /* 30 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 3f */
-  /* 40 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
-  /* 50 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 5f */
-  /* 60 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 6f */
-  /* 70 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 7f */
-  /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
-  /* 90 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 9f */
-  /* a0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* af */
-  /* b0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* bf */
-  /* c0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* cf */
-  /* d0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* df */
-  /* e0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ef */
-  /* f0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ff */
-  /*       -------------------------------        */
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-};
-
-/* This is used to determine if opcode 0f 3a XX uses DATA prefix.  */ 
-static const unsigned char threebyte_0x3a_uses_DATA_prefix[256] = {
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-  /*       -------------------------------        */
-  /* 00 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1, /* 0f */
-  /* 10 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 1f */
-  /* 20 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 2f */
-  /* 30 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 3f */
-  /* 40 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
-  /* 50 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 5f */
-  /* 60 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 6f */
-  /* 70 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 7f */
-  /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
-  /* 90 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 9f */
-  /* a0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* af */
-  /* b0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* bf */
-  /* c0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* cf */
-  /* d0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* df */
-  /* e0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ef */
-  /* f0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ff */
-  /*       -------------------------------        */
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-};
-
-/* This is used to determine if opcode 0f 3a XX uses REPNZ prefix.  */ 
-static const unsigned char threebyte_0x3a_uses_REPNZ_prefix[256] = {
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-  /*       -------------------------------        */
-  /* 00 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0f */
-  /* 10 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 1f */
-  /* 20 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 2f */
-  /* 30 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 3f */
-  /* 40 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
-  /* 50 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 5f */
-  /* 60 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 6f */
-  /* 70 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 7f */
-  /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
-  /* 90 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 9f */
-  /* a0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* af */
-  /* b0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* bf */
-  /* c0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* cf */
-  /* d0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* df */
-  /* e0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ef */
-  /* f0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ff */
-  /*       -------------------------------        */
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-};
-
-/* This is used to determine if opcode 0f 3a XX uses REPZ prefix.  */ 
-static const unsigned char threebyte_0x3a_uses_REPZ_prefix[256] = {
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-  /*       -------------------------------        */
-  /* 00 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0f */
-  /* 10 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 1f */
-  /* 20 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 2f */
-  /* 30 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 3f */
-  /* 40 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
-  /* 50 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 5f */
-  /* 60 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 6f */
-  /* 70 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 7f */
-  /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
-  /* 90 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 9f */
-  /* a0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* af */
-  /* b0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* bf */
-  /* c0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* cf */
-  /* d0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* df */
-  /* e0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ef */
-  /* f0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ff */
   /*       -------------------------------        */
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
 };
@@ -1879,7 +1687,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "maskmovq", MX, MS, XX, XX },
     { "(bad)", XM, EX, XX, XX },
-    { "maskmovdqu", XM, XS, XX, XX },
+    { "maskmovdqu", XM, EX, XX, XX },
     { "(bad)", XM, EX, XX, XX },
   },
   /* PREGRP19 */
@@ -2012,13 +1820,6 @@ static const struct dis386 prefix_user_table[][4] = {
     { "(bad)",  XX, XX, XX, XX },
   },
 
-  /* PREGRP37 */
-  {
-    { "(bad)",  XX, XX, XX, XX },
-    { "popcntS",Gv, Ev, XX, XX },
-    { "(bad)",  XX, XX, XX, XX },
-    { "(bad)",  XX, XX, XX, XX },    
-  },
 };
 
 static const struct dis386 x86_64_table[][2] = {
@@ -2839,12 +2640,10 @@ print_insn (bfd_vma pc, disassemble_info *info)
   int i;
   char *first, *second, *third, *fourth;
   int needcomma;
-  unsigned char uses_DATA_prefix, uses_LOCK_prefix;
-  unsigned char uses_REPNZ_prefix, uses_REPZ_prefix;
+  unsigned char uses_SSE_prefix, uses_LOCK_prefix;
   int sizeflag;
   const char *p;
   struct dis_private priv;
-  unsigned char op;
 
   if (info->mach == bfd_mach_x86_64_intel_syntax
       || info->mach == bfd_mach_x86_64)
@@ -2868,44 +2667,44 @@ print_insn (bfd_vma pc, disassemble_info *info)
 
   for (p = info->disassembler_options; p != NULL; )
     {
-      if (CONST_STRNEQ (p, "x86-64"))
+      if (strncmp (p, "x86-64", 6) == 0)
 	{
 	  address_mode = mode_64bit;
 	  priv.orig_sizeflag = AFLAG | DFLAG;
 	}
-      else if (CONST_STRNEQ (p, "i386"))
+      else if (strncmp (p, "i386", 4) == 0)
 	{
 	  address_mode = mode_32bit;
 	  priv.orig_sizeflag = AFLAG | DFLAG;
 	}
-      else if (CONST_STRNEQ (p, "i8086"))
+      else if (strncmp (p, "i8086", 5) == 0)
 	{
 	  address_mode = mode_16bit;
 	  priv.orig_sizeflag = 0;
 	}
-      else if (CONST_STRNEQ (p, "intel"))
+      else if (strncmp (p, "intel", 5) == 0)
 	{
 	  intel_syntax = 1;
 	}
-      else if (CONST_STRNEQ (p, "att"))
+      else if (strncmp (p, "att", 3) == 0)
 	{
 	  intel_syntax = 0;
 	}
-      else if (CONST_STRNEQ (p, "addr"))
+      else if (strncmp (p, "addr", 4) == 0)
 	{
 	  if (p[4] == '1' && p[5] == '6')
 	    priv.orig_sizeflag &= ~AFLAG;
 	  else if (p[4] == '3' && p[5] == '2')
 	    priv.orig_sizeflag |= AFLAG;
 	}
-      else if (CONST_STRNEQ (p, "data"))
+      else if (strncmp (p, "data", 4) == 0)
 	{
 	  if (p[4] == '1' && p[5] == '6')
 	    priv.orig_sizeflag &= ~DFLAG;
 	  else if (p[4] == '3' && p[5] == '2')
 	    priv.orig_sizeflag |= DFLAG;
 	}
-      else if (CONST_STRNEQ (p, "suffix"))
+      else if (strncmp (p, "suffix", 6) == 0)
 	priv.orig_sizeflag |= SUFFIX_ALWAYS;
 
       p = strchr (p, ',');
@@ -3012,61 +2811,35 @@ print_insn (bfd_vma pc, disassemble_info *info)
       return 1;
     }
 
-  op = 0;
   if (*codep == 0x0f)
     {
-      unsigned char threebyte;
       FETCH_DATA (info, codep + 2);
-      threebyte = *++codep;
-      dp = &dis386_twobyte[threebyte];
+      dp = &dis386_twobyte[*++codep];
       need_modrm = twobyte_has_modrm[*codep];
-      uses_DATA_prefix = twobyte_uses_DATA_prefix[*codep];
-      uses_REPNZ_prefix = twobyte_uses_REPNZ_prefix[*codep];
-      uses_REPZ_prefix = twobyte_uses_REPZ_prefix[*codep];
+      uses_SSE_prefix = twobyte_uses_SSE_prefix[*codep];
       uses_LOCK_prefix = (*codep & ~0x02) == 0x20;
-      codep++;
-      if (dp->name == NULL && dp->bytemode1 == IS_3BYTE_OPCODE)
-	{
-	  FETCH_DATA (info, codep + 2);
-	  op = *codep++;
-	  switch (threebyte)
-	    {
-	    case 0x38:
-	      uses_DATA_prefix = threebyte_0x38_uses_DATA_prefix[op];
-	      uses_REPNZ_prefix = threebyte_0x38_uses_REPNZ_prefix[op];
-	      uses_REPZ_prefix = threebyte_0x38_uses_REPZ_prefix[op];
-	      break;
-	    case 0x3a:
-	      uses_DATA_prefix = threebyte_0x3a_uses_DATA_prefix[op];
-	      uses_REPNZ_prefix = threebyte_0x3a_uses_REPNZ_prefix[op];
-	      uses_REPZ_prefix = threebyte_0x3a_uses_REPZ_prefix[op];
-	      break;
-	    default:
-	      break;
-	    }
-	}
     }
   else
     {
       dp = &dis386[*codep];
       need_modrm = onebyte_has_modrm[*codep];
-      uses_DATA_prefix = 0;
-      uses_REPNZ_prefix = 0;
-      uses_REPZ_prefix = 0;
+      uses_SSE_prefix = 0;
       uses_LOCK_prefix = 0;
-      codep++;
     }
   
-  if (!uses_REPZ_prefix && (prefixes & PREFIX_REPZ))
+  /*"lzcnt"=0xBD is the only non-sse instruction which uses F3 in the opcode without any "rep(z|nz)"*/
+  if (!uses_SSE_prefix && (prefixes & PREFIX_REPZ) && *codep !=0xBD)
     {
       oappend ("repz ");
       used_prefixes |= PREFIX_REPZ;
     }
-  if (!uses_REPNZ_prefix && (prefixes & PREFIX_REPNZ))
+  if (!uses_SSE_prefix && (prefixes & PREFIX_REPNZ) && *codep !=0xBD)
     {
       oappend ("repnz ");
       used_prefixes |= PREFIX_REPNZ;
     }
+
+  codep++;
 
   if (!uses_LOCK_prefix && (prefixes & PREFIX_LOCK))
     {
@@ -3087,7 +2860,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
 	}
     }
 
-  if (!uses_DATA_prefix && (prefixes & PREFIX_DATA))
+  if (!uses_SSE_prefix && (prefixes & PREFIX_DATA))
     {
       sizeflag ^= DFLAG;
       if (dp->bytemode3 == cond_jump_mode
@@ -3104,7 +2877,8 @@ print_insn (bfd_vma pc, disassemble_info *info)
 
   if (dp->name == NULL && dp->bytemode1 == IS_3BYTE_OPCODE)
     {
-      dp = &three_byte_table[dp->bytemode2][op];
+      FETCH_DATA (info, codep + 2);
+      dp = &three_byte_table[dp->bytemode2][*codep++];
       mod = (*codep >> 6) & 3;
       reg = (*codep >> 3) & 7;
       rm = *codep & 7;
@@ -3139,16 +2913,14 @@ print_insn (bfd_vma pc, disassemble_info *info)
 		index = 1;
 	      else
 		{
-		  /* We should check PREFIX_REPNZ and PREFIX_REPZ
-		     before PREFIX_DATA.  */
-		  used_prefixes |= (prefixes & PREFIX_REPNZ);
-		  if (prefixes & PREFIX_REPNZ)
-		    index = 3;
+		  used_prefixes |= (prefixes & PREFIX_DATA);
+		  if (prefixes & PREFIX_DATA)
+		    index = 2;
 		  else
 		    {
-		      used_prefixes |= (prefixes & PREFIX_DATA);
-		      if (prefixes & PREFIX_DATA)
-			index = 2;
+		      used_prefixes |= (prefixes & PREFIX_REPNZ);
+		      if (prefixes & PREFIX_REPNZ)
+			index = 3;
 		    }
 		}
 	      dp = &prefix_user_table[dp->bytemode2][index];
@@ -4921,8 +4693,7 @@ OP_OFF64 (int bytemode, int sizeflag)
 {
   bfd_vma off;
 
-  if (address_mode != mode_64bit
-      || (prefixes & PREFIX_ADDR))
+  if (address_mode != mode_64bit)
     {
       OP_OFF (bytemode, sizeflag);
       return;
@@ -5436,9 +5207,9 @@ PNI_Fixup (int extrachar ATTRIBUTE_UNUSED, int sizeflag)
 	  && (prefixes & PREFIX_ADDR)
 	  && olen >= (4 + 7)
 	  && *(p - 1) == ' '
-	  && CONST_STRNEQ (p - 7, "addr")
-	  && (CONST_STRNEQ (p - 3, "16")
-	      || CONST_STRNEQ (p - 3, "32")))
+	  && strncmp (p - 7, "addr", 4) == 0
+	  && (strncmp (p - 3, "16", 2) == 0
+	      || strncmp (p - 3, "32", 2) == 0))
 	p -= 7;
 
       if (rm)

@@ -360,6 +360,7 @@ lookup_minimal_symbol_solib_trampoline (const char *name,
   return NULL;
 }
 
+
 /* Search through the minimal symbol table for each objfile and find
    the symbol whose address is the largest address that is still less
    than or equal to PC, and matches SECTION (if non-NULL).  Returns a
@@ -490,8 +491,7 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc, asection *section)
 			 don't fill the bfd_section member, so don't
 			 throw away symbols on those platforms.  */
 		      && SYMBOL_BFD_SECTION (&msymbol[hi]) != NULL
-		      && (!matching_bfd_sections
-			  (SYMBOL_BFD_SECTION (&msymbol[hi]), section)))
+		      && SYMBOL_BFD_SECTION (&msymbol[hi]) != section)
 		    {
 		      hi--;
 		      continue;

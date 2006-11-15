@@ -14,7 +14,6 @@
 #include <sys/types.h>
 #include <sys/syscall.h>
 #include <signal.h>
-#include <errno.h>
 
 static void *
 process (void *arg)
@@ -28,11 +27,7 @@ int main (void)
 {
   pthread_t th_a;
   if (pthread_create (&th_a, NULL, process, (void *) "a") == 0)
-    {
-      int err = syscall (SYS_sigreturn, 1, 2, 3, 4, 5, 6);
-      if (err == -1 && errno == ENOSYS)
-	printf ("ENOSYS\n");
-    }
+    syscall (SYS_sigreturn, 1, 2, 3, 4, 5, 6);
   printf ("xyzzy\n");
   exit (0);
 }

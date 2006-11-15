@@ -12,18 +12,11 @@ int main (int argc, char *argv[])
 {
   char buf[1024];
   char buf2[1024];
-  int err;
 
   /* This is a special feature handled in the simulator.  The "42"
      should be formed from getpid () if this was a real program.  */
-  err = readlink ("/proc/42/exe", buf, sizeof (buf));
-  if (err < 0)
-    {
-      if (err == -1 && errno == ENOSYS)
-	printf ("ENOSYS\n");
-      printf ("xyzzy\n");
-      exit (0);
-    }      
+  if (readlink ("/proc/42/exe", buf, sizeof (buf)) < 0)
+    abort ();
 
   /* Don't use an abort in the following; it might cause the printf to
      not make it all the way to output and make debugging more
