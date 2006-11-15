@@ -1080,9 +1080,9 @@ resolve_symbol_value (symbolS *symp)
 	      symp->sy_resolving = 0;
 	      goto exit_dont_set_value;
 	    }
-	  else if (finalize_syms &&
-		   ((final_seg == expr_section && seg_left != expr_section) ||
-		    symbol_shadow_p (symp)))
+	  else if (finalize_syms
+		   && ((final_seg == expr_section && seg_left != expr_section)
+		       || symbol_shadow_p (symp)))
 	    {
 	      /* If the symbol is an expression symbol, do similarly
 		 as for undefined and common syms above.  Handles

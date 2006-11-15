@@ -1,3 +1,7 @@
+2006-11-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* symbols.c (resolve_symbol_value): Formatting.
+
 2006-11-15  Jan Beulich  <jbeulich@novell.com>
 
 	PR/3469
