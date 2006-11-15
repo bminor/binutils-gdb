@@ -1,3 +1,15 @@
+2006-11-14  Phil Lello  <phil.lello@homecall.co.uk>
+
+	* peXXigen.c: Updates for PE/COFF V8.0, and clarification
+	(dir_names): Added CLR Runtime Header to dir_names[].
+	(_bfd_XX_print_private_bfd_data_common): Added EFI_ROM and XBOX
+	subsystem names
+	(_bfd_XXi_swap_aouthdr_in, _bfd_XXi_swap_aouthdr_out)
+	(pe_print_idata, pe_print_edata)
+	(_bfd_XX_bfd_copy_private_bfd_data_common)
+	(_bfd_XXi_final_link_postscript): Use #DEFINEs for index into
+	DataDirectory.
+
 2006-11-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* bfd-in.h (bfd_elf32_arm_process_before_allocation): Update
