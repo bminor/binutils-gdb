@@ -598,11 +598,13 @@ symbol_clone (symbolS *orgsymP, int replace)
 	symbol_lastP = newsymP;
       else if (orgsymP->sy_next)
 	orgsymP->sy_next->sy_previous = newsymP;
-      orgsymP->sy_next = NULL;
+      orgsymP->sy_previous = orgsymP->sy_next = orgsymP;
       debug_verify_symchain (symbol_rootP, symbol_lastP);
 
       symbol_table_insert (newsymP);
     }
+  else
+    newsymP->sy_previous = newsymP->sy_next = newsymP;
 
   return newsymP;
 }
@@ -1078,8 +1080,9 @@ resolve_symbol_value (symbolS *symp)
 	      symp->sy_resolving = 0;
 	      goto exit_dont_set_value;
 	    }
-	  else if (finalize_syms && final_seg == expr_section
-		   && seg_left != expr_section)
+	  else if (finalize_syms &&
+		   ((final_seg == expr_section && seg_left != expr_section) ||
+		    symbol_shadow_p (symp)))
 	    {
 	      /* If the symbol is an expression symbol, do similarly
 		 as for undefined and common syms above.  Handles
@@ -2490,6 +2493,17 @@ symbol_constant_p (symbolS *s)
   if (LOCAL_SYMBOL_CHECK (s))
     return 1;
   return s->sy_value.X_op == O_constant;
+}
+
+/* Return whether a symbol was cloned and thus removed from the global
+   symbol list.  */
+
+int
+symbol_shadow_p (symbolS *s)
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return 0;
+  return s->sy_next == s;
 }
 
 /* Return the BFD symbol for a symbol.  */

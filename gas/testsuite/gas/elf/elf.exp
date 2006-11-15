@@ -72,6 +72,7 @@ if { ([istarget "*-*-*elf*"]
 	{ *c54x*-*-* } { }
 	default {
 	    run_dump_test redef
+	    run_dump_test equ-reloc
 	}
     }
     run_dump_test "section0" 

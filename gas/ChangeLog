@@ -1,3 +1,12 @@
+2006-11-15  Jan Beulich  <jbeulich@novell.com>
+
+	PR/3469
+	* symbols.c (symbol_clone): Mark symbol ending up not on symbol
+	chain by linking it to itself.
+	(resolve_symbol_value): Also check symbol_shadow_p().
+	(symbol_shadow_p): New.
+	* symbols.h (symbol_shadow_p): Declare.
+
 2006-11-12  Mark Shinwell  <shinwell@codesourcery.com>
 
 	* config/tc-arm.c (do_t_czb): Rename to do_t_cbz.
