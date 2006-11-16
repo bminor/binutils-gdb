@@ -1,3 +1,8 @@
+2006-11-16  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* m68k-opc.c (m68k_opcodes): Place trap instructions before set
+	conditionals.  Add tpf coldfire instruction as alias for trapf.
+
 2006-11-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (print_insn): Check PREFIX_REPNZ before

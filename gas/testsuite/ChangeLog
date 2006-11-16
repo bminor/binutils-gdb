@@ -1,3 +1,8 @@
+2006-11-16  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gas/m68k/all.exp: Add mcf-trap.
+	* gas/m68k/mcf-trap.[sd]: New.
+
 2006-11-15  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/elf/equ-reloc.[sd]: New.
