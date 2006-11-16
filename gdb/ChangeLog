@@ -1,3 +1,8 @@
+2006-11-16  Maxim Grigoriev  <maxim2405@gmail.com>
+
+	* MAINTAINERS (Responsible Maintainers): Add myself for Xtensa.
+	(Write After Approval): Add myself.
+
 2006-11-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote.c (PACKET_QPassSignals): New.
