@@ -375,21 +375,21 @@ static const struct asm_opcode score_insns[] =
   {"andri",     0x18000000, 0x3e000001, 0x8000,     Rd_Rs_I14,            do_rdrsi14},
   {"andri.c",   0x18000001, 0x3e000001, 0x8000,     Rd_Rs_I14,            do_rdrsi14},
   {"and!",      0x2004,     0x700f,     0x00000021, Rd_Rs,                do16_rdrs},
-  {"bcs",       0x08000000, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
-  {"bcc",       0x08000400, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
-  {"bcnz",      0x08003800, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
+  {"bcs",       0x08000000, 0x3e007c01, 0x4000,     PC_DISP19div2,        do_branch},
+  {"bcc",       0x08000400, 0x3e007c01, 0x4000,     PC_DISP19div2,        do_branch},
+  {"bcnz",      0x08003800, 0x3e007c01, 0x4000,     PC_DISP19div2,        do_branch},
   {"bcsl",      0x08000001, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
   {"bccl",      0x08000401, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
   {"bcnzl",     0x08003801, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
   {"bcs!",      0x4000,     0x7f00,     0x08000000, PC_DISP8div2,         do16_branch},
   {"bcc!",      0x4100,     0x7f00,     0x08000400, PC_DISP8div2,         do16_branch},
   {"bcnz!",     0x4e00,     0x7f00,     0x08003800, PC_DISP8div2,         do16_branch},
-  {"beq",       0x08001000, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
+  {"beq",       0x08001000, 0x3e007c01, 0x4000,     PC_DISP19div2,        do_branch},
   {"beql",      0x08001001, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
   {"beq!",      0x4400,     0x7f00,     0x08001000, PC_DISP8div2,         do16_branch},
-  {"bgtu",      0x08000800, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
-  {"bgt",       0x08001800, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
-  {"bge",       0x08002000, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
+  {"bgtu",      0x08000800, 0x3e007c01, 0x4000,     PC_DISP19div2,        do_branch},
+  {"bgt",       0x08001800, 0x3e007c01, 0x4000,     PC_DISP19div2,        do_branch},
+  {"bge",       0x08002000, 0x3e007c01, 0x4000,     PC_DISP19div2,        do_branch},
   {"bgtul",     0x08000801, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
   {"bgtl",      0x08001801, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
   {"bgel",      0x08002001, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
@@ -405,9 +405,9 @@ static const struct asm_opcode score_insns[] =
   {"bitset!",   0x6005,     0x7007,     0x0000002b, Rd_I5,                do16_rdi5},
   {"bittst!",   0x6006,     0x7007,     0x0000002d, Rd_I5,                do16_rdi5},
   {"bittgl!",   0x6007,     0x7007,     0x0000002f, Rd_I5,                do16_rdi5},
-  {"bleu",      0x08000c00, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
-  {"ble",       0x08001c00, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
-  {"blt",       0x08002400, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
+  {"bleu",      0x08000c00, 0x3e007c01, 0x4000,     PC_DISP19div2,        do_branch},
+  {"ble",       0x08001c00, 0x3e007c01, 0x4000,     PC_DISP19div2,        do_branch},
+  {"blt",       0x08002400, 0x3e007c01, 0x4000,     PC_DISP19div2,        do_branch},
   {"bleul",     0x08000c01, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
   {"blel",      0x08001c01, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
   {"bltl",      0x08002401, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
@@ -415,13 +415,13 @@ static const struct asm_opcode score_insns[] =
   {"bleu!",     0x4300,     0x7f00,     0x08000c00, PC_DISP8div2,         do16_branch},
   {"ble!",      0x4700,     0x7f00,     0x08001c00, PC_DISP8div2,         do16_branch},
   {"blt!",      0x4900,     0x7f00,     0x08002400, PC_DISP8div2,         do16_branch},
-  {"bmi",       0x08002800, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
+  {"bmi",       0x08002800, 0x3e007c01, 0x4000,     PC_DISP19div2,        do_branch},
   {"bmil",      0x08002801, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
   {"bmi!",      0x00004a00, 0x00007f00, 0x08002800, PC_DISP8div2,         do16_branch},
-  {"bne",       0x08001400, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
+  {"bne",       0x08001400, 0x3e007c01, 0x4000,     PC_DISP19div2,        do_branch},
   {"bnel",      0x08001401, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
   {"bne!",      0x4500,     0x7f00,     0x08001400, PC_DISP8div2,         do16_branch},
-  {"bpl",       0x08002c00, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
+  {"bpl",       0x08002c00, 0x3e007c01, 0x4000,     PC_DISP19div2,        do_branch},
   {"bpll",      0x08002c01, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
   {"bpl!",      0x4b00,     0x7f00,     0x08002c00, PC_DISP8div2,         do16_branch},
   {"brcs",      0x00000008, 0x3e007fff, 0x0004,     x_Rs_x,               do_rs},
@@ -488,14 +488,14 @@ static const struct asm_opcode score_insns[] =
   {"brvcl!",    0x0d0c,     0x7f0f,     0x00003409, x_Rs,                 do16_xrs},
   {"brcnzl!",   0x0e0c,     0x7f0f,     0x00003809, x_Rs,                 do16_xrs},
   {"brl!",      0x0f0c,     0x7f0f,     0x00003c09, x_Rs,                 do16_xrs},
-  {"bvs",       0x08003000, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
-  {"bvc",       0x08003400, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
+  {"bvs",       0x08003000, 0x3e007c01, 0x4000,     PC_DISP19div2,        do_branch},
+  {"bvc",       0x08003400, 0x3e007c01, 0x4000,     PC_DISP19div2,        do_branch},
   {"bvsl",      0x08003001, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
   {"bvcl",      0x08003401, 0x3e007c01, 0x8000,     PC_DISP19div2,        do_branch},
   {"bvs!",      0x4c00,     0x7f00,     0x08003000, PC_DISP8div2,         do16_branch},
   {"bvc!",      0x4d00,     0x7f00,     0x08003400, PC_DISP8div2,         do16_branch},
   {"b!",        0x4f00,     0x7f00,     0x08003c00, PC_DISP8div2,         do16_branch},
-  {"b",         0x08003c00, 0x3e007c01, 0x08003c00, PC_DISP19div2,        do_branch},
+  {"b",         0x08003c00, 0x3e007c01, 0x4000,     PC_DISP19div2,        do_branch},
   {"cache",     0x30000000, 0x3ff00000, 0x8000,     OP5_rvalueRs_SI15,    do_cache},
   {"ceinst",    0x38000000, 0x3e000000, 0x8000,     I5_Rs_Rs_I5_OP5,      do_ceinst},
   {"clz",       0x3800000d, 0x3e007fff, 0x8000,     Rd_Rs_x,              do_rdrs},
@@ -4609,11 +4609,10 @@ do_branch (char *str)
   /* Branch 32  offset field : 20 bit, 16 bit branch offset field : 8 bit.  */
   inst.instruction |= (inst.reloc.exp.X_add_number & 0x3fe) | ((inst.reloc.exp.X_add_number & 0xffc00) << 5);
 
-  /* Take the branch condition code.  */
-  inst.relax_inst = 0x4000 | (((inst.instruction >> 10) & 0xf) << 8);
-
-  if ((abs_value & 0xfffffe00) == 0)
+  /* Compute 16 bit branch instruction.  */
+  if ((inst.relax_inst != 0x8000) && (abs_value & 0xfffffe00) == 0)
     {
+      inst.relax_inst |= (((inst.instruction >> 10) & 0xf) << 8);
       inst.relax_inst |= ((inst.reloc.exp.X_add_number >> 1) & 0xff);
       inst.relax_size = 2;
     }
@@ -4621,9 +4620,6 @@ do_branch (char *str)
     {
       inst.relax_inst = 0x8000;
     }
-
-  if (inst.instruction & 1)
-    inst.relax_inst = 0x8000;
 }
 
 static void
@@ -5045,7 +5041,9 @@ score_relax_frag (asection * sec ATTRIBUTE_UNUSED, fragS * fragp, long stretch A
               n_insn_size = RELAX_OLD (next_fragp->fr_subtype);
             }
 
-	  n_relaxable_p = RELAX_OPT (next_fragp->fr_subtype);
+          if (RELAX_TYPE (next_fragp->fr_subtype) == PC_DISP19div2)
+            b32_relax_to_b16 (next_fragp);
+          n_relaxable_p = RELAX_OPT (next_fragp->fr_subtype);
 
           if (word_align_p)
             {
@@ -5061,7 +5059,7 @@ score_relax_frag (asection * sec ATTRIBUTE_UNUSED, fragS * fragp, long stretch A
               else if (insn_size == 2)
                 {
                   /* 16 -> 32.  */
-                  if (relaxable_p && ((n_insn_size == 4) && !n_relaxable_p))
+                  if (relaxable_p && (((n_insn_size == 4) && !n_relaxable_p) || (n_insn_size > 4)))
                     {
                       grows += 2;
                       do_relax_p = 1;
