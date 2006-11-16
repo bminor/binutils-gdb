@@ -128,7 +128,8 @@ Sized_relobj<size, big_endian>::Sized_relobj(
     output_local_symbol_count_(0),
     symbols_(NULL),
     local_symbol_offset_(0),
-    values_(NULL)
+    local_values_(),
+    local_indexes_()
 {
 }
 
@@ -505,23 +506,25 @@ Sized_relobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
 
 // Finalize the local symbols.  Here we record the file offset at
 // which they should be output, we add their names to *POOL, and we
-// add their values to THIS->VALUES_.  Return the new file offset.
-// This function is always called from the main thread.  The actual
-// output of the local symbols will occur in a separate task.
+// add their values to THIS->LOCAL_VALUES_ and their indexes in the
+// output symbol table to THIS->LOCAL_INDEXES_.  Return the symbol
+// index.  This function is always called from the main thread.  The
+// actual output of the local symbols will occur in a separate task.
 
 template<int size, bool big_endian>
-off_t
-Sized_relobj<size, big_endian>::do_finalize_local_symbols(off_t off,
+unsigned int
+Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
+							  off_t off,
 							  Stringpool* pool)
 {
   assert(this->symtab_shndx_ != -1U);
   if (this->symtab_shndx_ == 0)
     {
       // This object has no symbols.  Weird but legal.
-      return off;
+      return index;
     }
 
-  off = align_address(off, size >> 3);
+  assert(off == static_cast<off_t>(align_address(off, size >> 3)));
 
   this->local_symbol_offset_ = off;
 
@@ -539,7 +542,8 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(off_t off,
   const unsigned char* psyms = this->get_view(symtabshdr.get_sh_offset(),
 					      locsize);
 
-  this->values_ = new typename elfcpp::Elf_types<size>::Elf_Addr[loccount];
+  this->local_values_.resize(loccount);
+  this->local_indexes_.resize(loccount);
 
   // Read the symbol names.
   const unsigned int strtab_shndx = symtabshdr.get_sh_link();
@@ -550,7 +554,7 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(off_t off,
 
   // Loop over the local symbols.
 
-  std::vector<Map_to_output>& mo(this->map_to_output());
+  const std::vector<Map_to_output>& mo(this->map_to_output());
   unsigned int shnum = this->shnum();
   unsigned int count = 0;
   // Skip the first, dummy, symbol.
@@ -564,7 +568,7 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(off_t off,
       if (shndx >= elfcpp::SHN_LORESERVE)
 	{
 	  if (shndx == elfcpp::SHN_ABS)
-	    this->values_[i] = sym.get_st_value();
+	    this->local_values_[i] = sym.get_st_value();
 	  else
 	    {
 	      // FIXME: Handle SHN_XINDEX.
@@ -588,37 +592,46 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(off_t off,
 
 	  if (mo[shndx].output_section == NULL)
 	    {
-	      this->values_[i] = 0;
+	      this->local_values_[i] = 0;
+	      this->local_indexes_[i] = -1U;
 	      continue;
 	    }
 
-	  this->values_[i] = (mo[shndx].output_section->address()
-			      + mo[shndx].offset
-			      + sym.get_st_value());
+	  this->local_values_[i] = (mo[shndx].output_section->address()
+				    + mo[shndx].offset
+				    + sym.get_st_value());
 	}
 
-      if (sym.get_st_type() != elfcpp::STT_SECTION)
+      // Decide whether this symbol should go into the output file.
+
+      if (sym.get_st_type() == elfcpp::STT_SECTION)
 	{
-	  if (sym.get_st_name() >= strtab_size)
-	    {
-	      fprintf(stderr,
-		      _("%s: %s: local symbol %u section name "
-			"out of range: %u >= %u\n"),
-		      program_name, this->name().c_str(),
-		      i, sym.get_st_name(),
-		      static_cast<unsigned int>(strtab_size));
-	      gold_exit(false);
-	    }
-
-	  pool->add(pnames + sym.get_st_name(), NULL);
-	  off += sym_size;
-	  ++count;
+	  this->local_indexes_[i] = -1U;
+	  continue;
 	}
+
+      if (sym.get_st_name() >= strtab_size)
+	{
+	  fprintf(stderr,
+		  _("%s: %s: local symbol %u section name "
+		    "out of range: %u >= %u\n"),
+		  program_name, this->name().c_str(),
+		  i, sym.get_st_name(),
+		  static_cast<unsigned int>(strtab_size));
+	  gold_exit(false);
+	}
+
+      const char* name = pnames + sym.get_st_name();
+      pool->add(name, NULL);
+      this->local_indexes_[i] = index;
+      ++index;
+      off += sym_size;
+      ++count;
     }
 
   this->output_local_symbol_count_ = count;
 
-  return off;
+  return index;
 }
 
 // Write out the local symbols.
@@ -661,16 +674,20 @@ Sized_relobj<size, big_endian>::write_local_symbols(Output_file* of,
   unsigned char* oview = of->get_output_view(this->local_symbol_offset_,
 					     output_size);
 
-  std::vector<Map_to_output>& mo(this->map_to_output());
+  const std::vector<Map_to_output>& mo(this->map_to_output());
 
-  psyms += sym_size;
+  assert(this->local_values_.size() == loccount);
+  assert(this->local_indexes_.size() == loccount);
+
   unsigned char* ov = oview;
+  psyms += sym_size;
   for (unsigned int i = 1; i < loccount; ++i, psyms += sym_size)
     {
       elfcpp::Sym<size, big_endian> isym(psyms);
 
-      if (isym.get_st_type() == elfcpp::STT_SECTION)
+      if (this->local_indexes_[i] == -1U)
 	continue;
+      assert(this->local_indexes_[i] != 0);
 
       unsigned int st_shndx = isym.get_st_shndx();
       if (st_shndx < elfcpp::SHN_LORESERVE)
@@ -684,8 +701,9 @@ Sized_relobj<size, big_endian>::write_local_symbols(Output_file* of,
       elfcpp::Sym_write<size, big_endian> osym(ov);
 
       assert(isym.get_st_name() < strtab_size);
-      osym.put_st_name(sympool->get_offset(pnames + isym.get_st_name()));
-      osym.put_st_value(this->values_[i]);
+      const char* name = pnames + isym.get_st_name();
+      osym.put_st_name(sympool->get_offset(name));
+      osym.put_st_value(this->local_values_[i]);
       osym.put_st_size(isym.get_st_size());
       osym.put_st_info(isym.get_st_info());
       osym.put_st_other(isym.get_st_other());

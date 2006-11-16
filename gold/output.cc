@@ -366,6 +366,120 @@ Output_section_data::do_out_shndx() const
   return this->output_section_->out_shndx();
 }
 
+// Output_reloc methods.
+
+// Get the symbol index of a relocation.
+
+template<bool dynamic, int size, bool big_endian>
+unsigned int
+Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::get_symbol_index()
+  const
+{
+  unsigned int index;
+  switch (this->local_sym_index_)
+    {
+    case INVALID_CODE:
+      abort();
+
+    case GSYM_CODE:
+      if (this->u_.gsym == NULL)
+	index = 0;
+      else if (dynamic)
+	index = this->u_.gsym->dynsym_index();
+      else
+	index = this->u_.gsym->symtab_index();
+      break;
+
+    case SECTION_CODE:
+      if (dynamic)
+	index = this->u_.os->dynsym_index();
+      else
+	index = this->u_.os->symtab_index();
+      break;
+
+    default:
+      if (dynamic)
+	{
+	  // FIXME: It seems that some targets may need to generate
+	  // dynamic relocations against local symbols for some
+	  // reasons.  This will have to be addressed at some point.
+	  abort();
+	}
+      else
+	index = this->u_.object->symtab_index(this->local_sym_index_);
+      break;
+    }
+  assert(index != -1U);
+  return index;
+}
+
+// Write out the offset and info fields of a Rel or Rela relocation
+// entry.
+
+template<bool dynamic, int size, bool big_endian>
+template<typename Write_rel>
+void
+Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::write_rel(
+    Write_rel* wr) const
+{
+  wr->put_r_offset(this->address_);
+  wr->put_r_info(elfcpp::elf_r_info<size>(this->get_symbol_index(),
+					  this->type_));
+}
+
+// Write out a Rel relocation.
+
+template<bool dynamic, int size, bool big_endian>
+void
+Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::write(
+    unsigned char* pov) const
+{
+  elfcpp::Rel_write<size, big_endian> orel(pov);
+  this->write_rel(&orel);
+}
+
+// Write out a Rela relocation.
+
+template<bool dynamic, int size, bool big_endian>
+void
+Output_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>::write(
+    unsigned char* pov) const
+{
+  elfcpp::Rela_write<size, big_endian> orel(pov);
+  this->rel_.write_rel(&orel);
+  orel.put_r_addend(this->addend_);
+}
+
+// Output_data_reloc_base methods.
+
+// Write out relocation data.
+
+template<int sh_type, bool dynamic, int size, bool big_endian>
+void
+Output_data_reloc_base<sh_type, dynamic, size, big_endian>::do_write(
+    Output_file* of)
+{
+  const off_t off = this->offset();
+  const off_t oview_size = this->data_size();
+  unsigned char* const oview = of->get_output_view(off, oview_size);
+
+  unsigned char* pov = oview;
+  for (typename Relocs::const_iterator p = this->relocs_.begin();
+       p != this->relocs_.end();
+       ++p)
+    {
+      p->write(pov);
+      pov += reloc_size;
+    }
+
+  assert(pov - oview == oview_size);
+
+  of->write_output_view(off, oview_size, oview);
+
+  // We no longer need the relocation entries.
+  this->relocs_.clear();
+}
+
 // Output_data_got::Got_entry methods.
 
 // Write out the entry.
@@ -439,7 +553,7 @@ Output_data_got<size, big_endian>::do_write(Output_file* of)
   const int add = size / 8;
 
   const off_t off = this->offset();
-  const off_t oview_size = this->entries_.size() * add;
+  const off_t oview_size = this->data_size();
   unsigned char* const oview = of->get_output_view(off, oview_size);
 
   unsigned char* pov = oview;
@@ -450,6 +564,8 @@ Output_data_got<size, big_endian>::do_write(Output_file* of)
       p->write(pov);
       pov += add;
     }
+
+  assert(pov - oview == oview_size);
 
   of->write_output_view(off, oview_size, oview);
 
@@ -508,6 +624,8 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
     type_(type),
     flags_(flags),
     out_shndx_(0),
+    symtab_index_(0),
+    dynsym_index_(0),
     input_sections_(),
     first_input_offset_(0),
     may_add_data_(may_add_data)
@@ -564,12 +682,17 @@ Output_section::add_input_section(Relobj* object, unsigned int shndx,
 void
 Output_section::add_output_section_data(Output_section_data* posd)
 {
+  assert(this->may_add_data_);
+
   if (this->input_sections_.empty())
     this->first_input_offset_ = this->data_size();
+
   this->input_sections_.push_back(Input_section(posd));
+
   uint64_t addralign = posd->addralign();
   if (addralign > this->addralign_)
     this->addralign_ = addralign;
+
   posd->set_output_section(this);
 }
 
@@ -625,14 +748,6 @@ Output_section::do_write(Output_file* of)
        p != this->input_sections_.end();
        ++p)
     p->write(of);
-}
-
-// Output_section_symtab methods.
-
-Output_section_symtab::Output_section_symtab(const char* name, off_t size)
-  : Output_section(name, elfcpp::SHT_SYMTAB, 0, false)
-{
-  this->set_data_size(size);
 }
 
 // Output_section_strtab methods.
@@ -1142,6 +1257,54 @@ Output_section::add_input_section<64, true>(
     unsigned int shndx,
     const char* secname,
     const elfcpp::Shdr<64, true>& shdr);
+
+template
+class Output_data_reloc<elfcpp::SHT_REL, false, 32, false>;
+
+template
+class Output_data_reloc<elfcpp::SHT_REL, false, 32, true>;
+
+template
+class Output_data_reloc<elfcpp::SHT_REL, false, 64, false>;
+
+template
+class Output_data_reloc<elfcpp::SHT_REL, false, 64, true>;
+
+template
+class Output_data_reloc<elfcpp::SHT_REL, true, 32, false>;
+
+template
+class Output_data_reloc<elfcpp::SHT_REL, true, 32, true>;
+
+template
+class Output_data_reloc<elfcpp::SHT_REL, true, 64, false>;
+
+template
+class Output_data_reloc<elfcpp::SHT_REL, true, 64, true>;
+
+template
+class Output_data_reloc<elfcpp::SHT_RELA, false, 32, false>;
+
+template
+class Output_data_reloc<elfcpp::SHT_RELA, false, 32, true>;
+
+template
+class Output_data_reloc<elfcpp::SHT_RELA, false, 64, false>;
+
+template
+class Output_data_reloc<elfcpp::SHT_RELA, false, 64, true>;
+
+template
+class Output_data_reloc<elfcpp::SHT_RELA, true, 32, false>;
+
+template
+class Output_data_reloc<elfcpp::SHT_RELA, true, 32, true>;
+
+template
+class Output_data_reloc<elfcpp::SHT_RELA, true, 64, false>;
+
+template
+class Output_data_reloc<elfcpp::SHT_RELA, true, 64, true>;
 
 template
 class Output_data_got<32, false>;

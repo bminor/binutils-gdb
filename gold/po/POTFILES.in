@@ -27,8 +27,10 @@ readsyms.cc
 readsyms.h
 reloc.cc
 reloc.h
+reloc-types.h
 resolve.cc
 script.cc
+script-c.h
 script.h
 stringpool.cc
 stringpool.h

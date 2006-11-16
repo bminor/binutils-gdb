@@ -6,29 +6,10 @@
 #include "elfcpp.h"
 #include "object.h"
 #include "symtab.h"
+#include "reloc-types.h"
 
 namespace gold
 {
-
-// Pick the ELF relocation accessor class and the size based on
-// SH_TYPE, which is either SHT_REL or SHT_RELA.
-
-template<int sh_type, int size, bool big_endian>
-struct Reloc_types;
-
-template<int size, bool big_endian>
-struct Reloc_types<elfcpp::SHT_REL, size, big_endian>
-{
-  typedef typename elfcpp::Rel<size, big_endian> Reloc;
-  static const int reloc_size = elfcpp::Elf_sizes<size>::rel_size;
-};
-
-template<int size, bool big_endian>
-struct Reloc_types<elfcpp::SHT_RELA, size, big_endian>
-{
-  typedef typename elfcpp::Rela<size, big_endian> Reloc;
-  static const int reloc_size = elfcpp::Elf_sizes<size>::rela_size;
-};
 
 // This function implements the generic part of reloc scanning.  This
 // is an inline function which takes a class whose operator()
@@ -140,8 +121,9 @@ relocate_section(
   Relocate relocate;
 
   unsigned int local_count = relinfo->local_symbol_count;
-  typename elfcpp::Elf_types<size>::Elf_Addr *local_values = relinfo->values;
-  Symbol** global_syms = relinfo->symbols;
+  const typename Sized_relobj<size, big_endian>::Local_values* local_values =
+    relinfo->local_values;
+  const Symbol* const * global_syms = relinfo->symbols;
 
   for (size_t i = 0; i < reloc_count; ++i, prelocs += reloc_size)
     {
@@ -153,22 +135,22 @@ relocate_section(
       unsigned int r_sym = elfcpp::elf_r_sym<size>(r_info);
       unsigned int r_type = elfcpp::elf_r_type<size>(r_info);
 
-      Sized_symbol<size>* sym;
+      const Sized_symbol<size>* sym;
       typename elfcpp::Elf_types<size>::Elf_Addr value;
 
       if (r_sym < local_count)
 	{
 	  sym = NULL;
-	  value = local_values[r_sym];
+	  value = (*local_values)[r_sym];
 	}
       else
 	{
-	  Symbol* gsym = global_syms[r_sym - local_count];
+	  const Symbol* gsym = global_syms[r_sym - local_count];
 	  assert(gsym != NULL);
 	  if (gsym->is_forwarder())
 	    gsym = relinfo->symtab->resolve_forwards(gsym);
 
-	  sym = static_cast<Sized_symbol<size>*>(gsym);
+	  sym = static_cast<const Sized_symbol<size>*>(gsym);
 	  value = sym->value();
 	}
 

@@ -352,10 +352,10 @@ class Relobj : public Object
 
   // Initial local symbol processing: set the offset where local
   // symbol information will be stored; add local symbol names to
-  // *POOL; return the offset following the local symbols.
-  off_t
-  finalize_local_symbols(off_t off, Stringpool* pool)
-  { return this->do_finalize_local_symbols(off, pool); }
+  // *POOL; return the new local symbol index.
+  unsigned int
+  finalize_local_symbols(unsigned int index, off_t off, Stringpool* pool)
+  { return this->do_finalize_local_symbols(index, off, pool); }
 
   // Relocate the input sections and write out the local symbols.
   void
@@ -408,8 +408,8 @@ class Relobj : public Object
 		 Read_relocs_data*) = 0;
 
   // Finalize local symbols--implemented by child class.
-  virtual off_t
-  do_finalize_local_symbols(off_t, Stringpool*) = 0;
+  virtual unsigned int
+  do_finalize_local_symbols(unsigned int, off_t, Stringpool*) = 0;
 
   // Relocate the input sections and write out the local
   // symbols--implemented by child class.
@@ -443,6 +443,9 @@ template<int size, bool big_endian>
 class Sized_relobj : public Relobj
 {
  public:
+  typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
+  typedef std::vector<Address> Local_values;
+
   Sized_relobj(const std::string& name, Input_file* input_file, off_t offset,
 	       const typename elfcpp::Ehdr<size, big_endian>&);
 
@@ -451,6 +454,16 @@ class Sized_relobj : public Relobj
   // Set up the object file based on the ELF header.
   void
   setup(const typename elfcpp::Ehdr<size, big_endian>&);
+
+  // Return the index of local symbol SYM in the ordinary symbol
+  // table.  A value of -1U means that the symbol is not being output.
+  unsigned int
+  symtab_index(unsigned int sym) const
+  {
+    assert(sym < this->local_indexes_.size());
+    assert(this->local_indexes_[sym] != 0);
+    return this->local_indexes_[sym];
+  }
 
   // Read the symbols.
   void
@@ -475,8 +488,8 @@ class Sized_relobj : public Relobj
 		 Read_relocs_data*);
 
   // Finalize the local symbols.
-  off_t
-  do_finalize_local_symbols(off_t, Stringpool*);
+  unsigned int
+  do_finalize_local_symbols(unsigned int, off_t, Stringpool*);
 
   // Relocate the input sections and write out the local symbols.
   void
@@ -563,7 +576,9 @@ class Sized_relobj : public Relobj
   // File offset for local symbols.
   off_t local_symbol_offset_;
   // Values of local symbols.
-  typename elfcpp::Elf_types<size>::Elf_Addr *values_;
+  Local_values local_values_;
+  // Indexes of local symbols in the output file; -1U if not present.
+  std::vector<unsigned int> local_indexes_;
 };
 
 // A class to manage the list of all objects.
@@ -643,9 +658,9 @@ struct Relocate_info
   // Number of local symbols.
   unsigned int local_symbol_count;
   // Values of local symbols.
-  typename elfcpp::Elf_types<size>::Elf_Addr *values;
+  const typename Sized_relobj<size, big_endian>::Local_values* local_values;
   // Global symbols.
-  Symbol** symbols;
+  const Symbol* const * symbols;
   // Section index of relocation section.
   unsigned int reloc_shndx;
   // Section index of section being relocated.

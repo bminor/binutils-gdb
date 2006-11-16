@@ -96,7 +96,7 @@ class Target_i386 : public Sized_target<32, false>
     inline bool
     relocate(const Relocate_info<32, false>*, Target_i386*, size_t relnum,
 	     const elfcpp::Rel<32, false>&,
-	     unsigned int r_type, Sized_symbol<32>*,
+	     unsigned int r_type, const Sized_symbol<32>*,
 	     elfcpp::Elf_types<32>::Elf_Addr,
 	     unsigned char*, elfcpp::Elf_types<32>::Elf_Addr,
 	     off_t);
@@ -106,7 +106,7 @@ class Target_i386 : public Sized_target<32, false>
     inline void
     relocate_tls(const Relocate_info<32, false>*, size_t relnum,
 		 const elfcpp::Rel<32, false>&,
-		 unsigned int r_type, Sized_symbol<32>*,
+		 unsigned int r_type, const Sized_symbol<32>*,
 		 elfcpp::Elf_types<32>::Elf_Addr,
 		 unsigned char*, elfcpp::Elf_types<32>::Elf_Addr, off_t);
 
@@ -529,7 +529,7 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
 				size_t relnum,
 				const elfcpp::Rel<32, false>& rel,
 				unsigned int r_type,
-				Sized_symbol<32>* gsym,
+				const Sized_symbol<32>* gsym,
 				elfcpp::Elf_types<32>::Elf_Addr value,
 				unsigned char* view,
 				elfcpp::Elf_types<32>::Elf_Addr address,
@@ -670,7 +670,7 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 				    size_t relnum,
 				    const elfcpp::Rel<32, false>& rel,
 				    unsigned int r_type,
-				    Sized_symbol<32>* gsym,
+				    const Sized_symbol<32>* gsym,
 				    elfcpp::Elf_types<32>::Elf_Addr value,
 				    unsigned char* view,
 				    elfcpp::Elf_types<32>::Elf_Addr,

@@ -29,6 +29,8 @@ Symbol::init_fields(const char* name, const char* version,
 {
   this->name_ = name;
   this->version_ = version;
+  this->symtab_index_ = 0;
+  this->dynsym_index_ = 0;
   this->got_offset_ = 0;
   this->type_ = type;
   this->binding_ = binding;
@@ -37,6 +39,7 @@ Symbol::init_fields(const char* name, const char* version,
   this->is_target_special_ = false;
   this->is_def_ = false;
   this->is_forwarder_ = false;
+  this->needs_dynsym_entry_ = false;
   this->in_dyn_ = false;
   this->has_got_offset_ = false;
   this->has_warning_ = false;
@@ -204,10 +207,10 @@ Symbol_table::make_forwarder(Symbol* from, Symbol* to)
 // Resolve the forwards from FROM, returning the real symbol.
 
 Symbol*
-Symbol_table::resolve_forwards(Symbol* from) const
+Symbol_table::resolve_forwards(const Symbol* from) const
 {
   assert(from->is_forwarder());
-  Unordered_map<Symbol*, Symbol*>::const_iterator p =
+  Unordered_map<const Symbol*, Symbol*>::const_iterator p =
     this->forwarders_.find(from);
   assert(p != this->forwarders_.end());
   return p->second;
@@ -952,18 +955,22 @@ Symbol_table::define_symbols(const Layout* layout, Target* target, int count,
     }
 }
 
-// Set the final values for all the symbols.  Record the file offset
+// Set the final values for all the symbols.  The index of the first
+// global symbol in the output file is INDEX.  Record the file offset
 // OFF.  Add their names to POOL.  Return the new file offset.
 
 off_t
-Symbol_table::finalize(off_t off, Stringpool* pool)
+Symbol_table::finalize(unsigned int index, off_t off, Stringpool* pool)
 {
   off_t ret;
 
+  assert(index != 0);
+  this->first_global_index_ = index;
+
   if (this->size_ == 32)
-    ret = this->sized_finalize<32>(off, pool);
+    ret = this->sized_finalize<32>(index, off, pool);
   else if (this->size_ == 64)
-    ret = this->sized_finalize<64>(off, pool);
+    ret = this->sized_finalize<64>(index, off, pool);
   else
     abort();
 
@@ -980,15 +987,17 @@ Symbol_table::finalize(off_t off, Stringpool* pool)
 
 template<int size>
 off_t
-Symbol_table::sized_finalize(off_t off, Stringpool* pool)
+Symbol_table::sized_finalize(unsigned index, off_t off, Stringpool* pool)
 {
   off = align_address(off, size >> 3);
   this->offset_ = off;
 
+  size_t orig_index = index;
+
   const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
-  Symbol_table_type::iterator p = this->table_.begin();
-  size_t count = 0;
-  while (p != this->table_.end())
+  for (Symbol_table_type::iterator p = this->table_.begin();
+       p != this->table_.end();
+       ++p)
     {
       Sized_symbol<size>* sym = static_cast<Sized_symbol<size>*>(p->second);
 
@@ -1030,12 +1039,7 @@ Symbol_table::sized_finalize(off_t off, Stringpool* pool)
 
 		if (os == NULL)
 		  {
-		    // We should be able to erase this symbol from the
-		    // symbol table, but at least with gcc 4.0.2
-		    // std::unordered_map::erase doesn't appear to return
-		    // the new iterator.
-		    // p = this->table_.erase(p);
-		    ++p;
+		    sym->set_symtab_index(-1U);
 		    continue;
 		  }
 
@@ -1082,13 +1086,13 @@ Symbol_table::sized_finalize(off_t off, Stringpool* pool)
 	}
 
       sym->set_value(value);
+      sym->set_symtab_index(index);
       pool->add(sym->name(), NULL);
-      ++count;
+      ++index;
       off += sym_size;
-      ++p;
     }
 
-  this->output_count_ = count;
+  this->output_count_ = index - orig_index;
 
   return off;
 }
@@ -1126,14 +1130,19 @@ Symbol_table::sized_write_globals(const Target*,
 				  Output_file* of) const
 {
   const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
-  unsigned char* psyms = of->get_output_view(this->offset_,
-					     this->output_count_ * sym_size);
+  unsigned int index = this->first_global_index_;
+  const off_t oview_size = this->output_count_ * sym_size;
+  unsigned char* psyms = of->get_output_view(this->offset_, oview_size);
+
   unsigned char* ps = psyms;
   for (Symbol_table_type::const_iterator p = this->table_.begin();
        p != this->table_.end();
        ++p)
     {
       Sized_symbol<size>* sym = static_cast<Sized_symbol<size>*>(p->second);
+
+      if (sym->symtab_index() == -1U)
+	continue;
 
       unsigned int shndx;
       switch (sym->source())
@@ -1164,9 +1173,7 @@ Symbol_table::sized_write_globals(const Target*,
 		Relobj* relobj = static_cast<Relobj*>(symobj);
 		off_t secoff;
 		Output_section* os = relobj->output_section(shnum, &secoff);
-		if (os == NULL)
-		  continue;
-
+		assert(os != NULL);
 		shndx = os->out_shndx();
 	      }
 	  }
@@ -1188,6 +1195,9 @@ Symbol_table::sized_write_globals(const Target*,
 	  abort();
 	}
 
+      assert(sym->symtab_index() == index);
+      ++index;
+
       elfcpp::Sym_write<size, big_endian> osym(ps);
       osym.put_st_name(sympool->get_offset(sym->name()));
       osym.put_st_value(sym->value());
@@ -1200,7 +1210,9 @@ Symbol_table::sized_write_globals(const Target*,
       ps += sym_size;
     }
 
-  of->write_output_view(this->offset_, this->output_count_ * sym_size, psyms);
+  assert(ps - psyms == oview_size);
+
+  of->write_output_view(this->offset_, oview_size, psyms);
 }
 
 // Warnings functions.
@@ -1254,7 +1266,7 @@ Warnings::note_warnings(Symbol_table* symtab)
 // symbol for which has a warning.
 
 void
-Warnings::issue_warning(Symbol* sym, const std::string& location) const
+Warnings::issue_warning(const Symbol* sym, const std::string& location) const
 {
   assert(sym->has_warning());
   Warning_table::const_iterator p = this->warnings_.find(sym->name());

@@ -9,6 +9,7 @@
 
 #include "elfcpp.h"
 #include "layout.h"
+#include "reloc-types.h"
 
 namespace gold
 {
@@ -16,9 +17,11 @@ namespace gold
 class General_options;
 class Object;
 class Output_file;
-
+class Output_section;
 template<int size, bool big_endian>
 class Sized_target;
+template<int size, bool big_endian>
+class Sized_relobj;
 
 // An abtract class for data which has to go into the output file.
 
@@ -361,6 +364,262 @@ class Output_data_common : public Output_section_data
   { }
 };
 
+// This POD class is used to represent a single reloc in the output
+// file.  This could be a private class within Output_data_reloc, but
+// the templatization is complex enough that I broke it out into a
+// separate class.  The class is templatized on either elfcpp::SHT_REL
+// or elfcpp::SHT_RELA, and also on whether this is a dynamic
+// relocation or an ordinary relocation.
+
+// A relocation can be against a global symbol, a local symbol, an
+// output section, or the undefined symbol at index 0.  We represent
+// the latter by using a NULL global symbol.
+
+template<int sh_type, bool dynamic, int size, bool big_endian>
+class Output_reloc;
+
+template<bool dynamic, int size, bool big_endian>
+class Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
+{
+ public:
+  typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
+
+  // An uninitialized entry.  We need this because we want to put
+  // instances of this class into an STL container.
+  Output_reloc()
+    : local_sym_index_(INVALID_CODE)
+  { }
+
+  // A reloc against a global symbol.
+  Output_reloc(Symbol* gsym, unsigned int type, Address address)
+    : local_sym_index_(GSYM_CODE), type_(type), address_(address)
+  { this->u_.gsym = gsym; }
+
+  // A reloc against a local symbol.
+  Output_reloc(Sized_relobj<size, big_endian>* object,
+	       unsigned int local_sym_index,
+	       unsigned int type, Address address)
+    : local_sym_index_(local_sym_index), type_(type), address_(address)
+  {
+    assert(local_sym_index != GSYM_CODE && local_sym_index != INVALID_CODE);
+    this->u_.object = object;
+  }
+
+  // A reloc against the STT_SECTION symbol of an output section.
+  Output_reloc(Output_section* os, unsigned int type, Address address)
+    : local_sym_index_(SECTION_CODE), type_(type), address_(address)
+  { this->u_.os = os; }
+
+  // Write the reloc entry to an output view.
+  void
+  write(unsigned char* pov) const;
+
+  // Write the offset and info fields to Write_rel.
+  template<typename Write_rel>
+  void write_rel(Write_rel*) const;
+
+ private:
+  // Return the symbol index.  We can't do a double template
+  // specialization, so we do a secondary template here.
+  unsigned int
+  get_symbol_index() const;
+
+  // Codes for local_sym_index_.
+  enum
+  {
+    // Global symbol.
+    GSYM_CODE = -1U,
+    // Output section.
+    SECTION_CODE = -2U,
+    // Invalid uninitialized entry.
+    INVALID_CODE = -3U
+  };
+
+  union
+  {
+    // For a local symbol, the object.  We will never generate a
+    // relocation against a local symbol in a dynamic object; that
+    // doesn't make sense.  And our callers will always be
+    // templatized, so we use Sized_relobj here.
+    Sized_relobj<size, big_endian>* object;
+    // For a global symbol, the symbol.  If this is NULL, it indicates
+    // a relocation against the undefined 0 symbol.
+    Symbol* gsym;
+    // For a relocation against an output section, the output section.
+    Output_section* os;
+  } u_;
+  // For a local symbol, the local symbol index.  This is GSYM_CODE
+  // for a global symbol, or INVALID_CODE for an uninitialized value.
+  unsigned int local_sym_index_;
+  unsigned int type_;
+  Address address_;
+};
+
+// The SHT_RELA version of Output_reloc<>.  This is just derived from
+// the SHT_REL version of Output_reloc, but it adds an addend.
+
+template<bool dynamic, int size, bool big_endian>
+class Output_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
+{
+ public:
+  typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
+  typedef typename elfcpp::Elf_types<size>::Elf_Addr Addend;
+
+  // An uninitialized entry.
+  Output_reloc()
+    : rel_()
+  { }
+
+  // A reloc against a global symbol.
+  Output_reloc(Symbol* gsym, unsigned int type, Address address, Addend addend)
+    : rel_(gsym, type, address), addend_(addend)
+  { }
+
+  // A reloc against a local symbol.
+  Output_reloc(Sized_relobj<size, big_endian>* object,
+	       unsigned int local_sym_index,
+	       unsigned int type, Address address, Addend addend)
+    : rel_(object, local_sym_index, type, address), addend_(addend)
+  { }
+
+  // A reloc against the STT_SECTION symbol of an output section.
+  Output_reloc(Output_section* os, unsigned int type, Address address,
+	       Addend addend)
+    : rel_(os, type, address), addend_(addend)
+  { }
+
+  // Write the reloc entry to an output view.
+  void
+  write(unsigned char* pov) const;
+
+ private:
+  // The basic reloc.
+  Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian> rel_;
+  // The addend.
+  Addend addend_;
+};
+
+// Output_data_reloc is used to manage a section containing relocs.
+// SH_TYPE is either elfcpp::SHT_REL or elfcpp::SHT_RELA.  DYNAMIC
+// indicates whether this is a dynamic relocation or a normal
+// relocation.  Output_data_reloc_base is a base class.
+// Output_data_reloc is the real class, which we specialize based on
+// the reloc type.
+
+template<int sh_type, bool dynamic, int size, bool big_endian>
+class Output_data_reloc_base : public Output_section_data
+{
+ public:
+  typedef Output_reloc<sh_type, dynamic, size, big_endian> Output_reloc_type;
+  typedef typename Output_reloc_type::Address Address;
+  static const int reloc_size =
+    Reloc_types<sh_type, size, big_endian>::reloc_size;
+
+  // Construct the section.
+  Output_data_reloc_base()
+    : Output_section_data(Output_data::default_alignment(size))
+  { }
+
+  // Write out the data.
+  void
+  do_write(Output_file*);
+
+ protected:
+  // Add a relocation entry.
+  void
+  add(const Output_reloc_type& reloc)
+  {
+    this->relocs_.push_back(reloc);
+    this->set_data_size(this->relocs_.size() * reloc_size);
+  }
+
+ private:
+  typedef std::vector<Output_reloc_type> Relocs;
+
+  Relocs relocs_;
+};
+
+// The class which callers actually create.
+
+template<int sh_type, bool dynamic, int size, bool big_endian>
+class Output_data_reloc;
+
+// The SHT_REL version of Output_data_reloc.
+
+template<bool dynamic, int size, bool big_endian>
+class Output_data_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
+  : public Output_data_reloc_base<elfcpp::SHT_REL, dynamic, size, big_endian>
+{
+ private: 
+  typedef Output_data_reloc_base<elfcpp::SHT_REL, dynamic, size,
+				 big_endian> Base;
+
+ public:
+  typedef typename Base::Output_reloc_type Output_reloc_type;
+  typedef typename Output_reloc_type::Address Address;
+
+  Output_data_reloc()
+    : Output_data_reloc_base<elfcpp::SHT_REL, dynamic, size, big_endian>()
+  { }
+
+  // Add a reloc against a global symbol.
+  void
+  add_global(Symbol* gsym, unsigned int type, Address address)
+  { this->add(Output_reloc_type(gsym, type, address)); }
+
+  // Add a reloc against a local symbol.
+  void
+  add_local(Sized_relobj<size, big_endian>* object,
+	    unsigned int local_sym_index, unsigned int type, Address address)
+  { this->add(Output_reloc_type(object, local_sym_index, type, address)); }
+
+  // A reloc against the STT_SECTION symbol of an output section.
+  void
+  add_output_section(Output_section* os, unsigned int type, Address address)
+  { this->add(Output_reloc_type(os, type, address)); }
+};
+
+// The SHT_RELA version of Output_data_reloc.
+
+template<bool dynamic, int size, bool big_endian>
+class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
+  : public Output_data_reloc_base<elfcpp::SHT_RELA, dynamic, size, big_endian>
+{
+ private: 
+  typedef Output_data_reloc_base<elfcpp::SHT_RELA, dynamic, size,
+				 big_endian> Base;
+
+ public:
+  typedef typename Base::Output_reloc_type Output_reloc_type;
+  typedef typename Output_reloc_type::Address Address;
+  typedef typename Output_reloc_type::Addend Addend;
+
+  Output_data_reloc()
+    : Output_data_reloc_base<elfcpp::SHT_RELA, dynamic, size, big_endian>()
+  { }
+
+  // Add a reloc against a global symbol.
+  void
+  add_global(Symbol* gsym, unsigned int type, Address address, Addend addend)
+  { this->add(Output_reloc_type(gsym, type, address, addend)); }
+
+  // Add a reloc against a local symbol.
+  void
+  add_local(Sized_relobj<size, big_endian>* object,
+	    unsigned int local_sym_index, unsigned int type,
+	    Address address, Addend addend)
+  {
+    this->add(Output_reloc_type(object, local_sym_index, type, address,
+				addend));
+  }
+
+  // A reloc against the STT_SECTION symbol of an output section.
+  void
+  add_output_section(Output_section* os, unsigned int type, Address address,
+		     Addend addend)
+  { this->add(Output_reloc_type(os, type, address, addend)); }
+};
+
 // Output_data_got is used to manage a GOT.  Each entry in the GOT is
 // for one symbol--either a global symbol or a local symbol in an
 // object.  The target specific code adds entries to the GOT as
@@ -456,8 +715,8 @@ class Output_data_got : public Output_section_data
       // For a constant, the constant.
       Valtype constant;
     } u_;
-    // For a local symbol, the local symbol index.  This is -1U for a
-    // global symbol, or -2U for a constant.
+    // For a local symbol, the local symbol index.  This is GSYM_CODE
+    // for a global symbol, or CONSTANT_CODE for a constant.
     unsigned int local_sym_index_;
   };
 
@@ -501,7 +760,7 @@ class Output_section : public Output_data
 		    const elfcpp::Shdr<size, big_endian>& shdr);
 
   // Add generated data ODATA to this output section.
-  virtual void
+  void
   add_output_section_data(Output_section_data* posd);
 
   // Return the section name.
@@ -548,6 +807,58 @@ class Output_section : public Output_data
   void
   set_addralign(uint64_t v)
   { this->addralign_ = v; }
+
+  // Indicate that we need a symtab index.
+  void
+  set_needs_symtab_index()
+  { this->needs_symtab_index_ = true; }
+
+  // Return whether we need a symtab index.
+  bool
+  needs_symtab_index() const
+  { return this->needs_symtab_index_; }
+
+  // Get the symtab index.
+  unsigned int
+  symtab_index() const
+  {
+    assert(this->symtab_index_ != 0);
+    return this->symtab_index_;
+  }
+
+  // Set the symtab index.
+  void
+  set_symtab_index(unsigned int index)
+  {
+    assert(index != 0);
+    this->symtab_index_ = index;
+  }
+
+  // Indicate that we need a dynsym index.
+  void
+  set_needs_dynsym_index()
+  { this->needs_dynsym_index_ = true; }
+
+  // Return whether we need a dynsym index.
+  bool
+  needs_dynsym_index() const
+  { return this->needs_dynsym_index_; }
+
+  // Get the dynsym index.
+  unsigned int
+  dynsym_index() const
+  {
+    assert(this->dynsym_index_ != 0);
+    return this->dynsym_index_;
+  }
+
+  // Set the dynsym index.
+  void
+  set_dynsym_index(unsigned int index)
+  {
+    assert(index != 0);
+    this->dynsym_index_ = index;
+  }
 
   // Set the address of the Output_section.  For a typical
   // Output_section, there is nothing to do, but if there are any
@@ -686,13 +997,31 @@ class Output_section : public Output_data
   elfcpp::Elf_Xword flags_;
   // The section index.
   unsigned int out_shndx_;
+  // If there is a STT_SECTION for this output section in the normal
+  // symbol table, this is the symbol index.  This starts out as zero.
+  // It is initialized in Layout::finalize() to be the index, or -1U
+  // if there isn't one.
+  unsigned int symtab_index_;
+  // If there is a STT_SECTION for this output section in the dynamic
+  // symbol table, this is the symbol index.  This starts out as zero.
+  // It is initialized in Layout::finalize() to be the index, or -1U
+  // if there isn't one.
+  unsigned int dynsym_index_;
   // The input sections.  This will be empty in cases where we don't
   // need to keep track of them.
   Input_section_list input_sections_;
   // The offset of the first entry in input_sections_.
   off_t first_input_offset_;
   // Whether we permit adding data.
-  bool may_add_data_;
+  bool may_add_data_ : 1;
+  // Whether this output section needs a STT_SECTION symbol in the
+  // normal symbol table.  This will be true if there is a relocation
+  // which needs it.
+  bool needs_symtab_index_ : 1;
+  // Whether this output section needs a STT_SECTION symbol in the
+  // dynamic symbol table.  This will be true if there is a dynamic
+  // relocation which needs it.
+  bool needs_dynsym_index_ : 1;
 };
 
 // A special Output_section which represents the symbol table
@@ -702,18 +1031,33 @@ class Output_section : public Output_data
 class Output_section_symtab : public Output_section
 {
  public:
-  Output_section_symtab(const char* name, off_t size);
+  Output_section_symtab(const char* name, off_t data_size)
+    : Output_section(name, elfcpp::SHT_SYMTAB, 0, false)
+  { this->set_data_size(data_size); }
 
   // The data is written out by Symbol_table::write_globals.  We don't
   // do anything here.
   void
   do_write(Output_file*)
   { }
+};
 
-  // We don't expect to see any input sections or data here.
+// A special Output_section which represents the dynamic symbol table
+// (SHT_DYNSYM).  The actual data is written out by
+// Symbol_table::write_globals.
+
+class Output_section_dynsym : public Output_section
+{
+ public:
+  Output_section_dynsym(const char* name, off_t data_size)
+    : Output_section(name, elfcpp::SHT_DYNSYM, 0, false)
+  { this->set_data_size(data_size); }
+
+  // The data is written out by Symbol_table::write_globals.  We don't
+  // do anything here.
   void
-  add_output_section_data(Output_section_data*)
-  { abort(); }
+  do_write(Output_file*)
+  { }
 };
 
 // A special Output_section which holds a string table.
@@ -726,11 +1070,6 @@ class Output_section_strtab : public Output_section
   // Write out the data.
   void
   do_write(Output_file*);
-
-  // We don't expect to see any input sections or data here.
-  void
-  add_output_section_data(Output_section_data*)
-  { abort(); }
 
  private:
   Stringpool* contents_;

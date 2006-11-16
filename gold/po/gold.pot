@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-11-14 11:17-0800\n"
+"POT-Creation-Date: 2006-11-15 16:35-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -101,7 +101,7 @@ msgstr ""
 msgid "%s: %s: dynamic symbol table name section has wrong type: %u\n"
 msgstr ""
 
-#: dynobj.cc:356 object.cc:421
+#: dynobj.cc:356 object.cc:422
 #, c-format
 msgid "%s: %s: bad section name offset for section %u: %lu\n"
 msgstr ""
@@ -300,87 +300,87 @@ msgstr ""
 msgid "%s: %s: section name section has wrong type: %u\n"
 msgstr ""
 
-#: object.cc:229
+#: object.cc:230
 #, c-format
 msgid "%s: %s: invalid symbol table name index: %u\n"
 msgstr ""
 
-#: object.cc:237
+#: object.cc:238
 #, c-format
 msgid "%s: %s: symbol table name section has wrong type: %u\n"
 msgstr ""
 
-#: object.cc:293
+#: object.cc:294
 #, c-format
 msgid "%s: %s: section group %u info %u out of range\n"
 msgstr ""
 
-#: object.cc:310
+#: object.cc:311
 #, c-format
 msgid "%s: %s: symbol %u name offset %u out of range\n"
 msgstr ""
 
-#: object.cc:344
+#: object.cc:345
 #, c-format
 msgid "%s: %s: section %u in section group %u out of range"
 msgstr ""
 
-#: object.cc:488
+#: object.cc:489
 #, c-format
 msgid "%s: %s: size of symbols is not multiple of symbol size\n"
 msgstr ""
 
-#: object.cc:572
+#: object.cc:576
 #, c-format
 msgid "%s: %s: unknown section index %u for local symbol %u\n"
 msgstr ""
 
-#: object.cc:583
+#: object.cc:587
 #, c-format
 msgid "%s: %s: local symbol %u section index %u out of range\n"
 msgstr ""
 
-#: object.cc:605
+#: object.cc:616
 #, c-format
 msgid "%s: %s: local symbol %u section name out of range: %u >= %u\n"
 msgstr ""
 
-#: object.cc:782
+#: object.cc:800
 #, c-format
 msgid "%s: %s: unsupported ELF file type %d\n"
 msgstr ""
 
-#: object.cc:801 object.cc:854 object.cc:875
+#: object.cc:819 object.cc:872 object.cc:893
 #, c-format
 msgid "%s: %s: ELF file too short\n"
 msgstr ""
 
-#: object.cc:810
+#: object.cc:828
 #, c-format
 msgid "%s: %s: invalid ELF version 0\n"
 msgstr ""
 
-#: object.cc:813
+#: object.cc:831
 #, c-format
 msgid "%s: %s: unsupported ELF version %d\n"
 msgstr ""
 
-#: object.cc:821
+#: object.cc:839
 #, c-format
 msgid "%s: %s: invalid ELF class 0\n"
 msgstr ""
 
-#: object.cc:828
+#: object.cc:846
 #, c-format
 msgid "%s: %s: unsupported ELF class %d\n"
 msgstr ""
 
-#: object.cc:836
+#: object.cc:854
 #, c-format
 msgid "%s: %s: invalid ELF data encoding\n"
 msgstr ""
 
-#: object.cc:843
+#: object.cc:861
 #, c-format
 msgid "%s: %s: unsupported ELF data encoding %d\n"
 msgstr ""
@@ -496,37 +496,37 @@ msgstr ""
 msgid "%s: -%c: %s\n"
 msgstr ""
 
-#: output.cc:538
+#: output.cc:656
 #, c-format
 msgid "%s: %s: invalid alignment %lu for section \"%s\"\n"
 msgstr ""
 
-#: output.cc:1056
+#: output.cc:1171
 #, c-format
 msgid "%s: %s: open: %s\n"
 msgstr ""
 
-#: output.cc:1065
+#: output.cc:1180
 #, c-format
 msgid "%s: %s: lseek: %s\n"
 msgstr ""
 
-#: output.cc:1072
+#: output.cc:1187
 #, c-format
 msgid "%s: %s: write: %s\n"
 msgstr ""
 
-#: output.cc:1082
+#: output.cc:1197
 #, c-format
 msgid "%s: %s: mmap: %s\n"
 msgstr ""
 
-#: output.cc:1096
+#: output.cc:1211
 #, c-format
 msgid "%s: %s: munmap: %s\n"
 msgstr ""
 
-#: output.cc:1104
+#: output.cc:1219
 #, c-format
 msgid "%s: %s: close: %s\n"
 msgstr ""
@@ -567,62 +567,62 @@ msgstr ""
 msgid "%s: %s: reloc section %u size %lu uneven"
 msgstr ""
 
-#: resolve.cc:141
+#: resolve.cc:142
 #, c-format
 msgid "%s: %s: invalid STB_LOCAL symbol %s in external symbols\n"
 msgstr ""
 
-#: resolve.cc:147
+#: resolve.cc:148
 #, c-format
 msgid "%s: %s: unsupported symbol binding %d for symbol %s\n"
 msgstr ""
 
-#: symtab.cc:443 symtab.cc:540
+#: symtab.cc:446 symtab.cc:543
 #, c-format
 msgid "%s: %s: mixing 32-bit and 64-bit ELF objects\n"
 msgstr ""
 
-#: symtab.cc:460
+#: symtab.cc:463
 #, c-format
 msgid "%s: %s: bad global symbol name offset %u at %lu\n"
 msgstr ""
 
-#: symtab.cc:547
+#: symtab.cc:550
 #, c-format
 msgid "%s: %s: too few symbol versions\n"
 msgstr ""
 
-#: symtab.cc:567
+#: symtab.cc:570
 #, c-format
 msgid "%s: %s: bad symbol name offset %u at %lu\n"
 msgstr ""
 
-#: symtab.cc:611
+#: symtab.cc:614
 #, c-format
 msgid "%s: %s: versym for symbol %zu out of range: %u\n"
 msgstr ""
 
-#: symtab.cc:619
+#: symtab.cc:622
 #, c-format
 msgid "%s: %s: versym for symbol %zu has no name: %u\n"
 msgstr ""
 
-#: symtab.cc:1010 symtab.cc:1149
+#: symtab.cc:1019 symtab.cc:1158
 #, c-format
 msgid "%s: %s: unsupported symbol section 0x%x\n"
 msgstr ""
 
-#: symtab.cc:1262
+#: symtab.cc:1274
 #, c-format
 msgid "%s: %s: warning: %s\n"
 msgstr ""
 
-#: target-reloc.h:181
+#: target-reloc.h:163
 #, c-format
 msgid "%s: %s: reloc has bad offset %zu\n"
 msgstr ""
 
-#: target-reloc.h:191
+#: target-reloc.h:173
 #, c-format
 msgid "%s: %s: undefined reference to '%s'\n"
 msgstr ""

@@ -56,7 +56,9 @@ HFILES = \
 	output.h \
 	readsyms.h \
 	reloc.h \
+	reloc-types.h \
 	script.h \
+	script-c.h \
 	stringpool.h \
 	symtab.h \
 	target.h \

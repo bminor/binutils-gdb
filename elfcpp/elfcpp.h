@@ -1163,7 +1163,7 @@ class Sym_write
   internal::Sym_data<size>* p_;
 };
 
-// Accessor classes for Elf relocation table entries.
+// Accessor classes for an ELF REL relocation entry.
 
 template<int size, bool big_endian>
 class Rel
@@ -1190,6 +1190,30 @@ class Rel
  private:
   const internal::Rel_data<size>* p_;
 };
+
+// Writer class for an ELF Rel relocation.
+
+template<int size, bool big_endian>
+class Rel_write
+{
+ public:
+  Rel_write(unsigned char* p)
+    : p_(reinterpret_cast<internal::Rel_data<size>*>(p))
+  { }
+
+  void
+  put_r_offset(typename Elf_types<size>::Elf_Addr v)
+  { this->p_->r_offset = Convert<size, big_endian>::convert_host(v); }
+
+  void
+  put_r_info(typename Elf_types<size>::Elf_WXword v)
+  { this->p_->r_info = Convert<size, big_endian>::convert_host(v); }
+
+ private:
+  internal::Rel_data<size>* p_;
+};
+
+// Accessor class for an ELF Rela relocation.
 
 template<int size, bool big_endian>
 class Rela
@@ -1219,6 +1243,32 @@ class Rela
 
  private:
   const internal::Rela_data<size>* p_;
+};
+
+// Writer class for an ELF Rela relocation.
+
+template<int size, bool big_endian>
+class Rela_write
+{
+ public:
+  Rela_write(unsigned char* p)
+    : p_(reinterpret_cast<internal::Rela_data<size>*>(p))
+  { }
+
+  void
+  put_r_offset(typename Elf_types<size>::Elf_Addr v)
+  { this->p_->r_offset = Convert<size, big_endian>::convert_host(v); }
+
+  void
+  put_r_info(typename Elf_types<size>::Elf_WXword v)
+  { this->p_->r_info = Convert<size, big_endian>::convert_host(v); }
+
+  void
+  put_r_addend(typename Elf_types<size>::Elf_Swxword v)
+  { this->p_->r_addend = Convert<size, big_endian>::convert_host(v); }
+
+ private:
+  internal::Rela_data<size>* p_;
 };
 
 // Accessor classes for entries in the ELF SHT_DYNAMIC section aka

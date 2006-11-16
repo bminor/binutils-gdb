@@ -173,6 +173,17 @@ class Symbol
   set_forwarder()
   { this->is_forwarder_ = true; }
 
+  // Return whether this symbol needs an entry in the dynamic symbol
+  // table.
+  bool
+  needs_dynsym_entry() const
+  { return this->needs_dynsym_entry_; }
+
+  // Mark this symbol as needing an entry in the dynamic symbol table.
+  void
+  set_needs_dynsym_entry()
+  { this->needs_dynsym_entry_ = true; }
+
   // Return whether this symbol was ever seen in a dynamic object.
   bool
   in_dyn() const
@@ -182,6 +193,46 @@ class Symbol
   void
   set_in_dyn()
   { this->in_dyn_ = true; }
+
+  // Return the index of this symbol in the output file symbol table.
+  // A value of -1U means that this symbol is not going into the
+  // output file.  This starts out as zero, and is set to a non-zero
+  // value by Symbol_table::finalize.  It is an error to ask for the
+  // symbol table index before it has been set.
+  unsigned int
+  symtab_index() const
+  {
+    assert(this->symtab_index_ != 0);
+    return this->symtab_index_;
+  }
+
+  // Set the index of the symbol in the output file symbol table.
+  void
+  set_symtab_index(unsigned int index)
+  {
+    assert(index != 0);
+    this->symtab_index_ = index;
+  }
+
+  // Return the index of this symbol in the dynamic symbol table.  A
+  // value of -1U means that this symbol is not going into the dynamic
+  // symbol table.  This starts out as zero, and is set to a non-zero
+  // during Layout::finalize.  It is an error to ask for the dynamic
+  // symbol table index before it has been set.
+  unsigned int
+  dynsym_index() const
+  {
+    assert(this->dynsym_index_ != 0);
+    return this->dynsym_index_;
+  }
+
+  // Set the index of the symbol in the dynamic symbol table.
+  void
+  set_dynsym_index(unsigned int index)
+  {
+    assert(index != 0);
+    this->dynsym_index_ = index;
+  }
 
   // Return whether this symbol has an entry in the GOT section.
   bool
@@ -334,9 +385,22 @@ class Symbol
     } in_output_segment;
   } u_;
 
+  // The index of this symbol in the output file.  If the symbol is
+  // not going into the output file, this value is -1U.  This field
+  // starts as always holding zero.  It is set to a non-zero value by
+  // Symbol_table::finalize.
+  unsigned int symtab_index_;
+
+  // The index of this symbol in the dynamic symbol table.  If the
+  // symbol is not going into the dynamic symbol table, this value is
+  // -1U.  This field starts as always holding zero.  It is set to a
+  // non-zero value during Layout::finalize.
+  unsigned int dynsym_index_;
+
   // If this symbol has an entry in the GOT section (has_got_offset_
-  // is true), this is the offset.
+  // is true), this is the offset from the start of the GOT section.
   unsigned int got_offset_;
+
   // Symbol type.
   elfcpp::STT type_ : 4;
   // Symbol binding.
@@ -360,6 +424,8 @@ class Symbol
   // It forwards to the symbol found in the forwarders_ map of
   // Symbol_table.
   bool is_forwarder_ : 1;
+  // True if this symbol needs to be in the dynamic symbol table.
+  bool needs_dynsym_entry_ : 1;
   // True if we've seen this symbol in a dynamic object.
   bool in_dyn_ : 1;
   // True if the symbol has an entry in the GOT section.
@@ -548,7 +614,7 @@ class Warnings
 
   // Issue a warning for a reference to SYM at LOCATION.
   void
-  issue_warning(Symbol* sym, const std::string& location) const;
+  issue_warning(const Symbol* sym, const std::string& location) const;
 
  private:
   Warnings(const Warnings&);
@@ -667,7 +733,7 @@ class Symbol_table
 
   // Return the real symbol associated with the forwarder symbol FROM.
   Symbol*
-  resolve_forwards(Symbol* from) const;
+  resolve_forwards(const Symbol* from) const;
 
   // Return the size of the symbols in the table.
   int
@@ -705,15 +771,16 @@ class Symbol_table
   // Possibly issue a warning for a reference to SYM at LOCATION which
   // is in OBJ.
   void
-  issue_warning(Symbol* sym, const std::string& location) const
+  issue_warning(const Symbol* sym, const std::string& location) const
   { this->warnings_.issue_warning(sym, location); }
 
   // Finalize the symbol table after we have set the final addresses
-  // of all the input sections.  This sets the final symbol values and
-  // adds the names to *POOL.  It records the file offset OFF, and
+  // of all the input sections.  This sets the final symbol indexes,
+  // values and adds the names to *POOL.  INDEX is the index of the
+  // first global symbol.  This records the file offset OFF, and
   // returns the new file offset.
   off_t
-  finalize(off_t, Stringpool*);
+  finalize(unsigned int index, off_t off, Stringpool* pool);
 
   // Write out the global symbols.
   void
@@ -791,7 +858,7 @@ class Symbol_table
   // Finalize symbols specialized for size.
   template<int size>
   off_t
-  sized_finalize(off_t, Stringpool*);
+  sized_finalize(unsigned int, off_t, Stringpool*);
 
   // Write globals specialized for size and endianness.
   template<int size, bool big_endian>
@@ -828,6 +895,9 @@ class Symbol_table
   // use in archive groups.
   int saw_undefined_;
 
+  // The index of the first global symbol in the output file.
+  unsigned int first_global_index_;
+
   // The file offset within the output symtab section where we should
   // write the table.
   off_t offset_;
@@ -843,7 +913,7 @@ class Symbol_table
   Stringpool namepool_;
 
   // Forwarding symbols.
-  Unordered_map<Symbol*, Symbol*> forwarders_;
+  Unordered_map<const Symbol*, Symbol*> forwarders_;
 
   // We don't expect there to be very many common symbols, so we keep
   // a list of them.  When we find a common symbol we add it to this

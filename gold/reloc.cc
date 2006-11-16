@@ -391,7 +391,7 @@ Sized_relobj<size, big_endian>::relocate_sections(
   relinfo.layout = layout;
   relinfo.object = this;
   relinfo.local_symbol_count = this->local_symbol_count_;
-  relinfo.values = this->values_;
+  relinfo.local_values = &this->local_values_;
   relinfo.symbols = this->symbols_;
 
   const unsigned char* p = pshdrs + This::shdr_size;

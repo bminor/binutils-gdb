@@ -106,7 +106,8 @@ Symbol_table::resolve(Sized_symbol<size>* to,
       abort();
     }
 
-  if (to->object() != NULL && to->object()->is_dynamic())
+  if (to->source() == Symbol::FROM_OBJECT
+      && to->object()->is_dynamic())
     tobits |= (1 << 1);
 
   switch (to->shnum())
@@ -172,6 +173,15 @@ Symbol_table::resolve(Sized_symbol<size>* to,
       if (sym.get_st_type() == elfcpp::STT_COMMON)
 	frombits |= (2 << 2);
       break;
+    }
+
+  if ((tobits & (1 << 1)) != (frombits & (1 << 1)))
+    {
+      // This symbol is seen in both a dynamic object and a regular
+      // object.  That means that we need the symbol to go into the
+      // dynamic symbol table, so that the dynamic linker can use the
+      // regular symbol to override or define the dynamic symbol.
+      to->set_needs_dynsym_entry();
     }
 
   // FIXME: Warn if either but not both of TO and SYM are STT_TLS.

@@ -676,19 +676,24 @@ Layout::create_symtab_sections(int size, const Input_objects* input_objects,
   // Save space for the dummy symbol at the start of the section.  We
   // never bother to write this out--it will just be left as zero.
   off += symsize;
+  unsigned int local_symbol_index = 1;
 
   for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
        p != input_objects->relobj_end();
        ++p)
     {
       Task_lock_obj<Object> tlo(**p);
-      off = (*p)->finalize_local_symbols(off, &this->sympool_);
+      unsigned int index = (*p)->finalize_local_symbols(local_symbol_index,
+							off,
+							&this->sympool_);
+      off += (index - local_symbol_index) * symsize;
+      local_symbol_index = index;
     }
 
-  unsigned int local_symcount = (off - startoff) / symsize;
+  unsigned int local_symcount = local_symbol_index;
   assert(local_symcount * symsize == off - startoff);
 
-  off = symtab->finalize(off, &this->sympool_);
+  off = symtab->finalize(local_symcount, off, &this->sympool_);
 
   this->sympool_.set_string_offsets();
 
