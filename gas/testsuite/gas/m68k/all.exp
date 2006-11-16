@@ -48,6 +48,7 @@ if { [istarget m68*-*-*] || [istarget fido*-*-*] } then {
     run_dump_test mcf-mac
     run_dump_test mcf-emac
     run_dump_test mcf-fpu
+    run_dump_test mcf-trap
     run_dump_test arch-cpu-1
 
     set testname "68000 operands"
