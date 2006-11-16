@@ -1,5 +1,10 @@
 2006-11-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* configure.ac: Correct td_thr_tls_get_addr test.
+	* configure: Regenerated.
+
+2006-11-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* linux-low.c (linux_wait_for_event): Reformat.  Use the
 	pass_signals array.
 	* remote-utils.c (decode_address_to_semicolon): New.

@@ -3968,7 +3968,7 @@ _ACEOF
 
   fi
 
-  if test "$srv_cv_tls_get_addr"; then
+  if test "$srv_cv_tls_get_addr" = yes; then
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_TD_THR_TLS_GET_ADDR 1
