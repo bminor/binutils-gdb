@@ -312,6 +312,9 @@ the native maintainer when resolving ABI issues.
 	xstormy16	--target=xstormy16-elf
 			Corinna Vinschen	vinschen@redhat.com
 
+	xtensa		--target=xtensa-elf
+			Maxim Grigoriev		maxim2405@gmail.com
+
 All developers recognized by this file can make arbitrary changes to
 OBSOLETE targets.
 
@@ -469,6 +472,7 @@ Paul Gilliam					pgilliam@us.ibm.com
 Raoul Gough					RaoulGough@yahoo.co.uk
 Anthony Green			 		green@redhat.com
 Matthew Green					mrg@eterna.com.au
+Maxim Grigoriev					maxim2405@gmail.com
 Jerome Guitton					guitton@act-europe.fr
 Ben Harris					bjh21@netbsd.org
 Richard Henderson				rth@redhat.com
