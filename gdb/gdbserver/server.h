@@ -129,6 +129,7 @@ extern unsigned long step_thread;
 extern unsigned long thread_from_wait;
 extern unsigned long old_thread_from_wait;
 extern int server_waiting;
+extern int pass_signals[];
 
 extern jmp_buf toplevel;
 
@@ -153,6 +154,7 @@ void new_thread_notify (int id);
 void dead_thread_notify (int id);
 void prepare_resume_reply (char *buf, char status, unsigned char sig);
 
+const char *decode_address_to_semicolon (CORE_ADDR *addrp, const char *start);
 void decode_address (CORE_ADDR *addrp, const char *start, int len);
 void decode_m_packet (char *from, CORE_ADDR * mem_addr_ptr,
 		      unsigned int *len_ptr);

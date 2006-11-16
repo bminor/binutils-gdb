@@ -296,6 +296,22 @@ decode_address (CORE_ADDR *addrp, const char *start, int len)
   *addrp = addr;
 }
 
+const char *
+decode_address_to_semicolon (CORE_ADDR *addrp, const char *start)
+{
+  const char *end;
+
+  end = start;
+  while (*end != '\0' && *end != ';')
+    end++;
+
+  decode_address (addrp, start, end - start);
+
+  if (*end == ';')
+    end++;
+  return end;
+}
+
 /* Convert number NIB to a hex digit.  */
 
 static int

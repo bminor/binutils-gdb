@@ -1,3 +1,13 @@
+2006-11-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-low.c (linux_wait_for_event): Reformat.  Use the
+	pass_signals array.
+	* remote-utils.c (decode_address_to_semicolon): New.
+	* server.c (pass_signals, handle_general_set): New.
+	(handle_query): Mention QPassSignals for qSupported.
+	(main): Call handle_general_set.
+	* server.h (pass_signals, decode_address_to_semicolon): New.
+
 2006-11-06  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* server.c (handle_query): Correct error handling for read_auxv.

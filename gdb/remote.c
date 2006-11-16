@@ -867,6 +867,7 @@ enum {
   PACKET_qXfer_memory_map,
   PACKET_qGetTLSAddr,
   PACKET_qSupported,
+  PACKET_QPassSignals,
   PACKET_MAX
 };
 
@@ -1001,6 +1002,65 @@ record_currthread (int currthread)
       ui_out_text (uiout, "[New ");
       ui_out_text (uiout, target_pid_to_str (pid_to_ptid (currthread)));
       ui_out_text (uiout, "]\n");
+    }
+}
+
+static char *last_pass_packet;
+
+/* If 'QPassSignals' is supported, tell the remote stub what signals
+   it can simply pass through to the inferior without reporting.  */
+
+static void
+remote_pass_signals (void)
+{
+  if (remote_protocol_packets[PACKET_QPassSignals].support != PACKET_DISABLE)
+    {
+      char *pass_packet, *p;
+      int numsigs = (int) TARGET_SIGNAL_LAST;
+      int count = 0, i;
+
+      gdb_assert (numsigs < 256);
+      for (i = 0; i < numsigs; i++)
+	{
+	  if (signal_stop_state (i) == 0
+	      && signal_print_state (i) == 0
+	      && signal_pass_state (i) == 1)
+	    count++;
+	}
+      pass_packet = xmalloc (count * 3 + strlen ("QPassSignals:") + 1);
+      strcpy (pass_packet, "QPassSignals:");
+      p = pass_packet + strlen (pass_packet);
+      for (i = 0; i < numsigs; i++)
+	{
+	  if (signal_stop_state (i) == 0
+	      && signal_print_state (i) == 0
+	      && signal_pass_state (i) == 1)
+	    {
+	      if (i >= 16)
+		*p++ = tohex (i >> 4);
+	      *p++ = tohex (i & 15);
+	      if (count)
+		*p++ = ';';
+	      else
+		break;
+	      count--;
+	    }
+	}
+      *p = 0;
+      if (!last_pass_packet || strcmp (last_pass_packet, pass_packet))
+	{
+	  struct remote_state *rs = get_remote_state ();
+	  char *buf = rs->buf;
+
+	  putpkt (pass_packet);
+	  getpkt (&rs->buf, &rs->buf_size, 0);
+	  packet_ok (buf, &remote_protocol_packets[PACKET_QPassSignals]);
+	  if (last_pass_packet)
+	    xfree (last_pass_packet);
+	  last_pass_packet = pass_packet;
+	}
+      else
+	xfree (pass_packet);
     }
 }
 
@@ -2206,7 +2266,9 @@ static struct protocol_feature remote_protocol_features[] = {
   { "qXfer:auxv:read", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_auxv },
   { "qXfer:memory-map:read", PACKET_DISABLE, remote_supported_packet,
-    PACKET_qXfer_memory_map }
+    PACKET_qXfer_memory_map },
+  { "QPassSignals", PACKET_DISABLE, remote_supported_packet,
+    PACKET_QPassSignals },
 };
 
 static void
@@ -2260,14 +2322,14 @@ remote_query_supported (void)
 	}
       else
 	{
+	  *end = '\0';
+	  next = end + 1;
+
 	  if (end == p)
 	    {
 	      warning (_("empty item in \"qSupported\" response"));
 	      continue;
 	    }
-
-	  *end = '\0';
-	  next = end + 1;
 	}
 
       name_end = strchr (p, '=');
@@ -2353,6 +2415,10 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
   target_preopen (from_tty);
 
   unpush_target (target);
+
+  /* Make sure we send the passed signals list the next time we resume.  */
+  xfree (last_pass_packet);
+  last_pass_packet = NULL;
 
   remote_fileio_reset ();
   reopen_exec_file ();
@@ -2727,6 +2793,9 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
      resumption.  */
   if (deprecated_target_resume_hook)
     (*deprecated_target_resume_hook) ();
+
+  /* Update the inferior on signals to silently pass, if they've changed.  */
+  remote_pass_signals ();
 
   /* The vCont packet doesn't need to specify threads via Hc.  */
   if (remote_vcont_resume (ptid, step, siggnal))
@@ -6280,6 +6349,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_vCont],
 			 "vCont", "verbose-resume", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_QPassSignals],
+			 "QPassSignals", "pass-signals", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qSymbol],
 			 "qSymbol", "symbol-lookup", 0);

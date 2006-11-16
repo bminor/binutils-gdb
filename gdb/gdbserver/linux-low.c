@@ -498,69 +498,76 @@ linux_wait_for_event (struct thread_info *child)
       current_inferior = (struct thread_info *)
 	find_inferior_id (&all_threads, event_child->tid);
 
-      if (using_threads)
+      /* Check for thread exit.  */
+      if (using_threads && ! WIFSTOPPED (wstat))
 	{
-	  /* Check for thread exit.  */
-	  if (! WIFSTOPPED (wstat))
-	    {
-	      if (debug_threads)
-		fprintf (stderr, "Thread %ld (LWP %ld) exiting\n",
-			 event_child->tid, event_child->head.id);
+	  if (debug_threads)
+	    fprintf (stderr, "Thread %ld (LWP %ld) exiting\n",
+		     event_child->tid, event_child->head.id);
 
-	      /* If the last thread is exiting, just return.  */
-	      if (all_threads.head == all_threads.tail)
-		return wstat;
+	  /* If the last thread is exiting, just return.  */
+	  if (all_threads.head == all_threads.tail)
+	    return wstat;
 
-	      dead_thread_notify (event_child->tid);
+	  dead_thread_notify (event_child->tid);
 
-	      remove_inferior (&all_processes, &event_child->head);
-	      free (event_child);
-	      remove_thread (current_inferior);
-	      current_inferior = (struct thread_info *) all_threads.head;
+	  remove_inferior (&all_processes, &event_child->head);
+	  free (event_child);
+	  remove_thread (current_inferior);
+	  current_inferior = (struct thread_info *) all_threads.head;
 
-	      /* If we were waiting for this particular child to do something...
-		 well, it did something.  */
-	      if (child != NULL)
-		return wstat;
+	  /* If we were waiting for this particular child to do something...
+	     well, it did something.  */
+	  if (child != NULL)
+	    return wstat;
 
-	      /* Wait for a more interesting event.  */
-	      continue;
-	    }
+	  /* Wait for a more interesting event.  */
+	  continue;
+	}
 
-	  if (WIFSTOPPED (wstat)
-	      && WSTOPSIG (wstat) == SIGSTOP
-	      && event_child->stop_expected)
-	    {
-	      if (debug_threads)
-		fprintf (stderr, "Expected stop.\n");
-	      event_child->stop_expected = 0;
-	      linux_resume_one_process (&event_child->head,
-					event_child->stepping, 0, NULL);
-	      continue;
-	    }
+      if (using_threads
+	  && WIFSTOPPED (wstat)
+	  && WSTOPSIG (wstat) == SIGSTOP
+	  && event_child->stop_expected)
+	{
+	  if (debug_threads)
+	    fprintf (stderr, "Expected stop.\n");
+	  event_child->stop_expected = 0;
+	  linux_resume_one_process (&event_child->head,
+				    event_child->stepping, 0, NULL);
+	  continue;
+	}
 
-	  /* FIXME drow/2002-06-09: Get signal numbers from the inferior's
-	     thread library?  */
-	  if (WIFSTOPPED (wstat)
-	      && (WSTOPSIG (wstat) == __SIGRTMIN
-		  || WSTOPSIG (wstat) == __SIGRTMIN + 1))
-	    {
-	      siginfo_t info, *info_p;
+      /* If GDB is not interested in this signal, don't stop other
+	 threads, and don't report it to GDB.  Just resume the
+	 inferior right away.  We do this for threading-related
+	 signals as well as any that GDB specifically requested
+	 we ignore.  But never ignore SIGSTOP if we sent it
+	 ourselves.  */
+      /* FIXME drow/2002-06-09: Get signal numbers from the inferior's
+	 thread library?  */
+      if (WIFSTOPPED (wstat)
+	  && ((using_threads && (WSTOPSIG (wstat) == __SIGRTMIN
+				 || WSTOPSIG (wstat) == __SIGRTMIN + 1))
+	      || (pass_signals[target_signal_from_host (WSTOPSIG (wstat))]
+		  && (WSTOPSIG (wstat) != SIGSTOP
+		      || !event_child->sigstop_sent))))
+	{
+	  siginfo_t info, *info_p;
 
-	      if (debug_threads)
-		fprintf (stderr, "Ignored signal %d for %ld (LWP %ld).\n",
-			 WSTOPSIG (wstat), event_child->tid,
-			 event_child->head.id);
+	  if (debug_threads)
+	    fprintf (stderr, "Ignored signal %d for %ld (LWP %ld).\n",
+		     WSTOPSIG (wstat), event_child->tid,
+		     event_child->head.id);
 
-	      if (ptrace (PTRACE_GETSIGINFO, event_child->lwpid, 0, &info) == 0)
-		info_p = &info;
-	      else
-		info_p = NULL;
-	      linux_resume_one_process (&event_child->head,
-					event_child->stepping,
-					WSTOPSIG (wstat), info_p);
-	      continue;
-	    }
+	  if (ptrace (PTRACE_GETSIGINFO, event_child->lwpid, 0, &info) == 0)
+	    info_p = &info;
+	  else
+	    info_p = NULL;
+	  linux_resume_one_process (&event_child->head,
+				    event_child->stepping,
+				    WSTOPSIG (wstat), info_p);
+	  continue;
 	}
 
       /* If this event was not handled above, and is not a SIGTRAP, report

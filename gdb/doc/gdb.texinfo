@@ -12841,6 +12841,10 @@ The available settings are:
 @tab @code{qSupported}
 @tab Remote communications parameters
 
+@item @code{pass-signals-packet}
+@tab @code{QPassSignals}
+@tab @code{handle @var{signal}}
+
 @end multitable
 
 @node remote stub
@@ -23347,8 +23351,8 @@ The @samp{C}, @samp{c}, @samp{S}, @samp{s} and @samp{?} packets can
 receive any of the below as a reply.  In the case of the @samp{C},
 @samp{c}, @samp{S} and @samp{s} packets, that reply is only returned
 when the target halts.  In the below the exact meaning of @dfn{signal
-number} is poorly defined.  In general one of the UNIX signal
-numbering conventions is used.
+number} is defined by the header @file{include/gdb/signals.h} in the
+@value{GDBN} source code.
 
 As in the description of request packets, we include spaces in the
 reply templates for clarity; these are not part of the reply packet's
@@ -23604,6 +23608,37 @@ Don't use this packet; use the @samp{qThreadExtraInfo} query instead
 
 Reply: see @code{remote.c:remote_unpack_thread_info_response()}.
 
+@item QPassSignals: @var{signal} @r{[};@var{signal}@r{]}@dots{}
+@cindex pass signals to inferior, remote request
+@cindex @samp{QPassSignals} packet
+Each listed @var{signal} should be passed directly to the inferior process. 
+Signals are numbered identically to continue packets and stop replies
+(@pxref{Stop Reply Packets}).  Each @var{signal} list item should be
+strictly greater than the previous item.  These signals do not need to stop
+the inferior, or be reported to @value{GDBN}.  All other signals should be
+reported to @value{GDBN}.  Multiple @samp{QPassSignals} packets do not
+combine; any earlier @samp{QPassSignals} list is completely replaced by the
+new list.  This packet improves performance when using @samp{handle
+@var{signal} nostop noprint pass}.
+
+Reply:
+@table @samp
+@item OK
+The request succeeded.
+
+@item E @var{nn}
+An error occurred.  @var{nn} are hex digits.
+
+@item
+An empty reply indicates that @samp{QPassSignals} is not supported by
+the stub.
+@end table
+
+Use of this packet is controlled by the @code{set remote pass-signals}
+command (@pxref{Remote configuration, set remote pass-signals}).
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
+
 @item qRcmd,@var{command}
 @cindex execute remote command, remote request
 @cindex @samp{qRcmd} packet
@@ -23747,6 +23782,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab Yes
 
+@item @samp{QPassSignals}
+@tab No
+@tab @samp{-}
+@tab Yes
+
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -23862,7 +23902,7 @@ Access the target's @dfn{auxiliary vector}.  @xref{OS Information,
 auxiliary vector}.  Note @var{annex} must be empty.
 
 This packet is not probed by default; the remote stub must request it,
-by suppling an appropriate @samp{qSupported} response (@pxref{qSupported}).
+by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
 @end table
 
 @table @samp

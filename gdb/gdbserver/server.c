@@ -36,6 +36,8 @@ unsigned long old_thread_from_wait;
 int extended_protocol;
 int server_waiting;
 
+int pass_signals[TARGET_SIGNAL_LAST];
+
 jmp_buf toplevel;
 
 /* The PID of the originally created or attached inferior.  Used to
@@ -157,6 +159,40 @@ write_qxfer_response (char *buf, unsigned char *data, int len, int is_more)
 			       PBUFSIZ - 2) + 1;
 }
 
+/* Handle all of the extended 'Q' packets.  */
+void
+handle_general_set (char *own_buf)
+{
+  if (strncmp ("QPassSignals:", own_buf, strlen ("QPassSignals:")) == 0)
+    {
+      int numsigs = (int) TARGET_SIGNAL_LAST, i;
+      const char *p = own_buf + strlen ("QPassSignals:");
+      CORE_ADDR cursig;
+
+      p = decode_address_to_semicolon (&cursig, p);
+      for (i = 0; i < numsigs; i++)
+	{
+	  if (i == cursig)
+	    {
+	      pass_signals[i] = 1;
+	      if (*p == '\0')
+		/* Keep looping, to clear the remaining signals.  */
+		cursig = -1;
+	      else
+		p = decode_address_to_semicolon (&cursig, p);
+	    }
+	  else
+	    pass_signals[i] = 0;
+	}
+      strcpy (own_buf, "OK");
+      return;
+    }
+
+  /* Otherwise we didn't know what packet it was.  Say we didn't
+     understand it.  */
+  own_buf[0] = 0;
+}
+
 /* Handle all of the extended 'q' packets.  */
 void
 handle_query (char *own_buf, int *new_packet_len_p)
@@ -248,7 +284,7 @@ handle_query (char *own_buf, int *new_packet_len_p)
   if (strncmp ("qSupported", own_buf, 10) == 0
       && (own_buf[10] == ':' || own_buf[10] == '\0'))
     {
-      sprintf (own_buf, "PacketSize=%x", PBUFSIZ - 1);
+      sprintf (own_buf, "PacketSize=%x;QPassSignals+", PBUFSIZ - 1);
 
       if (the_target->read_auxv != NULL)
 	strcat (own_buf, ";qXfer:auxv:read+");
@@ -600,6 +636,9 @@ main (int argc, char *argv[])
 	    {
 	    case 'q':
 	      handle_query (own_buf, &new_packet_len);
+	      break;
+	    case 'Q':
+	      handle_general_set (own_buf);
 	      break;
 	    case 'd':
 	      remote_debug = !remote_debug;

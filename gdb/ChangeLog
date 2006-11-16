@@ -1,3 +1,13 @@
+2006-11-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c (PACKET_QPassSignals): New.
+	(last_pass_packet, remote_pass_signals): New.
+	(remote_protocol_features): Add QPassSignals.
+	(remote_query_supported): Correct an infinite loop.
+	(remote_open_1): Reset last_pass_packet.
+	(remote_resume): Call remote_pass_signals.
+	(_initialize_remote): Register "set remote pass-signals".
+
 2006-11-14  Maxim Grigoriev  <maxim@tensilica.com>
 
 	* NEWS: New port to Xtensa.
