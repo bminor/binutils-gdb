@@ -1,3 +1,7 @@
+2006-11-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* NEWS: Mention QPassSignals.
+
 2006-11-16  Maxim Grigoriev  <maxim2405@gmail.com>
 
 	* MAINTAINERS (Responsible Maintainers): Add myself for Xtensa.

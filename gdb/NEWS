@@ -21,6 +21,9 @@ broken in GDB 6.3, 6.4, and 6.5.
 * Support for GNU/Linux Thread Local Storage (TLS, per-thread variables) no
 longer requires symbolic debug information (e.g. DWARF-2).
 
+* The GDB remote stub, gdbserver, now has lower overhead for high 
+frequency signals (e.g. SIGALRM) via the QPassSignals packet.
+
 * New commands
 
 set substitute-path
@@ -58,6 +61,10 @@ qSupported:
 qXfer:auxv:read:
   Fetch an OS auxilliary vector from the remote stub.  This packet is a
   more efficient replacement for qPart:auxv:read.
+
+QPassSignals:
+  Ignore the specified signals; pass them directly to the debugged program
+  without stopping other threads or reporting them to GDB.
 
 * Removed remote packets
 
