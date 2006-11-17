@@ -2865,7 +2865,7 @@ string_to_core_addr (const char *my_string)
 	  else if (isxdigit (my_string[i]))
 	    addr = (tolower (my_string[i]) - 'a' + 0xa) + (addr * 16);
 	  else
-	    internal_error (__FILE__, __LINE__, _("invalid hex"));
+	    error (_("invalid hex \"%s\""), my_string);
 	}
     }
   else
@@ -2877,7 +2877,7 @@ string_to_core_addr (const char *my_string)
 	  if (isdigit (my_string[i]))
 	    addr = (my_string[i] - '0') + (addr * 10);
 	  else
-	    internal_error (__FILE__, __LINE__, _("invalid decimal"));
+	    error (_("invalid decimal \"%s\""), my_string);
 	}
     }
   return addr;

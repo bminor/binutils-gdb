@@ -1,5 +1,11 @@
 2006-11-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* utils.c (string_to_core_addr): Use error instead of
+	internal_error.
+	* mi/mi-main.c (mi_execute_command): Check for a NULL message.
+
+2006-11-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* NEWS: Mention QPassSignals.
 
 2006-11-16  Maxim Grigoriev  <maxim2405@gmail.com>

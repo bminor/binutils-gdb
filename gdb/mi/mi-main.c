@@ -1183,7 +1183,10 @@ mi_execute_command (char *cmd, int from_tty)
 	     somewhere.  */
 	  fputs_unfiltered (command->token, raw_stdout);
 	  fputs_unfiltered ("^error,msg=\"", raw_stdout);
-	  fputstr_unfiltered (result.message, '"', raw_stdout);
+	  if (result.message == NULL)
+	    fputs_unfiltered ("unknown error", raw_stdout);
+	  else
+	      fputstr_unfiltered (result.message, '"', raw_stdout);
 	  fputs_unfiltered ("\"\n", raw_stdout);
 	  mi_out_rewind (uiout);
 	}
