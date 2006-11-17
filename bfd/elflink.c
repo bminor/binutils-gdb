@@ -7287,8 +7287,8 @@ match_group_member (asection *sec, asection *group,
 }
 
 /* Check if the kept section of a discarded section SEC can be used
-   to replace it. Return the replacement if it is OK. Otherwise return
-   NULL. */
+   to replace it.  Return the replacement if it is OK.  Otherwise return
+   NULL.  */
 
 asection *
 _bfd_elf_check_kept_section (asection *sec, struct bfd_link_info *info)
@@ -7298,10 +7298,11 @@ _bfd_elf_check_kept_section (asection *sec, struct bfd_link_info *info)
   kept = sec->kept_section;
   if (kept != NULL)
     {
-      if (elf_sec_group (sec) != NULL)
+      if ((kept->flags & SEC_GROUP) != 0)
 	kept = match_group_member (sec, kept, info);
       if (kept != NULL && sec->size != kept->size)
 	kept = NULL;
+      sec->kept_section = kept;
     }
   return kept;
 }
@@ -10316,33 +10317,21 @@ _bfd_elf_section_already_linked (bfd *abfd, struct bfd_section *sec,
   const char *name, *p;
   struct bfd_section_already_linked *l;
   struct bfd_section_already_linked_hash_entry *already_linked_list;
-  asection *group;
 
-  /* A single member comdat group section may be discarded by a
-     linkonce section. See below.  */
   if (sec->output_section == bfd_abs_section_ptr)
     return;
 
   flags = sec->flags;
 
-  /* Check if it belongs to a section group.  */
-  group = elf_sec_group (sec);
-
-  /* Return if it isn't a linkonce section nor a member of a group.  A
-     comdat group section also has SEC_LINK_ONCE set.  */
-  if ((flags & SEC_LINK_ONCE) == 0 && group == NULL)
+  /* Return if it isn't a linkonce section.  A comdat group section
+     also has SEC_LINK_ONCE set.  */
+  if ((flags & SEC_LINK_ONCE) == 0)
     return;
 
-  if (group)
-    {
-      /* If this is the member of a single member comdat group, check if
-	 the group should be discarded.  */
-      if (elf_next_in_group (sec) == sec
-	  && (group->flags & SEC_LINK_ONCE) != 0)
-	sec = group;
-      else
-	return;
-    }
+  /* Don't put group member sections on our list of already linked
+     sections.  They are handled as a group via their group section.  */
+  if (elf_sec_group (sec) != NULL)
+    return;
 
   /* FIXME: When doing a relocatable link, we may have trouble
      copying relocations in other sections that refer to local symbols
@@ -10373,11 +10362,8 @@ _bfd_elf_section_already_linked (bfd *abfd, struct bfd_section *sec,
 
   for (l = already_linked_list->entry; l != NULL; l = l->next)
     {
-      /* We may have 3 different sections on the list: group section,
-	 comdat section and linkonce section. SEC may be a linkonce or
-	 group section. We match a group section with a group section,
-	 a linkonce section with a linkonce section, and ignore comdat
-	 section.  */
+      /* We may have 2 different types of sections on the list: group
+	 sections and linkonce sections.  Match like sections.  */
       if ((flags & SEC_GROUP) == (l->sec->flags & SEC_GROUP)
 	  && strcmp (name, l->sec->name) == 0
 	  && bfd_coff_get_comdat_section (l->sec->owner, l->sec) == NULL)
@@ -10465,32 +10451,28 @@ _bfd_elf_section_already_linked (bfd *abfd, struct bfd_section *sec,
 	}
     }
 
-  if (group)
+  /* A single member comdat group section may be discarded by a
+     linkonce section and vice versa.  */
+
+  if ((flags & SEC_GROUP) != 0)
     {
-      /* If this is the member of a single member comdat group and the
-	 group hasn't be discarded, we check if it matches a linkonce
-	 section. We only record the discarded comdat group. Otherwise
-	 the undiscarded group will be discarded incorrectly later since
-	 itself has been recorded.  */
-      for (l = already_linked_list->entry; l != NULL; l = l->next)
-	if ((l->sec->flags & SEC_GROUP) == 0
-	    && bfd_coff_get_comdat_section (l->sec->owner, l->sec) == NULL
-	    && bfd_elf_match_symbols_in_sections (l->sec,
-						  elf_next_in_group (sec),
-						  info))
-	  {
-	    elf_next_in_group (sec)->output_section = bfd_abs_section_ptr;
-	    elf_next_in_group (sec)->kept_section = l->sec;
-	    group->output_section = bfd_abs_section_ptr;
-	    break;
-	  }
-      if (l == NULL)
-	return;
+      asection *first = elf_next_in_group (sec);
+
+      if (first != NULL && elf_next_in_group (first) == first)
+	/* Check this single member group against linkonce sections.  */
+	for (l = already_linked_list->entry; l != NULL; l = l->next)
+	  if ((l->sec->flags & SEC_GROUP) == 0
+	      && bfd_coff_get_comdat_section (l->sec->owner, l->sec) == NULL
+	      && bfd_elf_match_symbols_in_sections (l->sec, first, info))
+	    {
+	      first->output_section = bfd_abs_section_ptr;
+	      first->kept_section = l->sec;
+	      sec->output_section = bfd_abs_section_ptr;
+	      break;
+	    }
     }
   else
-    /* There is no direct match. But for linkonce section, we should
-       check if there is a match with comdat group member. We always
-       record the linkonce section, discarded or not.  */
+    /* Check this linkonce section against single member groups.  */
     for (l = already_linked_list->entry; l != NULL; l = l->next)
       if (l->sec->flags & SEC_GROUP)
 	{
@@ -10501,7 +10483,7 @@ _bfd_elf_section_already_linked (bfd *abfd, struct bfd_section *sec,
 	      && bfd_elf_match_symbols_in_sections (first, sec, info))
 	    {
 	      sec->output_section = bfd_abs_section_ptr;
-	      sec->kept_section = l->sec;
+	      sec->kept_section = first;
 	      break;
 	    }
 	}

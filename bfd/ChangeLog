@@ -1,3 +1,13 @@
+2006-11-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (_bfd_elf_check_kept_section): Test for kept group
+	section.  Save result of checks in kept_section.
+	(_bfd_elf_section_already_linked): Tidy.  Correct comments.
+	Ignore all group member sections.  Handle special matching of
+	single-member groups against linkonce sections via their group
+	section.  When such a match is found, set kept_section to the
+	group member section rather than to the group.
+
 2006-11-14  Phil Lello  <phil.lello@homecall.co.uk>
 
 	* peXXigen.c: Updates for PE/COFF V8.0, and clarification
