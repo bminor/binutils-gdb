@@ -1950,29 +1950,29 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    strcat (buf, ", cpu32");
 	  if (e_flags & EF_M68K_M68000)
 	    strcat (buf, ", m68000");
-	  if (e_flags & EF_M68K_ISA_MASK)
+	  if (e_flags & EF_M68K_CF_ISA_MASK)
 	    {
 	      char const *isa = _("unknown");
 	      char const *mac = _("unknown mac");
 	      char const *additional = NULL;
       
-	      switch (e_flags & EF_M68K_ISA_MASK)
+	      switch (e_flags & EF_M68K_CF_ISA_MASK)
 		{
-		case EF_M68K_ISA_A_NODIV:
+		case EF_M68K_CF_ISA_A_NODIV:
 		  isa = "A";
 		  additional = ", nodiv";
 		  break;
-		case EF_M68K_ISA_A:
+		case EF_M68K_CF_ISA_A:
 		  isa = "A";
 		  break;
-		case EF_M68K_ISA_A_PLUS:
+		case EF_M68K_CF_ISA_A_PLUS:
 		  isa = "A+";
 		  break;
-		case EF_M68K_ISA_B_NOUSP:
+		case EF_M68K_CF_ISA_B_NOUSP:
 		  isa = "B";
 		  additional = ", nousp";
 		  break;
-		case EF_M68K_ISA_B:
+		case EF_M68K_CF_ISA_B:
 		  isa = "B";
 		  break;
 		}
@@ -1980,17 +1980,17 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	      strcat (buf, isa);
 	      if (additional)
 		strcat (buf, additional);
-	      if (e_flags & EF_M68K_FLOAT)
+	      if (e_flags & EF_M68K_CF_FLOAT)
 		strcat (buf, ", float");
-	      switch (e_flags & EF_M68K_MAC_MASK)
+	      switch (e_flags & EF_M68K_CF_MAC_MASK)
 		{
 		case 0:
 		  mac = NULL;
 		  break;
-		case EF_M68K_MAC:
+		case EF_M68K_CF_MAC:
 		  mac = "mac";
 		  break;
-		case EF_M68K_EMAC:
+		case EF_M68K_CF_EMAC:
 		  mac = "emac";
 		  break;
 		}

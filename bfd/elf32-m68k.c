@@ -445,36 +445,36 @@ elf32_m68k_object_p (bfd *abfd)
     features |= m68000;
   else if (eflags & EF_M68K_CPU32)
     features |= cpu32;
-  else if (eflags & EF_M68K_ISA_MASK)
+  else if (eflags & EF_M68K_CF_ISA_MASK)
     {
-      switch (eflags & EF_M68K_ISA_MASK)
+      switch (eflags & EF_M68K_CF_ISA_MASK)
 	{
-	case EF_M68K_ISA_A_NODIV:
+	case EF_M68K_CF_ISA_A_NODIV:
 	  features |= mcfisa_a;
 	  break;
-	case EF_M68K_ISA_A:
+	case EF_M68K_CF_ISA_A:
 	  features |= mcfisa_a|mcfhwdiv;
 	  break;
-	case EF_M68K_ISA_A_PLUS:
+	case EF_M68K_CF_ISA_A_PLUS:
 	  features |= mcfisa_a|mcfisa_aa|mcfhwdiv|mcfusp;
 	  break;
-	case EF_M68K_ISA_B_NOUSP:
+	case EF_M68K_CF_ISA_B_NOUSP:
 	  features |= mcfisa_a|mcfisa_b|mcfhwdiv;
 	  break;
-	case EF_M68K_ISA_B:
+	case EF_M68K_CF_ISA_B:
 	  features |= mcfisa_a|mcfisa_b|mcfhwdiv|mcfusp;
 	  break;
 	}
-      switch (eflags & EF_M68K_MAC_MASK)
+      switch (eflags & EF_M68K_CF_MAC_MASK)
 	{
-	case EF_M68K_MAC:
+	case EF_M68K_CF_MAC:
 	  features |= mcfmac;
 	  break;
-	case EF_M68K_EMAC:
+	case EF_M68K_CF_EMAC:
 	  features |= mcfemac;
 	  break;
 	}
-      if (eflags & EF_M68K_FLOAT)
+      if (eflags & EF_M68K_CF_FLOAT)
 	features |= cfloat;
     }
 
@@ -530,8 +530,8 @@ elf32_m68k_merge_private_bfd_data (ibfd, obfd)
   else
     {
       out_flags = elf_elfheader (obfd)->e_flags;
-      in_isa = (in_flags & EF_M68K_ISA_MASK);
-      out_isa = (out_flags & EF_M68K_ISA_MASK);
+      in_isa = (in_flags & EF_M68K_CF_ISA_MASK);
+      out_isa = (out_flags & EF_M68K_CF_ISA_MASK);
       if (in_isa > out_isa)
 	out_flags ^= in_isa ^ out_isa;
       out_flags |= in_flags ^ in_isa;
@@ -569,44 +569,44 @@ elf32_m68k_print_private_bfd_data (abfd, ptr)
   if (eflags & EF_M68K_CFV4E)
     fprintf (file, " [cfv4e]");
 
-  if (eflags & EF_M68K_ISA_MASK)
+  if (eflags & EF_M68K_CF_ISA_MASK)
     {
       char const *isa = _("unknown");
       char const *mac = _("unknown");
       char const *additional = "";
       
-      switch (eflags & EF_M68K_ISA_MASK)
+      switch (eflags & EF_M68K_CF_ISA_MASK)
 	{
-	case EF_M68K_ISA_A_NODIV:
+	case EF_M68K_CF_ISA_A_NODIV:
 	  isa = "A";
 	  additional = " [nodiv]";
 	  break;
-	case EF_M68K_ISA_A:
+	case EF_M68K_CF_ISA_A:
 	  isa = "A";
 	  break;
-	case EF_M68K_ISA_A_PLUS:
+	case EF_M68K_CF_ISA_A_PLUS:
 	  isa = "A+";
 	  break;
-	case EF_M68K_ISA_B_NOUSP:
+	case EF_M68K_CF_ISA_B_NOUSP:
 	  isa = "B";
 	  additional = " [nousp]";
 	  break;
-	case EF_M68K_ISA_B:
+	case EF_M68K_CF_ISA_B:
 	  isa = "B";
 	  break;
 	}
       fprintf (file, " [isa %s]%s", isa, additional);
-      if (eflags & EF_M68K_FLOAT)
+      if (eflags & EF_M68K_CF_FLOAT)
 	fprintf (file, " [float]");
-      switch (eflags & EF_M68K_MAC_MASK)
+      switch (eflags & EF_M68K_CF_MAC_MASK)
 	{
 	case 0:
 	  mac = NULL;
 	  break;
-	case EF_M68K_MAC:
+	case EF_M68K_CF_MAC:
 	  mac = "mac";
 	  break;
-	case EF_M68K_EMAC:
+	case EF_M68K_CF_EMAC:
 	  mac = "emac";
 	  break;
 	}

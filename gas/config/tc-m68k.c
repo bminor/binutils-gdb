@@ -7561,17 +7561,17 @@ m68k_elf_final_processing (void)
     {
       static const unsigned isa_features[][2] =
       {
-	{EF_M68K_ISA_A_NODIV, mcfisa_a},
-	{EF_M68K_ISA_A,	mcfisa_a|mcfhwdiv},
-	{EF_M68K_ISA_A_PLUS,mcfisa_a|mcfisa_aa|mcfhwdiv|mcfusp},
-	{EF_M68K_ISA_B_NOUSP,mcfisa_a|mcfisa_b|mcfhwdiv},
-	{EF_M68K_ISA_B,	mcfisa_a|mcfisa_b|mcfhwdiv|mcfusp},
+	{EF_M68K_CF_ISA_A_NODIV, mcfisa_a},
+	{EF_M68K_CF_ISA_A,	mcfisa_a|mcfhwdiv},
+	{EF_M68K_CF_ISA_A_PLUS,mcfisa_a|mcfisa_aa|mcfhwdiv|mcfusp},
+	{EF_M68K_CF_ISA_B_NOUSP,mcfisa_a|mcfisa_b|mcfhwdiv},
+	{EF_M68K_CF_ISA_B,	mcfisa_a|mcfisa_b|mcfhwdiv|mcfusp},
 	{0,0},
       };
       static const unsigned mac_features[][2] =
       {
-	{EF_M68K_MAC, mcfmac},
-	{EF_M68K_EMAC, mcfemac},
+	{EF_M68K_CF_MAC, mcfmac},
+	{EF_M68K_CF_EMAC, mcfemac},
 	{0,0},
       };
       unsigned ix;
@@ -7595,7 +7595,7 @@ m68k_elf_final_processing (void)
       else
 	{
 	  if (current_architecture & cfloat)
-	    flags |= EF_M68K_FLOAT | EF_M68K_CFV4E;
+	    flags |= EF_M68K_CF_FLOAT | EF_M68K_CFV4E;
 
 	  pattern = current_architecture & (mcfmac|mcfemac);
 	  if (pattern)
