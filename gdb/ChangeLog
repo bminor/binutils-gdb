@@ -1,5 +1,9 @@
 2006-11-18  Pedro Alves  <pedro_alves@portugalmail.pt>
 
+	* prologue-value.c (clear_entries): Fix memory leak.
+
+2006-11-18  Pedro Alves  <pedro_alves@portugalmail.pt>
+
 	* parse.c (write_exp_msymbol): Check SYMBOL_BFD_SECTION before
 	dereferencing it.
 

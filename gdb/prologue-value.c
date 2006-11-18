@@ -351,6 +351,7 @@ clear_entries (struct pv_area *area)
         {
           struct area_entry *next = e->next;
           xfree (e);
+          e = next;
         }
       while (e != area->entry);
 
