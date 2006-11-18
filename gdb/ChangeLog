@@ -1,3 +1,8 @@
+2006-11-18  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* parse.c (write_exp_msymbol): Check SYMBOL_BFD_SECTION before
+	dereferencing it.
+
 2006-11-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* utils.c (string_to_core_addr): Use error instead of

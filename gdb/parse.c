@@ -408,7 +408,8 @@ write_exp_msymbol (struct minimal_symbol *msymbol,
 
   write_exp_elt_opcode (OP_LONG);
 
-  if (SYMBOL_BFD_SECTION (msymbol)->flags & SEC_THREAD_LOCAL)
+  if (SYMBOL_BFD_SECTION (msymbol)
+      && SYMBOL_BFD_SECTION (msymbol)->flags & SEC_THREAD_LOCAL)
     {
       bfd *bfd = SYMBOL_BFD_SECTION (msymbol)->owner;
       struct objfile *ofp;
