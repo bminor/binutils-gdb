@@ -1,3 +1,8 @@
+2006-11-19  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 6.6 branch created (branch timestamp: 2006-11-15 12:00)
+	* version.in: Bump version to 6.5.90.20061115-cvs
+
 2006-11-14  Maxim Grigoriev  <maxim@tensilica.com>
 
 	* NEWS: New port to Xtensa.
