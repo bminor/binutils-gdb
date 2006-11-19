@@ -1297,6 +1297,7 @@ const struct m68k_opcode m68k_opcodes[] =
 {"ftentoxx", 4,	two(0xF000, 0x0012), two(0xF1C0, 0xE07F), "IiFt",   mfloat },
 
 {"ftrapeq", 4,	two(0xF07C, 0x0001), two(0xF1FF, 0xFFFF), "Ii", mfloat },
+{"tpf", 2,	one(0050774),	one(0177777), "", mcfisa_a },
 {"ftrapf", 4,	two(0xF07C, 0x0000), two(0xF1FF, 0xFFFF), "Ii", mfloat },
 {"ftrapge", 4,	two(0xF07C, 0x0013), two(0xF1FF, 0xFFFF), "Ii", mfloat },
 {"ftrapgl", 4,	two(0xF07C, 0x0016), two(0xF1FF, 0xFFFF), "Ii", mfloat },
@@ -1330,6 +1331,7 @@ const struct m68k_opcode m68k_opcodes[] =
 {"ftrapun", 4,	two(0xF07C, 0x0008), two(0xF1FF, 0xFFFF), "Ii", mfloat },
 
 {"ftrapeqw", 4,	two(0xF07A, 0x0001), two(0xF1FF, 0xFFFF), "Ii^w", mfloat },
+{"tpfw", 4,	one(0050772),	one(0177777), "#w", mcfisa_a},
 {"ftrapfw", 4,	two(0xF07A, 0x0000), two(0xF1FF, 0xFFFF), "Ii^w", mfloat },
 {"ftrapgew", 4,	two(0xF07A, 0x0013), two(0xF1FF, 0xFFFF), "Ii^w", mfloat },
 {"ftrapglw", 4,	two(0xF07A, 0x0016), two(0xF1FF, 0xFFFF), "Ii^w", mfloat },
@@ -1363,6 +1365,7 @@ const struct m68k_opcode m68k_opcodes[] =
 {"ftrapunw", 4,	two(0xF07A, 0x0008), two(0xF1FF, 0xFFFF), "Ii^w", mfloat },
 
 {"ftrapeql", 4,	two(0xF07B, 0x0001), two(0xF1FF, 0xFFFF), "Ii^l", mfloat },
+{"tpfl", 6,	one(0050773),	one(0177777), "#l", mcfisa_a},
 {"ftrapfl", 4,	two(0xF07B, 0x0000), two(0xF1FF, 0xFFFF), "Ii^l", mfloat },
 {"ftrapgel", 4,	two(0xF07B, 0x0013), two(0xF1FF, 0xFFFF), "Ii^l", mfloat },
 {"ftrapgll", 4,	two(0xF07B, 0x0016), two(0xF1FF, 0xFFFF), "Ii^l", mfloat },
@@ -2005,6 +2008,7 @@ const struct m68k_opcode m68k_opcodes[] =
 {"trapcc", 2,	one(0052374),	one(0177777), "", m68020up | cpu32 },
 {"trapcs", 2,	one(0052774),	one(0177777), "", m68020up | cpu32 },
 {"trapeq", 2,	one(0053774),	one(0177777), "", m68020up | cpu32 },
+{"tpf", 2,	one(0050774),	one(0177777), "", mcfisa_a },
 {"trapf", 2,	one(0050774),	one(0177777), "", m68020up | cpu32 | mcfisa_a },
 {"trapge", 2,	one(0056374),	one(0177777), "", m68020up | cpu32 },
 {"trapgt", 2,	one(0057374),	one(0177777), "", m68020up | cpu32 },
@@ -2022,6 +2026,7 @@ const struct m68k_opcode m68k_opcodes[] =
 {"trapccw", 4,	one(0052372),	one(0177777), "#w", m68020up|cpu32 },
 {"trapcsw", 4,	one(0052772),	one(0177777), "#w", m68020up|cpu32 },
 {"trapeqw", 4,	one(0053772),	one(0177777), "#w", m68020up|cpu32 },
+{"tpfw", 4,	one(0050772),	one(0177777), "#w", mcfisa_a},
 {"trapfw", 4,	one(0050772),	one(0177777), "#w", m68020up|cpu32|mcfisa_a},
 {"trapgew", 4,	one(0056372),	one(0177777), "#w", m68020up|cpu32 },
 {"trapgtw", 4,	one(0057372),	one(0177777), "#w", m68020up|cpu32 },
@@ -2039,6 +2044,7 @@ const struct m68k_opcode m68k_opcodes[] =
 {"trapccl", 6,	one(0052373),	one(0177777), "#l", m68020up|cpu32 },
 {"trapcsl", 6,	one(0052773),	one(0177777), "#l", m68020up|cpu32 },
 {"trapeql", 6,	one(0053773),	one(0177777), "#l", m68020up|cpu32 },
+{"tpfl", 6,	one(0050773),	one(0177777), "#l", mcfisa_a},
 {"trapfl", 6,	one(0050773),	one(0177777), "#l", m68020up|cpu32|mcfisa_a},
 {"trapgel", 6,	one(0056373),	one(0177777), "#l", m68020up|cpu32 },
 {"trapgtl", 6,	one(0057373),	one(0177777), "#l", m68020up|cpu32 },
