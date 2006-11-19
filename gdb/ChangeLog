@@ -1,3 +1,8 @@
+2006-11-19  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 6.6 branch created (branch timestamp: 2006-11-15 12:00)
+	* version.in: Bump version to 6.6.50.20061119-cvs.
+
 2006-11-18  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* prologue-value.c (clear_entries): Fix memory leak.
