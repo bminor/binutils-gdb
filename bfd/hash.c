@@ -383,6 +383,7 @@ bfd_hash_table_init_n (struct bfd_hash_table *table,
   table->size = size;
   table->entsize = entsize;
   table->count = 0;
+  table->frozen = 0;
   table->newfunc = newfunc;
   return TRUE;
 }
@@ -471,7 +472,7 @@ bfd_hash_lookup (struct bfd_hash_table *table,
   table->table[index] = hashp;
   table->count++;
 
-  if (table->count > table->size * 3 / 4)
+  if (!table->frozen && table->count > table->size * 3 / 4)
     {
       unsigned long newsize = higher_prime_number (table->size);
       struct bfd_hash_entry **newtable;
@@ -482,8 +483,7 @@ bfd_hash_lookup (struct bfd_hash_table *table,
 	 that much memory, don't try to grow the table.  */
       if (newsize == 0 || alloc / sizeof (struct bfd_hash_entry *) != newsize)
 	{
-	  /* Lie.  Stops us trying to grow again for a while.  */
-	  table->count = 0;
+	  table->frozen = 1;
 	  return hashp;
 	}
 
@@ -573,14 +573,17 @@ bfd_hash_traverse (struct bfd_hash_table *table,
 {
   unsigned int i;
 
+  table->frozen = 1;
   for (i = 0; i < table->size; i++)
     {
       struct bfd_hash_entry *p;
 
       for (p = table->table[i]; p != NULL; p = p->next)
 	if (! (*func) (p, info))
-	  return;
+	  goto out;
     }
+ out:
+  table->frozen = 0;
 }
 
 void

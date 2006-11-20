@@ -1,3 +1,12 @@
+2006-11-20  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 3532
+	* bfd-in.h (struct bfd_hash_table): Reorganize.  Add "frozen".
+	* hash.c (bfd_hash_table_init_n): Init frozen.
+	(bfd_hash_lookup): Don't grow if frozen.
+	(bfd_hash_traverse): Freeze hash table during traversal.
+	* bfd-in2.h: Regenerate.
+
 2006-11-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (_bfd_elf_check_kept_section): Test for kept group
