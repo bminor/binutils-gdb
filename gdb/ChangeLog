@@ -1,5 +1,9 @@
 2006-11-19  Joel Brobecker  <brobecker@adacore.com>
 
+	* NEWS: Change "Changes since gdb-6.5" into "Changes in gdb-6.6".
+
+2006-11-19  Joel Brobecker  <brobecker@adacore.com>
+
 	GDB 6.6 branch created (branch timestamp: 2006-11-15 12:00)
 	* version.in: Bump version to 6.5.90.20061115-cvs
 
