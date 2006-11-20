@@ -1,3 +1,9 @@
+2006-11-16  Mei ligang  <ligang@sunnorth.com.cn>
+
+	* config/tc-score.c (score_relax_frag): If next frag contains 32 bit branch
+	instruction, handle it specially.
+	(score_insns): Modify 32 bit branch instruction.
+
 2006-11-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* symbols.c (resolve_symbol_value): Formatting.
