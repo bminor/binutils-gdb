@@ -1,3 +1,7 @@
+2006-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld.texinfo: Fix a typo.
+
 2006-11-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* emulparams/elf32_spu.sh (OTHER_SECTIONS): Define.

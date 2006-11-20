@@ -4403,7 +4403,7 @@ they might suggest to the person reading them.  The @samp{2.0} version
 could just as well have appeared in between @samp{1.1} and @samp{1.2}.
 However, this would be a confusing way to write a version script.
 
-Node name can be omited, provided it is the only version node
+Node name can be omitted, provided it is the only version node
 in the version script.  Such version script doesn't assign any versions to
 symbols, only selects which symbols will be globally visible out and which
 won't.
