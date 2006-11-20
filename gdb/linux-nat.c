@@ -986,10 +986,10 @@ lin_lwp_attach_lwp (ptid_t ptid, int verbose)
     {
       /* We assume that the LWP representing the original process is
          already stopped.  Mark it as stopped in the data structure
-         that the linux ptrace layer uses to keep track of threads.
-         Note that this won't have already been done since the main
-         thread will have, we assume, been stopped by an attach from a
-         different layer.  */
+         that the GNU/linux ptrace layer uses to keep track of
+         threads.  Note that this won't have already been done since
+         the main thread will have, we assume, been stopped by an
+         attach from a different layer.  */
       lp->stopped = 1;
     }
 }
@@ -2396,11 +2396,11 @@ linux_nat_thread_alive (ptid_t ptid)
 			target_pid_to_str (ptid),
 			errno ? safe_strerror (errno) : "OK");
 
-  /* Not every Linux target implements PTRACE_PEEKUSER.
-     But we can handle that case gracefully since ptrace
-     will first do a lookup for the process based upon the
-     passed-in pid.  If that fails we will get either -ESRCH
-     or -EPERM, otherwise the child exists and is alive.  */
+  /* Not every Linux kernel implements PTRACE_PEEKUSER.  But we can
+     handle that case gracefully since ptrace will first do a lookup
+     for the process based upon the passed-in pid.  If that fails we
+     will get either -ESRCH or -EPERM, otherwise the child exists and
+     is alive.  */
   if (errno == ESRCH || errno == EPERM)
     return 0;
 

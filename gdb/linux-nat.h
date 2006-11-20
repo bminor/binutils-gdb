@@ -85,11 +85,11 @@ struct lwp_info *iterate_over_lwps (int (*callback) (struct lwp_info *,
 						     void *), 
 				    void *data);
 
-/* Create a prototype generic Linux target.  The client can override
-   it with local methods.  */
+/* Create a prototype generic GNU/Linux target.  The client can
+   override it with local methods.  */
 struct target_ops * linux_target (void);
 
-/* Register the customized Linux target.  This should be used
+/* Register the customized GNU/Linux target.  This should be used
    instead of calling add_target directly.  */
 void linux_nat_add_target (struct target_ops *);
 

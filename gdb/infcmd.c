@@ -1857,8 +1857,8 @@ attach_command (char *args, int from_tty)
 
   /* Clear out solib state. Otherwise the solib state of the previous
      inferior might have survived and is entirely wrong for the new
-     target.  This has been observed on Linux using glibc 2.3. How to
-     reproduce:
+     target.  This has been observed on GNU/Linux using glibc 2.3. How
+     to reproduce:
 
      bash$ ./foo&
      [1] 4711
