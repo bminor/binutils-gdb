@@ -1,5 +1,12 @@
 2006-11-19  Joel Brobecker  <brobecker@adacore.com>
 
+	* NEWS: Add a new section for changes since GDB 6.6. Rename
+	the section "Changes since GDB 6.5" into "Changes in GDB 6.6".
+	Move a couple of items into the new section as they did not
+	make it to 6.6.
+
+2006-11-19  Joel Brobecker  <brobecker@adacore.com>
+
 	GDB 6.6 branch created (branch timestamp: 2006-11-15 12:00)
 	* version.in: Bump version to 6.6.50.20061119-cvs.
 
