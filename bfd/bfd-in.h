@@ -350,7 +350,8 @@ typedef struct bfd_section *sec_ptr;
   (((sec)->rawsize ? (sec)->rawsize : (sec)->size) \
    / bfd_octets_per_byte (bfd))
 
-typedef struct stat stat_type;
+/* Forward define.  */
+struct stat;
 
 typedef enum bfd_print_symbol
 {

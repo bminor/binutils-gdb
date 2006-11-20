@@ -114,24 +114,24 @@ trad_unix_core_file_p (abfd)
     if (bfd_stat (abfd, &statbuf) < 0)
       return 0;
 
-    if ((unsigned long) (NBPG * (UPAGES + u.u_dsize
+    if ((ufile_ptr) NBPG * (UPAGES + u.u_dsize
 #ifdef TRAD_CORE_DSIZE_INCLUDES_TSIZE
-				 - u.u_tsize
+			    - u.u_tsize
 #endif
-				 + u.u_ssize))
-	> (unsigned long) statbuf.st_size)
+			    + u.u_ssize)
+	> (ufile_ptr) statbuf.st_size)
       {
 	bfd_set_error (bfd_error_wrong_format);
 	return 0;
       }
 #ifndef TRAD_CORE_ALLOW_ANY_EXTRA_SIZE
-    if ((unsigned long) (NBPG * (UPAGES + u.u_dsize + u.u_ssize)
+    if (((ufile_ptr) NBPG * (UPAGES + u.u_dsize + u.u_ssize)
 #ifdef TRAD_CORE_EXTRA_SIZE_ALLOWED
 	/* Some systems write the file too big.  */
-			 + TRAD_CORE_EXTRA_SIZE_ALLOWED
+	 + TRAD_CORE_EXTRA_SIZE_ALLOWED
 #endif
-			 )
-	< (unsigned long) statbuf.st_size)
+	 )
+	< (ufile_ptr) statbuf.st_size)
       {
 	/* The file is too big.  Maybe it's not a core file
 	   or we otherwise have bad values for u_dsize and u_ssize).  */

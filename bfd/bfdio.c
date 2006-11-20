@@ -401,7 +401,7 @@ FUNCTION
 	bfd_get_size
 
 SYNOPSIS
-	long bfd_get_size (bfd *abfd);
+	file_ptr bfd_get_size (bfd *abfd);
 
 DESCRIPTION
 	Return the file size (as read from file system) for the file
@@ -429,7 +429,7 @@ DESCRIPTION
 	size reasonable?".
 */
 
-long
+file_ptr
 bfd_get_size (bfd *abfd)
 {
   struct stat buf;

@@ -88,7 +88,7 @@ cisco_core_file_validate (abfd, crash_info_loc)
   char buf[4];
   unsigned int crashinfo_offset;
   crashinfo_external crashinfo;
-  int nread;
+  bfd_size_type nread;
   unsigned int magic;
   unsigned int version;
   unsigned int rambase;

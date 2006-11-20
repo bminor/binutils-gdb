@@ -1,5 +1,15 @@
 2006-11-20  Alan Modra  <amodra@bigpond.net.au>
 
+	* bfd-in.h (struct stat): Don't typedef.
+	* bfdio.c (bfd_get_size): Return a file_ptr.
+	* cisco-core.c (cisco_core_file_validate): Use bfd_size_type for nread.
+	* mmo.c (mmo_scan): Use file_ptr for curpos.
+	* trad-core.c (trad_unix_core): Don't cast statbuf.st_size to
+	unsigned long.
+	* bfd-in2.h: Regenerate.
+
+2006-11-20  Alan Modra  <amodra@bigpond.net.au>
+
 	PR 3532
 	* bfd-in.h (struct bfd_hash_table): Reorganize.  Add "frozen".
 	* hash.c (bfd_hash_table_init_n): Init frozen.

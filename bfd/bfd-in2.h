@@ -357,7 +357,8 @@ typedef struct bfd_section *sec_ptr;
   (((sec)->rawsize ? (sec)->rawsize : (sec)->size) \
    / bfd_octets_per_byte (bfd))
 
-typedef struct stat stat_type;
+/* Forward define.  */
+struct stat;
 
 typedef enum bfd_print_symbol
 {
@@ -1110,7 +1111,7 @@ bfd_boolean bfd_fill_in_gnu_debuglink_section
 /* Extracted from bfdio.c.  */
 long bfd_get_mtime (bfd *abfd);
 
-long bfd_get_size (bfd *abfd);
+file_ptr bfd_get_size (bfd *abfd);
 
 /* Extracted from bfdwin.c.  */
 /* Extracted from section.c.  */

@@ -1917,7 +1917,7 @@ mmo_scan (bfd *abfd)
 		/* This must be the last 32-bit word in an mmo file.
 		   Let's find out.  */
 		struct stat statbuf;
-		long curpos = bfd_tell (abfd);
+		file_ptr curpos = bfd_tell (abfd);
 
 		if (bfd_stat (abfd, &statbuf) < 0)
 		  goto error_return;
