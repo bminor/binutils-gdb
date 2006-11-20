@@ -17,3 +17,4 @@ EMBEDDED=true
 MAXPAGESIZE=0x80
 DATA_ADDR="ALIGN(${MAXPAGESIZE})"
 OTHER_BSS_SECTIONS=".toe ALIGN(128) : { *(.toe) } = 0"
+OTHER_SECTIONS=".note.spu_name 0 : { *(.note.spu_name) }"

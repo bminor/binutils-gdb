@@ -1,3 +1,7 @@
+2006-11-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* emulparams/elf32_spu.sh (OTHER_SECTIONS): Define.
+
 2006-11-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* emultempl/armelf.em (arm_elf_before_allocation): Only call
