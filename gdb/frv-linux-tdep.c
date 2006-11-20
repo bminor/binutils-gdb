@@ -1,6 +1,7 @@
 /* Target-dependent code for GNU/Linux running on the Fujitsu FR-V,
    for GDB.
-   Copyright (C) 2004 Free Software Foundation, Inc.
+
+   Copyright (C) 2004, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -452,7 +453,7 @@ frv_linux_supply_fpregset (const struct regset *regset,
   regcache_raw_supply (regcache, fsr0_regnum, fpregsetp->fsr[0]);
 }
 
-/* FRV Linux register sets.  */
+/* FRV Linux kernel register sets.  */
 
 static struct regset frv_linux_gregset =
 {

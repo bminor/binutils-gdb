@@ -481,7 +481,7 @@ hppa_linux_supply_fpregset (const struct regset *regset,
     }
 }
 
-/* Linux register set.  */
+/* HPPA Linux kernel register set.  */
 static struct regset hppa_linux_regset =
 {
   NULL,

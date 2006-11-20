@@ -1,6 +1,6 @@
 /* Target-dependent code for the Matsushita MN10300 for GDB, the GNU debugger.
-   Copyright (C) 2003, 2004, 2005
-   Free Software Foundation, Inc.
+
+   Copyright (C) 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -704,7 +704,7 @@ am33_linux_sigframe_cache_init (const struct tramp_frame *self,
   trad_frame_set_id (this_cache, frame_id_build (sc_base, func));
 }
 
-/* AM33 Linux osabi has been recognized.
+/* AM33 GNU/Linux osabi has been recognized.
    Now's our chance to register our corefile handling.  */
 
 static void

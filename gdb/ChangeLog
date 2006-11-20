@@ -1,3 +1,12 @@
+2006-11-20  Andrew Cagney  <cagney@redhat.com>
+
+	* linux-nat.h: Refer to GNU/Linux or Linux kernel.
+	* linux-nat.c (lin_lwp_attach_lwp, linux_nat_thread_alive): Ditto.
+	* infcmd.c (attach_command): Ditto.
+	* hppa-linux-tdep.c (hppa_linux_regset): Ditto.
+	* mn10300-linux-tdep.c: Ditto.  Update copyright year.
+	* frv-linux-tdep.c: Ditto.  Update copyright year.
+
 2006-11-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* README: Update GDB version number to 6.6.
