@@ -1,3 +1,17 @@
+2006-11-21  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf-eh-frame.c (struct cie): New type.
+	(cie_compare): Removed.
+	(cie_eq, cie_hash, cie_compute_hash): New functions.
+	(_bfd_elf_discard_section_eh_frame): Rewrite not to rely on FDEs
+	pointing only to last CIE and allow merging of any duplicate CIEs,
+	not just duplicate consecutive CIEs.
+	(_bfd_elf_discard_section_eh_frame_hdr): Delete cies hash table.
+	* elf-bfd.h (struct cie_header, struct cie): Removed.
+	(struct eh_frame_sec_info): Remove alloced field.
+	(struct eh_frame_hdr_info): Remove last_cie, last_cie_sec
+	and last_cie_inf fields.  Add cies field.
+
 2006-11-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* bfd-in.h (struct stat): Don't typedef.
