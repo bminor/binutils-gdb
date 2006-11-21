@@ -1,5 +1,5 @@
 		     README for gdb-6.6 release
-		Updated 8, November, 2004 by Andrew Cagney
+		     Updated 20, November, 2006
 
 This is GDB, the GNU source-level debugger.
 
@@ -462,12 +462,6 @@ monitors and other hardware:
 	remote-sds.c	 PowerPC SDS monitor
 	remote-sim.c	 Generalized simulator protocol
 	remote-st.c	 Tandem ST-2000 monitor
-	remote-vx.c	 VxWorks realtime kernel
-
-   Remote-vx.c and the vx-share subdirectory contain a remote
-interface for the VxWorks realtime kernel, which communicates over TCP
-using the Sun RPC library.  This would be a useful starting point for
-other remote- via-ethernet back ends.
 
 
 Reporting Bugs in GDB

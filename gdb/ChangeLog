@@ -1,3 +1,7 @@
+2006-11-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* README: Remove obsolete information.
+
 2006-11-20  Andrew Cagney  <cagney@redhat.com>
 
 	* linux-nat.h: Refer to GNU/Linux or Linux kernel.
