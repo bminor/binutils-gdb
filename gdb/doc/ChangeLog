@@ -1,3 +1,7 @@
+2006-11-21  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.texinfo (Memory Access Checking): New.
+
 2006-11-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (Remote configuration): Mention

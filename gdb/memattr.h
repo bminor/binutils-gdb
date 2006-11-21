@@ -26,6 +26,7 @@
 
 enum mem_access_mode
 {
+  MEM_NONE,                     /* Memory that is not physically present. */
   MEM_RW,			/* read/write */
   MEM_RO,			/* read only */
   MEM_WO,			/* write only */
@@ -76,7 +77,10 @@ struct mem_attrib
 
 struct mem_region 
 {
+  /* Lowest address in the region.  */
   CORE_ADDR lo;
+  /* Address past the highest address of the region. 
+     If 0, upper bound is "infinity".  */
   CORE_ADDR hi;
 
   /* Item number of this memory region. */

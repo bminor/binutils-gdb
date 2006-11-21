@@ -1015,7 +1015,8 @@ memory_xfer_partial (struct target_ops *ops, void *readbuf, const void *writebuf
 
   /* Try GDB's internal data cache.  */
   region = lookup_mem_region (memaddr);
-  if (memaddr + len < region->hi)
+  /* region->hi == 0 means there's no upper bound.  */
+  if (memaddr + len < region->hi || region->hi == 0)
     reg_len = len;
   else
     reg_len = region->hi - memaddr;
@@ -1037,6 +1038,9 @@ memory_xfer_partial (struct target_ops *ops, void *readbuf, const void *writebuf
       if (writebuf != NULL)
 	error (_("Writing to flash memory forbidden in this context"));
       break;
+
+    case MEM_NONE:
+      return -1;
     }
 
   if (region->attrib.cache)
@@ -1072,7 +1076,7 @@ memory_xfer_partial (struct target_ops *ops, void *readbuf, const void *writebuf
   do
     {
       res = ops->to_xfer_partial (ops, TARGET_OBJECT_MEMORY, NULL,
-				  readbuf, writebuf, memaddr, len);
+				  readbuf, writebuf, memaddr, reg_len);
       if (res > 0)
 	return res;
 

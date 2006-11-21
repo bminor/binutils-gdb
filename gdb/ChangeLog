@@ -1,3 +1,21 @@
+2006-11-21  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* memattr.h (enum mem_access_mode): New value
+	MEM_NONE.
+	* memattr.c (unknown_mem_attrib): New.
+	(inaccessible_by_default): New.
+	(show_inaccessible_by_default): New.
+	(lookup_mem_region): Check inaccessible_by_default.
+	(dummy_cmd): New.
+	(mem_set_cmdlist, mem_show_cmdlist): New.
+	(_initialize_mem): Register new "set" and "show"
+	commands.
+	* target.c (memory_xfer_partial): If memory type
+	is MEM_NONE, return an error.
+	Clip to region size when calling to_xfer_partial.
+	If upper limit of memory range is 0, don't clip
+	anything.
+
 2006-11-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* README: Remove obsolete information.

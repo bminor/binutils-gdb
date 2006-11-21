@@ -40,6 +40,17 @@ const struct mem_attrib default_mem_attrib =
   -1 /* Flash blocksize not specified.  */
 };
 
+const struct mem_attrib unknown_mem_attrib =
+{
+  MEM_NONE,			/* mode */
+  MEM_WIDTH_UNSPECIFIED,
+  0,				/* hwbreak */
+  0,				/* cache */
+  0,				/* verify */
+  -1 /* Flash blocksize not specified.  */
+};
+
+
 VEC(mem_region_s) *mem_region_list, *target_mem_region_list;
 static int mem_number = 0;
 
@@ -52,6 +63,25 @@ static int mem_use_target = 1;
    since the last time it was invalidated.  If that list is still
    empty, then the target can't supply memory regions.  */
 static int target_mem_regions_valid;
+
+/* If this flag is set, gdb will assume that memory ranges not
+   specified by the memory map have type MEM_NONE, and will
+   emit errors on all accesses to that memory.  */
+static int inaccessible_by_default = 0;
+
+static void
+show_inaccessible_by_default (struct ui_file *file, int from_tty,
+			      struct cmd_list_element *c,
+			      const char *value)
+{
+  if (inaccessible_by_default)
+    fprintf_filtered (file, _("\
+Unknown memory addresses will be treated as inaccessible.\n"));
+  else
+    fprintf_filtered (file, _("\
+Unknown memory addresses will be treated as RAM.\n"));          
+}
+
 
 /* Predicate function which returns true if LHS should sort before RHS
    in a list of memory regions, useful for VEC_lower_bound.  */
@@ -215,13 +245,17 @@ lookup_mem_region (CORE_ADDR addr)
   lo = 0;
   hi = 0;
 
-  /* If we ever want to support a huge list of memory regions, this
+  /* Either find memory range containing ADDRESS, or set LO and HI
+     to the nearest boundaries of an existing memory range.
+     
+     If we ever want to support a huge list of memory regions, this
      check should be replaced with a binary search (probably using
      VEC_lower_bound).  */
   for (ix = 0; VEC_iterate (mem_region_s, mem_region_list, ix, m); ix++)
     {
       if (m->enabled_p == 1)
 	{
+	  /* If the address is in the memory region, return that memory range.  */
 	  if (addr >= m->lo && (addr < m->hi || m->hi == 0))
 	    return m;
 
@@ -243,7 +277,15 @@ lookup_mem_region (CORE_ADDR addr)
      was learned above.  */
   region.lo = lo;
   region.hi = hi;
-  region.attrib = default_mem_attrib;
+
+  /* When no memory map is defined at all, we always return 
+     'default_mem_attrib', so that we do not make all memory 
+     inaccessible for targets that don't provide a memory map.  */
+  if (inaccessible_by_default && !VEC_empty (mem_region_s, mem_region_list))
+    region.attrib = unknown_mem_attrib;
+  else
+    region.attrib = default_mem_attrib;
+
   return &region;
 }
 
@@ -674,8 +716,16 @@ mem_delete_command (char *args, int from_tty)
 
   dont_repeat ();
 }
+
+static void
+dummy_cmd (char *args, int from_tty)
+{
+}
 
 extern initialize_file_ftype _initialize_mem; /* -Wmissing-prototype */
+
+static struct cmd_list_element *mem_set_cmdlist;
+static struct cmd_list_element *mem_show_cmdlist;
 
 void
 _initialize_mem (void)
@@ -709,4 +759,25 @@ Do \"info mem\" to see current list of code numbers."), &deletelist);
 
   add_info ("mem", mem_info_command,
 	    _("Memory region attributes"));
+
+  add_prefix_cmd ("mem", class_vars, dummy_cmd, _("\
+Memory regions settings"),
+		  &mem_set_cmdlist, "set mem ",
+		  0/* allow-unknown */, &setlist);
+  add_prefix_cmd ("mem", class_vars, dummy_cmd, _("\
+Memory regions settings"),
+		  &mem_show_cmdlist, "show mem  ",
+		  0/* allow-unknown */, &showlist);
+
+  add_setshow_boolean_cmd ("inaccessible-by-default", no_class,
+				  &inaccessible_by_default, _("\
+Set handling of unknown memory regions."), _("\
+Show handling of unknown memory regions."), _("\
+If on, and some memory map is defined, debugger will emit errors on\n\
+accesses to memory not defined in the memory map. If off, accesses to all\n\
+memory addresses will be allowed."),
+				NULL,
+				show_inaccessible_by_default,
+				&mem_set_cmdlist,
+				&mem_show_cmdlist);
 }

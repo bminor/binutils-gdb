@@ -6894,6 +6894,27 @@ Enable @value{GDBN} to cache target memory.
 Disable @value{GDBN} from caching target memory.  This is the default.
 @end table
 
+@subsection Memory Access Checking
+@value{GDBN} can be instructed to refuse accesses to memory that is
+not explicitly described.  This can be useful if accessing such
+regions has undesired effects for a specific target, or to provide
+better error checking.  The following commands control this behaviour.
+
+@table @code
+@kindex set mem inaccessible-by-default
+@item set mem inaccessible-by-default [on|off]
+If @code{on} is specified, make  @value{GDBN} treat memory not
+explicitly described by the memory ranges as non-existent and refuse accesses
+to such memory.  The checks are only performed if there's at least one
+memory range defined.  If @code{off} is specified, make @value{GDBN}
+treat the memory not explicitly described by the memory ranges as RAM.
+The default value is @code{off}.
+@kindex show mem inaccessible-by-default
+@item show mem inaccessible-by-default
+Show the current handling of accesses to unknown memory.
+@end table
+
+
 @c @subsubsection Memory Write Verification
 @c The memory write verification attributes set whether @value{GDBN}
 @c will re-reads data after each write to verify the write was successful.
