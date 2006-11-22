@@ -1,3 +1,7 @@
+2006-11-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.arch/thumb-prologue.c, gdb.arch/thumb-prologue.exp: New files.
+
 2006-11-22  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* gdb.asm/asm-source.exp: Add "spu*-*-*" target.

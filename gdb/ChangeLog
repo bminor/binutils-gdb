@@ -1,3 +1,11 @@
+2006-11-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (arm-tdep.o): Update dependencies.
+	* arm-tdep.c (thumb_skip_prologue): Remove.
+	(thumb_analyze_prologue): New function.
+	(arm_skip_prologue): Use thumb_analyze_prologue.
+	(thumb_scan_prologue): Ditto.
+
 2006-11-22  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* configure.tgt: Enable gdbserver for SPU target.
