@@ -82,7 +82,7 @@ fi
 AC_PROG_CC
 AC_PROG_INSTALL
 
-ALL_LINGUAS="fr sv tr es da vi zh_CN zh_TW"
+ALL_LINGUAS="fr sv tr es da vi zh_CN zh_TW ga"
 ZW_GNU_GETTEXT_SISTER_DIR
 AM_PO_SUBDIRS
 

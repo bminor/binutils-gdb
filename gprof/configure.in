@@ -24,7 +24,7 @@ AC_PROG_INSTALL
 
 AC_CHECK_FUNCS(setmode)
 
-ALL_LINGUAS="fr tr sv es id da pt_BR de vi rw ga"
+ALL_LINGUAS="fr tr sv es id da pt_BR de vi rw ga ms"
 ZW_GNU_GETTEXT_SISTER_DIR
 AM_PO_SUBDIRS
 

@@ -1,3 +1,8 @@
+2006-11-22  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (LINGUAS): Add ga.
+	* po/ga.po: New Irish translation.
+
 2006-11-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld.texinfo: Fix a typo.
