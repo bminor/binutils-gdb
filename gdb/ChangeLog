@@ -1,3 +1,9 @@
+2006-11-21  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	Checked in by Joel Brobecker  <brobecker@adacore.com>
+	* parse.c (write_exp_msymbol): Check SYMBOL_BFD_SECTION before
+	dereferencing it.
+
 2006-11-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* README: Remove obsolete information.
