@@ -29,6 +29,11 @@ if [is_remote target] then {
     continue
 }
 
+if [target_info exists noargs] then {
+    verbose "Skipping term.exp because of noargs."
+    return
+}
+
 gdb_start
 
 #
