@@ -1,6 +1,6 @@
 /* ELF object file format
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1456,7 +1456,7 @@ obj_elf_version (int ignore ATTRIBUTE_UNUSED)
       p = frag_more (sizeof (e_note.type));
       md_number_to_chars (p, i_note.type, sizeof (e_note.type));
       p = frag_more (len);
-      strcpy (p, name);
+      memcpy (p, name, len);
 
       frag_align (2, 0, 0);
 

@@ -1,7 +1,11 @@
+2006-11-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/obj-elf.c (obj_elf_version): Use memcpy rather than strcpy.
+
 2006-11-16  Mei ligang  <ligang@sunnorth.com.cn>
 
-	* config/tc-score.c (score_relax_frag): If next frag contains 32 bit branch
-	instruction, handle it specially.
+	* config/tc-score.c (score_relax_frag): If next frag contains 32 bit
+	branch instruction, handle it specially.
 	(score_insns): Modify 32 bit branch instruction.
 
 2006-11-16  Alan Modra  <amodra@bigpond.net.au>
@@ -132,7 +136,7 @@
 	(do_macro_ldst_label): Modify inst.type.
 	(Insn_PIC): Delete.
 	(data_op2): The immediate value in lw is 15 bit signed.
-	
+
 2006-10-29  Randolph Chung  <tausq@debian.org>
 
 	* config/tc-hppa.c (hppa_cfi_frame_initial_instructions)
@@ -179,7 +183,7 @@
 
 	* expr.c (expr): Replace O_add case in switch (op_left) explaining
 	why it can never occur.
-	
+
 2006-10-24  Andrew Pinski  <andrew_pinski@playstation.sony.com>
 
 	* doc/c-ppc.texi (-mcell): Document.
