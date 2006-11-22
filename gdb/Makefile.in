@@ -799,6 +799,7 @@ source_h = source.h
 sparc64_tdep_h = sparc64-tdep.h $(sparc_tdep_h)
 sparc_nat_h = sparc-nat.h
 sparc_tdep_h = sparc-tdep.h
+spu_tdep_h = spu-tdep.h
 srec_h = srec.h
 stabsread_h = stabsread.h
 stack_h = stack.h
@@ -1497,6 +1498,7 @@ ALLDEPFILES = \
 	sparc64-tdep.c sparc64fbsd-nat.c sparc64fbsd-tdep.c \
 	sparc64nbsd-nat.c sparc64nbsd-tdep.c sparc64obsd-tdep.c \
 	sparcnbsd-nat.c sparcnbsd-tdep.c sparcobsd-tdep.c \
+	spu-linux-nat.c spu-tdep.c \
 	v850-tdep.c \
 	vax-nat.c vax-tdep.c vaxbsd-nat.c vaxnbsd-tdep.c \
 	win32-nat.c \
@@ -2721,6 +2723,15 @@ sparc-tdep.o: sparc-tdep.c $(defs_h) $(arch_utils_h) $(dis_asm_h) \
 	$(frame_unwind_h) $(gdbcore_h) $(gdbtypes_h) $(inferior_h) \
 	$(symtab_h) $(objfiles_h) $(osabi_h) $(regcache_h) $(target_h) \
 	$(value_h) $(gdb_assert_h) $(gdb_string_h) $(sparc_tdep_h)
+spu-linux-nat.o: spu-linux-nat.c $(defs_h) $(gdbcore_h) $(gdb_string_h) \
+	$(target_h) $(inferior_h) $(inf_ptrace_h) $(regcache_h) $(symfile_h) \
+	$(gdb_wait_h) $(spu_tdep_h)
+spu-tdep.o: spu-tdep.c $(defs_h) $(arch_utils_h) $(gdbtypes_h) $(gdbcmd_h) \
+	$(gdbcore_h) $(gdb_string_h) $(gdb_assert_h) $(frame_h) \
+	$(frame_unwind_h) $(frame_base_h) $(trad_frame_h) $(symtab_h) \
+	$(symfile_h) $(value_h) $(inferior_h) $(dis_asm_h) $(objfiles_h) \
+	$(language_h) $(regcache_h) $(reggroups_h) $(floatformat_h) \
+	$(spu_tdep_h)
 stabsread.o: stabsread.c $(defs_h) $(gdb_string_h) $(bfd_h) $(gdb_obstack_h) \
 	$(symtab_h) $(gdbtypes_h) $(expression_h) $(symfile_h) $(objfiles_h) \
 	$(aout_stab_gnu_h) $(libaout_h) $(aout_aout64_h) $(gdb_stabs_h) \

@@ -81,6 +81,12 @@ AC_CONFIG_SUBDIRS(doc testsuite)
 # configuration.
 gdb_host_obs=posix-hdep.o
 
+if test "${target}" = "${host}"; then
+  gdb_native=yes
+else
+  gdb_native=no
+fi
+
 . $srcdir/configure.host
 
 . $srcdir/configure.tgt
@@ -1420,7 +1426,7 @@ fi
 AC_SUBST(target_subdir)
 
 frags=
-if test "${target}" = "${host}"; then
+if test "${gdb_native}" = "yes"; then
   host_makefile_frag=${srcdir}/config/${gdb_host_cpu}/${gdb_host}.mh
   if test ! -f ${host_makefile_frag}; then
     AC_MSG_ERROR("*** Gdb does not support native target ${host}")
@@ -1449,7 +1455,7 @@ targetfile=`sed -n '
 s/DEPRECATED_TM_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
 ' ${target_makefile_frag}`
 
-if test "${target}" = "${host}"; then
+if test "${gdb_native}" = "yes"; then
 # We pick this up from the host configuration file (.mh) because we
 # do not have a native configuration Makefile fragment.
 nativefile=`sed -n '

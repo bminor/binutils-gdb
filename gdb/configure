@@ -3062,6 +3062,12 @@ subdirs="$subdirs doc testsuite"
 # configuration.
 gdb_host_obs=posix-hdep.o
 
+if test "${target}" = "${host}"; then
+  gdb_native=yes
+else
+  gdb_native=no
+fi
+
 . $srcdir/configure.host
 
 . $srcdir/configure.tgt
@@ -22335,7 +22341,7 @@ ac_x_header_dirs='
 /usr/openwin/share/include'
 
 if test "$ac_x_includes" = no; then
-  # Guess where to find include files, by looking for Intrinsic.h.
+  # Guess where to find include files, by looking for Xlib.h.
   # First, try using that file with no special directory specified.
   cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
@@ -22343,7 +22349,7 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-#include <X11/Intrinsic.h>
+#include <X11/Xlib.h>
 _ACEOF
 if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
   (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
@@ -22370,7 +22376,7 @@ else
 sed 's/^/| /' conftest.$ac_ext >&5
 
   for ac_dir in $ac_x_header_dirs; do
-  if test -r "$ac_dir/X11/Intrinsic.h"; then
+  if test -r "$ac_dir/X11/Xlib.h"; then
     ac_x_includes=$ac_dir
     break
   fi
@@ -22391,11 +22397,11 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-#include <X11/Intrinsic.h>
+#include <X11/Xlib.h>
 int
 main ()
 {
-XtMalloc (0)
+XrmInitialize ()
   ;
   return 0;
 }
@@ -22572,7 +22578,7 @@ fi
 
 
 frags=
-if test "${target}" = "${host}"; then
+if test "${gdb_native}" = "yes"; then
   host_makefile_frag=${srcdir}/config/${gdb_host_cpu}/${gdb_host}.mh
   if test ! -f ${host_makefile_frag}; then
     { { echo "$as_me:$LINENO: error: \"*** Gdb does not support native target ${host}\"" >&5
@@ -22604,7 +22610,7 @@ targetfile=`sed -n '
 s/DEPRECATED_TM_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
 ' ${target_makefile_frag}`
 
-if test "${target}" = "${host}"; then
+if test "${gdb_native}" = "yes"; then
 # We pick this up from the host configuration file (.mh) because we
 # do not have a native configuration Makefile fragment.
 nativefile=`sed -n '
