@@ -135,7 +135,7 @@ if test "$srv_linux_thread_db" = "yes"; then
     AC_DEFINE(HAVE_TD_VERSION, 1, [Define if TD_VERSION is available.])
   fi
 
-  if test "$srv_cv_tls_get_addr"; then
+  if test "$srv_cv_tls_get_addr" = yes; then
     AC_DEFINE(HAVE_TD_THR_TLS_GET_ADDR, 1, [Define if td_thr_tls_get_addr is available.])
   fi
 fi

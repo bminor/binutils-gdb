@@ -1,3 +1,9 @@
+2006-11-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	Checked in by Joel Brobecker  <brobecker@adacore.com>
+	* configure.ac: Correct td_thr_tls_get_addr test.
+	* configure: Regenerated.
+
 2006-11-06  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* server.c (handle_query): Correct error handling for read_auxv.
