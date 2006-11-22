@@ -192,6 +192,12 @@ extern void arm_md_end (void);
 # define GLOBAL_OFFSET_TABLE_NAME	"_GLOBAL_OFFSET_TABLE_"
 # define TC_SEGMENT_INFO_TYPE 		struct arm_segment_info_type
 
+/* This is not really an alignment operation, but it's something we
+   need to do at the same time: whenever we are figuring out the
+   alignment for data, we should check whether a $d symbol is
+   necessary.  */
+# define md_cons_align(nbytes)		mapping_state (MAP_DATA)
+
 enum mstate
 {
   MAP_UNDEFINED = 0, /* Must be zero, for seginfo in new sections.  */
@@ -199,6 +205,8 @@ enum mstate
   MAP_ARM,
   MAP_THUMB
 };
+
+void mapping_state (enum mstate);
 
 struct arm_segment_info_type
 {

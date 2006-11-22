@@ -1,3 +1,12 @@
+2006-11-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gas/arm/arm7t.d, gas/arm/neon-ldst-rm.d, gas/arm/thumb2_pool.d,
+	gas/arm/tls.d: Update for $d support.
+	* gas/arm/mapshort.d, gas/arm/mapshort.s: New test.
+	* gas/elf/section2.e-armeabi: Update.
+	* gas/elf/section2.e-armelf: New file.
+	* gas/elf/elf.exp: Use it.
+
 2006-11-16  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* gas/m68k/all.exp: Add mcf-trap.

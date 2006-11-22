@@ -54,10 +54,14 @@ if { ([istarget "*-*-*elf*"]
 	set target_machine -score
     }
     if { ([istarget "*arm*-*-*"]
-	  || [istarget "xscale*-*-*"])
-	&& ([istarget "*-*-*eabi"]
-	    || [istarget "*-*-symbianelf"])} then {
-	set target_machine -armeabi
+	  || [istarget "xscale*-*-*"]) } {
+	
+	if { ([istarget "*-*-*eabi"]
+	      || [istarget "*-*-symbianelf"])} then {
+	    set target_machine -armeabi
+	} else {
+	    set target_machine -armelf
+	}
     }
     run_dump_test "ehopt0"
     run_dump_test "group0a" 

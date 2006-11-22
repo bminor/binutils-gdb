@@ -2282,7 +2282,7 @@ s_unreq (int a ATTRIBUTE_UNUSED)
 
 static enum mstate mapstate = MAP_UNDEFINED;
 
-static void
+void
 mapping_state (enum mstate state)
 {
   symbolS * symbolP;

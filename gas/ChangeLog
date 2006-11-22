@@ -1,3 +1,9 @@
+2006-11-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* config/tc-arm.h (md_cons_align): Define.
+	(mapping_state): New prototype.
+	* config/tc-arm.c (mapping_state): Make global.
+
 2006-11-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/obj-elf.c (obj_elf_version): Use memcpy rather than strcpy.

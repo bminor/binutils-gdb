@@ -12,7 +12,8 @@ Disassembly of section .plt:
  .*:	e08fe00e 	add	lr, pc, lr
  .*:	e5bef008 	ldr	pc, \[lr, #8\]!
  .*:	.*
- .*:	(46c04778 	undefined|477846c0 	ldrmib	r4, \[r8, -r0, asr #13\]!)
+ .*:	4778      	bx	pc
+ .*:	46c0      	nop			\(mov r8, r8\)
  .*:	e28fc6.* 	add	ip, pc, #.*	; 0x.*
  .*:	e28cca.* 	add	ip, ip, #.*	; 0x.*
  .*:	e5bcf.* 	ldr	pc, \[ip, #.*\]!

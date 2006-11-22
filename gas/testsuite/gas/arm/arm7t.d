@@ -62,7 +62,7 @@ Disassembly of section .text:
 0+d0 <[^>]*> b19100d2 ?	ldrltsb	r0, \[r1, r2\]
 0+d4 <[^>]*> e1df00f4 ?	ldrsh	r0, \[pc, #4\]	; 0+e0 <[^>]*>
 0+d8 <[^>]*> e1df00f4 ?	ldrsh	r0, \[pc, #4\]	; 0+e4 <[^>]*>
-0+dc <[^>]*> 00000000 ?	andeq	r0, r0, r0
+0+dc <[^>]*> 00000000 ?	.word	0x00000000
 [		]*dc:.*fred
 0+e0 <[^>]*> 0000c0de ?	.*
 0+e4 <[^>]*> 0000dead ?	.*

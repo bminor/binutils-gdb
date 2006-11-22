@@ -10,9 +10,9 @@ Disassembly of section .text:
     8204:	e1a00000 	nop			\(mov r0,r0\)
     8208:	e1a00000 	nop			\(mov r0,r0\)
     820c:	e1a0f00e 	mov	pc, lr
-    8210:	000080bc 	streqh	r8, \[r0\], -ip
-    8214:	000080b4 	streqh	r8, \[r0\], -r4
-    8218:	000080ac 	andeq	r8, r0, ip, lsr #1
-    821c:	00000004 	andeq	r0, r0, r4
-    8220:	000080c4 	andeq	r8, r0, r4, asr #1
-    8224:	00000014 	andeq	r0, r0, r4, lsl r0
+    8210:	000080bc 	.word	0x000080bc
+    8214:	000080b4 	.word	0x000080b4
+    8218:	000080ac 	.word	0x000080ac
+    821c:	00000004 	.word	0x00000004
+    8220:	000080c4 	.word	0x000080c4
+    8224:	00000014 	.word	0x00000014

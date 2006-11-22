@@ -1480,8 +1480,14 @@ static unsigned int ifthen_next_state;
 static bfd_vma ifthen_address;
 #define IFTHEN_COND ((ifthen_state >> 4) & 0xf)
 
-/* Cached Thumb state.  */
-int last_is_thumb;
+/* Cached mapping symbol state.  */
+enum map_type {
+  MAP_ARM,
+  MAP_THUMB,
+  MAP_DATA
+};
+
+enum map_type last_type;
 int last_mapping_sym = -1;
 bfd_vma last_mapping_addr = 0;
 
@@ -3711,6 +3717,28 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
   abort ();
 }
 
+/* Print data bytes on INFO->STREAM.  */
+
+static void
+print_insn_data (bfd_vma pc ATTRIBUTE_UNUSED, struct disassemble_info *info,
+		 long given)
+{
+  switch (info->bytes_per_chunk)
+    {
+    case 1:
+      info->fprintf_func (info->stream, ".byte\t0x%02lx", given);
+      break;
+    case 2:
+      info->fprintf_func (info->stream, ".short\t0x%04lx", given);
+      break;
+    case 4:
+      info->fprintf_func (info->stream, ".word\t0x%08lx", given);
+      break;
+    default:
+      abort ();
+    }
+}
+
 /* Disallow mapping symbols ($a, $b, $d, $t etc) from
    being displayed in symbol relative addresses.  */
 
@@ -3865,31 +3893,34 @@ find_ifthen_state (bfd_vma pc, struct disassemble_info *info,
 }
 
 /* Try to infer the code type (Arm or Thumb) from a symbol.
-   Returns nonzero if is_thumb was set.  */
+   Returns nonzero if *MAP_TYPE was set.  */
 
 static int
-get_sym_code_type (struct disassemble_info *info, int n, int *is_thumb)
+get_sym_code_type (struct disassemble_info *info, int n,
+		   enum map_type *map_type)
 {
   elf_symbol_type *es;
   unsigned int type;
   const char *name;
 
-  es = *(elf_symbol_type **)(info->symbols);
+  es = *(elf_symbol_type **)(info->symtab + n);
   type = ELF_ST_TYPE (es->internal_elf_sym.st_info);
 
   /* If the symbol has function type then use that.  */
   if (type == STT_FUNC || type == STT_ARM_TFUNC)
     {
-      *is_thumb = (type == STT_ARM_TFUNC);
+      *map_type = (type == STT_ARM_TFUNC) ? MAP_THUMB : MAP_ARM;
       return TRUE;
     }
 
   /* Check for mapping symbols.  */
   name = bfd_asymbol_name(info->symtab[n]);
-  if (name[0] == '$' && (name[1] == 'a' || name[1] == 't')
+  if (name[0] == '$' && (name[1] == 'a' || name[1] == 't' || name[1] == 'd')
       && (name[2] == 0 || name[2] == '.'))
     {
-      *is_thumb = (name[1] == 't');
+      *map_type = ((name[1] == 'a') ? MAP_ARM
+		   : (name[1] == 't') ? MAP_THUMB
+		   : MAP_DATA);
       return TRUE;
     }
 
@@ -3905,9 +3936,11 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
   unsigned char b[4];
   long		given;
   int           status;
-  int           is_thumb;
-  int		size;
+  int           is_thumb = FALSE;
+  int           is_data = FALSE;
+  unsigned int	size = 4;
   void	 	(*printer) (bfd_vma, struct disassemble_info *, long);
+  bfd_boolean   found = FALSE;
 
   if (info->disassembler_options)
     {
@@ -3917,9 +3950,89 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
       info->disassembler_options = NULL;
     }
 
-  is_thumb = force_thumb;
+  /* First check the full symtab for a mapping symbol, even if there
+     are no usable non-mapping symbols for this address.  */
+  if (info->symtab != NULL
+      && bfd_asymbol_flavour (*info->symtab) == bfd_target_elf_flavour)
+    {
+      bfd_vma addr;
+      int n;
+      int last_sym = -1;
+      enum map_type type;
 
-  if (!is_thumb && info->symbols != NULL)
+      if (pc <= last_mapping_addr)
+	last_mapping_sym = -1;
+      is_thumb = (last_type == MAP_THUMB);
+      found = FALSE;
+      /* Start scanning at the start of the function, or wherever
+	 we finished last time.  */
+      n = info->symtab_pos + 1;
+      if (n < last_mapping_sym)
+	n = last_mapping_sym;
+
+      /* Scan up to the location being disassembled.  */
+      for (; n < info->symtab_size; n++)
+	{
+	  addr = bfd_asymbol_value (info->symtab[n]);
+	  if (addr > pc)
+	    break;
+	  if (get_sym_code_type (info, n, &type))
+	    {
+	      last_sym = n;
+	      found = TRUE;
+	    }
+	}
+
+      if (!found)
+	{
+	  n = info->symtab_pos;
+	  if (n < last_mapping_sym - 1)
+	    n = last_mapping_sym - 1;
+
+	  /* No mapping symbol found at this address.  Look backwards
+	     for a preceeding one.  */
+	  for (; n >= 0; n--)
+	    {
+	      if (get_sym_code_type (info, n, &type))
+		{
+		  last_sym = n;
+		  found = TRUE;
+		  break;
+		}
+	    }
+	}
+
+      last_mapping_sym = last_sym;
+      last_type = type;
+      is_thumb = (last_type == MAP_THUMB);
+      is_data = (last_type == MAP_DATA);
+
+      /* Look a little bit ahead to see if we should print out
+	 two or four bytes of data.  If there's a symbol,
+	 mapping or otherwise, after two bytes then don't
+	 print more.  */
+      if (is_data)
+	{
+	  size = 4 - (pc & 3);
+	  for (n = last_sym + 1; n < info->symtab_size; n++)
+	    {
+	      addr = bfd_asymbol_value (info->symtab[n]);
+	      if (addr > pc)
+		{
+		  if (addr - pc < size)
+		    size = addr - pc;
+		  break;
+		}
+	    }
+	  /* If the next symbol is after three bytes, we need to
+	     print only part of the data, so that we can use either
+	     .byte or .short.  */
+	  if (size == 3)
+	    size = (pc & 1) ? 1 : 2;
+	}
+    }
+
+  if (info->symbols != NULL)
     {
       if (bfd_asymbol_flavour (*info->symbols) == bfd_target_coff_flavour)
 	{
@@ -3932,80 +4045,45 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
 		      || cs->native->u.syment.n_sclass == C_THUMBEXTFUNC
 		      || cs->native->u.syment.n_sclass == C_THUMBSTATFUNC);
 	}
-      else if (bfd_asymbol_flavour (*info->symbols) == bfd_target_elf_flavour)
+      else if (bfd_asymbol_flavour (*info->symbols) == bfd_target_elf_flavour
+	       && !found)
 	{
-	  bfd_vma addr;
-	  int n;
-	  int last_sym;
-	  bfd_boolean found;
-
-	  if (info->symtab)
-	    {
-	      if (pc <= last_mapping_addr)
-		last_mapping_sym = -1;
-	      is_thumb = last_is_thumb;
-	      found = FALSE;
-	      /* Start scanning at the start of the function, or wherever
-		 we finished last time.  */
-	      n = info->symtab_pos + 1;
-	      if (n < last_mapping_sym)
-		n = last_mapping_sym;
-
-	      /* Scan up to the location being disassembled.  */
-	      for (; n < info->symtab_size; n++)
-		{
-		  addr = bfd_asymbol_value (info->symtab[n]);
-		  if (addr > pc)
-		    break;
-		  if (get_sym_code_type (info, n, &is_thumb))
-		    found = TRUE;
-		}
-
-	      last_sym = n;
-	      if (!found)
-		{
-		  if (last_mapping_sym == -1)
-		    last_mapping_sym = 0;
-		  else
-		    found = TRUE;
-
-		  /* No mapping symbol found at this address.  Look backwards
-		     for a preceeding one.  */
-		  for (n = info->symtab_pos; n >= last_mapping_sym; n--)
-		    {
-		      if (get_sym_code_type (info, n, &is_thumb))
-			{
-			  found = TRUE;
-			  break;
-			}
-		    }
-		}
-
-	      last_mapping_sym = last_sym;
-	      last_is_thumb = is_thumb;
-	    }
-	  else
-	    found = FALSE;
-
 	  /* If no mapping symbol has been found then fall back to the type
 	     of the function symbol.  */
-	  if (!found)
-	    {
-	      elf_symbol_type *  es;
-	      unsigned int       type;
+	  elf_symbol_type *  es;
+	  unsigned int       type;
 
-	      es = *(elf_symbol_type **)(info->symbols);
-	      type = ELF_ST_TYPE (es->internal_elf_sym.st_info);
+	  es = *(elf_symbol_type **)(info->symbols);
+	  type = ELF_ST_TYPE (es->internal_elf_sym.st_info);
 
-	      is_thumb = (type == STT_ARM_TFUNC) || (type == STT_ARM_16BIT);
-	    }
+	  is_thumb = (type == STT_ARM_TFUNC) || (type == STT_ARM_16BIT);
 	}
     }
 
-  info->display_endian  = little ? BFD_ENDIAN_LITTLE : BFD_ENDIAN_BIG;
+  if (force_thumb)
+    is_thumb = TRUE;
+
+  info->display_endian = little ? BFD_ENDIAN_LITTLE : BFD_ENDIAN_BIG;
   info->bytes_per_line = 4;
 
-  if (!is_thumb)
+  if (is_data)
+    {
+      int i;
+
+      /* size was already set above.  */
+      info->bytes_per_chunk = size;
+      printer = print_insn_data;
+
+      status = info->read_memory_func (pc, (bfd_byte *)b, size, info);
+      given = 0;
+      if (little)
+	for (i = size - 1; i >= 0; i--)
+	  given = b[i] | (given << 8);
+      else
+	for (i = 0; i < (int) size; i++)
+	  given = b[i] | (given << 8);
+    }
+  else if (!is_thumb)
     {
       /* In ARM mode endianness is a straightforward issue: the instruction
 	 is four bytes long and is either ordered 0123 or 3210.  */

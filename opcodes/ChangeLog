@@ -1,3 +1,14 @@
+2006-11-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-dis.c (last_is_thumb): Delete.
+	(enum map_type, last_type): New.
+	(print_insn_data): New.
+	(get_sym_code_type): Take MAP_TYPE argument.  Check the type of
+	the right symbol.  Handle $d.
+	(print_insn): Check for mapping symbols even without a normal
+	symbol.  Adjust searching.  If $d is found see how much data
+	to print.  Handle data.
+
 2006-11-16  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* m68k-opc.c (m68k_opcodes): Place trap instructions before set
