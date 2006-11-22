@@ -1,3 +1,9 @@
+2006-11-22  Vladimir Prus  <vladimir@codesourcery.com>
+        
+	* gdb.texinfo (Setting breakpoints): Document
+        automatic software/hardware breakpoint usage and
+        the "set breakpoint auto-hw" command.
+
 2006-11-21  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (Memory Access Checking): New.

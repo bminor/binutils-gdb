@@ -53,6 +53,7 @@
 #include "solist.h"
 #include "observer.h"
 #include "exceptions.h"
+#include "memattr.h"
 
 #include "gdb-events.h"
 #include "mi/mi-common.h"
@@ -230,6 +231,22 @@ show_pending_break_support (struct ui_file *file, int from_tty,
 Debugger's behavior regarding pending breakpoints is %s.\n"),
 		    value);
 }
+
+/* If 1, gdb will automatically use hardware breakpoints for breakpoints
+   set with "break" but falling in read-only memory. 
+   If 0, gdb will warn about such breakpoints, but won't automatically
+   use hardware breakpoints.  */
+static int automatic_hardware_breakpoints;
+static void
+show_automatic_hardware_breakpoints (struct ui_file *file, int from_tty,
+				     struct cmd_list_element *c,
+				     const char *value)
+{
+  fprintf_filtered (file, _("\
+Automatic usage of hardware breakpoints is %s.\n"),
+		    value);
+}
+
 
 void _initialize_breakpoint (void);
 
@@ -794,6 +811,57 @@ insert_bp_location (struct bp_location *bpt,
   if (bpt->loc_type == bp_loc_software_breakpoint
       || bpt->loc_type == bp_loc_hardware_breakpoint)
     {
+      if (bpt->owner->type != bp_hardware_breakpoint)
+	{
+	  /* If the explicitly specified breakpoint type
+	     is not hardware breakpoint, check the memory map to see
+	     if the breakpoint address is in read only memory or not.
+	     Two important cases are:
+	     - location type is not hardware breakpoint, memory
+	     is readonly.  We change the type of the location to
+	     hardware breakpoint.
+	     - location type is hardware breakpoint, memory is read-write.
+	     This means we've previously made the location hardware one, but
+	     then the memory map changed, so we undo.
+	     
+	     When breakpoints are removed, remove_breakpoints will
+	     use location types we've just set here, the only possible
+	     problem is that memory map has changed during running program,
+	     but it's not going to work anyway with current gdb.  */
+	  struct mem_region *mr 
+	    = lookup_mem_region (bpt->target_info.placed_address);
+	  
+	  if (mr)
+	    {
+	      if (automatic_hardware_breakpoints)
+		{
+		  int changed = 0;
+		  enum bp_loc_type new_type;
+		  
+		  if (mr->attrib.mode != MEM_RW)
+		    new_type = bp_loc_hardware_breakpoint;
+		  else 
+		    new_type = bp_loc_software_breakpoint;
+		  
+		  if (new_type != bpt->loc_type)
+		    {
+		      static int said = 0;
+		      bpt->loc_type = new_type;
+		      if (!said)
+			{
+			  fprintf_filtered (gdb_stdout, _("\
+Note: automatically using hardware breakpoints for read-only addresses."));
+			  said = 1;
+			}
+		    }
+		}
+	      else if (bpt->loc_type == bp_loc_software_breakpoint
+		       && mr->attrib.mode != MEM_RW)	    
+		warning (_("cannot set software breakpoint at readonly address %s"),
+			 paddr (bpt->address));
+	    }
+	}
+        
       /* First check to see if we have to handle an overlay.  */
       if (overlay_debugging == ovly_off
 	  || bpt->section == NULL
@@ -1235,6 +1303,9 @@ reattach_breakpoints (int pid)
     if (b->inserted)
       {
 	remove_breakpoint (b, mark_inserted);
+	/* Note: since we insert a breakpoint right after removing,
+	   any decisions about automatically using hardware breakpoints
+	   made in insert_bp_location are preserved.  */
 	if (b->loc_type == bp_loc_hardware_breakpoint)
 	  val = target_insert_hw_breakpoint (&b->target_info);
 	else
@@ -8127,4 +8198,18 @@ user-query to see if a pending breakpoint should be created."),
 				&breakpoint_show_cmdlist);
 
   pending_break_support = AUTO_BOOLEAN_AUTO;
+
+  add_setshow_boolean_cmd ("auto-hw", no_class,
+			   &automatic_hardware_breakpoints, _("\
+Set automatic usage of hardware breakpoints."), _("\
+Show automatic usage of hardware breakpoints."), _("\
+If set, the debugger will automatically use hardware breakpoints for\n\
+breakpoints set with \"break\" but falling in read-only memory.  If not set,\n\
+a warning will be emitted for such breakpoints."),
+			   NULL,
+			   show_automatic_hardware_breakpoints,
+			   &breakpoint_set_cmdlist,
+			   &breakpoint_show_cmdlist);
+  
+  automatic_hardware_breakpoints = 1;
 }

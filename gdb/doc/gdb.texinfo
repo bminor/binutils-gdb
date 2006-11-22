@@ -3099,6 +3099,32 @@ This is done because any number of shared library loads could have
 occurred since the time the breakpoint was disabled and one or more
 of these loads could resolve the location.
 
+@cindex automatic hardware breakpoints
+For some targets, @value{GDBN} can automatically decide if hardware or
+software breakpoints should be used, depending on whether the
+breakpoint address is read-only or read-write.  This applies to
+breakpoints set with the @code{break} command as well as to internal
+breakpoints set by commands like @code{next} and @code{finish}.  For
+breakpoints set with @code{hbreak}, @value{GDBN} will always use hardware 
+breakpoints.
+
+You can control this automatic behaviour with the following commands::
+
+@kindex set breakpoint auto-hw
+@kindex show breakpoint auto-hw
+@table @code
+@item set breakpoint auto-hw on
+This is the default behavior.  When @value{GDBN} sets a breakpoint, it
+will try to use the target memory map to decide if software or hardware
+breakpoint must be used.
+
+@item set breakpoint auto-hw off
+This indicates @value{GDBN} should not automatically select breakpoint
+type.  If the target provides a memory map, @value{GDBN} will warn when
+trying to set software breakpoint at a read-only address.
+@end table
+
+
 @cindex negative breakpoint numbers
 @cindex internal @value{GDBN} breakpoints
 @value{GDBN} itself sometimes sets breakpoints in your program for
