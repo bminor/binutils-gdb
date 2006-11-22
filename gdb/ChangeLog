@@ -1,3 +1,8 @@
+2006-11-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* osabi.c (gdbarch_lookup_osabi): Do not return
+	GDB_OSABI_UNINITIALIZED.
+
 2006-11-22  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* config/powerpc/spu-linux.mh: New file.
