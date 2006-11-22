@@ -1,3 +1,9 @@
+2006-11-21  Greg McGary  <greg@mcgary.org>
+
+	* elf32-ppc.c (ppc_elf_relocate_section): Fixup D field
+	at proper offset in little-endian mode.
+	* elf64-ppc.c (ppc_elf_relocate_section): Likewise.
+
 2006-11-21  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf-eh-frame.c (struct cie): New type.

@@ -5504,6 +5504,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
   asection *got2, *sreloc = NULL;
   bfd_vma *local_got_offsets;
   bfd_boolean ret = TRUE;
+  bfd_vma d_offset = (bfd_big_endian (output_bfd) ? 2 : 0);
 
 #ifdef DEBUG
   _bfd_error_handler ("ppc_elf_relocate_section called for %B section %A, "
@@ -5630,10 +5631,10 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      && (tls_mask & TLS_TPREL) == 0)
 	    {
 	      bfd_vma insn;
-	      insn = bfd_get_32 (output_bfd, contents + rel->r_offset - 2);
+	      insn = bfd_get_32 (output_bfd, contents + rel->r_offset - d_offset);
 	      insn &= 31 << 21;
 	      insn |= 0x3c020000;	/* addis 0,2,0 */
-	      bfd_put_32 (output_bfd, insn, contents + rel->r_offset - 2);
+	      bfd_put_32 (output_bfd, insn, contents + rel->r_offset - d_offset);
 	      r_type = R_PPC_TPREL16_HA;
 	      rel->r_info = ELF32_R_INFO (r_symndx, r_type);
 	    }
@@ -5677,9 +5678,10 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      bfd_put_32 (output_bfd, insn, contents + rel->r_offset);
 	      r_type = R_PPC_TPREL16_LO;
 	      rel->r_info = ELF32_R_INFO (r_symndx, r_type);
+
 	      /* Was PPC_TLS which sits on insn boundary, now
-		 PPC_TPREL16_LO which is at insn+2.  */
-	      rel->r_offset += 2;
+		 PPC_TPREL16_LO which is at low-order half-word.  */
+	      rel->r_offset += d_offset;
 	    }
 	  break;
 
@@ -5701,7 +5703,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      else
 		{
 		  bfd_put_32 (output_bfd, NOP, contents + rel->r_offset);
-		  rel->r_offset -= 2;
+		  rel->r_offset -= d_offset;
 		  r_type = R_PPC_NONE;
 		}
 	      rel->r_info = ELF32_R_INFO (r_symndx, r_type);
@@ -5750,7 +5752,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  /* OK, it checks out.  Replace the call.  */
 		  offset = rel[1].r_offset;
 		  insn1 = bfd_get_32 (output_bfd,
-				      contents + rel->r_offset - 2);
+				      contents + rel->r_offset - d_offset);
 		  if ((tls_mask & tls_gd) != 0)
 		    {
 		      /* IE */
@@ -5778,10 +5780,10 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		      rel->r_info = ELF32_R_INFO (r_symndx, r_type);
 		      rel[1].r_info = ELF32_R_INFO (r_symndx,
 						    R_PPC_TPREL16_LO);
-		      rel[1].r_offset += 2;
+		      rel[1].r_offset += d_offset;
 		      rel[1].r_addend = rel->r_addend;
 		    }
-		  bfd_put_32 (output_bfd, insn1, contents + rel->r_offset - 2);
+		  bfd_put_32 (output_bfd, insn1, contents + rel->r_offset - d_offset);
 		  bfd_put_32 (output_bfd, insn2, contents + offset);
 		  if (tls_gd == 0)
 		    {

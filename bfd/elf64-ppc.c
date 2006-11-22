@@ -9731,6 +9731,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
   bfd_boolean is_opd;
   /* Disabled until we sort out how ld should choose 'y' vs 'at'.  */
   bfd_boolean is_power4 = FALSE;
+  bfd_vma d_offset = (bfd_big_endian (output_bfd) ? 2 : 0);
 
   /* Initialize howto table if needed.  */
   if (!ppc64_elf_howto_table[R_PPC64_ADDR32])
@@ -9960,10 +9961,10 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      && (tls_mask & TLS_TPREL) == 0)
 	    {
 	    toctprel:
-	      insn = bfd_get_32 (output_bfd, contents + rel->r_offset - 2);
+	      insn = bfd_get_32 (output_bfd, contents + rel->r_offset - d_offset);
 	      insn &= 31 << 21;
 	      insn |= 0x3c0d0000;	/* addis 0,13,0 */
-	      bfd_put_32 (output_bfd, insn, contents + rel->r_offset - 2);
+	      bfd_put_32 (output_bfd, insn, contents + rel->r_offset - d_offset);
 	      r_type = R_PPC64_TPREL16_HA;
 	      if (toc_symndx != 0)
 		{
@@ -10015,8 +10016,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      insn |= rtra;
 	      bfd_put_32 (output_bfd, insn, contents + rel->r_offset);
 	      /* Was PPC64_TLS which sits on insn boundary, now
-		 PPC64_TPREL16_LO which is at insn+2.  */
-	      rel->r_offset += 2;
+		 PPC64_TPREL16_LO which is at low-order half-word.  */
+	      rel->r_offset += d_offset;
 	      r_type = R_PPC64_TPREL16_LO;
 	      if (toc_symndx != 0)
 		{
@@ -10049,7 +10050,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      else
 		{
 		  bfd_put_32 (output_bfd, NOP, contents + rel->r_offset);
-		  rel->r_offset -= 2;
+		  rel->r_offset -= d_offset;
 		  r_type = R_PPC64_NONE;
 		}
 	      rel->r_info = ELF64_R_INFO (r_symndx, r_type);
@@ -10098,7 +10099,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  /* OK, it checks out.  Replace the call.  */
 		  offset = rel[1].r_offset;
 		  insn1 = bfd_get_32 (output_bfd,
-				      contents + rel->r_offset - 2);
+				      contents + rel->r_offset - d_offset);
 		  insn3 = bfd_get_32 (output_bfd,
 				      contents + offset + 4);
 		  if ((tls_mask & tls_gd) != 0)
@@ -10133,7 +10134,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		      rel->r_info = ELF64_R_INFO (r_symndx, r_type);
 		      rel[1].r_info = ELF64_R_INFO (r_symndx,
 						    R_PPC64_TPREL16_LO);
-		      rel[1].r_offset += 2;
+		      rel[1].r_offset += d_offset;
 		    }
 		  if (insn3 == NOP
 		      || insn3 == CROR_151515 || insn3 == CROR_313131)
@@ -10142,7 +10143,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		      insn2 = NOP;
 		      rel[1].r_offset += 4;
 		    }
-		  bfd_put_32 (output_bfd, insn1, contents + rel->r_offset - 2);
+		  bfd_put_32 (output_bfd, insn1, contents + rel->r_offset - d_offset);
 		  bfd_put_32 (output_bfd, insn2, contents + offset);
 		  bfd_put_32 (output_bfd, insn3, contents + offset + 4);
 		  if (tls_gd == 0 || toc_symndx != 0)
