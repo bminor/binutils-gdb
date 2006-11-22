@@ -1,4 +1,4 @@
-# Copyright 1997, 1998, 1999, 2001, 2003, 2004
+# Copyright 1997, 1998, 1999, 2001, 2003, 2004, 2006
 # Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -228,7 +228,7 @@ proc print_weird_var { var } {
 
 	# Make sure that the variable gets printed out correctly, without
 	# any sort of warning message.
-        gdb_test_multiple "print $var\n" "variable $var printed property" {  
+        gdb_test_multiple "print $var" "variable $var printed property" {  
 		-re "^print $var\r*\n.\[0-9\]* = 42.*$gdb_prompt $" {
 			pass "variable $var printed properly"
 		}
