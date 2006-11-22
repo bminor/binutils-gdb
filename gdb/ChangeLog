@@ -1,3 +1,9 @@
+2006-11-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* findvar.c (address_from_register): New function.
+	* value.h (address_from_register): Add prototype.
+	* dwarf2loc.c (dwarf_expr_read_reg): Use address_from_register.
+
 2006-11-22  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* breakpoint.c: Include "memattr.h".

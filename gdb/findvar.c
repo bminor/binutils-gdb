@@ -728,6 +728,26 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
   return v;
 }
 
+/* Return contents of register REGNUM in frame FRAME as address,
+   interpreted as value of type TYPE.   Will abort if register
+   value is not available.  */
+
+CORE_ADDR
+address_from_register (struct type *type, int regnum, struct frame_info *frame)
+{
+  struct value *value;
+  CORE_ADDR result;
+
+  value = value_from_register (type, regnum, frame);
+  gdb_assert (value);
+
+  result = value_as_address (value);
+  release_value (value);
+  value_free (value);
+
+  return result;
+}
+
 
 /* Given a struct symbol for a variable or function,
    and a stack frame id, 
