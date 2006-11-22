@@ -1,3 +1,8 @@
+2006-11-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* osabi.c (gdbarch_lookup_osabi): Do not return
+	GDB_OSABI_UNINITIALIZED.
+
 2006-11-21  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	Checked in by Joel Brobecker  <brobecker@adacore.com>

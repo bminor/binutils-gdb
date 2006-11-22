@@ -207,14 +207,9 @@ gdbarch_lookup_osabi (bfd *abfd)
     return user_selected_osabi;
 
   /* If we don't have a binary, return the default OS ABI (if set) or
-     an inconclusive result (otherwise).  */
+     unknown (otherwise).  */
   if (abfd == NULL) 
-    {
-      if (GDB_OSABI_DEFAULT != GDB_OSABI_UNKNOWN)
-	return GDB_OSABI_DEFAULT;
-      else
-	return GDB_OSABI_UNINITIALIZED;
-    }
+    return GDB_OSABI_DEFAULT;
 
   match = GDB_OSABI_UNKNOWN;
   match_specific = 0;
