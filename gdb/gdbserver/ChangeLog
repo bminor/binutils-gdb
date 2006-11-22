@@ -1,3 +1,10 @@
+2006-11-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* configure.srv: Add target "spu*-*-*".
+	* Makefile.in (clean): Remove reg-spu.c.
+	(reg-spu.c, reg-spu.o, spu-low.o): Add dependencies.
+	* spu-low.c: New file.
+
 2006-11-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* configure.ac: Correct td_thr_tls_get_addr test.

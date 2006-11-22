@@ -1481,8 +1481,8 @@ if test "x$enable_multi_ice" = xyes; then
    AC_CONFIG_SUBDIRS(multi-ice)
 fi
 
-# We only build gdbserver automatically if host and target are the same.
-if test "x$target" = "x$host"; then
+# We only build gdbserver automatically in a native configuration. 
+if test "$gdb_native" = "yes"; then
   AC_MSG_CHECKING(whether gdbserver is supported on this host)
   if test "x$build_gdbserver" = xyes; then
     AC_MSG_RESULT(yes)
