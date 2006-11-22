@@ -1,3 +1,7 @@
+2006-11-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.stabs/weird.exp (print_weird_var): Don't send extra \n.
+
 2006-11-10  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.base/completion.exp: Fix completion tests for
