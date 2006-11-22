@@ -987,11 +987,7 @@ bfd_pef_canonicalize_symtab (bfd *abfd, asymbol **alocation)
   return ret;
 }
 
-static asymbol *
-bfd_pef_make_empty_symbol (bfd *abfd)
-{
-  return bfd_alloc (abfd, sizeof (asymbol));
-}
+#define bfd_pef_make_empty_symbol _bfd_generic_make_empty_symbol
 
 static void
 bfd_pef_get_symbol_info (bfd *abfd ATTRIBUTE_UNUSED,

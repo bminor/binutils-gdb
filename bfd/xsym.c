@@ -2275,11 +2275,7 @@ bfd_sym_object_p (bfd *abfd)
   return NULL;
 }
 
-asymbol *
-bfd_sym_make_empty_symbol (bfd *abfd)
-{
-  return bfd_alloc (abfd, sizeof (asymbol));
-}
+#define bfd_sym_make_empty_symbol _bfd_generic_make_empty_symbol
 
 void
 bfd_sym_get_symbol_info (bfd *abfd ATTRIBUTE_UNUSED, asymbol *symbol, symbol_info *ret)

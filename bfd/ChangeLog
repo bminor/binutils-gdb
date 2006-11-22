@@ -1,3 +1,9 @@
+2006-11-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* pef.c (bfd_pef_make_empty_symbol): Delete function.  Define instead.
+	* xsym.c (bfd_sym_make_empty_symbol): Likewise.
+	* xsym.h (bfd_sym_make_empty_symbol): Delete.
+
 2006-11-21  Greg McGary  <greg@mcgary.org>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): Fixup D field
