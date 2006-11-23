@@ -1,3 +1,7 @@
+2006-11-23  Thiemo Seufer  <ths@mips.com>
+
+	* ld-elf/warn2.d: Match regex also for the second segment.
+
 2006-11-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ld-arm/mixed-app.d, ld-arm/tls-app.d, ld-arm/tls-lib.d: Update
