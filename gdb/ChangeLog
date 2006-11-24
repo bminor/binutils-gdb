@@ -1,5 +1,9 @@
 2006-11-24  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* NEWS: SPU target is already supported in GDB 6.6.
+
+2006-11-24  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* Makefile.in (mips-linux-tdep.o) Add $(solib_h) dependency.
 	(nto-procfs.o): Likewise.
 	* mips-linux-tdep.c: Include "solib.h".

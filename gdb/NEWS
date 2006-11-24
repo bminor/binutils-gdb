@@ -3,10 +3,6 @@
 
 *** Changes since GDB 6.6
 
-* New targets
-
-Cell Broadband Engine SPU	spu-elf
-
 * The GDB remote stub, gdbserver, now has lower overhead for high 
 frequency signals (e.g. SIGALRM) via the QPassSignals packet.
 
@@ -22,6 +18,7 @@ QPassSignals:
 * New targets
 
 Xtensa				xtensa-elf
+Cell Broadband Engine SPU	spu-elf
 
 * GDB can now be configured as a cross-debugger targeting native Windows
 (mingw32) or Cygwin.  It can communicate with a remote debugging stub
