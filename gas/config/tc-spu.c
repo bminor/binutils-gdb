@@ -94,6 +94,9 @@ const pseudo_typeS md_pseudo_table[] =
   /* Force set to be treated as an instruction.  */
   {"set", NULL, 0},
   {".set", s_set, 0},
+  /* Likewise for eqv.  */
+  {"eqv", NULL, 0},
+  {".eqv", s_set, -1},
   {"file", (void (*) PARAMS ((int))) dwarf2_directive_file, 0 }, 
   {"loc", dwarf2_directive_loc, 0}, 
   {0,0,0}
