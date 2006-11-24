@@ -1,3 +1,18 @@
+2006-11-24  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* config/powerpc/spu-linux.mh: New file.
+	* config/spu/spu.mt: New file.
+	* configure.ac: Provide gdb_native configuration variable.
+	* configure: Regenerate.
+	* configure.host: Support powerpc64 to spu 'pseudo-native' mode.
+	* configure.tgt: Add "spu" target_cpu and "spu*-*-*" target.
+	* Makefile.in (spu_tdep_h): New variable.
+	(ALLDEPFILES): Add spu-linux-nat.c and spu-tdep.c
+	(spu-linux-nat.o, spu-tdep.o): Add dependencies.
+	* spu-linux-nat.c: New file.
+	* spu-tdep.c: New file.
+	* spu-tdep.h: New file.
+
 2006-11-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* osabi.c (gdbarch_lookup_osabi): Do not return
