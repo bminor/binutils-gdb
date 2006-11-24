@@ -101,6 +101,9 @@ case "${target}" in
 			srv_linux_usrregs=yes
 			srv_linux_thread_db=yes
 			;;
+  spu*-*-*)		srv_regobj=reg-spu.o
+			srv_tgtobj="spu-low.o"
+			;;
   x86_64-*-linux*)	srv_regobj=reg-x86-64-linux.o
 			srv_tgtobj="linux-low.o linux-x86-64-low.o i387-fp.o"
 			srv_linux_regsets=yes

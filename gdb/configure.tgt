@@ -210,7 +210,9 @@ sparc-*-rtems*)		gdb_target=embed ;;
 sparc-*-*)		gdb_target=sparc ;;
 sparc64-*-*)		gdb_target=sparc64 ;;
 
-spu*-*-*)		gdb_target=spu ;;
+spu*-*-*)		gdb_target=spu
+			build_gdbserver=yes
+			;;
 
 xstormy16-*-*)          gdb_target=xstormy16 ;;
 

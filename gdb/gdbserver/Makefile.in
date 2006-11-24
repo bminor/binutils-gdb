@@ -205,7 +205,7 @@ clean:
 	rm -f version.c
 	rm -f gdbserver gdbreplay core make.log
 	rm -f reg-arm.c reg-i386.c reg-ia64.c reg-m32r.c reg-m68k.c reg-mips.c
-	rm -f reg-ppc.c reg-sh.c reg-x86-64.c reg-i386-linux.c
+	rm -f reg-ppc.c reg-sh.c reg-spu.c reg-x86-64.c reg-i386-linux.c
 	rm -f reg-cris.c reg-crisv32.c reg-x86-64-linux.c
 
 maintainer-clean realclean distclean: clean
@@ -289,6 +289,8 @@ linux-x86-64-low.o: linux-x86-64-low.c $(linux_low_h) $(server_h) \
 
 win32-i386-low.o: win32-i386-low.c $(server_h) $(regdef_h) $(regcache_h)
 
+spu-low.o: spu-low.c $(server_h)
+
 reg-arm.o : reg-arm.c $(regdef_h)
 reg-arm.c : $(srcdir)/../regformats/reg-arm.dat $(regdat_sh)
 	sh $(regdat_sh) $(srcdir)/../regformats/reg-arm.dat reg-arm.c
@@ -331,6 +333,9 @@ reg-s390x.c : $(srcdir)/../regformats/reg-s390x.dat $(regdat_sh)
 reg-sh.o : reg-sh.c $(regdef_h)
 reg-sh.c : $(srcdir)/../regformats/reg-sh.dat $(regdat_sh)
 	sh $(regdat_sh) $(srcdir)/../regformats/reg-sh.dat reg-sh.c
+reg-spu.o : reg-spu.c $(regdef_h)
+reg-spu.c : $(srcdir)/../regformats/reg-spu.dat $(regdat_sh)
+	sh $(regdat_sh) $(srcdir)/../regformats/reg-spu.dat reg-spu.c
 reg-x86-64.o : reg-x86-64.c $(regdef_h)
 reg-x86-64.c : $(srcdir)/../regformats/reg-x86-64.dat $(regdat_sh)
 	sh $(regdat_sh) $(srcdir)/../regformats/reg-x86-64.dat reg-x86-64.c

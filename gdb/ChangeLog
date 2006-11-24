@@ -1,5 +1,12 @@
 2006-11-24  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* configure.tgt: Enable gdbserver for SPU target.
+	* configure.ac: Build gdbserver when gdb_native is yes.
+	* configure: Regenerate.
+	* regformats/reg-spu.dat: New file.
+
+2006-11-24  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* findvar.c (address_from_register): New function.
 	* value.h (address_from_register): Add prototype.
 	* dwarf2loc.c (dwarf_expr_read_reg): Use address_from_register.
