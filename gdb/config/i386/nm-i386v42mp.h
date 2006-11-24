@@ -23,10 +23,6 @@
 #ifndef NM_I386V42MP_H
 #define NM_I386V42MP_H
 
-/* Use SVR4 style shared library support */
-
-#include "solib.h"
-
 /* SVR4 has /proc support, so use it instead of ptrace. */
 
 #define USE_PROC_FS

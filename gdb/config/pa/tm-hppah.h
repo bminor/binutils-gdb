@@ -24,8 +24,6 @@
 
 struct frame_info;
 
-#include "solib.h"		/* Support for shared libraries. */
-
 /* For HP-UX on PA-RISC we have an implementation
    for the exception handling target op (in hppa-tdep.c) */
 #define CHILD_ENABLE_EXCEPTION_CALLBACK

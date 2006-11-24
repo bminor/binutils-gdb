@@ -35,14 +35,6 @@ struct target_ops;
 #define REALTIME_HI	(__SIGRTMAX + 1)
 #endif
 
-/* We define this if link.h is available, because with ELF we use SVR4
-   style shared libraries.  */
-
-#ifdef HAVE_LINK_H
-#include "solib.h"             /* Support for shared libraries.  */
-#endif
-
-
 extern void lin_lwp_attach_lwp (ptid_t ptid, int verbose);
 #define ATTACH_LWP(ptid, verbose) lin_lwp_attach_lwp ((ptid), (verbose))
 

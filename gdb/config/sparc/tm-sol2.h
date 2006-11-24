@@ -21,9 +21,6 @@
 #ifndef TM_SOL2_H
 #define TM_SOL2_H
 
-/* Shared library support.  */
-#include "solib.h"
-
 /* The Sun compilers (Sun ONE Studio, Forte Developer, Sun WorkShop,
    SunPRO) compiler puts out 0 instead of the address in N_SO stabs.
    Starting with SunPRO 3.0, the compiler does this for N_FUN stabs

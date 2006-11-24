@@ -24,10 +24,6 @@
 #define GDB_GREGSET_T prgregset_t
 #define GDB_FPREGSET_T prfpregset_t
 
-/* Shared library support.  */
-
-#include "solib.h"
-
 /* Hardware wactchpoints.  */
 
 /* Solaris 2.6 and above can do HW watchpoints.  */

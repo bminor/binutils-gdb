@@ -2,6 +2,5 @@
 NATDEPFILES= fork-child.o inf-ptrace.o \
 	i386bsd-nat.o i386nbsd-nat.o bsd-kvm.o \
 	solib.o solib-sunos.o
-NAT_FILE= solib.h
 
 LOADLIBES= -lkvm

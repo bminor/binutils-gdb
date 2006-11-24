@@ -33,6 +33,7 @@
 #include "trad-frame.h"
 #include "tramp-frame.h"
 #include "floatformat.h"
+#include "solib.h"
 #include "mips-linux-tdep.h"
 
 /* Figure out where the longjmp will land.

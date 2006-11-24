@@ -23,6 +23,5 @@
 #define TM_NBSD_H
 
 #include "sh/tm-sh.h"
-#include "solib.h"
 
 #endif /* TM_NBSD_H */

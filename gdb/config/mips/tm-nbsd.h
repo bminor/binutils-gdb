@@ -22,8 +22,6 @@
 #ifndef TM_NBSD_H
 #define TM_NBSD_H
 
-#include "solib.h"
-
 #undef SKIP_TRAMPOLINE_CODE
 #undef DEPRECATED_IGNORE_HELPER_CALL
 

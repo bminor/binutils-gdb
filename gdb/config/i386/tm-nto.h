@@ -26,6 +26,4 @@
 
 #include "config/tm-nto.h"
 
-#include "solib.h"
-
 #endif /* TM_NTO_H */

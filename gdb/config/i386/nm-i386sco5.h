@@ -28,9 +28,6 @@
 /* Basically, its a lot like the older versions ... */
 #include "i386/nm-i386sco.h"
 
-/* ... but it can do a lot of SVR4 type stuff too.  */
-#include "solib.h"		/* Pick up shared library support.  */
-
 /* SCO is unlike other SVR4 systems in that it has SVR4 style shared
    libs, with a slight twist.  We expect 3 traps (2 for the exec and
    one for the dynamic loader).  After the third trap we insert the

@@ -21,4 +21,3 @@
 
 #define FETCH_INFERIOR_REGISTERS
 
-#include "solib.h"		/* Support for shared libraries. */

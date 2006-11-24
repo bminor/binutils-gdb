@@ -90,9 +90,3 @@ extern CORE_ADDR (*rs6000_find_toc_address_hook) (CORE_ADDR);
 
 extern void (*rs6000_set_host_arch_hook) (int);
 
-/* We need solib.h for building cross debuggers.  However, we don't want
-   to clobber any special solib support required by native debuggers, so
-   only include solib.h if SOLIB_ADD is not defined.  */
-#ifndef SOLIB_ADD
-#include "solib.h"
-#endif

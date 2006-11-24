@@ -1,3 +1,45 @@
+2006-11-24  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* Makefile.in (mips-linux-tdep.o) Add $(solib_h) dependency.
+	(nto-procfs.o): Likewise.
+	* mips-linux-tdep.c: Include "solib.h".
+	* nto-procfs.c: Likewise.
+	* config/nm-linux.h: Do not include "solib.h".
+	* config/nm-nbsd.h: Likewise.
+	* config/tm-linux.h: Likewise.
+	* config/alpha/nm-osf.h: Likewise.
+	* config/frv/tm-frv.h: Likewise.
+	* config/i386/nm-fbsh.h: Likewise.
+	* config/i386/nm-i386gnu.h: Likewise.
+	* config/i386/nm-i386sco5.h: Likewise.
+	* config/i386/nm-i386sol2.h: Likewise.
+	* config/i386/nm-i386v4.h: Likewise.
+	* config/i386/nm-i386v42mp.h: Likewise.
+	* config/i386/tm-i386sol2.h: Likewise.
+	* config/i386/tm-nto.h: Likewise.
+	* config/mips/nm-irix5.h: Likewise.
+	* config/mips/tm-nbsd.h: Likewise.
+	* config/pa/tm-hppah.h: Likewise.
+	* config/powerpc/tm-ppc-eabi.h: Likewise.
+	* config/rs6000/tm-rs6000.h: Likewise.
+	* config/sh/tm-nbsd.h: Likewise.
+	* config/sparc/nm-sol2.h: Likewise.
+	* config/sparc/tm-sol2.h: Likewise.
+	* config/arm/nbsdaout.mh: Remove NAT_FILE.
+	* config/i386/nbsdaout.mh: Likewise.
+	* config/i386/nbsdelf.mh: Likewise.
+	* config/i386/obsdaout.mh: Likewise.
+	* config/m68k/nbsdaout.mh: Likewise.
+	* config/m68k/obsd.mh: Likewise.
+	* config/sparc/nbsdaout.mh: Likewise.
+	* config/cris/cris.mt: Remove DEPRECATED_TM_FILE.
+	* config/i386/linux64.mt: Likewise.
+	* config/m68k/linux.mt: Likewise.
+	* config/m68k/nbsd.mt: Likewise.
+	* config/sparc/linux.mt: Likewise.
+	* config/sparc/linux64.mt: Likewise.
+	* config/vax/nbsd.mt: Likewise.
+
 2006-11-22  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* NEWS: New port to Cell Broadband Engine SPU.

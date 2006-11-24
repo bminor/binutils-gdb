@@ -43,6 +43,7 @@
 #include "nto-tdep.h"
 #include "command.h"
 #include "regcache.h"
+#include "solib.h"
 
 #define NULL_PID		0
 #define _DEBUG_FLAG_TRACE	(_DEBUG_FLAG_TRACE_EXEC|_DEBUG_FLAG_TRACE_RD|\

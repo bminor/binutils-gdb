@@ -35,4 +35,3 @@
 
 #define SKIP_TRAMPOLINE_CODE(pc)  find_solib_trampoline_target (pc)
 
-#include "solib.h"		/* Support for shared libraries. */

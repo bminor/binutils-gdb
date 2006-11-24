@@ -40,4 +40,3 @@ extern int frv_have_stopped_data_address(void);
 #define target_stopped_data_address(target, x) frv_stopped_data_address(x)
 extern int frv_stopped_data_address(CORE_ADDR *addr_p);
 
-#include "solib.h"		/* Include support for shared libraries.  */

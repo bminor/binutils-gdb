@@ -52,8 +52,4 @@ extern void i386bsd_dr_reset_addr (int regnum);
 extern unsigned long i386bsd_dr_get_status (void);
 
 
-/* Shared library support.  */
-
-#include "solib.h"
-
 #endif /* nm-fbsd.h */
