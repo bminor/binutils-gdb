@@ -1,3 +1,17 @@
+2006-11-24  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.asm/asm-source.exp: Add "spu*-*-*" target.
+	* gdb.asm/spu.inc: New file.
+	* gdb.base/term.exp: Disable if [target_info exists noargs].
+	* gdb.gdb/complaints.exp: Disable if ![isnative].
+	* gdb.gdb/selftest.exp: Likewise.
+	* gdb.gdb/observer.exp: Likewise.
+	* gdb.gdb/xfullpath.exp: Likewise.
+	* gdb.base/attach.exp: Disable on SPU target.
+	* gdb.cp/bs145503.exp: Likewise.
+	* gdb.cp/exception.exp: Likewise.
+	* gdb.cp/userdef.exp: Likewise.
+
 2006-11-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.stabs/weird.exp (print_weird_var): Don't send extra \n.

@@ -25,7 +25,7 @@ set prms_id 0
 set bug_id 0
 
 # are we on a target board
-if [is_remote target] {
+if { [is_remote target] || ![isnative] } then {
     return
 }
 

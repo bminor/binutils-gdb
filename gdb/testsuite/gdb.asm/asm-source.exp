@@ -120,6 +120,11 @@ switch -glob -- [istarget] {
         set asm-flags "-xarch=v9 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
 	set debug-flags "-gdwarf-2"
     }
+    "spu*-*-*" {
+       set asm-arch spu
+       set asm-flags "-I${srcdir}/${subdir} -I${objdir}/${subdir} --no-warn"
+       set debug-flags "-gdwarf-2"
+    }
     "xstormy16-*-*" {
         set asm-arch xstormy16
 	set debug-flags "-gdwarf-2"
