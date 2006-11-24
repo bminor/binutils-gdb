@@ -303,6 +303,9 @@ the native maintainer when resolving ABI issues.
 
 	sparc		--target=sparc-elf ,-Werror
 
+	spu		--target=spu-elf ,-Werror
+			Ulrich Weigand		uweigand@de.ibm.com
+
 	v850		--target=v850-elf ,-Werror
 
 	vax		--target=vax-netbsd ,-Werror

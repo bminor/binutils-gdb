@@ -1,5 +1,10 @@
 2006-11-24  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* NEWS: New port to Cell Broadband Engine SPU.
+	* MAINTAINERS: Add myself as spu maintainer.
+
+2006-11-24  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* configure.tgt: Enable gdbserver for SPU target.
 	* configure.ac: Build gdbserver when gdb_native is yes.
 	* configure: Regenerate.

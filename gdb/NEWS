@@ -6,6 +6,7 @@
 * New targets
 
 Xtensa				xtensa-elf
+Cell Broadband Engine SPU	spu-elf
 
 * GDB can now be configured as a cross-debugger targeting native Windows
 (mingw32) or Cygwin.  It can communicate with a remote debugging stub
