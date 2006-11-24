@@ -115,24 +115,17 @@ struct dwarf_expr_baton
 /* Helper functions for dwarf2_evaluate_loc_desc.  */
 
 /* Using the frame specified in BATON, return the value of register
-   REGNUM, treated as an unsigned integer.  */
+   REGNUM, treated as a pointer.  */
 static CORE_ADDR
 dwarf_expr_read_reg (void *baton, int dwarf_regnum)
 {
   struct dwarf_expr_baton *debaton = (struct dwarf_expr_baton *) baton;
   CORE_ADDR result;
-  gdb_byte *buf;
-  int regnum, regsize;
+  int regnum;
 
   regnum = DWARF2_REG_TO_REGNUM (dwarf_regnum);
-  regsize = register_size (current_gdbarch, regnum);
-  buf = alloca (regsize);
-
-  frame_register_read (debaton->frame, regnum, buf);
-  /* NOTE: cagney/2003-05-22: This extract is assuming that a DWARF 2
-     address is always unsigned.  That may or may not be true.  */
-  result = extract_unsigned_integer (buf, regsize);
-
+  result = address_from_register (builtin_type_void_data_ptr,
+				  regnum, debaton->frame);
   return result;
 }
 
