@@ -1,3 +1,11 @@
+2006-11-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf.c (IS_SECTION_IN_INPUT_SEGMENT): New.
+	(INCLUDE_SECTION_IN_SEGMENT): Use IS_SECTION_IN_INPUT_SEGMENT.
+	(rewrite_elf_program_header): Don't preserve segment physical
+	address in the output segment if the first section in the
+	corresponding input segment is removed.
+
 2006-11-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* pef.c (bfd_pef_make_empty_symbol): Delete function.  Define instead.

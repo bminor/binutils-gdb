@@ -5257,13 +5257,12 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
        7. SHF_TLS sections are only in PT_TLS or PT_LOAD segments.
        8. PT_DYNAMIC should not contain empty sections at the beginning
           (with the possible exception of .dynamic).  */
-#define INCLUDE_SECTION_IN_SEGMENT(section, segment, bed)		\
+#define IS_SECTION_IN_INPUT_SEGMENT(section, segment, bed)		\
   ((((segment->p_paddr							\
       ? IS_CONTAINED_BY_LMA (section, segment, segment->p_paddr)	\
       : IS_CONTAINED_BY_VMA (section, segment))				\
      && (section->flags & SEC_ALLOC) != 0)				\
     || IS_COREFILE_NOTE (segment, section))				\
-   && section->output_section != NULL					\
    && segment->p_type != PT_GNU_STACK					\
    && (segment->p_type != PT_TLS					\
        || (section->flags & SEC_THREAD_LOCAL))				\
@@ -5278,6 +5277,12 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
        || (strcmp (bfd_get_section_name (ibfd, section), ".dynamic")	\
            == 0))							\
    && ! section->segment_mark)
+
+/* If the output section of a section in the input segment is NULL,
+   it is removed from the corresponding output segment.   */
+#define INCLUDE_SECTION_IN_SEGMENT(section, segment, bed)		\
+  (IS_SECTION_IN_INPUT_SEGMENT (section, segment, bed)		\
+   && section->output_section != NULL)
 
   /* Returns TRUE iff seg1 starts after the end of seg2.  */
 #define SEGMENT_AFTER_SEGMENT(seg1, seg2, field)			\
@@ -5386,16 +5391,27 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
       bfd_vma       suggested_lma;
       unsigned int  j;
       bfd_size_type amt;
+      asection *    first_section;
 
       if (segment->p_type == PT_NULL)
 	continue;
 
+      first_section = NULL;
       /* Compute how many sections might be placed into this segment.  */
       for (section = ibfd->sections, section_count = 0;
 	   section != NULL;
 	   section = section->next)
-	if (INCLUDE_SECTION_IN_SEGMENT (section, segment, bed))
-	  ++section_count;
+	{
+	  /* Find the first section in the input segment, which may be
+	     removed from the corresponding output segment.   */
+	  if (IS_SECTION_IN_INPUT_SEGMENT (section, segment, bed))
+	    {
+	      if (first_section == NULL)
+		first_section = section;
+	      if (section->output_section != NULL)
+		++section_count;
+	    }
+	}
 
       /* Allocate a segment map big enough to contain
 	 all of the sections we have selected.  */
@@ -5411,8 +5427,14 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
       map->p_type        = segment->p_type;
       map->p_flags       = segment->p_flags;
       map->p_flags_valid = 1;
-      map->p_paddr       = segment->p_paddr;
-      map->p_paddr_valid = 1;
+      /* If the first section in the input segment is removed, there is
+	 no need to preserve segment physical address in the corresponding
+	 output segment.  */
+      if (first_section->output_section != NULL)
+	{
+	  map->p_paddr = segment->p_paddr;
+	  map->p_paddr_valid = 1;
+	}
 
       /* Determine if this segment contains the ELF file header
 	 and if it contains the program headers themselves.  */
@@ -5742,6 +5764,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 #undef IS_CONTAINED_BY_LMA
 #undef IS_COREFILE_NOTE
 #undef IS_SOLARIS_PT_INTERP
+#undef IS_SECTION_IN_INPUT_SEGMENT
 #undef INCLUDE_SECTION_IN_SEGMENT
 #undef SEGMENT_AFTER_SEGMENT
 #undef SEGMENT_OVERLAPS
