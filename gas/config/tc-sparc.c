@@ -3437,7 +3437,7 @@ md_apply_fix (fixP, valP, segment)
 
 arelent **
 tc_gen_reloc (section, fixp)
-     asection *section ATTRIBUTE_UNUSED;
+     asection *section;
      fixS *fixp;
 {
   static arelent *relocs[3];
@@ -3579,6 +3579,16 @@ tc_gen_reloc (section, fixp)
 	}
     }
 #endif /* defined (OBJ_ELF) || defined (OBJ_AOUT)  */
+
+  /* Nothing is aligned in DWARF debugging sections.  */
+  if (bfd_get_section_flags (stdoutput, section) & SEC_DEBUGGING)
+    switch (code)
+      {
+      case BFD_RELOC_16: code = BFD_RELOC_SPARC_UA16; break;
+      case BFD_RELOC_32: code = BFD_RELOC_SPARC_UA32; break;
+      case BFD_RELOC_64: code = BFD_RELOC_SPARC_UA64; break;
+      default: break;
+      }
 
   if (code == BFD_RELOC_SPARC_OLO10)
     reloc->howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_LO10);
