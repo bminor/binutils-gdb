@@ -153,90 +153,83 @@ set old_timeout $timeout
 set timeout 50
 set program_exited 0
 send_gdb "next\n"
+set nexted 0
 gdb_expect {
     -re "33.*$gdb_prompt $" {
 	# sometimes we stop at the closing brace, if so, do another next
-	send_gdb "next\n"
-	gdb_expect {
-	    -re ".*Unable to find return pc for this frame.*$gdb_prompt $" {
-		fail "step out of main (Old bug came back!)"
-		gdb_test "n" ".*" ""
-	    }
-	    -re ".*in.*start.*$gdb_prompt $" { 
-		pass "step out of main"
-	    }
-	    -re ".*in.*bsp_trap.*$gdb_prompt $" { 
-		pass "step out of main"
-	    }
-	    -re ".*in.*init.*$gdb_prompt $" { 
-		# This is what happens on sparc64-elf ultra.
-		pass "step out of main"
-	    }
-	    -re ".*in.*dll_crt0_1.*$gdb_prompt $" {
-		# This is what happens on Cygwin.
-	        pass "step out of main"
-	    }
-	    -re ".*Program exited normally.*$gdb_prompt $" {
-		# This is what happens on Linux i86 (and I would expect others)
-		set program_exited 1
-		pass "step out of main"
-	    }
-	    -re ".*in .nope ().*$gdb_prompt $" {
-		# This is what happens on Solaris currently -sts 1999-08-25
-		pass "step out of main (on Solaris)"
-	    }
-	    -re ".*in _int_reset ().*$gdb_prompt $" {
-		# This is what happens on Sanyo XStormy16
-		pass "step out of main"
-	    }
-	    -re ".*init ().*$gdb_prompt $" {
-		# This is what happens on many Mips targets
-		pass "step out of main"
-	    }
-	    -re ".*in ..change.mode ().*$gdb_prompt $" {
-		# This is what happens on ARM in thumb mode -fn 2000-02-01
-		pass "step out of main (on ARM thumb)"
-	    }
-	    -re ".*in.*\\\$START\\\$.*from.*dld.sl.*$gdb_prompt $" { 
-		pass "step out of main"
-	    }
-	    -re ".*in __wrap__?main ().*$gdb_prompt $" {
-		pass "step out of main (status wrapper)"
-	    }
-	    -re "__setup_argv_for_main (.*).*$gdb_prompt $" {
-		# On sh, another wrapper function (start_l) exists, so
-		# another `next' is necessary.
-		gdb_test "next" ".*in start_l ().*" "step out of main (on sh)"
-	    }
-            -re ".*$gdb_prompt $" { fail "step out of main (at end 2)" }
-	    timeout { 
-		fail "step out of main (hang or timeout on step at end 2)" 
-	    }
+	if { $nexted } {
+	    fail "step out of main"
+	} else {
+	    set nexted 1
+	    send_gdb "next\n"
+	    exp_continue
 	}
     }
     -re ".*Unable to find return pc for this frame.*$gdb_prompt $" {
-        fail "Old bug came back!"
-        gdb_test "n" ".*" ""
+	fail "step out of main"
+	gdb_test "n" ".*" ""
     }
     -re ".*in.*start.*$gdb_prompt $" { 
-        pass "step out of main"
+	pass "step out of main"
     }
-    -re ".*in.*\\\$START\\\$.*from.*dld.sl.*$gdb_prompt $"  {
-        pass "step out of main (2)"
+    -re ".*in.*bsp_trap.*$gdb_prompt $" { 
+	pass "step out of main"
+    }
+    -re ".*in.*init.*$gdb_prompt $" { 
+	# This is what happens on sparc64-elf ultra.
+	pass "step out of main"
+    }
+    -re ".*in.*dll_crt0_1.*$gdb_prompt $" {
+	# This is what happens on Cygwin.
+	pass "step out of main"
     }
     -re ".*Program exited normally.*$gdb_prompt $" {
 	# This is what happens on Linux i86 (and I would expect others)
 	set program_exited 1
 	pass "step out of main"
     }
+    -re ".*in .nope ().*$gdb_prompt $" {
+	# This is what happens on Solaris currently -sts 1999-08-25
+	pass "step out of main"
+    }
+    -re ".*in _int_reset ().*$gdb_prompt $" {
+	# This is what happens on Sanyo XStormy16
+	pass "step out of main"
+    }
+    -re ".*init ().*$gdb_prompt $" {
+	# This is what happens on many Mips targets
+	pass "step out of main"
+    }
+    -re ".*in ..change.mode ().*$gdb_prompt $" {
+	# This is what happens on ARM in thumb mode -fn 2000-02-01
+	pass "step out of main"
+    }
+    -re ".*__rt_entry ().*$gdb_prompt $" {
+	# This is what happens on the ARM RVDS runtime
+	pass "step out of main"
+    }
+    -re ".*in.*\\\$START\\\$.*from.*dld.sl.*$gdb_prompt $" { 
+	pass "step out of main"
+    }
+    -re ".*in __wrap__?main ().*$gdb_prompt $" {
+	pass "step out of main"
+    }
+    -re "__setup_argv_for_main (.*).*$gdb_prompt $" {
+	# On sh, another wrapper function (start_l) exists, so
+	# another `next' is necessary.
+	gdb_test "next" ".*in start_l ().*" "step out of main"
+    }
     -re ".*in.*currently asm.*$gdb_prompt $" { 
-        pass "step out of main (into assembler)"
+        pass "step out of main"
+    }
+    -re "_*start\[0-9\]* \\(\[^)\]*\\).*$gdb_prompt $" {
+        pass "step out of main"
     }
     -re ".*Program received signal SIGTRAP.*$gdb_prompt $" {
-        pass "Cygmon stopped in ending trap."
+        pass "step out of main"
     }
-    -re ".*$gdb_prompt $" { fail "step out of main (at end 1)" }
-    timeout { fail "step out of main (hang or timeout on step at end 1)" }
+    -re ".*$gdb_prompt $" { fail "step out of main" }
+    timeout { fail "step out of main" }
 }
 
 # When we're talking to a program running on a real stand-alone board,

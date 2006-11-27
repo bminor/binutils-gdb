@@ -1,3 +1,11 @@
+2006-11-27  Nathan Sidwell  <nathan@codesourcery.com>
+	    Paul Brook  <paul@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/ending-run.exp: Flatten expect script stepping out of
+        main to remove duplication.  Add start function of the form
+	'_*start[1-9]*'. Add RVDS start function.
+
 2006-11-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.arch/thumb-prologue.c, gdb.arch/thumb-prologue.exp: New files.
