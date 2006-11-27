@@ -1,3 +1,7 @@
+2006-11-27  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (elf_xtensa_special_sections): Add .xtensa.info.
+
 2006-11-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf.c (IS_SECTION_IN_INPUT_SEGMENT): New.

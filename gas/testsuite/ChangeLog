@@ -1,3 +1,8 @@
+2006-11-27  Bob Wilson  <bob.wilson@acm.org>
+
+	* gas/elf/section2.e-xtensa: New file.
+	* gas/elf/elf.exp: Use it.
+
 2006-11-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gas/arm/arm7t.d, gas/arm/neon-ldst-rm.d, gas/arm/thumb2_pool.d,

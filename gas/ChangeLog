@@ -1,3 +1,10 @@
+2006-11-27  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (XSHAL_ABI): Add default definition.
+	(directive_state): Disable scheduling by default.
+	(xtensa_add_config_info): New.
+	(xtensa_end): Call xtensa_add_config_info.
+
 2006-11-27  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* config/tc-sparc.c (tc_gen_reloc): Turn aligned relocs into

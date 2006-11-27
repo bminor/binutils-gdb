@@ -53,6 +53,9 @@ if { ([istarget "*-*-*elf*"]
     if {[istarget "score-*-*"]} then {
 	set target_machine -score
     }
+    if {[istarget "xtensa-*-*"]} then {
+	set target_machine -xtensa
+    }
     if { ([istarget "*arm*-*-*"]
 	  || [istarget "xscale*-*-*"]) } {
 	

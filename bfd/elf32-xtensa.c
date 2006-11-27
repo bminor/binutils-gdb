@@ -9801,6 +9801,7 @@ static const struct bfd_elf_special_section elf_xtensa_special_sections[] =
   { STRING_COMMA_LEN (".fini.literal"), 0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
   { STRING_COMMA_LEN (".init.literal"), 0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
   { STRING_COMMA_LEN (".literal"),      0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
+  { STRING_COMMA_LEN (".xtensa.info"),  0, SHT_NOTE,     0 },
   { NULL,                       0,      0, 0,            0 }
 };
 

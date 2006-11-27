@@ -1,3 +1,14 @@
+2006-11-27  Bob Wilson  <bob.wilson@acm.org>
+
+	* emultempl/xtensaelf.em (XSHAL_ABI): Add default definition.
+	(replace_insn_sec_with_prop_sec): Use bfd_make_section_with_flags.
+	Delete redundant code to set sections flags and alignment.
+	(xt_config_info_unpack_and_check, check_xtensa_info): New.
+	(elf_xtensa_after_open): Iterate over input statements instead of
+	link_info.input_bfds.
+	(elf_xtensa_before_allocation): Likewise.  Call check_xtensa_info for
+	each input, and write a new .xtensa.info section in the output.
+
 2006-11-22  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in (LINGUAS): Add ga.

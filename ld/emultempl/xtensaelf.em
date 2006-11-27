@@ -16,7 +16,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
+# Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, 
+# MA 02110-1301 USA.
 #
 
 # This file is sourced from elf32.em, and defines extra xtensa-elf
@@ -29,6 +30,11 @@ cat >>e${EMULATION_NAME}.c <<EOF
 #include "../bfd/libbfd.h"
 #include "elf/xtensa.h"
 #include "bfd.h"
+
+/* Provide default values for new configuration settings.  */
+#ifndef XSHAL_ABI
+#define XSHAL_ABI 0
+#endif
 
 static void xtensa_wild_group_interleave (lang_statement_union_type *);
 static void xtensa_colocate_output_literals (lang_statement_union_type *);
@@ -128,25 +134,17 @@ replace_insn_sec_with_prop_sec (bfd *abfd,
 	}
     }
 
-  /* Create a Property table section and relocation section for it.  */
+  /* Create a property table section for it.  */
   prop_sec_name = strdup (prop_sec_name);
-  prop_sec = bfd_make_section (abfd, prop_sec_name);
+  prop_sec = bfd_make_section_with_flags
+    (abfd, prop_sec_name, bfd_get_section_flags (abfd, insn_sec));
   if (prop_sec == NULL
-      || ! bfd_set_section_flags (abfd, prop_sec, 
-				  bfd_get_section_flags (abfd, insn_sec))
       || ! bfd_set_section_alignment (abfd, prop_sec, 2))
     {
       *error_message = _("could not create new section");
       goto cleanup;
     }
   
-  if (! bfd_set_section_flags (abfd, prop_sec, 
-			       bfd_get_section_flags (abfd, insn_sec))
-      || ! bfd_set_section_alignment (abfd, prop_sec, 2))
-    {
-      *error_message = _("could not set new section properties");
-      goto cleanup;
-    }
   prop_sec->size = entry_count * 12;
   prop_contents = (bfd_byte *) bfd_zalloc (abfd, prop_sec->size);
   elf_section_data (prop_sec)->this_hdr.contents = prop_contents;
@@ -297,17 +295,13 @@ replace_instruction_table_sections (bfd *abfd, asection *sec)
 static void
 elf_xtensa_after_open (void)
 {
-  bfd *abfd;
-
   /* First call the ELF version.  */
   gld${EMULATION_NAME}_after_open ();
   
   /* Now search the input files looking for instruction table sections.  */
-  for (abfd = link_info.input_bfds;
-       abfd != NULL;
-       abfd = abfd->link_next)
+  LANG_FOR_EACH_INPUT_STATEMENT (f)
     {
-      asection *sec = abfd->sections;
+      asection *sec = f->the_bfd->sections;
       asection *next_sec;
 
       /* Do not use bfd_map_over_sections here since we are removing
@@ -315,10 +309,111 @@ elf_xtensa_after_open (void)
       while (sec != NULL)
 	{
 	  next_sec = sec->next;
-	  replace_instruction_table_sections (abfd, sec);
+	  replace_instruction_table_sections (f->the_bfd, sec);
 	  sec = next_sec;
 	}
     }
+}
+
+
+static bfd_boolean
+xt_config_info_unpack_and_check (char *data,
+				 bfd_boolean *pmismatch,
+				 char **pmsg)
+{
+  char *d, *key;
+  unsigned num;
+
+  *pmismatch = FALSE;
+
+  d = data;
+  while (*d)
+    {
+      key = d;
+      d = strchr (d, '=');
+      if (! d)
+	goto error;
+
+      /* Overwrite the equal sign.  */
+      *d++ = 0;
+
+      /* Check if this is a quoted string or a number.  */
+      if (*d == '"')
+	{
+	  /* No string values are currently checked by LD;
+	     just skip over the quotes.  */
+	  d++;
+	  d = strchr (d, '"');
+	  if (! d)
+	    goto error;
+	  /* Overwrite the trailing quote.  */
+	  *d++ = 0;
+	}
+      else
+	{
+	  if (*d == 0)
+	    goto error;
+	  num = strtoul (d, &d, 0);
+
+	  if (! strcmp (key, "ABI"))
+	    {
+	      if (num != XSHAL_ABI)
+		{
+		  *pmismatch = TRUE;
+		  *pmsg = "ABI does not match";
+		}
+	    }
+	  else if (! strcmp (key, "USE_ABSOLUTE_LITERALS"))
+	    {
+	      if (num != XSHAL_USE_ABSOLUTE_LITERALS)
+		{
+		  *pmismatch = TRUE;
+		  *pmsg = "incompatible use of the Extended L32R option";
+		}
+	    }
+	}
+
+      if (*d++ != '\n')
+	goto error;
+    }
+
+  return TRUE;
+
+ error:
+  return FALSE;
+}
+
+
+#define XTINFO_NAME "Xtensa_Info"
+#define XTINFO_NAMESZ 12
+#define XTINFO_TYPE 1
+
+static void
+check_xtensa_info (bfd *abfd, asection *info_sec)
+{
+  char *data, *errmsg = "";
+  bfd_boolean mismatch;
+
+  data = xmalloc (info_sec->size);
+  if (! bfd_get_section_contents (abfd, info_sec, data, 0, info_sec->size))
+    einfo (_("%F%P:%B: cannot read contents of section %A\n"), abfd, info_sec);
+
+  if (info_sec->size > 24
+      && info_sec->size >= 24 + bfd_get_32 (abfd, data + 4)
+      && bfd_get_32 (abfd, data + 0) == XTINFO_NAMESZ
+      && bfd_get_32 (abfd, data + 8) == XTINFO_TYPE
+      && strcmp (data + 12, XTINFO_NAME) == 0
+      && xt_config_info_unpack_and_check (data + 12 + XTINFO_NAMESZ,
+					  &mismatch, &errmsg))
+    {
+      if (mismatch)
+	einfo (_("%P:%B: warning: incompatible Xtensa configuration (%s)\n"),
+	       abfd, errmsg);
+    }
+  else
+    einfo (_("%P:%B: warning: cannot parse .xtensa.info section\n"), abfd);
+
+  free (data);
 }
 
 
@@ -328,7 +423,8 @@ elf_xtensa_after_open (void)
 static void
 elf_xtensa_before_allocation (void)
 {
-  bfd *in_bfd;
+  asection *info_sec, *first_info_sec;
+  bfd *first_bfd;
   bfd_boolean is_big_endian = XCHAL_HAVE_BE;
 
   /* Check that the output endianness matches the Xtensa
@@ -349,18 +445,80 @@ elf_xtensa_before_allocation (void)
 	       "Xtensa configuration\n"));
     }
 
-  /* Check that the endianness for each input file matches the output.
-     The merge_private_bfd_data hook has already reported any mismatches
-     as errors, but those errors are not fatal.  At this point, we
-     cannot go any further if there are any mismatches.  */
+  /* Keep track of the first input .xtensa.info section, and as a fallback,
+     the first input bfd where a .xtensa.info section could be created.
+     After the input .xtensa.info has been checked, the contents of the
+     first one will be replaced with the output .xtensa.info table.  */
+  first_info_sec = 0;
+  first_bfd = 0;
 
-  for (in_bfd = link_info.input_bfds;
-       in_bfd != NULL;
-       in_bfd = in_bfd->link_next)
+  LANG_FOR_EACH_INPUT_STATEMENT (f)
     {
-      if ((is_big_endian && in_bfd->xvec->byteorder == BFD_ENDIAN_LITTLE)
-	  || (!is_big_endian && in_bfd->xvec->byteorder == BFD_ENDIAN_BIG))
-	einfo (_("%F%P: cross-endian linking not supported\n"));
+      /* Check that the endianness for each input file matches the output.
+	 The merge_private_bfd_data hook has already reported any mismatches
+	 as errors, but those errors are not fatal.  At this point, we
+	 cannot go any further if there are any mismatches.  */
+      if ((is_big_endian && f->the_bfd->xvec->byteorder == BFD_ENDIAN_LITTLE)
+	  || (!is_big_endian && f->the_bfd->xvec->byteorder == BFD_ENDIAN_BIG))
+	einfo (_("%F%P: cross-endian linking for %B not supported\n"),
+	       f->the_bfd);
+
+      if (! first_bfd)
+	first_bfd = f->the_bfd;
+
+      info_sec = bfd_get_section_by_name (f->the_bfd, ".xtensa.info");
+      if (! info_sec)
+	continue;
+
+      if (! first_info_sec)
+	first_info_sec = info_sec;
+
+      /* Unpack the .xtensa.info section and check it against the current
+	 Xtensa configuration.  */
+      check_xtensa_info (f->the_bfd, info_sec);
+
+      /* Do not include this copy of .xtensa.info in the output.  */
+      info_sec->size = 0;
+      info_sec->flags |= SEC_EXCLUDE;
+    }
+
+  /* Reuse the first .xtensa.info input section to hold the output
+     .xtensa.info; or, if none were found, create a new section in the
+     first input bfd (assuming there is one).  */
+  info_sec = first_info_sec;
+  if (! info_sec && first_bfd)
+    {
+      info_sec = bfd_make_section_with_flags (first_bfd, ".xtensa.info",
+					      SEC_HAS_CONTENTS | SEC_READONLY);
+      if (! info_sec)
+	einfo (_("%F%P: failed to create .xtensa.info section\n"));
+    }
+  if (info_sec)
+    {
+      int xtensa_info_size;
+      char *data;
+
+      info_sec->flags &= ~SEC_EXCLUDE;
+      info_sec->flags |= SEC_IN_MEMORY;
+
+      data = xmalloc (100);
+      sprintf (data, "USE_ABSOLUTE_LITERALS=%d\nABI=%d\n",
+	       XSHAL_USE_ABSOLUTE_LITERALS, XSHAL_ABI);
+      xtensa_info_size = strlen (data) + 1;
+
+      /* Add enough null terminators to pad to a word boundary.  */
+      do
+	data[xtensa_info_size++] = 0;
+      while ((xtensa_info_size & 3) != 0);
+
+      info_sec->size = 12 + XTINFO_NAMESZ + xtensa_info_size;
+      info_sec->contents = xmalloc (info_sec->size);
+      bfd_put_32 (info_sec->owner, XTINFO_NAMESZ, info_sec->contents + 0);
+      bfd_put_32 (info_sec->owner, xtensa_info_size, info_sec->contents + 4);
+      bfd_put_32 (info_sec->owner, XTINFO_TYPE, info_sec->contents + 8);
+      memcpy (info_sec->contents + 12, XTINFO_NAME, XTINFO_NAMESZ);
+      memcpy (info_sec->contents + 12 + XTINFO_NAMESZ, data, xtensa_info_size);
+      free (data);
     }
 
   /* Enable relaxation by default if the "--no-relax" option was not

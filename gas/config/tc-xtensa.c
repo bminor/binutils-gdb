@@ -30,6 +30,11 @@
 #include "struc-symbol.h"
 #include "xtensa-config.h"
 
+/* Provide default values for new configuration settings.  */
+#ifndef XSHAL_ABI
+#define XSHAL_ABI 0
+#endif
+
 #ifndef uint32
 #define uint32 unsigned int
 #endif
@@ -396,7 +401,7 @@ bfd_boolean directive_state[] =
   FALSE,			/* freeregs */
   FALSE,			/* longcalls */
   FALSE,			/* literal_prefix */
-  TRUE,				/* schedule */
+  FALSE,			/* schedule */
 #if XSHAL_USE_ABSOLUTE_LITERALS
   TRUE				/* absolute_literals */
 #else
@@ -6859,6 +6864,7 @@ static void xtensa_fix_b_j_loop_end_frags (void);
 static void xtensa_fix_close_loop_end_frags (void);
 static void xtensa_fix_short_loop_frags (void);
 static void xtensa_sanity_check (void);
+static void xtensa_add_config_info (void);
 
 void
 xtensa_end (void)
@@ -6889,6 +6895,8 @@ xtensa_end (void)
   xtensa_mark_zcl_first_insns ();
 
   xtensa_sanity_check ();
+
+  xtensa_add_config_info ();
 }
 
 
@@ -7795,6 +7803,55 @@ is_local_forward_loop (const TInsn *insn, fragS *fragP)
     }
 
   return FALSE;
+}
+
+
+#define XTINFO_NAME "Xtensa_Info"
+#define XTINFO_NAMESZ 12
+#define XTINFO_TYPE 1
+
+static void
+xtensa_add_config_info (void)
+{
+  asection *info_sec;
+  char *data, *p;
+  int sz;
+
+  info_sec = subseg_new (".xtensa.info", 0);
+  bfd_set_section_flags (stdoutput, info_sec, SEC_HAS_CONTENTS | SEC_READONLY);
+
+  data = xmalloc (100);
+  sprintf (data, "USE_ABSOLUTE_LITERALS=%d\nABI=%d\n",
+	   XSHAL_USE_ABSOLUTE_LITERALS, XSHAL_ABI);
+  sz = strlen (data) + 1;
+
+  /* Add enough null terminators to pad to a word boundary.  */
+  do
+    data[sz++] = 0;
+  while ((sz & 3) != 0);
+
+  /* Follow the standard note section layout:
+     First write the length of the name string.  */
+  p = frag_more (4);
+  md_number_to_chars (p, (valueT) XTINFO_NAMESZ, 4);
+
+  /* Next comes the length of the "descriptor", i.e., the actual data.  */
+  p = frag_more (4);
+  md_number_to_chars (p, (valueT) sz, 4);
+
+  /* Write the note type.  */
+  p = frag_more (4);
+  md_number_to_chars (p, (valueT) XTINFO_TYPE, 4);
+
+  /* Write the name field.  */
+  p = frag_more (XTINFO_NAMESZ);
+  memcpy (p, XTINFO_NAME, XTINFO_NAMESZ);
+
+  /* Finally, write the descriptor.  */
+  p = frag_more (sz);
+  memcpy (p, data, sz);
+
+  free (data);
 }
 
 
