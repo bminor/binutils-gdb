@@ -1,3 +1,7 @@
+2006-11-27  Nick Clifton  <nickc@redhat.com>
+
+	* po/ms.po: Updated Malay translation.
+
 2006-11-22  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in (LINGUAS): Add ms.
