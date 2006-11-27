@@ -7675,9 +7675,9 @@ xtensa_sanity_check (void)
 	/* Walk over all of the fragments in a subsection.  */
 	for (fragP = frchP->frch_root; fragP; fragP = fragP->fr_next)
 	  {
-	    /* Currently we only check for empty loops here.  */
 	    if (fragP->fr_type == rs_machine_dependent
-		&& fragP->fr_subtype == RELAX_IMMED)
+		&& fragP->fr_subtype == RELAX_SLOTS 
+		&& fragP->tc_frag_data.slot_subtypes[0] == RELAX_IMMED)
 	      {
 		static xtensa_insnbuf insnbuf = NULL;
 		TInsn t_insn;

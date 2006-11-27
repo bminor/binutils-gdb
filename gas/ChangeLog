@@ -1,3 +1,8 @@
+2006-11-27  Sterling Augustine  <sterling@tensilica.com>
+
+	* config/tc-xtensa.c (xtensa_sanity_check): Check for RELAX_IMMED
+	as the first slot_subtype, not the frag subtype.
+
 2006-11-27  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (XSHAL_ABI): Add default definition.
