@@ -55,6 +55,8 @@
 #include "trad-frame.h"
 #include "infcall.h"
 #include "floatformat.h"
+#include "remote.h"
+#include "target-descriptions.h"
 
 static const struct objfile_data *mips_pdr_data;
 
@@ -119,6 +121,11 @@ static enum mips_fpu_type mips_fpu_type = MIPS_DEFAULT_FPU_TYPE;
 
 static int mips_debug = 0;
 
+/* Properties (for struct target_desc) describing the g/G packet
+   layout.  */
+#define PROPERTY_GP32 "internal: transfers-32bit-registers"
+#define PROPERTY_GP64 "internal: transfers-64bit-registers"
+
 /* MIPS specific per-architecture information */
 struct gdbarch_tdep
 {
@@ -141,6 +148,13 @@ struct gdbarch_tdep
   const struct mips_regnum *regnum;
   /* Register names table for the current register set.  */
   const char **mips_processor_reg_names;
+
+  /* The size of register data available from the target, if known.
+     This doesn't quite obsolete the manual
+     mips64_transfers_32bit_regs_p, since that is documented to force
+     left alignment even for big endian (very strange).  */
+  int register_size_valid_p;
+  int register_size;
 };
 
 static int
@@ -245,6 +259,13 @@ mips_abi (struct gdbarch *gdbarch)
 int
 mips_isa_regsize (struct gdbarch *gdbarch)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  /* If we know how big the registers are, use that size.  */
+  if (tdep->register_size_valid_p)
+    return tdep->register_size;
+
+  /* Fall back to the previous behavior.  */
   return (gdbarch_bfd_arch_info (gdbarch)->bits_per_word
 	  / gdbarch_bfd_arch_info (gdbarch)->bits_per_byte);
 }
@@ -4711,6 +4732,37 @@ global_mips_abi (void)
   internal_error (__FILE__, __LINE__, _("unknown ABI string"));
 }
 
+static void
+mips_register_g_packet_guesses (struct gdbarch *gdbarch)
+{
+  static struct target_desc *tdesc_gp32, *tdesc_gp64;
+
+  if (tdesc_gp32 == NULL)
+    {
+      /* Create feature sets with the appropriate properties.  The values
+	 are not important.  */
+
+      tdesc_gp32 = allocate_target_description ();
+      set_tdesc_property (tdesc_gp32, PROPERTY_GP32, "");
+
+      tdesc_gp64 = allocate_target_description ();
+      set_tdesc_property (tdesc_gp64, PROPERTY_GP64, "");
+    }
+
+  /* If the size matches the set of 32-bit or 64-bit integer registers,
+     assume that's what we've got.  */
+  register_remote_g_packet_guess (gdbarch, 38 * 4, tdesc_gp32);
+  register_remote_g_packet_guess (gdbarch, 38 * 8, tdesc_gp64);
+
+  /* If the size matches the full set of registers GDB traditionally
+     knows about, including floating point, for either 32-bit or
+     64-bit, assume that's what we've got.  */
+  register_remote_g_packet_guess (gdbarch, 90 * 4, tdesc_gp32);
+  register_remote_g_packet_guess (gdbarch, 90 * 8, tdesc_gp64);
+
+  /* Otherwise we don't have a useful guess.  */
+}
+
 static struct gdbarch *
 mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
@@ -4855,6 +4907,16 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     fprintf_unfiltered (gdb_stdlog,
 			"mips_gdbarch_init: fpu_type = %d\n", fpu_type);
 
+  /* Check for blatant incompatibilities.  */
+
+  /* If we have only 32-bit registers, then we can't debug a 64-bit
+     ABI.  */
+  if (info.target_desc
+      && tdesc_property (info.target_desc, PROPERTY_GP32) != NULL
+      && mips_abi != MIPS_ABI_EABI32
+      && mips_abi != MIPS_ABI_O32)
+    return NULL;
+
   /* try to find a pre-existing architecture */
   for (arches = gdbarch_list_lookup_by_info (arches, &info);
        arches != NULL;
@@ -4885,6 +4947,23 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->found_abi = found_abi;
   tdep->mips_abi = mips_abi;
   tdep->mips_fpu_type = fpu_type;
+  tdep->register_size_valid_p = 0;
+  tdep->register_size = 0;
+
+  if (info.target_desc)
+    {
+      /* Some useful properties can be inferred from the target.  */
+      if (tdesc_property (info.target_desc, PROPERTY_GP32) != NULL)
+	{
+	  tdep->register_size_valid_p = 1;
+	  tdep->register_size = 4;
+	}
+      else if (tdesc_property (info.target_desc, PROPERTY_GP64) != NULL)
+	{
+	  tdep->register_size_valid_p = 1;
+	  tdep->register_size = 8;
+	}
+    }
 
   /* Initially set everything according to the default ABI/ISA.  */
   set_gdbarch_short_bit (gdbarch, 16);
@@ -5151,6 +5230,8 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_skip_trampoline_code (gdbarch, mips_skip_trampoline_code);
 
   set_gdbarch_single_step_through_delay (gdbarch, mips_single_step_through_delay);
+
+  mips_register_g_packet_guesses (gdbarch);
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);

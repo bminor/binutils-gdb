@@ -21,6 +21,8 @@
 #ifndef REMOTE_H
 #define REMOTE_H
 
+struct target_desc;
+
 /* FIXME?: move this interface down to tgt vector) */
 
 /* Read a packet from the remote machine, with error checking, and
@@ -62,5 +64,8 @@ extern int remote_read_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len);
 
 extern void (*deprecated_target_resume_hook) (void);
 extern void (*deprecated_target_wait_loop_hook) (void);
+
+void register_remote_g_packet_guess (struct gdbarch *gdbarch, int bytes,
+				     const struct target_desc *tdesc);
 
 #endif

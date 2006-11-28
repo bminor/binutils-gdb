@@ -45,8 +45,17 @@ const struct target_desc *target_current_description (void);
 
 /* Accessors for target descriptions.  */
 
+/* Return the string value of a property named KEY, or NULL if the
+   property was not specified.  */
+
+const char *tdesc_property (const struct target_desc *,
+			    const char *key);
+
 /* Methods for constructing a target description.  */
 
 struct target_desc *allocate_target_description (void);
+
+void set_tdesc_property (struct target_desc *,
+			 const char *key, const char *value);
 
 #endif /* TARGET_DESCRIPTIONS_H */

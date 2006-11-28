@@ -3535,11 +3535,10 @@ fetch_register_using_p (struct packet_reg *reg)
 
 /* Fetch the registers included in the target's 'g' packet.  */
 
-static void
-fetch_registers_using_g (void)
+static int
+send_g_packet (void)
 {
   struct remote_state *rs = get_remote_state ();
-  struct remote_arch_state *rsa = get_remote_arch_state ();
   int i, buf_len;
   char *p;
   char *regs;
@@ -3547,11 +3546,41 @@ fetch_registers_using_g (void)
   sprintf (rs->buf, "g");
   remote_send (&rs->buf, &rs->buf_size);
 
+  /* We can get out of synch in various cases.  If the first character
+     in the buffer is not a hex character, assume that has happened
+     and try to fetch another packet to read.  */
+  while ((rs->buf[0] < '0' || rs->buf[0] > '9')
+	 && (rs->buf[0] < 'A' || rs->buf[0] > 'F')
+	 && (rs->buf[0] < 'a' || rs->buf[0] > 'f')
+	 && rs->buf[0] != 'x')	/* New: unavailable register value.  */
+    {
+      if (remote_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "Bad register packet; fetching a new packet\n");
+      getpkt (&rs->buf, &rs->buf_size, 0);
+    }
+
   buf_len = strlen (rs->buf);
 
   /* Sanity check the received packet.  */
   if (buf_len % 2 != 0)
     error (_("Remote 'g' packet reply is of odd length: %s"), rs->buf);
+
+  return buf_len / 2;
+}
+
+static void
+process_g_packet (void)
+{
+  struct remote_state *rs = get_remote_state ();
+  struct remote_arch_state *rsa = get_remote_arch_state ();
+  int i, buf_len;
+  char *p;
+  char *regs;
+
+  buf_len = strlen (rs->buf);
+
+  /* Further sanity checks, with knowledge of the architecture.  */
   if (REGISTER_BYTES_OK_P () && !REGISTER_BYTES_OK (buf_len / 2))
     error (_("Remote 'g' packet reply is wrong length: %s"), rs->buf);
   if (buf_len > 2 * rsa->sizeof_g_packet)
@@ -3587,20 +3616,6 @@ fetch_registers_using_g (void)
 
   /* Unimplemented registers read as all bits zero.  */
   memset (regs, 0, rsa->sizeof_g_packet);
-
-  /* We can get out of synch in various cases.  If the first character
-     in the buffer is not a hex character, assume that has happened
-     and try to fetch another packet to read.  */
-  while ((rs->buf[0] < '0' || rs->buf[0] > '9')
-	 && (rs->buf[0] < 'A' || rs->buf[0] > 'F')
-	 && (rs->buf[0] < 'a' || rs->buf[0] > 'f')
-	 && rs->buf[0] != 'x')	/* New: unavailable register value.  */
-    {
-      if (remote_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "Bad register packet; fetching a new packet\n");
-      getpkt (&rs->buf, &rs->buf_size, 0);
-    }
 
   /* Reply describes registers byte by byte, each byte encoded as two
      hex characters.  Suck them all up, then supply them to the
@@ -3646,6 +3661,13 @@ fetch_registers_using_g (void)
 	  }
       }
   }
+}
+
+static void
+fetch_registers_using_g (void)
+{
+  send_g_packet ();
+  process_g_packet ();
 }
 
 static void
@@ -6052,6 +6074,83 @@ remote_get_thread_local_address (ptid_t ptid, CORE_ADDR lm, CORE_ADDR offset)
   return 0;
 }
 
+/* Support for inferring a target description based on the current
+   architecture and the size of a 'g' packet.  While the 'g' packet
+   can have any size (since optional registers can be left off the
+   end), some sizes are easily recognizable given knowledge of the
+   approximate architecture.  */
+
+struct remote_g_packet_guess
+{
+  int bytes;
+  const struct target_desc *tdesc;
+};
+typedef struct remote_g_packet_guess remote_g_packet_guess_s;
+DEF_VEC_O(remote_g_packet_guess_s);
+
+struct remote_g_packet_data
+{
+  VEC(remote_g_packet_guess_s) *guesses;
+};
+
+static struct gdbarch_data *remote_g_packet_data_handle;
+
+static void *
+remote_g_packet_data_init (struct obstack *obstack)
+{
+  return OBSTACK_ZALLOC (obstack, struct remote_g_packet_data);
+}
+
+void
+register_remote_g_packet_guess (struct gdbarch *gdbarch, int bytes,
+				const struct target_desc *tdesc)
+{
+  struct remote_g_packet_data *data
+    = gdbarch_data (gdbarch, remote_g_packet_data_handle);
+  struct remote_g_packet_guess new_guess, *guess;
+  int ix;
+
+  gdb_assert (tdesc != NULL);
+
+  for (ix = 0;
+       VEC_iterate (remote_g_packet_guess_s, data->guesses, ix, guess);
+       ix++)
+    if (guess->bytes == bytes)
+      internal_error (__FILE__, __LINE__,
+		      "Duplicate g packet description added for size %d",
+		      bytes);
+
+  new_guess.bytes = bytes;
+  new_guess.tdesc = tdesc;
+  VEC_safe_push (remote_g_packet_guess_s, data->guesses, &new_guess);
+}
+
+static const struct target_desc *
+remote_read_description (struct target_ops *target)
+{
+  struct remote_g_packet_data *data
+    = gdbarch_data (current_gdbarch, remote_g_packet_data_handle);
+
+  if (!VEC_empty (remote_g_packet_guess_s, data->guesses))
+    {
+      struct remote_g_packet_guess *guess;
+      int ix;
+      int bytes = send_g_packet ();
+
+      for (ix = 0;
+	   VEC_iterate (remote_g_packet_guess_s, data->guesses, ix, guess);
+	   ix++)
+	if (guess->bytes == bytes)
+	  return guess->tdesc;
+
+      /* We discard the g packet.  A minor optimization would be to
+	 hold on to it, and fill the register cache once we have selected
+	 an architecture, but it's too tricky to do safely.  */
+    }
+
+  return NULL;
+}
+
 static void
 init_remote_ops (void)
 {
@@ -6103,6 +6202,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_memory_map = remote_memory_map;
   remote_ops.to_flash_erase = remote_flash_erase;
   remote_ops.to_flash_done = remote_flash_done;
+  remote_ops.to_read_description = remote_read_description;
 }
 
 /* Set up the extended remote vector by making a copy of the standard
@@ -6235,6 +6335,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_async_ops.to_memory_map = remote_memory_map;
   remote_async_ops.to_flash_erase = remote_flash_erase;
   remote_async_ops.to_flash_done = remote_flash_done;
+  remote_ops.to_read_description = remote_read_description;
 }
 
 /* Set up the async extended remote vector by making a copy of the standard
@@ -6326,6 +6427,8 @@ _initialize_remote (void)
   /* architecture specific data */
   remote_gdbarch_data_handle =
     gdbarch_data_register_post_init (init_remote_state);
+  remote_g_packet_data_handle =
+    gdbarch_data_register_pre_init (remote_g_packet_data_init);
 
   /* Old tacky stuff.  NOTE: This comes after the remote protocol so
      that the remote protocol has been initialized.  */

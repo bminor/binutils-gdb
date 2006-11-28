@@ -26,13 +26,23 @@
 #include "arch-utils.h"
 #include "target.h"
 #include "target-descriptions.h"
+#include "vec.h"
 
 #include "gdb_assert.h"
 
 /* Types.  */
 
+typedef struct property
+{
+  const char *key;
+  const char *value;
+} property_s;
+DEF_VEC_O(property_s);
+
 struct target_desc
 {
+  /* Any architecture-specific properties specified by the target.  */
+  VEC(property_s) *properties;
 };
 
 /* Global state.  These variables are associated with the current
@@ -122,10 +132,47 @@ target_current_description (void)
   return NULL;
 }
 
+/* Return the string value of a property named KEY, or NULL if the
+   property was not specified.  */
+
+const char *
+tdesc_property (const struct target_desc *target_desc, const char *key)
+{
+  struct property *prop;
+  int ix;
+
+  for (ix = 0; VEC_iterate (property_s, target_desc->properties, ix, prop);
+       ix++)
+    if (strcmp (prop->key, key) == 0)
+      return prop->value;
+
+  return NULL;
+}
+
 /* Methods for constructing a target description.  */
 
 struct target_desc *
 allocate_target_description (void)
 {
   return XZALLOC (struct target_desc);
+}
+
+void
+set_tdesc_property (struct target_desc *target_desc,
+		    const char *key, const char *value)
+{
+  struct property *prop, new_prop;
+  int ix;
+
+  gdb_assert (key != NULL && value != NULL);
+
+  for (ix = 0; VEC_iterate (property_s, target_desc->properties, ix, prop);
+       ix++)
+    if (strcmp (prop->key, key) == 0)
+      internal_error (__FILE__, __LINE__,
+		      _("Attempted to add duplicate property \"%s\""), key);
+
+  new_prop.key = key;
+  new_prop.value = value;
+  VEC_safe_push (property_s, target_desc->properties, &new_prop);
 }

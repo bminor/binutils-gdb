@@ -1,5 +1,30 @@
 2006-11-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* Makefile.in (mips-tdep.o, target-descriptions.o): Update.
+	* target-descriptions.c (struct property): New.
+	(struct target_desc): Add properties member.
+	(tdesc_property, set_tdesc_property): New.
+	* target-descriptions.h (tdesc_property, set_tdesc_property):
+	Declare.
+	* mips-tdep.c (PROPERTY_GP32, PROPERTY_GP64): New constants.
+	(struct gdbarch_tdep): Add register_size_valid_p and register_size.
+	(mips_isa_regsize): Use them.
+	(mips_register_g_packet_guesses): New.
+	(mips_gdbarch_init): Call it.  If a target description is supplied,
+	check for internal properties.  Check for register size mismatches.
+	* remote.c (send_g_packet, process_g_packet): New functions, split
+	out from fetch_registers_using_g.
+	(fetch_registers_using_g): Use them.
+	(struct remote_g_packet_guess, remote_g_packet_guess_s)
+	(struct remote_g_packet_data, remote_g_packet_data_handle)
+	(remote_g_packet_data_init, register_remote_g_packet_guess)
+	(remote_read_description): New.
+	(init_remote_ops, init_remote_async_ops): Set to_read_description.
+	(_initialize_remote): Register remote_g_packet_data_handle.
+	* remote.h (register_remote_g_packet_guess): Declare.
+
+2006-11-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* Makefile.in (SFILES): Add new and missed files.
 	(target_descriptions_h): New.
 	(COMMON_OBS): Add target-descriptions.o.
