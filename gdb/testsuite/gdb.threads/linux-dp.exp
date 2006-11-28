@@ -67,21 +67,37 @@ gdb_breakpoint [gdb_get_line_number "linuxthreads.exp: create philosopher"]
 set expect_manager -1
 for {set i 0} {$i < 5} {incr i} {
     gdb_continue_to_breakpoint "about to create philosopher: $i"
-    send_gdb "next\n"
+    send_gdb "info threads\n"
+    set threads_before {}
     gdb_expect {
-	-re "\\\[New .*\\\].*\\\[New .*\\\].*$gdb_prompt $" {
-	    # Two threads are created the first time in LinuxThreads,
-	    # where the second is the manager thread.  In NPTL, there is none.
-	    if {$i == 0} {
-		set expect_manager 1
-	    }
-	    pass "create philosopher: $i"
+	-re "info threads\r\n" {
+	    exp_continue
 	}
-	-re "\\\[New .*\\\].*$gdb_prompt $" {
-	    if {$i == 0} {
-		set expect_manager 0
-	    }
-	    pass "create philosopher: $i"
+	-re "^\\*? +(\[0-9\]+ Thread \[0-9\]+) \[^\n\]*\n" {
+	    verbose -log "found thread $expect_out(1,string)" 2
+	    lappend threads_before $expect_out(1,string)
+	    exp_continue
+	}
+	-re "^$gdb_prompt $" {
+	}
+	timeout {
+	    fail "(timeout) info threads"
+	}
+    }
+    send_gdb "next\n"
+    set threads_created 0
+    gdb_expect {
+	-re "^next\r\n" {
+	    exp_continue
+	}
+	-re "^\\\[New \[^\]\n\]+\\\]\[^\n\]+\n" {
+	    incr threads_created
+	    exp_continue
+	}
+	-re "^189\[^\n\]+\n" {
+	    exp_continue
+	}
+	-re "^$gdb_prompt $" {
 	}
 	-re "Program received signal.*(Unknown signal|SIGUSR|Real-time event).*$gdb_prompt $" {
 	    # It would be nice if we could catch the message that GDB prints
@@ -91,17 +107,72 @@ for {set i 0} {$i < 5} {incr i} {
 	    return -1
 	}
 	-re "$gdb_prompt $" {
-	    # We used to fail here, but not all targets announce new
-	    # threads as they are created.  For example, the GDB
-	    # remote protocol target only finds out about threads when
-	    # they actually report some event like a breakpoint hit,
-	    # or when the user types 'info threads'.
-	    unresolved "create philosopher: $i"
 	}
 	timeout {
 	    fail "(timeout) create philosopher: $i"
 	}
     }
+    if { $threads_created == 0 } {
+	# Not all targets announce new threads as they are created.
+	# For example, the GDB
+	# remote protocol target only finds out about threads when
+	# they actually report some event like a breakpoint hit,
+	# or when the user types 'info threads'.
+	unsupported "create philosopher: $i"
+    } elseif { $threads_created == 1 } {
+	if { $expect_manager < 0 } {
+	    set expect_manager 0
+	}
+	pass "create philosopher: $i"
+    } elseif { !$i && $threads_created == 2 } {
+	# Two threads are created the first time in LinuxThreads,
+	# where the second is the manager thread.  In NPTL, there is none.
+	set expect_manager 1
+	pass "create philosopher: $i"
+    } else {
+	fail "create philosopher: $i"
+    }
+    
+    send_gdb "info threads\n"
+    set threads_after {}
+    gdb_expect {
+	-re "info threads\r\n" {
+	    exp_continue
+	}
+	-re "^\\*? +(\[0-9\]+ Thread \[0-9\]+) \[^\n\]+\n" {
+	    set name $expect_out(1,string)
+	    for {set j 0} {$j != [llength $threads_before] } {incr j} {
+		if {$name == [lindex $threads_before $j]} {
+		    set threads_before [lreplace $threads_before $j $j]
+		    set name ""
+		    break
+		}
+	    }
+	    if { $name != "" } {
+		lappend threads_after $name
+	    }
+	    exp_continue
+	}
+	-re "^$gdb_prompt $" {
+	    if { [llength $threads_before] != 0 } {
+		fail "create philosopher: $i"
+	    } elseif { !$i && [llength $threads_after] == 2 } {
+		set expect_manager 1
+		pass "create philosopher: $i"
+	    } elseif { [llength $threads_after] == 1 } {
+		if { $expect_manager < 0 } {
+		    set expect_manager 0
+		}
+		pass "create philosopher: $i"
+	    } else {
+		fail "create philosopher: $i"
+	    }
+	}
+	timeout {
+	    fail "(timeout) info threads"
+	}
+    }
+    
 }
 
 set nthreads 6
