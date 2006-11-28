@@ -1,3 +1,17 @@
+2006-11-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (clean): Remove reg-mips64.c.
+	(reg-mips64.c, reg-mips64.o): New rules.
+	* configure.srv: Handle mips64.  Include regset support for mips.
+	* linux-mips-low.c (union mips_register): New.
+	(mips_get_pc, mips_set_pc, mips_reinsert_addr): Use it.
+	(mips_breakpoint, mips_breakpoint_at): Use int.
+	(mips_collect_register, mips_supply_register)
+	(mips_collect_register_32bit, mips_supply_register_32bit)
+	(mips_fill_gregset, mips_store_gregset, mips_fill_fpregset)
+	(mips_store_fpregset, target_regsets): New.
+	* thread-db.c (thread_db_get_tls_address): Use uintptr_t.
+
 2006-11-22  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* configure.srv: Add target "spu*-*-*".

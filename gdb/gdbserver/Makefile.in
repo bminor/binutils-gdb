@@ -206,7 +206,7 @@ clean:
 	rm -f gdbserver gdbreplay core make.log
 	rm -f reg-arm.c reg-i386.c reg-ia64.c reg-m32r.c reg-m68k.c reg-mips.c
 	rm -f reg-ppc.c reg-sh.c reg-spu.c reg-x86-64.c reg-i386-linux.c
-	rm -f reg-cris.c reg-crisv32.c reg-x86-64-linux.c
+	rm -f reg-cris.c reg-crisv32.c reg-x86-64-linux.c reg-mips64.c
 
 maintainer-clean realclean distclean: clean
 	rm -f nm.h tm.h xm.h config.status config.h stamp-h config.log
@@ -318,6 +318,9 @@ reg-m68k.c : $(srcdir)/../regformats/reg-m68k.dat $(regdat_sh)
 reg-mips.o : reg-mips.c $(regdef_h)
 reg-mips.c : $(srcdir)/../regformats/reg-mips.dat $(regdat_sh)
 	sh $(regdat_sh) $(srcdir)/../regformats/reg-mips.dat reg-mips.c
+reg-mips64.o : reg-mips64.c $(regdef_h)
+reg-mips64.c : $(srcdir)/../regformats/reg-mips64.dat $(regdat_sh)
+	sh $(regdat_sh) $(srcdir)/../regformats/reg-mips64.dat reg-mips64.c
 reg-ppc.o : reg-ppc.c $(regdef_h)
 reg-ppc.c : $(srcdir)/../regformats/reg-ppc.dat $(regdat_sh)
 	sh $(regdat_sh) $(srcdir)/../regformats/reg-ppc.dat reg-ppc.c

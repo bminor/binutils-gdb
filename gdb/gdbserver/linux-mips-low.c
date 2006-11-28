@@ -23,6 +23,7 @@
 #include "linux-low.h"
 
 #include <sys/ptrace.h>
+#include <endian.h>
 
 #include "gdb_proc_service.h"
 
@@ -37,6 +38,15 @@
 #define mips_num_regs 90
 
 #include <asm/ptrace.h>
+
+union mips_register
+{
+  unsigned char buf[8];
+
+  /* Deliberately signed, for proper sign extension.  */
+  int reg32;
+  long long reg64;
+};
 
 /* Return the ptrace ``address'' of register REGNO. */
 
@@ -107,20 +117,25 @@ mips_cannot_store_register (int regno)
 static CORE_ADDR
 mips_get_pc ()
 {
-  unsigned long pc;
-  collect_register_by_name ("pc", &pc);
-  return pc;
+  union mips_register pc;
+  collect_register_by_name ("pc", pc.buf);
+  return register_size (0) == 4 ? pc.reg32 : pc.reg64;
 }
 
 static void
 mips_set_pc (CORE_ADDR pc)
 {
-  unsigned long newpc = pc;
-  supply_register_by_name ("pc", &newpc);
+  union mips_register newpc;
+  if (register_size (0) == 4)
+    newpc.reg32 = pc;
+  else
+    newpc.reg64 = pc;
+
+  supply_register_by_name ("pc", newpc.buf);
 }
 
 /* Correct in either endianness.  */
-static const unsigned long mips_breakpoint = 0x0005000d;
+static const unsigned int mips_breakpoint = 0x0005000d;
 #define mips_breakpoint_len 4
 
 /* We only place breakpoints in empty marker functions, and thread locking
@@ -129,15 +144,15 @@ static const unsigned long mips_breakpoint = 0x0005000d;
 static CORE_ADDR
 mips_reinsert_addr ()
 {
-  unsigned long pc;
-  collect_register_by_name ("ra", &pc);
-  return pc;
+  union mips_register ra;
+  collect_register_by_name ("ra", ra.buf);
+  return register_size (0) == 4 ? ra.reg32 : ra.reg64;
 }
 
 static int
 mips_breakpoint_at (CORE_ADDR where)
 {
-  unsigned long insn;
+  unsigned int insn;
 
   (*the_target->read_memory) (where, (unsigned char *) &insn, 4);
   if (insn == mips_breakpoint)
@@ -164,6 +179,155 @@ ps_get_thread_area (const struct ps_prochandle *ph,
 
   return PS_OK;
 }
+
+#ifdef HAVE_PTRACE_GETREGS
+
+static void
+mips_collect_register (int use_64bit, int regno, union mips_register *reg)
+{
+  union mips_register tmp_reg;
+
+  if (use_64bit)
+    {
+      collect_register (regno, &tmp_reg.reg64);
+      *reg = tmp_reg;
+    }
+  else
+    {
+      collect_register (regno, &tmp_reg.reg32);
+      reg->reg64 = tmp_reg.reg32;
+    }
+}
+
+static void
+mips_supply_register (int use_64bit, int regno, const union mips_register *reg)
+{
+  int offset = 0;
+
+  /* For big-endian 32-bit targets, ignore the high four bytes of each
+     eight-byte slot.  */
+  if (__BYTE_ORDER == __BIG_ENDIAN && !use_64bit)
+    offset = 4;
+
+  supply_register (regno, reg->buf + offset);
+}
+
+static void
+mips_collect_register_32bit (int use_64bit, int regno, unsigned char *buf)
+{
+  union mips_register tmp_reg;
+  int reg32;
+
+  mips_collect_register (use_64bit, regno, &tmp_reg);
+  reg32 = tmp_reg.reg64;
+  memcpy (buf, &reg32, 4);
+}
+
+static void
+mips_supply_register_32bit (int use_64bit, int regno, const unsigned char *buf)
+{
+  union mips_register tmp_reg;
+  int reg32;
+
+  memcpy (&reg32, buf, 4);
+  tmp_reg.reg64 = reg32;
+  mips_supply_register (use_64bit, regno, &tmp_reg);
+}
+
+static void
+mips_fill_gregset (void *buf)
+{
+  union mips_register *regset = buf;
+  int i, use_64bit;
+
+  use_64bit = (register_size (0) == 8);
+
+  for (i = 0; i < 32; i++)
+    mips_collect_register (use_64bit, i, regset + i);
+
+  mips_collect_register (use_64bit, find_regno ("lo"), regset + 32);
+  mips_collect_register (use_64bit, find_regno ("hi"), regset + 33);
+  mips_collect_register (use_64bit, find_regno ("pc"), regset + 34);
+  mips_collect_register (use_64bit, find_regno ("bad"), regset + 35);
+  mips_collect_register (use_64bit, find_regno ("sr"), regset + 36);
+  mips_collect_register (use_64bit, find_regno ("cause"), regset + 37);
+}
+
+static void
+mips_store_gregset (const void *buf)
+{
+  const union mips_register *regset = buf;
+  int i, use_64bit;
+
+  use_64bit = (register_size (0) == 8);
+
+  for (i = 0; i < 32; i++)
+    mips_supply_register (use_64bit, i, regset + i);
+
+  mips_supply_register (use_64bit, find_regno ("lo"), regset + 32);
+  mips_supply_register (use_64bit, find_regno ("hi"), regset + 33);
+  mips_supply_register (use_64bit, find_regno ("pc"), regset + 34);
+  mips_supply_register (use_64bit, find_regno ("bad"), regset + 35);
+  mips_supply_register (use_64bit, find_regno ("sr"), regset + 36);
+  mips_supply_register (use_64bit, find_regno ("cause"), regset + 37);
+}
+
+static void
+mips_fill_fpregset (void *buf)
+{
+  union mips_register *regset = buf;
+  int i, use_64bit, first_fp, big_endian;
+
+  use_64bit = (register_size (0) == 8);
+  first_fp = find_regno ("f0");
+  big_endian = (__BYTE_ORDER == __BIG_ENDIAN);
+
+  /* See GDB for a discussion of this peculiar layout.  */
+  for (i = 0; i < 32; i++)
+    if (use_64bit)
+      collect_register (first_fp + i, regset[i].buf);
+    else
+      collect_register (first_fp + i,
+			regset[i & ~1].buf + 4 * (big_endian != (i & 1)));
+
+  mips_collect_register_32bit (use_64bit, find_regno ("fsr"), regset[32].buf);
+  mips_collect_register_32bit (use_64bit, find_regno ("fir"),
+			       regset[32].buf + 4);
+}
+
+static void
+mips_store_fpregset (const void *buf)
+{
+  const union mips_register *regset = buf;
+  int i, use_64bit, first_fp, big_endian;
+
+  use_64bit = (register_size (0) == 8);
+  first_fp = find_regno ("f0");
+  big_endian = (__BYTE_ORDER == __BIG_ENDIAN);
+
+  /* See GDB for a discussion of this peculiar layout.  */
+  for (i = 0; i < 32; i++)
+    if (use_64bit)
+      supply_register (first_fp + i, regset[i].buf);
+    else
+      supply_register (first_fp + i,
+		       regset[i & ~1].buf + 4 * (big_endian != (i & 1)));
+
+  mips_supply_register_32bit (use_64bit, find_regno ("fsr"), regset[32].buf);
+  mips_supply_register_32bit (use_64bit, find_regno ("fir"),
+			      regset[32].buf + 4);
+}
+#endif /* HAVE_PTRACE_GETREGS */
+
+struct regset_info target_regsets[] = {
+#ifdef HAVE_PTRACE_GETREGS
+  { PTRACE_GETREGS, PTRACE_SETREGS, 38 * 8, GENERAL_REGS,
+    mips_fill_gregset, mips_store_gregset },
+  { PTRACE_GETFPREGS, PTRACE_SETFPREGS, 33 * 8, FP_REGS,
+    mips_fill_fpregset, mips_store_fpregset },
+#endif /* HAVE_PTRACE_GETREGS */
+  { 0, 0, -1, -1, NULL, NULL }
+};
 
 struct linux_target_ops the_low_target = {
   mips_num_regs,

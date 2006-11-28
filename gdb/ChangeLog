@@ -1,5 +1,9 @@
 2006-11-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* regformats/reg-mips64.dat: New file.
+
+2006-11-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* Makefile.in (mips-tdep.o, target-descriptions.o): Update.
 	* target-descriptions.c (struct property): New.
 	(struct target_desc): Add properties member.

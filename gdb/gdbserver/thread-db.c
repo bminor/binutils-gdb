@@ -33,6 +33,8 @@ extern int debug_threads;
 
 #include "gdb_proc_service.h"
 
+#include <stdint.h>
+
 /* Structure that identifies the child process for the
    <proc_service.h> interface.  */
 static struct ps_prochandle proc_handle;
@@ -333,11 +335,14 @@ thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
   if (!process->thread_known)
     return TD_NOTHR;
 
-  err = td_thr_tls_get_addr (&process->th, (psaddr_t) load_module, offset,
-			     &addr);
+  /* Note the cast through uintptr_t: this interface only works if
+     a target address fits in a psaddr_t, which is a host pointer.
+     So a 32-bit debugger can not access 64-bit TLS through this.  */
+  err = td_thr_tls_get_addr (&process->th, (psaddr_t) (uintptr_t) load_module,
+			     offset, &addr);
   if (err == TD_OK)
     {
-      *address = (CORE_ADDR) addr;
+      *address = (CORE_ADDR) (uintptr_t) addr;
       return 0;
     }
   else
