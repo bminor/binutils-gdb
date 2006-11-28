@@ -25,16 +25,6 @@ struct target_ops;
 /* GNU/Linux is SVR4-ish but its /proc file system isn't.  */
 #undef USE_PROC_FS
 
-/* Since we're building a native debugger, we can include <signal.h>
-   to find the range of real-time signals.  */
-
-#include <signal.h>
-
-#ifdef __SIGRTMIN
-#define REALTIME_LO	__SIGRTMIN
-#define REALTIME_HI	(__SIGRTMAX + 1)
-#endif
-
 extern void lin_lwp_attach_lwp (ptid_t ptid, int verbose);
 #define ATTACH_LWP(ptid, verbose) lin_lwp_attach_lwp ((ptid), (verbose))
 
