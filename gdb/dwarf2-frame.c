@@ -1674,15 +1674,12 @@ decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p)
 	      augmentation++;
 	    }
 
-	  /* Otherwise we have an unknown augmentation.
-	     Bail out unless we saw a 'z' prefix.  */
+	  /* Otherwise we have an unknown augmentation.  Assume that either
+	     there is no augmentation data, or we saw a 'z' prefix.  */
 	  else
 	    {
-	      if (cie->initial_instructions == NULL)
-		return end;
-
-	      /* Skip unknown augmentations.  */
-	      buf = cie->initial_instructions;
+	      if (cie->initial_instructions)
+		buf = cie->initial_instructions;
 	      break;
 	    }
 	}
