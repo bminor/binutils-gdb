@@ -1,3 +1,10 @@
+2006-11-28  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.mi/mi-var-cmd.exp: Check -var-update after
+	assignement of arrays and function pointers.
+	* gdb.mi/var-cmd.c: Add declaration necessary for above
+	tests.
+
 2006-11-27  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* gdb.base/break.c (main): Call malloc.

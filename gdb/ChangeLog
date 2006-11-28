@@ -1,3 +1,21 @@
+2006-11-28  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Fetch varobj values from memory in a single place,
+	and only fetch the values that are really needed.
+	* varobj.c (struct varobj): Clarify comment.
+	(my_value_equal): Remove.
+	(install_new_value): New function.
+	(type_of_child): Remove.
+	(varobj_create): Use install_new_value.
+	(varobj_set_value): Use value_contents_equal, not
+	my_value_equal.
+	(varobj_update): Use install_new_value.
+	(create_child): Likewise. Inline type_of_child here.
+	(value_of_child): Don't fetch the value.
+	(c_value_of_root): Likewise.
+	(c_value_of_variable): Likewise.
+	(type_changeable): Improve comments.
+
 2006-11-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote.c (struct remote_arch_state): Doc fix.

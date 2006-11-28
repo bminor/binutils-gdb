@@ -382,6 +382,43 @@ mi_gdb_test "-var-assign lsimple.integer 333" \
 	"\\^done,value=\"333\"" \
 	"assign to lsimple.integer"
 
+mi_gdb_test "-var-update *" \
+	"\\^done,changelist=.*" \
+	"var update"
+
+# Check that assignment of function and array values
+# promotes the assigned value to function pointer/data
+# pointer before comparing with the existing value, 
+# and does not incorrectly make the value as changed.
+mi_gdb_test "-var-assign func do_block_tests" \
+	"\\^done,value=\"$hex <do_block_tests>\"" \
+	"assign same value to func"
+
+mi_gdb_test "-var-update *" \
+	"\\^done,changelist=\\\[\\\]" \
+	"assign same value to func (update)"
+
+mi_gdb_test "-var-create array_ptr * array_ptr" \
+	"\\^done,name=\"array_ptr\",numchild=\"1\",type=\"int \\*\"" \
+	"create global variable array_ptr"
+
+mi_gdb_test "-var-assign array_ptr array2" \
+	"\\^done,value=\"$hex\"" \
+	"assign array to pointer"
+
+mi_gdb_test "-var-update *" \
+	"\\^done,changelist=\\\[\{name=\"array_ptr\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"assign array to pointer (update)"
+
+mi_gdb_test "-var-assign array_ptr array2" \
+	"\\^done,value=\"$hex\"" \
+	"assign same array to pointer"
+
+mi_gdb_test "-var-update *" \
+	"\\^done,changelist=\\\[\\\]" \
+	"assign same array to pointer (update)"
+
+
 ######
 # End of assign tests 
 #####

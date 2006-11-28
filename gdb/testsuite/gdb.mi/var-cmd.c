@@ -106,6 +106,10 @@ void incr_a (char a)
   b = a;
 }
 
+int array[] = {1,2,3};
+int array2[] = {4,5,6};
+int *array_ptr = array;
+
 void
 do_locals_tests ()
 {

@@ -101,7 +101,9 @@ struct varobj
   /* The type of this variable. This may NEVER be NULL. */
   struct type *type;
 
-  /* The value of this expression or subexpression.  This may be NULL. */
+  /* The value of this expression or subexpression.  This may be NULL. 
+     Invariant: if type_changeable (this) is non-zero, the value is either
+     NULL, or not lazy.  */
   struct value *value;
 
   /* Did an error occur evaluating the expression or getting its value? */
@@ -202,8 +204,6 @@ static struct type *get_target_type (struct type *);
 
 static enum varobj_display_formats variable_default_display (struct varobj *);
 
-static int my_value_equal (struct value *, struct value *, int *);
-
 static void vpush (struct vstack **pstack, struct varobj *var);
 
 static struct varobj *vpop (struct vstack **pstack);
@@ -211,6 +211,9 @@ static struct varobj *vpop (struct vstack **pstack);
 static void cppush (struct cpstack **pstack, char *name);
 
 static char *cppop (struct cpstack **pstack);
+
+static int install_new_value (struct varobj *var, struct value *value, 
+			      int initial);
 
 /* Language-specific routines. */
 
@@ -225,8 +228,6 @@ static char *name_of_child (struct varobj *, int);
 static struct value *value_of_root (struct varobj **var_handle, int *);
 
 static struct value *value_of_child (struct varobj *parent, int index);
-
-static struct type *type_of_child (struct varobj *var);
 
 static int variable_editable (struct varobj *var);
 
@@ -445,6 +446,7 @@ varobj_create (char *objname,
     {
       char *p;
       enum varobj_languages lang;
+      struct value *value;
 
       /* Parse and evaluate the expression, filling in as much
          of the variable's data as possible */
@@ -505,17 +507,16 @@ varobj_create (char *objname,
       /* We definitively need to catch errors here.
          If evaluate_expression succeeds we got the value we wanted.
          But if it fails, we still go on with a call to evaluate_type()  */
-      if (gdb_evaluate_expression (var->root->exp, &var->value))
-	{
-	  /* no error */
-	  release_value (var->value);
-	  if (value_lazy (var->value))
-	    gdb_value_fetch_lazy (var->value);
-	}
-      else
-	var->value = evaluate_type (var->root->exp);
+      if (!gdb_evaluate_expression (var->root->exp, &value))
+	/* Error getting the value.  Try to at least get the
+	   right type.  */
+	value = evaluate_type (var->root->exp);
 
-      var->type = value_type (var->value);
+      release_value (value);
+
+      var->type = value_type (value);
+
+      install_new_value (var, value, 1 /* Initial assignment */);
 
       /* Set language info */
       lang = variable_language (var);
@@ -825,8 +826,28 @@ varobj_set_value (struct varobj *var, char *expression)
 	  return 0;
 	}
 
-      if (!my_value_equal (var->value, value, &error))
+      /* All types that are editable must also be changeable.  */
+      gdb_assert (type_changeable (var));
+
+      /* The value of a changeable variable object must not be lazy.  */
+      gdb_assert (!value_lazy (var->value));
+
+      /* Need to coerce the input.  We want to check if the
+	 value of the variable object will be different
+	 after assignment, and the first thing value_assign
+	 does is coerce the input.
+	 For example, if we are assigning an array to a pointer variable we
+	 should compare the pointer with the the array's address, not with the
+	 array's content.  */
+      value = coerce_array (value);
+
+      if (!value_contents_equal (var->value, value))
         var->updated = 1;
+
+      /* The new value may be lazy.  gdb_value_assign, or 
+	 rather value_contents, will take care of this.
+	 If fetching of the new value will fail, gdb_value_assign
+	 with catch the exception.  */
       if (!gdb_value_assign (var->value, value, &val))
 	return 0;
       value_free (var->value);
@@ -869,6 +890,101 @@ varobj_list (struct varobj ***varlist)
 
   return rootcount;
 }
+
+/* Assign a new value to a variable object.  If INITIAL is non-zero,
+   this is the first assignement after the variable object was just
+   created, or changed type.  In that case, just assign the value 
+   and return 0.
+   Otherwise, assign the value and if type_changeable returns non-zero,
+   find if the new value is different from the current value.
+   Return 1 if so, and 0 if the values are equal.  */
+static int
+install_new_value (struct varobj *var, struct value *value, int initial)
+{ 
+  int changeable;
+  int need_to_fetch;
+  int changed = 0;
+
+  var->error = 0;
+  /* We need to know the varobj's type to decide if the value should
+     be fetched or not.  C++ fake children (public/protected/private) don't have
+     a type. */
+  gdb_assert (var->type || CPLUS_FAKE_CHILD (var));
+  changeable = type_changeable (var);
+  need_to_fetch = changeable;
+
+  if (var->type && TYPE_CODE (var->type) == TYPE_CODE_UNION)
+    /* For unions, we need to fetch the value implicitly because
+       of implementation of union member fetch.  When gdb
+       creates a value for a field and the value of the enclosing
+       structure is not lazy,  it immediately copies the necessary
+       bytes from the enclosing values.  If the enclosing value is
+       lazy, the call to value_fetch_lazy on the field will read
+       the data from memory.  For unions, that means we'll read the
+       same memory more than once, which is not desirable.  So
+       fetch now.  */
+    need_to_fetch = 1;
+
+  /* The new value might be lazy.  If the type is changeable,
+     that is we'll be comparing values of this type, fetch the
+     value now.  Otherwise, on the next update the old value
+     will be lazy, which means we've lost that old value.  */
+  if (need_to_fetch && value && value_lazy (value))
+    {
+      if (!gdb_value_fetch_lazy (value))
+	{
+	  var->error = 1;
+	  /* Set the value to NULL, so that for the next -var-update,
+	     we don't try to compare the new value with this value,
+	     that we couldn't even read.  */
+	  value = NULL;
+	}
+      else
+	var->error = 0;
+    }
+
+  /* If the type is changeable, compare the old and the new values.
+     If this is the initial assignment, we don't have any old value
+     to compare with.  */
+  if (!initial && changeable)
+    {
+      /* If the value of the varobj was changed by -var-set-value, then the 
+	 value in the varobj and in the target is the same.  However, that value
+	 is different from the value that the varobj had after the previous
+	 -var-update. So need to the varobj as changed.  */	 
+      if (var->updated)
+	changed = 1;
+      else 
+	{
+	  /* Try to compare the values.  That requires that both
+	     values are non-lazy.  */
+	  
+	  /* Quick comparison of NULL values.  */
+	  if (var->value == NULL && value == NULL)
+	    /* Equal. */
+	    ;
+	  else if (var->value == NULL || value == NULL)
+	    changed = 1;
+	  else
+	    {
+	      gdb_assert (!value_lazy (var->value));
+	      gdb_assert (!value_lazy (value));
+	      
+	      if (!value_contents_equal (var->value, value))
+		changed = 1;
+	    }
+	}
+    }
+    
+  /* We must always keep the new value, since children depend on it.  */
+  if (var->value != NULL)
+    value_free (var->value);
+  var->value = value;
+  var->updated = 0;
+
+  return changed;
+}
+  
 
 /* Update the values for a variable and its children.  This is a
    two-pronged attack.  First, re-parse the value for the root's
@@ -939,23 +1055,15 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
       vpush (&result, *varp);
       changed++;
     }
-  /* If values are not equal, note that it's changed.
-     There a couple of exceptions here, though.
-     We don't want some types to be reported as "changed". */
-  else if (type_changeable (*varp) &&
-	   ((*varp)->updated || !my_value_equal ((*varp)->value, new, &error)))
-    {
-      vpush (&result, *varp);
-      (*varp)->updated = 0;
-      changed++;
-      /* Its value is going to be updated to NEW.  */
-      (*varp)->error = error;
-    }
 
-  /* We must always keep around the new value for this root
-     variable expression, or we lose the updated children! */
-  value_free ((*varp)->value);
-  (*varp)->value = new;
+  if (install_new_value ((*varp), new, type_changed))
+    {
+      /* If type_changed is 1, install_new_value will never return
+	 non-zero, so we'll never report the same variable twice.  */
+      gdb_assert (!type_changed);
+      vpush (&result, (*varp));
+      changed++;
+    }
 
   /* Initialize a stack */
   vpush (&stack, NULL);
@@ -982,21 +1090,13 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
 
       /* Update this variable */
       new = value_of_child (v->parent, v->index);
-      if (type_changeable (v) && 
-          (v->updated || !my_value_equal (v->value, new, &error)))
-	{
+      if (install_new_value (v, new, 0 /* type not changed */))
+ 	{
 	  /* Note that it's changed */
 	  vpush (&result, v);
 	  v->updated = 0;
 	  changed++;
 	}
-      /* Its value is going to be updated to NEW.  */
-      v->error = error;
-
-      /* We must always keep new values, since children depend on it. */
-      if (v->value != NULL)
-	value_free (v->value);
-      v->value = new;
 
       /* Get next child */
       v = vpop (&stack);
@@ -1257,15 +1357,14 @@ create_child (struct varobj *parent, int index, char *name)
 {
   struct varobj *child;
   char *childs_name;
+  struct value *value;
 
   child = new_variable ();
 
   /* name is allocated by name_of_child */
   child->name = name;
   child->index = index;
-  child->value = value_of_child (parent, index);
-  if ((!CPLUS_FAKE_CHILD (child) && child->value == NULL) || parent->error)
-    child->error = 1;
+  value = value_of_child (parent, index);
   child->parent = parent;
   child->root = parent->root;
   childs_name = xstrprintf ("%s.%s", parent->obj_name, name);
@@ -1275,8 +1374,20 @@ create_child (struct varobj *parent, int index, char *name)
   /* Save a pointer to this child in the parent */
   save_child_in_parent (parent, child);
 
-  /* Note the type of this child */
-  child->type = type_of_child (child);
+  /* Compute the type of the child.  Must do this before
+     calling install_new_value.  */
+  if (value != NULL)
+    /* If the child had no evaluation errors, var->value
+       will be non-NULL and contain a valid type. */
+    child->type = value_type (value);
+  else
+    /* Otherwise, we must compute the type. */
+    child->type = (*child->root->lang->type_of_child) (child->parent, 
+						       child->index);
+  install_new_value (child, value, 1);
+
+  if ((!CPLUS_FAKE_CHILD (child) && child->value == NULL) || parent->error)
+    child->error = 1;
 
   return child;
 }
@@ -1449,42 +1560,6 @@ static enum varobj_display_formats
 variable_default_display (struct varobj *var)
 {
   return FORMAT_NATURAL;
-}
-
-/* This function is similar to GDB's value_contents_equal, except that
-   this one is "safe"; it never longjmps.  It determines if the VAL1's
-   value is the same as VAL2.  If for some reason the value of VAR2
-   can't be established, *ERROR2 is set to non-zero.  */
-
-static int
-my_value_equal (struct value *val1, struct value *volatile val2, int *error2)
-{
-  volatile struct gdb_exception except;
-
-  /* As a special case, if both are null, we say they're equal.  */
-  if (val1 == NULL && val2 == NULL)
-    return 1;
-  else if (val1 == NULL || val2 == NULL)
-    return 0;
-
-  /* The contents of VAL1 are supposed to be known.  */
-  gdb_assert (!value_lazy (val1));
-
-  /* Make sure we also know the contents of VAL2.  */
-  val2 = coerce_array (val2);
-  TRY_CATCH (except, RETURN_MASK_ERROR)
-    {
-      if (value_lazy (val2))
-	value_fetch_lazy (val2);
-    }
-  if (except.reason < 0)
-    {
-      *error2 = 1;
-      return 0;
-    }
-  gdb_assert (!value_lazy (val2));
-
-  return value_contents_equal (val1, val2);
 }
 
 /* FIXME: The following should be generic for any pointer */
@@ -1678,31 +1753,7 @@ value_of_child (struct varobj *parent, int index)
 
   value = (*parent->root->lang->value_of_child) (parent, index);
 
-  /* If we're being lazy, fetch the real value of the variable. */
-  if (value != NULL && value_lazy (value))
-    {
-      /* If we fail to fetch the value of the child, return
-         NULL so that callers notice that we're leaving an
-         error message. */
-      if (!gdb_value_fetch_lazy (value))
-	value = NULL;
-    }
-
   return value;
-}
-
-/* What is the type of VAR? */
-static struct type *
-type_of_child (struct varobj *var)
-{
-
-  /* If the child had no evaluation errors, var->value
-     will be non-NULL and contain a valid type. */
-  if (var->value != NULL)
-    return value_type (var->value);
-
-  /* Otherwise, we must compute the type. */
-  return (*var->root->lang->type_of_child) (var->parent, var->index);
 }
 
 /* Is this variable editable? Use the variable's type to make
@@ -1720,9 +1771,15 @@ my_value_of_variable (struct varobj *var)
   return (*var->root->lang->value_of_variable) (var);
 }
 
-/* Is VAR something that can change? Depending on language,
-   some variable's values never change. For example,
-   struct and unions never change values. */
+/* Return non-zero if changes in value of VAR
+   must be detected and reported by -var-update.
+   Return zero is -var-update should never report
+   changes of such values.  This makes sense for structures
+   (since the changes in children values will be reported separately),
+   or for artifical objects (like 'public' pseudo-field in C++).
+
+   Return value of 0 means that gdb need not call value_fetch_lazy
+   for the value of this variable object.  */
 static int
 type_changeable (struct varobj *var)
 {
@@ -1898,24 +1955,12 @@ c_value_of_root (struct varobj **var_handle)
          go on */
       if (gdb_evaluate_expression (var->root->exp, &new_val))
 	{
-	  if (value_lazy (new_val))
-	    {
-	      /* We need to catch errors because if
-	         value_fetch_lazy fails we still want to continue
-	         (after making val->error = 1) */
-	      /* FIXME: Shouldn't be using value_contents()?  The
-	         comment on value_fetch_lazy() says it is only called
-	         from the macro... */
-	      if (!gdb_value_fetch_lazy (new_val))
-		var->error = 1;
-	      else
-		var->error = 0;
-	    }
+	  var->error = 0;
+	  release_value (new_val);
 	}
       else
 	var->error = 1;
 
-      release_value (new_val);
       return new_val;
     }
 
@@ -2094,8 +2139,8 @@ c_value_of_variable (struct varobj *var)
 	    struct cleanup *old_chain = make_cleanup_ui_file_delete (stb);
 	    char *thevalue;
 
-	    if (value_lazy (var->value))
-	      gdb_value_fetch_lazy (var->value);
+	    gdb_assert (type_changeable (var));
+	    gdb_assert (!value_lazy (var->value));
 	    common_val_print (var->value, stb,
 			      format_code[(int) var->format], 1, 0, 0);
 	    thevalue = ui_file_xstrdup (stb, &dummy);
