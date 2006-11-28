@@ -39,6 +39,8 @@
 #include "gdbcore.h"
 #include "linux-nat.h"
 
+#include <signal.h>
+
 #ifdef HAVE_GNU_LIBC_VERSION_H
 #include <gnu/libc-version.h>
 #endif
