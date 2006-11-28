@@ -1,3 +1,15 @@
+2006-11-28  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* coffread.c (cs_to_bfd_section): New function.
+	(cs_to_section): Use cs_to_bfd_section.
+	(record_minimal_symbol): Take the coff_symbol* parameter instead
+	of the symbol's name as a char*.
+	Add 'int section' parameter. Call prim_record_minimal_symbol_and_info
+	instead of prim_record_minimal_symbol_and_info.
+	Change return type to struct minimal_symbol *.
+	(coff_symtab_read): Adapt to new record_minimal_symbol's signature.
+	Make all minimal symbol creations go through record_minimal_symbol.
+
 2006-11-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* symtab.c (find_pc_sect_line): Do not return a line before

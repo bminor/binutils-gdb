@@ -259,17 +259,25 @@ find_targ_sec (bfd *abfd, asection *sect, void *obj)
     *args->resultp = sect;
 }
 
-/* Return the section number (SECT_OFF_*) that CS points to.  */
-static int
-cs_to_section (struct coff_symbol *cs, struct objfile *objfile)
+/* Return the bfd_section that CS points to.  */
+static struct bfd_section*
+cs_to_bfd_section (struct coff_symbol *cs, struct objfile *objfile)
 {
   asection *sect = NULL;
   struct find_targ_sec_arg args;
-  int off = SECT_OFF_TEXT (objfile);
 
   args.targ_index = cs->c_secnum;
   args.resultp = &sect;
   bfd_map_over_sections (objfile->obfd, find_targ_sec, &args);
+  return sect;
+}
+
+/* Return the section number (SECT_OFF_*) that CS points to.  */
+static int
+cs_to_section (struct coff_symbol *cs, struct objfile *objfile)
+{
+  asection *sect = cs_to_bfd_section (cs, objfile);
+  int off = SECT_OFF_TEXT (objfile);
   if (sect != NULL)
     {
       /* This is the section.  Figure out what SECT_OFF_* code it is.  */
@@ -408,15 +416,19 @@ coff_end_symtab (struct objfile *objfile)
   last_source_file = NULL;
 }
 
-static void
-record_minimal_symbol (char *name, CORE_ADDR address,
-		       enum minimal_symbol_type type, struct objfile *objfile)
+static struct minimal_symbol *
+record_minimal_symbol (struct coff_symbol *cs, CORE_ADDR address,
+		       enum minimal_symbol_type type, int section, 
+		       struct objfile *objfile)
 {
+  struct bfd_section *bfd_section;
   /* We don't want TDESC entry points in the minimal symbol table */
-  if (name[0] == '@')
-    return;
+  if (cs->c_name[0] == '@')
+    return NULL;
 
-  prim_record_minimal_symbol (name, address, type, objfile);
+  bfd_section = cs_to_bfd_section (cs, objfile);
+  return prim_record_minimal_symbol_and_info (cs->c_name, address, type,
+    NULL, section, bfd_section, objfile);
 }
 
 /* coff_symfile_init ()
@@ -762,8 +774,9 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
       if (ISFCN (cs->c_type) && cs->c_sclass != C_TPDEF)
 	{
 	  /* Record all functions -- external and static -- in minsyms. */
+	  int section = cs_to_section (cs, objfile);
 	  tmpaddr = cs->c_value + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
-	  record_minimal_symbol (cs->c_name, tmpaddr, mst_text, objfile);
+	  record_minimal_symbol (cs, tmpaddr, mst_text, section, objfile);
 
 	  fcn_line_ptr = main_aux.x_sym.x_fcnary.x_fcn.x_lnnoptr;
 	  fcn_start_addr = tmpaddr;
@@ -923,15 +936,13 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 		  ms_type = mst_unknown;
 	      }
 
-	    if (cs->c_name[0] != '@' /* Skip tdesc symbols */ )
-	      {
-		struct minimal_symbol *msym;
-		msym = prim_record_minimal_symbol_and_info
-		  (cs->c_name, tmpaddr, ms_type, NULL,
-		   sec, NULL, objfile);
-		if (msym)
-		  COFF_MAKE_MSYMBOL_SPECIAL (cs->c_sclass, msym);
-	      }
+	    {
+	      struct minimal_symbol *msym;
+	      msym = record_minimal_symbol (cs, tmpaddr, ms_type, sec, objfile);
+	      if (msym)
+	        COFF_MAKE_MSYMBOL_SPECIAL (cs->c_sclass, msym);
+	    }
+
 	    if (SDB_TYPE (cs->c_type))
 	      {
 		struct symbol *sym;
