@@ -2222,23 +2222,11 @@ find_pc_sect_line (CORE_ADDR pc, struct bfd_section *section, int notcurrent)
 
   if (!best_symtab)
     {
-      if (!alt_symtab)
-	{			/* If we didn't find any line # info, just
-				   return zeros.  */
-	  val.pc = pc;
-	}
-      else
-	{
-	  val.symtab = alt_symtab;
-	  val.line = alt->line - 1;
-
-	  /* Don't return line 0, that means that we didn't find the line.  */
-	  if (val.line == 0)
-	    ++val.line;
-
-	  val.pc = BLOCK_END (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK));
-	  val.end = alt->pc;
-	}
+      /* If we didn't find any line number info, just return zeros.
+	 We used to return alt->line - 1 here, but that could be
+	 anywhere; if we don't have line number info for this PC,
+	 don't make some up.  */
+      val.pc = pc;
     }
   else if (best->line == 0)
     {

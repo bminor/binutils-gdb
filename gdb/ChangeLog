@@ -1,3 +1,8 @@
+2006-11-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* symtab.c (find_pc_sect_line): Do not return a line before
+	the start of a symtab.
+
 2006-11-24  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* NEWS: SPU target is already supported in GDB 6.6.
