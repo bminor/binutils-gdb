@@ -1864,7 +1864,7 @@ install-data-local: install-info
 
 # Stuff that should be included in a distribution.  The diststuff
 # target is run by the taz target in ../Makefile.in.
-EXTRA_DIST = ldgram.c ldgram.h ldlex.c spu_ovl.o $(man_MANS)
+EXTRA_DIST = ldgram.c ldgram.h ldlex.c emultempl/spu_ovl.o $(man_MANS)
 diststuff: info $(EXTRA_DIST)
 all: info ld.1
 

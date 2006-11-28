@@ -1,3 +1,9 @@
+2006-11-27  Ian Lance Taylor  <ian@airs.com>
+
+	* Makefile.am (EXTRA_DIST): Put spu_ovl.o in the emultempl
+	subdirectory.
+	* Makefile.in: Regenerate.
+
 2006-11-27  Bob Wilson  <bob.wilson@acm.org>
 
 	* emultempl/xtensaelf.em (XSHAL_ABI): Add default definition.
