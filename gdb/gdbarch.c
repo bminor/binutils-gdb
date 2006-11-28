@@ -2,8 +2,8 @@
 
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free
-   Software Foundation, Inc.
+   Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -92,6 +92,7 @@ struct gdbarch
   const struct bfd_arch_info * bfd_arch_info;
   int byte_order;
   enum gdb_osabi osabi;
+  const struct target_desc * target_desc;
 
   /* target specific vector. */
   struct gdbarch_tdep *tdep;
@@ -250,6 +251,7 @@ struct gdbarch startup_gdbarch =
   &bfd_default_arch_struct,  /* bfd_arch_info */
   BFD_ENDIAN_BIG,  /* byte_order */
   GDB_OSABI_UNKNOWN,  /* osabi */
+  0,  /* target_desc */
   /* target specific vector and its dump routine */
   NULL, NULL,
   /*per-architecture data-pointers and swap regions */
@@ -394,6 +396,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->bfd_arch_info = info->bfd_arch_info;
   current_gdbarch->byte_order = info->byte_order;
   current_gdbarch->osabi = info->osabi;
+  current_gdbarch->target_desc = info->target_desc;
 
   /* Force the explicit initialization of these. */
   current_gdbarch->short_bit = 2*TARGET_CHAR_BIT;
@@ -1563,6 +1566,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
                       "gdbarch_dump: store_return_value = <0x%lx>\n",
                       (long) current_gdbarch->store_return_value);
   fprintf_unfiltered (file,
+                      "gdbarch_dump: target_desc = %s\n",
+                      paddr_d ((long) current_gdbarch->target_desc));
+  fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_unwind_dummy_id_p() = %d\n",
                       gdbarch_unwind_dummy_id_p (current_gdbarch));
   fprintf_unfiltered (file,
@@ -1645,6 +1651,15 @@ gdbarch_osabi (struct gdbarch *gdbarch)
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_osabi called\n");
   return gdbarch->osabi;
+}
+
+const struct target_desc *
+gdbarch_target_desc (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_target_desc called\n");
+  return gdbarch->target_desc;
 }
 
 int
@@ -3961,8 +3976,7 @@ register_gdbarch_init (enum bfd_architecture bfd_architecture,
 }
 
 
-/* Look for an architecture using gdbarch_info.  Base search on only
-   BFD_ARCH_INFO and BYTE_ORDER. */
+/* Look for an architecture using gdbarch_info.  */
 
 struct gdbarch_list *
 gdbarch_list_lookup_by_info (struct gdbarch_list *arches,
@@ -3975,6 +3989,8 @@ gdbarch_list_lookup_by_info (struct gdbarch_list *arches,
       if (info->byte_order != arches->gdbarch->byte_order)
 	continue;
       if (info->osabi != arches->gdbarch->osabi)
+	continue;
+      if (info->target_desc != arches->gdbarch->target_desc)
 	continue;
       return arches;
     }

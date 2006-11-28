@@ -492,6 +492,11 @@ struct target_ops
        equal to what was written.  */
     void (*to_flash_done) (struct target_ops *);
 
+    /* Describe the architecture-specific features of this target.
+       Returns the description found, or NULL if no description
+       was available.  */
+    const struct target_desc *(*to_read_description) (struct target_ops *ops);
+
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
      */
@@ -1178,6 +1183,8 @@ extern int target_stopped_data_address_p (struct target_ops *);
 /* Horrible hack to get around existing macros :-(.  */
 #define target_stopped_data_address_p(CURRENT_TARGET) (1)
 #endif
+
+extern const struct target_desc *target_read_description (struct target_ops *);
 
 /* This will only be defined by a target that supports catching vfork events,
    such as HP-UX.

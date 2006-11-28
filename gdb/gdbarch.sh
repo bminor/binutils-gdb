@@ -2,8 +2,8 @@
 
 # Architecture commands for GDB, the GNU debugger.
 #
-# Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free
-# Software Foundation, Inc.
+# Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+# Free Software Foundation, Inc.
 #
 # This file is part of GDB.
 #
@@ -372,6 +372,8 @@ i:TARGET_ARCHITECTURE:const struct bfd_arch_info *:bfd_arch_info:::&bfd_default_
 i:TARGET_BYTE_ORDER:int:byte_order:::BFD_ENDIAN_BIG
 #
 i:TARGET_OSABI:enum gdb_osabi:osabi:::GDB_OSABI_UNKNOWN
+#
+i::const struct target_desc *:target_desc:::::::paddr_d ((long) current_gdbarch->target_desc)
 # Number of bits in a char or unsigned char for the target machine.
 # Just like CHAR_BIT in <limits.h> but describes the target machine.
 # v:TARGET_CHAR_BIT:int:char_bit::::8 * sizeof (char):8::0:
@@ -713,8 +715,8 @@ cat <<EOF
 
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free
-   Software Foundation, Inc.
+   Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -771,6 +773,7 @@ struct disassemble_info;
 struct target_ops;
 struct obstack;
 struct bp_target_info;
+struct target_desc;
 
 extern struct gdbarch *current_gdbarch;
 EOF
@@ -985,6 +988,9 @@ struct gdbarch_info
 
   /* Use default: GDB_OSABI_UNINITIALIZED (-1).  */
   enum gdb_osabi osabi;
+
+  /* Use default: NULL (ZERO).  */
+  const struct target_desc *target_desc;
 };
 
 typedef struct gdbarch *(gdbarch_init_ftype) (struct gdbarch_info info, struct gdbarch_list *arches);
@@ -1009,11 +1015,11 @@ extern const char **gdbarch_printable_names (void);
 /* Helper function.  Search the list of ARCHES for a GDBARCH that
    matches the information provided by INFO. */
 
-extern struct gdbarch_list *gdbarch_list_lookup_by_info (struct gdbarch_list *arches,  const struct gdbarch_info *info);
+extern struct gdbarch_list *gdbarch_list_lookup_by_info (struct gdbarch_list *arches, const struct gdbarch_info *info);
 
 
 /* Helper function.  Create a preliminary \`\`struct gdbarch''.  Perform
-   basic initialization using values obtained from the INFO andTDEP
+   basic initialization using values obtained from the INFO and TDEP
    parameters.  set_gdbarch_*() functions are called to complete the
    initialization of the object. */
 
@@ -2023,8 +2029,7 @@ register_gdbarch_init (enum bfd_architecture bfd_architecture,
 }
 
 
-/* Look for an architecture using gdbarch_info.  Base search on only
-   BFD_ARCH_INFO and BYTE_ORDER. */
+/* Look for an architecture using gdbarch_info.  */
 
 struct gdbarch_list *
 gdbarch_list_lookup_by_info (struct gdbarch_list *arches,
@@ -2037,6 +2042,8 @@ gdbarch_list_lookup_by_info (struct gdbarch_list *arches,
       if (info->byte_order != arches->gdbarch->byte_order)
 	continue;
       if (info->osabi != arches->gdbarch->osabi)
+	continue;
+      if (info->target_desc != arches->gdbarch->target_desc)
 	continue;
       return arches;
     }

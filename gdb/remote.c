@@ -45,6 +45,7 @@
 #include "solib.h"
 #include "cli/cli-decode.h"
 #include "cli/cli-setshow.h"
+#include "target-descriptions.h"
 
 #include <ctype.h>
 #include <sys/time.h>
@@ -2500,6 +2501,10 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
      packets" request.  If the target can answer this, it will tell us
      which later probes to skip.  */
   remote_query_supported ();
+
+  /* Next, if the target can specify a description, read it.  We do
+     this before anything involving memory or registers.  */
+  target_find_description ();
 
   /* Without this, some commands which require an active target (such
      as kill) won't work.  This variable serves (at least) double duty
@@ -5023,6 +5028,14 @@ extended_remote_create_inferior (char *exec_file, char *args,
   /* Now restart the remote server.  */
   extended_remote_restart ();
 
+  /* NOTE: We don't need to recheck for a target description here; but
+     if we gain the ability to switch the remote executable we may
+     need to, if for instance we are running a process which requested
+     different emulated hardware from the operating system.  A
+     concrete example of this is ARM GNU/Linux, where some binaries
+     will have a legacy FPA coprocessor emulated and others may have
+     access to a hardware VFP unit.  */
+
   /* Now put the breakpoints back in.  This way we're safe if the
      restart function works via a unix fork on the remote side.  */
   insert_breakpoints ();
@@ -5047,6 +5060,14 @@ extended_remote_async_create_inferior (char *exec_file, char *args,
 
   /* Now restart the remote server.  */
   extended_remote_restart ();
+
+  /* NOTE: We don't need to recheck for a target description here; but
+     if we gain the ability to switch the remote executable we may
+     need to, if for instance we are running a process which requested
+     different emulated hardware from the operating system.  A
+     concrete example of this is ARM GNU/Linux, where some binaries
+     will have a legacy FPA coprocessor emulated and others may have
+     access to a hardware VFP unit.  */
 
   /* Now put the breakpoints back in.  This way we're safe if the
      restart function works via a unix fork on the remote side.  */

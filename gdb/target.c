@@ -40,6 +40,7 @@
 #include "gdb_assert.h"
 #include "gdbcore.h"
 #include "exceptions.h"
+#include "target-descriptions.h"
 
 static void target_info (char *, int);
 
@@ -464,6 +465,7 @@ update_current_target (void)
       INHERIT (to_find_memory_regions, t);
       INHERIT (to_make_corefile_notes, t);
       INHERIT (to_get_thread_local_address, t);
+      /* Do not inherit to_read_description.  */
       INHERIT (to_magic, t);
       /* Do not inherit to_memory_map.  */
       /* Do not inherit to_flash_erase.  */
@@ -641,6 +643,7 @@ update_current_target (void)
   de_fault (to_async,
 	    (void (*) (void (*) (enum inferior_event_type, void*), void*))
 	    tcomplain);
+  current_target.to_read_description = NULL;
 #undef de_fault
 
   /* Finally, position the target-stack beneath the squashed
@@ -1602,6 +1605,8 @@ void
 target_pre_inferior (int from_tty)
 {
   invalidate_target_mem_regions ();
+
+  target_clear_description ();
 }
 
 /* This is to be called by the open routine before it does
@@ -1687,6 +1692,27 @@ target_follow_fork (int follow_child)
   /* Some target returned a fork event, but did not know how to follow it.  */
   internal_error (__FILE__, __LINE__,
 		  "could not find a target to follow fork");
+}
+
+/* Look for a target which can describe architectural features, starting
+   from TARGET.  If we find one, return its description.  */
+
+const struct target_desc *
+target_read_description (struct target_ops *target)
+{
+  struct target_ops *t;
+
+  for (t = target; t != NULL; t = t->beneath)
+    if (t->to_read_description != NULL)
+      {
+	const struct target_desc *tdesc;
+
+	tdesc = t->to_read_description (t);
+	if (tdesc)
+	  return tdesc;
+      }
+
+  return NULL;
 }
 
 /* Look through the list of possible targets for a target that can

@@ -516,7 +516,7 @@ TARGET_FLAGS_TO_PASS = \
 # SFILES is used in building the distribution archive.
 
 SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
-	ax-general.c ax-gdb.c \
+	auxv.c ax-general.c ax-gdb.c \
 	bcache.c \
 	bfd-target.c \
 	block.c blockframe.c breakpoint.c buildsym.c \
@@ -554,7 +554,8 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
 	solib.c solib-null.c source.c \
 	stabsread.c stack.c std-regs.c symfile.c symfile-mem.c symmisc.c \
 	symtab.c \
-	target.c target-memory.c thread.c top.c tracepoint.c \
+	target.c target-descriptions.c target-memory.c \
+	thread.c top.c tracepoint.c \
 	trad-frame.c \
 	tramp-frame.c \
 	typeprint.c \
@@ -806,6 +807,7 @@ stack_h = stack.h
 symfile_h = symfile.h
 symtab_h = symtab.h
 target_h = target.h $(bfd_h) $(symtab_h) $(dcache_h) $(memattr_h) $(vec_h)
+target_descriptions_h = target-descriptions.h
 terminal_h = terminal.h
 top_h = top.h
 tracepoint_h = tracepoint.h
@@ -967,7 +969,8 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	trad-frame.o \
 	tramp-frame.o \
 	solib.o solib-null.o \
-	prologue-value.o memory-map.o xml-support.o target-memory.o
+	prologue-value.o memory-map.o xml-support.o \
+	target-descriptions.o target-memory.o
 
 TSOBS = inflow.o
 
@@ -1783,7 +1786,7 @@ annotate.o: annotate.c $(defs_h) $(annotate_h) $(value_h) $(target_h) \
 arch-utils.o: arch-utils.c $(defs_h) $(arch_utils_h) $(buildsym_h) \
 	$(gdbcmd_h) $(inferior_h) $(gdb_string_h) $(regcache_h) \
 	$(gdb_assert_h) $(sim_regno_h) $(gdbcore_h) $(osabi_h) $(version_h) \
-	$(floatformat_h)
+	$(floatformat_h) $(target_descriptions_h)
 arm-linux-nat.o: arm-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(gdb_string_h) $(regcache_h) $(arm_tdep_h) $(gregset_h) \
 	$(target_h) $(linux_nat_h) $(gdb_proc_service_h) $(arm_linux_tdep_h)
@@ -2178,7 +2181,7 @@ infcmd.o: infcmd.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(symfile_h) $(gdbcore_h) $(target_h) $(language_h) $(symfile_h) \
 	$(objfiles_h) $(completer_h) $(ui_out_h) $(event_top_h) \
 	$(parser_defs_h) $(regcache_h) $(reggroups_h) $(block_h) \
-	$(solib_h) $(gdb_assert_h) $(observer_h)
+	$(solib_h) $(gdb_assert_h) $(observer_h) $(target_descriptions_h)
 inf-loop.o: inf-loop.c $(defs_h) $(inferior_h) $(target_h) $(event_loop_h) \
 	$(event_top_h) $(inf_loop_h) $(remote_h) $(exceptions_h)
 inflow.o: inflow.c $(defs_h) $(frame_h) $(inferior_h) $(command_h) \
@@ -2513,7 +2516,7 @@ remote.o: remote.c $(defs_h) $(gdb_string_h) $(inferior_h) $(bfd_h) \
 	$(gdb_stabs_h) $(gdbthread_h) $(remote_h) $(regcache_h) $(value_h) \
 	$(gdb_assert_h) $(event_loop_h) $(event_top_h) $(inf_loop_h) \
 	$(serial_h) $(gdbcore_h) $(remote_fileio_h) $(solib_h) $(observer_h) \
-	$(cli_decode_h) $(cli_setshow_h) $(memory_map_h)
+	$(cli_decode_h) $(cli_setshow_h) $(memory_map_h) $(target_descriptions_h)
 remote-e7000.o: remote-e7000.c $(defs_h) $(gdbcore_h) $(gdbarch_h) \
 	$(inferior_h) $(target_h) $(value_h) $(command_h) $(gdb_string_h) \
 	$(exceptions_h) $(gdbcmd_h) $(serial_h) $(remote_utils_h) \
@@ -2775,7 +2778,9 @@ symtab.o: symtab.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(gdbcore_h) \
 target.o: target.c $(defs_h) $(gdb_string_h) $(target_h) $(gdbcmd_h) \
 	$(symtab_h) $(inferior_h) $(bfd_h) $(symfile_h) $(objfiles_h) \
 	$(gdb_wait_h) $(dcache_h) $(regcache_h) $(gdb_assert_h) $(gdbcore_h) \
-	$(exceptions_h)
+	$(exceptions_h) $(target_descriptions_h)
+target-descriptions.o: target-descriptions.c $(defs_h) $(arch_utils_h) \
+	$(target_h) $(target_descriptions_h) $(gdb_assert_h)
 target-memory.o: target-memory.c $(defs_h) $(vec_h) $(target_h) \
 	$(memory_map_h) $(gdb_assert_h)
 thread.o: thread.c $(defs_h) $(symtab_h) $(frame_h) $(inferior_h) \

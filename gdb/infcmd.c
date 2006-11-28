@@ -48,6 +48,7 @@
 #include <ctype.h>
 #include "gdb_assert.h"
 #include "observer.h"
+#include "target-descriptions.h"
 
 /* Functions exported for general use, in inferior.h: */
 
@@ -405,6 +406,12 @@ tty_command (char *file, int from_tty)
 void
 post_create_inferior (struct target_ops *target, int from_tty)
 {
+  /* If the target hasn't taken care of this already, do it now.
+     Targets which need to access registers during to_open,
+     to_create_inferior, or to_attach should do it earlier; but many
+     don't need to.  */
+  target_find_description ();
+
   if (exec_bfd)
     {
       /* Sometimes the platform-specific hook loads initial shared

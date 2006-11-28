@@ -1,3 +1,27 @@
+2006-11-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (SFILES): Add new and missed files.
+	(target_descriptions_h): New.
+	(COMMON_OBS): Add target-descriptions.o.
+	(arch-utils.o, infcmd.o, remote.o, target.o): Update.
+	(target-descriptions.o): New.
+	* arch-utils.c (gdbarch_info_fill): Check for a target
+	description.
+	* target-descriptions.c, target-descriptions.h: New files.
+	* gdbarch.sh: Add target_desc to info.  Declare it in gdbarch.h.
+	Correct typos.
+	(gdbarch_list_lookup_by_info): Check target_desc.
+	* gdbarch.c, gdbarch.h: Regenerated.
+	* target.c (update_current_target): Mention to_read_description.
+	(target_pre_inferior): Call target_clear_description.
+	(target_read_description): New.
+	* target.h (struct target_ops): Add to_read_description.
+	(target_read_description): New prototype.
+	* infcmd.c (post_create_inferior): Call target_find_description.
+	* remote.c (remote_open_1): Likewise.
+	(extended_remote_create_inferior): Add a comment.
+	(extended_remote_async_create_inferior): Likewise.
+
 2006-11-29  Nick Roberts  <nickrob@snap.net.nz>
 
 	* linux-thread-db.c: Include <signal.h>.

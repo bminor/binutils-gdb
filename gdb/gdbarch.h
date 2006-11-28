@@ -2,8 +2,8 @@
 
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free
-   Software Foundation, Inc.
+   Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -50,6 +50,7 @@ struct disassemble_info;
 struct target_ops;
 struct obstack;
 struct bp_target_info;
+struct target_desc;
 
 extern struct gdbarch *current_gdbarch;
 
@@ -82,6 +83,9 @@ extern enum gdb_osabi gdbarch_osabi (struct gdbarch *gdbarch);
 #if !defined (TARGET_OSABI)
 #define TARGET_OSABI (gdbarch_osabi (current_gdbarch))
 #endif
+
+extern const struct target_desc * gdbarch_target_desc (struct gdbarch *gdbarch);
+/* set_gdbarch_target_desc() - not applicable - pre-initialized. */
 
 
 /* The following are initialized by the target dependent code. */
@@ -1462,6 +1466,9 @@ struct gdbarch_info
 
   /* Use default: GDB_OSABI_UNINITIALIZED (-1).  */
   enum gdb_osabi osabi;
+
+  /* Use default: NULL (ZERO).  */
+  const struct target_desc *target_desc;
 };
 
 typedef struct gdbarch *(gdbarch_init_ftype) (struct gdbarch_info info, struct gdbarch_list *arches);
@@ -1486,11 +1493,11 @@ extern const char **gdbarch_printable_names (void);
 /* Helper function.  Search the list of ARCHES for a GDBARCH that
    matches the information provided by INFO. */
 
-extern struct gdbarch_list *gdbarch_list_lookup_by_info (struct gdbarch_list *arches,  const struct gdbarch_info *info);
+extern struct gdbarch_list *gdbarch_list_lookup_by_info (struct gdbarch_list *arches, const struct gdbarch_info *info);
 
 
 /* Helper function.  Create a preliminary ``struct gdbarch''.  Perform
-   basic initialization using values obtained from the INFO andTDEP
+   basic initialization using values obtained from the INFO and TDEP
    parameters.  set_gdbarch_*() functions are called to complete the
    initialization of the object. */
 

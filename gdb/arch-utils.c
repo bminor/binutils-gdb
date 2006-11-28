@@ -1,6 +1,6 @@
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -32,6 +32,7 @@
 #include "sim-regno.h"
 #include "gdbcore.h"
 #include "osabi.h"
+#include "target-descriptions.h"
 
 #include "version.h"
 
@@ -688,10 +689,15 @@ gdbarch_info_fill (struct gdbarch_info *info)
   if (info->abfd == NULL)
     info->abfd = exec_bfd;
 
+  /* Check for the current target description.  */
+  if (info->target_desc == NULL)
+    info->target_desc = target_current_description ();
+
   /* "(gdb) set architecture ...".  */
   if (info->bfd_arch_info == NULL
       && target_architecture_user)
     info->bfd_arch_info = target_architecture_user;
+  /* From the file.  */
   if (info->bfd_arch_info == NULL
       && info->abfd != NULL
       && bfd_get_arch (info->abfd) != bfd_arch_unknown
