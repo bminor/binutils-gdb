@@ -1946,11 +1946,13 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	  break;
 
 	case EM_68K:
-	  if (e_flags & EF_M68K_CPU32)
-	    strcat (buf, ", cpu32");
-	  if (e_flags & EF_M68K_M68000)
+	  if ((e_flags & EF_M68K_ARCH_MASK) == EF_M68K_M68000)
 	    strcat (buf, ", m68000");
-	  if (e_flags & EF_M68K_CF_ISA_MASK)
+	  else if ((e_flags & EF_M68K_ARCH_MASK) == EF_M68K_CPU32)
+	    strcat (buf, ", cpu32");
+	  else if (((e_flags & EF_M68K_ARCH_MASK) == 0
+		    && (e_flags & EF_M68K_CF_ISA_MASK) != 0)
+		   || (e_flags & EF_M68K_ARCH_MASK) == EF_M68K_CFV4E)
 	    {
 	      char const *isa = _("unknown");
 	      char const *mac = _("unknown mac");

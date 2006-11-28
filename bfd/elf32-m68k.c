@@ -441,11 +441,13 @@ elf32_m68k_object_p (bfd *abfd)
   unsigned features = 0;
   flagword eflags = elf_elfheader (abfd)->e_flags;
 
-  if (eflags & EF_M68K_M68000)
+  if ((eflags & EF_M68K_ARCH_MASK) == EF_M68K_M68000)
     features |= m68000;
-  else if (eflags & EF_M68K_CPU32)
+  else if ((eflags & EF_M68K_ARCH_MASK) == EF_M68K_CPU32)
     features |= cpu32;
-  else if (eflags & EF_M68K_CF_ISA_MASK)
+  else if (((eflags & EF_M68K_ARCH_MASK) == 0
+	    && (eflags & EF_M68K_CF_ISA_MASK) != 0)
+	   || (eflags & EF_M68K_ARCH_MASK) == EF_M68K_CFV4E)
     {
       switch (eflags & EF_M68K_CF_ISA_MASK)
 	{
@@ -560,58 +562,61 @@ elf32_m68k_print_private_bfd_data (abfd, ptr)
   /* xgettext:c-format */
   fprintf (file, _("private flags = %lx:"), elf_elfheader (abfd)->e_flags);
 
-  if (eflags & EF_M68K_CPU32)
-    fprintf (file, " [cpu32]");
-
-  if (eflags & EF_M68K_M68000)
+  if ((eflags & EF_M68K_ARCH_MASK) == EF_M68K_M68000)
     fprintf (file, " [m68000]");
-
-  if (eflags & EF_M68K_CFV4E)
-    fprintf (file, " [cfv4e]");
-
-  if (eflags & EF_M68K_CF_ISA_MASK)
+  else if ((eflags & EF_M68K_ARCH_MASK) == EF_M68K_CPU32)
+    fprintf (file, " [cpu32]");
+  else if (((eflags & EF_M68K_ARCH_MASK) == 0
+	    && (eflags & EF_M68K_CF_ISA_MASK) != 0)
+	   || (eflags & EF_M68K_ARCH_MASK) == EF_M68K_CFV4E)
     {
-      char const *isa = _("unknown");
-      char const *mac = _("unknown");
-      char const *additional = "";
+      if ((eflags & EF_M68K_ARCH_MASK) == EF_M68K_CFV4E)
+	fprintf (file, " [cfv4e]");
+
+      if (eflags & EF_M68K_CF_ISA_MASK)
+	{
+	  char const *isa = _("unknown");
+	  char const *mac = _("unknown");
+	  char const *additional = "";
       
-      switch (eflags & EF_M68K_CF_ISA_MASK)
-	{
-	case EF_M68K_CF_ISA_A_NODIV:
-	  isa = "A";
-	  additional = " [nodiv]";
-	  break;
-	case EF_M68K_CF_ISA_A:
-	  isa = "A";
-	  break;
-	case EF_M68K_CF_ISA_A_PLUS:
-	  isa = "A+";
-	  break;
-	case EF_M68K_CF_ISA_B_NOUSP:
-	  isa = "B";
-	  additional = " [nousp]";
-	  break;
-	case EF_M68K_CF_ISA_B:
-	  isa = "B";
-	  break;
+	  switch (eflags & EF_M68K_CF_ISA_MASK)
+	    {
+	    case EF_M68K_CF_ISA_A_NODIV:
+	      isa = "A";
+	      additional = " [nodiv]";
+	      break;
+	    case EF_M68K_CF_ISA_A:
+	      isa = "A";
+	      break;
+	    case EF_M68K_CF_ISA_A_PLUS:
+	      isa = "A+";
+	      break;
+	    case EF_M68K_CF_ISA_B_NOUSP:
+	      isa = "B";
+	      additional = " [nousp]";
+	      break;
+	    case EF_M68K_CF_ISA_B:
+	      isa = "B";
+	      break;
+	    }
+	  fprintf (file, " [isa %s]%s", isa, additional);
+	  if (eflags & EF_M68K_CF_FLOAT)
+	    fprintf (file, " [float]");
+	  switch (eflags & EF_M68K_CF_MAC_MASK)
+	    {
+	    case 0:
+	      mac = NULL;
+	      break;
+	    case EF_M68K_CF_MAC:
+	      mac = "mac";
+	      break;
+	    case EF_M68K_CF_EMAC:
+	      mac = "emac";
+	      break;
+	    }
+	  if (mac)
+	    fprintf (file, " [%s]", mac);
 	}
-      fprintf (file, " [isa %s]%s", isa, additional);
-      if (eflags & EF_M68K_CF_FLOAT)
-	fprintf (file, " [float]");
-      switch (eflags & EF_M68K_CF_MAC_MASK)
-	{
-	case 0:
-	  mac = NULL;
-	  break;
-	case EF_M68K_CF_MAC:
-	  mac = "mac";
-	  break;
-	case EF_M68K_CF_EMAC:
-	  mac = "emac";
-	  break;
-	}
-      if (mac)
-	fprintf (file, " [%s]", mac);
     }
   
   fputc ('\n', file);
