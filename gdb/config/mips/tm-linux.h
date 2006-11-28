@@ -22,13 +22,6 @@
 #ifndef TM_MIPSLINUX_H
 #define TM_MIPSLINUX_H
 
-/* GNU/Linux MIPS has __SIGRTMAX == 127.  */
-
-#ifndef REALTIME_LO
-#define REALTIME_LO 32
-#define REALTIME_HI 128
-#endif
-
 #include "config/tm-linux.h"
 
 #undef IN_SOLIB_DYNSYM_RESOLVE_CODE

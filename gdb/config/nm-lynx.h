@@ -40,6 +40,12 @@ struct target_waitstatus;
 #include <sys/proc.h>
 #include "gdbthread.h"
 
+/* Lynx's signal.h doesn't seem to have any macros for what signal numbers
+   the real-time events are.  */
+#define REALTIME_LO 33
+/* One more than the last one.  */
+#define REALTIME_HI 64
+
 /* This is the amount to subtract from u.u_ar0 to get the offset in
    the core file of the register values.  */
 

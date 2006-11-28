@@ -1,3 +1,24 @@
+2006-11-28  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* config/tm-linux.h (REALTIME_LO, REALTIME_HI): Do not define.
+	* config/mips/tm-linux.h (REALTIME_LO, REALTIME_HI): Likewise.
+
+	* config/rs6000/tm-rs6000ly.h (REALTIME_LO, REALTIME_HI): Move to ...
+	* config/nm-lynx.h (REALTIME_LO, REALTIME_HI): ... here.
+
+	* config/i386/nto.mh (NAT_FILE): Define.
+	* config/i386/nto.mt (DEPRECATED_TM_FILE): Remove.
+	* config/i386/tm-nto.h: Delete file.
+	* config/tm-nto.h: Delete file.
+	* config/nm-nto.h: New file.
+
+	* Makefile.in (nto-tdep.o): Add dependency on $(objfiles_h).
+	* nto-tdep.c: Include "objfiles.h" and <string.h>.
+
+	* coff-solib.h (SOLIB_UNLOADED_LIBRARY_PATHNAME): Define as "".
+	* xcoffread.c (read_xcoff_symtab): Initialize fcn_stab_saved.
+	* config/rs6000/rs6000lynx.mt (TDEPFILES): Add xcoffread.o.
+
 2006-11-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2-frame.c (decode_frame_entry_1): Skip unknown augmentations

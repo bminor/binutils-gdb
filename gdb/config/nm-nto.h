@@ -1,6 +1,6 @@
-/* QNX Neutrino target header.
- 
-   Copyright 2003, 2004 Free Software Foundation, Inc.
+/* Native support for QNX Neutrino version 6.
+
+   Copyright 2003,2006 Free Software Foundation, Inc.
 
    This code was donated by QNX Software Systems Ltd.
 
@@ -21,9 +21,11 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef TM_NTO_H
-#define TM_NTO_H 1
+#ifndef NM_NTO_H
+#define NM_NTO_H
 
-#include "config/tm-nto.h"
+/* Setup the valid realtime signal range.  */
+#define REALTIME_LO 41
+#define REALTIME_HI 56
 
-#endif /* TM_NTO_H */
+#endif /* NM_NTO_H */

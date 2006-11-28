@@ -925,7 +925,7 @@ read_xcoff_symtab (struct partial_symtab *pst)
   int depth = 0;
   int fcn_start_addr = 0;
 
-  struct coff_symbol fcn_stab_saved;
+  struct coff_symbol fcn_stab_saved = { 0 };
 
   /* fcn_cs_saved is global because process_xcoff_symbol needs it. */
   union internal_auxent fcn_aux_saved;

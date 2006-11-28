@@ -19,15 +19,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* Pick reasonable defaults for the number of real-time signals.  */
-
-#ifndef REALTIME_LO
-#define REALTIME_LO 32
-#endif
-#ifndef REALTIME_HI
-#define REALTIME_HI 64
-#endif
-
 /* We need this file for the SOLIB_TRAMPOLINE stuff. */
 
 /* If PC is in a shared library trampoline code, return the PC

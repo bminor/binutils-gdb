@@ -2407,7 +2407,7 @@ nto-procfs.o: nto-procfs.c $(defs_h) $(gdb_dirent_h) $(exceptions_h) \
 	$(gdbthread_h) $(nto_tdep_h) $(command_h) $(regcache_h) $(solib_h)
 nto-tdep.o: nto-tdep.c $(gdb_stat_h) $(gdb_string_h) $(nto_tdep_h) $(top_h) \
 	$(cli_decode_h) $(cli_cmds_h) $(inferior_h) $(gdbarch_h) $(bfd_h) \
-	$(elf_bfd_h) $(solib_svr4_h) $(gdbcore_h)
+	$(elf_bfd_h) $(solib_svr4_h) $(gdbcore_h) $(objfiles_h)
 objc-exp.o: objc-exp.c $(defs_h) $(gdb_string_h) $(expression_h) \
 	$(objc_lang_h) $(value_h) $(parser_defs_h) $(language_h) $(c_lang_h) \
 	$(bfd_h) $(symfile_h) $(objfiles_h) $(top_h) $(completer_h) \
