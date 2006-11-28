@@ -1,3 +1,7 @@
+2006-11-28  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gdb.base/break.c (main): Move position of malloc.
+
 2006-11-28  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.mi/mi-var-cmd.exp: Check -var-update after
