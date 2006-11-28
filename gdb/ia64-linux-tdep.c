@@ -26,6 +26,7 @@
 #include "regcache.h"
 #include "osabi.h"
 #include "solib-svr4.h"
+#include "symtab.h"
 
 /* The sigtramp code is in a non-readable (executable-only) region
    of memory called the ``gate page''.  The addresses in question
@@ -125,6 +126,8 @@ ia64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sigcontext_register_address = ia64_linux_sigcontext_register_address;
 
   set_gdbarch_write_pc (gdbarch, ia64_linux_write_pc);
+
+  set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,

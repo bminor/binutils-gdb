@@ -33,6 +33,7 @@
 
 #include "glibc-tdep.h"
 #include "solib-svr4.h"
+#include "symtab.h"
 
 #include "trad-frame.h"
 #include "frame-unwind.h"
@@ -413,6 +414,7 @@ m32r_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   frame_unwind_append_sniffer (gdbarch, m32r_linux_sigtramp_frame_sniffer);
 
   /* GNU/Linux uses SVR4-style shared libraries.  */
+  set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 

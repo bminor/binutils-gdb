@@ -35,6 +35,7 @@
 #include "i386-linux-tdep.h"
 #include "glibc-tdep.h"
 #include "solib-svr4.h"
+#include "symtab.h"
 
 /* Return the name of register REG.  */
 
@@ -431,6 +432,7 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sc_num_regs = ARRAY_SIZE (i386_linux_sc_reg_offset);
 
   /* GNU/Linux uses SVR4-style shared libraries.  */
+  set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 

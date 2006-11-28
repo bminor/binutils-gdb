@@ -23,8 +23,6 @@
 #ifndef TM_LINUX_H
 #define TM_LINUX_H
 
-#include "config/tm-linux.h"
-
 /* The following works around a problem with /usr/include/sys/procfs.h  */
 #define sys_quotactl 1
 

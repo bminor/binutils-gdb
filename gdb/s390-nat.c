@@ -23,7 +23,6 @@
    Boston, MA 02110-1301, USA.  */
 
 #include "defs.h"
-#include "tm.h"
 #include "regcache.h"
 #include "inferior.h"
 #include "target.h"

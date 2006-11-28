@@ -22,12 +22,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define TM_LINUX_H
 
 #include "powerpc/tm-ppc-eabi.h"
-/* Avoid warning from redefinition in tm-sysv4.h (included from tm-linux.h) */
-#undef SKIP_TRAMPOLINE_CODE
-#include "config/tm-linux.h"
 
-/* We've multi-arched these.  (Note that this completely undoes the
-   effect of config/tm-linux.h #including config/tm-sysv4.h.)  */
+/* We've multi-arched these.  */
 #undef SKIP_TRAMPOLINE_CODE
 
 /* Make sure nexti gets the help it needs for debugging assembly code

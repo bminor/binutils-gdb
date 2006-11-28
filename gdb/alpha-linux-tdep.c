@@ -23,6 +23,7 @@
 #include "gdb_assert.h"
 #include "osabi.h"
 #include "solib-svr4.h"
+#include "symtab.h"
 
 #include "alpha-tdep.h"
 
@@ -141,6 +142,8 @@ alpha_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->pc_in_sigtramp = alpha_linux_pc_in_sigtramp;
   tdep->jb_pc = 2;
   tdep->jb_elt_size = 8;
+
+  set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,

@@ -1,5 +1,45 @@
 2006-11-28  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* config/tm-linux.h: Delete file.
+	* config/alpha/alpha-linux.mt (DEPRECATED_TM_FILE): Set to tm-alpha.h.
+	* config/alpha/tm-alphalinux.h: Delete file.
+	* config/arm/linux.mt (DEPRECATED_TM_FILE): Set to tm-arm.h
+	* config/arm/tm-linux.h: Delete file.
+	* config/i386/tm-linux.h: Do not include "config/tm-linux.h".
+	* config/ia64/tm-linux.h: Do not include "config/tm-linux.h".
+	* config/m32r/linux.mt (DEPRECATED_TM_FILE): Remove.
+	* config/mips/tm-linux.h:  Do not include "config/tm-linux.h".
+	* config/pa/linux.mt (DEPRECATED_TM_FILE): Set to tm-hppa.h.
+	* config/pa/tm-linux.h: Delete file.
+	* config/powerpc/tm-linux.h: Do not include "config/tm-linux.h".
+	* config/s390/linux.mt (DEPRECATED_TM_FILE): Remove.
+	* config/sh/linux.mt (DEPRECATED_TM_FILE): Set to tm-sh.h.
+	* config/sh/tm-linux.h: Delete file.
+	* alpha-linux-tdep.c: Include "symtab.h".
+	(alpha_linux_init_abi): Call set_gdbarch_skip_trampoline_code.
+	* i386-linux-tdep.c: Include "symtab.h".
+	(i386_linux_init_abi): Call set_gdbarch_skip_trampoline_code.
+	* ia64-linux-tdep.c: Include "symtab.h".
+	(ia64_linux_init_abi): Call set_gdbarch_skip_trampoline_code.
+	* m32r-linux-tdep.c: Include "symtab.h".
+	(m32r_linux_init_abi): Call set_gdbarch_skip_trampoline_code.
+	* mips-linux-tdep.c: Include "symtab.h".
+	(mips_linux_init_abi): Call set_gdbarch_skip_trampoline_code.
+	* sh-linux-tdep.c: Include "symtab.h".
+	(sh_linux_init_abi): Call set_gdbarch_skip_trampoline_code.
+	* s390-tdep.c (s390_gdbarch_init): Call
+	set_gdbarch_skip_trampoline_code.
+	* s390-nat.c: Do not include "tm.h".
+	* Makefile.in (alpha-linux-tdep.o): Add dependency on $(symtab_h).
+	(i386-linux-tdep.o): Likewise.
+	(ia64-linux-tdep.o): Likewise.
+	(m32r-linux-tdep.o): Likewise.
+	(mips-linux-tdep.o): Likewise.
+	(sh-linux-tdep.o): Likewise.
+	(s390-nat.o): Remove dependency on $(tm_h).
+
+2006-11-28  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* config/nm-linux.h: Do not include <signal.h>.
 	(REALTIME_LO, REALTIME_HI): Do not define.
 	* signals/signals.c (REALTIME_HI): Fix off-by-one bug.

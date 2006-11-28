@@ -22,8 +22,6 @@
 #ifndef TM_MIPSLINUX_H
 #define TM_MIPSLINUX_H
 
-#include "config/tm-linux.h"
-
 #undef IN_SOLIB_DYNSYM_RESOLVE_CODE
 #define IN_SOLIB_DYNSYM_RESOLVE_CODE(PC) mips_linux_in_dynsym_resolve_code (PC)
 int mips_linux_in_dynsym_resolve_code (CORE_ADDR pc);

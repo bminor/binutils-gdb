@@ -34,6 +34,7 @@
 #include "tramp-frame.h"
 #include "floatformat.h"
 #include "solib.h"
+#include "symtab.h"
 #include "mips-linux-tdep.h"
 
 /* Figure out where the longjmp will land.
@@ -1179,6 +1180,7 @@ mips_linux_init_abi (struct gdbarch_info info,
 	break;
     }
 
+  set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
   set_gdbarch_skip_solib_resolver (gdbarch, mips_linux_skip_resolver);
 
   set_gdbarch_software_single_step (gdbarch, mips_software_single_step);
