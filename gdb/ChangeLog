@@ -1,3 +1,27 @@
+2006-11-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c (struct remote_arch_state): Doc fix.
+	(compare_pnums): New function.
+	(init_remote_state): Only allocate packet_reg structures for raw
+	registers.  Define the g/G packet format separately from creating
+	packet_reg.  Don't use DEPRECATED_REGISTER_BYTE.
+	(packet_reg_from_regnum, packet_reg_from_pnum): Only iterate over
+	raw registers.
+	(register_bytes_found): Delete.
+	(fetch_register_using_p): Take a struct packet_reg.  Handle disabled
+	'p' packet here.  Use packet_ok.
+	(fetch_registers_using_g): New function, split out of
+	remote_fetch_registers.  Check the 'g' packet more strictly.  Save
+	its actual size and contents.  Eliminate BUF.  Only iterate over
+	raw registers.
+	(remote_fetch_registers): Use the new functions for 'p' and 'g'.
+	Mark unavailable registers.
+	(store_register_using_P): Likewise to fetch_register_using_p.
+	(store_registers_using_G): New function, split out of
+	remote_store_registers.  Only iterate over raw registers.  Don't
+	use register_bytes_found.
+	(remote_store_registers): Likewise to remote_fetch_registers.
+
 2006-11-28  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* coffread.c (cs_to_bfd_section): New function.

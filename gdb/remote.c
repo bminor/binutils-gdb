@@ -268,7 +268,7 @@ struct remote_arch_state
   long sizeof_g_packet;
 
   /* Description of the remote protocol registers indexed by REGNUM
-     (making an array of NUM_REGS + NUM_PSEUDO_REGS in size).  */
+     (making an array NUM_REGS in size).  */
   struct packet_reg *regs;
 
   /* This is the size (in chars) of the first response to the ``g''
@@ -309,33 +309,61 @@ get_remote_state (void)
   return get_remote_state_raw ();
 }
 
+static int
+compare_pnums (const void *lhs_, const void *rhs_)
+{
+  const struct packet_reg * const *lhs = lhs_;
+  const struct packet_reg * const *rhs = rhs_;
+
+  if ((*lhs)->pnum < (*rhs)->pnum)
+    return -1;
+  else if ((*lhs)->pnum == (*rhs)->pnum)
+    return 0;
+  else
+    return 1;
+}
+
 static void *
 init_remote_state (struct gdbarch *gdbarch)
 {
-  int regnum;
+  int regnum, num_remote_regs, offset;
   struct remote_state *rs = get_remote_state_raw ();
   struct remote_arch_state *rsa;
+  struct packet_reg **remote_regs;
 
   rsa = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct remote_arch_state);
 
-  rsa->sizeof_g_packet = 0;
-
   /* Assume a 1:1 regnum<->pnum table.  */
-  rsa->regs = GDBARCH_OBSTACK_CALLOC (gdbarch, NUM_REGS + NUM_PSEUDO_REGS,
-				      struct packet_reg);
-  for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
+  rsa->regs = GDBARCH_OBSTACK_CALLOC (gdbarch, NUM_REGS, struct packet_reg);
+  for (regnum = 0; regnum < NUM_REGS; regnum++)
     {
       struct packet_reg *r = &rsa->regs[regnum];
       r->pnum = regnum;
       r->regnum = regnum;
-      r->offset = DEPRECATED_REGISTER_BYTE (regnum);
-      r->in_g_packet = (regnum < NUM_REGS);
-      /* ...name = REGISTER_NAME (regnum); */
-
-      /* Compute packet size by accumulating the size of all registers.  */
-      if (regnum < NUM_REGS)
-	rsa->sizeof_g_packet += register_size (current_gdbarch, regnum);
     }
+
+  /* Define the g/G packet format as the contents of each register
+     with a remote protocol number, in order of ascending protocol
+     number.  */
+
+  remote_regs = alloca (NUM_REGS * sizeof (struct packet_reg *));
+  for (num_remote_regs = 0, regnum = 0; regnum < NUM_REGS; regnum++)
+    if (rsa->regs[regnum].pnum != -1)
+      remote_regs[num_remote_regs++] = &rsa->regs[regnum];
+
+  qsort (remote_regs, num_remote_regs, sizeof (struct packet_reg *),
+	 compare_pnums);
+
+  for (regnum = 0, offset = 0; regnum < num_remote_regs; regnum++)
+    {
+      remote_regs[regnum]->in_g_packet = 1;
+      remote_regs[regnum]->offset = offset;
+      offset += register_size (current_gdbarch, remote_regs[regnum]->regnum);
+    }
+
+  /* Record the maximum possible size of the g packet - it may turn out
+     to be smaller.  */
+  rsa->sizeof_g_packet = offset;
 
   /* Default maximum number of characters in a packet body. Many
      remote stubs have a hardwired buffer size of 400 bytes
@@ -387,7 +415,7 @@ get_remote_packet_size (void)
 static struct packet_reg *
 packet_reg_from_regnum (struct remote_arch_state *rsa, long regnum)
 {
-  if (regnum < 0 && regnum >= NUM_REGS + NUM_PSEUDO_REGS)
+  if (regnum < 0 && regnum >= NUM_REGS)
     return NULL;
   else
     {
@@ -401,7 +429,7 @@ static struct packet_reg *
 packet_reg_from_pnum (struct remote_arch_state *rsa, LONGEST pnum)
 {
   int i;
-  for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
+  for (i = 0; i < NUM_REGS; i++)
     {
       struct packet_reg *r = &rsa->regs[i];
       if (r->pnum == pnum)
@@ -3442,39 +3470,46 @@ got_status:
   return inferior_ptid;
 }
 
-/* Number of bytes of registers this stub implements.  */
-
-static int register_bytes_found;
-
-/* Read the remote registers into the block REGS.  */
-/* Currently we just read all the registers, so we don't use regnum.  */
+/* Fetch a single register using a 'p' packet.  */
 
 static int
-fetch_register_using_p (int regnum)
+fetch_register_using_p (struct packet_reg *reg)
 {
   struct remote_state *rs = get_remote_state ();
   char *buf, *p;
   char regp[MAX_REGISTER_SIZE];
   int i;
 
+  if (remote_protocol_packets[PACKET_p].support == PACKET_DISABLE)
+    return 0;
+
+  if (reg->pnum == -1)
+    return 0;
+
   p = rs->buf;
   *p++ = 'p';
-  p += hexnumstr (p, regnum);
+  p += hexnumstr (p, reg->pnum);
   *p++ = '\0';
   remote_send (&rs->buf, &rs->buf_size);
 
   buf = rs->buf;
 
-  /* If the stub didn't recognize the packet, or if we got an error,
-     tell our caller.  */
-  if (buf[0] == '\0' || buf[0] == 'E')
-    return 0;
+  switch (packet_ok (buf, &remote_protocol_packets[PACKET_p]))
+    {
+    case PACKET_OK:
+      break;
+    case PACKET_UNKNOWN:
+      return 0;
+    case PACKET_ERROR:
+      error (_("Could not fetch register \"%s\""),
+	     gdbarch_register_name (current_gdbarch, reg->regnum));
+    }
 
   /* If this register is unfetchable, tell the regcache.  */
   if (buf[0] == 'x')
     {
-      regcache_raw_supply (current_regcache, regnum, NULL);
-      set_register_cached (regnum, -1);
+      regcache_raw_supply (current_regcache, reg->regnum, NULL);
+      set_register_cached (reg->regnum, -1);
       return 1;
     }
 
@@ -3484,74 +3519,66 @@ fetch_register_using_p (int regnum)
   while (p[0] != 0)
     {
       if (p[1] == 0)
-        {
-          error (_("fetch_register_using_p: early buf termination"));
-          return 0;
-        }
+	error (_("fetch_register_using_p: early buf termination"));
 
       regp[i++] = fromhex (p[0]) * 16 + fromhex (p[1]);
       p += 2;
     }
-  regcache_raw_supply (current_regcache, regnum, regp);
+  regcache_raw_supply (current_regcache, reg->regnum, regp);
   return 1;
 }
 
+/* Fetch the registers included in the target's 'g' packet.  */
+
 static void
-remote_fetch_registers (int regnum)
+fetch_registers_using_g (void)
 {
   struct remote_state *rs = get_remote_state ();
   struct remote_arch_state *rsa = get_remote_arch_state ();
-  char *buf;
-  int i;
+  int i, buf_len;
   char *p;
-  char *regs = alloca (rsa->sizeof_g_packet);
-
-  set_thread (PIDGET (inferior_ptid), 1);
-
-  if (regnum >= 0)
-    {
-      struct packet_reg *reg = packet_reg_from_regnum (rsa, regnum);
-      gdb_assert (reg != NULL);
-      if (!reg->in_g_packet)
-	internal_error (__FILE__, __LINE__,
-			_("Attempt to fetch a non G-packet register when this "
-			"remote.c does not support the p-packet."));
-    }
-      switch (remote_protocol_packets[PACKET_p].support)
-	{
-	case PACKET_DISABLE:
-	  break;
-	case PACKET_ENABLE:
-	  if (fetch_register_using_p (regnum))
-	    return;
-	  else
-	    error (_("Protocol error: p packet not recognized by stub"));
-	case PACKET_SUPPORT_UNKNOWN:
-	  if (fetch_register_using_p (regnum))
-	    {
-	      /* The stub recognized the 'p' packet.  Remember this.  */
-	      remote_protocol_packets[PACKET_p].support = PACKET_ENABLE;
-	      return;
-	    }
-	  else
-	    {
-	      /* The stub does not support the 'P' packet.  Use 'G'
-	         instead, and don't try using 'P' in the future (it
-	         will just waste our time).  */
-	      remote_protocol_packets[PACKET_p].support = PACKET_DISABLE;
-	      break;
-	    }
-	}
+  char *regs;
 
   sprintf (rs->buf, "g");
   remote_send (&rs->buf, &rs->buf_size);
-  buf = rs->buf;
 
-  /* Save the size of the packet sent to us by the target.  Its used
+  buf_len = strlen (rs->buf);
+
+  /* Sanity check the received packet.  */
+  if (buf_len % 2 != 0)
+    error (_("Remote 'g' packet reply is of odd length: %s"), rs->buf);
+  if (REGISTER_BYTES_OK_P () && !REGISTER_BYTES_OK (buf_len / 2))
+    error (_("Remote 'g' packet reply is wrong length: %s"), rs->buf);
+  if (buf_len > 2 * rsa->sizeof_g_packet)
+    error (_("Remote 'g' packet reply is too long: %s"), rs->buf);
+
+  /* Save the size of the packet sent to us by the target.  It is used
      as a heuristic when determining the max size of packets that the
      target can safely receive.  */
-  if ((rsa->actual_register_packet_size) == 0)
-    (rsa->actual_register_packet_size) = strlen (buf);
+  if (rsa->actual_register_packet_size == 0)
+    rsa->actual_register_packet_size = buf_len;
+
+  /* If this is smaller than we guessed the 'g' packet would be,
+     update our records.  A 'g' reply that doesn't include a register's
+     value implies either that the register is not available, or that
+     the 'p' packet must be used.  */
+  if (buf_len < 2 * rsa->sizeof_g_packet)
+    {
+      rsa->sizeof_g_packet = buf_len / 2;
+
+      for (i = 0; i < NUM_REGS; i++)
+	{
+	  if (rsa->regs[i].pnum == -1)
+	    continue;
+
+	  if (rsa->regs[i].offset >= rsa->sizeof_g_packet)
+	    rsa->regs[i].in_g_packet = 0;
+	  else
+	    rsa->regs[i].in_g_packet = 1;
+	}
+    }
+
+  regs = alloca (rsa->sizeof_g_packet);
 
   /* Unimplemented registers read as all bits zero.  */
   memset (regs, 0, rsa->sizeof_g_packet);
@@ -3559,34 +3586,29 @@ remote_fetch_registers (int regnum)
   /* We can get out of synch in various cases.  If the first character
      in the buffer is not a hex character, assume that has happened
      and try to fetch another packet to read.  */
-  while ((buf[0] < '0' || buf[0] > '9')
-	 && (buf[0] < 'A' || buf[0] > 'F')
-	 && (buf[0] < 'a' || buf[0] > 'f')
-	 && buf[0] != 'x')	/* New: unavailable register value.  */
+  while ((rs->buf[0] < '0' || rs->buf[0] > '9')
+	 && (rs->buf[0] < 'A' || rs->buf[0] > 'F')
+	 && (rs->buf[0] < 'a' || rs->buf[0] > 'f')
+	 && rs->buf[0] != 'x')	/* New: unavailable register value.  */
     {
       if (remote_debug)
 	fprintf_unfiltered (gdb_stdlog,
 			    "Bad register packet; fetching a new packet\n");
       getpkt (&rs->buf, &rs->buf_size, 0);
-      buf = rs->buf;
     }
 
   /* Reply describes registers byte by byte, each byte encoded as two
      hex characters.  Suck them all up, then supply them to the
      register cacheing/storage mechanism.  */
 
-  p = buf;
+  p = rs->buf;
   for (i = 0; i < rsa->sizeof_g_packet; i++)
     {
-      if (p[0] == 0)
-	break;
-      if (p[1] == 0)
-	{
-	  warning (_("Remote reply is of odd length: %s"), buf);
-	  /* Don't change register_bytes_found in this case, and don't
-	     print a second warning.  */
-	  goto supply_them;
-	}
+      if (p[0] == 0 || p[1] == 0)
+	/* This shouldn't happen - we adjusted sizeof_g_packet above.  */
+	internal_error (__FILE__, __LINE__,
+			"unexpected end of 'g' packet reply");
+
       if (p[0] == 'x' && p[1] == 'x')
 	regs[i] = 0;		/* 'x' */
       else
@@ -3594,31 +3616,20 @@ remote_fetch_registers (int regnum)
       p += 2;
     }
 
-  if (i != register_bytes_found)
-    {
-      register_bytes_found = i;
-      if (REGISTER_BYTES_OK_P ()
-	  && !REGISTER_BYTES_OK (i))
-	warning (_("Remote reply is wrong length: %s"), buf);
-    }
-
- supply_them:
   {
     int i;
-    for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
+    for (i = 0; i < NUM_REGS; i++)
       {
 	struct packet_reg *r = &rsa->regs[i];
 	if (r->in_g_packet)
 	  {
-	    if (r->offset * 2 >= strlen (buf))
-	      /* A short packet that didn't include the register's
-                 value, this implies that the register is zero (and
-                 not that the register is unavailable).  Supply that
-                 zero value.  */
-	      regcache_raw_supply (current_regcache, r->regnum, NULL);
-	    else if (buf[r->offset * 2] == 'x')
+	    if (r->offset * 2 >= strlen (rs->buf))
+	      /* This shouldn't happen - we adjusted in_g_packet above.  */
+	      internal_error (__FILE__, __LINE__,
+			      "unexpected end of 'g' packet reply");
+	    else if (rs->buf[r->offset * 2] == 'x')
 	      {
-		gdb_assert (r->offset * 2 < strlen (buf));
+		gdb_assert (r->offset * 2 < strlen (rs->buf));
 		/* The register isn't available, mark it as such (at
                    the same time setting the value to zero).  */
 		regcache_raw_supply (current_regcache, r->regnum, NULL);
@@ -3630,6 +3641,53 @@ remote_fetch_registers (int regnum)
 	  }
       }
   }
+}
+
+static void
+remote_fetch_registers (int regnum)
+{
+  struct remote_state *rs = get_remote_state ();
+  struct remote_arch_state *rsa = get_remote_arch_state ();
+  int i;
+
+  set_thread (PIDGET (inferior_ptid), 1);
+
+  if (regnum >= 0)
+    {
+      struct packet_reg *reg = packet_reg_from_regnum (rsa, regnum);
+      gdb_assert (reg != NULL);
+
+      /* If this register might be in the 'g' packet, try that first -
+	 we are likely to read more than one register.  If this is the
+	 first 'g' packet, we might be overly optimistic about its
+	 contents, so fall back to 'p'.  */
+      if (reg->in_g_packet)
+	{
+	  fetch_registers_using_g ();
+	  if (reg->in_g_packet)
+	    return;
+	}
+
+      if (fetch_register_using_p (reg))
+	return;
+
+      /* This register is not available.  */
+      regcache_raw_supply (current_regcache, reg->regnum, NULL);
+      set_register_cached (reg->regnum, -1);
+
+      return;
+    }
+
+  fetch_registers_using_g ();
+
+  for (i = 0; i < NUM_REGS; i++)
+    if (!rsa->regs[i].in_g_packet)
+      if (!fetch_register_using_p (&rsa->regs[i]))
+	{
+	  /* This register is not available.  */
+	  regcache_raw_supply (current_regcache, i, NULL);
+	  set_register_cached (i, -1);
+	}
 }
 
 /* Prepare to store registers.  Since we may send them all (using a
@@ -3662,15 +3720,20 @@ remote_prepare_to_store (void)
    packet was not recognized.  */
 
 static int
-store_register_using_P (int regnum)
+store_register_using_P (struct packet_reg *reg)
 {
   struct remote_state *rs = get_remote_state ();
   struct remote_arch_state *rsa = get_remote_arch_state ();
-  struct packet_reg *reg = packet_reg_from_regnum (rsa, regnum);
   /* Try storing a single register.  */
   char *buf = rs->buf;
   gdb_byte regp[MAX_REGISTER_SIZE];
   char *p;
+
+  if (remote_protocol_packets[PACKET_P].support == PACKET_DISABLE)
+    return 0;
+
+  if (reg->pnum == -1)
+    return 0;
 
   xsnprintf (buf, get_remote_packet_size (), "P%s=", phex_nz (reg->pnum, 0));
   p = buf + strlen (buf);
@@ -3678,51 +3741,30 @@ store_register_using_P (int regnum)
   bin2hex (regp, p, register_size (current_gdbarch, reg->regnum));
   remote_send (&rs->buf, &rs->buf_size);
 
-  return rs->buf[0] != '\0';
+  switch (packet_ok (rs->buf, &remote_protocol_packets[PACKET_P]))
+    {
+    case PACKET_OK:
+      return 1;
+    case PACKET_ERROR:
+      error (_("Could not write register \"%s\""),
+	     gdbarch_register_name (current_gdbarch, reg->regnum));
+    case PACKET_UNKNOWN:
+      return 0;
+    default:
+      internal_error (__FILE__, __LINE__, _("Bad result from packet_ok"));
+    }
 }
-
 
 /* Store register REGNUM, or all registers if REGNUM == -1, from the
    contents of the register cache buffer.  FIXME: ignores errors.  */
 
 static void
-remote_store_registers (int regnum)
+store_registers_using_G (void)
 {
   struct remote_state *rs = get_remote_state ();
   struct remote_arch_state *rsa = get_remote_arch_state ();
   gdb_byte *regs;
   char *p;
-
-  set_thread (PIDGET (inferior_ptid), 1);
-
-  if (regnum >= 0)
-    {
-      switch (remote_protocol_packets[PACKET_P].support)
-	{
-	case PACKET_DISABLE:
-	  break;
-	case PACKET_ENABLE:
-	  if (store_register_using_P (regnum))
-	    return;
-	  else
-	    error (_("Protocol error: P packet not recognized by stub"));
-	case PACKET_SUPPORT_UNKNOWN:
-	  if (store_register_using_P (regnum))
-	    {
-	      /* The stub recognized the 'P' packet.  Remember this.  */
-	      remote_protocol_packets[PACKET_P].support = PACKET_ENABLE;
-	      return;
-	    }
-	  else
-	    {
-	      /* The stub does not support the 'P' packet.  Use 'G'
-	         instead, and don't try using 'P' in the future (it
-	         will just waste our time).  */
-	      remote_protocol_packets[PACKET_P].support = PACKET_DISABLE;
-	      break;
-	    }
-	}
-    }
 
   /* Extract all the registers in the regcache copying them into a
      local buffer.  */
@@ -3730,7 +3772,7 @@ remote_store_registers (int regnum)
     int i;
     regs = alloca (rsa->sizeof_g_packet);
     memset (regs, 0, rsa->sizeof_g_packet);
-    for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
+    for (i = 0; i < NUM_REGS; i++)
       {
 	struct packet_reg *r = &rsa->regs[i];
 	if (r->in_g_packet)
@@ -3742,9 +3784,54 @@ remote_store_registers (int regnum)
      each byte encoded as two hex characters.  */
   p = rs->buf;
   *p++ = 'G';
-  /* remote_prepare_to_store insures that register_bytes_found gets set.  */
-  bin2hex (regs, p, register_bytes_found);
+  /* remote_prepare_to_store insures that rsa->sizeof_g_packet gets
+     updated.  */
+  bin2hex (regs, p, rsa->sizeof_g_packet);
   remote_send (&rs->buf, &rs->buf_size);
+}
+
+/* Store register REGNUM, or all registers if REGNUM == -1, from the contents
+   of the register cache buffer.  FIXME: ignores errors.  */
+
+static void
+remote_store_registers (int regnum)
+{
+  struct remote_state *rs = get_remote_state ();
+  struct remote_arch_state *rsa = get_remote_arch_state ();
+  int i;
+
+  set_thread (PIDGET (inferior_ptid), 1);
+
+  if (regnum >= 0)
+    {
+      struct packet_reg *reg = packet_reg_from_regnum (rsa, regnum);
+      gdb_assert (reg != NULL);
+
+      /* Always prefer to store registers using the 'P' packet if
+	 possible; we often change only a small number of registers.
+	 Sometimes we change a larger number; we'd need help from a
+	 higher layer to know to use 'G'.  */
+      if (store_register_using_P (reg))
+	return;
+
+      /* For now, don't complain if we have no way to write the
+	 register.  GDB loses track of unavailable registers too
+	 easily.  Some day, this may be an error.  We don't have
+	 any way to read the register, either... */
+      if (!reg->in_g_packet)
+	return;
+
+      store_registers_using_G ();
+      return;
+    }
+
+  store_registers_using_G ();
+
+  for (i = 0; i < NUM_REGS; i++)
+    if (!rsa->regs[i].in_g_packet)
+      if (!store_register_using_P (&rsa->regs[i]))
+	/* See above for why we do not issue an error here.  */
+	continue;
 }
 
 
