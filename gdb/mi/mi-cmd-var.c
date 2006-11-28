@@ -66,9 +66,10 @@ mi_cmd_var_create (char *command, char **argv, int argc)
   old_cleanups = make_cleanup (free_current_contents, &name);
 
   frame = xstrdup (argv[1]);
-  old_cleanups = make_cleanup (xfree, frame);
+  make_cleanup (xfree, frame);
 
   expr = xstrdup (argv[2]);
+  make_cleanup (xfree, expr);
 
   if (strcmp (name, "-") == 0)
     {

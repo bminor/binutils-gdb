@@ -1,3 +1,8 @@
+2006-11-28  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* mi/mi-cmd-var.c (mi_cmd_var_create): Fix cleanup
+        handlers. Free expression.
+
 2006-11-28  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* config/tm-linux.h (REALTIME_LO, REALTIME_HI): Do not define.
