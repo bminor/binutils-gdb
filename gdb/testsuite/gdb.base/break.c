@@ -87,6 +87,10 @@ char *argv[], **envp;
     set_debug_traps();  /* set breakpoint 5 here */
     breakpoint();
 #endif
+    /* We're used by a test that requires malloc, so make sure it is
+       in the executable.  */
+    (void)malloc (1);
+
     if (argc == 12345) {  /* an unlikely value < 2^16, in case uninited */ /* set breakpoint 6 here */
 	fprintf (stderr, "usage:  factorial <number>\n");
 	return 1;

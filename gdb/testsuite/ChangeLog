@@ -1,4 +1,6 @@
-2006-11-28  Nathan Sidwell  <nathan@codesourcery.com>
+2006-11-27  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gdb.base/break.c (main): Call malloc.
 
 	* gdb.threads/linux-dp.exp: Read thread table before and after
 	creating each philosopher and verify it.
