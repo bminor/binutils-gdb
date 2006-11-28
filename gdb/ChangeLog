@@ -1,3 +1,7 @@
+2006-11-29  Nick Roberts  <nickrob@snap.net.nz>
+
+	* linux-thread-db.c: Include <signal.h>.
+
 2006-11-28  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* config/tm-linux.h: Delete file.
