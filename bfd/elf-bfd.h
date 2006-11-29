@@ -1030,6 +1030,9 @@ struct elf_backend_data
 			       bfd_boolean *, bfd_boolean *,
 			       bfd *, asection **);
 
+  /* Return TRUE if symbol should be hashed in the `.gnu.hash' section.  */
+  bfd_boolean (*elf_hash_symbol) (struct elf_link_hash_entry *);
+
   /* Used to handle bad SHF_LINK_ORDER input.  */
   bfd_error_handler_type link_order_error_handler;
 
@@ -1470,6 +1473,8 @@ extern bfd_vma _bfd_elf_section_offset
 
 extern unsigned long bfd_elf_hash
   (const char *);
+extern unsigned long bfd_elf_gnu_hash
+  (const char *);
 
 extern bfd_reloc_status_type bfd_elf_generic_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
@@ -1639,6 +1644,8 @@ extern bfd_boolean _bfd_elf_merge_symbol
    asection **, bfd_vma *, unsigned int *,
    struct elf_link_hash_entry **, bfd_boolean *,
    bfd_boolean *, bfd_boolean *, bfd_boolean *);
+
+extern bfd_boolean _bfd_elf_hash_symbol (struct elf_link_hash_entry *);
 
 extern bfd_boolean _bfd_elf_add_default_symbol
   (bfd *, struct bfd_link_info *, struct elf_link_hash_entry *,

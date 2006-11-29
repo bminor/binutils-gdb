@@ -11,6 +11,7 @@ BIG_OUTPUT_FORMAT="elf32-bigmips"
 LITTLE_OUTPUT_FORMAT="elf32-littlemips"
 
 TEMPLATE_NAME=elf32
+EXTRA_EM_FILE=mipself
 
 case "$EMULATION_NAME" in
 elf32*n32*) ELFSIZE=32 ;;
