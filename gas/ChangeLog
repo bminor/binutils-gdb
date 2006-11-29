@@ -1,5 +1,12 @@
 2006-11-29  Paul Brook  <paul@codesourcery.com>
 
+	* config/tc-arm.c (arm_is_eabi): New function.
+	* config/tc-arm.h (arm_is_eabi): New prototype.
+	(THUMB_IS_FUNC): Use ELF function type for EABI objects.
+	* doc/c-arm.texi (.thumb_func): Update documentation.
+
+2006-11-29  Paul Brook  <paul@codesourcery.com>
+
 	* config/tc-arm.c (do_vfp_sp_const, do_vfp_dp_const): Fix operans
 	encoding.
 
