@@ -545,7 +545,12 @@ This program is free software.  This program has absolutely no warranty.\n"));
   if (output_style == 0)
     {
       if (gmon_input & (INPUT_HISTOGRAM | INPUT_CALL_GRAPH))
-	output_style = STYLE_FLAT_PROFILE | STYLE_CALL_GRAPH;
+	{
+	  if (gmon_input & INPUT_HISTOGRAM)
+	    output_style |= STYLE_FLAT_PROFILE;
+	  if (gmon_input & INPUT_CALL_GRAPH)
+	    output_style |= STYLE_CALL_GRAPH;
+	}
       else
 	output_style = STYLE_EXEC_COUNTS;
 
