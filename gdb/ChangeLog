@@ -1,3 +1,9 @@
+2006-11-29  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* varobj.c (varobj_set_value): Don't compare the old
+	and the new value here.  Don't assign new value here.
+	Instead, call install_new_value.
+
 2006-11-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* regformats/reg-mips64.dat: New file.

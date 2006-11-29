@@ -841,18 +841,22 @@ varobj_set_value (struct varobj *var, char *expression)
 	 array's content.  */
       value = coerce_array (value);
 
-      if (!value_contents_equal (var->value, value))
-        var->updated = 1;
-
       /* The new value may be lazy.  gdb_value_assign, or 
 	 rather value_contents, will take care of this.
 	 If fetching of the new value will fail, gdb_value_assign
 	 with catch the exception.  */
       if (!gdb_value_assign (var->value, value, &val))
 	return 0;
-      value_free (var->value);
+
       release_value (val);
-      var->value = val;
+      
+      /* If the value has changed, record it, so that next -var-update can
+	 report this change.  If a variable had a value of '1', we've set it
+	 to '333' and then set again to '1', when -var-update will report this
+	 variable as changed -- because the first assignment has set the
+	 'updated' flag.  There's no need to optimize that, because return value
+	 of -var-update should be considered an approximation.  */
+      var->updated = install_new_value (var, val, 0 /* Compare values. */);
       input_radix = saved_input_radix;
       return 1;
     }
