@@ -10,9 +10,11 @@
 namespace gold
 {
 
+class General_options;
 class Relobj;
 class Read_relocs_data;
 class Stringpool;
+class Symbol;
 class Layout;
 
 // A class to read the relocations for an object file, and then queue
@@ -227,6 +229,12 @@ public:
   {
     This::template pcrel<64>(view, value, address);
   }
+
+  // Return whether we need a COPY reloc for a reloc against GSYM,
+  // which is being applied to section SHNDX in OBJECT.
+  static bool
+  need_copy_reloc(const General_options*, Relobj* object, unsigned int shndx,
+		  Symbol* gsym);
 };
 
 } // End namespace gold.

@@ -3,7 +3,6 @@
 #ifndef GOLD_OBJECT_H
 #define GOLD_OBJECT_H
 
-#include <cassert>
 #include <string>
 #include <vector>
 
@@ -166,8 +165,13 @@ class Object
   // Return the name of a section given a section index.  This is only
   // used for error messages.
   std::string
-  section_name(unsigned int shnum)
-  { return this->do_section_name(shnum); }
+  section_name(unsigned int shndx)
+  { return this->do_section_name(shndx); }
+
+  // Return the section flags given a section index.
+  uint64_t
+  section_flags(unsigned int shndx)
+  { return this->do_section_flags(shndx); }
 
   // Functions and types for the elfcpp::Elf_file interface.  This
   // permit us to use Object as the File template parameter for
@@ -233,11 +237,15 @@ class Object
   // Return the location of the contents of a section.  Implemented by
   // child class.
   virtual Location
-  do_section_contents(unsigned int shnum) = 0;
+  do_section_contents(unsigned int shndx) = 0;
 
   // Get the name of a section--implemented by child class.
   virtual std::string
-  do_section_name(unsigned int shnum) = 0;
+  do_section_name(unsigned int shndx) = 0;
+
+  // Get section flags--implemented by child class.
+  virtual uint64_t
+  do_section_flags(unsigned int shndx) = 0;
 
   // Get the file.
   Input_file*
@@ -324,8 +332,8 @@ template<int size, bool big_endian>
 inline Sized_target<size, big_endian>*
 Object::sized_target(ACCEPT_SIZE_ENDIAN_ONLY)
 {
-  assert(this->target_->get_size() == size);
-  assert(this->target_->is_big_endian() ? big_endian : !big_endian);
+  gold_assert(this->target_->get_size() == size);
+  gold_assert(this->target_->is_big_endian() ? big_endian : !big_endian);
   return static_cast<Sized_target<size, big_endian>*>(this->target_);
 }
 
@@ -367,7 +375,7 @@ class Relobj : public Object
   bool
   is_section_included(unsigned int shnum) const
   {
-    assert(shnum < this->map_to_output_.size());
+    gold_assert(shnum < this->map_to_output_.size());
     return this->map_to_output_[shnum].output_section != NULL;
   }
 
@@ -381,7 +389,7 @@ class Relobj : public Object
   void
   set_section_offset(unsigned int shndx, off_t off)
   {
-    assert(shndx < this->map_to_output_.size());
+    gold_assert(shndx < this->map_to_output_.size());
     this->map_to_output_[shndx].offset = off;
   }
 
@@ -431,7 +439,7 @@ class Relobj : public Object
 inline Output_section*
 Relobj::output_section(unsigned int shnum, off_t* poff)
 {
-  assert(shnum < this->map_to_output_.size());
+  gold_assert(shnum < this->map_to_output_.size());
   const Map_to_output& mo(this->map_to_output_[shnum]);
   *poff = mo.offset;
   return mo.output_section;
@@ -460,8 +468,8 @@ class Sized_relobj : public Relobj
   unsigned int
   symtab_index(unsigned int sym) const
   {
-    assert(sym < this->local_indexes_.size());
-    assert(this->local_indexes_[sym] != 0);
+    gold_assert(sym < this->local_indexes_.size());
+    gold_assert(this->local_indexes_[sym] != 0);
     return this->local_indexes_[sym];
   }
 
@@ -505,6 +513,11 @@ class Sized_relobj : public Relobj
   Object::Location
   do_section_contents(unsigned int shndx)
   { return this->elf_file_.section_contents(shndx); }
+
+  // Return section flags.
+  uint64_t
+  do_section_flags(unsigned int shndx)
+  { return this->elf_file_.section_flags(shndx); }
 
   // Return the appropriate Sized_target structure.
   Sized_target<size, big_endian>*

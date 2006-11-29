@@ -17,8 +17,71 @@ class Dynobj : public Object
 {
  public:
   Dynobj(const std::string& name, Input_file* input_file, off_t offset = 0)
-    : Object(name, input_file, true, offset)
+    : Object(name, input_file, true, offset), soname_()
   { }
+
+  // Return the name to use in a DT_NEEDED entry for this object.
+  const char*
+  soname() const;
+
+  // Create a standard ELF hash table, setting *PPHASH and *PHASHLEN.
+  // DYNSYMS is the global dynamic symbols.  LOCAL_DYNSYM_COUNT is the
+  // number of local dynamic symbols, which is the index of the first
+  // dynamic gobal symbol.
+  static void
+  create_elf_hash_table(const Target*, const std::vector<Symbol*>& dynsyms,
+			unsigned int local_dynsym_count,
+			unsigned char** pphash,
+			unsigned int* phashlen);
+
+  // Create a GNU hash table, setting *PPHASH and *PHASHLEN.  DYNSYMS
+  // is the global dynamic symbols.  LOCAL_DYNSYM_COUNT is the number
+  // of local dynamic symbols, which is the index of the first dynamic
+  // gobal symbol.
+  static void
+  create_gnu_hash_table(const Target*, const std::vector<Symbol*>& dynsyms,
+			unsigned int local_dynsym_count,
+			unsigned char** pphash, unsigned int* phashlen);
+
+ protected:
+  // Set the DT_SONAME string.
+  void
+  set_soname_string(const char* s)
+  { this->soname_.assign(s); }
+
+ private:
+  // Compute the ELF hash code for a string.
+  static uint32_t
+  elf_hash(const char*);
+
+  // Compute the GNU hash code for a string.
+  static uint32_t
+  gnu_hash(const char*);
+
+  // Compute the number of hash buckets to use.
+  static unsigned int
+  compute_bucket_count(const std::vector<uint32_t>& hashcodes,
+		       bool for_gnu_hash_table);
+
+  // Sized version of create_elf_hash_table.
+  template<bool big_endian>
+  static void
+  sized_create_elf_hash_table(const std::vector<uint32_t>& bucket,
+			      const std::vector<uint32_t>& chain,
+			      unsigned char* phash,
+			      unsigned int hashlen);
+
+  // Sized version of create_gnu_hash_table.
+  template<int size, bool big_endian>
+  static void
+  sized_create_gnu_hash_table(const std::vector<Symbol*>& hashed_dynsyms,
+			      const std::vector<uint32_t>& dynsym_hashvals,
+			      unsigned int unhashed_dynsym_count,
+			      unsigned char** pphash,
+			      unsigned int* phashlen);
+
+  // The DT_SONAME name, if any.
+  std::string soname_;
 };
 
 // A dynamic object, size and endian specific version.
@@ -57,6 +120,11 @@ class Sized_dynobj : public Dynobj
   Object::Location
   do_section_contents(unsigned int shndx)
   { return this->elf_file_.section_contents(shndx); }
+
+  // Return section flags.
+  uint64_t
+  do_section_flags(unsigned int shndx)
+  { return this->elf_file_.section_flags(shndx); }
 
  private:
   // For convenience.
@@ -104,8 +172,6 @@ class Sized_dynobj : public Dynobj
 
   // General access to the ELF file.
   elfcpp::Elf_file<size, big_endian, Object> elf_file_;
-  // The DT_SONAME name, if any.
-  std::string soname_;
 };
 
 } // End namespace gold.

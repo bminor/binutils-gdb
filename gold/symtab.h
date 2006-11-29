@@ -6,7 +6,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <cassert>
 
 #include "elfcpp.h"
 #include "stringpool.h"
@@ -26,6 +25,7 @@ class Dynobj;
 template<int size, bool big_endian>
 class Sized_dynobj;
 class Output_data;
+class Output_section;
 class Output_segment;
 class Output_file;
 class Target;
@@ -90,7 +90,7 @@ class Symbol
   Object*
   object() const
   {
-    assert(this->source_ == FROM_OBJECT);
+    gold_assert(this->source_ == FROM_OBJECT);
     return this->u_.from_object.object;
   }
 
@@ -99,7 +99,7 @@ class Symbol
   unsigned int
   shnum() const
   {
-    assert(this->source_ == FROM_OBJECT);
+    gold_assert(this->source_ == FROM_OBJECT);
     return this->u_.from_object.shnum;
   }
 
@@ -109,7 +109,7 @@ class Symbol
   Output_data*
   output_data() const
   {
-    assert(this->source_ == IN_OUTPUT_DATA);
+    gold_assert(this->source_ == IN_OUTPUT_DATA);
     return this->u_.in_output_data.output_data;
   }
 
@@ -118,7 +118,7 @@ class Symbol
   bool
   offset_is_from_end() const
   {
-    assert(this->source_ == IN_OUTPUT_DATA);
+    gold_assert(this->source_ == IN_OUTPUT_DATA);
     return this->u_.in_output_data.offset_is_from_end;
   }
 
@@ -128,7 +128,7 @@ class Symbol
   Output_segment*
   output_segment() const
   {
-    assert(this->source_ == IN_OUTPUT_SEGMENT);
+    gold_assert(this->source_ == IN_OUTPUT_SEGMENT);
     return this->u_.in_output_segment.output_segment;
   }
 
@@ -137,7 +137,7 @@ class Symbol
   Segment_offset_base
   offset_base() const
   {
-    assert(this->source_ == IN_OUTPUT_SEGMENT);
+    gold_assert(this->source_ == IN_OUTPUT_SEGMENT);
     return this->u_.in_output_segment.offset_base;
   }
 
@@ -184,11 +184,6 @@ class Symbol
   set_needs_dynsym_entry()
   { this->needs_dynsym_entry_ = true; }
 
-  // Return whether this symbol was ever seen in a dynamic object.
-  bool
-  in_dyn() const
-  { return this->in_dyn_; }
-
   // Mark this symbol as having been seen in a dynamic object.
   void
   set_in_dyn()
@@ -202,7 +197,7 @@ class Symbol
   unsigned int
   symtab_index() const
   {
-    assert(this->symtab_index_ != 0);
+    gold_assert(this->symtab_index_ != 0);
     return this->symtab_index_;
   }
 
@@ -210,9 +205,15 @@ class Symbol
   void
   set_symtab_index(unsigned int index)
   {
-    assert(index != 0);
+    gold_assert(index != 0);
     this->symtab_index_ = index;
   }
+
+  // Return whether this symbol already has an index in the output
+  // file symbol table.
+  bool
+  has_symtab_index() const
+  { return this->symtab_index_ != 0; }
 
   // Return the index of this symbol in the dynamic symbol table.  A
   // value of -1U means that this symbol is not going into the dynamic
@@ -222,7 +223,7 @@ class Symbol
   unsigned int
   dynsym_index() const
   {
-    assert(this->dynsym_index_ != 0);
+    gold_assert(this->dynsym_index_ != 0);
     return this->dynsym_index_;
   }
 
@@ -230,7 +231,7 @@ class Symbol
   void
   set_dynsym_index(unsigned int index)
   {
-    assert(index != 0);
+    gold_assert(index != 0);
     this->dynsym_index_ = index;
   }
 
@@ -243,7 +244,7 @@ class Symbol
   unsigned int
   got_offset() const
   {
-    assert(this->has_got_offset());
+    gold_assert(this->has_got_offset());
     return this->got_offset_;
   }
 
@@ -255,14 +256,36 @@ class Symbol
     this->got_offset_ = got_offset;
   }
 
-  // Return whether this symbol is resolved locally.  This is always
-  // true when linking statically.  It is true for a symbol defined in
-  // this object when using -Bsymbolic.  It is true for a symbol
-  // marked local in a version file.  FIXME: This needs to be
-  // completed.
+  // Return whether this symbol has an entry in the PLT section.
   bool
-  is_resolved_locally() const
-  { return !this->in_dyn_; }
+  has_plt_offset() const
+  { return this->has_plt_offset_; }
+
+  // Return the offset into the PLT section of this symbol.
+  unsigned int
+  plt_offset() const
+  {
+    gold_assert(this->has_plt_offset());
+    return this->plt_offset_;
+  }
+
+  // Set the PLT offset of this symbol.
+  void
+  set_plt_offset(unsigned int plt_offset)
+  {
+    this->has_plt_offset_ = true;
+    this->plt_offset_ = plt_offset;
+  }
+
+  // Return true if the final value of this symbol is known at link
+  // time.
+  bool
+  final_value_is_known(const General_options* options) const
+  {
+    if (options->is_shared())
+      return false;
+    return this->source_ != FROM_OBJECT || !this->object()->is_dynamic();
+  }
 
   // Return whether this is a defined symbol (not undefined or
   // common).
@@ -270,8 +293,17 @@ class Symbol
   is_defined() const
   {
     return (this->source_ != FROM_OBJECT
-	    || (this->u_.from_object.shnum != elfcpp::SHN_UNDEF
-		&& this->u_.from_object.shnum != elfcpp::SHN_COMMON));
+	    || (this->shnum() != elfcpp::SHN_UNDEF
+		&& this->shnum() != elfcpp::SHN_COMMON));
+  }
+
+  // Return whether this symbol is defined in a dynamic object.
+  bool
+  is_defined_in_dynobj() const
+  {
+    return (this->source_ == FROM_OBJECT
+	    && this->object()->is_dynamic()
+	    && this->is_defined());
   }
 
   // Return whether this is an undefined symbol.
@@ -286,7 +318,7 @@ class Symbol
   is_common() const
   {
     return (this->source_ == FROM_OBJECT
-	    && (this->u_.from_object.shnum == elfcpp::SHN_COMMON
+	    && (this->shnum() == elfcpp::SHN_COMMON
 		|| this->type_ == elfcpp::STT_COMMON));
   }
 
@@ -401,6 +433,11 @@ class Symbol
   // is true), this is the offset from the start of the GOT section.
   unsigned int got_offset_;
 
+  // If this symbol has an entry in the PLT section (has_plt_offset_
+  // is true), then this is the offset from the start of the PLT
+  // section.
+  unsigned int plt_offset_;
+
   // Symbol type.
   elfcpp::STT type_ : 4;
   // Symbol binding.
@@ -430,6 +467,8 @@ class Symbol
   bool in_dyn_ : 1;
   // True if the symbol has an entry in the GOT section.
   bool has_got_offset_ : 1;
+  // True if the symbol has an entry in the PLT section.
+  bool has_plt_offset_ : 1;
   // True if there is a warning for this symbol.
   bool has_warning_ : 1;
 };
@@ -735,7 +774,7 @@ class Symbol_table
   Symbol*
   resolve_forwards(const Symbol* from) const;
 
-  // Return the size of the symbols in the table.
+  // Return the bitsize (32 or 64) of the symbols in the table.
   int
   get_size() const
   { return this->size_; }
@@ -774,6 +813,14 @@ class Symbol_table
   issue_warning(const Symbol* sym, const std::string& location) const
   { this->warnings_.issue_warning(sym, location); }
 
+  // Set the dynamic symbol indexes.  INDEX is the index of the first
+  // global dynamic symbol.  Pointers to the symbols are stored into
+  // the vector.  The names are stored into the Stringpool.  This
+  // returns an updated dynamic symbol index.
+  unsigned int
+  set_dynsym_indexes(unsigned int index, std::vector<Symbol*>*,
+		     Stringpool*);
+
   // Finalize the symbol table after we have set the final addresses
   // of all the input sections.  This sets the final symbol indexes,
   // values and adds the names to *POOL.  INDEX is the index of the
@@ -786,11 +833,16 @@ class Symbol_table
   void
   write_globals(const Target*, const Stringpool*, Output_file*) const;
 
+  // Write out a section symbol.  Return the updated offset.
+  void
+  write_section_symbol(const Target*, const Output_section*, Output_file*,
+		       off_t) const;
+
  private:
   Symbol_table(const Symbol_table&);
   Symbol_table& operator=(const Symbol_table&);
 
-  // Set the size of the symbols in the table.
+  // Set the size (32 or 64) of the symbols in the table.
   void
   set_size(int size)
   { this->size_ = size; }
@@ -865,6 +917,11 @@ class Symbol_table
   void
   sized_write_globals(const Target*, const Stringpool*, Output_file*) const;
 
+  // Write out a section symbol, specialized for size and endianness.
+  template<int size, bool big_endian>
+  void
+  sized_write_section_symbol(const Output_section*, Output_file*, off_t) const;
+
   // The type of the symbol hash table.
 
   typedef std::pair<Stringpool::Key, Stringpool::Key> Symbol_table_key;
@@ -932,7 +989,7 @@ template<int size>
 Sized_symbol<size>*
 Symbol_table::get_sized_symbol(Symbol* sym ACCEPT_SIZE) const
 {
-  assert(size == this->get_size());
+  gold_assert(size == this->get_size());
   return static_cast<Sized_symbol<size>*>(sym);
 }
 
@@ -940,7 +997,7 @@ template<int size>
 const Sized_symbol<size>*
 Symbol_table::get_sized_symbol(const Symbol* sym ACCEPT_SIZE) const
 {
-  assert(size == this->get_size());
+  gold_assert(size == this->get_size());
   return static_cast<const Sized_symbol<size>*>(sym);
 }
 

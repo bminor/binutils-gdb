@@ -19,7 +19,7 @@ void
 Symbol::override_base(const elfcpp::Sym<size, big_endian>& sym,
 		      Object* object)
 {
-  assert(this->source_ == FROM_OBJECT);
+  gold_assert(this->source_ == FROM_OBJECT);
   this->u_.from_object.object = object;
   // FIXME: Handle SHN_XINDEX.
   this->u_.from_object.shnum = sym.get_st_shndx();
@@ -98,12 +98,12 @@ Symbol_table::resolve(Sized_symbol<size>* to,
     case elfcpp::STB_LOCAL:
       // We should only see externally visible symbols in the symbol
       // table.
-      abort();
+      gold_unreachable();
 
     default:
       // Any target which wants to handle STB_LOOS, etc., needs to
       // define a resolve method.
-      abort();
+      gold_unreachable();
     }
 
   if (to->source() == Symbol::FROM_OBJECT
@@ -507,7 +507,7 @@ Symbol_table::resolve(Sized_symbol<size>* to,
       return;
 
     default:
-      abort();
+      gold_unreachable();
     }
 }
 

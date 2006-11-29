@@ -120,7 +120,7 @@ Symbol_table::allocate_commons(const General_options& options, Layout* layout)
   else if (this->get_size() == 64)
     this->do_allocate_commons<64>(options, layout);
   else
-    abort();
+    gold_unreachable();
 }
 
 // Allocated the common symbols, sized version.
@@ -171,7 +171,7 @@ Symbol_table::do_allocate_commons(const General_options&,
 
   // Place them in a newly allocated .bss section.
 
-  Output_data_common *poc = new Output_data_common(addralign);
+  Output_data_space *poc = new Output_data_space(addralign);
 
   layout->add_output_section_data(".bss", elfcpp::SHT_NOBITS,
 				  elfcpp::SHF_WRITE | elfcpp::SHF_ALLOC,
@@ -202,7 +202,7 @@ Symbol_table::do_allocate_commons(const General_options&,
       off += symsize;
     }
 
-  poc->set_common_size(off);
+  poc->set_space_size(off);
 
   this->commons_.clear();
 }

@@ -13,8 +13,6 @@
 #ifndef GOLD_TARGET_H
 #define GOLD_TARGET_H
 
-#include <cassert>
-
 #include "elfcpp.h"
 
 namespace gold
@@ -137,7 +135,7 @@ class Sized_target : public Target
   // returns true.
   virtual Sized_symbol<size>*
   make_symbol()
-  { abort(); }
+  { gold_unreachable(); }
 
   // Resolve a symbol for the target.  This should be overridden by a
   // target which needs to take special action.  TO is the
@@ -145,12 +143,13 @@ class Sized_target : public Target
   // This will only be called if has_resolve() returns true.
   virtual void
   resolve(Symbol*, const elfcpp::Sym<size, big_endian>&, Object*)
-  { abort(); }
+  { gold_unreachable(); }
 
   // Scan the relocs for a section, and record any information
   // required for the symbol.  OPTIONS is the command line options.
   // SYMTAB is the symbol table.  OBJECT is the object in which the
-  // section appears.  SH_TYPE is the type of the relocation section,
+  // section appears.  DATA_SHNDX is the section index that these
+  // relocs apply to.  SH_TYPE is the type of the relocation section,
   // SHT_REL or SHT_RELA.  PRELOCS points to the relocation data.
   // RELOC_COUNT is the number of relocs.  LOCAL_SYMBOL_COUNT is the
   // number of local symbols.  PLOCAL_SYMBOLS points to the local
@@ -161,6 +160,7 @@ class Sized_target : public Target
 	      Symbol_table* symtab,
 	      Layout* layout,
 	      Sized_relobj<size, big_endian>* object,
+	      unsigned int data_shndx,
 	      unsigned int sh_type,
 	      const unsigned char* prelocs,
 	      size_t reloc_count,
@@ -187,8 +187,8 @@ class Sized_target : public Target
   Sized_target(const Target::Target_info* pti)
     : Target(pti)
   {
-    assert(pti->size == size);
-    assert(pti->is_big_endian ? big_endian : !big_endian);
+    gold_assert(pti->size == size);
+    gold_assert(pti->is_big_endian ? big_endian : !big_endian);
   }
 };
 

@@ -15,7 +15,6 @@
 #include <list>
 #include <string>
 #include <vector>
-#include <cassert>
 
 namespace gold
 {
@@ -218,7 +217,7 @@ class Input_argument
   const Input_file_argument&
   file() const
   {
-    assert(this->is_file_);
+    gold_assert(this->is_file_);
     return this->file_;
   }
 
@@ -226,14 +225,14 @@ class Input_argument
   const Input_file_group*
   group() const
   {
-    assert(!this->is_file_);
+    gold_assert(!this->is_file_);
     return this->group_;
   }
 
   Input_file_group*
   group()
   {
-    assert(!this->is_file_);
+    gold_assert(!this->is_file_);
     return this->group_;
   }
 

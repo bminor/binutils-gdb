@@ -52,10 +52,14 @@ gold_nomem()
   gold_exit(false);
 }
 
+// Handle an unreachable case.
+
 void
-gold_unreachable()
+do_gold_unreachable(const char* filename, int lineno, const char* function)
 {
-  abort();
+  fprintf(stderr, "%s: internal error in %s, at %s:%d\n",
+	  program_name, function, filename, lineno);
+  gold_exit(false);
 }
 
 // This class arranges to run the functions done in the middle of the
@@ -136,6 +140,10 @@ queue_middle_tasks(const General_options& options,
 		   Layout* layout,
 		   Workqueue* workqueue)
 {
+  // Define some sections and symbols needed for a dynamic link.  This
+  // handles some cases we want to see before we read the relocs.
+  layout->create_initial_dynamic_sections(input_objects, symtab);
+
   // Predefine standard symbols.  This should be fast, so we don't
   // bother to create a task for it.
   define_standard_symbols(symtab, layout, input_objects->target());
@@ -215,7 +223,9 @@ queue_final_tasks(const General_options& options,
 
   // Queue a task to write out everything else.
   final_blocker->add_blocker();
-  workqueue->queue(new Write_data_task(layout, of, final_blocker));
+  workqueue->queue(new Write_data_task(layout, symtab,
+				       input_objects->target(),
+				       of, final_blocker));
 
   // Queue a task to close the output file.  This will be blocked by
   // FINAL_BLOCKER.

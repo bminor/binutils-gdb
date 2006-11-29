@@ -4,7 +4,6 @@
 
 #include <cerrno>
 #include <cstring>
-#include <cassert>
 #include <cstdarg>
 
 #include "target-select.h"
@@ -210,7 +209,7 @@ Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
   // Get the symbol table section header.
   typename This::Shdr symtabshdr(pshdrs
 				 + this->symtab_shndx_ * This::shdr_size);
-  assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
+  gold_assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
 
   // We only need the external symbols.
   const int sym_size = This::sym_size;
@@ -477,7 +476,7 @@ Sized_relobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
 {
   if (sd->symbols == NULL)
     {
-      assert(sd->symbol_names == NULL);
+      gold_assert(sd->symbol_names == NULL);
       return;
     }
 
@@ -517,14 +516,14 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
 							  off_t off,
 							  Stringpool* pool)
 {
-  assert(this->symtab_shndx_ != -1U);
+  gold_assert(this->symtab_shndx_ != -1U);
   if (this->symtab_shndx_ == 0)
     {
       // This object has no symbols.  Weird but legal.
       return index;
     }
 
-  assert(off == static_cast<off_t>(align_address(off, size >> 3)));
+  gold_assert(off == static_cast<off_t>(align_address(off, size >> 3)));
 
   this->local_symbol_offset_ = off;
 
@@ -532,12 +531,12 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
   const unsigned int symtab_shndx = this->symtab_shndx_;
   typename This::Shdr symtabshdr(this,
 				 this->elf_file_.section_header(symtab_shndx));
-  assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
+  gold_assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
 
   // Read the local symbols.
   const int sym_size = This::sym_size;
   const unsigned int loccount = this->local_symbol_count_;
-  assert(loccount == symtabshdr.get_sh_info());
+  gold_assert(loccount == symtabshdr.get_sh_info());
   off_t locsize = loccount * sym_size;
   const unsigned char* psyms = this->get_view(symtabshdr.get_sh_offset(),
 					      locsize);
@@ -641,7 +640,7 @@ void
 Sized_relobj<size, big_endian>::write_local_symbols(Output_file* of,
 						    const Stringpool* sympool)
 {
-  assert(this->symtab_shndx_ != -1U);
+  gold_assert(this->symtab_shndx_ != -1U);
   if (this->symtab_shndx_ == 0)
     {
       // This object has no symbols.  Weird but legal.
@@ -652,9 +651,9 @@ Sized_relobj<size, big_endian>::write_local_symbols(Output_file* of,
   const unsigned int symtab_shndx = this->symtab_shndx_;
   typename This::Shdr symtabshdr(this,
 				 this->elf_file_.section_header(symtab_shndx));
-  assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
+  gold_assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
   const unsigned int loccount = this->local_symbol_count_;
-  assert(loccount == symtabshdr.get_sh_info());
+  gold_assert(loccount == symtabshdr.get_sh_info());
 
   // Read the local symbols.
   const int sym_size = This::sym_size;
@@ -676,8 +675,8 @@ Sized_relobj<size, big_endian>::write_local_symbols(Output_file* of,
 
   const std::vector<Map_to_output>& mo(this->map_to_output());
 
-  assert(this->local_values_.size() == loccount);
-  assert(this->local_indexes_.size() == loccount);
+  gold_assert(this->local_values_.size() == loccount);
+  gold_assert(this->local_indexes_.size() == loccount);
 
   unsigned char* ov = oview;
   psyms += sym_size;
@@ -687,12 +686,12 @@ Sized_relobj<size, big_endian>::write_local_symbols(Output_file* of,
 
       if (this->local_indexes_[i] == -1U)
 	continue;
-      assert(this->local_indexes_[i] != 0);
+      gold_assert(this->local_indexes_[i] != 0);
 
       unsigned int st_shndx = isym.get_st_shndx();
       if (st_shndx < elfcpp::SHN_LORESERVE)
 	{
-	  assert(st_shndx < mo.size());
+	  gold_assert(st_shndx < mo.size());
 	  if (mo[st_shndx].output_section == NULL)
 	    continue;
 	  st_shndx = mo[st_shndx].output_section->out_shndx();
@@ -700,7 +699,7 @@ Sized_relobj<size, big_endian>::write_local_symbols(Output_file* of,
 
       elfcpp::Sym_write<size, big_endian> osym(ov);
 
-      assert(isym.get_st_name() < strtab_size);
+      gold_assert(isym.get_st_name() < strtab_size);
       const char* name = pnames + isym.get_st_name();
       osym.put_st_name(sympool->get_offset(name));
       osym.put_st_value(this->local_values_[i]);
@@ -712,7 +711,7 @@ Sized_relobj<size, big_endian>::write_local_symbols(Output_file* of,
       ov += sym_size;
     }
 
-  assert(ov - oview == output_size);
+  gold_assert(ov - oview == output_size);
 
   of->write_output_view(this->local_symbol_offset_, output_size, oview);
 }

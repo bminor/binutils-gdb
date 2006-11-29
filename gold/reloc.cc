@@ -227,17 +227,17 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
     }
 
   // Read the local symbols.
-  assert(this->symtab_shndx_ != -1U);
+  gold_assert(this->symtab_shndx_ != -1U);
   if (this->symtab_shndx_ == 0 || this->local_symbol_count_ == 0)
     rd->local_symbols = NULL;
   else
     {
       typename This::Shdr symtabshdr(pshdrs
 				     + this->symtab_shndx_ * This::shdr_size);
-      assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
+      gold_assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
       const int sym_size = This::sym_size;
       const unsigned int loccount = this->local_symbol_count_;
-      assert(loccount == symtabshdr.get_sh_info());
+      gold_assert(loccount == symtabshdr.get_sh_info());
       off_t locsize = loccount * sym_size;
       rd->local_symbols = this->get_lasting_view(symtabshdr.get_sh_offset(),
 						 locsize);
@@ -266,8 +266,8 @@ Sized_relobj<size, big_endian>::do_scan_relocs(const General_options& options,
        p != rd->relocs.end();
        ++p)
     {
-      target->scan_relocs(options, symtab, layout, this, p->sh_type,
-			  p->contents->data(), p->reloc_count,
+      target->scan_relocs(options, symtab, layout, this, p->data_shndx,
+			  p->sh_type, p->contents->data(), p->reloc_count,
 			  this->local_symbol_count_,
 			  local_symbols,
 			  this->symbols_);
@@ -357,8 +357,8 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
       if (sh_size == 0)
 	continue;
 
-      assert(map_sections[i].offset >= 0
-	     && map_sections[i].offset + sh_size <= os->data_size());
+      gold_assert(map_sections[i].offset >= 0
+		  && map_sections[i].offset + sh_size <= os->data_size());
 
       unsigned char* view = of->get_output_view(start, sh_size);
       this->read(shdr.get_sh_offset(), sh_size, view);
@@ -418,7 +418,7 @@ Sized_relobj<size, big_endian>::relocate_sections(
 	  continue;
 	}
 
-      assert((*pviews)[index].view != NULL);
+      gold_assert((*pviews)[index].view != NULL);
 
       if (shdr.get_sh_link() != this->symtab_shndx_)
 	{
@@ -469,6 +469,29 @@ Sized_relobj<size, big_endian>::relocate_sections(
 			       (*pviews)[index].address,
 			       (*pviews)[index].view_size);
     }
+}
+
+// Relocate_functions functions.
+
+// Return whether we need a COPY reloc for a relocation against GSYM.
+// The relocation is being applied to section SHNDX in OBJECT.
+
+template<int size, bool big_endian>
+bool
+Relocate_functions<size, big_endian>::need_copy_reloc(
+    const General_options*,
+    Relobj* object,
+    unsigned int shndx,
+    Symbol*)
+{
+  // FIXME: Handle -z nocopyrelocs.
+
+  // If this is a readonly section, then we need a COPY reloc.
+  // Otherwise we can use a dynamic reloc.
+  if ((object->section_flags(shndx) & elfcpp::SHF_WRITE) == 0)
+    return true;
+
+  return false;
 }
 
 // Instantiate the templates we need.  We could use the configure
@@ -546,5 +569,28 @@ Sized_relobj<64, true>::do_relocate(const General_options& options,
 				    const Layout* layout,
 				    Output_file* of);
 
+template
+bool
+Relocate_functions<32, false>::need_copy_reloc(const General_options*,
+					       Relobj*, unsigned int,
+					       Symbol*);
+
+template
+bool
+Relocate_functions<32, true>::need_copy_reloc(const General_options*,
+					      Relobj*, unsigned int,
+					      Symbol*);
+
+template
+bool
+Relocate_functions<64, false>::need_copy_reloc(const General_options*,
+					       Relobj*, unsigned int,
+					       Symbol*);
+
+template
+bool
+Relocate_functions<64, true>::need_copy_reloc(const General_options*,
+					      Relobj*, unsigned int,
+					      Symbol*);
 
 } // End namespace gold.

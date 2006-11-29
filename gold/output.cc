@@ -17,6 +17,10 @@
 namespace gold
 {
 
+// Output_data variables.
+
+bool Output_data::sizes_are_fixed;
+
 // Output_data methods.
 
 Output_data::~Output_data()
@@ -45,7 +49,7 @@ Output_data::default_alignment(int size)
   else if (size == 64)
     return 8;
   else
-    abort();
+    gold_unreachable();
 }
 
 // Output_section_header methods.  This currently assumes that the
@@ -55,12 +59,12 @@ Output_section_headers::Output_section_headers(
     int size,
     bool big_endian,
     const Layout::Segment_list& segment_list,
-    const Layout::Section_list& section_list,
+    const Layout::Section_list& unattached_section_list,
     const Stringpool* secnamepool)
   : size_(size),
     big_endian_(big_endian),
     segment_list_(segment_list),
-    section_list_(section_list),
+    unattached_section_list_(unattached_section_list),
     secnamepool_(secnamepool)
 {
   // Count all the sections.  Start with 1 for the null section.
@@ -70,7 +74,7 @@ Output_section_headers::Output_section_headers(
        ++p)
     if ((*p)->type() == elfcpp::PT_LOAD)
       count += (*p)->output_section_count();
-  count += section_list.size();
+  count += unattached_section_list.size();
 
   int shdr_size;
   if (size == 32)
@@ -78,7 +82,7 @@ Output_section_headers::Output_section_headers(
   else if (size == 64)
     shdr_size = elfcpp::Elf_sizes<64>::shdr_size;
   else
-    abort();
+    gold_unreachable();
 
   this->set_data_size(count * shdr_size);
 }
@@ -103,7 +107,7 @@ Output_section_headers::do_write(Output_file* of)
 	this->do_sized_write<64, false>(of);
     }
   else
-    abort();
+    gold_unreachable();
 }
 
 template<int size, bool big_endian>
@@ -139,11 +143,12 @@ Output_section_headers::do_sized_write(Output_file* of)
     v = (*p)->write_section_headers SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
 	    this->secnamepool_, v, &shndx
 	    SELECT_SIZE_ENDIAN(size, big_endian));
-  for (Layout::Section_list::const_iterator p = this->section_list_.begin();
-       p != this->section_list_.end();
+  for (Layout::Section_list::const_iterator p =
+	 this->unattached_section_list_.begin();
+       p != this->unattached_section_list_.end();
        ++p)
     {
-      assert(shndx == (*p)->out_shndx());
+      gold_assert(shndx == (*p)->out_shndx());
       elfcpp::Shdr_write<size, big_endian> oshdr(v);
       (*p)->write_header(this->secnamepool_, &oshdr);
       v += shdr_size;
@@ -167,7 +172,7 @@ Output_segment_headers::Output_segment_headers(
   else if (size == 64)
     phdr_size = elfcpp::Elf_sizes<64>::phdr_size;
   else
-    abort();
+    gold_unreachable();
 
   this->set_data_size(segment_list.size() * phdr_size);
 }
@@ -190,7 +195,7 @@ Output_segment_headers::do_write(Output_file* of)
 	this->do_sized_write<64, false>(of);
     }
   else
-    abort();
+    gold_unreachable();
 }
 
 template<int size, bool big_endian>
@@ -237,7 +242,7 @@ Output_file_header::Output_file_header(int size,
   else if (size == 64)
     ehdr_size = elfcpp::Elf_sizes<64>::ehdr_size;
   else
-    abort();
+    gold_unreachable();
 
   this->set_data_size(ehdr_size);
 }
@@ -272,7 +277,7 @@ Output_file_header::do_write(Output_file* of)
 	this->do_sized_write<64, false>(of);
     }
   else
-    abort();
+    gold_unreachable();
 }
 
 // Write out the file header with appropriate size and endianess.
@@ -281,7 +286,7 @@ template<int size, bool big_endian>
 void
 Output_file_header::do_sized_write(Output_file* of)
 {
-  assert(this->offset() == 0);
+  gold_assert(this->offset() == 0);
 
   int ehdr_size = elfcpp::Elf_sizes<size>::ehdr_size;
   unsigned char* view = of->get_output_view(0, ehdr_size);
@@ -298,7 +303,7 @@ Output_file_header::do_sized_write(Output_file* of)
   else if (size == 64)
     e_ident[elfcpp::EI_CLASS] = elfcpp::ELFCLASS64;
   else
-    abort();
+    gold_unreachable();
   e_ident[elfcpp::EI_DATA] = (big_endian
 			      ? elfcpp::ELFDATA2MSB
 			      : elfcpp::ELFDATA2LSB);
@@ -352,9 +357,17 @@ Output_file_header::do_sized_write(Output_file* of)
 // Output_data_const methods.
 
 void
-Output_data_const::do_write(Output_file* output)
+Output_data_const::do_write(Output_file* of)
 {
-  output->write(this->offset(), data_.data(), data_.size());
+  of->write(this->offset(), this->data_.data(), this->data_.size());
+}
+
+// Output_data_const_buffer methods.
+
+void
+Output_data_const_buffer::do_write(Output_file* of)
+{
+  of->write(this->offset(), this->p_, this->data_size());
 }
 
 // Output_section_data methods.
@@ -362,8 +375,28 @@ Output_data_const::do_write(Output_file* output)
 unsigned int
 Output_section_data::do_out_shndx() const
 {
-  assert(this->output_section_ != NULL);
+  gold_assert(this->output_section_ != NULL);
   return this->output_section_->out_shndx();
+}
+
+// Output_data_strtab methods.
+
+// Set the address.  We don't actually care about the address, but we
+// do set our final size.
+
+void
+Output_data_strtab::do_set_address(uint64_t, off_t)
+{
+  this->strtab_->set_string_offsets();
+  this->set_data_size(this->strtab_->get_strtab_size());
+}
+
+// Write out a string table.
+
+void
+Output_data_strtab::do_write(Output_file* of)
+{
+  this->strtab_->write(of, this->offset());
 }
 
 // Output_reloc methods.
@@ -379,7 +412,7 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::get_symbol_index()
   switch (this->local_sym_index_)
     {
     case INVALID_CODE:
-      abort();
+      gold_unreachable();
 
     case GSYM_CODE:
       if (this->u_.gsym == NULL)
@@ -403,13 +436,13 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::get_symbol_index()
 	  // FIXME: It seems that some targets may need to generate
 	  // dynamic relocations against local symbols for some
 	  // reasons.  This will have to be addressed at some point.
-	  abort();
+	  gold_unreachable();
 	}
       else
 	index = this->u_.object->symtab_index(this->local_sym_index_);
       break;
     }
-  assert(index != -1U);
+  gold_assert(index != -1U);
   return index;
 }
 
@@ -422,7 +455,10 @@ void
 Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::write_rel(
     Write_rel* wr) const
 {
-  wr->put_r_offset(this->address_);
+  Address address = this->address_;
+  if (this->od_ != NULL)
+    address += this->od_->address();
+  wr->put_r_offset(address);
   wr->put_r_info(elfcpp::elf_r_info<size>(this->get_symbol_index(),
 					  this->type_));
 }
@@ -472,7 +508,7 @@ Output_data_reloc_base<sh_type, dynamic, size, big_endian>::do_write(
       pov += reloc_size;
     }
 
-  assert(pov - oview == oview_size);
+  gold_assert(pov - oview == oview_size);
 
   of->write_output_view(off, oview_size, oview);
 
@@ -486,8 +522,9 @@ Output_data_reloc_base<sh_type, dynamic, size, big_endian>::do_write(
 
 template<int size, bool big_endian>
 void
-Output_data_got<size, big_endian>::Got_entry::write(unsigned char* pov)
-    const
+Output_data_got<size, big_endian>::Got_entry::write(
+    const General_options* options,
+    unsigned char* pov) const
 {
   Valtype val = 0;
 
@@ -501,7 +538,7 @@ Output_data_got<size, big_endian>::Got_entry::write(unsigned char* pov)
 	// value.  Otherwise we just write zero.  The target code is
 	// responsible for creating a relocation entry to fill in the
 	// value at runtime.
-	if (gsym->is_resolved_locally())
+	if (gsym->final_value_is_known(options))
 	  {
 	    Sized_symbol<size>* sgsym;
 	    // This cast is a bit ugly.  We don't want to put a
@@ -518,11 +555,10 @@ Output_data_got<size, big_endian>::Got_entry::write(unsigned char* pov)
       break;
 
     default:
-      abort();
+      gold_unreachable();
     }
 
-  Valtype* povv = reinterpret_cast<Valtype*>(pov);
-  elfcpp::Swap<size, big_endian>::writeval(povv, val);
+  elfcpp::Swap<size, big_endian>::writeval(pov, val);
 }
 
 // Output_data_got methods.
@@ -561,15 +597,130 @@ Output_data_got<size, big_endian>::do_write(Output_file* of)
        p != this->entries_.end();
        ++p)
     {
-      p->write(pov);
+      p->write(this->options_, pov);
       pov += add;
     }
 
-  assert(pov - oview == oview_size);
+  gold_assert(pov - oview == oview_size);
 
   of->write_output_view(off, oview_size, oview);
 
   // We no longer need the GOT entries.
+  this->entries_.clear();
+}
+
+// Output_data_dynamic::Dynamic_entry methods.
+
+// Write out the entry.
+
+template<int size, bool big_endian>
+void
+Output_data_dynamic::Dynamic_entry::write(
+    unsigned char* pov,
+    const Stringpool* pool) const
+{
+  typename elfcpp::Elf_types<size>::Elf_WXword val;
+  switch (this->classification_)
+    {
+    case DYNAMIC_NUMBER:
+      val = this->u_.val;
+      break;
+
+    case DYNAMIC_SECTION_ADDRESS:
+      val = this->u_.os->address();
+      break;
+
+    case DYNAMIC_SECTION_SIZE:
+      val = this->u_.os->data_size();
+      break;
+
+    case DYNAMIC_SYMBOL:
+      {
+	Sized_symbol<size>* s = static_cast<Sized_symbol<size>*>(this->u_.sym);
+	val = s->value();
+      }
+      break;
+
+    case DYNAMIC_STRING:
+      val = pool->get_offset(this->u_.str);
+      break;
+
+    default:
+      gold_unreachable();
+    }
+
+  elfcpp::Dyn_write<size, big_endian> dw(pov);
+  dw.put_d_tag(this->tag_);
+  dw.put_d_val(val);
+}
+
+// Output_data_dynamic methods.
+
+// Set the final data size.
+
+void
+Output_data_dynamic::do_set_address(uint64_t, off_t)
+{
+  // Add the terminating entry.
+  this->add_constant(elfcpp::DT_NULL, 0);
+
+  int dyn_size;
+  if (this->target_->get_size() == 32)
+    dyn_size = elfcpp::Elf_sizes<32>::dyn_size;
+  else if (this->target_->get_size() == 64)
+    dyn_size = elfcpp::Elf_sizes<64>::dyn_size;
+  else
+    gold_unreachable();
+  this->set_data_size(this->entries_.size() * dyn_size);
+}
+
+// Write out the dynamic entries.
+
+void
+Output_data_dynamic::do_write(Output_file* of)
+{
+  if (this->target_->get_size() == 32)
+    {
+      if (this->target_->is_big_endian())
+	this->sized_write<32, true>(of);
+      else
+	this->sized_write<32, false>(of);
+    }
+  else if (this->target_->get_size() == 64)
+    {
+      if (this->target_->is_big_endian())
+	this->sized_write<64, true>(of);
+      else
+	this->sized_write<64, false>(of);
+    }
+  else
+    gold_unreachable();
+}
+
+template<int size, bool big_endian>
+void
+Output_data_dynamic::sized_write(Output_file* of)
+{
+  const int dyn_size = elfcpp::Elf_sizes<size>::dyn_size;
+
+  const off_t offset = this->offset();
+  const off_t oview_size = this->data_size();
+  unsigned char* const oview = of->get_output_view(offset, oview_size);
+
+  unsigned char* pov = oview;
+  for (typename Dynamic_entries::const_iterator p = this->entries_.begin();
+       p != this->entries_.end();
+       ++p)
+    {
+      p->write<size, big_endian>(pov, this->pool_);
+      pov += dyn_size;
+    }
+
+  gold_assert(pov - oview == oview_size);
+
+  of->write_output_view(offset, oview_size, oview);
+
+  // We no longer need the dynamic entries.
   this->entries_.clear();
 }
 
@@ -628,7 +779,9 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
     dynsym_index_(0),
     input_sections_(),
     first_input_offset_(0),
-    may_add_data_(may_add_data)
+    may_add_data_(may_add_data),
+    needs_symtab_index_(false),
+    needs_dynsym_index_(false)
 {
 }
 
@@ -648,7 +801,7 @@ Output_section::add_input_section(Relobj* object, unsigned int shndx,
 				  const char* secname,
 				  const elfcpp::Shdr<size, big_endian>& shdr)
 {
-  assert(this->may_add_data_);
+  gold_assert(this->may_add_data_);
 
   elfcpp::Elf_Xword addralign = shdr.get_sh_addralign();
   if ((addralign & (addralign - 1)) != 0)
@@ -682,7 +835,7 @@ Output_section::add_input_section(Relobj* object, unsigned int shndx,
 void
 Output_section::add_output_section_data(Output_section_data* posd)
 {
-  assert(this->may_add_data_);
+  gold_assert(this->may_add_data_);
 
   if (this->input_sections_.empty())
     this->first_input_offset_ = this->data_size();
@@ -750,22 +903,6 @@ Output_section::do_write(Output_file* of)
     p->write(of);
 }
 
-// Output_section_strtab methods.
-
-Output_section_strtab::Output_section_strtab(const char* name,
-					     Stringpool* contents)
-  : Output_section(name, elfcpp::SHT_STRTAB, 0, false),
-    contents_(contents)
-{
-  this->set_data_size(contents->get_strtab_size());
-}
-
-void
-Output_section_strtab::do_write(Output_file* of)
-{
-  this->contents_->write(of, this->offset());
-}
-
 // Output segment methods.
 
 Output_segment::Output_segment(elfcpp::Elf_Word type, elfcpp::Elf_Word flags)
@@ -790,8 +927,8 @@ Output_segment::add_output_section(Output_section* os,
 				   elfcpp::Elf_Word seg_flags,
 				   bool front)
 {
-  assert((os->flags() & elfcpp::SHF_ALLOC) != 0);
-  assert(!this->is_align_known_);
+  gold_assert((os->flags() & elfcpp::SHF_ALLOC) != 0);
+  gold_assert(!this->is_align_known_);
 
   // Update the segment flags.
   this->flags_ |= seg_flags;
@@ -817,7 +954,7 @@ Output_segment::add_output_section(Output_section* os,
 
   if (os->type() == elfcpp::SHT_NOTE && !pdl->empty())
     {
-      Layout::Data_list::iterator p = pdl->end();
+      Output_segment::Output_data_list::iterator p = pdl->end();
       do
 	{
 	  --p;
@@ -842,7 +979,7 @@ Output_segment::add_output_section(Output_section* os,
       pdl = &this->output_data_;
       bool nobits = os->type() == elfcpp::SHT_NOBITS;
       bool sawtls = false;
-      Layout::Data_list::iterator p = pdl->end();
+      Output_segment::Output_data_list::iterator p = pdl->end();
       do
 	{
 	  --p;
@@ -888,7 +1025,7 @@ Output_segment::add_output_section(Output_section* os,
 void
 Output_segment::add_initial_output_data(Output_data* od)
 {
-  assert(!this->is_align_known_);
+  gold_assert(!this->is_align_known_);
   this->output_data_.push_front(od);
 }
 
@@ -942,7 +1079,7 @@ uint64_t
 Output_segment::set_section_addresses(uint64_t addr, off_t* poff,
 				      unsigned int* pshndx)
 {
-  assert(this->type_ == elfcpp::PT_LOAD);
+  gold_assert(this->type_ == elfcpp::PT_LOAD);
 
   this->vaddr_ = addr;
   this->paddr_ = addr;
@@ -1011,7 +1148,7 @@ Output_segment::set_section_list_addresses(Output_data_list* pdl,
 void
 Output_segment::set_offset()
 {
-  assert(this->type_ != elfcpp::PT_LOAD);
+  gold_assert(this->type_ != elfcpp::PT_LOAD);
 
   if (this->output_data_.empty() && this->output_bss_.empty())
     {
@@ -1136,7 +1273,7 @@ Output_segment::write_section_headers_list(const Stringpool* secnamepool,
       if ((*p)->is_section())
 	{
 	  const Output_section* ps = static_cast<const Output_section*>(*p);
-	  assert(*pshndx == ps->out_shndx());
+	  gold_assert(*pshndx == ps->out_shndx());
 	  elfcpp::Shdr_write<size, big_endian> oshdr(v);
 	  ps->write_header(secnamepool, &oshdr);
 	  v += shdr_size;

@@ -163,10 +163,18 @@ gold_fatal(const char* msg, bool perrno) ATTRIBUTE_NORETURN;
 extern void
 gold_nomem() ATTRIBUTE_NORETURN;
 
-// This function is called in cases which can not arise if the code is
-// written correctly.
-extern void
-gold_unreachable() ATTRIBUTE_NORETURN;
+// This macro and function are used in cases which can not arise if
+// the code is written correctly.
+
+#define gold_unreachable() \
+  (gold::do_gold_unreachable(__FILE__, __LINE__, __FUNCTION__))
+
+extern void do_gold_unreachable(const char*, int, const char*)
+  ATTRIBUTE_NORETURN;
+
+// Assertion check.
+
+#define gold_assert(expr) ((void)(!(expr) ? gold_unreachable(), 0 : 0))
 
 // Queue up the first set of tasks.
 extern void

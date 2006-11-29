@@ -3,7 +3,6 @@
 #ifndef GOLD_OUTPUT_H
 #define GOLD_OUTPUT_H
 
-#include <cassert>
 #include <list>
 #include <vector>
 
@@ -16,8 +15,10 @@ namespace gold
 
 class General_options;
 class Object;
+class Symbol;
 class Output_file;
 class Output_section;
+class Target;
 template<int size, bool big_endian>
 class Sized_target;
 template<int size, bool big_endian>
@@ -96,6 +97,12 @@ class Output_data
   write(Output_file* file)
   { this->do_write(file); }
 
+  // This is called by Layout::finalize to note that all sizes must
+  // now be fixed.
+  static void
+  layout_complete()
+  { Output_data::sizes_are_fixed = true; }
+
  protected:
   // Functions that child classes may or in some cases must implement.
 
@@ -127,15 +134,16 @@ class Output_data
   // Return the output section index, if there is an output section.
   virtual unsigned int
   do_out_shndx() const
-  { abort(); }
+  { gold_unreachable(); }
 
   // Set the output section index, if this is an output section.
   virtual void
   do_set_out_shndx(unsigned int)
-  { abort(); }
+  { gold_unreachable(); }
 
   // Set the address and file offset of the data.  This only needs to
-  // be implemented if the child needs to know.
+  // be implemented if the child needs to know.  The child class can
+  // set its size in this call.
   virtual void
   do_set_address(uint64_t, off_t)
   { }
@@ -145,7 +153,10 @@ class Output_data
   // Set the size of the data.
   void
   set_data_size(off_t data_size)
-  { this->data_size_ = data_size; }
+  {
+    gold_assert(!Output_data::sizes_are_fixed);
+    this->data_size_ = data_size;
+  }
 
   // Return default alignment for a size--32 or 64.
   static uint64_t
@@ -154,6 +165,10 @@ class Output_data
  private:
   Output_data(const Output_data&);
   Output_data& operator=(const Output_data&);
+
+  // This is used for verification, to make sure that we don't try to
+  // change any sizes after we set the section addresses.
+  static bool sizes_are_fixed;
 
   // Memory address in file (not always meaningful).
   uint64_t address_;
@@ -192,7 +207,7 @@ class Output_section_headers : public Output_data
   int size_;
   bool big_endian_;
   const Layout::Segment_list& segment_list_;
-  const Layout::Section_list& section_list_;
+  const Layout::Section_list& unattached_section_list_;
   const Stringpool* secnamepool_;
 };
 
@@ -254,7 +269,7 @@ class Output_file_header : public Output_data
   // checking.
   void
   do_set_address(uint64_t, off_t off) const
-  { assert(off == 0); }
+  { gold_assert(off == 0); }
 
  private:
   // Write the data to the file with the right size and endianness.
@@ -292,7 +307,7 @@ class Output_section_data : public Output_data
   void
   set_output_section(Output_section* os)
   {
-    assert(this->output_section_ == NULL);
+    gold_assert(this->output_section_ == NULL);
     this->output_section_ = os;
   }
 
@@ -334,34 +349,85 @@ class Output_data_const : public Output_section_data
       data_(reinterpret_cast<const char*>(p), len)
   { }
 
-  // Write the data to the file.
+  // Add more data.
   void
-  do_write(Output_file* output);
+  add_data(const std::string& add)
+  {
+    this->data_.append(add);
+    this->set_data_size(this->data_.size());
+  }
+
+  // Write the data to the output file.
+  void
+  do_write(Output_file*);
 
  private:
   std::string data_;
 };
 
-// Output_data_common is used to handle the common symbols.  This is
-// quite simple.
+// Another version of Output_data with constant data, in which the
+// buffer is allocated by the caller.
 
-class Output_data_common : public Output_section_data
+class Output_data_const_buffer : public Output_section_data
 {
  public:
-  Output_data_common(uint64_t addralign)
+  Output_data_const_buffer(const unsigned char* p, off_t len,
+			   uint64_t addralign)
+    : Output_section_data(len, addralign), p_(p)
+  { }
+
+  // Write the data the output file.
+  void
+  do_write(Output_file*);
+
+ private:
+  const unsigned char* p_;
+};
+
+// A place holder for data written out via some other mechanism.
+
+class Output_data_space : public Output_section_data
+{
+ public:
+  Output_data_space(off_t data_size, uint64_t addralign)
+    : Output_section_data(data_size, addralign)
+  { }
+
+  explicit Output_data_space(uint64_t addralign)
     : Output_section_data(addralign)
   { }
 
   // Set the size.
   void
-  set_common_size(off_t common_size)
-  { this->set_data_size(common_size); }
+  set_space_size(off_t space_size)
+  { this->set_data_size(space_size); }
 
-  // Write out the data--there is nothing to do, as common symbols are
-  // always zero and are stored in the BSS.
+  // Write out the data--this must be handled elsewhere.
   void
   do_write(Output_file*)
   { }
+};
+
+// A string table which goes into an output section.
+
+class Output_data_strtab : public Output_section_data
+{
+ public:
+  Output_data_strtab(Stringpool* strtab)
+    : Output_section_data(1), strtab_(strtab)
+  { }
+
+  // This is called to set the address and file offset.  Here we make
+  // sure that the Stringpool is finalized.
+  void
+  do_set_address(uint64_t, off_t);
+
+  // Write out the data.
+  void
+  do_write(Output_file*);
+
+ private:
+  Stringpool* strtab_;
 };
 
 // This POD class is used to represent a single reloc in the output
@@ -391,23 +457,29 @@ class Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
   { }
 
   // A reloc against a global symbol.
-  Output_reloc(Symbol* gsym, unsigned int type, Address address)
-    : local_sym_index_(GSYM_CODE), type_(type), address_(address)
+  Output_reloc(Symbol* gsym, unsigned int type, Output_data* od,
+	       Address address)
+    : local_sym_index_(GSYM_CODE), type_(type), od_(od), address_(address)
   { this->u_.gsym = gsym; }
 
   // A reloc against a local symbol.
   Output_reloc(Sized_relobj<size, big_endian>* object,
 	       unsigned int local_sym_index,
-	       unsigned int type, Address address)
-    : local_sym_index_(local_sym_index), type_(type), address_(address)
+	       unsigned int type,
+	       Output_data* od,
+	       Address address)
+    : local_sym_index_(local_sym_index), type_(type), od_(od),
+      address_(address)
   {
-    assert(local_sym_index != GSYM_CODE && local_sym_index != INVALID_CODE);
+    gold_assert(local_sym_index != GSYM_CODE
+		&& local_sym_index != INVALID_CODE);
     this->u_.object = object;
   }
 
   // A reloc against the STT_SECTION symbol of an output section.
-  Output_reloc(Output_section* os, unsigned int type, Address address)
-    : local_sym_index_(SECTION_CODE), type_(type), address_(address)
+  Output_reloc(Output_section* os, unsigned int type, Output_data* od,
+	       Address address)
+    : local_sym_index_(SECTION_CODE), type_(type), od_(od), address_(address)
   { this->u_.os = os; }
 
   // Write the reloc entry to an output view.
@@ -451,7 +523,13 @@ class Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
   // For a local symbol, the local symbol index.  This is GSYM_CODE
   // for a global symbol, or INVALID_CODE for an uninitialized value.
   unsigned int local_sym_index_;
+  // The reloc type--a processor specific code.
   unsigned int type_;
+  // If this is not NULL, then the relocation is against the contents
+  // of this output data.
+  Output_data* od_;
+  // The reloc address--if od_ is not NULL, this is the offset from
+  // the start of od_.
   Address address_;
 };
 
@@ -471,21 +549,23 @@ class Output_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
   { }
 
   // A reloc against a global symbol.
-  Output_reloc(Symbol* gsym, unsigned int type, Address address, Addend addend)
-    : rel_(gsym, type, address), addend_(addend)
+  Output_reloc(Symbol* gsym, unsigned int type, Output_data* od,
+	       Address address, Addend addend)
+    : rel_(gsym, type, od, address), addend_(addend)
   { }
 
   // A reloc against a local symbol.
   Output_reloc(Sized_relobj<size, big_endian>* object,
 	       unsigned int local_sym_index,
-	       unsigned int type, Address address, Addend addend)
-    : rel_(object, local_sym_index, type, address), addend_(addend)
+	       unsigned int type, Output_data* od, Address address,
+	       Addend addend)
+    : rel_(object, local_sym_index, type, od, address), addend_(addend)
   { }
 
   // A reloc against the STT_SECTION symbol of an output section.
-  Output_reloc(Output_section* os, unsigned int type, Address address,
-	       Addend addend)
-    : rel_(os, type, address), addend_(addend)
+  Output_reloc(Output_section* os, unsigned int type, Output_data* od,
+	       Address address, Addend addend)
+    : rel_(os, type, od, address), addend_(addend)
   { }
 
   // Write the reloc entry to an output view.
@@ -564,19 +644,21 @@ class Output_data_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
 
   // Add a reloc against a global symbol.
   void
-  add_global(Symbol* gsym, unsigned int type, Address address)
-  { this->add(Output_reloc_type(gsym, type, address)); }
+  add_global(Symbol* gsym, unsigned int type, Output_data* od, Address address)
+  { this->add(Output_reloc_type(gsym, type, od, address)); }
 
   // Add a reloc against a local symbol.
   void
   add_local(Sized_relobj<size, big_endian>* object,
-	    unsigned int local_sym_index, unsigned int type, Address address)
-  { this->add(Output_reloc_type(object, local_sym_index, type, address)); }
+	    unsigned int local_sym_index, unsigned int type,
+	    Output_data* od, Address address)
+  { this->add(Output_reloc_type(object, local_sym_index, type, od, address)); }
 
   // A reloc against the STT_SECTION symbol of an output section.
   void
-  add_output_section(Output_section* os, unsigned int type, Address address)
-  { this->add(Output_reloc_type(os, type, address)); }
+  add_output_section(Output_section* os, unsigned int type,
+		     Output_data* od, Address address)
+  { this->add(Output_reloc_type(os, type, od, address)); }
 };
 
 // The SHT_RELA version of Output_data_reloc.
@@ -600,24 +682,25 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
 
   // Add a reloc against a global symbol.
   void
-  add_global(Symbol* gsym, unsigned int type, Address address, Addend addend)
-  { this->add(Output_reloc_type(gsym, type, address, addend)); }
+  add_global(Symbol* gsym, unsigned int type, Output_data* od,
+	     Address address, Addend addend)
+  { this->add(Output_reloc_type(gsym, type, od, address, addend)); }
 
   // Add a reloc against a local symbol.
   void
   add_local(Sized_relobj<size, big_endian>* object,
 	    unsigned int local_sym_index, unsigned int type,
-	    Address address, Addend addend)
+	    Output_data* od, Address address, Addend addend)
   {
-    this->add(Output_reloc_type(object, local_sym_index, type, address,
+    this->add(Output_reloc_type(object, local_sym_index, type, od, address,
 				addend));
   }
 
   // A reloc against the STT_SECTION symbol of an output section.
   void
-  add_output_section(Output_section* os, unsigned int type, Address address,
-		     Addend addend)
-  { this->add(Output_reloc_type(os, type, address, addend)); }
+  add_output_section(Output_section* os, unsigned int type, Output_data* od,
+		     Address address, Addend addend)
+  { this->add(Output_reloc_type(os, type, od, address, addend)); }
 };
 
 // Output_data_got is used to manage a GOT.  Each entry in the GOT is
@@ -631,9 +714,9 @@ class Output_data_got : public Output_section_data
  public:
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Valtype;
 
-  Output_data_got()
+  Output_data_got(const General_options* options)
     : Output_section_data(Output_data::default_alignment(size)),
-      entries_()
+      options_(options), entries_()
   { }
 
   // Add an entry for a global symbol to the GOT.  Return true if this
@@ -676,7 +759,7 @@ class Output_data_got : public Output_section_data
     { this->u_.constant = 0; }
 
     // Create a global symbol entry.
-    Got_entry(Symbol* gsym)
+    explicit Got_entry(Symbol* gsym)
       : local_sym_index_(GSYM_CODE)
     { this->u_.gsym = gsym; }
 
@@ -684,20 +767,20 @@ class Output_data_got : public Output_section_data
     Got_entry(Object* object, unsigned int local_sym_index)
       : local_sym_index_(local_sym_index)
     {
-      assert(local_sym_index != GSYM_CODE
-	     && local_sym_index != CONSTANT_CODE);
+      gold_assert(local_sym_index != GSYM_CODE
+		  && local_sym_index != CONSTANT_CODE);
       this->u_.object = object;
     }
 
     // Create a constant entry.  The constant is a host value--it will
     // be swapped, if necessary, when it is written out.
-    Got_entry(Valtype constant)
+    explicit Got_entry(Valtype constant)
       : local_sym_index_(CONSTANT_CODE)
     { this->u_.constant = constant; }
 
     // Write the GOT entry to an output view.
     void
-    write(unsigned char* pov) const;
+    write(const General_options*, unsigned char* pov) const;
 
    private:
     enum
@@ -737,8 +820,140 @@ class Output_data_got : public Output_section_data
   set_got_size()
   { this->set_data_size(this->got_offset(this->entries_.size())); }
 
+  // Options.
+  const General_options* options_;
   // The list of GOT entries.
   Got_entries entries_;
+};
+
+// Output_data_dynamic is used to hold the data in SHT_DYNAMIC
+// section.
+
+class Output_data_dynamic : public Output_section_data
+{
+ public:
+  Output_data_dynamic(const Target* target, Stringpool* pool)
+    : Output_section_data(Output_data::default_alignment(target->get_size())),
+      target_(target), entries_(), pool_(pool)
+  { }
+
+  // Add a new dynamic entry with a fixed numeric value.
+  void
+  add_constant(elfcpp::DT tag, unsigned int val)
+  { this->add_entry(Dynamic_entry(tag, val)); }
+
+  // Add a new dynamic entry with the address of a section.
+  void
+  add_section_address(elfcpp::DT tag, Output_section* os)
+  { this->add_entry(Dynamic_entry(tag, os, false)); }
+
+  // Add a new dynamic entry with the size of a section.
+  void
+  add_section_size(elfcpp::DT tag, Output_section* os)
+  { this->add_entry(Dynamic_entry(tag, os, true)); }
+
+  // Add a new dynamic entry with the address of a symbol.
+  void
+  add_symbol(elfcpp::DT tag, Symbol* sym)
+  { this->add_entry(Dynamic_entry(tag, sym)); }
+
+  // Add a new dynamic entry with a string.
+  void
+  add_string(elfcpp::DT tag, const char* str)
+  { this->add_entry(Dynamic_entry(tag, this->pool_->add(str, NULL))); }
+
+  // Set the final data size.
+  void
+  do_set_address(uint64_t, off_t);
+
+  // Write out the dynamic entries.
+  void
+  do_write(Output_file*);
+
+ private:
+  // This POD class holds a single dynamic entry.
+  class Dynamic_entry
+  {
+   public:
+    // Create an entry with a fixed numeric value.
+    Dynamic_entry(elfcpp::DT tag, unsigned int val)
+      : tag_(tag), classification_(DYNAMIC_NUMBER)
+    { this->u_.val = val; }
+
+    // Create an entry with the size or address of a section.
+    Dynamic_entry(elfcpp::DT tag, Output_section* os, bool section_size)
+      : tag_(tag),
+	classification_(section_size
+			? DYNAMIC_SECTION_SIZE
+			: DYNAMIC_SECTION_ADDRESS)
+    { this->u_.os = os; }
+
+    // Create an entry with the address of a symbol.
+    Dynamic_entry(elfcpp::DT tag, Symbol* sym)
+      : tag_(tag), classification_(DYNAMIC_SYMBOL)
+    { this->u_.sym = sym; }
+
+    // Create an entry with a string.
+    Dynamic_entry(elfcpp::DT tag, const char* str)
+      : tag_(tag), classification_(DYNAMIC_STRING)
+    { this->u_.str = str; }
+
+    // Write the dynamic entry to an output view.
+    template<int size, bool big_endian>
+    void
+    write(unsigned char* pov, const Stringpool*) const;
+
+   private:
+    enum Classification
+    {
+      // Number.
+      DYNAMIC_NUMBER,
+      // Section address.
+      DYNAMIC_SECTION_ADDRESS,
+      // Section size.
+      DYNAMIC_SECTION_SIZE,
+      // Symbol adress.
+      DYNAMIC_SYMBOL,
+      // String.
+      DYNAMIC_STRING
+    };
+
+    union
+    {
+      // For DYNAMIC_NUMBER.
+      unsigned int val;
+      // For DYNAMIC_SECTION_ADDRESS and DYNAMIC_SECTION_SIZE.
+      Output_section* os;
+      // For DYNAMIC_SYMBOL.
+      Symbol* sym;
+      // For DYNAMIC_STRING.
+      const char* str;
+    } u_;
+    // The dynamic tag.
+    elfcpp::DT tag_;
+    // The type of entry.
+    Classification classification_;
+  };
+
+  // Add an entry to the list.
+  void
+  add_entry(const Dynamic_entry& entry)
+  { this->entries_.push_back(entry); }
+
+  // Sized version of write function.
+  template<int size, bool big_endian>
+  void
+  sized_write(Output_file* of);
+
+  // The type of the list of entries.
+  typedef std::vector<Dynamic_entry> Dynamic_entries;
+
+  // The target.
+  const Target* target_;
+  // The entries.
+  Dynamic_entries entries_;
+  // The pool used for strings.
+  Stringpool* pool_;
 };
 
 // An output section.  We don't expect to have too many output
@@ -788,6 +1003,11 @@ class Output_section : public Output_data
   do_set_out_shndx(unsigned int shndx)
   { this->out_shndx_ = shndx; }
 
+  // Return the entsize field.
+  uint64_t
+  entsize() const
+  { return this->entsize_; }
+
   // Set the entsize field.
   void
   set_entsize(uint64_t v)
@@ -822,7 +1042,7 @@ class Output_section : public Output_data
   unsigned int
   symtab_index() const
   {
-    assert(this->symtab_index_ != 0);
+    gold_assert(this->symtab_index_ != 0);
     return this->symtab_index_;
   }
 
@@ -830,7 +1050,7 @@ class Output_section : public Output_data
   void
   set_symtab_index(unsigned int index)
   {
-    assert(index != 0);
+    gold_assert(index != 0);
     this->symtab_index_ = index;
   }
 
@@ -848,7 +1068,7 @@ class Output_section : public Output_data
   unsigned int
   dynsym_index() const
   {
-    assert(this->dynsym_index_ != 0);
+    gold_assert(this->dynsym_index_ != 0);
     return this->dynsym_index_;
   }
 
@@ -856,7 +1076,7 @@ class Output_section : public Output_data
   void
   set_dynsym_index(unsigned int index)
   {
-    assert(index != 0);
+    gold_assert(index != 0);
     this->dynsym_index_ = index;
   }
 
@@ -871,7 +1091,7 @@ class Output_section : public Output_data
   // does nothing: the data is written out by calling Object::Relocate
   // on each input object.  But if there are any Output_section_data
   // objects we do need to write them out here.
-  virtual void
+  void
   do_write(Output_file*);
 
   // Return the address alignment--function required by parent class.
@@ -923,7 +1143,7 @@ class Output_section : public Output_data
 	p2align_(ffsll(static_cast<long long>(addralign))),
 	data_size_(data_size)
     {
-      assert(shndx != -1U);
+      gold_assert(shndx != -1U);
       this->u_.object = object;
     }
 
@@ -936,7 +1156,11 @@ class Output_section : public Output_data
     // The required alignment.
     uint64_t
     addralign() const
-    { return static_cast<uint64_t>(1) << this->p2align_; }
+    {
+      return (this->p2align_ == 0
+	      ? 0
+	      : static_cast<uint64_t>(1) << (this->p2align_ - 1));
+    }
 
     // Return the required size.
     off_t
@@ -1022,57 +1246,6 @@ class Output_section : public Output_data
   // dynamic symbol table.  This will be true if there is a dynamic
   // relocation which needs it.
   bool needs_dynsym_index_ : 1;
-};
-
-// A special Output_section which represents the symbol table
-// (SHT_SYMTAB).  The actual data is written out by
-// Symbol_table::write_globals.
-
-class Output_section_symtab : public Output_section
-{
- public:
-  Output_section_symtab(const char* name, off_t data_size)
-    : Output_section(name, elfcpp::SHT_SYMTAB, 0, false)
-  { this->set_data_size(data_size); }
-
-  // The data is written out by Symbol_table::write_globals.  We don't
-  // do anything here.
-  void
-  do_write(Output_file*)
-  { }
-};
-
-// A special Output_section which represents the dynamic symbol table
-// (SHT_DYNSYM).  The actual data is written out by
-// Symbol_table::write_globals.
-
-class Output_section_dynsym : public Output_section
-{
- public:
-  Output_section_dynsym(const char* name, off_t data_size)
-    : Output_section(name, elfcpp::SHT_DYNSYM, 0, false)
-  { this->set_data_size(data_size); }
-
-  // The data is written out by Symbol_table::write_globals.  We don't
-  // do anything here.
-  void
-  do_write(Output_file*)
-  { }
-};
-
-// A special Output_section which holds a string table.
-
-class Output_section_strtab : public Output_section
-{
- public:
-  Output_section_strtab(const char* name, Stringpool* contents);
-
-  // Write out the data.
-  void
-  do_write(Output_file*);
-
- private:
-  Stringpool* contents_;
 };
 
 // An output segment.  PT_LOAD segments are built from collections of
@@ -1247,7 +1420,7 @@ class Output_file
   unsigned char*
   get_output_view(off_t start, off_t size)
   {
-    assert(start >= 0 && size >= 0 && start + size <= this->file_size_);
+    gold_assert(start >= 0 && size >= 0 && start + size <= this->file_size_);
     return this->base_ + start;
   }
 

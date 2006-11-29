@@ -2,7 +2,6 @@
 
 #include "gold.h"
 
-#include <cassert>
 #include <stdint.h>
 #include <string>
 #include <utility>
@@ -198,8 +197,8 @@ Symbol_table::Symbol_table_eq::operator()(const Symbol_table_key& k1,
 void
 Symbol_table::make_forwarder(Symbol* from, Symbol* to)
 {
-  assert(from != to);
-  assert(!from->is_forwarder() && !to->is_forwarder());
+  gold_assert(from != to);
+  gold_assert(!from->is_forwarder() && !to->is_forwarder());
   this->forwarders_[from] = to;
   from->set_forwarder();
 }
@@ -209,10 +208,10 @@ Symbol_table::make_forwarder(Symbol* from, Symbol* to)
 Symbol*
 Symbol_table::resolve_forwards(const Symbol* from) const
 {
-  assert(from->is_forwarder());
+  gold_assert(from->is_forwarder());
   Unordered_map<const Symbol*, Symbol*>::const_iterator p =
     this->forwarders_.find(from);
-  assert(p != this->forwarders_.end());
+  gold_assert(p != this->forwarders_.end());
   return p->second;
 }
 
@@ -324,7 +323,7 @@ Symbol_table::add_from_object(Object* object,
       // We already have an entry for NAME/VERSION.
       ret = this->get_sized_symbol SELECT_SIZE_NAME(size) (ins.first->second
                                                            SELECT_SIZE(size));
-      assert(ret != NULL);
+      gold_assert(ret != NULL);
 
       was_undefined = ret->is_undefined();
       was_common = ret->is_common();
@@ -357,7 +356,7 @@ Symbol_table::add_from_object(Object* object,
   else
     {
       // This is the first time we have seen NAME/VERSION.
-      assert(ins.first->second == NULL);
+      gold_assert(ins.first->second == NULL);
 
       was_undefined = false;
       was_common = false;
@@ -406,7 +405,7 @@ Symbol_table::add_from_object(Object* object,
 	    {
 	      // This is the first time we have seen NAME/NULL.  Point
 	      // it at the new entry for NAME/VERSION.
-	      assert(insdef.second);
+	      gold_assert(insdef.second);
 	      insdef.first->second = ret;
 	    }
 	}
@@ -654,7 +653,7 @@ Symbol_table::define_special_symbol(Target* target, const char* name,
 				    bool only_if_ref
                                     ACCEPT_SIZE_ENDIAN)
 {
-  assert(this->size_ == size);
+  gold_assert(this->size_ == size);
 
   Symbol* oldsym;
   Sized_symbol<size>* sym;
@@ -685,20 +684,20 @@ Symbol_table::define_special_symbol(Target* target, const char* name,
 	{
 	  // We already have a symbol table entry for NAME.
 	  oldsym = ins.first->second;
-	  assert(oldsym != NULL);
+	  gold_assert(oldsym != NULL);
 	  sym = NULL;
 	}
       else
 	{
 	  // We haven't seen this symbol before.
-	  assert(ins.first->second == NULL);
+	  gold_assert(ins.first->second == NULL);
 
 	  if (!target->has_make_symbol())
 	    sym = new Sized_symbol<size>();
 	  else
 	    {
-	      assert(target->get_size() == size);
-	      assert(target->is_big_endian() ? big_endian : !big_endian);
+	      gold_assert(target->get_size() == size);
+	      gold_assert(target->is_big_endian() ? big_endian : !big_endian);
 	      typedef Sized_target<size, big_endian> My_target;
 	      My_target* sized_target = static_cast<My_target*>(target);
 	      sym = sized_target->make_symbol();
@@ -713,11 +712,11 @@ Symbol_table::define_special_symbol(Target* target, const char* name,
 
   if (oldsym != NULL)
     {
-      assert(sym == NULL);
+      gold_assert(sym == NULL);
 
       sym = this->get_sized_symbol SELECT_SIZE_NAME(size) (oldsym
                                                            SELECT_SIZE(size));
-      assert(sym->source() == Symbol::FROM_OBJECT);
+      gold_assert(sym->source() == Symbol::FROM_OBJECT);
       const int old_shnum = sym->shnum();
       if (old_shnum != elfcpp::SHN_UNDEF
 	  && old_shnum != elfcpp::SHN_COMMON
@@ -748,7 +747,7 @@ Symbol_table::define_in_output_data(Target* target, const char* name,
 				    bool offset_is_from_end,
 				    bool only_if_ref)
 {
-  assert(target->get_size() == this->size_);
+  gold_assert(target->get_size() == this->size_);
   if (this->size_ == 32)
     this->do_define_in_output_data<32>(target, name, od, value, symsize,
 				       type, binding, visibility, nonvis,
@@ -758,7 +757,7 @@ Symbol_table::define_in_output_data(Target* target, const char* name,
 				       type, binding, visibility, nonvis,
 				       offset_is_from_end, only_if_ref);
   else
-    abort();
+    gold_unreachable();
 }
 
 // Define a symbol in an Output_data, sized version.
@@ -808,7 +807,7 @@ Symbol_table::define_in_output_segment(Target* target, const char* name,
 				       Symbol::Segment_offset_base offset_base,
 				       bool only_if_ref)
 {
-  assert(target->get_size() == this->size_);
+  gold_assert(target->get_size() == this->size_);
   if (this->size_ == 32)
     this->do_define_in_output_segment<32>(target, name, os, value, symsize,
 					  type, binding, visibility, nonvis,
@@ -818,7 +817,7 @@ Symbol_table::define_in_output_segment(Target* target, const char* name,
 					  type, binding, visibility, nonvis,
 					  offset_base, only_if_ref);
   else
-    abort();
+    gold_unreachable();
 }
 
 // Define a symbol in an Output_segment, sized version.
@@ -866,7 +865,7 @@ Symbol_table::define_as_constant(Target* target, const char* name,
 				 elfcpp::STV visibility, unsigned char nonvis,
 				 bool only_if_ref)
 {
-  assert(target->get_size() == this->size_);
+  gold_assert(target->get_size() == this->size_);
   if (this->size_ == 32)
     this->do_define_as_constant<32>(target, name, value, symsize,
 				    type, binding, visibility, nonvis,
@@ -876,7 +875,7 @@ Symbol_table::define_as_constant(Target* target, const char* name,
 				    type, binding, visibility, nonvis,
 				    only_if_ref);
   else
-    abort();
+    gold_unreachable();
 }
 
 // Define a symbol as a constant, sized version.
@@ -955,6 +954,33 @@ Symbol_table::define_symbols(const Layout* layout, Target* target, int count,
     }
 }
 
+// Set the dynamic symbol indexes.  INDEX is the index of the first
+// global dynamic symbol.  Pointers to the symbols are stored into the
+// vector SYMS.  The names are added to DYNPOOL.  This returns an
+// updated dynamic symbol index.
+
+unsigned int
+Symbol_table::set_dynsym_indexes(unsigned int index,
+				 std::vector<Symbol*>* syms,
+				 Stringpool* dynpool)
+{
+  for (Symbol_table_type::iterator p = this->table_.begin();
+       p != this->table_.end();
+       ++p)
+    {
+      Symbol* sym = p->second;
+      if (sym->needs_dynsym_entry())
+	{
+	  sym->set_dynsym_index(index);
+	  ++index;
+	  syms->push_back(sym);
+	  dynpool->add(sym->name(), NULL);
+	}
+    }
+
+  return index;
+}
+
 // Set the final values for all the symbols.  The index of the first
 // global symbol in the output file is INDEX.  Record the file offset
 // OFF.  Add their names to POOL.  Return the new file offset.
@@ -964,7 +990,7 @@ Symbol_table::finalize(unsigned int index, off_t off, Stringpool* pool)
 {
   off_t ret;
 
-  assert(index != 0);
+  gold_assert(index != 0);
   this->first_global_index_ = index;
 
   if (this->size_ == 32)
@@ -972,7 +998,7 @@ Symbol_table::finalize(unsigned int index, off_t off, Stringpool* pool)
   else if (this->size_ == 64)
     ret = this->sized_finalize<64>(index, off, pool);
   else
-    abort();
+    gold_unreachable();
 
   // Now that we have the final symbol table, we can reliably note
   // which symbols should get warnings.
@@ -1002,7 +1028,12 @@ Symbol_table::sized_finalize(unsigned index, off_t off, Stringpool* pool)
       Sized_symbol<size>* sym = static_cast<Sized_symbol<size>*>(p->second);
 
       // FIXME: Here we need to decide which symbols should go into
-      // the output file.
+      // the output file, based on --strip.
+
+      // The default version of a symbol may appear twice in the
+      // symbol table.  We only need to finalize it once.
+      if (sym->has_symtab_index())
+	continue;
 
       typename Sized_symbol<size>::Value_type value;
 
@@ -1072,7 +1103,7 @@ Symbol_table::sized_finalize(unsigned index, off_t off, Stringpool* pool)
 		value += os->filesz();
 		break;
 	      default:
-		abort();
+		gold_unreachable();
 	      }
 	  }
 	  break;
@@ -1082,7 +1113,7 @@ Symbol_table::sized_finalize(unsigned index, off_t off, Stringpool* pool)
 	  break;
 
 	default:
-	  abort();
+	  gold_unreachable();
 	}
 
       sym->set_value(value);
@@ -1118,7 +1149,7 @@ Symbol_table::write_globals(const Target* target, const Stringpool* sympool,
 	this->sized_write_globals<64, false>(target, sympool, of);
     }
   else
-    abort();
+    gold_unreachable();
 }
 
 // Write out the global symbols.
@@ -1141,8 +1172,20 @@ Symbol_table::sized_write_globals(const Target*,
     {
       Sized_symbol<size>* sym = static_cast<Sized_symbol<size>*>(p->second);
 
-      if (sym->symtab_index() == -1U)
-	continue;
+      unsigned int sym_index = sym->symtab_index();
+      if (sym_index == -1U)
+	{
+	  // This symbol is not included in the output file.
+	  continue;
+	}
+      if (sym_index != index)
+	{
+	  // We have already seen this symbol, because it has a
+	  // default version.
+	  gold_assert(sym_index < index);
+	  continue;
+	}
+      ++index;
 
       unsigned int shndx;
       switch (sym->source())
@@ -1173,7 +1216,7 @@ Symbol_table::sized_write_globals(const Target*,
 		Relobj* relobj = static_cast<Relobj*>(symobj);
 		off_t secoff;
 		Output_section* os = relobj->output_section(shnum, &secoff);
-		assert(os != NULL);
+		gold_assert(os != NULL);
 		shndx = os->out_shndx();
 	      }
 	  }
@@ -1192,11 +1235,8 @@ Symbol_table::sized_write_globals(const Target*,
 	  break;
 
 	default:
-	  abort();
+	  gold_unreachable();
 	}
-
-      assert(sym->symtab_index() == index);
-      ++index;
 
       elfcpp::Sym_write<size, big_endian> osym(ps);
       osym.put_st_name(sympool->get_offset(sym->name()));
@@ -1210,9 +1250,59 @@ Symbol_table::sized_write_globals(const Target*,
       ps += sym_size;
     }
 
-  assert(ps - psyms == oview_size);
+  gold_assert(ps - psyms == oview_size);
 
   of->write_output_view(this->offset_, oview_size, psyms);
+}
+
+// Write out a section symbol.  Return the update offset.
+
+void
+Symbol_table::write_section_symbol(const Target* target,
+				   const Output_section *os,
+				   Output_file* of,
+				   off_t offset) const
+{
+  if (this->size_ == 32)
+    {
+      if (target->is_big_endian())
+	this->sized_write_section_symbol<32, true>(os, of, offset);
+      else
+	this->sized_write_section_symbol<32, false>(os, of, offset);
+    }
+  else if (this->size_ == 64)
+    {
+      if (target->is_big_endian())
+	this->sized_write_section_symbol<64, true>(os, of, offset);
+      else
+	this->sized_write_section_symbol<64, false>(os, of, offset);
+    }
+  else
+    gold_unreachable();
+}
+
+// Write out a section symbol, specialized for size and endianness.
+
+template<int size, bool big_endian>
+void
+Symbol_table::sized_write_section_symbol(const Output_section* os,
+					 Output_file* of,
+					 off_t offset) const
+{
+  const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
+
+  unsigned char* pov = of->get_output_view(offset, sym_size);
+
+  elfcpp::Sym_write<size, big_endian> osym(pov);
+  osym.put_st_name(0);
+  osym.put_st_value(os->address());
+  osym.put_st_size(0);
+  osym.put_st_info(elfcpp::elf_st_info(elfcpp::STB_LOCAL,
+				       elfcpp::STT_SECTION));
+  osym.put_st_other(elfcpp::elf_st_other(elfcpp::STV_DEFAULT, 0));
+  osym.put_st_shndx(os->out_shndx());
+
+  of->write_output_view(offset, sym_size, pov);
 }
 
 // Warnings functions.
@@ -1268,9 +1358,9 @@ Warnings::note_warnings(Symbol_table* symtab)
 void
 Warnings::issue_warning(const Symbol* sym, const std::string& location) const
 {
-  assert(sym->has_warning());
+  gold_assert(sym->has_warning());
   Warning_table::const_iterator p = this->warnings_.find(sym->name());
-  assert(p != this->warnings_.end());
+  gold_assert(p != this->warnings_.end());
   fprintf(stderr, _("%s: %s: warning: %s\n"), program_name, location.c_str(),
 	  p->second.text.c_str());
 }

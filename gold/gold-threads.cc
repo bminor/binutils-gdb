@@ -1,7 +1,5 @@
 // gold-threads.cc -- thread support for gold
 
-#include <cassert>
-
 #include "gold.h"
 
 #ifdef ENABLE_THREADS
@@ -87,20 +85,20 @@ Lock_impl::Lock_impl()
 
 Lock_impl::~Lock_impl()
 {
-  assert(!this->acquired_);
+  gold_assert(!this->acquired_);
 }
 
 void
 Lock_impl::acquire()
 {
-  assert(!this->acquired_);
+  gold_assert(!this->acquired_);
   this->acquired_ = true;
 }
 
 void
 Lock_impl::release()
 {
-  assert(this->acquired_);
+  gold_assert(this->acquired_);
   this->acquired_ = false;
 }
 
@@ -192,7 +190,7 @@ Condvar_impl::~Condvar_impl()
 void
 Condvar_impl::wait(Lock_impl* li)
 {
-  assert(li->acquired_);
+  gold_assert(li->acquired_);
 }
 
 void

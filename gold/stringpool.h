@@ -63,7 +63,10 @@ class Stringpool
   // Get the size of the ELF strtab.
   off_t
   get_strtab_size() const
-  { return this->strtab_size_; }
+  {
+    gold_assert(this->strtab_size_ != 0);
+    return this->strtab_size_;
+  }
 
   // Write the strtab into the output file at the specified offset.
   void

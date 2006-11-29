@@ -291,8 +291,8 @@ Input_arguments::add_file(const Input_file_argument& file)
     this->input_argument_list_.push_back(Input_argument(file));
   else
     {
-      assert(!this->input_argument_list_.empty());
-      assert(this->input_argument_list_.back().is_group());
+      gold_assert(!this->input_argument_list_.empty());
+      gold_assert(this->input_argument_list_.back().is_group());
       this->input_argument_list_.back().group()->add_file(file);
     }
 }
@@ -302,7 +302,7 @@ Input_arguments::add_file(const Input_file_argument& file)
 void
 Input_arguments::start_group()
 {
-  assert(!this->in_group_);
+  gold_assert(!this->in_group_);
   Input_file_group* group = new Input_file_group();
   this->input_argument_list_.push_back(Input_argument(group));
   this->in_group_ = true;
@@ -313,7 +313,7 @@ Input_arguments::start_group()
 void
 Input_arguments::end_group()
 {
-  assert(this->in_group_);
+  gold_assert(this->in_group_);
   this->in_group_ = false;
 }
 

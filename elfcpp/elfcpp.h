@@ -1304,6 +1304,32 @@ class Dyn
   const internal::Dyn_data<size>* p_;
 };
 
+// Write class for an entry in the SHT_DYNAMIC section.
+
+template<int size, bool big_endian>
+class Dyn_write
+{
+ public:
+  Dyn_write(unsigned char* p)
+    : p_(reinterpret_cast<internal::Dyn_data<size>*>(p))
+  { }
+
+  void
+  put_d_tag(typename Elf_types<size>::Elf_Swxword v)
+  { this->p_->d_tag = Convert<size, big_endian>::convert_host(v); }
+
+  void
+  put_d_val(typename Elf_types<size>::Elf_WXword v)
+  { this->p_->d_val = Convert<size, big_endian>::convert_host(v); }
+
+  void
+  put_d_ptr(typename Elf_types<size>::Elf_Addr v)
+  { this->p_->d_val = Convert<size, big_endian>::convert_host(v); }
+
+ private:
+  internal::Dyn_data<size>* p_;
+};
+
 // Accessor classes for entries in the ELF SHT_GNU_verdef section.
 
 template<int size, bool big_endian>

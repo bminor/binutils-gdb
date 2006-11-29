@@ -5,11 +5,24 @@
 #include <vector>
 #include <cstring>
 
+#include "elfcpp.h"
 #include "symtab.h"
 #include "dynobj.h"
 
 namespace gold
 {
+
+// Class Dynobj.
+
+// Return the string to use in a DT_NEEDED entry.
+
+const char*
+Dynobj::soname() const
+{
+  if (!this->soname_.empty())
+    return this->soname_.c_str();
+  return this->name().c_str();
+}
 
 // Class Sized_dynobj.
 
@@ -20,8 +33,7 @@ Sized_dynobj<size, big_endian>::Sized_dynobj(
     off_t offset,
     const elfcpp::Ehdr<size, big_endian>& ehdr)
   : Dynobj(name, input_file, offset),
-    elf_file_(this, ehdr),
-    soname_()
+    elf_file_(this, ehdr)
 {
 }
 
@@ -130,7 +142,7 @@ Sized_dynobj<size, big_endian>::read_dynsym_section(
 
   typename This::Shdr shdr(pshdrs + shndx * This::shdr_size);
 
-  assert(shdr.get_sh_type() == type);
+  gold_assert(shdr.get_sh_type() == type);
 
   if (shdr.get_sh_link() != link)
     {
@@ -146,11 +158,11 @@ Sized_dynobj<size, big_endian>::read_dynsym_section(
   *view_info = shdr.get_sh_info();
 }
 
-// Set soname_ if this shared object has a DT_SONAME tag.  PSHDRS
-// points to the section headers.  DYNAMIC_SHNDX is the section index
-// of the SHT_DYNAMIC section.  STRTAB_SHNDX, STRTAB, and STRTAB_SIZE
-// are the section index and contents of a string table which may be
-// the one associated with the SHT_DYNAMIC section.
+// Set the soname field if this shared object has a DT_SONAME tag.
+// PSHDRS points to the section headers.  DYNAMIC_SHNDX is the section
+// index of the SHT_DYNAMIC section.  STRTAB_SHNDX, STRTAB, and
+// STRTAB_SIZE are the section index and contents of a string table
+// which may be the one associated with the SHT_DYNAMIC section.
 
 template<int size, bool big_endian>
 void
@@ -161,7 +173,7 @@ Sized_dynobj<size, big_endian>::set_soname(const unsigned char* pshdrs,
 					   off_t strtab_size)
 {
   typename This::Shdr dynamicshdr(pshdrs + dynamic_shndx * This::shdr_size);
-  assert(dynamicshdr.get_sh_type() == elfcpp::SHT_DYNAMIC);
+  gold_assert(dynamicshdr.get_sh_type() == elfcpp::SHT_DYNAMIC);
 
   const off_t dynamic_size = dynamicshdr.get_sh_size();
   const unsigned char* pdynamic = this->get_view(dynamicshdr.get_sh_offset(),
@@ -214,7 +226,7 @@ Sized_dynobj<size, big_endian>::set_soname(const unsigned char* pshdrs,
 	    }
 
 	  const char* strtab = reinterpret_cast<const char*>(strtabu);
-	  this->soname_ = std::string(strtab + val);
+	  this->set_soname_string(strtab + val);
 	  return;
 	}
 
@@ -259,7 +271,7 @@ Sized_dynobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
     {
       // Get the dynamic symbols.
       typename This::Shdr dynsymshdr(pshdrs + dynsym_shndx * This::shdr_size);
-      assert(dynsymshdr.get_sh_type() == elfcpp::SHT_DYNSYM);
+      gold_assert(dynsymshdr.get_sh_type() == elfcpp::SHT_DYNSYM);
 
       sd->symbols = this->get_lasting_view(dynsymshdr.get_sh_offset(),
 					   dynsymshdr.get_sh_size());
@@ -380,7 +392,7 @@ Sized_dynobj<size, big_endian>::set_version_map(
     unsigned int ndx,
     const char* name) const
 {
-  assert(ndx < version_map->size());
+  gold_assert(ndx < version_map->size());
   if ((*version_map)[ndx] != NULL)
     {
       fprintf(stderr, _("%s: %s: duplicate definition for version %u\n"),
@@ -602,8 +614,9 @@ Sized_dynobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
 {
   if (sd->symbols == NULL)
     {
-      assert(sd->symbol_names == NULL);
-      assert(sd->versym == NULL && sd->verdef == NULL && sd->verneed == NULL);
+      gold_assert(sd->symbol_names == NULL);
+      gold_assert(sd->versym == NULL && sd->verdef == NULL
+		  && sd->verneed == NULL);
       return;
     }
 
@@ -650,6 +663,400 @@ Sized_dynobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
       delete sd->verneed;
       sd->verneed = NULL;
     }
+}
+
+// Given a vector of hash codes, compute the number of hash buckets to
+// use.
+
+unsigned int
+Dynobj::compute_bucket_count(const std::vector<uint32_t>& hashcodes,
+			     bool for_gnu_hash_table)
+{
+  // FIXME: Implement optional hash table optimization.
+
+  // Array used to determine the number of hash table buckets to use
+  // based on the number of symbols there are.  If there are fewer
+  // than 3 symbols we use 1 bucket, fewer than 17 symbols we use 3
+  // buckets, fewer than 37 we use 17 buckets, and so forth.  We never
+  // use more than 32771 buckets.  This is straight from the old GNU
+  // linker.
+  static const unsigned int buckets[] =
+  {
+    1, 3, 17, 37, 67, 97, 131, 197, 263, 521, 1031, 2053, 4099, 8209,
+    16411, 32771
+  };
+  const int buckets_count = sizeof buckets / sizeof buckets[0];
+
+  unsigned int symcount = hashcodes.size();
+  unsigned int ret = 1;
+  for (int i = 0; i < buckets_count; ++i)
+    {
+      if (symcount < buckets[i])
+	break;
+      ret = buckets[i];
+    }
+
+  if (for_gnu_hash_table && ret < 2)
+    ret = 2;
+
+  return ret;
+}
+
+// The standard ELF hash function.  This hash function must not
+// change, as the dynamic linker uses it also.
+
+uint32_t
+Dynobj::elf_hash(const char* name)
+{
+  const unsigned char* nameu = reinterpret_cast<const unsigned char*>(name);
+  uint32_t h = 0;
+  unsigned char c;
+  while ((c = *nameu++) != '\0')
+    {
+      h = (h << 4) + c;
+      uint32_t g = h & 0xf0000000;
+      if (g != 0)
+	{
+	  h ^= g >> 24;
+	  // The ELF ABI says h &= ~g, but using xor is equivalent in
+	  // this case (since g was set from h) and may save one
+	  // instruction.
+	  h ^= g;
+	}
+    }
+  return h;
+}
+
+// Create a standard ELF hash table, setting *PPHASH and *PHASHLEN.
+// DYNSYMS is a vector with all the global dynamic symbols.
+// LOCAL_DYNSYM_COUNT is the number of local symbols in the dynamic
+// symbol table.
+
+void
+Dynobj::create_elf_hash_table(const Target* target,
+			      const std::vector<Symbol*>& dynsyms,
+			      unsigned int local_dynsym_count,
+			      unsigned char** pphash,
+			      unsigned int* phashlen)
+{
+  unsigned int dynsym_count = dynsyms.size();
+
+  // Get the hash values for all the symbols.
+  std::vector<uint32_t> dynsym_hashvals(dynsym_count);
+  for (unsigned int i = 0; i < dynsym_count; ++i)
+    dynsym_hashvals[i] = Dynobj::elf_hash(dynsyms[i]->name());
+
+  const unsigned int bucketcount =
+    Dynobj::compute_bucket_count(dynsym_hashvals, false);
+
+  std::vector<uint32_t> bucket(bucketcount);
+  std::vector<uint32_t> chain(local_dynsym_count + dynsym_count);
+
+  for (unsigned int i = 0; i < dynsym_count; ++i)
+    {
+      unsigned int dynsym_index = dynsyms[i]->dynsym_index();
+      unsigned int bucketpos = dynsym_hashvals[i] % bucketcount;
+      chain[dynsym_index] = bucket[bucketpos];
+      bucket[bucketpos] = dynsym_index;
+    }
+
+  unsigned int hashlen = ((2
+			   + bucketcount
+			   + local_dynsym_count
+			   + dynsym_count)
+			  * 4);
+  unsigned char* phash = new unsigned char[hashlen];
+
+  if (target->is_big_endian())
+    Dynobj::sized_create_elf_hash_table<true>(bucket, chain, phash, hashlen);
+  else
+    Dynobj::sized_create_elf_hash_table<false>(bucket, chain, phash, hashlen);
+
+  *pphash = phash;
+  *phashlen = hashlen;
+}
+
+// Fill in an ELF hash table.
+
+template<bool big_endian>
+void
+Dynobj::sized_create_elf_hash_table(const std::vector<uint32_t>& bucket,
+				    const std::vector<uint32_t>& chain,
+				    unsigned char* phash,
+				    unsigned int hashlen)
+{
+  unsigned char* p = phash;
+
+  const unsigned int bucketcount = bucket.size();
+  const unsigned int chaincount = chain.size();
+
+  elfcpp::Swap<32, big_endian>::writeval(p, bucketcount);
+  p += 4;
+  elfcpp::Swap<32, big_endian>::writeval(p, chaincount);
+  p += 4;
+
+  for (unsigned int i = 0; i < bucketcount; ++i)
+    {
+      elfcpp::Swap<32, big_endian>::writeval(p, bucket[i]);
+      p += 4;
+    }
+
+  for (unsigned int i = 0; i < chaincount; ++i)
+    {
+      elfcpp::Swap<32, big_endian>::writeval(p, chain[i]);
+      p += 4;
+    }
+
+  gold_assert(static_cast<unsigned int>(p - phash) == hashlen);
+}
+
+// The hash function used for the GNU hash table.  This hash function
+// must not change, as the dynamic linker uses it also.
+
+uint32_t
+Dynobj::gnu_hash(const char* name)
+{
+  const unsigned char* nameu = reinterpret_cast<const unsigned char*>(name);
+  uint32_t h = 5381;
+  unsigned char c;
+  while ((c = *nameu++) != '\0')
+    h = (h << 5) + h + c;
+  return h;
+}
+
+// Create a GNU hash table, setting *PPHASH and *PHASHLEN.  GNU hash
+// tables are an extension to ELF which are recognized by the GNU
+// dynamic linker.  They are referenced using dynamic tag DT_GNU_HASH.
+// TARGET is the target.  DYNSYMS is a vector with all the global
+// symbols which will be going into the dynamic symbol table.
+// LOCAL_DYNSYM_COUNT is the number of local symbols in the dynamic
+// symbol table.
+
+void
+Dynobj::create_gnu_hash_table(const Target* target,
+			      const std::vector<Symbol*>& dynsyms,
+			      unsigned int local_dynsym_count,
+			      unsigned char** pphash,
+			      unsigned int* phashlen)
+{
+  const unsigned int count = dynsyms.size();
+
+  // Sort the dynamic symbols into two vectors.  Symbols which we do
+  // not want to put into the hash table we store into
+  // UNHASHED_DYNSYMS.  Symbols which we do want to store we put into
+  // HASHED_DYNSYMS.  DYNSYM_HASHVALS is parallel to HASHED_DYNSYMS,
+  // and records the hash codes.
+
+  std::vector<Symbol*> unhashed_dynsyms;
+  unhashed_dynsyms.reserve(count);
+
+  std::vector<Symbol*> hashed_dynsyms;
+  hashed_dynsyms.reserve(count);
+
+  std::vector<uint32_t> dynsym_hashvals;
+  dynsym_hashvals.reserve(count);
+  
+  for (unsigned int i = 0; i < count; ++i)
+    {
+      Symbol* sym = dynsyms[i];
+
+      // FIXME: Should put on unhashed_dynsyms if the symbol is
+      // hidden.
+      if (sym->is_undefined())
+	unhashed_dynsyms.push_back(sym);
+      else
+	{
+	  hashed_dynsyms.push_back(sym);
+	  dynsym_hashvals.push_back(Dynobj::gnu_hash(sym->name()));
+	}
+    }
+
+  // Put the unhashed symbols at the start of the global portion of
+  // the dynamic symbol table.
+  const unsigned int unhashed_count = unhashed_dynsyms.size();
+  unsigned int unhashed_dynsym_index = local_dynsym_count;
+  for (unsigned int i = 0; i < unhashed_count; ++i)
+    {
+      unhashed_dynsyms[i]->set_dynsym_index(unhashed_dynsym_index);
+      ++unhashed_dynsym_index;
+    }
+
+  // For the actual data generation we call out to a templatized
+  // function.
+  int size = target->get_size();
+  bool big_endian = target->is_big_endian();
+  if (size == 32)
+    {
+      if (big_endian)
+	Dynobj::sized_create_gnu_hash_table<32, true>(hashed_dynsyms,
+						      dynsym_hashvals,
+						      unhashed_dynsym_index,
+						      pphash,
+						      phashlen);
+      else
+	Dynobj::sized_create_gnu_hash_table<32, false>(hashed_dynsyms,
+						       dynsym_hashvals,
+						       unhashed_dynsym_index,
+						       pphash,
+						       phashlen);
+    }
+  else if (size == 64)
+    {
+      if (big_endian)
+	Dynobj::sized_create_gnu_hash_table<64, true>(hashed_dynsyms,
+						      dynsym_hashvals,
+						      unhashed_dynsym_index,
+						      pphash,
+						      phashlen);
+      else
+	Dynobj::sized_create_gnu_hash_table<64, false>(hashed_dynsyms,
+						       dynsym_hashvals,
+						       unhashed_dynsym_index,
+						       pphash,
+						       phashlen);
+    }
+  else
+    gold_unreachable();
+}
+
+// Create the actual data for a GNU hash table.  This is just a copy
+// of the code from the old GNU linker.
+
+template<int size, bool big_endian>
+void
+Dynobj::sized_create_gnu_hash_table(
+    const std::vector<Symbol*>& hashed_dynsyms,
+    const std::vector<uint32_t>& dynsym_hashvals,
+    unsigned int unhashed_dynsym_count,
+    unsigned char** pphash,
+    unsigned int* phashlen)
+{
+  if (hashed_dynsyms.empty())
+    {
+      // Special case for the empty hash table.
+      unsigned int hashlen = 5 * 4 + size / 8;
+      unsigned char* phash = new unsigned char[hashlen];
+      // One empty bucket.
+      elfcpp::Swap<32, big_endian>::writeval(phash, 1);
+      // Symbol index above unhashed symbols.
+      elfcpp::Swap<32, big_endian>::writeval(phash + 4, unhashed_dynsym_count);
+      // One word for bitmask.
+      elfcpp::Swap<32, big_endian>::writeval(phash + 8, 1);
+      // Only bloom filter.
+      elfcpp::Swap<32, big_endian>::writeval(phash + 12, 0);
+      // No valid hashes.
+      elfcpp::Swap<size, big_endian>::writeval(phash + 16, 0);
+      // No hashes in only bucket.
+      elfcpp::Swap<32, big_endian>::writeval(phash + 16 + size / 8, 0);
+
+      *phashlen = hashlen;
+      *pphash = phash;
+
+      return;
+    }
+
+  const unsigned int bucketcount =
+    Dynobj::compute_bucket_count(dynsym_hashvals, true);
+
+  const unsigned int nsyms = hashed_dynsyms.size();
+
+  uint32_t maskbitslog2 = 1;
+  uint32_t x = nsyms >> 1;
+  while (x != 0)
+    {
+      ++maskbitslog2;
+      x >>= 1;
+    }
+  if (maskbitslog2 < 3)
+    maskbitslog2 = 5;
+  else if (((1U << (maskbitslog2 - 2)) & nsyms) != 0)
+    maskbitslog2 += 3;
+  else
+    maskbitslog2 += 2;
+
+  uint32_t shift1;
+  if (size == 32)
+    shift1 = 5;
+  else
+    {
+      if (maskbitslog2 == 5)
+	maskbitslog2 = 6;
+      shift1 = 6;
+    }
+  uint32_t mask = (1U << shift1) - 1U;
+  uint32_t shift2 = maskbitslog2;
+  uint32_t maskbits = 1U << maskbitslog2;
+  uint32_t maskwords = 1U << (maskbitslog2 - shift1);
+
+  typedef typename elfcpp::Elf_types<size>::Elf_WXword Word;
+  std::vector<Word> bitmask(maskwords);
+  std::vector<uint32_t> counts(bucketcount);
+  std::vector<uint32_t> indx(bucketcount);
+  uint32_t symindx = unhashed_dynsym_count;
+
+  // Count the number of times each hash bucket is used.
+  for (unsigned int i = 0; i < nsyms; ++i)
+    ++counts[dynsym_hashvals[i] % bucketcount];
+
+  unsigned int cnt = symindx;
+  for (unsigned int i = 0; i < bucketcount; ++i)
+    {
+      indx[i] = cnt;
+      cnt += counts[i];
+    }
+
+  unsigned int hashlen = (4 + bucketcount + nsyms) * 4;
+  hashlen += maskbits / 8;
+  unsigned char* phash = new unsigned char[hashlen];
+
+  elfcpp::Swap<32, big_endian>::writeval(phash, bucketcount);
+  elfcpp::Swap<32, big_endian>::writeval(phash + 4, symindx);
+  elfcpp::Swap<32, big_endian>::writeval(phash + 8, maskwords);
+  elfcpp::Swap<32, big_endian>::writeval(phash + 12, shift2);
+
+  unsigned char* p = phash + 16 + maskbits / 8;
+  for (unsigned int i = 0; i < bucketcount; ++i)
+    {
+      if (counts[i] == 0)
+	elfcpp::Swap<32, big_endian>::writeval(p, 0);
+      else
+	elfcpp::Swap<32, big_endian>::writeval(p, indx[i]);
+      p += 4;
+    }
+
+  for (unsigned int i = 0; i < nsyms; ++i)
+    {
+      Symbol* sym = hashed_dynsyms[i];
+      uint32_t hashval = dynsym_hashvals[i];
+
+      unsigned int bucket = hashval % bucketcount;
+      unsigned int val = ((hashval >> shift1)
+			  & ((maskbits >> shift1) - 1));
+      bitmask[val] |= (static_cast<Word>(1U)) << (hashval & mask);
+      bitmask[val] |= (static_cast<Word>(1U)) << ((hashval >> shift2) & mask);
+      val = hashval & ~ 1U;
+      if (counts[bucket] == 1)
+	{
+	  // Last element terminates the chain.
+	  val |= 1;
+	}
+      elfcpp::Swap<32, big_endian>::writeval(p + (indx[bucket] - symindx) * 4,
+					     val);
+      --counts[bucket];
+
+      sym->set_dynsym_index(indx[bucket]);
+      ++indx[bucket];
+    }
+
+  p = phash + 16;
+  for (unsigned int i = 0; i < maskwords; ++i)
+    {
+      elfcpp::Swap<size, big_endian>::writeval(p, bitmask[i]);
+      p += size / 8;
+    }
+
+  *phashlen = hashlen;
+  *pphash = phash;
 }
 
 // Instantiate the templates we need.  We could use the configure

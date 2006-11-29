@@ -2,7 +2,6 @@
 
 #include "gold.h"
 
-#include <cassert>
 #include <cstring>
 #include <cerrno>
 #include <fcntl.h>
@@ -19,7 +18,7 @@ namespace gold
 
 File_read::View::~View()
 {
-  assert(!this->is_locked());
+  gold_assert(!this->is_locked());
   delete[] this->data_;
 }
 
@@ -32,7 +31,7 @@ File_read::View::lock()
 void
 File_read::View::unlock()
 {
-  assert(this->lock_count_ > 0);
+  gold_assert(this->lock_count_ > 0);
   --this->lock_count_;
 }
 
@@ -49,7 +48,7 @@ File_read::View::is_locked()
 
 File_read::~File_read()
 {
-  assert(this->lock_count_ == 0);
+  gold_assert(this->lock_count_ == 0);
   if (this->descriptor_ >= 0)
     {
       if (close(this->descriptor_) < 0)
@@ -64,9 +63,9 @@ File_read::~File_read()
 bool
 File_read::open(const std::string& name)
 {
-  assert(this->lock_count_ == 0
-	 && this->descriptor_ < 0
-	 && this->name_.empty());
+  gold_assert(this->lock_count_ == 0
+	      && this->descriptor_ < 0
+	      && this->name_.empty());
   this->name_ = name;
   this->descriptor_ = ::open(this->name_.c_str(), O_RDONLY);
   ++this->lock_count_;
@@ -76,7 +75,7 @@ File_read::open(const std::string& name)
 int
 File_read::get_descriptor()
 {
-  assert(this->lock_count_ > 0);
+  gold_assert(this->lock_count_ > 0);
   return this->descriptor_;
 }
 
@@ -89,7 +88,7 @@ File_read::lock()
 void
 File_read::unlock()
 {
-  assert(this->lock_count_ > 0);
+  gold_assert(this->lock_count_ > 0);
   --this->lock_count_;
 }
 
@@ -121,7 +120,7 @@ File_read::find_view(off_t start, off_t size)
 off_t
 File_read::do_read(off_t start, off_t size, void* p, off_t* pbytes)
 {
-  assert(this->lock_count_ > 0);
+  gold_assert(this->lock_count_ > 0);
   int o = this->descriptor_;
 
   if (lseek(o, start, SEEK_SET) < 0)
@@ -161,7 +160,7 @@ File_read::do_read(off_t start, off_t size, void* p, off_t* pbytes)
 void
 File_read::read(off_t start, off_t size, void* p, off_t* pbytes)
 {
-  assert(this->lock_count_ > 0);
+  gold_assert(this->lock_count_ > 0);
 
   File_read::View* pv = this->find_view(start, size);
   if (pv != NULL)
@@ -180,7 +179,7 @@ File_read::read(off_t start, off_t size, void* p, off_t* pbytes)
 File_read::View*
 File_read::find_or_make_view(off_t start, off_t size, off_t* pbytes)
 {
-  assert(this->lock_count_ > 0);
+  gold_assert(this->lock_count_ > 0);
 
   off_t poff = File_read::page_offset(start);
 
@@ -244,7 +243,7 @@ File_read::find_or_make_view(off_t start, off_t size, off_t* pbytes)
 const unsigned char*
 File_read::get_view(off_t start, off_t size, off_t* pbytes)
 {
-  assert(this->lock_count_ > 0);
+  gold_assert(this->lock_count_ > 0);
   File_read::View* pv = this->find_or_make_view(start, size, pbytes);
   return pv->data() + (start - pv->start());
 }
@@ -252,7 +251,7 @@ File_read::get_view(off_t start, off_t size, off_t* pbytes)
 File_view*
 File_read::get_lasting_view(off_t start, off_t size, off_t* pbytes)
 {
-  assert(this->lock_count_ > 0);
+  gold_assert(this->lock_count_ > 0);
   File_read::View* pv = this->find_or_make_view(start, size, pbytes);
   pv->lock();
   return new File_view(*this, pv, pv->data() + (start - pv->start()));
@@ -271,7 +270,7 @@ File_read::clear_views(bool destroying)
 	delete p->second;
       else
 	{
-	  assert(!destroying);
+	  gold_assert(!destroying);
 	  this->saved_views_.push_back(p->second);
 	}
     }
@@ -287,7 +286,7 @@ File_read::clear_views(bool destroying)
 	}
       else
 	{
-	  assert(!destroying);
+	  gold_assert(!destroying);
 	  ++p;
 	}
     }
@@ -297,7 +296,7 @@ File_read::clear_views(bool destroying)
 
 File_view::~File_view()
 {
-  assert(this->file_.is_locked());
+  gold_assert(this->file_.is_locked());
   this->view_->unlock();
 }
 

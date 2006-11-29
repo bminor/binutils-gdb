@@ -2,7 +2,6 @@
 
 #include "gold.h"
 
-#include <cassert>
 #include <cstring>
 #include <algorithm>
 #include <vector>
@@ -60,12 +59,15 @@ Stringpool::Stringpool_hash::operator()(const char* s) const
 const char*
 Stringpool::add_string(const char* s, Key* pkey)
 {
+  // We are in trouble if we've already computed the string offsets.
+  gold_assert(this->strtab_size_ == 0);
+
   // The size we allocate for a new Stringdata.
   const size_t buffer_size = 1000;
   // The amount we multiply the Stringdata index when calculating the
   // key.
   const size_t key_mult = 1024;
-  assert(key_mult >= buffer_size);
+  gold_assert(key_mult >= buffer_size);
 
   size_t len = strlen(s);
 
@@ -141,7 +143,7 @@ Stringpool::add(const char* s, Key* pkey)
   std::pair<const char*, Val> element(ret, std::make_pair(k, ozero));
   std::pair<String_set_type::iterator, bool> ins =
     this->string_set_.insert(element);
-  assert(ins.second);
+  gold_assert(ins.second);
 
   if (pkey != NULL)
     *pkey = k;
@@ -222,6 +224,12 @@ Stringpool::is_suffix(const char* s1, const char* s2)
 void
 Stringpool::set_string_offsets()
 {
+  if (this->strtab_size_ != 0)
+    {
+      // We've already computed the offsets.
+      return;
+    }
+
   size_t count = this->string_set_.size();
 
   std::vector<String_set_type::iterator> v;
@@ -260,10 +268,11 @@ Stringpool::set_string_offsets()
 off_t
 Stringpool::get_offset(const char* s) const
 {
+  gold_assert(this->strtab_size_ != 0);
   String_set_type::const_iterator p = this->string_set_.find(s);
   if (p != this->string_set_.end())
     return p->second.second;
-  abort();
+  gold_unreachable();
 }
 
 // Write the ELF strtab into the output file at the specified offset.
@@ -271,6 +280,7 @@ Stringpool::get_offset(const char* s) const
 void
 Stringpool::write(Output_file* of, off_t offset)
 {
+  gold_assert(this->strtab_size_ != 0);
   unsigned char* viewu = of->get_output_view(offset, this->strtab_size_);
   char* view = reinterpret_cast<char*>(viewu);
   view[0] = '\0';

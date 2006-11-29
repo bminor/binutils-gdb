@@ -4,7 +4,6 @@
 
 #include <string>
 #include <vector>
-#include <cassert>
 #include <cstdio>
 #include <cstdlib>
 
@@ -50,14 +49,20 @@ class Token
   Token(Classification classification, int lineno, int charpos)
     : classification_(classification), value_(), opcode_(0),
       lineno_(lineno), charpos_(charpos)
-  { assert(classification == TOKEN_INVALID || classification == TOKEN_EOF); }
+  {
+    gold_assert(classification == TOKEN_INVALID
+		|| classification == TOKEN_EOF);
+  }
 
   // A general token with a value.
   Token(Classification classification, const std::string& value,
 	int lineno, int charpos)
     : classification_(classification), value_(value), opcode_(0),
       lineno_(lineno), charpos_(charpos)
-  { assert(classification != TOKEN_INVALID && classification != TOKEN_EOF); }
+  {
+    gold_assert(classification != TOKEN_INVALID
+		&& classification != TOKEN_EOF);
+  }
 
   // A token representing a string of characters.
   Token(const std::string& s, int lineno, int charpos)
@@ -101,21 +106,21 @@ class Token
   const std::string&
   string_value() const
   {
-    assert(this->classification_ == TOKEN_STRING);
+    gold_assert(this->classification_ == TOKEN_STRING);
     return this->value_;
   }
 
   int
   operator_value() const
   {
-    assert(this->classification_ == TOKEN_OPERATOR);
+    gold_assert(this->classification_ == TOKEN_OPERATOR);
     return this->opcode_;
   }
 
   int64_t
   integer_value() const
   {
-    assert(this->classification_ == TOKEN_INTEGER);
+    gold_assert(this->classification_ == TOKEN_INTEGER);
     return strtoll(this->value_.c_str(), NULL, 0);
   }
 
@@ -1097,7 +1102,7 @@ yylex(YYSTYPE* lvalp, void* closurev)
     default:
     case Token::TOKEN_INVALID:
     case Token::TOKEN_EOF:
-      abort();
+      gold_unreachable();
 
     case Token::TOKEN_STRING:
       {

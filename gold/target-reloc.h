@@ -26,6 +26,7 @@ scan_relocs(
     Layout* layout,
     Target_type* target,
     Sized_relobj<size, big_endian>* object,
+    unsigned int data_shndx,
     const unsigned char* prelocs,
     size_t reloc_count,
     size_t local_count,
@@ -47,7 +48,7 @@ scan_relocs(
 
       if (r_sym < local_count)
 	{
-	  assert(plocal_syms != NULL);
+	  gold_assert(plocal_syms != NULL);
 	  typename elfcpp::Sym<size, big_endian> lsym(plocal_syms
 						      + r_sym * sym_size);
 	  const unsigned int shndx = lsym.get_st_shndx();
@@ -73,18 +74,18 @@ scan_relocs(
 	      continue;
 	    }
 
-	  scan.local(options, symtab, layout, target, object, reloc, r_type,
-		     lsym);
+	  scan.local(options, symtab, layout, target, object, data_shndx,
+		     reloc, r_type, lsym);
 	}
       else
 	{
 	  Symbol* gsym = global_syms[r_sym - local_count];
-	  assert(gsym != NULL);
+	  gold_assert(gsym != NULL);
 	  if (gsym->is_forwarder())
 	    gsym = symtab->resolve_forwards(gsym);
 
-	  scan.global(options, symtab, layout, target, object, reloc, r_type,
-		      gsym);
+	  scan.global(options, symtab, layout, target, object, data_shndx,
+		      reloc, r_type, gsym);
 	}
     }
 }
@@ -146,7 +147,7 @@ relocate_section(
       else
 	{
 	  const Symbol* gsym = global_syms[r_sym - local_count];
-	  assert(gsym != NULL);
+	  gold_assert(gsym != NULL);
 	  if (gsym->is_forwarder())
 	    gsym = relinfo->symtab->resolve_forwards(gsym);
 

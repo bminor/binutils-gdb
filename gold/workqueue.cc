@@ -2,8 +2,6 @@
 
 #include "gold.h"
 
-#include <cassert>
-
 #include "workqueue.h"
 
 namespace gold
@@ -18,59 +16,59 @@ Task_token::Task_token()
 
 Task_token::~Task_token()
 {
-  assert(this->readers_ == 0 && this->writer_ == NULL);
+  gold_assert(this->readers_ == 0 && this->writer_ == NULL);
 }
 
 bool
 Task_token::is_readable() const
 {
-  assert(!this->is_blocker_);
+  gold_assert(!this->is_blocker_);
   return this->writer_ == NULL;
 }
 
 void
 Task_token::add_reader()
 {
-  assert(!this->is_blocker_);
-  assert(this->is_readable());
+  gold_assert(!this->is_blocker_);
+  gold_assert(this->is_readable());
   ++this->readers_;
 }
 
 void
 Task_token::remove_reader()
 {
-  assert(!this->is_blocker_);
-  assert(this->readers_ > 0);
+  gold_assert(!this->is_blocker_);
+  gold_assert(this->readers_ > 0);
   --this->readers_;
 }
 
 bool
 Task_token::is_writable() const
 {
-  assert(!this->is_blocker_);
+  gold_assert(!this->is_blocker_);
   return this->writer_ == NULL && this->readers_ == 0;
 }
 
 void
 Task_token::add_writer(const Task* t)
 {
-  assert(!this->is_blocker_);
-  assert(this->is_writable());
+  gold_assert(!this->is_blocker_);
+  gold_assert(this->is_writable());
   this->writer_ = t;
 }
 
 void
 Task_token::remove_writer(const Task* t)
 {
-  assert(!this->is_blocker_);
-  assert(this->writer_ == t);
+  gold_assert(!this->is_blocker_);
+  gold_assert(this->writer_ == t);
   this->writer_ = NULL;
 }
 
 bool
 Task_token::has_write_lock(const Task* t)
 {
-  assert(!this->is_blocker_);
+  gold_assert(!this->is_blocker_);
   return this->writer_ == t;
 }
 
@@ -82,14 +80,14 @@ Task_token::add_blocker()
   if (this->readers_ == 0 && this->writer_ == NULL)
     this->is_blocker_ = true;
   else
-    assert(this->is_blocker_);
+    gold_assert(this->is_blocker_);
   ++this->readers_;
 }
 
 bool
 Task_token::remove_blocker()
 {
-  assert(this->is_blocker_ && this->readers_ > 0);
+  gold_assert(this->is_blocker_ && this->readers_ > 0);
   --this->readers_;
   return this->readers_ == 0;
 }
@@ -97,7 +95,8 @@ Task_token::remove_blocker()
 bool
 Task_token::is_blocked() const
 {
-  assert(this->is_blocker_ || (this->readers_ == 0 && this->writer_ == NULL));
+  gold_assert(this->is_blocker_
+	      || (this->readers_ == 0 && this->writer_ == NULL));
   return this->readers_ > 0;
 }
 
@@ -109,7 +108,7 @@ Task_block_token::Task_block_token(Task_token& token, Workqueue* workqueue)
   // We must increment the block count when the task is created and
   // put on the queue.  This object is created when the task is run,
   // so we don't increment the block count here.
-  assert(this->token_.is_blocked());
+  gold_assert(this->token_.is_blocked());
 }
 
 Task_block_token::~Task_block_token()
@@ -187,9 +186,9 @@ Workqueue::Workqueue(const General_options&)
 
 Workqueue::~Workqueue()
 {
-  assert(this->tasks_.empty());
-  assert(this->completed_.empty());
-  assert(this->running_ == 0);
+  gold_assert(this->tasks_.empty());
+  gold_assert(this->completed_.empty());
+  gold_assert(this->running_ == 0);
 }
 
 // Add a task to the queue.
@@ -263,7 +262,7 @@ Workqueue::find_runnable(Task_list& tasks, bool* all_blocked)
 	      {
 		// There had better be some tasks running, or we will
 		// never find a runnable task.
-		assert(this->running_ > 0);
+		gold_assert(this->running_ > 0);
 
 		// We couldn't find any runnable tasks, and we
 		// couldn't release any locks.
@@ -322,7 +321,7 @@ Workqueue::process()
 
 	    // There must be something for us to wait for, or we won't
 	    // be able to make progress.
-	    assert(this->running_ > 0 || !this->completed_.empty());
+	    gold_assert(this->running_ > 0 || !this->completed_.empty());
 
 	    if (all_blocked)
 	      {
@@ -330,7 +329,7 @@ Workqueue::process()
 		this->clear_completed();
 		while (this->cleared_blockers_ == 0)
 		  {
-		    assert(this->running_ > 0);
+		    gold_assert(this->running_ > 0);
 		    this->completed_condvar_.wait();
 		    this->clear_completed();
 		  }
@@ -385,7 +384,7 @@ Workqueue::completed(Task* t, Task_locker* tl)
 {
   {
     Hold_lock hl(this->completed_lock_);
-    assert(this->running_ > 0);
+    gold_assert(this->running_ > 0);
     --this->running_;
     this->completed_.push_back(tl);
     this->completed_condvar_.signal();

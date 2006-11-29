@@ -56,7 +56,7 @@ Read_symbols::run(Workqueue* workqueue)
 {
   if (this->input_argument_->is_group())
     {
-      assert(this->input_group_ == NULL);
+      gold_assert(this->input_group_ == NULL);
       this->do_group(workqueue);
       return;
     }
@@ -170,7 +170,7 @@ Read_symbols::do_group(Workqueue* workqueue)
        ++p)
     {
       const Input_argument* arg = &*p;
-      assert(arg->is_file());
+      gold_assert(arg->is_file());
 
       Task_token* next_blocker = new Task_token();
       next_blocker->add_blocker();

@@ -3,7 +3,6 @@
 #include "gold.h"
 
 #include <cerrno>
-#include <cassert>
 #include <sys/types.h>
 #include <dirent.h>
 
@@ -125,7 +124,7 @@ Dir_caches::add(const char* dirname)
 
     std::pair<const char*, Dir_cache*> v(dirname, cache);
     std::pair<Cache_hash::iterator, bool> p = this->caches_.insert(v);
-    assert(p.second);
+    gold_assert(p.second);
   }
 }
 
@@ -217,14 +216,14 @@ Dirsearch::add(Workqueue* workqueue, const General_options::Dir_list& list)
 std::string
 Dirsearch::find(const std::string& n1, const std::string& n2) const
 {
-  assert(!this->token_.is_blocked());
+  gold_assert(!this->token_.is_blocked());
 
   for (std::list<const char*>::const_iterator p = this->directories_.begin();
        p != this->directories_.end();
        ++p)
     {
       Dir_cache* pdc = caches.lookup(*p);
-      assert(pdc != NULL);
+      gold_assert(pdc != NULL);
       if (pdc->find(n1))
 	return std::string(*p) + '/' + n1;
       if (!n2.empty() && pdc->find(n2))

@@ -180,9 +180,9 @@ struct Swap<8, big_endian>
 
 // Swap_unaligned is a template based on size and on whether the
 // target is big endian.  It defines the type Valtype and the
-// functions readval_unaligned and writeval_unaligned.  The functions
-// read and write values of the appropriate size out of buffers which
-// may be misaligned.
+// functions readval and writeval.  The functions read and write
+// values of the appropriate size out of buffers which may be
+// misaligned.
 
 template<int size, bool big_endian>
 struct Swap_unaligned;
@@ -193,11 +193,11 @@ struct Swap_unaligned<8, big_endian>
   typedef typename Valtype_base<8>::Valtype Valtype;
 
   static inline Valtype
-  readval_unaligned(const unsigned char* wv)
+  readval(const unsigned char* wv)
   { return *wv; }
 
   static inline void
-  writeval_unaligned(unsigned char* wv, Valtype v)
+  writeval(unsigned char* wv, Valtype v)
   { *wv = v; }
 };
 
@@ -207,13 +207,13 @@ struct Swap_unaligned<16, false>
   typedef Valtype_base<16>::Valtype Valtype;
 
   static inline Valtype
-  readval_unaligned(const unsigned char* wv)
+  readval(const unsigned char* wv)
   {
     return (wv[1] << 8) | wv[0];
   }
 
   static inline void
-  writeval_unaligned(unsigned char* wv, Valtype v)
+  writeval(unsigned char* wv, Valtype v)
   {
     wv[1] = v >> 8;
     wv[0] = v;
@@ -226,13 +226,13 @@ struct Swap_unaligned<16, true>
   typedef Valtype_base<16>::Valtype Valtype;
 
   static inline Valtype
-  readval_unaligned(const unsigned char* wv)
+  readval(const unsigned char* wv)
   {
     return (wv[0] << 8) | wv[1];
   }
 
   static inline void
-  writeval_unaligned(unsigned char* wv, Valtype v)
+  writeval(unsigned char* wv, Valtype v)
   {
     wv[0] = v >> 8;
     wv[1] = v;
@@ -245,13 +245,13 @@ struct Swap_unaligned<32, false>
   typedef Valtype_base<32>::Valtype Valtype;
 
   static inline Valtype
-  readval_unaligned(const unsigned char* wv)
+  readval(const unsigned char* wv)
   {
     return (wv[3] << 24) | (wv[2] << 16) | (wv[1] << 8) | wv[0];
   }
 
   static inline void
-  writeval_unaligned(unsigned char* wv, Valtype v)
+  writeval(unsigned char* wv, Valtype v)
   {
     wv[3] = v >> 24;
     wv[2] = v >> 16;
@@ -266,13 +266,13 @@ struct Swap_unaligned<32, true>
   typedef Valtype_base<32>::Valtype Valtype;
 
   static inline Valtype
-  readval_unaligned(const unsigned char* wv)
+  readval(const unsigned char* wv)
   {
     return (wv[0] << 24) | (wv[1] << 16) | (wv[2] << 8) | wv[3];
   }
 
   static inline void
-  writeval_unaligned(unsigned char* wv, Valtype v)
+  writeval(unsigned char* wv, Valtype v)
   {
     wv[0] = v >> 24;
     wv[1] = v >> 16;
@@ -287,7 +287,7 @@ struct Swap_unaligned<64, false>
   typedef Valtype_base<64>::Valtype Valtype;
 
   static inline Valtype
-  readval_unaligned(const unsigned char* wv)
+  readval(const unsigned char* wv)
   {
     return ((static_cast<Valtype>(wv[7]) << 56)
 	    | (static_cast<Valtype>(wv[6]) << 48)
@@ -300,7 +300,7 @@ struct Swap_unaligned<64, false>
   }
 
   static inline void
-  writeval_unaligned(unsigned char* wv, Valtype v)
+  writeval(unsigned char* wv, Valtype v)
   {
     wv[7] = v >> 56;
     wv[6] = v >> 48;
@@ -319,7 +319,7 @@ struct Swap_unaligned<64, true>
   typedef Valtype_base<64>::Valtype Valtype;
 
   static inline Valtype
-  readval_unaligned(const unsigned char* wv)
+  readval(const unsigned char* wv)
   {
     return ((static_cast<Valtype>(wv[0]) << 56)
 	    | (static_cast<Valtype>(wv[1]) << 48)
@@ -332,7 +332,7 @@ struct Swap_unaligned<64, true>
   }
 
   static inline void
-  writeval_unaligned(unsigned char* wv, Valtype v)
+  writeval(unsigned char* wv, Valtype v)
   {
     wv[7] = v >> 56;
     wv[6] = v >> 48;

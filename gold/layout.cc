@@ -2,7 +2,6 @@
 
 #include "gold.h"
 
-#include <cassert>
 #include <cstring>
 #include <algorithm>
 #include <iostream>
@@ -10,6 +9,7 @@
 
 #include "output.h"
 #include "symtab.h"
+#include "dynobj.h"
 #include "layout.h"
 
 namespace gold
@@ -39,13 +39,18 @@ Layout_task_runner::run(Workqueue* workqueue)
 // Layout methods.
 
 Layout::Layout(const General_options& options)
-  : options_(options), namepool_(), sympool_(), signatures_(),
+  : options_(options), namepool_(), sympool_(), dynpool_(), signatures_(),
     section_name_map_(), segment_list_(), section_list_(),
-    special_output_list_(), tls_segment_(NULL)
+    unattached_section_list_(), special_output_list_(),
+    tls_segment_(NULL), symtab_section_(NULL), dynsym_section_(NULL)
 {
   // Make space for more than enough segments for a typical file.
   // This is just for efficiency--it's OK if we wind up needing more.
-  segment_list_.reserve(12);
+  this->segment_list_.reserve(12);
+
+  // We expect three unattached Output_data objects: the file header,
+  // the segment headers, and the section headers.
+  this->special_output_list_.reserve(3);
 }
 
 // Hash a key we use to look up an output section mapping.
@@ -219,9 +224,10 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
 			    elfcpp::Elf_Xword flags)
 {
   Output_section* os = new Output_section(name, type, flags, true);
+  this->section_list_.push_back(os);
 
   if ((flags & elfcpp::SHF_ALLOC) == 0)
-    this->section_list_.push_back(os);
+    this->unattached_section_list_.push_back(os);
   else
     {
       // This output section goes into a PT_LOAD segment.
@@ -299,6 +305,28 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
   return os;
 }
 
+// Create the dynamic sections which are needed before we read the
+// relocs.
+
+void
+Layout::create_initial_dynamic_sections(const Input_objects* input_objects,
+					Symbol_table* symtab)
+{
+  if (!input_objects->any_dynamic())
+    return;
+
+  const char* dynamic_name = this->namepool_.add(".dynamic", NULL);
+  this->dynamic_section_ = this->make_output_section(dynamic_name,
+						     elfcpp::SHT_DYNAMIC,
+						     (elfcpp::SHF_ALLOC
+						      | elfcpp::SHF_WRITE));
+
+  symtab->define_in_output_data(input_objects->target(), "_DYNAMIC",
+				this->dynamic_section_, 0, 0,
+				elfcpp::STT_OBJECT, elfcpp::STB_LOCAL,
+				elfcpp::STV_HIDDEN, 0, false, false);
+}
+
 // Find the first read-only PT_LOAD segment, creating one if
 // necessary.
 
@@ -355,7 +383,8 @@ Layout::find_first_load_seg()
 off_t
 Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
 {
-  const int size = input_objects->target()->get_size();
+  const Target* const target = input_objects->target();
+  const int size = target->get_size();
 
   Output_segment* phdr_seg = NULL;
   if (input_objects->any_dynamic())
@@ -368,17 +397,22 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
       phdr_seg = new Output_segment(elfcpp::PT_PHDR, elfcpp::PF_R);
       this->segment_list_.push_back(phdr_seg);
 
+      // This holds the dynamic tags.
+      Output_data_dynamic* odyn;
+      odyn = new Output_data_dynamic(input_objects->target(),
+				     &this->dynpool_);
+
       // Create the dynamic symbol table, including the hash table,
       // the dynamic relocations, and the version sections.
-      this->create_dynamic_symtab(size, symtab);
-
-      // Create the .dynamic section to hold the dynamic data, and put
-      // it in a PT_DYNAMIC segment.
-      this->create_dynamic_section();
+      this->create_dynamic_symtab(target, odyn, symtab);
 
       // Create the .interp section to hold the name of the
       // interpreter, and put it in a PT_INTERP segment.
-      this->create_interp(input_objects->target());
+      this->create_interp(target);
+
+      // Finish the .dynamic section to hold the dynamic data, and put
+      // it in a PT_DYNAMIC segment.
+      this->finish_dynamic_section(input_objects, symtab, odyn);
     }
 
   // FIXME: Handle PT_GNU_STACK.
@@ -386,7 +420,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
   Output_segment* load_seg = this->find_first_load_seg();
 
   // Lay out the segment headers.
-  bool big_endian = input_objects->target()->is_big_endian();
+  bool big_endian = target->is_big_endian();
   Output_segment_headers* segment_headers;
   segment_headers = new Output_segment_headers(size, big_endian,
 					       this->segment_list_);
@@ -400,7 +434,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
   file_header = new Output_file_header(size,
 				       big_endian,
 				       this->options_,
-				       input_objects->target(),
+				       target,
 				       symtab,
 				       segment_headers);
   load_seg->add_initial_output_data(file_header);
@@ -412,15 +446,13 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
 
   // Set the file offsets of all the segments, and all the sections
   // they contain.
-  off_t off = this->set_segment_offsets(input_objects->target(), load_seg,
-					&shndx);
+  off_t off = this->set_segment_offsets(target, load_seg, &shndx);
 
   // Create the symbol table sections.
   // FIXME: We don't need to do this if we are stripping symbols.
-  Output_section* osymtab;
   Output_section* ostrtab;
   this->create_symtab_sections(size, input_objects, symtab, &off,
-			       &osymtab, &ostrtab);
+			       &ostrtab);
 
   // Create the .shstrtab section.
   Output_section* shstrtab_section = this->create_shstrtab();
@@ -430,7 +462,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
   off = this->set_section_offsets(off, &shndx);
 
   // Now the section index of OSTRTAB is set.
-  osymtab->set_link(ostrtab->out_shndx());
+  this->symtab_section_->set_link(ostrtab->out_shndx());
 
   // Create the section table header.
   Output_section_headers* oshdrs = this->create_shdrs(size, big_endian, &off);
@@ -438,6 +470,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
   file_header->set_section_info(oshdrs, shstrtab_section);
 
   // Now we know exactly where everything goes in the output file.
+  Output_data::layout_complete();
 
   return off;
 }
@@ -457,7 +490,7 @@ Layout::segment_precedes(const Output_segment* seg1,
   // segment.  We simply make it always first.
   if (type1 == elfcpp::PT_PHDR)
     {
-      assert(type2 != elfcpp::PT_PHDR);
+      gold_assert(type2 != elfcpp::PT_PHDR);
       return true;
     }
   if (type2 == elfcpp::PT_PHDR)
@@ -467,7 +500,7 @@ Layout::segment_precedes(const Output_segment* seg1,
   // segment.  We simply make it always second.
   if (type1 == elfcpp::PT_INTERP)
     {
-      assert(type2 != elfcpp::PT_INTERP);
+      gold_assert(type2 != elfcpp::PT_INTERP);
       return true;
     }
   if (type2 == elfcpp::PT_INTERP)
@@ -497,7 +530,7 @@ Layout::segment_precedes(const Output_segment* seg1,
     {
       if (type1 != type2)
 	return type1 < type2;
-      assert(flags1 != flags2);
+      gold_assert(flags1 != flags2);
       return flags1 < flags2;
     }
 
@@ -522,7 +555,7 @@ Layout::segment_precedes(const Output_segment* seg1,
 
   uint64_t paddr1 = seg1->paddr();
   uint64_t paddr2 = seg2->paddr();
-  assert(paddr1 != paddr2);
+  gold_assert(paddr1 != paddr2);
   return paddr1 < paddr2;
 }
 
@@ -550,7 +583,7 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
       if ((*p)->type() == elfcpp::PT_LOAD)
 	{
 	  if (load_seg != NULL && load_seg != *p)
-	    abort();
+	    gold_unreachable();
 	  load_seg = NULL;
 
 	  // If the last segment was readonly, and this one is not,
@@ -630,8 +663,8 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 off_t
 Layout::set_section_offsets(off_t off, unsigned int* pshndx)
 {
-  for (Layout::Section_list::iterator p = this->section_list_.begin();
-       p != this->section_list_.end();
+  for (Section_list::iterator p = this->unattached_section_list_.begin();
+       p != this->unattached_section_list_.end();
        ++p)
     {
       (*p)->set_out_shndx(*pshndx);
@@ -651,7 +684,6 @@ void
 Layout::create_symtab_sections(int size, const Input_objects* input_objects,
 			       Symbol_table* symtab,
 			       off_t* poff,
-			       Output_section** posymtab,
 			       Output_section** postrtab)
 {
   int symsize;
@@ -667,7 +699,7 @@ Layout::create_symtab_sections(int size, const Input_objects* input_objects,
       align = 8;
     }
   else
-    abort();
+    gold_unreachable();
 
   off_t off = *poff;
   off = align_address(off, align);
@@ -677,6 +709,21 @@ Layout::create_symtab_sections(int size, const Input_objects* input_objects,
   // never bother to write this out--it will just be left as zero.
   off += symsize;
   unsigned int local_symbol_index = 1;
+
+  // Add STT_SECTION symbols for each Output section which needs one.
+  for (Section_list::iterator p = this->section_list_.begin();
+       p != this->section_list_.end();
+       ++p)
+    {
+      if (!(*p)->needs_symtab_index())
+	(*p)->set_symtab_index(-1U);
+      else
+	{
+	  (*p)->set_symtab_index(local_symbol_index);
+	  ++local_symbol_index;
+	  off += symsize;
+	}
+    }
 
   for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
        p != input_objects->relobj_end();
@@ -691,30 +738,35 @@ Layout::create_symtab_sections(int size, const Input_objects* input_objects,
     }
 
   unsigned int local_symcount = local_symbol_index;
-  assert(local_symcount * symsize == off - startoff);
+  gold_assert(local_symcount * symsize == off - startoff);
 
   off = symtab->finalize(local_symcount, off, &this->sympool_);
 
   this->sympool_.set_string_offsets();
 
   const char* symtab_name = this->namepool_.add(".symtab", NULL);
-  Output_section* osymtab = new Output_section_symtab(symtab_name,
-						      off - startoff);
-  this->section_list_.push_back(osymtab);
+  Output_section* osymtab = this->make_output_section(symtab_name,
+						      elfcpp::SHT_SYMTAB,
+						      0);
+  this->symtab_section_ = osymtab;
+
+  Output_section_data* pos = new Output_data_space(off - startoff,
+						   align);
+  osymtab->add_output_section_data(pos);
 
   const char* strtab_name = this->namepool_.add(".strtab", NULL);
-  Output_section *ostrtab = new Output_section_strtab(strtab_name,
-						      &this->sympool_);
-  this->section_list_.push_back(ostrtab);
-  this->special_output_list_.push_back(ostrtab);
+  Output_section* ostrtab = this->make_output_section(strtab_name,
+						      elfcpp::SHT_STRTAB,
+						      0);
+
+  Output_section_data* pstr = new Output_data_strtab(&this->sympool_);
+  ostrtab->add_output_section_data(pstr);
 
   osymtab->set_address(0, startoff);
   osymtab->set_info(local_symcount);
   osymtab->set_entsize(symsize);
-  osymtab->set_addralign(align);
 
   *poff = off;
-  *posymtab = osymtab;
   *postrtab = ostrtab;
 }
 
@@ -732,10 +784,10 @@ Layout::create_shstrtab()
 
   this->namepool_.set_string_offsets();
 
-  Output_section* os = new Output_section_strtab(name, &this->namepool_);
+  Output_section* os = this->make_output_section(name, elfcpp::SHT_STRTAB, 0);
 
-  this->section_list_.push_back(os);
-  this->special_output_list_.push_back(os);
+  Output_section_data* posd = new Output_data_strtab(&this->namepool_);
+  os->add_output_section_data(posd);
 
   return os;
 }
@@ -748,7 +800,7 @@ Layout::create_shdrs(int size, bool big_endian, off_t* poff)
 {
   Output_section_headers* oshdrs;
   oshdrs = new Output_section_headers(size, big_endian, this->segment_list_,
-				      this->section_list_,
+				      this->unattached_section_list_,
 				      &this->namepool_);
   off_t off = align_address(*poff, oshdrs->addralign());
   oshdrs->set_address(0, off);
@@ -761,17 +813,109 @@ Layout::create_shdrs(int size, bool big_endian, off_t* poff)
 // Create the dynamic symbol table.
 
 void
-Layout::create_dynamic_symtab(int, Symbol_table*)
+Layout::create_dynamic_symtab(const Target* target, Output_data_dynamic* odyn,
+			      Symbol_table* symtab)
 {
-  abort();
-}
+  // Count all the symbols in the dynamic symbol table, and set the
+  // dynamic symbol indexes.
 
-// Create the .dynamic section and PT_DYNAMIC segment.
+  // Skip symbol 0, which is always all zeroes.
+  unsigned int index = 1;
 
-void
-Layout::create_dynamic_section()
-{
-  abort();
+  // Add STT_SECTION symbols for each Output section which needs one.
+  for (Section_list::iterator p = this->section_list_.begin();
+       p != this->section_list_.end();
+       ++p)
+    {
+      if (!(*p)->needs_dynsym_index())
+	(*p)->set_dynsym_index(-1U);
+      else
+	{
+	  (*p)->set_dynsym_index(index);
+	  ++index;
+	}
+    }
+
+  // FIXME: Some targets apparently require local symbols in the
+  // dynamic symbol table.  Here is where we will have to count them,
+  // and set the dynamic symbol indexes, and add the names to
+  // this->dynpool_.
+
+  unsigned int local_symcount = index;
+
+  std::vector<Symbol*> dynamic_symbols;
+
+  // FIXME: We have to tell set_dynsym_indexes whether the
+  // -E/--export-dynamic option was used.
+  index = symtab->set_dynsym_indexes(index, &dynamic_symbols,
+				     &this->dynpool_);
+
+  int symsize;
+  unsigned int align;
+  const int size = target->get_size();
+  if (size == 32)
+    {
+      symsize = elfcpp::Elf_sizes<32>::sym_size;
+      align = 4;
+    }
+  else if (size == 64)
+    {
+      symsize = elfcpp::Elf_sizes<64>::sym_size;
+      align = 8;
+    }
+  else
+    gold_unreachable();
+
+  const char* dynsym_name = this->namepool_.add(".dynsym", NULL);
+  Output_section* dynsym = this->make_output_section(dynsym_name,
+						     elfcpp::SHT_DYNSYM,
+						     elfcpp::SHF_ALLOC);
+
+  Output_section_data* odata = new Output_data_space(index * symsize,
+						     align);
+  dynsym->add_output_section_data(odata);
+
+  dynsym->set_info(local_symcount);
+  dynsym->set_entsize(symsize);
+  dynsym->set_addralign(align);
+
+  this->dynsym_section_ = dynsym;
+
+  odyn->add_section_address(elfcpp::DT_SYMTAB, dynsym);
+  odyn->add_constant(elfcpp::DT_SYMENT, symsize);
+
+  const char* dynstr_name = this->namepool_.add(".dynstr", NULL);
+  Output_section* dynstr = this->make_output_section(dynstr_name,
+						     elfcpp::SHT_STRTAB,
+						     elfcpp::SHF_ALLOC);
+
+  Output_section_data* strdata = new Output_data_strtab(&this->dynpool_);
+  dynstr->add_output_section_data(strdata);
+
+  odyn->add_section_address(elfcpp::DT_STRTAB, dynstr);
+  odyn->add_section_size(elfcpp::DT_STRSZ, dynstr);
+
+  // FIXME: We need an option to create a GNU hash table.
+
+  unsigned char* phash;
+  unsigned int hashlen;
+  Dynobj::create_elf_hash_table(target, dynamic_symbols, local_symcount,
+				&phash, &hashlen);
+
+  const char* hash_name = this->namepool_.add(".hash", NULL);
+  Output_section* hashsec = this->make_output_section(hash_name,
+						      elfcpp::SHT_HASH,
+						      elfcpp::SHF_ALLOC);
+
+  Output_section_data* hashdata = new Output_data_const_buffer(phash,
+							       hashlen,
+							       align);
+  hashsec->add_output_section_data(hashdata);
+
+  hashsec->set_entsize(4);
+  // FIXME: .hash should link to .dynsym.
+
+  odyn->add_section_address(elfcpp::DT_HASH, hashsec);
 }
 
 // Create the .interp section and PT_INTERP segment.
@@ -783,7 +927,7 @@ Layout::create_interp(const Target* target)
   if (interp == NULL)
     {
       interp = target->dynamic_linker();
-      assert(interp != NULL);
+      gold_assert(interp != NULL);
     }
 
   size_t len = strlen(interp) + 1;
@@ -799,6 +943,41 @@ Layout::create_interp(const Target* target)
   Output_segment* oseg = new Output_segment(elfcpp::PT_INTERP, elfcpp::PF_R);
   this->segment_list_.push_back(oseg);
   oseg->add_initial_output_section(osec, elfcpp::PF_R);
+}
+
+// Finish the .dynamic section and PT_DYNAMIC segment.
+
+void
+Layout::finish_dynamic_section(const Input_objects* input_objects,
+			       const Symbol_table* symtab,
+			       Output_data_dynamic* odyn)
+{
+  this->dynamic_section_->add_output_section_data(odyn);
+
+  Output_segment* oseg = new Output_segment(elfcpp::PT_DYNAMIC,
+					    elfcpp::PF_R | elfcpp::PF_W);
+  this->segment_list_.push_back(oseg);
+  oseg->add_initial_output_section(this->dynamic_section_,
+				   elfcpp::PF_R | elfcpp::PF_W);
+
+  for (Input_objects::Dynobj_iterator p = input_objects->dynobj_begin();
+       p != input_objects->dynobj_end();
+       ++p)
+    {
+      // FIXME: Handle --as-needed.
+      odyn->add_string(elfcpp::DT_NEEDED, (*p)->soname());
+    }
+
+  // FIXME: Support --init and --fini.
+  Symbol* sym = symtab->lookup("_init");
+  if (sym != NULL && sym->is_defined() && !sym->is_defined_in_dynobj())
+    odyn->add_symbol(elfcpp::DT_INIT, sym);
+
+  sym = symtab->lookup("_fini");
+  if (sym != NULL && sym->is_defined() && !sym->is_defined_in_dynobj())
+    odyn->add_symbol(elfcpp::DT_FINI, sym);
+
+  // FIXME: Support DT_INIT_ARRAY and DT_FINI_ARRAY.
 }
 
 // The mapping of .gnu.linkonce section names to real section names.
@@ -950,8 +1129,51 @@ Layout::add_comdat(const char* signature, bool group)
 // Write out data not associated with a section or the symbol table.
 
 void
-Layout::write_data(Output_file* of) const
+Layout::write_data(const Symbol_table* symtab, const Target* target,
+		   Output_file* of) const
 {
+  const Output_section* symtab_section = this->symtab_section_;
+  for (Section_list::const_iterator p = this->section_list_.begin();
+       p != this->section_list_.end();
+       ++p)
+    {
+      if ((*p)->needs_symtab_index())
+	{
+	  gold_assert(symtab_section != NULL);
+	  unsigned int index = (*p)->symtab_index();
+	  gold_assert(index > 0 && index != -1U);
+	  off_t off = (symtab_section->offset()
+		       + index * symtab_section->entsize());
+	  symtab->write_section_symbol(target, *p, of, off);
+	}
+    }
+
+  const Output_section* dynsym_section = this->dynsym_section_;
+  for (Section_list::const_iterator p = this->section_list_.begin();
+       p != this->section_list_.end();
+       ++p)
+    {
+      if ((*p)->needs_dynsym_index())
+	{
+	  gold_assert(dynsym_section != NULL);
+	  unsigned int index = (*p)->dynsym_index();
+	  gold_assert(index > 0 && index != -1U);
+	  off_t off = (dynsym_section->offset()
+		       + index * dynsym_section->entsize());
+	  symtab->write_section_symbol(target, *p, of, off);
+	}
+    }
+
+  // Write out the Output_sections.  Most won't have anything to
+  // write, since most of the data will come from input sections which
+  // are handled elsewhere.  But some Output_sections do have
+  // Output_data.
+  for (Section_list::const_iterator p = this->section_list_.begin();
+       p != this->section_list_.end();
+       ++p)
+    (*p)->write(of);
+
+  // Write out the Output_data which are not in an Output_section.
   for (Data_list::const_iterator p = this->special_output_list_.begin();
        p != this->special_output_list_.end();
        ++p)
@@ -981,7 +1203,7 @@ Write_data_task::locks(Workqueue* workqueue)
 void
 Write_data_task::run(Workqueue*)
 {
-  this->layout_->write_data(this->of_);
+  this->layout_->write_data(this->symtab_, this->target_, this->of_);
 }
 
 // Write_symbols_task methods.

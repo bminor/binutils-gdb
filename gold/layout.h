@@ -20,10 +20,10 @@ class Input_objects;
 class Symbol_table;
 class Output_section_data;
 class Output_section;
-class Output_section_symtab;
 class Output_section_headers;
 class Output_segment;
 class Output_data;
+class Output_data_dynamic;
 class Target;
 
 // This task function handles mapping the input sections to output
@@ -80,6 +80,10 @@ class Layout
 			  elfcpp::Elf_Xword flags,
 			  Output_section_data*);
 
+  // Create dynamic sections if necessary.
+  void
+  create_initial_dynamic_sections(const Input_objects*, Symbol_table*);
+
   // Return the Stringpool used for symbol names.
   const Stringpool*
   sympool() const
@@ -110,7 +114,7 @@ class Layout
   // Write out data not associated with an input file or the symbol
   // table.
   void
-  write_data(Output_file*) const;
+  write_data(const Symbol_table*, const Target*, Output_file*) const;
 
   // Return an output section named NAME, or NULL if there is none.
   Output_section*
@@ -128,11 +132,11 @@ class Layout
 
   // The list of sections not attached to a segment.
 
-  typedef std::list<Output_section*> Section_list;
+  typedef std::vector<Output_section*> Section_list;
 
   // The list of information to write out which is not attached to
   // either a section or a segment.
-  typedef std::list<Output_data*> Data_list;
+  typedef std::vector<Output_data*> Data_list;
 
  private:
   Layout(const Layout&);
@@ -157,7 +161,6 @@ class Layout
   // Create the output sections for the symbol table.
   void
   create_symtab_sections(int size, const Input_objects*, Symbol_table*, off_t*,
-			 Output_section** osymtab,
 			 Output_section** ostrtab);
 
   // Create the .shstrtab section.
@@ -170,11 +173,12 @@ class Layout
 
   // Create the dynamic symbol table.
   void
-  create_dynamic_symtab(int size, Symbol_table*);
+  create_dynamic_symtab(const Target*, Output_data_dynamic*, Symbol_table*);
 
-  // Create the .dynamic section and PT_DYNAMIC segment.
+  // Finish the .dynamic section and PT_DYNAMIC segment.
   void
-  create_dynamic_section();
+  finish_dynamic_section(const Input_objects*, const Symbol_table*,
+			 Output_data_dynamic*);
 
   // Create the .interp section and PT_INTERP segment.
   void
@@ -256,20 +260,30 @@ class Layout
   Stringpool namepool_;
   // The output symbol names.
   Stringpool sympool_;
+  // The dynamic strings, if needed.
+  Stringpool dynpool_;
   // The list of group sections and linkonce sections which we have seen.
   Signatures signatures_;
   // The mapping from input section name/type/flags to output sections.
   Section_name_map section_name_map_;
   // The list of output segments.
   Segment_list segment_list_;
+  // The list of output sections.
+  Section_list section_list_;
   // The list of output sections which are not attached to any output
   // segment.
-  Section_list section_list_;
-  // The list of sections which require special output because they
-  // are not comprised of input sections.
+  Section_list unattached_section_list_;
+  // The list of unattached Output_data objects which require special
+  // handling because they are not Output_sections.
   Data_list special_output_list_;
   // A pointer to the PT_TLS segment if there is one.
   Output_segment* tls_segment_;
+  // The SHT_SYMTAB output section.
+  Output_section* symtab_section_;
+  // The SHT_DYNSYM output section if there is one.
+  Output_section* dynsym_section_;
+  // The SHT_DYNAMIC output section if there is one.
+  Output_section* dynamic_section_;
 };
 
 // This task handles writing out data which is not part of a section
@@ -278,9 +292,11 @@ class Layout
 class Write_data_task : public Task
 {
  public:
-  Write_data_task(const Layout* layout, Output_file* of,
+  Write_data_task(const Layout* layout, const Symbol_table* symtab,
+		  const Target* target, Output_file* of,
 		  Task_token* final_blocker)
-    : layout_(layout), of_(of), final_blocker_(final_blocker)
+    : layout_(layout), symtab_(symtab), target_(target), of_(of),
+      final_blocker_(final_blocker)
   { }
 
   // The standard Task methods.
@@ -296,6 +312,8 @@ class Write_data_task : public Task
 
  private:
   const Layout* layout_;
+  const Symbol_table* symtab_;
+  const Target* target_;
   Output_file* of_;
   Task_token* final_blocker_;
 };
