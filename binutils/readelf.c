@@ -1950,9 +1950,7 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    strcat (buf, ", m68000");
 	  else if ((e_flags & EF_M68K_ARCH_MASK) == EF_M68K_CPU32)
 	    strcat (buf, ", cpu32");
-	  else if (((e_flags & EF_M68K_ARCH_MASK) == 0
-		    && (e_flags & EF_M68K_CF_ISA_MASK) != 0)
-		   || (e_flags & EF_M68K_ARCH_MASK) == EF_M68K_CFV4E)
+	  else
 	    {
 	      char const *isa = _("unknown");
 	      char const *mac = _("unknown mac");
