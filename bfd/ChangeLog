@@ -1,4 +1,18 @@
 2006-11-29  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_to_thumb_export_stub): Assert that output
+	section is present.
+	(allocate_dynrelocs): Only add export stub for symbols defined in
+	this object.
+
+2006-11-29  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_to_thumb_export_stub): Assert that output
+	section is present.
+	(allocate_dynrelocs): Only add export stub for symbols defined in
+	this object.
+
+2006-11-29  Paul Brook  <paul@codesourcery.com>
 	Julian Brown  <julian@codesourcery.com>
 
 	* elf32-arm.c (copy_eabi_attributes): Correct starting offset.
