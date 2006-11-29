@@ -1,7 +1,7 @@
 /* Handle shared libraries for GDB, the GNU Debugger.
 
    Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2005
+   1999, 2000, 2001, 2002, 2003, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -151,32 +151,26 @@ solib_open (char *in_pathname, char **found_pathname)
   solib_absolute_prefix_is_empty = (solib_absolute_prefix == NULL
                                     || *solib_absolute_prefix == 0);
 
-  while (*p && !IS_DIR_SEPARATOR (*p))
-    p++;
-
-  if (*p)
+  if (! IS_ABSOLUTE_PATH (in_pathname) || solib_absolute_prefix_is_empty)
+    temp_pathname = in_pathname;
+  else
     {
-      if (! IS_ABSOLUTE_PATH (in_pathname) || solib_absolute_prefix_is_empty)
-        temp_pathname = in_pathname;
-      else
-	{
-	  int prefix_len = strlen (solib_absolute_prefix);
+      int prefix_len = strlen (solib_absolute_prefix);
 
-	  /* Remove trailing slashes from absolute prefix.  */
-	  while (prefix_len > 0
-		 && IS_DIR_SEPARATOR (solib_absolute_prefix[prefix_len - 1]))
-	    prefix_len--;
+      /* Remove trailing slashes from absolute prefix.  */
+      while (prefix_len > 0
+	     && IS_DIR_SEPARATOR (solib_absolute_prefix[prefix_len - 1]))
+	prefix_len--;
 
-	  /* Cat the prefixed pathname together.  */
-	  temp_pathname = alloca (prefix_len + strlen (in_pathname) + 1);
-	  strncpy (temp_pathname, solib_absolute_prefix, prefix_len);
-	  temp_pathname[prefix_len] = '\0';
-	  strcat (temp_pathname, in_pathname);
-	}
-
-      /* Now see if we can open it.  */
-      found_file = open (temp_pathname, O_RDONLY | O_BINARY, 0);
+      /* Cat the prefixed pathname together.  */
+      temp_pathname = alloca (prefix_len + strlen (in_pathname) + 1);
+      strncpy (temp_pathname, solib_absolute_prefix, prefix_len);
+      temp_pathname[prefix_len] = '\0';
+      strcat (temp_pathname, in_pathname);
     }
+
+  /* Now see if we can open it.  */
+  found_file = open (temp_pathname, O_RDONLY | O_BINARY, 0);
 
   /* If the search in solib_absolute_prefix failed, and the path name is
      absolute at this point, make it relative.  (openp will try and open the

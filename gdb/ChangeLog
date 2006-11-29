@@ -1,3 +1,7 @@
+2006-11-29  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* solib.c (solib_open): Treat bare file names as relative paths.
+
 2006-11-29  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* varobj.c (varobj_set_value): Don't compare the old
