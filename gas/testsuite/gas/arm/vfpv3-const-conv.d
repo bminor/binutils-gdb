@@ -5,12 +5,12 @@
 .*: +file format .*arm.*
 
 Disassembly of section \.text:
-0[0-9a-f]+ <[^>]+> eef48a00 	fconsts	s17, #4
-0[0-9a-f]+ <[^>]+> eeb59a00 	fconsts	s18, #5
-0[0-9a-f]+ <[^>]+> eef69a00 	fconsts	s19, #6
-0[0-9a-f]+ <[^>]+> eef41b00 	fconstd	d17, #4
-0[0-9a-f]+ <[^>]+> eef52b00 	fconstd	d18, #5
-0[0-9a-f]+ <[^>]+> eef63b00 	fconstd	d19, #6
+0[0-9a-f]+ <[^>]+> eef08a04 	fconsts	s17, #4
+0[0-9a-f]+ <[^>]+> eeba9a05 	fconsts	s18, #165
+0[0-9a-f]+ <[^>]+> eef49a00 	fconsts	s19, #64
+0[0-9a-f]+ <[^>]+> eef01b04 	fconstd	d17, #4
+0[0-9a-f]+ <[^>]+> eefa2b05 	fconstd	d18, #165
+0[0-9a-f]+ <[^>]+> eef43b00 	fconstd	d19, #64
 0[0-9a-f]+ <[^>]+> eefa8a63 	fshtos	s17, #9
 0[0-9a-f]+ <[^>]+> eefa1b63 	fshtod	d17, #9
 0[0-9a-f]+ <[^>]+> eefa8aeb 	fsltos	s17, #9

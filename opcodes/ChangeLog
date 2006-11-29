@@ -1,3 +1,7 @@
+2006-11-29  Paul Brook  <paul@codesourcery.com>
+
+	* arm-dis.c (coprocessor_opcodes): Fix bitfields for fconstd/fconstd.
+
 2006-11-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* arm-dis.c (last_is_thumb): Delete.

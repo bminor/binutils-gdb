@@ -1,3 +1,10 @@
+2006-11-29  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/vfpv3-const-conv.s: Improve test coverage.
+	* gas/arm/vfpv3-const-conv.d: Adjust expected output.
+	* gas/arm/vfp-neon-syntax_t2.d: Ditto.
+	* gas/arm/vfp-neon-syntax.d: Ditto.
+
 2006-11-27  Bob Wilson  <bob.wilson@acm.org>
 
 	* gas/elf/section2.e-xtensa: New file.

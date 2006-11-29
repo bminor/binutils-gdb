@@ -1,3 +1,8 @@
+2006-11-29  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (do_vfp_sp_const, do_vfp_dp_const): Fix operans
+	encoding.
+
 2006-11-27  Sterling Augustine  <sterling@tensilica.com>
 
 	* config/tc-xtensa.c (xtensa_sanity_check): Check for RELAX_IMMED
