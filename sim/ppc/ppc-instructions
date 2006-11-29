@@ -3644,6 +3644,18 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	STORE(EA, 8, *frS);
 	PPC_INSN_INT_FLOAT(0, 0, (RA_BITMASK & ~1) | RB_BITMASK, FRS_BITMASK);
 
+0.31,6.FRS,11.RA,16.RB,21.983,31./:X:f::Store Floating-Point Integer Word Indexed
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
+	unsigned_word b;
+	unsigned_word EA;
+	if (RA_is_0) b = 0;
+	else         b = *rA;
+	EA = b + *rB;
+	STORE(EA, 4, *frS);
+	PPC_INSN_INT_FLOAT(0, 0, (RA_BITMASK & ~1) | RB_BITMASK, FRS_BITMASK);
+
 0.55,6.FRS,11.RA,16.D:D:f::Store Floating-Point Double with Update
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
@@ -4681,13 +4693,6 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	  bit |= fpscr_fx;
 	FPSCR |= bit;
 	FPSCR_END(Rc);
-
-
-#
-# I.A.1.1 Floating-Point Store Instruction
-#
-0.31,6.FRS,11.RA,16.RB,21.983,31./:X:f,o::Store Floating-Point as Integer Word Indexed
-	program_interrupt(processor, cia, optional_instruction_program_interrupt);
 
 #
 # I.A.1.2 Floating-Point Arithmetic Instructions
