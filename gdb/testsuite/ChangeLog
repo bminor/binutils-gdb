@@ -1,5 +1,8 @@
 2006-11-29  Nathan Sidwell  <nathan@codesourcery.com>
 
+	* gdb.threads/linux-dp.exp: Adjust regexps used to scan thread
+	info.  Adjust test names.
+
 	* gdb.base/break.c (main): Move position of malloc.
 	* gdb.base/break.exp: Revert mistaken checkin.
 

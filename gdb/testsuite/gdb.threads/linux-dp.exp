@@ -73,15 +73,18 @@ for {set i 0} {$i < 5} {incr i} {
 	-re "info threads\r\n" {
 	    exp_continue
 	}
-	-re "^\\*? +(\[0-9\]+ Thread \[0-9\]+) \[^\n\]*\n" {
+	-re "^. +(\[0-9\]+ Thread \[-0-9\]+) \[^\n\]*\n" {
 	    verbose -log "found thread $expect_out(1,string)" 2
 	    lappend threads_before $expect_out(1,string)
 	    exp_continue
 	}
+	-re "^\[^\n\]*\n" {
+	    verbose -log "skipping line" 2
+	}
 	-re "^$gdb_prompt $" {
 	}
 	timeout {
-	    fail "(timeout) info threads"
+	    fail "(timeout) info threads before: $i"
 	}
     }
     send_gdb "next\n"
@@ -139,7 +142,7 @@ for {set i 0} {$i < 5} {incr i} {
 	-re "info threads\r\n" {
 	    exp_continue
 	}
-	-re "^\\*? +(\[0-9\]+ Thread \[0-9\]+) \[^\n\]+\n" {
+	-re "^. +(\[0-9\]+ Thread \[-0-9\]+) \[^\n\]*\n" {
 	    set name $expect_out(1,string)
 	    for {set j 0} {$j != [llength $threads_before] } {incr j} {
 		if {$name == [lindex $threads_before $j]} {
@@ -153,23 +156,26 @@ for {set i 0} {$i < 5} {incr i} {
 	    }
 	    exp_continue
 	}
+	-re "^\[^\n\]*\n" {
+	    verbose -log "skipping line" 2
+	}
 	-re "^$gdb_prompt $" {
 	    if { [llength $threads_before] != 0 } {
-		fail "create philosopher: $i"
+		fail "info threads after: $i"
 	    } elseif { !$i && [llength $threads_after] == 2 } {
 		set expect_manager 1
-		pass "create philosopher: $i"
+		pass "info threads after: $i"
 	    } elseif { [llength $threads_after] == 1 } {
 		if { $expect_manager < 0 } {
 		    set expect_manager 0
 		}
-		pass "create philosopher: $i"
+		pass "info threads after: $i"
 	    } else {
-		fail "create philosopher: $i"
+		fail "info threads after: $i"
 	    }
 	}
 	timeout {
-	    fail "(timeout) info threads"
+	    fail "(timeout) info threads after: $i"
 	}
     }
     
