@@ -321,7 +321,6 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
   struct varobj **cc;
   struct cleanup *cleanup_children;
   int numchild;
-  char *type;
   enum print_values print_values;
 
   if (argc != 1 && argc != 2)
