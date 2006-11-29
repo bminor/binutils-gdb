@@ -39,6 +39,33 @@ extern int varobjdebug;		/* defined in varobj.c */
 static int varobj_update_one (struct varobj *var,
 			      enum print_values print_values);
 
+static int mi_print_value_p (struct type *type, enum print_values print_values);
+
+/* Print variable object VAR.  The PRINT_VALUES parameter controls
+   if the value should be printed.  The PRINT_EXPRESSION parameter
+   controls if the expression should be printed.  */
+static void 
+print_varobj (struct varobj *var, enum print_values print_values,
+	      int print_expression)
+{
+  char *type;
+
+  ui_out_field_string (uiout, "name", varobj_get_objname (var));
+  if (print_expression)
+    ui_out_field_string (uiout, "exp", varobj_get_expression (var));
+  ui_out_field_int (uiout, "numchild", varobj_get_num_children (var));
+  
+  if (mi_print_value_p (varobj_get_gdb_type (var), print_values))
+    ui_out_field_string (uiout, "value", varobj_get_value (var));
+
+  type = varobj_get_type (var);
+  if (type != NULL)
+    {
+      ui_out_field_string (uiout, "type", type);
+      xfree (type);
+    }
+}
+
 /* VAROBJ operations */
 
 enum mi_cmd_result
@@ -49,7 +76,6 @@ mi_cmd_var_create (char *command, char **argv, int argc)
   char *name;
   char *frame;
   char *expr;
-  char *type;
   struct cleanup *old_cleanups;
   enum varobj_type var_type;
 
@@ -99,16 +125,7 @@ mi_cmd_var_create (char *command, char **argv, int argc)
   if (var == NULL)
     error (_("mi_cmd_var_create: unable to create variable object"));
 
-  ui_out_field_string (uiout, "name", name);
-  ui_out_field_int (uiout, "numchild", varobj_get_num_children (var));
-  type = varobj_get_type (var);
-  if (type == NULL)
-    ui_out_field_string (uiout, "type", "");
-  else
-    {
-      ui_out_field_string (uiout, "type", type);
-      xfree (type);
-    }
+  print_varobj (var, PRINT_NO_VALUES, 0 /* don't print expression */);
 
   do_cleanups (old_cleanups);
   return MI_CMD_DONE;
@@ -337,17 +354,9 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
     {
       struct cleanup *cleanup_child;
       cleanup_child = make_cleanup_ui_out_tuple_begin_end (uiout, "child");
-      ui_out_field_string (uiout, "name", varobj_get_objname (*cc));
-      ui_out_field_string (uiout, "exp", varobj_get_expression (*cc));
-      ui_out_field_int (uiout, "numchild", varobj_get_num_children (*cc));
-      if (mi_print_value_p (varobj_get_gdb_type (*cc), print_values))
-	ui_out_field_string (uiout, "value", varobj_get_value (*cc));
-      type = varobj_get_type (*cc);
-      /* C++ pseudo-variables (public, private, protected) do not have a type */
-      if (type)
-	ui_out_field_string (uiout, "type", type);
-      do_cleanups (cleanup_child);
+      print_varobj (*cc, print_values, 1 /* print expression */);
       cc++;
+      do_cleanups (cleanup_child);
     }
   do_cleanups (cleanup_children);
   xfree (childlist);
