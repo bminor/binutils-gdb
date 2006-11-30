@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-11-29 09:53-0800\n"
+"POT-Creation-Date: 2006-11-30 15:37-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -161,27 +161,27 @@ msgstr ""
 msgid "%s: warning: close(%s) failed: %s"
 msgstr ""
 
-#: fileread.cc:128
+#: fileread.cc:143
 #, c-format
 msgid "%s: %s: lseek to %lld failed: %s"
 msgstr ""
 
-#: fileread.cc:138
+#: fileread.cc:153
 #, c-format
 msgid "%s: %s: read failed: %s\n"
 msgstr ""
 
-#: fileread.cc:148 fileread.cc:231
+#: fileread.cc:173 fileread.cc:256
 #, c-format
 msgid "%s: %s: file too short: read only %lld of %lld bytes at %lld\n"
 msgstr ""
 
-#: fileread.cc:326
+#: fileread.cc:365
 #, c-format
 msgid "%s: cannot find %s\n"
 msgstr ""
 
-#: fileread.cc:334
+#: fileread.cc:373
 #, c-format
 msgid "%s: cannot open %s: %s\n"
 msgstr ""
@@ -235,57 +235,57 @@ msgid "pthread_cond_signal failed"
 msgstr ""
 
 #. FIXME: This needs to specify the location somehow.
-#: i386.cc:93
+#: i386.cc:100
 #, c-format
 msgid "%s: missing expected TLS relocation\n"
 msgstr ""
 
-#: i386.cc:617 i386.cc:757 i386.cc:961
+#: i386.cc:702 i386.cc:843 i386.cc:1064
 #, c-format
 msgid "%s: %s: unexpected reloc %u in object file\n"
 msgstr ""
 
-#: i386.cc:653 i386.cc:672
+#: i386.cc:738 i386.cc:757
 #, c-format
 msgid "%s: %s: unsupported reloc %u against local symbol\n"
 msgstr ""
 
-#: i386.cc:793 i386.cc:814
+#: i386.cc:879 i386.cc:900
 #, c-format
 msgid "%s: %s: unsupported reloc %u against global symbol %s\n"
 msgstr ""
 
-#: i386.cc:837
+#: i386.cc:923
 #, c-format
 msgid "%s: %s: unsupported RELA reloc section\n"
 msgstr ""
 
-#: i386.cc:877
+#: i386.cc:980
 #, c-format
 msgid "%s: %s: missing expected TLS relocation\n"
 msgstr ""
 
-#: i386.cc:993 i386.cc:1068 i386.cc:1079
+#: i386.cc:1096 i386.cc:1171 i386.cc:1182
 #, c-format
 msgid "%s: %s: unsupported reloc %u\n"
 msgstr ""
 
-#: i386.cc:1020
+#: i386.cc:1123
 #, c-format
 msgid "%s: %s: TLS reloc but no TLS segment\n"
 msgstr ""
 
-#: i386.cc:1053
+#: i386.cc:1156
 #, c-format
 msgid "%s: %s: unsupported reloc type %u\n"
 msgstr ""
 
-#: i386.cc:1262
+#: i386.cc:1365
 #, c-format
 msgid "%s: %s: TLS relocation out of range\n"
 msgstr ""
 
-#: i386.cc:1280
+#: i386.cc:1383
 #, c-format
 msgid "%s: %s: TLS relocation against invalid instruction\n"
 msgstr ""
@@ -496,37 +496,37 @@ msgstr ""
 msgid "%s: -%c: %s\n"
 msgstr ""
 
-#: output.cc:809
+#: output.cc:817
 #, c-format
 msgid "%s: %s: invalid alignment %lu for section \"%s\"\n"
 msgstr ""
 
-#: output.cc:1308
+#: output.cc:1316
 #, c-format
 msgid "%s: %s: open: %s\n"
 msgstr ""
 
-#: output.cc:1317
+#: output.cc:1325
 #, c-format
 msgid "%s: %s: lseek: %s\n"
 msgstr ""
 
-#: output.cc:1324
+#: output.cc:1332
 #, c-format
 msgid "%s: %s: write: %s\n"
 msgstr ""
 
-#: output.cc:1334
+#: output.cc:1342
 #, c-format
 msgid "%s: %s: mmap: %s\n"
 msgstr ""
 
-#: output.cc:1348
+#: output.cc:1356
 #, c-format
 msgid "%s: %s: munmap: %s\n"
 msgstr ""
 
-#: output.cc:1356
+#: output.cc:1364
 #, c-format
 msgid "%s: %s: close: %s\n"
 msgstr ""
@@ -547,22 +547,22 @@ msgstr ""
 msgid "%s: %s: not an object or archive\n"
 msgstr ""
 
-#: reloc.cc:168 reloc.cc:409
+#: reloc.cc:169 reloc.cc:410
 #, c-format
 msgid "%s: %s: relocation section %u has bad info %u\n"
 msgstr ""
 
-#: reloc.cc:187 reloc.cc:426
+#: reloc.cc:188 reloc.cc:427
 #, c-format
 msgid "%s: %s: relocation section %u uses unexpected symbol table %u\n"
 msgstr ""
 
-#: reloc.cc:203 reloc.cc:445
+#: reloc.cc:204 reloc.cc:446
 #, c-format
 msgid "%s: %s: unexpected entsize for reloc section %u: %lu != %u"
 msgstr ""
 
-#: reloc.cc:214 reloc.cc:456
+#: reloc.cc:215 reloc.cc:457
 #, c-format
 msgid "%s: %s: reloc section %u size %lu uneven"
 msgstr ""

@@ -383,8 +383,10 @@ Layout::find_first_load_seg()
 off_t
 Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
 {
-  const Target* const target = input_objects->target();
+  Target* const target = input_objects->target();
   const int size = target->get_size();
+
+  target->finalize_sections(this);
 
   Output_segment* phdr_seg = NULL;
   if (input_objects->any_dynamic())

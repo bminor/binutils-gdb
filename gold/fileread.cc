@@ -60,6 +60,8 @@ File_read::~File_read()
   this->clear_views(true);
 }
 
+// Open the file.
+
 bool
 File_read::open(const std::string& name)
 {
@@ -72,11 +74,20 @@ File_read::open(const std::string& name)
   return this->descriptor_ >= 0;
 }
 
-int
-File_read::get_descriptor()
+// Open the file for testing purposes.
+
+bool
+File_read::open(const std::string& name, const unsigned char* contents,
+		off_t contents_size)
 {
-  gold_assert(this->lock_count_ > 0);
-  return this->descriptor_;
+  gold_assert(this->lock_count_ == 0
+	      && this->descriptor_ < 0
+	      && this->name_.empty());
+  this->name_ = name;
+  this->contents_ = contents;
+  this->contents_size_ = contents_size;
+  ++this->lock_count_;
+  return true;
 }
 
 void
@@ -121,23 +132,37 @@ off_t
 File_read::do_read(off_t start, off_t size, void* p, off_t* pbytes)
 {
   gold_assert(this->lock_count_ > 0);
-  int o = this->descriptor_;
 
-  if (lseek(o, start, SEEK_SET) < 0)
+  off_t bytes;
+  if (this->contents_ == NULL)
     {
-      fprintf(stderr, _("%s: %s: lseek to %lld failed: %s"),
-	      program_name, this->filename().c_str(),
-	      static_cast<long long>(start),
-	      strerror(errno));
-      gold_exit(false);
+      int o = this->descriptor_;
+
+      if (lseek(o, start, SEEK_SET) < 0)
+	{
+	  fprintf(stderr, _("%s: %s: lseek to %lld failed: %s"),
+		  program_name, this->filename().c_str(),
+		  static_cast<long long>(start),
+		  strerror(errno));
+	  gold_exit(false);
+	}
+
+      bytes = ::read(o, p, size);
+      if (bytes < 0)
+	{
+	  fprintf(stderr, _("%s: %s: read failed: %s\n"),
+		  program_name, this->filename().c_str(), strerror(errno));
+	  gold_exit(false);
+	}
     }
-
-  off_t bytes = ::read(o, p, size);
-  if (bytes < 0)
+  else
     {
-      fprintf(stderr, _("%s: %s: read failed: %s\n"),
-	      program_name, this->filename().c_str(), strerror(errno));
-      gold_exit(false);
+      bytes = this->contents_size_ - start;
+      if (bytes < 0)
+	bytes = 0;
+      else if (bytes > size)
+	bytes = size;
+      memcpy(p, this->contents_ + start, bytes);
     }
 
   if (pbytes != NULL)
@@ -302,16 +327,30 @@ File_view::~File_view()
 
 // Class Input_file.
 
+// Create a file for testing.
+
+Input_file::Input_file(const char* name, const unsigned char* contents,
+		       off_t size)
+  : file_()
+{
+  this->input_argument_ =
+    new Input_file_argument(name, false, Position_dependent_options());
+  bool ok = file_.open(name, contents, size);
+  gold_assert(ok);
+}
+
+// Open the file.
+
 void
 Input_file::open(const General_options& options, const Dirsearch& dirpath)
 {
   std::string name;
-  if (!this->input_argument_.is_lib())
-    name = this->input_argument_.name();
+  if (!this->input_argument_->is_lib())
+    name = this->input_argument_->name();
   else
     {
       std::string n1("lib");
-      n1 += this->input_argument_.name();
+      n1 += this->input_argument_->name();
       std::string n2;
       if (options.is_static())
 	n1 += ".a";
@@ -324,7 +363,7 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath)
       if (name.empty())
 	{
 	  fprintf(stderr, _("%s: cannot find %s\n"), program_name,
-		  this->input_argument_.name());
+		  this->input_argument_->name());
 	  gold_exit(false);
 	}
     }

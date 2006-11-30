@@ -83,6 +83,12 @@ class Target
   common_pagesize() const
   { return this->pti_->common_pagesize; }
 
+  // This is called to tell the target to complete any sections it is
+  // handling.  After this all sections must have their final size.
+  void
+  finalize_sections(Layout* layout)
+  { return this->do_finalize_sections(layout); }
+
  protected:
   // This struct holds the constant information for a child class.  We
   // use a struct to avoid the overhead of virtual function calls for
@@ -111,6 +117,11 @@ class Target
 
   Target(const Target_info* pti)
     : pti_(pti)
+  { }
+
+  // Virtual function which may be implemented by the child class.
+  virtual void
+  do_finalize_sections(Layout*)
   { }
 
  private:

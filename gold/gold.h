@@ -137,6 +137,7 @@ namespace gold
 {
 
 class General_options;
+class Command_line;
 class Input_argument_list;
 class Dirsearch;
 class Input_objects;
@@ -180,7 +181,7 @@ extern void do_gold_unreachable(const char*, int, const char*)
 extern void
 queue_initial_tasks(const General_options&,
 		    const Dirsearch&,
-		    const Input_argument_list&,
+		    const Command_line&,
 		    Workqueue*,
 		    Input_objects*,
 		    Symbol_table*,

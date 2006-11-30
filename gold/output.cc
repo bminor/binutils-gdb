@@ -415,19 +415,19 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::get_symbol_index()
       gold_unreachable();
 
     case GSYM_CODE:
-      if (this->u_.gsym == NULL)
+      if (this->u1_.gsym == NULL)
 	index = 0;
       else if (dynamic)
-	index = this->u_.gsym->dynsym_index();
+	index = this->u1_.gsym->dynsym_index();
       else
-	index = this->u_.gsym->symtab_index();
+	index = this->u1_.gsym->symtab_index();
       break;
 
     case SECTION_CODE:
       if (dynamic)
-	index = this->u_.os->dynsym_index();
+	index = this->u1_.os->dynsym_index();
       else
-	index = this->u_.os->symtab_index();
+	index = this->u1_.os->symtab_index();
       break;
 
     default:
@@ -439,7 +439,7 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::get_symbol_index()
 	  gold_unreachable();
 	}
       else
-	index = this->u_.object->symtab_index(this->local_sym_index_);
+	index = this->u1_.relobj->symtab_index(this->local_sym_index_);
       break;
     }
   gold_assert(index != -1U);
@@ -456,8 +456,16 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::write_rel(
     Write_rel* wr) const
 {
   Address address = this->address_;
-  if (this->od_ != NULL)
-    address += this->od_->address();
+  if (this->shndx_ != INVALID_CODE)
+    {
+      off_t off;
+      Output_section* os = this->u2_.relobj->output_section(this->shndx_,
+							    &off);
+      gold_assert(os != NULL);
+      address += os->address() + off;
+    }
+  else if (this->u2_.od != NULL)
+    address += this->u2_.od->address();
   wr->put_r_offset(address);
   wr->put_r_info(elfcpp::elf_r_info<size>(this->get_symbol_index(),
 					  this->type_));

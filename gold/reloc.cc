@@ -4,6 +4,7 @@
 
 #include "workqueue.h"
 #include "object.h"
+#include "symtab.h"
 #include "output.h"
 #include "reloc.h"
 
@@ -471,20 +472,63 @@ Sized_relobj<size, big_endian>::relocate_sections(
     }
 }
 
-// Relocate_functions functions.
+// Copy_relocs::Copy_reloc_entry methods.
+
+// Return whether we should emit this reloc.  We should emit it if the
+// symbol is still defined in a dynamic object.  If we should not emit
+// it, we clear it, to save ourselves the test next time.
+
+template<int size, bool big_endian>
+bool
+Copy_relocs<size, big_endian>::Copy_reloc_entry::should_emit()
+{
+  if (this->sym_ == NULL)
+    return false;
+  if (this->sym_->is_defined_in_dynobj())
+    return true;
+  this->sym_ = NULL;
+  return false;
+}
+
+// Emit a reloc into a SHT_REL section.
+
+template<int size, bool big_endian>
+void
+Copy_relocs<size, big_endian>::Copy_reloc_entry::emit(
+    Output_data_reloc<elfcpp::SHT_REL, true, size, big_endian>* reloc_data)
+{
+  reloc_data->add_global(this->sym_, this->reloc_type_, this->relobj_,
+			 this->shndx_, this->address_);
+}
+
+// Emit a reloc into a SHT_RELA section.
+
+template<int size, bool big_endian>
+void
+Copy_relocs<size, big_endian>::Copy_reloc_entry::emit(
+    Output_data_reloc<elfcpp::SHT_RELA, true, size, big_endian>* reloc_data)
+{
+  reloc_data->add_global(this->sym_, this->reloc_type_, this->relobj_,
+			 this->shndx_, this->address_, this->addend_);
+}
+
+// Copy_relocs methods.
 
 // Return whether we need a COPY reloc for a relocation against GSYM.
 // The relocation is being applied to section SHNDX in OBJECT.
 
 template<int size, bool big_endian>
 bool
-Relocate_functions<size, big_endian>::need_copy_reloc(
+Copy_relocs<size, big_endian>::need_copy_reloc(
     const General_options*,
     Relobj* object,
     unsigned int shndx,
-    Symbol*)
+    Sized_symbol<size>* sym)
 {
   // FIXME: Handle -z nocopyrelocs.
+
+  if (sym->symsize() == 0)
+    return false;
 
   // If this is a readonly section, then we need a COPY reloc.
   // Otherwise we can use a dynamic reloc.
@@ -492,6 +536,71 @@ Relocate_functions<size, big_endian>::need_copy_reloc(
     return true;
 
   return false;
+}
+
+// Save a Rel reloc.
+
+template<int size, bool big_endian>
+void
+Copy_relocs<size, big_endian>::save(
+    Symbol* sym,
+    Relobj* relobj,
+    unsigned int shndx,
+    const elfcpp::Rel<size, big_endian>& rel)
+{
+  unsigned int reloc_type = elfcpp::elf_r_type<size>(rel.get_r_info());
+  this->entries_.push_back(Copy_reloc_entry(sym, reloc_type, relobj, shndx,
+					    rel.get_r_offset(), 0));
+}
+
+// Save a Rela reloc.
+
+template<int size, bool big_endian>
+void
+Copy_relocs<size, big_endian>::save(
+    Symbol* sym,
+    Relobj* relobj,
+    unsigned int shndx,
+    const elfcpp::Rela<size, big_endian>& rela)
+{
+  unsigned int reloc_type = elfcpp::elf_r_type<size>(rela.get_r_info());
+  this->entries_.push_back(Copy_reloc_entry(sym, reloc_type, relobj, shndx,
+					    rela.get_r_offset(),
+					    rela.get_r_addend()));
+}
+
+// Return whether there are any relocs to emit.  We don't want to emit
+// a reloc if the symbol is no longer defined in a dynamic object.
+
+template<int size, bool big_endian>
+bool
+Copy_relocs<size, big_endian>::any_to_emit()
+{
+  for (typename Copy_reloc_entries::iterator p = this->entries_.begin();
+       p != this->entries_.end();
+       ++p)
+    {
+      if (p->should_emit())
+	return true;
+    }
+  return false;
+}
+
+// Emit relocs.
+
+template<int size, bool big_endian>
+template<int sh_type>
+void
+Copy_relocs<size, big_endian>::emit(
+    Output_data_reloc<sh_type, true, size, big_endian>* reloc_data)
+{
+  for (typename Copy_reloc_entries::iterator p = this->entries_.begin();
+       p != this->entries_.end();
+       ++p)
+    {
+      if (p->should_emit())
+	p->emit(reloc_data);
+    }
 }
 
 // Instantiate the templates we need.  We could use the configure
@@ -570,27 +679,55 @@ Sized_relobj<64, true>::do_relocate(const General_options& options,
 				    Output_file* of);
 
 template
-bool
-Relocate_functions<32, false>::need_copy_reloc(const General_options*,
-					       Relobj*, unsigned int,
-					       Symbol*);
+class Copy_relocs<32, false>;
 
 template
-bool
-Relocate_functions<32, true>::need_copy_reloc(const General_options*,
-					      Relobj*, unsigned int,
-					      Symbol*);
+class Copy_relocs<32, true>;
 
 template
-bool
-Relocate_functions<64, false>::need_copy_reloc(const General_options*,
-					       Relobj*, unsigned int,
-					       Symbol*);
+class Copy_relocs<64, false>;
 
 template
-bool
-Relocate_functions<64, true>::need_copy_reloc(const General_options*,
-					      Relobj*, unsigned int,
-					      Symbol*);
+class Copy_relocs<64, true>;
+
+template
+void
+Copy_relocs<32, false>::emit<elfcpp::SHT_REL>(
+    Output_data_reloc<elfcpp::SHT_REL, true, 32, false>*);
+
+template
+void
+Copy_relocs<32, true>::emit<elfcpp::SHT_REL>(
+    Output_data_reloc<elfcpp::SHT_REL, true, 32, true>*);
+
+template
+void
+Copy_relocs<64, false>::emit<elfcpp::SHT_REL>(
+    Output_data_reloc<elfcpp::SHT_REL, true, 64, false>*);
+
+template
+void
+Copy_relocs<64, true>::emit<elfcpp::SHT_REL>(
+    Output_data_reloc<elfcpp::SHT_REL, true, 64, true>*);
+
+template
+void
+Copy_relocs<32, false>::emit<elfcpp::SHT_RELA>(
+    Output_data_reloc<elfcpp::SHT_RELA , true, 32, false>*);
+
+template
+void
+Copy_relocs<32, true>::emit<elfcpp::SHT_RELA>(
+    Output_data_reloc<elfcpp::SHT_RELA, true, 32, true>*);
+
+template
+void
+Copy_relocs<64, false>::emit<elfcpp::SHT_RELA>(
+    Output_data_reloc<elfcpp::SHT_RELA, true, 64, false>*);
+
+template
+void
+Copy_relocs<64, true>::emit<elfcpp::SHT_RELA>(
+    Output_data_reloc<elfcpp::SHT_RELA, true, 64, true>*);
 
 } // End namespace gold.

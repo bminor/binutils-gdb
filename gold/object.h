@@ -140,22 +140,10 @@ class Object
   Sized_target<size, big_endian>*
   sized_target(ACCEPT_SIZE_ENDIAN_ONLY);
 
-  // Read the symbol information.
-  void
-  read_symbols(Read_symbols_data* sd)
-  { return this->do_read_symbols(sd); }
-
-  // Pass sections which should be included in the link to the Layout
-  // object, and record where the sections go in the output file.
-  void
-  layout(const General_options& options, Symbol_table* symtab,
-	 Layout* layout, Read_symbols_data* sd)
-  { this->do_layout(options, symtab, layout, sd); }
-
-  // Add symbol information to the global symbol table.
-  void
-  add_symbols(Symbol_table* symtab, Read_symbols_data* sd)
-  { this->do_add_symbols(symtab, sd); }
+  // Get the number of sections.
+  unsigned int
+  shnum() const
+  { return this->shnum_; }
 
   // Return a view of the contents of a section.  Set *PLEN to the
   // size.
@@ -172,6 +160,23 @@ class Object
   uint64_t
   section_flags(unsigned int shndx)
   { return this->do_section_flags(shndx); }
+
+  // Read the symbol information.
+  void
+  read_symbols(Read_symbols_data* sd)
+  { return this->do_read_symbols(sd); }
+
+  // Pass sections which should be included in the link to the Layout
+  // object, and record where the sections go in the output file.
+  void
+  layout(const General_options& options, Symbol_table* symtab,
+	 Layout* layout, Read_symbols_data* sd)
+  { this->do_layout(options, symtab, layout, sd); }
+
+  // Add symbol information to the global symbol table.
+  void
+  add_symbols(Symbol_table* symtab, Read_symbols_data* sd)
+  { this->do_add_symbols(symtab, sd); }
 
   // Functions and types for the elfcpp::Elf_file interface.  This
   // permit us to use Object as the File template parameter for
@@ -280,11 +285,6 @@ class Object
   set_target(int machine, int size, bool big_endian, int osabi,
 	     int abiversion);
 
-  // Get the number of sections.
-  unsigned int
-  shnum() const
-  { return this->shnum_; }
-
   // Set the number of sections.
   void
   set_shnum(int shnum)
@@ -373,17 +373,17 @@ class Relobj : public Object
 
   // Return whether an input section is being included in the link.
   bool
-  is_section_included(unsigned int shnum) const
+  is_section_included(unsigned int shndx) const
   {
-    gold_assert(shnum < this->map_to_output_.size());
-    return this->map_to_output_[shnum].output_section != NULL;
+    gold_assert(shndx < this->map_to_output_.size());
+    return this->map_to_output_[shndx].output_section != NULL;
   }
 
   // Given a section index, return the corresponding Output_section
   // (which will be NULL if the section is not included in the link)
   // and set *POFF to the offset within that section.
   inline Output_section*
-  output_section(unsigned int shnum, off_t* poff);
+  output_section(unsigned int shndx, off_t* poff);
 
   // Set the offset of an input section within its output section.
   void
@@ -437,10 +437,10 @@ class Relobj : public Object
 
 // Implement Object::output_section inline for efficiency.
 inline Output_section*
-Relobj::output_section(unsigned int shnum, off_t* poff)
+Relobj::output_section(unsigned int shndx, off_t* poff)
 {
-  gold_assert(shnum < this->map_to_output_.size());
-  const Map_to_output& mo(this->map_to_output_[shnum]);
+  gold_assert(shndx < this->map_to_output_.size());
+  const Map_to_output& mo(this->map_to_output_[shndx]);
   *poff = mo.offset;
   return mo.output_section;
 }

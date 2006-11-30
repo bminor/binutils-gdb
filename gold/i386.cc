@@ -27,9 +27,12 @@ class Output_data_plt_i386;
 class Target_i386 : public Sized_target<32, false>
 {
  public:
+  typedef Output_data_reloc<elfcpp::SHT_REL, true, 32, false> Reloc_section;
+
   Target_i386()
     : Sized_target<32, false>(&i386_info),
-      got_(NULL), plt_(NULL), got_plt_(NULL)
+      got_(NULL), plt_(NULL), got_plt_(NULL), rel_dyn_(NULL),
+      copy_relocs_(NULL), dynbss_(NULL)
   { }
 
   // Scan the relocations to look for symbol adjustments.
@@ -45,6 +48,10 @@ class Target_i386 : public Sized_target<32, false>
 	      size_t local_symbol_count,
 	      const unsigned char* plocal_symbols,
 	      Symbol** global_symbols);
+
+  // Finalize the sections.
+  void
+  do_finalize_sections(Layout*);
 
   // Relocate a section.
   void
@@ -170,9 +177,14 @@ class Target_i386 : public Sized_target<32, false>
     return this->plt_;
   }
 
+  // Get the dynamic reloc section, creating it if necessary.
+  Reloc_section*
+  rel_dyn_section(Layout*);
+
   // Copy a relocation against a global symbol.
   void
-  copy_reloc(const General_options*, Sized_relobj<32, false>*, unsigned int,
+  copy_reloc(const General_options*, Symbol_table*, Layout*,
+	     Sized_relobj<32, false>*, unsigned int,
 	     Symbol*, const elfcpp::Rel<32, false>&);
 
   // Information about this specific target which we pass to the
@@ -185,6 +197,12 @@ class Target_i386 : public Sized_target<32, false>
   Output_data_plt_i386* plt_;
   // The GOT PLT section.
   Output_data_space* got_plt_;
+  // The dynamic reloc section.
+  Reloc_section* rel_dyn_;
+  // Relocs saved to avoid a COPY reloc.
+  Copy_relocs<32, false>* copy_relocs_;
+  // Space for variables copied with a COPY reloc.
+  Output_data_space* dynbss_;
 };
 
 const Target::Target_info Target_i386::i386_info =
@@ -236,6 +254,21 @@ Target_i386::got_section(const General_options* options, Symbol_table* symtab,
     }
 
   return this->got_;
+}
+
+// Get the dynamic reloc section, creating it if necessary.
+
+Target_i386::Reloc_section*
+Target_i386::rel_dyn_section(Layout* layout)
+{
+  if (this->rel_dyn_ == NULL)
+    {
+      gold_assert(layout != NULL);
+      this->rel_dyn_ = new Reloc_section();
+      layout->add_output_section_data(".rel.dyn", elfcpp::SHT_REL,
+				      elfcpp::SHF_ALLOC, this->rel_dyn_);
+    }
+  return this->rel_dyn_;
 }
 
 // A class to handle the PLT data.
@@ -493,18 +526,70 @@ Target_i386::make_plt_entry(const General_options* options,
 
 void
 Target_i386::copy_reloc(const General_options* options,
+			Symbol_table* symtab,
+			Layout* layout,
 			Sized_relobj<32, false>* object,
 			unsigned int data_shndx, Symbol* gsym,
-			const elfcpp::Rel<32, false>&)
+			const elfcpp::Rel<32, false>& rel)
 {
-  if (!Relocate_functions<32, false>::need_copy_reloc(options, object,
-						      data_shndx, gsym))
+  Sized_symbol<32>* ssym;
+  ssym = symtab->get_sized_symbol SELECT_SIZE_NAME(32) (gsym
+							SELECT_SIZE(32));
+
+  if (!Copy_relocs<32, false>::need_copy_reloc(options, object,
+					       data_shndx, ssym))
     {
       // So far we do not need a COPY reloc.  Save this relocation.
-      // If it turns out that we never a COPY reloc for this symbol,
-      // then we emit the relocation.
+      // If it turns out that we never need a COPY reloc for this
+      // symbol, then we will emit the relocation.
+      if (this->copy_relocs_ == NULL)
+	this->copy_relocs_ = new Copy_relocs<32, false>();
+      this->copy_relocs_->save(ssym, object, data_shndx, rel);
     }
+  else
+    {
+      // Allocate space for this symbol in the .bss section.
 
+      elfcpp::Elf_types<32>::Elf_WXword symsize = ssym->symsize();
+
+      // There is no defined way to determine the required alignment
+      // of the symbol.  We pick the alignment based on the size.  We
+      // set an arbitrary maximum of 256.
+      unsigned int align;
+      for (align = 1; align < 512; align <<= 1)
+	if ((symsize & align) != 0)
+	  break;
+
+      if (this->dynbss_ == NULL)
+	{
+	  this->dynbss_ = new Output_data_space(align);
+	  layout->add_output_section_data(".bss",
+					  elfcpp::SHT_NOBITS,
+					  (elfcpp::SHF_ALLOC
+					   | elfcpp::SHF_WRITE),
+					  this->dynbss_);
+	}
+
+      Output_data_space* dynbss = this->dynbss_;
+
+      if (align > dynbss->addralign())
+	dynbss->set_space_alignment(align);
+
+      off_t dynbss_size = dynbss->data_size();
+      dynbss_size = align_address(dynbss_size, align);
+      off_t offset = dynbss_size;
+      dynbss->set_space_size(dynbss_size + symsize);
+
+      // Define the symbol in the .dynbss section.
+      symtab->define_in_output_data(this, ssym->name(), dynbss, offset,
+				    symsize, ssym->type(), ssym->binding(),
+				    ssym->visibility(), ssym->nonvis(),
+				    false, false);
+
+      // Add the COPY reloc.
+      Reloc_section* rel_dyn = this->rel_dyn_section(layout);
+      rel_dyn->add_global(ssym, elfcpp::R_386_COPY, dynbss, offset);
+    }
 }
 
 // Optimize the TLS relocation type based on what we know about the
@@ -715,7 +800,8 @@ Target_i386::Scan::global(const General_options& options,
 	  if (gsym->type() == elfcpp::STT_FUNC)
 	    target->make_plt_entry(&options, symtab, layout, gsym);
 	  else
-	    target->copy_reloc(&options, object, data_shndx, gsym, reloc);
+	    target->copy_reloc(&options, symtab, layout, object, data_shndx,
+			       gsym, reloc);
 	}
 
       break;
@@ -852,6 +938,23 @@ Target_i386::scan_relocs(const General_options& options,
     local_symbol_count,
     plocal_symbols,
     global_symbols);
+}
+
+// Finalize the sections.  This is where we emit any relocs we saved
+// in an attempt to avoid generating extra COPY relocs.
+
+void
+Target_i386::do_finalize_sections(Layout* layout)
+{
+  if (this->copy_relocs_ == NULL)
+    return;
+  if (this->copy_relocs_->any_to_emit())
+    {
+      Reloc_section* rel_dyn = this->rel_dyn_section(layout);
+      this->copy_relocs_->emit(rel_dyn);
+    }
+  delete this->copy_relocs_;
+  this->copy_relocs_ = NULL;
 }
 
 // Perform a relocation.

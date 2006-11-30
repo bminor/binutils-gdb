@@ -2,7 +2,7 @@
 
 AUTOMAKE_OPTIONS =
 
-SUBDIRS = po
+SUBDIRS = po testsuite
 
 tooldir = $(exec_prefix)/$(target_alias)
 
@@ -18,6 +18,7 @@ INCLUDES = -D_GNU_SOURCE \
 YFLAGS = -d
 
 noinst_PROGRAMS = ld-new
+noinst_LIBRARIES = libgold.a
 
 CCFILES = \
 	archive.cc \
@@ -74,18 +75,17 @@ YFILES = \
 
 EXTRA_DIST = yyscript.c yyscript.h
 
-POTFILES= $(CCFILES) $(HFILES) $(TARGETFILES)
+libgold_a_SOURCES = $(CCFILES) $(HFILES) $(YFILES)
 
-po/POTFILES.in: @MAINT@ Makefile
-	for f in $(POTFILES); do echo $$f; done | LC_COLLATE= sort > tmp \
-	  && mv tmp $(srcdir)/po/POTFILES.in
-
-ld_new_SOURCES = $(CCFILES) $(HFILES) $(TARGETFILES) $(YFILES)
-ld_new_DEPENDENCIES = $(LIBINTL_DEP)
-ld_new_LDADD = $(LIBINTL)
+ld_new_SOURCES = main.cc $(TARGETFILES)
+ld_new_DEPENDENCIES = libgold.a $(LIBINTL_DEP)
+ld_new_LDADD = libgold.a $(LIBINTL)
 
 # Use an explicit dependency for the bison generated header file.
 script.$(OBJEXT): yyscript.h
+
+# We have to build libgold.a before we run the tests.
+check: libgold.a
 
 .PHONY: install-exec-local
 
@@ -102,3 +102,9 @@ install-exec-local: ld-new$(EXEEXT)
 # We want install to imply install-info as per GNU standards, despite
 # the cygnus option.
 install-data-local: install-info
+
+POTFILES= $(CCFILES) $(HFILES) $(TARGETFILES)
+
+po/POTFILES.in: @MAINT@ Makefile
+	for f in $(POTFILES); do echo $$f; done | LC_COLLATE= sort > tmp \
+	  && mv tmp $(srcdir)/po/POTFILES.in

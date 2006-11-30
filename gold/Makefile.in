@@ -16,6 +16,7 @@
 
 # Process this file with automake to generate Makefile.in
 
+
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
@@ -62,7 +63,11 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
 mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = po/Makefile.in
-PROGRAMS = $(noinst_PROGRAMS)
+LIBRARIES = $(noinst_LIBRARIES)
+AR = ar
+ARFLAGS = cru
+libgold_a_AR = $(AR) $(ARFLAGS)
+libgold_a_LIBADD =
 am__objects_1 = archive.$(OBJEXT) common.$(OBJEXT) defstd.$(OBJEXT) \
 	dirsearch.$(OBJEXT) dynobj.$(OBJEXT) fileread.$(OBJEXT) \
 	gold.$(OBJEXT) gold-threads.$(OBJEXT) layout.$(OBJEXT) \
@@ -71,10 +76,13 @@ am__objects_1 = archive.$(OBJEXT) common.$(OBJEXT) defstd.$(OBJEXT) \
 	script.$(OBJEXT) symtab.$(OBJEXT) stringpool.$(OBJEXT) \
 	target-select.$(OBJEXT) workqueue.$(OBJEXT)
 am__objects_2 =
-am__objects_3 = i386.$(OBJEXT)
-am__objects_4 = yyscript.$(OBJEXT)
-am_ld_new_OBJECTS = $(am__objects_1) $(am__objects_2) $(am__objects_3) \
-	$(am__objects_4)
+am__objects_3 = yyscript.$(OBJEXT)
+am_libgold_a_OBJECTS = $(am__objects_1) $(am__objects_2) \
+	$(am__objects_3)
+libgold_a_OBJECTS = $(am_libgold_a_OBJECTS)
+PROGRAMS = $(noinst_PROGRAMS)
+am__objects_4 = i386.$(OBJEXT)
+am_ld_new_OBJECTS = main.$(OBJEXT) $(am__objects_4)
 ld_new_OBJECTS = $(am_ld_new_OBJECTS)
 am__DEPENDENCIES_1 =
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
@@ -90,8 +98,8 @@ CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
 YACCCOMPILE = $(YACC) $(YFLAGS) $(AM_YFLAGS)
-SOURCES = $(ld_new_SOURCES)
-DIST_SOURCES = $(ld_new_SOURCES)
+SOURCES = $(libgold_a_SOURCES) $(ld_new_SOURCES)
+DIST_SOURCES = $(libgold_a_SOURCES) $(ld_new_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-exec-recursive install-info-recursive \
@@ -171,6 +179,7 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 POSUB = @POSUB@
+RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -182,6 +191,7 @@ XGETTEXT = @XGETTEXT@
 YACC = @YACC@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
+ac_ct_RANLIB = @ac_ct_RANLIB@
 ac_ct_STRIP = @ac_ct_STRIP@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
@@ -225,7 +235,7 @@ target_cpu = @target_cpu@
 target_os = @target_os@
 target_vendor = @target_vendor@
 AUTOMAKE_OPTIONS = 
-SUBDIRS = po
+SUBDIRS = po testsuite
 tooldir = $(exec_prefix)/$(target_alias)
 ACLOCAL_AMFLAGS = -I ../bfd -I ../config
 AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CXXFLAGS)
@@ -235,6 +245,7 @@ INCLUDES = -D_GNU_SOURCE \
 	@INCINTL@
 
 YFLAGS = -d
+noinst_LIBRARIES = libgold.a
 CCFILES = \
 	archive.cc \
 	common.cc \
@@ -289,10 +300,11 @@ YFILES = \
 	yyscript.y
 
 EXTRA_DIST = yyscript.c yyscript.h
+libgold_a_SOURCES = $(CCFILES) $(HFILES) $(YFILES)
+ld_new_SOURCES = main.cc $(TARGETFILES)
+ld_new_DEPENDENCIES = libgold.a $(LIBINTL_DEP)
+ld_new_LDADD = libgold.a $(LIBINTL)
 POTFILES = $(CCFILES) $(HFILES) $(TARGETFILES)
-ld_new_SOURCES = $(CCFILES) $(HFILES) $(TARGETFILES) $(YFILES)
-ld_new_DEPENDENCIES = $(LIBINTL_DEP)
-ld_new_LDADD = $(LIBINTL)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -351,13 +363,20 @@ distclean-hdr:
 po/Makefile.in: $(top_builddir)/config.status $(top_srcdir)/po/Make-in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 
-clean-noinstPROGRAMS:
-	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+clean-noinstLIBRARIES:
+	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
 yyscript.h: yyscript.c
 	@if test ! -f $@; then \
 	  rm -f yyscript.c; \
 	  $(MAKE) yyscript.c; \
 	else :; fi
+libgold.a: $(libgold_a_OBJECTS) $(libgold_a_DEPENDENCIES) 
+	-rm -f libgold.a
+	$(libgold_a_AR) libgold.a $(libgold_a_OBJECTS) $(libgold_a_LIBADD)
+	$(RANLIB) libgold.a
+
+clean-noinstPROGRAMS:
+	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
 ld-new$(EXEEXT): $(ld_new_OBJECTS) $(ld_new_DEPENDENCIES) 
 	@rm -f ld-new$(EXEEXT)
 	$(CXXLINK) $(ld_new_LDFLAGS) $(ld_new_OBJECTS) $(ld_new_LDADD) $(LIBS)
@@ -378,6 +397,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gold.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/i386.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/layout.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/object.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/options.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/output.Po@am__quote@
@@ -717,7 +737,7 @@ distcleancheck: distclean
 	       exit 1; } >&2
 check-am: all-am
 check: check-recursive
-all-am: Makefile $(PROGRAMS) config.h
+all-am: Makefile $(LIBRARIES) $(PROGRAMS) config.h
 installdirs: installdirs-recursive
 installdirs-am:
 install: install-recursive
@@ -748,7 +768,8 @@ maintainer-clean-generic:
 	-rm -f yyscript.h
 clean: clean-recursive
 
-clean-am: clean-generic clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-generic clean-noinstLIBRARIES clean-noinstPROGRAMS \
+	mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
@@ -801,28 +822,28 @@ uninstall-am: uninstall-info-am
 uninstall-info: uninstall-info-recursive
 
 .PHONY: $(RECURSIVE_TARGETS) CTAGS GTAGS all all-am am--refresh check \
-	check-am clean clean-generic clean-noinstPROGRAMS \
-	clean-recursive ctags ctags-recursive dist dist-all dist-bzip2 \
-	dist-gzip dist-shar dist-tarZ dist-zip distcheck distclean \
-	distclean-compile distclean-generic distclean-hdr \
-	distclean-recursive distclean-tags distcleancheck distdir \
-	distuninstallcheck dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am \
-	install-data-local install-exec install-exec-am \
-	install-exec-local install-info install-info-am install-man \
-	install-strip installcheck installcheck-am installdirs \
-	installdirs-am maintainer-clean maintainer-clean-generic \
-	maintainer-clean-recursive mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-recursive pdf pdf-am ps ps-am \
-	tags tags-recursive uninstall uninstall-am uninstall-info-am
+	check-am clean clean-generic clean-noinstLIBRARIES \
+	clean-noinstPROGRAMS clean-recursive ctags ctags-recursive \
+	dist dist-all dist-bzip2 dist-gzip dist-shar dist-tarZ \
+	dist-zip distcheck distclean distclean-compile \
+	distclean-generic distclean-hdr distclean-recursive \
+	distclean-tags distcleancheck distdir distuninstallcheck dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-data install-data-am install-data-local install-exec \
+	install-exec-am install-exec-local install-info \
+	install-info-am install-man install-strip installcheck \
+	installcheck-am installdirs installdirs-am maintainer-clean \
+	maintainer-clean-generic maintainer-clean-recursive \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-recursive pdf pdf-am ps ps-am tags tags-recursive \
+	uninstall uninstall-am uninstall-info-am
 
-
-po/POTFILES.in: @MAINT@ Makefile
-	for f in $(POTFILES); do echo $$f; done | LC_COLLATE= sort > tmp \
-	  && mv tmp $(srcdir)/po/POTFILES.in
 
 # Use an explicit dependency for the bison generated header file.
 script.$(OBJEXT): yyscript.h
+
+# We have to build libgold.a before we run the tests.
+check: libgold.a
 
 .PHONY: install-exec-local
 
@@ -839,6 +860,10 @@ install-exec-local: ld-new$(EXEEXT)
 # We want install to imply install-info as per GNU standards, despite
 # the cygnus option.
 install-data-local: install-info
+
+po/POTFILES.in: @MAINT@ Makefile
+	for f in $(POTFILES); do echo $$f; done | LC_COLLATE= sort > tmp \
+	  && mv tmp $(srcdir)/po/POTFILES.in
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

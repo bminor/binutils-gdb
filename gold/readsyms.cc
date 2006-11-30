@@ -61,7 +61,7 @@ Read_symbols::run(Workqueue* workqueue)
       return;
     }
 
-  Input_file* input_file = new Input_file(this->input_argument_->file());
+  Input_file* input_file = new Input_file(&this->input_argument_->file());
   input_file->open(this->options_, this->dirpath_);
 
   // Read enough of the file to pick up the entire ELF header.

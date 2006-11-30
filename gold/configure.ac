@@ -13,6 +13,7 @@ AM_CONFIG_HEADER(config.h:config.in)
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_YACC
+AC_PROG_RANLIB
 AC_PROG_INSTALL
 ZW_GNU_GETTEXT_SISTER_DIR
 AM_PO_SUBDIRS
@@ -48,4 +49,4 @@ AC_LANG_POP(C++)
 
 AM_MAINTAINER_MODE
 
-AC_OUTPUT(Makefile po/Makefile.in:po/Make-in)
+AC_OUTPUT(Makefile testsuite/Makefile po/Makefile.in:po/Make-in)

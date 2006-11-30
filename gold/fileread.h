@@ -25,22 +25,26 @@ class File_read
 {
  public:
   File_read()
-    : name_(), descriptor_(-1), lock_count_(0)
+    : name_(), descriptor_(-1), lock_count_(0), views_(),
+      saved_views_(), contents_(NULL), contents_size_(0)
   { }
+
   ~File_read();
 
   // Open a file.
   bool
   open(const std::string& name);
 
+  // Pretend to open the file, but provide the file contents.  No
+  // actual file system activity will occur.  This is used for
+  // testing.
+  bool
+  open(const std::string& name, const unsigned char* contents, off_t size);
+
   // Return the file name.
   const std::string&
   filename() const
   { return this->name_; }
-
-  // Return the file descriptor.
-  int
-  get_descriptor();
 
   // Lock the file for access within a particular Task::run execution.
   // This means that the descriptor can not be closed.  This routine
@@ -169,6 +173,10 @@ class File_read
   // List of views which were locked but had to be removed from views_
   // because they were not large enough.
   Saved_views saved_views_;
+  // Specified file contents.  Used only for testing purposes.
+  const unsigned char* contents_;
+  // Specified file size.  Used only for testing purposes.
+  off_t contents_size_;
 };
 
 // A view of file data that persists even when the file is unlocked.
@@ -209,17 +217,23 @@ class File_view
 class Input_file
 {
  public:
-  Input_file(const Input_file_argument& input_argument)
-    : input_argument_(input_argument)
+  Input_file(const Input_file_argument* input_argument)
+    : input_argument_(input_argument), file_()
   { }
 
+  // Create an input file with the contents already provided.  This is
+  // only used for testing.  With this path, don't call the open
+  // method.
+  Input_file(const char* name, const unsigned char* contents, off_t size);
+
+  // Open the file.
   void
   open(const General_options&, const Dirsearch&);
 
   // Return the name given by the user.
   const char*
   name() const
-  { return this->input_argument_.name(); }
+  { return this->input_argument_->name(); }
 
   // Return the file name.
   const std::string&
@@ -234,7 +248,7 @@ class Input_file
   Input_file(const Input_file&);
   Input_file& operator=(const Input_file&);
 
-  const Input_file_argument& input_argument_;
+  const Input_file_argument* input_argument_;
   File_read file_;
 };
 

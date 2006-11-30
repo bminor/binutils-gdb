@@ -323,6 +323,11 @@ class Output_section_data : public Output_data
   unsigned int
   do_out_shndx() const;
 
+  // Set the alignment.
+  void
+  set_addralign(uint64_t addralign)
+  { this->addralign_ = addralign; }
+
  private:
   // The output section for this section.
   const Output_section* output_section_;
@@ -402,6 +407,11 @@ class Output_data_space : public Output_section_data
   set_space_size(off_t space_size)
   { this->set_data_size(space_size); }
 
+  // Set the alignment.
+  void
+  set_space_alignment(uint64_t align)
+  { this->set_addralign(align); }
+
   // Write out the data--this must be handled elsewhere.
   void
   do_write(Output_file*)
@@ -457,30 +467,77 @@ class Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
   { }
 
   // A reloc against a global symbol.
+
   Output_reloc(Symbol* gsym, unsigned int type, Output_data* od,
 	       Address address)
-    : local_sym_index_(GSYM_CODE), type_(type), od_(od), address_(address)
-  { this->u_.gsym = gsym; }
+    : address_(address), local_sym_index_(GSYM_CODE), type_(type),
+      shndx_(INVALID_CODE)
+  {
+    this->u1_.gsym = gsym;
+    this->u2_.od = od;
+  }
+
+  Output_reloc(Symbol* gsym, unsigned int type, Relobj* relobj,
+	       unsigned int shndx, Address address)
+    : address_(address), local_sym_index_(GSYM_CODE), type_(type),
+      shndx_(shndx)
+  {
+    gold_assert(shndx != INVALID_CODE);
+    this->u1_.gsym = gsym;
+    this->u2_.relobj = relobj;
+  }
 
   // A reloc against a local symbol.
-  Output_reloc(Sized_relobj<size, big_endian>* object,
+
+  Output_reloc(Sized_relobj<size, big_endian>* relobj,
 	       unsigned int local_sym_index,
 	       unsigned int type,
 	       Output_data* od,
 	       Address address)
-    : local_sym_index_(local_sym_index), type_(type), od_(od),
-      address_(address)
+    : address_(address), local_sym_index_(local_sym_index), type_(type),
+      shndx_(INVALID_CODE)
   {
     gold_assert(local_sym_index != GSYM_CODE
 		&& local_sym_index != INVALID_CODE);
-    this->u_.object = object;
+    this->u1_.relobj = relobj;
+    this->u2_.od = od;
+  }
+
+  Output_reloc(Sized_relobj<size, big_endian>* relobj,
+	       unsigned int local_sym_index,
+	       unsigned int type,
+	       unsigned int shndx,
+	       Address address)
+    : address_(address), local_sym_index_(local_sym_index), type_(type),
+      shndx_(shndx)
+  {
+    gold_assert(local_sym_index != GSYM_CODE
+		&& local_sym_index != INVALID_CODE);
+    gold_assert(shndx != INVALID_CODE);
+    this->u1_.relobj = relobj;
+    this->u2_.relobj = relobj;
   }
 
   // A reloc against the STT_SECTION symbol of an output section.
+
   Output_reloc(Output_section* os, unsigned int type, Output_data* od,
 	       Address address)
-    : local_sym_index_(SECTION_CODE), type_(type), od_(od), address_(address)
-  { this->u_.os = os; }
+    : address_(address), local_sym_index_(SECTION_CODE), type_(type),
+      shndx_(INVALID_CODE)
+  {
+    this->u1_.os = os;
+    this->u2_.od = od;
+  }
+
+  Output_reloc(Output_section* os, unsigned int type, Relobj* relobj,
+	       unsigned int shndx, Address address)
+    : address_(address), local_sym_index_(SECTION_CODE), type_(type),
+      shndx_(shndx)
+  {
+    gold_assert(shndx != INVALID_CODE);
+    this->u1_.os = os;
+    this->u2_.relobj = relobj;
+  }
 
   // Write the reloc entry to an output view.
   void
@@ -513,24 +570,34 @@ class Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
     // relocation against a local symbol in a dynamic object; that
     // doesn't make sense.  And our callers will always be
     // templatized, so we use Sized_relobj here.
-    Sized_relobj<size, big_endian>* object;
+    Sized_relobj<size, big_endian>* relobj;
     // For a global symbol, the symbol.  If this is NULL, it indicates
     // a relocation against the undefined 0 symbol.
     Symbol* gsym;
     // For a relocation against an output section, the output section.
     Output_section* os;
-  } u_;
+  } u1_;
+  union
+  {
+    // If shndx_ is not INVALID CODE, the object which holds the input
+    // section being used to specify the reloc address.
+    Relobj* relobj;
+    // If shndx_ is INVALID_CODE, the output data being used to
+    // specify the reloc address.  This may be NULL if the reloc
+    // address is absolute.
+    Output_data* od;
+  } u2_;
+  // The address offset within the input section or the Output_data.
+  Address address_;
   // For a local symbol, the local symbol index.  This is GSYM_CODE
   // for a global symbol, or INVALID_CODE for an uninitialized value.
   unsigned int local_sym_index_;
   // The reloc type--a processor specific code.
   unsigned int type_;
-  // If this is not NULL, then the relocation is against the contents
-  // of this output data.
-  Output_data* od_;
-  // The reloc address--if od_ is not NULL, this is the offset from
-  // the start of od_.
-  Address address_;
+  // If the reloc address is an input section in an object, the
+  // section index.  This is INVALID_CODE if the reloc address is
+  // specified in some other way.
+  unsigned int shndx_;
 };
 
 // The SHT_RELA version of Output_reloc<>.  This is just derived from
@@ -549,23 +616,46 @@ class Output_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
   { }
 
   // A reloc against a global symbol.
+
   Output_reloc(Symbol* gsym, unsigned int type, Output_data* od,
 	       Address address, Addend addend)
     : rel_(gsym, type, od, address), addend_(addend)
   { }
 
+  Output_reloc(Symbol* gsym, unsigned int type, Relobj* relobj,
+	       unsigned int shndx, Address address, Addend addend)
+    : rel_(gsym, type, relobj, shndx, address), addend_(addend)
+  { }
+
   // A reloc against a local symbol.
-  Output_reloc(Sized_relobj<size, big_endian>* object,
+
+  Output_reloc(Sized_relobj<size, big_endian>* relobj,
 	       unsigned int local_sym_index,
 	       unsigned int type, Output_data* od, Address address,
 	       Addend addend)
-    : rel_(object, local_sym_index, type, od, address), addend_(addend)
+    : rel_(relobj, local_sym_index, type, od, address), addend_(addend)
+  { }
+
+  Output_reloc(Sized_relobj<size, big_endian>* relobj,
+	       unsigned int local_sym_index,
+	       unsigned int type,
+	       unsigned int shndx,
+	       Address address,
+	       Addend addend)
+    : rel_(relobj, local_sym_index, type, shndx, address),
+      addend_(addend)
   { }
 
   // A reloc against the STT_SECTION symbol of an output section.
+
   Output_reloc(Output_section* os, unsigned int type, Output_data* od,
 	       Address address, Addend addend)
     : rel_(os, type, od, address), addend_(addend)
+  { }
+
+  Output_reloc(Output_section* os, unsigned int type, Relobj* relobj,
+	       unsigned int shndx, Address address, Addend addend)
+    : rel_(os, type, relobj, shndx, address), addend_(addend)
   { }
 
   // Write the reloc entry to an output view.
@@ -643,22 +733,43 @@ class Output_data_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
   { }
 
   // Add a reloc against a global symbol.
+
   void
   add_global(Symbol* gsym, unsigned int type, Output_data* od, Address address)
   { this->add(Output_reloc_type(gsym, type, od, address)); }
 
-  // Add a reloc against a local symbol.
   void
-  add_local(Sized_relobj<size, big_endian>* object,
+  add_global(Symbol* gsym, unsigned int type, Relobj* relobj,
+	     unsigned int shndx, Address address)
+  { this->add(Output_reloc_type(gsym, type, relobj, shndx, address)); }
+
+  // Add a reloc against a local symbol.
+
+  void
+  add_local(Sized_relobj<size, big_endian>* relobj,
 	    unsigned int local_sym_index, unsigned int type,
 	    Output_data* od, Address address)
-  { this->add(Output_reloc_type(object, local_sym_index, type, od, address)); }
+  { this->add(Output_reloc_type(relobj, local_sym_index, type, od, address)); }
+
+  void
+  add_local(Sized_relobj<size, big_endian>* relobj,
+	    unsigned int local_sym_index, unsigned int type,
+	    unsigned int shndx, Address address)
+  { this->add(Output_reloc_type(relobj, local_sym_index, type, shndx,
+				address)); }
+
 
   // A reloc against the STT_SECTION symbol of an output section.
+
   void
   add_output_section(Output_section* os, unsigned int type,
 		     Output_data* od, Address address)
   { this->add(Output_reloc_type(os, type, od, address)); }
+
+  void
+  add_output_section(Output_section* os, unsigned int type,
+		     Relobj* relobj, unsigned int shndx, Address address)
+  { this->add(Output_reloc_type(os, type, relobj, shndx, address)); }
 };
 
 // The SHT_RELA version of Output_data_reloc.
@@ -681,26 +792,48 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
   { }
 
   // Add a reloc against a global symbol.
+
   void
   add_global(Symbol* gsym, unsigned int type, Output_data* od,
 	     Address address, Addend addend)
   { this->add(Output_reloc_type(gsym, type, od, address, addend)); }
 
-  // Add a reloc against a local symbol.
   void
-  add_local(Sized_relobj<size, big_endian>* object,
+  add_global(Symbol* gsym, unsigned int type, Relobj* relobj,
+	     unsigned int shndx, Address address, Addend addend)
+  { this->add(Output_reloc_type(gsym, type, relobj, shndx, address, addend)); }
+
+  // Add a reloc against a local symbol.
+
+  void
+  add_local(Sized_relobj<size, big_endian>* relobj,
 	    unsigned int local_sym_index, unsigned int type,
 	    Output_data* od, Address address, Addend addend)
   {
-    this->add(Output_reloc_type(object, local_sym_index, type, od, address,
+    this->add(Output_reloc_type(relobj, local_sym_index, type, od, address,
+				addend));
+  }
+
+  void
+  add_local(Sized_relobj<size, big_endian>* relobj,
+	    unsigned int local_sym_index, unsigned int type,
+	    unsigned int shndx, Address address, Addend addend)
+  {
+    this->add(Output_reloc_type(relobj, local_sym_index, type, shndx, address,
 				addend));
   }
 
   // A reloc against the STT_SECTION symbol of an output section.
+
   void
   add_output_section(Output_section* os, unsigned int type, Output_data* od,
 		     Address address, Addend addend)
   { this->add(Output_reloc_type(os, type, od, address, addend)); }
+
+  void
+  add_output_section(Output_section* os, unsigned int type, Relobj* relobj,
+		     unsigned int shndx, Address address, Addend addend)
+  { this->add(Output_reloc_type(os, type, relobj, shndx, address, addend)); }
 };
 
 // Output_data_got is used to manage a GOT.  Each entry in the GOT is
