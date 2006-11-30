@@ -444,7 +444,14 @@ elf32_m68k_object_p (bfd *abfd)
   if ((eflags & EF_M68K_ARCH_MASK) == EF_M68K_M68000)
     features |= m68000;
   else if ((eflags & EF_M68K_ARCH_MASK) == EF_M68K_CPU32)
-    features |= cpu32;
+    {
+      features |= cpu32;
+      switch (eflags & EF_M68K_CPU32_MASK)
+	{
+        case EF_M68K_CPU32_FIDO_A:
+	  features |= fido_a; break;
+	}
+    }
   else
     {
       switch (eflags & EF_M68K_CF_ISA_MASK)
@@ -535,7 +542,7 @@ elf32_m68k_merge_private_bfd_data (ibfd, obfd)
       if ((in_flags & EF_M68K_ARCH_MASK) == EF_M68K_M68000)
 	variant_mask = 0;
       else if ((in_flags & EF_M68K_ARCH_MASK) == EF_M68K_CPU32)
-	variant_mask = 0;
+	variant_mask = EF_M68K_CPU32_MASK;
       else
 	variant_mask = EF_M68K_CF_ISA_MASK;
 
@@ -572,7 +579,11 @@ elf32_m68k_print_private_bfd_data (abfd, ptr)
   if ((eflags & EF_M68K_ARCH_MASK) == EF_M68K_M68000)
     fprintf (file, " [m68000]");
   else if ((eflags & EF_M68K_ARCH_MASK) == EF_M68K_CPU32)
-    fprintf (file, " [cpu32]");
+    {
+      fprintf (file, " [cpu32]");
+      if (eflags & EF_M68K_CPU32_FIDO_A)
+	fprintf (file, " [fido]");
+    }
   else
     {
       if ((eflags & EF_M68K_ARCH_MASK) == EF_M68K_CFV4E)

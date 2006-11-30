@@ -7552,7 +7552,11 @@ m68k_elf_final_processing (void)
     flags |= EF_M68K_CFV4E;
   /* Set file-specific flags if this is a cpu32 processor.  */
   if (cpu_of_arch (current_architecture) & cpu32)
-    flags |= EF_M68K_CPU32;
+    {
+      flags |= EF_M68K_CPU32;
+      if (cpu_of_arch (current_architecture) & fido_a)
+	flags |= EF_M68K_CPU32_FIDO_A;
+    }
   else if ((cpu_of_arch (current_architecture) & m68000up)
 	   && !(cpu_of_arch (current_architecture) & m68020up))
     flags |= EF_M68K_M68000;

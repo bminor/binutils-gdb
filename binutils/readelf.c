@@ -1951,7 +1951,11 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	  if ((e_flags & EF_M68K_ARCH_MASK) == EF_M68K_M68000)
 	    strcat (buf, ", m68000");
 	  else if ((e_flags & EF_M68K_ARCH_MASK) == EF_M68K_CPU32)
-	    strcat (buf, ", cpu32");
+	    {
+	      strcat (buf, ", cpu32");
+	      if (e_flags & EF_M68K_CPU32_FIDO_A)
+		strcat (buf, ", fido_a");
+	    }
 	  else
 	    {
 	      char const *isa = _("unknown");
