@@ -1,5 +1,14 @@
 2006-11-30  Jan Beulich  <jbeulich@novell.com>
 
+	* i386-dis.c (SEG_Fixup): Delete.
+	(Sv): Use OP_SEG.
+	(putop): New suffix character 'D'.
+	(dis386): Use it.
+	(grps): Likewise.
+	(OP_SEG): Handle bytemode other than w_mode.
+
+2006-11-30  Jan Beulich  <jbeulich@novell.com>
+
 	* i386-dis.c (zAX): New.
 	(Xz): New.
 	(Yzr): New.

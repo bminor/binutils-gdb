@@ -137,9 +137,9 @@ Disassembly of section .text:
  1a3:	89 90 90 90 90 90 [ 	]*mov    %edx,0x90909090\(%eax\)
  1a9:	8a 90 90 90 90 90 [ 	]*mov    0x90909090\(%eax\),%dl
  1af:	8b 90 90 90 90 90 [ 	]*mov    0x90909090\(%eax\),%edx
- 1b5:	8c 90 90 90 90 90 [ 	]*movw   %ss,0x90909090\(%eax\)
+ 1b5:	8c 90 90 90 90 90 [ 	]*mov    %ss,0x90909090\(%eax\)
  1bb:	8d 90 90 90 90 90 [ 	]*lea    0x90909090\(%eax\),%edx
- 1c1:	8e 90 90 90 90 90 [ 	]*movw   0x90909090\(%eax\),%ss
+ 1c1:	8e 90 90 90 90 90 [ 	]*mov    0x90909090\(%eax\),%ss
  1c7:	8f 80 90 90 90 90 [ 	]*popl   0x90909090\(%eax\)
  1cd:	90 [ 	]*nop    
  1ce:	91 [ 	]*xchg   %eax,%ecx

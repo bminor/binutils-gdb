@@ -1,5 +1,11 @@
 2006-11-30  Jan Beulich  <jbeulich@novell.com>
 
+	* gas/i386/intel.d: Adjust.
+	* gas/i386/naked.d: Adjust.
+	* gas/i386/opcode.d: Adjust.
+
+2006-11-30  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/i386/x86-64-io.[sd]: New.
 	* gas/i386/x86-64-io-intel.d: New.
 	* gas/i386/x86-64-io-suffix.d: New.

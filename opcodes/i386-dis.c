@@ -102,7 +102,6 @@ static void PNI_Fixup (int, int);
 static void SVME_Fixup (int, int);
 static void INVLPG_Fixup (int, int);
 static void BadOp (void);
-static void SEG_Fixup (int, int);
 static void VMX_Fixup (int, int);
 static void REP_Fixup (int, int);
 
@@ -241,7 +240,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Cm OP_C, m_mode
 #define Dm OP_D, m_mode
 #define Td OP_T, d_mode
-#define Sv SEG_Fixup, v_mode
 
 #define RMeAX OP_REG, eAX_reg
 #define RMeBX OP_REG, eBX_reg
@@ -293,6 +291,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define indirDX OP_IMREG, indir_dx_reg
 
 #define Sw OP_SEG, w_mode
+#define Sv OP_SEG, v_mode
 #define Ap OP_DIR, 0
 #define Ob OP_OFF64, b_mode
 #define Ov OP_OFF64, v_mode
@@ -503,6 +502,8 @@ struct dis386 {
    'B' => print 'b' if suffix_always is true
    'C' => print 's' or 'l' ('w' or 'd' in Intel mode) depending on operand
    .      size prefix
+   'D' => print 'w' if no register operands or 'w', 'l' or 'q', if
+   .      suffix_always is true
    'E' => print 'e' if 32-bit form of jcxz
    'F' => print 'w' or 'l' depending on address size prefix (loop insns)
    'G' => print 'w' or 'l' depending on operand size prefix (i/o insns)
@@ -695,9 +696,9 @@ static const struct dis386 dis386[] = {
   { "movS",		Ev, Gv, XX, XX },
   { "movB",		Gb, Eb, XX, XX },
   { "movS",		Gv, Ev, XX, XX },
-  { "movQ",		Sv, Sw, XX, XX },
+  { "movD",		Sv, Sw, XX, XX },
   { "leaS",		Gv, M, XX, XX },
-  { "movQ",		Sw, Sv, XX, XX },
+  { "movD",		Sw, Sv, XX, XX },
   { "popU",		stackEv, XX, XX, XX },
   /* 90 */
   { "xchgS",		NOP_Fixup1, eAX_reg, NOP_Fixup2, eAX_reg, XX, XX },
@@ -1600,8 +1601,8 @@ static const struct dis386 grps[][8] = {
   },
   /* GRP6 */
   {
-    { "sldt",	Ev, XX, XX, XX },
-    { "str",	Ev, XX, XX, XX },
+    { "sldtD",	Sv, XX, XX, XX },
+    { "strD",	Sv, XX, XX, XX },
     { "lldt",	Ew, XX, XX, XX },
     { "ltr",	Ew, XX, XX, XX },
     { "verr",	Ew, XX, XX, XX },
@@ -1615,7 +1616,7 @@ static const struct dis386 grps[][8] = {
     { "sidt{Q|IQ||}", PNI_Fixup, 0, XX, XX, XX },
     { "lgdt{Q|Q||}",	 M, XX, XX, XX },
     { "lidt{Q|Q||}",	 SVME_Fixup, 0, XX, XX, XX },
-    { "smsw",	Ev, XX, XX, XX },
+    { "smswD",	Sv, XX, XX, XX },
     { "(bad)",	XX, XX, XX, XX },
     { "lmsw",	Ew, XX, XX, XX },
     { "invlpg",	INVLPG_Fixup, w_mode, XX, XX, XX },
@@ -3748,6 +3749,23 @@ putop (const char *template, int sizeflag)
 	      used_prefixes |= (prefixes & PREFIX_DATA);
 	    }
 	  break;
+	case 'D':
+	  if (intel_syntax || !(sizeflag & SUFFIX_ALWAYS))
+	    break;
+	  USED_REX (REX_MODE64);
+	  if (mod == 3)
+	    {
+	      if (rex & REX_MODE64)
+		*obufp++ = 'q';
+	      else if (sizeflag & DFLAG)
+		*obufp++ = intel_syntax ? 'd' : 'l';
+	      else
+		*obufp++ = 'w';
+	      used_prefixes |= (prefixes & PREFIX_DATA);
+	    }
+	  else
+	    *obufp++ = 'w';
+	  break;
 	case 'E':		/* For jcxz/jecxz */
 	  if (address_mode == mode_64bit)
 	    {
@@ -4865,9 +4883,12 @@ OP_J (int bytemode, int sizeflag)
 }
 
 static void
-OP_SEG (int dummy ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
+OP_SEG (int bytemode, int sizeflag)
 {
-  oappend (names_seg[reg]);
+  if (bytemode == w_mode)
+    oappend (names_seg[reg]);
+  else
+    OP_E (mod == 3 ? bytemode : w_mode, sizeflag);
 }
 
 static void
@@ -5608,55 +5629,6 @@ BadOp (void)
   /* Throw away prefixes and 1st. opcode byte.  */
   codep = insn_codep + 1;
   oappend ("(bad)");
-}
-
-static void
-SEG_Fixup (int extrachar, int sizeflag)
-{
-  if (mod == 3)
-    {
-      /* We need to add a proper suffix with
-
-		movw %ds,%ax
-		movl %ds,%eax
-		movq %ds,%rax
-		movw %ax,%ds
-		movl %eax,%ds
-		movq %rax,%ds
-       */
-      const char *suffix;
-
-      if (prefixes & PREFIX_DATA)
-	suffix = "w";
-      else
-	{
-	  USED_REX (REX_MODE64);
-	  if (rex & REX_MODE64)
-	    suffix = "q";
-	  else
-	    suffix = "l";
-	}
-      strcat (obuf, suffix);
-    }
-  else
-    {
-      /* We need to fix the suffix for
-
-		movw %ds,(%eax)
-		movw %ds,(%rax)
-		movw (%eax),%ds
-		movw (%rax),%ds
-
-	 Override "mov[l|q]".  */
-      char *p = obuf + strlen (obuf) - 1;
-
-      /* We might not have a suffix.  */
-      if (*p == 'v')
-	++p;
-      *p = 'w';
-    }
-
-  OP_E (extrachar, sizeflag);
 }
 
 static void
