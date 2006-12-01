@@ -5427,10 +5427,11 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
       map->p_type        = segment->p_type;
       map->p_flags       = segment->p_flags;
       map->p_flags_valid = 1;
+
       /* If the first section in the input segment is removed, there is
 	 no need to preserve segment physical address in the corresponding
 	 output segment.  */
-      if (first_section->output_section != NULL)
+      if (first_section != NULL && first_section->output_section != NULL)
 	{
 	  map->p_paddr = segment->p_paddr;
 	  map->p_paddr_valid = 1;
