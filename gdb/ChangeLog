@@ -1,3 +1,7 @@
+2006-12-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elfread.c (elf_symtab_read): Treat weak functions as global.
+
 2006-11-30  Jim Blandy  <jimb@codesourcery.com>
 
 	* ada-lang.c (value_subscript_packed): Don't bother to set the

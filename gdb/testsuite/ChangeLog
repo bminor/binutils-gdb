@@ -1,3 +1,8 @@
+2006-12-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/solib-weak.c, gdb.base/solib-weak.exp, gdb.base/weaklib1.c,
+	gdb.base/weaklib2.c: New files.
+
 2006-11-29  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* gdb.threads/linux-dp.exp: Adjust regexps used to scan thread

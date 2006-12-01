@@ -284,7 +284,7 @@ elf_symtab_read (struct objfile *objfile, int dynamic,
 	    }
 	  else if (sym->section->flags & SEC_CODE)
 	    {
-	      if (sym->flags & BSF_GLOBAL)
+	      if (sym->flags & (BSF_GLOBAL | BSF_WEAK))
 		{
 		  ms_type = mst_text;
 		}
