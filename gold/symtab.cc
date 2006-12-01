@@ -1275,7 +1275,9 @@ Symbol_table::sized_write_globals(const Target*,
 
       if (sym_index != -1U)
 	{
-	  this->sized_write_symbol<size, big_endian>(sym, shndx, sympool, ps);
+	  this->sized_write_symbol SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
+              sym, shndx, sympool, ps
+              SELECT_SIZE_ENDIAN(size, big_endian));
 	  ps += sym_size;
 	}
 
@@ -1284,7 +1286,9 @@ Symbol_table::sized_write_globals(const Target*,
 	  dynsym_index -= first_dynamic_global_index;
 	  gold_assert(dynsym_index < dynamic_count);
 	  unsigned char* pd = dynamic_view + (dynsym_index * sym_size);
-	  this->sized_write_symbol<size, big_endian>(sym, shndx, dynpool, pd);
+	  this->sized_write_symbol SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
+              sym, shndx, dynpool, pd
+              SELECT_SIZE_ENDIAN(size, big_endian));
 	}
     }
 
@@ -1303,7 +1307,8 @@ void
 Symbol_table::sized_write_symbol(Sized_symbol<size>* sym,
 				 unsigned int shndx,
 				 const Stringpool* pool,
-				 unsigned char* p) const
+				 unsigned char* p
+                                 ACCEPT_SIZE_ENDIAN) const
 {
   elfcpp::Sym_write<size, big_endian> osym(p);
   osym.put_st_name(pool->get_offset(sym->name()));

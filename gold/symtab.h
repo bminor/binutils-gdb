@@ -933,7 +933,8 @@ class Symbol_table
   template<int size, bool big_endian>
   void
   sized_write_symbol(Sized_symbol<size>*, unsigned int shndx,
-		     const Stringpool*, unsigned char* p) const;
+		     const Stringpool*, unsigned char* p
+                     ACCEPT_SIZE_ENDIAN) const;
 
   // Write out a section symbol, specialized for size and endianness.
   template<int size, bool big_endian>
