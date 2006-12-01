@@ -484,8 +484,8 @@ foo:
  xchg   bp, ax
  xchg   si, ax
  xchg   di, ax
- cbtw
- cwtd
+ cbw
+ cwd
  callw  0x9090,0x9090
  pushfw
  popfw

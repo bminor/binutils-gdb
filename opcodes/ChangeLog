@@ -1,3 +1,9 @@
+2006-11-30  Jan Beulich  <jbeulich@novell.com>
+
+	* i386-dis.c (dis386): Use 'R' and 'O' for cbw/cwd unconditionally.
+	(putop): For 'O' suffix, print 'q' in Intel mode, and mark data prefix
+	used. For 'R' and 'W' suffix, simplify and fix Intel mode.
+
 2006-11-29  Paul Brook  <paul@codesourcery.com>
 
 	* arm-dis.c (coprocessor_opcodes): Fix bitfields for fconstd/fconstd.

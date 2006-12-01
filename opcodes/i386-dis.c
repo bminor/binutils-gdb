@@ -506,17 +506,17 @@ struct dis386 {
    'J' => print 'l'
    'L' => print 'l' if suffix_always is true
    'N' => print 'n' if instruction has no wait "prefix"
-   'O' => print 'd', or 'o'
+   'O' => print 'd' or 'o' (or 'q' in Intel mode)
    'P' => print 'w', 'l' or 'q' if instruction has an operand size prefix,
    .      or suffix_always is true.  print 'q' if rex prefix is present.
    'Q' => print 'w', 'l' or 'q' if no register operands or suffix_always
    .      is true
-   'R' => print 'w', 'l' or 'q' ("wd" or "dq" in intel mode)
+   'R' => print 'w', 'l' or 'q' ('d' for 'l' and 'e' in Intel mode)
    'S' => print 'w', 'l' or 'q' if suffix_always is true
    'T' => print 'q' in 64bit mode and behave as 'P' otherwise
    'U' => print 'q' in 64bit mode and behave as 'Q' otherwise
    'V' => print 'q' in 64bit mode and behave as 'S' otherwise
-   'W' => print 'b' or 'w' ("w" or "de" in intel mode)
+   'W' => print 'b', 'w' or 'l' ('d' in Intel mode)
    'X' => print 's', 'd' depending on data16 prefix (for XMM)
    'Y' => 'q' if instruction has an REX 64bit overwrite prefix
    'Z' => print 'q' in 64bit mode and behave as 'L' otherwise
@@ -703,8 +703,8 @@ static const struct dis386 dis386[] = {
   { "xchgS",		RMeSI, eAX, XX, XX },
   { "xchgS",		RMeDI, eAX, XX, XX },
   /* 98 */
-  { "cW{tR||tR|}",	XX, XX, XX, XX },
-  { "cR{tO||tO|}",	XX, XX, XX, XX },
+  { "cW{t||t|}R",	XX, XX, XX, XX },
+  { "cR{t||t|}O",	XX, XX, XX, XX },
   { "Jcall{T|}",	Ap, XX, XX, XX },
   { "(bad)",		XX, XX, XX, XX },	/* fwait */
   { "pushfT",		XX, XX, XX, XX },
@@ -3812,8 +3812,12 @@ putop (const char *template, int sizeflag)
 	  USED_REX (REX_MODE64);
 	  if (rex & REX_MODE64)
 	    *obufp++ = 'o';
+	  else if (intel_syntax && (sizeflag & DFLAG))
+	    *obufp++ = 'q';
 	  else
 	    *obufp++ = 'd';
+	  if (!(rex & REX_MODE64))
+	    used_prefixes |= (prefixes & PREFIX_DATA);
 	  break;
 	case 'T':
 	  if (intel_syntax)
@@ -3874,33 +3878,20 @@ putop (const char *template, int sizeflag)
 	  break;
 	case 'R':
 	  USED_REX (REX_MODE64);
-	  if (intel_syntax)
+	  if (rex & REX_MODE64)
+	    *obufp++ = 'q';
+	  else if (sizeflag & DFLAG)
 	    {
-	      if (rex & REX_MODE64)
-		{
-		  *obufp++ = 'q';
-		  *obufp++ = 't';
-		}
-	      else if (sizeflag & DFLAG)
-		{
+	      if (intel_syntax)
 		  *obufp++ = 'd';
-		  *obufp++ = 'q';
-		}
 	      else
-		{
-		  *obufp++ = 'w';
-		  *obufp++ = 'd';
-		}
+		  *obufp++ = 'l';
 	    }
 	  else
-	    {
-	      if (rex & REX_MODE64)
-		*obufp++ = 'q';
-	      else if (sizeflag & DFLAG)
-		*obufp++ = 'l';
-	      else
-		*obufp++ = 'w';
-	    }
+	    *obufp++ = 'w';
+	  if (intel_syntax && !p[1]
+	      && ((rex & REX_MODE64) || (sizeflag & DFLAG)))
+	    *obufp++ = 'e';
 	  if (!(rex & REX_MODE64))
 	    used_prefixes |= (prefixes & PREFIX_DATA);
 	  break;
@@ -3950,31 +3941,19 @@ putop (const char *template, int sizeflag)
 	  /* implicit operand size 'l' for i386 or 'q' for x86-64 */
 	case 'W':
 	  /* operand size flag for cwtl, cbtw */
-	  USED_REX (0);
-	  if (rex)
-	    *obufp++ = 'l';
+	  USED_REX (REX_MODE64);
+	  if (rex & REX_MODE64)
+	    {
+	      if (intel_syntax)
+		*obufp++ = 'd';
+	      else
+		*obufp++ = 'l';
+	    }
 	  else if (sizeflag & DFLAG)
 	    *obufp++ = 'w';
 	  else
 	    *obufp++ = 'b';
-	  if (intel_syntax)
-	    {
-	      if (rex)
-		{
-		  *obufp++ = 'q';
-		  *obufp++ = 'e';
-		}
-	      if (sizeflag & DFLAG)
-		{
-		  *obufp++ = 'd';
-		  *obufp++ = 'e';
-		}
-	      else
-		{
-		  *obufp++ = 'w';
-		}
-	    }
-	  if (!rex)
+	  if (!(rex & REX_MODE64))
 	    used_prefixes |= (prefixes & PREFIX_DATA);
 	  break;
 	}

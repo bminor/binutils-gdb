@@ -155,6 +155,8 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-merom"
     run_dump_test "x86-64-rep"
     run_dump_test "x86-64-rep-suffix"
+    run_dump_test "x86-64-cbw"
+    run_dump_test "x86-64-cbw-intel"
     run_dump_test "x86-64-gidt"
     run_dump_test "x86-64-nops"
     if ![istarget "*-*-mingw64*"] then {
