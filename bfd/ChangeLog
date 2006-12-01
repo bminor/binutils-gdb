@@ -1,3 +1,10 @@
+2006-12-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/3609
+	* elf.c (rewrite_elf_program_header): Preserve segment physical
+	address in the output segment if the first section in the
+	corresponding input segment is null.
+
 2006-12-01  Nick Clifton  <nickc@redhat.com>
 
 	PR 3609
