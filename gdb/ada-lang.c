@@ -1887,10 +1887,6 @@ value_subscript_packed (struct value *arr, int arity, struct value **ind)
 
   v = ada_value_primitive_packed_val (arr, NULL, elt_off, bit_off,
                                       bits, elt_type);
-  if (VALUE_LVAL (arr) == lval_internalvar)
-    VALUE_LVAL (v) = lval_internalvar_component;
-  else
-    VALUE_LVAL (v) = VALUE_LVAL (arr);
   return v;
 }
 

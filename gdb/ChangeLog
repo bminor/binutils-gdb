@@ -1,3 +1,9 @@
+2006-11-30  Jim Blandy  <jimb@codesourcery.com>
+
+	* ada-lang.c (value_subscript_packed): Don't bother to set the
+	lvalue type of the returned value here;
+	ada_value_primitive_packed_val takes care of that.
+
 2006-11-30  Nick Roberts  <nickrob@snap.net.nz>
 
 	* mi/mi-cmd-var.c (mi_cmd_var_list_children): Remove unused
