@@ -185,8 +185,9 @@ class Output_section_headers : public Output_data
  public:
   Output_section_headers(int size,
 			 bool big_endian,
-			 const Layout::Segment_list&,
-			 const Layout::Section_list&,
+			 const Layout*,
+			 const Layout::Segment_list*,
+			 const Layout::Section_list*,
 			 const Stringpool*);
 
   // Write the data to the file.
@@ -206,8 +207,9 @@ class Output_section_headers : public Output_data
 
   int size_;
   bool big_endian_;
-  const Layout::Segment_list& segment_list_;
-  const Layout::Section_list& unattached_section_list_;
+  const Layout* layout_;
+  const Layout::Segment_list* segment_list_;
+  const Layout::Section_list* unattached_section_list_;
   const Stringpool* secnamepool_;
 };
 
@@ -303,16 +305,23 @@ class Output_section_data : public Output_data
     : Output_data(0), output_section_(NULL), addralign_(addralign)
   { }
 
+  // Return the output section.
+  const Output_section*
+  output_section() const
+  { return this->output_section_; }
+
   // Record the output section.
   void
-  set_output_section(Output_section* os)
-  {
-    gold_assert(this->output_section_ == NULL);
-    this->output_section_ = os;
-  }
+  set_output_section(Output_section* os);
 
  protected:
   // The child class must implement do_write.
+
+  // The child class may implement specific adjustments to the output
+  // section.
+  virtual void
+  do_adjust_output_section(Output_section*)
+  { }
 
   // Return the required alignment.
   uint64_t
@@ -695,6 +704,10 @@ class Output_data_reloc_base : public Output_section_data
   do_write(Output_file*);
 
  protected:
+  // Set the entry size and the link.
+  void
+  do_adjust_output_section(Output_section *os);
+
   // Add a relocation entry.
   void
   add(const Output_reloc_type& reloc)
@@ -975,19 +988,19 @@ class Output_data_dynamic : public Output_section_data
   add_constant(elfcpp::DT tag, unsigned int val)
   { this->add_entry(Dynamic_entry(tag, val)); }
 
-  // Add a new dynamic entry with the address of a section.
+  // Add a new dynamic entry with the address of output data.
   void
-  add_section_address(elfcpp::DT tag, Output_section* os)
-  { this->add_entry(Dynamic_entry(tag, os, false)); }
+  add_section_address(elfcpp::DT tag, const Output_data* od)
+  { this->add_entry(Dynamic_entry(tag, od, false)); }
 
-  // Add a new dynamic entry with the size of a section.
+  // Add a new dynamic entry with the size of output data.
   void
-  add_section_size(elfcpp::DT tag, Output_section* os)
-  { this->add_entry(Dynamic_entry(tag, os, true)); }
+  add_section_size(elfcpp::DT tag, const Output_data* od)
+  { this->add_entry(Dynamic_entry(tag, od, true)); }
 
   // Add a new dynamic entry with the address of a symbol.
   void
-  add_symbol(elfcpp::DT tag, Symbol* sym)
+  add_symbol(elfcpp::DT tag, const Symbol* sym)
   { this->add_entry(Dynamic_entry(tag, sym)); }
 
   // Add a new dynamic entry with a string.
@@ -1003,6 +1016,11 @@ class Output_data_dynamic : public Output_section_data
   void
   do_write(Output_file*);
 
+ protected:
+  // Adjust the output section to set the entry size.
+  void
+  do_adjust_output_section(Output_section*);
+
  private:
   // This POD class holds a single dynamic entry.
   class Dynamic_entry
@@ -1014,15 +1032,15 @@ class Output_data_dynamic : public Output_section_data
     { this->u_.val = val; }
 
     // Create an entry with the size or address of a section.
-    Dynamic_entry(elfcpp::DT tag, Output_section* os, bool section_size)
+    Dynamic_entry(elfcpp::DT tag, const Output_data* od, bool section_size)
       : tag_(tag),
 	classification_(section_size
 			? DYNAMIC_SECTION_SIZE
 			: DYNAMIC_SECTION_ADDRESS)
-    { this->u_.os = os; }
+    { this->u_.od = od; }
 
     // Create an entry with the address of a symbol.
-    Dynamic_entry(elfcpp::DT tag, Symbol* sym)
+    Dynamic_entry(elfcpp::DT tag, const Symbol* sym)
       : tag_(tag), classification_(DYNAMIC_SYMBOL)
     { this->u_.sym = sym; }
 
@@ -1056,9 +1074,9 @@ class Output_data_dynamic : public Output_section_data
       // For DYNAMIC_NUMBER.
       unsigned int val;
       // For DYNAMIC_SECTION_ADDRESS and DYNAMIC_SECTION_SIZE.
-      Output_section* os;
+      const Output_data* od;
       // For DYNAMIC_SYMBOL.
-      Symbol* sym;
+      const Symbol* sym;
       // For DYNAMIC_STRING.
       const char* str;
     } u_;
@@ -1143,18 +1161,71 @@ class Output_section : public Output_data
 
   // Set the entsize field.
   void
-  set_entsize(uint64_t v)
-  { this->entsize_ = v; }
+  set_entsize(uint64_t v);
 
-  // Set the link field.
+  // Set the link field to the output section index of a section.
+  void
+  set_link_section(Output_data* od)
+  {
+    gold_assert(this->link_ == 0
+		&& !this->should_link_to_symtab_
+		&& !this->should_link_to_dynsym_);
+    this->link_section_ = od;
+  }
+
+  // Set the link field to a constant.
   void
   set_link(unsigned int v)
-  { this->link_ = v; }
+  {
+    gold_assert(this->link_section_ == NULL
+		&& !this->should_link_to_symtab_
+		&& !this->should_link_to_dynsym_);
+    this->link_ = v;
+  }
 
-  // Set the info field.
+  // Record that this section should link to the normal symbol table.
+  void
+  set_should_link_to_symtab()
+  {
+    gold_assert(this->link_section_ == NULL
+		&& this->link_ == 0
+		&& !this->should_link_to_dynsym_);
+    this->should_link_to_symtab_ = true;
+  }
+
+  // Record that this section should link to the dynamic symbol table.
+  void
+  set_should_link_to_dynsym()
+  {
+    gold_assert(this->link_section_ == NULL
+		&& this->link_ == 0
+		&& !this->should_link_to_symtab_);
+    this->should_link_to_dynsym_ = true;
+  }
+
+  // Return the info field.
+  unsigned int
+  info() const
+  {
+    gold_assert(this->info_section_ == NULL);
+    return this->info_;
+  }
+
+  // Set the info field to the output section index of a section.
+  void
+  set_info_section(Output_data* od)
+  {
+    gold_assert(this->info_ == 0);
+    this->info_section_ = od;
+  }
+
+  // Set the info field to a constant.
   void
   set_info(unsigned int v)
-  { this->info_ = v; }
+  {
+    gold_assert(this->info_section_ == NULL);
+    this->info_ = v;
+  }
 
   // Set the addralign field.
   void
@@ -1250,7 +1321,8 @@ class Output_section : public Output_data
   // Write the section header into *OPHDR.
   template<int size, bool big_endian>
   void
-  write_header(const Stringpool*, elfcpp::Shdr_write<size, big_endian>*) const;
+  write_header(const Layout*, const Stringpool*,
+	       elfcpp::Shdr_write<size, big_endian>*) const;
 
  private:
   // In some cases we need to keep a list of the input sections
@@ -1344,9 +1416,13 @@ class Output_section : public Output_data
   // The section entry size.
   uint64_t entsize_;
   // The file offset is in the parent class.
-  // The section link field.
+  // Set the section link field to the index of this section.
+  Output_data* link_section_;
+  // If link_section_ is NULL, this is the link field.
   unsigned int link_;
-  // The section info field.
+  // Set the section info field to the index of this section.
+  Output_data* info_section_;
+  // If info_section_ is NULL, this is the section info field.
   unsigned int info_;
   // The section type.
   elfcpp::Elf_Word type_;
@@ -1379,6 +1455,12 @@ class Output_section : public Output_data
   // dynamic symbol table.  This will be true if there is a dynamic
   // relocation which needs it.
   bool needs_dynsym_index_ : 1;
+  // Whether the link field of this output section should point to the
+  // normal symbol table.
+  bool should_link_to_symtab_ : 1;
+  // Whether the link field of this output section should point to the
+  // dynamic symbol table.
+  bool should_link_to_dynsym_ : 1;
 };
 
 // An output segment.  PT_LOAD segments are built from collections of
@@ -1466,8 +1548,7 @@ class Output_segment
   // Write the section headers of associated sections into V.
   template<int size, bool big_endian>
   unsigned char*
-  write_section_headers(const Stringpool*,
-                        unsigned char* v,
+  write_section_headers(const Layout*, const Stringpool*, unsigned char* v,
 			unsigned int* pshndx ACCEPT_SIZE_ENDIAN) const;
 
  private:
@@ -1497,8 +1578,8 @@ class Output_segment
   // Write the section headers in the list into V.
   template<int size, bool big_endian>
   unsigned char*
-  write_section_headers_list(const Stringpool*, const Output_data_list*,
-			     unsigned char* v,
+  write_section_headers_list(const Layout*, const Stringpool*,
+			     const Output_data_list*, unsigned char* v,
 			     unsigned int* pshdx ACCEPT_SIZE_ENDIAN) const;
 
   // The list of output data with contents attached to this segment.

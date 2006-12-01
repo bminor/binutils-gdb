@@ -42,7 +42,8 @@ Layout::Layout(const General_options& options)
   : options_(options), namepool_(), sympool_(), dynpool_(), signatures_(),
     section_name_map_(), segment_list_(), section_list_(),
     unattached_section_list_(), special_output_list_(),
-    tls_segment_(NULL), symtab_section_(NULL), dynsym_section_(NULL)
+    tls_segment_(NULL), symtab_section_(NULL), dynsym_section_(NULL),
+    dynamic_section_(NULL), dynamic_data_(NULL)
 {
   // Make space for more than enough segments for a typical file.
   // This is just for efficiency--it's OK if we wind up needing more.
@@ -325,6 +326,11 @@ Layout::create_initial_dynamic_sections(const Input_objects* input_objects,
 				this->dynamic_section_, 0, 0,
 				elfcpp::STT_OBJECT, elfcpp::STB_LOCAL,
 				elfcpp::STV_HIDDEN, 0, false, false);
+
+  this->dynamic_data_ =  new Output_data_dynamic(input_objects->target(),
+						 &this->dynpool_);
+
+  this->dynamic_section_->add_output_section_data(this->dynamic_data_);
 }
 
 // Find the first read-only PT_LOAD segment, creating one if
@@ -386,7 +392,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
   Target* const target = input_objects->target();
   const int size = target->get_size();
 
-  target->finalize_sections(this);
+  target->finalize_sections(&this->options_, this);
 
   Output_segment* phdr_seg = NULL;
   if (input_objects->any_dynamic())
@@ -399,14 +405,9 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
       phdr_seg = new Output_segment(elfcpp::PT_PHDR, elfcpp::PF_R);
       this->segment_list_.push_back(phdr_seg);
 
-      // This holds the dynamic tags.
-      Output_data_dynamic* odyn;
-      odyn = new Output_data_dynamic(input_objects->target(),
-				     &this->dynpool_);
-
       // Create the dynamic symbol table, including the hash table,
       // the dynamic relocations, and the version sections.
-      this->create_dynamic_symtab(target, odyn, symtab);
+      this->create_dynamic_symtab(target, symtab);
 
       // Create the .interp section to hold the name of the
       // interpreter, and put it in a PT_INTERP segment.
@@ -414,7 +415,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
 
       // Finish the .dynamic section to hold the dynamic data, and put
       // it in a PT_DYNAMIC segment.
-      this->finish_dynamic_section(input_objects, symtab, odyn);
+      this->finish_dynamic_section(input_objects, symtab);
     }
 
   // FIXME: Handle PT_GNU_STACK.
@@ -452,9 +453,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
 
   // Create the symbol table sections.
   // FIXME: We don't need to do this if we are stripping symbols.
-  Output_section* ostrtab;
-  this->create_symtab_sections(size, input_objects, symtab, &off,
-			       &ostrtab);
+  this->create_symtab_sections(size, input_objects, symtab, &off);
 
   // Create the .shstrtab section.
   Output_section* shstrtab_section = this->create_shstrtab();
@@ -462,9 +461,6 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
   // Set the file offsets of all the sections not associated with
   // segments.
   off = this->set_section_offsets(off, &shndx);
-
-  // Now the section index of OSTRTAB is set.
-  this->symtab_section_->set_link(ostrtab->out_shndx());
 
   // Create the section table header.
   Output_section_headers* oshdrs = this->create_shdrs(size, big_endian, &off);
@@ -685,8 +681,7 @@ Layout::set_section_offsets(off_t off, unsigned int* pshndx)
 void
 Layout::create_symtab_sections(int size, const Input_objects* input_objects,
 			       Symbol_table* symtab,
-			       off_t* poff,
-			       Output_section** postrtab)
+			       off_t* poff)
 {
   int symsize;
   unsigned int align;
@@ -742,7 +737,27 @@ Layout::create_symtab_sections(int size, const Input_objects* input_objects,
   unsigned int local_symcount = local_symbol_index;
   gold_assert(local_symcount * symsize == off - startoff);
 
-  off = symtab->finalize(local_symcount, off, &this->sympool_);
+  off_t dynoff;
+  size_t dyn_global_index;
+  size_t dyncount;
+  if (this->dynsym_section_ == NULL)
+    {
+      dynoff = 0;
+      dyn_global_index = 0;
+      dyncount = 0;
+    }
+  else
+    {
+      dyn_global_index = this->dynsym_section_->info();
+      off_t locsize = dyn_global_index * this->dynsym_section_->entsize();
+      dynoff = this->dynsym_section_->offset() + locsize;
+      dyncount = (this->dynsym_section_->data_size() - locsize) / symsize;
+      gold_assert(dyncount * symsize
+		  == this->dynsym_section_->data_size() - locsize);
+    }
+
+  off = symtab->finalize(local_symcount, off, dynoff, dyn_global_index,
+			 dyncount, &this->sympool_);
 
   this->sympool_.set_string_offsets();
 
@@ -765,11 +780,11 @@ Layout::create_symtab_sections(int size, const Input_objects* input_objects,
   ostrtab->add_output_section_data(pstr);
 
   osymtab->set_address(0, startoff);
+  osymtab->set_link_section(ostrtab);
   osymtab->set_info(local_symcount);
   osymtab->set_entsize(symsize);
 
   *poff = off;
-  *postrtab = ostrtab;
 }
 
 // Create the .shstrtab section, which holds the names of the
@@ -801,8 +816,9 @@ Output_section_headers*
 Layout::create_shdrs(int size, bool big_endian, off_t* poff)
 {
   Output_section_headers* oshdrs;
-  oshdrs = new Output_section_headers(size, big_endian, this->segment_list_,
-				      this->unattached_section_list_,
+  oshdrs = new Output_section_headers(size, big_endian, this,
+				      &this->segment_list_,
+				      &this->unattached_section_list_,
 				      &this->namepool_);
   off_t off = align_address(*poff, oshdrs->addralign());
   oshdrs->set_address(0, off);
@@ -815,8 +831,7 @@ Layout::create_shdrs(int size, bool big_endian, off_t* poff)
 // Create the dynamic symbol table.
 
 void
-Layout::create_dynamic_symtab(const Target* target, Output_data_dynamic* odyn,
-			      Symbol_table* symtab)
+Layout::create_dynamic_symtab(const Target* target, Symbol_table* symtab)
 {
   // Count all the symbols in the dynamic symbol table, and set the
   // dynamic symbol indexes.
@@ -883,6 +898,7 @@ Layout::create_dynamic_symtab(const Target* target, Output_data_dynamic* odyn,
 
   this->dynsym_section_ = dynsym;
 
+  Output_data_dynamic* const odyn = this->dynamic_data_;
   odyn->add_section_address(elfcpp::DT_SYMTAB, dynsym);
   odyn->add_constant(elfcpp::DT_SYMENT, symsize);
 
@@ -893,6 +909,9 @@ Layout::create_dynamic_symtab(const Target* target, Output_data_dynamic* odyn,
 
   Output_section_data* strdata = new Output_data_strtab(&this->dynpool_);
   dynstr->add_output_section_data(strdata);
+
+  dynsym->set_link_section(dynstr);
+  this->dynamic_section_->set_link_section(dynstr);
 
   odyn->add_section_address(elfcpp::DT_STRTAB, dynstr);
   odyn->add_section_size(elfcpp::DT_STRSZ, dynstr);
@@ -914,8 +933,8 @@ Layout::create_dynamic_symtab(const Target* target, Output_data_dynamic* odyn,
 							       align);
   hashsec->add_output_section_data(hashdata);
 
+  hashsec->set_link_section(dynsym);
   hashsec->set_entsize(4);
-  // FIXME: .hash should link to .dynsym.
 
   odyn->add_section_address(elfcpp::DT_HASH, hashsec);
 }
@@ -951,16 +970,15 @@ Layout::create_interp(const Target* target)
 
 void
 Layout::finish_dynamic_section(const Input_objects* input_objects,
-			       const Symbol_table* symtab,
-			       Output_data_dynamic* odyn)
+			       const Symbol_table* symtab)
 {
-  this->dynamic_section_->add_output_section_data(odyn);
-
   Output_segment* oseg = new Output_segment(elfcpp::PT_DYNAMIC,
 					    elfcpp::PF_R | elfcpp::PF_W);
   this->segment_list_.push_back(oseg);
   oseg->add_initial_output_section(this->dynamic_section_,
 				   elfcpp::PF_R | elfcpp::PF_W);
+
+  Output_data_dynamic* const odyn = this->dynamic_data_;
 
   for (Input_objects::Dynobj_iterator p = input_objects->dynobj_begin();
        p != input_objects->dynobj_end();
@@ -1231,7 +1249,8 @@ Write_symbols_task::locks(Workqueue* workqueue)
 void
 Write_symbols_task::run(Workqueue*)
 {
-  this->symtab_->write_globals(this->target_, this->sympool_, this->of_);
+  this->symtab_->write_globals(this->target_, this->sympool_, this->dynpool_,
+			       this->of_);
 }
 
 // Close_task_runner methods.

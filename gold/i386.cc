@@ -51,7 +51,7 @@ class Target_i386 : public Sized_target<32, false>
 
   // Finalize the sections.
   void
-  do_finalize_sections(Layout*);
+  do_finalize_sections(const General_options*, Layout*);
 
   // Relocate a section.
   void
@@ -231,7 +231,8 @@ Target_i386::got_section(const General_options* options, Symbol_table* symtab,
       this->got_ = new Output_data_got<32, false>(options);
 
       layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
-				      elfcpp::SHF_ALLOC, this->got_);
+				      elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE,
+				      this->got_);
 
       // The old GNU linker creates a .got.plt section.  We just
       // create another set of data in the .got section.  Note that we
@@ -239,7 +240,8 @@ Target_i386::got_section(const General_options* options, Symbol_table* symtab,
       // might be empty.
       this->got_plt_ = new Output_data_space(4);
       layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
-				      elfcpp::SHF_ALLOC, this->got_plt_);
+				      elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE,
+				      this->got_plt_);
 
       // The first three entries are reserved.
       this->got_plt_->set_space_size(3 * 4);
@@ -248,7 +250,7 @@ Target_i386::got_section(const General_options* options, Symbol_table* symtab,
       symtab->define_in_output_data(this, "_GLOBAL_OFFSET_TABLE_",
 				    this->got_plt_,
 				    0, 0, elfcpp::STT_OBJECT,
-				    elfcpp::STB_GLOBAL,
+				    elfcpp::STB_LOCAL,
 				    elfcpp::STV_HIDDEN, 0,
 				    false, false);
     }
@@ -283,6 +285,15 @@ class Output_data_plt_i386 : public Output_section_data
   // Add an entry to the PLT.
   void
   add_entry(Symbol* gsym);
+
+  // Return the .rel.plt section data.
+  const Reloc_section*
+  rel_plt() const
+  { return this->rel_; }
+
+ protected:
+  void
+  do_adjust_output_section(Output_section* os);
 
  private:
   // The size of an entry in the PLT.
@@ -333,6 +344,16 @@ Output_data_plt_i386::Output_data_plt_i386(Layout* layout,
 				  elfcpp::SHF_ALLOC, this->rel_);
 }
 
+// For some reason
+
+void
+Output_data_plt_i386::do_adjust_output_section(Output_section* os)
+{
+  // UnixWare sets the entsize of .plt to 4, and so does the old GNU
+  // linker, and so do we.
+  os->set_entsize(4);
+}
+
 // Add an entry to the PLT.
 
 void
@@ -354,6 +375,7 @@ Output_data_plt_i386::add_entry(Symbol* gsym)
   this->got_plt_->set_space_size(got_offset + 4);
 
   // Every PLT entry needs a reloc.
+  gsym->set_needs_dynsym_entry();
   this->rel_->add_global(gsym, elfcpp::R_386_JUMP_SLOT, this->got_plt_,
 			 got_offset);
 
@@ -503,6 +525,10 @@ Target_i386::make_plt_entry(const General_options* options,
 
       this->plt_ = new Output_data_plt_i386(layout, this->got_plt_,
 					    options->is_shared());
+      layout->add_output_section_data(".plt", elfcpp::SHT_PROGBITS,
+				      (elfcpp::SHF_ALLOC
+				       | elfcpp::SHF_EXECINSTR),
+				      this->plt_);
     }
 
   this->plt_->add_entry(gsym);
@@ -587,6 +613,7 @@ Target_i386::copy_reloc(const General_options* options,
 				    false, false);
 
       // Add the COPY reloc.
+      ssym->set_needs_dynsym_entry();
       Reloc_section* rel_dyn = this->rel_dyn_section(layout);
       rel_dyn->add_global(ssym, elfcpp::R_386_COPY, dynbss, offset);
     }
@@ -940,12 +967,46 @@ Target_i386::scan_relocs(const General_options& options,
     global_symbols);
 }
 
-// Finalize the sections.  This is where we emit any relocs we saved
-// in an attempt to avoid generating extra COPY relocs.
+// Finalize the sections.
 
 void
-Target_i386::do_finalize_sections(Layout* layout)
+Target_i386::do_finalize_sections(const General_options* options,
+				  Layout* layout)
 {
+  // Fill in some more dynamic tags.
+  Output_data_dynamic* const odyn = layout->dynamic_data();
+  if (odyn != NULL)
+    {
+      if (this->got_plt_ != NULL)
+	odyn->add_section_address(elfcpp::DT_PLTGOT, this->got_plt_);
+
+      if (this->plt_ != NULL)
+	{
+	  const Output_data* od = this->plt_->rel_plt();
+	  odyn->add_section_size(elfcpp::DT_PLTRELSZ, od);
+	  odyn->add_section_address(elfcpp::DT_JMPREL, od);
+	  odyn->add_constant(elfcpp::DT_PLTREL, elfcpp::DT_REL);
+	}
+
+      if (this->rel_dyn_ != NULL)
+	{
+	  const Output_data* od = this->rel_dyn_;
+	  odyn->add_section_address(elfcpp::DT_REL, od);
+	  odyn->add_section_size(elfcpp::DT_RELSZ, od);
+	  odyn->add_constant(elfcpp::DT_RELENT,
+			     elfcpp::Elf_sizes<32>::rel_size);
+	}
+
+      if (!options->is_shared())
+	{
+	  // The value of the DT_DEBUG tag is filled in by the dynamic
+	  // linker at run time, and used by the debugger.
+	  odyn->add_constant(elfcpp::DT_DEBUG, 0);
+	}
+    }
+
+  // Emit any relocs we saved in an attempt to avoid generating COPY
+  // relocs.
   if (this->copy_relocs_ == NULL)
     return;
   if (this->copy_relocs_->any_to_emit())
@@ -992,7 +1053,7 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
   if (gsym != NULL && gsym->is_defined_in_dynobj())
     {
       if (gsym->has_plt_offset())
-	address = target->plt_section()->address() + gsym->plt_offset();
+	value = target->plt_section()->address() + gsym->plt_offset();
       else
 	gold_unreachable();
     }

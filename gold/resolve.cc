@@ -22,7 +22,7 @@ Symbol::override_base(const elfcpp::Sym<size, big_endian>& sym,
   gold_assert(this->source_ == FROM_OBJECT);
   this->u_.from_object.object = object;
   // FIXME: Handle SHN_XINDEX.
-  this->u_.from_object.shnum = sym.get_st_shndx();
+  this->u_.from_object.shndx = sym.get_st_shndx();
   this->type_ = sym.get_st_type();
   this->binding_ = sym.get_st_bind();
   this->visibility_ = sym.get_st_visibility();
@@ -110,7 +110,7 @@ Symbol_table::resolve(Sized_symbol<size>* to,
       && to->object()->is_dynamic())
     tobits |= (1 << 1);
 
-  switch (to->shnum())
+  switch (to->shndx())
     {
     case elfcpp::SHN_UNDEF:
       tobits |= (1 << 2);

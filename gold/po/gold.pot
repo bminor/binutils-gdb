@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-11-30 15:37-0800\n"
+"POT-Creation-Date: 2006-12-01 08:46-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -240,52 +240,52 @@ msgstr ""
 msgid "%s: missing expected TLS relocation\n"
 msgstr ""
 
-#: i386.cc:702 i386.cc:843 i386.cc:1064
+#: i386.cc:729 i386.cc:870 i386.cc:1125
 #, c-format
 msgid "%s: %s: unexpected reloc %u in object file\n"
 msgstr ""
 
-#: i386.cc:738 i386.cc:757
+#: i386.cc:765 i386.cc:784
 #, c-format
 msgid "%s: %s: unsupported reloc %u against local symbol\n"
 msgstr ""
 
-#: i386.cc:879 i386.cc:900
+#: i386.cc:906 i386.cc:927
 #, c-format
 msgid "%s: %s: unsupported reloc %u against global symbol %s\n"
 msgstr ""
 
-#: i386.cc:923
+#: i386.cc:950
 #, c-format
 msgid "%s: %s: unsupported RELA reloc section\n"
 msgstr ""
 
-#: i386.cc:980
+#: i386.cc:1041
 #, c-format
 msgid "%s: %s: missing expected TLS relocation\n"
 msgstr ""
 
-#: i386.cc:1096 i386.cc:1171 i386.cc:1182
+#: i386.cc:1157 i386.cc:1232 i386.cc:1243
 #, c-format
 msgid "%s: %s: unsupported reloc %u\n"
 msgstr ""
 
-#: i386.cc:1123
+#: i386.cc:1184
 #, c-format
 msgid "%s: %s: TLS reloc but no TLS segment\n"
 msgstr ""
 
-#: i386.cc:1156
+#: i386.cc:1217
 #, c-format
 msgid "%s: %s: unsupported reloc type %u\n"
 msgstr ""
 
-#: i386.cc:1365
+#: i386.cc:1426
 #, c-format
 msgid "%s: %s: TLS relocation out of range\n"
 msgstr ""
 
-#: i386.cc:1383
+#: i386.cc:1444
 #, c-format
 msgid "%s: %s: TLS relocation against invalid instruction\n"
 msgstr ""
@@ -496,37 +496,37 @@ msgstr ""
 msgid "%s: -%c: %s\n"
 msgstr ""
 
-#: output.cc:817
+#: output.cc:881
 #, c-format
 msgid "%s: %s: invalid alignment %lu for section \"%s\"\n"
 msgstr ""
 
-#: output.cc:1316
+#: output.cc:1393
 #, c-format
 msgid "%s: %s: open: %s\n"
 msgstr ""
 
-#: output.cc:1325
+#: output.cc:1402
 #, c-format
 msgid "%s: %s: lseek: %s\n"
 msgstr ""
 
-#: output.cc:1332
+#: output.cc:1409
 #, c-format
 msgid "%s: %s: write: %s\n"
 msgstr ""
 
-#: output.cc:1342
+#: output.cc:1419
 #, c-format
 msgid "%s: %s: mmap: %s\n"
 msgstr ""
 
-#: output.cc:1356
+#: output.cc:1433
 #, c-format
 msgid "%s: %s: munmap: %s\n"
 msgstr ""
 
-#: output.cc:1364
+#: output.cc:1441
 #, c-format
 msgid "%s: %s: close: %s\n"
 msgstr ""
@@ -607,12 +607,12 @@ msgstr ""
 msgid "%s: %s: versym for symbol %zu has no name: %u\n"
 msgstr ""
 
-#: symtab.cc:1050 symtab.cc:1201
+#: symtab.cc:1063 symtab.cc:1235
 #, c-format
 msgid "%s: %s: unsupported symbol section 0x%x\n"
 msgstr ""
 
-#: symtab.cc:1364
+#: symtab.cc:1423
 #, c-format
 msgid "%s: %s: warning: %s\n"
 msgstr ""

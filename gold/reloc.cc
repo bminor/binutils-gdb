@@ -497,6 +497,7 @@ void
 Copy_relocs<size, big_endian>::Copy_reloc_entry::emit(
     Output_data_reloc<elfcpp::SHT_REL, true, size, big_endian>* reloc_data)
 {
+  this->sym_->set_needs_dynsym_entry();
   reloc_data->add_global(this->sym_, this->reloc_type_, this->relobj_,
 			 this->shndx_, this->address_);
 }
@@ -508,6 +509,7 @@ void
 Copy_relocs<size, big_endian>::Copy_reloc_entry::emit(
     Output_data_reloc<elfcpp::SHT_RELA, true, size, big_endian>* reloc_data)
 {
+  this->sym_->set_needs_dynsym_entry();
   reloc_data->add_global(this->sym_, this->reloc_type_, this->relobj_,
 			 this->shndx_, this->address_, this->addend_);
 }

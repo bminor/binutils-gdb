@@ -86,8 +86,8 @@ class Target
   // This is called to tell the target to complete any sections it is
   // handling.  After this all sections must have their final size.
   void
-  finalize_sections(Layout* layout)
-  { return this->do_finalize_sections(layout); }
+  finalize_sections(const General_options* options, Layout* layout)
+  { return this->do_finalize_sections(options, layout); }
 
  protected:
   // This struct holds the constant information for a child class.  We
@@ -121,7 +121,7 @@ class Target
 
   // Virtual function which may be implemented by the child class.
   virtual void
-  do_finalize_sections(Layout*)
+  do_finalize_sections(const General_options*, Layout*)
   { }
 
  private:

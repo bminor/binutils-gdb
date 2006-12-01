@@ -55,7 +55,7 @@ Symbol::init_base(const char* name, const char* version, Object* object,
 		    sym.get_st_visibility(), sym.get_st_nonvis());
   this->u_.from_object.object = object;
   // FIXME: Handle SHN_XINDEX.
-  this->u_.from_object.shnum = sym.get_st_shndx();
+  this->u_.from_object.shndx = sym.get_st_shndx();
   this->source_ = FROM_OBJECT;
   this->in_dyn_ = object->is_dynamic();
 }
@@ -258,7 +258,7 @@ Symbol_table::resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from
   esym.put_st_size(from->symsize());
   esym.put_st_info(from->binding(), from->type());
   esym.put_st_other(from->visibility(), from->nonvis());
-  esym.put_st_shndx(from->shnum());
+  esym.put_st_shndx(from->shndx());
   Symbol_table::resolve(to, esym.sym(), from->object());
 }
 
@@ -717,9 +717,9 @@ Symbol_table::define_special_symbol(Target* target, const char* name,
       sym = this->get_sized_symbol SELECT_SIZE_NAME(size) (oldsym
                                                            SELECT_SIZE(size));
       gold_assert(sym->source() == Symbol::FROM_OBJECT);
-      const int old_shnum = sym->shnum();
-      if (old_shnum != elfcpp::SHN_UNDEF
-	  && old_shnum != elfcpp::SHN_COMMON
+      const int old_shndx = sym->shndx();
+      if (old_shndx != elfcpp::SHN_UNDEF
+	  && old_shndx != elfcpp::SHN_COMMON
 	  && !sym->object()->is_dynamic())
 	{
 	  fprintf(stderr, "%s: linker defined: multiple definition of %s\n",
@@ -969,7 +969,14 @@ Symbol_table::set_dynsym_indexes(unsigned int index,
        ++p)
     {
       Symbol* sym = p->second;
-      if (sym->needs_dynsym_entry())
+
+      // Note that SYM may already have a dynamic symbol index, since
+      // some symbols appear more than once in the symbol table, with
+      // and without a version.
+
+      if (!sym->needs_dynsym_entry())
+	sym->set_dynsym_index(-1U);
+      else if (!sym->has_dynsym_index())
 	{
 	  sym->set_dynsym_index(index);
 	  ++index;
@@ -986,12 +993,18 @@ Symbol_table::set_dynsym_indexes(unsigned int index,
 // OFF.  Add their names to POOL.  Return the new file offset.
 
 off_t
-Symbol_table::finalize(unsigned int index, off_t off, Stringpool* pool)
+Symbol_table::finalize(unsigned int index, off_t off, off_t dynoff,
+		       size_t dyn_global_index, size_t dyncount,
+		       Stringpool* pool)
 {
   off_t ret;
 
   gold_assert(index != 0);
   this->first_global_index_ = index;
+
+  this->dynamic_offset_ = dynoff;
+  this->first_dynamic_global_index_ = dyn_global_index;
+  this->dynamic_count_ = dyncount;
 
   if (this->size_ == 32)
     ret = this->sized_finalize<32>(index, off, pool);
@@ -1041,14 +1054,14 @@ Symbol_table::sized_finalize(unsigned index, off_t off, Stringpool* pool)
 	{
 	case Symbol::FROM_OBJECT:
 	  {
-	    unsigned int shnum = sym->shnum();
+	    unsigned int shndx = sym->shndx();
 
 	    // FIXME: We need some target specific support here.
-	    if (shnum >= elfcpp::SHN_LORESERVE
-		&& shnum != elfcpp::SHN_ABS)
+	    if (shndx >= elfcpp::SHN_LORESERVE
+		&& shndx != elfcpp::SHN_ABS)
 	      {
 		fprintf(stderr, _("%s: %s: unsupported symbol section 0x%x\n"),
-			program_name, sym->name(), shnum);
+			program_name, sym->name(), shndx);
 		gold_exit(false);
 	      }
 
@@ -1056,21 +1069,22 @@ Symbol_table::sized_finalize(unsigned index, off_t off, Stringpool* pool)
 	    if (symobj->is_dynamic())
 	      {
 		value = 0;
-		shnum = elfcpp::SHN_UNDEF;
+		shndx = elfcpp::SHN_UNDEF;
 	      }
-	    else if (shnum == elfcpp::SHN_UNDEF)
+	    else if (shndx == elfcpp::SHN_UNDEF)
 	      value = 0;
-	    else if (shnum == elfcpp::SHN_ABS)
+	    else if (shndx == elfcpp::SHN_ABS)
 	      value = sym->value();
 	    else
 	      {
 		Relobj* relobj = static_cast<Relobj*>(symobj);
 		off_t secoff;
-		Output_section* os = relobj->output_section(shnum, &secoff);
+		Output_section* os = relobj->output_section(shndx, &secoff);
 
 		if (os == NULL)
 		  {
 		    sym->set_symtab_index(-1U);
+		    gold_assert(sym->dynsym_index() == -1U);
 		    continue;
 		  }
 
@@ -1132,21 +1146,21 @@ Symbol_table::sized_finalize(unsigned index, off_t off, Stringpool* pool)
 
 void
 Symbol_table::write_globals(const Target* target, const Stringpool* sympool,
-			    Output_file* of) const
+			    const Stringpool* dynpool, Output_file* of) const
 {
   if (this->size_ == 32)
     {
       if (target->is_big_endian())
-	this->sized_write_globals<32, true>(target, sympool, of);
+	this->sized_write_globals<32, true>(target, sympool, dynpool, of);
       else
-	this->sized_write_globals<32, false>(target, sympool, of);
+	this->sized_write_globals<32, false>(target, sympool, dynpool, of);
     }
   else if (this->size_ == 64)
     {
       if (target->is_big_endian())
-	this->sized_write_globals<64, true>(target, sympool, of);
+	this->sized_write_globals<64, true>(target, sympool, dynpool, of);
       else
-	this->sized_write_globals<64, false>(target, sympool, of);
+	this->sized_write_globals<64, false>(target, sympool, dynpool, of);
     }
   else
     gold_unreachable();
@@ -1158,12 +1172,22 @@ template<int size, bool big_endian>
 void
 Symbol_table::sized_write_globals(const Target*,
 				  const Stringpool* sympool,
+				  const Stringpool* dynpool,
 				  Output_file* of) const
 {
   const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
   unsigned int index = this->first_global_index_;
   const off_t oview_size = this->output_count_ * sym_size;
-  unsigned char* psyms = of->get_output_view(this->offset_, oview_size);
+  unsigned char* const psyms = of->get_output_view(this->offset_, oview_size);
+
+  unsigned int dynamic_count = this->dynamic_count_;
+  off_t dynamic_size = dynamic_count * sym_size;
+  unsigned int first_dynamic_global_index = this->first_dynamic_global_index_;
+  unsigned char* dynamic_view;
+  if (this->dynamic_offset_ == 0)
+    dynamic_view = NULL;
+  else
+    dynamic_view = of->get_output_view(this->dynamic_offset_, dynamic_size);
 
   unsigned char* ps = psyms;
   for (Symbol_table_type::const_iterator p = this->table_.begin();
@@ -1173,33 +1197,43 @@ Symbol_table::sized_write_globals(const Target*,
       Sized_symbol<size>* sym = static_cast<Sized_symbol<size>*>(p->second);
 
       unsigned int sym_index = sym->symtab_index();
-      if (sym_index == -1U)
+      unsigned int dynsym_index;
+      if (dynamic_view == NULL)
+	dynsym_index = -1U;
+      else
+	dynsym_index = sym->dynsym_index();
+
+      if (sym_index == -1U && dynsym_index == -1U)
 	{
 	  // This symbol is not included in the output file.
 	  continue;
 	}
-      if (sym_index != index)
+
+      if (sym_index == index)
+	++index;
+      else if (sym_index != -1U)
 	{
 	  // We have already seen this symbol, because it has a
 	  // default version.
 	  gold_assert(sym_index < index);
-	  continue;
+	  if (dynsym_index == -1U)
+	    continue;
+	  sym_index = -1U;
 	}
-      ++index;
 
       unsigned int shndx;
       switch (sym->source())
 	{
 	case Symbol::FROM_OBJECT:
 	  {
-	    unsigned int shnum = sym->shnum();
+	    unsigned int in_shndx = sym->shndx();
 
 	    // FIXME: We need some target specific support here.
-	    if (shnum >= elfcpp::SHN_LORESERVE
-		&& shnum != elfcpp::SHN_ABS)
+	    if (in_shndx >= elfcpp::SHN_LORESERVE
+		&& in_shndx != elfcpp::SHN_ABS)
 	      {
 		fprintf(stderr, _("%s: %s: unsupported symbol section 0x%x\n"),
-			program_name, sym->name(), sym->shnum());
+			program_name, sym->name(), in_shndx);
 		gold_exit(false);
 	      }
 
@@ -1209,13 +1243,14 @@ Symbol_table::sized_write_globals(const Target*,
 		// FIXME.
 		shndx = elfcpp::SHN_UNDEF;
 	      }
-	    else if (shnum == elfcpp::SHN_UNDEF || shnum == elfcpp::SHN_ABS)
-	      shndx = shnum;
+	    else if (in_shndx == elfcpp::SHN_UNDEF
+		     || in_shndx == elfcpp::SHN_ABS)
+	      shndx = in_shndx;
 	    else
 	      {
 		Relobj* relobj = static_cast<Relobj*>(symobj);
 		off_t secoff;
-		Output_section* os = relobj->output_section(shnum, &secoff);
+		Output_section* os = relobj->output_section(in_shndx, &secoff);
 		gold_assert(os != NULL);
 		shndx = os->out_shndx();
 	      }
@@ -1238,21 +1273,45 @@ Symbol_table::sized_write_globals(const Target*,
 	  gold_unreachable();
 	}
 
-      elfcpp::Sym_write<size, big_endian> osym(ps);
-      osym.put_st_name(sympool->get_offset(sym->name()));
-      osym.put_st_value(sym->value());
-      osym.put_st_size(sym->symsize());
-      osym.put_st_info(elfcpp::elf_st_info(sym->binding(), sym->type()));
-      osym.put_st_other(elfcpp::elf_st_other(sym->visibility(),
-					     sym->nonvis()));
-      osym.put_st_shndx(shndx);
+      if (sym_index != -1U)
+	{
+	  this->sized_write_symbol<size, big_endian>(sym, shndx, sympool, ps);
+	  ps += sym_size;
+	}
 
-      ps += sym_size;
+      if (dynsym_index != -1U)
+	{
+	  dynsym_index -= first_dynamic_global_index;
+	  gold_assert(dynsym_index < dynamic_count);
+	  unsigned char* pd = dynamic_view + (dynsym_index * sym_size);
+	  this->sized_write_symbol<size, big_endian>(sym, shndx, dynpool, pd);
+	}
     }
 
   gold_assert(ps - psyms == oview_size);
 
   of->write_output_view(this->offset_, oview_size, psyms);
+  if (dynamic_view != NULL)
+    of->write_output_view(this->dynamic_offset_, dynamic_size, dynamic_view);
+}
+
+// Write out the symbol SYM, in section SHNDX, to P.  POOL is the
+// strtab holding the name.
+
+template<int size, bool big_endian>
+void
+Symbol_table::sized_write_symbol(Sized_symbol<size>* sym,
+				 unsigned int shndx,
+				 const Stringpool* pool,
+				 unsigned char* p) const
+{
+  elfcpp::Sym_write<size, big_endian> osym(p);
+  osym.put_st_name(pool->get_offset(sym->name()));
+  osym.put_st_value(sym->value());
+  osym.put_st_size(sym->symsize());
+  osym.put_st_info(elfcpp::elf_st_info(sym->binding(), sym->type()));
+  osym.put_st_other(elfcpp::elf_st_other(sym->visibility(), sym->nonvis()));
+  osym.put_st_shndx(shndx);
 }
 
 // Write out a section symbol.  Return the update offset.

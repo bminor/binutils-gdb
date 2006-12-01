@@ -58,23 +58,25 @@ Output_data::default_alignment(int size)
 Output_section_headers::Output_section_headers(
     int size,
     bool big_endian,
-    const Layout::Segment_list& segment_list,
-    const Layout::Section_list& unattached_section_list,
+    const Layout* layout,
+    const Layout::Segment_list* segment_list,
+    const Layout::Section_list* unattached_section_list,
     const Stringpool* secnamepool)
   : size_(size),
     big_endian_(big_endian),
+    layout_(layout),
     segment_list_(segment_list),
     unattached_section_list_(unattached_section_list),
     secnamepool_(secnamepool)
 {
   // Count all the sections.  Start with 1 for the null section.
   off_t count = 1;
-  for (Layout::Segment_list::const_iterator p = segment_list.begin();
-       p != segment_list.end();
+  for (Layout::Segment_list::const_iterator p = segment_list->begin();
+       p != segment_list->end();
        ++p)
     if ((*p)->type() == elfcpp::PT_LOAD)
       count += (*p)->output_section_count();
-  count += unattached_section_list.size();
+  count += unattached_section_list->size();
 
   int shdr_size;
   if (size == 32)
@@ -137,20 +139,20 @@ Output_section_headers::do_sized_write(Output_file* of)
   v += shdr_size;
 
   unsigned shndx = 1;
-  for (Layout::Segment_list::const_iterator p = this->segment_list_.begin();
-       p != this->segment_list_.end();
+  for (Layout::Segment_list::const_iterator p = this->segment_list_->begin();
+       p != this->segment_list_->end();
        ++p)
     v = (*p)->write_section_headers SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
-	    this->secnamepool_, v, &shndx
+	    this->layout_, this->secnamepool_, v, &shndx
 	    SELECT_SIZE_ENDIAN(size, big_endian));
   for (Layout::Section_list::const_iterator p =
-	 this->unattached_section_list_.begin();
-       p != this->unattached_section_list_.end();
+	 this->unattached_section_list_->begin();
+       p != this->unattached_section_list_->end();
        ++p)
     {
       gold_assert(shndx == (*p)->out_shndx());
       elfcpp::Shdr_write<size, big_endian> oshdr(v);
-      (*p)->write_header(this->secnamepool_, &oshdr);
+      (*p)->write_header(this->layout_, this->secnamepool_, &oshdr);
       v += shdr_size;
       ++shndx;
     }
@@ -372,6 +374,18 @@ Output_data_const_buffer::do_write(Output_file* of)
 
 // Output_section_data methods.
 
+// Record the output section, and set the entry size and such.
+
+void
+Output_section_data::set_output_section(Output_section* os)
+{
+  gold_assert(this->output_section_ == NULL);
+  this->output_section_ = os;
+  this->do_adjust_output_section(os);
+}
+
+// Return the section index of the output section.
+
 unsigned int
 Output_section_data::do_out_shndx() const
 {
@@ -495,6 +509,25 @@ Output_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>::write(
 }
 
 // Output_data_reloc_base methods.
+
+// Adjust the output section.
+
+template<int sh_type, bool dynamic, int size, bool big_endian>
+void
+Output_data_reloc_base<sh_type, dynamic, size, big_endian>
+    ::do_adjust_output_section(Output_section* os)
+{
+  if (sh_type == elfcpp::SHT_REL)
+    os->set_entsize(elfcpp::Elf_sizes<size>::rel_size);
+  else if (sh_type == elfcpp::SHT_RELA)
+    os->set_entsize(elfcpp::Elf_sizes<size>::rela_size);
+  else
+    gold_unreachable();
+  if (dynamic)
+    os->set_should_link_to_dynsym();
+  else
+    os->set_should_link_to_symtab();
+}
 
 // Write out relocation data.
 
@@ -636,16 +669,17 @@ Output_data_dynamic::Dynamic_entry::write(
       break;
 
     case DYNAMIC_SECTION_ADDRESS:
-      val = this->u_.os->address();
+      val = this->u_.od->address();
       break;
 
     case DYNAMIC_SECTION_SIZE:
-      val = this->u_.os->data_size();
+      val = this->u_.od->data_size();
       break;
 
     case DYNAMIC_SYMBOL:
       {
-	Sized_symbol<size>* s = static_cast<Sized_symbol<size>*>(this->u_.sym);
+	const Sized_symbol<size>* s =
+	  static_cast<const Sized_symbol<size>*>(this->u_.sym);
 	val = s->value();
       }
       break;
@@ -664,6 +698,19 @@ Output_data_dynamic::Dynamic_entry::write(
 }
 
 // Output_data_dynamic methods.
+
+// Adjust the output section to set the entry size.
+
+void
+Output_data_dynamic::do_adjust_output_section(Output_section* os)
+{
+  if (this->target_->get_size() == 32)
+    os->set_entsize(elfcpp::Elf_sizes<32>::dyn_size);
+  else if (this->target_->get_size() == 64)
+    os->set_entsize(elfcpp::Elf_sizes<64>::dyn_size);
+  else
+    gold_unreachable();
+}
 
 // Set the final data size.
 
@@ -780,7 +827,9 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
   : name_(name),
     addralign_(0),
     entsize_(0),
+    link_section_(NULL),
     link_(0),
+    info_section_(NULL),
     info_(0),
     type_(type),
     flags_(flags),
@@ -791,12 +840,25 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
     first_input_offset_(0),
     may_add_data_(may_add_data),
     needs_symtab_index_(false),
-    needs_dynsym_index_(false)
+    needs_dynsym_index_(false),
+    should_link_to_symtab_(false),
+    should_link_to_dynsym_(false)
 {
 }
 
 Output_section::~Output_section()
 {
+}
+
+// Set the entry size.
+
+void
+Output_section::set_entsize(uint64_t v)
+{
+  if (this->entsize_ == 0)
+    this->entsize_ = v;
+  else
+    gold_assert(this->entsize_ == v);
 }
 
 // Add the input section SHNDX, with header SHDR, named SECNAME, in
@@ -885,7 +947,8 @@ Output_section::do_set_address(uint64_t address, off_t startoff)
 
 template<int size, bool big_endian>
 void
-Output_section::write_header(const Stringpool* secnamepool,
+Output_section::write_header(const Layout* layout,
+			     const Stringpool* secnamepool,
 			     elfcpp::Shdr_write<size, big_endian>* oshdr) const
 {
   oshdr->put_sh_name(secnamepool->get_offset(this->name_));
@@ -894,8 +957,18 @@ Output_section::write_header(const Stringpool* secnamepool,
   oshdr->put_sh_addr(this->address());
   oshdr->put_sh_offset(this->offset());
   oshdr->put_sh_size(this->data_size());
-  oshdr->put_sh_link(this->link_);
-  oshdr->put_sh_info(this->info_);
+  if (this->link_section_ != NULL)
+    oshdr->put_sh_link(this->link_section_->out_shndx());
+  else if (this->should_link_to_symtab_)
+    oshdr->put_sh_link(layout->symtab_section()->out_shndx());
+  else if (this->should_link_to_dynsym_)
+    oshdr->put_sh_link(layout->dynsym_section()->out_shndx());
+  else
+    oshdr->put_sh_link(this->link_);
+  if (this->info_section_ != NULL)
+    oshdr->put_sh_info(this->info_section_->out_shndx());
+  else
+    oshdr->put_sh_info(this->info_);
   oshdr->put_sh_addralign(this->addralign_);
   oshdr->put_sh_entsize(this->entsize_);
 }
@@ -1245,7 +1318,8 @@ Output_segment::write_header(elfcpp::Phdr_write<size, big_endian>* ophdr)
 
 template<int size, bool big_endian>
 unsigned char*
-Output_segment::write_section_headers(const Stringpool* secnamepool,
+Output_segment::write_section_headers(const Layout* layout,
+				      const Stringpool* secnamepool,
 				      unsigned char* v,
 				      unsigned int *pshndx
                                       ACCEPT_SIZE_ENDIAN) const
@@ -1258,18 +1332,19 @@ Output_segment::write_section_headers(const Stringpool* secnamepool,
 
   v = this->write_section_headers_list
       SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
-          secnamepool, &this->output_data_, v, pshndx
+	  layout, secnamepool, &this->output_data_, v, pshndx
           SELECT_SIZE_ENDIAN(size, big_endian));
   v = this->write_section_headers_list
       SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
-          secnamepool, &this->output_bss_, v, pshndx
+          layout, secnamepool, &this->output_bss_, v, pshndx
           SELECT_SIZE_ENDIAN(size, big_endian));
   return v;
 }
 
 template<int size, bool big_endian>
 unsigned char*
-Output_segment::write_section_headers_list(const Stringpool* secnamepool,
+Output_segment::write_section_headers_list(const Layout* layout,
+					   const Stringpool* secnamepool,
 					   const Output_data_list* pdl,
 					   unsigned char* v,
 					   unsigned int* pshndx
@@ -1285,7 +1360,7 @@ Output_segment::write_section_headers_list(const Stringpool* secnamepool,
 	  const Output_section* ps = static_cast<const Output_section*>(*p);
 	  gold_assert(*pshndx == ps->out_shndx());
 	  elfcpp::Shdr_write<size, big_endian> oshdr(v);
-	  ps->write_header(secnamepool, &oshdr);
+	  ps->write_header(layout, secnamepool, &oshdr);
 	  v += shdr_size;
 	  ++*pshndx;
 	}

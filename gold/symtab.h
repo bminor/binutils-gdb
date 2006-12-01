@@ -97,10 +97,10 @@ class Symbol
   // Return the index of the section in the input relocatable or
   // dynamic object file.
   unsigned int
-  shnum() const
+  shndx() const
   {
     gold_assert(this->source_ == FROM_OBJECT);
-    return this->u_.from_object.shnum;
+    return this->u_.from_object.shndx;
   }
 
   // Return the output data section with which this symbol is
@@ -235,6 +235,12 @@ class Symbol
     this->dynsym_index_ = index;
   }
 
+  // Return whether this symbol already has an index in the dynamic
+  // symbol table.
+  bool
+  has_dynsym_index() const
+  { return this->dynsym_index_ != 0; }
+
   // Return whether this symbol has an entry in the GOT section.
   bool
   has_got_offset() const
@@ -293,8 +299,8 @@ class Symbol
   is_defined() const
   {
     return (this->source_ != FROM_OBJECT
-	    || (this->shnum() != elfcpp::SHN_UNDEF
-		&& this->shnum() != elfcpp::SHN_COMMON));
+	    || (this->shndx() != elfcpp::SHN_UNDEF
+		&& this->shndx() != elfcpp::SHN_COMMON));
   }
 
   // Return whether this symbol is defined in a dynamic object.
@@ -310,7 +316,7 @@ class Symbol
   bool
   is_undefined() const
   {
-    return this->source_ == FROM_OBJECT && this->shnum() == elfcpp::SHN_UNDEF;
+    return this->source_ == FROM_OBJECT && this->shndx() == elfcpp::SHN_UNDEF;
   }
 
   // Return whether this is a common symbol.
@@ -318,7 +324,7 @@ class Symbol
   is_common() const
   {
     return (this->source_ == FROM_OBJECT
-	    && (this->shnum() == elfcpp::SHN_COMMON
+	    && (this->shndx() == elfcpp::SHN_COMMON
 		|| this->type_ == elfcpp::STT_COMMON));
   }
 
@@ -391,7 +397,7 @@ class Symbol
       // seen.
       Object* object;
       // Section number in object_ in which symbol is defined.
-      unsigned int shnum;
+      unsigned int shndx;
     } from_object;
 
     // This struct is used if SOURCE_ == IN_OUTPUT_DATA.
@@ -824,14 +830,19 @@ class Symbol_table
   // Finalize the symbol table after we have set the final addresses
   // of all the input sections.  This sets the final symbol indexes,
   // values and adds the names to *POOL.  INDEX is the index of the
-  // first global symbol.  This records the file offset OFF, and
-  // returns the new file offset.
+  // first global symbol.  OFF is the file offset of the global symbol
+  // table, DYNOFF is the offset of the globals in the dynamic symbol
+  // table, DYN_GLOBAL_INDEX is the index of the first global dynamic
+  // symbol, and DYNCOUNT is the number of global dynamic symbols.
+  // This records the parameters, and returns the new file offset.
   off_t
-  finalize(unsigned int index, off_t off, Stringpool* pool);
+  finalize(unsigned int index, off_t off, off_t dynoff,
+	   size_t dyn_global_index, size_t dyncount, Stringpool* pool);
 
   // Write out the global symbols.
   void
-  write_globals(const Target*, const Stringpool*, Output_file*) const;
+  write_globals(const Target*, const Stringpool*, const Stringpool*,
+		Output_file*) const;
 
   // Write out a section symbol.  Return the updated offset.
   void
@@ -915,7 +926,14 @@ class Symbol_table
   // Write globals specialized for size and endianness.
   template<int size, bool big_endian>
   void
-  sized_write_globals(const Target*, const Stringpool*, Output_file*) const;
+  sized_write_globals(const Target*, const Stringpool*, const Stringpool*,
+		      Output_file*) const;
+
+  // Write out a symbol to P.
+  template<int size, bool big_endian>
+  void
+  sized_write_symbol(Sized_symbol<size>*, unsigned int shndx,
+		     const Stringpool*, unsigned char* p) const;
 
   // Write out a section symbol, specialized for size and endianness.
   template<int size, bool big_endian>
@@ -961,6 +979,15 @@ class Symbol_table
 
   // The number of global symbols we want to write out.
   size_t output_count_;
+
+  // The file offset of the global dynamic symbols, or 0 if none.
+  off_t dynamic_offset_;
+
+  // The index of the first global dynamic symbol.
+  unsigned int first_dynamic_global_index_;
+
+  // The number of global dynamic symbols, or 0 if none.
+  off_t dynamic_count_;
 
   // The symbol hash table.
   Symbol_table_type table_;

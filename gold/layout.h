@@ -89,6 +89,12 @@ class Layout
   sympool() const
   { return &this->sympool_; }
 
+  // Return the Stringpool used for dynamic symbol names and dynamic
+  // tags.
+  const Stringpool*
+  dynpool() const
+  { return &this->dynpool_; }
+
   // Return whether a section is a .gnu.linkonce section, given the
   // section name.
   static inline bool
@@ -106,10 +112,32 @@ class Layout
   off_t
   finalize(const Input_objects*, Symbol_table*);
 
-  // Return the TLS segment.
+  // Return the TLS segment.  This will return NULL if there isn't
+  // one.
   Output_segment*
   tls_segment() const
   { return this->tls_segment_; }
+
+  // Return the normal symbol table.
+  Output_section*
+  symtab_section() const
+  {
+    gold_assert(this->symtab_section_ != NULL);
+    return this->symtab_section_;
+  }
+
+  // Return the dynamic symbol table.
+  Output_section*
+  dynsym_section() const
+  {
+    gold_assert(this->dynsym_section_ != NULL);
+    return this->dynsym_section_;
+  }
+
+  // Return the dynamic tags.
+  Output_data_dynamic*
+  dynamic_data() const
+  { return this->dynamic_data_; }
 
   // Write out data not associated with an input file or the symbol
   // table.
@@ -160,8 +188,8 @@ class Layout
 
   // Create the output sections for the symbol table.
   void
-  create_symtab_sections(int size, const Input_objects*, Symbol_table*, off_t*,
-			 Output_section** ostrtab);
+  create_symtab_sections(int size, const Input_objects*, Symbol_table*,
+			 off_t*);
 
   // Create the .shstrtab section.
   Output_section*
@@ -173,12 +201,11 @@ class Layout
 
   // Create the dynamic symbol table.
   void
-  create_dynamic_symtab(const Target*, Output_data_dynamic*, Symbol_table*);
+  create_dynamic_symtab(const Target*, Symbol_table*);
 
   // Finish the .dynamic section and PT_DYNAMIC segment.
   void
-  finish_dynamic_section(const Input_objects*, const Symbol_table*,
-			 Output_data_dynamic*);
+  finish_dynamic_section(const Input_objects*, const Symbol_table*);
 
   // Create the .interp section and PT_INTERP segment.
   void
@@ -284,6 +311,8 @@ class Layout
   Output_section* dynsym_section_;
   // The SHT_DYNAMIC output section if there is one.
   Output_section* dynamic_section_;
+  // The dynamic data which goes into dynamic_section_.
+  Output_data_dynamic* dynamic_data_;
 };
 
 // This task handles writing out data which is not part of a section
@@ -324,10 +353,10 @@ class Write_symbols_task : public Task
 {
  public:
   Write_symbols_task(const Symbol_table* symtab, const Target* target,
-		     const Stringpool* sympool, Output_file* of,
-		     Task_token* final_blocker)
-    : symtab_(symtab), target_(target), sympool_(sympool), of_(of),
-      final_blocker_(final_blocker)
+		     const Stringpool* sympool, const Stringpool* dynpool,
+		     Output_file* of, Task_token* final_blocker)
+    : symtab_(symtab), target_(target), sympool_(sympool), dynpool_(dynpool),
+      of_(of), final_blocker_(final_blocker)
   { }
 
   // The standard Task methods.
@@ -345,6 +374,7 @@ class Write_symbols_task : public Task
   const Symbol_table* symtab_;
   const Target* target_;
   const Stringpool* sympool_;
+  const Stringpool* dynpool_;
   Output_file* of_;
   Task_token* final_blocker_;
 };
