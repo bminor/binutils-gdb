@@ -1,3 +1,10 @@
+2006-12-01  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/i386/opcode.d: Adjust name.
+	* gas/i386/opcode-intel.d: New.
+	* gas/i386/opcode-suffix.d: New.
+	* gas/i386/i386.exp: Run new tests.
+
 2006-12-01  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/thumbrel.s: New test.
