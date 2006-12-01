@@ -1034,7 +1034,7 @@ class Output_data_dynamic : public Output_section_data
     // Write the dynamic entry to an output view.
     template<int size, bool big_endian>
     void
-    write(unsigned char* pov, const Stringpool*) const;
+    write(unsigned char* pov, const Stringpool* ACCEPT_SIZE_ENDIAN) const;
 
    private:
     enum Classification

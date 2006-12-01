@@ -625,7 +625,8 @@ template<int size, bool big_endian>
 void
 Output_data_dynamic::Dynamic_entry::write(
     unsigned char* pov,
-    const Stringpool* pool) const
+    const Stringpool* pool
+    ACCEPT_SIZE_ENDIAN) const
 {
   typename elfcpp::Elf_types<size>::Elf_WXword val;
   switch (this->classification_)
@@ -720,7 +721,8 @@ Output_data_dynamic::sized_write(Output_file* of)
        p != this->entries_.end();
        ++p)
     {
-      p->write<size, big_endian>(pov, this->pool_);
+      p->write SELECT_SIZE_ENDIAN_NAME(size, big_endian)(
+          pov, this->pool_ SELECT_SIZE_ENDIAN(size, big_endian));
       pov += dyn_size;
     }
 
