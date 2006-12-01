@@ -1,5 +1,21 @@
 2006-11-30  Jan Beulich  <jbeulich@novell.com>
 
+	* i386-dis.c (zAX): New.
+	(Xz): New.
+	(Yzr): New.
+	(z_mode): New.
+	(z_mode_ax_reg): New.
+	(putop): New suffix character 'G'.
+	(dis386): Use it for in, out, ins, and outs.
+	(intel_operand_size): Handle z_mode.
+	(OP_REG): Delete unreachable case indir_dx_reg.
+	(OP_IMREG): Fix Intel syntax output for case indir_dx_reg. Handle
+	z_mode_ax_reg.
+	(OP_ESreg): Fix Intel syntax operand size handling.
+	(OP_DSreg): Likewise.
+
+2006-11-30  Jan Beulich  <jbeulich@novell.com>
+
 	* i386-dis.c (dis386): Use 'R' and 'O' for cbw/cwd unconditionally.
 	(putop): For 'O' suffix, print 'q' in Intel mode, and mark data prefix
 	used. For 'R' and 'W' suffix, simplify and fix Intel mode.

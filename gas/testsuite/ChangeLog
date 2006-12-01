@@ -1,5 +1,12 @@
 2006-11-30  Jan Beulich  <jbeulich@novell.com>
 
+	* gas/i386/x86-64-io.[sd]: New.
+	* gas/i386/x86-64-io-intel.d: New.
+	* gas/i386/x86-64-io-suffix.d: New.
+	* gas/i386/i386.exp: Run new tests.
+
+2006-11-30  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/i386/intel.s: Use Intel syntax in Intel syntax test.
 	* gas/i386/x86-64-cbw.[sd]: New.
 	* gas/i386/x86-64-cbw-intel.d: New.

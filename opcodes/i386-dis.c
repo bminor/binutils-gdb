@@ -289,6 +289,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define BH OP_IMREG, bh_reg
 #define AX OP_IMREG, ax_reg
 #define DX OP_IMREG, dx_reg
+#define zAX OP_IMREG, z_mode_ax_reg
 #define indirDX OP_IMREG, indir_dx_reg
 
 #define Sw OP_SEG, w_mode
@@ -297,6 +298,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Ov OP_OFF64, v_mode
 #define Xb OP_DSreg, eSI_reg
 #define Xv OP_DSreg, eSI_reg
+#define Xz OP_DSreg, eSI_reg
 #define Yb OP_ESreg, eDI_reg
 #define Yv OP_ESreg, eDI_reg
 #define DSBX OP_DSreg, eBX_reg
@@ -325,6 +327,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Xvr REP_Fixup, eSI_reg
 #define Ybr REP_Fixup, eDI_reg
 #define Yvr REP_Fixup, eDI_reg
+#define Yzr REP_Fixup, eDI_reg
 #define indirDXr REP_Fixup, indir_dx_reg
 #define ALr REP_Fixup, al_reg
 #define eAXr REP_Fixup, eAX_reg
@@ -352,6 +355,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define f_mode 13 /* 4- or 6-byte pointer operand */
 #define const_1_mode 14
 #define stack_v_mode 15 /* v_mode for stack-related opcodes.  */
+#define z_mode 16 /* non-quad operand size depends on prefixes */
 
 #define es_reg 100
 #define cs_reg 101
@@ -396,6 +400,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define rSI_reg 138
 #define rDI_reg 139
 
+#define z_mode_ax_reg 149
 #define indir_dx_reg 150
 
 #define FLOATCODE 1
@@ -500,6 +505,7 @@ struct dis386 {
    .      size prefix
    'E' => print 'e' if 32-bit form of jcxz
    'F' => print 'w' or 'l' depending on address size prefix (loop insns)
+   'G' => print 'w' or 'l' depending on operand size prefix (i/o insns)
    'H' => print ",pt" or ",pn" branch hint
    'I' => honor following macro letter even in Intel mode (implemented only
    .      for some of the macro letters)
@@ -654,9 +660,9 @@ static const struct dis386 dis386[] = {
   { "pushT",		sIb, XX, XX, XX },
   { "imulS",		Gv, Ev, sIb, XX },
   { "ins{b||b|}",	Ybr, indirDX, XX, XX },
-  { "ins{R||R|}",	Yvr, indirDX, XX, XX },
+  { "ins{R||G|}",	Yzr, indirDX, XX, XX },
   { "outs{b||b|}",	indirDXr, Xb, XX, XX },
-  { "outs{R||R|}",	indirDXr, Xv, XX, XX },
+  { "outs{R||G|}",	indirDXr, Xz, XX, XX },
   /* 70 */
   { "joH",		Jb, XX, cond_jump_flag, XX },
   { "jnoH",		Jb, XX, cond_jump_flag, XX },
@@ -789,18 +795,18 @@ static const struct dis386 dis386[] = {
   { "loopFH",		Jb, XX, loop_jcxz_flag, XX },
   { "jEcxzH",		Jb, XX, loop_jcxz_flag, XX },
   { "inB",		AL, Ib, XX, XX },
-  { "inS",		eAX, Ib, XX, XX },
+  { "inG",		zAX, Ib, XX, XX },
   { "outB",		Ib, AL, XX, XX },
-  { "outS",		Ib, eAX, XX, XX },
+  { "outG",		Ib, zAX, XX, XX },
   /* e8 */
   { "callT",		Jv, XX, XX, XX },
   { "jmpT",		Jv, XX, XX, XX },
   { "Jjmp{T|}",		Ap, XX, XX, XX },
   { "jmp",		Jb, XX, XX, XX },
   { "inB",		AL, indirDX, XX, XX },
-  { "inS",		eAX, indirDX, XX, XX },
+  { "inG",		zAX, indirDX, XX, XX },
   { "outB",		indirDX, AL, XX, XX },
-  { "outS",		indirDX, eAX, XX, XX },
+  { "outG",		indirDX, zAX, XX, XX },
   /* f0 */
   { "(bad)",		XX, XX, XX, XX },	/* lock prefix */
   { "icebp",		XX, XX, XX, XX },
@@ -3767,6 +3773,16 @@ putop (const char *template, int sizeflag)
 	      used_prefixes |= (prefixes & PREFIX_ADDR);
 	    }
 	  break;
+	case 'G':
+	  if (intel_syntax || (obufp[-1] != 's' && !(sizeflag & SUFFIX_ALWAYS)))
+	    break;
+	  if ((rex & REX_MODE64) || (sizeflag & DFLAG))
+	    *obufp++ = 'l';
+	  else
+	    *obufp++ = 'w';
+	  if (!(rex & REX_MODE64))
+	    used_prefixes |= (prefixes & PREFIX_DATA);
+	  break;
 	case 'H':
 	  if (intel_syntax)
 	    break;
@@ -4100,6 +4116,13 @@ intel_operand_size (int bytemode, int sizeflag)
       else
 	oappend ("WORD PTR ");
       used_prefixes |= (prefixes & PREFIX_DATA);
+      break;
+    case z_mode:
+      if ((rex & REX_MODE64) || (sizeflag & DFLAG))
+	*obufp++ = 'D';
+      oappend ("WORD PTR ");
+      if (!(rex & REX_MODE64))
+	used_prefixes |= (prefixes & PREFIX_DATA);
       break;
     case d_mode:
       oappend ("DWORD PTR ");
@@ -4551,12 +4574,6 @@ OP_REG (int code, int sizeflag)
 
   switch (code)
     {
-    case indir_dx_reg:
-      if (intel_syntax)
-	s = "[dx]";
-      else
-	s = "(%dx)";
-      break;
     case ax_reg: case cx_reg: case dx_reg: case bx_reg:
     case sp_reg: case bp_reg: case si_reg: case di_reg:
       s = names16[code - ax_reg + add];
@@ -4609,7 +4626,7 @@ OP_IMREG (int code, int sizeflag)
     {
     case indir_dx_reg:
       if (intel_syntax)
-	s = "[dx]";
+	s = "dx";
       else
 	s = "(%dx)";
       break;
@@ -4639,6 +4656,14 @@ OP_IMREG (int code, int sizeflag)
       else
 	s = names16[code - eAX_reg];
       used_prefixes |= (prefixes & PREFIX_DATA);
+      break;
+    case z_mode_ax_reg:
+      if ((rex & REX_MODE64) || (sizeflag & DFLAG))
+	s = *names32;
+      else
+	s = *names16;
+      if (!(rex & REX_MODE64))
+	used_prefixes |= (prefixes & PREFIX_DATA);
       break;
     default:
       s = INTERNAL_DISASSEMBLER_ERROR;
@@ -4953,7 +4978,22 @@ static void
 OP_ESreg (int code, int sizeflag)
 {
   if (intel_syntax)
-    intel_operand_size (codep[-1] & 1 ? v_mode : b_mode, sizeflag);
+    {
+      switch (codep[-1])
+	{
+	case 0x6d:	/* insw/insl */
+	  intel_operand_size (z_mode, sizeflag);
+	  break;
+	case 0xa5:	/* movsw/movsl/movsq */
+	case 0xa7:	/* cmpsw/cmpsl/cmpsq */
+	case 0xab:	/* stosw/stosl */
+	case 0xaf:	/* scasw/scasl */
+	  intel_operand_size (v_mode, sizeflag);
+	  break;
+	default:
+	  intel_operand_size (b_mode, sizeflag);
+	}
+    }
   oappend ("%es:" + intel_syntax);
   ptr_reg (code, sizeflag);
 }
@@ -4962,10 +5002,21 @@ static void
 OP_DSreg (int code, int sizeflag)
 {
   if (intel_syntax)
-    intel_operand_size (codep[-1] != 0xd7 && (codep[-1] & 1)
-			? v_mode
-			: b_mode,
-			sizeflag);
+    {
+      switch (codep[-1])
+	{
+	case 0x6f:	/* outsw/outsl */
+	  intel_operand_size (z_mode, sizeflag);
+	  break;
+	case 0xa5:	/* movsw/movsl/movsq */
+	case 0xa7:	/* cmpsw/cmpsl/cmpsq */
+	case 0xad:	/* lodsw/lodsl/lodsq */
+	  intel_operand_size (v_mode, sizeflag);
+	  break;
+	default:
+	  intel_operand_size (b_mode, sizeflag);
+	}
+    }
   if ((prefixes
        & (PREFIX_CS
 	  | PREFIX_DS
