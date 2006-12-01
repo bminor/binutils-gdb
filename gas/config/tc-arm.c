@@ -18905,6 +18905,12 @@ arm_force_relocation (struct fix * fixp)
       || fixp->fx_r_type == BFD_RELOC_ARM_LDR_PC_G0)
     return 1;
 
+  /* Always generate relocations against function symbols.  */
+  if (fixp->fx_r_type == BFD_RELOC_32
+      && fixp->fx_addsy
+      && (symbol_get_bfdsym (fixp->fx_addsy)->flags & BSF_FUNCTION))
+    return 1;
+
   return generic_force_reloc (fixp);
 }
 
