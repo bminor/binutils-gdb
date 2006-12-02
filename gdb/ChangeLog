@@ -1,5 +1,9 @@
 2006-12-02  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Bump version number to 6.5.91 after first pre-release.
+
+2006-12-02  Joel Brobecker  <brobecker@adacore.com>
+
 	From Daniel Jacobowitz  <dan@codesourcery.com>
 	* utils.c (string_to_core_addr): Use error instead of
 	internal_error.
