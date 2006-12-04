@@ -1,3 +1,8 @@
+2006-12-04  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/i386/opcode-intel.d: Fix wrong expectation. Make white space
+	expectations more consistent.
+
 2006-12-01  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/i386/opcode.d: Adjust name.

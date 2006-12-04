@@ -4871,6 +4871,7 @@ OP_J (int bytemode, int sizeflag)
 	     displacement is added!  */
 	  mask = 0xffff;
 	}
+      used_prefixes |= (prefixes & PREFIX_DATA);
       break;
     default:
       oappend (INTERNAL_DISASSEMBLER_ERROR);

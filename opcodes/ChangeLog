@@ -1,3 +1,7 @@
+2006-12-04  Jan Beulich  <jbeulich@novell.com>
+
+	* i386-dis.c (OP_J): Update used_prefixes in v_mode.
+
 2006-11-30  Jan Beulich  <jbeulich@novell.com>
 
 	* i386-dis.c (SEG_Fixup): Delete.
