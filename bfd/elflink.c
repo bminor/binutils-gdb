@@ -185,16 +185,6 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	return FALSE;
     }
 
-  if (! info->traditional_format)
-    {
-      s = bfd_make_section_with_flags (abfd, ".eh_frame_hdr",
-				       flags | SEC_READONLY);
-      if (s == NULL
-	  || ! bfd_set_section_alignment (abfd, s, 2))
-	return FALSE;
-      elf_hash_table (info)->eh_info.hdr_sec = s;
-    }
-
   /* Create sections to hold version informations.  These are removed
      if they are not needed.  */
   s = bfd_make_section_with_flags (abfd, ".gnu.version_d",
@@ -5281,15 +5271,15 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
       && ! (*bed->elf_backend_always_size_sections) (output_bfd, info))
     return FALSE;
 
+  if (! _bfd_elf_maybe_strip_eh_frame_hdr (info))
+    return FALSE;
+
   dynobj = elf_hash_table (info)->dynobj;
 
   /* If there were no dynamic objects in the link, there is nothing to
      do here.  */
   if (dynobj == NULL)
     return TRUE;
-
-  if (! _bfd_elf_maybe_strip_eh_frame_hdr (info))
-    return FALSE;
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {

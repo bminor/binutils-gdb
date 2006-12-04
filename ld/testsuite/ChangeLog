@@ -1,3 +1,10 @@
+2006-12-04  Jan Beulich  <jbeulich@novell.com>
+
+	* ld-elf/eh-frame-hdr.d: New.
+	* ld-elf/eh-frame-hdr.s: New.
+	* ld-ia64/tlsbin.dd, ld-ia64/tlsbin.sd: Don't depend on exact linkage
+	table layout.
+
 2006-11-23  Thiemo Seufer  <ths@mips.com>
 
 	* ld-elf/warn2.d: Match regex also for the second segment.

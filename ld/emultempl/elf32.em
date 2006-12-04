@@ -865,6 +865,42 @@ gld${EMULATION_NAME}_after_open (void)
 {
   struct bfd_link_needed_list *needed, *l;
 
+  if (link_info.eh_frame_hdr
+      && ! link_info.traditional_format
+      && ! link_info.relocatable)
+    {
+      struct elf_link_hash_table *htab;
+
+      htab = elf_hash_table (&link_info);
+      if (is_elf_hash_table (htab))
+	{
+	  bfd *abfd;
+	  asection *s;
+
+	  for (abfd = link_info.input_bfds; abfd; abfd = abfd->link_next)
+	    {
+	      s = bfd_get_section_by_name (abfd, ".eh_frame");
+	      if (s && s->size > 8 && !bfd_is_abs_section (s->output_section))
+		 break;
+	    }
+	  if (abfd)
+	    {
+	      const struct elf_backend_data *bed;
+
+	      bed = get_elf_backend_data (abfd);
+	      s = bfd_make_section_with_flags (abfd, ".eh_frame_hdr",
+					       bed->dynamic_sec_flags
+					       | SEC_READONLY);
+	      if (s != NULL
+		 && bfd_set_section_alignment (abfd, s, 2))
+		htab->eh_info.hdr_sec = s;
+	      else
+		einfo ("%P: warning: Cannot create .eh_frame_hdr section,"
+		       " --eh-frame-hdr ignored.\n");
+	    }
+	}
+    }
+
   /* We only need to worry about this when doing a final link.  */
   if (link_info.relocatable || !link_info.executable)
     return;

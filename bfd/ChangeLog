@@ -1,3 +1,10 @@
+2006-12-04  Jan Beulich  <jbeulich@novell.com>
+
+	* elflink.c (_bfd_elf_link_create_dynamic_sections): Don't create
+	.eh_frame_hdr section from here anymore.
+	(bfd_elf_size_dynamic_sections): Call _bfd_elf_maybe_strip_eh_frame_hdr
+	a little earlier.
+
 2006-12-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/3609
