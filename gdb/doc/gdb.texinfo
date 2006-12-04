@@ -19598,7 +19598,7 @@ access this functionality:
 @item @code{-var-create}
 @tab create a variable object
 @item @code{-var-delete}
-@tab delete the variable object and its children
+@tab delete the variable object and/or its children
 @item @code{-var-set-format}
 @tab set the display format of this variable
 @item @code{-var-show-format}
@@ -19681,10 +19681,11 @@ the @value{GDBN} CLI:
 @subsubheading Synopsis
 
 @smallexample
- -var-delete @var{name}
+ -var-delete [ -c ] @var{name}
 @end smallexample
 
 Deletes a previously created variable object and all of its children.
+With the @samp{-c} option, just deletes the children.
 
 Returns an error if the object @var{name} is not found.
 
