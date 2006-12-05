@@ -1,5 +1,9 @@
 2006-12-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* cp-valprint.c, p-valprint.c: Revert last change.
+
+2006-12-05  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* NEWS: Mention MIPS remote autodetection, mips64 gdbserver,
 	"set mem inaccessible-by-default", and "set breakpoint auto-hw".
 

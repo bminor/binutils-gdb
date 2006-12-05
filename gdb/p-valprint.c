@@ -753,7 +753,7 @@ pascal_object_print_value_fields (struct type *type, const gdb_byte *valaddr,
 				  int dont_print_statmem)
 {
   int i, len, n_baseclasses;
-  struct obstack tmp_obstack = { 0 };
+  struct obstack tmp_obstack;
   char *last_dont_print = obstack_next_free (&dont_print_statmem_obstack);
 
   CHECK_TYPEDEF (type);
@@ -922,7 +922,7 @@ pascal_object_print_value (struct type *type, const gdb_byte *valaddr,
 			   enum val_prettyprint pretty,
 			   struct type **dont_print_vb)
 {
-  struct obstack tmp_obstack = { 0 };
+  struct obstack tmp_obstack;
   struct type **last_dont_print
   = (struct type **) obstack_next_free (&dont_print_vb_obstack);
   int i, n_baseclasses = TYPE_N_BASECLASSES (type);
