@@ -2386,10 +2386,10 @@ debug_to_remove_watchpoint (CORE_ADDR addr, int len, int type)
 {
   int retval;
 
-  retval = debug_target.to_insert_watchpoint (addr, len, type);
+  retval = debug_target.to_remove_watchpoint (addr, len, type);
 
   fprintf_unfiltered (gdb_stdlog,
-		      "target_insert_watchpoint (0x%lx, %d, %d) = %ld\n",
+		      "target_remove_watchpoint (0x%lx, %d, %d) = %ld\n",
 		      (unsigned long) addr, len, type, (unsigned long) retval);
   return retval;
 }
