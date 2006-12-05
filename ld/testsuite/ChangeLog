@@ -1,3 +1,29 @@
+2006-12-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-alpha/tlspic.rd: Update for unused section removal.
+	* ld-frv/fdpic-shared-6.d: Likewise.
+	* ld-frv/tls-dynamic-1.d: Update for symbol changes.
+	* ld-frv/tls-dynamic-2.d: Likewise.
+	* ld-frv/tls-dynamic-3.d: Likewise.
+	* ld-frv/tls-initial-shared-2.d: Likewise.
+	* ld-frv/tls-pie-1.d: Likewise.
+	* ld-frv/tls-pie-3.d: Likewise.
+	* ld-frv/tls-relax-dynamic-1.d: Likewise.
+	* ld-frv/tls-relax-dynamic-2.d: Likewise.
+	* ld-frv/tls-relax-dynamic-3.d: Likewise.
+	* ld-frv/tls-relax-initial-shared-2.d: Likewise.
+	* ld-frv/tls-relax-pie-1.d: Likewise.
+	* ld-frv/tls-relax-pie-3.d: Likewise.
+	* ld-frv/tls-relax-shared-1.d: Likewise.
+	* ld-frv/tls-relax-shared-2.d: Likewise.
+	* ld-frv/tls-relax-shared-3.d: Likewise.
+	* ld-frv/tls-relax-static-3.d: Likewise.
+	* ld-frv/tls-shared-1.d: Likewise.
+	* ld-frv/tls-shared-2.d: Likewise.
+	* ld-frv/tls-shared-3.d: Likewise.
+	* ld-frv/tls-static-1.d: Likewise.
+	* ld-frv/tls-static-3.d: Likewise.
+
 2006-12-05  Jakub Jelinek  <jakub@redhat.com>
 	    Alan Modra  <amodra@bigpond.net.au>
 
@@ -44,21 +70,21 @@
 
 	* ld-elf/group.ld: Handle .rodata.brlt for powerpc64.
 
-2006-11-07  Vladimir Prus  <vladimir@codesourcery.com>  
+2006-11-07  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* testsuite/ld-elf/symbol2w.s: Use "%" instead of "@" to avoid
 	breakage on ARM.
 
-2006-11-06  Vladimir Prus  <vladimir@codesourcery.com>  
+2006-11-06  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* testsuite/ld-elf/symbol1ref.s: Use ".dc.a" instead
 	of ".long".
 
-2006-11-06  Vladimir Prus  <vladimir@codesourcery.com>  
+2006-11-06  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* testsuite/ld-elf/warn2.d: New.
 	* testsuite/ld-elf/symbol2w.s: New.
-	* testsuite/ld-elf/symbol2ref.s: New.   
+	* testsuite/ld-elf/symbol2ref.s: New.
 
 2006-11-05  Hans-Peter Nilsson  <hp@axis.com>
 
