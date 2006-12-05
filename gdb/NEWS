@@ -6,6 +6,32 @@
 * The GDB remote stub, gdbserver, now has lower overhead for high 
 frequency signals (e.g. SIGALRM) via the QPassSignals packet.
 
+* GDB for MIPS targets now autodetects whether a remote target provides
+32-bit or 64-bit register values.
+
+* New commands
+
+set mem inaccessible-by-default
+show mem inaccessible-by-default
+  If the target supplies a memory map, for instance via the remote
+  protocol's "qXfer:memory-map:read" packet, setting this variable
+  prevents GDB from accessing memory outside the memory map.  This
+  is useful for targets with memory mapped registers or which react
+  badly to accesses of unmapped address space.
+
+set breakpoint auto-hw
+show breakpoint auto-hw
+  If the target supplies a memory map, for instance via the remote
+  protocol's "qXfer:memory-map:read" packet, setting this variable
+  lets GDB use hardware breakpoints automatically for memory regions
+  where it can not use software breakpoints.  This covers both the
+  "break" command and internal breakpoints used for other commands
+  including "next" and "finish".
+
+* New targets
+
+MIPS64 GNU/Linux (gdbserver)	mips64-linux-gnu
+
 * New remote packets
 
 QPassSignals:
