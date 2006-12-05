@@ -1,3 +1,7 @@
+2006-12-05  Markus Deuling  <deuling@de.ibm.com>
+
+	* README: Update supported targets.
+
 2006-11-24  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* configure.srv: Add target "spu*-*-*".
