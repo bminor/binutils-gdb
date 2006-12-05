@@ -1,3 +1,7 @@
+2006-12-05  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* cp-valprint.c, p-valprint.c: Revert last change.
+
 2006-12-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* cp-valprint.c (cp_print_value_fields): Initialize tmp_obstack.
