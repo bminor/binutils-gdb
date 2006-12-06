@@ -1,3 +1,7 @@
+2006-12-05  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* MAINTAINERS (Write After Approval): Add myself.
+
 2006-12-05  Jim Blandy  <jimb@codesourcery.com>
 
 	* gdbtypes.c (built_gdbtypes): Don't set builtin_type_void here.
