@@ -1,3 +1,8 @@
+2006-12-06  H.J. Lu <hjl@gnu.org>
+
+	* config/tc-i386.h: Change the prefix order to SEG_PREFIX,
+	ADDR_PREFIX, DATA_PREFIX, LOCKREP_PREFIX.
+
 2006-12-02  Jakub Jelinek  <jakub@redhat.com>
 
 	PR gas/3607

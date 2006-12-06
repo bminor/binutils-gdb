@@ -8,16 +8,16 @@ Disassembly of section .text:
 0+000 <foo>:
    0:	f3 48 0f bd 19[ 	]+lzcnt  \(%rcx\),%rbx
    5:	f3 0f bd 19[ 	]+lzcnt  \(%rcx\),%ebx
-   9:	f3 66 0f bd 19[ 	]+lzcnt  \(%rcx\),%bx
+   9:	66 f3 0f bd 19[ 	]+lzcnt  \(%rcx\),%bx
    e:	f3 48 0f bd d9[ 	]+lzcnt  %rcx,%rbx
   13:	f3 0f bd d9[ 	]+lzcnt  %ecx,%ebx
-  17:	f3 66 0f bd d9[ 	]+lzcnt  %cx,%bx
+  17:	66 f3 0f bd d9[ 	]+lzcnt  %cx,%bx
   1c:	f3 48 0f b8 19[ 	]+popcnt \(%rcx\),%rbx
   21:	f3 0f b8 19[ 	]+popcnt \(%rcx\),%ebx
-  25:	f3 66 0f b8 19[ 	]+popcnt \(%rcx\),%bx
+  25:	66 f3 0f b8 19[ 	]+popcnt \(%rcx\),%bx
   2a:	f3 48 0f b8 d9[ 	]+popcnt %rcx,%rbx
   2f:	f3 0f b8 d9[ 	]+popcnt %ecx,%ebx
-  33:	f3 66 0f b8 d9[ 	]+popcnt %cx,%bx
+  33:	66 f3 0f b8 d9[ 	]+popcnt %cx,%bx
   38:	66 0f 79 ca[ 	]+extrq  %xmm2,%xmm1
   3c:	66 0f 78 c1 02 04[ 	]+extrq  \$0x4,\$0x2,%xmm1
   42:	f2 0f 79 ca[ 	]+insertq %xmm2,%xmm1

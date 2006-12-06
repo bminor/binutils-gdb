@@ -102,12 +102,14 @@ extern const char *i386_comment_chars;
 
 /* Prefixes will be emitted in the order defined below.
    WAIT_PREFIX must be the first prefix since FWAIT is really is an
-   instruction, and so must come before any prefixes.  */
+   instruction, and so must come before any prefixes.
+   The preferred prefix order is SEG_PREFIX, ADDR_PREFIX, DATA_PREFIX,
+   LOCKREP_PREFIX.  */
 #define WAIT_PREFIX	0
-#define LOCKREP_PREFIX	1
+#define SEG_PREFIX	1
 #define ADDR_PREFIX	2
 #define DATA_PREFIX	3
-#define SEG_PREFIX	4
+#define LOCKREP_PREFIX	4
 #define REX_PREFIX	5       /* must come last.  */
 #define MAX_PREFIXES	6	/* max prefixes per opcode */
 
