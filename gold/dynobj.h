@@ -274,7 +274,8 @@ class Verdef : public Version_base
   // Write contents to buffer.
   template<int size, bool big_endian>
   unsigned char*
-  write(const Stringpool*, bool is_last, unsigned char*) const;
+  write(const Stringpool*, bool is_last, unsigned char*
+        ACCEPT_SIZE_ENDIAN) const;
 
  private:
   Verdef(const Verdef&);
@@ -359,7 +360,8 @@ class Verneed
   // Write contents to buffer.
   template<int size, bool big_endian>
   unsigned char*
-  write(const Stringpool*, bool is_last, unsigned char*) const;
+  write(const Stringpool*, bool is_last, unsigned char*
+        ACCEPT_SIZE_ENDIAN) const;
 
  private:
   Verneed(const Verneed&);
@@ -416,21 +418,24 @@ class Versions
   void
   symbol_section_contents(const Stringpool*, unsigned int local_symcount,
 			  const std::vector<Symbol*>& syms,
-			  unsigned char**, unsigned int*) const;
+			  unsigned char**, unsigned int*
+                          ACCEPT_SIZE_ENDIAN) const;
 
   // Build an allocated buffer holding the contents of the version
   // definition section (.gnu.version_d).
   template<int size, bool big_endian>
   void
   def_section_contents(const Stringpool*, unsigned char**,
-		       unsigned int* psize, unsigned int* pentries) const;
+		       unsigned int* psize, unsigned int* pentries
+                       ACCEPT_SIZE_ENDIAN) const;
 
   // Build an allocated buffer holding the contents of the version
   // reference section (.gnu.version_r).
   template<int size, bool big_endian>
   void
   need_section_contents(const Stringpool*, unsigned char**,
-			unsigned int* psize, unsigned int* pentries) const;
+			unsigned int* psize, unsigned int* pentries
+                        ACCEPT_SIZE_ENDIAN) const;
 
  private:
   // The type of the list of version definitions.

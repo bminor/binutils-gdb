@@ -1050,7 +1050,8 @@ Dynobj::sized_create_gnu_hash_table(
 
 template<int size, bool big_endian>
 unsigned char*
-Verdef::write(const Stringpool* dynpool, bool is_last, unsigned char* pb) const
+Verdef::write(const Stringpool* dynpool, bool is_last, unsigned char* pb
+              ACCEPT_SIZE_ENDIAN) const
 {
   const int verdef_size = elfcpp::Elf_sizes<size>::verdef_size;
   const int verdaux_size = elfcpp::Elf_sizes<size>::verdaux_size;
@@ -1129,7 +1130,7 @@ Verneed::finalize(unsigned int index)
 template<int size, bool big_endian>
 unsigned char*
 Verneed::write(const Stringpool* dynpool, bool is_last,
-	       unsigned char* pb) const
+	       unsigned char* pb ACCEPT_SIZE_ENDIAN) const
 {
   const int verneed_size = elfcpp::Elf_sizes<size>::verneed_size;
   const int vernaux_size = elfcpp::Elf_sizes<size>::vernaux_size;
@@ -1367,12 +1368,9 @@ Versions::version_index(const Stringpool* dynpool, const Symbol* sym) const
   const char* version = dynpool->find(sym->version(), &version_key);
   gold_assert(version != NULL);
 
-  Version_table::const_iterator p;
+  Key k;
   if (!sym->is_from_dynobj())
-    {
-      Key k(version_key, 0);
-      p = this->version_table_.find(k);
-    }
+    k = Key(version_key, 0);
   else
     {
       Object* object = sym->object();
@@ -1383,10 +1381,10 @@ Versions::version_index(const Stringpool* dynpool, const Symbol* sym) const
       const char* filename = dynpool->find(dynobj->soname(), &filename_key);
       gold_assert(filename != NULL);
 
-      Key k(version_key, filename_key);
-      p = this->version_table_.find(k);
+      k = Key(version_key, filename_key);
     }
 
+  Version_table::const_iterator p = this->version_table_.find(k);
   gold_assert(p != this->version_table_.end());
 
   return p->second->index();
@@ -1401,7 +1399,8 @@ Versions::symbol_section_contents(const Stringpool* dynpool,
 				  unsigned int local_symcount,
 				  const std::vector<Symbol*>& syms,
 				  unsigned char** pp,
-				  unsigned int* psize) const
+				  unsigned int* psize
+                                  ACCEPT_SIZE_ENDIAN) const
 {
   gold_assert(this->is_finalized_);
 
@@ -1437,7 +1436,8 @@ template<int size, bool big_endian>
 void
 Versions::def_section_contents(const Stringpool* dynpool,
 			       unsigned char** pp, unsigned int* psize,
-			       unsigned int* pentries) const
+			       unsigned int* pentries
+                               ACCEPT_SIZE_ENDIAN) const
 {
   gold_assert(this->is_finalized_);
   gold_assert(!this->defs_.empty());
@@ -1462,9 +1462,9 @@ Versions::def_section_contents(const Stringpool* dynpool,
   for (p = this->defs_.begin(), i = 0;
        p != this->defs_.end();
        ++p, ++i)
-    pb = (*p)->write<size, big_endian>(dynpool,
-				       i + 1 >= this->defs_.size(),
-				       pb);
+    pb = (*p)->write SELECT_SIZE_ENDIAN_NAME(size, big_endian)(
+            dynpool, i + 1 >= this->defs_.size(), pb
+            SELECT_SIZE_ENDIAN(size, big_endian));
 
   gold_assert(static_cast<unsigned int>(pb - pbuf) == sz);
 
@@ -1480,7 +1480,8 @@ template<int size, bool big_endian>
 void
 Versions::need_section_contents(const Stringpool* dynpool,
 				unsigned char** pp, unsigned int *psize,
-				unsigned int *pentries) const
+				unsigned int *pentries
+                                ACCEPT_SIZE_ENDIAN) const
 {
   gold_assert(this->is_finalized_);
   gold_assert(!this->needs_.empty());
@@ -1505,9 +1506,9 @@ Versions::need_section_contents(const Stringpool* dynpool,
   for (p = this->needs_.begin(), i = 0;
        p != this->needs_.end();
        ++p, ++i)
-    pb = (*p)->write<size, big_endian>(dynpool,
-				       i + 1 >= this->needs_.size(),
-				       pb);
+    pb = (*p)->write SELECT_SIZE_ENDIAN_NAME(size, big_endian)(
+	    dynpool, i + 1 >= this->needs_.size(), pb
+            SELECT_SIZE_ENDIAN(size, big_endian));
 
   gold_assert(static_cast<unsigned int>(pb - pbuf) == sz);
 
@@ -1533,90 +1534,114 @@ class Sized_dynobj<64, true>;
 
 template
 void
-Versions::symbol_section_contents<32, false>(const Stringpool*,
-					     unsigned int,
-					     const std::vector<Symbol*>&,
-					     unsigned char**,
-					     unsigned int*) const;
+Versions::symbol_section_contents<32, false>(
+    const Stringpool*,
+    unsigned int,
+    const std::vector<Symbol*>&,
+    unsigned char**,
+    unsigned int*
+    ACCEPT_SIZE_ENDIAN_EXPLICIT(32, false)) const;
 
 template
 void
-Versions::symbol_section_contents<32, true>(const Stringpool*,
-					    unsigned int,
-					    const std::vector<Symbol*>&,
-					    unsigned char**,
-					    unsigned int*) const;
+Versions::symbol_section_contents<32, true>(
+    const Stringpool*,
+    unsigned int,
+    const std::vector<Symbol*>&,
+    unsigned char**,
+    unsigned int*
+    ACCEPT_SIZE_ENDIAN_EXPLICIT(32, true)) const;
 
 template
 void
-Versions::symbol_section_contents<64, false>(const Stringpool*,
-					     unsigned int,
-					     const std::vector<Symbol*>&,
-					     unsigned char**,
-					     unsigned int*) const;
+Versions::symbol_section_contents<64, false>(
+    const Stringpool*,
+    unsigned int,
+    const std::vector<Symbol*>&,
+    unsigned char**,
+    unsigned int*
+    ACCEPT_SIZE_ENDIAN_EXPLICIT(64, false)) const;
 
 template
 void
-Versions::symbol_section_contents<64, true>(const Stringpool*,
-					    unsigned int,
-					    const std::vector<Symbol*>&,
-					    unsigned char**,
-					    unsigned int*) const;
+Versions::symbol_section_contents<64, true>(
+    const Stringpool*,
+    unsigned int,
+    const std::vector<Symbol*>&,
+    unsigned char**,
+    unsigned int*
+    ACCEPT_SIZE_ENDIAN_EXPLICIT(64, true)) const;
 
 template
 void
-Versions::def_section_contents<32, false>(const Stringpool*,
-					  unsigned char**,
-					  unsigned int*,
-					  unsigned int*) const;
+Versions::def_section_contents<32, false>(
+    const Stringpool*,
+    unsigned char**,
+    unsigned int*,
+    unsigned int*
+    ACCEPT_SIZE_ENDIAN_EXPLICIT(32, false)) const;
 
 template
 void
-Versions::def_section_contents<32, true>(const Stringpool*,
-					 unsigned char**,
-					 unsigned int*,
-					 unsigned int*) const;
+Versions::def_section_contents<32, true>(
+    const Stringpool*,
+    unsigned char**,
+    unsigned int*,
+    unsigned int*
+    ACCEPT_SIZE_ENDIAN_EXPLICIT(32, true)) const;
 
 template
 void
-Versions::def_section_contents<64, false>(const Stringpool*,
-					  unsigned char**,
-					  unsigned int*,
-					  unsigned int*) const;
+Versions::def_section_contents<64, false>(
+    const Stringpool*,
+    unsigned char**,
+    unsigned int*,
+    unsigned int*
+    ACCEPT_SIZE_ENDIAN_EXPLICIT(64, false)) const;
 
 template
 void
-Versions::def_section_contents<64, true>(const Stringpool*,
-					 unsigned char**,
-					 unsigned int*,
-					 unsigned int*) const;
+Versions::def_section_contents<64, true>(
+    const Stringpool*,
+    unsigned char**,
+    unsigned int*,
+    unsigned int*
+    ACCEPT_SIZE_ENDIAN_EXPLICIT(64, true)) const;
 
 template
 void
-Versions::need_section_contents<32, false>(const Stringpool*,
-					   unsigned char**,
-					   unsigned int*,
-					   unsigned int*) const;
+Versions::need_section_contents<32, false>(
+    const Stringpool*,
+    unsigned char**,
+    unsigned int*,
+    unsigned int*
+    ACCEPT_SIZE_ENDIAN_EXPLICIT(32, false)) const;
 
 template
 void
-Versions::need_section_contents<32, true>(const Stringpool*,
-					  unsigned char**,
-					  unsigned int*,
-					  unsigned int*) const;
+Versions::need_section_contents<32, true>(
+    const Stringpool*,
+    unsigned char**,
+    unsigned int*,
+    unsigned int*
+    ACCEPT_SIZE_ENDIAN_EXPLICIT(32, true)) const;
 
 template
 void
-Versions::need_section_contents<64, false>(const Stringpool*,
-					   unsigned char**,
-					   unsigned int*,
-					   unsigned int*) const;
+Versions::need_section_contents<64, false>(
+    const Stringpool*,
+    unsigned char**,
+    unsigned int*,
+    unsigned int*
+    ACCEPT_SIZE_ENDIAN_EXPLICIT(64, false)) const;
 
 template
 void
-Versions::need_section_contents<64, true>(const Stringpool*,
-					  unsigned char**,
-					  unsigned int*,
-					  unsigned int*) const;
+Versions::need_section_contents<64, true>(
+    const Stringpool*,
+    unsigned char**,
+    unsigned int*,
+    unsigned int*
+    ACCEPT_SIZE_ENDIAN_EXPLICIT(64, true)) const;
 
 } // End namespace gold.

@@ -101,12 +101,14 @@ namespace gold
 #define SELECT_SIZE_ONLY(size)
 #define ACCEPT_SIZE
 #define ACCEPT_SIZE_ONLY
+#define ACCEPT_SIZE_EXPLICIT(size)
 
 #define SELECT_SIZE_ENDIAN_NAME(size, big_endian) <size, big_endian>
 #define SELECT_SIZE_ENDIAN(size, big_endian)
 #define SELECT_SIZE_ENDIAN_ONLY(size, big_endian)
 #define ACCEPT_SIZE_ENDIAN
 #define ACCEPT_SIZE_ENDIAN_ONLY
+#define ACCEPT_SIZE_ENDIAN_EXPLICIT(size, big_endian)
 
 #else // !defined(HAVE_MEMBER_TEMPLATE_SPECIFICATIONS)
 
@@ -120,6 +122,7 @@ class Select_size_endian { };
 #define SELECT_SIZE_ONLY(size) Select_size<size>()
 #define ACCEPT_SIZE , Select_size<size>
 #define ACCEPT_SIZE_ONLY Select_size<size>
+#define ACCEPT_SIZE_EXPLICIT(size) , Select_size<size>
 
 #define SELECT_SIZE_ENDIAN_NAME(size, big_endian)
 #define SELECT_SIZE_ENDIAN(size, big_endian) \
@@ -128,6 +131,8 @@ class Select_size_endian { };
   Select_size_endian<size, big_endian>()
 #define ACCEPT_SIZE_ENDIAN , Select_size_endian<size, big_endian>
 #define ACCEPT_SIZE_ENDIAN_ONLY Select_size_endian<size, big_endian>
+#define ACCEPT_SIZE_ENDIAN_EXPLICIT(size, big_endian) \
+  , Select_size_endian<size, big_endian>
 
 #endif // !defined(HAVE_MEMBER_TEMPLATE_SPECIFICATIONS)
 
