@@ -501,7 +501,10 @@ command_handler (char *command)
      but GDB is still alive. In such a case, we just quit gdb
      killing the inferior program too. */
   if (command == 0)
-    quit_command ((char *) 0, stdin == instream);
+    {
+      printf_unfiltered ("quit\n");
+      execute_command ("quit", stdin == instream);
+    }
 
   time_at_cmd_start = get_run_time ();
 

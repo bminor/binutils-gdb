@@ -1,3 +1,9 @@
+2006-12-06  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* event-top.c (command_handler): On EOF, print 'quit' and run quit
+	command via execute_command such that hooks and trace work.
+	* utils.c (defaulted_query): On EOF, print default answer and newline.
+
 2006-12-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* cp-valprint.c, p-valprint.c: Revert last change.
