@@ -5,10 +5,14 @@
 
 #include <vector>
 
+#include "stringpool.h"
 #include "object.h"
 
 namespace gold
 {
+
+class General_options;
+class Stringpool;
 
 // A dynamic object (ET_DYN).  This is an abstract base class itself.
 // The implementations is the template class Sized_dynobj.
@@ -23,6 +27,10 @@ class Dynobj : public Object
   // Return the name to use in a DT_NEEDED entry for this object.
   const char*
   soname() const;
+
+  // Compute the ELF hash code for a string.
+  static uint32_t
+  elf_hash(const char*);
 
   // Create a standard ELF hash table, setting *PPHASH and *PHASHLEN.
   // DYNSYMS is the global dynamic symbols.  LOCAL_DYNSYM_COUNT is the
@@ -50,10 +58,6 @@ class Dynobj : public Object
   { this->soname_.assign(s); }
 
  private:
-  // Compute the ELF hash code for a string.
-  static uint32_t
-  elf_hash(const char*);
-
   // Compute the GNU hash code for a string.
   static uint32_t
   gnu_hash(const char*);
@@ -166,12 +170,319 @@ class Sized_dynobj : public Dynobj
   void
   make_version_map(Read_symbols_data* sd, Version_map*) const;
 
+  // Add version definitions to the version map.
+  void
+  make_verdef_map(Read_symbols_data* sd, Version_map*) const;
+
+  // Add version references to the version map.
+  void
+  make_verneed_map(Read_symbols_data* sd, Version_map*) const;
+
   // Add an entry to the version map.
   void
   set_version_map(Version_map*, unsigned int ndx, const char* name) const;
 
   // General access to the ELF file.
   elfcpp::Elf_file<size, big_endian, Object> elf_file_;
+};
+
+// A base class for Verdef and Verneed_version which just handles the
+// version index which will be stored in the SHT_GNU_versym section.
+
+class Version_base
+{
+ public:
+  Version_base()
+    : index_(-1U)
+  { }
+
+  virtual
+  ~Version_base()
+  { }
+
+  // Return the version index.
+  unsigned int
+  index() const
+  {
+    gold_assert(this->index_ != -1U);
+    return this->index_;
+  }
+
+  // Set the version index.
+  void
+  set_index(unsigned int index)
+  {
+    gold_assert(this->index_ == -1U);
+    this->index_ = index;
+  }
+
+  // Clear the weak flag in a version definition.
+  virtual void
+  clear_weak() = 0;
+
+ private:
+  Version_base(const Version_base&);
+  Version_base& operator=(const Version_base&);
+
+  // The index of the version definition or reference.
+  unsigned int index_;
+};
+
+// This class handles a version being defined in the file we are
+// generating.
+
+class Verdef : public Version_base
+{
+ public:
+  Verdef(const char* name, bool is_base, bool is_weak, bool is_symbol_created)
+    : name_(name), deps_(), is_base_(is_base), is_weak_(is_weak),
+      is_symbol_created_(is_symbol_created)
+  { }
+
+  // Return the version name.
+  const char*
+  name() const
+  { return this->name_; }
+
+  // Return the number of dependencies.
+  unsigned int
+  count_dependencies() const
+  { return this->deps_.size(); }
+
+  // Add a dependency to this version.  The NAME should be
+  // canonicalized in the dynamic Stringpool.
+  void
+  add_dependency(const char* name)
+  { this->deps_.push_back(name); }
+
+  // Return whether this definition is weak.
+  bool
+  is_weak() const
+  { return this->is_weak_; }
+
+  // Clear the weak flag.
+  void
+  clear_weak()
+  { this->is_weak_ = false; }
+
+  // Return whether a version symbol has been created for this
+  // definition.
+  bool
+  is_symbol_created() const
+  { return this->is_symbol_created_; }
+
+  // Write contents to buffer.
+  template<int size, bool big_endian>
+  unsigned char*
+  write(const Stringpool*, bool is_last, unsigned char*) const;
+
+ private:
+  Verdef(const Verdef&);
+  Verdef& operator=(const Verdef&);
+
+  // The type of the list of version dependencies.  Each dependency
+  // should be canonicalized in the dynamic Stringpool.
+  typedef std::vector<const char*> Deps;
+
+  // The name of this version.  This should be canonicalized in the
+  // dynamic Stringpool.
+  const char* name_;
+  // A list of other versions which this version depends upon.
+  Deps deps_;
+  // Whether this is the base version.
+  bool is_base_;
+  // Whether this version is weak.
+  bool is_weak_;
+  // Whether a version symbol has been created.
+  bool is_symbol_created_;
+};
+
+// A referened version.  This will be associated with a filename by
+// Verneed.
+
+class Verneed_version : public Version_base
+{
+ public:
+  Verneed_version(const char* version)
+    : version_(version)
+  { }
+
+  // Return the version name.
+  const char*
+  version() const
+  { return this->version_; }
+
+  // Clear the weak flag.  This is invalid for a reference.
+  void
+  clear_weak()
+  { gold_unreachable(); }
+
+ private:
+  Verneed_version(const Verneed_version&);
+  Verneed_version& operator=(const Verneed_version&);
+
+  const char* version_;
+};
+
+// Version references in a single dynamic object.
+
+class Verneed
+{
+ public:
+  Verneed(const char* filename)
+    : filename_(filename), need_versions_()
+  { }
+
+  ~Verneed();
+
+  // Return the file name.
+  const char*
+  filename() const
+  { return this->filename_; }
+
+  // Return the number of versions.
+  unsigned int
+  count_versions() const
+  { return this->need_versions_.size(); }
+
+  // Add a version name.  The name should be canonicalized in the
+  // dynamic Stringpool.  If the name is already present, this does
+  // nothing.
+  Verneed_version*
+  add_name(const char* name);
+
+  // Set the version indexes, starting at INDEX.  Return the updated
+  // INDEX.
+  unsigned int
+  finalize(unsigned int index);
+
+  // Write contents to buffer.
+  template<int size, bool big_endian>
+  unsigned char*
+  write(const Stringpool*, bool is_last, unsigned char*) const;
+
+ private:
+  Verneed(const Verneed&);
+  Verneed& operator=(const Verneed&);
+
+  // The type of the list of version names.  Each name should be
+  // canonicalized in the dynamic Stringpool.
+  typedef std::vector<Verneed_version*> Need_versions;
+
+  // The filename of the dynamic object.  This should be
+  // canonicalized in the dynamic Stringpool.
+  const char* filename_;
+  // The list of version names.
+  Need_versions need_versions_;
+};
+
+// This class handles version definitions and references which go into
+// the output file.
+
+class Versions
+{
+ public:
+  Versions()
+    : defs_(), needs_(), version_table_(), is_finalized_(false)
+  { }
+
+  ~Versions();
+
+  // SYM is going into the dynamic symbol table and has a version.
+  // Record the appropriate version information.
+  void
+  record_version(const General_options*, Stringpool*, const Symbol* sym);
+
+  // Set the version indexes.  DYNSYM_INDEX is the index we should use
+  // for the next dynamic symbol.  We add new dynamic symbols to SYMS
+  // and return an updated DYNSYM_INDEX.
+  unsigned int
+  finalize(const Target*, Symbol_table* symtab, unsigned int dynsym_index,
+	   std::vector<Symbol*>* syms);
+
+  // Return whether there are any version definitions.
+  bool
+  any_defs() const
+  { return !this->defs_.empty(); }
+
+  // Return whether there are any version references.
+  bool
+  any_needs() const
+  { return !this->needs_.empty(); }
+
+  // Build an allocated buffer holding the contents of the symbol
+  // version section (.gnu.version).
+  template<int size, bool big_endian>
+  void
+  symbol_section_contents(const Stringpool*, unsigned int local_symcount,
+			  const std::vector<Symbol*>& syms,
+			  unsigned char**, unsigned int*) const;
+
+  // Build an allocated buffer holding the contents of the version
+  // definition section (.gnu.version_d).
+  template<int size, bool big_endian>
+  void
+  def_section_contents(const Stringpool*, unsigned char**,
+		       unsigned int* psize, unsigned int* pentries) const;
+
+  // Build an allocated buffer holding the contents of the version
+  // reference section (.gnu.version_r).
+  template<int size, bool big_endian>
+  void
+  need_section_contents(const Stringpool*, unsigned char**,
+			unsigned int* psize, unsigned int* pentries) const;
+
+ private:
+  // The type of the list of version definitions.
+  typedef std::vector<Verdef*> Defs;
+
+  // The type of the list of version references.
+  typedef std::vector<Verneed*> Needs;
+
+  // Handle a symbol SYM defined with version VERSION.
+  void
+  add_def(const General_options*, const Symbol* sym, const char* version,
+	  Stringpool::Key);
+
+  // Add a reference to version NAME in file FILENAME.
+  void
+  add_need(Stringpool*, const char* filename, const char* name,
+	   Stringpool::Key);
+
+  // Return the version index to use for SYM.
+  unsigned int
+  version_index(const Stringpool*, const Symbol* sym) const;
+
+  // We keep a hash table mapping canonicalized name/version pairs to
+  // a version base.
+  typedef std::pair<Stringpool::Key, Stringpool::Key> Key;
+
+  struct Version_table_hash
+  {
+    size_t
+    operator()(const Key& k) const
+    { return k.first + k.second; }
+  };
+
+  struct Version_table_eq
+  {
+    bool
+    operator()(const Key& k1, const Key& k2) const
+    { return k1.first == k2.first && k1.second == k2.second; }
+  };
+
+  typedef Unordered_map<Key, Version_base*, Version_table_hash,
+			Version_table_eq> Version_table;
+
+  // The version definitions.
+  Defs defs_;
+  // The version references.
+  Needs needs_;
+  // The mapping from a canonicalized version/filename pair to a
+  // version index.  The filename may be NULL.
+  Version_table version_table_;
+  // Whether the version indexes have been set.
+  bool is_finalized_;
 };
 
 } // End namespace gold.

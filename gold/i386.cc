@@ -247,7 +247,7 @@ Target_i386::got_section(const General_options* options, Symbol_table* symtab,
       this->got_plt_->set_space_size(3 * 4);
 
       // Define _GLOBAL_OFFSET_TABLE_ at the start of the PLT.
-      symtab->define_in_output_data(this, "_GLOBAL_OFFSET_TABLE_",
+      symtab->define_in_output_data(this, "_GLOBAL_OFFSET_TABLE_", NULL,
 				    this->got_plt_,
 				    0, 0, elfcpp::STT_OBJECT,
 				    elfcpp::STB_LOCAL,
@@ -607,10 +607,10 @@ Target_i386::copy_reloc(const General_options* options,
       dynbss->set_space_size(dynbss_size + symsize);
 
       // Define the symbol in the .dynbss section.
-      symtab->define_in_output_data(this, ssym->name(), dynbss, offset,
-				    symsize, ssym->type(), ssym->binding(),
-				    ssym->visibility(), ssym->nonvis(),
-				    false, false);
+      symtab->define_in_output_data(this, ssym->name(), ssym->version(),
+				    dynbss, offset, symsize, ssym->type(),
+				    ssym->binding(), ssym->visibility(),
+				    ssym->nonvis(), false, false);
 
       // Add the COPY reloc.
       ssym->set_needs_dynsym_entry();
@@ -819,7 +819,7 @@ Target_i386::Scan::global(const General_options& options,
       // relocation in order to avoid a COPY relocation.
       gold_assert(!options.is_shared());
 
-      if (gsym->is_defined_in_dynobj())
+      if (gsym->is_from_dynobj())
 	{
 	  // This symbol is defined in a dynamic object.  If it is a
 	  // function, we make a PLT entry.  Otherwise we need to
@@ -1050,7 +1050,7 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
     }
 
   // Pick the value to use for symbols defined in shared objects.
-  if (gsym != NULL && gsym->is_defined_in_dynobj())
+  if (gsym != NULL && gsym->is_from_dynobj())
     {
       if (gsym->has_plt_offset())
 	value = target->plt_section()->address() + gsym->plt_offset();

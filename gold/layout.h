@@ -10,6 +10,7 @@
 
 #include "workqueue.h"
 #include "object.h"
+#include "dynobj.h"
 #include "stringpool.h"
 
 namespace gold
@@ -201,7 +202,10 @@ class Layout
 
   // Create the dynamic symbol table.
   void
-  create_dynamic_symtab(const Target*, Symbol_table*);
+  create_dynamic_symtab(const Target*, Symbol_table*, Output_section** pdynstr,
+			unsigned int* plocal_dynamic_count,
+			std::vector<Symbol*>* pdynamic_symbols,
+			Versions* versions);
 
   // Finish the .dynamic section and PT_DYNAMIC segment.
   void
@@ -210,6 +214,20 @@ class Layout
   // Create the .interp section and PT_INTERP segment.
   void
   create_interp(const Target* target);
+
+  // Create the version sections.
+  void
+  create_version_sections(const Target*, const Versions*,
+			  unsigned int local_symcount,
+			  const std::vector<Symbol*>& dynamic_symbols,
+			  const Output_section* dynstr);
+
+  template<int size, bool big_endian>
+  void
+  sized_create_version_sections(const Versions* versions,
+				unsigned int local_symcount,
+				const std::vector<Symbol*>& dynamic_symbols,
+				const Output_section* dynstr);
 
   // Return whether to include this section in the link.
   template<int size, bool big_endian>
@@ -242,7 +260,7 @@ class Layout
   off_t
   set_segment_offsets(const Target*, Output_segment*, unsigned int* pshndx);
 
-  // Set the final file offsets and section indices of all the
+  // Set the final file offsets and section indexes of all the
   // sections not associated with a segment.
   off_t
   set_section_offsets(off_t, unsigned int *pshndx);

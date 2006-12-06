@@ -392,7 +392,8 @@ Sized_dynobj<size, big_endian>::set_version_map(
     unsigned int ndx,
     const char* name) const
 {
-  gold_assert(ndx < version_map->size());
+  if (ndx >= version_map->size())
+    version_map->resize(ndx + 1);
   if ((*version_map)[ndx] != NULL)
     {
       fprintf(stderr, _("%s: %s: duplicate definition for version %u\n"),
@@ -400,6 +401,174 @@ Sized_dynobj<size, big_endian>::set_version_map(
       gold_exit(false);
     }
   (*version_map)[ndx] = name;
+}
+
+// Add mappings for the version definitions to VERSION_MAP.
+
+template<int size, bool big_endian>
+void
+Sized_dynobj<size, big_endian>::make_verdef_map(
+    Read_symbols_data* sd,
+    Version_map* version_map) const
+{
+  if (sd->verdef == NULL)
+    return;
+
+  const char* names = reinterpret_cast<const char*>(sd->symbol_names->data());
+  off_t names_size = sd->symbol_names_size;
+
+  const unsigned char* pverdef = sd->verdef->data();
+  off_t verdef_size = sd->verdef_size;
+  const unsigned int count = sd->verdef_info;
+
+  const unsigned char* p = pverdef;
+  for (unsigned int i = 0; i < count; ++i)
+    {
+      elfcpp::Verdef<size, big_endian> verdef(p);
+
+      if (verdef.get_vd_version() != elfcpp::VER_DEF_CURRENT)
+	{
+	  fprintf(stderr, _("%s: %s: unexpected verdef version %u\n"),
+		  program_name, this->name().c_str(), verdef.get_vd_version());
+	  gold_exit(false);
+	}
+
+      const unsigned int vd_ndx = verdef.get_vd_ndx();
+
+      // The GNU linker clears the VERSYM_HIDDEN bit.  I'm not
+      // sure why.
+
+      // The first Verdaux holds the name of this version.  Subsequent
+      // ones are versions that this one depends upon, which we don't
+      // care about here.
+      const unsigned int vd_cnt = verdef.get_vd_cnt();
+      if (vd_cnt < 1)
+	{
+	  fprintf(stderr, _("%s: %s: verdef vd_cnt field too small: %u\n"),
+		  program_name, this->name().c_str(), vd_cnt);
+	  gold_exit(false);
+	}
+
+      const unsigned int vd_aux = verdef.get_vd_aux();
+      if ((p - pverdef) + vd_aux >= verdef_size)
+	{
+	  fprintf(stderr,
+		  _("%s: %s: verdef vd_aux field out of range: %u\n"),
+		  program_name, this->name().c_str(), vd_aux);
+	  gold_exit(false);
+	}
+
+      const unsigned char* pvda = p + vd_aux;
+      elfcpp::Verdaux<size, big_endian> verdaux(pvda);
+
+      const unsigned int vda_name = verdaux.get_vda_name();
+      if (vda_name >= names_size)
+	{
+	  fprintf(stderr,
+		  _("%s: %s: verdaux vda_name field out of range: %u\n"),
+		  program_name, this->name().c_str(), vda_name);
+	  gold_exit(false);
+	}
+
+      this->set_version_map(version_map, vd_ndx, names + vda_name);
+
+      const unsigned int vd_next = verdef.get_vd_next();
+      if ((p - pverdef) + vd_next >= verdef_size)
+	{
+	  fprintf(stderr,
+		  _("%s: %s: verdef vd_next field out of range: %u\n"),
+		  program_name, this->name().c_str(), vd_next);
+	  gold_exit(false);
+	}
+
+      p += vd_next;
+    }
+}
+
+// Add mappings for the required versions to VERSION_MAP.
+
+template<int size, bool big_endian>
+void
+Sized_dynobj<size, big_endian>::make_verneed_map(
+    Read_symbols_data* sd,
+    Version_map* version_map) const
+{
+  if (sd->verneed == NULL)
+    return;
+
+  const char* names = reinterpret_cast<const char*>(sd->symbol_names->data());
+  off_t names_size = sd->symbol_names_size;
+
+  const unsigned char* pverneed = sd->verneed->data();
+  const off_t verneed_size = sd->verneed_size;
+  const unsigned int count = sd->verneed_info;
+
+  const unsigned char* p = pverneed;
+  for (unsigned int i = 0; i < count; ++i)
+    {
+      elfcpp::Verneed<size, big_endian> verneed(p);
+
+      if (verneed.get_vn_version() != elfcpp::VER_NEED_CURRENT)
+	{
+	  fprintf(stderr, _("%s: %s: unexpected verneed version %u\n"),
+		  program_name, this->name().c_str(),
+		  verneed.get_vn_version());
+	  gold_exit(false);
+	}
+
+      const unsigned int vn_aux = verneed.get_vn_aux();
+
+      if ((p - pverneed) + vn_aux >= verneed_size)
+	{
+	  fprintf(stderr,
+		  _("%s: %s: verneed vn_aux field out of range: %u\n"),
+		  program_name, this->name().c_str(), vn_aux);
+	  gold_exit(false);
+	}
+
+      const unsigned int vn_cnt = verneed.get_vn_cnt();
+      const unsigned char* pvna = p + vn_aux;
+      for (unsigned int j = 0; j < vn_cnt; ++j)
+	{
+	  elfcpp::Vernaux<size, big_endian> vernaux(pvna);
+
+	  const unsigned int vna_name = vernaux.get_vna_name();
+	  if (vna_name >= names_size)
+	    {
+	      fprintf(stderr,
+		      _("%s: %s: vernaux vna_name field "
+			"out of range: %u\n"),
+		      program_name, this->name().c_str(), vna_name);
+	      gold_exit(false);
+	    }
+
+	  this->set_version_map(version_map, vernaux.get_vna_other(),
+				names + vna_name);
+
+	  const unsigned int vna_next = vernaux.get_vna_next();
+	  if ((pvna - pverneed) + vna_next >= verneed_size)
+	    {
+	      fprintf(stderr,
+		      _("%s: %s: verneed vna_next field "
+			"out of range: %u\n"),
+		      program_name, this->name().c_str(), vna_next);
+	      gold_exit(false);
+	    }
+
+	  pvna += vna_next;
+	}
+
+      const unsigned int vn_next = verneed.get_vn_next();
+      if ((p - pverneed) + vn_next >= verneed_size)
+	{
+	  fprintf(stderr,
+		  _("%s: %s: verneed vn_next field out of range: %u\n"),
+		  program_name, this->name().c_str(), vn_next);
+	  gold_exit(false);
+	}
+
+      p += vn_next;
+    }
 }
 
 // Create a vector mapping version numbers to version strings.
@@ -413,196 +582,12 @@ Sized_dynobj<size, big_endian>::make_version_map(
   if (sd->verdef == NULL && sd->verneed == NULL)
     return;
 
-  // First find the largest version index.
-  unsigned int maxver = 0;
+  // A guess at the maximum version number we will see.  If this is
+  // wrong we will be less efficient but still correct.
+  version_map->reserve(sd->verdef_info + sd->verneed_info * 10);
 
-  if (sd->verdef != NULL)
-    {
-      const unsigned char* pverdef = sd->verdef->data();
-      off_t verdef_size = sd->verdef_size;
-      const unsigned int count = sd->verdef_info;
-
-      const unsigned char* p = pverdef;
-      for (unsigned int i = 0; i < count; ++i)
-	{
-	  elfcpp::Verdef<size, big_endian> verdef(p);
-
-	  const unsigned int vd_ndx = verdef.get_vd_ndx();
-
-	  // The GNU linker clears the VERSYM_HIDDEN bit.  I'm not
-	  // sure why.
-
-	  if (vd_ndx > maxver)
-	    maxver = vd_ndx;
-
-	  const unsigned int vd_next = verdef.get_vd_next();
-	  if ((p - pverdef) + vd_next >= verdef_size)
-	    {
-	      fprintf(stderr,
-		      _("%s: %s: verdef vd_next field out of range: %u\n"),
-		      program_name, this->name().c_str(), vd_next);
-	      gold_exit(false);
-	    }
-
-	  p += vd_next;
-	}
-    }
-
-  if (sd->verneed != NULL)
-    {
-      const unsigned char* pverneed = sd->verneed->data();
-      off_t verneed_size = sd->verneed_size;
-      const unsigned int count = sd->verneed_info;
-
-      const unsigned char* p = pverneed;
-      for (unsigned int i = 0; i < count; ++i)
-	{
-	  elfcpp::Verneed<size, big_endian> verneed(p);
-
-	  const unsigned int vn_aux = verneed.get_vn_aux();
-	  if ((p - pverneed) + vn_aux >= verneed_size)
-	    {
-	      fprintf(stderr,
-		      _("%s: %s: verneed vn_aux field out of range: %u\n"),
-		      program_name, this->name().c_str(), vn_aux);
-	      gold_exit(false);
-	    }
-
-	  const unsigned int vn_cnt = verneed.get_vn_cnt();
-	  const unsigned char* pvna = p + vn_aux;
-	  for (unsigned int j = 0; j < vn_cnt; ++j)
-	    {
-	      elfcpp::Vernaux<size, big_endian> vernaux(pvna);
-
-	      const unsigned int vna_other = vernaux.get_vna_other();
-	      if (vna_other > maxver)
-		maxver = vna_other;
-
-	      const unsigned int vna_next = vernaux.get_vna_next();
-	      if ((pvna - pverneed) + vna_next >= verneed_size)
-		{
-		  fprintf(stderr,
-			  _("%s: %s: verneed vna_next field "
-			    "out of range: %u\n"),
-			  program_name, this->name().c_str(), vna_next);
-		  gold_exit(false);
-		}
-
-	      pvna += vna_next;
-	    }
-
-	  const unsigned int vn_next = verneed.get_vn_next();
-	  if ((p - pverneed) + vn_next >= verneed_size)
-	    {
-	      fprintf(stderr,
-		      _("%s: %s: verneed vn_next field out of range: %u\n"),
-		      program_name, this->name().c_str(), vn_next);
-	      gold_exit(false);
-	    }
-
-	  p += vn_next;
-	}
-    }
-
-  // Now MAXVER is the largest version index we have seen.
-
-  version_map->resize(maxver + 1);
-
-  const char* names = reinterpret_cast<const char*>(sd->symbol_names->data());
-  off_t names_size = sd->symbol_names_size;
-
-  if (sd->verdef != NULL)
-    {
-      const unsigned char* pverdef = sd->verdef->data();
-      off_t verdef_size = sd->verdef_size;
-      const unsigned int count = sd->verdef_info;
-
-      const unsigned char* p = pverdef;
-      for (unsigned int i = 0; i < count; ++i)
-	{
-	  elfcpp::Verdef<size, big_endian> verdef(p);
-
-	  const unsigned int vd_cnt = verdef.get_vd_cnt();
-	  if (vd_cnt < 1)
-	    {
-	      fprintf(stderr, _("%s: %s: verdef vd_cnt field too small: %u\n"),
-		      program_name, this->name().c_str(), vd_cnt);
-	      gold_exit(false);
-	    }
-
-	  const unsigned int vd_aux = verdef.get_vd_aux();
-	  if ((p - pverdef) + vd_aux >= verdef_size)
-	    {
-	      fprintf(stderr,
-		      _("%s: %s: verdef vd_aux field out of range: %u\n"),
-		      program_name, this->name().c_str(), vd_aux);
-	      gold_exit(false);
-	    }
-
-	  const unsigned char* pvda = p + vd_aux;
-	  elfcpp::Verdaux<size, big_endian> verdaux(pvda);
-
-	  const unsigned int vda_name = verdaux.get_vda_name();
-	  if (vda_name >= names_size)
-	    {
-	      fprintf(stderr,
-		      _("%s: %s: verdaux vda_name field out of range: %u\n"),
-		      program_name, this->name().c_str(), vda_name);
-	      gold_exit(false);
-	    }
-
-	  this->set_version_map(version_map, verdef.get_vd_ndx(),
-				names + vda_name);
-
-	  const unsigned int vd_next = verdef.get_vd_next();
-	  if ((p - pverdef) + vd_next >= verdef_size)
-	    {
-	      fprintf(stderr,
-		      _("%s: %s: verdef vd_next field out of range: %u\n"),
-		      program_name, this->name().c_str(), vd_next);
-	      gold_exit(false);
-	    }
-
-	  p += vd_next;
-	}
-    }
-
-  if (sd->verneed != NULL)
-    {
-      const unsigned char* pverneed = sd->verneed->data();
-      const unsigned int count = sd->verneed_info;
-
-      const unsigned char* p = pverneed;
-      for (unsigned int i = 0; i < count; ++i)
-	{
-	  elfcpp::Verneed<size, big_endian> verneed(p);
-
-	  const unsigned int vn_aux = verneed.get_vn_aux();
-	  const unsigned int vn_cnt = verneed.get_vn_cnt();
-	  const unsigned char* pvna = p + vn_aux;
-	  for (unsigned int j = 0; j < vn_cnt; ++j)
-	    {
-	      elfcpp::Vernaux<size, big_endian> vernaux(pvna);
-
-	      const unsigned int vna_name = vernaux.get_vna_name();
-	      if (vna_name >= names_size)
-		{
-		  fprintf(stderr,
-			  _("%s: %s: vernaux vna_name field "
-			    "out of range: %u\n"),
-			  program_name, this->name().c_str(), vna_name);
-		  gold_exit(false);
-		}
-
-	      this->set_version_map(version_map, vernaux.get_vna_other(),
-				    names + vna_name);
-
-	      pvna += vernaux.get_vna_next();
-	    }
-
-	  p += verneed.get_vn_next();
-	}
-    }
+  this->make_verdef_map(sd, version_map);
+  this->make_verneed_map(sd, version_map);
 }
 
 // Add the dynamic symbols to the symbol table.
@@ -1059,6 +1044,478 @@ Dynobj::sized_create_gnu_hash_table(
   *pphash = phash;
 }
 
+// Verdef methods.
+
+// Write this definition to a buffer for the output section.
+
+template<int size, bool big_endian>
+unsigned char*
+Verdef::write(const Stringpool* dynpool, bool is_last, unsigned char* pb) const
+{
+  const int verdef_size = elfcpp::Elf_sizes<size>::verdef_size;
+  const int verdaux_size = elfcpp::Elf_sizes<size>::verdaux_size;
+
+  elfcpp::Verdef_write<size, big_endian> vd(pb);
+  vd.set_vd_version(elfcpp::VER_DEF_CURRENT);
+  vd.set_vd_flags((this->is_base_ ? elfcpp::VER_FLG_BASE : 0)
+		  | (this->is_weak_ ? elfcpp::VER_FLG_WEAK : 0));
+  vd.set_vd_ndx(this->index());
+  vd.set_vd_cnt(1 + this->deps_.size());
+  vd.set_vd_hash(Dynobj::elf_hash(this->name()));
+  vd.set_vd_aux(verdef_size);
+  vd.set_vd_next(is_last
+		 ? 0
+		 : verdef_size + (1 + this->deps_.size()) * verdaux_size);
+  pb += verdef_size;
+
+  elfcpp::Verdaux_write<size, big_endian> vda(pb);
+  vda.set_vda_name(dynpool->get_offset(this->name()));
+  vda.set_vda_next(this->deps_.empty() ? 0 : verdaux_size);
+  pb += verdaux_size;
+
+  Deps::const_iterator p;
+  unsigned int i;
+  for (p = this->deps_.begin(), i = 0;
+       p != this->deps_.end();
+       ++p, ++i)
+    {
+      elfcpp::Verdaux_write<size, big_endian> vda(pb);
+      vda.set_vda_name(dynpool->get_offset(*p));
+      vda.set_vda_next(i + 1 >= this->deps_.size() ? 0 : verdaux_size);
+      pb += verdaux_size;
+    }
+
+  return pb;
+}
+
+// Verneed methods.
+
+Verneed::~Verneed()
+{
+  for (Need_versions::iterator p = this->need_versions_.begin();
+       p != this->need_versions_.end();
+       ++p)
+    delete *p;
+}
+
+// Add a new version to this file reference.
+
+Verneed_version*
+Verneed::add_name(const char* name)
+{
+  Verneed_version* vv = new Verneed_version(name);
+  this->need_versions_.push_back(vv);
+  return vv;
+}
+
+// Set the version indexes starting at INDEX.
+
+unsigned int
+Verneed::finalize(unsigned int index)
+{
+  for (Need_versions::iterator p = this->need_versions_.begin();
+       p != this->need_versions_.end();
+       ++p)
+    {
+      (*p)->set_index(index);
+      ++index;
+    }
+  return index;
+}
+
+// Write this list of referenced versions to a buffer for the output
+// section.
+
+template<int size, bool big_endian>
+unsigned char*
+Verneed::write(const Stringpool* dynpool, bool is_last,
+	       unsigned char* pb) const
+{
+  const int verneed_size = elfcpp::Elf_sizes<size>::verneed_size;
+  const int vernaux_size = elfcpp::Elf_sizes<size>::vernaux_size;
+
+  elfcpp::Verneed_write<size, big_endian> vn(pb);
+  vn.set_vn_version(elfcpp::VER_NEED_CURRENT);
+  vn.set_vn_cnt(this->need_versions_.size());
+  vn.set_vn_file(dynpool->get_offset(this->filename()));
+  vn.set_vn_aux(verneed_size);
+  vn.set_vn_next(is_last
+		 ? 0
+		 : verneed_size + this->need_versions_.size() * vernaux_size);
+  pb += verneed_size;
+
+  Need_versions::const_iterator p;
+  unsigned int i;
+  for (p = this->need_versions_.begin(), i = 0;
+       p != this->need_versions_.end();
+       ++p, ++i)
+    {
+      elfcpp::Vernaux_write<size, big_endian> vna(pb);
+      vna.set_vna_hash(Dynobj::elf_hash((*p)->version()));
+      // FIXME: We need to sometimes set VER_FLG_WEAK here.
+      vna.set_vna_flags(0);
+      vna.set_vna_other((*p)->index());
+      vna.set_vna_name(dynpool->get_offset((*p)->version()));
+      vna.set_vna_next(i + 1 >= this->need_versions_.size()
+		       ? 0
+		       : vernaux_size);
+      pb += vernaux_size;
+    }
+
+  return pb;
+}
+
+// Versions methods.
+
+Versions::~Versions()
+{
+  for (Defs::iterator p = this->defs_.begin();
+       p != this->defs_.end();
+       ++p)
+    delete *p;
+
+  for (Needs::iterator p = this->needs_.begin();
+       p != this->needs_.end();
+       ++p)
+    delete *p;
+}
+
+// Record version information for a symbol going into the dynamic
+// symbol table.
+
+void
+Versions::record_version(const General_options* options,
+			 Stringpool* dynpool, const Symbol* sym)
+{
+  gold_assert(!this->is_finalized_);
+  gold_assert(sym->version() != NULL);
+
+  Stringpool::Key version_key;
+  const char* version = dynpool->add(sym->version(), &version_key);
+
+  if (!sym->is_from_dynobj())
+    this->add_def(options, sym, version, version_key);
+  else
+    {
+      // This is a version reference.
+
+      Object* object = sym->object();
+      gold_assert(object->is_dynamic());
+      Dynobj* dynobj = static_cast<Dynobj*>(object);
+
+      this->add_need(dynpool, dynobj->soname(), version, version_key);
+    }
+}
+
+// We've found a symbol SYM defined in version VERSION.
+
+void
+Versions::add_def(const General_options* options, const Symbol* sym,
+		  const char* version, Stringpool::Key version_key)
+{
+  Key k(version_key, 0);
+  Version_base* const vbnull = NULL;
+  std::pair<Version_table::iterator, bool> ins =
+    this->version_table_.insert(std::make_pair(k, vbnull));
+
+  if (!ins.second)
+    {
+      // We already have an entry for this version.
+      Version_base* vb = ins.first->second;
+
+      // We have now seen a symbol in this version, so it is not
+      // weak.
+      vb->clear_weak();
+
+      // FIXME: When we support version scripts, we will need to
+      // check whether this symbol should be forced local.
+    }
+  else
+    {
+      // If we are creating a shared object, it is an error to
+      // find a definition of a symbol with a version which is not
+      // in the version script.
+      if (options->is_shared())
+	{
+	  fprintf(stderr, _("%s: symbol %s has undefined version %s\n"),
+		  program_name, sym->name(), version);
+	  gold_exit(false);
+	}
+
+      // If this is the first version we are defining, first define
+      // the base version.  FIXME: Should use soname here when
+      // creating a shared object.
+      Verdef* vdbase = new Verdef(options->output_file_name(), true, false,
+				  true);
+      this->defs_.push_back(vdbase);
+
+      // When creating a regular executable, automatically define
+      // a new version.
+      Verdef* vd = new Verdef(version, false, false, false);
+      this->defs_.push_back(vd);
+      ins.first->second = vd;
+    }
+}
+
+// Add a reference to version NAME in file FILENAME.
+
+void
+Versions::add_need(Stringpool* dynpool, const char* filename, const char* name,
+		   Stringpool::Key name_key)
+{
+  Stringpool::Key filename_key;
+  filename = dynpool->add(filename, &filename_key);
+
+  Key k(name_key, filename_key);
+  Version_base* const vbnull = NULL;
+  std::pair<Version_table::iterator, bool> ins =
+    this->version_table_.insert(std::make_pair(k, vbnull));
+
+  if (!ins.second)
+    {
+      // We already have an entry for this filename/version.
+      return;
+    }
+
+  // See whether we already have this filename.  We don't expect many
+  // version references, so we just do a linear search.  This could be
+  // replaced by a hash table.
+  Verneed* vn = NULL;
+  for (Needs::iterator p = this->needs_.begin();
+       p != this->needs_.end();
+       ++p)
+    {
+      if ((*p)->filename() == filename)
+	{
+	  vn = *p;
+	  break;
+	}
+    }
+
+  if (vn == NULL)
+    {
+      // We have a new filename.
+      vn = new Verneed(filename);
+      this->needs_.push_back(vn);
+    }
+
+  ins.first->second = vn->add_name(name);
+}
+
+// Set the version indexes.  Create a new dynamic version symbol for
+// each new version definition.
+
+unsigned int
+Versions::finalize(const Target* target, Symbol_table* symtab,
+		   unsigned int dynsym_index, std::vector<Symbol*>* syms)
+{
+  gold_assert(!this->is_finalized_);
+
+  unsigned int vi = 1;
+
+  for (Defs::iterator p = this->defs_.begin();
+       p != this->defs_.end();
+       ++p)
+    {
+      (*p)->set_index(vi);
+      ++vi;
+
+      // Create a version symbol if necessary.
+      if (!(*p)->is_symbol_created())
+	{
+	  Symbol* vsym =symtab->define_as_constant(target, (*p)->name(),
+						   (*p)->name(), 0, 0,
+						   elfcpp::STT_OBJECT,
+						   elfcpp::STB_GLOBAL,
+						   elfcpp::STV_DEFAULT, 0,
+						   false);
+	  vsym->set_needs_dynsym_entry();
+	  ++dynsym_index;
+	  syms->push_back(vsym);
+	  // The name is already in the dynamic pool.
+	}
+    }
+
+  // Index 1 is used for global symbols.
+  if (vi == 1)
+    {
+      gold_assert(this->defs_.empty());
+      vi = 2;
+    }
+
+  for (Needs::iterator p = this->needs_.begin();
+       p != this->needs_.end();
+       ++p)
+    vi = (*p)->finalize(vi);
+
+  this->is_finalized_ = true;
+
+  return dynsym_index;
+}
+
+// Return the version index to use for a symbol.  This does two hash
+// table lookups: one in DYNPOOL and one in this->version_table_.
+// Another approach alternative would be store a pointer in SYM, which
+// would increase the size of the symbol table.  Or perhaps we could
+// use a hash table from dynamic symbol pointer values to Version_base
+// pointers.
+
+unsigned int
+Versions::version_index(const Stringpool* dynpool, const Symbol* sym) const
+{
+  Stringpool::Key version_key;
+  const char* version = dynpool->find(sym->version(), &version_key);
+  gold_assert(version != NULL);
+
+  Version_table::const_iterator p;
+  if (!sym->is_from_dynobj())
+    {
+      Key k(version_key, 0);
+      p = this->version_table_.find(k);
+    }
+  else
+    {
+      Object* object = sym->object();
+      gold_assert(object->is_dynamic());
+      Dynobj* dynobj = static_cast<Dynobj*>(object);
+
+      Stringpool::Key filename_key;
+      const char* filename = dynpool->find(dynobj->soname(), &filename_key);
+      gold_assert(filename != NULL);
+
+      Key k(version_key, filename_key);
+      p = this->version_table_.find(k);
+    }
+
+  gold_assert(p != this->version_table_.end());
+
+  return p->second->index();
+}
+
+// Return an allocated buffer holding the contents of the symbol
+// version section.
+
+template<int size, bool big_endian>
+void
+Versions::symbol_section_contents(const Stringpool* dynpool,
+				  unsigned int local_symcount,
+				  const std::vector<Symbol*>& syms,
+				  unsigned char** pp,
+				  unsigned int* psize) const
+{
+  gold_assert(this->is_finalized_);
+
+  unsigned int sz = (local_symcount + syms.size()) * 2;
+  unsigned char* pbuf = new unsigned char[sz];
+
+  for (unsigned int i = 0; i < local_symcount; ++i)
+    elfcpp::Swap<16, big_endian>::writeval(pbuf + i * 2,
+					   elfcpp::VER_NDX_LOCAL);
+
+  for (std::vector<Symbol*>::const_iterator p = syms.begin();
+       p != syms.end();
+       ++p)
+    {
+      unsigned int version_index;
+      const char* version = (*p)->version();
+      if (version == NULL)
+	version_index = elfcpp::VER_NDX_GLOBAL;
+      else
+	version_index = this->version_index(dynpool, *p);
+      elfcpp::Swap<16, big_endian>::writeval(pbuf + (*p)->dynsym_index() * 2,
+					     version_index);
+    }
+
+  *pp = pbuf;
+  *psize = sz;
+}
+
+// Return an allocated buffer holding the contents of the version
+// definition section.
+
+template<int size, bool big_endian>
+void
+Versions::def_section_contents(const Stringpool* dynpool,
+			       unsigned char** pp, unsigned int* psize,
+			       unsigned int* pentries) const
+{
+  gold_assert(this->is_finalized_);
+  gold_assert(!this->defs_.empty());
+
+  const int verdef_size = elfcpp::Elf_sizes<size>::verdef_size;
+  const int verdaux_size = elfcpp::Elf_sizes<size>::verdaux_size;
+
+  unsigned int sz = 0;
+  for (Defs::const_iterator p = this->defs_.begin();
+       p != this->defs_.end();
+       ++p)
+    {
+      sz += verdef_size + verdaux_size;
+      sz += (*p)->count_dependencies() * verdaux_size;
+    }
+
+  unsigned char* pbuf = new unsigned char[sz];
+
+  unsigned char* pb = pbuf;
+  Defs::const_iterator p;
+  unsigned int i;
+  for (p = this->defs_.begin(), i = 0;
+       p != this->defs_.end();
+       ++p, ++i)
+    pb = (*p)->write<size, big_endian>(dynpool,
+				       i + 1 >= this->defs_.size(),
+				       pb);
+
+  gold_assert(static_cast<unsigned int>(pb - pbuf) == sz);
+
+  *pp = pbuf;
+  *psize = sz;
+  *pentries = this->defs_.size();
+}
+
+// Return an allocated buffer holding the contents of the version
+// reference section.
+
+template<int size, bool big_endian>
+void
+Versions::need_section_contents(const Stringpool* dynpool,
+				unsigned char** pp, unsigned int *psize,
+				unsigned int *pentries) const
+{
+  gold_assert(this->is_finalized_);
+  gold_assert(!this->needs_.empty());
+
+  const int verneed_size = elfcpp::Elf_sizes<size>::verneed_size;
+  const int vernaux_size = elfcpp::Elf_sizes<size>::vernaux_size;
+
+  unsigned int sz = 0;
+  for (Needs::const_iterator p = this->needs_.begin();
+       p != this->needs_.end();
+       ++p)
+    {
+      sz += verneed_size;
+      sz += (*p)->count_versions() * vernaux_size;
+    }
+
+  unsigned char* pbuf = new unsigned char[sz];
+
+  unsigned char* pb = pbuf;
+  Needs::const_iterator p;
+  unsigned int i;
+  for (p = this->needs_.begin(), i = 0;
+       p != this->needs_.end();
+       ++p, ++i)
+    pb = (*p)->write<size, big_endian>(dynpool,
+				       i + 1 >= this->needs_.size(),
+				       pb);
+
+  gold_assert(static_cast<unsigned int>(pb - pbuf) == sz);
+
+  *pp = pbuf;
+  *psize = sz;
+  *pentries = this->needs_.size();
+}
+
 // Instantiate the templates we need.  We could use the configure
 // script to restrict this to only the ones for implemented targets.
 
@@ -1073,5 +1530,93 @@ class Sized_dynobj<64, false>;
 
 template
 class Sized_dynobj<64, true>;
+
+template
+void
+Versions::symbol_section_contents<32, false>(const Stringpool*,
+					     unsigned int,
+					     const std::vector<Symbol*>&,
+					     unsigned char**,
+					     unsigned int*) const;
+
+template
+void
+Versions::symbol_section_contents<32, true>(const Stringpool*,
+					    unsigned int,
+					    const std::vector<Symbol*>&,
+					    unsigned char**,
+					    unsigned int*) const;
+
+template
+void
+Versions::symbol_section_contents<64, false>(const Stringpool*,
+					     unsigned int,
+					     const std::vector<Symbol*>&,
+					     unsigned char**,
+					     unsigned int*) const;
+
+template
+void
+Versions::symbol_section_contents<64, true>(const Stringpool*,
+					    unsigned int,
+					    const std::vector<Symbol*>&,
+					    unsigned char**,
+					    unsigned int*) const;
+
+template
+void
+Versions::def_section_contents<32, false>(const Stringpool*,
+					  unsigned char**,
+					  unsigned int*,
+					  unsigned int*) const;
+
+template
+void
+Versions::def_section_contents<32, true>(const Stringpool*,
+					 unsigned char**,
+					 unsigned int*,
+					 unsigned int*) const;
+
+template
+void
+Versions::def_section_contents<64, false>(const Stringpool*,
+					  unsigned char**,
+					  unsigned int*,
+					  unsigned int*) const;
+
+template
+void
+Versions::def_section_contents<64, true>(const Stringpool*,
+					 unsigned char**,
+					 unsigned int*,
+					 unsigned int*) const;
+
+template
+void
+Versions::need_section_contents<32, false>(const Stringpool*,
+					   unsigned char**,
+					   unsigned int*,
+					   unsigned int*) const;
+
+template
+void
+Versions::need_section_contents<32, true>(const Stringpool*,
+					  unsigned char**,
+					  unsigned int*,
+					  unsigned int*) const;
+
+template
+void
+Versions::need_section_contents<64, false>(const Stringpool*,
+					   unsigned char**,
+					   unsigned int*,
+					   unsigned int*) const;
+
+template
+void
+Versions::need_section_contents<64, true>(const Stringpool*,
+					  unsigned char**,
+					  unsigned int*,
+					  unsigned int*) const;
 
 } // End namespace gold.

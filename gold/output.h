@@ -1165,7 +1165,7 @@ class Output_section : public Output_data
 
   // Set the link field to the output section index of a section.
   void
-  set_link_section(Output_data* od)
+  set_link_section(const Output_data* od)
   {
     gold_assert(this->link_ == 0
 		&& !this->should_link_to_symtab_
@@ -1213,7 +1213,7 @@ class Output_section : public Output_data
 
   // Set the info field to the output section index of a section.
   void
-  set_info_section(Output_data* od)
+  set_info_section(const Output_data* od)
   {
     gold_assert(this->info_ == 0);
     this->info_section_ = od;
@@ -1417,11 +1417,11 @@ class Output_section : public Output_data
   uint64_t entsize_;
   // The file offset is in the parent class.
   // Set the section link field to the index of this section.
-  Output_data* link_section_;
+  const Output_data* link_section_;
   // If link_section_ is NULL, this is the link field.
   unsigned int link_;
   // Set the section info field to the index of this section.
-  Output_data* info_section_;
+  const Output_data* info_section_;
   // If info_section_ is NULL, this is the section info field.
   unsigned int info_;
   // The section type.

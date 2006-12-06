@@ -692,6 +692,11 @@ struct Elf_sizes
   static const int rela_size = sizeof(internal::Rela_data<size>);
   // Size of ELF dynamic entry.
   static const int dyn_size = sizeof(internal::Dyn_data<size>);
+  // Size of ELF version structures.
+  static const int verdef_size = sizeof(internal::Verdef_data);
+  static const int verdaux_size = sizeof(internal::Verdaux_data);
+  static const int verneed_size = sizeof(internal::Verneed_data);
+  static const int vernaux_size = sizeof(internal::Vernaux_data);
 };
 
 // Accessor class for the ELF file header.
@@ -1378,6 +1383,46 @@ class Verdef
   const internal::Verdef_data* p_;
 };
 
+template<int size, bool big_endian>
+class Verdef_write
+{
+ public:
+  Verdef_write(unsigned char* p)
+    : p_(reinterpret_cast<internal::Verdef_data*>(p))
+  { }
+
+  void
+  set_vd_version(Elf_Half v)
+  { this->p_->vd_version = Convert<16, big_endian>::convert_host(v); }
+
+  void
+  set_vd_flags(Elf_Half v)
+  { this->p_->vd_flags = Convert<16, big_endian>::convert_host(v); }
+
+  void
+  set_vd_ndx(Elf_Half v)
+  { this->p_->vd_ndx = Convert<16, big_endian>::convert_host(v); }
+
+  void
+  set_vd_cnt(Elf_Half v)
+  { this->p_->vd_cnt = Convert<16, big_endian>::convert_host(v); }
+
+  void
+  set_vd_hash(Elf_Word v)
+  { this->p_->vd_hash = Convert<32, big_endian>::convert_host(v); }
+
+  void
+  set_vd_aux(Elf_Word v)
+  { this->p_->vd_aux = Convert<32, big_endian>::convert_host(v); }
+
+  void
+  set_vd_next(Elf_Word v)
+  { this->p_->vd_next = Convert<32, big_endian>::convert_host(v); }
+
+ private:
+  internal::Verdef_data* p_;
+};
+
 // Accessor classes for auxiliary entries in the ELF SHT_GNU_verdef
 // section.
 
@@ -1405,6 +1450,26 @@ class Verdaux
 
  private:
   const internal::Verdaux_data* p_;
+};
+
+template<int size, bool big_endian>
+class Verdaux_write
+{
+ public:
+  Verdaux_write(unsigned char* p)
+    : p_(reinterpret_cast<internal::Verdaux_data*>(p))
+  { }
+
+  void
+  set_vda_name(Elf_Word v)
+  { this->p_->vda_name = Convert<32, big_endian>::convert_host(v); }
+
+  void
+  set_vda_next(Elf_Word v)
+  { this->p_->vda_next = Convert<32, big_endian>::convert_host(v); }
+
+ private:
+  internal::Verdaux_data* p_;
 };
 
 // Accessor classes for entries in the ELF SHT_GNU_verneed section.
@@ -1445,6 +1510,38 @@ class Verneed
 
  private:
   const internal::Verneed_data* p_;
+};
+
+template<int size, bool big_endian>
+class Verneed_write
+{
+ public:
+  Verneed_write(unsigned char* p)
+    : p_(reinterpret_cast<internal::Verneed_data*>(p))
+  { }
+
+  void
+  set_vn_version(Elf_Half v)
+  { this->p_->vn_version = Convert<16, big_endian>::convert_host(v); }
+
+  void
+  set_vn_cnt(Elf_Half v)
+  { this->p_->vn_cnt = Convert<16, big_endian>::convert_host(v); }
+
+  void
+  set_vn_file(Elf_Word v)
+  { this->p_->vn_file = Convert<32, big_endian>::convert_host(v); }
+
+  void
+  set_vn_aux(Elf_Word v)
+  { this->p_->vn_aux = Convert<32, big_endian>::convert_host(v); }
+
+  void
+  set_vn_next(Elf_Word v)
+  { this->p_->vn_next = Convert<32, big_endian>::convert_host(v); }
+
+ private:
+  internal::Verneed_data* p_;
 };
 
 // Accessor classes for auxiliary entries in the ELF SHT_GNU_verneed
@@ -1488,6 +1585,37 @@ class Vernaux
   const internal::Vernaux_data* p_;
 };
 
+template<int size, bool big_endian>
+class Vernaux_write
+{
+ public:
+  Vernaux_write(unsigned char* p)
+    : p_(reinterpret_cast<internal::Vernaux_data*>(p))
+  { }
+
+  void
+  set_vna_hash(Elf_Word v)
+  { this->p_->vna_hash = Convert<32, big_endian>::convert_host(v); }
+
+  void
+  set_vna_flags(Elf_Half v)
+  { this->p_->vna_flags = Convert<16, big_endian>::convert_host(v); }
+
+  void
+  set_vna_other(Elf_Half v)
+  { this->p_->vna_other = Convert<16, big_endian>::convert_host(v); }
+
+  void
+  set_vna_name(Elf_Word v)
+  { this->p_->vna_name = Convert<32, big_endian>::convert_host(v); }
+
+  void
+  set_vna_next(Elf_Word v)
+  { this->p_->vna_next = Convert<32, big_endian>::convert_host(v); }
+
+ private:
+  internal::Vernaux_data* p_;
+};
 
 } // End namespace elfcpp.
 

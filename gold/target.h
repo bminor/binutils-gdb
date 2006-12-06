@@ -145,15 +145,17 @@ class Sized_target : public Target
   // symbol table.  This will only be called if has_make_symbol()
   // returns true.
   virtual Sized_symbol<size>*
-  make_symbol()
+  make_symbol() const
   { gold_unreachable(); }
 
   // Resolve a symbol for the target.  This should be overridden by a
   // target which needs to take special action.  TO is the
   // pre-existing symbol.  SYM is the new symbol, seen in OBJECT.
-  // This will only be called if has_resolve() returns true.
+  // VERSION is the version of SYM.  This will only be called if
+  // has_resolve() returns true.
   virtual void
-  resolve(Symbol*, const elfcpp::Sym<size, big_endian>&, Object*)
+  resolve(Symbol*, const elfcpp::Sym<size, big_endian>&, Object*,
+	  const char*)
   { gold_unreachable(); }
 
   // Scan the relocs for a section, and record any information

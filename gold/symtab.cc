@@ -248,8 +248,8 @@ Symbol_table::lookup(const char* name, const char* version) const
 
 template<int size, bool big_endian>
 void
-Symbol_table::resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from
-                      ACCEPT_SIZE_ENDIAN)
+Symbol_table::resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from,
+		      const char* version ACCEPT_SIZE_ENDIAN)
 {
   unsigned char buf[elfcpp::Elf_sizes<size>::sym_size];
   elfcpp::Sym_write<size, big_endian> esym(buf);
@@ -259,7 +259,7 @@ Symbol_table::resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from
   esym.put_st_info(from->binding(), from->type());
   esym.put_st_other(from->visibility(), from->nonvis());
   esym.put_st_shndx(from->shndx());
-  Symbol_table::resolve(to, esym.sym(), from->object());
+  Symbol_table::resolve(to, esym.sym(), from->object(), version);
 }
 
 // Add one symbol from OBJECT to the symbol table.  NAME is symbol
@@ -328,7 +328,7 @@ Symbol_table::add_from_object(Object* object,
       was_undefined = ret->is_undefined();
       was_common = ret->is_common();
 
-      Symbol_table::resolve(ret, sym, object);
+      Symbol_table::resolve(ret, sym, object, version);
 
       if (def)
 	{
@@ -347,7 +347,7 @@ Symbol_table::add_from_object(Object* object,
 		insdef.first->second
                 SELECT_SIZE(size));
 	      Symbol_table::resolve SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
-		ret, sym2 SELECT_SIZE_ENDIAN(size, big_endian));
+		ret, sym2, version SELECT_SIZE_ENDIAN(size, big_endian));
 	      this->make_forwarder(insdef.first->second, ret);
 	      insdef.first->second = ret;
 	    }
@@ -363,12 +363,12 @@ Symbol_table::add_from_object(Object* object,
 
       if (def && !insdef.second)
 	{
-	  // We already have an entry for NAME/NULL.  Make
-	  // NAME/VERSION point to it.
+	  // We already have an entry for NAME/NULL.  If we override
+	  // it, then change it to NAME/VERSION.
 	  ret = this->get_sized_symbol SELECT_SIZE_NAME(size) (
               insdef.first->second
               SELECT_SIZE(size));
-	  Symbol_table::resolve(ret, sym, object);
+	  Symbol_table::resolve(ret, sym, object, version);
 	  ins.first->second = ret;
 	}
       else
@@ -649,8 +649,8 @@ Symbol_table::add_from_dynobj(
 
 template<int size, bool big_endian>
 Sized_symbol<size>*
-Symbol_table::define_special_symbol(Target* target, const char* name,
-				    bool only_if_ref
+Symbol_table::define_special_symbol(const Target* target, const char* name,
+				    const char* version, bool only_if_ref
                                     ACCEPT_SIZE_ENDIAN)
 {
   gold_assert(this->size_ == size);
@@ -660,29 +660,34 @@ Symbol_table::define_special_symbol(Target* target, const char* name,
 
   if (only_if_ref)
     {
-      oldsym = this->lookup(name, NULL);
+      oldsym = this->lookup(name, version);
       if (oldsym == NULL || !oldsym->is_undefined())
 	return NULL;
       sym = NULL;
 
-      // Canonicalize NAME.
+      // Canonicalize NAME and VERSION.
       name = oldsym->name();
+      version = oldsym->version();
     }
   else
     {
-      // Canonicalize NAME.
+      // Canonicalize NAME and VERSION.
       Stringpool::Key name_key;
       name = this->namepool_.add(name, &name_key);
 
+      Stringpool::Key version_key = 0;
+      if (version != NULL)
+	version = this->namepool_.add(version, &version_key);
+
       Symbol* const snull = NULL;
-      const Stringpool::Key ver_key = 0;
       std::pair<typename Symbol_table_type::iterator, bool> ins =
-	this->table_.insert(std::make_pair(std::make_pair(name_key, ver_key),
+	this->table_.insert(std::make_pair(std::make_pair(name_key,
+							  version_key),
 					   snull));
 
       if (!ins.second)
 	{
-	  // We already have a symbol table entry for NAME.
+	  // We already have a symbol table entry for NAME/VERSION.
 	  oldsym = ins.first->second;
 	  gold_assert(oldsym != NULL);
 	  sym = NULL;
@@ -699,7 +704,8 @@ Symbol_table::define_special_symbol(Target* target, const char* name,
 	      gold_assert(target->get_size() == size);
 	      gold_assert(target->is_big_endian() ? big_endian : !big_endian);
 	      typedef Sized_target<size, big_endian> My_target;
-	      My_target* sized_target = static_cast<My_target*>(target);
+	      const My_target* sized_target =
+		static_cast<const My_target*>(target);
 	      sym = sized_target->make_symbol();
 	      if (sym == NULL)
 		return NULL;
@@ -737,9 +743,9 @@ Symbol_table::define_special_symbol(Target* target, const char* name,
 
 // Define a symbol based on an Output_data.
 
-void
-Symbol_table::define_in_output_data(Target* target, const char* name,
-				    Output_data* od,
+Symbol*
+Symbol_table::define_in_output_data(const Target* target, const char* name,
+				    const char* version, Output_data* od,
 				    uint64_t value, uint64_t symsize,
 				    elfcpp::STT type, elfcpp::STB binding,
 				    elfcpp::STV visibility,
@@ -749,13 +755,15 @@ Symbol_table::define_in_output_data(Target* target, const char* name,
 {
   gold_assert(target->get_size() == this->size_);
   if (this->size_ == 32)
-    this->do_define_in_output_data<32>(target, name, od, value, symsize,
-				       type, binding, visibility, nonvis,
-				       offset_is_from_end, only_if_ref);
+    return this->do_define_in_output_data<32>(target, name, version, od, value,
+					      symsize, type, binding,
+					      visibility, nonvis,
+					      offset_is_from_end, only_if_ref);
   else if (this->size_ == 64)
-    this->do_define_in_output_data<64>(target, name, od, value, symsize,
-				       type, binding, visibility, nonvis,
-				       offset_is_from_end, only_if_ref);
+    return this->do_define_in_output_data<64>(target, name, version, od, value,
+					      symsize, type, binding,
+					      visibility, nonvis,
+					      offset_is_from_end, only_if_ref);
   else
     gold_unreachable();
 }
@@ -763,10 +771,11 @@ Symbol_table::define_in_output_data(Target* target, const char* name,
 // Define a symbol in an Output_data, sized version.
 
 template<int size>
-void
+Sized_symbol<size>*
 Symbol_table::do_define_in_output_data(
-    Target* target,
+    const Target* target,
     const char* name,
+    const char* version,
     Output_data* od,
     typename elfcpp::Elf_types<size>::Elf_Addr value,
     typename elfcpp::Elf_types<size>::Elf_WXword symsize,
@@ -781,25 +790,27 @@ Symbol_table::do_define_in_output_data(
 
   if (target->is_big_endian())
     sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, true) (
-        target, name, only_if_ref
+	target, name, version, only_if_ref
         SELECT_SIZE_ENDIAN(size, true));
   else
     sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, false) (
-        target, name, only_if_ref
+        target, name, version, only_if_ref
         SELECT_SIZE_ENDIAN(size, false));
 
   if (sym == NULL)
-    return;
+    return NULL;
 
   sym->init(name, od, value, symsize, type, binding, visibility, nonvis,
 	    offset_is_from_end);
+
+  return sym;
 }
 
 // Define a symbol based on an Output_segment.
 
-void
-Symbol_table::define_in_output_segment(Target* target, const char* name,
-				       Output_segment* os,
+Symbol*
+Symbol_table::define_in_output_segment(const Target* target, const char* name,
+				       const char* version, Output_segment* os,
 				       uint64_t value, uint64_t symsize,
 				       elfcpp::STT type, elfcpp::STB binding,
 				       elfcpp::STV visibility,
@@ -809,13 +820,15 @@ Symbol_table::define_in_output_segment(Target* target, const char* name,
 {
   gold_assert(target->get_size() == this->size_);
   if (this->size_ == 32)
-    this->do_define_in_output_segment<32>(target, name, os, value, symsize,
-					  type, binding, visibility, nonvis,
-					  offset_base, only_if_ref);
+    return this->do_define_in_output_segment<32>(target, name, version, os,
+						 value, symsize, type, binding,
+						 visibility, nonvis,
+						 offset_base, only_if_ref);
   else if (this->size_ == 64)
-    this->do_define_in_output_segment<64>(target, name, os, value, symsize,
-					  type, binding, visibility, nonvis,
-					  offset_base, only_if_ref);
+    return this->do_define_in_output_segment<64>(target, name, version, os,
+						 value, symsize, type, binding,
+						 visibility, nonvis,
+						 offset_base, only_if_ref);
   else
     gold_unreachable();
 }
@@ -823,10 +836,11 @@ Symbol_table::define_in_output_segment(Target* target, const char* name,
 // Define a symbol in an Output_segment, sized version.
 
 template<int size>
-void
+Sized_symbol<size>*
 Symbol_table::do_define_in_output_segment(
-    Target* target,
+    const Target* target,
     const char* name,
+    const char* version,
     Output_segment* os,
     typename elfcpp::Elf_types<size>::Elf_Addr value,
     typename elfcpp::Elf_types<size>::Elf_WXword symsize,
@@ -841,39 +855,41 @@ Symbol_table::do_define_in_output_segment(
 
   if (target->is_big_endian())
     sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, true) (
-        target, name, only_if_ref
+        target, name, version, only_if_ref
         SELECT_SIZE_ENDIAN(size, true));
   else
     sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, false) (
-        target, name, only_if_ref
+        target, name, version, only_if_ref
         SELECT_SIZE_ENDIAN(size, false));
 
   if (sym == NULL)
-    return;
+    return NULL;
 
   sym->init(name, os, value, symsize, type, binding, visibility, nonvis,
 	    offset_base);
+
+  return sym;
 }
 
 // Define a special symbol with a constant value.  It is a multiple
 // definition error if this symbol is already defined.
 
-void
-Symbol_table::define_as_constant(Target* target, const char* name,
-				 uint64_t value, uint64_t symsize,
-				 elfcpp::STT type, elfcpp::STB binding,
-				 elfcpp::STV visibility, unsigned char nonvis,
-				 bool only_if_ref)
+Symbol*
+Symbol_table::define_as_constant(const Target* target, const char* name,
+				 const char* version, uint64_t value,
+				 uint64_t symsize, elfcpp::STT type,
+				 elfcpp::STB binding, elfcpp::STV visibility,
+				 unsigned char nonvis, bool only_if_ref)
 {
   gold_assert(target->get_size() == this->size_);
   if (this->size_ == 32)
-    this->do_define_as_constant<32>(target, name, value, symsize,
-				    type, binding, visibility, nonvis,
-				    only_if_ref);
+    return this->do_define_as_constant<32>(target, name, version, value,
+					   symsize, type, binding, visibility,
+					   nonvis, only_if_ref);
   else if (this->size_ == 64)
-    this->do_define_as_constant<64>(target, name, value, symsize,
-				    type, binding, visibility, nonvis,
-				    only_if_ref);
+    return this->do_define_as_constant<64>(target, name, version, value,
+					   symsize, type, binding, visibility,
+					   nonvis, only_if_ref);
   else
     gold_unreachable();
 }
@@ -881,10 +897,11 @@ Symbol_table::define_as_constant(Target* target, const char* name,
 // Define a symbol as a constant, sized version.
 
 template<int size>
-void
+Sized_symbol<size>*
 Symbol_table::do_define_as_constant(
-    Target* target,
+    const Target* target,
     const char* name,
+    const char* version,
     typename elfcpp::Elf_types<size>::Elf_Addr value,
     typename elfcpp::Elf_types<size>::Elf_WXword symsize,
     elfcpp::STT type,
@@ -897,35 +914,37 @@ Symbol_table::do_define_as_constant(
 
   if (target->is_big_endian())
     sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, true) (
-        target, name, only_if_ref
+        target, name, version, only_if_ref
         SELECT_SIZE_ENDIAN(size, true));
   else
     sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, false) (
-        target, name, only_if_ref
+        target, name, version, only_if_ref
         SELECT_SIZE_ENDIAN(size, false));
 
   if (sym == NULL)
-    return;
+    return NULL;
 
   sym->init(name, value, symsize, type, binding, visibility, nonvis);
+
+  return sym;
 }
 
 // Define a set of symbols in output sections.
 
 void
-Symbol_table::define_symbols(const Layout* layout, Target* target, int count,
-			     const Define_symbol_in_section* p)
+Symbol_table::define_symbols(const Layout* layout, const Target* target,
+			     int count, const Define_symbol_in_section* p)
 {
   for (int i = 0; i < count; ++i, ++p)
     {
       Output_section* os = layout->find_output_section(p->output_section);
       if (os != NULL)
-	this->define_in_output_data(target, p->name, os, p->value, p->size,
-				    p->type, p->binding, p->visibility,
-				    p->nonvis, p->offset_is_from_end,
-				    p->only_if_ref);
+	this->define_in_output_data(target, p->name, NULL, os, p->value,
+				    p->size, p->type, p->binding,
+				    p->visibility, p->nonvis,
+				    p->offset_is_from_end, p->only_if_ref);
       else
-	this->define_as_constant(target, p->name, 0, p->size, p->type,
+	this->define_as_constant(target, p->name, NULL, 0, p->size, p->type,
 				 p->binding, p->visibility, p->nonvis,
 				 p->only_if_ref);
     }
@@ -934,8 +953,8 @@ Symbol_table::define_symbols(const Layout* layout, Target* target, int count,
 // Define a set of symbols in output segments.
 
 void
-Symbol_table::define_symbols(const Layout* layout, Target* target, int count,
-			     const Define_symbol_in_segment* p)
+Symbol_table::define_symbols(const Layout* layout, const Target* target,
+			     int count, const Define_symbol_in_segment* p)
 {
   for (int i = 0; i < count; ++i, ++p)
     {
@@ -943,12 +962,12 @@ Symbol_table::define_symbols(const Layout* layout, Target* target, int count,
 						       p->segment_flags_set,
 						       p->segment_flags_clear);
       if (os != NULL)
-	this->define_in_output_segment(target, p->name, os, p->value, p->size,
-				       p->type, p->binding, p->visibility,
-				       p->nonvis, p->offset_base,
-				       p->only_if_ref);
+	this->define_in_output_segment(target, p->name, NULL, os, p->value,
+				       p->size, p->type, p->binding,
+				       p->visibility, p->nonvis,
+				       p->offset_base, p->only_if_ref);
       else
-	this->define_as_constant(target, p->name, 0, p->size, p->type,
+	this->define_as_constant(target, p->name, NULL, 0, p->size, p->type,
 				 p->binding, p->visibility, p->nonvis,
 				 p->only_if_ref);
     }
@@ -960,9 +979,12 @@ Symbol_table::define_symbols(const Layout* layout, Target* target, int count,
 // updated dynamic symbol index.
 
 unsigned int
-Symbol_table::set_dynsym_indexes(unsigned int index,
+Symbol_table::set_dynsym_indexes(const General_options* options,
+				 const Target* target,
+				 unsigned int index,
 				 std::vector<Symbol*>* syms,
-				 Stringpool* dynpool)
+				 Stringpool* dynpool,
+				 Versions* versions)
 {
   for (Symbol_table_type::iterator p = this->table_.begin();
        p != this->table_.end();
@@ -982,8 +1004,16 @@ Symbol_table::set_dynsym_indexes(unsigned int index,
 	  ++index;
 	  syms->push_back(sym);
 	  dynpool->add(sym->name(), NULL);
+
+	  // Record any version information.
+	  if (sym->version() != NULL)
+	    versions->record_version(options, dynpool, sym);
 	}
     }
+
+  // Finish up the versions.  In some cases this may add new dynamic
+  // symbols.
+  index = versions->finalize(target, this, index, syms);
 
   return index;
 }

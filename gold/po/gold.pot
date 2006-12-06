@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-12-01 08:46-0800\n"
+"POT-Creation-Date: 2006-12-05 15:53-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -106,54 +106,69 @@ msgstr ""
 msgid "%s: %s: bad section name offset for section %u: %lu\n"
 msgstr ""
 
-#: dynobj.cc:398
+#: dynobj.cc:399
 #, c-format
 msgid "%s: %s: duplicate definition for version %u\n"
 msgstr ""
 
-#: dynobj.cc:442 dynobj.cc:561
+#: dynobj.cc:431
 #, c-format
-msgid "%s: %s: verdef vd_next field out of range: %u\n"
+msgid "%s: %s: unexpected verdef version %u\n"
 msgstr ""
 
-#: dynobj.cc:466
-#, c-format
-msgid "%s: %s: verneed vn_aux field out of range: %u\n"
-msgstr ""
-
-#: dynobj.cc:485
-#, c-format
-msgid "%s: %s: verneed vna_next field out of range: %u\n"
-msgstr ""
-
-#: dynobj.cc:498
-#, c-format
-msgid "%s: %s: verneed vn_next field out of range: %u\n"
-msgstr ""
-
-#: dynobj.cc:528
+#: dynobj.cc:447
 #, c-format
 msgid "%s: %s: verdef vd_cnt field too small: %u\n"
 msgstr ""
 
-#: dynobj.cc:537
+#: dynobj.cc:456
 #, c-format
 msgid "%s: %s: verdef vd_aux field out of range: %u\n"
 msgstr ""
 
-#: dynobj.cc:549
+#: dynobj.cc:468
 #, c-format
 msgid "%s: %s: verdaux vda_name field out of range: %u\n"
 msgstr ""
 
-#: dynobj.cc:591
+#: dynobj.cc:479
+#, c-format
+msgid "%s: %s: verdef vd_next field out of range: %u\n"
+msgstr ""
+
+#: dynobj.cc:513
+#, c-format
+msgid "%s: %s: unexpected verneed version %u\n"
+msgstr ""
+
+#: dynobj.cc:524
+#, c-format
+msgid "%s: %s: verneed vn_aux field out of range: %u\n"
+msgstr ""
+
+#: dynobj.cc:539
 #, c-format
 msgid "%s: %s: vernaux vna_name field out of range: %u\n"
 msgstr ""
 
-#: dynobj.cc:628
+#: dynobj.cc:552
+#, c-format
+msgid "%s: %s: verneed vna_next field out of range: %u\n"
+msgstr ""
+
+#: dynobj.cc:565
+#, c-format
+msgid "%s: %s: verneed vn_next field out of range: %u\n"
+msgstr ""
+
+#: dynobj.cc:613
 #, c-format
 msgid "%s: %s: size of dynamic symbols is not multiple of symbol size\n"
+msgstr ""
+
+#: dynobj.cc:1240
+#, c-format
+msgid "%s: symbol %s has undefined version %s\n"
 msgstr ""
 
 #: fileread.cc:55
@@ -567,12 +582,12 @@ msgstr ""
 msgid "%s: %s: reloc section %u size %lu uneven"
 msgstr ""
 
-#: resolve.cc:142
+#: resolve.cc:147
 #, c-format
 msgid "%s: %s: invalid STB_LOCAL symbol %s in external symbols\n"
 msgstr ""
 
-#: resolve.cc:148
+#: resolve.cc:153
 #, c-format
 msgid "%s: %s: unsupported symbol binding %d for symbol %s\n"
 msgstr ""
@@ -607,12 +622,12 @@ msgstr ""
 msgid "%s: %s: versym for symbol %zu has no name: %u\n"
 msgstr ""
 
-#: symtab.cc:1063 symtab.cc:1235
+#: symtab.cc:1093 symtab.cc:1265
 #, c-format
 msgid "%s: %s: unsupported symbol section 0x%x\n"
 msgstr ""
 
-#: symtab.cc:1423
+#: symtab.cc:1458
 #, c-format
 msgid "%s: %s: warning: %s\n"
 msgstr ""

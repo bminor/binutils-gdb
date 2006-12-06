@@ -42,8 +42,8 @@ Layout::Layout(const General_options& options)
   : options_(options), namepool_(), sympool_(), dynpool_(), signatures_(),
     section_name_map_(), segment_list_(), section_list_(),
     unattached_section_list_(), special_output_list_(),
-    tls_segment_(NULL), symtab_section_(NULL), dynsym_section_(NULL),
-    dynamic_section_(NULL), dynamic_data_(NULL)
+    tls_segment_(NULL), symtab_section_(NULL),
+    dynsym_section_(NULL), dynamic_section_(NULL), dynamic_data_(NULL)
 {
   // Make space for more than enough segments for a typical file.
   // This is just for efficiency--it's OK if we wind up needing more.
@@ -322,7 +322,7 @@ Layout::create_initial_dynamic_sections(const Input_objects* input_objects,
 						     (elfcpp::SHF_ALLOC
 						      | elfcpp::SHF_WRITE));
 
-  symtab->define_in_output_data(input_objects->target(), "_DYNAMIC",
+  symtab->define_in_output_data(input_objects->target(), "_DYNAMIC", NULL,
 				this->dynamic_section_, 0, 0,
 				elfcpp::STT_OBJECT, elfcpp::STB_LOCAL,
 				elfcpp::STV_HIDDEN, 0, false, false);
@@ -405,9 +405,14 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
       phdr_seg = new Output_segment(elfcpp::PT_PHDR, elfcpp::PF_R);
       this->segment_list_.push_back(phdr_seg);
 
-      // Create the dynamic symbol table, including the hash table,
-      // the dynamic relocations, and the version sections.
-      this->create_dynamic_symtab(target, symtab);
+      // Create the dynamic symbol table, including the hash table.
+      Output_section* dynstr;
+      std::vector<Symbol*> dynamic_symbols;
+      unsigned int local_dynamic_count;
+      Versions versions;
+      this->create_dynamic_symtab(target, symtab, &dynstr,
+				  &local_dynamic_count, &dynamic_symbols,
+				  &versions);
 
       // Create the .interp section to hold the name of the
       // interpreter, and put it in a PT_INTERP segment.
@@ -416,6 +421,15 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
       // Finish the .dynamic section to hold the dynamic data, and put
       // it in a PT_DYNAMIC segment.
       this->finish_dynamic_section(input_objects, symtab);
+
+      // We should have added everything we need to the dynamic string
+      // table.
+      this->dynpool_.set_string_offsets();
+
+      // Create the version sections.  We can't do this until the
+      // dynamic string table is complete.
+      this->create_version_sections(target, &versions, local_dynamic_count,
+				    dynamic_symbols, dynstr);
     }
 
   // FIXME: Handle PT_GNU_STACK.
@@ -831,7 +845,11 @@ Layout::create_shdrs(int size, bool big_endian, off_t* poff)
 // Create the dynamic symbol table.
 
 void
-Layout::create_dynamic_symtab(const Target* target, Symbol_table* symtab)
+Layout::create_dynamic_symtab(const Target* target, Symbol_table* symtab,
+			      Output_section **pdynstr,
+			      unsigned int* plocal_dynamic_count,
+			      std::vector<Symbol*>* pdynamic_symbols,
+			      Versions* pversions)
 {
   // Count all the symbols in the dynamic symbol table, and set the
   // dynamic symbol indexes.
@@ -859,13 +877,13 @@ Layout::create_dynamic_symtab(const Target* target, Symbol_table* symtab)
   // this->dynpool_.
 
   unsigned int local_symcount = index;
-
-  std::vector<Symbol*> dynamic_symbols;
+  *plocal_dynamic_count = local_symcount;
 
   // FIXME: We have to tell set_dynsym_indexes whether the
   // -E/--export-dynamic option was used.
-  index = symtab->set_dynsym_indexes(index, &dynamic_symbols,
-				     &this->dynpool_);
+  index = symtab->set_dynsym_indexes(&this->options_, target, index,
+				     pdynamic_symbols, &this->dynpool_,
+				     pversions);
 
   int symsize;
   unsigned int align;
@@ -882,6 +900,8 @@ Layout::create_dynamic_symtab(const Target* target, Symbol_table* symtab)
     }
   else
     gold_unreachable();
+
+  // Create the dynamic symbol table section.
 
   const char* dynsym_name = this->namepool_.add(".dynsym", NULL);
   Output_section* dynsym = this->make_output_section(dynsym_name,
@@ -902,6 +922,8 @@ Layout::create_dynamic_symtab(const Target* target, Symbol_table* symtab)
   odyn->add_section_address(elfcpp::DT_SYMTAB, dynsym);
   odyn->add_constant(elfcpp::DT_SYMENT, symsize);
 
+  // Create the dynamic string table section.
+
   const char* dynstr_name = this->namepool_.add(".dynstr", NULL);
   Output_section* dynstr = this->make_output_section(dynstr_name,
 						     elfcpp::SHT_STRTAB,
@@ -916,11 +938,15 @@ Layout::create_dynamic_symtab(const Target* target, Symbol_table* symtab)
   odyn->add_section_address(elfcpp::DT_STRTAB, dynstr);
   odyn->add_section_size(elfcpp::DT_STRSZ, dynstr);
 
+  *pdynstr = dynstr;
+
+  // Create the hash tables.
+
   // FIXME: We need an option to create a GNU hash table.
 
   unsigned char* phash;
   unsigned int hashlen;
-  Dynobj::create_elf_hash_table(target, dynamic_symbols, local_symcount,
+  Dynobj::create_elf_hash_table(target, *pdynamic_symbols, local_symcount,
 				&phash, &hashlen);
 
   const char* hash_name = this->namepool_.add(".hash", NULL);
@@ -937,6 +963,131 @@ Layout::create_dynamic_symtab(const Target* target, Symbol_table* symtab)
   hashsec->set_entsize(4);
 
   odyn->add_section_address(elfcpp::DT_HASH, hashsec);
+}
+
+// Create the version sections.
+
+void
+Layout::create_version_sections(const Target* target, const Versions* versions,
+				unsigned int local_symcount,
+				const std::vector<Symbol*>& dynamic_symbols,
+				const Output_section* dynstr)
+{
+  if (!versions->any_defs() && !versions->any_needs())
+    return;
+
+  if (target->get_size() == 32)
+    {
+      if (target->is_big_endian())
+	this->sized_create_version_sections<32, true>(versions,
+						      local_symcount,
+						      dynamic_symbols,
+						      dynstr);
+      else
+	this->sized_create_version_sections<32, false>(versions,
+						       local_symcount,
+						       dynamic_symbols,
+						       dynstr);
+    }
+  else if (target->get_size() == 64)
+    {
+      if (target->is_big_endian())
+	this->sized_create_version_sections<64, true>(versions,
+						      local_symcount,
+						      dynamic_symbols,
+						      dynstr);
+      else
+	this->sized_create_version_sections<64, false>(versions,
+						       local_symcount,
+						       dynamic_symbols,
+						       dynstr);
+    }
+  else
+    gold_unreachable();
+}
+
+// Create the version sections, sized version.
+
+template<int size, bool big_endian>
+void
+Layout::sized_create_version_sections(
+    const Versions* versions,
+    unsigned int local_symcount,
+    const std::vector<Symbol*>& dynamic_symbols,
+    const Output_section* dynstr)
+{
+  const char* vname = this->namepool_.add(".gnu.version", NULL);
+  Output_section* vsec = this->make_output_section(vname,
+						   elfcpp::SHT_GNU_versym,
+						   elfcpp::SHF_ALLOC);
+
+  unsigned char* vbuf;
+  unsigned int vsize;
+  versions->symbol_section_contents<size, big_endian>(&this->dynpool_,
+						      local_symcount,
+						      dynamic_symbols,
+						      &vbuf, &vsize);
+
+  Output_section_data* vdata = new Output_data_const_buffer(vbuf, vsize, 2);
+
+  vsec->add_output_section_data(vdata);
+  vsec->set_entsize(2);
+  vsec->set_link_section(this->dynsym_section_);
+
+  Output_data_dynamic* const odyn = this->dynamic_data_;
+  odyn->add_section_address(elfcpp::DT_VERSYM, vsec);
+
+  if (versions->any_defs())
+    {
+      const char* vdname = this->namepool_.add(".gnu.version_d", NULL);
+      Output_section *vdsec;
+      vdsec = this->make_output_section(vdname, elfcpp::SHT_GNU_verdef,
+					elfcpp::SHF_ALLOC);
+
+      unsigned char* vdbuf;
+      unsigned int vdsize;
+      unsigned int vdentries;
+      versions->def_section_contents<size, big_endian>(&this->dynpool_,
+						       &vdbuf, &vdsize,
+						       &vdentries);
+
+      Output_section_data* vddata = new Output_data_const_buffer(vdbuf,
+								 vdsize,
+								 4);
+
+      vdsec->add_output_section_data(vddata);
+      vdsec->set_link_section(dynstr);
+      vdsec->set_info(vdentries);
+
+      odyn->add_section_address(elfcpp::DT_VERDEF, vdsec);
+      odyn->add_constant(elfcpp::DT_VERDEFNUM, vdentries);
+    }
+
+  if (versions->any_needs())
+    {
+      const char* vnname = this->namepool_.add(".gnu.version_r", NULL);
+      Output_section* vnsec;
+      vnsec = this->make_output_section(vnname, elfcpp::SHT_GNU_verneed,
+					elfcpp::SHF_ALLOC);
+
+      unsigned char* vnbuf;
+      unsigned int vnsize;
+      unsigned int vnentries;
+      versions->need_section_contents<size, big_endian>(&this->dynpool_,
+							&vnbuf, &vnsize,
+							&vnentries);
+
+      Output_section_data* vndata = new Output_data_const_buffer(vnbuf,
+								 vnsize,
+								 4);
+
+      vnsec->add_output_section_data(vndata);
+      vnsec->set_link_section(dynstr);
+      vnsec->set_info(vnentries);
+
+      odyn->add_section_address(elfcpp::DT_VERNEED, vnsec);
+      odyn->add_constant(elfcpp::DT_VERNEEDNUM, vnentries);
+    }
 }
 
 // Create the .interp section and PT_INTERP segment.
@@ -990,11 +1141,11 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
 
   // FIXME: Support --init and --fini.
   Symbol* sym = symtab->lookup("_init");
-  if (sym != NULL && sym->is_defined() && !sym->is_defined_in_dynobj())
+  if (sym != NULL && sym->is_defined() && !sym->is_from_dynobj())
     odyn->add_symbol(elfcpp::DT_INIT, sym);
 
   sym = symtab->lookup("_fini");
-  if (sym != NULL && sym->is_defined() && !sym->is_defined_in_dynobj())
+  if (sym != NULL && sym->is_defined() && !sym->is_from_dynobj())
     odyn->add_symbol(elfcpp::DT_FINI, sym);
 
   // FIXME: Support DT_INIT_ARRAY and DT_FINI_ARRAY.

@@ -484,7 +484,7 @@ Copy_relocs<size, big_endian>::Copy_reloc_entry::should_emit()
 {
   if (this->sym_ == NULL)
     return false;
-  if (this->sym_->is_defined_in_dynobj())
+  if (this->sym_->is_from_dynobj())
     return true;
   this->sym_ = NULL;
   return false;

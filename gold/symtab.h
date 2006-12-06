@@ -24,6 +24,7 @@ class Sized_relobj;
 class Dynobj;
 template<int size, bool big_endian>
 class Sized_dynobj;
+class Versions;
 class Output_data;
 class Output_section;
 class Output_segment;
@@ -303,13 +304,11 @@ class Symbol
 		&& this->shndx() != elfcpp::SHN_COMMON));
   }
 
-  // Return whether this symbol is defined in a dynamic object.
+  // Return true if this symbol is from a dynamic object.
   bool
-  is_defined_in_dynobj() const
+  is_from_dynobj() const
   {
-    return (this->source_ == FROM_OBJECT
-	    && this->object()->is_dynamic()
-	    && this->is_defined());
+    return this->source_ == FROM_OBJECT && this->object()->is_dynamic();
   }
 
   // Return whether this is an undefined symbol.
@@ -376,7 +375,8 @@ class Symbol
   // Override existing symbol.
   template<int size, bool big_endian>
   void
-  override_base(const elfcpp::Sym<size, big_endian>&, Object* object);
+  override_base(const elfcpp::Sym<size, big_endian>&, Object* object,
+		const char* version);
 
  private:
   Symbol(const Symbol&);
@@ -518,7 +518,8 @@ class Sized_symbol : public Symbol
   // Override existing symbol.
   template<bool big_endian>
   void
-  override(const elfcpp::Sym<size, big_endian>&, Object* object);
+  override(const elfcpp::Sym<size, big_endian>&, Object* object,
+	   const char* version);
 
   // Return the symbol's value.
   Value_type
@@ -730,25 +731,20 @@ class Symbol_table
 		  const unsigned char* versym, size_t versym_size,
 		  const std::vector<const char*>*);
 
-  // Define a special symbol.
-  template<int size, bool big_endian>
-  Sized_symbol<size>*
-  define_special_symbol(Target* target, const char* name, bool only_if_ref
-                        ACCEPT_SIZE_ENDIAN);
-
   // Define a special symbol based on an Output_data.  It is a
   // multiple definition error if this symbol is already defined.
-  void
-  define_in_output_data(Target*, const char* name, Output_data*,
-			uint64_t value, uint64_t symsize,
+  Symbol*
+  define_in_output_data(const Target*, const char* name, const char* version,
+			Output_data*, uint64_t value, uint64_t symsize,
 			elfcpp::STT type, elfcpp::STB binding,
 			elfcpp::STV visibility, unsigned char nonvis,
 			bool offset_is_from_end, bool only_if_ref);
 
   // Define a special symbol based on an Output_segment.  It is a
   // multiple definition error if this symbol is already defined.
-  void
-  define_in_output_segment(Target*, const char* name, Output_segment*,
+  Symbol*
+  define_in_output_segment(const Target*, const char* name,
+			   const char* version, Output_segment*,
 			   uint64_t value, uint64_t symsize,
 			   elfcpp::STT type, elfcpp::STB binding,
 			   elfcpp::STV visibility, unsigned char nonvis,
@@ -756,20 +752,20 @@ class Symbol_table
 
   // Define a special symbol with a constant value.  It is a multiple
   // definition error if this symbol is already defined.
-  void
-  define_as_constant(Target*, const char* name, uint64_t value,
-		     uint64_t symsize, elfcpp::STT type, elfcpp::STB binding,
-		     elfcpp::STV visibility, unsigned char nonvis,
-		     bool only_if_ref);
+  Symbol*
+  define_as_constant(const Target*, const char* name, const char* version,
+		     uint64_t value, uint64_t symsize, elfcpp::STT type,
+		     elfcpp::STB binding, elfcpp::STV visibility,
+		     unsigned char nonvis, bool only_if_ref);
 
   // Define a set of symbols in output sections.
   void
-  define_symbols(const Layout*, Target*, int count,
+  define_symbols(const Layout*, const Target*, int count,
 		 const Define_symbol_in_section*);
 
   // Define a set of symbols in output segments.
   void
-  define_symbols(const Layout*, Target*, int count,
+  define_symbols(const Layout*, const Target*, int count,
 		 const Define_symbol_in_segment*);  
 
   // Look up a symbol.
@@ -824,8 +820,8 @@ class Symbol_table
   // the vector.  The names are stored into the Stringpool.  This
   // returns an updated dynamic symbol index.
   unsigned int
-  set_dynsym_indexes(unsigned int index, std::vector<Symbol*>*,
-		     Stringpool*);
+  set_dynsym_indexes(const General_options*, const Target*, unsigned int index,
+		     std::vector<Symbol*>*, Stringpool*, Versions*);
 
   // Finalize the symbol table after we have set the final addresses
   // of all the input sections.  This sets the final symbol indexes,
@@ -874,17 +870,25 @@ class Symbol_table
   static void
   resolve(Sized_symbol<size>* to,
 	  const elfcpp::Sym<size, big_endian>& sym,
-	  Object*);
+	  Object*, const char* version);
 
   template<int size, bool big_endian>
   static void
-  resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from
-          ACCEPT_SIZE_ENDIAN);
+  resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from,
+          const char* version ACCEPT_SIZE_ENDIAN);
+
+  // Define a special symbol.
+  template<int size, bool big_endian>
+  Sized_symbol<size>*
+  define_special_symbol(const Target* target, const char* name,
+			const char* version, bool only_if_ref
+			ACCEPT_SIZE_ENDIAN);
 
   // Define a symbol in an Output_data, sized version.
   template<int size>
-  void
-  do_define_in_output_data(Target*, const char* name, Output_data*,
+  Sized_symbol<size>*
+  do_define_in_output_data(const Target*, const char* name,
+			   const char* version, Output_data*,
 			   typename elfcpp::Elf_types<size>::Elf_Addr value,
 			   typename elfcpp::Elf_types<size>::Elf_WXword ssize,
 			   elfcpp::STT type, elfcpp::STB binding,
@@ -893,9 +897,9 @@ class Symbol_table
 
   // Define a symbol in an Output_segment, sized version.
   template<int size>
-  void
+  Sized_symbol<size>*
   do_define_in_output_segment(
-    Target*, const char* name, Output_segment* os,
+    const Target*, const char* name, const char* version, Output_segment* os,
     typename elfcpp::Elf_types<size>::Elf_Addr value,
     typename elfcpp::Elf_types<size>::Elf_WXword ssize,
     elfcpp::STT type, elfcpp::STB binding,
@@ -904,9 +908,9 @@ class Symbol_table
 
   // Define a symbol as a constant, sized version.
   template<int size>
-  void
+  Sized_symbol<size>*
   do_define_as_constant(
-    Target*, const char* name,
+    const Target*, const char* name, const char* version,
     typename elfcpp::Elf_types<size>::Elf_Addr value,
     typename elfcpp::Elf_types<size>::Elf_WXword ssize,
     elfcpp::STT type, elfcpp::STB binding,
