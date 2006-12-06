@@ -2035,6 +2035,19 @@ elf64_alpha_adjust_dynamic_symbol (struct bfd_link_info *info,
   return TRUE;
 }
 
+/* Record STO_ALPHA_NOPV and STO_ALPHA_STD_GPLOAD.  */
+
+static void
+elf64_alpha_merge_symbol_attribute (struct elf_link_hash_entry *h,
+				    const Elf_Internal_Sym *isym,
+				    bfd_boolean definition,
+				    bfd_boolean dynamic)
+{
+  if (!dynamic && definition)
+    h->other = ((h->other & ELF_ST_VISIBILITY (-1))
+		| (isym->st_other & ~ELF_ST_VISIBILITY (-1)));
+}
+
 /* Symbol versioning can create new symbols, and make our old symbols
    indirect to the new ones.  Consolidate the got and reloc information
    in these situations.  */
@@ -5271,6 +5284,8 @@ static const struct elf_size_info alpha_elf_size_info =
   elf64_alpha_create_dynamic_sections
 #define elf_backend_adjust_dynamic_symbol \
   elf64_alpha_adjust_dynamic_symbol
+#define elf_backend_merge_symbol_attribute \
+  elf64_alpha_merge_symbol_attribute
 #define elf_backend_always_size_sections \
   elf64_alpha_always_size_sections
 #define elf_backend_size_dynamic_sections \
