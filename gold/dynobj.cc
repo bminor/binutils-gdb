@@ -1324,12 +1324,12 @@ Versions::finalize(const Target* target, Symbol_table* symtab,
       // Create a version symbol if necessary.
       if (!(*p)->is_symbol_created())
 	{
-	  Symbol* vsym =symtab->define_as_constant(target, (*p)->name(),
-						   (*p)->name(), 0, 0,
-						   elfcpp::STT_OBJECT,
-						   elfcpp::STB_GLOBAL,
-						   elfcpp::STV_DEFAULT, 0,
-						   false);
+	  Symbol* vsym = symtab->define_as_constant(target, (*p)->name(),
+						    (*p)->name(), 0, 0,
+						    elfcpp::STT_OBJECT,
+						    elfcpp::STB_GLOBAL,
+						    elfcpp::STV_DEFAULT, 0,
+						    false);
 	  vsym->set_needs_dynsym_entry();
 	  ++dynsym_index;
 	  syms->push_back(vsym);

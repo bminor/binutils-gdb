@@ -39,6 +39,7 @@ Symbol::init_fields(const char* name, const char* version,
   this->is_def_ = false;
   this->is_forwarder_ = false;
   this->needs_dynsym_entry_ = false;
+  this->in_reg_ = false;
   this->in_dyn_ = false;
   this->has_got_offset_ = false;
   this->has_warning_ = false;
@@ -57,6 +58,7 @@ Symbol::init_base(const char* name, const char* version, Object* object,
   // FIXME: Handle SHN_XINDEX.
   this->u_.from_object.shndx = sym.get_st_shndx();
   this->source_ = FROM_OBJECT;
+  this->in_reg_ = !object->is_dynamic();
   this->in_dyn_ = object->is_dynamic();
 }
 
@@ -72,6 +74,7 @@ Symbol::init_base(const char* name, Output_data* od, elfcpp::STT type,
   this->u_.in_output_data.output_data = od;
   this->u_.in_output_data.offset_is_from_end = offset_is_from_end;
   this->source_ = IN_OUTPUT_DATA;
+  this->in_reg_ = true;
 }
 
 // Initialize the fields in the base class Symbol for a symbol defined
@@ -86,6 +89,7 @@ Symbol::init_base(const char* name, Output_segment* os, elfcpp::STT type,
   this->u_.in_output_segment.output_segment = os;
   this->u_.in_output_segment.offset_base = offset_base;
   this->source_ = IN_OUTPUT_SEGMENT;
+  this->in_reg_ = true;
 }
 
 // Initialize the fields in the base class Symbol for a symbol defined
@@ -98,6 +102,7 @@ Symbol::init_base(const char* name, elfcpp::STT type,
 {
   this->init_fields(name, NULL, type, binding, visibility, nonvis);
   this->source_ = CONSTANT;
+  this->in_reg_ = true;
 }
 
 // Initialize the fields in Sized_symbol for SYM in OBJECT.
@@ -1077,6 +1082,14 @@ Symbol_table::sized_finalize(unsigned index, off_t off, Stringpool* pool)
       // symbol table.  We only need to finalize it once.
       if (sym->has_symtab_index())
 	continue;
+
+      if (!sym->in_reg())
+	{
+	  gold_assert(!sym->has_symtab_index());
+	  sym->set_symtab_index(-1U);
+	  gold_assert(sym->dynsym_index() == -1U);
+	  continue;
+	}
 
       typename Sized_symbol<size>::Value_type value;
 

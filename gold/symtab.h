@@ -185,6 +185,16 @@ class Symbol
   set_needs_dynsym_entry()
   { this->needs_dynsym_entry_ = true; }
 
+  // Return whether this symbol has been seen in a regular object.
+  bool
+  in_reg() const
+  { return this->in_reg_; }
+
+  // Mark this symbol as having been seen in a regular object.
+  void
+  set_in_reg()
+  { this->in_reg_ = true; }
+
   // Mark this symbol as having been seen in a dynamic object.
   void
   set_in_dyn()
@@ -469,6 +479,8 @@ class Symbol
   bool is_forwarder_ : 1;
   // True if this symbol needs to be in the dynamic symbol table.
   bool needs_dynsym_entry_ : 1;
+  // True if we've seen this symbol in a regular object.
+  bool in_reg_ : 1;
   // True if we've seen this symbol in a dynamic object.
   bool in_dyn_ : 1;
   // True if the symbol has an entry in the GOT section.

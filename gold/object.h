@@ -600,7 +600,7 @@ class Input_objects
 {
  public:
   Input_objects()
-    : relobj_list_(), target_(NULL)
+    : relobj_list_(), dynobj_list_(), target_(NULL), sonames_()
   { }
 
   // The type of the list of input relocateable objects.
@@ -611,8 +611,9 @@ class Input_objects
   typedef std::vector<Dynobj*> Dynobj_list;
   typedef Dynobj_list::const_iterator Dynobj_iterator;
 
-  // Add an object to the list.
-  void
+  // Add an object to the list.  Return true if all is well, or false
+  // if this object should be ignored.
+  bool
   add_object(Object*);
 
   // Get the target we should use for the output file.
@@ -649,9 +650,14 @@ class Input_objects
   Input_objects(const Input_objects&);
   Input_objects& operator=(const Input_objects&);
 
+  // The list of ordinary objects included in the link.
   Relobj_list relobj_list_;
+  // The list of dynamic objects included in the link.
   Dynobj_list dynobj_list_;
+  // The target.
   Target* target_;
+  // SONAMEs that we have seen.
+  Unordered_set<std::string> sonames_;
 };
 
 // Some of the information we pass to the relocation routines.  We

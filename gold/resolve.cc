@@ -156,7 +156,12 @@ Symbol_table::resolve(Sized_symbol<size>* to,
       gold_exit(false);
     }
 
-  if (object->is_dynamic())
+  if (!object->is_dynamic())
+    {
+      // Record that we've seen this symbol in a regular object.
+      to->set_in_reg();
+    }
+  else
     {
       frombits |= (1 << 1);
 

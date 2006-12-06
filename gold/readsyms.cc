@@ -240,10 +240,17 @@ Add_symbols::locks(Workqueue* workqueue)
 void
 Add_symbols::run(Workqueue*)
 {
-  this->input_objects_->add_object(this->object_);
-  this->object_->layout(this->options_, this->symtab_, this->layout_,
-			this->sd_);
-  this->object_->add_symbols(this->symtab_, this->sd_);
+  if (!this->input_objects_->add_object(this->object_))
+    {
+      // FIXME: We need to close the descriptor here.
+      delete this->object_;
+    }
+  else
+    {
+      this->object_->layout(this->options_, this->symtab_, this->layout_,
+			    this->sd_);
+      this->object_->add_symbols(this->symtab_, this->sd_);
+    }
   delete this->sd_;
   this->sd_ = NULL;
 }

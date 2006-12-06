@@ -718,15 +718,29 @@ Sized_relobj<size, big_endian>::write_local_symbols(Output_file* of,
 
 // Input_objects methods.
 
-// Add a regular relocatable object to the list.
+// Add a regular relocatable object to the list.  Return false if this
+// object should be ignored.
 
-void
+bool
 Input_objects::add_object(Object* obj)
 {
-  if (obj->is_dynamic())
-    this->dynobj_list_.push_back(static_cast<Dynobj*>(obj));
-  else
+  if (!obj->is_dynamic())
     this->relobj_list_.push_back(static_cast<Relobj*>(obj));
+  else
+    {
+      // See if this is a duplicate SONAME.
+      Dynobj* dynobj = static_cast<Dynobj*>(obj);
+
+      std::pair<Unordered_set<std::string>::iterator, bool> ins =
+	this->sonames_.insert(dynobj->soname());
+      if (!ins.second)
+	{
+	  // We have already seen a dynamic object with this soname.
+	  return false;
+	}
+
+      this->dynobj_list_.push_back(dynobj);
+    }
 
   Target* target = obj->target();
   if (this->target_ == NULL)
@@ -737,6 +751,8 @@ Input_objects::add_object(Object* obj)
 	      program_name, obj->name().c_str());
       gold_exit(false);
     }
+
+  return true;
 }
 
 // Relocate_info methods.
