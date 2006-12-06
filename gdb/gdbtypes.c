@@ -3297,6 +3297,10 @@ copy_type_recursive (struct objfile *objfile, struct type *type,
 static void
 build_gdbtypes (void)
 {
+  builtin_type_void =
+    init_type (TYPE_CODE_VOID, 1,
+	       0,
+	       "void", (struct objfile *) NULL);
   builtin_type_char =
     init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       (TYPE_FLAG_NOSIGN
@@ -3646,10 +3650,9 @@ _initialize_gdbtypes (void)
 {
   struct cmd_list_element *c;
 
-  builtin_type_void =
-    init_type (TYPE_CODE_VOID, 1,
-	       0,
-	       "void", (struct objfile *) NULL);
+  /* FIXME: Why don't the following types need to be arch-swapped?
+     See the comment at the top of the calls to
+     DEPRECATED_REGISTER_GDBARCH_SWAP below.  */
   builtin_type_int0 =
     init_type (TYPE_CODE_INT, 0 / 8,
 	       0,
@@ -3701,7 +3704,14 @@ _initialize_gdbtypes (void)
 
   /* FIXME - For the moment, handle types by swapping them in and out.
      Should be using the per-architecture data-pointer and a large
-     struct. */
+     struct. 
+
+     Note that any type T that we might create a 'T *' type for must
+     be arch-swapped: we cache a type's 'T *' type in the pointer_type
+     field, so if we change architectures but don't swap T, then
+     lookup_pointer_type will start handing out pointer types made for
+     a different architecture.  */
+  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_void);
   DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_char);
   DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_short);
   DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_int);
@@ -3744,7 +3754,8 @@ _initialize_gdbtypes (void)
   deprecated_register_gdbarch_swap (NULL, 0, build_gdbtypes);
 
   /* Note: These types do not need to be swapped - they are target
-     neutral.  */
+     neutral.  FIXME: Are you sure?  See the comment above the calls
+     to DEPRECATED_REGISTER_GDBARCH_SWAP above.  */
   builtin_type_ieee_single_big =
     init_type (TYPE_CODE_FLT, floatformat_ieee_single_big.totalsize / 8,
 	       0, "builtin_type_ieee_single_big", NULL);
