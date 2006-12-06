@@ -1230,6 +1230,7 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
       clearerr (stdin);		/* in case of C-d */
       if (answer == EOF)	/* C-d */
 	{
+	  printf_filtered ("EOF [assumed %c]\n", def_answer);
 	  retval = def_value;
 	  break;
 	}
