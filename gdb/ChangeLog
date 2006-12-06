@@ -1,3 +1,9 @@
+2006-12-05  Jim Blandy  <jimb@codesourcery.com>
+
+	* gdbtypes.c (built_gdbtypes): Don't set builtin_type_void here.
+	(_initialize_gdbtypes): Do it here, and don't swap it when the
+	architecture changes.
+
 2006-12-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* cp-valprint.c, p-valprint.c: Revert last change.

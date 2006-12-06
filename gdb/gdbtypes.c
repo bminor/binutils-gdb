@@ -3297,10 +3297,6 @@ copy_type_recursive (struct objfile *objfile, struct type *type,
 static void
 build_gdbtypes (void)
 {
-  builtin_type_void =
-    init_type (TYPE_CODE_VOID, 1,
-	       0,
-	       "void", (struct objfile *) NULL);
   builtin_type_char =
     init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       (TYPE_FLAG_NOSIGN
@@ -3650,6 +3646,10 @@ _initialize_gdbtypes (void)
 {
   struct cmd_list_element *c;
 
+  builtin_type_void =
+    init_type (TYPE_CODE_VOID, 1,
+	       0,
+	       "void", (struct objfile *) NULL);
   builtin_type_int0 =
     init_type (TYPE_CODE_INT, 0 / 8,
 	       0,
@@ -3702,7 +3702,6 @@ _initialize_gdbtypes (void)
   /* FIXME - For the moment, handle types by swapping them in and out.
      Should be using the per-architecture data-pointer and a large
      struct. */
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_void);
   DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_char);
   DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_short);
   DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_int);
