@@ -1,3 +1,7 @@
+2006-12-07  Kazu Hirata  <kazu@codesourcery.com>
+
+	* readelf.c: Update uses of EF_M68K_*.
+
 2006-10-30  Paul Brook  <paul@codesourcery.com>
 
 	* objdump.c (disassemble_section): Set info->symtab_pos.
