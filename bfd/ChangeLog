@@ -1,3 +1,9 @@
+2006-12-07  H.J. Lu <hjl@gnu.org>
+
+	PR ld/3666
+	* elflink.c (elf_link_add_object_symbols): Keep symbol
+	visibility for symbols from discarded section.
+
 2006-12-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-alpha.c (elf64_alpha_merge_symbol_attribute): New function.
