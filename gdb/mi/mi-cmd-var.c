@@ -500,10 +500,11 @@ mi_cmd_var_update (char *command, char **argv, int argc)
   if ((*name == '*') && (*(name + 1) == '\0'))
     {
       nv = varobj_list (&rootlist);
+      cleanup = make_cleanup (xfree, rootlist);
       if (mi_version (uiout) <= 1)
-        cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, "changelist");
+        make_cleanup_ui_out_tuple_begin_end (uiout, "changelist");
       else
-        cleanup = make_cleanup_ui_out_list_begin_end (uiout, "changelist");
+        make_cleanup_ui_out_list_begin_end (uiout, "changelist");
       if (nv <= 0)
 	{
 	  do_cleanups (cleanup);
@@ -515,7 +516,6 @@ mi_cmd_var_update (char *command, char **argv, int argc)
 	  varobj_update_one (*cr, print_values);
 	  cr++;
 	}
-      xfree (rootlist);
       do_cleanups (cleanup);
     }
   else
