@@ -19533,6 +19533,7 @@ The corresponding @value{GDBN} commands are @samp{frame}, @samp{up},
 @node GDB/MI Variable Objects
 @section @sc{gdb/mi} Variable Objects
 
+@ignore
 
 @subheading Motivation for Variable Objects in @sc{gdb/mi}
 
@@ -19566,6 +19567,8 @@ least, the following operations:
 @item @code{-stack-list-locals}
 @item @code{-stack-select-frame}
 @end itemize
+
+@end ignore
 
 @subheading Introduction to Variable Objects in @sc{gdb/mi}
 
