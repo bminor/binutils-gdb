@@ -41,7 +41,6 @@ mi_gdb_load ${binfile}
 
 # Test that children of classes are properly reported
 
-# Run to main
 mi_runto reference_update_tests
 
 mi_create_varobj "RX" "rx" "create varobj for rx"
@@ -68,6 +67,25 @@ mi_next_to "reference_update_tests" {} ".*${srcfile}" [expr $x_assignment+2] \
     "step to x assignment"
 
 mi_varobj_update RX {} "update RX (3)"
+
+mi_runto base_in_reference_test
+
+mi_create_varobj "S2" "s2" "create varobj for s2"
+
+mi_list_varobj_children "S2" {{"S2.S" "S" "1" "S"}} "list children of s2"
+
+mi_list_varobj_children "S2.S" {{"S2.S.public" "public" "2"}} \
+    "list children of s2.s"
+
+mi_list_varobj_children "S2.S.public"\
+{
+    {"S2.S.public.i" "i" "0" "int"}
+    {"S2.S.public.j" "j" "0" "int"}
+} "list children of s2.s.public"
+
+mi_check_varobj_value "S2.S.public.i" "67" "check S2.S.public.i"
+mi_check_varobj_value "S2.S.public.j" "89" "check S2.S.public.j"
+
 
 mi_gdb_exit
 return 0

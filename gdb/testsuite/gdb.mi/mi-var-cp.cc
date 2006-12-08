@@ -23,8 +23,26 @@ void reference_update_tests ()
   x = 567;
 }
 
+struct S { int i; int j; };
+struct S2 : S {};
+        
+int base_in_reference_test (S2& s2)
+{
+  return s2.i;
+}
+        
+void base_in_reference_test_main ()
+{
+  S2 s;
+  s.i = 67;
+  s.j = 89;
+  base_in_reference_test (s);
+}
+
+
 int main ()
 {
   reference_update_tests ();
+  base_in_reference_test_main ();
   return 0;
 }
