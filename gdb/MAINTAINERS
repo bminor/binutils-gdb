@@ -95,6 +95,9 @@ Something like changing or bypassing an interface is _not_ an obvious
 fix, since such a change without discussion will result in
 instantaneous and loud complaints.
 
+For documentation changes, about the only kind of fix that is obvious
+is correction of a typo or bad English usage.
+
 
 	     GDB Steering Committee
 	     ----------------------
