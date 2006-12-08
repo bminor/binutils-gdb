@@ -2379,8 +2379,9 @@ cplus_value_of_child (struct varobj *parent, int index)
 	    {
 	      struct value *temp = NULL;
 
-	      if (TYPE_CODE (value_type (parent->value)) == TYPE_CODE_PTR
-		  || TYPE_CODE (value_type (parent->value)) == TYPE_CODE_REF)
+	      /* No special processing for references is needed --
+		 value_cast below handles references.  */
+	      if (TYPE_CODE (value_type (parent->value)) == TYPE_CODE_PTR)
 		{
 		  if (!gdb_value_ind (parent->value, &temp))
 		    return NULL;
