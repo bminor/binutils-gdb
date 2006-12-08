@@ -1052,6 +1052,12 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
      has changed. */
   type_changed = 1;
   new = value_of_root (varp, &type_changed);
+
+  /* Restore selected frame */
+  fi = frame_find_by_id (old_fid);
+  if (fi)
+    select_frame (fi);
+
   if (new == NULL)
     {
       (*varp)->error = 1;
@@ -1146,11 +1152,6 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
 	*(*changelist + i) = *(templist + changed - 1 - i);
       *(*changelist + changed) = NULL;
     }
-
-  /* Restore selected frame */
-  fi = frame_find_by_id (old_fid);
-  if (fi)
-    select_frame (fi);
 
   if (type_changed)
     return -2;
