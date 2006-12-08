@@ -1,3 +1,9 @@
+2006-12-08  Christian Groessler  <chris@groessler.org>
+
+	* gas/z8k/reglabel.d: New test.
+	* gas/z8k/reglabel.s: New test.
+	* gas/z8k/z8k.exp: Run new test.
+
 2006-12-06  H.J. Lu <hjl@gnu.org>
 
 	* gas/i386/amdfam10.d: Updated for operand/address-size override
