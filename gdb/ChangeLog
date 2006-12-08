@@ -1,3 +1,10 @@
+2006-12-08  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* varobj.c (varobj_create): Don't call release_value.
+	(varobj_set_value): Likewise.
+	(install_new_value): Call coerce_ref and release_value
+	on the value. Add asserts.
+
 2006-12-08  Nick Roberts  <nickrob@snap.net.nz>
 
 	* mi/mi-cmd-var.c (mi_cmd_var_update):  Fix memory leak.

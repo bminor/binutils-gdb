@@ -1,3 +1,13 @@
+2006-12-08  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* lib/mi-support.exp
+	(mi_runto): Accept "()" after function name.
+	(mi_create_varobj): New function.
+	(mi_varobj_update): New function.
+	(mi_Check_varobj_value): New function.
+	* gdb.mi/mi-var-cp.exp: New file.
+	* gdb.mi/mi-var-cp.cc: New file.
+	
 2006-12-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/solib-weak.c, gdb.base/solib-weak.exp, gdb.base/weaklib1.c,

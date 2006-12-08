@@ -512,10 +512,7 @@ varobj_create (char *objname,
 	   right type.  */
 	value = evaluate_type (var->root->exp);
 
-      release_value (value);
-
       var->type = value_type (value);
-
       install_new_value (var, value, 1 /* Initial assignment */);
 
       /* Set language info */
@@ -847,9 +844,7 @@ varobj_set_value (struct varobj *var, char *expression)
 	 with catch the exception.  */
       if (!gdb_value_assign (var->value, value, &val))
 	return 0;
-
-      release_value (val);
-      
+     
       /* If the value has changed, record it, so that next -var-update can
 	 report this change.  If a variable had a value of '1', we've set it
 	 to '333' and then set again to '1', when -var-update will report this
@@ -901,7 +896,10 @@ varobj_list (struct varobj ***varlist)
    and return 0.
    Otherwise, assign the value and if type_changeable returns non-zero,
    find if the new value is different from the current value.
-   Return 1 if so, and 0 if the values are equal.  */
+   Return 1 if so, and 0 if the values are equal.  
+
+   The VALUE parameter should not be released -- the function will
+   take care of releasing it when needed.  */
 static int
 install_new_value (struct varobj *var, struct value *value, int initial)
 { 
@@ -916,6 +914,15 @@ install_new_value (struct varobj *var, struct value *value, int initial)
   gdb_assert (var->type || CPLUS_FAKE_CHILD (var));
   changeable = type_changeable (var);
   need_to_fetch = changeable;
+
+  /* We are not interested in the address of references, and given
+     that in C++ a reference is not rebindable, it cannot
+     meaningfully change.  So, get hold of the real value.  */
+  if (value)
+    {
+      value = coerce_ref (value);
+      release_value (value);
+    }
 
   if (var->type && TYPE_CODE (var->type) == TYPE_CODE_UNION)
     /* For unions, we need to fetch the value implicitly because
@@ -985,6 +992,8 @@ install_new_value (struct varobj *var, struct value *value, int initial)
     value_free (var->value);
   var->value = value;
   var->updated = 0;
+  
+  gdb_assert (!var->value || value_type (var->value));
 
   return changed;
 }

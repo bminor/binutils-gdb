@@ -869,7 +869,7 @@ proc mi_runto {func} {
 
   set test "mi runto $func"
   mi_gdb_test "200-break-insert $func" \
-    "200\\^done,bkpt=\{number=\"\[0-9\]+\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"$func\",file=\".*\",line=\"\[0-9\]*\",times=\"0\"\}" \
+    "200\\^done,bkpt=\{number=\"\[0-9\]+\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"$func\(\\\(.*\\\)\)?\",file=\".*\",line=\"\[0-9\]*\",times=\"0\"\}" \
     "breakpoint at $func"
 
   if {![regexp {number="[0-9]+"} $expect_out(buffer) str]
@@ -997,4 +997,40 @@ proc mi0_finish_to { func args file line result ret test } {
 proc mi0_continue_to { bkptno func args file line test } {
     mi0_execute_to "exec-continue" "breakpoint-hit\",bkptno=\"$bkptno" \
 	"$func" "$args" "$file" "$line" "" "$test"
+}
+
+# Creates varobj named NAME for EXPRESSION.
+# Name cannot be "-".
+proc mi_create_varobj { name expression testname } {
+    mi_gdb_test "-var-create $name * $expression" \
+        "\\^done,name=\"$name\",numchild=\"\[0-9\]+\",type=.*" \
+        $testname
+}
+
+# Updates varobj named NAME and checks that all varobjs in EXPECTED
+# are reported as updated, and no other varobj is updated.
+# Assumes that no varobj is out of scope and that no varobj changes
+# types.
+proc mi_varobj_update { name expected testname } {
+    set er "\\^done,changelist=\\\["
+    set first 1
+    foreach item $expected {
+        set v "{name=\"$item\",in_scope=\"true\",type_changed=\"false\"}"
+        if {$first} {
+            set er "$er$v"
+        } else {
+            set er "$er,$v"
+        }
+    }
+    set er "$er\\\]"
+
+    verbose -log "Expecting: $er" 2
+    mi_gdb_test "-var-update $name" $er $testname
+}
+
+proc mi_check_varobj_value { name value testname } {
+
+    mi_gdb_test "-var-evaluate-expression $name" \
+	"\\^done,value=\"$value\"" \
+	$testname
 }
