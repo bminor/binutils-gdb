@@ -1,3 +1,7 @@
+2006-12-08  Nick Roberts  <nickrob@snap.net.nz>
+
+	* mi/mi-cmd-var.c (mi_cmd_var_update):  Fix memory leak.
+
 2006-12-06  Jim Blandy  <jimb@codesourcery.com>
 
 	* gdbtypes.c: Revert 2006-12-05 change, and explain why.
