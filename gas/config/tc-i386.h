@@ -246,7 +246,7 @@ typedef struct
      by OR'ing together all of the possible type masks.  (e.g.
      'operand_types[i] = Reg|Imm' specifies that operand i can be
      either a register or an immediate operand.  */
-  unsigned int operand_types[4];
+  unsigned int operand_types[MAX_OPERANDS];
 
   /* operand_types[i] bits */
   /* register */
