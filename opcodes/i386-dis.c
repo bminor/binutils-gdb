@@ -427,8 +427,8 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define GRP7	  NULL, NULL, USE_GROUPS, NULL, 14, NULL, 0, NULL, 0
 #define GRP8	  NULL, NULL, USE_GROUPS, NULL, 15, NULL, 0, NULL, 0
 #define GRP9	  NULL, NULL, USE_GROUPS, NULL, 16, NULL, 0, NULL, 0
-#define GRP11_C6	  NULL, NULL, USE_GROUPS, NULL, 17, NULL, 0, NULL, 0
-#define GRP11_C7	  NULL, NULL, USE_GROUPS, NULL, 18, NULL, 0, NULL, 0
+#define GRP11_C6  NULL, NULL, USE_GROUPS, NULL, 17, NULL, 0, NULL, 0
+#define GRP11_C7  NULL, NULL, USE_GROUPS, NULL, 18, NULL, 0, NULL, 0
 #define GRP12	  NULL, NULL, USE_GROUPS, NULL, 19, NULL, 0, NULL, 0
 #define GRP13	  NULL, NULL, USE_GROUPS, NULL, 20, NULL, 0, NULL, 0
 #define GRP14	  NULL, NULL, USE_GROUPS, NULL, 21, NULL, 0, NULL, 0
@@ -478,7 +478,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define PREGRP37  NULL, NULL, USE_PREFIX_USER_TABLE, NULL, 37, NULL, 0, NULL, 0
 
 
-#define X86_64_0  NULL, NULL, X86_64_SPECIAL, NULL,  0, NULL, 0, NULL, 0
+#define X86_64_0  NULL, NULL, X86_64_SPECIAL, NULL, 0, NULL, 0, NULL, 0
 
 #define THREE_BYTE_0 NULL, NULL, IS_3BYTE_OPCODE, NULL, 0, NULL, 0, NULL, 0
 #define THREE_BYTE_1 NULL, NULL, IS_3BYTE_OPCODE, NULL, 1, NULL, 0, NULL, 0
@@ -551,7 +551,7 @@ static const struct dis386 dis386[] = {
   { "orB",		Eb, Gb, XX, XX },
   { "orS",		Ev, Gv, XX, XX },
   { "orB",		Gb, Eb, XX, XX },
-  { "orS",		Gv, Ev, XX , XX},
+  { "orS",		Gv, Ev, XX, XX },
   { "orB",		AL, Ib, XX, XX },
   { "orS",		eAX, Iv, XX, XX },
   { "push{T|}",		cs, XX, XX, XX },
@@ -585,7 +585,7 @@ static const struct dis386 dis386[] = {
   { "daa{|}",		XX, XX, XX, XX },
   /* 28 */
   { "subB",		Eb, Gb, XX, XX },
-  { "subS",		Ev, Gv, XX, XX},
+  { "subS",		Ev, Gv, XX, XX },
   { "subB",		Gb, Eb, XX, XX },
   { "subS",		Gv, Ev, XX, XX },
   { "subB",		AL, Ib, XX, XX },
@@ -647,7 +647,7 @@ static const struct dis386 dis386[] = {
   { "popV",		RMrSI, XX, XX, XX },
   { "popV",		RMrDI, XX, XX, XX },
   /* 60 */
-  { "pusha{P|}",	XX, XX, XX, XX},
+  { "pusha{P|}",	XX, XX, XX, XX },
   { "popa{P|}",		XX, XX, XX, XX },
   { "bound{S|}",	Gv, Ma, XX, XX },
   { X86_64_0 },
@@ -839,7 +839,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "clts",		XX, XX, XX, XX },
   { "sysretP",		XX, XX, XX, XX },
   /* 08 */
-  { "invd",		XX, XX, XX, XX},
+  { "invd",		XX, XX, XX, XX },
   { "wbinvd",		XX, XX, XX, XX },
   { "(bad)",		XX, XX, XX, XX },
   { "ud2a",		XX, XX, XX, XX },
@@ -1863,7 +1863,7 @@ static const struct dis386 prefix_user_table[][4] = {
   },
   /* PREGRP15 */
   {
-    { "(bad)", XM, EX, XX, XX},
+    { "(bad)", XM, EX, XX, XX },
     { "cvtdq2pd", XM, EX, XX, XX },
     { "cvttpd2dq", XM, EX, XX, XX },
     { "cvtpd2dq", XM, EX, XX, XX },
@@ -1915,7 +1915,7 @@ static const struct dis386 prefix_user_table[][4] = {
     { "pshufw", MX, EM, Ib, XX },
     { "pshufhw", XM, EX, Ib, XX },
     { "pshufd", XM, EX, Ib, XX },
-    { "pshuflw", XM, EX, Ib, XX},
+    { "pshuflw", XM, EX, Ib, XX },
   },
   /* PREGRP23 */
   {
@@ -1989,26 +1989,26 @@ static const struct dis386 prefix_user_table[][4] = {
   },
   /* PREGRP33 */
   {
-    {"movntps",Ev, XM, XX, XX},
-    {"movntss",Ev, XM, XX, XX},
-    {"movntpd",Ev, XM, XX, XX},
-    {"movntsd",Ev, XM, XX, XX},
+    {"movntps",Ev, XM, XX, XX },
+    {"movntss",Ev, XM, XX, XX },
+    {"movntpd",Ev, XM, XX, XX },
+    {"movntsd",Ev, XM, XX, XX },
   },
 
   /* PREGRP34 */
   {
-    {"vmread", Em, Gm, XX, XX},
-    {"(bad)",  XX, XX, XX, XX},
-    {"extrq",  XS, Ib, Ib, XX},
-    {"insertq",XM, XS, Ib, Ib},
+    {"vmread", Em, Gm, XX, XX },
+    {"(bad)",  XX, XX, XX, XX },
+    {"extrq",  XS, Ib, Ib, XX },
+    {"insertq",XM, XS, Ib, Ib },
   },
   
  /* PREGRP35 */  
   {
-    {"vmwrite", Gm, Em, XX, XX},
-    {"(bad)",   XX, XX, XX, XX},
-    {"extrq",   XM, XS, XX, XX},
-    {"insertq", XM, XS, XX, XX},
+    {"vmwrite", Gm, Em, XX, XX },
+    {"(bad)",   XX, XX, XX, XX },
+    {"extrq",   XM, XS, XX, XX },
+    {"insertq", XM, XS, XX, XX },
   }, 
 
   /* PREGRP36 */
