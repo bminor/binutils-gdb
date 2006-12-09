@@ -1842,15 +1842,6 @@ win32_open (char *arg, int from_tty)
   error (_("Use the \"run\" command to start a Unix child process."));
 }
 
-/* Function called by qsort to sort environment strings.  */
-static int
-env_sort (const void *a, const void *b)
-{     
-  const char **p = (const char **) a; 
-  const char **q = (const char **) b;
-  return strcasecmp (*p, *q);
-}
-
 /* Start an inferior win32 child process and sets inferior_ptid to its pid.
    EXEC_FILE is the file to run.
    ALLARGS is a string containing the arguments to the program.
@@ -1860,10 +1851,6 @@ static void
 win32_create_inferior (char *exec_file, char *allargs, char **in_env,
 		       int from_tty)
 {
-  char *winenv;
-  char *temp;
-  int envlen;
-  int i;
   STARTUPINFO si;
   PROCESS_INFORMATION pi;
   BOOL ret;
@@ -1918,83 +1905,7 @@ win32_create_inferior (char *exec_file, char *allargs, char **in_env,
   strcat (args, allargs);
 
   /* Prepare the environment vars for CreateProcess.  */
-  {
-    /* This code used to assume all env vars were file names and would
-       translate them all to win32 style.  That obviously doesn't work in the
-       general case.  The current rule is that we only translate PATH.
-       We need to handle PATH because we're about to call CreateProcess and
-       it uses PATH to find DLL's.  Fortunately PATH has a well-defined value
-       in both posix and win32 environments.  cygwin.dll will change it back
-       to posix style if necessary.  */
-
-    static const char *conv_path_names[] =
-    {
-      "PATH=",
-      0
-    };
-
-    /* CreateProcess takes the environment list as a null terminated set of
-       strings (i.e. two nulls terminate the list).  */
-
-    /* Get total size for env strings.  */
-    for (envlen = 0, i = 0; in_env[i] && *in_env[i]; i++)
-      {
-	int j, len;
-
-	for (j = 0; conv_path_names[j]; j++)
-	  {
-	    len = strlen (conv_path_names[j]);
-	    if (strncmp (conv_path_names[j], in_env[i], len) == 0)
-	      {
-		if (cygwin_posix_path_list_p (in_env[i] + len))
-		  envlen += len
-		    + cygwin_posix_to_win32_path_list_buf_size (in_env[i] + len);
-		else
-		  envlen += strlen (in_env[i]) + 1;
-		break;
-	      }
-	  }
-	if (conv_path_names[j] == NULL)
-	  envlen += strlen (in_env[i]) + 1;
-      }
-
-    size_t envsize = sizeof (in_env[0]) * (i + 1);
-    char **env = (char **) alloca (envsize);
-    memcpy (env, in_env, envsize);
-    /* Windows programs expect the environment block to be sorted.  */
-    qsort (env, i, sizeof (char *), env_sort);
-
-    winenv = alloca (envlen + 1);
-
-    /* Copy env strings into new buffer.  */
-    for (temp = winenv, i = 0; env[i] && *env[i]; i++)
-      {
-	int j, len;
-
-	for (j = 0; conv_path_names[j]; j++)
-	  {
-	    len = strlen (conv_path_names[j]);
-	    if (strncmp (conv_path_names[j], env[i], len) == 0)
-	      {
-		if (cygwin_posix_path_list_p (env[i] + len))
-		  {
-		    memcpy (temp, env[i], len);
-		    cygwin_posix_to_win32_path_list (env[i] + len, temp + len);
-		  }
-		else
-		  strcpy (temp, env[i]);
-		break;
-	      }
-	  }
-	if (conv_path_names[j] == NULL)
-	  strcpy (temp, env[i]);
-
-	temp += strlen (temp) + 1;
-      }
-
-    /* Final nil string to terminate new env.  */
-    *temp = 0;
-  }
+  cygwin_internal (CW_SYNC_WINENV);
 
   if (!inferior_io_terminal)
     tty = ostdin = ostdout = ostderr = -1;
@@ -2024,7 +1935,7 @@ win32_create_inferior (char *exec_file, char *allargs, char **in_env,
 		       NULL,	/* thread */
 		       TRUE,	/* inherit handles */
 		       flags,	/* start flags */
-		       winenv,
+		       NULL,	/* environment */
 		       NULL,	/* current directory */
 		       &si,
 		       &pi);

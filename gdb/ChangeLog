@@ -1,3 +1,10 @@
+2006-12-09  Corinna Vinschen  <vinschen@redhat.com>
+
+	* win32-nat.c (env_sort): Remove.
+	(win32_create_inferior): Remove code which creates a Windows
+	environment.  Use Cygwin function call instead.  Propagate
+	current environment to inferior process.
+
 2006-12-09  Nick Roberts  <nickrob@snap.net.nz>
 
 	* varobj.c (varobj_update): Ensure frame is restored when
