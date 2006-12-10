@@ -479,6 +479,9 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 
 
 #define X86_64_0  NULL, NULL, X86_64_SPECIAL, NULL, 0, NULL, 0, NULL, 0
+#define X86_64_1  NULL, NULL, X86_64_SPECIAL, NULL, 1, NULL, 0, NULL, 0
+#define X86_64_2  NULL, NULL, X86_64_SPECIAL, NULL, 2, NULL, 0, NULL, 0
+#define X86_64_3  NULL, NULL, X86_64_SPECIAL, NULL, 3, NULL, 0, NULL, 0
 
 #define THREE_BYTE_0 NULL, NULL, IS_3BYTE_OPCODE, NULL, 0, NULL, 0, NULL, 0
 #define THREE_BYTE_1 NULL, NULL, IS_3BYTE_OPCODE, NULL, 1, NULL, 0, NULL, 0
@@ -647,10 +650,10 @@ static const struct dis386 dis386[] = {
   { "popV",		RMrSI, XX, XX, XX },
   { "popV",		RMrDI, XX, XX, XX },
   /* 60 */
-  { "pusha{P|}",	XX, XX, XX, XX },
-  { "popa{P|}",		XX, XX, XX, XX },
-  { "bound{S|}",	Gv, Ma, XX, XX },
   { X86_64_0 },
+  { X86_64_1 },
+  { X86_64_2 },
+  { X86_64_3 },
   { "(bad)",		XX, XX, XX, XX },	/* seg fs */
   { "(bad)",		XX, XX, XX, XX },	/* seg gs */
   { "(bad)",		XX, XX, XX, XX },	/* op size prefix */
@@ -2030,8 +2033,20 @@ static const struct dis386 prefix_user_table[][4] = {
 
 static const struct dis386 x86_64_table[][2] = {
   {
-    { "arpl", Ew, Gw, XX, XX },
-    { "movs{||lq|xd}", Gv, Ed, XX, XX },
+    { "pusha{P|}",	XX, XX, XX, XX },
+    { "(bad)",		XX, XX, XX, XX },
+  },
+  {
+    { "popa{P|}",	XX, XX, XX, XX },
+    { "(bad)",		XX, XX, XX, XX },
+  },
+  {
+    { "bound{S|}",	Gv, Ma, XX, XX },
+    { "(bad)",		XX, XX, XX, XX },
+  },
+  {
+    { "arpl",		Ew, Gw, XX, XX },
+    { "movs{||lq|xd}",	Gv, Ed, XX, XX },
   },
 };
 

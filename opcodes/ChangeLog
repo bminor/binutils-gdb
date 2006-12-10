@@ -1,5 +1,14 @@
 2006-12-09  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-dis.c (X86_64_1): New.
+	(X86_64_2): Likewise.
+	(X86_64_3): Likewise.
+	(dis386): Replace 0x60, 0x61 and 0x62 entries with x86-64
+	tables.
+	(x86_64_table): Add entries for 0x60, 0x61 and 0x62.
+
+2006-12-09  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-dis.c: Adjust white spaces.
 
 2006-12-04  Jan Beulich  <jbeulich@novell.com>
