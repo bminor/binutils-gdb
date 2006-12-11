@@ -9255,7 +9255,8 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
       if (bfd_get_flavour (sub) != bfd_target_elf_flavour)
 	continue;
 
-      /* Keep .gcc_except_table.* if the associated .text.* is
+      /* Keep .gcc_except_table.* if the associated .text.* (or the
+	 associated .gnu.linkonce.t.* if .text.* doesn't exist) is
 	 marked.  This isn't very nice, but the proper solution,
 	 splitting .eh_frame up and using comdat doesn't pan out
 	 easily due to needing special relocs to handle the
@@ -9271,12 +9272,23 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
 		asection *fn_text;
 
 		len = strlen (o->name + 18) + 1;
-		fn_name = bfd_malloc (len + 6);
+		fn_name = bfd_malloc (len + 16);
 		if (fn_name == NULL)
 		  return FALSE;
+
+		/* Try the first prefix.  */
 		memcpy (fn_name, ".text.", 6);
 		memcpy (fn_name + 6, o->name + 18, len);
 		fn_text = bfd_get_section_by_name (sub, fn_name);
+
+		/* Try the second prefix.  */
+		if (fn_text == NULL)
+		  {
+		    memcpy (fn_name, ".gnu.linkonce.t.", 16);
+		    memcpy (fn_name + 16, o->name + 18, len);
+		    fn_text = bfd_get_section_by_name (sub, fn_name);
+		  }
+
 		free (fn_name);
 		if (fn_text == NULL || !fn_text->gc_mark)
 		  continue;
