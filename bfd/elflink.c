@@ -9809,13 +9809,15 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
       if (bfd_get_flavour (sub) != bfd_target_elf_flavour)
 	continue;
 
-      /* Keep .gcc_except_table.* if the associated .text.* is
+      /* Keep .gcc_except_table.* if the associated .text.* (or the
+	 associated .gnu.linkonce.t.* if .text.* doesn't exist) is
 	 marked.  This isn't very nice, but the proper solution,
 	 splitting .eh_frame up and using comdat doesn't pan out
 	 easily due to needing special relocs to handle the
 	 difference of two symbols in separate sections.
 	 Don't keep code sections referenced by .eh_frame.  */
 #define TEXT_PREFIX			".text."
+#define TEXT_PREFIX2			".gnu.linkonce.t."
 #define GCC_EXCEPT_TABLE_PREFIX		".gcc_except_table."
       for (o = sub->sections; o != NULL; o = o->next)
 	if (!o->gc_mark && o->gc_mark_from_eh && (o->flags & SEC_CODE) == 0)
@@ -9825,15 +9827,30 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
 		char *fn_name;
 		const char *sec_name;
 		asection *fn_text;
-		unsigned o_name_prefix_len  = strlen (GCC_EXCEPT_TABLE_PREFIX);
-		unsigned fn_name_prefix_len = strlen (TEXT_PREFIX);
+		unsigned o_name_prefix_len , fn_name_prefix_len, tmp;
 
+		o_name_prefix_len = strlen (GCC_EXCEPT_TABLE_PREFIX);
 		sec_name = o->name + o_name_prefix_len;
-		fn_name = bfd_malloc (strlen (sec_name) + fn_name_prefix_len + 1);
+		fn_name_prefix_len = strlen (TEXT_PREFIX);
+		tmp = strlen (TEXT_PREFIX2);
+		if (tmp > fn_name_prefix_len)
+		  fn_name_prefix_len = tmp;
+		fn_name
+		  = bfd_malloc (fn_name_prefix_len + strlen (sec_name) + 1);
 		if (fn_name == NULL)
 		  return FALSE;
+
+		/* Try the first prefix.  */
 		sprintf (fn_name, "%s%s", TEXT_PREFIX, sec_name);
 		fn_text = bfd_get_section_by_name (sub, fn_name);
+
+		/* Try the second prefix.  */
+		if (fn_text == NULL)
+		  {
+		    sprintf (fn_name, "%s%s", TEXT_PREFIX2, sec_name);
+		    fn_text = bfd_get_section_by_name (sub, fn_name);
+		  }
+
 		free (fn_name);
 		if (fn_text == NULL || !fn_text->gc_mark)
 		  continue;
