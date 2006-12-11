@@ -68,7 +68,7 @@ chew.o: chew.c
 
 protos: libbfd.h libcoff.h bfd.h
 
-$(srcdir)/bfd.info bfd.dvi bfd.html: $(DOCFILES) bfdsumm.texi bfd.texinfo
+bfd.info bfd.dvi bfd.html: $(DOCFILES) bfdsumm.texi bfd.texinfo
 
 # We can't replace these rules with an implicit rule, because
 # makes without VPATH support couldn't find the .h files in `..'.
@@ -309,6 +309,11 @@ install-html-am: $(HTMLS)
 	  fi; \
 	done
 
+MAINTAINERCLEANFILES += bfd.info
 
-
-
+# Automake 1.9 will only build info files in the objdir if they are
+# mentioned in DISTCLEANFILES.  It doesn't have to be unconditional,
+# though, so we use a bogus condition.
+if GENINSRC_NEVER
+DISTCLEANFILES += bfd.info
+endif

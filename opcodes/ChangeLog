@@ -1,3 +1,7 @@
+2006-12-11  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* po/Make-in (.po.gmo): Put gmo files in objdir.
+
 2006-12-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (X86_64_1): New.

@@ -67,7 +67,7 @@ gasver.texi: $(srcdir)/../../bfd/configure
 	eval `grep '^ *VERSION=' $(srcdir)/../../bfd/configure`; \
 	  echo "@set VERSION $$VERSION" > $@
 
-$(srcdir)/as.info as.dvi as.html: $(srcdir)/as.texinfo asconfig.texi gasver.texi $(CPU_DOCS)
+as.info as.dvi as.html: $(srcdir)/as.texinfo asconfig.texi gasver.texi $(CPU_DOCS)
 
 # We want install to imply install-info as per GNU standards, despite the
 # cygnus option.
@@ -121,3 +121,12 @@ as.1: $(srcdir)/as.texinfo asconfig.texi gasver.texi $(CPU_DOCS)
 	        mv -f $@.T$$$$ $@) || \
 	        (rm -f $@.T$$$$ && exit 1)
 	rm -f as.pod
+
+MAINTAINERCLEANFILES += as.info
+
+# Automake 1.9 will only build info files in the objdir if they are
+# mentioned in DISTCLEANFILES.  It doesn't have to be unconditional,
+# though, so we use a bogus condition.
+if GENINSRC_NEVER
+DISTCLEANFILES = as.info
+endif

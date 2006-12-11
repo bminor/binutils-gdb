@@ -1,3 +1,12 @@
+2006-12-11  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* configure.in: Define GENINSRC_NEVER.
+	* doc/Makefile.am (ld.info): Remove srcdir prefix.
+	(MAINTAINERCLEANFILES): Add info file.
+	(DISTCLEANFILES): Pretend to add info file.
+	* po/Make-in (.po.gmo): Put gmo files in objdir.
+	* configure, Makefile.in: Regenerated.
+
 2006-12-04  Jan Beulich  <jbeulich@novell.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Create

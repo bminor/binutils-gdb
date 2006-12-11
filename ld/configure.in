@@ -92,6 +92,7 @@ AC_PROG_YACC
 AM_PROG_LEX
 
 AM_MAINTAINER_MODE
+AM_CONDITIONAL(GENINSRC_NEVER, false)
 
 . ${srcdir}/configure.host
 

@@ -1760,7 +1760,7 @@ ldver.texi: $(srcdir)/../bfd/configure
 	eval `grep '^ *VERSION=' $(srcdir)/../bfd/configure`; \
 	  echo "@set VERSION $$VERSION" > $@
 
-$(srcdir)/ld.info ld.dvi ld.html: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
+ld.info ld.dvi ld.html: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
 
 # Build the man page from the texinfo file
 # The sed command removes the no-adjust Nroff command so that
@@ -1876,6 +1876,15 @@ info-recursive: ld.1
 DISTCLEANFILES = tdirs site.exp site.bak stringify.sed
 distclean-local:
 	rm -rf ldscripts
+
+MAINTAINERCLEANFILES += ld.info
+
+# Automake 1.9 will only build info files in the objdir if they are
+# mentioned in DISTCLEANFILES.  It doesn't have to be unconditional,
+# though, so we use a bogus condition.
+if GENINSRC_NEVER
+DISTCLEANFILES += ld.info
+endif
 
 # Targets to rebuild dependencies in this Makefile.
 # Have to get rid of DEP1 here so that "$?" later includes all of $(CFILES).

@@ -180,6 +180,15 @@ install-html-am: $(HTMLS)
 	  fi; \
 	done
 
+MAINTAINERCLEANFILES += binutils.info
+
+# Automake 1.9 will only build info files in the objdir if they are
+# mentioned in DISTCLEANFILES.  It doesn't have to be unconditional,
+# though, so we use a bogus condition.
+if GENINSRC_NEVER
+DISTCLEANFILES = binutils.info
+endif
+
 # Maintenance
 
 # We need it for the taz target in ../../Makefile.in.

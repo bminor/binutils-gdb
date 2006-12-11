@@ -61,7 +61,7 @@ POD2MAN = pod2man --center="GNU" --release="binutils-$(VERSION)" --section=1
 info_TEXINFOS = gprof.texi
 man_MANS = gprof.1
 
-$(srcdir)/gprof.info: gprof.texi config.texi
+gprof.info: gprof.texi config.texi
 
 config.texi:
 	echo "@set top_srcdir $(top_srcdir)" >> ./config.texi
@@ -176,6 +176,15 @@ dep-am: DEP
 .PHONY: dep dep-in dep-am
 
 CLEANFILES = dep.sed DEP DEPA DEP1 DEP2
+
+MAINTAINERCLEANFILES = gprof.info
+
+# Automake 1.9 will only build info files in the objdir if they are
+# mentioned in DISTCLEANFILES.  It doesn't have to be unconditional,
+# though, so we use a bogus condition.
+if GENINSRC_NEVER
+DISTCLEANFILES = gprof.info
+endif
 
 # DO NOT DELETE THIS LINE -- mkdep uses it.
 # DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
