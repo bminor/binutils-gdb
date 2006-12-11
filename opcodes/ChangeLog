@@ -1,3 +1,11 @@
+2006-12-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (Eq): Replaced by ...
+	(Mq): New. This.
+	(Ma): Defined with OP_M instead of OP_E.
+	(grps): Updated cmpxchg8b and vmptrst for Eq -> Mq.
+	(OP_M): Added bound, cmpxchg8b and vmptrst to bad modrm list.
+
 2006-12-11  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* po/Make-in (.po.gmo): Put gmo files in objdir.

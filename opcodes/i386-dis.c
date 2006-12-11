@@ -209,7 +209,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Eb OP_E, b_mode
 #define Ev OP_E, v_mode
 #define Ed OP_E, d_mode
-#define Eq OP_E, q_mode
 #define Edq OP_E, dq_mode
 #define Edqw OP_E, dqw_mode
 #define indirEv OP_indirE, stack_v_mode
@@ -217,9 +216,10 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define stackEv OP_E, stack_v_mode
 #define Em OP_E, m_mode
 #define Ew OP_E, w_mode
-#define Ma OP_E, v_mode
 #define M OP_M, 0		/* lea, lgdt, etc. */
+#define Ma OP_M, v_mode
 #define Mp OP_M, f_mode		/* 32 or 48 bit memory operand for LDS, LES etc */
+#define Mq OP_M, q_mode
 #define Gb OP_G, b_mode
 #define Gv OP_G, v_mode
 #define Gd OP_G, d_mode
@@ -1638,13 +1638,13 @@ static const struct dis386 grps[][8] = {
   /* GRP9 */
   {
     { "(bad)",	XX, XX, XX, XX },
-    { "cmpxchg8b", Eq, XX, XX, XX },
+    { "cmpxchg8b", Mq, XX, XX, XX },
     { "(bad)",	XX, XX, XX, XX },
     { "(bad)",	XX, XX, XX, XX },
     { "(bad)",	XX, XX, XX, XX },
     { "(bad)",	XX, XX, XX, XX },
     { "",	VM, XX, XX, XX },		/* See OP_VMX.  */
-    { "vmptrst", Eq, XX, XX, XX },
+    { "vmptrst", Mq, XX, XX, XX },
   },
   /* GRP11_C6 */
   {
@@ -5262,7 +5262,8 @@ static void
 OP_M (int bytemode, int sizeflag)
 {
   if (mod == 3)
-    BadOp ();	/* bad lea,lds,les,lfs,lgs,lss modrm */
+    /* bad bound,lea,lds,les,lfs,lgs,lss,cmpxchg8b,vmptrst modrm */
+    BadOp ();
   else
     OP_E (bytemode, sizeflag);
 }
