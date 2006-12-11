@@ -99,7 +99,6 @@ responsibility among the other maintainers.
   PPC vector ext   Aldy Hernandez <aldyh@redhat.com>
   s390, s390x	   Martin Schwidefsky <schwidefsky@de.ibm.com>
   SCORE		   Mei Ligang <ligang@sunnorth.com.cn>
-  SH		   Jörn Rennecke <joern.rennecke@st.com>
   SH		   Alexandre Oliva <aoliva@redhat.com>
   SH		   Kaz Kojima <kkojima@rr.iij4u.or.jp>
   SPARC		   Jakub Jelinek <jakub@redhat.com>
