@@ -1,3 +1,9 @@
+2006-12-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.am (ld_TEXINFOS): Set.
+	(ld.info ld.dvi ld.html): Delete rule.
+	* Makefile.in: Regenerated.
+
 2006-12-12  Ina Pandit  <inap@kpitcummins.com>
 
 	* ldlang.c (print_output_section_statement): Print load address

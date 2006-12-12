@@ -45,7 +45,7 @@ DIST_COMMON = $(srcdir)/../config.guess $(srcdir)/../config.sub README \
 	$(srcdir)/gconfig.in $(srcdir)/../mkinstalldirs \
 	$(top_srcdir)/po/Make-in $(srcdir)/../ltmain.sh \
 	$(srcdir)/../config.guess $(srcdir)/../config.sub \
-	$(noinst_HEADERS)
+	$(gprof_TEXINFOS) $(noinst_HEADERS)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
@@ -261,6 +261,7 @@ MANCONF = -Dman
 TEXI2POD = perl $(srcdir)/../etc/texi2pod.pl
 POD2MAN = pod2man --center="GNU" --release="binutils-$(VERSION)" --section=1
 info_TEXINFOS = gprof.texi
+gprof_TEXINFOS = config.texi
 man_MANS = gprof.1
 html__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 CLEANFILES = dep.sed DEP DEPA DEP1 DEP2
@@ -383,17 +384,35 @@ clean-libtool:
 distclean-libtool:
 	-rm -f libtool
 
-gprof.dvi: gprof.texi  
+gprof.info: gprof.texi $(gprof_TEXINFOS)
+	restore=: && backupdir="$(am__leading_dot)am$$$$" && \
+	rm -rf $$backupdir && mkdir $$backupdir && \
+	if ($(MAKEINFO) --version) >/dev/null 2>&1; then \
+	  for f in $@ $@-[0-9] $@-[0-9][0-9] $(@:.info=).i[0-9] $(@:.info=).i[0-9][0-9]; do \
+	    if test -f $$f; then mv $$f $$backupdir; restore=mv; else :; fi; \
+	  done; \
+	else :; fi && \
+	if $(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir) \
+	 -o $@ `test -f 'gprof.texi' || echo '$(srcdir)/'`gprof.texi; \
+	then \
+	  rc=0; \
+	else \
+	  rc=$$?; \
+	  $$restore $$backupdir/* `echo "./$@" | sed 's|[^/]*$$||'`; \
+	fi; \
+	rm -rf $$backupdir; exit $$rc
+
+gprof.dvi: gprof.texi $(gprof_TEXINFOS) 
 	TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
 	MAKEINFO='$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir)' \
 	$(TEXI2DVI) -o $@ `test -f 'gprof.texi' || echo '$(srcdir)/'`gprof.texi
 
-gprof.pdf: gprof.texi  
+gprof.pdf: gprof.texi $(gprof_TEXINFOS) 
 	TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
 	MAKEINFO='$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir)' \
 	$(TEXI2PDF) -o $@ `test -f 'gprof.texi' || echo '$(srcdir)/'`gprof.texi
 
-gprof.html: gprof.texi  
+gprof.html: gprof.texi $(gprof_TEXINFOS) 
 	rm -rf $(@:.html=.htp)
 	if $(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) -I $(srcdir) \
 	 -o $(@:.html=.htp) `test -f 'gprof.texi' || echo '$(srcdir)/'`gprof.texi; \
@@ -795,8 +814,6 @@ diststuff: $(BUILT_SOURCES) info $(man_MANS)
 po/POTFILES.in: @MAINT@ Makefile
 	for f in $(POTFILES); do echo $$f; done | LC_COLLATE= sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
-
-gprof.info: gprof.texi config.texi
 
 config.texi:
 	echo "@set top_srcdir $(top_srcdir)" >> ./config.texi

@@ -59,9 +59,8 @@ TEXI2POD = perl $(srcdir)/../etc/texi2pod.pl
 POD2MAN = pod2man --center="GNU" --release="binutils-$(VERSION)" --section=1
 
 info_TEXINFOS = gprof.texi
+gprof_TEXINFOS = config.texi
 man_MANS = gprof.1
-
-gprof.info: gprof.texi config.texi
 
 config.texi:
 	echo "@set top_srcdir $(top_srcdir)" >> ./config.texi

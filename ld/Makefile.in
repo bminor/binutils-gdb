@@ -49,7 +49,8 @@ DIST_COMMON = $(srcdir)/../config.guess $(srcdir)/../config.sub NEWS \
 	$(srcdir)/config.in $(srcdir)/../mkinstalldirs \
 	$(top_srcdir)/po/Make-in ldgram.h ldgram.c ldlex.c deffilep.h \
 	deffilep.c $(srcdir)/../ylwrap $(srcdir)/../ltmain.sh \
-	$(srcdir)/../config.guess $(srcdir)/../config.sub
+	$(srcdir)/../config.guess $(srcdir)/../config.sub \
+	$(ld_TEXINFOS)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
@@ -329,6 +330,7 @@ CXX_FOR_TARGET = ` \
   fi`
 
 info_TEXINFOS = ld.texinfo
+ld_TEXINFOS = configdoc.texi ldver.texi
 noinst_TEXINFOS = ldint.texinfo
 man_MANS = ld.1
 AM_MAKEINFOFLAGS = -I $(srcdir) -I $(BFDDIR)/doc -I $(top_srcdir)/../libiberty
@@ -813,7 +815,7 @@ clean-libtool:
 distclean-libtool:
 	-rm -f libtool
 
-ld.info: ld.texinfo 
+ld.info: ld.texinfo $(ld_TEXINFOS)
 	restore=: && backupdir="$(am__leading_dot)am$$$$" && \
 	rm -rf $$backupdir && mkdir $$backupdir && \
 	if ($(MAKEINFO) --version) >/dev/null 2>&1; then \
@@ -831,17 +833,17 @@ ld.info: ld.texinfo
 	fi; \
 	rm -rf $$backupdir; exit $$rc
 
-ld.dvi: ld.texinfo  
+ld.dvi: ld.texinfo $(ld_TEXINFOS) 
 	TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
 	MAKEINFO='$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir)' \
 	$(TEXI2DVI) -o $@ `test -f 'ld.texinfo' || echo '$(srcdir)/'`ld.texinfo
 
-ld.pdf: ld.texinfo  
+ld.pdf: ld.texinfo $(ld_TEXINFOS) 
 	TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
 	MAKEINFO='$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir)' \
 	$(TEXI2PDF) -o $@ `test -f 'ld.texinfo' || echo '$(srcdir)/'`ld.texinfo
 
-ld.html: ld.texinfo  
+ld.html: ld.texinfo $(ld_TEXINFOS) 
 	rm -rf $(@:.html=.htp)
 	if $(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) -I $(srcdir) \
 	 -o $(@:.html=.htp) `test -f 'ld.texinfo' || echo '$(srcdir)/'`ld.texinfo; \
@@ -2561,8 +2563,6 @@ ldver.texi: $(srcdir)/../bfd/configure
 	rm -f $@
 	eval `grep '^ *VERSION=' $(srcdir)/../bfd/configure`; \
 	  echo "@set VERSION $$VERSION" > $@
-
-ld.info ld.dvi ld.html: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
 
 # Build the man page from the texinfo file
 # The sed command removes the no-adjust Nroff command so that

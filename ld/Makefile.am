@@ -91,6 +91,7 @@ CXX_FOR_TARGET = ` \
 
 noinst_PROGRAMS = ld-new
 info_TEXINFOS = ld.texinfo
+ld_TEXINFOS = configdoc.texi ldver.texi
 noinst_TEXINFOS = ldint.texinfo
 man_MANS = ld.1
 
@@ -1759,8 +1760,6 @@ ldver.texi: $(srcdir)/../bfd/configure
 	rm -f $@
 	eval `grep '^ *VERSION=' $(srcdir)/../bfd/configure`; \
 	  echo "@set VERSION $$VERSION" > $@
-
-ld.info ld.dvi ld.html: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
 
 # Build the man page from the texinfo file
 # The sed command removes the no-adjust Nroff command so that

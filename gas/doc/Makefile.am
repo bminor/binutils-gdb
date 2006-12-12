@@ -16,6 +16,7 @@ POD2MAN = pod2man --center="GNU Development Tools" \
 man_MANS = as.1
 
 info_TEXINFOS = as.texinfo 
+as_TEXINFOS = asconfig.texi gasver.texi $(CPU_DOCS)
 
 AM_MAKEINFOFLAGS = -I "$(srcdir)" -I "$(top_srcdir)/../libiberty"
 TEXI2DVI = texi2dvi -I "$(srcdir)" -I "$(top_srcdir)/../libiberty"
@@ -66,8 +67,6 @@ gasver.texi: $(srcdir)/../../bfd/configure
 	rm -f $@
 	eval `grep '^ *VERSION=' $(srcdir)/../../bfd/configure`; \
 	  echo "@set VERSION $$VERSION" > $@
-
-as.info as.dvi as.html: $(srcdir)/as.texinfo asconfig.texi gasver.texi $(CPU_DOCS)
 
 # We want install to imply install-info as per GNU standards, despite the
 # cygnus option.
