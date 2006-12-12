@@ -314,7 +314,7 @@ typedef struct
 #define LLongMem AnyMem		/* 64 bits (or more) */
 #define LongMem AnyMem		/* 32 bit memory ref */
 #define ShortMem AnyMem		/* 16 bit memory ref */
-#define WordMem AnyMem		/* 16 or 32 bit memory ref */
+#define WordMem AnyMem		/* 16, 32 or 64 bit memory ref */
 #define ByteMem AnyMem		/* 8 bit memory ref */
 }
 template;
