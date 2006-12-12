@@ -3412,14 +3412,8 @@ print_output_section_statement
 
 	  minfo ("0x%V %W", section->vma, section->size);
 
-	  if (output_section_statement->load_base != NULL)
-	    {
-	      bfd_vma addr;
-
-	      addr = exp_get_abs_int (output_section_statement->load_base, 0,
-				      "load base");
-	      minfo (_(" load address 0x%V"), addr);
-	    }
+	  if (section->vma != section->lma)
+	    minfo (_(" load address 0x%V"), section->lma);
 	}
 
       print_nl ();
