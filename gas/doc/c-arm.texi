@@ -155,9 +155,9 @@ names are recognized:
 @code{armv6z},
 @code{armv6zk},
 @code{armv7},
-@code{armv7a},
-@code{armv7r},
-@code{armv7m},
+@code{armv7-a},
+@code{armv7-r},
+@code{armv7-m},
 @code{iwmmxt}
 and
 @code{xscale}.
