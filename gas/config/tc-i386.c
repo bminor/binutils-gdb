@@ -2573,6 +2573,7 @@ match_template ()
   int suffix_check;
   unsigned int operand_types [MAX_OPERANDS];
   int addr_prefix_disp;
+  unsigned int j;
 
 #if MAX_OPERANDS != 4
 # error "MAX_OPERANDS must be 4."
@@ -2596,10 +2597,8 @@ match_template ()
   overlap2 = 0;
   overlap3 = 0;
   found_reverse_match = 0;
-  operand_types [0] = 0;
-  operand_types [1] = 0;
-  operand_types [2] = 0;
-  operand_types [3] = 0;
+  for (j = 0; j < MAX_OPERANDS; j++)
+    operand_types [j] = 0;
   addr_prefix_disp = -1;
   suffix_check = (i.suffix == BYTE_MNEM_SUFFIX
 		  ? No_bSuf
@@ -2628,10 +2627,8 @@ match_template ()
 	       && (t->opcode_modifier & IgnoreSize)))
 	continue;
 
-      operand_types [0] = t->operand_types [0];
-      operand_types [1] = t->operand_types [1];
-      operand_types [2] = t->operand_types [2];
-      operand_types [3] = t->operand_types [3];
+      for (j = 0; j < MAX_OPERANDS; j++)
+	operand_types [j] = t->operand_types [j];
 
       /* In general, don't allow 64-bit operands in 32-bit mode.  */
       if (i.suffix == QWORD_MNEM_SUFFIX
@@ -2659,7 +2656,7 @@ match_template ()
 	 into Disp32/Disp16/Disp32 operand.  */
       if (i.prefix[ADDR_PREFIX] != 0)
 	  {
-	    unsigned int j, DispOn = 0, DispOff = 0;
+	    unsigned int DispOn = 0, DispOff = 0;
 
 	    switch (flag_code)
 	    {
