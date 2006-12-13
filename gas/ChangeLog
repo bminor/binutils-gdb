@@ -1,3 +1,8 @@
+2006-12-13  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (arm_arch_option_table): Add v7-{a,r,m}.
+	* doc/c-arm.texi: Fix spelling of ARMv7 profile variants.
+
 2006-12-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.h (WordMem): Document it for 64 bit memory
