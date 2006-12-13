@@ -46,6 +46,7 @@
 .*:47: Error: .*
 .*:48: Error: .*
 .*:49: Error: .*
+.*:50: Error: .*
 GAS LISTING .*
 
 
@@ -98,3 +99,4 @@ GAS LISTING .*
   47 [ 	]*	fcompll	28\(%ebp\)
   48 [ 	]*	fldlw	\(%eax\)
   49 [ 	]*	movl	\$%ebx,%eax
+  50 [ 	]*	insertq	\$4,\$2,%xmm2,%ebx

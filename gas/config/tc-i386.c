@@ -2568,11 +2568,15 @@ match_template ()
 {
   /* Points to template once we've found it.  */
   const template *t;
-  unsigned int overlap0, overlap1, overlap2;
+  unsigned int overlap0, overlap1, overlap2, overlap3;
   unsigned int found_reverse_match;
   int suffix_check;
-  unsigned int operand_types [3];
+  unsigned int operand_types [MAX_OPERANDS];
   int addr_prefix_disp;
+
+#if MAX_OPERANDS != 4
+# error "MAX_OPERANDS must be 4."
+#endif
 
 #define MATCH(overlap, given, template)				\
   ((overlap & ~JumpAbsolute)					\
@@ -2590,10 +2594,12 @@ match_template ()
   overlap0 = 0;
   overlap1 = 0;
   overlap2 = 0;
+  overlap3 = 0;
   found_reverse_match = 0;
   operand_types [0] = 0;
   operand_types [1] = 0;
   operand_types [2] = 0;
+  operand_types [3] = 0;
   addr_prefix_disp = -1;
   suffix_check = (i.suffix == BYTE_MNEM_SUFFIX
 		  ? No_bSuf
@@ -2625,6 +2631,7 @@ match_template ()
       operand_types [0] = t->operand_types [0];
       operand_types [1] = t->operand_types [1];
       operand_types [2] = t->operand_types [2];
+      operand_types [3] = t->operand_types [3];
 
       /* In general, don't allow 64-bit operands in 32-bit mode.  */
       if (i.suffix == QWORD_MNEM_SUFFIX
@@ -2670,7 +2677,7 @@ match_template ()
 	      break;
 	    }
 
-	    for (j = 0; j < 3; j++)
+	    for (j = 0; j < MAX_OPERANDS; j++)
 	      {
 		/* There should be only one Disp operand.  */
 		if ((operand_types[j] & DispOff))
@@ -2692,6 +2699,7 @@ match_template ()
 	  break;
 	case 2:
 	case 3:
+	case 4:
 	  overlap1 = i.types[1] & operand_types[1];
 	  if (!MATCH (overlap0, i.types[0], operand_types[0])
 	      || !MATCH (overlap1, i.types[1], operand_types[1])
@@ -2726,23 +2734,42 @@ match_template ()
 		 we've found.  */
 	      found_reverse_match = t->opcode_modifier & (D | FloatDR);
 	    }
-	  /* Found a forward 2 operand match here.  */
-	  else if (t->operands == 3)
+	  else
 	    {
-	      /* Here we make use of the fact that there are no
-		 reverse match 3 operand instructions, and all 3
-		 operand instructions only need to be checked for
-		 register consistency between operands 2 and 3.  */
-	      overlap2 = i.types[2] & operand_types[2];
-	      if (!MATCH (overlap2, i.types[2], operand_types[2])
-		  || !CONSISTENT_REGISTER_MATCH (overlap1, i.types[1],
-						 operand_types[1],
-						 overlap2, i.types[2],
-						 operand_types[2]))
+	      /* Found a forward 2 operand match here.  */
+	      if (t->operands > 2)
+		overlap2 = i.types[2] & operand_types[2];
+	      if (t->operands > 3)
+		overlap3 = i.types[3] & operand_types[3];
 
-		continue;
+	      switch (t->operands)
+		{
+		case 4:
+		  if (!MATCH (overlap3, i.types[3], operand_types[3])
+		      || !CONSISTENT_REGISTER_MATCH (overlap2,
+						     i.types[2],
+						     operand_types[2],
+						     overlap3,
+						     i.types[3],
+						     operand_types[3]))
+		    continue;
+		case 3:
+		  /* Here we make use of the fact that there are no
+		     reverse match 3 operand instructions, and all 3
+		     operand instructions only need to be checked for
+		     register consistency between operands 2 and 3.  */
+		  if (!MATCH (overlap2, i.types[2], operand_types[2])
+		      || !CONSISTENT_REGISTER_MATCH (overlap1,
+						     i.types[1],
+						     operand_types[1],
+						     overlap2,
+						     i.types[2],
+						     operand_types[2]))
+		    continue;
+		  break;
+		}
 	    }
-	  /* Found either forward/reverse 2 or 3 operand match here:
+	  /* Found either forward/reverse 2, 3 or 4 operand match here:
 	     slip through to break.  */
 	}
       if (t->cpu_flags & ~cpu_arch_flags)
