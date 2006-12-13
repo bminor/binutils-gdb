@@ -3526,7 +3526,7 @@ build_modrm_byte ()
 	      i.rm.regmem = NO_BASE_REGISTER;
 	      i.types[op] &= ~ Disp;
 	      i.types[op] |= Disp32S;
-	      i.flags[op] = Operand_PCrel;
+	      i.flags[op] |= Operand_PCrel;
 	      if (! i.disp_operands)
 		fake_zero_displacement = 1;
 	    }
