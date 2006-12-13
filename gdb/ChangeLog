@@ -1,3 +1,9 @@
+2006-12-13  Jim Blandy  <jimb@codesourcery.com>
+
+	* value.c (value_copy): Copy the full 'location' contents, instead
+	of assuming that copying ADDRESS will bring over everything in the
+	union.
+
 2006-12-13  Markus Deuling  <deuling@de.ibm.com>
 
 	* spu-tdep.c (spu_init_vector_type): New function.

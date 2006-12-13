@@ -551,7 +551,7 @@ value_copy (struct value *arg)
   struct value *val = allocate_value (encl_type);
   val->type = arg->type;
   VALUE_LVAL (val) = VALUE_LVAL (arg);
-  VALUE_ADDRESS (val) = VALUE_ADDRESS (arg);
+  val->location = arg->location;
   val->offset = arg->offset;
   val->bitpos = arg->bitpos;
   val->bitsize = arg->bitsize;
