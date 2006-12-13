@@ -828,7 +828,7 @@
 2006-09-16  Nick Clifton  <nickc@redhat.com>
 	    Pedro Alves  <pedro_alves@portugalmail.pt>
 
-	* bfd-in.h (STRING_AND_COMMA): New macro.  Takes one constant
+	* bfd-in.h (STRING_COMMA_LEN): New macro.  Takes one constant
 	string as its argument and emits the string followed by a comma
 	and then the length of the string.
 	(CONST_STRNEQ): New macro.  Checks to see if a variable string
