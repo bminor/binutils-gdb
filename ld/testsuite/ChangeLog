@@ -1,3 +1,8 @@
+2006-12-13  Dave Brolley  <brolley@redhat.com>
+
+	* lib/ld-lib.exp (big_or_little_endian): Accept -meb and
+	-mel for big and little endian respectively.
+
 2006-12-12  Ina Pandit  <inap@kpitcummins.com>
 
 	* ld-scripts/overlay-size-map.d: Update.
