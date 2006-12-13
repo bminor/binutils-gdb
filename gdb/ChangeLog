@@ -1,3 +1,10 @@
+2006-12-13  Markus Deuling  <deuling@de.ibm.com>
+
+	* spu-tdep.c (spu_init_vector_type): New function.
+	(spu_builtin_type_vec128.): New static variable.
+	(spu_register_type): Return spu_builtin_type_vec128 as default.
+	(_initialize_spu_tdep): Call spu_init_vector_type.
+
 2006-12-09  Corinna Vinschen  <vinschen@redhat.com>
 
 	* win32-nat.c (env_sort): Remove.

@@ -45,6 +45,8 @@
 
 #include "spu-tdep.h"
 
+/* SPU-specific vector type.  */
+struct type *spu_builtin_type_vec128;
 
 /* Registers.  */
 
@@ -84,7 +86,7 @@ static struct type *
 spu_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
   if (reg_nr < SPU_NUM_GPRS)
-    return builtin_type_vec128;
+    return spu_builtin_type_vec128;
 
   switch (reg_nr)
     {
@@ -1092,8 +1094,31 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
+/* Implement a SPU-specific vector type as replacement
+   for __gdb_builtin_type_vec128.  */
+static void
+spu_init_vector_type (void)
+{
+  struct type *type;
+
+  type = init_composite_type ("__spu_builtin_type_vec128", TYPE_CODE_UNION);
+  append_composite_type_field (type, "uint128", builtin_type_int128);
+  append_composite_type_field (type, "v2_int64", builtin_type_v2_int64);
+  append_composite_type_field (type, "v4_int32", builtin_type_v4_int32);
+  append_composite_type_field (type, "v8_int16", builtin_type_v8_int16);
+  append_composite_type_field (type, "v16_int8", builtin_type_v16_int8);
+  append_composite_type_field (type, "v2_double", builtin_type_v2_double);
+  append_composite_type_field (type, "v4_float", builtin_type_v4_float);
+
+  TYPE_FLAGS (type) |= TYPE_FLAG_VECTOR;
+  TYPE_NAME (type) = "spu_builtin_type_vec128";
+  spu_builtin_type_vec128 = type;
+}
+
 void
 _initialize_spu_tdep (void)
 {
   register_gdbarch_init (bfd_arch_spu, spu_gdbarch_init);
+
+  spu_init_vector_type ();
 }
