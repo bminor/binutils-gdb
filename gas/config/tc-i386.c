@@ -2734,10 +2734,14 @@ match_template ()
 	  else
 	    {
 	      /* Found a forward 2 operand match here.  */
-	      if (t->operands > 2)
-		overlap2 = i.types[2] & operand_types[2];
-	      if (t->operands > 3)
-		overlap3 = i.types[3] & operand_types[3];
+	      switch (t->operands)
+		{
+		case 4:
+		  overlap3 = i.types[3] & operand_types[3];
+		case 3:
+		  overlap2 = i.types[2] & operand_types[2];
+		  break;
+		}
 
 	      switch (t->operands)
 		{

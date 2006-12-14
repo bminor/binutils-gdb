@@ -1,3 +1,8 @@
+2006-12-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (match_template): Simplify 3 and 4 operand
+	match.
+
 2006-12-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (build_modrm_byte): Set the Operand_PCrel
