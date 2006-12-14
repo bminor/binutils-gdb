@@ -1167,12 +1167,12 @@ struct bfd_elf_section_data
     struct bfd_symbol *id;
   } group;
 
-  /* Optional information about section group; NULL if it doesn't
-     belongs to any section group. */
+  /* For a member of a group, points to the SHT_GROUP section.
+     NULL for the SHT_GROUP section itself and non-group sections.  */
   asection *sec_group;
 
-  /* A linked list of sections in the group.  Circular when used by
-     the linker.  */
+  /* A linked list of member sections in the group.  Circular when used by
+     the linker.  For the SHT_GROUP section, points at first member.  */
   asection *next_in_group;
 
   /* A pointer used for various section optimizations.  */

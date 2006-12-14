@@ -1,5 +1,10 @@
 2006-12-14  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf-bfd.h (struct bfd_elf_section_data): Clarify sec_group
+	and next_in_group usage.
+
+2006-12-14  Alan Modra  <amodra@bigpond.net.au>
+
 	PR 3704
 	* bfdio.c (bfd_bread): Don't read past end of archive elements.
 
