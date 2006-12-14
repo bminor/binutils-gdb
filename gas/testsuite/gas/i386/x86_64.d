@@ -156,4 +156,6 @@ Disassembly of section .text:
  2fc:	66 89 04 25 11 22 33 ff 	mov[ 	]+%ax,0xffffffffff332211
  304:	89 04 25 11 22 33 ff 	mov[ 	]+%eax,0xffffffffff332211
  30b:	48 89 04 25 11 22 33 ff 	mov[ 	]+%rax,0xffffffffff332211
+ 313:	48 0f c7 08[ 	]+cmpxchg16b \(%rax\)
+ 317:	48 0f c7 08[ 	]+cmpxchg16b \(%rax\)
 #pass

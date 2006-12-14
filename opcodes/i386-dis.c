@@ -104,6 +104,7 @@ static void INVLPG_Fixup (int, int);
 static void BadOp (void);
 static void VMX_Fixup (int, int);
 static void REP_Fixup (int, int);
+static void CMPXCHG8B_Fixup (int, int);
 
 struct dis_private {
   /* Points to first byte not fetched.  */
@@ -1638,7 +1639,7 @@ static const struct dis386 grps[][8] = {
   /* GRP9 */
   {
     { "(bad)",	XX, XX, XX, XX },
-    { "cmpxchg8b", Mq, XX, XX, XX },
+    { "cmpxchg8b", CMPXCHG8B_Fixup, q_mode, XX, XX, XX },
     { "(bad)",	XX, XX, XX, XX },
     { "(bad)",	XX, XX, XX, XX },
     { "(bad)",	XX, XX, XX, XX },
@@ -5766,4 +5767,18 @@ REP_Fixup (int bytemode, int sizeflag)
       abort ();
       break;
     }
+}
+
+static void
+CMPXCHG8B_Fixup (int bytemode, int sizeflag)
+{
+  USED_REX (REX_MODE64);
+  if (rex & REX_MODE64)
+    {
+      /* Change cmpxchg8b to cmpxchg16b.  */
+      char *p = obuf + strlen (obuf) - 2;
+      strcpy (p, "16b");
+      bytemode = x_mode;
+    }
+  OP_M (bytemode, sizeflag);
 }

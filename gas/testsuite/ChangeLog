@@ -1,3 +1,10 @@
+2006-12-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/x86-64-inval.s: Add cmpxchg16b.
+	* gas/i386/x86_64.s: Likewise.
+	* gas/i386/x86-64-inval.l: Updated.
+	* gas/i386/x86_64.d: Likewise.
+
 2006-12-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/3712
