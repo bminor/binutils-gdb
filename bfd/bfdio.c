@@ -1,7 +1,7 @@
 /* Low-level I/O routines for BFDs.
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    Written by Cygnus Support.
@@ -115,6 +115,15 @@ bfd_size_type
 bfd_bread (void *ptr, bfd_size_type size, bfd *abfd)
 {
   size_t nread;
+
+  /* If this is an archive element, don't read past the end of
+     this element.  */
+  if (abfd->arelt_data != NULL)
+    {
+      size_t maxbytes = ((struct areltdata *) abfd->arelt_data)->parsed_size;
+      if (size > maxbytes)
+	size = maxbytes;
+    }
 
   if ((abfd->flags & BFD_IN_MEMORY) != 0)
     {
