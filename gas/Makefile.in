@@ -191,7 +191,10 @@ VERSION = @VERSION@
 WARN_CFLAGS = @WARN_CFLAGS@
 XGETTEXT = @XGETTEXT@
 YACC = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo @YACC@ ; fi`
-YFLAGS = @YFLAGS@
+
+# We have to set this, because autoconf 2.59 does not substitute YFLAGS.
+# Autoconf 2.61 does, so this can be removed when we upgrade.
+YFLAGS = 
 ac_ct_CC = @ac_ct_CC@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@

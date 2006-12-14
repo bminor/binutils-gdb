@@ -1,3 +1,8 @@
+2006-12-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.am (YFLAGS): Define.
+	* Makefile.in: Regenerated.
+
 2006-12-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (match_template): Simplify 3 and 4 operand
