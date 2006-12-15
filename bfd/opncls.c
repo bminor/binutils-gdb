@@ -384,7 +384,10 @@ SYNOPSIS
                                                  file_ptr nbytes,
                                                  file_ptr offset),
                               int (*close) (struct bfd *nbfd,
-                                            void *stream));
+                                            void *stream),
+			      int (*stat) (struct bfd *abfd,
+					   void *stream,
+					   struct stat *sb));
 
 DESCRIPTION
 
@@ -411,6 +414,10 @@ DESCRIPTION
 	<<bfd_close>>.  @var{close} either succeeds returning 0, or
 	fails returning -1 (setting <<bfd_error>>).
 
+	Calls @var{stat} to fill in a stat structure for bfd_stat,
+	bfd_get_size, and bfd_get_mtime calls.  @var{stat} returns 0
+	on success, or returns -1 on failure (setting <<bfd_error>>).
+
 	If <<bfd_openr_iovec>> returns <<NULL>> then an error has
 	occurred.  Possible errors are <<bfd_error_no_memory>>,
 	<<bfd_error_invalid_target>> and <<bfd_error_system_call>>.
@@ -423,6 +430,7 @@ struct opncls
   file_ptr (*pread) (struct bfd *abfd, void *stream, void *buf,
 		     file_ptr nbytes, file_ptr offset);
   int (*close) (struct bfd *abfd, void *stream);
+  int (*stat) (struct bfd *abfd, void *stream, struct stat *sb);
   file_ptr where;
 };
 
@@ -485,10 +493,15 @@ opncls_bflush (struct bfd *abfd ATTRIBUTE_UNUSED)
 }
 
 static int
-opncls_bstat (struct bfd *abfd ATTRIBUTE_UNUSED, struct stat *sb)
+opncls_bstat (struct bfd *abfd, struct stat *sb)
 {
+  struct opncls *vec = abfd->iostream;
+
   memset (sb, 0, sizeof (*sb));
-  return 0;
+  if (vec->stat == NULL)
+    return 0;
+
+  return (vec->stat) (abfd, vec->stream, sb);
 }
 
 static const struct bfd_iovec opncls_iovec = {
@@ -507,7 +520,10 @@ bfd_openr_iovec (const char *filename, const char *target,
 				    file_ptr nbytes,
 				    file_ptr offset),
 		 int (*close) (struct bfd *nbfd,
-			       void *stream))
+			       void *stream),
+		 int (*stat) (struct bfd *abfd,
+			      void *stream,
+			      struct stat *sb))
 {
   bfd *nbfd;
   const bfd_target *target_vec;
@@ -539,6 +555,7 @@ bfd_openr_iovec (const char *filename, const char *target,
   vec->stream = stream;
   vec->pread = pread;
   vec->close = close;
+  vec->stat = stat;
 
   nbfd->iovec = &opncls_iovec;
   nbfd->iostream = vec;

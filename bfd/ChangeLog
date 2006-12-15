@@ -1,3 +1,11 @@
+2006-12-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* opncls.c (bfd_openr_iovec): Add "stat" parameter.
+	(struct opncls): Add "stat" field.
+	(opncls_bstat): Call vec->stat.
+	* bfd-in2.h: Regenerate.
+	* elf32-spu.c (spu_elf_open_builtin_lib): Adjust.
+
 2006-12-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (struct bfd_elf_section_data): Clarify sec_group

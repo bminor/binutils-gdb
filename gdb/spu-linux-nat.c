@@ -281,6 +281,18 @@ spu_bfd_iovec_pread (struct bfd *abfd, void *stream, void *buf,
   return nbytes;
 }
 
+static int
+spu_bfd_iovec_stat (struct bfd *abfd, void *stream, struct stat *sb)
+{
+  /* We don't have an easy way of finding the size of embedded spu
+     images.  We could parse the in-memory ELF header and section
+     table to find the extent of the last section but that seems
+     pointless when the size is needed only for checks of other
+     parsed values in dbxread.c.  */
+  sb->st_size = INT_MAX;
+  return 0;
+}
+
 static bfd *
 spu_bfd_open (CORE_ADDR addr)
 {
@@ -291,7 +303,8 @@ spu_bfd_open (CORE_ADDR addr)
 
   nbfd = bfd_openr_iovec (xstrdup ("<in-memory>"), "elf32-spu",
 			  spu_bfd_iovec_open, open_closure,
-			  spu_bfd_iovec_pread, spu_bfd_iovec_close);
+			  spu_bfd_iovec_pread, spu_bfd_iovec_close,
+			  spu_bfd_iovec_stat);
   if (!nbfd)
     return NULL;
 

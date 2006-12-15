@@ -970,7 +970,10 @@ bfd *bfd_openr_iovec (const char *filename, const char *target,
     file_ptr nbytes,
     file_ptr offset),
     int (*close) (struct bfd *nbfd,
-    void *stream));
+    void *stream),
+    int (*stat) (struct bfd *abfd,
+    void *stream,
+    struct stat *sb));
 
 bfd *bfd_openw (const char *filename, const char *target);
 

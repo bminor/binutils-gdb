@@ -1090,6 +1090,7 @@ spu_elf_open_builtin_lib (bfd **ovl_bfd, const struct _ovl_stream *stream)
 			      ovl_mgr_open,
 			      (void *) stream,
 			      ovl_mgr_pread,
+			      NULL,
 			      NULL);
   return *ovl_bfd != NULL;
 }
