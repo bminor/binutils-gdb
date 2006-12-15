@@ -42,7 +42,7 @@ struct ppc_reg_offsets ppcnbsd_reg_offsets;
 
 /* Core file support.  */
 
-/* NetBSD/powerpc register set.  */
+/* NetBSD/powerpc register sets.  */
 
 struct regset ppcnbsd_gregset =
 {

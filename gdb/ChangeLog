@@ -1,3 +1,7 @@
+2006-12-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* ppcnbsd-tdep.c: Fix typo in comment.
+
 2006-12-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* remote-fileio.c (remote_fileio_mode_to_target): Use
