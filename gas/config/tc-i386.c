@@ -918,6 +918,7 @@ fits_in_signed_word (num)
 {
   return (-32768 <= num) && (num <= 32767);
 }
+
 static INLINE int
 fits_in_signed_long (num)
      offsetT num ATTRIBUTE_UNUSED;
@@ -929,6 +930,7 @@ fits_in_signed_long (num)
 	  || (((offsetT) -1 << 31) & num) == ((offsetT) -1 << 31));
 #endif
 }				/* fits_in_signed_long() */
+
 static INLINE int
 fits_in_unsigned_long (num)
      offsetT num ATTRIBUTE_UNUSED;
