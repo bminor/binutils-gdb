@@ -106,4 +106,4 @@ GAS LISTING .*
   51 [ 	]*retl		# can't have 32-bit stack operands
   52 [ 	]*insertq \$4,\$2,%xmm2,%ebx # The last operand must be XMM register.
   53 [ 	]*.intel_syntax noprefix
-  54 [ 	]*cmpxchg16b dword ptr \[rax\] # Must be xmmword
+  54 [ 	]*cmpxchg16b dword ptr \[rax\] # Must be oword

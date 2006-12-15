@@ -356,6 +356,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define const_1_mode 14
 #define stack_v_mode 15 /* v_mode for stack-related opcodes.  */
 #define z_mode 16 /* non-quad operand size depends on prefixes */
+#define o_mode 17  /* 16-byte operand */
 
 #define es_reg 100
 #define cs_reg 101
@@ -4183,6 +4184,9 @@ intel_operand_size (int bytemode, int sizeflag)
     case x_mode:
       oappend ("XMMWORD PTR ");
       break;
+    case o_mode:
+      oappend ("OWORD PTR ");
+      break;
     default:
       break;
     }
@@ -5778,7 +5782,7 @@ CMPXCHG8B_Fixup (int bytemode, int sizeflag)
       /* Change cmpxchg8b to cmpxchg16b.  */
       char *p = obuf + strlen (obuf) - 2;
       strcpy (p, "16b");
-      bytemode = x_mode;
+      bytemode = o_mode;
     }
   OP_M (bytemode, sizeflag);
 }

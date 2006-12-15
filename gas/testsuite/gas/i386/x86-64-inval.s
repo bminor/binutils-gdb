@@ -51,4 +51,4 @@ foo:	jcxz foo	# No prefix exists to select CX as a counter
 	retl		# can't have 32-bit stack operands
 	insertq $4,$2,%xmm2,%ebx # The last operand must be XMM register.
 	.intel_syntax noprefix
-	cmpxchg16b dword ptr [rax] # Must be xmmword
+	cmpxchg16b dword ptr [rax] # Must be oword
