@@ -850,7 +850,7 @@ insert_bp_location (struct bp_location *bpt,
 		      if (!said)
 			{
 			  fprintf_filtered (gdb_stdout, _("\
-Note: automatically using hardware breakpoints for read-only addresses."));
+Note: automatically using hardware breakpoints for read-only addresses.\n"));
 			  said = 1;
 			}
 		    }

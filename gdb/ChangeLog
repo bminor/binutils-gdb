@@ -1,3 +1,7 @@
+2006-12-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* breakpoint.c (insert_bp_location): Add newline to note.
+
 2006-12-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* spu-linux-nat.c (spu_bfd_iovec_stat): New function.
