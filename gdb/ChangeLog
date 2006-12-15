@@ -1,5 +1,12 @@
 2006-12-16  Mark Kettenis  <kettenis@gnu.org>
 
+	Add OpenBSD/sh support.
+	* NEWS (New targets): Mention OpenBSD/sh.
+	* configure.tgt: Add sh*-*-openbsd*.
+	* shnbsd-tdep.c (_initialize_shnbsd_tdep): Register handler for
+	GDB_OSABI_OPENBSD_ELF.
+	* config/sh/obsd.mt: New file.
+
 	* ppcnbsd-tdep.c: Fix typo in comment.
 
 2006-12-15  Mark Kettenis  <kettenis@gnu.org>

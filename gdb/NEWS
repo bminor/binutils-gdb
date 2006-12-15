@@ -30,6 +30,7 @@ show breakpoint auto-hw
 
 * New targets
 
+OpenBSD/sh			sh*-*-openbsd*
 MIPS64 GNU/Linux (gdbserver)	mips64-linux-gnu
 
 * New remote packets
