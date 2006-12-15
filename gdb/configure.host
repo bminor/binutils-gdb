@@ -130,6 +130,7 @@ s390*-*-*)		gdb_host=s390 ;;
 
 sh*-*-netbsdelf* | sh*-*-knetbsd*-gnu)
 			gdb_host=nbsd ;;
+sh*-*-openbsd*)		gdb_host=nbsd ;;
 
 sparc64-*-freebsd* | sparc64-*-kfreebsd*-gnu)
 			gdb_host=fbsd ;;

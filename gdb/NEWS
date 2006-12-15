@@ -28,6 +28,10 @@ show breakpoint auto-hw
   "break" command and internal breakpoints used for other commands
   including "next" and "finish".
 
+* New native configurations
+
+OpenBSD/sh			sh*-*openbsd*
+
 * New targets
 
 OpenBSD/sh			sh*-*-openbsd*
