@@ -3430,8 +3430,9 @@ build_modrm_byte ()
 		    | Control | Debug | Test))
 		? 0 : 1);
 
-      /* In 4 operands instructions with 2 immediate operands, the first two are immediate
-	 bytes and hence source operand will be in the next byte after the immediates */
+      /* In 4 operands instructions with 2 immediate operands, the first
+         two are immediate bytes and hence source operand will be in the
+	 next byte after the immediates */
       if ((i.operands == 4)&&(i.imm_operands=2)) source++; 
       dest = source + 1;
 
@@ -3496,9 +3497,11 @@ build_modrm_byte ()
 		      i.rm.regmem = ESCAPE_TO_TWO_BYTE_ADDRESSING;
 		      i.sib.base = NO_BASE_REGISTER;
 		      i.sib.index = NO_INDEX_REGISTER;
-		      i.types[op] = ((i.prefix[ADDR_PREFIX] == 0) ? Disp32S : Disp32);
+		      i.types[op] = ((i.prefix[ADDR_PREFIX] == 0)
+				     ? Disp32S : Disp32);
 		    }
-		  else if ((flag_code == CODE_16BIT) ^ (i.prefix[ADDR_PREFIX] != 0))
+		  else if ((flag_code == CODE_16BIT)
+			   ^ (i.prefix[ADDR_PREFIX] != 0))
 		    {
 		      i.rm.regmem = NO_BASE_REGISTER_16;
 		      i.types[op] = Disp16;
@@ -3568,7 +3571,9 @@ build_modrm_byte ()
 	    {
 	      if (flag_code == CODE_64BIT
 		  && (i.types[op] & Disp))
-		i.types[op] = (i.types[op] & Disp8) | (i.prefix[ADDR_PREFIX] == 0 ? Disp32S : Disp32);
+		i.types[op] = ((i.types[op] & Disp8)
+			       | (i.prefix[ADDR_PREFIX] == 0
+				  ? Disp32S : Disp32));
 
 	      i.rm.regmem = i.base_reg->reg_num;
 	      if ((i.base_reg->reg_flags & RegRex) != 0)
