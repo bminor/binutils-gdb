@@ -1,3 +1,7 @@
+2006-12-15  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* configure.tgt (NATIVE_LIB_DIRS): Specify for spu-*-elf*.
+
 2006-12-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.am (ld_TEXINFOS): Set.

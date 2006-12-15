@@ -638,6 +638,11 @@ sparc*-*-solaris2*)
   NATIVE_LIB_DIRS='/usr/local/lib /usr/ccs/lib /lib /usr/lib'
   ;;
 
+spu-*-elf*)
+  # This allows to build a pair of PPU/SPU toolchains with common sysroot.
+  NATIVE_LIB_DIRS='/usr/spu/lib'
+  ;;
+
 i[03-9x]86-*-cygwin*)
   NATIVE_LIB_DIRS='/usr/lib /usr/lib/w32api'
   ;;
