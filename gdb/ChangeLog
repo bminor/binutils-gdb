@@ -1,3 +1,7 @@
+2006-12-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* vx-share/README: Delete file.
+
 2006-12-16  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386obsd-nat.c: Include "gdbcore.h", "regcache.h", "target.h",
