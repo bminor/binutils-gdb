@@ -1256,6 +1256,10 @@ case "${targ}" in
     targ_selvecs="bfd_elf32_shl_vec shcoff_vec shlcoff_vec shcoff_small_vec shlcoff_small_vec"
     targ_underscore=yes
     ;;
+  sh*-*-openbsd*)
+    targ_defvec=bfd_elf32_shlnbsd_vec
+    targ_selvecs="bfd_elf32_shnbsd_vec shcoff_vec shlcoff_vec"
+    ;;
   sh-*-pe)
     targ_defvec=shlpe_vec
     targ_selvecs="shlpe_vec shlpei_vec"
