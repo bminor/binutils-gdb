@@ -1,5 +1,7 @@
 2006-12-16  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparcobsd-tdep.c: Fix typo.
+
 	Add OpenBSD/sh native support.
 	* NEWS (New native configurations): Mention OpenBSD/sh.
 	* configure.host: Add sh*-*-openbsd*.

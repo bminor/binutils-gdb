@@ -1,6 +1,6 @@
 /* Target-dependent code for OpenBSD/sparc.
 
-   Copyright (C) 2004, 2005 Free Software Foundation, Inc.
+   Copyright (C) 2004, 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -43,7 +43,7 @@
    detecting it won't work.
 
    The signal trampoline will be mapped at an address that is page
-   aligned.  We recognize the signal trampoline by the looking for the
+   aligned.  We recognize the signal trampoline by looking for the
    sigreturn system call.  */
 
 static const int sparc32obsd_page_size = 4096;
