@@ -1473,7 +1473,7 @@ ALLDEPFILES = \
 	mingw-hdep.c \
 	mips-linux-nat.c mips-linux-tdep.c \
 	mips-irix-tdep.c \
-	mips-tdep.c mipsv4-nat.c \
+	mips-tdep.c \
 	mipsnbsd-nat.c mipsnbsd-tdep.c \
 	mips64obsd-nat.c mips64obsd-tdep.c \
 	nbsd-tdep.c obsd-tdep.c \
@@ -2381,8 +2381,6 @@ mips-tdep.o: mips-tdep.c $(defs_h) $(gdb_string_h) $(gdb_assert_h) \
 	$(elf_bfd_h) $(symcat_h) $(sim_regno_h) $(dis_asm_h) \
 	$(frame_unwind_h) $(frame_base_h) $(trad_frame_h) $(infcall_h) \
 	$(floatformat_h) $(remote_h) $(target_descriptions_h)
-mipsv4-nat.o: mipsv4-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(target_h) \
-	$(regcache_h) $(gregset_h)
 memory-map.o: memory-map.c $(defs_h) $(memory_map_h) $(xml_support_h) \
 	$(gdb_assert_h) $(exceptions_h) $(gdb_string_h) $(gdb_expat_h)
 mn10300-linux-tdep.o: mn10300-linux-tdep.c $(defs_h) $(gdbcore_h) \
