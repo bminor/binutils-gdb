@@ -1,3 +1,17 @@
+2006-12-17  Nick Hudson  <skrll@netbsd.org>
+	    Mark Kettenis  <kettenis@gnu.org>
+
+	* i386nbsd-nat.c: Include "nbsd-nat.h".
+	(_initialize_i386nbsd_nat): Update target vector to use
+	nbsd_pid_to_exec_file.
+	* config/i386/nbsdelf.mh (NATDEPFILES): Add nbsd-nat.o.
+	* config/i386/nbsdaout.mh (NATDEPFILES): Add nbsd-nat.o.
+	* nbsd-nat.c: New file.
+	* nbsd-nat.h: New file.
+	* Makefile.in (ALLDEPFILES): Add nbsd-nat.c.
+	(nbsd_nat_h): New variable.
+	(nbsd-nat.o): New dependency.
+
 2006-12-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (ALLDEPFILES): Remove mipsv4-nat.c.
