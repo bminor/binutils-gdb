@@ -2830,3 +2830,11 @@ pe_exe_fill_sections (bfd *abfd, struct bfd_link_info *info)
     }
   reloc_s->contents = reloc_d;
 }
+
+bfd_boolean
+pe_bfd_is_dll (bfd *abfd)
+{
+  return (bfd_get_format (abfd) == bfd_object
+          && obj_pe (abfd)
+          && pe_data (abfd)->dll);
+}

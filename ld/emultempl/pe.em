@@ -1415,19 +1415,8 @@ gld_${EMULATION_NAME}_recognized_file (lang_input_statement_type *entry ATTRIBUT
 #ifdef TARGET_IS_arm_wince_pe
   pe_dll_id_target ("pei-arm-wince-little");
 #endif
-  if (bfd_get_format (entry->the_bfd) == bfd_object)
-    {
-      char fbuf[LD_PATHMAX + 1];
-      const char *ext;
-
-      if (REALPATH (entry->filename, fbuf) == NULL)
-	strncpy (fbuf, entry->filename, sizeof (fbuf));
-
-      ext = fbuf + strlen (fbuf) - 4;
-
-      if (strcmp (ext, ".dll") == 0 || strcmp (ext, ".DLL") == 0)
-	return pe_implied_import_dll (fbuf);
-    }
+  if (pe_bfd_is_dll (entry->the_bfd))
+    return pe_implied_import_dll (entry->filename);
 #endif
   return FALSE;
 }

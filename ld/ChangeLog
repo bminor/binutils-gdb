@@ -1,3 +1,10 @@
+2006-12-18  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* pe-dll.c (pe_bfd_is_dll): New function.
+	* pe-dll.h (pe_bfd_is_dll): Declare.
+	* emultempl/pe.em (gld_${EMULATION_NAME}_recognized_file): Recognize
+	dlls using pe_bfd_is_dll instead of using the filename extension.
+
 2006-12-15  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* configure.tgt (NATIVE_LIB_DIRS): Specify for spu-*-elf*.
