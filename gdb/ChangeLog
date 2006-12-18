@@ -1,5 +1,9 @@
 2006-12-18  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Set version number to 6.6.0.date-cvs again.
+
+2006-12-18  Joel Brobecker  <brobecker@adacore.com>
+
 	* version.in: Set version number to 6.6.
 
 2006-12-17  Joel Brobecker  <brobecker@adacore.com>
