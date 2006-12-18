@@ -1,3 +1,7 @@
+2006-12-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* breakpoint.c (watchpoint_check): Double-check the found frame.
+
 2006-12-17  Nick Hudson  <skrll@netbsd.org>
 	    Mark Kettenis  <kettenis@gnu.org>
 

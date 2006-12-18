@@ -2564,6 +2564,13 @@ watchpoint_check (void *p)
       reinit_frame_cache ();
       fr = frame_find_by_id (b->watchpoint_frame);
       within_current_scope = (fr != NULL);
+
+      /* If we've gotten confused in the unwinder, we might have
+	 returned a frame that can't describe this variable.  */
+      if (within_current_scope
+	  && block_function (b->exp_valid_block) != get_frame_function (fr))
+	within_current_scope = 0;
+
       /* in_function_epilogue_p() returns a non-zero value if we're still
 	 in the function but the stack frame has already been invalidated.
 	 Since we can't rely on the values of local variables after the
