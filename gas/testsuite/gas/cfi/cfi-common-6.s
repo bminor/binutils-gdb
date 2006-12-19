@@ -19,13 +19,13 @@
 	.cfi_endproc
 
 	.cfi_startproc simple
-	.cfi_personality (0x10 | 11), my_personality_v1
+	.cfi_personality (0x1b), my_personality_v1
 	.cfi_lsda 27, 1f
 	.long 0
 	.cfi_endproc
 
 	.cfi_startproc simple
-	.cfi_personality (0x10 | 11), my_personality_v1
+	.cfi_personality (0x1b), my_personality_v1
 	.cfi_lsda 27, 2f
 	.long 0
 	.cfi_endproc
