@@ -4326,7 +4326,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
       if (m->count == 0)
 	p->p_vaddr = 0;
       else
-	p->p_vaddr = m->sections[0]->vma;
+	p->p_vaddr = m->sections[0]->vma - m->p_vaddr_offset;
 
       if (m->p_paddr_valid)
 	p->p_paddr = m->p_paddr;
@@ -4353,6 +4353,8 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	}
       else if (m->count == 0)
 	p->p_align = 1 << bed->s->log_file_align;
+      else if (m->p_align_valid)
+	p->p_align = m->p_align;
       else
 	p->p_align = 0;
 
@@ -4363,18 +4365,22 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	  bfd_vma adjust;
 	  unsigned int align_power = 0;
 
-	  for (i = 0, secpp = m->sections; i < m->count; i++, secpp++)
+	  if (m->p_align_valid)
+	    align = p->p_align;
+	  else
 	    {
-	      unsigned int secalign;
-
-	      secalign = bfd_get_section_alignment (abfd, *secpp);
-	      if (secalign > align_power)
-		align_power = secalign;
+	      for (i = 0, secpp = m->sections; i < m->count; i++, secpp++)
+		{
+		  unsigned int secalign;
+		  
+		  secalign = bfd_get_section_alignment (abfd, *secpp);
+		  if (secalign > align_power)
+		    align_power = secalign;
+		}
+	      align = (bfd_size_type) 1 << align_power;
+	      if (align < maxpagesize)
+		align = maxpagesize;
 	    }
-	  align = (bfd_size_type) 1 << align_power;
-
-	  if (align < maxpagesize)
-	    align = maxpagesize;
 
 	  adjust = vma_page_aligned_bias (m->sections[0]->vma, off, align);
 	  off += adjust;
@@ -4605,6 +4611,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	      if (p->p_type == PT_GNU_RELRO)
 		p->p_align = 1;
 	      else if (align > p->p_align
+		       && !m->p_align_valid
 		       && (p->p_type != PT_LOAD
 			   || (abfd->flags & D_PAGED) == 0))
 		p->p_align = align;
@@ -5581,7 +5588,14 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	  map->count = section_count;
 	  *pointer_to_map = map;
 	  pointer_to_map = &map->next;
-
+	  
+	  if (matching_lma != map->p_paddr
+	      && !map->includes_filehdr && !map->includes_phdrs)
+	    /* There is some padding before the first section in the
+	       segment.  So, we must account for that in the output
+	       segment's vma.  */
+	    map->p_vaddr_offset = matching_lma - map->p_paddr;
+	  
 	  free (sections);
 	  continue;
 	}
@@ -5800,6 +5814,7 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
       unsigned int section_count;
       bfd_size_type amt;
       Elf_Internal_Shdr *this_hdr;
+      bfd_vma first_lma = 0;
 
       /* FIXME: Do we need to copy PT_NULL segment?  */
       if (segment->p_type == PT_NULL)
@@ -5812,7 +5827,11 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 	{
 	  this_hdr = &(elf_section_data(section)->this_hdr);
 	  if (ELF_IS_SECTION_IN_SEGMENT_FILE (this_hdr, segment))
-	    section_count++;
+	    {
+	      if (!section_count || section->lma < first_lma)
+		first_lma = section->lma;
+	      section_count++;
+	    }
 	}
 
       /* Allocate a segment map big enough to contain
@@ -5834,6 +5853,7 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
       map->p_paddr_valid = 1;
       map->p_align = segment->p_align;
       map->p_align_valid = 1;
+      map->p_vaddr_offset = 0;
 
       /* Determine if this segment contains the ELF file header
 	 and if it contains the program headers themselves.  */
@@ -5853,6 +5873,10 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 	    phdr_included = TRUE;
 	}
 
+      if (!map->includes_phdrs && !map->includes_filehdr)
+	/* There is some other padding before the first section.  */
+	map->p_vaddr_offset = first_lma - segment->p_paddr;
+      
       if (section_count != 0)
 	{
 	  unsigned int isec = 0;

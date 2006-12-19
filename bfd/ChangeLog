@@ -1,3 +1,11 @@
+2006-12-19  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* elf.c (assign_file_positions_for_load_sections): Adjust p_vaddr
+	by p_vaddr_offset.  Copy alignment & use if it is valid.
+	(rewrite_elf_program_headers): Cope with leading padding in a
+	segment that does not contain file or program headers.
+	(copy_elf_program_header): Likewise.
+
 2006-12-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* config.bfd: (sh*-*-openbsd*): Add target. 
@@ -57,6 +65,7 @@
 	* elf64-alpha.c (elf64_alpha_merge_symbol_attribute): New function.
 	(elf_backend_merge_symbol_attribute): Define.
 
+>>>>>>> 1.3701
 2006-12-04  Jan Beulich  <jbeulich@novell.com>
 
 	* elflink.c (_bfd_elf_link_create_dynamic_sections): Don't create
