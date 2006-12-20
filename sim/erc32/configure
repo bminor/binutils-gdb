@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS sim_environment sim_alignment sim_assert sim_bitsize sim_endian sim_hostendian sim_float sim_scache sim_default_model sim_hw_cflags sim_hw_objs sim_hw sim_inline sim_packages sim_regparm sim_reserved_bits sim_smp sim_stdcall sim_xor_endian WARN_CFLAGS WERROR_CFLAGS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CC_FOR_BUILD HDEFINES AR RANLIB ac_ct_RANLIB USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT CPP EGREP MAINT sim_bswap sim_cflags sim_debug sim_stdio sim_trace sim_profile TERMCAP cgen_breaks LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS sim_environment sim_alignment sim_assert sim_bitsize sim_endian sim_hostendian sim_float sim_scache sim_default_model sim_hw_cflags sim_hw_objs sim_hw sim_inline sim_packages sim_regparm sim_reserved_bits sim_smp sim_stdcall sim_xor_endian WARN_CFLAGS WERROR_CFLAGS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CC_FOR_BUILD HDEFINES AR RANLIB ac_ct_RANLIB USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT CPP EGREP MAINT sim_bswap sim_cflags sim_debug sim_stdio sim_trace sim_profile TERMCAP READLINE cgen_breaks LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -4592,6 +4592,85 @@ fi
 fi
 
 
+# We prefer the in-tree readline.  Top-level dependencies make sure
+# src/readline (if it's there) is configured before src/sim.
+if test -r ../../readline/Makefile; then
+  READLINE=../../readline/libreadline.a
+else
+  echo "$as_me:$LINENO: checking for readline in -lreadline" >&5
+echo $ECHO_N "checking for readline in -lreadline... $ECHO_C" >&6
+if test "${ac_cv_lib_readline_readline+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lreadline $TERMCAP $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char readline ();
+int
+main ()
+{
+readline ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_readline_readline=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_lib_readline_readline=no
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_readline_readline" >&5
+echo "${ECHO_T}$ac_cv_lib_readline_readline" >&6
+if test $ac_cv_lib_readline_readline = yes; then
+  READLINE=-lreadline
+else
+  { { echo "$as_me:$LINENO: error: the required \"readline\" library is missing" >&5
+echo "$as_me: error: the required \"readline\" library is missing" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+fi
+
 
 ac_sources="$sim_link_files"
 ac_dests="$sim_link_links"
@@ -5311,6 +5390,7 @@ s,@sim_stdio@,$sim_stdio,;t t
 s,@sim_trace@,$sim_trace,;t t
 s,@sim_profile@,$sim_profile,;t t
 s,@TERMCAP@,$TERMCAP,;t t
+s,@READLINE@,$READLINE,;t t
 s,@cgen_breaks@,$cgen_breaks,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t

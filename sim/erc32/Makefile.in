@@ -20,10 +20,10 @@
 ## COMMON_PRE_CONFIG_FRAG
 
 TERMCAP_LIB = @TERMCAP@
+READLINE_LIB = @READLINE@
 
 SIM_OBJS = exec.o erc32.o func.o help.o float.o interf.o
-SIM_EXTRA_LIBS = ../../readline/libreadline.a  $(TERMCAP_LIB) -lm
-SIM_EXTRA_LIBDEPS = ../../readline/libreadline.a
+SIM_EXTRA_LIBS = $(READLINE_LIB) $(TERMCAP_LIB) -lm
 SIM_EXTRA_ALL = sis
 SIM_EXTRA_INSTALL = install-sis
 SIM_EXTRA_CLEAN = clean-sis

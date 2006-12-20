@@ -25,4 +25,13 @@ else
 fi
 AC_SUBST(TERMCAP)
 
+# We prefer the in-tree readline.  Top-level dependencies make sure
+# src/readline (if it's there) is configured before src/sim.
+if test -r ../../readline/Makefile; then
+  READLINE=../../readline/libreadline.a
+else
+  AC_CHECK_LIB(readline, readline, READLINE=-lreadline,
+	       AC_ERROR([the required "readline" library is missing]), $TERMCAP)
+fi
+AC_SUBST(READLINE)
 SIM_AC_OUTPUT
