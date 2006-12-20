@@ -104,7 +104,6 @@ gdb_test "continue" \
 	"Breakpoint \[0-9\]*.*stack_align.*" \
 	"continue to stack_align + 7"
 
-setup_kfail *-*-* gdb/2080
 gdb_test "backtrace 10" \
 	"#0\[ \t\]*$hex in stack_align.*\r\n#1\[ \t\]*$hex in main.*" \
 	"first backtrace in stack_align"
@@ -115,12 +114,10 @@ gdb_test "continue" \
 
 skip_breakpoint stack_align
 
-setup_kfail *-*-* gdb/2080
 gdb_test "backtrace 10" \
 	"#0\[ \t\]*$hex in stack_align.*\r\n#1\[ \t\]*$hex in main.*" \
 	"second backtrace in stack_align"
 
-setup_kfail *-*-* gdb/2080
 gdb_test "info frame" \
 	".*Saved registers:.*ecx at.*ebp at.*edi at.*eip at.*" \
 	"saved registers in stack_align"
