@@ -24,6 +24,7 @@ common		Frank Ch. Eigler <fche@redhat.com>
 
 	Authorized committers for particular sims:
 v850		DJ Delorie <dj@redhat.com>
+*		Hans-Peter Nilsson <hp@axis.com>
 
 	Past sim maintainers:
 
