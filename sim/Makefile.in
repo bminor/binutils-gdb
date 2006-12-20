@@ -207,8 +207,8 @@ config.status: configure
 
 # Utility to run autoconf in each directory that uses the common framework.
 # This is intended to be invoked in $srcdir as
-# "make -f Makefile.in autoconf-common".
-.PHONY: autoconf-common
+# "make -f Makefile.in autoconf-common SHELL=/bin/sh".
+.PHONY: autoconf-common autoheader-common
 autoconf-common autoheader-common:
 	for d in * ; \
 	do \
