@@ -216,7 +216,7 @@ autoconf-common autoheader-common:
 	    then \
 		 echo "Running autoconf in $$d ..." ; \
 		 (cd $$d && autoconf --force) ; \
-		 if [ $@ = autoheader-common ] ; \
+		 if [ $@ = autoheader-common ] && [ -f $$d/config.in ] ; \
 		 then \
 		   echo "Running autoheader in $$d ..." ; \
 		   (cd $$d && autoheader --force) ; \

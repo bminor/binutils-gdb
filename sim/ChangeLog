@@ -1,5 +1,8 @@
 2006-12-20  Hans-Peter Nilsson  <hp@axis.com>
 
+	* Makefile.in (autoconf-common autoheader-common): Only run
+	autoheader on subdirs with a file config.in.
+
 	* configure.ac (common): Make the default "yes" for all targets
 	with sim subdirs.
 	* configure: Regenerate.
