@@ -3413,7 +3413,7 @@ fi;
 
 if test "${enable_sim}" != no; then
    testsuite=no
-   common=no
+   common=yes
    igen=no
    case "${target}" in
        arm*-*-* | thumb*-*-* | strongarm*-*-* | xscale-*-*)
@@ -3422,7 +3422,6 @@ if test "${enable_sim}" != no; then
 subdirs="$subdirs arm"
 
 	   testsuite=yes
-	   common=yes
 	   ;;
        cris-*-* | crisv32-*-*)
 
@@ -3430,7 +3429,6 @@ subdirs="$subdirs arm"
 subdirs="$subdirs cris"
 
 	   testsuite=yes
-	   common=yes
 	   ;;
        d10v-*-*)
 
@@ -3444,7 +3442,6 @@ subdirs="$subdirs d10v"
 subdirs="$subdirs frv"
 
 	   testsuite=yes
-	   common=yes
 	   ;;
        h8300*-*-*)
 
@@ -3452,7 +3449,6 @@ subdirs="$subdirs frv"
 subdirs="$subdirs h8300"
 
 	   testsuite=yes
-	   common=yes
 	   ;;
        iq2000-*-*)
 
@@ -3460,14 +3456,12 @@ subdirs="$subdirs h8300"
 subdirs="$subdirs iq2000"
 
 	   testsuite=yes
-	   common=yes
 	   ;;
        m32c-*-*)
 
 
 subdirs="$subdirs m32c"
 
-           common=yes
            ;;
        m32r-*-*)
 
@@ -3475,7 +3469,6 @@ subdirs="$subdirs m32c"
 subdirs="$subdirs m32r"
 
 	   testsuite=yes
-	   common=yes
 	   ;;
        m68hc11-*-*|m6811-*-*)
 
@@ -3483,7 +3476,6 @@ subdirs="$subdirs m32r"
 subdirs="$subdirs m68hc11"
 
 	   testsuite=yes
-	   common=yes
 	   ;;
        mcore-*-*)
 
@@ -3491,7 +3483,6 @@ subdirs="$subdirs m68hc11"
 subdirs="$subdirs mcore"
 
 	   testsuite=yes
-	   common=yes
 	   ;;
        mips*-*-*)
 
@@ -3499,7 +3490,6 @@ subdirs="$subdirs mcore"
 subdirs="$subdirs mips"
 
 	   testsuite=yes
-	   common=yes
 	   igen=yes
 	   ;;
        mn10300*-*-*)
@@ -3507,7 +3497,6 @@ subdirs="$subdirs mips"
 
 subdirs="$subdirs mn10300"
 
-	   common=yes
 	   igen=yes
 	   ;;
        sh64-*-*)
@@ -3516,7 +3505,6 @@ subdirs="$subdirs mn10300"
 subdirs="$subdirs sh64"
 
 	   testsuite=yes
-	   common=yes
 	   ;;
        sh-*-*)
 
@@ -3524,7 +3512,6 @@ subdirs="$subdirs sh64"
 subdirs="$subdirs sh"
 
 	   testsuite=yes
-	   common=yes
 	   ;;
        sparc-*-rtems*|sparc-*-elf*)
 
@@ -3532,22 +3519,23 @@ subdirs="$subdirs sh"
 subdirs="$subdirs erc32"
 
 	   testsuite=yes
-	   common=yes
 	   ;;
        powerpc*-*-* )
 
 
 subdirs="$subdirs ppc"
 
-	   common=yes
 	   ;;
        v850*-*-* )
 
 
 subdirs="$subdirs v850"
 
-	   common=yes
 	   igen=yes
+	   ;;
+       *)
+	   # No simulator subdir, so the subdir "common" isn't needed.
+	   common=no
 	   ;;
    esac
    if test "$testsuite" = yes; then

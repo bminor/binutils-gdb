@@ -44,18 +44,16 @@ esac])
 
 if test "${enable_sim}" != no; then
    testsuite=no
-   common=no
+   common=yes
    igen=no
    case "${target}" in
        arm*-*-* | thumb*-*-* | strongarm*-*-* | xscale-*-*)
            AC_CONFIG_SUBDIRS(arm)
 	   testsuite=yes
-	   common=yes
 	   ;;
        cris-*-* | crisv32-*-*)
 	   AC_CONFIG_SUBDIRS(cris)
 	   testsuite=yes
-	   common=yes
 	   ;;
        d10v-*-*)
            AC_CONFIG_SUBDIRS(d10v)
@@ -63,71 +61,61 @@ if test "${enable_sim}" != no; then
        frv-*-*)
            AC_CONFIG_SUBDIRS(frv)
 	   testsuite=yes
-	   common=yes
 	   ;;
        h8300*-*-*)
            AC_CONFIG_SUBDIRS(h8300)
 	   testsuite=yes
-	   common=yes
 	   ;;
        iq2000-*-*)
            AC_CONFIG_SUBDIRS(iq2000)
 	   testsuite=yes
-	   common=yes
 	   ;;
        m32c-*-*)
            AC_CONFIG_SUBDIRS(m32c)
-           common=yes
            ;;
        m32r-*-*)
            AC_CONFIG_SUBDIRS(m32r)
 	   testsuite=yes
-	   common=yes
 	   ;;
        m68hc11-*-*|m6811-*-*)
            AC_CONFIG_SUBDIRS(m68hc11)
 	   testsuite=yes
-	   common=yes
 	   ;;
        mcore-*-*)
            AC_CONFIG_SUBDIRS(mcore)
 	   testsuite=yes
-	   common=yes
 	   ;;
        mips*-*-*)
            AC_CONFIG_SUBDIRS(mips)
 	   testsuite=yes
-	   common=yes
 	   igen=yes
 	   ;;
        mn10300*-*-*)
            AC_CONFIG_SUBDIRS(mn10300)
-	   common=yes
 	   igen=yes
 	   ;;
        sh64-*-*)
            AC_CONFIG_SUBDIRS(sh64)
 	   testsuite=yes
-	   common=yes
 	   ;;
        sh-*-*)
            AC_CONFIG_SUBDIRS(sh)
 	   testsuite=yes
-	   common=yes
 	   ;;
        sparc-*-rtems*|sparc-*-elf*)
 	   AC_CONFIG_SUBDIRS(erc32)
 	   testsuite=yes
-	   common=yes
 	   ;;
        powerpc*-*-* )
            AC_CONFIG_SUBDIRS(ppc)
-	   common=yes
 	   ;;
        v850*-*-* )
            AC_CONFIG_SUBDIRS(v850)
-	   common=yes
 	   igen=yes
+	   ;;
+       *)
+	   # No simulator subdir, so the subdir "common" isn't needed.
+	   common=no
 	   ;;
    esac
    if test "$testsuite" = yes; then
