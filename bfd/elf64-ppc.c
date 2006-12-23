@@ -88,6 +88,7 @@ static bfd_vma opd_entry_value
 #define elf_backend_copy_indirect_symbol      ppc64_elf_copy_indirect_symbol
 #define elf_backend_add_symbol_hook	      ppc64_elf_add_symbol_hook
 #define elf_backend_check_directives	      ppc64_elf_check_directives
+#define elf_backend_as_needed_cleanup	      ppc64_elf_as_needed_cleanup
 #define elf_backend_archive_symbol_lookup     ppc64_elf_archive_symbol_lookup
 #define elf_backend_check_relocs	      ppc64_elf_check_relocs
 #define elf_backend_gc_mark_dynamic_ref       ppc64_elf_gc_mark_dynamic_ref
@@ -4244,6 +4245,17 @@ ppc64_elf_check_directives (bfd *ibfd, struct bfd_link_info *info)
       bfd_link_repair_undef_list (&htab->elf.root);
       htab->twiddled_syms = 0;
     }
+  return TRUE;
+}
+
+/* Undo hash table changes when an --as-needed input file is determined
+   not to be needed.  */
+
+static bfd_boolean
+ppc64_elf_as_needed_cleanup (bfd *ibfd ATTRIBUTE_UNUSED,
+			     struct bfd_link_info *info)
+{
+  ppc_hash_table (info)->dot_syms = NULL;
   return TRUE;
 }
 

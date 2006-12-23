@@ -711,6 +711,13 @@ struct elf_backend_data
   bfd_boolean (*check_directives)
     (bfd *abfd, struct bfd_link_info *info);
 
+  /* The AS_NEEDED_CLEANUP function is called once per --as-needed
+     input file that was not needed by the add_symbols phase of the
+     ELF backend linker.  The function must undo any target specific
+     changes in the symbol hash table.  */
+  bfd_boolean (*as_needed_cleanup)
+    (bfd *abfd, struct bfd_link_info *info);
+
   /* The ADJUST_DYNAMIC_SYMBOL function is called by the ELF backend
      linker for every symbol which is defined by a dynamic object and
      referenced by a regular object.  This is called after all the

@@ -4251,6 +4251,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       unsigned int i;
 
       /* Restore the symbol table.  */
+      if (bed->as_needed_cleanup)
+	(*bed->as_needed_cleanup) (abfd, info);
       old_hash = (char *) old_tab + tabsize;
       old_ent = (char *) old_hash + hashsize;
       sym_hash = elf_sym_hashes (abfd);
