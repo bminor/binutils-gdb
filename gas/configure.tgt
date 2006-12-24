@@ -37,6 +37,7 @@ case ${cpu} in
   c4x*)			cpu_type=tic4x ;;
   crisv32)		cpu_type=cris arch=crisv32 ;;
   crx*)			cpu_type=crx endian=little ;;
+  fido)			cpu_type=m68k ;;
   hppa*)		cpu_type=hppa ;;
   i[3-7]86)		cpu_type=i386 arch=i386;;
   ia64)			cpu_type=ia64 ;;

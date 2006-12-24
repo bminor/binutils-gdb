@@ -1,3 +1,7 @@
+2006-12-23  Kazu Hirata  <kazu@codesourcery.com>
+
+	* configure.tgt: Recognize fido.
+
 2006-12-18  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* pe-dll.c (pe_bfd_is_dll): New function.
