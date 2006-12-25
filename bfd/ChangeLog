@@ -1,10 +1,32 @@
+2006-12-25  Kazu Hirata  <kazu@codesourcery.com>
+
+	* archures.c (bfd_mach_cpu32_fido): New.
+	(bfd_mach_mcf_isa_a_nodiv, bfd_mach_mcf_isa_a,
+	bfd_mach_mcf_isa_a_mac, bfd_mach_mcf_isa_a_emac,
+	bfd_mach_mcf_isa_aplus, bfd_mach_mcf_isa_aplus_mac,
+	bfd_mach_mcf_isa_aplus_emac, bfd_mach_mcf_isa_b_nousp,
+	bfd_mach_mcf_isa_b_nousp_mac, bfd_mach_mcf_isa_b_nousp_emac,
+	bfd_mach_mcf_isa_b, bfd_mach_mcf_isa_b_mac,
+	bfd_mach_mcf_isa_b_emac, bfd_mach_mcf_isa_b_float,
+	bfd_mach_mcf_isa_b_float_mac, bfd_mach_mcf_isa_b_float_emac):
+	Increment the defined values.
+	* bfd-in2.h: Regenerate.
+	* cpu-m68k.c (arch_info_struct): Add en entry for
+	bfd_mach_cpu32_fido.
+	* elf32-m68k.c (elf32_m68k_object_p): Handle
+	EF_M68K_CPU32_FIDO_A.
+	(elf32_m68k_merge_private_bfd_data): Use EF_M68K_CPU32_MASK.
+	(elf32_m68k_print_private_bfd_data): Handle
+	EF_M68K_CPU32_FIDO_A.
+
 2006-12-25  Mei Ligang  <ligang@sunnorth.com.cn>
 	
-	* elf32-score.c (score_elf_got_lo16_reloc): Change some variables type from
-	unsigned to signed.
-	(score_elf_final_link_relocate): Fix bugs of handling relocation type R_SCORE_GOT15,
-	R_SCORE_GOT_LO16, and R_SCORE_REL32.
-	(_bfd_score_elf_relocate_section): Handle R_SCORE_GOT_LO16 specially.
+	* elf32-score.c (score_elf_got_lo16_reloc): Change some variables
+	type from unsigned to signed.
+	(score_elf_final_link_relocate): Fix bugs of handling relocation
+	type R_SCORE_GOT15, R_SCORE_GOT_LO16, and R_SCORE_REL32.
+	(_bfd_score_elf_relocate_section): Handle R_SCORE_GOT_LO16
+	specially.
 
 2006-12-23  Jakub Jelinek  <jakub@redhat.com>
 

@@ -1,3 +1,9 @@
+2006-12-25  Kazu Hirata  <kazu@codesourcery.com>
+
+	* config/tc-m68k.c (cpu_of_arch): Add fido.
+	(m68k_archs, m68k_cpu): Add entries for fido.
+	(m68k_elf_final_processing): Handle EF_M68K_CPU32_FIDO_A.
+
 2006-12-25  Mei Ligang  <ligang@sunnorth.com.cn>
 
 	* config/tc-score.c (build_lw_pic): Rename as build_lwst_pic.

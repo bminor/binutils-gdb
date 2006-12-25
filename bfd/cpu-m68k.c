@@ -41,53 +41,54 @@ static const bfd_arch_info_type arch_info_struct[] =
     N(bfd_mach_m68040,  "m68k:68040", FALSE, &arch_info_struct[6]),
     N(bfd_mach_m68060,  "m68k:68060", FALSE, &arch_info_struct[7]),
     N(bfd_mach_cpu32,   "m68k:cpu32", FALSE, &arch_info_struct[8]),
+    N(bfd_mach_cpu32_fido, "m68k:fido", FALSE, &arch_info_struct[9]),
 
     /* Various combinations of CF architecture features */
     N(bfd_mach_mcf_isa_a_nodiv, "m68k:isa-a:nodiv",
-      FALSE, &arch_info_struct[9]),
-    N(bfd_mach_mcf_isa_a, "m68k:isa-a",
       FALSE, &arch_info_struct[10]),
-    N(bfd_mach_mcf_isa_a_mac, "m68k:isa-a:mac",
+    N(bfd_mach_mcf_isa_a, "m68k:isa-a",
       FALSE, &arch_info_struct[11]),
-    N(bfd_mach_mcf_isa_a_emac, "m68k:isa-a:emac",
+    N(bfd_mach_mcf_isa_a_mac, "m68k:isa-a:mac",
       FALSE, &arch_info_struct[12]),
-    N(bfd_mach_mcf_isa_aplus, "m68k:isa-aplus",
+    N(bfd_mach_mcf_isa_a_emac, "m68k:isa-a:emac",
       FALSE, &arch_info_struct[13]),
-    N(bfd_mach_mcf_isa_aplus_mac, "m68k:isa-aplus:mac",
+    N(bfd_mach_mcf_isa_aplus, "m68k:isa-aplus",
       FALSE, &arch_info_struct[14]),
-    N(bfd_mach_mcf_isa_aplus_emac, "m68k:isa-aplus:emac",
+    N(bfd_mach_mcf_isa_aplus_mac, "m68k:isa-aplus:mac",
       FALSE, &arch_info_struct[15]),
-    N(bfd_mach_mcf_isa_b_nousp, "m68k:isa-b:nousp",
+    N(bfd_mach_mcf_isa_aplus_emac, "m68k:isa-aplus:emac",
       FALSE, &arch_info_struct[16]),
-    N(bfd_mach_mcf_isa_b_nousp_mac, "m68k:isa-b:nousp:mac",
+    N(bfd_mach_mcf_isa_b_nousp, "m68k:isa-b:nousp",
       FALSE, &arch_info_struct[17]),
-    N(bfd_mach_mcf_isa_b_nousp_emac, "m68k:isa-b:nousp:emac",
+    N(bfd_mach_mcf_isa_b_nousp_mac, "m68k:isa-b:nousp:mac",
       FALSE, &arch_info_struct[18]),
-    N(bfd_mach_mcf_isa_b, "m68k:isa-b",
+    N(bfd_mach_mcf_isa_b_nousp_emac, "m68k:isa-b:nousp:emac",
       FALSE, &arch_info_struct[19]),
-    N(bfd_mach_mcf_isa_b_mac, "m68k:isa-b:mac",
+    N(bfd_mach_mcf_isa_b, "m68k:isa-b",
       FALSE, &arch_info_struct[20]),
-    N(bfd_mach_mcf_isa_b_emac, "m68k:isa-b:emac",
+    N(bfd_mach_mcf_isa_b_mac, "m68k:isa-b:mac",
       FALSE, &arch_info_struct[21]),
-    N(bfd_mach_mcf_isa_b_float, "m68k:isa-b:float",
+    N(bfd_mach_mcf_isa_b_emac, "m68k:isa-b:emac",
       FALSE, &arch_info_struct[22]),
-    N(bfd_mach_mcf_isa_b_float_mac, "m68k:isa-b:float:mac",
+    N(bfd_mach_mcf_isa_b_float, "m68k:isa-b:float",
       FALSE, &arch_info_struct[23]),
-    N(bfd_mach_mcf_isa_b_float_emac, "m68k:isa-b:float:emac",
+    N(bfd_mach_mcf_isa_b_float_mac, "m68k:isa-b:float:mac",
       FALSE, &arch_info_struct[24]),
+    N(bfd_mach_mcf_isa_b_float_emac, "m68k:isa-b:float:emac",
+      FALSE, &arch_info_struct[25]),
 
     /* Legacy names for CF architectures */
-    N(bfd_mach_mcf_isa_a_nodiv, "m68k:5200", FALSE, &arch_info_struct[25]),
-    N(bfd_mach_mcf_isa_a_mac,"m68k:5206e", FALSE, &arch_info_struct[26]),
-    N(bfd_mach_mcf_isa_a_mac, "m68k:5307", FALSE, &arch_info_struct[27]),
-    N(bfd_mach_mcf_isa_b_nousp_mac, "m68k:5407", FALSE, &arch_info_struct[28]),
-    N(bfd_mach_mcf_isa_aplus_emac, "m68k:528x", FALSE, &arch_info_struct[29]),
-    N(bfd_mach_mcf_isa_aplus_emac, "m68k:521x", FALSE, &arch_info_struct[30]),
-    N(bfd_mach_mcf_isa_a_emac, "m68k:5249", FALSE, &arch_info_struct[31]),
+    N(bfd_mach_mcf_isa_a_nodiv, "m68k:5200", FALSE, &arch_info_struct[26]),
+    N(bfd_mach_mcf_isa_a_mac,"m68k:5206e", FALSE, &arch_info_struct[27]),
+    N(bfd_mach_mcf_isa_a_mac, "m68k:5307", FALSE, &arch_info_struct[28]),
+    N(bfd_mach_mcf_isa_b_nousp_mac, "m68k:5407", FALSE, &arch_info_struct[29]),
+    N(bfd_mach_mcf_isa_aplus_emac, "m68k:528x", FALSE, &arch_info_struct[30]),
+    N(bfd_mach_mcf_isa_aplus_emac, "m68k:521x", FALSE, &arch_info_struct[31]),
+    N(bfd_mach_mcf_isa_a_emac, "m68k:5249", FALSE, &arch_info_struct[32]),
     N(bfd_mach_mcf_isa_b_float_emac, "m68k:547x",
-      FALSE, &arch_info_struct[32]),
-    N(bfd_mach_mcf_isa_b_float_emac, "m68k:548x",
       FALSE, &arch_info_struct[33]),
+    N(bfd_mach_mcf_isa_b_float_emac, "m68k:548x",
+      FALSE, &arch_info_struct[34]),
     N(bfd_mach_mcf_isa_b_float_emac, "m68k:cfv4e", FALSE, 0),
   };
 
@@ -107,6 +108,7 @@ static const unsigned m68k_arch_features[] =
   m68040|m68881|m68851,
   m68060|m68881|m68851,
   cpu32|m68881,
+  cpu32|m68881|fido_a,
   mcfisa_a,
   mcfisa_a|mcfhwdiv,
   mcfisa_a|mcfhwdiv|mcfmac,
@@ -202,15 +204,15 @@ bfd_m68k_compatible (const bfd_arch_info_type *a,
   if (a->mach <= bfd_mach_m68060 && b->mach <= bfd_mach_m68060)
     /* Merge m68k machine. */
     return a->mach > b->mach ? a : b;
-  else if (a->mach == bfd_mach_cpu32 && b->mach == bfd_mach_cpu32)
-    /* CPU32 is compatible with itself. */
-    return a;
-  else if (a->mach >= bfd_mach_mcf_isa_a_nodiv
-	   && b->mach >= bfd_mach_mcf_isa_a_nodiv)
+  else if (a->mach >= bfd_mach_cpu32 && b->mach >= bfd_mach_cpu32)
     {
-      /* Merge cf machine.  */
+      /* Merge the machine features.  */
       unsigned features = (bfd_m68k_mach_to_features (a->mach)
 			   | bfd_m68k_mach_to_features (b->mach));
+
+      /* CPU32 and Coldfire are incompatible.  */
+      if ((~features & (cpu32 | mcfisa_a)) == 0)
+	return NULL;
 
       /* ISA A+ and ISA B are incompatible.  */
       if ((~features & (mcfisa_aa | mcfisa_b)) == 0)
