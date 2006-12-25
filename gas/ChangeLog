@@ -1,3 +1,12 @@
+2006-12-25  Mei Ligang  <ligang@sunnorth.com.cn>
+
+	* config/tc-score.c (build_lw_pic): Rename as build_lwst_pic.
+	Delete the code handling large constant for PIC.
+	Modify some comments.
+	(score_relax_frag): Decrease insn_addr in certain situation.
+	(s_score_cprestore): Change .cprestore syntax from ".cprestore offset" 
+	to ".cprestore reg, offset".
+	
 2006-12-23  Kazu Hirata  <kazu@codesourcery.com>
 
 	* configure.tgt: Recognize fido.

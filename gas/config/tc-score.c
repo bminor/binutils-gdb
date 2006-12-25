@@ -783,7 +783,7 @@ static const struct asm_opcode score_insns[] =
   {"ldis_pic",  0x0a0c0000, 0x3e0e0000, 0x5000,     Insn_internal, do_rdi16_pic},
   {"addi_s_pic",0x02000000, 0x3e0e0001, 0x8000,     Insn_internal, do_addi_s_pic},
   {"addi_u_pic",0x02000000, 0x3e0e0001, 0x8000,     Insn_internal, do_addi_u_pic},
-  {"lw_pic",    0x20000000, 0x3e000000, 0x2008,     Insn_internal, do_lw_pic},
+  {"lw_pic",    0x20000000, 0x3e000000, 0x8000,     Insn_internal, do_lw_pic},
 };
 
 /* Next free entry in the pool.  */
@@ -3747,9 +3747,10 @@ build_la_pic (int reg_rd, expressionS exp)
       fix_num = 1;
       var_num = 2;
 
-      /* Insn 1 and Insn 2  */
+      /* For an external symbol, only one insn is generated; 
+         For a local symbol, two insns are generated.  */
       /* Fix part
-	 For an external symbol: lw rD, <sym>($gp)
+         For an external symbol: lw rD, <sym>($gp)
                                  (BFD_RELOC_SCORE_GOT15 or BFD_RELOC_SCORE_CALL15)  */
       sprintf (tmp, "lw_pic r%d, %s", reg_rd, add_symbol->bsym->name);
       if (append_insn (tmp, FALSE) == (int) FAIL)
@@ -4149,11 +4150,11 @@ nopic_need_relax (symbolS * sym, int before_relaxing)
     return 1;
 }
 
-/* Build a relax frag for lw instruction when generating PIC,
+/* Build a relax frag for lw/st instruction when generating PIC,
    external symbol first and local symbol second.  */
 
 static void
-build_lw_pic (int reg_rd, expressionS exp)
+build_lwst_pic (int reg_rd, expressionS exp, const char *insn_name)
 {
   symbolS *add_symbol = exp.X_add_symbol;
   int add_number = exp.X_add_number;
@@ -4172,13 +4173,14 @@ build_lw_pic (int reg_rd, expressionS exp)
       fix_num = 1;
       var_num = 2;
 
-      /* Insn 1 and Insn 2  */
+      /* For an external symbol, two insns are generated;
+         For a local symbol, three insns are generated.  */
       /* Fix part
-	 For an external symbol: lw rD, <sym>($gp)
+         For an external symbol: lw rD, <sym>($gp)
                                  (BFD_RELOC_SCORE_GOT15)  */
-      sprintf (tmp, "lw_pic r%d, %s", reg_rd, add_symbol->bsym->name);
+      sprintf (tmp, "lw_pic %s, %s", "r1", add_symbol->bsym->name);
       if (append_insn (tmp, FALSE) == (int) FAIL)
-	return;
+        return;
 
       memcpy (&fix_insts[0], &inst, sizeof (struct score_it));
 
@@ -4188,91 +4190,25 @@ build_lw_pic (int reg_rd, expressionS exp)
 	 addi rD, <sym>       (BFD_RELOC_GOT_LO16) */
       inst.reloc.type = BFD_RELOC_SCORE_GOT15;
       memcpy (&var_insts[0], &inst, sizeof (struct score_it));
-      sprintf (tmp, "addi_s_pic r%d, %s", reg_rd, add_symbol->bsym->name);
+      sprintf (tmp, "addi_s_pic %s, %s", "r1", add_symbol->bsym->name);
       if (append_insn (tmp, FALSE) == (int) FAIL)
-	return;
+        return;
 
       memcpy (&var_insts[1], &inst, sizeof (struct score_it));
       build_relax_frag (fix_insts, fix_num, var_insts, var_num, add_symbol);
 
-      /* Insn 2: lw rD, [rD, constant]  */
-      sprintf (tmp, "lw r%d, [r%d, %d]", reg_rd, reg_rd, add_number);
+      /* Insn 2 or Insn 3: lw/st rD, [r1, constant]  */
+      sprintf (tmp, "%s r%d, [%s, %d]", insn_name, reg_rd, "r1", add_number);
       if (append_insn (tmp, TRUE) == (int) FAIL)
-	return;
+        return;
 
-     /* Set bwarn as -1, so macro instruction itself will not be generated frag.  */
-     inst.bwarn = -1;
+      /* Set bwarn as -1, so macro instruction itself will not be generated frag.  */
+      inst.bwarn = -1;
     }
   else
     {
-      int hi = (add_number >> 16) & 0x0000FFFF;
-      int lo = add_number & 0x0000FFFF;
-
-      /* Insn 1: lw rD, <sym>($gp)    (BFD_RELOC_SCORE_GOT15)  */
-      sprintf (tmp, "lw_pic r%d, %s", reg_rd, add_symbol->bsym->name);
-      if (append_insn (tmp, TRUE) == (int) FAIL)
-	return;
-
-      /* Insn 2  */
-      fix_num = 1;
-      var_num = 1;
-      /* Fix part
-	 For an external symbol: ldis r1, HI%<constant>  */
-      sprintf (tmp, "ldis %s, %d", "r1", hi);
-      if (append_insn (tmp, FALSE) == (int) FAIL)
-	return;
-
-      memcpy (&fix_insts[0], &inst, sizeof (struct score_it));
-
-      /* Var part
-	 For a local symbol: ldis r1, HI%<constant>
-         but, if lo is outof 16 bit, make hi plus 1  */
-      if ((lo < -0x8000) || (lo > 0x7fff))
-	{
-	  hi += 1;
-	}
-      sprintf (tmp, "ldis_pic %s, %d", "r1", hi);
-      if (append_insn (tmp, FALSE) == (int) FAIL)
-	return;
-
-      memcpy (&var_insts[0], &inst, sizeof (struct score_it));
-      build_relax_frag (fix_insts, fix_num, var_insts, var_num, add_symbol);
-
-      /* Insn 3  */
-      fix_num = 1;
-      var_num = 1;
-      /* Fix part
-	 For an external symbol: ori r1, LO%<constant>  */
-      sprintf (tmp, "ori %s, %d", "r1", lo);
-      if (append_insn (tmp, FALSE) == (int) FAIL)
-	return;
-
-      memcpy (&fix_insts[0], &inst, sizeof (struct score_it));
-
-      /* Var part
-  	 For a local symbol: addi r1, <sym>+LO%<constant>    (BFD_RELOC_GOT_LO16)  */
-      sprintf (tmp, "addi_u_pic %s, %s + %d", "r1", add_symbol->bsym->name, lo);
-      if (append_insn (tmp, FALSE) == (int) FAIL)
-	return;
-
-      memcpy (&var_insts[0], &inst, sizeof (struct score_it));
-      build_relax_frag (fix_insts, fix_num, var_insts, var_num, add_symbol);
-
-      /* Insn 4: add rD, rD, r1  */
-      sprintf (tmp, "add r%d, r%d, %s", reg_rd, reg_rd, "r1");
-      if (append_insn (tmp, TRUE) == (int) FAIL)
-	return;
-
-     /* Set bwarn as -1, so macro instruction itself will not be generated frag.  */
-     inst.bwarn = -1;
-
-      /* Insn 5: lw rD, [rD, 0]  */
-      sprintf (tmp, "lw r%d, [r%d, 0]", reg_rd, reg_rd);
-      if (append_insn (tmp, TRUE) == (int) FAIL)
-	return;
-
-     /* Set bwarn as -1, so macro instruction itself will not be generated frag.  */
-     inst.bwarn = -1;
+      inst.error = _("PIC code offset overflow (max 16 signed bits)");
+      return;
     }
 
   nor1 = r1_bak;
@@ -4354,8 +4290,10 @@ do_macro_ldst_label (char *str)
 
       if (score_pic == PIC)
         {
-	  build_lw_pic (reg_rd, inst.reloc.exp);
-	  return;
+          int ldst_idx = 0;
+          ldst_idx = inst.instruction & OPC_PSEUDOLDST_MASK;
+          build_lwst_pic (reg_rd, inst.reloc.exp, score_ldst_insns[ldst_idx * 3 + 0].template);
+          return;
         }
       else
 	{
@@ -5006,9 +4944,17 @@ score_relax_frag (asection * sec ATTRIBUTE_UNUSED, fragS * fragp, long stretch A
     {
       if (!word_align_p)
         {
-          fragp->insn_addr += 2;
-          grows += 2;
-	}
+          if (fragp->insn_addr < 2)
+            {
+              fragp->insn_addr += 2;
+              grows += 2;
+            }
+          else
+            {
+              fragp->insn_addr -= 2;
+              grows -= 2;
+            }
+        }
 
       if (fragp->fr_opcode)
 	fragp->fr_fix = RELAX_NEW (fragp->fr_subtype) + fragp->insn_addr;
@@ -6291,7 +6237,7 @@ s_score_cpload (int ignore ATTRIBUTE_UNUSED)
 static void
 s_score_cprestore (int ignore ATTRIBUTE_UNUSED)
 {
-#define SCORE_BP_REG  2
+  int reg;
   int cprestore_offset;
   char insn_str[MAX_LITERAL_POOL_SIZE];
 
@@ -6302,11 +6248,43 @@ s_score_cprestore (int ignore ATTRIBUTE_UNUSED)
       return;
     }
 
+  if ((reg = reg_required_here (&input_line_pointer, -1, REG_TYPE_SCORE)) == (int) FAIL
+      || skip_past_comma (&input_line_pointer) == (int) FAIL)
+    {
+      return;
+    }
+
   cprestore_offset = get_absolute_expression ();
 
-  sprintf (insn_str, "sw r%d, [r%d, %d]", GP, SCORE_BP_REG, cprestore_offset);
-  if (append_insn (insn_str, TRUE) == (int) FAIL)
-    return;
+  if (cprestore_offset <= 0x3fff)
+    {
+      sprintf (insn_str, "sw r%d, [r%d, %d]", GP, reg, cprestore_offset);
+      if (append_insn (insn_str, TRUE) == (int) FAIL)
+        return;
+    }
+  else
+    {
+      int r1_bak;
+
+      r1_bak = nor1;
+      nor1 = 0;
+
+      sprintf (insn_str, "li r1, %d", cprestore_offset);
+      if (append_insn (insn_str, TRUE) == (int) FAIL)
+        return;
+
+      sprintf (insn_str, "add r1, r1, r%d", reg);
+      if (append_insn (insn_str, TRUE) == (int) FAIL)
+        return;
+
+      sprintf (insn_str, "sw r%d, [r1]", GP);
+      if (append_insn (insn_str, TRUE) == (int) FAIL)
+        return;
+
+      nor1 = r1_bak;
+    }
+
+  demand_empty_rest_of_line ();
 }
 
 /* Handle the .gpword pseudo-op.  This is used when generating PIC
