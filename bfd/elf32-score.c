@@ -532,8 +532,8 @@ score_elf_got_lo16_reloc (bfd *abfd,
 		          char **error_message ATTRIBUTE_UNUSED)
 {
   bfd_vma addend = 0, offset = 0;
-  unsigned long val;
-  unsigned long hi16_offset, hi16_value, uvalue;
+  signed long val;
+  signed long hi16_offset, hi16_value, uvalue;
 
   hi16_value = bfd_get_32 (abfd, hi16_rel_addr);
   hi16_offset = ((((hi16_value >> 16) & 0x3) << 15) | (hi16_value & 0x7fff)) >> 1;
@@ -543,7 +543,10 @@ score_elf_got_lo16_reloc (bfd *abfd,
   if (reloc_entry->address > input_section->size)
     return bfd_reloc_outofrange;
   uvalue = ((hi16_offset << 16) | (offset & 0xffff)) + val;
-  hi16_offset = (uvalue >> 16) & 0x7fff;
+  if ((uvalue > -0x8000) && (uvalue < 0x7fff))
+    hi16_offset = 0;
+  else
+    hi16_offset = (uvalue >> 16) & 0x7fff;
   hi16_value = (hi16_value & ~0x37fff) | (hi16_offset & 0x7fff) | ((hi16_offset << 1) & 0x30000);
   bfd_put_32 (abfd, hi16_value, hi16_rel_addr);
   offset = (uvalue & 0xffff) << 1;
@@ -1897,6 +1900,7 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
   r_symndx = ELF32_R_SYM (rel->r_info);
   r_type = ELF32_R_TYPE (rel->r_info);
   rel_addr = (input_section->output_section->vma + input_section->output_offset + rel->r_offset);
+  local_p = score_elf_local_relocation_p (input_bfd, rel, local_sections, TRUE);
 
   if (r_type == R_SCORE_GOT15)
     {
@@ -1905,24 +1909,21 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
       const struct elf_backend_data *bed;
       bfd_vma lo_value = 0;
 
-      addend = (bfd_get_32 (input_bfd, hit_data) >> howto->bitpos) & howto->src_mask;
-
       bed = get_elf_backend_data (output_bfd);
       relend = relocs + input_section->reloc_count * bed->s->int_rels_per_ext_rel;
       lo16_rel = score_elf_next_relocation (input_bfd, R_SCORE_GOT_LO16, rel, relend);
-      if (lo16_rel != NULL)
+      if ((local_p) && (lo16_rel != NULL))
 	{
-          lo_value = (bfd_get_32 (input_bfd, contents + lo16_rel->r_offset) >> howto->bitpos)
-                      & howto->src_mask;
+	  bfd_vma tmp = 0;
+	  tmp = bfd_get_32 (input_bfd, contents + lo16_rel->r_offset);
+	  lo_value = (((tmp >> 16) & 0x3) << 14) | ((tmp & 0x7fff) >> 1);
 	}
-      addend = (addend << 16) + lo_value;
+      addend = lo_value;
     }
   else
     {
       addend = (bfd_get_32 (input_bfd, hit_data) >> howto->bitpos) & howto->src_mask;
     }
-
-  local_p = score_elf_local_relocation_p (input_bfd, rel, local_sections, TRUE);
 
   /* If we haven't already determined the GOT offset, or the GP value,
      and we're going to need it, get it now.  */
@@ -1932,9 +1933,21 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
     case R_SCORE_GOT15:
       if (!local_p)
         {
-	  g = score_elf_global_got_index (elf_hash_table (info)->dynobj,
-				          (struct elf_link_hash_entry *) h);
-	}
+          g = score_elf_global_got_index (elf_hash_table (info)->dynobj,
+                                          (struct elf_link_hash_entry *) h);
+          if ((! elf_hash_table(info)->dynamic_sections_created
+               || (info->shared
+                   && (info->symbolic || h->root.dynindx == -1)
+                   && h->root.def_regular)))
+            {
+              /* This is a static link or a -Bsymbolic link.  The
+                 symbol is defined locally, or was forced to be local.
+                 We must initialize this entry in the GOT.  */
+              bfd *tmpbfd = elf_hash_table (info)->dynobj;
+              asection *sgot = score_elf_got_section (tmpbfd, FALSE);
+              bfd_put_32 (tmpbfd, value, sgot->contents + g);
+            }
+        }
       else if (r_type == R_SCORE_GOT15 || r_type == R_SCORE_CALL15)
         {
 	  /* There's no need to create a local GOT entry here; the
@@ -1993,6 +2006,11 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
 						    input_section))
 	    return bfd_reloc_undefined;
 	}
+      else if (r_symndx == 0)
+        /* r_symndx will be zero only for relocs against symbols
+           from removed linkonce sections, or sections discarded by
+           a linker script.  */
+        value = 0;
       else
 	{
 	  if (r_type != R_SCORE_REL32)
@@ -2122,7 +2140,10 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
 
       if ((long) value > 0x3fff || (long) value < -0x4000)
         return bfd_reloc_overflow;
-      bfd_put_16 (input_bfd, value, hit_data + 2);
+
+      addend = bfd_get_32 (input_bfd, hit_data);
+      value = (addend & ~howto->dst_mask) | (value & howto->dst_mask);
+      bfd_put_32 (input_bfd, value, hit_data);
       return bfd_reloc_ok;
 
     case R_SCORE_GPREL32:
@@ -2133,10 +2154,10 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
 
     case R_SCORE_GOT_LO16:
       addend = bfd_get_32 (input_bfd, hit_data);
-      value = ((((addend >> 16) & 0x3) << 15) | (addend & 0x7fff)) >> 1;
+      value = (((addend >> 16) & 0x3) << 14) | ((addend & 0x7fff) >> 1);
       value += symbol;
-      offset = (value & 0xffff) << 1;
-      value = (addend & (~(howto->dst_mask))) | (offset & 0x7fff) | ((offset << 1) & 0x30000);
+      value = (addend & (~(howto->dst_mask))) | ((value & 0x3fff) << 1)  
+               | (((value >> 14) & 0x3) << 16);
 
       bfd_put_32 (input_bfd, value, hit_data);
       return bfd_reloc_ok;
@@ -2301,6 +2322,17 @@ _bfd_score_elf_relocate_section (bfd *output_bfd,
                   offset = (uvalue & 0xffff) << 1;
                   value = (value & (~(howto->dst_mask)))
                     | (offset & 0x7fff) | ((offset << 1) & 0x30000);
+                  bfd_put_32 (input_bfd, value, contents + rel->r_offset);
+                  break;
+                case R_SCORE_GOT_LO16:
+                  value = bfd_get_32 (input_bfd, contents + rel->r_offset);
+                  addend = (((value >> 16) & 0x3) << 14) | ((value & 0x7fff) >> 1);
+                  msec = sec;
+                  addend = _bfd_elf_rel_local_sym (output_bfd, sym, &msec, addend) - relocation;
+                  addend += msec->output_section->vma + msec->output_offset;
+                  value = (value & (~(howto->dst_mask))) | ((addend & 0x3fff) << 1)
+                           | (((addend >> 14) & 0x3) << 16);
+
                   bfd_put_32 (input_bfd, value, contents + rel->r_offset);
                   break;
                 default:
