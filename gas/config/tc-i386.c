@@ -4493,11 +4493,8 @@ pe_directive_secrel (dummy)
 }
 #endif
 
-static int i386_immediate PARAMS ((char *));
-
 static int
-i386_immediate (imm_start)
-     char *imm_start;
+i386_immediate (char *imm_start)
 {
   char *save_input_line_pointer;
   char *gotfree_input_line;
