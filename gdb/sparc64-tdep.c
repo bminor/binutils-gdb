@@ -1086,6 +1086,15 @@ sparc64_extract_return_value (struct type *type, struct regcache *regcache,
 	regcache_cooked_read (regcache, SPARC_F0_REGNUM + i, buf + i * 4);
       memcpy (valbuf, buf, len);
     }
+  else if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+    {
+      /* Small arrays are returned the same way as small structures.  */
+      gdb_assert (len <= 32);
+
+      for (i = 0; i < ((len + 7) / 8); i++)
+	regcache_cooked_read (regcache, SPARC_O0_REGNUM + i, buf + i * 8);
+      memcpy (valbuf, buf, len);
+    }
   else
     {
       /* Integral and pointer return values.  */
@@ -1130,6 +1139,16 @@ sparc64_store_return_value (struct type *type, struct regcache *regcache,
       memcpy (buf, valbuf, len);
       for (i = 0; i < len / 4; i++)
 	regcache_cooked_write (regcache, SPARC_F0_REGNUM + i, buf + i * 4);
+    }
+  else if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+    {
+      /* Small arrays are returned the same way as small structures.  */
+      gdb_assert (len <= 32);
+
+      memset (buf, 0, sizeof (buf));
+      memcpy (buf, valbuf, len);
+      for (i = 0; i < ((len + 7) / 8); i++)
+	regcache_cooked_write (regcache, SPARC_O0_REGNUM + i, buf + i * 8);
     }
   else
     {

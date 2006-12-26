@@ -1,3 +1,9 @@
+2006-12-26  Joel brobecker  <brobecker@adacore.com>
+
+	* sparc64-tdep.c (sparc64_extract_return_value): Add handling
+	for array types.
+	(sparc64_store_return_value): Likewise.
+
 2006-12-18  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* breakpoint.c (watchpoint_check): Double-check the found frame.
