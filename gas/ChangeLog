@@ -1,3 +1,7 @@
+2006-12-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c: Document tc-i386.c, not i386.c.
+
 2006-12-27  Kazu Hirata  <kazu@codesourcery.com>
 
 	* config/m68k-parse.h (m68k_register): Add CAC and MBB.
