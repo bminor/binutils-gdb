@@ -7881,14 +7881,34 @@ dwarf_tag_name (unsigned tag)
       return "DW_TAG_partial_unit";
     case DW_TAG_imported_unit:
       return "DW_TAG_imported_unit";
+    case DW_TAG_condition:
+      return "DW_TAG_condition";
+    case DW_TAG_shared_type:
+      return "DW_TAG_shared_type";
     case DW_TAG_MIPS_loop:
       return "DW_TAG_MIPS_loop";
+    case DW_TAG_HP_array_descriptor:
+      return "DW_TAG_HP_array_descriptor";
     case DW_TAG_format_label:
       return "DW_TAG_format_label";
     case DW_TAG_function_template:
       return "DW_TAG_function_template";
     case DW_TAG_class_template:
       return "DW_TAG_class_template";
+    case DW_TAG_GNU_BINCL:
+      return "DW_TAG_GNU_BINCL";
+    case DW_TAG_GNU_EINCL:
+      return "DW_TAG_GNU_EINCL";
+    case DW_TAG_upc_shared_type:
+      return "DW_TAG_upc_shared_type";
+    case DW_TAG_upc_strict_type:
+      return "DW_TAG_upc_strict_type";
+    case DW_TAG_upc_relaxed_type:
+      return "DW_TAG_upc_relaxed_type";
+    case DW_TAG_PGI_kanji_type:
+      return "DW_TAG_PGI_kanji_type";
+    case DW_TAG_PGI_interface_block:
+      return "DW_TAG_PGI_interface_block";
     default:
       return "DW_TAG_<unknown>";
     }
@@ -8025,6 +8045,7 @@ dwarf_attr_name (unsigned attr)
       return "DW_AT_virtuality";
     case DW_AT_vtable_elem_location:
       return "DW_AT_vtable_elem_location";
+    /* DWARF 3 values.  */
     case DW_AT_allocated:
       return "DW_AT_allocated";
     case DW_AT_associated:
@@ -8049,7 +8070,38 @@ dwarf_attr_name (unsigned attr)
       return "DW_AT_call_file";
     case DW_AT_call_line:
       return "DW_AT_call_line";
+    case DW_AT_description:
+      return "DW_AT_description";
+    case DW_AT_binary_scale:
+      return "DW_AT_binary_scale";
+    case DW_AT_decimal_scale:
+      return "DW_AT_decimal_scale";
+    case DW_AT_small:
+      return "DW_AT_small";
+    case DW_AT_decimal_sign:
+      return "DW_AT_decimal_sign";
+    case DW_AT_digit_count:
+      return "DW_AT_digit_count";
+    case DW_AT_picture_string:
+      return "DW_AT_picture_string";
+    case DW_AT_mutable:
+      return "DW_AT_mutable";
+    case DW_AT_threads_scaled:
+      return "DW_AT_threads_scaled";
+    case DW_AT_explicit:
+      return "DW_AT_explicit";
+    case DW_AT_object_pointer:
+      return "DW_AT_object_pointer";
+    case DW_AT_endianity:
+      return "DW_AT_endianity";
+    case DW_AT_elemental:
+      return "DW_AT_elemental";
+    case DW_AT_pure:
+      return "DW_AT_pure";
+    case DW_AT_recursive:
+      return "DW_AT_recursive";
 #ifdef MIPS
+    /* SGI/MIPS extensions.  */
     case DW_AT_MIPS_fde:
       return "DW_AT_MIPS_fde";
     case DW_AT_MIPS_loop_begin:
@@ -8062,10 +8114,47 @@ dwarf_attr_name (unsigned attr)
       return "DW_AT_MIPS_loop_unroll_factor";
     case DW_AT_MIPS_software_pipeline_depth:
       return "DW_AT_MIPS_software_pipeline_depth";
-#endif
     case DW_AT_MIPS_linkage_name:
       return "DW_AT_MIPS_linkage_name";
-
+    case DW_AT_MIPS_stride:
+      return "DW_AT_MIPS_stride";
+    case DW_AT_MIPS_abstract_name:
+      return "DW_AT_MIPS_abstract_name";
+    case DW_AT_MIPS_clone_origin:
+      return "DW_AT_MIPS_clone_origin";
+    case DW_AT_MIPS_has_inlines:
+      return "DW_AT_MIPS_has_inlines";
+#endif
+    /* HP extensions.  */
+    case DW_AT_HP_block_index:
+      return "DW_AT_HP_block_index";
+    case DW_AT_HP_unmodifiable:
+      return "DW_AT_HP_unmodifiable";
+    case DW_AT_HP_actuals_stmt_list:
+      return "DW_AT_HP_actuals_stmt_list";
+    case DW_AT_HP_proc_per_section:
+      return "DW_AT_HP_proc_per_section";
+    case DW_AT_HP_raw_data_ptr:
+      return "DW_AT_HP_raw_data_ptr";
+    case DW_AT_HP_pass_by_reference:
+      return "DW_AT_HP_pass_by_reference";
+    case DW_AT_HP_opt_level:
+      return "DW_AT_HP_opt_level";
+    case DW_AT_HP_prof_version_id:
+      return "DW_AT_HP_prof_version_id";
+    case DW_AT_HP_opt_flags:
+      return "DW_AT_HP_opt_flags";
+    case DW_AT_HP_cold_region_low_pc:
+      return "DW_AT_HP_cold_region_low_pc";
+    case DW_AT_HP_cold_region_high_pc:
+      return "DW_AT_HP_cold_region_high_pc";
+    case DW_AT_HP_all_variables_modifiable:
+      return "DW_AT_HP_all_variables_modifiable";
+    case DW_AT_HP_linkage_name:
+      return "DW_AT_HP_linkage_name";
+    case DW_AT_HP_prof_flags:
+      return "DW_AT_HP_prof_flags";
+    /* GNU extensions.  */
     case DW_AT_sf_names:
       return "DW_AT_sf_names";
     case DW_AT_src_info:
@@ -8080,6 +8169,19 @@ dwarf_attr_name (unsigned attr)
       return "DW_AT_body_end";
     case DW_AT_GNU_vector:
       return "DW_AT_GNU_vector";
+    /* VMS extensions.  */
+    case DW_AT_VMS_rtnbeg_pd_address:
+      return "DW_AT_VMS_rtnbeg_pd_address";
+    /* UPC extension.  */
+    case DW_AT_upc_threads_scaled:
+      return "DW_AT_upc_threads_scaled";
+    /* PGI (STMicroelectronics) extensions.  */
+    case DW_AT_PGI_lbase:
+      return "DW_AT_PGI_lbase";
+    case DW_AT_PGI_soffset:
+      return "DW_AT_PGI_soffset";
+    case DW_AT_PGI_lstride:
+      return "DW_AT_PGI_lstride";
     default:
       return "DW_AT_<unknown>";
     }
@@ -8436,7 +8538,7 @@ dwarf_stack_op_name (unsigned op)
       return "DW_OP_xderef_size";
     case DW_OP_nop:
       return "DW_OP_nop";
-      /* DWARF 3 extensions.  */
+    /* DWARF 3 extensions.  */
     case DW_OP_push_object_address:
       return "DW_OP_push_object_address";
     case DW_OP_call2:
@@ -8445,9 +8547,28 @@ dwarf_stack_op_name (unsigned op)
       return "DW_OP_call4";
     case DW_OP_call_ref:
       return "DW_OP_call_ref";
-      /* GNU extensions.  */
+    /* GNU extensions.  */
+    case DW_OP_form_tls_address:
+      return "DW_OP_form_tls_address";
+    case DW_OP_call_frame_cfa:
+      return "DW_OP_call_frame_cfa";
+    case DW_OP_bit_piece:
+      return "DW_OP_bit_piece";
     case DW_OP_GNU_push_tls_address:
       return "DW_OP_GNU_push_tls_address";
+    /* HP extensions. */ 
+    case DW_OP_HP_is_value:
+      return "DW_OP_HP_is_value";
+    case DW_OP_HP_fltconst4:
+      return "DW_OP_HP_fltconst4";
+    case DW_OP_HP_fltconst8:
+      return "DW_OP_HP_fltconst8";
+    case DW_OP_HP_mod_range:
+      return "DW_OP_HP_mod_range";
+    case DW_OP_HP_unmod_range:
+      return "DW_OP_HP_unmod_range";
+    case DW_OP_HP_tls:
+      return "DW_OP_HP_tls";
     default:
       return "OP_<unknown>";
     }
@@ -8469,6 +8590,8 @@ dwarf_type_encoding_name (unsigned enc)
 {
   switch (enc)
     {
+    case DW_ATE_void:
+      return "DW_ATE_void";
     case DW_ATE_address:
       return "DW_ATE_address";
     case DW_ATE_boolean:
@@ -8485,8 +8608,36 @@ dwarf_type_encoding_name (unsigned enc)
       return "DW_ATE_unsigned";
     case DW_ATE_unsigned_char:
       return "DW_ATE_unsigned_char";
+    /* DWARF 3.  */
     case DW_ATE_imaginary_float:
       return "DW_ATE_imaginary_float";
+    case DW_ATE_packed_decimal:
+      return "DW_ATE_packed_decimal";
+    case DW_ATE_numeric_string:
+      return "DW_ATE_numeric_string";
+    case DW_ATE_edited:
+      return "DW_ATE_edited";
+    case DW_ATE_signed_fixed:
+      return "DW_ATE_signed_fixed";
+    case DW_ATE_unsigned_fixed:
+      return "DW_ATE_unsigned_fixed";
+    case DW_ATE_decimal_float:
+      return "DW_ATE_decimal_float";
+    /* HP extensions.  */
+    case DW_ATE_HP_float80:
+      return "DW_ATE_HP_float80";
+    case DW_ATE_HP_complex_float80:
+      return "DW_ATE_HP_complex_float80";
+    case DW_ATE_HP_float128:
+      return "DW_ATE_HP_float128";
+    case DW_ATE_HP_complex_float128:
+      return "DW_ATE_HP_complex_float128";
+    case DW_ATE_HP_floathpintel:
+      return "DW_ATE_HP_floathpintel";
+    case DW_ATE_HP_imaginary_float80:
+      return "DW_ATE_HP_imaginary_float80";
+    case DW_ATE_HP_imaginary_float128:
+      return "DW_ATE_HP_imaginary_float128";
     default:
       return "DW_ATE_<unknown>";
     }
@@ -8536,8 +8687,7 @@ dwarf_cfi_name (unsigned cfi_opc)
       return "DW_CFA_def_cfa_register";
     case DW_CFA_def_cfa_offset:
       return "DW_CFA_def_cfa_offset";
-
-    /* DWARF 3 */
+    /* DWARF 3.  */
     case DW_CFA_def_cfa_expression:
       return "DW_CFA_def_cfa_expression";
     case DW_CFA_expression:
@@ -8548,19 +8698,22 @@ dwarf_cfi_name (unsigned cfi_opc)
       return "DW_CFA_def_cfa_sf";
     case DW_CFA_def_cfa_offset_sf:
       return "DW_CFA_def_cfa_offset_sf";
-
-      /* SGI/MIPS specific */
+    case DW_CFA_val_offset:
+      return "DW_CFA_val_offset";
+    case DW_CFA_val_offset_sf:
+      return "DW_CFA_val_offset_sf";
+    case DW_CFA_val_expression:
+      return "DW_CFA_val_expression";
+    /* SGI/MIPS specific.  */
     case DW_CFA_MIPS_advance_loc8:
       return "DW_CFA_MIPS_advance_loc8";
-
-    /* GNU extensions */
+    /* GNU extensions.  */
     case DW_CFA_GNU_window_save:
       return "DW_CFA_GNU_window_save";
     case DW_CFA_GNU_args_size:
       return "DW_CFA_GNU_args_size";
     case DW_CFA_GNU_negative_offset_extended:
       return "DW_CFA_GNU_negative_offset_extended";
-
     default:
       return "DW_CFA_<unknown>";
     }
