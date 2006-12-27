@@ -27,4 +27,9 @@ package body Pck is
       return (others => 2);
    end Create_Large;
 
+   function Create_Small_Float_Vector return Small_Float_Vector is
+   begin
+      return (others => 4.25);
+   end Create_Small_Float_Vector;
+
 end Pck;

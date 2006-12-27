@@ -20,8 +20,11 @@ with Pck; use Pck;
 procedure P is
    Small : Data_Small;
    Large : Data_Large;
+   Vector : Small_Float_Vector;
 begin
    Small := Create_Small;
    Large := Create_Large;
+   Vector := Create_Small_Float_Vector;
    Small (1) := Large (1);
+   Small (2) := Integer (Vector (1));
 end P;

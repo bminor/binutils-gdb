@@ -20,8 +20,11 @@ package Pck is
    type Data_Small is array (1 .. 2) of Integer;
    type Data_Large is array (1 .. 4) of Integer;
 
+   type Small_Float_Vector is array (1 .. 2) of Float;
+
    function Create_Small return Data_Small;
    function Create_Large return Data_Large;
+   function Create_Small_Float_Vector return Small_Float_Vector;
 
 end Pck;
 
