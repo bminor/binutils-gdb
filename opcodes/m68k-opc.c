@@ -2089,6 +2089,8 @@ const struct m68k_opcode m68k_opcodes[] =
 {"svs", 2,	one(0054700),	one(0177700), "$s", m68000up },
 {"svs", 2,	one(0054700),	one(0177770), "Ds", mcfisa_a },
 
+{"sleep", 2,	one(0047170),	one(0177777), "", fido_a },
+
 {"stop", 4,	one(0047162),	one(0177777), "#w", m68000up | mcfisa_a },
 
 {"strldsr", 4, two(0040347,0043374), two(0177777,0177777), "#w", mcfisa_aa},
@@ -2155,6 +2157,8 @@ TBL("tblub", "tbluw", "tblul", 0, 1),
 TBL("tblunb", "tblunw", "tblunl", 0, 0),
 
 {"trap", 2,	one(0047100),	one(0177760), "Ts", m68000up | mcfisa_a },
+
+{"trapx", 2,	one(0047060),	one(0177760), "Ts", fido_a },
 
 {"tstb", 2,	one(0045000),	one(0177700), ";b", m68020up|cpu32|mcfisa_a },
 {"tstb", 2,	one(0045000),	one(0177700), "$b", m68000up },
