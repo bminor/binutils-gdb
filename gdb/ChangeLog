@@ -1,3 +1,7 @@
+2006-12-27  Gary Funck  <gary@intrepid.com>
+
+	* MAINTAINERS (Write After Approval): Add myself.
+
 2006-12-26  Joel brobecker  <brobecker@adacore.com>
 
 	* sparc64-tdep.c (sparc64_extract_return_value): Add handling
