@@ -1,3 +1,8 @@
+2006-12-27  Kazu Hirata  <kazu@codesourcery.com>
+
+	* gas/m68k/all.exp: Add support for fido.
+	* gas/m68k/fido.d, gas/m68k/fido.s: New.
+
 2006-12-19  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* gas/cfi/cfi-common-6.s: Do not use |.
