@@ -1,3 +1,12 @@
+2006-12-27  Kazu Hirata  <kazu@codesourcery.com>
+
+	* config/m68k-parse.h (m68k_register): Add CAC and MBB.
+	* config/tc-m68k.c (fido_ctrl): New.
+	(m68k_archs): Use fido_ctrl for -mfidoa.
+	(m68k_cpus): Use fido_ctrl on fido-*-*.
+	(m68k_ip): Add support for CAC and MBB.
+	(init_table): Add CAC and MBB.
+
 2006-12-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (i386_immediate): Remove prototype.

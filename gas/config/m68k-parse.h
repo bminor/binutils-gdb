@@ -126,7 +126,9 @@ enum m68k_register
   FLASHBAR, RAMBAR,  		/* mcf528x added these.  */
   MBAR2,  		        /* mcf5249 added this.  */
   MBAR,
-#define last_movec_reg MBAR
+  CAC,  		        /* fido added this.  */
+  MBB,
+#define last_movec_reg MBB
   /* End of movec ordering constraints.  */
 
   FPI,

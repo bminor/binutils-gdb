@@ -1,5 +1,9 @@
 2006-12-27  Kazu Hirata  <kazu@codesourcery.com>
 
+	* m68k-dis.c (print_insn_arg): Add support for cac and mbb.
+
+2006-12-27  Kazu Hirata  <kazu@codesourcery.com>
+
 	* m68k-opc.c (m68k_opcodes): Add sleep and trapx.
 
 2006-12-15  H.J. Lu  <hongjiu.lu@intel.com>

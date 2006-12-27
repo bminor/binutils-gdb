@@ -650,7 +650,10 @@ print_insn_arg (const char *d,
 	     /* Should we be calling this psr like we do in case 'Y'?  */
 	     {"%mmusr",0x805},
 
-             {"%urp", 0x806}, {"%srp", 0x807}, {"%pcr", 0x808}};
+             {"%urp", 0x806}, {"%srp", 0x807}, {"%pcr", 0x808},
+
+	     /* Fido added these.  */
+             {"%cac", 0xffe}, {"%mbb", 0xfff}};
 
 	val = fetch_arg (buffer, place, 12, info);
 	for (regno = sizeof names / sizeof names[0] - 1; regno >= 0; regno--)

@@ -231,6 +231,10 @@ static const enum m68k_register mcfv4e_ctrl[] = {
   PCR3U0, PCR3L0, PCR3U1, PCR3L1,
   0
 };
+static const enum m68k_register fido_ctrl[] = {
+  SFC, DFC, USP, VBR, CAC, MBB,
+  0
+};
 #define cpu32_ctrl m68010_ctrl
 
 static const enum m68k_register *control_regs;
@@ -421,7 +425,7 @@ static const struct m68k_cpu m68k_archs[] =
   {m68040,					m68040_ctrl, "68040", 0},
   {m68060,					m68060_ctrl, "68060", 0},
   {cpu32|m68881,				cpu32_ctrl, "cpu32", 0},
-  {cpu32|fido_a,				cpu32_ctrl, "fidoa", 0},
+  {cpu32|fido_a,				fido_ctrl, "fidoa", 0},
   {mcfisa_a|mcfhwdiv,				NULL, "isaa", 0},
   {mcfisa_a|mcfhwdiv|mcfisa_aa|mcfusp,		NULL, "isaaplus", 0},
   {mcfisa_a|mcfhwdiv|mcfisa_b|mcfusp,		NULL, "isab", 0},
@@ -553,7 +557,7 @@ static const struct m68k_cpu m68k_cpus[] =
   {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5485", -1},
   {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "548x", 0},
   
-  {cpu32|fido_a,				cpu32_ctrl, "fido", 1},
+  {cpu32|fido_a,				fido_ctrl, "fido", 1},
 
   {0,NULL,NULL, 0}
   };
@@ -3074,6 +3078,12 @@ m68k_ip (char *instring)
             case PCR3U1:
               tmpreg = 0xD0F;
               break;
+            case CAC:
+              tmpreg = 0xFFE;
+              break;
+            case MBB:
+              tmpreg = 0xFFF;
+              break;
 	    default:
 	      abort ();
 	    }
@@ -3798,6 +3808,9 @@ static const struct init_entry init_table[] =
   { "rambar",   RAMBAR },  	/* mcf528x registers.  */
 
   { "mbar2",    MBAR2 },  	/* mcf5249 registers.  */
+
+  { "cac",    CAC },  		/* fido registers.  */
+  { "mbb",    MBB },  		/* fido registers.  */
   /* End of control registers.  */
 
   { "ac", AC },
