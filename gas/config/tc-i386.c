@@ -272,8 +272,9 @@ static i386_insn i;
 /* Possible templates for current insn.  */
 static const templates *current_templates;
 
-/* Per instruction expressionS buffers: 2 displacements & 2 immediate max.  */
-static expressionS disp_expressions[2], im_expressions[2];
+/* Per instruction expressionS buffers: max displacements & immediates.  */
+static expressionS disp_expressions[MAX_MEMORY_OPERANDS];
+static expressionS im_expressions[MAX_IMMEDIATE_OPERANDS];
 
 /* Current operand we are working on.  */
 static int this_operand;
@@ -4504,7 +4505,8 @@ i386_immediate (char *imm_start)
 
   if (i.imm_operands == MAX_IMMEDIATE_OPERANDS)
     {
-      as_bad (_("only 1 or 2 immediate operands are allowed"));
+      as_bad (_("at most %d immediate operands are allowed"),
+	      MAX_IMMEDIATE_OPERANDS);
       return 0;
     }
 
@@ -4644,6 +4646,13 @@ i386_displacement (disp_start, disp_end)
   char *gotfree_input_line;
   int bigdisp, override;
   unsigned int types = Disp;
+
+  if (i.disp_operands == MAX_MEMORY_OPERANDS)
+    {
+      as_bad (_("at most %d displacement operands are allowed"),
+	      MAX_MEMORY_OPERANDS);
+      return 0;
+    }
 
   if ((i.types[this_operand] & JumpAbsolute)
       || !(current_templates->start->opcode_modifier & (Jump | JumpDword)))
