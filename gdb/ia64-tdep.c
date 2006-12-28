@@ -2486,13 +2486,14 @@ get_kernel_table (unw_word_t ip, unw_dyn_info_t *di)
   if (!ktab) 
     {
       gdb_byte *ktab_buf;
-      size_t size;
+      LONGEST size;
 
-      ktab_size = getunwind_table (&ktab_buf);
-      if (ktab_size <= 0)
+      size = getunwind_table (&ktab_buf);
+      if (size <= 0)
 	return -UNW_ENOINFO;
-      else
-	ktab = (struct ia64_table_entry *) ktab_buf;
+
+      ktab = (struct ia64_table_entry *) ktab_buf;
+      ktab_size = size;
 
       for (etab = ktab; etab->start_offset; ++etab)
         etab->info_offset += KERNEL_START;
