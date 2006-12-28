@@ -5,8 +5,6 @@
 	(dwarf_type_encoding_name): Decode additional DWARF 2
 	and DWARF 3 codes into their corresponding string names.
 
-2006-12-27  Gary Funck  <gary@intrepid.com>
-
 	* MAINTAINERS (Write After Approval): Add myself.
 
 2006-12-26  Joel brobecker  <brobecker@adacore.com>
