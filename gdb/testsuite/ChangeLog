@@ -1,3 +1,7 @@
+2006-12-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/array_return.exp: Update copyright date list.
+
 2006-12-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/array_return/pck.ads (Small_Float_Vector): New type.
