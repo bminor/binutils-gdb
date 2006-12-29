@@ -3436,10 +3436,13 @@ build_modrm_byte ()
 	  source = 0;
 	  break;
 	case 3:
-	  /* When there are 3 operands, one of them must be immediate,
-	     which may be the first or the last operand.  */
-	  assert (i.imm_operands == 1);
-	  source = (i.types[0] & Imm) ? 1 : 0;
+	  /* When there are 3 operands, one of them may be immediate,
+	     which may be the first or the last operand.  Otherwise,
+	     the first operand must be shift count register (cl). */
+	  assert (i.imm_operands == 1
+		  || (i.imm_operands == 0
+		      && (i.types[0] & ShiftCount)));
+	  source = (i.types[0] & (Imm | ShiftCount)) ? 1 : 0;
 	  break;
 	case 4:
 	  /* When there are 4 operands, the first two must be immediate

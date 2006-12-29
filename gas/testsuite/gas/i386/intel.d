@@ -628,5 +628,6 @@ Disassembly of section .text:
  a87:	b0 11 [ 	]*mov    \$0x11,%al
  a89:	b3 47 [ 	]*mov    \$0x47,%bl
  a8b:	b3 47 [ 	]*mov    \$0x47,%bl
- a8d:	00 00 .*
+ a8d:	0f ad d0 [ 	]*shrd   %cl,%edx,%eax
+ a90:	0f a5 d0 [ 	]*shld   %cl,%edx,%eax
 [ 	]*...

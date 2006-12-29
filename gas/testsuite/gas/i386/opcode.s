@@ -578,5 +578,8 @@ foo:
  str	%ax
  str	(%eax)
 
+ shrd   %cl,%edx,%eax
+ shld   %cl,%edx,%eax
+
 # Force a good alignment.
  .p2align 4,0

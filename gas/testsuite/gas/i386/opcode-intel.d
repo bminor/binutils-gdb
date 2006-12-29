@@ -606,4 +606,6 @@ Disassembly of section .text:
  *[0-9a-f]+:	0f 00 c8[ 	]+str[ 	]+eax
  *[0-9a-f]+:	66 0f 00 c8[ 	]+str[ 	]+ax
  *[0-9a-f]+:	0f 00 08[ 	]+str[ 	]+(WORD PTR )?\[eax\]
+ *[0-9a-f]+:	0f ad d0 [ 	]*shrd[ 	]+eax,edx,cl
+ *[0-9a-f]+:	0f a5 d0 [ 	]*shld[ 	]+eax,edx,cl
 	\.\.\.

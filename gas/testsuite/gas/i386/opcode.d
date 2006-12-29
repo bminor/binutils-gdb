@@ -582,4 +582,6 @@ Disassembly of section .text:
  9e5:	0f 00 c8 [ 	]*str    %eax
  9e8:	66 0f 00 c8 [ 	]*str    %ax
  9ec:	0f 00 08 [ 	]*str    \(%eax\)
+ 9ef:	0f ad d0 [ 	]*shrd   %cl,%edx,%eax
+ 9f2:	0f a5 d0 [ 	]*shld   %cl,%edx,%eax
 	\.\.\.

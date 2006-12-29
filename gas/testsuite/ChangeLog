@@ -1,3 +1,14 @@
+2006-12-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/intel.s: Add tests for "shrd %cl,%edx,%eax" and
+	"shld %cl,%edx,%eax".
+	* gas/i386/opcode.s: Likewise.
+
+	* gas/i386/intel.d: Updated.
+	* gas/i386/opcode-intel.d: Likewise.
+	* gas/i386/opcode-suffix.d: Likewise.
+	* gas/i386/opcode.d: Likewise.
+
 2006-12-27  Kazu Hirata  <kazu@codesourcery.com>
 
 	* gas/m68k/all.exp: Add support for fido.

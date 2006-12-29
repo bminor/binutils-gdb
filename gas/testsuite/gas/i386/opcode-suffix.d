@@ -583,4 +583,6 @@ Disassembly of section .text:
  *[0-9a-f]+:	0f 00 c8[ 	]+strl[ 	]+%eax
  *[0-9a-f]+:	66 0f 00 c8[ 	]+strw[ 	]+%ax
  *[0-9a-f]+:	0f 00 08[ 	]+strw[ 	]+\(%eax\)
+ *[0-9a-f]+:	0f ad d0 [ 	]*shrdl[ 	]+%cl,%edx,%eax
+ *[0-9a-f]+:	0f a5 d0 [ 	]*shldl[ 	]+%cl,%edx,%eax
 	\.\.\.
