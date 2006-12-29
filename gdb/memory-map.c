@@ -141,10 +141,11 @@ memory_map_end_element (void *data_, const XML_Char *name)
 	{
 	  if (strcmp (data->property_name, "blocksize") == 0)
 	    {
+	      char *end = NULL;
+
 	      if (!data->character_data)
 		throw_error (XML_PARSE_ERROR,
 			     _("Empty content of 'property' element"));
-	      char *end = NULL;
 	      data->currently_parsing->attrib.blocksize
 		= strtoul (data->character_data, &end, 0);
 	      if (*end != '\0')
