@@ -1,5 +1,11 @@
 2006-12-29  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-tdep.c (sparc_psr_type, sparc_fsr_type): New variables.
+	(sparc_init_types): New function.
+	(sparc32_register_type): Use appropriate flag types for %fsr and
+	%prs.
+	(_initialize_sparc_tdep): Call sparc_init_types.
+
 	* memory-map.c (memory_map_end_element): Move variable
 	declarations to the begining of the block.
 
