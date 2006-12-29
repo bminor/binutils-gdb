@@ -1,3 +1,8 @@
+2006-12-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (elf_link_add_object_symbols): Remember the symbol
+	size only if it is defined.
+
 2006-12-25  Kazu Hirata  <kazu@codesourcery.com>
 
 	* archures.c (bfd_mach_cpu32_fido): New.

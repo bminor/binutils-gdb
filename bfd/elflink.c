@@ -4035,11 +4035,13 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		}
 	    }
 
-	  /* Remember the symbol size and type.  */
-	  if (isym->st_size != 0
+	  /* Remember the symbol size if it isn't undefined.  */
+	  if ((isym->st_size != 0 && isym->st_shndx != SHN_UNDEF)
 	      && (definition || h->size == 0))
 	    {
-	      if (h->size != 0 && h->size != isym->st_size && ! size_change_ok)
+	      if (h->size != 0
+		  && h->size != isym->st_size
+		  && ! size_change_ok)
 		(*_bfd_error_handler)
 		  (_("Warning: size of symbol `%s' changed"
 		     " from %lu in %B to %lu in %B"),

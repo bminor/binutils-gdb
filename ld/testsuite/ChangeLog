@@ -1,3 +1,11 @@
+2006-12-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/wrap.exp: New file.
+	* ld-elf/wrap1.c: Likewise.
+	* ld-elf/wrap1.out: Likewise.
+	* ld-elf/wrap1a.c: Likewise.
+	* ld-elf/wrap1b.c: Likewise.
+
 2006-12-18  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* ld-pe/direct.exp: New file.
