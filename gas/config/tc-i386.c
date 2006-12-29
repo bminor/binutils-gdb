@@ -3335,10 +3335,12 @@ process_operands ()
     {
       unsigned int first_reg_op = (i.types[0] & Reg) ? 0 : 1;
       /* Pretend we saw the extra register operand.  */
-      assert (i.op[first_reg_op + 1].regs == 0);
+      assert (i.reg_operands == 1
+	      && i.op[first_reg_op + 1].regs == 0);
       i.op[first_reg_op + 1].regs = i.op[first_reg_op].regs;
       i.types[first_reg_op + 1] = i.types[first_reg_op];
-      i.reg_operands = 2;
+      i.operands++;
+      i.reg_operands++;
     }
 
   if (i.tm.opcode_modifier & ShortForm)
@@ -3427,16 +3429,30 @@ build_modrm_byte ()
   if (i.reg_operands == 2)
     {
       unsigned int source, dest;
-      source = ((i.types[0]
-		 & (Reg | RegMMX | RegXMM
-		    | SReg2 | SReg3
-		    | Control | Debug | Test))
-		? 0 : 1);
 
-      /* In 4 operands instructions with 2 immediate operands, the first
-         two are immediate bytes and hence source operand will be in the
-	 next byte after the immediates */
-      if ((i.operands == 4)&&(i.imm_operands=2)) source++; 
+      switch (i.operands)
+	{
+	case 2:
+	  source = 0;
+	  break;
+	case 3:
+	  /* When there are 3 operands, one of them must be immediate,
+	     which may be the first or the last operand.  */
+	  assert (i.imm_operands == 1);
+	  source = (i.types[0] & Imm) ? 1 : 0;
+	  break;
+	case 4:
+	  /* When there are 4 operands, the first two must be immediate
+	     operands. The source operand will be the 3rd one.  */
+	  assert (i.imm_operands == 2
+		  && (i.types[0] & Imm)
+		  && (i.types[1] & Imm));
+	  source = 2;
+	  break;
+	default:
+	  abort ();
+	}
+
       dest = source + 1;
 
       i.rm.mode = 3;
