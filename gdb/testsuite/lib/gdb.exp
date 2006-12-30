@@ -1575,7 +1575,10 @@ proc gdb_compile_shlib {sources dest options} {
         }
         "gcc-*" {
             if { !([istarget "powerpc*-*-aix*"]
-                   || [istarget "rs6000*-*-aix*"]) } {
+                   || [istarget "rs6000*-*-aix*"]
+                   || [istarget "*-*-cygwin*"]
+                   || [istarget "*-*-mingw*"]
+                   || [istarget "*-*-pe*"]) } {
                 lappend obj_options "additional_flags=-fpic"
             }
         }
