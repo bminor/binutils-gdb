@@ -1186,28 +1186,6 @@ extern int target_stopped_data_address_p (struct target_ops *);
 
 extern const struct target_desc *target_read_description (struct target_ops *);
 
-/* This will only be defined by a target that supports catching vfork events,
-   such as HP-UX.
-
-   On some targets (such as HP-UX 10.20 and earlier), resuming a newly vforked
-   child process after it has exec'd, causes the parent process to resume as
-   well.  To prevent the parent from running spontaneously, such targets should
-   define this to a function that prevents that from happening.  */
-#if !defined(ENSURE_VFORKING_PARENT_REMAINS_STOPPED)
-#define ENSURE_VFORKING_PARENT_REMAINS_STOPPED(PID) (0)
-#endif
-
-/* This will only be defined by a target that supports catching vfork events,
-   such as HP-UX.
-
-   On some targets (such as HP-UX 10.20 and earlier), a newly vforked child
-   process must be resumed when it delivers its exec event, before the parent
-   vfork event will be delivered to us.  */
-
-#if !defined(RESUME_EXECD_VFORKING_CHILD_TO_GET_PARENT_VFORK)
-#define RESUME_EXECD_VFORKING_CHILD_TO_GET_PARENT_VFORK() (0)
-#endif
-
 /* Routines for maintenance of the target structures...
 
    add_target:   Add a target to the list of all possible targets.

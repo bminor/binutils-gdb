@@ -1454,9 +1454,6 @@ handle_inferior_event (struct execution_control_state *ecs)
       if (inferior_ignoring_leading_exec_events)
 	{
 	  inferior_ignoring_leading_exec_events--;
-	  if (pending_follow.kind == TARGET_WAITKIND_VFORKED)
-	    ENSURE_VFORKING_PARENT_REMAINS_STOPPED (pending_follow.fork_event.
-						    parent_pid);
 	  target_resume (ecs->ptid, 0, TARGET_SIGNAL_0);
 	  prepare_to_wait (ecs);
 	  return;

@@ -1,3 +1,10 @@
+2006-12-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* infrun.c (handle_inferior_event): Don't call
+	ENSURE_VFORKING_PARENT_REMAINS_STOPPED.
+	* target.h (ENSURE_VFORKING_PARENT_REMAINS_STOPPED): Delete.
+	(RESUME_EXECD_VFORKING_CHILD_TO_GET_PARENT_VFORK): Delete.
+
 2006-12-29  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc-tdep.c (sparc_psr_type, sparc_fsr_type): New variables.
