@@ -52,6 +52,8 @@
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
+#include <sys/stat.h>
+#include <errno.h>
 
 #if USE_WIN32API
 #include <winsock.h>
@@ -94,13 +96,25 @@ remote_open (char *name)
 #if defined(F_SETFL) && defined (FASYNC)
   int save_fcntl_flags;
 #endif
-  
-  if (!strchr (name, ':'))
+  char *port_str;
+
+  port_str = strchr (name, ':');
+  if (port_str == NULL)
     {
 #ifdef USE_WIN32API
       error ("Only <host>:<port> is supported on this platform.");
 #else
-      remote_desc = open (name, O_RDWR);
+      struct stat statbuf;
+
+      if (stat (name, &statbuf) == 0
+	  && (S_ISCHR (statbuf.st_mode) || S_ISFIFO (statbuf.st_mode)))
+	remote_desc = open (name, O_RDWR);
+      else
+	{
+	  errno = EINVAL;
+	  remote_desc = -1;
+	}
+
       if (remote_desc < 0)
 	perror_with_name ("Could not open remote device");
 

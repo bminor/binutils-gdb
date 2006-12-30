@@ -614,6 +614,13 @@ main (int argc, char *argv[])
 	}
     }
 
+  if (setjmp (toplevel))
+    {
+      fprintf (stderr, "Killing inferior\n");
+      kill_inferior ();
+      exit (1);
+    }
+
   while (1)
     {
       remote_open (argv[1]);

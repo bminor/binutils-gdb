@@ -1,3 +1,11 @@
+2006-12-30  Denis PILAT <denis.pilat@st.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote-utils.c (remote_open): Check the type of specified
+	serial port devices before opening them.
+	* server.c (main): Kill the inferior if an error occurs during
+	the first remote_open.
+
 2006-12-05  Markus Deuling  <deuling@de.ibm.com>
 
 	* README: Update supported targets.
