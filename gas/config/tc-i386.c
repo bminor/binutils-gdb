@@ -6039,6 +6039,10 @@ md_show_usage (stream)
   fprintf (stream, _("\
   -s                      ignored\n"));
 #endif
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) || defined(TE_PEP)
+  fprintf (stream, _("\
+  --32/--64               generate 32bit/64bit code\n"));
+#endif
 #ifdef SVR4_COMMENT_CHARS
   fprintf (stream, _("\
   --divide                do not treat `/' as a comment character\n"));

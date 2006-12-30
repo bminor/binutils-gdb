@@ -1,3 +1,7 @@
+2006-12-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (md_show_usage): Mention --32/--64.
+
 2006-12-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (build_modrm_byte): Handle shift count
