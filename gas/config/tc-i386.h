@@ -277,7 +277,7 @@ typedef struct
 #define Disp64	       0x10000	/* 64 bit displacement */
   /* specials */
 #define InOutPortReg   0x20000	/* register to hold in/out port addr = dx */
-#define ShiftCount     0x40000	/* register to hold shift cound = cl */
+#define ShiftCount     0x40000	/* register to hold shift count = cl */
 #define Control	       0x80000	/* Control register */
 #define Debug	      0x100000	/* Debug register */
 #define Test	      0x200000	/* Test register */
