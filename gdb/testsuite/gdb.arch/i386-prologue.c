@@ -34,7 +34,9 @@ int
 main (void)
 {
   standard ();
-  stack_align ();
+  stack_align_ecx ();
+  stack_align_edx ();
+  stack_align_eax ();
   gdb1253 ();
   gdb1718 ();
   gdb1338 ();
@@ -114,7 +116,7 @@ asm(".text\n"
 
 asm(".text\n"
     "    .align 8\n"
-    SYMBOL (stack_align) ":\n"
+    SYMBOL (stack_align_ecx) ":\n"
     "    leal  4(%esp), %ecx\n"
     "    andl  $-16, %esp\n"
     "    pushl -4(%ecx)\n"
@@ -128,3 +130,38 @@ asm(".text\n"
     "    popl  %ebp\n"
     "    leal  -4(%ecx), %esp\n"
     "    ret\n");
+
+asm(".text\n"
+    "    .align 8\n"
+    SYMBOL (stack_align_edx) ":\n"
+    "    leal  4(%esp), %edx\n"
+    "    andl  $-16, %esp\n"
+    "    pushl -4(%edx)\n"
+    "    pushl %ebp\n"
+    "    movl  %esp, %ebp\n"
+    "    pushl %edi\n"
+    "    pushl %ecx\n"
+    "    int   $0x03\n"
+    "    popl  %ecx\n"
+    "    popl  %edi\n"
+    "    popl  %ebp\n"
+    "    leal  -4(%edx), %esp\n"
+    "    ret\n");
+
+asm(".text\n"
+    "    .align 8\n"
+    SYMBOL (stack_align_eax) ":\n"
+    "    leal  4(%esp), %eax\n"
+    "    andl  $-16, %esp\n"
+    "    pushl -4(%eax)\n"
+    "    pushl %ebp\n"
+    "    movl  %esp, %ebp\n"
+    "    pushl %edi\n"
+    "    pushl %ecx\n"
+    "    int   $0x03\n"
+    "    popl  %ecx\n"
+    "    popl  %edi\n"
+    "    popl  %ebp\n"
+    "    leal  -4(%eax), %esp\n"
+    "    ret\n");
+

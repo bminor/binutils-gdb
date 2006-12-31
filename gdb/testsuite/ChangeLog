@@ -1,3 +1,13 @@
+2006-12-31  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.arch/i386-prologue.c (stack_align_ecx): Renamed from stack_align.
+	(stack_align_edx): New function.
+	(stack_align_eax): New function.
+	(main): Add calls to stack_align_edx and stack_align_eax.
+	* gdb.arch/i386-prologue.exp: Replace stack_align with stack_align_ecx.
+	Add testing for the cases where the register used during a stack
+	realignment is edx. Same for eax.
+
 2006-12-30  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* lib/gdb.exp: Don't pass -fpic to gcc on Cygwin, MinGW
