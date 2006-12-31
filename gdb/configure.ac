@@ -1024,7 +1024,8 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
    AC_SUBST(CONFIG_LDFLAGS)
 fi
 
-dnl See if we have a thread_db header file that has TD_NOTALLOC.
+dnl See if we have a thread_db header file that has TD_NOTALLOC and
+dnl other error codes.
 if test "x$ac_cv_header_thread_db_h" = "xyes"; then
    AC_CACHE_CHECK([whether <thread_db.h> has TD_NOTALLOC],
                   gdb_cv_thread_db_h_has_td_notalloc,
@@ -1035,10 +1036,36 @@ if test "x$ac_cv_header_thread_db_h" = "xyes"; then
        gdb_cv_thread_db_h_has_td_notalloc=no
      )
    )
+   AC_CACHE_CHECK([whether <thread_db.h> has TD_VERSION],
+                  gdb_cv_thread_db_h_has_td_version,
+     AC_TRY_COMPILE(
+       [#include <thread_db.h>],
+       [int i = TD_VERSION;],
+       gdb_cv_thread_db_h_has_td_version=yes,
+       gdb_cv_thread_db_h_has_td_version=no
+     )
+   )
+   AC_CACHE_CHECK([whether <thread_db.h> has TD_NOTLS],
+                  gdb_cv_thread_db_h_has_td_notls,
+     AC_TRY_COMPILE(
+       [#include <thread_db.h>],
+       [int i = TD_NOTLS;],
+       gdb_cv_thread_db_h_has_td_notls=yes,
+       gdb_cv_thread_db_h_has_td_notls=no
+     )
+   )
 fi
 if test "x$gdb_cv_thread_db_h_has_td_notalloc" = "xyes"; then
   AC_DEFINE(THREAD_DB_HAS_TD_NOTALLOC, 1,
             [Define if <thread_db.h> has the TD_NOTALLOC error code.])
+fi
+if test "x$gdb_cv_thread_db_h_has_td_version" = "xyes"; then
+  AC_DEFINE(THREAD_DB_HAS_TD_VERSION, 1,
+            [Define if <thread_db.h> has the TD_VERSION error code.])
+fi
+if test "x$gdb_cv_thread_db_h_has_td_notls" = "xyes"; then
+  AC_DEFINE(THREAD_DB_HAS_TD_NOTLS, 1,
+            [Define if <thread_db.h> has the TD_NOTLS error code.])
 fi
 
 dnl See if we have a sys/syscall header file that has __NR_tkill.

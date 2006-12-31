@@ -209,6 +209,18 @@ thread_db_err_str (td_err_e err)
       return "only part of register set was written/read";
     case TD_NOXREGS:
       return "X register set not available for this thread";
+#ifdef THREAD_DB_HAS_TD_NOTALLOC
+    case TD_NOTALLOC:
+      return "thread has not yet allocated TLS for given module";
+#endif
+#ifdef THREAD_DB_HAS_TD_VERSION
+    case TD_VERSION:
+      return "versions of libpthread and libthread_db do not match";
+#endif
+#ifdef THREAD_DB_HAS_TD_NOTLS
+    case TD_NOTLS:
+      return "there is no TLS segment in the given module";
+#endif
     default:
       snprintf (buf, sizeof (buf), "unknown thread_db error '%d'", err);
       return buf;
