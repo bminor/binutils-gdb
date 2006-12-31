@@ -1,3 +1,8 @@
+2007-01-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* Makefile.in (remote-sds.o): Remove.
+	* remote-sds.c: Delete.
+
 2006-12-31  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-nat.c (lin_lwp_attach_lwp): Return a status.  Do not
