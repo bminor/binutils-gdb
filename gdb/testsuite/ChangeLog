@@ -1,3 +1,22 @@
+2006-12-31  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/annota1.exp: Allow .*printf in backtraces.
+	* gdb.base/annota3.exp: Likewise.
+	* gdb.base/sigstep.exp (advancei): Fail if we hit the breakpoint
+	again (instead of timing out).
+	* gdb.gdb/selftest.exp (do_steps_and_nexts): Add an XFAIL for
+	GCC bug 26475.
+	* gdb.java/jmisc.exp: Adjust to work with method signatures including
+	return types.  Add kfails for GDB bugs 2214 and 2215.  Move exit
+	test from jmisc1.exp.
+	* gdb.java/jmisc1.exp: Delete.
+	* gdb.java/jprint.exp: Adjust to work with method signatures including
+	return types.
+	* gdb.objc/basicclass.exp: Update for gobjc 4.1 debug info.
+	* gdb.threads/linux-dp.exp: Don't be confused by program output.
+	* lib/java.exp (compile_java_from_source): Pass the correct type
+	to target_compile.
+
 2006-12-31  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.arch/i386-prologue.c (stack_align_ecx): Renamed from stack_align.

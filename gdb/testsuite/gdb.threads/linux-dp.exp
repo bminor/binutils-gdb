@@ -1,4 +1,5 @@
-# Copyright 1999, 2001, 2002, 2003 Free Software Foundation, Inc.
+# Copyright 1999, 2001, 2002, 2003, 2004, 2005, 2006
+# Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -92,6 +93,10 @@ for {set i 0} {$i < 5} {incr i} {
     gdb_expect {
 	-re "^next\r\n" {
 	    exp_continue
+	}
+	-re "^ *\[_!\] \[0-9\]* \[_!\]\r\n" {
+	    # Ignore program output.
+	    exp_continue -continue_timer
 	}
 	-re "^\\\[New \[^\]\n\]+\\\]\[^\n\]+\n" {
 	    incr threads_created

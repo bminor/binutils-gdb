@@ -1,5 +1,5 @@
-# Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software
-# Foundation, Inc.
+# Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+# Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -240,15 +240,16 @@ gdb_expect {
 #
 # get to printf
 #
-send_gdb "continue\n"
-gdb_expect {
-  -re "\r\n\032\032post-prompt\r\nContinuing.\r\n\r\n\032\032starting\r\n\r\n\032\032frames-invalid\r\n\r\n\032\032breakpoint 3\r\n\r\nBreakpoint 3, \r\n\032\032frame-begin 0 $hex\r\n\r\n(\032\032frame-address\r\n$hex\r\n\032\032frame-address-end\r\n in \r\n)*\032\032frame-function-name\r\nprintf\r\n\032\032frame-args\r\n.*\032\032frame-end\r\n\r\n\032\032stopped\r\n$gdb_prompt$" \
-	  { pass "continue to printf" }
-  -re "\r\n\032\032post-prompt\r\nContinuing.\r\n\r\n\032\032starting\r\n\r\n\032\032frames-invalid\r\nwarning: Breakpoint 3 address previously adjusted from $hex to $hex.\r\n\r\n\032\032breakpoint 3\r\n\r\nBreakpoint 3, \r\n\032\032frame-begin 0 $hex\r\n\r\n(\032\032frame-address\r\n$hex\r\n\032\032frame-address-end\r\n in \r\n)*.*\032\032frame-function-name\r\n.printf\r\n\032\032frame-args\r\n.*\032\032frame-end\r\n\r\n\032\032stopped\r\n$gdb_prompt$" \
-	  { pass "continue to printf" }
+set pat_begin "\r\n\032\032post-prompt\r\nContinuing.\r\n\r\n\032\032starting\r\n\r\n\032\032frames-invalid\r\n"
+set pat_adjust "warning: Breakpoint 3 address previously adjusted from $hex to $hex.\r\n"
+set pat_end "\r\n\032\032breakpoint 3\r\n\r\nBreakpoint 3, \r\n\032\032frame-begin 0 $hex\r\n\r\n(\032\032frame-address\r\n$hex\r\n\032\032frame-address-end\r\n in \r\n)*.*\032\032frame-function-name\r\n.*printf\r\n\032\032frame-args\r\n.*\032\032frame-end\r\n\r\n\032\032stopped\r\n$gdb_prompt$"
 
-  -re ".*$gdb_prompt$"     { fail "continue to printf" }
-  timeout	            { fail "continue to printf (timeout)" }
+send_gdb "continue\n"
+gdb_test_multiple "continue" "continue to printf" {
+    -re "${pat_begin}($pat_adjust)?$pat_end" {
+	pass "continue to printf"
+    }
+    -re ".*$gdb_prompt$"     { fail "continue to printf" }
 }
 
 #
@@ -257,15 +258,17 @@ gdb_expect {
 # annotate-frame-address
 # annotate-frame-address-end
 #
+set pat_begin "\r\n\032\032post-prompt\r\n\r\n\032\032frame-begin 0 $hex\r\n.0  \r\n(\032\032frame-address\r\n$hex\r\n\032\032frame-address-end\r\n in \r\n)*\032\032frame-function-name\r\n.*printf\r\n\032\032frame-args\r\n \\(.*frame-end\r\n\r\n\032\032frame-begin 1 $hex\r\n.1  \r\n\032\032frame-address\r\n$hex\r\n\032\032frame-address-end\r\n in \r\n\032\032frame-function-name\r\nmain\r\n\032\032frame-args\r\n \\(\\)\r\n\032\032frame-source-begin\r\n at \r\n\032\032frame-source-file\r\n"
+set pat_end "\r\n\032\032frame-source-file-end\r\n:\r\n\032\032frame-source-line\r\n.*\r\n\032\032frame-source-end\r\n\r\n\r\n\032\032frame-end\r\n(\r\n\032\032frame-begin .*\r\n\r\n\032\032frame-end\r\n)*$gdb_prompt$"
 send_gdb "backtrace\n"
 gdb_expect {
-    -re "\r\n\032\032post-prompt\r\n\r\n\032\032frame-begin 0 $hex\r\n.0  \r\n(\032\032frame-address\r\n$hex\r\n\032\032frame-address-end\r\n in \r\n)*\032\032frame-function-name\r\nprintf\r\n\032\032frame-args\r\n \\(.*frame-end\r\n\r\n\032\032frame-begin 1 $hex\r\n.1  \r\n\032\032frame-address\r\n$hex\r\n\032\032frame-address-end\r\n in \r\n\032\032frame-function-name\r\nmain\r\n\032\032frame-args\r\n \\(\\)\r\n\032\032frame-source-begin\r\n at \r\n\032\032frame-source-file\r\n${escapedsrcfile}\r\n\032\032frame-source-file-end\r\n:\r\n\032\032frame-source-line\r\n.*\r\n\032\032frame-source-end\r\n\r\n\r\n\032\032frame-end\r\n(\r\n\032\032frame-begin .*\r\n\r\n\032\032frame-end\r\n)*$gdb_prompt$" \
+    -re "$pat_begin$escapedsrcfile$pat_end"
 	  { pass "backtrace from shlibrary" }
-    -re "\r\n\032\032post-prompt\r\n\r\n\032\032frame-begin 0 $hex\r\n.0  \r\n(\032\032frame-address\r\n$hex\r\n\032\032frame-address-end\r\n in \r\n)*\032\032frame-function-name\r\nprintf\r\n\032\032frame-args\r\n \\(.*frame-end\r\n\r\n\032\032frame-begin 1 $hex\r\n.1  \r\n\032\032frame-address\r\n$hex\r\n\032\032frame-address-end\r\n in \r\n\032\032frame-function-name\r\nmain\r\n\032\032frame-args\r\n \\(\\)\r\n\032\032frame-source-begin\r\n at \r\n\032\032frame-source-file\r\n.*${srcfile}\r\n\032\032frame-source-file-end\r\n:\r\n\032\032frame-source-line\r\n.*\r\n\032\032frame-source-end\r\n\r\n\r\n\032\032frame-end\r\n(\r\n\032\032frame-begin .*\r\n\r\n\032\032frame-end\r\n)*$gdb_prompt$" \
+    -re "$pat_begin.*$srcfile$pat_end"
 	  { setup_xfail "*-*-*" 1270
             fail "backtrace from shlibrary" }
-  -re ".*$gdb_prompt$"     { fail "backtrace from shlibrary" }
-  timeout	            { fail "backtrace from shlibrary (timeout)" }
+    -re ".*$gdb_prompt$"     { fail "backtrace from shlibrary" }
+    timeout	            { fail "backtrace from shlibrary (timeout)" }
 }
 
 

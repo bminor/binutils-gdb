@@ -1,6 +1,6 @@
 # This test code is part of GDB, the GNU debugger.
 
-# Copyright 1998, 1999, 2000, 2003, 2004
+# Copyright 1998, 1999, 2000, 2003, 2004, 2006
 # Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -111,7 +111,7 @@ proc compile_java_from_source { srcfile binfile compile_args } {
 	set errname "$errname $compile_args"
     }
 
-    set x [target_compile $srcfile ${binfile} ${binfile} $args]
+    set x [target_compile $srcfile ${binfile} executable $args]
     if { $x != "" } {
 	verbose "target_compile failed: $x" 2
 	return "$errname compilation from source";
