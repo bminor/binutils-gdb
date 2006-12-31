@@ -1352,11 +1352,10 @@ bfd_record_phdr (bfd *abfd,
 
   amt = sizeof (struct elf_segment_map);
   amt += ((bfd_size_type) count - 1) * sizeof (asection *);
-  m = bfd_alloc (abfd, amt);
+  m = bfd_zalloc (abfd, amt);
   if (m == NULL)
     return FALSE;
 
-  m->next = NULL;
   m->p_type = type;
   m->p_flags = flags;
   m->p_paddr = at;
@@ -1365,8 +1364,6 @@ bfd_record_phdr (bfd *abfd,
   m->includes_filehdr = includes_filehdr;
   m->includes_phdrs = includes_phdrs;
   m->count = count;
-  m->p_align_valid = FALSE;
-  m->p_align = 0;
   if (count > 0)
     memcpy (m->sections, secs, count * sizeof (asection *));
 

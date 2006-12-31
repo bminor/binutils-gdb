@@ -1,3 +1,8 @@
+2006-12-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd.c (bfd_record_phdr): Call bfd_zalloc instead of bfd_alloc
+	to allocate elf_segment_map.
+
 2006-12-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elflink.c (elf_link_add_object_symbols): Remember the symbol
