@@ -1,3 +1,20 @@
+2006-12-31  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc64-tdep.h (SPARC64_PSTATE_AG, SPARC64_PSTATE_IE) 
+	(SPARC64_PSTATE_PRIV, SPARC64_PSTATE_AM, SPARC64_PSTATE_PEF) 
+	(SPARC64_PSTATE_RED, SPARC64_PSTATE_TLE, SPARC64_PSTATE_CLE) 
+	(SPARC64_PSTATE_PID0, SPARC64_PSTATE_PID1): New defines.
+	* sparc64nbsd-nat.c: Include "gdbcore.h".
+	(sparc64nbsd_supply_pcb): Get %pc from stack if necessary.  Supply
+	processor state register.
+	* sparc64obsd-tdep.c (sparc64obsd_trapframe_cache) 
+	(sparc64obsd_trapframe_this_id) 
+	(sparc64obsd_trapframe_prev_register) 
+	(sparc64obsd_trapframe_sniffer): New functions.
+	(sparc64obsd_trapframe_unwind): New variable.
+	(sparc64obsd_init_abi): Append trapframe unwinder.
+	* Makefile.in (sparc64nbsd-nat.o): Update dependencies.
+
 2006-12-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* infrun.c (handle_inferior_event): Don't call
