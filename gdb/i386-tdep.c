@@ -497,15 +497,27 @@ static CORE_ADDR
 i386_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
 			  struct i386_frame_cache *cache)
 {
-  static const gdb_byte insns[10] = { 
+  static const gdb_byte insns_ecx[10] = { 
     0x8d, 0x4c, 0x24, 0x04,	/* leal  4(%esp), %ecx */
     0x83, 0xe4, 0xf0,		/* andl  $-16, %esp */
     0xff, 0x71, 0xfc		/* pushl -4(%ecx) */
   };
+  static const gdb_byte insns_edx[10] = { 
+    0x8d, 0x54, 0x24, 0x04,	/* leal  4(%esp), %edx */
+    0x83, 0xe4, 0xf0,		/* andl  $-16, %esp */
+    0xff, 0x72, 0xfc		/* pushl -4(%edx) */
+  };
+  static const gdb_byte insns_eax[10] = { 
+    0x8d, 0x44, 0x24, 0x04,	/* leal  4(%esp), %eax */
+    0x83, 0xe4, 0xf0,		/* andl  $-16, %esp */
+    0xff, 0x70, 0xfc		/* pushl -4(%eax) */
+  };
   gdb_byte buf[10];
 
   if (target_read_memory (pc, buf, sizeof buf)
-      || memcmp (buf, insns, sizeof buf) != 0)
+      || (memcmp (buf, insns_ecx, sizeof buf) != 0
+          && memcmp (buf, insns_edx, sizeof buf) != 0
+          && memcmp (buf, insns_eax, sizeof buf) != 0))
     return pc;
 
   if (current_pc > pc + 4)
