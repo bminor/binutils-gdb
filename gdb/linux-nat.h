@@ -80,6 +80,8 @@ extern void linux_enable_event_reporting (ptid_t ptid);
 extern ptid_t linux_handle_extended_wait (int pid, int status,
 					  struct target_waitstatus *ourstatus);
 
+extern int lin_lwp_attach_lwp (ptid_t ptid, int verbose);
+
 /* Iterator function for lin-lwp's lwp list.  */
 struct lwp_info *iterate_over_lwps (int (*callback) (struct lwp_info *, 
 						     void *), 

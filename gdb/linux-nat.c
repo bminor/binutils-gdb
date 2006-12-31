@@ -915,12 +915,13 @@ exit_lwp (struct lwp_info *lp)
 
 /* Attach to the LWP specified by PID.  If VERBOSE is non-zero, print
    a message telling the user that a new LWP has been added to the
-   process.  */
+   process.  Return 0 if successful or -1 if the new LWP could not
+   be attached.  */
 
-void
+int
 lin_lwp_attach_lwp (ptid_t ptid, int verbose)
 {
-  struct lwp_info *lp, *found_lp;
+  struct lwp_info *lp;
 
   gdb_assert (is_lwp (ptid));
 
@@ -932,12 +933,7 @@ lin_lwp_attach_lwp (ptid_t ptid, int verbose)
       sigprocmask (SIG_BLOCK, &blocked_mask, NULL);
     }
 
-  if (verbose)
-    printf_filtered (_("[New %s]\n"), target_pid_to_str (ptid));
-
-  found_lp = lp = find_lwp_pid (ptid);
-  if (lp == NULL)
-    lp = add_lwp (ptid);
+  lp = find_lwp_pid (ptid);
 
   /* We assume that we're already attached to any LWP that has an id
      equal to the overall process id, and to any LWP that is already
@@ -945,14 +941,25 @@ lin_lwp_attach_lwp (ptid_t ptid, int verbose)
      and we've had PID wraparound since we last tried to stop all threads,
      this assumption might be wrong; fortunately, this is very unlikely
      to happen.  */
-  if (GET_LWP (ptid) != GET_PID (ptid) && found_lp == NULL)
+  if (GET_LWP (ptid) != GET_PID (ptid) && lp == NULL)
     {
       pid_t pid;
       int status;
 
       if (ptrace (PTRACE_ATTACH, GET_LWP (ptid), 0, 0) < 0)
-	error (_("Can't attach %s: %s"), target_pid_to_str (ptid),
-	       safe_strerror (errno));
+	{
+	  /* If we fail to attach to the thread, issue a warning,
+	     but continue.  One way this can happen is if thread
+	     creation is interrupted; as of Linux 2.6.19, a kernel
+	     bug may place threads in the thread list and then fail
+	     to create them.  */
+	  warning (_("Can't attach %s: %s"), target_pid_to_str (ptid),
+		   safe_strerror (errno));
+	  return -1;
+	}
+
+      if (lp == NULL)
+	lp = add_lwp (ptid);
 
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
@@ -990,8 +997,15 @@ lin_lwp_attach_lwp (ptid_t ptid, int verbose)
          threads.  Note that this won't have already been done since
          the main thread will have, we assume, been stopped by an
          attach from a different layer.  */
+      if (lp == NULL)
+	lp = add_lwp (ptid);
       lp->stopped = 1;
     }
+
+  if (verbose)
+    printf_filtered (_("[New %s]\n"), target_pid_to_str (ptid));
+
+  return 0;
 }
 
 static void

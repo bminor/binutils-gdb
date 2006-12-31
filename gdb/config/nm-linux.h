@@ -1,6 +1,6 @@
 /* Native support for GNU/Linux.
 
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -24,9 +24,6 @@ struct target_ops;
 
 /* GNU/Linux is SVR4-ish but its /proc file system isn't.  */
 #undef USE_PROC_FS
-
-extern void lin_lwp_attach_lwp (ptid_t ptid, int verbose);
-#define ATTACH_LWP(ptid, verbose) lin_lwp_attach_lwp ((ptid), (verbose))
 
 extern void lin_thread_get_thread_signals (sigset_t *mask);
 #define GET_THREAD_SIGNALS(mask) lin_thread_get_thread_signals (mask)

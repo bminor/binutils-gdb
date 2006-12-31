@@ -690,6 +690,13 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
 
   check_thread_signals ();
 
+  if (ti_p->ti_state == TD_THR_UNKNOWN || ti_p->ti_state == TD_THR_ZOMBIE)
+    return;			/* A zombie thread -- do not attach.  */
+
+  /* Under GNU/Linux, we have to attach to each and every thread.  */
+  if (lin_lwp_attach_lwp (BUILD_LWP (ti_p->ti_lid, GET_PID (ptid)), 0) < 0)
+    return;
+
   /* Add the thread to GDB's thread list.  */
   tp = add_thread (ptid);
   tp->private = xmalloc (sizeof (struct private_thread_info));
@@ -697,14 +704,6 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
 
   if (verbose)
     printf_unfiltered (_("[New %s]\n"), target_pid_to_str (ptid));
-
-  if (ti_p->ti_state == TD_THR_UNKNOWN || ti_p->ti_state == TD_THR_ZOMBIE)
-    return;			/* A zombie thread -- do not attach.  */
-
-  /* Under GNU/Linux, we have to attach to each and every thread.  */
-#ifdef ATTACH_LWP
-  ATTACH_LWP (BUILD_LWP (ti_p->ti_lid, GET_PID (ptid)), 0);
-#endif
 
   /* Enable thread event reporting for this thread.  */
   err = td_thr_event_enable_p (th_p, 1);
