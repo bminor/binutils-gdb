@@ -26,6 +26,7 @@
 #include "language.h"
 #include "wrapper.h"
 #include "gdbcmd.h"
+#include "block.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
@@ -1958,8 +1959,14 @@ c_value_of_root (struct varobj **var_handle)
       fi = frame_find_by_id (var->root->frame);
       within_scope = fi != NULL;
       /* FIXME: select_frame could fail */
-      if (within_scope)
-	select_frame (fi);
+      if (fi)
+	{
+	  CORE_ADDR pc = get_frame_pc (fi);
+	  if (pc <  BLOCK_START (var->root->valid_block) ||
+	      pc >= BLOCK_END (var->root->valid_block))
+	    within_scope = 0;
+	  select_frame (fi);
+	}	  
     }
 
   if (within_scope)
