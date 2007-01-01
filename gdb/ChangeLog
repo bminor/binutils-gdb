@@ -1,5 +1,9 @@
 2007-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* config/djgpp/fnchange.lst: Add entry for ChangeLog-2006.
+
+2007-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	Followed the Start of New Year Procedure:
 	* ChangeLog-2006: New file, containing all the entries for 2006.
 	* ChangeLog: Removed all 2006 entries, and changed the reference

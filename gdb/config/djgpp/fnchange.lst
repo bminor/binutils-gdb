@@ -7,6 +7,7 @@
 @V@/bfd/ChangeLog-0203 @V@/bfd/ChangeLog.0203
 @V@/bfd/ChangeLog-2004 @V@/bfd/ChangeLog.004
 @V@/bfd/ChangeLog-2005 @V@/bfd/ChangeLog.005
+@V@/bfd/ChangeLog-2006 @V@/bfd/ChangeLog.006
 @V@/bfd/doc/ChangeLog-9103 @V@/bfd/ChangeLog.9103
 @V@/bfd/coff-tic30.c @V@/bfd/cofftic30.c
 @V@/bfd/coff-tic4x.c @V@/bfd/cofftic40.c
