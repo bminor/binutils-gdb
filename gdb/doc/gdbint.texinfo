@@ -6178,6 +6178,10 @@ End:
 @end smallexample
 
 @item
+Add an entry for the newly created ChangeLog file (@file{ChangeLog-YYYY})
+in @file{gdb/config/djgpp/fnchange.lst}.
+
+@item
 Update the copyright year in the startup message
 
 Update the copyright year in file @file{top.c}, function

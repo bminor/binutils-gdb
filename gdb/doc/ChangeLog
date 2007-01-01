@@ -1,3 +1,7 @@
+2007-01-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbint.texinfo (Start of New Year Procedure): Add missing item.
+
 2006-12-08  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (GDB/MI Variable Objects): Wrap historical
