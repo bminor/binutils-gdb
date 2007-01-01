@@ -1,3 +1,8 @@
+2007-01-02  Nick Roberts  <nickrob@snap.net.nz>
+
+	* varobj.c: Include block.h.
+	(c_value_of_root): Check scope within nested statements.
+
 2007-01-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* mi/mi-main.c (mi_cmd_data_write_register_values): Use
