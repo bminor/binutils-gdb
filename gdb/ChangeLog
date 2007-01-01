@@ -1,4 +1,8 @@
-2007-01-02  Nick Roberts  <nickrob@snap.net.nz>
+2006-01-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* breakpoint.c (remove_breakpoint): Remove dead code.
+
+2007-01-01  Nick Roberts  <nickrob@snap.net.nz>
 
 	* varobj.c: Include block.h.
 	(c_value_of_root): Check scope within nested statements.

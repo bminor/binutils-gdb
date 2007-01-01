@@ -1637,17 +1637,6 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
 	return val;
       b->inserted = (is == mark_inserted);
     }
-  else if (ep_is_exception_catchpoint (b->owner)
-	   && b->inserted	/* sometimes previous insert doesn't happen */
-	   && breakpoint_enabled (b->owner)
-	   && !b->duplicate)
-    {
-      val = target_remove_breakpoint (&b->target_info);
-      if (val)
-	return val;
-
-      b->inserted = (is == mark_inserted);
-    }
 
   return 0;
 }
