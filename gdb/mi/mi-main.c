@@ -545,10 +545,7 @@ get_register (int regnum, int format)
 enum mi_cmd_result
 mi_cmd_data_write_register_values (char *command, char **argv, int argc)
 {
-  int regnum;
-  int i;
-  int numregs;
-  LONGEST value;
+  int numregs, i;
   char format;
 
   /* Note that the test for a valid register must include checking the
@@ -587,26 +584,18 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
 
   for (i = 1; i < argc; i = i + 2)
     {
-      regnum = atoi (argv[i]);
+      int regnum = atoi (argv[i]);
 
-      if (regnum >= 0
-	  && regnum < numregs
-	  && REGISTER_NAME (regnum) != NULL
-	  && *REGISTER_NAME (regnum) != '\000')
+      if (regnum >= 0 && regnum < numregs
+	  && REGISTER_NAME (regnum) && *REGISTER_NAME (regnum))
 	{
-	  void *buffer;
-	  struct cleanup *old_chain;
+	  LONGEST value;
 
-	  /* Get the value as a number */
+	  /* Get the value as a number.  */
 	  value = parse_and_eval_address (argv[i + 1]);
-	  /* Get the value into an array */
-	  buffer = xmalloc (DEPRECATED_REGISTER_SIZE);
-	  old_chain = make_cleanup (xfree, buffer);
-	  store_signed_integer (buffer, DEPRECATED_REGISTER_SIZE, value);
+
 	  /* Write it down */
-	  deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (regnum), buffer, register_size (current_gdbarch, regnum));
-	  /* Free the buffer.  */
-	  do_cleanups (old_chain);
+	  regcache_cooked_write_signed (current_regcache, regnum, value);
 	}
       else
 	{

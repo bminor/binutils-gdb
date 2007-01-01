@@ -1,3 +1,9 @@
+2007-01-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* mi/mi-main.c (mi_cmd_data_write_register_values): Use
+	regcache_cooked_write_signed instead of
+	deprecated_write_register_bytes.
+
 2007-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* config/djgpp/fnchange.lst: Add entry for ChangeLog-2006.
