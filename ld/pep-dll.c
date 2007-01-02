@@ -50,6 +50,7 @@
 #define pe_dll_generate_implib      pep_dll_generate_implib
 #define pe_dll_add_excludes         pep_dll_add_excludes
 #define pe_walk_relocs_of_symbol    pep_walk_relocs_of_symbol
+#define pe_bfd_is_dll		    pep_bfd_is_dll
 
 /* Uses x86_64 PE+.  */
 #define pe_use_x86_64

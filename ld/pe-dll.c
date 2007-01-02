@@ -40,6 +40,7 @@
 #include "coff/internal.h"
 #include "../bfd/libcoff.h"
 #include "deffile.h"
+#include "pe-dll.h"
 
 #ifdef pe_use_x86_64
 
