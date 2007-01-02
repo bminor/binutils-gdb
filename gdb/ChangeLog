@@ -1,3 +1,9 @@
+2007-01-02  Nick Roberts  <nickrob@snap.net.nz>
+
+	* mi/mi-cmds.c (mi_cmds): Remove entries for -display-delete,
+	-display-disable, -display-enable, -display-insert and
+	-display-list.
+
 2006-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* breakpoint.c (remove_breakpoint): Remove dead code.
