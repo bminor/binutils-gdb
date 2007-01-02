@@ -1,3 +1,14 @@
+2007-01-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* rs6000-tdep.c (rs6000_use_struct_convention)
+	(rs6000_extract_return_value, rs6000_store_return_value)
+	(rs6000_extract_struct_value_address): Remove.
+	(rs6000_return_value): New function.
+	(rs6000_gdbarch_init): Don't set deprecated_extract_return_value,
+	store_return_value, deprecated_extract_struct_value_address and
+	deprecated_use_struct_convention.  Use rs6000_return_value
+	instead.
+
 2007-01-02  Nick Roberts  <nickrob@snap.net.nz>
 
 	* mi/mi-cmds.c (mi_cmds): Remove entries for -display-delete,

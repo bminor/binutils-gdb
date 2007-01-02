@@ -1,7 +1,7 @@
 /* Target-dependent code for GDB, the GNU debugger.
 
    Copyright (C) 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -1734,61 +1734,124 @@ ran_out_of_registers_for_arguments:
   return sp;
 }
 
-/* PowerOpen always puts structures in memory.  Vectors, which were
-   added later, do get returned in a register though.  */
-
-static int     
-rs6000_use_struct_convention (int gcc_p, struct type *value_type)
-{  
-  if ((TYPE_LENGTH (value_type) == 16 || TYPE_LENGTH (value_type) == 8)
-      && TYPE_VECTOR (value_type))
-    return 0;                            
-  return 1;
-}
-
-static void
-rs6000_extract_return_value (struct type *valtype, gdb_byte *regbuf,
-			     gdb_byte *valbuf)
+static enum return_value_convention
+rs6000_return_value (struct gdbarch *gdbarch, struct type *valtype,
+		     struct regcache *regcache, gdb_byte *readbuf,
+		     const gdb_byte *writebuf)
 {
-  int offset = 0;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  gdb_byte buf[8];
 
   /* The calling convention this function implements assumes the
      processor has floating-point registers.  We shouldn't be using it
-     on PPC variants that lack them.  */
+     on PowerPC variants that lack them.  */
   gdb_assert (ppc_floating_point_unit_p (current_gdbarch));
 
-  if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
+  /* AltiVec extension: Functions that declare a vector data type as a
+     return value place that return value in VR2.  */
+  if (TYPE_CODE (valtype) == TYPE_CODE_ARRAY && TYPE_VECTOR (valtype)
+      && TYPE_LENGTH (valtype) == 16)
     {
+      if (readbuf)
+	regcache_cooked_read (regcache, tdep->ppc_vr0_regnum + 2, readbuf);
+      if (writebuf)
+	regcache_cooked_write (regcache, tdep->ppc_vr0_regnum + 2, writebuf);
 
-      /* floats and doubles are returned in fpr1. fpr's have a size of 8 bytes.
-         We need to truncate the return value into float size (4 byte) if
-         necessary.  */
-
-      convert_typed_floating (&regbuf[DEPRECATED_REGISTER_BYTE
-                                      (tdep->ppc_fp0_regnum + 1)],
-                              builtin_type_double,
-                              valbuf,
-                              valtype);
+      return RETURN_VALUE_REGISTER_CONVENTION;
     }
-  else if (TYPE_CODE (valtype) == TYPE_CODE_ARRAY
-           && TYPE_LENGTH (valtype) == 16
-           && TYPE_VECTOR (valtype))
+
+  /* If the called subprogram returns an aggregate, there exists an
+     implicit first argument, whose value is the address of a caller-
+     allocated buffer into which the callee is assumed to store its
+     return value. All explicit parameters are appropriately
+     relabeled.  */
+  if (TYPE_CODE (valtype) == TYPE_CODE_STRUCT
+      || TYPE_CODE (valtype) == TYPE_CODE_UNION
+      || TYPE_CODE (valtype) == TYPE_CODE_ARRAY)
+    return RETURN_VALUE_STRUCT_CONVENTION;
+
+  /* Scalar floating-point values are returned in FPR1 for float or
+     double, and in FPR1:FPR2 for quadword precision.  Fortran
+     complex*8 and complex*16 are returned in FPR1:FPR2, and
+     complex*32 is returned in FPR1:FPR4.  */
+  if (TYPE_CODE (valtype) == TYPE_CODE_FLT
+      && (TYPE_LENGTH (valtype) == 4 || TYPE_LENGTH (valtype) == 8))
     {
-      memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (tdep->ppc_vr0_regnum + 2),
-	      TYPE_LENGTH (valtype));
-    }
-  else
-    {
-      /* return value is copied starting from r3. */
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-	  && TYPE_LENGTH (valtype) < register_size (current_gdbarch, 3))
-	offset = register_size (current_gdbarch, 3) - TYPE_LENGTH (valtype);
+      struct type *regtype = register_type (gdbarch, tdep->ppc_fp0_regnum);
+      gdb_byte regval[8];
 
-      memcpy (valbuf,
-	      regbuf + DEPRECATED_REGISTER_BYTE (3) + offset,
-	      TYPE_LENGTH (valtype));
+      /* FIXME: kettenis/2007-01-01: Add support for quadword
+	 precision and complex.  */
+
+      if (readbuf)
+	{
+	  regcache_cooked_read (regcache, tdep->ppc_fp0_regnum + 1, regval);
+	  convert_typed_floating (regval, regtype, readbuf, valtype);
+	}
+      if (writebuf)
+	{
+	  convert_typed_floating (writebuf, valtype, regval, regtype);
+	  regcache_cooked_write (regcache, tdep->ppc_fp0_regnum + 1, regval);
+	}
+
+      return RETURN_VALUE_REGISTER_CONVENTION;
+  }
+
+  /* Values of the types int, long, short, pointer, and char (length
+     is less than or equal to four bytes), as well as bit values of
+     lengths less than or equal to 32 bits, must be returned right
+     justified in GPR3 with signed values sign extended and unsigned
+     values zero extended, as necessary.  */
+  if (TYPE_LENGTH (valtype) <= tdep->wordsize)
+    {
+      if (readbuf)
+	{
+	  ULONGEST regval;
+
+	  /* For reading we don't have to worry about sign extension.  */
+	  regcache_cooked_read_unsigned (regcache, tdep->ppc_gp0_regnum + 3,
+					 &regval);
+	  store_unsigned_integer (readbuf, TYPE_LENGTH (valtype), regval);
+	}
+      if (writebuf)
+	{
+	  /* For writing, use unpack_long since that should handle any
+	     required sign extension.  */
+	  regcache_cooked_write_unsigned (regcache, tdep->ppc_gp0_regnum + 3,
+					  unpack_long (valtype, writebuf));
+	}
+
+      return RETURN_VALUE_REGISTER_CONVENTION;
     }
+
+  /* Eight-byte non-floating-point scalar values must be returned in
+     GPR3:GPR4.  */
+
+  if (TYPE_LENGTH (valtype) == 8)
+    {
+      gdb_assert (TYPE_CODE (valtype) != TYPE_CODE_FLT);
+      gdb_assert (tdep->wordsize == 4);
+
+      if (readbuf)
+	{
+	  gdb_byte regval[8];
+
+	  regcache_cooked_read (regcache, tdep->ppc_gp0_regnum + 3, regval);
+	  regcache_cooked_read (regcache, tdep->ppc_gp0_regnum + 4,
+				regval + 4);
+	  memcpy (readbuf, regval, 8);
+	}
+      if (writebuf)
+	{
+	  regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 3, writebuf);
+	  regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 4,
+				 writebuf + 4);
+	}
+
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+
+  return RETURN_VALUE_STRUCT_CONVENTION;
 }
 
 /* Return whether handle_inferior_event() should proceed through code
@@ -2240,79 +2303,6 @@ rs6000_dwarf2_reg_to_regnum (int num)
       default:
         return num;
       }
-}
-
-
-static void
-rs6000_store_return_value (struct type *type,
-                           struct regcache *regcache,
-                           const gdb_byte *valbuf)
-{
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  int regnum = -1;
-
-  /* The calling convention this function implements assumes the
-     processor has floating-point registers.  We shouldn't be using it
-     on PPC variants that lack them.  */
-  gdb_assert (ppc_floating_point_unit_p (gdbarch));
-
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
-    /* Floating point values are returned starting from FPR1 and up.
-       Say a double_double_double type could be returned in
-       FPR1/FPR2/FPR3 triple.  */
-    regnum = tdep->ppc_fp0_regnum + 1;
-  else if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
-    {
-      if (TYPE_LENGTH (type) == 16
-          && TYPE_VECTOR (type))
-        regnum = tdep->ppc_vr0_regnum + 2;
-      else
-        internal_error (__FILE__, __LINE__,
-                        _("rs6000_store_return_value: "
-                        "unexpected array return type"));
-    }
-  else
-    /* Everything else is returned in GPR3 and up.  */
-    regnum = tdep->ppc_gp0_regnum + 3;
-
-  {
-    size_t bytes_written = 0;
-
-    while (bytes_written < TYPE_LENGTH (type))
-      {
-        /* How much of this value can we write to this register?  */
-        size_t bytes_to_write = min (TYPE_LENGTH (type) - bytes_written,
-                                     register_size (gdbarch, regnum));
-        regcache_cooked_write_part (regcache, regnum,
-                                    0, bytes_to_write,
-                                    valbuf + bytes_written);
-        regnum++;
-        bytes_written += bytes_to_write;
-      }
-  }
-}
-
-
-/* Extract from an array REGBUF containing the (raw) register state
-   the address in which a function should return its structure value,
-   as a CORE_ADDR (or an expression that can be used as one).  */
-
-static CORE_ADDR
-rs6000_extract_struct_value_address (struct regcache *regcache)
-{
-  /* FIXME: cagney/2002-09-26: PR gdb/724: When making an inferior
-     function call GDB knows the address of the struct return value
-     and hence, should not need to call this function.  Unfortunately,
-     the current call_function_by_hand() code only saves the most
-     recent struct address leading to occasional calls.  The code
-     should instead maintain a stack of such addresses (in the dummy
-     frame object).  */
-  /* NOTE: cagney/2002-09-26: Return 0 which indicates that we've
-     really got no idea where the return value is being stored.  While
-     r3, on function entry, contained the address it will have since
-     been reused (scratch) and hence wouldn't be valid */
-  return 0;
 }
 
 /* Hook called when a new child process is started.  */
@@ -3307,10 +3297,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   else if (sysv_abi && wordsize == 4)
     set_gdbarch_return_value (gdbarch, ppc_sysv_abi_return_value);
   else
-    {
-      set_gdbarch_deprecated_extract_return_value (gdbarch, rs6000_extract_return_value);
-      set_gdbarch_store_return_value (gdbarch, rs6000_store_return_value);
-    }
+    set_gdbarch_return_value (gdbarch, rs6000_return_value);
 
   /* Set lr_frame_offset.  */
   if (wordsize == 8)
@@ -3413,21 +3400,13 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_stab_reg_to_regnum (gdbarch, rs6000_stab_reg_to_regnum);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, rs6000_dwarf2_reg_to_regnum);
-  /* Note: kevinb/2002-04-12: I'm not convinced that rs6000_push_arguments()
-     is correct for the SysV ABI when the wordsize is 8, but I'm also
-     fairly certain that ppc_sysv_abi_push_arguments() will give even
-     worse results since it only works for 32-bit code.  So, for the moment,
-     we're better off calling rs6000_push_arguments() since it works for
-     64-bit code.  At some point in the future, this matter needs to be
-     revisited.  */
+
   if (sysv_abi && wordsize == 4)
     set_gdbarch_push_dummy_call (gdbarch, ppc_sysv_abi_push_dummy_call);
   else if (sysv_abi && wordsize == 8)
     set_gdbarch_push_dummy_call (gdbarch, ppc64_sysv_abi_push_dummy_call);
   else
     set_gdbarch_push_dummy_call (gdbarch, rs6000_push_dummy_call);
-
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, rs6000_extract_struct_value_address);
 
   set_gdbarch_skip_prologue (gdbarch, rs6000_skip_prologue);
   set_gdbarch_in_function_epilogue_p (gdbarch, rs6000_in_function_epilogue_p);
@@ -3446,9 +3425,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Not sure on this. FIXMEmgo */
   set_gdbarch_frame_args_skip (gdbarch, 8);
-
-  if (!sysv_abi)
-    set_gdbarch_deprecated_use_struct_convention (gdbarch, rs6000_use_struct_convention);
 
   if (!sysv_abi)
     {
