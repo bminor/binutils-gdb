@@ -582,6 +582,9 @@ win32_attach (unsigned long pid)
 static void
 win32_kill (void)
 {
+  if (current_process_handle == NULL)
+    return;
+
   TerminateProcess (current_process_handle, 0);
   for (;;)
     {
@@ -901,6 +904,7 @@ in:
       ourstatus->kind = TARGET_WAITKIND_EXITED;
       ourstatus->value.integer = current_event.u.ExitProcess.dwExitCode;
       CloseHandle (current_process_handle);
+      current_process_handle = NULL;
       retval = main_thread_id;
       break;
 

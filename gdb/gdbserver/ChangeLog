@@ -1,4 +1,11 @@
-2006-12-30  Denis PILAT <denis.pilat@st.com>
+2007-01-03  Denis Pilat  <denis.pilat@st.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-low.c (linux_kill): Handle being called with no threads.
+	* win32-i386-low.c (win32_kill): Likewise.
+	(get_child_debug_event): Clear current_process_handle.
+
+2006-12-30  Denis PILAT  <denis.pilat@st.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote-utils.c (remote_open): Check the type of specified

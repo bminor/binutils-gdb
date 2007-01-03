@@ -255,13 +255,17 @@ static void
 linux_kill (void)
 {
   struct thread_info *thread = (struct thread_info *) all_threads.head;
-  struct process_info *process = get_thread_process (thread);
+  struct process_info *process;
   int wstat;
+
+  if (thread == NULL)
+    return;
 
   for_each_inferior (&all_threads, linux_kill_one_process);
 
   /* See the comment in linux_kill_one_process.  We did not kill the first
      thread in the list, so do so now.  */
+  process = get_thread_process (thread);
   do
     {
       ptrace (PTRACE_KILL, pid_of (process), 0, 0);
