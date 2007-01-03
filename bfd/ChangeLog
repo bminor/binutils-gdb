@@ -121,7 +121,6 @@
 	* elf64-alpha.c (elf64_alpha_merge_symbol_attribute): New function.
 	(elf_backend_merge_symbol_attribute): Define.
 
->>>>>>> 1.3701
 2006-12-04  Jan Beulich  <jbeulich@novell.com>
 
 	* elflink.c (_bfd_elf_link_create_dynamic_sections): Don't create
