@@ -1,6 +1,6 @@
 /* GNU/Linux on ARM target support.
 
-   Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -74,29 +74,6 @@ static const char arm_linux_thumb_le_breakpoint[] = {0x01, 0xde};
 #define ARM_LINUX_JB_ELEMENT_SIZE	INT_REGISTER_SIZE
 #define ARM_LINUX_JB_PC			21
 
-/* Extract from an array REGBUF containing the (raw) register state
-   a function return value of type TYPE, and copy that, in virtual format,
-   into VALBUF.  */
-/* FIXME rearnsha/2002-02-23: This function shouldn't be necessary.
-   The ARM generic one should be able to handle the model used by
-   linux and the low-level formatting of the registers should be
-   hidden behind the regcache abstraction.  */
-static void
-arm_linux_extract_return_value (struct type *type,
-				gdb_byte regbuf[],
-				gdb_byte *valbuf)
-{
-  /* ScottB: This needs to be looked at to handle the different
-     floating point emulators on ARM GNU/Linux.  Right now the code
-     assumes that fetch inferior registers does the right thing for
-     GDB.  I suspect this won't handle NWFPE registers correctly, nor
-     will the default ARM version (arm_extract_return_value()).  */
-
-  int regnum = ((TYPE_CODE_FLT == TYPE_CODE (type))
-		? ARM_F0_REGNUM : ARM_A1_REGNUM);
-  memcpy (valbuf, &regbuf[DEPRECATED_REGISTER_BYTE (regnum)], TYPE_LENGTH (type));
-}
-   	  
 /*
    Dynamic Linking on ARM GNU/Linux
    --------------------------------
@@ -627,9 +604,6 @@ arm_linux_init_abi (struct gdbarch_info info,
 
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
-
-  /* The following override shouldn't be needed.  */
-  set_gdbarch_deprecated_extract_return_value (gdbarch, arm_linux_extract_return_value);
 
   /* Shared library handling.  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);

@@ -1,3 +1,8 @@
+2007-01-03  Mark Kettenis  <kettenis@gnu.org>
+
+	* arm-linux-tdep.c (arm_linux_extract_return_value): Remove.
+	(arm_linux_init_abi): Don't set deprecated_extract_return_value.
+
 2007-01-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ada-lang.c (find_struct_field): Initialize *byte_offset_p.
