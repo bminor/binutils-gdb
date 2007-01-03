@@ -1,5 +1,10 @@
 2007-01-03  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c: Update copyright year.
+	* config/tc-i386.h: Likewise.
+
+2007-01-03  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (smallest_imm_type): Return unsigned int
 	instead of int.
 
