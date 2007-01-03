@@ -70,7 +70,7 @@ extern unsigned long i386_mach (void);
 
 #if ((defined (OBJ_MAYBE_COFF) && defined (OBJ_MAYBE_AOUT)) \
      || defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF))
-extern const char *i386_target_format PARAMS ((void));
+extern const char *i386_target_format (void);
 #define TARGET_FORMAT i386_target_format ()
 #else
 #ifdef OBJ_ELF
@@ -83,7 +83,7 @@ extern const char *i386_target_format PARAMS ((void));
 
 #if (defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF))
 #define md_end i386_elf_emit_arch_note
-extern void i386_elf_emit_arch_note PARAMS ((void));
+extern void i386_elf_emit_arch_note (void);
 #endif
 
 #define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) 0
@@ -418,22 +418,22 @@ arch_entry;
 
 #if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)) && !defined (LEX_AT)
 #define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) x86_cons (EXP, NBYTES)
-extern void x86_cons PARAMS ((expressionS *, int));
+extern void x86_cons (expressionS *, int);
 #endif
 
 #define TC_CONS_FIX_NEW(FRAG,OFF,LEN,EXP) x86_cons_fix_new(FRAG, OFF, LEN, EXP)
 extern void x86_cons_fix_new
-  PARAMS ((fragS *, unsigned int, unsigned int, expressionS *));
+  (fragS *, unsigned int, unsigned int, expressionS *);
 
 #define DIFF_EXPR_OK    /* foo-. gets turned into PC relative relocs */
 
 #define NO_RELOC BFD_RELOC_NONE
 
-void i386_validate_fix PARAMS ((struct fix *));
+void i386_validate_fix (struct fix *);
 #define TC_VALIDATE_FIX(FIX,SEGTYPE,SKIP) i386_validate_fix(FIX)
 
 #define tc_fix_adjustable(X)  tc_i386_fix_adjustable(X)
-extern int tc_i386_fix_adjustable PARAMS ((struct fix *));
+extern int tc_i386_fix_adjustable (struct fix *);
 
 /* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
@@ -485,7 +485,7 @@ if ((n)									\
 
 #define MAX_MEM_FOR_RS_ALIGN_CODE  15
 
-extern void i386_align_code PARAMS ((fragS *, int));
+extern void i386_align_code (fragS *, int);
 
 #define HANDLE_ALIGN(fragP)						\
 if (fragP->fr_type == rs_align_code) 					\
@@ -493,14 +493,14 @@ if (fragP->fr_type == rs_align_code) 					\
 			   - fragP->fr_address				\
 			   - fragP->fr_fix));
 
-void i386_print_statistics PARAMS ((FILE *));
+void i386_print_statistics (FILE *);
 #define tc_print_statistics i386_print_statistics
 
 #define md_number_to_chars number_to_chars_littleendian
 
 #ifdef SCO_ELF
 #define tc_init_after_args() sco_id ()
-extern void sco_id PARAMS ((void));
+extern void sco_id (void);
 #endif
 
 /* We want .cfi_* pseudo-ops for generating unwind info.  */
@@ -513,17 +513,17 @@ extern int x86_cie_data_alignment;
 #define DWARF2_CIE_DATA_ALIGNMENT x86_cie_data_alignment
 
 #define tc_regname_to_dw2regnum tc_x86_regname_to_dw2regnum
-extern int tc_x86_regname_to_dw2regnum PARAMS ((char *regname));
+extern int tc_x86_regname_to_dw2regnum (char *);
 
 #define tc_cfi_frame_initial_instructions tc_x86_frame_initial_instructions
-extern void tc_x86_frame_initial_instructions PARAMS ((void));
+extern void tc_x86_frame_initial_instructions (void);
 
 #define md_elf_section_type(str,len) i386_elf_section_type (str, len)
-extern int i386_elf_section_type PARAMS ((const char *, size_t len));
+extern int i386_elf_section_type (const char *, size_t);
 
 /* Support for SHF_X86_64_LARGE */
-extern int x86_64_section_word PARAMS ((char *, size_t));
-extern int x86_64_section_letter PARAMS ((int letter, char **ptr_msg));
+extern int x86_64_section_word (char *, size_t);
+extern int x86_64_section_letter (int, char **);
 #define md_elf_section_letter(LETTER, PTR_MSG)	x86_64_section_letter (LETTER, PTR_MSG)
 #define md_elf_section_word(STR, LEN)		x86_64_section_word (STR, LEN)
 

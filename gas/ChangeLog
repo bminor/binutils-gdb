@@ -1,3 +1,8 @@
+2007-01-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c: Convert to ISO C90 formatting
+	* config/tc-i386.h: Likewise.
+
 2007-01-03  David Daney  <ddaney@avtrex.com>
 
 	* config/tc-mips.c (md_show_usage):  Clean up -mno-shared

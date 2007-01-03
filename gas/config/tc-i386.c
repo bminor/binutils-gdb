@@ -63,55 +63,39 @@
 #endif
 #endif
 
-static INLINE unsigned int mode_from_disp_size PARAMS ((unsigned int));
-static INLINE int fits_in_signed_byte PARAMS ((offsetT));
-static INLINE int fits_in_unsigned_byte PARAMS ((offsetT));
-static INLINE int fits_in_unsigned_word PARAMS ((offsetT));
-static INLINE int fits_in_signed_word PARAMS ((offsetT));
-static INLINE int fits_in_unsigned_long PARAMS ((offsetT));
-static INLINE int fits_in_signed_long PARAMS ((offsetT));
-static int smallest_imm_type PARAMS ((offsetT));
-static offsetT offset_in_range PARAMS ((offsetT, int));
-static int add_prefix PARAMS ((unsigned int));
-static void set_code_flag PARAMS ((int));
-static void set_16bit_gcc_code_flag PARAMS ((int));
-static void set_intel_syntax PARAMS ((int));
-static void set_cpu_arch PARAMS ((int));
+static void set_code_flag (int);
+static void set_16bit_gcc_code_flag (int);
+static void set_intel_syntax (int);
+static void set_cpu_arch (int);
 #ifdef TE_PE
-static void pe_directive_secrel PARAMS ((int));
+static void pe_directive_secrel (int);
 #endif
-static void signed_cons PARAMS ((int));
-static char *output_invalid PARAMS ((int c));
-static int i386_operand PARAMS ((char *operand_string));
-static int i386_intel_operand PARAMS ((char *operand_string, int got_a_float));
-static const reg_entry *parse_register PARAMS ((char *reg_string,
-						char **end_op));
-static char *parse_insn PARAMS ((char *, char *));
-static char *parse_operands PARAMS ((char *, const char *));
-static void swap_operands PARAMS ((void));
-static void swap_imm_operands PARAMS ((void));
-static void optimize_imm PARAMS ((void));
-static void optimize_disp PARAMS ((void));
-static int match_template PARAMS ((void));
-static int check_string PARAMS ((void));
-static int process_suffix PARAMS ((void));
-static int check_byte_reg PARAMS ((void));
-static int check_long_reg PARAMS ((void));
-static int check_qword_reg PARAMS ((void));
-static int check_word_reg PARAMS ((void));
-static int finalize_imm PARAMS ((void));
-static int process_operands PARAMS ((void));
-static const seg_entry *build_modrm_byte PARAMS ((void));
-static void output_insn PARAMS ((void));
-static void output_branch PARAMS ((void));
-static void output_jump PARAMS ((void));
-static void output_interseg_jump PARAMS ((void));
-static void output_imm PARAMS ((fragS *insn_start_frag,
-				offsetT insn_start_off));
-static void output_disp PARAMS ((fragS *insn_start_frag,
-				 offsetT insn_start_off));
+static void signed_cons (int);
+static char *output_invalid (int c);
+static int i386_operand (char *);
+static int i386_intel_operand (char *, int);
+static const reg_entry *parse_register (char *, char **);
+static char *parse_insn (char *, char *);
+static char *parse_operands (char *, const char *);
+static void swap_operands (void);
+static void swap_imm_operands (void);
+static void optimize_imm (void);
+static void optimize_disp (void);
+static int match_template (void);
+static int check_string (void);
+static int process_suffix (void);
+static int check_byte_reg (void);
+static int check_long_reg (void);
+static int check_qword_reg (void);
+static int check_word_reg (void);
+static int finalize_imm (void);
+static int process_operands (void);
+static const seg_entry *build_modrm_byte (void);
+static void output_insn (void);
+static void output_imm (fragS *, offsetT);
+static void output_disp (fragS *, offsetT);
 #ifndef I386COFF
-static void s_bss PARAMS ((int));
+static void s_bss (int);
 #endif
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
 static void handle_large_common (int small ATTRIBUTE_UNUSED);
@@ -555,7 +539,7 @@ const pseudo_typeS md_pseudo_table[] =
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   {"largecomm", handle_large_common, 0},
 #else
-  {"file", (void (*) PARAMS ((int))) dwarf2_directive_file, 0},
+  {"file", (void (*) (int)) dwarf2_directive_file, 0},
   {"loc", dwarf2_directive_loc, 0},
   {"loc_mark_labels", dwarf2_directive_loc_mark_labels, 0},
 #endif
@@ -575,9 +559,7 @@ static struct hash_control *op_hash;
 static struct hash_control *reg_hash;
 
 void
-i386_align_code (fragP, count)
-     fragS *fragP;
-     int count;
+i386_align_code (fragS *fragP, int count)
 {
   /* Various efficient no-op patterns for aligning code labels.
      Note: Don't try to assemble the instructions in the comments.
@@ -886,43 +868,37 @@ i386_align_code (fragP, count)
 }
 
 static INLINE unsigned int
-mode_from_disp_size (t)
-     unsigned int t;
+mode_from_disp_size (unsigned int t)
 {
   return (t & Disp8) ? 1 : (t & (Disp16 | Disp32 | Disp32S)) ? 2 : 0;
 }
 
 static INLINE int
-fits_in_signed_byte (num)
-     offsetT num;
+fits_in_signed_byte (offsetT num)
 {
   return (num >= -128) && (num <= 127);
 }
 
 static INLINE int
-fits_in_unsigned_byte (num)
-     offsetT num;
+fits_in_unsigned_byte (offsetT num)
 {
   return (num & 0xff) == num;
 }
 
 static INLINE int
-fits_in_unsigned_word (num)
-     offsetT num;
+fits_in_unsigned_word (offsetT num)
 {
   return (num & 0xffff) == num;
 }
 
 static INLINE int
-fits_in_signed_word (num)
-     offsetT num;
+fits_in_signed_word (offsetT num)
 {
   return (-32768 <= num) && (num <= 32767);
 }
 
 static INLINE int
-fits_in_signed_long (num)
-     offsetT num ATTRIBUTE_UNUSED;
+fits_in_signed_long (offsetT num ATTRIBUTE_UNUSED)
 {
 #ifndef BFD64
   return 1;
@@ -933,8 +909,7 @@ fits_in_signed_long (num)
 }				/* fits_in_signed_long() */
 
 static INLINE int
-fits_in_unsigned_long (num)
-     offsetT num ATTRIBUTE_UNUSED;
+fits_in_unsigned_long (offsetT num ATTRIBUTE_UNUSED)
 {
 #ifndef BFD64
   return 1;
@@ -944,8 +919,7 @@ fits_in_unsigned_long (num)
 }				/* fits_in_unsigned_long() */
 
 static int
-smallest_imm_type (num)
-     offsetT num;
+smallest_imm_type (offsetT num)
 {
   if (cpu_arch_flags != (Cpu186 | Cpu286 | Cpu386 | Cpu486 | CpuNo64))
     {
@@ -971,9 +945,7 @@ smallest_imm_type (num)
 }
 
 static offsetT
-offset_in_range (val, size)
-     offsetT val;
-     int size;
+offset_in_range (offsetT val, int size)
 {
   addressT mask;
 
@@ -1008,8 +980,7 @@ offset_in_range (val, size)
    class already exists, 1 if non rep/repne added, 2 if rep/repne
    added.  */
 static int
-add_prefix (prefix)
-     unsigned int prefix;
+add_prefix (unsigned int prefix)
 {
   int ret = 1;
   unsigned int q;
@@ -1076,8 +1047,7 @@ add_prefix (prefix)
 }
 
 static void
-set_code_flag (value)
-     int value;
+set_code_flag (int value)
 {
   flag_code = value;
   cpu_arch_flags &= ~(Cpu64 | CpuNo64);
@@ -1094,8 +1064,7 @@ set_code_flag (value)
 }
 
 static void
-set_16bit_gcc_code_flag (new_code_flag)
-     int new_code_flag;
+set_16bit_gcc_code_flag (int new_code_flag)
 {
   flag_code = new_code_flag;
   cpu_arch_flags &= ~(Cpu64 | CpuNo64);
@@ -1104,8 +1073,7 @@ set_16bit_gcc_code_flag (new_code_flag)
 }
 
 static void
-set_intel_syntax (syntax_flag)
-     int syntax_flag;
+set_intel_syntax (int syntax_flag)
 {
   /* Find out if register prefixing is specified.  */
   int ask_naked_reg = 0;
@@ -1139,8 +1107,7 @@ set_intel_syntax (syntax_flag)
 }
 
 static void
-set_cpu_arch (dummy)
-     int dummy ATTRIBUTE_UNUSED;
+set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 {
   SKIP_WHITESPACE ();
 
@@ -1352,8 +1319,7 @@ md_begin ()
 }
 
 void
-i386_print_statistics (file)
-     FILE *file;
+i386_print_statistics (FILE *file)
 {
   hash_print_statistics (file, "i386 opcode", op_hash);
   hash_print_statistics (file, "i386 register", reg_hash);
@@ -1362,16 +1328,13 @@ i386_print_statistics (file)
 #ifdef DEBUG386
 
 /* Debugging routines for md_assemble.  */
-static void pi PARAMS ((char *, i386_insn *));
-static void pte PARAMS ((template *));
-static void pt PARAMS ((unsigned int));
-static void pe PARAMS ((expressionS *));
-static void ps PARAMS ((symbolS *));
+static void pte (template *);
+static void pt (unsigned int);
+static void pe (expressionS *);
+static void ps (symbolS *);
 
 static void
-pi (line, x)
-     char *line;
-     i386_insn *x;
+pi (char *line, i386_insn *x)
 {
   unsigned int i;
 
@@ -1406,8 +1369,7 @@ pi (line, x)
 }
 
 static void
-pte (t)
-     template *t;
+pte (template *t)
 {
   unsigned int i;
   fprintf (stdout, " %d operands ", t->operands);
@@ -1428,8 +1390,7 @@ pte (t)
 }
 
 static void
-pe (e)
-     expressionS *e;
+pe (expressionS *e)
 {
   fprintf (stdout, "    operation     %d\n", e->X_op);
   fprintf (stdout, "    add_number    %ld (%lx)\n",
@@ -1449,8 +1410,7 @@ pe (e)
 }
 
 static void
-ps (s)
-     symbolS *s;
+ps (symbolS *s)
 {
   fprintf (stdout, "%s type %s%s",
 	   S_GET_NAME (s),
@@ -1613,8 +1573,7 @@ reloc (unsigned int size,
    some cases we force the original symbol to be used.  */
 
 int
-tc_i386_fix_adjustable (fixP)
-     fixS *fixP ATTRIBUTE_UNUSED;
+tc_i386_fix_adjustable (fixS *fixP ATTRIBUTE_UNUSED)
 {
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   if (!IS_ELF)
@@ -1667,11 +1626,8 @@ tc_i386_fix_adjustable (fixP)
   return 1;
 }
 
-static int intel_float_operand PARAMS ((const char *mnemonic));
-
 static int
-intel_float_operand (mnemonic)
-     const char *mnemonic;
+intel_float_operand (const char *mnemonic)
 {
   /* Note that the value returned is meaningful only for opcodes with (memory)
      operands, hence the code here is free to improperly handle opcodes that
@@ -1961,9 +1917,7 @@ md_assemble (line)
 }
 
 static char *
-parse_insn (line, mnemonic)
-     char *line;
-     char *mnemonic;
+parse_insn (char *line, char *mnemonic)
 {
   char *l = line;
   char *token_start = l;
@@ -2182,9 +2136,7 @@ parse_insn (line, mnemonic)
 }
 
 static char *
-parse_operands (l, mnemonic)
-     char *l;
-     const char *mnemonic;
+parse_operands (char *l, const char *mnemonic)
 {
   char *token_start;
 
@@ -2302,7 +2254,7 @@ parse_operands (l, mnemonic)
 }
 
 static void
-swap_imm_operands ()
+swap_imm_operands (void)
 {
   union i386_op temp_op;
   unsigned int temp_type;
@@ -2323,7 +2275,7 @@ swap_imm_operands ()
 
 
 static void
-swap_operands ()
+swap_operands (void)
 {
   union i386_op temp_op;
   unsigned int temp_type;
@@ -2383,7 +2335,7 @@ swap_operands ()
 /* Try to ensure constant immediates are represented in the smallest
    opcode possible.  */
 static void
-optimize_imm ()
+optimize_imm (void)
 {
   char guess_suffix = 0;
   int op;
@@ -2503,7 +2455,7 @@ optimize_imm ()
 
 /* Try to use the smallest displacement type too.  */
 static void
-optimize_disp ()
+optimize_disp (void)
 {
   int op;
 
@@ -2567,7 +2519,7 @@ optimize_disp ()
 }
 
 static int
-match_template ()
+match_template (void)
 {
   /* Points to template once we've found it.  */
   const template *t;
@@ -2834,7 +2786,7 @@ match_template ()
 }
 
 static int
-check_string ()
+check_string (void)
 {
   int mem_op = (i.types[0] & AnyMem) ? 0 : 1;
   if ((i.tm.operand_types[mem_op] & EsSeg) != 0)
@@ -3119,7 +3071,7 @@ check_byte_reg (void)
 }
 
 static int
-check_long_reg ()
+check_long_reg (void)
 {
   int op;
 
@@ -3170,7 +3122,7 @@ check_long_reg ()
 }
 
 static int
-check_qword_reg ()
+check_qword_reg (void)
 {
   int op;
 
@@ -3202,7 +3154,7 @@ check_qword_reg ()
 }
 
 static int
-check_word_reg ()
+check_word_reg (void)
 {
   int op;
   for (op = i.operands; --op >= 0;)
@@ -3243,7 +3195,7 @@ check_word_reg ()
 }
 
 static int
-finalize_imm ()
+finalize_imm (void)
 {
   unsigned int overlap0, overlap1, overlap2;
 
@@ -3321,7 +3273,7 @@ finalize_imm ()
 }
 
 static int
-process_operands ()
+process_operands (void)
 {
   /* Default segment register this instruction will use for memory
      accesses.  0 means unknown.  This is only for optimizing out
@@ -3420,7 +3372,7 @@ process_operands ()
 }
 
 static const seg_entry *
-build_modrm_byte ()
+build_modrm_byte (void)
 {
   const seg_entry *default_seg = 0;
 
@@ -3711,7 +3663,7 @@ build_modrm_byte ()
 }
 
 static void
-output_branch ()
+output_branch (void)
 {
   char *p;
   int code16;
@@ -3789,7 +3741,7 @@ output_branch ()
 }
 
 static void
-output_jump ()
+output_jump (void)
 {
   char *p;
   int size;
@@ -3855,7 +3807,7 @@ output_jump ()
 }
 
 static void
-output_interseg_jump ()
+output_interseg_jump (void)
 {
   char *p;
   int size;
@@ -3919,7 +3871,7 @@ output_interseg_jump ()
 }
 
 static void
-output_insn ()
+output_insn (void)
 {
   fragS *insn_start_frag;
   offsetT insn_start_off;
@@ -4312,9 +4264,7 @@ static enum bfd_reloc_code_real got_reloc = NO_RELOC;
 static int cons_sign = -1;
 
 void
-x86_cons_fix_new (fragS *frag,
-		  unsigned int off,
-		  unsigned int len,
+x86_cons_fix_new (fragS *frag, unsigned int off, unsigned int len,
 		  expressionS *exp)
 {
   enum bfd_reloc_code_real r = reloc (len, 0, cons_sign, got_reloc);
@@ -4449,9 +4399,7 @@ lex_got (enum bfd_reloc_code_real *reloc,
 }
 
 void
-x86_cons (exp, size)
-     expressionS *exp;
-     int size;
+x86_cons (expressionS *exp, int size)
 {
   if (size == 4 || (object_64bit && size == 8))
     {
@@ -4601,11 +4549,8 @@ i386_immediate (char *imm_start)
   return 1;
 }
 
-static char *i386_scale PARAMS ((char *));
-
 static char *
-i386_scale (scale)
-     char *scale;
+i386_scale (char *scale)
 {
   offsetT val;
   char *save = input_line_pointer;
@@ -4652,12 +4597,8 @@ i386_scale (scale)
   return scale;
 }
 
-static int i386_displacement PARAMS ((char *, char *));
-
 static int
-i386_displacement (disp_start, disp_end)
-     char *disp_start;
-     char *disp_end;
+i386_displacement (char *disp_start, char *disp_end)
 {
   expressionS *exp;
   segT exp_seg = 0;
@@ -4839,14 +4780,11 @@ i386_displacement (disp_start, disp_end)
   return 1;
 }
 
-static int i386_index_check PARAMS ((const char *));
-
 /* Make sure the memory operand we've been dealt is valid.
    Return 1 on success, 0 on a failure.  */
 
 static int
-i386_index_check (operand_string)
-     const char *operand_string;
+i386_index_check (const char *operand_string)
 {
   int ok;
 #if INFER_ADDR_PREFIX
@@ -4952,8 +4890,7 @@ i386_index_check (operand_string)
    on error.  */
 
 static int
-i386_operand (operand_string)
-     char *operand_string;
+i386_operand (char *operand_string)
 {
   const reg_entry *r;
   char *end_op;
@@ -5718,8 +5655,7 @@ md_atof (type, litP, sizeP)
 static char output_invalid_buf[sizeof (unsigned char) * 2 + 6];
 
 static char *
-output_invalid (c)
-     int c;
+output_invalid (int c)
 {
   if (ISPRINT (c))
     snprintf (output_invalid_buf, sizeof (output_invalid_buf),
@@ -6083,7 +6019,7 @@ x86_64_target_format (void)
 /* Pick the target format to use.  */
 
 const char *
-i386_target_format ()
+i386_target_format (void)
 {
   if (!strcmp (default_arch, "x86_64"))
     {
@@ -6137,7 +6073,8 @@ i386_target_format ()
 #endif /* OBJ_MAYBE_ more than one  */
 
 #if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF))
-void i386_elf_emit_arch_note ()
+void
+i386_elf_emit_arch_note (void)
 {
   if (IS_ELF && cpu_arch_name != NULL)
     {
@@ -6228,8 +6165,7 @@ md_section_align (segment, size)
    size, since the offset is always the last part of the insn.  */
 
 long
-md_pcrel_from (fixP)
-     fixS *fixP;
+md_pcrel_from (fixS *fixP)
 {
   return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address;
 }
@@ -6237,8 +6173,7 @@ md_pcrel_from (fixP)
 #ifndef I386COFF
 
 static void
-s_bss (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_bss (int ignore ATTRIBUTE_UNUSED)
 {
   int temp;
 
@@ -6254,8 +6189,7 @@ s_bss (ignore)
 #endif
 
 void
-i386_validate_fix (fixp)
-     fixS *fixp;
+i386_validate_fix (fixS *fixp)
 {
   if (fixp->fx_subsy && fixp->fx_subsy == GOT_symbol)
     {
@@ -6644,22 +6578,19 @@ static struct intel_token cur_token, prev_token;
 #define T_SHR		15
 
 /* Prototypes for intel parser functions.  */
-static int intel_match_token	PARAMS ((int code));
-static void intel_get_token	PARAMS ((void));
-static void intel_putback_token	PARAMS ((void));
-static int intel_expr		PARAMS ((void));
-static int intel_e04		PARAMS ((void));
-static int intel_e05		PARAMS ((void));
-static int intel_e06		PARAMS ((void));
-static int intel_e09		PARAMS ((void));
-static int intel_bracket_expr	PARAMS ((void));
-static int intel_e10		PARAMS ((void));
-static int intel_e11		PARAMS ((void));
+static int intel_match_token (int);
+static void intel_putback_token	(void);
+static void intel_get_token (void);
+static int intel_expr (void);
+static int intel_e04 (void);
+static int intel_e05 (void);
+static int intel_e06 (void);
+static int intel_e09 (void);
+static int intel_e10 (void);
+static int intel_e11 (void);
 
 static int
-i386_intel_operand (operand_string, got_a_float)
-     char *operand_string;
-     int got_a_float;
+i386_intel_operand (char *operand_string, int got_a_float)
 {
   int ret;
   char *p;
@@ -6769,7 +6700,7 @@ i386_intel_operand (operand_string, got_a_float)
    expr'  cmpOp e04 expr'
 	| Empty  */
 static int
-intel_expr ()
+intel_expr (void)
 {
   /* XXX Implement the comparison operators.  */
   return intel_e04 ();
@@ -6780,7 +6711,7 @@ intel_expr ()
    e04'	addOp e05 e04'
 	| Empty  */
 static int
-intel_e04 ()
+intel_e04 (void)
 {
   int nregs = -1;
 
@@ -6809,7 +6740,7 @@ intel_e04 ()
    e05'	binOp e06 e05'
 	| Empty  */
 static int
-intel_e05 ()
+intel_e05 (void)
 {
   int nregs = ~NUM_ADDRESS_REGS;
 
@@ -6844,7 +6775,7 @@ intel_e05 ()
    e06'	mulOp e09 e06'
 	| Empty  */
 static int
-intel_e06 ()
+intel_e06 (void)
 {
   int nregs = ~NUM_ADDRESS_REGS;
 
@@ -6890,7 +6821,7 @@ intel_e06 ()
 	| : e10 e09'
 	| Empty */
 static int
-intel_e09 ()
+intel_e09 (void)
 {
   int nregs = ~NUM_ADDRESS_REGS;
   int in_offset = 0;
@@ -7104,7 +7035,7 @@ intel_e09 ()
 }
 
 static int
-intel_bracket_expr ()
+intel_bracket_expr (void)
 {
   int was_offset = intel_parser.op_modifier & (1 << T_OFFSET);
   const char *start = intel_parser.op_string;
@@ -7180,7 +7111,7 @@ intel_bracket_expr ()
    e10'	[ expr ] e10'
 	| Empty  */
 static int
-intel_e10 ()
+intel_e10 (void)
 {
   if (!intel_e11 ())
     return 0;
@@ -7210,7 +7141,7 @@ intel_e10 ()
 	| id
 	| constant  */
 static int
-intel_e11 ()
+intel_e11 (void)
 {
   switch (cur_token.code)
     {
@@ -7511,8 +7442,7 @@ intel_e11 ()
 /* Match the given token against cur_token. If they match, read the next
    token from the operand string.  */
 static int
-intel_match_token (code)
-     int code;
+intel_match_token (int code)
 {
   if (cur_token.code == code)
     {
@@ -7528,7 +7458,7 @@ intel_match_token (code)
 
 /* Read a new token from intel_parser.op_string and store it in cur_token.  */
 static void
-intel_get_token ()
+intel_get_token (void)
 {
   char *end_op;
   const reg_entry *reg;
@@ -7713,7 +7643,7 @@ intel_get_token ()
 /* Put cur_token back into the token stream and make cur_token point to
    prev_token.  */
 static void
-intel_putback_token ()
+intel_putback_token (void)
 {
   if (cur_token.code != T_NIL)
     {
