@@ -277,19 +277,9 @@ static int
 cs_to_section (struct coff_symbol *cs, struct objfile *objfile)
 {
   asection *sect = cs_to_bfd_section (cs, objfile);
-  int off = SECT_OFF_TEXT (objfile);
-  if (sect != NULL)
-    {
-      /* This is the section.  Figure out what SECT_OFF_* code it is.  */
-      if (bfd_get_section_flags (abfd, sect) & SEC_CODE)
-	off = SECT_OFF_TEXT (objfile);
-      else if (bfd_get_section_flags (abfd, sect) & SEC_LOAD)
-	off = SECT_OFF_DATA (objfile);
-      else
-	/* Just return the bfd section index. */
-	off = sect->index;
-    }
-  return off;
+  if (sect == NULL)
+    return SECT_OFF_TEXT (objfile);
+  return sect->index;
 }
 
 /* Return the address of the section of a COFF symbol.  */
@@ -711,6 +701,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
   long fcn_line_ptr = 0;
   int val;
   CORE_ADDR tmpaddr;
+  struct minimal_symbol *msym;
 
   /* Work around a stdio bug in SunOS4.1.1 (this makes me nervous....
      it's hard to know I've really worked around it.  The fix should be
@@ -903,6 +894,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
  	      }
 	    else
 	      {
+		asection *bfd_section = cs_to_bfd_section (cs, objfile);
 		sec = cs_to_section (cs, objfile);
 		tmpaddr = cs->c_value;
  		/* Statics in a PE file also get relocated */
@@ -912,7 +904,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
  		    || (pe_file && (cs->c_sclass == C_STAT)))
 		  tmpaddr += ANOFFSET (objfile->section_offsets, sec);
 
-		if (sec == SECT_OFF_TEXT (objfile))
+		if (bfd_section->flags & SEC_CODE)
 		  {
 		    ms_type =
 		      cs->c_sclass == C_EXT || cs->c_sclass == C_THUMBEXTFUNC
@@ -920,28 +912,26 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 		      mst_text : mst_file_text;
 		    tmpaddr = SMASH_TEXT_ADDRESS (tmpaddr);
 		  }
-		else if (sec == SECT_OFF_DATA (objfile))
+		else if (bfd_section->flags & SEC_ALLOC
+			 && bfd_section->flags & SEC_LOAD)
 		  {
 		    ms_type =
 		      cs->c_sclass == C_EXT || cs->c_sclass == C_THUMBEXT ?
 		      mst_data : mst_file_data;
 		  }
-		else if (sec == SECT_OFF_BSS (objfile))
+		else if (bfd_section->flags & SEC_ALLOC)
 		  {
 		    ms_type =
 		      cs->c_sclass == C_EXT || cs->c_sclass == C_THUMBEXT ?
-		      mst_data : mst_file_data;
+		      mst_bss : mst_file_bss;
 		  }
 		else
 		  ms_type = mst_unknown;
 	      }
 
-	    {
-	      struct minimal_symbol *msym;
-	      msym = record_minimal_symbol (cs, tmpaddr, ms_type, sec, objfile);
-	      if (msym)
-	        COFF_MAKE_MSYMBOL_SPECIAL (cs->c_sclass, msym);
-	    }
+	    msym = record_minimal_symbol (cs, tmpaddr, ms_type, sec, objfile);
+	    if (msym)
+	      COFF_MAKE_MSYMBOL_SPECIAL (cs->c_sclass, msym);
 
 	    if (SDB_TYPE (cs->c_type))
 	      {

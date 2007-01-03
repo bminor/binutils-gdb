@@ -1,3 +1,10 @@
+2007-01-03  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* coffread.c (cs_to_section): If bfd_section is found, always
+	return its section index.
+	(coff_symtab_read): Determine the minimal_symbol_type using the
+	bfd_section flags.
+
 2007-01-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 

@@ -55,7 +55,7 @@ set lib_opts "debug"
 set exec_opts [list debug shlib=$lib1_sl shlib=$lib2_sl]
 
 if {([istarget "*pc-cygwin"] || [istarget "*pc-mingw32"]) } {
-    lappend lib_opts "additional_flags=-Wl,--image-base,0x04000000"
+    lappend lib_opts "ldflags=-Wl,--image-base,0x04000000"
 }
 
 if [test_compiler_info "xlc-*"] {
