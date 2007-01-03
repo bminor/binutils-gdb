@@ -1,3 +1,13 @@
+2007-01-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (top.o): Update.
+	* top.c (gdb_readline_wrapper_done, gdb_readline_wrapper_result)
+	(saved_after_char_processing_hook, gdb_readline_wrapper_line)
+	(struct gdb_readline_wrapper_cleanup, gdb_readline_wrapper_cleanup):
+	New.
+	(gdb_readline_wrapper): Rewrite to use asynchronous readline.
+
 2007-01-03  Mark Kettenis  <kettenis@gnu.org>
 
 	* arm-linux-tdep.c (arm_linux_extract_return_value): Remove.

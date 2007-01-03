@@ -1,4 +1,4 @@
-# Copyright 2002 Free Software Foundation, Inc.
+# Copyright 2002, 2003, 2007 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -159,6 +159,14 @@ if [info exists env(INPUTRC)] {
 }
 set env(INPUTRC) "/dev/null"
 
+# The arrow key test relies on the standard VT100 bindings, so make
+# sure that an appropriate terminal is selected.  The same bug
+# doesn't show up if we use ^P / ^N instead.
+if [info exists env(TERM)] {
+    set old_term $env(TERM)
+}
+set env(TERM) "vt100"
+
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 
@@ -178,6 +186,18 @@ operate_and_get_next "operate-and-get-next with secondary prompt" \
   "p 5" "" \
   "end" ".* = 5"
 
+# Verify that arrow keys work in secondary prompts.  The control
+# sequence is a hard-coded VT100 up arrow.
+gdb_test "print 42" "\\\$\[0-9\]* = 42"
+set msg "arrow keys with secondary prompt"
+gdb_test_multiple "if 1 > 0\n\033\[A\033\[A\nend" $msg {
+    -re ".*\\\$\[0-9\]* = 42\r\n$gdb_prompt $" {
+	pass $msg
+    }
+    -re ".*Undefined command:.*$gdb_prompt $" {
+	fail $msg
+    }
+}
 
 # Now repeat the first test with a history file that fills the entire
 # history list.

@@ -47,6 +47,7 @@
 #include "doublest.h"
 #include "gdb_assert.h"
 #include "main.h"
+#include "event-loop.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -712,26 +713,111 @@ The filename in which to record the command history is \"%s\".\n"),
 }
 
 /* This is like readline(), but it has some gdb-specific behavior.
-   gdb can use readline in both the synchronous and async modes during
+   gdb may want readline in both the synchronous and async modes during
    a single gdb invocation.  At the ordinary top-level prompt we might
    be using the async readline.  That means we can't use
    rl_pre_input_hook, since it doesn't work properly in async mode.
    However, for a secondary prompt (" >", such as occurs during a
-   `define'), gdb just calls readline() directly, running it in
-   synchronous mode.  So for operate-and-get-next to work in this
-   situation, we have to switch the hooks around.  That is what
-   gdb_readline_wrapper is for.  */
+   `define'), gdb wants a synchronous response.
+
+   We used to call readline() directly, running it in synchronous
+   mode.  But mixing modes this way is not supported, and as of
+   readline 5.x it no longer works; the arrow keys come unbound during
+   the synchronous call.  So we make a nested call into the event
+   loop.  That's what gdb_readline_wrapper is for.  */
+
+/* A flag set as soon as gdb_readline_wrapper_line is called; we can't
+   rely on gdb_readline_wrapper_result, which might still be NULL if
+   the user types Control-D for EOF.  */
+static int gdb_readline_wrapper_done;
+
+/* The result of the current call to gdb_readline_wrapper, once a newline
+   is seen.  */
+static char *gdb_readline_wrapper_result;
+
+/* Any intercepted hook.  Operate-and-get-next sets this, expecting it
+   to be called after the newline is processed (which will redisplay
+   the prompt).  But in gdb_readline_wrapper we will not get a new
+   prompt until the next call, or until we return to the event loop.
+   So we disable this hook around the newline and restore it before we
+   return.  */
+static void (*saved_after_char_processing_hook) (void);
+
+/* This function is called when readline has seen a complete line of
+   text.  */
+
+static void
+gdb_readline_wrapper_line (char *line)
+{
+  gdb_assert (!gdb_readline_wrapper_done);
+  gdb_readline_wrapper_result = line;
+  gdb_readline_wrapper_done = 1;
+
+  /* Prevent operate-and-get-next from acting too early.  */
+  saved_after_char_processing_hook = after_char_processing_hook;
+  after_char_processing_hook = NULL;
+}
+
+struct gdb_readline_wrapper_cleanup
+  {
+    void (*handler_orig) (char *);
+    char *prompt_orig;
+    int already_prompted_orig;
+  };
+
+static void
+gdb_readline_wrapper_cleanup (void *arg)
+{
+  struct gdb_readline_wrapper_cleanup *cleanup = arg;
+
+  gdb_assert (rl_already_prompted == 1);
+  rl_already_prompted = cleanup->already_prompted_orig;
+  PROMPT (0) = cleanup->prompt_orig;
+
+  gdb_assert (input_handler == gdb_readline_wrapper_line);
+  input_handler = cleanup->handler_orig;
+  gdb_readline_wrapper_result = NULL;
+  gdb_readline_wrapper_done = 0;
+
+  after_char_processing_hook = saved_after_char_processing_hook;
+  saved_after_char_processing_hook = NULL;
+
+  xfree (cleanup);
+}
+
 char *
 gdb_readline_wrapper (char *prompt)
 {
-  /* Set the hook that works in this case.  */
-  if (after_char_processing_hook)
-    {
-      rl_pre_input_hook = (Function *) after_char_processing_hook;
-      after_char_processing_hook = NULL;
-    }
+  struct cleanup *back_to;
+  struct gdb_readline_wrapper_cleanup *cleanup;
+  char *retval;
 
-  return readline (prompt);
+  cleanup = xmalloc (sizeof (*cleanup));
+  cleanup->handler_orig = input_handler;
+  input_handler = gdb_readline_wrapper_line;
+
+  cleanup->prompt_orig = get_prompt ();
+  PROMPT (0) = prompt;
+  cleanup->already_prompted_orig = rl_already_prompted;
+
+  back_to = make_cleanup (gdb_readline_wrapper_cleanup, cleanup);
+
+  /* Display our prompt and prevent double prompt display.  */
+  display_gdb_prompt (NULL);
+  rl_already_prompted = 1;
+
+  if (after_char_processing_hook)
+    (*after_char_processing_hook) ();
+  gdb_assert (after_char_processing_hook == NULL);
+
+  /* gdb_do_one_event argument is unused.  */
+  while (gdb_do_one_event (NULL) >= 0)
+    if (gdb_readline_wrapper_done)
+      break;
+
+  retval = gdb_readline_wrapper_result;
+  do_cleanups (back_to);
+  return retval;
 }
 
 

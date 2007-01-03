@@ -1,3 +1,9 @@
+2007-01-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/readline.exp: Set $TERM.  Test arrow keys in
+	secondary prompts.
+
 2007-01-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.cp/classes.exp (test_pointers_to_class_members): Update expected
