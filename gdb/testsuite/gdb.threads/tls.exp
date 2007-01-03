@@ -246,7 +246,11 @@ foreach i [array names spin_threads] {
       incr thrs_in_spin
       select_thread $i
       set level $spin_threads_level($i)
-      gdb_test "up $level" ".*spin.*sem_wait.*" "thread $i up"
+      # We expect to be in sem_wait, but if the thread has not yet
+      # been scheduled, we might be in sem_post still.  We could be at
+      # any intermediate point in spin, too, but that is much less
+      # likely.
+      gdb_test "up $level" ".*spin.*sem_(wait|post).*" "thread $i up"
       check_thread_local $i 
     }
 }
