@@ -1,5 +1,10 @@
 2007-01-03  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (smallest_imm_type): Return unsigned int
+	instead of int.
+
+2007-01-03  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c: Convert to ISO C90 formatting
 	* config/tc-i386.h: Likewise.
 

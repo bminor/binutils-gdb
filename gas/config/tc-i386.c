@@ -918,7 +918,7 @@ fits_in_unsigned_long (offsetT num ATTRIBUTE_UNUSED)
 #endif
 }				/* fits_in_unsigned_long() */
 
-static int
+static unsigned int
 smallest_imm_type (offsetT num)
 {
   if (cpu_arch_flags != (Cpu186 | Cpu286 | Cpu386 | Cpu486 | CpuNo64))
