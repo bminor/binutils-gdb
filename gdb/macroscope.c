@@ -33,7 +33,7 @@
 struct macro_scope *
 sal_macro_scope (struct symtab_and_line sal)
 {
-  struct macro_source_file *main, *inclusion;
+  struct macro_source_file *main_file, *inclusion;
   struct macro_scope *ms;
 
   if (! sal.symtab
@@ -42,8 +42,8 @@ sal_macro_scope (struct symtab_and_line sal)
 
   ms = (struct macro_scope *) xmalloc (sizeof (*ms));
 
-  main = macro_main (sal.symtab->macro_table);
-  inclusion = macro_lookup_inclusion (main, sal.symtab->filename);
+  main_file = macro_main (sal.symtab->macro_table);
+  inclusion = macro_lookup_inclusion (main_file, sal.symtab->filename);
 
   if (inclusion)
     {
@@ -66,7 +66,7 @@ sal_macro_scope (struct symtab_and_line sal)
 
          For the time being, though, we'll just treat these as
          occurring at the end of the main source file.  */
-      ms->file = main;
+      ms->file = main_file;
       ms->line = -1;
 
       complaint (&symfile_complaints,
@@ -83,7 +83,6 @@ struct macro_scope *
 default_macro_scope (void)
 {
   struct symtab_and_line sal;
-  struct macro_source_file *main;
   struct macro_scope *ms;
 
   /* If there's a selected frame, use its PC.  */ 

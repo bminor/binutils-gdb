@@ -996,8 +996,8 @@ static int use_threadinfo_query;
 static int use_threadextra_query;
 
 /* Tokens for use by the asynchronous signal handlers for SIGINT.  */
-static void *sigint_remote_twice_token;
-static void *sigint_remote_token;
+static struct async_signal_handler *sigint_remote_twice_token;
+static struct async_signal_handler *sigint_remote_token;
 
 /* These are pointers to hook functions that may be set in order to
    modify resume/wait behavior for a particular architecture.  */
@@ -2945,11 +2945,9 @@ cleanup_sigint_signal_handler (void *dummy)
 {
   signal (SIGINT, handle_sigint);
   if (sigint_remote_twice_token)
-    delete_async_signal_handler ((struct async_signal_handler **)
-				 &sigint_remote_twice_token);
+    delete_async_signal_handler (&sigint_remote_twice_token);
   if (sigint_remote_token)
-    delete_async_signal_handler ((struct async_signal_handler **)
-				 &sigint_remote_token);
+    delete_async_signal_handler (&sigint_remote_token);
 }
 
 /* Send ^C to target to halt it.  Target will respond, and send us a

@@ -84,7 +84,7 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
     {"n", NUM_OPT, 1},
     {"s", START_OPT, 1},
     {"e", END_OPT, 1},
-    0
+    { 0, 0, 0 }
   };
 
   /* Get the options with their arguments. Keep track of what we

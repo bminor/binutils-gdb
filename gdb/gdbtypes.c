@@ -3305,7 +3305,7 @@ copy_type_recursive (struct objfile *objfile, struct type *type,
      can't, but at the moment it is not needed.  */
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
-    TYPE_FLOATFORMAT (new_type) == TYPE_FLOATFORMAT (type);
+    TYPE_FLOATFORMAT (new_type) = TYPE_FLOATFORMAT (type);
   else if (TYPE_CODE (type) == TYPE_CODE_STRUCT
 	   || TYPE_CODE (type) == TYPE_CODE_UNION
 	   || TYPE_CODE (type) == TYPE_CODE_TEMPLATE

@@ -252,7 +252,7 @@ pascal_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
       if (passed_a_ptr)
 	fprintf_filtered (stream, "(");
       fprintf_filtered (stream, "array ");
-      if (TYPE_LENGTH (type) >= 0 && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0
+      if (TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0
 	&& TYPE_ARRAY_UPPER_BOUND_TYPE (type) != BOUND_CANNOT_BE_DETERMINED)
 	fprintf_filtered (stream, "[%d..%d] ",
 			  TYPE_ARRAY_LOWER_BOUND_VALUE (type),

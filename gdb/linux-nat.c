@@ -2804,7 +2804,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
   if (cmdline_f || all)
     {
       sprintf (fname1, "/proc/%lld/cmdline", pid);
-      if ((procfile = fopen (fname1, "r")) > 0)
+      if ((procfile = fopen (fname1, "r")) != NULL)
 	{
 	  fgets (buffer, sizeof (buffer), procfile);
 	  printf_filtered ("cmdline = '%s'\n", buffer);
@@ -2834,7 +2834,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
   if (mappings_f || all)
     {
       sprintf (fname1, "/proc/%lld/maps", pid);
-      if ((procfile = fopen (fname1, "r")) > 0)
+      if ((procfile = fopen (fname1, "r")) != NULL)
 	{
 	  long long addr, endaddr, size, offset, inode;
 	  char permissions[8], device[8], filename[MAXPATHLEN];
@@ -2894,7 +2894,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
   if (status_f || all)
     {
       sprintf (fname1, "/proc/%lld/status", pid);
-      if ((procfile = fopen (fname1, "r")) > 0)
+      if ((procfile = fopen (fname1, "r")) != NULL)
 	{
 	  while (fgets (buffer, sizeof (buffer), procfile) != NULL)
 	    puts_filtered (buffer);
@@ -2906,7 +2906,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
   if (stat_f || all)
     {
       sprintf (fname1, "/proc/%lld/stat", pid);
-      if ((procfile = fopen (fname1, "r")) > 0)
+      if ((procfile = fopen (fname1, "r")) != NULL)
 	{
 	  int itmp;
 	  char ctmp;

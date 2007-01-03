@@ -762,7 +762,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
   static struct mi_opt opts[] =
   {
     {"o", OFFSET_OPT, 1},
-    0
+    { 0, 0, 0 }
   };
 
   while (1)
@@ -962,7 +962,7 @@ mi_cmd_data_write_memory (char *command, char **argv, int argc)
   static struct mi_opt opts[] =
   {
     {"o", OFFSET_OPT, 1},
-    0
+    { 0, 0, 0 }
   };
 
   while (1)

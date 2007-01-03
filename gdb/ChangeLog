@@ -1,5 +1,41 @@
 2007-01-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* ada-lang.c (find_struct_field): Initialize *byte_offset_p.
+	* breakpoint.c (do_enable_breakpoint): Ignore both mem_cnt and i.
+	* c-typeprint.c (c_type_print_varspec_suffix): Don't test length
+	greater than or equal to zero.
+	* m2-typeprint.c (m2_array): Likewise.
+	* p-typeprint.c (pascal_type_print_varspec_prefix): Likewise.
+	* gdbtypes.c (copy_type_recursive): Correct == typo.
+	* i386-tdep.c (i386_skip_prologue): Remove stray semicolon.
+	* linux-nat.c (linux_nat_info_proc_cmd): Don't compare a pointer
+	greater than zero.
+	* macroscope.c (sal_macro_scope): Don't name a local variable "main".
+	(default_macro_scope): Remove unused variable.
+	* prologue-value.h (pv_area_find_reg): Don't name an argument
+	"register".
+	* remote-fileio.c (remote_fio_func_map): Add missing braces.
+	* remote.c (sigint_remote_twice_token, sigint_remote_token): Change
+	type.
+	(cleanup_sigint_signal_handler): Remove casts.
+	* valprint.c (val_print): Use a volatile local for the modified
+	argument.
+	* varobj.c (languages): Remove extra array dimension.
+	(varobj_create): Correct access to languages array.
+	* mi/mi-cmd-break.c (mi_cmd_break_insert, mi_cmd_break_watch): Add
+	missing braces.
+	* mi/mi-cmd-disas.c (mi_cmd_disassemble): Likewise.
+	* mi/mi-cmd-env.c (mi_cmd_env_path, mi_cmd_env_dir): Likewise.
+	* mi/mi-getopt.c (mi_valid_noargs): Likewise.
+	* mi/mi-main.c (mi_cmd_data_read_memory): Likewise.
+	(mi_cmd_data_write_memory): Likewise.
+	* signals/signals.c (target_signal_to_string): Cast to int before
+	comparing.
+	* tui/tui-layout.c (init_and_make_win): Take and return a void *.
+	Update all callers.
+
+2007-01-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* NEWS: Mention pointer to member improvements.
 	* Makefile.in (gnu-v3-abi.o): Delete special rule.
 	(eval.o, gnu-v3-abi.o, ia64-tdep.o): Update.

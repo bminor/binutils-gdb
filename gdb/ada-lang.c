@@ -5628,7 +5628,7 @@ find_struct_field (char *name, struct type *type, int offset,
   if (field_type_p != NULL)
     *field_type_p = NULL;
   if (byte_offset_p != NULL)
-    *byte_offset_p;
+    *byte_offset_p = 0;
   if (bit_offset_p != NULL)
     *bit_offset_p = 0;
   if (bit_size_p != NULL)

@@ -7599,7 +7599,7 @@ is valid is not currently in scope.\n"), bpt->number);
 	      int mem_cnt = can_use_hardware_watchpoint (bpt->val);
 	      
 	      /* Hack around 'unused var' error for some targets here */
-	      (void) mem_cnt, i;
+	      (void) mem_cnt, (void) i;
 	      target_resources_ok = TARGET_CAN_USE_HARDWARE_WATCHPOINT (
 									bpt->type, i + mem_cnt, other_type_used);
 	      /* we can consider of type is bp_hardware_watchpoint, convert to 

@@ -1332,19 +1332,19 @@ static struct {
   char *name;
   void (*func)(char *);
 } remote_fio_func_map[] = {
-  "open", remote_fileio_func_open,
-  "close", remote_fileio_func_close,
-  "read", remote_fileio_func_read,
-  "write", remote_fileio_func_write,
-  "lseek", remote_fileio_func_lseek,
-  "rename", remote_fileio_func_rename,
-  "unlink", remote_fileio_func_unlink,
-  "stat", remote_fileio_func_stat,
-  "fstat", remote_fileio_func_fstat,
-  "gettimeofday", remote_fileio_func_gettimeofday,
-  "isatty", remote_fileio_func_isatty,
-  "system", remote_fileio_func_system,
-  NULL, NULL
+  { "open", remote_fileio_func_open },
+  { "close", remote_fileio_func_close },
+  { "read", remote_fileio_func_read },
+  { "write", remote_fileio_func_write },
+  { "lseek", remote_fileio_func_lseek },
+  { "rename", remote_fileio_func_rename },
+  { "unlink", remote_fileio_func_unlink },
+  { "stat", remote_fileio_func_stat },
+  { "fstat", remote_fileio_func_fstat },
+  { "gettimeofday", remote_fileio_func_gettimeofday },
+  { "isatty", remote_fileio_func_isatty },
+  { "system", remote_fileio_func_system },
+  { NULL, NULL }
 };
 
 static int

@@ -126,7 +126,7 @@ mi_cmd_env_path (char *command, char **argv, int argc)
   static struct mi_opt opts[] =
   {
     {"r", RESET_OPT, 0},
-    0
+    { 0, 0, 0 }
   };
 
   dont_repeat ();
@@ -198,7 +198,7 @@ mi_cmd_env_dir (char *command, char **argv, int argc)
   static struct mi_opt opts[] =
   {
     {"r", RESET_OPT, 0},
-    0
+    { 0, 0, 0 }
   };
 
   dont_repeat ();

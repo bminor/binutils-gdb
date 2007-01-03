@@ -285,7 +285,7 @@ int pv_area_store_would_trash (struct pv_area *area, pv_t addr);
    instead, and collecting all your information in one pass.  */
 int pv_area_find_reg (struct pv_area *area,
                       struct gdbarch *gdbarch,
-                      int register,
+                      int reg,
                       CORE_ADDR *offset_p);
 
 

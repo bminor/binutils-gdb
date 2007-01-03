@@ -1,6 +1,6 @@
 /* Target signal translation functions for GDB.
    Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002 Free Software Foundation, Inc.
+   2000, 2001, 2002, 2003, 2006 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
    This file is part of GDB.
@@ -219,7 +219,7 @@ static struct {
 char *
 target_signal_to_string (enum target_signal sig)
 {
-  if ((sig >= TARGET_SIGNAL_FIRST) && (sig <= TARGET_SIGNAL_LAST))
+  if ((int) sig >= TARGET_SIGNAL_FIRST && (int) sig <= TARGET_SIGNAL_LAST)
     return signals[sig].string;
   else
     return signals[TARGET_SIGNAL_UNKNOWN].string;
@@ -229,7 +229,7 @@ target_signal_to_string (enum target_signal sig)
 char *
 target_signal_to_name (enum target_signal sig)
 {
-  if ((sig >= TARGET_SIGNAL_FIRST) && (sig <= TARGET_SIGNAL_LAST)
+  if ((int) sig >= TARGET_SIGNAL_FIRST && (int) sig <= TARGET_SIGNAL_LAST
       && signals[sig].name != NULL)
     return signals[sig].name;
   else

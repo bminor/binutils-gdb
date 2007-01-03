@@ -326,8 +326,7 @@ struct language_specific
 };
 
 /* Array of known source language routines. */
-static struct language_specific
-  languages[vlang_end][sizeof (struct language_specific)] = {
+static struct language_specific languages[vlang_end] = {
   /* Unknown (try treating as C */
   {
    vlang_unknown,
@@ -518,7 +517,7 @@ varobj_create (char *objname,
 
       /* Set language info */
       lang = variable_language (var);
-      var->root->lang = languages[lang];
+      var->root->lang = &languages[lang];
 
       /* Set ourselves as our root */
       var->root->rootvar = var;

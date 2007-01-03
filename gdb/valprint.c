@@ -207,13 +207,12 @@ val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	   int deref_ref, int recurse, enum val_prettyprint pretty)
 {
   volatile struct gdb_exception except;
+  volatile enum val_prettyprint real_pretty = pretty;
   int ret = 0;
 
   struct type *real_type = check_typedef (type);
   if (pretty == Val_pretty_default)
-    {
-      pretty = prettyprint_structs ? Val_prettyprint : Val_no_prettyprint;
-    }
+    real_pretty = prettyprint_structs ? Val_prettyprint : Val_no_prettyprint;
 
   QUIT;
 
@@ -231,7 +230,7 @@ val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
   TRY_CATCH (except, RETURN_MASK_ERROR)
     {
       ret = LA_VAL_PRINT (type, valaddr, embedded_offset, address,
-			  stream, format, deref_ref, recurse, pretty);
+			  stream, format, deref_ref, recurse, real_pretty);
     }
   if (except.reason < 0)
     fprintf_filtered (stream, _("<error reading variable>"));

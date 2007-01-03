@@ -90,7 +90,7 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
     {"c", CONDITION_OPT, 1},
     {"i", IGNORE_COUNT_OPT, 1},
     {"p", THREAD_OPT, 1},
-    0
+    { 0, 0, 0 }
   };
 
   /* Parse arguments. It could be -r or -h or -t, <location> or ``--''
@@ -196,7 +196,7 @@ mi_cmd_break_watch (char *command, char **argv, int argc)
   {
     {"r", READ_OPT, 0},
     {"a", ACCESS_OPT, 0},
-    0
+    { 0, 0, 0 }
   };
 
   /* Parse arguments. */

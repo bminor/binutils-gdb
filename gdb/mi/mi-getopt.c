@@ -82,7 +82,7 @@ mi_valid_noargs (const char *prefix, int argc, char **argv)
   char *optarg;
   static struct mi_opt opts[] =
   {
-    0
+    { 0, 0, 0 }
   };
 
   if (mi_getopt (prefix, argc, argv, opts, &optind, &optarg) == -1)
