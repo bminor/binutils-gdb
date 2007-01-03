@@ -1,3 +1,8 @@
+2007-01-03  David Daney  <ddaney@avtrex.com>
+
+	* config/tc-mips.c (md_show_usage):  Clean up -mno-shared
+	documentation.
+
 2006-12-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.h (ShiftCount): Fix a comment typo.

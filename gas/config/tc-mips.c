@@ -14832,7 +14832,6 @@ MIPS options:\n\
 -mfix-vr4130		work around VR4130 mflo/mfhi errata\n\
 -mgp32			use 32-bit GPRs, regardless of the chosen ISA\n\
 -mfp32			use 32-bit FPRs, regardless of the chosen ISA\n\
--mno-shared		optimize output for executables\n\
 -msym32			assume all symbols have 32-bit values\n\
 -O0			remove unneeded NOPs, do not swap branches\n\
 -O			remove unneeded NOPs and swap branches\n\
@@ -14846,7 +14845,7 @@ MIPS options:\n\
 -xgot			assume a 32 bit GOT\n\
 -mpdr, -mno-pdr		enable/disable creation of .pdr sections\n\
 -mshared, -mno-shared   disable/enable .cpload optimization for\n\
-                        non-shared code\n\
+                        position dependent (non shared) code\n\
 -mabi=ABI		create ABI conformant object file for:\n"));
 
   first = 1;
