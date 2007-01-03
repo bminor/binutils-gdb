@@ -1,7 +1,8 @@
 /* Abstraction of GNU v3 abi.
    Contributed by Jim Blandy <jimb@redhat.com>
 
-   Copyright (C) 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
+   Copyright (C) 2001, 2002, 2003, 2005, 2006
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,6 +26,8 @@
 #include "cp-abi.h"
 #include "cp-support.h"
 #include "demangle.h"
+#include "valprint.h"
+
 #include "gdb_assert.h"
 #include "gdb_string.h"
 
@@ -274,77 +277,92 @@ gnuv3_rtti_type (struct value *value,
   return run_time_type;
 }
 
+/* Find the vtable for CONTAINER and return a value of the correct
+   vtable type for this architecture.  */
+
+static struct value *
+gnuv3_get_vtable (struct value *container)
+{
+  struct type *vtable_type = gdbarch_data (current_gdbarch,
+					   vtable_type_gdbarch_data);
+  struct type *vtable_pointer_type;
+  struct value *vtable_pointer;
+  CORE_ADDR vtable_pointer_address, vtable_address;
+
+  /* We do not consult the debug information to find the virtual table.
+     The ABI specifies that it is always at offset zero in any class,
+     and debug information may not represent it.  We won't issue an
+     error if there's a class with virtual functions but no virtual table
+     pointer, but something's already gone seriously wrong if that
+     happens.
+
+     We avoid using value_contents on principle, because the object might
+     be large.  */
+
+  /* Find the type "pointer to virtual table".  */
+  vtable_pointer_type = lookup_pointer_type (vtable_type);
+
+  /* Load it from the start of the class.  */
+  vtable_pointer_address = value_as_address (value_addr (container));
+  vtable_pointer = value_at (vtable_pointer_type, vtable_pointer_address);
+  vtable_address = value_as_address (vtable_pointer);
+
+  /* Correct it to point at the start of the virtual table, rather
+     than the address point.  */
+  return value_at_lazy (vtable_type,
+			vtable_address - vtable_address_point_offset ());
+}
+
+/* Return a function pointer for CONTAINER's VTABLE_INDEX'th virtual
+   function, of type FNTYPE.  */
+
+static struct value *
+gnuv3_get_virtual_fn (struct value *container, struct type *fntype,
+		      int vtable_index)
+{
+  struct value *vtable = gnuv3_get_vtable (container);
+  struct value *vfn;
+
+  /* Fetch the appropriate function pointer from the vtable.  */
+  vfn = value_subscript (value_field (vtable, vtable_field_virtual_functions),
+                         value_from_longest (builtin_type_int, vtable_index));
+
+  /* If this architecture uses function descriptors directly in the vtable,
+     then the address of the vtable entry is actually a "function pointer"
+     (i.e. points to the descriptor).  We don't need to scale the index
+     by the size of a function descriptor; GCC does that before outputing
+     debug information.  */
+  if (gdbarch_vtable_function_descriptors (current_gdbarch))
+    vfn = value_addr (vfn);
+
+  /* Cast the function pointer to the appropriate type.  */
+  vfn = value_cast (lookup_pointer_type (fntype), vfn);
+
+  return vfn;
+}
+
+/* GNU v3 implementation of value_virtual_fn_field.  See cp-abi.h
+   for a description of the arguments.  */
 
 static struct value *
 gnuv3_virtual_fn_field (struct value **value_p,
                         struct fn_field *f, int j,
-			struct type *type, int offset)
+			struct type *vfn_base, int offset)
 {
-  struct type *vtable_type = gdbarch_data (current_gdbarch,
-					   vtable_type_gdbarch_data);
-  struct value *value = *value_p;
-  struct type *values_type = check_typedef (value_type (value));
-  struct type *vfn_base;
-  CORE_ADDR vtable_address;
-  struct value *vtable;
-  struct value *vfn;
+  struct type *values_type = check_typedef (value_type (*value_p));
 
   /* Some simple sanity checks.  */
   if (TYPE_CODE (values_type) != TYPE_CODE_CLASS)
     error (_("Only classes can have virtual functions."));
 
-  /* Find the base class that defines this virtual function.  */
-  vfn_base = TYPE_FN_FIELD_FCONTEXT (f, j);
-  if (! vfn_base)
-    /* In programs compiled with G++ version 1, the debug info doesn't
-       say which base class defined the virtual function.  We'll guess
-       it's the same base class that has our vtable; this is wrong for
-       multiple inheritance, but it's better than nothing.  */
-    vfn_base = TYPE_VPTR_BASETYPE (type);
-
-  /* This type may have been defined before its virtual function table
-     was.  If so, fill in the virtual function table entry for the
-     type now.  */
-  if (TYPE_VPTR_FIELDNO (vfn_base) < 0)
-    fill_in_vptr_fieldno (vfn_base);
-  if (TYPE_VPTR_FIELDNO (vfn_base) < 0)
-    error (_("Could not find virtual table pointer for class \"%s\"."),
-	   TYPE_TAG_NAME (vfn_base) ? TYPE_TAG_NAME (vfn_base) : "<unknown>");
-
-  /* Now that we know which base class is defining our virtual
-     function, cast our value to that baseclass.  This takes care of
-     any necessary `this' adjustments.  */
+  /* Cast our value to the base class which defines this virtual
+     function.  This takes care of any necessary `this'
+     adjustments.  */
   if (vfn_base != values_type)
-    value = value_cast (vfn_base, value);
+    *value_p = value_cast (vfn_base, *value_p);
 
-  /* Now value is an object of the appropriate base type.  Fetch its
-     virtual table.  */
-  /* It might be possible to do this cast at the same time as the above.
-     Does multiple inheritance affect this?
-     Can this even trigger, or is TYPE_VPTR_BASETYPE idempotent?
-  */
-  if (TYPE_VPTR_BASETYPE (vfn_base) != vfn_base)
-    value = value_cast (TYPE_VPTR_BASETYPE (vfn_base), value);
-  vtable_address
-    = value_as_address (value_field (value, TYPE_VPTR_FIELDNO (vfn_base)));
-
-  vtable = value_at_lazy (vtable_type,
-                          vtable_address - vtable_address_point_offset ());
-
-  /* Fetch the appropriate function pointer from the vtable.  */
-  vfn = value_subscript (value_field (vtable, vtable_field_virtual_functions),
-                         value_from_longest (builtin_type_int,
-                                             TYPE_FN_FIELD_VOFFSET (f, j)));
-
-  /* Cast the function pointer to the appropriate type.  */
-  vfn = value_cast (lookup_pointer_type (TYPE_FN_FIELD_TYPE (f, j)),
-                    vfn);
-
-  /* Is (type)value always numerically the same as (vfn_base)value?
-     If so we can spare this cast and use one of the ones above.  */
-  *value_p = value_addr (value_cast (type, *value_p));
-
-  return vfn;
+  return gnuv3_get_virtual_fn (*value_p, TYPE_FN_FIELD_TYPE (f, j),
+			       TYPE_FN_FIELD_VOFFSET (f, j));
 }
 
 /* Compute the offset of the baseclass which is
@@ -416,6 +434,245 @@ gnuv3_baseclass_offset (struct type *type, int index, const bfd_byte *valaddr,
   return base_offset;
 }
 
+/* Locate a virtual method in DOMAIN or its non-virtual base classes
+   which has virtual table index VOFFSET.  The method has an associated
+   "this" adjustment of ADJUSTMENT bytes.  */
+
+const char *
+gnuv3_find_method_in (struct type *domain, CORE_ADDR voffset,
+		      LONGEST adjustment)
+{
+  int i;
+  const char *physname;
+
+  /* Search this class first.  */
+  physname = NULL;
+  if (adjustment == 0)
+    {
+      int len;
+
+      len = TYPE_NFN_FIELDS (domain);
+      for (i = 0; i < len; i++)
+	{
+	  int len2, j;
+	  struct fn_field *f;
+
+	  f = TYPE_FN_FIELDLIST1 (domain, i);
+	  len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
+
+	  check_stub_method_group (domain, i);
+	  for (j = 0; j < len2; j++)
+	    if (TYPE_FN_FIELD_VOFFSET (f, j) == voffset)
+	      return TYPE_FN_FIELD_PHYSNAME (f, j);
+	}
+    }
+
+  /* Next search non-virtual bases.  If it's in a virtual base,
+     we're out of luck.  */
+  for (i = 0; i < TYPE_N_BASECLASSES (domain); i++)
+    {
+      int pos;
+      struct type *basetype;
+
+      if (BASETYPE_VIA_VIRTUAL (domain, i))
+	continue;
+
+      pos = TYPE_BASECLASS_BITPOS (domain, i) / 8;
+      basetype = TYPE_FIELD_TYPE (domain, i);
+      /* Recurse with a modified adjustment.  We don't need to adjust
+	 voffset.  */
+      if (adjustment >= pos && adjustment < pos + TYPE_LENGTH (basetype))
+	return gnuv3_find_method_in (basetype, voffset, adjustment - pos);
+    }
+
+  return NULL;
+}
+
+/* GNU v3 implementation of cplus_print_method_ptr.  */
+
+static void
+gnuv3_print_method_ptr (const gdb_byte *contents,
+			struct type *type,
+			struct ui_file *stream)
+{
+  CORE_ADDR ptr_value;
+  LONGEST adjustment;
+  struct type *domain;
+  int vbit;
+
+  domain = TYPE_DOMAIN_TYPE (type);
+
+  /* Extract the pointer to member.  */
+  ptr_value = extract_typed_address (contents, builtin_type_void_func_ptr);
+  contents += TYPE_LENGTH (builtin_type_void_func_ptr);
+  adjustment = extract_signed_integer (contents,
+				       TYPE_LENGTH (builtin_type_long));
+
+  if (!gdbarch_vbit_in_delta (current_gdbarch))
+    {
+      vbit = ptr_value & 1;
+      ptr_value = ptr_value ^ vbit;
+    }
+  else
+    {
+      vbit = adjustment & 1;
+      adjustment = adjustment >> 1;
+    }
+
+  /* Check for NULL.  */
+  if (ptr_value == 0 && vbit == 0)
+    {
+      fprintf_filtered (stream, "NULL");
+      return;
+    }
+
+  /* Search for a virtual method.  */
+  if (vbit)
+    {
+      CORE_ADDR voffset;
+      const char *physname;
+
+      /* It's a virtual table offset, maybe in this class.  Search
+	 for a field with the correct vtable offset.  First convert it
+	 to an index, as used in TYPE_FN_FIELD_VOFFSET.  */
+      voffset = ptr_value / TYPE_LENGTH (builtin_type_long);
+
+      physname = gnuv3_find_method_in (domain, voffset, adjustment);
+
+      /* If we found a method, print that.  We don't bother to disambiguate
+	 possible paths to the method based on the adjustment.  */
+      if (physname)
+	{
+	  char *demangled_name = cplus_demangle (physname,
+						 DMGL_ANSI | DMGL_PARAMS);
+	  if (demangled_name != NULL)
+	    {
+	      fprintf_filtered (stream, "&virtual ");
+	      fputs_filtered (demangled_name, stream);
+	      xfree (demangled_name);
+	      return;
+	    }
+	}
+    }
+
+  /* We didn't find it; print the raw data.  */
+  if (vbit)
+    {
+      fprintf_filtered (stream, "&virtual table offset ");
+      print_longest (stream, 'd', 1, ptr_value);
+    }
+  else
+    print_address_demangle (ptr_value, stream, demangle);
+
+  if (adjustment)
+    {
+      fprintf_filtered (stream, ", this adjustment ");
+      print_longest (stream, 'd', 1, adjustment);
+    }
+}
+
+/* GNU v3 implementation of cplus_method_ptr_size.  */
+
+static int
+gnuv3_method_ptr_size (void)
+{
+  return 2 * TYPE_LENGTH (builtin_type_void_data_ptr);
+}
+
+/* GNU v3 implementation of cplus_make_method_ptr.  */
+
+static void
+gnuv3_make_method_ptr (gdb_byte *contents, CORE_ADDR value, int is_virtual)
+{
+  int size = TYPE_LENGTH (builtin_type_void_data_ptr);
+
+  /* FIXME drow/2006-12-24: The adjustment of "this" is currently
+     always zero, since the method pointer is of the correct type.
+     But if the method pointer came from a base class, this is
+     incorrect - it should be the offset to the base.  The best
+     fix might be to create the pointer to member pointing at the
+     base class and cast it to the derived class, but that requires
+     support for adjusting pointers to members when casting them -
+     not currently supported by GDB.  */
+
+  if (!gdbarch_vbit_in_delta (current_gdbarch))
+    {
+      store_unsigned_integer (contents, size, value | is_virtual);
+      store_unsigned_integer (contents + size, size, 0);
+    }
+  else
+    {
+      store_unsigned_integer (contents, size, value);
+      store_unsigned_integer (contents + size, size, is_virtual);
+    }
+}
+
+/* GNU v3 implementation of cplus_method_ptr_to_value.  */
+
+static struct value *
+gnuv3_method_ptr_to_value (struct value **this_p, struct value *method_ptr)
+{
+  const gdb_byte *contents = value_contents (method_ptr);
+  CORE_ADDR ptr_value;
+  struct type *final_type, *method_type;
+  LONGEST adjustment;
+  struct value *adjval;
+  int vbit;
+
+  final_type = TYPE_DOMAIN_TYPE (check_typedef (value_type (method_ptr)));
+  final_type = lookup_pointer_type (final_type);
+
+  method_type = TYPE_TARGET_TYPE (check_typedef (value_type (method_ptr)));
+
+  ptr_value = extract_typed_address (contents, builtin_type_void_func_ptr);
+  contents += TYPE_LENGTH (builtin_type_void_func_ptr);
+  adjustment = extract_signed_integer (contents,
+				       TYPE_LENGTH (builtin_type_long));
+
+  if (!gdbarch_vbit_in_delta (current_gdbarch))
+    {
+      vbit = ptr_value & 1;
+      ptr_value = ptr_value ^ vbit;
+    }
+  else
+    {
+      vbit = adjustment & 1;
+      adjustment = adjustment >> 1;
+    }
+
+  /* First convert THIS to match the containing type of the pointer to
+     member.  This cast may adjust the value of THIS.  */
+  *this_p = value_cast (final_type, *this_p);
+
+  /* Then apply whatever adjustment is necessary.  This creates a somewhat
+     strange pointer: it claims to have type FINAL_TYPE, but in fact it
+     might not be a valid FINAL_TYPE.  For instance, it might be a
+     base class of FINAL_TYPE.  And if it's not the primary base class,
+     then printing it out as a FINAL_TYPE object would produce some pretty
+     garbage.
+
+     But we don't really know the type of the first argument in
+     METHOD_TYPE either, which is why this happens.  We can't
+     dereference this later as a FINAL_TYPE, but once we arrive in the
+     called method we'll have debugging information for the type of
+     "this" - and that'll match the value we produce here.
+
+     You can provoke this case by casting a Base::* to a Derived::*, for
+     instance.  */
+  *this_p = value_cast (builtin_type_void_data_ptr, *this_p);
+  adjval = value_from_longest (builtin_type_long, adjustment);
+  *this_p = value_add (*this_p, adjval);
+  *this_p = value_cast (final_type, *this_p);
+
+  if (vbit)
+    {
+      LONGEST voffset = ptr_value / TYPE_LENGTH (builtin_type_long);
+      return gnuv3_get_virtual_fn (value_ind (*this_p), method_type, voffset);
+    }
+  else
+    return value_from_pointer (lookup_pointer_type (method_type), ptr_value);
+}
+
 static void
 init_gnuv3_ops (void)
 {
@@ -433,6 +690,10 @@ init_gnuv3_ops (void)
   gnu_v3_abi_ops.rtti_type = gnuv3_rtti_type;
   gnu_v3_abi_ops.virtual_fn_field = gnuv3_virtual_fn_field;
   gnu_v3_abi_ops.baseclass_offset = gnuv3_baseclass_offset;
+  gnu_v3_abi_ops.print_method_ptr = gnuv3_print_method_ptr;
+  gnu_v3_abi_ops.method_ptr_size = gnuv3_method_ptr_size;
+  gnu_v3_abi_ops.make_method_ptr = gnuv3_make_method_ptr;
+  gnu_v3_abi_ops.method_ptr_to_value = gnuv3_method_ptr_to_value;
 }
 
 extern initialize_file_ftype _initialize_gnu_v3_abi; /* -Wmissing-prototypes */

@@ -389,29 +389,19 @@ proc test_print_mi_member_types {} {
     # Print the types of qualified members; none of these tests pass today.
 
     # Print all members of g_A.
-    setup_kfail "gdb/2092" "*-*-*"
     gdb_test "ptype g_A.A::a" "type = int"
-    setup_kfail "gdb/2092" "*-*-*"
     gdb_test "ptype g_A.A::x" "type = int"
 
     # Print all members of g_B.
-    setup_kfail "gdb/2092" "*-*-*"
     gdb_test "ptype g_B.A::a" "type = int"
-    setup_kfail "gdb/2092" "*-*-*"
     gdb_test "ptype g_B.A::x" "type = int"
-    setup_kfail "gdb/2092" "*-*-*"
     gdb_test "ptype g_B.B::b" "type = int"
-    setup_kfail "gdb/2092" "*-*-*"
     gdb_test "ptype g_B.B::x" "type = int"
 
     # Print all members of g_C.
-    setup_kfail "gdb/2092" "*-*-*"
     gdb_test "ptype g_C.A::a" "type = int"
-    setup_kfail "gdb/2092" "*-*-*"
     gdb_test "ptype g_C.A::x" "type = int"
-    setup_kfail "gdb/2092" "*-*-*"
     gdb_test "ptype g_C.C::c" "type = int"
-    setup_kfail "gdb/2092" "*-*-*"
     gdb_test "ptype g_C.C::x" "type = int"
 
     # Print all members of g_D.
@@ -423,9 +413,6 @@ proc test_print_mi_member_types {} {
 
     set name "ptype g_D.A::a"
     gdb_test_multiple "ptype g_D.A::a" $name {
-	-re "Attempt to take address of non-lval$nl$gdb_prompt $" {
-	    kfail "gdb/2092" "$name"
-	}
 	-re "type = int$nl$gdb_prompt $" {
 	    kfail "gdb/68" "ptype g_D.A::a"
 	}
@@ -433,25 +420,16 @@ proc test_print_mi_member_types {} {
 
     set name "ptype g_D.A::x"
     gdb_test_multiple "ptype g_D.A::x" $name {
-	-re "Attempt to take address of non-lval$nl$gdb_prompt $" {
-	    kfail "gdb/2092" "$name"
-	}
 	-re "type = int$nl$gdb_prompt $" {
 	    kfail "gdb/68" "ptype g_D.A::x"
 	}
     }
 
-    setup_kfail "gdb/2092" "*-*-*"
     gdb_test "ptype g_D.B::b" "type = int"
-    setup_kfail "gdb/2092" "*-*-*"
     gdb_test "ptype g_D.B::x" "type = int"
-    setup_kfail "gdb/2092" "*-*-*"
     gdb_test "ptype g_D.C::c" "type = int"
-    setup_kfail "gdb/2092" "*-*-*"
     gdb_test "ptype g_D.C::x" "type = int"
-    setup_kfail "gdb/2092" "*-*-*"
     gdb_test "ptype g_D.D::d" "type = int"
-    setup_kfail "gdb/2092" "*-*-*"
     gdb_test "ptype g_D.D::x" "type = int"
 
     # Print all members of g_E.
@@ -459,9 +437,6 @@ proc test_print_mi_member_types {} {
 
     set name "ptype g_E.A::a"
     gdb_test_multiple "ptype g_E.A::a" $name {
-	-re "Attempt to take address of non-lval$nl$gdb_prompt $" {
-	    kfail "gdb/2092" "$name"
-	}
 	-re "type = int$nl$gdb_prompt $" {
 	    kfail "gdb/68" "ptype g_E.A::a"
 	}
@@ -469,29 +444,18 @@ proc test_print_mi_member_types {} {
 
     set name "ptype g_E.A::x"
     gdb_test_multiple "ptype g_E.A::x" $name {
-	-re "Attempt to take address of non-lval$nl$gdb_prompt $" {
-	    kfail "gdb/2092" "$name"
-	}
 	-re "type = int$nl$gdb_prompt $" {
 	    kfail "gdb/68" "ptype g_E.A::x"
 	}
     }
 
-    setup_kfail "gdb/2092" "*-*-*"
     gdb_test "ptype g_E.B::b" "type = int"
-    setup_kfail "gdb/2092" "*-*-*"
     gdb_test "ptype g_E.B::x" "type = int"
-    setup_kfail "gdb/2092" "*-*-*"
     gdb_test "ptype g_E.C::c" "type = int"
-    setup_kfail "gdb/2092" "*-*-*"
     gdb_test "ptype g_E.C::x" "type = int"
-    setup_kfail "gdb/2092" "*-*-*"
     gdb_test "ptype g_E.D::d" "type = int"
-    setup_kfail "gdb/2092" "*-*-*"
     gdb_test "ptype g_E.D::x" "type = int"
-    setup_kfail "gdb/2092" "*-*-*"
     gdb_test "ptype g_E.E::e" "type = int"
-    setup_kfail "gdb/2092" "*-*-*"
     gdb_test "ptype g_E.E::x" "type = int"
 }
 

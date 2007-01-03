@@ -1,7 +1,8 @@
 /* Perform non-arithmetic operations on values, for GDB.
 
    Copyright (C) 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+   2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -97,14 +98,15 @@ static struct value *value_struct_elt_for_reference (struct type *domain,
 						     struct type *curtype,
 						     char *name,
 						     struct type *intype,
+						     int want_address,
 						     enum noside noside);
 
 static struct value *value_namespace_elt (const struct type *curtype,
-					  char *name,
+					  char *name, int want_address,
 					  enum noside noside);
 
 static struct value *value_maybe_namespace_elt (const struct type *curtype,
-						char *name,
+						char *name, int want_address,
 						enum noside noside);
 
 static CORE_ADDR allocate_space_in_inferior (int);
@@ -259,6 +261,7 @@ value_cast_pointers (struct type *type, struct value *arg2)
     }
 
   /* No superclass found, just change the pointer type.  */
+  arg2 = value_copy (arg2);
   deprecated_set_value_type (arg2, type);
   arg2 = value_change_enclosing_type (arg2, type);
   set_value_pointed_to_offset (arg2, 0);	/* pai: chk_val */
@@ -366,33 +369,24 @@ value_cast (struct type *type, struct value *arg2)
     return value_from_double (type, value_as_double (arg2));
   else if ((code1 == TYPE_CODE_INT || code1 == TYPE_CODE_ENUM
 	    || code1 == TYPE_CODE_RANGE)
-	   && (scalar || code2 == TYPE_CODE_PTR))
+	   && (scalar || code2 == TYPE_CODE_PTR
+	       || code2 == TYPE_CODE_MEMBERPTR))
     {
       LONGEST longest;
 
-      if (deprecated_hp_som_som_object_present	/* if target compiled by HP aCC */
-	  && (code2 == TYPE_CODE_PTR))
+      /* If target compiled by HP aCC.  */
+      if (deprecated_hp_som_som_object_present
+	  && code2 == TYPE_CODE_MEMBERPTR)
 	{
 	  unsigned int *ptr;
 	  struct value *retvalp;
 
-	  switch (TYPE_CODE (TYPE_TARGET_TYPE (type2)))
-	    {
-	      /* With HP aCC, pointers to data members have a bias */
-	    case TYPE_CODE_MEMBER:
-	      retvalp = value_from_longest (type, value_as_long (arg2));
-	      /* force evaluation */
-	      ptr = (unsigned int *) value_contents (retvalp);
-	      *ptr &= ~0x20000000;	/* zap 29th bit to remove bias */
-	      return retvalp;
-
-	      /* While pointers to methods don't really point to a function */
-	    case TYPE_CODE_METHOD:
-	      error (_("Pointers to methods not supported with HP aCC"));
-
-	    default:
-	      break;		/* fall out and go to normal handling */
-	    }
+	  /* With HP aCC, pointers to data members have a bias.  */
+	  retvalp = value_from_longest (type, value_as_long (arg2));
+	  /* force evaluation */
+	  ptr = (unsigned int *) value_contents (retvalp);
+	  *ptr &= ~0x20000000;	/* zap 29th bit to remove bias */
+	  return retvalp;
 	}
 
       /* When we cast pointers to integers, we mustn't use
@@ -434,11 +428,26 @@ value_cast (struct type *type, struct value *arg2)
 	}
       return value_from_longest (type, longest);
     }
+  else if (code1 == TYPE_CODE_METHODPTR && code2 == TYPE_CODE_INT
+	   && value_as_long (arg2) == 0)
+    {
+      struct value *result = allocate_value (type);
+      cplus_make_method_ptr (value_contents_writeable (result), 0, 0);
+      return result;
+    }
+  else if (code1 == TYPE_CODE_MEMBERPTR && code2 == TYPE_CODE_INT
+	   && value_as_long (arg2) == 0)
+    {
+      /* The Itanium C++ ABI represents NULL pointers to members as
+	 minus one, instead of biasing the normal case.  */
+      return value_from_longest (type, -1);
+    }
   else if (TYPE_LENGTH (type) == TYPE_LENGTH (type2))
     {
       if (code1 == TYPE_CODE_PTR && code2 == TYPE_CODE_PTR)
 	return value_cast_pointers (type, arg2);
 
+      arg2 = value_copy (arg2);
       deprecated_set_value_type (arg2, type);
       arg2 = value_change_enclosing_type (arg2, type);
       set_value_pointed_to_offset (arg2, 0);	/* pai: chk_val */
@@ -940,9 +949,6 @@ value_ind (struct value *arg1)
 
   base_type = check_typedef (value_type (arg1));
 
-  if (TYPE_CODE (base_type) == TYPE_CODE_MEMBER)
-    error (_("not implemented: member types in value_ind"));
-
   /* Allow * on an integer so we can cast it to whatever we want.
      This returns an int, which seems like the most C-like thing
      to do.  "long long" variables are rare enough that
@@ -957,9 +963,17 @@ value_ind (struct value *arg1)
       /* Get the real type of the enclosing object */
       enc_type = check_typedef (value_enclosing_type (arg1));
       enc_type = TYPE_TARGET_TYPE (enc_type);
-      /* Retrieve the enclosing object pointed to */
-      arg2 = value_at_lazy (enc_type, (value_as_address (arg1)
-				       - value_pointed_to_offset (arg1)));
+
+      if (TYPE_CODE (check_typedef (enc_type)) == TYPE_CODE_FUNC
+	  || TYPE_CODE (check_typedef (enc_type)) == TYPE_CODE_METHOD)
+	/* For functions, go through find_function_addr, which knows
+	   how to handle function descriptors.  */
+	arg2 = value_at_lazy (enc_type, find_function_addr (arg1, NULL));
+      else
+	/* Retrieve the enclosing object pointed to */
+	arg2 = value_at_lazy (enc_type, (value_as_address (arg1)
+					 - value_pointed_to_offset (arg1)));
+
       /* Re-adjust type */
       deprecated_set_value_type (arg2, TYPE_TARGET_TYPE (base_type));
       /* Add embedding info */
@@ -1599,9 +1613,6 @@ value_struct_elt (struct value **argp, struct value **args,
       t = check_typedef (value_type (*argp));
     }
 
-  if (TYPE_CODE (t) == TYPE_CODE_MEMBER)
-    error (_("not implemented: member type in value_struct_elt"));
-
   if (TYPE_CODE (t) != TYPE_CODE_STRUCT
       && TYPE_CODE (t) != TYPE_CODE_UNION)
     error (_("Attempt to extract a component of a value that is not a %s."), err);
@@ -1797,9 +1808,6 @@ value_find_oload_method_list (struct value **argp, char *method, int offset,
 	*argp = coerce_array (*argp);
       t = check_typedef (value_type (*argp));
     }
-
-  if (TYPE_CODE (t) == TYPE_CODE_MEMBER)
-    error (_("Not implemented: member type in value_find_oload_lis"));
 
   if (TYPE_CODE (t) != TYPE_CODE_STRUCT
       && TYPE_CODE (t) != TYPE_CODE_UNION)
@@ -2334,9 +2342,6 @@ check_field (struct value *arg1, const char *name)
       t = TYPE_TARGET_TYPE (t);
     }
 
-  if (TYPE_CODE (t) == TYPE_CODE_MEMBER)
-    error (_("not implemented: member type in check_field"));
-
   if (TYPE_CODE (t) != TYPE_CODE_STRUCT
       && TYPE_CODE (t) != TYPE_CODE_UNION)
     error (_("Internal error: `this' is not an aggregate"));
@@ -2345,14 +2350,14 @@ check_field (struct value *arg1, const char *name)
 }
 
 /* C++: Given an aggregate type CURTYPE, and a member name NAME,
-   return the appropriate member.  This function is used to resolve
-   user expressions of the form "DOMAIN::NAME".  For more details on
-   what happens, see the comment before
-   value_struct_elt_for_reference.  */
+   return the appropriate member (or the address of the member, if
+   WANT_ADDRESS).  This function is used to resolve user expressions
+   of the form "DOMAIN::NAME".  For more details on what happens, see
+   the comment before value_struct_elt_for_reference.  */
 
 struct value *
 value_aggregate_elt (struct type *curtype,
-		     char *name,
+		     char *name, int want_address,
 		     enum noside noside)
 {
   switch (TYPE_CODE (curtype))
@@ -2360,9 +2365,9 @@ value_aggregate_elt (struct type *curtype,
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
       return value_struct_elt_for_reference (curtype, 0, curtype, name, NULL,
-					     noside);
+					     want_address, noside);
     case TYPE_CODE_NAMESPACE:
-      return value_namespace_elt (curtype, name, noside);
+      return value_namespace_elt (curtype, name, want_address, noside);
     default:
       internal_error (__FILE__, __LINE__,
 		      _("non-aggregate type in value_aggregate_elt"));
@@ -2379,12 +2384,12 @@ value_aggregate_elt (struct type *curtype,
 static struct value *
 value_struct_elt_for_reference (struct type *domain, int offset,
 				struct type *curtype, char *name,
-				struct type *intype,
+				struct type *intype, int want_address,
 				enum noside noside)
 {
   struct type *t = curtype;
   int i;
-  struct value *v;
+  struct value *v, *result;
 
   if (TYPE_CODE (t) != TYPE_CODE_STRUCT
       && TYPE_CODE (t) != TYPE_CODE_UNION)
@@ -2402,15 +2407,21 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	      if (v == NULL)
 		error (_("static field %s has been optimized out"),
 		       name);
+	      if (want_address)
+		v = value_addr (v);
 	      return v;
 	    }
 	  if (TYPE_FIELD_PACKED (t, i))
 	    error (_("pointers to bitfield members not allowed"));
 
-	  return value_from_longest
-	    (lookup_reference_type (lookup_member_type (TYPE_FIELD_TYPE (t, i),
-							domain)),
-	     offset + (LONGEST) (TYPE_FIELD_BITPOS (t, i) >> 3));
+	  if (want_address)
+	    return value_from_longest
+	      (lookup_memberptr_type (TYPE_FIELD_TYPE (t, i), domain),
+	       offset + (LONGEST) (TYPE_FIELD_BITPOS (t, i) >> 3));
+	  else if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	    return allocate_value (TYPE_FIELD_TYPE (t, i));
+	  else
+	    error (_("Cannot reference non-static field \"%s\""), name);
 	}
     }
 
@@ -2461,33 +2472,52 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	  else
 	    j = 0;
 
+	  if (TYPE_FN_FIELD_STATIC_P (f, j))
+	    {
+	      struct symbol *s = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, j),
+						0, VAR_DOMAIN, 0, NULL);
+	      if (s == NULL)
+		return NULL;
+
+	      if (want_address)
+		return value_addr (read_var_value (s, 0));
+	      else
+		return read_var_value (s, 0);
+	    }
+
 	  if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
 	    {
-	      return value_from_longest
-		(lookup_reference_type
-		 (lookup_member_type (TYPE_FN_FIELD_TYPE (f, j),
-				      domain)),
-		 (LONGEST) METHOD_PTR_FROM_VOFFSET (TYPE_FN_FIELD_VOFFSET (f, j)));
+	      if (want_address)
+		{
+		  result = allocate_value
+		    (lookup_methodptr_type (TYPE_FN_FIELD_TYPE (f, j)));
+		  cplus_make_method_ptr (value_contents_writeable (result),
+					 TYPE_FN_FIELD_VOFFSET (f, j), 1);
+		}
+	      else if (noside == EVAL_AVOID_SIDE_EFFECTS)
+		return allocate_value (TYPE_FN_FIELD_TYPE (f, j));
+	      else
+		error (_("Cannot reference virtual member function \"%s\""),
+		       name);
 	    }
 	  else
 	    {
 	      struct symbol *s = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, j),
 						0, VAR_DOMAIN, 0, NULL);
 	      if (s == NULL)
-		{
-		  v = 0;
-		}
+		return NULL;
+
+	      v = read_var_value (s, 0);
+	      if (!want_address)
+		result = v;
 	      else
 		{
-		  v = read_var_value (s, 0);
-#if 0
-		  VALUE_TYPE (v) = lookup_reference_type
-		    (lookup_member_type (TYPE_FN_FIELD_TYPE (f, j),
-					 domain));
-#endif
+		  result = allocate_value (lookup_methodptr_type (TYPE_FN_FIELD_TYPE (f, j)));
+		  cplus_make_method_ptr (value_contents_writeable (result),
+					 VALUE_ADDRESS (v), 0);
 		}
-	      return v;
 	    }
+	  return result;
 	}
     }
   for (i = TYPE_N_BASECLASSES (t) - 1; i >= 0; i--)
@@ -2503,7 +2533,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 					  offset + base_offset,
 					  TYPE_BASECLASS (t, i),
 					  name,
-					  intype,
+					  intype, want_address,
 					  noside);
       if (v)
 	return v;
@@ -2513,7 +2543,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
      it up that way; this (frequently) works for types nested inside
      classes.  */
 
-  return value_maybe_namespace_elt (curtype, name, noside);
+  return value_maybe_namespace_elt (curtype, name, want_address, noside);
 }
 
 /* C++: Return the member NAME of the namespace given by the type
@@ -2521,11 +2551,11 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 
 static struct value *
 value_namespace_elt (const struct type *curtype,
-		     char *name,
+		     char *name, int want_address,
 		     enum noside noside)
 {
   struct value *retval = value_maybe_namespace_elt (curtype, name,
-						    noside);
+						    want_address, noside);
 
   if (retval == NULL)
     error (_("No symbol \"%s\" in namespace \"%s\"."), name,
@@ -2542,11 +2572,12 @@ value_namespace_elt (const struct type *curtype,
 
 static struct value *
 value_maybe_namespace_elt (const struct type *curtype,
-			   char *name,
+			   char *name, int want_address,
 			   enum noside noside)
 {
   const char *namespace_name = TYPE_TAG_NAME (curtype);
   struct symbol *sym;
+  struct value *result;
 
   sym = cp_lookup_symbol_namespace (namespace_name, name, NULL,
 				    get_selected_block (0), VAR_DOMAIN,
@@ -2556,9 +2587,14 @@ value_maybe_namespace_elt (const struct type *curtype,
     return NULL;
   else if ((noside == EVAL_AVOID_SIDE_EFFECTS)
 	   && (SYMBOL_CLASS (sym) == LOC_TYPEDEF))
-    return allocate_value (SYMBOL_TYPE (sym));
+    result = allocate_value (SYMBOL_TYPE (sym));
   else
-    return value_of_variable (sym, get_selected_block (0));
+    result = value_of_variable (sym, get_selected_block (0));
+
+  if (result && want_address)
+    result = value_addr (result);
+
+  return result;
 }
 
 /* Given a pointer value V, find the real (RTTI) type

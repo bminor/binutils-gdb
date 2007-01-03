@@ -112,10 +112,6 @@ m2_print_type (struct type *type, char *varstring, struct ui_file *stream,
       m2_ref (type, stream, show, level);
       break;
 
-    case TYPE_CODE_MEMBER:
-      m2_unknown (_("member"), type, stream, show, level);
-      break;
-
     case TYPE_CODE_METHOD:
       m2_unknown (_("method"), type, stream, show, level);
       break;

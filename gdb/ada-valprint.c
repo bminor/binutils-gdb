@@ -420,7 +420,8 @@ ada_print_scalar (struct type *type, LONGEST val, struct ui_file *stream)
     case TYPE_CODE_SET:
     case TYPE_CODE_STRING:
     case TYPE_CODE_ERROR:
-    case TYPE_CODE_MEMBER:
+    case TYPE_CODE_MEMBERPTR:
+    case TYPE_CODE_METHODPTR:
     case TYPE_CODE_METHOD:
     case TYPE_CODE_REF:
       warning (_("internal error: unhandled type in ada_print_scalar"));

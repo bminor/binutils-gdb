@@ -1,7 +1,7 @@
 /* C language support definitions for GDB, the GNU debugger.
 
-   Copyright (C) 1992, 1994, 1995, 1996, 1997, 1998, 2000, 2002, 2005 Free
-   Software Foundation, Inc.
+   Copyright (C) 1992, 1994, 1995, 1996, 1997, 1998, 2000, 2002, 2005, 2006
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -78,9 +78,6 @@ extern int static_field_print;
 
 extern void cp_print_class_member (const gdb_byte *, struct type *,
 				   struct ui_file *, char *);
-
-extern void cp_print_class_method (const gdb_byte *, struct type *,
-				   struct ui_file *);
 
 extern void cp_print_value_fields (struct type *, struct type *,
 				   const gdb_byte *, int, CORE_ADDR,

@@ -1,8 +1,8 @@
 /* Evaluate expressions for GDB.
 
    Copyright (C) 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005 Free
-   Software Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -37,6 +37,8 @@
 #include "block.h"
 #include "parser-defs.h"
 #include "cp-support.h"
+
+#include "gdb_assert.h"
 
 /* This is defined in valops.c */
 extern int overload_resolution;
@@ -434,9 +436,11 @@ evaluate_subexp_standard (struct type *expect_type,
     case OP_SCOPE:
       tem = longest_to_int (exp->elts[pc + 2].longconst);
       (*pos) += 4 + BYTES_TO_EXP_ELEM (tem + 1);
+      if (noside == EVAL_SKIP)
+	goto nosideret;
       arg1 = value_aggregate_elt (exp->elts[pc + 1].type,
 				  &exp->elts[pc + 3].string,
-				  noside);
+				  0, noside);
       if (arg1 == NULL)
 	error (_("There is no field named %s"), &exp->elts[pc + 3].string);
       return arg1;
@@ -993,8 +997,6 @@ evaluate_subexp_standard (struct type *expect_type,
       argvec = (struct value **) alloca (sizeof (struct value *) * (nargs + 3));
       if (op == STRUCTOP_MEMBER || op == STRUCTOP_MPTR)
 	{
-	  LONGEST fnptr;
-
 	  /* 1997-08-01 Currently we do not support function invocation
 	     via pointers-to-methods with HP aCC. Pointer does not point
 	     to the function, but possibly to some thunk. */
@@ -1027,41 +1029,18 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	  arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
 
-	  fnptr = value_as_long (arg1);
+	  if (TYPE_CODE (check_typedef (value_type (arg1)))
+	      != TYPE_CODE_METHODPTR)
+	    error (_("Non-pointer-to-member value used in pointer-to-member "
+		     "construct"));
 
-	  if (METHOD_PTR_IS_VIRTUAL (fnptr))
+	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	    {
-	      int fnoffset = METHOD_PTR_TO_VOFFSET (fnptr);
-	      struct type *basetype;
-	      struct type *domain_type =
-	      TYPE_DOMAIN_TYPE (TYPE_TARGET_TYPE (value_type (arg1)));
-	      int i, j;
-	      basetype = TYPE_TARGET_TYPE (value_type (arg2));
-	      if (domain_type != basetype)
-		arg2 = value_cast (lookup_pointer_type (domain_type), arg2);
-	      basetype = TYPE_VPTR_BASETYPE (domain_type);
-	      for (i = TYPE_NFN_FIELDS (basetype) - 1; i >= 0; i--)
-		{
-		  struct fn_field *f = TYPE_FN_FIELDLIST1 (basetype, i);
-		  /* If one is virtual, then all are virtual.  */
-		  if (TYPE_FN_FIELD_VIRTUAL_P (f, 0))
-		    for (j = TYPE_FN_FIELDLIST_LENGTH (basetype, i) - 1; j >= 0; --j)
-		      if ((int) TYPE_FN_FIELD_VOFFSET (f, j) == fnoffset)
-			{
-			  struct value *temp = value_ind (arg2);
-			  arg1 = value_virtual_fn_field (&temp, f, j, domain_type, 0);
-			  arg2 = value_addr (temp);
-			  goto got_it;
-			}
-		}
-	      if (i < 0)
-		error (_("virtual function at index %d not found"), fnoffset);
+	      struct type *method_type = check_typedef (value_type (arg1));
+	      arg1 = value_zero (method_type, not_lval);
 	    }
 	  else
-	    {
-	      deprecated_set_value_type (arg1, lookup_pointer_type (TYPE_TARGET_TYPE (value_type (arg1))));
-	    }
-	got_it:
+	    arg1 = cplus_method_ptr_to_value (&arg2, arg1);
 
 	  /* Now, say which argument to start evaluating from */
 	  tem = 2;
@@ -1396,57 +1375,60 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
 
     case STRUCTOP_MEMBER:
-      arg1 = evaluate_subexp_for_address (exp, pos, noside);
-      arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-
-      /* With HP aCC, pointers to methods do not point to the function code */
-      if (deprecated_hp_som_som_object_present &&
-	  (TYPE_CODE (value_type (arg2)) == TYPE_CODE_PTR) &&
-      (TYPE_CODE (TYPE_TARGET_TYPE (value_type (arg2))) == TYPE_CODE_METHOD))
-	error (_("Pointers to methods not supported with HP aCC"));	/* 1997-08-19 */
-
-      mem_offset = value_as_long (arg2);
-      goto handle_pointer_to_member;
-
     case STRUCTOP_MPTR:
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      if (op == STRUCTOP_MEMBER)
+	arg1 = evaluate_subexp_for_address (exp, pos, noside);
+      else
+	arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+
       arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
 
-      /* With HP aCC, pointers to methods do not point to the function code */
-      if (deprecated_hp_som_som_object_present &&
-	  (TYPE_CODE (value_type (arg2)) == TYPE_CODE_PTR) &&
-      (TYPE_CODE (TYPE_TARGET_TYPE (value_type (arg2))) == TYPE_CODE_METHOD))
-	error (_("Pointers to methods not supported with HP aCC"));	/* 1997-08-19 */
-
-      mem_offset = value_as_long (arg2);
-
-    handle_pointer_to_member:
-      /* HP aCC generates offsets that have bit #29 set; turn it off to get
-         a real offset to the member. */
-      if (deprecated_hp_som_som_object_present)
-	{
-	  if (!mem_offset)	/* no bias -> really null */
-	    error (_("Attempted dereference of null pointer-to-member"));
-	  mem_offset &= ~0x20000000;
-	}
       if (noside == EVAL_SKIP)
 	goto nosideret;
+
       type = check_typedef (value_type (arg2));
-      if (TYPE_CODE (type) != TYPE_CODE_PTR)
-	goto bad_pointer_to_member;
-      type = check_typedef (TYPE_TARGET_TYPE (type));
-      if (TYPE_CODE (type) == TYPE_CODE_METHOD)
-	error (_("not implemented: pointer-to-method in pointer-to-member construct"));
-      if (TYPE_CODE (type) != TYPE_CODE_MEMBER)
-	goto bad_pointer_to_member;
-      /* Now, convert these values to an address.  */
-      arg1 = value_cast (lookup_pointer_type (TYPE_DOMAIN_TYPE (type)),
-			 arg1);
-      arg3 = value_from_pointer (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
-				 value_as_long (arg1) + mem_offset);
-      return value_ind (arg3);
-    bad_pointer_to_member:
-      error (_("non-pointer-to-member value used in pointer-to-member construct"));
+      switch (TYPE_CODE (type))
+	{
+	case TYPE_CODE_METHODPTR:
+	  if (deprecated_hp_som_som_object_present)
+	    {
+	      /* With HP aCC, pointers to methods do not point to the
+		 function code.  */
+	      /* 1997-08-19 */
+	      error (_("Pointers to methods not supported with HP aCC"));
+	    }
+
+	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	    return value_zero (TYPE_TARGET_TYPE (type), not_lval);
+	  else
+	    {
+	      arg2 = cplus_method_ptr_to_value (&arg1, arg2);
+	      gdb_assert (TYPE_CODE (value_type (arg2)) == TYPE_CODE_PTR);
+	      return value_ind (arg2);
+	    }
+
+	case TYPE_CODE_MEMBERPTR:
+	  /* Now, convert these values to an address.  */
+	  arg1 = value_cast (lookup_pointer_type (TYPE_DOMAIN_TYPE (type)),
+			     arg1);
+
+	  mem_offset = value_as_long (arg2);
+	  if (deprecated_hp_som_som_object_present)
+	    {
+	      /* HP aCC generates offsets that have bit #29 set; turn it off to get
+		 a real offset to the member. */
+	      if (!mem_offset)	/* no bias -> really null */
+		error (_("Attempted dereference of null pointer-to-member"));
+	      mem_offset &= ~0x20000000;
+	    }
+
+	  arg3 = value_from_pointer (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
+				     value_as_long (arg1) + mem_offset);
+	  return value_ind (arg3);
+
+	default:
+	  error (_("non-pointer-to-member value used in pointer-to-member construct"));
+	}
 
     case BINOP_CONCAT:
       arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
@@ -1469,13 +1451,11 @@ evaluate_subexp_standard (struct type *expect_type,
 	     the implementation yet; but the pointer appears to point to a code
 	     sequence (thunk) in memory -- in any case it is *not* the address
 	     of the function as it would be in a naive implementation. */
-	  if ((TYPE_CODE (value_type (arg1)) == TYPE_CODE_PTR) &&
-	      (TYPE_CODE (TYPE_TARGET_TYPE (value_type (arg1))) == TYPE_CODE_METHOD))
+	  if (TYPE_CODE (value_type (arg1)) == TYPE_CODE_METHODPTR)
 	    error (_("Assignment to pointers to methods not implemented with HP aCC"));
 
-	  /* HP aCC pointers to data members require a constant bias */
-	  if ((TYPE_CODE (value_type (arg1)) == TYPE_CODE_PTR) &&
-	      (TYPE_CODE (TYPE_TARGET_TYPE (value_type (arg1))) == TYPE_CODE_MEMBER))
+	  /* HP aCC pointers to data members require a constant bias.  */
+	  if (TYPE_CODE (value_type (arg1)) == TYPE_CODE_MEMBERPTR)
 	    {
 	      unsigned int *ptr = (unsigned int *) value_contents (arg2);	/* forces evaluation */
 	      *ptr |= 0x20000000;	/* set 29th bit */
@@ -1934,9 +1914,9 @@ evaluate_subexp_standard (struct type *expect_type,
       if (expect_type && TYPE_CODE (expect_type) == TYPE_CODE_PTR)
 	expect_type = TYPE_TARGET_TYPE (check_typedef (expect_type));
       arg1 = evaluate_subexp (expect_type, exp, pos, noside);
-      if ((TYPE_TARGET_TYPE (value_type (arg1))) &&
-	  ((TYPE_CODE (TYPE_TARGET_TYPE (value_type (arg1))) == TYPE_CODE_METHOD) ||
-	   (TYPE_CODE (TYPE_TARGET_TYPE (value_type (arg1))) == TYPE_CODE_MEMBER)))
+      type = check_typedef (value_type (arg1));
+      if (TYPE_CODE (type) == TYPE_CODE_METHODPTR
+	  || TYPE_CODE (type) == TYPE_CODE_MEMBERPTR)
 	error (_("Attempt to dereference pointer to member without an object"));
       if (noside == EVAL_SKIP)
 	goto nosideret;
@@ -1967,22 +1947,15 @@ evaluate_subexp_standard (struct type *expect_type,
 
       if (noside == EVAL_SKIP)
 	{
-	  if (op == OP_SCOPE)
-	    {
-	      int temm = longest_to_int (exp->elts[pc + 3].longconst);
-	      (*pos) += 3 + BYTES_TO_EXP_ELEM (temm + 1);
-	    }
-	  else
-	    evaluate_subexp (NULL_TYPE, exp, pos, EVAL_SKIP);
+	  evaluate_subexp (NULL_TYPE, exp, pos, EVAL_SKIP);
 	  goto nosideret;
 	}
       else
 	{
 	  struct value *retvalp = evaluate_subexp_for_address (exp, pos, noside);
 	  /* If HP aCC object, use bias for pointers to members */
-	  if (deprecated_hp_som_som_object_present &&
-	      (TYPE_CODE (value_type (retvalp)) == TYPE_CODE_PTR) &&
-	      (TYPE_CODE (TYPE_TARGET_TYPE (value_type (retvalp))) == TYPE_CODE_MEMBER))
+	  if (deprecated_hp_som_som_object_present
+	      && TYPE_CODE (value_type (retvalp)) == TYPE_CODE_MEMBERPTR)
 	    {
 	      unsigned int *ptr = (unsigned int *) value_contents (retvalp);	/* forces evaluation */
 	      *ptr |= 0x20000000;	/* set 29th bit */
@@ -2148,6 +2121,7 @@ evaluate_subexp_for_address (struct expression *exp, int *pos,
   int pc;
   struct symbol *var;
   struct value *x;
+  int tem;
 
   pc = (*pos);
   op = exp->elts[pc].opcode;
@@ -2162,15 +2136,7 @@ evaluate_subexp_for_address (struct expression *exp, int *pos,
       if (unop_user_defined_p (op, x))
 	{
 	  x = value_x_unop (x, op, noside);
-	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	    {
-	      if (VALUE_LVAL (x) == lval_memory)
-		return value_zero (lookup_pointer_type (value_type (x)),
-				   not_lval);
-	      else
-		error (_("Attempt to take address of non-lval"));
-	    }
-	  return value_addr (x);
+	  goto default_case_after_eval;
 	}
 
       return x;
@@ -2210,13 +2176,29 @@ evaluate_subexp_for_address (struct expression *exp, int *pos,
 	  (var,
 	   block_innermost_frame (exp->elts[pc + 1].block));
 
+    case OP_SCOPE:
+      tem = longest_to_int (exp->elts[pc + 2].longconst);
+      (*pos) += 5 + BYTES_TO_EXP_ELEM (tem + 1);
+      x = value_aggregate_elt (exp->elts[pc + 1].type,
+			       &exp->elts[pc + 3].string,
+			       1, noside);
+      if (x == NULL)
+	error (_("There is no field named %s"), &exp->elts[pc + 3].string);
+      return x;
+
     default:
     default_case:
       x = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+    default_case_after_eval:
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	{
+	  struct type *type = check_typedef (value_type (x));
+
 	  if (VALUE_LVAL (x) == lval_memory)
 	    return value_zero (lookup_pointer_type (value_type (x)),
+			       not_lval);
+	  else if (TYPE_CODE (type) == TYPE_CODE_REF)
+	    return value_zero (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
 			       not_lval);
 	  else
 	    error (_("Attempt to take address of non-lval"));

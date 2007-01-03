@@ -1,7 +1,7 @@
 /* Language independent support for printing types for GDB, the GNU debugger.
 
    Copyright (C) 1986, 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1998,
-   1999, 2000, 2001, 2003 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2003, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -257,7 +257,8 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
     case TYPE_CODE_SET:
     case TYPE_CODE_STRING:
     case TYPE_CODE_ERROR:
-    case TYPE_CODE_MEMBER:
+    case TYPE_CODE_MEMBERPTR:
+    case TYPE_CODE_METHODPTR:
     case TYPE_CODE_METHOD:
     case TYPE_CODE_REF:
     case TYPE_CODE_NAMESPACE:

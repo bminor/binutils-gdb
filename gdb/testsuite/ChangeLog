@@ -1,5 +1,23 @@
 2007-01-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.cp/classes.exp (test_pointers_to_class_members): Update expected
+	output.  Test the types of members and member pointers.
+	* gdb.cp/inherit.exp (test_print_mi_member_types): Remove KFAILs for
+	gdb/2092.
+	* gdb.cp/member-ptr.exp: Search for a comment instead of a
+	statement.  Enable for GCC.  Update expected output for some tests
+	and add new tests.  Remove obsolete GCC KFAILs.  Allow GCC's class
+	layout.
+	* gdb.cp/member-ptr.cc (Padding, Padding::vspacer, Base, Base::get_x)
+	(Base::vget_base, Left, Left::vget, Right, Right::vget, Diamond)
+	(Diamond::vget_base): New.
+	(main): Add new tests.
+	* gdb.cp/printmethod.exp: Update expected output for member functions.
+	* gdb.cp/virtfunc.exp (test_virtual_calls): Add a KFAIL for
+	print pEe->D::vg().
+
+2007-01-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.threads/tls.exp: Allow stops in sem_post.
 
 2006-12-31  Daniel Jacobowitz  <dan@codesourcery.com>

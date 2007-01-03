@@ -327,10 +327,6 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	}
       break;
 
-    case TYPE_CODE_MEMBER:
-      error (_("not implemented: member type in m2_val_print"));
-      break;
-
     case TYPE_CODE_REF:
       elttype = check_typedef (TYPE_TARGET_TYPE (type));
       if (addressprint)

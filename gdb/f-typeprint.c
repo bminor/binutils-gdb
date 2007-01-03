@@ -73,7 +73,6 @@ f_print_type (struct type *type, char *varstring, struct ui_file *stream,
        (code == TYPE_CODE_PTR || code == TYPE_CODE_FUNC
 	|| code == TYPE_CODE_METHOD
 	|| code == TYPE_CODE_ARRAY
-	|| code == TYPE_CODE_MEMBER
 	|| code == TYPE_CODE_REF)))
     fputs_filtered (" ", stream);
   f_type_print_varspec_prefix (type, stream, show, 0);
@@ -138,7 +137,6 @@ f_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
     case TYPE_CODE_STRING:
     case TYPE_CODE_BITSTRING:
     case TYPE_CODE_METHOD:
-    case TYPE_CODE_MEMBER:
     case TYPE_CODE_REF:
     case TYPE_CODE_COMPLEX:
     case TYPE_CODE_TYPEDEF:
@@ -250,7 +248,6 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
     case TYPE_CODE_STRING:
     case TYPE_CODE_BITSTRING:
     case TYPE_CODE_METHOD:
-    case TYPE_CODE_MEMBER:
     case TYPE_CODE_COMPLEX:
     case TYPE_CODE_TYPEDEF:
       /* These types do not need a suffix.  They are listed so that

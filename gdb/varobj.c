@@ -2106,7 +2106,6 @@ c_variable_editable (struct varobj *var)
     case TYPE_CODE_UNION:
     case TYPE_CODE_ARRAY:
     case TYPE_CODE_FUNC:
-    case TYPE_CODE_MEMBER:
     case TYPE_CODE_METHOD:
       return 0;
       break;

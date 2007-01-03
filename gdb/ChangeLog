@@ -1,3 +1,93 @@
+2007-01-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* NEWS: Mention pointer to member improvements.
+	* Makefile.in (gnu-v3-abi.o): Delete special rule.
+	(eval.o, gnu-v3-abi.o, ia64-tdep.o): Update.
+	* ada-valprint.c (ada_print_scalar): Update for new type codes.
+	* c-typeprint.c (c_print_type): Update for new type codes.
+	(c_type_print_varspec_prefix, c_type_print_varspec_suffix)
+	(c_type_print_base): Likewise.
+	(c_type_print_args): Rewrite.
+	* c-valprint.c (c_val_print): Update for new type codes.  Remove
+	support for references to members.  Treat methods like functions.
+	* cp-abi.c (cplus_print_method_ptr, cplus_method_ptr_size)
+	(cplus_make_method_ptr, cplus_method_ptr_to_value): New.
+	* cp-abi.h (cplus_print_method_ptr, cplus_method_ptr_size)
+	(cplus_make_method_ptr, cplus_method_ptr_to_value): New prototypes.
+	(struct cp_abi_ops): Add corresponding members.
+	* cp-valprint.c (cp_print_class_method): Delete.
+	(cp_find_class_member): New function.
+	(cp_print_class_member): Use it.  Simplify support for bogus
+	member pointers.
+	* dwarf2read.c (quirk_gcc_member_function_pointer): Use
+	lookup_methodptr_type.
+	(read_tag_ptr_to_member_type): Likewise, and lookup_memberptr_type.
+	* eval.c (evaluate_subexp_standard): Implement EVAL_SKIP for
+	OP_SCOPE.  Update call to value_aggregate_elt.  Rewrite member
+	pointer support.
+	(evaluate_subexp_for_address): Handle OP_SCOPE explicitly.  Handle
+	references returned by user defined operators.
+	* f-typeprint.c (f_print_type, f_type_print_varspec_prefix)
+	(f_type_print_varspec_suffix): Remove support for member pointers.
+	* gdbtypes.c (lookup_memberptr_type): Renamed from lookup_member_type
+	and adjusted.
+	(smash_to_memberptr_type): Likewise, from smash_to_member_type.
+	(lookup_methodptr_type): New.
+	(rank_one_type): Adjust for TYPE_CODE_MEMBERPTR.
+	(recursive_dump_type): Update for new types.
+	* gdbtypes.h (enum type_code): Replace TYPE_CODE_MEMBER with
+	TYPE_CODE_MEMBERPTR and TYPE_CODE_METHODPTR.
+	(lookup_memberptr_type, lookup_methodptr_type)
+	(smash_to_memberptr_type): New prototypes.
+	(smash_to_method_type): Formatting fix.
+	(lookup_member_type, smash_to_member_type): Delete prototypes.
+	* gnu-v3-abi.c (gnuv3_get_vtable, gnuv3_get_virtual_fn): New.
+	Do not rely on debug information for the vptr or the method's
+	enclosing type.  Handle function descriptors for IA64.
+	(gnuv3_virtual_fn_field): Rewrite using the new functions.
+	(gnuv3_find_method_in, gnuv3_print_method_ptr)
+	(gnuv3_method_ptr_size, gnuv3_make_method_ptr)
+	(gnuv3_method_ptr_to_value): New.
+	(init_gnuv3_ops): Set new members of gnu_v3_abi_ops.
+	* hpread.c (hpread_type_lookup): Update for new types.
+	* infcall.c (value_arg_coerce): Likewise.
+	* m2-typeprint.c (m2_print_type): Remove explicit support
+	for member pointers.
+	* m2-valprint.c (m2_val_print): Likewise.
+	* p-typeprint.c (pascal_type_print_varspec_prefix)
+	(pascal_type_print_varspec_suffix, pascal_type_print_base): Likewise.
+	* p-valprint.c (pascal_val_print): Likewise.
+	(pascal_object_print_class_method, pascal_object_print_class_member):
+	Delete.
+	* p-lang.h (pascal_object_print_class_method)
+	(pascal_object_print_class_member): Delete prototypes.
+	* stabsread.c (read_type): Update for new types.
+	* typeprint.c (print_type_scalar): Likewise.
+	* valops.c (value_struct_elt_for_reference, value_namespace_elt)
+	(value_maybe_namespace_elt, value_aggregate_elt): Add want_address
+	argument.  Construct a pointer to member if the address of a
+	function or data member is requested.
+	(value_cast_pointers): Don't modify the input value.
+	(value_cast): Adjust pointer to member handling for new types.
+	Allow null pointer to member constants.  Don't modify the input
+	value.
+	(value_ind): Remove pointer to member check.  Handle function
+	descriptors for function pointers.
+	(value_struct_elt, value_find_oload_method_list, check_field):
+	Remove pointer to member checks.
+	* value.c (unpack_long): Allow pointers to data members.
+	(value_from_longest): Allow member pointers.
+	* value.h (value_aggregate_elt): Add want_address.
+	* varobj.c (c_variable_editable): Remove check for members.
+	* gdbarch.sh: Add vtable_function_descriptors and vbit_in_delta.
+	* ia64-tdep.c (ia64_convert_from_func_ptr_addr): Handle descriptors
+	in virtual tables.
+	(ia64_gdbarch_init): Call set_gdbarch_vtable_function_descriptors.
+	* c-lang.h (cp_print_class_method): Delete prototype.
+	* arm-tdep.c (arm_gdbarch_init): Call set_gdbarch_vbit_in_delta.
+	* mips-tdep.c (mips_gdbarch_init): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerated.
+
 2007-01-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* rs6000-tdep.c (rs6000_use_struct_convention)

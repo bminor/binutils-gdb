@@ -1,7 +1,8 @@
 /* Support for printing C++ values for GDB, the GNU debugger.
 
    Copyright (C) 1986, 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 2000, 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
+   1997, 2000, 2001, 2002, 2003, 2005, 2006
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -91,104 +92,6 @@ static void cp_print_hpacc_virtual_table_entries (struct type *, int *,
 						  int,
 						  enum val_prettyprint);
 
-
-void
-cp_print_class_method (const gdb_byte *valaddr,
-		       struct type *type,
-		       struct ui_file *stream)
-{
-  struct type *domain;
-  struct fn_field *f = NULL;
-  int j = 0;
-  int len2;
-  int offset;
-  char *kind = "";
-  CORE_ADDR addr;
-  struct symbol *sym;
-  unsigned len;
-  unsigned int i;
-  struct type *target_type = check_typedef (TYPE_TARGET_TYPE (type));
-
-  domain = TYPE_DOMAIN_TYPE (target_type);
-  if (domain == (struct type *) NULL)
-    {
-      fprintf_filtered (stream, "<unknown>");
-      return;
-    }
-  addr = unpack_pointer (type, valaddr);
-  if (METHOD_PTR_IS_VIRTUAL (addr))
-    {
-      offset = METHOD_PTR_TO_VOFFSET (addr);
-      len = TYPE_NFN_FIELDS (domain);
-      for (i = 0; i < len; i++)
-	{
-	  f = TYPE_FN_FIELDLIST1 (domain, i);
-	  len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
-
-	  check_stub_method_group (domain, i);
-	  for (j = 0; j < len2; j++)
-	    {
-	      if (TYPE_FN_FIELD_VOFFSET (f, j) == offset)
-		{
-		  kind = "virtual ";
-		  goto common;
-		}
-	    }
-	}
-    }
-  else
-    {
-      sym = find_pc_function (addr);
-      if (sym == 0)
-	{
-	  /* 1997-08-01 Currently unsupported with HP aCC */
-	  if (deprecated_hp_som_som_object_present)
-	    {
-	      fputs_filtered ("?? <not supported with HP aCC>", stream);
-	      return;
-	    }
-	  error (_("invalid pointer to member function"));
-	}
-      len = TYPE_NFN_FIELDS (domain);
-      for (i = 0; i < len; i++)
-	{
-	  f = TYPE_FN_FIELDLIST1 (domain, i);
-	  len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
-
-	  check_stub_method_group (domain, i);
-	  for (j = 0; j < len2; j++)
-	    {
-	      if (strcmp (DEPRECATED_SYMBOL_NAME (sym), TYPE_FN_FIELD_PHYSNAME (f, j))
-		  == 0)
-		goto common;
-	    }
-	}
-    }
- common:
-  if (i < len)
-    {
-      char *demangled_name;
-
-      fprintf_filtered (stream, "&");
-      fputs_filtered (kind, stream);
-      demangled_name = cplus_demangle (TYPE_FN_FIELD_PHYSNAME (f, j),
-				       DMGL_ANSI | DMGL_PARAMS);
-      if (demangled_name == NULL)
-	fprintf_filtered (stream, "<badly mangled name %s>",
-			  TYPE_FN_FIELD_PHYSNAME (f, j));
-      else
-	{
-	  fputs_filtered (demangled_name, stream);
-	  xfree (demangled_name);
-	}
-    }
-  else
-    {
-      fprintf_filtered (stream, "(");
-      type_print (type, "", stream, -1);
-      fprintf_filtered (stream, ") %d", (int) addr >> 3);
-    }
-}
 
 /* GCC versions after 2.4.5 use this.  */
 const char vtbl_ptr_name[] = "__vtbl_ptr_type";
@@ -703,48 +606,82 @@ cp_print_static_field (struct type *type,
 	     stream, format, 0, recurse, pretty);
 }
 
+
+/* Find the field in *DOMAIN, or its non-virtual base classes, with bit offset
+   OFFSET.  Set *DOMAIN to the containing type and *FIELDNO to the containing
+   field number.  If OFFSET is not exactly at the start of some field, set
+   *DOMAIN to NULL.  */
+
+void
+cp_find_class_member (struct type **domain_p, int *fieldno,
+		      LONGEST offset)
+{
+  struct type *domain;
+  unsigned int i;
+  unsigned len;
+
+  *domain_p = check_typedef (*domain_p);
+  domain = *domain_p;
+  len = TYPE_NFIELDS (domain);
+
+  for (i = TYPE_N_BASECLASSES (domain); i < len; i++)
+    {
+      LONGEST bitpos = TYPE_FIELD_BITPOS (domain, i);
+
+      QUIT;
+      if (offset == bitpos)
+	{
+	  *fieldno = i;
+	  return;
+	}
+    }
+
+  for (i = 0; i < TYPE_N_BASECLASSES (domain); i++)
+    {
+      LONGEST bitpos = TYPE_FIELD_BITPOS (domain, i);
+      LONGEST bitsize = 8 * TYPE_LENGTH (TYPE_FIELD_TYPE (domain, i));
+
+      if (offset >= bitpos && offset < bitpos + bitsize)
+	{
+	  *domain_p = TYPE_FIELD_TYPE (domain, i);
+	  cp_find_class_member (domain_p, fieldno, offset - bitpos);
+	  return;
+	}
+    }
+
+  *domain_p = NULL;
+}
+
 void
 cp_print_class_member (const gdb_byte *valaddr, struct type *domain,
 		       struct ui_file *stream, char *prefix)
 {
-
   /* VAL is a byte offset into the structure type DOMAIN.
      Find the name of the field for that offset and
      print it.  */
-  int extra = 0;
-  int bits = 0;
-  unsigned int i;
-  unsigned len = TYPE_NFIELDS (domain);
+  unsigned int fieldno;
 
-  /* @@ Make VAL into bit offset */
+  LONGEST val = unpack_long (builtin_type_long, valaddr);
 
-  /* Note: HP aCC generates offsets that are the real byte offsets added
-     to a constant bias 0x20000000 (1 << 29).  This constant bias gets
-     shifted out in the code below -- joyous happenstance! */
+  /* Pointers to data members are usually byte offsets into an object.
+     Because a data member can have offset zero, and a NULL pointer to
+     member must be distinct from any valid non-NULL pointer to
+     member, either the value is biased or the NULL value has a
+     special representation; both are permitted by ISO C++.  HP aCC
+     used a bias of 0x20000000; HP cfront used a bias of 1; g++ 3.x
+     and other compilers which use the Itanium ABI use -1 as the NULL
+     value.  GDB only supports that last form; to add support for
+     another form, make this into a cp-abi hook.  */
 
-  /* Note: HP cfront uses a constant bias of 1; if we support this
-     compiler ever, we will have to adjust the computation below */
-
-  LONGEST val = unpack_long (builtin_type_int, valaddr) << 3;
-  for (i = TYPE_N_BASECLASSES (domain); i < len; i++)
+  if (val == -1)
     {
-      int bitpos = TYPE_FIELD_BITPOS (domain, i);
-      QUIT;
-      if (val == bitpos)
-	break;
-      if (val < bitpos && i != 0)
-	{
-	  /* Somehow pointing into a field.  */
-	  i -= 1;
-	  extra = (val - TYPE_FIELD_BITPOS (domain, i));
-	  if (extra & 0x7)
-	    bits = 1;
-	  else
-	    extra >>= 3;
-	  break;
-	}
+      fprintf_filtered (stream, "NULL");
+      return;
     }
-  if (i < len)
+
+  cp_find_class_member (&domain, &fieldno, val << 3);
+
+  if (domain != NULL)
     {
       char *name;
       fputs_filtered (prefix, stream);
@@ -754,14 +691,10 @@ cp_print_class_member (const gdb_byte *valaddr, struct type *domain,
       else
 	c_type_print_base (domain, stream, 0, 0);
       fprintf_filtered (stream, "::");
-      fputs_filtered (TYPE_FIELD_NAME (domain, i), stream);
-      if (extra)
-	fprintf_filtered (stream, " + %d bytes", extra);
-      if (bits)
-	fprintf_filtered (stream, " (offset in bits)");
+      fputs_filtered (TYPE_FIELD_NAME (domain, fieldno), stream);
     }
   else
-    fprintf_filtered (stream, "%ld", (long) (val >> 3));
+    fprintf_filtered (stream, "%ld", (long) val);
 }
 
 

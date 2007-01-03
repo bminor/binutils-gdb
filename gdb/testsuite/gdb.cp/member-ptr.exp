@@ -1,4 +1,4 @@
-# Copyright 1998, 1999, 2003, 2004 Free Software Foundation, Inc.
+# Copyright 1998, 1999, 2003, 2004, 2006 Free Software Foundation, Inc.
 
 # This file is part of the gdb testsuite
 
@@ -19,8 +19,6 @@
 # Tests for pointer-to-member support
 # Written by Satish Pai <pai@apollo.hp.com> 1997-08-19
 # Rewritten by Michael Chastain <mec.gnu@mindspring.com> 2004-01-11
-
-# TODO: copyright notice for member-ptr.cc
 
 set vhn "\\$\[0-9\]+"
 
@@ -56,15 +54,8 @@ if ![runto_main] then {
     continue
 }
 
-gdb_breakpoint [gdb_get_line_number "pmi = NULL"]
+gdb_breakpoint [gdb_get_line_number "Breakpoint 1 here"]
 gdb_continue_to_breakpoint "continue to pmi = NULL"
-
-# gcc is not ready for production
-# -- chastain 2004-01-12
-
-if { [test_compiler_info "gcc-*"] } {
-    continue
-}
 
 # ======================
 # pointer to member data
@@ -74,13 +65,8 @@ if { [test_compiler_info "gcc-*"] } {
 
 set name "ptype pmi (A::j)"
 gdb_test_multiple "ptype pmi" $name {
-    -re "type = int *\\( ?A::\\*\\)\r\n$gdb_prompt $" {
+    -re "type = int A::\\*\r\n$gdb_prompt $" {
 	pass $name
-    }
-    -re "type = int *A::\r\n$gdb_prompt $" {
-	# gcc HEAD 2004-01-10 -gdwarf-2
-	# gcc HEAD 2004-01-10 -gstabs+
-	kfail "gdb/NNNN" $name
     }
 }
 
@@ -390,7 +376,7 @@ gdb_test_multiple "ptype *pmi" $name {
 
 set name "print (int) pmi"
 gdb_test_multiple "print (int) pmi" $name {
-    -re "$vhn = (4|8)\r\n$gdb_prompt" {
+    -re "$vhn = (4|8|12)\r\n$gdb_prompt" {
 	pass $name
     }
 }
@@ -412,7 +398,7 @@ gdb_test_multiple "print ((int) pmi) == ((char *) &a.j - (char *) & a)" $name {
 
 set name "ptype pmf"
 gdb_test_multiple "ptype pmf" $name {
-    -re "type = int \\( ?A::\\*\\)\\(int\\)\r\n$gdb_prompt $" {
+    -re "type = int \\( ?A::\\*\\)\\(A \\*, int\\)\r\n$gdb_prompt $" {
 	pass $name
     }
     -re "type = int \\( ?A::\\*\\)\\(void\\)\r\n$gdb_prompt $" {
@@ -434,7 +420,7 @@ gdb_test_multiple "ptype pmf" $name {
 
 set name "print pmf"
 gdb_test_multiple "print pmf" $name {
-    -re "$vhn = &A::bar\r\n$gdb_prompt $" {
+    -re "$vhn = $hex <A::bar\\(int\\)>\r\n$gdb_prompt $" {
 	pass $name
     }
     -re "$vhn = .*not supported with HP aCC.*\r\n$gdb_prompt $" {
@@ -456,7 +442,7 @@ gdb_test_multiple "print pmf" $name {
 
 set name "ptype pmf_p"
 gdb_test_multiple "ptype pmf_p" $name {
-    -re "type = int \\( ?A::\\*\\*\\)\\(int\\)\r\n$gdb_prompt $" {
+    -re "type = int \\( ?A::\\*\\*\\)\\(A \\*, int\\)\r\n$gdb_prompt $" {
 	pass $name
     }
     -re "type = int \\( ?A::\\*\\*\\)\\(void\\)\r\n$gdb_prompt $" {
@@ -498,7 +484,7 @@ gdb_test_multiple "print pmf_p" $name {
 
 set name "print a.*pmf"
 gdb_test_multiple "print a.*pmf" $name {
-    -re "$vhn = \\(int \\(\\*\\)\\(int\\)\\) $hex <A::bar\\(int\\)>\r\n$gdb_prompt$ " {
+    -re "$vhn = {int \\(A \\*, int\\)} $hex <A::bar\\(int\\)>\r\n$gdb_prompt $" {
 	pass $name
     }
     -re "Pointers to methods not supported with HP aCC\r\n$gdb_prompt $" {
@@ -520,7 +506,7 @@ gdb_test_multiple "print a.*pmf" $name {
 
 set name "print a_p->*pmf"
 gdb_test_multiple "print a_p->*pmf" $name {
-    -re "$vhn = \\(int \\(\\*\\)\\(int\\)\\) $hex <A::bar\\(int\\)>\r\n$gdb_prompt$ " {
+    -re "$vhn = {int \\(A \\*, int\\)} $hex <A::bar\\(int\\)>\r\n$gdb_prompt $" {
 	pass $name
     }
     -re "Pointers to methods not supported with HP aCC\r\n$gdb_prompt $" {
@@ -621,3 +607,56 @@ gdb_test_multiple "print (a.*pmf)(3)" $name {
 	kfail "gdb/NNNN" $name
     }
 }
+
+# Print out a pointer to data member which requires looking into
+# a base class.
+gdb_test "print diamond_pmi" "$vhn = &Base::x"
+gdb_test "print diamond.*diamond_pmi" "$vhn = 77"
+
+# Examine some more complicated pmfs, which require adjusting "this"
+# and looking through virtual tables.
+
+# These two have a different object adjustment, but call the same method.
+gdb_test "print diamond.*left_pmf" \
+    "$vhn = {int \\(Diamond \\*\\)} $hex <Base::get_x\\((void|)\\)>"
+gdb_test "print diamond.*right_pmf" \
+    "$vhn = {int \\(Diamond \\*\\)} $hex <Base::get_x\\((void|)\\)>"
+
+gdb_test "print (diamond.*left_pmf) ()" "$vhn = 77"
+gdb_test "print (diamond.*right_pmf) ()" "$vhn = 88"
+
+# These two point to different methods, although they have the same
+# virtual table offsets.
+gdb_test "print diamond.*left_vpmf" \
+    "$vhn = {int \\(Diamond \\*\\)} $hex <Left::vget\\((void|)\\)>"
+gdb_test "print diamond.*right_vpmf" \
+    "$vhn = {int \\(Diamond \\*\\)} $hex <Right::vget\\((void|)\\)>"
+
+gdb_test "print (diamond.*left_vpmf) ()" "$vhn = 177"
+gdb_test "print (diamond.*left_base_vpmf) ()" "$vhn = 2077"
+gdb_test "print (diamond.*right_vpmf) ()" "$vhn = 288"
+
+# We should be able to figure out left_vpmf even without an object,
+# because it comes from a non-virtual base.  The same for right_vpmf.
+gdb_test "print left_vpmf" "$vhn = &virtual Left::vget\\(\\)"
+gdb_test "print right_vpmf" "$vhn = &virtual Right::vget\\(\\)"
+
+# But we should gracefully fail to figure out base_vpmf, because
+# its runtime type is more derived than its static type.  This
+# is a valid but unspecified cast (it is value preserving, i.e.
+# can be casted back to the correct type and used).
+gdb_test "print base_vpmf" \
+    "$vhn = &virtual table offset \[0-9\]*, this adjustment -\[0-9\]*"
+
+# Make sure we parse this correctly; it's invalid.
+gdb_test "print diamond.*left_vpmf ()" \
+    "Invalid data type for function to be called\\."
+
+# NULL pointer to member tests.
+gdb_test "print null_pmi" "$vhn = NULL"
+gdb_test "print null_pmi = &A::j" "$vhn = &A::j"
+gdb_test "print null_pmi = 0" "$vhn = NULL"
+
+gdb_test "print null_pmf" "$vhn = NULL"
+gdb_test "print null_pmf = &A::foo" "$vhn = $hex <A::foo ?\\(int\\)>"
+gdb_test "print null_pmf = 0" "$vhn = NULL"

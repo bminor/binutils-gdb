@@ -621,13 +621,28 @@ replace_type (struct type *ntype, struct type *type)
    of the aggregate that the member belongs to.  */
 
 struct type *
-lookup_member_type (struct type *type, struct type *domain)
+lookup_memberptr_type (struct type *type, struct type *domain)
 {
   struct type *mtype;
 
   mtype = alloc_type (TYPE_OBJFILE (type));
-  smash_to_member_type (mtype, domain, type);
+  smash_to_memberptr_type (mtype, domain, type);
   return (mtype);
+}
+
+/* Return a pointer-to-method type, for a method of type TO_TYPE.  */
+
+struct type *
+lookup_methodptr_type (struct type *to_type)
+{
+  struct type *mtype;
+
+  mtype = alloc_type (TYPE_OBJFILE (to_type));
+  TYPE_TARGET_TYPE (mtype) = to_type;
+  TYPE_DOMAIN_TYPE (mtype) = TYPE_DOMAIN_TYPE (to_type);
+  TYPE_LENGTH (mtype) = cplus_method_ptr_size ();
+  TYPE_CODE (mtype) = TYPE_CODE_METHODPTR;
+  return mtype;
 }
 
 /* Allocate a stub method whose return type is TYPE.  
@@ -981,19 +996,20 @@ build_builtin_type_vec128 (void)
   return t;
 }
 
-/* Smash TYPE to be a type of members of DOMAIN with type TO_TYPE. 
-   A MEMBER is a wierd thing -- it amounts to a typed offset into
-   a struct, e.g. "an int at offset 8".  A MEMBER TYPE doesn't
-   include the offset (that's the value of the MEMBER itself), but does
-   include the structure type into which it points (for some reason).
+/* Smash TYPE to be a type of pointers to members of DOMAIN with type
+   TO_TYPE.  A member pointer is a wierd thing -- it amounts to a
+   typed offset into a struct, e.g. "an int at offset 8".  A MEMBER
+   TYPE doesn't include the offset (that's the value of the MEMBER
+   itself), but does include the structure type into which it points
+   (for some reason).
 
    When "smashing" the type, we preserve the objfile that the
    old type pointed to, since we aren't changing where the type is actually
    allocated.  */
 
 void
-smash_to_member_type (struct type *type, struct type *domain,
-		      struct type *to_type)
+smash_to_memberptr_type (struct type *type, struct type *domain,
+			 struct type *to_type)
 {
   struct objfile *objfile;
 
@@ -1003,8 +1019,10 @@ smash_to_member_type (struct type *type, struct type *domain,
   TYPE_OBJFILE (type) = objfile;
   TYPE_TARGET_TYPE (type) = to_type;
   TYPE_DOMAIN_TYPE (type) = domain;
-  TYPE_LENGTH (type) = 1;	/* In practice, this is never needed.  */
-  TYPE_CODE (type) = TYPE_CODE_MEMBER;
+  /* Assume that a data member pointer is the same size as a normal
+     pointer.  */
+  TYPE_LENGTH (type) = TARGET_PTR_BIT / TARGET_CHAR_BIT;
+  TYPE_CODE (type) = TYPE_CODE_MEMBERPTR;
 }
 
 /* Smash TYPE to be a type of method of DOMAIN with type TO_TYPE.
@@ -2643,7 +2661,7 @@ rank_one_type (struct type *parm, struct type *arg)
 	  return INCOMPATIBLE_TYPE_BADNESS;
 	}
       break;
-    case TYPE_CODE_MEMBER:
+    case TYPE_CODE_MEMBERPTR:
       switch (TYPE_CODE (arg))
 	{
 	default:
@@ -2957,8 +2975,11 @@ recursive_dump_type (struct type *type, int spaces)
     case TYPE_CODE_ERROR:
       printf_filtered ("(TYPE_CODE_ERROR)");
       break;
-    case TYPE_CODE_MEMBER:
-      printf_filtered ("(TYPE_CODE_MEMBER)");
+    case TYPE_CODE_MEMBERPTR:
+      printf_filtered ("(TYPE_CODE_MEMBERPTR)");
+      break;
+    case TYPE_CODE_METHODPTR:
+      printf_filtered ("(TYPE_CODE_METHODPTR)");
       break;
     case TYPE_CODE_METHOD:
       printf_filtered ("(TYPE_CODE_METHOD)");

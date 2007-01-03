@@ -3699,7 +3699,6 @@ dwarf2_attach_fn_fields_to_type (struct field_info *fip, struct type *type,
   TYPE_NFN_FIELDS_TOTAL (type) = total_length;
 }
 
-
 /* Returns non-zero if NAME is the name of a vtable member in CU's
    language, zero otherwise.  */
 static int
@@ -3779,7 +3778,7 @@ quirk_gcc_member_function_pointer (struct die_info *die, struct dwarf2_cu *cu)
   smash_to_method_type (type, domain_type, TYPE_TARGET_TYPE (pfn_type),
 			TYPE_FIELDS (pfn_type), TYPE_NFIELDS (pfn_type),
 			TYPE_VARARGS (pfn_type));
-  type = lookup_pointer_type (type);
+  type = lookup_methodptr_type (type);
   set_die_type (die, type, cu);
 
   return 1;
@@ -4561,10 +4560,13 @@ read_tag_ptr_to_member_type (struct die_info *die, struct dwarf2_cu *cu)
       return;
     }
 
-  type = alloc_type (objfile);
   to_type = die_type (die, cu);
   domain = die_containing_type (die, cu);
-  smash_to_member_type (type, domain, to_type);
+
+  if (TYPE_CODE (check_typedef (to_type)) == TYPE_CODE_METHOD)
+    type = lookup_methodptr_type (to_type);
+  else
+    type = lookup_memberptr_type (to_type, domain);
 
   set_die_type (die, type, cu);
 }

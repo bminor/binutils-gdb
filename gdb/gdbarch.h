@@ -1383,6 +1383,19 @@ typedef const struct regset * (gdbarch_regset_from_core_section_ftype) (struct g
 extern const struct regset * gdbarch_regset_from_core_section (struct gdbarch *gdbarch, const char *sect_name, size_t sect_size);
 extern void set_gdbarch_regset_from_core_section (struct gdbarch *gdbarch, gdbarch_regset_from_core_section_ftype *regset_from_core_section);
 
+/* If the elements of C++ vtables are in-place function descriptors rather
+   than normal function pointers (which may point to code or a descriptor),
+   set this to one. */
+
+extern int gdbarch_vtable_function_descriptors (struct gdbarch *gdbarch);
+extern void set_gdbarch_vtable_function_descriptors (struct gdbarch *gdbarch, int vtable_function_descriptors);
+
+/* Set if the least significant bit of the delta is used instead of the least
+   significant bit of the pfn for pointers to virtual member functions. */
+
+extern int gdbarch_vbit_in_delta (struct gdbarch *gdbarch);
+extern void set_gdbarch_vbit_in_delta (struct gdbarch *gdbarch, int vbit_in_delta);
+
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
 

@@ -235,6 +235,8 @@ struct gdbarch
   gdbarch_register_reggroup_p_ftype *register_reggroup_p;
   gdbarch_fetch_pointer_argument_ftype *fetch_pointer_argument;
   gdbarch_regset_from_core_section_ftype *regset_from_core_section;
+  int vtable_function_descriptors;
+  int vbit_in_delta;
 };
 
 
@@ -361,6 +363,8 @@ struct gdbarch startup_gdbarch =
   default_register_reggroup_p,  /* register_reggroup_p */
   0,  /* fetch_pointer_argument */
   0,  /* regset_from_core_section */
+  0,  /* vtable_function_descriptors */
+  0,  /* vbit_in_delta */
   /* startup_gdbarch() */
 };
 
@@ -615,6 +619,8 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of register_reggroup_p, invalid_p == 0 */
   /* Skip verify of fetch_pointer_argument, has predicate */
   /* Skip verify of regset_from_core_section, has predicate */
+  /* Skip verify of vtable_function_descriptors, invalid_p == 0 */
+  /* Skip verify of vbit_in_delta, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &dummy);
   make_cleanup (xfree, buf);
   if (strlen (buf) > 0)
@@ -1595,6 +1601,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: value_to_register = <0x%lx>\n",
                       (long) current_gdbarch->value_to_register);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: vbit_in_delta = %s\n",
+                      paddr_d (current_gdbarch->vbit_in_delta));
 #ifdef TARGET_VIRTUAL_FRAME_POINTER
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1604,6 +1613,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: virtual_frame_pointer = <0x%lx>\n",
                       (long) current_gdbarch->virtual_frame_pointer);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: vtable_function_descriptors = %s\n",
+                      paddr_d (current_gdbarch->vtable_function_descriptors));
 #ifdef TARGET_WRITE_PC
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -3651,6 +3663,40 @@ set_gdbarch_regset_from_core_section (struct gdbarch *gdbarch,
                                       gdbarch_regset_from_core_section_ftype regset_from_core_section)
 {
   gdbarch->regset_from_core_section = regset_from_core_section;
+}
+
+int
+gdbarch_vtable_function_descriptors (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of vtable_function_descriptors, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_vtable_function_descriptors called\n");
+  return gdbarch->vtable_function_descriptors;
+}
+
+void
+set_gdbarch_vtable_function_descriptors (struct gdbarch *gdbarch,
+                                         int vtable_function_descriptors)
+{
+  gdbarch->vtable_function_descriptors = vtable_function_descriptors;
+}
+
+int
+gdbarch_vbit_in_delta (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of vbit_in_delta, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_vbit_in_delta called\n");
+  return gdbarch->vbit_in_delta;
+}
+
+void
+set_gdbarch_vbit_in_delta (struct gdbarch *gdbarch,
+                           int vbit_in_delta)
+{
+  gdbarch->vbit_in_delta = vbit_in_delta;
 }
 
 

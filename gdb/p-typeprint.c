@@ -1,5 +1,5 @@
 /* Support for printing Pascal types for GDB, the GNU debugger.
-   Copyright (C) 2000, 2001, 2002
+   Copyright (C) 2000, 2001, 2002, 2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -208,19 +208,6 @@ pascal_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
       pascal_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1);
       break;			/* pointer should be handled normally in pascal */
 
-    case TYPE_CODE_MEMBER:
-      if (passed_a_ptr)
-	fprintf_filtered (stream, "(");
-      pascal_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0);
-      fprintf_filtered (stream, " ");
-      name = type_name_no_tag (TYPE_DOMAIN_TYPE (type));
-      if (name)
-	fputs_filtered (name, stream);
-      else
-	pascal_type_print_base (TYPE_DOMAIN_TYPE (type), stream, 0, passed_a_ptr);
-      fprintf_filtered (stream, "::");
-      break;
-
     case TYPE_CODE_METHOD:
       if (passed_a_ptr)
 	fprintf_filtered (stream, "(");
@@ -353,12 +340,6 @@ pascal_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 	fprintf_filtered (stream, ")");
       break;
 
-    case TYPE_CODE_MEMBER:
-      if (passed_a_ptr)
-	fprintf_filtered (stream, ")");
-      pascal_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 0, 0);
-      break;
-
     case TYPE_CODE_METHOD:
       if (passed_a_ptr)
 	fprintf_filtered (stream, ")");
@@ -481,7 +462,6 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
     {
     case TYPE_CODE_TYPEDEF:
     case TYPE_CODE_PTR:
-    case TYPE_CODE_MEMBER:
     case TYPE_CODE_REF:
       /* case TYPE_CODE_FUNC:
          case TYPE_CODE_METHOD: */

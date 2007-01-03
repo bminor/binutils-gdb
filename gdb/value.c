@@ -1090,6 +1090,7 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
     case TYPE_CODE_INT:
     case TYPE_CODE_CHAR:
     case TYPE_CODE_RANGE:
+    case TYPE_CODE_MEMBERPTR:
       if (nosign)
 	return extract_unsigned_integer (valaddr, len);
       else
@@ -1103,9 +1104,6 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
       /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
          whether we want this to be true eventually.  */
       return extract_typed_address (valaddr, type);
-
-    case TYPE_CODE_MEMBER:
-      error (_("not implemented: member types in unpack_long"));
 
     default:
       error (_("Value can't be converted to integer."));
@@ -1537,6 +1535,7 @@ retry:
     case TYPE_CODE_FLAGS:
     case TYPE_CODE_BOOL:
     case TYPE_CODE_RANGE:
+    case TYPE_CODE_MEMBERPTR:
       store_signed_integer (value_contents_raw (val), len, num);
       break;
 

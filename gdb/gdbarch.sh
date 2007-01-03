@@ -663,6 +663,15 @@ F:=:CORE_ADDR:fetch_pointer_argument:struct frame_info *frame, int argi, struct 
 # Return the appropriate register set for a core file section with
 # name SECT_NAME and size SECT_SIZE.
 M::const struct regset *:regset_from_core_section:const char *sect_name, size_t sect_size:sect_name, sect_size
+
+# If the elements of C++ vtables are in-place function descriptors rather
+# than normal function pointers (which may point to code or a descriptor),
+# set this to one.
+v::int:vtable_function_descriptors:::0:0::0
+
+# Set if the least significant bit of the delta is used instead of the least
+# significant bit of the pfn for pointers to virtual member functions.
+v::int:vbit_in_delta:::0:0::0
 EOF
 }
 

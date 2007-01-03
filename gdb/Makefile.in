@@ -1527,13 +1527,6 @@ main.o: main.c
 	$(CC) -c $(INTERNAL_CFLAGS) $(TARGET_SYSTEM_ROOT_DEFINE) \
 		-DBINDIR=\"$(bindir)\" $(srcdir)/main.c
 
-# FIXME: cagney/2004-09-16: "gnu-v3-abi.c", with a GCC 3.4 compiler,
-# gets a "assignment from incompatible pointer type" warning.  The
-# return types - "enum gnu_v3_dtor_kinds" vs "enum ctor_kinds" -
-# conflict.
-gnu-v3-abi.o: $(srcdir)/gnu-v3-abi.c
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/gnu-v3-abi.c
-
 # FIXME: cagney/2003-08-10: "monitor.c" gets -Wformat-nonliteral
 # errors.  It turns out that that is the least of monitor.c's
 # problems.  The function print_vsprintf appears to be using
@@ -1973,7 +1966,7 @@ environ.o: environ.c $(defs_h) $(environ_h) $(gdb_string_h)
 eval.o: eval.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(value_h) $(expression_h) $(target_h) $(frame_h) $(language_h) \
 	$(f_lang_h) $(cp_abi_h) $(infcall_h) $(objc_lang_h) $(block_h) \
-	$(parser_defs_h) $(cp_support_h)
+	$(parser_defs_h) $(cp_support_h) $(gdb_assert_h)
 event-loop.o: event-loop.c $(defs_h) $(event_loop_h) $(event_top_h) \
 	$(gdb_string_h) $(exceptions_h) $(gdb_assert_h) $(gdb_select_h)
 event-top.o: event-top.c $(defs_h) $(top_h) $(inferior_h) $(target_h) \
@@ -2052,7 +2045,7 @@ gnu-v2-abi.o: gnu-v2-abi.c $(defs_h) $(gdb_string_h) $(symtab_h) \
 	$(gdbtypes_h) $(value_h) $(demangle_h) $(cp_abi_h) $(cp_support_h) \
 	$(gnu_v2_abi_h)
 gnu-v3-abi.o: gnu-v3-abi.c $(defs_h) $(value_h) $(cp_abi_h) $(cp_support_h) \
-	$(demangle_h) $(gdb_assert_h) $(gdb_string_h)
+	$(demangle_h) $(valprint_h) $(gdb_assert_h) $(gdb_string_h)
 go32-nat.o: go32-nat.c $(defs_h) $(inferior_h) $(gdb_wait_h) $(gdbcore_h) \
 	$(command_h) $(gdbcmd_h) $(floatformat_h) $(buildsym_h) \
 	$(i387_tdep_h) $(i386_tdep_h) $(value_h) $(regcache_h) \
@@ -2168,7 +2161,8 @@ ia64-tdep.o: ia64-tdep.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(frame_h) $(frame_base_h) $(frame_unwind_h) $(doublest_h) \
 	$(value_h) $(gdb_assert_h) $(objfiles_h) $(elf_common_h) \
 	$(elf_bfd_h) $(dis_asm_h) $(infcall_h) $(osabi_h) $(ia64_tdep_h) \
-	$(elf_ia64_h) $(libunwind_frame_h) $(libunwind_ia64_h)
+	$(elf_ia64_h) $(libunwind_frame_h) $(libunwind_ia64_h) \
+	$(cp_abi_h)
 infcall.o: infcall.c $(defs_h) $(breakpoint_h) $(target_h) $(regcache_h) \
 	$(inferior_h) $(gdb_assert_h) $(block_h) $(gdbcore_h) $(language_h) \
 	$(objfiles_h) $(gdbcmd_h) $(command_h) $(gdb_string_h) $(infcall_h) \

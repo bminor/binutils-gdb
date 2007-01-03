@@ -9,6 +9,8 @@ frequency signals (e.g. SIGALRM) via the QPassSignals packet.
 * GDB for MIPS targets now autodetects whether a remote target provides
 32-bit or 64-bit register values.
 
+* Support for C++ member pointers has been improved.
+
 * New commands
 
 set mem inaccessible-by-default

@@ -142,8 +142,20 @@ enum type_code
     TYPE_CODE_ERROR,
 
     /* C++ */
-    TYPE_CODE_MEMBER,		/* Member type */
     TYPE_CODE_METHOD,		/* Method type */
+
+    /* Pointer-to-member-function type.  This describes how to access a
+       particular member function of a class (possibly a virtual
+       member function).  The representation may vary between different
+       C++ ABIs.  */
+    TYPE_CODE_METHODPTR,
+
+    /* Pointer-to-member type.  This is the offset within a class to some
+       particular data member.  The only currently supported representation
+       uses an unbiased offset, with -1 representing NULL; this is used
+       by the Itanium C++ ABI (used by GCC on all platforms).  */
+    TYPE_CODE_MEMBERPTR,
+
     TYPE_CODE_REF,		/* C++ Reference types */
 
     TYPE_CODE_CHAR,		/* *real* character type */
@@ -464,8 +476,9 @@ struct main_type
   /* For types with virtual functions (TYPE_CODE_STRUCT), VPTR_BASETYPE
      is the base class which defined the virtual function table pointer.  
 
-     For types that are pointer to member types (TYPE_CODE_MEMBER),
-     VPTR_BASETYPE is the type that this pointer is a member of.
+     For types that are pointer to member types (TYPE_CODE_METHODPTR,
+     TYPE_CODE_MEMBERPTR), VPTR_BASETYPE is the type that this pointer
+     is a member of.
 
      For method types (TYPE_CODE_METHOD), VPTR_BASETYPE is the aggregate
      type that contains the method.
@@ -1220,14 +1233,16 @@ extern const char *address_space_int_to_name (int);
 extern struct type *make_type_with_address_space (struct type *type, 
 						  int space_identifier);
 
-extern struct type *lookup_member_type (struct type *, struct type *);
+extern struct type *lookup_memberptr_type (struct type *, struct type *);
 
-extern void
-smash_to_method_type (struct type *type, struct type *domain,
-		      struct type *to_type, struct field *args,
-		      int nargs, int varargs);
+extern struct type *lookup_methodptr_type (struct type *);
 
-extern void smash_to_member_type (struct type *, struct type *, struct type *);
+extern void smash_to_method_type (struct type *type, struct type *domain,
+				  struct type *to_type, struct field *args,
+				  int nargs, int varargs);
+
+extern void smash_to_memberptr_type (struct type *, struct type *,
+				     struct type *);
 
 extern struct type *allocate_stub_method (struct type *);
 

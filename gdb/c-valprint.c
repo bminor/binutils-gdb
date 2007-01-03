@@ -142,6 +142,21 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       addr = address;
       goto print_unpacked_pointer;
 
+    case TYPE_CODE_MEMBERPTR:
+      if (format)
+	{
+	  print_scalar_formatted (valaddr + embedded_offset, type, format, 0, stream);
+	  break;
+	}
+      cp_print_class_member (valaddr + embedded_offset,
+			     TYPE_DOMAIN_TYPE (type),
+			     stream, "&");
+      break;
+
+    case TYPE_CODE_METHODPTR:
+      cplus_print_method_ptr (valaddr + embedded_offset, type, stream);
+      break;
+
     case TYPE_CODE_PTR:
       if (format && format != 's')
 	{
@@ -159,17 +174,6 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	  break;
 	}
       elttype = check_typedef (TYPE_TARGET_TYPE (type));
-      if (TYPE_CODE (elttype) == TYPE_CODE_METHOD)
-	{
-	  cp_print_class_method (valaddr + embedded_offset, type, stream);
-	}
-      else if (TYPE_CODE (elttype) == TYPE_CODE_MEMBER)
-	{
-	  cp_print_class_member (valaddr + embedded_offset,
-				 TYPE_DOMAIN_TYPE (TYPE_TARGET_TYPE (type)),
-				 stream, "&");
-	}
-      else
 	{
 	  addr = unpack_pointer (type, valaddr + embedded_offset);
 	print_unpacked_pointer:
@@ -250,19 +254,8 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	}
       break;
 
-    case TYPE_CODE_MEMBER:
-      error (_("not implemented: member type in c_val_print"));
-      break;
-
     case TYPE_CODE_REF:
       elttype = check_typedef (TYPE_TARGET_TYPE (type));
-      if (TYPE_CODE (elttype) == TYPE_CODE_MEMBER)
-	{
-	  cp_print_class_member (valaddr + embedded_offset,
-				 TYPE_DOMAIN_TYPE (elttype),
-				 stream, "");
-	  break;
-	}
       if (addressprint)
 	{
 	  CORE_ADDR addr
@@ -351,6 +344,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       break;
 
     case TYPE_CODE_FUNC:
+    case TYPE_CODE_METHOD:
       if (format)
 	{
 	  print_scalar_formatted (valaddr + embedded_offset, type, format, 0, stream);
@@ -441,14 +435,6 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	  print_floating (valaddr + embedded_offset, type, stream);
 	}
       break;
-
-    case TYPE_CODE_METHOD:
-      {
-	struct value *v = value_at (type, address);
-	cp_print_class_method (value_contents (value_addr (v)),
-			       lookup_pointer_type (type), stream);
-	break;
-      }
 
     case TYPE_CODE_VOID:
       fprintf_filtered (stream, "void");

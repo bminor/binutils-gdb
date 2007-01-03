@@ -1,5 +1,5 @@
 # Copyright 1992, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-# 2003, 2004 Free Software Foundation, Inc.
+# 2003, 2004, 2006 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -498,10 +498,13 @@ proc test_enums {} {
 # Pointers to class members
 
 proc test_pointers_to_class_members {} {
-    gdb_test "print Bar::z" "\\$\[0-9\]+ = \\(int ?\\( ?Bar::& ?\\) ?\\) ?Bar::z"
-    gdb_test "print &Foo::x" "\\$\[0-9\]+ = \\(int ?\\( ?Foo::\\* ?\\) ?\\) ?&Foo::x"
+    gdb_test "print Bar::z" "Cannot reference non-static field \"z\""
+    gdb_test "print &Foo::x" "\\$\[0-9\]+ = &Foo::x"
     gdb_test "print (int)&Foo::x" "\\$\[0-9\]+ = 0"
     gdb_test "print (int)&Bar::y == 2*sizeof(int)" "\\$\[0-9\]+ = true"
+
+    gdb_test "ptype Bar::z" "type = int"
+    gdb_test "ptype &Bar::z" "type = int Bar::\\*"
 
     # TODO: this is a bogus test.  It's looking at a variable that
     # has not even been declared yet, so it's accessing random junk

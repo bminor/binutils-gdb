@@ -40,6 +40,7 @@
 #include "infcall.h"
 #include "osabi.h"
 #include "ia64-tdep.h"
+#include "cp-abi.h"
 
 #ifdef HAVE_LIBUNWIND_IA64_H
 #include "elf/ia64.h"           /* for PT_IA_64_UNWIND value */
@@ -3306,6 +3307,17 @@ ia64_convert_from_func_ptr_addr (struct gdbarch *gdbarch, CORE_ADDR addr,
   if (s && strcmp (s->the_bfd_section->name, ".opd") == 0)
     return read_memory_unsigned_integer (addr, 8);
 
+  /* There are also descriptors embedded in vtables.  */
+  if (s)
+    {
+      struct minimal_symbol *minsym;
+
+      minsym = lookup_minimal_symbol_by_pc (addr);
+
+      if (minsym && is_vtable_name (SYMBOL_LINKAGE_NAME (minsym)))
+	return read_memory_unsigned_integer (addr, 8);
+    }
+
   return addr;
 }
 
@@ -3639,6 +3651,10 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_print_insn (gdbarch, ia64_print_insn);
   set_gdbarch_convert_from_func_ptr_addr (gdbarch, ia64_convert_from_func_ptr_addr);
+
+  /* The virtual table contains 16-byte descriptors, not pointers to
+     descriptors.  */
+  set_gdbarch_vtable_function_descriptors (gdbarch, 1);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);

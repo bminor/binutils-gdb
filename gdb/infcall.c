@@ -1,7 +1,7 @@
 /* Perform an inferior function call, for GDB, the GNU debugger.
 
    Copyright (C) 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -169,7 +169,8 @@ value_arg_coerce (struct value *arg, struct type *param_type,
     case TYPE_CODE_STRING:
     case TYPE_CODE_BITSTRING:
     case TYPE_CODE_ERROR:
-    case TYPE_CODE_MEMBER:
+    case TYPE_CODE_MEMBERPTR:
+    case TYPE_CODE_METHODPTR:
     case TYPE_CODE_METHOD:
     case TYPE_CODE_COMPLEX:
     default:

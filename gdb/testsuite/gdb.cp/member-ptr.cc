@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 1998, 1999, 2004 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2004, 2006 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -81,6 +81,69 @@ typedef int (A::*PMF)(int);
 
 typedef int A::*PMI;
 
+/* This class is in front of the other base classes of Diamond, so
+   that we can detect if the offset for Left or the first Base is
+   added twice - otherwise it would be 2 * 0 == 0.  */
+class Padding
+{
+  int spacer;
+  virtual int vspacer();
+};
+
+int Padding::vspacer()
+{
+  return this->spacer;
+}
+
+class Base
+{
+public:
+  int x;
+  int get_x();
+  virtual int vget_base ();
+};
+
+int Base::get_x ()
+{
+  return this->x;
+}
+
+int Base::vget_base ()
+{
+  return this->x + 1000;
+}
+
+class Left : public Base {
+public:
+  virtual int vget ();
+};
+
+int Left::vget ()
+{
+  return this->x + 100;
+}
+
+class Right : public Base {
+public:
+  virtual int vget ();
+};
+
+int Right::vget ()
+{
+  return this->x + 200;
+}
+
+class Diamond : public Padding, public Left, public Right
+{
+public:
+  virtual int vget_base ();
+};
+
+int Diamond::vget_base ()
+{
+  return this->Left::x + 2000;
+}
+
 int main ()
 {
   A a;
@@ -89,6 +152,18 @@ int main ()
 
   PMF * pmf_p;
   PMI pmi;
+
+  Diamond diamond;
+  int (Diamond::*left_pmf) ();
+  int (Diamond::*right_pmf) ();
+  int (Diamond::*left_vpmf) ();
+  int (Diamond::*left_base_vpmf) ();
+  int (Diamond::*right_vpmf) ();
+  int (Base::*base_vpmf) ();
+  int Diamond::*diamond_pmi;
+
+  PMI null_pmi;
+  PMF null_pmf;
 
   a.j = 121;
   a.jj = 1331;
@@ -101,8 +176,27 @@ int main ()
   pmf = &A::bar;
   pmf_p = &pmf;
 
-  pmi = NULL;
-  
+  diamond.Left::x = 77;
+  diamond.Right::x = 88;
+
+  /* Some valid pointer to members from a base class.  */
+  left_pmf = (int (Diamond::*) ()) (int (Left::*) ()) (&Base::get_x);
+  right_pmf = (int (Diamond::*) ()) (int (Right::*) ()) (&Base::get_x);
+  left_vpmf = &Left::vget;
+  left_base_vpmf = (int (Diamond::*) ()) (int (Left::*) ()) (&Base::vget_base);
+  right_vpmf = &Right::vget;
+
+  /* An unspecified, value preserving pointer to member cast.  */
+  base_vpmf = (int (Base::*) ()) (int (Left::*) ()) &Diamond::vget_base;
+
+  /* A pointer to data member from a base class.  */
+  diamond_pmi = (int Diamond::*) (int Left::*) &Base::x;
+
+  null_pmi = NULL;
+  null_pmf = NULL;
+
+  pmi = NULL; /* Breakpoint 1 here.  */
+
   k = (a.*pmf)(3);
 
   pmi = &A::jj;

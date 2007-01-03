@@ -1,6 +1,6 @@
 /* Read hp debug symbols and convert to internal format, for GDB.
    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -4875,9 +4875,7 @@ hpread_type_lookup (dnttpointer hp_type, struct objfile *objfile)
 				      objfile),
 	  class_type = hpread_type_lookup (dn_bufp->dptrmem.pointsto,
 					   objfile),
-	  ptrmemtype = alloc_type (objfile);
-	smash_to_member_type (ptrmemtype, class_type, memtype);
-	return make_pointer_type (ptrmemtype, NULL);
+	return lookup_memberptr_type (memtype, class_type);
       }
       break;
 
@@ -4905,7 +4903,7 @@ hpread_type_lookup (dnttpointer hp_type, struct objfile *objfile)
 			      TYPE_FIELDS (functype),
 			      TYPE_NFIELDS (functype),
 			      0);
-	return make_pointer_type (ptrmemtype, NULL);
+	return lookup_methodptr_type (ptrmemtype);
       }
       break;
 
