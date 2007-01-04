@@ -291,6 +291,9 @@ static int intel_syntax = 0;
 /* 1 if register prefix % not required.  */
 static int allow_naked_reg = 0;
 
+/* Register prefix used for error message.  */
+static const char *register_prefix = "%";
+
 /* Used in 16 bit gcc mode to add an l suffix to call, ret, enter,
    leave, push, and pop instructions so that gcc has the same stack
    frame as in 32 bit mode.  */
@@ -1102,7 +1105,13 @@ set_intel_syntax (int syntax_flag)
   else
     allow_naked_reg = (ask_naked_reg < 0);
 
-  identifier_chars['%'] = intel_syntax && allow_naked_reg ? '%' : 0;
+  if (intel_syntax && allow_naked_reg)
+    {
+      identifier_chars['%'] = '%';
+      register_prefix = "";
+    }
+  else
+    identifier_chars['%'] = 0;
   identifier_chars['$'] = intel_syntax ? '$' : 0;
 }
 
@@ -3028,8 +3037,8 @@ check_byte_reg (void)
 	  if (flag_code == CODE_64BIT
 	      && (i.tm.operand_types[op] & InOutPortReg) == 0)
 	    {
-	      as_bad (_("Incorrect register `%%%s' used with `%c' suffix"),
-		      i.op[op].regs->reg_name,
+	      as_bad (_("Incorrect register `%s%s' used with `%c' suffix"),
+		      register_prefix, i.op[op].regs->reg_name,
 		      i.suffix);
 	      return 0;
 	    }
@@ -3087,8 +3096,8 @@ check_long_reg (void)
 	   lowering is more complicated.  */
 	if (flag_code == CODE_64BIT)
 	  {
-	    as_bad (_("Incorrect register `%%%s' used with `%c' suffix"),
-		    i.op[op].regs->reg_name,
+	    as_bad (_("Incorrect register `%s%s' used with `%c' suffix"),
+		    register_prefix, i.op[op].regs->reg_name,
 		    i.suffix);
 	    return 0;
 	  }
@@ -3104,8 +3113,8 @@ check_long_reg (void)
     else if ((i.types[op] & Reg64) != 0
 	     && (i.tm.operand_types[op] & (Reg32 | Acc)) != 0)
       {
-	as_bad (_("Incorrect register `%%%s' used with `%c' suffix"),
-		i.op[op].regs->reg_name,
+	as_bad (_("Incorrect register `%s%s' used with `%c' suffix"),
+		register_prefix, i.op[op].regs->reg_name,
 		i.suffix);
 	return 0;
       }
@@ -3136,8 +3145,8 @@ check_qword_reg (void)
       {
 	/* Prohibit these changes in the 64bit mode, since the
 	   lowering is more complicated.  */
-	as_bad (_("Incorrect register `%%%s' used with `%c' suffix"),
-		i.op[op].regs->reg_name,
+	as_bad (_("Incorrect register `%s%s' used with `%c' suffix"),
+		register_prefix, i.op[op].regs->reg_name,
 		i.suffix);
 	return 0;
       }
@@ -3169,8 +3178,8 @@ check_word_reg (void)
 	   lowering is more complicated.  */
 	if (flag_code == CODE_64BIT)
 	  {
-	    as_bad (_("Incorrect register `%%%s' used with `%c' suffix"),
-		    i.op[op].regs->reg_name,
+	    as_bad (_("Incorrect register `%s%s' used with `%c' suffix"),
+		    register_prefix, i.op[op].regs->reg_name,
 		    i.suffix);
 	    return 0;
 	  }

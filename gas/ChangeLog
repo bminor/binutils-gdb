@@ -1,3 +1,14 @@
+2007-01-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/3826
+	* config/tc-i386.c (register_prefix): New.
+	(set_intel_syntax): Set set_intel_syntax to "" if register
+	prefix is needed.
+	(check_byte_reg): Use register_prefix for error message.
+	(check_long_reg): Likewise.
+	(check_qword_reg): Likewise.
+	(check_word_reg): Likewise.
+
 2006-01-04  Julian Brown  <julian@codesourcery.com>
 
 	* config/tc-arm.c (do_neon_shl_imm): Swap rN, rM.
@@ -10,6 +21,10 @@
 
 	* config/tc-arm.c (NEON_ENC_TAB): Fix encoding of vclt, vcle, vaclt
 	and vacle.
+
+2007-01-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (swap_operands): Remove branches.
 
 2007-01-03  H.J. Lu  <hongjiu.lu@intel.com>
 
