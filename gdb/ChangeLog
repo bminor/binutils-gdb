@@ -1,16 +1,20 @@
-2007-01-04  Vladimir Prus  <vladimir@codesourcery.com>
+2007-01-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
-	Implement specification of MI tests as comments
-	in C and C++ sources.
-	* lib/mi-support.exp (mi_autotest_data): New variable.
-	(mi_autotest_source): New variable.
-	(count_newlines, mi_prepare_inline_tests)
-	(mi_get_inline_test, mi_continue_to_line)
-	(mi_run_inline_test, mi_tbreak)
-	(mi_send_resuming_command, mi_wait_for_stop): New functions.
-	* gdb.mi/mi-var-cp.exp: Move most content to the C file.
-	Run inline tests.
-	* gdb.mi/mi-var-cp.cc: Define tests here.
+	* buildsym.c (start_subfile): Handle producer.
+	(record_producer): New function.
+	* buildsym.h (struct subfile): Include producer.
+	(record_producer): New prototype.
+	* dwarf2-frame.c (struct dwarf2_cie): Add version and augmentation.
+	(struct dwarf2_frame_state): Add armcc_cfa_offsets_sf and
+	armcc_cfa_offsets_reversed.
+	(execute_cfa_program): Handle armcc_cfa_offsets_sf.
+	(dwarf2_frame_find_quirks): New function.
+	(dwarf2_frame_cache): Call it.  Handle armcc_cfa_offsets_reversed.
+	(decode_frame_entry_1): Record the CIE version.  Record the
+	augmentation.  Skip armcc augmentations.
+	* dwarf2read.c (read_file_scope): Save the producer.
+	* symtab.h (struct symtab): Rename unused version member to
+	producer.
 
 2007-01-04  Daniel Jacobowitz  <dan@codesourcery.com>
 

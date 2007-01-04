@@ -64,6 +64,9 @@ struct dwarf2_cie
   gdb_byte *initial_instructions;
   gdb_byte *end;
 
+  /* Saved augmentation, in case it's needed later.  */
+  char *augmentation;
+
   /* Encoding of addresses.  */
   gdb_byte encoding;
 
@@ -72,6 +75,9 @@ struct dwarf2_cie
 
   /* True if an 'S' augmentation existed.  */
   unsigned char signal_frame;
+
+  /* The version recorded in the CIE.  */
+  unsigned char version;
 
   struct dwarf2_cie *next;
 };
@@ -138,6 +144,16 @@ struct dwarf2_frame_state
   LONGEST data_align;
   ULONGEST code_align;
   ULONGEST retaddr_column;
+
+  /* Flags for known producer quirks.  */
+
+  /* The ARM compilers, in DWARF2 mode, assume that DW_CFA_def_cfa
+     and DW_CFA_def_cfa_offset takes a factored offset.  */
+  int armcc_cfa_offsets_sf;
+
+  /* The ARM compilers, in DWARF2 or DWARF3 mode, may assume that
+     the CFA is defined as REG - OFFSET rather than REG + OFFSET.  */
+  int armcc_cfa_offsets_reversed;
 };
 
 /* Store the length the expression for the CFA in the `cfa_reg' field,
@@ -430,6 +446,10 @@ bad CFI data; mismatched DW_CFA_restore_state at 0x%s"), paddr (fs->pc));
 	    case DW_CFA_def_cfa:
 	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &fs->cfa_reg);
 	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &utmp);
+
+	      if (fs->armcc_cfa_offsets_sf)
+		utmp *= fs->data_align;
+
 	      fs->cfa_offset = utmp;
 	      fs->cfa_how = CFA_REG_OFFSET;
 	      break;
@@ -444,6 +464,10 @@ bad CFI data; mismatched DW_CFA_restore_state at 0x%s"), paddr (fs->pc));
 
 	    case DW_CFA_def_cfa_offset:
 	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &utmp);
+
+	      if (fs->armcc_cfa_offsets_sf)
+		utmp *= fs->data_align;
+
 	      fs->cfa_offset = utmp;
 	      /* cfa_how deliberately not set.  */
 	      break;
@@ -715,6 +739,49 @@ dwarf2_frame_eh_frame_regnum (struct gdbarch *gdbarch, int regnum)
     return regnum;
   return ops->eh_frame_regnum (gdbarch, regnum);
 }
+
+static void
+dwarf2_frame_find_quirks (struct dwarf2_frame_state *fs,
+			  struct dwarf2_fde *fde)
+{
+  static const char *arm_idents[] = {
+    "ARM C Compiler, ADS",
+    "Thumb C Compiler, ADS",
+    "ARM C++ Compiler, ADS",
+    "Thumb C++ Compiler, ADS",
+    "ARM/Thumb C/C++ Compiler, RVCT"
+  };
+  int i;
+
+  struct symtab *s;
+
+  s = find_pc_symtab (fs->pc);
+  if (s == NULL || s->producer == NULL)
+    return;
+
+  for (i = 0; i < ARRAY_SIZE (arm_idents); i++)
+    if (strncmp (s->producer, arm_idents[i], strlen (arm_idents[i])) == 0)
+      {
+	if (fde->cie->version == 1)
+	  fs->armcc_cfa_offsets_sf = 1;
+
+	if (fde->cie->version == 1)
+	  fs->armcc_cfa_offsets_reversed = 1;
+
+	/* The reversed offset problem is present in some compilers
+	   using DWARF3, but it was eventually fixed.  Check the ARM
+	   defined augmentations, which are in the format "armcc" followed
+	   by a list of one-character options.  The "+" option means
+	   this problem is fixed (no quirk needed).  If the armcc
+	   augmentation is missing, the quirk is needed.  */
+	if (fde->cie->version == 3
+	    && (strncmp (fde->cie->augmentation, "armcc", 5) != 0
+		|| strchr (fde->cie->augmentation + 5, '+') == NULL))
+	  fs->armcc_cfa_offsets_reversed = 1;
+
+	return;
+      }
+}
 
 
 struct dwarf2_frame_cache
@@ -781,6 +848,9 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
   fs->code_align = fde->cie->code_alignment_factor;
   fs->retaddr_column = fde->cie->return_address_register;
 
+  /* Check for "quirks" - known bugs in producers.  */
+  dwarf2_frame_find_quirks (fs, fde);
+
   /* First decode all the insns in the CIE.  */
   execute_cfa_program (fde->cie->initial_instructions,
 		       fde->cie->end, next_frame, fs, fde->eh_frame_p);
@@ -798,7 +868,10 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
     {
     case CFA_REG_OFFSET:
       cache->cfa = read_reg (next_frame, fs->cfa_reg);
-      cache->cfa += fs->cfa_offset;
+      if (fs->armcc_cfa_offsets_reversed)
+	cache->cfa -= fs->cfa_offset;
+      else
+	cache->cfa += fs->cfa_offset;
       break;
 
     case CFA_EXP:
@@ -1584,11 +1657,17 @@ decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p)
       cie_version = read_1_byte (unit->abfd, buf);
       if (cie_version != 1 && cie_version != 3)
 	return NULL;
+      cie->version = cie_version;
       buf += 1;
 
       /* Interpret the interesting bits of the augmentation.  */
-      augmentation = (char *) buf;
+      cie->augmentation = augmentation = (char *) buf;
       buf += (strlen (augmentation) + 1);
+
+      /* Ignore armcc augmentations.  We only use them for quirks,
+	 and that doesn't happen until later.  */
+      if (strncmp (augmentation, "armcc", 5) == 0)
+	augmentation += strlen (augmentation);
 
       /* The GCC 2.x "eh" augmentation has a pointer immediately
          following the augmentation string, so it must be handled

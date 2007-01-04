@@ -846,9 +846,9 @@ struct symtab
 
   char *debugformat;
 
-  /* String of version information.  May be zero.  */
+  /* String of producer version information.  May be zero.  */
 
-  char *version;
+  char *producer;
 
   /* Full name of file as found by searching the source path.
      NULL if not yet known.  */
