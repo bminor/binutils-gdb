@@ -2151,8 +2151,8 @@ const struct m68k_opcode m68k_opcodes[] =
      two(0177770,0107770), "DsD3D1", cpu32 }
 #define TBL(name1, name2, name3, s, r) \
   TBL1(name1, 4, s, r, 0), TBL1(name2, 4, s, r, 1), TBL1(name3, 4, s, r, 2)
-TBL("tblsb", "tblsw", "tblsl", 2, 1),
-TBL("tblsnb", "tblsnw", "tblsnl", 2, 0),
+TBL("tblsb", "tblsw", "tblsl", 1, 1),
+TBL("tblsnb", "tblsnw", "tblsnl", 1, 0),
 TBL("tblub", "tbluw", "tblul", 0, 1),
 TBL("tblunb", "tblunw", "tblunl", 0, 0),
 

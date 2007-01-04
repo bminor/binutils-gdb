@@ -1,3 +1,7 @@
+2007-01-04  Andreas Schwab  <schwab@suse.de>
+
+	* m68k-opc.c: Fix encoding of signed bit in the cpu32 tbls insns.
+
 2007-01-04  Julian Brown  <julian@codesourcery.com>
 
 	* arm-dis.c (neon_opcode): Fix disassembly for vshl, vqshl, vrshl,
