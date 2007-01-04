@@ -1,3 +1,7 @@
+2007-01-04  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (do_cpsi): Set mmod bit for 2 argument form.
+
 2007-01-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/3826

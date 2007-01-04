@@ -814,10 +814,10 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_EXT_V6K, 0x0320f000, 0x0fffff00, "nop%c\t{%0-7d}"},
 
   /* ARM V6 instructions. */
-  {ARM_EXT_V6, 0xf1080000, 0xfffdfe3f, "cpsie\t%8'a%7'i%6'f"},
-  {ARM_EXT_V6, 0xf1080000, 0xfffdfe20, "cpsie\t%8'a%7'i%6'f,#%0-4d"},
-  {ARM_EXT_V6, 0xf10C0000, 0xfffdfe3f, "cpsid\t%8'a%7'i%6'f"},
-  {ARM_EXT_V6, 0xf10C0000, 0xfffdfe20, "cpsid\t%8'a%7'i%6'f,#%0-4d"},
+  {ARM_EXT_V6, 0xf1080000, 0xfffffe3f, "cpsie\t%8'a%7'i%6'f"},
+  {ARM_EXT_V6, 0xf10a0000, 0xfffffe20, "cpsie\t%8'a%7'i%6'f,#%0-4d"},
+  {ARM_EXT_V6, 0xf10C0000, 0xfffffe3f, "cpsid\t%8'a%7'i%6'f"},
+  {ARM_EXT_V6, 0xf10e0000, 0xfffffe20, "cpsid\t%8'a%7'i%6'f,#%0-4d"},
   {ARM_EXT_V6, 0xf1000000, 0xfff1fe20, "cps\t#%0-4d"},
   {ARM_EXT_V6, 0x06800010, 0x0ff00ff0, "pkhbt%c\t%12-15r, %16-19r, %0-3r"},
   {ARM_EXT_V6, 0x06800010, 0x0ff00070, "pkhbt%c\t%12-15r, %16-19r, %0-3r, LSL #%7-11d"},

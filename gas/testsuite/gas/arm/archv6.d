@@ -217,3 +217,5 @@ Disassembly of section .text:
 0+344 <[^>]*> e6ef2475 ?	uxtb r2,r5, ROR #8
 0+348 <[^>]*> 16ef2075 ?	uxtbne r2,r5
 0+34c <[^>]*> 16ef2475 ?	uxtbne r2,r5, ROR #8
+0+350 <[^>]*> f10a00ca ?	cpsie	if,#10
+0+354 <[^>]*> f10a00d5 ?	cpsie	if,#21

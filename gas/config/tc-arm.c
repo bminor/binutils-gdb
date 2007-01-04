@@ -548,6 +548,7 @@ struct asm_opcode
 #define INDEX_UP	0x00800000
 #define WRITE_BACK	0x00200000
 #define LDM_TYPE_2_OR_3	0x00400000
+#define CPSI_MMOD	0x00020000
 
 #define LITERAL_MASK	0xf000f000
 #define OPCODE_MASK	0xfe1fffff
@@ -6828,7 +6829,11 @@ static void
 do_cpsi (void)
 {
   inst.instruction |= inst.operands[0].imm << 6;
-  inst.instruction |= inst.operands[1].imm;
+  if (inst.operands[1].present)
+    {
+      inst.instruction |= CPSI_MMOD;
+      inst.instruction |= inst.operands[1].imm;
+    }
 }
 
 static void

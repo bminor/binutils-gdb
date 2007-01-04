@@ -1,3 +1,8 @@
+2007-01-04  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/archv6.s: Add more cpsie tests.
+	* gas/arm/archv6.d: Ditto.
+
 2007-01-04  Andreas Schwab  <schwab@suse.de>
 
 	* gas/m68k/cpu32.[sd]: New test.
