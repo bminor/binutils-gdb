@@ -1,3 +1,11 @@
+2007-01-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* alpha-tdep.c (alpha_register_name): Use ARRAY_SIZE.
+	(alpha_read_insn, alpha_skip_prologue, alpha_heuristic_proc_start)
+	(alpha_heuristic_frame_unwind_cache, alpha_next_pc)
+	(alpha_gdbarch_init): Use ALPHA_INSN_SIZE, ALPHA_REGISTER_SIZE and
+	sizeof, instead of hardcoded constants.
+
 2007-01-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* CONTRIBUTE: Use sourceware.org.

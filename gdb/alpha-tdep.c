@@ -73,7 +73,7 @@ alpha_register_name (int regno)
 
   if (regno < 0)
     return NULL;
-  if (regno >= (sizeof(register_names) / sizeof(*register_names)))
+  if (regno >= ARRAY_SIZE(register_names))
     return NULL;
   return register_names[regno];
 }
@@ -640,13 +640,13 @@ alpha_after_prologue (CORE_ADDR pc)
 unsigned int
 alpha_read_insn (CORE_ADDR pc)
 {
-  gdb_byte buf[4];
+  gdb_byte buf[ALPHA_INSN_SIZE];
   int status;
 
-  status = read_memory_nobpt (pc, buf, 4);
+  status = read_memory_nobpt (pc, buf, sizeof (buf));
   if (status)
     memory_error (status, pc);
-  return extract_unsigned_integer (buf, 4);
+  return extract_unsigned_integer (buf, sizeof (buf));
 }
 
 /* To skip prologues, I use this predicate.  Returns either PC itself
@@ -662,7 +662,7 @@ alpha_skip_prologue (CORE_ADDR pc)
   unsigned long inst;
   int offset;
   CORE_ADDR post_prologue_pc;
-  gdb_byte buf[4];
+  gdb_byte buf[ALPHA_INSN_SIZE];
 
   /* Silently return the unaltered pc upon memory errors.
      This could happen on OSF/1 if decode_line_1 tries to skip the
@@ -671,7 +671,7 @@ alpha_skip_prologue (CORE_ADDR pc)
      Reading target memory is slow over serial lines, so we perform
      this check only if the target has shared libraries (which all
      Alpha targets do).  */
-  if (target_read_memory (pc, buf, 4))
+  if (target_read_memory (pc, buf, sizeof (buf)))
     return pc;
 
   /* See if we can determine the end of the prologue via the symbol table.
@@ -688,7 +688,7 @@ alpha_skip_prologue (CORE_ADDR pc)
   /* Skip the typical prologue instructions. These are the stack adjustment
      instruction and the instructions that save registers on the stack
      or in the gcc frame.  */
-  for (offset = 0; offset < 100; offset += 4)
+  for (offset = 0; offset < 100; offset += ALPHA_INSN_SIZE)
     {
       inst = alpha_read_insn (pc + offset);
 
@@ -946,7 +946,7 @@ alpha_heuristic_proc_start (CORE_ADDR pc)
   /* Search back for previous return; also stop at a 0, which might be
      seen for instance before the start of a code section.  Don't include
      nops, since this usually indicates padding between functions.  */
-  for (pc -= 4; pc >= fence; pc -= 4)
+  for (pc -= ALPHA_INSN_SIZE; pc >= fence; pc -= ALPHA_INSN_SIZE)
     {
       unsigned int insn = alpha_read_insn (pc);
       switch (insn)
@@ -1028,7 +1028,7 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *next_frame,
       if (start_pc + 200 < limit_pc)
 	limit_pc = start_pc + 200;
 
-      for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += 4)
+      for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += ALPHA_INSN_SIZE)
 	{
 	  unsigned int word = alpha_read_insn (cur_pc);
 
@@ -1137,7 +1137,7 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *next_frame,
 		  break;
 		}
 
-	      cur_pc += 4;
+	      cur_pc += ALPHA_INSN_SIZE;
 	    }
 	}
     }
@@ -1396,7 +1396,7 @@ alpha_next_pc (CORE_ADDR pc)
   int regno;
   int offset;
   LONGEST rav;
-  gdb_byte reg[8];
+  gdb_byte reg[ALPHA_REGISTER_SIZE];
 
   insn = alpha_read_insn (pc);
 
@@ -1421,8 +1421,8 @@ alpha_next_pc (CORE_ADDR pc)
           offset = (insn & 0x001fffff);
 	  if (offset & 0x00100000)
 	    offset  |= 0xffe00000;
-	  offset *= 4;
-	  return (pc + 4 + offset);
+	  offset *= ALPHA_INSN_SIZE;
+	  return (pc + ALPHA_INSN_SIZE + offset);
 	}
 
       /* Need to determine if branch is taken; read RA.  */
@@ -1439,7 +1439,7 @@ alpha_next_pc (CORE_ADDR pc)
 	}
       
       regcache_cooked_read (current_regcache, regno, reg);
-      rav = extract_signed_integer (reg, 8);
+      rav = extract_signed_integer (reg, ALPHA_REGISTER_SIZE);
 
       switch (op)
 	{
@@ -1507,7 +1507,7 @@ alpha_next_pc (CORE_ADDR pc)
 
   /* Not a branch or branch not taken; target PC is:
      pc + 4  */
-  return (pc + 4);
+  return (pc + ALPHA_INSN_SIZE);
 }
 
 void
@@ -1625,7 +1625,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 
   set_gdbarch_breakpoint_from_pc (gdbarch, alpha_breakpoint_from_pc);
-  set_gdbarch_decr_pc_after_break (gdbarch, 4);
+  set_gdbarch_decr_pc_after_break (gdbarch, ALPHA_INSN_SIZE);
   set_gdbarch_cannot_step_breakpoint (gdbarch, 1);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
