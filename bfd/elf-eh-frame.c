@@ -927,8 +927,6 @@ _bfd_elf_discard_section_eh_frame
   /* Resize the sec as needed.  */
   sec->rawsize = sec->size;
   sec->size = offset;
-  if (sec->size == 0)
-    sec->flags |= SEC_EXCLUDE;
 
   free (ehbuf);
   if (ecies)
