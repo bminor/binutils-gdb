@@ -1,7 +1,8 @@
 /* Everything about breakpoints, for GDB.
 
    Copyright (C) 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
+   2007
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -54,6 +55,7 @@
 #include "observer.h"
 #include "exceptions.h"
 #include "memattr.h"
+#include "ada-lang.h"
 
 #include "gdb-events.h"
 #include "mi/mi-common.h"
@@ -3609,8 +3611,11 @@ print_one_breakpoint (struct breakpoint *b,
       ui_out_text (uiout, "\n");
     }
   
-  if (b->cond)
+  if (b->cond && !ada_exception_catchpoint_p (b))
     {
+      /* We do not print the condition for Ada exception catchpoints
+         because the condition is an internal implementation detail
+         that we do not want to expose to the user.  */
       annotate_field (7);
       ui_out_text (uiout, "\tstop only if ");
       print_expression (b->cond, stb->stream);
@@ -6507,6 +6512,86 @@ catch_exception_command_1 (enum exception_event_kind ex_event, char *arg,
   warning (_("Unsupported with this platform/compiler combination."));
 }
 
+/* Create a breakpoint struct for Ada exception catchpoints.  */
+
+static void
+create_ada_exception_breakpoint (struct symtab_and_line sal,
+                                 char *addr_string,
+                                 char *exp_string,
+                                 char *cond_string,
+                                 struct expression *cond,
+                                 struct breakpoint_ops *ops,
+                                 int tempflag,
+                                 int from_tty)
+{
+  struct breakpoint *b;
+
+  if (from_tty)
+    {
+      describe_other_breakpoints (sal.pc, sal.section, -1);
+      /* FIXME: brobecker/2006-12-28: Actually, re-implement a special
+         version for exception catchpoints, because two catchpoints
+         used for different exception names will use the same address.
+         In this case, a "breakpoint ... also set at..." warning is
+         unproductive.  Besides. the warning phrasing is also a bit
+         inapropriate, we should use the word catchpoint, and tell
+         the user what type of catchpoint it is.  The above is good
+         enough for now, though.  */
+    }
+
+  b = set_raw_breakpoint (sal, bp_breakpoint);
+  set_breakpoint_count (breakpoint_count + 1);
+
+  b->enable_state = bp_enabled;
+  b->disposition = tempflag ? disp_del : disp_donttouch;
+  b->number = breakpoint_count;
+  b->ignore_count = 0;
+  b->cond = cond;
+  b->addr_string = addr_string;
+  b->language = language_ada;
+  b->cond_string = cond_string;
+  b->exp_string = exp_string;
+  b->thread = -1;
+  b->ops = ops;
+  b->from_tty = from_tty;
+
+  mention (b);
+}
+
+/* Implement the "catch exception" command.  */
+
+static void
+catch_ada_exception_command (char *arg, int tempflag, int from_tty)
+{
+  struct symtab_and_line sal;
+  enum bptype type;
+  char *addr_string = NULL;
+  char *exp_string = NULL;
+  char *cond_string = NULL;
+  struct expression *cond = NULL;
+  struct breakpoint_ops *ops = NULL;
+
+  sal = ada_decode_exception_location (arg, &addr_string, &exp_string,
+                                       &cond_string, &cond, &ops);
+  create_ada_exception_breakpoint (sal, addr_string, exp_string,
+                                   cond_string, cond, ops, tempflag,
+                                   from_tty);
+}
+
+/* Implement the "catch assert" command.  */
+
+static void
+catch_assert_command (char *arg, int tempflag, int from_tty)
+{
+  struct symtab_and_line sal;
+  char *addr_string = NULL;
+  struct breakpoint_ops *ops = NULL;
+
+  sal = ada_decode_assert_location (arg, &addr_string, &ops);
+  create_ada_exception_breakpoint (sal, addr_string, NULL, NULL, NULL, ops,
+                                   tempflag, from_tty);
+}
+
 /* Cover routine to allow wrapping target_enable_exception_catchpoints
    inside a catch_errors */
 
@@ -6610,6 +6695,15 @@ catch_command_1 (char *arg, int tempflag, int from_tty)
   else if (strncmp (arg1_start, "stop", arg1_length) == 0)
     {
       error (_("Catch of stop not yet implemented"));
+    }
+  else if (strncmp (arg1_start, "exception", arg1_length) == 0)
+    {
+      catch_ada_exception_command (arg1_end + 1, tempflag, from_tty);
+    }
+
+  else if (strncmp (arg1_start, "assert", arg1_length) == 0)
+    {
+      catch_assert_command (arg1_end + 1, tempflag, from_tty);
     }
 
   /* This doesn't appear to be an event name */
@@ -8117,6 +8211,11 @@ The act of your program's execution stopping may also be caught:\n\
 C++ exceptions may be caught:\n\
 \tcatch throw               - all exceptions, when thrown\n\
 \tcatch catch               - all exceptions, when caught\n\
+Ada exceptions may be caught:\n\
+\tcatch exception           - all exceptions, when raised\n\
+\tcatch exception <name>    - a particular exception, when raised\n\
+\tcatch exception unhandled - all unhandled exceptions, when raised\n\
+\tcatch assert              - all failed assertions, when raised\n\
 \n\
 Do \"help set follow-fork-mode\" for info on debugging your program\n\
 after a fork or vfork is caught.\n\n\

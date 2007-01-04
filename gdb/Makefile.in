@@ -1,5 +1,5 @@
 # Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-# 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+# 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
 # Free Software Foundation, Inc.
 
 # This file is part of GDB.
@@ -1694,7 +1694,7 @@ ada-lang.o: ada-lang.c $(defs_h) $(gdb_string_h) $(demangle_h) \
 	$(inferior_h) $(symfile_h) $(objfiles_h) $(breakpoint_h) \
 	$(gdbcore_h) $(hashtab_h) $(gdb_obstack_h) $(ada_lang_h) \
 	$(completer_h) $(gdb_stat_h) $(ui_out_h) $(block_h) $(infcall_h) \
-	$(dictionary_h) $(exceptions_h)
+	$(dictionary_h) $(exceptions_h) $(annotate_h) $(valprint_h)
 ada-typeprint.o: ada-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) \
 	$(symtab_h) $(gdbtypes_h) $(expression_h) $(value_h) $(gdbcore_h) \
 	$(target_h) $(command_h) $(gdbcmd_h) $(language_h) $(demangle_h) \
@@ -1834,7 +1834,7 @@ breakpoint.o: breakpoint.c $(defs_h) $(symtab_h) $(frame_h) $(breakpoint_h) \
 	$(objfiles_h) $(source_h) $(linespec_h) $(completer_h) $(gdb_h) \
 	$(ui_out_h) $(cli_script_h) $(gdb_assert_h) $(block_h) $(solib_h) \
 	$(solist_h) $(observer_h) $(exceptions_h) $(gdb_events_h) $(mi_common_h) \
-	$(memattr_h)
+	$(memattr_h) $(ada_lang_h)
 bsd-kvm.o: bsd-kvm.c $(defs_h) $(cli_cmds_h) $(command_h) $(frame_h) \
 	$(regcache_h) $(target_h) $(value_h) $(gdbcore_h) $(gdb_assert_h) \
 	$(readline_h) $(bsd_kvm_h)

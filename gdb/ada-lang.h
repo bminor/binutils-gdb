@@ -1,7 +1,8 @@
 /* Ada language support definitions for GDB, the GNU debugger.
 
    Copyright (C) 1992, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005 Free Software Foundation, Inc.
+   2005, 2007
+   Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -470,8 +471,6 @@ extern int ada_print_exception_breakpoint_nontask (struct breakpoint *);
 
 extern void ada_print_exception_breakpoint_task (struct breakpoint *);
 
-extern void ada_find_printable_frame (struct frame_info *fi);
-
 extern void ada_reset_thread_registers (void);
 
 extern int ada_build_task_list (void);
@@ -486,4 +485,18 @@ extern struct symbol *lookup_symbol_in_language (const char *,
 						 enum language,
 						 int *,
 						 struct symtab **);
+
+extern int ada_exception_catchpoint_p (struct breakpoint *b);
+  
+extern struct symtab_and_line
+  ada_decode_exception_location (char *args, char **addr_string,
+                                 char **exp_string, char **cond_string,
+                                 struct expression **cond,
+                                 struct breakpoint_ops **ops);
+
+extern struct symtab_and_line
+  ada_decode_assert_location (char *args, char **addr_string,
+                              struct breakpoint_ops **ops);
+
+
 #endif

@@ -1,7 +1,7 @@
 /* Ada language support routines for GDB, the GNU debugger.  Copyright (C)
 
-   1992, 1993, 1994, 1997, 1998, 1999, 2000, 2003, 2004, 2005 Free
-   Software Foundation, Inc.
+   1992, 1993, 1994, 1997, 1998, 1999, 2000, 2003, 2004, 2005, 2007
+   Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -53,6 +53,8 @@ Boston, MA 02110-1301, USA.  */
 #include "infcall.h"
 #include "dictionary.h"
 #include "exceptions.h"
+#include "annotate.h"
+#include "valprint.h"
 
 #ifndef ADA_RETAIN_DOTS
 #define ADA_RETAIN_DOTS 0
@@ -8973,6 +8975,786 @@ ada_modulus (struct type * type)
   return (ULONGEST) TYPE_HIGH_BOUND (type) + 1;
 }
 
+
+/* Ada exception catchpoint support:
+   ---------------------------------
+
+   We support 3 kinds of exception catchpoints:
+     . catchpoints on Ada exceptions
+     . catchpoints on unhandled Ada exceptions
+     . catchpoints on failed assertions
+
+   Exceptions raised during failed assertions, or unhandled exceptions
+   could perfectly be caught with the general catchpoint on Ada exceptions.
+   However, we can easily differentiate these two special cases, and having
+   the option to distinguish these two cases from the rest can be useful
+   to zero-in on certain situations.
+
+   Exception catchpoints are a specialized form of breakpoint,
+   since they rely on inserting breakpoints inside known routines
+   of the GNAT runtime.  The implementation therefore uses a standard
+   breakpoint structure of the BP_BREAKPOINT type, but with its own set
+   of breakpoint_ops.
+
+   At this time, we do not support the use of conditions on Ada exception
+   catchpoints.  The COND and COND_STRING fields are therefore set
+   to NULL (most of the time, see below).
+   
+   Conditions where EXP_STRING, COND, and COND_STRING are used:
+
+     When a user specifies the name of a specific exception in the case
+     of catchpoints on Ada exceptions, we store the name of that exception
+     in the EXP_STRING.  We then translate this request into an actual
+     condition stored in COND_STRING, and then parse it into an expression
+     stored in COND.  */
+
+/* The different types of catchpoints that we introduced for catching
+   Ada exceptions.  */
+
+enum exception_catchpoint_kind
+{
+  ex_catch_exception,
+  ex_catch_exception_unhandled,
+  ex_catch_assert
+};
+
+/* Return the name of the function at PC, NULL if could not find it.
+   This function only checks the debugging information, not the symbol
+   table.  */
+
+static char *
+function_name_from_pc (CORE_ADDR pc)
+{
+  char *func_name;
+
+  if (!find_pc_partial_function (pc, &func_name, NULL, NULL))
+    return NULL;
+
+  return func_name;
+}
+
+/* True iff FRAME is very likely to be that of a function that is
+   part of the runtime system.  This is all very heuristic, but is
+   intended to be used as advice as to what frames are uninteresting
+   to most users.  */
+
+static int
+is_known_support_routine (struct frame_info *frame)
+{
+  struct frame_info *next_frame = get_next_frame (frame);
+  /* If frame is not innermost, that normally means that frame->pc
+     points to *after* the call instruction, and we want to get the line
+     containing the call, never the next line.  But if the next frame is
+     a signal_handler_caller or a dummy frame, then the next frame was
+     not entered as the result of a call, and we want to get the line
+     containing frame->pc.  */
+  const int pc_is_after_call =
+    next_frame != NULL
+    && get_frame_type (next_frame) != SIGTRAMP_FRAME
+    && get_frame_type (next_frame) != DUMMY_FRAME;
+  struct symtab_and_line sal
+    = find_pc_line (get_frame_pc (frame), pc_is_after_call);
+  char *func_name;
+  int i;
+  struct stat st;
+
+  /* The heuristic:
+     1. The symtab is null (indicating no debugging symbols)
+     2. The symtab's filename does not exist.
+     3. The object file's name is one of the standard libraries.
+     4. The symtab's file name has the form of an Ada library source file.
+     5. The function at frame's PC has a GNAT-compiler-generated name.  */
+
+  if (sal.symtab == NULL)
+    return 1;
+
+  /* On some systems (e.g. VxWorks), the kernel contains debugging
+     symbols; in this case, the filename referenced by these symbols
+     does not exists.  */
+
+  if (stat (sal.symtab->filename, &st))
+    return 1;
+
+  for (i = 0; known_runtime_file_name_patterns[i] != NULL; i += 1)
+    {
+      re_comp (known_runtime_file_name_patterns[i]);
+      if (re_exec (sal.symtab->filename))
+        return 1;
+    }
+  if (sal.symtab->objfile != NULL)
+    {
+      for (i = 0; known_runtime_file_name_patterns[i] != NULL; i += 1)
+        {
+          re_comp (known_runtime_file_name_patterns[i]);
+          if (re_exec (sal.symtab->objfile->name))
+            return 1;
+        }
+    }
+
+  /* If the frame PC points after the call instruction, then we need to
+     decrement it in order to search for the function associated to this
+     PC.  Otherwise, if the associated call was the last instruction of
+     the function, we might either find the wrong function or even fail
+     during the function name lookup.  */
+  if (pc_is_after_call)
+    func_name = function_name_from_pc (get_frame_pc (frame) - 1);
+  else
+    func_name = function_name_from_pc (get_frame_pc (frame));
+
+  if (func_name == NULL)
+    return 1;
+
+  for (i = 0; known_auxiliary_function_name_patterns[i] != NULL; i += 1)
+    {
+      re_comp (known_auxiliary_function_name_patterns[i]);
+      if (re_exec (func_name))
+        return 1;
+    }
+
+  return 0;
+}
+
+/* Find the first frame that contains debugging information and that is not
+   part of the Ada run-time, starting from FI and moving upward.  */
+
+static void
+ada_find_printable_frame (struct frame_info *fi)
+{
+  for (; fi != NULL; fi = get_prev_frame (fi))
+    {
+      if (!is_known_support_routine (fi))
+        {
+          select_frame (fi);
+          break;
+        }
+    }
+
+}
+
+/* Assuming that the inferior just triggered an unhandled exception
+   catchpoint, return the address in inferior memory where the name
+   of the exception is stored.
+   
+   Return zero if the address could not be computed.  */
+
+static CORE_ADDR
+ada_unhandled_exception_name_addr (void)
+{
+  int frame_level;
+  struct frame_info *fi;
+
+  /* To determine the name of this exception, we need to select
+     the frame corresponding to RAISE_SYM_NAME.  This frame is
+     at least 3 levels up, so we simply skip the first 3 frames
+     without checking the name of their associated function.  */
+  fi = get_current_frame ();
+  for (frame_level = 0; frame_level < 3; frame_level += 1)
+    if (fi != NULL)
+      fi = get_prev_frame (fi); 
+
+  while (fi != NULL)
+    {
+      const char *func_name =
+        function_name_from_pc (get_frame_address_in_block (fi));
+      if (func_name != NULL
+          && strcmp (func_name, raise_sym_name) == 0)
+        break; /* We found the frame we were looking for...  */
+      fi = get_prev_frame (fi);
+    }
+
+  if (fi == NULL)
+    return 0;
+
+  select_frame (fi);
+  return parse_and_eval_address ("id.full_name");
+}
+
+/* Assuming the inferior just triggered an Ada exception catchpoint
+   (of any type), return the address in inferior memory where the name
+   of the exception is stored, if applicable.
+
+   Return zero if the address could not be computed, or if not relevant.  */
+
+static CORE_ADDR
+ada_exception_name_addr_1 (enum exception_catchpoint_kind ex,
+                           struct breakpoint *b)
+{
+  switch (ex)
+    {
+      case ex_catch_exception:
+        return (parse_and_eval_address ("e.full_name"));
+        break;
+
+      case ex_catch_exception_unhandled:
+        return ada_unhandled_exception_name_addr ();
+        break;
+      
+      case ex_catch_assert:
+        return 0;  /* Exception name is not relevant in this case.  */
+        break;
+
+      default:
+        internal_error (__FILE__, __LINE__, _("unexpected catchpoint type"));
+        break;
+    }
+
+  return 0; /* Should never be reached.  */
+}
+
+/* Same as ada_exception_name_addr_1, except that it intercepts and contains
+   any error that ada_exception_name_addr_1 might cause to be thrown.
+   When an error is intercepted, a warning with the error message is printed,
+   and zero is returned.  */
+
+static CORE_ADDR
+ada_exception_name_addr (enum exception_catchpoint_kind ex,
+                         struct breakpoint *b)
+{
+  struct gdb_exception e;
+  CORE_ADDR result = 0;
+
+  TRY_CATCH (e, RETURN_MASK_ERROR)
+    {
+      result = ada_exception_name_addr_1 (ex, b);
+    }
+
+  if (e.reason < 0)
+    {
+      warning (_("failed to get exception name: %s"), e.message);
+      return 0;
+    }
+
+  return result;
+}
+
+/* Implement the PRINT_IT method in the breakpoint_ops structure
+   for all exception catchpoint kinds.  */
+
+static enum print_stop_action
+print_it_exception (enum exception_catchpoint_kind ex, struct breakpoint *b)
+{
+  const CORE_ADDR addr = ada_exception_name_addr (ex, b);
+  char exception_name[256];
+
+  if (addr != 0)
+    {
+      read_memory (addr, exception_name, sizeof (exception_name) - 1);
+      exception_name [sizeof (exception_name) - 1] = '\0';
+    }
+
+  ada_find_printable_frame (get_current_frame ());
+
+  annotate_catchpoint (b->number);
+  switch (ex)
+    {
+      case ex_catch_exception:
+        if (addr != 0)
+          printf_filtered (_("\nCatchpoint %d, %s at "),
+                           b->number, exception_name);
+        else
+          printf_filtered (_("\nCatchpoint %d, exception at "), b->number);
+        break;
+      case ex_catch_exception_unhandled:
+        if (addr != 0)
+          printf_filtered (_("\nCatchpoint %d, unhandled %s at "),
+                           b->number, exception_name);
+        else
+          printf_filtered (_("\nCatchpoint %d, unhandled exception at "),
+                           b->number);
+        break;
+      case ex_catch_assert:
+        printf_filtered (_("\nCatchpoint %d, failed assertion at "),
+                         b->number);
+        break;
+    }
+
+  return PRINT_SRC_AND_LOC;
+}
+
+/* Implement the PRINT_ONE method in the breakpoint_ops structure
+   for all exception catchpoint kinds.  */
+
+static void
+print_one_exception (enum exception_catchpoint_kind ex,
+                     struct breakpoint *b, CORE_ADDR *last_addr)
+{ 
+  if (addressprint)
+    {
+      annotate_field (4);
+      ui_out_field_core_addr (uiout, "addr", b->loc->address);
+    }
+
+  annotate_field (5);
+  *last_addr = b->loc->address;
+  switch (ex)
+    {
+      case ex_catch_exception:
+        if (b->exp_string != NULL)
+          {
+            char *msg = xstrprintf (_("`%s' Ada exception"), b->exp_string);
+            
+            ui_out_field_string (uiout, "what", msg);
+            xfree (msg);
+          }
+        else
+          ui_out_field_string (uiout, "what", "all Ada exceptions");
+        
+        break;
+
+      case ex_catch_exception_unhandled:
+        ui_out_field_string (uiout, "what", "unhandled Ada exceptions");
+        break;
+      
+      case ex_catch_assert:
+        ui_out_field_string (uiout, "what", "failed Ada assertions");
+        break;
+
+      default:
+        internal_error (__FILE__, __LINE__, _("unexpected catchpoint type"));
+        break;
+    }
+}
+
+/* Implement the PRINT_MENTION method in the breakpoint_ops structure
+   for all exception catchpoint kinds.  */
+
+static void
+print_mention_exception (enum exception_catchpoint_kind ex,
+                         struct breakpoint *b)
+{
+  switch (ex)
+    {
+      case ex_catch_exception:
+        if (b->exp_string != NULL)
+          printf_filtered (_("Catchpoint %d: `%s' Ada exception"),
+                           b->number, b->exp_string);
+        else
+          printf_filtered (_("Catchpoint %d: all Ada exceptions"), b->number);
+        
+        break;
+
+      case ex_catch_exception_unhandled:
+        printf_filtered (_("Catchpoint %d: unhandled Ada exceptions"),
+                         b->number);
+        break;
+      
+      case ex_catch_assert:
+        printf_filtered (_("Catchpoint %d: failed Ada assertions"), b->number);
+        break;
+
+      default:
+        internal_error (__FILE__, __LINE__, _("unexpected catchpoint type"));
+        break;
+    }
+}
+
+/* Virtual table for "catch exception" breakpoints.  */
+
+static enum print_stop_action
+print_it_catch_exception (struct breakpoint *b)
+{
+  return print_it_exception (ex_catch_exception, b);
+}
+
+static void
+print_one_catch_exception (struct breakpoint *b, CORE_ADDR *last_addr)
+{
+  print_one_exception (ex_catch_exception, b, last_addr);
+}
+
+static void
+print_mention_catch_exception (struct breakpoint *b)
+{
+  print_mention_exception (ex_catch_exception, b);
+}
+
+static struct breakpoint_ops catch_exception_breakpoint_ops =
+{
+  print_it_catch_exception,
+  print_one_catch_exception,
+  print_mention_catch_exception
+};
+
+/* Virtual table for "catch exception unhandled" breakpoints.  */
+
+static enum print_stop_action
+print_it_catch_exception_unhandled (struct breakpoint *b)
+{
+  return print_it_exception (ex_catch_exception_unhandled, b);
+}
+
+static void
+print_one_catch_exception_unhandled (struct breakpoint *b, CORE_ADDR *last_addr)
+{
+  print_one_exception (ex_catch_exception_unhandled, b, last_addr);
+}
+
+static void
+print_mention_catch_exception_unhandled (struct breakpoint *b)
+{
+  print_mention_exception (ex_catch_exception_unhandled, b);
+}
+
+static struct breakpoint_ops catch_exception_unhandled_breakpoint_ops = {
+  print_it_catch_exception_unhandled,
+  print_one_catch_exception_unhandled,
+  print_mention_catch_exception_unhandled
+};
+
+/* Virtual table for "catch assert" breakpoints.  */
+
+static enum print_stop_action
+print_it_catch_assert (struct breakpoint *b)
+{
+  return print_it_exception (ex_catch_assert, b);
+}
+
+static void
+print_one_catch_assert (struct breakpoint *b, CORE_ADDR *last_addr)
+{
+  print_one_exception (ex_catch_assert, b, last_addr);
+}
+
+static void
+print_mention_catch_assert (struct breakpoint *b)
+{
+  print_mention_exception (ex_catch_assert, b);
+}
+
+static struct breakpoint_ops catch_assert_breakpoint_ops = {
+  print_it_catch_assert,
+  print_one_catch_assert,
+  print_mention_catch_assert
+};
+
+/* Return non-zero if B is an Ada exception catchpoint.  */
+
+int
+ada_exception_catchpoint_p (struct breakpoint *b)
+{
+  return (b->ops == &catch_exception_breakpoint_ops
+          || b->ops == &catch_exception_unhandled_breakpoint_ops
+          || b->ops == &catch_assert_breakpoint_ops);
+}
+
+/* Cause the appropriate error if no appropriate runtime symbol is
+   found to set a breakpoint, using ERR_DESC to describe the
+   breakpoint.  */
+
+static void
+error_breakpoint_runtime_sym_not_found (const char *err_desc)
+{
+  /* If we are not debugging an Ada program, we cannot put exception
+     catchpoints!  */
+
+  if (ada_update_initial_language (language_unknown, NULL) != language_ada)
+    error (_("Unable to break on %s.  Is this an Ada main program?"),
+           err_desc);
+
+  /* If the symbol does not exist, then check that the program is
+     already started, to make sure that shared libraries have been
+     loaded.  If it is not started, this may mean that the symbol is
+     in a shared library.  */
+
+  if (ptid_get_pid (inferior_ptid) == 0)
+    error (_("Unable to break on %s. Try to start the program first."),
+           err_desc);
+
+  /* At this point, we know that we are debugging an Ada program and
+     that the inferior has been started, but we still are not able to
+     find the run-time symbols. That can mean that we are in
+     configurable run time mode, or that a-except as been optimized
+     out by the linker...  In any case, at this point it is not worth
+     supporting this feature.  */
+
+  error (_("Cannot break on %s in this configuration."), err_desc);
+}
+
+/* Return a newly allocated copy of the first space-separated token
+   in ARGSP, and then adjust ARGSP to point immediately after that
+   token.
+
+   Return NULL if ARGPS does not contain any more tokens.  */
+
+static char *
+ada_get_next_arg (char **argsp)
+{
+  char *args = *argsp;
+  char *end;
+  char *result;
+
+  /* Skip any leading white space.  */
+
+  while (isspace (*args))
+    args++;
+
+  if (args[0] == '\0')
+    return NULL; /* No more arguments.  */
+  
+  /* Find the end of the current argument.  */
+
+  end = args;
+  while (*end != '\0' && !isspace (*end))
+    end++;
+
+  /* Adjust ARGSP to point to the start of the next argument.  */
+
+  *argsp = end;
+
+  /* Make a copy of the current argument and return it.  */
+
+  result = xmalloc (end - args + 1);
+  strncpy (result, args, end - args);
+  result[end - args] = '\0';
+  
+  return result;
+}
+
+/* Split the arguments specified in a "catch exception" command.  
+   Set EX to the appropriate catchpoint type.
+   Set EXP_STRING to the name of the specific exception if
+   specified by the user.  */
+
+static void
+catch_ada_exception_command_split (char *args,
+                                   enum exception_catchpoint_kind *ex,
+                                   char **exp_string)
+{
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
+  char *exception_name;
+
+  exception_name = ada_get_next_arg (&args);
+  make_cleanup (xfree, exception_name);
+
+  /* Check that we do not have any more arguments.  Anything else
+     is unexpected.  */
+
+  while (isspace (*args))
+    args++;
+
+  if (args[0] != '\0')
+    error (_("Junk at end of expression"));
+
+  discard_cleanups (old_chain);
+
+  if (exception_name == NULL)
+    {
+      /* Catch all exceptions.  */
+      *ex = ex_catch_exception;
+      *exp_string = NULL;
+    }
+  else if (strcmp (exception_name, "unhandled") == 0)
+    {
+      /* Catch unhandled exceptions.  */
+      *ex = ex_catch_exception_unhandled;
+      *exp_string = NULL;
+    }
+  else
+    {
+      /* Catch a specific exception.  */
+      *ex = ex_catch_exception;
+      *exp_string = exception_name;
+    }
+}
+
+/* Return the name of the symbol on which we should break in order to
+   implement a catchpoint of the EX kind.  */
+
+static const char *
+ada_exception_sym_name (enum exception_catchpoint_kind ex)
+{
+  switch (ex)
+    {
+      case ex_catch_exception:
+        return (raise_sym_name);
+        break;
+      case ex_catch_exception_unhandled:
+        return (raise_unhandled_sym_name);
+        break;
+      case ex_catch_assert:
+        return (raise_assert_sym_name);
+        break;
+      default:
+        internal_error (__FILE__, __LINE__,
+                        _("unexpected catchpoint kind (%d)"), ex);
+    }
+}
+
+/* Return the breakpoint ops "virtual table" used for catchpoints
+   of the EX kind.  */
+
+static struct breakpoint_ops *
+ada_exception_breakption_ops (enum exception_catchpoint_kind ex)
+{
+  switch (ex)
+    {
+      case ex_catch_exception:
+        return (&catch_exception_breakpoint_ops);
+        break;
+      case ex_catch_exception_unhandled:
+        return (&catch_exception_unhandled_breakpoint_ops);
+        break;
+      case ex_catch_assert:
+        return (&catch_assert_breakpoint_ops);
+        break;
+      default:
+        internal_error (__FILE__, __LINE__,
+                        _("unexpected catchpoint kind (%d)"), ex);
+    }
+}
+
+/* Return the condition that will be used to match the current exception
+   being raised with the exception that the user wants to catch.  This
+   assumes that this condition is used when the inferior just triggered
+   an exception catchpoint.
+   
+   The string returned is a newly allocated string that needs to be
+   deallocated later.  */
+
+static char *
+ada_exception_catchpoint_cond_string (const char *exp_string)
+{
+  return xstrprintf ("long_integer (e) = long_integer (&%s)", exp_string);
+}
+
+/* Return the expression corresponding to COND_STRING evaluated at SAL.  */
+
+static struct expression *
+ada_parse_catchpoint_condition (char *cond_string,
+                                struct symtab_and_line sal)
+{
+  return (parse_exp_1 (&cond_string, block_for_pc (sal.pc), 0));
+}
+
+/* Return the symtab_and_line that should be used to insert an exception
+   catchpoint of the TYPE kind.
+
+   EX_STRING should contain the name of a specific exception
+   that the catchpoint should catch, or NULL otherwise.
+
+   The idea behind all the remaining parameters is that their names match
+   the name of certain fields in the breakpoint structure that are used to
+   handle exception catchpoints.  This function returns the value to which
+   these fields should be set, depending on the type of catchpoint we need
+   to create.
+   
+   If COND and COND_STRING are both non-NULL, any value they might
+   hold will be free'ed, and then replaced by newly allocated ones.
+   These parameters are left untouched otherwise.  */
+
+static struct symtab_and_line
+ada_exception_sal (enum exception_catchpoint_kind ex, char *exp_string,
+                   char **addr_string, char **cond_string,
+                   struct expression **cond, struct breakpoint_ops **ops)
+{
+  const char *sym_name;
+  struct symbol *sym;
+  struct symtab_and_line sal;
+
+  /* First lookup the function on which we will break in order to catch
+     the Ada exceptions requested by the user.  */
+
+  sym_name = ada_exception_sym_name (ex);
+  sym = standard_lookup (sym_name, NULL, VAR_DOMAIN);
+
+  /* The symbol we're looking up is provided by a unit in the GNAT runtime
+     that should be compiled with debugging information.  As a result, we
+     expect to find that symbol in the symtabs.  If we don't find it, then
+     the target most likely does not support Ada exceptions, or we cannot
+     insert exception breakpoints yet, because the GNAT runtime hasn't been
+     loaded yet.  */
+
+  /* brobecker/2006-12-26: It is conceivable that the runtime was compiled
+     in such a way that no debugging information is produced for the symbol
+     we are looking for.  In this case, we could search the minimal symbols
+     as a fall-back mechanism.  This would still be operating in degraded
+     mode, however, as we would still be missing the debugging information
+     that is needed in order to extract the name of the exception being
+     raised (this name is printed in the catchpoint message, and is also
+     used when trying to catch a specific exception).  We do not handle
+     this case for now.  */
+
+  if (sym == NULL)
+    error_breakpoint_runtime_sym_not_found (sym_name);
+
+  /* Make sure that the symbol we found corresponds to a function.  */
+  if (SYMBOL_CLASS (sym) != LOC_BLOCK)
+    error (_("Symbol \"%s\" is not a function (class = %d)"),
+           sym_name, SYMBOL_CLASS (sym));
+
+  sal = find_function_start_sal (sym, 1);
+
+  /* Set ADDR_STRING.  */
+
+  *addr_string = xstrdup (sym_name);
+
+  /* Set the COND and COND_STRING (if not NULL).  */
+
+  if (cond_string != NULL && cond != NULL)
+    {
+      if (*cond_string != NULL)
+        {
+          xfree (*cond_string);
+          *cond_string = NULL;
+        }
+      if (*cond != NULL)
+        {
+          xfree (*cond);
+          *cond = NULL;
+        }
+      if (exp_string != NULL)
+        {
+          *cond_string = ada_exception_catchpoint_cond_string (exp_string);
+          *cond = ada_parse_catchpoint_condition (*cond_string, sal);
+        }
+    }
+
+  /* Set OPS.  */
+  *ops = ada_exception_breakption_ops (ex);
+
+  return sal;
+}
+
+/* Parse the arguments (ARGS) of the "catch exception" command.
+ 
+   Set TYPE to the appropriate exception catchpoint type.
+   If the user asked the catchpoint to catch only a specific
+   exception, then save the exception name in ADDR_STRING.
+
+   See ada_exception_sal for a description of all the remaining
+   function arguments of this function.  */
+
+struct symtab_and_line
+ada_decode_exception_location (char *args, char **addr_string,
+                               char **exp_string, char **cond_string,
+                               struct expression **cond,
+                               struct breakpoint_ops **ops)
+{
+  enum exception_catchpoint_kind ex;
+
+  catch_ada_exception_command_split (args, &ex, exp_string);
+  return ada_exception_sal (ex, *exp_string, addr_string, cond_string,
+                            cond, ops);
+}
+
+struct symtab_and_line
+ada_decode_assert_location (char *args, char **addr_string,
+                            struct breakpoint_ops **ops)
+{
+  /* Check that no argument where provided at the end of the command.  */
+
+  if (args != NULL)
+    {
+      while (isspace (*args))
+        args++;
+      if (*args != '\0')
+        error (_("Junk at end of arguments."));
+    }
+
+  return ada_exception_sal (ex_catch_assert, NULL, addr_string, NULL, NULL,
+                            ops);
+}
+
                                 /* Operators */
 /* Information about operators given special treatment in functions
    below.  */

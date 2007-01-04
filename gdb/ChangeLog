@@ -1,3 +1,42 @@
+2007-01-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.h (ada_find_printable_frame): Remove.
+	(ada_exception_catchpoint_p, ada_decode_exception_location)
+	(ada_decode_assert_location): Add declaration.
+	* ada-lang.c: Add include of annotate.h and valprint.h.
+	(exception_catchpoint_kind): New enum.
+	(function_name_from_pc, is_known_support_routine)
+	(ada_find_printable_frame, ada_unhandled_exception_name_addr)
+	(ada_exception_name_addr_1, ada_exception_name_addr)
+	(print_it_exception, print_one_exception, print_mention_exception)
+	(print_it_catch_exception, print_one_catch_exception)
+	(print_mention_catch_exception, catch_exception_breakpoint_ops)
+	(print_it_catch_exception_unhandled)
+	(print_one_catch_exception_unhandled)
+	(print_mention_catch_exception_unhandled, print_it_catch_assert)
+	(print_one_catch_assert, print_mention_catch_assert)
+	(ada_exception_catchpoint_p, error_breakpoint_runtime_sym_not_found)
+	(ada_get_next_arg, catch_ada_exception_command_split)
+	(ada_exception_sym_name, ada_exception_sym_name)
+	(ada_exception_breakption_ops, ada_exception_catchpoint_cond_string)
+	(ada_parse_catchpoint_condition, ada_exception_sal)
+	(ada_decode_exception_location)
+	(ada_decode_assert_location): New function.
+	(catch_exception_unhandled_breakpoint_ops): New global variable.
+	(catch_assert_breakpoint_ops): New global variable.
+	* breakpoint.c: Add include of ada-lang.h.
+	(print_one_breakpoint): Do not print the condition for Ada
+	exception catchpoints.
+	(create_ada_exception_breakpoint): New function.
+	(catch_ada_exception_command, catch_assert_command): New function.
+	(catch_command_1): Add support for the new "catch exception" and
+	"catch assert" commands.
+	(_initialize_breakpoint): Add help description for the new catch
+	commands.
+	* Makefile.in (ada-lang.o): Add dependency on annotate.h and
+	valprint.h.
+	(breakpoint.o): Add dependency on ada-lang.h.
+
 2007-01-03  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* coffread.c (cs_to_section): If bfd_section is found, always
