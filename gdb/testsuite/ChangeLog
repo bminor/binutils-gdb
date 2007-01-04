@@ -1,5 +1,16 @@
 2006-01-04  Joel Brobecker  <brobecker@adacore.com>
 
+	Make this testcase a bit more realistic. The current code
+	is too simplistic, and allows the compiler to optimize out
+	some of the entities we need for this testcase.
+	* gdb.ada/null_record/bar.ads (Void_Star): New type.
+	(Do_Nothing): Add extra parameter.
+	* gdb.ada/null_record/bar.adb (Do_Nothing): Likewise.
+	* gdb.ada/null_record/null_record.adb: Fake use of type Empty
+	by using a variable of type Void_Star.
+
+2006-01-04  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/catch_ex/foo.adb: New file.
 	* gdb.ada/catch_ex.exp: New testcase.
 

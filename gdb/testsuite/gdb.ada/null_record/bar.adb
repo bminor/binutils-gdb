@@ -1,4 +1,4 @@
---  Copyright 2004 Free Software Foundation, Inc.
+--  Copyright 2004, 2007 Free Software Foundation, Inc.
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 
 package body Bar is
 
-   procedure Do_Nothing is
+   procedure Do_Nothing (E : Void_Star) is
    begin
       null;
    end Do_Nothing;

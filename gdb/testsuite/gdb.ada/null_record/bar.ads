@@ -1,4 +1,4 @@
---  Copyright 2004 Free Software Foundation, Inc.
+--  Copyright 2004, 2007 Free Software Foundation, Inc.
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -17,7 +17,8 @@
 package Bar is
 
    type Empty is null record;
+   type Void_Star is access all Empty;
 
-   procedure Do_Nothing;
+   procedure Do_Nothing (E : Void_Star);
 
 end Bar;
