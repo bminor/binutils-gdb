@@ -1,3 +1,10 @@
+2007-01-05  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.mi/mi-var-cp.exp: New test for references to pointers.
+
+	* gdb.mi/mi-var-cp.cc: (reference_to_pointer): New procedure for above
+	 test.
+
 2007-01-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.mi/mi-var-cmd.exp: Add tests for unreadable varobjs.
