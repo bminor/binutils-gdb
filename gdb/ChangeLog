@@ -1,5 +1,23 @@
 2007-01-04  Vladimir Prus  <vladimir@codesourcery.com>
 
+	gdb/
+	* varobj.c: Include "vec.h". 
+	(varobj_p): New typedef, declare vector of those.
+	(struct varobj): Use vector for the 'children' member.
+	(child_exists): Remove.
+	(save_child_in_parent): Remove.
+	(remove_child_from_parent): Remove.
+	(struct varobj_child): Remove.
+	(struct vstack): Remove.
+	(vpush, vpop): Remove.
+	(varobj_list_children): Adjust to work work vector.
+	(varobj_update): Likewise. Use vectors for
+	working stack and result.
+	(delete_variable_1): Likewise.
+	* Makefile.in (varobj.o): Update dependencies.
+
+2007-01-04  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Port from Apple's version.
 	gdb/
 	* varobj.c (type_changeable): Rename to...

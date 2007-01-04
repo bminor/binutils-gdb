@@ -32,6 +32,7 @@
 #include "gdb_string.h"
 
 #include "varobj.h"
+#include "vec.h"
 
 /* Non-zero if we want to see trace of varobj level stuff.  */
 
@@ -80,6 +81,10 @@ struct varobj_root
   struct varobj_root *next;
 };
 
+typedef struct varobj *varobj_p;
+
+DEF_VEC_P (varobj_p);
+
 /* Every variable in the system has a structure of this type defined
    for it. This structure holds all information necessary to manipulate
    a particular object variable. Members which must be freed are noted. */
@@ -116,8 +121,8 @@ struct varobj
   /* If this object is a child, this points to its immediate parent. */
   struct varobj *parent;
 
-  /* A list of this object's children */
-  struct varobj_child *children;
+  /* Children of this object.  */
+  VEC (varobj_p) *children;
 
   /* Description of the root variable. Points to root variable for children. */
   struct varobj_root *root;
@@ -127,29 +132,6 @@ struct varobj
 
   /* Was this variable updated via a varobj_set_value operation */
   int updated;
-};
-
-/* Every variable keeps a linked list of its children, described
-   by the following structure. */
-/* FIXME: Deprecated.  All should use vlist instead */
-
-struct varobj_child
-{
-
-  /* Pointer to the child's data */
-  struct varobj *child;
-
-  /* Pointer to the next child */
-  struct varobj_child *next;
-};
-
-/* A stack of varobjs */
-/* FIXME: Deprecated.  All should use vlist instead */
-
-struct vstack
-{
-  struct varobj *var;
-  struct vstack *next;
 };
 
 struct cpstack
@@ -179,13 +161,7 @@ static int install_variable (struct varobj *);
 
 static void uninstall_variable (struct varobj *);
 
-static struct varobj *child_exists (struct varobj *, char *);
-
 static struct varobj *create_child (struct varobj *, int, char *);
-
-static void save_child_in_parent (struct varobj *, struct varobj *);
-
-static void remove_child_from_parent (struct varobj *, struct varobj *);
 
 /* Utility routines */
 
@@ -204,10 +180,6 @@ static struct type *get_type_deref (struct varobj *var);
 static struct type *get_target_type (struct type *);
 
 static enum varobj_display_formats variable_default_display (struct varobj *);
-
-static void vpush (struct vstack **pstack, struct varobj *var);
-
-static struct varobj *vpop (struct vstack **pstack);
 
 static void cppush (struct cpstack **pstack, char *name);
 
@@ -713,21 +685,34 @@ varobj_list_children (struct varobj *var, struct varobj ***childlist)
   if (var->num_children == -1)
     var->num_children = number_of_children (var);
 
+  /* If we're called when the list of children is not yet initialized,
+     allocate enough elements in it.  */
+  while (VEC_length (varobj_p, var->children) < var->num_children)
+    VEC_safe_push (varobj_p, var->children, NULL);
+
   /* List of children */
   *childlist = xmalloc ((var->num_children + 1) * sizeof (struct varobj *));
 
   for (i = 0; i < var->num_children; i++)
     {
+      varobj_p existing;
+
       /* Mark as the end in case we bail out */
       *((*childlist) + i) = NULL;
 
-      /* check if child exists, if not create */
-      name = name_of_child (var, i);
-      child = child_exists (var, name);
-      if (child == NULL)
-	child = create_child (var, i, name);
+      existing = VEC_index (varobj_p, var->children, i);
 
-      *((*childlist) + i) = child;
+      if (existing == NULL)
+	{
+	  /* Either it's the first call to varobj_list_children for
+	     this variable object, and the child was never created,
+	     or it was explicitly deleted by the client.  */
+	  name = name_of_child (var, i);
+	  existing = create_child (var, i, name);
+	  VEC_replace (varobj_p, var->children, i, existing);
+	}
+
+      *((*childlist) + i) = existing;
     }
 
   /* End of list is marked by a NULL pointer */
@@ -1034,8 +1019,8 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
   struct varobj **cv;
   struct varobj **templist = NULL;
   struct value *new;
-  struct vstack *stack = NULL;
-  struct vstack *result = NULL;
+  VEC (varobj_p) *stack = NULL;
+  VEC (varobj_p) *result = NULL;
   struct frame_id old_fid;
   struct frame_info *fi;
 
@@ -1071,94 +1056,64 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
       return -1;
     }
 
-  /* Initialize a stack for temporary results */
-  vpush (&result, NULL);
-
   /* If this is a "use_selected_frame" varobj, and its type has changed,
      them note that it's changed. */
   if (type_changed)
-    {
-      vpush (&result, *varp);
-      changed++;
-    }
+    VEC_safe_push (varobj_p, result, *varp);
 
   if (install_new_value ((*varp), new, type_changed))
     {
       /* If type_changed is 1, install_new_value will never return
 	 non-zero, so we'll never report the same variable twice.  */
       gdb_assert (!type_changed);
-      vpush (&result, (*varp));
-      changed++;
+      VEC_safe_push (varobj_p, result, *varp);
     }
 
-  /* Initialize a stack */
-  vpush (&stack, NULL);
-
-  /* Push the root's children */
-  if ((*varp)->children != NULL)
-    {
-      struct varobj_child *c;
-      for (c = (*varp)->children; c != NULL; c = c->next)
-	vpush (&stack, c->child);
-    }
+  VEC_safe_push (varobj_p, stack, *varp);
 
   /* Walk through the children, reconstructing them all. */
-  v = vpop (&stack);
-  while (v != NULL)
+  while (!VEC_empty (varobj_p, stack))
     {
-      /* Push any children */
-      if (v->children != NULL)
+      v = VEC_pop (varobj_p, stack);
+
+      /* Push any children.  Use reverse order so that the first
+	 child is popped from the work stack first, and so
+	 will be added to result first.  This does not
+	 affect correctness, just "nicer".  */
+      for (i = VEC_length (varobj_p, v->children)-1; i >= 0; --i)
 	{
-	  struct varobj_child *c;
-	  for (c = v->children; c != NULL; c = c->next)
-	    vpush (&stack, c->child);
+	  varobj_p c = VEC_index (varobj_p, v->children, i);
+	  /* Child may be NULL if explicitly deleted by -var-delete.  */
+	  if (c != NULL)
+	    VEC_safe_push (varobj_p, stack, c);
 	}
 
-      /* Update this variable */
-      new = value_of_child (v->parent, v->index);
-      if (install_new_value (v, new, 0 /* type not changed */))
- 	{
-	  /* Note that it's changed */
-	  vpush (&result, v);
-	  v->updated = 0;
-	  changed++;
+      /* Update this variable, unless it's a root, which is already
+	 updated.  */
+      if (v != *varp)
+	{	  
+	  new = value_of_child (v->parent, v->index);
+	  if (install_new_value (v, new, 0 /* type not changed */))
+	    {
+	      /* Note that it's changed */
+	      VEC_safe_push (varobj_p, result, v);
+	      v->updated = 0;
+	    }
 	}
-
-      /* Get next child */
-      v = vpop (&stack);
     }
 
   /* Alloc (changed + 1) list entries */
-  /* FIXME: add a cleanup for the allocated list(s)
-     because one day the select_frame called below can longjump */
+  changed = VEC_length (varobj_p, result);
   *changelist = xmalloc ((changed + 1) * sizeof (struct varobj *));
-  if (changed > 1)
-    {
-      templist = xmalloc ((changed + 1) * sizeof (struct varobj *));
-      cv = templist;
-    }
-  else
-    cv = *changelist;
+  cv = *changelist;
 
-  /* Copy from result stack to list */
-  vleft = changed;
-  *cv = vpop (&result);
-  while ((*cv != NULL) && (vleft > 0))
+  for (i = 0; i < changed; ++i)
     {
-      vleft--;
-      cv++;
-      *cv = vpop (&result);
+      *cv = VEC_index (varobj_p, result, i);
+      gdb_assert (*cv != NULL);
+      ++cv;
     }
-  if (vleft)
-    warning (_("varobj_update: assertion failed - vleft <> 0"));
-
-  if (changed > 1)
-    {
-      /* Now we revert the order. */
-      for (i = 0; i < changed; i++)
-	*(*changelist + i) = *(templist + changed - 1 - i);
-      *(*changelist + changed) = NULL;
-    }
+  *cv = 0;
 
   if (type_changed)
     return -2;
@@ -1194,18 +1149,17 @@ delete_variable_1 (struct cpstack **resultp, int *delcountp,
 		   struct varobj *var, int only_children_p,
 		   int remove_from_parent_p)
 {
-  struct varobj_child *vc;
-  struct varobj_child *next;
+  int i;
 
   /* Delete any children of this variable, too. */
-  for (vc = var->children; vc != NULL; vc = next)
-    {
+  for (i = 0; i < VEC_length (varobj_p, var->children); ++i)
+    {   
+      varobj_p child = VEC_index (varobj_p, var->children, i);
       if (!remove_from_parent_p)
-	vc->child->parent = NULL;
-      delete_variable_1 (resultp, delcountp, vc->child, 0, only_children_p);
-      next = vc->next;
-      xfree (vc);
+	child->parent = NULL;
+      delete_variable_1 (resultp, delcountp, child, 0, only_children_p);
     }
+  VEC_free (varobj_p, var->children);
 
   /* if we were called to delete only the children we are done here */
   if (only_children_p)
@@ -1227,7 +1181,7 @@ delete_variable_1 (struct cpstack **resultp, int *delcountp,
      discarding the list afterwards */
   if ((remove_from_parent_p) && (var->parent != NULL))
     {
-      remove_child_from_parent (var->parent, var);
+      VEC_replace (varobj_p, var->parent->children, var->index, NULL);
     }
 
   if (var->obj_name != NULL)
@@ -1356,22 +1310,6 @@ uninstall_variable (struct varobj *var)
 
 }
 
-/* Does a child with the name NAME exist in VAR? If so, return its data.
-   If not, return NULL. */
-static struct varobj *
-child_exists (struct varobj *var, char *name)
-{
-  struct varobj_child *vc;
-
-  for (vc = var->children; vc != NULL; vc = vc->next)
-    {
-      if (strcmp (vc->child->name, name) == 0)
-	return vc->child;
-    }
-
-  return NULL;
-}
-
 /* Create and install a child of the parent of the given name */
 static struct varobj *
 create_child (struct varobj *parent, int index, char *name)
@@ -1392,9 +1330,6 @@ create_child (struct varobj *parent, int index, char *name)
   child->obj_name = childs_name;
   install_variable (child);
 
-  /* Save a pointer to this child in the parent */
-  save_child_in_parent (parent, child);
-
   /* Compute the type of the child.  Must do this before
      calling install_new_value.  */
   if (value != NULL)
@@ -1411,46 +1346,6 @@ create_child (struct varobj *parent, int index, char *name)
     child->error = 1;
 
   return child;
-}
-
-/* FIXME: This should be a generic add to list */
-/* Save CHILD in the PARENT's data. */
-static void
-save_child_in_parent (struct varobj *parent, struct varobj *child)
-{
-  struct varobj_child *vc;
-
-  /* Insert the child at the top */
-  vc = parent->children;
-  parent->children =
-    (struct varobj_child *) xmalloc (sizeof (struct varobj_child));
-
-  parent->children->next = vc;
-  parent->children->child = child;
-}
-
-/* FIXME: This should be a generic remove from list */
-/* Remove the CHILD from the PARENT's list of children. */
-static void
-remove_child_from_parent (struct varobj *parent, struct varobj *child)
-{
-  struct varobj_child *vc, *prev;
-
-  /* Find the child in the parent's list */
-  prev = NULL;
-  for (vc = parent->children; vc != NULL;)
-    {
-      if (vc->child == child)
-	break;
-      prev = vc;
-      vc = vc->next;
-    }
-
-  if (prev == NULL)
-    parent->children = vc->next;
-  else
-    prev->next = vc->next;
-
 }
 
 
@@ -1581,36 +1476,6 @@ static enum varobj_display_formats
 variable_default_display (struct varobj *var)
 {
   return FORMAT_NATURAL;
-}
-
-/* FIXME: The following should be generic for any pointer */
-static void
-vpush (struct vstack **pstack, struct varobj *var)
-{
-  struct vstack *s;
-
-  s = (struct vstack *) xmalloc (sizeof (struct vstack));
-  s->var = var;
-  s->next = *pstack;
-  *pstack = s;
-}
-
-/* FIXME: The following should be generic for any pointer */
-static struct varobj *
-vpop (struct vstack **pstack)
-{
-  struct vstack *s;
-  struct varobj *v;
-
-  if ((*pstack)->var == NULL && (*pstack)->next == NULL)
-    return NULL;
-
-  s = *pstack;
-  v = s->var;
-  *pstack = (*pstack)->next;
-  xfree (s);
-
-  return v;
 }
 
 /* FIXME: The following should be generic for any pointer */
