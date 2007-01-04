@@ -48,167 +48,86 @@ parse_memory_map (const char *memory_map)
 
 #include "xml-support.h"
 
-#include "gdb_expat.h"
-
-/* Internal parsing data passed to all Expat callbacks.  */
+/* Internal parsing data passed to all XML callbacks.  */
 struct memory_map_parsing_data
   {
     VEC(mem_region_s) **memory_map;
-    struct mem_region *currently_parsing;
-    char *character_data;
-    const char *property_name;
-    int capture_text;
+    char property_name[32];
   };
 
-static void
-free_memory_map_parsing_data (void *p_)
-{
-  struct memory_map_parsing_data *p = p_;
+/* Handle the start of a <memory> element.  */
 
-  xfree (p->character_data);
+static void
+memory_map_start_memory (struct gdb_xml_parser *parser,
+			 const struct gdb_xml_element *element,
+			 void *user_data, VEC(gdb_xml_value_s) *attributes)
+{
+  struct memory_map_parsing_data *data = user_data;
+  struct mem_region *r = VEC_safe_push (mem_region_s, *data->memory_map, NULL);
+  ULONGEST *start_p, *length_p, *type_p;
+
+  start_p = VEC_index (gdb_xml_value_s, attributes, 0)->value;
+  length_p = VEC_index (gdb_xml_value_s, attributes, 1)->value;
+  type_p = VEC_index (gdb_xml_value_s, attributes, 2)->value;
+
+  mem_region_init (r);
+  r->lo = *start_p;
+  r->hi = r->lo + *length_p;
+  r->attrib.mode = *type_p;
+  r->attrib.blocksize = -1;
 }
 
-/* Callback called by Expat on start of element.
-   DATA_ is pointer to memory_map_parsing_data
-   NAME is the name of element
-   ATTRS is the zero-terminated array of attribute names and
-   attribute values.
-
-   This function handles the following elements:
-   - 'memory' -- creates a new memory region and initializes it
-     from attributes.  Sets DATA_.currently_parsing to the new region.
-   - 'properties' -- sets DATA.capture_text.  */
+/* Handle the end of a <memory> element.  Verify that any necessary
+   children were present.  */
 
 static void
-memory_map_start_element (void *data_, const XML_Char *name,
-			  const XML_Char **attrs)
+memory_map_end_memory (struct gdb_xml_parser *parser,
+		       const struct gdb_xml_element *element,
+		       void *user_data, const char *body_text)
 {
-  static const XML_Char *type_names[] = {"ram", "rom", "flash", 0};
-  static int type_values[] = { MEM_RW, MEM_RO, MEM_FLASH };
-  struct memory_map_parsing_data *data = data_;
-  struct gdb_exception ex;
+  struct memory_map_parsing_data *data = user_data;
+  struct mem_region *r = VEC_last (mem_region_s, *data->memory_map);
 
-  TRY_CATCH (ex, RETURN_MASK_ERROR)
+  if (r->attrib.mode == MEM_FLASH && r->attrib.blocksize == -1)
+    gdb_xml_error (parser, _("Flash block size is not set"));
+}
+
+/* Handle the start of a <property> element by saving the name
+   attribute for later.  */
+
+static void
+memory_map_start_property (struct gdb_xml_parser *parser,
+			   const struct gdb_xml_element *element,
+			   void *user_data, VEC(gdb_xml_value_s) *attributes)
+{
+  struct memory_map_parsing_data *data = user_data;
+  char *name;
+
+  name = VEC_index (gdb_xml_value_s, attributes, 0)->value;
+  snprintf (data->property_name, sizeof (data->property_name), "%s", name);
+}
+
+/* Handle the end of a <property> element and its value.  */
+
+static void
+memory_map_end_property (struct gdb_xml_parser *parser,
+			 const struct gdb_xml_element *element,
+			 void *user_data, const char *body_text)
+{
+  struct memory_map_parsing_data *data = user_data;
+  char *name = data->property_name;
+
+  if (strcmp (name, "blocksize") == 0)
     {
-      if (strcmp (name, "memory") == 0)
-	{
-	  struct mem_region *r;
+      struct mem_region *r = VEC_last (mem_region_s, *data->memory_map);
 
-	  r = VEC_safe_push (mem_region_s, *data->memory_map, NULL);
-	  mem_region_init (r);
-
-	  r->lo = xml_get_integer_attribute (attrs, "start");
-	  r->hi = r->lo + xml_get_integer_attribute (attrs, "length");
-	  r->attrib.mode = xml_get_enum_value (attrs, "type", type_names,
-					       type_values);
-	  r->attrib.blocksize = -1;
-
-	  data->currently_parsing = r;
-	}
-      else if (strcmp (name, "property") == 0)
-	{
-	  if (!data->currently_parsing)
-	    throw_error (XML_PARSE_ERROR,
-		_("memory map: found 'property' element outside 'memory'"));
-
-	  data->capture_text = 1;
-
-	  data->property_name = xml_get_required_attribute (attrs, "name");
-	}
+      r->attrib.blocksize = gdb_xml_parse_ulongest (parser, body_text);
     }
-  if (ex.reason < 0)
-    throw_error
-      (ex.error, _("While parsing element %s:\n%s"), name, ex.message);
-}
-
-/* Callback called by Expat on start of element.  DATA_ is a pointer
-   to our memory_map_parsing_data.  NAME is the name of the element.
-
-   This function handles the following elements:
-   - 'property' -- check that the property name is 'blocksize' and
-     sets DATA->currently_parsing->attrib.blocksize
-   - 'memory' verifies that flash block size is set.  */
-
-static void
-memory_map_end_element (void *data_, const XML_Char *name)
-{
-  struct memory_map_parsing_data *data = data_;
-  struct gdb_exception ex;
-
-  TRY_CATCH (ex, RETURN_MASK_ERROR)
-    {
-      if (strcmp (name, "property") == 0)
-	{
-	  if (strcmp (data->property_name, "blocksize") == 0)
-	    {
-	      char *end = NULL;
-
-	      if (!data->character_data)
-		throw_error (XML_PARSE_ERROR,
-			     _("Empty content of 'property' element"));
-	      data->currently_parsing->attrib.blocksize
-		= strtoul (data->character_data, &end, 0);
-	      if (*end != '\0')
-		throw_error (XML_PARSE_ERROR,
-			     _("Invalid content of the 'blocksize' property"));
-	    }
-	  else
-	    throw_error (XML_PARSE_ERROR,
-			 _("Unknown memory region property: %s"), name);
-
-	  data->capture_text = 0;
-	}
-      else if (strcmp (name, "memory") == 0)
-	{
-	  if (data->currently_parsing->attrib.mode == MEM_FLASH
-	      && data->currently_parsing->attrib.blocksize == -1)
-	    throw_error (XML_PARSE_ERROR,
-			 _("Flash block size is not set"));
-
-	  data->currently_parsing = 0;
-	  data->character_data = 0;
-	}
-    }
-  if (ex.reason < 0)
-    throw_error
-      (ex.error, _("while parsing element %s: \n%s"), name, ex.message);
-}
-
-/* Callback called by expat for all character data blocks.
-   DATA_ is the pointer to memory_map_parsing_data.
-   S is the point to character data.
-   LEN is the length of data; the data is not zero-terminated.
-
-   If DATA_->CAPTURE_TEXT is 1, appends this block of characters
-   to DATA_->CHARACTER_DATA.  */
-static void
-memory_map_character_data (void *data_, const XML_Char *s,
-			   int len)
-{
-  struct memory_map_parsing_data *data = data_;
-  int current_size = 0;
-
-  if (!data->capture_text)
-    return;
-
-  /* Expat interface does not guarantee that a single call to
-     a handler will be made. Actually, one call for each line
-     will be made, and character data can possibly span several
-     lines.
-
-     Take care to realloc the data if needed.  */
-  if (!data->character_data)
-    data->character_data = xmalloc (len + 1);
   else
-    {
-      current_size = strlen (data->character_data);
-      data->character_data = xrealloc (data->character_data,
-				       current_size + len + 1);
-    }
-
-  memcpy (data->character_data + current_size, s, len);
-  data->character_data[current_size + len] = '\0';
+    gdb_xml_debug (parser, _("Unknown property \"%s\""), name);
 }
+
+/* Discard the constructed memory map (if an error occurs).  */
 
 static void
 clear_result (void *p)
@@ -218,56 +137,66 @@ clear_result (void *p)
   *result = NULL;
 }
 
+/* The allowed elements and attributes for an XML memory map.  */
+
+const struct gdb_xml_attribute property_attributes[] = {
+  { "name", GDB_XML_AF_NONE, NULL, NULL },
+  { NULL, GDB_XML_AF_NONE, NULL, NULL }
+};
+
+const struct gdb_xml_element memory_children[] = {
+  { "property", property_attributes, NULL,
+    GDB_XML_EF_REPEATABLE | GDB_XML_EF_OPTIONAL,
+    memory_map_start_property, memory_map_end_property },
+  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
+};
+
+const struct gdb_xml_enum memory_type_enum[] = {
+  { "ram", MEM_RW },
+  { "rom", MEM_RO },
+  { "flash", MEM_FLASH },
+  { NULL, 0 }
+};
+
+const struct gdb_xml_attribute memory_attributes[] = {
+  { "start", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
+  { "length", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
+  { "type", GDB_XML_AF_NONE, gdb_xml_parse_attr_enum, &memory_type_enum },
+  { NULL, GDB_XML_AF_NONE, NULL, NULL }
+};
+
+const struct gdb_xml_element memory_map_children[] = {
+  { "memory", memory_attributes, memory_children, GDB_XML_EF_REPEATABLE,
+    memory_map_start_memory, memory_map_end_memory },
+  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
+};
+
+const struct gdb_xml_element memory_map_elements[] = {
+  { "memory-map", NULL, memory_map_children, GDB_XML_EF_NONE,
+    NULL, NULL },
+  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
+};
+
 VEC(mem_region_s) *
 parse_memory_map (const char *memory_map)
 {
+  struct gdb_xml_parser *parser;
   VEC(mem_region_s) *result = NULL;
-  struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
-  struct cleanup *before_deleting_result;
-  struct cleanup *saved;
-  volatile struct gdb_exception ex;
-  int ok = 0;
-
+  struct cleanup *before_deleting_result, *back_to;
   struct memory_map_parsing_data data = {};
 
-  XML_Parser parser = XML_ParserCreateNS (NULL, '!');
-  if (parser == NULL)
-    goto out;
+  back_to = make_cleanup (null_cleanup, NULL);
+  parser = gdb_xml_create_parser_and_cleanup (_("target memory map"),
+					      memory_map_elements, &data);
 
-  make_cleanup_free_xml_parser (parser);
-  make_cleanup (free_memory_map_parsing_data, &data);
   /* Note: 'clear_result' will zero 'result'.  */
   before_deleting_result = make_cleanup (clear_result, &result);
-
-  XML_SetElementHandler (parser, memory_map_start_element,
-			 memory_map_end_element);
-  XML_SetCharacterDataHandler (parser, memory_map_character_data);
-  XML_SetUserData (parser, &data);
   data.memory_map = &result;
 
-  TRY_CATCH (ex, RETURN_MASK_ERROR)
-    {
-      if (XML_Parse (parser, memory_map, strlen (memory_map), 1)
-	  != XML_STATUS_OK)
-	{
-	  enum XML_Error err = XML_GetErrorCode (parser);
-
-	  throw_error (XML_PARSE_ERROR, "%s", XML_ErrorString (err));
-	}
-    }
-  if (ex.reason != GDB_NO_ERROR)
-    {
-      if (ex.error == XML_PARSE_ERROR)
-	/* Just report it.  */
-	warning (_("Could not parse XML memory map: %s"), ex.message);
-      else
-	throw_exception (ex);
-    }
-  else
+  if (gdb_xml_parse (parser, memory_map) == 0)
     /* Parsed successfully, don't need to delete the result.  */
     discard_cleanups (before_deleting_result);
 
- out:
   do_cleanups (back_to);
   return result;
 }

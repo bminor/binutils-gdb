@@ -1,5 +1,10 @@
 2007-01-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.texinfo (Debugging Output): Document "set debug xml"
+	and "show debug xml".
+
+2007-01-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdbint.texinfo (Compiler Warnings): Update for -Wall use.
 
 2007-01-01  Joel Brobecker  <brobecker@adacore.com>

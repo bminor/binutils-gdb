@@ -1,5 +1,40 @@
 2007-01-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* memory-map.c (struct_memory_map_parsing_data): Remove most
+	members.  Make property_name an array.
+	(free_memory_map_parsing_data, memory_map_start_element)
+	(memory_map_end_element, memory_map_character_data): Delete.
+	(memory_map_start_memory, memory_map_end_memory)
+	(memory_map_start_property, memory_map_end_property): New functions.
+	(property_attributes, memory_children, memory_type_enum)
+	(memory_attributes, memory_map_children, memory_map_elements): New.
+	(parse_memory_map): Rewrite.
+	* xml-support.c (debug_xml): New.
+	(xml_get_required_attribute, xml_get_integer_attribute)
+	(xml_get_enum_value, free_xml_parser, make_cleanup_free_xml_parser):
+	Delete.
+	(struct scope_level, struct gdb_xml_parser, gdb_xml_body_text)
+	(gdb_xml_debug, gdb_xml_error, gdb_xml_values_cleanup)
+	(gdb_xml_start_element, gdb_xml_start_element_wrapper)
+	(gdb_xml_end_element, gdb_xml_end_element_wrapper, gdb_xml_cleanup)
+	(gdb_xml_create_parser_and_cleanup, gdb_xml_parse)
+	(gdb_xml_parse_ulongest, gdb_xml_parse_attr_ulongest)
+	(gdb_xml_parse_attr_enum, show_debug_xml, _initialize_xml_support):
+	New.
+	* xml-support.h (struct gdb_xml_value, gdb_xml_attribute_handler)
+	(enum gdb_xml_attribute_flag, struct gdb_xml_attribute)
+	(enum gdb_xml_element_flag, struct gdb_xml_element)
+	(gdb_xml_element_start_handler, gdb_xml_element_end_handler)
+	(struct gdb_xml_enum): New.
+	(gdb_xml_create_parser_and_cleanup, gdb_xml_parse, gdb_xml_debug)
+	(gdb_xml_error, gdb_xml_parse_attr_ulongest)
+	(gdb_xml_parse_attr_enum, gdb_xml_parse_ulongest): New prototypes.
+	(xml_get_required_attribute, xml_get_integer_attribute)
+	(xml_get_enum_value, make_cleanup_free_xml_parser): Delete prototypes.
+	* Makefile.in (xml_support_h, xml-support.o): Update.
+
+2007-01-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* Makefile.in (eval.o): Update dependencies.
 	* eval.c: Include "ui-out.h" and "exceptions.h".
 	(evaluate_subexp_standard): Use TRY_CATCH around value_of_variable.
