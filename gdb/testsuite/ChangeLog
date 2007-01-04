@@ -1,5 +1,10 @@
 2007-01-04  Pedro Alves  <pedro_alves@portugalmail.pt>
 
+	* gdb.base/charset.exp: Add explicit filename to break.
+	* gdb.base/dbx.exp: Add explicit filename to breaks.
+
+2007-01-04  Pedro Alves  <pedro_alves@portugalmail.pt>
+
 	* gdb.mi/mi-file.exp: Use mi_gdb_file_cmd instead of mi_gdb_load.
 	* gdb.mi/mi2-file.exp: Likewise.
 
