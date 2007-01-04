@@ -1,3 +1,17 @@
+2007-01-04  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Implement specification of MI tests as comments
+	in C and C++ sources.
+	* lib/mi-support.exp (mi_autotest_data): New variable.
+	(mi_autotest_source): New variable.
+	(count_newlines, mi_prepare_inline_tests)
+	(mi_get_inline_test, mi_continue_to_line)
+	(mi_run_inline_test, mi_tbreak)
+	(mi_send_resuming_command, mi_wait_for_stop): New functions.
+	* gdb.mi/mi-var-cp.exp: Move most content to the C file.
+	Run inline tests.
+	* gdb.mi/mi-var-cp.cc: Define tests here.
+
 2007-01-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* configure.ac (build_warnings): Use -Wall and

@@ -17,10 +17,22 @@
 
 void reference_update_tests ()
 {
+  /*: BEGIN: reference_update :*/
   int x = 167;
+  /*: mi_create_varobj "RX" "rx" "create varobj for rx" :*/
   int& rx = x;
+  /*: mi_varobj_update RX {RX} "update RX (1)"
+      mi_check_varobj_value RX 167 "check RX: expect 167"
+      :*/
   x = 567;
+  /*: mi_varobj_update RX {RX} "update RX (2)"
+      mi_check_varobj_value RX 567 "check RX: expect 567"
+      :*/  
   x = 567;
+  /*: mi_varobj_update RX {} "update RX (3)"
+    :*/
+
+  /*: END: reference_update :*/
 }
 
 struct S { int i; int j; };
@@ -28,7 +40,26 @@ struct S2 : S {};
         
 int base_in_reference_test (S2& s2)
 {
+  /*: BEGIN: base_in_reference :*/
   return s2.i;
+  /*: 
+    mi_create_varobj "S2" "s2" "create varobj for s2"
+    mi_list_varobj_children "S2" {
+       {"S2.S" "S" "1" "S"}
+    } "list children of s2"
+    mi_list_varobj_children "S2.S" {
+       {"S2.S.public" "public" "2"}
+    } "list children of s2.s"
+    mi_list_varobj_children "S2.S.public" {
+       {"S2.S.public.i" "i" "0" "int"}
+       {"S2.S.public.j" "j" "0" "int"}
+    } "list children of s2.s.public"
+
+    mi_check_varobj_value "S2.S.public.i" "67" "check S2.S.public.i"
+    mi_check_varobj_value "S2.S.public.j" "89" "check S2.S.public.j"
+
+  :*/
+  /*: END: base_in_reference :*/
 }
         
 void base_in_reference_test_main ()

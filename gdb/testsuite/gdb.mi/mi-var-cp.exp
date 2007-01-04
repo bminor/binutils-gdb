@@ -39,53 +39,10 @@ if {[gdb_compile $srcdir/$subdir/$srcfile $binfile executable {debug c++}] != ""
 
 mi_gdb_load ${binfile}
 
-# Test that children of classes are properly reported
+mi_prepare_inline_tests $srcfile
 
-mi_runto reference_update_tests
-
-mi_create_varobj "RX" "rx" "create varobj for rx"
-
-set x_assignment [gdb_get_line_number "x = 567;"]
-mi_next_to "reference_update_tests" {} ".*${srcfile}" [expr $x_assignment-1] \
-    "step to x assignment"
-mi_next_to "reference_update_tests" {} ".*${srcfile}" [expr $x_assignment] \
-    "step to x assignment"
-
-mi_varobj_update RX {RX} "update RX (1)"
-
-mi_check_varobj_value RX 167 "check RX: expect 167"
-
-# Execute the first 'x = 567' line.
-mi_next_to "reference_update_tests" {} ".*${srcfile}" [expr $x_assignment+1] \
-    "step to x assignment"
-
-mi_varobj_update RX {RX} "update RX (2)"
-mi_check_varobj_value RX 567 "check RX: expect 567"
-
-# Execute the second 'x = 567' line.
-mi_next_to "reference_update_tests" {} ".*${srcfile}" [expr $x_assignment+2] \
-    "step to x assignment"
-
-mi_varobj_update RX {} "update RX (3)"
-
-mi_runto base_in_reference_test
-
-mi_create_varobj "S2" "s2" "create varobj for s2"
-
-mi_list_varobj_children "S2" {{"S2.S" "S" "1" "S"}} "list children of s2"
-
-mi_list_varobj_children "S2.S" {{"S2.S.public" "public" "2"}} \
-    "list children of s2.s"
-
-mi_list_varobj_children "S2.S.public"\
-{
-    {"S2.S.public.i" "i" "0" "int"}
-    {"S2.S.public.j" "j" "0" "int"}
-} "list children of s2.s.public"
-
-mi_check_varobj_value "S2.S.public.i" "67" "check S2.S.public.i"
-mi_check_varobj_value "S2.S.public.j" "89" "check S2.S.public.j"
-
+mi_run_inline_test reference_update
+mi_run_inline_test base_in_reference
 
 mi_gdb_exit
 return 0

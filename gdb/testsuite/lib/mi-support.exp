@@ -822,7 +822,7 @@ proc mi_run_cmd {args} {
 	    return
 	}
     }
-    # NOTE: Shortly after this there will be a ``000*stopping,...(gdb)''
+    # NOTE: Shortly after this there will be a ``000*stopped,...(gdb)''
 }
 
 #
@@ -1085,4 +1085,250 @@ proc mi_list_varobj_children { varname children testname } {
     verbose -log "Expecting: $expected"
 
     mi_gdb_test "-var-list-children $varname" $expected $testname
+}
+
+# A list of two-element lists.  First element of each list is
+# a Tcl statement, and the second element is the line
+# number of source C file where the statement originates.
+set mi_autotest_data ""
+# The name of the source file for autotesting.
+set mi_autotest_source ""
+
+proc count_newlines { string } {
+    return [regexp -all "\n" $string]
+}
+
+# Prepares for running inline tests in FILENAME.
+# See comments for mi_run_inline_test for detailed
+# explanation of the idea and syntax.
+proc mi_prepare_inline_tests { filename } {
+
+    global srcdir
+    global subdir
+    global mi_autotest_source
+    global mi_autotest_data
+
+    set mi_autotest_data {}
+
+    set mi_autotest_source $filename
+    
+    if { ! [regexp "^/" "$filename"] } then {
+	set filename "$srcdir/$subdir/$filename"
+    }
+
+    set chan [open $filename]
+    set content [read $chan]
+    set line_number 1
+    while {1} {
+        set start [string first "/*:" $content]
+        if {$start != -1} {
+            set end [string first ":*/" $content]
+            if {$end == -1} {
+                error "Unterminated special comment in $filename"
+            }
+            
+            set prefix [string range $content 0 $start]
+            set prefix_newlines [count_newlines $prefix]
+            
+            set line_number [expr $line_number+$prefix_newlines]
+            set comment_line $line_number
+
+            set comment [string range $content [expr $start+3] [expr $end-1]]
+
+            set comment_newlines [count_newlines $comment]
+            set line_number [expr $line_number+$comment_newlines]
+            
+            set comment [string trim $comment]
+            set content [string range $content [expr $end+3] \
+                             [string length $content]]
+            lappend mi_autotest_data [list $comment $comment_line]
+        } else {        
+           break
+        }        
+    }
+    close $chan
+}
+
+# Helper to mi_run_inline_test below.
+# Return the list of all (statement,line_number) lists
+# that comprise TESTCASE.  The begin and end markers
+# are not included.
+proc mi_get_inline_test {testcase} {
+
+    global mi_gdb_prompt
+    global mi_autotest_data
+    global mi_autotest_source
+
+    set result {}
+
+    set seen_begin 0
+    set seen_end 0
+    foreach l $mi_autotest_data {
+
+        set comment [lindex $l 0]
+
+        if {$comment == "BEGIN: $testcase"} {
+            set seen_begin 1
+        } elseif {$comment == "END: $testcase"} {
+            set seen_end 1
+            break
+        } elseif {$seen_begin==1} {
+            lappend result $l
+        }
+    }
+
+    if {$seen_begin == 0} {
+        error "Autotest $testcase not found" 
+    }
+
+    if {$seen_begin == 1 && $seen_end == 0} {
+        error "Missing end marker for test $testcase"
+    }
+
+    return $result
+}
+
+# Sets temporary breakpoint at LOCATION.
+proc mi_tbreak {location} {
+
+    global mi_gdb_prompt
+
+    mi_gdb_test "-break-insert -t $location" \
+        {\^done,bkpt=.*} \
+        "run to $location (set breakpoint)"    
+}
+
+# Send COMMAND that must be a command that resumes
+# the inferiour (run/continue/next/etc) and consumes
+# the "^running" output from it.
+proc mi_send_resuming_command {command test} {
+
+    global mi_gdb_prompt
+
+    send_gdb "220-$command\n"
+    gdb_expect {
+        -re "220\\^running\r\n${mi_gdb_prompt}" {
+        }
+        timeout {
+            fail $test
+        }
+    }
+}
+
+# Helper to mi_run_inline_test below.
+# Sets a temporary breakpoint at LOCATION and runs
+# the program using COMMAND.  When the program is stopped
+# returns the line at which it.  Returns -1 if line cannot
+# be determined.
+# Does not check that the line is the same as requested.
+# The caller can check itself if required.
+proc mi_continue_to_line {location command} {
+
+    mi_tbreak $location   
+    mi_send_resuming_command "exec-continue" "run to $location (exec-continue)"
+    return [mi_wait_for_stop]
+}
+
+# Wait until gdb prints the current line.
+proc mi_wait_for_stop {test} {
+
+  global mi_gdb_prompt
+
+  gdb_expect {
+      -re ".*line=\"(.*)\".*\r\n$mi_gdb_prompt$" {
+          return $expect_out(1,string)
+      }
+      -re ".*$mi_gdb_prompt$" {
+          fail "wait for stop ($test)"
+      }
+      timeout {
+          fail "wait for stop ($test)"
+      }
+  }
+}
+
+# Run a MI test embedded in comments in a C file.
+# The C file should contain special comments in the following
+# three forms:
+#
+#    /*: BEGIN: testname :*/
+#    /*:  <Tcl statements> :*/
+#    /*: END: testname :*/
+#
+# This procedure find the begin and end marker for the requested
+# test. Then, a temporary breakpoint is set at the begin
+# marker and the program is run (from start).
+#
+# After that, for each special comment between the begin and end
+# marker, the Tcl statements are executed.  It is assumed that
+# for each comment, the immediately preceding line is executable
+# C statement.  Then, gdb will be single-stepped until that
+# preceding C statement is executed, and after that the
+# Tcl statements in the comment will be executed.
+#
+# For example:
+#
+#     /*: BEGIN: assignment-test :*/
+#     v = 10;
+#     /*: <Tcl code to check that 'v' is indeed 10 :*/
+#     /*: END: assignment-test :*/
+#
+# The mi_prepare_inline_tests function should be called before
+# calling this function.  A given C file can contain several
+# inline tests.  The names of the tests must be unique within one
+# C file.
+#
+proc mi_run_inline_test { testcase } {
+
+    global mi_gdb_prompt
+    global hex
+    global decimal
+    global fullname_syntax
+    global mi_autotest_source
+
+    set commands [mi_get_inline_test $testcase]
+
+    set first 1
+    set line_now 1
+
+    foreach c $commands {
+        set statements [lindex $c 0]
+        set line [lindex $c 1]
+        set line [expr $line-1]
+
+        # We want gdb to be stopped at the expression immediately
+        # before the comment.  If this is the first comment, the
+        # program is either not started yet or is in some random place,
+        # so we run it.  For further comments, we might be already
+        # standing at the right line. If not continue till the
+        # right line.
+
+        if {$first==1} {
+            # Start the program afresh.
+            mi_tbreak "$mi_autotest_source:$line"
+            mi_run_cmd
+            set line_now [mi_wait_for_stop "$testcase: step to $line"]
+            set first 0
+        } elseif {$line_now!=$line} {
+            set line_now [mi_continue_to_line "$mi_autotest_source:$line"]
+        }
+
+        if {$line_now!=$line} {
+            fail "$testcase: go to line $line"
+        }
+
+        # We're not at the statement right above the comment.
+        # Execute that statement so that the comment can test
+        # the state after the statement is executed.
+
+        # Single-step past the line.
+        mi_send_resuming_command "exec-next" "$testcase: step over $line"
+        set line_now [mi_wait_for_stop "$testcase: step over $line"]
+
+        # We probably want to use 'uplevel' so that statements
+        # have direct access to global variables that the
+        # main 'exp' file has set up.  But it's not yet clear,
+        # will need more experience to be sure.
+        eval $statements
+    }
 }
