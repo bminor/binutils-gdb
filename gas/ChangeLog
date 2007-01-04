@@ -1,3 +1,11 @@
+2006-01-04  Julian Brown  <julian@codesourcery.com>
+
+	* config/tc-arm.c (do_neon_shl_imm): Swap rN, rM.
+	(do_neon_qshl_imm): Likewise.
+	(do_neon_rshl): New function. Handle rounding variants of
+	v{q}shl-by-register.
+	(insns): Use do_neon_rshl for vrshl, vqrshl.
+
 2007-01-04  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (NEON_ENC_TAB): Fix encoding of vclt, vcle, vaclt

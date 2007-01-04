@@ -11393,6 +11393,18 @@ do_neon_shl_imm (void)
       enum neon_shape rs = neon_select_shape (NS_DDD, NS_QQQ, NS_NULL);
       struct neon_type_el et = neon_check_type (3, rs,
         N_EQK, N_SU_ALL | N_KEY, N_EQK | N_SGN);
+      unsigned int tmp;
+
+      /* VSHL/VQSHL 3-register variants have syntax such as:
+           vshl.xx Dd, Dm, Dn
+         whereas other 3-register operations encoded by neon_three_same have
+         syntax like:
+           vadd.xx Dd, Dn, Dm
+         (i.e. with Dn & Dm reversed). Swap operands[1].reg and operands[2].reg
+         here.  */
+      tmp = inst.operands[2].reg;
+      inst.operands[2].reg = inst.operands[1].reg;
+      inst.operands[1].reg = tmp;
       inst.instruction = NEON_ENC_INTEGER (inst.instruction);
       neon_three_same (neon_quad (rs), et.type == NT_unsigned, et.size);
     }
@@ -11405,6 +11417,7 @@ do_neon_qshl_imm (void)
     {
       enum neon_shape rs = neon_select_shape (NS_DDI, NS_QQI, NS_NULL);
       struct neon_type_el et = neon_check_type (2, rs, N_EQK, N_SU_ALL | N_KEY);
+
       inst.instruction = NEON_ENC_IMMED (inst.instruction);
       neon_imm_shift (TRUE, et.type == NT_unsigned, neon_quad (rs), et,
                       inst.operands[2].imm);
@@ -11414,9 +11427,29 @@ do_neon_qshl_imm (void)
       enum neon_shape rs = neon_select_shape (NS_DDD, NS_QQQ, NS_NULL);
       struct neon_type_el et = neon_check_type (3, rs,
         N_EQK, N_SU_ALL | N_KEY, N_EQK | N_SGN);
+      unsigned int tmp;
+
+      /* See note in do_neon_shl_imm.  */
+      tmp = inst.operands[2].reg;
+      inst.operands[2].reg = inst.operands[1].reg;
+      inst.operands[1].reg = tmp;
       inst.instruction = NEON_ENC_INTEGER (inst.instruction);
       neon_three_same (neon_quad (rs), et.type == NT_unsigned, et.size);
     }
+}
+
+static void
+do_neon_rshl (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_DDD, NS_QQQ, NS_NULL);
+  struct neon_type_el et = neon_check_type (3, rs,
+    N_EQK, N_EQK, N_SU_ALL | N_KEY);
+  unsigned int tmp;
+
+  tmp = inst.operands[2].reg;
+  inst.operands[2].reg = inst.operands[1].reg;
+  inst.operands[1].reg = tmp;
+  neon_three_same (neon_quad (rs), et.type == NT_unsigned, et.size);
 }
 
 static int
@@ -15653,10 +15686,10 @@ static const struct asm_opcode insns[] =
  NUF(vqaddq,    0000010, 3, (RNQ,  oRNQ,  RNQ),  neon_dyadic_i64_su),
  NUF(vqsub,     0000210, 3, (RNDQ, oRNDQ, RNDQ), neon_dyadic_i64_su),
  NUF(vqsubq,    0000210, 3, (RNQ,  oRNQ,  RNQ),  neon_dyadic_i64_su),
- NUF(vrshl,     0000500, 3, (RNDQ, oRNDQ, RNDQ), neon_dyadic_i64_su),
- NUF(vrshlq,    0000500, 3, (RNQ,  oRNQ,  RNQ),  neon_dyadic_i64_su),
- NUF(vqrshl,    0000510, 3, (RNDQ, oRNDQ, RNDQ), neon_dyadic_i64_su),
- NUF(vqrshlq,   0000510, 3, (RNQ,  oRNQ,  RNQ),  neon_dyadic_i64_su),
+ NUF(vrshl,     0000500, 3, (RNDQ, oRNDQ, RNDQ), neon_rshl),
+ NUF(vrshlq,    0000500, 3, (RNQ,  oRNQ,  RNQ),  neon_rshl),
+ NUF(vqrshl,    0000510, 3, (RNDQ, oRNDQ, RNDQ), neon_rshl),
+ NUF(vqrshlq,   0000510, 3, (RNQ,  oRNQ,  RNQ),  neon_rshl),
   /* If not immediate, fall back to neon_dyadic_i64_su.
      shl_imm should accept I8 I16 I32 I64,
      qshl_imm should accept S8 S16 S32 S64 U8 U16 U32 U64.  */
