@@ -2385,7 +2385,6 @@ hpread_start_psymtab (struct objfile *objfile, char *filename,
 		      struct partial_symbol **static_syms)
 {
   int offset = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
-  extern void hpread_psymtab_to_symtab ();
   struct partial_symtab *result =
   start_psymtab_common (objfile, objfile->section_offsets,
 			filename, textlow, global_syms, static_syms);
