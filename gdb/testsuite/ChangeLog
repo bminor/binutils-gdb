@@ -1,3 +1,8 @@
+2007-01-04  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* gdb.mi/mi-file.exp: Use mi_gdb_file_cmd instead of mi_gdb_load.
+	* gdb.mi/mi2-file.exp: Likewise.
+
 2007-01-04  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Implement specification of MI tests as comments
