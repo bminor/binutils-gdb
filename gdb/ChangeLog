@@ -1,5 +1,10 @@
 2007-01-04  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_evaluate_subexp) [OP_TYPE]: Return a value with
+	the appropriate type rather than a bogus void type.
+
+2007-01-04  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.h (ada_find_printable_frame): Remove.
 	(ada_exception_catchpoint_p, ada_decode_exception_location)
 	(ada_decode_assert_location): Add declaration.

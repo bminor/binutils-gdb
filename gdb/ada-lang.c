@@ -8578,7 +8578,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       if (noside == EVAL_SKIP)
         goto nosideret;
       else if (noside == EVAL_AVOID_SIDE_EFFECTS)
-        return allocate_value (builtin_type_void);
+        return allocate_value (exp->elts[pc + 1].type);
       else
         error (_("Attempt to use a type name as an expression"));
 
