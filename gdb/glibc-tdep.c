@@ -90,8 +90,13 @@ glibc_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 
   if (resolver)
     {
+      /* The dynamic linker began using this name in early 2005.  */
       struct minimal_symbol *fixup
-	= lookup_minimal_symbol ("fixup", NULL, objfile);
+	= lookup_minimal_symbol ("_dl_fixup", NULL, objfile);
+      
+      /* This is the name used in older versions.  */
+      if (! fixup)
+        fixup = lookup_minimal_symbol ("fixup", NULL, objfile);
 
       if (fixup && SYMBOL_VALUE_ADDRESS (fixup) == pc)
 	return frame_pc_unwind (get_current_frame ());

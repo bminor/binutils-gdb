@@ -1,3 +1,8 @@
+2007-01-04  Jim Blandy  <jimb@codesourcery.com>
+
+	* glibc-tdep.c (glibc_skip_solib_resolver): Look for '_dl_fixup',
+	then plain 'fixup'.
+
 2007-01-04  Joel Brobecker  <brobecker@adacore.com>
 
 	* hpread.c (hpread_start_psymtab): Remove unnecessary extern.
