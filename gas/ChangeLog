@@ -7,7 +7,7 @@
 	PR gas/3826
 	* config/tc-i386.c (register_prefix): New.
 	(set_intel_syntax): Set set_intel_syntax to "" if register
-	prefix is needed.
+	prefix isn't needed.
 	(check_byte_reg): Use register_prefix for error message.
 	(check_long_reg): Likewise.
 	(check_qword_reg): Likewise.
