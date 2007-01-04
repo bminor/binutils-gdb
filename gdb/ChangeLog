@@ -1,3 +1,8 @@
+2007-01-05  Nick Roberts  <nickrob@snap.net.nz>
+
+	* varobj.c (get_type_deref): Fix variable objects for references to
+	pointers.
+
 2007-01-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* symtab.c (find_pc_sect_psymtab): Add comments.  Handle psymtabs
