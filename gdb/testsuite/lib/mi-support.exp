@@ -858,7 +858,7 @@ proc mi_run_to_main { } {
 #   -1  if test suppressed, failed, timedout
 #    0  if test passed
 
-proc mi_runto {func} {
+proc mi_runto_helper {func run_or_continue} {
   global suppress_flag
   if { $suppress_flag } {
     return -1
@@ -877,7 +877,11 @@ proc mi_runto {func} {
     set bkptno {[0-9]+}
   }
 
-  mi_run_cmd
+  if {$run_or_continue == "run"} {
+      mi_run_cmd
+  } else {
+    send_gdb "000-exec-continue\n"
+  }
   gdb_expect {
     -re ".*000\\*stopped,thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\"$func\",args=\(\\\[.*\\\]\|\{.*\}\),file=\".*\",fullname=\"${fullname_syntax}.*\",line=\"\[0-9\]*\"\}\r\n$mi_gdb_prompt$" {
       pass "$test"
@@ -893,6 +897,9 @@ proc mi_runto {func} {
   }
 }
 
+proc mi_runto {func} {
+    mi_runto_helper $func "run"
+}
 
 # Next to the next statement
 # For return values, see mi_execute_to_helper
@@ -967,9 +974,8 @@ proc mi_finish_to { func args file line result ret test } {
 	"$test"
 }
 
-proc mi_continue_to { bkptno func args file line test } {
-    mi_execute_to "exec-continue" "breakpoint-hit\",bkptno=\"$bkptno" \
-	"$func" "$args" "$file" "$line" "" "$test"
+proc mi_continue_to {func} {
+    mi_runto_helper $func "continue"
 }
 
 proc mi0_execute_to { cmd reason func args file line extra test } {

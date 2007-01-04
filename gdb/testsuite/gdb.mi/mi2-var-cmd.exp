@@ -388,12 +388,7 @@ mi_gdb_test "-var-assign lsimple.integer 333" \
 
 set line_subroutine1_body [gdb_get_line_number "global_simple.integer = i + 3;"]
 
-mi_gdb_test "-break-insert subroutine1" \
-	"\\^done,bkpt=\{number=\"2\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"subroutine1\",file=\".*var-cmd.c\",line=\"$line_subroutine1_body\",times=\"0\"\}" \
-	"break-insert subroutine1"
-mi_continue_to "2" "subroutine1" \
-	"\{name=\"i\",value=\"4321\"\},\{name=\"l\",value=\"$hex\"\}" \
-	"var-cmd.c" $line_subroutine1_body "continue to subroutine1"
+mi_continue_to "subroutine1"
 
 # Test: c_variable-2.10
 # Desc: create variable for locals i,l in subroutine1
@@ -535,21 +530,13 @@ mi_gdb_test "-var-delete l" \
 
 # Test whether we can follow the name of a variable through multiple
 # stack frames.
-mi_gdb_test "-break-insert do_special_tests" \
-  {\^done,bkpt=.*} \
-  "set breakpoint at do_special_tests"
-
-mi_continue_to {.*} do_special_tests {.*} {.*var-cmd.c} {.*} {stop in do_special_tests}
+mi_continue_to do_special_tests
 
 mi_gdb_test "-var-create selected_a @ a" \
   {\^done,name="selected_a",numchild="0",type="int"} \
   "create selected_a"
 
-mi_gdb_test "-break-insert incr_a" \
-  {\^done,bkpt=.*} \
-  "set breakpoint at incr_a"
-
-mi_continue_to {.*} incr_a {.*} {.*var-cmd.c} {.*} {stop in incr_a}
+mi_continue_to incr_a
 
 mi_gdb_test "-var-update selected_a" \
 	"\\^done,changelist=\\\[\{name=\"selected_a\",in_scope=\"true\",new_type=\"char\",new_num_children=\"0\"\}\\\]" \
