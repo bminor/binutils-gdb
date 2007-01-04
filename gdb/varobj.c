@@ -1908,7 +1908,7 @@ c_name_of_child (struct varobj *parent, int index)
 static struct value *
 c_value_of_root (struct varobj **var_handle)
 {
-  struct value *new_val;
+  struct value *new_val = NULL;
   struct varobj *var = *var_handle;
   struct frame_info *fi;
   int within_scope;

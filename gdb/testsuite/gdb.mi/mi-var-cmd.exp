@@ -586,5 +586,48 @@ mi_gdb_test "-var-update selected_a" \
 	"\\^done,changelist=\\\[\{name=\"selected_a\",in_scope=\"true\",new_type=\"int\",new_num_children=\"0\"\}\\\]" \
 	"update selected_a in do_special_tests"
 
+# Test whether bad varobjs crash GDB.
+
+# A varobj we fail to read during -var-update should be considered
+# out of scope.
+mi_gdb_test "-var-create null_ptr * **0" \
+    {\^done,name="null_ptr",numchild="0",type="int"} \
+    "create null_ptr"
+
+# Allow this to succeed, if address zero is readable, although it
+# will not test what it was meant to.  Most important is that GDB
+# does not crash.
+mi_gdb_test "-var-update null_ptr" \
+    {\^done,changelist=\[{.*}\]} \
+    "update null_ptr"
+
+mi_gdb_test "-var-delete null_ptr" \
+    "\\^done,ndeleted=\"1\"" \
+    "delete null_ptr"
+
+# When we fail to read a varobj created from a named variable,
+# we evaluate its type instead.  Make sure that doesn't blow
+# up by trying to read it again.  We can use _end when not running
+# the program to simulate an unreadable variable, if this platform
+# provides _end, but cope if it's missing.
+
+mi_gdb_test "kill" \
+    {&"kill\\n".*\^done} \
+    "kill program before endvar"
+
+mi_gdb_test "-var-create endvar * _end" \
+    {(\^done,name="endvar",numchild="0",type=".*"|&".*unable to.*".*\^error,msg=".*")} \
+    "create endvar"
+
+# Allow this to succeed whether the value is readable, unreadable, or
+# missing.  Most important is that GDB does not crash.
+mi_gdb_test "-var-update endvar" \
+    {(\^done,changelist=\[.*\]|^".*".*\^error,msg=".*not found")} \
+    "update endvar"
+
+mi_gdb_test "-var-delete endvar" \
+    "\\^done,ndeleted=\"1\"" \
+    "delete endvar"
+
 mi_gdb_exit
 return 0

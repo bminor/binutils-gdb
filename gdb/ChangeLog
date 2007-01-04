@@ -1,5 +1,13 @@
 2007-01-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* Makefile.in (eval.o): Update dependencies.
+	* eval.c: Include "ui-out.h" and "exceptions.h".
+	(evaluate_subexp_standard): Use TRY_CATCH around value_of_variable.
+	Use value_zero if an error occurs when avoiding side effects.
+	* varobj.c (c_value_of_root): Initialize new_val.
+
+2007-01-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* varobj.c (varobj_list_children): Stop if the number of children is
 	unknown.
 	(c_number_of_children):
