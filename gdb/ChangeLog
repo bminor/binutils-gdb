@@ -1,4 +1,4 @@
-2007-01-03  Joel Brobecker  <brobecker@adacore.com>
+2007-01-04  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.h (ada_find_printable_frame): Remove.
 	(ada_exception_catchpoint_p, ada_decode_exception_location)
