@@ -39,7 +39,7 @@ set bug_id 0
 
 set testfile "annota3"
 set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+set binfile ${objdir}/${subdir}/${testfile}$EXEEXT
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug nowarnings}] != "" } {
     untested annota3.exp
@@ -118,7 +118,7 @@ gdb_expect_list "breakpoint info" "$gdb_prompt$" {
 send_gdb "run\n"
 gdb_expect_list "run until main breakpoint" "$gdb_prompt$" {
     "\r\n\032\032post-prompt\r\n"
-    "Starting program: .*annota3 \r\n"
+    "Starting program: .*annota3(|\.exe) \r\n"
     "\r\n\032\032starting\r\n"
     "\r\n\032\032breakpoint 1\r\n"
     "\r\n"

@@ -1,5 +1,10 @@
 2007-01-04  Pedro Alves  <pedro_alves@portugalmail.pt>
 
+	* gdb.base/annota3.exp ($binfile): Append $EXEEXT.
+	Expect ".exe" extension.
+
+2007-01-04  Pedro Alves  <pedro_alves@portugalmail.pt>
+
 	* gdb.base/charset.exp: Add explicit filename to break.
 	* gdb.base/dbx.exp: Add explicit filename to breaks.
 
