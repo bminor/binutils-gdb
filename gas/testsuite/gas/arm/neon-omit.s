@@ -33,9 +33,11 @@
 	vmls.s32 q3,q4
 	vacge.f q1,q2
 	vacgt.f q3,q4
-	vaclt.f q5,q6
-	vacle.f q7,q8
+	vacle.f q5,q6
+	vaclt.f q7,q8
 	vcge.u32 q7,q8
+	vcgt.u32 q7,q8
+	vcle.u32 q7,q8
 	vclt.u32 q7,q8
 	vaddw.u32 q1,d2
 	vsubw.s32 q3,d4

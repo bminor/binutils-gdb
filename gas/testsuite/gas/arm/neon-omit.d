@@ -37,7 +37,9 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> f30cae5a 	vacge\.f32	q5, q6, q5
 0[0-9a-f]+ <[^>]+> f320eede 	vacgt\.f32	q7, q8, q7
 0[0-9a-f]+ <[^>]+> f32ee370 	vcge\.u32	q7, q7, q8
+0[0-9a-f]+ <[^>]+> f32ee360 	vcgt\.u32	q7, q7, q8
 0[0-9a-f]+ <[^>]+> f320e3de 	vcge\.u32	q7, q8, q7
+0[0-9a-f]+ <[^>]+> f320e3ce 	vcgt\.u32	q7, q8, q7
 0[0-9a-f]+ <[^>]+> f3a22102 	vaddw\.u32	q1, q1, d2
 0[0-9a-f]+ <[^>]+> f2a66304 	vsubw\.s32	q3, q3, d4
 0[0-9a-f]+ <[^>]+> f2244856 	vtst\.32	q2, q2, q3

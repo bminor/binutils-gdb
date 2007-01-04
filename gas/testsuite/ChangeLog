@@ -1,3 +1,10 @@
+2007-01-04  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/neon-cov.d: Adjust expected output.
+	* gas/arm/neon-omit.s: Add tests for vcgt and vcle.  Reorder vacle
+	and vacle.
+	* gas/arm/neon-omit.d: Adjust expected output.
+
 2006-12-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/intel.s: Add tests for "shrd %cl,%edx,%eax" and
