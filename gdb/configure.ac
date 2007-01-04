@@ -1138,32 +1138,15 @@ if test "${ERROR_ON_WARNING}" = yes ; then
     WERROR_CFLAGS="-Werror"
 fi
 
-# NOTE: Don't add -Wall or -Wunused, they both include
-# -Wunused-parameter which reports bogus warnings.
-# NOTE: If you add to this list, remember to update
+# The entries after -Wno-pointer-sign are disabled warnings which may
+# be enabled in the future, which can not currently be used to build
+# GDB.
+# NOTE: If you change this list, remember to update
 # gdb/doc/gdbint.texinfo.
-build_warnings="-Wimplicit -Wreturn-type -Wcomment -Wtrigraphs \
--Wformat -Wparentheses -Wpointer-arith -Wformat-nonliteral \
--Wunused-label -Wunused-function -Wno-pointer-sign"
+build_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith \
+-Wformat-nonliteral -Wno-pointer-sign \
+-Wno-unused -Wno-switch"
 
-# GCC supports -Wuninitialized only with -O or -On, n != 0.
-if test x${CFLAGS+set} = xset; then
-  case "${CFLAGS}" in
-    *"-O0"* ) ;;
-    *"-O"* )
-      build_warnings="${build_warnings} -Wuninitialized"
-    ;;
-  esac
-else
-  build_warnings="${build_warnings} -Wuninitialized"
-fi
-
-# Up for debate: -Wswitch -Wcomment -trigraphs -Wtrigraphs
-# -Wunused-function -Wunused-variable -Wunused-value
-# -Wchar-subscripts -Wtraditional -Wshadow -Wcast-qual
-# -Wcast-align -Wwrite-strings -Wconversion -Wstrict-prototypes
-# -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls
-# -Woverloaded-virtual -Winline -Werror"
 AC_ARG_ENABLE(build-warnings,
 [  --enable-build-warnings Enable build-time compiler warnings if gcc is used],
 [case "${enableval}" in
@@ -1208,7 +1191,7 @@ then
 	    CFLAGS="$saved_CFLAGS"
 	esac
     done
-    AC_MSG_RESULT(${WARN_CFLAGS}${WERROR_CFLAGS})
+    AC_MSG_RESULT(${WARN_CFLAGS} ${WERROR_CFLAGS})
 fi
 AC_SUBST(WARN_CFLAGS)
 AC_SUBST(WERROR_CFLAGS)

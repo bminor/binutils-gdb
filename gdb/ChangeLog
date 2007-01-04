@@ -1,3 +1,9 @@
+2007-01-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* configure.ac (build_warnings): Use -Wall and
+	-Wdeclaration-after-statement.
+	* configure: Regenerated.
+
 2007-01-04  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Simplify access to variours properties of child

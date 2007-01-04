@@ -21114,32 +21114,15 @@ if test "${ERROR_ON_WARNING}" = yes ; then
     WERROR_CFLAGS="-Werror"
 fi
 
-# NOTE: Don't add -Wall or -Wunused, they both include
-# -Wunused-parameter which reports bogus warnings.
-# NOTE: If you add to this list, remember to update
+# The entries after -Wno-pointer-sign are disabled warnings which may
+# be enabled in the future, which can not currently be used to build
+# GDB.
+# NOTE: If you change this list, remember to update
 # gdb/doc/gdbint.texinfo.
-build_warnings="-Wimplicit -Wreturn-type -Wcomment -Wtrigraphs \
--Wformat -Wparentheses -Wpointer-arith -Wformat-nonliteral \
--Wunused-label -Wunused-function -Wno-pointer-sign"
+build_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith \
+-Wformat-nonliteral -Wno-pointer-sign \
+-Wno-unused -Wno-switch"
 
-# GCC supports -Wuninitialized only with -O or -On, n != 0.
-if test x${CFLAGS+set} = xset; then
-  case "${CFLAGS}" in
-    *"-O0"* ) ;;
-    *"-O"* )
-      build_warnings="${build_warnings} -Wuninitialized"
-    ;;
-  esac
-else
-  build_warnings="${build_warnings} -Wuninitialized"
-fi
-
-# Up for debate: -Wswitch -Wcomment -trigraphs -Wtrigraphs
-# -Wunused-function -Wunused-variable -Wunused-value
-# -Wchar-subscripts -Wtraditional -Wshadow -Wcast-qual
-# -Wcast-align -Wwrite-strings -Wconversion -Wstrict-prototypes
-# -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls
-# -Woverloaded-virtual -Winline -Werror"
 # Check whether --enable-build-warnings or --disable-build-warnings was given.
 if test "${enable_build_warnings+set}" = set; then
   enableval="$enable_build_warnings"
@@ -21230,8 +21213,8 @@ rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 	    CFLAGS="$saved_CFLAGS"
 	esac
     done
-    echo "$as_me:$LINENO: result: ${WARN_CFLAGS}${WERROR_CFLAGS}" >&5
-echo "${ECHO_T}${WARN_CFLAGS}${WERROR_CFLAGS}" >&6
+    echo "$as_me:$LINENO: result: ${WARN_CFLAGS} ${WERROR_CFLAGS}" >&5
+echo "${ECHO_T}${WARN_CFLAGS} ${WERROR_CFLAGS}" >&6
 fi
 
 

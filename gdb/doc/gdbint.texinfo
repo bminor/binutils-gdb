@@ -5471,63 +5471,34 @@ errors.}
 @subsection Compiler Warnings
 @cindex compiler warnings
 
-With few exceptions, developers should include the configuration option
-@samp{--enable-gdb-build-warnings=,-Werror} when building @value{GDBN}.
-The exceptions are listed in the file @file{gdb/MAINTAINERS}.
+With few exceptions, developers should avoid the configuration option
+@samp{--disable-werror} when building @value{GDBN}.  The exceptions
+are listed in the file @file{gdb/MAINTAINERS}.  The default, when
+building with @sc{gcc}, is @samp{--enable-werror}.
 
 This option causes @value{GDBN} (when built using GCC) to be compiled
 with a carefully selected list of compiler warning flags.  Any warnings
-from those flags being treated as errors.
+from those flags are treated as errors.
 
 The current list of warning flags includes:
 
 @table @samp
-@item -Wimplicit
-Since @value{GDBN} coding standard requires all functions to be declared
-using a prototype, the flag has the side effect of ensuring that
-prototyped functions are always visible with out resorting to
-@samp{-Wstrict-prototypes}.
+@item -Wall
+Recommended @sc{gcc} warnings.
 
-@item -Wreturn-type
-Such code often appears to work except on instruction set architectures
-that use register windows.
+@item -Wdeclaration-after-statement
 
-@item -Wcomment
-
-@item -Wtrigraphs
-
-@item -Wformat
-@itemx -Wformat-nonliteral
-Since @value{GDBN} uses the @code{format printf} attribute on all
-@code{printf} like functions these check not just @code{printf} calls
-but also calls to functions such as @code{fprintf_unfiltered}.
-
-@item -Wparentheses
-This warning includes uses of the assignment operator within an
-@code{if} statement.
+@sc{gcc} 3.x (and later) and @sc{c99} allow declarations mixed with
+code, but @sc{gcc} 2.x and @sc{c89} do not.
 
 @item -Wpointer-arith
 
-@item -Wuninitialized
-
-@item -Wunused-label
-This warning has the additional benefit of detecting the absence of the
-@code{case} reserved word in a switch statement:
-@smallexample
-enum @{ FD_SCHEDULED, NOTHING_SCHEDULED @} sched;
-@dots{}
-switch (sched)
-  @{
-  case FD_SCHEDULED:
-    @dots{};
-    break;
-  NOTHING_SCHEDULED:
-    @dots{};
-    break;
-  @}
-@end smallexample
-
-@item -Wunused-function
+@item -Wformat-nonliteral
+Non-literal format strings, with a few exceptions, are bugs - they
+might contain unintented user-supplied format specifiers.
+Since @value{GDBN} uses the @code{format printf} attribute on all
+@code{printf} like functions this checks not just @code{printf} calls
+but also calls to functions such as @code{fprintf_unfiltered}.
 
 @item -Wno-pointer-sign
 In version 4.0, GCC began warning about pointer argument passing or
@@ -5537,19 +5508,19 @@ carefully between @code{char} and @code{unsigned char}.  In early 2006
 the @value{GDBN} developers decided correcting these warnings wasn't
 worth the time it would take.
 
-@end table
-
-@emph{Pragmatics: Due to the way that @value{GDBN} is implemented most
-functions have unused parameters.  Consequently the warning
-@samp{-Wunused-parameter} is precluded from the list.  The macro
+@item -Wno-unused-parameter
+Due to the way that @value{GDBN} is implemented many functions have
+unused parameters.  Consequently this warning is avoided.  The macro
 @code{ATTRIBUTE_UNUSED} is not used as it leads to false negatives ---
 it is not an error to have @code{ATTRIBUTE_UNUSED} on a parameter that
-is being used.  The options @samp{-Wall} and @samp{-Wunused} are also
-precluded because they both include @samp{-Wunused-parameter}.}
+is being used.
 
-@emph{Pragmatics: @value{GDBN} has not simply accepted the warnings
-enabled by @samp{-Wall -Werror -W...}.  Instead it is selecting warnings
-when and where their benefits can be demonstrated.}
+@item -Wno-unused
+@itemx -Wno-switch
+These are warnings which might be useful for @value{GDBN}, but are
+currently too noisy to enable with @samp{-Werror}.
+
+@end table
 
 @subsection Formatting
 
