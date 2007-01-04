@@ -1,3 +1,15 @@
+2007-01-04  Qinwei  <qinwei@sunnorth.com.cn>
+
+	* NEWS: New port to S+core.
+	* MAINTAINERS (Write After Approval, Responsible Maintainers):
+	Add myself.
+
+	* Makefile.in: Add dependencies for S+core files.
+	* configure.tgt (score*, score-*-*): Add S+core target.
+	* config/score/embed.mt: New file.
+	* score-tdep.c: New file.
+	* score-tdep.h: New file.
+
 2007-01-04  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_evaluate_subexp) [OP_TYPE]: Return a value with

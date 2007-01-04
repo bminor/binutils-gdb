@@ -783,6 +783,7 @@ rs6000_tdep_h = rs6000-tdep.h $(defs_h)
 s390_tdep_h = s390-tdep.h
 scm_lang_h = scm-lang.h $(scm_tags_h)
 scm_tags_h = scm-tags.h
+score_tdep_h = score-tdep.h
 sentinel_frame_h = sentinel-frame.h
 serial_h = serial.h
 ser_base_h = ser-base.h
@@ -1491,6 +1492,7 @@ ALLDEPFILES = \
 	remote-st.c remote-utils.c dcache.c \
 	rs6000-nat.c rs6000-tdep.c \
 	s390-tdep.c s390-nat.c \
+	score-tdep.c \
 	ser-go32.c ser-pipe.c ser-tcp.c ser-mingw.c \
 	sh-tdep.c sh64-tdep.c shnbsd-tdep.c shnbsd-nat.c \
 	sol2-tdep.c \
@@ -2568,6 +2570,10 @@ scm-lang.o: scm-lang.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
 scm-valprint.o: scm-valprint.c $(defs_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) $(parser_defs_h) $(language_h) $(value_h) \
 	$(scm_lang_h) $(valprint_h) $(gdbcore_h) $(c_lang_h)
+score-tdep.o: score-tdep.c $(defs_h) $(gdb_assert_h) $(inferior_h) \
+	$(symtab_h) $(objfiles_h) $(gdbcore_h) $(target_h) \
+	$(arch_utils_h) $(regcache_h) $(dis_asm_h) $(frame_unwind_h) \
+	$(frame_base_h) $(trad_frame_h) $(dwarf2_frame_h) $(score_tdep_h)
 sentinel-frame.o: sentinel-frame.c $(defs_h) $(regcache_h) \
 	$(sentinel_frame_h) $(inferior_h) $(frame_unwind_h)
 ser-e7kpc.o: ser-e7kpc.c $(defs_h) $(serial_h) $(gdb_string_h)

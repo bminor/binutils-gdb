@@ -301,6 +301,9 @@ the native maintainer when resolving ABI issues.
 
 	s390		--target=s390-linux-gnu ,-Werror
 
+	score	--target=score-elf
+			Qinwei		qinwei@sunnorth.com.cn
+
 	sh		--target=sh-elf ,-Werror
 			--target=sh64-elf ,-Werror
 
@@ -525,6 +528,7 @@ Hans-Peter Nilsson				hp@bitrange.com
 David O'Brien					obrien@freebsd.org
 Alexandre Oliva					aoliva@redhat.com
 Vladimir Prus                                   vladimir@codesourcery.com
+Qinwei							qinwei@sunnorth.com.cn
 Ramana Radhakrishnan 				ramana.radhakrishnan@codito.com
 Frederic Riss					frederic.riss@st.com
 Tom Rix						trix@redhat.com
