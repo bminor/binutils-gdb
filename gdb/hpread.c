@@ -4871,10 +4871,9 @@ hpread_type_lookup (dnttpointer hp_type, struct objfile *objfile)
 	struct type *ptrmemtype;
 	struct type *class_type;
 	struct type *memtype;
-	memtype = hpread_type_lookup (dn_bufp->dptrmem.memtype,
-				      objfile),
-	  class_type = hpread_type_lookup (dn_bufp->dptrmem.pointsto,
-					   objfile),
+
+	memtype = hpread_type_lookup (dn_bufp->dptrmem.memtype, objfile);
+	class_type = hpread_type_lookup (dn_bufp->dptrmem.pointsto, objfile);
 	return lookup_memberptr_type (memtype, class_type);
       }
       break;

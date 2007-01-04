@@ -1,3 +1,7 @@
+2007-01-04  Joel Brobecker  <brobecker@adacore.com>
+
+	* hpread.c (hpread_type_lookup): Fix compilation failure.
+
 2007-01-04  Qinwei  <qinwei@sunnorth.com.cn>
 
 	* NEWS: New port to S+core.
