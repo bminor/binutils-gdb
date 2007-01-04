@@ -103,8 +103,8 @@ struct varobj
   struct type *type;
 
   /* The value of this expression or subexpression.  This may be NULL. 
-     Invariant: if type_changeable (this) is non-zero, the value is either
-     NULL, or not lazy.  */
+     Invariant: if varobj_value_is_changeable_p (this) is non-zero, 
+     the value is either NULL, or not lazy.  */
   struct value *value;
 
   /* Did an error occur evaluating the expression or getting its value? */
@@ -234,7 +234,9 @@ static int variable_editable (struct varobj *var);
 
 static char *my_value_of_variable (struct varobj *var);
 
-static int type_changeable (struct varobj *var);
+static int varobj_value_is_changeable_p (struct varobj *var);
+
+static int is_root_p (struct varobj *var);
 
 /* C implementation */
 
@@ -404,6 +406,11 @@ static struct vlist **varobj_table;
 
 
 /* API Implementation */
+static int
+is_root_p (struct varobj *var)
+{
+  return (var->root->rootvar == var);
+}
 
 /* Creates a varobj (not its children) */
 
@@ -824,7 +831,7 @@ varobj_set_value (struct varobj *var, char *expression)
 	}
 
       /* All types that are editable must also be changeable.  */
-      gdb_assert (type_changeable (var));
+      gdb_assert (varobj_value_is_changeable_p (var));
 
       /* The value of a changeable variable object must not be lazy.  */
       gdb_assert (!value_lazy (var->value));
@@ -912,7 +919,7 @@ install_new_value (struct varobj *var, struct value *value, int initial)
      be fetched or not.  C++ fake children (public/protected/private) don't have
      a type. */
   gdb_assert (var->type || CPLUS_FAKE_CHILD (var));
-  changeable = type_changeable (var);
+  changeable = varobj_value_is_changeable_p (var);
   need_to_fetch = changeable;
 
   /* We are not interested in the address of references, and given
@@ -1037,7 +1044,7 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
     return -1;
 
   /*  Only root variables can be updated... */
-  if ((*varp)->root->rootvar != *varp)
+  if (!is_root_p (*varp))
     /* Not a root var */
     return -1;
 
@@ -1259,7 +1266,7 @@ install_variable (struct varobj *var)
   *(varobj_table + index) = newvl;
 
   /* If root, add varobj to root list */
-  if (var->root->rootvar == var)
+  if (is_root_p (var))
     {
       /* Add to list of root variables */
       if (rootlist == NULL)
@@ -1318,7 +1325,7 @@ uninstall_variable (struct varobj *var)
   xfree (cv);
 
   /* If root, remove varobj from root list */
-  if (var->root->rootvar == var)
+  if (is_root_p (var))
     {
       /* Remove from list of root variables */
       if (rootlist == var->root)
@@ -1495,7 +1502,7 @@ static void
 free_variable (struct varobj *var)
 {
   /* Free the expression if this is a root variable. */
-  if (var->root->rootvar == var)
+  if (is_root_p (var))
     {
       free_current_contents (&var->root->exp);
       xfree (var->root);
@@ -1713,7 +1720,7 @@ value_of_root (struct varobj **var_handle, int *type_changed)
   /* This should really be an exception, since this should
      only get called with a root variable. */
 
-  if (var->root->rootvar != var)
+  if (!is_root_p (var))
     return NULL;
 
   if (var->root->use_selected_frame)
@@ -1795,7 +1802,7 @@ my_value_of_variable (struct varobj *var)
    Return value of 0 means that gdb need not call value_fetch_lazy
    for the value of this variable object.  */
 static int
-type_changeable (struct varobj *var)
+varobj_value_is_changeable_p (struct varobj *var)
 {
   int r;
   struct type *type;
@@ -1944,7 +1951,7 @@ c_value_of_root (struct varobj **var_handle)
   int within_scope;
 
   /*  Only root variables can be updated... */
-  if (var->root->rootvar != var)
+  if (!is_root_p (var))
     /* Not a root var */
     return NULL;
 
@@ -2158,7 +2165,7 @@ c_value_of_variable (struct varobj *var)
 	    struct cleanup *old_chain = make_cleanup_ui_file_delete (stb);
 	    char *thevalue;
 
-	    gdb_assert (type_changeable (var));
+	    gdb_assert (varobj_value_is_changeable_p (var));
 	    gdb_assert (!value_lazy (var->value));
 	    common_val_print (var->value, stb,
 			      format_code[(int) var->format], 1, 0, 0);

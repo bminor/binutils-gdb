@@ -1,5 +1,13 @@
 2007-01-04  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Port from Apple's version.
+	gdb/
+	* varobj.c (type_changeable): Rename to...
+	(varobj_value_is_changeable_p): ...this. Adjust all callers.
+	(is_root_p): New function. Use it everywhere.
+
+2007-01-04  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Simplify usage of mi_continue_to.
 	* lib/mi-support.exp (mi_runto_helper): Renamed
 	from mi_runto, added new parameter 'run_or_continue'.
