@@ -79,7 +79,7 @@ o	Submitting Patches
 	or as uuencoded gzipped text.
 
 	When you have all these pieces, bundle them up in a mail
-	message and send it to gdb-patches@sources.redhat.com. All
+	message and send it to gdb-patches@sourceware.org. All
 	patches and related discussion should be sent to the
 	gdb-patches mailinglist. For further information on the GDB
 	CVS repository, see the Anonymous read-only CVS access and

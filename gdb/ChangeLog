@@ -1,5 +1,9 @@
 2007-01-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* CONTRIBUTE: Use sourceware.org.
+
+2007-01-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* buildsym.c (start_subfile): Handle producer.
 	(record_producer): New function.
 	* buildsym.h (struct subfile): Include producer.
