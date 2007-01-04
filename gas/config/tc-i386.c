@@ -2280,16 +2280,13 @@ swap_operands (void)
   union i386_op temp_op;
   unsigned int temp_type;
   enum bfd_reloc_code_real temp_reloc;
-  int xchg1 = 0;
-  int xchg2 = 0;
+  int xchg1, xchg2;
 
-  if (i.operands == 4)
-    /* There will be two exchanges in a 4 operand instruction.
-       First exchange is the done inside this block.(1st and 4rth operand) 
-       The next exchange is done outside this block.(2nd and 3rd operand) */
+  switch (i.operands)
     {
-      xchg1 = 0;
-      xchg2 = 3;
+    case 4:
+      xchg1 = 1;
+      xchg2 = i.operands - 2;
       temp_type = i.types[xchg2];
       i.types[xchg2] = i.types[xchg1];
       i.types[xchg1] = temp_type;
@@ -2299,29 +2296,23 @@ swap_operands (void)
       temp_reloc = i.reloc[xchg2];
       i.reloc[xchg2] = i.reloc[xchg1];
       i.reloc[xchg1] = temp_reloc;
-      xchg1 = 1;
-      xchg2 = 2;
-    }
-
-  if (i.operands == 2)
-    {
+    case 3:
+    case 2:
       xchg1 = 0;
-      xchg2 = 1;
+      xchg2 = i.operands - 1;
+      temp_type = i.types[xchg2];
+      i.types[xchg2] = i.types[xchg1];
+      i.types[xchg1] = temp_type;
+      temp_op = i.op[xchg2];
+      i.op[xchg2] = i.op[xchg1];
+      i.op[xchg1] = temp_op;
+      temp_reloc = i.reloc[xchg2];
+      i.reloc[xchg2] = i.reloc[xchg1];
+      i.reloc[xchg1] = temp_reloc;
+      break;
+    default:
+      abort ();
     }
-  else if (i.operands == 3)
-    {
-      xchg1 = 0;
-      xchg2 = 2;
-    }
-  temp_type = i.types[xchg2];
-  i.types[xchg2] = i.types[xchg1];
-  i.types[xchg1] = temp_type;
-  temp_op = i.op[xchg2];
-  i.op[xchg2] = i.op[xchg1];
-  i.op[xchg1] = temp_op;
-  temp_reloc = i.reloc[xchg2];
-  i.reloc[xchg2] = i.reloc[xchg1];
-  i.reloc[xchg1] = temp_reloc;
 
   if (i.mem_operands == 2)
     {
