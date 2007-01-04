@@ -1,3 +1,7 @@
+2007-01-04  Julian Brown  <julian@codesourcery.com>
+
+	* gas/arm/neon-omit.d: Fix expected encodings for vshl, vqshl.
+
 2007-01-04  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/neon-cov.d: Adjust expected output.
