@@ -1441,7 +1441,8 @@ get_type (struct varobj *var)
   return type;
 }
 
-/* This returns the type of the variable, dereferencing pointers, too. */
+/* This returns the type of the variable, dereferencing references, pointers
+   and references to pointers, too. */
 static struct type *
 get_type_deref (struct varobj *var)
 {
@@ -1449,9 +1450,13 @@ get_type_deref (struct varobj *var)
 
   type = get_type (var);
 
-  if (type != NULL && (TYPE_CODE (type) == TYPE_CODE_PTR
-		       || TYPE_CODE (type) == TYPE_CODE_REF))
-    type = get_target_type (type);
+  if (type)
+    {
+      if (TYPE_CODE (type) == TYPE_CODE_REF)
+	type = get_target_type (type);
+      if (TYPE_CODE (type) == TYPE_CODE_PTR)
+	type = get_target_type (type);
+    }
 
   return type;
 }
@@ -1726,9 +1731,9 @@ c_number_of_children (struct varobj *var)
       break;
 
     case TYPE_CODE_PTR:
-      /* This is where things get compilcated. All pointers have one child.
+      /* This is where things get complicated. All pointers have one child.
          Except, of course, for struct and union ptr, which we automagically
-         dereference for the user and function ptrs, which have no children.
+         dereference for the user, and function ptrs which have no children.
          We also don't dereference void* as we don't know what to show.
          We can show char* so we allow it to be dereferenced.  If you decide
          to test for it, please mind that a little magic is necessary to
