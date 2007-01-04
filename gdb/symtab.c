@@ -795,7 +795,7 @@ find_pc_sect_psymtab (CORE_ADDR pc, asection *section)
       {
 	struct partial_symtab *tpst;
 	struct partial_symtab *best_pst = pst;
-	struct partial_symbol *best_psym = NULL;
+	CORE_ADDR best_addr = pst->textlow;
 
 	/* An objfile that has its functions reordered might have
 	   many partial symbol tables containing the PC, but
@@ -820,36 +820,42 @@ find_pc_sect_psymtab (CORE_ADDR pc, asection *section)
 	    if (pc >= tpst->textlow && pc < tpst->texthigh)
 	      {
 		struct partial_symbol *p;
+		CORE_ADDR this_addr;
 
+		/* NOTE: This assumes that every psymbol has a
+		   corresponding msymbol, which is not necessarily
+		   true; the debug info might be much richer than the
+		   object's symbol table.  */
 		p = find_pc_sect_psymbol (tpst, pc, section);
 		if (p != NULL
 		    && SYMBOL_VALUE_ADDRESS (p)
 		    == SYMBOL_VALUE_ADDRESS (msymbol))
 		  return (tpst);
-		if (p != NULL)
-		  {
-		    /* We found a symbol in this partial symtab which
-		       matches (or is closest to) PC, check whether it
-		       is closer than our current BEST_PSYM.  Since
-		       this symbol address is necessarily lower or
-		       equal to PC, the symbol closer to PC is the
-		       symbol which address is the highest.  */
-		    /* This way we return the psymtab which contains
-		       such best match symbol. This can help in cases
-		       where the symbol information/debuginfo is not
-		       complete, like for instance on IRIX6 with gcc,
-		       where no debug info is emitted for
-		       statics. (See also the nodebug.exp
-		       testcase.)  */
-		    if (best_psym == NULL
-			|| SYMBOL_VALUE_ADDRESS (p)
-			> SYMBOL_VALUE_ADDRESS (best_psym))
-		      {
-			best_psym = p;
-			best_pst = tpst;
-		      }
-		  }
 
+		/* Also accept the textlow value of a psymtab as a
+		   "symbol", to provide some support for partial
+		   symbol tables with line information but no debug
+		   symbols (e.g. those produced by an assembler).  */
+		if (p != NULL)
+		  this_addr = SYMBOL_VALUE_ADDRESS (p);
+		else
+		  this_addr = tpst->textlow;
+
+		/* Check whether it is closer than our current
+		   BEST_ADDR.  Since this symbol address is
+		   necessarily lower or equal to PC, the symbol closer
+		   to PC is the symbol which address is the highest.
+		   This way we return the psymtab which contains such
+		   best match symbol. This can help in cases where the
+		   symbol information/debuginfo is not complete, like
+		   for instance on IRIX6 with gcc, where no debug info
+		   is emitted for statics. (See also the nodebug.exp
+		   testcase.) */
+		if (this_addr > best_addr)
+		  {
+		    best_addr = this_addr;
+		    best_pst = tpst;
+		  }
 	      }
 	  }
 	return (best_pst);

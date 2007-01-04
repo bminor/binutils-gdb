@@ -1,5 +1,10 @@
 2007-01-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* symtab.c (find_pc_sect_psymtab): Add comments.  Handle psymtabs
+	with no symbols.
+
+2007-01-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* memory-map.c (struct_memory_map_parsing_data): Remove most
 	members.  Make property_name an array.
 	(free_memory_map_parsing_data, memory_map_start_element)
