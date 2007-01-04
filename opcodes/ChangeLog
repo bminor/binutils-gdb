@@ -1,3 +1,8 @@
+2007-01-04  Julian Brown  <julian@codesourcery.com>
+
+	* arm-dis.c (neon_opcode): Fix disassembly for vshl, vqshl, vrshl,
+	vqrshl instructions.
+
 2006-12-27  Kazu Hirata  <kazu@codesourcery.com>
 
 	* m68k-dis.c (print_insn_arg): Add support for cac and mbb.
