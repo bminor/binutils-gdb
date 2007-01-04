@@ -685,6 +685,10 @@ varobj_list_children (struct varobj *var, struct varobj ***childlist)
   if (var->num_children == -1)
     var->num_children = number_of_children (var);
 
+  /* If that failed, give up.  */
+  if (var->num_children == -1)
+    return -1;
+
   /* If we're called when the list of children is not yet initialized,
      allocate enough elements in it.  */
   while (VEC_length (varobj_p, var->children) < var->num_children)
@@ -1711,7 +1715,9 @@ c_number_of_children (struct varobj *var)
 	  && TYPE_ARRAY_UPPER_BOUND_TYPE (type) != BOUND_CANNOT_BE_DETERMINED)
 	children = TYPE_LENGTH (type) / TYPE_LENGTH (target);
       else
-	children = -1;
+	/* If we don't know how many elements there are, don't display
+	   any.  */
+	children = 0;
       break;
 
     case TYPE_CODE_STRUCT:

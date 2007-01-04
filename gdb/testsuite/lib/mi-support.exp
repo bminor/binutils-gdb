@@ -880,8 +880,17 @@ proc mi_runto_helper {func run_or_continue} {
   if {$run_or_continue == "run"} {
       mi_run_cmd
   } else {
-    send_gdb "000-exec-continue\n"
+      send_gdb "000-exec-continue\n"
+      gdb_expect {
+	  -re "000\\^running\r\n${mi_gdb_prompt}" {
+	  }
+	  timeout {
+	    fail "$test"
+	    return -1
+	  }
+      }
   }
+
   gdb_expect {
     -re ".*000\\*stopped,thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\"$func\",args=\(\\\[.*\\\]\|\{.*\}\),file=\".*\",fullname=\"${fullname_syntax}.*\",line=\"\[0-9\]*\"\}\r\n$mi_gdb_prompt$" {
       pass "$test"

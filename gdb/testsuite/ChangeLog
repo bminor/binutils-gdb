@@ -1,3 +1,8 @@
+2007-01-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* lib/mi-support.exp (mi_runto_helper): Expect two prompts
+	when continuing.
+
 2007-01-04  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* gdb.base/annota3.exp ($binfile): Append $EXEEXT.

@@ -1,3 +1,9 @@
+2007-01-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* varobj.c (varobj_list_children): Stop if the number of children is
+	unknown.
+	(c_number_of_children):
+
 2007-01-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* alpha-tdep.c (alpha_register_name): Use ARRAY_SIZE.
