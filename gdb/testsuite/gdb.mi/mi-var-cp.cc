@@ -70,10 +70,34 @@ void base_in_reference_test_main ()
   base_in_reference_test (s);
 }
 
+int reference_to_pointer ()
+{
+  S s, *ptr_s, *& rptr_s = ptr_s;
+  s.i = 67;
+  s.j = 89;
+  ptr_s = &s;
+  /*: BEGIN: reference_to_pointer :*/
+  return 99;
+  /*: 
+    mi_create_varobj RPTR rptr_s "create varobj for rptr_s"
+
+    mi_list_varobj_children RPTR {{RPTR.public public 2}}	\
+    "list public child of RPTR"
+
+    mi_list_varobj_children  RPTR.public	\
+    {{RPTR.public.i i 0 int}
+    {RPTR.public.j j 0 int}} "list children of reference to pointer"
+
+    mi_check_varobj_value RPTR.public.i 67 "check i member"
+    mi_check_varobj_value RPTR.public.j 89 "check j member"
+  :*/
+  /*: END: reference_to_pointer :*/
+}
 
 int main ()
 {
   reference_update_tests ();
   base_in_reference_test_main ();
+  reference_to_pointer ();
   return 0;
 }
