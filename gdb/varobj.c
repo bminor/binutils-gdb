@@ -1760,50 +1760,142 @@ c_name_of_variable (struct varobj *parent)
   return savestring (parent->name, strlen (parent->name));
 }
 
-static char *
-c_name_of_child (struct varobj *parent, int index)
+/* Return the value of element TYPE_INDEX of a structure
+   value VALUE.  VALUE's type should be a structure,
+   or union, or a typedef to struct/union.  
+
+   Returns NULL if getting the value fails.  Never throws.  */
+static struct value *
+value_struct_element_index (struct value *value, int type_index)
 {
-  struct type *type;
-  struct type *target;
-  char *name;
-  char *string;
+  struct value *result = NULL;
+  volatile struct gdb_exception e;
 
-  type = get_type (parent);
-  target = get_target_type (type);
+  struct type *type = value_type (value);
+  type = check_typedef (type);
 
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
+	      || TYPE_CODE (type) == TYPE_CODE_UNION);
+
+  TRY_CATCH (e, RETURN_MASK_ERROR)
+    {
+      if (TYPE_FIELD_STATIC (type, type_index))
+	result = value_static_field (type, type_index);
+      else
+	result = value_primitive_field (value, 0, type_index, type);
+    }
+  if (e.reason < 0)
+    {
+      return NULL;
+    }
+  else
+    {
+      return result;
+    }
+}
+
+/* Obtain the information about child INDEX of the variable
+   object PARENT.  
+   If CNAME is not null, sets *CNAME to the name of the child relative
+   to the parent.
+   If CVALUE is not null, sets *CVALUE to the value of the child.
+   If CTYPE is not null, sets *CTYPE to the type of the child.
+
+   If any of CNAME, CVALUE, or CTYPE is not null, but the corresponding
+   information cannot be determined, set *CNAME, *CVALUE, or *CTYPE
+   to NULL.  */
+static void 
+c_describe_child (struct varobj *parent, int index,
+		  char **cname, struct value **cvalue, struct type **ctype)
+{
+  struct value *value = parent->value;
+  struct type *type = get_type (parent);
+
+  if (cname)
+    *cname = NULL;
+  if (cvalue)
+    *cvalue = NULL;
+  if (ctype)
+    *ctype = NULL;
+
+  /* Pointers to structures are treated just like
+     structures when accessing children.  */
+  if (TYPE_CODE (type) == TYPE_CODE_PTR)
+    {
+      struct type *target_type = get_target_type (type);
+      if (TYPE_CODE (target_type) == TYPE_CODE_STRUCT
+	  || TYPE_CODE (target_type) == TYPE_CODE_UNION)
+	{
+	  if (value)
+	    gdb_value_ind (value, &value);	  
+	  type = target_type;
+	}
+    }
+      
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:
-      name = xstrprintf ("%d", index
-			 + TYPE_LOW_BOUND (TYPE_INDEX_TYPE (type)));
+      if (cname)
+	*cname = xstrprintf ("%d", index
+			     + TYPE_LOW_BOUND (TYPE_INDEX_TYPE (type)));
+
+      if (cvalue && value)
+	{
+	  int real_index = index + TYPE_LOW_BOUND (TYPE_INDEX_TYPE (type));
+	  struct value *indval = 
+	    value_from_longest (builtin_type_int, (LONGEST) real_index);
+	  gdb_value_subscript (value, indval, cvalue);
+	}
+
+      if (ctype)
+	*ctype = get_target_type (type);
+
       break;
 
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
-      string = TYPE_FIELD_NAME (type, index);
-      name = savestring (string, strlen (string));
+      if (cname)
+	{
+	  char *string = TYPE_FIELD_NAME (type, index);
+	  *cname = savestring (string, strlen (string));
+	}
+
+      if (cvalue && value)
+	{
+	  /* For C, varobj index is the same as type index.  */
+	  *cvalue = value_struct_element_index (value, index);
+	}
+
+      if (ctype)
+	*ctype = TYPE_FIELD_TYPE (type, index);
+
       break;
 
     case TYPE_CODE_PTR:
-      switch (TYPE_CODE (target))
-	{
-	case TYPE_CODE_STRUCT:
-	case TYPE_CODE_UNION:
-	  string = TYPE_FIELD_NAME (target, index);
-	  name = savestring (string, strlen (string));
-	  break;
+      if (cname)
+	*cname = xstrprintf ("*%s", parent->name);
 
-	default:
-	  name = xstrprintf ("*%s", parent->name);
-	  break;
-	}
+      if (cvalue && value)
+	gdb_value_ind (value, cvalue);
+
+      if (ctype)
+	*ctype = get_target_type (type);
+      
       break;
 
     default:
       /* This should not happen */
-      name = xstrdup ("???");
+      if (cname)
+	*cname = xstrdup ("???");
+      /* Don't set value and type, we don't know then. */
     }
+}
 
+static char *
+c_name_of_child (struct varobj *parent, int index)
+{
+  char *name;
+  c_describe_child (parent, index, &name, NULL, NULL);
   return name;
 }
 
@@ -1862,109 +1954,19 @@ c_value_of_root (struct varobj **var_handle)
 static struct value *
 c_value_of_child (struct varobj *parent, int index)
 {
-  struct value *value;
-  struct value *temp;
-  struct value *indval;
-  struct type *type, *target;
-  char *name;
-  int real_index;
-
-  type = get_type (parent);
-  target = get_target_type (type);
-  name = name_of_child (parent, index);
-  temp = parent->value;
-  value = NULL;
-
-  if (temp != NULL)
-    {
-      switch (TYPE_CODE (type))
-	{
-	case TYPE_CODE_ARRAY:
-	  real_index = index + TYPE_LOW_BOUND (TYPE_INDEX_TYPE (type));
-#if 0
-	  /* This breaks if the array lives in a (vector) register. */
-	  value = value_slice (temp, real_index, 1);
-	  temp = value_coerce_array (value);
-	  gdb_value_ind (temp, &value);
-#else
-	  indval = value_from_longest (builtin_type_int, (LONGEST) real_index);
-	  gdb_value_subscript (temp, indval, &value);
-#endif
-	  break;
-
-	case TYPE_CODE_STRUCT:
-	case TYPE_CODE_UNION:
-	  gdb_value_struct_elt (NULL, &value, &temp, NULL, name, NULL,
-				"vstructure");
-	  break;
-
-	case TYPE_CODE_PTR:
-	  switch (TYPE_CODE (target))
-	    {
-	    case TYPE_CODE_STRUCT:
-	    case TYPE_CODE_UNION:
-	      gdb_value_struct_elt (NULL, &value, &temp, NULL, name, NULL,
-				    "vstructure");
-	      break;
-
-	    default:
-	      gdb_value_ind (temp, &value);
-	      break;
-	    }
-	  break;
-
-	default:
-	  break;
-	}
-    }
-
+  struct value *value = NULL;
+  c_describe_child (parent, index, NULL, &value, NULL);
   if (value != NULL)
     release_value (value);
 
-  xfree (name);
   return value;
 }
 
 static struct type *
 c_type_of_child (struct varobj *parent, int index)
 {
-  struct type *type;
-  char *name = name_of_child (parent, index);
-
-  switch (TYPE_CODE (parent->type))
-    {
-    case TYPE_CODE_ARRAY:
-      type = get_target_type (parent->type);
-      break;
-
-    case TYPE_CODE_STRUCT:
-    case TYPE_CODE_UNION:
-      type = lookup_struct_elt_type (parent->type, name, 0);
-      break;
-
-    case TYPE_CODE_PTR:
-      switch (TYPE_CODE (get_target_type (parent->type)))
-	{
-	case TYPE_CODE_STRUCT:
-	case TYPE_CODE_UNION:
-	  type = lookup_struct_elt_type (parent->type, name, 0);
-	  break;
-
-	default:
-	  type = get_target_type (parent->type);
-	  break;
-	}
-      break;
-
-    default:
-      /* This should not happen as only the above types have children */
-      warning (_("Child of parent whose type does not allow children"));
-      /* FIXME: Can we still go on? */
-      type = NULL;
-      break;
-    }
-
-  xfree (name);
+  struct type *type = NULL;
+  c_describe_child (parent, index, NULL, NULL, &type);
   return type;
 }
 

@@ -1,5 +1,14 @@
 2007-01-04  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Simplify access to variours properties of child
+	variable objects in C.
+	* varobj.c (value_struct_element_index): New function.
+	(c_describe_child): New function.
+	(c_name_of_child, c_value_of_child)
+	(c_type_of_child): Rewrite to use c_describe_child.
+
+2007-01-04  Vladimir Prus  <vladimir@codesourcery.com>
+
 	gdb/
 	* varobj.c: Include "vec.h". 
 	(varobj_p): New typedef, declare vector of those.
