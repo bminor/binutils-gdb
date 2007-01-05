@@ -132,6 +132,9 @@ struct varobj
 
   /* Was this variable updated via a varobj_set_value operation */
   int updated;
+
+  /* Last print value.  */
+  char *print_value;
 };
 
 struct cpstack
@@ -205,6 +208,9 @@ static struct value *value_of_child (struct varobj *parent, int index);
 static int variable_editable (struct varobj *var);
 
 static char *my_value_of_variable (struct varobj *var);
+
+static char *value_get_print_value (struct value *value,
+				    enum varobj_display_formats format);
 
 static int varobj_value_is_changeable_p (struct varobj *var);
 
@@ -953,7 +959,9 @@ install_new_value (struct varobj *var, struct value *value, int initial)
   /* If the type is changeable, compare the old and the new values.
      If this is the initial assignment, we don't have any old value
      to compare with.  */
-  if (!initial && changeable)
+  if (initial)
+    var->print_value = value_get_print_value (value, var->format);
+  else if (changeable)
     {
       /* If the value of the varobj was changed by -var-set-value, then the 
 	 value in the varobj and in the target is the same.  However, that value
@@ -974,26 +982,33 @@ install_new_value (struct varobj *var, struct value *value, int initial)
 	    changed = 1;
 	  else
 	    {
+	      char *print_value;
 	      gdb_assert (!value_lazy (var->value));
 	      gdb_assert (!value_lazy (value));
-	      
-	      if (!value_contents_equal (var->value, value))
-		changed = 1;
+	      print_value = value_get_print_value (value, var->format);
+
+	      if (strcmp (var->print_value, print_value) != 0)
+		{
+		  xfree (var->print_value);
+		  var->print_value = print_value;
+		  changed = 1;
+		}
+	      else
+		xfree (print_value);
 	    }
 	}
     }
-    
+
   /* We must always keep the new value, since children depend on it.  */
   if (var->value != NULL)
     value_free (var->value);
   var->value = value;
   var->updated = 0;
-  
+
   gdb_assert (!var->value || value_type (var->value));
 
   return changed;
 }
-  
 
 /* Update the values for a variable and its children.  This is a
    two-pronged attack.  First, re-parse the value for the root's
@@ -1376,6 +1391,7 @@ new_variable (void)
   var->format = 0;
   var->root = NULL;
   var->updated = 0;
+  var->print_value = NULL;
 
   return var;
 }
@@ -1409,6 +1425,7 @@ free_variable (struct varobj *var)
 
   xfree (var->name);
   xfree (var->obj_name);
+  xfree (var->print_value);
   xfree (var);
 }
 
@@ -1664,6 +1681,20 @@ static char *
 my_value_of_variable (struct varobj *var)
 {
   return (*var->root->lang->value_of_variable) (var);
+}
+
+static char *
+value_get_print_value (struct value *value, enum varobj_display_formats format)
+{
+  long dummy;
+  struct ui_file *stb = mem_fileopen ();
+  struct cleanup *old_chain = make_cleanup_ui_file_delete (stb);
+  char *thevalue;
+	    
+  common_val_print (value, stb, format_code[(int) format], 1, 0, 0);
+  thevalue = ui_file_xstrdup (stb, &dummy);
+  do_cleanups (old_chain);
+  return thevalue;
 }
 
 /* Return non-zero if changes in value of VAR
@@ -2038,19 +2069,10 @@ c_value_of_variable (struct varobj *var)
 	  }
 	else
 	  {
-	    long dummy;
-	    struct ui_file *stb = mem_fileopen ();
-	    struct cleanup *old_chain = make_cleanup_ui_file_delete (stb);
-	    char *thevalue;
-
 	    gdb_assert (varobj_value_is_changeable_p (var));
 	    gdb_assert (!value_lazy (var->value));
-	    common_val_print (var->value, stb,
-			      format_code[(int) var->format], 1, 0, 0);
-	    thevalue = ui_file_xstrdup (stb, &dummy);
-	    do_cleanups (old_chain);
-	return thevalue;
-      }
+	    return value_get_print_value (var->value, var->format);
+	  }
       }
     }
 }
