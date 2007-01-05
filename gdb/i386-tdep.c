@@ -497,6 +497,10 @@ static CORE_ADDR
 i386_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
 			  struct i386_frame_cache *cache)
 {
+  /* The register used by the compiler to perform the stack re-alignment 
+     is, in order of preference, either %ecx, %edx, or %eax.  GCC should
+     never use %ebx as it always treats it as callee-saved, whereas
+     the compiler can only use caller-saved registers.  */
   static const gdb_byte insns_ecx[10] = { 
     0x8d, 0x4c, 0x24, 0x04,	/* leal  4(%esp), %ecx */
     0x83, 0xe4, 0xf0,		/* andl  $-16, %esp */

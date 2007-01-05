@@ -1,5 +1,9 @@
 2007-01-05  Joel Brobecker  <brobecker@adacore.com>
 
+	* i386-tdep.c (i386_analyze_stack_align): Add comment.
+
+2007-01-05  Joel Brobecker  <brobecker@adacore.com>
+
 	* NEWS: Add entries for new catch commands.
 
 2006-02-05  Joel Brobecker  <brobecker@adacore.com>
