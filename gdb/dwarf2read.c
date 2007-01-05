@@ -1,7 +1,7 @@
 /* DWARF 2 debugging format support for GDB.
 
    Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-                 2002, 2003, 2004, 2005, 2006
+                 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    Adapted by Gary Funck (gary@intrepid.com), Intrepid Technology,
@@ -466,6 +466,9 @@ struct partial_die_info
     /* Flag set if the SCOPE field of this structure has been
        computed.  */
     unsigned int scope_set : 1;
+
+    /* Flag set if the DIE has a byte_size attribute.  */
+    unsigned int has_byte_size : 1;
 
     /* The name of this DIE.  Normally the value of DW_AT_name, but
        sometimes DW_TAG_MIPS_linkage_name or a string computed in some
@@ -1979,12 +1982,16 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
     case DW_TAG_structure_type:
     case DW_TAG_union_type:
     case DW_TAG_enumeration_type:
-      /* Skip aggregate types without children, these are external
-         references.  */
+      /* Skip external references.  The DWARF standard says in the section
+         about "Structure, Union, and Class Type Entries": "An incomplete
+         structure, union or class type is represented by a structure,
+         union or class entry that does not have a byte size attribute
+         and that has a DW_AT_declaration attribute."  */
+      if (!pdi->has_byte_size && pdi->is_declaration)
+        return;
+
       /* NOTE: carlton/2003-10-07: See comment in new_symbol about
 	 static vs. global.  */
-      if (pdi->has_children == 0)
-	return;
       add_psymbol_to_list (actual_name, strlen (actual_name),
 			   STRUCT_DOMAIN, LOC_TYPEDEF,
 			   (cu->language == language_cplus
@@ -4010,7 +4017,11 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
       child_die = sibling_die (child_die);
     }
 
-  if (die->child != NULL && ! die_is_declaration (die, cu))
+  /* Do not consider external references.  According to the DWARF standard,
+     these DIEs are identified by the fact that they have no byte_size
+     attribute, and a declaration attribute.  */
+  if (dwarf2_attr (die, DW_AT_byte_size, cu) != NULL
+      || !die_is_declaration (die, cu))
     new_symbol (die, die->type, cu);
 
   processing_current_prefix = previous_prefix;
@@ -5574,6 +5585,9 @@ read_partial_die (struct partial_die_info *part_die,
         case DW_AT_stmt_list:
           part_die->has_stmt_list = 1;
           part_die->line_offset = DW_UNSND (&attr);
+          break;
+        case DW_AT_byte_size:
+          part_die->has_byte_size = 1;
           break;
 	default:
 	  break;

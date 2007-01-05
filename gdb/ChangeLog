@@ -1,4 +1,11 @@
-2007-01-04  Daniel Jacobowitz  <dan@codesourcery.com>
+2006-02-05  Joel Brobecker  <brobecker@adacore.com>
+
+        * dwarf2read.c (partial_die_info): Add field has_byte_size.
+        (add_partial_symbol): Correct identification of external references.
+        (process_structure_scope): Likewise.
+        (read_partial_die): Handle DW_AT_byte_size attribute.
+
+2007-01-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* xml-support.c (gdb_xml_end_element): Remove wrong backslashes.
 
