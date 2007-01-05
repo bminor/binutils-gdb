@@ -1970,7 +1970,8 @@ c_value_of_root (struct varobj **var_handle)
 	  if (pc <  BLOCK_START (var->root->valid_block) ||
 	      pc >= BLOCK_END (var->root->valid_block))
 	    within_scope = 0;
-	  select_frame (fi);
+	  else
+	    select_frame (fi);
 	}	  
     }
 
