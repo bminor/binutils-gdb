@@ -1,3 +1,14 @@
+2007-01-06  Nick Roberts  <nickrob@snap.net.nz>
+
+	* varobj.c (struct varobj): New member print_value.
+	(install_new_value): Compare last printed value with current one
+	instead of contents.
+	(new_variable): Initialize var->print_value to NULL.
+	(free_variable): Free var->print_value.
+	(value_get_print_value): New function derived from
+	c_value_of_variable.
+	(c_value_of_variable): Use value_get_print_value.
+
 2007-01-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* i386-tdep.c (i386_analyze_stack_align): Add comment.
