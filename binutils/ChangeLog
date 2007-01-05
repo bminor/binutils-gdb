@@ -1,3 +1,8 @@
+2007-01-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* readelf.c (dump_section): Don't print 32-bit values, which
+	were done incorrectly for little-endian.  Instead print bytes.
+
 2006-12-25  Kazu Hirata  <kazu@codesourcery.com>
 
 	* readelf.c (get_machine_flags): Handle EF_M68K_CPU32_FIDO_A.

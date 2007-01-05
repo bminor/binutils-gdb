@@ -7671,34 +7671,15 @@ dump_section (Elf_Internal_Shdr *section, FILE *file)
 
       printf ("  0x%8.8lx ", (unsigned long) addr);
 
-      switch (elf_header.e_ident[EI_DATA])
+      for (j = 0; j < 16; j++)
 	{
-	default:
-	case ELFDATA2LSB:
-	  for (j = 15; j >= 0; j --)
-	    {
-	      if (j < lbytes)
-		printf ("%2.2x", data[j]);
-	      else
-		printf ("  ");
+	  if (j < lbytes)
+	    printf ("%2.2x", data[j]);
+	  else
+	    printf ("  ");
 
-	      if (!(j & 0x3))
-		printf (" ");
-	    }
-	  break;
-
-	case ELFDATA2MSB:
-	  for (j = 0; j < 16; j++)
-	    {
-	      if (j < lbytes)
-		printf ("%2.2x", data[j]);
-	      else
-		printf ("  ");
-
-	      if ((j & 3) == 3)
-		printf (" ");
-	    }
-	  break;
+	  if ((j & 3) == 3)
+	    printf (" ");
 	}
 
       for (j = 0; j < lbytes; j++)
