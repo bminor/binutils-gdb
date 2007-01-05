@@ -1,3 +1,8 @@
+2007-01-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (set_intel_syntax): Update set_intel_syntax
+	depending on allow_naked_reg.
+
 2007-01-04  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (do_cpsi): Set mmod bit for 2 argument form.

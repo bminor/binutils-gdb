@@ -1105,14 +1105,9 @@ set_intel_syntax (int syntax_flag)
   else
     allow_naked_reg = (ask_naked_reg < 0);
 
-  if (intel_syntax && allow_naked_reg)
-    {
-      identifier_chars['%'] = '%';
-      register_prefix = "";
-    }
-  else
-    identifier_chars['%'] = 0;
+  identifier_chars['%'] = intel_syntax && allow_naked_reg ? '%' : 0;
   identifier_chars['$'] = intel_syntax ? '$' : 0;
+  register_prefix = allow_naked_reg ? "" : "%";
 }
 
 static void
