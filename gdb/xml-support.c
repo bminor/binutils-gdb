@@ -309,7 +309,7 @@ gdb_xml_end_element (void *data, const XML_Char *name)
        element++, seen <<= 1)
     if ((scope->seen & seen) == 0
 	&& (element->flags & GDB_XML_EF_OPTIONAL) == 0)
-      gdb_xml_error (parser, _("Required element \<%s\> is missing"),
+      gdb_xml_error (parser, _("Required element <%s> is missing"),
 		     element->name);
 
   /* Call the element processor. */

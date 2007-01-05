@@ -1,3 +1,7 @@
+2007-01-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* xml-support.c (gdb_xml_end_element): Remove wrong backslashes.
+
 2007-01-05  Nick Roberts  <nickrob@snap.net.nz>
 
 	* varobj.c (get_type_deref): Fix variable objects for references to
