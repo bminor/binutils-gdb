@@ -1,3 +1,8 @@
+2006-02-05  Joel Brobecker  <brobecker@adacore.com>
+
+        * gdb.base/nofield.c: New file.
+        * gdb.base/nofield.exp: New testcase.
+
 2007-01-05  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdb.mi/mi-var-cp.exp: New test for references to pointers.
