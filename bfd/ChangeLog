@@ -1,3 +1,10 @@
+2007-01-05  Jakub Jelinek  <jakub@redhat.com>
+
+	* texhex.c (first_phase): Don't fall through into the default
+	case.
+	(pass_over): Replace abort () calls with return FALSE.  Fix
+	buffer overflow.
+
 2007-01-04  Jie Zhang  <jie.zhang@analog.com>
 
 	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Don't set
