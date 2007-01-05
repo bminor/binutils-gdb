@@ -30,6 +30,13 @@ show breakpoint auto-hw
   "break" command and internal breakpoints used for other commands
   including "next" and "finish".
 
+catch exception
+catch exception unhandled
+  Stop the program execution when Ada exceptions are raised.
+
+catch assert
+  Stop the program execution when an Ada assertion failed.
+
 * New native configurations
 
 OpenBSD/sh			sh*-*openbsd*
