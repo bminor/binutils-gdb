@@ -563,7 +563,13 @@ fold_name (etree_type *tree)
 	  lang_output_section_statement_type *os;
 
 	  os = lang_output_section_find (tree->name.name);
-	  if (os != NULL && os->processed_vma)
+	  if (os == NULL)
+	    {
+	      if (expld.phase == lang_final_phase_enum)
+		einfo (_("%F%S: undefined section `%s' referenced in expression\n"),
+		       tree->name.name);
+	    }
+	  else if (os->processed_vma)
 	    new_rel (0, NULL, os->bfd_section);
 	}
       break;
@@ -574,7 +580,13 @@ fold_name (etree_type *tree)
 	  lang_output_section_statement_type *os;
 
 	  os = lang_output_section_find (tree->name.name);
-	  if (os != NULL && os->processed_lma)
+	  if (os == NULL)
+	    {
+	      if (expld.phase == lang_final_phase_enum)
+		einfo (_("%F%S: undefined section `%s' referenced in expression\n"),
+		       tree->name.name);
+	    }
+	  else if (os->processed_lma)
 	    {
 	      if (os->load_base == NULL)
 		new_abs (os->bfd_section->lma);
@@ -592,7 +604,12 @@ fold_name (etree_type *tree)
 
 	  os = lang_output_section_find (tree->name.name);
 	  if (os == NULL)
-	    new_abs (0);
+	    {
+	      if (expld.phase == lang_final_phase_enum)
+		einfo (_("%F%S: undefined section `%s' referenced in expression\n"),
+		       tree->name.name);
+	      new_abs (0);
+	    }
 	  else if (os->processed_vma)
 	    new_abs (os->bfd_section->size / opb);
 	}
