@@ -231,8 +231,12 @@ ax_const_l (struct agent_expr *x, LONGEST l)
      signed or unsigned; we always reproduce the value exactly, and
      use the shortest representation.  */
   for (op = 0, size = 8; size < 64; size *= 2, op++)
-    if (-((LONGEST) 1 << size) <= l && l < ((LONGEST) 1 << size))
-      break;
+    {
+      LONGEST lim = 1 << (size - 1);
+
+      if (-lim <= l && l <= lim - 1)
+        break;
+    }
 
   /* Emit the right opcode... */
   ax_simple (x, ops[op]);

@@ -1,3 +1,8 @@
+2007-01-07  Jim Blandy  <jimb@codesourcery.com>
+
+	* ax-general.c (ax_const_l): Select proper opcode for the given
+	value.
+
 2007-01-04  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* varobj.c (c_value_of_root): Don't select frame if variable
