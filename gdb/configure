@@ -22714,7 +22714,7 @@ s/XM_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
 ' ${host_makefile_frag}`
 
 targetfile=`sed -n '
-s/DEPRECATED_TM_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
+s/^[ 	]*DEPRECATED_TM_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
 ' ${target_makefile_frag}`
 
 if test "${gdb_native}" = "yes"; then

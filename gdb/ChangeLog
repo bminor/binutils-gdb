@@ -1,3 +1,9 @@
+2007-01-08  Jim Blandy  <jimb@codesourcery.com>
+
+	* configure.ac: Tighten pattern for extracting value of
+	DEPRECATED_TM_FILE from the target makefile fragment.
+	* configure: Regenerated.
+
 2007-01-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-nat.c (struct simple_pid_list): Add status.
