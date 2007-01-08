@@ -1,3 +1,10 @@
+2007-01-08  Nick Roberts  <nickrob@snap.net.nz>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.mi/mi-var-cmd.exp: Expect lpcharacter to update when
+	lcharacter or linteger change.  Correct duplicated test name.
+	* gdb.mi/mi2-var-cmd.exp: Likewise.
+
 2007-01-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.threads/sigthread.c, gdb.threads/sigthread.exp: New.

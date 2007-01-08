@@ -966,9 +966,13 @@ install_new_value (struct varobj *var, struct value *value, int initial)
       /* If the value of the varobj was changed by -var-set-value, then the 
 	 value in the varobj and in the target is the same.  However, that value
 	 is different from the value that the varobj had after the previous
-	 -var-update. So need to the varobj as changed.  */	 
+	 -var-update. So need to the varobj as changed.  */
       if (var->updated)
-	changed = 1;
+	{
+	  xfree (var->print_value);
+	  var->print_value = value_get_print_value (value, var->format);
+	  changed = 1;
+	}
       else 
 	{
 	  /* Try to compare the values.  That requires that both
@@ -979,7 +983,11 @@ install_new_value (struct varobj *var, struct value *value, int initial)
 	    /* Equal. */
 	    ;
 	  else if (var->value == NULL || value == NULL)
-	    changed = 1;
+	    {
+	      xfree (var->print_value);
+	      var->print_value = value_get_print_value (value, var->format);
+	      changed = 1;
+	    }
 	  else
 	    {
 	      char *print_value;
@@ -987,6 +995,7 @@ install_new_value (struct varobj *var, struct value *value, int initial)
 	      gdb_assert (!value_lazy (value));
 	      print_value = value_get_print_value (value, var->format);
 
+	      gdb_assert (var->print_value != NULL && print_value != NULL);
 	      if (strcmp (var->print_value, print_value) != 0)
 		{
 		  xfree (var->print_value);
@@ -1687,12 +1696,19 @@ static char *
 value_get_print_value (struct value *value, enum varobj_display_formats format)
 {
   long dummy;
-  struct ui_file *stb = mem_fileopen ();
-  struct cleanup *old_chain = make_cleanup_ui_file_delete (stb);
+  struct ui_file *stb;
+  struct cleanup *old_chain;
   char *thevalue;
-	    
+
+  if (value == NULL)
+    return NULL;
+
+  stb = mem_fileopen ();
+  old_chain = make_cleanup_ui_file_delete (stb);
+
   common_val_print (value, stb, format_code[(int) format], 1, 0, 0);
   thevalue = ui_file_xstrdup (stb, &dummy);
+
   do_cleanups (old_chain);
   return thevalue;
 }

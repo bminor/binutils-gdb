@@ -261,8 +261,8 @@ mi_execute_to "exec-step 8" "end-stepping-range" "do_locals_tests" "" \
 # Note: this test also checks that lpsimple->integer and lsimple.integer have
 #       changed (they are the same)
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"lsimple.integer\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"lsimple->integer\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"lsimple.character\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"ldouble\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"lfloat\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"llong\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"lcharacter\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"linteger\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
-	"update all vars: func and lpsimple changed"
+	"\\^done,changelist=\\\[\{name=\"lsimple.integer\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"lsimple->integer\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"lsimple.character\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"ldouble\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"lfloat\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"llong\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"lpcharacter\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"lcharacter\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"linteger\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"update all vars: lsimple and others changed"
 
 
 ### 
@@ -278,8 +278,13 @@ mi_gdb_test "-var-assign linteger 3333" \
 	"\\^done,value=\"3333\"" \
 	"assign to linteger"
 
+# Allow lpcharacter to update, optionally.  Because it points to a
+# char variable instead of a zero-terminated string, if linteger is
+# directly after it in memory the printed characters may appear to
+# change.
+set lpchar_update "\{name=\"lpcharacter\",in_scope=\"true\",type_changed=\"false\"\},"
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"linteger\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"\\^done,changelist=\\\[($lpchar_update)?\{name=\"linteger\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
 	"update all vars: linteger changed after assign"
 
 mi_gdb_test "-var-assign linteger 3333" \
