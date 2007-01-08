@@ -11842,33 +11842,45 @@ to specify the search directories for target libraries.
 
 @table @code
 @cindex prefix for shared library file names
+@cindex system root, alternate
 @kindex set solib-absolute-prefix
-@item set solib-absolute-prefix @var{path}
-If this variable is set, @var{path} will be used as a prefix for any
-absolute shared library paths; many runtime loaders store the absolute
-paths to the shared library in the target program's memory.  If you use
-@samp{solib-absolute-prefix} to find shared libraries, they need to be laid
-out in the same way that they are on the target, with e.g.@: a
-@file{/usr/lib} hierarchy under @var{path}.
+@kindex set sysroot
+@item set sysroot @var{path}
+Use @var{path} as the system root for the program being debugged.  Any
+absolute shared library paths will be prefixed with @var{path}; many
+runtime loaders store the absolute paths to the shared library in the
+target program's memory.  If you use @code{set sysroot} to find shared
+libraries, they need to be laid out in the same way that they are on
+the target, with e.g.@: a @file{/lib} and @file{/usr/lib} hierarchy
+under @var{path}.
 
-@cindex default value of @samp{solib-absolute-prefix}
+The @code{set solib-absolute-prefix} command is an alias for @code{set
+sysroot}.
+
+@cindex default system root
 @cindex @samp{--with-sysroot}
-You can set the default value of @samp{solib-absolute-prefix} by using the
-configure-time @samp{--with-sysroot} option.
+You can set the default system root by using the configure-time
+@samp{--with-sysroot} option.  If the system root is inside
+@value{GDBN}'s configured binary prefix (set with @samp{--prefix} or
+@samp{--exec-prefix}), then the default system root will be updated
+automatically if the installed @value{GDBN} is moved to a new
+location.
 
-@kindex show solib-absolute-prefix
-@item show solib-absolute-prefix
+@kindex show sysroot
+@item show sysroot
 Display the current shared library prefix.
 
 @kindex set solib-search-path
 @item set solib-search-path @var{path}
-If this variable is set, @var{path} is a colon-separated list of directories
-to search for shared libraries.  @samp{solib-search-path} is used after
-@samp{solib-absolute-prefix} fails to locate the library, or if the path to
-the library is relative instead of absolute.  If you want to use
-@samp{solib-search-path} instead of @samp{solib-absolute-prefix}, be sure to
-set @samp{solib-absolute-prefix} to a nonexistant directory to prevent
-@value{GDBN} from finding your host's libraries.
+If this variable is set, @var{path} is a colon-separated list of
+directories to search for shared libraries.  @samp{solib-search-path}
+is used after @samp{sysroot} fails to locate the library, or if the
+path to the library is relative instead of absolute.  If you want to
+use @samp{solib-search-path} instead of @samp{sysroot}, be sure to set
+@samp{sysroot} to a nonexistant directory to prevent @value{GDBN} from
+finding your host's libraries.  @samp{sysroot} is preferred; setting
+it to a nonexistant directory may interfere with automatic loading
+of shared library symbols.
 
 @kindex show solib-search-path
 @item show solib-search-path
@@ -12709,25 +12721,34 @@ You can debug processes by name instead of process ID if your target has the
 @code{pidof} utility:
 
 @smallexample
-target> gdbserver @var{comm} --attach `pidof @var{PROGRAM}`
+target> gdbserver @var{comm} --attach `pidof @var{program}`
 @end smallexample
 
-In case more than one copy of @var{PROGRAM} is running, or @var{PROGRAM}
+In case more than one copy of @var{program} is running, or @var{program}
 has multiple threads, most versions of @code{pidof} support the
 @code{-s} option to only return the first process ID.
 
 @item On the host machine,
-connect to your target (@pxref{Connecting,,Connecting to a remote target}).
+first make sure you have the necessary symbol files.  Load symbols for
+your application using the @code{file} command before you connect.  Use
+@code{set sysroot} to locate target libraries (unless your @value{GDBN}
+was compiled with the correct sysroot using @code{--with-system-root}).
+
+The symbol file and target libraries must exactly match the executable
+and libraries on the target, with one exception: the files on the host
+system should not be stripped, even if the files on the target system
+are.  Mismatched or missing files will lead to confusing results
+during debugging.  On @sc{gnu}/Linux targets, mismatched or missing
+files may also prevent @code{gdbserver} from debugging multi-threaded
+programs.
+
+Connect to your target (@pxref{Connecting,,Connecting to a remote target}).
 For TCP connections, you must start up @code{gdbserver} prior to using
 the @code{target remote} command.  Otherwise you may get an error whose
 text depends on the host system, but which usually looks something like
 @samp{Connection refused}.  You don't need to use the @code{load}
 command in @value{GDBN} when using @code{gdbserver}, since the program is
-already on the target.  However, if you want to load the symbols (as
-you normally would), do that with the @code{file} command, and issue
-it @emph{before} connecting to the server; otherwise, you will get an
-error message saying @code{"Program is already running"}, since the
-program is considered running after the connection.
+already on the target.
 
 @end table
 

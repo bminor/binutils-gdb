@@ -1,3 +1,11 @@
+2007-01-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (Commands to specify files): Describe
+	"set sysroot" and "show sysroot".
+	(Using the `gdbserver' program): Lowercase argument
+	to @var.  Expand description of setting up GDB on the
+	host.
+
 2007-01-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Set Catchpoints): Add documentation for the new

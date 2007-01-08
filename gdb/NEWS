@@ -37,6 +37,12 @@ catch exception unhandled
 catch assert
   Stop the program execution when an Ada assertion failed.
 
+set sysroot
+show sysroot
+  Set an alternate system root for target files.  This is a more
+  general version of "set solib-absolute-prefix", which is now
+  an alias to "set sysroot".
+
 * New native configurations
 
 OpenBSD/sh			sh*-*openbsd*

@@ -1,3 +1,11 @@
+2007-01-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* NEWS: Add "set sysroot" and "show sysroot".
+	* solib.c (solib_absolute_prefix): Delete.  Replace
+	all uses with gdb_sysroot.
+	(_initialize_solib): Add "set sysroot" and "show sysroot".
+	Make "solib-absolute-prefix" an alias to it.
+
 2007-01-08  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* frame.c (get_frame_register_bytes): New function.
