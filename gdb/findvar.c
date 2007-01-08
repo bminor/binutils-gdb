@@ -599,11 +599,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
   return v;
 }
 
-/* Return a value of type TYPE, stored in register REGNUM, in frame
-   FRAME.
-
-   NOTE: returns NULL if register value is not available.
-   Caller will check return value or die!  */
+/* Return a value of type TYPE, stored in register REGNUM, in frame FRAME.  */
 
 struct value *
 value_from_register (struct type *type, int regnum, struct frame_info *frame)
@@ -612,30 +608,11 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
   struct value *v = allocate_value (type);
   CHECK_TYPEDEF (type);
 
-  if (TYPE_LENGTH (type) == 0)
-    {
-      /* It doesn't matter much what we return for this: since the
-         length is zero, it could be anything.  But if allowed to see
-         a zero-length type, the register-finding loop below will set
-         neither mem_stor nor reg_stor, and then report an internal
-         error.  
-
-         Zero-length types can legitimately arise from declarations
-         like 'struct {}' (a GCC extension, not valid ISO C).  GDB may
-         also create them when it finds bogus debugging information;
-         for example, in GCC 2.95.4 and binutils 2.11.93.0.2, the
-         STABS BINCL->EXCL compression process can create bad type
-         numbers.  GDB reads these as TYPE_CODE_UNDEF types, with zero
-         length.  (That bug is actually the only known way to get a
-         zero-length value allocated to a register --- which is what
-         it takes to make it here.)
-
-         We'll just attribute the value to the original register.  */
-      VALUE_LVAL (v) = lval_register;
-      VALUE_ADDRESS (v) = regnum;
-      VALUE_REGNUM (v) = regnum;
-    }
-  else if (CONVERT_REGISTER_P (regnum, type))
+  VALUE_LVAL (v) = lval_register;
+  VALUE_FRAME_ID (v) = get_frame_id (frame);
+  VALUE_REGNUM (v) = regnum;
+      
+  if (CONVERT_REGISTER_P (regnum, type))
     {
       /* The ISA/ABI need to something weird when obtaining the
          specified value from this register.  It might need to
@@ -645,85 +622,26 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
          is that REGISTER_TO_VALUE populates the entire value
          including the location.  */
       REGISTER_TO_VALUE (frame, regnum, type, value_contents_raw (v));
-      VALUE_LVAL (v) = lval_register;
-      VALUE_FRAME_ID (v) = get_frame_id (frame);
-      VALUE_REGNUM (v) = regnum;
     }
   else
     {
-      int local_regnum;
-      int mem_stor = 0, reg_stor = 0;
-      int mem_tracking = 1;
-      CORE_ADDR last_addr = 0;
-      CORE_ADDR first_addr = 0;
-      int first_realnum = regnum;
       int len = TYPE_LENGTH (type);
-      int value_bytes_copied;
-      int optimized = 0;
-      gdb_byte *value_bytes = alloca (len + MAX_REGISTER_SIZE);
 
-      /* Copy all of the data out, whereever it may be.  */
-      for (local_regnum = regnum, value_bytes_copied = 0;
-	   value_bytes_copied < len;
-	   (value_bytes_copied += register_size (current_gdbarch, local_regnum),
-	    ++local_regnum))
-	{
-	  int realnum;
-	  int optim;
-	  enum lval_type lval;
-	  CORE_ADDR addr;
-	  frame_register (frame, local_regnum, &optim, &lval, &addr,
-			  &realnum, value_bytes + value_bytes_copied);
-	  optimized += optim;
-	  if (register_cached (local_regnum) == -1)
-	    return NULL;	/* register value not available */
-	  
-	  if (regnum == local_regnum)
-	    {
-	      first_addr = addr;
-	      first_realnum = realnum;
-	    }
-	  if (lval == lval_register)
-	    reg_stor++;
-	  else
-	    {
-	      mem_stor++;
-	      
-	      /* FIXME: cagney/2004-11-12: I think this is trying to
-		 check that the stored registers are adjacent in
-		 memory.  It isn't doing a good job?  */
-	      mem_tracking = (mem_tracking
-			      && (regnum == local_regnum
-				  || addr == last_addr));
-	    }
-	  last_addr = addr;
-	}
-      
-      if (mem_tracking && mem_stor && !reg_stor)
-	{
-	  VALUE_LVAL (v) = lval_memory;
-	  VALUE_ADDRESS (v) = first_addr;
-	}
-      else
-	{
-	  VALUE_LVAL (v) = lval_register;
-	  VALUE_FRAME_ID (v) = get_frame_id (frame);
-	  VALUE_REGNUM (v) = regnum;
-	}
-      
-      set_value_optimized_out (v, optimized);
-      
       /* Any structure stored in more than one register will always be
          an integral number of registers.  Otherwise, you need to do
          some fiddling with the last register copied here for little
          endian machines.  */
       if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-	  && len < register_size (current_gdbarch, regnum))
+	  && len < register_size (gdbarch, regnum))
 	/* Big-endian, and we want less than full size.  */
-	set_value_offset (v, register_size (current_gdbarch, regnum) - len);
+	set_value_offset (v, register_size (gdbarch, regnum) - len);
       else
 	set_value_offset (v, 0);
-      memcpy (value_contents_raw (v), value_bytes + value_offset (v), len);
+
+      /* Get the data.  */
+      if (!get_frame_register_bytes (frame, regnum, value_offset (v), len,
+				     value_contents_raw (v)))
+	set_value_optimized_out (v, 1);
     }
   return v;
 }

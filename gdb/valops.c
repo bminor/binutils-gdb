@@ -651,8 +651,7 @@ value_assign (struct value *toval, struct value *fromval)
 	if (!frame)
 	  error (_("Value being assigned to is no longer active."));
 	
-	if (VALUE_LVAL (toval) == lval_register
-	    && CONVERT_REGISTER_P (VALUE_REGNUM (toval), type))
+	if (CONVERT_REGISTER_P (VALUE_REGNUM (toval), type))
 	  {
 	    /* If TOVAL is a special machine register requiring
 	       conversion of program values to a special raw format.  */
@@ -661,59 +660,40 @@ value_assign (struct value *toval, struct value *fromval)
 	  }
 	else
 	  {
-	    /* TOVAL is stored in a series of registers in the frame
-	       specified by the structure.  Copy that value out,
-	       modify it, and copy it back in.  */
-	    int amount_copied;
-	    int amount_to_copy;
-	    gdb_byte *buffer;
-	    int reg_offset;
-	    int byte_offset;
-	    int regno;
-
-	    /* Locate the first register that falls in the value that
-	       needs to be transfered.  Compute the offset of the
-	       value in that register.  */
-	    {
-	      int offset;
-	      for (reg_offset = value_reg, offset = 0;
-		   offset + register_size (current_gdbarch, reg_offset) <= value_offset (toval);
-		   reg_offset++);
-	      byte_offset = value_offset (toval) - offset;
-	    }
-
-	    /* Compute the number of register aligned values that need
-	       to be copied.  */
 	    if (value_bitsize (toval))
-	      amount_to_copy = byte_offset + 1;
+	      {
+		int changed_len;
+		gdb_byte buffer[sizeof (LONGEST)];
+
+		changed_len = (value_bitpos (toval)
+			       + value_bitsize (toval)
+			       + HOST_CHAR_BIT - 1)
+		  / HOST_CHAR_BIT;
+
+		if (changed_len > (int) sizeof (LONGEST))
+		  error (_("Can't handle bitfields which don't fit in a %d bit word."),
+			 (int) sizeof (LONGEST) * HOST_CHAR_BIT);
+
+		get_frame_register_bytes (frame, value_reg,
+					  value_offset (toval),
+					  changed_len, buffer);
+
+		modify_field (buffer, value_as_long (fromval),
+			      value_bitpos (toval), value_bitsize (toval));
+
+		put_frame_register_bytes (frame, value_reg,
+					  value_offset (toval),
+					  changed_len, buffer);
+	      }
 	    else
-	      amount_to_copy = byte_offset + TYPE_LENGTH (type);
-	    
-	    /* And a bounce buffer.  Be slightly over generous.  */
-	    buffer = alloca (amount_to_copy + MAX_REGISTER_SIZE);
-
-	    /* Copy it in.  */
-	    for (regno = reg_offset, amount_copied = 0;
-		 amount_copied < amount_to_copy;
-		 amount_copied += register_size (current_gdbarch, regno), regno++)
-	      frame_register_read (frame, regno, buffer + amount_copied);
-	    
-	    /* Modify what needs to be modified.  */
-	    if (value_bitsize (toval))
-	      modify_field (buffer + byte_offset,
-			    value_as_long (fromval),
-			    value_bitpos (toval), value_bitsize (toval));
-	    else
-	      memcpy (buffer + byte_offset, value_contents (fromval),
-		      TYPE_LENGTH (type));
-
-	    /* Copy it out.  */
-	    for (regno = reg_offset, amount_copied = 0;
-		 amount_copied < amount_to_copy;
-		 amount_copied += register_size (current_gdbarch, regno), regno++)
-	      put_frame_register (frame, regno, buffer + amount_copied);
-
+	      {
+		put_frame_register_bytes (frame, value_reg,
+					  value_offset (toval),
+					  TYPE_LENGTH (type),
+					  value_contents (fromval));
+	      }
 	  }
+
 	if (deprecated_register_changed_hook)
 	  deprecated_register_changed_hook (-1);
 	observer_notify_target_changed (&current_target);

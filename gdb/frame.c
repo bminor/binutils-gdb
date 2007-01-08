@@ -742,6 +742,84 @@ frame_register_read (struct frame_info *frame, int regnum,
   return !optimized;
 }
 
+int
+get_frame_register_bytes (struct frame_info *frame, int regnum,
+			  CORE_ADDR offset, int len, gdb_byte *myaddr)
+{
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+
+  /* Skip registers wholly inside of OFFSET.  */
+  while (offset >= register_size (gdbarch, regnum))
+    {
+      offset -= register_size (gdbarch, regnum);
+      regnum++;
+    }
+
+  /* Copy the data.  */
+  while (len > 0)
+    {
+      int curr_len = register_size (gdbarch, regnum) - offset;
+      if (curr_len > len)
+	curr_len = len;
+
+      if (curr_len == register_size (gdbarch, regnum))
+	{
+	  if (!frame_register_read (frame, regnum, myaddr))
+	    return 0;
+	}
+      else
+	{
+	  gdb_byte buf[MAX_REGISTER_SIZE];
+	  if (!frame_register_read (frame, regnum, buf))
+	    return 0;
+	  memcpy (myaddr, buf + offset, curr_len);
+	}
+
+      len -= curr_len;
+      offset = 0;
+      regnum++;
+    }
+
+  return 1;
+}
+
+void
+put_frame_register_bytes (struct frame_info *frame, int regnum,
+			  CORE_ADDR offset, int len, const gdb_byte *myaddr)
+{
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+
+  /* Skip registers wholly inside of OFFSET.  */
+  while (offset >= register_size (gdbarch, regnum))
+    {
+      offset -= register_size (gdbarch, regnum);
+      regnum++;
+    }
+
+  /* Copy the data.  */
+  while (len > 0)
+    {
+      int curr_len = register_size (gdbarch, regnum) - offset;
+      if (curr_len > len)
+	curr_len = len;
+
+      if (curr_len == register_size (gdbarch, regnum))
+	{
+	  put_frame_register (frame, regnum, myaddr);
+	}
+      else
+	{
+	  gdb_byte buf[MAX_REGISTER_SIZE];
+	  frame_register_read (frame, regnum, buf);
+	  memcpy (buf + offset, myaddr, curr_len);
+	  put_frame_register (frame, regnum, buf);
+	}
+
+      len -= curr_len;
+      offset = 0;
+      regnum++;
+    }
+}
 
 /* Map between a frame register number and its name.  A frame register
    space is a superset of the cooked register space --- it also

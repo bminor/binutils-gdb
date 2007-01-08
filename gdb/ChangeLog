@@ -1,3 +1,14 @@
+2007-01-08  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* frame.c (get_frame_register_bytes): New function.
+	(put_frame_register_bytes): Likewise.
+	* frame.h (get_frame_register_bytes): Declare.
+	(put_frame_register_bytes): Likewise.
+	* findvar.c (value_from_register): Always construct lval_register
+	values.  Use get_frame_register_bytes.
+	* valops.c (value_assign): Use get_frame_register_bytes and
+	put_frame_register_bytes.
+
 2007-01-08  Jim Blandy  <jimb@codesourcery.com>
 
 	* MAINTAINERS: Update Stan Shebs' email address.

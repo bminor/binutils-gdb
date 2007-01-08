@@ -491,6 +491,18 @@ extern void frame_register (struct frame_info *frame, int regnum,
 extern void put_frame_register (struct frame_info *frame, int regnum,
 				const gdb_byte *buf);
 
+/* Read LEN bytes from one or multiple registers starting with REGNUM
+   in frame FRAME, starting at OFFSET, into BUF.  */
+extern int get_frame_register_bytes (struct frame_info *frame, int regnum,
+				     CORE_ADDR offset, int len,
+				     gdb_byte *myaddr);
+
+/* Write LEN bytes to one or multiple registers starting with REGNUM
+   in frame FRAME, starting at OFFSET, into BUF.  */
+extern void put_frame_register_bytes (struct frame_info *frame, int regnum,
+				      CORE_ADDR offset, int len,
+				      const gdb_byte *myaddr);
+
 /* Map between a frame register number and its name.  A frame register
    space is a superset of the cooked register space --- it also
    includes builtin registers.  If NAMELEN is negative, use the NAME's
