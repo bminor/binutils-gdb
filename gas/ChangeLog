@@ -1,3 +1,11 @@
+2007-01-08  Kazu Hirata  <kazu@codesourcery.com>
+
+	* config/tc-m68k.c (m68k_archs, m68k_cpus): Treat Fido as an
+	architecture by itself.
+	(m68k_ip): Don't issue a warning for tbl instructions on fido.
+	(m68k_elf_final_processing): Treat Fido as an architecture by
+	itself.
+
 2007-01-08  Kai Tietz	<kai.tietz@onevision.com>
 
 	* configure.tgt: Renamed target x86_64-*-mingw64 to x86_64-*-mingw*

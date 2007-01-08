@@ -41,7 +41,7 @@ static const bfd_arch_info_type arch_info_struct[] =
     N(bfd_mach_m68040,  "m68k:68040", FALSE, &arch_info_struct[6]),
     N(bfd_mach_m68060,  "m68k:68060", FALSE, &arch_info_struct[7]),
     N(bfd_mach_cpu32,   "m68k:cpu32", FALSE, &arch_info_struct[8]),
-    N(bfd_mach_cpu32_fido, "m68k:fido", FALSE, &arch_info_struct[9]),
+    N(bfd_mach_fido,    "m68k:fido",  FALSE, &arch_info_struct[9]),
 
     /* Various combinations of CF architecture features */
     N(bfd_mach_mcf_isa_a_nodiv, "m68k:isa-a:nodiv",
@@ -108,7 +108,7 @@ static const unsigned m68k_arch_features[] =
   m68040|m68881|m68851,
   m68060|m68881|m68851,
   cpu32|m68881,
-  cpu32|m68881|fido_a,
+  fido_a|m68881,
   mcfisa_a,
   mcfisa_a|mcfhwdiv,
   mcfisa_a|mcfhwdiv|mcfmac,
@@ -214,6 +214,10 @@ bfd_m68k_compatible (const bfd_arch_info_type *a,
       if ((~features & (cpu32 | mcfisa_a)) == 0)
 	return NULL;
 
+      /* Fido and Coldfire are incompatible.  */
+      if ((~features & (fido_a | mcfisa_a)) == 0)
+	return NULL;
+
       /* ISA A+ and ISA B are incompatible.  */
       if ((~features & (mcfisa_aa | mcfisa_b)) == 0)
 	return NULL;
@@ -221,6 +225,22 @@ bfd_m68k_compatible (const bfd_arch_info_type *a,
       /* MAC and EMAC code cannot be merged.  */
       if ((~features & (mcfmac | mcfemac)) == 0)
 	return NULL;
+
+      /* CPU32 is compatible with Fido except that Fido does not
+	 support tbl instructions.  Warn when the user wants to mix
+	 the two.  */
+      if ((a->mach == bfd_mach_cpu32 && b->mach == bfd_mach_fido)
+	  || (a->mach == bfd_mach_fido && b->mach == bfd_mach_cpu32))
+	{
+	  static int cpu32_fido_mix_warning;
+	  if (!cpu32_fido_mix_warning)
+	    {
+	      cpu32_fido_mix_warning = 1;
+	      (*_bfd_error_handler) ("warning: linking CPU32 objects with fido objects");
+	    }
+	  return bfd_lookup_arch (a->arch,
+				  bfd_m68k_features_to_mach (fido_a | m68881));
+	}
 
       return bfd_lookup_arch (a->arch, bfd_m68k_features_to_mach (features));
     }

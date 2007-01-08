@@ -1,3 +1,18 @@
+2007-01-08  Kazu Hirata  <kazu@codesourcery.com>
+
+	* archures.c (bfd_mach_cpu32_fido): Rename to bfd_mach_fido.
+	* bfd-in2.h: Regenerate.
+	* cpu-m68k.c (arch_info_struct): Use bfd_mach_fido instead of
+	bfd_mach_cpu32_fido.
+	(m68k_arch_features): Use fido_a instead of cpu32.
+	(bfd_m68k_compatible): Reject the combination of Fido and
+	ColdFire.  Accept the combination of CPU32 and Fido with a
+	warning.
+	* elf32-m68k.c (elf32_m68k_object_p,
+	elf32_m68k_merge_private_bfd_data,
+	elf32_m68k_print_private_bfd_data): Treat Fido as an
+	architecture by itself.
+
 2007-01-08  Kai Tietz	<kai.tietz@onevision.com>
 
 	* config.bfd: Renamed target x86_64-*-mingw64 to x86_64-*-mingw*.

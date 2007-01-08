@@ -1,3 +1,8 @@
+2007-01-08  Kazu Hirata  <kazu@codesourcery.com>
+
+	* readelf.c (get_machine_flags): Treat Fido as an architecture
+	by itself.
+
 2007-01-08  Kai Tietz	<kai.tietz@onevision.com>
 
 	* configure.in: Renamed target x86_64-*-mingw64 to

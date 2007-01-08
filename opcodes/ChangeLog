@@ -1,3 +1,8 @@
+2007-01-08  Kazu Hirata  <kazu@codesourcery.com>
+
+	* m68k-opc.c (m68k_opcodes): Replace cpu32 with
+	cpu32 | fido_a except on tbl instructions.
+
 2007-01-04  Paul Brook  <paul@codesourcery.com>
 
 	* arm-dis.c (arm_opcodes): Fix cpsie and cpsid entries.

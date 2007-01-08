@@ -425,7 +425,7 @@ static const struct m68k_cpu m68k_archs[] =
   {m68040,					m68040_ctrl, "68040", 0},
   {m68060,					m68060_ctrl, "68060", 0},
   {cpu32|m68881,				cpu32_ctrl, "cpu32", 0},
-  {cpu32|fido_a,				fido_ctrl, "fidoa", 0},
+  {fido_a,					fido_ctrl, "fidoa", 0},
   {mcfisa_a|mcfhwdiv,				NULL, "isaa", 0},
   {mcfisa_a|mcfhwdiv|mcfisa_aa|mcfusp,		NULL, "isaaplus", 0},
   {mcfisa_a|mcfhwdiv|mcfisa_b|mcfusp,		NULL, "isab", 0},
@@ -557,7 +557,7 @@ static const struct m68k_cpu m68k_cpus[] =
   {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5485", -1},
   {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "548x", 0},
   
-  {cpu32|fido_a,				fido_ctrl, "fido", 1},
+  {fido_a,				fido_ctrl, "fido", 1},
 
   {0,NULL,NULL, 0}
   };
@@ -7514,11 +7514,9 @@ m68k_elf_final_processing (void)
     flags |= EF_M68K_CFV4E;
   /* Set file-specific flags if this is a cpu32 processor.  */
   if (cpu_of_arch (current_architecture) & cpu32)
-    {
-      flags |= EF_M68K_CPU32;
-      if (cpu_of_arch (current_architecture) & fido_a)
-	flags |= EF_M68K_CPU32_FIDO_A;
-    }
+    flags |= EF_M68K_CPU32;
+  else if (cpu_of_arch (current_architecture) & fido_a)
+    flags |= EF_M68K_FIDO;
   else if ((cpu_of_arch (current_architecture) & m68000up)
 	   && !(cpu_of_arch (current_architecture) & m68020up))
     flags |= EF_M68K_M68000;

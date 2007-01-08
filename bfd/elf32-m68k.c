@@ -432,14 +432,9 @@ elf32_m68k_object_p (bfd *abfd)
   if ((eflags & EF_M68K_ARCH_MASK) == EF_M68K_M68000)
     features |= m68000;
   else if ((eflags & EF_M68K_ARCH_MASK) == EF_M68K_CPU32)
-    {
-      features |= cpu32;
-      switch (eflags & EF_M68K_CPU32_MASK)
-	{
-        case EF_M68K_CPU32_FIDO_A:
-	  features |= fido_a; break;
-	}
-    }
+    features |= cpu32;
+  else if ((eflags & EF_M68K_ARCH_MASK) == EF_M68K_FIDO)
+    features |= fido_a;
   else
     {
       switch (eflags & EF_M68K_CF_ISA_MASK)
@@ -530,7 +525,9 @@ elf32_m68k_merge_private_bfd_data (ibfd, obfd)
       if ((in_flags & EF_M68K_ARCH_MASK) == EF_M68K_M68000)
 	variant_mask = 0;
       else if ((in_flags & EF_M68K_ARCH_MASK) == EF_M68K_CPU32)
-	variant_mask = EF_M68K_CPU32_MASK;
+	variant_mask = 0;
+      else if ((in_flags & EF_M68K_ARCH_MASK) == EF_M68K_FIDO)
+	variant_mask = 0;
       else
 	variant_mask = EF_M68K_CF_ISA_MASK;
 
@@ -538,6 +535,12 @@ elf32_m68k_merge_private_bfd_data (ibfd, obfd)
       out_isa = (out_flags & variant_mask);
       if (in_isa > out_isa)
 	out_flags ^= in_isa ^ out_isa;
+      if (((in_flags & EF_M68K_ARCH_MASK) == EF_M68K_CPU32
+	   && (out_flags & EF_M68K_ARCH_MASK) == EF_M68K_FIDO)
+	  || ((in_flags & EF_M68K_ARCH_MASK) == EF_M68K_FIDO
+	      && (out_flags & EF_M68K_ARCH_MASK) == EF_M68K_CPU32))
+	out_flags = EF_M68K_FIDO;
+      else
       out_flags |= in_flags ^ in_isa;
     }
   elf_elfheader (obfd)->e_flags = out_flags;
@@ -567,11 +570,9 @@ elf32_m68k_print_private_bfd_data (abfd, ptr)
   if ((eflags & EF_M68K_ARCH_MASK) == EF_M68K_M68000)
     fprintf (file, " [m68000]");
   else if ((eflags & EF_M68K_ARCH_MASK) == EF_M68K_CPU32)
-    {
-      fprintf (file, " [cpu32]");
-      if (eflags & EF_M68K_CPU32_FIDO_A)
-	fprintf (file, " [fido]");
-    }
+    fprintf (file, " [cpu32]");
+  else if ((eflags & EF_M68K_ARCH_MASK) == EF_M68K_FIDO)
+    fprintf (file, " [fido]");
   else
     {
       if ((eflags & EF_M68K_ARCH_MASK) == EF_M68K_CFV4E)

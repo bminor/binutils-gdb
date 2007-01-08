@@ -1715,7 +1715,7 @@ enum bfd_architecture
 #define bfd_mach_m68040 6
 #define bfd_mach_m68060 7
 #define bfd_mach_cpu32  8
-#define bfd_mach_cpu32_fido  9
+#define bfd_mach_fido   9
 #define bfd_mach_mcf_isa_a_nodiv 10
 #define bfd_mach_mcf_isa_a 11
 #define bfd_mach_mcf_isa_a_mac 12
