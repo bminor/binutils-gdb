@@ -219,6 +219,9 @@ i[3-7]86-*-freebsd* | i[3-7]86-*-kfreebsd*-gnu)
 x86_64-*-freebsd* | x86_64-*-kfreebsd*-gnu)
 			targ_emul=elf_x86_64_fbsd
 			targ_extra_emuls="elf_i386_fbsd elf_x86_64 elf_i386"
+			targ_extra_libpath="elf_i386_fbsd"
+			tdir_elf_i386_fbsd=`echo ${targ_alias} \
+			    | sed -e 's/x86_64/i386/'`
 			tdir_elf_i386=`echo ${targ_alias} \
 			    | sed -e 's/x86_64/i386/'` ;;
 i[3-7]86-*-sysv*)	targ_emul=i386coff ;;

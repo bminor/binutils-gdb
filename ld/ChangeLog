@@ -1,3 +1,9 @@
+2007-01-08  Aurelien Jarno  <aurelien@aurel32.net>
+
+	PR ld/3843
+	* configure.tgt (x86_64_[k]freebsd*): Add targ_extra_libpath and
+	tdir_elf_i386_fbsd.
+
 2007-01-06  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ldexp.c (fold_name): Issue error on undefined sections.
