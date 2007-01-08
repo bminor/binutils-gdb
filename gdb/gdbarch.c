@@ -183,6 +183,7 @@ struct gdbarch
   gdbarch_convert_register_p_ftype *convert_register_p;
   gdbarch_register_to_value_ftype *register_to_value;
   gdbarch_value_to_register_ftype *value_to_register;
+  gdbarch_value_from_register_ftype *value_from_register;
   gdbarch_pointer_to_address_ftype *pointer_to_address;
   gdbarch_address_to_pointer_ftype *address_to_pointer;
   gdbarch_integer_to_address_ftype *integer_to_address;
@@ -311,6 +312,7 @@ struct gdbarch startup_gdbarch =
   0,  /* convert_register_p */
   0,  /* register_to_value */
   0,  /* value_to_register */
+  0,  /* value_from_register */
   0,  /* pointer_to_address */
   0,  /* address_to_pointer */
   0,  /* integer_to_address */
@@ -433,6 +435,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->cannot_fetch_register = cannot_register_not;
   current_gdbarch->cannot_store_register = cannot_register_not;
   current_gdbarch->convert_register_p = generic_convert_register_p;
+  current_gdbarch->value_from_register = default_value_from_register;
   current_gdbarch->pointer_to_address = unsigned_pointer_to_address;
   current_gdbarch->address_to_pointer = unsigned_address_to_pointer;
   current_gdbarch->return_value = legacy_return_value;
@@ -566,6 +569,7 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of cannot_store_register, invalid_p == 0 */
   /* Skip verify of get_longjmp_target, has predicate */
   /* Skip verify of convert_register_p, invalid_p == 0 */
+  /* Skip verify of value_from_register, invalid_p == 0 */
   /* Skip verify of pointer_to_address, invalid_p == 0 */
   /* Skip verify of address_to_pointer, invalid_p == 0 */
   /* Skip verify of integer_to_address, has predicate */
@@ -1592,6 +1596,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: unwind_sp = <0x%lx>\n",
                       (long) current_gdbarch->unwind_sp);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: value_from_register = <0x%lx>\n",
+                      (long) current_gdbarch->value_from_register);
 #ifdef VALUE_TO_REGISTER
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -2646,6 +2653,23 @@ set_gdbarch_value_to_register (struct gdbarch *gdbarch,
                                gdbarch_value_to_register_ftype value_to_register)
 {
   gdbarch->value_to_register = value_to_register;
+}
+
+struct value *
+gdbarch_value_from_register (struct gdbarch *gdbarch, struct type *type, int regnum, struct frame_info *frame)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->value_from_register != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_value_from_register called\n");
+  return gdbarch->value_from_register (type, regnum, frame);
+}
+
+void
+set_gdbarch_value_from_register (struct gdbarch *gdbarch,
+                                 gdbarch_value_from_register_ftype value_from_register)
+{
+  gdbarch->value_from_register = value_from_register;
 }
 
 CORE_ADDR

@@ -280,6 +280,10 @@ extern struct value *value_from_string (char *string);
 extern struct value *value_at (struct type *type, CORE_ADDR addr);
 extern struct value *value_at_lazy (struct type *type, CORE_ADDR addr);
 
+extern struct value *default_value_from_register (struct type *type,
+						  int regnum,
+						  struct frame_info *frame);
+
 extern struct value *value_from_register (struct type *type, int regnum,
 					  struct frame_info *frame);
 

@@ -704,6 +704,15 @@ extern void set_gdbarch_value_to_register (struct gdbarch *gdbarch, gdbarch_valu
 #define VALUE_TO_REGISTER(frame, regnum, type, buf) (gdbarch_value_to_register (current_gdbarch, frame, regnum, type, buf))
 #endif
 
+/* Construct a value representing the contents of register REGNUM in
+   frame FRAME, interpreted as type TYPE.  The routine needs to
+   allocate and return a struct value with all value attributes
+   (but not the value contents) filled in. */
+
+typedef struct value * (gdbarch_value_from_register_ftype) (struct type *type, int regnum, struct frame_info *frame);
+extern struct value * gdbarch_value_from_register (struct gdbarch *gdbarch, struct type *type, int regnum, struct frame_info *frame);
+extern void set_gdbarch_value_from_register (struct gdbarch *gdbarch, gdbarch_value_from_register_ftype *value_from_register);
+
 typedef CORE_ADDR (gdbarch_pointer_to_address_ftype) (struct type *type, const gdb_byte *buf);
 extern CORE_ADDR gdbarch_pointer_to_address (struct gdbarch *gdbarch, struct type *type, const gdb_byte *buf);
 extern void set_gdbarch_pointer_to_address (struct gdbarch *gdbarch, gdbarch_pointer_to_address_ftype *pointer_to_address);

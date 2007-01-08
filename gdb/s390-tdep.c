@@ -306,36 +306,17 @@ s390x_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 /* 'float' values are stored in the upper half of floating-point
    registers, even though we are otherwise a big-endian platform.  */
 
-static int
-s390_convert_register_p (int regno, struct type *type)
+static struct value *
+s390_value_from_register (struct type *type, int regnum,
+			  struct frame_info *frame)
 {
-  return (regno >= S390_F0_REGNUM && regno <= S390_F15_REGNUM)
-	 && TYPE_LENGTH (type) < 8;
-}
+  struct value *value = default_value_from_register (type, regnum, frame);
+  int len = TYPE_LENGTH (type);
 
-static void
-s390_register_to_value (struct frame_info *frame, int regnum,
-                        struct type *valtype, gdb_byte *out)
-{
-  gdb_byte in[8];
-  int len = TYPE_LENGTH (valtype);
-  gdb_assert (len < 8);
+  if (regnum >= S390_F0_REGNUM && regnum <= S390_F15_REGNUM && len < 8)
+    set_value_offset (value, 0);
 
-  get_frame_register (frame, regnum, in);
-  memcpy (out, in, len);
-}
-
-static void
-s390_value_to_register (struct frame_info *frame, int regnum,
-                        struct type *valtype, const gdb_byte *in)
-{
-  gdb_byte out[8];
-  int len = TYPE_LENGTH (valtype);
-  gdb_assert (len < 8);
-
-  memset (out, 0, 8);
-  memcpy (out, in, len);
-  put_frame_register (frame, regnum, out);
+  return value;
 }
 
 /* Register groups.  */
@@ -2411,9 +2392,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_stab_reg_to_regnum (gdbarch, s390_dwarf_reg_to_regnum);
   set_gdbarch_dwarf_reg_to_regnum (gdbarch, s390_dwarf_reg_to_regnum);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, s390_dwarf_reg_to_regnum);
-  set_gdbarch_convert_register_p (gdbarch, s390_convert_register_p);
-  set_gdbarch_register_to_value (gdbarch, s390_register_to_value);
-  set_gdbarch_value_to_register (gdbarch, s390_value_to_register);
+  set_gdbarch_value_from_register (gdbarch, s390_value_from_register);
   set_gdbarch_register_reggroup_p (gdbarch, s390_register_reggroup_p);
   set_gdbarch_regset_from_core_section (gdbarch,
                                         s390_regset_from_core_section);

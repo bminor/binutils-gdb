@@ -599,20 +599,44 @@ addresses have not been bound by the dynamic loader. Try again when executable i
   return v;
 }
 
+/* Install default attributes for register values.  */
+
+struct value *
+default_value_from_register (struct type *type, int regnum,
+			     struct frame_info *frame)
+{
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  int len = TYPE_LENGTH (type);
+  struct value *value = allocate_value (type);
+
+  VALUE_LVAL (value) = lval_register;
+  VALUE_FRAME_ID (value) = get_frame_id (frame);
+  VALUE_REGNUM (value) = regnum;
+
+  /* Any structure stored in more than one register will always be
+     an integral number of registers.  Otherwise, you need to do
+     some fiddling with the last register copied here for little
+     endian machines.  */
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
+      && len < register_size (gdbarch, regnum))
+    /* Big-endian, and we want less than full size.  */
+    set_value_offset (value, register_size (gdbarch, regnum) - len);
+  else
+    set_value_offset (value, 0);
+
+  return value;
+}
+
 /* Return a value of type TYPE, stored in register REGNUM, in frame FRAME.  */
 
 struct value *
 value_from_register (struct type *type, int regnum, struct frame_info *frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct value *v = allocate_value (type);
-  CHECK_TYPEDEF (type);
+  struct type *type1 = check_typedef (type);
+  struct value *v;
 
-  VALUE_LVAL (v) = lval_register;
-  VALUE_FRAME_ID (v) = get_frame_id (frame);
-  VALUE_REGNUM (v) = regnum;
-      
-  if (CONVERT_REGISTER_P (regnum, type))
+  if (CONVERT_REGISTER_P (regnum, type1))
     {
       /* The ISA/ABI need to something weird when obtaining the
          specified value from this register.  It might need to
@@ -621,22 +645,18 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
          the corresponding [integer] type (see Alpha).  The assumption
          is that REGISTER_TO_VALUE populates the entire value
          including the location.  */
-      REGISTER_TO_VALUE (frame, regnum, type, value_contents_raw (v));
+      v = allocate_value (type);
+      VALUE_LVAL (v) = lval_register;
+      VALUE_FRAME_ID (v) = get_frame_id (frame);
+      VALUE_REGNUM (v) = regnum;
+      REGISTER_TO_VALUE (frame, regnum, type1, value_contents_raw (v));
     }
   else
     {
       int len = TYPE_LENGTH (type);
 
-      /* Any structure stored in more than one register will always be
-         an integral number of registers.  Otherwise, you need to do
-         some fiddling with the last register copied here for little
-         endian machines.  */
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-	  && len < register_size (gdbarch, regnum))
-	/* Big-endian, and we want less than full size.  */
-	set_value_offset (v, register_size (gdbarch, regnum) - len);
-      else
-	set_value_offset (v, 0);
+      /* Construct the value.  */
+      v = gdbarch_value_from_register (gdbarch, type, regnum, frame);
 
       /* Get the data.  */
       if (!get_frame_register_bytes (frame, regnum, value_offset (v), len,

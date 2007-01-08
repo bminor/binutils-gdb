@@ -1,3 +1,23 @@
+2007-01-08  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdbarch.sh (value_from_register): New gdbarch function.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* findvar.c (default_value_from_register): New function.
+	(value_from_register): Use gdbarch_value_from_register.
+	* value.h (default_value_from_register): Declare.
+	* spu-tdep.c (spu_convert_register_p, spu_register_to_value,
+	spu_value_to_register): Remove.
+	(spu_value_from_register): New function.
+	(spu_gdbarch_init): Do not call set_gdbarch_convert_register_p,
+	set_gdbarch_register_to_value, set_gdbarch_value_to_register.
+	Call set_gdbarch_value_from_register.
+	* s390-tdep.c (s390_convert_register_p, s390_register_to_value,
+	s390_value_to_register): Remove.
+	(s390_value_from_register): New function.
+	(s390_gdbarch_init): Do not call set_gdbarch_convert_register_p,
+	set_gdbarch_register_to_value, set_gdbarch_value_to_register.
+	Call set_gdbarch_value_from_register.
+
 2007-01-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* NEWS: Add "set sysroot" and "show sysroot".

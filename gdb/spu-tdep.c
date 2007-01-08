@@ -145,37 +145,20 @@ spu_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 
 /* Value conversion -- access scalar values at the preferred slot.  */
 
-static int
-spu_convert_register_p (int regno, struct type *type)
+static struct value *
+spu_value_from_register (struct type *type, int regnum,
+			 struct frame_info *frame)
 {
-  return regno < SPU_NUM_GPRS && TYPE_LENGTH (type) < 16;
-}
+  struct value *value = default_value_from_register (type, regnum, frame);
+  int len = TYPE_LENGTH (type);
 
-static void
-spu_register_to_value (struct frame_info *frame, int regnum,
-                       struct type *valtype, gdb_byte *out)
-{
-  gdb_byte in[16];
-  int len = TYPE_LENGTH (valtype);
-  int preferred_slot = len < 4 ? 4 - len : 0;
-  gdb_assert (len < 16);
+  if (regnum < SPU_NUM_GPRS && len < 16)
+    {
+      int preferred_slot = len < 4 ? 4 - len : 0;
+      set_value_offset (value, preferred_slot);
+    }
 
-  get_frame_register (frame, regnum, in);
-  memcpy (out, in + preferred_slot, len);
-}
-
-static void
-spu_value_to_register (struct frame_info *frame, int regnum,
-                       struct type *valtype, const gdb_byte *in)
-{
-  gdb_byte out[16];
-  int len = TYPE_LENGTH (valtype);
-  int preferred_slot = len < 4 ? 4 - len : 0;
-  gdb_assert (len < 16);
-
-  memset (out, 0, 16);
-  memcpy (out + preferred_slot, in, len);
-  put_frame_register (frame, regnum, out);
+  return value;
 }
 
 /* Register groups.  */
@@ -1050,9 +1033,7 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_type (gdbarch, spu_register_type);
   set_gdbarch_pseudo_register_read (gdbarch, spu_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, spu_pseudo_register_write);
-  set_gdbarch_convert_register_p (gdbarch, spu_convert_register_p);
-  set_gdbarch_register_to_value (gdbarch, spu_register_to_value);
-  set_gdbarch_value_to_register (gdbarch, spu_value_to_register);
+  set_gdbarch_value_from_register (gdbarch, spu_value_from_register);
   set_gdbarch_register_reggroup_p (gdbarch, spu_register_reggroup_p);
 
   /* Data types.  */
