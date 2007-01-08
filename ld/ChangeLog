@@ -1,3 +1,7 @@
+2007-01-08  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* configure.host: Add i[3-7]86-*-mingw* case.
+
 2007-01-08  Nick Clifton  <nickc@redhat.com>
 
 	* pep-dll.h (pep_bfd_is_dll): Add prototype.
