@@ -1,4 +1,8 @@
-2006-02-05  Joel Brobecker  <brobecker@adacore.com>
+2007-01-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.threads/sigthread.c, gdb.threads/sigthread.exp: New.
+
+2007-01-05  Joel Brobecker  <brobecker@adacore.com>
 
         * gdb.base/nofield.c: New file.
         * gdb.base/nofield.exp: New testcase.

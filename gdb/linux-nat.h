@@ -75,10 +75,7 @@ void thread_db_init (struct target_ops *);
 void linux_proc_pending_signals (int pid, sigset_t *pending, sigset_t *blocked, sigset_t *ignored);
 
 /* linux-nat functions for handling fork events.  */
-extern void linux_record_stopped_pid (int pid);
 extern void linux_enable_event_reporting (ptid_t ptid);
-extern ptid_t linux_handle_extended_wait (int pid, int status,
-					  struct target_waitstatus *ourstatus);
 
 extern int lin_lwp_attach_lwp (ptid_t ptid, int verbose);
 

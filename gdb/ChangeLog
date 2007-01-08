@@ -1,3 +1,17 @@
+2007-01-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-nat.c (struct simple_pid_list): Add status.
+	(add_to_pid_list): Record the PID's status.
+	(linux_record_stopped_pid): Likewise.  Make static.
+	(pull_pid_from_list): Return the saved status.
+	(linux_nat_handle_extended): Deleted.
+	(linux_handle_extended_wait): Combine with linux_nat_handle_extended.
+	Make static.  Handle non-SIGSTOP for a new thread's first signal.
+	(flush_callback): Handle unexpected pending signals.
+	(linux_nat_wait): Update calls to changed functions.
+	* linux-nat.h (linux_record_stopped_pid, linux_handle_extended_wait):
+	Remove prototypes for newly static functions.
+
 2007-01-08  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdbarch.sh (value_from_register): New gdbarch function.

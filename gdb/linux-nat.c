@@ -113,6 +113,7 @@ static int linux_parent_pid;
 struct simple_pid_list
 {
   int pid;
+  int status;
   struct simple_pid_list *next;
 };
 struct simple_pid_list *stopped_pids;
@@ -131,16 +132,17 @@ static int linux_supports_tracevforkdone_flag = -1;
 /* Trivial list manipulation functions to keep track of a list of
    new stopped processes.  */
 static void
-add_to_pid_list (struct simple_pid_list **listp, int pid)
+add_to_pid_list (struct simple_pid_list **listp, int pid, int status)
 {
   struct simple_pid_list *new_pid = xmalloc (sizeof (struct simple_pid_list));
   new_pid->pid = pid;
+  new_pid->status = status;
   new_pid->next = *listp;
   *listp = new_pid;
 }
 
 static int
-pull_pid_from_list (struct simple_pid_list **listp, int pid)
+pull_pid_from_list (struct simple_pid_list **listp, int pid, int *status)
 {
   struct simple_pid_list **p;
 
@@ -148,6 +150,7 @@ pull_pid_from_list (struct simple_pid_list **listp, int pid)
     if ((*p)->pid == pid)
       {
 	struct simple_pid_list *next = (*p)->next;
+	*status = (*p)->status;
 	xfree (*p);
 	*p = next;
 	return 1;
@@ -155,10 +158,10 @@ pull_pid_from_list (struct simple_pid_list **listp, int pid)
   return 0;
 }
 
-void
-linux_record_stopped_pid (int pid)
+static void
+linux_record_stopped_pid (int pid, int status)
 {
-  add_to_pid_list (&stopped_pids, pid);
+  add_to_pid_list (&stopped_pids, pid, status);
 }
 
 
@@ -514,69 +517,6 @@ child_follow_fork (struct target_ops *ops, int follow_child)
     }
 
   return 0;
-}
-
-ptid_t
-linux_handle_extended_wait (int pid, int status,
-			    struct target_waitstatus *ourstatus)
-{
-  int event = status >> 16;
-
-  if (event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK
-      || event == PTRACE_EVENT_CLONE)
-    {
-      unsigned long new_pid;
-      int ret;
-
-      ptrace (PTRACE_GETEVENTMSG, pid, 0, &new_pid);
-
-      /* If we haven't already seen the new PID stop, wait for it now.  */
-      if (! pull_pid_from_list (&stopped_pids, new_pid))
-	{
-	  /* The new child has a pending SIGSTOP.  We can't affect it until it
-	     hits the SIGSTOP, but we're already attached.  */
-	  ret = my_waitpid (new_pid, &status,
-			    (event == PTRACE_EVENT_CLONE) ? __WCLONE : 0);
-	  if (ret == -1)
-	    perror_with_name (_("waiting for new child"));
-	  else if (ret != new_pid)
-	    internal_error (__FILE__, __LINE__,
-			    _("wait returned unexpected PID %d"), ret);
-	  else if (!WIFSTOPPED (status) || WSTOPSIG (status) != SIGSTOP)
-	    internal_error (__FILE__, __LINE__,
-			    _("wait returned unexpected status 0x%x"), status);
-	}
-
-      if (event == PTRACE_EVENT_FORK)
-	ourstatus->kind = TARGET_WAITKIND_FORKED;
-      else if (event == PTRACE_EVENT_VFORK)
-	ourstatus->kind = TARGET_WAITKIND_VFORKED;
-      else
-	ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
-
-      ourstatus->value.related_pid = new_pid;
-      return inferior_ptid;
-    }
-
-  if (event == PTRACE_EVENT_EXEC)
-    {
-      ourstatus->kind = TARGET_WAITKIND_EXECD;
-      ourstatus->value.execd_pathname
-	= xstrdup (child_pid_to_exec_file (pid));
-
-      if (linux_parent_pid)
-	{
-	  detach_breakpoints (linux_parent_pid);
-	  ptrace (PTRACE_DETACH, linux_parent_pid, 0, 0);
-
-	  linux_parent_pid = 0;
-	}
-
-      return inferior_ptid;
-    }
-
-  internal_error (__FILE__, __LINE__,
-		  _("unknown ptrace event %d"), event);
 }
 
 
@@ -1293,44 +1233,113 @@ kill_lwp (int lwpid, int signo)
   return kill (lwpid, signo);
 }
 
-/* Handle a GNU/Linux extended wait response.  Most of the work we
-   just pass off to linux_handle_extended_wait, but if it reports a
-   clone event we need to add the new LWP to our list (and not report
-   the trap to higher layers).  This function returns non-zero if
-   the event should be ignored and we should wait again.  If STOPPING
-   is true, the new LWP remains stopped, otherwise it is continued.  */
+/* Handle a GNU/Linux extended wait response.  If we see a clone
+   event, we need to add the new LWP to our list (and not report the
+   trap to higher layers).  This function returns non-zero if the
+   event should be ignored and we should wait again.  If STOPPING is
+   true, the new LWP remains stopped, otherwise it is continued.  */
 
 static int
-linux_nat_handle_extended (struct lwp_info *lp, int status, int stopping)
+linux_handle_extended_wait (struct lwp_info *lp, int status,
+			    int stopping)
 {
-  linux_handle_extended_wait (GET_LWP (lp->ptid), status,
-			      &lp->waitstatus);
+  int pid = GET_LWP (lp->ptid);
+  struct target_waitstatus *ourstatus = &lp->waitstatus;
+  struct lwp_info *new_lp = NULL;
+  int event = status >> 16;
 
-  /* TARGET_WAITKIND_SPURIOUS is used to indicate clone events.  */
-  if (lp->waitstatus.kind == TARGET_WAITKIND_SPURIOUS)
+  if (event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK
+      || event == PTRACE_EVENT_CLONE)
     {
-      struct lwp_info *new_lp;
-      new_lp = add_lwp (BUILD_LWP (lp->waitstatus.value.related_pid,
-				   GET_PID (inferior_ptid)));
-      new_lp->cloned = 1;
+      unsigned long new_pid;
+      int ret;
 
-      if (stopping)
-	new_lp->stopped = 1;
+      ptrace (PTRACE_GETEVENTMSG, pid, 0, &new_pid);
+
+      /* If we haven't already seen the new PID stop, wait for it now.  */
+      if (! pull_pid_from_list (&stopped_pids, new_pid, &status))
+	{
+	  /* The new child has a pending SIGSTOP.  We can't affect it until it
+	     hits the SIGSTOP, but we're already attached.  */
+	  ret = my_waitpid (new_pid, &status,
+			    (event == PTRACE_EVENT_CLONE) ? __WCLONE : 0);
+	  if (ret == -1)
+	    perror_with_name (_("waiting for new child"));
+	  else if (ret != new_pid)
+	    internal_error (__FILE__, __LINE__,
+			    _("wait returned unexpected PID %d"), ret);
+	  else if (!WIFSTOPPED (status))
+	    internal_error (__FILE__, __LINE__,
+			    _("wait returned unexpected status 0x%x"), status);
+	}
+
+      ourstatus->value.related_pid = new_pid;
+
+      if (event == PTRACE_EVENT_FORK)
+	ourstatus->kind = TARGET_WAITKIND_FORKED;
+      else if (event == PTRACE_EVENT_VFORK)
+	ourstatus->kind = TARGET_WAITKIND_VFORKED;
       else
-	ptrace (PTRACE_CONT, lp->waitstatus.value.related_pid, 0, 0);
+	{
+	  ourstatus->kind = TARGET_WAITKIND_IGNORE;
+	  new_lp = add_lwp (BUILD_LWP (new_pid, GET_PID (inferior_ptid)));
+	  new_lp->cloned = 1;
 
-      lp->waitstatus.kind = TARGET_WAITKIND_IGNORE;
+	  if (WSTOPSIG (status) != SIGSTOP)
+	    {
+	      /* This can happen if someone starts sending signals to
+		 the new thread before it gets a chance to run, which
+		 have a lower number than SIGSTOP (e.g. SIGUSR1).
+		 This is an unlikely case, and harder to handle for
+		 fork / vfork than for clone, so we do not try - but
+		 we handle it for clone events here.  We'll send
+		 the other signal on to the thread below.  */
 
-      if (debug_linux_nat)
-	fprintf_unfiltered (gdb_stdlog,
-			    "LLHE: Got clone event from LWP %ld, resuming\n",
-			    GET_LWP (lp->ptid));
-      ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0, 0);
+	      new_lp->signalled = 1;
+	    }
+	  else
+	    status = 0;
 
-      return 1;
+	  if (stopping)
+	    new_lp->stopped = 1;
+	  else
+	    {
+	      new_lp->resumed = 1;
+	      ptrace (PTRACE_CONT, lp->waitstatus.value.related_pid, 0,
+		      status ? WSTOPSIG (status) : 0);
+	    }
+
+	  if (debug_linux_nat)
+	    fprintf_unfiltered (gdb_stdlog,
+				"LHEW: Got clone event from LWP %ld, resuming\n",
+				GET_LWP (lp->ptid));
+	  ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0, 0);
+
+	  return 1;
+	}
+
+      return 0;
     }
 
-  return 0;
+  if (event == PTRACE_EVENT_EXEC)
+    {
+      ourstatus->kind = TARGET_WAITKIND_EXECD;
+      ourstatus->value.execd_pathname
+	= xstrdup (child_pid_to_exec_file (pid));
+
+      if (linux_parent_pid)
+	{
+	  detach_breakpoints (linux_parent_pid);
+	  ptrace (PTRACE_DETACH, linux_parent_pid, 0, 0);
+
+	  linux_parent_pid = 0;
+	}
+
+      return 0;
+    }
+
+  internal_error (__FILE__, __LINE__,
+		  _("unknown ptrace event %d"), event);
 }
 
 /* Wait for LP to stop.  Returns the wait status, or 0 if the LWP has
@@ -1401,7 +1410,7 @@ wait_lwp (struct lwp_info *lp)
 	fprintf_unfiltered (gdb_stdlog,
 			    "WL: Handling extended status 0x%06x\n",
 			    status);
-      if (linux_nat_handle_extended (lp, status, 1))
+      if (linux_handle_extended_wait (lp, status, 1))
 	return wait_lwp (lp);
     }
 
@@ -1641,7 +1650,15 @@ flush_callback (struct lwp_info *lp, void *data)
 	lp->status = 0;
     }
 
-  while (linux_nat_has_pending (GET_LWP (lp->ptid), &pending, flush_mask))
+  /* While there is a pending signal we would like to flush, continue
+     the inferior and collect another signal.  But if there's already
+     a saved status that we don't want to flush, we can't resume the
+     inferior - if it stopped for some other reason we wouldn't have
+     anywhere to save the new status.  In that case, we must leave the
+     signal unflushed (and possibly generate an extra SIGINT stop).
+     That's much less bad than losing a signal.  */
+  while (lp->status == 0
+	 && linux_nat_has_pending (GET_LWP (lp->ptid), &pending, flush_mask))
     {
       int ret;
       
@@ -1995,7 +2012,7 @@ retry:
 	     from waitpid before or after the event is.  */
 	  if (WIFSTOPPED (status) && !lp)
 	    {
-	      linux_record_stopped_pid (lwpid);
+	      linux_record_stopped_pid (lwpid, status);
 	      status = 0;
 	      continue;
 	    }
@@ -2046,7 +2063,7 @@ retry:
 		fprintf_unfiltered (gdb_stdlog,
 				    "LLW: Handling extended status 0x%06x\n",
 				    status);
-	      if (linux_nat_handle_extended (lp, status, 0))
+	      if (linux_handle_extended_wait (lp, status, 0))
 		{
 		  status = 0;
 		  continue;
