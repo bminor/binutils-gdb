@@ -9042,65 +9042,44 @@ function_name_from_pc (CORE_ADDR pc)
 static int
 is_known_support_routine (struct frame_info *frame)
 {
-  struct frame_info *next_frame = get_next_frame (frame);
-  /* If frame is not innermost, that normally means that frame->pc
-     points to *after* the call instruction, and we want to get the line
-     containing the call, never the next line.  But if the next frame is
-     a signal_handler_caller or a dummy frame, then the next frame was
-     not entered as the result of a call, and we want to get the line
-     containing frame->pc.  */
-  const int pc_is_after_call =
-    next_frame != NULL
-    && get_frame_type (next_frame) != SIGTRAMP_FRAME
-    && get_frame_type (next_frame) != DUMMY_FRAME;
-  struct symtab_and_line sal
-    = find_pc_line (get_frame_pc (frame), pc_is_after_call);
+  struct symtab_and_line sal;
   char *func_name;
   int i;
 
-  /* The heuristic:
-     1. The symtab is null (indicating no debugging symbols)
-     2. The symtab's filename does not exist.
-     3. The object file's name is one of the standard libraries.
-     4. The symtab's file name has the form of an Ada library source file.
-     5. The function at frame's PC has a GNAT-compiler-generated name.  */
+  /* If this code does not have any debugging information (no symtab),
+     This cannot be any user code.  */
 
+  find_frame_sal (frame, &sal);
   if (sal.symtab == NULL)
     return 1;
 
-  /* On some systems (e.g. VxWorks), the kernel contains debugging
-     symbols; in this case, the filename referenced by these symbols
-     does not exists.  */
+  /* If there is a symtab, but the associated source file cannot be
+     located, then assume this is not user code:  Selecting a frame
+     for which we cannot display the code would not be very helpful
+     for the user.  This should also take care of case such as VxWorks
+     where the kernel has some debugging info provided for a few units.  */
 
   if (symtab_to_fullname (sal.symtab) == NULL)
     return 1;
+
+  /* Check the unit filename againt the Ada runtime file naming.
+     We also check the name of the objfile against the name of some
+     known system libraries that sometimes come with debugging info
+     too.  */
 
   for (i = 0; known_runtime_file_name_patterns[i] != NULL; i += 1)
     {
       re_comp (known_runtime_file_name_patterns[i]);
       if (re_exec (sal.symtab->filename))
         return 1;
-    }
-  if (sal.symtab->objfile != NULL)
-    {
-      for (i = 0; known_runtime_file_name_patterns[i] != NULL; i += 1)
-        {
-          re_comp (known_runtime_file_name_patterns[i]);
-          if (re_exec (sal.symtab->objfile->name))
-            return 1;
-        }
+      if (sal.symtab->objfile != NULL
+          && re_exec (sal.symtab->objfile->name))
+        return 1;
     }
 
-  /* If the frame PC points after the call instruction, then we need to
-     decrement it in order to search for the function associated to this
-     PC.  Otherwise, if the associated call was the last instruction of
-     the function, we might either find the wrong function or even fail
-     during the function name lookup.  */
-  if (pc_is_after_call)
-    func_name = function_name_from_pc (get_frame_pc (frame) - 1);
-  else
-    func_name = function_name_from_pc (get_frame_pc (frame));
+  /* Check whether the function is a GNAT-generated entity.  */
 
+  func_name = function_name_from_pc (get_frame_address_in_block (frame));
   if (func_name == NULL)
     return 1;
 

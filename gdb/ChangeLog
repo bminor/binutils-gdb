@@ -1,3 +1,7 @@
+2007-01-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (is_known_support_routine): Improve the implementation.
+
 2007-01-06  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c: Add include of source.h.
