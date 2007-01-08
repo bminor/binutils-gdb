@@ -1,3 +1,7 @@
+2007-01-08  Jim Blandy  <jimb@codesourcery.com>
+
+	* MAINTAINERS: Update Stan Shebs' email address.
+
 2007-01-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (is_known_support_routine): Improve the implementation.

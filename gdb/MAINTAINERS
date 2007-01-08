@@ -121,7 +121,7 @@ their affiliation, and they act on behalf of the GNU project.
 	Klee Dienes (Apple)
 	Paul Hilfinger (UC Berkeley)
 	Dan Jacobowitz (CodeSourcery)
-	Stan Shebs (Apple)
+	Stan Shebs (Mozilla)
 	Richard Stallman (FSF)
 	Ian Lance Taylor (C2)
 	Todd Whitesel
@@ -164,7 +164,7 @@ Andrew Cagney			cagney@gnu.org
 Fred Fish			fnf@ninemoons.com
 Daniel Jacobowitz		dan@debian.org
 Mark Kettenis           	kettenis@gnu.org
-Stan Shebs			shebs@apple.com
+Stan Shebs			shebs@mozilla.com
 Michael Snyder			Michael.Snyder@PalmSource.com
 Elena Zannoni			ezannoni@redhat.com
 Eli Zaretskii			eliz@gnu.org
@@ -543,7 +543,7 @@ Richard Sandiford				richard@codesourcery.com
 Peter Schauer					Peter.Schauer@mytum.de
 Andreas Schwab					schwab@suse.de
 Keith Seitz					keiths@redhat.com
-Stan Shebs					shebs@apple.com
+Stan Shebs					shebs@mozilla.com
 Aidan Skinner					aidan@velvet.net
 Jiri Smid					smid@suse.cz
 David Smith					dsmith@redhat.com
