@@ -1,3 +1,10 @@
+2007-01-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c: Add include of source.h.
+	(is_known_support_routine): Improve the check verifying that the file
+	associated to this frame exists.
+	* Makefile.in (ada-lang.o): Add dependency on source.h.
+
 2007-01-07  Jim Blandy  <jimb@codesourcery.com>
 
 	* ax-general.c (ax_const_l): Select proper opcode for the given

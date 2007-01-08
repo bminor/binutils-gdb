@@ -55,6 +55,7 @@ Boston, MA 02110-1301, USA.  */
 #include "exceptions.h"
 #include "annotate.h"
 #include "valprint.h"
+#include "source.h"
 
 #ifndef ADA_RETAIN_DOTS
 #define ADA_RETAIN_DOTS 0
@@ -9056,7 +9057,6 @@ is_known_support_routine (struct frame_info *frame)
     = find_pc_line (get_frame_pc (frame), pc_is_after_call);
   char *func_name;
   int i;
-  struct stat st;
 
   /* The heuristic:
      1. The symtab is null (indicating no debugging symbols)
@@ -9072,7 +9072,7 @@ is_known_support_routine (struct frame_info *frame)
      symbols; in this case, the filename referenced by these symbols
      does not exists.  */
 
-  if (stat (sal.symtab->filename, &st))
+  if (symtab_to_fullname (sal.symtab) == NULL)
     return 1;
 
   for (i = 0; known_runtime_file_name_patterns[i] != NULL; i += 1)
