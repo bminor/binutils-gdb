@@ -1,3 +1,7 @@
+2007-01-08  Nick Clifton  <nickc@redhat.com>
+
+	* pep-dll.h (pep_bfd_is_dll): Add prototype.
+
 2007-01-08  Aurelien Jarno  <aurelien@aurel32.net>
 
 	PR ld/3843

@@ -49,5 +49,6 @@ extern void pep_exe_fill_sections  (bfd *, struct bfd_link_info *);
 extern void pep_walk_relocs_of_symbol
   (struct bfd_link_info *, const char *, int (*) (arelent *, asection *));
 extern void pep_create_import_fixup  (arelent * rel, asection *, int);
+extern bfd_boolean pep_bfd_is_dll  (bfd *);
 
 #endif /* PEP_DLL_H */
