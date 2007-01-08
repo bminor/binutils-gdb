@@ -1,3 +1,8 @@
+2007-01-08  Kai Tietz	<kai.tietz@onevision.com>
+
+	* gas/all/gas.exp: Renamed target x86_64-*-mingw64 to x86_64-*-mingw*.
+	* gas/i386/i386.exp: Ditto.
+
 2007-01-04  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/archv6.s: Add more cpsie tests.

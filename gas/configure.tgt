@@ -212,8 +212,11 @@ case ${generic_target} in
   i386-*-pe)				fmt=coff em=pe ;;
   i386-*-cygwin*)			fmt=coff em=pe ;;
   i386-*-interix*)			fmt=coff em=interix ;;
-  i386-*-mingw32*)			fmt=coff em=pe ;;
-  i386-*-mingw64*)			fmt=coff em=pep ;;
+  i386-*-mingw*)
+    case ${cpu} in
+      x86_64*)				fmt=coff em=pep ;;
+      i*)				fmt=coff em=pe ;;
+    esac ;;
   i386-*-nto-qnx*)			fmt=elf ;;
   i386-*-*nt*)				fmt=coff em=pe ;;
   i386-*-chaos)				fmt=elf ;;

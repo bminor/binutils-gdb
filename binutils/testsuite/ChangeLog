@@ -1,3 +1,11 @@
+2007-01-08  Kai Tietz	<kai.tietz@onevision.com>
+
+	* copy-3.d: Renamed target x86_64-*-mingw64 to x86_64-*-mingw*
+	* dlltool.exp: Dito
+	* lang.rc: Dito
+	* strtab1.rc: Dito
+	* windres.exp: Dito
+
 2006-09-20  Kai Tietz  <Kai.Tietz@onevision.com>
 
 	* binutils-all/copy-3.d: Add support for target x86_64-pc-mingw64.

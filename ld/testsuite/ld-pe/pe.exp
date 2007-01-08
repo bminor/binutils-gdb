@@ -21,7 +21,7 @@
 if {    ![istarget i*86-*-cygwin*]
      && ![istarget i*86-*-pe]
      && ![istarget i*86-*-mingw*]
-     && ![istarget x86_64-*-mingw64*]
+     && ![istarget x86_64-*-mingw*]
      && ![istarget arm-wince-pe] } {
     return
 }

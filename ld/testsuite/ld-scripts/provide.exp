@@ -31,7 +31,7 @@ if {[istarget "rs6000-*-aix*"] || [is_aout_format]} {
 
 global LDFLAGS
 set saved_LDFLAGS "$LDFLAGS"
-if [istarget "*-*-mingw64*"] then {
+if [istarget "x86_64-*-mingw*"] then {
   set LDFLAGS "$LDFLAGS --image-base 0"
 }
 

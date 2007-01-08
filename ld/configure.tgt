@@ -239,7 +239,7 @@ i[3-7]86-*-cygwin*)	targ_emul=i386pe ;
 			test "$targ" != "$host" && LIB_PATH='${tooldir}/lib/w32api' ;;
 i[3-7]86-*-mingw32*)	targ_emul=i386pe ;
 			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
-x86_64-*-mingw64*)	targ_emul=i386pep ;
+x86_64-*-mingw*)	targ_emul=i386pep ;
 			targ_extra_ofiles="deffilep.o pep-dll.o" ;;
 i[3-7]86-*-interix*)	targ_emul=i386pe_posix;
  			targ_extra_ofiles="deffilep.o pe-dll.o" ;;

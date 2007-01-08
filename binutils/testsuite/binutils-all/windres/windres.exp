@@ -19,14 +19,14 @@
 
 # Written by DJ Delorie <dj@redhat.com>
 
-if {![istarget "i*86-*-*"] && ![istarget "x86_64-*-mingw64"] } {
+if {![istarget "i*86-*-*"] && ![istarget "x86_64-*-mingw*"] } {
     return
 }
 
 if {![istarget "i*86-*-*pe*"] \
     && ![istarget "i*86-*-cygwin*"] \
     && ![istarget "i*86-*-mingw32*"] \
-    && ![istarget "x86_64-*-mingw64*"] } {
+    && ![istarget "x86_64-*-mingw*"] } {
     set target_xfail "yes"
 } else {
     set target_xfail "no"

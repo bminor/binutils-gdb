@@ -27,7 +27,7 @@ if ![ld_assemble $as $srcdir/$subdir/defined.s tmpdir/def.o] {
 
 global LDFLAGS
 set saved_LDFLAGS "$LDFLAGS"
-if [istarget "*-*-mingw64*"] then {
+if [istarget "x86_64-*-mingw*"] then {
   set LDFLAGS "$LDFLAGS --image-base 0"
 }
 

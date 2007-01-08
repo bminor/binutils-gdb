@@ -1,3 +1,9 @@
+2007-01-08  Kai Tietz	<kai.tietz@onevision.com>
+
+	* configure.in: Renamed target x86_64-*-mingw64 to
+	x86_64-*-mingw*.
+	* configure: Regenerated.
+
 2007-01-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* readelf.c (dump_section): Don't print 32-bit values, which

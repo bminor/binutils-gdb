@@ -1,3 +1,13 @@
+2007-01-08  Kai Tietz	<kai.tietz@onevision.com>
+
+	* ld-fastcall/fastcall.exp: Renamed target x86_64-*-mingw64 to
+	x86_64-*-mingw*.
+	* ld-pe/pe.exp: Ditto.
+	* ld-scripts/align.exp: Ditto.
+	* ld-scripts/defined.exp: Ditto.
+	* ld-scripts/provide.exp: Ditto.
+	* ld-scripts/weak.exp: Ditto.
+
 2007-01-06  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-scripts/expr.exp: New.

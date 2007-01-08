@@ -590,7 +590,7 @@ case "${targ}" in
     targ_selvecs="bfd_elf32_i386_vec i386linux_vec bfd_efi_app_ia32_vec"
     want64=true
     ;;
-  x86_64-*-mingw64*)
+  x86_64-*-mingw*)
     targ_defvec=x86_64pe_vec
     targ_selvecs="x86_64pe_vec x86_64pei_vec x86_64coff_vec  bfd_elf64_x86_64_vec"
     want64=true
