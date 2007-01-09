@@ -206,8 +206,10 @@ enum target_object
      a previously erased flash memory.  Using it without erasing
      flash can have unexpected results.  Addresses are physical
      address on target, and not relative to flash start.  */
-  TARGET_OBJECT_FLASH
-
+  TARGET_OBJECT_FLASH,
+  /* Available target-specific features, e.g. registers and coprocessors.
+     See "target-descriptions.c".  ANNEX should never be empty.  */
+  TARGET_OBJECT_AVAILABLE_FEATURES
   /* Possible future objects: TARGET_OBJECT_FILE, TARGET_OBJECT_PROC, ... */
 };
 

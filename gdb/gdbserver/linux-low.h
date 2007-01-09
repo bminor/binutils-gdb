@@ -71,6 +71,10 @@ struct linux_target_ops
   /* Whether to left-pad registers for PEEKUSR/POKEUSR if they are smaller
      than an xfer unit.  */
   int left_pad_xfer;
+
+  /* What string to report to GDB when it asks for the architecture,
+     or NULL not to answer.  */
+  const char *arch_string;
 };
 
 extern struct linux_target_ops the_low_target;

@@ -145,7 +145,7 @@ decode_xfer_read (char *buf, char **annex, CORE_ADDR *ofs, unsigned int *len)
    to as much of DATA/LEN as we could fit.  IS_MORE controls
    the first character of the response.  */
 static int
-write_qxfer_response (char *buf, unsigned char *data, int len, int is_more)
+write_qxfer_response (char *buf, const void *data, int len, int is_more)
 {
   int out_len;
 
@@ -190,6 +190,31 @@ handle_general_set (char *own_buf)
   /* Otherwise we didn't know what packet it was.  Say we didn't
      understand it.  */
   own_buf[0] = 0;
+}
+
+static const char *
+get_features_xml (void)
+{
+  static int features_supported = -1;
+  static char *document;
+
+  if (features_supported == -1)
+    {
+      const char *arch = (*the_target->arch_string) ();
+
+      if (arch == NULL)
+	features_supported = 0;
+      else
+	{
+	  features_supported = 1;
+	  document = malloc (64 + strlen (arch));
+	  snprintf (document, 64 + strlen (arch),
+		    "<target><architecture>%s</architecture></target>",
+		    arch);
+	}
+    }
+
+  return document;
 }
 
 /* Handle all of the extended 'q' packets.  */
@@ -279,6 +304,45 @@ handle_query (char *own_buf, int *new_packet_len_p)
       return;
     }
 
+  if (strncmp ("qXfer:features:read:", own_buf, 20) == 0)
+    {
+      CORE_ADDR ofs;
+      unsigned int len, total_len;
+      const char *document;
+      char *annex;
+
+      document = get_features_xml ();
+      if (document == NULL)
+	{
+	  own_buf[0] = '\0';
+	  return;
+	}
+
+      /* Reject any annex other than target.xml; grab the offset and
+	 length.  */
+      if (decode_xfer_read (own_buf + 20, &annex, &ofs, &len) < 0
+	  || strcmp (annex, "target.xml") != 0)
+	{
+	  strcpy (own_buf, "E00");
+	  return;
+	}
+
+      total_len = strlen (document);
+      if (len > PBUFSIZ - 2)
+	len = PBUFSIZ - 2;
+
+      if (ofs > total_len)
+	write_enn (own_buf);
+      else if (len < total_len - ofs)
+	*new_packet_len_p = write_qxfer_response (own_buf, document + ofs,
+						  len, 1);
+      else
+	*new_packet_len_p = write_qxfer_response (own_buf, document + ofs,
+						  total_len - ofs, 0);
+
+      return;
+    }
+
   /* Protocol features query.  */
   if (strncmp ("qSupported", own_buf, 10) == 0
       && (own_buf[10] == ':' || own_buf[10] == '\0'))
@@ -287,6 +351,9 @@ handle_query (char *own_buf, int *new_packet_len_p)
 
       if (the_target->read_auxv != NULL)
 	strcat (own_buf, ";qXfer:auxv:read+");
+
+      if (get_features_xml () != NULL)
+	strcat (own_buf, ";qXfer:features:read+");
 
       return;
     }

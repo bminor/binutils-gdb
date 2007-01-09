@@ -171,6 +171,10 @@ struct target_ops
 
   int (*get_tls_address) (struct thread_info *thread, CORE_ADDR offset,
 			  CORE_ADDR load_module, CORE_ADDR *address);
+
+  /* Return a string identifying the current architecture, or NULL if
+     this operation is not supported.  */
+  const char *(*arch_string) (void);
 };
 
 extern struct target_ops *the_target;

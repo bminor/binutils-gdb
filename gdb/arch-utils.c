@@ -409,6 +409,75 @@ set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
   show_endian (gdb_stdout, from_tty, NULL, NULL);
 }
 
+/* Given SELECTED, a currently selected BFD architecture, and
+   FROM_TARGET, a BFD architecture reported by the target description,
+   return what architecture to use.  Either may be NULL; if both are
+   specified, we use the more specific.  If the two are obviously
+   incompatible, warn the user.  */
+
+static const struct bfd_arch_info *
+choose_architecture_for_target (const struct bfd_arch_info *selected,
+				const struct bfd_arch_info *from_target)
+{
+  const struct bfd_arch_info *compat1, *compat2;
+
+  if (selected == NULL)
+    return from_target;
+
+  if (from_target == NULL)
+    return selected;
+
+  /* struct bfd_arch_info objects are singletons: that is, there's
+     supposed to be exactly one instance for a given machine.  So you
+     can tell whether two are equivalent by comparing pointers.  */
+  if (from_target == selected)
+    return selected;
+
+  /* BFD's 'A->compatible (A, B)' functions return zero if A and B are
+     incompatible.  But if they are compatible, it returns the 'more
+     featureful' of the two arches.  That is, if A can run code
+     written for B, but B can't run code written for A, then it'll
+     return A.
+
+     Some targets (e.g. MIPS as of 2006-12-04) don't fully
+     implement this, instead always returning NULL or the first
+     argument.  We detect that case by checking both directions.  */
+
+  compat1 = selected->compatible (selected, from_target);
+  compat2 = from_target->compatible (from_target, selected);
+
+  if (compat1 == NULL && compat2 == NULL)
+    {
+      warning (_("Selected architecture %s is not compatible "
+		 "with reported target architecture %s"),
+	       selected->printable_name, from_target->printable_name);
+      return selected;
+    }
+
+  if (compat1 == NULL)
+    return compat2;
+  if (compat2 == NULL)
+    return compat1;
+  if (compat1 == compat2)
+    return compat1;
+
+  /* If the two didn't match, but one of them was a default architecture,
+     assume the more specific one is correct.  This handles the case
+     where an executable or target description just says "mips", but
+     the other knows which MIPS variant.  */
+  if (compat1->the_default)
+    return compat2;
+  if (compat2->the_default)
+    return compat1;
+
+  /* We have no idea which one is better.  This is a bug, but not
+     a critical problem; warn the user.  */
+  warning (_("Selected architecture %s is ambiguous with "
+	     "reported target architecture %s"),
+	   selected->printable_name, from_target->printable_name);
+  return selected;
+}
+
 /* Functions to manipulate the architecture of the target */
 
 enum set_arch { set_arch_auto, set_arch_manual };
@@ -703,6 +772,10 @@ gdbarch_info_fill (struct gdbarch_info *info)
       && bfd_get_arch (info->abfd) != bfd_arch_unknown
       && bfd_get_arch (info->abfd) != bfd_arch_obscure)
     info->bfd_arch_info = bfd_get_arch_info (info->abfd);
+  /* From the target.  */
+  if (info->target_desc != NULL)
+    info->bfd_arch_info = choose_architecture_for_target
+      (info->bfd_arch_info, tdesc_architecture (info->target_desc));
   /* From the default.  */
   if (info->bfd_arch_info == NULL)
     info->bfd_arch_info = default_bfd_arch;

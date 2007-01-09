@@ -563,7 +563,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
 	user-regs.c \
 	valarith.c valops.c valprint.c value.c varobj.c vec.c \
 	wrapper.c \
-	xml-support.c
+	xml-tdesc.c xml-support.c
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
@@ -972,7 +972,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	tramp-frame.o \
 	solib.o solib-null.o \
 	prologue-value.o memory-map.o xml-support.o \
-	target-descriptions.o target-memory.o
+	target-descriptions.o target-memory.o xml-tdesc.o
 
 TSOBS = inflow.o
 
@@ -2776,7 +2776,8 @@ target.o: target.c $(defs_h) $(gdb_string_h) $(target_h) $(gdbcmd_h) \
 	$(gdb_wait_h) $(dcache_h) $(regcache_h) $(gdb_assert_h) $(gdbcore_h) \
 	$(exceptions_h) $(target_descriptions_h)
 target-descriptions.o: target-descriptions.c $(defs_h) $(arch_utils_h) \
-	$(target_h) $(target_descriptions_h) $(vec_h) $(gdb_assert_h)
+	$(target_h) $(target_descriptions_h) $(vec_h) $(xml_tdesc_h) \
+	$(gdbcmd_h) $(gdb_assert_h)
 target-memory.o: target-memory.c $(defs_h) $(vec_h) $(target_h) \
 	$(memory_map_h) $(gdb_assert_h)
 thread.o: thread.c $(defs_h) $(symtab_h) $(frame_h) $(inferior_h) \
@@ -2874,6 +2875,8 @@ xcoffread.o: xcoffread.c $(defs_h) $(bfd_h) $(gdb_string_h) $(gdb_stat_h) \
 	$(complaints_h) $(gdb_stabs_h) $(aout_stab_gnu_h)
 xcoffsolib.o: xcoffsolib.c $(defs_h) $(bfd_h) $(xcoffsolib_h) $(inferior_h) \
 	$(gdbcmd_h) $(symfile_h) $(frame_h) $(gdb_regex_h)
+xml-tdesc.o: xml-tdesc.c $(defs_h) $(target_h) $(target_descriptions_h) \
+	$(xml_tdesc_h) $(xml_support_h) $(gdb_assert_h)
 xml-support.o: xml-support.c $(defs_h) $(xml_support_h) $(exceptions_h) \
 	$(gdbcmd_h) $(gdb_string_h) $(gdb_expat_h) $(safe_ctype_h)
 xstormy16-tdep.o: xstormy16-tdep.c $(defs_h) $(frame_h) $(frame_base_h) \

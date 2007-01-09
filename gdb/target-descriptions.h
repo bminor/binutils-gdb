@@ -44,6 +44,12 @@ const struct target_desc *target_current_description (void);
 
 /* Accessors for target descriptions.  */
 
+/* Return the BFD architecture associated with this target
+   description, or NULL if no architecture was specified.  */
+
+const struct bfd_arch_info *tdesc_architecture
+  (const struct target_desc *);
+
 /* Return the string value of a property named KEY, or NULL if the
    property was not specified.  */
 
@@ -53,6 +59,9 @@ const char *tdesc_property (const struct target_desc *,
 /* Methods for constructing a target description.  */
 
 struct target_desc *allocate_target_description (void);
+struct cleanup *make_cleanup_free_target_description (struct target_desc *);
+void set_tdesc_architecture (struct target_desc *,
+			     const struct bfd_arch_info *);
 
 void set_tdesc_property (struct target_desc *,
 			 const char *key, const char *value);

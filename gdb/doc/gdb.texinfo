@@ -159,6 +159,8 @@ Copyright (C) 1988-2006 Free Software Foundation, Inc.
 * Maintenance Commands::        Maintenance Commands
 * Remote Protocol::             GDB Remote Serial Protocol
 * Agent Expressions::           The GDB Agent Expression Mechanism
+* Target Descriptions::         How targets can describe themselves to
+                                @value{GDBN}
 * Copying::			GNU General Public License says
                                 how you can copy and share GDB
 * GNU Free Documentation License::  The license for this documentation
@@ -23702,6 +23704,7 @@ Reply: see @code{remote.c:remote_unpack_thread_info_response()}.
 @item QPassSignals: @var{signal} @r{[};@var{signal}@r{]}@dots{}
 @cindex pass signals to inferior, remote request
 @cindex @samp{QPassSignals} packet
+@anchor{QPassSignals}
 Each listed @var{signal} should be passed directly to the inferior process. 
 Signals are numbered identically to continue packets and stop replies
 (@pxref{Stop Reply Packets}).  Each @var{signal} list item should be
@@ -23868,6 +23871,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab Yes
 
+@item @samp{qXfer:features:read}
+@tab No
+@tab @samp{-}
+@tab Yes
+
 @item @samp{qXfer:memory-map:read}
 @tab No
 @tab @samp{-}
@@ -23897,6 +23905,18 @@ byte in its buffer for the NUL.  If this stub feature is not supported,
 @item qXfer:auxv:read
 The remote stub understands the @samp{qXfer:auxv:read} packet
 (@pxref{qXfer auxiliary vector read}).
+
+@item qXfer:features:read
+The remote stub understands the @samp{qXfer:features:read} packet
+(@pxref{qXfer target description read}).
+
+@item qXfer:memory-map:read
+The remote stub understands the @samp{qXfer:memory-map:read} packet
+(@pxref{qXfer memory map read}).
+
+@item QPassSignals
+The remote stub understands the @samp{QPassSignals} packet
+(@pxref{QPassSignals}).
 
 @end table
 
@@ -23994,9 +24014,16 @@ auxiliary vector}.  Note @var{annex} must be empty.
 
 This packet is not probed by default; the remote stub must request it,
 by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
-@end table
 
-@table @samp
+@item qXfer:features:read:@var{annex}:@var{offset},@var{length}
+@anchor{qXfer target description read}
+Access the @dfn{target description}.  @xref{Target Descriptions}.  The
+annex specifies which XML document to access.  The main description is
+always loaded from the @samp{target.xml} annex.
+
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
+
 @item qXfer:memory-map:read::@var{offset},@var{length}
 @anchor{qXfer memory map read}
 Access the target's @dfn{memory-map}.  @xref{Memory map format}.  The
@@ -25570,6 +25597,130 @@ The formal DTD for memory map format is given below:
 @end smallexample
 
 @include agentexpr.texi
+
+@node Target Descriptions
+@appendix Target Descriptions
+@cindex target descriptions
+
+@strong{Warning:} target descriptions are still under active development,
+and the contents and format may change between @value{GDBN} releases.
+The format is expected to stabilize in the future.
+
+One of the challenges of using @value{GDBN} to debug embedded systems
+is that there are so many minor variants of each processor
+architecture in use.  It is common practice for vendors to start with
+a standard processor core --- ARM, PowerPC, or MIPS, for example ---
+and then make changes to adapt it to a particular market niche.  Some
+architectures have hundreds of variants, available from dozens of
+vendors.  This leads to a number of problems:
+
+@itemize @bullet
+@item
+With so many different customized processors, it is difficult for
+the @value{GDBN} maintainers to keep up with the changes.
+@item
+Since individual variants may have short lifetimes or limited
+audiences, it may not be worthwhile to carry information about every
+variant in the @value{GDBN} source tree.
+@item
+When @value{GDBN} does support the architecture of the embedded system
+at hand, the task of finding the correct architecture name to give the
+@command{set architecture} command can be error-prone.
+@end itemize
+
+To address these problems, the @value{GDBN} remote protocol allows a
+target system to not only identify itself to @value{GDBN}, but to
+actually describe its own features.  This lets @value{GDBN} support
+processor variants it has never seen before --- to the extent that the
+descriptions are accurate, and that @value{GDBN} understands them.
+
+@menu
+* Retrieving Descriptions::         How descriptions are fetched from a target.
+* Target Description Format::       The contents of a target description.
+@end menu
+
+@node Retrieving Descriptions
+@section Retrieving Descriptions
+
+Target descriptions can be read from the target automatically, or
+specified by the user manually.  The default behavior is to read the
+description from the target.  @value{GDBN} retrieves it via the remote
+protocol using @samp{qXfer} requests (@pxref{General Query Packets,
+qXfer}).  The @var{annex} in the @samp{qXfer} packet will be
+@samp{target.xml}.  The contents of the @samp{target.xml} annex are an
+XML document, of the form described in @ref{Target Description
+Format}.
+
+Alternatively, you can specify a file to read for the target description.
+If a file is set, the target will not be queried.  The commands to
+specify a file are:
+
+@table @code
+@cindex set tdesc filename
+@item set tdesc filename @var{path}
+Read the target description from @var{path}.
+
+@cindex unset tdesc filename
+@item unset tdesc filename
+Do not read the XML target description from a file.  @value{GDBN}
+will use the description supplied by the current target.
+
+@cindex show tdesc filename
+@item show tdesc filename
+Show the filename to read for a target description, if any.
+@end table
+
+
+@node Target Description Format
+@section Target Description Format
+@cindex target descriptions, XML format
+
+A target description annex is an @uref{http://www.w3.org/XML/, XML}
+document which complies with the Document Type Definition provided in
+the @value{GDBN} sources in @file{gdb/features/gdb-target.dtd}.  This
+means you can use generally available tools like @command{xmllint} to
+check that your feature descriptions are well-formed and valid.
+However, to help people unfamiliar with XML write descriptions for
+their targets, we also describe the grammar here.
+
+At the moment, target descriptions can only provide minimal information
+about the architecture of the remote target.  @value{GDBN} can use this
+information to autoconfigure, or to warn you if you connect to an
+unsupported target.
+
+Here is a simple target description:
+
+@example
+<target>
+  <architecture>i386:x86-64</architecture>
+</target>
+@end example
+
+@noindent
+This minimal description only says that the target uses
+the x86-64 architecture.
+
+A target description has the overall form:
+
+@example
+<?xml version="1.0"?>
+<!DOCTYPE target SYSTEM "gdb-target.dtd">
+<target>
+  <architecture>@var{arch name}</architecture>
+</target>
+@end example
+
+@noindent
+The description is generally insensitive to whitespace and line
+breaks, under the usual common-sense rules.  The XML version
+declaration and document type declaration can generally be omitted
+(@value{GDBN} does not require them), but specifying them may be
+useful for XML validation tools.
+
+The content of the @samp{<architecture>} element is an architecture
+name, from the same selection accepted by @code{set architecture}
+(@pxref{Targets, ,Specifying a Debugging Target}).
+
 
 @include gpl.texi
 

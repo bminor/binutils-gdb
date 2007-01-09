@@ -1,5 +1,38 @@
 2007-01-09  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* NEWS: Mention target descriptions, "set tdesc filename",
+	"unset tdesc filename", "show tdesc filename", and
+	qXfer:features:read.
+	* arch-utils.c (choose_architecture_for_target): New function.
+	(gdbarch_info_fill): Call it.
+	* target-descriptions.c (struct property): Make members non-const.
+	(struct target_desc): Add arch member.
+	(target_description_filename): New variable.
+	(target_find_description): Try via XML first.
+	(tdesc_architecture): New.
+	(free_target_description, make_cleanup_free_target_description): New.
+	(set_tdesc_property): Call xstrdup.
+	(set_tdesc_architecture, tdesc_set_cmdlist, tdesc_show_cmdlist)
+	(tdesc_unset_cmdlist, unset_tdesc_cmd, unset_tdesc_filename_cmd)
+	(set_tdesc_cmd, show_tdesc_cmd, set_tdesc_filename_cmd)
+	(show_tdesc_filename_cmd, _initialize_target_descriptions): New.
+	* target-descriptions.h (tdesc_architecture)
+	(make_cleanup_free_target_description, set_tdesc_architecture): New
+	prototypes.
+	* Makefile.in (SFILES): Add xml-tdesc.c.
+	(COMMON_OBS): Add xml-tdesc.o.
+	(target-descriptions.o): Update.
+	(xml-tdesc.o): New rule.
+	* xml-tdesc.c, xml-tdesc.h: New files.
+	* remote.c (PACKET_qXfer_features): New enum.
+	(remote_protocol_features): Add qXfer:features:read.
+	(remote_xfer_partial): Handle TARGET_OBJECT_AVAILABLE_FEATURES.
+	(_initialize_remote): Register qXfer:features:read.
+	* target.h (enum target_object): Add TARGET_OBJECT_AVAILABLE_FEATURES.
+	* features/gdb-target.dtd: New file.
+
+2007-01-09  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* copyright.sh: Clarify error.
 
 2007-01-09  Jan Kratochvil  <jan.kratochvil@redhat.com>

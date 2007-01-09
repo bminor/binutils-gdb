@@ -893,6 +893,7 @@ enum {
   PACKET_Z3,
   PACKET_Z4,
   PACKET_qXfer_auxv,
+  PACKET_qXfer_features,
   PACKET_qXfer_memory_map,
   PACKET_qGetTLSAddr,
   PACKET_qSupported,
@@ -2294,6 +2295,8 @@ static struct protocol_feature remote_protocol_features[] = {
   { "PacketSize", PACKET_DISABLE, remote_packet_size, -1 },
   { "qXfer:auxv:read", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_auxv },
+  { "qXfer:features:read", PACKET_DISABLE, remote_supported_packet,
+    PACKET_qXfer_features },
   { "qXfer:memory-map:read", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_memory_map },
   { "QPassSignals", PACKET_DISABLE, remote_supported_packet,
@@ -5716,6 +5719,11 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
       return remote_read_qxfer (ops, "auxv", annex, readbuf, offset, len,
 				&remote_protocol_packets[PACKET_qXfer_auxv]);
 
+    case TARGET_OBJECT_AVAILABLE_FEATURES:
+      return remote_read_qxfer
+	(ops, "features", annex, readbuf, offset, len,
+	 &remote_protocol_packets[PACKET_qXfer_features]);
+
     case TARGET_OBJECT_MEMORY_MAP:
       gdb_assert (annex == NULL);
       return remote_read_qxfer (ops, "memory-map", annex, readbuf, offset, len,
@@ -6588,6 +6596,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_auxv],
 			 "qXfer:auxv:read", "read-aux-vector", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_features],
+			 "qXfer:features:read", "target-features", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_memory_map],
 			 "qXfer:memory-map:read", "memory-map", 0);

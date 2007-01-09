@@ -11,6 +11,10 @@ frequency signals (e.g. SIGALRM) via the QPassSignals packet.
 
 * Support for C++ member pointers has been improved.
 
+* GDB now understands XML target descriptions, which specify the
+target's overall architecture.  GDB can read a description from
+a local file or over the remote serial protocol.
+
 * New commands
 
 set mem inaccessible-by-default
@@ -47,6 +51,12 @@ show sysroot
 
 OpenBSD/sh			sh*-*openbsd*
 
+set tdesc filename
+unset tdesc filename
+show tdesc filename
+  Use the specified local file as an XML target description, and do
+  not query the target for its built-in description.
+
 * New targets
 
 OpenBSD/sh			sh*-*-openbsd*
@@ -58,6 +68,9 @@ QPassSignals:
   Ignore the specified signals; pass them directly to the debugged program
   without stopping other threads or reporting them to GDB.
 
+qXfer:features:read:
+  Read an XML target description from the target, which describes its
+  features.
 
 *** Changes in GDB 6.6
 

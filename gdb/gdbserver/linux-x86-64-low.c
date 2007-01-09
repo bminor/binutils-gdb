@@ -172,4 +172,10 @@ struct linux_target_ops the_low_target = {
   NULL,                                 
   1,
   x86_64_breakpoint_at,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  0,
+  "i386:x86-64",
 };

@@ -1,3 +1,15 @@
+2007-01-09  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-i386-low.c (the_low_target): Set arch_string.
+	* linux-x86-64-low.c (the_low_target): Likewise.
+	* linux-low.c (linux_arch_string): New.
+	(linux_target_ops): Add it.
+	* linux-low.h (struct linux_target_ops): Add arch_string.
+	* server.c (write_qxfer_response): Use const void * for DATA.
+	(get_features_xml): New.
+	(handle_query): Handle qXfer:features:read.  Report it for qSupported.
+	* target.h (struct target_ops): Add arch_string method.
+
 2007-01-03  Denis Pilat  <denis.pilat@st.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 
