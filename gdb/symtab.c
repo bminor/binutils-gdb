@@ -739,8 +739,11 @@ matching_bfd_sections (asection *first, asection *second)
   if (bfd_get_section_size (first) != bfd_get_section_size (second))
     return 0;
 
+  /* In-memory addresses may start at a different offset, relativize them.  */
   if (bfd_get_section_vma (first->owner, first)
-      != bfd_get_section_vma (second->owner, second))
+      - bfd_get_start_address (first->owner)
+      != bfd_get_section_vma (second->owner, second)
+	 - bfd_get_start_address (second->owner))
     return 0;
 
   if (bfd_get_section_name (first->owner, first) == NULL

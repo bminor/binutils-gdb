@@ -1,5 +1,10 @@
 2007-01-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* symtab.c (matching_bfd_sections): Fix VMA matching for
+	prelinked objects.
+
+2007-01-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* minsyms.c (lookup_minimal_symbol_by_pc_section): Handle
 	nested symbols.
 
