@@ -1,4 +1,9 @@
 2007-01-09  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Eli Zaretskii  <eliz@gnu.org>
+
+	* copyright.sh: New file.
+
+2007-01-09  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* configure.ac: Check for XML_StopParser.
 	* xml-support.c (gdb_xml_body_text): Check for an error.
