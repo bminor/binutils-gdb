@@ -1,3 +1,7 @@
+2007-01-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/i386-size-overlap.c, gdb.arch/i386-size-overlap.exp: New.
+
 2007-01-08  Nick Roberts  <nickrob@snap.net.nz>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 

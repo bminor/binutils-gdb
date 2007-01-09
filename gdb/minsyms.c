@@ -510,6 +510,22 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc, asection *section)
 		      continue;
 		    }
 
+		  /* If we are past the end of the current symbol, try
+		     the previous symbol if it has a larger overlapping
+		     size.  This happens on i686-pc-linux-gnu with glibc;
+		     the nocancel variants of system calls are inside
+		     the cancellable variants, but both have sizes.  */
+		  if (hi > 0
+		      && MSYMBOL_SIZE (&msymbol[hi]) != 0
+		      && pc >= (SYMBOL_VALUE_ADDRESS (&msymbol[hi])
+				+ MSYMBOL_SIZE (&msymbol[hi]))
+		      && pc < (SYMBOL_VALUE_ADDRESS (&msymbol[hi - 1])
+			       + MSYMBOL_SIZE (&msymbol[hi - 1])))
+		    {
+		      hi--;
+		      continue;
+		    }
+
 		  /* Otherwise, this symbol must be as good as we're going
 		     to get.  */
 		  break;

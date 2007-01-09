@@ -1,3 +1,8 @@
+2007-01-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* minsyms.c (lookup_minimal_symbol_by_pc_section): Handle
+	nested symbols.
+
 2007-01-09  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* copyright.sh (prunes): Add step-line.inp and step-line.c.
