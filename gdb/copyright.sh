@@ -93,7 +93,7 @@ set -f
 
 version=`$EMACS --version | sed 's/GNU Emacs \([0-9]*\)\..*/\1/; 1q'`
 if test "$version" -lt 22; then
-  echo "error: $EMACS is too old; use at least an Emacs 22 snapshot." >&2
+  echo "error: $EMACS is too old; use at least an Emacs 22.0.XX snapshot." >&2
   exit 1
 fi
 
