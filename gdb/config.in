@@ -14,6 +14,9 @@
 /* Global directory for separate debug files. */
 #undef DEBUGDIR
 
+/* Define if the debug directory should be relocated when GDB is moved. */
+#undef DEBUGDIR_RELOCATABLE
+
 /* Define to BFD's default architecture. */
 #undef DEFAULT_BFD_ARCH
 

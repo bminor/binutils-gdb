@@ -221,18 +221,59 @@ captured_main (void *data)
       if (res == 0)
 	{
 	  xfree (gdb_sysroot);
-	  gdb_sysroot = TARGET_SYSTEM_ROOT;
+	  gdb_sysroot = xstrdup (TARGET_SYSTEM_ROOT);
 	}
     }
   else
-    gdb_sysroot = TARGET_SYSTEM_ROOT;
+    gdb_sysroot = xstrdup (TARGET_SYSTEM_ROOT);
 #else
-#if defined (TARGET_SYSTEM_ROOT)
-  gdb_sysroot = TARGET_SYSTEM_ROOT;
+  gdb_sysroot = xstrdup (TARGET_SYSTEM_ROOT);
+#endif
+
+  /* Canonicalize the sysroot path.  */
+  if (*gdb_sysroot)
+    {
+      char *canon_sysroot = lrealpath (gdb_sysroot);
+      if (canon_sysroot)
+	{
+	  xfree (gdb_sysroot);
+	  gdb_sysroot = canon_sysroot;
+	}
+    }
+
+#ifdef DEBUGDIR_RELOCATABLE
+  debug_file_directory = make_relative_prefix (argv[0], BINDIR, DEBUGDIR);
+  if (debug_file_directory)
+    {
+      struct stat s;
+      int res = 0;
+
+      if (stat (debug_file_directory, &s) == 0)
+	if (S_ISDIR (s.st_mode))
+	  res = 1;
+
+      if (res == 0)
+	{
+	  xfree (debug_file_directory);
+	  debug_file_directory = xstrdup (DEBUGDIR);
+	}
+    }
+  else
+    debug_file_directory = xstrdup (DEBUGDIR);
 #else
-  gdb_sysroot = "";
+  debug_file_directory = xstrdup (DEBUGDIR);
 #endif
-#endif
+
+  /* Canonicalize the debugfile path.  */
+  if (*debug_file_directory)
+    {
+      char *canon_debug = lrealpath (debug_file_directory);
+      if (canon_debug)
+	{
+	  xfree (debug_file_directory);
+	  debug_file_directory = canon_debug;
+	}
+    }
 
   /* There will always be an interpreter.  Either the one passed into
      this captured main, or one specified by the user at start up, or

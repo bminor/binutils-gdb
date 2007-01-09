@@ -75,6 +75,22 @@ AC_DEFINE_DIR(DEBUGDIR, debugdir,
               [Global directory for separate debug files. ])
 #AC_DEFINE_UNQUOTED(DEBUGDIR, "$debugdir"),
 
+if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
+  if test "x$prefix" = xNONE; then
+    test_prefix=/usr/local
+  else
+    test_prefix=$prefix
+  fi
+else
+  test_prefix=$exec_prefix
+fi
+case ${debugdir} in
+"${test_prefix}"|"${test_prefix}/"*|\
+'${exec_prefix}'|'${exec_prefix}/'*)
+  AC_DEFINE(DEBUGDIR_RELOCATABLE, 1, [Define if the debug directory should be relocated when GDB is moved.])
+  ;;
+esac
+
 AC_CONFIG_SUBDIRS(doc testsuite)
 
 # Provide defaults for some variables set by the per-host and per-target
@@ -1102,7 +1118,7 @@ AC_ARG_WITH(sysroot,
 
  TARGET_SYSTEM_ROOT_DEFINE='-DTARGET_SYSTEM_ROOT=\"$(TARGET_SYSTEM_ROOT)\"'
 
- if test "x$exec_prefix" = xNONE; then
+ if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
   if test "x$prefix" = xNONE; then
    test_prefix=/usr/local
   else

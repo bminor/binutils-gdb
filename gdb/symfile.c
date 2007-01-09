@@ -1156,7 +1156,7 @@ separate_debug_file_exists (const char *name, unsigned long crc)
   return crc == file_crc;
 }
 
-static char *debug_file_directory = NULL;
+char *debug_file_directory = NULL;
 static void
 show_debug_file_directory (struct ui_file *file, int from_tty,
 			   struct cmd_list_element *c, const char *value)
@@ -1178,6 +1178,7 @@ find_separate_debug_file (struct objfile *objfile)
   char *dir;
   char *debugfile;
   char *name_copy;
+  char *canon_name;
   bfd_size_type debuglink_size;
   unsigned long crc32;
   int i;
@@ -1244,6 +1245,30 @@ find_separate_debug_file (struct objfile *objfile)
       xfree (dir);
       return xstrdup (debugfile);
     }
+
+  /* If the file is in the sysroot, try using its base path in the
+     global debugfile directory.  */
+  canon_name = lrealpath (dir);
+  if (canon_name
+      && strncmp (canon_name, gdb_sysroot, strlen (gdb_sysroot)) == 0
+      && IS_DIR_SEPARATOR (canon_name[strlen (gdb_sysroot)]))
+    {
+      strcpy (debugfile, debug_file_directory);
+      strcat (debugfile, canon_name + strlen (gdb_sysroot));
+      strcat (debugfile, "/");
+      strcat (debugfile, basename);
+
+      if (separate_debug_file_exists (debugfile, crc32))
+	{
+	  xfree (canon_name);
+	  xfree (basename);
+	  xfree (dir);
+	  return xstrdup (debugfile);
+	}
+    }
+  
+  if (canon_name)
+    xfree (canon_name);
 
   xfree (basename);
   xfree (dir);
@@ -3857,7 +3882,6 @@ Usage: set extension-language .foo bar"),
   add_info ("extensions", info_ext_lang_command,
 	    _("All filename extensions associated with a source language."));
 
-  debug_file_directory = xstrdup (DEBUGDIR);
   add_setshow_optional_filename_cmd ("debug-file-directory", class_support,
 				     &debug_file_directory, _("\
 Set the directory where separate debug symbols are searched for."), _("\

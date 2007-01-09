@@ -167,6 +167,9 @@ extern int dbx_commands;
 /* System root path, used to find libraries etc.  */
 extern char *gdb_sysroot;
 
+/* Search path for separate debug files.  */
+extern char *debug_file_directory;
+
 extern int quit_flag;
 extern int immediate_quit;
 extern int sevenbit_strings;

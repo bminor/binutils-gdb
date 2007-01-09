@@ -1,3 +1,19 @@
+2007-01-09  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* configure.ac (DEBUGDIR_RELOCATABLE): Define for debugdir inside
+	exec_prefix.
+	(TARGET_SYSTEM_ROOT_RELOCATABLE): Allow for exec_prefix being
+	'${prefix}'.
+	* configure, config.in: Regenerate.
+	* defs.h (debug_file_directory): Declare.
+	* main.c (captured_main): Canonicalize gdb_sysroot.  Assume
+	TARGET_SYSTEM_ROOT is defined.  Initialize debug_file_directory and
+	relocate it if DEBUGDIR_RELOCATABLE.
+	* symfile.c (debug_file_directory): Make non-static.
+	(find_separate_debug_file): Look for debug info for SYSROOT/PATH
+	in DEBUGDIR/PATH if DEBUGDIR is inside SYSROOT.
+	(_initialize_symfile): Don't initialize debug_file_directory here.
+
 2007-01-09  Jim Blandy  <jimb@codesourcery.com>
 
 	* score-tdep.c (score_push_dummy_call): Don't mix declarations and
