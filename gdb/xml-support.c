@@ -81,6 +81,9 @@ gdb_xml_body_text (void *data, const XML_Char *text, int length)
   struct gdb_xml_parser *parser = data;
   struct scope_level *scope = VEC_last (scope_level_s, parser->scopes);
 
+  if (parser->error.reason < 0)
+    return;
+
   if (scope->body == NULL)
     {
       scope->body = XZALLOC (struct obstack);
@@ -286,7 +289,9 @@ gdb_xml_start_element_wrapper (void *data, const XML_Char *name,
   if (ex.reason < 0)
     {
       parser->error = ex;
+#ifdef HAVE_XML_STOPPARSER
       XML_StopParser (parser->expat_parser, XML_FALSE);
+#endif
     }
 }
 
@@ -362,7 +367,9 @@ gdb_xml_end_element_wrapper (void *data, const XML_Char *name)
   if (ex.reason < 0)
     {
       parser->error = ex;
+#ifdef HAVE_XML_STOPPARSER
       XML_StopParser (parser->expat_parser, XML_FALSE);
+#endif
     }
 }
 

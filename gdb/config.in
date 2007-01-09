@@ -451,6 +451,9 @@
 /* Define to 1 if `vfork' works. */
 #undef HAVE_WORKING_VFORK
 
+/* Define to 1 if you have the `XML_StopParser' function. */
+#undef HAVE_XML_STOPPARSER
+
 /* Define to 1 if your system has the _etext variable. */
 #undef HAVE__ETEXT
 

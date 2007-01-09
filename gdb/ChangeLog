@@ -1,3 +1,11 @@
+2007-01-09  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* configure.ac: Check for XML_StopParser.
+	* xml-support.c (gdb_xml_body_text): Check for an error.
+	(gdb_xml_start_element_wrapper): Conditionalize call to XML_StopParser.
+	(gdb_xml_end_element_wrapper): Likewise.
+	* config.in, configure: Regenerated.
+
 2007-01-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* varobj.c (install_new_value): Always update print_value.
