@@ -61,7 +61,8 @@ byhand="
 "
 
 # Files which should not be modified, either because they are
-# generated, non-FSF, or otherwise special (e.g. license text).
+# generated, non-FSF, or otherwise special (e.g. license text,
+# or test cases which must be sensitive to line numbering).
 prunes="
 COPYING
 COPYING.LIB
@@ -76,6 +77,8 @@ gdbtk
 gdb.gdbtk
 osf-share
 aclocal.m4
+step-line.inp
+step-line.c
 "
 
 ####

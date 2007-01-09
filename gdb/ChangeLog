@@ -1,5 +1,9 @@
 2007-01-09  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* copyright.sh (prunes): Add step-line.inp and step-line.c.
+
+2007-01-09  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* configure.ac (DEBUGDIR_RELOCATABLE): Define for debugdir inside
 	exec_prefix.
 	(TARGET_SYSTEM_ROOT_RELOCATABLE): Allow for exec_prefix being
