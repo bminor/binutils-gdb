@@ -1,0 +1,9 @@
+<!-- The root element of a GDB target description is <target>.  -->
+
+<!ELEMENT target	(architecture?)>
+<!ATTLIST target
+	xmlns:xi	CDATA	#FIXED "http://www.w3.org/2001/XInclude">
+
+<!ELEMENT architecture	(#PCDATA)>
+
+
