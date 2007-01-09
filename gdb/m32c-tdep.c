@@ -1919,8 +1919,14 @@ m32c_prev_register (struct frame_info *next_frame,
   /* Otherwise, presume we haven't changed the value of this
      register, and get it from the next frame.  */
   else
-    frame_register_unwind (next_frame, regnum,
-			   optimizedp, lvalp, addrp, realnump, bufferp);
+    {
+      *optimizedp = 0;
+      *lvalp = lval_register;
+      *addrp = 0;
+      *realnump = regnum;
+      if (bufferp)
+	frame_unwind_register (next_frame, *realnump, bufferp);
+    }
 }
 
 

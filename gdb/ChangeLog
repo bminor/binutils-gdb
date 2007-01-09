@@ -1,4 +1,14 @@
 2007-01-09  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* alpha-mdebug-tdep.c (alpha_mdebug_frame_prev_register): Use
+	frame_unwind_register to recurse.
+	* alpha-tdep.c (alpha_sigtramp_frame_prev_register): Likewise.
+	(alpha_heuristic_frame_prev_register): Likewise.
+	* h8300-tdep.c (h8300_frame_prev_register): Likewise.
+	* m32c-tdep.c (m32c_prev_register): Likewise.
+	* frame.c (frame_register_unwind_location): Remove FIXME.
+
+2007-01-09  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Eli Zaretskii  <eliz@gnu.org>
 
 	* copyright.sh: New file.

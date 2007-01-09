@@ -864,8 +864,12 @@ alpha_sigtramp_frame_prev_register (struct frame_info *next_frame,
      current description of it in alpha_sigtramp_frame_unwind_cache
      doesn't include it.  Too bad.  Fall back on whatever's in the
      outer frame.  */
-  frame_register (next_frame, regnum, optimizedp, lvalp, addrp,
-		  realnump, bufferp);
+  *optimizedp = 0;
+  *lvalp = lval_register;
+  *addrp = 0;
+  *realnump = regnum;
+  if (bufferp)
+    frame_unwind_register (next_frame, *realnump, bufferp);
 }
 
 static const struct frame_unwind alpha_sigtramp_frame_unwind = {
@@ -1218,8 +1222,12 @@ alpha_heuristic_frame_prev_register (struct frame_info *next_frame,
     }
 
   /* Otherwise assume the next frame has the same register value.  */
-  frame_register_unwind (next_frame, regnum, optimizedp, lvalp, addrp,
-                         realnump, bufferp);
+  *optimizedp = 0;
+  *lvalp = lval_register;
+  *addrp = 0;
+  *realnump = regnum;
+  if (bufferp)
+    frame_unwind_register (next_frame, *realnump, bufferp);
 }
 
 static const struct frame_unwind alpha_heuristic_frame_unwind = {

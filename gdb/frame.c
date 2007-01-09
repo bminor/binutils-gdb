@@ -1103,10 +1103,7 @@ reinit_frame_cache (void)
 
 /* Find where a register is saved (in memory or another register).
    The result of frame_register_unwind is just where it is saved
-   relative to this particular frame.
-
-   FIXME: alpha, m32c, and h8300 actually do the transitive operation
-   themselves.  */
+   relative to this particular frame.  */
 
 static void
 frame_register_unwind_location (struct frame_info *this_frame, int regnum,
