@@ -434,14 +434,15 @@ score_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (value_type (arg));
-      arglen = TYPE_LENGTH (arg_type);
       enum type_code typecode = TYPE_CODE (arg_type);
       const gdb_byte *val = value_contents (arg);
       int downward_offset = 0;
-
-      int odd_sized_struct_p = (arglen > SCORE_REGSIZE
-                                && arglen % SCORE_REGSIZE != 0);
+      int odd_sized_struct_p;
       int arg_last_part_p = 0;
+
+      arglen = TYPE_LENGTH (arg_type);
+      odd_sized_struct_p = (arglen > SCORE_REGSIZE
+                                && arglen % SCORE_REGSIZE != 0);
 
       /* If a arg should be aligned to 8 bytes (long long or double),
          the value should be put to even register numbers.  */

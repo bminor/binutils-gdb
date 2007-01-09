@@ -1,3 +1,8 @@
+2007-01-09  Jim Blandy  <jimb@codesourcery.com>
+
+	* score-tdep.c (score_push_dummy_call): Don't mix declarations and
+	statements.
+
 2007-01-09  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* alpha-mdebug-tdep.c (alpha_mdebug_frame_prev_register): Use
