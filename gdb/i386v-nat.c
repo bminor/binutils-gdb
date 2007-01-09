@@ -1,7 +1,7 @@
 /* Intel 386 native support for System V systems (pre-SVR4).
 
-   Copyright (C) 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
-   1999, 2000, 2002 Free Software Foundation, Inc.
+   Copyright (C) 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999,
+   2000, 2002, 2007 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

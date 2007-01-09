@@ -1,5 +1,5 @@
 /* Definitions to make GDB run on an M32R based machine under GNU/Linux.
-   Copyright 2004 Free Software Foundation, Inc.
+   Copyright 2004, 2007 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

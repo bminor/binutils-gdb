@@ -1,8 +1,7 @@
 /* Parameters for execution on any Hewlett-Packard PA-RISC machine.
 
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
-   Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
+   1999, 2000, 2001, 2002, 2003, 2004, 2007 Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).

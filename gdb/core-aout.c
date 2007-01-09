@@ -1,6 +1,6 @@
 /* Extract registers from a "standard" core file, for GDB.
    Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
-   1999, 2000, 2001 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2007 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

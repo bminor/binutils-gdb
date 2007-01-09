@@ -1,5 +1,6 @@
 /*  dv-m68hc11.c -- CPU 68HC11&68HC12 as a device.
-    Copyright (C) 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2007
+    Free Software Foundation, Inc.
     Written by Stephane Carrez (stcarrez@nerim.fr)
     (From a driver model Contributed by Cygnus Solutions.)
     

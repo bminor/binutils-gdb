@@ -1,6 +1,6 @@
 /* Generic support for remote debugging interfaces.
 
-   Copyright (C) 1993, 1994, 1995, 1996, 1998, 2000, 2001
+   Copyright (C) 1993, 1994, 1995, 1996, 1998, 2000, 2001, 2007
    Free Software Foundation, Inc.
 
    This file is part of GDB.

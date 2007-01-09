@@ -1,6 +1,6 @@
 /* Macro definitions for GDB on an Intel i386 running Solaris 2.
 
-   Copyright 1998, 1999, 2000, 2004 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2004, 2007 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

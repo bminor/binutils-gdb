@@ -1,6 +1,6 @@
 /* Target-dependent code for NetBSD/mips.
 
-   Copyright (C) 2002, 2003, 2004, 2006 Free Software Foundation, Inc.
+   Copyright (C) 2002, 2003, 2004, 2006, 2007 Free Software Foundation, Inc.
 
    Contributed by Wasabi Systems, Inc.
 

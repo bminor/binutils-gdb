@@ -1,5 +1,5 @@
 /* Native support for SCO 3.2v4.
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 2007 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  By Ian Lance Taylor
    <ian@cygnus.com> based on work by Martin Walker <maw@netcom.com>.
 

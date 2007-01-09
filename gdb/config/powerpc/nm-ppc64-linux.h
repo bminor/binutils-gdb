@@ -1,5 +1,5 @@
 /* IBM PowerPC64 native-dependent macros for GDB, the GNU debugger.
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2007 Free Software Foundation, Inc.
 
 This file is part of GDB.
 

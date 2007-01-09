@@ -1,6 +1,6 @@
 /* Definitions to target GDB to GNU/Linux on ia64.
 
-   Copyright 1992, 1993, 2000, 2004, 2005 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 2000, 2004, 2005, 2007 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

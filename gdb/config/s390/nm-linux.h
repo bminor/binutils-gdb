@@ -1,6 +1,6 @@
 /* Native support for GNU/Linux on S390.
 
-   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003, 2007 Free Software Foundation, Inc.
 
    Ported by D.J. Barrow for IBM Deutschland Entwicklung GmbH, IBM
    Corporation.  derived from i390-nmlinux.h

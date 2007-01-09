@@ -1,5 +1,5 @@
 /* Native support for i386 running SVR4.
-   Copyright 1986, 1987, 1989, 1992, 1993, 1996
+   Copyright 1986, 1987, 1989, 1992, 1993, 1996, 2007
    Free Software Foundation, Inc.
    Changes for 80386 by Pace Willisson (pace@prep.ai.mit.edu), July 1988.
 

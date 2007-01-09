@@ -1,6 +1,5 @@
 /* Target operations for the remote server for GDB.
-   Copyright (C) 2002, 2004, 2005
-   Free Software Foundation, Inc.
+   Copyright (C) 2002, 2004, 2005, 2007 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
 

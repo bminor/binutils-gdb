@@ -1,5 +1,5 @@
 /* Target-specific definition for a Renesas Super-H.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2007
    Free Software Foundation, Inc.
 
    This file is part of GDB.

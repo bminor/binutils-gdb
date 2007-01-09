@@ -1,5 +1,5 @@
 /* Data structures associated with tracepoints in GDB.
-   Copyright (C) 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1997, 1998, 1999, 2000, 2007 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

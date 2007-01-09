@@ -1,6 +1,6 @@
 /* Remote target communications for the Macraigor Systems BDM Wiggler
    talking to a Motorola PPC 8xx ADS board
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2007
    Free Software Foundation, Inc.
 
    This file is part of GDB.

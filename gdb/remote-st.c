@@ -1,7 +1,7 @@
 /* Remote debugging interface for Tandem ST2000 phone switch, for GDB.
 
-   Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000,
-   2001, 2002, 2006 Free Software Foundation, Inc.
+   Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001,
+   2002, 2006, 2007 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.  Written by Jim Kingdon for Cygnus.
 

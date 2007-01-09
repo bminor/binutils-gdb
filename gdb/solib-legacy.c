@@ -1,7 +1,6 @@
 /* Provide legacy r_debug and link_map support for SVR4-like native targets.
 
-   Copyright (C) 2000, 2001, 2006
-   Free Software Foundation, Inc.
+   Copyright (C) 2000, 2001, 2006, 2007 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

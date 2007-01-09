@@ -1,6 +1,6 @@
 /* Native-dependent definitions for NetBSD.
 
-   Copyright 1994, 1996, 1999, 2004 Free Software Foundation, Inc.
+   Copyright 1994, 1996, 1999, 2004, 2007 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

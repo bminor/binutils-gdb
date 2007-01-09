@@ -1,5 +1,5 @@
 /* Parameters for execution on an HP PA-RISC machine, running HPUX, for GDB.
-   Copyright 1991, 1992, 1995, 1998, 2002, 2003, 2004
+   Copyright 1991, 1992, 1995, 1998, 2002, 2003, 2004, 2007
    Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the

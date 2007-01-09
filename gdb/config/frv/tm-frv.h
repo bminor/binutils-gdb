@@ -1,5 +1,5 @@
 /* Target definitions for the Fujitsu FR-V, for GDB, the GNU Debugger.
-   Copyright 2000, 2004 Free Software Foundation, Inc.
+   Copyright 2000, 2004, 2007 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

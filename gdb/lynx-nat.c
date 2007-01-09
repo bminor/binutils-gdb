@@ -1,7 +1,7 @@
 /* Native-dependent code for LynxOS.
 
-   Copyright (C) 1993, 1994, 1995, 1996, 1999, 2000, 2001, 2003 Free
-   Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 1995, 1996, 1999, 2000, 2001, 2003, 2007
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

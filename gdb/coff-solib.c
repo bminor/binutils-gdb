@@ -1,5 +1,6 @@
 /* Handle COFF SVR3 shared libraries for GDB, the GNU Debugger.
-   Copyright (C) 1993, 1994, 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 1998, 1999, 2000, 2007
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

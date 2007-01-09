@@ -1,6 +1,7 @@
 /* Target-dependent code for GNU/Linux x86-64.
 
-   Copyright (C) 2001, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
+   Copyright (C) 2001, 2003, 2004, 2005, 2006, 2007
+   Free Software Foundation, Inc.
    Contributed by Jiri Smid, SuSE Labs.
 
    This file is part of GDB.

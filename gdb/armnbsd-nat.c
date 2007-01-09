@@ -1,6 +1,6 @@
 /* Native-dependent code for BSD Unix running on ARM's, for GDB.
 
-   Copyright (C) 1988, 1989, 1991, 1992, 1994, 1996, 1999, 2002, 2004
+   Copyright (C) 1988, 1989, 1991, 1992, 1994, 1996, 1999, 2002, 2004, 2007
    Free Software Foundation, Inc.
 
    This file is part of GDB.

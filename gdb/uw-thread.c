@@ -1,7 +1,7 @@
 /* Low level interface for debugging UnixWare user-mode threads for
    GDB, the GNU debugger.
 
-   Copyright (C) 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000, 2001, 2007 Free Software Foundation, Inc.
    Written by Nick Duffek <nsd@cygnus.com>.
 
    This file is part of GDB.

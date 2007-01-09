@@ -1,5 +1,5 @@
 /* Remote debugging interface for EST-300 ICE, for GDB
-   Copyright (C) 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2007
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 

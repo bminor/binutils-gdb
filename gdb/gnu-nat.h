@@ -1,5 +1,6 @@
 /* Common things used by the various *gnu-nat.c files
-   Copyright (C) 1995, 1996, 1997, 1999, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1995, 1996, 1997, 1999, 2000, 2007
+   Free Software Foundation, Inc.
 
    Written by Miles Bader <miles@gnu.ai.mit.edu>
 

@@ -1,5 +1,5 @@
 /* Macro definitions for Power PC running embedded ABI.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2007
    Free Software Foundation, Inc.
 
    This file is part of GDB.

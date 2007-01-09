@@ -1,5 +1,5 @@
 /* Native-dependent definitions for NetBSD a.out.
-   Copyright 1994, 1996, 1999 Free Software Foundation, Inc.
+   Copyright 1994, 1996, 1999, 2007 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

@@ -1,6 +1,7 @@
 /* frv simulator machine independent profiling code.
 
-   Copyright (C) 1998, 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
+   Copyright (C) 1998, 1999, 2000, 2001, 2003, 2007
+   Free Software Foundation, Inc.
    Contributed by Red Hat
 
 This file is part of the GNU simulators.

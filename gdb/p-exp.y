@@ -1,6 +1,5 @@
 /* YACC parser for Pascal expressions, for GDB.
-   Copyright (C) 2000, 2006
-   Free Software Foundation, Inc.
+   Copyright (C) 2000, 2006, 2007 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
