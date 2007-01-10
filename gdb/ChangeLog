@@ -1,3 +1,12 @@
+2007-01-10  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* infrun.c (singlestep_pc): New variable.
+	(resume): Set singlestep_pc.
+	(context_switch): Add a debugging message.  Flush the frame cache.
+	(handle_inferior_event): Add debugging messages.  Handle thread
+	hops when a software single step has completed.  Let context_switch
+	handle flushing the frame cache.
+
 2007-01-09  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* NEWS: Mention target descriptions, "set tdesc filename",

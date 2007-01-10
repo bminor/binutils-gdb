@@ -469,6 +469,9 @@ static int singlestep_breakpoints_inserted_p = 0;
 /* The thread we inserted single-step breakpoints for.  */
 static ptid_t singlestep_ptid;
 
+/* PC when we started this single-step.  */
+static CORE_ADDR singlestep_pc;
+
 /* If another thread hit the singlestep breakpoint, we save the original
    thread here so that we can resume single-stepping it later.  */
 static ptid_t saved_singlestep_ptid;
@@ -563,6 +566,7 @@ resume (int step, enum target_signal sig)
          `wait_for_inferior' */
       singlestep_breakpoints_inserted_p = 1;
       singlestep_ptid = inferior_ptid;
+      singlestep_pc = read_pc ();
     }
 
   /* If there were any forks/vforks/execs that were caught and are
@@ -1126,6 +1130,14 @@ context_switch (struct execution_control_state *ecs)
      be lost.  This may happen as a result of the target module
      mishandling thread creation.  */
 
+  if (debug_infrun)
+    {
+      fprintf_unfiltered (gdb_stdlog, "infrun: Switching context from %s ",
+			  target_pid_to_str (inferior_ptid));
+      fprintf_unfiltered (gdb_stdlog, "to %s\n",
+			  target_pid_to_str (ecs->ptid));
+    }
+
   if (in_thread_list (inferior_ptid) && in_thread_list (ecs->ptid))
     {				/* Perform infrun state context switch: */
       /* Save infrun state for the old thread.  */
@@ -1149,6 +1161,7 @@ context_switch (struct execution_control_state *ecs)
 			 &ecs->current_line, &ecs->current_symtab);
     }
   inferior_ptid = ecs->ptid;
+  flush_cached_frames ();
 }
 
 static void
@@ -1609,6 +1622,14 @@ handle_inferior_event (struct execution_control_state *ecs)
 	}
       else if (SOFTWARE_SINGLE_STEP_P () && singlestep_breakpoints_inserted_p)
 	{
+	  /* We have not context switched yet, so this should be true
+	     no matter which thread hit the singlestep breakpoint.  */
+	  gdb_assert (ptid_equal (inferior_ptid, singlestep_ptid));
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog, "infrun: software single step "
+				"trap for %s\n",
+				target_pid_to_str (ecs->ptid));
+
 	  ecs->random_signal = 0;
 	  /* The call to in_thread_list is necessary because PTIDs sometimes
 	     change when we go from single-threaded to multi-threaded.  If
@@ -1617,9 +1638,46 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  if (!ptid_equal (singlestep_ptid, ecs->ptid)
 	      && in_thread_list (singlestep_ptid))
 	    {
-	      thread_hop_needed = 1;
-	      stepping_past_singlestep_breakpoint = 1;
-	      saved_singlestep_ptid = singlestep_ptid;
+	      /* If the PC of the thread we were trying to single-step
+		 has changed, discard this event (which we were going
+		 to ignore anyway), and pretend we saw that thread
+		 trap.  This prevents us continuously moving the
+		 single-step breakpoint forward, one instruction at a
+		 time.  If the PC has changed, then the thread we were
+		 trying to single-step has trapped or been signalled,
+		 but the event has not been reported to GDB yet.
+
+		 There might be some cases where this loses signal
+		 information, if a signal has arrived at exactly the
+		 same time that the PC changed, but this is the best
+		 we can do with the information available.  Perhaps we
+		 should arrange to report all events for all threads
+		 when they stop, or to re-poll the remote looking for
+		 this particular thread (i.e. temporarily enable
+		 schedlock).  */
+             if (read_pc_pid (singlestep_ptid) != singlestep_pc)
+	       {
+		 if (debug_infrun)
+		   fprintf_unfiltered (gdb_stdlog, "infrun: unexpected thread,"
+				       " but expected thread advanced also\n");
+
+		 /* The current context still belongs to
+		    singlestep_ptid.  Don't swap here, since that's
+		    the context we want to use.  Just fudge our
+		    state and continue.  */
+                 ecs->ptid = singlestep_ptid;
+                 stop_pc = read_pc_pid (ecs->ptid);
+               }
+             else
+	       {
+		 if (debug_infrun)
+		   fprintf_unfiltered (gdb_stdlog,
+				       "infrun: unexpected thread\n");
+
+		 thread_hop_needed = 1;
+		 stepping_past_singlestep_breakpoint = 1;
+		 saved_singlestep_ptid = singlestep_ptid;
+	       }
 	    }
 	}
 
@@ -1702,8 +1760,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 
       if (deprecated_context_hook)
 	deprecated_context_hook (pid_to_thread_id (ecs->ptid));
-
-      flush_cached_frames ();
     }
 
   if (SOFTWARE_SINGLE_STEP_P () && singlestep_breakpoints_inserted_p)
