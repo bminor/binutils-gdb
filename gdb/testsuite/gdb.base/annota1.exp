@@ -244,7 +244,6 @@ set pat_begin "\r\n\032\032post-prompt\r\nContinuing.\r\n\r\n\032\032starting\r\
 set pat_adjust "warning: Breakpoint 3 address previously adjusted from $hex to $hex.\r\n"
 set pat_end "\r\n\032\032breakpoint 3\r\n\r\nBreakpoint 3, \r\n\032\032frame-begin 0 $hex\r\n\r\n(\032\032frame-address\r\n$hex\r\n\032\032frame-address-end\r\n in \r\n)*.*\032\032frame-function-name\r\n.*printf\r\n\032\032frame-args\r\n.*\032\032frame-end\r\n\r\n\032\032stopped\r\n$gdb_prompt$"
 
-send_gdb "continue\n"
 gdb_test_multiple "continue" "continue to printf" {
     -re "${pat_begin}($pat_adjust)?$pat_end" {
 	pass "continue to printf"

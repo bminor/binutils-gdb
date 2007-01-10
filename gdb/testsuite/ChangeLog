@@ -1,3 +1,7 @@
+2007-01-09  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/annota1.exp: Remove extra send_gdb.
+
 2007-01-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/relativedebug.c, gdb.base/relativedebug.exp: New files.
