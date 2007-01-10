@@ -1,3 +1,8 @@
+2007-01-10  Jim Blandy  <jimb@codesourcery.com>
+
+	* MAINTAINERS (Global Maintainers): Ulrich Weigand has accepted
+	the Global Maintainers' invitation to be a global maintainer.
+
 2007-01-10  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* infrun.c (singlestep_pc): New variable.
