@@ -47,6 +47,10 @@
 
 2007-01-09  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	Updated copyright notices for most files.
+
+2007-01-09  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* copyright.sh (prunes): Add step-line.inp and step-line.c.
 
 2007-01-09  Daniel Jacobowitz  <dan@codesourcery.com>
