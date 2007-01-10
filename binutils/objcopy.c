@@ -1764,15 +1764,6 @@ copy_object (bfd *ibfd, bfd *obfd)
   return TRUE;
 }
 
-#if ! defined(HAVE_MKDTEMP)
-#undef MKDIR
-#if defined (_WIN32) && !defined (__CYGWIN32__)
-#define MKDIR(DIR, MODE) mkdir (DIR)
-#else
-#define MKDIR(DIR, MODE) mkdir (DIR, MODE)
-#endif
-#endif
-
 /* Read each archive element in turn from IBFD, copy the
    contents to temp file, and keep the temp file handle.
    If 'force_output_target' is TRUE then make sure that
@@ -1794,19 +1785,10 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
   char * dir;
 
   /* Make a temp directory to hold the contents.  */
-#if defined(HAVE_MKDTEMP)
   dir = make_tempdir (bfd_get_filename (obfd));
-
   if (dir == NULL)
       fatal (_("cannot create tempdir for archive copying (error: %s)"),
 	   strerror (errno));
-#else
-  dir = make_tempname (bfd_get_filename (obfd));
-
-  if (MKDIR (dir, 0700) != 0)
-    fatal (_("cannot mkdir %s for archive copying (error: %s)"),
-	   dir, strerror (errno));
-#endif
 
   obfd->has_armap = ibfd->has_armap;
 
@@ -1833,17 +1815,10 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
       /* If the file already exists, make another temp dir.  */
       if (stat (output_name, &buf) >= 0)
 	{
-#if defined(HAVE_MKDTEMP)
 	  output_name = make_tempdir (output_name);
 	  if (output_name == NULL)
-	    fatal (_("cannot create temporary dir '%s' for archive copying (error: %s)"),
-		   output_name, strerror (errno));
-#else
-	  output_name = make_tempname (output_name);
-	  if (MKDIR (output_name, 0700) != 0)
-	    fatal (_("cannot mkdir %s for archive copying (error: %s)"),
-		   output_name, strerror (errno));
-#endif
+	    fatal (_("cannot create tempdir for archive copying (error: %s)"),
+		   strerror (errno));
 
 	  l = xmalloc (sizeof (struct name_list));
 	  l->name = output_name;

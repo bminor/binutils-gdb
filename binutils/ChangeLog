@@ -1,3 +1,14 @@
+2007-01-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* bucomm.h (make_tempdir): Declare independently of HAVE_MKDTEMP.
+	* bucomm.c (template_in_dir): New function, split out from..
+	(make_tempname): ..here.  Open the file with O_EXCL if !HAVE_MKSTEMP.
+	(make_tempdir): Use template_in_dir.  Handle directory creation
+	when !HAVE_MKDTEMP.
+	* objcopy.c (MKDIR): Don't define.
+	(copy_archive): Use make_tempdir when !HAVE_MKDTEMP too.  Fix
+	error message.
+
 2007-01-08  Kazu Hirata  <kazu@codesourcery.com>
 
 	* readelf.c (get_machine_flags): Treat Fido as an architecture

@@ -200,9 +200,7 @@ int display_info (void);
 void print_arelt_descr (FILE *, bfd *, bfd_boolean);
 
 char *make_tempname (char *);
-#if defined(HAVE_MKDTEMP)
 char *make_tempdir (char *);
-#endif
 
 bfd_vma parse_vma (const char *, const char *);
 
