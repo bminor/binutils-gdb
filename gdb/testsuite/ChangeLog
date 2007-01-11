@@ -1,3 +1,9 @@
+2007-01-11  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.mi/mi-var-cp.cc (reference_update_tests):
+	Make sure the variable we're using is in scope.
+	(reference_to_pointer): Likewise.
+
 2007-01-11  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* lib/gdb.exp (gdb_compile_test): New.

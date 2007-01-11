@@ -31,6 +31,8 @@ void reference_update_tests ()
   x = 567;
   /*: mi_varobj_update RX {} "update RX (3)"
     :*/
+  /* Dummy assignment to keep 'x' in scope.  */
+  x = 444;    
 
   /*: END: reference_update :*/
 }
@@ -72,12 +74,11 @@ void base_in_reference_test_main ()
 
 int reference_to_pointer ()
 {
+  /*: BEGIN: reference_to_pointer :*/  
   S s, *ptr_s, *& rptr_s = ptr_s;
   s.i = 67;
   s.j = 89;
   ptr_s = &s;
-  /*: BEGIN: reference_to_pointer :*/
-  return 99;
   /*: 
     mi_create_varobj RPTR rptr_s "create varobj for rptr_s"
 
@@ -91,6 +92,7 @@ int reference_to_pointer ()
     mi_check_varobj_value RPTR.public.i 67 "check i member"
     mi_check_varobj_value RPTR.public.j 89 "check j member"
   :*/
+  return 99;
   /*: END: reference_to_pointer :*/
 }
 
