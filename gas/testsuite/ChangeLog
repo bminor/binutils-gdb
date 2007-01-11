@@ -1,3 +1,8 @@
+2007-01-11  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb2_add.d: Add test for missing operand.
+	* gas/arm/thumb2_add.s: Ditto.
+
 2007-01-11  Nick Clifton  <nickc@redhat.com>
 
 	* gas/mcore/allinsn.s: Remove use of '#' before numbers - it is a

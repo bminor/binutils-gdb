@@ -8414,8 +8414,8 @@ do_t_add_sub (void)
 		  else
 		    inst.reloc.type = BFD_RELOC_ARM_T32_ADD_IMM;
 		}
-	      inst.instruction |= inst.operands[0].reg << 8;
-	      inst.instruction |= inst.operands[1].reg << 16;
+	      inst.instruction |= Rd << 8;
+	      inst.instruction |= Rs << 16;
 	    }
 	}
       else

@@ -17,3 +17,5 @@ thumb2_add:
 	sub r8, r9, #0x400
 	sub r8, r9, #0x101
 	sub r3, r1, #0x101
+	add r3, #1
+	sub r3, #1
