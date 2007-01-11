@@ -60,7 +60,17 @@ gld${EMULATION_NAME}_map_segments (bfd_boolean need_layout)
 	    einfo ("%F%P: map sections to segments failed: %E\n");
 
 	  if (phdr_size != elf_tdata (output_bfd)->program_header_size)
-	    need_layout = TRUE;
+	    {
+	      if (tries > 6)
+		/* The first few times we allow any change to
+		   phdr_size .  */
+		need_layout = TRUE;
+	      else if (phdr_size < elf_tdata (output_bfd)->program_header_size)
+		/* After that we only allow the size to grow.  */
+		need_layout = TRUE;
+	      else
+		elf_tdata (output_bfd)->program_header_size = phdr_size;
+	    }
 	}
     }
   while (need_layout && --tries);

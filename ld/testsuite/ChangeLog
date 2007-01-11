@@ -1,3 +1,9 @@
+2007-01-11  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-elf/header.d: New.
+	* ld-elf/header.t: New.
+	* ld-elf/header.s: New.
+
 2007-01-08  Kai Tietz	<kai.tietz@onevision.com>
 
 	* ld-fastcall/fastcall.exp: Renamed target x86_64-*-mingw64 to

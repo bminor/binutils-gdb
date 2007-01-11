@@ -4275,7 +4275,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
     elf_tdata (abfd)->program_header_size = alloc * bed->s->sizeof_phdr;
   else
     BFD_ASSERT (elf_tdata (abfd)->program_header_size
-		== alloc * bed->s->sizeof_phdr);
+		>= alloc * bed->s->sizeof_phdr);
 
   if (alloc == 0)
     {

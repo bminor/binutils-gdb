@@ -1,3 +1,8 @@
+2007-01-11  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* emultempl/elf-generic.em (gdl_map_segments): Only allow header
+	shrinkage for the first few iterations.
+
 2007-01-08  Kai Tietz	<kai.tietz@onevision.com>
 
 	* configure.tgt: Renamed target x86_64-*-mingw64 to
