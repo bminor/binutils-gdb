@@ -277,6 +277,10 @@ sysinfo.o:
 	  $(CC_FOR_BUILD) -c -I. $(AM_CFLAGS) $(CFLAGS) $(srcdir)/sysinfo.c -Wno-error ; \
 	fi
 
+embedspu: embedspu.sh
+	sed "s@^program_transform_name=@program_transform_name=$(program_transform_name)@" < $< > $@
+	chmod a+x $@
+
 # We need these for parallel make.
 arparse.h: arparse.c
 defparse.h: defparse.c

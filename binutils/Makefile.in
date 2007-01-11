@@ -237,7 +237,6 @@ GENCAT = @GENCAT@
 GENINSRC_NEVER_FALSE = @GENINSRC_NEVER_FALSE@
 GENINSRC_NEVER_TRUE = @GENINSRC_NEVER_TRUE@
 GMSGFMT = @GMSGFMT@
-GREP = @GREP@
 HDEFINES = @HDEFINES@
 INCINTL = @INCINTL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -284,8 +283,9 @@ VERSION = @VERSION@
 WARN_CFLAGS = @WARN_CFLAGS@
 XGETTEXT = @XGETTEXT@
 YACC = `if [ -f ../bison/bison ]; then echo ../bison/bison -y -L$(srcdir)/../bison/; else echo @YACC@; fi`
-YFLAGS = -d
 ac_ct_CC = @ac_ct_CC@
+ac_ct_RANLIB = @ac_ct_RANLIB@
+ac_ct_STRIP = @ac_ct_STRIP@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
 am__include = @am__include@
@@ -302,7 +302,6 @@ build_vendor = @build_vendor@
 datadir = @datadir@
 datarootdir = @datarootdir@
 docdir = @docdir@
-dvidir = @dvidir@
 exec_prefix = @exec_prefix@
 host = @host@
 host_alias = @host_alias@
@@ -315,15 +314,12 @@ infodir = @infodir@
 install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
-localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
-pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
-psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
@@ -335,6 +331,7 @@ target_vendor = @target_vendor@
 AUTOMAKE_OPTIONS = cygnus dejagnu
 SUBDIRS = doc po
 tooldir = $(exec_prefix)/$(target_alias)
+YFLAGS = -d
 AM_CFLAGS = $(WARN_CFLAGS)
 
 # these two are almost the same program
@@ -1032,6 +1029,10 @@ sysinfo.o:
 	else \
 	  $(CC_FOR_BUILD) -c -I. $(AM_CFLAGS) $(CFLAGS) $(srcdir)/sysinfo.c -Wno-error ; \
 	fi
+
+embedspu: embedspu.sh
+	sed "s@^program_transform_name=@program_transform_name=$(program_transform_name)@" < $< > $@
+	chmod a+x $@
 
 # We need these for parallel make.
 arparse.h: arparse.c
