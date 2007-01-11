@@ -1221,10 +1221,17 @@ get_prev_frame_1 (struct frame_info *this_frame)
      have different frame IDs, the new frame will be bogus; two
      functions can't share a register save slot for the PC.  This can
      happen when the prologue analyzer finds a stack adjustment, but
-     no PC save.  This check does assume that the "PC register" is
-     roughly a traditional PC, even if the gdbarch_unwind_pc method
-     frobs it.  */
+     no PC save.
+
+     This check does assume that the "PC register" is roughly a
+     traditional PC, even if the gdbarch_unwind_pc method adjusts
+     it (we do not rely on the value, only on the unwound PC being
+     dependent on this value).  A potential improvement would be
+     to have the frame prev_pc method and the gdbarch unwind_pc
+     method set the same lval and location information as
+     frame_register_unwind.  */
   if (this_frame->level > 0
+      && PC_REGNUM >= 0
       && get_frame_type (this_frame) == NORMAL_FRAME
       && get_frame_type (this_frame->next) == NORMAL_FRAME)
     {
