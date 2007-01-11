@@ -21,8 +21,12 @@ run_list_test "lns-diag-1" ""
 # ??? Won't work on targets that don't have a bare "nop" insn.
 # Perhaps we could arrange for an include file or something that
 # defined a macro...
-if { ![istarget ia64*-*-*] && ![istarget i370-*-*] && ![istarget i960-*-*]
-     && ![istarget or32-*-*] && ![istarget s390*-*-*] } {
+if { ![istarget ia64*-*-*]
+     && ![istarget i370-*-*]
+     && ![istarget i960-*-*]
+     && ![istarget mcore-*-*]
+     && ![istarget or32-*-*]
+     && ![istarget s390*-*-*] } {
   # Use alternate file for targets using DW_LNS_fixed_advance_pc opcodes.
   if { [istarget xtensa-*-*] } {
     run_dump_test "lns-common-1-alt"

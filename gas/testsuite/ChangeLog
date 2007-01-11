@@ -1,3 +1,8 @@
+2007-01-11  Nick Clifton  <nickc@redhat.com>
+
+	* gas/lns/lns.exp (run_list_test): Run the alternative version of
+	the lns-common-1 test for the MCore target.
+
 2007-01-08  Kai Tietz	<kai.tietz@onevision.com>
 
 	* gas/all/gas.exp: Renamed target x86_64-*-mingw64 to x86_64-*-mingw*.
