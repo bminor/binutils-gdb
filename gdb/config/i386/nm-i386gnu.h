@@ -28,9 +28,6 @@
 
 extern char *gnu_target_pid_to_str (int pid);
 
-/* Before storing, we need to read all the registers.  */
-#define CHILD_PREPARE_TO_STORE() deprecated_read_register_bytes (0, NULL, deprecated_register_bytes ())
-
 /* Don't do wait_for_inferior on attach.  */
 #define ATTACH_NO_WAIT
 

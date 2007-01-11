@@ -1,3 +1,7 @@
+2007-01-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/nm-i386gnu.h (CHILD_PREPARE_TO_STORE): Remove.
+
 2007-01-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* spu-tdep.c (spu_analyze_prologue): Fix erroneous backtrace
