@@ -1,5 +1,9 @@
 2007-01-11  Nick Clifton  <nickc@redhat.com>
 
+	PR gas/3707
+	* config/tc-arm.c (md_begin): Cope with an NULL mcpu_fpu_opt
+	variable.
+
 	* config/tc-mcore.c (md_number_to_chars): Use
 	number_to_chars_{big|little}endian.
 

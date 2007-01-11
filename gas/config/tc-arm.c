@@ -19291,9 +19291,9 @@ md_begin (void)
 
   if (!mfpu_opt)
     {
-      if (!mcpu_cpu_opt)
+      if (mcpu_cpu_opt != NULL)
 	mfpu_opt = &fpu_default;
-      else if (ARM_CPU_HAS_FEATURE (*mcpu_fpu_opt, arm_ext_v5))
+      else if (mcpu_fpu_opt != NULL && ARM_CPU_HAS_FEATURE (*mcpu_fpu_opt, arm_ext_v5))
 	mfpu_opt = &fpu_arch_vfp_v2;
       else
 	mfpu_opt = &fpu_arch_fpa;
