@@ -478,11 +478,17 @@ spu_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR end_pc,
       else if (is_ri16 (insn, op_il, &rt, &immed))
 	{
 	  reg_immed[rt] = immed;
+
+	  if (rt == SPU_RAW_SP_REGNUM && !found_sp)
+	    found_sp = 1;
 	}
 
       else if (is_ri18 (insn, op_ila, &rt, &immed))
 	{
 	  reg_immed[rt] = immed & 0x3ffff;
+
+	  if (rt == SPU_RAW_SP_REGNUM && !found_sp)
+	    found_sp = 1;
 	}
 
       /* STQD is used to save registers to the stack.  */

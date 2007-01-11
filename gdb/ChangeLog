@@ -1,3 +1,8 @@
+2007-01-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* spu-tdep.c (spu_analyze_prologue): Fix erroneous backtrace
+	past entry function with recent newlib.
+
 2007-01-11  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (GDB/MI Variable Objects): Improve the 
