@@ -101,6 +101,17 @@
 	Run inline tests.
 	* gdb.mi/mi-var-cp.cc: Define tests here.
 
+2007-01-04  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Simplify usage of mi_continue_to.
+	* lib/mi-support.exp (mi_runto_helper): Renamed
+	from mi_runto, added new parameter 'run_or_continue'.
+	(mi_runto): Use mi_runto_helper.
+	(mi_continue_to): Accept just function name as parameter.
+	Use mi_runto_helper.
+	* gdb.mi/mi-var-cmd.exp: Adjust to changes.
+	* gdb.mi/mi2-var-cmd.exp: Likewise.
+	
 2006-01-04  Joel Brobecker  <brobecker@adacore.com>
 
 	Make this testcase a bit more realistic. The current code
