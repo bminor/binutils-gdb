@@ -394,7 +394,7 @@ static char *
 template_in_dir (const char *path)
 {
 #define template "stXXXXXX"
-  char *slash = strrchr (path, '/');
+  const char *slash = strrchr (path, '/');
   char *tmpname;
   size_t len;
 
@@ -406,7 +406,7 @@ template_in_dir (const char *path)
     if (slash == NULL || (bslash != NULL && bslash > slash))
       slash = bslash;
     if (slash == NULL && path[0] != '\0' && path[1] == ':')
-      slash = filename + 1;
+      slash = path + 1;
   }
 #endif
 
