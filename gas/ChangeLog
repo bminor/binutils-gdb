@@ -1,3 +1,8 @@
+2007-01-11  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-mcore.c (md_number_to_chars): Use
+	number_to_chars_{big|little}endian.
+
 2007-01-08  Kazu Hirata  <kazu@codesourcery.com>
 
 	* config/tc-m68k.c (m68k_archs, m68k_cpus): Treat Fido as an
