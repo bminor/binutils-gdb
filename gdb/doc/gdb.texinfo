@@ -19612,26 +19612,40 @@ least, the following operations:
 
 @end ignore
 
-@subheading Introduction to Variable Objects in @sc{gdb/mi}
+@subheading Introduction to Variable Objects
 
 @cindex variable objects in @sc{gdb/mi}
-The basic idea behind variable objects is the creation of a named object
-to represent a variable, an expression, a memory location or even a CPU
-register.  For each object created, a set of operations is available for
-examining or changing its properties.
 
-Furthermore, complex data types, such as C structures, are represented
-in a tree format.  For instance, the @code{struct} type variable is the
-root and the children will represent the struct members.  If a child
-is itself of a complex type, it will also have children of its own.
-Appropriate language differences are handled for C, C@t{++} and Java.
+Variable objects are "object-oriented" MI interface for examining and
+changing values of expressions.  Unlike some other MI interfaces that
+work with expressions, variable objects are specifically designed for
+simple and efficient presentation in the frontend.  A variable object
+is identified by string name.  When a variable object is created, the
+frontend specifies the expression for that variable object.  The
+expression can be a simple variable, or it can be an arbitrary complex
+expression, and can even involve CPU registers.  After creating a
+variable object, the frontend can invoke other variable object
+operations---for example to obtain or change the value of a variable
+object, or to change display format.
 
-When returning the actual values of the objects, this facility allows
-for the individual selection of the display format used in the result
-creation.  It can be chosen among: binary, decimal, hexadecimal, octal
-and natural.  Natural refers to a default format automatically
-chosen based on the variable type (like decimal for an @code{int}, hex
-for pointers, etc.).
+Variable objects have hierarchical tree structure.  Any variable object
+that corresponds to a composite type, such as structure in C, has
+a number of child variable objects, for example corresponding to each
+element of a structure.  A child variable object can itself have 
+children, recursively.  Recursion ends when we reach 
+leaf variable objects, which always have built-in types.
+
+For a leaf variable object it is possible to obtain its value as a
+string, or set the value from a string.  String value can be also
+obtained for a non-leaf variable object, but it's generally a string
+that only indicates the type of the object, and does not list its
+contents.  Assignment to a non-leaf variable object is not allowed.
+ 
+A frontend does not need to read the values of all variable objects each time
+the program stops.  Instead, MI provides an update command that lists all
+variable objects whose values has changed since the last update
+operation.  This considerably reduces the amount of data that must
+be transferred to the frontend.
 
 The following is the complete set of @sc{gdb/mi} operations defined to
 access this functionality:
@@ -19754,6 +19768,12 @@ The syntax for the @var{format-spec} is as follows:
  @{binary | decimal | hexadecimal | octal | natural@}
 @end smallexample
 
+The natural format is the default format choosen automatically
+based on the variable type (like decimal for an @code{int}, hex
+for pointers, etc.).
+
+For a variable with children, the format is set only on the 
+variable itself, and the children are not affected.  
 
 @subheading The @code{-var-show-format} Command
 @findex -var-show-format
@@ -19885,8 +19905,8 @@ where @var{attr} is @code{@{ @{ editable | noneditable @} | TBD @}}.
 @end smallexample
 
 Evaluates the expression that is represented by the specified variable
-object and returns its value as a string in the current format specified
-for the object:
+object and returns its value as a string.  The format of the
+string can be changed using the @code{-var-set-format} command.
 
 @smallexample
  value=@var{value}
@@ -19930,12 +19950,19 @@ subsequent @code{-var-update} list.
  -var-update [@var{print-values}] @{@var{name} | "*"@}
 @end smallexample
 
-Update the value of the variable object @var{name} by evaluating its
-expression after fetching all the new values from memory or registers.
-A @samp{*} causes all existing variable objects to be updated.  The
-option @var{print-values} determines whether names both and values, or
-just names are printed in the manner described for
-@code{-var-list-children} (@pxref{-var-list-children}).
+Reevaluate the expressions corresponding to the variable object
+@var{name} and all its direct and indirect children, and return the
+list of variable objects whose values have changed. Here,
+``changed'' means that the result of @code{-var-evaluate-expression} before
+and after the @code{-var-update} is different.  If @samp{*} is used
+as the variable object names, all existing variable objects are
+updated.  The option @var{print-values} determines whether both names 
+and values, or just names are printed.  The possible values of
+this options are the same as for @code{-var-list-children}
+(@pxref{-var-list-children}).  It is recommended to use the
+@samp{--all-values} option, to reduce the number of MI commands needed
+on each program stop.
+
 
 @subsubheading Example
 

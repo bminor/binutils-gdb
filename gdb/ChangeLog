@@ -1,3 +1,8 @@
+2007-01-11  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Variable Objects): Improve the 
+	introduction.  Specify -var-update more exactly.
+
 2007-01-11  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* frame.c (get_prev_frame_1): Check PC_REGNUM before using it.
