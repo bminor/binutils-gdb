@@ -1,3 +1,8 @@
+2076-01-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (BFD_LIBS): Removed.
+	* Makefile.in: Regenerated.
+
 2076-01-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/3631
