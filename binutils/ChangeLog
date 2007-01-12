@@ -1,3 +1,9 @@
+2007-01-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* ar.c (open_inarch): Check fwrite return.  Use size_t.
+	(extract_file): Likewise.  Remove test for "negative" file size.
+	* readelf.c (process_program_headers): Check fscanf return.
+
 2007-01-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bucomm.c (template_in_dir): Fix typo.

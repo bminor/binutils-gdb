@@ -3520,7 +3520,8 @@ process_program_headers (FILE *file)
 		error (_("Internal error: failed to create format string to display program interpreter"));
 
 	      program_interpreter[0] = 0;
-	      fscanf (file, fmt, program_interpreter);
+	      if (fscanf (file, fmt, program_interpreter) <= 0)
+		error (_("Unable to read program interpreter name\n"));
 
 	      if (do_segments)
 		printf (_("\n      [Requesting program interpreter: %s]"),
