@@ -1,3 +1,7 @@
+2007-01-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* input-file.c (input_file_open): Check fgets return.
+
 2007-01-11  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (do_t_add_sub): Use Rd and Rs.
