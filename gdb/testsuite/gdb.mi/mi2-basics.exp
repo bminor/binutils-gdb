@@ -42,7 +42,7 @@ set testfile "basics"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 set escapedobjdir [string_to_regexp ${objdir}]
-set escapedsrcdir [string_to_regexp ${srcdir}]
+set envirodir [string_to_regexp ${objdir}/${subdir}]
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DFAKEARGV}] != "" } {
      untested mi2-basics.exp
@@ -150,8 +150,9 @@ proc test_breakpoints_deletion {} {
 
 proc test_dir_specification {} {
     global mi_gdb_prompt
-    global srcdir
+    global objdir
     global subdir
+    global envirodir
 
     # Add to the search directories, display, then reset back to default
     # Tests:
@@ -159,9 +160,7 @@ proc test_dir_specification {} {
     # -environment-directory 
     # -environment-directory -r
 
-    set envirodir [string_to_regexp ${srcdir}/${subdir}]
-
-    mi_gdb_test "202-environment-directory ${srcdir}/${subdir}" \
+    mi_gdb_test "202-environment-directory ${objdir}/${subdir}" \
              "202\\\^done,source-path=\"${envirodir}.\\\$cdir.\\\$cwd\"" \
              "environment-directory arg operation"
 
@@ -200,9 +199,9 @@ proc test_path_specification {} {
     global mi_gdb_prompt
     global orig_path
     global objdir
-    global srcdir
+    global subdir
     global escapedobjdir
-    global escapedsrcdir
+    global envirodir
 
     # Add to the path, display, then reset 
     # Tests:
@@ -223,13 +222,14 @@ proc test_path_specification {} {
     }
 
     set orig_path [string_to_regexp ${orig_path}]
+    set pathdir [string_to_regexp ${objdir}/${subdir}]
 
     mi_gdb_test "207-environment-path" \
              "207\\\^done,path=\"$orig_path\"" \
              "environment-path no-args operation"
 
-    mi_gdb_test "208-environment-path $srcdir $objdir" \
-             "208\\\^done,path=\"$escapedsrcdir.$escapedobjdir.$orig_path\"" \
+    mi_gdb_test "208-environment-path $objdir ${objdir}/${subdir}" \
+             "208\\\^done,path=\"$escapedobjdir.${envirodir}.$orig_path\"" \
              "environment-path dir1 dir2 operation"
 
     mi_gdb_test "209-environment-path -r $objdir" \
