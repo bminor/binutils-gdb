@@ -1,3 +1,7 @@
+2007-01-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.cp/member-ptr.cc (class Padding): Make contents public.
+
 2007-01-11  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.mi/mi-var-cp.cc (reference_update_tests):

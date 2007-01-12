@@ -86,6 +86,7 @@ typedef int A::*PMI;
    added twice - otherwise it would be 2 * 0 == 0.  */
 class Padding
 {
+public:
   int spacer;
   virtual int vspacer();
 };
