@@ -1,3 +1,9 @@
+2007-01-13  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.mi/mi-basics.exp, gdb.mi/mi2-basics.exp (test_dir_specification)
+	(test_path_specification): Use objdir instead of srcdir to always
+	get an absolute filename.
+
 2007-01-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.cp/member-ptr.cc (class Padding): Make contents public.
