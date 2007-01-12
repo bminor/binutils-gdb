@@ -1,6 +1,6 @@
 /* tc-mn10300.c -- Assembler code for the Matsushita 10300
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006  Free Software Foundation, Inc.
+   2006, 2007 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -2545,7 +2545,7 @@ bfd_boolean
 mn10300_fix_adjustable (fixp)
      struct fix *fixp;
 {
-  if (! TC_RELOC_RTSYM_LOC_FIXUP (fixp))
+  if (TC_FORCE_RELOCATION_LOCAL (fixp))
     return 0;
 
   if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT

@@ -1,6 +1,6 @@
 /* spu.h -- Assembler for spu
 
-   Copyright 2006 Free Software Foundation, Inc.
+   Copyright 2006, 2007 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -53,18 +53,6 @@
 
 /* Values passed to md_apply_fix don't include symbol values.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
-
-/* This expression evaluates to false if the relocation is for a local 
-   object for which we still want to do the relocation at runtime.
-   True if we are willing to perform this relocation while building
-   the .o file.  This is only used for pcrel relocations.  */
-
-#define TC_RELOC_RTSYM_LOC_FIXUP(FIX)				\
-  ((FIX)->fx_addsy == NULL					\
-   || (! S_IS_EXTERNAL ((FIX)->fx_addsy)			\
-       && ! S_IS_WEAK ((FIX)->fx_addsy)				\
-       && S_IS_DEFINED ((FIX)->fx_addsy)			\
-       && ! S_IS_COMMON ((FIX)->fx_addsy)))
 
 /* The spu uses pseudo-ops with no leading period.  */
 #define NO_PSEUDO_DOT 1
