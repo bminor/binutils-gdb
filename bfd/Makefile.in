@@ -81,8 +81,7 @@ am__objects_1 = archive.lo archures.lo bfd.lo bfdio.lo bfdwin.lo \
 	opncls.lo reloc.lo section.lo syms.lo targets.lo hash.lo \
 	linker.lo srec.lo binary.lo tekhex.lo ihex.lo stabs.lo \
 	stab-syms.lo merge.lo dwarf2.lo simple.lo
-am__objects_2 = archive64.lo
-am_libbfd_la_OBJECTS = $(am__objects_1) $(am__objects_2)
+am_libbfd_la_OBJECTS = $(am__objects_1)
 libbfd_la_OBJECTS = $(am_libbfd_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
 depcomp =
@@ -143,7 +142,6 @@ GENCAT = @GENCAT@
 GENINSRC_NEVER_FALSE = @GENINSRC_NEVER_FALSE@
 GENINSRC_NEVER_TRUE = @GENINSRC_NEVER_TRUE@
 GMSGFMT = @GMSGFMT@
-GREP = @GREP@
 HDEFINES = @HDEFINES@
 INCINTL = @INCINTL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -189,7 +187,10 @@ WARN_CFLAGS = @WARN_CFLAGS@
 WIN32LDFLAGS = @WIN32LDFLAGS@
 WIN32LIBADD = @WIN32LIBADD@
 XGETTEXT = @XGETTEXT@
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
+ac_ct_RANLIB = @ac_ct_RANLIB@
+ac_ct_STRIP = @ac_ct_STRIP@
 all_backends = @all_backends@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
@@ -198,10 +199,10 @@ am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
+bfd64_libs = @bfd64_libs@
 bfd_backends = @bfd_backends@
 bfd_default_target_size = @bfd_default_target_size@
 bfd_file_ptr = @bfd_file_ptr@
-bfd_libs = @bfd_libs@
 bfd_machines = @bfd_machines@
 bfd_ufile_ptr = @bfd_ufile_ptr@
 bfdincludedir = @bfdincludedir@
@@ -215,7 +216,6 @@ build_vendor = @build_vendor@
 datadir = @datadir@
 datarootdir = @datarootdir@
 docdir = @docdir@
-dvidir = @dvidir@
 exec_prefix = @exec_prefix@
 host = @host@
 host_alias = @host_alias@
@@ -229,15 +229,12 @@ infodir = @infodir@
 install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
-localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
-pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
-psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
@@ -910,8 +907,12 @@ BLD_POTFILES = $(BUILD_CFILES) $(BUILD_HFILES)
 # BFD_BACKENDS	Routines the configured targets need.
 # BFD_MACHINES	Architecture-specific routines the configured targets need.
 # COREFILE	Core file routines for a native configuration
-OFILES = $(BFD_BACKENDS) $(BFD_MACHINES) @COREFILE@
-libbfd_la_SOURCES = $(BFD32_LIBS_CFILES) $(BFD64_LIBS_CFILES)
+# bfd64_libs	Routines for 64bit support
+OFILES = $(BFD_BACKENDS) $(BFD_MACHINES) @COREFILE@ @bfd64_libs@
+
+# Since BFD64_LIBS is optional and we can't have substitution in
+# libbfd_la_SOURCES, we put BFD64_LIBS in OFILES instead.
+libbfd_la_SOURCES = $(BFD32_LIBS_CFILES)
 libbfd_la_DEPENDENCIES = $(OFILES) ofiles
 libbfd_la_LIBADD = `cat ofiles` @WIN32LIBADD@
 libbfd_la_LDFLAGS = -release $(VERSION) @WIN32LDFLAGS@

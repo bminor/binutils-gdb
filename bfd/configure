@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE AR ac_ct_AR RANLIB ac_ct_RANLIB LN_S LIBTOOL WARN_CFLAGS NO_WERROR MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT GENINSRC_NEVER_TRUE GENINSRC_NEVER_FALSE INSTALL_LIBBFD_TRUE INSTALL_LIBBFD_FALSE host_noncanonical target_noncanonical bfdlibdir bfdincludedir USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT MKINSTALLDIRS MSGFMT MSGMERGE HDEFINES CPP EGREP BFD_HOST_64BIT_LONG BFD_HOST_LONG_LONG BFD_HOST_64_BIT_DEFINED BFD_HOST_64_BIT BFD_HOST_U_64_BIT CC_FOR_BUILD EXEEXT_FOR_BUILD COREFILE COREFLAG WIN32LDFLAGS WIN32LIBADD TDEFINES wordsize bfd_libs all_backends bfd_backends bfd_machines bfd_default_target_size bfd_file_ptr bfd_ufile_ptr tdefaults datarootdir docdir htmldir LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE AR ac_ct_AR RANLIB ac_ct_RANLIB LN_S LIBTOOL WARN_CFLAGS NO_WERROR MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT GENINSRC_NEVER_TRUE GENINSRC_NEVER_FALSE INSTALL_LIBBFD_TRUE INSTALL_LIBBFD_FALSE host_noncanonical target_noncanonical bfdlibdir bfdincludedir USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT MKINSTALLDIRS MSGFMT MSGMERGE HDEFINES CPP EGREP BFD_HOST_64BIT_LONG BFD_HOST_LONG_LONG BFD_HOST_64_BIT_DEFINED BFD_HOST_64_BIT BFD_HOST_U_64_BIT CC_FOR_BUILD EXEEXT_FOR_BUILD COREFILE COREFLAG WIN32LDFLAGS WIN32LIBADD TDEFINES wordsize bfd64_libs all_backends bfd_backends bfd_machines bfd_default_target_size bfd_file_ptr bfd_ufile_ptr tdefaults datarootdir docdir htmldir LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -11131,7 +11131,7 @@ fi	# all_targets is true
 case ${host64}-${target64}-${want64} in
   *true*)
     wordsize=64
-    bfd_libs='$(BFD64_LIBS) $(BFD32_LIBS)'
+    bfd64_libs='$(BFD64_LIBS)'
     all_backends='$(BFD64_BACKENDS) $(BFD32_BACKENDS)'
     if test $BFD_HOST_64_BIT_DEFINED = 0; then
       { echo "$as_me:$LINENO: WARNING: You have requested a 64 bit BFD configuration, but" >&5
@@ -11172,7 +11172,6 @@ echo "$as_me: error: A newer version of gcc is needed for the requested 64-bit B
     ;;
   false-false-false)
     wordsize=32
-    bfd_libs='$(BFD32_LIBS)'
     all_backends='$(BFD32_BACKENDS)'
     ;;
 esac
@@ -13055,7 +13054,7 @@ s,@WIN32LDFLAGS@,$WIN32LDFLAGS,;t t
 s,@WIN32LIBADD@,$WIN32LIBADD,;t t
 s,@TDEFINES@,$TDEFINES,;t t
 s,@wordsize@,$wordsize,;t t
-s,@bfd_libs@,$bfd_libs,;t t
+s,@bfd64_libs@,$bfd64_libs,;t t
 s,@all_backends@,$all_backends,;t t
 s,@bfd_backends@,$bfd_backends,;t t
 s,@bfd_machines@,$bfd_machines,;t t

@@ -1,3 +1,14 @@
+2076-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/3631
+	* Makefile.am (OFILES): Add @bfd64_libs@.
+	(libbfd_la_SOURCES): Remove $(BFD64_LIBS_CFILES).
+	* Makefile.in: Regenerated.
+
+	* configure.in (bfd_libs): Replaced by ...
+	(bfd64_libs): This.
+	* configure: Regenerated.
+
 2007-01-11  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* elf.c (assign_file_positions_for_load_sections): We can

@@ -910,7 +910,7 @@ fi	# all_targets is true
 case ${host64}-${target64}-${want64} in
   *true*)
     wordsize=64
-    bfd_libs='$(BFD64_LIBS) $(BFD32_LIBS)'
+    bfd64_libs='$(BFD64_LIBS)'
     all_backends='$(BFD64_BACKENDS) $(BFD32_BACKENDS)'
     if test $BFD_HOST_64_BIT_DEFINED = 0; then
       AC_MSG_WARN([You have requested a 64 bit BFD configuration, but])
@@ -931,13 +931,12 @@ case ${host64}-${target64}-${want64} in
     ;;
   false-false-false)
     wordsize=32
-    bfd_libs='$(BFD32_LIBS)'
     all_backends='$(BFD32_BACKENDS)'
     ;;
 esac
 
 AC_SUBST(wordsize)
-AC_SUBST(bfd_libs)
+AC_SUBST(bfd64_libs)
 AC_SUBST(all_backends)
 AC_SUBST(bfd_backends)
 AC_SUBST(bfd_machines)

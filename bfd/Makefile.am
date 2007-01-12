@@ -717,7 +717,8 @@ install-html-recursive:
 # BFD_BACKENDS	Routines the configured targets need.
 # BFD_MACHINES	Architecture-specific routines the configured targets need.
 # COREFILE	Core file routines for a native configuration
-OFILES = $(BFD_BACKENDS) $(BFD_MACHINES) @COREFILE@
+# bfd64_libs	Routines for 64bit support
+OFILES = $(BFD_BACKENDS) $(BFD_MACHINES) @COREFILE@ @bfd64_libs@
 
 stamp-ofiles: Makefile
 	rm -f tofiles
@@ -734,7 +735,9 @@ stamp-ofiles: Makefile
 
 ofiles: stamp-ofiles ; @true
 
-libbfd_la_SOURCES = $(BFD32_LIBS_CFILES) $(BFD64_LIBS_CFILES)
+# Since BFD64_LIBS is optional and we can't have substitution in
+# libbfd_la_SOURCES, we put BFD64_LIBS in OFILES instead.
+libbfd_la_SOURCES = $(BFD32_LIBS_CFILES)
 libbfd_la_DEPENDENCIES = $(OFILES) ofiles
 libbfd_la_LIBADD = `cat ofiles` @WIN32LIBADD@
 libbfd_la_LDFLAGS = -release $(VERSION) @WIN32LDFLAGS@
