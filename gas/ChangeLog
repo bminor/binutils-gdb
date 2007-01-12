@@ -1,3 +1,9 @@
+2007-01-12  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/3856
+	* macro.c (expand_irp): Do not ignore spaces inside quoted
+	strings.
+
 2007-01-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-spu.h (TC_RELOC_RTSYM_LOC_FIXUP): Delete.

@@ -1325,8 +1325,14 @@ expand_irp (int irpc, int idx, sb *in, sb *out, int (*get_line) (sb *))
     }
   else
     {
+      bfd_boolean in_quotes = FALSE;
+
       if (irpc && in->ptr[idx] == '"')
-	++idx;
+	{
+	  in_quotes = TRUE;
+	  ++idx;
+	}
+
       while (idx < in->len)
 	{
 	  if (!irpc)
@@ -1337,6 +1343,9 @@ expand_irp (int irpc, int idx, sb *in, sb *out, int (*get_line) (sb *))
 		{
 		  int nxt;
 
+		  if (irpc)
+		    in_quotes = ! in_quotes;
+	  
 		  nxt = sb_skip_white (idx + 1, in);
 		  if (nxt >= in->len)
 		    {
@@ -1348,12 +1357,13 @@ expand_irp (int irpc, int idx, sb *in, sb *out, int (*get_line) (sb *))
 	      sb_add_char (&f.actual, in->ptr[idx]);
 	      ++idx;
 	    }
+
 	  err = macro_expand_body (&sub, out, &f, h, 0);
 	  if (err != NULL)
 	    break;
 	  if (!irpc)
 	    idx = sb_skip_comma (idx, in);
-	  else
+	  else if (! in_quotes)
 	    idx = sb_skip_white (idx, in);
 	}
     }
