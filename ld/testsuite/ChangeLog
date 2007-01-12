@@ -1,3 +1,8 @@
+2007-01-12  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-elf/header.d: Allow arbitrary lines between "Program Header"
+	and "Sections".  Only run on *-*-linux*.
+
 2007-01-11  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-elf/header.d: New.
