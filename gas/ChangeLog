@@ -1,5 +1,14 @@
 2007-01-12  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-spu.h (TC_RELOC_RTSYM_LOC_FIXUP): Delete.
+	* config/tc-m32r.h (TC_RELOC_RTSYM_LOC_FIXUP): Delete.
+	* config/tc-mn10300.h (TC_RELOC_RTSYM_LOC_FIXUP): Delete.
+	(TC_FORCE_RELOCATION): Define.
+	(TC_FORCE_RELOCATION_LOCAL): Define.
+	* config/tc-mn10300.c (mn10300_fix_adjustable): Adjust.
+
+2007-01-12  Alan Modra  <amodra@bigpond.net.au>
+
 	* input-file.c (input_file_open): Check fgets return.
 
 2007-01-11  Paul Brook  <paul@codesourcery.com>
