@@ -388,12 +388,6 @@ regcache_valid_p (struct regcache *regcache, int regnum)
   return regcache->register_valid_p[regnum];
 }
 
-gdb_byte *
-deprecated_grub_regcache_for_registers (struct regcache *regcache)
-{
-  return regcache->registers;
-}
-
 /* Global structure containing the current regcache.  */
 /* FIXME: cagney/2002-05-11: The two global arrays registers[] and
    deprecated_register_valid[] currently point into this structure.  */

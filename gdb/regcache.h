@@ -171,7 +171,6 @@ extern void regcache_cpy_no_passthrough (struct regcache *dest, struct regcache 
    method, there should already be a non-deprecated variant that is
    parameterized with FRAME or REGCACHE.  */
 
-extern gdb_byte *deprecated_grub_regcache_for_registers (struct regcache *);
 extern void deprecated_read_register_gen (int regnum, gdb_byte *myaddr);
 extern void deprecated_write_register_gen (int regnum, gdb_byte *myaddr);
 

@@ -804,26 +804,6 @@ extern void set_gdbarch_store_return_value (struct gdbarch *gdbarch, gdbarch_sto
 #define STORE_RETURN_VALUE(type, regcache, valbuf) (gdbarch_store_return_value (current_gdbarch, type, regcache, valbuf))
 #endif
 
-typedef void (gdbarch_deprecated_extract_return_value_ftype) (struct type *type, gdb_byte *regbuf, gdb_byte *valbuf);
-extern void gdbarch_deprecated_extract_return_value (struct gdbarch *gdbarch, struct type *type, gdb_byte *regbuf, gdb_byte *valbuf);
-extern void set_gdbarch_deprecated_extract_return_value (struct gdbarch *gdbarch, gdbarch_deprecated_extract_return_value_ftype *deprecated_extract_return_value);
-#if !defined (GDB_TM_FILE) && defined (DEPRECATED_EXTRACT_RETURN_VALUE)
-#error "Non multi-arch definition of DEPRECATED_EXTRACT_RETURN_VALUE"
-#endif
-#if !defined (DEPRECATED_EXTRACT_RETURN_VALUE)
-#define DEPRECATED_EXTRACT_RETURN_VALUE(type, regbuf, valbuf) (gdbarch_deprecated_extract_return_value (current_gdbarch, type, regbuf, valbuf))
-#endif
-
-typedef void (gdbarch_deprecated_store_return_value_ftype) (struct type *type, gdb_byte *valbuf);
-extern void gdbarch_deprecated_store_return_value (struct gdbarch *gdbarch, struct type *type, gdb_byte *valbuf);
-extern void set_gdbarch_deprecated_store_return_value (struct gdbarch *gdbarch, gdbarch_deprecated_store_return_value_ftype *deprecated_store_return_value);
-#if !defined (GDB_TM_FILE) && defined (DEPRECATED_STORE_RETURN_VALUE)
-#error "Non multi-arch definition of DEPRECATED_STORE_RETURN_VALUE"
-#endif
-#if !defined (DEPRECATED_STORE_RETURN_VALUE)
-#define DEPRECATED_STORE_RETURN_VALUE(type, valbuf) (gdbarch_deprecated_store_return_value (current_gdbarch, type, valbuf))
-#endif
-
 typedef int (gdbarch_deprecated_use_struct_convention_ftype) (int gcc_p, struct type *value_type);
 extern int gdbarch_deprecated_use_struct_convention (struct gdbarch *gdbarch, int gcc_p, struct type *value_type);
 extern void set_gdbarch_deprecated_use_struct_convention (struct gdbarch *gdbarch, gdbarch_deprecated_use_struct_convention_ftype *deprecated_use_struct_convention);

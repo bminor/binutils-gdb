@@ -524,10 +524,8 @@ M::enum return_value_convention:return_value:struct type *valtype, struct regcac
 # DEPRECATED_USE_STRUCT_CONVENTION have all been folded into
 # RETURN_VALUE.
 
-f:=:void:extract_return_value:struct type *type, struct regcache *regcache, gdb_byte *valbuf:type, regcache, valbuf::legacy_extract_return_value::0
-f:=:void:store_return_value:struct type *type, struct regcache *regcache, const gdb_byte *valbuf:type, regcache, valbuf::legacy_store_return_value::0
-f:=:void:deprecated_extract_return_value:struct type *type, gdb_byte *regbuf, gdb_byte *valbuf:type, regbuf, valbuf
-f:=:void:deprecated_store_return_value:struct type *type, gdb_byte *valbuf:type, valbuf
+f:=:void:extract_return_value:struct type *type, struct regcache *regcache, gdb_byte *valbuf:type, regcache, valbuf:0
+f:=:void:store_return_value:struct type *type, struct regcache *regcache, const gdb_byte *valbuf:type, regcache, valbuf:0
 f:=:int:deprecated_use_struct_convention:int gcc_p, struct type *value_type:gcc_p, value_type::generic_use_struct_convention::0
 
 # As of 2004-01-17 only the 32-bit SPARC ABI has been identified as an

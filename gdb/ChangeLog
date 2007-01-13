@@ -1,5 +1,14 @@
 2007-01-13  Mark Kettenis  <kettenis@gnu.org>
 
+	* gdbarch.sh (deprecated_extract_return_value)
+	(deprecated_store_return_value): Remove.
+	(extract_return_value, store_return_value): Remove default values.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* arch-utils.c, arch-utils.h (legacy_extract_return_value)
+	(legacy_store_return_value): Remove.
+	* regcache.c, regcache.h (deprecated_grub_regcache_for_registers):
+	Remove.
+
 	* mi/mi-main.c: Remove obsolete comment.
 
 	* regcache.c, regcache.h (deprecated_register_bytes)

@@ -41,13 +41,6 @@ enum return_value_convention legacy_return_value (struct gdbarch *gdbarch,
 						  gdb_byte *readbuf,
 						  const gdb_byte *writebuf);
 
-/* Implementation of extract return value that grubs around in the
-   register cache.  */
-extern gdbarch_extract_return_value_ftype legacy_extract_return_value;
-
-/* Implementation of store return value that grubs the register cache.  */
-extern gdbarch_store_return_value_ftype legacy_store_return_value;
-
 /* To return any structure or union type by value, store it at the
    address passed as an invisible first argument to the function.  */
 extern gdbarch_deprecated_use_struct_convention_ftype always_use_struct_convention;

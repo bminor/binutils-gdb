@@ -38,29 +38,6 @@
 
 #include "floatformat.h"
 
-/* Implementation of extract return value that grubs around in the
-   register cache.  */
-void
-legacy_extract_return_value (struct type *type, struct regcache *regcache,
-			     gdb_byte *valbuf)
-{
-  gdb_byte *registers = deprecated_grub_regcache_for_registers (regcache);
-  gdb_byte *buf = valbuf;
-  DEPRECATED_EXTRACT_RETURN_VALUE (type, registers, buf); /* OK */
-}
-
-/* Implementation of store return value that grubs the register cache.
-   Takes a local copy of the buffer to avoid const problems.  */
-void
-legacy_store_return_value (struct type *type, struct regcache *regcache,
-			   const gdb_byte *buf)
-{
-  gdb_byte *b = alloca (TYPE_LENGTH (type));
-  gdb_assert (regcache == current_regcache);
-  memcpy (b, buf, TYPE_LENGTH (type));
-  DEPRECATED_STORE_RETURN_VALUE (type, b);
-}
-
 int
 always_use_struct_convention (int gcc_p, struct type *value_type)
 {
@@ -312,17 +289,6 @@ generic_convert_register_p (int regnum, struct type *type)
 int
 default_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
 {
-  if (DEPRECATED_REG_STRUCT_HAS_ADDR_P ()
-      && DEPRECATED_REG_STRUCT_HAS_ADDR (processing_gcc_compilation, type))
-    {
-      CHECK_TYPEDEF (type);
-
-      return (TYPE_CODE (type) == TYPE_CODE_STRUCT
-	      || TYPE_CODE (type) == TYPE_CODE_UNION
-	      || TYPE_CODE (type) == TYPE_CODE_SET
-	      || TYPE_CODE (type) == TYPE_CODE_BITSTRING);
-    }
-
   return 0;
 }
 
