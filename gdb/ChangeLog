@@ -1,5 +1,7 @@
 2007-01-13  Mark Kettenis  <kettenis@gnu.org>
 
+	* mi/mi-main.c: Remove obsolete comment.
+
 	* regcache.c, regcache.h (deprecated_register_bytes)
 	(deprecated_read_register_bytes)
 	(deprecated_write_register_bytes): Remove.

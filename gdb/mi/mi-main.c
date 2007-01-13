@@ -41,7 +41,7 @@
 #include "event-loop.h"
 #include "event-top.h"
 #include "gdbcore.h"		/* for write_memory() */
-#include "value.h"		/* for deprecated_write_register_bytes() */
+#include "value.h"
 #include "regcache.h"
 #include "gdb.h"
 #include "frame.h"
