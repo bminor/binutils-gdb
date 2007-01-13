@@ -1,3 +1,8 @@
+2007-01-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (build_modrm_byte): Check number of operands
+	when procssing memory/register operand.
+
 2007-01-12  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/3856

@@ -3443,9 +3443,12 @@ build_modrm_byte (void)
       if (i.mem_operands)
 	{
 	  unsigned int fake_zero_displacement = 0;
-	  unsigned int op = ((i.types[0] & AnyMem)
-			     ? 0
-			     : (i.types[1] & AnyMem) ? 1 : 2);
+	  unsigned int op;
+	  
+	  for (op = 0; op < i.operands; op++)
+	    if ((i.types[op] & AnyMem))
+	      break;
+	  assert (op < i.operands);
 
 	  default_seg = &ds;
 
@@ -3616,18 +3619,15 @@ build_modrm_byte (void)
 	 registers are coded into the i.rm.reg field.  */
       if (i.reg_operands)
 	{
-	  unsigned int op =
-	    ((i.types[0]
-	      & (Reg | RegMMX | RegXMM
-		 | SReg2 | SReg3
-		 | Control | Debug | Test))
-	     ? 0
-	     : ((i.types[1]
-		 & (Reg | RegMMX | RegXMM
-		    | SReg2 | SReg3
-		    | Control | Debug | Test))
-		? 1
-		: 2));
+	  unsigned int op;
+
+	  for (op = 0; op < i.operands; op++)
+	    if ((i.types[op] & (Reg | RegMMX | RegXMM
+				| SReg2 | SReg3
+				| Control | Debug | Test)))
+	      break;
+	  assert (op < i.operands);
+
 	  /* If there is an extension opcode to put here, the register
 	     number must be put into the regmem field.  */
 	  if (i.tm.extension_opcode != None)
