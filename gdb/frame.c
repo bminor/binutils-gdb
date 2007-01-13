@@ -775,6 +775,7 @@ get_frame_register_bytes (struct frame_info *frame, int regnum,
 	  memcpy (myaddr, buf + offset, curr_len);
 	}
 
+      myaddr += curr_len;
       len -= curr_len;
       offset = 0;
       regnum++;
@@ -815,6 +816,7 @@ put_frame_register_bytes (struct frame_info *frame, int regnum,
 	  put_frame_register (frame, regnum, buf);
 	}
 
+      myaddr += curr_len;
       len -= curr_len;
       offset = 0;
       regnum++;

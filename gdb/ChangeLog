@@ -1,3 +1,8 @@
+2007-01-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* frame.c (get_frame_register_bytes, put_frame_register_bytes):
+	Don't forget to move destination pointer.
+
 2007-01-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/nm-i386gnu.h (CHILD_PREPARE_TO_STORE): Remove.
