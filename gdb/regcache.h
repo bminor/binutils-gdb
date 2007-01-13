@@ -114,10 +114,6 @@ extern void regcache_raw_collect (const struct regcache *regcache,
 
 extern int register_offset_hack (struct gdbarch *gdbarch, int regnum);
 
-/* Similar.  The total number of bytes occupied by a regcache.  */
-
-extern int deprecated_register_bytes (void );
-
 
 /* The type of a register.  This function is slightly more efficient
    then its gdbarch vector counterpart since it returns a precomputed
@@ -178,10 +174,6 @@ extern void regcache_cpy_no_passthrough (struct regcache *dest, struct regcache 
 extern gdb_byte *deprecated_grub_regcache_for_registers (struct regcache *);
 extern void deprecated_read_register_gen (int regnum, gdb_byte *myaddr);
 extern void deprecated_write_register_gen (int regnum, gdb_byte *myaddr);
-extern void deprecated_read_register_bytes (int regbyte, gdb_byte *myaddr,
-					    int len);
-extern void deprecated_write_register_bytes (int regbyte, gdb_byte *myaddr,
-					     int len);
 
 /* NOTE: cagney/2002-11-05: This function has been superseeded by
    regcache_raw_supply().  */

@@ -495,84 +495,6 @@ deprecated_registers_fetched (void)
      Fetching all real regs NEVER accounts for pseudo-regs.  */
 }
 
-/* deprecated_read_register_bytes and deprecated_write_register_bytes
-   are generally a *BAD* idea.  They are inefficient because they need
-   to check for partial updates, which can only be done by scanning
-   through all of the registers and seeing if the bytes that are being
-   read/written fall inside of an invalid register.  [The main reason
-   this is necessary is that register sizes can vary, so a simple
-   index won't suffice.]  It is far better to call read_register_gen
-   and write_register_gen if you want to get at the raw register
-   contents, as it only takes a regnum as an argument, and therefore
-   can't do a partial register update.
-
-   Prior to the recent fixes to check for partial updates, both read
-   and deprecated_write_register_bytes always checked to see if any
-   registers were stale, and then called target_fetch_registers (-1)
-   to update the whole set.  This caused really slowed things down for
-   remote targets.  */
-
-/* Copy INLEN bytes of consecutive data from registers
-   starting with the INREGBYTE'th byte of register data
-   into memory at MYADDR.  */
-
-void
-deprecated_read_register_bytes (int in_start, gdb_byte *in_buf, int in_len)
-{
-  int in_end = in_start + in_len;
-  int regnum;
-  gdb_byte reg_buf[MAX_REGISTER_SIZE];
-
-  /* See if we are trying to read bytes from out-of-date registers.  If so,
-     update just those registers.  */
-
-  for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
-    {
-      int reg_start;
-      int reg_end;
-      int reg_len;
-      int start;
-      int end;
-      int byte;
-
-      reg_start = DEPRECATED_REGISTER_BYTE (regnum);
-      reg_len = register_size (current_gdbarch, regnum);
-      reg_end = reg_start + reg_len;
-
-      if (reg_end <= in_start || in_end <= reg_start)
-	/* The range the user wants to read doesn't overlap with regnum.  */
-	continue;
-
-      if (REGISTER_NAME (regnum) != NULL && *REGISTER_NAME (regnum) != '\0')
-	/* Force the cache to fetch the entire register.  */
-	deprecated_read_register_gen (regnum, reg_buf);
-
-      /* Legacy note: This function, for some reason, allows a NULL
-         input buffer.  If the buffer is NULL, the registers are still
-         fetched, just the final transfer is skipped. */
-      if (in_buf == NULL)
-	continue;
-
-      /* start = max (reg_start, in_start) */
-      if (reg_start > in_start)
-	start = reg_start;
-      else
-	start = in_start;
-
-      /* end = min (reg_end, in_end) */
-      if (reg_end < in_end)
-	end = reg_end;
-      else
-	end = in_end;
-
-      /* Transfer just the bytes common to both IN_BUF and REG_BUF */
-      for (byte = start; byte < end; byte++)
-	{
-	  in_buf[byte - in_start] = reg_buf[byte - reg_start];
-	}
-    }
-}
-
 void
 regcache_raw_read (struct regcache *regcache, int regnum, gdb_byte *buf)
 {
@@ -787,55 +709,6 @@ regcache_cooked_write (struct regcache *regcache, int regnum,
 				   regnum, buf);
 }
 
-/* Copy INLEN bytes of consecutive data from memory at MYADDR
-   into registers starting with the MYREGSTART'th byte of register data.  */
-
-void
-deprecated_write_register_bytes (int myregstart, gdb_byte *myaddr, int inlen)
-{
-  int myregend = myregstart + inlen;
-  int regnum;
-
-  target_prepare_to_store ();
-
-  /* Scan through the registers updating any that are covered by the
-     range myregstart<=>myregend using write_register_gen, which does
-     nice things like handling threads, and avoiding updates when the
-     new and old contents are the same.  */
-
-  for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
-    {
-      int regstart, regend;
-
-      regstart = DEPRECATED_REGISTER_BYTE (regnum);
-      regend = regstart + register_size (current_gdbarch, regnum);
-
-      /* Is this register completely outside the range the user is writing?  */
-      if (myregend <= regstart || regend <= myregstart)
-	/* do nothing */ ;		
-
-      /* Is this register completely within the range the user is writing?  */
-      else if (myregstart <= regstart && regend <= myregend)
-	deprecated_write_register_gen (regnum, myaddr + (regstart - myregstart));
-
-      /* The register partially overlaps the range being written.  */
-      else
-	{
-	  gdb_byte regbuf[MAX_REGISTER_SIZE];
-	  /* What's the overlap between this register's bytes and
-             those the caller wants to write?  */
-	  int overlapstart = max (regstart, myregstart);
-	  int overlapend   = min (regend,   myregend);
-
-	  /* We may be doing a partial update of an invalid register.
-	     Update it from the target before scribbling on it.  */
-	  deprecated_read_register_gen (regnum, regbuf);
-
-	  target_store_registers (regnum);
-	}
-    }
-}
-
 /* Perform a partial register transfer using a read, modify, write
    operation.  */
 
@@ -929,14 +802,6 @@ register_offset_hack (struct gdbarch *gdbarch, int regnum)
   struct regcache_descr *descr = regcache_descr (gdbarch);
   gdb_assert (regnum >= 0 && regnum < descr->nr_cooked_registers);
   return descr->register_offset[regnum];
-}
-
-/* Hack to keep code using register_bytes working.  */
-
-int
-deprecated_register_bytes (void)
-{
-  return current_regcache->descr->sizeof_raw_registers;
 }
 
 /* Return the contents of register REGNUM as an unsigned integer.  */
