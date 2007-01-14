@@ -1,3 +1,12 @@
+2007-01-14  Mark Kettenis  <kettenis@gnu.org>
+
+	* frv-tdep.c (frv_gdbarch_init, frv_register_name)
+	(frv_breakpoint_from_pc, frv_gdbarch_adjust_breakpoint_address)
+	(frv_skip_prologue): Remove prototypes.
+	(frv_adjust_breakpoint_address): Renamed from
+	frv_gdbarch_adjust_breakpoint_address.
+	(frv_gdbarch_init): Adjust.
+
 2007-01-13  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdbarch.sh (deprecated_extract_return_value)

@@ -43,14 +43,6 @@
 
 extern void _initialize_frv_tdep (void);
 
-static gdbarch_init_ftype frv_gdbarch_init;
-
-static gdbarch_register_name_ftype frv_register_name;
-static gdbarch_breakpoint_from_pc_ftype frv_breakpoint_from_pc;
-static gdbarch_adjust_breakpoint_address_ftype frv_gdbarch_adjust_breakpoint_address;
-static gdbarch_skip_prologue_ftype frv_skip_prologue;
-
-
 struct frv_unwind_cache		/* was struct frame_extra_info */
   {
     /* The previous frame's inner-most stack address.  Used as this
@@ -443,7 +435,7 @@ static const int frv_instr_size = 4;
    constraint that a break instruction must not appear as any but the
    first instruction in the bundle.  */
 static CORE_ADDR
-frv_gdbarch_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
+frv_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
 {
   int count = max_instrs_per_bundle;
   CORE_ADDR addr = bpaddr - frv_instr_size;
@@ -1505,7 +1497,8 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_skip_prologue (gdbarch, frv_skip_prologue);
   set_gdbarch_breakpoint_from_pc (gdbarch, frv_breakpoint_from_pc);
-  set_gdbarch_adjust_breakpoint_address (gdbarch, frv_gdbarch_adjust_breakpoint_address);
+  set_gdbarch_adjust_breakpoint_address
+    (gdbarch, frv_adjust_breakpoint_address);
 
   set_gdbarch_deprecated_use_struct_convention (gdbarch, always_use_struct_convention);
   set_gdbarch_extract_return_value (gdbarch, frv_extract_return_value);
