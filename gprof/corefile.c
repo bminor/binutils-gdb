@@ -53,6 +53,13 @@ extern void sparc_find_call (Sym *, bfd_vma, bfd_vma);
 extern void mips_find_call  (Sym *, bfd_vma, bfd_vma);
 
 static void
+parse_error (const char *filename)
+{
+  fprintf (stderr, _("%s: unable to parse mapping file %s.\n"), whoami, filename);
+  done (1);
+}
+
+static void
 read_function_mappings (const char *filename)
 {
   FILE *file = fopen (filename, "r");
@@ -74,21 +81,21 @@ read_function_mappings (const char *filename)
 
       matches = fscanf (file, "%[^\n:]", dummy);
       if (!matches)
-	{
-	  fprintf (stderr, _("%s: unable to parse mapping file %s.\n"),
-		   whoami, filename);
-	  done (1);
-	}
+	parse_error (filename);
 
       /* Just skip messages about files with no symbols.  */
       if (!strncmp (dummy, "No symbols in ", 14))
 	{
-	  fscanf (file, "\n");
+	  matches = fscanf (file, "\n");
+	  if (matches == EOF)
+	    parse_error (filename);
 	  continue;
 	}
 
       /* Don't care what else is on this line at this point.  */
-      fscanf (file, "%[^\n]\n", dummy);
+      matches = fscanf (file, "%[^\n]\n", dummy);
+      if (!matches)
+	parse_error (filename);
       count++;
     }
 
@@ -108,16 +115,14 @@ read_function_mappings (const char *filename)
 
       matches = fscanf (file, "%[^\n:]", dummy);
       if (!matches)
-	{
-	  fprintf (stderr, _("%s: unable to parse mapping file %s.\n"),
-		   whoami, filename);
-	  done (1);
-	}
+	parse_error (filename);
 
       /* Just skip messages about files with no symbols.  */
       if (!strncmp (dummy, "No symbols in ", 14))
 	{
-	  fscanf (file, "\n");
+	  matches = fscanf (file, "\n");
+	  if (matches == EOF)
+	    parse_error (filename);
 	  continue;
 	}
 
@@ -126,7 +131,9 @@ read_function_mappings (const char *filename)
       strcpy (symbol_map[count].file_name, dummy);
 
       /* Now we need the function name.  */
-      fscanf (file, "%[^\n]\n", dummy);
+      matches = fscanf (file, "%[^\n]\n", dummy);
+      if (!matches)
+	parse_error (filename);
       tmp = strrchr (dummy, ' ') + 1;
       symbol_map[count].function_name = xmalloc (strlen (tmp) + 1);
       strcpy (symbol_map[count].function_name, tmp);
