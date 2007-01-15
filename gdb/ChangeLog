@@ -1,3 +1,8 @@
+2007-01-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* source.c (_initialize_source): Improve the help text of
+	the substitute-path commands.
+
 2007-01-14  Mark Kettenis  <kettenis@gnu.org>
 
 	* frv-tdep.c (frv_gdbarch_init, frv_register_name)

@@ -1997,16 +1997,24 @@ Show number of source lines gdb will list by default."), NULL,
 
   add_cmd ("substitute-path", class_files, set_substitute_path_command,
            _("\
-Add a source path substitution rule.  If a substitution rule was previously\n\
-set, it is overridden."), &setlist);
+Usage: set substitute-path FROM TO\n\
+Add a substitution rule replacing FROM into TO in source file names.\n\
+If a substitution rule was previously set for FROM, the old rule\n\
+is replaced by the new one."),
+           &setlist);
 
   add_cmd ("substitute-path", class_files, unset_substitute_path_command,
            _("\
-Remove the current source path substitution rule.  This has no effect\n\
-if no path substitution rule was previously specified."),
+Usage: unset substitute-path [FROM]\n\
+Delete the rule for substituting FROM in source file names.  If FROM\n\
+is not specified, all substituting rules are deleted.\n\
+If the debugger cannot find a rule for FROM, it will display a warning."),
            &unsetlist);
 
   add_cmd ("substitute-path", class_files, show_substitute_path_command,
-           _("Show the current source path substitution rule."),
+           _("\
+Usage: show substitute-path [FROM]\n\
+Print the rule for substituting FROM in source file names. If FROM\n\
+is not specified, print all substitution rules."),
            &showlist);
 }
