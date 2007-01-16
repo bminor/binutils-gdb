@@ -13,7 +13,7 @@ main (void)
   handle = dlopen("./tmpdir/libdl1.so", RTLD_GLOBAL|RTLD_LAZY);
   if (!handle)
     {
-      printf("dlopen libfoo.so: %s\n", dlerror ());
+      printf("dlopen ./tmpdir/libdl1.so: %s\n", dlerror ());
       return 1;
     }
 

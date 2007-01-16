@@ -1,5 +1,9 @@
 2007-01-16  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-elf/dl1main.c (main): Fix a typo.
+
+2007-01-16  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/3831
 	* ld-elf/del.cc: New.
 	* ld-elf/dl5.cc: Likewise.
