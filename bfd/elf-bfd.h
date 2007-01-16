@@ -1832,7 +1832,8 @@ extern int bfd_elf_link_record_local_dynamic_symbol
   (struct bfd_link_info *, bfd *, long);
 
 extern void bfd_elf_link_mark_dynamic_symbol
-  (struct bfd_link_info *, struct elf_link_hash_entry *);
+  (struct bfd_link_info *, struct elf_link_hash_entry *,
+   Elf_Internal_Sym *);
 
 extern bfd_boolean _bfd_elf_close_and_cleanup
   (bfd *);

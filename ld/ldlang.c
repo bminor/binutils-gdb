@@ -5634,8 +5634,8 @@ void
 lang_process (void)
 {
   /* Finalize dynamic list.  */
-  if (link_info.dynamic)
-    lang_finalize_version_expr_head (&link_info.dynamic->head);
+  if (link_info.dynamic_list)
+    lang_finalize_version_expr_head (&link_info.dynamic_list->head);
 
   current_target = default_target;
 
@@ -6945,13 +6945,13 @@ lang_add_unique (const char *name)
 void
 lang_append_dynamic_list (struct bfd_elf_version_expr *dynamic)
 {
-  if (link_info.dynamic)
+  if (link_info.dynamic_list)
     {
       struct bfd_elf_version_expr *tail;
       for (tail = dynamic; tail->next != NULL; tail = tail->next)
 	;
-      tail->next = link_info.dynamic->head.list;
-      link_info.dynamic->head.list = dynamic;
+      tail->next = link_info.dynamic_list->head.list;
+      link_info.dynamic_list->head.list = dynamic;
     }
   else
     {
@@ -6960,7 +6960,7 @@ lang_append_dynamic_list (struct bfd_elf_version_expr *dynamic)
       d = xcalloc (1, sizeof *d);
       d->head.list = dynamic;
       d->match = lang_vers_match;
-      link_info.dynamic = d;
+      link_info.dynamic_list = d;
     }
 }
 
@@ -6974,6 +6974,27 @@ lang_append_dynamic_list_cpp_typeinfo (void)
     {
       "typeinfo name for*",
       "typeinfo for*"
+    };
+  struct bfd_elf_version_expr *dynamic = NULL;
+  unsigned int i;
+
+  for (i = 0; i < ARRAY_SIZE (symbols); i++)
+    dynamic = lang_new_vers_pattern (dynamic, symbols [i], "C++",
+				     FALSE);
+
+  lang_append_dynamic_list (dynamic);
+}
+
+/* Append the list of C++ operator new and delete dynamic symbols to the
+   existing one.  */
+
+void
+lang_append_dynamic_list_cpp_new (void)
+{
+  const char * symbols [] =
+    {
+      "operator new*",
+      "operator delete*"
     };
   struct bfd_elf_version_expr *dynamic = NULL;
   unsigned int i;

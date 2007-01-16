@@ -1,3 +1,16 @@
+2007-01-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/3831
+	* elf-bfd.h (bfd_elf_link_mark_dynamic_symbol): Add an
+	argument, Elf_Internal_Sym *.
+
+	* elflink.c (bfd_elf_link_mark_dynamic_symbol): Mark a data
+	symbol dynamic if info->dynamic_data is TRUE.
+	(bfd_elf_record_link_assignment): Updated call to
+	bfd_elf_record_link_assignment.
+	(_bfd_elf_merge_symbol): Likewise.  Always call
+	bfd_elf_link_mark_dynamic_symbol.
+
 2076-01-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (BFD_LIBS): Removed.

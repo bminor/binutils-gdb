@@ -1,3 +1,14 @@
+2007-01-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/3831
+	* ld-elf/del.cc: New.
+	* ld-elf/dl5.cc: Likewise.
+	* ld-elf/dl5.out: Likewise.
+	* ld-elf/new.cc: Likewise.
+
+	* ld-elf/shared.exp: Add tests for --dynamic-list-data and
+	 --dynamic-list-cpp-new.
+
 2007-01-12  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-elf/header.d: Allow arbitrary lines between "Program Header"

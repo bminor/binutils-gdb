@@ -72,14 +72,26 @@ set build_tests {
   {"Build libdl2a.so with --dynamic-list=dl2.list"
    "-shared -Wl,--dynamic-list=dl2.list" "-fPIC"
    {dl2.c dl2xxx.c} {} "libdl2a.so"}
+  {"Build libdl2a.so with --dynamic-list-data"
+   "-shared -Wl,--dynamic-list-data" "-fPIC"
+   {dl2.c dl2xxx.c} {} "libdl2a.so"}
   {"Build libdl2b.so with --dynamic-list=dl2.list and dl2xxx.list"
    "-shared -Wl,--dynamic-list=dl2.list,--dynamic-list=dl2xxx.list" "-fPIC"
+   {dl2.c dl2xxx.c} {} "libdl2b.so"}
+  {"Build libdl2b.so with --dynamic-list-data and dl2xxx.list"
+   "-shared -Wl,--dynamic-list-data,--dynamic-list=dl2xxx.list" "-fPIC"
    {dl2.c dl2xxx.c} {} "libdl2b.so"}
   {"Build libdl4a.so with --dynamic-list=dl4.list"
    "-shared -Wl,--dynamic-list=dl4.list" "-fPIC"
    {dl4.c dl4xxx.c} {} "libdl4a.so"}
+  {"Build libdl4a.so with --dynamic-list-data"
+   "-shared -Wl,--dynamic-list-data" "-fPIC"
+   {dl4.c dl4xxx.c} {} "libdl4a.so"}
   {"Build libdl4b.so with --dynamic-list=dl4.list and dl4xxx.list"
    "-shared -Wl,--dynamic-list=dl4.list,--dynamic-list=dl4xxx.list" "-fPIC"
+   {dl4.c dl4xxx.c} {} "libdl4b.so"}
+  {"Build libdl4b.so with --dynamic-list-data and dl4xxx.list"
+   "-shared -Wl,--dynamic-list-data,--dynamic-list=dl4xxx.list" "-fPIC"
    {dl4.c dl4xxx.c} {} "libdl4b.so"}
 }
 
@@ -120,8 +132,11 @@ set run_tests {
     {"Run hidden libbar.so with versioned libfoo.so"
      "tmpdir/libbarhfoov.so tmpdir/libfoov.so" ""
      {main.c} "hidden" "hidden.out"}
-    {"Run with dlopen on libdl1.so"
+    {"Run dl1 with --dynamic-list=dl1.list and dlopen on libdl1.so"
      "--dynamic-list=dl1.list -ldl" ""
+     {dl1main.c} "dl1" "dl1.out"}
+    {"Run dl1 with --dynamic-list-data and dlopen on libdl1.so"
+     "--dynamic-list-data -ldl" ""
      {dl1main.c} "dl1" "dl1.out"}
     {"Run with libdl2a.so"
      "tmpdir/libdl2a.so" ""
@@ -156,6 +171,9 @@ set build_cxx_tests {
   {"Build libdl3a.so with --dynamic-list-cpp-typeinfo"
    "-shared -Wl,--dynamic-list-cpp-typeinfo" "-fPIC"
    {dl3.cc} {} "libdl3c.so" "c++"}
+  {"Build libdnew.so with -Bsymbolic-functions -dynamic-list-cpp-new"
+   "-shared -Wl,-Bsymbolic-functions,--dynamic-list-cpp-new" "-fPIC"
+   {del.cc new.cc} {} "libnew.so" "c++"}
 }
 
 set run_cxx_tests {
@@ -168,6 +186,9 @@ set run_cxx_tests {
     {"Run with libdl3c.so"
      "tmpdir/libdl3c.so" ""
      {dl3main.cc} "dl3c" "dl3a.out" "" "c++"}
+    {"Run with libnew.so"
+     "tmpdir/libnew.so" ""
+     {dl5.cc} "dl5" "dl5.out" "" "c++"}
 }
 
 run_cc_link_tests $build_cxx_tests

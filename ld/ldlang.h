@@ -607,6 +607,7 @@ extern void lang_register_vers_node
   (const char *, struct bfd_elf_version_tree *, struct bfd_elf_version_deps *);
 extern void lang_append_dynamic_list (struct bfd_elf_version_expr *);
 extern void lang_append_dynamic_list_cpp_typeinfo (void);
+extern void lang_append_dynamic_list_cpp_new (void);
 bfd_boolean unique_section_p
   (const asection *);
 extern void lang_add_unique

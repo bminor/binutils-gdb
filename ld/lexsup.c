@@ -108,7 +108,9 @@ enum option_values
   OPTION_VERSION_SCRIPT,
   OPTION_VERSION_EXPORTS_SECTION,
   OPTION_DYNAMIC_LIST,
+  OPTION_DYNAMIC_LIST_CPP_NEW,
   OPTION_DYNAMIC_LIST_CPP_TYPEINFO,
+  OPTION_DYNAMIC_LIST_DATA,
   OPTION_WARN_COMMON,
   OPTION_WARN_CONSTRUCTORS,
   OPTION_WARN_FATAL,
@@ -346,6 +348,8 @@ static const struct ld_option ld_options[] =
     '\0', NULL, NULL, ONE_DASH },
   { {"Bsymbolic", no_argument, NULL, OPTION_SYMBOLIC},
     '\0', NULL, N_("Bind global references locally"), ONE_DASH },
+  { {"Bsymbolic-functions", no_argument, NULL, OPTION_DYNAMIC_LIST_DATA},
+    '\0', NULL, N_("Bind global function references locally"), ONE_DASH },
   { {"check-sections", no_argument, NULL, OPTION_CHECK_SECTIONS},
     '\0', NULL, N_("Check section addresses for overlaps (default)"),
     TWO_DASHES },
@@ -503,6 +507,10 @@ static const struct ld_option ld_options[] =
      OPTION_VERSION_EXPORTS_SECTION },
     '\0', N_("SYMBOL"), N_("Take export symbols list from .exports, using\n"
 			   "\t\t\t\tSYMBOL as the version."), TWO_DASHES },
+  { {"dynamic-list-data", no_argument, NULL, OPTION_DYNAMIC_LIST_DATA},
+    '\0', NULL, N_("Add data symbols to dynamic list"), TWO_DASHES },
+  { {"dynamic-list-cpp-new", no_argument, NULL, OPTION_DYNAMIC_LIST_CPP_NEW},
+    '\0', NULL, N_("Use C++ operator new/delete dynamic list"), TWO_DASHES },
   { {"dynamic-list-cpp-typeinfo", no_argument, NULL, OPTION_DYNAMIC_LIST_CPP_TYPEINFO},
     '\0', NULL, N_("Use C++ typeinfo dynamic list"), TWO_DASHES },
   { {"dynamic-list", required_argument, NULL, OPTION_DYNAMIC_LIST},
@@ -1244,8 +1252,17 @@ parse_args (unsigned argc, char **argv)
 	     .exports sections.  */
 	  command_line.version_exports_section = optarg;
 	  break;
+	case OPTION_DYNAMIC_LIST_DATA:
+	  link_info.dynamic_data = TRUE;
+	  link_info.dynamic = TRUE;
+	  break;
 	case OPTION_DYNAMIC_LIST_CPP_TYPEINFO:
 	  lang_append_dynamic_list_cpp_typeinfo ();
+	  link_info.dynamic = TRUE;
+	  break;
+	case OPTION_DYNAMIC_LIST_CPP_NEW:
+	  lang_append_dynamic_list_cpp_new ();
+	  link_info.dynamic = TRUE;
 	  break;
 	case OPTION_DYNAMIC_LIST:
 	  /* This option indicates a small script that only specifies
@@ -1260,6 +1277,7 @@ parse_args (unsigned argc, char **argv)
 	    parser_input = input_dynamic_list;
 	    yyparse ();
 	  }
+	  link_info.dynamic = TRUE;
 	  break;
 	case OPTION_WARN_COMMON:
 	  config.warn_common = TRUE;

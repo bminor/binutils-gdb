@@ -1,4 +1,9 @@
 -*- text -*-
+* ELF: Add -Bsymbolic-functions, --dynamic-list-cpp-new, which puts C++
+  operator new and delete on the dynamic list, and --dynamic-list-data,
+  builtin list for --dynamic-list, which puts global data symbols on the
+  dynamic list.
+
 * Add support for x86_64 PE+ target.
 
 * Add support for Score target.

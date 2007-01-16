@@ -318,7 +318,9 @@ main (int argc, char **argv)
   link_info.warn_shared_textrel = FALSE;
   link_info.gc_sections = FALSE;
   link_info.print_gc_sections = FALSE;
-  link_info.dynamic = NULL;
+  link_info.dynamic = FALSE;
+  link_info.dynamic_list = NULL;
+  link_info.dynamic_data = FALSE;
   link_info.reduce_memory_overheads = FALSE;
 
   config.maxpagesize = 0;

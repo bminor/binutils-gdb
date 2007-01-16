@@ -1130,6 +1130,14 @@ for a program linked against a shared library to override the definition
 within the shared library.  This option is only meaningful on ELF
 platforms which support shared libraries.
 
+@kindex -Bsymbolic-functions
+@item -Bsymbolic-functions
+When creating a shared library, bind references to global function
+symbols to the definition within the shared library, if any. 
+@option{-Bsymbolic-functions} is an alias for @option{--dynamic-list-data}.
+This option is only meaningful on ELF platforms which support shared
+libraries.
+
 @kindex --dynamic-list=@var{dynamic-list-file}
 @item --dynamic-list=@var{dynamic-list-file}
 Specify the name of a dynamic list file to the linker.  This is
@@ -1142,6 +1150,15 @@ which support shared libraries.
 
 The format of the dynamic list is the same as the version node without
 scope and node name.  See @ref{VERSION} for more information.
+
+@kindex --dynamic-list-data
+@item --dynamic-list-data
+Include all global data symbols to the dynamic list.
+
+@kindex --dynamic-list-cpp-new
+@item --dynamic-list-cpp-new
+Provide the builtin dynamic list for C++ operator new and delete.  It
+is mainly useful for building shared libstdc++.
 
 @kindex --dynamic-list-cpp-typeinfo
 @item --dynamic-list-cpp-typeinfo

@@ -1,3 +1,31 @@
+2007-01-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/3831
+	* NEWS: Mention -Bsymbolic-functions, --dynamic-list-data and
+	--dynamic-list-cpp-new.
+
+	* ld.texinfo: Document -Bsymbolic-functions, --dynamic-list-data
+	and --dynamic-list-cpp-new.
+
+	* ldlang.c (lang_append_dynamic_list_cpp_new): New.
+	(lang_process): Change link_info.dynamic to
+	link_info.dynamic_list.
+	(lang_append_dynamic_list): Likewise.
+	* ldmain.c (main): Likewise.  Initialize link_info.dynamic and
+	link_info.dynamic_data to FALSE.
+
+	* ldlang.h (lang_append_dynamic_list_cpp_new): New.
+
+	* lexsup.c (option_values): Add OPTION_DYNAMIC_LIST_DATA and
+	OPTION_DYNAMIC_LIST_CPP_NEW.
+	(ld_options): Add entries for -Bsymbolic-functions,
+	--dynamic-list-data and --dynamic-list-cpp-new.  Make
+	-Bsymbolic-functions an alias of --dynamic-list-data.
+	(parse_args): Change link_info.dynamic to link_info.dynamic_list.
+	Set link_info.dynamic to TRUE for --dynamic-list and
+	--dynamic-list-cpp-typeinfo.  Handle --dynamic-list-data and
+	--dynamic-list-cpp-new.
+
 2007-01-11  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* emultempl/elf-generic.em (gdl_map_segments): Only allow header

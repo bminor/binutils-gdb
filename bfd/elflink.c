@@ -438,14 +438,22 @@ bfd_elf_link_record_dynamic_symbol (struct bfd_link_info *info,
 
 void
 bfd_elf_link_mark_dynamic_symbol (struct bfd_link_info *info,
-				  struct elf_link_hash_entry *h)
+				  struct elf_link_hash_entry *h,
+				  Elf_Internal_Sym *sym)
 {
-  struct bfd_elf_dynamic_list *d = info->dynamic;
+  struct bfd_elf_dynamic_list *d = info->dynamic_list;
 
-  if (d == NULL || info->relocatable)
+  /* It may be called more than once on the same H.  */
+  if(h->dynamic || info->relocatable)
     return;
 
-  if ((*d->match) (&d->head, NULL, h->root.root.string))
+  if ((info->dynamic_data
+       && (h->type == STT_OBJECT
+	   || (sym != NULL
+	       && ELF_ST_TYPE (sym->st_info) == STT_OBJECT)))
+      || (d != NULL 
+	  && h->root.type == bfd_link_hash_new
+	  && (*d->match) (&d->head, NULL, h->root.root.string)))
     h->dynamic = 1;
 }
 
@@ -483,7 +491,7 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
 
   if (h->root.type == bfd_link_hash_new)
     {
-      bfd_elf_link_mark_dynamic_symbol (info, h);
+      bfd_elf_link_mark_dynamic_symbol (info, h, NULL);
       h->non_elf = 0;
     }
 
@@ -861,13 +869,17 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	 || h->root.type == bfd_link_hash_warning)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
+  /* We have to check it for every instance since the first few may be
+     refereences and not all compilers emit symbol type for undefined
+     symbols.  */
+  bfd_elf_link_mark_dynamic_symbol (info, h, sym);
+
   /* If we just created the symbol, mark it as being an ELF symbol.
      Other than that, there is nothing to do--there is no merge issue
      with a newly defined symbol--so we just return.  */
 
   if (h->root.type == bfd_link_hash_new)
     {
-      bfd_elf_link_mark_dynamic_symbol (info, h);
       h->non_elf = 0;
       return TRUE;
     }
