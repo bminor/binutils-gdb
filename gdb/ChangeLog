@@ -1,3 +1,18 @@
+2007-01-16  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Vladimir Prus  <vladimir@codesourcery.com>
+
+	Fix 'selected frame' varobjs.
+	* varobj.c (struct varobj): Remove the error field.
+	(varobj_set_value): Don't check var->error.
+	(install_new_value): Don't set var->error.
+	(varobj_update): Always pass the new value
+	of the root via install_new_value.
+	(create_child): Don't set error field.
+	(new_variable): Likewise.
+	(c_value_of_root): Always reevaluate the value
+	of selected frame varobjs in the selected frame.
+	Don't call reinit_frame_cache.
+
 2007-01-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* source.c (_initialize_source): Improve the help text of

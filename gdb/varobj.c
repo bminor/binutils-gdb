@@ -107,13 +107,11 @@ struct varobj
   /* The type of this variable. This may NEVER be NULL. */
   struct type *type;
 
-  /* The value of this expression or subexpression.  This may be NULL. 
+  /* The value of this expression or subexpression.  A NULL value
+     indicates there was an error getting this value.
      Invariant: if varobj_value_is_changeable_p (this) is non-zero, 
      the value is either NULL, or not lazy.  */
   struct value *value;
-
-  /* Did an error occur evaluating the expression or getting its value? */
-  int error;
 
   /* The number of (immediate) children this variable has */
   int num_children;
@@ -811,7 +809,7 @@ varobj_set_value (struct varobj *var, char *expression)
   struct value *value;
   int saved_input_radix = input_radix;
 
-  if (var->value != NULL && variable_editable (var) && !var->error)
+  if (var->value != NULL && variable_editable (var))
     {
       char *s = expression;
       int i;
@@ -909,7 +907,6 @@ install_new_value (struct varobj *var, struct value *value, int initial)
   int need_to_fetch;
   int changed = 0;
 
-  var->error = 0;
   /* We need to know the varobj's type to decide if the value should
      be fetched or not.  C++ fake children (public/protected/private) don't have
      a type. */
@@ -946,14 +943,11 @@ install_new_value (struct varobj *var, struct value *value, int initial)
     {
       if (!gdb_value_fetch_lazy (value))
 	{
-	  var->error = 1;
 	  /* Set the value to NULL, so that for the next -var-update,
 	     we don't try to compare the new value with this value,
 	     that we couldn't even read.  */
 	  value = NULL;
 	}
-      else
-	var->error = 0;
     }
 
   /* If the type is changeable, compare the old and the new values.
@@ -1078,12 +1072,6 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
   if (fi)
     select_frame (fi);
 
-  if (new == NULL)
-    {
-      (*varp)->error = 1;
-      return -1;
-    }
-
   /* If this is a "use_selected_frame" varobj, and its type has changed,
      them note that it's changed. */
   if (type_changed)
@@ -1095,6 +1083,14 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
 	 non-zero, so we'll never report the same variable twice.  */
       gdb_assert (!type_changed);
       VEC_safe_push (varobj_p, result, *varp);
+    }
+
+  if (new == NULL)
+    {
+      /* This means the varobj itself is out of scope.
+	 Report it.  */
+      VEC_free (varobj_p, result);
+      return -1;
     }
 
   VEC_safe_push (varobj_p, stack, *varp);
@@ -1370,9 +1366,6 @@ create_child (struct varobj *parent, int index, char *name)
 						       child->index);
   install_new_value (child, value, 1);
 
-  if ((!CPLUS_FAKE_CHILD (child) && child->value == NULL) || parent->error)
-    child->error = 1;
-
   return child;
 }
 
@@ -1393,7 +1386,6 @@ new_variable (void)
   var->index = -1;
   var->type = NULL;
   var->value = NULL;
-  var->error = 0;
   var->num_children = -1;
   var->parent = NULL;
   var->children = NULL;
@@ -1972,11 +1964,10 @@ c_value_of_root (struct varobj **var_handle)
 
 
   /* Determine whether the variable is still around. */
-  if (var->root->valid_block == NULL)
+  if (var->root->valid_block == NULL || var->root->use_selected_frame)
     within_scope = 1;
   else
     {
-      reinit_frame_cache ();
       fi = frame_find_by_id (var->root->frame);
       within_scope = fi != NULL;
       /* FIXME: select_frame could fail */
@@ -1998,11 +1989,8 @@ c_value_of_root (struct varobj **var_handle)
          go on */
       if (gdb_evaluate_expression (var->root->exp, &new_val))
 	{
-	  var->error = 0;
 	  release_value (new_val);
 	}
-      else
-	var->error = 1;
 
       return new_val;
     }
