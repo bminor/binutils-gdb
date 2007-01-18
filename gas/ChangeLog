@@ -1,3 +1,9 @@
+2007-01-18  Mei Ligang  <ligang@sunnorth.com.cn>
+
+	* config/tc-score.c : Using _() for const string.
+	Do not assign inst.error with a local string pointer.
+	(md_section_align): Pad section.
+	
 2007-01-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (build_modrm_byte): Check number of operands

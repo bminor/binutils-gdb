@@ -142,3 +142,4 @@ Disassembly of section \.text:
  322:	268f      	sb!		r6, \[r8\]
  324:	237f      	sb!		r3, \[r7\]
  326:	237f      	sb!		r3, \[r7\]
+#pass

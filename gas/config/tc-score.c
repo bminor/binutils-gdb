@@ -535,7 +535,7 @@ static const struct asm_opcode score_insns[] =
   {"lh!",       0x2009,     0x700f,     0x22000000, Rd_rvalueRs,          do16_ldst_insn},
   {"lhp!",      0x7001,     0x7007,     0x22000000, Rd_rvalueBP_I5,       do16_ldst_imm_insn},
   {"ldi",       0x020c0000, 0x3e0e0000, 0x5000,     Rd_SI16,              do_rdsi16},
-  {"ldis",      0x0a0c0000, 0x3e0e0000, 0x5000,     Rd_I16,               do_rdi16},
+  {"ldis",      0x0a0c0000, 0x3e0e0000, 0x8000,     Rd_I16,               do_rdi16},
   {"ldiu!",     0x5000,     0x7000,     0x020c0000, Rd_I8,                do16_ldst_imm_insn},
   {"lw!",       0x2008,     0x700f,     0x20000000, Rd_rvalueRs,          do16_ldst_insn},
   {"lwp!",      0x7000,     0x7007,     0x20000000, Rd_rvalueBP_I5,       do16_ldst_imm_insn},
@@ -854,7 +854,7 @@ reg_required_here (char **str, int shift, enum score_reg_type reg_type)
         {
           if ((reg == 1) && (nor1 == 1) && (inst.bwarn == 0))
             {
-              as_warn ("Using temp register(r1)");
+              as_warn (_("Using temp register(r1)"));
               inst.bwarn = 1;
             }
         }
@@ -1207,19 +1207,19 @@ data_op2 (char **str, int shift, enum score_data_type data_type)
 
       if (value == (int) FAIL)
         {
-          char err_msg[100];
+          static char err_msg[100];
 
           if ((data_type != _SIMM14_NEG) && (data_type != _SIMM16_NEG) && (data_type != _IMM16_NEG))
             {
               sprintf (err_msg,
-                       "invalid constant: %d bit expression not in range %d..%d",
+                       _("invalid constant: %d bit expression not in range %d..%d"),
                        score_df_range[data_type].bits,
                        score_df_range[data_type].range[0], score_df_range[data_type].range[1]);
             }
           else
             {
               sprintf (err_msg,
-                       "invalid constant: %d bit expression not in range %d..%d",
+                       _("invalid constant: %d bit expression not in range %d..%d"),
                        score_df_range[data_type].bits,
                        -score_df_range[data_type].range[1], -score_df_range[data_type].range[0]);
             }
@@ -1259,9 +1259,9 @@ data_op2 (char **str, int shift, enum score_data_type data_type)
           && (((inst.instruction >> 20) & 0x1F) != 0x1e)
           && (((inst.instruction >> 20) & 0x1F) != 0x1f))
         {
-          char err_msg[100];
+          static char err_msg[100];
 
-          sprintf (err_msg, "invalid constant: bit expression not defined");
+          sprintf (err_msg, _("invalid constant: bit expression not defined"));
           inst.error = _(err_msg);
           return (int) FAIL;
         }
@@ -1417,7 +1417,7 @@ do_xrsi5 (char *str)
     inst.relax_inst = 0x8000;
 }
 
-/* Handle andi/ori/andis/oris/ldis.  */
+/* Handle addis/andi/ori/andis/oris/ldis.  */
 static void
 do_rdi16 (char *str)
 {
@@ -1428,11 +1428,12 @@ do_rdi16 (char *str)
       || data_op2 (&str, 1, _IMM16) == (int) FAIL
       || end_of_line (str) == (int) FAIL)
     return;
-
+  /*
   if (((inst.instruction & 0xa0dfffe) != 0xa0c0000) || ((((inst.instruction >> 20) & 0x1f) & 0x10) == 0x10))
     inst.relax_inst = 0x8000;
   else
     inst.relax_size = 2;
+  */
 }
 
 static void
@@ -1722,7 +1723,7 @@ reglow_required_here (char **str, int shift)
     {
       if ((reg == 1) && (nor1 == 1) && (inst.bwarn == 0))
         {
-          as_warn ("Using temp register(r1)");
+          as_warn (_("Using temp register(r1)"));
           inst.bwarn = 1;
         }
       if (reg < 16)
@@ -2063,7 +2064,7 @@ handle_dependency (struct score_it *theinst)
 	      if (remainder_bubbles <= 2)
 		{
 		  if (warn_fix_data_dependency)
-		    as_warn ("Fix data dependency: %s %s -- %s %s  (insert %d nop!/%d)",
+		    as_warn (_("Fix data dependency: %s %s -- %s %s  (insert %d nop!/%d)"),
 			     dependency_vector[i].name, dependency_vector[i].reg,
 			     dependency_vector[0].name, dependency_vector[0].reg,
 			     remainder_bubbles, bubbles);
@@ -2082,7 +2083,7 @@ handle_dependency (struct score_it *theinst)
 	      else
 		{
 		  if (warn_fix_data_dependency)
-		    as_warn ("Fix data dependency: %s %s -- %s %s  (insert 1 pflush/%d)",
+		    as_warn (_("Fix data dependency: %s %s -- %s %s  (insert 1 pflush/%d)"),
 			     dependency_vector[i].name, dependency_vector[i].reg,
 			     dependency_vector[0].name, dependency_vector[0].reg,
 			     bubbles);
@@ -2098,14 +2099,14 @@ handle_dependency (struct score_it *theinst)
             {
 	      if (warn_or_error)
 		{
-                  as_bad ("data dependency: %s %s -- %s %s  (%d/%d bubble)",
+                  as_bad (_("data dependency: %s %s -- %s %s  (%d/%d bubble)"),
                            dependency_vector[i].name, dependency_vector[i].reg,
                            dependency_vector[0].name, dependency_vector[0].reg,
                            remainder_bubbles, bubbles);
 		}
 	      else
 		{
-                  as_warn ("data dependency: %s %s -- %s %s  (%d/%d bubble)",
+                  as_warn (_("data dependency: %s %s -- %s %s  (%d/%d bubble)"),
                            dependency_vector[i].name, dependency_vector[i].reg,
                            dependency_vector[0].name, dependency_vector[0].reg,
                            remainder_bubbles, bubbles);
@@ -2395,7 +2396,7 @@ append_insn (char *str, bfd_boolean gen_frag_p)
   if (inst.error)
     {
       retval = (int) FAIL;
-      as_bad ("%s -- `%s'", inst.error, inst.str);
+      as_bad (_("%s -- `%s'"), inst.error, inst.str);
       inst.error = NULL;
     }
 
@@ -2437,7 +2438,7 @@ do16_mv_rdrs (char *str)
             {
               char append_str[MAX_LITERAL_POOL_SIZE];
 
-              sprintf (append_str, "mlfh! %s", backupstr);
+              sprintf (append_str, _("mlfh! %s"), backupstr);
               if (append_insn (append_str, TRUE) == (int) FAIL)
 		return;
               /* Set bwarn as -1, so macro instruction itself will not be generated frag.  */
@@ -2456,7 +2457,7 @@ do16_mv_rdrs (char *str)
             {
               char append_str[MAX_LITERAL_POOL_SIZE];
 
-              sprintf (append_str, "mhfl! %s", backupstr);
+              sprintf (append_str, _("mhfl! %s"), backupstr);
               if (append_insn (append_str, TRUE) == (int) FAIL)
 		return;
 
@@ -2607,16 +2608,16 @@ exp_ldst_offset (char **str, int shift, unsigned int data_type)
       value = validate_immediate (inst.reloc.exp.X_add_number, data_type);
       if (value == (int) FAIL)
         {
-          char err_msg[255];
+          static char err_msg[255];
 
           if (data_type < 30)
             sprintf (err_msg,
-                     "invalid constant: %d bit expression not in range %d..%d",
+                     _("invalid constant: %d bit expression not in range %d..%d"),
                      score_df_range[data_type].bits,
                      score_df_range[data_type].range[0], score_df_range[data_type].range[1]);
           else
             sprintf (err_msg,
-                     "invalid constant: %d bit expression not in range %d..%d",
+                     _("invalid constant: %d bit expression not in range %d..%d"),
                      score_df_range[data_type - 24].bits,
                      score_df_range[data_type - 24].range[0], score_df_range[data_type - 24].range[1]);
           inst.error = _(err_msg);
@@ -2892,16 +2893,16 @@ do_ldst_insn (char *str)
               value = validate_immediate (inst.reloc.exp.X_add_number, data_type);
               if (value == (int) FAIL)
                 {
-                  char err_msg[255];
+                  static char err_msg[255];
 
                   if (data_type < 30)
                     sprintf (err_msg,
-                             "invalid constant: %d bit expression not in range %d..%d",
+                             _("invalid constant: %d bit expression not in range %d..%d"),
                              score_df_range[data_type].bits,
                              score_df_range[data_type].range[0], score_df_range[data_type].range[1]);
                   else
                     sprintf (err_msg,
-                             "invalid constant: %d bit expression not in range %d..%d",
+                             _("invalid constant: %d bit expression not in range %d..%d"),
                              score_df_range[data_type - 24].bits,
                              score_df_range[data_type - 24].range[0],
                              score_df_range[data_type - 24].range[1]);
@@ -3172,7 +3173,7 @@ do_cache (char *str)
       int cache_op;
 
       cache_op = (inst.instruction >> 20) & 0x1F;
-      sprintf (inst.name, "cache %d", cache_op);
+      sprintf (inst.name, _("cache %d"), cache_op);
     }
 
   if (*str == '[')
@@ -3752,7 +3753,7 @@ build_la_pic (int reg_rd, expressionS exp)
       /* Fix part
          For an external symbol: lw rD, <sym>($gp)
                                  (BFD_RELOC_SCORE_GOT15 or BFD_RELOC_SCORE_CALL15)  */
-      sprintf (tmp, "lw_pic r%d, %s", reg_rd, add_symbol->bsym->name);
+      sprintf (tmp, _("lw_pic r%d, %s"), reg_rd, add_symbol->bsym->name);
       if (append_insn (tmp, FALSE) == (int) FAIL)
 	return;
 
@@ -3766,7 +3767,7 @@ build_la_pic (int reg_rd, expressionS exp)
 	 addi rD, <sym>       (BFD_RELOC_GOT_LO16) */
       inst.reloc.type = BFD_RELOC_SCORE_GOT15;
       memcpy (&var_insts[0], &inst, sizeof (struct score_it));
-      sprintf (tmp, "addi_s_pic r%d, %s", reg_rd, add_symbol->bsym->name);
+      sprintf (tmp, _("addi_s_pic r%d, %s"), reg_rd, add_symbol->bsym->name);
       if (append_insn (tmp, FALSE) == (int) FAIL)
 	return;
 
@@ -3776,7 +3777,7 @@ build_la_pic (int reg_rd, expressionS exp)
   else if (add_number >= -0x8000 && add_number <= 0x7fff)
     {
       /* Insn 1: lw rD, <sym>($gp)    (BFD_RELOC_SCORE_GOT15)  */
-      sprintf (tmp, "lw_pic r%d, %s", reg_rd, add_symbol->bsym->name);
+      sprintf (tmp, _("lw_pic r%d, %s"), reg_rd, add_symbol->bsym->name);
       if (append_insn (tmp, TRUE) == (int) FAIL)
 	return;
 
@@ -3785,7 +3786,7 @@ build_la_pic (int reg_rd, expressionS exp)
       var_num = 1;
       /* Fix part
          For an external symbol: addi rD, <constant> */
-      sprintf (tmp, "addi r%d, %d", reg_rd, (int)add_number);
+      sprintf (tmp, _("addi r%d, %d"), reg_rd, (int)add_number);
       if (append_insn (tmp, FALSE) == (int) FAIL)
 	return;
 
@@ -3793,7 +3794,7 @@ build_la_pic (int reg_rd, expressionS exp)
 
       /* Var part
  	 For a local symbol: addi rD, <sym>+<constant>    (BFD_RELOC_GOT_LO16)  */
-      sprintf (tmp, "addi_s_pic r%d, %s + %d", reg_rd, add_symbol->bsym->name, (int)add_number);
+      sprintf (tmp, _("addi_s_pic r%d, %s + %d"), reg_rd, add_symbol->bsym->name, (int)add_number);
       if (append_insn (tmp, FALSE) == (int) FAIL)
 	return;
 
@@ -3806,7 +3807,7 @@ build_la_pic (int reg_rd, expressionS exp)
       int lo = add_number & 0x0000FFFF;
 
       /* Insn 1: lw rD, <sym>($gp)    (BFD_RELOC_SCORE_GOT15)  */
-      sprintf (tmp, "lw_pic r%d, %s", reg_rd, add_symbol->bsym->name);
+      sprintf (tmp, _("lw_pic r%d, %s"), reg_rd, add_symbol->bsym->name);
       if (append_insn (tmp, TRUE) == (int) FAIL)
 	return;
 
@@ -3815,7 +3816,7 @@ build_la_pic (int reg_rd, expressionS exp)
       var_num = 1;
       /* Fix part
 	 For an external symbol: ldis r1, HI%<constant>  */
-      sprintf (tmp, "ldis %s, %d", "r1", hi);
+      sprintf (tmp, _("ldis %s, %d"), _("r1"), hi);
       if (append_insn (tmp, FALSE) == (int) FAIL)
 	return;
 
@@ -3828,7 +3829,7 @@ build_la_pic (int reg_rd, expressionS exp)
 	{
 	  hi += 1;
 	}
-      sprintf (tmp, "ldis_pic %s, %d", "r1", hi);
+      sprintf (tmp, _("ldis_pic %s, %d"), _("r1"), hi);
       if (append_insn (tmp, FALSE) == (int) FAIL)
 	return;
 
@@ -3840,7 +3841,7 @@ build_la_pic (int reg_rd, expressionS exp)
       var_num = 1;
       /* Fix part
 	 For an external symbol: ori r1, LO%<constant>  */
-      sprintf (tmp, "ori %s, %d", "r1", lo);
+      sprintf (tmp, _("ori %s, %d"), _("r1"), lo);
       if (append_insn (tmp, FALSE) == (int) FAIL)
 	return;
 
@@ -3848,7 +3849,7 @@ build_la_pic (int reg_rd, expressionS exp)
 
       /* Var part
   	 For a local symbol: addi r1, <sym>+LO%<constant>    (BFD_RELOC_GOT_LO16)  */
-      sprintf (tmp, "addi_u_pic %s, %s + %d", "r1", add_symbol->bsym->name, lo);
+      sprintf (tmp, _("addi_u_pic %s, %s + %d"), _("r1"), add_symbol->bsym->name, lo);
       if (append_insn (tmp, FALSE) == (int) FAIL)
 	return;
 
@@ -3856,7 +3857,7 @@ build_la_pic (int reg_rd, expressionS exp)
       build_relax_frag (fix_insts, fix_num, var_insts, var_num, add_symbol);
 
       /* Insn 4: add rD, rD, r1  */
-      sprintf (tmp, "add r%d, r%d, %s", reg_rd, reg_rd, "r1");
+      sprintf (tmp, _("add r%d, r%d, %s"), reg_rd, reg_rd, _("r1"));
       if (append_insn (tmp, TRUE) == (int) FAIL)
 	return;
 
@@ -3903,13 +3904,13 @@ do_macro_la_rdi32 (char *str)
           else
             {
               if ((score_pic == NO_PIC) || (!inst.reloc.exp.X_add_symbol))
-		{
-                  sprintf (append_str, "ld_i32hi r%d, %s", reg_rd, keep_data);
-	          if (append_insn (append_str, TRUE) == (int) FAIL)
+                {
+                  sprintf (append_str, _("ld_i32hi r%d, %s"), reg_rd, keep_data);
+                  if (append_insn (append_str, TRUE) == (int) FAIL)
 		    return;
 
-	          sprintf (append_str, "ld_i32lo r%d, %s", reg_rd, keep_data);
-	          if (append_insn (append_str, TRUE) == (int) FAIL)
+                  sprintf (append_str, _("ld_i32lo r%d, %s"), reg_rd, keep_data);
+                  if (append_insn (append_str, TRUE) == (int) FAIL)
 		    return;
 		}
 	      else
@@ -3966,13 +3967,13 @@ do_macro_li_rdi32 (char *str){
             }
           else
             {
-              sprintf (append_str, "ld_i32hi r%d, %s", reg_rd, keep_data);
+              sprintf (append_str, _("ld_i32hi r%d, %s"), reg_rd, keep_data);
 
               if (append_insn (append_str, TRUE) == (int) FAIL)
 		return;
               else
                 {
-                  sprintf (append_str, "ld_i32lo r%d, %s", reg_rd, keep_data);
+                  sprintf (append_str, _("ld_i32lo r%d, %s"), reg_rd, keep_data);
                   if (append_insn (append_str, TRUE) == (int) FAIL)
 		    return;
 
@@ -4036,18 +4037,18 @@ do_macro_mul_rdrsrs (char *str)
 
           if (strcmp (inst.name, "rem") == 0)
             {
-              sprintf (append_str, "%s r%d, r%d", "mul", reg_rs1, reg_rs2);
-              sprintf (append_str1, "mfceh  r%d", reg_rd);
+              sprintf (append_str, _("%s r%d, r%d"), _("mul"), reg_rs1, reg_rs2);
+              sprintf (append_str1, _("mfceh  r%d"), reg_rd);
             }
           else if (strcmp (inst.name, "remu") == 0)
             {
-              sprintf (append_str, "%s r%d, r%d", "mulu", reg_rs1, reg_rs2);
-              sprintf (append_str1, "mfceh  r%d", reg_rd);
+              sprintf (append_str, _("%s r%d, r%d"), _("mulu"), reg_rs1, reg_rs2);
+              sprintf (append_str1, _("mfceh  r%d"), reg_rd);
             }
           else
             {
-              sprintf (append_str, "%s r%d, r%d", inst.name, reg_rs1, reg_rs2);
-              sprintf (append_str1, "mfcel  r%d", reg_rd);
+              sprintf (append_str, _("%s r%d, r%d"), inst.name, reg_rs1, reg_rs2);
+              sprintf (append_str1, _("mfcel  r%d"), reg_rd);
             }
 
           /* Output mul/mulu or div/divu or rem/remu.  */
@@ -4089,11 +4090,11 @@ exp_macro_ldst_abs (char *str)
     return;
 
   backupstr = tmp;
-  sprintf (append_str, "li r1  %s", backupstr);
+  sprintf (append_str, _("li r1  %s"), backupstr);
   append_insn (append_str, TRUE);
 
   memcpy (&inst, &inst_backup, sizeof (struct score_it));
-  sprintf (append_str, " r%d, [r1,0]", reg_rd);
+  sprintf (append_str, _(" r%d, [r1,0]"), reg_rd);
   do_ldst_insn (append_str);
 
   nor1 = r1_bak;
@@ -4178,7 +4179,7 @@ build_lwst_pic (int reg_rd, expressionS exp, const char *insn_name)
       /* Fix part
          For an external symbol: lw rD, <sym>($gp)
                                  (BFD_RELOC_SCORE_GOT15)  */
-      sprintf (tmp, "lw_pic %s, %s", "r1", add_symbol->bsym->name);
+      sprintf (tmp, _("lw_pic %s, %s"), _("r1"), add_symbol->bsym->name);
       if (append_insn (tmp, FALSE) == (int) FAIL)
         return;
 
@@ -4190,7 +4191,7 @@ build_lwst_pic (int reg_rd, expressionS exp, const char *insn_name)
 	 addi rD, <sym>       (BFD_RELOC_GOT_LO16) */
       inst.reloc.type = BFD_RELOC_SCORE_GOT15;
       memcpy (&var_insts[0], &inst, sizeof (struct score_it));
-      sprintf (tmp, "addi_s_pic %s, %s", "r1", add_symbol->bsym->name);
+      sprintf (tmp, _("addi_s_pic %s, %s"), _("r1"), add_symbol->bsym->name);
       if (append_insn (tmp, FALSE) == (int) FAIL)
         return;
 
@@ -4198,7 +4199,7 @@ build_lwst_pic (int reg_rd, expressionS exp, const char *insn_name)
       build_relax_frag (fix_insts, fix_num, var_insts, var_num, add_symbol);
 
       /* Insn 2 or Insn 3: lw/st rD, [r1, constant]  */
-      sprintf (tmp, "%s r%d, [%s, %d]", insn_name, reg_rd, "r1", add_number);
+      sprintf (tmp, _("%s r%d, [%s, %d]"), insn_name, reg_rd, _("r1"), add_number);
       if (append_insn (tmp, TRUE) == (int) FAIL)
         return;
 
@@ -4322,9 +4323,9 @@ do_macro_ldst_label (char *str)
   nor1 = 0;
 
   /* Determine which instructions should be output.  */
-  sprintf (append_str[0], "ld_i32hi r1, %s", label_str);
-  sprintf (append_str[1], "ld_i32lo r1, %s", label_str);
-  sprintf (append_str[2], "%s r%d, [r1, 0]", inst_backup.name, reg_rd);
+  sprintf (append_str[0], _("ld_i32hi r1, %s"), label_str);
+  sprintf (append_str[1], _("ld_i32lo r1, %s"), label_str);
+  sprintf (append_str[2], _("%s r%d, [r1, 0]"), inst_backup.name, reg_rd);
 
   /* Generate three instructions.
      la r1, label
@@ -4466,7 +4467,7 @@ static void
 do_jump (char *str)
 {
   char *save_in;
-  char err_msg[100];
+  static char err_msg[100];
 
   skip_whitespace (str);
   if (my_get_expression (&inst.reloc.exp, &str) == (int) FAIL
@@ -4482,7 +4483,7 @@ do_jump (char *str)
   if (((inst.reloc.exp.X_add_number & 0xff000000) != 0)
       && ((inst.reloc.exp.X_add_number & 0xff000000) != 0xff000000))
     {
-      sprintf (err_msg, "invalid constant: 25 bit expression not in range -2^24..2^24");
+      sprintf (err_msg, _("invalid constant: 25 bit expression not in range -2^24..2^24"));
       inst.error = _(err_msg);
       return;
     }
@@ -4537,7 +4538,7 @@ do_branch (char *str)
   else if (((inst.reloc.exp.X_add_number & 0xff000000) != 0)
            && ((inst.reloc.exp.X_add_number & 0xff000000) != 0xff000000))
     {
-      inst.error = "invalid constant: 20 bit expression not in range -2^19..2^19";
+      inst.error = _("invalid constant: 20 bit expression not in range -2^19..2^19");
       return;
     }
 
@@ -5235,17 +5236,6 @@ md_section_align (segT segment ATTRIBUTE_UNUSED, valueT size)
 {
   int align = bfd_get_section_alignment (stdoutput, segment);
 
-#ifdef OBJ_ELF
-  /* We don't need to align ELF sections to the full alignment.
-     However, Irix 5 may prefer that we align them at least to a 16
-     byte boundary.  We don't bother to align the sections if we are
-     targeted for an embedded system.  */
-  if (strcmp (TARGET_OS, "elf") == 0)
-    return size;
-  if (align > 4)
-    align = 4;
-#endif
-
   return ((size + (1 << align) - 1) & (-1 << align));
 }
 
@@ -5643,7 +5633,7 @@ md_assemble (char *str)
     parse_16_32_inst (str, TRUE);
 
   if (inst.error)
-    as_bad ("%s -- `%s'", inst.error, inst.str);
+    as_bad (_("%s -- `%s'"), inst.error, inst.str);
 }
 
 /* We handle all bad expressions here, so that we can report the faulty
@@ -6217,15 +6207,15 @@ s_score_cpload (int ignore ATTRIBUTE_UNUSED)
 
   demand_empty_rest_of_line ();
 
-  sprintf (insn_str, "ld_i32hi r%d, %s", GP, GP_DISP_LABEL);
+  sprintf (insn_str, _("ld_i32hi r%d, %s"), GP, GP_DISP_LABEL);
   if (append_insn (insn_str, TRUE) == (int) FAIL)
     return;
 
-  sprintf (insn_str, "ld_i32lo r%d, %s", GP, GP_DISP_LABEL);
+  sprintf (insn_str, _("ld_i32lo r%d, %s"), GP, GP_DISP_LABEL);
   if (append_insn (insn_str, TRUE) == (int) FAIL)
     return;
 
-  sprintf (insn_str, "add r%d, r%d, r%d", GP, GP, reg);
+  sprintf (insn_str, _("add r%d, r%d, r%d"), GP, GP, reg);
   if (append_insn (insn_str, TRUE) == (int) FAIL)
     return;
 }
@@ -6258,7 +6248,7 @@ s_score_cprestore (int ignore ATTRIBUTE_UNUSED)
 
   if (cprestore_offset <= 0x3fff)
     {
-      sprintf (insn_str, "sw r%d, [r%d, %d]", GP, reg, cprestore_offset);
+      sprintf (insn_str, _("sw r%d, [r%d, %d]"), GP, reg, cprestore_offset);
       if (append_insn (insn_str, TRUE) == (int) FAIL)
         return;
     }
@@ -6269,15 +6259,15 @@ s_score_cprestore (int ignore ATTRIBUTE_UNUSED)
       r1_bak = nor1;
       nor1 = 0;
 
-      sprintf (insn_str, "li r1, %d", cprestore_offset);
+      sprintf (insn_str, _("li r1, %d"), cprestore_offset);
       if (append_insn (insn_str, TRUE) == (int) FAIL)
         return;
 
-      sprintf (insn_str, "add r1, r1, r%d", reg);
+      sprintf (insn_str, _("add r1, r1, r%d"), reg);
       if (append_insn (insn_str, TRUE) == (int) FAIL)
         return;
 
-      sprintf (insn_str, "sw r%d, [r1]", GP);
+      sprintf (insn_str, _("sw r%d, [r1]"), GP);
       if (append_insn (insn_str, TRUE) == (int) FAIL)
         return;
 
@@ -6336,7 +6326,7 @@ s_score_cpadd (int ignore ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 
   /* Add $gp to the register named as an argument.  */
-  sprintf (insn_str, "add r%d, r%d, r%d", reg, reg, GP);
+  sprintf (insn_str, _("add r%d, r%d, r%d"), reg, reg, GP);
   if (append_insn (insn_str, TRUE) == (int) FAIL)
     return;
 }
