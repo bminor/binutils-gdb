@@ -783,6 +783,7 @@ proc run_dump_test { name } {
 	set sourcefile [lindex $sourcefiles $i]
 
 	set objfile "tmpdir/dump$i.o"
+	catch "exec rm -f $objfile" exec_output
 	lappend objfiles $objfile
 	set cmd "$AS $ASFLAGS $opts(as) $asflags($sourcefile) -o $objfile $sourcefile"
 
@@ -814,6 +815,7 @@ proc run_dump_test { name } {
     # Perhaps link the file(s).
     if { $run_ld } {
 	set objfile "tmpdir/dump"
+	catch "exec rm -f $objfile" exec_output
 
 	# Add -L$srcdir/$subdir so that the linker command can use
 	# linker scripts in the source directory.
@@ -840,6 +842,7 @@ proc run_dump_test { name } {
 	if { $cmdret == 0 && $run_objcopy } {
 	    set infile $objfile
 	    set objfile "tmpdir/dump1"
+	    catch "exec rm -f $objfile" exec_output
 
 	    # Note that we don't use OBJCOPYFLAGS here; any flags must be
 	    # explicitly specified.
@@ -879,6 +882,7 @@ proc run_dump_test { name } {
 	}
     } else {
 	set objfile "tmpdir/dump0.o"
+	catch "exec rm -f $objfile" exec_output
     }
 
     # We must not have expected failure if we get here.

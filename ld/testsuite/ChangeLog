@@ -1,3 +1,8 @@
+2007-01-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/1283
+	* lib/ld-lib.exp (run_dump_test): Remove output file first.
+
 2007-01-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/header.d: Adjust for .text section with 16byte
