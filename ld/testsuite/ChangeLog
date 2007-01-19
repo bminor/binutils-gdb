@@ -1,3 +1,17 @@
+2007-01-19 H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/dl6.c: New file.
+	* ld-elf/dl6a.out: Likewise.
+	* ld-elf/dl6amain.c: Likewise.
+	* ld-elf/dl6b.out: Likewise.
+	* ld-elf/dl6bmain.c: Likewise.
+	* ld-elf/dl6cmain.c: Likewise.
+	* ld-elf/dl6dmain.c: Likewise.
+
+	* ld-elf/shared.exp: Add new tests for -Bsymbolic,
+	-Bsymbolic-functions, --dynamic-list-data and
+	--dynamic-list-cpp-new.
+
 2007-01-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/maxpage3.t: New file.

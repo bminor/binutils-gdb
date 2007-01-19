@@ -256,6 +256,8 @@ main (int argc, char **argv)
   command_line.warn_mismatch = TRUE;
   command_line.check_section_addresses = TRUE;
   command_line.accept_unknown_input_arch = FALSE;
+  command_line.symbolic = symbolic_unset;
+  command_line.dynamic_list = dynamic_list_unset;
 
   sort_section = none;
 
@@ -354,6 +356,43 @@ main (int argc, char **argv)
 	einfo (_("%P%F: --relax and -r may not be used together\n"));
       if (link_info.shared)
 	einfo (_("%P%F: -r and -shared may not be used together\n"));
+    }
+
+  /* We may have -Bsymbolic, -Bsymbolic-functions, --dynamic-list-data,
+     --dynamic-list-cpp-new, --dynamic-list-cpp-typeinfo and
+     --dynamic-list FILE.  -Bsymbolic and -Bsymbolic-functions are
+     for shared libraries.  -Bsymbolic overrides all others and vice
+     versa.  */
+  switch (command_line.symbolic)
+    {
+    case symbolic_unset:
+      break;
+    case symbolic:
+      /* -Bsymbolic is for shared library only.  */
+      if (link_info.shared)
+	{
+	  link_info.symbolic = TRUE;
+	  /* Should we free the unused memory?  */
+	  link_info.dynamic_list = NULL;
+	  command_line.dynamic_list = dynamic_list_unset;
+	}
+      break;
+    case symbolic_functions:
+      /* -Bsymbolic-functions is for shared library only.  */
+      if (link_info.shared)
+	command_line.dynamic_list = dynamic_list_data;
+      break;
+    }
+
+  switch (command_line.dynamic_list)
+    {
+    case dynamic_list_unset:
+      break;
+    case dynamic_list_data:
+      link_info.dynamic_data = TRUE;
+    case dynamic_list:
+      link_info.dynamic = TRUE;
+      break;
     }
 
   if (! link_info.shared)

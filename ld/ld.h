@@ -203,6 +203,23 @@ typedef struct {
      behaviour of the linker.  The new default behaviour is to reject such
      input files.  */
   bfd_boolean accept_unknown_input_arch;
+
+  /* -Bsymbolic and -Bsymbolic-functions, as set on command line.  */
+  enum
+    {
+      symbolic_unset = 0,
+      symbolic,
+      symbolic_functions,
+    } symbolic;
+
+  /* --dynamic-list, --dynamic-list-cpp-new, --dynamic-list-cpp-typeinfo
+     and --dynamic-list FILE, as set on command line.  */
+  enum
+    {
+      dynamic_list_unset = 0,
+      dynamic_list_data,
+      dynamic_list
+    } dynamic_list;
 } args_type;
 
 extern args_type command_line;

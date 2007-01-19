@@ -97,6 +97,7 @@ enum option_values
   OPTION_SORT_SECTION,
   OPTION_STATS,
   OPTION_SYMBOLIC,
+  OPTION_SYMBOLIC_FUNCTIONS,
   OPTION_TASK_LINK,
   OPTION_TBSS,
   OPTION_TDATA,
@@ -353,7 +354,7 @@ static const struct ld_option ld_options[] =
     '\0', NULL, NULL, ONE_DASH },
   { {"Bsymbolic", no_argument, NULL, OPTION_SYMBOLIC},
     '\0', NULL, N_("Bind global references locally"), ONE_DASH },
-  { {"Bsymbolic-functions", no_argument, NULL, OPTION_DYNAMIC_LIST_DATA},
+  { {"Bsymbolic-functions", no_argument, NULL, OPTION_SYMBOLIC_FUNCTIONS},
     '\0', NULL, N_("Bind global function references locally"), ONE_DASH },
   { {"check-sections", no_argument, NULL, OPTION_CHECK_SECTIONS},
     '\0', NULL, N_("Check section addresses for overlaps (default)"),
@@ -1144,7 +1145,10 @@ parse_args (unsigned argc, char **argv)
 	  config.stats = TRUE;
 	  break;
 	case OPTION_SYMBOLIC:
-	  link_info.symbolic = TRUE;
+	  command_line.symbolic = symbolic;
+	  break;
+	case OPTION_SYMBOLIC_FUNCTIONS:
+	  command_line.symbolic = symbolic_functions;
 	  break;
 	case 't':
 	  trace_files = TRUE;
@@ -1261,16 +1265,23 @@ parse_args (unsigned argc, char **argv)
 	  command_line.version_exports_section = optarg;
 	  break;
 	case OPTION_DYNAMIC_LIST_DATA:
-	  link_info.dynamic_data = TRUE;
-	  link_info.dynamic = TRUE;
+	  command_line.dynamic_list = dynamic_list_data;
+	  if (command_line.symbolic == symbolic)
+	    command_line.symbolic = symbolic_unset;
 	  break;
 	case OPTION_DYNAMIC_LIST_CPP_TYPEINFO:
 	  lang_append_dynamic_list_cpp_typeinfo ();
-	  link_info.dynamic = TRUE;
+	  if (command_line.dynamic_list != dynamic_list_data)
+	    command_line.dynamic_list = dynamic_list;
+	  if (command_line.symbolic == symbolic)
+	    command_line.symbolic = symbolic_unset;
 	  break;
 	case OPTION_DYNAMIC_LIST_CPP_NEW:
 	  lang_append_dynamic_list_cpp_new ();
-	  link_info.dynamic = TRUE;
+	  if (command_line.dynamic_list != dynamic_list_data)
+	    command_line.dynamic_list = dynamic_list;
+	  if (command_line.symbolic == symbolic)
+	    command_line.symbolic = symbolic_unset;
 	  break;
 	case OPTION_DYNAMIC_LIST:
 	  /* This option indicates a small script that only specifies
@@ -1285,7 +1296,10 @@ parse_args (unsigned argc, char **argv)
 	    parser_input = input_dynamic_list;
 	    yyparse ();
 	  }
-	  link_info.dynamic = TRUE;
+	  if (command_line.dynamic_list != dynamic_list_data)
+	    command_line.dynamic_list = dynamic_list;
+	  if (command_line.symbolic == symbolic)
+	    command_line.symbolic = symbolic_unset;
 	  break;
 	case OPTION_WARN_COMMON:
 	  config.warn_common = TRUE;

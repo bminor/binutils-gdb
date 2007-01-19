@@ -1150,7 +1150,6 @@ platforms which support shared libraries.
 @item -Bsymbolic-functions
 When creating a shared library, bind references to global function
 symbols to the definition within the shared library, if any. 
-@option{-Bsymbolic-functions} is an alias for @option{--dynamic-list-data}.
 This option is only meaningful on ELF platforms which support shared
 libraries.
 
