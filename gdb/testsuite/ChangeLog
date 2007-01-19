@@ -1,3 +1,9 @@
+2006-07-29  Mark Kettenis  <kettenis@gnu.org>
+
+	From Marcus Deuling <deuling@de.ibm.com>:
+	* gdb.arch/altivec-regs.exp: Initialise variable endianness in
+	every case.
+
 2007-01-13  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdb.mi/mi-basics.exp, gdb.mi/mi2-basics.exp (test_dir_specification)

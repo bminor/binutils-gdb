@@ -89,6 +89,7 @@ gdb_test "set \$vrsave = 1" "" ""
 gdb_test "next" "" ""
 
 send_gdb "show endian\n"
+set endianness ""
 gdb_expect {
     -re "(The target endianness is set automatically .currently )(big|little)( endian.*)$gdb_prompt $" {
         pass "endianness"
