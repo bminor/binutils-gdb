@@ -159,7 +159,8 @@ enum option_values
   OPTION_WARN_UNRESOLVED_SYMBOLS,
   OPTION_ERROR_UNRESOLVED_SYMBOLS,
   OPTION_WARN_SHARED_TEXTREL,
-  OPTION_REDUCE_MEMORY_OVERHEADS
+  OPTION_REDUCE_MEMORY_OVERHEADS,
+  OPTION_DEFAULT_SCRIPT
 };
 
 /* The long options.  This structure is used for both the option
@@ -282,6 +283,10 @@ static const struct ld_option ld_options[] =
     't', NULL, N_("Trace file opens"), TWO_DASHES },
   { {"script", required_argument, NULL, 'T'},
     'T', N_("FILE"), N_("Read linker script"), TWO_DASHES },
+  { {"default-script", required_argument, NULL, OPTION_DEFAULT_SCRIPT},
+    '\0', N_("FILE"), N_("Read default linker script"), TWO_DASHES },
+  { {"dT", required_argument, NULL, OPTION_DEFAULT_SCRIPT},
+    '\0', NULL, NULL, ONE_DASH },
   { {"undefined", required_argument, NULL, 'u'},
     'u', N_("SYMBOL"), N_("Start with undefined reference to SYMBOL"),
     TWO_DASHES },
@@ -1148,6 +1153,9 @@ parse_args (unsigned argc, char **argv)
 	  ldfile_open_command_file (optarg);
 	  parser_input = input_script;
 	  yyparse ();
+	  break;
+	case OPTION_DEFAULT_SCRIPT:
+	  command_line.default_script = optarg;
 	  break;
 	case OPTION_SECTION_START:
 	  {

@@ -856,6 +856,22 @@ the current directory, @code{ld} looks for it in the directories
 specified by any preceding @samp{-L} options.  Multiple @samp{-T}
 options accumulate.
 
+@kindex -dT @var{script}
+@kindex --default-script=@var{script}
+@cindex script files
+@item -dT @var{scriptfile}
+@itemx --default-script=@var{scriptfile}
+Use @var{scriptfile} as the default linker script.  @xref{Scripts}.
+
+This option is similar to the @option{--script} option except that
+processing of the script is delayed until after the rest of the
+command line has been processed.  This allows options placed after the
+@option{--default-script} option on the command line to affect the
+behaviour of the linker script, which can be important when the linker
+command line cannot be directly controlled by the user.  (eg because
+the command line is being constructed by another tool, such as
+@samp{gcc}).
+
 @kindex -u @var{symbol}
 @kindex --undefined=@var{symbol}
 @cindex undefined symbol

@@ -1,3 +1,13 @@
+2007-01-19 H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-scripts/default-script.exp: New file.
+	* ld-scripts/default-script.s: Likewise.
+	* ld-scripts/default-script.t: Likewise.
+	* ld-scripts/default-script1.d: Likewise.
+	* ld-scripts/default-script2.d: Likewise.
+	* ld-scripts/default-script3.d: Likewise.
+	* ld-scripts/default-script4.d: Likewise.
+
 2007-01-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/1283

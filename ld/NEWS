@@ -1,4 +1,8 @@
 -*- text -*-
+* Add a new command line option '--default-script=FILE' or '-dT FILE'
+  which specifies a replacement for the built in, default linker
+  script.
+
 * ELF: Add -Bsymbolic-functions, --dynamic-list-cpp-new, which puts C++
   operator new and delete on the dynamic list, and --dynamic-list-data,
   builtin list for --dynamic-list, which puts global data symbols on the

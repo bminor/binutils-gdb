@@ -191,6 +191,9 @@ typedef struct {
      .exports sections.  */
   char *version_exports_section;
 
+  /* Default linker script.  */
+  char *default_script;
+
   /* If TRUE (the default) check section addresses, once compute,
      fpor overlaps.  */
   bfd_boolean check_section_addresses;

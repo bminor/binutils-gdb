@@ -1,3 +1,17 @@
+2007-01-19 H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention --default-script/-dT.
+
+	* ld.h (args_type): Add a default_script field.
+
+	* ld.texinfo: Document --default-script/-dT.
+
+	* ldmain.c (main): Handle command_line.default_script.
+
+	* lexsup.c (option_values): Add OPTION_DEFAULT_SCRIPT.
+	(ld_options): Add entries for --default-script and -dT.
+	(parse_args): Handle --default-script/-dT.
+
 2007-01-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/3831

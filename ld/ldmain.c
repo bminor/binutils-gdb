@@ -388,6 +388,16 @@ main (int argc, char **argv)
      the -L's in argv have been processed.  */
   set_scripts_dir ();
 
+  /* If we have not already opened and parsed a linker script,
+     try the default script from command line first.  */
+  if (saved_script_handle == NULL
+      && command_line.default_script != NULL)
+    {
+      ldfile_open_command_file (command_line.default_script);
+      parser_input = input_script;
+      yyparse ();
+    }
+
   /* If we have not already opened and parsed a linker script
      read the emulation's appropriate default script.  */
   if (saved_script_handle == NULL)
