@@ -344,13 +344,6 @@ main (int argc, char **argv)
   if (config.hash_table_size != 0)
     bfd_hash_set_default_size (config.hash_table_size);
 
-  if (config.maxpagesize != 0)
-    bfd_emul_set_maxpagesize (default_target, config.maxpagesize);
-
-  if (config.commonpagesize != 0)
-    bfd_emul_set_commonpagesize (default_target,
-				 config.commonpagesize);
-
   ldemul_set_symbols ();
 
   if (link_info.relocatable)

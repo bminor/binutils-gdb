@@ -1,3 +1,10 @@
+2007-01-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/maxpage3.t: New file.
+	* ld-elf/maxpage3a.d: Likewise.
+	* ld-elf/maxpage3b.d: Likewise.
+	* ld-elf/maxpage3c.d: Likewise.
+
 2007-01-19 H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-scripts/default-script.exp: New file.

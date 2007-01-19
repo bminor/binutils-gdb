@@ -1,3 +1,15 @@
+2007-01-19  Jakub Jelinek  <jakub@redhat.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/elf32.em (handle_option): Make sure -z max-page-size
+	or -z common-page-size argument is a power of 2.  Call
+	bfd_emul_set_maxpagesize and bfd_emul_set_commonpagesize.
+
+2007-01-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldmain.c (main): Don't call bfd_emul_set_maxpagesize nor
+	bfd_emul_set_commonpagesize.
+
 2007-01-19 H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention --default-script/-dT.
