@@ -11,7 +11,7 @@ rm -f e${EMULATION_NAME}.c
 cat >>e${EMULATION_NAME}.c <<EOF
 /* This file is part of GLD, the Gnu Linker.
    Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006 Free Software Foundation, Inc.
+   2005, 2006, 2007 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -1246,6 +1246,74 @@ gld_${EMULATION_NAME}_after_open (void)
 		new_name = xmalloc (strlen (is->filename) + 3);
 		sprintf (new_name, "%s.%c", is->filename, seq);
 		is->filename = new_name;
+	      }
+	  }
+      }
+  }
+
+  {
+    /* The following chunk of code tries to identify jump stubs in
+       import libraries which are dead code and eliminates them
+       from the final link. For each exported symbol <sym>, there
+       is a object file in the import library with a .text section
+       and several .idata$* sections. The .text section contains the
+       symbol definition for <sym> which is a jump stub of the form
+       jmp *__imp_<sym>. The .idata$5 contains the symbol definition
+       for __imp_<sym> which is the address of the slot for <sym> in
+       the import address table. When a symbol is imported explicitly
+       using __declspec(dllimport) declaration, the compiler generates
+       a reference to __imp_<sym> which directly resolves to the
+       symbol in .idata$5, in which case the jump stub code is not
+       needed. The following code tries to identify jump stub sections
+       in import libraries which are not referred to by anyone and
+       marks them for exclusion from the final link.  */
+    LANG_FOR_EACH_INPUT_STATEMENT (is)
+      {
+	if (is->the_bfd->my_archive)
+	  {
+	    int is_imp = 0;
+	    asection *sec, *stub_sec = NULL;
+
+	    /* See if this is an import library thunk.  */
+	    for (sec = is->the_bfd->sections; sec; sec = sec->next)
+	      {
+		if (strncmp (sec->name, ".idata\$", 7) == 0)
+		  is_imp = 1;
+		/* The section containing the jmp stub has code
+		   and has a reloc.  */
+		if ((sec->flags & SEC_CODE) && sec->reloc_count)
+		  stub_sec = sec;
+	      }
+   
+	    if (is_imp && stub_sec)
+	      {
+		long symsize;
+		asymbol **symbols;
+		long src_count;
+		struct bfd_link_hash_entry * blhe;
+
+		symsize = bfd_get_symtab_upper_bound (is->the_bfd);
+		symbols = xmalloc (symsize);
+		symsize = bfd_canonicalize_symtab (is->the_bfd, symbols);
+
+		for (src_count = 0; src_count < symsize; src_count++)
+		  {
+		    if (symbols[src_count]->section->id == stub_sec->id)
+		      {
+			/* This symbol belongs to the section containing
+			   the stub.  */
+			blhe = bfd_link_hash_lookup (link_info.hash,
+						     symbols[src_count]->name,
+						     FALSE, FALSE, TRUE);
+			/* If the symbol in the stub section has no other
+			   undefined references, exclude the stub section
+			   from the final link.  */
+			if (blhe && (blhe->type == bfd_link_hash_defined)
+			    && (blhe->u.undef.next == NULL))
+			  stub_sec->flags |= SEC_EXCLUDE;
+		      }
+		  }
+		free (symbols);
 	      }
 	  }
       }

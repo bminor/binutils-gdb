@@ -1,5 +1,5 @@
 /* Routines to help build PEI-format DLLs (Win32 etc)
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
    Written by DJ Delorie <dj@cygnus.com>
 
@@ -1873,7 +1873,7 @@ static const unsigned char jmp_arm_bytes[] =
 
 
 static bfd *
-make_one (def_file_export *exp, bfd *parent)
+make_one (def_file_export *exp, bfd *parent, bfd_boolean include_jmp_stub)
 {
   asection *tx, *id7, *id5, *id4, *id6;
   unsigned char *td = NULL, *d7, *d5, *d4, *d6 = NULL;
@@ -1883,28 +1883,37 @@ make_one (def_file_export *exp, bfd *parent)
   const unsigned char *jmp_bytes = NULL;
   int jmp_byte_count = 0;
 
-  switch (pe_details->pe_arch)
+  /* Include the jump stub section only if it is needed. A jump
+     stub is needed if the symbol being imported <sym> is a function
+     symbol and there is at least one undefined reference to that
+     symbol. In other words, if all the import references to <sym> are
+     explicitly through _declspec(dllimport) then the jump stub is not
+     needed.  */
+  if (include_jmp_stub)
     {
-    case PE_ARCH_i386:
-      jmp_bytes = jmp_ix86_bytes;
-      jmp_byte_count = sizeof (jmp_ix86_bytes);
-      break;
-    case PE_ARCH_sh:
-      jmp_bytes = jmp_sh_bytes;
-      jmp_byte_count = sizeof (jmp_sh_bytes);
-      break;
-    case PE_ARCH_mips:
-      jmp_bytes = jmp_mips_bytes;
-      jmp_byte_count = sizeof (jmp_mips_bytes);
-      break;
-    case PE_ARCH_arm:
-    case PE_ARCH_arm_epoc:
-    case PE_ARCH_arm_wince:
-      jmp_bytes = jmp_arm_bytes;
-      jmp_byte_count = sizeof (jmp_arm_bytes);
-      break;
-    default:
-      abort ();
+      switch (pe_details->pe_arch)
+	{
+	case PE_ARCH_i386:
+	  jmp_bytes = jmp_ix86_bytes;
+	  jmp_byte_count = sizeof (jmp_ix86_bytes);
+	  break;
+	case PE_ARCH_sh:
+	  jmp_bytes = jmp_sh_bytes;
+	  jmp_byte_count = sizeof (jmp_sh_bytes);
+	  break;
+	case PE_ARCH_mips:
+	  jmp_bytes = jmp_mips_bytes;
+	  jmp_byte_count = sizeof (jmp_mips_bytes);
+	  break;
+	case PE_ARCH_arm:
+	case PE_ARCH_arm_epoc:
+	case PE_ARCH_arm_wince:
+	  jmp_bytes = jmp_arm_bytes;
+	  jmp_byte_count = sizeof (jmp_arm_bytes);
+	  break;
+	default:
+	  abort ();
+	}
     }
 
   oname = xmalloc (20);
@@ -1930,7 +1939,7 @@ make_one (def_file_export *exp, bfd *parent)
     {
       quick_symbol (abfd, U ("_head_"), dll_symname, "", UNDSEC,
 		    BSF_GLOBAL, 0);
-      if (! exp->flag_data)
+      if (include_jmp_stub)
 	quick_symbol (abfd, "", exp->internal_name, "", tx, BSF_GLOBAL, 0);
       quick_symbol (abfd, "__imp_", exp->internal_name, "", id5,
 		    BSF_GLOBAL, 0);
@@ -1941,7 +1950,7 @@ make_one (def_file_export *exp, bfd *parent)
     {
       quick_symbol (abfd, U ("_head_"), dll_symname, "", UNDSEC,
 		    BSF_GLOBAL, 0);
-      if (! exp->flag_data)
+      if (include_jmp_stub)
 	quick_symbol (abfd, U (""), exp->internal_name, "", tx,
 		      BSF_GLOBAL, 0);
       quick_symbol (abfd, "__imp_", U (""), exp->internal_name, id5,
@@ -1956,7 +1965,7 @@ make_one (def_file_export *exp, bfd *parent)
     quick_symbol (abfd, U ("__imp_"), exp->internal_name, "", id5,
 		  BSF_GLOBAL, 0);
 
-  if (! exp->flag_data)
+  if (include_jmp_stub)
     {
       bfd_set_section_size (abfd, tx, jmp_byte_count);
       td = xmalloc (jmp_byte_count);
@@ -1986,6 +1995,8 @@ make_one (def_file_export *exp, bfd *parent)
 	}
       save_relocs (tx);
     }
+  else
+    bfd_set_section_size (abfd, tx, 0);
 
   bfd_set_section_size (abfd, id7, 4);
   d7 = xmalloc (4);
@@ -2050,7 +2061,8 @@ make_one (def_file_export *exp, bfd *parent)
 
   bfd_set_symtab (abfd, symtab, symptr);
 
-  bfd_set_section_contents (abfd, tx, td, 0, jmp_byte_count);
+  if (include_jmp_stub)
+    bfd_set_section_contents (abfd, tx, td, 0, jmp_byte_count);
   bfd_set_section_contents (abfd, id7, d7, 0, 4);
   bfd_set_section_contents (abfd, id5, d5, 0, PE_IDATA5_SIZE);
   bfd_set_section_contents (abfd, id4, d4, 0, PE_IDATA4_SIZE);
@@ -2398,7 +2410,8 @@ pe_dll_generate_implib (def_file *def, const char *impfilename)
       if (pe_def_file->exports[i].flag_private)
 	continue;
       def->exports[i].internal_name = def->exports[i].name;
-      n = make_one (def->exports + i, outarch);
+      n = make_one (def->exports + i, outarch,
+		    ! (def->exports + i)->flag_data);
       n->next = head;
       head = n;
       def->exports[i].internal_name = internal;
@@ -2474,6 +2487,7 @@ pe_process_import_defs (bfd *output_bfd, struct bfd_link_info *link_info)
 	    /* See if we need this import.  */
 	    size_t len = strlen (pe_def_file->imports[i].internal_name);
 	    char *name = xmalloc (len + 2 + 6);
+	    bfd_boolean include_jmp_stub = FALSE;
 
  	    if (lead_at)
 	      sprintf (name, "%s",
@@ -2485,6 +2499,8 @@ pe_process_import_defs (bfd *output_bfd, struct bfd_link_info *link_info)
 	    blhe = bfd_link_hash_lookup (link_info->hash, name,
 					 FALSE, FALSE, FALSE);
 
+	    /* Include the jump stub for <sym> only if the <sym>
+	       is undefined.  */
 	    if (!blhe || (blhe && blhe->type != bfd_link_hash_undefined))
 	      {
 		if (lead_at)
@@ -2497,6 +2513,9 @@ pe_process_import_defs (bfd *output_bfd, struct bfd_link_info *link_info)
 		blhe = bfd_link_hash_lookup (link_info->hash, name,
 					     FALSE, FALSE, FALSE);
 	      }
+	    else
+	      include_jmp_stub = TRUE;
+
 	    free (name);
 
 	    if (blhe && blhe->type == bfd_link_hash_undefined)
@@ -2517,7 +2536,7 @@ pe_process_import_defs (bfd *output_bfd, struct bfd_link_info *link_info)
 		exp.flag_constant = 0;
 		exp.flag_data = pe_def_file->imports[i].data;
 		exp.flag_noname = exp.name ? 0 : 1;
-		one = make_one (&exp, output_bfd);
+		one = make_one (&exp, output_bfd, (! exp.flag_data) && include_jmp_stub);
 		add_bfd_to_link (one, one->filename, link_info);
 	      }
 	  }

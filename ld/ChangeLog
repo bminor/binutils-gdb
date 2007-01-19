@@ -1,3 +1,10 @@
+2007-01-19  Murali Vemulapati  <murali.vemulapati@gmail.com>
+
+	* pe-dll.c: (make_one) Conditionally include jump stubs.
+	* emultempl/pe.em (gld_${EMULATION_NAME}_after_open): Identify
+	redundant jump stubs from import libraries and exclude them from 
+	link.
+
 2007-01-19 H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld.h (args_type): Add new symbolic and dynamic_list fields.
