@@ -1,4 +1,4 @@
-2006-07-29  Mark Kettenis  <kettenis@gnu.org>
+2007-01-19  Mark Kettenis  <kettenis@gnu.org>
 
 	From Marcus Deuling <deuling@de.ibm.com>:
 	* gdb.arch/altivec-regs.exp: Initialise variable endianness in
