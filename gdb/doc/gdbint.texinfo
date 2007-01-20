@@ -284,7 +284,7 @@ and called functions.
 need to support @sc{dwarf}'s Call Frame Information in mind.  In fact,
 the term ``unwind'' is taken directly from that specification.
 Developers wishing to learn more about unwinders, are encouraged to
-read the the @sc{dwarf} specification.
+read the @sc{dwarf} specification.
 
 @findex frame_register_unwind
 @findex get_frame_register
@@ -1054,7 +1054,7 @@ command immediately after it is created.
 
 The first time a command is used the user will be warned and offered a
 replacement (if one exists). Note that the replacement string passed to
-@code{deprecate_cmd} should be the full name of the command, i.e. the
+@code{deprecate_cmd} should be the full name of the command, i.e., the
 entire string the user should type at the command line.
 
 @section UI-Independent Output---the @code{ui_out} Functions
@@ -2929,7 +2929,7 @@ Given the type flags representing an address class qualifier, return
 its name.
 @end deftypefn
 @deftypefn {Target Macro} int ADDRESS_CLASS_NAME_to_TYPE_FLAGS (int @var{name}, int *var{type_flags_ptr})
-Given an address qualifier name, set the @code{int} refererenced by @var{type_flags_ptr} to the type flags
+Given an address qualifier name, set the @code{int} referenced by @var{type_flags_ptr} to the type flags
 for that address class qualifier.
 @end deftypefn
 
@@ -3104,7 +3104,7 @@ their @var{reg} and @var{type} arguments in different orders.
 @cindex @code{struct value}, converting register contents to
 
 @emph{Maintainer's note: The way GDB manipulates registers is undergoing
-significant change.  Many of the macros and functions refered to in this
+significant change.  Many of the macros and functions referred to in this
 section are likely to be subject to further revision.  See
 @uref{http://sources.redhat.com/gdb/current/ari/, A.R. Index} and
 @uref{http://www.gnu.org/software/gdb/bugs, Bug Tracking Database} for
@@ -3555,7 +3555,7 @@ This method is deprecated. @xref{unwind_pc}.
 @findex unwind_pc
 @anchor{unwind_pc} Return the instruction address, in @var{this_frame}'s
 caller, at which execution will resume after @var{this_frame} returns.
-This is commonly refered to as the return address.
+This is commonly referred to as the return address.
 
 The implementation, which must be frame agnostic (work with any frame),
 is typically no more than:
@@ -3572,7 +3572,7 @@ return d10v_make_iaddr (pc);
 @item CORE_ADDR unwind_sp (struct frame_info *@var{this_frame})
 @findex unwind_sp
 @anchor{unwind_sp} Return the frame's inner most stack address.  This is
-commonly refered to as the frame's @dfn{stack pointer}.
+commonly referred to as the frame's @dfn{stack pointer}.
 
 The implementation, which must be frame agnostic (work with any frame),
 is typically no more than:
@@ -3816,7 +3816,7 @@ Return the virtual type of @var{reg}.
 @item struct type *register_type (@var{gdbarch}, @var{reg})
 @findex register_type
 If defined, return the type of register @var{reg}.  This function
-superseeds @code{DEPRECATED_REGISTER_VIRTUAL_TYPE}.  @xref{Target Architecture
+supersedes @code{DEPRECATED_REGISTER_VIRTUAL_TYPE}.  @xref{Target Architecture
 Definition, , Raw and Virtual Register Representations}.
 
 @item REGISTER_CONVERT_TO_VIRTUAL(@var{reg}, @var{type}, @var{from}, @var{to})
@@ -3841,10 +3841,10 @@ Return the appropriate register set for a core file section with name
 Define this as 1 if the target does not have a hardware single-step
 mechanism.  The macro @code{SOFTWARE_SINGLE_STEP} must also be defined.
 
-@item SOFTWARE_SINGLE_STEP(@var{signal}, @var{insert_breapoints_p})
+@item SOFTWARE_SINGLE_STEP(@var{signal}, @var{insert_breakpoints_p})
 @findex SOFTWARE_SINGLE_STEP
 A function that inserts or removes (depending on
-@var{insert_breapoints_p}) breakpoints at each possible destinations of
+@var{insert_breakpoints_p}) breakpoints at each possible destinations of
 the next instruction. See @file{sparc-tdep.c} and @file{rs6000-tdep.c}
 for examples.
 
@@ -3925,7 +3925,7 @@ definition is only used in generic code when parsing "$ps".)
 @findex DEPRECATED_POP_FRAME
 @findex frame_pop
 If defined, used by @code{frame_pop} to remove a stack frame.  This
-method has been superseeded by generic code.
+method has been superseded by generic code.
 
 @item push_dummy_call (@var{gdbarch}, @var{function}, @var{regcache}, @var{pc_addr}, @var{nargs}, @var{args}, @var{sp}, @var{struct_return}, @var{struct_addr})
 @findex push_dummy_call
@@ -3976,7 +3976,7 @@ This method has been replaced by @code{stabs_argument_has_addr}
 @findex SAVE_DUMMY_FRAME_TOS
 @anchor{SAVE_DUMMY_FRAME_TOS} Used in @samp{call_function_by_hand} to
 notify the target dependent code of the top-of-stack value that will be
-passed to the the inferior code.  This is the value of the @code{SP}
+passed to the inferior code.  This is the value of the @code{SP}
 after both the dummy frame and space for parameters/results have been
 allocated on the stack.  @xref{unwind_dummy_id}.
 
@@ -4020,7 +4020,7 @@ return-value extract and store.}
 parameter, and such a parameter should not be added.  If an architecture
 that requires per-compiler or per-function information be identified,
 then the replacement of @var{rettype} with @code{struct value}
-@var{function} should be persued.}
+@var{function} should be pursued.}
 
 @emph{Maintainer note: The @var{regcache} parameter limits this methods
 to the inner most frame.  While replacing @var{regcache} with a
@@ -4501,7 +4501,7 @@ A target vector can be completely inactive (not pushed on the target
 stack), active but not running (pushed, but not connected to a fully
 manifested inferior), or completely active (pushed, with an accessible
 inferior).  Most targets are only completely inactive or completely
-active, but some support persistant connections to a target even
+active, but some support persistent connections to a target even
 when the target has exited or not yet started.
 
 For example, connecting to the simulator using @code{target sim} does
@@ -4933,7 +4933,7 @@ The obstack mechanism provides a convenient way to allocate and free
 chunks of memory.  Each obstack is a pool of memory that is managed
 like a stack.  Objects (of any nature, size and alignment) are
 allocated and freed in a @acronym{LIFO} fashion on an obstack (see
-@code{libiberty}'s documenatation for a more detailed explanation of
+@code{libiberty}'s documentation for a more detailed explanation of
 @code{obstacks}).
 
 The most noticeable use of the @code{obstacks} in @value{GDBN} is in
@@ -4942,7 +4942,7 @@ representation of an object file.  Lots of things get allocated on
 these @code{obstacks}: dictionary entries, blocks, blockvectors,
 symbols, minimal symbols, types, vectors of fundamental types, class
 fields of types, object files section lists, object files section
-offets lists, line tables, symbol tables, partial symbol tables,
+offset lists, line tables, symbol tables, partial symbol tables,
 string tables, symbol table private data, macros tables, debug
 information sections and entries, import and export lists (som),
 unwind information (hppa), dwarf2 location expressions data.  Plus
@@ -4951,7 +4951,7 @@ names of types.
 
 An essential and convenient property of all data on @code{obstacks} is
 that memory for it gets allocated (with @code{obstack_alloc}) at
-various times during a debugging sesssion, but it is released all at
+various times during a debugging session, but it is released all at
 once using the @code{obstack_free} function.  The @code{obstack_free}
 function takes a pointer to where in the stack it must start the
 deletion from (much like the cleanup chains have a pointer to where to
@@ -5000,7 +5000,7 @@ Regex conditionals.
 
 Often it is necessary to manipulate a dynamic array of a set of
 objects.  C forces some bookkeeping on this, which can get cumbersome
-and repetative.  The @file{vec.h} file contains macros for defining
+and repetitive.  The @file{vec.h} file contains macros for defining
 and using a typesafe vector type.  The functions defined will be
 inlined when compiling, and so the abstraction cost should be zero.
 Domain checks are added to detect programming errors.
@@ -5496,7 +5496,7 @@ code, but @sc{gcc} 2.x and @sc{c89} do not.
 
 @item -Wformat-nonliteral
 Non-literal format strings, with a few exceptions, are bugs - they
-might contain unintented user-supplied format specifiers.
+might contain unintended user-supplied format specifiers.
 Since @value{GDBN} uses the @code{format printf} attribute on all
 @code{printf} like functions this checks not just @code{printf} calls
 but also calls to functions such as @code{fprintf_unfiltered}.
@@ -6032,7 +6032,7 @@ branch tag, denoting the head of the branch, does not need this.}
 To avoid version conflicts, vendors are expected to modify the file
 @file{gdb/version.in} to include a vendor unique alphabetic identifier
 (an official @value{GDBN} release never uses alphabetic characters in
-its version identifer).  E.g., @samp{6.2widgit2}, or @samp{6.2 (Widgit
+its version identifier).  E.g., @samp{6.2widgit2}, or @samp{6.2 (Widgit
 Inc Patch 2)}.
 
 @section Experimental Branches
@@ -6407,8 +6407,8 @@ Send an announcement to the mailing lists:
 @item
 @email{gdb-announce@@sources.redhat.com, GDB Announcement mailing list}
 @item
-@email{gdb@@sources.redhat.com, GDB Discsussion mailing list} and
-@email{gdb-testers@@sources.redhat.com, GDB Discsussion mailing list}
+@email{gdb@@sources.redhat.com, GDB Discussion mailing list} and
+@email{gdb-testers@@sources.redhat.com, GDB Testers mailing list}
 @end itemize
 
 @emph{Pragmatics: The branch creation is sent to the announce list to
@@ -6615,7 +6615,7 @@ $
 @emph{Don't worry about the @file{gdb.info-??} or
 @file{gdb/p-exp.tab.c}.  They were generated (and yes @file{gdb.info-1}
 was also generated only something strange with CVS means that they
-didn't get supressed).  Fixing it would be nice though.}
+didn't get suppressed).  Fixing it would be nice though.}
 
 @subsubheading Create compressed versions of the release
 

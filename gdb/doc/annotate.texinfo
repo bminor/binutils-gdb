@@ -20,7 +20,7 @@
 @set DATE July 2003
 
 @c NOTE: cagney/2003-07-28:
-@c Don't make this migration doccument an appendix of GDB's user guide.
+@c Don't make this migration document an appendix of GDB's user guide.
 @c By keeping this separate, the size of the user guide is contained. If
 @c the user guide to get much bigger it would need to switch to a larger,
 @c more expensive, form factor and would drive up the manuals publication
@@ -161,7 +161,7 @@ assume that specific @value{GDBN} commands provide specific information.
 Any change to @value{GDBN}'s @sc{cli} output modifies or removes that
 information and, consequently, likely breaks the client.
 
-Since the @sc{gdb/mi} output is independant of the @sc{cli}, it does not
+Since the @sc{gdb/mi} output is independent of the @sc{cli}, it does not
 have this problem.
 
 @section Scalability
@@ -200,8 +200,8 @@ The annotation mechanism was implemented by interspersing @sc{cli} print
 statements with various annotations.  As a consequence, any @sc{cli}
 output change can alter the annotation output.
 
-Since the @sc{gdb/mi} output is independant of the @sc{cli}, and the
-@sc{gdb/mi} is increasingly implemented independant of the @sc{cli}
+Since the @sc{gdb/mi} output is independent of the @sc{cli}, and the
+@sc{gdb/mi} is increasingly implemented independent of the @sc{cli}
 code, its long term maintenance is much easier.
 
 @node Migrating to GDB/MI

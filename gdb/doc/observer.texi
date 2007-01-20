@@ -74,7 +74,7 @@ The following interfaces are available to manage observers:
 
 @deftypefun extern struct observer *observer_attach_@var{event} (observer_@var{event}_ftype *@var{f})
 Using the function @var{f}, create an observer that is notified when
-ever @var{event} occures, return the observer.
+ever @var{event} occurs, return the observer.
 @end deftypefun
 
 @deftypefun extern void observer_detach_@var{event} (struct observer *@var{observer});

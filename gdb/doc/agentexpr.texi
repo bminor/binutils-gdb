@@ -17,7 +17,7 @@
 @node Agent Expressions
 @appendix The GDB Agent Expression Mechanism
 
-In some applications, it is not feasable for the debugger to interrupt
+In some applications, it is not feasible for the debugger to interrupt
 the program's execution long enough for the developer to learn anything
 helpful about its behavior.  If the program's correctness depends on its
 real-time behavior, delays introduced by a debugger might cause the
@@ -221,7 +221,7 @@ their sum, as an integer.
 
 In this example, @code{add} is the name of the bytecode, and
 @code{(0x02)} is the one-byte value used to encode the bytecode, in
-hexidecimal.  The phrase ``@var{a} @var{b} @result{} @var{a+b}'' shows
+hexadecimal.  The phrase ``@var{a} @var{b} @result{} @var{a+b}'' shows
 the stack before and after the bytecode executes.  Beforehand, the stack
 must contain at least two values, @var{a} and @var{b}; since the top of
 the stack is to the right, @var{b} is on the top of the stack, and

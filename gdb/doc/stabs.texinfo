@@ -1069,7 +1069,7 @@ start of the relevant section for that compilation unit.  SunPRO has
 plans to have the linker stop relocating stabs; I suspect that their the
 debugger gets the address from the corresponding ELF (not stab) symbol.
 I'm not sure how to find which symbol of that name is the right one.
-The clean way to do all this would be to have a the value of a symbol
+The clean way to do all this would be to have the value of a symbol
 descriptor @samp{S} symbol be an offset relative to the start of the
 file, just like everything else, but that introduces obvious
 compatibility problems.  For more information on linker stab relocation,
