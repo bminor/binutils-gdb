@@ -1,3 +1,8 @@
+2007-01-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/bigcore.c (RLIMIT_CAP): Define.
+	(maximize_rlimit): Reduce limits on 64-bit systems.
+
 2007-01-19  Mark Kettenis  <kettenis@gnu.org>
 
 	From Marcus Deuling <deuling@de.ibm.com>:

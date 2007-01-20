@@ -31,6 +31,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+/* This test was written for >2GB core files on 32-bit systems.  On
+   current 64-bit systems, generating a >4EB (2 ** 63) core file is
+   not practical, and getting as close as we can takes a lot of
+   useless CPU time.  So limit ourselves to a bit bigger than
+   32-bit, which is still a useful test.  */
+#define RLIMIT_CAP (1ULL << 34)
+
 /* Print routines:
 
    The following are so that printf et.al. can be avoided.  Those
@@ -110,6 +117,8 @@ maximize_rlimit (int resource, const char *prefix)
   print_rlimit (resource);
   getrlimit (resource, &rl);
   rl.rlim_cur = rl.rlim_max;
+  if (sizeof (rl.rlim_cur) >= sizeof (RLIMIT_CAP))
+    rl.rlim_cur = (rlim_t) RLIMIT_CAP;
   setrlimit (resource, &rl);
   print_string (" -> ");
   print_rlimit (resource);
