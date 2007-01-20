@@ -322,7 +322,7 @@ static void
 show_endian (struct ui_file *file, int from_tty, struct cmd_list_element *c,
 	     const char *value)
 {
-  if (target_byte_order_user != BFD_ENDIAN_UNKNOWN)
+  if (target_byte_order_user == BFD_ENDIAN_UNKNOWN)
     if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
       fprintf_unfiltered (file, _("The target endianness is set automatically "
 				  "(currently big endian)\n"));
