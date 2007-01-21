@@ -1133,6 +1133,10 @@ lookup_symbol (const char *name, const struct block *block,
   if (needtofreename)
     xfree (demangled_name);
 
+  /* Override the returned symtab with the symbol's specific one.  */
+  if (returnval != NULL && symtab != NULL)
+    *symtab = SYMBOL_SYMTAB (returnval);
+
   return returnval;	 
 }
 
@@ -3008,7 +3012,11 @@ search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
 	    QUIT;
 
 	    /* If it would match (logic taken from loop below)
-	       load the file and go on to the next one */
+	       load the file and go on to the next one.  We check the
+	       filename here, but that's a bit bogus: we don't know
+	       what file it really comes from until we have full
+	       symtabs.  The symbol might be in a header file included by
+	       this psymtab.  This only affects Insight.  */
 	    if (file_matches (ps->filename, files, nfiles)
 		&& ((regexp == NULL
 		     || re_exec (SYMBOL_NATURAL_NAME (*psym)) != 0)
@@ -3087,8 +3095,10 @@ search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
 	  b = BLOCKVECTOR_BLOCK (bv, i);
 	  ALL_BLOCK_SYMBOLS (b, iter, sym)
 	    {
+	      struct symtab *real_symtab = SYMBOL_SYMTAB (sym);
 	      QUIT;
-	      if (file_matches (s->filename, files, nfiles)
+
+	      if (file_matches (real_symtab->filename, files, nfiles)
 		  && ((regexp == NULL
 		       || re_exec (SYMBOL_NATURAL_NAME (sym)) != 0)
 		      && ((kind == VARIABLES_DOMAIN && SYMBOL_CLASS (sym) != LOC_TYPEDEF
@@ -3101,7 +3111,7 @@ search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
 		  /* match */
 		  psr = (struct symbol_search *) xmalloc (sizeof (struct symbol_search));
 		  psr->block = i;
-		  psr->symtab = s;
+		  psr->symtab = real_symtab;
 		  psr->symbol = sym;
 		  psr->msymbol = NULL;
 		  psr->next = NULL;

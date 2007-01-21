@@ -1,3 +1,22 @@
+2007-01-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* buildsym.c (end_symtab): Use preallocated symtab if available.
+	Fill in SYMBOL_SYMTAB.
+	* buildsym.h (struct subfile): Add symtab member.
+	* dwarf2read.c (struct dwarf2_cu): Add line_header.
+	(struct file_entry): Add symtab.
+	(free_cu_line_header): New function.
+	(read_file_scope): Use it.  Save line_header in the cu.  Process
+	lines before DIEs.
+	(add_file_name): Initialize new symtab member.
+	(dwarf_decode_lines): Create symtabs for included files.
+	(new_symbol): Set SYMBOL_SYMTAB.
+	* symtab.c (lookup_symbol): Use SYMBOL_SYMTAB.
+	(search_symbols): Likewise.
+	* symtab.h (struct symbol): Add symtab member.
+	(SYMBOL_SYMTAB): Define.
+
 2007-01-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* symfile.c (allocate_symtab): Remove INIT_EXTRA_SYMTAB_INFO.

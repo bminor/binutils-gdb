@@ -609,6 +609,10 @@ struct symbol
 
   struct type *type;
 
+  /* The symbol table containing this symbol.  This is the file
+     associated with LINE.  */
+  struct symtab *symtab;
+
   /* Domain code.  */
 
   ENUM_BITFIELD(domain_enum_tag) domain : 6;
@@ -664,6 +668,7 @@ struct symbol
 #define SYMBOL_CLASS(symbol)		(symbol)->aclass
 #define SYMBOL_TYPE(symbol)		(symbol)->type
 #define SYMBOL_LINE(symbol)		(symbol)->line
+#define SYMBOL_SYMTAB(symbol)		(symbol)->symtab
 #define SYMBOL_BASEREG(symbol)		(symbol)->aux_value.basereg
 #define SYMBOL_OBJFILE(symbol)          (symbol)->aux_value.objfile
 #define SYMBOL_OPS(symbol)              (symbol)->ops

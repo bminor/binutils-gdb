@@ -70,6 +70,7 @@ struct subfile
     enum language language;
     char *producer;
     char *debugformat;
+    struct symtab *symtab;
   };
 
 EXTERN struct subfile *subfiles;

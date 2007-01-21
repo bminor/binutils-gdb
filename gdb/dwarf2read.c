@@ -341,6 +341,9 @@ struct dwarf2_cu
      partial symbol tables do not have dependencies.  */
   htab_t dependencies;
 
+  /* Header data from the line table, during full symbol processing.  */
+  struct line_header *line_header;
+
   /* Mark used when releasing cached dies.  */
   unsigned int mark : 1;
 
@@ -432,6 +435,7 @@ struct line_header
     unsigned int mod_time;
     unsigned int length;
     int included_p; /* Non-zero if referenced by the Line Number Program.  */
+    struct symtab *symtab; /* The associated symbol table, if any.  */
   } *file_names;
 
   /* The start and end of the statement program following this
@@ -2754,6 +2758,15 @@ initialize_cu_func_list (struct dwarf2_cu *cu)
 }
 
 static void
+free_cu_line_header (void *arg)
+{
+  struct dwarf2_cu *cu = arg;
+
+  free_line_header (cu->line_header);
+  cu->line_header = NULL;
+}
+
+static void
 read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
@@ -2823,6 +2836,22 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   initialize_cu_func_list (cu);
 
+  /* Decode line number information if present.  We do this before
+     processing child DIEs, so that the line header table is available
+     for DW_AT_decl_file.  */
+  attr = dwarf2_attr (die, DW_AT_stmt_list, cu);
+  if (attr)
+    {
+      unsigned int line_offset = DW_UNSND (attr);
+      line_header = dwarf_decode_line_header (line_offset, abfd, cu);
+      if (line_header)
+        {
+          cu->line_header = line_header;
+          make_cleanup (free_cu_line_header, cu);
+          dwarf_decode_lines (line_header, comp_dir, abfd, cu, NULL);
+        }
+    }
+
   /* Process all dies in compilation unit.  */
   if (die->child != NULL)
     {
@@ -2832,20 +2861,6 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  process_die (child_die, cu);
 	  child_die = sibling_die (child_die);
 	}
-    }
-
-  /* Decode line number information if present.  */
-  attr = dwarf2_attr (die, DW_AT_stmt_list, cu);
-  if (attr)
-    {
-      unsigned int line_offset = DW_UNSND (attr);
-      line_header = dwarf_decode_line_header (line_offset, abfd, cu);
-      if (line_header)
-        {
-          make_cleanup ((make_cleanup_ftype *) free_line_header,
-                        (void *) line_header);
-          dwarf_decode_lines (line_header, comp_dir, abfd, cu, NULL);
-        }
     }
 
   /* Decode macro information, if present.  Dwarf 2 macro information
@@ -6457,6 +6472,7 @@ add_file_name (struct line_header *lh,
   fe->mod_time = mod_time;
   fe->length = length;
   fe->included_p = 0;
+  fe->symtab = NULL;
 }
  
 
@@ -6644,7 +6660,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
   CORE_ADDR baseaddr;
   struct objfile *objfile = cu->objfile;
   const int decode_for_pst_p = (pst != NULL);
-  struct subfile *last_subfile = NULL;
+  struct subfile *last_subfile = NULL, *first_subfile = current_subfile;
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
@@ -6869,6 +6885,35 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
               dwarf2_create_include_psymtab (include_name, pst, objfile);
           }
     }
+  else
+    {
+      /* Make sure a symtab is created for every file, even files
+	 which contain only variables (i.e. no code with associated
+	 line numbers).  */
+
+      int i;
+      struct file_entry *fe;
+
+      for (i = 0; i < lh->num_file_names; i++)
+	{
+	  char *dir = NULL;
+	  fe = &lh->file_names[i];
+	  if (fe->dir_index)
+	    dir = lh->include_dirs[fe->dir_index - 1];
+	  dwarf2_start_subfile (fe->name, dir, comp_dir);
+
+	  /* Skip the main file; we don't need it, and it must be
+	     allocated last, so that it will show up before the
+	     non-primary symtabs in the objfile's symtab list.  */
+	  if (current_subfile == first_subfile)
+	    continue;
+
+	  if (current_subfile->symtab == NULL)
+	    current_subfile->symtab = allocate_symtab (current_subfile->name,
+						       cu->objfile);
+	  fe->symtab = current_subfile->symtab;
+	}
+    }
 }
 
 /* Start a subfile for DWARF.  FILENAME is the name of the file and
@@ -7024,6 +7069,23 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	{
 	  SYMBOL_LINE (sym) = DW_UNSND (attr);
 	}
+
+      attr = dwarf2_attr (die, DW_AT_decl_file, cu);
+      if (attr)
+	{
+	  int file_index = DW_UNSND (attr);
+	  if (cu->line_header == NULL
+	      || file_index > cu->line_header->num_file_names)
+	    complaint (&symfile_complaints,
+		       _("file index out of range"));
+	  else
+	    {
+	      struct file_entry *fe;
+	      fe = &cu->line_header->file_names[file_index - 1];
+	      SYMBOL_SYMTAB (sym) = fe->symtab;
+	    }
+	}
+
       switch (die->tag)
 	{
 	case DW_TAG_label:

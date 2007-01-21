@@ -959,7 +959,10 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 	    }
 
 	  /* Now, allocate a symbol table.  */
-	  symtab = allocate_symtab (subfile->name, objfile);
+	  if (subfile->symtab == NULL)
+	    symtab = allocate_symtab (subfile->name, objfile);
+	  else
+	    symtab = subfile->symtab;
 
 	  /* Fill in its components.  */
 	  symtab->blockvector = blockvector;
@@ -1046,6 +1049,26 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
   if (symtab)
     {
       symtab->primary = 1;
+    }
+
+  /* Default any symbols without a specified symtab to the primary
+     symtab.  */
+  if (blockvector)
+    {
+      int block_i;
+
+      for (block_i = 0; block_i < BLOCKVECTOR_NBLOCKS (blockvector); block_i++)
+	{
+	  struct block *block = BLOCKVECTOR_BLOCK (blockvector, block_i);
+	  struct symbol *sym;
+	  struct dict_iterator iter;
+
+	  for (sym = dict_iterator_first (BLOCK_DICT (block), &iter);
+	       sym != NULL;
+	       sym = dict_iterator_next (&iter))
+	    if (SYMBOL_SYMTAB (sym) == NULL)
+	      SYMBOL_SYMTAB (sym) = symtab;
+	}
     }
 
   last_source_file = NULL;
