@@ -21,6 +21,12 @@
 # need to be modified for any target, it can be done with a variable
 # or by passing arguments.
 
+if {$tool == ""} {
+    # Tests would fail, logs on get_compiler_info() would be missing.
+    send_error "`site.exp' not found, run `make site.exp'!\n"
+    exit 2
+}
+
 load_lib libgloss.exp
 
 global GDB
