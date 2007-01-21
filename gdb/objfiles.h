@@ -603,6 +603,14 @@ extern void *objfile_data (struct objfile *objfile,
   ALL_OBJFILES (objfile)	 \
     ALL_OBJFILE_SYMTABS (objfile, s)
 
+/* Traverse all symtabs in all objfiles, skipping included files
+   (which share a blockvector with their primary symtab).  */
+
+#define ALL_PRIMARY_SYMTABS(objfile, s) \
+  ALL_OBJFILES (objfile)		\
+    ALL_OBJFILE_SYMTABS (objfile, s)	\
+      if ((s)->primary)
+
 /* Traverse all psymtabs in all objfiles.  */
 
 #define	ALL_PSYMTABS(objfile, p) \

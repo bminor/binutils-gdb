@@ -4120,7 +4120,7 @@ symtab_for_sym (struct symbol *sym)
   struct dict_iterator iter;
   int j;
 
-  ALL_SYMTABS (objfile, s)
+  ALL_PRIMARY_SYMTABS (objfile, s)
   {
     switch (SYMBOL_CLASS (sym))
       {
@@ -4549,11 +4549,9 @@ ada_lookup_symbol_list (const char *name0, const struct block *block0,
   /* Now add symbols from all global blocks: symbol tables, minimal symbol
      tables, and psymtab's.  */
 
-  ALL_SYMTABS (objfile, s)
+  ALL_PRIMARY_SYMTABS (objfile, s)
   {
     QUIT;
-    if (!s->primary)
-      continue;
     bv = BLOCKVECTOR (s);
     block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
     ada_add_block_symbols (&symbol_list_obstack, block, name, namespace,
@@ -4619,11 +4617,9 @@ ada_lookup_symbol_list (const char *name0, const struct block *block0,
   if (num_defns_collected (&symbol_list_obstack) == 0)
     {
 
-      ALL_SYMTABS (objfile, s)
+      ALL_PRIMARY_SYMTABS (objfile, s)
       {
         QUIT;
-        if (!s->primary)
-          continue;
         bv = BLOCKVECTOR (s);
         block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
         ada_add_block_symbols (&symbol_list_obstack, block, name, namespace,
@@ -4703,7 +4699,7 @@ ada_lookup_symbol (const char *name, const struct block *block0,
 
           /* Search the list of symtabs for one which contains the
              address of the start of this block.  */
-          ALL_SYMTABS (objfile, s)
+          ALL_PRIMARY_SYMTABS (objfile, s)
           {
             bv = BLOCKVECTOR (s);
             b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);

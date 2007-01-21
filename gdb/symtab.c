@@ -1269,7 +1269,7 @@ lookup_symbol_aux_block (const char *name, const char *linkage_name,
 	{
 	  /* Search the list of symtabs for one which contains the
 	     address of the start of this block.  */
-	  ALL_SYMTABS (objfile, s)
+	  ALL_PRIMARY_SYMTABS (objfile, s)
 	    {
 	      bv = BLOCKVECTOR (s);
 	      b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
@@ -1304,7 +1304,7 @@ lookup_symbol_aux_symtabs (int block_index,
   const struct block *block;
   struct symtab *s;
 
-  ALL_SYMTABS (objfile, s)
+  ALL_PRIMARY_SYMTABS (objfile, s)
   {
     bv = BLOCKVECTOR (s);
     block = BLOCKVECTOR_BLOCK (bv, block_index);
@@ -1719,7 +1719,7 @@ basic_lookup_transparent_type (const char *name)
      of the desired name as a global, then do psymtab-to-symtab
      conversion on the fly and return the found symbol.  */
 
-  ALL_SYMTABS (objfile, s)
+  ALL_PRIMARY_SYMTABS (objfile, s)
   {
     bv = BLOCKVECTOR (s);
     block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
@@ -1767,7 +1767,7 @@ basic_lookup_transparent_type (const char *name)
      conversion on the fly and return the found symbol.
    */
 
-  ALL_SYMTABS (objfile, s)
+  ALL_PRIMARY_SYMTABS (objfile, s)
   {
     bv = BLOCKVECTOR (s);
     block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
@@ -1944,7 +1944,7 @@ find_pc_sect_symtab (CORE_ADDR pc, asection *section)
      It also happens for objfiles that have their functions reordered.
      For these, the symtab we are looking for is not necessarily read in.  */
 
-  ALL_SYMTABS (objfile, s)
+  ALL_PRIMARY_SYMTABS (objfile, s)
   {
     bv = BLOCKVECTOR (s);
     b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
@@ -2897,7 +2897,6 @@ search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
   struct symtab *s;
   struct partial_symtab *ps;
   struct blockvector *bv;
-  struct blockvector *prev_bv = 0;
   struct block *b;
   int i = 0;
   struct dict_iterator iter;
@@ -3079,15 +3078,9 @@ search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
       }
     }
 
-  ALL_SYMTABS (objfile, s)
+  ALL_PRIMARY_SYMTABS (objfile, s)
   {
     bv = BLOCKVECTOR (s);
-    /* Often many files share a blockvector.
-       Scan each blockvector only once so that
-       we don't get every symbol many times.
-       It happens that the first symtab in the list
-       for any given blockvector is the main file.  */
-    if (bv != prev_bv)
       for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)
 	{
 	  struct symbol_search *prevtail = tail;
@@ -3139,7 +3132,6 @@ search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
 		tail = sort_search_symbols (prevtail, nfound);
 	    }
 	}
-    prev_bv = bv;
   }
 
   /* If there are no eyes, avoid all contact.  I mean, if there are
@@ -3704,7 +3696,7 @@ make_symbol_completion_list (char *text, char *word)
   /* Go through the symtabs and check the externs and statics for
      symbols which match.  */
 
-  ALL_SYMTABS (objfile, s)
+  ALL_PRIMARY_SYMTABS (objfile, s)
   {
     QUIT;
     b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
@@ -3714,7 +3706,7 @@ make_symbol_completion_list (char *text, char *word)
       }
   }
 
-  ALL_SYMTABS (objfile, s)
+  ALL_PRIMARY_SYMTABS (objfile, s)
   {
     QUIT;
     b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);

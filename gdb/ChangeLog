@@ -1,3 +1,14 @@
+2007-01-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* objfiles.h (ALL_PRIMARY_SYMTABS): Define.
+
+	* ada-lang.c (symtab_for_sym, ada_lookup_symbol_list)
+	(ada_lookup_symbol): Use ALL_PRIMARY_SYMTABS.
+	* cp-support.c (make_symbol_overload_list_qualified): Likewise.
+	* symtab.c (lookup_symbol_aux_block, lookup_symbol_aux_symtabs)
+	(basic_lookup_transparent_type, find_pc_sect_symtab, search_symbols)
+	(make_symbol_completion_list): Likewise.
+
 2007-01-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 

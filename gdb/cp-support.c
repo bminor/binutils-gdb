@@ -750,7 +750,7 @@ make_symbol_overload_list_qualified (const char *func_name)
   /* Go through the symtabs and check the externs and statics for
      symbols which match.  */
 
-  ALL_SYMTABS (objfile, s)
+  ALL_PRIMARY_SYMTABS (objfile, s)
   {
     QUIT;
     b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
@@ -764,7 +764,7 @@ make_symbol_overload_list_qualified (const char *func_name)
     }
   }
 
-  ALL_SYMTABS (objfile, s)
+  ALL_PRIMARY_SYMTABS (objfile, s)
   {
     QUIT;
     b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
