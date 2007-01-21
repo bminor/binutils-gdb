@@ -7125,7 +7125,10 @@ delete_command (char *arg, int from_tty)
 	    b->type != bp_thread_event &&
 	    b->type != bp_overlay_event &&
 	    b->number >= 0)
-	  breaks_to_delete = 1;
+	  {
+	    breaks_to_delete = 1;
+	    break;
+	  }
       }
 
       /* Ask user only if there are some breakpoints to delete.  */

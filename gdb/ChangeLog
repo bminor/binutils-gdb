@@ -1,3 +1,7 @@
+2007-01-21  Markus Deuling  <deuling@de.ibm.com>
+
+	* breakpoint.c (delete_command): Skip redundant loop iterations.
+
 2007-01-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdbarch.sh (register_type): Update comment.
