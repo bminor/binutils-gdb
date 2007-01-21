@@ -1,5 +1,9 @@
 2007-01-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* symfile.c (allocate_symtab): Remove INIT_EXTRA_SYMTAB_INFO.
+
+2007-01-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* arch-utils.c (show_endian): Correct reversed condition.
 
 2007-01-19  Jan Kratochvil  <jan.kratochvil@redhat.com>

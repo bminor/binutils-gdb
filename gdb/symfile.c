@@ -2506,14 +2506,6 @@ allocate_symtab (char *filename, struct objfile *objfile)
   symtab->next = objfile->symtabs;
   objfile->symtabs = symtab;
 
-  /* FIXME: This should go away.  It is only defined for the Z8000,
-     and the Z8000 definition of this macro doesn't have anything to
-     do with the now-nonexistent EXTRA_SYMTAB_INFO macro, it's just
-     here for convenience.  */
-#ifdef INIT_EXTRA_SYMTAB_INFO
-  INIT_EXTRA_SYMTAB_INFO (symtab);
-#endif
-
   return (symtab);
 }
 
