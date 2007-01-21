@@ -90,6 +90,9 @@ supported.
 * The "set trust-readonly-sections" command works again.  This command was
 broken in GDB 6.3, 6.4, and 6.5.
 
+* The "load" command now supports writing to flash memory, if the remote
+stub provides the required support.
+
 * Support for GNU/Linux Thread Local Storage (TLS, per-thread variables) no
 longer requires symbolic debug information (e.g. DWARF-2).
 
@@ -130,6 +133,15 @@ qSupported:
 qXfer:auxv:read:
   Fetch an OS auxilliary vector from the remote stub.  This packet is a
   more efficient replacement for qPart:auxv:read.
+
+qXfer:memory-map:read:
+  Fetch a memory map from the remote stub, including information about
+  RAM, ROM, and flash memory devices.
+
+vFlashErase:
+vFlashWrite:
+vFlashDone:
+  Erase and program a flash memory device.
 
 * Removed remote packets
 
