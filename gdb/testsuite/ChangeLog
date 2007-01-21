@@ -1,3 +1,9 @@
+2007-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.arch/i386-gnu-cfi.exp, gdb.arch/i386-gnu-cfi.c,
+	gdb.arch/i386-gnu-cfi-asm.S: New files.
+
 2007-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* lib/gdb.exp: Abort on missing `site.exp'.
