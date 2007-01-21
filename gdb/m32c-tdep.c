@@ -1481,7 +1481,7 @@ check_for_saved (void *prologue_untyped, pv_t addr, CORE_ADDR size, pv_t value)
 
       if (value.reg == tdep->pc->num)
 	saved_size = tdep->ret_addr_bytes;
-      else if (gdbarch_register_type (arch, value.reg)
+      else if (register_type (arch, value.reg)
 	       == tdep->data_addr_reg_type)
 	saved_size = tdep->push_addr_bytes;
 

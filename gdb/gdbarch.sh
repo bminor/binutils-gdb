@@ -455,7 +455,9 @@ f:=:int:sdb_reg_to_regnum:int sdb_regnr:sdb_regnr::no_op_reg_to_regnum::0
 f:=:int:dwarf2_reg_to_regnum:int dwarf2_regnr:dwarf2_regnr::no_op_reg_to_regnum::0
 f:=:const char *:register_name:int regnr:regnr
 
-# REGISTER_TYPE is a direct replacement for DEPRECATED_REGISTER_VIRTUAL_TYPE.
+# Return the type of a register specified by the architecture.  Only
+# the register cache should call this function directly; others should
+# use "register_type".
 M::struct type *:register_type:int reg_nr:reg_nr
 # If the value returned by DEPRECATED_REGISTER_BYTE agrees with the
 # register offsets computed using just REGISTER_TYPE, this can be

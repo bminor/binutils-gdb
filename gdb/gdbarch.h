@@ -469,7 +469,9 @@ extern void set_gdbarch_register_name (struct gdbarch *gdbarch, gdbarch_register
 #define REGISTER_NAME(regnr) (gdbarch_register_name (current_gdbarch, regnr))
 #endif
 
-/* REGISTER_TYPE is a direct replacement for DEPRECATED_REGISTER_VIRTUAL_TYPE. */
+/* Return the type of a register specified by the architecture.  Only
+   the register cache should call this function directly; others should
+   use "register_type". */
 
 extern int gdbarch_register_type_p (struct gdbarch *gdbarch);
 

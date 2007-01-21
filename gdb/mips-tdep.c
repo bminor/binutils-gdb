@@ -4031,7 +4031,7 @@ mips_print_register (struct ui_file *file, struct frame_info *frame,
   gdb_byte raw_buffer[MAX_REGISTER_SIZE];
   int offset;
 
-  if (TYPE_CODE (gdbarch_register_type (gdbarch, regnum)) == TYPE_CODE_FLT)
+  if (TYPE_CODE (register_type (gdbarch, regnum)) == TYPE_CODE_FLT)
     {
       mips_print_fp_register (file, frame, regnum);
       return;
@@ -4063,7 +4063,7 @@ mips_print_register (struct ui_file *file, struct frame_info *frame,
     offset = 0;
 
   print_scalar_formatted (raw_buffer + offset,
-			  gdbarch_register_type (gdbarch, regnum), 'x', 0,
+			  register_type (gdbarch, regnum), 'x', 0,
 			  file);
 }
 
@@ -4100,7 +4100,7 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
     {
       if (*REGISTER_NAME (regnum) == '\0')
 	continue;		/* unused register */
-      if (TYPE_CODE (gdbarch_register_type (gdbarch, regnum)) ==
+      if (TYPE_CODE (register_type (gdbarch, regnum)) ==
 	  TYPE_CODE_FLT)
 	break;			/* end the row: reached FP register */
       if (col == 0)
@@ -4126,7 +4126,7 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
     {
       if (*REGISTER_NAME (regnum) == '\0')
 	continue;		/* unused register */
-      if (TYPE_CODE (gdbarch_register_type (gdbarch, regnum)) ==
+      if (TYPE_CODE (register_type (gdbarch, regnum)) ==
 	  TYPE_CODE_FLT)
 	break;			/* end row: reached FP register */
       /* OK: get the data in raw format.  */
@@ -4178,7 +4178,7 @@ mips_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
       regnum = NUM_REGS;
       while (regnum < NUM_REGS + NUM_PSEUDO_REGS)
 	{
-	  if (TYPE_CODE (gdbarch_register_type (gdbarch, regnum)) ==
+	  if (TYPE_CODE (register_type (gdbarch, regnum)) ==
 	      TYPE_CODE_FLT)
 	    {
 	      if (all)		/* true for "INFO ALL-REGISTERS" command */

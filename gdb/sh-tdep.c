@@ -2004,7 +2004,7 @@ sh_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 					     base_regnum) * portion));
       /* We must pay attention to the endiannes. */
       sh_register_convert_to_virtual (reg_nr,
-				      gdbarch_register_type (gdbarch, reg_nr),
+				      register_type (gdbarch, reg_nr),
 				      temp_buffer, buffer);
     }
   else if (reg_nr >= FV0_REGNUM && reg_nr <= FV_LAST_REGNUM)
@@ -2044,7 +2044,7 @@ sh_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       base_regnum = dr_reg_base_num (reg_nr);
 
       /* We must pay attention to the endiannes. */
-      sh_register_convert_to_raw (gdbarch_register_type (gdbarch, reg_nr),
+      sh_register_convert_to_raw (register_type (gdbarch, reg_nr),
 				  reg_nr, buffer, temp_buffer);
 
       /* Write the real regs for which this one is an alias.  */

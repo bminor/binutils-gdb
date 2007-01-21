@@ -1597,8 +1597,7 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 
       /* We must pay attention to the endianness.  */
       sh64_register_convert_to_virtual (reg_nr, 
-					gdbarch_register_type (gdbarch, 
-							       reg_nr),
+					register_type (gdbarch, reg_nr),
 					temp_buffer, buffer);
 
     }
@@ -1669,8 +1668,7 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 
       /* We must pay attention to the endianness.  */
       sh64_register_convert_to_virtual (reg_nr, 
-					gdbarch_register_type (gdbarch, 
-							       reg_nr),
+					register_type (gdbarch, reg_nr),
 					temp_buffer, buffer);
     }
 
@@ -1755,7 +1753,7 @@ sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
     {
       base_regnum = sh64_dr_reg_base_num (reg_nr);
       /* We must pay attention to the endianness.  */
-      sh64_register_convert_to_raw (gdbarch_register_type (gdbarch, reg_nr),
+      sh64_register_convert_to_raw (register_type (gdbarch, reg_nr),
 				    reg_nr,
 				    buffer, temp_buffer);
 
@@ -1829,8 +1827,7 @@ sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       for (portion = 0; portion < 2; portion++)
 	{
 	  /* We must pay attention to the endianness.  */
-	  sh64_register_convert_to_raw (gdbarch_register_type (gdbarch,
-							       reg_nr), 
+	  sh64_register_convert_to_raw (register_type (gdbarch, reg_nr),
 					reg_nr,
 					buffer, temp_buffer);
 
@@ -2084,10 +2081,10 @@ sh64_do_register (struct gdbarch *gdbarch, struct ui_file *file,
   if (!frame_register_read (frame, regnum, raw_buffer))
     fprintf_filtered (file, "*value not available*\n");
       
-  val_print (gdbarch_register_type (gdbarch, regnum), raw_buffer, 0, 0,
+  val_print (register_type (gdbarch, regnum), raw_buffer, 0, 0,
 	     file, 'x', 1, 0, Val_pretty_default);
   fprintf_filtered (file, "\t");
-  val_print (gdbarch_register_type (gdbarch, regnum), raw_buffer, 0, 0,
+  val_print (register_type (gdbarch, regnum), raw_buffer, 0, 0,
 	     file, 0, 1, 0, Val_pretty_default);
   fprintf_filtered (file, "\n");
 }
@@ -2102,7 +2099,7 @@ sh64_print_register (struct gdbarch *gdbarch, struct ui_file *file,
 
   else if (regnum >= 0 && regnum < NUM_REGS)
     {
-      if (TYPE_CODE (gdbarch_register_type (gdbarch, regnum)) == TYPE_CODE_FLT)
+      if (TYPE_CODE (register_type (gdbarch, regnum)) == TYPE_CODE_FLT)
 	sh64_do_fp_register (gdbarch, file, frame, regnum);	/* FP regs */
       else
 	sh64_do_register (gdbarch, file, frame, regnum);
@@ -2139,7 +2136,7 @@ sh64_media_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
 	      continue;
 	    }
 
-	  if (TYPE_CODE (gdbarch_register_type (gdbarch, regnum))
+	  if (TYPE_CODE (register_type (gdbarch, regnum))
 	      == TYPE_CODE_FLT)
 	    {
 	      if (fpregs)

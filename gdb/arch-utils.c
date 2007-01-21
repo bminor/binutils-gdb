@@ -250,7 +250,7 @@ int
 generic_register_size (int regnum)
 {
   gdb_assert (regnum >= 0 && regnum < NUM_REGS + NUM_PSEUDO_REGS);
-  return TYPE_LENGTH (gdbarch_register_type (current_gdbarch, regnum));
+  return TYPE_LENGTH (register_type (current_gdbarch, regnum));
 }
 
 /* Assume all registers are adjacent.  */

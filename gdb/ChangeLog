@@ -1,5 +1,21 @@
 2007-01-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdbarch.sh (register_type): Update comment.
+	* gdbarch.h: Regenerated.
+	* arch-utils.c (generic_register_size): Call register_type.
+	* ia64-tdep.c (ia64_extract_return_value): Likewise.
+	* m32c-tdep.c (check_for_saved): Likewise.
+	* mips-tdep.c (mips_print_register, print_gp_register_row)
+	(mips_print_registers_info): Likewise.
+	* sh-tdep.c (sh_pseudo_register_read, sh_pseudo_register_write):
+	Likewise.
+	* sh64-tdep.c (sh64_pseudo_register_read, sh64_pseudo_register_write)
+	(sh64_do_register, sh64_print_register)
+	(sh64_media_print_registers_info): Likewise.
+	* tui/tui-regs.c (tui_register_format): Likewise.
+
+2007-01-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* objfiles.h (ALL_PRIMARY_SYMTABS): Define.
 
 	* ada-lang.c (symtab_for_sym, ada_lookup_symbol_list)

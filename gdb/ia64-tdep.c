@@ -3034,7 +3034,8 @@ ia64_extract_return_value (struct type *type, struct regcache *regcache,
       ULONGEST val;
       int offset = 0;
       int regnum = IA64_GR8_REGNUM;
-      int reglen = TYPE_LENGTH (ia64_register_type (NULL, IA64_GR8_REGNUM));
+      int reglen = TYPE_LENGTH (register_type (get_regcache_arch (regcache),
+					       IA64_GR8_REGNUM));
       int n = TYPE_LENGTH (type) / reglen;
       int m = TYPE_LENGTH (type) % reglen;
 
