@@ -579,6 +579,17 @@ bad CFI data; mismatched DW_CFA_restore_state at 0x%s"), paddr (fs->pc));
 	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &utmp);
 	      break;
 
+	    case DW_CFA_GNU_negative_offset_extended:
+	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &reg);
+	      if (eh_frame_p)
+		reg = dwarf2_frame_eh_frame_regnum (gdbarch, reg);
+	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &offset);
+	      offset *= fs->data_align;
+	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
+	      fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_OFFSET;
+	      fs->regs.reg[reg].loc.offset = -offset;
+	      break;
+
 	    default:
 	      internal_error (__FILE__, __LINE__, _("Unknown CFI encountered."));
 	    }

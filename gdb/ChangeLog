@@ -1,3 +1,10 @@
+2007-01-11  Andrew Cagney  <cagney@redhat.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2-frame.c (execute_cfa_program): New support of
+	`DW_CFA_GNU_negative_offset_extended'.
+
 2007-01-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* NEWS: Mention flash support for "load" and new remote packets.
