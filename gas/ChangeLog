@@ -1,5 +1,6 @@
 2007-01-22  Nick Clifton  <nickc@redhat.com>
 
+	PR gas/3871
 	* tc-score.c: Remove unnecessary uses of _().
 	Make the err_msg[] a file level local array in order to save
 	storage space.
@@ -7,6 +8,7 @@
 
 2007-01-18  Mei Ligang  <ligang@sunnorth.com.cn>
 
+	PR gas/3871
 	* config/tc-score.c : Using _() for const string.
 	Do not assign inst.error with a local string pointer.
 	(md_section_align): Pad section.
