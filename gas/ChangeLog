@@ -1,3 +1,10 @@
+2007-01-22  Nick Clifton  <nickc@redhat.com>
+
+	* tc-score.c: Remove unnecessary uses of _().
+	Make the err_msg[] a file level local array in order to save
+	storage space.
+	Remove unnecessary sprintf()s.
+
 2007-01-18  Mei Ligang  <ligang@sunnorth.com.cn>
 
 	* config/tc-score.c : Using _() for const string.
