@@ -73,7 +73,7 @@
 
 2007-01-04  H.J. Lu  <hongjiu.lu@intel.com>
 
-	PR gas/3826
+	PR gas/3830
 	* config/tc-i386.c (register_prefix): New.
 	(set_intel_syntax): Set set_intel_syntax to "" if register
 	prefix isn't needed.
