@@ -2004,7 +2004,8 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 			   0, (CORE_ADDR) 0, cu->language, objfile);
 
       if (cu->language == language_cplus
-          || cu->language == language_java)
+          || cu->language == language_java
+          || cu->language == language_ada)
 	{
 	  /* For C++ and Java, these implicitly act as typedefs as well. */
 	  add_psymbol_to_list (actual_name, strlen (actual_name),
@@ -7231,7 +7232,8 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	       defines a typedef for the class.  Synthesize a typedef symbol
 	       so that "ptype foo" works as expected.  */
 	    if (cu->language == language_cplus
-		|| cu->language == language_java)
+		|| cu->language == language_java
+		|| cu->language == language_ada)
 	      {
 		struct symbol *typedef_sym = (struct symbol *)
 		  obstack_alloc (&objfile->objfile_obstack,

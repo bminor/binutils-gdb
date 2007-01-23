@@ -1,3 +1,9 @@
+2007-01-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2read.c (add_partial_symbol): Create an extra partial
+	symbol in the VAR_DOMAIN for Ada structures, unions or enums.
+	(new_symbol): Likewise for symbols.
+
 2007-01-24  Nick Roberts  <nickrob@snap.net.nz>
 
 	* mi/mi-main.c (mi_cmd_execute): Call free_all_values.
