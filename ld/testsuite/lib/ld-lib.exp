@@ -1,6 +1,6 @@
 # Support routines for LD testsuite.
 #   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-#    2004, 2005, 2006 Free Software Foundation, Inc.
+#    2004, 2005, 2006, 2007 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -882,7 +882,6 @@ proc run_dump_test { name } {
 	}
     } else {
 	set objfile "tmpdir/dump0.o"
-	catch "exec rm -f $objfile" exec_output
     }
 
     # We must not have expected failure if we get here.

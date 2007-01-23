@@ -1,3 +1,8 @@
+2007-01-23  Andreas Schwab  <schwab@suse.de>
+
+	* lib/ld-lib.exp (run_dump_test): Don't prematurely remove
+	assembler output.
+
 2007-01-19 H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/dl6.c: New file.
