@@ -2280,6 +2280,29 @@ proc gdb_skip_bogus_test { msg } {
     return 0;
 }
 
+# Return true if a test should be skipped due to lack of XML support
+# in the host GDB.
+
+proc gdb_skip_xml_test { } {
+    global gdb_prompt
+    global srcdir
+    global xml_missing_cached
+
+    if {[info exists xml_missing_cached]} {
+	return $xml_missing_cached
+    }
+
+    gdb_start
+    set xml_missing_cached 0
+    gdb_test_multiple "set tdesc filename ${srcdir}/gdb.xml/trivial.xml" "" {
+	-re ".*XML support was disabled at compile time.*$gdb_prompt $" {
+	    set xml_missing_cached 1
+	}
+	-re ".*$gdb_prompt $" { }
+    }
+    gdb_exit
+    return $xml_missing_cached
+}
 
 # Note: the procedure gdb_gnu_strip_debug will produce an executable called
 # ${binfile}.dbglnk, which is just like the executable ($binfile) but without

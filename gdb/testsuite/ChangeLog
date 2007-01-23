@@ -1,3 +1,13 @@
+2007-01-23  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (ALL_SUBDIRS): Add gdb.xml.
+	* configure: Regenerated.
+	* configure.ac (AC_OUTPUT): Add gdb.xml/Makefile.
+	* gdb.xml/Makefile.in, gdb.xml/tdesc-arch.exp,
+	gdb.xml/tdesc-bogus.xml, gdb.xml/tdesc-errors.exp,
+	gdb.xml/trivial.xml, gdb.xml/tdesc-unknown.xml: New files.
+	* lib/gdb.exp (gdb_skip_xml_test): New function.
+
 2007-01-23  Nick Hudson  <nick.hudson@dsl.pipex.com>
 
 	* gdb.base/sigrepeat.exp: Correct error message.
