@@ -1343,11 +1343,9 @@ value_primitive_field (struct value *arg1, int offset,
   VALUE_LVAL (v) = VALUE_LVAL (arg1);
   if (VALUE_LVAL (arg1) == lval_internalvar)
     VALUE_LVAL (v) = lval_internalvar_component;
-  VALUE_ADDRESS (v) = VALUE_ADDRESS (arg1);
+  v->location = arg1->location;
   VALUE_REGNUM (v) = VALUE_REGNUM (arg1);
   VALUE_FRAME_ID (v) = VALUE_FRAME_ID (arg1);
-/*  VALUE_OFFSET (v) = VALUE_OFFSET (arg1) + offset
-   + TYPE_FIELD_BITPOS (arg_type, fieldno) / 8; */
   return v;
 }
 

@@ -1,3 +1,9 @@
+2007-01-23  Vladimir Prus  <vladimir@codesourcery.com>
+	
+	* value.c (value_primitive_field): Copy the full 'location' 
+	contents, instead of assuming that copying ADDRESS will 
+	bring over everything in the union.  Remove obsolete comment.
+	
 2007-01-23  Masaki Muranaka  <monaka@monami-software.com>
 
 	* m32c-tdep.c (make_regs, m32c_analyze_prologue)
