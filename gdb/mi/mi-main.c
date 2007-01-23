@@ -1191,6 +1191,8 @@ mi_execute_command (char *cmd, int from_tty)
 static enum mi_cmd_result
 mi_cmd_execute (struct mi_parse *parse)
 {
+  free_all_values ();
+
   if (parse->cmd->argv_func != NULL
       || parse->cmd->args_func != NULL)
     {
