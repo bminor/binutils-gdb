@@ -2,7 +2,7 @@ ENTRY(main)
 
 SECTIONS
 {
-  . = 0x10000 + SIZEOF_HEADERS;
+  . = 0x100 + SIZEOF_HEADERS;
   .text : { *(.text) }
   .data : { *(.data) }
 }

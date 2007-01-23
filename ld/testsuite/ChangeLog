@@ -1,3 +1,9 @@
+2007-01-23  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-elf/header.d: Reduce page size, restrict to linux & vxworks
+	* ld-elf/header.s: Adjust.
+	* ld-elf/header.t: Reduce initial offset.
+
 2007-01-23  Andreas Schwab  <schwab@suse.de>
 
 	* lib/ld-lib.exp (run_dump_test): Don't prematurely remove

@@ -1,7 +1,7 @@
 	.text
 	.globl main
 main:
-	.rept 0x4000 - 0x15
+	.rept 0x40 - 0x15
 	.long 0xfedcba98
 	.endr
 	.data
