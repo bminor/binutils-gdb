@@ -782,6 +782,28 @@ make_regs (struct gdbarch *arch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (arch);
   int mach = gdbarch_bfd_arch_info (arch)->mach;
+  int num_raw_regs;
+  int num_cooked_regs;
+
+  struct m32c_reg *r0;
+  struct m32c_reg *r1;
+  struct m32c_reg *r2;
+  struct m32c_reg *r3;
+  struct m32c_reg *a0;
+  struct m32c_reg *a1;
+  struct m32c_reg *fb;
+  struct m32c_reg *sb;
+  struct m32c_reg *sp;
+  struct m32c_reg *r0hl;
+  struct m32c_reg *r1hl;
+  struct m32c_reg *r2hl;
+  struct m32c_reg *r3hl;
+  struct m32c_reg *intbhl;
+  struct m32c_reg *r2r0;
+  struct m32c_reg *r3r1;
+  struct m32c_reg *r3r1r2r0;
+  struct m32c_reg *r3r2r1r0;
+  struct m32c_reg *a1a0;
 
   struct m32c_reg *raw_r0_pair = RBD (r0);
   struct m32c_reg *raw_r1_pair = RBD (r1);
@@ -816,50 +838,48 @@ make_regs (struct gdbarch *arch)
       struct m32c_reg *dra01   = DMA (RP (dra, tdep->data_addr_reg_type));
     }
 
-  int num_raw_regs = tdep->num_regs;
+  num_raw_regs = tdep->num_regs;
 
-  struct m32c_reg *r0 	       = G (CB (r0, raw_r0_pair));
-  struct m32c_reg *r1 	       = G (CB (r1, raw_r1_pair));
-  struct m32c_reg *r2          = G (CB (r2, raw_r2_pair));
-  struct m32c_reg *r3          = G (CB (r3, raw_r3_pair));
-  struct m32c_reg *a0          = G (CB (a0, raw_a0_pair));
-  struct m32c_reg *a1          = G (CB (a1, raw_a1_pair));
-  struct m32c_reg *fb          = G (CB (fb, raw_fb_pair));
+  r0 	      = G (CB (r0, raw_r0_pair));
+  r1 	      = G (CB (r1, raw_r1_pair));
+  r2          = G (CB (r2, raw_r2_pair));
+  r3          = G (CB (r3, raw_r3_pair));
+  a0          = G (CB (a0, raw_a0_pair));
+  a1          = G (CB (a1, raw_a1_pair));
+  fb          = G (CB (fb, raw_fb_pair));
 
   /* sb is banked on the bfd_mach_m32c, but not on bfd_mach_m16c.
      Specify custom read/write functions that do the right thing.  */
-  struct m32c_reg *sb
-    = G (add_reg (arch, "sb", raw_sb_pair->type, 0,
-		  m32c_sb_read, m32c_sb_write,
-		  raw_sb_pair, raw_sb_pair + 1, 0));
+  sb          = G (add_reg (arch, "sb", raw_sb_pair->type, 0,
+			    m32c_sb_read, m32c_sb_write,
+			    raw_sb_pair, raw_sb_pair + 1, 0));
 
   /* The current sp is either usp or isp, depending on the value of
      the FLG register's U bit.  */
-  struct m32c_reg *sp
-    = G (add_reg (arch, "sp", usp->type, 0,
-		  m32c_banked_read, m32c_banked_write, isp, usp, FLAGBIT_U));
+  sp          = G (add_reg (arch, "sp", usp->type, 0,
+			    m32c_banked_read, m32c_banked_write,
+			    isp, usp, FLAGBIT_U));
 
-  struct m32c_reg *r0hl        = CHL (r0, tdep->int8);
-  struct m32c_reg *r1hl        = CHL (r1, tdep->int8);
-  struct m32c_reg *r2hl        = CHL (r2, tdep->int8);
-  struct m32c_reg *r3hl        = CHL (r3, tdep->int8);
-  struct m32c_reg *intbhl      = CHL (intb, tdep->int16);
+  r0hl        = CHL (r0, tdep->int8);
+  r1hl        = CHL (r1, tdep->int8);
+  r2hl        = CHL (r2, tdep->int8);
+  r3hl        = CHL (r3, tdep->int8);
+  intbhl      = CHL (intb, tdep->int16);
 
-  struct m32c_reg *r2r0        = CCAT (r2,   r0,   tdep->int32);
-  struct m32c_reg *r3r1        = CCAT (r3,   r1,   tdep->int32);
-  struct m32c_reg *r3r1r2r0    = CCAT (r3r1, r2r0, tdep->int64);
+  r2r0        = CCAT (r2,   r0,   tdep->int32);
+  r3r1        = CCAT (r3,   r1,   tdep->int32);
+  r3r1r2r0    = CCAT (r3r1, r2r0, tdep->int64);
 
-  struct m32c_reg *r3r2r1r0
+  r3r2r1r0
     = add_reg (arch, "r3r2r1r0", tdep->int64, 0,
 	       m32c_r3r2r1r0_read, m32c_r3r2r1r0_write, NULL, NULL, 0);
 
-  struct m32c_reg *a1a0;
   if (mach == bfd_mach_m16c)
     a1a0 = CCAT (a1, a0, tdep->int32);
   else
     a1a0 = NULL;
 
-  int num_cooked_regs = tdep->num_regs - num_raw_regs;
+  num_cooked_regs = tdep->num_regs - num_raw_regs;
 
   tdep->pc   	 = pc;
   tdep->flg  	 = flg;
@@ -1592,14 +1612,16 @@ m32c_analyze_prologue (struct gdbarch *arch,
 	  else if ((st.insn[0] & 0xfe) == 0x72)
 	    {
 	      int size = (st.insn[0] & 0x01) ? 2 : 1;
-
+	      struct srcdest src;
+	      struct srcdest dest;
+	      pv_t src_value;
 	      st.next_addr += 2;
 
-	      struct srcdest src
+	      src
 		= m32c_decode_srcdest4 (&st, (st.insn[1] >> 4) & 0xf, size);
-	      struct srcdest dest
+	      dest
 		= m32c_decode_srcdest4 (&st, st.insn[1] & 0xf, size);
-	      pv_t src_value = m32c_srcdest_fetch (&st, src, size);
+	      src_value = m32c_srcdest_fetch (&st, src, size);
 
 	      if (m32c_is_arg_spill (&st, dest, src_value))
 		after_last_frame_related_insn = st.next_addr;
@@ -1677,18 +1699,20 @@ m32c_analyze_prologue (struct gdbarch *arch,
 		   && m32c_get_src23 (&st.insn[i]) < 20
 		   && m32c_get_dest23 (&st.insn[i]) < 20)
 	    {
+	      struct srcdest src;
+	      struct srcdest dest;
+	      pv_t src_value;
 	      int bw = st.insn[i] & 0x01;
 	      int size = bw ? 2 : 1;
-
 	      st.next_addr += 2;
 
-	      struct srcdest src
+	      src
 		= m32c_decode_sd23 (&st, m32c_get_src23 (&st.insn[i]),
 				    size, src_indirect);
-	      struct srcdest dest
+	      dest
 		= m32c_decode_sd23 (&st, m32c_get_dest23 (&st.insn[i]),
 				    size, dest_indirect);
-	      pv_t src_value = m32c_srcdest_fetch (&st, src, size);
+	      src_value = m32c_srcdest_fetch (&st, src, size);
 
 	      if (m32c_is_arg_spill (&st, dest, src_value))
 		after_last_frame_related_insn = st.next_addr;
@@ -2405,13 +2429,18 @@ m32c_skip_trampoline_code (CORE_ADDR stop_pc)
 static void
 m32c_m16c_address_to_pointer (struct type *type, gdb_byte *buf, CORE_ADDR addr)
 {
+  enum type_code target_code;
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_PTR ||
 	      TYPE_CODE (type) == TYPE_CODE_REF);
 
-  enum type_code target_code = TYPE_CODE (TYPE_TARGET_TYPE (type));
+  target_code = TYPE_CODE (TYPE_TARGET_TYPE (type));
 
   if (target_code == TYPE_CODE_FUNC || target_code == TYPE_CODE_METHOD)
     {
+      char *func_name;
+      char *tramp_name;
+      struct minimal_symbol *tramp_msym;
+
       /* Try to find a linker symbol at this address.  */
       struct minimal_symbol *func_msym = lookup_minimal_symbol_by_pc (addr);
 
@@ -2420,14 +2449,13 @@ m32c_m16c_address_to_pointer (struct type *type, gdb_byte *buf, CORE_ADDR addr)
                "couldn't find a symbol at that address, to find trampoline.",
                paddr_nz (addr));
 
-      char *func_name = SYMBOL_LINKAGE_NAME (func_msym);
-      char *tramp_name = xmalloc (strlen (func_name) + 5);
+      func_name = SYMBOL_LINKAGE_NAME (func_msym);
+      tramp_name = xmalloc (strlen (func_name) + 5);
       strcpy (tramp_name, func_name);
       strcat (tramp_name, ".plt");
 
       /* Try to find a linker symbol for the trampoline.  */
-      struct minimal_symbol *tramp_msym
-        = lookup_minimal_symbol (tramp_name, NULL, NULL);
+      tramp_msym = lookup_minimal_symbol (tramp_name, NULL, NULL);
 
       /* We've either got another copy of the name now, or don't need
          the name any more.  */
@@ -2449,12 +2477,15 @@ m32c_m16c_address_to_pointer (struct type *type, gdb_byte *buf, CORE_ADDR addr)
 static CORE_ADDR
 m32c_m16c_pointer_to_address (struct type *type, const gdb_byte *buf)
 {
+  CORE_ADDR ptr;
+  enum type_code target_code;
+
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_PTR ||
 	      TYPE_CODE (type) == TYPE_CODE_REF);
 
-  CORE_ADDR ptr = extract_unsigned_integer (buf, TYPE_LENGTH (type));
+  ptr = extract_unsigned_integer (buf, TYPE_LENGTH (type));
 
-  enum type_code target_code = TYPE_CODE (TYPE_TARGET_TYPE (type));
+  target_code = TYPE_CODE (TYPE_TARGET_TYPE (type));
 
   if (target_code == TYPE_CODE_FUNC || target_code == TYPE_CODE_METHOD)
     {
@@ -2470,6 +2501,7 @@ m32c_m16c_pointer_to_address (struct type *type, const gdb_byte *buf)
           if (len > 4
               && strcmp (ptr_msym_name + len - 4, ".plt") == 0)
             {
+	      struct minimal_symbol *func_msym;
               /* We have a .plt symbol; try to find the symbol for the
                  corresponding function.
 
@@ -2479,7 +2511,7 @@ m32c_m16c_pointer_to_address (struct type *type, const gdb_byte *buf)
               char *func_name = xmalloc (len - 4 + 1);
               memcpy (func_name, ptr_msym_name, len - 4);
               func_name[len - 4] = '\0';
-              struct minimal_symbol *func_msym
+              func_msym
                 = lookup_minimal_symbol (func_name, NULL, NULL);
 
               /* If we do have such a symbol, return its value as the
