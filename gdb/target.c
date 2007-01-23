@@ -379,7 +379,7 @@ update_current_target (void)
 {
   struct target_ops *t;
 
-  /* First, reset curren'ts contents.  */
+  /* First, reset current's contents.  */
   memset (&current_target, 0, sizeof (current_target));
 
 #define INHERIT(FIELD, TARGET) \

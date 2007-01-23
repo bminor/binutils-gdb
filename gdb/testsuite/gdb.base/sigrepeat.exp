@@ -21,7 +21,7 @@
 # cpu advancment.
 
 if [target_info exists gdb,nosignals] {
-    verbose "Skipping sigstep.exp because of nosignals."
+    verbose "Skipping sigrepeat.exp because of nosignals."
     continue
 }
 

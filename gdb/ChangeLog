@@ -1,3 +1,7 @@
+2007-01-23  Nick Hudson  <nick.hudson@dsl.pipex.com>
+
+	* target.c (update_current_target): Correct typo.
+
 2007-01-22  Masaki Muranaka  <monaka@monami-software.com>
 
 	* xstormy16-tdep.c (xstormy16_skip_prologue): Separate code from a

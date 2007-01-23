@@ -1,4 +1,8 @@
-2007-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+2007-01-23  Nick Hudson  <nick.hudson@dsl.pipex.com>
+
+	* gdb.base/sigrepeat.exp: Correct error message.
+
+2007-01-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.arch/i386-gnu-cfi.exp, gdb.arch/i386-gnu-cfi.c,
