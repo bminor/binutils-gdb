@@ -1,5 +1,10 @@
 2007-01-24  Joel Brobecker  <brobecker@adacore.com>
 
+	* source.c (find_and_open_source): Try rewriting the source
+	path inside filename if dirname is NULL.
+
+2007-01-24  Joel Brobecker  <brobecker@adacore.com>
+
 	* dwarf2read.c (add_partial_symbol): Create an extra partial
 	symbol in the VAR_DOMAIN for Ada structures, unions or enums.
 	(new_symbol): Likewise for symbols.
