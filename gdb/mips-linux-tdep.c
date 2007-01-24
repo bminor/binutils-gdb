@@ -799,9 +799,11 @@ static const struct tramp_frame mips_linux_n32_rt_sigframe = {
 static const struct tramp_frame mips_linux_n64_rt_sigframe = {
   SIGTRAMP_FRAME,
   4,
-  { MIPS_INST_LI_V0_N64_RT_SIGRETURN,
-    MIPS_INST_SYSCALL,
-    TRAMP_SENTINEL_INSN },
+  {
+    { MIPS_INST_LI_V0_N64_RT_SIGRETURN, -1 },
+    { MIPS_INST_SYSCALL, -1 },
+    { TRAMP_SENTINEL_INSN, -1 }
+  },
   mips_linux_n32n64_sigframe_init
 };
 
