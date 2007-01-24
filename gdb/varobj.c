@@ -2020,13 +2020,8 @@ c_value_of_root (struct varobj **var_handle)
   if (within_scope)
     {
       /* We need to catch errors here, because if evaluate
-         expression fails we just want to make val->error = 1 and
-         go on */
-      if (gdb_evaluate_expression (var->root->exp, &new_val))
-	{
-	  release_value (new_val);
-	}
-
+         expression fails we want to just return NULL.  */
+      gdb_evaluate_expression (var->root->exp, &new_val);
       return new_val;
     }
 
@@ -2038,8 +2033,6 @@ c_value_of_child (struct varobj *parent, int index)
 {
   struct value *value = NULL;
   c_describe_child (parent, index, NULL, &value, NULL);
-  if (value != NULL)
-    release_value (value);
 
   return value;
 }
@@ -2304,7 +2297,6 @@ cplus_describe_child (struct varobj *parent, int index,
 	  if (cvalue && value)
 	    {
 	      *cvalue = value_cast (TYPE_FIELD_TYPE (type, index), value);
-	      release_value (*cvalue);
 	    }
 
 	  if (ctype)

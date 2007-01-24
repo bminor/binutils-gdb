@@ -1,3 +1,8 @@
+2007-01-24  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* varobj.c (c_value_of_root, c_value_of_child)
+	(cplus_describe_child): Don't call release_value.
+
 2007-01-24  Thiemo Seufer  <ths@mips.com>
 
 	* mips-linux-tdep.c (mips_linux_n64_rt_sigframe): Fix struct
