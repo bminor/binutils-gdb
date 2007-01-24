@@ -1,3 +1,11 @@
+2007-01-24  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Fix computation of the 'editable' attribute and
+	value changeability for for references.
+	* varobj.c (get_value_type): New function.
+	(c_variable_editable): Use get_value_type.
+	(varobj_value_is_changeable): Likewise.
+		
 2007-01-24  Joel Brobecker  <brobecker@adacore.com>
 
 	* source.c (find_and_open_source): Try rewriting the source

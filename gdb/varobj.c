@@ -176,6 +176,8 @@ static struct cleanup *make_cleanup_free_variable (struct varobj *var);
 
 static struct type *get_type (struct varobj *var);
 
+static struct type *get_value_type (struct varobj *var);
+
 static struct type *get_type_deref (struct varobj *var);
 
 static struct type *get_target_type (struct type *);
@@ -1459,6 +1461,37 @@ get_type (struct varobj *var)
   return type;
 }
 
+/* Return the type of the value that's stored in VAR,
+   or that would have being stored there if the
+   value were accessible.  
+
+   This differs from VAR->type in that VAR->type is always
+   the true type of the expession in the source language.
+   The return value of this function is the type we're
+   actually storing in varobj, and using for displaying
+   the values and for comparing previous and new values.
+
+   For example, top-level references are always stripped.  */
+static struct type *
+get_value_type (struct varobj *var)
+{
+  struct type *type;
+
+  if (var->value)
+    type = value_type (var->value);
+  else
+    type = var->type;
+
+  type = check_typedef (type);
+
+  if (TYPE_CODE (type) == TYPE_CODE_REF)
+    type = get_target_type (type);
+
+  type = check_typedef (type);
+
+  return type;
+}
+
 /* This returns the type of the variable, dereferencing references, pointers
    and references to pointers, too. */
 static struct type *
@@ -1723,7 +1756,7 @@ varobj_value_is_changeable_p (struct varobj *var)
   if (CPLUS_FAKE_CHILD (var))
     return 0;
 
-  type = get_type (var);
+  type = get_value_type (var);
 
   switch (TYPE_CODE (type))
     {
@@ -2020,7 +2053,7 @@ c_type_of_child (struct varobj *parent, int index)
 static int
 c_variable_editable (struct varobj *var)
 {
-  switch (TYPE_CODE (get_type (var)))
+  switch (TYPE_CODE (get_value_type (var)))
     {
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:

@@ -1023,6 +1023,13 @@ proc mi_create_varobj { name expression testname } {
         $testname
 }
 
+# Deletes the specified NAME. 
+proc mi_delete_varobj { name testname } {
+    mi_gdb_test "-var-delete $name" \
+        "\\^done,ndeleted=.*" \
+        $testname
+}
+
 # Updates varobj named NAME and checks that all varobjs in EXPECTED
 # are reported as updated, and no other varobj is updated.
 # Assumes that no varobj is out of scope and that no varobj changes

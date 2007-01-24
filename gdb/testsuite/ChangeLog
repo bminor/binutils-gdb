@@ -1,3 +1,13 @@
+2007-01-24  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* lib/mi-support.exp (mi_delete_varobj): New.
+	* gdb.mi/mi-var-cp.exp: Run the reference_to_struct
+	testcase.
+	* gdb.mi/mi-var-cp.cc (reference_to_struct): New function.
+	(main): Call the above.
+	(reference_update_test, base_in_reference_test)
+	(reference_to_pointer): Delete the created varobjs.
+	
 2007-01-23  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (ALL_SUBDIRS): Add gdb.xml.

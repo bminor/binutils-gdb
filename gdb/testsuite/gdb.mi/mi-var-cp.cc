@@ -30,6 +30,7 @@ void reference_update_tests ()
       :*/  
   x = 567;
   /*: mi_varobj_update RX {} "update RX (3)"
+      mi_delete_varobj RX "delete RX"
     :*/
   /* Dummy assignment to keep 'x' in scope.  */
   x = 444;    
@@ -59,7 +60,8 @@ int base_in_reference_test (S2& s2)
 
     mi_check_varobj_value "S2.S.public.i" "67" "check S2.S.public.i"
     mi_check_varobj_value "S2.S.public.j" "89" "check S2.S.public.j"
-
+    mi_delete_varobj S2 "delete S2"
+    
   :*/
   /*: END: base_in_reference :*/
 }
@@ -91,9 +93,32 @@ int reference_to_pointer ()
 
     mi_check_varobj_value RPTR.public.i 67 "check i member"
     mi_check_varobj_value RPTR.public.j 89 "check j member"
+    mi_delete_varobj RPTR "delete RPTR"
   :*/
   return 99;
   /*: END: reference_to_pointer :*/
+}
+
+int reference_to_struct ()
+{
+  /*: BEGIN: reference_to_struct :*/
+  S s = {7, 8};
+  S& r = s;
+  /*:
+    mi_create_varobj S s "create varobj for s"
+    mi_create_varobj R r "create varobj for s"
+    mi_gdb_test "-var-show-attributes S" \
+	"\\^done,attr=\"noneditable\"" \
+	"check attributes of S"
+    mi_gdb_test "-var-show-attributes R" \
+	"\\^done,attr=\"noneditable\"" \
+	"check attributes of R"
+    :*/
+  s.i = 56;
+  /*: mi_varobj_update * [] "-var-update should not list structure varobjs"
+    :*/
+  return 99;
+  /*: END: reference_to_struct :*/
 }
 
 int main ()
@@ -101,5 +126,6 @@ int main ()
   reference_update_tests ();
   base_in_reference_test_main ();
   reference_to_pointer ();
+  reference_to_struct ();
   return 0;
 }
