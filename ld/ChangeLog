@@ -1,3 +1,10 @@
+2007-01-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldgram.y (SIZEOF_HEADERS): Remove duplicated one.
+	(DEFSYMEND): Likewise.
+	(NAME): Likewise.
+	(LNAME): Likewise.
+
 2007-01-19  Murali Vemulapati  <murali.vemulapati@gmail.com>
 
 	* pe-dll.c: (make_one) Conditionally include jump stubs.
