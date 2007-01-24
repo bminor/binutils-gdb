@@ -178,8 +178,6 @@ static struct type *get_type (struct varobj *var);
 
 static struct type *get_value_type (struct varobj *var);
 
-static struct type *get_type_deref (struct varobj *var);
-
 static struct type *get_target_type (struct type *);
 
 static enum varobj_display_formats variable_default_display (struct varobj *);
@@ -1492,26 +1490,6 @@ get_value_type (struct varobj *var)
   return type;
 }
 
-/* This returns the type of the variable, dereferencing references, pointers
-   and references to pointers, too. */
-static struct type *
-get_type_deref (struct varobj *var)
-{
-  struct type *type;
-
-  type = get_type (var);
-
-  if (type)
-    {
-      if (TYPE_CODE (type) == TYPE_CODE_REF)
-	type = get_target_type (type);
-      if (TYPE_CODE (type) == TYPE_CODE_PTR)
-	type = get_target_type (type);
-    }
-
-  return type;
-}
-
 /* This returns the target type (or NULL) of TYPE, also skipping
    past typedefs, just like get_type ().
 
@@ -1773,17 +1751,61 @@ varobj_value_is_changeable_p (struct varobj *var)
   return r;
 }
 
+/* Given the value and the type of a variable object,
+   adjust the value and type to those necessary
+   for getting children of the variable object.
+   This includes dereferencing top-level references
+   to all types and dereferencing pointers to
+   structures.  
+
+   Both TYPE and *TYPE should be non-null. VALUE
+   can be null if we want to only translate type.
+   *VALUE can be null as well -- if the parent
+   value is not known.  */
+static void
+adjust_value_for_child_access (struct value **value,
+				  struct type **type)
+{
+  gdb_assert (type && *type);
+
+  *type = check_typedef (*type);
+  
+  /* The type of value stored in varobj, that is passed
+     to us, is already supposed to be
+     reference-stripped.  */
+
+  gdb_assert (TYPE_CODE (*type) != TYPE_CODE_REF);
+
+  /* Pointers to structures are treated just like
+     structures when accessing children.  Don't
+     dererences pointers to other types.  */
+  if (TYPE_CODE (*type) == TYPE_CODE_PTR)
+    {
+      struct type *target_type = get_target_type (*type);
+      if (TYPE_CODE (target_type) == TYPE_CODE_STRUCT
+	  || TYPE_CODE (target_type) == TYPE_CODE_UNION)
+	{
+	  if (value && *value)
+	    gdb_value_ind (*value, value);	  
+	  *type = target_type;
+	}
+    }
+
+  /* The 'get_target_type' function calls check_typedef on
+     result, so we can immediately check type code.  No
+     need to call check_typedef here.  */
+}
+
 /* C */
 static int
 c_number_of_children (struct varobj *var)
 {
-  struct type *type;
+  struct type *type = get_value_type (var);
+  int children = 0;
   struct type *target;
-  int children;
 
-  type = get_type (var);
+  adjust_value_for_child_access (NULL, &type);
   target = get_target_type (type);
-  children = 0;
 
   switch (TYPE_CODE (type))
     {
@@ -1803,30 +1825,19 @@ c_number_of_children (struct varobj *var)
       break;
 
     case TYPE_CODE_PTR:
-      /* This is where things get complicated. All pointers have one child.
-         Except, of course, for struct and union ptr, which we automagically
-         dereference for the user, and function ptrs which have no children.
-         We also don't dereference void* as we don't know what to show.
+      /* The type here is a pointer to non-struct. Typically, pointers
+	 have one child, except for function ptrs, which have no children,
+	 and except for void*, as we don't know what to show.
+
          We can show char* so we allow it to be dereferenced.  If you decide
          to test for it, please mind that a little magic is necessary to
          properly identify it: char* has TYPE_CODE == TYPE_CODE_INT and 
          TYPE_NAME == "char" */
-
-      switch (TYPE_CODE (target))
-	{
-	case TYPE_CODE_STRUCT:
-	case TYPE_CODE_UNION:
-	  children = TYPE_NFIELDS (target);
-	  break;
-
-	case TYPE_CODE_FUNC:
-	case TYPE_CODE_VOID:
-	  children = 0;
-	  break;
-
-	default:
-	  children = 1;
-	}
+      if (TYPE_CODE (target) == TYPE_CODE_FUNC
+	  || TYPE_CODE (target) == TYPE_CODE_VOID)
+	children = 0;
+      else
+	children = 1;
       break;
 
     default:
@@ -1892,7 +1903,7 @@ c_describe_child (struct varobj *parent, int index,
 		  char **cname, struct value **cvalue, struct type **ctype)
 {
   struct value *value = parent->value;
-  struct type *type = get_type (parent);
+  struct type *type = get_value_type (parent);
 
   if (cname)
     *cname = NULL;
@@ -1901,19 +1912,7 @@ c_describe_child (struct varobj *parent, int index,
   if (ctype)
     *ctype = NULL;
 
-  /* Pointers to structures are treated just like
-     structures when accessing children.  */
-  if (TYPE_CODE (type) == TYPE_CODE_PTR)
-    {
-      struct type *target_type = get_target_type (type);
-      if (TYPE_CODE (target_type) == TYPE_CODE_STRUCT
-	  || TYPE_CODE (target_type) == TYPE_CODE_UNION)
-	{
-	  if (value)
-	    gdb_value_ind (value, &value);	  
-	  type = target_type;
-	}
-    }
+  adjust_value_for_child_access (&value, &type);
       
   switch (TYPE_CODE (type))
     {
@@ -1961,8 +1960,11 @@ c_describe_child (struct varobj *parent, int index,
       if (cvalue && value)
 	gdb_value_ind (value, cvalue);
 
+      /* Don't use get_target_type because it calls
+	 check_typedef and here, we want to show the true
+	 declared type of the variable.  */
       if (ctype)
-	*ctype = get_target_type (type);
+	*ctype = TYPE_TARGET_TYPE (type);
       
       break;
 
@@ -2129,7 +2131,8 @@ cplus_number_of_children (struct varobj *var)
 
   if (!CPLUS_FAKE_CHILD (var))
     {
-      type = get_type_deref (var);
+      type = get_value_type (var);
+      adjust_value_for_child_access (NULL, &type);
 
       if (((TYPE_CODE (type)) == TYPE_CODE_STRUCT) ||
 	  ((TYPE_CODE (type)) == TYPE_CODE_UNION))
@@ -2155,7 +2158,8 @@ cplus_number_of_children (struct varobj *var)
     {
       int kids[3];
 
-      type = get_type_deref (var->parent);
+      type = get_value_type (var->parent);
+      adjust_value_for_child_access (NULL, &type);
 
       cplus_class_num_children (type, kids);
       if (strcmp (var->name, "public") == 0)
@@ -2206,25 +2210,56 @@ cplus_name_of_variable (struct varobj *parent)
   return c_name_of_variable (parent);
 }
 
-static char *
-cplus_name_of_child (struct varobj *parent, int index)
+enum accessibility { private_field, protected_field, public_field };
+
+/* Check if field INDEX of TYPE has the specified accessibility.
+   Return 0 if so and 1 otherwise.  */
+static int 
+match_accessibility (struct type *type, int index, enum accessibility acc)
 {
-  char *name;
+  if (acc == private_field && TYPE_FIELD_PRIVATE (type, index))
+    return 1;
+  else if (acc == protected_field && TYPE_FIELD_PROTECTED (type, index))
+    return 1;
+  else if (acc == public_field && !TYPE_FIELD_PRIVATE (type, index)
+	   && !TYPE_FIELD_PROTECTED (type, index))
+    return 1;
+  else
+    return 0;
+}
+
+static void
+cplus_describe_child (struct varobj *parent, int index,
+		      char **cname, struct value **cvalue, struct type **ctype)
+{
+  char *name = 0;
+  struct value *value;
   struct type *type;
+
+  if (cname)
+    *cname = NULL;
+  if (cvalue)
+    *cvalue = NULL;
+  if (ctype)
+    *ctype = NULL;
+
 
   if (CPLUS_FAKE_CHILD (parent))
     {
-      /* Looking for children of public, private, or protected. */
-      type = get_type_deref (parent->parent);
+      value = parent->parent->value;
+      type = get_value_type (parent->parent);
     }
   else
-    type = get_type_deref (parent);
-
-  name = NULL;
-  switch (TYPE_CODE (type))
     {
-    case TYPE_CODE_STRUCT:
-    case TYPE_CODE_UNION:
+      value = parent->value;
+      type = get_value_type (parent);
+    }
+
+  adjust_value_for_child_access (&value, &type);
+
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
+      || TYPE_CODE (type) == TYPE_CODE_STRUCT)
+    {
       if (CPLUS_FAKE_CHILD (parent))
 	{
 	  /* The fields of the class type are ordered as they
@@ -2234,56 +2269,54 @@ cplus_name_of_child (struct varobj *parent, int index)
 	     have the access control we are looking for to properly
 	     find the indexed field. */
 	  int type_index = TYPE_N_BASECLASSES (type);
+	  enum accessibility acc = public_field;
 	  if (strcmp (parent->name, "private") == 0)
-	    {
-	      while (index >= 0)
-		{
-	  	  if (TYPE_VPTR_BASETYPE (type) == type
-	      	      && type_index == TYPE_VPTR_FIELDNO (type))
-		    ; /* ignore vptr */
-		  else if (TYPE_FIELD_PRIVATE (type, type_index))
-		    --index;
-		  ++type_index;
-		}
-	      --type_index;
-	    }
+	    acc = private_field;
 	  else if (strcmp (parent->name, "protected") == 0)
-	    {
-	      while (index >= 0)
-		{
-	  	  if (TYPE_VPTR_BASETYPE (type) == type
-	      	      && type_index == TYPE_VPTR_FIELDNO (type))
-		    ; /* ignore vptr */
-		  else if (TYPE_FIELD_PROTECTED (type, type_index))
-		    --index;
-		  ++type_index;
-		}
-	      --type_index;
-	    }
-	  else
-	    {
-	      while (index >= 0)
-		{
-	  	  if (TYPE_VPTR_BASETYPE (type) == type
-	      	      && type_index == TYPE_VPTR_FIELDNO (type))
-		    ; /* ignore vptr */
-		  else if (!TYPE_FIELD_PRIVATE (type, type_index) &&
-		      !TYPE_FIELD_PROTECTED (type, type_index))
-		    --index;
-		  ++type_index;
-		}
-	      --type_index;
-	    }
+	    acc = protected_field;
 
-	  name = TYPE_FIELD_NAME (type, type_index);
+	  while (index >= 0)
+	    {
+	      if (TYPE_VPTR_BASETYPE (type) == type
+		  && type_index == TYPE_VPTR_FIELDNO (type))
+		; /* ignore vptr */
+	      else if (match_accessibility (type, type_index, acc))
+		    --index;
+		  ++type_index;
+	    }
+	  --type_index;
+
+	  if (cname)
+	    *cname = xstrdup (TYPE_FIELD_NAME (type, type_index));
+
+	  if (cvalue && value)
+	    *cvalue = value_struct_element_index (value, type_index);
+
+	  if (ctype)
+	    *ctype = TYPE_FIELD_TYPE (type, type_index);
 	}
       else if (index < TYPE_N_BASECLASSES (type))
-	/* We are looking up the name of a base class */
-	name = TYPE_FIELD_NAME (type, index);
+	{
+	  /* This is a baseclass.  */
+	  if (cname)
+	    *cname = xstrdup (TYPE_FIELD_NAME (type, index));
+
+	  if (cvalue && value)
+	    {
+	      *cvalue = value_cast (TYPE_FIELD_TYPE (type, index), value);
+	      release_value (*cvalue);
+	    }
+
+	  if (ctype)
+	    {
+	      *ctype = TYPE_FIELD_TYPE (type, index);
+	    }
+	}
       else
 	{
+	  char *access = 0;
 	  int children[3];
-	  cplus_class_num_children(type, children);
+	  cplus_class_num_children (type, children);
 
 	  /* Everything beyond the baseclasses can
 	     only be "public", "private", or "protected"
@@ -2295,46 +2328,49 @@ cplus_name_of_child (struct varobj *parent, int index)
 	    {
 	    case 0:
 	      if (children[v_public] > 0)
-	 	name = "public";
+	 	access = "public";
 	      else if (children[v_private] > 0)
-	 	name = "private";
+	 	access = "private";
 	      else 
-	 	name = "protected";
+	 	access = "protected";
 	      break;
 	    case 1:
 	      if (children[v_public] > 0)
 		{
 		  if (children[v_private] > 0)
-		    name = "private";
+		    access = "private";
 		  else
-		    name = "protected";
+		    access = "protected";
 		}
 	      else if (children[v_private] > 0)
-	 	name = "protected";
+	 	access = "protected";
 	      break;
 	    case 2:
 	      /* Must be protected */
-	      name = "protected";
+	      access = "protected";
 	      break;
 	    default:
 	      /* error! */
 	      break;
 	    }
+	  
+	  if (cname)
+	    *cname = xstrdup (access);
+
+	  /* Value and type are null here.  */
 	}
-      break;
-
-    default:
-      break;
     }
-
-  if (name == NULL)
-    return c_name_of_child (parent, index);
   else
     {
-      if (name != NULL)
-	name = savestring (name, strlen (name));
-    }
+      c_describe_child (parent, index, cname, cvalue, ctype);
+    }  
+}
 
+static char *
+cplus_name_of_child (struct varobj *parent, int index)
+{
+  char *name = NULL;
+  cplus_describe_child (parent, index, &name, NULL, NULL);
   return name;
 }
 
@@ -2347,118 +2383,16 @@ cplus_value_of_root (struct varobj **var_handle)
 static struct value *
 cplus_value_of_child (struct varobj *parent, int index)
 {
-  struct type *type;
-  struct value *value;
-
-  if (CPLUS_FAKE_CHILD (parent))
-    type = get_type_deref (parent->parent);
-  else
-    type = get_type_deref (parent);
-
-  value = NULL;
-
-  if (((TYPE_CODE (type)) == TYPE_CODE_STRUCT) ||
-      ((TYPE_CODE (type)) == TYPE_CODE_UNION))
-    {
-      if (CPLUS_FAKE_CHILD (parent))
-	{
-	  char *name;
-	  struct value *temp = parent->parent->value;
-
-	  if (temp == NULL)
-	    return NULL;
-
-	  name = name_of_child (parent, index);
-	  gdb_value_struct_elt (NULL, &value, &temp, NULL, name, NULL,
-				"cplus_structure");
-	  if (value != NULL)
-	    release_value (value);
-
-	  xfree (name);
-	}
-      else if (index >= TYPE_N_BASECLASSES (type))
-	{
-	  /* public, private, or protected */
-	  return NULL;
-	}
-      else
-	{
-	  /* Baseclass */
-	  if (parent->value != NULL)
-	    {
-	      struct value *temp = NULL;
-
-	      /* No special processing for references is needed --
-		 value_cast below handles references.  */
-	      if (TYPE_CODE (value_type (parent->value)) == TYPE_CODE_PTR)
-		{
-		  if (!gdb_value_ind (parent->value, &temp))
-		    return NULL;
-		}
-	      else
-		temp = parent->value;
-
-	      if (temp != NULL)
-		{
-		  value = value_cast (TYPE_FIELD_TYPE (type, index), temp);
-		  release_value (value);
-		}
-	      else
-		{
-		  /* We failed to evaluate the parent's value, so don't even
-		     bother trying to evaluate this child. */
-		  return NULL;
-		}
-	    }
-	}
-    }
-
-  if (value == NULL)
-    return c_value_of_child (parent, index);
-
+  struct value *value = NULL;
+  cplus_describe_child (parent, index, NULL, &value, NULL);
   return value;
 }
 
 static struct type *
 cplus_type_of_child (struct varobj *parent, int index)
 {
-  struct type *type, *t;
-
-  if (CPLUS_FAKE_CHILD (parent))
-    {
-      /* Looking for the type of a child of public, private, or protected. */
-      t = get_type_deref (parent->parent);
-    }
-  else
-    t = get_type_deref (parent);
-
-  type = NULL;
-  switch (TYPE_CODE (t))
-    {
-    case TYPE_CODE_STRUCT:
-    case TYPE_CODE_UNION:
-      if (CPLUS_FAKE_CHILD (parent))
-	{
-	  char *name = cplus_name_of_child (parent, index);
-	  type = lookup_struct_elt_type (t, name, 0);
-	  xfree (name);
-	}
-      else if (index < TYPE_N_BASECLASSES (t))
-	type = TYPE_FIELD_TYPE (t, index);
-      else
-	{
-	  /* special */
-	  return NULL;
-	}
-      break;
-
-    default:
-      break;
-    }
-
-  if (type == NULL)
-    return c_type_of_child (parent, index);
-
+  struct type *type = NULL;
+  cplus_describe_child (parent, index, NULL, NULL, &type);
   return type;
 }
 
