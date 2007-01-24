@@ -151,6 +151,7 @@ s_bss (int ignore ATTRIBUTE_UNUSED)
 const pseudo_typeS md_pseudo_table[] =
 {
   { "bss",	s_bss, 		0},
+  { "3byte",	cons,		3 },
   { "word",	cons,		4 },
   { NULL, 	NULL, 		0 }
 };

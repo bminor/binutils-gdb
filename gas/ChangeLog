@@ -1,3 +1,7 @@
+2007-01-24  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-m32c.c (md_pseudo_table): Add .3byte.
+
 2007-01-22  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/3871
