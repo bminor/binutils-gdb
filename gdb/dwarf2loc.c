@@ -201,6 +201,7 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
       retval = allocate_value (SYMBOL_TYPE (var));
       VALUE_LVAL (retval) = not_lval;
       set_value_optimized_out (retval, 1);
+      return retval;
     }
 
   baton.frame = frame;

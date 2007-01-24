@@ -1,3 +1,9 @@
+2007-01-24  Jim Blandy  <jimb@codesourcery.com>
+
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc): When the location
+	expression is empty, bother to return the 'optimized out' value we
+	construct.  (Thanks to Carl Burch.)
+
 2007-01-24  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* varobj.c (c_value_of_root, c_value_of_child)
