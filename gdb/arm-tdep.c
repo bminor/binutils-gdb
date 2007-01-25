@@ -1623,8 +1623,8 @@ arm_get_next_pc (CORE_ADDR pc)
 	      error (_("Invalid update to pc in instruction"));
 
 	    /* BX <reg>, BLX <reg> */
-	    if (bits (this_instr, 4, 28) == 0x12fff1
-		|| bits (this_instr, 4, 28) == 0x12fff3)
+	    if (bits (this_instr, 4, 27) == 0x12fff1
+		|| bits (this_instr, 4, 27) == 0x12fff3)
 	      {
 		rn = bits (this_instr, 0, 3);
 		result = (rn == 15) ? pc_val + 8 : read_register (rn);

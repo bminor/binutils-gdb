@@ -1,3 +1,7 @@
+2007-01-25  Paul Brook  <paul@codesourcery.com>
+
+	* arm-tdep.c (arm_get_next_pc): Fix bitfield off-by-one error.
+
 2007-01-24  Jim Blandy  <jimb@codesourcery.com>
 
 	* dwarf2loc.c (dwarf2_evaluate_loc_desc): When the location
