@@ -12,7 +12,7 @@
 	redundant jump stubs from import libraries and exclude them from 
 	link.
 
-2007-01-19 H.J. Lu  <hongjiu.lu@intel.com>
+2007-01-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld.h (args_type): Add new symbolic and dynamic_list fields.
 
@@ -46,7 +46,7 @@
 	* ldmain.c (main): Don't call bfd_emul_set_maxpagesize nor
 	bfd_emul_set_commonpagesize.
 
-2007-01-19 H.J. Lu  <hongjiu.lu@intel.com>
+2007-01-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention --default-script/-dT.
 

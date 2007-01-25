@@ -9,7 +9,7 @@
 	* lib/ld-lib.exp (run_dump_test): Don't prematurely remove
 	assembler output.
 
-2007-01-19 H.J. Lu  <hongjiu.lu@intel.com>
+2007-01-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/dl6.c: New file.
 	* ld-elf/dl6a.out: Likewise.
@@ -30,7 +30,7 @@
 	* ld-elf/maxpage3b.d: Likewise.
 	* ld-elf/maxpage3c.d: Likewise.
 
-2007-01-19 H.J. Lu  <hongjiu.lu@intel.com>
+2007-01-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-scripts/default-script.exp: New file.
 	* ld-scripts/default-script.s: Likewise.
