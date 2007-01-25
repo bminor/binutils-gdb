@@ -805,7 +805,11 @@ print_contents (bfd *abfd)
 	/* xgettext:c-format */
 	fatal (_("%s is not a valid archive"),
 	       bfd_get_filename (bfd_my_archive (abfd)));
-      if (fwrite (cbuf, 1, nread, stdout) != nread)
+
+      /* fwrite in mingw32 may return int instead of size_t. Cast the
+	 return value to size_t to avoid comparison between signed and
+	 unsigned values.  */
+      if ((size_t) fwrite (cbuf, 1, nread, stdout) != nread)
 	fatal ("stdout: %s", strerror (errno));
       ncopied += tocopy;
     }
@@ -885,7 +889,11 @@ extract_file (bfd *abfd)
 
 	    output_file = ostream;
 	  }
-	if (fwrite (cbuf, 1, nread, ostream) != nread)
+
+	/* fwrite in mingw32 may return int instead of size_t. Cast
+	   the return value to size_t to avoid comparison between
+	   signed and unsigned values.  */
+	if ((size_t) fwrite (cbuf, 1, nread, ostream) != nread)
 	  fatal ("%s: %s", output_filename, strerror (errno));
 	ncopied += tocopy;
       }

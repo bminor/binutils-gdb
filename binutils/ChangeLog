@@ -1,3 +1,8 @@
+2007-01-25  Kazu Hirata  <kazu@codesourcery.com>
+
+	* ar.c (print_contents, extract_file): Cast the return value
+	of fwrite to size_t.
+
 2007-01-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* ar.c (open_inarch): Check fwrite return.  Use size_t.
