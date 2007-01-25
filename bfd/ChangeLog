@@ -1,3 +1,20 @@
+2007-01-25  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/3874
+	* elf32-avr.c (avr_link_hash_table): Check to make sure that the
+	hash table was created by elf32_avr_link_hash_table_create before
+	using it.
+	(elf32_avr_link_hash_newfunc): New function.  Just pass the call
+	through to _bfd_elf_link_hash_newfunc.
+	(elf32_avr_link_hash_table_create): Use
+	elf32_avr_link_hash_newfunc instead of
+	_bfd_elf_link_hash_newfunc.
+	(elf32_avr_relocate_section): Check for the hash table pointer
+	being NULL.
+	(elf32_avr_relax_section, avr_build_one_stub,
+	elf32_avr_setup_params, get_local_syms, elf32_avr_size_stubs,
+	elf32_avr_build_stubs): Likewise.
+
 2007-01-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/3831
