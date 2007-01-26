@@ -4491,7 +4491,7 @@ frames in @value{GDBN} commands.
 @c underflow problems.
 @cindex frameless execution
 Some compilers provide a way to compile functions so that they operate
-without stack frames.  (For example, the @value{GCC} option
+without stack frames.  (For example, the @value{NGCC} option
 @smallexample
 @samp{-fomit-frame-pointer}
 @end smallexample
@@ -11499,7 +11499,7 @@ understands debugging information in whatever format is the standard
 generated for that environment; you may use either a @sc{gnu} compiler, or
 other compilers that adhere to the local conventions.
 Best results are usually obtained from @sc{gnu} compilers; for example,
-using @code{@value{GCC}} you can generate debugging information for
+using @code{@value{NGCC}} you can generate debugging information for
 optimized code.
 
 For most kinds of object files, with the exception of old SVR3 systems
@@ -13176,7 +13176,7 @@ either obtain it from your hardware manufacturer, or write your own.
 If you do not use the GNU C compiler, you may need other standard
 library subroutines as well; this varies from one stub to another,
 but in general the stubs are likely to use any of the common library
-subroutines which @code{@value{GCC}} generates as inline code.
+subroutines which @code{@value{NGCC}} generates as inline code.
 
 
 @node Debug Session
@@ -21930,7 +21930,7 @@ What compiler (and its version) was used to compile @value{GDBN}---e.g.@:
 @item
 What compiler (and its version) was used to compile the program you are
 debugging---e.g.@:  ``@value{GCC}--2.8.1'', or ``HP92453-01 A.10.32.03 HP
-C Compiler''.  For GCC, you can say @code{gcc --version} to get this
+C Compiler''.  For @value{NGCC}, you can say @kbd{gcc --version} to get this
 information; for other compilers, see the documentation for those
 compilers.
 
