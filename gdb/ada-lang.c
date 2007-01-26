@@ -9559,7 +9559,7 @@ ada_exception_sym_name (enum exception_catchpoint_kind ex)
    of the EX kind.  */
 
 static struct breakpoint_ops *
-ada_exception_breakption_ops (enum exception_catchpoint_kind ex)
+ada_exception_breakpoint_ops (enum exception_catchpoint_kind ex)
 {
   switch (ex)
     {
@@ -9685,7 +9685,7 @@ ada_exception_sal (enum exception_catchpoint_kind ex, char *exp_string,
     }
 
   /* Set OPS.  */
-  *ops = ada_exception_breakption_ops (ex);
+  *ops = ada_exception_breakpoint_ops (ex);
 
   return sal;
 }

@@ -1,3 +1,8 @@
+2007-01-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_exception_breakpoint_ops): Fix typo in function name.
+	(ada_exception_sal): Update accordingly.
+
 2007-01-26  Jan Kratochvil <jan.kratochvil@redhat.com>
 
 	* c-valprint.c (c_val_print): Require strings to be of no-signed CHARs.
