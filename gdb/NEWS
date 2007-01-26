@@ -15,6 +15,9 @@ frequency signals (e.g. SIGALRM) via the QPassSignals packet.
 target's overall architecture.  GDB can read a description from
 a local file or over the remote serial protocol.
 
+* Arrays of explicitly SIGNED or UNSIGNED CHARs are now printed as arrays
+  of numbers.
+
 * New commands
 
 set mem inaccessible-by-default

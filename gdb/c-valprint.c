@@ -96,7 +96,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	    }
 	  /* For an array of chars, print with string syntax.  */
 	  if (eltlen == 1 &&
-	      ((TYPE_CODE (elttype) == TYPE_CODE_INT)
+	      ((TYPE_CODE (elttype) == TYPE_CODE_INT && TYPE_NOSIGN (elttype))
 	       || ((current_language->la_language == language_m2)
 		   && (TYPE_CODE (elttype) == TYPE_CODE_CHAR)))
 	      && (format == 0 || format == 's'))
