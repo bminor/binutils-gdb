@@ -1,3 +1,8 @@
+2007-01-26  Andreas Schwab  <schwab@suse.de>
+
+	* gdb.base/multi-forks.exp ("restart $i"): Also match
+	__kernel_syscall_via_break.
+
 2007-01-24  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* lib/mi-support.exp (mi_delete_varobj): New.
