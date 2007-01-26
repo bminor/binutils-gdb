@@ -1,3 +1,8 @@
+2007-01-26  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Compilation, Files, Bootstrapping, Bug Reporting):
+	Use @value{NGCC} instead of @value{GCC}.
+
 2007-01-20  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>  (tiny change)
 
 	* agentexpr.texi: Fix typos.
