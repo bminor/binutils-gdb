@@ -5632,6 +5632,26 @@ If you ask to print an object whose contents are unknown to
 by the debug information, @value{GDBN} will say @samp{<incomplete
 type>}.  @xref{Symbols, incomplete type}, for more about this.
 
+Strings are identified as arrays of @code{char} values without specified
+signedness.  Arrays of either @code{signed char} or @code{unsigned char} get
+printed as arrays of 1 byte sized integers.  @code{-fsigned-char} or
+@code{-funsigned-char} @value{NGCC} options have no effect as @value{GDBN}
+defines literal string type @code{"char"} as @code{char} without a sign.
+For program code
+
+@smallexample
+char var0[] = "A";
+signed char var1[] = "A";
+@end smallexample
+
+You get during debugging
+@smallexample
+(gdb) print var0
+$1 = "A"
+(gdb) print var1
+$2 = @{65 'A', 0 '\0'@}
+@end smallexample
+
 @node Arrays
 @section Artificial arrays
 
