@@ -239,6 +239,6 @@ gdb_test_multiple "x/8bd buf2" "$test" {
 # test reinit_frame_cache
 
 gdb_load ${binfile}
-gdb_test "up" "#\[0-9\]* *\[0-9xa-fH'\]* in .* \\(\\).*" "up in corefile.exp (reinit)"
+gdb_test "up" "#\[0-9\]* *\[0-9xa-fH'\]* in .* \\(.*\\).*" "up in corefile.exp (reinit)"
 
 gdb_test "core" "No core file now."

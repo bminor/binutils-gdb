@@ -1,5 +1,8 @@
 2007-01-26  Andreas Schwab  <schwab@suse.de>
 
+	* gdb.base/corefile.exp: Allow non-empty argument list in reinit
+	test.
+
 	* gdb.base/multi-forks.exp ("restart $i"): Also match
 	__kernel_syscall_via_break.
 
