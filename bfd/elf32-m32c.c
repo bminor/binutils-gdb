@@ -60,13 +60,16 @@ static reloc_howto_type m32c_elf_howto_table [] =
 	 0,			/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
+  /* GCC intentionally overflows these next two in order to work
+     around limitations in the addressing modes, so don't complain
+     about overflow.  */
   HOWTO (R_M32C_16,		/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
+	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_M32C_16",		/* name */
 	 FALSE,			/* partial_inplace */
@@ -80,7 +83,7 @@ static reloc_howto_type m32c_elf_howto_table [] =
 	 24,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
+	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_M32C_24",		/* name */
 	 FALSE,			/* partial_inplace */
