@@ -1,3 +1,8 @@
+2007-01-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* elf32-hppa.c (elf32_bed): Define for hpux, linux and netbsd.
+	(INCLUDED_TARGET_FILE): Remove.
+
 2007-01-25  DJ Delorie  <dj@redhat.com>
 
 	* elf32-m32c.c (m32c_elf_howto_table): Don't complain about

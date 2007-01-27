@@ -4679,20 +4679,24 @@ elf32_hppa_elf_get_symbol_type (Elf_Internal_Sym *elf_sym, int type)
 #define ELF_ARCH		bfd_arch_hppa
 #define ELF_MACHINE_CODE	EM_PARISC
 #define ELF_MAXPAGESIZE		0x1000
+#define elf32_bed		elf32_hppa_hpux_bed
 
 #include "elf32-target.h"
 
 #undef TARGET_BIG_SYM
-#define TARGET_BIG_SYM			bfd_elf32_hppa_linux_vec
+#define TARGET_BIG_SYM		bfd_elf32_hppa_linux_vec
 #undef TARGET_BIG_NAME
-#define TARGET_BIG_NAME			"elf32-hppa-linux"
+#define TARGET_BIG_NAME		"elf32-hppa-linux"
+#undef elf32_bed
+#define elf32_bed		elf32_hppa_linux_bed
 
-#define INCLUDED_TARGET_FILE 1
 #include "elf32-target.h"
 
 #undef TARGET_BIG_SYM
-#define TARGET_BIG_SYM			bfd_elf32_hppa_nbsd_vec
+#define TARGET_BIG_SYM		bfd_elf32_hppa_nbsd_vec
 #undef TARGET_BIG_NAME
-#define TARGET_BIG_NAME			"elf32-hppa-netbsd"
+#define TARGET_BIG_NAME		"elf32-hppa-netbsd"
+#undef elf32_bed
+#define elf32_bed		elf32_hppa_netbsd_bed
 
 #include "elf32-target.h"
