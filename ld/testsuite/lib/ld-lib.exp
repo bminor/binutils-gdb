@@ -147,7 +147,7 @@ proc default_ld_relocate { ld target objects } {
     global HOSTING_EMU
 
     remote_file host delete $target
-    return [run_host_cmd_yesno "$ld" "$HOSTING_EMU -o $target -r $objects"]
+    return [run_host_cmd_yesno "$ld" "$HOSTING_EMU --hash-style=sysv -o $target -r $objects"]
 }
 
 # Check to see if ld is being invoked with a non-endian output format
@@ -228,7 +228,7 @@ proc default_ld_link { ld target objects } {
 
     remote_file host delete $target
 
-    return [run_host_cmd_yesno "$ld" "$HOSTING_EMU $flags -o $target $objs $libs"]
+    return [run_host_cmd_yesno "$ld" "$HOSTING_EMU --hash-style=sysv $flags -o $target $objs $libs"]
 }
 
 # Link a program using ld, without including any libraries.

@@ -100,6 +100,19 @@ static void
 gld${EMULATION_NAME}_before_parse (void)
 {
   ldfile_set_output_arch ("${OUTPUT_ARCH}", bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`);
+EOF
+# Enable gnu hash by default for Linux (non-mips) targets.
+# This has been supported since glibc-2.5.
+case ${target} in
+  mips*) ;;
+  *-*-linux-* | *-*-gnu*)
+    fragment <<EOF
+  link_info.emit_hash = FALSE;
+  link_info.emit_gnu_hash = TRUE;
+EOF
+    ;;
+esac
+fragment <<EOF
   input_flags.dynamic = ${DYNAMIC_LINK-TRUE};
   config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo TRUE ; else echo FALSE ; fi`;
   config.separate_code = `if test "x${SEPARATE_CODE}" = xyes ; then echo TRUE ; else echo FALSE ; fi`;
