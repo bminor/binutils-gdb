@@ -691,6 +691,7 @@ enum command_control_type
     continue_control,
     while_control,
     if_control,
+    commands_control,
     invalid_control
   };
 

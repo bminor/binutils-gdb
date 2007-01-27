@@ -1,3 +1,28 @@
+2007-01-27  Eli Zaretskii  <eliz@gnu.org>
+
+	* cli/cli-script.c: Include breakpoint.h.
+	(build_command_line): Require arguments only for if and while
+	commands.
+	(get_command_line, execute_user_command, execute_control_command):
+	Fix wording of warning messages.
+	(print_command_lines): Print breakpoint commands.
+	(execute_control_command): Call commands_from_control_command to
+	handle the `commands' command inside a body of a flow-control
+	command.
+	(read_next_line): Recognize the `commands' command and build a
+	command line structure for it.
+	(recurse_read_control_structure, read_command_lines): Handle
+	`commands' similarly to `if' and `while'.
+
+	* breakpoint.c (get_number_trailer): Document the special meaning
+	of NULL as the first argument PP.
+	(commands_from_control_command): New function.
+
+	* breakpoint.h (commands_from_control_command): Add prototype.
+
+	* defs.h (commands_control): New enumerated value for enum
+	command_control_type.
+
 2007-01-26  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_exception_breakpoint_ops): Fix typo in function name.

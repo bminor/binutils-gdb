@@ -403,6 +403,8 @@ int default_breakpoint_line;
    Currently the string can either be a number or "$" followed by the name
    of a convenience variable.  Making it an expression wouldn't work well
    for map_breakpoint_numbers (e.g. "4 + 5 + 6").
+
+   If the string is a NULL pointer, that denotes the last breakpoint.
    
    TRAILER is a character which can be found after the number; most
    commonly this is `-'.  If you don't want a trailer, use \0.  */ 
@@ -644,6 +646,52 @@ commands_command (char *arg, int from_tty)
 	breakpoints_changed ();
 	breakpoint_modify_event (b->number);
 	return;
+    }
+  error (_("No breakpoint number %d."), bnum);
+}
+
+/* Like commands_command, but instead of reading the commands from
+   input stream, takes them from an already parsed command structure.
+
+   This is used by cli-script.c to DTRT with breakpoint commands
+   that are part of if and while bodies.  */
+enum command_control_type
+commands_from_control_command (char *arg, struct command_line *cmd)
+{
+  struct breakpoint *b;
+  char *p;
+  int bnum;
+
+  /* If we allowed this, we would have problems with when to
+     free the storage, if we change the commands currently
+     being read from.  */
+
+  if (executing_breakpoint_commands)
+    error (_("Can't use the \"commands\" command among a breakpoint's commands."));
+
+  /* An empty string for the breakpoint number means the last
+     breakpoint, but get_number expects a NULL pointer.  */
+  if (arg && !*arg)
+    p = NULL;
+  else
+    p = arg;
+  bnum = get_number (&p);
+
+  if (p && *p)
+    error (_("Unexpected extra arguments following breakpoint number."));
+
+  ALL_BREAKPOINTS (b)
+    if (b->number == bnum)
+      {
+	free_command_lines (&b->commands);
+	if (cmd->body_count != 1)
+	  error (_("Invalid \"commands\" block structure."));
+	/* We need to copy the commands because if/while will free the
+	   list after it finishes execution.  */
+	b->commands = copy_command_lines (cmd->body_list[0]);
+	breakpoints_changed ();
+	breakpoint_modify_event (b->number);
+	return simple_control;
     }
   error (_("No breakpoint number %d."), bnum);
 }

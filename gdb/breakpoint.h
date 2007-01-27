@@ -759,6 +759,10 @@ extern void disable_watchpoints_before_interactive_call_start (void);
 
 extern void enable_watchpoints_after_interactive_call_stop (void);
 
+/* For script interpreters that need to define breakpoint commands
+   after they've already read the commands into a struct command_line.  */
+extern enum command_control_type commands_from_control_command
+  (char *arg, struct command_line *cmd);
 
 extern void clear_breakpoint_hit_counts (void);
 
