@@ -856,7 +856,7 @@ class General_options
 		N_("Min fraction of empty buckets in dynamic hash"),
 		N_("FRACTION"));
 
-  DEFINE_enum(hash_style, options::TWO_DASHES, '\0', "sysv",
+  DEFINE_enum(hash_style, options::TWO_DASHES, '\0', "gnu",
 	      N_("Dynamic hash style"), N_("[sysv,gnu,both]"),
 	      {"sysv", "gnu", "both"});
 
