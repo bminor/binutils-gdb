@@ -39,17 +39,17 @@ func_cu1:
 	.section .debug_info
 .Lcu1_begin:
 	/* CU header */
-	.int	.Lcu1_end - .Lcu1_start		/* Length of Compilation Unit */
+	.4byte	.Lcu1_end - .Lcu1_start		/* Length of Compilation Unit */
 .Lcu1_start:
-	.short	2				/* DWARF Version */
-	.int	.Labbrev1_begin			/* Offset into abbrev section */
+	.2byte	2				/* DWARF Version */
+	.4byte	.Labbrev1_begin			/* Offset into abbrev section */
 	.byte	4				/* Pointer size */
 
 	/* CU die */
 	.uleb128 1				/* Abbrev: DW_TAG_compile_unit */
-	.int	.Lline1_begin			/* DW_AT_stmt_list */
-	.int	.Lend_text1			/* DW_AT_high_pc */
-	.int	.Lbegin_text1			/* DW_AT_low_pc */
+	.4byte	.Lline1_begin			/* DW_AT_stmt_list */
+	.4byte	.Lend_text1			/* DW_AT_high_pc */
+	.4byte	.Lbegin_text1			/* DW_AT_low_pc */
 	.ascii	"file1.txt\0"			/* DW_AT_name */
 	.ascii	"GNU C 3.3.3\0"			/* DW_AT_producer */
 	.byte	1				/* DW_AT_language (C) */
@@ -60,9 +60,9 @@ func_cu1:
 	.byte		1			/* DW_AT_decl_file */
 	.byte		2			/* DW_AT_decl_line */
 	.ascii		"func_cu1\0"		/* DW_AT_name */
-	.int		.Ltype_int		/* DW_AT_type */
-	.int		.Lbegin_func_cu1	/* DW_AT_low_pc */
-	.int		.Lend_func_cu1		/* DW_AT_high_pc */
+	.4byte		.Ltype_int		/* DW_AT_type */
+	.4byte		.Lbegin_func_cu1	/* DW_AT_low_pc */
+	.4byte		.Lend_func_cu1		/* DW_AT_high_pc */
 	.byte		1			/* DW_AT_frame_base: length */
 	.byte		0x55			/* DW_AT_frame_base: DW_OP_reg5 */
 
@@ -73,10 +73,10 @@ func_cu1:
 	/* Second compilation unit.  */
 .Lcu2_begin:
 	/* CU header */
-	.int	.Lcu2_end - .Lcu2_start		/* Length of Compilation Unit */
+	.4byte	.Lcu2_end - .Lcu2_start		/* Length of Compilation Unit */
 .Lcu2_start:
-	.short	2				/* DWARF Version */
-	.int	.Labbrev2_begin			/* Offset into abbrev section */
+	.2byte	2				/* DWARF Version */
+	.4byte	.Labbrev2_begin			/* Offset into abbrev section */
 	.byte	4				/* Pointer size */
 
 	/* CU die */
@@ -172,10 +172,10 @@ func_cu1:
 /* Line table */
 	.section .debug_line
 .Lline1_begin:
-	.int		.Lline1_end - .Lline1_start	/* Initial length */
+	.4byte		.Lline1_end - .Lline1_start	/* Initial length */
 .Lline1_start:
-	.short		2			/* Version */
-	.int		.Lline1_lines - .Lline1_hdr	/* header_length */
+	.2byte		2			/* Version */
+	.4byte		.Lline1_lines - .Lline1_hdr	/* header_length */
 .Lline1_hdr:
 	.byte		1			/* Minimum insn length */
 	.byte		1			/* default_is_stmt */
@@ -215,7 +215,7 @@ func_cu1:
 	.byte		0	/* DW_LNE_set_address */
 	.uleb128	5
 	.byte		2
-	.int		.Lbegin_func_cu1
+	.4byte		.Lbegin_func_cu1
 
 	.byte		3	/* DW_LNS_advance_line */
 	.sleb128	3	/* ... to 4 */
@@ -227,7 +227,7 @@ func_cu1:
 	.byte		0	/* DW_LNE_set_address */
 	.uleb128	5
 	.byte		2
-	.int		.Lend_func_cu1
+	.4byte		.Lend_func_cu1
 
 	.byte		0	/* DW_LNE_end_of_sequence */
 	.uleb128	1
