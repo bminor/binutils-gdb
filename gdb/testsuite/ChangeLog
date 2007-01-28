@@ -8,7 +8,8 @@
 2007-01-25  Jan Kratochvil <jan.kratochvil@redhat.com>
 
 	* gdb.base/charsign.exp, gdb.base/charsign.c: New files.
-	* gdb.arch/i386-sse.exp: Check $xmm.v16_int8 printing as a number array.
+	* gdb.arch/i386-sse.exp: Check $xmm.v16_int8 printing as a number
+	array.
 	* gdb.base/printcmds.exp: Sign-provided CHARs now became arrays.
 	* gdb.base/setvar.exp: Likewise.
 
