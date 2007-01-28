@@ -1,3 +1,7 @@
+2076-01-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-hppa.c (elf64_bed): Defined for HPUX and Linux.
+
 2007-01-27  Mike Frysinger  <vapier@gentoo.org>
 
 	* elf32-hppa.c (elf32_bed): Define for hpux, linux and netbsd.

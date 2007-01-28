@@ -2866,12 +2866,15 @@ const struct elf_size_info hppa64_elf_size_info =
 #define elf_backend_action_discarded	elf_hppa_action_discarded
 #define elf_backend_section_from_phdr   elf64_hppa_section_from_phdr
 
+#define elf64_bed			elf64_hppa_hpux_bed
+
 #include "elf64-target.h"
 
 #undef TARGET_BIG_SYM
 #define TARGET_BIG_SYM			bfd_elf64_hppa_linux_vec
 #undef TARGET_BIG_NAME
 #define TARGET_BIG_NAME			"elf64-hppa-linux"
+#undef elf64_bed
+#define elf64_bed			elf64_hppa_linux_bed
 
-#define INCLUDED_TARGET_FILE 1
 #include "elf64-target.h"
