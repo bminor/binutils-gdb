@@ -1,3 +1,8 @@
+2007-01-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf2loc.h (struct dwarf2_locexpr_baton): Change size to a long.
+	(struct dwarf2_loclist_baton): Likewise.
+
 2007-01-27  Eli Zaretskii  <eliz@gnu.org>
 
 	* cli/cli-script.c: Include breakpoint.h.
