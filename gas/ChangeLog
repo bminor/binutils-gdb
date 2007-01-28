@@ -1,3 +1,10 @@
+2076-01-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (swap_imm_operands): Renamed to ...
+	(swap_2_operands): This.  Take 2 ints.
+	(md_assemble): Updated.
+	(swap_operands): Call swap_2_operands to swap 2 operands.
+
 2007-01-24  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-m32c.c (md_pseudo_table): Add .3byte.

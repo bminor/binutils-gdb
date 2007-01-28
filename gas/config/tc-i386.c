@@ -78,7 +78,7 @@ static const reg_entry *parse_register (char *, char **);
 static char *parse_insn (char *, char *);
 static char *parse_operands (char *, const char *);
 static void swap_operands (void);
-static void swap_imm_operands (void);
+static void swap_2_operands (int, int);
 static void optimize_imm (void);
 static void optimize_disp (void);
 static int match_template (void);
@@ -1716,11 +1716,11 @@ md_assemble (line)
 
   /* The order of the immediates should be reversed 
      for 2 immediates extrq and insertq instructions */
-  if ((i.imm_operands == 2) && 
-      ((strcmp (mnemonic, "extrq") == 0) 
-       || (strcmp (mnemonic, "insertq") == 0)))
+  if ((i.imm_operands == 2)
+      && ((strcmp (mnemonic, "extrq") == 0)
+	  || (strcmp (mnemonic, "insertq") == 0)))
     {
-      swap_imm_operands ();  
+      swap_2_operands (0, 1);  
       /* "extrq" and insertq" are the only two instructions whose operands 
 	 have to be reversed even though they have two immediate operands.
       */
@@ -1735,7 +1735,8 @@ md_assemble (line)
      "enter".  We also don't reverse intersegment "jmp" and "call"
      instructions with 2 immediate operands so that the immediate segment
      precedes the offset, as it does when in AT&T mode. */
-  if (intel_syntax && i.operands > 1
+  if (intel_syntax
+      && i.operands > 1
       && (strcmp (mnemonic, "bound") != 0)
       && (strcmp (mnemonic, "invlpga") != 0)
       && !((i.types[0] & Imm) && (i.types[1] & Imm)))
@@ -2258,13 +2259,11 @@ parse_operands (char *l, const char *mnemonic)
 }
 
 static void
-swap_imm_operands (void)
+swap_2_operands (int xchg1, int xchg2)
 {
   union i386_op temp_op;
   unsigned int temp_type;
   enum bfd_reloc_code_real temp_reloc;
-  int xchg1 = 0;
-  int xchg2 = 1;
   
   temp_type = i.types[xchg2];
   i.types[xchg2] = i.types[xchg1];
@@ -2277,42 +2276,16 @@ swap_imm_operands (void)
   i.reloc[xchg1] = temp_reloc;
 }
 
-
 static void
 swap_operands (void)
 {
-  union i386_op temp_op;
-  unsigned int temp_type;
-  enum bfd_reloc_code_real temp_reloc;
-  int xchg1, xchg2;
-
   switch (i.operands)
     {
     case 4:
-      xchg1 = 1;
-      xchg2 = i.operands - 2;
-      temp_type = i.types[xchg2];
-      i.types[xchg2] = i.types[xchg1];
-      i.types[xchg1] = temp_type;
-      temp_op = i.op[xchg2];
-      i.op[xchg2] = i.op[xchg1];
-      i.op[xchg1] = temp_op;
-      temp_reloc = i.reloc[xchg2];
-      i.reloc[xchg2] = i.reloc[xchg1];
-      i.reloc[xchg1] = temp_reloc;
+      swap_2_operands (1, i.operands - 2);
     case 3:
     case 2:
-      xchg1 = 0;
-      xchg2 = i.operands - 1;
-      temp_type = i.types[xchg2];
-      i.types[xchg2] = i.types[xchg1];
-      i.types[xchg1] = temp_type;
-      temp_op = i.op[xchg2];
-      i.op[xchg2] = i.op[xchg1];
-      i.op[xchg1] = temp_op;
-      temp_reloc = i.reloc[xchg2];
-      i.reloc[xchg2] = i.reloc[xchg1];
-      i.reloc[xchg1] = temp_reloc;
+      swap_2_operands (0, i.operands - 1);
       break;
     default:
       abort ();
