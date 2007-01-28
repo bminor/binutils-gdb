@@ -18,7 +18,7 @@
 /* Loop long enough for GDB to send a few signals of its own, but
    don't hang around eating CPU forever if something goes wrong during
    testing.  */
-#define NSIGS 1000000
+#define NSIGS 10000000
 
 void
 handler (int sig)
