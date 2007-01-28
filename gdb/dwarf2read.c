@@ -7079,7 +7079,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	      || file_index > cu->line_header->num_file_names)
 	    complaint (&symfile_complaints,
 		       _("file index out of range"));
-	  else
+	  else if (file_index > 0)
 	    {
 	      struct file_entry *fe;
 	      fe = &cu->line_header->file_names[file_index - 1];

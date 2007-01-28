@@ -1,3 +1,7 @@
+2007-01-28  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2read.c (new_symbol): Handle DW_AT_decl_file being zero.
+
 2007-01-27  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2loc.h (struct dwarf2_locexpr_baton): Change size to a long.
