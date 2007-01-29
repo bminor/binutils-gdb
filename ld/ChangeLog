@@ -1,3 +1,23 @@
+2006-01-29  Julian Brown  <julian@codesourcery.com>
+
+	* NEWS: Mention --vfp11-denorm-fix option.
+	* ld.texinfo: Document above.
+	* emulparams/armelf_linux.sh (OTHER_TEXT_SECTIONS): Add
+	.vfp11_veneer section.
+	* emulparams/armelf.sh (OTHER_TEXT_SECTIONS): Likewise.
+	* emultempl/armelf.em (vfp11_denorm_fix): New static variable.
+	(arm_elf_before_allocation): Call bfd_elf32_arm_set_vfp11_fix,
+	bfd_elf32_arm_init_maps and bfd_elf32_arm_vfp11_erratum_scan.
+	(arm_elf_after_allocation): New function. Call
+	bfd_elf32_arm_vfp11_fix_veneer_locations for all input statements.
+	(arm_elf_create_output_section_statements): Pass vfp11 fix command
+	line option to BFD.
+	(OPTION_VFP11_DENORM_FIX): New option.
+	(PARSE_AND_LIST_LONGOPTS): Handle new option.
+	(PARSE_AND_LIST_OPTIONS): Likewise.
+	(PARSE_AND_LIST_ARGS_CASES): Likewise.
+	(LDEMUL_AFTER_ALLOCATION): Define.
+
 2007-01-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ldgram.y (SIZEOF_HEADERS): Remove duplicated one.

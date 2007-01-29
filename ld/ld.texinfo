@@ -5489,6 +5489,36 @@ each PLT entry. This should lead to such calls executing slightly faster.
 This option is enabled implicitly for SymbianOS, so there is no need to
 specify it if you are using that target.
 
+@cindex VFP11_DENORM_FIX
+@kindex --vfp11-denorm-fix
+The @samp{--vfp11-denorm-fix} switch enables a link-time workaround for a
+bug in certain VFP11 coprocessor hardware, which sometimes allows
+instructions with denorm operands (which must be handled by support code)
+to have those operands overwritten by subsequent instructions before
+the support code can read the intended values.
+
+The bug may be avoided in scalar mode if you allow at least one
+intervening instruction between a VFP11 instruction which uses a register
+and another instruction which writes to the same register, or at least two
+intervening instructions if vector mode is in use. The bug only affects
+full-compliance floating-point mode: you do not need this workaround if
+you are using "runfast" mode. Please contact ARM for further details.
+
+If you know you are using buggy VFP11 hardware, you can
+enable this workaround by specifying the linker option
+@samp{--vfp-denorm-fix=scalar} if you are using the VFP11 scalar
+mode only, or @samp{--vfp-denorm-fix=vector} if you are using
+vector mode (the latter also works for scalar code). The default is
+@samp{--vfp-denorm-fix=none}.
+
+If the workaround is enabled, instructions are scanned for
+potentially-troublesome sequences, and a veneer is created for each
+such sequence which may trigger the erratum. The veneer consists of the
+first instruction of the sequence and a branch back to the subsequent
+instruction. The original instruction is then replaced with a branch to
+the veneer. The extra cycles required to call and return from the veneer
+are sufficient to avoid the erratum in both the scalar and vector cases.
+
 @ifclear GENERIC
 @lowersections
 @end ifclear
