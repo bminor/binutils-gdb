@@ -1,3 +1,8 @@
+2007-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/commands.exp: Call if_commands_test.
+	(gdb_test_no_prompt, if_commands_test): New.
+
 2007-01-28  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.threads/sigthread.c (NSIGS): Make bigger.

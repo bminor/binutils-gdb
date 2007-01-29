@@ -618,6 +618,79 @@ end}
     file delete file3
 }
 
+proc gdb_test_no_prompt { command result msg } {
+    global gdb_prompt
+
+    set msg "$command - $msg"
+    set result "^[string_to_regexp $command]\r\n$result$"
+    gdb_test_multiple $command $msg {
+	-re "$result" {
+	    pass $msg
+	    return 1
+	}
+	-re "\r\n *>$" {
+	    fail $msg
+	    return 0
+	}
+    }
+    return 0
+}
+
+proc if_commands_test {} {
+    global gdb_prompt
+
+    gdb_test "set \$tem = 1" "" "set \$tem in if_commands_test"
+
+    set test "if_commands_test 1"
+    gdb_test_no_prompt "if \$tem == 2" { >} $test
+    gdb_test_no_prompt "break main" { >} $test
+    gdb_test_no_prompt "else" { >} $test
+    gdb_test_no_prompt "break factorial" { >} $test
+    gdb_test_no_prompt "commands" {  >} $test
+    gdb_test_no_prompt "silent" {  >} $test
+    gdb_test_no_prompt "set \$tem = 3" {  >} $test
+    gdb_test_no_prompt "continue" {  >} $test
+    gdb_test_multiple "end" "first end - $test" {
+	-re " >\$" {
+	    pass "first end - $test"
+	}
+	-re "\r\n>\$" {
+	    fail "first end - $test"
+	}
+    }
+    gdb_test_multiple "end" "second end - $test" {
+	-re "Breakpoint \[0-9\]+ at .*: file .*/run.c, line \[0-9\]+\.\r\n$gdb_prompt $" {
+	    pass "second end - $test"
+	}
+	-re "Undefined command: \"silent\".*$gdb_prompt $" {
+	    fail "second end - $test"
+	}
+    }
+
+    set test "if_commands_test 2"
+    gdb_test_no_prompt "if \$tem == 1" { >} $test
+    gdb_test_no_prompt "break main" { >} $test
+    gdb_test_no_prompt "else" { >} $test
+    gdb_test_no_prompt "break factorial" { >} $test
+    gdb_test_no_prompt "commands" {  >} $test
+    gdb_test_no_prompt "silent" {  >} $test
+    gdb_test_no_prompt "set \$tem = 3" {  >} $test
+    gdb_test_no_prompt "continue" {  >} $test
+    gdb_test_multiple "end" "first end - $test" {
+	-re " >\$" {
+	    pass "first end - $test"
+	}
+	-re "\r\n>\$" {
+	    fail "first end - $test"
+	}
+    }
+    gdb_test_multiple "end" "second end - $test" {
+	-re "Breakpoint \[0-9\]+ at .*: file .*/run.c, line \[0-9\]+\.\r\n$gdb_prompt $" {
+	    pass "second end - $test"
+	}
+    }
+}
+
 gdbvar_simple_if_test
 gdbvar_simple_while_test
 gdbvar_complex_if_while_test
@@ -635,3 +708,4 @@ bp_deleted_in_command_test
 temporary_breakpoint_commands
 stray_arg0_test
 recursive_source_test
+if_commands_test
