@@ -1,3 +1,9 @@
+2007-01-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* target.c (maintenance_print_target_stack): New function.
+	(initialize_targets): Add new "maintenance print target-stack"
+	command.
+
 2007-01-28  Mark Kettenis  <kettenis@gnu.org>
 
 	* dwarf2read.c (new_symbol): Handle DW_AT_decl_file being zero.

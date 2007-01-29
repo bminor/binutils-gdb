@@ -2769,6 +2769,21 @@ do_monitor_command (char *cmd,
   target_rcmd (cmd, gdb_stdtarg);
 }
 
+/* Print the name of each layers of our target stack.  */
+
+static void
+maintenance_print_target_stack (char *cmd, int from_tty)
+{
+  struct target_ops *t;
+
+  printf_filtered (_("The current target stack is:\n"));
+
+  for (t = target_stack; t != NULL; t = t->beneath)
+    {
+      printf_filtered ("  - %s (%s)\n", t->to_shortname, t->to_longname);
+    }
+}
+
 void
 initialize_targets (void)
 {
@@ -2801,6 +2816,10 @@ result in significant performance improvement for remote targets."),
 
   add_com ("monitor", class_obscure, do_monitor_command,
 	   _("Send a command to the remote monitor (remote targets only)."));
+
+  add_cmd ("target-stack", class_maintenance, maintenance_print_target_stack,
+           _("Print the name of each layer of the internal target stack."),
+           &maintenanceprintlist);
 
   target_dcache = dcache_init ();
 }
