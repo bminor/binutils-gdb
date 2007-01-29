@@ -52,10 +52,6 @@ extern gdbarch_remote_translate_xfer_address_ftype generic_remote_translate_xfer
 extern int core_addr_lessthan (CORE_ADDR lhs, CORE_ADDR rhs);
 extern int core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs);
 
-/* Floating point values. */
-extern const struct floatformat *default_float_format (struct gdbarch *gdbarch);
-extern const struct floatformat *default_double_format (struct gdbarch *gdbarch);
-
 /* Identity functions on a CORE_ADDR.  Just return the "addr".  */
 
 extern CORE_ADDR core_addr_identity (CORE_ADDR addr);

@@ -391,13 +391,15 @@ v:TARGET_LONG_LONG_BIT:int:long_long_bit:::8 * sizeof (LONGEST):2*TARGET_LONG_BI
 # The ABI default bit-size and format for "float", "double", and "long
 # double".  These bit/format pairs should eventually be combined into
 # a single object.  For the moment, just initialize them as a pair.
+# Each format describes both the big and little endian layouts (if
+# useful).
 
 v:TARGET_FLOAT_BIT:int:float_bit:::8 * sizeof (float):4*TARGET_CHAR_BIT::0
-v:TARGET_FLOAT_FORMAT:const struct floatformat *:float_format:::::default_float_format (current_gdbarch)::pformat (current_gdbarch->float_format)
+v:TARGET_FLOAT_FORMAT:const struct floatformat **:float_format:::::floatformats_ieee_single::pformat (current_gdbarch->float_format)
 v:TARGET_DOUBLE_BIT:int:double_bit:::8 * sizeof (double):8*TARGET_CHAR_BIT::0
-v:TARGET_DOUBLE_FORMAT:const struct floatformat *:double_format:::::default_double_format (current_gdbarch)::pformat (current_gdbarch->double_format)
+v:TARGET_DOUBLE_FORMAT:const struct floatformat **:double_format:::::floatformats_ieee_double::pformat (current_gdbarch->double_format)
 v:TARGET_LONG_DOUBLE_BIT:int:long_double_bit:::8 * sizeof (long double):8*TARGET_CHAR_BIT::0
-v:TARGET_LONG_DOUBLE_FORMAT:const struct floatformat *:long_double_format:::::default_double_format (current_gdbarch)::pformat (current_gdbarch->long_double_format)
+v:TARGET_LONG_DOUBLE_FORMAT:const struct floatformat **:long_double_format:::::floatformats_ieee_double::pformat (current_gdbarch->long_double_format)
 
 # For most targets, a pointer on the target and its representation as an
 # address in GDB have the same size and "look the same".  For such a
@@ -1204,12 +1206,13 @@ show_gdbarch_debug (struct ui_file *file, int from_tty,
 }
 
 static const char *
-pformat (const struct floatformat *format)
+pformat (const struct floatformat **format)
 {
   if (format == NULL)
     return "(null)";
   else
-    return  format->name;
+    /* Just print out one of them - this is only for diagnostics.  */
+    return format[0]->name;
 }
 
 EOF

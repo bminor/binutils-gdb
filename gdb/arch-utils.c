@@ -143,42 +143,6 @@ core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs)
   return (lhs > rhs);
 }
 
-
-/* Helper functions for TARGET_{FLOAT,DOUBLE}_FORMAT */
-
-const struct floatformat *
-default_float_format (struct gdbarch *gdbarch)
-{
-  int byte_order = gdbarch_byte_order (gdbarch);
-  switch (byte_order)
-    {
-    case BFD_ENDIAN_BIG:
-      return &floatformat_ieee_single_big;
-    case BFD_ENDIAN_LITTLE:
-      return &floatformat_ieee_single_little;
-    default:
-      internal_error (__FILE__, __LINE__,
-		      _("default_float_format: bad byte order"));
-    }
-}
-
-
-const struct floatformat *
-default_double_format (struct gdbarch *gdbarch)
-{
-  int byte_order = gdbarch_byte_order (gdbarch);
-  switch (byte_order)
-    {
-    case BFD_ENDIAN_BIG:
-      return &floatformat_ieee_double_big;
-    case BFD_ENDIAN_LITTLE:
-      return &floatformat_ieee_double_little;
-    default:
-      internal_error (__FILE__, __LINE__,
-		      _("default_double_format: bad byte order"));
-    }
-}
-
 /* Misc helper functions for targets. */
 
 CORE_ADDR

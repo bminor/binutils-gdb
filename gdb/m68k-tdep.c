@@ -1157,7 +1157,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep = xmalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
 
-  set_gdbarch_long_double_format (gdbarch, &floatformat_m68881_ext);
+  set_gdbarch_long_double_format (gdbarch, floatformats_m68881_ext);
   set_gdbarch_long_double_bit (gdbarch, 96);
 
   set_gdbarch_skip_prologue (gdbarch, m68k_skip_prologue);

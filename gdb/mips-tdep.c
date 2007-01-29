@@ -179,8 +179,14 @@ static const struct floatformat floatformat_n32n64_long_double_big =
 {
   floatformat_big, 128, 0, 1, 11, 1023, 2047, 12, 52,
   floatformat_intbit_no,
-  "floatformat_ieee_double_big",
+  "floatformat_n32n64_long_double_big",
   n32n64_floatformat_always_valid
+};
+
+static const struct floatformat *floatformats_n32n64_long[BFD_ENDIAN_UNKNOWN] =
+{
+  &floatformat_n32n64_long_double_big,
+  &floatformat_n32n64_long_double_big
 };
 
 const struct mips_regnum *
@@ -701,22 +707,10 @@ mips_register_type (struct gdbarch *gdbarch, int regnum)
     {
       /* The floating-point registers raw, or cooked, always match
          mips_isa_regsize(), and also map 1:1, byte for byte.  */
-      switch (gdbarch_byte_order (gdbarch))
-	{
-	case BFD_ENDIAN_BIG:
-	  if (mips_isa_regsize (gdbarch) == 4)
-	    return builtin_type_ieee_single_big;
-	  else
-	    return builtin_type_ieee_double_big;
-	case BFD_ENDIAN_LITTLE:
-	  if (mips_isa_regsize (gdbarch) == 4)
-	    return builtin_type_ieee_single_little;
-	  else
-	    return builtin_type_ieee_double_little;
-	case BFD_ENDIAN_UNKNOWN:
-	default:
-	  internal_error (__FILE__, __LINE__, _("bad switch"));
-	}
+      if (mips_isa_regsize (gdbarch) == 4)
+	return builtin_type_ieee_single;
+      else
+	return builtin_type_ieee_double;
     }
   else if (regnum < NUM_REGS)
     {
@@ -3867,19 +3861,13 @@ mips_o64_return_value (struct gdbarch *gdbarch,
 static struct type *
 mips_float_register_type (void)
 {
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-    return builtin_type_ieee_single_big;
-  else
-    return builtin_type_ieee_single_little;
+  return builtin_type_ieee_single;
 }
 
 static struct type *
 mips_double_register_type (void)
 {
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-    return builtin_type_ieee_double_big;
-  else
-    return builtin_type_ieee_double_little;
+  return builtin_type_ieee_double;
 }
 
 /* Copy a 32-bit single-precision value from the current frame
@@ -5077,8 +5065,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
       set_gdbarch_long_double_bit (gdbarch, 128);
-      set_gdbarch_long_double_format (gdbarch,
-                                      &floatformat_n32n64_long_double_big);
+      set_gdbarch_long_double_format (gdbarch, floatformats_n32n64_long);
       break;
     case MIPS_ABI_N64:
       set_gdbarch_push_dummy_call (gdbarch, mips_n32n64_push_dummy_call);
@@ -5090,8 +5077,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_ptr_bit (gdbarch, 64);
       set_gdbarch_long_long_bit (gdbarch, 64);
       set_gdbarch_long_double_bit (gdbarch, 128);
-      set_gdbarch_long_double_format (gdbarch,
-                                      &floatformat_n32n64_long_double_big);
+      set_gdbarch_long_double_format (gdbarch, floatformats_n32n64_long);
       break;
     default:
       internal_error (__FILE__, __LINE__, _("unknown ABI in switch"));

@@ -141,7 +141,9 @@ extern void set_gdbarch_long_long_bit (struct gdbarch *gdbarch, int long_long_bi
 
 /* The ABI default bit-size and format for "float", "double", and "long
    double".  These bit/format pairs should eventually be combined into
-   a single object.  For the moment, just initialize them as a pair. */
+   a single object.  For the moment, just initialize them as a pair.
+   Each format describes both the big and little endian layouts (if
+   useful). */
 
 extern int gdbarch_float_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_float_bit (struct gdbarch *gdbarch, int float_bit);
@@ -152,8 +154,8 @@ extern void set_gdbarch_float_bit (struct gdbarch *gdbarch, int float_bit);
 #define TARGET_FLOAT_BIT (gdbarch_float_bit (current_gdbarch))
 #endif
 
-extern const struct floatformat * gdbarch_float_format (struct gdbarch *gdbarch);
-extern void set_gdbarch_float_format (struct gdbarch *gdbarch, const struct floatformat * float_format);
+extern const struct floatformat ** gdbarch_float_format (struct gdbarch *gdbarch);
+extern void set_gdbarch_float_format (struct gdbarch *gdbarch, const struct floatformat ** float_format);
 #if !defined (GDB_TM_FILE) && defined (TARGET_FLOAT_FORMAT)
 #error "Non multi-arch definition of TARGET_FLOAT_FORMAT"
 #endif
@@ -170,8 +172,8 @@ extern void set_gdbarch_double_bit (struct gdbarch *gdbarch, int double_bit);
 #define TARGET_DOUBLE_BIT (gdbarch_double_bit (current_gdbarch))
 #endif
 
-extern const struct floatformat * gdbarch_double_format (struct gdbarch *gdbarch);
-extern void set_gdbarch_double_format (struct gdbarch *gdbarch, const struct floatformat * double_format);
+extern const struct floatformat ** gdbarch_double_format (struct gdbarch *gdbarch);
+extern void set_gdbarch_double_format (struct gdbarch *gdbarch, const struct floatformat ** double_format);
 #if !defined (GDB_TM_FILE) && defined (TARGET_DOUBLE_FORMAT)
 #error "Non multi-arch definition of TARGET_DOUBLE_FORMAT"
 #endif
@@ -188,8 +190,8 @@ extern void set_gdbarch_long_double_bit (struct gdbarch *gdbarch, int long_doubl
 #define TARGET_LONG_DOUBLE_BIT (gdbarch_long_double_bit (current_gdbarch))
 #endif
 
-extern const struct floatformat * gdbarch_long_double_format (struct gdbarch *gdbarch);
-extern void set_gdbarch_long_double_format (struct gdbarch *gdbarch, const struct floatformat * long_double_format);
+extern const struct floatformat ** gdbarch_long_double_format (struct gdbarch *gdbarch);
+extern void set_gdbarch_long_double_format (struct gdbarch *gdbarch, const struct floatformat ** long_double_format);
 #if !defined (GDB_TM_FILE) && defined (TARGET_LONG_DOUBLE_FORMAT)
 #error "Non multi-arch definition of TARGET_LONG_DOUBLE_FORMAT"
 #endif

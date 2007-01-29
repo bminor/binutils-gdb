@@ -69,12 +69,13 @@ show_gdbarch_debug (struct ui_file *file, int from_tty,
 }
 
 static const char *
-pformat (const struct floatformat *format)
+pformat (const struct floatformat **format)
 {
   if (format == NULL)
     return "(null)";
   else
-    return  format->name;
+    /* Just print out one of them - this is only for diagnostics.  */
+    return format[0]->name;
 }
 
 
@@ -136,11 +137,11 @@ struct gdbarch
   int long_bit;
   int long_long_bit;
   int float_bit;
-  const struct floatformat * float_format;
+  const struct floatformat ** float_format;
   int double_bit;
-  const struct floatformat * double_format;
+  const struct floatformat ** double_format;
   int long_double_bit;
-  const struct floatformat * long_double_format;
+  const struct floatformat ** long_double_format;
   int ptr_bit;
   int addr_bit;
   int bfd_vma_bit;
@@ -516,13 +517,13 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of long_long_bit, invalid_p == 0 */
   /* Skip verify of float_bit, invalid_p == 0 */
   if (current_gdbarch->float_format == 0)
-    current_gdbarch->float_format = default_float_format (current_gdbarch);
+    current_gdbarch->float_format = floatformats_ieee_single;
   /* Skip verify of double_bit, invalid_p == 0 */
   if (current_gdbarch->double_format == 0)
-    current_gdbarch->double_format = default_double_format (current_gdbarch);
+    current_gdbarch->double_format = floatformats_ieee_double;
   /* Skip verify of long_double_bit, invalid_p == 0 */
   if (current_gdbarch->long_double_format == 0)
-    current_gdbarch->long_double_format = default_double_format (current_gdbarch);
+    current_gdbarch->long_double_format = floatformats_ieee_double;
   /* Skip verify of ptr_bit, invalid_p == 0 */
   if (current_gdbarch->addr_bit == 0)
     current_gdbarch->addr_bit = TARGET_PTR_BIT;
@@ -1740,7 +1741,7 @@ set_gdbarch_float_bit (struct gdbarch *gdbarch,
   gdbarch->float_bit = float_bit;
 }
 
-const struct floatformat *
+const struct floatformat **
 gdbarch_float_format (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
@@ -1751,7 +1752,7 @@ gdbarch_float_format (struct gdbarch *gdbarch)
 
 void
 set_gdbarch_float_format (struct gdbarch *gdbarch,
-                          const struct floatformat * float_format)
+                          const struct floatformat ** float_format)
 {
   gdbarch->float_format = float_format;
 }
@@ -1773,7 +1774,7 @@ set_gdbarch_double_bit (struct gdbarch *gdbarch,
   gdbarch->double_bit = double_bit;
 }
 
-const struct floatformat *
+const struct floatformat **
 gdbarch_double_format (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
@@ -1784,7 +1785,7 @@ gdbarch_double_format (struct gdbarch *gdbarch)
 
 void
 set_gdbarch_double_format (struct gdbarch *gdbarch,
-                           const struct floatformat * double_format)
+                           const struct floatformat ** double_format)
 {
   gdbarch->double_format = double_format;
 }
@@ -1806,7 +1807,7 @@ set_gdbarch_long_double_bit (struct gdbarch *gdbarch,
   gdbarch->long_double_bit = long_double_bit;
 }
 
-const struct floatformat *
+const struct floatformat **
 gdbarch_long_double_format (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
@@ -1817,7 +1818,7 @@ gdbarch_long_double_format (struct gdbarch *gdbarch)
 
 void
 set_gdbarch_long_double_format (struct gdbarch *gdbarch,
-                                const struct floatformat * long_double_format)
+                                const struct floatformat ** long_double_format)
 {
   gdbarch->long_double_format = long_double_format;
 }

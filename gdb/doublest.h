@@ -100,11 +100,4 @@ extern void convert_typed_floating (const void *from,
 				    const struct type *from_type,
                                     void *to, const struct type *to_type);
 
-/* Table of convenient float-formats.  */
-extern const struct floatformat *floatformat_ieee_single[BFD_ENDIAN_UNKNOWN];
-extern const struct floatformat *floatformat_ieee_double[BFD_ENDIAN_UNKNOWN];
-extern const struct floatformat *floatformat_ieee_quad[BFD_ENDIAN_UNKNOWN];
-extern const struct floatformat *floatformat_arm_ext[BFD_ENDIAN_UNKNOWN];
-extern const struct floatformat *floatformat_ia64_spill[BFD_ENDIAN_UNKNOWN];
-
 #endif

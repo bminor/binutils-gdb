@@ -336,6 +336,12 @@ const struct floatformat floatformat_ia64_ext =
   floatformat_intbit_yes, "floatformat_ia64_ext", floatformat_valid
 };
 
+const struct floatformat *floatformats_ia64_ext[2] =
+{
+  &floatformat_ia64_ext,
+  &floatformat_ia64_ext
+};
+
 
 /* Extract ``len'' bits from an instruction bundle starting at
    bit ``from''.  */
@@ -3574,7 +3580,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   builtin_type_ia64_ext =
     init_type (TYPE_CODE_FLT, 128 / 8,
                0, "builtin_type_ia64_ext", NULL);
-  TYPE_FLOATFORMAT (builtin_type_ia64_ext) = &floatformat_ia64_ext;
+  TYPE_FLOATFORMAT (builtin_type_ia64_ext) = floatformats_ia64_ext;
 
   /* According to the ia64 specs, instructions that store long double
      floats in memory use a long-double format different than that
@@ -3584,7 +3590,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      format for storing long doubles (e.g. HPUX).  In the latter case,
      the setting of the format may be moved/overridden in an
      OS-specific tdep file.  */
-  set_gdbarch_long_double_format (gdbarch, &floatformat_i387_ext);
+  set_gdbarch_long_double_format (gdbarch, floatformats_i387_ext);
 
   set_gdbarch_short_bit (gdbarch, 16);
   set_gdbarch_int_bit (gdbarch, 32);

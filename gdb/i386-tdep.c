@@ -2333,7 +2333,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      the i387 extended floating-point format.  In fact, of all targets
      in the GCC 2.95 tree, only OSF/1 does it different, and insists
      on having a `long double' that's not `long' at all.  */
-  set_gdbarch_long_double_format (gdbarch, &floatformat_i387_ext);
+  set_gdbarch_long_double_format (gdbarch, floatformats_i387_ext);
 
   /* Although the i387 extended floating-point has only 80 significant
      bits, a `long double' actually takes up 96, probably to enforce

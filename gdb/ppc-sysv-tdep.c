@@ -132,19 +132,8 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  if (write_pass)
 		    {
 		      char memval[8];
-		      struct type *memtype;
-		      switch (TARGET_BYTE_ORDER)
-			{
-			case BFD_ENDIAN_BIG:
-			  memtype = builtin_type_ieee_double_big;
-			  break;
-			case BFD_ENDIAN_LITTLE:
-			  memtype = builtin_type_ieee_double_little;
-			  break;
-			default:
-			  internal_error (__FILE__, __LINE__, _("bad switch"));
-			}
-		      convert_typed_floating (val, type, memval, memtype);
+		      convert_typed_floating (val, type, memval,
+					      builtin_type_ieee_double);
 		      write_memory (sp + argoffset, val, len);
 		    }
 		  argoffset += 8;

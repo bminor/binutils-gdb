@@ -1,3 +1,45 @@
+2007-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* doublest.c (floatformat_from_length): Use the right element from
+	gdbarch floatformats.
+	(floatformat_from_type, extract_typed_floating)
+	(store_typed_floating): Likewise.
+	* doublest.h: Remove declarations for undefined floatformat arrays.
+	* gdbarch.sh (float_format, double_format, long_double_format): Change
+	to pairs.
+	(pformat): Update for pairs.
+	* gdbarch.c, gdbarch.h: Regenerated.
+	* gdbtypes.c (floatformats_ieee_single, floatformats_ieee_double)
+	(floatformats_ieee_double_littlebyte_bigword)
+	(floatformats_i387_ext, floatformats_m68881_ext, floatformats_arm_ext)
+	(floatformats_ia64_spill, floatformats_ia64_quad, floatformats_vax_f)
+	(floatformats_vax_d): New variables.
+	(builtin_type_ieee_single, builtin_type_ieee_double)
+	(builtin_type_arm_ext, builtin_type_ia64_spill)
+	(builtin_type_ia64_quad): Replace arrays with individual types.
+	(builtin_type_ieee_single_big, builtin_type_ieee_single_little)
+	(builtin_type_ieee_double_big, builtin_type_ieee_double_little)
+	(builtin_type_ieee_double_littlebyte_bigword, builtin_type_i960_ext)
+	(builtin_type_m88110_ext, builtin_type_m88110_harris_ext)
+	(builtin_type_arm_ext_big, builtin_type_arm_ext_littlebyte_bigword)
+	(builtin_type_ia64_spill_big, builtin_type_ia64_spill_little)
+	(builtin_type_ia64_quad_big, builtin_type_ia64_quad_little): Delete
+	unused and endian-specific types.
+	(recursive_dump_type): Update for floatformat pairs.
+	(build_flt): Move higher.  Handle bit == -1.  Take a floatformat pair.
+	(build_gdbtypes): Use build_flt.
+	(_initialize_gdbtypes): Update set of initialized types.
+	* gdbtypes.h: Update declarations to match gdbtypes.c.
+	(struct main_type): Store a pointer to two floatformats.
+	* arch-utils.c (default_float_format, default_double_format): Delete.
+	* arch-utils.h (default_float_format, default_double_format): Delete.
+
+	* arm-tdep.c, avr-tdep.c, hppa-tdep.c, hppabsd-tdep.c, i386-tdep.c,
+	ia64-tdep.c,  iq2000-tdep.c, m68k-tdep.c, m88k-tdep.c,
+	mips-linux-tdep.c, mips-tdep.c, mt-tdep.c, ppcobsd-tdep.c,
+	sparc-linux-tdep.c, sparc-tdep.c, sparcnbsd-tdep.c, spu-tdep.c,
+	vax-tdep.c, alpha-tdep.c, ppc-sysv-tdep.c: Update.
+
 2007-01-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* target.c (maintenance_print_target_stack): New function.

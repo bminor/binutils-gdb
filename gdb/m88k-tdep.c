@@ -845,7 +845,7 @@ m88k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* There is no real `long double'.  */
   set_gdbarch_long_double_bit (gdbarch, 64);
-  set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_big);
+  set_gdbarch_long_double_format (gdbarch, floatformats_ieee_double);
 
   set_gdbarch_num_regs (gdbarch, M88K_NUM_REGS);
   set_gdbarch_register_name (gdbarch, m88k_register_name);

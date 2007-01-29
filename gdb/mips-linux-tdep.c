@@ -1154,10 +1154,7 @@ mips_linux_init_abi (struct gdbarch_info info,
 	   the same 128-bit IEEE floating point format that IA-64 uses,
 	   except that the quiet/signalling NaN bit is reversed (GDB
 	   does not distinguish between quiet and signalling NaNs).  */
-	if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
-	  set_gdbarch_long_double_format (gdbarch, &floatformat_ia64_quad_big);
-	else
-	  set_gdbarch_long_double_format (gdbarch, &floatformat_ia64_quad_little);
+	set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
 	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_n32_rt_sigframe);
 	break;
       case MIPS_ABI_N64:
@@ -1171,10 +1168,7 @@ mips_linux_init_abi (struct gdbarch_info info,
 	   the same 128-bit IEEE floating point format that IA-64 uses,
 	   except that the quiet/signalling NaN bit is reversed (GDB
 	   does not distinguish between quiet and signalling NaNs).  */
-	if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
-	  set_gdbarch_long_double_format (gdbarch, &floatformat_ia64_quad_big);
-	else
-	  set_gdbarch_long_double_format (gdbarch, &floatformat_ia64_quad_little);
+	set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
 	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_n64_rt_sigframe);
 	break;
       default:

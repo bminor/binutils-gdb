@@ -1118,23 +1118,9 @@ mt_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      provided.  */
   gdbarch = gdbarch_alloc (&info, NULL);
 
-  switch (info.byte_order)
-    {
-    case BFD_ENDIAN_BIG:
-      set_gdbarch_float_format (gdbarch, &floatformat_ieee_single_big);
-      set_gdbarch_double_format (gdbarch, &floatformat_ieee_double_big);
-      set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_big);
-      break;
-    case BFD_ENDIAN_LITTLE:
-      set_gdbarch_float_format (gdbarch, &floatformat_ieee_single_little);
-      set_gdbarch_double_format (gdbarch, &floatformat_ieee_double_little);
-      set_gdbarch_long_double_format (gdbarch,
-				      &floatformat_ieee_double_little);
-      break;
-    default:
-      internal_error (__FILE__, __LINE__,
-		      _("mt_gdbarch_init: bad byte order for float format"));
-    }
+  set_gdbarch_float_format (gdbarch, floatformats_ieee_single_big);
+  set_gdbarch_double_format (gdbarch, floatformats_ieee_double_big);
+  set_gdbarch_long_double_format (gdbarch, floatformats_ieee_double_big);
 
   set_gdbarch_register_name (gdbarch, mt_register_name);
   set_gdbarch_num_regs (gdbarch, MT_NUM_REGS);

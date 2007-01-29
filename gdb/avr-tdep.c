@@ -1267,9 +1267,9 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_double_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_long_double_bit (gdbarch, 4 * TARGET_CHAR_BIT);
 
-  set_gdbarch_float_format (gdbarch, &floatformat_ieee_single_little);
-  set_gdbarch_double_format (gdbarch, &floatformat_ieee_single_little);
-  set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_single_little);
+  set_gdbarch_float_format (gdbarch, floatformats_ieee_single);
+  set_gdbarch_double_format (gdbarch, floatformats_ieee_single);
+  set_gdbarch_long_double_format (gdbarch, floatformats_ieee_single);
 
   set_gdbarch_read_pc (gdbarch, avr_read_pc);
   set_gdbarch_write_pc (gdbarch, avr_write_pc);

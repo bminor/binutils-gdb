@@ -98,27 +98,57 @@ struct type *builtin_type_v4hi;
 struct type *builtin_type_v2si;
 struct type *builtin_type_vec64;
 struct type *builtin_type_vec128;
-struct type *builtin_type_ieee_single[BFD_ENDIAN_UNKNOWN];
-struct type *builtin_type_ieee_single_big;
-struct type *builtin_type_ieee_single_little;
-struct type *builtin_type_ieee_double[BFD_ENDIAN_UNKNOWN];
-struct type *builtin_type_ieee_double_big;
-struct type *builtin_type_ieee_double_little;
-struct type *builtin_type_ieee_double_littlebyte_bigword;
+
+/* Floatformat pairs.  */
+const struct floatformat *floatformats_ieee_single[BFD_ENDIAN_UNKNOWN] = {
+  &floatformat_ieee_single_big,
+  &floatformat_ieee_single_little
+};
+const struct floatformat *floatformats_ieee_double[BFD_ENDIAN_UNKNOWN] = {
+  &floatformat_ieee_double_big,
+  &floatformat_ieee_double_little
+};
+const struct floatformat *floatformats_ieee_double_littlebyte_bigword[BFD_ENDIAN_UNKNOWN] = {
+  &floatformat_ieee_double_big,
+  &floatformat_ieee_double_littlebyte_bigword
+};
+const struct floatformat *floatformats_i387_ext[BFD_ENDIAN_UNKNOWN] = {
+  &floatformat_i387_ext,
+  &floatformat_i387_ext
+};
+const struct floatformat *floatformats_m68881_ext[BFD_ENDIAN_UNKNOWN] = {
+  &floatformat_m68881_ext,
+  &floatformat_m68881_ext
+};
+const struct floatformat *floatformats_arm_ext[BFD_ENDIAN_UNKNOWN] = {
+  &floatformat_arm_ext_big,
+  &floatformat_arm_ext_littlebyte_bigword
+};
+const struct floatformat *floatformats_ia64_spill[BFD_ENDIAN_UNKNOWN] = {
+  &floatformat_ia64_spill_big,
+  &floatformat_ia64_spill_little
+};
+const struct floatformat *floatformats_ia64_quad[BFD_ENDIAN_UNKNOWN] = {
+  &floatformat_ia64_quad_big,
+  &floatformat_ia64_quad_little
+};
+const struct floatformat *floatformats_vax_f[BFD_ENDIAN_UNKNOWN] = {
+  &floatformat_vax_f,
+  &floatformat_vax_f
+};
+const struct floatformat *floatformats_vax_d[BFD_ENDIAN_UNKNOWN] = {
+  &floatformat_vax_d,
+  &floatformat_vax_d
+};
+
+struct type *builtin_type_ieee_single;
+struct type *builtin_type_ieee_double;
 struct type *builtin_type_i387_ext;
 struct type *builtin_type_m68881_ext;
-struct type *builtin_type_i960_ext;
-struct type *builtin_type_m88110_ext;
-struct type *builtin_type_m88110_harris_ext;
-struct type *builtin_type_arm_ext[BFD_ENDIAN_UNKNOWN];
-struct type *builtin_type_arm_ext_big;
-struct type *builtin_type_arm_ext_littlebyte_bigword;
-struct type *builtin_type_ia64_spill[BFD_ENDIAN_UNKNOWN];
-struct type *builtin_type_ia64_spill_big;
-struct type *builtin_type_ia64_spill_little;
-struct type *builtin_type_ia64_quad[BFD_ENDIAN_UNKNOWN];
-struct type *builtin_type_ia64_quad_big;
-struct type *builtin_type_ia64_quad_little;
+struct type *builtin_type_arm_ext;
+struct type *builtin_type_ia64_spill;
+struct type *builtin_type_ia64_quad;
+
 struct type *builtin_type_void_data_ptr;
 struct type *builtin_type_void_func_ptr;
 struct type *builtin_type_CORE_ADDR;
@@ -3148,11 +3178,26 @@ recursive_dump_type (struct type *type, int spaces)
 
     case TYPE_CODE_FLT:
       printfi_filtered (spaces, "floatformat ");
-      if (TYPE_FLOATFORMAT (type) == NULL
-	  || TYPE_FLOATFORMAT (type)->name == NULL)
+      if (TYPE_FLOATFORMAT (type) == NULL)
 	puts_filtered ("(null)");
       else
-	puts_filtered (TYPE_FLOATFORMAT (type)->name);
+	{
+	  puts_filtered ("{ ");
+	  if (TYPE_FLOATFORMAT (type)[0] == NULL
+	      || TYPE_FLOATFORMAT (type)[0]->name == NULL)
+	    puts_filtered ("(null)");
+	  else
+	    puts_filtered (TYPE_FLOATFORMAT (type)[0]->name);
+
+	  puts_filtered (", ");
+	  if (TYPE_FLOATFORMAT (type)[1] == NULL
+	      || TYPE_FLOATFORMAT (type)[1]->name == NULL)
+	    puts_filtered ("(null)");
+	  else
+	    puts_filtered (TYPE_FLOATFORMAT (type)[1]->name);
+
+	  puts_filtered (" }");
+	}
       puts_filtered ("\n");
       break;
 
@@ -3315,6 +3360,24 @@ copy_type_recursive (struct objfile *objfile, struct type *type,
   return new_type;
 }
 
+static struct type *
+build_flt (int bit, char *name, const struct floatformat **floatformats)
+{
+  struct type *t;
+
+  if (bit == -1)
+    {
+      gdb_assert (floatformats != NULL);
+      gdb_assert (floatformats[0] != NULL && floatformats[1] != NULL);
+      bit = floatformats[0]->totalsize;
+    }
+  gdb_assert (bit >= 0);
+
+  t = init_type (TYPE_CODE_FLT, bit / TARGET_CHAR_BIT, 0, name, NULL);
+  TYPE_FLOATFORMAT (t) = floatformats;
+  return t;
+}
+
 static void
 build_gdbtypes (void)
 {
@@ -3371,35 +3434,14 @@ build_gdbtypes (void)
     init_type (TYPE_CODE_INT, TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
 	       TYPE_FLAG_UNSIGNED,
 	       "unsigned long long", (struct objfile *) NULL);
-  builtin_type_float =
-    init_type (TYPE_CODE_FLT, TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "float", (struct objfile *) NULL);
-/* vinschen@redhat.com 2002-02-08:
-   The below lines are disabled since they are doing the wrong
-   thing for non-multiarch targets.  They are setting the correct
-   type of floats for the target but while on multiarch targets
-   this is done everytime the architecture changes, it's done on
-   non-multiarch targets only on startup, leaving the wrong values
-   in even if the architecture changes (eg. from big-endian to
-   little-endian).  */
-#if 0
-  TYPE_FLOATFORMAT (builtin_type_float) = TARGET_FLOAT_FORMAT;
-#endif
-  builtin_type_double =
-    init_type (TYPE_CODE_FLT, TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "double", (struct objfile *) NULL);
-#if 0
-  TYPE_FLOATFORMAT (builtin_type_double) = TARGET_DOUBLE_FORMAT;
-#endif
-  builtin_type_long_double =
-    init_type (TYPE_CODE_FLT, TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "long double", (struct objfile *) NULL);
-#if 0
-  TYPE_FLOATFORMAT (builtin_type_long_double) = TARGET_LONG_DOUBLE_FORMAT;
-#endif
+
+  builtin_type_float = build_flt (TARGET_FLOAT_BIT, "float",
+				  TARGET_FLOAT_FORMAT);
+  builtin_type_double = build_flt (TARGET_DOUBLE_BIT, "double",
+				   TARGET_DOUBLE_FORMAT);
+  builtin_type_long_double = build_flt (TARGET_LONG_DOUBLE_BIT, "long double",
+					TARGET_LONG_DOUBLE_FORMAT);
+
   builtin_type_complex =
     init_type (TYPE_CODE_COMPLEX, 2 * TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
 	       0,
@@ -3511,21 +3553,6 @@ builtin_type (struct gdbarch *gdbarch)
   return gdbarch_data (gdbarch, gdbtypes_data);
 }
 
-
-static struct type *
-build_flt (int bit, char *name, const struct floatformat *floatformat)
-{
-  struct type *t;
-  if (bit <= 0 || floatformat == NULL)
-    {
-      gdb_assert (builtin_type_error != NULL);
-      return builtin_type_error;
-    }
-  t = init_type (TYPE_CODE_FLT, bit / TARGET_CHAR_BIT,
-		 0, name, (struct objfile *) NULL);
-  TYPE_FLOATFORMAT (t) = floatformat;
-  return t;
-}
 
 static struct type *
 build_complex (int bit, char *name, struct type *target_type)
@@ -3777,110 +3804,20 @@ _initialize_gdbtypes (void)
   /* Note: These types do not need to be swapped - they are target
      neutral.  FIXME: Are you sure?  See the comment above the calls
      to DEPRECATED_REGISTER_GDBARCH_SWAP above.  */
-  builtin_type_ieee_single_big =
-    init_type (TYPE_CODE_FLT, floatformat_ieee_single_big.totalsize / 8,
-	       0, "builtin_type_ieee_single_big", NULL);
-  TYPE_FLOATFORMAT (builtin_type_ieee_single_big) = &floatformat_ieee_single_big;
-  builtin_type_ieee_single_little =
-    init_type (TYPE_CODE_FLT, floatformat_ieee_single_little.totalsize / 8,
-	       0, "builtin_type_ieee_single_little", NULL);
-  TYPE_FLOATFORMAT (builtin_type_ieee_single_little) = &floatformat_ieee_single_little;
-  builtin_type_ieee_single[BFD_ENDIAN_BIG]
-    = build_flt (floatformat_ieee_single_big.totalsize,
-		 "builtin_type_ieee_single_big",
-		 &floatformat_ieee_single_big);
-  builtin_type_ieee_single[BFD_ENDIAN_LITTLE]
-    = build_flt (floatformat_ieee_single_little.totalsize,
-		 "builtin_type_ieee_single_little",
-		 &floatformat_ieee_single_little);
-  builtin_type_ieee_double_big =
-    init_type (TYPE_CODE_FLT, floatformat_ieee_double_big.totalsize / 8,
-	       0, "builtin_type_ieee_double_big", NULL);
-  TYPE_FLOATFORMAT (builtin_type_ieee_double_big) = &floatformat_ieee_double_big;
-  builtin_type_ieee_double_little =
-    init_type (TYPE_CODE_FLT, floatformat_ieee_double_little.totalsize / 8,
-	       0, "builtin_type_ieee_double_little", NULL);
-  TYPE_FLOATFORMAT (builtin_type_ieee_double_little) = &floatformat_ieee_double_little;
-  builtin_type_ieee_double[BFD_ENDIAN_BIG]
-    = build_flt (floatformat_ieee_double_big.totalsize,
-		 "builtin_type_ieee_double_big",
-		 &floatformat_ieee_double_big);
-  builtin_type_ieee_double[BFD_ENDIAN_LITTLE]
-    = build_flt (floatformat_ieee_double_little.totalsize,
-		 "builtin_type_ieee_double_little",
-		 &floatformat_ieee_double_little);
-  builtin_type_ieee_double_littlebyte_bigword =
-    init_type (TYPE_CODE_FLT, floatformat_ieee_double_littlebyte_bigword.totalsize / 8,
-	       0, "builtin_type_ieee_double_littlebyte_bigword", NULL);
-  TYPE_FLOATFORMAT (builtin_type_ieee_double_littlebyte_bigword) = &floatformat_ieee_double_littlebyte_bigword;
-  builtin_type_i387_ext =
-    init_type (TYPE_CODE_FLT, floatformat_i387_ext.totalsize / 8,
-	       0, "builtin_type_i387_ext", NULL);
-  TYPE_FLOATFORMAT (builtin_type_i387_ext) = &floatformat_i387_ext;
-  builtin_type_m68881_ext =
-    init_type (TYPE_CODE_FLT, floatformat_m68881_ext.totalsize / 8,
-	       0, "builtin_type_m68881_ext", NULL);
-  TYPE_FLOATFORMAT (builtin_type_m68881_ext) = &floatformat_m68881_ext;
-  builtin_type_i960_ext =
-    init_type (TYPE_CODE_FLT, floatformat_i960_ext.totalsize / 8,
-	       0, "builtin_type_i960_ext", NULL);
-  TYPE_FLOATFORMAT (builtin_type_i960_ext) = &floatformat_i960_ext;
-  builtin_type_m88110_ext =
-    init_type (TYPE_CODE_FLT, floatformat_m88110_ext.totalsize / 8,
-	       0, "builtin_type_m88110_ext", NULL);
-  TYPE_FLOATFORMAT (builtin_type_m88110_ext) = &floatformat_m88110_ext;
-  builtin_type_m88110_harris_ext =
-    init_type (TYPE_CODE_FLT, floatformat_m88110_harris_ext.totalsize / 8,
-	       0, "builtin_type_m88110_harris_ext", NULL);
-  TYPE_FLOATFORMAT (builtin_type_m88110_harris_ext) = &floatformat_m88110_harris_ext;
-  builtin_type_arm_ext_big =
-    init_type (TYPE_CODE_FLT, floatformat_arm_ext_big.totalsize / 8,
-	       0, "builtin_type_arm_ext_big", NULL);
-  TYPE_FLOATFORMAT (builtin_type_arm_ext_big) = &floatformat_arm_ext_big;
-  builtin_type_arm_ext_littlebyte_bigword =
-    init_type (TYPE_CODE_FLT, floatformat_arm_ext_littlebyte_bigword.totalsize / 8,
-	       0, "builtin_type_arm_ext_littlebyte_bigword", NULL);
-  TYPE_FLOATFORMAT (builtin_type_arm_ext_littlebyte_bigword) = &floatformat_arm_ext_littlebyte_bigword;
-  builtin_type_arm_ext[BFD_ENDIAN_BIG]
-    = build_flt (floatformat_arm_ext_big.totalsize,
-		 "builtin_type_arm_ext_big",
-		 &floatformat_arm_ext_big);
-  builtin_type_arm_ext[BFD_ENDIAN_LITTLE]
-    = build_flt (floatformat_arm_ext_littlebyte_bigword.totalsize,
-		 "builtin_type_arm_ext_littlebyte_bigword",
-		 &floatformat_arm_ext_littlebyte_bigword);
-  builtin_type_ia64_spill_big =
-    init_type (TYPE_CODE_FLT, floatformat_ia64_spill_big.totalsize / 8,
-	       0, "builtin_type_ia64_spill_big", NULL);
-  TYPE_FLOATFORMAT (builtin_type_ia64_spill_big) = &floatformat_ia64_spill_big;
-  builtin_type_ia64_spill_little =
-    init_type (TYPE_CODE_FLT, floatformat_ia64_spill_little.totalsize / 8,
-	       0, "builtin_type_ia64_spill_little", NULL);
-  TYPE_FLOATFORMAT (builtin_type_ia64_spill_little) = &floatformat_ia64_spill_little;
-  builtin_type_ia64_spill[BFD_ENDIAN_BIG]
-    = build_flt (floatformat_ia64_spill_big.totalsize,
-		 "builtin_type_ia64_spill_big",
-		 &floatformat_ia64_spill_big);
-  builtin_type_ia64_spill[BFD_ENDIAN_LITTLE]
-    = build_flt (floatformat_ia64_spill_little.totalsize,
-		 "builtin_type_ia64_spill_little",
-		 &floatformat_ia64_spill_little);
-  builtin_type_ia64_quad_big =
-    init_type (TYPE_CODE_FLT, floatformat_ia64_quad_big.totalsize / 8,
-	       0, "builtin_type_ia64_quad_big", NULL);
-  TYPE_FLOATFORMAT (builtin_type_ia64_quad_big) = &floatformat_ia64_quad_big;
-  builtin_type_ia64_quad_little =
-    init_type (TYPE_CODE_FLT, floatformat_ia64_quad_little.totalsize / 8,
-	       0, "builtin_type_ia64_quad_little", NULL);
-  TYPE_FLOATFORMAT (builtin_type_ia64_quad_little) = &floatformat_ia64_quad_little;
-  builtin_type_ia64_quad[BFD_ENDIAN_BIG]
-    = build_flt (floatformat_ia64_quad_big.totalsize,
-		 "builtin_type_ia64_quad_big",
-		 &floatformat_ia64_quad_big);
-  builtin_type_ia64_quad[BFD_ENDIAN_LITTLE]
-    = build_flt (floatformat_ia64_quad_little.totalsize,
-		 "builtin_type_ia64_quad_little",
-		 &floatformat_ia64_quad_little);
+  builtin_type_ieee_single
+    = build_flt (-1, "builtin_type_ieee_single", floatformats_ieee_single);
+  builtin_type_ieee_double
+    = build_flt (-1, "builtin_type_ieee_double", floatformats_ieee_double);
+  builtin_type_i387_ext
+    = build_flt (-1, "builtin_type_i387_ext", floatformats_i387_ext);
+  builtin_type_m68881_ext
+    = build_flt (-1, "builtin_type_m68881_ext", floatformats_m68881_ext);
+  builtin_type_arm_ext
+    = build_flt (-1, "builtin_type_arm_ext", floatformats_arm_ext);
+  builtin_type_ia64_spill
+    = build_flt (-1, "builtin_type_ia64_spill", floatformats_ia64_spill);
+  builtin_type_ia64_quad
+    = build_flt (-1, "builtin_type_ia64_quad", floatformats_ia64_quad);
 
   add_setshow_zinteger_cmd ("overload", no_class, &overload_debug, _("\
 Set debugging of C++ overloading."), _("\

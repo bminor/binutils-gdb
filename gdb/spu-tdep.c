@@ -1053,9 +1053,9 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_float_bit (gdbarch, 32);
   set_gdbarch_double_bit (gdbarch, 64);
   set_gdbarch_long_double_bit (gdbarch, 64);
-  set_gdbarch_float_format (gdbarch, &floatformat_ieee_single_big);
-  set_gdbarch_double_format (gdbarch, &floatformat_ieee_double_big);
-  set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_big);
+  set_gdbarch_float_format (gdbarch, floatformats_ieee_single);
+  set_gdbarch_double_format (gdbarch, floatformats_ieee_double);
+  set_gdbarch_long_double_format (gdbarch, floatformats_ieee_double);
 
   /* Inferior function calls.  */
   set_gdbarch_push_dummy_call (gdbarch, spu_push_dummy_call);

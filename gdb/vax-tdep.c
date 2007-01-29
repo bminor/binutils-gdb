@@ -477,10 +477,10 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   gdbarch = gdbarch_alloc (&info, NULL);
 
-  set_gdbarch_float_format (gdbarch, &floatformat_vax_f);
-  set_gdbarch_double_format (gdbarch, &floatformat_vax_d);
-  set_gdbarch_long_double_format (gdbarch, &floatformat_vax_d);
-  set_gdbarch_long_double_bit(gdbarch, 64);
+  set_gdbarch_float_format (gdbarch, floatformats_vax_f);
+  set_gdbarch_double_format (gdbarch, floatformats_vax_d);
+  set_gdbarch_long_double_format (gdbarch, floatformats_vax_d);
+  set_gdbarch_long_double_bit (gdbarch, 64);
 
   /* Register info */
   set_gdbarch_num_regs (gdbarch, VAX_NUM_REGS);

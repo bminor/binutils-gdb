@@ -497,11 +497,12 @@ struct main_type
 
     struct cplus_struct_type *cplus_stuff;
 
-    /* FLOATFORMAT is for TYPE_CODE_FLT.  It is a pointer to the
-       floatformat object that describes the floating-point value
-       that resides within the type.  */
+    /* FLOATFORMAT is for TYPE_CODE_FLT.  It is a pointer to two
+       floatformat objects that describe the floating-point value
+       that resides within the type.  The first is for big endian
+       targets and the second is for little endian targets.  */
 
-    const struct floatformat *floatformat;
+    const struct floatformat **floatformat;
   } type_specific;
 };
 
@@ -1105,27 +1106,24 @@ extern struct type *builtin_type_v16_int8;
 extern struct type *builtin_type_vec128;
 
 /* Explicit floating-point formats.  See "floatformat.h".  */
-extern struct type *builtin_type_ieee_single[BFD_ENDIAN_UNKNOWN];
-extern struct type *builtin_type_ieee_single_big;
-extern struct type *builtin_type_ieee_single_little;
-extern struct type *builtin_type_ieee_double[BFD_ENDIAN_UNKNOWN];
-extern struct type *builtin_type_ieee_double_big;
-extern struct type *builtin_type_ieee_double_little;
-extern struct type *builtin_type_ieee_double_littlebyte_bigword;
+extern const struct floatformat *floatformats_ieee_single[BFD_ENDIAN_UNKNOWN];
+extern const struct floatformat *floatformats_ieee_double[BFD_ENDIAN_UNKNOWN];
+extern const struct floatformat *floatformats_ieee_double_littlebyte_bigword[BFD_ENDIAN_UNKNOWN];
+extern const struct floatformat *floatformats_i387_ext[BFD_ENDIAN_UNKNOWN];
+extern const struct floatformat *floatformats_m68881_ext[BFD_ENDIAN_UNKNOWN];
+extern const struct floatformat *floatformats_arm_ext[BFD_ENDIAN_UNKNOWN];
+extern const struct floatformat *floatformats_ia64_spill[BFD_ENDIAN_UNKNOWN];
+extern const struct floatformat *floatformats_ia64_quad[BFD_ENDIAN_UNKNOWN];
+extern const struct floatformat *floatformats_vax_f[BFD_ENDIAN_UNKNOWN];
+extern const struct floatformat *floatformats_vax_d[BFD_ENDIAN_UNKNOWN];
+
+extern struct type *builtin_type_ieee_single;
+extern struct type *builtin_type_ieee_double;
 extern struct type *builtin_type_i387_ext;
 extern struct type *builtin_type_m68881_ext;
-extern struct type *builtin_type_i960_ext;
-extern struct type *builtin_type_m88110_ext;
-extern struct type *builtin_type_m88110_harris_ext;
-extern struct type *builtin_type_arm_ext[BFD_ENDIAN_UNKNOWN];
-extern struct type *builtin_type_arm_ext_big;
-extern struct type *builtin_type_arm_ext_littlebyte_bigword;
-extern struct type *builtin_type_ia64_spill[BFD_ENDIAN_UNKNOWN];
-extern struct type *builtin_type_ia64_spill_big;
-extern struct type *builtin_type_ia64_spill_little;
-extern struct type *builtin_type_ia64_quad[BFD_ENDIAN_UNKNOWN];
-extern struct type *builtin_type_ia64_quad_big;
-extern struct type *builtin_type_ia64_quad_little;
+extern struct type *builtin_type_arm_ext;
+extern struct type *builtin_type_ia64_spill;
+extern struct type *builtin_type_ia64_quad;
 
 /* We use this for the '/c' print format, because builtin_type_char is
    just a one-byte integral type, which languages less laid back than

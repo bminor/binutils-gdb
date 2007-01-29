@@ -2635,7 +2635,7 @@ hppa32_register_type (struct gdbarch *gdbarch, int regnum)
    if (regnum < HPPA_FP4_REGNUM)
      return builtin_type_uint32;
    else
-     return builtin_type_ieee_single_big;
+     return builtin_type_ieee_single;
 }
 
 static struct type *
@@ -2644,7 +2644,7 @@ hppa64_register_type (struct gdbarch *gdbarch, int regnum)
    if (regnum < HPPA64_FP4_REGNUM)
      return builtin_type_uint64;
    else
-     return builtin_type_ieee_double_big;
+     return builtin_type_ieee_double;
 }
 
 /* Return non-zero if REGNUM is not a register available to the user
@@ -3085,7 +3085,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      and LP64, but might show differences some day.  */
   set_gdbarch_long_long_bit (gdbarch, 64);
   set_gdbarch_long_double_bit (gdbarch, 128);
-  set_gdbarch_long_double_format (gdbarch, &floatformat_ia64_quad_big);
+  set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
 
   /* The following gdbarch vector elements do not depend on the address
      size, or in any other gdbarch element previously set.  */

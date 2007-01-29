@@ -1334,12 +1334,7 @@ static struct type *
 arm_register_type (struct gdbarch *gdbarch, int regnum)
 {
   if (regnum >= ARM_F0_REGNUM && regnum < ARM_F0_REGNUM + NUM_FREGS)
-    {
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-	return builtin_type_arm_ext_big;
-      else
-	return builtin_type_arm_ext_littlebyte_bigword;
-    }
+    return builtin_type_arm_ext;
   else if (regnum == ARM_SP_REGNUM)
     return builtin_type_void_data_ptr;
   else if (regnum == ARM_PC_REGNUM)
@@ -2833,34 +2828,18 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_get_longjmp_target (gdbarch, arm_get_longjmp_target);
 
   /* Floating point sizes and format.  */
-  switch (info.byte_order)
+  set_gdbarch_float_format (gdbarch, floatformats_ieee_single);
+  if (fp_model == ARM_FLOAT_SOFT_FPA || fp_model == ARM_FLOAT_FPA)
     {
-    case BFD_ENDIAN_BIG:
-      set_gdbarch_float_format (gdbarch, &floatformat_ieee_single_big);
-      set_gdbarch_double_format (gdbarch, &floatformat_ieee_double_big);
-      set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_big);
-      break;
-
-    case BFD_ENDIAN_LITTLE:
-      set_gdbarch_float_format (gdbarch, &floatformat_ieee_single_little);
-      if (fp_model == ARM_FLOAT_SOFT_FPA || fp_model == ARM_FLOAT_FPA)
-	{
-	  set_gdbarch_double_format
-	    (gdbarch, &floatformat_ieee_double_littlebyte_bigword);
-	  set_gdbarch_long_double_format
-	    (gdbarch, &floatformat_ieee_double_littlebyte_bigword);
-	}
-      else
-	{
-	  set_gdbarch_double_format (gdbarch, &floatformat_ieee_double_little);
-	  set_gdbarch_long_double_format (gdbarch,
-					  &floatformat_ieee_double_little);
-	}
-      break;
-
-    default:
-      internal_error (__FILE__, __LINE__,
-		      _("arm_gdbarch_init: bad byte order for float format"));
+      set_gdbarch_double_format
+	(gdbarch, floatformats_ieee_double_littlebyte_bigword);
+      set_gdbarch_long_double_format
+	(gdbarch, floatformats_ieee_double_littlebyte_bigword);
+    }
+  else
+    {
+      set_gdbarch_double_format (gdbarch, floatformats_ieee_double);
+      set_gdbarch_long_double_format (gdbarch, floatformats_ieee_double);
     }
 
   return gdbarch;
