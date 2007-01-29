@@ -7954,7 +7954,8 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 
       /* Write out the modified section contents.  */
       if (bed->elf_backend_write_section
-	  && (*bed->elf_backend_write_section) (output_bfd, o, contents))
+	  && (*bed->elf_backend_write_section) (output_bfd, finfo->info, o,
+						contents))
 	{
 	  /* Section written out.  */
 	}

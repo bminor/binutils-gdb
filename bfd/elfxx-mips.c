@@ -9758,8 +9758,9 @@ _bfd_mips_elf_ignore_discarded_relocs (asection *sec)
 }
 
 bfd_boolean
-_bfd_mips_elf_write_section (bfd *output_bfd, asection *sec,
-			     bfd_byte *contents)
+_bfd_mips_elf_write_section (bfd *output_bfd,
+			     struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
+                             asection *sec, bfd_byte *contents)
 {
   bfd_byte *to, *from, *end;
   int i;

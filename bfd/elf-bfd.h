@@ -985,7 +985,7 @@ struct elf_backend_data
   /* This function, if defined, may write out the given section.
      Returns TRUE if it did so and FALSE if the caller should.  */
   bfd_boolean (*elf_backend_write_section)
-    (bfd *, asection *, bfd_byte *);
+    (bfd *, struct bfd_link_info *, asection *, bfd_byte *);
 
   /* The level of IRIX compatibility we're striving for.
      MIPS ELF specific function.  */

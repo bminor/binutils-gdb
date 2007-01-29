@@ -2151,6 +2151,7 @@ ppc_elf_begin_write_processing (bfd *abfd, struct bfd_link_info *link_info)
 
 static bfd_boolean
 ppc_elf_write_section (bfd *abfd ATTRIBUTE_UNUSED,
+		       struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
 		       asection *asec,
 		       bfd_byte *contents ATTRIBUTE_UNUSED)
 {

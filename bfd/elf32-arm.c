@@ -1875,6 +1875,9 @@ typedef unsigned short int insn16;
 #define ARM2THUMB_GLUE_SECTION_NAME ".glue_7"
 #define ARM2THUMB_GLUE_ENTRY_NAME   "__%s_from_arm"
 
+#define VFP11_ERRATUM_VENEER_SECTION_NAME ".vfp11_veneer"
+#define VFP11_ERRATUM_VENEER_ENTRY_NAME   "__vfp11_veneer_%x"
+
 /* The name of the dynamic interpreter.  This is put in the .interp
    section.  */
 #define ELF_DYNAMIC_INTERPRETER     "/usr/lib/ld.so.1"
@@ -1987,11 +1990,46 @@ typedef struct elf32_elf_section_map
 }
 elf32_arm_section_map;
 
+/* Information about a VFP11 erratum veneer, or a branch to such a veneer.  */
+
+typedef enum
+{
+  VFP11_ERRATUM_BRANCH_TO_ARM_VENEER,
+  VFP11_ERRATUM_BRANCH_TO_THUMB_VENEER,
+  VFP11_ERRATUM_ARM_VENEER,
+  VFP11_ERRATUM_THUMB_VENEER
+}
+elf32_vfp11_erratum_type;
+
+typedef struct elf32_vfp11_erratum_list
+{
+  struct elf32_vfp11_erratum_list *next;
+  bfd_vma vma;
+  union
+  {
+    struct
+    {
+      struct elf32_vfp11_erratum_list *veneer;
+      unsigned int vfp_insn;
+    } b;
+    struct
+    {
+      struct elf32_vfp11_erratum_list *branch;
+      unsigned int id;
+    } v;
+  } u;
+  elf32_vfp11_erratum_type type;
+}
+elf32_vfp11_erratum_list;
+
 typedef struct _arm_elf_section_data
 {
   struct bfd_elf_section_data elf;
   unsigned int mapcount;
+  unsigned int mapsize;
   elf32_arm_section_map *map;
+  unsigned int erratumcount;
+  elf32_vfp11_erratum_list *erratumlist;
 }
 _arm_elf_section_data;
 
@@ -2120,6 +2158,10 @@ struct elf32_arm_link_hash_table
     /* The size in bytes of the section containing the ARM-to-Thumb glue.  */
     bfd_size_type arm_glue_size;
 
+    /* The size in bytes of the section containing glue for VFP11 erratum
+       veneers.  */
+    bfd_size_type vfp11_erratum_glue_size;
+
     /* An arbitrary input BFD chosen to hold the glue sections.  */
     bfd * bfd_of_glue_owner;
 
@@ -2138,6 +2180,13 @@ struct elf32_arm_link_hash_table
 
     /* Nonzero if the ARM/Thumb BLX instructions are available for use.  */
     int use_blx;
+
+    /* What sort of code sequences we should look for which may trigger the
+       VFP11 denorm erratum.  */
+    bfd_arm_vfp11_fix vfp11_fix;
+
+    /* Global counter for the number of fixes we have emitted.  */
+    int num_vfp11_fixes;
 
     /* The number of bytes in the initial entry in the PLT.  */
     bfd_size_type plt_header_size;
@@ -2401,6 +2450,9 @@ elf32_arm_link_hash_table_create (bfd *abfd)
   ret->srelplt2 = NULL;
   ret->thumb_glue_size = 0;
   ret->arm_glue_size = 0;
+  ret->vfp11_fix = BFD_ARM_VFP11_FIX_NONE;
+  ret->vfp11_erratum_glue_size = 0;
+  ret->num_vfp11_fixes = 0;
   ret->bfd_of_glue_owner = NULL;
   ret->byteswap_code = 0;
   ret->target1_is_rel = 0;
@@ -2540,6 +2592,8 @@ static const insn16 t2a1_bx_pc_insn = 0x4778;
 static const insn16 t2a2_noop_insn = 0x46c0;
 static const insn32 t2a3_b_insn = 0xea000000;
 
+#define VFP11_ERRATUM_VENEER_SIZE 8
+
 #ifndef ELFARM_NABI_C_INCLUDED
 bfd_boolean
 bfd_elf32_arm_allocate_interworking_sections (struct bfd_link_info * info)
@@ -2579,6 +2633,22 @@ bfd_elf32_arm_allocate_interworking_sections (struct bfd_link_info * info)
       foo = bfd_alloc (globals->bfd_of_glue_owner, globals->thumb_glue_size);
 
       BFD_ASSERT (s->size == globals->thumb_glue_size);
+      s->contents = foo;
+    }
+  
+  if (globals->vfp11_erratum_glue_size != 0)
+    {
+      BFD_ASSERT (globals->bfd_of_glue_owner != NULL);
+      
+      s = bfd_get_section_by_name
+        (globals->bfd_of_glue_owner, VFP11_ERRATUM_VENEER_SECTION_NAME);
+      
+      BFD_ASSERT (s != NULL);
+      
+      foo = bfd_alloc (globals->bfd_of_glue_owner,
+		       globals->vfp11_erratum_glue_size);
+      
+      BFD_ASSERT (s->size == globals->vfp11_erratum_glue_size);
       s->contents = foo;
     }
 
@@ -2729,6 +2799,156 @@ record_thumb_to_arm_glue (struct bfd_link_info *link_info,
   return;
 }
 
+
+/* Add an entry to the code/data map for section SEC.  */
+
+static void
+elf32_arm_section_map_add (asection *sec, char type, bfd_vma vma)
+{
+  struct _arm_elf_section_data *sec_data = elf32_arm_section_data (sec);
+  unsigned int newidx;
+  
+  if (sec_data->map == NULL)
+    {
+      sec_data->map = bfd_malloc (sizeof (elf32_arm_section_map));
+      sec_data->mapcount = 0;
+      sec_data->mapsize = 1;
+    }
+  
+  newidx = sec_data->mapcount++;
+  
+  if (sec_data->mapcount > sec_data->mapsize)
+    {
+      sec_data->mapsize *= 2;
+      sec_data->map = bfd_realloc (sec_data->map, sec_data->mapsize
+				     * sizeof (elf32_arm_section_map));
+    }
+  
+  sec_data->map[newidx].vma = vma;
+  sec_data->map[newidx].type = type;
+}
+
+
+/* Record information about a VFP11 denorm-erratum veneer.  Only ARM-mode
+   veneers are handled for now.  */
+
+static bfd_vma
+record_vfp11_erratum_veneer (struct bfd_link_info *link_info,
+                             elf32_vfp11_erratum_list *branch,
+                             bfd *branch_bfd,
+                             asection *branch_sec,
+                             unsigned int offset)
+{
+  asection *s;
+  struct elf32_arm_link_hash_table *hash_table;
+  char *tmp_name;
+  struct elf_link_hash_entry *myh;
+  struct bfd_link_hash_entry *bh;
+  bfd_vma val;
+  struct _arm_elf_section_data *sec_data;
+  int errcount;
+  elf32_vfp11_erratum_list *newerr;
+  
+  hash_table = elf32_arm_hash_table (link_info);
+  
+  BFD_ASSERT (hash_table != NULL);
+  BFD_ASSERT (hash_table->bfd_of_glue_owner != NULL);
+  
+  s = bfd_get_section_by_name
+    (hash_table->bfd_of_glue_owner, VFP11_ERRATUM_VENEER_SECTION_NAME);
+  
+  sec_data = elf32_arm_section_data (s);
+  
+  BFD_ASSERT (s != NULL);
+  
+  tmp_name = bfd_malloc ((bfd_size_type) strlen
+			 (VFP11_ERRATUM_VENEER_ENTRY_NAME) + 10);
+  
+  BFD_ASSERT (tmp_name);
+  
+  sprintf (tmp_name, VFP11_ERRATUM_VENEER_ENTRY_NAME,
+	   hash_table->num_vfp11_fixes);
+  
+  myh = elf_link_hash_lookup
+    (&(hash_table)->root, tmp_name, FALSE, FALSE, FALSE);
+  
+  BFD_ASSERT (myh == NULL);
+  
+  bh = NULL;
+  val = hash_table->vfp11_erratum_glue_size;
+  _bfd_generic_link_add_one_symbol (link_info, hash_table->bfd_of_glue_owner,
+                                    tmp_name, BSF_FUNCTION | BSF_LOCAL, s, val,
+                                    NULL, TRUE, FALSE, &bh);
+
+  myh = (struct elf_link_hash_entry *) bh;
+  myh->type = ELF_ST_INFO (STB_LOCAL, STT_FUNC);
+  myh->forced_local = 1;
+
+  /* Link veneer back to calling location.  */
+  errcount = ++(sec_data->erratumcount);
+  newerr = bfd_zmalloc (sizeof (elf32_vfp11_erratum_list));
+  
+  newerr->type = VFP11_ERRATUM_ARM_VENEER;
+  newerr->vma = -1;
+  newerr->u.v.branch = branch;
+  newerr->u.v.id = hash_table->num_vfp11_fixes;
+  branch->u.b.veneer = newerr;
+
+  newerr->next = sec_data->erratumlist;
+  sec_data->erratumlist = newerr;
+
+  /* A symbol for the return from the veneer.  */
+  sprintf (tmp_name, VFP11_ERRATUM_VENEER_ENTRY_NAME "_r",
+	   hash_table->num_vfp11_fixes);
+
+  myh = elf_link_hash_lookup
+    (&(hash_table)->root, tmp_name, FALSE, FALSE, FALSE);
+  
+  if (myh != NULL)
+    abort ();
+
+  bh = NULL;
+  val = offset + 4;
+  _bfd_generic_link_add_one_symbol (link_info, branch_bfd, tmp_name, BSF_LOCAL,
+				    branch_sec, val, NULL, TRUE, FALSE, &bh);
+  
+  myh = (struct elf_link_hash_entry *) bh;
+  myh->type = ELF_ST_INFO (STB_LOCAL, STT_FUNC);
+  myh->forced_local = 1;
+
+  free (tmp_name);
+  
+  /* Generate a mapping symbol for the veneer section, and explicitly add an
+     entry for that symbol to the code/data map for the section.  */
+  if (hash_table->vfp11_erratum_glue_size == 0)
+    {
+      bh = NULL;
+      /* FIXME: Creates an ARM symbol.  Thumb mode will need attention if it
+         ever requires this erratum fix.  */
+      _bfd_generic_link_add_one_symbol (link_info,
+					hash_table->bfd_of_glue_owner, "$a",
+					BSF_LOCAL, s, 0, NULL,
+                                        TRUE, FALSE, &bh);
+
+      myh = (struct elf_link_hash_entry *) bh;
+      myh->type = ELF_ST_INFO (STB_LOCAL, STT_NOTYPE);
+      myh->forced_local = 1;
+      
+      /* The elf32_arm_init_maps function only cares about symbols from input
+         BFDs.  We must make a note of this generated mapping symbol
+         ourselves so that code byteswapping works properly in
+         elf32_arm_write_section.  */
+      elf32_arm_section_map_add (s, 'a', 0);
+    }
+  
+  s->size += VFP11_ERRATUM_VENEER_SIZE;
+  hash_table->vfp11_erratum_glue_size += VFP11_ERRATUM_VENEER_SIZE;
+  hash_table->num_vfp11_fixes++;
+  
+  /* The offset of the veneer.  */
+  return val;
+}
+
 /* Add the glue sections to ABFD.  This function is called from the
    linker scripts in ld/emultempl/{armelf}.em.  */
 
@@ -2777,6 +2997,24 @@ bfd_elf32_arm_add_glue_sections_to_bfd (bfd *abfd,
       sec = bfd_make_section_with_flags (abfd,
 					 THUMB2ARM_GLUE_SECTION_NAME,
 					 flags);
+
+      if (sec == NULL
+	  || !bfd_set_section_alignment (abfd, sec, 2))
+	return FALSE;
+
+      sec->gc_mark = 1;
+    }
+
+  sec = bfd_get_section_by_name (abfd, VFP11_ERRATUM_VENEER_SECTION_NAME);
+
+  if (sec == NULL)
+    {
+      flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
+	       | SEC_CODE | SEC_READONLY);
+
+      sec = bfd_make_section_with_flags (abfd,
+					 VFP11_ERRATUM_VENEER_SECTION_NAME,
+                                         flags);
 
       if (sec == NULL
 	  || !bfd_set_section_alignment (abfd, sec, 2))
@@ -2988,6 +3226,635 @@ error_return:
 #endif
 
 
+/* Initialise maps of ARM/Thumb/data for input BFDs.  */
+
+void
+bfd_elf32_arm_init_maps (bfd *abfd)
+{
+  Elf_Internal_Sym *isymbuf;
+  Elf_Internal_Shdr *hdr;
+  unsigned int i, localsyms;
+
+  if ((abfd->flags & DYNAMIC) != 0)
+    return;
+
+  hdr = &elf_tdata (abfd)->symtab_hdr;
+  localsyms = hdr->sh_info;
+
+  /* Obtain a buffer full of symbols for this BFD. The hdr->sh_info field
+     should contain the number of local symbols, which should come before any
+     global symbols.  Mapping symbols are always local.  */
+  isymbuf = bfd_elf_get_elf_syms (abfd, hdr, localsyms, 0, NULL, NULL,
+				  NULL);
+
+  /* No internal symbols read?  Skip this BFD.  */
+  if (isymbuf == NULL)
+    return;
+
+  for (i = 0; i < localsyms; i++)
+    {
+      Elf_Internal_Sym *isym = &isymbuf[i];
+      asection *sec = bfd_section_from_elf_index (abfd, isym->st_shndx);
+      const char *name;
+      
+      if (sec != NULL
+          && ELF_ST_BIND (isym->st_info) == STB_LOCAL)
+        {
+          name = bfd_elf_string_from_elf_section (abfd,
+            hdr->sh_link, isym->st_name);
+          
+          if (bfd_is_arm_special_symbol_name (name,
+					      BFD_ARM_SPECIAL_SYM_TYPE_MAP))
+            elf32_arm_section_map_add (sec, name[1], isym->st_value);
+        }
+    }
+}
+
+
+void
+bfd_elf32_arm_set_vfp11_fix (bfd *obfd, struct bfd_link_info *link_info)
+{
+  struct elf32_arm_link_hash_table *globals = elf32_arm_hash_table (link_info);
+  aeabi_attribute *out_attr = elf32_arm_tdata (obfd)->known_eabi_attributes;
+  
+  /* We assume that ARMv7+ does not need the VFP11 denorm erratum fix.  */
+  if (out_attr[Tag_CPU_arch].i >= TAG_CPU_ARCH_V7)
+    {
+      switch (globals->vfp11_fix)
+        {
+        case BFD_ARM_VFP11_FIX_DEFAULT:
+        case BFD_ARM_VFP11_FIX_NONE:
+          globals->vfp11_fix = BFD_ARM_VFP11_FIX_NONE;
+          break;
+        
+        default:
+          /* Give a warning, but do as the user requests anyway.  */
+          (*_bfd_error_handler) (_("%B: warning: selected VFP11 erratum "
+            "workaround is not necessary for target architecture"), obfd);
+        }
+    }
+  else if (globals->vfp11_fix == BFD_ARM_VFP11_FIX_DEFAULT)
+    /* For earlier architectures, we might need the workaround, but do not
+       enable it by default.  If users is running with broken hardware, they
+       must enable the erratum fix explicitly.  */
+    globals->vfp11_fix = BFD_ARM_VFP11_FIX_NONE;
+}
+
+
+enum bfd_arm_vfp11_pipe {
+  VFP11_FMAC,
+  VFP11_LS,
+  VFP11_DS,
+  VFP11_BAD
+};
+
+/* Return a VFP register number.  This is encoded as RX:X for single-precision
+   registers, or X:RX for double-precision registers, where RX is the group of
+   four bits in the instruction encoding and X is the single extension bit.
+   RX and X fields are specified using their lowest (starting) bit.  The return
+   value is:
+
+     0...31: single-precision registers s0...s31
+     32...63: double-precision registers d0...d31.
+  
+   Although X should be zero for VFP11 (encoding d0...d15 only), we might
+   encounter VFP3 instructions, so we allow the full range for DP registers.  */
+   
+static unsigned int
+bfd_arm_vfp11_regno (unsigned int insn, bfd_boolean is_double, unsigned int rx,
+                     unsigned int x)
+{
+  if (is_double)
+    return (((insn >> rx) & 0xf) | (((insn >> x) & 1) << 4)) + 32;
+  else
+    return (((insn >> rx) & 0xf) << 1) | ((insn >> x) & 1);
+}
+
+/* Set bits in *WMASK according to a register number REG as encoded by
+   bfd_arm_vfp11_regno().  Ignore d16-d31.  */
+
+static void
+bfd_arm_vfp11_write_mask (unsigned int *wmask, unsigned int reg)
+{
+  if (reg < 32)
+    *wmask |= 1 << reg;
+  else if (reg < 48)
+    *wmask |= 3 << ((reg - 32) * 2);
+}
+
+/* Return TRUE if WMASK overwrites anything in REGS.  */
+
+static bfd_boolean
+bfd_arm_vfp11_antidependency (unsigned int wmask, int *regs, int numregs)
+{
+  int i;
+  
+  for (i = 0; i < numregs; i++)
+    {
+      unsigned int reg = regs[i];
+
+      if (reg < 32 && (wmask & (1 << reg)) != 0)
+        return TRUE;
+      
+      reg -= 32;
+
+      if (reg >= 16)
+        continue;
+      
+      if ((wmask & (3 << (reg * 2))) != 0)
+        return TRUE;
+    }
+  
+  return FALSE;
+}
+
+/* In this function, we're interested in two things: finding input registers
+   for VFP data-processing instructions, and finding the set of registers which
+   arbitrary VFP instructions may write to.  We use a 32-bit unsigned int to
+   hold the written set, so FLDM etc. are easy to deal with (we're only
+   interested in 32 SP registers or 16 dp registers, due to the VFP version
+   implemented by the chip in question).  DP registers are marked by setting
+   both SP registers in the write mask).  */
+
+static enum bfd_arm_vfp11_pipe
+bfd_arm_vfp11_insn_decode (unsigned int insn, unsigned int *destmask, int *regs,
+                           int *numregs)
+{
+  enum bfd_arm_vfp11_pipe pipe = VFP11_BAD;
+  bfd_boolean is_double = ((insn & 0xf00) == 0xb00) ? 1 : 0;
+
+  if ((insn & 0x0f000e10) == 0x0e000a00)  /* A data-processing insn.  */
+    {
+      unsigned int pqrs;
+      unsigned int fd = bfd_arm_vfp11_regno (insn, is_double, 12, 22);
+      unsigned int fm = bfd_arm_vfp11_regno (insn, is_double, 0, 5);
+
+      pqrs = ((insn & 0x00800000) >> 20)
+           | ((insn & 0x00300000) >> 19)
+           | ((insn & 0x00000040) >> 6);
+
+      switch (pqrs)
+        {
+        case 0: /* fmac[sd].  */
+        case 1: /* fnmac[sd].  */
+        case 2: /* fmsc[sd].  */
+        case 3: /* fnmsc[sd].  */
+          pipe = VFP11_FMAC;
+          bfd_arm_vfp11_write_mask (destmask, fd);
+          regs[0] = fd;
+          regs[1] = bfd_arm_vfp11_regno (insn, is_double, 16, 7);  /* Fn.  */
+          regs[2] = fm;
+          *numregs = 3;
+          break;
+
+        case 4: /* fmul[sd].  */
+        case 5: /* fnmul[sd].  */
+        case 6: /* fadd[sd].  */
+        case 7: /* fsub[sd].  */
+          pipe = VFP11_FMAC;
+          goto vfp_binop;
+
+        case 8: /* fdiv[sd].  */
+          pipe = VFP11_DS;
+          vfp_binop:
+          bfd_arm_vfp11_write_mask (destmask, fd);
+          regs[0] = bfd_arm_vfp11_regno (insn, is_double, 16, 7);   /* Fn.  */
+          regs[1] = fm;
+          *numregs = 2;
+          break;
+
+        case 15: /* extended opcode.  */
+          {
+            unsigned int extn = ((insn >> 15) & 0x1e)
+                              | ((insn >> 7) & 1);
+
+            switch (extn)
+              {
+              case 0: /* fcpy[sd].  */
+              case 1: /* fabs[sd].  */
+              case 2: /* fneg[sd].  */
+              case 8: /* fcmp[sd].  */
+              case 9: /* fcmpe[sd].  */
+              case 10: /* fcmpz[sd].  */
+              case 11: /* fcmpez[sd].  */
+              case 16: /* fuito[sd].  */
+              case 17: /* fsito[sd].  */
+              case 24: /* ftoui[sd].  */
+              case 25: /* ftouiz[sd].  */
+              case 26: /* ftosi[sd].  */
+              case 27: /* ftosiz[sd].  */
+                /* These instructions will not bounce due to underflow.  */
+                *numregs = 0;
+                pipe = VFP11_FMAC;
+                break;
+
+              case 3: /* fsqrt[sd].  */
+                /* fsqrt cannot underflow, but it can (perhaps) overwrite
+                   registers to cause the erratum in previous instructions.  */
+                bfd_arm_vfp11_write_mask (destmask, fd);
+                pipe = VFP11_DS;
+                break;
+
+              case 15: /* fcvt{ds,sd}.  */
+                {
+                  int rnum = 0;
+
+                  bfd_arm_vfp11_write_mask (destmask, fd);
+
+		  /* Only FCVTSD can underflow.  */
+                  if ((insn & 0x100) != 0)
+                    regs[rnum++] = fm;
+
+                  *numregs = rnum;
+
+                  pipe = VFP11_FMAC;
+                }
+                break;
+
+              default:
+                return VFP11_BAD;
+              }
+          }
+          break;
+
+        default:
+          return VFP11_BAD;
+        }
+    }
+  /* Two-register transfer.  */
+  else if ((insn & 0x0fe00ed0) == 0x0c400a10)
+    {
+      unsigned int fm = bfd_arm_vfp11_regno (insn, is_double, 0, 5);
+      
+      if ((insn & 0x100000) == 0)
+	{
+          if (is_double)
+            bfd_arm_vfp11_write_mask (destmask, fm);
+          else
+            {
+              bfd_arm_vfp11_write_mask (destmask, fm);
+              bfd_arm_vfp11_write_mask (destmask, fm + 1);
+            }
+	}
+
+      pipe = VFP11_LS;
+    }
+  else if ((insn & 0x0e100e00) == 0x0c100a00)  /* A load insn.  */
+    {
+      int fd = bfd_arm_vfp11_regno (insn, is_double, 12, 22);
+      unsigned int puw = ((insn >> 21) & 0x1) | (((insn >> 23) & 3) << 1);
+      
+      switch (puw)
+        {
+        case 0: /* Two-reg transfer.  We should catch these above.  */
+          abort ();
+        
+        case 2: /* fldm[sdx].  */
+        case 3:
+        case 5:
+          {
+            unsigned int i, offset = insn & 0xff;
+
+            if (is_double)
+              offset >>= 1;
+
+            for (i = fd; i < fd + offset; i++)
+              bfd_arm_vfp11_write_mask (destmask, i);
+          }
+          break;
+        
+        case 4: /* fld[sd].  */
+        case 6:
+          bfd_arm_vfp11_write_mask (destmask, fd);
+          break;
+        
+        default:
+          return VFP11_BAD;
+        }
+
+      pipe = VFP11_LS;
+    }
+  /* Single-register transfer. Note L==0.  */
+  else if ((insn & 0x0f100e10) == 0x0e000a10)
+    {
+      unsigned int opcode = (insn >> 21) & 7;
+      unsigned int fn = bfd_arm_vfp11_regno (insn, is_double, 16, 7);
+
+      switch (opcode)
+        {
+        case 0: /* fmsr/fmdlr.  */
+        case 1: /* fmdhr.  */
+          /* Mark fmdhr and fmdlr as writing to the whole of the DP
+             destination register.  I don't know if this is exactly right,
+             but it is the conservative choice.  */
+          bfd_arm_vfp11_write_mask (destmask, fn);
+          break;
+
+        case 7: /* fmxr.  */
+          break;
+        }
+
+      pipe = VFP11_LS;
+    }
+
+  return pipe;
+}
+
+
+static int elf32_arm_compare_mapping (const void * a, const void * b);
+
+
+/* Look for potentially-troublesome code sequences which might trigger the
+   VFP11 denormal/antidependency erratum.  See, e.g., the ARM1136 errata sheet
+   (available from ARM) for details of the erratum.  A short version is
+   described in ld.texinfo.  */
+
+bfd_boolean
+bfd_elf32_arm_vfp11_erratum_scan (bfd *abfd, struct bfd_link_info *link_info)
+{
+  asection *sec;
+  bfd_byte *contents = NULL;
+  int state = 0;
+  int regs[3], numregs = 0;
+  struct elf32_arm_link_hash_table *globals = elf32_arm_hash_table (link_info);
+  int use_vector = (globals->vfp11_fix == BFD_ARM_VFP11_FIX_VECTOR);
+  
+  /* We use a simple FSM to match troublesome VFP11 instruction sequences.
+     The states transition as follows:
+     
+       0 -> 1 (vector) or 0 -> 2 (scalar)
+           A VFP FMAC-pipeline instruction has been seen. Fill
+           regs[0]..regs[numregs-1] with its input operands. Remember this
+           instruction in 'first_fmac'.
+
+       1 -> 2
+           Any instruction, except for a VFP instruction which overwrites
+           regs[*].
+       
+       1 -> 3 [ -> 0 ]  or
+       2 -> 3 [ -> 0 ]
+           A VFP instruction has been seen which overwrites any of regs[*].
+           We must make a veneer!  Reset state to 0 before examining next
+           instruction.
+       
+       2 -> 0
+           If we fail to match anything in state 2, reset to state 0 and reset
+           the instruction pointer to the instruction after 'first_fmac'.
+
+     If the VFP11 vector mode is in use, there must be at least two unrelated
+     instructions between anti-dependent VFP11 instructions to properly avoid
+     triggering the erratum, hence the use of the extra state 1.
+  */
+
+  /* If we are only performing a partial link do not bother
+     to construct any glue.  */
+  if (link_info->relocatable)
+    return TRUE;
+
+  /* We should have chosen a fix type by the time we get here.  */
+  BFD_ASSERT (globals->vfp11_fix != BFD_ARM_VFP11_FIX_DEFAULT);
+
+  if (globals->vfp11_fix == BFD_ARM_VFP11_FIX_NONE)
+    return TRUE;
+  
+  for (sec = abfd->sections; sec != NULL; sec = sec->next)
+    {
+      unsigned int i, span, first_fmac = 0, veneer_of_insn = 0;
+      struct _arm_elf_section_data *sec_data;
+
+      /* If we don't have executable progbits, we're not interested in this
+         section.  Also skip if section is to be excluded.  */
+      if (elf_section_type (sec) != SHT_PROGBITS
+          || (elf_section_flags (sec) & SHF_EXECINSTR) == 0
+          || (sec->flags & SEC_EXCLUDE) != 0
+          || strcmp (sec->name, VFP11_ERRATUM_VENEER_SECTION_NAME) == 0)
+        continue;
+
+      sec_data = elf32_arm_section_data (sec);
+      
+      if (sec_data->mapcount == 0)
+        continue;
+      
+      if (elf_section_data (sec)->this_hdr.contents != NULL)
+	contents = elf_section_data (sec)->this_hdr.contents;
+      else if (! bfd_malloc_and_get_section (abfd, sec, &contents))
+	goto error_return;
+
+      qsort (sec_data->map, sec_data->mapcount, sizeof (elf32_arm_section_map),
+	     elf32_arm_compare_mapping);
+
+      for (span = 0; span < sec_data->mapcount; span++)
+        {
+          unsigned int span_start = sec_data->map[span].vma;
+          unsigned int span_end = (span == sec_data->mapcount - 1)
+				  ? sec->size : sec_data->map[span + 1].vma;
+          char span_type = sec_data->map[span].type;
+          
+          /* FIXME: Only ARM mode is supported at present.  We may need to
+             support Thumb-2 mode also at some point.  */
+          if (span_type != 'a')
+            continue;
+
+          for (i = span_start; i < span_end;)
+            {
+              unsigned int next_i = i + 4;
+              unsigned int insn = bfd_big_endian (abfd)
+                ? (contents[i] << 24)
+                  | (contents[i + 1] << 16)
+                  | (contents[i + 2] << 8)
+                  | contents[i + 3]
+                : (contents[i + 3] << 24)
+                  | (contents[i + 2] << 16)
+                  | (contents[i + 1] << 8)
+                  | contents[i];
+              unsigned int writemask = 0;
+              enum bfd_arm_vfp11_pipe pipe;
+
+              switch (state)
+                {
+                case 0:
+                  pipe = bfd_arm_vfp11_insn_decode (insn, &writemask, regs,
+                                                    &numregs);
+                  /* I'm assuming the VFP11 erratum can trigger with denorm
+                     operands on either the FMAC or the DS pipeline. This might
+                     lead to slightly overenthusiastic veneer insertion.  */
+                  if (pipe == VFP11_FMAC || pipe == VFP11_DS)
+                    {
+                      state = use_vector ? 1 : 2;
+                      first_fmac = i;
+                      veneer_of_insn = insn;
+                    }
+                  break;
+
+                case 1:
+                  {
+                    int other_regs[3], other_numregs;
+                    pipe = bfd_arm_vfp11_insn_decode (insn, &writemask,
+						      other_regs,
+                                                      &other_numregs);
+                    if (pipe != VFP11_BAD
+                        && bfd_arm_vfp11_antidependency (writemask, regs,
+							 numregs))
+                      state = 3;
+                    else
+                      state = 2;
+                  }
+                  break;
+
+                case 2:
+                  {
+                    int other_regs[3], other_numregs;
+                    pipe = bfd_arm_vfp11_insn_decode (insn, &writemask,
+						      other_regs,
+                                                      &other_numregs);
+                    if (pipe != VFP11_BAD
+                        && bfd_arm_vfp11_antidependency (writemask, regs,
+							 numregs))
+                      state = 3;
+                    else
+                      {
+                        state = 0;
+                        next_i = first_fmac + 4;
+                      }
+                  }
+                  break;
+
+                case 3:
+                  abort ();  /* Should be unreachable.  */
+                }
+
+              if (state == 3)
+                {
+                  elf32_vfp11_erratum_list *newerr
+                    = bfd_zmalloc (sizeof (elf32_vfp11_erratum_list));
+                  int errcount;
+
+                  errcount = ++(elf32_arm_section_data (sec)->erratumcount);
+
+                  newerr->u.b.vfp_insn = veneer_of_insn;
+
+                  switch (span_type)
+                    {
+                    case 'a':
+                      newerr->type = VFP11_ERRATUM_BRANCH_TO_ARM_VENEER;
+                      break;
+                    
+                    default:
+                      abort ();
+                    }
+
+                  record_vfp11_erratum_veneer (link_info, newerr, abfd, sec,
+					       first_fmac);
+
+                  newerr->vma = -1;
+
+                  newerr->next = sec_data->erratumlist;
+                  sec_data->erratumlist = newerr;
+
+                  state = 0;
+                }
+
+              i = next_i;
+            }
+        }
+      
+      if (contents != NULL
+          && elf_section_data (sec)->this_hdr.contents != contents)
+        free (contents);
+      contents = NULL;
+    }
+
+  return TRUE;
+
+error_return:
+  if (contents != NULL
+      && elf_section_data (sec)->this_hdr.contents != contents)
+    free (contents);
+  
+  return FALSE;
+}
+
+/* Find virtual-memory addresses for VFP11 erratum veneers and return locations
+   after sections have been laid out, using specially-named symbols.  */
+
+void
+bfd_elf32_arm_vfp11_fix_veneer_locations (bfd *abfd,
+					  struct bfd_link_info *link_info)
+{
+  asection *sec;
+  struct elf32_arm_link_hash_table *globals;
+  char *tmp_name;
+  
+  if (link_info->relocatable)
+    return;
+  
+  globals = elf32_arm_hash_table (link_info);
+  
+  tmp_name = bfd_malloc ((bfd_size_type) strlen
+			   (VFP11_ERRATUM_VENEER_ENTRY_NAME) + 10);
+
+  for (sec = abfd->sections; sec != NULL; sec = sec->next)
+    {
+      struct _arm_elf_section_data *sec_data = elf32_arm_section_data (sec);
+      elf32_vfp11_erratum_list *errnode = sec_data->erratumlist;
+      
+      for (; errnode != NULL; errnode = errnode->next)
+        {
+          struct elf_link_hash_entry *myh;
+          bfd_vma vma;
+
+          switch (errnode->type)
+            {
+            case VFP11_ERRATUM_BRANCH_TO_ARM_VENEER:
+            case VFP11_ERRATUM_BRANCH_TO_THUMB_VENEER:
+              /* Find veneer symbol.  */
+              sprintf (tmp_name, VFP11_ERRATUM_VENEER_ENTRY_NAME,
+		       errnode->u.b.veneer->u.v.id);
+
+              myh = elf_link_hash_lookup
+                (&(globals)->root, tmp_name, FALSE, FALSE, TRUE);
+
+              if (myh == NULL)
+                (*_bfd_error_handler) (_("%B: unable to find VFP11 veneer "
+                			 "`%s'"), abfd, tmp_name);
+
+              vma = myh->root.u.def.section->output_section->vma
+                    + myh->root.u.def.section->output_offset
+                    + myh->root.u.def.value;
+
+              errnode->u.b.veneer->vma = vma;
+              break;
+
+	    case VFP11_ERRATUM_ARM_VENEER:
+            case VFP11_ERRATUM_THUMB_VENEER:
+              /* Find return location.  */
+              sprintf (tmp_name, VFP11_ERRATUM_VENEER_ENTRY_NAME "_r",
+                       errnode->u.v.id);
+
+              myh = elf_link_hash_lookup
+                (&(globals)->root, tmp_name, FALSE, FALSE, TRUE);
+
+              if (myh == NULL)
+                (*_bfd_error_handler) (_("%B: unable to find VFP11 veneer "
+					 "`%s'"), abfd, tmp_name);
+
+              vma = myh->root.u.def.section->output_section->vma
+                    + myh->root.u.def.section->output_offset
+                    + myh->root.u.def.value;
+
+              errnode->u.v.branch->vma = vma;
+              break;
+            
+            default:
+              abort ();
+            }
+        }
+    }
+  
+  free (tmp_name);
+}
+
+
 /* Set target relocation values needed during linking.  */
 
 void
@@ -2995,7 +3862,8 @@ bfd_elf32_arm_set_target_relocs (struct bfd_link_info *link_info,
 				 int target1_is_rel,
 				 char * target2_type,
                                  int fix_v4bx,
-				 int use_blx)
+				 int use_blx,
+                                 bfd_arm_vfp11_fix vfp11_fix)
 {
   struct elf32_arm_link_hash_table *globals;
 
@@ -3015,6 +3883,7 @@ bfd_elf32_arm_set_target_relocs (struct bfd_link_info *link_info,
     }
   globals->fix_v4bx = fix_v4bx;
   globals->use_blx |= use_blx;
+  globals->vfp11_fix = vfp11_fix;
 }
 
 /* The thumb form of a long branch is a bit finicky, because the offset
@@ -8041,10 +8910,16 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 
   /* Here we rummage through the found bfds to collect glue information.  */
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
-    if (!bfd_elf32_arm_process_before_allocation (ibfd, info))
-      /* xgettext:c-format */
-      _bfd_error_handler (_("Errors encountered processing file %s"),
-			  ibfd->filename);
+    {
+      /* Initialise mapping tables for code/data.  */
+      bfd_elf32_arm_init_maps (ibfd);
+      
+      if (!bfd_elf32_arm_process_before_allocation (ibfd, info)
+	  || !bfd_elf32_arm_vfp11_erratum_scan (ibfd, info))
+        /* xgettext:c-format */
+        _bfd_error_handler (_("Errors encountered processing file %s"),
+			    ibfd->filename);
+    }
 
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate
@@ -9084,63 +9959,6 @@ unrecord_section_with_arm_elf_section_data (asection * sec)
     }
 }
 
-/* Called for each symbol.  Builds a section map based on mapping symbols.
-   Does not alter any of the symbols.  */
-
-static bfd_boolean
-elf32_arm_output_symbol_hook (struct bfd_link_info *info,
-			      const char *name,
-			      Elf_Internal_Sym *elfsym,
-			      asection *input_sec,
-			      struct elf_link_hash_entry *h)
-{
-  int mapcount;
-  elf32_arm_section_map *map;
-  elf32_arm_section_map *newmap;
-  _arm_elf_section_data *arm_data;
-  struct elf32_arm_link_hash_table *globals;
-
-  globals = elf32_arm_hash_table (info);
-  if (globals->vxworks_p
-      && !elf_vxworks_link_output_symbol_hook (info, name, elfsym,
-					       input_sec, h))
-    return FALSE;
-
-  /* Only do this on final link.  */
-  if (info->relocatable)
-    return TRUE;
-
-  /* Only build a map if we need to byteswap code.  */
-  if (!globals->byteswap_code)
-    return TRUE;
-
-  /* We only want mapping symbols.  */
-  if (!bfd_is_arm_special_symbol_name (name, BFD_ARM_SPECIAL_SYM_TYPE_MAP))
-    return TRUE;
-
-  /* If this section has not been allocated an _arm_elf_section_data
-     structure then we cannot record anything.  */
-  arm_data = get_arm_elf_section_data (input_sec);
-  if (arm_data == NULL)
-    return TRUE;
-
-  mapcount = arm_data->mapcount + 1;
-  map = arm_data->map;
-
-  /* TODO: This may be inefficient, but we probably don't usually have many
-     mapping symbols per section.  */
-  newmap = bfd_realloc (map, mapcount * sizeof (* map));
-  if (newmap != NULL)
-    {
-      arm_data->map = newmap;
-      arm_data->mapcount = mapcount;
-
-      newmap[mapcount - 1].vma = elfsym->st_value;
-      newmap[mapcount - 1].type = name[1];
-    }
-
-  return TRUE;
-}
 
 typedef struct
 {
@@ -9346,15 +10164,18 @@ elf32_arm_compare_mapping (const void * a, const void * b)
    written out as normal.  */
 
 static bfd_boolean
-elf32_arm_write_section (bfd *output_bfd ATTRIBUTE_UNUSED, asection *sec,
+elf32_arm_write_section (bfd *output_bfd,
+			 struct bfd_link_info *link_info, asection *sec,
 			 bfd_byte *contents)
 {
-  int mapcount;
+  int mapcount, errcount;
   _arm_elf_section_data *arm_data;
+  struct elf32_arm_link_hash_table *globals = elf32_arm_hash_table (link_info);
   elf32_arm_section_map *map;
+  elf32_vfp11_erratum_list *errnode;
   bfd_vma ptr;
   bfd_vma end;
-  bfd_vma offset;
+  bfd_vma offset = sec->output_section->vma + sec->output_offset;
   bfd_byte tmp;
   int i;
 
@@ -9366,57 +10187,136 @@ elf32_arm_write_section (bfd *output_bfd ATTRIBUTE_UNUSED, asection *sec,
 
   mapcount = arm_data->mapcount;
   map = arm_data->map;
+  errcount = arm_data->erratumcount;
+
+  if (errcount != 0)
+    {
+      unsigned int endianflip = bfd_big_endian (output_bfd) ? 3 : 0;
+
+      for (errnode = arm_data->erratumlist; errnode != 0;
+           errnode = errnode->next)
+        {
+          bfd_vma index = errnode->vma - offset;
+
+          switch (errnode->type)
+            {
+            case VFP11_ERRATUM_BRANCH_TO_ARM_VENEER:
+              {
+                bfd_vma branch_to_veneer;
+                /* Original condition code of instruction, plus bit mask for
+                   ARM B instruction.  */
+                unsigned int insn = (errnode->u.b.vfp_insn & 0xf0000000)
+                                  | 0x0a000000;
+
+		/* The instruction is before the label.  */
+		index -= 4;
+
+		/* Above offset included in -4 below.  */
+		branch_to_veneer = errnode->u.b.veneer->vma
+                                   - errnode->vma - 4;
+
+		if ((signed) branch_to_veneer < -(1 << 25)
+		    || (signed) branch_to_veneer >= (1 << 25))
+		  (*_bfd_error_handler) (_("%B: error: VFP11 veneer out of "
+					   "range"), output_bfd);
+
+                insn |= (branch_to_veneer >> 2) & 0xffffff;
+                contents[endianflip ^ index] = insn & 0xff;
+                contents[endianflip ^ (index + 1)] = (insn >> 8) & 0xff;
+                contents[endianflip ^ (index + 2)] = (insn >> 16) & 0xff;
+                contents[endianflip ^ (index + 3)] = (insn >> 24) & 0xff;
+              }
+              break;
+
+	    case VFP11_ERRATUM_ARM_VENEER:
+              {
+                bfd_vma branch_from_veneer;
+                unsigned int insn;
+
+                /* Take size of veneer into account.  */
+                branch_from_veneer = errnode->u.v.branch->vma
+                                     - errnode->vma - 12;
+
+		if ((signed) branch_from_veneer < -(1 << 25)
+		    || (signed) branch_from_veneer >= (1 << 25))
+		  (*_bfd_error_handler) (_("%B: error: VFP11 veneer out of "
+					   "range"), output_bfd);
+
+                /* Original instruction.  */
+                insn = errnode->u.v.branch->u.b.vfp_insn;
+                contents[endianflip ^ index] = insn & 0xff;
+                contents[endianflip ^ (index + 1)] = (insn >> 8) & 0xff;
+                contents[endianflip ^ (index + 2)] = (insn >> 16) & 0xff;
+                contents[endianflip ^ (index + 3)] = (insn >> 24) & 0xff;
+
+                /* Branch back to insn after original insn.  */
+                insn = 0xea000000 | ((branch_from_veneer >> 2) & 0xffffff);
+                contents[endianflip ^ (index + 4)] = insn & 0xff;
+                contents[endianflip ^ (index + 5)] = (insn >> 8) & 0xff;
+                contents[endianflip ^ (index + 6)] = (insn >> 16) & 0xff;
+                contents[endianflip ^ (index + 7)] = (insn >> 24) & 0xff;
+              }
+              break;
+
+            default:
+              abort ();
+            }
+        }
+    }
 
   if (mapcount == 0)
     return FALSE;
 
-  qsort (map, mapcount, sizeof (* map), elf32_arm_compare_mapping);
-
-  offset = sec->output_section->vma + sec->output_offset;
-  ptr = map[0].vma - offset;
-  for (i = 0; i < mapcount; i++)
+  if (globals->byteswap_code)
     {
-      if (i == mapcount - 1)
-	end = sec->size;
-      else
-	end = map[i + 1].vma - offset;
+      qsort (map, mapcount, sizeof (* map), elf32_arm_compare_mapping);
 
-      switch (map[i].type)
-	{
-	case 'a':
-	  /* Byte swap code words.  */
-	  while (ptr + 3 < end)
+      ptr = map[0].vma;
+      for (i = 0; i < mapcount; i++)
+        {
+          if (i == mapcount - 1)
+	    end = sec->size;
+          else
+            end = map[i + 1].vma;
+
+          switch (map[i].type)
 	    {
-	      tmp = contents[ptr];
-	      contents[ptr] = contents[ptr + 3];
-	      contents[ptr + 3] = tmp;
-	      tmp = contents[ptr + 1];
-	      contents[ptr + 1] = contents[ptr + 2];
-	      contents[ptr + 2] = tmp;
-	      ptr += 4;
-	    }
-	  break;
+	    case 'a':
+	      /* Byte swap code words.  */
+	      while (ptr + 3 < end)
+	        {
+	          tmp = contents[ptr];
+	          contents[ptr] = contents[ptr + 3];
+	          contents[ptr + 3] = tmp;
+	          tmp = contents[ptr + 1];
+	          contents[ptr + 1] = contents[ptr + 2];
+	          contents[ptr + 2] = tmp;
+	          ptr += 4;
+	        }
+	      break;
 
-	case 't':
-	  /* Byte swap code halfwords.  */
-	  while (ptr + 1 < end)
-	    {
-	      tmp = contents[ptr];
-	      contents[ptr] = contents[ptr + 1];
-	      contents[ptr + 1] = tmp;
-	      ptr += 2;
-	    }
-	  break;
+	    case 't':
+	      /* Byte swap code halfwords.  */
+	      while (ptr + 1 < end)
+	        {
+	          tmp = contents[ptr];
+	          contents[ptr] = contents[ptr + 1];
+	          contents[ptr + 1] = tmp;
+	          ptr += 2;
+	        }
+	      break;
 
-	case 'd':
-	  /* Leave data alone.  */
-	  break;
-	}
-      ptr = end;
+	    case 'd':
+	      /* Leave data alone.  */
+	      break;
+	    }
+          ptr = end;
+        }
     }
 
   free (map);
   arm_data->mapcount = 0;
+  arm_data->mapsize = 0;
   arm_data->map = NULL;
   unrecord_section_with_arm_elf_section_data (sec);
 
@@ -9640,7 +10540,6 @@ const struct elf_size_info elf32_arm_size_info = {
 #define elf_backend_create_dynamic_sections     elf32_arm_create_dynamic_sections
 #define elf_backend_finish_dynamic_symbol	elf32_arm_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections	elf32_arm_finish_dynamic_sections
-#define elf_backend_link_output_symbol_hook	elf32_arm_output_symbol_hook
 #define elf_backend_size_dynamic_sections	elf32_arm_size_dynamic_sections
 #define elf_backend_init_index_section		_bfd_elf_init_2_index_sections
 #define elf_backend_post_process_headers	elf32_arm_post_process_headers

@@ -1,4 +1,60 @@
-2076-01-27  H.J. Lu  <hongjiu.lu@intel.com>
+2007-01-29  Julian Brown  <julian@codesourcery.com>
+
+	* bfd-in2.h: Regenerate.
+	* bfd-in.h (bfd_arm_vfp11_fix): New enum. Specify how VFP11
+	instruction scanning should be done.
+	(bfd_elf32_arm_init_maps, bfd_elf32_arm_vfp11_erratum_scan)
+	(bfd_elf32_arm_vfp11_fix_veneer_locations): Add prototypes.
+	(bfd_elf32_arm_set_target_relocs): Add vfp11 fix type argument to
+	prototype.
+	* elf-bfd.h (elf_backend_write_section): Add struct bfd_link_info
+	argument.
+	* elf32-arm.c (VFP11_ERRATUM_VENEER_SECTION_NAME)
+	(VFP11_ERRATUM_VENEER_ENTRY_NAME): Define macros.
+	(elf32_vfp11_erratum_type): New enum.
+	(elf32_vfp11_erratum_list): New struct. List of veneers or jumps to
+	veneers.
+	(_arm_elf_section_data): Add mapsize, erratumcount, erratumlist.
+	(elf32_arm_link_hash_table): Add vfp11_erratum_glue_size,
+	vfp11_fix and num_vfp11_fixes fields.
+	(elf32_arm_link_hash_table_create): Initialise vfp11_fix,
+	vfp11_erratum_glue_size, num_vfp11_fixes fields.
+	(VFP11_ERRATUM_VENEER_SIZE): Define. Size of an (ARM) veneer.
+	(bfd_elf32_arm_allocate_interworking_sections): Initialise erratum
+	glue section.
+	(elf32_arm_section_map_add): Add an code/data mapping symbol entry
+	to a section's map.
+	(record_vfp11_erratum_veneer): Create a single veneer, and its
+	associated symbols.
+	(bfd_elf32_arm_add_glue_sections_to_bfd): Add vfp11 erratum glue.
+	(bfd_elf32_arm_init_maps): Initialise mapping symbol table for input
+	BFDs.
+	(bfd_elf32_arm_set_vfp11_fix): Set the type of erratum workaround
+	required.
+	(bfd_arm_vfp11_pipe): Define VFP11 instruction pipes.
+	(bfd_arm_vfp11_regno): Recode a register number from a VFP11 insn.
+	(bfd_arm_vfp11_write_mask): Update write mask according to coded
+	register number.
+	(bfd_arm_vfp11_antidependency): New function.
+	(bfd_arm_vfp11_insn_decode): Decode a VFP11 insn.
+	(elf32_arm_compare_mapping): Declare.
+	(bfd_elf32_arm_vfp11_erratum_scan): Scan the sections of an input
+	BFD for potential erratum-triggering insns. Record results.
+	(bfd_elf32_arm_vfp11_fix_veneer_locations): Find out where veneers
+	and branches to veneers have been placed in virtual memory after
+	layout.
+	(bfd_elf32_arm_set_target_relocs): Set vfp11_fix field in global
+	hash table.
+	(elf32_arm_output_symbol_hook): Remove.
+	(elf32_arm_write_section): Output veneers, and branches to veneers.
+	Use maps from input sections, not output sections, for code
+	byte-swapping.
+	* elf32-ppc.c (ppc_elf_write_section): Add dummy link_info argument.
+	* elf32-score.c (_bfd_score_elf_write_section): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_write_section): Likewise.
+	* elfxx-mips.h (_bfd_mips_elf_write_section): Likewise.
+
+2007-01-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-hppa.c (elf64_bed): Defined for HPUX and Linux.
 	(INCLUDED_TARGET_FILE): Removed.

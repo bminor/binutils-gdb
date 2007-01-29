@@ -109,7 +109,7 @@ extern bfd_boolean _bfd_mips_elf_print_private_bfd_data
 extern bfd_boolean _bfd_mips_elf_discard_info
   (bfd *, struct elf_reloc_cookie *, struct bfd_link_info *);
 extern bfd_boolean _bfd_mips_elf_write_section
-  (bfd *, asection *, bfd_byte *);
+  (bfd *, struct bfd_link_info *, asection *, bfd_byte *);
 
 extern bfd_boolean _bfd_mips_elf_read_ecoff_info
   (bfd *, asection *, struct ecoff_debug_info *);
