@@ -1,3 +1,8 @@
+2007-01-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Maintenance Commands): Add documentation for
+	the new "maint print target-stack" command.
+
 2007-01-26  Jan Kratochvil <jan.kratochvil@redhat.com>
 	    Eli Zaretskii  <eliz@gnu.org>
 

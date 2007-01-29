@@ -22687,6 +22687,19 @@ average, and median entry size, total memory used and its overhead and
 savings, and various measures of the hash table size and chain
 lengths.
 
+@kindex maint print target-stack
+@cindex target stack description
+@item maint print target-stack
+A @dfn{target} is an interface between the debugger and a particular
+kind of file or process.  Targets can be stacked in @dfn{strata},
+so that more than one target can potentially respond to a request.
+In particular, memory accesses will walk down the stack of targets
+until they find a target that is interested in handling that particular
+address.
+
+This command prints a short description of each layer that was pushed on
+the @dfn{target stack}, starting from the top layer down to the bottom one.
+
 @kindex maint print type
 @cindex type chain of a data type
 @item maint print type @var{expr}
