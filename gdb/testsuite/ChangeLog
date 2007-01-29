@@ -1,3 +1,8 @@
+2007-01-29  Andreas Schwab  <schwab@suse.de>
+
+	* gdb.cp/annota2.exp ("watch triggered on a.x"): Allow arbitrary
+	number of "frames-invalid" annotations.
+
 2007-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/commands.exp: Call if_commands_test.
