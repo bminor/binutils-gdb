@@ -3499,14 +3499,14 @@ subdirs="$subdirs mn10300"
 
 	   igen=yes
 	   ;;
-       sh64-*-*)
+       sh64*-*-*)
 
 
 subdirs="$subdirs sh64"
 
 	   testsuite=yes
 	   ;;
-       sh-*-*)
+       sh*-*-*)
 
 
 subdirs="$subdirs sh"
