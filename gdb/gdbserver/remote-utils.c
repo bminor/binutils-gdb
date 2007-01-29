@@ -86,6 +86,11 @@ static int remote_desc;
 extern int using_threads;
 extern int debug_threads;
 
+#ifdef USE_WIN32API
+# define read(fd, buf, len) recv (fd, buf, len, 0)
+# define write(fd, buf, len) send (fd, buf, len, 0)
+#endif
+
 /* Open a connection to a remote debugger.
    NAME is the filename used for communication.  */
 
@@ -515,7 +520,7 @@ putpkt_binary (char *buf, int cnt)
     {
       int cc;
 
-      if (send (remote_desc, buf2, p - buf2, 0) != p - buf2)
+      if (write (remote_desc, buf2, p - buf2) != p - buf2)
 	{
 	  perror ("putpkt(write)");
 	  return -1;
@@ -526,7 +531,7 @@ putpkt_binary (char *buf, int cnt)
 	  fprintf (stderr, "putpkt (\"%s\"); [looking for ack]\n", buf2);
 	  fflush (stderr);
 	}
-      cc = recv (remote_desc, buf3, 1, 0);
+      cc = read (remote_desc, buf3, 1);
       if (remote_debug)
 	{
 	  fprintf (stderr, "[received '%c' (0x%x)]\n", buf3[0], buf3[0]);
@@ -587,7 +592,7 @@ input_interrupt (int unused)
       int cc;
       char c = 0;
       
-      cc = recv (remote_desc, &c, 1, 0);
+      cc = read (remote_desc, &c, 1);
 
       if (cc != 1 || c != '\003')
 	{
@@ -668,7 +673,7 @@ readchar (void)
   if (bufcnt-- > 0)
     return *bufp++;
 
-  bufcnt = recv (remote_desc, buf, sizeof (buf), 0);
+  bufcnt = read (remote_desc, buf, sizeof (buf));
 
   if (bufcnt <= 0)
     {
@@ -735,7 +740,7 @@ getpkt (char *buf)
 
       fprintf (stderr, "Bad checksum, sentsum=0x%x, csum=0x%x, buf=%s\n",
 	       (c1 << 4) + c2, csum, buf);
-      send (remote_desc, "-", 1, 0);
+      write (remote_desc, "-", 1);
     }
 
   if (remote_debug)
@@ -744,7 +749,7 @@ getpkt (char *buf)
       fflush (stderr);
     }
 
-  send (remote_desc, "+", 1, 0);
+  write (remote_desc, "+", 1);
 
   if (remote_debug)
     {

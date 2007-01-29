@@ -1,3 +1,9 @@
+2007-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote-utils.c [USE_WIN32API] (read, write): Define.
+	(putpkt_binary, input_interrupt, readchar, getpkt): Use read and
+	write.
+
 2007-01-09  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-i386-low.c (the_low_target): Set arch_string.
