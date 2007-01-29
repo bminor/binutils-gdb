@@ -144,6 +144,18 @@ set armelftests {
     {"Using Thumb lib by another lib" "-shared tmpdir/mixed-lib.so" "" {use-thumb-lib.s}
      {{readelf -Ds use-thumb-lib.sym}}
      "use-thumb-lib.so"}
+    {"VFP11 denorm erratum fix, scalar operation"
+     "-EL --vfp11-denorm-fix=scalar" "-EL" {vfp11-fix-scalar.s}
+     {{objdump -dr vfp11-fix-scalar.d}}
+     "vfp11-fix-scalar"}
+    {"VFP11 denorm erratum fix, vector operation"
+     "-EB --vfp11-denorm-fix=vector" "-EB" {vfp11-fix-vector.s}
+     {{objdump -dr vfp11-fix-vector.d}}
+     "vfp11-fix-vector"}
+    {"VFP11 denorm erratum fix, embedded code-like data"
+     "-EL --vfp11-denorm-fix=scalar" "-EL" {vfp11-fix-none.s}
+     {{objdump -dr vfp11-fix-none.d}}
+     "vfp11-fix-none"}
 
 }
 

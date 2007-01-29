@@ -1,3 +1,13 @@
+2007-01-29  Julian Brown  <julian@codesourcery.com>
+
+	* ld-arm/arm-elf.exp: Add VFP11 tests.
+	* ld-arm/vfp11-fix-none.s: New file.
+	* ld-arm/vfp11-fix-none.d: Expected disassembly of above.
+	* ld-arm/vfp11-fix-scalar.s: New file.
+	* ld-arm/vfp11-fix-scalar.d: Expected disassembly of above.
+	* ld-arm/vfp11-fix-vector.s: New file.
+	* ld-arm/vfp11-fix-vector.d: Expected disassembly of above.
+
 2007-01-23  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-elf/header.d: Reduce page size, restrict to linux & vxworks
