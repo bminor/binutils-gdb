@@ -1,5 +1,8 @@
 2007-01-29  Andreas Schwab  <schwab@suse.de>
 
+	* gdb.cp/annota3.exp ("watch triggered on a.x"): Match optional
+	"frame-begin" annotation.
+
 	* gdb.cp/annota2.exp ("watch triggered on a.x"): Allow arbitrary
 	number of "frames-invalid" annotations.
 
