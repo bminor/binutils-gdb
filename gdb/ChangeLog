@@ -1,3 +1,9 @@
+2006-01-30  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* ser-mingw.c (pipe_windows_open)
+	(pipe_windows_read, pipe_windows_write): Declare
+	variables at the top of the function.
+
 2007-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* doublest.c (floatformat_from_length): Use the right element from

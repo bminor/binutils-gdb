@@ -696,12 +696,15 @@ cleanup_pipe_state (void *untyped)
 static int
 pipe_windows_open (struct serial *scb, const char *name)
 {
+  struct pipe_state *ps;
+
   char **argv = buildargv (name);
   struct cleanup *back_to = make_cleanup_freeargv (argv);
   if (! argv[0] || argv[0][0] == '\0')
     error ("missing child command");
 
-  struct pipe_state *ps = make_pipe_state ();
+
+  ps = make_pipe_state ();
   make_cleanup (cleanup_pipe_state, ps);
 
   ps->pex = pex_init (PEX_USE_PIPES, "target remote pipe", NULL);
@@ -765,18 +768,20 @@ pipe_windows_close (struct serial *scb)
 static int
 pipe_windows_read (struct serial *scb, size_t count)
 {
-  HANDLE pipeline_out = (HANDLE) _get_osfhandle (scb->fd);
+  HANDLE pipeline_out;
+  DWORD available;
+  DWORD bytes_read;
+
+  pipeline_out = (HANDLE) _get_osfhandle (scb->fd);
   if (pipeline_out == INVALID_HANDLE_VALUE)
     return -1;
 
-  DWORD available;
   if (! PeekNamedPipe (pipeline_out, NULL, 0, NULL, &available, NULL))
     return -1;
 
   if (count > available)
     count = available;
 
-  DWORD bytes_read;
   if (! ReadFile (pipeline_out, scb->buf, count, &bytes_read, NULL))
     return -1;
 
@@ -788,15 +793,17 @@ static int
 pipe_windows_write (struct serial *scb, const void *buf, size_t count)
 {
   struct pipe_state *ps = scb->state;
+  HANDLE pipeline_in;
+  DWORD written;
+
   int pipeline_in_fd = fileno (ps->input);
   if (pipeline_in_fd < 0)
     return -1;
 
-  HANDLE pipeline_in = (HANDLE) _get_osfhandle (pipeline_in_fd);
+  pipeline_in = (HANDLE) _get_osfhandle (pipeline_in_fd);
   if (pipeline_in == INVALID_HANDLE_VALUE)
     return -1;
 
-  DWORD written;
   if (! WriteFile (pipeline_in, buf, count, &written, NULL))
     return -1;
 
