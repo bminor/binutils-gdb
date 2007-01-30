@@ -5814,7 +5814,7 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
       unsigned int section_count;
       bfd_size_type amt;
       Elf_Internal_Shdr *this_hdr;
-      bfd_vma first_lma = 0;
+      asection *first_section = NULL;
 
       /* FIXME: Do we need to copy PT_NULL segment?  */
       if (segment->p_type == PT_NULL)
@@ -5828,8 +5828,8 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 	  this_hdr = &(elf_section_data(section)->this_hdr);
 	  if (ELF_IS_SECTION_IN_SEGMENT_FILE (this_hdr, segment))
 	    {
-	      if (!section_count || section->lma < first_lma)
-		first_lma = section->lma;
+	      if (!first_section)
+		first_section = section;
 	      section_count++;
 	    }
 	}
@@ -5875,19 +5875,24 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 
       if (!map->includes_phdrs && !map->includes_filehdr)
 	/* There is some other padding before the first section.  */
-	map->p_vaddr_offset = first_lma - segment->p_paddr;
+	map->p_vaddr_offset = ((first_section ? first_section->lma : 0)
+			       - segment->p_paddr);
       
       if (section_count != 0)
 	{
 	  unsigned int isec = 0;
 
-	  for (section = ibfd->sections;
+	  for (section = first_section;
 	       section != NULL;
 	       section = section->next)
 	    {
 	      this_hdr = &(elf_section_data(section)->this_hdr);
 	      if (ELF_IS_SECTION_IN_SEGMENT_FILE (this_hdr, segment))
-		map->sections[isec++] = section->output_section;
+		{
+		  map->sections[isec++] = section->output_section;
+		  if (isec == section_count)
+		    break;
+		}
 	    }
 	}
 

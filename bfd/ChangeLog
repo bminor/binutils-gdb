@@ -1,3 +1,9 @@
+2007-01-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf.c (copy_elf_program_header): Start from the first section
+	in a segment and stop when all sections in a segment are
+	accounted for.
+
 2007-01-29  Julian Brown  <julian@codesourcery.com>
 
 	* bfd-in2.h: Regenerate.
