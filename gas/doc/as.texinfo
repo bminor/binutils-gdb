@@ -501,7 +501,9 @@ other assemblers.
 @item --defsym @var{sym}=@var{value}
 Define the symbol @var{sym} to be @var{value} before assembling the input file.
 @var{value} must be an integer constant.  As in C, a leading @samp{0x}
-indicates a hexadecimal value, and a leading @samp{0} indicates an octal value.
+indicates a hexadecimal value, and a leading @samp{0} indicates an octal
+value.  The value of the symbol can be overridden inside a source file via the
+use of a @code{.set} pseudo-op.
 
 @item -f
 ``fast''---skip whitespace and comment preprocessing (assume source is

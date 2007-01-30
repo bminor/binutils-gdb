@@ -1,6 +1,6 @@
 /* as.c - GAS main program.
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -1122,6 +1122,11 @@ main (int argc, char ** argv)
 
       sym = symbol_new (defsyms->name, absolute_section, defsyms->value,
 			&zero_address_frag);
+      /* Make symbols defined on the command line volatile, so that they
+	 can be redefined inside a source file.  This makes this assembler's
+	 behaviour compatible with earlier versions, but it may not be
+	 completely intuitive.  */
+      S_SET_VOLATILE (sym);
       symbol_table_insert (sym);
       next = defsyms->next;
       free (defsyms);

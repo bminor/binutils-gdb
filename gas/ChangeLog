@@ -1,3 +1,12 @@
+2007-01-30  Nick Clifton  <nickc@redhat.com>
+
+	* as.c (main): Mark symbols created via the --defsym command line
+	option as volatile so that they can be overridden later on by a
+	.set directive.  This maintains compatibility with the behaviour
+	of earlier versions of the assembler.
+	* doc/as.texinfo (--defsym): Document that the defined symbol's
+	value can be overridden via a .set directive.
+
 2076-01-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (swap_imm_operands): Renamed to ...
