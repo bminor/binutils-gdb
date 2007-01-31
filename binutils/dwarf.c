@@ -1604,7 +1604,6 @@ process_debug_info (struct dwarf_section *section, void *file,
       hdrptr += 2;
 
       cu_offset = start - section_begin;
-      start += compunit.cu_length + initial_length_size;
 
       cu_abbrev_offset_ptr = hdrptr;
       compunit.cu_abbrev_offset = byte_get (hdrptr, offset_size);
@@ -1628,8 +1627,6 @@ process_debug_info (struct dwarf_section *section, void *file,
 	  debug_information [unit].num_range_lists = 0;
 	}
 
-      tags = hdrptr;
-
       if (!do_loc)
 	{
 	  printf (_("  Compilation Unit @ offset 0x%lx:\n"), cu_offset);
@@ -1638,6 +1635,16 @@ process_debug_info (struct dwarf_section *section, void *file,
 	  printf (_("   Abbrev Offset: %ld\n"), compunit.cu_abbrev_offset);
 	  printf (_("   Pointer Size:  %d\n"), compunit.cu_pointer_size);
 	}
+
+      if (cu_offset + compunit.cu_length + initial_length_size
+	  > section->size)
+	{
+	  warn (_("Debug info is corrupted, length is invalid (section is %lu bytes)\n"),
+		(unsigned long)section->size);
+	  break;
+	}
+      tags = hdrptr;
+      start += compunit.cu_length + initial_length_size;
 
       if (compunit.cu_version != 2 && compunit.cu_version != 3)
 	{
@@ -1649,11 +1656,15 @@ process_debug_info (struct dwarf_section *section, void *file,
 
       /* Process the abbrevs used by this compilation unit. DWARF
 	 sections under Mach-O have non-zero addresses.  */
-      process_abbrev_section
-	((unsigned char *) debug_displays [abbrev].section.start
-	 + compunit.cu_abbrev_offset - debug_displays [abbrev].section.address,
-	 (unsigned char *) debug_displays [abbrev].section.start
-	 + debug_displays [abbrev].section.size);
+      if (compunit.cu_abbrev_offset >= debug_displays [abbrev].section.size)
+	warn (_("Debug info is corrupted, abbrev offset is invalid (section is %lu bytes)\n"),
+	      (unsigned long)debug_displays [abbrev].section.size);
+      else
+	process_abbrev_section
+	  ((unsigned char *) debug_displays [abbrev].section.start
+	   + compunit.cu_abbrev_offset - debug_displays [abbrev].section.address,
+	   (unsigned char *) debug_displays [abbrev].section.start
+	   + debug_displays [abbrev].section.size);
 
       level = 0;
       while (tags < start)
