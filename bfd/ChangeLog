@@ -1,3 +1,14 @@
+2076-01-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-cris.c (INCLUDED_TARGET_FILE): Removed.
+	(elf32_bed): Defined for elf32-us-cris.
+
+	* elf64-sh64.c (elf64_bed): Defined for Linux.
+	(INCLUDED_TARGET_FILE): Removed.
+
+	* elfxx-target.h (elfNN_bed): Always define. Don't check
+	INCLUDED_TARGET_FILE.
+
 2007-01-31  DJ Delorie  <dj@redhat.com>
 
 	* elf-m10300.c (mn10300_elf_relocate_section): Clarify the warning

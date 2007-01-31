@@ -576,7 +576,6 @@
 
 extern const struct elf_size_info _bfd_elfNN_size_info;
 
-#ifndef INCLUDED_TARGET_FILE
 static struct elf_backend_data elfNN_bed =
 {
   ELF_ARCH,			/* arch */
@@ -682,7 +681,6 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_want_dynbss,
   elf_backend_want_p_paddr_set_to_zero
 };
-#endif
 
 /* Forward declaration for use when initialising alternative_target field.  */
 #ifdef TARGET_LITTLE_SYM

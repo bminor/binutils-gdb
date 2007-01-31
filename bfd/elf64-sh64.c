@@ -4136,6 +4136,7 @@ static const struct bfd_elf_special_section sh64_elf64_special_sections[]=
 #define	TARGET_LITTLE_SYM		bfd_elf64_sh64lin_vec
 #undef	TARGET_LITTLE_NAME
 #define	TARGET_LITTLE_NAME		"elf64-sh64-linux"
+#undef elf64_bed
+#define	elf64_bed			elf64_sh64_linux_bed
 
-#define	INCLUDED_TARGET_FILE
 #include "elf64-target.h"

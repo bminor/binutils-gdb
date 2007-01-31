@@ -3428,8 +3428,6 @@ elf_cris_reloc_type_class (rela)
 
 #include "elf32-target.h"
 
-#define INCLUDED_TARGET_FILE
-
 #undef TARGET_LITTLE_SYM
 #undef TARGET_LITTLE_NAME
 #undef elf_symbol_leading_char
@@ -3437,5 +3435,7 @@ elf_cris_reloc_type_class (rela)
 #define TARGET_LITTLE_SYM bfd_elf32_us_cris_vec
 #define TARGET_LITTLE_NAME "elf32-us-cris"
 #define elf_symbol_leading_char '_'
+#undef elf32_bed
+#define elf32_bed elf32_us_cris_bed
 
 #include "elf32-target.h"
