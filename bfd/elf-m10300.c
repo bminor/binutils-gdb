@@ -1499,7 +1499,12 @@ mn10300_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      goto common_error;
 
 	    case bfd_reloc_dangerous:
-	      msg = _("internal error: dangerous error");
+	      if (r_type == R_MN10300_PCREL32)
+		msg = _("error: inappropriate relocation type for shared"
+			" library (did you forget -fpic?)");
+	      else
+		msg = _("internal error: suspicious relocation type used"
+			" in shared library");
 	      goto common_error;
 
 	    default:
