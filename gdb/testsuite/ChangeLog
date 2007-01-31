@@ -1,3 +1,8 @@
+2007-01-31  Andreas Schwab  <schwab@suse.de>
+
+	* gdb.base/callfuncs.exp (do_get_all_registers): Filter out
+	bspstore register on ia64.
+
 2007-01-29  Andreas Schwab  <schwab@suse.de>
 
 	* gdb.cp/annota3.exp ("watch triggered on a.x"): Match optional

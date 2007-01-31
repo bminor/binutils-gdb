@@ -248,6 +248,11 @@ proc do_get_all_registers { } {
     gdb_expect {
 	-re "info all-registers\r\n(.*)$gdb_prompt $" {
 	    set all_registers_content $expect_out(1,string)
+	    if [istarget "ia64-*-*"] {
+		# Filter out bspstore which is specially tied to bsp,
+		# giving spurious differences.
+		regsub {\nbspstore[^\n]*\n} $all_registers_content "\n" all_registers_content
+	    }
 	}
 	default {}
     }
