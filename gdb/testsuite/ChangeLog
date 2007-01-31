@@ -1,5 +1,9 @@
 2007-01-31  Andreas Schwab  <schwab@suse.de>
 
+	* gdb.dwarf2/dup-psym.S: Use .2byte/.4byte instead of .short/.int
+	in the dwarf sections.
+	* gdb.dwarf2/mac-fileno.S: Likewise.
+
 	* gdb.base/callfuncs.exp (do_get_all_registers): Filter out
 	bspstore register on ia64.
 
