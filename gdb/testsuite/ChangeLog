@@ -1,5 +1,7 @@
 2007-01-31  Andreas Schwab  <schwab@suse.de>
 
+	* gdb.gdb/selftest.exp (do_steps_and_nexts): Add more matches.
+
 	* gdb.dwarf2/dup-psym.S: Use .2byte/.4byte instead of .short/.int
 	in the dwarf sections.
 	* gdb.dwarf2/mac-fileno.S: Likewise.

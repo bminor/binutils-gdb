@@ -185,6 +185,18 @@ proc do_steps_and_nexts {} {
 		set description "next over getcwd"
 		set command "next"
 	    }
+	    -re ".*quit_flag = 0.*$gdb_prompt $" {
+		set description "step over quit_flag initialization"
+		set command "step"
+	    }
+	    -re ".*gdb_stdout = stdio_fileopen .stdout.;.*$gdb_prompt $" {
+		set description "step over gdb_stdout initialization"
+		set command "step"
+	    }
+	    -re ".*gdb_stderr = stdio_fileopen .stderr.;.*$gdb_prompt $" {
+		set description "step over gdb_stderr initialization"
+		set command "step"
+	    }
 	    -re "\[ \t\]+\{\r\n$gdb_prompt $" {
 		setup_xfail "mips-*-irix5*"
 		fail "$description ended up at odd location"
