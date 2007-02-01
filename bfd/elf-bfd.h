@@ -924,14 +924,18 @@ struct elf_backend_data
     (asection *, Elf_Internal_Rela *);
 
   /* This function, if defined, is called when an NT_PRSTATUS note is found
-     in a core file. */
+     in a core file.  */
   bfd_boolean (*elf_backend_grok_prstatus)
     (bfd *, Elf_Internal_Note *);
 
   /* This function, if defined, is called when an NT_PSINFO or NT_PRPSINFO
-     note is found in a core file. */
+     note is found in a core file.  */
   bfd_boolean (*elf_backend_grok_psinfo)
     (bfd *, Elf_Internal_Note *);
+
+  /* This function, if defined, is called to write a note to a corefile.  */
+  char *(*elf_backend_write_core_note)
+    (bfd *abfd, char *buf, int *bufsiz, int note_type, ...);
 
   /* Functions to print VMAs.  Special code to handle 64 bit ELF files.  */
   void (* elf_backend_sprintf_vma)

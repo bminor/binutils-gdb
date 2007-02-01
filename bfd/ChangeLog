@@ -1,3 +1,19 @@
+2007-02-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (struct elf_backend_data): Add elf_backend_write_core_note.
+	* elfxx-target.h (elf_backend_write_core_note): Define and use.
+	* elf.c (elfcore_write_prpsinfo): Call the above.  Add support for
+	32-bit core note on 64-bit target.
+	(elfcore_write_prstatus): Likewise.
+	(elfcore_write_lwpstatus): Make note_name const.
+	(elfcore_write_prfpreg): Likewise.
+	(elfcore_write_pstatus): Add support for 32-bit core note on 64-bit
+	target.
+	* elf32-ppc.c (ppc_elf_write_core_note): New function.
+	(elf_backend_write_core_note): Define.
+	* elf64-ppc.c (ppc64_elf_write_core_note): New function.
+	(elf_backend_write_core_note): Define.
+
 2076-01-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-cris.c (INCLUDED_TARGET_FILE): Removed.

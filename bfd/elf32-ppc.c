@@ -25,6 +25,7 @@
    suggestions from the in-progress Embedded PowerPC ABI, and that
    information may also not match.  */
 
+#include <stdarg.h>
 #include "bfd.h"
 #include "sysdep.h"
 #include "bfdlink.h"
@@ -1811,6 +1812,52 @@ ppc_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
   }
 
   return TRUE;
+}
+
+static char *
+ppc_elf_write_core_note (bfd *abfd, char *buf, int *bufsiz, int note_type, ...)
+{
+  switch (note_type)
+    {
+    default:
+      return NULL;
+
+    case NT_PRPSINFO:
+      {
+	char data[128];
+	va_list ap;
+
+	va_start (ap, note_type);
+	memset (data, 0, 32);
+	strncpy (data + 32, va_arg (ap, const char *), 16);
+	strncpy (data + 48, va_arg (ap, const char *), 80);
+	va_end (ap);
+	return elfcore_write_note (abfd, buf, bufsiz,
+				   "CORE", note_type, data, sizeof (data));
+      }
+
+    case NT_PRSTATUS:
+      {
+	char data[268];
+	va_list ap;
+	long pid;
+	int cursig;
+	const void *greg;
+
+	va_start (ap, note_type);
+	memset (data, 0, 72);
+	pid = va_arg (ap, long);
+	bfd_put_32 (abfd, pid, data + 24);
+	cursig = va_arg (ap, int);
+	bfd_put_16 (abfd, cursig, data + 12);
+	greg = va_arg (ap, const void *);
+	memcpy (data + 72, greg, 192);
+	memset (data + 264, 0, 4);
+	va_end (ap);
+	return elfcore_write_note (abfd, buf, bufsiz,
+				   "CORE", note_type, data, sizeof (data));
+      }
+    }
 }
 
 /* Return address for Ith PLT stub in section PLT, for relocation REL
@@ -7476,6 +7523,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 #define elf_backend_additional_program_headers	ppc_elf_additional_program_headers
 #define elf_backend_grok_prstatus		ppc_elf_grok_prstatus
 #define elf_backend_grok_psinfo			ppc_elf_grok_psinfo
+#define elf_backend_write_core_note		ppc_elf_write_core_note
 #define elf_backend_reloc_type_class		ppc_elf_reloc_type_class
 #define elf_backend_begin_write_processing	ppc_elf_begin_write_processing
 #define elf_backend_final_write_processing	ppc_elf_final_write_processing

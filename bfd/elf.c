@@ -8211,22 +8211,52 @@ elfcore_write_prpsinfo (bfd  *abfd,
 			const char *fname,
 			const char *psargs)
 {
-  int note_type;
-  char *note_name = "CORE";
+  const char *note_name = "CORE";
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
-#if defined (HAVE_PSINFO_T)
-  psinfo_t  data;
-  note_type = NT_PSINFO;
+  if (bed->elf_backend_write_core_note != NULL)
+    {
+      char *ret;
+      ret = (*bed->elf_backend_write_core_note) (abfd, buf, bufsiz,
+						 NT_PRPSINFO, fname, psargs);
+      if (ret != NULL)
+	return ret;
+    }
+
+#if defined (HAVE_PRPSINFO32_T) || defined (HAVE_PSINFO32_T)
+  if (bed->s->elfclass == ELFCLASS32)
+    {
+#if defined (HAVE_PSINFO32_T)
+      psinfo32_t data;
+      int note_type = NT_PSINFO;
 #else
-  prpsinfo_t data;
-  note_type = NT_PRPSINFO;
+      prpsinfo32_t data;
+      int note_type = NT_PRPSINFO;
 #endif
 
-  memset (&data, 0, sizeof (data));
-  strncpy (data.pr_fname, fname, sizeof (data.pr_fname));
-  strncpy (data.pr_psargs, psargs, sizeof (data.pr_psargs));
-  return elfcore_write_note (abfd, buf, bufsiz,
-			     note_name, note_type, &data, sizeof (data));
+      memset (&data, 0, sizeof (data));
+      strncpy (data.pr_fname, fname, sizeof (data.pr_fname));
+      strncpy (data.pr_psargs, psargs, sizeof (data.pr_psargs));
+      return elfcore_write_note (abfd, buf, bufsiz,
+				 note_name, note_type, &data, sizeof (data));
+    }
+  else
+#endif
+    {
+#if defined (HAVE_PSINFO_T)
+      psinfo_t data;
+      int note_type = NT_PSINFO;
+#else
+      prpsinfo_t data;
+      int note_type = NT_PRPSINFO;
+#endif
+
+      memset (&data, 0, sizeof (data));
+      strncpy (data.pr_fname, fname, sizeof (data.pr_fname));
+      strncpy (data.pr_psargs, psargs, sizeof (data.pr_psargs));
+      return elfcore_write_note (abfd, buf, bufsiz,
+				 note_name, note_type, &data, sizeof (data));
+    }
 }
 #endif	/* PSINFO_T or PRPSINFO_T */
 
@@ -8239,15 +8269,43 @@ elfcore_write_prstatus (bfd *abfd,
 			int cursig,
 			const void *gregs)
 {
-  prstatus_t prstat;
-  char *note_name = "CORE";
+  const char *note_name = "CORE";
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
-  memset (&prstat, 0, sizeof (prstat));
-  prstat.pr_pid = pid;
-  prstat.pr_cursig = cursig;
-  memcpy (&prstat.pr_reg, gregs, sizeof (prstat.pr_reg));
-  return elfcore_write_note (abfd, buf, bufsiz,
-			     note_name, NT_PRSTATUS, &prstat, sizeof (prstat));
+  if (bed->elf_backend_write_core_note != NULL)
+    {
+      char *ret;
+      ret = (*bed->elf_backend_write_core_note) (abfd, buf, bufsiz,
+						 NT_PRSTATUS,
+						 pid, cursig, gregs);
+      if (ret != NULL)
+	return ret;
+    }
+
+#if defined (HAVE_PRSTATUS32_T)
+  if (bed->s->elfclass == ELFCLASS32)
+    {
+      prstatus32_t prstat;
+
+      memset (&prstat, 0, sizeof (prstat));
+      prstat.pr_pid = pid;
+      prstat.pr_cursig = cursig;
+      memcpy (&prstat.pr_reg, gregs, sizeof (prstat.pr_reg));
+      return elfcore_write_note (abfd, buf, bufsiz, note_name,
+				 NT_PRSTATUS, &prstat, sizeof (prstat));
+    }
+  else
+#endif
+    {
+      prstatus_t prstat;
+
+      memset (&prstat, 0, sizeof (prstat));
+      prstat.pr_pid = pid;
+      prstat.pr_cursig = cursig;
+      memcpy (&prstat.pr_reg, gregs, sizeof (prstat.pr_reg));
+      return elfcore_write_note (abfd, buf, bufsiz, note_name,
+				 NT_PRSTATUS, &prstat, sizeof (prstat));
+    }
 }
 #endif /* HAVE_PRSTATUS_T */
 
@@ -8261,7 +8319,7 @@ elfcore_write_lwpstatus (bfd *abfd,
 			 const void *gregs)
 {
   lwpstatus_t lwpstat;
-  char *note_name = "CORE";
+  const char *note_name = "CORE";
 
   memset (&lwpstat, 0, sizeof (lwpstat));
   lwpstat.pr_lwpid  = pid >> 16;
@@ -8291,14 +8349,31 @@ elfcore_write_pstatus (bfd *abfd,
 		       int cursig ATTRIBUTE_UNUSED,
 		       const void *gregs ATTRIBUTE_UNUSED)
 {
-  pstatus_t pstat;
-  char *note_name = "CORE";
+  const char *note_name = "CORE";
+#if defined (HAVE_PSTATUS32_T)
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
-  memset (&pstat, 0, sizeof (pstat));
-  pstat.pr_pid = pid & 0xffff;
-  buf = elfcore_write_note (abfd, buf, bufsiz, note_name,
-			    NT_PSTATUS, &pstat, sizeof (pstat));
-  return buf;
+  if (bed->s->elfclass == ELFCLASS32)
+    {
+      pstatus32_t pstat;
+
+      memset (&pstat, 0, sizeof (pstat));
+      pstat.pr_pid = pid & 0xffff;
+      buf = elfcore_write_note (abfd, buf, bufsiz, note_name,
+				NT_PSTATUS, &pstat, sizeof (pstat));
+      return buf;
+    }
+  else
+#endif
+    {
+      pstatus_t pstat;
+
+      memset (&pstat, 0, sizeof (pstat));
+      pstat.pr_pid = pid & 0xffff;
+      buf = elfcore_write_note (abfd, buf, bufsiz, note_name,
+				NT_PSTATUS, &pstat, sizeof (pstat));
+      return buf;
+    }
 }
 #endif /* HAVE_PSTATUS_T */
 
@@ -8309,7 +8384,7 @@ elfcore_write_prfpreg (bfd *abfd,
 		       const void *fpregs,
 		       int size)
 {
-  char *note_name = "CORE";
+  const char *note_name = "CORE";
   return elfcore_write_note (abfd, buf, bufsiz,
 			     note_name, NT_FPREGSET, fpregs, size);
 }

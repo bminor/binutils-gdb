@@ -25,6 +25,7 @@
    http://www.linuxbase.org/spec/ELF/ppc64/PPC-elf64abi.txt, and
    http://www.linuxbase.org/spec/ELF/ppc64/spec/book1.html  */
 
+#include <stdarg.h>
 #include "bfd.h"
 #include "sysdep.h"
 #include "bfdlink.h"
@@ -84,6 +85,7 @@ static bfd_vma opd_entry_value
 #define elf_backend_object_p		      ppc64_elf_object_p
 #define elf_backend_grok_prstatus	      ppc64_elf_grok_prstatus
 #define elf_backend_grok_psinfo		      ppc64_elf_grok_psinfo
+#define elf_backend_write_core_note	      ppc64_elf_write_core_note
 #define elf_backend_create_dynamic_sections   ppc64_elf_create_dynamic_sections
 #define elf_backend_copy_indirect_symbol      ppc64_elf_copy_indirect_symbol
 #define elf_backend_add_symbol_hook	      ppc64_elf_add_symbol_hook
@@ -2482,6 +2484,53 @@ ppc64_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
     = _bfd_elfcore_strndup (abfd, note->descdata + 56, 80);
 
   return TRUE;
+}
+
+static char *
+ppc64_elf_write_core_note (bfd *abfd, char *buf, int *bufsiz, int note_type,
+			   ...)
+{
+  switch (note_type)
+    {
+    default:
+      return NULL;
+
+    case NT_PRPSINFO:
+      {
+	char data[136];
+	va_list ap;
+
+	va_start (ap, note_type);
+	memset (data, 0, 40);
+	strncpy (data + 40, va_arg (ap, const char *), 16);
+	strncpy (data + 56, va_arg (ap, const char *), 80);
+	va_end (ap);
+	return elfcore_write_note (abfd, buf, bufsiz,
+				   "CORE", note_type, data, sizeof (data));
+      }
+
+    case NT_PRSTATUS:
+      {
+	char data[504];
+	va_list ap;
+	long pid;
+	int cursig;
+	const void *greg;
+
+	va_start (ap, note_type);
+	memset (data, 0, 112);
+	pid = va_arg (ap, long);
+	bfd_put_32 (abfd, pid, data + 32);
+	cursig = va_arg (ap, int);
+	bfd_put_16 (abfd, cursig, data + 12);
+	greg = va_arg (ap, const void *);
+	memcpy (data + 112, greg, 384);
+	memset (data + 496, 0, 8);
+	va_end (ap);
+	return elfcore_write_note (abfd, buf, bufsiz,
+				   "CORE", note_type, data, sizeof (data));
+      }
+    }
 }
 
 /* Merge backend specific data from an object file to the output
