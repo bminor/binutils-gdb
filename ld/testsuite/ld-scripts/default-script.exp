@@ -16,6 +16,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
+if { [istarget spu*-*-*] } {
+    set LDFLAGS "$LDFLAGS --local-store 0:0"
+}
+
 set test_list [lsort [glob -nocomplain $srcdir/$subdir/default-script*.d]]
 foreach t $test_list {
     # We need to strip the ".d", but can leave the dirname.

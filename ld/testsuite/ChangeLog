@@ -1,3 +1,8 @@
+2007-02-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-scripts/default-script.exp: Add "--local-store 0:0" to
+	LDFLAGS for spu.
+
 2007-01-29  Julian Brown  <julian@codesourcery.com>
 
 	* ld-arm/arm-elf.exp: Add VFP11 tests.
