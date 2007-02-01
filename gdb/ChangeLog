@@ -1,3 +1,8 @@
+2006-02-01  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
+
+	* gdb/remote-m32r.sdi.c (m32r_fetch_register): Change PWD mask.
+        (m32r_store_register): Ditto.
+
 2006-01-30  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* ser-mingw.c (pipe_windows_open)

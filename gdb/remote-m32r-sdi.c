@@ -935,7 +935,7 @@ m32r_fetch_register (int regno)
 	{
 	  send_one_arg_cmd (SDI_READ_CPU_REG, SDI_REG_BBPSW);
 	  val2 = recv_long_data ();
-	  val = ((0x00c1 & val2) << 8) | ((0xc100 & val) >> 8);
+	  val = ((0x00cf & val2) << 8) | ((0xcf00 & val) >> 8);
 	}
 
       if (remote_debug)
@@ -990,10 +990,10 @@ m32r_store_register (int regno)
 	  send_one_arg_cmd (SDI_READ_CPU_REG, SDI_REG_BBPSW);
 	  bbpsw = recv_long_data ();
 
-	  tmp = (0x00c1 & psw) | ((0x00c1 & regval) << 8);
+	  tmp = (0x00cf & psw) | ((0x00cf & regval) << 8);
 	  send_two_arg_cmd (SDI_WRITE_CPU_REG, SDI_REG_PSW, tmp);
 
-	  tmp = (0x0030 & bbpsw) | ((0xc100 & regval) >> 8);
+	  tmp = (0x0030 & bbpsw) | ((0xcf00 & regval) >> 8);
 	  send_two_arg_cmd (SDI_WRITE_CPU_REG, SDI_REG_BBPSW, tmp);
 	}
       else
