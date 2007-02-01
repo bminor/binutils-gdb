@@ -4118,7 +4118,7 @@ xg_add_opcode_fix (TInsn *tinsn,
   if (expr->X_add_symbol
       && (S_IS_EXTERNAL (expr->X_add_symbol)
 	  || S_IS_WEAK (expr->X_add_symbol)))
-    the_fix->fx_plt = TRUE;
+    the_fix->fx_tcbit = TRUE;
 
   the_fix->tc_fix_data.X_add_symbol = expr->X_add_symbol;
   the_fix->tc_fix_data.X_add_number = expr->X_add_number;
@@ -5566,7 +5566,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	     readable when all branch targets are encoded in relocations.  */
 
 	  assert (fixP->fx_addsy);
-	  if (S_GET_SEGMENT (fixP->fx_addsy) == seg && !fixP->fx_plt
+	  if (S_GET_SEGMENT (fixP->fx_addsy) == seg
+	      && !fixP->fx_tcbit
 	      && !S_FORCE_RELOC (fixP->fx_addsy, 1))
 	    {
 	      val = (S_GET_VALUE (fixP->fx_addsy) + fixP->fx_offset

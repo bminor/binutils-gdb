@@ -1,6 +1,7 @@
 /* tc-msp430.c -- Assembler code for the Texas Instruments MSP430
 
-  Copyright (C) 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
+  Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007
+  Free Software Foundation, Inc.
   Contributed by Dmitry Diky <diwil@mail.ru>
 
   This file is part of GAS, the GNU Assembler.
@@ -1915,7 +1916,6 @@ msp430_force_relocation_local(fixS *fixp)
     return 1;
   else
     return (!fixp->fx_pcrel
-	    || fixp->fx_plt
 	    || generic_force_reloc(fixp));
 }
 

@@ -1,5 +1,5 @@
 /* tc-ia64.c -- Assembler for the HP/Intel IA-64 architecture.
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
@@ -7067,7 +7067,6 @@ emit_one_bundle ()
 	  fix = fix_new_exp (frag_now, frag_now_fix () - 16 + i, 8,
 			     &ifix->expr, ifix->is_pcrel, ifix->code);
 	  fix->tc_fix_data.opnd = ifix->opnd;
-	  fix->fx_plt = (fix->fx_r_type == BFD_RELOC_IA64_PLTOFF22);
 	  fix->fx_file = md.slot[curr].src_file;
 	  fix->fx_line = md.slot[curr].src_line;
 	}

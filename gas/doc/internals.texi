@@ -1279,7 +1279,7 @@ absolute symbol.  If undefined, @code{TC_FORCE_RELOCATION} will be used.
 @cindex TC_FORCE_RELOCATION_LOCAL
 Like @code{TC_FORCE_RELOCATION}, but used only for fixup expressions against a
 symbol in the current section.  If undefined, fixups that are not
-@code{fx_pcrel} or @code{fx_plt} or for which @code{TC_FORCE_RELOCATION}
+@code{fx_pcrel} or for which @code{TC_FORCE_RELOCATION}
 returns non-zero, will emit relocs.
 
 @item TC_FORCE_RELOCATION_SUB_SAME (@var{fix}, @var{seg})

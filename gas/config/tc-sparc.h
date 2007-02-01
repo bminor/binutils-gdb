@@ -1,6 +1,7 @@
 /* tc-sparc.h - Macros and type defines for the sparc.
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003, 2005, 2007
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -91,7 +92,6 @@ extern void sparc_handle_align PARAMS ((struct frag *));
 
 #define TC_FORCE_RELOCATION_LOCAL(FIX)		\
   (!(FIX)->fx_pcrel				\
-   || (FIX)->fx_plt				\
    || (sparc_pic_code				\
        && S_IS_EXTERNAL ((FIX)->fx_addsy))	\
    || TC_FORCE_RELOCATION (FIX))

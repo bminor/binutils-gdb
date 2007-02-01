@@ -1,6 +1,7 @@
 /* write.h
    Copyright 1987, 1992, 1993, 1994, 1995, 1996, 1997, 1999, 2000, 2001,
-   2002, 2003, 2005, 2006 Free Software Foundation, Inc.
+   2002, 2003, 2005, 2006, 2007
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -45,29 +46,16 @@ struct fix
   /* These small fields are grouped together for compactness of
      this structure, and efficiency of access on some architectures.  */
 
-  /* pc-relative offset adjust (only used by m68k) */
-  char fx_pcrel_adjust;
-
-  /* How many bytes are involved? */
-  unsigned char fx_size;
-
   /* Is this a pc-relative relocation?  */
   unsigned fx_pcrel : 1;
 
-  /* Is this a relocation to a procedure linkage table entry?  If so,
-     some of the reductions we try to apply are invalid.  A better way
-     might be to represent PLT entries with different kinds of
-     symbols, and use normal relocations (with undefined symbols);
-     look into it for version 2.6.  */
-  unsigned fx_plt : 1;
-
   /* Is this value an immediate displacement?  */
-  /* Only used on i960 and ns32k; merge it into TC_FIX_TYPE sometime.  */
+  /* Only used on ns32k; merge it into TC_FIX_TYPE sometime.  */
   unsigned fx_im_disp : 2;
 
-  /* A bit for the CPU specific code.
-     This probably can be folded into tc_fix_data, below.  */
+  /* Some bits for the CPU specific code.  */
   unsigned fx_tcbit : 1;
+  unsigned fx_tcbit2 : 1;
 
   /* Has this relocation already been applied?  */
   unsigned fx_done : 1;
@@ -81,6 +69,12 @@ struct fix
 
   /* The value is signed when checking for overflow.  */
   unsigned fx_signed : 1;
+
+  /* pc-relative offset adjust (only used by m68k and m68hc11) */
+  char fx_pcrel_adjust;
+
+  /* How many bytes are involved? */
+  unsigned char fx_size;
 
   /* Which frag does this fix apply to?  */
   fragS *fx_frag;

@@ -1,3 +1,26 @@
+2007-02-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* write.h (struct fix <fx_pcrel_adjust, fx_size>): Move.
+	(struct fix <fx_plt>): Rename to tcbit2.
+	* write.c (fix_new_internal): Adjust.
+	(TC_FORCE_RELOCATION_LOCAL): Don't test fx_plt.
+	* config/tc-arm.h (TC_FORCE_RELOCATION_LOCAL): Likewise.
+	* config/tc-cris.h (TC_FORCE_RELOCATION_LOCAL): Likewise.
+	* config/tc-i386.h (TC_FORCE_RELOCATION_LOCAL): Likewise.
+	* config/tc-i960.h (TC_FORCE_RELOCATION_LOCAL): Likewise.
+	* config/tc-sh.h (TC_FORCE_RELOCATION_LOCAL): Likewise.
+	* config/tc-sh64.h (TC_FORCE_RELOCATION_LOCAL): Likewise.
+	* config/tc-sparc.h (TC_FORCE_RELOCATION_LOCAL): Likewise.
+	* config/tc-msp430.c (msp430_force_relocation_local): Likewise.
+	* config/tc-ia64.c (emit_one_bundle): Don't set fx_plt.
+	* config/tc-ia64.h (TC_FORCE_RELOCATION_LOCAL): Don't test fx_plt.
+	Instead, compare fx_r_type.
+	* config/tc-xtensa.c (xg_add_opcode_fix, md_apply_fix): Use
+	fx_tcbit in place of fx_plt.
+	* config/tc-xtensa.h (TC_FORCE_RELOCATION_LOCAL): Define.
+	* doc/internals.texi (TC_FORCE_RELOCATION_LOCAL): Remove reference
+	to fx_plt.
+
 2007-01-30  Nick Clifton  <nickc@redhat.com>
 
 	* as.c (main): Mark symbols created via the --defsym command line

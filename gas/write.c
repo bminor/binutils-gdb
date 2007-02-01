@@ -1,6 +1,6 @@
 /* write.c - emit .o file
    Copyright 1986, 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -45,7 +45,6 @@
 #ifndef TC_FORCE_RELOCATION_LOCAL
 #define TC_FORCE_RELOCATION_LOCAL(FIX)		\
   (!(FIX)->fx_pcrel				\
-   || (FIX)->fx_plt				\
    || TC_FORCE_RELOCATION (FIX))
 #endif
 
@@ -169,13 +168,13 @@ fix_new_internal (fragS *frag,		/* Which frag?  */
   fixP->fx_offset = offset;
   fixP->fx_dot_value = dot_value;
   fixP->fx_pcrel = pcrel;
-  fixP->fx_plt = 0;
   fixP->fx_r_type = r_type;
   fixP->fx_im_disp = 0;
   fixP->fx_pcrel_adjust = 0;
   fixP->fx_bit_fixP = 0;
   fixP->fx_addnumber = 0;
   fixP->fx_tcbit = 0;
+  fixP->fx_tcbit2 = 0;
   fixP->fx_done = 0;
   fixP->fx_no_overflow = 0;
   fixP->fx_signed = 0;
