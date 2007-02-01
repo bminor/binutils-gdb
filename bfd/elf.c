@@ -1592,28 +1592,13 @@ _bfd_elf_link_hash_table_init
   bfd_boolean ret;
   int can_refcount = get_elf_backend_data (abfd)->can_refcount;
 
-  table->dynamic_sections_created = FALSE;
-  table->dynobj = NULL;
+  memset (table, 0, sizeof * table);
   table->init_got_refcount.refcount = can_refcount - 1;
   table->init_plt_refcount.refcount = can_refcount - 1;
   table->init_got_offset.offset = -(bfd_vma) 1;
   table->init_plt_offset.offset = -(bfd_vma) 1;
   /* The first dynamic symbol is a dummy.  */
   table->dynsymcount = 1;
-  table->dynstr = NULL;
-  table->bucketcount = 0;
-  table->needed = NULL;
-  table->hgot = NULL;
-  table->hplt = NULL;
-  table->merge_info = NULL;
-  memset (&table->stab_info, 0, sizeof (table->stab_info));
-  memset (&table->eh_info, 0, sizeof (table->eh_info));
-  table->dynlocal = NULL;
-  table->runpath = NULL;
-  table->tls_sec = NULL;
-  table->tls_size = 0;
-  table->loaded = NULL;
-  table->is_relocatable_executable = FALSE;
 
   ret = _bfd_link_hash_table_init (&table->root, abfd, newfunc, entsize);
   table->root.type = bfd_link_elf_hash_table;

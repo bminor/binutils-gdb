@@ -1,3 +1,9 @@
+2007-02-01  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/3852
+	* elf.c (_bfd_elf_link_hash_table_init): Initialize all the fields
+	in the elf_link_hash_table structure.
+
 2007-02-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (struct elf_backend_data): Add elf_backend_write_core_note.
