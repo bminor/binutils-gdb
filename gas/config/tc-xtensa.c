@@ -1,5 +1,5 @@
 /* tc-xtensa.c -- Assemble Xtensa instructions.
-   Copyright 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
+   Copyright 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -4114,12 +4114,6 @@ xg_add_opcode_fix (TInsn *tinsn,
   the_fix = fix_new_exp (fragP, offset, fmt_length, expr,
 			 howto->pc_relative, reloc);
   the_fix->fx_no_overflow = 1;
-
-  if (expr->X_add_symbol
-      && (S_IS_EXTERNAL (expr->X_add_symbol)
-	  || S_IS_WEAK (expr->X_add_symbol)))
-    the_fix->fx_tcbit = TRUE;
-
   the_fix->tc_fix_data.X_add_symbol = expr->X_add_symbol;
   the_fix->tc_fix_data.X_add_number = expr->X_add_number;
   the_fix->tc_fix_data.slot = slot;
@@ -5567,7 +5561,6 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 
 	  assert (fixP->fx_addsy);
 	  if (S_GET_SEGMENT (fixP->fx_addsy) == seg
-	      && !fixP->fx_tcbit
 	      && !S_FORCE_RELOC (fixP->fx_addsy, 1))
 	    {
 	      val = (S_GET_VALUE (fixP->fx_addsy) + fixP->fx_offset

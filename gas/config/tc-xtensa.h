@@ -1,5 +1,5 @@
 /* tc-xtensa.h -- Header file for tc-xtensa.c.
-   Copyright (C) 2003, 2004, 2005 Free Software Foundation, Inc.
+   Copyright (C) 2003, 2004, 2005, 2007 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -319,10 +319,6 @@ extern char *xtensa_section_rename (char *);
 #define TC_FORCE_RELOCATION(fix)	xtensa_force_relocation (fix)
 #define TC_FORCE_RELOCATION_SUB_SAME(fix, seg) \
   (! SEG_NORMAL (seg) || xtensa_force_relocation (fix))
-#define TC_FORCE_RELOCATION_LOCAL(FIX)		\
-  (!(FIX)->fx_pcrel				\
-   || (FIX)->fx_tcbit				\
-   || TC_FORCE_RELOCATION (FIX))
 #define	TC_VALIDATE_FIX_SUB(fix)	xtensa_validate_fix_sub (fix)
 #define NO_PSEUDO_DOT			xtensa_check_inside_bundle ()
 #define tc_canonicalize_symbol_name(s)	xtensa_section_rename (s)

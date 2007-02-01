@@ -1,3 +1,9 @@
+2007-02-01  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (xg_add_opcode_fix, md_apply_fix): Delete use of
+	fx_tcbit.
+	* config/tc-xtensa.h (TC_FORCE_RELOCATION_LOCAL): Remove.
+
 2007-02-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* write.h (struct fix <fx_pcrel_adjust, fx_size>): Move.
