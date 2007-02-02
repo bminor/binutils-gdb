@@ -376,6 +376,7 @@ AC_CHECK_HEADERS(sys/file.h)
 AC_CHECK_HEADERS(sys/filio.h)
 AC_CHECK_HEADERS(sys/ioctl.h)
 AC_CHECK_HEADERS(sys/param.h)
+AC_CHECK_HEADERS(sys/resource.h)
 AC_CHECK_HEADERS(sys/proc.h, [], [],
 [#if HAVE_SYS_PARAM_H
 # include <sys/param.h>
@@ -463,6 +464,7 @@ AC_FUNC_ALLOCA
 AC_FUNC_MMAP
 AC_FUNC_VFORK
 AC_CHECK_FUNCS(canonicalize_file_name realpath)
+AC_CHECK_FUNCS(getrusage)
 AC_CHECK_FUNCS(getuid getgid)
 AC_CHECK_FUNCS(poll)
 AC_CHECK_FUNCS(pread64)
