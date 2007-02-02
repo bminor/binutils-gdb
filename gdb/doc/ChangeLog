@@ -1,3 +1,8 @@
+2006-02-03  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Describe the new
+	command -enable-timings.
+
 2007-02-02  Markus Deuling  <deuling@de.ibm.com>  (tiny change)
 
         * gdbint.texinfo (Operation System ABI Variant Handling): Update
