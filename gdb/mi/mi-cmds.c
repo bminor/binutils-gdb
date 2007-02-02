@@ -53,6 +53,7 @@ struct mi_cmd mi_cmds[] =
   { "data-read-memory", { NULL, 0 }, 0, mi_cmd_data_read_memory},
   { "data-write-memory", { NULL, 0 }, 0, mi_cmd_data_write_memory},
   { "data-write-register-values", { NULL, 0 }, 0, mi_cmd_data_write_register_values},
+  { "enable-timings", { NULL, 0 }, 0, mi_cmd_enable_timings},
   { "environment-cd", { NULL, 0 }, 0, mi_cmd_env_cd},
   { "environment-directory", { NULL, 0 }, 0, mi_cmd_env_dir},
   { "environment-path", { NULL, 0 }, 0, mi_cmd_env_path},

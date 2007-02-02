@@ -50,6 +50,14 @@
 #include <ctype.h>
 #include <sys/time.h>
 
+#if defined HAVE_SYS_RESOURCE_H
+#include <sys/resource.h>
+#endif
+
+#ifdef HAVE_GETRUSAGE
+struct rusage rusage;
+#endif
+
 enum
   {
     FROM_TTY = 0
@@ -81,6 +89,12 @@ struct captured_mi_execute_command_args
 int mi_debug_p;
 struct ui_file *raw_stdout;
 
+/* This is used to pass the current command timestamp
+   down to continuation routines.  */
+static struct mi_timestamp *current_command_ts;
+
+static int do_timings = 0;
+
 /* The token of the last asynchronous command */
 static char *last_async_command;
 static char *previous_async_command;
@@ -102,6 +116,11 @@ static int get_register (int regnum, int format);
 /* Command implementations. FIXME: Is this libgdb? No.  This is the MI
    layer that calls libgdb.  Any operation used in the below should be
    formalized. */
+
+static void timestamp (struct mi_timestamp *tv);
+
+static void print_diff_now (struct mi_timestamp *start);
+static void print_diff (struct mi_timestamp *start, struct mi_timestamp *end);
 
 enum mi_cmd_result
 mi_cmd_gdb_exit (char *command, char **argv, int argc)
@@ -194,7 +213,7 @@ mi_cmd_exec_continue (char *args, int from_tty)
 }
 
 /* Interrupt the execution of the target. Note how we must play around
-   with the token varialbes, in order to display the current token in
+   with the token variables, in order to display the current token in
    the result of the interrupt command, and the previous execution
    token when the target finally stops. See comments in
    mi_cmd_execute. */
@@ -1013,6 +1032,30 @@ mi_cmd_data_write_memory (char *command, char **argv, int argc)
   return MI_CMD_DONE;
 }
 
+enum mi_cmd_result
+mi_cmd_enable_timings (char *command, char **argv, int argc)
+{
+  if (argc == 0)
+    do_timings = 1;
+  else if (argc == 1)
+    {
+      if (strcmp (argv[0], "yes") == 0)
+	do_timings = 1;
+      else if (strcmp (argv[0], "no") == 0)
+	do_timings = 0;
+      else
+	goto usage_error;
+    }
+  else
+    goto usage_error;
+    
+  return MI_CMD_DONE;
+
+ usage_error:
+  error ("mi_cmd_enable_timings: Usage: %s {yes|no}", command);
+  return MI_CMD_ERROR;
+}
+
 /* Execute a command within a safe environment.
    Return <0 for error; >=0 for ok.
 
@@ -1026,6 +1069,8 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
   struct captured_mi_execute_command_args *args =
     (struct captured_mi_execute_command_args *) data;
   struct mi_parse *context = args->command;
+
+  struct mi_timestamp cmd_finished;
 
   switch (context->op)
     {
@@ -1041,7 +1086,14 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
          indication of what action is required and then switch on
          that. */
       args->action = EXECUTE_COMMAND_DISPLAY_PROMPT;
+
+      if (do_timings)
+	current_command_ts = context->cmd_start;
+
       args->rc = mi_cmd_execute (context);
+
+      if (do_timings)
+          timestamp (&cmd_finished);
 
       if (!target_can_async_p () || !target_executing)
 	{
@@ -1057,6 +1109,10 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
 	      fputs_unfiltered ("^done", raw_stdout);
 	      mi_out_put (uiout, raw_stdout);
 	      mi_out_rewind (uiout);
+	      /* Have to check cmd_start, since the command could be
+		 -enable-timings.  */
+	      if (do_timings && context->cmd_start)
+		  print_diff (context->cmd_start, &cmd_finished);
 	      fputs_unfiltered ("\n", raw_stdout);
 	    }
 	  else if (args->rc == MI_CMD_ERROR)
@@ -1152,6 +1208,14 @@ mi_execute_command (char *cmd, int from_tty)
   if (command != NULL)
     {
       struct gdb_exception result;
+
+      if (do_timings)
+	{
+	  command->cmd_start = (struct mi_timestamp *)
+	    xmalloc (sizeof (struct mi_timestamp));
+	  timestamp (command->cmd_start);
+	}
+
       /* FIXME: cagney/1999-11-04: Can this use of catch_exceptions either
          be pushed even further down or even eliminated? */
       args.command = command;
@@ -1341,6 +1405,8 @@ mi_execute_async_cli_command (char *mi, char *args, int from_tty)
       fputs_unfiltered ("*stopped", raw_stdout);
       mi_out_put (uiout, raw_stdout);
       mi_out_rewind (uiout);
+      if (do_timings)
+      	print_diff_now (current_command_ts);
       fputs_unfiltered ("\n", raw_stdout);
       return MI_CMD_QUIET;
     }
@@ -1457,3 +1523,49 @@ _initialize_mi_main (void)
   DEPRECATED_REGISTER_GDBARCH_SWAP (old_regs);
   deprecated_register_gdbarch_swap (NULL, 0, mi_setup_architecture_data);
 }
+
+static void 
+timestamp (struct mi_timestamp *tv)
+  {
+    long usec;
+    gettimeofday (&tv->wallclock, NULL);
+#ifdef HAVE_GETRUSAGE
+    getrusage (RUSAGE_SELF, &rusage);
+    tv->utime.tv_sec = rusage.ru_utime.tv_sec;
+    tv->utime.tv_usec = rusage.ru_utime.tv_usec;
+    tv->stime.tv_sec = rusage.ru_stime.tv_sec;
+    tv->stime.tv_usec = rusage.ru_stime.tv_usec;
+#else
+    usec = get_run_time ();
+    tv->utime.tv_sec = usec/1000000;
+    tv->utime.tv_usec = usec - 1000000*tv->utime.tv_sec;
+    tv->stime.tv_sec = 0;
+    tv->stime.tv_usec = 0;
+#endif
+  }
+
+static void 
+print_diff_now (struct mi_timestamp *start)
+  {
+    struct mi_timestamp now;
+    timestamp (&now);
+    print_diff (start, &now);
+  }
+
+static long 
+timeval_diff (struct timeval start, struct timeval end)
+  {
+    return ((end.tv_sec - start.tv_sec) * 1000000)
+      + (end.tv_usec - start.tv_usec);
+  }
+
+static void 
+print_diff (struct mi_timestamp *start, struct mi_timestamp *end)
+  {
+    fprintf_unfiltered
+      (raw_stdout,
+       ",time={wallclock=\"%0.5f\",user=\"%0.5f\",system=\"%0.5f\"}", 
+       timeval_diff (start->wallclock, end->wallclock) / 1000000.0, 
+       timeval_diff (start->utime, end->utime) / 1000000.0, 
+       timeval_diff (start->stime, end->stime) / 1000000.0);
+  }
