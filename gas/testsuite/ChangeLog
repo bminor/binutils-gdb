@@ -1,3 +1,9 @@
+2007-02-02  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/3812
+	* gas/v850/v850e1.d: Correct expected disassembly of cmov insn to
+	account for sign extension.
+
 2007-01-11  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/thumb2_add.d: Add test for missing operand.
