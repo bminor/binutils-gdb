@@ -1,5 +1,15 @@
 2007-02-02  Bob Wilson  <bob.wilson@acm.org>
 
+	* config/xtensa-relax.h (struct build_instr): Delete id field.
+	* config/xtensa-relax.c (widen_spec_list): Remove zeros from LITERAL
+	and LABEL tokens.
+	(append_literal_op, append_label_op): Remove litnum/labnum arguments;
+	set op_data fields to zero.
+	(parse_id_constant): Delete.
+	(build_transition): Remove code to handle numbered literals and labels.
+
+2007-02-02  Bob Wilson  <bob.wilson@acm.org>
+
 	* config/xtensa-relax.c (build_transition): Remove code after as_fatal.
 	(build_transition_table): Likewise.
 
