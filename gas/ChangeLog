@@ -1,5 +1,15 @@
 2007-02-02  Bob Wilson  <bob.wilson@acm.org>
 
+	* config/tc-xtensa.c (SUFFIX_MAP, suffix_relocs): New.
+	(xtensa_elf_suffix): Use suffix_relocs instead of local mapping table.
+	(map_suffix_reloc_to_operator): New.
+	(map_operator_to_reloc): New.
+	(expression_maybe_register): Fix incorrect test of return value from
+	xtensa_elf_suffix.  Rearrange to use map_suffix_reloc_to_operator.
+	(xg_assemble_literal, convert_frag_immed): Use map_operator_to_reloc.
+
+2007-02-02  Bob Wilson  <bob.wilson@acm.org>
+
 	* config/xtensa-istack.h (struct tinsn_struct): Delete fixup field.
 	(tinsn_get_tok): Delete prototype.
 	* config/tc-xtensa.c (tinsn_get_tok): Delete.

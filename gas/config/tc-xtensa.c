@@ -352,6 +352,24 @@ op_placement_info_table op_placement_table;
 #define O_hi16		O_md2	/* use high 16 bits of symbolic value */
 #define O_lo16		O_md3	/* use low 16 bits of symbolic value */
 
+struct suffix_reloc_map
+{
+  char *suffix;
+  int length;
+  bfd_reloc_code_real_type reloc;
+  unsigned char operator;
+};
+
+#define SUFFIX_MAP(str, reloc, op) { str, sizeof (str) - 1, reloc, op }
+
+static struct suffix_reloc_map suffix_relocs[] =
+{
+  SUFFIX_MAP ("l",	BFD_RELOC_LO16,			O_lo16),
+  SUFFIX_MAP ("h",	BFD_RELOC_HI16,			O_hi16),
+  SUFFIX_MAP ("plt",	BFD_RELOC_XTENSA_PLT,		O_pltrel),
+  { (char *) 0, 0,	BFD_RELOC_UNUSED,		0 }
+};
+
 
 /* Directives.  */
 
@@ -1574,29 +1592,12 @@ xtensa_elf_cons (int nbytes)
 static bfd_reloc_code_real_type
 xtensa_elf_suffix (char **str_p, expressionS *exp_p)
 {
-  struct map_bfd
-  {
-    char *string;
-    int length;
-    bfd_reloc_code_real_type reloc;
-  };
-
   char ident[20];
   char *str = *str_p;
   char *str2;
   int ch;
   int len;
-  struct map_bfd *ptr;
-
-#define MAP(str,reloc) { str, sizeof (str) - 1, reloc }
-
-  static struct map_bfd mapping[] =
-  {
-    MAP ("l",		BFD_RELOC_LO16),
-    MAP ("h",		BFD_RELOC_HI16),
-    MAP ("plt",		BFD_RELOC_XTENSA_PLT),
-    { (char *) 0, 0,	BFD_RELOC_UNUSED }
-  };
+  struct suffix_reloc_map *ptr;
 
   if (*str++ != '@')
     return BFD_RELOC_NONE;
@@ -1613,10 +1614,10 @@ xtensa_elf_suffix (char **str_p, expressionS *exp_p)
   len = str2 - ident;
 
   ch = ident[0];
-  for (ptr = &mapping[0]; ptr->length > 0; ptr++)
-    if (ch == ptr->string[0]
+  for (ptr = &suffix_relocs[0]; ptr->length > 0; ptr++)
+    if (ch == ptr->suffix[0]
 	&& len == ptr->length
-	&& memcmp (ident, ptr->string, ptr->length) == 0)
+	&& memcmp (ident, ptr->suffix, ptr->length) == 0)
       {
 	/* Now check for "identifier@suffix+constant".  */
 	if (*str == '-' || *str == '+')
@@ -1641,6 +1642,49 @@ xtensa_elf_suffix (char **str_p, expressionS *exp_p)
       }
 
   return BFD_RELOC_UNUSED;
+}
+
+
+/* Find the matching operator type.  */
+static unsigned char
+map_suffix_reloc_to_operator (bfd_reloc_code_real_type reloc)
+{
+  struct suffix_reloc_map *sfx;
+  unsigned char operator = (unsigned char) -1;
+  
+  for (sfx = &suffix_relocs[0]; sfx->suffix; sfx++)
+    {
+      if (sfx->reloc == reloc)
+	{
+	  operator = sfx->operator;
+	  break;
+	}
+    }
+  assert (operator != (unsigned char) -1);
+  return operator;
+}
+
+
+/* Find the matching reloc type.  */
+static bfd_reloc_code_real_type
+map_operator_to_reloc (unsigned char operator)
+{
+  struct suffix_reloc_map *sfx;
+  bfd_reloc_code_real_type reloc = BFD_RELOC_UNUSED;
+
+  for (sfx = &suffix_relocs[0]; sfx->suffix; sfx++)
+    {
+      if (sfx->operator == operator)
+	{
+	  reloc = sfx->reloc;
+	  break;
+	}
+    }
+
+  if (reloc == BFD_RELOC_UNUSED)
+    return BFD_RELOC_32;
+
+  return reloc;
 }
 
 
@@ -1744,34 +1788,32 @@ expression_maybe_register (xtensa_opcode opc, int opnd, expressionS *tok)
 	}
 
       if ((tok->X_op == O_constant || tok->X_op == O_symbol)
-	  && (reloc = xtensa_elf_suffix (&input_line_pointer, tok))
-	  && (reloc != BFD_RELOC_NONE))
+	  && ((reloc = xtensa_elf_suffix (&input_line_pointer, tok))
+	      != BFD_RELOC_NONE))
 	{
-	  switch (reloc)
+	  if (reloc == BFD_RELOC_UNUSED)
 	    {
-	      default:
-	      case BFD_RELOC_UNUSED:
-		as_bad (_("unsupported relocation"));
-	        break;
-
-	      case BFD_RELOC_XTENSA_PLT:
-		tok->X_op = O_pltrel;
-		break;
-
-	      case BFD_RELOC_LO16:
-		if (tok->X_op == O_constant)
-		  tok->X_add_number &= 0xffff;
-		else
-		  tok->X_op = O_lo16;
-		break;
-
-	      case BFD_RELOC_HI16:
-		if (tok->X_op == O_constant)
-		  tok->X_add_number = ((unsigned) tok->X_add_number) >> 16;
-		else
-		  tok->X_op = O_hi16;
-		break;
+	      as_bad (_("unsupported relocation"));
+	      return;
 	    }
+
+	  if (tok->X_op == O_constant)
+	    {
+	      switch (reloc)
+		{
+		case BFD_RELOC_LO16:
+		  tok->X_add_number &= 0xffff;
+		  return;
+
+		case BFD_RELOC_HI16:
+		  tok->X_add_number = ((unsigned) tok->X_add_number) >> 16;
+		  return;
+
+		default:
+		  break;
+		}
+	    }
+	  tok->X_op = map_suffix_reloc_to_operator (reloc);
 	}
     }
   else
@@ -3946,6 +3988,8 @@ xg_assemble_literal (/* const */ TInsn *insn)
 {
   emit_state state;
   symbolS *lit_sym = NULL;
+  bfd_reloc_code_real_type reloc;
+  char *p;
 
   /* size = 4 for L32R.  It could easily be larger when we move to
      larger constants.  Add a parameter later.  */
@@ -3981,19 +4025,24 @@ xg_assemble_literal (/* const */ TInsn *insn)
   frag_align (litalign, 0, 0);
   record_alignment (now_seg, litalign);
 
-  if (emit_val->X_op == O_pltrel)
+  switch (emit_val->X_op)
     {
-      char *p = frag_more (litsize);
+    case O_pltrel:
+      p = frag_more (litsize);
       xtensa_set_frag_assembly_state (frag_now);
+      reloc = map_operator_to_reloc (emit_val->X_op);
       if (emit_val->X_add_symbol)
 	emit_val->X_op = O_symbol;
       else
 	emit_val->X_op = O_constant;
       fix_new_exp (frag_now, p - frag_now->fr_literal,
-		   litsize, emit_val, 0, BFD_RELOC_XTENSA_PLT);
+		   litsize, emit_val, 0, reloc);
+      break;
+
+    default:
+      emit_expr (emit_val, litsize);
+      break;
     }
-  else
-    emit_expr (emit_val, litsize);
 
   assert (frag_now->tc_frag_data.literal_frag == NULL);
   frag_now->tc_frag_data.literal_frag = get_literal_pool_location (now_seg);
@@ -9302,10 +9351,7 @@ convert_frag_immed (segT segP,
 	      /* Add a fixup.  */
 	      target_seg = S_GET_SEGMENT (lit_sym);
 	      assert (target_seg);
-	      if (tinsn->tok[0].X_op == O_pltrel)
-		reloc_type = BFD_RELOC_XTENSA_PLT;
-	      else
-		reloc_type = BFD_RELOC_32;
+	      reloc_type = map_operator_to_reloc (tinsn->tok[0].X_op);
 	      fix_new_exp_in_seg (target_seg, 0, lit_frag, 0, 4,
 				  &tinsn->tok[0], FALSE, reloc_type);
 	      break;
