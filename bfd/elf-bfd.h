@@ -1392,7 +1392,7 @@ struct elf_obj_tdata
   bfd_boolean flags_init;
 
   /* Symbol buffer.  */
-  Elf_Internal_Sym *symbuf;
+  void *symbuf;
 };
 
 #define elf_tdata(bfd)		((bfd) -> tdata.elf_obj_data)

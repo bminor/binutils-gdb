@@ -1,3 +1,16 @@
+2007-02-02  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf-bfd.h (struct elf_obj_tdata): Change symbuf type to void *.
+	* elf.c (struct elf_symbuf_symbol, struct elf_symbuf_head): New types.
+	(struct elf_symbol): Change first member into union.
+	(elf_sort_elf_symbol): Compare pointers to internal syms rather than
+	internal syms.  Only compare st_shndx fields.
+	(elf_create_symbuf): New function.
+	(bfd_elf_match_symbols_in_sections): Use it.  If symbufs are available
+	for bfds, use a binary search, otherwise don't qsort symbols
+	unnecessarily only to select which symbols are for the particular
+	shndx.
+
 2007-02-01  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/3852

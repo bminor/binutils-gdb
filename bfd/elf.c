@@ -8745,38 +8745,40 @@ _bfd_elf_get_synthetic_symtab (bfd *abfd,
   return n;
 }
 
-/* Sort symbol by binding and section. We want to put definitions
-   sorted by section at the beginning.  */
+struct elf_symbuf_symbol
+{
+  unsigned long st_name;	/* Symbol name, index in string tbl */
+  unsigned char st_info;	/* Type and binding attributes */
+  unsigned char st_other;	/* Visibilty, and target specific */
+};
+
+struct elf_symbuf_head
+{
+  struct elf_symbuf_symbol *ssym;
+  bfd_size_type count;
+  unsigned int st_shndx;
+};
+
+struct elf_symbol
+{
+  union
+    {
+      Elf_Internal_Sym *isym;
+      struct elf_symbuf_symbol *ssym;
+    } u;
+  const char *name;
+};
+
+/* Sort references to symbols by ascending section number.  */
 
 static int
 elf_sort_elf_symbol (const void *arg1, const void *arg2)
 {
-  const Elf_Internal_Sym *s1;
-  const Elf_Internal_Sym *s2;
-  int shndx;
+  const Elf_Internal_Sym *s1 = *(const Elf_Internal_Sym **) arg1;
+  const Elf_Internal_Sym *s2 = *(const Elf_Internal_Sym **) arg2;
 
-  /* Make sure that undefined symbols are at the end.  */
-  s1 = (const Elf_Internal_Sym *) arg1;
-  if (s1->st_shndx == SHN_UNDEF)
-    return 1;
-  s2 = (const Elf_Internal_Sym *) arg2;
-  if (s2->st_shndx == SHN_UNDEF)
-    return -1;
-
-  /* Sorted by section index.  */
-  shndx = s1->st_shndx - s2->st_shndx;
-  if (shndx != 0)
-    return shndx;
-
-  /* Sorted by binding.  */
-  return ELF_ST_BIND (s1->st_info)  - ELF_ST_BIND (s2->st_info);
+  return s1->st_shndx - s2->st_shndx;
 }
-
-struct elf_symbol
-{
-  Elf_Internal_Sym *sym;
-  const char *name;
-};
 
 static int
 elf_sym_name_compare (const void *arg1, const void *arg2)
@@ -8784,6 +8786,64 @@ elf_sym_name_compare (const void *arg1, const void *arg2)
   const struct elf_symbol *s1 = (const struct elf_symbol *) arg1;
   const struct elf_symbol *s2 = (const struct elf_symbol *) arg2;
   return strcmp (s1->name, s2->name);
+}
+
+static struct elf_symbuf_head *
+elf_create_symbuf (bfd_size_type symcount, Elf_Internal_Sym *isymbuf)
+{
+  Elf_Internal_Sym **ind, **indbufend, **indbuf
+    = bfd_malloc2 (symcount, sizeof (*indbuf));
+  struct elf_symbuf_symbol *ssym;
+  struct elf_symbuf_head *ssymbuf, *ssymhead;
+  bfd_size_type i, shndx_count;
+
+  if (indbuf == NULL)
+    return NULL;
+
+  for (ind = indbuf, i = 0; i < symcount; i++)
+    if (isymbuf[i].st_shndx != SHN_UNDEF)
+      *ind++ = &isymbuf[i];
+  indbufend = ind;
+
+  qsort (indbuf, indbufend - indbuf, sizeof (Elf_Internal_Sym *),
+	 elf_sort_elf_symbol);
+
+  shndx_count = 0;
+  if (indbufend > indbuf)
+    for (ind = indbuf, shndx_count++; ind < indbufend - 1; ind++)
+      if (ind[0]->st_shndx != ind[1]->st_shndx)
+	shndx_count++;
+
+  ssymbuf = bfd_malloc ((shndx_count + 1) * sizeof (*ssymbuf)
+			+ (indbufend - indbuf) * sizeof (*ssymbuf));
+  if (ssymbuf == NULL)
+    {
+      free (indbuf);
+      return NULL;
+    }
+
+  ssym = (struct elf_symbuf_symbol *) (ssymbuf + shndx_count);
+  ssymbuf->ssym = NULL;
+  ssymbuf->count = shndx_count;
+  ssymbuf->st_shndx = 0;
+  for (ssymhead = ssymbuf, ind = indbuf; ind < indbufend; ssym++, ind++)
+    {
+      if (ind == indbuf || ssymhead->st_shndx != (*ind)->st_shndx)
+	{
+	  ssymhead++;
+	  ssymhead->ssym = ssym;
+	  ssymhead->count = 0;
+	  ssymhead->st_shndx = (*ind)->st_shndx;
+	}
+      ssym->st_name = (*ind)->st_name;
+      ssym->st_info = (*ind)->st_info;
+      ssym->st_other = (*ind)->st_other;
+      ssymhead->count++;
+    }
+  BFD_ASSERT ((bfd_size_type) (ssymhead - ssymbuf) == shndx_count);
+
+  free (indbuf);
+  return ssymbuf;
 }
 
 /* Check if 2 sections define the same set of local and global
@@ -8798,9 +8858,9 @@ bfd_elf_match_symbols_in_sections (asection *sec1, asection *sec2,
   Elf_Internal_Shdr *hdr1, *hdr2;
   bfd_size_type symcount1, symcount2;
   Elf_Internal_Sym *isymbuf1, *isymbuf2;
-  Elf_Internal_Sym *isymstart1 = NULL, *isymstart2 = NULL, *isym;
-  Elf_Internal_Sym *isymend;
-  struct elf_symbol *symp, *symtable1 = NULL, *symtable2 = NULL;
+  struct elf_symbuf_head *ssymbuf1, *ssymbuf2;
+  Elf_Internal_Sym *isym, *isymend;
+  struct elf_symbol *symtable1 = NULL, *symtable2 = NULL;
   bfd_size_type count1, count2, i;
   int shndx1, shndx2;
   bfd_boolean result;
@@ -8848,99 +8908,154 @@ bfd_elf_match_symbols_in_sections (asection *sec1, asection *sec2,
     return FALSE;
 
   result = FALSE;
-  isymbuf1 = elf_tdata (bfd1)->symbuf;
-  isymbuf2 = elf_tdata (bfd2)->symbuf;
+  isymbuf1 = NULL;
+  isymbuf2 = NULL;
+  ssymbuf1 = elf_tdata (bfd1)->symbuf;
+  ssymbuf2 = elf_tdata (bfd2)->symbuf;
 
-  if (isymbuf1 == NULL)
+  if (ssymbuf1 == NULL)
     {
       isymbuf1 = bfd_elf_get_elf_syms (bfd1, hdr1, symcount1, 0,
 				       NULL, NULL, NULL);
       if (isymbuf1 == NULL)
 	goto done;
-      /* Sort symbols by binding and section. Global definitions are at
-	 the beginning.  */
-      qsort (isymbuf1, symcount1, sizeof (Elf_Internal_Sym),
-	     elf_sort_elf_symbol);
+
       if (!info->reduce_memory_overheads)
-	elf_tdata (bfd1)->symbuf = isymbuf1;
+	elf_tdata (bfd1)->symbuf = ssymbuf1
+	  = elf_create_symbuf (symcount1, isymbuf1);
     }
 
-  if (isymbuf2 == NULL)
+  if (ssymbuf1 == NULL || ssymbuf2 == NULL)
     {
       isymbuf2 = bfd_elf_get_elf_syms (bfd2, hdr2, symcount2, 0,
 				       NULL, NULL, NULL);
       if (isymbuf2 == NULL)
 	goto done;
-      /* Sort symbols by binding and section. Global definitions are at
-	 the beginning.  */
-      qsort (isymbuf2, symcount2, sizeof (Elf_Internal_Sym),
-	     elf_sort_elf_symbol);
-      if (!info->reduce_memory_overheads)
-	elf_tdata (bfd2)->symbuf = isymbuf2;
+
+      if (ssymbuf1 != NULL && !info->reduce_memory_overheads)
+	elf_tdata (bfd2)->symbuf = ssymbuf2
+	  = elf_create_symbuf (symcount2, isymbuf2);
     }
+
+  if (ssymbuf1 != NULL && ssymbuf2 != NULL)
+    {
+      /* Optimized faster version.  */
+      bfd_size_type lo, hi, mid;
+      struct elf_symbol *symp;
+      struct elf_symbuf_symbol *ssym, *ssymend;
+
+      lo = 0;
+      hi = ssymbuf1->count;
+      ssymbuf1++;
+      count1 = 0;
+      while (lo < hi)
+	{
+	  mid = (lo + hi) / 2;
+	  if ((unsigned int) shndx1 < ssymbuf1[mid].st_shndx)
+	    hi = mid;
+	  else if ((unsigned int) shndx1 > ssymbuf1[mid].st_shndx)
+	    lo = mid + 1;
+	  else
+	    {
+	      count1 = ssymbuf1[mid].count;
+	      ssymbuf1 += mid;
+	      break;
+	    }
+	}
+
+      lo = 0;
+      hi = ssymbuf2->count;
+      ssymbuf2++;
+      count2 = 0;
+      while (lo < hi)
+	{
+	  mid = (lo + hi) / 2;
+	  if ((unsigned int) shndx2 < ssymbuf2[mid].st_shndx)
+	    hi = mid;
+	  else if ((unsigned int) shndx2 > ssymbuf2[mid].st_shndx)
+	    lo = mid + 1;
+	  else
+	    {
+	      count2 = ssymbuf2[mid].count;
+	      ssymbuf2 += mid;
+	      break;
+	    }
+	}
+
+      if (count1 == 0 || count2 == 0 || count1 != count2)
+	goto done;
+
+      symtable1 = bfd_malloc (count1 * sizeof (struct elf_symbol));
+      symtable2 = bfd_malloc (count2 * sizeof (struct elf_symbol));
+      if (symtable1 == NULL || symtable2 == NULL)
+	goto done;
+
+      symp = symtable1;
+      for (ssym = ssymbuf1->ssym, ssymend = ssym + count1;
+	   ssym < ssymend; ssym++, symp++)
+	{
+	  symp->u.ssym = ssym;
+	  symp->name = bfd_elf_string_from_elf_section (bfd1,
+							hdr1->sh_link,
+							ssym->st_name);
+	}
+
+      symp = symtable2;
+      for (ssym = ssymbuf2->ssym, ssymend = ssym + count2;
+	   ssym < ssymend; ssym++, symp++)
+	{
+	  symp->u.ssym = ssym;
+	  symp->name = bfd_elf_string_from_elf_section (bfd2,
+							hdr2->sh_link,
+							ssym->st_name);
+	}
+
+      /* Sort symbol by name.  */
+      qsort (symtable1, count1, sizeof (struct elf_symbol),
+	     elf_sym_name_compare);
+      qsort (symtable2, count1, sizeof (struct elf_symbol),
+	     elf_sym_name_compare);
+
+      for (i = 0; i < count1; i++)
+	/* Two symbols must have the same binding, type and name.  */
+	if (symtable1 [i].u.ssym->st_info != symtable2 [i].u.ssym->st_info
+	    || symtable1 [i].u.ssym->st_other != symtable2 [i].u.ssym->st_other
+	    || strcmp (symtable1 [i].name, symtable2 [i].name) != 0)
+	  goto done;
+
+      result = TRUE;
+      goto done;
+    }
+
+  symtable1 = bfd_malloc (symcount1 * sizeof (struct elf_symbol));
+  symtable2 = bfd_malloc (symcount2 * sizeof (struct elf_symbol));
+  if (symtable1 == NULL || symtable2 == NULL)
+    goto done;
 
   /* Count definitions in the section.  */
   count1 = 0;
-  for (isym = isymbuf1, isymend = isym + symcount1;
-       isym < isymend; isym++)
-    {
-      if (isym->st_shndx == (unsigned int) shndx1)
-	{
-	  if (count1 == 0)
-	    isymstart1 = isym;
-	  count1++;
-	}
-
-      if (count1 && isym->st_shndx != (unsigned int) shndx1)
-	break;
-    }
+  for (isym = isymbuf1, isymend = isym + symcount1; isym < isymend; isym++)
+    if (isym->st_shndx == (unsigned int) shndx1)
+      symtable1[count1++].u.isym = isym;
 
   count2 = 0;
-  for (isym = isymbuf2, isymend = isym + symcount2;
-       isym < isymend; isym++)
-    {
-      if (isym->st_shndx == (unsigned int) shndx2)
-	{
-	  if (count2 == 0)
-	    isymstart2 = isym;
-	  count2++;
-	}
-
-      if (count2 && isym->st_shndx != (unsigned int) shndx2)
-	break;
-    }
+  for (isym = isymbuf2, isymend = isym + symcount2; isym < isymend; isym++)
+    if (isym->st_shndx == (unsigned int) shndx2)
+      symtable2[count2++].u.isym = isym;
 
   if (count1 == 0 || count2 == 0 || count1 != count2)
     goto done;
 
-  symtable1 = bfd_malloc (count1 * sizeof (struct elf_symbol));
-  symtable2 = bfd_malloc (count1 * sizeof (struct elf_symbol));
+  for (i = 0; i < count1; i++)
+    symtable1[i].name
+      = bfd_elf_string_from_elf_section (bfd1, hdr1->sh_link,
+					 symtable1[i].u.isym->st_name);
 
-  if (symtable1 == NULL || symtable2 == NULL)
-    goto done;
+  for (i = 0; i < count2; i++)
+    symtable2[i].name
+      = bfd_elf_string_from_elf_section (bfd2, hdr2->sh_link,
+					 symtable2[i].u.isym->st_name);
 
-  symp = symtable1;
-  for (isym = isymstart1, isymend = isym + count1;
-       isym < isymend; isym++)
-    {
-      symp->sym = isym;
-      symp->name = bfd_elf_string_from_elf_section (bfd1,
-						    hdr1->sh_link,
-						    isym->st_name);
-      symp++;
-    }
- 
-  symp = symtable2;
-  for (isym = isymstart2, isymend = isym + count1;
-       isym < isymend; isym++)
-    {
-      symp->sym = isym;
-      symp->name = bfd_elf_string_from_elf_section (bfd2,
-						    hdr2->sh_link,
-						    isym->st_name);
-      symp++;
-    }
-  
   /* Sort symbol by name.  */
   qsort (symtable1, count1, sizeof (struct elf_symbol),
 	 elf_sym_name_compare);
@@ -8949,8 +9064,8 @@ bfd_elf_match_symbols_in_sections (asection *sec1, asection *sec2,
 
   for (i = 0; i < count1; i++)
     /* Two symbols must have the same binding, type and name.  */
-    if (symtable1 [i].sym->st_info != symtable2 [i].sym->st_info
-	|| symtable1 [i].sym->st_other != symtable2 [i].sym->st_other
+    if (symtable1 [i].u.isym->st_info != symtable2 [i].u.isym->st_info
+	|| symtable1 [i].u.isym->st_other != symtable2 [i].u.isym->st_other
 	|| strcmp (symtable1 [i].name, symtable2 [i].name) != 0)
       goto done;
 
@@ -8961,13 +9076,10 @@ done:
     free (symtable1);
   if (symtable2)
     free (symtable2);
-  if (info->reduce_memory_overheads)
-    {
-      if (isymbuf1)
-	free (isymbuf1);
-      if (isymbuf2)
-	free (isymbuf2);
-    }
+  if (isymbuf1)
+    free (isymbuf1);
+  if (isymbuf2)
+    free (isymbuf2);
 
   return result;
 }
