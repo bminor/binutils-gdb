@@ -2615,9 +2615,13 @@ A @dfn{handler} is used to fine-tune the @code{gdbarch} structure for the
 selected OS ABI.  There may be only one handler for a given OS ABI
 for each BFD architecture.
 
-The following OS ABI variants are defined in @file{osabi.h}:
+The following OS ABI variants are defined in @file{defs.h}:
 
 @table @code
+
+@findex GDB_OSABI_UNINITIALIZED
+@item GDB_OSABI_UNINITIALIZED
+Used for struct gdbarch_info if ABI is still uninitialized.
 
 @findex GDB_OSABI_UNKNOWN
 @item GDB_OSABI_UNKNOWN
@@ -2626,63 +2630,87 @@ settings for the architecture will be used.
 
 @findex GDB_OSABI_SVR4
 @item GDB_OSABI_SVR4
-UNIX System V Release 4
+UNIX System V Release 4.
 
 @findex GDB_OSABI_HURD
 @item GDB_OSABI_HURD
-GNU using the Hurd kernel
+GNU using the Hurd kernel.
 
 @findex GDB_OSABI_SOLARIS
 @item GDB_OSABI_SOLARIS
-Sun Solaris
+Sun Solaris.
 
 @findex GDB_OSABI_OSF1
 @item GDB_OSABI_OSF1
-OSF/1, including Digital UNIX and Compaq Tru64 UNIX
+OSF/1, including Digital UNIX and Compaq Tru64 UNIX.
 
 @findex GDB_OSABI_LINUX
 @item GDB_OSABI_LINUX
-GNU using the Linux kernel
+GNU using the Linux kernel.
 
 @findex GDB_OSABI_FREEBSD_AOUT
 @item GDB_OSABI_FREEBSD_AOUT
-FreeBSD using the a.out executable format
+FreeBSD using the @code{a.out} executable format.
 
 @findex GDB_OSABI_FREEBSD_ELF
 @item GDB_OSABI_FREEBSD_ELF
-FreeBSD using the ELF executable format
+FreeBSD using the ELF executable format.
 
 @findex GDB_OSABI_NETBSD_AOUT
 @item GDB_OSABI_NETBSD_AOUT
-NetBSD using the a.out executable format
+NetBSD using the @code{a.out} executable format.
 
 @findex GDB_OSABI_NETBSD_ELF
 @item GDB_OSABI_NETBSD_ELF
-NetBSD using the ELF executable format
+NetBSD using the ELF executable format.
+
+@findex GDB_OSABI_OPENBSD_ELF
+@item GDB_OSABI_OPENBSD_ELF
+OpenBSD using the ELF executable format.
 
 @findex GDB_OSABI_WINCE
 @item GDB_OSABI_WINCE
-Windows CE
+Windows CE.
 
 @findex GDB_OSABI_GO32
 @item GDB_OSABI_GO32
-DJGPP
+DJGPP.
 
 @findex GDB_OSABI_NETWARE
 @item GDB_OSABI_NETWARE
-Novell NetWare
+Novell NetWare.
 
-@findex GDB_OSABI_ARM_EABI_V1
-@item GDB_OSABI_ARM_EABI_V1
-ARM Embedded ABI version 1
+@findex GDB_OSABI_IRIX
+@item GDB_OSABI_IRIX
+Irix.
 
-@findex GDB_OSABI_ARM_EABI_V2
-@item GDB_OSABI_ARM_EABI_V2
-ARM Embedded ABI version 2
+@findex GDB_OSABI_LYNXOS
+@item GDB_OSABI_LYNXOS
+LynxOS.
 
-@findex GDB_OSABI_ARM_APCS
-@item GDB_OSABI_ARM_APCS
-Generic ARM Procedure Call Standard
+@findex GDB_OSABI_INTERIX
+@item GDB_OSABI_INTERIX
+Interix (Posix layer for MS-Windows systems).
+
+@findex GDB_OSABI_HPUX_ELF
+@item GDB_OSABI_HPUX_ELF
+HP/UX using the ELF executable format.
+
+@findex GDB_OSABI_HPUX_SOM
+@item GDB_OSABI_HPUX_SOM
+HP/UX using the SOM executable format.
+
+@findex GDB_OSABI_QNXNTO
+@item GDB_OSABI_QNXNTO
+QNX Neutrino.
+
+@findex GDB_OSABI_CYGWIN
+@item GDB_OSABI_CYGWIN
+Cygwin.
+
+@findex GDB_OSABI_AIX
+@item GDB_OSABI_AIX
+AIX.
 
 @end table
 
@@ -2720,6 +2748,13 @@ Invoke the OS ABI handler corresponding to @var{osabi} to fine-tune the
 corresponding to @var{osabi} has not been registered for @var{gdbarch}'s
 architecture, a warning will be issued and the debugging session will continue
 with the defaults already established for @var{gdbarch}.
+@end deftypefun
+
+@deftypefun void generic_elf_osabi_sniff_abi_tag_sections (bfd *@var{abfd}, asection *@var{sect}, void *@var{obj})
+Helper routine for ELF file sniffers.  Examine the file described by
+@var{abfd} and look at ABI tag note sections to determine the OS ABI
+from the note.  This function should be called via
+@code{bfd_map_over_sections}.
 @end deftypefun
 
 @section Initializing a New Architecture

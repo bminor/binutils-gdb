@@ -1,3 +1,9 @@
+2007-02-02  Markus Deuling  <deuling@de.ibm.com>  (tiny change)
+
+        * gdbint.texinfo (Operation System ABI Variant Handling): Update
+	descriptions for new/deleted elements in gdb_osabi.  Add missing
+	description for function generic_elf_osabi_sniff_abi_tag_sections.
+
 2007-01-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Maintenance Commands): Add documentation for
@@ -6,7 +12,7 @@
 2007-01-26  Jan Kratochvil <jan.kratochvil@redhat.com>
 	    Eli Zaretskii  <eliz@gnu.org>
 
-	* gdb.texinfo: Describe CHAR array vs. string identifcation rules.
+	* gdb.texinfo: Describe CHAR array vs. string identification rules.
 
 2007-01-26  Eli Zaretskii  <eliz@gnu.org>
 
