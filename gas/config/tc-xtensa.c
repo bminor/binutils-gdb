@@ -10991,17 +10991,6 @@ tinsn_init (TInsn *dst)
 }
 
 
-/* Get the ``num''th token of the TInsn.
-   It is illegal to call this if num > insn->ntoks.  */
-
-expressionS *
-tinsn_get_tok (TInsn *insn, int num)
-{
-  assert (num < insn->ntok);
-  return &insn->tok[num];
-}
-
-
 /* Return TRUE if ANY of the operands in the insn are symbolic.  */
 
 static bfd_boolean

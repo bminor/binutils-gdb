@@ -1,5 +1,11 @@
 2007-02-02  Bob Wilson  <bob.wilson@acm.org>
 
+	* config/xtensa-istack.h (struct tinsn_struct): Delete fixup field.
+	(tinsn_get_tok): Delete prototype.
+	* config/tc-xtensa.c (tinsn_get_tok): Delete.
+	
+2007-02-02  Bob Wilson  <bob.wilson@acm.org>
+
 	* config/xtensa-relax.h (struct build_instr): Delete id field.
 	* config/xtensa-relax.c (widen_spec_list): Remove zeros from LITERAL
 	and LABEL tokens.
