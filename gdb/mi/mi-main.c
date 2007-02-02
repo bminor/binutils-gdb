@@ -1461,7 +1461,7 @@ mi_load_progress (const char *section_name,
   if (delta.tv_usec < 0)
     {
       delta.tv_sec -= 1;
-      delta.tv_usec += 1000000;
+      delta.tv_usec += 1000000L;
     }
 
   new_section = (previous_sect_name ?
@@ -1537,8 +1537,8 @@ timestamp (struct mi_timestamp *tv)
     tv->stime.tv_usec = rusage.ru_stime.tv_usec;
 #else
     usec = get_run_time ();
-    tv->utime.tv_sec = usec/1000000;
-    tv->utime.tv_usec = usec - 1000000*tv->utime.tv_sec;
+    tv->utime.tv_sec = usec/1000000L;
+    tv->utime.tv_usec = usec - 1000000L*tv->utime.tv_sec;
     tv->stime.tv_sec = 0;
     tv->stime.tv_usec = 0;
 #endif
@@ -1555,7 +1555,7 @@ print_diff_now (struct mi_timestamp *start)
 static long 
 timeval_diff (struct timeval start, struct timeval end)
   {
-    return ((end.tv_sec - start.tv_sec) * 1000000)
+    return ((end.tv_sec - start.tv_sec) * 1000000L)
       + (end.tv_usec - start.tv_usec);
   }
 
