@@ -2856,6 +2856,26 @@ print_insn_i386 (bfd_vma pc, disassemble_info *info)
   return print_insn (pc, info);
 }
 
+void
+print_i386_disassembler_options (FILE *stream)
+{
+  fprintf (stream, _("\n\
+The following i386/x86-64 specific disassembler options are supported for use\n\
+with the -M switch (multiple options should be separated by commas):\n"));
+
+  fprintf (stream, _("  x86-64      Disassemble in 64bit mode\n"));
+  fprintf (stream, _("  i386        Disassemble in 32bit mode\n"));
+  fprintf (stream, _("  i8086       Disassemble in 16bit mode\n"));
+  fprintf (stream, _("  att         Display instruction in AT&T syntax\n"));
+  fprintf (stream, _("  intel       Display instruction in Intel syntax\n"));
+  fprintf (stream, _("  addr64      Assume 64bit address size\n"));
+  fprintf (stream, _("  addr32      Assume 32bit address size\n"));
+  fprintf (stream, _("  addr16      Assume 16bit address size\n"));
+  fprintf (stream, _("  data32      Assume 32bit data size\n"));
+  fprintf (stream, _("  data16      Assume 16bit data size\n"));
+  fprintf (stream, _("  suffix      Always display instruction suffix in AT&T syntax\n"));
+}
+
 static int
 print_insn (bfd_vma pc, disassemble_info *info)
 {
@@ -2917,10 +2937,20 @@ print_insn (bfd_vma pc, disassemble_info *info)
 	}
       else if (CONST_STRNEQ (p, "addr"))
 	{
-	  if (p[4] == '1' && p[5] == '6')
-	    priv.orig_sizeflag &= ~AFLAG;
-	  else if (p[4] == '3' && p[5] == '2')
-	    priv.orig_sizeflag |= AFLAG;
+	  if (address_mode == mode_64bit)
+	    {
+	      if (p[4] == '3' && p[5] == '2')
+		priv.orig_sizeflag &= ~AFLAG;
+	      else if (p[4] == '6' && p[5] == '4')
+		priv.orig_sizeflag |= AFLAG;
+	    }
+	  else
+	    {
+	      if (p[4] == '1' && p[5] == '6')
+		priv.orig_sizeflag &= ~AFLAG;
+	      else if (p[4] == '3' && p[5] == '2')
+		priv.orig_sizeflag |= AFLAG;
+	    }
 	}
       else if (CONST_STRNEQ (p, "data"))
 	{

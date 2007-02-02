@@ -448,6 +448,9 @@ disassembler_usage (stream)
 #ifdef ARCH_powerpc
   print_ppc_disassembler_options (stream);
 #endif
+#ifdef ARCH_i386
+  print_i386_disassembler_options (stream);
+#endif
 
   return;
 }
