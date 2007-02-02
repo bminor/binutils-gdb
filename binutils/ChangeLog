@@ -1,13 +1,13 @@
-2076-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+2007-02-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* MAINTAINERS: Add a space between H.J. and Lu.
 
-2076-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+2007-02-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* doc/binutils.texi (objdump): Document the new addr64 option
 	for i386 disassembler.
 
-2076-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+2007-02-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/3945
 	* configure.in (DLLTOOL_DEFAULT): New. Defined for the first PE
