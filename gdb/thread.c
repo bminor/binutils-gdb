@@ -65,6 +65,8 @@ static void thread_apply_command (char *, int);
 static void restore_current_thread (ptid_t);
 static void switch_to_thread (ptid_t ptid);
 static void prune_threads (void);
+static struct cleanup *make_cleanup_restore_current_thread (ptid_t,
+                                                            struct frame_id);
 
 void
 delete_step_resume_breakpoint (void *arg)
@@ -408,8 +410,13 @@ info_threads_command (char *arg, int from_tty)
   struct thread_info *tp;
   ptid_t current_ptid;
   struct frame_info *cur_frame;
-  struct frame_id saved_frame_id = get_frame_id (get_selected_frame (NULL));
+  struct cleanup *old_chain;
+  struct frame_id saved_frame_id;
   char *extra_info;
+
+  /* Backup current thread and selected frame.  */
+  saved_frame_id = get_frame_id (get_selected_frame (NULL));
+  old_chain = make_cleanup_restore_current_thread (inferior_ptid, saved_frame_id);
 
   prune_threads ();
   target_find_new_threads ();
@@ -427,29 +434,21 @@ info_threads_command (char *arg, int from_tty)
       if (extra_info)
 	printf_filtered (" (%s)", extra_info);
       puts_filtered ("  ");
-
+      /* That switch put us at the top of the stack (leaf frame).  */
       switch_to_thread (tp->ptid);
       print_stack_frame (get_selected_frame (NULL), 0, LOCATION);
     }
 
-  switch_to_thread (current_ptid);
+  /* Restores the current thread and the frame selected before
+     the "info threads" command.  */
+  do_cleanups (old_chain);
 
-  /* Restores the frame set by the user before the "info threads"
-     command.  We have finished the info-threads display by switching
-     back to the current thread.  That switch has put us at the top of
-     the stack (leaf frame).  */
-  cur_frame = frame_find_by_id (saved_frame_id);
-  if (cur_frame == NULL)
+  /*  If case we were not able to find the original frame, print the
+      new selected frame.  */
+  if (frame_find_by_id (saved_frame_id) == NULL)
     {
-      /* Ooops, can't restore, tell user where we are.  */
       warning (_("Couldn't restore frame in current thread, at frame 0"));
       print_stack_frame (get_selected_frame (NULL), 0, LOCATION);
-    }
-  else
-    {
-      select_frame (cur_frame);
-      /* re-show current frame. */
-      show_stack_frame (cur_frame);
     }
 }
 
@@ -474,13 +473,27 @@ restore_current_thread (ptid_t ptid)
   if (!ptid_equal (ptid, inferior_ptid))
     {
       switch_to_thread (ptid);
-      print_stack_frame (get_current_frame (), 1, SRC_LINE);
+    }
+}
+
+static void
+restore_selected_frame (struct frame_id a_frame_id)
+{
+  struct frame_info *selected_frame_info = NULL;
+
+  if (frame_id_eq (a_frame_id, null_frame_id))
+    return;        
+
+  if ((selected_frame_info = frame_find_by_id (a_frame_id)) != NULL)
+    {
+      select_frame (selected_frame_info);
     }
 }
 
 struct current_thread_cleanup
 {
   ptid_t inferior_ptid;
+  struct frame_id selected_frame_id;
 };
 
 static void
@@ -488,15 +501,18 @@ do_restore_current_thread_cleanup (void *arg)
 {
   struct current_thread_cleanup *old = arg;
   restore_current_thread (old->inferior_ptid);
+  restore_selected_frame (old->selected_frame_id);
   xfree (old);
 }
 
 static struct cleanup *
-make_cleanup_restore_current_thread (ptid_t inferior_ptid)
+make_cleanup_restore_current_thread (ptid_t inferior_ptid, 
+                                     struct frame_id a_frame_id)
 {
   struct current_thread_cleanup *old
     = xmalloc (sizeof (struct current_thread_cleanup));
   old->inferior_ptid = inferior_ptid;
+  old->selected_frame_id = a_frame_id;
   return make_cleanup (do_restore_current_thread_cleanup, old);
 }
 
@@ -516,11 +532,16 @@ thread_apply_all_command (char *cmd, int from_tty)
   struct cleanup *old_chain;
   struct cleanup *saved_cmd_cleanup_chain;
   char *saved_cmd;
+  struct frame_id saved_frame_id;
+  ptid_t current_ptid;
+  int thread_has_changed = 0;
 
   if (cmd == NULL || *cmd == '\000')
     error (_("Please specify a command following the thread ID list"));
-
-  old_chain = make_cleanup_restore_current_thread (inferior_ptid);
+  
+  current_ptid = inferior_ptid;
+  saved_frame_id = get_frame_id (get_selected_frame (NULL));
+  old_chain = make_cleanup_restore_current_thread (inferior_ptid, saved_frame_id);
 
   /* It is safe to update the thread list now, before
      traversing it for "thread apply all".  MVS */
@@ -540,8 +561,15 @@ thread_apply_all_command (char *cmd, int from_tty)
 	strcpy (cmd, saved_cmd);	/* Restore exact command used previously */
       }
 
+  if (!ptid_equal (current_ptid, inferior_ptid))
+    thread_has_changed = 1;
+
   do_cleanups (saved_cmd_cleanup_chain);
   do_cleanups (old_chain);
+  /* Print stack frame only if we changed thread.  */
+  if (thread_has_changed)
+    print_stack_frame (get_current_frame (), 1, SRC_LINE);
+
 }
 
 static void
@@ -552,6 +580,9 @@ thread_apply_command (char *tidlist, int from_tty)
   struct cleanup *old_chain;
   struct cleanup *saved_cmd_cleanup_chain;
   char *saved_cmd;
+  struct frame_id saved_frame_id;
+  ptid_t current_ptid;
+  int thread_has_changed = 0;
 
   if (tidlist == NULL || *tidlist == '\000')
     error (_("Please specify a thread ID list"));
@@ -561,7 +592,9 @@ thread_apply_command (char *tidlist, int from_tty)
   if (*cmd == '\000')
     error (_("Please specify a command following the thread ID list"));
 
-  old_chain = make_cleanup_restore_current_thread (inferior_ptid);
+  current_ptid = inferior_ptid;
+  saved_frame_id = get_frame_id (get_selected_frame (NULL));
+  old_chain = make_cleanup_restore_current_thread (inferior_ptid, saved_frame_id);
 
   /* Save a copy of the command in case it is clobbered by
      execute_command */
@@ -613,8 +646,14 @@ thread_apply_command (char *tidlist, int from_tty)
 	}
     }
 
+  if (!ptid_equal (current_ptid, inferior_ptid))
+    thread_has_changed = 1;
+
   do_cleanups (saved_cmd_cleanup_chain);
   do_cleanups (old_chain);
+  /* Print stack frame only if we changed thread.  */
+  if (thread_has_changed)
+    print_stack_frame (get_current_frame (), 1, SRC_LINE);
 }
 
 /* Switch to the specified thread.  Will dispatch off to thread_apply_command

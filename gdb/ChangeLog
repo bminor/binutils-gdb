@@ -1,5 +1,19 @@
 2007-02-02  Denis Pilat  <denis.pilat@st.com>
 
+	* thread.c (make_cleanup_restore_current_thread): New function.
+	(info_threads_command): Use of make_cleanup_restore_current_thread
+	to restore the current thread and the selected frame.
+	(restore_selected_frame): New function.
+	(struct current_thread_cleanup): Add frame_id field.
+	(do_restore_current_thread_cleanup): Add restoring of the selected
+	frame.
+	(make_cleanup_restore_current_thread): Likewise.
+	(thread_apply_all_command): backup the selected frame while 
+	entering the function and restore it at exit.
+	(thread_apply_command): Likewise.
+
+2007-02-02  Denis Pilat  <denis.pilat@st.com>
+
 	* MAINTAINERS (Write After Approval): Add myself to the list.
 
 2006-02-01  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
