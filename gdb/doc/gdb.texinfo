@@ -21508,6 +21508,50 @@ The corresponding @value{GDBN} command is @samp{show inferior-tty}.
 (gdb)
 @end smallexample
 
+@subheading The @code{-enable-timings} Command
+@findex -enable-timings
+
+@subheading Synopsis
+
+@smallexample
+-enable-timings [yes | no]
+@end smallexample
+
+Toggle the printing of the wallclock, user and system times for an MI
+command as a field in its output.  This command is to help frontend
+developers optimize the performance of their code.  No argument is
+equivalent to @samp{yes}.
+
+@subheading @value{GDBN} Command
+
+No equivalent.
+
+@subheading Example
+
+@smallexample
+(gdb)
+-enable-timings
+^done
+(gdb)
+-break-insert main
+^done,bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
+addr="0x080484ed",func="main",file="myprog.c",
+fullname="/home/nickrob/myprog.c",line="73",times="0"@},
+time=@{wallclock="0.05185",user="0.00800",system="0.00000"@}
+(gdb)
+-enable-timings no
+^done
+(gdb)
+-exec-run
+^running
+(gdb)
+*stopped,reason="breakpoint-hit",bkptno="1",thread-id="0",
+frame=@{addr="0x080484ed",func="main",args=[@{name="argc",value="1"@},
+@{name="argv",value="0xbfb60364"@}],file="myprog.c",
+fullname="/home/nickrob/myprog.c",line="73"@}
+(gdb)
+@end smallexample
+
 @node Annotations
 @chapter @value{GDBN} Annotations
 
