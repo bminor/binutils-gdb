@@ -1,5 +1,5 @@
 /* Table of relaxations for Xtensa assembly.
-   Copyright 2003, 2004, 2005 Free Software Foundation, Inc.
+   Copyright 2003, 2004, 2005, 2007 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1661,35 +1661,26 @@ build_transition (insn_pattern *initial_insn,
 	{
 	  op1 = get_opmatch (&initial_insn->t.operand_map, precond->opname1);
 	  if (op1 == NULL)
-	    {
-	      as_fatal (_("opcode '%s': no bound opname '%s' "
-			  "for precondition in '%s'"),
-			xtensa_opcode_name (isa, opcode),
-			precond->opname1, from_string);
-	      return NULL;
-	    }
+	    as_fatal (_("opcode '%s': no bound opname '%s' "
+			"for precondition in '%s'"),
+		      xtensa_opcode_name (isa, opcode),
+		      precond->opname1, from_string);
 	}
 
       if (precond->opname2)
 	{
 	  op2 = get_opmatch (&initial_insn->t.operand_map, precond->opname2);
 	  if (op2 == NULL)
-	    {
-	      as_fatal (_("opcode '%s': no bound opname '%s' "
-			  "for precondition in %s"),
-		       xtensa_opcode_name (isa, opcode),
-		       precond->opname2, from_string);
-	      return NULL;
-	    }
+	    as_fatal (_("opcode '%s': no bound opname '%s' "
+			"for precondition in %s"),
+		      xtensa_opcode_name (isa, opcode),
+		      precond->opname2, from_string);
 	}
 
       if (op1 == NULL && op2 == NULL)
-	{
-	  as_fatal (_("opcode '%s': precondition only contains "
-		      "constants in '%s'"),
-		    xtensa_opcode_name (isa, opcode), from_string);
-	  return NULL;
-	}
+	as_fatal (_("opcode '%s': precondition only contains "
+		    "constants in '%s'"),
+		  xtensa_opcode_name (isa, opcode), from_string);
       else if (op1 != NULL && op2 != NULL)
 	append_value_condition (tr, precond->cmpop,
 				op1->operand_num, op2->operand_num);
@@ -1806,14 +1797,9 @@ build_transition (insn_pattern *initial_insn,
 	      orig_op = get_opmatch (&initial_insn->t.operand_map,
 				     op->operand_name);
 	      if (orig_op == NULL)
-		{
-		  as_fatal (_("opcode %s: unidentified operand '%s' in '%s'"),
-			    opcode_name, op->operand_name, to_string);
-
-		  append_constant_op (bi, op->operand_num, 0);
-		}
-	      else
-		append_field_op (bi, op->operand_num, orig_op->operand_num);
+		as_fatal (_("opcode %s: unidentified operand '%s' in '%s'"),
+			  opcode_name, op->operand_name, to_string);
+	      append_field_op (bi, op->operand_num, orig_op->operand_num);
 	    }
 	  else if (parse_special_fn (op->operand_name,
 				     &fn_name, &operand_arg_name))
@@ -1837,30 +1823,20 @@ build_transition (insn_pattern *initial_insn,
 	      orig_op = get_opmatch (&initial_insn->t.operand_map,
 				     operand_arg_name);
 	      if (orig_op == NULL)
-		{
-		  as_fatal (_("opcode %s: unidentified operand '%s' in '%s'"),
-			    opcode_name, op->operand_name, to_string);
-		  append_constant_op (bi, op->operand_num, 0);
-		}
-	      else
-		append_user_fn_field_op (bi, op->operand_num,
-					 typ, orig_op->operand_num);
+		as_fatal (_("opcode %s: unidentified operand '%s' in '%s'"),
+			  opcode_name, op->operand_name, to_string);
+	      append_user_fn_field_op (bi, op->operand_num,
+				       typ, orig_op->operand_num);
 	    }
 	  else
-	    {
-	      as_fatal (_("opcode %s: could not parse operand '%s' in '%s'"),
-			opcode_name, op->operand_name, to_string);
-	      append_constant_op (bi, op->operand_num, 0);
-	    }
+	    as_fatal (_("opcode %s: could not parse operand '%s' in '%s'"),
+		      opcode_name, op->operand_name, to_string);
 	}
     }
   if (has_label && max_label_count >= label_count)
-    {
-      as_fatal (_("opcode %s: replacement label %d >= label_count(%d)"),
-		xtensa_opcode_name (isa, opcode),
-		max_label_count, label_count);
-      return NULL;
-    }
+    as_fatal (_("opcode %s: replacement label %d >= label_count(%d)"),
+	      xtensa_opcode_name (isa, opcode),
+	      max_label_count, label_count);
 
   return tr;
 }
@@ -1898,20 +1874,11 @@ build_transition_table (const string_pattern_pair *transitions,
 
       init_insn_pattern (&initial_insn);
       if (!parse_insn_pattern (from_string, &initial_insn))
-	{
-	  as_fatal (_("could not parse INSN_PATTERN '%s'"), from_string);
-	  clear_insn_pattern (&initial_insn);
-	  continue;
-	}
+	as_fatal (_("could not parse INSN_PATTERN '%s'"), from_string);
 
       init_insn_repl (&replace_insns);
       if (!parse_insn_repl (to_string, &replace_insns))
-	{
-	  as_fatal (_("could not parse INSN_REPL '%s'"), to_string);
-	  clear_insn_pattern (&initial_insn);
-	  clear_insn_repl (&replace_insns);
-	  continue;
-	}
+	as_fatal (_("could not parse INSN_REPL '%s'"), to_string);
 
       if (transition_applies (&initial_insn, from_string, to_string))
 	{
