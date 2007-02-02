@@ -1,3 +1,10 @@
+2007-02-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c (insert_bdm): -Many comment.
+	(valid_bo): Add "extract" param.  Accept both powerpc and power4
+	BO fields when disassembling with -Many.
+	(insert_bo, extract_bo, insert_boe, extract_boe): Adjust valid_bo call.
+
 2007-01-08  Kazu Hirata  <kazu@codesourcery.com>
 
 	* m68k-opc.c (m68k_opcodes): Replace cpu32 with

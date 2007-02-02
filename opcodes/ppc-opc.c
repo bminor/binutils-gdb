@@ -1,6 +1,6 @@
 /* ppc-opc.c -- PowerPC opcode list
    Copyright 1994, 1995, 1996, 1997, 1998, 2000, 2001, 2002, 2003, 2004,
-   2005 Free Software Foundation, Inc.
+   2005, 2006, 2007 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support
 
    This file is part of GDB, GAS, and the GNU binutils.
@@ -683,7 +683,11 @@ extract_bd (unsigned long insn,
    the "y" bit.  "at" == 00 => no hint, "at" == 01 => unpredictable,
    "at" == 10 => not taken, "at" == 11 => taken.  The "t" bit is 00001
    in BO field, the "a" bit is 00010 for branch on CR(BI) and 01000
-   for branch on CTR.  We only handle the taken/not-taken hint here.  */
+   for branch on CTR.  We only handle the taken/not-taken hint here.
+   Note that we don't relax the conditions tested here when
+   disassembling with -Many because insns using extract_bdm and
+   extract_bdp always occur in pairs.  One or the other will always
+   be valid.  */
 
 static unsigned long
 insert_bdm (unsigned long insn,
@@ -774,10 +778,11 @@ extract_bdp (unsigned long insn,
 /* Check for legal values of a BO field.  */
 
 static int
-valid_bo (long value, int dialect)
+valid_bo (long value, int dialect, int extract)
 {
   if ((dialect & PPC_OPCODE_POWER4) == 0)
     {
+      int valid;
       /* Certain encodings have bits that are required to be zero.
 	 These are (z must be zero, y may be anything):
 	     001zy
@@ -790,36 +795,43 @@ valid_bo (long value, int dialect)
 	{
 	default:
 	case 0:
-	  return 1;
+	  valid = 1;
+	  break;
 	case 0x4:
-	  return (value & 0x2) == 0;
+	  valid = (value & 0x2) == 0;
+	  break;
 	case 0x10:
-	  return (value & 0x8) == 0;
+	  valid = (value & 0x8) == 0;
+	  break;
 	case 0x14:
-	  return value == 0x14;
+	  valid = value == 0x14;
+	  break;
 	}
+      /* When disassembling with -Many, accept power4 encodings too.  */
+      if (valid
+	  || (dialect & PPC_OPCODE_ANY) == 0
+	  || !extract)
+	return valid;
     }
+
+  /* Certain encodings have bits that are required to be zero.
+     These are (z must be zero, a & t may be anything):
+	 0000z
+	 0001z
+	 0100z
+	 0101z
+	 001at
+	 011at
+	 1a00t
+	 1a01t
+	 1z1zz
+  */
+  if ((value & 0x14) == 0)
+    return (value & 0x1) == 0;
+  else if ((value & 0x14) == 0x14)
+    return value == 0x14;
   else
-    {
-      /* Certain encodings have bits that are required to be zero.
-	 These are (z must be zero, a & t may be anything):
-	     0000z
-	     0001z
-	     0100z
-	     0101z
-	     001at
-	     011at
-	     1a00t
-	     1a01t
-	     1z1zz
-      */
-      if ((value & 0x14) == 0)
-	return (value & 0x1) == 0;
-      else if ((value & 0x14) == 0x14)
-	return value == 0x14;
-      else
-	return 1;
-    }
+    return 1;
 }
 
 /* The BO field in a B form instruction.  Warn about attempts to set
@@ -831,7 +843,7 @@ insert_bo (unsigned long insn,
 	   int dialect,
 	   const char **errmsg)
 {
-  if (!valid_bo (value, dialect))
+  if (!valid_bo (value, dialect, 0))
     *errmsg = _("invalid conditional option");
   return insn | ((value & 0x1f) << 21);
 }
@@ -844,7 +856,7 @@ extract_bo (unsigned long insn,
   long value;
 
   value = (insn >> 21) & 0x1f;
-  if (!valid_bo (value, dialect))
+  if (!valid_bo (value, dialect, 1))
     *invalid = 1;
   return value;
 }
@@ -859,7 +871,7 @@ insert_boe (unsigned long insn,
 	    int dialect,
 	    const char **errmsg)
 {
-  if (!valid_bo (value, dialect))
+  if (!valid_bo (value, dialect, 0))
     *errmsg = _("invalid conditional option");
   else if ((value & 1) != 0)
     *errmsg = _("attempt to set y bit when using + or - modifier");
@@ -875,7 +887,7 @@ extract_boe (unsigned long insn,
   long value;
 
   value = (insn >> 21) & 0x1f;
-  if (!valid_bo (value, dialect))
+  if (!valid_bo (value, dialect, 1))
     *invalid = 1;
   return value & 0x1e;
 }
