@@ -1,3 +1,9 @@
+2007-02-02  Hiroki Kaminaga  <kaminaga@sm.sony.co.jp>
+
+	* ppc-dis.c (powerpc_dialect): Handle ppc440.
+	* ppc-dis.c (print_ppc_disassembler_options): Note the -M440 can
+	be used.
+
 2007-02-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* ppc-opc.c (insert_bdm): -Many comment.

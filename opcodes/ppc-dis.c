@@ -1,5 +1,5 @@
 /* ppc-dis.c -- Disassemble PowerPC instructions
-   Copyright 1994, 1995, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright 1994, 1995, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support
 
@@ -61,6 +61,10 @@ powerpc_dialect (struct disassemble_info *info)
   else if (info->disassembler_options
 	   && strstr (info->disassembler_options, "e300") != NULL)
     dialect |= PPC_OPCODE_E300 | PPC_OPCODE_CLASSIC | PPC_OPCODE_COMMON;
+  else if (info->disassembler_options
+	   && strstr (info->disassembler_options, "440") != NULL)
+    dialect |= PPC_OPCODE_BOOKE | PPC_OPCODE_32
+      | PPC_OPCODE_440 | PPC_OPCODE_ISEL | PPC_OPCODE_RFMCI;
   else
     dialect |= (PPC_OPCODE_403 | PPC_OPCODE_601 | PPC_OPCODE_CLASSIC
 		| PPC_OPCODE_COMMON | PPC_OPCODE_ALTIVEC);
@@ -311,6 +315,7 @@ the -M switch:\n");
   fprintf (stream, "  booke|booke32|booke64    Disassemble the BookE instructions\n");
   fprintf (stream, "  e300                     Disassemble the e300 instructions\n");
   fprintf (stream, "  e500|e500x2              Disassemble the e500 instructions\n");
+  fprintf (stream, "  440                      Disassemble the 440 instructions\n");
   fprintf (stream, "  efs                      Disassemble the EFS instructions\n");
   fprintf (stream, "  power4                   Disassemble the Power4 instructions\n");
   fprintf (stream, "  power5                   Disassemble the Power5 instructions\n");
