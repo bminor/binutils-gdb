@@ -387,41 +387,43 @@ static int verbose;
 static FILE *output_def;
 static FILE *base_file;
 
-#ifdef DLLTOOL_ARM
-#if defined(DLLTOOL_ARM_EPOC)
-static const char *mname = "arm-epoc";
-#elif defined(DLLTOOL_ARM_WINCE)
-static const char *mname = "arm-wince";
-#else
+#ifdef DLLTOOL_DEFAULT_ARM
 static const char *mname = "arm";
 #endif
+
+#ifdef DLLTOOL_DEFAULT_ARM_EPOC
+static const char *mname = "arm-epoc";
 #endif
 
-#ifdef DLLTOOL_I386
+#ifdef DLLTOOL_DEFAULT_ARM_WINCE
+static const char *mname = "arm-wince";
+#endif
+
+#ifdef DLLTOOL_DEFAULT_I386
 static const char *mname = "i386";
 #endif
 
-#ifdef DLLTOOL_MX86_64
+#ifdef DLLTOOL_DEFAULT_MX86_64
 static const char *mname = "i386:x86-64";
 #endif
 
-#ifdef DLLTOOL_PPC
+#ifdef DLLTOOL_DEFAULT_PPC
 static const char *mname = "ppc";
 #endif
 
-#ifdef DLLTOOL_SH
+#ifdef DLLTOOL_DEFAULT_SH
 static const char *mname = "sh";
 #endif
 
-#ifdef DLLTOOL_MIPS
+#ifdef DLLTOOL_DEFAULT_MIPS
 static const char *mname = "mips";
 #endif
 
-#ifdef DLLTOOL_MCORE
+#ifdef DLLTOOL_DEFAULT_MCORE
 static const char * mname = "mcore-le";
 #endif
 
-#ifdef DLLTOOL_MCORE_ELF
+#ifdef DLLTOOL_DEFAULT_MCORE_ELF
 static const char * mname = "mcore-elf";
 static char * mcore_elf_out_file = NULL;
 static char * mcore_elf_linker   = NULL;
