@@ -1,3 +1,8 @@
+2007-02-02  Denis Pilat  <denis.pilat@st.com>
+
+	* gdb.threads/threadapply.exp: check that frame is not changed by
+	the thread apply all command.
+
 2007-01-31  Andreas Schwab  <schwab@suse.de>
 
 	* gdb.gdb/selftest.exp (do_steps_and_nexts): Add more matches.
