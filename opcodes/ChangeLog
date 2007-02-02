@@ -1,5 +1,9 @@
 2007-02-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* avr-dis.c (avr_operand): Correct PR number in comment.
+
+2007-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* disassemble.c (disassembler_usage): Call
 	print_i386_disassembler_options for i386 disassembler.
 
