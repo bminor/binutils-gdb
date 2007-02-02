@@ -1,3 +1,27 @@
+2007-01-03  Nick Roberts  <nickrob@snap.net.nz>
+
+	    Based on work by Apple Computer, Inc.
+
+	* configure.ac: Test for sys/resource.h and getrusage.
+	* configure, config.in: Regenerate.
+
+	* mi/mi-main.c: Include <sys/resource.h> if present.
+	(rusage): Declare if HAVE_GETRUSAGE.
+	(current_command_ts, do_timings): New static variables.
+	(timestamp, print_diff_now, print_diff, timeval_diff):
+	New static timing functions.
+	(mi_cmd_enable_timings): New function for new MI command.
+	(captured_mi_execute_command, mi_execute_async_cli_command): 
+	Call timing functions.
+
+	* mi/mi-cmds.c (mi_cmds): Add entry for new MI command
+	-enable-timings.
+
+	* mi/mi-cmds.h (mi_cmd_enable_timings): New extern.
+
+	* mi/mi-parse.h: (mi_timestamp): New structure.
+	(mi_parse): Add mi_timestamp* member.
+
 2007-02-02  Denis Pilat  <denis.pilat@st.com>
 
 	* thread.c (make_cleanup_restore_current_thread): New function.
