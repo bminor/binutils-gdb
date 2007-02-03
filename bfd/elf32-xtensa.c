@@ -549,7 +549,7 @@ elf_xtensa_link_hash_table_create (bfd *abfd)
 }
 
 static inline bfd_boolean
-xtensa_elf_dynamic_symbol_p (struct elf_link_hash_entry *h,
+elf_xtensa_dynamic_symbol_p (struct elf_link_hash_entry *h,
 			     struct bfd_link_info *info)
 {
   /* Check if we should do dynamic things to this symbol.  The
@@ -1236,7 +1236,7 @@ elf_xtensa_fix_refcounts (struct elf_link_hash_entry *h, void *arg)
   if (h->root.type == bfd_link_hash_warning)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-  if (! xtensa_elf_dynamic_symbol_p (h, info))
+  if (! elf_xtensa_dynamic_symbol_p (h, info))
     elf_xtensa_make_sym_local (info, h);
 
   return TRUE;
@@ -2200,7 +2200,7 @@ elf_xtensa_relocate_section (bfd *output_bfd,
       /* Generate dynamic relocations.  */
       if (elf_hash_table (info)->dynamic_sections_created)
 	{
-	  bfd_boolean dynamic_symbol = xtensa_elf_dynamic_symbol_p (h, info);
+	  bfd_boolean dynamic_symbol = elf_xtensa_dynamic_symbol_p (h, info);
 
 	  if (dynamic_symbol && is_operand_relocation (r_type))
 	    {
@@ -8662,7 +8662,7 @@ shrink_dynamic_reloc_sections (struct bfd_link_info *info,
   else
     h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 
-  dynamic_symbol = xtensa_elf_dynamic_symbol_p (h, info);
+  dynamic_symbol = elf_xtensa_dynamic_symbol_p (h, info);
 
   if ((r_type == R_XTENSA_32 || r_type == R_XTENSA_PLT)
       && (input_section->flags & SEC_ALLOC) != 0

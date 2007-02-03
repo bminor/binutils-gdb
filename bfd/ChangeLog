@@ -1,5 +1,10 @@
 2007-02-02  Bob Wilson  <bob.wilson@acm.org>
 
+	* elf32-xtensa.c (xtensa_elf_dynamic_symbol_p): Renamed to...
+	(elf_xtensa_dynamic_symbol_p): ...this.
+
+2007-02-02  Bob Wilson  <bob.wilson@acm.org>
+
 	* elf32-xtensa.c (plt_reloc_count): Move into link hash table.
 	(struct elf_xtensa_link_hash_table): New.
 	(elf_xtensa_hash_table): New.
