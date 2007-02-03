@@ -1,3 +1,9 @@
+2007-02-03  Nick Roberts  <nickrob@snap.net.nz>
+
+	* mi/mi-main.c: Numerous formatting changes.
+	(mi_cmd_data_write_register_values): Replace clause inadvertantly
+	removed in my previous change.
+
 2007-02-03   Eli Zaretskii  <eliz@gnu.org>
 
 	* mi/mi-main.c (mi_load_progress, timestamp, print_diff_now):
