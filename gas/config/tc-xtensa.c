@@ -3309,7 +3309,7 @@ xg_build_to_insn (TInsn *targ, TInsn *insn, BuildInstr *bi)
   BuildOp *op;
   symbolS *sym;
 
-  memset (targ, 0, sizeof (TInsn));
+  tinsn_init (targ);
   targ->linenum = insn->linenum;
   switch (bi->typ)
     {
@@ -3858,7 +3858,7 @@ xg_expand_assembly_insn (IStack *istack, TInsn *orig_insn)
   TInsn new_insn;
   bfd_boolean do_expand;
 
-  memset (&new_insn, 0, sizeof (TInsn));
+  tinsn_init (&new_insn);
 
   /* Narrow it if we can.  xg_simplify_insn now does all the
      appropriate checking (e.g., for the density option).  */
@@ -11009,7 +11009,7 @@ istack_push_space (IStack *stack)
   TInsn *insn;
   assert (!istack_full (stack));
   insn = &stack->insn[rec];
-  memset (insn, 0, sizeof (TInsn));
+  tinsn_init (insn);
   stack->ninsn++;
   return insn;
 }
@@ -11024,7 +11024,7 @@ istack_pop (IStack *stack)
   int rec = stack->ninsn - 1;
   assert (!istack_empty (stack));
   stack->ninsn--;
-  memset (&stack->insn[rec], 0, sizeof (TInsn));
+  tinsn_init (&stack->insn[rec]);
 }
 
 

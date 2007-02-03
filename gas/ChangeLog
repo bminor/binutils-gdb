@@ -1,4 +1,9 @@
 2007-02-02  Bob Wilson  <bob.wilson@acm.org>
+	
+	* config/tc-xtensa.c (xg_build_to_insn): Use tinsn_init.
+	(xg_expand_assembly_insn, istack_push_space, istack_pop): Likewise.
+	
+2007-02-02  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (SUFFIX_MAP, suffix_relocs): New.
 	(xtensa_elf_suffix): Use suffix_relocs instead of local mapping table.
