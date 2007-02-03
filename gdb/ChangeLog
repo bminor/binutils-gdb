@@ -1,3 +1,8 @@
+2007-02-03   Eli Zaretskii  <eliz@gnu.org>
+
+	* mi/mi-main.c (mi_load_progress, timestamp, print_diff_now):
+	Use 1000000L instead of 1000000.
+
 2007-02-03  Nick Roberts  <nickrob@snap.net.nz>
 
 	    Based on work by Apple Computer, Inc.
