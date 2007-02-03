@@ -1,3 +1,8 @@
+2076-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/pcrel16.d: Updated.
+	* ld-x86-64/pcrel16.d: Likewise.
+
 2007-02-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-scripts/default-script.exp: Add "--local-store 0:0" to

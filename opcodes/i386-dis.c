@@ -4916,10 +4916,13 @@ OP_J (int bytemode, int sizeflag)
       else
 	{
 	  disp = get16 ();
+	  if ((disp & 0x8000) != 0)
+	    disp -= 0x10000;
 	  /* For some reason, a data16 prefix on a jump instruction
 	     means that the pc is masked to 16 bits after the
 	     displacement is added!  */
-	  mask = 0xffff;
+	  if ((prefixes & PREFIX_DATA))
+	    mask = 0xffff;
 	}
       used_prefixes |= (prefixes & PREFIX_DATA);
       break;
