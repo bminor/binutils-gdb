@@ -22,7 +22,7 @@
    Foundation, Inc., 51 Franklin Street, Fifth Floor,
    Boston, MA 02110-1301, USA.  */
 
-/* Work in progress */
+/* Work in progress.  */
 
 #include "defs.h"
 #include "target.h"
@@ -40,7 +40,7 @@
 #include "interps.h"
 #include "event-loop.h"
 #include "event-top.h"
-#include "gdbcore.h"		/* for write_memory() */
+#include "gdbcore.h"		/* For write_memory().  */
 #include "value.h"
 #include "regcache.h"
 #include "gdb.h"
@@ -64,7 +64,7 @@ enum
   };
 
 /* Enumerations of the actions that may result from calling
-   captured_mi_execute_command */
+   captured_mi_execute_command.  */
 
 enum captured_mi_execute_command_actions
   {
@@ -73,16 +73,16 @@ enum captured_mi_execute_command_actions
   };
 
 /* This structure is used to pass information from captured_mi_execute_command
-   to mi_execute_command. */
+   to mi_execute_command.  */
 struct captured_mi_execute_command_args
 {
-  /* This return result of the MI command (output) */
+  /* This return result of the MI command (output).  */
   enum mi_cmd_result rc;
 
-  /* What action to perform when the call is finished (output) */
+  /* What action to perform when the call is finished (output).  */
   enum captured_mi_execute_command_actions action;
 
-  /* The command context to be executed (input) */
+  /* The command context to be executed (input).  */
   struct mi_parse *command;
 };
 
@@ -95,7 +95,7 @@ static struct mi_timestamp *current_command_ts;
 
 static int do_timings = 0;
 
-/* The token of the last asynchronous command */
+/* The token of the last asynchronous command.  */
 static char *last_async_command;
 static char *previous_async_command;
 char *mi_error_message;
@@ -113,9 +113,9 @@ static void mi_exec_async_cli_cmd_continuation (struct continuation_arg *arg);
 static int register_changed_p (int regnum);
 static int get_register (int regnum, int format);
 
-/* Command implementations. FIXME: Is this libgdb? No.  This is the MI
+/* Command implementations.  FIXME: Is this libgdb?  No.  This is the MI
    layer that calls libgdb.  Any operation used in the below should be
-   formalized. */
+   formalized.  */
 
 static void timestamp (struct mi_timestamp *tv);
 
@@ -125,12 +125,12 @@ static void print_diff (struct mi_timestamp *start, struct mi_timestamp *end);
 enum mi_cmd_result
 mi_cmd_gdb_exit (char *command, char **argv, int argc)
 {
-  /* We have to print everything right here because we never return */
+  /* We have to print everything right here because we never return.  */
   if (last_async_command)
     fputs_unfiltered (last_async_command, raw_stdout);
   fputs_unfiltered ("^exit\n", raw_stdout);
   mi_out_put (uiout, raw_stdout);
-  /* FIXME: The function called is not yet a formal libgdb function */
+  /* FIXME: The function called is not yet a formal libgdb function.  */
   quit_force (NULL, FROM_TTY);
   return MI_CMD_DONE;
 }
@@ -138,49 +138,49 @@ mi_cmd_gdb_exit (char *command, char **argv, int argc)
 enum mi_cmd_result
 mi_cmd_exec_run (char *args, int from_tty)
 {
-  /* FIXME: Should call a libgdb function, not a cli wrapper */
+  /* FIXME: Should call a libgdb function, not a cli wrapper.  */
   return mi_execute_async_cli_command ("run", args, from_tty);
 }
 
 enum mi_cmd_result
 mi_cmd_exec_next (char *args, int from_tty)
 {
-  /* FIXME: Should call a libgdb function, not a cli wrapper */
+  /* FIXME: Should call a libgdb function, not a cli wrapper.  */
   return mi_execute_async_cli_command ("next", args, from_tty);
 }
 
 enum mi_cmd_result
 mi_cmd_exec_next_instruction (char *args, int from_tty)
 {
-  /* FIXME: Should call a libgdb function, not a cli wrapper */
+  /* FIXME: Should call a libgdb function, not a cli wrapper.  */
   return mi_execute_async_cli_command ("nexti", args, from_tty);
 }
 
 enum mi_cmd_result
 mi_cmd_exec_step (char *args, int from_tty)
 {
-  /* FIXME: Should call a libgdb function, not a cli wrapper */
+  /* FIXME: Should call a libgdb function, not a cli wrapper.  */
   return mi_execute_async_cli_command ("step", args, from_tty);
 }
 
 enum mi_cmd_result
 mi_cmd_exec_step_instruction (char *args, int from_tty)
 {
-  /* FIXME: Should call a libgdb function, not a cli wrapper */
+  /* FIXME: Should call a libgdb function, not a cli wrapper.  */
   return mi_execute_async_cli_command ("stepi", args, from_tty);
 }
 
 enum mi_cmd_result
 mi_cmd_exec_finish (char *args, int from_tty)
 {
-  /* FIXME: Should call a libgdb function, not a cli wrapper */
+  /* FIXME: Should call a libgdb function, not a cli wrapper.  */
   return mi_execute_async_cli_command ("finish", args, from_tty);
 }
 
 enum mi_cmd_result
 mi_cmd_exec_until (char *args, int from_tty)
 {
-  /* FIXME: Should call a libgdb function, not a cli wrapper */
+  /* FIXME: Should call a libgdb function, not a cli wrapper.  */
   return mi_execute_async_cli_command ("until", args, from_tty);
 }
 
@@ -191,15 +191,15 @@ mi_cmd_exec_return (char *args, int from_tty)
      specified number of frames. */
   if (*args)
     /* Call return_command with from_tty argument equal to 0 so as to
-       avoid being queried. */
+       avoid being queried.  */
     return_command (args, 0);
   else
     /* Call return_command with from_tty argument equal to 0 so as to
-       avoid being queried. */
+       avoid being queried.  */
     return_command (NULL, 0);
 
   /* Because we have called return_command with from_tty = 0, we need
-     to print the frame here. */
+     to print the frame here.  */
   print_stack_frame (get_selected_frame (NULL), 1, LOC_AND_ADDRESS);
 
   return MI_CMD_DONE;
@@ -208,15 +208,15 @@ mi_cmd_exec_return (char *args, int from_tty)
 enum mi_cmd_result
 mi_cmd_exec_continue (char *args, int from_tty)
 {
-  /* FIXME: Should call a libgdb function, not a cli wrapper */
+  /* FIXME: Should call a libgdb function, not a cli wrapper.  */
   return mi_execute_async_cli_command ("continue", args, from_tty);
 }
 
-/* Interrupt the execution of the target. Note how we must play around
+/* Interrupt the execution of the target.  Note how we must play around
    with the token variables, in order to display the current token in
    the result of the interrupt command, and the previous execution
-   token when the target finally stops. See comments in
-   mi_cmd_execute. */
+   token when the target finally stops.  See comments in
+   mi_cmd_execute.  */
 enum mi_cmd_result
 mi_cmd_exec_interrupt (char *args, int from_tty)
 {
@@ -254,7 +254,7 @@ mi_cmd_thread_select (char *command, char **argv, int argc)
     rc = gdb_thread_select (uiout, argv[0], &mi_error_message);
 
   /* RC is enum gdb_rc if it is successful (>=0)
-     enum return_reason if not (<0). */
+     enum return_reason if not (<0).  */
   if ((int) rc < 0 && (enum return_reason) rc == RETURN_ERROR)
     return MI_CMD_ERROR;
   else if ((int) rc >= 0 && rc == GDB_RC_FAIL)
@@ -299,7 +299,7 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
 
   cleanup = make_cleanup_ui_out_list_begin_end (uiout, "register-names");
 
-  if (argc == 0)		/* No args, just do all the regs */
+  if (argc == 0)		/* No args, just do all the regs.  */
     {
       for (regnum = 0;
 	   regnum < numregs;
@@ -313,7 +313,7 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
 	}
     }
 
-  /* Else, list of register #s, just do listed regs */
+  /* Else, list of register #s, just do listed regs.  */
   for (i = 0; i < argc; i++)
     {
       regnum = atoi (argv[i]);
@@ -350,7 +350,7 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 
   cleanup = make_cleanup_ui_out_list_begin_end (uiout, "changed-registers");
 
-  if (argc == 0)		/* No args, just do all the regs */
+  if (argc == 0)		/* No args, just do all the regs.  */
     {
       for (regnum = 0;
 	   regnum < numregs;
@@ -371,7 +371,7 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 	}
     }
 
-  /* Else, list of register #s, just do listed regs */
+  /* Else, list of register #s, just do listed regs.  */
   for (i = 0; i < argc; i++)
     {
       regnum = atoi (argv[i]);
@@ -414,7 +414,7 @@ register_changed_p (int regnum)
 	      register_size (current_gdbarch, regnum)) == 0)
     return 0;
 
-  /* Found a changed register. Return 1. */
+  /* Found a changed register.  Return 1.  */
 
   memcpy (&old_regs[DEPRECATED_REGISTER_BYTE (regnum)], raw_buffer,
 	  register_size (current_gdbarch, regnum));
@@ -422,13 +422,13 @@ register_changed_p (int regnum)
   return 1;
 }
 
-/* Return a list of register number and value pairs. The valid
+/* Return a list of register number and value pairs.  The valid
    arguments expected are: a letter indicating the format in which to
-   display the registers contents. This can be one of: x (hexadecimal), d
+   display the registers contents.  This can be one of: x (hexadecimal), d
    (decimal), N (natural), t (binary), o (octal), r (raw).  After the
    format argumetn there can be a sequence of numbers, indicating which
-   registers to fetch the content of. If the format is the only argument,
-   a list of all the registers with their values is returned. */
+   registers to fetch the content of.  If the format is the only argument,
+   a list of all the registers with their values is returned.  */
 enum mi_cmd_result
 mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 {
@@ -454,7 +454,7 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 
   list_cleanup = make_cleanup_ui_out_list_begin_end (uiout, "register-values");
 
-  if (argc == 1)		/* No args, beside the format: do all the regs */
+  if (argc == 1)	    /* No args, beside the format: do all the regs.  */
     {
       for (regnum = 0;
 	   regnum < numregs;
@@ -475,7 +475,7 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 	}
     }
 
-  /* Else, list of register #s, just do listed regs */
+  /* Else, list of register #s, just do listed regs.  */
   for (i = 1; i < argc; i++)
     {
       regnum = atoi (argv[i]);
@@ -506,7 +506,7 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
   return MI_CMD_DONE;
 }
 
-/* Output one register's contents in the desired format. */
+/* Output one register's contents in the desired format.  */
 static int
 get_register (int regnum, int format)
 {
@@ -559,7 +559,7 @@ get_register (int regnum, int format)
 }
 
 /* Write given values into registers. The registers and values are
-   given as pairs. The corresponding MI command is 
+   given as pairs.  The corresponding MI command is 
    -data-write-register-values <format> [<regnum1> <value1>...<regnumN> <valueN>]*/
 enum mi_cmd_result
 mi_cmd_data_write_register_values (char *command, char **argv, int argc)
@@ -613,7 +613,7 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
 	  /* Get the value as a number.  */
 	  value = parse_and_eval_address (argv[i + 1]);
 
-	  /* Write it down */
+	  /* Write it down.  */
 	  regcache_cooked_write_signed (current_regcache, regnum, value);
 	}
       else
@@ -626,12 +626,12 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
 }
 
 #if 0
-/*This is commented out because we decided it was not useful. I leave
-   it, just in case. ezannoni:1999-12-08 */
+/* This is commented out because we decided it was not useful.  I leave
+   it, just in case.  ezannoni:1999-12-08 */
 
-/* Assign a value to a variable. The expression argument must be in
-   the form A=2 or "A = 2" (I.e. if there are spaces it needs to be
-   quoted. */
+/* Assign a value to a variable.  The expression argument must be in
+   the form A=2 or "A = 2" i.e. if there are spaces it needs to be
+   quoted.  */
 enum mi_cmd_result
 mi_cmd_data_assign (char *command, char **argv, int argc)
 {
@@ -644,8 +644,8 @@ mi_cmd_data_assign (char *command, char **argv, int argc)
       return MI_CMD_ERROR;
     }
 
-  /* NOTE what follows is a clone of set_command(). FIXME: ezannoni
-     01-12-1999: Need to decide what to do with this for libgdb purposes. */
+  /* NOTE what follows is a clone of set_command().  FIXME: ezannoni
+     01-12-1999: Need to decide what to do with this for libgdb purposes.  */
 
   expr = parse_expression (argv[0]);
   old_chain = make_cleanup (free_current_contents, &expr);
@@ -655,9 +655,9 @@ mi_cmd_data_assign (char *command, char **argv, int argc)
 }
 #endif
 
-/* Evaluate the value of the argument. The argument is an
+/* Evaluate the value of the argument.  The argument is an
    expression. If the expression contains spaces it needs to be
-   included in double quotes. */
+   included in double quotes.  */
 enum mi_cmd_result
 mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
 {
@@ -680,7 +680,7 @@ mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
 
   val = evaluate_expression (expr);
 
-  /* Print the result of the expression evaluation. */
+  /* Print the result of the expression evaluation.  */
   val_print (value_type (val), value_contents (val),
 	     value_embedded_offset (val), VALUE_ADDRESS (val),
 	     stb->stream, 0, 0, 0, 0);
@@ -707,7 +707,7 @@ mi_cmd_target_download (char *args, int from_tty)
   return MI_CMD_DONE;
 }
 
-/* Connect to the remote target. */
+/* Connect to the remote target.  */
 enum mi_cmd_result
 mi_cmd_target_select (char *args, int from_tty)
 {
@@ -717,16 +717,16 @@ mi_cmd_target_select (char *args, int from_tty)
   run = xstrprintf ("target %s", args);
   old_cleanups = make_cleanup (xfree, run);
 
-  /* target-select is always synchronous.  once the call has returned
-     we know that we are connected. */
+  /* target-select is always synchronous.  Once the call has returned
+     we know that we are connected.  */
   /* NOTE: At present all targets that are connected are also
      (implicitly) talking to a halted target.  In the future this may
-     change. */
+     change.  */
   execute_command (run, from_tty);
 
   do_cleanups (old_cleanups);
 
-  /* Issue the completion message here. */
+  /* Issue the completion message here.  */
   if (last_async_command)
     fputs_unfiltered (last_async_command, raw_stdout);
   fputs_unfiltered ("^connected", raw_stdout);
@@ -740,9 +740,9 @@ mi_cmd_target_select (char *args, int from_tty)
 /* DATA-MEMORY-READ:
 
    ADDR: start address of data to be dumped.
-   WORD-FORMAT: a char indicating format for the ``word''. See 
+   WORD-FORMAT: a char indicating format for the ``word''.  See 
    the ``x'' command.
-   WORD-SIZE: size of each ``word''; 1,2,4, or 8 bytes
+   WORD-SIZE: size of each ``word''; 1,2,4, or 8 bytes.
    NR_ROW: Number of rows.
    NR_COL: The number of colums (words per row).
    ASCHAR: (OPTIONAL) Append an ascii character dump to each row.  Use
@@ -808,12 +808,12 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 
   /* Extract all the arguments. */
 
-  /* Start address of the memory dump. */
+  /* Start address of the memory dump.  */
   addr = parse_and_eval_address (argv[0]) + offset;
-  /* The format character to use when displaying a memory word. See
+  /* The format character to use when displaying a memory word.  See
      the ``x'' command. */
   word_format = argv[1][0];
-  /* The size of the memory word. */
+  /* The size of the memory word.  */
   word_size = atol (argv[2]);
   switch (word_size)
     {
@@ -837,27 +837,27 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
       word_type = builtin_type_int8;
       word_asize = 'b';
     }
-  /* The number of rows */
+  /* The number of rows.  */
   nr_rows = atol (argv[3]);
   if (nr_rows <= 0)
     {
       mi_error_message = xstrprintf ("mi_cmd_data_read_memory: invalid number of rows.");
       return MI_CMD_ERROR;
     }
-  /* number of bytes per row. */
+  /* Number of bytes per row.  */
   nr_cols = atol (argv[4]);
   if (nr_cols <= 0)
     {
       mi_error_message = xstrprintf ("mi_cmd_data_read_memory: invalid number of columns.");
       return MI_CMD_ERROR;
     }
-  /* The un-printable character when printing ascii. */
+  /* The un-printable character when printing ascii.  */
   if (argc == 6)
     aschar = *argv[5];
   else
     aschar = 0;
 
-  /* create a buffer and read it in. */
+  /* Create a buffer and read it in.  */
   total_bytes = word_size * nr_rows * nr_cols;
   mbuf = xcalloc (total_bytes, 1);
   make_cleanup (xfree, mbuf);
@@ -871,7 +871,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
       return MI_CMD_ERROR;
     }
 
-  /* output the header information. */
+  /* Output the header information.  */
   ui_out_field_core_addr (uiout, "addr", addr);
   ui_out_field_int (uiout, "nr-bytes", nr_bytes);
   ui_out_field_int (uiout, "total-bytes", total_bytes);
@@ -880,7 +880,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
   ui_out_field_core_addr (uiout, "next-page", addr + total_bytes);
   ui_out_field_core_addr (uiout, "prev-page", addr - total_bytes);
 
-  /* Build the result as a two dimentional table. */
+  /* Build the result as a two dimentional table.  */
   {
     struct ui_stream *stream = ui_out_stream_new (uiout);
     struct cleanup *cleanup_list_memory;
@@ -950,16 +950,16 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
    offset from the beginning of the memory grid row where the cell to
    be written is.
    ADDR: start address of the row in the memory grid where the memory
-   cell is, if OFFSET_COLUMN is specified. Otherwise, the address of
+   cell is, if OFFSET_COLUMN is specified.  Otherwise, the address of
    the location to write to.
-   FORMAT: a char indicating format for the ``word''. See 
+   FORMAT: a char indicating format for the ``word''.  See 
    the ``x'' command.
    WORD_SIZE: size of each ``word''; 1,2,4, or 8 bytes
    VALUE: value to be written into the memory address.
 
    Writes VALUE into ADDR + (COLUMN_OFFSET * WORD_SIZE).
 
-   Prints nothing. */
+   Prints nothing.  */
 enum mi_cmd_result
 mi_cmd_data_write_memory (char *command, char **argv, int argc)
 {
@@ -967,7 +967,7 @@ mi_cmd_data_write_memory (char *command, char **argv, int argc)
   char word_format;
   long word_size;
   /* FIXME: ezannoni 2000-02-17 LONGEST could possibly not be big
-     enough when using a compiler other than GCC. */
+     enough when using a compiler other than GCC.  */
   LONGEST value;
   void *buffer;
   struct cleanup *old_chain;
@@ -1006,25 +1006,25 @@ mi_cmd_data_write_memory (char *command, char **argv, int argc)
       return MI_CMD_ERROR;
     }
 
-  /* Extract all the arguments. */
-  /* Start address of the memory dump. */
+  /* Extract all the arguments.  */
+  /* Start address of the memory dump.  */
   addr = parse_and_eval_address (argv[0]);
-  /* The format character to use when displaying a memory word. See
-     the ``x'' command. */
+  /* The format character to use when displaying a memory word.  See
+     the ``x'' command.  */
   word_format = argv[1][0];
   /* The size of the memory word. */
   word_size = atol (argv[2]);
 
-  /* Calculate the real address of the write destination. */
+  /* Calculate the real address of the write destination.  */
   addr += (offset * word_size);
 
-  /* Get the value as a number */
+  /* Get the value as a number.  */
   value = parse_and_eval_address (argv[3]);
-  /* Get the value into an array */
+  /* Get the value into an array.  */
   buffer = xmalloc (word_size);
   old_chain = make_cleanup (xfree, buffer);
   store_signed_integer (buffer, word_size, value);
-  /* Write it down to memory */
+  /* Write it down to memory.  */
   write_memory (addr, buffer, word_size);
   /* Free the buffer.  */
   do_cleanups (old_chain);
@@ -1076,7 +1076,7 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
     {
 
     case MI_COMMAND:
-      /* A MI command was read from the input stream */
+      /* A MI command was read from the input stream.  */
       if (mi_debug_p)
 	/* FIXME: gdb_???? */
 	fprintf_unfiltered (raw_stdout, " token=`%s' command=`%s' args=`%s'\n",
@@ -1084,7 +1084,7 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
       /* FIXME: cagney/1999-09-25: Rather than this convoluted
          condition expression, each function should return an
          indication of what action is required and then switch on
-         that. */
+         that.  */
       args->action = EXECUTE_COMMAND_DISPLAY_PROMPT;
 
       if (do_timings)
@@ -1097,7 +1097,7 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
 
       if (!target_can_async_p () || !target_executing)
 	{
-	  /* print the result if there were no errors
+	  /* Print the result if there were no errors.
 
 	     Remember that on the way out of executing a command, you have
 	     to directly use the mi_interp's uiout, since the command could 
@@ -1133,7 +1133,7 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
       else if (sync_execution)
 	{
 	  /* Don't print the prompt. We are executing the target in
-	     synchronous mode. */
+	     synchronous mode.  */
 	  args->action = EXECUTE_COMMAND_SUPRESS_PROMPT;
 	  return;
 	}
@@ -1198,8 +1198,8 @@ mi_execute_command (char *cmd, int from_tty)
   struct captured_mi_execute_command_args args;
   struct ui_out *saved_uiout = uiout;
 
-  /* This is to handle EOF (^D). We just quit gdb. */
-  /* FIXME: we should call some API function here. */
+  /* This is to handle EOF (^D). We just quit gdb.  */
+  /* FIXME: we should call some API function here.  */
   if (cmd == 0)
     quit_force (NULL, from_tty);
 
@@ -1217,7 +1217,7 @@ mi_execute_command (char *cmd, int from_tty)
 	}
 
       /* FIXME: cagney/1999-11-04: Can this use of catch_exceptions either
-         be pushed even further down or even eliminated? */
+         be pushed even further down or even eliminated?  */
       args.command = command;
       result = catch_exception (uiout, captured_mi_execute_command, &args,
 				RETURN_MASK_ALL);
@@ -1226,7 +1226,7 @@ mi_execute_command (char *cmd, int from_tty)
       if (args.action == EXECUTE_COMMAND_SUPRESS_PROMPT)
 	{
 	  /* The command is executing synchronously.  Bail out early
-	     suppressing the finished prompt. */
+	     suppressing the finished prompt.  */
 	  mi_parse_free (command);
 	  return;
 	}
@@ -1248,7 +1248,7 @@ mi_execute_command (char *cmd, int from_tty)
 
   fputs_unfiltered ("(gdb) \n", raw_stdout);
   gdb_flush (raw_stdout);
-  /* print any buffered hook code */
+  /* Print any buffered hook code.  */
   /* ..... */
 }
 
@@ -1263,17 +1263,17 @@ mi_cmd_execute (struct mi_parse *parse)
       /* FIXME: We need to save the token because the command executed
          may be asynchronous and need to print the token again.
          In the future we can pass the token down to the func
-         and get rid of the last_async_command */
+         and get rid of the last_async_command.  */
       /* The problem here is to keep the token around when we launch
          the target, and we want to interrupt it later on.  The
          interrupt command will have its own token, but when the
          target stops, we must display the token corresponding to the
-         last execution command given. So we have another string where
+         last execution command given.  So we have another string where
          we copy the token (previous_async_command), if this was
          indeed the token of an execution command, and when we stop we
-         print that one. This is possible because the interrupt
+         print that one.  This is possible because the interrupt
          command, when over, will copy that token back into the
-         default token string (last_async_command). */
+         default token string (last_async_command).  */
 
       if (target_executing)
 	{
@@ -1300,15 +1300,15 @@ mi_cmd_execute (struct mi_parse *parse)
   else if (parse->cmd->cli.cmd != 0)
     {
       /* FIXME: DELETE THIS. */
-      /* The operation is still implemented by a cli command */
-      /* Must be a synchronous one */
+      /* The operation is still implemented by a cli command.  */
+      /* Must be a synchronous one.  */
       mi_execute_cli_command (parse->cmd->cli.cmd, parse->cmd->cli.args_p,
 			      parse->args);
       return MI_CMD_DONE;
     }
   else
     {
-      /* FIXME: DELETE THIS. */
+      /* FIXME: DELETE THIS.  */
       fputs_unfiltered (parse->token, raw_stdout);
       fputs_unfiltered ("^error,msg=\"", raw_stdout);
       fputs_unfiltered ("Undefined mi command: ", raw_stdout);
@@ -1320,8 +1320,8 @@ mi_cmd_execute (struct mi_parse *parse)
 }
 
 /* FIXME: This is just a hack so we can get some extra commands going.
-   We don't want to channel things through the CLI, but call libgdb directly */
-/* Use only for synchronous commands */
+   We don't want to channel things through the CLI, but call libgdb directly.
+   Use only for synchronous commands.  */
 
 void
 mi_execute_cli_command (const char *cmd, int args_p, const char *args)
@@ -1373,7 +1373,7 @@ mi_execute_async_cli_command (char *mi, char *args, int from_tty)
     {
       /* NOTE: For synchronous targets asynchronous behavour is faked by
          printing out the GDB prompt before we even try to execute the
-         command. */
+         command.  */
       if (last_async_command)
 	fputs_unfiltered (last_async_command, raw_stdout);
       fputs_unfiltered ("^running\n", raw_stdout);
@@ -1385,7 +1385,7 @@ mi_execute_async_cli_command (char *mi, char *args, int from_tty)
       /* FIXME: cagney/1999-11-29: Printing this message before
          calling execute_command is wrong.  It should only be printed
          once gdb has confirmed that it really has managed to send a
-         run command to the target. */
+         run command to the target.  */
       if (last_async_command)
 	fputs_unfiltered (last_async_command, raw_stdout);
       fputs_unfiltered ("^running\n", raw_stdout);
@@ -1396,10 +1396,10 @@ mi_execute_async_cli_command (char *mi, char *args, int from_tty)
   if (!target_can_async_p ())
     {
       /* Do this before doing any printing.  It would appear that some
-         print code leaves garbage around in the buffer. */
+         print code leaves garbage around in the buffer.  */
       do_cleanups (old_cleanups);
       /* If the target was doing the operation synchronously we fake
-         the stopped message. */
+         the stopped message.  */
       if (last_async_command)
 	fputs_unfiltered (last_async_command, raw_stdout);
       fputs_unfiltered ("*stopped", raw_stdout);
