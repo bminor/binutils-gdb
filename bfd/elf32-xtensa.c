@@ -1,5 +1,5 @@
 /* Xtensa-specific support for 32-bit ELF.
-   Copyright 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
+   Copyright 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -35,7 +35,7 @@
 
 /* Local helper functions.  */
 
-static bfd_boolean add_extra_plt_sections (bfd *, int);
+static bfd_boolean add_extra_plt_sections (struct bfd_link_info *, int);
 static char *vsprint_msg (const char *, const char *, int, ...) ATTRIBUTE_PRINTF(2,4);
 static bfd_reloc_status_type bfd_elf_xtensa_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
@@ -94,8 +94,8 @@ static Elf_Internal_Sym *retrieve_local_syms (bfd *);
 
 /* Miscellaneous utility functions.  */
 
-static asection *elf_xtensa_get_plt_section (bfd *, int);
-static asection *elf_xtensa_get_gotplt_section (bfd *, int);
+static asection *elf_xtensa_get_plt_section (struct bfd_link_info *, int);
+static asection *elf_xtensa_get_gotplt_section (struct bfd_link_info *, int);
 static asection *get_elf_r_symndx_section (bfd *, unsigned long);
 static struct elf_link_hash_entry *get_elf_r_symndx_hash_entry
   (bfd *, unsigned long);
@@ -130,16 +130,6 @@ int elf32xtensa_size_opt;
    during relaxation.  */
 
 typedef struct xtensa_relax_info_struct xtensa_relax_info;
-
-
-/* Total count of PLT relocations seen during check_relocs.
-   The actual PLT code must be split into multiple sections and all
-   the sections have to be created before size_dynamic_sections,
-   where we figure out the exact number of PLT entries that will be
-   needed.  It is OK if this count is an overestimate, e.g., some
-   relocations may be removed by GC.  */
-
-static int plt_reloc_count = 0;
 
 
 /* The GNU tools do not easily allow extending interfaces to pass around
@@ -496,6 +486,67 @@ static const bfd_byte elf_xtensa_le_plt_entry[PLT_ENTRY_SIZE] =
   0			/* unused */
 };
 
+/* Xtensa ELF linker hash table.  */
+
+struct elf_xtensa_link_hash_table
+{
+  struct elf_link_hash_table elf;
+
+  /* Short-cuts to get to dynamic linker sections.  */
+  asection *sgot;
+  asection *sgotplt;
+  asection *srelgot;
+  asection *splt;
+  asection *srelplt;
+  asection *sgotloc;
+  asection *spltlittbl;
+
+  /* Total count of PLT relocations seen during check_relocs.
+     The actual PLT code must be split into multiple sections and all
+     the sections have to be created before size_dynamic_sections,
+     where we figure out the exact number of PLT entries that will be
+     needed.  It is OK if this count is an overestimate, e.g., some
+     relocations may be removed by GC.  */
+  int plt_reloc_count;
+};
+
+/* Get the Xtensa ELF linker hash table from a link_info structure.  */
+
+#define elf_xtensa_hash_table(p) \
+  ((struct elf_xtensa_link_hash_table *) ((p)->hash))
+
+/* Create an Xtensa ELF linker hash table.  */
+
+static struct bfd_link_hash_table *
+elf_xtensa_link_hash_table_create (bfd *abfd)
+{
+  struct elf_xtensa_link_hash_table *ret;
+  bfd_size_type amt = sizeof (struct elf_xtensa_link_hash_table);
+
+  ret = bfd_malloc (amt);
+  if (ret == NULL)
+    return NULL;
+
+  if (!_bfd_elf_link_hash_table_init (&ret->elf, abfd,
+				      _bfd_elf_link_hash_newfunc,
+				      sizeof (struct elf_link_hash_entry)))
+    {
+      free (ret);
+      return NULL;
+    }
+
+  ret->sgot = NULL;
+  ret->sgotplt = NULL;
+  ret->srelgot = NULL;
+  ret->splt = NULL;
+  ret->srelplt = NULL;
+  ret->sgotloc = NULL;
+  ret->spltlittbl = NULL;
+
+  ret->plt_reloc_count = 0;
+
+  return &ret->elf.root;
+}
 
 static inline bfd_boolean
 xtensa_elf_dynamic_symbol_p (struct elf_link_hash_entry *h,
@@ -754,6 +805,7 @@ elf_xtensa_check_relocs (bfd *abfd,
 			 asection *sec,
 			 const Elf_Internal_Rela *relocs)
 {
+  struct elf_xtensa_link_hash_table *htab;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
   const Elf_Internal_Rela *rel;
@@ -762,6 +814,7 @@ elf_xtensa_check_relocs (bfd *abfd,
   if (info->relocatable)
     return TRUE;
 
+  htab = elf_xtensa_hash_table (info);
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
 
@@ -826,12 +879,11 @@ elf_xtensa_check_relocs (bfd *abfd,
 	      /* Keep track of the total PLT relocation count even if we
 		 don't yet know whether the dynamic sections will be
 		 created.  */
-	      plt_reloc_count += 1;
+	      htab->plt_reloc_count += 1;
 
 	      if (elf_hash_table (info)->dynamic_sections_created)
 		{
-		  if (!add_extra_plt_sections (elf_hash_table (info)->dynobj,
-					       plt_reloc_count))
+		  if (! add_extra_plt_sections (info, htab->plt_reloc_count))
 		    return FALSE;
 		}
 	    }
@@ -1056,16 +1108,22 @@ elf_xtensa_gc_sweep_hook (bfd *abfd,
 static bfd_boolean
 elf_xtensa_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
 {
+  struct elf_xtensa_link_hash_table *htab;
   flagword flags, noalloc_flags;
-  asection *s;
+
+  htab = elf_xtensa_hash_table (info);
 
   /* First do all the standard stuff.  */
   if (! _bfd_elf_create_dynamic_sections (dynobj, info))
     return FALSE;
+  htab->splt = bfd_get_section_by_name (dynobj, ".plt");
+  htab->srelplt = bfd_get_section_by_name (dynobj, ".rela.plt");
+  htab->sgot = bfd_get_section_by_name (dynobj, ".got");
+  htab->sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
 
   /* Create any extra PLT sections in case check_relocs has already
      been called on all the non-dynamic input files.  */
-  if (!add_extra_plt_sections (dynobj, plt_reloc_count))
+  if (! add_extra_plt_sections (info, htab->plt_reloc_count))
     return FALSE;
 
   noalloc_flags = (SEC_HAS_CONTENTS | SEC_IN_MEMORY
@@ -1073,28 +1131,27 @@ elf_xtensa_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
   flags = noalloc_flags | SEC_ALLOC | SEC_LOAD;
 
   /* Mark the ".got.plt" section READONLY.  */
-  s = bfd_get_section_by_name (dynobj, ".got.plt");
-  if (s == NULL
-      || ! bfd_set_section_flags (dynobj, s, flags))
+  if (htab->sgotplt == NULL
+      || ! bfd_set_section_flags (dynobj, htab->sgotplt, flags))
     return FALSE;
 
   /* Create ".rela.got".  */
-  s = bfd_make_section_with_flags (dynobj, ".rela.got", flags);
-  if (s == NULL
-      || ! bfd_set_section_alignment (dynobj, s, 2))
+  htab->srelgot = bfd_make_section_with_flags (dynobj, ".rela.got", flags);
+  if (htab->srelgot == NULL
+      || ! bfd_set_section_alignment (dynobj, htab->srelgot, 2))
     return FALSE;
 
   /* Create ".got.loc" (literal tables for use by dynamic linker).  */
-  s = bfd_make_section_with_flags (dynobj, ".got.loc", flags);
-  if (s == NULL
-      || ! bfd_set_section_alignment (dynobj, s, 2))
+  htab->sgotloc = bfd_make_section_with_flags (dynobj, ".got.loc", flags);
+  if (htab->sgotloc == NULL
+      || ! bfd_set_section_alignment (dynobj, htab->sgotloc, 2))
     return FALSE;
 
   /* Create ".xt.lit.plt" (literal table for ".got.plt*").  */
-  s = bfd_make_section_with_flags (dynobj, ".xt.lit.plt",
-				   noalloc_flags);
-  if (s == NULL
-      || ! bfd_set_section_alignment (dynobj, s, 2))
+  htab->spltlittbl = bfd_make_section_with_flags (dynobj, ".xt.lit.plt",
+						  noalloc_flags);
+  if (htab->spltlittbl == NULL
+      || ! bfd_set_section_alignment (dynobj, htab->spltlittbl, 2))
     return FALSE;
 
   return TRUE;
@@ -1102,8 +1159,9 @@ elf_xtensa_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
 
 
 static bfd_boolean
-add_extra_plt_sections (bfd *dynobj, int count)
+add_extra_plt_sections (struct bfd_link_info *info, int count)
 {
+  bfd *dynobj = elf_hash_table (info)->dynobj;
   int chunk;
 
   /* Iterate over all chunks except 0 which uses the standard ".plt" and
@@ -1115,7 +1173,7 @@ add_extra_plt_sections (bfd *dynobj, int count)
       asection *s;
 
       /* Stop when we find a section has already been created.  */
-      if (elf_xtensa_get_plt_section (dynobj, chunk))
+      if (elf_xtensa_get_plt_section (info, chunk))
 	break;
 
       flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
@@ -1216,10 +1274,12 @@ elf_xtensa_allocate_got_size (struct elf_link_hash_entry *h, void *arg)
 
 
 static void
-elf_xtensa_allocate_local_got_size (struct bfd_link_info *info,
-				    asection *srelgot)
+elf_xtensa_allocate_local_got_size (struct bfd_link_info *info)
 {
+  struct elf_xtensa_link_hash_table *htab;
   bfd *i;
+
+  htab = elf_xtensa_hash_table (info);
 
   for (i = info->input_bfds; i; i = i->link_next)
     {
@@ -1237,8 +1297,8 @@ elf_xtensa_allocate_local_got_size (struct bfd_link_info *info,
       for (j = 0; j < cnt; ++j)
 	{
 	  if (local_got_refcounts[j] > 0)
-	    srelgot->size += (local_got_refcounts[j]
-			      * sizeof (Elf32_External_Rela));
+	    htab->srelgot->size += (local_got_refcounts[j]
+				    * sizeof (Elf32_External_Rela));
 	}
     }
 }
@@ -1250,6 +1310,7 @@ static bfd_boolean
 elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 				  struct bfd_link_info *info)
 {
+  struct elf_xtensa_link_hash_table *htab;
   bfd *dynobj, *abfd;
   asection *s, *srelplt, *splt, *sgotplt, *srelgot, *spltlittbl, *sgotloc;
   bfd_boolean relplt, relgot;
@@ -1257,14 +1318,22 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   plt_entries = 0;
   plt_chunks = 0;
-  srelgot = 0;
 
+  htab = elf_xtensa_hash_table (info);
   dynobj = elf_hash_table (info)->dynobj;
   if (dynobj == NULL)
     abort ();
+  srelgot = htab->srelgot;
+  srelplt = htab->srelplt;
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
+      BFD_ASSERT (htab->srelgot != NULL
+		  && htab->srelplt != NULL
+		  && htab->sgot != NULL
+		  && htab->spltlittbl != NULL
+		  && htab->sgotloc != NULL);
+
       /* Set the contents of the .interp section to the interpreter.  */
       if (info->executable)
 	{
@@ -1276,10 +1345,7 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	}
 
       /* Allocate room for one word in ".got".  */
-      s = bfd_get_section_by_name (dynobj, ".got");
-      if (s == NULL)
-	abort ();
-      s->size = 4;
+      htab->sgot->size = 4;
 
       /* Adjust refcounts for symbols that we now know are not "dynamic".  */
       elf_link_hash_traverse (elf_hash_table (info),
@@ -1288,9 +1354,6 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       /* Allocate space in ".rela.got" for literals that reference
 	 global symbols.  */
-      srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
-      if (srelgot == NULL)
-	abort ();
       elf_link_hash_traverse (elf_hash_table (info),
 			      elf_xtensa_allocate_got_size,
 			      (void *) srelgot);
@@ -1299,12 +1362,9 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	 ".rela.got" for R_XTENSA_RELATIVE relocs for literals that
 	 reference local symbols.  */
       if (info->shared)
-	elf_xtensa_allocate_local_got_size (info, srelgot);
+	elf_xtensa_allocate_local_got_size (info);
 
       /* Allocate space in ".rela.plt" for literals that have PLT entries.  */
-      srelplt = bfd_get_section_by_name (dynobj, ".rela.plt");
-      if (srelplt == NULL)
-	abort ();
       elf_link_hash_traverse (elf_hash_table (info),
 			      elf_xtensa_allocate_plt_size,
 			      (void *) srelplt);
@@ -1314,10 +1374,7 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	 For each chunk of ".plt", we also need two more 4-byte
 	 literals, two corresponding entries in ".rela.got", and an
 	 8-byte entry in ".xt.lit.plt".  */
-      spltlittbl = bfd_get_section_by_name (dynobj, ".xt.lit.plt");
-      if (spltlittbl == NULL)
-	abort ();
-
+      spltlittbl = htab->spltlittbl;
       plt_entries = srelplt->size / sizeof (Elf32_External_Rela);
       plt_chunks =
 	(plt_entries + PLT_ENTRIES_PER_CHUNK - 1) / PLT_ENTRIES_PER_CHUNK;
@@ -1326,14 +1383,13 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	 created earlier because the initial count of PLT relocations
 	 was an overestimate.  */
       for (chunk = 0;
-	   (splt = elf_xtensa_get_plt_section (dynobj, chunk)) != NULL;
+	   (splt = elf_xtensa_get_plt_section (info, chunk)) != NULL;
 	   chunk++)
 	{
 	  int chunk_entries;
 
-	  sgotplt = elf_xtensa_get_gotplt_section (dynobj, chunk);
-	  if (sgotplt == NULL)
-	    abort ();
+	  sgotplt = elf_xtensa_get_gotplt_section (info, chunk);
+	  BFD_ASSERT (sgotplt != NULL);
 
 	  if (chunk < plt_chunks - 1)
 	    chunk_entries = PLT_ENTRIES_PER_CHUNK;
@@ -1358,9 +1414,7 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       /* Allocate space in ".got.loc" to match the total size of all the
 	 literal tables.  */
-      sgotloc = bfd_get_section_by_name (dynobj, ".got.loc");
-      if (sgotloc == NULL)
-	abort ();
+      sgotloc = htab->sgotloc;
       sgotloc->size = spltlittbl->size;
       for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link_next)
 	{
@@ -1443,8 +1497,6 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       /* Add the special XTENSA_RTLD relocations now.  The offsets won't be
 	 known until finish_dynamic_sections, but we need to get the relocs
 	 in place before they are sorted.  */
-      if (srelgot == NULL)
-	abort ();
       for (chunk = 0; chunk < plt_chunks; chunk++)
 	{
 	  Elf_Internal_Rela irela;
@@ -1890,7 +1942,7 @@ bfd_elf_xtensa_reloc (bfd *abfd,
 /* Set up an entry in the procedure linkage table.  */
 
 static bfd_vma
-elf_xtensa_create_plt_entry (bfd *dynobj,
+elf_xtensa_create_plt_entry (struct bfd_link_info *info,
 			     bfd *output_bfd,
 			     unsigned reloc_index)
 {
@@ -1900,8 +1952,8 @@ elf_xtensa_create_plt_entry (bfd *dynobj,
   int chunk;
 
   chunk = reloc_index / PLT_ENTRIES_PER_CHUNK;
-  splt = elf_xtensa_get_plt_section (dynobj, chunk);
-  sgotplt = elf_xtensa_get_gotplt_section (dynobj, chunk);
+  splt = elf_xtensa_get_plt_section (info, chunk);
+  sgotplt = elf_xtensa_get_gotplt_section (info, chunk);
   BFD_ASSERT (splt != NULL && sgotplt != NULL);
 
   plt_base = splt->output_section->vma + splt->output_offset;
@@ -1948,12 +2000,11 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 			     Elf_Internal_Sym *local_syms,
 			     asection **local_sections)
 {
+  struct elf_xtensa_link_hash_table *htab;
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
   struct elf_link_hash_entry **sym_hashes;
-  asection *srelgot, *srelplt;
-  bfd *dynobj;
   property_table_entry *lit_table = 0;
   int ltblsize = 0;
   char *error_message = NULL;
@@ -1962,17 +2013,9 @@ elf_xtensa_relocate_section (bfd *output_bfd,
   if (!xtensa_default_isa)
     xtensa_default_isa = xtensa_isa_init (0, 0);
 
-  dynobj = elf_hash_table (info)->dynobj;
+  htab = elf_xtensa_hash_table (info);
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
-
-  srelgot = NULL;
-  srelplt = NULL;
-  if (dynobj)
-    {
-      srelgot = bfd_get_section_by_name (dynobj, ".rela.got");;
-      srelplt = bfd_get_section_by_name (dynobj, ".rela.plt");
-    }
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
@@ -2181,9 +2224,9 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 	      asection *srel;
 
 	      if (dynamic_symbol && r_type == R_XTENSA_PLT)
-		srel = srelplt;
+		srel = htab->srelplt;
 	      else
-		srel = srelgot;
+		srel = htab->srelgot;
 
 	      BFD_ASSERT (srel != NULL);
 
@@ -2232,7 +2275,7 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 			     contents of the literal entry to the address of
 			     the PLT entry.  */
 			  relocation =
-			    elf_xtensa_create_plt_entry (dynobj, output_bfd,
+			    elf_xtensa_create_plt_entry (info, output_bfd,
 							 srel->reloc_count);
 			}
 		      unresolved_reloc = FALSE;
@@ -2480,6 +2523,7 @@ static bfd_boolean
 elf_xtensa_finish_dynamic_sections (bfd *output_bfd,
 				    struct bfd_link_info *info)
 {
+  struct elf_xtensa_link_hash_table *htab;
   bfd *dynobj;
   asection *sdyn, *srelplt, *sgot, *sxtlit, *sgotloc;
   Elf32_External_Dyn *dyncon, *dynconend;
@@ -2488,13 +2532,14 @@ elf_xtensa_finish_dynamic_sections (bfd *output_bfd,
   if (! elf_hash_table (info)->dynamic_sections_created)
     return TRUE;
 
+  htab = elf_xtensa_hash_table (info);
   dynobj = elf_hash_table (info)->dynobj;
   sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
   BFD_ASSERT (sdyn != NULL);
 
   /* Set the first entry in the global offset table to the address of
      the dynamic section.  */
-  sgot = bfd_get_section_by_name (dynobj, ".got");
+  sgot = htab->sgot;
   if (sgot)
     {
       BFD_ASSERT (sgot->size == 4);
@@ -2506,7 +2551,7 @@ elf_xtensa_finish_dynamic_sections (bfd *output_bfd,
 		    sgot->contents);
     }
 
-  srelplt = bfd_get_section_by_name (dynobj, ".rela.plt");
+  srelplt = htab->srelplt;
   if (srelplt && srelplt->size != 0)
     {
       asection *sgotplt, *srelgot, *spltlittbl;
@@ -2515,11 +2560,9 @@ elf_xtensa_finish_dynamic_sections (bfd *output_bfd,
       bfd_byte *loc;
       unsigned rtld_reloc;
 
-      srelgot = bfd_get_section_by_name (dynobj, ".rela.got");;
-      BFD_ASSERT (srelgot != NULL);
-
-      spltlittbl = bfd_get_section_by_name (dynobj, ".xt.lit.plt");
-      BFD_ASSERT (spltlittbl != NULL);
+      srelgot = htab->srelgot;
+      spltlittbl = htab->spltlittbl;
+      BFD_ASSERT (srelgot != NULL && spltlittbl != NULL);
 
       /* Find the first XTENSA_RTLD relocation.  Presumably the rest
 	 of them follow immediately after....  */
@@ -2540,7 +2583,7 @@ elf_xtensa_finish_dynamic_sections (bfd *output_bfd,
 	{
 	  int chunk_entries = 0;
 
-	  sgotplt = elf_xtensa_get_gotplt_section (dynobj, chunk);
+	  sgotplt = elf_xtensa_get_gotplt_section (info, chunk);
 	  BFD_ASSERT (sgotplt != NULL);
 
 	  /* Emit special RTLD relocations for the first two entries in
@@ -2608,7 +2651,7 @@ elf_xtensa_finish_dynamic_sections (bfd *output_bfd,
   /* Combine adjacent literal table entries.  */
   BFD_ASSERT (! info->relocatable);
   sxtlit = bfd_get_section_by_name (output_bfd, ".xt.lit");
-  sgotloc = bfd_get_section_by_name (dynobj, ".got.loc");
+  sgotloc = htab->sgotloc;
   BFD_ASSERT (sxtlit && sgotloc);
   num_xtlit_entries =
     elf_xtensa_combine_prop_entries (output_bfd, sxtlit, sgotloc);
@@ -2620,8 +2663,6 @@ elf_xtensa_finish_dynamic_sections (bfd *output_bfd,
   for (; dyncon < dynconend; dyncon++)
     {
       Elf_Internal_Dyn dyn;
-      const char *name;
-      asection *s;
 
       bfd_elf32_swap_dyn_in (dynobj, dyncon, &dyn);
 
@@ -2635,23 +2676,19 @@ elf_xtensa_finish_dynamic_sections (bfd *output_bfd,
 	  break;
 
 	case DT_XTENSA_GOT_LOC_OFF:
-	  name = ".got.loc";
-	  goto get_vma;
+	  dyn.d_un.d_ptr = htab->sgotloc->vma;
+	  break;
+
 	case DT_PLTGOT:
-	  name = ".got";
-	  goto get_vma;
+	  dyn.d_un.d_ptr = htab->sgot->vma;
+	  break;
+
 	case DT_JMPREL:
-	  name = ".rela.plt";
-	get_vma:
-	  s = bfd_get_section_by_name (output_bfd, name);
-	  BFD_ASSERT (s);
-	  dyn.d_un.d_ptr = s->vma;
+	  dyn.d_un.d_ptr = htab->srelplt->vma;
 	  break;
 
 	case DT_PLTRELSZ:
-	  s = bfd_get_section_by_name (output_bfd, ".rela.plt");
-	  BFD_ASSERT (s);
-	  dyn.d_un.d_val = s->size;
+	  dyn.d_un.d_val = htab->srelplt->size;
 	  break;
 
 	case DT_RELASZ:
@@ -2661,9 +2698,8 @@ elf_xtensa_finish_dynamic_sections (bfd *output_bfd,
 	     seems to be unresolved.  Since the linker script arranges
 	     for .rela.plt to follow all other relocation sections, we
 	     don't have to worry about changing the DT_RELA entry.  */
-	  s = bfd_get_section_by_name (output_bfd, ".rela.plt");
-	  if (s)
-	    dyn.d_un.d_val -= s->size;
+	  if (htab->srelplt)
+	    dyn.d_un.d_val -= htab->srelplt->size;
 	  break;
 	}
 
@@ -2932,14 +2968,9 @@ elf_xtensa_discard_info_for_section (bfd *abfd,
 
       if (xtensa_is_littable_section (sec))
 	{
-	  bfd *dynobj = elf_hash_table (info)->dynobj;
-	  if (dynobj)
-	    {
-	      asection *sgotloc =
-		bfd_get_section_by_name (dynobj, ".got.loc");
-	      if (sgotloc)
-		sgotloc->size -= removed_bytes;
-	    }
+	  asection *sgotloc = elf_xtensa_hash_table (info)->sgotloc;
+	  if (sgotloc)
+	    sgotloc->size -= removed_bytes;
 	}
     }
   else
@@ -8611,6 +8642,7 @@ shrink_dynamic_reloc_sections (struct bfd_link_info *info,
 			       asection *input_section,
 			       Elf_Internal_Rela *rel)
 {
+  struct elf_xtensa_link_hash_table *htab;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
   unsigned long r_symndx;
@@ -8618,6 +8650,7 @@ shrink_dynamic_reloc_sections (struct bfd_link_info *info,
   struct elf_link_hash_entry *h;
   bfd_boolean dynamic_symbol;
 
+  htab = elf_xtensa_hash_table (info);
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
 
@@ -8635,24 +8668,18 @@ shrink_dynamic_reloc_sections (struct bfd_link_info *info,
       && (input_section->flags & SEC_ALLOC) != 0
       && (dynamic_symbol || info->shared))
     {
-      bfd *dynobj;
-      const char *srel_name;
       asection *srel;
       bfd_boolean is_plt = FALSE;
 
-      dynobj = elf_hash_table (info)->dynobj;
-      BFD_ASSERT (dynobj != NULL);
-
       if (dynamic_symbol && r_type == R_XTENSA_PLT)
 	{
-	  srel_name = ".rela.plt";
+	  srel = htab->srelplt;
 	  is_plt = TRUE;
 	}
       else
-	srel_name = ".rela.got";
+	srel = htab->srelgot;
 
       /* Reduce size of the .rela.* section by one reloc.  */
-      srel = bfd_get_section_by_name (dynobj, srel_name);
       BFD_ASSERT (srel != NULL);
       BFD_ASSERT (srel->size >= sizeof (Elf32_External_Rela));
       srel->size -= sizeof (Elf32_External_Rela);
@@ -8671,15 +8698,15 @@ shrink_dynamic_reloc_sections (struct bfd_link_info *info,
 	  reloc_index = srel->size / sizeof (Elf32_External_Rela);
 
 	  chunk = reloc_index / PLT_ENTRIES_PER_CHUNK;
-	  splt = elf_xtensa_get_plt_section (dynobj, chunk);
-	  sgotplt = elf_xtensa_get_gotplt_section (dynobj, chunk);
+	  splt = elf_xtensa_get_plt_section (info, chunk);
+	  sgotplt = elf_xtensa_get_gotplt_section (info, chunk);
 	  BFD_ASSERT (splt != NULL && sgotplt != NULL);
 
 	  /* Check if an entire PLT chunk has just been eliminated.  */
 	  if (reloc_index % PLT_ENTRIES_PER_CHUNK == 0)
 	    {
 	      /* The two magic GOT entries for that chunk can go away.  */
-	      srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
+	      srelgot = htab->srelgot;
 	      BFD_ASSERT (srelgot != NULL);
 	      srelgot->reloc_count -= 2;
 	      srelgot->size -= 2 * sizeof (Elf32_External_Rela);
@@ -9167,14 +9194,9 @@ relax_property_section (bfd *abfd,
 
 	  if (xtensa_is_littable_section (sec))
 	    {
-	      bfd *dynobj = elf_hash_table (link_info)->dynobj;
-	      if (dynobj)
-		{
-		  asection *sgotloc =
-		    bfd_get_section_by_name (dynobj, ".got.loc");
-		  if (sgotloc)
-		    sgotloc->size -= removed_bytes;
-		}
+	      asection *sgotloc = elf_xtensa_hash_table (link_info)->sgotloc;
+	      if (sgotloc)
+		sgotloc->size -= removed_bytes;
 	    }
 	}
     }
@@ -9360,26 +9382,38 @@ do_fix_for_final_link (Elf_Internal_Rela *rel,
 /* Miscellaneous utility functions....  */
 
 static asection *
-elf_xtensa_get_plt_section (bfd *dynobj, int chunk)
+elf_xtensa_get_plt_section (struct bfd_link_info *info, int chunk)
 {
+  struct elf_xtensa_link_hash_table *htab;
+  bfd *dynobj;
   char plt_name[10];
 
   if (chunk == 0)
-    return bfd_get_section_by_name (dynobj, ".plt");
+    {
+      htab = elf_xtensa_hash_table (info);
+      return htab->splt;
+    }
 
+  dynobj = elf_hash_table (info)->dynobj;
   sprintf (plt_name, ".plt.%u", chunk);
   return bfd_get_section_by_name (dynobj, plt_name);
 }
 
 
 static asection *
-elf_xtensa_get_gotplt_section (bfd *dynobj, int chunk)
+elf_xtensa_get_gotplt_section (struct bfd_link_info *info, int chunk)
 {
+  struct elf_xtensa_link_hash_table *htab;
+  bfd *dynobj;
   char got_name[14];
 
   if (chunk == 0)
-    return bfd_get_section_by_name (dynobj, ".got.plt");
+    {
+      htab = elf_xtensa_hash_table (info);
+      return htab->sgotplt;
+    }
 
+  dynobj = elf_hash_table (info)->dynobj;
   sprintf (got_name, ".got.plt.%u", chunk);
   return bfd_get_section_by_name (dynobj, got_name);
 }
@@ -9837,6 +9871,7 @@ static const struct bfd_elf_special_section elf_xtensa_special_sections[] =
 #define bfd_elf32_bfd_relax_section	     elf_xtensa_relax_section
 #define bfd_elf32_bfd_reloc_type_lookup	     elf_xtensa_reloc_type_lookup
 #define bfd_elf32_bfd_set_private_flags	     elf_xtensa_set_private_flags
+#define bfd_elf32_bfd_link_hash_table_create elf_xtensa_link_hash_table_create
 
 #define elf_backend_adjust_dynamic_symbol    elf_xtensa_adjust_dynamic_symbol
 #define elf_backend_check_relocs	     elf_xtensa_check_relocs

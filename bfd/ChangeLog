@@ -1,3 +1,26 @@
+2007-02-02  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (plt_reloc_count): Move into link hash table.
+	(struct elf_xtensa_link_hash_table): New.
+	(elf_xtensa_hash_table): New.
+	(elf_xtensa_link_hash_table_create): New.
+	(elf_xtensa_check_relocs): Update plt_reloc_count references.
+	Update arguments to add_extra_plt_sections.
+	(elf_xtensa_create_dynamic_sections): Record new sections in the hash
+	table.  Update for plt_reloc_count and add_extra_plt_sections.
+	(add_extra_plt_sections, elf_xtensa_create_plt_entry): Replace dynobj
+	argument with link info.  Update calls to elf_xtensa_get_plt_section
+	and elf_xtensa_get_gotplt_section.
+	(elf_xtensa_allocate_local_got_size, elf_xtensa_size_dynamic_sections)
+	(elf_xtensa_relocate_section, elf_xtensa_finish_dynamic_sections)
+	(elf_xtensa_discard_info_for_section, shrink_dynamic_reloc_sections)
+	(relax_property_section): Get sections from the hash table and update
+	function calls.
+	(elf_xtensa_get_plt_section, elf_xtensa_get_gotplt_section): Replace
+	dynobj argument with link info.  Get sections for first plt chunk from
+	the hash table.
+	(bfd_elf32_bfd_link_hash_table_create): Define.
+
 2007-02-02  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf-bfd.h (struct elf_obj_tdata): Change symbuf type to void *.
