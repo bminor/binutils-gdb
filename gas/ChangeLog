@@ -1,3 +1,10 @@
+2007-02-03  DJ Delorie  <dj@delorie.com>
+
+	* config/tc-m32c.c (m32c_cons_fix_new): New.  Added to support 3
+	byte relocs.
+	* config/tc-m32c.h (TC_CONS_FIX_NEW): Define.
+	(m32c_cons_fix_new): Prototype.
+
 2007-02-02  Bob Wilson  <bob.wilson@acm.org>
 	
 	* config/tc-xtensa.c (xg_build_to_insn): Use tinsn_init.

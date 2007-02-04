@@ -1019,6 +1019,37 @@ md_cgen_lookup_reloc (const CGEN_INSN *    insn ATTRIBUTE_UNUSED,
 }
 
 void
+m32c_cons_fix_new (fragS *	frag,
+		   int		where,
+		   int		size,
+		   expressionS *exp)
+{
+  bfd_reloc_code_real_type type;
+
+  switch (size)
+    {
+    case 1:
+      type = BFD_RELOC_8;
+      break;
+    case 2:
+      type = BFD_RELOC_16;
+      break;
+    case 3:
+      type = BFD_RELOC_24;
+      break;
+    case 4:
+    default:
+      type = BFD_RELOC_32;
+      break;
+    case 8:
+      type = BFD_RELOC_64;
+      break;
+    }
+
+  fix_new_exp (frag, where, (int) size, exp, 0, type);
+}
+
+void
 m32c_apply_fix (struct fix *f, valueT *t, segT s)
 {
   if (f->fx_r_type == BFD_RELOC_M32C_RL_JUMP
