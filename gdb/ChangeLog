@@ -1,3 +1,8 @@
+2007-02-05  Nick Roberts  <nickrob@snap.net.nz>
+
+	* mi/mi-cmd-stack.c (list_args_or_locals): Use common_val_print
+ 	instead of print_variable_value to print values.
+
 2007-02-03  Nick Roberts  <nickrob@snap.net.nz>
 
 	* mi/mi-main.c: Numerous formatting changes.

@@ -275,6 +275,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 	    {
 	      struct cleanup *cleanup_tuple = NULL;
 	      struct symbol *sym2;
+	      struct value *val;
 	      if (values != PRINT_NO_VALUES)
 		cleanup_tuple =
 		  make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
@@ -297,13 +298,17 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 		      && TYPE_CODE (type) != TYPE_CODE_STRUCT
 		      && TYPE_CODE (type) != TYPE_CODE_UNION)
 		    {
-		      print_variable_value (sym2, fi, stb->stream);
+		      val = read_var_value (sym2, fi);
+		      common_val_print
+			(val, stb->stream, 0, 1, 0, Val_no_prettyprint);
 		      ui_out_field_stream (uiout, "value", stb);
 		    }
 		  do_cleanups (cleanup_tuple);
 		  break;
 		case PRINT_ALL_VALUES:
-		  print_variable_value (sym2, fi, stb->stream);
+		  val = read_var_value (sym2, fi);
+		  common_val_print
+		    (val, stb->stream, 0, 1, 0, Val_no_prettyprint);
 		  ui_out_field_stream (uiout, "value", stb);
 		  do_cleanups (cleanup_tuple);
 		  break;
