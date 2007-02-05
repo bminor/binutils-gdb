@@ -24,7 +24,7 @@
 	(perform_complex_relocations): Renamed to
 	perform_complex_relocation and now examines only one relocation.
 	(elf_link_input_bfd): Don't call perform_complex_relocations.
-	* elf-bfd.h (bfd_elf_perform_complex_relocation_: New prototype.: 
+	* elf-bfd.h (bfd_elf_perform_complex_relocation_: New prototype.
 	* elf32-mep.c (mep_elf_howto_table): Add R_RELC.
 	(OD,OS,OU): #undefs corrected to N, S and U repectively.
 	(mep_reloc_type_lookup): Handle BFD_RELOC_RELC.
@@ -95,16 +95,16 @@
 
 	Various formatting tidy ups and compile time warning removals,
 	plus:
-	
+
 	* elflink.h (eval_symbol): Set bfd_error for failure returns.
 	(evaluate_complex_relocation_symbols): Only evaluate local
 	symbols.
 
 	2001-11-24  Graydon Hoare  <graydon@redhat.com>
 
-	* elflink.h.c (resolve_symbol): Skip non-local syms in 
-	local lookup loop; get section offset from section 
-	symbol occurs in (rather than reloc section); handle 
+	* elflink.h.c (resolve_symbol): Skip non-local syms in
+	local lookup loop; get section offset from section
+	symbol occurs in (rather than reloc section); handle
 	common symbols.
 
 	2001-11-24  Graydon Hoare  <graydon@redhat.com>
@@ -177,22 +177,22 @@
 	* bfd-in2.h: Regenerated.
 
 2007-02-05  Bob Wilson  <bob.wilson@acm.org>
-	
+
 	* elf32-xtensa.c (elf_xtensa_make_sym_local): Delete.
 	(elf_xtensa_hide_symbol, elf_backend_hide_symbol): Delete.
 	(elf_xtensa_fix_refcounts, elf_xtensa_allocate_plt_size)
 	(elf_xtensa_allocate_got_size): Replace these with...
 	(elf_xtensa_allocate_dynrelocs): ...this new function.
 	(elf_xtensa_size_dynamic_sections): Use it.
-	
+
 2007-02-05  Bob Wilson  <bob.wilson@acm.org>
-	
+
 	* elf32-xtensa.c (elf_howto_table) <R_XTENSA_GLOB_DAT>
 	<R_XTENSA_JMP_SLOT, R_XTENSA_RELATIVE, R_XTENSA_PLT, R_XTENSA_DIFF32>:
 	Set src_mask to zero.
 	<R_XTENSA_DIFF8, R_XTENSA_DIFF16>: Likewise.  Also fix dst_mask.
 	<R_XTENSA_ASM_EXPAND>: Set pcrel_offset to TRUE.
-	
+
 2007-02-02  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (xtensa_elf_dynamic_symbol_p): Renamed to...
