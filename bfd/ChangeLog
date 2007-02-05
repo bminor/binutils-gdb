@@ -1,4 +1,10 @@
 2007-02-05  Dave Brolley  <brolley@redhat.com>
+            Stan Cox  <scox@redhat.com>
+
+	PR ld/3972
+	* elflink.c (elf_link_input_bfd): Always setup finfo->internal_syms.
+
+2007-02-05  Dave Brolley  <brolley@redhat.com>
 
 	* elflink.h: Add support for Toshiba MeP.
 	* reloc.c: Likewise.

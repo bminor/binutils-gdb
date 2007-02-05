@@ -8082,6 +8082,15 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
       if (isymbuf == NULL)
 	return FALSE;
     }
+  /* evaluate_complex_relocation_symbols looks for symbols in
+     finfo->internal_syms.  */
+  else if (isymbuf != NULL && locsymcount != 0)
+    {
+      bfd_elf_get_elf_syms (input_bfd, symtab_hdr, locsymcount, 0,
+			    finfo->internal_syms,
+			    finfo->external_syms,
+			    finfo->locsym_shndx);
+    }
 
   /* Find local symbol sections and adjust values of symbols in
      SEC_MERGE sections.  Write out those local symbols we know are
