@@ -1,3 +1,23 @@
+2007-02-05  Dave Brolley  <brolley@redhat.com>
+
+	* readelf.c (dump_relocations): Don't check for
+	(rtype == NULL && type == R_RELC).
+
+2007-02-05  Dave Brolley  <brolley@redhat.com>
+
+	* Contribute the following changes:
+	2003-10-29  Dave Brolley  <brolley@redhat.com>
+
+	* configure.in: Define SKIP_ZEROES and SKIP_ZEROES_AT_END for mep.
+	* configure: Regenerated.
+
+	2001-04-03  Ben Elliston  <bje@redhat.com>
+
+	* readelf.c: Include "elf/mep.h".
+	(guess_is_rela): Handle EM_CYGNUS_MEP.
+	(get_machine_name): Ditto.
+	(dump_relocations): Ditto.
+
 2007-02-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* MAINTAINERS: Add a space between H.J. and Lu.

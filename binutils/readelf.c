@@ -112,6 +112,7 @@
 #include "elf/m68k.h"
 #include "elf/m68hc11.h"
 #include "elf/mcore.h"
+#include "elf/mep.h"
 #include "elf/mips.h"
 #include "elf/mmix.h"
 #include "elf/mn10200.h"
@@ -615,6 +616,7 @@ guess_is_rela (unsigned long e_machine)
     case EM_M32C:
     case EM_M32R:
     case EM_MCORE:
+    case EM_CYGNUS_MEP:
     case EM_MMIX:
     case EM_MN10200:
     case EM_CYGNUS_MN10200:
@@ -1166,6 +1168,10 @@ dump_relocations (FILE *file,
 
 	case EM_BLACKFIN:
 	  rtype = elf_bfin_reloc_type (type);
+	  break;
+
+	case EM_CYGNUS_MEP:
+	  rtype = elf_mep_reloc_type (type);
 	  break;
 	}
 
@@ -1762,6 +1768,7 @@ get_machine_name (unsigned e_machine)
     case EM_NIOS32:		return "Altera Nios";
     case EM_ALTERA_NIOS2:	return "Altera Nios II";
     case EM_XC16X:		return "Infineon Technologies xc16x";
+    case EM_CYGNUS_MEP:         return "Toshiba MeP Media Engine";
     default:
       snprintf (buff, sizeof (buff), _("<unknown>: %x"), e_machine);
       return buff;
@@ -6844,6 +6851,8 @@ get_symbol_type (unsigned int type)
     case STT_FILE:	return "FILE";
     case STT_COMMON:	return "COMMON";
     case STT_TLS:	return "TLS";
+    case STT_RELC:      return "RELC";
+    case STT_SRELC:     return "SRELC";
     default:
       if (type >= STT_LOPROC && type <= STT_HIPROC)
 	{

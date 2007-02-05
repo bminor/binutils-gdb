@@ -8738,6 +8738,9 @@ do
 	  fi
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_MCORE_ELF"
 	  ;;
+  	mep-*)
+	  OBJDUMP_DEFS="-DSKIP_ZEROES=256 -DSKIP_ZEROES_AT_END=0"
+	  ;;
 	esac
     fi
 done

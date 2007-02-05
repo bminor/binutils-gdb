@@ -1278,7 +1278,8 @@ readelf.o: readelf.c dwarf.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/elf/i370.h $(INCDIR)/elf/i860.h $(INCDIR)/elf/i960.h \
   $(INCDIR)/elf/ia64.h $(INCDIR)/elf/ip2k.h $(INCDIR)/elf/iq2000.h \
   $(INCDIR)/elf/m32c.h $(INCDIR)/elf/m32r.h $(INCDIR)/elf/m68k.h \
-  $(INCDIR)/elf/m68hc11.h $(INCDIR)/elf/mcore.h $(INCDIR)/elf/mips.h \
+  $(INCDIR)/elf/m68hc11.h $(INCDIR)/elf/mcore.h \
+  $(INCDIR)/elf/mep.h $(INCDIR)/elf/mips.h \
   $(INCDIR)/elf/mmix.h $(INCDIR)/elf/mn10200.h $(INCDIR)/elf/mn10300.h \
   $(INCDIR)/elf/mt.h $(INCDIR)/elf/msp430.h $(INCDIR)/elf/or32.h \
   $(INCDIR)/elf/pj.h $(INCDIR)/elf/ppc.h $(INCDIR)/elf/ppc64.h \
