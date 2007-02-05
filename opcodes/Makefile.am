@@ -39,6 +39,7 @@ HFILES = \
 	m32c-desc.h m32c-opc.h \
 	m32r-desc.h m32r-opc.h \
 	mcore-opc.h \
+	mep-desc.h mep-opc.h \
 	mt-desc.h mt-opc.h \
 	openrisc-desc.h openrisc-opc.h \
 	score-opc.h \
@@ -132,6 +133,11 @@ CFILES = \
 	m88k-dis.c \
 	maxq-dis.c \
 	mcore-dis.c \
+	mep-asm.c \
+	mep-desc.c \
+	mep-dis.c \
+	mep-ibld.c \
+	mep-opc.c \
 	mips-dis.c \
 	mips-opc.c \
 	mips16-opc.c \
@@ -270,6 +276,11 @@ ALL_MACHINES = \
 	m10300-opc.lo \
 	maxq-dis.lo \
 	mcore-dis.lo \
+	mep-asm.lo \
+	mep-desc.lo \
+	mep-dis.lo \
+	mep-ibld.lo \
+	mep-opc.lo \
 	mips-dis.lo \
 	mips-opc.lo \
 	mips16-opc.lo \
@@ -399,7 +410,7 @@ uninstall_libopcodes:
 
 CLEANFILES = \
 	stamp-ip2k stamp-m32c stamp-m32r stamp-fr30 stamp-frv \
-	stamp-openrisc stamp-iq2000 stamp-mt stamp-xstormy16 stamp-xc16x\
+	stamp-openrisc stamp-iq2000 stamp-mep stamp-mt stamp-xstormy16 stamp-xc16x\
 	libopcodes.a stamp-lib dep.sed DEP DEPA DEP1 DEP2
 
 
@@ -415,7 +426,7 @@ CGENDEPS = \
 	$(CGENDIR)/opc-opinst.scm \
 	cgen-asm.in cgen-dis.in cgen-ibld.in
 
-CGEN_CPUS = fr30 frv ip2k m32c m32r mt openrisc xc16x xstormy16
+CGEN_CPUS = fr30 frv ip2k m32c m32r mep mt openrisc xc16x xstormy16
 
 if CGEN_MAINT
 IP2K_DEPS = stamp-ip2k
@@ -423,6 +434,7 @@ M32C_DEPS = stamp-m32c
 M32R_DEPS = stamp-m32r
 FR30_DEPS = stamp-fr30
 FRV_DEPS = stamp-frv
+MEP_DEPS = stamp-mep
 MT_DEPS = stamp-mt
 OPENRISC_DEPS = stamp-openrisc
 IQ2000_DEPS = stamp-iq2000
@@ -434,6 +446,7 @@ M32C_DEPS =
 M32R_DEPS =
 FR30_DEPS =
 FRV_DEPS =
+MEP_DEPS =
 MT_DEPS =
 OPENRISC_DEPS = 
 IQ2000_DEPS = 
@@ -506,6 +519,12 @@ $(srcdir)/frv-desc.h $(srcdir)/frv-desc.c $(srcdir)/frv-opc.h $(srcdir)/frv-opc.
 stamp-frv: $(CGENDEPS) $(srcdir)/../cpu/frv.cpu $(srcdir)/../cpu/frv.opc
 	$(MAKE) run-cgen arch=frv prefix=frv options= \
 		archfile=$(srcdir)/../cpu/frv.cpu opcfile=$(srcdir)/../cpu/frv.opc extrafiles=
+
+$(srcdir)/mep-desc.h $(srcdir)/mep-desc.c $(srcdir)/mep-opc.h $(srcdir)/mep-opc.c $(srcdir)/mep-ibld.c $(srcdir)/mep-asm.c $(srcdir)/mep-dis.c: $(MEP_DEPS)
+	@true
+stamp-mep: $(CGENDEPS) $(CPUDIR)/mep.cpu $(CPUDIR)/mep-default.cpu $(CPUDIR)/mep-core.cpu $(CPUDIR)/mep-h1.cpu $(CPUDIR)/mep-ext-cop.cpu $(CPUDIR)/mep-sample-ucidsp.cpu $(CPUDIR)/mep-rhcop.cpu $(CPUDIR)/mep-fmax.cpu $(CPUDIR)/mep.opc
+	$(MAKE) run-cgen arch=mep prefix=mep options= \
+		archfile=$(CPUDIR)/mep.cpu opcfile=$(CPUDIR)/mep.opc extrafiles=
 
 $(srcdir)/mt-desc.h $(srcdir)/mt-desc.c $(srcdir)/mt-opc.h $(srcdir)/mt-opc.c $(srcdir)/mt-ibld.c $(srcdir)/mt-asm.c $(srcdir)/mt-dis.c: $(MT_DEPS)
 	@true
@@ -928,6 +947,23 @@ maxq-dis.lo: maxq-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
 mcore-dis.lo: mcore-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   mcore-opc.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h
+mep-asm.lo: mep-asm.c sysdep.h config.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h mep-desc.h \
+  $(INCDIR)/opcode/cgen.h mep-opc.h opintl.h
+mep-desc.lo: mep-desc.c sysdep.h config.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h mep-desc.h \
+  $(INCDIR)/opcode/cgen.h mep-opc.h opintl.h
+mep-dis.lo: mep-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h \
+  $(INCDIR)/symcat.h mep-desc.h $(INCDIR)/opcode/cgen.h \
+  mep-opc.h opintl.h
+mep-ibld.lo: mep-ibld.c sysdep.h config.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h \
+  $(INCDIR)/symcat.h mep-desc.h $(INCDIR)/opcode/cgen.h \
+  mep-opc.h opintl.h
+mep-opc.lo: mep-opc.c sysdep.h config.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h mep-desc.h \
+  $(INCDIR)/opcode/cgen.h mep-opc.h
 mips-dis.lo: mips-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
   $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mips.h \

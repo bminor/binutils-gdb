@@ -1,3 +1,12 @@
+2007-02-05  Dave Brolley  <brolley@redhat.com>
+
+	* mep-*: New support for Toshiba Media Processor (MeP).
+	* Makefile.am: Add support for MeP.
+	* configure.in: Likewise.
+	* disassemble.c: Likewise.
+	* Makefile.in: Regenerated.
+	* configure: Regenerated.
+
 2007-02-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (OP_J): Undo the last change. Properly handle 64K

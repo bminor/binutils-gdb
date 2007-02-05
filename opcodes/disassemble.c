@@ -50,6 +50,7 @@
 #define ARCH_m88k
 #define ARCH_maxq
 #define ARCH_mcore
+#define ARCH_mep
 #define ARCH_mips
 #define ARCH_mmix
 #define ARCH_mn10200
@@ -259,6 +260,11 @@ disassembler (abfd)
 #ifdef ARCH_mcore
     case bfd_arch_mcore:
       disassemble = print_insn_mcore;
+      break;
+#endif
+#ifdef ARCH_mep
+    case bfd_arch_mep:
+      disassemble = print_insn_mep;
       break;
 #endif
 #ifdef ARCH_mips
@@ -477,6 +483,12 @@ disassemble_init_for_target (struct disassemble_info * info)
 #ifdef ARCH_tic4x
     case bfd_arch_tic4x:
       info->skip_zeroes = 32;
+      break;
+#endif
+#ifdef ARCH_mep
+    case bfd_arch_mep:
+      info->skip_zeroes = 256;
+      info->skip_zeroes_at_end = 0;
       break;
 #endif
 #ifdef ARCH_m32c
