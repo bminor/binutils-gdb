@@ -1,5 +1,10 @@
 2007-02-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* linux-thread-db.c (check_for_thread_db): Return early if we have
+	no libthread_db support.
+
+2007-02-05  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* mi/mi-parse.h: Include <sys/time.h>.
 
 2007-02-05  Nick Roberts  <nickrob@snap.net.nz>

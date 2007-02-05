@@ -581,6 +581,10 @@ check_for_thread_db (void)
   td_err_e err;
   static int already_loaded;
 
+  /* Do nothing if we couldn't load libthread_db.so.1.  */
+  if (td_ta_new_p == NULL)
+    return;
+
   /* First time through, report that libthread_db was successfuly
      loaded.  Can't print this in in thread_db_load as, at that stage,
      the interpreter and it's console haven't started.  */
