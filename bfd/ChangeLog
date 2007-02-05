@@ -1,3 +1,11 @@
+2007-02-05  Bob Wilson  <bob.wilson@acm.org>
+	
+	* elf32-xtensa.c (elf_howto_table) <R_XTENSA_GLOB_DAT>
+	<R_XTENSA_JMP_SLOT, R_XTENSA_RELATIVE, R_XTENSA_PLT, R_XTENSA_DIFF32>:
+	Set src_mask to zero.
+	<R_XTENSA_DIFF8, R_XTENSA_DIFF16>: Likewise.  Also fix dst_mask.
+	<R_XTENSA_ASM_EXPAND>: Set pcrel_offset to TRUE.
+	
 2007-02-02  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (xtensa_elf_dynamic_symbol_p): Renamed to...
