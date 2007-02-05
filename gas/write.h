@@ -126,6 +126,10 @@ struct fix
     const struct cgen_insn *insn;
     /* Target specific data, usually reloc number.  */
     int opinfo;
+    /* Which ifield this fixup applies to. */
+    struct cgen_maybe_multi_ifield * field;
+    /* is this field is the MSB field in a set? */
+    int msb_field_p;
   } fx_cgen;
 #endif
 

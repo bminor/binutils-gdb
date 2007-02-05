@@ -4778,6 +4778,10 @@ _ACEOF
 	esac
 	;;
 
+      mep)
+	using_cgen=yes
+	;;
+
       mips)
 	echo ${extra_objects} | grep -s "itbl-parse.o"
 	if test $? -ne 0 ; then

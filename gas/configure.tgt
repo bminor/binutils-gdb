@@ -52,6 +52,7 @@ case ${cpu} in
   m6811|m6812|m68hc12)	cpu_type=m68hc11 ;;
   m683??)		cpu_type=m68k ;;
   maxq)			cpu_type=maxq ;;
+  mep-*-elf)		cpu_type=mep endian=big ;;
   mips*el)		cpu_type=mips endian=little ;;
   mips*)		cpu_type=mips endian=big ;;
   mt)                   cpu_type=mt endian=big ;;
@@ -256,6 +257,8 @@ case ${generic_target} in
   m68k-*-psos*)				fmt=elf em=psos;;
 
   maxq-*-coff)      			fmt=coff bfd_gas=yes ;;
+
+  mep-*-elf)				fmt=elf ;;
 
   mcore-*-elf)				fmt=elf ;;
   mcore-*-pe)				fmt=coff em=pe bfd_gas=yes ;;

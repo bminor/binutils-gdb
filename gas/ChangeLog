@@ -1,3 +1,119 @@
+2007-02-05  Dave Brolley  <brolley@redhat.com>
+
+	* Makefile.am: Add support for Toshiba MeP.
+	* configure.in: Likewise
+	* config/tc-mep.c:
+	* config/obj-elf.c: New file.
+	* config/tc-mep.c: New file.
+	* config/tc-mep.h: New file.
+	* testsuite/gas/mep: New testsuite with content.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
+2007-02-05  Dave Brolley  <brolley@redhat.com>
+
+	* cgen.c (gas_cgen_install_complex_reloc): Removed.
+	(complex_reloc_installation_howto): Removed.
+
+2007-02-05  Dave Brolley  <brolley@redhat.com>
+
+	* Contribute the following changes:
+	2002-06-06  Graydon Hoare  <graydon@redhat.com>
+
+	* symbols.c (use_complex_relocs_for): Tighten up conditions on
+	resolving expression symbols.
+
+	2002-04-04  DJ Delorie  <dj@redhat.com>
+
+	* symbols.c (use_complex_relocs_for): New, to decide
+	when to use complex relocs.
+	(resolve_symbol_value): Use it.
+
+	2002-03-07  Graydon Hoare  <graydon@redhat.com>
+
+	* cgen.c: Minor debugging touchups, warning removal.
+
+	2002-02-17  Catherine Moore  <clm@redhat.com>
+
+	* cgen.c (gas_cgen_md_apply_fix3):  Only set signed_p if RELC.
+
+	2002-01-23  Graydon Hoare  <graydon@redhat.com>
+
+	* cgen.c (gas_cgen_parse_operand): Add signed RELC support.
+	(queue_fixup_recursively): Likewise.
+	(make_right_shifted_expr): Likewise.
+	* symbols.c (resolve_symbol_value): Likewise.
+
+	2002-01-15  Graydon Hoare  <graydon@redhat.com>
+
+	* write.h (struct fix): Add msb_field_p to fx_cgen sub-struct.
+	* cgen.c (make_masked_expr): Remove.
+	(gas_cgen_encode_addend): Add oplen, signed_p, trunc_p params.
+	(gas_cgen_md_apply_fix3): Call encode_addend with new args.
+	(queue_fixup_recursively): Change from masked expr to trunc flag.
+	(queue_fixup_recursively): Restore assignment of sub-field value to
+	temporary in fixups array (lost in recent merge).
+
+	2002-01-01  Graydon Hoare  <graydon@redhat.com>
+
+	* cgen.c (make_masked_expr): Add.
+	(queue_fixup_recursively): Call make_masked_expr on non-rightmost
+	fragments of multi-ifield complex relocs.
+	(gas_cgen_parse_operand): Reflect changed meaning of last arg to
+	queue_fixup_recursively.
+
+	2001-12-18  Graydon Hoare  <graydon@redhat.com>
+
+	* cgen.c (weak_operand_overflow_check): Improve accuracy of
+	detecting overflows.
+
+	2001-12-17  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* cgen.c: Tidy up RELC code after the merge.
+
+	2001-11-15  graydon hoare  <graydon@redhat.com>
+
+	* cgen.c (fixup): Add cgen_maybe_multi_ifield member.
+	(make_right_shifted_expr): New function.
+	(queue_fixup): Change to recursive function that fragments
+	fixups if operand has a multi-ifield.
+	(gas_cgen_parse_operand): Add RELC code to wrap expressions in
+	symbols, call weak_operand_overflow_check, and fragment call
+	queue_fixup with operand fields.
+	(gas_cgen_finish_insn) Modify to manage ifield pointer.
+	(gas_cgen_md_apply_fix3) Modify to get start, length from
+	ifield whenever it is set. Also change condition on which
+	self-describing relocs are encoded.
+	(weak_operand_overflow_check): New function to try to select
+	insns correctly.
+	* cgen.h (GAS_CGEN_MAX_FIXUPS): Bump from 3 up to 32.
+	* write.h (struct fix): Add cgen_maybe_multi_ifield field to
+	fx_cgen substructure
+	* config/tc-mep.c (md_cgen_lookup_reloc): Fall back to
+	BFD_RELOC_RELC when no other reloc types can be found.
+
+	2001-10-03  graydon hoare  <graydon@redhat.com>
+
+	* symbols.c (resolve_symbol_value): Unconditionally encode
+	expression symbols as mangled complex relocation symbols (when
+	compiled with -DOBJ_COMPLEX_RELOC)
+
+	* cgen.c (gas_cgen_encode_addend): New function for relc.
+	(gas_cgen_install_complex_reloc): Likewise.
+	(gas_cgen_md_apply_fix3): Add hook into gas_cgen_encode_addend.
+	(gas_cgen_tc_gen_reloc): Add hook into gas_cgen_install_complex_reloc.
+
+	2001-06-24  Michael Chastain  <chastain@redhat.com>
+
+	* symbols.c (symbol_relc_make_expr): Conform to K & R C.
+
+	2001-06-20  Frank Ch. Eigler  <fche@redhat.com>
+
+	* symbols.c (resolve_symbol_value): Conditionally generate relc
+	symbols from unresolved expressions.
+	(symbol_relc_make_sym,value,expr): New traversal/conversion routines.
+	* symbols.h: Declare them.
+
 2007-02-03  DJ Delorie  <dj@delorie.com>
 
 	* config/tc-m32c.c (m32c_cons_fix_new): New.  Added to support 3

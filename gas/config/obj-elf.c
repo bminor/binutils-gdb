@@ -57,6 +57,10 @@
 #include "elf/x86-64.h"
 #endif
 
+#ifdef TC_MEP
+#include "elf/mep.h"
+#endif
+
 static void obj_elf_line (int);
 static void obj_elf_size (int);
 static void obj_elf_type (int);

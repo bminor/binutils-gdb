@@ -16,7 +16,10 @@ gas_test "p2425.s" ""   "" "pcrel values in assignment"
 # The ".space" directive is taken care of in the C54x-specific tests, so fail
 #  here 
 #
-if { [istarget hppa*-*-*] || [istarget *c54x*-*-*] } then {
+# The test also doesn't work on mep targets, since they use RELC, and it
+# will avoid simplifying the expression since it conservatively assumes
+# ugly expressions can be saved until link-time.
+if { [istarget hppa*-*-*] || [istarget *c54x*-*-*] || [istarget mep*-*-*]} then {
     setup_xfail *-*-*
     fail "simplifiable double subtraction"
 } else {
