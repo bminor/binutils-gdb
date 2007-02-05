@@ -1,9 +1,9 @@
-2076-02-05  H.J. Lu  <hongjiu.lu@intel.com>
+2007-02-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-i386/pcrel16.d: Undo the last change.
 	* ld-x86-64/pcrel16.d: Likewise.
 
-2076-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+2007-02-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-i386/pcrel16.d: Updated.
 	* ld-x86-64/pcrel16.d: Likewise.
