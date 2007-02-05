@@ -12,4 +12,4 @@ Disassembly of section .text:
      420:	cd 42[ 	]+int    \$0x42
      422:	ca 02 00[ 	]+lret   \$0x2
 	...
-    f065:	e9 b8 13[ 	]+jmp    10420 <__bss_start\+0x3b8>
+    f065:	e9 b8 13[ 	]+jmp    420 <_start\+0x420>

@@ -4901,6 +4901,7 @@ OP_J (int bytemode, int sizeflag)
 {
   bfd_vma disp;
   bfd_vma mask = -1;
+  bfd_vma segment = 0;
 
   switch (bytemode)
     {
@@ -4918,11 +4919,14 @@ OP_J (int bytemode, int sizeflag)
 	  disp = get16 ();
 	  if ((disp & 0x8000) != 0)
 	    disp -= 0x10000;
-	  /* For some reason, a data16 prefix on a jump instruction
-	     means that the pc is masked to 16 bits after the
-	     displacement is added!  */
-	  if ((prefixes & PREFIX_DATA) != 0)
-	    mask = 0xffff;
+	  /* In 16bit mode, address is wrapped around at 64k within
+	     the same segment.  Otherwise, a data16 prefix on a jump
+	     instruction means that the pc is masked to 16 bits after
+	     the displacement is added!  */
+	  mask = 0xffff;
+	  if ((prefixes & PREFIX_DATA) == 0)
+	    segment = ((start_pc + codep - start_codep)
+		       & ~((bfd_vma) 0xffff));
 	}
       used_prefixes |= (prefixes & PREFIX_DATA);
       break;
@@ -4930,7 +4934,7 @@ OP_J (int bytemode, int sizeflag)
       oappend (INTERNAL_DISASSEMBLER_ERROR);
       return;
     }
-  disp = (start_pc + codep - start_codep + disp) & mask;
+  disp = ((start_pc + codep - start_codep + disp) & mask) | segment;
   set_op (disp, 0);
   print_operand_value (scratchbuf, 1, disp);
   oappend (scratchbuf);
