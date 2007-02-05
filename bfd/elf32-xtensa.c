@@ -945,43 +945,6 @@ elf_xtensa_check_relocs (bfd *abfd,
 }
 
 
-static void
-elf_xtensa_make_sym_local (struct bfd_link_info *info,
-			   struct elf_link_hash_entry *h)
-{
-  if (info->shared)
-    {
-      if (h->plt.refcount > 0)
-	{
-	  /* Will use RELATIVE relocs instead of JMP_SLOT relocs.  */
-	  if (h->got.refcount < 0)
-	    h->got.refcount = 0;
-	  h->got.refcount += h->plt.refcount;
-	  h->plt.refcount = 0;
-	}
-    }
-  else
-    {
-      /* Don't need any dynamic relocations at all.  */
-      h->plt.refcount = 0;
-      h->got.refcount = 0;
-    }
-}
-
-
-static void
-elf_xtensa_hide_symbol (struct bfd_link_info *info,
-			struct elf_link_hash_entry *h,
-			bfd_boolean force_local)
-{
-  /* For a shared link, move the plt refcount to the got refcount to leave
-     space for RELATIVE relocs.  */
-  elf_xtensa_make_sym_local (info, h);
-
-  _bfd_elf_link_hash_hide_symbol (info, h, force_local);
-}
-
-
 /* Return the section that should be marked against GC for a given
    relocation.  */
 
@@ -1198,45 +1161,50 @@ elf_xtensa_adjust_dynamic_symbol (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 
 
 static bfd_boolean
-elf_xtensa_fix_refcounts (struct elf_link_hash_entry *h, void *arg)
+elf_xtensa_allocate_dynrelocs (struct elf_link_hash_entry *h, void *arg)
 {
-  struct bfd_link_info *info = (struct bfd_link_info *) arg;
+  struct bfd_link_info *info;
+  struct elf_xtensa_link_hash_table *htab;
+  bfd_boolean is_dynamic;
+
+  if (h->root.type == bfd_link_hash_indirect)
+    return TRUE;
 
   if (h->root.type == bfd_link_hash_warning)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-  if (! elf_xtensa_dynamic_symbol_p (h, info))
-    elf_xtensa_make_sym_local (info, h);
+  info = (struct bfd_link_info *) arg;
+  htab = elf_xtensa_hash_table (info);
 
-  return TRUE;
-}
+  is_dynamic = elf_xtensa_dynamic_symbol_p (h, info);
 
-
-static bfd_boolean
-elf_xtensa_allocate_plt_size (struct elf_link_hash_entry *h, void *arg)
-{
-  asection *srelplt = (asection *) arg;
-
-  if (h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+  if (! is_dynamic)
+    {
+      if (info->shared)
+	{
+	  /* For shared objects, there's no need for PLT entries for local
+	     symbols (use RELATIVE relocs instead of JMP_SLOT relocs).  */
+	  if (h->plt.refcount > 0)
+	    {
+	      if (h->got.refcount < 0)
+		h->got.refcount = 0;
+	      h->got.refcount += h->plt.refcount;
+	      h->plt.refcount = 0;
+	    }
+	}
+      else
+	{
+	  /* Don't need any dynamic relocations at all.  */
+	  h->plt.refcount = 0;
+	  h->got.refcount = 0;
+	}
+    }
 
   if (h->plt.refcount > 0)
-    srelplt->size += (h->plt.refcount * sizeof (Elf32_External_Rela));
-
-  return TRUE;
-}
-
-
-static bfd_boolean
-elf_xtensa_allocate_got_size (struct elf_link_hash_entry *h, void *arg)
-{
-  asection *srelgot = (asection *) arg;
-
-  if (h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+    htab->srelplt->size += (h->plt.refcount * sizeof (Elf32_External_Rela));
 
   if (h->got.refcount > 0)
-    srelgot->size += (h->got.refcount * sizeof (Elf32_External_Rela));
+    htab->srelgot->size += (h->got.refcount * sizeof (Elf32_External_Rela));
 
   return TRUE;
 }
@@ -1316,27 +1284,18 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       /* Allocate room for one word in ".got".  */
       htab->sgot->size = 4;
 
-      /* Adjust refcounts for symbols that we now know are not "dynamic".  */
+      /* Allocate space in ".rela.got" for literals that reference global
+	 symbols and space in ".rela.plt" for literals that have PLT
+	 entries.  */
       elf_link_hash_traverse (elf_hash_table (info),
-			      elf_xtensa_fix_refcounts,
+			      elf_xtensa_allocate_dynrelocs,
 			      (void *) info);
-
-      /* Allocate space in ".rela.got" for literals that reference
-	 global symbols.  */
-      elf_link_hash_traverse (elf_hash_table (info),
-			      elf_xtensa_allocate_got_size,
-			      (void *) srelgot);
 
       /* If we are generating a shared object, we also need space in
 	 ".rela.got" for R_XTENSA_RELATIVE relocs for literals that
 	 reference local symbols.  */
       if (info->shared)
 	elf_xtensa_allocate_local_got_size (info);
-
-      /* Allocate space in ".rela.plt" for literals that have PLT entries.  */
-      elf_link_hash_traverse (elf_hash_table (info),
-			      elf_xtensa_allocate_plt_size,
-			      (void *) srelplt);
 
       /* Allocate space in ".plt" to match the size of ".rela.plt".  For
 	 each PLT entry, we need the PLT code plus a 4-byte literal.
@@ -9854,7 +9813,6 @@ static const struct bfd_elf_special_section elf_xtensa_special_sections[] =
 #define elf_backend_gc_sweep_hook	     elf_xtensa_gc_sweep_hook
 #define elf_backend_grok_prstatus	     elf_xtensa_grok_prstatus
 #define elf_backend_grok_psinfo		     elf_xtensa_grok_psinfo
-#define elf_backend_hide_symbol		     elf_xtensa_hide_symbol
 #define elf_backend_object_p		     elf_xtensa_object_p
 #define elf_backend_reloc_type_class	     elf_xtensa_reloc_type_class
 #define elf_backend_relocate_section	     elf_xtensa_relocate_section

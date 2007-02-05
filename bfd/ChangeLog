@@ -1,5 +1,14 @@
 2007-02-05  Bob Wilson  <bob.wilson@acm.org>
 	
+	* elf32-xtensa.c (elf_xtensa_make_sym_local): Delete.
+	(elf_xtensa_hide_symbol, elf_backend_hide_symbol): Delete.
+	(elf_xtensa_fix_refcounts, elf_xtensa_allocate_plt_size)
+	(elf_xtensa_allocate_got_size): Replace these with...
+	(elf_xtensa_allocate_dynrelocs): ...this new function.
+	(elf_xtensa_size_dynamic_sections): Use it.
+	
+2007-02-05  Bob Wilson  <bob.wilson@acm.org>
+	
 	* elf32-xtensa.c (elf_howto_table) <R_XTENSA_GLOB_DAT>
 	<R_XTENSA_JMP_SLOT, R_XTENSA_RELATIVE, R_XTENSA_PLT, R_XTENSA_DIFF32>:
 	Set src_mask to zero.
