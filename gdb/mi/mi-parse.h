@@ -22,6 +22,8 @@
 #ifndef MI_PARSE_H
 #define MI_PARSE_H
 
+#include <sys/time.h>
+
 /* MI parser */
 
 /* Timestamps for current command and last asynchronous command.  */
