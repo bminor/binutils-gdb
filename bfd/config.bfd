@@ -840,6 +840,11 @@ case "${targ}" in
     targ_selvecs="mcore_pe_big_vec mcore_pe_little_vec mcore_pei_big_vec mcore_pei_little_vec"
     ;;
 
+  mep-*-elf)
+    targ_defvec=bfd_elf32_mep_vec
+    targ_selvecs=bfd_elf32_mep_little_vec
+    ;;
+
   mips*-big-*)
     targ_defvec=ecoff_big_vec
     targ_selvecs=ecoff_little_vec

@@ -6378,6 +6378,10 @@ Unable to find equivalent output section for symbol '%s' from section '%s'"),
 	type = STT_FUNC;
       else if ((flags & BSF_OBJECT) != 0)
 	type = STT_OBJECT;
+      else if ((flags & BSF_RELC) != 0)
+	type = STT_RELC;
+      else if ((flags & BSF_SRELC) != 0)
+	type = STT_SRELC;
       else
 	type = STT_NOTYPE;
 

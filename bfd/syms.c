@@ -288,6 +288,14 @@ CODE_FRAGMENT
 .  {* This symbol is thread local.  Used in ELF.  *}
 .#define BSF_THREAD_LOCAL  0x40000
 .
+.  {* This symbol represents a complex relocation expression,
+.     with the expression tree serialized in the symbol name.  *}
+.#define BSF_RELC 0x80000
+.
+.  {* This symbol represents a signed complex relocation expression,
+.     with the expression tree serialized in the symbol name.  *}
+.#define BSF_SRELC 0x100000
+.
 .  flagword flags;
 .
 .  {* A pointer to the section to which this symbol is

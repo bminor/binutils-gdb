@@ -1974,6 +1974,9 @@ enum bfd_architecture
 #define bfd_mach_fr500         500
 #define bfd_mach_fr550         550
   bfd_arch_mcore,
+  bfd_arch_mep,
+#define bfd_mach_mep           1
+#define bfd_mach_mep_h1        0x6831
   bfd_arch_ia64,      /* HP/Intel ia64 */
 #define bfd_mach_ia64_elf64    64
 #define bfd_mach_ia64_elf32    32
@@ -3560,6 +3563,29 @@ short offset into 11 bits.  */
   BFD_RELOC_MCORE_PCREL_JSR_IMM11BY2,
   BFD_RELOC_MCORE_RVA,
 
+/* Toshiba Media Processor Relocations.  */
+  BFD_RELOC_MEP_8,
+  BFD_RELOC_MEP_16,
+  BFD_RELOC_MEP_32,
+  BFD_RELOC_MEP_PCREL8A2,
+  BFD_RELOC_MEP_PCREL12A2,
+  BFD_RELOC_MEP_PCREL17A2,
+  BFD_RELOC_MEP_PCREL24A2,
+  BFD_RELOC_MEP_PCABS24A2,
+  BFD_RELOC_MEP_LOW16,
+  BFD_RELOC_MEP_HI16U,
+  BFD_RELOC_MEP_HI16S,
+  BFD_RELOC_MEP_GPREL,
+  BFD_RELOC_MEP_TPREL,
+  BFD_RELOC_MEP_TPREL7,
+  BFD_RELOC_MEP_TPREL7A2,
+  BFD_RELOC_MEP_TPREL7A4,
+  BFD_RELOC_MEP_UIMM24,
+  BFD_RELOC_MEP_ADDR24A4,
+  BFD_RELOC_MEP_GNU_VTINHERIT,
+  BFD_RELOC_MEP_GNU_VTENTRY,
+
+
 /* These are relocations for the GETA instruction.  */
   BFD_RELOC_MMIX_GETA,
   BFD_RELOC_MMIX_GETA_1,
@@ -4177,6 +4203,10 @@ This is the 5 bits of a value.  */
   BFD_RELOC_XSTORMY16_24,
   BFD_RELOC_XSTORMY16_FPTR16,
 
+/* Self-describing complex relocations.  */
+  BFD_RELOC_RELC,
+
+
 /* Infineon Relocations.  */
   BFD_RELOC_XC16X_PAG,
   BFD_RELOC_XC16X_POF,
@@ -4425,6 +4455,14 @@ typedef struct bfd_symbol
 
   /* This symbol is thread local.  Used in ELF.  */
 #define BSF_THREAD_LOCAL  0x40000
+
+  /* This symbol represents a complex relocation expression,
+     with the expression tree serialized in the symbol name.  */
+#define BSF_RELC 0x80000
+
+  /* This symbol represents a signed complex relocation expression,
+     with the expression tree serialized in the symbol name.  */
+#define BSF_SRELC 0x100000
 
   flagword flags;
 
@@ -5160,6 +5198,7 @@ typedef struct bfd_target
   /* See documentation on reloc types.  */
   reloc_howto_type *
               (*reloc_type_lookup) (bfd *, bfd_reloc_code_real_type);
+
 
   /* Routines used when writing an object file.  */
 #define BFD_JUMP_TABLE_WRITE(NAME) \
