@@ -1,3 +1,11 @@
+2007-02-05  Dave Brolley  <brolley@redhat.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add support for Toshiba MeP.
+	* configure.tgt: Likewise.
+	* scripttempl/mep.sc: New file.
+	* emulparams/elf32mep.sh: New file.
+	* Makefile.in: Regenerate.
+
 2006-01-29  Julian Brown  <julian@codesourcery.com>
 
 	* NEWS: Mention --vfp11-denorm-fix option.

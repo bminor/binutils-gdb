@@ -321,6 +321,7 @@ mcore-*-pe)		targ_emul=mcorepe ;
 			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 mcore-*-elf)		targ_emul=elf32mcore
 			;;
+mep-*-elf)		targ_emul=elf32mep ;;
 mips*-*-pe)		targ_emul=mipspe ;
 			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 mips*-dec-ultrix*)	targ_emul=mipslit ;;

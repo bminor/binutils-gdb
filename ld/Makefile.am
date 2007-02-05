@@ -177,6 +177,7 @@ ALL_EMULATIONS = \
 	eelf32lppcsim.o \
 	eelf32m32c.o \
 	eelf32mcore.o \
+	eelf32mep.o \
 	eelf32mipswindiss.o \
 	eelf32mt.o \
 	eelf32openrisc.o \
@@ -692,6 +693,9 @@ eelf32frvfd.c: $(srcdir)/emulparams/elf32frvfd.sh \
 eelf32mcore.c: $(srcdir)/emulparams/elf32mcore.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32mcore "$(tdir_mcore)"
+eelf32mep.c: $(srcdir)/emulparams/elf32mep.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/mep.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32mep "$(tdir_mep)"
 em32relf.c: $(srcdir)/emulparams/m32relf.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m32relf "$(tdir_m32r)"
