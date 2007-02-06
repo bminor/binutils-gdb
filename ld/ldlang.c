@@ -1,6 +1,6 @@
 /* Linker command language support.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006
+   2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
@@ -4413,7 +4413,8 @@ lang_size_sections_1
 		   an explicit assignment to the section LMA (ie.
 		   os->load_base set) because backwards moves normally
 		   create overlapping LMAs.  */
-		if (dot < last->vma)
+		if (dot < last->vma
+		    && os->bfd_section->size != 0)
 		  {
 		    einfo (_("%P: warning: dot moved backwards before `%s'\n"),
 			   os->name);
@@ -4463,8 +4464,11 @@ lang_size_sections_1
 		 || (os->bfd_section->flags & SEC_THREAD_LOCAL) == 0)
 		&& (os->bfd_section->flags & SEC_ALLOC) != 0
 		&& (os->bfd_section->size != 0
-		    || os->bfd_section->vma != os->bfd_section->lma
-		    || r->last_os != NULL)
+		    || (r->last_os == NULL
+			&& os->bfd_section->vma != os->bfd_section->lma)
+		    || (r->last_os != NULL
+			&& dot >= (r->last_os->output_section_statement
+				   .bfd_section->vma))
 		&& os->lma_region == NULL
 		&& !link_info.relocatable)
 	      r->last_os = s;

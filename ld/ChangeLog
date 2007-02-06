@@ -1,3 +1,8 @@
+2007-02-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (lang_size_sections_1): Don't warn on backwards dot
+	move unless section size is non-zero.
+
 2007-02-05  Dave Brolley  <brolley@redhat.com>
 
 	* Makefile.am (ALL_EMULATIONS): Add support for Toshiba MeP.
