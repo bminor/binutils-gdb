@@ -89,6 +89,7 @@ responsibility among the other maintainers.
   M68k		   Ben Elliston <bje@gnu.org>
   M88k		   Mark Kettenis <kettenis@gnu.org>
   MAXQ		   Inderpreet Singh <inderpreetb@noida.hcltech.com>
+  MEP		   Dave Brolley <brolley@redhat.com>
   MIPS		   Eric Christopher <echristo@apple.com>
   MIPS		   Thiemo Seufer <ths@networkno.de>
   MMIX		   Hans-Peter Nilsson <hp@bitrange.com>
