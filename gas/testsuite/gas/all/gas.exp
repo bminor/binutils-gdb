@@ -83,13 +83,18 @@ case $target_triplet in {
     default {
 	setup_xfail "*c30*-*-*" "*c4x*-*-*" "pdp11-*-*"
 	run_dump_test redef
+	# The next two tests can fail if the target does not convert fixups
+	# against ordinary symbols into relocations against section symbols.
+	# This is usually revealed by the error message:
+	#  symbol `sym' required but not present
 	setup_xfail "*c30*-*-*" "*c4x*-*-*" "*arm*-*-*aout*" "*arm*-*-*coff" \
 	    "*arm*-*-pe" "crx*-*-*" "h8300*-*-*" "m68hc*-*-*" "maxq-*-*" \
-	    "pdp11-*-*" "vax*-*-*" "z8k-*-*"
+	    "mn10300-*-*" "pdp11-*-*" "vax*-*-*" "z8k-*-*"
 	run_dump_test redef2
 	setup_xfail "*-*-aix*" "*-*-coff" "*-*-cygwin" "*-*-mingw*" "*-*-pe*" \
 	    "bfin-*-*" "*c4x*-*-*" "crx*-*-*" "h8300*-*-*" "hppa*-*-hpux*" \
-	    "m68hc*-*-*" "maxq-*-*" "or32-*-*" "pdp11-*-*" "vax*-*-*" "z8k-*-*"
+	    "m68hc*-*-*" "maxq-*-*" "mn10300-*-*" "or32-*-*" "pdp11-*-*" \
+	    "vax*-*-*" "z8k-*-*"
 	run_dump_test redef3
 	setup_xfail "*c4x*-*-*"
 	gas_test_error "redef4.s" "" ".set for symbol already used as label"

@@ -78,6 +78,11 @@ if { ([istarget "*-*-*elf*"]
 	{ mips*-*-* } { }
 	{ *c54x*-*-* } { }
 	default {
+	    # The next test can fail if the target does not convert fixups
+	    # against ordinary symbols into relocations against section symbols.
+	    # This is usually revealed by the error message:
+	    #  symbol `sym' required but not present
+	    setup_xfail "h8300-*-*" "mn10300-*-*"
 	    run_dump_test redef
 	    run_dump_test equ-reloc
 	}
