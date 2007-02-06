@@ -1,3 +1,18 @@
+2007-02-06  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/3800
+	* readelf.c: Include elf/h8.h twice.  The first time in order to
+	get the reloc numbers, the second time in order to get the reloc
+	decoder function.
+	(dump_section): Tell the user if the section being displayed has
+	unprocessed relocs associated with it.
+	(get_reloc_size): New function - returns the size of a reloc.
+	(debug_apply_rela_addends): Use get_reloc_size().
+	* dwarf.c (read_and_display_attr_value): Extend number of
+	languages known for the DW_AT_language attribute.
+	(process_debug_info): Display the attribute offset before decoding
+	the attribute, in case there are problems.
+
 2007-02-05  Dave Brolley  <brolley@redhat.com>
 
 	* readelf.c (dump_relocations): Don't check for

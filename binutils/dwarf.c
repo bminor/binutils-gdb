@@ -1,5 +1,5 @@
 /* dwarf.c -- display DWARF contents of a BFD binary file
-   Copyright 2005, 2006
+   Copyright 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -1213,26 +1213,37 @@ read_and_display_attr_value (unsigned long attribute,
     case DW_AT_language:
       switch (uvalue)
 	{
-	case DW_LANG_C:			printf ("(non-ANSI C)"); break;
+	  /* Ordered by the numeric value of these constants.  */
 	case DW_LANG_C89:		printf ("(ANSI C)"); break;
-	case DW_LANG_C_plus_plus:	printf ("(C++)"); break;
-	case DW_LANG_Fortran77:		printf ("(FORTRAN 77)"); break;
-	case DW_LANG_Fortran90:		printf ("(Fortran 90)"); break;
-	case DW_LANG_Modula2:		printf ("(Modula 2)"); break;
-	case DW_LANG_Pascal83:		printf ("(ANSI Pascal)"); break;
+	case DW_LANG_C:			printf ("(non-ANSI C)"); break;
 	case DW_LANG_Ada83:		printf ("(Ada)"); break;
+	case DW_LANG_C_plus_plus:	printf ("(C++)"); break;
 	case DW_LANG_Cobol74:		printf ("(Cobol 74)"); break;
 	case DW_LANG_Cobol85:		printf ("(Cobol 85)"); break;
+	case DW_LANG_Fortran77:		printf ("(FORTRAN 77)"); break;
+	case DW_LANG_Fortran90:		printf ("(Fortran 90)"); break;
+	case DW_LANG_Pascal83:		printf ("(ANSI Pascal)"); break;
+	case DW_LANG_Modula2:		printf ("(Modula 2)"); break;
 	  /* DWARF 2.1 values.	*/
+	case DW_LANG_Java:		printf ("(Java)"); break;
 	case DW_LANG_C99:		printf ("(ANSI C99)"); break;
 	case DW_LANG_Ada95:		printf ("(ADA 95)"); break;
 	case DW_LANG_Fortran95:		printf ("(Fortran 95)"); break;
+	  /* DWARF 3 values.  */
+	case DW_LANG_PLI:		printf ("(PLI)"); break;
+	case DW_LANG_ObjC:		printf ("(Objective C)"); break;
+	case DW_LANG_ObjC_plus_plus:	printf ("(Objective C++)"); break;
+	case DW_LANG_UPC:		printf ("(Unified Parallel C)"); break;
+	case DW_LANG_D:			printf ("(D)"); break;
 	  /* MIPS extension.  */
 	case DW_LANG_Mips_Assembler:	printf ("(MIPS assembler)"); break;
 	  /* UPC extension.  */
 	case DW_LANG_Upc:		printf ("(Unified Parallel C)"); break;
 	default:
-	  printf ("(Unknown: %lx)", uvalue);
+	  if (uvalue >= DW_LANG_lo_user && uvalue <= DW_LANG_hi_user)
+	    printf ("(implementation defined: %lx)", uvalue);
+	  else
+	    printf ("(Unknown: %lx)", uvalue);
 	  break;
 	}
       break;
@@ -1684,6 +1695,13 @@ process_debug_info (struct dwarf_section *section, void *file,
 	      continue;
 	    }
 
+	  if (!do_loc)
+	    printf (_(" <%d><%lx>: Abbrev Number: %lu"),
+		    level,
+		    (unsigned long) (tags - section_begin
+				     - bytes_read),
+		    abbrev_number);
+ 
 	  /* Scan through the abbreviation list until we reach the
 	     correct entry.  */
 	  for (entry = first_abbrev;
@@ -1693,18 +1711,18 @@ process_debug_info (struct dwarf_section *section, void *file,
 
 	  if (entry == NULL)
 	    {
+	      if (!do_loc)
+		{
+		  printf ("\n");
+		  fflush (stdout);
+		}
 	      warn (_("Unable to locate entry %lu in the abbreviation table\n"),
 		    abbrev_number);
 	      return 0;
 	    }
 
 	  if (!do_loc)
-	    printf (_(" <%d><%lx>: Abbrev Number: %lu (%s)\n"),
-		    level,
-		    (unsigned long) (tags - section_begin
-				     - bytes_read),
-		    abbrev_number,
-		    get_TAG_name (entry->tag));
+	    printf (_(" (%s)\n"), get_TAG_name (entry->tag));
  
 	  switch (entry->tag)
 	    {
@@ -1724,14 +1742,20 @@ process_debug_info (struct dwarf_section *section, void *file,
 	    }
 
 	  for (attr = entry->first_attr; attr; attr = attr->next)
-	    tags = read_and_display_attr (attr->attribute,
-					  attr->form,
-					  tags, cu_offset,
-					  compunit.cu_pointer_size,
-					  offset_size,
-					  compunit.cu_version,
-					  &debug_information [unit],
-					  do_loc);
+	    {
+	      if (! do_loc)
+		/* Show the offset from where the tag was extracted.  */
+		printf ("  <%2lx>", tags - section_begin);
+
+	      tags = read_and_display_attr (attr->attribute,
+					    attr->form,
+					    tags, cu_offset,
+					    compunit.cu_pointer_size,
+					    offset_size,
+					    compunit.cu_version,
+					    &debug_information [unit],
+					    do_loc);
+	    }
  
  	  if (entry->children)
  	    ++level;
@@ -2506,7 +2530,6 @@ display_debug_str (struct dwarf_section *section,
 
   return 1;
 }
-
 
 static int
 display_debug_info (struct dwarf_section *section, void *file)
