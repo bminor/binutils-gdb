@@ -1745,7 +1745,7 @@ process_debug_info (struct dwarf_section *section, void *file,
 	    {
 	      if (! do_loc)
 		/* Show the offset from where the tag was extracted.  */
-		printf ("  <%2lx>", tags - section_begin);
+		printf ("  <%2lx>", (unsigned long)(tags - section_begin));
 
 	      tags = read_and_display_attr (attr->attribute,
 					    attr->form,
