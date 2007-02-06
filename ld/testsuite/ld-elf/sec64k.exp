@@ -91,35 +91,41 @@ if [catch { set ofd [open "tmpdir/$test1.d" w] } x] {
 
 # The ld-r linked file will contain relocation-sections too, so make it
 # half the size in order to try and keep the test-time down.
-foreach sfile [lrange $sfiles 0 [expr [llength $sfiles] / 2]] {
-    puts $ofd "#source: $sfile"
+
+# The m32r target generates both REL and RELA relocs (for historical
+# reasons) so the expected number of sections will be much more than
+# 68000, which throws this particular test right off.
+if {![istarget "m32r-*-*"]} then {
+    foreach sfile [lrange $sfiles 0 [expr [llength $sfiles] / 2]] {
+	puts $ofd "#source: $sfile"
+    }
+    puts $ofd "#ld: -r"
+    puts $ofd "#readelf: -W -Ss"
+    puts $ofd "There are 680.. section headers.*:"
+    puts $ofd "#..."
+    puts $ofd "  \\\[ 0\\\] .* 682\[0-9\]\[0-9\]\[ \]+0\[ \]+0"
+    puts $ofd "#..."
+    puts $ofd "  \\\[ \[0-9\]\\\] \.foo\.1\[ \]+PROGBITS\[ \]+.*"
+    puts $ofd "#..."
+    puts $ofd "  \\\[65279\\\] (.rel\[a\]?)?\\.foo\\.\[0-9\]+ .*"
+    puts $ofd "  \\\[65536\\\] (.rel\[a\]?)?\\.foo\\.\[0-9\]+ .*"
+    puts $ofd "#..."
+    puts $ofd " 340..: 0+\[ \]+0\[ \]+SECTION\[ \]+LOCAL\[ \]+DEFAULT\[ \]+68... "
+    puts $ofd "#..."
+    puts $ofd " 340..: 0+(2|4|8)\[ \]+0\[ \]+NOTYPE\[ \]+LOCAL\[ \]+DEFAULT\[ \]+\[23\] bar_1$"
+    puts $ofd "#..."
+    puts $ofd ".* bar_34000$"
+    puts $ofd "#..."
+    # Global symbols are not in "alphanumeric" order, so we just check
+    # that the first and the last are present in any order (assuming no
+    # duplicates).
+    puts $ofd ".* (\[0-9\] foo_1|68... foo_34000)$"
+    puts $ofd "#..."
+    puts $ofd ".* (\[0-9\] foo_1|68... foo_34000)$"
+    puts $ofd "#pass"
+    close $ofd
+    run_dump_test "tmpdir/$test1"
 }
-puts $ofd "#ld: -r"
-puts $ofd "#readelf: -W -Ss"
-puts $ofd "There are 680.. section headers.*:"
-puts $ofd "#..."
-puts $ofd "  \\\[ 0\\\] .* 682\[0-9\]\[0-9\]\[ \]+0\[ \]+0"
-puts $ofd "#..."
-puts $ofd "  \\\[ \[0-9\]\\\] \.foo\.1\[ \]+PROGBITS\[ \]+.*"
-puts $ofd "#..."
-puts $ofd "  \\\[65279\\\] (.rel\[a\]?)?\\.foo\\.\[0-9\]+ .*"
-puts $ofd "  \\\[65536\\\] (.rel\[a\]?)?\\.foo\\.\[0-9\]+ .*"
-puts $ofd "#..."
-puts $ofd " 340..: 0+\[ \]+0\[ \]+SECTION\[ \]+LOCAL\[ \]+DEFAULT\[ \]+68... "
-puts $ofd "#..."
-puts $ofd " 340..: 0+(2|4|8)\[ \]+0\[ \]+NOTYPE\[ \]+LOCAL\[ \]+DEFAULT\[ \]+\[23\] bar_1$"
-puts $ofd "#..."
-puts $ofd ".* bar_34000$"
-puts $ofd "#..."
-# Global symbols are not in "alphanumeric" order, so we just check
-# that the first and the last are present in any order (assuming no
-# duplicates).
-puts $ofd ".* (\[0-9\] foo_1|68... foo_34000)$"
-puts $ofd "#..."
-puts $ofd ".* (\[0-9\] foo_1|68... foo_34000)$"
-puts $ofd "#pass"
-close $ofd
-run_dump_test "tmpdir/$test1"
 
 if [catch { set ofd [open "tmpdir/$test2.d" w] } x] {
     perror "$x"

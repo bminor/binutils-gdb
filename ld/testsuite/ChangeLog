@@ -1,3 +1,10 @@
+2007-02-06  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/3805
+	* ld-elf/sec64k.exp: Expect the relocatable version of this test
+	to fail for the m32r because it creates both .rel and .rela
+	sections.
+
 2007-02-05  Dave Brolley  <brolley@redhat.com>
 
 	* ld-undefined/undefined.exp: XFAIL the undefined test
