@@ -5,20 +5,35 @@
 	* elflink.c (elf_link_input_bfd): Always setup finfo->internal_syms.
 
 2007-02-05  Dave Brolley  <brolley@redhat.com>
+	    Richard Sandiford  <rsandifo@redhat.com>
+	    Stan Cox  <scox@redhat.com>
+	    Nick Clifton  <nickc@redhat.com>
+	    DJ Delorie  <dj@redhat.com>
+	    Frank Ch. Eigler  <fche@redhat.com>
+	    Ben Elliston  <bje@redhat.com>
+	    Richard Henderson  <rth@redhat.com>
 
-	* elflink.h: Add support for Toshiba MeP.
-	* reloc.c: Likewise.
-	* Makefile.am:  Likewise.
-	* config.bfd: Likewise.
-	* configure.in: Likewise.
-	* archures.c: Likewise.
-	* targets.c: Likewise.
-	* elf.c: Likewise.
+	* Makefile.am (ALL_MACHINES): Add cpu-mep.lo.
+	(ALL_MACHINES_CFILES): Add CPU_MEP.c.
+	(BFD32_BACKENDS): Add elf32-mep.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-mep.c.
+	(cpu-mep.lo,elf32-mep.lo): New targets.
+	* archures.c (bfd_arch_mep): New enumerator.
+	(bfd_mach_mep, bfd_mach_mep_h1): New macros.
+	(bfd_mep_arch): New external variable.
+	(bfd_archures_list): Add bfd_mep_arch.
+	* config.bfd: Support mep-*-elf.
+	* configure.in: Support bfd_elf32_mep_vec and bfd_elf32_mep_little_vec.
+	* reloc.c (BFD_RELOC_MEP_*): New relocation numbers.
+	* targets.c (bfd_elf32_mep_vec,bfd_elf32_mep_little_vec): New extern
+	declarations.
+	(_bfd_target_vector): Add bfd_elf32_mep_vec and
+	bfd_elf32_mep_little_vec.
 	* mep-relocs.pl: New file.
 	* cpu-mep.c: New file.
 	* elf32-mep.c: New file.
 	* bfd-in2.h: Regenerate.
-	* po/POTFILES.in: Likewise.
+	* po/POTFILES.in: Regenerate.
 	* libbfd.h: Regenerate.
 	* Makefile.in: Regenerate.
 	* configure: Regenerate.
@@ -39,117 +54,17 @@
 	(mep_elf_relocate_section): Call bfd_elf_perform_complex_relocation.
 
 2007-02-05  Dave Brolley  <brolley@redhat.com>
+	    Richard Sandiford  <rsandifo@redhat.com>
+	    DJ Delorie  <dj@redhat.com>
+	    Graydon Hoare  <graydon@redhat.com>
+	    Nick Clifton  <nickc@cambridge.redhat.com>
+	    Jeff Holcomb  <jeffh@redhat.com>
+	    Frank Ch. Eigler  <fche@redhat.com>
 
-	* Contribute the following changes:
-	2004-07-23  Richard Sandiford  <rsandifo@redhat.com>
-
-	* elflink.c (perform_complex_relocation): Detect relocations against
-	undefined symbols.
-
-	2002-04-02  DJ Delorie  <dj@redhat.com>
-
-	* elflink.h (resolve_symbol): Handle weak symbols.
-
-	2002-03-07  Graydon Hoare  <graydon@redhat.com>
-
-	* elflink.h (perform_complex_relocations): Minor debug message
-	touchup.
-
-	2002-01-23  Graydon Hoare  <graydon@redhat.com>
-
-	* bfd-in2.h: Add signed RELC (SRELC) symbols.
-	* elf.c (swap_out_syms): Likewise.
-	* elfcode.h (elf_slurp_symbol_table): Likewise.
-	(elf_symbol_flags): Likewise.
-	* syms.c: Likewise.
-	* elflink.h (eval_symbol): Introduce signed RELC evaluation.
-	(evaluate_complex_relocation_symbols): Likewise.
-	(perform_complex_relocations): Remove sign-extension logic,
-	which was broken anyways.
-
-	2002-01-15  Graydon Hoare  <graydon@redhat.com>
-
-	* elflink.h (decode_complex_addend): Add oplen, signed_p, trunc_p
-	params.
-	(perform_complex_relocations): Call decode with new args,
-	Sign extend leftmost signed fields, delegate overflow check to
-	bfd_check_overflow in reloc.c, enhance overflow error messages.
-
-	2002-01-08  Graydon Hoare  <graydon@redhat.com>
-
-	* elflink.h (resolve_symbol): Fix symbol -> section relationship.
-	(resolve_symbol): Remove unused parameter.
-	(eval_symbol): Remove unused arg from resolve_symbol call.
-
-	2002-01-01  Graydon Hoare  <graydon@redhat.com>
-
-	* elflink.h (perform_complex_relocations): Add overflow
-	checking for RELC fragments.
-
-	2001-12-15  Nick Clifton  <nickc@cambridge.redhat.com>
-
-	* elflink.h (evaluate_complex_relocation_symbols): Formatting
-	tidy ups.  Process all symbols, even if an error is
-	encountered.
-
-	2001-12-10  Graydon Hoare  <graydon@redhat.com>
-
-	* elflink.h (evaluate_complex_relocation_symbols): Resolve
-	global RELC symbols using separate logic from local symbols.
-
-	2001-12-10  Nick Clifton  <nickc@cambridge.redhat.com>
-
-	Various formatting tidy ups and compile time warning removals,
-	plus:
-
-	* elflink.h (eval_symbol): Set bfd_error for failure returns.
-	(evaluate_complex_relocation_symbols): Only evaluate local
-	symbols.
-
-	2001-11-24  Graydon Hoare  <graydon@redhat.com>
-
-	* elflink.h.c (resolve_symbol): Skip non-local syms in
-	local lookup loop; get section offset from section
-	symbol occurs in (rather than reloc section); handle
-	common symbols.
-
-	2001-11-24  Graydon Hoare  <graydon@redhat.com>
-
-	* elflink.h.c (resolve_symbol): Use
-	bfd_elf_string_from_elf_section to look up local symbols in
-	current bfd.
-	(eval_symbol): Add input_bfd parameter for resolve_symbol's
-	use.
-	(evaluate_complex_relocation_symbols): Pass parameter.
-	(resolve_section) Fix silly typo.
-
-	2001-10-16  Jeff Holcomb  <jeffh@redhat.com>
-
-	* elflink.h (eval_symbol): Buffer size needs to be an integer for
-	Solaris cc.
-
-	2001-11-15  graydon hoare  <graydon@redhat.com>
-
-	* elf32-mep.c (mep_info_to_howto_rela): Add complex reloc
-	howto.
-	* elflink.h (resolve_section): Add support for pseudo-sections
-	in complex symbols.
-	(evaluate_complex_relocation_symbols): Permit evaluating RELC
-	symbols on non-RELC relocs. They are distinct issues.
-
-	2001-10-15  graydon hoare  <graydon@redhat.com>
-
-	* reloc.c (bfd_reloc_code_type): Define BFD_RELOC_RELC,
-	in the _correct_ place.
-
-	2001-10-11  graydon hoare  <graydon@redhat.com>
-
-	* elflink.h (eval_symbol): Fix strtol calls with undefined
-	behavior.
-
-	2001-10-03  graydon hoare  <graydon@redhat.com>
-
-	* elflink.h (set_symbol_value): New function for relc.
+	* elf-bfd.h (bfd_elf_perform_complex_relocations): New prototype.
+	* elf.c (swap_out_syms): Handle BSF_RELC and BSF_SRELC.
+	* elfcode.h (elf_slurp_symbol_table): Handle STT_RELC and STT_SRELC.
+	* elflink.c (set_symbolValue): New static function.
 	(resolve_symbol): Likewise.
 	(resolve_section): Likewise.
 	(undefined_reference): Likewise.
@@ -157,30 +72,11 @@
 	(evaluate_complex_relocation_symbols): Likewise.
 	(put_value): Likewise.
 	(get_value): Likewise.
-	(decode_complex_addend): Likewise.
-	(perform_complex_relocations): Likewise.
-	(elf_link_input_bfd): Insert hook into
-	evaluate_complex_relocation_symbols.
-	(elf_link_input_bfd): Insert hook into
-	perform_complex_relocations.
-
-	* bfd-in2.h: Define BFD_RELOC_RELC, BSF_RELC.
-
-	* elf.c (swap_out_syms): Add BSF_RELC / STT_RELC support.
-
-	* elfcode.h (elf_slurp_symbol_table): Likewise.
-	(elf_symbol_flags): Likewise.
-
-	* libbfd.h: Add "BFD_RELOC_RELC" to bfd_reloc_code_real_names
-	table.
-
-	2001-06-20  Frank Ch. Eigler  <fche@redhat.com>
-
-	* syms.c (BSF_RELC): New symbol flag.
-	* elf.c (swap_out_syms): Map BSF_RELC -> STT_RELC.
-	* elfcode.h (elf_slurp_symbol_table): Map STT_RELC -> BSF_RELC.
-	(elf_symbol_flags): Display BSF_RELC as "relc".
-	* bfd-in2.h: Regenerated.
+	(decode_complex_addend):
+	(bfd_elf_perform_complex_relocation): New function.
+	(elf_link_input_bfd): Call evaluate_complex_relocation_symbols.
+	* reloc.c (BFD_RELOC_RELC): New relocation number.
+	* syms.c (BSF_RELC,BSF_SRELC): New macros.
 
 2007-02-05  Bob Wilson  <bob.wilson@acm.org>
 
