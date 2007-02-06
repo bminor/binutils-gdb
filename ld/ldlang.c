@@ -4468,7 +4468,7 @@ lang_size_sections_1
 			&& os->bfd_section->vma != os->bfd_section->lma)
 		    || (r->last_os != NULL
 			&& dot >= (r->last_os->output_section_statement
-				   .bfd_section->vma))
+				   .bfd_section->vma)))
 		&& os->lma_region == NULL
 		&& !link_info.relocatable)
 	      r->last_os = s;
