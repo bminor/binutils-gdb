@@ -1,5 +1,11 @@
 2007-02-07  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* xml-tdesc.c (struct tdesc_xml_cache, tdesc_xml_cache_s)
+	(xml_cache): New.
+	(tdesc_parse_xml): Cache expanded descriptions.
+
+2007-02-07  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* Makefile.in (XMLFILES): New.
 	(COMMON_OBS): Add xml-builtin.o.
 	(xml-builtin.c, stamp-xml): New rules.

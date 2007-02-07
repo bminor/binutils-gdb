@@ -55,6 +55,24 @@ tdesc_parse_xml (const char *document, xml_fetch_another fetcher,
 
 #else /* HAVE_LIBEXPAT */
 
+/* A record of every XML description we have parsed.  We never discard
+   old descriptions, because we never discard gdbarches.  As long as we
+   have a gdbarch referencing this description, we want to have a copy
+   of it here, so that if we parse the same XML document again we can
+   return the same "struct target_desc *"; if they are not singletons,
+   then we will create unnecessary duplicate gdbarches.  See
+   gdbarch_list_lookup_by_info.  */
+
+struct tdesc_xml_cache
+{
+  const char *xml_document;
+  struct target_desc *tdesc;
+};
+typedef struct tdesc_xml_cache tdesc_xml_cache_s;
+DEF_VEC_O(tdesc_xml_cache_s);
+
+static VEC(tdesc_xml_cache_s) *xml_cache;
+
 /* Callback data for target description parsing.  */
 
 struct tdesc_parsing_data
@@ -103,7 +121,9 @@ tdesc_parse_xml (const char *document, xml_fetch_another fetcher,
   struct cleanup *back_to, *result_cleanup;
   struct gdb_xml_parser *parser;
   struct tdesc_parsing_data data;
+  struct tdesc_xml_cache *cache;
   char *expanded_text;
+  int ix;
 
   /* Expand all XInclude directives.  */
   expanded_text = xml_process_xincludes (_("target description"),
@@ -113,8 +133,18 @@ tdesc_parse_xml (const char *document, xml_fetch_another fetcher,
       warning (_("Could not load XML target description; ignoring"));
       return NULL;
     }
-  back_to = make_cleanup (xfree, expanded_text);
 
+  /* Check for an exact match in the list of descriptions we have
+     previously parsed.  strcmp is a slightly inefficient way to
+     do this; an SHA-1 checksum would work as well.  */
+  for (ix = 0; VEC_iterate (tdesc_xml_cache_s, xml_cache, ix, cache); ix++)
+    if (strcmp (cache->xml_document, expanded_text) == 0)
+      {
+       xfree (expanded_text);
+       return cache->tdesc;
+      }
+
+  back_to = make_cleanup (null_cleanup, NULL);
   parser = gdb_xml_create_parser_and_cleanup (_("target description"),
 					      tdesc_elements, &data);
   gdb_xml_use_dtd (parser, "gdb-target.dtd");
@@ -122,10 +152,16 @@ tdesc_parse_xml (const char *document, xml_fetch_another fetcher,
   memset (&data, 0, sizeof (struct tdesc_parsing_data));
   data.tdesc = allocate_target_description ();
   result_cleanup = make_cleanup_free_target_description (data.tdesc);
+  make_cleanup (xfree, expanded_text);
 
   if (gdb_xml_parse (parser, expanded_text) == 0)
     {
       /* Parsed successfully.  */
+      struct tdesc_xml_cache new_cache;
+
+      new_cache.xml_document = expanded_text;
+      new_cache.tdesc = data.tdesc;
+      VEC_safe_push (tdesc_xml_cache_s, xml_cache, &new_cache);
       discard_cleanups (result_cleanup);
       do_cleanups (back_to);
       return data.tdesc;
