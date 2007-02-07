@@ -1,3 +1,7 @@
+2007-02-07  Paul Brook  <paul@codesourcery.com>
+
+	* configure.tgt: Ditto.
+
 2007-02-05  Dave Brolley  <brolley@redhat.com>
 	    Richard Sandiford  <rsandifo@redhat.com>
 	    DJ Delorie  <dj@redhat.com>
