@@ -36,6 +36,10 @@ static int debug_xml;
 #include "gdb_string.h"
 #include "safe-ctype.h"
 
+/* The maximum depth of <xi:include> nesting.  No need to be miserly,
+   we just want to avoid running out of stack on loops.  */
+#define MAX_XINCLUDE_DEPTH 30
+
 /* A parsing level -- used to keep track of the current element
    nesting.  */
 struct scope_level
@@ -68,6 +72,10 @@ struct gdb_xml_parser
 
   struct gdb_exception error;	/* A thrown error, if any.  */
   int last_line;		/* The line of the thrown error, or 0.  */
+
+  const char *dtd_name;		/* The name of the expected / default DTD,
+				   if specified.  */
+  int is_xinclude;		/* Are we the special <xi:include> parser?  */
 };
 
 /* Process some body text.  We accumulate the text for later use; it's
@@ -152,7 +160,7 @@ gdb_xml_start_element (void *data, const XML_Char *name,
 		       const XML_Char **attrs)
 {
   struct gdb_xml_parser *parser = data;
-  struct scope_level *scope = VEC_last (scope_level_s, parser->scopes);
+  struct scope_level *scope;
   struct scope_level new_scope;
   const struct gdb_xml_element *element;
   const struct gdb_xml_attribute *attribute;
@@ -160,13 +168,13 @@ gdb_xml_start_element (void *data, const XML_Char *name,
   unsigned int seen;
   struct cleanup *back_to;
 
-  back_to = make_cleanup (gdb_xml_values_cleanup, &attributes);
-
   /* Push an error scope.  If we return or throw an exception before
      filling this in, it will tell us to ignore children of this
      element.  */
+  VEC_reserve (scope_level_s, parser->scopes, 1);
+  scope = VEC_last (scope_level_s, parser->scopes);
   memset (&new_scope, 0, sizeof (new_scope));
-  VEC_safe_push (scope_level_s, parser->scopes, &new_scope);
+  VEC_quick_push (scope_level_s, parser->scopes, &new_scope);
 
   gdb_xml_debug (parser, _("Entering element <%s>"), name);
 
@@ -181,8 +189,21 @@ gdb_xml_start_element (void *data, const XML_Char *name,
 
   if (element == NULL || element->name == NULL)
     {
+      /* If we're working on XInclude, <xi:include> can be the child
+	 of absolutely anything.  Copy the previous scope's element
+	 list into the new scope even if there was no match.  */
+      if (parser->is_xinclude)
+	{
+	  struct scope_level *unknown_scope;
+
+	  XML_DefaultCurrent (parser->expat_parser);
+
+	  unknown_scope = VEC_last (scope_level_s, parser->scopes);
+	  unknown_scope->elements = scope->elements;
+	  return;
+	}
+
       gdb_xml_debug (parser, _("Element <%s> unknown"), name);
-      do_cleanups (back_to);
       return;
     }
 
@@ -190,6 +211,8 @@ gdb_xml_start_element (void *data, const XML_Char *name,
     gdb_xml_error (parser, _("Element <%s> only expected once"), name);
 
   scope->seen |= seen;
+
+  back_to = make_cleanup (gdb_xml_values_cleanup, &attributes);
 
   for (attribute = element->attributes;
        attribute != NULL && attribute->name != NULL;
@@ -304,7 +327,6 @@ gdb_xml_end_element (void *data, const XML_Char *name)
   struct scope_level *scope = VEC_last (scope_level_s, parser->scopes);
   const struct gdb_xml_element *element;
   unsigned int seen;
-  char *body;
 
   gdb_xml_debug (parser, _("Leaving element <%s>"), name);
 
@@ -317,26 +339,32 @@ gdb_xml_end_element (void *data, const XML_Char *name)
 		     element->name);
 
   /* Call the element processor. */
-  if (scope->body == NULL)
-    body = "";
-  else
-    {
-      int length;
-
-      length = obstack_object_size (scope->body);
-      obstack_1grow (scope->body, '\0');
-      body = obstack_finish (scope->body);
-
-      /* Strip leading and trailing whitespace.  */
-      while (length > 0 && ISSPACE (body[length-1]))
-	body[--length] = '\0';
-      while (*body && ISSPACE (*body))
-	body++;
-    }
-
   if (scope->element != NULL && scope->element->end_handler)
-    scope->element->end_handler (parser, scope->element, parser->user_data,
-				 body);
+    {
+      char *body;
+
+      if (scope->body == NULL)
+	body = "";
+      else
+	{
+	  int length;
+
+	  length = obstack_object_size (scope->body);
+	  obstack_1grow (scope->body, '\0');
+	  body = obstack_finish (scope->body);
+
+	  /* Strip leading and trailing whitespace.  */
+	  while (length > 0 && ISSPACE (body[length-1]))
+	    body[--length] = '\0';
+	  while (*body && ISSPACE (*body))
+	    body++;
+	}
+
+      scope->element->end_handler (parser, scope->element, parser->user_data,
+				   body);
+    }
+  else if (scope->element == NULL)
+    XML_DefaultCurrent (parser->expat_parser);
 
   /* Pop the scope level.  */
   if (scope->body)
@@ -433,6 +461,74 @@ gdb_xml_create_parser_and_cleanup (const char *name,
   make_cleanup (gdb_xml_cleanup, parser);
 
   return parser;
+}
+
+/* External entity handler.  The only external entities we support
+   are those compiled into GDB (we do not fetch entities from the
+   target).  */
+
+static int XMLCALL
+gdb_xml_fetch_external_entity (XML_Parser expat_parser,
+			       const XML_Char *context,
+			       const XML_Char *base,
+			       const XML_Char *systemId,
+			       const XML_Char *publicId)
+{
+  struct gdb_xml_parser *parser = XML_GetUserData (expat_parser);
+  XML_Parser entity_parser;
+  const char *text;
+  enum XML_Status status;
+
+  if (systemId == NULL)
+    {
+      text = fetch_xml_builtin (parser->dtd_name);
+      if (text == NULL)
+	internal_error (__FILE__, __LINE__, "could not locate built-in DTD %s",
+			parser->dtd_name);
+    }
+  else
+    {
+      text = fetch_xml_builtin (systemId);
+      if (text == NULL)
+	return XML_STATUS_ERROR;
+    }
+
+  entity_parser = XML_ExternalEntityParserCreate (expat_parser, context, NULL);
+
+  /* Don't use our handlers for the contents of the DTD.  Just let expat
+     process it.  */
+  XML_SetElementHandler (entity_parser, NULL, NULL);
+  XML_SetDoctypeDeclHandler (entity_parser, NULL, NULL);
+  XML_SetXmlDeclHandler (entity_parser, NULL);
+  XML_SetDefaultHandler (entity_parser, NULL);
+  XML_SetUserData (entity_parser, NULL);
+
+  status = XML_Parse (entity_parser, text, strlen (text), 1);
+
+  XML_ParserFree (entity_parser);
+  return status;
+}
+
+/* Associate DTD_NAME, which must be the name of a compiled-in DTD,
+   with PARSER.  */
+
+void
+gdb_xml_use_dtd (struct gdb_xml_parser *parser, const char *dtd_name)
+{
+  enum XML_Error err;
+
+  parser->dtd_name = dtd_name;
+
+  XML_SetParamEntityParsing (parser->expat_parser,
+			     XML_PARAM_ENTITY_PARSING_UNLESS_STANDALONE);
+  XML_SetExternalEntityRefHandler (parser->expat_parser,
+				   gdb_xml_fetch_external_entity);
+
+  /* Even if no DTD is provided, use the built-in DTD anyway.  */
+  err = XML_UseForeignDTD (parser->expat_parser, XML_TRUE);
+  if (err != XML_ERROR_NONE)
+    internal_error (__FILE__, __LINE__,
+		    "XML_UseForeignDTD failed: %s", XML_ErrorString (err));
 }
 
 /* Invoke PARSER on BUFFER.  BUFFER is the data to parse, which
@@ -559,6 +655,236 @@ gdb_xml_parse_attr_enum (struct gdb_xml_parser *parser,
   ret = xmalloc (sizeof (enums->value));
   memcpy (ret, &enums->value, sizeof (enums->value));
   return ret;
+}
+
+
+/* XInclude processing.  This is done as a separate step from actually
+   parsing the document, so that we can produce a single combined XML
+   document - e.g. to hand to a front end or to simplify comparing two
+   documents.  We make extensive use of XML_DefaultCurrent, to pass
+   input text directly into the output without reformatting or
+   requoting it.
+
+   We output the DOCTYPE declaration for the first document unchanged,
+   if present, and discard DOCTYPEs from included documents.  Only the
+   one we pass through here is used when we feed the result back to
+   expat.  The XInclude standard explicitly does not discuss
+   validation of the result; we choose to apply the same DTD applied
+   to the outermost document.
+
+   We can not simply include the external DTD subset in the document
+   as an internal subset, because <!IGNORE> and <!INCLUDE> are valid
+   only in external subsets.  But if we do not pass the DTD into the
+   output at all, default values will not be filled in.
+
+   We don't pass through any <?xml> declaration because we generate
+   UTF-8, not whatever the input encoding was.  */
+
+struct xinclude_parsing_data
+{
+  /* The obstack to build the output in.  */
+  struct obstack obstack;
+
+  /* A count indicating whether we are in an element whose
+     children should not be copied to the output, and if so,
+     how deep we are nested.  This is used for anything inside
+     an xi:include, and for the DTD.  */
+  int skip_depth;
+
+  /* The number of <xi:include> elements currently being processed,
+     to detect loops.  */
+  int include_depth;
+
+  /* A function to call to obtain additional features, and its
+     baton.  */
+  xml_fetch_another fetcher;
+  void *fetcher_baton;
+};
+
+static void
+xinclude_start_include (struct gdb_xml_parser *parser,
+			const struct gdb_xml_element *element,
+			void *user_data, VEC(gdb_xml_value_s) *attributes)
+{
+  struct xinclude_parsing_data *data = user_data;
+  char *href = VEC_index (gdb_xml_value_s, attributes, 0)->value;
+  struct cleanup *back_to;
+  char *text, *output;
+  int ret;
+
+  gdb_xml_debug (parser, _("Processing XInclude of \"%s\""), href);
+
+  if (data->include_depth > MAX_XINCLUDE_DEPTH)
+    gdb_xml_error (parser, _("Maximum XInclude depth (%d) exceeded"),
+		   MAX_XINCLUDE_DEPTH);
+
+  text = data->fetcher (href, data->fetcher_baton);
+  if (text == NULL)
+    gdb_xml_error (parser, _("Could not load XML document \"%s\""), href);
+  back_to = make_cleanup (xfree, text);
+
+  output = xml_process_xincludes (parser->name, text, data->fetcher,
+				  data->fetcher_baton,
+				  data->include_depth + 1);
+  if (output == NULL)
+    gdb_xml_error (parser, _("Parsing \"%s\" failed"), href);
+
+  obstack_grow (&data->obstack, output, strlen (output));
+  xfree (output);
+
+  do_cleanups (back_to);
+
+  data->skip_depth++;
+}
+
+static void
+xinclude_end_include (struct gdb_xml_parser *parser,
+		      const struct gdb_xml_element *element,
+		      void *user_data, const char *body_text)
+{
+  struct xinclude_parsing_data *data = user_data;
+
+  data->skip_depth--;
+}
+
+static void XMLCALL
+xml_xinclude_default (void *data_, const XML_Char *s, int len)
+{
+  struct gdb_xml_parser *parser = data_;
+  struct xinclude_parsing_data *data = parser->user_data;
+
+  /* If we are inside of e.g. xi:include or the DTD, don't save this
+     string.  */
+  if (data->skip_depth)
+    return;
+
+  /* Otherwise just add it to the end of the document we're building
+     up.  */
+  obstack_grow (&data->obstack, s, len);
+}
+
+static void XMLCALL
+xml_xinclude_start_doctype (void *data_, const XML_Char *doctypeName,
+			    const XML_Char *sysid, const XML_Char *pubid,
+			    int has_internal_subset)
+{
+  struct gdb_xml_parser *parser = data_;
+  struct xinclude_parsing_data *data = parser->user_data;
+
+  /* Don't print out the doctype, or the contents of the DTD internal
+     subset, if any.  */
+  data->skip_depth++;
+}
+
+static void XMLCALL
+xml_xinclude_end_doctype (void *data_)
+{
+  struct gdb_xml_parser *parser = data_;
+  struct xinclude_parsing_data *data = parser->user_data;
+
+  data->skip_depth--;
+}
+
+static void XMLCALL
+xml_xinclude_xml_decl (void *data_, const XML_Char *version,
+		       const XML_Char *encoding, int standalone)
+{
+  /* Do nothing - this function prevents the default handler from
+     being called, thus suppressing the XML declaration from the
+     output.  */
+}
+
+static void
+xml_xinclude_cleanup (void *data_)
+{
+  struct xinclude_parsing_data *data = data_;
+
+  obstack_free (&data->obstack, NULL);
+  xfree (data);
+}
+
+const struct gdb_xml_attribute xinclude_attributes[] = {
+  { "href", GDB_XML_AF_NONE, NULL, NULL },
+  { NULL, GDB_XML_AF_NONE, NULL, NULL }
+};
+
+const struct gdb_xml_element xinclude_elements[] = {
+  { "http://www.w3.org/2001/XInclude!include", xinclude_attributes, NULL,
+    GDB_XML_EF_OPTIONAL | GDB_XML_EF_REPEATABLE,
+    xinclude_start_include, xinclude_end_include },
+  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
+};
+
+/* The main entry point for <xi:include> processing.  */
+
+char *
+xml_process_xincludes (const char *name, const char *text,
+		       xml_fetch_another fetcher, void *fetcher_baton,
+		       int depth)
+{
+  enum XML_Error err;
+  struct gdb_xml_parser *parser;
+  struct xinclude_parsing_data *data;
+  struct cleanup *back_to;
+  char *result = NULL;
+
+  data = XZALLOC (struct xinclude_parsing_data);
+  obstack_init (&data->obstack);
+  back_to = make_cleanup (xml_xinclude_cleanup, data);
+
+  parser = gdb_xml_create_parser_and_cleanup (name, xinclude_elements, data);
+  parser->is_xinclude = 1;
+
+  data->include_depth = depth;
+  data->fetcher = fetcher;
+  data->fetcher_baton = fetcher_baton;
+
+  XML_SetCharacterDataHandler (parser->expat_parser, NULL);
+  XML_SetDefaultHandler (parser->expat_parser, xml_xinclude_default);
+
+  /* Always discard the XML version declarations; the only important
+     thing this provides is encoding, and our result will have been
+     converted to UTF-8.  */
+  XML_SetXmlDeclHandler (parser->expat_parser, xml_xinclude_xml_decl);
+
+  if (depth > 0)
+    /* Discard the doctype for included documents.  */
+    XML_SetDoctypeDeclHandler (parser->expat_parser,
+			       xml_xinclude_start_doctype,
+			       xml_xinclude_end_doctype);
+
+  gdb_xml_use_dtd (parser, "xinclude.dtd");
+
+  if (gdb_xml_parse (parser, text) == 0)
+    {
+      obstack_1grow (&data->obstack, '\0');
+      result = xstrdup (obstack_finish (&data->obstack));
+
+      if (depth == 0)
+	gdb_xml_debug (parser, _("XInclude processing succeeded:\n%s"),
+		       result);
+    }
+  else
+    result = NULL;
+
+  do_cleanups (back_to);
+  return result;
+}
+
+
+/* Return an XML document which was compiled into GDB, from
+   the given FILENAME, or NULL if the file was not compiled in.  */
+
+const char *
+fetch_xml_builtin (const char *filename)
+{
+  const char *(*p)[2];
+
+  for (p = xml_builtin; (*p)[0]; p++)
+    if (strcmp ((*p)[0], filename) == 0)
+      return (*p)[1];
+
+  return NULL;
 }
 
 #endif /* HAVE_LIBEXPAT */

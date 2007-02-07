@@ -1,3 +1,37 @@
+2007-02-07  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (XMLFILES): New.
+	(COMMON_OBS): Add xml-builtin.o.
+	(xml-builtin.c, stamp-xml): New rules.
+	(xml-tdesc.o): Update.
+	* features/feature_to_c.sh: New file.
+	* xml-support.c (MAX_XINCLUDE_DEPTH): Define.
+	(struct gdb_xml_parser): Add dtd_name and is_xinclude.
+	(gdb_xml_start_element): Initialize scope after possibly reallocating
+	scopes.  Move cleanup later.  Handle the XInclude description
+	specially.
+	(gdb_xml_end_element): Only parse the body if there is a current element.
+	Call XML_DefaultCurrent if there is no element.
+	(gdb_xml_fetch_external_entity, gdb_xml_use_dtd): New.
+	(struct xinclude_parsing_data, xinclude_start_include)
+	(xinclude_end_include, xml_xinclude_default)
+	(xml_xinclude_start_doctype, xml_xinclude_end_doctype)
+	(xml_xinclude_xml_decl, xml_xinclude_cleanup, xinclude_attributes)
+	(xinclude_elements, xml_process_xincludes, fetch_xml_builtin): New.
+	* xml-support.h (xml_fetch_another, xml_process_xincludes)
+	(fetch_xml_builtin, xml_builtin, gdb_xml_use_dtd): New declarations.
+	* xml-tdesc.c (tdesc_parse_xml): Add fetcher_baton argument.  Expand
+	XInclude directives.  Use the compiled in DTD.
+	(fetch_xml_from_file): Add baton argument.  Treat it as a containing
+	directory name.  Do not warn here.
+	(file_read_description_xml): Update call.  Warn here instead.  Pass
+	a dirname as baton.
+	(fetch_available_features_from_target): New.
+	(target_read_description_xml): Use it.
+	* features/gdb-target.dtd: Add copyright notice.  Use xinclude.dtd
+	to handle XInclude.
+	* features/xinclude.dtd: New file.
+
 2007-02-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-thread-db.c (check_for_thread_db): Return early if we have

@@ -25825,6 +25825,33 @@ The content of the @samp{<architecture>} element is an architecture
 name, from the same selection accepted by @code{set architecture}
 (@pxref{Targets, ,Specifying a Debugging Target}).
 
+@subsection Inclusion
+@cindex target descriptions, inclusion
+@cindex XInclude
+@ifnotinfo
+@cindex <xi:include>
+@end ifnotinfo
+
+It can sometimes be valuable to split a target description up into
+several different annexes, either for organizational purposes, or to
+share files between different possible target descriptions.  You can
+divide a description into multiple files by replacing any element of
+the target description with an inclusion directive of the form:
+
+@example
+<xi:include href="@var{document}"/>
+@end example
+
+@noindent
+When @value{GDBN} encounters an element of this form, it will retrieve
+the named XML @var{document}, and replace the inclusion directive with
+the contents of that document.  If the current description was read
+using @samp{qXfer}, then so will be the included document;
+@var{document} will be interpreted as the name of an annex.  If the
+current description was read from a file, @value{GDBN} will look for
+@var{document} as a file in the same directory where it found the
+original description.
+
 
 @include gpl.texi
 

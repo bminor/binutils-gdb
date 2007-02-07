@@ -4,11 +4,10 @@
      are permitted in any medium without royalty provided the copyright
      notice and this notice are preserved.  -->
 
-<!-- The root element of a GDB target description is <target>.  -->
+<!-- GDB supports a subset of XInclude.  Only whole documents can
+     be included, and only as XML.  -->
 
-<!ELEMENT target	(architecture?)>
-
-<!ELEMENT architecture	(#PCDATA)>
-
-<!ENTITY % xinclude SYSTEM "xinclude.dtd">
-%xinclude;
+<!ELEMENT xi:include	(EMPTY)>
+<!ATTLIST xi:include
+	xmlns:xi	CDATA	#FIXED "http://www.w3.org/2001/XInclude"
+	href		CDATA	#REQUIRED>

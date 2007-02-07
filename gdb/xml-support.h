@@ -30,6 +30,35 @@ struct gdb_xml_parser;
 struct gdb_xml_element;
 struct gdb_xml_attribute;
 
+/* Support for XInclude.  */
+
+/* Callback to fetch a new XML file, based on the provided HREF.  */
+
+typedef char *(*xml_fetch_another) (const char *href, void *baton);
+
+/* Return a new string which is the expansion of TEXT after processing
+   <xi:include> tags.  FETCHER will be called (with FETCHER_BATON) to
+   retrieve any new files.  DEPTH should be zero on the initial call.
+
+   On failure, this function uses NAME in a warning and returns NULL.
+   It may throw an exception, but does not for XML parsing
+   problems.  */
+
+char *xml_process_xincludes (const char *name, const char *text,
+			     xml_fetch_another fetcher, void *fetcher_baton,
+			     int depth);
+
+/* Return an XML document which was compiled into GDB, from
+   the given FILENAME, or NULL if the file was not compiled in.  */
+
+const char *fetch_xml_builtin (const char *filename);
+
+/* The text of compiled-in XML documents, from xml-builtin.c
+   (generated).  */
+extern const char *xml_builtin[][2];
+
+/* Simplified XML parser infrastructure.  */
+
 /* A name and value pair, used to record parsed attributes.  */
 
 struct gdb_xml_value
@@ -139,6 +168,11 @@ struct gdb_xml_element
 struct gdb_xml_parser *gdb_xml_create_parser_and_cleanup
   (const char *name, const struct gdb_xml_element *elements,
    void *user_data);
+
+/* Associate DTD_NAME, which must be the name of a compiled-in DTD,
+   with PARSER.  */
+
+void gdb_xml_use_dtd (struct gdb_xml_parser *parser, const char *dtd_name);
 
 /* Invoke PARSER on BUFFER.  BUFFER is the data to parse, which
    should be NUL-terminated.

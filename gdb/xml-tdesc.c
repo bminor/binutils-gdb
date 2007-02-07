@@ -28,6 +28,8 @@
 #include "xml-support.h"
 #include "xml-tdesc.h"
 
+#include "filenames.h"
+
 #include "gdb_assert.h"
 
 #if !defined(HAVE_LIBEXPAT)
@@ -36,7 +38,8 @@
    an XML parser.  */
 
 static struct target_desc *
-tdesc_parse_xml (const char *document)
+tdesc_parse_xml (const char *document, xml_fetch_another fetcher,
+		 void *fetcher_baton)
 {
   static int have_warned;
 
@@ -94,22 +97,33 @@ const struct gdb_xml_element tdesc_elements[] = {
 /* Parse DOCUMENT into a target description and return it.  */
 
 static struct target_desc *
-tdesc_parse_xml (const char *document)
+tdesc_parse_xml (const char *document, xml_fetch_another fetcher,
+		 void *fetcher_baton)
 {
   struct cleanup *back_to, *result_cleanup;
   struct gdb_xml_parser *parser;
   struct tdesc_parsing_data data;
+  char *expanded_text;
 
-  memset (&data, 0, sizeof (struct tdesc_parsing_data));
+  /* Expand all XInclude directives.  */
+  expanded_text = xml_process_xincludes (_("target description"),
+					 document, fetcher, fetcher_baton, 0);
+  if (expanded_text == NULL)
+    {
+      warning (_("Could not load XML target description; ignoring"));
+      return NULL;
+    }
+  back_to = make_cleanup (xfree, expanded_text);
 
-  back_to = make_cleanup (null_cleanup, NULL);
   parser = gdb_xml_create_parser_and_cleanup (_("target description"),
 					      tdesc_elements, &data);
+  gdb_xml_use_dtd (parser, "gdb-target.dtd");
 
+  memset (&data, 0, sizeof (struct tdesc_parsing_data));
   data.tdesc = allocate_target_description ();
   result_cleanup = make_cleanup_free_target_description (data.tdesc);
 
-  if (gdb_xml_parse (parser, document) == 0)
+  if (gdb_xml_parse (parser, expanded_text) == 0)
     {
       /* Parsed successfully.  */
       discard_cleanups (result_cleanup);
@@ -123,7 +137,6 @@ tdesc_parse_xml (const char *document)
       return NULL;
     }
 }
-
 #endif /* HAVE_LIBEXPAT */
 
 
@@ -139,19 +152,28 @@ do_cleanup_fclose (void *file)
    the text.  If something goes wrong, return NULL and warn.  */
 
 static char *
-fetch_xml_from_file (const char *filename)
+fetch_xml_from_file (const char *filename, void *baton)
 {
+  const char *dirname = baton;
   FILE *file;
   struct cleanup *back_to;
   char *text;
   size_t len, offset;
 
-  file = fopen (filename, FOPEN_RT);
-  if (file == NULL)
+  if (dirname && *dirname)
     {
-      warning (_("Could not open \"%s\""), filename);
-      return NULL;
+      char *fullname = concat (dirname, "/", filename, NULL);
+      if (fullname == NULL)
+	nomem (0);
+      file = fopen (fullname, FOPEN_RT);
+      xfree (fullname);
     }
+  else
+    file = fopen (filename, FOPEN_RT);
+
+  if (file == NULL)
+    return NULL;
+
   back_to = make_cleanup (do_cleanup_fclose, file);
 
   /* Read in the whole file, one chunk at a time.  */
@@ -198,17 +220,66 @@ file_read_description_xml (const char *filename)
   struct target_desc *tdesc;
   char *tdesc_str;
   struct cleanup *back_to;
+  const char *base;
+  char *dirname;
 
-  tdesc_str = fetch_xml_from_file (filename);
+  tdesc_str = fetch_xml_from_file (filename, NULL);
   if (tdesc_str == NULL)
-    return NULL;
+    {
+      warning (_("Could not open \"%s\""), filename);
+      return NULL;
+    }
 
   back_to = make_cleanup (xfree, tdesc_str);
-  tdesc = tdesc_parse_xml (tdesc_str);
+
+  /* Simple, portable version of dirname that does not modify its
+     argument.  */
+  base = lbasename (filename);
+  while (base > filename && IS_DIR_SEPARATOR (base[-1]))
+    --base;
+  if (base > filename)
+    {
+      dirname = xmalloc (base - filename + 2);
+      memcpy (dirname, filename, base - filename);
+
+      /* On DOS based file systems, convert "d:foo" to "d:.", so that
+	 we create "d:./bar" later instead of the (different)
+	 "d:/bar".  */
+      if (base - filename == 2 && IS_ABSOLUTE_PATH (base)
+	  && !IS_DIR_SEPARATOR (filename[0]))
+	dirname[base++ - filename] = '.';
+
+      dirname[base - filename] = '\0';
+      make_cleanup (xfree, dirname);
+    }
+  else
+    dirname = NULL;
+
+  tdesc = tdesc_parse_xml (tdesc_str, fetch_xml_from_file, dirname);
   do_cleanups (back_to);
 
   return tdesc;
 }
+
+/* Read a string representation of available features from the target,
+   using TARGET_OBJECT_AVAILABLE_FEATURES.  The returned string is
+   malloc allocated and NUL-terminated.  NAME should be a non-NULL
+   string identifying the XML document we want; the top level document
+   is "target.xml".  Other calls may be performed for the DTD or
+   for <xi:include>.  */
+
+static char *
+fetch_available_features_from_target (const char *name, void *baton_)
+{
+  struct target_ops *ops = baton_;
+
+  /* Read this object as a string.  This ensures that a NUL
+     terminator is added.  */
+  return target_read_stralloc (ops,
+			       TARGET_OBJECT_AVAILABLE_FEATURES,
+			       name);
+}
+
 
 /* Read an XML target description using OPS.  Parse it, and return the
    parsed description.  */
@@ -220,13 +291,14 @@ target_read_description_xml (struct target_ops *ops)
   char *tdesc_str;
   struct cleanup *back_to;
 
-  tdesc_str = target_read_stralloc (ops, TARGET_OBJECT_AVAILABLE_FEATURES,
-				    "target.xml");
+  tdesc_str = fetch_available_features_from_target ("target.xml", ops);
   if (tdesc_str == NULL)
     return NULL;
 
   back_to = make_cleanup (xfree, tdesc_str);
-  tdesc = tdesc_parse_xml (tdesc_str);
+  tdesc = tdesc_parse_xml (tdesc_str,
+			   fetch_available_features_from_target,
+			   ops);
   do_cleanups (back_to);
 
   return tdesc;

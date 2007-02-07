@@ -1,3 +1,8 @@
+2007-02-07  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.xml/bad-include.xml, gdb.xml/inc-2.xml, gdb.xml/inc-body.xml,
+	gdb.xml/includes.xml, gdb.xml/tdesc-xinclude.exp: New files.
+
 2007-02-02  Denis Pilat  <denis.pilat@st.com>
 
 	* gdb.threads/threadapply.exp: check that frame is not changed by

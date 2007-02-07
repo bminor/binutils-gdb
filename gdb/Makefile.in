@@ -400,6 +400,9 @@ LINTFLAGS= $(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
 RUNTEST = runtest
 RUNTESTFLAGS=
 
+# XML files to build in to GDB.
+XMLFILES = $(srcdir)/features/gdb-target.dtd $(srcdir)/features/xinclude.dtd
+
 # This is ser-unix.o for any system which supports a v7/BSD/SYSV/POSIX
 # interface to the serial port.  Hopefully if get ported to OS/2, VMS,
 # etc., then there will be (as part of the C library or perhaps as
@@ -972,7 +975,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	tramp-frame.o \
 	solib.o solib-null.o \
 	prologue-value.o memory-map.o xml-support.o \
-	target-descriptions.o target-memory.o xml-tdesc.o
+	target-descriptions.o target-memory.o xml-tdesc.o xml-builtin.o
 
 TSOBS = inflow.o
 
@@ -1680,6 +1683,19 @@ po/$(PACKAGE).pot: force
 .PRECIOUS: m2-exp.c
 .PRECIOUS: objc-exp.c
 .PRECIOUS: p-exp.c
+
+# XML rules
+
+xml-builtin.c: stamp-xml; @true
+stamp-xml: $(srcdir)/features/feature_to_c.sh Makefile $(XMLFILES)
+	rm -f xml-builtin.tmp
+	AWK="$(AWK)" \
+	  $(SHELL) $(srcdir)/features/feature_to_c.sh \
+	  xml-builtin.tmp $(XMLFILES)
+	$(SHELL) $(srcdir)/../move-if-change xml-builtin.tmp xml-builtin.c
+	echo stamp > stamp-xml
+
+.PRECIOUS: xml-builtin.c
 
 #
 # gdb/ dependencies
@@ -2876,7 +2892,7 @@ xcoffread.o: xcoffread.c $(defs_h) $(bfd_h) $(gdb_string_h) $(gdb_stat_h) \
 xcoffsolib.o: xcoffsolib.c $(defs_h) $(bfd_h) $(xcoffsolib_h) $(inferior_h) \
 	$(gdbcmd_h) $(symfile_h) $(frame_h) $(gdb_regex_h)
 xml-tdesc.o: xml-tdesc.c $(defs_h) $(target_h) $(target_descriptions_h) \
-	$(xml_tdesc_h) $(xml_support_h) $(gdb_assert_h)
+	$(xml_tdesc_h) $(xml_support_h) $(filenames_h) $(gdb_assert_h)
 xml-support.o: xml-support.c $(defs_h) $(xml_support_h) $(exceptions_h) \
 	$(gdbcmd_h) $(gdb_string_h) $(gdb_expat_h) $(safe_ctype_h)
 xstormy16-tdep.o: xstormy16-tdep.c $(defs_h) $(frame_h) $(frame_base_h) \
