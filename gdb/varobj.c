@@ -953,7 +953,7 @@ install_new_value (struct varobj *var, struct value *value, int initial)
   /* If the type is changeable, compare the old and the new values.
      If this is the initial assignment, we don't have any old value
      to compare with.  */
-  if (initial)
+  if (initial && changeable)
     var->print_value = value_get_print_value (value, var->format);
   else if (changeable)
     {

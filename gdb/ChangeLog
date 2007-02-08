@@ -1,5 +1,10 @@
 2007-02-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* varobj.c (install_new_value): Only call value_get_print_value
+	if changeable.
+
+2007-02-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	Reported by timeless@gmail.com:
 	* gdb/target.c (target_flash_erase): Do not return void value.
 	(target_flash_done): Likewise.
