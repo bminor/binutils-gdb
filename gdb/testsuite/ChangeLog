@@ -1,3 +1,14 @@
+2007-02-05  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.mi/mi-var-block.exp, gdb.mi/mi2-var-block.exp
+	* gdb.mi/mi-var-child.exp, gdb.mi/mi2-var-child.exp
+	* gdb.mi/mi-var-child-f.exp, gdb.mi/mi-var-cmd.exp
+	* gdb.mi/mi2-var-cmd.exp, gdb.mi/mi-var-display.exp
+	* gdb.mi/mi2-var-display.exp, gdb.mi/gdb701.exp
+        * gdb.mi/gdb792.exp, gdb.mi/gdb792.exp
+	* lib/mi-support.exp:
+	Update tests to include value field in output of -var-create.
+	
 2007-02-08  Andreas Schwab  <schwab@suse.de>
 
 	* gdb.mi/mi-var-child.exp: Fix matching display of function value.

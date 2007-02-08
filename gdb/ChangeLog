@@ -1,3 +1,7 @@
+2007-02-09  Nick Roberts  <nickrob@snap.net.nz>
+
+	* mi/mi-cmd-var.c (mi_cmd_var_create):  Add value field.
+
 2007-02-08  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* rs6000-tdep.c (gdb_print_insn_powerpc): Set
