@@ -1,3 +1,8 @@
+2007-02-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ser-mingw.c (pipe_windows_close): Move variable initialization back
+	up.
+
 2007-02-08  Fred Fish  <fnf@specifix.com>
 
 	* defs.h (request_quit): Remove declaration.

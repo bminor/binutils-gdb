@@ -768,11 +768,10 @@ pipe_windows_close (struct serial *scb)
 static int
 pipe_windows_read (struct serial *scb, size_t count)
 {
-  HANDLE pipeline_out;
+  HANDLE pipeline_out = (HANDLE) _get_osfhandle (scb->fd);
   DWORD available;
   DWORD bytes_read;
 
-  pipeline_out = (HANDLE) _get_osfhandle (scb->fd);
   if (pipeline_out == INVALID_HANDLE_VALUE)
     return -1;
 
