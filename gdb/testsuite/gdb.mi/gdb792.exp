@@ -50,7 +50,7 @@ if {[gdb_compile $srcdir/$subdir/$srcfile $binfile executable {debug c++}] != ""
 mi_run_to_main
 
 mi_gdb_test "-var-create - * a" \
-  "(&\".*\"\r\n)*\\^done,name=\"var1\",numchild=\"3\",type=\"A\"" \
+  "(&\".*\"\r\n)*\\^done,name=\"var1\",numchild=\"3\",value=\".*\",type=\"A\"" \
   "create var for class A"
 
 mi_gdb_test "-var-list-children var1" \
@@ -82,7 +82,7 @@ mi_gdb_test "-var-list-children var1.protected.b.private" \
   "list children of A.protected.b.private"
 
 mi_gdb_test "-var-create - * c" \
-  "(&\".*\"\r\n)*\\^done,name=\"var2\",numchild=\"3\",type=\"C\"" \
+  "(&\".*\"\r\n)*\\^done,name=\"var2\",numchild=\"3\",value=\".*\",type=\"C\"" \
   "create var for class C which has baseclass A"
 
 mi_gdb_test "-var-list-children var2" \

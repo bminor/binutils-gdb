@@ -56,9 +56,8 @@ mi_execute_to "exec-next" "end-stepping-range" do_children_tests {} ".*${srcfile
 
 # Test: c_variable-4.2
 # Desc: create variable "struct_declarations"
-mi_gdb_test "-var-create struct_declarations * struct_declarations" \
-	"\\^done,name=\"struct_declarations\",numchild=\"11\",type=\"struct _struct_decl\"" \
-	"create local variable struct_declarations"
+mi_create_varobj struct_declarations struct_declarations \
+    "create local variable struct_declarations"
 
 # Test: c_variable-4.3
 # Desc: children of struct_declarations
@@ -564,9 +563,7 @@ mi_step_to do_children_tests {} ".*${srcfile}" \
 
 # Test: c_variable-4.81
 # Desc: create local variable "weird"
-mi_gdb_test "-var-create weird * weird" \
-	"\\^done,name=\"weird\",numchild=\"11\",type=\"weird_struct \\*\"" \
-	"create local variable weird"
+mi_create_varobj weird weird "create local variable weird"
 
 # Test: c_variable-4.82
 # Desc: children of weird
@@ -628,9 +625,8 @@ mi_gdb_test "-var-info-num-children weird.int_ptr_ptr.*int_ptr_ptr" \
 
 # Test: c_variable-4.90
 # Desc: create weird->int_ptr_ptr
-mi_gdb_test "-var-create weird->int_ptr_ptr * weird->int_ptr_ptr" \
-	"\\^done,name=\"weird->int_ptr_ptr\",numchild=\"1\",type=\"int \\*\\*\"" \
-	"create local variable weird->int_ptr_ptr"
+mi_create_varobj weird->int_ptr_ptr weird->int_ptr_ptr \
+    "create local variable weird->int_ptr_ptr"
 
 # Test: c_variable-4.91
 # Desc: children of weird->int_ptr_ptr
@@ -894,9 +890,8 @@ mi_execute_to "exec-step 43" "end-stepping-range" do_children_tests {} ".*${srcf
 
 # Test: c_variable-5.10
 # Desc: create psnp->char_ptr
-mi_gdb_test "-var-create  psnp->char_ptr *  psnp->char_ptr" \
-	"\\^done,name=\"psnp->char_ptr\",numchild=\"1\",type=\"char \\*\\*\\*\\*\"" \
-	"create local variable  psnp->char_ptr"
+mi_create_varobj psnp->char_ptr psnp->char_ptr \
+    "create local variable  psnp->char_ptr"
 
 # Test: c_variable-5.11
 # Desc: children of psnp->char_ptr
@@ -967,9 +962,8 @@ mi_gdb_test "-var-info-num-children psnp->char_ptr.*psnp->char_ptr.**psnp->char_
 
 # Test: c_variable-5.19
 # Desc: create psnp->long_ptr
-mi_gdb_test "-var-create  psnp->long_ptr *  psnp->long_ptr" \
-	"\\^done,name=\"psnp->long_ptr\",numchild=\"1\",type=\"long int \\*\\*\\*\\*\"" \
-	"create local variable  psnp->long_ptr"
+mi_create_varobj psnp->long_ptr psnp->long_ptr \
+    "create local variable  psnp->long_ptr"
 
 # Test: c_variable-5.20
 # Desc: children of psnp->long_ptr
@@ -1034,9 +1028,7 @@ mi_gdb_test "-var-info-num-children psnp->long_ptr.*psnp->long_ptr.**psnp->long_
 
 # Test: c_variable-5.30
 # Desc: create psnp->ptrs
-mi_gdb_test "-var-create  psnp->ptrs *  psnp->ptrs" \
-	"\\^done,name=\"psnp->ptrs\",numchild=\"3\",type=\"struct _struct_n_pointer \\*\\\[3\\\]\"" \
-	"create local variable  psnp->ptrs"
+mi_create_varobj psnp->ptrs psnp->ptrs "create local variable  psnp->ptrs"
 
 # Test: c_variable-5.31
 # Desc: children of psnp->ptrs
@@ -1211,7 +1203,7 @@ mi_step_to do_children_tests {} ".*${srcfile}" \
 # Why does this have a FIXME?
 setup_xfail *-*-*
 mi_gdb_test "-var-update *" \
-	"FIXME\\^done,changelist=\\\[\{name=\"psnp->ptrs.0.next.long_ptr\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"FIXME\\^done,changelist=\\\[\{name=\"psnp->ptrs.0.next.long_ptr\",in_scope_changed=\"false\"\}\\\]" \
 	"update all vars psnp->next->long_ptr (and 1.long_ptr) changed"
 clear_xfail *-*-*
 
