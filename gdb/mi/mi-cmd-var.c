@@ -125,7 +125,7 @@ mi_cmd_var_create (char *command, char **argv, int argc)
   if (var == NULL)
     error (_("mi_cmd_var_create: unable to create variable object"));
 
-  print_varobj (var, PRINT_NO_VALUES, 0 /* don't print expression */);
+  print_varobj (var, PRINT_ALL_VALUES, 0 /* don't print expression */);
 
   do_cleanups (old_cleanups);
   return MI_CMD_DONE;
