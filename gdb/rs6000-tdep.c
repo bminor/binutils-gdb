@@ -2924,6 +2924,9 @@ find_variant_by_arch (enum bfd_architecture arch, unsigned long mach)
 static int
 gdb_print_insn_powerpc (bfd_vma memaddr, disassemble_info *info)
 {
+  if (!info->disassembler_options)
+    info->disassembler_options = "any";
+
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     return print_insn_big_powerpc (memaddr, info);
   else

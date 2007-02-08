@@ -1,3 +1,8 @@
+2007-02-08  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* rs6000-tdep.c (gdb_print_insn_powerpc): Set
+	info->disassembler_options to "any".
+
 2007-02-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* varobj.c (install_new_value): Only call value_get_print_value
