@@ -961,6 +961,13 @@ handle_sigint (int sig)
 {
   signal (sig, handle_sigint);
 
+  /* We could be running in a loop reading in symfiles or something so
+     it may be quite a while before we get back to the event loop.  So
+     set quit_flag to 1 here. Then if QUIT is called before we get to
+     the event loop, we will unwind as expected.  */
+
+  quit_flag = 1;
+
   /* If immediate_quit is set, we go ahead and process the SIGINT right
      away, even if we usually would defer this to the event loop. The
      assumption here is that it is safe to process ^C immediately if
@@ -989,7 +996,14 @@ handle_sigterm (int sig)
 void
 async_request_quit (gdb_client_data arg)
 {
-  quit_flag = 1;
+  /* If the quit_flag has gotten reset back to 0 by the time we get
+     back here, that means that an exception was thrown to unwind
+     the current command before we got back to the event loop.  So
+     there is no reason to call quit again here. */
+
+  if (quit_flag == 0)
+    return;
+
   quit ();
 }
 

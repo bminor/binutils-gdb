@@ -1,3 +1,9 @@
+2008-02-08  Fred Fish  <fnf@specifix.com>
+
+	* event-top.c (handle_sigint): Set quit_flag.
+	(async_request_quit): Don't set quit_flag.  Avoid calling quit()
+	if quit_flag has already been reset.
+
 2007-02-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ser-mingw.c (pipe_windows_close): Move variable initialization back
