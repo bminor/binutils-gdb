@@ -641,7 +641,6 @@ pascal_object_print_value_fields (struct type *type, const gdb_byte *valaddr,
 				  int dont_print_statmem)
 {
   int i, len, n_baseclasses;
-  struct obstack tmp_obstack;
   char *last_dont_print = obstack_next_free (&dont_print_statmem_obstack);
 
   CHECK_TYPEDEF (type);
@@ -660,6 +659,7 @@ pascal_object_print_value_fields (struct type *type, const gdb_byte *valaddr,
     fprintf_filtered (stream, "<No data fields>");
   else
     {
+      struct obstack tmp_obstack = dont_print_statmem_obstack;
       int fields_seen = 0;
 
       if (dont_print_statmem == 0)
@@ -667,7 +667,6 @@ pascal_object_print_value_fields (struct type *type, const gdb_byte *valaddr,
 	  /* If we're at top level, carve out a completely fresh
 	     chunk of the obstack and use that until this particular
 	     invocation returns.  */
-	  tmp_obstack = dont_print_statmem_obstack;
 	  obstack_finish (&dont_print_statmem_obstack);
 	}
 
@@ -810,9 +809,9 @@ pascal_object_print_value (struct type *type, const gdb_byte *valaddr,
 			   enum val_prettyprint pretty,
 			   struct type **dont_print_vb)
 {
-  struct obstack tmp_obstack;
   struct type **last_dont_print
   = (struct type **) obstack_next_free (&dont_print_vb_obstack);
+  struct obstack tmp_obstack = dont_print_vb_obstack;
   int i, n_baseclasses = TYPE_N_BASECLASSES (type);
 
   if (dont_print_vb == 0)
@@ -820,7 +819,6 @@ pascal_object_print_value (struct type *type, const gdb_byte *valaddr,
       /* If we're at top level, carve out a completely fresh
          chunk of the obstack and use that until this particular
          invocation returns.  */
-      tmp_obstack = dont_print_vb_obstack;
       /* Bump up the high-water mark.  Now alpha is omega.  */
       obstack_finish (&dont_print_vb_obstack);
     }

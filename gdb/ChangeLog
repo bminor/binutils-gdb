@@ -1,3 +1,11 @@
+2007-02-08  Mark Kettenis  <kettenis@gnu.org>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* cp-valprint.c (cp_print_value_fields, cp_print_value): Always
+	initialize tmp_obstack.
+	* p-valprint.c (pascal_object_print_value_fields)
+	(pascal_object_print_value): Likewise.
+
 2007-02-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* features/feature_to_c.sh: Use %s to avoid problems with nawk.
