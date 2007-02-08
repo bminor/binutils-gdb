@@ -902,6 +902,30 @@ store_param_on_stack_p (unsigned long op, int framep, int *r0_contains_arg)
   return 0;
 }
 
+/* Assuming that INSN is a "bl" instruction located at PC, return
+   nonzero if the destination of the branch is a "blrl" instruction.
+   
+   This sequence is sometimes found in certain function prologues.
+   It allows the function to load the LR register with a value that
+   they can use to access PIC data using PC-relative offsets.  */
+
+static int
+bl_to_blrl_insn_p (CORE_ADDR pc, int insn)
+{
+  const int opcode = 18;
+  const CORE_ADDR dest = branch_dest (opcode, insn, pc, -1);
+  int dest_insn;
+
+  if (dest == -1)
+    return 0;  /* Should never happen, but just return zero to be safe.  */
+  
+  dest_insn = read_memory_integer (dest, 4);
+  if ((dest_insn & 0xfc00ffff) == 0x4c000021) /* blrl */
+    return 1;
+
+  return 0;
+}
+
 static CORE_ADDR
 skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 {
@@ -1133,6 +1157,12 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 				   to save fprs??? */
 
 	  fdata->frameless = 0;
+
+	  /* If the return address has already been saved, we can skip
+	     calls to blrl (for PIC).  */
+          if (lr_reg != -1 && bl_to_blrl_insn_p (pc, op))
+	    continue;
+
 	  /* Don't skip over the subroutine call if it is not within
 	     the first three instructions of the prologue and either
 	     we have no line table information or the line info tells
