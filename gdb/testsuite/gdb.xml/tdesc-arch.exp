@@ -70,6 +70,9 @@ proc set_arch { arch which } {
 	-re "^$cmd_regex\r\n$gdb_prompt $" {
 	    pass $msg
 	}
+	-re "^$cmd_regex\r\nwarning: A handler for the OS ABI.*\r\n$gdb_prompt $" {
+	    kfail gdb/2225 $msg
+	}
     }
 
     set cmd "show architecture"
