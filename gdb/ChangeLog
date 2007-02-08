@@ -129,12 +129,12 @@
 
 	* MAINTAINERS (Write After Approval): Add myself to the list.
 
-2006-02-01  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
+2007-02-01  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
 
 	* gdb/remote-m32r.sdi.c (m32r_fetch_register): Change PWD mask.
         (m32r_store_register): Ditto.
 
-2006-01-30  Vladimir Prus  <vladimir@codesourcery.com>
+2007-01-30  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* ser-mingw.c (pipe_windows_open)
 	(pipe_windows_read, pipe_windows_write): Declare
@@ -675,7 +675,7 @@
 
 	* NEWS: Add entries for new catch commands.
 
-2006-02-05  Joel Brobecker  <brobecker@adacore.com>
+2007-01-05  Joel Brobecker  <brobecker@adacore.com>
 
         * dwarf2read.c (partial_die_info): Add field has_byte_size.
         (add_partial_symbol): Correct identification of external references.
@@ -1050,7 +1050,7 @@
 	-display-disable, -display-enable, -display-insert and
 	-display-list.
 
-2006-01-01  Joel Brobecker  <brobecker@adacore.com>
+2007-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* breakpoint.c (remove_breakpoint): Remove dead code.
 
