@@ -51,7 +51,7 @@ for input; do
         } else if (c == "\\") {
           printf "'\''\\\\'\'', "
         } else if (_ord_[c] >= 32 && _ord_[c] < 127) {
-          printf "'\''" c "'\'', "
+	  printf "'\''%s'\'', ", c
         } else {
           printf "'\''\\%03o'\'', ", _ord_[c]
         }

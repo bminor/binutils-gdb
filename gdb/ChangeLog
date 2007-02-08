@@ -1,3 +1,7 @@
+2007-02-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* features/feature_to_c.sh: Use %s to avoid problems with nawk.
+
 2007-02-08  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparcnbsd-tdep.c: Include "gdbtypes.h" instead of "floatformat.h".
