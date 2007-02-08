@@ -1019,7 +1019,7 @@ proc mi0_continue_to { bkptno func args file line test } {
 # Name cannot be "-".
 proc mi_create_varobj { name expression testname } {
     mi_gdb_test "-var-create $name * $expression" \
-        "\\^done,name=\"$name\",numchild=\"\[0-9\]+\",type=.*" \
+        "\\^done,name=\"$name\",numchild=\"\[0-9\]+\",value=\".*\",type=.*" \
         $testname
 }
 
