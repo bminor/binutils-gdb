@@ -21,10 +21,10 @@
    Boston, MA 02110-1301, USA.  */
 
 #include "defs.h"
-#include "floatformat.h"
 #include "frame.h"
 #include "frame-unwind.h"
 #include "gdbcore.h"
+#include "gdbtypes.h"
 #include "osabi.h"
 #include "regcache.h"
 #include "regset.h"
