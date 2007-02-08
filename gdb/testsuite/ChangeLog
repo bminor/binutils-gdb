@@ -1,3 +1,7 @@
+2007-02-08  Andreas Schwab  <schwab@suse.de>
+
+	* gdb.mi/mi-var-child.exp: Fix matching display of function value.
+
 2007-02-07  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.xml/bad-include.xml, gdb.xml/inc-2.xml, gdb.xml/inc-body.xml,
