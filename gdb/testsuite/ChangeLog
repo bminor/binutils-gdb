@@ -1,5 +1,9 @@
 2007-02-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.arch/iwmmxt-regs.c, gdb.arch/iwmmxt-regs.exp: New.
+
+2007-02-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* tdesc-arch.exp (set_arch): Add KFAIL for missing OS ABI handlers.
 
 2007-02-08  Daniel Jacobowitz  <dan@codesourcery.com>

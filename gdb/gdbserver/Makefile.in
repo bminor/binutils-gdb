@@ -137,9 +137,16 @@ TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS}
 OBS = inferiors.o regcache.o remote-utils.o server.o signals.o target.o \
 	utils.o version.o \
 	mem-break.o \
+	$(XML_BUILTIN) \
 	$(DEPFILES)
 GDBSERVER_LIBS = @GDBSERVER_LIBS@
 XM_CLIBS = @LIBS@
+
+# XML files to compile in to gdbserver, if any.
+XML_DIR = $(srcdir)/../features
+XML_TARGET = @srv_xmltarget@
+XML_FILES = @srv_xmlfiles@
+XML_BUILTIN = @srv_xmlbuiltin@
 
 # Prevent Sun make from putting in the machine type.  Setting
 # TARGET_ARCH to nothing works for SunOS 3, 4.0, but not for 4.1.
@@ -207,6 +214,8 @@ clean:
 	rm -f reg-arm.c reg-i386.c reg-ia64.c reg-m32r.c reg-m68k.c reg-mips.c
 	rm -f reg-ppc.c reg-sh.c reg-spu.c reg-x86-64.c reg-i386-linux.c
 	rm -f reg-cris.c reg-crisv32.c reg-x86-64-linux.c reg-mips64.c
+	rm -f arm-with-iwmmxt.c
+	rm -f xml-builtin.c stamp-xml target.xml
 
 maintainer-clean realclean distclean: clean
 	rm -f nm.h tm.h xm.h config.status config.h stamp-h config.log
@@ -231,6 +240,19 @@ version.c: Makefile $(srcdir)/../version.in
 	echo 'const char host_name[] = "$(host_alias)";' >> version.c-tmp
 	mv version.c-tmp version.c
 version.o: version.c $(server_h)
+
+target.xml: $(XML_TARGET)
+	rm -f target.xml
+	cp $(XML_TARGET) target.xml
+
+xml-builtin.c: stamp-xml; @true
+stamp-xml: $(XML_DIR)/feature_to_c.sh Makefile $(XML_FILES)
+	rm -f xml-builtin.tmp
+	$(SHELL) $(XML_DIR)/feature_to_c.sh xml-builtin.tmp $(XML_FILES)
+	$(SHELL) $(srcdir)/../../move-if-change xml-builtin.tmp xml-builtin.c
+	echo stamp > stamp-xml
+
+.PRECIOUS: target.xml xml-builtin.c
 
 # GNU Make has an annoying habit of putting *all* the Makefile variables
 # into the environment, unless you include this target as a circumvention.
@@ -294,6 +316,9 @@ spu-low.o: spu-low.c $(server_h)
 reg-arm.o : reg-arm.c $(regdef_h)
 reg-arm.c : $(srcdir)/../regformats/reg-arm.dat $(regdat_sh)
 	sh $(regdat_sh) $(srcdir)/../regformats/reg-arm.dat reg-arm.c
+arm-with-iwmmxt.o : arm-with-iwmmxt.c $(regdef_h)
+arm-with-iwmmxt.c : $(srcdir)/../regformats/arm-with-iwmmxt.dat $(regdat_sh)
+	sh $(regdat_sh) $(srcdir)/../regformats/arm-with-iwmmxt.dat arm-with-iwmmxt.c
 reg-cris.o : reg-cris.c $(regdef_h)
 reg-cris.c : $(srcdir)/../regformats/reg-cris.dat $(regdat_sh)
 	sh $(regdat_sh) $(srcdir)/../regformats/reg-cris.dat reg-cris.c

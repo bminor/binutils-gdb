@@ -48,6 +48,24 @@ AC_CHECK_TYPES(socklen_t, [], [],
 [#include <sys/types.h>
 #include <sys/socket.h>
 ])
+
+# Check for various supplementary target information (beyond the
+# triplet) which might affect the choices in configure.srv.
+case "${target}" in
+  arm*-*-linux*)
+    AC_CACHE_CHECK([if iWMMXt is selected], [gdb_cv_arm_iwmmxt],
+		   [save_CPPFLAGS="$CPPFLAGS"
+		   CPPFLAGS="$CPPFLAGS $CFLAGS"
+		   AC_EGREP_CPP([got it], [
+#ifdef __IWMMXT__
+got it
+#endif
+				], [gdb_cv_arm_iwmmxt=yes],
+				[gdb_cv_arm_iwmmxt=no])
+		   CPPFLAGS="$save_CPPFLAGS"])
+    ;;
+esac
+
 . ${srcdir}/configure.srv
 
 if test "${srv_mingw}" = "yes"; then
@@ -140,12 +158,27 @@ if test "$srv_linux_thread_db" = "yes"; then
   fi
 fi
 
+if test "$srv_xmltarget" != ""; then
+  srv_xmltarget="\$(XML_DIR)/$srv_xmltarget"
+  srv_xmlbuiltin="xml-builtin.o"
+  AC_DEFINE(USE_XML, 1, [Define if an XML target description is available.])
+
+  tmp_xmlfiles=$srv_xmlfiles
+  srv_xmlfiles="target.xml"
+  for f in $tmp_xmlfiles; do
+    srv_xmlfiles="$srv_xmlfiles \$(XML_DIR)/$f"
+  done
+fi
+
 GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj $srv_thread_depfiles"
 GDBSERVER_LIBS="$srv_libs"
 
 AC_SUBST(GDBSERVER_DEPFILES)
 AC_SUBST(GDBSERVER_LIBS)
 AC_SUBST(USE_THREAD_DB)
+AC_SUBST(srv_xmlbuiltin)
+AC_SUBST(srv_xmlfiles)
+AC_SUBST(srv_xmltarget)
 
 AC_OUTPUT(Makefile,
 [case x$CONFIG_HEADERS in

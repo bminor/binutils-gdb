@@ -1,3 +1,22 @@
+2007-02-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (OBS): Add $(XML_BUILTIN).
+	(XML_DIR, XML_TARGET, XML_FILES, XML_BUILTIN): New.
+	(clean): Update.
+	(target.xml, xml-builtin.c, stamp-xml, arm-with-iwmmxt.o)
+	(arm-with-iwmmxt.c): New.
+	* config.in, configure: Regenerate.
+	* configure.ac: Check for iWMMXt.  Handle srv_xmltarget,
+	srv_xmlbuiltin, and srv_xmlfiles.  Define USE_XML.
+	* configure.srv: Mention srv_xmltarget and srv_xmlfiles.
+	(arm*-*-linux*): Add iWMMXt and regset support.
+	* linux-arm-low.c (PTRACE_GETWMMXREGS, PTRACE_SETWMMXREGS): Define.
+	(arm_fill_gregset, arm_store_gregset, arm_fill_wmmxregset)
+	(arm_store_wmmxregset, target_regsets): New.
+	* server.c (get_features_xml): Take annex argument.  Check builtin
+	XML documents.
+	(handle_query): Handle multiple annexes.
+
 2007-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote-utils.c [USE_WIN32API] (read, write): Define.

@@ -193,10 +193,26 @@ handle_general_set (char *own_buf)
 }
 
 static const char *
-get_features_xml (void)
+get_features_xml (const char *annex)
 {
   static int features_supported = -1;
   static char *document;
+
+#ifdef USE_XML
+  extern const char *const xml_builtin[][2];
+  int i;
+
+  /* Look for the annex.  */
+  for (i = 0; xml_builtin[i][0] != NULL; i++)
+    if (strcmp (annex, xml_builtin[i][0]) == 0)
+      break;
+
+  if (xml_builtin[i][0] != NULL)
+    return xml_builtin[i][1];
+#endif
+
+  if (strcmp (annex, "target.xml") != 0)
+    return NULL;
 
   if (features_supported == -1)
     {
@@ -311,17 +327,24 @@ handle_query (char *own_buf, int *new_packet_len_p)
       const char *document;
       char *annex;
 
-      document = get_features_xml ();
+      /* Check for support.  */
+      document = get_features_xml ("target.xml");
       if (document == NULL)
 	{
 	  own_buf[0] = '\0';
 	  return;
 	}
 
-      /* Reject any annex other than target.xml; grab the offset and
-	 length.  */
-      if (decode_xfer_read (own_buf + 20, &annex, &ofs, &len) < 0
-	  || strcmp (annex, "target.xml") != 0)
+      /* Grab the annex, offset, and length.  */
+      if (decode_xfer_read (own_buf + 20, &annex, &ofs, &len) < 0)
+	{
+	  strcpy (own_buf, "E00");
+	  return;
+	}
+
+      /* Now grab the correct annex.  */
+      document = get_features_xml (annex);
+      if (document == NULL)
 	{
 	  strcpy (own_buf, "E00");
 	  return;
@@ -352,7 +375,7 @@ handle_query (char *own_buf, int *new_packet_len_p)
       if (the_target->read_auxv != NULL)
 	strcat (own_buf, ";qXfer:auxv:read+");
 
-      if (get_features_xml () != NULL)
+      if (get_features_xml ("target.xml") != NULL)
 	strcat (own_buf, ";qXfer:features:read+");
 
       return;

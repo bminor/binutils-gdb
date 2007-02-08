@@ -6,6 +6,9 @@
 #   srv_regobj		The register protocol appropriate for this target.
 #   srv_tgtobj		Any other target-specific modules appropriate
 #			for this target.
+#   srv_xmltarget	The XML source file to use for target.xml, if any.
+#   srv_xmlfiles	Any other XML files which should be available for
+#			gdbserver in this configuration.
 #
 # In addition, on GNU/Linux the following shell variables will be set:
 #   srv_linux_regsets	Set to "yes" if ptrace(PTRACE_GETREGS) and friends
@@ -18,10 +21,17 @@
 # Input is taken from the "${target}" variable.
 
 case "${target}" in
-  arm*-*-linux*)	srv_regobj=reg-arm.o
-			srv_tgtobj="linux-low.o linux-arm-low.o"
+  arm*-*-linux*)	srv_tgtobj="linux-low.o linux-arm-low.o"
 			srv_linux_usrregs=yes
+			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
+			if test $gdb_cv_arm_iwmmxt = yes; then
+			  srv_regobj=arm-with-iwmmxt.o
+			  srv_xmltarget=arm-with-iwmmxt.xml
+			  srv_xmlfiles="arm-core.xml xscale-iwmmxt.xml"
+			else
+			  srv_regobj=reg-arm.o
+			fi
 			;;
   crisv32-*-linux*)	srv_regobj=reg-crisv32.o
 			srv_tgtobj="linux-low.o linux-crisv32-low.o"

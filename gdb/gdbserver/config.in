@@ -135,3 +135,6 @@
    Windows, we use the Windows API when building for MinGW, but the POSIX API
    when building for Cygwin. */
 #undef USE_WIN32API
+
+/* Define if an XML target description is available. */
+#undef USE_XML

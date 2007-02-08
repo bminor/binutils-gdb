@@ -30,6 +30,11 @@
 #define PTRACE_GET_THREAD_AREA 22
 #endif
 
+#ifndef PTRACE_GETWMMXREGS
+# define PTRACE_GETWMMXREGS 18
+# define PTRACE_SETWMMXREGS 19
+#endif
+
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
 #endif
@@ -54,6 +59,60 @@ arm_cannot_fetch_register (int regno)
 {
   return (regno >= arm_num_regs);
 }
+
+static void
+arm_fill_gregset (void *buf)
+{
+  int i;
+
+  for (i = 0; i < arm_num_regs; i++)
+    if (arm_regmap[i] != -1)
+      collect_register (i, ((char *) buf) + arm_regmap[i]);
+}
+
+static void
+arm_store_gregset (const void *buf)
+{
+  int i;
+  char zerobuf[8];
+
+  memset (zerobuf, 0, 8);
+  for (i = 0; i < arm_num_regs; i++)
+    if (arm_regmap[i] != -1)
+      supply_register (i, ((char *) buf) + arm_regmap[i]);
+    else
+      supply_register (i, zerobuf);
+}
+
+#ifdef __IWMMXT__
+
+static void
+arm_fill_wmmxregset (void *buf)
+{
+  int i;
+
+  for (i = 0; i < 16; i++)
+    collect_register (arm_num_regs + i, (char *) buf + i * 8);
+
+  /* We only have access to wcssf, wcasf, and wcgr0-wcgr3.  */
+  for (i = 0; i < 6; i++)
+    collect_register (arm_num_regs + i + 16, (char *) buf + 16 * 8 + i * 4);
+}
+
+static void
+arm_store_wmmxregset (const void *buf)
+{
+  int i;
+
+  for (i = 0; i < 16; i++)
+    supply_register (arm_num_regs + i, (char *) buf + i * 8);
+
+  /* We only have access to wcssf, wcasf, and wcgr0-wcgr3.  */
+  for (i = 0; i < 6; i++)
+    supply_register (arm_num_regs + i + 16, (char *) buf + 16 * 8 + i * 4);
+}
+
+#endif /* __IWMMXT__ */
 
 extern int debug_threads;
 
@@ -129,6 +188,18 @@ ps_get_thread_area (const struct ps_prochandle *ph,
 
   return PS_OK;
 }
+
+struct regset_info target_regsets[] = {
+  { PTRACE_GETREGS, PTRACE_SETREGS, 18 * 4,
+    GENERAL_REGS,
+    arm_fill_gregset, arm_store_gregset },
+#ifdef __IWMMXT__
+  { PTRACE_GETWMMXREGS, PTRACE_SETWMMXREGS, 16 * 8 + 6 * 4,
+    EXTENDED_REGS,
+    arm_fill_wmmxregset, arm_store_wmmxregset },
+#endif
+  { 0, 0, -1, -1, NULL, NULL }
+};
 
 struct linux_target_ops the_low_target = {
   arm_num_regs,
