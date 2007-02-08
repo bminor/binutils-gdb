@@ -514,7 +514,7 @@ source_command (char *args, int from_tty)
 	}
     }
 
-  return source_script (file, from_tty);
+  source_script (file, from_tty);
 }
 
 

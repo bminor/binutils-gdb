@@ -1252,7 +1252,8 @@ target_flash_erase (ULONGEST address, LONGEST length)
 	  if (targetdebug)
 	    fprintf_unfiltered (gdb_stdlog, "target_flash_erase (%s, %s)\n",
                                 paddr (address), phex (length, 0));
-	  return t->to_flash_erase (t, address, length);
+	  t->to_flash_erase (t, address, length);
+	  return;
 	}
 
   tcomplain ();
@@ -1268,7 +1269,8 @@ target_flash_done (void)
 	{
 	  if (targetdebug)
 	    fprintf_unfiltered (gdb_stdlog, "target_flash_done\n");
-	  return t->to_flash_done (t);
+	  t->to_flash_done (t);
+	  return;
 	}
 
   tcomplain ();

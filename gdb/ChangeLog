@@ -1,4 +1,11 @@
-2008-02-08  Fred Fish  <fnf@specifix.com>
+2007-02-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	Reported by timeless@gmail.com:
+	* gdb/target.c (target_flash_erase): Do not return void value.
+	(target_flash_done): Likewise.
+	* gdb/cli/cli-cmds.c (source_command): Likewise.
+
+2007-02-08  Fred Fish  <fnf@specifix.com>
 
 	* event-top.c (handle_sigint): Set quit_flag.
 	(async_request_quit): Don't set quit_flag.  Avoid calling quit()

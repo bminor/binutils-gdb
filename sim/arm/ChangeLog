@@ -1,3 +1,8 @@
+2007-02-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	Reported by timeless@gmail.com:
+	* wrapper.c (sim_target_parse_arg_array): Do not return void value.
+
 2006-12-21  Hans-Peter Nilsson  <hp@axis.com>
 
 	* acconfig.h: Remove.

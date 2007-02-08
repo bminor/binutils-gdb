@@ -770,7 +770,7 @@ sim_target_parse_arg_array (argv)
   for (i = 0; argv[i]; i++)
     ;
 
-  return (void) sim_target_parse_command_line (i, argv);
+  sim_target_parse_command_line (i, argv);
 }
 
 void
