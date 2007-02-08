@@ -209,6 +209,9 @@ struct gdb_xml_enum
   ULONGEST value;
 };
 
+/* A handler_data for yes/no boolean values.  */
+extern const struct gdb_xml_enum gdb_xml_enums_boolean[];
+
 extern gdb_xml_attribute_handler gdb_xml_parse_attr_enum;
 
 /* Parse an integer string into a ULONGEST and return it, or call

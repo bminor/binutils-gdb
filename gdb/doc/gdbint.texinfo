@@ -80,6 +80,7 @@ as the mechanisms that adapt @value{GDBN} to specific hosts and targets.
 * Language Support::
 * Host Definition::
 * Target Architecture Definition::
+* Target Descriptions::
 * Target Vector Definition::
 * Native Debugging::
 * Support Libraries::
@@ -4510,6 +4511,135 @@ This should go smoothly.
 
 The @file{tm-@var{arch}.h} can be deleted.  @file{@var{arch}.mt} and
 @file{configure.in} updated.
+
+
+@node Target Descriptions
+@chapter Target Descriptions
+@cindex target descriptions
+
+The target architecture definition (@pxref{Target Architecture Definition})
+contains @value{GDBN}'s hard-coded knowledge about an architecture.  For
+some platforms, it is handy to have more flexible knowledge about a specific
+instance of the architecture---for instance, a processor or development board.
+@dfn{Target descriptions} provide a mechanism for the user to tell @value{GDBN}
+more about what their target supports, or for the target to tell @value{GDBN}
+directly.
+
+For details on writing, automatically supplying, and manually selecting
+target descriptions, see @ref{Target Descriptions, , , gdb,
+Debugging with @value{GDBN}}.  This section will cover some related
+topics about the @value{GDBN} internals.
+
+@menu
+* Target Descriptions Implementation::
+* Adding Target Described Register Support::
+@end menu
+
+@node Target Descriptions Implementation
+@section Target Descriptions Implementation
+@cindex target descriptions, implementation
+
+Before @value{GDBN} connects to a new target, or runs a new program on
+an existing target, it discards any existing target description and
+reverts to a default gdbarch.  Then, after connecting, it looks for a
+new target description by calling @code{target_find_description}.
+
+A description may come from a user specified file (XML), the remote
+@samp{qXfer:features:read} packet (also XML), or from any custom
+@code{to_read_description} routine in the target vector.  For instance,
+the remote target supports guessing whether a MIPS target is 32-bit or
+64-bit based on the size of the @samp{g} packet.
+
+If any target description is found, @value{GDBN} creates a new gdbarch
+incorporating the description by calling @code{gdbarch_update_p}.  Any
+@samp{<architecture>} element is handled first, to determine which
+architecture's gdbarch initialization routine is called to create the
+new architecture.  Then the initialization routine is called, and has
+a chance to adjust the constructed architecture based on the contents
+of the target description.  For instance, it can recognize any
+properties set by a @code{to_read_description} routine.  Also
+see @ref{Adding Target Described Register Support}.
+
+@node Adding Target Described Register Support
+@section Adding Target Described Register Support
+@cindex target descriptions, adding register support
+
+Target descriptions can report additional registers specific to an
+instance of the target.  But it takes a little work in the architecture
+specific routines to support this.
+
+A target description must either have no registers or a complete
+set---this avoids complexity in trying to merge standard registers
+with the target defined registers.  It is the architecture's
+responsibility to validate that a description with registers has
+everything it needs.  To keep architecture code simple, the same
+mechanism is used to assign fixed internal register numbers to
+standard registers.
+
+If @code{tdesc_has_registers} returns 1, the description contains
+registers.  The architecture's @code{gdbarch_init} routine should:
+
+@itemize @bullet
+
+@item
+Call @code{tdesc_data_alloc} to allocate storage, early, before
+searching for a matching gdbarch or allocating a new one.
+
+@item
+Use @code{tdesc_find_feature} to locate standard features by name.
+
+@item
+Use @code{tdesc_numbered_register} and @code{tdesc_numbered_register_choices}
+to locate the expected registers in the standard features.
+
+@item
+Return @code{NULL} if a required feature is missing, or if any standard
+feature is missing expected registers.  This will produce a warning that
+the description was incomplete.
+
+@item
+Free the allocated data before returning, unless @code{tdesc_use_registers}
+is called.
+
+@item
+Call @code{set_gdbarch_num_regs} as usual, with a number higher than any
+fixed number passed to @code{tdesc_numbered_register}.
+
+@item
+Call @code{tdesc_use_registers} after creating a new gdbarch, before
+returning it.
+
+@end itemize
+
+After @code{tdesc_use_registers} has been called, the architecture's
+@code{register_name}, @code{register_type}, and @code{register_reggroup_p}
+routines will not be called; that information will be taken from
+the target description.  @code{num_regs} may be increased to account
+for any additional registers in the description.
+
+Pseudo-registers require some extra care:
+
+@itemize @bullet
+
+@item
+Using @code{tdesc_numbered_register} allows the architecture to give
+constant register numbers to standard architectural registers, e.g.@:
+as an @code{enum} in @file{@var{arch}-tdep.h}.  But because
+pseudo-registers are always numbered above @code{num_regs},
+which may be increased by the description, constant numbers
+can not be used for pseudos.  They must be numbered relative to
+@code{num_regs} instead.
+
+@item
+The description will not describe pseudo-registers, so the
+architecture must call @code{set_tdesc_pseudo_register_name},
+@code{set_tdesc_pseudo_register_type}, and
+@code{set_tdesc_pseudo_register_reggroup_p} to supply routines
+describing pseudo registers.  These routines will be passed
+internal register numbers, so the same routines used for the
+gdbarch equivalents are usually suitable.
+
+@end itemize
 
 
 @node Target Vector Definition

@@ -24,7 +24,12 @@
 #ifndef TARGET_DESCRIPTIONS_H
 #define TARGET_DESCRIPTIONS_H 1
 
+struct tdesc_feature;
+struct tdesc_arch_data;
+struct tdesc_reg;
 struct target_desc;
+struct target_ops;
+struct type;
 
 /* Fetch the current target's description, and switch the current
    architecture to one which incorporates that description.  */
@@ -42,6 +47,65 @@ void target_clear_description (void);
 
 const struct target_desc *target_current_description (void);
 
+/* Record architecture-specific functions to call for pseudo-register
+   support.  If tdesc_use_registers is called and NUM_PSEUDO_REGS
+   is greater than zero, then these should be called as well.
+   They are equivalent to the gdbarch methods with similar names,
+   except that they will only be called for pseudo registers.  */
+
+void set_tdesc_pseudo_register_name
+  (struct gdbarch *gdbarch, gdbarch_register_name_ftype *pseudo_name);
+
+void set_tdesc_pseudo_register_type
+  (struct gdbarch *gdbarch, gdbarch_register_type_ftype *pseudo_type);
+
+void set_tdesc_pseudo_register_reggroup_p
+  (struct gdbarch *gdbarch,
+   gdbarch_register_reggroup_p_ftype *pseudo_reggroup_p);
+
+/* Update GDBARCH to use the target description for registers.  Fixed
+   register assignments are taken from EARLY_DATA, which is freed.
+   All registers which have not been assigned fixed numbers are given
+   numbers above the current value of NUM_REGS.  NUM_REGS and various
+   register-related predicates are updated to refer to the target
+   description.  This function should only be called from the
+   architecture's gdbarch initialization routine, and only after
+   successfully validating the required registers.  */
+
+void tdesc_use_registers (struct gdbarch *gdbarch,
+			  struct tdesc_arch_data *early_data);
+
+/* Allocate initial data for validation of a target description during
+   gdbarch initialization.  */
+
+struct tdesc_arch_data *tdesc_data_alloc (void);
+
+/* Clean up data allocated by tdesc_data_alloc.  This should only
+   be called to discard the data; tdesc_use_registers takes ownership
+   of its EARLY_DATA argument.  */
+
+void tdesc_data_cleanup (void *data_untyped);
+
+/* Search FEATURE for a register named NAME.  Record REGNO and the
+   register in DATA; when tdesc_use_registers is called, REGNO will be
+   assigned to the register.  1 is returned if the register was found,
+   0 if it was not.  */
+
+int tdesc_numbered_register (const struct tdesc_feature *feature,
+			     struct tdesc_arch_data *data,
+			     int regno, const char *name);
+
+/* Search FEATURE for a register with any of the names from NAMES
+   (NULL-terminated).  Record REGNO and the register in DATA; when
+   tdesc_use_registers is called, REGNO will be assigned to the
+   register.  1 is returned if the register was found, 0 if it was
+   not.  */
+
+int tdesc_numbered_register_choices (const struct tdesc_feature *feature,
+				     struct tdesc_arch_data *data,
+				     int regno, const char *const names[]);
+
+
 /* Accessors for target descriptions.  */
 
 /* Return the BFD architecture associated with this target
@@ -56,14 +120,41 @@ const struct bfd_arch_info *tdesc_architecture
 const char *tdesc_property (const struct target_desc *,
 			    const char *key);
 
+/* Return 1 if this target description describes any registers.  */
+
+int tdesc_has_registers (const struct target_desc *);
+
+/* Return the feature with the given name, if present, or NULL if
+   the named feature is not found.  */
+
+const struct tdesc_feature *tdesc_find_feature (const struct target_desc *,
+						const char *name);
+
+/* Return the name of FEATURE.  */
+
+const char *tdesc_feature_name (const struct tdesc_feature *feature);
+
+/* Return the type associated with ID in the context of FEATURE, or
+   NULL if none.  */
+
+struct type *tdesc_named_type (const struct tdesc_feature *feature,
+			       const char *id);
+
 /* Methods for constructing a target description.  */
 
 struct target_desc *allocate_target_description (void);
 struct cleanup *make_cleanup_free_target_description (struct target_desc *);
 void set_tdesc_architecture (struct target_desc *,
 			     const struct bfd_arch_info *);
-
 void set_tdesc_property (struct target_desc *,
 			 const char *key, const char *value);
+
+struct tdesc_feature *tdesc_create_feature (struct target_desc *tdesc,
+					    const char *name);
+void tdesc_record_type (struct tdesc_feature *feature, struct type *type);
+
+void tdesc_create_reg (struct tdesc_feature *feature, const char *name,
+		       int regnum, int save_restore, const char *group,
+		       int bitsize, const char *type);
 
 #endif /* TARGET_DESCRIPTIONS_H */

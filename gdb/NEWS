@@ -18,6 +18,10 @@ a local file or over the remote serial protocol.
 * Arrays of explicitly SIGNED or UNSIGNED CHARs are now printed as arrays
   of numbers.
 
+* Target descriptions can now describe target-specific registers,
+for architectures which have implemented the support (currently
+only ARM).
+
 * New commands
 
 set mem inaccessible-by-default

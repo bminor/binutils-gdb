@@ -109,6 +109,9 @@ extern int default_stabs_argument_has_addr (struct gdbarch *gdbarch,
 extern int generic_instruction_nullified (struct gdbarch *gdbarch,
 					  struct regcache *regcache);
 
+int default_remote_register_number (struct gdbarch *gdbarch,
+				    int regno);
+
 /* For compatibility with older architectures, returns
    (LEGACY_SIM_REGNO_IGNORE) when the register doesn't have a valid
    name.  */

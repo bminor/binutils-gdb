@@ -23,6 +23,7 @@
    Boston, MA 02110-1301, USA.  */
 
 #include "defs.h"
+#include "gdbtypes.h"
 #include "target.h"
 #include "target-descriptions.h"
 #include "xml-support.h"
@@ -79,6 +80,16 @@ struct tdesc_parsing_data
 {
   /* The target description we are building.  */
   struct target_desc *tdesc;
+
+  /* The target feature we are currently parsing, or last parsed.  */
+  struct tdesc_feature *current_feature;
+
+  /* The register number to use for the next register we see, if
+     it does not have its own.  This starts at zero.  */
+  int next_regnum;
+
+  /* The union we are currently parsing, or last parsed.  */
+  struct type *current_union;
 };
 
 /* Handle the end of an <architecture> element and its value.  */
@@ -98,15 +109,233 @@ tdesc_end_arch (struct gdb_xml_parser *parser,
   set_tdesc_architecture (data->tdesc, arch);
 }
 
+/* Handle the start of a <feature> element.  */
+
+static void
+tdesc_start_feature (struct gdb_xml_parser *parser,
+		     const struct gdb_xml_element *element,
+		     void *user_data, VEC(gdb_xml_value_s) *attributes)
+{
+  struct tdesc_parsing_data *data = user_data;
+  char *name = VEC_index (gdb_xml_value_s, attributes, 0)->value;
+
+  data->current_feature = tdesc_create_feature (data->tdesc, name);
+}
+
+/* Handle the start of a <reg> element.  Fill in the optional
+   attributes and attach it to the containing feature.  */
+
+static void
+tdesc_start_reg (struct gdb_xml_parser *parser,
+		 const struct gdb_xml_element *element,
+		 void *user_data, VEC(gdb_xml_value_s) *attributes)
+{
+  struct tdesc_parsing_data *data = user_data;
+  struct gdb_xml_value *attrs = VEC_address (gdb_xml_value_s, attributes);
+  int ix = 0, length;
+  char *name, *group, *type;
+  int bitsize, regnum, save_restore;
+
+  length = VEC_length (gdb_xml_value_s, attributes);
+
+  name = attrs[ix++].value;
+  bitsize = * (ULONGEST *) attrs[ix++].value;
+
+  if (ix < length && strcmp (attrs[ix].name, "regnum") == 0)
+    regnum = * (ULONGEST *) attrs[ix++].value;
+  else
+    regnum = data->next_regnum;
+
+  if (ix < length && strcmp (attrs[ix].name, "type") == 0)
+    type = attrs[ix++].value;
+  else
+    type = "int";
+
+  if (ix < length && strcmp (attrs[ix].name, "group") == 0)
+    group = attrs[ix++].value;
+  else
+    group = NULL;
+
+  if (ix < length && strcmp (attrs[ix].name, "save-restore") == 0)
+    save_restore = * (ULONGEST *) attrs[ix++].value;
+  else
+    save_restore = 1;
+
+  if (strcmp (type, "int") != 0
+      && strcmp (type, "float") != 0
+      && tdesc_named_type (data->current_feature, type) == NULL)
+    gdb_xml_error (parser, _("Register \"%s\" has unknown type \"%s\""),
+		   name, type);
+
+  tdesc_create_reg (data->current_feature, name, regnum, save_restore, group,
+		    bitsize, type);
+
+  data->next_regnum = regnum + 1;
+}
+
+/* Handle the start of a <union> element.  Initialize the type and
+   record it with the current feature.  */
+
+static void
+tdesc_start_union (struct gdb_xml_parser *parser,
+		   const struct gdb_xml_element *element,
+		   void *user_data, VEC(gdb_xml_value_s) *attributes)
+{
+  struct tdesc_parsing_data *data = user_data;
+  char *id = VEC_index (gdb_xml_value_s, attributes, 0)->value;
+  struct type *type;
+
+  type = init_composite_type (NULL, TYPE_CODE_UNION);
+  TYPE_NAME (type) = xstrdup (id);
+  tdesc_record_type (data->current_feature, type);
+  data->current_union = type;
+}
+
+/* Handle the end of a <union> element.  */
+
+static void
+tdesc_end_union (struct gdb_xml_parser *parser,
+		 const struct gdb_xml_element *element,
+		 void *user_data, const char *body_text)
+{
+  struct tdesc_parsing_data *data = user_data;
+  int i;
+
+  /* If any of the children of this union are vectors, flag the union
+     as a vector also.  This allows e.g. a union of two vector types
+     to show up automatically in "info vector".  */
+  for (i = 0; i < TYPE_NFIELDS (data->current_union); i++)
+    if (TYPE_VECTOR (TYPE_FIELD_TYPE (data->current_union, i)))
+      {
+        TYPE_FLAGS (data->current_union) |= TYPE_FLAG_VECTOR;
+        break;
+      }
+}
+
+/* Handle the start of a <field> element.  Attach the field to the
+   current union.  */
+
+static void
+tdesc_start_field (struct gdb_xml_parser *parser,
+		   const struct gdb_xml_element *element,
+		   void *user_data, VEC(gdb_xml_value_s) *attributes)
+{
+  struct tdesc_parsing_data *data = user_data;
+  struct gdb_xml_value *attrs = VEC_address (gdb_xml_value_s, attributes);
+  struct type *type, *field_type;
+  char *field_name, *field_type_id;
+
+  field_name = attrs[0].value;
+  field_type_id = attrs[1].value;
+
+  field_type = tdesc_named_type (data->current_feature, field_type_id);
+  if (field_type == NULL)
+    gdb_xml_error (parser, _("Union field \"%s\" references undefined "
+			     "type \"%s\""),
+		   field_name, field_type_id);
+
+  append_composite_type_field (data->current_union, xstrdup (field_name),
+			       field_type);
+}
+
+/* Handle the start of a <vector> element.  Initialize the type and
+   record it with the current feature.  */
+
+static void
+tdesc_start_vector (struct gdb_xml_parser *parser,
+		    const struct gdb_xml_element *element,
+		    void *user_data, VEC(gdb_xml_value_s) *attributes)
+{
+  struct tdesc_parsing_data *data = user_data;
+  struct gdb_xml_value *attrs = VEC_address (gdb_xml_value_s, attributes);
+  struct type *type, *field_type, *range_type;
+  char *id, *field_type_id;
+  int count;
+
+  id = attrs[0].value;
+  field_type_id = attrs[1].value;
+  count = * (ULONGEST *) attrs[2].value;
+
+  field_type = tdesc_named_type (data->current_feature, field_type_id);
+  if (field_type == NULL)
+    gdb_xml_error (parser, _("Vector \"%s\" references undefined type \"%s\""),
+		   id, field_type_id);
+
+  /* A vector is just an array plus a special flag.  */
+  range_type = create_range_type (NULL, builtin_type_int, 0, count - 1);
+  type = create_array_type (NULL, field_type, range_type);
+  TYPE_NAME (type) = xstrdup (id);
+
+  TYPE_FLAGS (type) |= TYPE_FLAG_VECTOR;
+
+  tdesc_record_type (data->current_feature, type);
+}
+
 /* The elements and attributes of an XML target description.  */
 
-const struct gdb_xml_element target_children[] = {
-  { "architecture", NULL, NULL, GDB_XML_EF_OPTIONAL,
-    NULL, tdesc_end_arch },
+static const struct gdb_xml_attribute field_attributes[] = {
+  { "name", GDB_XML_AF_NONE, NULL, NULL },
+  { "type", GDB_XML_AF_NONE, NULL, NULL },
+  { NULL, GDB_XML_AF_NONE, NULL, NULL }
+};
+
+static const struct gdb_xml_element union_children[] = {
+  { "field", field_attributes, NULL, GDB_XML_EF_REPEATABLE,
+    tdesc_start_field, NULL },
   { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
 };
 
-const struct gdb_xml_element tdesc_elements[] = {
+static const struct gdb_xml_attribute reg_attributes[] = {
+  { "name", GDB_XML_AF_NONE, NULL, NULL },
+  { "bitsize", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
+  { "regnum", GDB_XML_AF_OPTIONAL, gdb_xml_parse_attr_ulongest, NULL },
+  { "type", GDB_XML_AF_OPTIONAL, NULL, NULL },
+  { "group", GDB_XML_AF_OPTIONAL, NULL, NULL },
+  { "save-restore", GDB_XML_AF_OPTIONAL,
+    gdb_xml_parse_attr_enum, gdb_xml_enums_boolean },
+  { NULL, GDB_XML_AF_NONE, NULL, NULL }
+};
+
+static const struct gdb_xml_attribute union_attributes[] = {
+  { "id", GDB_XML_AF_NONE, NULL, NULL },
+  { NULL, GDB_XML_AF_NONE, NULL, NULL }
+};
+
+static const struct gdb_xml_attribute vector_attributes[] = {
+  { "id", GDB_XML_AF_NONE, NULL, NULL },
+  { "type", GDB_XML_AF_NONE, NULL, NULL },
+  { "count", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
+  { NULL, GDB_XML_AF_NONE, NULL, NULL }
+};
+
+static const struct gdb_xml_attribute feature_attributes[] = {
+  { "name", GDB_XML_AF_NONE, NULL, NULL },
+  { NULL, GDB_XML_AF_NONE, NULL, NULL }
+};
+
+static const struct gdb_xml_element feature_children[] = {
+  { "reg", reg_attributes, NULL,
+    GDB_XML_EF_OPTIONAL | GDB_XML_EF_REPEATABLE,
+    tdesc_start_reg, NULL },
+  { "union", union_attributes, union_children,
+    GDB_XML_EF_OPTIONAL | GDB_XML_EF_REPEATABLE,
+    tdesc_start_union, tdesc_end_union },
+  { "vector", vector_attributes, NULL,
+    GDB_XML_EF_OPTIONAL | GDB_XML_EF_REPEATABLE,
+    tdesc_start_vector, NULL },
+  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
+};
+
+static const struct gdb_xml_element target_children[] = {
+  { "architecture", NULL, NULL, GDB_XML_EF_OPTIONAL,
+    NULL, tdesc_end_arch },
+  { "feature", feature_attributes, feature_children,
+    GDB_XML_EF_OPTIONAL | GDB_XML_EF_REPEATABLE,
+    tdesc_start_feature, NULL },
+  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
+};
+
+static const struct gdb_xml_element tdesc_elements[] = {
   { "target", NULL, target_children, GDB_XML_EF_NONE,
     NULL, NULL },
   { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }

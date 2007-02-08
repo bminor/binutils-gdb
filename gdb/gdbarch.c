@@ -203,6 +203,7 @@ struct gdbarch
   CORE_ADDR decr_pc_after_break;
   CORE_ADDR deprecated_function_start_offset;
   gdbarch_remote_translate_xfer_address_ftype *remote_translate_xfer_address;
+  gdbarch_remote_register_number_ftype *remote_register_number;
   gdbarch_fetch_tls_load_module_address_ftype *fetch_tls_load_module_address;
   CORE_ADDR frame_args_skip;
   gdbarch_unwind_pc_ftype *unwind_pc;
@@ -330,6 +331,7 @@ struct gdbarch startup_gdbarch =
   0,  /* decr_pc_after_break */
   0,  /* deprecated_function_start_offset */
   generic_remote_translate_xfer_address,  /* remote_translate_xfer_address */
+  default_remote_register_number,  /* remote_register_number */
   0,  /* fetch_tls_load_module_address */
   0,  /* frame_args_skip */
   0,  /* unwind_pc */
@@ -440,6 +442,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->memory_insert_breakpoint = default_memory_insert_breakpoint;
   current_gdbarch->memory_remove_breakpoint = default_memory_remove_breakpoint;
   current_gdbarch->remote_translate_xfer_address = generic_remote_translate_xfer_address;
+  current_gdbarch->remote_register_number = default_remote_register_number;
   current_gdbarch->stabs_argument_has_addr = default_stabs_argument_has_addr;
   current_gdbarch->convert_from_func_ptr_addr = convert_from_func_ptr_addr_identity;
   current_gdbarch->addr_bits_remove = core_addr_identity;
@@ -584,6 +587,7 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of decr_pc_after_break, invalid_p == 0 */
   /* Skip verify of deprecated_function_start_offset, invalid_p == 0 */
   /* Skip verify of remote_translate_xfer_address, invalid_p == 0 */
+  /* Skip verify of remote_register_number, invalid_p == 0 */
   /* Skip verify of fetch_tls_load_module_address, has predicate */
   /* Skip verify of frame_args_skip, invalid_p == 0 */
   /* Skip verify of unwind_pc, has predicate */
@@ -1441,6 +1445,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: regset_from_core_section = <0x%lx>\n",
                       (long) current_gdbarch->regset_from_core_section);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: remote_register_number = <0x%lx>\n",
+                      (long) current_gdbarch->remote_register_number);
   fprintf_unfiltered (file,
                       "gdbarch_dump: remote_translate_xfer_address = <0x%lx>\n",
                       (long) current_gdbarch->remote_translate_xfer_address);
@@ -2987,6 +2994,23 @@ set_gdbarch_remote_translate_xfer_address (struct gdbarch *gdbarch,
                                            gdbarch_remote_translate_xfer_address_ftype remote_translate_xfer_address)
 {
   gdbarch->remote_translate_xfer_address = remote_translate_xfer_address;
+}
+
+int
+gdbarch_remote_register_number (struct gdbarch *gdbarch, int regno)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->remote_register_number != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_remote_register_number called\n");
+  return gdbarch->remote_register_number (gdbarch, regno);
+}
+
+void
+set_gdbarch_remote_register_number (struct gdbarch *gdbarch,
+                                    gdbarch_remote_register_number_ftype remote_register_number)
+{
+  gdbarch->remote_register_number = remote_register_number;
 }
 
 int

@@ -1,3 +1,73 @@
+2007-02-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (arm-tdep.o, eval.o, target-descriptions.o)
+	(xml-tdesc.o): Update.
+	* xml-support.c: Add a comment.
+	(gdb_xml_enums_boolean): New variable.
+	(gdb_xml_parse_attr_enum): Use strcasecmp.
+	* xml-support.h (gdb_xml_enums_boolean): Declare.
+	* xml-tdesc.c (struct tdesc_parsing_data): Record current_feature,
+	next_regnum, and current_union.
+	(tdesc_start_feature, tdesc_start_reg, tdesc_start_union)
+	(tdesc_end_union, tdesc_start_field, tdesc_start_vector)
+	(field_attributes, union_children, reg_attributes, union_attributes)
+	(vector_attributes, feature_attributes, feature_children): New.
+	(target_children): Make static.  Add <feature>.
+	(tdesc_elements): Make static.
+	* target-descriptions.c (struct tdesc_reg, tdesc_reg_p, type_p)
+	(struct tdesc_feature, tdesc_feature_p): New types.
+	(struct target_desc): Add features member.
+	(struct tdesc_arch_data, tdesc_data): New.
+	(target_find_description): Clarify error message.  Warn about
+	ignored register descriptions.
+	(tdesc_has_registers, tdesc_find_feature, tdesc_feature_name)
+	(tdesc_named_type, tdesc_data_init, tdesc_data_alloc)
+	(tdesc_data_cleanup, tdesc_numbered_register)
+	(tdesc_numbered_register_choices, tdesc_find_register)
+	(tdesc_register_name, tdesc_register_type)
+	(tdesc_remote_register_number, tdesc_register_reggroup_p)
+	(set_tdesc_pseudo_register_name, set_tdesc_pseudo_register_type)
+	(set_tdesc_pseudo_register_reggroup_p, tdesc_use_registers)
+	(tdesc_free_reg, tdesc_create_reg, tdesc_free_feature)
+	(tdesc_create_feature, tdesc_record_type): New.
+	(free_target_description): Free features.
+	(_initialize_target_descriptions): Initialize tdesc_data.
+	* arch-utils.c (default_remote_register_number): New.
+	* arch-utils.h (default_remote_register_number): New prototype.
+	* target-descriptions.h (set_tdesc_pseudo_register_name)
+	(set_tdesc_pseudo_register_type, set_tdesc_pseudo_register_reggroup_p)
+	(tdesc_use_registers, tdesc_data_alloc, tdesc_data_cleanup)
+	(tdesc_numbered_register, tdesc_numbered_register_choices)
+	(tdesc_has_registers, tdesc_find_feature, tdesc_feature_name)
+	(tdesc_named_type, tdesc_create_feature, tdesc_record_type)
+	(tdesc_create_reg): Declare.
+	* gdbarch.sh (remote_register_number): New entry.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* remote.c (init_remote_state): Use gdbarch_remote_register_number.
+	* features/gdb-target.dtd: Add feature, reg, vector, union, and field.
+
+	* arm-tdep.c (arm_register_aliases): New.
+	(arm_register_name_strings): Rename to...
+	(arm_register_names): ...this.  Make const.  Delete the old version.
+	(current_option, arm_register_byte): Delete.
+	(set_disassembly_style): Simplify.  Do not adjust arm_register_names.
+	(value_of_arm_user_reg): New.
+	(arm_gdbarch_init): Verify any described registers.  Call
+	tdesc_use_registers.  Don't use arm_register_byte.  Create aliases
+	for standard register names.
+	(_initialize_arm_tdep): Do not adjust arm_register_names.
+	* user-regs.c (struct user_reg): Add baton member.
+	(append_user_reg, user_reg_add_builtin, user_regs_init)
+	(user_reg_add, value_of_user_reg): Use a baton for user
+	register functions.
+	* std-regs.c: Update.
+	* user-regs.h (user_reg_read_ftype, user_reg_add_builtin)
+	(user_reg_add): Add baton argument.
+	* NEWS: Mention target description register support.
+	* features/arm-core.xml, features/arm-fpa.xml: New.
+	* eval.c (evaluate_subexp_standard): Allow ptype $register
+	when the program is not running.
+
 2007-02-09  Nick Roberts  <nickrob@snap.net.nz>
 
 	* mi/mi-cmd-var.c (mi_cmd_var_create):  Add value field.

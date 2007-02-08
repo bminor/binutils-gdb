@@ -39,6 +39,7 @@
 #include "cp-support.h"
 #include "ui-out.h"
 #include "exceptions.h"
+#include "regcache.h"
 
 #include "gdb_assert.h"
 
@@ -500,8 +501,12 @@ evaluate_subexp_standard (struct type *expect_type,
     case OP_REGISTER:
       {
 	int regno = longest_to_int (exp->elts[pc + 1].longconst);
-	struct value *val = value_of_register (regno, get_selected_frame (NULL));
+	struct value *val;
 	(*pos) += 2;
+	if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	  val = value_zero (register_type (current_gdbarch, regno), not_lval);
+	else
+	  val = value_of_register (regno, get_selected_frame (NULL));
 	if (val == NULL)
 	  error (_("Value of register %s not available."),
 		 frame_map_regnum_to_name (get_selected_frame (NULL), regno));

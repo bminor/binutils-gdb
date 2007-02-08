@@ -21047,9 +21047,9 @@ The corresponding @value{GDBN} command is @samp{detach}.
 
 @subsubheading Synopsis
 
-@example
+@smallexample
  -target-disconnect
-@end example
+@end smallexample
 
 Disconnect from the remote target.  There's no output and the target is
 generally not resumed.
@@ -22222,6 +22222,7 @@ working C90 compiler, e.g.@: GCC.
 @heading Tools/packages optional for building @value{GDBN}
 @table @asis
 @item Expat
+@anchor{Expat}
 @value{GDBN} can use the Expat XML parsing library.  This library may be
 included with your operating system distribution; if it is not, you
 can get the latest version from @url{http://expat.sourceforge.net}.
@@ -22229,8 +22230,8 @@ The @code{configure} script will search for this library in several
 standard locations; if it is installed in an unusual path, you can
 use the @option{--with-libexpat-prefix} option to specify its location.
 
-Expat is used currently only used to implement some remote-specific
-features.
+Expat is used for remote protocol memory maps (@pxref{Memory map format})
+and for target descriptions (@pxref{Target Descriptions}).
 
 @end table
 
@@ -25738,9 +25739,15 @@ actually describe its own features.  This lets @value{GDBN} support
 processor variants it has never seen before --- to the extent that the
 descriptions are accurate, and that @value{GDBN} understands them.
 
+@value{GDBN} must be compiled with Expat support to support XML target
+descriptions.  @xref{Expat}.
+
 @menu
 * Retrieving Descriptions::         How descriptions are fetched from a target.
 * Target Description Format::       The contents of a target description.
+* Predefined Target Types::         Standard types available for target
+                                    descriptions.
+* Standard Target Features::        Features @value{GDBN} knows about.
 @end menu
 
 @node Retrieving Descriptions
@@ -25787,32 +25794,35 @@ check that your feature descriptions are well-formed and valid.
 However, to help people unfamiliar with XML write descriptions for
 their targets, we also describe the grammar here.
 
-At the moment, target descriptions can only provide minimal information
-about the architecture of the remote target.  @value{GDBN} can use this
-information to autoconfigure, or to warn you if you connect to an
-unsupported target.
+Target descriptions can identify the architecture of the remote target
+and (for some architectures) provide information about custom register
+sets.  @value{GDBN} can use this information to autoconfigure for your
+target, or to warn you if you connect to an unsupported target.
 
 Here is a simple target description:
 
-@example
+@smallexample
 <target>
   <architecture>i386:x86-64</architecture>
 </target>
-@end example
+@end smallexample
 
 @noindent
 This minimal description only says that the target uses
 the x86-64 architecture.
 
-A target description has the overall form:
+A target description has the following overall form, with [ ] marking
+optional elements and @dots{} marking repeatable elements.  The elements
+are explained further below.
 
-@example
+@smallexample
 <?xml version="1.0"?>
 <!DOCTYPE target SYSTEM "gdb-target.dtd">
 <target>
-  <architecture>@var{arch name}</architecture>
+  @r{[}@var{architecture}@r{]}
+  @r{[}@var{feature}@dots{}@r{]}
 </target>
-@end example
+@end smallexample
 
 @noindent
 The description is generally insensitive to whitespace and line
@@ -25820,10 +25830,6 @@ breaks, under the usual common-sense rules.  The XML version
 declaration and document type declaration can generally be omitted
 (@value{GDBN} does not require them), but specifying them may be
 useful for XML validation tools.
-
-The content of the @samp{<architecture>} element is an architecture
-name, from the same selection accepted by @code{set architecture}
-(@pxref{Targets, ,Specifying a Debugging Target}).
 
 @subsection Inclusion
 @cindex target descriptions, inclusion
@@ -25838,9 +25844,9 @@ share files between different possible target descriptions.  You can
 divide a description into multiple files by replacing any element of
 the target description with an inclusion directive of the form:
 
-@example
+@smallexample
 <xi:include href="@var{document}"/>
-@end example
+@end smallexample
 
 @noindent
 When @value{GDBN} encounters an element of this form, it will retrieve
@@ -25851,6 +25857,208 @@ using @samp{qXfer}, then so will be the included document;
 current description was read from a file, @value{GDBN} will look for
 @var{document} as a file in the same directory where it found the
 original description.
+
+@subsection Architecture
+@cindex <architecture>
+
+An @samp{<architecture>} element has this form:
+
+@smallexample
+  <architecture>@var{arch}</architecture>
+@end smallexample
+
+@var{arch} is an architecture name from the same selection
+accepted by @code{set architecture} (@pxref{Targets, ,Specifying a
+Debugging Target}).
+
+@subsection Features
+@cindex <feature>
+
+Each @samp{<feature>} describes some logical portion of the target
+system.  Features are currently used to describe available CPU
+registers and the types of their contents.  A @samp{<feature>} element
+has this form:
+
+@smallexample
+<feature name="@var{name}">
+  @r{[}@var{type}@dots{}@r{]}
+  @var{reg}@dots{}
+</feature>
+@end smallexample
+
+@noindent
+Each feature's name should be unique within the description.  The name
+of a feature does not matter unless @value{GDBN} has some special
+knowledge of the contents of that feature; if it does, the feature
+should have its standard name.  @xref{Standard Target Features}.
+
+@subsection Types
+
+Any register's value is a collection of bits which @value{GDBN} must
+interpret.  The default interpretation is a two's complement integer,
+but other types can be requested by name in the register description.
+Some predefined types are provided by @value{GDBN} (@pxref{Predefined
+Target Types}), and the description can define additional composite types.
+
+Each type element must have an @samp{id} attribute, which gives
+a unique (within the containing @samp{<feature>}) name to the type.
+Types must be defined before they are used.
+
+@cindex <vector>
+Some targets offer vector registers, which can be treated as arrays
+of scalar elements.  These types are written as @samp{<vector>} elements,
+specifying the array element type, @var{type}, and the number of elements,
+@var{count}:
+
+@smallexample
+<vector id="@var{id}" type="@var{type}" count="@var{count}"/>
+@end smallexample
+
+@cindex <union>
+If a register's value is usefully viewed in multiple ways, define it
+with a union type containing the useful representations.  The
+@samp{<union>} element contains one or more @samp{<field>} elements,
+each of which has a @var{name} and a @var{type}:
+
+@smallexample
+<union id="@var{id}">
+  <field name="@var{name}" type="@var{type}"/>
+  @dots{}
+</union>
+@end smallexample
+
+@subsection Registers
+@cindex <reg>
+
+Each register is represented as an element with this form:
+
+@smallexample
+<reg name="@var{name}"
+     bitsize="@var{size}"
+     @r{[}regnum="@var{num}"@r{]}
+     @r{[}save-restore="@var{save-restore}"@r{]}
+     @r{[}type="@var{type}"@r{]}
+     @r{[}group="@var{group}"@r{]}/>
+@end smallexample
+
+@noindent
+The components are as follows:
+
+@table @var
+
+@item name
+The register's name; it must be unique within the target description.
+
+@item bitsize
+The register's size, in bits.
+
+@item regnum
+The register's number.  If omitted, a register's number is one greater
+than that of the previous register (either in the current feature or in
+a preceeding feature); the first register in the target description
+defaults to zero.  This register number is used to read or write
+the register; e.g.@: it is used in the remote @code{p} and @code{P}
+packets, and registers appear in the @code{g} and @code{G} packets
+in order of increasing register number.
+
+@item save-restore
+Whether the register should be preserved across inferior function
+calls; this must be either @code{yes} or @code{no}.  The default is
+@code{yes}, which is appropriate for most registers except for
+some system control registers; this is not related to the target's
+ABI.
+
+@item type
+The type of the register.  @var{type} may be a predefined type, a type
+defined in the current feature, or one of the special types @code{int}
+and @code{float}.  @code{int} is an integer type of the correct size
+for @var{bitsize}, and @code{float} is a floating point type (in the
+architecture's normal floating point format) of the correct size for
+@var{bitsize}.  The default is @code{int}.
+
+@item group
+The register group to which this register belongs.  @var{group} must
+be either @code{general}, @code{float}, or @code{vector}.  If no
+@var{group} is specified, @value{GDBN} will not display the register
+in @code{info registers}.
+
+@end table
+
+@node Predefined Target Types
+@section Predefined Target Types
+@cindex target descriptions, predefined types
+
+Type definitions in the self-description can build up composite types
+from basic building blocks, but can not define fundamental types.  Instead,
+standard identifiers are provided by @value{GDBN} for the fundamental
+types.  The currently supported types are:
+
+@table @code
+
+@item int8
+@itemx int16
+@itemx int32
+@itemx int64
+Signed integer types holding the specified number of bits.
+
+@item uint8
+@itemx uint16
+@itemx uint32
+@itemx uint64
+Unsigned integer types holding the specified number of bits.
+
+@item code_ptr
+@itemx data_ptr
+Pointers to unspecified code and data.  The program counter and
+any dedicated return address register may be marked as code
+pointers; printing a code pointer converts it into a symbolic
+address.  The stack pointer and any dedicated address registers
+may be marked as data pointers.
+
+@item arm_fpa_ext
+The 12-byte extended precision format used by ARM FPA registers.
+
+@end table
+
+@node Standard Target Features
+@section Standard Target Features
+@cindex target descriptions, standard features
+
+A target description must contain either no registers or all the
+target's registers.  If the description contains no registers, then
+@value{GDBN} will assume a default register layout, selected based on
+the architecture.  If the description contains any registers, the
+default layout will not be used; the standard registers must be
+described in the target description, in such a way that @value{GDBN}
+can recognize them.
+
+This is accomplished by giving specific names to feature elements
+which contain standard registers.  @value{GDBN} will look for features
+with those names and verify that they contain the expected registers;
+if any known feature is missing required registers, or if any required
+feature is missing, @value{GDBN} will reject the target
+description.  You can add additional registers to any of the
+standard features --- @value{GDBN} will display them just as if
+they were added to an unrecognized feature.
+
+This section lists the known features and their expected contents.
+Sample XML documents for these features are included in the
+@value{GDBN} source tree, in the directory @file{gdb/features}.
+
+Names recognized by @value{GDBN} should include the name of the
+company or organization which selected the name, and the overall
+architecture to which the feature applies; so e.g.@: the feature
+containing ARM core registers is named @samp{org.gnu.gdb.arm.core}.
+
+@subsection ARM Features
+@cindex target descriptions, ARM features
+
+The @samp{org.gnu.gdb.arm.core} feature is required for ARM targets.
+It should contain registers @samp{r0} through @samp{r13}, @samp{sp},
+@samp{lr}, @samp{pc}, and @samp{cpsr}.
+
+The @samp{org.gnu.gdb.arm.fpa} feature is optional.  If present, it
+should contain registers @samp{f0} through @samp{f7} and @samp{fps}.
 
 
 @include gpl.texi

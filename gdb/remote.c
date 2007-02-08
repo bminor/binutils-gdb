@@ -334,12 +334,13 @@ init_remote_state (struct gdbarch *gdbarch)
 
   rsa = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct remote_arch_state);
 
-  /* Assume a 1:1 regnum<->pnum table.  */
+  /* Use the architecture to build a regnum<->pnum table, which will be
+     1:1 unless a feature set specifies otherwise.  */
   rsa->regs = GDBARCH_OBSTACK_CALLOC (gdbarch, NUM_REGS, struct packet_reg);
   for (regnum = 0; regnum < NUM_REGS; regnum++)
     {
       struct packet_reg *r = &rsa->regs[regnum];
-      r->pnum = regnum;
+      r->pnum = gdbarch_remote_register_number (gdbarch, regnum);
       r->regnum = regnum;
     }
 

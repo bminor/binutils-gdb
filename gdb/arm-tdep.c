@@ -41,6 +41,8 @@
 #include "dwarf2-frame.h"
 #include "gdbtypes.h"
 #include "prologue-value.h"
+#include "target-descriptions.h"
+#include "user-regs.h"
 
 #include "arm-tdep.h"
 #include "gdb/sim-arm.h"
@@ -103,13 +105,58 @@ static const char *arm_abi_string = "auto";
 /* Number of different reg name sets (options).  */
 static int num_disassembly_options;
 
-/* We have more registers than the disassembler as gdb can print the value
-   of special registers as well.
-   The general register names are overwritten by whatever is being used by
-   the disassembler at the moment. We also adjust the case of cpsr and fps.  */
+/* The standard register names, and all the valid aliases for them.  */
+static const struct
+{
+  const char *name;
+  int regnum;
+} arm_register_aliases[] = {
+  /* Basic register numbers.  */
+  { "r0", 0 },
+  { "r1", 1 },
+  { "r2", 2 },
+  { "r3", 3 },
+  { "r4", 4 },
+  { "r5", 5 },
+  { "r6", 6 },
+  { "r7", 7 },
+  { "r8", 8 },
+  { "r9", 9 },
+  { "r10", 10 },
+  { "r11", 11 },
+  { "r12", 12 },
+  { "r13", 13 },
+  { "r14", 14 },
+  { "r15", 15 },
+  /* Synonyms (argument and variable registers).  */
+  { "a1", 0 },
+  { "a2", 1 },
+  { "a3", 2 },
+  { "a4", 3 },
+  { "v1", 4 },
+  { "v2", 5 },
+  { "v3", 6 },
+  { "v4", 7 },
+  { "v5", 8 },
+  { "v6", 9 },
+  { "v7", 10 },
+  { "v8", 11 },
+  /* Other platform-specific names for r9.  */
+  { "sb", 9 },
+  { "tr", 9 },
+  /* Special names.  */
+  { "ip", 12 },
+  { "sp", 13 },
+  { "lr", 14 },
+  { "pc", 15 },
+  /* Names used by GCC (not listed in the ARM EABI).  */
+  { "sl", 10 },
+  { "fp", 11 },
+  /* A special name from the older ATPCS.  */
+  { "wr", 7 },
+};
 
-/* Initial value: Register names used in ARM's ISA documentation.  */
-static char * arm_register_name_strings[] =
+static const char *const arm_register_names[] =
 {"r0",  "r1",  "r2",  "r3",	/*  0  1  2  3 */
  "r4",  "r5",  "r6",  "r7",	/*  4  5  6  7 */
  "r8",  "r9",  "r10", "r11",	/*  8  9 10 11 */
@@ -117,15 +164,12 @@ static char * arm_register_name_strings[] =
  "f0",  "f1",  "f2",  "f3",	/* 16 17 18 19 */
  "f4",  "f5",  "f6",  "f7",	/* 20 21 22 23 */
  "fps", "cpsr" };		/* 24 25       */
-static char **arm_register_names = arm_register_name_strings;
 
 /* Valid register name styles.  */
 static const char **valid_disassembly_styles;
 
 /* Disassembly style to use. Default to "std" register names.  */
 static const char *disassembly_style;
-/* Index to that option in the opcodes table.  */
-static int current_option;
 
 /* This is used to keep the bfd arch_info in sync with the disassembly
    style.  */
@@ -1343,23 +1387,6 @@ arm_register_type (struct gdbarch *gdbarch, int regnum)
     return builtin_type_uint32;
 }
 
-/* Index within `registers' of the first byte of the space for
-   register N.  */
-
-static int
-arm_register_byte (int regnum)
-{
-  if (regnum < ARM_F0_REGNUM)
-    return regnum * INT_REGISTER_SIZE;
-  else if (regnum < ARM_PS_REGNUM)
-    return (NUM_GREGS * INT_REGISTER_SIZE
-	    + (regnum - ARM_F0_REGNUM) * FP_REGISTER_SIZE);
-  else
-    return (NUM_GREGS * INT_REGISTER_SIZE
-	    + NUM_FREGS * FP_REGISTER_SIZE
-	    + (regnum - ARM_FPS_REGNUM) * STATUS_REGISTER_SIZE);
-}
-
 /* Map GDB internal REGNUM onto the Arm simulator register numbers.  */
 static int
 arm_register_sim_regno (int regnum)
@@ -2461,32 +2488,13 @@ arm_register_name (int i)
 static void
 set_disassembly_style (void)
 {
-  const char *setname, *setdesc, *const *regnames;
-  int numregs, j;
+  int current;
 
-  /* Find the style that the user wants in the opcodes table.  */
-  int current = 0;
-  numregs = get_arm_regnames (current, &setname, &setdesc, &regnames);
-  while ((disassembly_style != setname)
-	 && (current < num_disassembly_options))
-    get_arm_regnames (++current, &setname, &setdesc, &regnames);
-  current_option = current;
-
-  /* Fill our copy.  */
-  for (j = 0; j < numregs; j++)
-    arm_register_names[j] = (char *) regnames[j];
-
-  /* Adjust case.  */
-  if (isupper (*regnames[ARM_PC_REGNUM]))
-    {
-      arm_register_names[ARM_FPS_REGNUM] = "FPS";
-      arm_register_names[ARM_PS_REGNUM] = "CPSR";
-    }
-  else
-    {
-      arm_register_names[ARM_FPS_REGNUM] = "fps";
-      arm_register_names[ARM_PS_REGNUM] = "cpsr";
-    }
+  /* Find the style that the user wants.  */
+  for (current = 0; current < num_disassembly_options; current++)
+    if (disassembly_style == valid_disassembly_styles[current])
+      break;
+  gdb_assert (current < num_disassembly_options);
 
   /* Synchronize the disassembler.  */
   set_arm_regname_option (current);
@@ -2544,6 +2552,13 @@ arm_write_pc (CORE_ADDR pc, ptid_t ptid)
 	write_register_pid (ARM_PS_REGNUM, val & ~(CORE_ADDR) 0x20, ptid);
     }
 }
+
+static struct value *
+value_of_arm_user_reg (struct frame_info *frame, const void *baton)
+{
+  const int *reg_p = baton;
+  return value_of_register (*reg_p, frame);
+}
 
 static enum gdb_osabi
 arm_elf_osabi_sniffer (bfd *abfd)
@@ -2580,6 +2595,65 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   struct gdbarch_list *best_arch;
   enum arm_abi_kind arm_abi = arm_abi_global;
   enum arm_float_model fp_model = arm_fp_model;
+  struct tdesc_arch_data *tdesc_data = NULL;
+  int i;
+
+  /* Check any target description for validity.  */
+  if (tdesc_has_registers (info.target_desc))
+    {
+      /* For most registers we require GDB's default names; but also allow
+	 the numeric names for sp / lr / pc, as a convenience.  */
+      static const char *const arm_sp_names[] = { "r13", "sp", NULL };
+      static const char *const arm_lr_names[] = { "r14", "lr", NULL };
+      static const char *const arm_pc_names[] = { "r15", "pc", NULL };
+
+      const struct tdesc_feature *feature;
+      int i, valid_p;
+
+      feature = tdesc_find_feature (info.target_desc,
+				    "org.gnu.gdb.arm.core");
+      if (feature == NULL)
+	return NULL;
+
+      tdesc_data = tdesc_data_alloc ();
+
+      valid_p = 1;
+      for (i = 0; i < ARM_SP_REGNUM; i++)
+	valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
+					    arm_register_names[i]);
+      valid_p &= tdesc_numbered_register_choices (feature, tdesc_data,
+						  ARM_SP_REGNUM,
+						  arm_sp_names);
+      valid_p &= tdesc_numbered_register_choices (feature, tdesc_data,
+						  ARM_LR_REGNUM,
+						  arm_lr_names);
+      valid_p &= tdesc_numbered_register_choices (feature, tdesc_data,
+						  ARM_PC_REGNUM,
+						  arm_pc_names);
+      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					  ARM_PS_REGNUM, "cpsr");
+
+      if (!valid_p)
+	{
+	  tdesc_data_cleanup (tdesc_data);
+	  return NULL;
+	}
+
+      feature = tdesc_find_feature (info.target_desc,
+				    "org.gnu.gdb.arm.fpa");
+      if (feature != NULL)
+	{
+	  valid_p = 1;
+	  for (i = ARM_F0_REGNUM; i <= ARM_FPS_REGNUM; i++)
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
+						arm_register_names[i]);
+	  if (!valid_p)
+	    {
+	      tdesc_data_cleanup (tdesc_data);
+	      return NULL;
+	    }
+	}
+    }
 
   /* If we have an object to base this architecture on, try to determine
      its ABI.  */
@@ -2709,7 +2783,11 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   if (best_arch != NULL)
-    return best_arch->gdbarch;
+    {
+      if (tdesc_data != NULL)
+	tdesc_data_cleanup (tdesc_data);
+      return best_arch->gdbarch;
+    }
 
   tdep = xcalloc (1, sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
@@ -2784,7 +2862,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_fp_regnum (gdbarch, ARM_FP_REGNUM);	/* ??? */
   set_gdbarch_sp_regnum (gdbarch, ARM_SP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, ARM_PC_REGNUM);
-  set_gdbarch_deprecated_register_byte (gdbarch, arm_register_byte);
   set_gdbarch_num_regs (gdbarch, NUM_GREGS + NUM_FREGS + NUM_SREGS);
   set_gdbarch_register_type (gdbarch, arm_register_type);
 
@@ -2841,6 +2918,16 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_double_format (gdbarch, floatformats_ieee_double);
       set_gdbarch_long_double_format (gdbarch, floatformats_ieee_double);
     }
+
+  if (tdesc_data)
+    tdesc_use_registers (gdbarch, tdesc_data);
+
+  /* Add standard register aliases.  We add aliases even for those
+     nanes which are used by the current architecture - it's simpler,
+     and does no harm, since nothing ever lists user registers.  */
+  for (i = 0; i < ARRAY_SIZE (arm_register_aliases); i++)
+    user_reg_add (gdbarch, arm_register_aliases[i].name,
+		  value_of_arm_user_reg, &arm_register_aliases[i].regnum);
 
   return gdbarch;
 }
@@ -2906,13 +2993,11 @@ _initialize_arm_tdep (void)
       length = snprintf (rdptr, rest, "%s - %s\n", setname, setdesc);
       rdptr += length;
       rest -= length;
-      /* Copy the default names (if found) and synchronize disassembler.  */
+      /* When we find the default names, tell the disassembler to use
+	 them.  */
       if (!strcmp (setname, "std"))
 	{
           disassembly_style = setname;
-          current_option = i;
-	  for (j = 0; j < numregs; j++)
-            arm_register_names[j] = (char *) regnames[j];
           set_arm_regname_option (i);
 	}
     }

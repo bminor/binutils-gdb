@@ -57,15 +57,16 @@ extern const char *user_reg_map_regnum_to_name (struct gdbarch *gdbarch,
    bytes as, at the time the register is being added, the type needed
    to describe the register has not bee initialized.  */
 
-typedef struct value *(user_reg_read_ftype) (struct frame_info *frame);
+typedef struct value *(user_reg_read_ftype) (struct frame_info *frame,
+					     const void *baton);
 extern struct value *value_of_user_reg (int regnum, struct frame_info *frame);
 
 /* Add a builtin register (present in all architectures).  */
 extern void user_reg_add_builtin (const char *name,
-				  user_reg_read_ftype *read);
+				  user_reg_read_ftype *read, const void *baton);
 
 /* Add a per-architecture frame register.  */
 extern void user_reg_add (struct gdbarch *gdbarch, const char *name, 
-			  user_reg_read_ftype *read);
+			  user_reg_read_ftype *read, const void *baton);
 
 #endif

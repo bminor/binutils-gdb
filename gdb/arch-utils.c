@@ -263,6 +263,13 @@ generic_instruction_nullified (struct gdbarch *gdbarch,
   return 0;
 }
 
+int
+default_remote_register_number (struct gdbarch *gdbarch,
+				int regno)
+{
+  return regno;
+}
+
 
 /* Functions to manipulate the endianness of the target.  */
 

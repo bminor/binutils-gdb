@@ -40,6 +40,8 @@ static int debug_xml;
    we just want to avoid running out of stack on loops.  */
 #define MAX_XINCLUDE_DEPTH 30
 
+/* Simplified XML parser infrastructure.  */
+
 /* A parsing level -- used to keep track of the current element
    nesting.  */
 struct scope_level
@@ -631,6 +633,14 @@ gdb_xml_parse_attr_ulongest (struct gdb_xml_parser *parser,
   return ret;
 }
 
+/* A handler_data for yes/no boolean values.  */
+
+const struct gdb_xml_enum gdb_xml_enums_boolean[] = {
+  { "yes", 1 },
+  { "no", 0 },
+  { NULL, 0 }
+};
+
 /* Map NAME to VALUE.  A struct gdb_xml_enum * should be saved as the
    value of handler_data when using gdb_xml_parse_attr_enum to parse a
    fixed list of possible strings.  The list is terminated by an entry
@@ -645,7 +655,7 @@ gdb_xml_parse_attr_enum (struct gdb_xml_parser *parser,
   void *ret;
 
   for (enums = attribute->handler_data; enums->name != NULL; enums++)
-    if (strcmp (enums->name, value) == 0)
+    if (strcasecmp (enums->name, value) == 0)
       break;
 
   if (enums->name == NULL)

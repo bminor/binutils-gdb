@@ -53,7 +53,7 @@ build_builtin_type_frame_reg (void)
 }
 
 static struct value *
-value_of_builtin_frame_reg (struct frame_info *frame)
+value_of_builtin_frame_reg (struct frame_info *frame, const void *baton)
 {
   struct value *val;
   gdb_byte *buf;
@@ -72,7 +72,7 @@ value_of_builtin_frame_reg (struct frame_info *frame)
 }
 
 static struct value *
-value_of_builtin_frame_fp_reg (struct frame_info *frame)
+value_of_builtin_frame_fp_reg (struct frame_info *frame, const void *baton)
 {
   if (DEPRECATED_FP_REGNUM >= 0)
     /* NOTE: cagney/2003-04-24: Since the mere presence of "fp" in the
@@ -96,7 +96,7 @@ value_of_builtin_frame_fp_reg (struct frame_info *frame)
 }
 
 static struct value *
-value_of_builtin_frame_pc_reg (struct frame_info *frame)
+value_of_builtin_frame_pc_reg (struct frame_info *frame, const void *baton)
 {
   if (PC_REGNUM >= 0)
     return value_of_register (PC_REGNUM, frame);
@@ -114,7 +114,7 @@ value_of_builtin_frame_pc_reg (struct frame_info *frame)
 }
 
 static struct value *
-value_of_builtin_frame_sp_reg (struct frame_info *frame)
+value_of_builtin_frame_sp_reg (struct frame_info *frame, const void *baton)
 {
 #ifdef SP_REGNUM
   if (SP_REGNUM >= 0)
@@ -124,7 +124,7 @@ value_of_builtin_frame_sp_reg (struct frame_info *frame)
 }
 
 static struct value *
-value_of_builtin_frame_ps_reg (struct frame_info *frame)
+value_of_builtin_frame_ps_reg (struct frame_info *frame, const void *baton)
 {
 #ifdef PS_REGNUM
   if (PS_REGNUM >= 0)
@@ -147,14 +147,14 @@ _initialize_frame_reg (void)
   /* Frame based $fp, $pc, $sp and $ps.  These only come into play
      when the target does not define its own version of these
      registers.  */
-  user_reg_add_builtin ("fp", value_of_builtin_frame_fp_reg);
-  user_reg_add_builtin ("pc", value_of_builtin_frame_pc_reg);
-  user_reg_add_builtin ("sp", value_of_builtin_frame_sp_reg);
-  user_reg_add_builtin ("ps", value_of_builtin_frame_ps_reg);
+  user_reg_add_builtin ("fp", value_of_builtin_frame_fp_reg, NULL);
+  user_reg_add_builtin ("pc", value_of_builtin_frame_pc_reg, NULL);
+  user_reg_add_builtin ("sp", value_of_builtin_frame_sp_reg, NULL);
+  user_reg_add_builtin ("ps", value_of_builtin_frame_ps_reg, NULL);
 
   /* NOTE: cagney/2002-04-05: For moment leave the $frame / $gdbframe
      / $gdb.frame disabled.  It isn't yet clear which of the many
      options is the best.  */
   if (0)
-    user_reg_add_builtin ("frame", value_of_builtin_frame_reg);
+    user_reg_add_builtin ("frame", value_of_builtin_frame_reg, NULL);
 }
