@@ -1,3 +1,8 @@
+2007-02-08  Fred Fish  <fnf@specifix.com>
+
+	* defs.h (request_quit): Remove declaration.
+	* utils.c (request_quit): Remove definition.
+
 2007-02-08  Joel Brobecker  <brobecker@gnat.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>

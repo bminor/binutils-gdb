@@ -345,8 +345,6 @@ extern int subset_compare (char *, char *);
 
 extern char *safe_strerror (int);
 
-extern void request_quit (int);
-
 #define	ALL_CLEANUPS	((struct cleanup *)0)
 
 extern void do_cleanups (struct cleanup *);
