@@ -4419,7 +4419,7 @@ renaming_is_visible (const struct symbol *sym, char *function_name)
 
 static int
 remove_out_of_scope_renamings (struct ada_symbol_info *syms,
-                               int nsyms, struct block *current_block)
+                               int nsyms, const struct block *current_block)
 {
   struct symbol *current_function;
   char *current_function_name;
@@ -4656,8 +4656,7 @@ done:
     cache_symbol (name0, namespace, (*results)[0].sym, (*results)[0].block,
                   (*results)[0].symtab);
 
-  ndefns = remove_out_of_scope_renamings (*results, ndefns,
-                                          (struct block *) block0);
+  ndefns = remove_out_of_scope_renamings (*results, ndefns, block0);
 
   return ndefns;
 }

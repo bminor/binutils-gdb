@@ -1,3 +1,15 @@
+2007-02-09  Gabriel Dos Reis  <gdr@integrable-solutions.net>
+
+	* ada-lang.c (remove_out_of_scope_renamings): Change third parameter's
+	type to a pointer to const struct block.
+	(ada_lookup_symbol_list): Don't cast away constness when calling
+	remove_out_of_scope_renamings.
+
+2007-02-09  Gabriel Dos Reis  <gdr@integrable-solutions.net>
+
+	* linux-nat.c (linux_nat_find_memory_regions): Don't check the
+	address of 'filename'; it is always non null.
+
 2007-02-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* exec.c (add_to_section_table): Do not discard empty sections.

@@ -2553,7 +2553,7 @@ linux_nat_find_memory_regions (int (*func) (CORE_ADDR,
 			    size, paddr_nz (addr),
 			    read ? 'r' : ' ',
 			    write ? 'w' : ' ', exec ? 'x' : ' ');
-	  if (filename && filename[0])
+	  if (filename[0])
 	    fprintf_filtered (gdb_stdout, " for %s", filename);
 	  fprintf_filtered (gdb_stdout, "\n");
 	}
