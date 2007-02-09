@@ -345,11 +345,15 @@ add_to_section_table (bfd *abfd, struct bfd_section *asect,
   struct section_table **table_pp = (struct section_table **) table_pp_char;
   flagword aflag;
 
+  /* Check the section flags, but do not discard zero-length sections, since
+     some symbols may still be attached to this section.  For instance, we
+     encountered on sparc-solaris 2.10 a shared library with an empty .bss
+     section to which a symbol named "_end" was attached.  The address
+     of this symbol still needs to be relocated.  */
   aflag = bfd_get_section_flags (abfd, asect);
   if (!(aflag & SEC_ALLOC))
     return;
-  if (0 == bfd_section_size (abfd, asect))
-    return;
+
   (*table_pp)->bfd = abfd;
   (*table_pp)->the_bfd_section = asect;
   (*table_pp)->addr = bfd_section_vma (abfd, asect);

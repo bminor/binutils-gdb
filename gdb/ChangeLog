@@ -1,3 +1,7 @@
+2007-02-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* exec.c (add_to_section_table): Do not discard empty sections.
+
 2007-02-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* features/Makefile, features/arm-with-iwmmxt.xml,
