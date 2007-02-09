@@ -9,11 +9,18 @@
 #  targ_extra_emuls	additional linker emulations to provide
 #  targ_extra_libpath	additional linker emulations using LIB_PATH
 #  targ_extra_ofiles	additional objects needed by the emulation
+#  targ64_extra_emuls	additional linker emulations to provide if
+#  			--enable-64-bit-bfd is given or if host is 64 bit.
+#  targ64_extra_libpath	additional linker emulations using LIB_PATH if
+#  			--enable-64-bit-bfd is given or if host is 64 bit.
 #  NATIVE_LIB_DIRS	library directories to search on this host
 #			(if we are a native or sysrooted linker)
 
 targ_extra_emuls=
+targ_extra_libpath=
 targ_extra_ofiles=
+targ64_extra_emuls=
+targ64_extra_libpath=
 
 # Please try to keep this table in alphabetic order - it makes it
 # much easier to lookup a specific archictecture.  Naturally any
@@ -171,10 +178,8 @@ i[3-7]86-*-linux*aout*)	targ_emul=i386linux
 i[3-7]86-*-linux*oldld)	targ_emul=i386linux; targ_extra_emuls=elf_i386 ;;
 i[3-7]86-*-linux-*)	targ_emul=elf_i386
 			targ_extra_emuls=i386linux
-			if test x${want64} = xtrue; then
-			  targ_extra_emuls="$targ_extra_emuls elf_x86_64"
-			  targ_extra_libpath=elf_x86_64
-			fi
+			targ64_extra_emuls=elf_x86_64
+			targ64_extra_libpath=elf_x86_64
 			tdir_i386linux=${targ_alias}aout ;;
 x86_64-*-linux-*)	targ_emul=elf_x86_64
 			targ_extra_emuls="elf_i386 i386linux"
@@ -416,10 +421,9 @@ powerpc*-*-linux*)	case "${targ}" in
 			*)	targ_emul=elf32ppclinux
 				targ_extra_emuls="elf32ppc elf32ppcsim"
 				targ_extra_libpath=elf32ppc
-				if test "${want64}" = "true"; then
-					targ_extra_emuls="$targ_extra_emuls elf64ppc"
-					targ_extra_libpath="$targ_extra_libpath elf64ppc"
-				fi ;;
+				targ64_extra_emuls=elf64ppc
+				targ64_extra_libpath=elf64ppc
+				;;
 			esac ;;
 powerpc*le-*-elf* | powerpc*le-*-eabi* | powerpc*le-*-solaris* \
   | powerpc*le-*-sysv* | powerpc*le-*-vxworks*)
@@ -470,11 +474,9 @@ s390x-*-linux*)         targ_emul=elf64_s390
 s390x-*-tpf*)		targ_emul=elf64_s390
 			tdir_elf_s390=`echo ${targ_alias} | sed -e 's/s390x/s390/'` ;;
 s390-*-linux*)          targ_emul=elf_s390
-			if test "${want64}" = "true"; then
-			  targ_extra_emuls=elf64_s390
-			  targ_extra_libpath=$targ_extra_emuls
-			  tdir_elf64_s390=`echo ${targ_alias} | sed -e 's/s390/s390x/'`
-			fi
+			targ64_extra_emuls=elf64_s390
+			targ64_extra_libpath=elf64_s390
+			tdir_elf64_s390=`echo ${targ_alias} | sed -e 's/s390/s390x/'`
 			;;
 score-*-elf)            targ_emul=scoreelf ;;
 sh-*-linux*)		targ_emul=shlelf_linux

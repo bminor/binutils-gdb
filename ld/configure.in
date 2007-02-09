@@ -175,6 +175,11 @@ do
       . ${srcdir}/../bfd/config.bfd
     fi
 
+    if test x${want64} = xtrue; then
+      targ_extra_emuls="$targ_extra_emuls $targ64_extra_emuls"
+      targ_extra_libpath="$targ_extra_libpath $targ64_extra_libpath"
+    fi
+
     for i in $targ_emul $targ_extra_emuls $targ_extra_libpath; do
 	case " $all_emuls " in
 	*" e${i}.o "*) ;;
