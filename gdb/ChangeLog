@@ -1,3 +1,9 @@
+2007-02-09  Fred Fish  <fnf@specifix.com>
+
+	Based on work by Apple Computer, Inc.
+	* event-top.c (async_request_quit): Call quit() whenever either
+	quit_flag is set or immediate_quit is set.
+
 2007-02-09  Gabriel Dos Reis  <gdr@integrable-solutions.net>
 
 	* ada-lang.c (remove_out_of_scope_renamings): Change third parameter's
@@ -115,6 +121,7 @@
 
 2007-02-08  Fred Fish  <fnf@specifix.com>
 
+	Based on work by Apple Computer, Inc.
 	* event-top.c (handle_sigint): Set quit_flag.
 	(async_request_quit): Don't set quit_flag.  Avoid calling quit()
 	if quit_flag has already been reset.

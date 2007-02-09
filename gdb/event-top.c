@@ -997,14 +997,13 @@ void
 async_request_quit (gdb_client_data arg)
 {
   /* If the quit_flag has gotten reset back to 0 by the time we get
-     back here, that means that an exception was thrown to unwind
-     the current command before we got back to the event loop.  So
-     there is no reason to call quit again here. */
+     back here, that means that an exception was thrown to unwind the
+     current command before we got back to the event loop.  So there
+     is no reason to call quit again here, unless immediate_quit is
+     set.*/
 
-  if (quit_flag == 0)
-    return;
-
-  quit ();
+  if (quit_flag || immediate_quit)
+    quit ();
 }
 
 #ifdef SIGQUIT
