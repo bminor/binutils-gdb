@@ -6769,7 +6769,10 @@ evaluate_complex_relocation_symbols (bfd * input_bfd,
 	  index = ELF32_R_SYM (rel->r_info);
 	  if (bed->s->arch_size == 64)
 	    index >>= 24;
- 
+
+	  if (index == STN_UNDEF)
+	    continue;
+
 	  if (index < locsymcount)
 	    {
 	      /* The symbol is local.  */

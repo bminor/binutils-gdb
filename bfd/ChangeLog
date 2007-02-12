@@ -1,5 +1,10 @@
 2007-02-12  Alan Modra  <amodra@bigpond.net.au>
 
+	* elflink.c (evaluate_complex_relocation_symbols): Ignore relocs
+	with a zero symbol index.
+
+2007-02-12  Alan Modra  <amodra@bigpond.net.au>
+
 	* elflink.c (bfd_elf_discard_info): Tidy setting of "eh".
 
 2007-02-05  Dave Brolley  <brolley@redhat.com>
