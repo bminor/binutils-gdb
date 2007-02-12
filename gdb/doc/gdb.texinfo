@@ -17732,6 +17732,10 @@ New MI commands may be added.
 @item
 New fields may be added to the output of any MI command.
 
+@item
+The range of values for fields with specified values, e.g.,
+@code{in_scope} (@pxref{-var-update}) may be extended.
+
 @c The format of field's content e.g type prefix, may change so parse it
 @c   at your own risk.  Yes, in general?
 
@@ -19972,16 +19976,16 @@ subsequent @code{-var-update} list.
 
 Reevaluate the expressions corresponding to the variable object
 @var{name} and all its direct and indirect children, and return the
-list of variable objects whose values have changed. Here,
-``changed'' means that the result of @code{-var-evaluate-expression} before
-and after the @code{-var-update} is different.  If @samp{*} is used
-as the variable object names, all existing variable objects are
-updated.  The option @var{print-values} determines whether both names 
-and values, or just names are printed.  The possible values of
-this options are the same as for @code{-var-list-children}
-(@pxref{-var-list-children}).  It is recommended to use the
-@samp{--all-values} option, to reduce the number of MI commands needed
-on each program stop.
+list of variable objects whose values have changed; @var{name} must
+be a root variable object.  Here, ``changed'' means that the result of
+@code{-var-evaluate-expression} before and after the
+@code{-var-update} is different.  If @samp{*} is used as the variable
+object names, all existing variable objects are updated.  The option
+@var{print-values} determines whether both names and values, or just
+names are printed.  The possible values of this options are the same
+as for @code{-var-list-children} (@pxref{-var-list-children}).  It is
+recommended to use the @samp{--all-values} option, to reduce the
+number of MI commands needed on each program stop.
 
 
 @subsubheading Example
@@ -19996,6 +20000,29 @@ on each program stop.
 type_changed="false"@}]
 (gdb)
 @end smallexample
+
+@anchor{-var-update} 
+The field in_scope may take three values:
+
+@table @code
+@item "true"
+The variable object's current value is valid.
+
+@item "false"
+The variable object does not currently hold a valid value but it may
+hold one in the future if its associated expression comes back into
+scope.
+
+@item "invalid"
+The variable object no longer holds a valid value.
+This can occur when the executable file being debugged has changed,
+either through recompilation or by using the @value{GDBN} @code{file}
+command.  The front end should normally choose to delete these variable
+objects.
+@end table
+
+In the future new values may be added to this list so the front should
+be prepared for this possibility.  @xref{GDB/MI Development and Front Ends, ,@sc{GDB/MI} Development and Front Ends}.
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Data Manipulation
