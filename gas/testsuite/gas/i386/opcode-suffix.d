@@ -585,4 +585,7 @@ Disassembly of section .text:
  *[0-9a-f]+:	0f 00 08[ 	]+strw[ 	]+\(%eax\)
  *[0-9a-f]+:	0f ad d0 [ 	]*shrdl[ 	]+%cl,%edx,%eax
  *[0-9a-f]+:	0f a5 d0 [ 	]*shldl[ 	]+%cl,%edx,%eax
-	\.\.\.
+ *[0-9a-f]+:	85 c3 [ 	]*testl[ 	]+%eax,%ebx
+ *[0-9a-f]+:	85 d8 [ 	]*testl[ 	]+%ebx,%eax
+ *[0-9a-f]+:	85 18 [ 	]*testl[ 	]+%ebx,\(%eax\)
+#pass

@@ -584,4 +584,7 @@ Disassembly of section .text:
  9ec:	0f 00 08 [ 	]*str    \(%eax\)
  9ef:	0f ad d0 [ 	]*shrd   %cl,%edx,%eax
  9f2:	0f a5 d0 [ 	]*shld   %cl,%edx,%eax
-	\.\.\.
+ 9f5:	85 c3 [ 	]*test   %eax,%ebx
+ 9f7:	85 d8 [ 	]*test   %ebx,%eax
+ 9f9:	85 18 [ 	]*test   %ebx,\(%eax\)
+#pass

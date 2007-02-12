@@ -608,4 +608,8 @@ Disassembly of section .text:
  *[0-9a-f]+:	0f 00 08[ 	]+str[ 	]+(WORD PTR )?\[eax\]
  *[0-9a-f]+:	0f ad d0 [ 	]*shrd[ 	]+eax,edx,cl
  *[0-9a-f]+:	0f a5 d0 [ 	]*shld[ 	]+eax,edx,cl
+ *[0-9a-f]+:	85 c3 [ 	]*test[ 	]+ebx,eax
+ *[0-9a-f]+:	85 d8 [ 	]*test[ 	]+eax,ebx
+ *[0-9a-f]+:	85 18 [ 	]*test[ 	]+(DWORD PTR )?\[eax\],ebx
+#pass
 	\.\.\.
