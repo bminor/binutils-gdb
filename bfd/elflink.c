@@ -1,6 +1,6 @@
 /* ELF linking support for BFD.
    Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006 Free Software Foundation, Inc.
+   2005, 2006, 2007 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -10938,12 +10938,15 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
       if ((abfd->flags & DYNAMIC) != 0)
 	continue;
 
-      eh = bfd_get_section_by_name (abfd, ".eh_frame");
-      if (info->relocatable
-	  || (eh != NULL
+      eh = NULL;
+      if (!info->relocatable)
+	{
+	  eh = bfd_get_section_by_name (abfd, ".eh_frame");
+	  if (eh != NULL
 	      && (eh->size == 0
-		  || bfd_is_abs_section (eh->output_section))))
-	eh = NULL;
+		  || bfd_is_abs_section (eh->output_section)))
+	    eh = NULL;
+	}
 
       stab = bfd_get_section_by_name (abfd, ".stab");
       if (stab != NULL
