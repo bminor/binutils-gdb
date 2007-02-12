@@ -1,5 +1,15 @@
 2007-02-12  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (create_linkage_sections): Don't create
+	.rela.rodata.brlt for --emit-relocs.
+	(ppc_build_one_stub): Create relocs for brlt --emit-relocs here.
+	(ppc_size_one_stub): Count them.  Simplify test of stub type
+	when counting stub relocs.  Set SEC_RELOC too.
+	(ppc64_elf_size_stubs): Clear reloc_count and SEC_RELOC.
+	(ppc64_elf_finish_dynamic_sections): Output brlt relocs.
+
+2007-02-12  Alan Modra  <amodra@bigpond.net.au>
+
 	* elflink.c (evaluate_complex_relocation_symbols): Ignore relocs
 	with a zero symbol index.
 

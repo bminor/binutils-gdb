@@ -1,5 +1,5 @@
 /* PowerPC64-specific support for 64-bit ELF.
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
    Written by Linus Nordberg, Swox AB <info@swox.com>,
    based on elf32-ppc.c by Ian Lance Taylor.
@@ -3844,14 +3844,6 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
 	       | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED);
       htab->relbrlt
 	= bfd_make_section_anyway_with_flags (dynobj, ".rela.data.rel.ro.brlt",
-					      flags);
-    }
-  else if (info->emitrelocations)
-    {
-      flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
-	       | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-      htab->relbrlt
-	= bfd_make_section_anyway_with_flags (dynobj, ".rela.rodata.brlt",
 					      flags);
     }
   else
@@ -8394,6 +8386,33 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  rl += htab->relbrlt->reloc_count++ * sizeof (Elf64_External_Rela);
 	  bfd_elf64_swap_reloca_out (htab->relbrlt->owner, &rela, rl);
 	}
+      else if (info->emitrelocations)
+	{
+	  Elf_Internal_Rela *relocs, *r;
+	  struct bfd_elf_section_data *elfsec_data;
+
+	  elfsec_data = elf_section_data (htab->brlt);
+	  relocs = elfsec_data->relocs;
+	  if (relocs == NULL)
+	    {
+	      bfd_size_type relsize;
+	      relsize = htab->brlt->reloc_count * sizeof (*relocs);
+	      relocs = bfd_alloc (htab->brlt->owner, relsize);
+	      if (relocs == NULL)
+		return FALSE;
+	      elfsec_data->relocs = relocs;
+	      elfsec_data->rel_hdr.sh_size = relsize;
+	      elfsec_data->rel_hdr.sh_entsize = 24;
+	      htab->brlt->reloc_count = 0;
+	    }
+	  r = relocs + htab->brlt->reloc_count;
+	  htab->brlt->reloc_count += 1;
+	  r->r_offset = (br_entry->offset
+			 + htab->brlt->output_offset
+			 + htab->brlt->output_section->vma);
+	  r->r_info = ELF64_R_INFO (0, R_PPC64_RELATIVE);
+	  r->r_addend = off;
+	}
 
       off = (br_entry->offset
 	     + htab->brlt->output_offset
@@ -8623,6 +8642,11 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
 	      if (htab->relbrlt != NULL)
 		htab->relbrlt->size += sizeof (Elf64_External_Rela);
+	      else if (info->emitrelocations)
+		{
+		  htab->brlt->reloc_count += 1;
+		  htab->brlt->flags |= SEC_RELOC;
+		}
 	    }
 
 	  stub_entry->stub_type += ppc_stub_plt_branch - ppc_stub_long_branch;
@@ -8630,11 +8654,11 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  if (stub_entry->stub_type != ppc_stub_plt_branch)
 	    size = 28;
 	}
-
-      if (info->emitrelocations
-	  && (stub_entry->stub_type == ppc_stub_long_branch
-	      || stub_entry->stub_type == ppc_stub_long_branch_r2off))
-	stub_entry->stub_sec->reloc_count += 1;
+      else if (info->emitrelocations)
+	{
+	  stub_entry->stub_sec->reloc_count += 1;
+	  stub_entry->stub_sec->flags |= SEC_RELOC;
+	}
     }
 
   stub_entry->stub_sec->size += size;
@@ -9426,9 +9450,12 @@ ppc64_elf_size_stubs (bfd *output_bfd,
 	    stub_sec->rawsize = stub_sec->size;
 	    stub_sec->size = 0;
 	    stub_sec->reloc_count = 0;
+	    stub_sec->flags &= ~SEC_RELOC;
 	  }
 
       htab->brlt->size = 0;
+      htab->brlt->reloc_count = 0;
+      htab->brlt->flags &= ~SEC_RELOC;
       if (htab->relbrlt != NULL)
 	htab->relbrlt->size = 0;
 
@@ -11441,6 +11468,17 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
       elf_section_data (htab->plt->output_section)->this_hdr.sh_entsize
 	= PLT_ENTRY_SIZE;
     }
+
+  /* brlt is SEC_LINKER_CREATED, so we need to write out relocs for
+     brlt ourselves if emitrelocations.  */
+  if (htab->brlt != NULL
+      && htab->brlt->reloc_count != 0
+      && !_bfd_elf_link_output_relocs (output_bfd,
+				       htab->brlt,
+				       &elf_section_data (htab->brlt)->rel_hdr,
+				       elf_section_data (htab->brlt)->relocs,
+				       NULL))
+    return FALSE;
 
   /* We need to handle writing out multiple GOT sections ourselves,
      since we didn't add them to DYNOBJ.  We know dynobj is the first
