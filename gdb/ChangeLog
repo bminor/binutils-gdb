@@ -1,3 +1,9 @@
+2007-02-12  Corinna Vinschen  <vinschen@redhat.com>
+
+	* win32-nat.c (win32_wait): Reset terminal pgrp to GDB.
+	(do_initial_win32_stuff): Call terminal_init_inferior_with_pgrp
+	instead of target_terminal_init since inferior_ptid isn't set yet.
+
 2007-02-10  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* MAINTAINERS (Write After Approval): Add myself.
