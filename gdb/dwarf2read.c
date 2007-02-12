@@ -6325,9 +6325,11 @@ set_cu_language (unsigned int lang, struct dwarf2_cu *cu)
     case DW_LANG_Modula2:
       cu->language = language_m2;
       break;
+    case DW_LANG_Pascal83:
+      cu->language = language_pascal;
+      break;
     case DW_LANG_Cobol74:
     case DW_LANG_Cobol85:
-    case DW_LANG_Pascal83:
     default:
       cu->language = language_minimal;
       break;

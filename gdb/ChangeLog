@@ -1,3 +1,10 @@
+2007-02-12  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Fix PR pascal/2223.
+	* dwarfread.c (set_cu_language): Recognize DW_LANG_Pascal83 as
+	Pascal language marker.
+	* dwarf2read.c (set_cu_language): Likewise.
+
 2007-02-12  Corinna Vinschen  <vinschen@redhat.com>
 
 	* win32-nat.c (win32_wait): Reset terminal pgrp to GDB.
