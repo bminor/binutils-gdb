@@ -220,8 +220,6 @@ typedef struct
 #define JumpByte	 0x100  /* loop and jecxz */
 #define JumpInterSegment 0x200	/* special case for intersegment leaps/calls */
 #define FloatD		 0x400	/* direction for float insns:  MUST BE 0x400 */
-#define Seg2ShortForm	 0x800	/* encoding of load segment reg insns */
-#define Seg3ShortForm	0x1000	/* fs/gs segment register insns.  */
 #define Size16		0x2000	/* needs size prefix if in 32-bit mode */
 #define Size32		0x4000	/* needs size prefix if in 16-bit mode */
 #define Size64		0x8000	/* needs size prefix if in 64-bit mode */

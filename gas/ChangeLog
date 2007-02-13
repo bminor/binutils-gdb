@@ -1,3 +1,11 @@
+2007-02-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-i386.h (Seg2ShortForm, Seg3ShortForm): Delete.
+	* config/tc-i386.c: Wrap overly long lines, whitespace fixes.
+	(process_operands): Move old Seg2ShortForm and Seg3ShortForm
+	code, and test for these insns using a combination of
+	opcode_modifier and operand_types.
+
 2007-02-07  Paul Brook  <paul@codesourcery.com>
 
 	* configure.tgt: Add arm*-*-uclinux-*eabi.
