@@ -163,6 +163,8 @@ tdesc_start_reg (struct gdb_xml_parser *parser,
 
   if (strcmp (type, "int") != 0
       && strcmp (type, "float") != 0
+      && strcmp (type, "code_ptr") != 0
+      && strcmp (type, "data_ptr") != 0
       && tdesc_named_type (data->current_feature, type) == NULL)
     gdb_xml_error (parser, _("Register \"%s\" has unknown type \"%s\""),
 		   name, type);

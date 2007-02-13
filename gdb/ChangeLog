@@ -1,3 +1,11 @@
+2007-02-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* target-descriptions.c (tdesc_named_type): Move code_ptr and data_ptr
+	handling from here...
+	(tdesc_register_type): ...to here.
+	* xml-tdesc.c (tdesc_start_reg): Allow code_ptr and data_ptr.
+	* features/arm-core.xml: Use code_ptr and data_ptr.
+
 2007-02-13  Denis Pilat  <denis.pilat@st.com>
 
 	* varobj.h (enum varobj_update_error): New enum.

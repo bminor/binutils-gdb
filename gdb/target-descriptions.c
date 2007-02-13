@@ -382,12 +382,6 @@ tdesc_named_type (const struct tdesc_feature *feature, const char *id)
   if (strcmp (id, "uint64") == 0)
     return builtin_type_uint64;
 
-  if (strcmp (id, "code_ptr") == 0)
-    return builtin_type_void_func_ptr;
-
-  if (strcmp (id, "data_ptr") == 0)
-    return builtin_type_void_data_ptr;
-
   if (strcmp (id, "arm_fpa_ext") == 0)
     return builtin_type_arm_ext;
 
@@ -555,6 +549,10 @@ tdesc_register_type (struct gdbarch *gdbarch, int regno)
 	/* A bit desperate by this point... */
 	return builtin_type_void_data_ptr;
     }
+  else if (strcmp (reg->type, "code_ptr") == 0)
+    return builtin_type_void_func_ptr;
+  else if (strcmp (reg->type, "data_ptr") == 0)
+    return builtin_type_void_data_ptr;
   else
     internal_error (__FILE__, __LINE__,
 		    "Register \"%s\" has an unknown type \"%s\"",
