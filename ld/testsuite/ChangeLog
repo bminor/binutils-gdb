@@ -1,3 +1,10 @@
+2007-02-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-scripts/default-script1.d: Expect extra symbols.
+	* ld-scripts/default-script2.d: Likewise.
+	* ld-scripts/default-script3.d: Likewise.
+	* ld-scripts/default-script4.d: Likewise.
+
 2007-02-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/relbrlt.d: Update.
