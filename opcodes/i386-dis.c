@@ -2025,10 +2025,10 @@ static const struct dis386 prefix_user_table[][4] = {
 
   /* PREGRP37 */
   {
-    { "(bad)", {   XX } },
+    { "(bad)", { XX } },
     { "popcntS", { Gv, Ev } },
-    { "(bad)", {   XX } },
-    { "(bad)", {   XX } },    
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },    
   },
 };
 
