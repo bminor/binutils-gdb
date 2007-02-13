@@ -25,6 +25,7 @@ SIM_AC_OPTION_RESERVED_BITS(1)
 case "${target}" in
   mips64vr*-*-*)	SIM_SUBTARGET="-DTARGET_ENABLE_FR=1" ;;
   mips*tx39*)           SIM_SUBTARGET="-DSUBTARGET_R3900=1";;
+  mips*-sde-elf*)       SIM_SUBTARGET="-DTARGET_ENABLE_FR=1";;
   mipsisa32*-*-*)       SIM_SUBTARGET="-DTARGET_ENABLE_FR=1";;
   mipsisa64*-*-*)       SIM_SUBTARGET="-DTARGET_ENABLE_FR=1";;
   *)                    SIM_SUBTARGET="";;
@@ -59,6 +60,7 @@ mips_addr_bitsize=
 case "${target}" in
   mips64*-*-*)          mips_bitsize=64 ; mips_msb=63 ;;
   mips16*-*-*)          mips_bitsize=64 ; mips_msb=63 ;;
+  mips*-sde-elf*)       mips_bitsize=64 ; mips_msb=63 ;;
   mipsisa32*-*-*)       mips_bitsize=32 ; mips_msb=31 ;;
   mipsisa64*-*-*)       mips_bitsize=64 ; mips_msb=63 ;;
   mips*-*-*)            mips_bitsize=32 ; mips_msb=31 ;;
@@ -79,6 +81,7 @@ case "${target}" in
 			;;
   mips64*-*-*)          mips_fpu=HARD_FLOATING_POINT ;;
   mips16*-*-*)          mips_fpu=HARD_FLOATING_POINT ;;
+  mips*-sde-elf*)       mips_fpu=HARD_FLOATING_POINT ; mips_fpu_bitsize=64 ;;
   mipsisa32*-*-*)       mips_fpu=HARD_FLOATING_POINT ; mips_fpu_bitsize=64 ;;
   mipsisa64*-*-*)       mips_fpu=HARD_FLOATING_POINT ; mips_fpu_bitsize=64 ;;
   mips*-*-*)            mips_fpu=HARD_FLOATING_POINT ; mips_fpu_bitsize=32 ;;
@@ -145,42 +148,48 @@ case "${target}" in
 			sim_igen_filter="32,64,f"
 			sim_m16_filter="16"
 			;;
+  mips*-sde-elf*)	sim_gen=M16
+			sim_igen_machine="-M mips64r2,mips3d,mips16,mips16e,dsp,smartmips"
+			sim_m16_machine="-M mips16,mips16e,mips64r2"
+			sim_igen_filter="32,64,f"
+			sim_mach_default="mipsisa64r2"
+			;;
   mipsisa32r2*-*-*)	sim_gen=M16
-		        sim_igen_machine="-M mips32r2,mips16,mips16e,dsp,smartmips"
+			sim_igen_machine="-M mips32r2,mips16,mips16e,dsp,smartmips"
 			sim_m16_machine="-M mips16,mips16e,mips32r2"
 			sim_igen_filter="32,f"
 			sim_mach_default="mipsisa32r2"
 			;;
   mipsisa32*-*-*)	sim_gen=M16
-		        sim_igen_machine="-M mips32,mips16,mips16e,dsp,smartmips"
+			sim_igen_machine="-M mips32,mips16,mips16e,dsp,smartmips"
 			sim_m16_machine="-M mips16,mips16e,mips32"
 			sim_igen_filter="32,f"
 			sim_mach_default="mipsisa32"
 			;;
   mipsisa64r2*-*-*)	sim_gen=M16
-		        sim_igen_machine="-M mips64r2,mips3d,mips16,mips16e,dsp"
+			sim_igen_machine="-M mips64r2,mips3d,mips16,mips16e,dsp"
 			sim_m16_machine="-M mips16,mips16e,mips64r2"
 			sim_igen_filter="32,64,f"
 			sim_mach_default="mipsisa64r2"
 			;;
   mipsisa64sb1*-*-*)	sim_gen=IGEN
-		        sim_igen_machine="-M mips64,mips3d,sb1"
+			sim_igen_machine="-M mips64,mips3d,sb1"
 			sim_igen_filter="32,64,f"
 			sim_mach_default="mips_sb1"
 			;;
   mipsisa64*-*-*)	sim_gen=M16
-		        sim_igen_machine="-M mips64,mips3d,mips16,mips16e,dsp"
+			sim_igen_machine="-M mips64,mips3d,mips16,mips16e,dsp"
 			sim_m16_machine="-M mips16,mips16e,mips64"
 			sim_igen_filter="32,64,f"
 			sim_mach_default="mipsisa64"
 			;;
-  mips*lsi*)	        sim_gen=M16
+  mips*lsi*)		sim_gen=M16
 			sim_igen_machine="-M mipsIII,mips16"
 			sim_m16_machine="-M mips16,mipsIII"
 			sim_igen_filter="32,f"
 			sim_m16_filter="16"
 			sim_mach_default="mips4000"
-                        ;;
+			;;
   mips*-*-*)		sim_gen=IGEN
 			sim_igen_filter="32,f"
 			;;
