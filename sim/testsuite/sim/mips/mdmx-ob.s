@@ -6,7 +6,6 @@
 # output:	*\\npass\\n
 
 	.include "testutils.inc"
-	.include "utils-fpu.inc"
 	.include "utils-mdmx.inc"
 
 	setup
