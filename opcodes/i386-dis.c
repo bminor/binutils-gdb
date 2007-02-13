@@ -410,83 +410,83 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define X86_64_SPECIAL 4
 #define IS_3BYTE_OPCODE 5
 
-#define FLOAT	  NULL, { { NULL, FLOATCODE }, { NULL, 0 }, { NULL, 0 }, { NULL, 0 } }
+#define FLOAT	  NULL, { { NULL, FLOATCODE } }
 
-#define GRP1b	  NULL, { { NULL, USE_GROUPS }, { NULL,  0 }, { NULL, 0 }, { NULL, 0 } }
-#define GRP1S	  NULL, { { NULL, USE_GROUPS }, { NULL,  1 }, { NULL, 0 }, { NULL, 0 } }
-#define GRP1Ss	  NULL, { { NULL, USE_GROUPS }, { NULL,  2 }, { NULL, 0 }, { NULL, 0 } }
-#define GRP2b	  NULL, { { NULL, USE_GROUPS }, { NULL,  3 }, { NULL, 0 }, { NULL, 0 } }
-#define GRP2S	  NULL, { { NULL, USE_GROUPS }, { NULL,  4 }, { NULL, 0 }, { NULL, 0 } }
-#define GRP2b_one NULL, { { NULL, USE_GROUPS }, { NULL,  5 }, { NULL, 0 }, { NULL, 0 } }
-#define GRP2S_one NULL, { { NULL, USE_GROUPS }, { NULL,  6 }, { NULL, 0 }, { NULL, 0 } }
-#define GRP2b_cl  NULL, { { NULL, USE_GROUPS }, { NULL,  7 }, { NULL, 0 }, { NULL, 0 } }
-#define GRP2S_cl  NULL, { { NULL, USE_GROUPS }, { NULL,  8 }, { NULL, 0 }, { NULL, 0 } }
-#define GRP3b	  NULL, { { NULL, USE_GROUPS }, { NULL,  9 }, { NULL, 0 }, { NULL, 0 } }
-#define GRP3S	  NULL, { { NULL, USE_GROUPS }, { NULL, 10 }, { NULL, 0 }, { NULL, 0 } }
-#define GRP4	  NULL, { { NULL, USE_GROUPS }, { NULL, 11 }, { NULL, 0 }, { NULL, 0 } }
-#define GRP5	  NULL, { { NULL, USE_GROUPS }, { NULL, 12 }, { NULL, 0 }, { NULL, 0 } }
-#define GRP6	  NULL, { { NULL, USE_GROUPS }, { NULL, 13 }, { NULL, 0 }, { NULL, 0 } }
-#define GRP7	  NULL, { { NULL, USE_GROUPS }, { NULL, 14 }, { NULL, 0 }, { NULL, 0 } }
-#define GRP8	  NULL, { { NULL, USE_GROUPS }, { NULL, 15 }, { NULL, 0 }, { NULL, 0 } }
-#define GRP9	  NULL, { { NULL, USE_GROUPS }, { NULL, 16 }, { NULL, 0 }, { NULL, 0 } }
-#define GRP11_C6  NULL, { { NULL, USE_GROUPS }, { NULL, 17 }, { NULL, 0 }, { NULL, 0 } }
-#define GRP11_C7  NULL, { { NULL, USE_GROUPS }, { NULL, 18 }, { NULL, 0 }, { NULL, 0 } }
-#define GRP12	  NULL, { { NULL, USE_GROUPS }, { NULL, 19 }, { NULL, 0 }, { NULL, 0 } }
-#define GRP13	  NULL, { { NULL, USE_GROUPS }, { NULL, 20 }, { NULL, 0 }, { NULL, 0 } }
-#define GRP14	  NULL, { { NULL, USE_GROUPS }, { NULL, 21 }, { NULL, 0 }, { NULL, 0 } }
-#define GRP15	  NULL, { { NULL, USE_GROUPS }, { NULL, 22 }, { NULL, 0 }, { NULL, 0 } }
-#define GRP16	  NULL, { { NULL, USE_GROUPS }, { NULL, 23 }, { NULL, 0 }, { NULL, 0 } }
-#define GRPAMD	  NULL, { { NULL, USE_GROUPS }, { NULL, 24 }, { NULL, 0 }, { NULL, 0 } }
-#define GRPPADLCK1 NULL, { { NULL, USE_GROUPS }, { NULL, 25 }, { NULL, 0 }, { NULL, 0 } }
-#define GRPPADLCK2 NULL, { { NULL, USE_GROUPS }, { NULL, 26 }, { NULL, 0 }, { NULL, 0 } }
+#define GRP1b	  NULL, { { NULL, USE_GROUPS }, { NULL,  0 } }
+#define GRP1S	  NULL, { { NULL, USE_GROUPS }, { NULL,  1 } }
+#define GRP1Ss	  NULL, { { NULL, USE_GROUPS }, { NULL,  2 } }
+#define GRP2b	  NULL, { { NULL, USE_GROUPS }, { NULL,  3 } }
+#define GRP2S	  NULL, { { NULL, USE_GROUPS }, { NULL,  4 } }
+#define GRP2b_one NULL, { { NULL, USE_GROUPS }, { NULL,  5 } }
+#define GRP2S_one NULL, { { NULL, USE_GROUPS }, { NULL,  6 } }
+#define GRP2b_cl  NULL, { { NULL, USE_GROUPS }, { NULL,  7 } }
+#define GRP2S_cl  NULL, { { NULL, USE_GROUPS }, { NULL,  8 } }
+#define GRP3b	  NULL, { { NULL, USE_GROUPS }, { NULL,  9 } }
+#define GRP3S	  NULL, { { NULL, USE_GROUPS }, { NULL, 10 } }
+#define GRP4	  NULL, { { NULL, USE_GROUPS }, { NULL, 11 } }
+#define GRP5	  NULL, { { NULL, USE_GROUPS }, { NULL, 12 } }
+#define GRP6	  NULL, { { NULL, USE_GROUPS }, { NULL, 13 } }
+#define GRP7	  NULL, { { NULL, USE_GROUPS }, { NULL, 14 } }
+#define GRP8	  NULL, { { NULL, USE_GROUPS }, { NULL, 15 } }
+#define GRP9	  NULL, { { NULL, USE_GROUPS }, { NULL, 16 } }
+#define GRP11_C6  NULL, { { NULL, USE_GROUPS }, { NULL, 17 } }
+#define GRP11_C7  NULL, { { NULL, USE_GROUPS }, { NULL, 18 } }
+#define GRP12	  NULL, { { NULL, USE_GROUPS }, { NULL, 19 } }
+#define GRP13	  NULL, { { NULL, USE_GROUPS }, { NULL, 20 } }
+#define GRP14	  NULL, { { NULL, USE_GROUPS }, { NULL, 21 } }
+#define GRP15	  NULL, { { NULL, USE_GROUPS }, { NULL, 22 } }
+#define GRP16	  NULL, { { NULL, USE_GROUPS }, { NULL, 23 } }
+#define GRPAMD	  NULL, { { NULL, USE_GROUPS }, { NULL, 24 } }
+#define GRPPADLCK1 NULL, { { NULL, USE_GROUPS }, { NULL, 25 } }
+#define GRPPADLCK2 NULL, { { NULL, USE_GROUPS }, { NULL, 26 } }
 
-#define PREGRP0   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  0 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP1   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  1 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP2   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  2 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP3   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  3 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP4   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  4 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP5   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  5 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP6   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  6 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP7   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  7 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP8   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  8 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP9   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  9 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP10  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 10 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP11  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 11 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP12  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 12 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP13  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 13 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP14  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 14 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP15  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 15 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP16  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 16 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP17  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 17 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP18  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 18 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP19  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 19 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP20  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 20 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP21  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 21 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP22  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 22 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP23  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 23 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP24  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 24 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP25  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 25 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP26  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 26 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP27  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 27 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP28  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 28 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP29  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 29 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP30  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 30 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP31  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 31 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP32  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 32 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP33  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 33 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP34  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 34 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP35  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 35 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP36  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 36 }, { NULL, 0 }, { NULL, 0 } }
-#define PREGRP37  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 37 }, { NULL, 0 }, { NULL, 0 } }
+#define PREGRP0   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  0 } }
+#define PREGRP1   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  1 } }
+#define PREGRP2   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  2 } }
+#define PREGRP3   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  3 } }
+#define PREGRP4   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  4 } }
+#define PREGRP5   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  5 } }
+#define PREGRP6   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  6 } }
+#define PREGRP7   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  7 } }
+#define PREGRP8   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  8 } }
+#define PREGRP9   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  9 } }
+#define PREGRP10  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 10 } }
+#define PREGRP11  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 11 } }
+#define PREGRP12  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 12 } }
+#define PREGRP13  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 13 } }
+#define PREGRP14  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 14 } }
+#define PREGRP15  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 15 } }
+#define PREGRP16  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 16 } }
+#define PREGRP17  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 17 } }
+#define PREGRP18  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 18 } }
+#define PREGRP19  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 19 } }
+#define PREGRP20  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 20 } }
+#define PREGRP21  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 21 } }
+#define PREGRP22  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 22 } }
+#define PREGRP23  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 23 } }
+#define PREGRP24  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 24 } }
+#define PREGRP25  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 25 } }
+#define PREGRP26  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 26 } }
+#define PREGRP27  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 27 } }
+#define PREGRP28  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 28 } }
+#define PREGRP29  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 29 } }
+#define PREGRP30  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 30 } }
+#define PREGRP31  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 31 } }
+#define PREGRP32  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 32 } }
+#define PREGRP33  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 33 } }
+#define PREGRP34  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 34 } }
+#define PREGRP35  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 35 } }
+#define PREGRP36  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 36 } }
+#define PREGRP37  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 37 } }
 
 
-#define X86_64_0  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 0 }, { NULL, 0 }, { NULL, 0 } }
-#define X86_64_1  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 1 }, { NULL, 0 }, { NULL, 0 } }
-#define X86_64_2  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 2 }, { NULL, 0 }, { NULL, 0 } }
-#define X86_64_3  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 3 }, { NULL, 0 }, { NULL, 0 } }
+#define X86_64_0  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 0 } }
+#define X86_64_1  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 1 } }
+#define X86_64_2  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 2 } }
+#define X86_64_3  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 3 } }
 
-#define THREE_BYTE_0 NULL, { { NULL, IS_3BYTE_OPCODE }, { NULL, 0 }, { NULL, 0 }, { NULL, 0 } }
-#define THREE_BYTE_1 NULL, { { NULL, IS_3BYTE_OPCODE }, { NULL, 1 }, { NULL, 0 }, { NULL, 0 } }
+#define THREE_BYTE_0 NULL, { { NULL, IS_3BYTE_OPCODE }, { NULL, 0 } }
+#define THREE_BYTE_1 NULL, { { NULL, IS_3BYTE_OPCODE }, { NULL, 1 } }
 
 typedef void (*op_rtn) (int bytemode, int sizeflag);
 
@@ -3454,15 +3454,15 @@ static const unsigned char float_mem_mode[] = {
 #define ST { OP_ST, 0 }
 #define STi { OP_STi, 0 }
 
-#define FGRPd9_2 NULL, { { NULL, 0 }, { NULL, 0 }, { NULL, 0 }, { NULL, 0 } }
-#define FGRPd9_4 NULL, { { NULL, 1 }, { NULL, 0 }, { NULL, 0 }, { NULL, 0 } }
-#define FGRPd9_5 NULL, { { NULL, 2 }, { NULL, 0 }, { NULL, 0 }, { NULL, 0 } }
-#define FGRPd9_6 NULL, { { NULL, 3 }, { NULL, 0 }, { NULL, 0 }, { NULL, 0 } }
-#define FGRPd9_7 NULL, { { NULL, 4 }, { NULL, 0 }, { NULL, 0 }, { NULL, 0 } }
-#define FGRPda_5 NULL, { { NULL, 5 }, { NULL, 0 }, { NULL, 0 }, { NULL, 0 } }
-#define FGRPdb_4 NULL, { { NULL, 6 }, { NULL, 0 }, { NULL, 0 }, { NULL, 0 } }
-#define FGRPde_3 NULL, { { NULL, 7 }, { NULL, 0 }, { NULL, 0 }, { NULL, 0 } }
-#define FGRPdf_4 NULL, { { NULL, 8 }, { NULL, 0 }, { NULL, 0 }, { NULL, 0 } }
+#define FGRPd9_2 NULL, { { NULL, 0 } }
+#define FGRPd9_4 NULL, { { NULL, 1 } }
+#define FGRPd9_5 NULL, { { NULL, 2 } }
+#define FGRPd9_6 NULL, { { NULL, 3 } }
+#define FGRPd9_7 NULL, { { NULL, 4 } }
+#define FGRPda_5 NULL, { { NULL, 5 } }
+#define FGRPdb_4 NULL, { { NULL, 6 } }
+#define FGRPde_3 NULL, { { NULL, 7 } }
+#define FGRPdf_4 NULL, { { NULL, 8 } }
 
 static const struct dis386 float_reg[][8] = {
   /* d8 */
