@@ -3818,37 +3818,22 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
     return FALSE;
 
   /* Create branch lookup table for plt_branch stubs.  */
-  if (info->shared)
-    {
-      flags = (SEC_ALLOC | SEC_LOAD
-	       | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-      htab->brlt
-	= bfd_make_section_anyway_with_flags (dynobj, ".data.rel.ro.brlt",
-					      flags);
-    }
-  else
-    {
-      flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
-	       | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-      htab->brlt
-	= bfd_make_section_anyway_with_flags (dynobj, ".rodata.brlt", flags);
-    }
-
+  flags = (SEC_ALLOC | SEC_LOAD
+	   | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED);
+  htab->brlt = bfd_make_section_anyway_with_flags (dynobj, ".branch_lt",
+						   flags);
   if (htab->brlt == NULL
       || ! bfd_set_section_alignment (dynobj, htab->brlt, 3))
     return FALSE;
 
-  if (info->shared)
-    {
-      flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
-	       | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-      htab->relbrlt
-	= bfd_make_section_anyway_with_flags (dynobj, ".rela.data.rel.ro.brlt",
-					      flags);
-    }
-  else
+  if (!info->shared)
     return TRUE;
 
+  flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
+	   | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED);
+  htab->relbrlt = bfd_make_section_anyway_with_flags (dynobj,
+						      ".rela.branch_lt",
+						      flags);
   if (!htab->relbrlt
       || ! bfd_set_section_alignment (dynobj, htab->relbrlt, 3))
     return FALSE;

@@ -17,8 +17,8 @@ Section Headers:
  +\[ 6\] \.text .*
  +\[ 7\] \.tdata +PROGBITS .* 0+38 0+ WAT +0 +0 +8
  +\[ 8\] \.tbss +NOBITS .* 0+38 0+ WAT +0 +0 +8
- +\[ 9\] \.data\.rel\.ro .*
- +\[10\] \.dynamic .*
+ +\[ 9\] \.dynamic .*
+ +\[10\] \.branch_lt .*
  +\[11\] \.got .*
  +\[12\] \.plt .*
  +\[13\] \.shstrtab .*

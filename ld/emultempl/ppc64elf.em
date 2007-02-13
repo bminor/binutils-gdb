@@ -225,7 +225,7 @@ ppc_add_stub_section (const char *stub_sec_name, asection *input_section)
     goto err_ret;
 
   flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE
-	   | SEC_HAS_CONTENTS | SEC_RELOC | SEC_IN_MEMORY | SEC_KEEP);
+	   | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_KEEP);
   if (!bfd_set_section_flags (stub_file->the_bfd, stub_sec, flags))
     goto err_ret;
 

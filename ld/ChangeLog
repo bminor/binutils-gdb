@@ -1,3 +1,9 @@
+2007-02-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* emulparams/elf64ppc.sh (OTHER_READWRITE_SECTIONS): Add ".branch_lt".
+	* emultempl/ppc64elf.em (ppc_add_stub_section): Create without
+	SEC_RELOC flag set.
+
 2007-02-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.in (targ_extra_emuls): Add $targ64_extra_emuls if

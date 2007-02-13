@@ -1,3 +1,8 @@
+2007-02-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (create_linkage_sections): Use section ".branch_lt"
+	for branch lookup table.
+
 2007-02-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (create_linkage_sections): Don't create
