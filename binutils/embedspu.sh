@@ -1,7 +1,7 @@
 #! /bin/sh 
 # Embed an SPU ELF executable into a PowerPC object file.
 #
-# Copyright 2006 Free Software Foundation, Inc.
+# Copyright 2006, 2007 Free Software Foundation, Inc.
 #
 # This file is part of GNU Binutils.
 #
@@ -138,7 +138,7 @@ __speelf__:
  .section .data.spetoe,"aw",@progbits
  .p2align 7
 __spetoe__:
-`${READELF} -s ${INFILE} | grep ' _EAR_' | sort -k 2 | awk \
+`${READELF} -s -W ${INFILE} | grep ' _EAR_' | sort -k 2 | awk \
 'BEGIN { \
   last_addr = 0; \
   last_sym = ""; \
