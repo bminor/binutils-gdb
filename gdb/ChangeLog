@@ -1,3 +1,17 @@
+2007-02-13  Denis Pilat  <denis.pilat@st.com>
+
+	* varobj.h (enum varobj_update_error): New enum.
+	* varobj.c (struct varobj_root): Add is_valid member.
+	(varobj_get_type): Check for invalid varobj.
+	(varobj_get_attributes): Likewise.
+	(variable_editable):Likewise.
+	(varobj_update): Likewise.  Use varobj_update_error.
+	(new_root_variable): Set root varobj as valid by default.
+	(varobj_invalidate): New function.
+	* symfile.c (clear_symtab_users): Use varobj_invalidate.
+	* mi/mi-cmd-var.c (varobj_update_one): Change return type to void.
+	Use varobj_update_error.
+
 2007-02-12  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	Fix PR pascal/2223.

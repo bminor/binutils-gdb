@@ -71,6 +71,10 @@ struct varobj_root
      using the currently selected frame. */
   int use_selected_frame;
 
+  /* Flag that indicates validity: set to 0 when this varobj_root refers 
+     to symbols that do not exist anymore.  */
+  int is_valid;
+
   /* Language info for this variable and its children */
   struct language_specific *lang;
 
@@ -742,8 +746,9 @@ varobj_get_type (struct varobj *var)
   long length;
 
   /* For the "fake" variables, do not return a type. (It's type is
-     NULL, too.) */
-  if (CPLUS_FAKE_CHILD (var))
+     NULL, too.)
+     Do not return a type for invalid variables as well.  */
+  if (CPLUS_FAKE_CHILD (var) || !var->root->is_valid)
     return NULL;
 
   stb = mem_fileopen ();
@@ -778,7 +783,7 @@ varobj_get_attributes (struct varobj *var)
 {
   int attributes = 0;
 
-  if (variable_editable (var))
+  if (var->root->is_valid && variable_editable (var))
     /* FIXME: define masks for attributes */
     attributes |= 0x00000001;	/* Editable */
 
@@ -1018,16 +1023,15 @@ install_new_value (struct varobj *var, struct value *value, int initial)
    expression to see if it's changed.  Then go all the way
    through its children, reconstructing them and noting if they've
    changed.
-   Return value:
-    -1 if there was an error updating the varobj
-    -2 if the type changed
-    Otherwise it is the number of children + parent changed
+   Return value: 
+    < 0 for error values, see varobj.h.
+    Otherwise it is the number of children + parent changed.
 
    Only root variables can be updated... 
 
    NOTE: This function may delete the caller's varobj. If it
-   returns -2, then it has done this and VARP will be modified
-   to point to the new varobj. */
+   returns TYPE_CHANGED, then it has done this and VARP will be modified
+   to point to the new varobj.  */
 
 int
 varobj_update (struct varobj **varp, struct varobj ***changelist)
@@ -1046,34 +1050,37 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
   struct frame_id old_fid;
   struct frame_info *fi;
 
-  /* sanity check: have we been passed a pointer? */
+  /* sanity check: have we been passed a pointer?  */
   if (changelist == NULL)
-    return -1;
+    return WRONG_PARAM;
 
-  /*  Only root variables can be updated... */
+  /*  Only root variables can be updated...  */
   if (!is_root_p (*varp))
-    /* Not a root var */
-    return -1;
+    /* Not a root var.  */
+    return WRONG_PARAM;
+
+  if (!(*varp)->root->is_valid)
+    return INVALID;
 
   /* Save the selected stack frame, since we will need to change it
-     in order to evaluate expressions. */
+     in order to evaluate expressions.  */
   old_fid = get_frame_id (deprecated_selected_frame);
 
   /* Update the root variable. value_of_root can return NULL
      if the variable is no longer around, i.e. we stepped out of
      the frame in which a local existed. We are letting the 
      value_of_root variable dispose of the varobj if the type
-     has changed. */
+     has changed.  */
   type_changed = 1;
   new = value_of_root (varp, &type_changed);
 
-  /* Restore selected frame */
+  /* Restore selected frame.  */
   fi = frame_find_by_id (old_fid);
   if (fi)
     select_frame (fi);
 
   /* If this is a "use_selected_frame" varobj, and its type has changed,
-     them note that it's changed. */
+     them note that it's changed.  */
   if (type_changed)
     VEC_safe_push (varobj_p, result, *varp);
 
@@ -1090,12 +1097,12 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
       /* This means the varobj itself is out of scope.
 	 Report it.  */
       VEC_free (varobj_p, result);
-      return -1;
+      return NOT_IN_SCOPE;
     }
 
   VEC_safe_push (varobj_p, stack, *varp);
 
-  /* Walk through the children, reconstructing them all. */
+  /* Walk through the children, reconstructing them all.  */
   while (!VEC_empty (varobj_p, stack))
     {
       v = VEC_pop (varobj_p, stack);
@@ -1126,7 +1133,7 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
 	}
     }
 
-  /* Alloc (changed + 1) list entries */
+  /* Alloc (changed + 1) list entries.  */
   changed = VEC_length (varobj_p, result);
   *changelist = xmalloc ((changed + 1) * sizeof (struct varobj *));
   cv = *changelist;
@@ -1140,7 +1147,7 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
   *cv = 0;
 
   if (type_changed)
-    return -2;
+    return TYPE_CHANGED;
   else
     return changed;
 }
@@ -1409,6 +1416,7 @@ new_root_variable (void)
   var->root->frame = null_frame_id;
   var->root->use_selected_frame = 0;
   var->root->rootvar = NULL;
+  var->root->is_valid = 1;
 
   return var;
 }
@@ -1692,7 +1700,10 @@ variable_editable (struct varobj *var)
 static char *
 my_value_of_variable (struct varobj *var)
 {
-  return (*var->root->lang->value_of_variable) (var);
+  if (var->root->is_valid)
+    return (*var->root->lang->value_of_variable) (var);
+  else
+    return NULL;
 }
 
 static char *
@@ -2503,4 +2514,45 @@ When non-zero, varobj debugging is enabled."),
 			    NULL,
 			    show_varobjdebug,
 			    &setlist, &showlist);
+}
+
+/* Invalidate the varobjs that are tied to locals and re-create the ones that
+   are defined on globals.
+   Invalidated varobjs will be always printed in_scope="invalid".  */
+void 
+varobj_invalidate (void)
+{
+  struct varobj **all_rootvarobj;
+  struct varobj **varp;
+
+  if (varobj_list (&all_rootvarobj) > 0)
+  {
+    varp = all_rootvarobj;
+    while (*varp != NULL)
+      {
+        /* global var must be re-evaluated.  */     
+        if ((*varp)->root->valid_block == NULL)
+        {
+          struct varobj *tmp_var;
+
+          /* Try to create a varobj with same expression.  If we succeed replace
+             the old varobj, otherwise invalidate it.  */
+          tmp_var = varobj_create (NULL, (*varp)->name, (CORE_ADDR) 0, USE_CURRENT_FRAME);
+          if (tmp_var != NULL) 
+            { 
+	      tmp_var->obj_name = xstrdup ((*varp)->obj_name);
+              varobj_delete (*varp, NULL, 0);
+              install_variable (tmp_var);
+            }
+          else
+              (*varp)->root->is_valid = 0;
+        }
+        else /* locals must be invalidated.  */
+          (*varp)->root->is_valid = 0;
+
+        varp++;
+      }
+    xfree (all_rootvarobj);
+  }
+  return;
 }

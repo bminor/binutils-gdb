@@ -34,9 +34,9 @@ const char mi_no_values[] = "--no-values";
 const char mi_simple_values[] = "--simple-values";
 const char mi_all_values[] = "--all-values";
 
-extern int varobjdebug;		/* defined in varobj.c */
+extern int varobjdebug;		/* defined in varobj.c.  */
 
-static int varobj_update_one (struct varobj *var,
+static void varobj_update_one (struct varobj *var,
 			      enum print_values print_values);
 
 static int mi_print_value_p (struct type *type, enum print_values print_values);
@@ -535,11 +535,9 @@ mi_cmd_var_update (char *command, char **argv, int argc)
     return MI_CMD_DONE;
 }
 
-/* Helper for mi_cmd_var_update() Returns 0 if the update for
-   the variable fails (usually because the variable is out of
-   scope), and 1 if it succeeds. */
+/* Helper for mi_cmd_var_update().  */
 
-static int
+static void
 varobj_update_one (struct varobj *var, enum print_values print_values)
 {
   struct varobj **changelist;
@@ -549,37 +547,39 @@ varobj_update_one (struct varobj *var, enum print_values print_values)
 
   nc = varobj_update (&var, &changelist);
 
-  /* nc == 0 means that nothing has changed.
-     nc == -1 means that an error occured in updating the variable.
-     nc == -2 means the variable has changed type. */
+  /* nc >= 0  represents the number of changes reported into changelist.
+     nc < 0   means that an error occured or the the variable has 
+              changed type (TYPE_CHANGED).  */
   
   if (nc == 0)
-    return 1;
-  else if (nc == -1)
+    return;
+  else if (nc < 0)
     {
       if (mi_version (uiout) > 1)
         cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
       ui_out_field_string (uiout, "name", varobj_get_objname(var));
-      ui_out_field_string (uiout, "in_scope", "false");
-      if (mi_version (uiout) > 1)
-        do_cleanups (cleanup);
-      return -1;
-    }
-  else if (nc == -2)
-    {
-      if (mi_version (uiout) > 1)
-        cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-      ui_out_field_string (uiout, "name", varobj_get_objname (var));
-      ui_out_field_string (uiout, "in_scope", "true");
-      ui_out_field_string (uiout, "new_type", varobj_get_type(var));
-      ui_out_field_int (uiout, "new_num_children", 
-			   varobj_get_num_children(var));
+
+      switch (nc)
+      {
+        case NOT_IN_SCOPE:
+        case WRONG_PARAM:
+          ui_out_field_string (uiout, "in_scope", "false");
+	  break;
+        case INVALID:
+          ui_out_field_string (uiout, "in_scope", "invalid");
+ 	  break;
+        case TYPE_CHANGED:
+	  ui_out_field_string (uiout, "in_scope", "true");
+          ui_out_field_string (uiout, "new_type", varobj_get_type(var));
+          ui_out_field_int (uiout, "new_num_children", 
+			    varobj_get_num_children(var));
+	  break;
+      }
       if (mi_version (uiout) > 1)
         do_cleanups (cleanup);
     }
   else
     {
-      
       cc = changelist;
       while (*cc != NULL)
 	{
@@ -595,7 +595,5 @@ varobj_update_one (struct varobj *var, enum print_values print_values)
 	  cc++;
 	}
       xfree (changelist);
-      return 1;
     }
-  return 1;
 }

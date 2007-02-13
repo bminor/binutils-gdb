@@ -38,7 +38,16 @@ enum varobj_type
     USE_CURRENT_FRAME,          /* Use the current frame */
     USE_SELECTED_FRAME          /* Always reevaluate in selected frame */
   };
-    
+
+/* Error return values for varobj_update function.  */
+enum varobj_update_error
+  {
+    NOT_IN_SCOPE = -1,          /* varobj not in scope, can not be updated.  */
+    TYPE_CHANGED = -2,          /* varobj type has changed.  */
+    INVALID = -3,               /* varobj is not valid anymore.  */
+    WRONG_PARAM = -4            /* function is called with wrong arguments.  */
+  };
+
 /* String representations of gdb's format codes (defined in varobj.c) */
 extern char *varobj_format_string[];
 
@@ -98,5 +107,7 @@ extern int varobj_set_value (struct varobj *var, char *expression);
 extern int varobj_list (struct varobj ***rootlist);
 
 extern int varobj_update (struct varobj **varp, struct varobj ***changelist);
+
+extern void varobj_invalidate (void);
 
 #endif /* VAROBJ_H */

@@ -52,6 +52,7 @@
 #include "observer.h"
 #include "exec.h"
 #include "parser-defs.h"
+#include "varobj.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -2602,6 +2603,10 @@ clear_symtab_users (void)
      between expressions and which ought to be reset each time.  */
   expression_context_block = NULL;
   innermost_block = NULL;
+
+  /* Varobj may refer to old symbols, perform a cleanup.  */
+  varobj_invalidate ();
+
 }
 
 static void
