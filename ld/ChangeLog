@@ -1,5 +1,12 @@
 2007-02-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* emultempl/spu_ovl.S (__ovly_return, __ovly_load): Set sym size.
+	(__ovly_load_event): Define.
+	(size): Rename to osize.
+	* emultempl/spu_ovl.o: Regenerate.
+
+2007-02-13  Alan Modra  <amodra@bigpond.net.au>
+
 	* emulparams/elf64ppc.sh (OTHER_READWRITE_SECTIONS): Add ".branch_lt".
 	* emultempl/ppc64elf.em (ppc_add_stub_section): Create without
 	SEC_RELOC flag set.

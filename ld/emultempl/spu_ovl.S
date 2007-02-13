@@ -62,7 +62,7 @@
 #define vma		$6
 
 #define map		$7
-#define size		$7
+#define osize		$7
 #define cmp2		$7
 
 #define ea64		$8
@@ -101,6 +101,7 @@ __ovly_return:
 	shlqbyi		$78, $lr, 4
 	shlqbyi		$79, $lr, 8
 	biz		$78, $79
+	.size		__ovly_return, . - __ovly_return
 
 /**
  * __ovly_load - copy an overlay partion to local store.
@@ -194,6 +195,13 @@ __ovly_backchain_loop:
 	ceq		cmp, $78, cur
 	brnz		cmp, __ovly_load_restore
 
+/* Marker for profiling code.  If we get here, we are about to load
+ * a new overlay.
+ */
+	.global		__ovly_load_event
+	.type		__ovly_load_event, @function
+__ovly_load_event:
+
 /* Set _ovly_buf_table[buf].mapped = $78. */
 	cwx		genwi, tab, off
 	shufb		map, $78, map, genwi
@@ -204,7 +212,7 @@ __ovly_backchain_loop:
  * loader, and indicating the value for SPU executable image start.
  */
 	lqd		cgshuf, (__cg_pattern-__ovly_return+4)(retval)
-	rotqbyi		size, vma, 4
+	rotqbyi		osize, vma, 4
 	rotqbyi		sz, vma, 8
 	lqa		ea64, _EAR_
 
@@ -219,8 +227,8 @@ __ovly_xfer_loop:
 /* Setup DMA parameters, then issue DMA request. */
 	rotqbyi		ealo, add64, 4
 	ila		maxsize, MFC_MAX_DMA_SIZE
-	cgt		cmp, size, maxsize
-	selb		sz, size, maxsize, cmp
+	cgt		cmp, osize, maxsize
+	selb		sz, osize, maxsize, cmp
 	ila		tagid, MFC_TAG_ID
 	wrch		$MFC_LSA, vma
 	wrch		$MFC_EAH, ea64
@@ -232,8 +240,8 @@ __ovly_xfer_loop:
 
 /* Increment vma, decrement size, branch back as needed. */
 	a		vma, vma, sz
-	sf		size, sz, size
-	brnz		size, __ovly_xfer_loop
+	sf		osize, sz, osize
+	brnz		osize, __ovly_xfer_loop
 
 /* Save app's tagmask, wait for DMA complete, restore mask. */
 	rdch		oldmask, $MFC_RdTagMask
@@ -273,3 +281,5 @@ __ovly_irq_restore:
 __ovly_load_ret:
 /* Branch to target address. */
 	bi		$79
+
+	.size		__ovly_load, . - __ovly_load
