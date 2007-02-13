@@ -1,5 +1,5 @@
 # MIPS32 DSP ASE test
-# mach:  mips32 mips64
+# mach:  mips32r2 mips64r2
 #as:		-mdsp
 #ld:		-N -Ttext=0x80010000
 #output:	*\\npass\\n
