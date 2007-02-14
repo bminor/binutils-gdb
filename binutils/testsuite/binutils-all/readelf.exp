@@ -260,7 +260,7 @@ proc readelf_wi_test {} {
     set got [prune_readelf_wi_warnings $got]
 
     if ![string match "" $got] then {
-	fail "readelf $options (reason: unexpected output)"
+	fail "readelf $READELFFLAGS -wi (reason: unexpected output)"
 	send_log $got
 	send_log "\n"
 	return
