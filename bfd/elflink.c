@@ -1556,6 +1556,10 @@ _bfd_elf_add_default_symbol (bfd *abfd,
       hi = h;
     }
 
+  /* Check if HI is a warning symbol.  */
+  if (hi->root.type == bfd_link_hash_warning)
+    hi = (struct elf_link_hash_entry *) hi->root.u.i.link;
+
   /* If there is a duplicate definition somewhere, then HI may not
      point to an indirect symbol.  We will have reported an error to
      the user in that case.  */

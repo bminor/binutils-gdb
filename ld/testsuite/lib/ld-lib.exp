@@ -39,11 +39,14 @@ proc default_ld_version { ld } {
 proc default_ld_relocate { ld target objects } {
     global HOSTING_EMU
     global host_triplet
+    global exec_output
 
     if { [which $ld] == 0 } then {
 	perror "$ld does not exist"
 	return 0
     }
+
+    catch "exec rm -f $target" exec_output
 
     verbose -log "$ld $HOSTING_EMU -o $target -r $objects"
 
@@ -115,6 +118,7 @@ proc default_ld_link { ld target objects } {
     global LIBS
     global host_triplet
     global link_output
+    global exec_output
 
     set objs "$HOSTING_CRT0 $objects"
     set libs "$LIBS $HOSTING_LIBS"
@@ -129,14 +133,17 @@ proc default_ld_link { ld target objects } {
     } else {
 	set flags ""
     }
+
+    catch "exec rm -f $target" exec_output
+
     verbose -log "$ld $HOSTING_EMU $flags -o $target $objs $libs"
 
     catch "exec $ld $HOSTING_EMU $flags -o $target $objs $libs" link_output
     set exec_output [prune_warnings $link_output]
-    if [string match "" $link_output] then {
+    if [string match "" $exec_output] then {
 	return 1
     } else {
-	verbose -log "$link_output"
+	verbose -log "$exec_output"
 	return 0
     }
 }
@@ -147,6 +154,7 @@ proc default_ld_simple_link { ld target objects } {
     global host_triplet
     global link_output
     global gcc_ld_flag
+    global exec_output
 
     if { [which $ld] == 0 } then {
 	perror "$ld does not exist"
@@ -171,6 +179,8 @@ proc default_ld_simple_link { ld target objects } {
     if {[string match "*gcc*" $ldexe] || [string match "*++*" $ldexe]} then {
 	set flags "$gcc_ld_flag $flags"
     }
+
+    catch "exec rm -f $target" exec_output
 
     verbose -log "$ld $flags -o $target $objects"
 
@@ -1249,7 +1259,7 @@ if ![string length [info proc prune_warnings]] {
 
 # targets_to_xfail is a list of target triplets to be xfailed.
 # ldtests contains test-items with 3 items followed by 1 lists, 2 items
-# and 2 optional items:
+# and 3 optional items:
 #   0:name
 #   1:ld options
 #   2:assembler options
@@ -1258,6 +1268,7 @@ if ![string length [info proc prune_warnings]] {
 #   5:expected output
 #   6:compiler flags (optional)
 #   7:language (optional)
+#   8:linker warning (optional)
 
 proc run_ld_link_exec_tests { targets_to_xfail ldtests } {
     global ld
@@ -1269,6 +1280,7 @@ proc run_ld_link_exec_tests { targets_to_xfail ldtests } {
     global CXX
     global CFLAGS
     global errcnt
+    global exec_output
 
     foreach testitem $ldtests {
 	foreach target $targets_to_xfail {
@@ -1282,6 +1294,7 @@ proc run_ld_link_exec_tests { targets_to_xfail ldtests } {
 	set expfile [lindex $testitem 5]
 	set cflags [lindex $testitem 6]
 	set lang [lindex $testitem 7]
+	set warning [lindex $testitem 8]
 	set objfiles {}
 	set failed 0
 
@@ -1322,6 +1335,19 @@ proc run_ld_link_exec_tests { targets_to_xfail ldtests } {
 		set failed 1
 	    } else {
 		set failed 0
+	    }
+
+	    # Check if exec_output is expected.
+	    if { $warning != "" } then {
+		verbose -log "returned with: <$exec_output>, expected: <$warning>"
+		if { [regexp $warning $exec_output] } then {
+		    set failed 0
+		} else {
+		    set failed 1
+		}
+	    }
+
+	    if { $failed == 0 } {
 		send_log "Running: $binfile > $binfile.out\n"
 		verbose "Running: $binfile > $binfile.out"
 		catch "exec $binfile > $binfile.out" exec_output

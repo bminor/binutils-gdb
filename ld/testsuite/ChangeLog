@@ -1,3 +1,20 @@
+2007-02-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/3953
+	* ld-elf/beginwarn.c: New file.
+	* ld-elf/warn.out: Likewise.
+
+	* ld-elf/shared.exp (build_tests): Add "Build warn libbar.so".
+	(run_tests): Add "Run warn with versioned libfoo.so".
+
+	* lib/ld-lib.exp (default_ld_relocate): Make exec_output global
+	and remove target first.
+	(default_ld_link): Likewise.
+	(default_ld_simple_link): Likewise.
+	(run_ld_link_exec_tests): Take an optional linker warning and
+	check it.
+	(default_ld_link): Check pruned linker output.
+
 2007-02-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-scripts/default-script1.d: Expect extra symbols.

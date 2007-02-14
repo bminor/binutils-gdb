@@ -1,3 +1,9 @@
+2007-02-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/3953
+	* elflink.c (_bfd_elf_add_default_symbol): Check warning symbol
+	when adding default symbol.
+
 2007-02-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (create_linkage_sections): Use section ".branch_lt"
