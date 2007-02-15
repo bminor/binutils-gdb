@@ -376,7 +376,7 @@ handle_v6_insn (ARMul_State * state, ARMword instr)
 	  break;
 
 	Rm = ((state->Reg[BITS (0, 3)] >> ror) & 0xFFFF);
-	if (Rm & 8000)
+	if (Rm & 0x8000)
 	  Rm |= 0xffff0000;
 
 	if (BITS (16, 19) == 0xf)
