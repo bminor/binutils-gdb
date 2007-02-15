@@ -1,3 +1,25 @@
+2007-02-15  Maxim Grigoriev  <maxim2405@gmail.com>
+
+	* xtensa-tdep.h (xtensa_reg_mask_t): New.
+	(xtensa_mask_t): Change mask field to be a separate array.
+	* xtensa-tdep.c (extract_call_winsize, xtensa_pseudo_register_read)
+	(xtensa_pseudo_register_write, xtensa_unwind_pc)
+	(xtensa_unwind_dummy_id, xtensa_push_dummy_call)
+	(xtensa_breakpoint_from_pc): Remove implicit type casting.
+	* xtensa-config.c (mask0, mask1, mask2, mask3, mask4, mask5)
+	(mask6, mask7, mask8, mask9, mask10, mask11, mask12, mask13)
+	(mask14, mask15): Rename to
+	(xtensa_mask0, xtensa_mask1, xtensa_mask2, xtensa_mask3)
+	(xtensa_mask4, xtensa_mask5, xtensa_mask6, xtensa_mask7)
+	(xtensa_mask8, xtensa_mask9, xtensa_mask10, xtensa_mask11)
+	(xtensa_mask12, xtensa_mask13, xtensa_mask14, xtensa_mask15): this.
+	(xtensa_submask0, xtensa_submask1, xtensa_submask2, xtensa_submask3)
+	(xtensa_submask4, xtensa_submask5, xtensa_submask6, xtensa_submask7)
+	(xtensa_submask8, xtensa_submask9, xtensa_submask10)
+	(xtensa_submask11, xtensa_submask12, xtensa_submask13)
+	(xtensa_submask14, xtensa_submask15): New.
+	(rmap): Follow strict aliasing rules doing static initialization.
+
 2007-02-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* target-descriptions.c (tdesc_named_type): Move code_ptr and data_ptr

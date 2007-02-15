@@ -56,22 +56,38 @@ xtensa_config_tdep (struct gdbarch_info *info)
 
 
 /* Masked registers.  */
-const int mask0[] = { 1, 96, 0, 4  };
-const int mask1[] = { 1, 96, 5, 1  };
-const int mask2[] = { 1, 96, 18, 1  };
-const int mask3[] = { 1, 96, 6, 2  };
-const int mask4[] = { 1, 96, 4, 1  };
-const int mask5[] = { 1, 96, 16, 2  };
-const int mask6[] = { 1, 96, 8, 4  };
-const int mask7[] = { 1, 95, 12, 20  };
-const int mask8[] = { 1, 95, 0, 1  };
-const int mask9[] = { 1, 108, 8, 4  };
-const int mask10[] = { 1, 109, 24, 8  };
-const int mask11[] = { 1, 109, 16, 8  };
-const int mask12[] = { 1, 109, 8, 8  };
-const int mask13[] = { 1, 110, 16, 2  };
-const int mask14[] = { 1, 111, 16, 2  };
-const int mask15[] = { 1, 67, 22, 10  };
+xtensa_reg_mask_t xtensa_submask0[] = { { 96, 0, 4 } };
+const xtensa_mask_t xtensa_mask0 = { 1, xtensa_submask0 };
+xtensa_reg_mask_t xtensa_submask1[] = { { 96, 5, 1 } };
+const xtensa_mask_t xtensa_mask1 = { 1, xtensa_submask1 };
+xtensa_reg_mask_t xtensa_submask2[] = { { 96, 18, 1 } };
+const xtensa_mask_t xtensa_mask2 = { 1, xtensa_submask2 };
+xtensa_reg_mask_t xtensa_submask3[] = { { 96, 6, 2 } };
+const xtensa_mask_t xtensa_mask3 = { 1, xtensa_submask3 };
+xtensa_reg_mask_t xtensa_submask4[] = { { 96, 4, 1 } };
+const xtensa_mask_t xtensa_mask4 = { 1, xtensa_submask4 };
+xtensa_reg_mask_t xtensa_submask5[] = { { 96, 16, 2 } };
+const xtensa_mask_t xtensa_mask5 = { 1, xtensa_submask5 };
+xtensa_reg_mask_t xtensa_submask6[] = { { 96, 8, 4 } };
+const xtensa_mask_t xtensa_mask6 = { 1, xtensa_submask6 };
+xtensa_reg_mask_t xtensa_submask7[] = { { 95, 12, 20 } };
+const xtensa_mask_t xtensa_mask7 = { 1, xtensa_submask7 };
+xtensa_reg_mask_t xtensa_submask8[] = { { 95, 0, 1 } };
+const xtensa_mask_t xtensa_mask8 = { 1, xtensa_submask8 };
+xtensa_reg_mask_t xtensa_submask9[] = { { 108, 8, 4 } };
+const xtensa_mask_t xtensa_mask9 = { 1, xtensa_submask9 };
+xtensa_reg_mask_t xtensa_submask10[] = { { 109, 24, 8 } };
+const xtensa_mask_t xtensa_mask10 = { 1, xtensa_submask10 };
+xtensa_reg_mask_t xtensa_submask11[] = { { 109, 16, 8 } };
+const xtensa_mask_t xtensa_mask11 = { 1, xtensa_submask11 };
+xtensa_reg_mask_t xtensa_submask12[] = { { 109, 8, 8 } };
+const xtensa_mask_t xtensa_mask12 = { 1, xtensa_submask12 };
+xtensa_reg_mask_t xtensa_submask13[] = { { 110, 16, 2 } };
+const xtensa_mask_t xtensa_mask13 = { 1, xtensa_submask13 };
+xtensa_reg_mask_t xtensa_submask14[] = { { 111, 16, 2 } };
+const xtensa_mask_t xtensa_mask14 = { 1, xtensa_submask14 };
+xtensa_reg_mask_t xtensa_submask15[] = { { 67, 22, 10 } };
+const xtensa_mask_t xtensa_mask15 = { 1, xtensa_submask15 };
 
 
 /* Register map.  */
@@ -468,52 +484,52 @@ xtensa_register_t rmap[] =
     32, 4, 4, 0x0000000f, 0x0006, 0, 
     0, 0 },
   { /* 0130 */ "psintlevel", 520, xtRegisterTypeMapped, 0x1010, 0, 
-    4, 4, 4, 0x00002004, 0x0006, (xtensa_mask_t *) mask0, 
+    4, 4, 4, 0x00002004, 0x0006, &xtensa_mask0, 
     0, 0 },
   { /* 0131 */ "psum", 524, xtRegisterTypeMapped, 0x1010, 0, 
-    1, 4, 4, 0x00002005, 0x0006, (xtensa_mask_t *) mask1, 
+    1, 4, 4, 0x00002005, 0x0006, &xtensa_mask1, 
     0, 0 },
   { /* 0132 */ "pswoe", 528, xtRegisterTypeMapped, 0x1010, 0, 
-    1, 4, 4, 0x00002006, 0x0006, (xtensa_mask_t *) mask2, 
+    1, 4, 4, 0x00002006, 0x0006, &xtensa_mask2, 
     0, 0 },
   { /* 0133 */ "psring", 532, xtRegisterTypeMapped, 0x1010, 0, 
-    2, 4, 4, 0x00002007, 0x0006, (xtensa_mask_t *) mask3, 
+    2, 4, 4, 0x00002007, 0x0006, &xtensa_mask3, 
     0, 0 },
   { /* 0134 */ "psexcm", 536, xtRegisterTypeMapped, 0x1010, 0, 
-    1, 4, 4, 0x00002008, 0x0006, (xtensa_mask_t *) mask4, 
+    1, 4, 4, 0x00002008, 0x0006, &xtensa_mask4, 
     0, 0 },
   { /* 0135 */ "pscallinc", 540, xtRegisterTypeMapped, 0x1010, 0, 
-    2, 4, 4, 0x00002009, 0x0006, (xtensa_mask_t *) mask5, 
+    2, 4, 4, 0x00002009, 0x0006, &xtensa_mask5, 
     0, 0 },
   { /* 0136 */ "psowb", 544, xtRegisterTypeMapped, 0x1010, 0, 
-    4, 4, 4, 0x0000200a, 0x0006, (xtensa_mask_t *) mask6, 
+    4, 4, 4, 0x0000200a, 0x0006, &xtensa_mask6, 
     0, 0 },
   { /* 0137 */ "litbaddr", 548, xtRegisterTypeMapped, 0x1010, 0, 
-    20, 4, 4, 0x0000200b, 0x0006, (xtensa_mask_t *) mask7, 
+    20, 4, 4, 0x0000200b, 0x0006, &xtensa_mask7, 
     0, 0 },
   { /* 0138 */ "litben", 552, xtRegisterTypeMapped, 0x1010, 0, 
-    1, 4, 4, 0x0000200c, 0x0006, (xtensa_mask_t *) mask8, 
+    1, 4, 4, 0x0000200c, 0x0006, &xtensa_mask8, 
     0, 0 },
   { /* 0139 */ "dbnum", 556, xtRegisterTypeMapped, 0x1010, 0, 
-    4, 4, 4, 0x00002011, 0x0006, (xtensa_mask_t *) mask9, 
+    4, 4, 4, 0x00002011, 0x0006, &xtensa_mask9, 
     0, 0 },
   { /* 0140 */ "asid3", 560, xtRegisterTypeMapped, 0x1010, 0, 
-    8, 4, 4, 0x00002012, 0x0006, (xtensa_mask_t *) mask10, 
+    8, 4, 4, 0x00002012, 0x0006, &xtensa_mask10, 
     0, 0 },
   { /* 0141 */ "asid2", 564, xtRegisterTypeMapped, 0x1010, 0, 
-    8, 4, 4, 0x00002013, 0x0006, (xtensa_mask_t *) mask11, 
+    8, 4, 4, 0x00002013, 0x0006, &xtensa_mask11, 
     0, 0 },
   { /* 0142 */ "asid1", 568, xtRegisterTypeMapped, 0x1010, 0, 
-    8, 4, 4, 0x00002014, 0x0006, (xtensa_mask_t *) mask12, 
+    8, 4, 4, 0x00002014, 0x0006, &xtensa_mask12, 
     0, 0 },
   { /* 0143 */ "instpgszid4", 572, xtRegisterTypeMapped, 0x1010, 0, 
-    2, 4, 4, 0x00002015, 0x0006, (xtensa_mask_t *) mask13, 
+    2, 4, 4, 0x00002015, 0x0006, &xtensa_mask13, 
     0, 0 },
   { /* 0144 */ "datapgszid4", 576, xtRegisterTypeMapped, 0x1010, 0, 
-    2, 4, 4, 0x00002016, 0x0006, (xtensa_mask_t *) mask14, 
+    2, 4, 4, 0x00002016, 0x0006, &xtensa_mask14, 
     0, 0 },
   { /* 0145 */ "ptbase", 580, xtRegisterTypeMapped, 0x1010, 0, 
-    10, 4, 4, 0x00002017, 0x0006, (xtensa_mask_t *) mask15, 
+    10, 4, 4, 0x00002017, 0x0006, &xtensa_mask15, 
     0, 0 },
 };
 

@@ -140,7 +140,7 @@ extract_call_winsize (CORE_ADDR pc)
 {
   int winsize = 4;	/* Default: No call, e.g. dummy frame.  */
   int insn;
-  char buf[4];
+  gdb_byte buf[4];
 
   DEBUGTRACE ("extract_call_winsize (pc = 0x%08x)\n", (int) pc);
 
@@ -484,7 +484,7 @@ xtensa_pseudo_register_read (struct gdbarch *gdbarch,
   /* Read aliases a0..a15.  */
   if (regnum >= A0_REGNUM && regnum <= A15_REGNUM)
     {
-      char *buf = (char *) alloca (MAX_REGISTER_SIZE);
+      gdb_byte *buf = (gdb_byte *) alloca (MAX_REGISTER_SIZE);
 
       regcache_raw_read (regcache, WB_REGNUM, buf);
       regnum = AREG_NUMBER (regnum, extract_unsigned_integer (buf, 4));
@@ -565,7 +565,7 @@ xtensa_pseudo_register_write (struct gdbarch *gdbarch,
   /* Renumber register, if aliase a0..a15.  */
   if (regnum >= A0_REGNUM && regnum <= A15_REGNUM)
     {
-      char *buf = (char *) alloca (MAX_REGISTER_SIZE);
+      gdb_byte *buf = (gdb_byte *) alloca (MAX_REGISTER_SIZE);
       unsigned int wb;
 
       regcache_raw_read (regcache, WB_REGNUM, buf);
@@ -842,7 +842,7 @@ xtensa_frame_align (struct gdbarch *gdbarch, CORE_ADDR address)
 static CORE_ADDR
 xtensa_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  char buf[8];
+  gdb_byte buf[8];
 
   DEBUGTRACE ("xtensa_unwind_pc (next_frame = %p)\n", next_frame);
 
@@ -859,7 +859,7 @@ static struct frame_id
 xtensa_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   CORE_ADDR pc, fp;
-  char buf[4];
+  gdb_byte buf[4];
 
   /* next_frame->prev is a dummy frame. Return a frame ID of that frame.  */
 
@@ -1265,7 +1265,7 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 {
   int i;
   int size, onstack_size;
-  char *buf = (char *) alloca (16);
+  gdb_byte *buf = (gdb_byte *) alloca (16);
   CORE_ADDR ra, ps;
   struct argument_info
   {
@@ -1493,10 +1493,10 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 const unsigned char *
 xtensa_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
-  static char big_breakpoint[] = BIG_BREAKPOINT;
-  static char little_breakpoint[] = LITTLE_BREAKPOINT;
-  static char density_big_breakpoint[] = DENSITY_BIG_BREAKPOINT;
-  static char density_little_breakpoint[] = DENSITY_LITTLE_BREAKPOINT;
+  static unsigned char big_breakpoint[] = BIG_BREAKPOINT;
+  static unsigned char little_breakpoint[] = LITTLE_BREAKPOINT;
+  static unsigned char density_big_breakpoint[] = DENSITY_BIG_BREAKPOINT;
+  static unsigned char density_little_breakpoint[] = DENSITY_LITTLE_BREAKPOINT;
 
   DEBUGTRACE ("xtensa_breakpoint_from_pc (pc = 0x%08x)\n", (int) *pcptr);
 

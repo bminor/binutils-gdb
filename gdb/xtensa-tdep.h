@@ -103,13 +103,15 @@ typedef struct
 
 typedef struct 
 {
+  int reg_num;
+  int bit_start;
+  int bit_size;
+} xtensa_reg_mask_t;
+
+typedef struct 
+{
   int count;
-  struct 
-  {
-    int reg_num;
-    int bit_start;
-    int bit_size;
-  } mask[0];
+  xtensa_reg_mask_t *mask;
 } xtensa_mask_t;
 
 
