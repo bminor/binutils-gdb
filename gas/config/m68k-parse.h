@@ -116,6 +116,7 @@ enum m68k_register
   RAMBAR0,
   RAMBAR1,
   MMUBAR,			/* mcfv4e added these.  */
+  ROMBAR0,			/* mcfv4e added these.  */
   ROMBAR1,			/* mcfv4e added these.  */
   MPCR, EDRAMBAR, SECMBAR,	/* mcfv4e added these.  */
   PCR1U0, PCR1L0, PCR1U1, PCR1L1,/* mcfv4e added these.  */
@@ -126,6 +127,7 @@ enum m68k_register
   FLASHBAR, RAMBAR,  		/* mcf528x added these.  */
   MBAR2,  		        /* mcf5249 added this.  */
   MBAR,
+  ASID,				/* m5475.  */
   CAC,  		        /* fido added this.  */
   MBB,
 #define last_movec_reg MBB

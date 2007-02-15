@@ -225,10 +225,37 @@ static const enum m68k_register mcf5373_ctrl[] = {
   0
 };
 static const enum m68k_register mcfv4e_ctrl[] = {
-  CACR, TC, ITT0, ITT1, DTT0, DTT1, BUSCR, VBR, PC, ROMBAR,
-  ROMBAR1, RAMBAR0, RAMBAR1, MPCR, EDRAMBAR, SECMBAR, MBAR, MBAR0, MBAR1,
+  CACR, ASID, ACR0, ACR1, ACR2, ACR3, MMUBAR,
+  VBR, PC, ROMBAR0, ROMBAR1, RAMBAR0, RAMBAR1,
+  MBAR, SECMBAR,
+  MPCR /* Multiprocessor Control register */,
+  EDRAMBAR /* Embedded DRAM Base Address Register */,
+  /* Permutation control registers.  */
   PCR1U0, PCR1L0, PCR1U1, PCR1L1, PCR2U0, PCR2L0, PCR2U1, PCR2L1,
   PCR3U0, PCR3L0, PCR3U1, PCR3L1,
+  /* Legacy names */
+  TC /* ASID */, BUSCR /* MMUBAR */,
+  ITT0 /* ACR0 */, ITT1 /* ACR1 */, DTT0 /* ACR2 */, DTT1 /* ACR3 */,
+  MBAR1 /* MBAR */, MBAR2 /* SECMBAR */, MBAR0 /* SECMBAR */,
+  ROMBAR /* ROMBAR0 */,
+  0
+};
+static const enum m68k_register mcf5475_ctrl[] = {
+  CACR, ASID, ACR0, ACR1, ACR2, ACR3, MMUBAR,
+  VBR, PC, RAMBAR0, RAMBAR1, MBAR,
+  /* Legacy names */
+  TC /* ASID */, BUSCR /* MMUBAR */,
+  ITT0 /* ACR0 */, ITT1 /* ACR1 */, DTT0 /* ACR2 */, DTT1 /* ACR3 */,
+  MBAR1 /* MBAR */, ROMBAR /* ROMBAR0 */,
+  0
+};
+static const enum m68k_register mcf5485_ctrl[] = {
+  CACR, ASID, ACR0, ACR1, ACR2, ACR3, MMUBAR,
+  VBR, PC, RAMBAR0, RAMBAR1, MBAR,
+  /* Legacy names */
+  TC /* ASID */, BUSCR /* MMUBAR */,
+  ITT0 /* ACR0 */, ITT1 /* ACR1 */, DTT0 /* ACR2 */, DTT1 /* ACR3 */,
+  MBAR1 /* MBAR */, ROMBAR /* ROMBAR0 */,
   0
 };
 static const enum m68k_register fido_ctrl[] = {
@@ -541,21 +568,21 @@ static const struct m68k_cpu m68k_cpus[] =
   
   {mcfisa_a|mcfisa_b|mcfhwdiv|mcfmac,		mcf_ctrl, "5407",0},
   
-  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5470", -1},
-  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5471", -1},
-  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5472", -1},
-  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5473", -1},
-  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5474", -1},
-  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5475", -1},
-  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "547x", 0},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcf5475_ctrl, "5470", -1},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcf5475_ctrl, "5471", -1},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcf5475_ctrl, "5472", -1},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcf5475_ctrl, "5473", -1},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcf5475_ctrl, "5474", -1},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcf5475_ctrl, "5475", -1},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcf5475_ctrl, "547x", 0},
   
-  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5480", -1},
-  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5481", -1},
-  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5482", -1},
-  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5483", -1},
-  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5484", -1},
-  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5485", -1},
-  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "548x", 0},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcf5485_ctrl, "5480", -1},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcf5485_ctrl, "5481", -1},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcf5485_ctrl, "5482", -1},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcf5485_ctrl, "5483", -1},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcf5485_ctrl, "5484", -1},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcf5485_ctrl, "5485", -1},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcf5485_ctrl, "548x", 0},
   
   {fido_a,				fido_ctrl, "fido", 1},
 
@@ -2964,6 +2991,7 @@ m68k_ip (char *instring)
 	      tmpreg = 0x002;
 	      break;
 	    case TC:
+	    case ASID:
 	      tmpreg = 0x003;
 	      break;
 	    case ACR0:
@@ -2983,6 +3011,7 @@ m68k_ip (char *instring)
 	      tmpreg = 0x007;
 	      break;
 	    case BUSCR:
+	    case MMUBAR:
 	      tmpreg = 0x008;
 	      break;
 
@@ -3014,6 +3043,7 @@ m68k_ip (char *instring)
 	      tmpreg = 0x808;
 	      break;
             case ROMBAR:
+            case ROMBAR0:
 	      tmpreg = 0xC00;
 	      break;
             case ROMBAR1:
@@ -3759,7 +3789,7 @@ static const struct init_entry init_table[] =
   { "dacr0", DTT0 },		/* Data Access Control Register 0.  */
   { "dacr1", DTT1 },		/* Data Access Control Register 0.  */
 
-  /* mcf5200 versions of same.  The ColdFire programmer's reference
+  /* Coldfire versions of same.  The ColdFire programmer's reference
      manual indicated that the order is 2,3,0,1, but Ken Rose
      <rose@netcom.com> says that 0,1,2,3 is the correct order.  */
   { "acr0", ACR0 },		/* Access Control Unit 0.  */
@@ -3769,12 +3799,14 @@ static const struct init_entry init_table[] =
 
   { "tc", TC },			/* MMU Translation Control Register.  */
   { "tcr", TC },
+  { "asid", ASID },
 
   { "mmusr", MMUSR },		/* MMU Status Register.  */
   { "srp", SRP },		/* User Root Pointer.  */
   { "urp", URP },		/* Supervisor Root Pointer.  */
 
   { "buscr", BUSCR },
+  { "mmubar", MMUBAR },
   { "pcr", PCR },
 
   { "rombar", ROMBAR },		/* ROM Base Address Register.  */
@@ -3784,7 +3816,7 @@ static const struct init_entry init_table[] =
 
   { "mbar0",    MBAR0 },	/* mcfv4e registers.  */
   { "mbar1",    MBAR1 },	/* mcfv4e registers.  */
-  { "rombar0",  ROMBAR },	/* mcfv4e registers.  */
+  { "rombar0",  ROMBAR0 },	/* mcfv4e registers.  */
   { "rombar1",  ROMBAR1 },	/* mcfv4e registers.  */
   { "mpcr",     MPCR },		/* mcfv4e registers.  */
   { "edrambar", EDRAMBAR },	/* mcfv4e registers.  */
