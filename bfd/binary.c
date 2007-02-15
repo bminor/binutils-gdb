@@ -1,6 +1,6 @@
 /* BFD back-end for binary objects.
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support, <ian@cygnus.com>
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -221,9 +221,6 @@ binary_get_symbol_info (bfd *ignore_abfd ATTRIBUTE_UNUSED,
 #define binary_bfd_make_debug_symbol       _bfd_nosymbols_bfd_make_debug_symbol
 #define binary_read_minisymbols            _bfd_generic_read_minisymbols
 #define binary_minisymbol_to_symbol        _bfd_generic_minisymbol_to_symbol
-#define binary_bfd_reloc_type_lookup       _bfd_norelocs_bfd_reloc_type_lookup
-#define binary_get_reloc_upper_bound        ((long (*) (bfd *, asection *)) bfd_0l)
-#define binary_canonicalize_reloc           ((long (*) (bfd *, asection *, arelent **, asymbol **)) bfd_0l)
 #define binary_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
 
 /* Set the architecture of a binary file.  */
@@ -368,7 +365,7 @@ const bfd_target binary_vec =
   BFD_JUMP_TABLE_CORE (_bfd_nocore),
   BFD_JUMP_TABLE_ARCHIVE (_bfd_noarchive),
   BFD_JUMP_TABLE_SYMBOLS (binary),
-  BFD_JUMP_TABLE_RELOCS (binary),
+  BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
   BFD_JUMP_TABLE_WRITE (binary),
   BFD_JUMP_TABLE_LINK (binary),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),

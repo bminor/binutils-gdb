@@ -1,3 +1,23 @@
+2007-02-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* libbfd-in.h (_bfd_norelocs_get_reloc_upper_bound): Don't define,
+	declare.
+	(_bfd_norelocs_canonicalize_reloc): Likewise.
+	* libbfd.h: Regenerate.
+	* libbfd.c (_bfd_norelocs_get_reloc_upper_bound): New function.
+	(_bfd_norelocs_canonicalize_reloc): Likewise.
+	* binary.c (binary_bfd_reloc_type_lookup): Don't define.
+	(binary_get_reloc_upper_bound, binary_canonicalize_reloc): Likewise.
+	(binary_vec): Use _bfd_norelocs in BFD_JUMP_TABLE_RELOCS.
+	* ihex.c: Similarly.
+	* mach-o-target.c: Similarly.
+	* mach-o.c: Similarly.
+	* mmo.c: Similarly.
+	* pef.c: Similarly.
+	* ppcboot.c: Similarly.
+	* srec.c: Similarly.
+	* xsym.c: Similarly.
+
 2007-02-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/3953

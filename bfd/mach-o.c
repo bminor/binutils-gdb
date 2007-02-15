@@ -1,5 +1,5 @@
 /* Mach-O support for BFD.
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -52,9 +52,6 @@
 #define bfd_mach_o_bfd_make_debug_symbol              _bfd_nosymbols_bfd_make_debug_symbol
 #define bfd_mach_o_read_minisymbols                   _bfd_generic_read_minisymbols
 #define bfd_mach_o_minisymbol_to_symbol               _bfd_generic_minisymbol_to_symbol
-#define bfd_mach_o_get_reloc_upper_bound              _bfd_norelocs_get_reloc_upper_bound
-#define bfd_mach_o_canonicalize_reloc                 _bfd_norelocs_canonicalize_reloc
-#define bfd_mach_o_bfd_reloc_type_lookup              _bfd_norelocs_bfd_reloc_type_lookup
 #define bfd_mach_o_bfd_get_relocated_section_contents bfd_generic_get_relocated_section_contents
 #define bfd_mach_o_bfd_relax_section                  bfd_generic_relax_section
 #define bfd_mach_o_bfd_link_hash_table_create         _bfd_generic_link_hash_table_create

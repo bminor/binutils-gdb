@@ -1,5 +1,5 @@
 /* xSYM symbol-file support for BFD.
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -34,9 +34,6 @@
 #define bfd_sym_bfd_make_debug_symbol               _bfd_nosymbols_bfd_make_debug_symbol
 #define bfd_sym_read_minisymbols                    _bfd_generic_read_minisymbols
 #define bfd_sym_minisymbol_to_symbol                _bfd_generic_minisymbol_to_symbol
-#define bfd_sym_get_reloc_upper_bound               _bfd_norelocs_get_reloc_upper_bound
-#define bfd_sym_canonicalize_reloc                  _bfd_norelocs_canonicalize_reloc
-#define bfd_sym_bfd_reloc_type_lookup               _bfd_norelocs_bfd_reloc_type_lookup
 #define bfd_sym_set_arch_mach                       _bfd_generic_set_arch_mach
 #define bfd_sym_get_section_contents                _bfd_generic_get_section_contents
 #define bfd_sym_set_section_contents                _bfd_generic_set_section_contents
@@ -2346,7 +2343,7 @@ const bfd_target sym_vec =
   BFD_JUMP_TABLE_CORE (_bfd_nocore),
   BFD_JUMP_TABLE_ARCHIVE (_bfd_noarchive),
   BFD_JUMP_TABLE_SYMBOLS (bfd_sym),
-  BFD_JUMP_TABLE_RELOCS (bfd_sym),
+  BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
   BFD_JUMP_TABLE_WRITE (bfd_sym),
   BFD_JUMP_TABLE_LINK (bfd_sym),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),

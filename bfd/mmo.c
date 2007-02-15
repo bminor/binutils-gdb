@@ -1,5 +1,5 @@
 /* BFD back-end for mmo objects (MMIX-specific object-format).
-   Copyright 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
    Written by Hans-Peter Nilsson (hp@bitrange.com).
    Infrastructure and other bits originally copied from srec.c and
@@ -388,7 +388,6 @@ static void mmo_print_symbol (bfd *, void *, asymbol *,
 static bfd_boolean mmo_set_section_contents (bfd *, sec_ptr, const void *,
 					     file_ptr, bfd_size_type);
 static int mmo_sizeof_headers (bfd *, struct bfd_link_info *);
-static long mmo_get_reloc_upper_bound (bfd *, asection *);
 static bfd_boolean mmo_internal_write_header (bfd *);
 static bfd_boolean mmo_internal_write_post (bfd *, int, asection *);
 static bfd_boolean mmo_internal_add_3_sym (bfd *, struct mmo_symbol_trie *,
@@ -415,7 +414,6 @@ static void mmo_write_byte (bfd *, bfd_byte);
 static bfd_boolean mmo_new_section_hook (bfd *, asection *);
 static int mmo_sort_mmo_symbols (const void *, const void *);
 static bfd_boolean mmo_write_object_contents (bfd *);
-static long mmo_canonicalize_reloc (bfd *, sec_ptr, arelent **, asymbol **);
 static bfd_boolean mmo_write_section_description (bfd *, asection *);
 static bfd_boolean mmo_has_leading_or_trailing_zero_tetra_p (bfd *,
 							     asection *);
@@ -3161,28 +3159,6 @@ mmo_write_object_contents (bfd *abfd)
   return mmo_write_symbols_and_terminator (abfd);
 }
 
-/* Return the size of a NULL pointer, so we support linking in an mmo
-   object.  */
-
-static long
-mmo_get_reloc_upper_bound (bfd *abfd ATTRIBUTE_UNUSED,
-			   asection *sec ATTRIBUTE_UNUSED)
-{
-  return sizeof (void *);
-}
-
-/* Similarly canonicalize relocs to empty, filling in the terminating NULL
-   pointer.  */
-
-long
-mmo_canonicalize_reloc (bfd *abfd ATTRIBUTE_UNUSED,
-			sec_ptr section ATTRIBUTE_UNUSED, arelent **relptr,
-			asymbol **symbols ATTRIBUTE_UNUSED)
-{
-  *relptr = NULL;
-  return 0;
-}
-
 /* If there's anything in particular in a mmo bfd that we want to free,
    make this a real function.  Only do this if you see major memory
    thrashing; zealous free:ing will cause unwanted behavior, especially if
@@ -3233,18 +3209,6 @@ mmo_canonicalize_reloc (bfd *abfd ATTRIBUTE_UNUSED,
 #define mmo_bfd_discard_group bfd_generic_discard_group
 #define mmo_section_already_linked \
   _bfd_generic_section_already_linked
-
-/* objcopy will be upset if we return -1 from bfd_get_reloc_upper_bound by
-   using BFD_JUMP_TABLE_RELOCS (_bfd_norelocs) rather than 0.  FIXME: Most
-   likely a bug in the _bfd_norelocs definition.
-
-   On the other hand, we smuggle in an mmo object (because setting up ELF
-   is too cumbersome) when linking (from other formats, presumably ELF) to
-   represent the g255 entry.  We need to link that object, so need to say
-   it has no relocs.  Upper bound for the size of the relocation table is
-   the size of a NULL pointer, and we support "canonicalization" for that
-   pointer.  */
-#define mmo_bfd_reloc_type_lookup _bfd_norelocs_bfd_reloc_type_lookup
 
 /* We want to copy time of creation, otherwise we'd use
    BFD_JUMP_TABLE_COPY (_bfd_generic).  */
@@ -3305,9 +3269,7 @@ const bfd_target bfd_mmo_vec =
   BFD_JUMP_TABLE_CORE (_bfd_nocore),
   BFD_JUMP_TABLE_ARCHIVE (_bfd_noarchive),
   BFD_JUMP_TABLE_SYMBOLS (mmo),
-  /* We have to provide a valid method for getting relocs, returning zero,
-     so we can't say BFD_JUMP_TABLE_RELOCS (_bfd_norelocs).  */
-  BFD_JUMP_TABLE_RELOCS (mmo),
+  BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
   BFD_JUMP_TABLE_WRITE (mmo),
   BFD_JUMP_TABLE_LINK (mmo),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),

@@ -1,6 +1,6 @@
 /* BFD back-end for Intel Hex objects.
    Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006 Free Software Foundation, Inc.
+   2006, 2007 Free Software Foundation, Inc.
    Written by Ian Lance Taylor of Cygnus Support <ian@cygnus.com>.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -924,9 +924,6 @@ ihex_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
 #define ihex_bfd_make_debug_symbol                _bfd_nosymbols_bfd_make_debug_symbol
 #define ihex_read_minisymbols                     _bfd_nosymbols_read_minisymbols
 #define ihex_minisymbol_to_symbol                 _bfd_nosymbols_minisymbol_to_symbol
-#define ihex_get_reloc_upper_bound                ((long (*) (bfd *, asection *)) bfd_0l)
-#define ihex_canonicalize_reloc                   ((long (*) (bfd *, asection *, arelent **, asymbol **)) bfd_0l)
-#define ihex_bfd_reloc_type_lookup                _bfd_norelocs_bfd_reloc_type_lookup
 #define ihex_bfd_get_relocated_section_contents   bfd_generic_get_relocated_section_contents
 #define ihex_bfd_relax_section                    bfd_generic_relax_section
 #define ihex_bfd_gc_sections                      bfd_generic_gc_sections
@@ -985,7 +982,7 @@ const bfd_target ihex_vec =
   BFD_JUMP_TABLE_CORE (_bfd_nocore),
   BFD_JUMP_TABLE_ARCHIVE (_bfd_noarchive),
   BFD_JUMP_TABLE_SYMBOLS (ihex),
-  BFD_JUMP_TABLE_RELOCS (ihex),
+  BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
   BFD_JUMP_TABLE_WRITE (ihex),
   BFD_JUMP_TABLE_LINK (ihex),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
