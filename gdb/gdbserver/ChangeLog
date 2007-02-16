@@ -1,3 +1,9 @@
+2007-02-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote-utils.c: Remove HAVE_TERMINAL_H check.
+	* configure.ac: Do not check for terminal.h.
+	* configure, config.in: Regenerated.
+
 2007-02-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (OBS): Add $(XML_BUILTIN).

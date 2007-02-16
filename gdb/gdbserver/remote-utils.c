@@ -20,9 +20,7 @@
    Boston, MA 02110-1301, USA.  */
 
 #include "server.h"
-#if HAVE_TERMINAL_H
 #include "terminal.h"
-#endif
 #include <stdio.h>
 #include <string.h>
 #if HAVE_SYS_IOCTL_H

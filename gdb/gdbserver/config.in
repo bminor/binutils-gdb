@@ -98,9 +98,6 @@
 /* Define if TD_VERSION is available. */
 #undef HAVE_TD_VERSION
 
-/* Define to 1 if you have the <terminal.h> header file. */
-#undef HAVE_TERMINAL_H
-
 /* Define to 1 if you have the <termios.h> header file. */
 #undef HAVE_TERMIOS_H
 
