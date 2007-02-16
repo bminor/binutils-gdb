@@ -1,3 +1,9 @@
+2007-02-16  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_print_private_bfd_data):
+	Print EF_MIPS_NOREORDER, EF_MIPS_PIC, EF_MIPS_CPIC, EF_MIPS_XGOT
+	and EF_MIPS_UCODE.
+
 2007-02-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* libbfd-in.h (_bfd_norelocs_get_reloc_upper_bound): Don't define,
