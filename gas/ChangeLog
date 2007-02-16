@@ -1,3 +1,13 @@
+2007-02-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* subsegs.c (subseg_change, subseg_get): Use xcalloc rather than
+	xmalloc, memset.  Don't bother assigning NULL to known zero mem.
+	(subseg_set_rest): Remove unnecessary cast.
+	* write.c: Include libbfd.h.  Replace PTR with void * throughout.
+	Remove unnecessary forward declarations and casts.
+	(set_symtab): Delete extern bfd_alloc.
+	(fixup_segment): Move.
+
 2007-02-15  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* config/m68k-parse.h (m68k_register): Add ROMBAR0, ASID.
