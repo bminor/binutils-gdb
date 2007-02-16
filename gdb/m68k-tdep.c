@@ -25,7 +25,7 @@
 #include "frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
-#include "floatformat.h"
+#include "gdbtypes.h"
 #include "symtab.h"
 #include "gdbcore.h"
 #include "value.h"

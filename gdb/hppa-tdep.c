@@ -41,6 +41,7 @@
 
 #include "gdbcore.h"
 #include "gdbcmd.h"
+#include "gdbtypes.h"
 #include "objfiles.h"
 #include "hppa-tdep.h"
 

@@ -21,6 +21,7 @@
 
 #include "defs.h"
 #include "arch-utils.h"
+#include "gdbtypes.h"
 #include "symtab.h"
 #include "objfiles.h"
 #include "osabi.h"

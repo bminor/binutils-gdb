@@ -21,9 +21,9 @@
 
 #include "defs.h"
 #include "arch-utils.h"
-#include "floatformat.h"
 #include "frame.h"
 #include "frame-unwind.h"
+#include "gdbtypes.h"
 #include "osabi.h"
 #include "regcache.h"
 #include "regset.h"

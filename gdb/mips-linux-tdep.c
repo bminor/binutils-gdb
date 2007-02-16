@@ -32,7 +32,7 @@
 #include "regcache.h"
 #include "trad-frame.h"
 #include "tramp-frame.h"
-#include "floatformat.h"
+#include "gdbtypes.h"
 #include "solib.h"
 #include "symtab.h"
 #include "mips-linux-tdep.h"

@@ -21,9 +21,9 @@
 
 #include "defs.h"
 #include "dwarf2-frame.h"
-#include "floatformat.h"
 #include "frame.h"
 #include "frame-unwind.h"
+#include "gdbtypes.h"
 #include "regset.h"
 #include "gdbarch.h"
 #include "gdbcore.h"

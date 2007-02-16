@@ -32,6 +32,7 @@
 #include "trad-frame.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
+#include "gdbtypes.h"
 #include "inferior.h"
 #include "symfile.h"
 #include "arch-utils.h"

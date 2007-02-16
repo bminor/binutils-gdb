@@ -25,6 +25,7 @@
 #include "gdbcore.h"
 #include "arch-utils.h"
 #include "floatformat.h"
+#include "gdbtypes.h"
 #include "regcache.h"
 #include "reggroups.h"
 #include "frame.h"
