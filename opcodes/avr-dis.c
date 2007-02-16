@@ -43,6 +43,8 @@ const struct avr_opcodes_s avr_opcodes[] =
   {NULL, NULL, NULL, 0, 0, 0}
 };
 
+static const char * comment_start = "0x";
+
 static int
 avr_operand (unsigned int insn, unsigned int insn2, unsigned int pc, int constraint,
              char *buf, char *comment, int regs, int *sym, bfd_vma *sym_addr)
@@ -144,8 +146,7 @@ avr_operand (unsigned int insn, unsigned int insn2, unsigned int pc, int constra
 	 value of the address only once, but this would mean recoding
 	 objdump_print_address() which would affect many targets.  */
       sprintf (buf, "%#lx", (unsigned long) *sym_addr);      
-      sprintf (comment, "0x");
-
+      sprintf (comment, comment_start);
       break;
       
     case 'L':
@@ -154,17 +155,18 @@ avr_operand (unsigned int insn, unsigned int insn2, unsigned int pc, int constra
 	sprintf (buf, ".%+-8d", rel_addr);
         *sym = 1;
         *sym_addr = pc + 2 + rel_addr;
-	sprintf (comment, "0x");
+	sprintf (comment, comment_start);
       }
       break;
 
     case 'l':
       {
 	int rel_addr = ((((insn >> 3) & 0x7f) ^ 0x40) - 0x40) * 2;
+
 	sprintf (buf, ".%+-8d", rel_addr);
         *sym = 1;
         *sym_addr = pc + 2 + rel_addr;
-	sprintf (comment, "0x");
+	sprintf (comment, comment_start);
       }
       break;
 
@@ -267,9 +269,16 @@ print_insn_avr (bfd_vma addr, disassemble_info *info)
   int sym_op1 = 0, sym_op2 = 0;
   bfd_vma sym_addr1, sym_addr2;
 
+
   if (!initialized)
     {
       unsigned int nopcodes;
+
+      /* PR 4045: Try to avoid duplicating the 0x prefix that
+	 objdump_print_addr() will put on addresses when there
+	 is no symbol table available.  */
+      if (info->symtab_size == 0)
+	comment_start = " ";
 
       nopcodes = sizeof (avr_opcodes) / sizeof (struct avr_opcodes_s);
       

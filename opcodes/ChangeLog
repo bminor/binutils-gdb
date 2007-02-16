@@ -1,3 +1,12 @@
+2007-02-16  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/4045
+	* avr-dis.c (comment_start): New variable, contains the prefix to
+	use when printing addresses in comments.
+	(print_insn_avr): Set comment_start to an empty space if there is
+	no symbol table available as the generic address printing code
+	will prefix the numeric value of the address with 0x.
+
 2007-02-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	 * i386-dis.c: Updated to use an array of MAX_OPERANDS operands
