@@ -68,8 +68,6 @@
 #define _(String) gettext (String)
 #endif
 
-#include "bin-bugs.h"
-
 #define STYLE_FLAT_PROFILE	(1<<0)
 #define STYLE_CALL_GRAPH	(1<<1)
 #define STYLE_SUMMARY_FILE	(1<<2)

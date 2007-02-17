@@ -1,6 +1,6 @@
 /* nlmconv.c -- NLM conversion program
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -1109,7 +1109,7 @@ show_usage (FILE *file, int status)
   -h --help                     Display this information\n\
   -v --version                  Display the program's version\n\
 "));
-  if (status == 0)
+  if (REPORT_BUGS_TO[0] && status == 0)
     fprintf (file, _("Report bugs to %s\n"), REPORT_BUGS_TO);
   exit (status);
 }

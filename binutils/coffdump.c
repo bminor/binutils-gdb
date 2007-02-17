@@ -1,5 +1,5 @@
 /* Coff file dumper.
-   Copyright 1994, 1995, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1994, 1995, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2007
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -462,7 +462,7 @@ show_usage (FILE *file, int status)
   -v --version           Display the program's version\n\
 \n"));
 
-  if (status == 0)
+  if (REPORT_BUGS_TO[0] && status == 0)
     fprintf (file, _("Report bugs to %s\n"), REPORT_BUGS_TO);
 
   exit (status);

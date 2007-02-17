@@ -63,6 +63,19 @@ if test $use_secureplt = true; then
     [Define if we should default to creating read-only plt entries])
 fi
 
+# Package version.  For an official FSF release, it is empty.
+AC_ARG_WITH(pkgversion,
+  AS_HELP_STRING([--with-pkgversion=PKG],
+                 [Add PKG to the version string]),
+  [case "$withval" in
+    yes) AC_MSG_ERROR([package version not specified]) ;;
+    no)  PKGVERSION= ;;
+    *)   PKGVERSION="($withval) " ;;
+   esac],
+  PKGVERSION=
+)
+AC_SUBST(PKGVERSION)
+
 AM_BINUTILS_WARNINGS
 
 AM_CONFIG_HEADER(config.h:config.in)

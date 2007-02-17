@@ -145,7 +145,6 @@ GENCAT = @GENCAT@
 GENINSRC_NEVER_FALSE = @GENINSRC_NEVER_FALSE@
 GENINSRC_NEVER_TRUE = @GENINSRC_NEVER_TRUE@
 GMSGFMT = @GMSGFMT@
-GREP = @GREP@
 INCINTL = @INCINTL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -183,6 +182,7 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
+REPORT_BUGS_TO = "\"@REPORT_BUGS_TO@\""
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -191,11 +191,9 @@ VERSION = @VERSION@
 WARN_CFLAGS = @WARN_CFLAGS@
 XGETTEXT = @XGETTEXT@
 YACC = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo @YACC@ ; fi`
-
-# We have to set this, because autoconf 2.59 does not substitute YFLAGS.
-# Autoconf 2.61 does, so this can be removed when we upgrade.
-YFLAGS = 
 ac_ct_CC = @ac_ct_CC@
+ac_ct_RANLIB = @ac_ct_RANLIB@
+ac_ct_STRIP = @ac_ct_STRIP@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
 am__include = @am__include@
@@ -214,7 +212,6 @@ cgen_cpu_prefix = @cgen_cpu_prefix@
 datadir = @datadir@
 datarootdir = @datarootdir@
 docdir = @docdir@
-dvidir = @dvidir@
 exec_prefix = @exec_prefix@
 extra_objects = @extra_objects@
 host = @host@
@@ -229,16 +226,13 @@ install_sh = @install_sh@
 install_tooldir = @install_tooldir@
 libdir = @libdir@
 libexecdir = @libexecdir@
-localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 obj_format = @obj_format@
 oldincludedir = @oldincludedir@
-pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
-psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
@@ -255,6 +249,10 @@ SUBDIRS = doc po
 # of the "cygnus" option.  But distclean still wants it.
 DIST_SUBDIRS = $(SUBDIRS)
 tooldir = $(exec_prefix)/$(target_alias)
+
+# We have to set this, because autoconf 2.59 does not substitute YFLAGS.
+# Autoconf 2.61 does, so this can be removed when we upgrade.
+YFLAGS = 
 AM_CFLAGS = $(WARN_CFLAGS)
 MKDEP = gcc -MM
 TARG_CPU = @target_cpu_type@
@@ -698,13 +696,22 @@ INCDIR = $(BASEDIR)/include
 # Both . and srcdir are used, in that order,
 # so that tm.h and config.h will be found in the compilation
 # subdirectory rather than in the source directory.
-INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(srcdir)/config -I$(INCDIR) -I$(srcdir)/.. -I$(BFDDIR) @INCINTL@ -DLOCALEDIR="\"$(datadir)/locale\""
+INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(srcdir)/config \
+	-I$(INCDIR) -I$(srcdir)/.. -I$(BFDDIR) @INCINTL@ \
+	-DREPORT_BUGS_TO=$(REPORT_BUGS_TO) \
+	-DLOCALEDIR="\"$(datadir)/locale\""
+
 
 # This should be parallel to INCLUDES, but should replace $(srcdir)
 # with $${srcdir}, and should work in a subdirectory.  This is used
 # when building dependencies, because the dependency building is done
 # in a subdirectory.
-DEP_INCLUDES = -D_GNU_SOURCE -I.. -I$${srcdir} -I../../bfd -I$${srcdir}/config -I$${srcdir}/../include -I$${srcdir}/.. -I$${srcdir}/../bfd @INCINTL@ -DLOCALEDIR="\"$(datadir)/locale\""
+DEP_INCLUDES = -D_GNU_SOURCE -I.. -I$${srcdir} -I../../bfd \
+	-I$${srcdir}/config -I$${srcdir}/../include -I$${srcdir}/.. \
+	-I$${srcdir}/../bfd @INCINTL@ \
+	-DREPORT_BUGS_TO=$(REPORT_BUGS_TO) \
+	-DLOCALEDIR="\"$(datadir)/locale\""
+
 DEP_FLAGS = -DOBJ_MAYBE_ELF \
 	-I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES)
 
@@ -2482,7 +2489,7 @@ all: info
 
 # Stuff that every object file depends upon.  If anything is removed
 # from this list, remove it from dep-in.sed as well.
-$(OBJS): ../bfd/bfd.h $(INCDIR)/symcat.h $(INCDIR)/bin-bugs.h \
+$(OBJS): ../bfd/bfd.h $(INCDIR)/symcat.h \
 	$(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h $(INCDIR)/progress.h \
 	$(INCDIR)/fopen-same.h $(INCDIR)/fopen-bin.h $(INCDIR)/fopen-vms.h \
 	$(OBJ_FORMAT_H) $(TARG_CPU_H) $(TARG_ENV_H) \

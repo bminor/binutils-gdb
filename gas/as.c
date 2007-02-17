@@ -349,7 +349,9 @@ Options:\n\
   md_show_usage (stream);
 
   fputc ('\n', stream);
-  fprintf (stream, _("Report bugs to %s\n"), REPORT_BUGS_TO);
+
+  if (REPORT_BUGS_TO[0] && stream == stdout)
+    fprintf (stream, _("Report bugs to %s\n"), REPORT_BUGS_TO);
 }
 
 /* Since it is easy to do here we interpret the special arg "-"

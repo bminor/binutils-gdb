@@ -170,7 +170,7 @@ Usage: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n\
 	[--demangle[=STYLE]] [--no-demangle] [@FILE]\n\
 	[image-file] [profile-file...]\n"),
 	   whoami);
-  if (status == 0)
+  if (REPORT_BUGS_TO[0] && status == 0)
     fprintf (stream, _("Report bugs to %s\n"), REPORT_BUGS_TO);
   done (status);
 }
@@ -411,7 +411,7 @@ main (int argc, char **argv)
 	  break;
 	case 'v':
 	  /* This output is intended to follow the GNU standards document.  */
-	  printf (_("GNU gprof %s\n"), VERSION);
+	  printf (_("GNU gprof %s\n"), PKGVERSION VERSION);
 	  printf (_("Based on BSD gprof, copyright 1983 Regents of the University of California.\n"));
 	  printf (_("\
 This program is free software.  This program has absolutely no warranty.\n"));

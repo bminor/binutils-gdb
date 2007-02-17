@@ -19,7 +19,6 @@ s! \.\./intl/libintl\.h!!g
 
 s! \.\./bfd/bfd\.h!!g
 s! \$(INCDIR)/symcat\.h!!g
-s! \$(INCDIR)/bin-bugs\.h!!g
 s! \$(INCDIR)/ansidecl\.h!!g
 s! \$(INCDIR)/libiberty\.h!!g
 s! \$(INCDIR)/progress\.h!!g

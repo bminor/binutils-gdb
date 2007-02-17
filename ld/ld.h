@@ -1,6 +1,6 @@
 /* ld.h -- general linker header file
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006
+   2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
@@ -80,8 +80,6 @@ void *alloca ();
 # define _(String) (String)
 # define N_(String) (String)
 #endif
-
-#include "bin-bugs.h"
 
 /* Look in this environment name for the linker to pretend to be */
 #define EMULATION_ENVIRON "LDEMULATION"

@@ -1,3 +1,35 @@
+2007-02-17  Mark Mitchell  <mark@codesourcery.com>
+            Nathan Sidwell  <nathan@codesourcery.com>
+            Vladimir Prus  <vladimir@codesourcery.com
+            Joseph Myers  <joseph@codesourcery.com>
+
+	* configure.in (--with-bugurl): New option.
+	* configure: Regenerate.
+	* Makefile.am (REPORT_BUGS_TO): Define.
+	(INCLUDES): Define REPORT_BUGS_TO.
+	Regenerate dependencies.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+	* bucomm.h: Remove include of bin-bugs.h.
+	* addr2line.c (usage): Don't print empty REPORT_BUGS_TO.
+	* ar.c (usage): Pass s to list_supported_targets.  Don't print
+	empty REPORT_BUGS_TO.
+	* coffdump.c (show_usage): Don't print empty REPORT_BUGS_TO.
+	* cxxfilt.c (usage): Print bug url when giving help.
+	* dlltool.c (usage): Likewise.
+	* dllwrap.c (usage): Likewise.
+	* nlmconv.c (show_usage): Don't print empty REPORT_BUGS_TO.
+	* nm.c (usage): Likewise.
+	* objcopy.c (copy_usage, strip_usage): Likewise.
+	* objdump.c (usage): Likewise.
+	* readelf.c ((usage): Likewise. Add STREAM argument.  Adjust
+	callers.
+	* size.c (usage): Don't print empty REPORT_BUGS_TO.
+	* srconv.c (show_usage): Likewise.
+	* strings.c (usage): Likewise.
+	* sysdymp.c (show_usage): Likewise.
+	* windres.c (usage): Likewise.
+
 2007-02-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* embedspu.sh: Add -W to readelf invocation.
