@@ -1,3 +1,10 @@
+2007-02-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* write.c: White space fixes.
+	(fixup_segment): Move symbol_mri_common_p adjustments..
+	(write_relocs): ..and symbol_equated_reloc_p adjustments..
+	(adjust_reloc_syms): ..to here.
+
 2007-02-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* subsegs.c (subseg_change, subseg_get): Use xcalloc rather than

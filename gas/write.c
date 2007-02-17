@@ -661,17 +661,21 @@ adjust_reloc_syms (bfd *abfd ATTRIBUTE_UNUSED,
 
 	/* If this symbol is equated to an undefined or common symbol,
 	   convert the fixup to being against that symbol.  */
-	if (symbol_equated_reloc_p (sym)
-	    || S_IS_WEAKREFR (sym))
+	while (symbol_equated_reloc_p (sym)
+	       || S_IS_WEAKREFR (sym))
 	  {
+	    symbolS *newsym = symbol_get_value_expression (sym)->X_add_symbol;
+	    if (sym == newsym)
+	      break;
 	    fixp->fx_offset += symbol_get_value_expression (sym)->X_add_number;
-	    sym = symbol_get_value_expression (sym)->X_add_symbol;
-	    fixp->fx_addsy = sym;
+	    fixp->fx_addsy = newsym;
+	    sym = newsym;
 	  }
 
 	if (symbol_mri_common_p (sym))
 	  {
-	    /* These symbols are handled specially in fixup_segment.  */
+	    fixp->fx_offset += S_GET_VALUE (sym);
+	    fixp->fx_addsy = symbol_get_value_expression (sym)->X_add_symbol;
 	    continue;
 	  }
 
@@ -700,14 +704,14 @@ adjust_reloc_syms (bfd *abfd ATTRIBUTE_UNUSED,
 	if (bfd_is_abs_section (symsec))
 	  {
 	    /* The fixup_segment routine normally will not use this
-               symbol in a relocation.  */
+	       symbol in a relocation.  */
 	    continue;
 	  }
 
 	/* Don't try to reduce relocs which refer to non-local symbols
-           in .linkonce sections.  It can lead to confusion when a
-           debugging section refers to a .linkonce section.  I hope
-           this will always be correct.  */
+	   in .linkonce sections.  It can lead to confusion when a
+	   debugging section refers to a .linkonce section.  I hope
+	   this will always be correct.  */
 	if (symsec != sec && ! S_IS_LOCAL (sym))
 	  {
 	    if ((symsec->flags & SEC_LINK_ONCE) != 0
@@ -807,15 +811,6 @@ fixup_segment (fixS *fixP, segT this_segment)
       TC_VALIDATE_FIX (fixP, this_segment, skip);
 #endif
       add_number = fixP->fx_offset;
-
-      if (fixP->fx_addsy != NULL
-	  && symbol_mri_common_p (fixP->fx_addsy))
-	{
-	  add_number += S_GET_VALUE (fixP->fx_addsy);
-	  fixP->fx_offset = add_number;
-	  fixP->fx_addsy
-	    = symbol_get_value_expression (fixP->fx_addsy)->X_add_symbol;
-	}
 
       if (fixP->fx_addsy != NULL)
 	add_symbol_segment = S_GET_SEGMENT (fixP->fx_addsy);
@@ -1030,24 +1025,6 @@ write_relocs (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 	  continue;
 	}
 
-      /* If this is an undefined symbol which was equated to another
-         symbol, then generate the reloc against the latter symbol
-         rather than the former.  */
-      sym = fixp->fx_addsy;
-      while (symbol_equated_reloc_p (sym))
-	{
-	  symbolS *n;
-
-	  /* We must avoid looping, as that can occur with a badly
-	     written program.  */
-	  n = symbol_get_value_expression (sym)->X_add_symbol;
-	  if (n == sym)
-	    break;
-	  fixp->fx_offset += symbol_get_value_expression (sym)->X_add_number;
-	  sym = n;
-	}
-      fixp->fx_addsy = sym;
-
       reloc = tc_gen_reloc (sec, fixp);
       if (!reloc)
 	{
@@ -1102,24 +1079,6 @@ write_relocs (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 	  n--;
 	  continue;
 	}
-
-      /* If this is an undefined symbol which was equated to another
-         symbol, then generate the reloc against the latter symbol
-         rather than the former.  */
-      sym = fixp->fx_addsy;
-      while (symbol_equated_reloc_p (sym))
-	{
-	  symbolS *n;
-
-	  /* We must avoid looping, as that can occur with a badly
-	     written program.  */
-	  n = symbol_get_value_expression (sym)->X_add_symbol;
-	  if (n == sym)
-	    break;
-	  fixp->fx_offset += symbol_get_value_expression (sym)->X_add_number;
-	  sym = n;
-	}
-      fixp->fx_addsy = sym;
 
       reloc = tc_gen_reloc (sec, fixp);
 
@@ -1700,7 +1659,7 @@ write_object_file (void)
 	  resolve_symbol_value (symp);
 
 	  /* Skip symbols which were equated to undefined or common
-             symbols.  */
+	     symbols.  */
 	  if (symbol_equated_reloc_p (symp)
 	      || S_IS_WEAKREFR (symp))
 	    {
@@ -2041,11 +2000,11 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
        depending upon the location of a symbol which is in turn moved by
        the growing frag.  eg:
 
-         foo = .
-         .org foo+16
-         foo = .
+	 foo = .
+	 .org foo+16
+	 foo = .
 
-	So we dictate that this algorithm can be at most O2.  */
+       So we dictate that this algorithm can be at most O2.  */
     max_iterations = frag_count * frag_count;
     /* Check for overflow.  */
     if (max_iterations < frag_count)
@@ -2168,11 +2127,11 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 
 		  if (symbolP)
 		    {
-                      /* Convert from an actual address to an octet offset
-                         into the section.  Here it is assumed that the
-                         section's VMA is zero, and can omit subtracting it
-                         from the symbol's value to get the address offset.  */
-                      know (S_GET_SEGMENT (symbolP)->vma == 0);
+		      /* Convert from an actual address to an octet offset
+			 into the section.  Here it is assumed that the
+			 section's VMA is zero, and can omit subtracting it
+			 from the symbol's value to get the address offset.  */
+		      know (S_GET_SEGMENT (symbolP)->vma == 0);
 		      target += S_GET_VALUE (symbolP) * OCTETS_PER_BYTE;
 		    }
 
@@ -2208,7 +2167,7 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 				    _("attempt to move .org backwards"));
 
 		      /* We've issued an error message.  Change the
-                         frag to avoid cascading errors.  */
+			 frag to avoid cascading errors.  */
 		      fragP->fr_type = rs_align;
 		      fragP->fr_subtype = 0;
 		      fragP->fr_offset = 0;
