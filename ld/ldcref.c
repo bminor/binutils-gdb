@@ -1,6 +1,6 @@
 /* ldcref.c -- output a cross reference table
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2006
-   Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2006,
+   2007 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>
 
 This file is part of GLD, the Gnu Linker.
@@ -710,11 +710,11 @@ check_reloc_refs (bfd *abfd, asection *sec, void *iarg)
 						   | BSF_WEAK)) != 0))
 	      || (!global
 		  && ((*q->sym_ptr_ptr)->flags & (BSF_LOCAL
-						  | BSF_SECTION_SYM)) != 0))
+						  | BSF_SECTION_SYM)) != 0
+		  && bfd_get_section (*q->sym_ptr_ptr) == info->defsec))
 	  && (symname != NULL
 	      ? strcmp (bfd_asymbol_name (*q->sym_ptr_ptr), symname) == 0
-	      : (((*q->sym_ptr_ptr)->flags & BSF_SECTION_SYM) != 0
-		 && bfd_get_section (*q->sym_ptr_ptr) == info->defsec)))
+	      : ((*q->sym_ptr_ptr)->flags & BSF_SECTION_SYM) != 0))
 	{
 	  /* We found a reloc for the symbol.  The symbol is defined
 	     in OUTSECNAME.  This reloc is from a section which is
