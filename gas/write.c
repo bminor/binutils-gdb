@@ -1017,7 +1017,6 @@ write_relocs (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
     {
       arelent *reloc;
       bfd_reloc_status_type s;
-      symbolS *sym;
 
       if (fixp->fx_done)
 	{
