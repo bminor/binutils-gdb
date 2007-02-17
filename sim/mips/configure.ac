@@ -141,6 +141,12 @@ case "${target}" in
 			  vr5500:mipsIV,vr5500:32,64,f:mips5500"
 			sim_multi_default=mips5000
 			;;
+  mips*-sde-elf*)	sim_gen=M16
+			sim_igen_machine="-M mips64r2,mips3d,mips16,mips16e,mdmx,dsp,smartmips"
+			sim_m16_machine="-M mips16,mips16e,mips64r2"
+			sim_igen_filter="32,64,f"
+			sim_mach_default="mipsisa64r2"
+			;;
   mips64*-*-*)		sim_igen_filter="32,64,f"
 			sim_gen=IGEN
 			;;
@@ -148,26 +154,20 @@ case "${target}" in
 			sim_igen_filter="32,64,f"
 			sim_m16_filter="16"
 			;;
-  mips*-sde-elf*)	sim_gen=M16
-			sim_igen_machine="-M mips64r2,mips3d,mips16,mips16e,dsp,smartmips"
-			sim_m16_machine="-M mips16,mips16e,mips64r2"
-			sim_igen_filter="32,64,f"
-			sim_mach_default="mipsisa64r2"
-			;;
   mipsisa32r2*-*-*)	sim_gen=M16
-			sim_igen_machine="-M mips32r2,mips16,mips16e,dsp,smartmips"
+			sim_igen_machine="-M mips32r2,mips16,mips16e,mdmx,dsp,smartmips"
 			sim_m16_machine="-M mips16,mips16e,mips32r2"
 			sim_igen_filter="32,f"
 			sim_mach_default="mipsisa32r2"
 			;;
   mipsisa32*-*-*)	sim_gen=M16
-			sim_igen_machine="-M mips32,mips16,mips16e,dsp,smartmips"
+			sim_igen_machine="-M mips32,mips16,mips16e,smartmips"
 			sim_m16_machine="-M mips16,mips16e,mips32"
 			sim_igen_filter="32,f"
 			sim_mach_default="mipsisa32"
 			;;
   mipsisa64r2*-*-*)	sim_gen=M16
-			sim_igen_machine="-M mips64r2,mips3d,mips16,mips16e,dsp"
+			sim_igen_machine="-M mips64r2,mips3d,mips16,mips16e,mdmx,dsp"
 			sim_m16_machine="-M mips16,mips16e,mips64r2"
 			sim_igen_filter="32,64,f"
 			sim_mach_default="mipsisa64r2"
@@ -178,7 +178,7 @@ case "${target}" in
 			sim_mach_default="mips_sb1"
 			;;
   mipsisa64*-*-*)	sim_gen=M16
-			sim_igen_machine="-M mips64,mips3d,mips16,mips16e,dsp"
+			sim_igen_machine="-M mips64,mips3d,mips16,mips16e,mdmx"
 			sim_m16_machine="-M mips16,mips16e,mips64"
 			sim_igen_filter="32,64,f"
 			sim_mach_default="mipsisa64"

@@ -37,18 +37,27 @@ proc run_hilo_test {testfile models nops} {
 if {[istarget mips*-*-elf] && [board_info target exists is_simulator]} {
 
     set dspmodels ""
+    set mdmxmodels ""
 
     if {[istarget mipsisa64sb1*-*-elf]} {
 	set models "sb1"
 	set submodels "mips1 mips2 mips3 mips4 mips32 mips64"
+	append mdmxmodels " mips64"
     } elseif {[istarget mipsisa64*-*-elf]} {
 	set models "mips32 mips64 mips32r2 mips64r2"
 	set submodels "mips1 mips2 mips3 mips4"
 	append dspmodels " mips32r2 mips64r2"
+	append mdmxmodels " mips64 mips32r2 mips64r2"
+    } elseif {[istarget mips*-sde-elf*]} {
+	set models "mips32 mips64 mips32r2 mips64r2"
+	set submodels ""
+	append dspmodels " mips32r2 mips64r2"
+	append mdmxmodels " mips64 mips32r2 mips64r2"
     } elseif {[istarget mipsisa32*-*-elf]} {
 	set models "mips32 mips32r2"
 	set submodels "mips1 mips2"
 	append dspmodels " mips32r2"
+	append mdmxmodels " mips32r2"
     } elseif {[istarget mips64vr*-*-elf]} {
 	set models "vr4100 vr4111 vr4120 vr5000 vr5400 vr5500"
 	set submodels "mips1 mips2 mips3 mips4"
@@ -73,8 +82,8 @@ if {[istarget mips*-*-elf] && [board_info target exists is_simulator]} {
     run_sim_test fpu64-ps.s $submodels
     run_sim_test fpu64-ps-sb1.s $submodels
 
-    run_sim_test mdmx-ob.s $submodels
-    run_sim_test mdmx-ob-sb1.s $submodels
+    run_sim_test mdmx-ob.s $mdmxmodels
+    run_sim_test mdmx-ob-sb1.s $mdmxmodels
 
     run_sim_test mips32-dsp.s $dspmodels
 }

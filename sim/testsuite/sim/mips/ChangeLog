@@ -1,3 +1,8 @@
+2007-02-17  Thiemo Seufer  <ths@mips.com>
+
+	* basic.exp: Add case for mips*-sde-elf*.
+	(mdmxmodels): Run mdmx tests only on mdmx capable configurations.
+
 2007-02-13  Thiemo Seufer  <ths@mips.com>
 
 	* mips32-dsp.s: Run DSP testcase only for release 2 architecture.

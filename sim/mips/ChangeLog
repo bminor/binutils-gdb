@@ -1,3 +1,11 @@
+2007-02-17  Thiemo Seufer  <ths@mips.com>
+
+	* configure.ac (mips*-sde-elf*, mipsisa32r2*-*-*, mipsisa64r2*-*-*):
+	Add mdmx to sim_igen_machine.
+	(mipsisa64*-*-*): Likewise. Remove dsp.
+	(mipsisa32*-*-*): Remove dsp.
+	* configure: Regenerate.
+
 2007-02-13  Thiemo Seufer  <ths@mips.com>
 
 	* configure.ac: Add mips*-sde-elf* target.
