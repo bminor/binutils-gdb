@@ -75,4 +75,7 @@ extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
 /* Values passed to md_apply_fix3 don't include symbol values.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
+/* This target is buggy, and sets fix size too large.  */
+#define TC_FX_SIZE_SLACK(FIX) 2
+
 /* end of tc-bfin.h */

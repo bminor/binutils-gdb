@@ -81,6 +81,11 @@ extern int sh_force_relocation (struct fix *);
 #define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from_section (FIX, SEC)
 extern long md_pcrel_from_section (struct fix *, segT);
 
+/* SH_COUNT relocs are allowed outside of frag.
+   The target is also buggy and sets fix size too large for other relocs.  */
+#define TC_FX_SIZE_SLACK(FIX) \
+  ((FIX)->fx_r_type == BFD_RELOC_SH_COUNT ? -1 : 2)
+
 #define IGNORE_NONSTANDARD_ESCAPES
 
 #define LISTING_HEADER \

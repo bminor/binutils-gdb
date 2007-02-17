@@ -97,6 +97,16 @@
 #define TC_FAKE_LABEL(NAME) (strcmp ((NAME), FAKE_LABEL_NAME) == 0)
 #endif
 
+/* Positive values of TC_FX_SIZE_SLACK allow a target to define
+   fixups that far past the end of a frag.  Having such fixups
+   is of course most most likely a bug in setting fx_size correctly.
+   A negative value disables the fixup check entirely, which is
+   appropriate for something like the Renesas / SuperH SH_COUNT
+   reloc.  */
+#ifndef TC_FX_SIZE_SLACK
+#define TC_FX_SIZE_SLACK(FIX) 0
+#endif
+
 /* Used to control final evaluation of expressions.  */
 int finalize_syms = 0;
 
@@ -1017,6 +1027,8 @@ write_relocs (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
     {
       arelent *reloc;
       bfd_reloc_status_type s;
+      int fx_size, slack;
+      offsetT loc;
 
       if (fixp->fx_done)
 	{
@@ -1031,12 +1043,15 @@ write_relocs (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 	  continue;
 	}
 
-      /*
-	This test is triggered inappropriately for the SH:
-         if (fixp->fx_where + fixp->fx_size
-	     > fixp->fx_frag->fr_fix + fixp->fx_frag->fr_offset)
-	     abort ();
-      */
+      fx_size = fixp->fx_size;
+      slack = TC_FX_SIZE_SLACK (fixp);
+      if (slack > 0)
+	fx_size = fx_size > slack ? fx_size - slack : 0;
+      loc = fixp->fx_where + fx_size;
+      if (slack >= 0
+	  && loc > fixp->fx_frag->fr_fix + fixp->fx_frag->fr_offset)
+	as_bad_where (fixp->fx_file, fixp->fx_line,
+		      _("internal error: fixup not contained within frag"));
 
       s = bfd_install_relocation (stdoutput, reloc,
 				  fixp->fx_frag->fr_literal,
@@ -1071,6 +1086,8 @@ write_relocs (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
       arelent **reloc;
       bfd_reloc_status_type s;
       int j;
+      int fx_size, slack;
+      offsetT loc;
 
       if (fixp->fx_done)
 	{
@@ -1085,10 +1102,17 @@ write_relocs (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 	  relocs[i++] = reloc[j];
 	  assert (i <= n);
 	}
-      if (fixp->fx_where + fixp->fx_size
-	  > fixp->fx_frag->fr_fix + fixp->fx_frag->fr_offset)
+
+      fx_size = fixp->fx_size;
+      slack = TC_FX_SIZE_SLACK (fixp);
+      if (slack > 0)
+	fx_size = fx_size > slack ? fx_size - slack : 0;
+      loc = fixp->fx_where + fx_size;
+      if (slack >= 0
+	  && loc > fixp->fx_frag->fr_fix + fixp->fx_frag->fr_offset)
 	as_bad_where (fixp->fx_file, fixp->fx_line,
 		      _("internal error: fixup not contained within frag"));
+
       for (j = 0; reloc[j]; j++)
 	{
 	  s = bfd_install_relocation (stdoutput, reloc[j],
