@@ -151,10 +151,10 @@ Copyright (C) 1988-2006 Free Software Foundation, Inc.
 * GDB/MI::                      @value{GDBN}'s Machine Interface.
 
 * GDB Bugs::                    Reporting bugs in @value{GDBN}
-* Formatting Documentation::    How to format and print @value{GDBN} documentation
 
 * Command Line Editing::        Command Line Editing
 * Using History Interactively:: Using History Interactively
+* Formatting Documentation::    How to format and print @value{GDBN} documentation
 * Installing GDB::              Installing GDB
 * Maintenance Commands::        Maintenance Commands
 * Remote Protocol::             GDB Remote Serial Protocol
@@ -11458,8 +11458,9 @@ Out of @value{GDBN}}).
 Occasionally it is necessary to change to a different file during a
 @value{GDBN} session.  Or you may run @value{GDBN} and forget to
 specify a file you want to use.  Or you are debugging a remote target
-via @code{gdbserver} (@pxref{Server, file}).  In these situations the
-@value{GDBN} commands to specify new files are useful.
+via @code{gdbserver} (@pxref{Server, file, Using the gdbserver
+program}).  In these situations the @value{GDBN} commands to specify
+new files are useful.
 
 @table @code
 @cindex executable file
@@ -13802,8 +13803,8 @@ Note that the internal name of the DLL may be all upper-case, even
 though the file name of the DLL is lower-case, or vice-versa. Since
 symbols within @value{GDBN} are @emph{case-sensitive} this may cause
 some confusion. If in doubt, try the @code{info functions} and
-@code{info variables} commands or even @code{maint print msymbols} (see
-@pxref{Symbols}). Here's an example:
+@code{info variables} commands or even @code{maint print msymbols}
+(@pxref{Symbols}). Here's an example:
 
 @smallexample
 (@value{GDBP}) info function CreateFileA
@@ -14279,7 +14280,7 @@ acceptable commands.
 * MIPS Embedded::               MIPS Embedded
 * OpenRISC 1000::               OpenRisc 1000
 * PA::                          HP PA Embedded
-* PowerPC:                      PowerPC
+* PowerPC::                     PowerPC
 * SH::                          Renesas SH
 * Sparclet::                    Tsqware Sparclet
 * Sparclite::                   Fujitsu Sparclite
@@ -18431,7 +18432,8 @@ Setting a watchpoint on a variable in the @code{main} function:
 (gdb)
 -exec-continue
 ^running
-^done,reason="watchpoint-trigger",wpt=@{number="2",exp="x"@},
+(gdb)
+*stopped,reason="watchpoint-trigger",wpt=@{number="2",exp="x"@},
 value=@{old="-268439212",new="55"@},
 frame=@{func="main",args=[],file="recursive2.c",
 fullname="/home/foo/bar/recursive2.c",line="5"@}
@@ -18449,7 +18451,8 @@ for the watchpoint going out of scope.
 (gdb)
 -exec-continue
 ^running
-^done,reason="watchpoint-trigger",
+(gdb)
+*stopped,reason="watchpoint-trigger",
 wpt=@{number="5",exp="C"@},value=@{old="-276895068",new="3"@},
 frame=@{func="callee4",args=[],
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
@@ -18457,7 +18460,8 @@ fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="13"@}
 (gdb)
 -exec-continue
 ^running
-^done,reason="watchpoint-scope",wpnum="5",
+(gdb)
+*stopped,reason="watchpoint-scope",wpnum="5",
 frame=@{func="callee3",args=[@{name="strarg",
 value="0x11940 \"A string argument.\""@}],
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
@@ -18491,7 +18495,8 @@ enabled="y",addr="",what="C",times="0"@}]@}
 (gdb)
 -exec-continue
 ^running
-^done,reason="watchpoint-trigger",wpt=@{number="2",exp="C"@},
+(gdb)
+*stopped,reason="watchpoint-trigger",wpt=@{number="2",exp="C"@},
 value=@{old="-276895068",new="3"@},
 frame=@{func="callee4",args=[],
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
