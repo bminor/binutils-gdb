@@ -1,3 +1,12 @@
+2007-02-18  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.texinfo (Top): Put Appendix A after numbered sections.
+	(Files): Add section name to argument list for pxref.
+	(Non-debug DLL symbols): Don't use `see' for pxref.
+	(Embedded Processors): Fix typo.
+	(GDB/MI Breakpoint Commands): Execution commands generate
+	*stopped not ^done.
+
 2007-02-13  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdb.texinfo (GDB/MI Variable Objects): Describe meanings of
