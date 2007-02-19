@@ -156,7 +156,7 @@ static SIM_ADDR lsipmon_monitor_base = 0xBFC00200;
 static SIM_RC sim_firmware_command (SIM_DESC sd, char* arg);
 
 
-#define MEM_SIZE (2 << 20)
+#define MEM_SIZE (8 << 20)	/* 8 MBytes */
 
 
 #if defined(TRACE)
