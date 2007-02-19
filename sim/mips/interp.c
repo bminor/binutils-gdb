@@ -1264,6 +1264,10 @@ sim_monitor (SIM_DESC sd,
 	char *buf = zalloc (nr);
 	sim_read (sd, A1, buf, nr);
 	V0 = sim_io_write (sd, fd, buf, nr);
+	if (fd == 1)
+	    sim_io_flush_stdout (sd);
+	else if (fd == 2)
+	    sim_io_flush_stderr (sd);
 	zfree (buf);
 	break;
       }
