@@ -1758,6 +1758,20 @@ ColdReset (SIM_DESC sd)
 	    FPR_STATE[rn] = fmt_uninterpreted;
 	}
       
+      /* Initialise the Config0 register. */
+      C0_CONFIG = 0x80000000 		/* Config1 present */
+	| 2;				/* KSEG0 uncached */
+      if (WITH_TARGET_WORD_BITSIZE == 64)
+	{
+	  /* FIXME Currently mips/sim-main.c:address_translation()
+	     truncates all addresses to 32-bits. */
+	  if (0 && WITH_TARGET_ADDRESS_BITSIZE == 64)
+	    C0_CONFIG |= (2 << 13);	/* MIPS64, 64-bit addresses */
+	  else
+	    C0_CONFIG |= (1 << 13);	/* MIPS64, 32-bit addresses */
+	}
+      if (BigEndianMem)
+	C0_CONFIG |= 0x00008000;	/* Big Endian */
     }
 }
 
@@ -2252,10 +2266,11 @@ decode_coproc (SIM_DESC sd,
 #else
 		/* 16 = Config             R4000   VR4100  VR4300 */
               case 16:
-                if (code == 0x00)
-                  GPR[rt] = C0_CONFIG;
-                else
-                  C0_CONFIG = GPR[rt];
+		if (code == 0x00)
+		  GPR[rt] = C0_CONFIG;
+		else
+		  /* only bottom three bits are writable */
+		  C0_CONFIG = (C0_CONFIG & ~0x7) | (GPR[rt] & 0x7);
                 break;
 #endif
 #ifdef SUBTARGET_R3900
@@ -2295,6 +2310,40 @@ decode_coproc (SIM_DESC sd,
 		  sim_io_printf(sd,"Warning: MTC0 %d,%d ignored, PC=%08x (architecture specific)\n",rt,rd, (unsigned)cia);
 #endif
 	      }
+	  }
+	else if ((code == 0x00 || code == 0x01)
+		 && rd == 16)
+	  {
+	    /* [D]MFC0 RT,C0_CONFIG,SEL */
+	    signed32 cfg = 0;
+	    switch (tail & 0x07) 
+	      {
+	      case 0:
+		cfg = C0_CONFIG;
+		break;
+	      case 1:
+		/* MIPS32 r/o Config1: 
+		   Config2 present */
+		cfg = 0x80000000;
+		/* MIPS16 implemented. 
+		   XXX How to check configuration? */
+		cfg |= 0x0000004;
+		if (CURRENT_FLOATING_POINT == HARD_FLOATING_POINT)
+		  /* MDMX & FPU implemented */
+		  cfg |= 0x00000021;
+		break;
+	      case 2:
+		/* MIPS32 r/o Config2: 
+		   Config3 present. */
+		cfg = 0x80000000;
+		break;
+	      case 3:
+		/* MIPS32 r/o Config3: 
+		   SmartMIPS implemented. */
+		cfg = 0x00000002;
+		break;
+	      }
+	    GPR[rt] = cfg;
 	  }
 	else if (code == 0x10 && (tail & 0x3f) == 0x18)
 	  {
