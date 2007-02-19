@@ -1945,8 +1945,18 @@
   DELAY_SLOT (temp);
 }
 
+000000,5.RS,00000,5.RD,10000,001001:SPECIAL:32::JALR_HB
+"jalr.hb r<RS>":RD == 31
+"jalr.hb r<RD>, r<RS>"
+*mips32r2:
+*mips64r2:
+{
+  address_word temp = GPR[RS];
+  GPR[RD] = CIA + 8;
+  DELAY_SLOT (temp);
+}
 
-000000,5.RS,000000000000000,001000:SPECIAL:32::JR
+000000,5.RS,0000000000,00000,001000:SPECIAL:32::JR
 "jr r<RS>"
 *mipsI:
 *mipsII:
@@ -1964,6 +1974,13 @@
   DELAY_SLOT (GPR[RS]);
 }
 
+000000,5.RS,0000000000,10000,001000:SPECIAL:32::JR_HB
+"jr.hb r<RS>"
+*mips32r2:
+*mips64r2:
+{
+  DELAY_SLOT (GPR[RS]);
+}
 
 :function:::unsigned_word:do_load:unsigned access, address_word base, address_word offset
 {

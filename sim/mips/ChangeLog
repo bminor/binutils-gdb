@@ -1,14 +1,20 @@
 2007-02-19  Thiemo Seufer  <ths@mips.com>
             Nigel Stephens  <nigel@mips.com>
 
+	* mips.igen (jalr.hb, jr.hb): Add decoder for mip32r2/mips64r2
+	jumps with hazard barrier.
+
+2007-02-19  Thiemo Seufer  <ths@mips.com>
+            Nigel Stephens  <nigel@mips.com>
+
 	* interp.c (sim_monitor): Flush stdout and stderr file descriptors
 	after each call to sim_io_write.
 
-2007-02-19  Thiemo Seufer <ths@mips.com>
+2007-02-19  Thiemo Seufer  <ths@mips.com>
             Nigel Stephens  <nigel@mips.com>
-	
-	(ColdReset): Set CP0 Config0 to reflect the address size supported
-	by this simulator.
+
+	* interp.c (ColdReset): Set CP0 Config0 to reflect the address size
+	supported by this simulator.
 	(decode_coproc): Recognise additional CP0 Config registers
 	correctly.
 
