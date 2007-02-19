@@ -133,7 +133,10 @@ const struct s390_operand s390_operands[] =
 #define U32_16 41		  /* 32 bit unsigned value starting at 16 */
   { 32, 16, 0 },
 #define M_16   42                 /* 4 bit optional mask starting at 16 */
-  { 4, 16, S390_OPERAND_OPTIONAL }
+  { 4, 16, S390_OPERAND_OPTIONAL },
+#define RO_28  43                 /* optional GPR starting at position 28 */
+  { 4, 28, (S390_OPERAND_GPR | S390_OPERAND_OPTIONAL) }
+
 };
 
 
@@ -202,6 +205,9 @@ const struct s390_operand s390_operands[] =
 #define INSTR_RRE_RA     4, { R_24,A_28,0,0,0,0 }              /* e.g. ear   */
 #define INSTR_RRE_RF     4, { R_24,F_28,0,0,0,0 }              /* e.g. cefbr */
 #define INSTR_RRE_RR     4, { R_24,R_28,0,0,0,0 }              /* e.g. lura  */
+/* Actually efpc and sfpc do not take an optional operand.
+   This is just a workaround for existing code e.g. glibc.  */
+#define INSTR_RRE_RR_OPT 4, { R_24,RO_28,0,0,0,0 }             /* efpc, sfpc */
 #define INSTR_RRF_F0FF   4, { F_16,F_24,F_28,0,0,0 }           /* e.g. madbr */
 #define INSTR_RRF_FUFF   4, { F_24,F_16,F_28,U4_20,0,0 }       /* e.g. didbr */
 #define INSTR_RRF_RURR   4, { R_24,R_28,R_16,U4_20,0,0 }       /* e.g. .insn */
@@ -275,6 +281,7 @@ const struct s390_operand s390_operands[] =
 #define MASK_RRE_RA      { 0xff, 0xff, 0xff, 0x00, 0x00, 0x00 }
 #define MASK_RRE_RF      { 0xff, 0xff, 0xff, 0x00, 0x00, 0x00 }
 #define MASK_RRE_RR      { 0xff, 0xff, 0xff, 0x00, 0x00, 0x00 }
+#define MASK_RRE_RR_OPT  { 0xff, 0xff, 0xff, 0x00, 0x00, 0x00 }
 #define MASK_RRF_F0FF    { 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00 }
 #define MASK_RRF_FUFF    { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RRF_RURR    { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }

@@ -354,7 +354,7 @@ b30d debr RRE_FF "divide short bfp" g5 esa,zarch
 ed000000000d deb RXE_FRRD "divide short bfp" g5 esa,zarch
 b35b didbr RRF_FUFF "divide to integer long bfp" g5 esa,zarch
 b353 diebr RRF_FUFF "divide to integer short bfp" g5 esa,zarch
-b38c efpc RRE_RR "extract fpc" g5 esa,zarch
+b38c efpc RRE_RR_OPT "extract fpc" g5 esa,zarch
 b342 ltxbr RRE_FF "load and test extended bfp" g5 esa,zarch
 b312 ltdbr RRE_FF "load and test long bfp" g5 esa,zarch
 b302 ltebr RRE_FF "load and test short bfp" g5 esa,zarch
@@ -397,7 +397,7 @@ b31f msdbr RRF_F0FF "multiply and subtract long bfp" g5 esa,zarch
 ed000000001f msdb RXF_FRRDF "multiply and subtract long bfp" g5 esa,zarch
 b30f msebr RRF_F0FF "multiply and subtract short bfp" g5 esa,zarch
 ed000000000f mseb RXF_FRRDF "multiply and subtract short bfp" g5 esa,zarch
-b384 sfpc RRE_RR "set fpc" g5 esa,zarch
+b384 sfpc RRE_RR_OPT "set fpc" g5 esa,zarch
 b299 srnm S_RD "set rounding mode" g5 esa,zarch
 b316 sqxbr RRE_FF "square root extended bfp" g5 esa,zarch
 b315 sqdbr RRE_FF "square root long bfp" g5 esa,zarch

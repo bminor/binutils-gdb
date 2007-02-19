@@ -1,3 +1,10 @@
+2007-02-19  Andreas Krebbel  <krebbel1@de.ibm.com>
+
+	* s390-opc.txt ("efpc", "sfpc"): Set to RRE_RR_OPT instruction type.
+	* s390-opc.c (s390_operands): Add RO_28 as optional gpr.
+	(INSTR_RRE_RR_OPT, MASK_RRE_RR_OPT): New instruction type for efpc
+	and sfpc.
+
 2007-02-16  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/4045
