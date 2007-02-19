@@ -1,6 +1,6 @@
 /* This module handles expression trees.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006
+   2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
@@ -485,6 +485,7 @@ fold_name (etree_type *tree)
 	  new_abs (hdr_size);
 	}
       break;
+
     case DEFINED:
       if (expld.phase == lang_first_phase_enum)
 	lang_track_definedness (tree->name.name);
@@ -507,6 +508,7 @@ fold_name (etree_type *tree)
 	  expld.result.valid_p = TRUE;
 	}
       break;
+
     case NAME:
       if (expld.phase == lang_first_phase_enum)
 	;
@@ -591,7 +593,10 @@ fold_name (etree_type *tree)
 	      if (os->load_base == NULL)
 		new_abs (os->bfd_section->lma);
 	      else
-		exp_fold_tree_1 (os->load_base);
+		{
+		  exp_fold_tree_1 (os->load_base);
+		  make_abs ();
+		}
 	    }
 	}
       break;
