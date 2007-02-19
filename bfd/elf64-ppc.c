@@ -73,6 +73,7 @@ static bfd_vma opd_entry_value
 #define elf_backend_can_gc_sections 1
 #define elf_backend_can_refcount 1
 #define elf_backend_rela_normal 1
+#define elf_backend_default_execstack 0
 
 #define bfd_elf64_mkobject		      ppc64_elf_mkobject
 #define bfd_elf64_bfd_reloc_type_lookup	      ppc64_elf_reloc_type_lookup
@@ -1197,7 +1198,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 
   /* Like R_PPC64_PLTGOT16, but for instructions with a DS field.  */
   /* FIXME: R_PPC64_PLTGOT16_DS not implemented.  */
-    HOWTO (R_PPC64_PLTGOT16_DS,	/* type */
+  HOWTO (R_PPC64_PLTGOT16_DS,	/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */

@@ -1106,10 +1106,17 @@ struct elf_backend_data
   unsigned can_refcount : 1;
   unsigned want_got_sym : 1;
   unsigned want_dynbss : 1;
-    /* Targets which do not support physical addressing often require
-       that the p_paddr field in the section header to be set to zero.
-       This field indicates whether this behavior is required.  */
+
+  /* Targets which do not support physical addressing often require
+     that the p_paddr field in the section header to be set to zero.
+     This field indicates whether this behavior is required.  */
   unsigned want_p_paddr_set_to_zero : 1;
+
+  /* True if an object file lacking a .note.GNU-stack section
+     should be assumed to be requesting exec stack.  At least one
+     other file in the link needs to have a .note.GNU-stack section
+     for a PT_GNU_STACK segment to be created.  */
+  unsigned default_execstack : 1;
 };
 
 /* Information stored for each BFD section in an ELF file.  This

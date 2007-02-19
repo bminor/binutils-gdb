@@ -103,6 +103,9 @@
 #ifndef elf_backend_want_p_paddr_set_to_zero
 #define elf_backend_want_p_paddr_set_to_zero 0
 #endif
+#ifndef elf_backend_default_execstack
+#define elf_backend_default_execstack 1
+#endif
 
 #define bfd_elfNN_bfd_debug_info_start	bfd_void
 #define bfd_elfNN_bfd_debug_info_end	bfd_void
@@ -683,7 +686,8 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_can_refcount,
   elf_backend_want_got_sym,
   elf_backend_want_dynbss,
-  elf_backend_want_p_paddr_set_to_zero
+  elf_backend_want_p_paddr_set_to_zero,
+  elf_backend_default_execstack
 };
 
 /* Forward declaration for use when initialising alternative_target field.  */

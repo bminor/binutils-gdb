@@ -5237,6 +5237,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
   if (!is_elf_hash_table (info->hash))
     return TRUE;
 
+  bed = get_elf_backend_data (output_bfd);
   elf_tdata (output_bfd)->relro = info->relro;
   if (info->execstack)
     elf_tdata (output_bfd)->stack_flags = PF_R | PF_W | PF_X;
@@ -5263,7 +5264,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 		exec = PF_X;
 	      notesec = s;
 	    }
-	  else
+	  else if (bed->default_execstack)
 	    exec = PF_X;
 	}
       if (notesec)
@@ -5284,7 +5285,6 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 
   /* The backend may have to create some sections regardless of whether
      we're dynamic or not.  */
-  bed = get_elf_backend_data (output_bfd);
   if (bed->elf_backend_always_size_sections
       && ! (*bed->elf_backend_always_size_sections) (output_bfd, info))
     return FALSE;
