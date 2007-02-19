@@ -176,28 +176,17 @@
 *vr4100:
 *vr5000:
 *r3900:
-{
-  /* For historical simulator compatibility (until documentation is
-     found that makes these operations unpredictable on some of these
-     architectures), this check never returns true.  */
-  return 0;
-}
-
-:function:::int:not_word_value:unsigned_word value
 *mips32:
 *mips32r2:
-{
-  /* On MIPS32, since registers are 32-bits, there's no check to be done.  */
-  return 0;
-}
-
-:function:::int:not_word_value:unsigned_word value
 *mips64:
 *mips64r2:
 {
-  return ((value >> 32) != (value & 0x80000000 ? 0xFFFFFFFF : 0));
+#if WITH_TARGET_WORD_BITSIZE == 64
+  return value != (((value & 0xffffffff) ^ 0x80000000) - 0x80000000);
+#else
+  return 0;
+#endif
 }
-
 
 // Helper:
 //

@@ -1,3 +1,31 @@
+2007-02-19  Thiemo Seufer  <ths@mips.com>
+            Nigel Stephens  <nigel@mips.com>
+            David Ung  <davidu@mips.com>
+
+	* cp1.c (value_fpr): Don't inherit existing FPR_STATE for
+	uninterpreted formats. If fmt is one of the uninterpreted types
+	don't update the FPR_STATE. Handle fmt_uninterpreted_32 like
+	fmt_word, and fmt_uninterpreted_64 like fmt_long.
+	(store_fpr): When writing an invalid odd register, set the
+	matching even register to fmt_unknown, not the following register.
+	* interp.c (sim_open): If STATE_MEM_SIZE isn't set then set it to
+	the the memory window at offset 0 set by --memory-size command
+	line option.
+	(sim_store_register): Handle storing 4 bytes to an 8 byte floating
+	point register.
+	(sim_fetch_register): Likewise for reading 4 bytes from an 8 byte
+	register.
+	(sim_monitor): When returning the memory size to the MIPS
+	application, use the value in STATE_MEM_SIZE, not an arbitrary
+	hardcoded value.
+	(cop_lw): Don' mess around with FPR_STATE, just pass
+	fmt_uninterpreted_32 to StoreFPR.
+	(cop_sw): Similarly.
+	(cop_ld): Pass fmt_uninterpreted_64 not fmt_uninterpreted.
+	(cop_sd): Similarly.
+	* mips.igen (not_word_value): Single version for mips32, mips64
+	and mips16.
+
 2007-02-19  Thiemo Seufer <ths@mips.com>
             Nigel Stephens  <nigel@mips.com>
 

@@ -131,6 +131,9 @@ static void ColdReset PARAMS((SIM_DESC sd));
 
 /* Note that the monitor code essentially assumes this layout of memory.
    If you change these, change the monitor code, too.  */
+/* FIXME Currently addresses are truncated to 32-bits, see
+   mips/sim-main.c:address_translation(). If that changes, then these
+   values will need to be extended, and tested for more carefully. */
 #define K0BASE  (0x80000000)
 #define K0SIZE  (0x20000000)
 #define K1BASE  (0xA0000000)
@@ -365,17 +368,67 @@ sim_open (kind, cb, abfd, argv)
   if (board == NULL)
     {
       /* Allocate core managed memory */
-      
+      sim_memopt *entry, *match = NULL;
+      address_word mem_size = 0;
+      int mapped = 0;
 
       /* For compatibility with the old code - under this (at level one)
 	 are the kernel spaces K0 & K1.  Both of these map to a single
 	 smaller sub region */
       sim_do_command(sd," memory region 0x7fff8000,0x8000") ; /* MTZ- 32 k stack */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx%%0x%lx,0x%0x",
-		       K1BASE, K0SIZE,
-		       MEM_SIZE, /* actual size */
-		       K0BASE);
-      
+
+      /* Look for largest memory region defined on command-line at
+	 phys address 0. */
+#ifdef SIM_HAVE_FLATMEM
+      mem_size = STATE_MEM_SIZE (sd);
+#endif
+      for (entry = STATE_MEMOPT (sd); entry != NULL; entry = entry->next)
+	{
+	  /* If we find an entry at address 0, then we will end up
+	     allocating a new buffer in the "memory alias" command
+	     below. The region at address 0 will be deleted. */
+	  address_word size = (entry->modulo != 0
+			       ? entry->modulo : entry->nr_bytes);
+	  if (entry->addr == 0
+	      && (!match || entry->level < match->level))
+	    match = entry;
+	  else if (entry->addr == K0BASE || entry->addr == K1BASE)
+	    mapped = 1;
+	  else
+	    {
+	      sim_memopt *alias;
+	      for (alias = entry->alias; alias != NULL; alias = alias->next)
+		{
+		  if (alias->addr == 0
+		      && (!match || entry->level < match->level))
+		    match = entry;
+		  else if (alias->addr == K0BASE || alias->addr == K1BASE)
+		    mapped = 1;
+		}
+	    }
+	}
+
+      if (!mapped)
+	{
+	  if (match)
+	    {
+	      /* Get existing memory region size. */
+	      mem_size = (match->modulo != 0
+			  ? match->modulo : match->nr_bytes);
+	      /* Delete old region. */
+	      sim_do_commandf (sd, "memory delete %d:0x%lx@%d",
+			       match->space, match->addr, match->level);
+	    }	      
+	  else if (mem_size == 0)
+	    mem_size = MEM_SIZE;
+	  /* Limit to KSEG1 size (512MB) */
+	  if (mem_size > K1SIZE)
+	    mem_size = K1SIZE;
+	  /* memory alias K1BASE@1,K1SIZE%MEMSIZE,K0BASE */
+	  sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx%%0x%lx,0x%0x",
+			   K1BASE, K1SIZE, (long)mem_size, K0BASE);
+	}
+
       device_init(sd);
     }
   else if (board != NULL
@@ -868,8 +921,16 @@ sim_store_register (sd,rn,memory,length)
 	}
       else
 	{
-	  cpu->fgr[rn - FGR_BASE] = T2H_8 (*(unsigned64*)memory);
-	  return 8;
+          if (length == 8)
+	    {
+	      cpu->fgr[rn - FGR_BASE] = T2H_8 (*(unsigned64*)memory);
+	      return 8;
+	    }
+	  else
+	    {
+	      cpu->fgr[rn - FGR_BASE] = T2H_4 (*(unsigned32*)memory);
+	      return 4;
+	    }
 	}
     }
 
@@ -889,8 +950,16 @@ sim_store_register (sd,rn,memory,length)
     }
   else
     {
-      cpu->registers[rn] = T2H_8 (*(unsigned64*)memory);
-      return 8;
+      if (length == 8)
+	{
+	  cpu->registers[rn] = T2H_8 (*(unsigned64*)memory);
+	  return 8;
+	}
+      else
+	{
+	  cpu->registers[rn] = (signed32) T2H_4(*(unsigned32*)memory);
+	  return 4;
+	}
     }
 
   return 0;
@@ -939,8 +1008,16 @@ sim_fetch_register (sd,rn,memory,length)
 	}
       else
 	{
-	  *(unsigned64*)memory = H2T_8 (cpu->fgr[rn - FGR_BASE]);
-	  return 8;
+	  if (length == 8)
+	    {
+	      *(unsigned64*)memory = H2T_8 (cpu->fgr[rn - FGR_BASE]);
+	      return 8;
+	    }
+	  else
+	    {
+	      *(unsigned32*)memory = H2T_4 ((unsigned32)(cpu->fgr[rn - FGR_BASE]));
+	      return 4;
+	    }
 	}
     }
 
@@ -960,8 +1037,17 @@ sim_fetch_register (sd,rn,memory,length)
     }
   else
     {
-      *(unsigned64*)memory = H2T_8 ((unsigned64)(cpu->registers[rn]));
-      return 8;
+      if (length == 8)
+	{
+	  *(unsigned64*)memory =
+	    H2T_8 ((unsigned64) (cpu->registers[rn]));
+	  return 8;
+	}
+      else
+	{
+	  *(unsigned32*)memory = H2T_4 ((unsigned32)(cpu->registers[rn]));
+	  return 4;
+	}
     }
 
   return 0;
@@ -1235,8 +1321,39 @@ sim_monitor (SIM_DESC sd,
       /*      [A0 + 4] = instruction cache size */
       /*      [A0 + 8] = data cache size */
       {
-	unsigned_4 value = MEM_SIZE /* FIXME STATE_MEM_SIZE (sd) */;
+	unsigned_4 value;
 	unsigned_4 zero = 0;
+	address_word mem_size;
+	sim_memopt *entry, *match = NULL;
+
+	/* Search for memory region mapped to KSEG0 or KSEG1. */
+	for (entry = STATE_MEMOPT (sd); 
+	     entry != NULL;
+	     entry = entry->next)
+	  {
+	    if ((entry->addr == K0BASE || entry->addr == K1BASE)
+		&& (!match || entry->level < match->level))
+	      match = entry;
+	    else
+	      {
+		sim_memopt *alias;
+		for (alias = entry->alias; 
+		     alias != NULL;
+		     alias = alias->next)
+		  if ((alias->addr == K0BASE || alias->addr == K1BASE)
+		      && (!match || entry->level < match->level))
+		    match = entry;
+	      }
+	  }
+
+	/* Get region size, limit to KSEG1 size (512MB). */
+	SIM_ASSERT (match != NULL);
+	mem_size = (match->modulo != 0
+		    ? match->modulo : match->nr_bytes);
+	if (mem_size > K1SIZE)
+	  mem_size = K1SIZE;
+
+	value = mem_size;
 	H2T (value);
 	sim_write (sd, A0 + 0, (char *)&value, 4);
 	sim_write (sd, A0 + 4, (char *)&zero, 4);
@@ -1924,8 +2041,7 @@ cop_lw (SIM_DESC sd,
 #ifdef DEBUG
 	  printf("DBG: COP_LW: memword = 0x%08X (uword64)memword = 0x%s\n",memword,pr_addr(memword));
 #endif
-	  StoreFPR(coproc_reg,fmt_word,(uword64)memword);
-	  FPR_STATE[coproc_reg] = fmt_uninterpreted;
+	  StoreFPR(coproc_reg,fmt_uninterpreted_32,(uword64)memword);
 	  break;
 	}
 
@@ -1956,7 +2072,7 @@ cop_ld (SIM_DESC sd,
     case 1:
       if (CURRENT_FLOATING_POINT == HARD_FLOATING_POINT)
 	{
-	  StoreFPR(coproc_reg,fmt_uninterpreted,memword);
+	  StoreFPR(coproc_reg,fmt_uninterpreted_64,memword);
 	  break;
 	}
 
@@ -1987,11 +2103,7 @@ cop_sw (SIM_DESC sd,
     case 1:
       if (CURRENT_FLOATING_POINT == HARD_FLOATING_POINT)
 	{
-	  FP_formats hold;
-	  hold = FPR_STATE[coproc_reg];
-	  FPR_STATE[coproc_reg] = fmt_word;
-	  value = (unsigned int)ValueFPR(coproc_reg,fmt_uninterpreted);
-	  FPR_STATE[coproc_reg] = hold;
+	  value = (unsigned int)ValueFPR(coproc_reg,fmt_uninterpreted_32);
 	  break;
 	}
 
@@ -2018,7 +2130,7 @@ cop_sd (SIM_DESC sd,
     case 1:
       if (CURRENT_FLOATING_POINT == HARD_FLOATING_POINT)
 	{
-	  value = ValueFPR(coproc_reg,fmt_uninterpreted);
+	  value = ValueFPR(coproc_reg,fmt_uninterpreted_64);
 	  break;
 	}
 

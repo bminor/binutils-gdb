@@ -111,10 +111,10 @@ value_fpr (sim_cpu *cpu,
   int err = 0;
 
   /* Treat unused register values, as fixed-point 64bit values.  */
-  if ((fmt == fmt_uninterpreted) || (fmt == fmt_unknown))
+  if (fmt == fmt_unknown)
     {
 #if 1
-      /* If request to read data as "uninterpreted", then use the current
+      /* If request to read data as "unknown", then use the current
 	 encoding:  */
       fmt = FPR_STATE[fpr];
 #else
@@ -123,20 +123,23 @@ value_fpr (sim_cpu *cpu,
     }
 
   /* For values not yet accessed, set to the desired format.  */
-  if (FPR_STATE[fpr] == fmt_uninterpreted)
+  if (fmt < fmt_uninterpreted) 
     {
-      FPR_STATE[fpr] = fmt;
+      if (FPR_STATE[fpr] == fmt_uninterpreted)
+	{
+	  FPR_STATE[fpr] = fmt;
 #ifdef DEBUG
-      printf ("DBG: Register %d was fmt_uninterpreted. Now %s\n", fpr,
-	      fpu_format_name (fmt));
+	  printf ("DBG: Register %d was fmt_uninterpreted. Now %s\n", fpr,
+		  fpu_format_name (fmt));
 #endif /* DEBUG */
-    }
-  if (fmt != FPR_STATE[fpr])
-    {
-      sim_io_eprintf (SD, "FPR %d (format %s) being accessed with format %s - setting to unknown (PC = 0x%s)\n",
-		      fpr, fpu_format_name (FPR_STATE[fpr]),
-		      fpu_format_name (fmt), pr_addr (cia));
-      FPR_STATE[fpr] = fmt_unknown;
+	}
+      else if (fmt != FPR_STATE[fpr])
+	{
+	  sim_io_eprintf (SD, "FPR %d (format %s) being accessed with format %s - setting to unknown (PC = 0x%s)\n",
+			  fpr, fpu_format_name (FPR_STATE[fpr]),
+			  fpu_format_name (fmt), pr_addr (cia));
+	  FPR_STATE[fpr] = fmt_unknown;
+	}
     }
 
   if (FPR_STATE[fpr] == fmt_unknown)
@@ -156,11 +159,13 @@ value_fpr (sim_cpu *cpu,
     {
       switch (fmt)
 	{
+	case fmt_uninterpreted_32:
 	case fmt_single:
 	case fmt_word:
 	  value = (FGR[fpr] & 0xFFFFFFFF);
 	  break;
 
+	case fmt_uninterpreted_64:
 	case fmt_uninterpreted:
 	case fmt_double:
 	case fmt_long:
@@ -177,11 +182,13 @@ value_fpr (sim_cpu *cpu,
     {
       switch (fmt)
 	{
+	case fmt_uninterpreted_32:
 	case fmt_single:
 	case fmt_word:
 	  value = (FGR[fpr] & 0xFFFFFFFF);
 	  break;
 
+	case fmt_uninterpreted_64:
 	case fmt_uninterpreted:
 	case fmt_double:
 	case fmt_long:
@@ -299,7 +306,7 @@ store_fpr (sim_cpu *cpu,
 	  else
 	    {
 	      FPR_STATE[fpr] = fmt_unknown;
-	      FPR_STATE[fpr + 1] = fmt_unknown;
+	      FPR_STATE[fpr ^ 1] = fmt_unknown;
 	      SignalException (ReservedInstruction, 0);
 	    }
 	  break;
