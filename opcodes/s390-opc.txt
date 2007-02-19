@@ -344,9 +344,9 @@ ed0000000008 keb RXE_FRRD "compare and signal short bfp" g5 esa,zarch
 b396 cxfbr RRE_RF "convert from fixed 32 to extended bfp" g5 esa,zarch
 b395 cdfbr RRE_RF "convert from fixed 32 to long bfp" g5 esa,zarch
 b394 cefbr RRE_RF "convert from fixed 32 to short bfp" g5 esa,zarch
-b39a cfxbr RRF_U0FR "convert to fixed extended bfp to 32" g5 esa,zarch
-b399 cfdbr RRF_U0FR "convert to fixed long bfp to 32" g5 esa,zarch
-b398 cfebr RRF_U0FR "convert to fixed short bfp to 32" g5 esa,zarch
+b39a cfxbr RRF_U0RF "convert to fixed extended bfp to 32" g5 esa,zarch
+b399 cfdbr RRF_U0RF "convert to fixed long bfp to 32" g5 esa,zarch
+b398 cfebr RRF_U0RF "convert to fixed short bfp to 32" g5 esa,zarch
 b34d dxbr RRE_FF "divide extended bfp" g5 esa,zarch
 b31d ddbr RRE_FF "divide long bfp" g5 esa,zarch
 ed000000001d ddb RXE_FRRD "divide long bfp" g5 esa,zarch
@@ -555,15 +555,15 @@ b91c msgfr RRE_RR "multiply single 64<32" z900 zarch
 b3a4 cegbr RRE_RR "convert from fixed 64 to short bfp" z900 zarch
 b3a5 cdgbr RRE_RR "convert from fixed 64 to long bfp" z900 zarch
 b3a6 cxgbr RRE_RR "convert from fixed 64 to extended bfp" z900 zarch
-b3a8 cgebr RRF_U0FR "convert to fixed short bfd to 64" z900 zarch
-b3a9 cgdbr RRF_U0FR "convert to fixed long bfp to 64" z900 zarch
-b3aa cgxbr RRF_U0FR "convert to fixed extended bfp to 64" z900 zarch
+b3a8 cgebr RRF_U0RF "convert to fixed short bfd to 64" z900 zarch
+b3a9 cgdbr RRF_U0RF "convert to fixed long bfp to 64" z900 zarch
+b3aa cgxbr RRF_U0RF "convert to fixed extended bfp to 64" z900 zarch
 b3c4 cegr RRE_RR "convert from fixed 64 to short hfp" z900 zarch
 b3c5 cdgr RRE_RR "convert from fixed 64 to long hfp" z900 zarch
 b3c6 cxgr RRE_RR "convert from fixed 64 to extended hfp" z900 zarch
-b3c8 cger RRF_U0FR "convert to fixed short hfp to 64" z900 zarch
-b3c9 cgdr RRF_U0FR "convert to fixed long hfp to 64" z900 zarch
-b3ca cgxr RRF_U0FR "convert to fixed extended hfp to 64" z900 zarch
+b3c8 cger RRF_U0RF "convert to fixed short hfp to 64" z900 zarch
+b3c9 cgdr RRF_U0RF "convert to fixed long hfp to 64" z900 zarch
+b3ca cgxr RRF_U0RF "convert to fixed extended hfp to 64" z900 zarch
 010b tam E "test addressing mode" z900 esa,zarch
 010c sam24 E "set addressing mode 24" z900 esa,zarch
 010d sam31 E "set addressing mode 31" z900 esa,zarch
@@ -631,9 +631,9 @@ b369 cxr RRE_FF "compare extended hfp" g5 esa,zarch
 b3b6 cxfr RRE_RF "convert from fixed 32 to extended hfp" g5 esa,zarch
 b3b5 cdfr RRE_RF "convert from fixed 32 to long hfp" g5 esa,zarch
 b3b4 cefr RRE_RF "convert from fixed 32 to short hfp" g5 esa,zarch
-b3ba cfxr RRF_U0FR "convert to fixed extended hfp to 32" z900 zarch
-b3b9 cfdr RRF_U0FR "convert to fixed long hfp to 32" z900 zarch
-b3b8 cfer RRF_U0FR "convert to fixed short hfp to 32" z900 zarch
+b3ba cfxr RRF_U0RF "convert to fixed extended hfp to 32" z900 zarch
+b3b9 cfdr RRF_U0RF "convert to fixed long hfp to 32" z900 zarch
+b3b8 cfer RRF_U0RF "convert to fixed short hfp to 32" z900 zarch
 b362 ltxr RRE_FF "load and test extended hfp" g5 esa,zarch
 b363 lcxr RRE_FF "load complement extended hfp" g5 esa,zarch
 b367 fixr RRF_U0FF "load fp integer extended hfp" g5 esa,zarch

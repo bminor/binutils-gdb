@@ -98,9 +98,9 @@ foo:
 	cefr	%r6,%f9
 	cer	%f6,%f9
 	cfc	4095(%r5)
-	cfdbr	%r6,5,%r9
-	cfebr	%r6,5,%r9
-	cfxbr	%r6,5,%r9
+	cfdbr	%r6,5,%f9
+	cfebr	%r6,5,%f9
+	cfxbr	%r6,5,%f9
 	ch	%r6,4095(%r5,%r10)
 	chi	%r6,-32767
 	cksm	%r6,%r9

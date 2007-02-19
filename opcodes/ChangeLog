@@ -1,5 +1,12 @@
 2007-02-19  Andreas Krebbel  <krebbel1@de.ibm.com>
 
+	* s390-opc.c (INSTR_RRF_U0FR, MASK_RRF_U0FR): Removed.
+	(INSTR_RRF_U0RF, MASK_RRF_U0RF): Added.
+	* s390-opc.txt (cfxbr, cfdbr, cfebr, cgebr, cgdbr, cgxbr, cger, cgdr,
+	cgxr, cfxr, cfdr, cfer): Instruction type set to INSTR_RRF_U0RF.
+
+2007-02-19  Andreas Krebbel  <krebbel1@de.ibm.com>
+
 	* s390-opc.txt ("efpc", "sfpc"): Set to RRE_RR_OPT instruction type.
 	* s390-opc.c (s390_operands): Add RO_28 as optional gpr.
 	(INSTR_RRE_RR_OPT, MASK_RRE_RR_OPT): New instruction type for efpc

@@ -104,9 +104,9 @@ Disassembly of section .text:
 .*:	b3 b4 00 69 [	 ]*cefr	%r6,%f9
 .*:	39 69 [	 ]*cer	%f6,%f9
 .*:	b2 1a 5f ff [	 ]*cfc	4095\(%r5\)
-.*:	b3 99 50 69 [	 ]*cfdbr	%f6,5,%r9
-.*:	b3 98 50 69 [	 ]*cfebr	%f6,5,%r9
-.*:	b3 9a 50 69 [	 ]*cfxbr	%f6,5,%r9
+.*:	b3 99 50 69 [	 ]*cfdbr	%r6,5,%f9
+.*:	b3 98 50 69 [	 ]*cfebr	%r6,5,%f9
+.*:	b3 9a 50 69 [	 ]*cfxbr	%r6,5,%f9
 .*:	49 65 af ff [	 ]*ch	%r6,4095\(%r5,%r10\)
 .*:	a7 6e 80 01 [	 ]*chi	%r6,-32767
 .*:	b2 41 00 69 [	 ]*cksm	%r6,%r9
