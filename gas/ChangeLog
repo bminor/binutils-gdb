@@ -1,3 +1,8 @@
+2007-02-20  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* config/tc-m68k.c (mcf5210a_ctrl, mcf52235_ctrl, mcf5225_ctrl): New.
+	(m68k_cpus): Add 5210a..5211a, 52230..52235 5224..5225.
+
 2007-02-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* write.c (TC_FX_SIZE_SLACK): Define.
