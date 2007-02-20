@@ -776,7 +776,7 @@ xtensa_regset_from_core_section (struct gdbarch *core_arch,
 {
   DEBUGTRACE ("xtensa_regset_from_core_section "
 	      "(..., sect_name==\"%s\", sect_size==%x) \n",
-	      sect_name, sect_size);
+	      sect_name, (int) sect_size);
 
   if (strcmp (sect_name, ".reg") == 0
       && sect_size >= sizeof(xtensa_elf_gregset_t))
@@ -1001,8 +1001,8 @@ xtensa_frame_this_id (struct frame_info *next_frame,
   struct xtensa_frame_cache *cache =
     xtensa_frame_cache (next_frame, this_cache);
 
-  DEBUGTRACE ("xtensa_frame_this_id (next 0x%08x, *this 0x%08x)\n",
-	      (unsigned int) next_frame, (unsigned int) *this_cache);
+  DEBUGTRACE ("xtensa_frame_this_id (next %p, *this %p)\n",
+	      next_frame, *this_cache);
 
   if (cache->prev_sp == 0)
     return;
@@ -1026,10 +1026,10 @@ xtensa_frame_prev_register (struct frame_info *next_frame,
   CORE_ADDR saved_reg = 0;
   int done = 1;
 
-  DEBUGTRACE ("xtensa_frame_prev_register (next 0x%08x, "
-	      "*this 0x%08x, regnum %d (%s), ...)\n",
-	      (unsigned int) next_frame,
-	      *this_cache? (unsigned int) *this_cache : 0, regnum,
+  DEBUGTRACE ("xtensa_frame_prev_register (next %p, "
+	      "*this %p, regnum %d (%s), ...)\n",
+	      next_frame,
+	      *this_cache ? *this_cache : 0, regnum,
 	      xtensa_register_name (regnum));
 
   if (regnum == WS_REGNUM)
@@ -1299,8 +1299,8 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
         {
 	  struct value *arg = args[i];
 	  struct type *arg_type = check_typedef (value_type (arg));
-	  fprintf_unfiltered (gdb_stdlog, "%2d: 0x%08x %3d ",
-			      i, (int) arg, TYPE_LENGTH (arg_type));
+	  fprintf_unfiltered (gdb_stdlog, "%2d: %p %3d ",
+			      i, arg, TYPE_LENGTH (arg_type));
 	  switch (TYPE_CODE (arg_type))
 	    {
 	    case TYPE_CODE_INT:
@@ -1313,8 +1313,8 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 	      fprintf_unfiltered (gdb_stdlog, "%3d", TYPE_CODE (arg_type));
 	      break;
 	    }
-	  fprintf_unfiltered (gdb_stdlog, " 0x%08x\n",
-			      (unsigned int) value_contents (arg));
+	  fprintf_unfiltered (gdb_stdlog, " %p\n",
+			      value_contents (arg));
 	}
     }
 

@@ -1118,9 +1118,9 @@ mt_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      provided.  */
   gdbarch = gdbarch_alloc (&info, NULL);
 
-  set_gdbarch_float_format (gdbarch, floatformats_ieee_single_big);
-  set_gdbarch_double_format (gdbarch, floatformats_ieee_double_big);
-  set_gdbarch_long_double_format (gdbarch, floatformats_ieee_double_big);
+  set_gdbarch_float_format (gdbarch, floatformats_ieee_single);
+  set_gdbarch_double_format (gdbarch, floatformats_ieee_double);
+  set_gdbarch_long_double_format (gdbarch, floatformats_ieee_double);
 
   set_gdbarch_register_name (gdbarch, mt_register_name);
   set_gdbarch_num_regs (gdbarch, MT_NUM_REGS);

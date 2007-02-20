@@ -23,6 +23,7 @@
 #include "gdb_string.h"
 #include "inferior.h"
 #include "gdbcore.h"
+#include "solib.h"
 #include "solist.h"
 #include "frv-tdep.h"
 #include "objfiles.h"

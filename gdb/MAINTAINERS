@@ -256,7 +256,8 @@ the native maintainer when resolving ABI issues.
 
 	avr		--target=avr ,-Werror
 
-	cris		--target=cris-elf ,-Werror
+	cris		--target=cris-elf ,-Werror ,
+			(sim does not build with -Werror)
 
 	d10v		OBSOLETE
 
@@ -308,7 +309,8 @@ the native maintainer when resolving ABI issues.
 	sh		--target=sh-elf ,-Werror
 			--target=sh64-elf ,-Werror
 
-	sparc		--target=sparc-elf ,-Werror
+	sparc		--target=sparc64-solaris2.10 ,-Werror
+			(--target=sparc-elf broken)
 
 	spu		--target=spu-elf ,-Werror
 			Ulrich Weigand		uweigand@de.ibm.com

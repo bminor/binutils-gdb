@@ -123,7 +123,6 @@ tmp-igen: $(IGEN_INSN) $(IGEN_DC) ../igen/igen
 clean-extra: clean-igen
 	rm -f table.c simops.h gencode
 
-#interp.o: interp.c table.c $(INCLUDE)
+interp.o: interp.c $(INCLUDE)
 simops.o: simops.c simops.h $(INCLUDE) targ-vals.h
-#table.o: table.c
 semantics.o: $(INCLUDE)

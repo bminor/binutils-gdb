@@ -1,3 +1,14 @@
+2007-02-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* MAINTAINERS: Disable -Werror for cris simulator.  Build
+	sparc64-solaris2.10 instead of the broken sparc-elf.
+	* solib-frv.c: Include "solib.h".
+	* Makefile.in (solib-frv.o): Update.
+	* mt-tdep.c (mt_gdbarch_init): Correct typo in floatformats patch.
+	* xtensa-tdep.c (xtensa_regset_from_core_section): Cast size_t to int.
+	(xtensa_frame_this_id, xtensa_frame_prev_register)
+	(xtensa_push_dummy_call): Use %p.
+
 2007-02-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* avr-tdep.c, hppa-tdep.c, hppabsd-tdep.c, i386-tdep.c,
