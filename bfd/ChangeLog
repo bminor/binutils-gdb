@@ -1,3 +1,8 @@
+2007-02-19  Thiemo Seufer  <ths@mips.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_print_private_bfd_data): Remove
+	translation marker from untranslatable strings.
+
 2007-02-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (struct elf_backend_data): Add default_execstack.

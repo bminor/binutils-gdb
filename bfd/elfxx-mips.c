@@ -11192,51 +11192,51 @@ _bfd_mips_elf_print_private_bfd_data (bfd *abfd, void *ptr)
     fprintf (file, _(" [no abi set]"));
 
   if ((elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_1)
-    fprintf (file, _(" [mips1]"));
+    fprintf (file, " [mips1]");
   else if ((elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_2)
-    fprintf (file, _(" [mips2]"));
+    fprintf (file, " [mips2]");
   else if ((elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_3)
-    fprintf (file, _(" [mips3]"));
+    fprintf (file, " [mips3]");
   else if ((elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_4)
-    fprintf (file, _(" [mips4]"));
+    fprintf (file, " [mips4]");
   else if ((elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_5)
-    fprintf (file, _(" [mips5]"));
+    fprintf (file, " [mips5]");
   else if ((elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_32)
-    fprintf (file, _(" [mips32]"));
+    fprintf (file, " [mips32]");
   else if ((elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_64)
-    fprintf (file, _(" [mips64]"));
+    fprintf (file, " [mips64]");
   else if ((elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_32R2)
-    fprintf (file, _(" [mips32r2]"));
+    fprintf (file, " [mips32r2]");
   else if ((elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_64R2)
-    fprintf (file, _(" [mips64r2]"));
+    fprintf (file, " [mips64r2]");
   else
     fprintf (file, _(" [unknown ISA]"));
 
   if (elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH_ASE_MDMX)
-    fprintf (file, _(" [mdmx]"));
+    fprintf (file, " [mdmx]");
 
   if (elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH_ASE_M16)
-    fprintf (file, _(" [mips16]"));
+    fprintf (file, " [mips16]");
 
   if (elf_elfheader (abfd)->e_flags & EF_MIPS_32BITMODE)
-    fprintf (file, _(" [32bitmode]"));
+    fprintf (file, " [32bitmode]");
   else
     fprintf (file, _(" [not 32bitmode]"));
 
   if (elf_elfheader (abfd)->e_flags & EF_MIPS_NOREORDER)
-    fprintf (file, _(" [noreorder]"));
+    fprintf (file, " [noreorder]");
 
   if (elf_elfheader (abfd)->e_flags & EF_MIPS_PIC)
-    fprintf (file, _(" [PIC]"));
+    fprintf (file, " [PIC]");
 
   if (elf_elfheader (abfd)->e_flags & EF_MIPS_CPIC)
-    fprintf (file, _(" [CPIC]"));
+    fprintf (file, " [CPIC]");
 
   if (elf_elfheader (abfd)->e_flags & EF_MIPS_XGOT)
-    fprintf (file, _(" [XGOT]"));
+    fprintf (file, " [XGOT]");
 
   if (elf_elfheader (abfd)->e_flags & EF_MIPS_UCODE)
-    fprintf (file, _(" [UCODE]"));
+    fprintf (file, " [UCODE]");
 
   fputc ('\n', file);
 
