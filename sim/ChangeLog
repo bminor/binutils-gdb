@@ -1,3 +1,8 @@
+2007-02-20  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris/traps.c (dump_statistics): Change format for cycle numbers
+	to %llu and cast parameters to unsigned long long.
+
 2007-02-16  Thiemo Seufer  <ths@mips.com>
 
 	* Makefile.in (FLAGS_TO_PASS, TARGET_FLAGS_TO_PASS): Add RUNTEST.

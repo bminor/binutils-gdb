@@ -870,25 +870,25 @@ dump_statistics (SIM_CPU *current_cpu)
 
   /* For v32, unaligned_mem_dword_count should always be 0.  For
      v10, memsrc_stall_count should always be 0.  */
-  sim_io_eprintf (sd, "Memory source stall cycles: %lld\n",
-		  profp->memsrc_stall_count
-		  + profp->unaligned_mem_dword_count);
-  sim_io_eprintf (sd, "Memory read-after-write stall cycles: %lld\n",
-		  profp->memraw_stall_count);
-  sim_io_eprintf (sd, "Movem source stall cycles: %lld\n",
-		  profp->movemsrc_stall_count);
-  sim_io_eprintf (sd, "Movem destination stall cycles: %lld\n",
-		  profp->movemdst_stall_count);
-  sim_io_eprintf (sd, "Movem address stall cycles: %lld\n",
-		  profp->movemaddr_stall_count);
-  sim_io_eprintf (sd, "Multiplication source stall cycles: %lld\n",
-		  profp->mulsrc_stall_count);
-  sim_io_eprintf (sd, "Jump source stall cycles: %lld\n",
-		  profp->jumpsrc_stall_count);
-  sim_io_eprintf (sd, "Branch misprediction stall cycles: %lld\n",
-		  profp->branch_stall_count);
-  sim_io_eprintf (sd, "Jump target stall cycles: %lld\n",
-		  profp->jumptarget_stall_count);
+  sim_io_eprintf (sd, "Memory source stall cycles: %llu\n",
+		  (unsigned long long) (profp->memsrc_stall_count
+					+ profp->unaligned_mem_dword_count));
+  sim_io_eprintf (sd, "Memory read-after-write stall cycles: %llu\n",
+		  (unsigned long long) profp->memraw_stall_count);
+  sim_io_eprintf (sd, "Movem source stall cycles: %llu\n",
+		  (unsigned long long) profp->movemsrc_stall_count);
+  sim_io_eprintf (sd, "Movem destination stall cycles: %llu\n",
+		  (unsigned long long) profp->movemdst_stall_count);
+  sim_io_eprintf (sd, "Movem address stall cycles: %llu\n",
+		  (unsigned long long) profp->movemaddr_stall_count);
+  sim_io_eprintf (sd, "Multiplication source stall cycles: %llu\n",
+		  (unsigned long long) profp->mulsrc_stall_count);
+  sim_io_eprintf (sd, "Jump source stall cycles: %llu\n",
+		  (unsigned long long) profp->jumpsrc_stall_count);
+  sim_io_eprintf (sd, "Branch misprediction stall cycles: %llu\n",
+		  (unsigned long long) profp->branch_stall_count);
+  sim_io_eprintf (sd, "Jump target stall cycles: %llu\n",
+		  (unsigned long long) profp->jumptarget_stall_count);
 }
 
 /* Check whether any part of [addr .. addr + len - 1] is already mapped.
