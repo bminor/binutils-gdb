@@ -1,5 +1,9 @@
 2007-02-20  Thiemo Seufer  <ths@mips.com>
 
+	* doc/c-mips.texi: Document 74kc, 74kf, 74kx.
+
+2007-02-20  Thiemo Seufer  <ths@mips.com>
+
 	* config/tc-mips.c (mips_cpu_info_table): Add 74K configurations.
 
 2007-02-20  Thiemo Seufer  <ths@mips.com>
