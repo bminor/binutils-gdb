@@ -1,9 +1,9 @@
 // -*- C -*-
 
 // Simulator definition for the MIPS DSP REV 2 ASE.
-// Copyright (C) 2006 MIPS Technologies, Inc.
-// All rights reserved.
-// Contributed by Chao-ying Fu (fu@mips.com).
+// Copyright (C) 2007 Free Software Foundation, Inc.
+// Contributed by MIPS Technologies, Inc.
+// Written by Chao-ying Fu (fu@mips.com).
 //
 // This file is part of GDB, the GNU debugger.
 //

@@ -1,4 +1,9 @@
 2007-02-20  Thiemo Seufer  <ths@mips.com>
+
+	* dsp.igen: Update copyright notice.
+	* dsp2.igen: Fix copyright notice.
+
+2007-02-20  Thiemo Seufer  <ths@mips.com>
             Chao-Ying Fu  <fu@mips.com>
 
 	* Makefile.in (IGEN_INCLUDE): Add dsp2.igen.
