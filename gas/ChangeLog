@@ -1,4 +1,8 @@
 2007-02-20  Thiemo Seufer  <ths@mips.com>
+
+	* config/tc-mips.c (mips_cpu_info_table): Add 74K configurations.
+
+2007-02-20  Thiemo Seufer  <ths@mips.com>
             Chao-Ying Fu  <fu@mips.com>
 
 	* config/tc-mips.c (mips_set_options, mips_opts, file_ase_dspr2,
