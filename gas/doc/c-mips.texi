@@ -137,9 +137,16 @@ This tells the assembler to accept MDMX instructions.
 
 @item -mdsp
 @itemx -mno-dsp
-Generate code for the DSP Application Specific Extension.
-This tells the assembler to accept DSP instructions.
+Generate code for the DSP Release 1 Application Specific Extension.
+This tells the assembler to accept DSP Release 1 instructions.
 @samp{-mno-dsp} turns off this option.
+
+@item -mdspr2
+@itemx -mno-dspr2
+Generate code for the DSP Release 2 Application Specific Extension.
+This option implies -mdsp.
+This tells the assembler to accept DSP Release 2 instructions.
+@samp{-mno-dspr2} turns off this option.
 
 @item -mmt
 @itemx -mno-mt
@@ -520,13 +527,22 @@ from the MDMX Application Specific Extension from that point on
 in the assembly.  The @code{.set nomdmx} directive prevents MDMX
 instructions from being accepted.
 
-@cindex MIPS DSP instruction generation override
+@cindex MIPS DSP Release 1 instruction generation override
 @kindex @code{.set dsp}
 @kindex @code{.set nodsp}
 The directive @code{.set dsp} makes the assembler accept instructions
-from the DSP Application Specific Extension from that point on
-in the assembly.  The @code{.set nodsp} directive prevents DSP
-instructions from being accepted.
+from the DSP Release 1 Application Specific Extension from that point
+on in the assembly.  The @code{.set nodsp} directive prevents DSP
+Release 1 instructions from being accepted.
+
+@cindex MIPS DSP Release 2 instruction generation override
+@kindex @code{.set dspr2}
+@kindex @code{.set nodspr2}
+The directive @code{.set dspr2} makes the assembler accept instructions
+from the DSP Release 2 Application Specific Extension from that point
+on in the assembly.  This dirctive implies @code{.set dsp}.  The
+@code{.set nodspr2} directive prevents DSP Release 2 instructions from
+being accepted.
 
 @cindex MIPS MT instruction generation override
 @kindex @code{.set mt}

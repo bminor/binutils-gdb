@@ -86,4 +86,5 @@ if {[istarget mips*-*-elf] && [board_info target exists is_simulator]} {
     run_sim_test mdmx-ob-sb1.s $mdmxmodels
 
     run_sim_test mips32-dsp.s $dspmodels
+    run_sim_test mips32-dsp2.s $dspmodels
 }

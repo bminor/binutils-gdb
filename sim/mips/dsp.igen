@@ -21,12 +21,12 @@
 // 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 
-// op: 0 = ADD, 1 = SUB
+// op: 0 = ADD, 1 = SUB, 2 = MUL
 // sat: 0 = no saturation, 1 = saturation
 :function:::void:do_ph_op:int rd, int rs, int rt, int op, int sat
 {
   int i;
-  signed32 h0;
+  signed32 h0 = 0;
   signed16 h1, h2;
   unsigned32 v1 = GPR[rs];
   unsigned32 v2 = GPR[rt];
@@ -37,17 +37,22 @@
       h2 = (signed16)(v2 & 0xffff);
       if (op == 0) // ADD
 	h0 = (signed32)h1 + (signed32)h2;
-      else // SUB
+      else if (op == 1) // SUB
         h0 = (signed32)h1 - (signed32)h2;
-      if (((h0 & 0x10000) >> 1) != (h0 & 0x8000))
+      else // MUL
+        h0 = (signed32)h1 * (signed32)h2;
+      if (h0 > (signed32)0x7fff || h0 < (signed32)0xffff8000)
 	{
-	  DSPCR |= DSPCR_OUFLAG4;
+	  if (op == 0 || op == 1) // ADD, SUB
+	    DSPCR |= DSPCR_OUFLAG4;
+	  else if (op == 2) // MUL
+	    DSPCR |= DSPCR_OUFLAG5;
 	  if (sat == 1)
 	    {
-	      if (h0 & 0x10000)
-		h0 = 0x8000;
-	      else
+	      if (h0 > (signed32)0x7fff)
 		h0 = 0x7fff;
+	      else
+		h0 = 0x8000;
 	    }
 	}
       result |= ((unsigned32)((unsigned16)h0) << i);
@@ -775,14 +780,13 @@
   do_qb_muleu (SD_, RD, RS, RT, 1);
 }
 
-011111,5.RS,5.RT,5.RD,11111,010000:SPECIAL3:32::MULQ_RS.PH
-"mulq_rs.ph r<RD>, r<RS>, r<RT>"
-*dsp:
+// round: 0 = no rounding, 1 = rounding
+:function:::void:do_ph_mulq:int rd, int rs, int rt, int round
 {
   int i;
   unsigned32 result = 0;
-  unsigned32 v1 = GPR[RS];
-  unsigned32 v2 = GPR[RT];
+  unsigned32 v1 = GPR[rs];
+  unsigned32 v2 = GPR[rt];
   signed16 h1, h2;
   signed32 prod;
   for (i = 0; i < 32; i += 16, v1 >>= 16, v2 >>= 16)
@@ -795,11 +799,21 @@
 	  prod = 0x7fffffff;
 	}
       else
-	prod = (((signed32)h1 * (signed32)h2) << 1) + (signed32)0x8000;
-
+	{
+	  prod = ((signed32)h1 * (signed32)h2) << 1;
+	  if (round == 1)
+	    prod += (signed32)0x8000;
+	}
       result |= (((unsigned32)prod >> 16) << i);
     }
-  GPR[RD] = EXTEND32 (result);
+  GPR[rd] = EXTEND32 (result);
+}
+
+011111,5.RS,5.RT,5.RD,11111,010000:SPECIAL3:32::MULQ_RS.PH
+"mulq_rs.ph r<RD>, r<RS>, r<RT>"
+*dsp:
+{
+  do_ph_mulq (SD_, RD, RS, RT, 1);
 }
 
 // loc: 0 = phl, 1 = phr
@@ -1649,64 +1663,6 @@
     pos += 32;
   DSPCR &= (~DSPCR_POS_SMASK);
   DSPCR |= (pos & DSPCR_POS_MASK) << DSPCR_POS_SHIFT;
-}
-
-000000,000,2.AC,00000,5.RD,00000,010000:SPECIAL:32::MFHIdsp
-"mfhi r<RD>":AC == 0
-"mfhi r<RD>, ac<AC>"
-*mips32:
-*mips32r2:
-*mips64:
-*mips64r2:
-*dsp:
-{
-  if (AC == 0)
-    do_mfhi (SD_, RD);
-  else
-    GPR[RD] = DSPHI(AC);
-}
-
-000000,000,2.AC,00000,5.RD,00000,010010:SPECIAL:32::MFLOdsp
-"mflo r<RD>":AC == 0
-"mflo r<RD>, ac<AC>"
-*mips32:
-*mips32r2:
-*mips64:
-*mips64r2:
-*dsp:
-{
-  if (AC == 0)
-    do_mflo (SD_, RD);
-  else
-    GPR[RD] = DSPLO(AC);
-}
-
-000000,5.RS,00000,000,2.AC,00000,010001:SPECIAL:32::MTHIdsp
-"mthi r<RS>":AC == 0
-"mthi r<RS>, ac<AC>"
-*mips32:
-*mips32r2:
-*mips64:
-*mips64r2:
-*dsp:
-{
-  if (AC == 0)
-    check_mt_hilo (SD_, HIHISTORY);
-  DSPHI(AC) = GPR[RS];
-}
-
-000000,5.RS,00000,000,2.AC,00000,010011:SPECIAL:32::MTLOdsp
-"mtlo r<RS>":AC == 0
-"mtlo r<RS>, ac<AC>"
-*mips32:
-*mips32r2:
-*mips64:
-*mips64r2:
-*dsp:
-{
-  if (AC == 0)
-    check_mt_hilo (SD_, LOHISTORY);
-  DSPLO(AC) = GPR[RS];
 }
 
 011111,5.RS,10.MASK10,10011,111000:SPECIAL3:32::WRDSP

@@ -188,6 +188,34 @@
 	.endm
 
 	# Set dsp control register <= crin
+	# Set acc <= {hiin, loin}
+	# (inst acc, s, t)
+	# Check if {hiou, loou} == acc
+	# Check if (crout & 0x80000) == (dsp control register & 0x80000)
+	.macro dspckacc_astio inst, acc, hiin, loin, hiou, loou, s, t, crin, crout
+	li	$4, \crin
+	wrdsp	$4
+	li	$4, \hiin
+	mthi	$4, \acc
+	li	$4, \loin
+	mtlo	$4, \acc
+	li	$4, \s
+	li	$5, \t
+	\inst	\acc, $4, $5
+	li	$4, \hiou
+	mfhi	$5, \acc
+	dsp_assert	$4, $5
+	li	$4, \loou
+	mflo	$5, \acc
+	dsp_assert	$4, $5
+	li	$4, \crout
+	and	$4, $4, 0x80000
+	rddsp	$5
+	and	$5, $5, 0x80000
+	dsp_assert	$4, $5
+	.endm
+
+	# Set dsp control register <= crin
 	# Set $ac1 <= {hi, lo}
 	# Check if t == (inst ? $ac1, s)
 	# Check if crout == dsp control register
@@ -403,5 +431,14 @@
 	li	$5, 0
 1:
 	li	$6, \r
+	dsp_assert	$5, $6
+	.endm
+
+	# Check if tou == (inst tin, s)
+	.macro dspck_tsimm inst, tou, tin, s, sa
+	li	$4, \s
+	li	$5, \tin
+	\inst	$5, $4, \sa
+	li	$6, \tou
 	dsp_assert	$5, $6
 	.endm

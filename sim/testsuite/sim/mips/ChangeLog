@@ -1,3 +1,9 @@
+2007-02-20  Thiemo Seufer  <ths@mips.com>
+            Chao-Ying Fu  <fu@mips.com>
+	* basic.exp: Run the dsp2 test.
+	* utils-dsp.inc (dspckacc_astio, dspck_tsimm): New macro.
+	* mips32-dsp2.s: New test.
+
 2007-02-17  Thiemo Seufer  <ths@mips.com>
 
 	* basic.exp: Add case for mips*-sde-elf*.

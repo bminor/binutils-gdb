@@ -193,6 +193,7 @@ struct mips_set_options
   int ase_mdmx;
   int ase_smartmips;
   int ase_dsp;
+  int ase_dspr2;
   int ase_mt;
   /* Whether we are assembling for the mips16 processor.  0 if we are
      not, 1 if we are, and -1 if the value has not been initialized.
@@ -244,7 +245,7 @@ static int file_mips_fp32 = -1;
 
 static struct mips_set_options mips_opts =
 {
-  ISA_UNKNOWN, -1, -1, 0, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, CPU_UNKNOWN, FALSE
+  ISA_UNKNOWN, -1, -1, 0, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, CPU_UNKNOWN, FALSE
 };
 
 /* These variables are filled in with the masks of registers used.
@@ -288,6 +289,13 @@ static int file_ase_dsp;
 			      || mips_opts.isa == ISA_MIPS64R2)
 
 #define ISA_SUPPORTS_DSP64_ASE (mips_opts.isa == ISA_MIPS64R2)
+
+/* True if -mdspr2 was passed or implied by arguments passed on the
+   command line (e.g., by -march).  */
+static int file_ase_dspr2;
+
+#define ISA_SUPPORTS_DSPR2_ASE (mips_opts.isa == ISA_MIPS32R2		\
+			        || mips_opts.isa == ISA_MIPS64R2)
 
 /* True if -mmt was passed or implied by arguments passed on the
    command line (e.g., by -march).  */
@@ -1052,6 +1060,7 @@ struct mips_cpu_info
 #define MIPS_CPU_ASE_MT		0x0008	/* CPU implements MT ASE */
 #define MIPS_CPU_ASE_MIPS3D	0x0010	/* CPU implements MIPS-3D ASE */
 #define MIPS_CPU_ASE_MDMX	0x0020	/* CPU implements MDMX ASE */
+#define MIPS_CPU_ASE_DSPR2	0x0040	/* CPU implements DSP R2 ASE */
 
 static const struct mips_cpu_info *mips_parse_cpu (const char *, const char *);
 static const struct mips_cpu_info *mips_cpu_info_from_isa (int);
@@ -3326,17 +3335,24 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
   assert (mo);
   assert (strcmp (name, mo->name) == 0);
 
-  /* Search until we get a match for NAME.  It is assumed here that
-     macros will never generate MDMX, MIPS-3D, DSP or MT instructions.  */
-  while (strcmp (fmt, mo->args) != 0
-	 || mo->pinfo == INSN_MACRO
-	 || !OPCODE_IS_MEMBER (mo,
+  while (1)
+    {
+      /* Search until we get a match for NAME.  It is assumed here that
+	 macros will never generate MDMX, MIPS-3D, or MT instructions.  */
+      if (strcmp (fmt, mo->args) == 0
+	  && mo->pinfo != INSN_MACRO
+	  && OPCODE_IS_MEMBER (mo,
 			       (mips_opts.isa
 				| (mips_opts.mips16 ? INSN_MIPS16 : 0)
+				| (mips_opts.ase_dsp ? INSN_DSP : 0)
+				| ((mips_opts.ase_dsp && ISA_SUPPORTS_DSP64_ASE)
+				   ? INSN_DSP64 : 0)
+				| (mips_opts.ase_dspr2 ? INSN_DSPR2 : 0)
 				| (mips_opts.ase_smartmips ? INSN_SMARTMIPS : 0)),
 			       mips_opts.arch)
-	 || (mips_opts.arch == CPU_R4650 && (mo->pinfo & FP_D) != 0))
-    {
+	  && (mips_opts.arch != CPU_R4650 || (mo->pinfo & FP_D) == 0))
+	break;
+
       ++mo;
       assert (mo->name);
       assert (strcmp (name, mo->name) == 0);
@@ -3385,6 +3401,10 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 	    default:
 	      internalError ();
 	    }
+	  continue;
+
+	case '2':
+	  INSERT_OPERAND (BP, insn, va_arg (args, int));
 	  continue;
 
 	case 't':
@@ -4613,6 +4633,22 @@ macro (struct mips_cl_insn *ip)
       used_at = 1;
       load_register (AT, &imm_expr, HAVE_64BIT_GPRS);
       macro_build (NULL, s2, "d,v,t", treg, sreg, AT);
+      break;
+
+    case M_BALIGN:
+      switch (imm_expr.X_add_number)
+	{
+	case 0:
+	  macro_build (NULL, "nop", "");
+	  break;
+	case 2:
+	  macro_build (NULL, "packrl.ph", "d,s,t", treg, treg, sreg);
+	  break;
+	default:
+	  macro_build (NULL, "balign", "t,s,2", treg, sreg,
+		       (int)imm_expr.X_add_number);
+	  break;
+	}
       break;
 
     case M_BEQ_I:
@@ -8222,6 +8258,7 @@ validate_mips_insn (const struct mips_opcode *opc)
       case '%': USE_BITS (OP_MASK_VECALIGN,	OP_SH_VECALIGN); break;
       case '[': break;
       case ']': break;
+      case '2': USE_BITS (OP_MASK_BP,		OP_SH_BP);	break;
       case '3': USE_BITS (OP_MASK_SA3,  	OP_SH_SA3);	break;
       case '4': USE_BITS (OP_MASK_SA4,  	OP_SH_SA4);	break;
       case '5': USE_BITS (OP_MASK_IMM8, 	OP_SH_IMM8);	break;
@@ -8399,6 +8436,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      		     | (mips_opts.ase_dsp ? INSN_DSP : 0)
 	      		     | ((mips_opts.ase_dsp && ISA_SUPPORTS_DSP64_ASE)
 				? INSN_DSP64 : 0)
+	      		     | (mips_opts.ase_dspr2 ? INSN_DSPR2 : 0)
 	      		     | (mips_opts.ase_mt ? INSN_MT : 0)
 			     | (mips_opts.ase_mips3d ? INSN_MIPS3D : 0)
 			     | (mips_opts.ase_smartmips ? INSN_SMARTMIPS : 0)),
@@ -8453,6 +8491,20 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      if (*s == '\0')
 		return;
 	      break;
+
+	    case '2': /* dsp 2-bit unsigned immediate in bit 11 */
+	      my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+	      if ((unsigned long) imm_expr.X_add_number != 1
+		  && (unsigned long) imm_expr.X_add_number != 3)
+		{
+		  as_bad (_("BALIGN immediate not 1 or 3 (%lu)"),
+			  (unsigned long) imm_expr.X_add_number);
+		}
+	      INSERT_OPERAND (BP, *ip, imm_expr.X_add_number);
+	      imm_expr.X_op = O_absent;
+	      s = expr_end;
+	      continue;
 
 	    case '3': /* dsp 3-bit unsigned immediate in bit 21 */
 	      my_getExpression (&imm_expr, s);
@@ -10826,9 +10878,13 @@ struct option md_longopts[] =
   {"msmartmips", no_argument, NULL, OPTION_SMARTMIPS},
 #define OPTION_NO_SMARTMIPS (OPTION_ASE_BASE + 11)
   {"mno-smartmips", no_argument, NULL, OPTION_NO_SMARTMIPS},
+#define OPTION_DSPR2 (OPTION_ASE_BASE + 12)
+  {"mdspr2", no_argument, NULL, OPTION_DSPR2},
+#define OPTION_NO_DSPR2 (OPTION_ASE_BASE + 13)
+  {"mno-dspr2", no_argument, NULL, OPTION_NO_DSPR2},
 
   /* Old-style architecture options.  Don't add more of these.  */
-#define OPTION_COMPAT_ARCH_BASE (OPTION_ASE_BASE + 12)
+#define OPTION_COMPAT_ARCH_BASE (OPTION_ASE_BASE + 14)
 #define OPTION_M4650 (OPTION_COMPAT_ARCH_BASE + 0)
   {"m4650", no_argument, NULL, OPTION_M4650},
 #define OPTION_NO_M4650 (OPTION_COMPAT_ARCH_BASE + 1)
@@ -11079,9 +11135,21 @@ md_parse_option (int c, char *arg)
 
     case OPTION_DSP:
       mips_opts.ase_dsp = 1;
+      mips_opts.ase_dspr2 = 0;
       break;
 
     case OPTION_NO_DSP:
+      mips_opts.ase_dsp = 0;
+      mips_opts.ase_dspr2 = 0;
+      break;
+
+    case OPTION_DSPR2:
+      mips_opts.ase_dspr2 = 1;
+      mips_opts.ase_dsp = 1;
+      break;
+
+    case OPTION_NO_DSPR2:
+      mips_opts.ase_dspr2 = 0;
       mips_opts.ase_dsp = 0;
       break;
 
@@ -11497,10 +11565,19 @@ mips_after_parse_args (void)
       as_warn ("%s ISA does not support DSP ASE", 
 	       mips_cpu_info_from_isa (mips_opts.isa)->name);
 
+  if (mips_opts.ase_dspr2 == -1)
+    {
+      mips_opts.ase_dspr2 = (arch_info->flags & MIPS_CPU_ASE_DSPR2) ? 1 : 0;
+      mips_opts.ase_dsp = (arch_info->flags & MIPS_CPU_ASE_DSP) ? 1 : 0;
+    }
+  if (mips_opts.ase_dspr2 && !ISA_SUPPORTS_DSPR2_ASE)
+      as_warn ("%s ISA does not support DSP R2 ASE",
+	       mips_cpu_info_from_isa (mips_opts.isa)->name);
+
   if (mips_opts.ase_mt == -1)
     mips_opts.ase_mt = (arch_info->flags & MIPS_CPU_ASE_MT) ? 1 : 0;
   if (mips_opts.ase_mt && !ISA_SUPPORTS_MT_ASE)
-      as_warn ("%s ISA does not support MT ASE", 
+      as_warn ("%s ISA does not support MT ASE",
 	       mips_cpu_info_from_isa (mips_opts.isa)->name);
 
   file_mips_isa = mips_opts.isa;
@@ -11509,6 +11586,7 @@ mips_after_parse_args (void)
   file_ase_mdmx = mips_opts.ase_mdmx;
   file_ase_smartmips = mips_opts.ase_smartmips;
   file_ase_dsp = mips_opts.ase_dsp;
+  file_ase_dspr2 = mips_opts.ase_dspr2;
   file_ase_mt = mips_opts.ase_mt;
   mips_opts.gp32 = file_mips_gp32;
   mips_opts.fp32 = file_mips_fp32;
@@ -12399,9 +12477,26 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
 	as_warn ("%s ISA does not support DSP ASE", 
 		 mips_cpu_info_from_isa (mips_opts.isa)->name);
       mips_opts.ase_dsp = 1;
+      mips_opts.ase_dspr2 = 0;
     }
   else if (strcmp (name, "nodsp") == 0)
-    mips_opts.ase_dsp = 0;
+    {
+      mips_opts.ase_dsp = 0;
+      mips_opts.ase_dspr2 = 0;
+    }
+  else if (strcmp (name, "dspr2") == 0)
+    {
+      if (!ISA_SUPPORTS_DSPR2_ASE)
+	as_warn ("%s ISA does not support DSP R2 ASE",
+		 mips_cpu_info_from_isa (mips_opts.isa)->name);
+      mips_opts.ase_dspr2 = 1;
+      mips_opts.ase_dsp = 1;
+    }
+  else if (strcmp (name, "nodspr2") == 0)
+    {
+      mips_opts.ase_dspr2 = 0;
+      mips_opts.ase_dsp = 0;
+    }
   else if (strcmp (name, "mt") == 0)
     {
       if (!ISA_SUPPORTS_MT_ASE)
@@ -14085,6 +14180,7 @@ mips_elf_final_processing (void)
   /* Set MIPS ELF flags for ASEs.  */
   /* We may need to define a new flag for DSP ASE, and set this flag when
      file_ase_dsp is true.  */
+  /* Same for DSP R2.  */
   /* We may need to define a new flag for MT ASE, and set this flag when
      file_ase_mt is true.  */
   if (file_ase_mips16)
@@ -14824,6 +14920,9 @@ MIPS options:\n\
   fprintf (stream, _("\
 -mdsp			generate DSP instructions\n\
 -mno-dsp		do not generate DSP instructions\n"));
+  fprintf (stream, _("\
+-mdspr2			generate DSP R2 instructions\n\
+-mno-dspr2		do not generate DSP R2 instructions\n"));
   fprintf (stream, _("\
 -mmt			generate MT instructions\n\
 -mno-mt			do not generate MT instructions\n"));

@@ -1,3 +1,20 @@
+2007-02-20  Thiemo Seufer  <ths@mips.com>
+            Chao-Ying Fu  <fu@mips.com>
+
+	* config/tc-mips.c (mips_set_options, mips_opts, file_ase_dspr2,
+	ISA_SUPPORTS_DSPR2_ASE, MIPS_CPU_ASE_DSPR2): Add DSP R2 ASE support.
+	(macro_build): Add case '2'.
+	(macro): Expand M_BALIGN to nop, packrl.ph or balign.
+	(validate_mips_insn): Add support for balign instruction.
+	(mips_ip): Handle DSP R2 instructions. Support balign instruction.
+	(OPTION_DSPR2, OPTION_NO_DSPR2, OPTION_COMPAT_ARCH_BASE,
+	md_parse_option, mips_after_parse_args): Add -mdspr2 and -mno-dspr2
+	command line options.
+	(s_mipsset): Add support for .set dspr2 and .set nodspr2 directives.
+	(md_show_usage): Add -mdspr2 and -mno-dspr2 help output.
+	* doc/c-mips.texi, doc/as.texinfo: Document -mdspr2, -mno-dspr2,
+	.set dspr2, .set nodspr2.
+
 2007-02-20  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* config/tc-m68k.c (mcf5210a_ctrl, mcf52235_ctrl, mcf5225_ctrl): New.

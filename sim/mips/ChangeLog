@@ -1,3 +1,21 @@
+2007-02-20  Thiemo Seufer  <ths@mips.com>
+            Chao-Ying Fu  <fu@mips.com>
+
+	* Makefile.in (IGEN_INCLUDE): Add dsp2.igen.
+	* configure.ac (mips*-sde-elf*, mipsisa32r2*-*-*, mipsisa64r2*-*-*):
+	Add dsp2 to sim_igen_machine.
+	* configure: Regenerate.
+	* dsp.igen (do_ph_op): Add MUL support when op = 2.
+	(do_ph_mulq): New function to support mulq_rs.ph and mulq_s.ph.
+	(mulq_rs.ph): Use do_ph_mulq.
+	(MFHI, MFLO, MTHI, MTLO): Move these instructions to mips.igen.
+	* mips.igen: Add dsp2 model and include dsp2.igen.
+	(MFHI, MFLO, MTHI, MTLO): Extend these instructions for
+	for *mips32r2, *mips64r2, *dsp.
+	(MADD, MADDU, MSUB, MSUBU, MULT, MULTU): Extend these instructions
+	for *mips32r2, *mips64r2, *dsp2.
+	* dsp2.igen: New file for MIPS DSP REV 2 ASE.
+
 2007-02-19  Thiemo Seufer  <ths@mips.com>
             Nigel Stephens  <nigel@mips.com>
 

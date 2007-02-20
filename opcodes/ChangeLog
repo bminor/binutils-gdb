@@ -1,3 +1,11 @@
+2007-02-20  Thiemo Seufer  <ths@mips.com>
+            Chao-Ying Fu  <fu@mips.com>
+
+	* mips-dis.c (mips_arch_choices): Add DSP R2 support.
+	(print_insn_args): Add support for balign instruction.
+	* mips-opc.c (D33): New shortcut for DSP R2 instructions.
+	(mips_builtin_opcodes): Add DSP R2 instructions.
+
 2007-02-19  Andreas Krebbel  <krebbel1@de.ibm.com>
 
 	* s390-opc.c (INSTR_RRF_U0FR, MASK_RRF_U0FR): Removed.

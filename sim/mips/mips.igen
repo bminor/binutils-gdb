@@ -72,6 +72,7 @@
 :model:::mips3d:mips3d:			// mips3d.igen
 :model:::mdmx:mdmx:			// mdmx.igen
 :model:::dsp:dsp:			// dsp.igen
+:model:::dsp2:dsp2:			// dsp2.igen
 :model:::smartmips:smartmips:		// smartmips.igen
 
 //  Vendor Extensions
@@ -2430,9 +2431,7 @@
 011100,5.RS,5.RT,00000,00000,000000:SPECIAL2:32::MADD
 "madd r<RS>, r<RT>"
 *mips32:
-*mips32r2:
 *mips64:
-*mips64r2:
 *vr5500:
 {
   signed64 temp;
@@ -2448,13 +2447,32 @@
 }
 
 
+011100,5.RS,5.RT,000,2.AC,00000,000000:SPECIAL2:32::MADD
+"madd r<RS>, r<RT>":AC == 0
+"madd ac<AC>, r<RS>, r<RT>"
+*mips32r2:
+*mips64r2:
+*dsp2:
+{
+  signed64 temp;
+  if (AC == 0)
+    check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
+  if (NotWordValue (GPR[RS]) || NotWordValue (GPR[RT]))
+    Unpredictable ();
+  TRACE_ALU_INPUT2 (GPR[RS], GPR[RT]);
+  temp = (U8_4 (VL4_8 (DSPHI(AC)), VL4_8 (DSPLO(AC)))
+	  + ((signed64) EXTEND32 (GPR[RT]) * (signed64) EXTEND32 (GPR[RS])));
+  DSPLO(AC) = EXTEND32 (temp);
+  DSPHI(AC) = EXTEND32 (VH4_8 (temp));
+  if (AC == 0)
+    TRACE_ALU_RESULT2 (HI, LO);
+}
+
 
 011100,5.RS,5.RT,00000,00000,000001:SPECIAL2:32::MADDU
 "maddu r<RS>, r<RT>"
 *mips32:
-*mips32r2:
 *mips64:
-*mips64r2:
 *vr5500:
 {
   unsigned64 temp;
@@ -2468,6 +2486,30 @@
   LO = EXTEND32 (temp);
   HI = EXTEND32 (VH4_8 (temp));
   TRACE_ALU_RESULT2 (HI, LO);
+}
+
+
+011100,5.RS,5.RT,000,2.AC,00000,000001:SPECIAL2:32::MADDU
+"maddu r<RS>, r<RT>":AC == 0
+"maddu ac<AC>, r<RS>, r<RT>"
+*mips32r2:
+*mips64r2:
+*dsp2:
+{
+  unsigned64 temp;
+  if (AC == 0)
+    check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
+  if (NotWordValue (GPR[RS]) || NotWordValue (GPR[RT]))
+    Unpredictable ();
+  TRACE_ALU_INPUT2 (GPR[RS], GPR[RT]);
+  temp = (U8_4 (VL4_8 (DSPHI(AC)), VL4_8 (DSPLO(AC)))
+	  + ((unsigned64) VL4_8 (GPR[RS]) * (unsigned64) VL4_8 (GPR[RT])));
+  if (AC == 0)
+    ACX += U8_4 (VL4_8 (HI), VL4_8 (LO)) < temp;  /* SmartMIPS */
+  DSPLO(AC) = EXTEND32 (temp);
+  DSPHI(AC) = EXTEND32 (VH4_8 (temp));
+  if (AC == 0)
+    TRACE_ALU_RESULT2 (HI, LO);
 }
 
 
@@ -2494,6 +2536,19 @@
 }
 
 
+000000,000,2.AC,00000,5.RD,00000,010000:SPECIAL:32::MFHI
+"mfhi r<RD>":AC == 0
+"mfhi r<RD>, ac<AC>"
+*mips32r2:
+*mips64r2:
+*dsp:
+{
+  if (AC == 0)
+    do_mfhi (SD_, RD);
+  else
+    GPR[RD] = DSPHI(AC);
+}
+
 
 :function:::void:do_mflo:int rd
 {
@@ -2517,6 +2572,19 @@
   do_mflo (SD_, RD);
 }
 
+
+000000,000,2.AC,00000,5.RD,00000,010010:SPECIAL:32::MFLO
+"mflo r<RD>":AC == 0
+"mflo r<RD>, ac<AC>"
+*mips32r2:
+*mips64r2:
+*dsp:
+{
+  if (AC == 0)
+    do_mflo (SD_, RD);
+  else
+    GPR[RD] = DSPLO(AC);
+}
 
 
 000000,5.RS,5.RT,5.RD,00000,001011:SPECIAL:32::MOVN
@@ -2560,9 +2628,7 @@
 011100,5.RS,5.RT,00000,00000,000100:SPECIAL2:32::MSUB
 "msub r<RS>, r<RT>"
 *mips32:
-*mips32r2:
 *mips64:
-*mips64r2:
 *vr5500:
 {
   signed64 temp;
@@ -2578,13 +2644,32 @@
 }
 
 
+011100,5.RS,5.RT,000,2.AC,00000,000100:SPECIAL2:32::MSUB
+"msub r<RS>, r<RT>":AC == 0
+"msub ac<AC>, r<RS>, r<RT>"
+*mips32r2:
+*mips64r2:
+*dsp2:
+{
+  signed64 temp;
+  if (AC == 0)
+    check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
+  if (NotWordValue (GPR[RS]) || NotWordValue (GPR[RT]))
+    Unpredictable ();
+  TRACE_ALU_INPUT2 (GPR[RS], GPR[RT]);
+  temp = (U8_4 (VL4_8 (DSPHI(AC)), VL4_8 (DSPLO(AC)))
+	  - ((signed64) EXTEND32 (GPR[RT]) * (signed64) EXTEND32 (GPR[RS])));
+  DSPLO(AC) = EXTEND32 (temp);
+  DSPHI(AC) = EXTEND32 (VH4_8 (temp));
+  if (AC == 0)
+    TRACE_ALU_RESULT2 (HI, LO);
+}
+
 
 011100,5.RS,5.RT,00000,00000,000101:SPECIAL2:32::MSUBU
 "msubu r<RS>, r<RT>"
 *mips32:
-*mips32r2:
 *mips64:
-*mips64r2:
 *vr5500:
 {
   unsigned64 temp;
@@ -2599,6 +2684,27 @@
   TRACE_ALU_RESULT2 (HI, LO);
 }
 
+
+011100,5.RS,5.RT,000,2.AC,00000,000101:SPECIAL2:32::MSUBU
+"msubu r<RS>, r<RT>":AC == 0
+"msubu ac<AC>, r<RS>, r<RT>"
+*mips32r2:
+*mips64r2:
+*dsp2:
+{
+  unsigned64 temp;
+  if (AC == 0)
+    check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
+  if (NotWordValue (GPR[RS]) || NotWordValue (GPR[RT]))
+    Unpredictable ();
+  TRACE_ALU_INPUT2 (GPR[RS], GPR[RT]);
+  temp = (U8_4 (VL4_8 (DSPHI(AC)), VL4_8 (DSPLO(AC)))
+          - ((unsigned64) VL4_8 (GPR[RS]) * (unsigned64) VL4_8 (GPR[RT])));
+  DSPLO(AC) = EXTEND32 (temp);
+  DSPHI(AC) = EXTEND32 (VH4_8 (temp));
+  if (AC == 0)
+    TRACE_ALU_RESULT2 (HI, LO);
+}
 
 
 000000,5.RS,000000000000000,010001:SPECIAL:32::MTHI
@@ -2617,6 +2723,18 @@
 }
 
 
+000000,5.RS,00000,000,2.AC,00000,010001:SPECIAL:32::MTHI
+"mthi r<RS>":AC == 0
+"mthi r<RS>, ac<AC>"
+*mips32r2:
+*mips64r2:
+*dsp:
+{
+  if (AC == 0)
+    check_mt_hilo (SD_, HIHISTORY);
+  DSPHI(AC) = GPR[RS];
+}
+
 
 000000,5.RS,000000000000000,010011:SPECIAL:32::MTLO
 "mtlo r<RS>"
@@ -2633,6 +2751,18 @@
   LO = GPR[RS];
 }
 
+
+000000,5.RS,00000,000,2.AC,00000,010011:SPECIAL:32::MTLO
+"mtlo r<RS>":AC == 0
+"mtlo r<RS>, ac<AC>"
+*mips32r2:
+*mips64r2:
+*dsp:
+{
+  if (AC == 0)
+    check_mt_hilo (SD_, LOHISTORY);
+  DSPLO(AC) = GPR[RS];
+}
 
 
 011100,5.RS,5.RT,5.RD,00000,000010:SPECIAL2:32::MUL
@@ -2680,12 +2810,35 @@
 *mipsIV:
 *mipsV:
 *mips32:
-*mips32r2:
 *mips64:
-*mips64r2:
 *vr4100:
 {
   do_mult (SD_, RS, RT, 0);
+}
+
+
+000000,5.RS,5.RT,000,2.AC,00000,011000:SPECIAL:32::MULT
+"mult r<RS>, r<RT>":AC == 0
+"mult ac<AC>, r<RS>, r<RT>"
+*mips32r2:
+*mips64r2:
+*dsp2:
+{
+  signed64 prod;
+  if (AC == 0)
+    check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
+  if (NotWordValue (GPR[RS]) || NotWordValue (GPR[RT]))
+    Unpredictable ();
+  TRACE_ALU_INPUT2 (GPR[RS], GPR[RT]);
+  prod = ((signed64)(signed32) GPR[RS])
+	  * ((signed64)(signed32) GPR[RT]);
+  DSPLO(AC) = EXTEND32 (VL4_8 (prod));
+  DSPHI(AC) = EXTEND32 (VH4_8 (prod));
+  if (AC == 0)
+    {
+      ACX = 0;  /* SmartMIPS */
+      TRACE_ALU_RESULT2 (HI, LO);
+    }
 }
 
 
@@ -2723,13 +2876,34 @@
 *mipsIV:
 *mipsV:
 *mips32:
-*mips32r2:
 *mips64:
-*mips64r2:
 *vr4100:
 {
   do_multu (SD_, RS, RT, 0);
 }
+
+
+000000,5.RS,5.RT,000,2.AC,00000,011001:SPECIAL:32::MULTU
+"multu r<RS>, r<RT>":AC == 0
+"multu r<RS>, r<RT>"
+*mips32r2:
+*mips64r2:
+*dsp2:
+{
+  unsigned64 prod;
+  if (AC == 0)
+    check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
+  if (NotWordValue (GPR[RS]) || NotWordValue (GPR[RT]))
+    Unpredictable ();
+  TRACE_ALU_INPUT2 (GPR[RS], GPR[RT]);
+  prod = ((unsigned64)(unsigned32) GPR[RS])
+          * ((unsigned64)(unsigned32) GPR[RT]);
+  DSPLO(AC) = EXTEND32 (VL4_8 (prod));
+  DSPHI(AC) = EXTEND32 (VH4_8 (prod));
+  if (AC == 0)
+    TRACE_ALU_RESULT2 (HI, LO);
+}
+
 
 000000,5.RS,5.RT,5.RD,00000,011001:SPECIAL:32::MULTU
 "multu r<RS>, r<RT>":RD == 0
@@ -5694,5 +5868,6 @@
 :include:::tx.igen
 :include:::vr.igen
 :include:::dsp.igen
+:include:::dsp2.igen
 :include:::smartmips.igen
 
