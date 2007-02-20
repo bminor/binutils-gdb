@@ -31,4 +31,10 @@
 # define XML_STATUS_ERROR 0
 #endif
 
+/* Old versions of expat do not define this macro, so define it
+   as void.  */
+#ifndef XMLCALL
+#define XMLCALL
+#endif
+
 #endif /* !defined(GDB_EXPAT_H) */

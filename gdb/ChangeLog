@@ -1,3 +1,7 @@
+2007-02-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb_expat.h (XMLCALL): Define if not already defined.
+
 2007-02-20  Andreas Schwab  <schwab@suse.de>
 
 	* Makefile.in (symfile.o): Update dependencies.
