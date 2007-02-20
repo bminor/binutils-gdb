@@ -1,3 +1,8 @@
+2007-02-21  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 4082
+	* config/tc-avr.h (TC_FX_SIZE_SLACK): Define.
+
 2007-02-20  Thiemo Seufer  <ths@mips.com>
 
 	* doc/c-mips.texi: Document 74kc, 74kf, 74kx.

@@ -1,5 +1,6 @@
 /* This file is tc-avr.h
-   Copyright 1999, 2000, 2001, 2002, 2005, 2006 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2005, 2006, 2007
+   Free Software Foundation, Inc.
 
    Contributed by Denis Chertykov <denisc@overta.ru>
 
@@ -143,3 +144,6 @@ extern long md_pcrel_from_section (struct fix *, segT);
     {                                                        \
       goto SKIP;                                             \
    }
+
+/* This target is buggy, and sets fix size too large.  */
+#define TC_FX_SIZE_SLACK(FIX) 2
