@@ -3953,6 +3953,10 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	      new_segment = FALSE;
 	    }
 
+	  /* Allow interested parties a chance to override our decision.  */
+	  if (last_hdr && info->callbacks->override_segment_assignment)
+	    new_segment = info->callbacks->override_segment_assignment (info, abfd, hdr, last_hdr, new_segment);
+
 	  if (! new_segment)
 	    {
 	      if ((hdr->flags & SEC_READONLY) == 0)

@@ -4704,6 +4704,42 @@ lang_size_sections_1
   return dot;
 }
 
+/* Callback routine that is used in _bfd_elf_map_sections_to_segments.  */
+
+bfd_boolean
+ldlang_override_segment_assignment (struct bfd_link_info * info ATTRIBUTE_UNUSED,
+				    bfd * abfd ATTRIBUTE_UNUSED,
+				    asection * current_section,
+				    asection * previous_section,
+				    bfd_boolean new_segment)
+{
+  lang_output_section_statement_type * cur;
+  lang_output_section_statement_type * prev;
+  
+  if (new_segment)
+    return TRUE;
+
+  /* Paranoia checks.  */
+  if (current_section == NULL || previous_section == NULL)
+    return new_segment;
+
+  /* Find the memory regions associated with the two sections.
+     We call lang_output_section_find() here rather than scanning the list
+     of output sections looking for a matching section pointer because if
+     we have a large number of sections a hash lookup is faster.  */
+  cur  = lang_output_section_find (current_section->name);
+  prev = lang_output_section_find (previous_section->name);
+
+  if (cur == NULL || prev == NULL)
+    return new_segment;
+
+  /* If the regions are different then force the sections to live in
+     different segments.  See the email thread starting here for the
+     reasons why this is necessary:
+     http://sourceware.org/ml/binutils/2007-02/msg00216.html  */
+  return cur->region != prev->region;
+}
+
 void
 one_lang_size_sections_pass (bfd_boolean *relax, bfd_boolean check_regions)
 {

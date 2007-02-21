@@ -1,3 +1,10 @@
+2007-02-21  Nick Clifton  <nickc@redhat.com>
+
+	* ldlang.c (ldlang_override_segment_assignment): New function.
+	* ldlang.h (ldlang_override_segment_assignment): Prototype.
+	* ldmain.c (link_callbacks): Add
+	ldlang_override_segment_assignment.
+
 2007-02-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldexp.c (fold_name <LOADADDR>): Ensure result is always absolute.

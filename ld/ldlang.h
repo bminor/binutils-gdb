@@ -623,4 +623,8 @@ extern void add_excluded_libs (const char *);
 extern bfd_boolean load_symbols
   (lang_input_statement_type *, lang_statement_list_type *);
 
+extern bfd_boolean
+ldlang_override_segment_assignment
+  (struct bfd_link_info *, bfd *, asection *, asection *, bfd_boolean);
+
 #endif

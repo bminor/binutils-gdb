@@ -1,3 +1,8 @@
+2007-02-21  Nick Clifton  <nickc@redhat.com>
+
+	* elf.c (_bfd_elf_map_sections_to_segments): If the
+	override_segment_assignment callback is defined then call it.
+
 2007-02-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (spu_elf_size_stubs): Correct order of warning args.
