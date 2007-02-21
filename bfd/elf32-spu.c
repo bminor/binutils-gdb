@@ -1,6 +1,6 @@
 /* SPU specific support for 32-bit ELF
 
-   Copyright 2006 Free Software Foundation, Inc.
+   Copyright 2006, 2007 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -871,7 +871,7 @@ spu_elf_size_stubs (bfd *output_bfd,
 
 		      (*_bfd_error_handler) (_("warning: call to non-function"
 					       " symbol %s defined in %B"),
-					     sym_name, sym_sec->owner);
+					     sym_sec->owner, sym_name);
 		    }
 		  else
 		    continue;

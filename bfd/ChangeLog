@@ -1,3 +1,7 @@
+2007-02-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (spu_elf_size_stubs): Correct order of warning args.
+
 2007-02-19  Thiemo Seufer  <ths@mips.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_print_private_bfd_data): Remove
