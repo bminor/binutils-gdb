@@ -1,3 +1,9 @@
+2007-02-22  DJ Delorie  <dj@redhat.com>
+
+	* s390-opc.c (INSTR_SS_L2RDRD): New.
+	(MASK_SS_L2RDRD): New.
+	* s390-opc.txt (pka): Use it.
+
 2007-02-20  Thiemo Seufer  <ths@mips.com>
             Chao-Ying Fu  <fu@mips.com>
 

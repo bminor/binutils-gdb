@@ -341,7 +341,7 @@ Disassembly of section .text:
 .*:	b2 18 5f ff [	 ]*pc	4095\(%r5\)
 .*:	b2 2e 00 69 [	 ]*pgin	%r6,%r9
 .*:	b2 2f 00 69 [	 ]*pgout	%r6,%r9
-.*:	e9 ff 5f ff af ff [	 ]*pka	4095\(256,%r5\),4095\(%r10\)
+.*:	e9 1f 5f ff af ff [	 ]*pka	4095\(%r5\),4095\(32,%r10\)
 .*:	e1 ff 5f ff af ff [	 ]*pku	4095\(256,%r5\),4095\(%r10\)
 .*:	ee 69 5f ff af ff [	 ]*plo	%r6,4095\(%r5\),%r9,4095\(%r10\)
 .*:	01 01 [	 ]*pr

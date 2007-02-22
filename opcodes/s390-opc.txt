@@ -428,7 +428,7 @@ a701 tmll RI_RU "test under mask low low" g5 esa,zarch
 b278 stcke S_RD "store clock extended" g5 esa,zarch
 b2a5 tre RRE_RR "translate extended" g5 esa,zarch
 eb000000008e mvclu RSE_RRRD "move long unicode" g5 esa,zarch
-e9 pka SS_L0RDRD "pack ascii" g5 esa,zarch
+e9 pka SS_L2RDRD "pack ascii" g5 esa,zarch
 e1 pku SS_L0RDRD "pack unicode" g5 esa,zarch
 b993 troo RRE_RR "translate one to one" g5 esa,zarch
 b992 trot RRE_RR "translate one to two" g5 esa,zarch
