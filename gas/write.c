@@ -553,11 +553,7 @@ size_seg (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   if (size > 0 && ! seginfo->bss)
     flags |= SEC_HAS_CONTENTS;
 
-  /* @@ This is just an approximation.  */
-  if (seginfo && seginfo->fix_root)
-    flags |= SEC_RELOC;
-  else
-    flags &= ~SEC_RELOC;
+  flags &= ~SEC_RELOC;
   x = bfd_set_section_flags (abfd, sec, flags);
   assert (x);
 
@@ -1000,6 +996,32 @@ fix_segment (bfd *abfd ATTRIBUTE_UNUSED,
 }
 
 static void
+install_reloc (asection *sec, arelent *reloc, fragS *fragp,
+	       char *file, unsigned int line)
+{
+  char *err;
+  bfd_reloc_status_type s;
+
+  s = bfd_install_relocation (stdoutput, reloc,
+			      fragp->fr_literal, fragp->fr_address,
+			      sec, &err);
+  switch (s)
+    {
+    case bfd_reloc_ok:
+      break;
+    case bfd_reloc_overflow:
+      as_bad_where (file, line, _("relocation overflow"));
+      break;
+    case bfd_reloc_outofrange:
+      as_bad_where (file, line, _("relocation out of range"));
+      break;
+    default:
+      as_fatal (_("%s:%u: bad return from bfd_install_relocation: %x"),
+		file, line, s);
+    }
+}
+
+static void
 write_relocs (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 {
   segment_info_type *seginfo = seg_info (sec);
@@ -1007,7 +1029,6 @@ write_relocs (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   unsigned int n;
   arelent **relocs;
   fixS *fixp;
-  char *err;
 
   /* If seginfo is NULL, we did not create this section; don't do
      anything with it.  */
@@ -1016,129 +1037,57 @@ write_relocs (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 
   n = 0;
   for (fixp = seginfo->fix_root; fixp; fixp = fixp->fx_next)
-    n++;
+    if (!fixp->fx_done)
+      n++;
 
-#ifndef RELOC_EXPANSION_POSSIBLE
-  /* Set up reloc information as well.  */
+#ifdef RELOC_EXPANSION_POSSIBLE
+  n *= MAX_RELOC_EXPANSION;
+#endif
+
   relocs = xcalloc (n, sizeof (arelent *));
 
   i = 0;
   for (fixp = seginfo->fix_root; fixp != (fixS *) NULL; fixp = fixp->fx_next)
     {
-      arelent *reloc;
-      bfd_reloc_status_type s;
-      int fx_size, slack;
-      offsetT loc;
-
-      if (fixp->fx_done)
-	{
-	  n--;
-	  continue;
-	}
-
-      reloc = tc_gen_reloc (sec, fixp);
-      if (!reloc)
-	{
-	  n--;
-	  continue;
-	}
-
-      fx_size = fixp->fx_size;
-      slack = TC_FX_SIZE_SLACK (fixp);
-      if (slack > 0)
-	fx_size = fx_size > slack ? fx_size - slack : 0;
-      loc = fixp->fx_where + fx_size;
-      if (slack >= 0
-	  && loc > fixp->fx_frag->fr_fix + fixp->fx_frag->fr_offset)
-	as_bad_where (fixp->fx_file, fixp->fx_line,
-		      _("internal error: fixup not contained within frag"));
-
-      s = bfd_install_relocation (stdoutput, reloc,
-				  fixp->fx_frag->fr_literal,
-				  fixp->fx_frag->fr_address,
-				  sec, &err);
-      switch (s)
-	{
-	case bfd_reloc_ok:
-	  break;
-	case bfd_reloc_overflow:
-	  as_bad_where (fixp->fx_file, fixp->fx_line,
-			_("relocation overflow"));
-	  break;
-	case bfd_reloc_outofrange:
-	  as_bad_where (fixp->fx_file, fixp->fx_line,
-			_("relocation out of range"));
-	  break;
-	default:
-	  as_fatal (_("%s:%u: bad return from bfd_install_relocation: %x"),
-		    fixp->fx_file, fixp->fx_line, s);
-	}
-      relocs[i++] = reloc;
-    }
-#else
-  n = n * MAX_RELOC_EXPANSION;
-  /* Set up reloc information as well.  */
-  relocs = xcalloc (n, sizeof (arelent *));
-
-  i = 0;
-  for (fixp = seginfo->fix_root; fixp != (fixS *) NULL; fixp = fixp->fx_next)
-    {
-      arelent **reloc;
-      bfd_reloc_status_type s;
       int j;
       int fx_size, slack;
       offsetT loc;
 
       if (fixp->fx_done)
-	{
-	  n--;
-	  continue;
-	}
-
-      reloc = tc_gen_reloc (sec, fixp);
-
-      for (j = 0; reloc[j]; j++)
-	{
-	  relocs[i++] = reloc[j];
-	  assert (i <= n);
-	}
+	continue;
 
       fx_size = fixp->fx_size;
       slack = TC_FX_SIZE_SLACK (fixp);
       if (slack > 0)
 	fx_size = fx_size > slack ? fx_size - slack : 0;
       loc = fixp->fx_where + fx_size;
-      if (slack >= 0
-	  && loc > fixp->fx_frag->fr_fix + fixp->fx_frag->fr_offset)
+      if (slack >= 0 && loc > fixp->fx_frag->fr_fix)
 	as_bad_where (fixp->fx_file, fixp->fx_line,
 		      _("internal error: fixup not contained within frag"));
 
-      for (j = 0; reloc[j]; j++)
-	{
-	  s = bfd_install_relocation (stdoutput, reloc[j],
-				      fixp->fx_frag->fr_literal,
-				      fixp->fx_frag->fr_address,
-				      sec, &err);
-	  switch (s)
-	    {
-	    case bfd_reloc_ok:
-	      break;
-	    case bfd_reloc_overflow:
-	      as_bad_where (fixp->fx_file, fixp->fx_line,
-			    _("relocation overflow"));
-	      break;
-	    case bfd_reloc_outofrange:
-	      as_bad_where (fixp->fx_file, fixp->fx_line,
-			    _("relocation out of range"));
-	      break;
-	    default:
-	      as_fatal (_("%s:%u: bad return from bfd_install_relocation: %x"),
-			fixp->fx_file, fixp->fx_line, s);
-	    }
-	}
+#ifndef RELOC_EXPANSION_POSSIBLE
+      {
+	arelent *reloc = tc_gen_reloc (sec, fixp);
+
+	if (!reloc)
+	  continue;
+	relocs[i++] = reloc;
+	j = 1;
+      }
+#else
+      {
+	arelent **reloc = tc_gen_reloc (sec, fixp);
+
+	for (j = 0; reloc[j]; j++)
+	  relocs[i++] = reloc[j];
+      }
+#endif
+
+      for ( ; j != 0; --j)
+	install_reloc (sec, relocs[i - j], fixp->fx_frag,
+		       fixp->fx_file, fixp->fx_line);
     }
   n = i;
-#endif
 
 #ifdef DEBUG4
   {
@@ -1159,11 +1108,12 @@ write_relocs (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 #endif
 
   if (n)
-    bfd_set_reloc (stdoutput, sec, relocs, n);
-  else
-    bfd_set_section_flags (abfd, sec,
-			   (bfd_get_section_flags (abfd, sec)
-			    & (flagword) ~SEC_RELOC));
+    {
+      flagword flags = bfd_get_section_flags (abfd, sec);
+      flags |= SEC_RELOC;
+      bfd_set_section_flags (abfd, sec, flags);
+      bfd_set_reloc (stdoutput, sec, relocs, n);
+    }
 
 #ifdef SET_SECTION_RELOCS
   SET_SECTION_RELOCS (sec, relocs, n);
