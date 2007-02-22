@@ -1,3 +1,9 @@
+2007-02-22  Paul Brook  <paul@codesourcery.com>
+
+	* ld-arm/arm-elf.exp (armelftests): Add gc-unwind.h.
+	* ld-arm/gc-unwind.s: New file.
+	* ld-arm/gc-unwind.d: New file.
+
 2007-02-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/3953

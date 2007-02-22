@@ -1,3 +1,16 @@
+2007-02-22  Paul Brook  <paul@codesourcery.com>
+
+	* elflink.c (gc_mark_hook_fn): Remove.
+	(_bfd_elf_gc_mark): Rename gc_mark_hook_fn to elf_gc_mark_hook_fn.
+	(bfd_elf_gc_sections): Ditto.  Call gc_mark_extra_sections.
+	* elf-bfd.h (elf_gc_mark_hook_fn): Define.
+	(elf_backend_data): Add gc_mark_extra_sections.
+	* elfxx-target.h (elf_backend_gc_mark_extra_sections): Provide default
+	definition.
+	(elfNN_bed): Add elf_backend_gc_mark_extra_sections.
+	* elf32-arm.c (elf32_arm_gc_mark_extra_sections): New function.
+	(elf_backend_gc_mark_extra_sections): Define.
+
 2007-02-21  Nick Clifton  <nickc@redhat.com>
 
 	* elf.c (_bfd_elf_map_sections_to_segments): If the

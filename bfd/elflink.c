@@ -10088,10 +10088,6 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
 /* Garbage collect unused sections.  */
 
-typedef asection * (*gc_mark_hook_fn)
-  (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
-   struct elf_link_hash_entry *, Elf_Internal_Sym *);
-
 /* Default gc_mark_hook.  */
 
 asection *
@@ -10129,7 +10125,7 @@ _bfd_elf_gc_mark_hook (asection *sec,
 bfd_boolean
 _bfd_elf_gc_mark (struct bfd_link_info *info,
 		  asection *sec,
-		  gc_mark_hook_fn gc_mark_hook)
+		  elf_gc_mark_hook_fn gc_mark_hook)
 {
   bfd_boolean ret;
   bfd_boolean is_eh;
@@ -10498,9 +10494,7 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
 {
   bfd_boolean ok = TRUE;
   bfd *sub;
-  asection * (*gc_mark_hook)
-    (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
-     struct elf_link_hash_entry *h, Elf_Internal_Sym *);
+  elf_gc_mark_hook_fn gc_mark_hook;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   if (!bed->can_gc_sections
@@ -10546,6 +10540,10 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
 	  if (!_bfd_elf_gc_mark (info, o, gc_mark_hook))
 	    return FALSE;
     }
+
+  /* Allow the backend to mark additional target specific sections.  */
+  if (bed->gc_mark_extra_sections)
+    bed->gc_mark_extra_sections(info, gc_mark_hook);
 
   /* ... again for sections marked from eh_frame.  */
   for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)

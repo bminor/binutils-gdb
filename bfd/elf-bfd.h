@@ -538,6 +538,10 @@ enum action_discarded
     PRETEND = 2
   };
 
+typedef asection * (*elf_gc_mark_hook_fn)
+  (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
+   struct elf_link_hash_entry *, Elf_Internal_Sym *);
+
 struct elf_backend_data
 {
   /* The architecture for this backend.  */
@@ -843,9 +847,12 @@ struct elf_backend_data
 
   /* This function is called during section gc to discover the section a
      particular relocation refers to.  */
-  asection * (*gc_mark_hook)
-    (asection *sec, struct bfd_link_info *, Elf_Internal_Rela *,
-     struct elf_link_hash_entry *h, Elf_Internal_Sym *);
+  elf_gc_mark_hook_fn gc_mark_hook;
+
+  /* This function, if defined, is called after the first gc marking pass
+     to allow the backend to mark additional sections.  */
+  bfd_boolean (*gc_mark_extra_sections)
+    (struct bfd_link_info *info, elf_gc_mark_hook_fn gc_mark_hook);
 
   /* This function, if defined, is called during the sweep phase of gc
      in order that a backend might update any data structures it might

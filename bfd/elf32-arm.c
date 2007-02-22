@@ -8150,6 +8150,50 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
   return TRUE;
 }
 
+/* Unwinding tables are not referenced directly.  This pass marks them as
+   required if the corresponding code section is marked.  */
+
+static bfd_boolean
+elf32_arm_gc_mark_extra_sections(struct bfd_link_info *info,
+				 elf_gc_mark_hook_fn gc_mark_hook)
+{
+  bfd *sub;
+  Elf_Internal_Shdr **elf_shdrp;
+  bfd_boolean again;
+
+  /* Marking EH data may cause additional code sections to be marked,
+     requiring multiple passes.  */
+  again = TRUE;
+  while (again)
+    {
+      again = FALSE;
+      for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+	{
+	  asection *o;
+
+	  if (bfd_get_flavour (sub) != bfd_target_elf_flavour)
+	    continue;
+
+	  elf_shdrp = elf_elfsections (sub);
+	  for (o = sub->sections; o != NULL; o = o->next)
+	    {
+	      Elf_Internal_Shdr *hdr;
+	      hdr = &elf_section_data (o)->this_hdr;
+	      if (hdr->sh_type == SHT_ARM_EXIDX && hdr->sh_link
+		  && !o->gc_mark
+		  && elf_shdrp[hdr->sh_link]->bfd_section->gc_mark)
+		{
+		  again = TRUE;
+		  if (!_bfd_elf_gc_mark (info, o, gc_mark_hook))
+		    return FALSE;
+		}
+	    }
+	}
+    }
+
+  return TRUE;
+}
+
 /* Treat mapping symbols as special target symbols.  */
 
 static bfd_boolean
@@ -10532,6 +10576,7 @@ const struct elf_size_info elf32_arm_size_info = {
 
 #define elf_backend_get_symbol_type             elf32_arm_get_symbol_type
 #define elf_backend_gc_mark_hook                elf32_arm_gc_mark_hook
+#define elf_backend_gc_mark_extra_sections	elf32_arm_gc_mark_extra_sections
 #define elf_backend_gc_sweep_hook               elf32_arm_gc_sweep_hook
 #define elf_backend_check_relocs                elf32_arm_check_relocs
 #define elf_backend_relocate_section		elf32_arm_relocate_section

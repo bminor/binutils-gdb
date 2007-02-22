@@ -156,6 +156,9 @@ set armelftests {
      "-EL --vfp11-denorm-fix=scalar" "-EL" {vfp11-fix-none.s}
      {{objdump -dr vfp11-fix-none.d}}
      "vfp11-fix-none"}
+    {"Unwinding and -gc-sections" "-gc-sections" "" {gc-unwind.s}
+     {{objdump -sj.data gc-unwind.d}}
+     "gc-unwind"}
 
 }
 
