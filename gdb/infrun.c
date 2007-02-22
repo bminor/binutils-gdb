@@ -904,12 +904,8 @@ enum infwait_states
    to the interface from within handle_inferior_event(). */
 enum inferior_stop_reason
 {
-  /* We don't know why. */
-  STOP_UNKNOWN,
   /* Step, next, nexti, stepi finished. */
   END_STEPPING_RANGE,
-  /* Found breakpoint. */
-  BREAKPOINT_HIT,
   /* Inferior terminated by signal. */
   SIGNAL_EXITED,
   /* Inferior exited. */
@@ -2986,10 +2982,6 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
 {
   switch (stop_reason)
     {
-    case STOP_UNKNOWN:
-      /* We don't deal with these cases from handle_inferior_event()
-         yet. */
-      break;
     case END_STEPPING_RANGE:
       /* We are done with a step/next/si/ni command. */
       /* For now print nothing. */
@@ -3000,10 +2992,6 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
 	  ui_out_field_string
 	    (uiout, "reason",
 	     async_reason_lookup (EXEC_ASYNC_END_STEPPING_RANGE));
-      break;
-    case BREAKPOINT_HIT:
-      /* We found a breakpoint. */
-      /* For now print nothing. */
       break;
     case SIGNAL_EXITED:
       /* The inferior was terminated by a signal. */

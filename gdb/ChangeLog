@@ -1,5 +1,10 @@
 2007-02-22  Markus Deuling  <deuling@de.ibm.com>
 
+	* infrun.c (inferior_stop_reason, print_stop_reason): Remove
+	BREAKPOINT_HIT and STOP_UNKNOWN.
+
+2007-02-22  Markus Deuling  <deuling@de.ibm.com>
+
 	* valops.c (value_ind): Fix unary * handling of TYPE_CODE_INT. 
 
 2007-02-20  Joel Brobecker  <brobecker@adacore.com>
