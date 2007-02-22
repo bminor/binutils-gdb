@@ -1019,7 +1019,7 @@ md_convert_frag (abfd, sec, fragP)
       int offset = fragP->fr_fix;
       fragP->fr_literal[offset] = 0xcc;
 
-      fix_new (fragP, fragP->fr_fix + 1, 4, fragP->fr_symbol,
+      fix_new (fragP, fragP->fr_fix + 1, 2, fragP->fr_symbol,
 	       fragP->fr_offset + 1, 1, BFD_RELOC_16_PCREL);
       fragP->fr_var = 0;
       fragP->fr_fix += 3;
@@ -2280,17 +2280,8 @@ keep_going:
 		    abort ();
 		}
 
-	      /* Convert the size of the reloc into what fix_new_exp wants.  */
-	      reloc_size = reloc_size / 8;
-	      if (reloc_size == 8)
-		reloc_size = 0;
-	      else if (reloc_size == 16)
-		reloc_size = 1;
-	      else if (reloc_size == 32)
-		reloc_size = 2;
-
 	      fixP = fix_new_exp (frag_now, f - frag_now->fr_literal + offset,
-				  reloc_size, &fixups[i].exp, pcrel,
+				  reloc_size / 8, &fixups[i].exp, pcrel,
 				  ((bfd_reloc_code_real_type) reloc));
 
 	      if (pcrel)
