@@ -556,6 +556,12 @@ spu_send_signal (int signo)
   syscall (SYS_tkill, current_tid, signo);
 }
 
+static const char *
+spu_arch_string (void)
+{
+  return "spu";
+}
+
 
 static struct target_ops spu_target_ops = {
   spu_create_inferior,
@@ -572,6 +578,13 @@ static struct target_ops spu_target_ops = {
   spu_look_up_symbols,
   spu_send_signal,
   NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  spu_arch_string,
 };
 
 void
