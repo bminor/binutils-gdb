@@ -4419,7 +4419,6 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	{
 	  if (! m->p_flags_valid)
 	    p->p_flags |= PF_R;
-	  p->p_offset = 0;
 	  p->p_filesz = bed->s->sizeof_ehdr;
 	  p->p_memsz = bed->s->sizeof_ehdr;
 	  if (m->count > 0)
@@ -5224,7 +5223,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
    && bfd_get_format (ibfd) == bfd_core					\
    && s->vma == 0 && s->lma == 0					\
    && (bfd_vma) s->filepos >= p->p_offset				\
-   && ((bfd_vma) s->filepos + s->size				\
+   && ((bfd_vma) s->filepos + s->size					\
        <= p->p_offset + p->p_filesz))
 
   /* The complicated case when p_vaddr is 0 is to handle the Solaris
@@ -5238,7 +5237,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
    && (s->flags & SEC_HAS_CONTENTS) != 0				\
    && s->size > 0							\
    && (bfd_vma) s->filepos >= p->p_offset				\
-   && ((bfd_vma) s->filepos + s->size				\
+   && ((bfd_vma) s->filepos + s->size					\
        <= p->p_offset + p->p_filesz))
 
   /* Decide if the given section should be included in the given segment.
@@ -5909,8 +5908,8 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 
   if (ibfd->xvec == obfd->xvec)
     {
-      /* Check if any sections in the input BFD covered by ELF program
-	 header are changed.  */
+      /* Check to see if any sections in the input BFD
+	 covered by ELF program header have changed.  */
       Elf_Internal_Phdr *segment;
       asection *section, *osec;
       unsigned int i, num_segments;
@@ -5926,6 +5925,21 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 	   i < num_segments;
 	   i++, segment++)
 	{
+	  /* This is a different version of the IS_SOLARIS_PT_INTERP
+	     macro to the one defined in rewrite_elf_program_header().  */
+#define IS_SOLARIS_PT_INTERP(p)			\
+  (p->p_type == PT_INTERP			\
+   && p->p_vaddr == 0				\
+   && p->p_paddr == 0				\
+   && p->p_memsz == 0				\
+   && p->p_filesz > 0)
+ 
+	  /* PR binutils/3535.  The Solaris interpreter program header
+	     needs special treatment, so we always rewrite the headers
+	     when one is detected.  */
+	  if (IS_SOLARIS_PT_INTERP (segment))
+	    goto rewrite;
+	  
 	  for (section = ibfd->sections;
 	       section != NULL; section = section->next)
 	    {
@@ -5953,7 +5967,7 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 	    }
 	}
 
-      /* Check to see if any output section doesn't come from the
+      /* Check to see if any output section do not come from the
 	 input BFD.  */
       for (section = obfd->sections; section != NULL;
 	   section = section->next)
