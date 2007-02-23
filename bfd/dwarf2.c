@@ -2469,13 +2469,19 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 	  length = read_4_bytes (abfd, stash->info_ptr + 4);
 	  stash->info_ptr += 8;
 	}
-      /* In the absence of the hints above, we assume addr_size-sized
-	 offsets, for backward-compatibility with pre-DWARF3 64-bit
-	 platforms.  */
+      /* In the absence of the hints above, we assume 32-bit DWARF2
+	 offsets even for targets with 64-bit addresses, because:
+	   a) most of the time these targets will not have generated
+	      more than 2Gb of debug info and so will not need 64-bit
+	      offsets,
+	 and
+	   b) if they do use 64-bit offsets but they are not using
+	      the size hints that are tested for above then they are
+	      not conforming to the DWARF3 standard anyway.  */
       else if (addr_size == 8)
 	{
-	  length = read_8_bytes (abfd, stash->info_ptr);
-	  stash->info_ptr += 8;
+	  offset_size = 4;
+          stash->info_ptr += 4;
 	}
       else
 	stash->info_ptr += 4;
@@ -2692,13 +2698,19 @@ _bfd_dwarf2_find_line (bfd *abfd,
 	  length = read_4_bytes (abfd, stash->info_ptr + 4);
 	  stash->info_ptr += 8;
 	}
-      /* In the absence of the hints above, we assume addr_size-sized
-	 offsets, for backward-compatibility with pre-DWARF3 64-bit
-	 platforms.  */
+      /* In the absence of the hints above, we assume 32-bit DWARF2
+	 offsets even for targets with 64-bit addresses, because:
+	   a) most of the time these targets will not have generated
+	      more than 2Gb of debug info and so will not need 64-bit
+	      offsets,
+	 and
+	   b) if they do use 64-bit offsets but they are not using
+	      the size hints that are tested for above then they are
+	      not conforming to the DWARF3 standard anyway.  */
       else if (addr_size == 8)
 	{
-	  length = read_8_bytes (abfd, stash->info_ptr);
-	  stash->info_ptr += 8;
+	  offset_size = 4;
+          stash->info_ptr += 4;
 	}
       else
 	stash->info_ptr += 4;
