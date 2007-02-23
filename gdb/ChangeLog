@@ -1,5 +1,9 @@
 2007-02-23  Kevin Buettner  <kevinb@redhat.com>
 
+	* MAINTAINERS (mep): New target.
+
+2007-02-23  Kevin Buettner  <kevinb@redhat.com>
+
 	From Jim Blandy, Dave Brolley, Kevin Buettner, Don Howard, and
 	Richard Sandiford:
 	* Makefile.in (elf_mep_h, mep_desc_h, mep_opc_h): New variables.

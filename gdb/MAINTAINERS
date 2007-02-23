@@ -286,6 +286,9 @@ the native maintainer when resolving ABI issues.
 
 	mcore		Deleted
 
+	mep		--target=mep-elf ,-Werror
+			Kevin Buettner		kevinb@redhat.com
+
 	mips		--target=mips-elf ,-Werror
 
 	mn10300		--target=mn10300-elf broken
