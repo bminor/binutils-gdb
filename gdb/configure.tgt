@@ -141,6 +141,8 @@ m68*-*-uclinux*)	gdb_target=monitor ;;
 
 m88*-*-openbsd*)	gdb_target=obsd ;;
 
+mep-*-*)		gdb_target=mep ;;
+
 mips*-*-pe)		gdb_target=wince ;;
 mips*-sgi-irix5*)	gdb_target=irix5 ;;
 mips*-sgi-irix6*)	gdb_target=irix6 ;;

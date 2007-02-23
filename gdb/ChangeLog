@@ -1,3 +1,13 @@
+2007-02-23  Kevin Buettner  <kevinb@redhat.com>
+
+	From Jim Blandy, Dave Brolley, Kevin Buettner, Don Howard, and
+	Richard Sandiford:
+	* Makefile.in (elf_mep_h, mep_desc_h, mep_opc_h): New variables.
+	(mep-tdep.o): New rule.
+	* configure.tgt (mep-*-*): New target.
+	* mep-tdep.c: New file.
+	* config/mep/mep.mt: New file.
+
 2007-02-22  Markus Deuling  <deuling@de.ibm.com>
 
 	* infrun.c (inferior_stop_reason, print_stop_reason): Remove

@@ -592,6 +592,7 @@ elf_arm_h =	$(INCLUDE_DIR)/elf/arm.h $(elf_reloc_macros_h)
 elf_bfd_h =	$(BFD_SRC)/elf-bfd.h
 elf_frv_h =	$(INCLUDE_DIR)/elf/frv.h $(elf_reloc_macros_h)
 elf_m32c_h =    $(INCLUDE_DIR)/elf/m32c.h $(elf_reloc_macros_h)
+elf_mep_h =     $(INCLUDE_DIR)/elf/mep.h $(elf_reloc_macros_h)
 libaout_h =	$(BFD_SRC)/libaout.h
 libiberty_h =	$(INCLUDE_DIR)/libiberty.h
 libbfd_h =	$(BFD_SRC)/libbfd.h
@@ -603,6 +604,8 @@ readline_h = 	$(READLINE_SRC)/readline.h
 readline_tilde_h =	$(READLINE_SRC)/tilde.h
 readline_history_h =	$(READLINE_SRC)/history.h
 frv_desc_h =	$(OPCODES_SRC)/frv-desc.h
+mep_desc_h =	$(OPCODES_SRC)/mep-desc.h
+mep_opc_h =	$(OPCODES_SRC)/mep-opc.h
 sh_opc_h = 	$(OPCODES_SRC)/sh-opc.h
 gdb_callback_h = $(INCLUDE_DIR)/gdb/callback.h
 gdb_sim_arm_h =	$(INCLUDE_DIR)/gdb/sim-arm.h
@@ -2357,6 +2360,13 @@ memattr.o: memattr.c $(defs_h) $(command_h) $(gdbcmd_h) $(memattr_h) \
 	$(target_h) $(value_h) $(language_h) $(vec_h) $(gdb_string_h)
 mem-break.o: mem-break.c $(defs_h) $(symtab_h) $(breakpoint_h) $(inferior_h) \
 	$(target_h)
+mep-tdep.o: $(defs_h) $(frame_h) $(frame_unwind_h) $(frame_base_h) \
+	$(symtab_h) $(gdbtypes_h) $(gdbcmd_h) $(gdbcore_h) $(gdb_string_h) \
+	$(value_h) $(inferior_h) $(dis_asm_h) $(symfile_h) $(objfiles_h) \
+	$(language_h) $(arch_utils_h) $(regcache_h) $(remote_h) \
+	$(floatformat_h) $(sim_regno_h) $(disasm_h) $(trad_frame_h) \
+	$(reggroups_h) $(elf_bfd_h) $(elf_mep_h) $(gdb_assert_h) \
+	$(mep_desc_h) $(mep_opc_h) $(prologue_value_h) $(infcall_h)
 mingw-hdep.o: mingw-hdep.c $(defs_h) $(serial_h) $(gdb_assert_h) \
 	$(gdb_select_h) $(gdb_string_h)
 minsyms.o: minsyms.c $(defs_h) $(gdb_string_h) $(symtab_h) $(bfd_h) \
