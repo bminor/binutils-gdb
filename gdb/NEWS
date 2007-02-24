@@ -71,6 +71,7 @@ show tdesc filename
 
 OpenBSD/sh			sh*-*-openbsd*
 MIPS64 GNU/Linux (gdbserver)	mips64-linux-gnu
+Toshiba Media Processor		mep-elf
 
 * New remote packets
 

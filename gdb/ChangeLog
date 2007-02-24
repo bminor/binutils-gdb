@@ -1,3 +1,7 @@
+2007-02-24  Kevin Buettner  <kevinb@redhat.com>
+
+	* NEWS (New targets): Add entry for the Toshiba Media Processor.
+
 2007-02-23  Kevin Buettner  <kevinb@redhat.com>
 
 	* MAINTAINERS (mep): New target.
