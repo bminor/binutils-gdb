@@ -11257,9 +11257,9 @@ do_vfp_nsyn_pop (void)
 {
   nsyn_insert_sp ();
   if (inst.operands[1].issingle)
-    do_vfp_nsyn_opcode ("fldmdbs");
+    do_vfp_nsyn_opcode ("fldmias");
   else
-    do_vfp_nsyn_opcode ("fldmdbd");
+    do_vfp_nsyn_opcode ("fldmiad");
 }
 
 /* Fix up Neon data-processing instructions, ORing in the correct bits for
