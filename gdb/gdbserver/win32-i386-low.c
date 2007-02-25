@@ -1054,6 +1054,12 @@ win32_write_inferior_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
   return child_xfer_memory (memaddr, (char *) myaddr, len, 1, 0) != len;
 }
 
+static const char *
+win32_arch_string (void)
+{
+  return "i386";
+}
+
 static struct target_ops win32_target_ops = {
   win32_create_inferior,
   win32_attach,
@@ -1066,8 +1072,16 @@ static struct target_ops win32_target_ops = {
   win32_store_inferior_registers,
   win32_read_inferior_memory,
   win32_write_inferior_memory,
-  0,
-  0
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  win32_arch_string
 };
 
 /* Initialize the Win32 backend.  */

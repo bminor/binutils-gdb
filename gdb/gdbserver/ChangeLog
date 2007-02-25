@@ -1,3 +1,10 @@
+2007-02-25  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* server.c (get_features_xml): Check if target implemented
+	arch_string.
+	* win32-i386-low.c (win32_arch_string): New.
+	(win32_target_ops): Add win32_arch_string as arch_string member.
+
 2007-02-22  Markus Deuling  <deuling@de.ibm.com>
 
 	* spu-low.c (spu_arch_string): New.

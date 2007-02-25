@@ -216,7 +216,9 @@ get_features_xml (const char *annex)
 
   if (features_supported == -1)
     {
-      const char *arch = (*the_target->arch_string) ();
+      const char *arch = NULL;
+      if (the_target->arch_string != NULL)
+	arch = (*the_target->arch_string) ();
 
       if (arch == NULL)
 	features_supported = 0;
