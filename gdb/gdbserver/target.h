@@ -127,8 +127,10 @@ struct target_ops
 
   void (*look_up_symbols) (void);
 
-  /* Send a signal to the inferior process, however is appropriate.  */
-  void (*send_signal) (int);
+  /* Send an interrupt request to the inferior process,
+     however is appropriate.  */
+
+  void (*request_interrupt) (void);
 
   /* Read auxiliary vector data from the inferior process.
 

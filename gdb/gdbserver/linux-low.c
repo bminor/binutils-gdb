@@ -1514,7 +1514,7 @@ linux_look_up_symbols (void)
 }
 
 static void
-linux_send_signal (int signum)
+linux_request_interrupt (void)
 {
   extern unsigned long signal_pid;
 
@@ -1523,10 +1523,10 @@ linux_send_signal (int signum)
       struct process_info *process;
 
       process = get_thread_process (current_inferior);
-      kill_lwp (process->lwpid, signum);
+      kill_lwp (process->lwpid, SIGINT);
     }
   else
-    kill_lwp (signal_pid, signum);
+    kill_lwp (signal_pid, SIGINT);
 }
 
 /* Copy LEN bytes from inferior's auxiliary vector starting at OFFSET
@@ -1660,7 +1660,7 @@ static struct target_ops linux_target_ops = {
   linux_read_memory,
   linux_write_memory,
   linux_look_up_symbols,
-  linux_send_signal,
+  linux_request_interrupt,
   linux_read_auxv,
   linux_insert_watchpoint,
   linux_remove_watchpoint,

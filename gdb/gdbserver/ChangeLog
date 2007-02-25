@@ -1,5 +1,17 @@
 2007-02-25  Pedro Alves  <pedro_alves@portugalmail.pt>
 
+	* target.h (target_ops): Rename send_signal to request_interrupt,
+	and remove enum target_signal parameter.
+	* linux-low.c (linux_request_interrupt): Rename from
+	linux_send_signal, and always send SIGINT.
+	* spu-low.c (spu_request_interrupt): Rename from spu_send_signal,
+	and always send SIGINT.
+	* remote-utils.c (putpkt_binary): Call request_interrupt, instead
+	of send_signal.
+	(input_interrupt): Likewise.
+
+2007-02-25  Pedro Alves  <pedro_alves@portugalmail.pt>
+
 	* server.c (get_features_xml): Check if target implemented
 	arch_string.
 	* win32-i386-low.c (win32_arch_string): New.

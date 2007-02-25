@@ -549,7 +549,7 @@ putpkt_binary (char *buf, int cnt)
 
       /* Check for an input interrupt while we're here.  */
       if (buf3[0] == '\003')
-	(*the_target->send_signal) (SIGINT);
+	(*the_target->request_interrupt) ();
     }
   while (buf3[0] != '+');
 
@@ -572,7 +572,7 @@ putpkt (char *buf)
 /* Come here when we get an input interrupt from the remote side.  This
    interrupt should only be active while we are waiting for the child to do
    something.  About the only thing that should come through is a ^C, which
-   will cause us to send a SIGINT to the child.  */
+   will cause us to request child interruption.  */
 
 static void
 input_interrupt (int unused)
@@ -599,7 +599,7 @@ input_interrupt (int unused)
 	  return;
 	}
       
-      (*the_target->send_signal) (SIGINT);
+      (*the_target->request_interrupt) ();
     }
 }
 #endif
