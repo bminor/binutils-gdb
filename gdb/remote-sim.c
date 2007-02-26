@@ -504,9 +504,9 @@ gdbsim_open (char *args, int from_tty)
 	 + 50) /* slack */ ;
   arg_buf = (char *) alloca (len);
   strcpy (arg_buf, "gdbsim");	/* 7 */
-  /* Specify the byte order for the target when it is both selectable
-     and explicitly specified by the user (not auto detected). */
-  switch (TARGET_BYTE_ORDER)
+  /* Specify the byte order for the target when it is explicitly
+     specified by the user (not auto detected). */
+  switch (selected_byte_order ())
     {
     case BFD_ENDIAN_BIG:
       strcat (arg_buf, " -E big");

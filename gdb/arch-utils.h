@@ -118,6 +118,10 @@ int default_remote_register_number (struct gdbarch *gdbarch,
 
 extern int legacy_register_sim_regno (int regnum);
 
+/* Return the selected byte order, or BFD_ENDIAN_UNKNOWN if no byte
+   order was explicitly selected.  */
+extern enum bfd_endian selected_byte_order (void);
+
 /* Return the selected architecture's name, or NULL if no architecture
    was explicitly selected.  */
 extern const char *selected_architecture_name (void);

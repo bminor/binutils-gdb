@@ -287,6 +287,15 @@ static const char *endian_enum[] =
 };
 static const char *set_endian_string;
 
+enum bfd_endian
+selected_byte_order (void)
+{
+  if (target_byte_order_user != BFD_ENDIAN_UNKNOWN)
+    return TARGET_BYTE_ORDER;
+  else
+    return BFD_ENDIAN_UNKNOWN;
+}
+
 /* Called by ``show endian''.  */
 
 static void

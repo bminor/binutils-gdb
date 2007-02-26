@@ -1,5 +1,11 @@
 2007-02-26  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* arch-utils.c (selected_byte_order): New.
+	* arch-utils.h (selected_byte_order): New prototype.
+	* remote-sim.c (gdbsim_open): Use selected_byte_order.
+
+2007-02-26  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* symfile.c (place_section): Check SEC_ALLOC.  Do not check VMA.
 	(default_symfile_offsets): Check VMA here.  Update section VMAs.
 
