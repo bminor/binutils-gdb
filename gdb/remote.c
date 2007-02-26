@@ -340,7 +340,13 @@ init_remote_state (struct gdbarch *gdbarch)
   for (regnum = 0; regnum < NUM_REGS; regnum++)
     {
       struct packet_reg *r = &rsa->regs[regnum];
-      r->pnum = gdbarch_remote_register_number (gdbarch, regnum);
+
+      if (register_size (current_gdbarch, regnum) == 0)
+	/* Do not try to fetch zero-sized (placeholder) registers.  */
+	r->pnum = -1;
+      else
+	r->pnum = gdbarch_remote_register_number (gdbarch, regnum);
+
       r->regnum = regnum;
     }
 

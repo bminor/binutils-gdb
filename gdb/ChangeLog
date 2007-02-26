@@ -1,5 +1,10 @@
 2007-02-26  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* remote.c (init_remote_state): Add special handling for placeholder
+	registers.
+
+2007-02-26  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* Makefile.in (XMLFILES): Include $(TDEP_XML).
 	(filenames_h): New variable.
 	(clean): Clean up xml-builtin.c and stamp-xml.
