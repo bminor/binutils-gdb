@@ -77,8 +77,6 @@ struct pending_signals
 static int use_regsets_p = 1;
 #endif
 
-int debug_threads = 0;
-
 #define pid_of(proc) ((proc)->head.id)
 
 /* FIXME: Delete eventually.  */

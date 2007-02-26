@@ -1,5 +1,9 @@
 2007-02-26  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.server/server-mon.exp: New test.
+
+2007-02-26  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.cp/cp-relocate.cc, gdb.cp/cp-relocate.exp: New.
 
 2007-02-26  Daniel Jacobowitz  <dan@codesourcery.com>

@@ -35,6 +35,10 @@ unsigned long old_thread_from_wait;
 int extended_protocol;
 int server_waiting;
 
+/* Enable miscellaneous debugging output.  The name is historical - it
+   was originally used to debug LinuxThreads support.  */
+int debug_threads;
+
 int pass_signals[TARGET_SIGNAL_LAST];
 
 jmp_buf toplevel;
@@ -233,6 +237,16 @@ get_features_xml (const char *annex)
     }
 
   return document;
+}
+
+void
+monitor_show_help (void)
+{
+  monitor_output ("The following monitor commands are supported:\n");
+  monitor_output ("  set debug <0|1>\n");
+  monitor_output ("    Enable general debugging messages\n");  
+  monitor_output ("  set remote-debug <0|1>\n");
+  monitor_output ("    Enable remote protocol debugging messages\n");
 }
 
 /* Handle all of the extended 'q' packets.  */
@@ -440,6 +454,55 @@ handle_query (char *own_buf, int *new_packet_len_p)
 	}
 
       /* Otherwise, pretend we do not understand this packet.  */
+    }
+
+  /* Handle "monitor" commands.  */
+  if (strncmp ("qRcmd,", own_buf, 6) == 0)
+    {
+      char *mon = malloc (PBUFSIZ);
+      int len = strlen (own_buf + 6);
+
+      if ((len % 1) != 0 || unhexify (mon, own_buf + 6, len / 2) != len / 2)
+	{
+	  write_enn (own_buf);
+	  free (mon);
+	  return;
+	}
+      mon[len / 2] = '\0';
+
+      write_ok (own_buf);
+
+      if (strcmp (mon, "set debug 1") == 0)
+	{
+	  debug_threads = 1;
+	  monitor_output ("Debug output enabled.\n");
+	}
+      else if (strcmp (mon, "set debug 0") == 0)
+	{
+	  debug_threads = 0;
+	  monitor_output ("Debug output disabled.\n");
+	}
+      else if (strcmp (mon, "set remote-debug 1") == 0)
+	{
+	  remote_debug = 1;
+	  monitor_output ("Protocol debug output enabled.\n");
+	}
+      else if (strcmp (mon, "set remote-debug 0") == 0)
+	{
+	  remote_debug = 0;
+	  monitor_output ("Protocol debug output disabled.\n");
+	}
+      else if (strcmp (mon, "help") == 0)
+	monitor_show_help ();
+      else
+	{
+	  monitor_output ("Unknown monitor command.\n\n");
+	  monitor_show_help ();
+	  write_enn (own_buf);
+	}
+
+      free (mon);
+      return;
     }
 
   /* Otherwise we didn't know what packet it was.  Say we didn't
@@ -737,9 +800,6 @@ main (int argc, char *argv[])
 	      break;
 	    case 'Q':
 	      handle_general_set (own_buf);
-	      break;
-	    case 'd':
-	      remote_debug = !remote_debug;
 	      break;
 #ifndef USE_WIN32API
 	    /* Skip "detach" support on mingw32, since we don't have

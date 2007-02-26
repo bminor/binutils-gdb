@@ -44,7 +44,6 @@
 #define OUTMSG2(X)
 #endif
 
-int debug_threads;
 int using_threads = 1;
 
 /* Globals.  */

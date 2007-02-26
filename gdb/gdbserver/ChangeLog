@@ -1,3 +1,14 @@
+2007-02-26  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote-utils.c (monitor_output): New function.
+	* server.c (debug_threads): Define here.
+	(monitor_show_help): New function.
+	(handle_query): Handle qRcmd.
+	(main): Do not handle 'd' packet.
+	* server.h (debug_threads, remote_debug, monitor_output): Declare.
+	* linux-low.c, spu-low.c, win32-i386-low.c: Remove definitions
+	of debug_threads.
+
 2007-02-25  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* Makefile.in (EXEEXT): New.

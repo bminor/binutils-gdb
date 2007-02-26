@@ -1,5 +1,9 @@
 2007-02-26  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.texinfo (Monitor commands for gdbserver): New subsection.
+
+2007-02-26  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* src/gdb/doc/gdb.texinfo (Standard Target Features): Mention
 	case insensitivity.
 	(ARM Features): Describe org.gnu.gdb.xscale.iwmmxt.

@@ -1074,3 +1074,15 @@ look_up_one_symbol (const char *name, CORE_ADDR *addrp)
 
   return 1;
 }
+
+void
+monitor_output (char *msg)
+{
+  char *buf = malloc (strlen (msg) * 2 + 2);
+
+  buf[0] = 'O';
+  hexify (buf + 1, msg, 0);
+
+  putpkt (buf);
+  free (buf);
+}

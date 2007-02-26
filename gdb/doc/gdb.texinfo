@@ -12775,6 +12775,29 @@ already on the target.
 
 @end table
 
+@subsection Monitor commands for @code{gdbserver}
+@cindex monitor commands, for @code{gdbserver}
+
+During a @value{GDBN} session using @code{gdbserver}, you can use the
+@code{monitor} command to send special requests to @code{gdbserver}.
+Here are the available commands; they are only of interest when
+debugging @value{GDBN} or @code{gdbserver}.
+
+@table @code
+@item monitor help
+List the available monitor commands.
+
+@item monitor set debug 0
+@itemx monitor set debug 1
+Disable or enable general debugging messages.
+
+@item monitor set remote-debug 0
+@itemx monitor set remote-debug 1
+Disable or enable specific debugging messages associated with the remote
+protocol (@pxref{Remote Protocol}).
+
+@end table
+
 @node Remote configuration
 @section Remote configuration
 

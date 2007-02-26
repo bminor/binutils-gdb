@@ -58,7 +58,6 @@
 
 /* These are used in remote-utils.c.  */
 int using_threads = 0;
-int debug_threads = 0;
 
 
 /* Fetch PPU register REGNO.  */

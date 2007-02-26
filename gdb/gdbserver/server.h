@@ -128,12 +128,14 @@ extern unsigned long step_thread;
 extern unsigned long thread_from_wait;
 extern unsigned long old_thread_from_wait;
 extern int server_waiting;
+extern int debug_threads;
 extern int pass_signals[];
 
 extern jmp_buf toplevel;
 
 /* From remote-utils.c */
 
+extern int remote_debug;
 extern int all_symbols_looked_up;
 
 int putpkt (char *buf);
@@ -169,6 +171,8 @@ int remote_escape_output (const gdb_byte *buffer, int len,
 			  int out_maxlen);
 
 int look_up_one_symbol (const char *name, CORE_ADDR *addrp);
+
+void monitor_output (char *msg);
 
 /* Functions from ``signals.c''.  */
 enum target_signal target_signal_from_host (int hostsig);
