@@ -477,8 +477,8 @@ place_section (bfd *abfd, asection *sect, void *obj)
   int done;
   ULONGEST align = ((ULONGEST) 1) << bfd_get_section_alignment (abfd, sect);
 
-  /* We are only interested in loadable sections.  */
-  if ((bfd_get_section_flags (abfd, sect) & SEC_LOAD) == 0)
+  /* We are only interested in allocated sections.  */
+  if ((bfd_get_section_flags (abfd, sect) & SEC_ALLOC) == 0)
     return;
 
   /* If the user specified an offset, honor it.  */
@@ -502,13 +502,8 @@ place_section (bfd *abfd, asection *sect, void *obj)
 	if (cur_sec == sect)
 	  continue;
 
-	/* We can only conflict with loadable sections.  */
-	if ((bfd_get_section_flags (abfd, cur_sec) & SEC_LOAD) == 0)
-	  continue;
-
-	/* We do not expect this to happen; just ignore sections in a
-	   relocatable file with an assigned VMA.  */
-	if (bfd_section_vma (abfd, cur_sec) != 0)
+	/* We can only conflict with allocated sections.  */
+	if ((bfd_get_section_flags (abfd, cur_sec) & SEC_ALLOC) == 0)
 	  continue;
 
 	/* If the section offset is 0, either the section has not been placed
@@ -581,9 +576,62 @@ default_symfile_offsets (struct objfile *objfile,
   if ((bfd_get_file_flags (objfile->obfd) & (EXEC_P | DYNAMIC)) == 0)
     {
       struct place_section_arg arg;
-      arg.offsets = objfile->section_offsets;
-      arg.lowest = 0;
-      bfd_map_over_sections (objfile->obfd, place_section, &arg);
+      bfd *abfd = objfile->obfd;
+      asection *cur_sec;
+      CORE_ADDR lowest = 0;
+
+      for (cur_sec = abfd->sections; cur_sec != NULL; cur_sec = cur_sec->next)
+	/* We do not expect this to happen; just skip this step if the
+	   relocatable file has a section with an assigned VMA.  */
+	if (bfd_section_vma (abfd, cur_sec) != 0)
+	  break;
+
+      if (cur_sec == NULL)
+	{
+	  CORE_ADDR *offsets = objfile->section_offsets->offsets;
+
+	  /* Pick non-overlapping offsets for sections the user did not
+	     place explicitly.  */
+	  arg.offsets = objfile->section_offsets;
+	  arg.lowest = 0;
+	  bfd_map_over_sections (objfile->obfd, place_section, &arg);
+
+	  /* Correctly filling in the section offsets is not quite
+	     enough.  Relocatable files have two properties that
+	     (most) shared objects do not:
+
+	     - Their debug information will contain relocations.  Some
+	     shared libraries do also, but many do not, so this can not
+	     be assumed.
+
+	     - If there are multiple code sections they will be loaded
+	     at different relative addresses in memory than they are
+	     in the objfile, since all sections in the file will start
+	     at address zero.
+
+	     Because GDB has very limited ability to map from an
+	     address in debug info to the correct code section,
+	     it relies on adding SECT_OFF_TEXT to things which might be
+	     code.  If we clear all the section offsets, and set the
+	     section VMAs instead, then symfile_relocate_debug_section
+	     will return meaningful debug information pointing at the
+	     correct sections.
+
+	     GDB has too many different data structures for section
+	     addresses - a bfd, objfile, and so_list all have section
+	     tables, as does exec_ops.  Some of these could probably
+	     be eliminated.  */
+
+	  for (cur_sec = abfd->sections; cur_sec != NULL;
+	       cur_sec = cur_sec->next)
+	    {
+	      if ((bfd_get_section_flags (abfd, cur_sec) & SEC_ALLOC) == 0)
+		continue;
+
+	      bfd_set_section_vma (abfd, cur_sec, offsets[cur_sec->index]);
+	      offsets[cur_sec->index] = 0;
+	    }
+	}
     }
 
   /* Remember the bfd indexes for the .text, .data, .bss and
