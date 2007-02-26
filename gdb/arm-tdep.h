@@ -44,6 +44,19 @@ enum gdb_regnum {
   ARM_F7_REGNUM = 23, 		/* last floating point register */
   ARM_FPS_REGNUM = 24,		/* floating point status register */
   ARM_PS_REGNUM = 25,		/* Contains processor status */
+  ARM_WR0_REGNUM,		/* WMMX data registers.  */
+  ARM_WR15_REGNUM = ARM_WR0_REGNUM + 15,
+  ARM_WC0_REGNUM,		/* WMMX control registers.  */
+  ARM_WCSSF_REGNUM = ARM_WC0_REGNUM + 2,
+  ARM_WCASF_REGNUM = ARM_WC0_REGNUM + 3,
+  ARM_WC7_REGNUM = ARM_WC0_REGNUM + 7,
+  ARM_WCGR0_REGNUM,		/* WMMX general purpose registers.  */
+  ARM_WCGR3_REGNUM = ARM_WCGR0_REGNUM + 3,
+  ARM_WCGR7_REGNUM = ARM_WCGR0_REGNUM + 7,
+
+  ARM_NUM_REGS,
+
+  /* Other useful registers.  */
   ARM_FP_REGNUM = 11,		/* Frame register in ARM code, if used.  */
   THUMB_FP_REGNUM = 7,		/* Frame register in Thumb code, if used.  */
   ARM_NUM_ARG_REGS = 4, 
@@ -145,6 +158,8 @@ struct gdbarch_tdep
   enum arm_abi_kind arm_abi;
 
   enum arm_float_model fp_model; /* Floating point calling conventions.  */
+
+  int have_fpa_registers;	/* Does the target report the FPA registers?  */
 
   CORE_ADDR lowest_pc;		/* Lowest address at which instructions 
 				   will appear.  */

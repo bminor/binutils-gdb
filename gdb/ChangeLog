@@ -1,3 +1,21 @@
+2007-02-26  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-tdep.c (arm_scan_prologue): Do not record FPA register saves
+	if there are no FPA registers.
+	(arm_dwarf_reg_to_regnum): New function.
+	(arm_register_type, arm_register_name): Return minimal values for
+	unsupported registers.
+	(arm_register_sim_regno): Handle iWMMXt registers.
+	(arm_gdbarch_init): Record missing FPA registers if indicated by
+	a target description.  Recognize iWMMXt registers.  Only register
+	"info float" for FPA.  Use ARM_NUM_REGS.  Register
+	arm_dwarf_reg_to_regnum.
+	* arm-tdep.h (enum gdb_regnum): Add ARM_NUM_REGS and iWMMXt
+	constants.
+	(struct gdbarch_tdep): Add have_fpa_registers.
+	* features/xscale-iwmmxt.xml: Update capitalization.
+	* regformats/arm-with-iwmmxt.dat: Regenerated.
+
 2007-02-24  Kevin Buettner  <kevinb@redhat.com>
 
 	* NEWS (New targets): Add entry for the Toshiba Media Processor.

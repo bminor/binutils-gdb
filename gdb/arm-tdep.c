@@ -832,13 +832,15 @@ arm_scan_prologue (struct frame_info *next_frame, struct arm_prologue_cache *cac
 	  imm = (imm >> rot) | (imm << (32 - rot));
 	  sp_offset -= imm;
 	}
-      else if ((insn & 0xffff7fff) == 0xed6d0103)	/* stfe f?, [sp, -#c]! */
+      else if ((insn & 0xffff7fff) == 0xed6d0103	/* stfe f?, [sp, -#c]! */
+	       && gdbarch_tdep (current_gdbarch)->have_fpa_registers)
 	{
 	  sp_offset -= 12;
 	  regno = ARM_F0_REGNUM + ((insn >> 12) & 0x07);
 	  cache->saved_regs[regno].addr = sp_offset;
 	}
-      else if ((insn & 0xffbf0fff) == 0xec2d0200)	/* sfmfd f0, 4, [sp!] */
+      else if ((insn & 0xffbf0fff) == 0xec2d0200	/* sfmfd f0, 4, [sp!] */
+	       && gdbarch_tdep (current_gdbarch)->have_fpa_registers)
 	{
 	  int n_saved_fp_regs;
 	  unsigned int fp_start_reg, fp_bound_reg;
@@ -1383,8 +1385,46 @@ arm_register_type (struct gdbarch *gdbarch, int regnum)
     return builtin_type_void_data_ptr;
   else if (regnum == ARM_PC_REGNUM)
     return builtin_type_void_func_ptr;
+  else if (regnum >= ARRAY_SIZE (arm_register_names))
+    /* These registers are only supported on targets which supply
+       an XML description.  */
+    return builtin_type_int0;
   else
     return builtin_type_uint32;
+}
+
+/* Map a DWARF register REGNUM onto the appropriate GDB register
+   number.  */
+
+static int
+arm_dwarf_reg_to_regnum (int reg)
+{
+  /* Core integer regs.  */
+  if (reg >= 0 && reg <= 15)
+    return reg;
+
+  /* Legacy FPA encoding.  These were once used in a way which
+     overlapped with VFP register numbering, so their use is
+     discouraged, but GDB doesn't support the ARM toolchain
+     which used them for VFP.  */
+  if (reg >= 16 && reg <= 23)
+    return ARM_F0_REGNUM + reg - 16;
+
+  /* New assignments for the FPA registers.  */
+  if (reg >= 96 && reg <= 103)
+    return ARM_F0_REGNUM + reg - 96;
+
+  /* WMMX register assignments.  */
+  if (reg >= 104 && reg <= 111)
+    return ARM_WCGR0_REGNUM + reg - 104;
+
+  if (reg >= 112 && reg <= 127)
+    return ARM_WR0_REGNUM + reg - 112;
+
+  if (reg >= 192 && reg <= 199)
+    return ARM_WC0_REGNUM + reg - 192;
+
+  return -1;
 }
 
 /* Map GDB internal REGNUM onto the Arm simulator register numbers.  */
@@ -1393,6 +1433,15 @@ arm_register_sim_regno (int regnum)
 {
   int reg = regnum;
   gdb_assert (reg >= 0 && reg < NUM_REGS);
+
+  if (regnum >= ARM_WR0_REGNUM && regnum <= ARM_WR15_REGNUM)
+    return regnum - ARM_WR0_REGNUM + SIM_ARM_IWMMXT_COP0R0_REGNUM;
+
+  if (regnum >= ARM_WC0_REGNUM && regnum <= ARM_WC7_REGNUM)
+    return regnum - ARM_WC0_REGNUM + SIM_ARM_IWMMXT_COP1R0_REGNUM;
+
+  if (regnum >= ARM_WCGR0_REGNUM && regnum <= ARM_WCGR7_REGNUM)
+    return regnum - ARM_WCGR0_REGNUM + SIM_ARM_IWMMXT_COP1R8_REGNUM;
 
   if (reg < NUM_GREGS)
     return SIM_ARM_R0_REGNUM + reg;
@@ -2482,6 +2531,11 @@ set_disassembly_style_sfunc (char *args, int from_tty,
 static const char *
 arm_register_name (int i)
 {
+  if (i >= ARRAY_SIZE (arm_register_names))
+    /* These registers are only supported on targets which supply
+       an XML description.  */
+    return "";
+
   return arm_register_names[i];
 }
 
@@ -2597,6 +2651,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   enum arm_float_model fp_model = arm_fp_model;
   struct tdesc_arch_data *tdesc_data = NULL;
   int i;
+  int have_fpa_registers = 1;
 
   /* Check any target description for validity.  */
   if (tdesc_has_registers (info.target_desc))
@@ -2647,6 +2702,43 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  for (i = ARM_F0_REGNUM; i <= ARM_FPS_REGNUM; i++)
 	    valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
 						arm_register_names[i]);
+	  if (!valid_p)
+	    {
+	      tdesc_data_cleanup (tdesc_data);
+	      return NULL;
+	    }
+	}
+      else
+	have_fpa_registers = 0;
+
+      feature = tdesc_find_feature (info.target_desc,
+				    "org.gnu.gdb.xscale.iwmmxt");
+      if (feature != NULL)
+	{
+	  static const char *const iwmmxt_names[] = {
+	    "wR0", "wR1", "wR2", "wR3", "wR4", "wR5", "wR6", "wR7",
+	    "wR8", "wR9", "wR10", "wR11", "wR12", "wR13", "wR14", "wR15",
+	    "wCID", "wCon", "wCSSF", "wCASF", "", "", "", "",
+	    "wCGR0", "wCGR1", "wCGR2", "wCGR3", "", "", "", "",
+	  };
+
+	  valid_p = 1;
+	  for (i = ARM_WR0_REGNUM; i <= ARM_WR15_REGNUM; i++)
+	    valid_p
+	      &= tdesc_numbered_register (feature, tdesc_data, i,
+					  iwmmxt_names[i - ARM_WR0_REGNUM]);
+
+	  /* Check for the control registers, but do not fail if they
+	     are missing.  */
+	  for (i = ARM_WC0_REGNUM; i <= ARM_WCASF_REGNUM; i++)
+	    tdesc_numbered_register (feature, tdesc_data, i,
+				     iwmmxt_names[i - ARM_WR0_REGNUM]);
+
+	  for (i = ARM_WCGR0_REGNUM; i <= ARM_WCGR3_REGNUM; i++)
+	    valid_p
+	      &= tdesc_numbered_register (feature, tdesc_data, i,
+					  iwmmxt_names[i - ARM_WR0_REGNUM]);
+
 	  if (!valid_p)
 	    {
 	      tdesc_data_cleanup (tdesc_data);
@@ -2796,6 +2888,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      These are gdbarch discriminators, like the OSABI.  */
   tdep->arm_abi = arm_abi;
   tdep->fp_model = fp_model;
+  tdep->have_fpa_registers = have_fpa_registers;
 
   /* Breakpoints.  */
   switch (info.byte_order)
@@ -2858,14 +2951,20 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_breakpoint_from_pc (gdbarch, arm_breakpoint_from_pc);
 
   /* Information about registers, etc.  */
-  set_gdbarch_print_float_info (gdbarch, arm_print_float_info);
   set_gdbarch_deprecated_fp_regnum (gdbarch, ARM_FP_REGNUM);	/* ??? */
   set_gdbarch_sp_regnum (gdbarch, ARM_SP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, ARM_PC_REGNUM);
-  set_gdbarch_num_regs (gdbarch, NUM_GREGS + NUM_FREGS + NUM_SREGS);
+  set_gdbarch_num_regs (gdbarch, ARM_NUM_REGS);
   set_gdbarch_register_type (gdbarch, arm_register_type);
 
+  /* This "info float" is FPA-specific.  Use the generic version if we
+     do not have FPA.  */
+  if (gdbarch_tdep (gdbarch)->have_fpa_registers)
+    set_gdbarch_print_float_info (gdbarch, arm_print_float_info);
+
   /* Internal <-> external register number maps.  */
+  set_gdbarch_dwarf_reg_to_regnum (gdbarch, arm_dwarf_reg_to_regnum);
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, arm_dwarf_reg_to_regnum);
   set_gdbarch_register_sim_regno (gdbarch, arm_register_sim_regno);
 
   /* Integer registers are 4 bytes.  */

@@ -22,57 +22,57 @@
 void
 read_regs (unsigned long long regs[16], unsigned long control_regs[6])
 {
-  asm volatile ("wstrd wr0, %0" : "=m" (regs[0]));
-  asm volatile ("wstrd wr1, %0" : "=m" (regs[1]));
-  asm volatile ("wstrd wr2, %0" : "=m" (regs[2]));
-  asm volatile ("wstrd wr3, %0" : "=m" (regs[3]));
-  asm volatile ("wstrd wr4, %0" : "=m" (regs[4]));
-  asm volatile ("wstrd wr5, %0" : "=m" (regs[5]));
-  asm volatile ("wstrd wr6, %0" : "=m" (regs[6]));
-  asm volatile ("wstrd wr7, %0" : "=m" (regs[7]));
-  asm volatile ("wstrd wr8, %0" : "=m" (regs[8]));
-  asm volatile ("wstrd wr9, %0" : "=m" (regs[9]));
-  asm volatile ("wstrd wr10, %0" : "=m" (regs[10]));
-  asm volatile ("wstrd wr11, %0" : "=m" (regs[11]));
-  asm volatile ("wstrd wr12, %0" : "=m" (regs[12]));
-  asm volatile ("wstrd wr13, %0" : "=m" (regs[13]));
-  asm volatile ("wstrd wr14, %0" : "=m" (regs[14]));
-  asm volatile ("wstrd wr15, %0" : "=m" (regs[15]));
+  asm volatile ("wstrd wR0, %0" : "=m" (regs[0]));
+  asm volatile ("wstrd wR1, %0" : "=m" (regs[1]));
+  asm volatile ("wstrd wR2, %0" : "=m" (regs[2]));
+  asm volatile ("wstrd wR3, %0" : "=m" (regs[3]));
+  asm volatile ("wstrd wR4, %0" : "=m" (regs[4]));
+  asm volatile ("wstrd wR5, %0" : "=m" (regs[5]));
+  asm volatile ("wstrd wR6, %0" : "=m" (regs[6]));
+  asm volatile ("wstrd wR7, %0" : "=m" (regs[7]));
+  asm volatile ("wstrd wR8, %0" : "=m" (regs[8]));
+  asm volatile ("wstrd wR9, %0" : "=m" (regs[9]));
+  asm volatile ("wstrd wR10, %0" : "=m" (regs[10]));
+  asm volatile ("wstrd wR11, %0" : "=m" (regs[11]));
+  asm volatile ("wstrd wR12, %0" : "=m" (regs[12]));
+  asm volatile ("wstrd wR13, %0" : "=m" (regs[13]));
+  asm volatile ("wstrd wR14, %0" : "=m" (regs[14]));
+  asm volatile ("wstrd wR15, %0" : "=m" (regs[15]));
 
-  asm volatile ("wstrw wcssf, %0" : "=m" (control_regs[0]));
-  asm volatile ("wstrw wcasf, %0" : "=m" (control_regs[1]));
-  asm volatile ("wstrw wcgr0, %0" : "=m" (control_regs[2]));
-  asm volatile ("wstrw wcgr1, %0" : "=m" (control_regs[3]));
-  asm volatile ("wstrw wcgr2, %0" : "=m" (control_regs[4]));
-  asm volatile ("wstrw wcgr3, %0" : "=m" (control_regs[5]));
+  asm volatile ("wstrw wCSSF, %0" : "=m" (control_regs[0]));
+  asm volatile ("wstrw wCASF, %0" : "=m" (control_regs[1]));
+  asm volatile ("wstrw wCGR0, %0" : "=m" (control_regs[2]));
+  asm volatile ("wstrw wCGR1, %0" : "=m" (control_regs[3]));
+  asm volatile ("wstrw wCGR2, %0" : "=m" (control_regs[4]));
+  asm volatile ("wstrw wCGR3, %0" : "=m" (control_regs[5]));
 }
 
 void
 write_regs (unsigned long long regs[16], unsigned long control_regs[6])
 {
-  asm volatile ("wldrd wr0, %0" : : "m" (regs[0]));
-  asm volatile ("wldrd wr1, %0" : : "m" (regs[1]));
-  asm volatile ("wldrd wr2, %0" : : "m" (regs[2]));
-  asm volatile ("wldrd wr3, %0" : : "m" (regs[3]));
-  asm volatile ("wldrd wr4, %0" : : "m" (regs[4]));
-  asm volatile ("wldrd wr5, %0" : : "m" (regs[5]));
-  asm volatile ("wldrd wr6, %0" : : "m" (regs[6]));
-  asm volatile ("wldrd wr7, %0" : : "m" (regs[7]));
-  asm volatile ("wldrd wr8, %0" : : "m" (regs[8]));
-  asm volatile ("wldrd wr9, %0" : : "m" (regs[9]));
-  asm volatile ("wldrd wr10, %0" : : "m" (regs[10]));
-  asm volatile ("wldrd wr11, %0" : : "m" (regs[11]));
-  asm volatile ("wldrd wr12, %0" : : "m" (regs[12]));
-  asm volatile ("wldrd wr13, %0" : : "m" (regs[13]));
-  asm volatile ("wldrd wr14, %0" : : "m" (regs[14]));
-  asm volatile ("wldrd wr15, %0" : : "m" (regs[15]));
+  asm volatile ("wldrd wR0, %0" : : "m" (regs[0]));
+  asm volatile ("wldrd wR1, %0" : : "m" (regs[1]));
+  asm volatile ("wldrd wR2, %0" : : "m" (regs[2]));
+  asm volatile ("wldrd wR3, %0" : : "m" (regs[3]));
+  asm volatile ("wldrd wR4, %0" : : "m" (regs[4]));
+  asm volatile ("wldrd wR5, %0" : : "m" (regs[5]));
+  asm volatile ("wldrd wR6, %0" : : "m" (regs[6]));
+  asm volatile ("wldrd wR7, %0" : : "m" (regs[7]));
+  asm volatile ("wldrd wR8, %0" : : "m" (regs[8]));
+  asm volatile ("wldrd wR9, %0" : : "m" (regs[9]));
+  asm volatile ("wldrd wR10, %0" : : "m" (regs[10]));
+  asm volatile ("wldrd wR11, %0" : : "m" (regs[11]));
+  asm volatile ("wldrd wR12, %0" : : "m" (regs[12]));
+  asm volatile ("wldrd wR13, %0" : : "m" (regs[13]));
+  asm volatile ("wldrd wR14, %0" : : "m" (regs[14]));
+  asm volatile ("wldrd wR15, %0" : : "m" (regs[15]));
 
-  asm volatile ("wldrw wcssf, %0" : : "m" (control_regs[0]));
-  asm volatile ("wldrw wcasf, %0" : : "m" (control_regs[1]));
-  asm volatile ("wldrw wcgr0, %0" : : "m" (control_regs[2]));
-  asm volatile ("wldrw wcgr1, %0" : : "m" (control_regs[3]));
-  asm volatile ("wldrw wcgr2, %0" : : "m" (control_regs[4]));
-  asm volatile ("wldrw wcgr3, %0" : : "m" (control_regs[5]));
+  asm volatile ("wldrw wCSSF, %0" : : "m" (control_regs[0]));
+  asm volatile ("wldrw wCASF, %0" : : "m" (control_regs[1]));
+  asm volatile ("wldrw wCGR0, %0" : : "m" (control_regs[2]));
+  asm volatile ("wldrw wCGR1, %0" : : "m" (control_regs[3]));
+  asm volatile ("wldrw wCGR2, %0" : : "m" (control_regs[4]));
+  asm volatile ("wldrw wCGR3, %0" : : "m" (control_regs[5]));
 }
 
 int

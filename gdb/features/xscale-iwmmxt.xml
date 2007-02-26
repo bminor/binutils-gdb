@@ -17,28 +17,28 @@
     <field name="u64" type="uint64"/>
   </union>
 
-  <reg name="wr0" bitsize="64" type="iwmmxt_vec64i"/>
-  <reg name="wr1" bitsize="64" type="iwmmxt_vec64i"/>
-  <reg name="wr2" bitsize="64" type="iwmmxt_vec64i"/>
-  <reg name="wr3" bitsize="64" type="iwmmxt_vec64i"/>
-  <reg name="wr4" bitsize="64" type="iwmmxt_vec64i"/>
-  <reg name="wr5" bitsize="64" type="iwmmxt_vec64i"/>
-  <reg name="wr6" bitsize="64" type="iwmmxt_vec64i"/>
-  <reg name="wr7" bitsize="64" type="iwmmxt_vec64i"/>
-  <reg name="wr8" bitsize="64" type="iwmmxt_vec64i"/>
-  <reg name="wr9" bitsize="64" type="iwmmxt_vec64i"/>
-  <reg name="wr10" bitsize="64" type="iwmmxt_vec64i"/>
-  <reg name="wr11" bitsize="64" type="iwmmxt_vec64i"/>
-  <reg name="wr12" bitsize="64" type="iwmmxt_vec64i"/>
-  <reg name="wr13" bitsize="64" type="iwmmxt_vec64i"/>
-  <reg name="wr14" bitsize="64" type="iwmmxt_vec64i"/>
-  <reg name="wr15" bitsize="64" type="iwmmxt_vec64i"/>
+  <reg name="wR0" bitsize="64" type="iwmmxt_vec64i"/>
+  <reg name="wR1" bitsize="64" type="iwmmxt_vec64i"/>
+  <reg name="wR2" bitsize="64" type="iwmmxt_vec64i"/>
+  <reg name="wR3" bitsize="64" type="iwmmxt_vec64i"/>
+  <reg name="wR4" bitsize="64" type="iwmmxt_vec64i"/>
+  <reg name="wR5" bitsize="64" type="iwmmxt_vec64i"/>
+  <reg name="wR6" bitsize="64" type="iwmmxt_vec64i"/>
+  <reg name="wR7" bitsize="64" type="iwmmxt_vec64i"/>
+  <reg name="wR8" bitsize="64" type="iwmmxt_vec64i"/>
+  <reg name="wR9" bitsize="64" type="iwmmxt_vec64i"/>
+  <reg name="wR10" bitsize="64" type="iwmmxt_vec64i"/>
+  <reg name="wR11" bitsize="64" type="iwmmxt_vec64i"/>
+  <reg name="wR12" bitsize="64" type="iwmmxt_vec64i"/>
+  <reg name="wR13" bitsize="64" type="iwmmxt_vec64i"/>
+  <reg name="wR14" bitsize="64" type="iwmmxt_vec64i"/>
+  <reg name="wR15" bitsize="64" type="iwmmxt_vec64i"/>
 
-  <reg name="wcssf" bitsize="32" type="int" group="vector"/>
-  <reg name="wcasf" bitsize="32" type="int" group="vector"/>
+  <reg name="wCSSF" bitsize="32" type="int" group="vector"/>
+  <reg name="wCASF" bitsize="32" type="int" group="vector"/>
 
-  <reg name="wcgr0" bitsize="32" type="int" group="vector"/>
-  <reg name="wcgr1" bitsize="32" type="int" group="vector"/>
-  <reg name="wcgr2" bitsize="32" type="int" group="vector"/>
-  <reg name="wcgr3" bitsize="32" type="int" group="vector"/>
+  <reg name="wCGR0" bitsize="32" type="int" group="vector"/>
+  <reg name="wCGR1" bitsize="32" type="int" group="vector"/>
+  <reg name="wCGR2" bitsize="32" type="int" group="vector"/>
+  <reg name="wCGR3" bitsize="32" type="int" group="vector"/>
 </feature>
