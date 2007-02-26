@@ -21,6 +21,11 @@
 
 #include "defs.h"
 #include "gdbcmd.h"
+#include "exceptions.h"
+#include "xml-support.h"
+
+#include "gdb_string.h"
+#include "safe-ctype.h"
 
 /* Debugging flag.  */
 static int debug_xml;
@@ -29,12 +34,7 @@ static int debug_xml;
    available.  */
 #ifdef HAVE_LIBEXPAT
 
-#include "exceptions.h"
-#include "xml-support.h"
-
 #include "gdb_expat.h"
-#include "gdb_string.h"
-#include "safe-ctype.h"
 
 /* The maximum depth of <xi:include> nesting.  No need to be miserly,
    we just want to avoid running out of stack on loops.  */
@@ -880,6 +880,7 @@ xml_process_xincludes (const char *name, const char *text,
   do_cleanups (back_to);
   return result;
 }
+#endif /* HAVE_LIBEXPAT */
 
 
 /* Return an XML document which was compiled into GDB, from
@@ -897,7 +898,36 @@ fetch_xml_builtin (const char *filename)
   return NULL;
 }
 
-#endif /* HAVE_LIBEXPAT */
+/* A to_xfer_partial helper function which reads XML files which were
+   compiled into GDB.  The target may call this function from its own
+   to_xfer_partial handler, after converting object and annex to the
+   appropriate filename.  */
+
+LONGEST
+xml_builtin_xfer_partial (const char *filename,
+			  gdb_byte *readbuf, const gdb_byte *writebuf,
+			  ULONGEST offset, LONGEST len)
+{
+  const char *buf;
+  LONGEST len_avail;
+
+  gdb_assert (readbuf != NULL && writebuf == NULL);
+  gdb_assert (filename != NULL);
+
+  buf = fetch_xml_builtin (filename);
+  if (buf == NULL)
+    return -1;
+
+  len_avail = strlen (buf);
+  if (offset >= len_avail)
+    return 0;
+
+  if (len > len_avail - offset)
+    len = len_avail - offset;
+  memcpy (readbuf, buf + offset, len);
+  return len;
+}
+
 
 static void
 show_debug_xml (struct ui_file *file, int from_tty,

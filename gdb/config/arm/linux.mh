@@ -6,3 +6,6 @@ NATDEPFILES= inf-ptrace.o fork-child.o arm-linux-nat.o gcore.o \
 
 LOADLIBES= -ldl -rdynamic
 
+TDEP_XML = $(srcdir)/features/arm-with-iwmmxt.xml \
+	$(srcdir)/features/xscale-iwmmxt.xml \
+	$(srcdir)/features/arm-core.xml

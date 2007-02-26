@@ -1,5 +1,26 @@
 2007-02-26  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* Makefile.in (XMLFILES): Include $(TDEP_XML).
+	(filenames_h): New variable.
+	(clean): Clean up xml-builtin.c and stamp-xml.
+	(arm-linux-nat.o): Update.
+	* config/arm/linux.mh (TDEP_XML): Define.
+	* arm-linux-nat.c (PTRACE_GETWMMXREGS, PTRACE_SETWMMXREGS): Define.
+	(arm_linux_has_wmmx_registers): New.
+	(GET_THREAD_ID): Fix typo.
+	(IWMMXT_REGS_SIZE): Define.
+	(fetch_wmmx_regs, store_wmmx_regs): New.
+	(arm_linux_fetch_inferior_registers): Use fetch_wmmx_regs.
+	(arm_linux_store_inferior_registers): Use store_wmmx_regs.
+	(super_xfer_partial, arm_linux_xfer_partial): New.
+	(_initialize_arm_linux_nat): Use them.
+	* xml-support.c (fetch_xml_builtin): Move outside HAVE_LIBEXPAT.
+	(xml_builtin_xfer_partial): New function.
+	* xml-support.h (xml_builtin_xfer_partial): New prototype.
+	* NEWS: Update mention of iWMMXt support.
+
+2007-02-26  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* arm-tdep.c (arm_scan_prologue): Do not record FPA register saves
 	if there are no FPA registers.
 	(arm_dwarf_reg_to_regnum): New function.

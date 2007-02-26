@@ -22,8 +22,8 @@ a local file or over the remote serial protocol.
 for architectures which have implemented the support (currently
 only ARM).
 
-* The GDB remote stub, gdbserver, now supports the XScale iWMMXt
-coprocessor.
+* GDB and the GDB remote stub, gdbserver, now support the XScale
+iWMMXt coprocessor.
 
 * New commands
 

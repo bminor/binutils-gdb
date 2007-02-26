@@ -401,7 +401,8 @@ RUNTEST = runtest
 RUNTESTFLAGS=
 
 # XML files to build in to GDB.
-XMLFILES = $(srcdir)/features/gdb-target.dtd $(srcdir)/features/xinclude.dtd
+XMLFILES = $(srcdir)/features/gdb-target.dtd $(srcdir)/features/xinclude.dtd \
+	$(TDEP_XML)
 
 # This is ser-unix.o for any system which supports a v7/BSD/SYSV/POSIX
 # interface to the serial port.  Hopefully if get ported to OS/2, VMS,
@@ -617,6 +618,7 @@ gdb_sim_sh_h =	$(INCLUDE_DIR)/gdb/sim-sh.h
 splay_tree_h =  $(INCLUDE_DIR)/splay-tree.h
 safe_ctype_h =  $(INCLUDE_DIR)/safe-ctype.h
 hashtab_h =	$(INCLUDE_DIR)/hashtab.h
+filenames_h =	$(INCLUDE_DIR)/filenames.h
 
 #
 # $BUILD/ headers
@@ -1288,6 +1290,7 @@ clean mostlyclean: $(CONFIG_CLEAN)
 	rm -f gdb$(EXEEXT) core make.log
 	rm -f gdb[0-9]$(EXEEXT)
 	rm -f test-cp-name-parser$(EXEEXT)
+	rm -f xml-builtin.c stamp-xml
 
 .PHONY: clean-tui
 clean-tui:
@@ -1805,7 +1808,8 @@ arch-utils.o: arch-utils.c $(defs_h) $(arch_utils_h) $(buildsym_h) \
 	$(floatformat_h) $(target_descriptions_h)
 arm-linux-nat.o: arm-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(gdb_string_h) $(regcache_h) $(arm_tdep_h) $(gregset_h) \
-	$(target_h) $(linux_nat_h) $(gdb_proc_service_h) $(arm_linux_tdep_h)
+	$(target_h) $(linux_nat_h) $(gdb_proc_service_h) $(arm_linux_tdep_h) \
+	$(target_descriptions_h) $(xml_support_h)
 arm-linux-tdep.o: arm-linux-tdep.c $(defs_h) $(target_h) $(value_h) \
 	$(gdbtypes_h) $(floatformat_h) $(gdbcore_h) $(frame_h) $(regcache_h) \
 	$(doublest_h) $(solib_svr4_h) $(osabi_h) $(arm_tdep_h) \

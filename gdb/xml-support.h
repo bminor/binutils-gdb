@@ -53,6 +53,15 @@ char *xml_process_xincludes (const char *name, const char *text,
 
 const char *fetch_xml_builtin (const char *filename);
 
+/* A to_xfer_partial helper function which reads XML files which were
+   compiled into GDB.  The target may call this function from its own
+   to_xfer_partial handler, after converting object and annex to the
+   appropriate filename.  */
+
+LONGEST xml_builtin_xfer_partial (const char *filename,
+				  gdb_byte *readbuf, const gdb_byte *writebuf,
+				  ULONGEST offset, LONGEST len);
+
 /* The text of compiled-in XML documents, from xml-builtin.c
    (generated).  */
 extern const char *xml_builtin[][2];
