@@ -1,3 +1,16 @@
+2007-02-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/spuelf.em (_binary_builtin_ovl_mgr_start): Rename
+	to _binary_spu_ovl_o_start.
+	(_binary_builtin_ovl_mgr_end): Rename to _binary_spu_ovl_o_end.
+	(spu_elf_load_ovl_mgr): Fatal error on missing overlay manager.
+	* emultempl/spu_inc.s: Rename symbols.
+	* emultempl/spu_none.s: New file.
+	* emultempl/spu_ovl.S: Update copyright.
+	* Makefile.am (spu_inc.o): Try building with ld -r first, then
+	gas incbin, then build without overlay manager.
+	* Makefile.in: Regenerate.
+
 2007-02-22  Joseph Myers  <joseph@codesourcery.com>
 
 	* configure.tgt (mips64*el-*-linux-*, mips64*-*-linux-*,

@@ -38,12 +38,12 @@ static int emit_stub_syms = 0;
 static bfd_vma local_store_lo = 0;
 static bfd_vma local_store_hi = 0x3ffff;
 
-extern void *_binary_builtin_ovl_mgr_start;
-extern void *_binary_builtin_ovl_mgr_end;
+extern void *_binary_spu_ovl_o_start;
+extern void *_binary_spu_ovl_o_end;
 
 static const struct _ovl_stream ovl_mgr_stream = {
-  &_binary_builtin_ovl_mgr_start,
-  &_binary_builtin_ovl_mgr_end
+  &_binary_spu_ovl_o_start,
+  &_binary_spu_ovl_o_end
 };
 
 static asection *toe = NULL;
@@ -118,6 +118,8 @@ spu_elf_load_ovl_mgr (void)
     {
       /* User supplied __ovly_load.  */
     }
+  else if (ovl_mgr_stream.start == ovl_mgr_stream.end)
+    einfo ("%F%P: no built-in overlay manager\n");
   else
     {
       lang_input_statement_type *ovl_is;

@@ -1535,8 +1535,14 @@ eelf32_sparc_vxworks.c: $(srcdir)/emulparams/elf32_sparc_vxworks.sh \
 eelf32_spu.c: $(srcdir)/emulparams/elf32_spu.sh $(srcdir)/emultempl/spuelf.em \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_spu "$(tdir_elf32_spu)"
-spu_inc.o: $(srcdir)/emultempl/spu_inc.s $(srcdir)/emultempl/spu_ovl.o
-	$(CC) -c -Wa,-I,$(srcdir)/emultempl -o $@ $<
+spu_inc.o: $(srcdir)/emultempl/spu_inc.s $(srcdir)/emultempl/spu_none.s \
+  $(srcdir)/emultempl/spu_ovl.o
+	cp $(srcdir)/emultempl/spu_ovl.o spu_ovl.o; \
+	if ! ld -r -o $@ -b binary spu_ovl.o; then \
+	  if ! $(CC) -c -o $@ $(srcdir)/emultempl/spu_inc.s; then \
+	    $(CC) -c -o $@ $(srcdir)/emultempl/spu_none.s; \
+	  fi \
+	fi
 $(srcdir)/emultempl/spu_ovl.o: @MAINT@ $(srcdir)/emultempl/spu_ovl.S
 	cpp -DOVLY_IRQ_SAVE $(srcdir)/emultempl/spu_ovl.S spu_ovl.s
 	if ../gas/as-new --version \
