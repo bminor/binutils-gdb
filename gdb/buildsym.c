@@ -1139,6 +1139,11 @@ record_debugformat (char *format)
 void
 record_producer (const char *producer)
 {
+  /* The producer is not always provided in the debugging info.
+     Do nothing if PRODUCER is NULL.  */
+  if (producer == NULL)
+    return;
+
   current_subfile->producer = savestring (producer, strlen (producer));
 }
 
