@@ -1142,6 +1142,9 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
     }
   *cv = 0;
 
+  VEC_free (varobj_p, stack);
+  VEC_free (varobj_p, result);
+
   if (type_changed)
     return TYPE_CHANGED;
   else
