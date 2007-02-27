@@ -440,7 +440,7 @@ varobj_create (char *objname,
 
       /* Allow creator to specify context of variable */
       if ((type == USE_CURRENT_FRAME) || (type == USE_SELECTED_FRAME))
-	fi = deprecated_selected_frame;
+	fi = deprecated_safe_get_selected_frame ();
       else
 	/* FIXME: cagney/2002-11-23: This code should be doing a
 	   lookup using the frame ID and not just the frame's
@@ -487,7 +487,7 @@ varobj_create (char *objname,
       if (fi != NULL)
 	{
 	  var->root->frame = get_frame_id (fi);
-	  old_fi = deprecated_selected_frame;
+	  old_fi = get_selected_frame (NULL);
 	  select_frame (fi);
 	}
 
@@ -1064,7 +1064,7 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
 
   /* Save the selected stack frame, since we will need to change it
      in order to evaluate expressions.  */
-  old_fid = get_frame_id (deprecated_selected_frame);
+  old_fid = get_frame_id (deprecated_safe_get_selected_frame ());
 
   /* Update the root variable. value_of_root can return NULL
      if the variable is no longer around, i.e. we stepped out of

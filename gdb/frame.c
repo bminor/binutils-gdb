@@ -935,7 +935,7 @@ get_current_frame (void)
 /* The "selected" stack frame is used by default for local and arg
    access.  May be zero, for no selected frame.  */
 
-struct frame_info *deprecated_selected_frame;
+static struct frame_info *selected_frame;
 
 /* Return the selected frame.  Always non-NULL (unless there isn't an
    inferior sufficient for creating a frame) in which case an error is
@@ -944,7 +944,7 @@ struct frame_info *deprecated_selected_frame;
 struct frame_info *
 get_selected_frame (const char *message)
 {
-  if (deprecated_selected_frame == NULL)
+  if (selected_frame == NULL)
     {
       if (message != NULL && (!target_has_registers
 			      || !target_has_stack
@@ -956,8 +956,8 @@ get_selected_frame (const char *message)
       select_frame (get_current_frame ());
     }
   /* There is always a frame.  */
-  gdb_assert (deprecated_selected_frame != NULL);
-  return deprecated_selected_frame;
+  gdb_assert (selected_frame != NULL);
+  return selected_frame;
 }
 
 /* This is a variant of get_selected_frame() which can be called when
@@ -979,7 +979,7 @@ select_frame (struct frame_info *fi)
 {
   struct symtab *s;
 
-  deprecated_selected_frame = fi;
+  selected_frame = fi;
   /* NOTE: cagney/2002-05-04: FI can be NULL.  This occurs when the
      frame is being invalidated.  */
   if (deprecated_selected_frame_level_changed_hook)

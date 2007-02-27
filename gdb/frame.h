@@ -665,10 +665,10 @@ extern void (*deprecated_selected_frame_level_changed_hook) (int);
 extern void return_command (char *, int);
 
 
-/* NOTE: cagney/2002-11-27:
+/* Notes (cagney/2002-11-27, drow/2003-09-06):
 
-   You might think that the below global can simply be replaced by a
-   call to either get_selected_frame() or select_frame().
+   You might think that calls to this function can simply be replaced by a
+   call to get_selected_frame().
 
    Unfortunately, it isn't that easy.
 
@@ -680,25 +680,17 @@ extern void return_command (char *, int);
    The only real exceptions occur at the edge (in the CLI code) where
    user commands need to pick up the selected frame before proceeding.
 
+   There are also some functions called with a NULL frame meaning either "the
+   program is not running" or "use the selected frame".
+
    This is important.  GDB is trying to stamp out the hack:
 
-   saved_frame = deprecated_selected_frame;
-   deprecated_selected_frame = ...;
+   saved_frame = deprecated_safe_get_selected_frame ();
+   select_frame (...);
    hack_using_global_selected_frame ();
-   deprecated_selected_frame = saved_frame;
+   select_frame (saved_frame);
 
-   Take care!  */
-
-extern struct frame_info *deprecated_selected_frame;
-
-/* NOTE: drow/2003-09-06:
-
-   This function is "a step sideways" for uses of deprecated_selected_frame.
-   They should be fixed as above, but meanwhile, we needed a solution for
-   cases where functions are called with a NULL frame meaning either "the
-   program is not running" or "use the selected frame".  Lazy building of
-   deprecated_selected_frame confuses the situation, because now
-   deprecated_selected_frame can be NULL even when the inferior is running.
+   Take care!
 
    This function calls get_selected_frame if the inferior should have a
    frame, or returns NULL otherwise.  */

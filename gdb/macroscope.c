@@ -84,17 +84,14 @@ default_macro_scope (void)
 {
   struct symtab_and_line sal;
   struct macro_scope *ms;
+  struct frame_info *frame;
 
-  /* If there's a selected frame, use its PC.  */ 
-  if (deprecated_selected_frame)
-    sal = find_pc_line (get_frame_pc (deprecated_selected_frame), 0);
+  /* If there's a selected frame, use its PC.  */
+  frame = deprecated_safe_get_selected_frame ();
+  if (frame)
+    sal = find_pc_line (get_frame_pc (frame), 0);
   
-  /* If the target has any registers at all, then use its PC.  Why we
-     would have registers but no stack, I'm not sure.  */
-  else if (target_has_registers)
-    sal = find_pc_line (read_pc (), 0);
-
-  /* If all else fails, fall back to the current listing position.  */
+  /* Fall back to the current listing position.  */
   else
     {
       /* Don't call select_source_symtab here.  That can raise an

@@ -378,7 +378,7 @@ symbol_read_needs_frame (struct symbol *sym)
    and a stack frame id, read the value of the variable
    and return a (pointer to a) struct value containing the value. 
    If the variable cannot be found, return a zero pointer.
-   If FRAME is NULL, use the deprecated_selected_frame.  */
+   If FRAME is NULL, use the selected frame.  */
 
 struct value *
 read_var_value (struct symbol *var, struct frame_info *frame)

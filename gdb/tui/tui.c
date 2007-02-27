@@ -408,8 +408,8 @@ tui_enable (void)
   tui_setup_io (1);
 
   tui_active = 1;
-  if (deprecated_selected_frame)
-     tui_show_frame_info (deprecated_selected_frame);
+  if (deprecated_safe_get_selected_frame ())
+     tui_show_frame_info (deprecated_safe_get_selected_frame ());
 
   /* Restore TUI keymap.  */
   tui_set_key_mode (tui_current_key_mode);

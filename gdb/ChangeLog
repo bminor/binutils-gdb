@@ -1,3 +1,17 @@
+2007-02-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* frame.c (deprecated_selected_frame): Rename to...
+	(selected_frame): ...this.  Make static.
+	(get_selected_frame, select_frame): Update.
+	* frame.h (deprected_select_frame): Delete.
+	(deprecated_safe_get_selected_frame): Update comments.
+
+	* breakpoint.c, cli/cli-cmds.c, f-valprint.c, infcmd.c, inflow.c,
+	infrun.c, stack.c, tui/tui-disasm.c, tui/tui-source.c,
+	tui/tui-winsource.c, valops.c, varobj.c, findvar.c, macroscope.c,
+	parse.c, regcache.h, sh64-tdep.c, tui/tui-hooks.c, tui/tui-win.c,
+	tui/tui.c: Replace references to deprecated_selected_frame.
+
 2007-02-27  Fred Fish  <fnf@specifix.com>
 
 	* rs6000-tdep.c (skip_prologue): Recognize addi instructions that 

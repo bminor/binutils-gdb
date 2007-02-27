@@ -3173,7 +3173,7 @@ Further execution is probably impossible.\n"));
          bpstat_print() contains the logic deciding in detail
          what to print, based on the event(s) that just occurred. */
 
-      if (stop_print_frame && deprecated_selected_frame)
+      if (stop_print_frame)
 	{
 	  int bpstat_ret;
 	  int source_flag;
@@ -3692,7 +3692,7 @@ save_inferior_status (int restore_stack_info)
 
   inf_status->registers = regcache_dup (current_regcache);
 
-  inf_status->selected_frame_id = get_frame_id (deprecated_selected_frame);
+  inf_status->selected_frame_id = get_frame_id (get_selected_frame (NULL));
   return inf_status;
 }
 

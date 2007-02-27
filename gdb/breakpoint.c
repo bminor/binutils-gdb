@@ -1045,7 +1045,7 @@ Note: automatically using hardware breakpoints for read-only addresses.\n"));
       /* FIXME drow/2003-09-09: It would be nice if evaluate_expression
 	 took a frame parameter, so that we didn't have to change the
 	 selected frame.  */
-      saved_frame_id = get_frame_id (deprecated_selected_frame);
+      saved_frame_id = get_frame_id (get_selected_frame (NULL));
 
       /* Determine if the watchpoint is within scope.  */
       if (bpt->owner->exp_valid_block == NULL)
@@ -6053,7 +6053,8 @@ until_break_command (char *arg, int from_tty, int anywhere)
 {
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
-  struct frame_info *prev_frame = get_prev_frame (deprecated_selected_frame);
+  struct frame_info *frame = get_selected_frame (NULL);
+  struct frame_info *prev_frame = get_prev_frame (frame);
   struct breakpoint *breakpoint;
   struct cleanup *old_chain;
   struct continuation_arg *arg1;
@@ -6089,8 +6090,7 @@ until_break_command (char *arg, int from_tty, int anywhere)
   else
     /* Otherwise, specify the current frame, because we want to stop only
        at the very same frame.  */
-    breakpoint = set_momentary_breakpoint (sal,
-					   get_frame_id (deprecated_selected_frame),
+    breakpoint = set_momentary_breakpoint (sal, get_frame_id (frame),
 					   bp_until);
 
   if (!target_can_async_p ())

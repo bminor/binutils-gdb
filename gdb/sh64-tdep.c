@@ -1408,8 +1408,7 @@ sh64_show_compact_regs (void)
 void
 sh64_show_regs (void)
 {
-  if (deprecated_selected_frame
-      && pc_is_isa32 (get_frame_pc (deprecated_selected_frame)))
+  if (pc_is_isa32 (get_frame_pc (get_selected_frame (NULL))))
     sh64_show_media_regs ();
   else
     sh64_show_compact_regs ();

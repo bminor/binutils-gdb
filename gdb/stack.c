@@ -1592,24 +1592,7 @@ get_selected_block (CORE_ADDR *addr_in_block)
   if (!target_has_stack)
     return 0;
 
-  /* NOTE: cagney/2002-11-28: Why go to all this effort to not create
-     a selected/current frame?  Perhaps this function is called,
-     indirectly, by WFI in "infrun.c" where avoiding the creation of
-     an inner most frame is very important (it slows down single
-     step).  I suspect, though that this was true in the deep dark
-     past but is no longer the case.  A mindless look at all the
-     callers tends to support this theory.  I think we should be able
-     to assume that there is always a selcted frame.  */
-  /* gdb_assert (deprecated_selected_frame != NULL); So, do you feel
-     lucky? */
-  if (!deprecated_selected_frame)
-    {
-      CORE_ADDR pc = read_pc ();
-      if (addr_in_block != NULL)
-	*addr_in_block = pc;
-      return block_for_pc (pc);
-    }
-  return get_frame_block (deprecated_selected_frame, addr_in_block);
+  return get_frame_block (get_selected_frame (NULL), addr_in_block);
 }
 
 /* Find a frame a certain number of levels away from FRAME.
@@ -1933,7 +1916,7 @@ func_command (char *arg, int from_tty)
 
   if (!found)
     printf_filtered (_("'%s' not within current stack frame.\n"), arg);
-  else if (frame != deprecated_selected_frame)
+  else if (frame != get_selected_frame (NULL))
     select_and_print_frame (frame);
 }
 
@@ -1942,7 +1925,7 @@ func_command (char *arg, int from_tty)
 enum language
 get_frame_language (void)
 {
-  struct frame_info *frame = deprecated_selected_frame;
+  struct frame_info *frame = deprecated_safe_get_selected_frame ();
 
   if (frame)
     {

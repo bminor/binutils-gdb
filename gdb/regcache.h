@@ -163,7 +163,7 @@ extern void regcache_cpy_no_passthrough (struct regcache *dest, struct regcache 
    simple substitution is required when updating the code.  The
    change, as far as practical, should avoid adding references to
    global variables (e.g., current_regcache, current_frame,
-   current_gdbarch or deprecated_selected_frame) and instead refer to
+   current_gdbarch or the selected frame) and instead refer to
    the FRAME or REGCACHE that has been passed into the containing
    function as parameters.  Consequently, the change typically
    involves modifying the containing function so that it takes a FRAME

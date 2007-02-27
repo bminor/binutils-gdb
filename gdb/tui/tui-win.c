@@ -1328,13 +1328,13 @@ make_visible_with_new_height (struct tui_win_info * win_info)
 	  tui_free_win_content (&win_info->generic);
 	  tui_update_source_window (win_info, cursal.symtab, line_or_addr, TRUE);
 	}
-      else if (deprecated_selected_frame != (struct frame_info *) NULL)
+      else if (deprecated_safe_get_selected_frame () != NULL)
 	{
 	  struct tui_line_or_address line;
 	  struct symtab_and_line cursal = get_current_source_symtab_and_line ();
+	  struct frame_info *frame = deprecated_safe_get_selected_frame ();
 
-
-	  s = find_pc_symtab (get_frame_pc (deprecated_selected_frame));
+	  s = find_pc_symtab (get_frame_pc (frame));
 	  if (win_info->generic.type == SRC_WIN)
 	    {
 	      line.loa = LOA_LINE;
