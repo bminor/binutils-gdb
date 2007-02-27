@@ -1,3 +1,15 @@
+2007-02-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (ALL_EMUL_EXTRA_OFILES): Remove spu_inc.o.
+	(eelf32_spu.c): Adjust dependencies.
+	* Makefile.in: Regenerate.
+	* emultempl/spuelf.em (ovl_mgr): New array.  Insert spu_ovl.o
+	code using bin2c.
+	(_binary_spu_ovl_o_start, _binary_spu_ovl_o_end): Delete.
+	(ovl_mgr_stream): Update.
+	* emultempl/spu_inc.s: Delete.
+	* emultempl/spu_none.s: Delete.
+
 2007-02-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/spuelf.em (_binary_builtin_ovl_mgr_start): Rename
