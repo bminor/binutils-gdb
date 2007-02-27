@@ -233,6 +233,7 @@ do
 	BUILD_NLMCONV='$(NLMCONV_PROG)$(EXEEXT)'
 	BUILD_SRCONV='$(SRCONV_PROG)'
 	NLMCONV_DEFS="-DNLMCONV_I386 -DNLMCONV_ALPHA -DNLMCONV_POWERPC -DNLMCONV_SPARC"
+	BUILD_MISC="${BUILD_MISC} bin2c"
     else
 	case $targ in
 changequote(,)dnl
@@ -335,7 +336,7 @@ changequote([,])dnl
 	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
 	  ;;
 	powerpc*-*-linux* | powerpc*-*-elf*)
-	  BUILD_MISC=embedspu
+	  BUILD_MISC="${BUILD_MISC} embedspu"
 	  ;;
 	sh*-*-pe)
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
@@ -344,6 +345,9 @@ changequote([,])dnl
 	  fi
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_SH"
 	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
+	  ;;
+	spu-*-*)
+	  BUILD_MISC="${BUILD_MISC} bin2c"
 	  ;;
 	mips*-*-pe)
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'

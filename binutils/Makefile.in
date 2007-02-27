@@ -44,7 +44,7 @@ bin_PROGRAMS = $(am__EXEEXT_5) $(am__EXEEXT_6) $(am__EXEEXT_7) \
 noinst_PROGRAMS = $(am__EXEEXT_13) $(am__EXEEXT_14) $(am__EXEEXT_15)
 EXTRA_PROGRAMS = $(am__EXEEXT_1) srconv$(EXEEXT) sysdump$(EXEEXT) \
 	coffdump$(EXEEXT) $(am__EXEEXT_2) $(am__EXEEXT_3) \
-	$(am__EXEEXT_4)
+	$(am__EXEEXT_4) bin2c$(EXEEXT)
 DIST_COMMON = $(srcdir)/../config.guess $(srcdir)/../config.sub NEWS \
 	README ChangeLog $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/configure $(am__configure_deps) \
@@ -101,6 +101,11 @@ am_ar_OBJECTS = arparse.$(OBJEXT) arlex.$(OBJEXT) ar.$(OBJEXT) \
 	not-ranlib.$(OBJEXT) arsup.$(OBJEXT) rename.$(OBJEXT) \
 	binemul.$(OBJEXT) emul_$(EMULATION).$(OBJEXT) $(am__objects_1)
 ar_OBJECTS = $(am_ar_OBJECTS)
+am_bin2c_OBJECTS = bin2c.$(OBJEXT) version.$(OBJEXT)
+bin2c_OBJECTS = $(am_bin2c_OBJECTS)
+bin2c_LDADD = $(LDADD)
+bin2c_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3)
 am_coffdump_OBJECTS = coffdump.$(OBJEXT) coffgrok.$(OBJEXT) \
 	$(am__objects_1)
 coffdump_OBJECTS = $(am_coffdump_OBJECTS)
@@ -178,12 +183,13 @@ YLWRAP = $(top_srcdir)/../ylwrap
 YACCCOMPILE = $(YACC) $(YFLAGS) $(AM_YFLAGS)
 LTYACCCOMPILE = $(LIBTOOL) --mode=compile $(YACC) $(YFLAGS) \
 	$(AM_YFLAGS)
-SOURCES = $(addr2line_SOURCES) $(ar_SOURCES) $(coffdump_SOURCES) \
-	$(cxxfilt_SOURCES) $(dlltool_SOURCES) $(dllwrap_SOURCES) \
-	$(nlmconv_SOURCES) $(nm_new_SOURCES) $(objcopy_SOURCES) \
-	$(objdump_SOURCES) $(ranlib_SOURCES) $(readelf_SOURCES) \
-	$(size_SOURCES) $(srconv_SOURCES) $(strings_SOURCES) \
-	$(strip_new_SOURCES) $(sysdump_SOURCES) $(windres_SOURCES)
+SOURCES = $(addr2line_SOURCES) $(ar_SOURCES) $(bin2c_SOURCES) \
+	$(coffdump_SOURCES) $(cxxfilt_SOURCES) $(dlltool_SOURCES) \
+	$(dllwrap_SOURCES) $(nlmconv_SOURCES) $(nm_new_SOURCES) \
+	$(objcopy_SOURCES) $(objdump_SOURCES) $(ranlib_SOURCES) \
+	$(readelf_SOURCES) $(size_SOURCES) $(srconv_SOURCES) \
+	$(strings_SOURCES) $(strip_new_SOURCES) $(sysdump_SOURCES) \
+	$(windres_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-exec-recursive install-info-recursive \
@@ -382,7 +388,7 @@ HFILES = \
 
 GENERATED_HFILES = arparse.h sysroff.h sysinfo.h defparse.h rcparse.h
 CFILES = \
-	addr2line.c ar.c arsup.c binemul.c bucomm.c budemang.c \
+	addr2line.c ar.c arsup.c bin2c.c binemul.c bucomm.c budemang.c \
 	coffdump.c coffgrok.c cxxfilt.c \
 	dwarf.c debug.c dlltool.c dllwrap.c \
 	emul_aix.c emul_vanilla.c filemode.c \
@@ -478,6 +484,7 @@ windres_SOURCES = windres.c resrc.c rescoff.c resbin.c rcparse.y rclex.l \
 windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(LIBINTL)
 dllwrap_SOURCES = dllwrap.c version.c
 dllwrap_LDADD = $(LIBIBERTY) $(LIBINTL)
+bin2c_SOURCES = bin2c.c version.c
 EXTRA_DIST = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
 	syslex.c deflex.c defparse.h defparse.c rclex.c rcparse.h rcparse.c
 
@@ -586,6 +593,9 @@ addr2line$(EXEEXT): $(addr2line_OBJECTS) $(addr2line_DEPENDENCIES)
 ar$(EXEEXT): $(ar_OBJECTS) $(ar_DEPENDENCIES) 
 	@rm -f ar$(EXEEXT)
 	$(LINK) $(ar_LDFLAGS) $(ar_OBJECTS) $(ar_LDADD) $(LIBS)
+bin2c$(EXEEXT): $(bin2c_OBJECTS) $(bin2c_DEPENDENCIES) 
+	@rm -f bin2c$(EXEEXT)
+	$(LINK) $(bin2c_LDFLAGS) $(bin2c_OBJECTS) $(bin2c_LDADD) $(LIBS)
 coffdump$(EXEEXT): $(coffdump_OBJECTS) $(coffdump_DEPENDENCIES) 
 	@rm -f coffdump$(EXEEXT)
 	$(LINK) $(coffdump_LDFLAGS) $(coffdump_OBJECTS) $(coffdump_LDADD) $(LIBS)
@@ -1165,6 +1175,9 @@ arsup.o: arsup.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h arsup.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
   bucomm.h $(INCDIR)/ansidecl.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/filenames.h
+bin2c.o: bin2c.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/symcat.h bucomm.h $(INCDIR)/ansidecl.h config.h \
+  $(INCDIR)/fopen-same.h
 binemul.o: binemul.c binemul.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h bucomm.h $(INCDIR)/ansidecl.h config.h \
   $(INCDIR)/fopen-same.h

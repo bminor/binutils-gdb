@@ -32,7 +32,7 @@ print_version (const char *name)
   /* This output is intended to follow the GNU standards document.  */
   /* xgettext:c-format */
   printf ("GNU %s %s\n", name, BFD_VERSION_STRING);
-  printf (_("Copyright 2005 Free Software Foundation, Inc.\n"));
+  printf (_("Copyright 2007 Free Software Foundation, Inc.\n"));
   printf (_("\
 This program is free software; you may redistribute it under the terms of\n\
 the GNU General Public License.  This program has absolutely no warranty.\n"));

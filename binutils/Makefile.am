@@ -58,7 +58,7 @@ bin_PROGRAMS = $(SIZE_PROG) $(OBJDUMP_PROG) $(AR_PROG) $(STRINGS_PROG) $(RANLIB_
 ## -new, and to rename cxxfilt to c++filt.
 noinst_PROGRAMS = $(NM_PROG) $(STRIP_PROG) $(DEMANGLER_PROG)
 
-EXTRA_PROGRAMS = $(NLMCONV_PROG) srconv sysdump coffdump $(DLLTOOL_PROG) $(WINDRES_PROG) $(DLLWRAP_PROG)
+EXTRA_PROGRAMS = $(NLMCONV_PROG) srconv sysdump coffdump $(DLLTOOL_PROG) $(WINDRES_PROG) $(DLLWRAP_PROG) bin2c
 
 # Stuff that goes in tooldir/ if appropriate.
 TOOL_PROGS = nm-new strip-new ar ranlib dlltool objdump
@@ -87,7 +87,7 @@ HFILES = \
 GENERATED_HFILES = arparse.h sysroff.h sysinfo.h defparse.h rcparse.h
 
 CFILES = \
-	addr2line.c ar.c arsup.c binemul.c bucomm.c budemang.c \
+	addr2line.c ar.c arsup.c bin2c.c binemul.c bucomm.c budemang.c \
 	coffdump.c coffgrok.c cxxfilt.c \
 	dwarf.c debug.c dlltool.c dllwrap.c \
 	emul_aix.c emul_vanilla.c filemode.c \
@@ -340,6 +340,8 @@ windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(LIBINTL)
 dllwrap_SOURCES = dllwrap.c version.c
 dllwrap_LDADD = $(LIBIBERTY) $(LIBINTL)
 
+bin2c_SOURCES = bin2c.c version.c
+
 
 EXTRA_DIST = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
 	syslex.c deflex.c defparse.h defparse.c rclex.c rcparse.h rcparse.c
@@ -444,6 +446,9 @@ arsup.o: arsup.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h arsup.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
   bucomm.h $(INCDIR)/ansidecl.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/filenames.h
+bin2c.o: bin2c.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/symcat.h bucomm.h $(INCDIR)/ansidecl.h config.h \
+  $(INCDIR)/fopen-same.h
 binemul.o: binemul.c binemul.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h bucomm.h $(INCDIR)/ansidecl.h config.h \
   $(INCDIR)/fopen-same.h
