@@ -1,6 +1,6 @@
 /* SPU specific support for 32-bit ELF.
 
-   Copyright 2006 Free Software Foundation, Inc.
+   Copyright 2006, 2007 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -33,8 +33,8 @@ struct _spu_elf_section_data
 
 struct _ovl_stream
 {
-  void *start;
-  void *end;
+  const void *start;
+  const void *end;
 };
 
 extern void spu_elf_plugin (int);

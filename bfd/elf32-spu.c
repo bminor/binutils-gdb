@@ -1069,7 +1069,7 @@ ovl_mgr_pread (struct bfd *abfd ATTRIBUTE_UNUSED,
   size_t max;
 
   os = (struct _ovl_stream *) stream;
-  max = (char *) os->end - (char *) os->start;
+  max = (const char *) os->end - (const char *) os->start;
 
   if ((ufile_ptr) offset >= max)
     return 0;
@@ -1078,7 +1078,7 @@ ovl_mgr_pread (struct bfd *abfd ATTRIBUTE_UNUSED,
   if (count > max - offset)
     count = max - offset;
 
-  memcpy (buf, (char *) os->start + offset, count);
+  memcpy (buf, (const char *) os->start + offset, count);
   return count;
 }
 

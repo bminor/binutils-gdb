@@ -1,3 +1,8 @@
+2007-02-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.h (struct _ovl_stream): Make "start" and "end" const.
+	* elf32-spu.c (ovl_mgr_pread): Add const to casts.
+
 2007-02-23  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* dwarf2.c (_bfd_dwarf2_find_nearest_line): Assume 32-bit
