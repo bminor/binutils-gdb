@@ -1,8 +1,8 @@
-2007-02-26  Joel Brobecker  <brobecker@adacore.com>
+2007-02-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* buildsym.c (record_producer): Do nothing if no producer is provided.
 
-2007-02-28  Nick Roberts  <nickrob@snap.net.nz>
+2007-02-27  Nick Roberts  <nickrob@snap.net.nz>
 
 	* varobj.c (varobj_update): Remove unused local.  Use gdb_assert
 	to check changelist is non-NULL.  Call error if the frontend tries
