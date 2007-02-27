@@ -1987,6 +1987,7 @@ elf_frob_file (void)
       bfd_set_section_size (stdoutput, s, size);
       s->contents = (unsigned char *) frag_more (size);
       frag_now->fr_fix = frag_now_fix_octets ();
+      frag_wane (frag_now);
     }
 
 #ifdef elf_tc_final_processing

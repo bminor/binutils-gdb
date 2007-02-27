@@ -1,3 +1,7 @@
+2007-02-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/obj-elf.c (elf_frob_file): frag_wane any new frags.
+
 2007-02-25  Mark Shinwell  <shinwell@codesourcery.com>
 
 	* config/tc-arm.c (do_vfp_nsyn_pop): Use fldmias/fldmiad.
