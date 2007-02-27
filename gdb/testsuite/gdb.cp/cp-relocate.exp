@@ -126,7 +126,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 
 gdb_test "add-symbol-file ${binfile} 0 -s ${func1_sec} 0x40000 -s ${func2_sec} 0x80000" \
 	"Reading symbols from .*${testfile}\\.o\\.\\.\\.done\\.(|\r\nUsing host libthread_db library .*libthread_db.so.*\\.)" \
-	"add-symbol-file ${binfile}" \
+	"add-symbol-file ${testfile}.o" \
 	"add symbol table from file \".*${testfile}\\.o\" at.*\\(y or n\\) " \
 	"y"
 

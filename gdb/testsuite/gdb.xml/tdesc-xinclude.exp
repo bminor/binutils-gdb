@@ -28,7 +28,7 @@ proc set_arch { srcfile errmsg } {
 
     # Anchor the test output, so that error messages are detected.
     set cmd "set tdesc filename $srcdir/$subdir/$srcfile"
-    set msg $cmd
+    set msg "set tdesc filename $subdir/$srcfile"
     set cmd_regex [string_to_regexp $cmd]
     gdb_test_multiple $cmd $msg {
 	-re "^$cmd_regex\r\n$errmsg$gdb_prompt $" {

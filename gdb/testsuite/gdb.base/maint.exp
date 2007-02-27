@@ -329,7 +329,7 @@ gdb_expect  {
 
 # Check that maint print msymbols allows relative pathnames
 set mydir [pwd]
-gdb_test "cd ${objdir}" "Working directory [string_to_regexp ${objdir}]\..*"
+gdb_test "cd ${objdir}" "Working directory [string_to_regexp ${objdir}]\..*" "cd to objdir"
 gdb_test_multiple "maint print msymbols msymbols_output2 ${subdir}/${testfile}" "maint print msymbols" {
     -re "^maint print msymbols msymbols_output2 \[^\n\]*\r\n$gdb_prompt $" {
     	gdb_test_multiple "shell ls msymbols_output2" "maint print msymbols" {
@@ -362,7 +362,7 @@ gdb_test_multiple "maint print msymbols msymbols_output2 ${subdir}/${testfile}" 
 	fail "(timeout) maint print msymbols"
     }
 }
-gdb_test "cd ${mydir}" "Working directory [string_to_regexp ${mydir}]\..*"
+gdb_test "cd ${mydir}" "Working directory [string_to_regexp ${mydir}]\..*" "cd to mydir"
 
 send_gdb "maint print symbols\n"
 gdb_expect  {

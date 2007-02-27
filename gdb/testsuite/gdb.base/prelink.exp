@@ -90,7 +90,7 @@ if { $found == 0  } {
 }
 
 if {[catch "system \"prelink -uN ${libfile}\""] != 0} {
-    untested "${libfile} was not prelinked, maybe system libraries are not prelinked?"
+    untested "${testfile}.so was not prelinked, maybe system libraries are not prelinked?"
     return 0
 }
 catch "system \"prelink -qNR ${libfile}\""
