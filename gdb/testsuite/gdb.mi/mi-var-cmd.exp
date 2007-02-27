@@ -52,7 +52,7 @@ mi_gdb_load ${binfile}
 # Desc:  Create global variable
 
 mi_gdb_test "111-var-create global_simple * global_simple" \
-	"111\\^done,name=\"global_simple\",numchild=\"6\",value=\".*\",type=\"simpleton\"" \
+	"111\\^done,name=\"global_simple\",numchild=\"6\",value=\"{...}\",type=\"simpleton\"" \
 	"create global variable"
 
 # Test: c_variable-1.2
@@ -74,43 +74,76 @@ mi_runto do_locals_tests
 # Test: c_variable-1.4
 # Desc: create local variables
 
-mi_create_varobj linteger linteger "create local variable linteger"
+mi_gdb_test "-var-create linteger * linteger" \
+	"\\^done,name=\"linteger\",numchild=\"0\",value=\".*\",type=\"int\"" \
+	"create local variable linteger"
 
-mi_create_varobj lpinteger lpinteger "create local variable lpinteger"
+mi_gdb_test "-var-create lpinteger * lpinteger" \
+	"\\^done,name=\"lpinteger\",numchild=\"1\",value=\"$hex\",type=\"int \\*\"" \
+	"create local variable lpinteger"
 
-mi_create_varobj lcharacter lcharacter "create local variable lcharacter"
+mi_gdb_test "-var-create lcharacter * lcharacter" \
+	"\\^done,name=\"lcharacter\",numchild=\"0\",value=\".*\",type=\"char\"" \
+	"create local variablelcharacter "
 
-mi_create_varobj lpcharacter lpcharacter "create local variable lpcharacter"
+mi_gdb_test "-var-create lpcharacter * lpcharacter" \
+	"\\^done,name=\"lpcharacter\",numchild=\"1\",value=\"$hex \\\\\".*\\\\\"\",type=\"char \\*\"" \
+ 	"create local variable lpcharacter"
 
-mi_create_varobj llong llong "create local variable llong"
+mi_gdb_test "-var-create llong * llong" \
+	"\\^done,name=\"llong\",numchild=\"0\",value=\".*\",type=\"long int\"" \
+	"create local variable llong"
 
-mi_create_varobj lplong lplong "create local variable lplong"
+mi_gdb_test "-var-create lplong * lplong" \
+	"\\^done,name=\"lplong\",numchild=\"1\",value=\"$hex\",type=\"long int \\*\"" \
+	"create local variable lplong"
 
-mi_create_varobj lfloat lfloat "create local variable lfloat"
+mi_gdb_test "-var-create lfloat * lfloat" \
+	"\\^done,name=\"lfloat\",numchild=\"0\",value=\".*\",type=\"float\"" \
+	"create local variable lfloat"
 
-mi_create_varobj lpfloat lpfloat "create local variable lpfloat"
+mi_gdb_test "-var-create lpfloat * lpfloat" \
+	"\\^done,name=\"lpfloat\",numchild=\"1\",value=\"$hex\",type=\"float \\*\"" \
+	"create local variable lpfloat"
 
-mi_create_varobj ldouble ldouble "create local variable ldouble"
+mi_gdb_test "-var-create ldouble * ldouble" \
+	"\\^done,name=\"ldouble\",numchild=\"0\",value=\".*\",type=\"double\"" \
+	"create local variable ldouble"
 
-mi_create_varobj lpdouble lpdouble "create local variable lpdouble"
+mi_gdb_test "-var-create lpdouble * lpdouble" \
+	"\\^done,name=\"lpdouble\",numchild=\"1\",value=\"$hex\",type=\"double \\*\"" \
+	"create local variable lpdouble"
 
-mi_create_varobj lsimple lsimple "create local variable lsimple"
+mi_gdb_test "-var-create lsimple * lsimple" \
+	"\\^done,name=\"lsimple\",numchild=\"6\",value=\"{...}\",type=\"struct _simple_struct\"" \
+	"create local variable lsimple"
 
-mi_create_varobj lpsimple lpsimple "create local variable lpsimple"
+mi_gdb_test "-var-create lpsimple * lpsimple" \
+	"\\^done,name=\"lpsimple\",numchild=\"6\",value=\"$hex\",type=\"struct _simple_struct \\*\"" \
+	"create local variable lpsimple"
 
-mi_create_varobj func func "create local variable func"
+mi_gdb_test "-var-create func * func" \
+	"\\^done,name=\"func\",numchild=\"0\",value=\"$hex\",type=\"void \\(\\*\\)\\((void|)\\)\"" \
+	"create local variable func"
 
 # Test: c_variable-1.5
 # Desc: create lsimple.character
-mi_create_varobj lsimple.character lsimple.character "create lsimple.character"
+mi_gdb_test "-var-create lsimple.character * lsimple.character" \
+	"\\^done,name=\"lsimple.character\",numchild=\"0\",value=\".*\",type=\"char\"" \
+	"create lsimple.character"
 
 # Test: c_variable-1.6
 # Desc: create lpsimple->integer
-mi_create_varobj lsimple->integer lsimple->integer "create lsimple->integer"
+mi_gdb_test "-var-create lsimple->integer * lsimple->integer" \
+	"\\^done,name=\"lsimple->integer\",numchild=\"0\",value=\".*\",type=\"int\"" \
+	"create lsimple->integer"
 
 # Test: c_variable-1.7
 # Desc: ceate lsimple.integer
-mi_create_varobj lsimple.integer lsimple.integer "create lsimple->integer"
+mi_gdb_test "-var-create lsimple.integer * lsimple.integer" \
+	"\\^done,name=\"lsimple.integer\",numchild=\"0\",value=\".*\",type=\"int\"" \
+	"create lsimple->integer"
+
 
 # Test: c_variable-1.9
 # Desc: create type name
@@ -370,7 +403,9 @@ mi_gdb_test "-var-update *" \
 	"\\^done,changelist=\\\[\\\]" \
 	"assign same value to func (update)"
 
-mi_create_varobj array_ptr array_ptr "create global variable array_ptr"
+mi_gdb_test "-var-create array_ptr * array_ptr" \
+	"\\^done,name=\"array_ptr\",numchild=\"1\",value=\"$hex\",type=\"int \\*\"" \
+	"create global variable array_ptr"
 
 mi_gdb_test "-var-assign array_ptr array2" \
 	"\\^done,value=\"$hex\"" \
@@ -399,9 +434,13 @@ mi_continue_to subroutine1
 
 # Test: c_variable-2.10
 # Desc: create variable for locals i,l in subroutine1
-mi_create_varobj i i "create i"
+mi_gdb_test "-var-create i  * i" \
+	"\\^done,name=\"i\",numchild=\"0\",value=\"4321\",type=\"int\"" \
+	"create i"
 
-mi_create_varobj l l "create l"
+mi_gdb_test "-var-create l * l" \
+	"\\^done,name=\"l\",numchild=\"1\",value=\"$hex\",type=\"long int \\*\"" \
+	"create l"
 
 # Test: c_variable-2.11
 # Desc: create do_locals_tests local in subroutine1
@@ -556,7 +595,9 @@ mi_gdb_test "-var-update selected_a" \
 
 # A varobj we fail to read during -var-update should be considered
 # out of scope.
-mi_create_varobj null_ptr **0 "create null_ptr"
+mi_gdb_test "-var-create null_ptr * **0" \
+    {\^done,name="null_ptr",numchild="0",value=".*",type="int"} \
+    "create null_ptr"
 
 # Allow this to succeed, if address zero is readable, although it
 # will not test what it was meant to.  Most important is that GDB
@@ -579,7 +620,9 @@ mi_gdb_test "kill" \
     {&"kill\\n".*\^done} \
     "kill program before endvar"
 
-mi_create_varobj endvar _end "create endvar"
+mi_gdb_test "-var-create endvar * _end" \
+    {(\^done,name="endvar",numchild="0",value=".*",type=".*"|&".*unable to.*".*\^error,msg=".*")} \
+    "create endvar"
 
 # Allow this to succeed whether the value is readable, unreadable, or
 # missing.  Most important is that GDB does not crash.

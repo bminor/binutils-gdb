@@ -38,7 +38,9 @@ mi_gdb_load ${binfile}
 
 mi_runto MAIN__
 
-mi_create_varobj "array" "array" "create local variable array"
+mi_gdb_test "-var-create array * array" \
+    "\\^done,name=\"array\",numchild=\"3\",value=\".*\",type=\"integer \\(2,-1:1\\)\"" \
+    "create local variable array"
 
 mi_gdb_test "-var-list-children --all-values array" \
     "\\^done,numchild=\"3\",children=\\\[child=\{name=\"array.-1\",exp=\"-1\",numchild=\"2\",value=\"\\\[2\\\]\",type=\"integer \\(2\\)\"\},child=\{name=\"array.0\",exp=\"0\",numchild=\"2\",value=\"\\\[2\\\]\",type=\"integer \\(2\\)\"\},child=\{name=\"array.1\",exp=\"1\",numchild=\"2\",value=\"\\\[2\\\]\",type=\"integer \\(2\\)\"\}\\\]" \
