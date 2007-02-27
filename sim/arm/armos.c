@@ -401,7 +401,7 @@ SWIflen (ARMul_State * state, ARMword fh)
   struct OSblock *OSptr = (struct OSblock *) state->OSptr;
   ARMword addr;
 
-  if (fh == 0 || fh > FOPEN_MAX)
+  if (fh > FOPEN_MAX)
     {
       OSptr->ErrorNo = EBADF;
       state->Reg[0] = -1L;
