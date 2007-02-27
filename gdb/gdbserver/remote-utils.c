@@ -209,6 +209,17 @@ remote_open (char *name)
 	  || listen (tmp_desc, 1))
 	perror_with_name ("Can't bind address");
 
+      /* If port is zero, a random port will be selected, and the
+	 fprintf below needs to know what port was selected.  */
+      if (port == 0)
+	{
+	  socklen_t len = sizeof (sockaddr);
+	  if (getsockname (tmp_desc, (struct sockaddr *) &sockaddr, &len) < 0
+	      || len < sizeof (sockaddr))
+	    perror_with_name ("Can't determine port");
+	  port = ntohs (sockaddr.sin_port);
+	}
+
       fprintf (stderr, "Listening on port %d\n", port);
       fflush (stderr);
 

@@ -1,3 +1,7 @@
+2007-02-26  Mat Hostetter  <mat@lcs.mit.edu>
+
+	* remote-utils.c (remote_open): Print out the assigned port number.
+
 2007-02-26  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote-utils.c (monitor_output): New function.
