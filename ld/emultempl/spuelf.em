@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2006 Free Software Foundation, Inc.
+#   Copyright 2006, 2007 Free Software Foundation, Inc.
 #
 # This file is part of GLD, the Gnu Linker.
 #
@@ -38,12 +38,17 @@ static int emit_stub_syms = 0;
 static bfd_vma local_store_lo = 0;
 static bfd_vma local_store_hi = 0x3ffff;
 
-extern void *_binary_spu_ovl_o_start;
-extern void *_binary_spu_ovl_o_end;
+static const char ovl_mgr[] = {
+EOF
+
+../binutils/bin2c < ${srcdir}/emultempl/spu_ovl.o >> e${EMULATION_NAME}.c
+
+cat >>e${EMULATION_NAME}.c <<EOF
+};
 
 static const struct _ovl_stream ovl_mgr_stream = {
-  &_binary_spu_ovl_o_start,
-  &_binary_spu_ovl_o_end
+  ovl_mgr,
+  ovl_mgr + sizeof (ovl_mgr)
 };
 
 static asection *toe = NULL;
