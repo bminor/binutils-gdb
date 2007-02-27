@@ -1037,7 +1037,6 @@ int
 varobj_update (struct varobj **varp, struct varobj ***changelist)
 {
   int changed = 0;
-  int error = 0;
   int type_changed;
   int i;
   int vleft;
@@ -1051,13 +1050,10 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
   struct frame_info *fi;
 
   /* sanity check: have we been passed a pointer?  */
-  if (changelist == NULL)
-    return WRONG_PARAM;
+  gdb_assert (changelist);
 
-  /*  Only root variables can be updated...  */
   if (!is_root_p (*varp))
-    /* Not a root var.  */
-    return WRONG_PARAM;
+    error (_("Only root variables can be updated"));
 
   if (!(*varp)->root->is_valid)
     return INVALID;
