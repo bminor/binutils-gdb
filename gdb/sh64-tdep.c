@@ -2253,7 +2253,7 @@ sh64_frame_cache (struct frame_info *next_frame, void **this_cache)
   if (cache->base == 0)
     return cache;
 
-  cache->pc = frame_func_unwind (next_frame);
+  cache->pc = frame_func_unwind (next_frame, NORMAL_FRAME);
   if (cache->pc != 0)
     sh64_analyze_prologue (current_gdbarch, cache, cache->pc, current_pc);
 

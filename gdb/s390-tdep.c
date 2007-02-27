@@ -1232,7 +1232,7 @@ s390_prologue_frame_unwind_cache (struct frame_info *next_frame,
      bother searching for it -- with modern compilers this would be mostly
      pointless anyway.  Trust that we'll either have valid DWARF-2 CFI data
      or else a valid backchain ...  */
-  func = frame_func_unwind (next_frame);
+  func = frame_func_unwind (next_frame, NORMAL_FRAME);
   if (!func)
     return 0;
 
@@ -1556,14 +1556,15 @@ static const struct frame_unwind s390_stub_frame_unwind = {
 static const struct frame_unwind *
 s390_stub_frame_sniffer (struct frame_info *next_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR addr_in_block;
   bfd_byte insn[S390_MAX_INSTR_SIZE];
 
   /* If the current PC points to non-readable memory, we assume we
      have trapped due to an invalid function pointer call.  We handle
      the non-existing current function like a PLT stub.  */
-  if (in_plt_section (pc, NULL)
-      || s390_readinstruction (insn, pc) < 0)
+  addr_in_block = frame_unwind_address_in_block (next_frame, NORMAL_FRAME);
+  if (in_plt_section (addr_in_block, NULL)
+      || s390_readinstruction (insn, frame_pc_unwind (next_frame)) < 0)
     return &s390_stub_frame_unwind;
   return NULL;
 }

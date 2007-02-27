@@ -386,7 +386,8 @@ mips_mdebug_frame_this_id (struct frame_info *next_frame, void **this_cache,
 {
   struct mips_frame_cache *info = mips_mdebug_frame_cache (next_frame,
 							   this_cache);
-  (*this_id) = frame_id_build (info->base, frame_func_unwind (next_frame));
+  (*this_id) = frame_id_build (info->base,
+			       frame_func_unwind (next_frame, NORMAL_FRAME));
 }
 
 static void
@@ -412,7 +413,7 @@ static const struct frame_unwind mips_mdebug_frame_unwind =
 static const struct frame_unwind *
 mips_mdebug_frame_sniffer (struct frame_info *next_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = frame_unwind_address_in_block (next_frame, NORMAL_FRAME);
   CORE_ADDR startaddr = 0;
   struct mdebug_extra_func_info *proc_desc;
   int kernel_trap;

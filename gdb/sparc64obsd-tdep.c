@@ -205,7 +205,7 @@ sparc64obsd_sigtramp_frame_sniffer (struct frame_info *next_frame)
 /* Kernel debugging support.  */
 
 static struct sparc_frame_cache *
-sparc64obsd_trapframe_cache(struct frame_info *next_frame, void **this_cache)
+sparc64obsd_trapframe_cache (struct frame_info *next_frame, void **this_cache)
 {
   struct sparc_frame_cache *cache;
   CORE_ADDR sp, trapframe_addr;
@@ -267,15 +267,17 @@ static const struct frame_unwind sparc64obsd_trapframe_unwind =
 static const struct frame_unwind *
 sparc64obsd_trapframe_sniffer (struct frame_info *next_frame)
 {
+  CORE_ADDR pc;
   ULONGEST pstate;
   char *name;
 
   /* Check whether we are in privileged mode, and bail out if we're not.  */
-  pstate = frame_unwind_register_unsigned(next_frame, SPARC64_PSTATE_REGNUM);
+  pstate = frame_unwind_register_unsigned (next_frame, SPARC64_PSTATE_REGNUM);
   if ((pstate & SPARC64_PSTATE_PRIV) == 0)
     return NULL;
 
-  find_pc_partial_function (frame_pc_unwind (next_frame), &name, NULL, NULL);
+  pc = frame_unwind_address_in_block (next_frame, NORMAL_FRAME);
+  find_pc_partial_function (pc, &name, NULL, NULL);
   if (name && strcmp (name, "Lslowtrap_reenter") == 0)
     return &sparc64obsd_trapframe_unwind;
 

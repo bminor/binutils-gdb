@@ -792,9 +792,11 @@ cris_frame_unwind_cache (struct frame_info *next_frame,
 
   /* Prologue analysis does the rest...  */
   if (cris_version () == 32)
-    crisv32_scan_prologue (frame_func_unwind (next_frame), next_frame, info);
+    crisv32_scan_prologue (frame_func_unwind (next_frame, NORMAL_FRAME),
+			   next_frame, info);
   else
-    cris_scan_prologue (frame_func_unwind (next_frame), next_frame, info);
+    cris_scan_prologue (frame_func_unwind (next_frame, NORMAL_FRAME),
+			next_frame, info);
 
   return info;
 }
@@ -814,7 +816,7 @@ cris_frame_this_id (struct frame_info *next_frame,
   struct frame_id id;
 
   /* The FUNC is easy.  */
-  func = frame_func_unwind (next_frame);
+  func = frame_func_unwind (next_frame, NORMAL_FRAME);
 
   /* Hopefully the prologue analysis either correctly determined the
      frame's base (which is the SP from the previous frame), or set

@@ -1836,7 +1836,7 @@ m32c_analyze_frame_prologue (struct frame_info *next_frame,
 {
   if (! *this_prologue_cache)
     {
-      CORE_ADDR func_start = frame_func_unwind (next_frame);
+      CORE_ADDR func_start = frame_func_unwind (next_frame, NORMAL_FRAME);
       CORE_ADDR stop_addr = frame_pc_unwind (next_frame);
 
       /* If we couldn't find any function containing the PC, then
@@ -1900,7 +1900,8 @@ m32c_this_id (struct frame_info *next_frame,
   CORE_ADDR base = m32c_frame_base (next_frame, this_prologue_cache);
 
   if (base)
-    *this_id = frame_id_build (base, frame_func_unwind (next_frame));
+    *this_id = frame_id_build (base,
+			       frame_func_unwind (next_frame, NORMAL_FRAME));
   /* Otherwise, leave it unset, and that will terminate the backtrace.  */
 }
 

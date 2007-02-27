@@ -924,7 +924,7 @@ xtensa_frame_cache (struct frame_info *next_frame, void **this_cache)
       cache->ws = ws & ~(1 << wb);
     }
 
-  cache->pc = ((frame_func_unwind (next_frame) & 0xc0000000)
+  cache->pc = ((frame_func_unwind (next_frame, NORMAL_FRAME) & 0xc0000000)
 	       | (ra & 0x3fffffff));
   cache->ps = (ps & ~PS_CALLINC_MASK) | ((WINSIZE(ra)/4) << PS_CALLINC_SHIFT);
 

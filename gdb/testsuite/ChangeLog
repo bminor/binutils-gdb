@@ -1,5 +1,9 @@
 2007-02-27  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.arch/i386-signal.c, gdb.arch/i386-signal.exp: New files.
+
+2007-02-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.base/maint.exp: Remove full paths from test names.
 	* gdb.base/prelink.exp, gdb.cp/cp-relocate.exp,
 	gdb.xml/tdesc-errors.exp, gdb.xml/tdesc-xinclude.exp: Likewise.

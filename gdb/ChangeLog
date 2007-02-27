@@ -1,5 +1,34 @@
 2007-02-27  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* dwarf2-frame.c (dwarf2_frame_cache, dwarf2_frame_this_id)
+	(dwarf2_frame_sniffer): Update.
+	(dwarf2_signal_frame_this_id): New function.
+	(dwarf2_signal_frame_unwind): Use it.
+	(dwarf2_frame_base_sniffer): Use frame_unwind_address_in_block.
+	* frame.c (frame_func_unwind): Add this_type argument.
+	(get_frame_func): Update.
+	(frame_unwind_address_in_block): Add this_type argument and check it.
+	Fix a typo.
+	(get_frame_address_in_block): Update.
+	* frame.h (enum frame_type): Move higher in the file.
+	(frame_unwind_address_in_block, frame_func_unwind): Add enum frame_type
+	argument.
+
+	* alpha-mdebug-tdep.c, alpha-tdep.c, amd64-tdep.c, amd64obsd-tdep.c,
+	arm-tdep.c, avr-tdep.c, cris-tdep.c, frv-tdep.c, h8300-tdep.c,
+	hppa-tdep.c, i386-tdep.c, i386obsd-tdep.c, ia64-tdep.c,
+	libunwind-frame.c, m32c-tdep.c, m32r-linux-tdep.c, m32r-tdep.c,
+	m68hc11-tdep.c, m68k-tdep.c, m88k-tdep.c, mips-mdebug-tdep.c,
+	mips-tdep.c, mn10300-tdep.c, mt-tdep.c, rs6000-tdep.c, s390-tdep.c,
+	score-tdep.c, sh-tdep.c, sh64-tdep.c, sparc-tdep.c,
+	sparc64obsd-tdep.c, spu-tdep.c, v850-tdep.c, vax-tdep.c,
+	xstormy16-tdep.c, xtensa-tdep.c: Update calls to
+	frame_func_unwind and frame_unwind_address_in_block to specify
+	the frame type.  Use frame_unwind_address_in_block instead of
+	frame_pc_unwind in sniffers.
+
+2007-02-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* frame.c (deprecated_selected_frame): Rename to...
 	(selected_frame): ...this.  Make static.
 	(get_selected_frame, select_frame): Update.

@@ -848,7 +848,7 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
      frame_unwind_address_in_block does just this.  It's not clear how
      reliable the method is though; there is the potential for the
      register state pre-call being different to that on return.  */
-  fs->pc = frame_unwind_address_in_block (next_frame);
+  fs->pc = frame_unwind_address_in_block (next_frame, NORMAL_FRAME);
 
   /* Find the correct FDE.  */
   fde = dwarf2_frame_find_fde (&fs->pc);
@@ -1011,7 +1011,22 @@ dwarf2_frame_this_id (struct frame_info *next_frame, void **this_cache,
   if (cache->undefined_retaddr)
     return;
 
-  (*this_id) = frame_id_build (cache->cfa, frame_func_unwind (next_frame));
+  (*this_id) = frame_id_build (cache->cfa,
+			       frame_func_unwind (next_frame, NORMAL_FRAME));
+}
+
+static void
+dwarf2_signal_frame_this_id (struct frame_info *next_frame, void **this_cache,
+			     struct frame_id *this_id)
+{
+  struct dwarf2_frame_cache *cache =
+    dwarf2_frame_cache (next_frame, this_cache);
+
+  if (cache->undefined_retaddr)
+    return;
+
+  (*this_id) = frame_id_build (cache->cfa,
+			       frame_func_unwind (next_frame, SIGTRAMP_FRAME));
 }
 
 static void
@@ -1179,7 +1194,7 @@ static const struct frame_unwind dwarf2_frame_unwind =
 static const struct frame_unwind dwarf2_signal_frame_unwind =
 {
   SIGTRAMP_FRAME,
-  dwarf2_frame_this_id,
+  dwarf2_signal_frame_this_id,
   dwarf2_frame_prev_register
 };
 
@@ -1188,8 +1203,12 @@ dwarf2_frame_sniffer (struct frame_info *next_frame)
 {
   /* Grab an address that is guarenteed to reside somewhere within the
      function.  frame_pc_unwind(), for a no-return next function, can
-     end up returning something past the end of this function's body.  */
-  CORE_ADDR block_addr = frame_unwind_address_in_block (next_frame);
+     end up returning something past the end of this function's body.
+     If the frame we're sniffing for is a signal frame whose start
+     address is placed on the stack by the OS, its FDE must
+     extend one byte before its start address or we will miss it.  */
+  CORE_ADDR block_addr = frame_unwind_address_in_block (next_frame,
+							NORMAL_FRAME);
   struct dwarf2_fde *fde = dwarf2_frame_find_fde (&block_addr);
   if (!fde)
     return NULL;
@@ -1233,8 +1252,9 @@ static const struct frame_base dwarf2_frame_base =
 const struct frame_base *
 dwarf2_frame_base_sniffer (struct frame_info *next_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
-  if (dwarf2_frame_find_fde (&pc))
+  CORE_ADDR block_addr = frame_unwind_address_in_block (next_frame,
+							NORMAL_FRAME);
+  if (dwarf2_frame_find_fde (&block_addr))
     return &dwarf2_frame_base;
 
   return NULL;

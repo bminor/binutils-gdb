@@ -141,7 +141,10 @@ libunwind_frame_cache (struct frame_info *next_frame, void **this_cache)
   /* Allocate a new cache.  */
   cache = FRAME_OBSTACK_ZALLOC (struct libunwind_frame_cache);
 
-  cache->func_addr = frame_func_unwind (next_frame);
+  /* We can assume we are unwinding a normal frame.  Even if this is
+     for a signal trampoline, ia64 signal "trampolines" use a normal
+     subroutine call to start the signal handler.  */
+  cache->func_addr = frame_func_unwind (next_frame, NORMAL_FRAME);
   if (cache->func_addr == 0
       && frame_relative_level (next_frame) > 0
       && get_frame_type (next_frame) != SIGTRAMP_FRAME)

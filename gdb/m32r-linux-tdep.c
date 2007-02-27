@@ -250,7 +250,7 @@ m32r_linux_sigtramp_frame_cache (struct frame_info *next_frame,
       if (addr)
 	sigcontext_addr += 128;
       else
-	addr = frame_func_unwind (next_frame);
+	addr = frame_func_unwind (next_frame, NORMAL_FRAME);
     }
   cache->pc = addr;
 

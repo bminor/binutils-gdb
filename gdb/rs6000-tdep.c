@@ -2977,7 +2977,7 @@ rs6000_frame_cache (struct frame_info *next_frame, void **this_cache)
   (*this_cache) = cache;
   cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
-  func = frame_func_unwind (next_frame);
+  func = frame_func_unwind (next_frame, NORMAL_FRAME);
   pc = frame_pc_unwind (next_frame);
   skip_prologue (func, pc, &fdata);
 
@@ -3129,7 +3129,8 @@ rs6000_frame_this_id (struct frame_info *next_frame, void **this_cache,
 {
   struct rs6000_frame_cache *info = rs6000_frame_cache (next_frame,
 							this_cache);
-  (*this_id) = frame_id_build (info->base, frame_func_unwind (next_frame));
+  (*this_id) = frame_id_build (info->base,
+			       frame_func_unwind (next_frame, NORMAL_FRAME));
 }
 
 static void

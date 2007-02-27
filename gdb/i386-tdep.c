@@ -949,7 +949,7 @@ i386_frame_cache (struct frame_info *next_frame, void **this_cache)
   /* For normal frames, %eip is stored at 4(%ebp).  */
   cache->saved_regs[I386_EIP_REGNUM] = 4;
 
-  cache->pc = frame_func_unwind (next_frame);
+  cache->pc = frame_func_unwind (next_frame, NORMAL_FRAME);
   if (cache->pc != 0)
     i386_analyze_prologue (cache->pc, frame_pc_unwind (next_frame), cache);
 

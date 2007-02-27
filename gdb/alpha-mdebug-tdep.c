@@ -246,7 +246,8 @@ alpha_mdebug_frame_this_id (struct frame_info *next_frame,
   struct alpha_mdebug_unwind_cache *info
     = alpha_mdebug_frame_unwind_cache (next_frame, this_prologue_cache);
 
-  *this_id = frame_id_build (info->vfp, frame_func_unwind (next_frame));
+  *this_id = frame_id_build (info->vfp,
+			     frame_func_unwind (next_frame, NORMAL_FRAME));
 }
 
 /* Retrieve the value of REGNUM in FRAME.  Don't give up!  */
@@ -311,7 +312,7 @@ static const struct frame_unwind alpha_mdebug_frame_unwind = {
 const struct frame_unwind *
 alpha_mdebug_frame_sniffer (struct frame_info *next_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = frame_unwind_address_in_block (next_frame, NORMAL_FRAME);
   struct mdebug_extra_func_info *proc_desc;
 
   /* If this PC does not map to a PDR, then clearly this isn't an
@@ -368,7 +369,7 @@ static const struct frame_base alpha_mdebug_frame_base = {
 static const struct frame_base *
 alpha_mdebug_frame_base_sniffer (struct frame_info *next_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = frame_unwind_address_in_block (next_frame, NORMAL_FRAME);
   struct mdebug_extra_func_info *proc_desc;
 
   /* If this PC does not map to a PDR, then clearly this isn't an

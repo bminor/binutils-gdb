@@ -1666,7 +1666,8 @@ mips_insn16_frame_this_id (struct frame_info *next_frame, void **this_cache,
 {
   struct mips_frame_cache *info = mips_insn16_frame_cache (next_frame,
 							   this_cache);
-  (*this_id) = frame_id_build (info->base, frame_func_unwind (next_frame));
+  (*this_id) = frame_id_build (info->base,
+			       frame_func_unwind (next_frame, NORMAL_FRAME));
 }
 
 static void
@@ -1692,7 +1693,7 @@ static const struct frame_unwind mips_insn16_frame_unwind =
 static const struct frame_unwind *
 mips_insn16_frame_sniffer (struct frame_info *next_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = frame_unwind_address_in_block (next_frame, NORMAL_FRAME);
   if (mips_pc_is_mips16 (pc))
     return &mips_insn16_frame_unwind;
   return NULL;
@@ -1986,7 +1987,8 @@ mips_insn32_frame_this_id (struct frame_info *next_frame, void **this_cache,
 {
   struct mips_frame_cache *info = mips_insn32_frame_cache (next_frame,
 							   this_cache);
-  (*this_id) = frame_id_build (info->base, frame_func_unwind (next_frame));
+  (*this_id) = frame_id_build (info->base,
+			       frame_func_unwind (next_frame, NORMAL_FRAME));
 }
 
 static void
@@ -2012,7 +2014,7 @@ static const struct frame_unwind mips_insn32_frame_unwind =
 static const struct frame_unwind *
 mips_insn32_frame_sniffer (struct frame_info *next_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = frame_unwind_address_in_block (next_frame, NORMAL_FRAME);
   if (! mips_pc_is_mips16 (pc))
     return &mips_insn32_frame_unwind;
   return NULL;
@@ -2107,7 +2109,7 @@ static const struct frame_unwind *
 mips_stub_frame_sniffer (struct frame_info *next_frame)
 {
   struct obj_section *s;
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = frame_unwind_address_in_block (next_frame, NORMAL_FRAME);
 
   if (in_plt_section (pc, NULL))
     return &mips_stub_frame_unwind;

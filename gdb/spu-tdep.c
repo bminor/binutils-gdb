@@ -587,7 +587,7 @@ spu_frame_unwind_cache (struct frame_info *next_frame,
   info->local_base = 0;
 
   /* Find the start of the current function, and analyze its prologue.  */
-  info->func = frame_func_unwind (next_frame);
+  info->func = frame_func_unwind (next_frame, NORMAL_FRAME);
   if (info->func == 0)
     {
       /* Fall back to using the current PC as frame ID.  */

@@ -833,7 +833,7 @@ amd64_frame_cache (struct frame_info *next_frame, void **this_cache)
   cache = amd64_alloc_frame_cache ();
   *this_cache = cache;
 
-  cache->pc = frame_func_unwind (next_frame);
+  cache->pc = frame_func_unwind (next_frame, NORMAL_FRAME);
   if (cache->pc != 0)
     amd64_analyze_prologue (cache->pc, frame_pc_unwind (next_frame), cache);
 

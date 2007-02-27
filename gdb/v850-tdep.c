@@ -856,7 +856,7 @@ v850_frame_cache (struct frame_info *next_frame, void **this_cache)
   if (cache->base == 0)
     return cache;
 
-  cache->pc = frame_func_unwind (next_frame);
+  cache->pc = frame_func_unwind (next_frame, NORMAL_FRAME);
   current_pc = frame_pc_unwind (next_frame);
   if (cache->pc != 0)
     v850_analyze_prologue (cache->pc, current_pc, cache);

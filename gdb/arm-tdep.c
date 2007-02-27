@@ -931,7 +931,7 @@ arm_prologue_this_id (struct frame_info *next_frame,
     *this_cache = arm_make_prologue_cache (next_frame);
   cache = *this_cache;
 
-  func = frame_func_unwind (next_frame);
+  func = frame_func_unwind (next_frame, NORMAL_FRAME);
 
   /* This is meant to halt the backtrace at "_start".  Make sure we
      don't halt it at a generic dummy frame. */
@@ -1036,9 +1036,11 @@ struct frame_unwind arm_stub_unwind = {
 static const struct frame_unwind *
 arm_stub_unwind_sniffer (struct frame_info *next_frame)
 {
+  CORE_ADDR addr_in_block;
   char dummy[4];
 
-  if (in_plt_section (frame_unwind_address_in_block (next_frame), NULL)
+  addr_in_block = frame_unwind_address_in_block (next_frame, NORMAL_FRAME);
+  if (in_plt_section (addr_in_block, NULL)
       || target_read_memory (frame_pc_unwind (next_frame), dummy, 4) != 0)
     return &arm_stub_unwind;
 

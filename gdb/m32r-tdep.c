@@ -536,7 +536,7 @@ m32r_frame_unwind_cache (struct frame_info *next_frame,
   info->uses_frame = 0;
 
   scan_limit = frame_pc_unwind (next_frame);
-  for (pc = frame_func_unwind (next_frame);
+  for (pc = frame_func_unwind (next_frame, NORMAL_FRAME);
        pc > 0 && pc < scan_limit; pc += 2)
     {
       if ((pc & 2) == 0)
@@ -835,7 +835,7 @@ m32r_frame_this_id (struct frame_info *next_frame,
   struct frame_id id;
 
   /* The FUNC is easy.  */
-  func = frame_func_unwind (next_frame);
+  func = frame_func_unwind (next_frame, NORMAL_FRAME);
 
   /* Check if the stack is empty.  */
   msym_stack = lookup_minimal_symbol ("_stack", NULL, NULL);

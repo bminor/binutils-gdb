@@ -447,7 +447,7 @@ h8300_frame_cache (struct frame_info *next_frame, void **this_cache)
 
   cache->saved_regs[E_PC_REGNUM] = -BINWORD;
 
-  cache->pc = frame_func_unwind (next_frame);
+  cache->pc = frame_func_unwind (next_frame, NORMAL_FRAME);
   current_pc = frame_pc_unwind (next_frame);
   if (cache->pc != 0)
     h8300_analyze_prologue (cache->pc, current_pc, cache);

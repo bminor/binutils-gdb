@@ -471,13 +471,13 @@ frame_pc_unwind (struct frame_info *this_frame)
 }
 
 CORE_ADDR
-frame_func_unwind (struct frame_info *fi)
+frame_func_unwind (struct frame_info *fi, enum frame_type this_type)
 {
   if (!fi->prev_func.p)
     {
       /* Make certain that this, and not the adjacent, function is
          found.  */
-      CORE_ADDR addr_in_block = frame_unwind_address_in_block (fi);
+      CORE_ADDR addr_in_block = frame_unwind_address_in_block (fi, this_type);
       fi->prev_func.p = 1;
       fi->prev_func.addr = get_pc_function_start (addr_in_block);
       if (frame_debug)
@@ -491,7 +491,7 @@ frame_func_unwind (struct frame_info *fi)
 CORE_ADDR
 get_frame_func (struct frame_info *fi)
 {
-  return frame_func_unwind (fi->next);
+  return frame_func_unwind (fi->next, get_frame_type (fi));
 }
 
 static int
@@ -1496,20 +1496,31 @@ get_frame_pc (struct frame_info *frame)
   return frame_pc_unwind (frame->next);
 }
 
-/* Return an address of that falls within the frame's code block.  */
+/* Return an address that falls within NEXT_FRAME's caller's code
+   block, assuming that the caller is a THIS_TYPE frame.  */
 
 CORE_ADDR
-frame_unwind_address_in_block (struct frame_info *next_frame)
+frame_unwind_address_in_block (struct frame_info *next_frame,
+			       enum frame_type this_type)
 {
   /* A draft address.  */
   CORE_ADDR pc = frame_pc_unwind (next_frame);
+
+  /* If NEXT_FRAME was called by a signal frame or dummy frame, then
+     we shold not adjust the unwound PC.  These frames may not call
+     their next frame in the normal way; the operating system or GDB
+     may have pushed their resume address manually onto the stack, so
+     it may be the very first instruction.  Even if the resume address
+     was not manually pushed, they expect to be returned to.  */
+  if (this_type != NORMAL_FRAME)
+    return pc;
 
   /* If THIS frame is not inner most (i.e., NEXT isn't the sentinel),
      and NEXT is `normal' (i.e., not a sigtramp, dummy, ....) THIS
      frame's PC ends up pointing at the instruction fallowing the
      "call".  Adjust that PC value so that it falls on the call
      instruction (which, hopefully, falls within THIS frame's code
-     block.  So far it's proved to be a very good approximation.  See
+     block).  So far it's proved to be a very good approximation.  See
      get_frame_type() for why ->type can't be used.  */
   if (next_frame->level >= 0
       && get_frame_type (next_frame) == NORMAL_FRAME)
@@ -1520,7 +1531,8 @@ frame_unwind_address_in_block (struct frame_info *next_frame)
 CORE_ADDR
 get_frame_address_in_block (struct frame_info *this_frame)
 {
-  return frame_unwind_address_in_block (this_frame->next);
+  return frame_unwind_address_in_block (this_frame->next,
+					get_frame_type (this_frame));
 }
 
 static int

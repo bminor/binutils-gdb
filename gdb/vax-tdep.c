@@ -384,7 +384,8 @@ vax_frame_this_id (struct frame_info *next_frame, void **this_cache,
   if (cache->base == 0)
     return;
 
-  (*this_id) = frame_id_build (cache->base, frame_func_unwind (next_frame));
+  (*this_id) = frame_id_build (cache->base,
+			       frame_func_unwind (next_frame, NORMAL_FRAME));
 }
 
 static void

@@ -875,7 +875,7 @@ avr_frame_unwind_cache (struct frame_info *next_frame,
   info->size = 0;
   info->prologue_type = AVR_PROLOGUE_NONE;
 
-  pc = frame_func_unwind (next_frame);
+  pc = frame_func_unwind (next_frame, NORMAL_FRAME);
 
   if ((pc > 0) && (pc < frame_pc_unwind (next_frame)))
     avr_scan_prologue (pc, info);
@@ -958,7 +958,7 @@ avr_frame_this_id (struct frame_info *next_frame,
   struct frame_id id;
 
   /* The FUNC is easy.  */
-  func = frame_func_unwind (next_frame);
+  func = frame_func_unwind (next_frame, NORMAL_FRAME);
 
   /* Hopefully the prologue analysis either correctly determined the
      frame's base (which is the SP from the previous frame), or set

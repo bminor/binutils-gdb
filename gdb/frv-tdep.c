@@ -1016,7 +1016,8 @@ frv_frame_unwind_cache (struct frame_info *next_frame,
   info->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
   /* Prologue analysis does the rest...  */
-  frv_analyze_prologue (frame_func_unwind (next_frame), next_frame, info);
+  frv_analyze_prologue (frame_func_unwind (next_frame, NORMAL_FRAME),
+			next_frame, info);
 
   return info;
 }
@@ -1346,7 +1347,7 @@ frv_frame_this_id (struct frame_info *next_frame,
   struct frame_id id;
 
   /* The FUNC is easy.  */
-  func = frame_func_unwind (next_frame);
+  func = frame_func_unwind (next_frame, NORMAL_FRAME);
 
   /* Check if the stack is empty.  */
   msym_stack = lookup_minimal_symbol ("_stack", NULL, NULL);

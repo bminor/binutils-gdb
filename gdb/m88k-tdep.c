@@ -659,12 +659,9 @@ m88k_frame_cache (struct frame_info *next_frame, void **this_cache)
   cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
   cache->fp_offset = -1;
 
-  cache->pc = frame_func_unwind (next_frame);
+  cache->pc = frame_func_unwind (next_frame, NORMAL_FRAME);
   if (cache->pc != 0)
-    {
-      CORE_ADDR addr_in_block = frame_unwind_address_in_block (next_frame);
-      m88k_analyze_prologue (cache->pc, addr_in_block, cache);
-    }
+    m88k_analyze_prologue (cache->pc, frame_pc_unwind (next_frame), cache);
 
   /* Calculate the stack pointer used in the prologue.  */
   if (cache->fp_offset != -1)

@@ -819,7 +819,7 @@ m68k_frame_cache (struct frame_info *next_frame, void **this_cache)
   /* For normal frames, %pc is stored at 4(%fp).  */
   cache->saved_regs[M68K_PC_REGNUM] = 4;
 
-  cache->pc = frame_func_unwind (next_frame);
+  cache->pc = frame_func_unwind (next_frame, NORMAL_FRAME);
   if (cache->pc != 0)
     m68k_analyze_prologue (cache->pc, frame_pc_unwind (next_frame), cache);
 

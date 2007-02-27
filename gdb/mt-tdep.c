@@ -891,7 +891,7 @@ mt_frame_unwind_cache (struct frame_info *next_frame,
   frame_unwind_unsigned_register (next_frame, MT_SP_REGNUM, &sp);
   frame_unwind_unsigned_register (next_frame, MT_FP_REGNUM, &fp);
 
-  start_addr = frame_func_unwind (next_frame);
+  start_addr = frame_func_unwind (next_frame, NORMAL_FRAME);
 
   /* Return early if GDB couldn't find the function.  */
   if (start_addr == 0)
@@ -1041,10 +1041,9 @@ mt_frame_this_id (struct frame_info *next_frame,
     mt_frame_unwind_cache (next_frame, this_prologue_cache);
 
   if (!(info == NULL || info->prev_sp == 0))
-    {
-      (*this_id) = frame_id_build (info->prev_sp,
-				   frame_func_unwind (next_frame));
-    }
+    (*this_id) = frame_id_build (info->prev_sp,
+				 frame_func_unwind (next_frame, NORMAL_FRAME));
+
   return;
 }
 

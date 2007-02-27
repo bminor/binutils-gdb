@@ -356,7 +356,9 @@ amd64obsd_trapframe_cache(struct frame_info *next_frame, void **this_cache)
   cache = trad_frame_cache_zalloc (next_frame);
   *this_cache = cache;
 
-  func = frame_func_unwind (next_frame);
+  /* NORMAL_FRAME matches the type in amd64obsd_trapframe_unwind, but
+     SIGTRAMP_FRAME might be more appropriate.  */
+  func = frame_func_unwind (next_frame, NORMAL_FRAME);
   sp = frame_unwind_register_unsigned (next_frame, AMD64_RSP_REGNUM);
 
   find_pc_partial_function (func, &name, NULL, NULL);

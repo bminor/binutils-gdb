@@ -699,12 +699,9 @@ sparc_frame_cache (struct frame_info *next_frame, void **this_cache)
   cache = sparc_alloc_frame_cache ();
   *this_cache = cache;
 
-  cache->pc = frame_func_unwind (next_frame);
+  cache->pc = frame_func_unwind (next_frame, NORMAL_FRAME);
   if (cache->pc != 0)
-    {
-      CORE_ADDR addr_in_block = frame_unwind_address_in_block (next_frame);
-      sparc_analyze_prologue (cache->pc, addr_in_block, cache);
-    }
+    sparc_analyze_prologue (cache->pc, frame_pc_unwind (next_frame), cache);
 
   if (cache->frameless_p)
     {
@@ -1054,7 +1051,7 @@ sparc32_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
 static int
 sparc32_dwarf2_struct_return_p (struct frame_info *next_frame)
 {
-  CORE_ADDR pc = frame_unwind_address_in_block (next_frame);
+  CORE_ADDR pc = frame_unwind_address_in_block (next_frame, NORMAL_FRAME);
   struct symbol *sym = find_pc_function (pc);
 
   if (sym)

@@ -1555,7 +1555,7 @@ ia64_frame_cache (struct frame_info *next_frame, void **this_cache)
 
   cache->cfm = cfm;
 
-  cache->pc = frame_func_unwind (next_frame);
+  cache->pc = frame_func_unwind (next_frame, NORMAL_FRAME);
 
   if (cache->pc != 0)
     examine_prologue (cache->pc, frame_pc_unwind (next_frame), next_frame, cache);

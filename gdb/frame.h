@@ -184,6 +184,25 @@ extern int frame_id_inner (struct frame_id l, struct frame_id r);
 extern void fprint_frame_id (struct ui_file *file, struct frame_id id);
 
 
+/* Frame types.  Some are real, some are signal trampolines, and some
+   are completely artificial (dummy).  */
+
+enum frame_type
+{
+  /* A true stack frame, created by the target program during normal
+     execution.  */
+  NORMAL_FRAME,
+  /* A fake frame, created by GDB when performing an inferior function
+     call.  */
+  DUMMY_FRAME,
+  /* In a signal handler, various OSs handle this in various ways.
+     The main thing is that the frame may be far from normal.  */
+  SIGTRAMP_FRAME,
+  /* Sentinel or registers frame.  This frame obtains register values
+     direct from the inferior's registers.  */
+  SENTINEL_FRAME
+};
+
 /* For every stopped thread, GDB tracks two frames: current and
    selected.  Current frame is the inner most frame of the selected
    thread.  Selected frame is the one being examined by the the GDB
@@ -265,7 +284,13 @@ extern CORE_ADDR get_frame_pc (struct frame_info *);
    the frame's block.  */
 
 extern CORE_ADDR get_frame_address_in_block (struct frame_info *this_frame);
-extern CORE_ADDR frame_unwind_address_in_block (struct frame_info *next_frame);
+
+/* Similar to get_frame_address_in_block, find an address in the
+   block which logically called NEXT_FRAME, assuming it is a THIS_TYPE
+   frame.  */
+
+extern CORE_ADDR frame_unwind_address_in_block (struct frame_info *next_frame,
+						enum frame_type this_type);
 
 /* The frame's inner-most bound.  AKA the stack-pointer.  Confusingly
    known as top-of-stack.  */
@@ -277,8 +302,12 @@ extern CORE_ADDR frame_sp_unwind (struct frame_info *);
 /* Following on from the `resume' address.  Return the entry point
    address of the function containing that resume address, or zero if
    that function isn't known.  */
-extern CORE_ADDR frame_func_unwind (struct frame_info *fi);
 extern CORE_ADDR get_frame_func (struct frame_info *fi);
+
+/* Similar to get_frame_func, find the start of the function which
+   logically called NEXT_FRAME, assuming it is a THIS_TYPE frame.  */
+extern CORE_ADDR frame_func_unwind (struct frame_info *next_frame,
+				    enum frame_type this_type);
 
 /* Closely related to the resume address, various symbol table
    attributes that are determined by the PC.  Note that for a normal
@@ -375,24 +404,8 @@ extern CORE_ADDR get_frame_args_address (struct frame_info *);
    for an invalid frame).  */
 extern int frame_relative_level (struct frame_info *fi);
 
-/* Return the frame's type.  Some are real, some are signal
-   trampolines, and some are completely artificial (dummy).  */
+/* Return the frame's type.  */
 
-enum frame_type
-{
-  /* A true stack frame, created by the target program during normal
-     execution.  */
-  NORMAL_FRAME,
-  /* A fake frame, created by GDB when performing an inferior function
-     call.  */
-  DUMMY_FRAME,
-  /* In a signal handler, various OSs handle this in various ways.
-     The main thing is that the frame may be far from normal.  */
-  SIGTRAMP_FRAME,
-  /* Sentinel or registers frame.  This frame obtains register values
-     direct from the inferior's registers.  */
-  SENTINEL_FRAME
-};
 extern enum frame_type get_frame_type (struct frame_info *);
 
 /* For frames where we can not unwind further, describe why.  */

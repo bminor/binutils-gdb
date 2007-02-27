@@ -1787,9 +1787,14 @@ hppa_skip_prologue (CORE_ADDR pc)
 static struct unwind_table_entry *
 hppa_find_unwind_entry_in_block (struct frame_info *f)
 {
-  CORE_ADDR pc;
+  CORE_ADDR pc = frame_unwind_address_in_block (f, NORMAL_FRAME);
 
-  pc = frame_unwind_address_in_block (f);
+  /* FIXME drow/20070101: Calling gdbarch_addr_bits_remove on the
+     result of frame_unwind_address_in_block implies a problem.
+     The bits should have been removed earlier, before the return
+     value of frame_pc_unwind.  That might be happening already;
+     if it isn't, it should be fixed.  Then this call can be
+     removed.  */
   pc = gdbarch_addr_bits_remove (get_frame_arch (f), pc);
   return find_unwind_entry (pc);
 }
@@ -1899,7 +1904,7 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
     if ((u->Region_description & 0x2) == 0)
       start_pc = u->region_start;
     else
-      start_pc = frame_func_unwind (next_frame);
+      start_pc = frame_func_unwind (next_frame, NORMAL_FRAME);
 
     prologue_end = skip_prologue_hard_way (start_pc, 0);
     end_pc = frame_pc_unwind (next_frame);
@@ -2267,7 +2272,7 @@ hppa_fallback_frame_cache (struct frame_info *next_frame, void **this_cache)
   (*this_cache) = cache;
   cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
-  start_pc = frame_func_unwind (next_frame);
+  start_pc = frame_func_unwind (next_frame, NORMAL_FRAME);
   if (start_pc)
     {
       CORE_ADDR cur_pc = frame_pc_unwind (next_frame);
@@ -2326,7 +2331,8 @@ hppa_fallback_frame_this_id (struct frame_info *next_frame, void **this_cache,
 {
   struct hppa_frame_cache *info = 
     hppa_fallback_frame_cache (next_frame, this_cache);
-  (*this_id) = frame_id_build (info->base, frame_func_unwind (next_frame));
+  (*this_id) = frame_id_build (info->base,
+			       frame_func_unwind (next_frame, NORMAL_FRAME));
 }
 
 static void
@@ -2409,7 +2415,8 @@ hppa_stub_frame_this_id (struct frame_info *next_frame,
     = hppa_stub_frame_unwind_cache (next_frame, this_prologue_cache);
 
   if (info)
-    *this_id = frame_id_build (info->base, frame_func_unwind (next_frame));
+    *this_id = frame_id_build (info->base,
+			       frame_func_unwind (next_frame, NORMAL_FRAME));
   else
     *this_id = null_frame_id;
 }
@@ -2441,7 +2448,7 @@ static const struct frame_unwind hppa_stub_frame_unwind = {
 static const struct frame_unwind *
 hppa_stub_unwind_sniffer (struct frame_info *next_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = frame_unwind_address_in_block (next_frame, NORMAL_FRAME);
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 

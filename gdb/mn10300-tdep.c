@@ -850,9 +850,12 @@ mn10300_frame_unwind_cache (struct frame_info *next_frame,
 		       frame_id_build (trad_frame_get_this_base (cache), 
 				       start));
   else
-    trad_frame_set_id (cache, 
-		       frame_id_build (trad_frame_get_this_base (cache), 
-				       frame_func_unwind (next_frame)));
+    {
+      start = frame_func_unwind (next_frame, NORMAL_FRAME);
+      trad_frame_set_id (cache,
+			 frame_id_build (trad_frame_get_this_base (cache),
+					 start));
+    }
 
   (*this_prologue_cache) = cache;
   return cache;

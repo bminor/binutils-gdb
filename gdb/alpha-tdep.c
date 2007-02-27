@@ -820,7 +820,7 @@ alpha_sigtramp_frame_this_id (struct frame_info *next_frame,
 	code_addr = 0;
     }
   else
-    code_addr = frame_func_unwind (next_frame);
+    code_addr = frame_func_unwind (next_frame, SIGTRAMP_FRAME);
 
   /* The stack address is trivially read from the sigcontext.  */
   stack_addr = alpha_sigtramp_register_address (info->sigcontext_addr,

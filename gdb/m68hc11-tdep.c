@@ -798,7 +798,7 @@ m68hc11_frame_unwind_cache (struct frame_info *next_frame,
   (*this_prologue_cache) = info;
   info->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
-  info->pc = frame_func_unwind (next_frame);
+  info->pc = frame_func_unwind (next_frame, NORMAL_FRAME);
 
   info->size = 0;
   info->return_kind = m68hc11_get_return_insn (info->pc);
@@ -889,7 +889,7 @@ m68hc11_frame_this_id (struct frame_info *next_frame,
   struct frame_id id;
 
   /* The FUNC is easy.  */
-  func = frame_func_unwind (next_frame);
+  func = frame_func_unwind (next_frame, NORMAL_FRAME);
 
   /* Hopefully the prologue analysis either correctly determined the
      frame's base (which is the SP from the previous frame), or set
