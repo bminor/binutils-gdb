@@ -458,6 +458,10 @@ proc copy_setup { } {
     set res [build_wrapper testglue.o]
     set flags { debug }
     
+    if { [istarget *-*-uclinux*] } {
+	return 1
+    }
+    
     if { $res != "" } {
 	lappend flags "additional_flags=[lindex $res 1]"
 	set add_libs "testglue.o"
