@@ -1,5 +1,12 @@
 2007-02-27  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-m68hc11.c (fixup24): Correct fixup size.
+	(build_jump_insn): Likewise.
+	(build_insn): Likewise.
+	(s_m68hc11_relax): Likewise.
+
+2007-02-27  Alan Modra  <amodra@bigpond.net.au>
+
 	* config/obj-elf.c (elf_frob_file): frag_wane any new frags.
 
 2007-02-25  Mark Shinwell  <shinwell@codesourcery.com>

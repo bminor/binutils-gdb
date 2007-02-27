@@ -1,5 +1,5 @@
 /* tc-m68hc11.c -- Assembler code for the Motorola 68HC11 & 68HC12.
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@nerim.fr)
 
@@ -1518,7 +1518,7 @@ fixup24 (expressionS *oper, int mode, int opmode ATTRIBUTE_UNUSED)
       fixS *fixp;
 
       /* Now create a 24-bit fixup.  */
-      fixp = fix_new_exp (frag_now, f - frag_now->fr_literal, 2,
+      fixp = fix_new_exp (frag_now, f - frag_now->fr_literal, 3,
 			  oper, FALSE, BFD_RELOC_M68HC11_24);
       number_to_chars_bigendian (f, 0, 3);
     }
@@ -1594,7 +1594,7 @@ build_jump_insn (struct m68hc11_opcode *opcode, operand operands[],
       frag = frag_now;
       where = frag_now_fix ();
 
-      fix_new (frag_now, frag_now_fix (), 1,
+      fix_new (frag_now, frag_now_fix (), 0,
                &abs_symbol, 0, 1, BFD_RELOC_M68HC11_RL_JUMP);
 
       if (code == M6811_BSR || code == M6811_BRA || code == M6812_BSR)
@@ -1654,7 +1654,7 @@ build_jump_insn (struct m68hc11_opcode *opcode, operand operands[],
       frag = frag_now;
       where = frag_now_fix ();
 
-      fix_new (frag_now, frag_now_fix (), 1,
+      fix_new (frag_now, frag_now_fix (), 0,
                &abs_symbol, 0, 1, BFD_RELOC_M68HC11_RL_JUMP);
 
       f = m68hc11_new_insn (2);
@@ -1669,7 +1669,7 @@ build_jump_insn (struct m68hc11_opcode *opcode, operand operands[],
       frag = frag_now;
       where = frag_now_fix ();
       
-      fix_new (frag_now, frag_now_fix (), 1,
+      fix_new (frag_now, frag_now_fix (), 0,
                &abs_symbol, 0, 1, BFD_RELOC_M68HC11_RL_JUMP);
 
       /* Branch offset must fit in 8-bits, don't do some relax.  */
@@ -2102,7 +2102,7 @@ build_insn (struct m68hc11_opcode *opcode, operand operands[],
   format = opcode->format;
 
   if (format & M6811_OP_BRANCH)
-    fix_new (frag_now, frag_now_fix (), 1,
+    fix_new (frag_now, frag_now_fix (), 0,
              &abs_symbol, 0, 1, BFD_RELOC_M68HC11_RL_JUMP);
 
   if (format & OP_EXTENDED)
@@ -2704,7 +2704,7 @@ s_m68hc11_relax (int ignore ATTRIBUTE_UNUSED)
       return;
     }
 
-  fix_new_exp (frag_now, frag_now_fix (), 2, &ex, 1,
+  fix_new_exp (frag_now, frag_now_fix (), 0, &ex, 1,
                BFD_RELOC_M68HC11_RL_GROUP);
 
   demand_empty_rest_of_line ();
