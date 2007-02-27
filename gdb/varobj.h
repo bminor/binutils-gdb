@@ -45,7 +45,6 @@ enum varobj_update_error
     NOT_IN_SCOPE = -1,          /* varobj not in scope, can not be updated.  */
     TYPE_CHANGED = -2,          /* varobj type has changed.  */
     INVALID = -3,               /* varobj is not valid anymore.  */
-    WRONG_PARAM = -4            /* function is called with wrong arguments.  */
   };
 
 /* String representations of gdb's format codes (defined in varobj.c) */
