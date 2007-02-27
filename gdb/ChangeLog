@@ -1,3 +1,11 @@
+2007-02-28  Nick Roberts  <nickrob@snap.net.nz>
+
+	* varobj.c (varobj_update): Remove unused local.  Use gdb_assert
+	to check changelist is non-NULL.  Call error if the frontend tries
+	to update a non-root variable.
+
+	* varobj.h (enum varobj_update_error): Delete WRONG_PARAM value.
+
 2007-02-27  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2-frame.c (dwarf2_frame_cache, dwarf2_frame_this_id)
