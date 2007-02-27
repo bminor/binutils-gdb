@@ -39,12 +39,14 @@
 #undef TIOCSETP
 #define TIOCSETP TCSETAF
 #define TERMINAL struct termio
-#else /* ! HAVE_TERMIO_H; default to SGTTY.  */
+#else /* ! HAVE_TERMIO_H */
+#ifdef HAVE_SGTTY_H
 #define HAVE_SGTTY
 #include <fcntl.h>
 #include <sgtty.h>
 #include <sys/ioctl.h>
 #define TERMINAL struct sgttyb
+#endif
 #endif
 #endif
 

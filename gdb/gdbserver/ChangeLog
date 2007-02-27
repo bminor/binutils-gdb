@@ -1,4 +1,8 @@
-2007-02-26  Mat Hostetter  <mat@lcs.mit.edu>
+2007-02-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* terminal.h: Check HAVE_SGTTY_H.
+
+2007-02-27  Mat Hostetter  <mat@lcs.mit.edu>
 
 	* remote-utils.c (remote_open): Print out the assigned port number.
 
