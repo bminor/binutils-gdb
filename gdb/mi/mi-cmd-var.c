@@ -562,7 +562,6 @@ varobj_update_one (struct varobj *var, enum print_values print_values)
       switch (nc)
       {
         case NOT_IN_SCOPE:
-        case WRONG_PARAM:
           ui_out_field_string (uiout, "in_scope", "false");
 	  break;
         case INVALID:

@@ -1,3 +1,8 @@
+2007-02-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* mi/mi-cmd-var.c (varobj_update_one): Remove reference to
+	unused WRONG_PARAM value since it was recently deleted.
+
 2007-02-28  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* varobj.c (varobj_update): Free temporary vectors.
