@@ -63,3 +63,22 @@ extern int kernel_u_size (void);
 
 /* Flag for machine-specific stuff in shared files.  FIXME */
 #define DEPRECATED_IBM6000_TARGET
+
+/* AIX has a couple of strange returns from wait().  */
+
+#define CHILD_SPECIAL_WAITSTATUS(ourstatus, hoststatus) ( \
+  /* "stop after load" status.  */ \
+  (hoststatus) == 0x57c ? (ourstatus)->kind = TARGET_WAITKIND_LOADED, 1 : \
+  \
+  /* signal 0. I have no idea why wait(2) returns with this status word.  */ \
+  /* It looks harmless. */ \
+  (hoststatus) == 0x7f ? (ourstatus)->kind = TARGET_WAITKIND_SPURIOUS, 1 : \
+  \
+  /* A normal waitstatus.  Let the usual macros deal with it.  */ \
+  0)
+
+/* Notice when a new child process is started. */
+
+#define TARGET_CREATE_INFERIOR_HOOK rs6000_create_inferior
+extern void rs6000_create_inferior (int);
+

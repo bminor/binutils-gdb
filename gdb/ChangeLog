@@ -1,3 +1,43 @@
+2007-02-28  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* config/powerpc/linux.mt (DEPRECATED_TM_FILE): Set to tm-ppc-eabi.h.
+	* config/powerpc/tm-linux.h: Delete file.
+	* config/powerpc/tm-ppc-eabi.h: Do not include "rs6000/tm-rs6000.h".
+	(PROCESS_LINENUMBER_HOOK): Do not undefine.
+	(TEXT_SEGMENT_BASE): Do not redefine.
+	* config/rs6000/nm-rs6000.h (CHILD_SPECIAL_WAITSTATUS): Move here
+	from config/rs6000/tm-rs6000.h.
+	(TARGET_CREATE_INFERIOR_HOOK, rs6000_create_inferior): Likewise.
+	* config/rs6000/tm-rs6000.h (struct frame_info): Remove declaration.
+	(TEXT_SEGMENT_BASE): Remove.
+	(IN_SOLIB_RETURN_TRAMPOLINE): Remove.
+	(rs6000_in_solib_return_trampoline): Remove.
+	(SKIP_TRAMPOLINE_CODE): Remove.
+	(rs6000_skip_trampoline_code): Remove.
+	(CHILD_SPECIAL_WAITSTATUS): Move to config/rs6000/nm-rs6000.h.
+	(TARGET_CREATE_INFERIOR_HOOK, rs6000_create_inferior): Likewise.
+	(FP0_REGNUM): Remove.
+	(rs6000_find_toc_address_hook): Move to rs6000-tdep.h.
+	(rs6000_set_host_arch_hook): Remove.
+	* Makefile.in (rs6000-nat.o): Add dependency on $(rs6000_tdep_h).
+	(rs6000-aix-tdep.o): Add dependency on $(ppc_tdep_h).
+	* ppc-tdep.h (struct gdbarch_tdep): Add field text_segment_base.
+	* rs6000-aix-tdep.c: Include "ppc-tdep.h".
+	(rs6000_aix_init_osabi): Set text_segment_base tdep field.
+	* rs6000-nat.c: Include "rs6000-tdep.h".
+	(exec_one_dummy_insn): Replace TEXT_SEGMENT_BASE by tdep field.
+	(set_host_arch): Rename to ...
+	(rs6000_create_inferior): ... this.  Make public.
+	(_initialize_core_rs6000): Do not set rs6000_set_host_arch_hook.
+	* rs6000-tdep.c (rs6000_set_host_arch_hook): Remove.
+	(rs6000_create_inferior): Remove.
+	(branch_dest): Replace TEXT_SEGMENT_BASE by tdep field.
+	(rs6000_gdbarch_init): Call set_gdbarch_fp0_regnum,
+	set_gdbarch_in_solib_return_trampoline, and
+	set_gdbarch_skip_trampoline_code.
+	* rs6000-tdep.h (rs6000_find_toc_address_hook): Move here
+	from config/rs6000/tm-rs6000.h.
+
 2007-02-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* buildsym.c (record_producer): Do nothing if no producer is provided.

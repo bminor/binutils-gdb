@@ -115,11 +115,6 @@ struct reg
 
 CORE_ADDR (*rs6000_find_toc_address_hook) (CORE_ADDR) = NULL;
 
-/* Hook to set the current architecture when starting a child process. 
-   rs6000-nat.c sets this. */
-
-void (*rs6000_set_host_arch_hook) (int) = NULL;
-
 /* Static function prototypes */
 
 static CORE_ADDR branch_dest (int opcode, int instr, CORE_ADDR pc,
@@ -655,7 +650,7 @@ branch_dest (int opcode, int instr, CORE_ADDR pc, CORE_ADDR safety)
 	     something like 0x3c90.  The current frame is a signal handler
 	     caller frame, upon completion of the sigreturn system call
 	     execution will return to the saved PC in the frame.  */
-	  if (dest < TEXT_SEGMENT_BASE)
+	  if (dest < gdbarch_tdep (current_gdbarch)->text_segment_base)
 	    {
 	      struct frame_info *fi;
 
@@ -673,7 +668,7 @@ branch_dest (int opcode, int instr, CORE_ADDR pc, CORE_ADDR safety)
 	  /* If we are about to execute a system call, dest is something
 	     like 0x22fc or 0x3b00.  Upon completion the system call
 	     will return to the address in the link register.  */
-	  if (dest < TEXT_SEGMENT_BASE)
+	  if (dest < gdbarch_tdep (current_gdbarch)->text_segment_base)
             dest = read_register (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum) & ~3;
 	}
       else
@@ -683,7 +678,7 @@ branch_dest (int opcode, int instr, CORE_ADDR pc, CORE_ADDR safety)
     default:
       return -1;
     }
-  return (dest < TEXT_SEGMENT_BASE) ? safety : dest;
+  return (dest < gdbarch_tdep (current_gdbarch)->text_segment_base) ? safety : dest;
 }
 
 
@@ -2342,14 +2337,6 @@ rs6000_dwarf2_reg_to_regnum (int num)
       }
 }
 
-/* Hook called when a new child process is started.  */
-
-void
-rs6000_create_inferior (int pid)
-{
-  if (rs6000_set_host_arch_hook)
-    rs6000_set_host_arch_hook (pid);
-}
 
 /* Support for CONVERT_FROM_FUNC_PTR_ADDR (ARCH, ADDR, TARG).
 
@@ -3332,6 +3319,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, 64);
   set_gdbarch_sp_regnum (gdbarch, 1);
   set_gdbarch_deprecated_fp_regnum (gdbarch, 1);
+  set_gdbarch_fp0_regnum (gdbarch, 32);
   set_gdbarch_register_sim_regno (gdbarch, rs6000_register_sim_regno);
   if (sysv_abi && wordsize == 8)
     set_gdbarch_return_value (gdbarch, ppc64_sysv_abi_return_value);
@@ -3477,6 +3465,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Helpers for function argument information.  */
   set_gdbarch_fetch_pointer_argument (gdbarch, rs6000_fetch_pointer_argument);
+
+  /* Trampoline.  */
+  set_gdbarch_in_solib_return_trampoline
+    (gdbarch, rs6000_in_solib_return_trampoline);
+  set_gdbarch_skip_trampoline_code (gdbarch, rs6000_skip_trampoline_code);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);

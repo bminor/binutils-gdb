@@ -22,14 +22,6 @@
 #ifndef TM_PPC_EABI_H
 #define TM_PPC_EABI_H
 
-/* Use generic RS6000 definitions. */
-#include "rs6000/tm-rs6000.h"
-
-#undef PROCESS_LINENUMBER_HOOK
-
-#undef TEXT_SEGMENT_BASE
-#define TEXT_SEGMENT_BASE 1
-
 /* The value of symbols of type N_SO and N_FUN maybe null when 
    it shouldn't be. */
 #define SOFUN_ADDRESS_MAYBE_MISSING

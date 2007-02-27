@@ -24,6 +24,7 @@
 #include "defs.h"
 #include "osabi.h"
 #include "rs6000-tdep.h"
+#include "ppc-tdep.h"
 
 static enum gdb_osabi
 rs6000_aix_osabi_sniffer (bfd *abfd)
@@ -40,6 +41,9 @@ rs6000_aix_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   /* RS6000/AIX does not support PT_STEP.  Has to be simulated.  */
   set_gdbarch_software_single_step (gdbarch, rs6000_software_single_step);
+
+  /* Minimum possible text address in AIX.  */
+  gdbarch_tdep (gdbarch)->text_segment_base = 0x10000000;
 }
 
 void

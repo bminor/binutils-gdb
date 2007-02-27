@@ -24,3 +24,8 @@
 extern void rs6000_software_single_step (enum target_signal signal,
 					 int insert_breakpoints_p);
 
+/* Hook in rs6000-tdep.c for determining the TOC address when
+   calling functions in the inferior.  */
+
+extern CORE_ADDR (*rs6000_find_toc_address_hook) (CORE_ADDR);
+

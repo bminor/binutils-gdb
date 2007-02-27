@@ -35,6 +35,7 @@
 #include "regcache.h"
 #include "arch-utils.h"
 #include "ppc-tdep.h"
+#include "rs6000-tdep.h"
 #include "exec.h"
 
 #include <sys/ptrace.h>
@@ -525,7 +526,7 @@ child_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
 static void
 exec_one_dummy_insn (void)
 {
-#define	DUMMY_INSN_ADDR	(TEXT_SEGMENT_BASE)+0x200
+#define	DUMMY_INSN_ADDR	gdbarch_tdep (current_gdbarch)->text_segment_base+0x200
 
   int ret, status, pid;
   CORE_ADDR prev_pc;
@@ -993,8 +994,8 @@ vmap_exec (void)
 /* Set the current architecture from the host running GDB.  Called when
    starting a child process. */
 
-static void
-set_host_arch (int pid)
+void
+rs6000_create_inferior (int pid)
 {
   enum bfd_architecture arch;
   unsigned long mach;
@@ -1037,7 +1038,7 @@ set_host_arch (int pid)
 
   if (!gdbarch_update_p (info))
     internal_error (__FILE__, __LINE__,
-		    _("set_host_arch: failed to select architecture"));
+		    _("rs6000_create_inferior: failed to select architecture"));
 }
 
 
@@ -1247,10 +1248,6 @@ _initialize_core_rs6000 (void)
   /* Initialize hook in rs6000-tdep.c for determining the TOC address
      when calling functions in the inferior.  */
   rs6000_find_toc_address_hook = find_toc_address;
-
-  /* Initialize hook in rs6000-tdep.c to set the current architecture
-     when starting a child process.  */
-  rs6000_set_host_arch_hook = set_host_arch;
 
   deprecated_add_core_fns (&rs6000_core_fns);
 }

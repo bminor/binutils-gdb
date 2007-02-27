@@ -183,6 +183,9 @@ struct gdbarch_tdep
        register number for GDB register number I, or -1 if the
        simulator does not implement that register.  */
     int *sim_regno;
+
+    /* Minimum possible text address.  */
+    CORE_ADDR text_segment_base;
 };
 
 
