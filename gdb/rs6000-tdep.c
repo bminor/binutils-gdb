@@ -1219,6 +1219,13 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	  offset = fdata->offset;
 	  continue;
 	}
+      else if ((op & 0xffff0000) == 0x38210000)
+ 	{			/* addi r1,r1,SIMM */
+ 	  fdata->frameless = 0;
+ 	  fdata->offset += SIGNED_SHORT (op);
+ 	  offset = fdata->offset;
+ 	  continue;
+ 	}
       /* Load up minimal toc pointer */
       else if (((op >> 22) == 0x20f	||	/* l r31,... or l r30,... */
 	       (op >> 22) == 0x3af)		/* ld r31,... or ld r30,... */
