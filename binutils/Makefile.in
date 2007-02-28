@@ -40,11 +40,12 @@ target_triplet = @target@
 bin_PROGRAMS = $(am__EXEEXT_5) $(am__EXEEXT_6) $(am__EXEEXT_7) \
 	$(am__EXEEXT_8) $(am__EXEEXT_9) $(am__EXEEXT_10) \
 	@BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ \
-	$(am__EXEEXT_11) $(am__EXEEXT_12) @BUILD_DLLWRAP@ @BUILD_MISC@
+	$(am__EXEEXT_11) $(am__EXEEXT_12) @BUILD_DLLWRAP@ \
+	@BUILD_INSTALL_MISC@ $(am__empty)
 noinst_PROGRAMS = $(am__EXEEXT_13) $(am__EXEEXT_14) $(am__EXEEXT_15)
 EXTRA_PROGRAMS = $(am__EXEEXT_1) srconv$(EXEEXT) sysdump$(EXEEXT) \
 	coffdump$(EXEEXT) $(am__EXEEXT_2) $(am__EXEEXT_3) \
-	$(am__EXEEXT_4) bin2c$(EXEEXT)
+	$(am__EXEEXT_4)
 DIST_COMMON = $(srcdir)/../config.guess $(srcdir)/../config.sub NEWS \
 	README ChangeLog $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/configure $(am__configure_deps) \
@@ -101,11 +102,6 @@ am_ar_OBJECTS = arparse.$(OBJEXT) arlex.$(OBJEXT) ar.$(OBJEXT) \
 	not-ranlib.$(OBJEXT) arsup.$(OBJEXT) rename.$(OBJEXT) \
 	binemul.$(OBJEXT) emul_$(EMULATION).$(OBJEXT) $(am__objects_1)
 ar_OBJECTS = $(am_ar_OBJECTS)
-am_bin2c_OBJECTS = bin2c.$(OBJEXT) version.$(OBJEXT)
-bin2c_OBJECTS = $(am_bin2c_OBJECTS)
-bin2c_LDADD = $(LDADD)
-bin2c_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3)
 am_coffdump_OBJECTS = coffdump.$(OBJEXT) coffgrok.$(OBJEXT) \
 	$(am__objects_1)
 coffdump_OBJECTS = $(am_coffdump_OBJECTS)
@@ -183,13 +179,12 @@ YLWRAP = $(top_srcdir)/../ylwrap
 YACCCOMPILE = $(YACC) $(YFLAGS) $(AM_YFLAGS)
 LTYACCCOMPILE = $(LIBTOOL) --mode=compile $(YACC) $(YFLAGS) \
 	$(AM_YFLAGS)
-SOURCES = $(addr2line_SOURCES) $(ar_SOURCES) $(bin2c_SOURCES) \
-	$(coffdump_SOURCES) $(cxxfilt_SOURCES) $(dlltool_SOURCES) \
-	$(dllwrap_SOURCES) $(nlmconv_SOURCES) $(nm_new_SOURCES) \
-	$(objcopy_SOURCES) $(objdump_SOURCES) $(ranlib_SOURCES) \
-	$(readelf_SOURCES) $(size_SOURCES) $(srconv_SOURCES) \
-	$(strings_SOURCES) $(strip_new_SOURCES) $(sysdump_SOURCES) \
-	$(windres_SOURCES)
+SOURCES = $(addr2line_SOURCES) $(ar_SOURCES) $(coffdump_SOURCES) \
+	$(cxxfilt_SOURCES) $(dlltool_SOURCES) $(dllwrap_SOURCES) \
+	$(nlmconv_SOURCES) $(nm_new_SOURCES) $(objcopy_SOURCES) \
+	$(objdump_SOURCES) $(ranlib_SOURCES) $(readelf_SOURCES) \
+	$(size_SOURCES) $(srconv_SOURCES) $(strings_SOURCES) \
+	$(strip_new_SOURCES) $(sysdump_SOURCES) $(windres_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-exec-recursive install-info-recursive \
@@ -213,6 +208,7 @@ AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
 BUILD_DLLTOOL = @BUILD_DLLTOOL@
 BUILD_DLLWRAP = @BUILD_DLLWRAP@
+BUILD_INSTALL_MISC = @BUILD_INSTALL_MISC@
 BUILD_MISC = @BUILD_MISC@
 BUILD_NLMCONV = @BUILD_NLMCONV@
 BUILD_SRCONV = @BUILD_SRCONV@
@@ -365,7 +361,7 @@ DLLTOOL_PROG = dlltool
 WINDRES_PROG = windres
 DLLWRAP_PROG = dllwrap
 SRCONV_PROG = srconv$(EXEEXT) sysdump$(EXEEXT) coffdump$(EXEEXT)
-PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ $(ADDR2LINE_PROG) $(READELF_PROG) @BUILD_DLLWRAP@ @BUILD_MISC@
+PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ $(ADDR2LINE_PROG) $(READELF_PROG) @BUILD_DLLWRAP@ @BUILD_MISC@ @BUILD_INSTALL_MISC@
 
 # Stuff that goes in tooldir/ if appropriate.
 TOOL_PROGS = nm-new strip-new ar ranlib dlltool objdump
@@ -484,16 +480,15 @@ windres_SOURCES = windres.c resrc.c rescoff.c resbin.c rcparse.y rclex.l \
 windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(LIBINTL)
 dllwrap_SOURCES = dllwrap.c version.c
 dllwrap_LDADD = $(LIBIBERTY) $(LIBINTL)
-bin2c_SOURCES = bin2c.c version.c
 EXTRA_DIST = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
 	syslex.c deflex.c defparse.h defparse.c rclex.c rcparse.h rcparse.c
 
-DISTCLEANFILES = sysinfo sysroff.c sysroff.h \
-	site.exp site.bak
-
+DISTCLEANFILES = sysroff.c sysroff.h site.exp site.bak
 
 ###
-MOSTLYCLEANFILES = sysinfo binutils.log binutils.sum abcdefgh*
+MOSTLYCLEANFILES = sysinfo$(EXEEXT_FOR_BUILD) bin2c$(EXEEXT_FOR_BUILD) \
+  binutils.log binutils.sum abcdefgh*
+
 CLEANFILES = dep.sed DEP DEPA DEP1 DEP2
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
@@ -593,9 +588,6 @@ addr2line$(EXEEXT): $(addr2line_OBJECTS) $(addr2line_DEPENDENCIES)
 ar$(EXEEXT): $(ar_OBJECTS) $(ar_DEPENDENCIES) 
 	@rm -f ar$(EXEEXT)
 	$(LINK) $(ar_LDFLAGS) $(ar_OBJECTS) $(ar_LDADD) $(LIBS)
-bin2c$(EXEEXT): $(bin2c_OBJECTS) $(bin2c_DEPENDENCIES) 
-	@rm -f bin2c$(EXEEXT)
-	$(LINK) $(bin2c_LDFLAGS) $(bin2c_OBJECTS) $(bin2c_LDADD) $(LIBS)
 coffdump$(EXEEXT): $(coffdump_OBJECTS) $(coffdump_DEPENDENCIES) 
 	@rm -f coffdump$(EXEEXT)
 	$(LINK) $(coffdump_LDFLAGS) $(coffdump_OBJECTS) $(coffdump_LDADD) $(LIBS)
@@ -1041,6 +1033,9 @@ sysinfo.o:
 	else \
 	  $(CC_FOR_BUILD) -c -I. $(AM_CFLAGS) $(CFLAGS) $(srcdir)/sysinfo.c -Wno-error ; \
 	fi
+
+bin2c$(EXEEXT_FOR_BUILD):
+	$(CC_FOR_BUILD) -o $@ $(INCLUDES) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) $(srcdir)/bin2c.c $(srcdir)/version.c
 
 embedspu: embedspu.sh
 	sed "s@^program_transform_name=@program_transform_name=$(program_transform_name)@" < $< > $@
