@@ -1,4 +1,4 @@
-2007-02-07  Joel Brobecker  <brobecker@adacore.com>
+2007-02-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* stabsread.c (define_symbol): Create an associated STRUCT_DOMAIN
 	symbol for Ada units when the symbol is defined using 't' rather
