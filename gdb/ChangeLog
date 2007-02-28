@@ -1,3 +1,8 @@
+2007-02-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbtypes.c (replace_type): Fix typo that caused us to not update
+	length of the types referenced by the new type CV ring.
+
 2007-02-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* frame.c (frame_pop, frame_observer_target_changed): Call

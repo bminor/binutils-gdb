@@ -636,7 +636,7 @@ replace_type (struct type *ntype, struct type *type)
        call replace_type().  */
     gdb_assert (TYPE_ADDRESS_CLASS_ALL (chain) == 0);
 
-    TYPE_LENGTH (ntype) = TYPE_LENGTH (type);
+    TYPE_LENGTH (chain) = TYPE_LENGTH (type);
     chain = TYPE_CHAIN (chain);
   } while (ntype != chain);
 
