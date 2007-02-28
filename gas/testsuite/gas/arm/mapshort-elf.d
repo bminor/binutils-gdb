@@ -1,7 +1,8 @@
 #objdump: --syms --special-syms -d
-#name: ARM Mapping Symbols for .short
+#name: ARM Mapping Symbols for .short (ELF version)
 # This test is only valid on ELF based ports.
-#not-target: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd *-*-riscix*
+#not-target: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd *-*-riscix* *-*-*eabi *-*-syymbianelf
+#source: mapshort.s
 
 # Test the generation and use of ARM ELF Mapping Symbols
 
@@ -20,7 +21,7 @@ SYMBOL TABLE:
 0+18 l       .text	00000000 \$a
 0+1c l       .text	00000000 \$d
 0+1f l       .text	00000000 bar
-
+# The ELF based port does not generate a .ARM.attributes symbol
 
 Disassembly of section .text:
 

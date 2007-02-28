@@ -45,7 +45,7 @@ Disassembly of section \.text:
 0[0-9a-f]+ <[^>]+> ed224b08 	vstmdb	r2!, {d4-d7}
 0[0-9a-f]+ <[^>]+> ed628b10 	vstmdb	r2!, {d24-d31}
 0[0-9a-f]+ <[^>]+> ed223b20 	vstmdb	r2!, {d3-d18}
-0[0-9a-f]+ <backward> 000001f4 	.word	0x000001f4
+0[0-9a-f]+ <backward> 000001f4 	.*
 0[0-9a-f]+ <[^>]+> eddf6b0b 	vldr	d22, \[pc, #44\]	; 0[0-9a-f]+ <forward>
 0[0-9a-f]+ <[^>]+> ed935b00 	vldr	d5, \[r3\]
 0[0-9a-f]+ <[^>]+> ed135b01 	vldr	d5, \[r3, #-4\]
@@ -59,5 +59,5 @@ Disassembly of section \.text:
 0[0-9a-f]+ <[^>]+> ed835b00 	vstr	d5, \[r3\]
 0[0-9a-f]+ <[^>]+> ed035b40 	vstr	d5, \[r3, #-256\]
 0[0-9a-f]+ <[^>]+> ed835b40 	vstr	d5, \[r3, #256\]
-0[0-9a-f]+ <forward> 000002bc 	.word	0x000002bc
+0[0-9a-f]+ <forward> 000002bc 	.*
 0[0-9a-f]+ <[^>]+> ed1f7b11 	vldr	d7, \[pc, #-68\]	; 0[0-9a-f]+ <backward>

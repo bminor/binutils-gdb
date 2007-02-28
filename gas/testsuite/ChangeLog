@@ -1,3 +1,18 @@
+2007-02-28  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/mapshort.d: Split into two new files...
+	* gas/arm/mapshort-eabi.d: The one and...
+	* gas/arm/mapshort-elf.d: This one.
+	* gas/arm/arch7.d: Remove 32-bit host expectation.
+	* gas/arm/arm7t.d: Replace ".word 0x00000000" with ".*" as some
+	arm targets will disassemble this value as an instruction.
+	* gas/arm/neon-ldst-rm.d: Likewise.
+	* gas/arm/thumb2_pool.d: Only run this test for ELF based arm
+	ports.
+	* gas/arm/thumbrel.d: Only run this test for EABI based arm
+	ports.
+	* gas/arm/wince_inst.d: Fix expected branch targets.
+
 2007-02-22  DJ Delorie  <dj@redhat.com>
 
 	* gas/s390/esa-g5.s: Adjust for corrected PKA syntax.
