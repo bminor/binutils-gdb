@@ -770,7 +770,6 @@ gdb_readline_wrapper_cleanup (void *arg)
 {
   struct gdb_readline_wrapper_cleanup *cleanup = arg;
 
-  gdb_assert (rl_already_prompted == 1);
   rl_already_prompted = cleanup->already_prompted_orig;
   PROMPT (0) = cleanup->prompt_orig;
 
