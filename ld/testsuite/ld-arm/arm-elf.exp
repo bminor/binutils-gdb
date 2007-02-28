@@ -65,9 +65,6 @@ set armelftests {
     {"Thumb-1 BL" "-Ttext 0x1000 --section-start .foo=0x401000" "" {thumb1-bl.s}
      {{objdump -dr thumb1-bl.d}}
      "thumb1-bl"}
-    {"Thumb-2 BL" "-Ttext 0x1000 --section-start .foo=0x1001000" "" {thumb2-bl.s}
-     {{objdump -dr thumb2-bl.d}}
-     "thumb2-bl"}
     {"Simple non-PIC shared library" "-shared" "" {arm-lib.s}
      {{objdump -fdw arm-lib.d} {objdump -Rw arm-lib.r}}
      "arm-lib.so"}
@@ -83,7 +80,7 @@ set armelftests {
     {"Non-pcrel function reference" "tmpdir/arm-lib.so" "" {arm-app-abs32.s}
      {{objdump -fdw arm-app-abs32.d} {objdump -Rw arm-app-abs32.r}}
      "arm-app-abs32"}
-    {"Thumb shared library with ARM entry points" "-shared -T arm-lib.ld" ""
+    {"Thumb shared library with ARM entry points" "-shared -T arm-lib.ld" "-mthumb-interwork"
      {mixed-lib.s}
      {{objdump -fdw armthumb-lib.d} {readelf -Ds armthumb-lib.sym}}
      "armthumb-lib.so"}
@@ -145,21 +142,20 @@ set armelftests {
      {{readelf -Ds use-thumb-lib.sym}}
      "use-thumb-lib.so"}
     {"VFP11 denorm erratum fix, scalar operation"
-     "-EL --vfp11-denorm-fix=scalar" "-EL" {vfp11-fix-scalar.s}
+     "-EL --vfp11-denorm-fix=scalar -Ttext=0x8000" "-EL -mfpu=vfpxd" {vfp11-fix-scalar.s}
      {{objdump -dr vfp11-fix-scalar.d}}
      "vfp11-fix-scalar"}
     {"VFP11 denorm erratum fix, vector operation"
-     "-EB --vfp11-denorm-fix=vector" "-EB" {vfp11-fix-vector.s}
+     "-EB --vfp11-denorm-fix=vector -Ttext=0x8000" "-EB -mfpu=vfpxd" {vfp11-fix-vector.s}
      {{objdump -dr vfp11-fix-vector.d}}
      "vfp11-fix-vector"}
     {"VFP11 denorm erratum fix, embedded code-like data"
-     "-EL --vfp11-denorm-fix=scalar" "-EL" {vfp11-fix-none.s}
+     "-EL --vfp11-denorm-fix=scalar -Ttext=0x8000" "-EL -mfpu=vfpxd" {vfp11-fix-none.s}
      {{objdump -dr vfp11-fix-none.d}}
      "vfp11-fix-none"}
     {"Unwinding and -gc-sections" "-gc-sections" "" {gc-unwind.s}
      {{objdump -sj.data gc-unwind.d}}
      "gc-unwind"}
-
 }
 
 run_ld_link_tests $armelftests
@@ -170,3 +166,16 @@ run_dump_test "group-relocs-ldc-bad"
 run_dump_test "thumb2-bl-as-thumb1-bad"
 run_dump_test "thumb2-bl-bad"
 
+# Exclude non-ARM-EABI targets.
+
+if { ![istarget "arm*-*-*eabi"] } {
+    return
+}
+
+set armeabitests {
+    {"Thumb-2 BL" "-Ttext 0x1000 --section-start .foo=0x1001000" "" {thumb2-bl.s}
+     {{objdump -dr thumb2-bl.d}}
+     "thumb2-bl"}
+}
+
+run_ld_link_tests $armeabitests
