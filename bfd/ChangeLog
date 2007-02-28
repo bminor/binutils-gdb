@@ -1,3 +1,7 @@
+2007-02-28  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* config.bfd (sh-*-uclinux, sh[12]-*-uclinux): New stanza.
+
 2007-02-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.h (struct _ovl_stream): Make "start" and "end" const.

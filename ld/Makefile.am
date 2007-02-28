@@ -364,6 +364,7 @@ ALL_EMULATIONS = \
 	eshlelf_nbsd.o \
 	eshelf_nto.o \
 	eshlelf_nto.o \
+	eshelf_uclinux.o \
 	eshelf_vxworks.o \
 	eshlelf_vxworks.o \
 	eshl.o \
@@ -1559,6 +1560,9 @@ eshlelf_vxworks.c: $(srcdir)/emulparams/shlelf_vxworks.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc $(srcdir)/emultempl/vxworks.em \
   ${GEN_DEPENDS}
 	${GENSCRIPTS} shlelf_vxworks "$(tdir_shlelf_vxworks)"
+eshelf_uclinux.c: $(srcdir)/emulparams/shelf_uclinux.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} shelf_uclinux "$(tdir_shelf_uclinux)"
 eshlelf.c: $(srcdir)/emulparams/shlelf.sh \
   $(srcdir)/emulparams/shelf.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}

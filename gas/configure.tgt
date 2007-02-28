@@ -337,7 +337,7 @@ case ${generic_target} in
   sh64*-*-netbsd*)			fmt=elf em=nbsd ;;
   sh*-*-netbsdelf*)			fmt=elf em=nbsd ;;
   sh*-*-symbianelf*)			fmt=elf endian=little ;;
-  sh-*-elf*)				fmt=elf ;;
+  sh-*-elf* | sh-*-uclinux* | sh[12]-*-uclinux*)	fmt=elf ;;
   sh-*-coff*)				fmt=coff ;;
   sh-*-nto*)				fmt=elf ;;
   sh-*-pe*)				fmt=coff em=pe bfd_gas=yes endian=little ;;
