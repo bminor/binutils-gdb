@@ -1,3 +1,9 @@
+2007-02-28  Jerome Guitton  <guitton@adacore.com>
+            Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbtypes.c (check_typedef): Do not replace stub type if
+	the resolved type is not defined in the same objfile.
+
 2007-02-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* top.c (gdb_readline_wrapper_cleanup): Remove invalid assertion.

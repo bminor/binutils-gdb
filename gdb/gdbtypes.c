@@ -1514,7 +1514,15 @@ check_typedef (struct type *type)
 	}
       sym = lookup_symbol (name, 0, STRUCT_DOMAIN, 0, (struct symtab **) NULL);
       if (sym)
-	make_cv_type (is_const, is_volatile, SYMBOL_TYPE (sym), &type);
+        {
+          /* Same as above for opaque types, we can replace the stub
+             with the complete type only if they are int the same
+             objfile.  */
+	  if (TYPE_OBJFILE (SYMBOL_TYPE(sym)) == TYPE_OBJFILE (type))
+            make_cv_type (is_const, is_volatile, SYMBOL_TYPE (sym), &type);
+	  else
+	    type = SYMBOL_TYPE (sym);
+        }
     }
 
   if (TYPE_TARGET_STUB (type))
