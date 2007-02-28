@@ -42,7 +42,7 @@ bin_PROGRAMS = $(am__EXEEXT_5) $(am__EXEEXT_6) $(am__EXEEXT_7) \
 	@BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ \
 	$(am__EXEEXT_11) $(am__EXEEXT_12) @BUILD_DLLWRAP@ \
 	@BUILD_INSTALL_MISC@ $(am__empty)
-noinst_PROGRAMS = $(am__EXEEXT_13) $(am__EXEEXT_14) $(am__EXEEXT_15)
+noinst_PROGRAMS = $(am__EXEEXT_16) @BUILD_MISC@
 EXTRA_PROGRAMS = $(am__EXEEXT_1) srconv$(EXEEXT) sysdump$(EXEEXT) \
 	coffdump$(EXEEXT) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 	$(am__EXEEXT_4)
@@ -89,6 +89,7 @@ binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 am__EXEEXT_13 = nm-new$(EXEEXT)
 am__EXEEXT_14 = strip-new$(EXEEXT)
 am__EXEEXT_15 = cxxfilt$(EXEEXT)
+am__EXEEXT_16 = $(am__EXEEXT_13) $(am__EXEEXT_14) $(am__EXEEXT_15)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am__objects_1 = bucomm.$(OBJEXT) version.$(OBJEXT) filemode.$(OBJEXT)
 am_addr2line_OBJECTS = addr2line.$(OBJEXT) budemang.$(OBJEXT) \
@@ -361,7 +362,7 @@ DLLTOOL_PROG = dlltool
 WINDRES_PROG = windres
 DLLWRAP_PROG = dllwrap
 SRCONV_PROG = srconv$(EXEEXT) sysdump$(EXEEXT) coffdump$(EXEEXT)
-PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ $(ADDR2LINE_PROG) $(READELF_PROG) @BUILD_DLLWRAP@ @BUILD_MISC@ @BUILD_INSTALL_MISC@
+RENAMED_PROGS = $(NM_PROG) $(STRIP_PROG) $(DEMANGLER_PROG)
 
 # Stuff that goes in tooldir/ if appropriate.
 TOOL_PROGS = nm-new strip-new ar ranlib dlltool objdump
@@ -1131,8 +1132,8 @@ mostlyclean-local:
 
 .PHONY: install-exec-local
 
-install-exec-local: install-binPROGRAMS $(bin_PROGRAMS) $(noinst_PROGRAMS)
-	@list='$(noinst_PROGRAMS)'; for p in $$list; do \
+install-exec-local: install-binPROGRAMS $(bin_PROGRAMS) $(RENAMED_PROGS)
+	@list='$(RENAMED_PROGS)'; for p in $$list; do \
 	  if test -f $$p; then \
 	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/$(EXEEXT)$$//' -e 's/-new//' -e 's/cxxfilt/$(DEMANGLER_NAME)/'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`"; \
 	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed -e 's/$(EXEEXT)$$//' -e 's/-new//' -e 's/cxxfilt/$(DEMANGLER_NAME)/'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
