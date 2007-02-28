@@ -1,5 +1,6 @@
 2007-02-28  Alan Modra  <amodra@bigpond.net.au>
 
+	* configure.tgt: Fix type last change.
 	* configure.tgt (spu-*-elf*): Delete targ_extra_ofiles.
 
 2007-02-27  Alan Modra  <amodra@bigpond.net.au>
