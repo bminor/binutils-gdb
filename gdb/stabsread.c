@@ -1102,6 +1102,22 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       break;
 
     case 't':
+      /* In Ada, there is no distinction between typedef and non-typedef;
+         any type declaration implicitly has the equivalent of a typedef,
+         and thus 't' is in fact equivalent to 'Tt'. 
+
+         Therefore, for Ada units, we check the character immediately
+         before the 't', and if we do not find a 'T', then make sure to
+         create the associated symbol in the STRUCT_DOMAIN ('t' definitions
+         will be stored in the VAR_DOMAIN).  If the symbol was indeed
+         defined as 'Tt' then the STRUCT_DOMAIN symbol will be created
+         elsewhere, so we don't need to take care of that.
+         
+         This is important to do, because of forward references:
+         The cleanup of undefined types stored in undef_types only uses
+         STRUCT_DOMAIN symbols to perform the replacement.  */
+      synonym = (SYMBOL_LANGUAGE (sym) == language_ada && p[-2] != 'T');
+
       /* Typedef */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
 
@@ -1185,6 +1201,24 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	}
 
       add_symbol_to_list (sym, &file_symbols);
+
+      if (synonym)
+        {
+          /* Create the STRUCT_DOMAIN clone.  */
+          struct symbol *struct_sym = (struct symbol *)
+            obstack_alloc (&objfile->objfile_obstack, sizeof (struct symbol));
+
+          *struct_sym = *sym;
+          SYMBOL_CLASS (struct_sym) = LOC_TYPEDEF;
+          SYMBOL_VALUE (struct_sym) = valu;
+          SYMBOL_DOMAIN (struct_sym) = STRUCT_DOMAIN;
+          if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
+            TYPE_NAME (SYMBOL_TYPE (sym))
+              = obconcat (&objfile->objfile_obstack, "", "",
+                          DEPRECATED_SYMBOL_NAME (sym));
+          add_symbol_to_list (struct_sym, &file_symbols);
+        }
+      
       break;
 
     case 'T':

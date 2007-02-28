@@ -1,3 +1,9 @@
+2007-02-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* stabsread.c (define_symbol): Create an associated STRUCT_DOMAIN
+	symbol for Ada units when the symbol is defined using 't' rather
+	than 'Tt' as symbol descriptor.
+
 2007-02-28  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* config/mips/tm-nbsd.h: Delete file.
