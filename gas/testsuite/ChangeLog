@@ -1,5 +1,32 @@
 2007-02-28  Nick Clifton  <nickc@redhat.com>
 
+	PR gas/3797
+	* gas/lns/lns.exp: Do not run the lns-common test for the d10v
+	port.
+	* gas/d10v/address-002.l: Update expected assembler output.
+	* gas/d10v/address-003.l, gas/d10v/address-004.l,
+	gas/d10v/address-005.l, gas/d10v/address-006.l,
+	gas/d10v/address-007.l, gas/d10v/address-008.l,
+	gas/d10v/address-009.l, gas/d10v/address-010.l,
+	gas/d10v/address-011.l, gas/d10v/address-012.l,
+	gas/d10v/address-013.l, gas/d10v/address-014.l,
+	gas/d10v/address-015.l, gas/d10v/address-016.l,
+	gas/d10v/address-017.l, gas/d10v/address-018.l,
+	gas/d10v/address-019.l, gas/d10v/address-020.l,
+	gas/d10v/address-021.l, gas/d10v/address-022.l,
+	gas/d10v/address-023.l, gas/d10v/address-024.l,
+	gas/d10v/address-025.l, gas/d10v/address-026.l,
+	gas/d10v/address-027.l, gas/d10v/address-030.l,
+	gas/d10v/address-031.l, gas/d10v/address-032.l,
+	gas/d10v/address-033.l, gas/d10v/address-034.l,
+	gas/d10v/address-035.l, gas/d10v/address-036.l,
+	gas/d10v/address-037.l, gas/d10v/address-038.l,
+	gas/d10v/address-039.l, gas/d10v/address-040.l, 
+	gas/d10v/address-041.l: Likewise.
+
+2007-02-28  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/3975
 	* gas/arm/mapshort.d: Split into two new files...
 	* gas/arm/mapshort-eabi.d: The one and...
 	* gas/arm/mapshort-elf.d: This one.

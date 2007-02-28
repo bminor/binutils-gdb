@@ -4,6 +4,12 @@
 
 2007-02-28  Nick Clifton  <nickc@redhat.com>
 
+	PR gas/3797
+	* config/tc-d10v.c (do_assemble): Do not generate error messages,
+	just return -1 whenever a problem is encountered.
+	(md_assemble): If do_assemble returns -1 generate a non-fatal
+	error message and return.
+
 	PR gas/2623
 	* config/tc-msp430.c (line_separator_char): Change to '{'.
 
