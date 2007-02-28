@@ -84,7 +84,7 @@ mi_gdb_test "-var-create lpinteger * lpinteger" \
 
 mi_gdb_test "-var-create lcharacter * lcharacter" \
 	"\\^done,name=\"lcharacter\",numchild=\"0\",value=\".*\",type=\"char\"" \
-	"create local variablelcharacter "
+	"create local variable lcharacter "
 
 mi_gdb_test "-var-create lpcharacter * lpcharacter" \
 	"\\^done,name=\"lpcharacter\",numchild=\"1\",value=\"$hex \\\\\".*\\\\\"\",type=\"char \\*\"" \
@@ -123,7 +123,7 @@ mi_gdb_test "-var-create lpsimple * lpsimple" \
 	"create local variable lpsimple"
 
 mi_gdb_test "-var-create func * func" \
-	"\\^done,name=\"func\",numchild=\"0\",value=\"$hex\",type=\"void \\(\\*\\)\\((void|)\\)\"" \
+	"\\^done,name=\"func\",numchild=\"0\",value=\".*\",type=\"void \\(\\*\\)\\((void|)\\)\"" \
 	"create local variable func"
 
 # Test: c_variable-1.5
