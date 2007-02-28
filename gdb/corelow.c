@@ -378,8 +378,7 @@ core_open (char *filename, int from_tty)
       target_fetch_registers (-1);
 
       /* Now, set up the frame cache, and print the top of stack.  */
-      flush_cached_frames ();
-      select_frame (get_current_frame ());
+      reinit_frame_cache ();
       print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
     }
   else

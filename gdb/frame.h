@@ -225,17 +225,10 @@ extern struct frame_info *get_current_frame (void);
 /* Invalidates the frame cache (this function should have been called
    invalidate_cached_frames).
 
-   FIXME: cagney/2002-11-28: The only difference between
-   flush_cached_frames() and reinit_frame_cache() is that the latter
-   explicitly sets the selected frame back to the current frame -- there
-   isn't any real difference (except that one delays the selection of
-   a new frame).  Code can instead simply rely on get_selected_frame()
-   to reinit the selected frame as needed.  As for invalidating the
-   cache, there should be two methods: one that reverts the thread's
-   selected frame back to current frame (for when the inferior
-   resumes) and one that does not (for when the user modifies the
-   target invalidating the frame cache).  */
-extern void flush_cached_frames (void);
+   FIXME: cagney/2002-11-28: There should be two methods: one that
+   reverts the thread's selected frame back to current frame (for when
+   the inferior resumes) and one that does not (for when the user
+   modifies the target invalidating the frame cache).  */
 extern void reinit_frame_cache (void);
 
 /* On demand, create the selected frame and then return it.  If the

@@ -1,3 +1,26 @@
+2007-02-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* frame.c (frame_pop, frame_observer_target_changed): Call
+	reinit_frame_cache.
+	(flush_cached_frames): Rename to reinit_frame_cache and delete
+	old implementation.
+	* frame.h (flush_cached_frames): Delete prototype and update comment.
+
+	* bsd-kvm.c (bsd_kvm_open, bsd_kvm_proc_cmd, bsd_kvm_pcb_cmd): Call
+	reinit_frame_cache instead of flush_cached_frames.  Do not call
+	select_frame after reinit_frame_cache.
+	* corelow.c (core_open): Likewise.
+	* gdbarch.sh (deprecated_current_gdbarch_select_hack): Likewise.
+	* infrun.c (prepare_to_proceed, context_switch)
+	(handle_inferior_event): Likewise.
+	* linux-fork.c (fork_load_infrun_state): Likewise.
+	* ocd.c (ocd_start_remote): Likewise.
+	* remote-e7000.c (e7000_start_remote): Likewise.
+	* remote-mips.c (device): Likewise.
+	* thread.c (switch_to_thread): Likewise.
+	* tracepoint.c (finish_tfind_command): Likewise.
+	* gdbarch.c: Regenerated.
+
 2007-02-28  Jerome Guitton  <guitton@adacore.com>
             Joel Brobecker  <brobecker@adacore.com>
 

@@ -1584,7 +1584,7 @@ device is attached to the target board (e.g., /dev/ttya).\n"
      of some sort.  That doesn't happen here (in fact, it may not be
      possible to get the monitor to send the appropriate packet).  */
 
-  flush_cached_frames ();
+  reinit_frame_cache ();
   registers_changed ();
   stop_pc = read_pc ();
   print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC);

@@ -1969,9 +1969,8 @@ finish_tfind_command (char **msg,
 	error (_("Bogus reply from target: %s"), reply);
       }
 
-  flush_cached_frames ();
+  reinit_frame_cache ();
   registers_changed ();
-  select_frame (get_current_frame ());
   set_traceframe_num (target_frameno);
   set_tracepoint_num (target_tracept);
   if (target_frameno == -1)

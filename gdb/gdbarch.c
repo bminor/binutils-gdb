@@ -4202,7 +4202,7 @@ deprecated_current_gdbarch_select_hack (struct gdbarch *new_gdbarch)
   current_gdbarch_swap_out_hack ();
   current_gdbarch_swap_in_hack (new_gdbarch);
   architecture_changed_event ();
-  flush_cached_frames ();
+  reinit_frame_cache ();
 }
 
 extern void _initialize_gdbarch (void);

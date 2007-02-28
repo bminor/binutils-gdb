@@ -461,10 +461,9 @@ switch_to_thread (ptid_t ptid)
     return;
 
   inferior_ptid = ptid;
-  flush_cached_frames ();
+  reinit_frame_cache ();
   registers_changed ();
   stop_pc = read_pc ();
-  select_frame (get_current_frame ());
 }
 
 static void

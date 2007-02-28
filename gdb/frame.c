@@ -537,7 +537,7 @@ frame_pop (struct frame_info *this_frame)
 
   /* We've made right mess of GDB's local state, just discard
      everything.  */
-  flush_cached_frames ();
+  reinit_frame_cache ();
 }
 
 void
@@ -1070,13 +1070,13 @@ get_next_frame (struct frame_info *this_frame)
 void
 frame_observer_target_changed (struct target_ops *target)
 {
-  flush_cached_frames ();
+  reinit_frame_cache ();
 }
 
 /* Flush the entire frame cache.  */
 
 void
-flush_cached_frames (void)
+reinit_frame_cache (void)
 {
   /* Since we can't really be sure what the first object allocated was */
   obstack_free (&frame_cache_obstack, 0);
@@ -1086,21 +1086,7 @@ flush_cached_frames (void)
   select_frame (NULL);
   annotate_frames_invalid ();
   if (frame_debug)
-    fprintf_unfiltered (gdb_stdlog, "{ flush_cached_frames () }\n");
-}
-
-/* Flush the frame cache, and start a new one if necessary.  */
-
-void
-reinit_frame_cache (void)
-{
-  flush_cached_frames ();
-
-  /* FIXME: The inferior_ptid test is wrong if there is a corefile.  */
-  if (PIDGET (inferior_ptid) != 0)
-    {
-      select_frame (get_current_frame ());
-    }
+    fprintf_unfiltered (gdb_stdlog, "{ reinit_frame_cache () }\n");
 }
 
 /* Find where a register is saved (in memory or another register).

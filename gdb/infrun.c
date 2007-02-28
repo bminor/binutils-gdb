@@ -686,10 +686,9 @@ prepare_to_proceed (void)
 
 	  /* FIXME: This stuff came from switch_to_thread() in
 	     thread.c (which should probably be a public function).  */
-	  flush_cached_frames ();
+	  reinit_frame_cache ();
 	  registers_changed ();
 	  stop_pc = wait_pc;
-	  select_frame (get_current_frame ());
 	}
 
       /* We return 1 to indicate that there is a breakpoint here,
@@ -1157,7 +1156,7 @@ context_switch (struct execution_control_state *ecs)
 			 &ecs->current_line, &ecs->current_symtab);
     }
   inferior_ptid = ecs->ptid;
-  flush_cached_frames ();
+  reinit_frame_cache ();
 }
 
 static void
@@ -1304,7 +1303,7 @@ handle_inferior_event (struct execution_control_state *ecs)
     }
   ecs->infwait_state = infwait_normal_state;
 
-  flush_cached_frames ();
+  reinit_frame_cache ();
 
   /* If it's a new process, add it to the thread database */
 
@@ -1429,7 +1428,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       if (!ptid_equal (ecs->ptid, inferior_ptid))
 	{
 	  context_switch (ecs);
-	  flush_cached_frames ();
+	  reinit_frame_cache ();
 	}
 
       stop_pc = read_pc ();
@@ -1490,7 +1489,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       if (!ptid_equal (ecs->ptid, inferior_ptid))
 	{
 	  context_switch (ecs);
-	  flush_cached_frames ();
+	  reinit_frame_cache ();
 	}
 
       /* If no catchpoint triggered for this, then keep going.  */

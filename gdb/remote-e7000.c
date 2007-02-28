@@ -628,7 +628,7 @@ e7000_start_remote (void *dummy)
    that the target is about to print out a status message of some sort.  That
    doesn't happen here. */
 
-  flush_cached_frames ();
+  reinit_frame_cache ();
   registers_changed ();
   stop_pc = read_pc ();
   print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC);

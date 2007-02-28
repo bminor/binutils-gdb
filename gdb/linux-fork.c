@@ -250,10 +250,6 @@ fork_load_infrun_state (struct fork_info *fp)
   registers_changed ();
   reinit_frame_cache ();
 
-  /* We must select a new frame before making any inferior calls to
-     avoid warnings.  */
-  select_frame (get_current_frame ());
-
   stop_pc = read_pc ();
   nullify_last_target_wait_ptid ();
 
