@@ -1,3 +1,8 @@
+2007-03-01  Thiemo Seufer  <ths@mips.com>
+
+	* mips.igen (MFHI, MFLO, MTHI, MTLO): Restore support for mips32
+	and mips64.
+
 2007-02-20  Thiemo Seufer  <ths@mips.com>
 
 	* dsp.igen: Update copyright notice.

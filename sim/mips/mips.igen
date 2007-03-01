@@ -2531,6 +2531,8 @@
 *vr4100:
 *vr5000:
 *r3900:
+*mips32:
+*mips64:
 {
   do_mfhi (SD_, RD);
 }
@@ -2568,6 +2570,8 @@
 *vr4100:
 *vr5000:
 *r3900:
+*mips32:
+*mips64:
 {
   do_mflo (SD_, RD);
 }
@@ -2717,6 +2721,8 @@
 *vr4100:
 *vr5000:
 *r3900:
+*mips32:
+*mips64:
 {
   check_mt_hilo (SD_, HIHISTORY);
   HI = GPR[RS];
@@ -2746,6 +2752,8 @@
 *vr4100:
 *vr5000:
 *r3900:
+*mips32:
+*mips64:
 {
   check_mt_hilo (SD_, LOHISTORY);
   LO = GPR[RS];
