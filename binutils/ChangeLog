@@ -1,3 +1,9 @@
+2007-03-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.am (install-exec-local): Depend on $(noinst_PROGRAMS).
+	Adjust $(EXEEXT) handling for $(RENAMED_PROGS).
+	* Makefile.in, doc/Makefile.in: Regenerate.
+
 2007-03-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* embedspu.sh: Set type and size of global program handle symbol.
