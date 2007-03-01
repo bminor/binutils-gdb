@@ -166,6 +166,7 @@ $8 != "_EAR_" { \
 
  .section .data,"aw",@progbits
  .globl ${SYMBOL}
+ .type ${SYMBOL}, @object
 # fill in a struct spe_program_handle
 #ifdef _LP64
  .p2align 3
@@ -181,6 +182,7 @@ ${SYMBOL}:
  .int __speelf__
  .int __spetoe__
 #endif
+ .size ${SYMBOL}, . - ${SYMBOL}
 EOF
 }
 
