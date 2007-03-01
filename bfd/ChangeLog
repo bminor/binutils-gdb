@@ -1,3 +1,11 @@
+2007-03-01  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (analyze_relocations): Zero src_count if not relaxing.
+	(find_relaxable_sections): Do not increment src_count for unknown
+	opcodes.  Decode only once instead of calling is_l32r_relocation.
+	(compute_text_actions): Remove unused no_insn_move flag.  Assert that
+	src_next matches src_count in relax_info.
+
 2007-03-01  Joseph Myers  <joseph@codesourcery.com>
 
 	* Makefile.am (bfdver.h): Use "." not " " between version number

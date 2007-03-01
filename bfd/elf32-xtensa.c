@@ -5913,6 +5913,8 @@ analyze_relocations (struct bfd_link_info *link_info)
 	    relax_info->src_relocs = (source_reloc *)
 	      bfd_malloc (relax_info->src_count * sizeof (source_reloc));
 	  }
+	else
+	  relax_info->src_count = 0;
       }
 
   /* Collect info on relocations against each relaxable section.  */
@@ -5956,6 +5958,7 @@ find_relaxable_sections (bfd *abfd,
   bfd_boolean ok = TRUE;
   unsigned i;
   xtensa_relax_info *source_relax_info;
+  bfd_boolean is_l32r_reloc;
 
   internal_relocs = retrieve_internal_relocs (abfd, sec,
 					      link_info->keep_memory);
@@ -6006,13 +6009,21 @@ find_relaxable_sections (bfd *abfd,
       /* Count PC-relative operand relocations against the target section.
          Note: The conditions tested here must match the conditions under
 	 which init_source_reloc is called in collect_source_relocs().  */
-      if (is_operand_relocation (ELF32_R_TYPE (irel->r_info))
-	  && (!is_alt_relocation (ELF32_R_TYPE (irel->r_info))
-	      || is_l32r_relocation (abfd, sec, contents, irel)))
-	target_relax_info->src_count++;
+      is_l32r_reloc = FALSE;
+      if (is_operand_relocation (ELF32_R_TYPE (irel->r_info)))
+	{
+	  xtensa_opcode opcode =
+	    get_relocation_opcode (abfd, sec, contents, irel);
+	  if (opcode != XTENSA_UNDEFINED)
+	    {
+	      is_l32r_reloc = (opcode == get_l32r_opcode ());
+	      if (!is_alt_relocation (ELF32_R_TYPE (irel->r_info))
+		  || is_l32r_reloc)
+		target_relax_info->src_count++;
+	    }
+	}
 
-      if (is_l32r_relocation (abfd, sec, contents, irel)
-	  && r_reloc_is_defined (&r_rel))
+      if (is_l32r_reloc && r_reloc_is_defined (&r_rel))
 	{
 	  /* Mark the target section as relaxable.  */
 	  target_relax_info->is_relaxable_literal_section = TRUE;
@@ -6333,14 +6344,12 @@ compute_text_actions (bfd *abfd,
   property_table_entry *prop_table = 0;
   int ptblsize = 0;
   bfd_size_type sec_size;
-  static bfd_boolean no_insn_move = FALSE;
 
-  if (no_insn_move)
-    return ok;
-
-  /* Do nothing if the section contains no optimized longcalls.  */
   relax_info = get_xtensa_relax_info (sec);
   BFD_ASSERT (relax_info);
+  BFD_ASSERT (relax_info->src_next == relax_info->src_count);
+
+  /* Do nothing if the section contains no optimized longcalls.  */
   if (!relax_info->is_relaxable_asm_section)
     return ok;
 
