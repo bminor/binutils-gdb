@@ -1,3 +1,11 @@
+2007-03-01  Joseph Myers  <joseph@codesourcery.com>
+
+	* Makefile.am (bfdver.h): Use "." not " " between version number
+	and date.
+	* Makefile.in: Regenerate.
+	* configure.in (PKGVERSION): Default to "(GNU Binutils) ".
+	* configure: Regenerate.
+
 2007-02-28  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* config.bfd (sh-*-uclinux, sh[12]-*-uclinux): New stanza.

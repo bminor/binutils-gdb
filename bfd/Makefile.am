@@ -968,7 +968,7 @@ bfdver.h: $(srcdir)/version.h $(srcdir)/Makefile.in
 	bfd_version_package="\"$(PKGVERSION)\"" ;\
 	if test "x$(RELEASE)" = x ; then \
 	  bfd_version_date=`sed -n -e 's/.*DATE //p' < $(srcdir)/version.h` ;\
-	  bfd_version_string="\"$(VERSION) $${bfd_version_date}\"" ;\
+	  bfd_version_string="\"$(VERSION).$${bfd_version_date}\"" ;\
 	fi ;\
 	sed -e "s/@bfd_version@/$$bfd_version/" -e "s/@bfd_version_string@/$$bfd_version_string/" -e "s/@bfd_version_package@/$$bfd_version_package/" < $(srcdir)/version.h > $@
 

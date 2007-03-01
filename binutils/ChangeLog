@@ -1,3 +1,7 @@
+2007-03-01  Joseph Myers  <joseph@codesourcery.com>
+
+	* version.c: Update copyright date.
+
 2007-03-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.am (install-exec-local): Depend on $(noinst_PROGRAMS).

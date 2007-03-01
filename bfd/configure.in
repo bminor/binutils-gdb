@@ -72,7 +72,7 @@ AC_ARG_WITH(pkgversion,
     no)  PKGVERSION= ;;
     *)   PKGVERSION="($withval) " ;;
    esac],
-  PKGVERSION=
+  PKGVERSION="(GNU Binutils) "
 )
 AC_SUBST(PKGVERSION)
 

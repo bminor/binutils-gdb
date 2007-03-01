@@ -4399,7 +4399,7 @@ echo "$as_me: error: package version not specified" >&2;}
     *)   PKGVERSION="($withval) " ;;
    esac
 else
-  PKGVERSION=
+  PKGVERSION="(GNU Binutils) "
 
 fi;
 

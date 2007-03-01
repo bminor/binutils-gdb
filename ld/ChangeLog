@@ -1,3 +1,8 @@
+2007-03-01  Joseph Myers  <joseph@codesourcery.com>
+
+	* ldver.c (ldversion): Remove word "version" from output.  Update
+	copyright date.
+
 2007-02-28  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* Makefile.am (ALL_EMULATIONS): Add eshelf_uclinux.o

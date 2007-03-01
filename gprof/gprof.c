@@ -29,6 +29,7 @@
 
 #include "libiberty.h"
 #include "gprof.h"
+#include "bfdver.h"
 #include "search_list.h"
 #include "source.h"
 #include "symtab.h"
@@ -411,7 +412,7 @@ main (int argc, char **argv)
 	  break;
 	case 'v':
 	  /* This output is intended to follow the GNU standards document.  */
-	  printf (_("GNU gprof %s\n"), PKGVERSION VERSION);
+	  printf (_("GNU gprof %s\n"), BFD_VERSION_STRING);
 	  printf (_("Based on BSD gprof, copyright 1983 Regents of the University of California.\n"));
 	  printf (_("\
 This program is free software.  This program has absolutely no warranty.\n"));

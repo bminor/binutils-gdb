@@ -1,3 +1,15 @@
+2007-03-01  Joseph Myers  <joseph@codesourcery.com>
+
+	* gprof.c: Include bfdver.h
+	(main): Use BFD_VERSION_STRING for version number and package
+	name.
+	* Makefile.am (PKGVERSION): Remove.
+	(INCLUDES): Update.
+	Regenerate dependencies.
+	* Makefile.in: Regenerate.
+	* configure.in (PKGVERSION): Remove.
+	* configure: Regenerate.
+
 2007-02-17  Mark Mitchell  <mark@codesourcery.com>
             Nathan Sidwell  <nathan@codesourcery.com>
             Vladimir Prus  <vladimir@codesourcery.com
