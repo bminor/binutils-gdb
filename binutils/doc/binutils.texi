@@ -996,6 +996,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--add-gnu-debuglink=}@var{path-to-file}]
         [@option{--keep-file-symbols}]
         [@option{--only-keep-debug}]
+        [@option{--extract-symbol}]
         [@option{--writable-text}]
         [@option{--readonly-text}]
         [@option{--pure}]
@@ -1488,6 +1489,21 @@ information may be incomplete.  Besides the gnu_debuglink feature
 currently only supports the presence of one filename containing
 debugging information, not multiple filenames on a one-per-object-file
 basis.
+
+@item --extract-symbol
+Keep the file's section flags and symbols but remove all section data.
+Specifically, the option:
+
+@itemize
+@item sets the virtual and load addresses of every section to zero;
+@item removes the contents of all sections;
+@item sets the size of every section to zero; and
+@item sets the file's start address to zero.
+@end itemize
+ 
+This option is used to build a @file{.sym} file for a VxWorks kernel.
+It can also be a useful way of reducing the size of a @option{--just-symbols}
+linker input file.
 
 @item -V
 @itemx --version

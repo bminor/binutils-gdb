@@ -215,6 +215,9 @@ static char *prefix_symbols_string = 0;
 static char *prefix_sections_string = 0;
 static char *prefix_alloc_sections_string = 0;
 
+/* True if --extract-symbol was passed on the command line.  */
+static bfd_boolean extract_symbol = FALSE;
+
 /* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
 enum command_line_switch
   {
@@ -261,7 +264,8 @@ enum command_line_switch
     OPTION_READONLY_TEXT,
     OPTION_WRITABLE_TEXT,
     OPTION_PURE,
-    OPTION_IMPURE
+    OPTION_IMPURE,
+    OPTION_EXTRACT_SYMBOL
   };
 
 /* Options to handle if running as "strip".  */
@@ -317,6 +321,7 @@ static struct option copy_options[] =
   {"debugging", no_argument, 0, OPTION_DEBUGGING},
   {"discard-all", no_argument, 0, 'x'},
   {"discard-locals", no_argument, 0, 'X'},
+  {"extract-symbol", no_argument, 0, OPTION_EXTRACT_SYMBOL},
   {"format", required_argument, 0, 'F'}, /* Obsolete */
   {"gap-fill", required_argument, 0, OPTION_GAP_FILL},
   {"globalize-symbol", required_argument, 0, OPTION_GLOBALIZE_SYMBOL},
@@ -431,6 +436,7 @@ copy_usage (FILE *stream, int exit_status)
                                    Do not copy symbol <name> unless needed by\n\
                                      relocations\n\
      --only-keep-debug             Strip everything but the debug information\n\
+     --extract-symbol              Remove section contents but keep symbols\n\
   -K --keep-symbol <name>          Do not strip symbol <name>\n\
      --keep-file-symbols           Do not strip file symbol(s)\n\
      --localize-hidden             Turn all ELF hidden symbols into locals\n\
@@ -1310,11 +1316,16 @@ copy_object (bfd *ibfd, bfd *obfd)
 	    bfd_get_archive_filename (ibfd), bfd_get_target (ibfd),
 	    bfd_get_filename (obfd), bfd_get_target (obfd));
 
-  if (set_start_set)
-    start = set_start;
+  if (extract_symbol)
+    start = 0;
   else
-    start = bfd_get_start_address (ibfd);
-  start += change_start;
+    {
+      if (set_start_set)
+	start = set_start;
+      else
+	start = bfd_get_start_address (ibfd);
+      start += change_start;
+    }
 
   /* Neither the start address nor the flags
      need to be set for a core file.  */
@@ -1724,6 +1735,11 @@ copy_object (bfd *ibfd, bfd *obfd)
 	    }
 	}
     }
+
+  /* Do not copy backend data if --extract-symbol is passed; anything
+     that needs to look at the section contents will fail.  */
+  if (extract_symbol)
+    return TRUE;
 
   /* Allow the BFD backend to copy any private data it understands
      from the input BFD to the output BFD.  This is done last to
@@ -2184,6 +2200,8 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   size = bfd_section_size (ibfd, isection);
   if (copy_byte >= 0)
     size = (size + interleave - 1) / interleave;
+  else if (extract_symbol)
+    size = 0;
   if (! bfd_set_section_size (obfd, osection, size))
     {
       err = _("size");
@@ -2198,7 +2216,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   else
     vma += change_section_address;
 
-  if (! bfd_set_section_vma (obfd, osection, vma))
+  if (! bfd_set_section_vma (obfd, osection, extract_symbol ? 0 : vma))
     {
       err = _("vma");
       goto loser;
@@ -2217,7 +2235,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   else
     lma += change_section_address;
 
-  osection->lma = lma;
+  osection->lma = extract_symbol ? 0 : lma;
 
   /* FIXME: This is probably not enough.  If we change the LMA we
      may have to recompute the header for the file as well.  */
@@ -2236,7 +2254,12 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
      bfd_get_section_by_name since some formats allow multiple
      sections with the same name.  */
   isection->output_section = osection;
-  isection->output_offset = 0;
+  isection->output_offset = extract_symbol ? vma : 0;
+
+  /* Do not copy backend data if --extract-symbol is passed; anything
+     that needs to look at the section contents will fail.  */
+  if (extract_symbol)
+    return;
 
   /* Allow the BFD backend to copy any private data it understands
      from the input section to the output section.  */
@@ -2353,6 +2376,9 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
       if (relcount == 0)
 	free (relpp);
     }
+
+  if (extract_symbol)
+    return;
 
   if (bfd_get_section_flags (ibfd, isection) & SEC_HAS_CONTENTS
       && bfd_get_section_flags (obfd, osection) & SEC_HAS_CONTENTS)
@@ -3229,6 +3255,10 @@ copy_main (int argc, char *argv[])
 	case OPTION_IMPURE:
 	  bfd_flags_to_clear |= D_PAGED;
 	  bfd_flags_to_set &= ~D_PAGED;
+	  break;
+
+	case OPTION_EXTRACT_SYMBOL:
+	  extract_symbol = TRUE;
 	  break;
 
 	case 0:

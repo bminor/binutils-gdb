@@ -1,3 +1,21 @@
+2007-03-01  Phil Edwards  <phil@codesourcery.com>
+	    Richard Sandiford  <richard@codesourcery.com>
+
+	* NEWS: Mention addition of --extract-symbol.
+	* doc/binutils.texi: Document it.
+	* objcopy.c (extract_symbol): New variable.
+	(OPTION_EXTRACT_SYMBOLS): New command_line_switch.
+	(copy_options): Add an entry for --extract-symbol.
+	(copy_usage): Mention --extract-symbol.
+	(copy_object): Set the start address to zero for --extract-symbol.
+	Do not copy private BFD data in that case.
+	(setup_section): Set the size, LMA and VMA to zero for
+	--extract-symbol.  Do not copy private BFD data in that case.
+	(copy_section): Do not copy section contents if --extract-symbol
+	is passed.
+	(copy_main): Set extract_symbol to TRUE if --extract-symbol
+	is passed.
+
 2007-03-01  Paul Brook  <paul@codesourcery.com>
 
 	* MAINTAINERS: Update my entry.
