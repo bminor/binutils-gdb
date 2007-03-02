@@ -16525,16 +16525,42 @@ relax_immediate (fragS *fragp, int size, int shift)
   offset = fragp->fr_offset;
   /* Force misaligned offsets to 32-bit variant.  */
   if (offset & low)
-    return -4;
+    return 4;
   if (offset & ~mask)
     return 4;
   return 2;
 }
 
+/* Get the address of a symbol during relaxation.  */
+static addressT
+relaxed_symbol_addr(fragS *fragp, long stretch)
+{
+  fragS *sym_frag;
+  addressT addr;
+  symbolS *sym;
+
+  sym = fragp->fr_symbol;
+  sym_frag = symbol_get_frag (sym);
+  know (S_GET_SEGMENT (sym) != absolute_section
+	|| sym_frag == &zero_address_frag);
+  addr = S_GET_VALUE (sym) + fragp->fr_offset;
+
+  /* If frag has yet to be reached on this pass, assume it will
+     move by STRETCH just as we did.  If this is not so, it will
+     be because some frag between grows, and that will force
+     another pass.  */
+
+  if (stretch != 0
+      && sym_frag->relax_marker != fragp->relax_marker)
+    addr += stretch;
+
+  return addr;
+}
+
 /* Return the size of a relaxable adr pseudo-instruction or PC-relative
    load.  */
 static int
-relax_adr (fragS *fragp, asection *sec)
+relax_adr (fragS *fragp, asection *sec, long stretch)
 {
   addressT addr;
   offsetT val;
@@ -16544,14 +16570,12 @@ relax_adr (fragS *fragp, asection *sec)
       || sec != S_GET_SEGMENT (fragp->fr_symbol))
     return 4;
 
-  val = S_GET_VALUE(fragp->fr_symbol) + fragp->fr_offset;
+  val = relaxed_symbol_addr(fragp, stretch);
   addr = fragp->fr_address + fragp->fr_fix;
   addr = (addr + 4) & ~3;
-  /* Fix the insn as the 4-byte version if the target address is not
-     sufficiently aligned.  This is prevents an infinite loop when two
-     instructions have contradictory range/alignment requirements.  */
+  /* Force misaligned targets to 32-bit variant.  */
   if (val & 3)
-    return -4;
+    return 4;
   val -= addr;
   if (val < 0 || val > 1020)
     return 4;
@@ -16578,7 +16602,7 @@ relax_addsub (fragS *fragp, asection *sec)
    size of the offset field in the narrow instruction.  */
 
 static int
-relax_branch (fragS *fragp, asection *sec, int bits)
+relax_branch (fragS *fragp, asection *sec, int bits, long stretch)
 {
   addressT addr;
   offsetT val;
@@ -16589,7 +16613,7 @@ relax_branch (fragS *fragp, asection *sec, int bits)
       || sec != S_GET_SEGMENT (fragp->fr_symbol))
     return 4;
 
-  val = S_GET_VALUE(fragp->fr_symbol) + fragp->fr_offset;
+  val = relaxed_symbol_addr(fragp, stretch);
   addr = fragp->fr_address + fragp->fr_fix + 4;
   val -= addr;
 
@@ -16605,7 +16629,7 @@ relax_branch (fragS *fragp, asection *sec, int bits)
    the current size of the frag should change.  */
 
 int
-arm_relax_frag (asection *sec, fragS *fragp, long stretch ATTRIBUTE_UNUSED)
+arm_relax_frag (asection *sec, fragS *fragp, long stretch)
 {
   int oldsize;
   int newsize;
@@ -16614,7 +16638,7 @@ arm_relax_frag (asection *sec, fragS *fragp, long stretch ATTRIBUTE_UNUSED)
   switch (fragp->fr_subtype)
     {
     case T_MNEM_ldr_pc2:
-      newsize = relax_adr(fragp, sec);
+      newsize = relax_adr(fragp, sec, stretch);
       break;
     case T_MNEM_ldr_pc:
     case T_MNEM_ldr_sp:
@@ -16634,7 +16658,7 @@ arm_relax_frag (asection *sec, fragS *fragp, long stretch ATTRIBUTE_UNUSED)
       newsize = relax_immediate(fragp, 5, 0);
       break;
     case T_MNEM_adr:
-      newsize = relax_adr(fragp, sec);
+      newsize = relax_adr(fragp, sec, stretch);
       break;
     case T_MNEM_mov:
     case T_MNEM_movs:
@@ -16643,10 +16667,10 @@ arm_relax_frag (asection *sec, fragS *fragp, long stretch ATTRIBUTE_UNUSED)
       newsize = relax_immediate(fragp, 8, 0);
       break;
     case T_MNEM_b:
-      newsize = relax_branch(fragp, sec, 11);
+      newsize = relax_branch(fragp, sec, 11, stretch);
       break;
     case T_MNEM_bcond:
-      newsize = relax_branch(fragp, sec, 8);
+      newsize = relax_branch(fragp, sec, 8, stretch);
       break;
     case T_MNEM_add_sp:
     case T_MNEM_add_pc:
@@ -16665,14 +16689,18 @@ arm_relax_frag (asection *sec, fragS *fragp, long stretch ATTRIBUTE_UNUSED)
     default:
       abort();
     }
-  if (newsize < 0)
+
+  fragp->fr_var = newsize;
+  /* Freeze wide instructions that are at or before the same location as
+     in the previous pass.  This avoids infinite loops.
+     Don't freeze them unconditionally because targets may be artificialy
+     misaligned by the expansion of preceeding frags.  */
+  if (stretch <= 0 && newsize > 2)
     {
-      fragp->fr_var = -newsize;
       md_convert_frag (sec->owner, sec, fragp);
       frag_wane(fragp);
-      return -(newsize + oldsize);
     }
-  fragp->fr_var = newsize;
+
   return newsize - oldsize;
 }
 

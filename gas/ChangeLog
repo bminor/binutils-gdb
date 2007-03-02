@@ -1,3 +1,10 @@
+2007-03-02  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (relax_immediate): Always return positive values.
+	(relaxed_symbol_addr): New function.
+	(relax_adr, relax_branch): Use it.
+	(arm_relax_frag): Pass strect argument.  Adjust infinite loop check.
+
 2007-03-01  Joseph Myers  <joseph@codesourcery.com>
 
 	* as.c (parse_args): Update copyright date.
