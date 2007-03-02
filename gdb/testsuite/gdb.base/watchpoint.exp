@@ -758,7 +758,7 @@ if [initialize] then {
     }
 
     # We've explicitly disabled hardware watches.  Verify that GDB
-    # 
+    # refrains from using them.
     #
     send_gdb "rwatch ival3\n"
     gdb_expect {
