@@ -108,7 +108,10 @@ gdb_test_multiple "" "stop threads 2" {
     exp_continue
   }
   -re "Program received signal SIGINT.*$gdb_prompt $" {
-    pass "stop threads 2"
+    pass "$message"
+  }
+  timeout {
+    fail "$message (timeout)"
   }
 } 
 

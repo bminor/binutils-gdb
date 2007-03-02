@@ -1,5 +1,10 @@
 2007-03-02  Michael Snyder  <michael.snyder@palmsource.com>
 
+	* gdb.threads/manythreads.exp: Use $message string for 
+	consistancy; add a default (timeout) case.
+
+2007-03-02  Michael Snyder  <michael.snyder@palmsource.com>
+
 	* gdb.base/watchpoint.exp: Fix truncated comment.
 
 2007-03-02  Michael Snyder  <michael.snyder@palmsource.com>
