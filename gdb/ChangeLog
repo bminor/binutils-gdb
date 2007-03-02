@@ -1,3 +1,24 @@
+2007-03-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* shnbsd-tdep.c: Include "regset.h", "gdb_assert.h" and
+	"gdb_string.h".  Don't include "nbsd-tdep.h".
+	(SIZEOF_STRUCT_REG): Remove.
+	(SHNBSD_SIZEOF_GREGS): New.
+	(shnbsd_supply_gregset, shnbsd_collect_gregset)
+	(shnbsd_regset_from_core_section): New functions.
+	(fetch_core_registers, fetch_elfcore_registers): Remove functions.
+	(shnbsd_supply_reg, shnbsd_fill_reg): Simply call
+	shnbsd_supply_gregset, shnbsd_collect_gregset.
+	(shnbsd_gregset): New variable.
+	(shnbsd_init_abi): Set regset_from_core_section.
+	(GDB_OSABI_NETBSD_CORE): New define.
+	(shnbsd_core_osabi_sniffer): New function.
+	(_initialize_shnbsd_tdep): Register shnbsd_core_osabi_sniffer.
+	* Makefile.in (shnbsd-tdep.o): Update dependencies.
+	* config/sh/nbsd.mt (TDEPFILES): Add corelow.o, remove
+	nbsd-tdep.o.
+	* config/sh/obsd.mt (TDEPFILES): Remove nbsd-tdep.o.
+
 2007-02-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbtypes.c (replace_type): Fix typo that caused us to not update
