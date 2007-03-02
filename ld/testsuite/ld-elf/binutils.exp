@@ -122,6 +122,3 @@ binutils_test objcopy "-z max-page-size=0x100000" tdata2
 binutils_test objcopy "" tdata2
 binutils_test objcopy "-shared" tdata2
 binutils_test objcopy "-z max-page-size=0x100000 -z common-page-size=0x1000" tdata2
-
-run_dump_test extract-symbol-1sec
-run_dump_test extract-symbol-1sym
