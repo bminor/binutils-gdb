@@ -55,7 +55,7 @@ RUNTEST_FOR_TARGET = `\
     if [ "$(host_canonical)" = "$(target_canonical)" ]; then \
       echo runtest; \
     else \
-      t='$(program_transform_name)'; echo runtest | sed -e '' $$t; \
+      t='$(program_transform_name)'; echo runtest | sed -e $$t; \
     fi; \
   fi`
 
