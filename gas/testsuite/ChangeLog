@@ -1,3 +1,11 @@
+2007-03-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/3918
+	* lib/gas-defs.exp (gas_started): New variable. Initialized to
+	0.
+	(gas_start): Set gas_started to 1.
+	(gas_finish): Skip if gas_started is 0.  Reset gas_started to 0.
+
 2007-03-02  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/relax_branch_align.d: New test.

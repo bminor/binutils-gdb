@@ -53,12 +53,21 @@ proc all_ones { args } {
     return 1
 }
 
+# ${tool}_finish (gas_finish) will be called by runtest.exp.  But
+# gas_finish should only be used with gas_start.  We use gas_started
+# to tell gas_finish if gas_start has been called so that runtest.exp
+# can call gas_finish without closing the wrong fd.
+set gas_started 0
+
 proc gas_start { prog as_opts } {
     global AS
     global ASFLAGS
     global srcdir
     global subdir
     global spawn_id
+    global gas_started
+
+    set gas_started 1
 
     verbose -log "Starting $AS $ASFLAGS $as_opts $prog" 2
     catch {
@@ -71,9 +80,13 @@ proc gas_start { prog as_opts } {
 
 proc gas_finish { } {
     global spawn_id
+    global gas_started
 
-    catch "close"
-    catch "wait"
+    if { $gas_started == 1 } {
+	catch "close"
+	catch "wait"
+	set gas_started 0
+    }
 }
 
 proc want_no_output { testname } {
