@@ -1,3 +1,9 @@
+2007-03-06  Andreas Krebbel  <krebbel1@de.ibm.com>
+
+	* gas/s390/zarch-z9-ec.d: New file.
+	* gas/s390/zarch-z9-ec.s: New file.
+	* gas/s390/s390.exp: Run the z9-ec testcases.
+
 2007-03-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/3918

@@ -1,3 +1,17 @@
+2007-03-06  Andreas Krebbel  <krebbel1@de.ibm.com>
+
+	* opcodes/s390-opc.c (INSTR_RRE_FR, INSTR_RRF_F0FF2, INSTR_RRF_F0FR,
+	INSTR_RRF_UUFF, INSTR_RRF_0UFF, INSTR_RRF_FFFU,	INSTR_RRR_F0FF): New
+	instruction formats added.
+	(MASK_RRE_FR, MASK_RRF_F0FF2, MASK_RRF_F0FR, MASK_RRF_UUFF,
+	MASK_RRF_0UFF, MASK_RRF_FFFU, MASK_RRR_F0FF): New instruction format
+	masks added.
+	* opcodes/s390-opc.txt (lpdfr - tgxt): Decimal floating point
+	instructions added.
+	* opcodes/s390-mkopc.c (s390_opcode_cpu_val): S390_OPCODE_Z9_EC added.
+	(main): z9-ec cpu type option added.
+	* include/opcode/s390.h (s390_opcode_cpu_val): S390_OPCODE_Z9_EC added.
+
 2007-02-22  DJ Delorie  <dj@redhat.com>
 
 	* s390-opc.c (INSTR_SS_L2RDRD): New.
