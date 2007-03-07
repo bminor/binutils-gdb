@@ -1,3 +1,8 @@
+2007-03-07  Denis Pilat  <denis.pilat@st.com>
+
+	* tui/tui-hooks.c (tui_selected_frame_level_changed_hook): Replace
+	get_selected_frame by deprecated_safe_get_selected_frame.
+
 2007-03-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* shnbsd-tdep.c: Include "regset.h", "gdb_assert.h" and

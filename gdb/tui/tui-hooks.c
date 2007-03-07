@@ -230,7 +230,7 @@ tui_selected_frame_level_changed_hook (int level)
 {
   struct frame_info *fi;
 
-  fi = get_selected_frame (NULL);
+  fi = deprecated_safe_get_selected_frame ();
   /* Ensure that symbols for this frame are read in.  Also, determine the
      source language of this frame, and switch to it if desired.  */
   if (fi)
