@@ -1,3 +1,19 @@
+2007-03-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config.bfd (x86_64-*-freebsd*): Add bfd_efi_app_x86_64_vec.
+	(x86_64-*-kfreebsd*-gnu): Likewise.
+	(x86_64-*-netbsd*): Likewise.
+	(x86_64-*-openbsd*): Likewise.
+	(x86_64-*-linux-*): Likewise.
+
+	* configure.in: Support bfd_efi_app_x86_64_vec.
+	* configure: Regenerated.
+
+	* efi-app-x86_64.c: New file.
+
+	* targets.c (bfd_efi_app_x86_64_vec): New.
+	(_bfd_target_vector): Add bfd_efi_app_x86_64_vec.
+
 2007-03-07  Kai Tietz   <kai.tietz@onevision.com>
 
 	* reloc.c (bfd_generic_get_relocated_section_contents): Remove
