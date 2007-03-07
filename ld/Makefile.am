@@ -1771,6 +1771,9 @@ ldver.texi: $(srcdir)/../bfd/configure
 	rm -f $@
 	eval `grep '^ *VERSION=' $(srcdir)/../bfd/configure`; \
 	  echo "@set VERSION $$VERSION" > $@
+	if [ -n "$(REPORT_BUGS_TEXI)" ]; then \
+	  echo "@set BUGURL $(REPORT_BUGS_TEXI)" >> $@; \
+	fi
 
 # Build the man page from the texinfo file
 # The sed command removes the no-adjust Nroff command so that

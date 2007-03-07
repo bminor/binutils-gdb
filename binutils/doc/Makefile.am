@@ -42,6 +42,9 @@ config.texi: $(srcdir)/../../bfd/configure $(binutils_TEXI)
 	eval `grep '^ *VERSION=' $(srcdir)/../../bfd/configure`; \
 	  echo "@set VERSION $$VERSION" > $@
 	echo "@set UPDATED `date '+%B %Y'`" >> config.texi
+	if [ -n "$(REPORT_BUGS_TEXI)" ]; then \
+	  echo "@set BUGURL $(REPORT_BUGS_TEXI)" >> config.texi; \
+	fi
 
 # Man page generation from texinfo
 addr2line.1:	$(binutils_TEXI) $(binutils_TEXINFOS)

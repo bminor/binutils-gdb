@@ -205,6 +205,7 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
+REPORT_BUGS_TEXI = @REPORT_BUGS_TEXI@
 REPORT_BUGS_TO = "\"@REPORT_BUGS_TO@\""
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
@@ -2571,6 +2572,9 @@ ldver.texi: $(srcdir)/../bfd/configure
 	rm -f $@
 	eval `grep '^ *VERSION=' $(srcdir)/../bfd/configure`; \
 	  echo "@set VERSION $$VERSION" > $@
+	if [ -n "$(REPORT_BUGS_TEXI)" ]; then \
+	  echo "@set BUGURL $(REPORT_BUGS_TEXI)" >> $@; \
+	fi
 
 # Build the man page from the texinfo file
 # The sed command removes the no-adjust Nroff command so that

@@ -1,3 +1,12 @@
+2007-03-07  Joseph Myers  <joseph@codesourcery.com>
+
+	* configure.in (REPORT_BUGS_TEXI): Define to Texinfo version of
+	bug-reporting URL.
+	* doc/Makefile.am (config.texi): Define BUGURL.
+	* doc/binutils.texi: Use BUGURL.  Remove text about large files
+	and uuencoding.
+	* Makefile.in, configure, doc/Makefile.in: Regenerate.
+
 2007-03-01  Phil Edwards  <phil@codesourcery.com>
 	    Richard Sandiford  <richard@codesourcery.com>
 

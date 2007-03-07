@@ -67,6 +67,9 @@ gasver.texi: $(srcdir)/../../bfd/configure
 	rm -f $@
 	eval `grep '^ *VERSION=' $(srcdir)/../../bfd/configure`; \
 	  echo "@set VERSION $$VERSION" > $@
+	if [ -n "$(REPORT_BUGS_TEXI)" ]; then \
+	  echo "@set BUGURL $(REPORT_BUGS_TEXI)" >> $@; \
+	fi
 
 # We want install to imply install-info as per GNU standards, despite the
 # cygnus option.
