@@ -651,18 +651,52 @@ gld${EMULATION_NAME}_before_allocation (void)
       size_t len;
       search_dirs_type *search;
 
-      len = strlen (search_head->name);
-      libpath = xmalloc (len + 1);
-      strcpy (libpath, search_head->name);
-      for (search = search_head->next; search != NULL; search = search->next)
+      /* PR ld/4023: Strip sysroot prefix from any paths
+	 being inserted into the output binary's DT_RPATH.  */
+      if (ld_sysroot != NULL
+	  && * ld_sysroot != 0)
 	{
-	  size_t nlen;
+	  const char * name = search_head->name;
+	  size_t ld_sysroot_len = strlen (ld_sysroot);
 
-	  nlen = strlen (search->name);
-	  libpath = xrealloc (libpath, len + nlen + 2);
-	  libpath[len] = ':';
-	  strcpy (libpath + len + 1, search->name);
-	  len += nlen + 1;
+	  if (strncmp (name, ld_sysroot, ld_sysroot_len) == 0)
+	    name += ld_sysroot_len;
+
+	  len = strlen (name);
+	  libpath = xmalloc (len + 1);
+	  strcpy (libpath, name);
+
+	  for (search = search_head->next; search != NULL; search = search->next)
+	    {
+	      size_t nlen;
+
+	      name = search->name;
+	      if (strncmp (name, ld_sysroot, ld_sysroot_len) == 0)
+		name += ld_sysroot_len;
+
+	      nlen = strlen (name);
+	      libpath = xrealloc (libpath, len + nlen + 2);
+	      libpath[len] = ':';
+	      strcpy (libpath + len + 1, name);
+	      len += nlen + 1;
+	    }
+	}
+      else
+	{
+	  len = strlen (search_head->name);
+	  libpath = xmalloc (len + 1);
+	  strcpy (libpath, search_head->name);
+
+	  for (search = search_head->next; search != NULL; search = search->next)
+	    {
+	      size_t nlen;
+
+	      nlen = strlen (search->name);
+	      libpath = xrealloc (libpath, len + nlen + 2);
+	      libpath[len] = ':';
+	      strcpy (libpath + len + 1, search->name);
+	      len += nlen + 1;
+	    }
 	}
     }
 
