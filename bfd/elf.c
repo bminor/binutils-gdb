@@ -1,7 +1,7 @@
 /* ELF executable support for BFD.
 
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -4495,11 +4495,13 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	  if (p->p_type == PT_LOAD
 	      || p->p_type == PT_TLS)
 	    {
-	      bfd_signed_vma adjust;
+	      bfd_signed_vma adjust = sec->lma - (p->p_paddr + p->p_filesz);
 
-	      if ((flags & SEC_LOAD) != 0)
+	      if ((flags & SEC_LOAD) != 0
+		  || ((flags & SEC_ALLOC) != 0
+		      && ((flags & SEC_THREAD_LOCAL) == 0
+			  || p->p_type == PT_TLS)))
 		{
-		  adjust = sec->lma - (p->p_paddr + p->p_filesz);
 		  if (adjust < 0)
 		    {
 		      (*_bfd_error_handler)
@@ -4507,25 +4509,13 @@ assign_file_positions_for_load_sections (bfd *abfd,
 			 abfd, sec, (unsigned long) sec->lma);
 		      adjust = 0;
 		    }
-		  off += adjust;
-		  p->p_filesz += adjust;
 		  p->p_memsz += adjust;
-		}
-	      /* .tbss is special.  It doesn't contribute to p_memsz of
-		 normal segments.  */
-	      else if ((flags & SEC_ALLOC) != 0
-		       && ((flags & SEC_THREAD_LOCAL) == 0
-			   || p->p_type == PT_TLS))
-		{
-		  /* The section VMA must equal the file position
-		     modulo the page size.  */
-		  bfd_size_type page = align;
-		  if (page < maxpagesize)
-		    page = maxpagesize;
-		  adjust = vma_page_aligned_bias (sec->vma,
-						  p->p_vaddr + p->p_memsz,
-						  page);
-		  p->p_memsz += adjust;
+
+		  if ((flags & SEC_LOAD) != 0)
+		    {
+		      off += adjust;
+		      p->p_filesz += adjust;
+		    }
 		}
 	    }
 

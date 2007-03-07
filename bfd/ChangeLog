@@ -1,3 +1,11 @@
+2007-03-07  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 4144
+	* elf.c (assign_file_positions_for_load_sections): Don't
+	adjust p_memsz for !SEC_LOAD section vma modulo page size.
+	Instead, use the same lma based adjustment for SEC_LOAD
+	sections.
+
 2007-03-01  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (analyze_relocations): Zero src_count if not relaxing.
