@@ -1,3 +1,10 @@
+2007-03-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/4144
+	* ld-elf/nobits-1.d: New file.
+	* ld-elf/nobits-1.s: Likewise.
+	* ld-elf/nobits-1.t: Likewise.
+
 2007-03-02  Richard Sandiford  <richard@codesourcery.com>
 
 	* ld-elf/binutils.exp: Revert last change.
