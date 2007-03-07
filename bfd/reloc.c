@@ -5155,7 +5155,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 	  if (symbol->section && elf_discarded_section (symbol->section))
 	    {
 	      bfd_byte *p;
-	      static const reloc_howto_type none_howto
+	      static reloc_howto_type none_howto
 		= HOWTO (0, 0, 0, 0, FALSE, 0, complain_overflow_dont, NULL,
 			 "unused", FALSE, 0, 0, FALSE);
 

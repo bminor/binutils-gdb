@@ -1,3 +1,8 @@
+2007-03-07  Kai Tietz   <kai.tietz@onevision.com>
+
+	* reloc.c (bfd_generic_get_relocated_section_contents): Remove
+	const for type reloc_howto_type.
+
 2007-03-07  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 3958
