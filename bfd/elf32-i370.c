@@ -1077,9 +1077,6 @@ i370_elf_relocate_section (bfd *output_bfd,
   bfd_vma *local_got_offsets;
   bfd_boolean ret = TRUE;
 
-  if (info->relocatable)
-    return TRUE;
-
 #ifdef DEBUG
   _bfd_error_handler ("i370_elf_relocate_section called for %B section %A, %ld relocations%s",
 		      input_bfd, input_section,
@@ -1122,6 +1119,7 @@ i370_elf_relocate_section (bfd *output_bfd,
 
       howto = i370_elf_howto_table[(int) r_type];
       r_symndx = ELF32_R_SYM (rel->r_info);
+      relocation = 0;
 
       if (r_symndx < symtab_hdr->sh_info)
 	{
@@ -1154,18 +1152,18 @@ i370_elf_relocate_section (bfd *output_bfd,
 		/* In these cases, we don't need the relocation
 		   value.  We check specially because in some
 		   obscure cases sec->output_section will be NULL.  */
-		relocation = 0;
+		;
 	      else
 		relocation = (h->root.u.def.value
 			      + sec->output_section->vma
 			      + sec->output_offset);
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
-	    relocation = 0;
+	    ;
 	  else if (info->unresolved_syms_in_objects == RM_IGNORE
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
-	    relocation = 0;
-	  else
+	    ;
+	  else if (!info->relocatable)
 	    {
 	      if ((*info->callbacks->undefined_symbol)
 		  (info, h->root.root.string, input_bfd,
@@ -1176,9 +1174,22 @@ i370_elf_relocate_section (bfd *output_bfd,
 		  ret = FALSE;
 		  continue;
 		}
-	      relocation = 0;
 	    }
 	}
+
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  Avoid any special processing.  */
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
+      if (info->relocatable)
+	continue;
 
       switch ((int) r_type)
 	{

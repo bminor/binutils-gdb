@@ -4323,11 +4323,6 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 						   input_section))
 	    return bfd_reloc_undefined;
 	}
-      else if (r_symndx == 0)
-	/* r_symndx will be zero only for relocs against symbols
-	   from removed linkonce sections, or sections discarded by
-	   a linker script.  */
-	value = 0;
       else
 	{
 	  if (r_type != R_MIPS_REL32)
@@ -7759,8 +7754,51 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       bfd_boolean rela_relocation_p = TRUE;
       unsigned int r_type = ELF_R_TYPE (output_bfd, rel->r_info);
       const char *msg;
+      unsigned long r_symndx;
+      asection *sec;
 
       /* Find the relocation howto for this relocation.  */
+      howto = MIPS_ELF_RTYPE_TO_HOWTO (input_bfd, r_type,
+				       NEWABI_P (input_bfd)
+				       && (MIPS_RELOC_RELA_P
+					   (input_bfd, input_section,
+					    rel - relocs)));
+
+      r_symndx = ELF_R_SYM (input_bfd, rel->r_info);
+      if (mips_elf_local_relocation_p (input_bfd, rel, local_sections, FALSE))
+	sec = local_sections[r_symndx];
+      else
+	{
+	  Elf_Internal_Shdr *symtab_hdr;
+	  unsigned long extsymoff;
+	  struct elf_link_hash_entry *h;
+
+	  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
+	  extsymoff = 0;
+	  if (!elf_bad_symtab (input_bfd))
+	    extsymoff = symtab_hdr->sh_info;
+	  h = elf_sym_hashes (input_bfd) [r_symndx - extsymoff];
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+	  sec = NULL;
+	  if (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
+	    sec = h->root.u.def.section;
+	}
+
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  Avoid any special processing.  */
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
       if (r_type == R_MIPS_64 && ! NEWABI_P (input_bfd))
 	{
 	  /* Some 32-bit code uses R_MIPS_64.  In particular, people use
@@ -7776,13 +7814,6 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  if (bfd_big_endian (input_bfd))
 	    rel->r_offset += 4;
 	}
-      else
-	/* NewABI defaults to RELA relocations.  */
-	howto = MIPS_ELF_RTYPE_TO_HOWTO (input_bfd, r_type,
-					 NEWABI_P (input_bfd)
-					 && (MIPS_RELOC_RELA_P
-					     (input_bfd, input_section,
-					      rel - relocs)));
 
       if (!use_saved_addend_p)
 	{

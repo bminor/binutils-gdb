@@ -1,5 +1,6 @@
 /* FRV-specific support for 32-bit ELF.
-   Copyright 2002, 2003, 2004, 2005, 2006  Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2004, 2005, 2006, 2007
+   Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -2722,9 +2723,6 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
   int silence_segment_error = !(info->shared || info->pie);
   unsigned long insn;
 
-  if (info->relocatable)
-    return TRUE;
-
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
   relend     = relocs + input_section->reloc_count;
@@ -2776,7 +2774,6 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 	  || r_type == R_FRV_GNU_VTENTRY)
 	continue;
 
-      /* This is a final link.  */
       r_symndx = ELF32_R_SYM (rel->r_info);
       howto  = elf32_frv_howto_table + ELF32_R_TYPE (rel->r_info);
       h      = NULL;
@@ -2795,50 +2792,38 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
       else
 	{
-	  h = sym_hashes [r_symndx - symtab_hdr->sh_info];
+	  bfd_boolean warned;
+	  bfd_boolean unresolved_reloc;
 
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-	  name = h->root.root.string;
-
-	  if ((h->root.type == bfd_link_hash_defined
-	       || h->root.type == bfd_link_hash_defweak))
-	    {
-	      if (/* TLSMOFF forces local binding.  */
-		  r_type != R_FRV_TLSMOFF
-		  && ! FRVFDPIC_SYM_LOCAL (info, h))
-		{
-		  sec = NULL;
-		  relocation = 0;
-		}
-	      else
-		{
-		  sec = h->root.u.def.section;
-		  relocation = (h->root.u.def.value
-				+ sec->output_section->vma
-				+ sec->output_offset);
-		}
-	    }
-	  else if (h->root.type == bfd_link_hash_undefweak)
-	    {
-	      relocation = 0;
-	    }
-	  else if (info->unresolved_syms_in_objects == RM_IGNORE
-		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
-	    relocation = 0;
-	  else
-	    {
-	      if (! ((*info->callbacks->undefined_symbol)
-		     (info, h->root.root.string, input_bfd,
-		      input_section, rel->r_offset,
-		      (info->unresolved_syms_in_objects == RM_GENERATE_ERROR
-		       || ELF_ST_VISIBILITY (h->other)))))
-		return FALSE;
-	      relocation = 0;
-	    }
+	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
+				   r_symndx, symtab_hdr, sym_hashes,
+				   h, sec, relocation,
+				   unresolved_reloc, warned);
 	  osec = sec;
+	}
+
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  Avoid any special processing.  */
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
+      if (info->relocatable)
+	continue;
+
+      if (r_type != R_FRV_TLSMOFF
+	  && h != NULL
+	  && (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
+	  && !FRVFDPIC_SYM_LOCAL (info, h))
+	{
+	  osec = sec = NULL;
+	  relocation = 0;
 	}
 
       switch (r_type)

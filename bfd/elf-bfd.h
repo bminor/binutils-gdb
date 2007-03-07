@@ -1,6 +1,6 @@
 /* BFD back-end data structures for ELF files.
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1213,13 +1213,6 @@ struct bfd_elf_section_data
 #define elf_next_in_group(sec) (elf_section_data(sec)->next_in_group)
 #define elf_sec_group(sec)	(elf_section_data(sec)->sec_group)
 
-/* Return TRUE if section has been discarded.  */
-#define elf_discarded_section(sec)				\
-  (!bfd_is_abs_section (sec)					\
-   && bfd_is_abs_section ((sec)->output_section)		\
-   && (sec)->sec_info_type != ELF_INFO_TYPE_MERGE		\
-   && (sec)->sec_info_type != ELF_INFO_TYPE_JUST_SYMS)
-
 #define xvec_get_elf_backend_data(xvec) \
   ((struct elf_backend_data *) (xvec)->backend_data)
 
@@ -2003,7 +1996,7 @@ extern bfd_boolean _sh_elf_set_mach_from_flags
       else if (info->unresolved_syms_in_objects == RM_IGNORE		\
 	       && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)		\
 	;								\
-      else								\
+      else if (!info->relocatable)					\
 	{								\
 	  bfd_boolean err;						\
 	  err = (info->unresolved_syms_in_objects == RM_GENERATE_ERROR	\

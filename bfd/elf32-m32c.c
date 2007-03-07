@@ -1,5 +1,5 @@
 /* M16C/M32C specific support for 32-bit ELF.
-   Copyright (C) 2005, 2006
+   Copyright (C) 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -372,31 +372,11 @@ m32c_elf_relocate_section
       
       r_symndx = ELF32_R_SYM (rel->r_info);
 
-      if (info->relocatable)
-	{
-	  /* This is a relocatable link.  We don't have to change
-             anything, unless the reloc is against a section symbol,
-             in which case we have to adjust according to where the
-             section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-	      
-	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sec = local_sections [r_symndx];
-		  rel->r_addend += sec->output_offset + sym->st_value;
-		}
-	    }
-
-	  continue;
-	}
-
-      /* This is a final link.  */
       howto  = m32c_elf_howto_table + ELF32_R_TYPE (rel->r_info);
       h      = NULL;
       sym    = NULL;
       sec    = NULL;
+      relocation = 0;
 
       if (r_symndx < symtab_hdr->sh_info)
 	{
@@ -429,17 +409,36 @@ m32c_elf_relocate_section
 			    + sec->output_offset);
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
-	    {
-	      relocation = 0;
-	    }
-	  else
+	    ;
+	  else if (!info->relocatable)
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd,
 		      input_section, rel->r_offset, TRUE)))
 		return FALSE;
-	      relocation = 0;
 	    }
+	}
+
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  Avoid any special processing.  */
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
+      if (info->relocatable)
+	{
+	  /* This is a relocatable link.  We don't have to change
+             anything, unless the reloc is against a section symbol,
+             in which case we have to adjust according to where the
+             section symbol winds up in the output section.  */
+	  if (sym != NULL && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+	    rel->r_addend += sec->output_offset;
+	  continue;
 	}
 
       switch (ELF32_R_TYPE (rel->r_info))

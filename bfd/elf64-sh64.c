@@ -1,5 +1,5 @@
 /* SuperH SH64-specific support for 64-bit ELF
-   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1487,10 +1487,10 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       howto = sh_elf64_howto_table + r_type;
 
-      /* This is a final link.  */
       h = NULL;
       sym = NULL;
       sec = NULL;
+      relocation = 0;
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  sym = local_syms + r_symndx;
@@ -1509,13 +1509,15 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      _("Unexpected STO_SH5_ISA32 on local symbol is not handled"),
 	      input_bfd, input_section, rel->r_offset));
 
-	  if (info->relocatable)
+	  if (sec != NULL && elf_discarded_section (sec))
+	    /* Handled below.  */
+	    ;
+	  else if (info->relocatable)
 	    {
 	      /* This is a relocatable link.  We don't have to change
 		 anything, unless the reloc is against a section symbol,
 		 in which case we have to adjust according to where the
 		 section symbol winds up in the output section.  */
-	      sym = local_syms + r_symndx;
 	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
 		goto final_link_relocate;
 
@@ -1553,12 +1555,6 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
       else
 	{
 	  /* ??? Could we use the RELOC_FOR_GLOBAL_SYMBOL macro here ?  */
-
-	  /* Section symbols are never (?) placed in the hash table, so
-	     we can just ignore hash relocations when creating a
-	     relocatable object file.  */
-	  if (info->relocatable)
-	    continue;
 
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	  while (h->root.type == bfd_link_hash_indirect
@@ -1619,19 +1615,8 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		  || (sec->output_section == NULL
 		      && ((input_section->flags & SEC_DEBUGGING) != 0
 			  && h->def_dynamic)))
-		relocation = 0;
-	      else if (sec->output_section == NULL)
-		{
-		  (*_bfd_error_handler)
-		    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
-		     input_bfd,
-		     input_section,
-		     (long) rel->r_offset,
-		     howto->name,
-		     h->root.root.string);
-		  relocation = 0;
-		}
-	      else
+		;
+	      else if (sec->output_section != NULL)
 		relocation = ((h->root.u.def.value
 			       + sec->output_section->vma
 			       + sec->output_offset)
@@ -1640,13 +1625,23 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 				 STT_DATALABEL on the way to it.  */
 			      | ((h->other & STO_SH5_ISA32) != 0
 				 && ! seen_stt_datalabel));
+	      else if (!info->relocatable)
+		{
+		  (*_bfd_error_handler)
+		    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
+		     input_bfd,
+		     input_section,
+		     (long) rel->r_offset,
+		     howto->name,
+		     h->root.root.string);
+		}
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
-	    relocation = 0;
+	    ;
 	  else if (info->unresolved_syms_in_objects == RM_IGNORE
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
-	    relocation = 0;
-	  else
+	    ;
+	  else if (!info->relocatable)
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd,
@@ -1654,9 +1649,22 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		      (info->unresolved_syms_in_objects == RM_GENERATE_ERROR
 		       || ELF_ST_VISIBILITY (h->other)))))
 		return FALSE;
-	      relocation = 0;
 	    }
 	}
+
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  Avoid any special processing.  */
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
+      if (info->relocatable)
+	continue;
 
       disp = (relocation
 	      - input_section->output_section->vma

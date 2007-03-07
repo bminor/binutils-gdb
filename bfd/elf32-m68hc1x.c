@@ -1,5 +1,5 @@
 /* Motorola 68HC11/HC12-specific support for 32-bit ELF
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
    Contributed by Stephane Carrez (stcarrez@nerim.fr)
 
@@ -873,86 +873,6 @@ elf32_m68hc11_check_relocs (bfd *abfd, struct bfd_link_info *info,
   return TRUE;
 }
 
-static bfd_boolean
-m68hc11_get_relocation_value (bfd *input_bfd, struct bfd_link_info *info,
-			      asection *input_section,
-                              asection **local_sections,
-                              Elf_Internal_Sym *local_syms,
-                              Elf_Internal_Rela *rel,
-                              const char **name,
-                              bfd_vma *relocation, bfd_boolean *is_far)
-{
-  Elf_Internal_Shdr *symtab_hdr;
-  struct elf_link_hash_entry **sym_hashes;
-  unsigned long r_symndx;
-  asection *sec;
-  struct elf_link_hash_entry *h;
-  Elf_Internal_Sym *sym;
-  const char* stub_name = 0;
-
-  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
-  sym_hashes = elf_sym_hashes (input_bfd);
-
-  r_symndx = ELF32_R_SYM (rel->r_info);
-
-  /* This is a final link.  */
-  h = NULL;
-  sym = NULL;
-  sec = NULL;
-  if (r_symndx < symtab_hdr->sh_info)
-    {
-      sym = local_syms + r_symndx;
-      sec = local_sections[r_symndx];
-      *relocation = (sec->output_section->vma
-                     + sec->output_offset
-                     + sym->st_value);
-      *is_far = (sym && (sym->st_other & STO_M68HC12_FAR));
-      if (*is_far)
-        stub_name = (bfd_elf_string_from_elf_section
-                     (input_bfd, symtab_hdr->sh_link,
-                      sym->st_name));
-    }
-  else
-    {
-      bfd_boolean unresolved_reloc, warned;
-
-      RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
-			       r_symndx, symtab_hdr, sym_hashes,
-			       h, sec, *relocation, unresolved_reloc, warned);
-
-      *is_far = (h && (h->other & STO_M68HC12_FAR));
-      stub_name = h->root.root.string;
-    }
-
-  if (h != NULL)
-    *name = h->root.root.string;
-  else
-    {
-      *name = (bfd_elf_string_from_elf_section
-               (input_bfd, symtab_hdr->sh_link, sym->st_name));
-      if (*name == NULL || **name == '\0')
-        *name = bfd_section_name (input_bfd, sec);
-    }
-
-  if (*is_far && ELF32_R_TYPE (rel->r_info) == R_M68HC11_16)
-    {
-      struct elf32_m68hc11_stub_hash_entry* stub;
-      struct m68hc11_elf_link_hash_table *htab;
-
-      htab = m68hc11_elf_hash_table (info);
-      stub = m68hc12_stub_hash_lookup (htab->stub_hash_table,
-                                       *name, FALSE, FALSE);
-      if (stub)
-        {
-          *relocation = stub->stub_offset
-            + stub->stub_sec->output_section->vma
-            + stub->stub_sec->output_offset;
-          *is_far = FALSE;
-        }
-    }
-  return TRUE;
-}
-
 /* Relocate a 68hc11/68hc12 ELF section.  */
 bfd_boolean
 elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
@@ -993,6 +913,8 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
       bfd_vma insn_addr;
       bfd_vma insn_page;
       bfd_boolean is_far = FALSE;
+      struct elf_link_hash_entry *h;
+      const char* stub_name = 0;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
@@ -1001,30 +923,86 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
           || r_type == R_M68HC11_GNU_VTINHERIT )
         continue;
 
+      (*ebd->elf_info_to_howto_rel) (input_bfd, &arel, rel);
+      howto = arel.howto;
+
+      h = NULL;
+      sym = NULL;
+      sec = NULL;
+      if (r_symndx < symtab_hdr->sh_info)
+	{
+	  sym = local_syms + r_symndx;
+	  sec = local_sections[r_symndx];
+	  relocation = (sec->output_section->vma
+			+ sec->output_offset
+			+ sym->st_value);
+	  is_far = (sym && (sym->st_other & STO_M68HC12_FAR));
+	  if (is_far)
+	    stub_name = (bfd_elf_string_from_elf_section
+			 (input_bfd, symtab_hdr->sh_link,
+			  sym->st_name));
+	}
+      else
+	{
+	  bfd_boolean unresolved_reloc, warned;
+
+	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
+				   r_symndx, symtab_hdr, sym_hashes,
+				   h, sec, relocation, unresolved_reloc,
+				   warned);
+
+	  is_far = (h && (h->other & STO_M68HC12_FAR));
+	  stub_name = h->root.root.string;
+	}
+
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  Avoid any special processing.  */
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
       if (info->relocatable)
 	{
 	  /* This is a relocatable link.  We don't have to change
 	     anything, unless the reloc is against a section symbol,
 	     in which case we have to adjust according to where the
 	     section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sec = local_sections[r_symndx];
-		  rel->r_addend += sec->output_offset + sym->st_value;
-		}
-	    }
-
+	  if (sym != NULL && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+	    rel->r_addend += sec->output_offset;
 	  continue;
 	}
-      (*ebd->elf_info_to_howto_rel) (input_bfd, &arel, rel);
-      howto = arel.howto;
 
-      m68hc11_get_relocation_value (input_bfd, info, input_section, 
-				    local_sections, local_syms,
-                                    rel, &name, &relocation, &is_far);
+      if (h != NULL)
+	name = h->root.root.string;
+      else
+	{
+	  name = (bfd_elf_string_from_elf_section
+		  (input_bfd, symtab_hdr->sh_link, sym->st_name));
+	  if (name == NULL || *name == '\0')
+	    name = bfd_section_name (input_bfd, sec);
+	}
+
+      if (is_far && ELF32_R_TYPE (rel->r_info) == R_M68HC11_16)
+	{
+	  struct elf32_m68hc11_stub_hash_entry* stub;
+	  struct m68hc11_elf_link_hash_table *htab;
+
+	  htab = m68hc11_elf_hash_table (info);
+	  stub = m68hc12_stub_hash_lookup (htab->stub_hash_table,
+					   name, FALSE, FALSE);
+	  if (stub)
+	    {
+	      relocation = stub->stub_offset
+		+ stub->stub_sec->output_section->vma
+		+ stub->stub_sec->output_offset;
+	      is_far = FALSE;
+	    }
+	}
 
       /* Do the memory bank mapping.  */
       phys_addr = m68hc11_phys_addr (pinfo, relocation + rel->r_addend);

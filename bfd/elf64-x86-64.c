@@ -1,5 +1,5 @@
 /* X86-64 specific support for 64-bit ELF
-   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
    Contributed by Jan Hubicka <jh@suse.cz>.
 
@@ -2062,9 +2062,6 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
 
-  if (info->relocatable)
-    return TRUE;
-
   htab = elf64_x86_64_hash_table (info);
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
@@ -2120,6 +2117,21 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 				   h, sec, relocation,
 				   unresolved_reloc, warned);
 	}
+
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  Avoid any special processing.  */
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
+      if (info->relocatable)
+	continue;
+
       /* When generating a shared object, the relocations handled here are
 	 copied into the output file to be resolved at run time.  */
       switch (r_type)
@@ -2366,15 +2378,6 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	case R_X86_64_64:
 	  /* FIXME: The ABI says the linker should make sure the value is
 	     the same when it's zeroextended to 64 bit.	 */
-
-	  /* r_symndx will be zero only for relocs against symbols
-	     from removed linkonce sections, or sections discarded by
-	     a linker script.  */
-	  if (r_symndx == 0)
-	    {
-	      _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
-	      break;
-	    }
 
 	  if ((input_section->flags & SEC_ALLOC) == 0)
 	    break;

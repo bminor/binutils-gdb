@@ -1,5 +1,5 @@
 /* SPARC-specific support for ELF
-   Copyright 2005, 2006 Free Software Foundation, Inc.
+   Copyright 2005, 2006, 2007 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -2471,10 +2471,14 @@ tpoff (struct bfd_link_info *info, bfd_vma address)
 /* Relocate a SPARC ELF section.  */
 
 bfd_boolean
-_bfd_sparc_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
-				 bfd *input_bfd, asection *input_section,
-				 bfd_byte *contents, Elf_Internal_Rela *relocs,
-				 Elf_Internal_Sym *local_syms, asection **local_sections)
+_bfd_sparc_elf_relocate_section (bfd *output_bfd,
+				 struct bfd_link_info *info,
+				 bfd *input_bfd,
+				 asection *input_section,
+				 bfd_byte *contents,
+				 Elf_Internal_Rela *relocs,
+				 Elf_Internal_Sym *local_syms,
+				 asection **local_sections)
 {
   struct _bfd_sparc_elf_link_hash_table *htab;
   Elf_Internal_Shdr *symtab_hdr;
@@ -2485,9 +2489,6 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
   int num_relocs;
-
-  if (info->relocatable)
-    return TRUE;
 
   htab = _bfd_sparc_elf_hash_table (info);
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
@@ -2532,7 +2533,6 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	}
       howto = _bfd_sparc_elf_howto_table + r_type;
 
-      /* This is a final link.  */
       r_symndx = SPARC_ELF_R_SYMNDX (htab, rel->r_info);
       h = NULL;
       sym = NULL;
@@ -2563,6 +2563,21 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		relocation = 0;
 	    }
 	}
+
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce
+	     sections, or sections discarded by a linker script, we
+	     just want the section contents zeroed.  Avoid any
+	     special processing.  */
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
+      if (info->relocatable)
+	continue;
 
       switch (r_type)
 	{
@@ -2752,15 +2767,6 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	case R_SPARC_L44:
 	case R_SPARC_UA64:
 	r_sparc_plt32:
-	  /* r_symndx will be zero only for relocs against symbols
-	     from removed linkonce sections, or sections discarded by
-	     a linker script.  */
-	  if (r_symndx == 0)
-	    {
-	      _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
-	      break;
-	    }
-
 	  if ((input_section->flags & SEC_ALLOC) == 0)
 	    break;
 

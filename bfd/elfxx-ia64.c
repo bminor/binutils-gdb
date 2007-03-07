@@ -1,5 +1,5 @@
 /* IA-64 support for 64-bit ELF
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
@@ -4557,7 +4557,6 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 
       elf_section_data(input_section->output_section)
 	->this_hdr.sh_flags |= flags;
-      return TRUE;
     }
 
   gp_val = _bfd_get_gp_value (output_bfd);
@@ -4606,7 +4605,8 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	  sym_sec = local_sections[r_symndx];
 	  msec = sym_sec;
 	  value = _bfd_elf_rela_local_sym (output_bfd, sym, &msec, rel);
-	  if ((sym_sec->flags & SEC_MERGE)
+	  if (!info->relocatable
+	      && (sym_sec->flags & SEC_MERGE) != 0
 	      && ELF_ST_TYPE (sym->st_info) == STT_SECTION
 	      && sym_sec->sec_info_type == ELF_INFO_TYPE_MERGE)
  	    {
@@ -4659,6 +4659,20 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	  else if (warned)
 	    continue;
 	}
+
+      /* For relocs against symbols from removed linkonce sections,
+	 or sections discarded by a linker script, we just want the
+	 section contents zeroed.  Avoid any special processing.  */
+      if (sym_sec != NULL && elf_discarded_section (sym_sec))
+	{
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
+      if (info->relocatable)
+	continue;
 
       hit_addr = contents + rel->r_offset;
       value += rel->r_addend;
@@ -4751,12 +4765,6 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_IA64_LTV32LSB:
 	case R_IA64_LTV64MSB:
 	case R_IA64_LTV64LSB:
-	  /* r_symndx will be zero only for relocs against symbols
-	     from removed linkonce sections, or sections discarded by
-	     a linker script.  */
-	  if (r_symndx == 0)
-	    value = 0;
-
 	  r = elfNN_ia64_install_value (hit_addr, value, r_type);
 	  break;
 
@@ -4997,13 +5005,6 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_IA64_SEGREL32LSB:
 	case R_IA64_SEGREL64MSB:
 	case R_IA64_SEGREL64LSB:
-	  if (r_symndx == 0)
-	    {
-	      /* If the input section was discarded from the output, then
-		 do nothing.  */
-	      r = bfd_reloc_ok;
-	    }
-	  else
 	    {
 	      struct elf_segment_map *m;
 	      Elf_Internal_Phdr *p;

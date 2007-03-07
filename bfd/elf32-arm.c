@@ -1,5 +1,5 @@
 /* 32-bit ELF support for ARM
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -4524,15 +4524,6 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
     case R_ARM_XPC25:
     case R_ARM_PREL31:
     case R_ARM_PLT32:
-      /* r_symndx will be zero only for relocs against symbols
-	 from removed linkonce sections, or sections discarded by
-	 a linker script.  */
-      if (r_symndx == 0)
-	{
-	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
-	  return bfd_reloc_ok;
-	}
-
       /* Handle relocations which should use the PLT entry.  ABS32/REL32
 	 will use the symbol's value, which may point to a PLT entry, but we
 	 don't need to handle that here.  If we created a PLT entry, all
@@ -6501,8 +6492,6 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
   struct elf32_arm_link_hash_table * globals;
 
   globals = elf32_arm_hash_table (info);
-  if (info->relocatable && !globals->use_rel)
-    return TRUE;
 
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
@@ -6535,29 +6524,6 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
       bfd_reloc.howto = elf32_arm_howto_from_type (r_type);
       howto = bfd_reloc.howto;
 
-      if (info->relocatable && globals->use_rel)
-	{
-	  /* This is a relocatable link.  We don't have to change
-	     anything, unless the reloc is against a section symbol,
-	     in which case we have to adjust according to where the
-	     section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sec = local_sections[r_symndx];
-		  arm_add_to_rel (input_bfd, contents + rel->r_offset,
-				  howto,
-				  (bfd_signed_vma) (sec->output_offset
-						    + sym->st_value));
-		}
-	    }
-
-	  continue;
-	}
-
-      /* This is a final link.  */
       h = NULL;
       sym = NULL;
       sec = NULL;
@@ -6572,8 +6538,9 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 	      relocation = (sec->output_section->vma
 			    + sec->output_offset
 			    + sym->st_value);
-	      if ((sec->flags & SEC_MERGE)
-		       && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+	      if (!info->relocatable
+		  && (sec->flags & SEC_MERGE)
+		  && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
 		{
 		  asection *msec;
 		  bfd_vma addend, value;
@@ -6621,6 +6588,34 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 				   unresolved_reloc, warned);
 
 	  sym_type = h->type;
+	}
+
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  Avoid any special processing.  */
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
+      if (info->relocatable)
+	{
+	  /* This is a relocatable link.  We don't have to change
+	     anything, unless the reloc is against a section symbol,
+	     in which case we have to adjust according to where the
+	     section symbol winds up in the output section.  */
+	  if (sym != NULL && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+	    {
+	      if (globals->use_rel)
+		arm_add_to_rel (input_bfd, contents + rel->r_offset,
+				howto, (bfd_signed_vma) sec->output_offset);
+	      else
+		rel->r_addend += sec->output_offset;
+	    }
+	  continue;
 	}
 
       if (h != NULL)
@@ -10613,7 +10608,6 @@ const struct elf_size_info elf32_arm_size_info = {
 #define elf_backend_may_use_rel_p   1
 #define elf_backend_may_use_rela_p  0
 #define elf_backend_default_use_rela_p 0
-#define elf_backend_rela_normal     0
 
 #define elf_backend_got_header_size	12
 
@@ -10677,8 +10671,6 @@ elf32_arm_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
 #define elf_backend_may_use_rela_p	1
 #undef elf_backend_default_use_rela_p
 #define elf_backend_default_use_rela_p	1
-#undef elf_backend_rela_normal
-#define elf_backend_rela_normal		1
 #undef elf_backend_want_plt_sym
 #define elf_backend_want_plt_sym	1
 #undef ELF_MAXPAGESIZE
@@ -10831,8 +10823,6 @@ elf32_arm_symbian_modify_segment_map (bfd *abfd,
 #define elf_backend_may_use_rela_p	0
 #undef elf_backend_default_use_rela_p
 #define elf_backend_default_use_rela_p	0
-#undef elf_backend_rela_normal
-#define elf_backend_rela_normal		0
 #undef elf_backend_want_plt_sym
 #define elf_backend_want_plt_sym	0
 #undef ELF_MAXPAGESIZE

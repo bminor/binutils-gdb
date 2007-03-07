@@ -1,5 +1,5 @@
 /* Morpho Technologies MT specific support for 32-bit ELF
-   Copyright 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -309,7 +309,6 @@ mt_elf_relocate_section
 
       r_symndx = ELF32_R_SYM (rel->r_info);
 
-      /* This is a final link.  */
       howto  = mt_elf_howto_table + ELF32_R_TYPE (rel->r_info);
       h      = NULL;
       sym    = NULL;
@@ -338,6 +337,19 @@ mt_elf_relocate_section
 	  name = h->root.root.string;
 	}
 
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  Avoid any special processing.  */
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
+      if (info->relocatable)
+	continue;
 
       /* Finally, the sole MT-specific part.  */
       switch (r_type)

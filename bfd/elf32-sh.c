@@ -1,6 +1,6 @@
 /* Renesas / SuperH SH specific support for 32-bit ELF
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006 Free Software Foundation, Inc.
+   2006, 2007 Free Software Foundation, Inc.
    Contributed by Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -3240,13 +3240,16 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	     (info,
 	      _("Unexpected STO_SH5_ISA32 on local symbol is not handled"),
 	      input_bfd, input_section, rel->r_offset));
-	  if (info->relocatable)
+
+	  if (sec != NULL && elf_discarded_section (sec))
+	    /* Handled below.  */
+	    ;
+	  else if (info->relocatable)
 	    {
 	      /* This is a relocatable link.  We don't have to change
 		 anything, unless the reloc is against a section symbol,
 		 in which case we have to adjust according to where the
 		 section symbol winds up in the output section.  */
-	      sym = local_syms + r_symndx;
 	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
 		{
 		  if (! howto->partial_inplace)
@@ -3255,7 +3258,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			 relocation, we need just to update the addend.
 			 All real relocs are of type partial_inplace; this
 			 code is mostly for completeness.  */
-		      rel->r_addend += sec->output_offset + sym->st_value;
+		      rel->r_addend += sec->output_offset;
 
 		      continue;
 		    }
@@ -3310,12 +3313,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	{
 	  /* FIXME: Ought to make use of the RELOC_FOR_GLOBAL_SYMBOL macro.  */
 
-	  /* Section symbol are never (?) placed in the hash table, so
-	     we can just ignore hash relocations when creating a
-	     relocatable object file.  */
-	  if (info->relocatable)
-	    continue;
-
+	  relocation = 0;
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
@@ -3386,8 +3384,17 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  || (sec->output_section == NULL
 		      && (sh_elf_hash_entry (h)->tls_type == GOT_TLS_IE
 			  || sh_elf_hash_entry (h)->tls_type == GOT_TLS_GD)))
-		relocation = 0;
-	      else if (sec->output_section == NULL)
+		;
+	      else if (sec->output_section != NULL)
+		relocation = ((h->root.u.def.value
+			      + sec->output_section->vma
+			      + sec->output_offset)
+			      /* A STO_SH5_ISA32 causes a "bitor 1" to the
+				 symbol value, unless we've seen
+				 STT_DATALABEL on the way to it.  */
+			      | ((h->other & STO_SH5_ISA32) != 0
+				 && ! seen_stt_datalabel));
+	      else if (!info->relocatable)
 		{
 		  (*_bfd_error_handler)
 		    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
@@ -3398,22 +3405,13 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		     h->root.root.string);
 		  return FALSE;
 		}
-	      else
-		relocation = ((h->root.u.def.value
-			      + sec->output_section->vma
-			      + sec->output_offset)
-			      /* A STO_SH5_ISA32 causes a "bitor 1" to the
-				 symbol value, unless we've seen
-				 STT_DATALABEL on the way to it.  */
-			      | ((h->other & STO_SH5_ISA32) != 0
-				 && ! seen_stt_datalabel));
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
-	    relocation = 0;
+	    ;
 	  else if (info->unresolved_syms_in_objects == RM_IGNORE
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
-	    relocation = 0;
-	  else
+	    ;
+	  else if (!info->relocatable)
 	    {
 	      if (! info->callbacks->undefined_symbol
 		  (info, h->root.root.string, input_bfd,
@@ -3421,9 +3419,22 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		   (info->unresolved_syms_in_objects == RM_GENERATE_ERROR
 		    || ELF_ST_VISIBILITY (h->other))))
 		return FALSE;
-	      relocation = 0;
 	    }
 	}
+
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  Avoid any special processing.  */
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
+      if (info->relocatable)
+	continue;
 
       switch ((int) r_type)
 	{
@@ -3557,15 +3568,6 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	case R_SH_IMM_MEDHI16_PCREL:
 	case R_SH_IMM_HI16_PCREL:
 #endif
-	  /* r_symndx will be zero only for relocs against symbols
-	     from removed linkonce sections, or sections discarded by
-	     a linker script.  */
-	  if (r_symndx == 0)
-	    {
-	      _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
-	      continue;
-	    }
-
 	  if (info->shared
 	      && (h == NULL
 		  || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT

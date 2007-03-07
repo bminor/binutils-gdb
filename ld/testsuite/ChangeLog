@@ -1,3 +1,14 @@
+2007-03-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 3958
+	* ld-elf/linkonce1.d: New.
+	* ld-elf/linkonce1a.s: New.
+	* ld-elf/linkonce1b.s: New.
+	* ld-elf/linkonce2.d: New.
+	* ld-i386/pcrel16abs.d: New.
+	* ld-i386/pcrel16abs.s: New.
+	* ld-i386/i386.exp: Run it.
+
 2007-03-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/4144

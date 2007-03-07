@@ -1,5 +1,5 @@
 /* MeP-specific support for 32-bit ELF.
-   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -499,28 +499,8 @@ mep_elf_relocate_section
 
       r_symndx = ELF32_R_SYM (rel->r_info);
 
-      if (info->relocatable)
-	{
-	  /* This is a relocatable link.  We don't have to change
-             anything, unless the reloc is against a section symbol,
-             in which case we have to adjust according to where the
-             section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-
-	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sec = local_sections [r_symndx];
-		  rel->r_addend += sec->output_offset + sym->st_value;
-		}
-	    }
-
-	  continue;
-	}
-
       /* Is this a complex relocation?  */
-      if (ELF32_R_TYPE (rel->r_info) == R_RELC)
+      if (!info->relocatable && ELF32_R_TYPE (rel->r_info) == R_RELC)
 	{
 	  bfd_elf_perform_complex_relocation (output_bfd, info,
 					      input_bfd, input_section, contents,
@@ -528,7 +508,6 @@ mep_elf_relocate_section
 	  continue;
 	}
 
-      /* This is a final link.  */
       howto  = mep_elf_howto_table + ELF32_R_TYPE (rel->r_info);
       h      = NULL;
       sym    = NULL;
@@ -552,6 +531,7 @@ mep_elf_relocate_section
 	}
       else
 	{
+	  relocation = 0;
 	  h = sym_hashes [r_symndx];
 
 	  while (h->root.type == bfd_link_hash_indirect
@@ -580,9 +560,8 @@ mep_elf_relocate_section
 	      fprintf (stderr, "undefined: sec: %s, name: %s\n",
 		       sec->name, name);
 #endif
-	      relocation = 0;
 	    }
-	  else
+	  else if (!info->relocatable)
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd,
@@ -592,8 +571,29 @@ mep_elf_relocate_section
 #if 0
 	      fprintf (stderr, "unknown: name: %s\n", name);
 #endif
-	      relocation = 0;
 	    }
+	}
+
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  Avoid any special processing.  */
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
+      if (info->relocatable)
+	{
+	  /* This is a relocatable link.  We don't have to change
+             anything, unless the reloc is against a section symbol,
+             in which case we have to adjust according to where the
+             section symbol winds up in the output section.  */
+	  if (sym != NULL && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+	    rel->r_addend += sec->output_offset;
+	  continue;
 	}
 
       switch (r_type)

@@ -1,5 +1,5 @@
 /* CRIS-specific support for 32-bit ELF.
-   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
    Contributed by Axis Communications AB.
    Written by Hans-Peter Nilsson, based on elf32-fr30.c
@@ -927,9 +927,6 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
 
-  if (info->relocatable)
-    return TRUE;
-
   dynobj = elf_hash_table (info)->dynobj;
   local_got_offsets = elf_local_got_offsets (input_bfd);
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
@@ -964,7 +961,6 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  || r_type == R_CRIS_GNU_VTENTRY)
 	continue;
 
-      /* This is a final link.  */
       r_symndx = ELF32_R_SYM (rel->r_info);
       howto  = cris_elf_howto_table + r_type;
       h      = NULL;
@@ -1042,7 +1038,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		      || r_type == R_CRIS_16_PCREL
 		      || r_type == R_CRIS_32_PCREL))
 		relocation = 0;
-	      else if (unresolved_reloc)
+	      else if (!info->relocatable && unresolved_reloc)
 		{
 		  _bfd_error_handler
 		    (_("%B, section %A: unresolvable relocation %s against symbol `%s'"),
@@ -1055,6 +1051,20 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		}
 	    }
 	}
+
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  Avoid any special processing.  */
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
+      if (info->relocatable)
+	continue;
 
       switch (r_type)
 	{

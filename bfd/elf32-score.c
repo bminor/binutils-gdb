@@ -1,5 +1,5 @@
 /* 32-bit ELF support for S+core.
-   Copyright 2006 Free Software Foundation, Inc.
+   Copyright 2006, 2007 Free Software Foundation, Inc.
    Contributed by
    Mei Ligang (ligang@sunnorth.com.cn)
    Pei-Lin Tsai (pltsai@sunplus.com)
@@ -2006,11 +2006,6 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
 						    input_section))
 	    return bfd_reloc_undefined;
 	}
-      else if (r_symndx == 0)
-        /* r_symndx will be zero only for relocs against symbols
-           from removed linkonce sections, or sections discarded by
-           a linker script.  */
-        value = 0;
       else
 	{
 	  if (r_type != R_SCORE_REL32)
@@ -2213,11 +2208,6 @@ _bfd_score_elf_relocate_section (bfd *output_bfd,
   size_t extsymoff;
   bfd_boolean gp_disp_p = FALSE;
 
-#ifndef USE_REL
-  if (info->relocatable)
-    return TRUE;
-#endif
-
   /* Sort dynsym.  */
   if (elf_hash_table (info)->dynamic_sections_created)
     {
@@ -2261,26 +2251,6 @@ _bfd_score_elf_relocate_section (bfd *output_bfd,
       _bfd_score_info_to_howto (input_bfd, &bfd_reloc, (Elf_Internal_Rela *) rel);
       howto = bfd_reloc.howto;
 
-      if (info->relocatable)
-        {
-          /* This is a relocatable link.  We don't have to change
-             anything, unless the reloc is against a section symbol,
-             in which case we have to adjust according to where the
-             section symbol winds up in the output section.  */
-          if (r_symndx < symtab_hdr->sh_info)
-            {
-              sym = local_syms + r_symndx;
-              if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-                {
-                  sec = local_sections[r_symndx];
-                  score_elf_add_to_rel (input_bfd, contents + rel->r_offset,
-                                    howto, (bfd_signed_vma) (sec->output_offset + sym->st_value));
-                }
-            }
-          continue;
-        }
-
-      /* This is a final link.  */
       h = NULL;
       sym = NULL;
       sec = NULL;
@@ -2294,7 +2264,8 @@ _bfd_score_elf_relocate_section (bfd *output_bfd,
 			+ sym->st_value);
           name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym, sec);
 
-          if ((sec->flags & SEC_MERGE)
+          if (!info->relocatable
+	      && (sec->flags & SEC_MERGE) != 0
 	      && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
             {
               asection *msec;
@@ -2416,7 +2387,7 @@ _bfd_score_elf_relocate_section (bfd *output_bfd,
 	      BFD_ASSERT (bfd_get_section_by_name (output_bfd, ".dynamic") == NULL);
 	      relocation = 0;
 	    }
-	  else
+	  else if (!info->relocatable)
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.root.string, input_bfd,
@@ -2426,6 +2397,29 @@ _bfd_score_elf_relocate_section (bfd *output_bfd,
 		return bfd_reloc_undefined;
 	      relocation = 0;
 	    }
+        }
+
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  Avoid any special processing.  */
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
+      if (info->relocatable)
+        {
+          /* This is a relocatable link.  We don't have to change
+             anything, unless the reloc is against a section symbol,
+             in which case we have to adjust according to where the
+             section symbol winds up in the output section.  */
+          if (sym != NULL && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+	    score_elf_add_to_rel (input_bfd, contents + rel->r_offset,
+				  howto, (bfd_signed_vma) sec->output_offset);
+          continue;
         }
 
       r = score_elf_final_link_relocate (howto, input_bfd, output_bfd,

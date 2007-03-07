@@ -1,7 +1,7 @@
 /* Main header file for the bfd library -- portable access to object files.
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
@@ -349,6 +349,13 @@ typedef struct bfd_section *sec_ptr;
 #define bfd_get_section_limit(bfd, sec) \
   (((sec)->rawsize ? (sec)->rawsize : (sec)->size) \
    / bfd_octets_per_byte (bfd))
+
+/* Return TRUE if section has been discarded.  */
+#define elf_discarded_section(sec)				\
+  (!bfd_is_abs_section (sec)					\
+   && bfd_is_abs_section ((sec)->output_section)		\
+   && (sec)->sec_info_type != ELF_INFO_TYPE_MERGE		\
+   && (sec)->sec_info_type != ELF_INFO_TYPE_JUST_SYMS)
 
 /* Forward define.  */
 struct stat;

@@ -1,5 +1,5 @@
 /*  MSP430-specific support for 32-bit ELF
-    Copyright (C) 2002, 2003, 2004, 2005, 2006
+    Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007
     Free Software Foundation, Inc.
     Contributed by Dmitry Diky <diwil@mail.ru>
 
@@ -413,8 +413,6 @@ elf32_msp430_relocate_section (bfd * output_bfd ATTRIBUTE_UNUSED,
       const char *name = NULL;
       int r_type;
 
-      /* This is a final link.  */
-
       r_type = ELF32_R_TYPE (rel->r_info);
       r_symndx = ELF32_R_SYM (rel->r_info);
       howto = elf_msp430_howto_table + ELF32_R_TYPE (rel->r_info);
@@ -441,6 +439,20 @@ elf32_msp430_relocate_section (bfd * output_bfd ATTRIBUTE_UNUSED,
 				   h, sec, relocation,
 				   unresolved_reloc, warned);
 	}
+
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  Avoid any special processing.  */
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
+      if (info->relocatable)
+	continue;
 
       r = msp430_final_link_relocate (howto, input_bfd, input_section,
 				      contents, rel, relocation);

@@ -1,6 +1,6 @@
 /* BFD back-end for Renesas H8/300 ELF binaries.
-   Copyright 1993, 1995, 1998, 1999, 2001, 2002, 2003, 2004, 2005, 2006
-   Free Software Foundation, Inc.
+   Copyright 1993, 1995, 1998, 1999, 2001, 2002, 2003, 2004, 2005, 2006,
+   2007 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -402,9 +402,6 @@ elf32_h8_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
   struct elf_link_hash_entry **sym_hashes;
   Elf_Internal_Rela *rel, *relend;
 
-  if (info->relocatable)
-    return TRUE;
-
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
 
@@ -419,8 +416,12 @@ elf32_h8_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       struct elf_link_hash_entry *h;
       bfd_vma relocation;
       bfd_reloc_status_type r;
+      arelent bfd_reloc;
+      reloc_howto_type *howto;
 
-      /* This is a final link.  */
+      elf32_h8_info_to_howto (input_bfd, &bfd_reloc, rel);
+      howto = bfd_reloc.howto;
+
       r_symndx = ELF32_R_SYM (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
       h = NULL;
@@ -442,6 +443,20 @@ elf32_h8_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 				   unresolved_reloc, warned);
 	}
 
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  Avoid any special processing.  */
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
+      if (info->relocatable)
+	continue;
+
       r = elf32_h8_final_link_relocate (r_type, input_bfd, output_bfd,
 					input_section,
 					contents, rel->r_offset,
@@ -452,11 +467,6 @@ elf32_h8_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	{
 	  const char *name;
 	  const char *msg = (const char *) 0;
-	  arelent bfd_reloc;
-	  reloc_howto_type *howto;
-
-	  elf32_h8_info_to_howto (input_bfd, &bfd_reloc, rel);
-	  howto = bfd_reloc.howto;
 
 	  if (h != NULL)
 	    name = h->root.root.string;

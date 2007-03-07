@@ -8394,16 +8394,6 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 			      continue;
 			    }
 			}
-
-		      /* Remove the symbol reference from the reloc, but
-			 don't kill the reloc completely.  This is so that
-			 a zero value will be written into the section,
-			 which may have non-zero contents put there by the
-			 assembler.  Zero in things like an eh_frame fde
-			 pc_begin allows stack unwinders to recognize the
-			 fde as bogus.  */
-		      rel->r_info &= r_type_mask;
-		      rel->r_addend = 0;
 		    }
 		}
 	    }
@@ -8557,8 +8547,10 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 
 			  /* If we have discarded a section, the output
 			     section will be the absolute section.  In
-			     case of discarded link-once and discarded
-			     SEC_MERGE sections, use the kept section.  */
+			     case of discarded SEC_MERGE sections, use
+			     the kept section.  relocate_section should
+			     have already handled discarded linkonce
+			     sections.  */
 			  if (bfd_is_abs_section (osec)
 			      && sec->kept_section != NULL
 			      && sec->kept_section->output_section != NULL)

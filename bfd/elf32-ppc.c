@@ -1,6 +1,6 @@
 /* PowerPC-specific support for 32-bit ELF
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -5564,29 +5564,6 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
   got2 = bfd_get_section_by_name (input_bfd, ".got2");
 
-  if (info->relocatable)
-    {
-      if (got2 == NULL)
-	return TRUE;
-
-      rel = relocs;
-      relend = relocs + input_section->reloc_count;
-      for (; rel < relend; rel++)
-	{
-	  enum elf_ppc_reloc_type r_type;
-
-	  r_type = ELF32_R_TYPE (rel->r_info);
-	  if (r_type == R_PPC_PLTREL24
-	      && rel->r_addend >= 32768)
-	    {
-	      /* R_PPC_PLTREL24 is rather special.  If non-zero, the
-		 addend specifies the GOT pointer offset within .got2.  */
-	      rel->r_addend += got2->output_offset;
-	    }
-	}
-      return TRUE;
-    }
-
   /* Initialize howto table if not already done.  */
   if (!ppc_elf_howto_table[R_PPC_ADDR32])
     ppc_elf_howto_init ();
@@ -5638,6 +5615,33 @@ ppc_elf_relocate_section (bfd *output_bfd,
 				   unresolved_reloc, warned);
 
 	  sym_name = h->root.root.string;
+	}
+
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  Avoid any special processing.  */
+	  howto = NULL;
+	  if (r_type < R_PPC_max)
+	    howto = ppc_elf_howto_table[r_type];
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
+      if (info->relocatable)
+	{
+	  if (got2 != NULL
+	      && r_type == R_PPC_PLTREL24
+	      && rel->r_addend >= 32768)
+	    {
+	      /* R_PPC_PLTREL24 is rather special.  If non-zero, the
+		 addend specifies the GOT pointer offset within .got2.  */
+	      rel->r_addend += got2->output_offset;
+	    }
+	  continue;
 	}
 
       /* TLS optimizations.  Replace instruction sequences and relocs
@@ -6225,17 +6229,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_ADDR14_BRNTAKEN:
 	case R_PPC_UADDR32:
 	case R_PPC_UADDR16:
-	  /* r_symndx will be zero only for relocs against symbols
-	     from removed linkonce sections, or sections discarded by
-	     a linker script.  */
 	dodyn:
-	  if (r_symndx == 0)
-	    {
-	      _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
-	      break;
-	    }
-	  /* Fall thru.  */
-
 	  if ((input_section->flags & SEC_ALLOC) == 0)
 	    break;
 	  /* Fall thru.  */

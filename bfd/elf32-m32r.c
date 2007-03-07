@@ -1,6 +1,6 @@
 /* M32R-specific support for 32-bit ELF.
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006 Free Software Foundation, Inc.
+   2006, 2007 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -2477,6 +2477,7 @@ m32r_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
          `r_addend'.  */
       bfd_vma addend = rel->r_addend;
       bfd_vma offset = rel->r_offset;
+      bfd_vma relocation;
       Elf_Internal_Sym *sym;
       asection *sec;
       const char *sym_name;
@@ -2509,27 +2510,152 @@ m32r_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
       howto = m32r_elf_howto_table + r_type;
       r_symndx = ELF32_R_SYM (rel->r_info);
 
+      sym = NULL;
+      sec = NULL;
+      h = NULL;
+
+      if (r_symndx < symtab_hdr->sh_info)
+	{
+	  /* Local symbol.  */
+	  sym = local_syms + r_symndx;
+	  sec = local_sections[r_symndx];
+	  sym_name = "<local symbol>";
+
+	  if (!use_rel)
+	    {
+	      relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
+	      addend = rel->r_addend;
+	    }
+	  else
+	    {
+	      relocation = (sec->output_section->vma
+			    + sec->output_offset
+			    + sym->st_value);
+	    }
+	}
+      else
+	{
+	  /* External symbol.  */
+	  relocation = 0;
+
+	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	  sym_name = h->root.root.string;
+
+	  if (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
+	    {
+	      bfd_boolean dyn;
+	      sec = h->root.u.def.section;
+
+	      dyn = htab->root.dynamic_sections_created;
+	      sec = h->root.u.def.section;
+	      if (r_type == R_M32R_GOTPC24
+		  || (r_type == R_M32R_GOTPC_HI_ULO
+		      || r_type == R_M32R_GOTPC_HI_SLO
+		      || r_type == R_M32R_GOTPC_LO)
+		  || (r_type == R_M32R_26_PLTREL
+		      && h->plt.offset != (bfd_vma) -1)
+		  || ((r_type == R_M32R_GOT24
+		       || r_type == R_M32R_GOT16_HI_ULO
+		       || r_type == R_M32R_GOT16_HI_SLO
+		       || r_type == R_M32R_GOT16_LO)
+		      && WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn,
+							  info->shared, h)
+		      && (! info->shared
+			  || (! info->symbolic && h->dynindx != -1)
+			  || !h->def_regular))
+		  || (info->shared
+		      && ((! info->symbolic && h->dynindx != -1)
+			  || !h->def_regular)
+		      && (((r_type == R_M32R_16_RELA
+			    || r_type == R_M32R_32_RELA
+			    || r_type == R_M32R_24_RELA
+			    || r_type == R_M32R_HI16_ULO_RELA
+			    || r_type == R_M32R_HI16_SLO_RELA
+			    || r_type == R_M32R_LO16_RELA)
+			   && !h->forced_local)
+			  || r_type == R_M32R_REL32
+			  || r_type == R_M32R_10_PCREL_RELA
+			  || r_type == R_M32R_18_PCREL_RELA
+			  || r_type == R_M32R_26_PCREL_RELA)
+		      && ((input_section->flags & SEC_ALLOC) != 0
+			  /* DWARF will emit R_M32R_16(24,32) relocations
+			     in its sections against symbols defined
+			     externally in shared libraries.  We can't do
+			     anything with them here.  */
+			  || ((input_section->flags & SEC_DEBUGGING) != 0
+			      && h->def_dynamic))))
+		{
+		  /* In these cases, we don't need the relocation
+		     value.  We check specially because in some
+		     obscure cases sec->output_section will be NULL.  */
+		}
+	      else if (sec->output_section != NULL)
+		relocation = (h->root.u.def.value
+			      + sec->output_section->vma
+			      + sec->output_offset);
+	      else if (!info->relocatable)
+		{
+		  (*_bfd_error_handler)
+		    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
+		     input_bfd,
+		     input_section,
+		     (long) rel->r_offset,
+		     howto->name,
+		     h->root.root.string);
+		}
+	    }
+	  else if (h->root.type == bfd_link_hash_undefweak)
+	    ;
+	  else if (info->unresolved_syms_in_objects == RM_IGNORE
+		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
+	    ;
+	  else if (!info->relocatable)
+	    {
+	      if (! ((*info->callbacks->undefined_symbol)
+		     (info, h->root.root.string, input_bfd,
+		      input_section, offset,
+		      (info->unresolved_syms_in_objects == RM_GENERATE_ERROR
+		       || ELF_ST_VISIBILITY (h->other)))))
+		return FALSE;
+	    }
+	}
+
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  Avoid any special processing.  */
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
+      if (info->relocatable && !use_rel)
+	{
+	  /* This is a relocatable link.  We don't have to change
+	     anything, unless the reloc is against a section symbol,
+	     in which case we have to adjust according to where the
+	     section symbol winds up in the output section.  */
+	  if (sym != NULL && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+	    rel->r_addend += sec->output_offset;
+	  continue;
+	}
+
       if (info->relocatable && use_rel)
 	{
 	  /* This is a relocatable link.  We don't have to change
 	     anything, unless the reloc is against a section symbol,
 	     in which case we have to adjust according to where the
 	     section symbol winds up in the output section.  */
-	  sec = NULL;
-	  if (r_symndx >= symtab_hdr->sh_info)
-	    /* External symbol.  */
+	  if (sym == NULL || ELF_ST_TYPE (sym->st_info) != STT_SECTION)
 	    continue;
 
-	  /* Local symbol.  */
-	  sym = local_syms + r_symndx;
-	  sym_name = "<local symbol>";
-	  /* STT_SECTION: symbol is associated with a section.  */
-	  if (ELF_ST_TYPE (sym->st_info) != STT_SECTION)
-	    /* Symbol isn't associated with a section.  Nothing to do.  */
-	    continue;
-
-	  sec = local_sections[r_symndx];
-	  addend += sec->output_offset + sym->st_value;
+	  addend += sec->output_offset;
 
 	  /* If partial_inplace, we need to store any additional addend
 	     back in the section.  */
@@ -2567,140 +2693,6 @@ m32r_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	}
       else
 	{
-	  bfd_vma relocation;
-
-	  /* This is a final link.  */
-	  sym = NULL;
-	  sec = NULL;
-          h = NULL;
-
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      /* Local symbol.  */
-	      sym = local_syms + r_symndx;
-	      sec = local_sections[r_symndx];
-	      sym_name = "<local symbol>";
-
-              if (!use_rel)
-                {
-	          relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
-	          addend = rel->r_addend;
-
-                  if (info->relocatable)
-                    {
-                      /* This is a relocatable link.  We don't have to change
-                         anything, unless the reloc is against a section symbol,
-                         in which case we have to adjust according to where the
-                         section symbol winds up in the output section.  */
-                      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-                        rel->r_addend += sec->output_offset + sym->st_value;
-
-                      continue;
-                    }
-                }
-              else
-                {
-	          relocation = (sec->output_section->vma
-			        + sec->output_offset
-			        + sym->st_value);
-                }
-	    }
-	  else
-	    {
-	      /* External symbol.  */
-              if (info->relocatable && !use_rel)
-                continue;
-
-	      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	      while (h->root.type == bfd_link_hash_indirect
-		     || h->root.type == bfd_link_hash_warning)
-		h = (struct elf_link_hash_entry *) h->root.u.i.link;
-	      sym_name = h->root.root.string;
-
-	      if (h->root.type == bfd_link_hash_defined
-		  || h->root.type == bfd_link_hash_defweak)
-		{
-	          bfd_boolean dyn;
-		  sec = h->root.u.def.section;
-
-	          dyn = htab->root.dynamic_sections_created;
-                  sec = h->root.u.def.section;
-                  if (r_type == R_M32R_GOTPC24
-                      || (r_type == R_M32R_GOTPC_HI_ULO
-                          || r_type == R_M32R_GOTPC_HI_SLO
-                          || r_type == R_M32R_GOTPC_LO)
-                      || (r_type == R_M32R_26_PLTREL
-                          && h->plt.offset != (bfd_vma) -1)
-                      || ((r_type == R_M32R_GOT24
-                           || r_type == R_M32R_GOT16_HI_ULO
-                           || r_type == R_M32R_GOT16_HI_SLO
-                           || r_type == R_M32R_GOT16_LO)
-                          && WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn,
-							      info->shared, h)
-                          && (! info->shared
-                              || (! info->symbolic && h->dynindx != -1)
-                              || !h->def_regular))
-                      || (info->shared
-                          && ((! info->symbolic && h->dynindx != -1)
-                              || !h->def_regular)
-                          && (((r_type == R_M32R_16_RELA
-                              || r_type == R_M32R_32_RELA
-                              || r_type == R_M32R_24_RELA
-                              || r_type == R_M32R_HI16_ULO_RELA
-                              || r_type == R_M32R_HI16_SLO_RELA
-                              || r_type == R_M32R_LO16_RELA)
-			          && !h->forced_local)
-                              || r_type == R_M32R_REL32
-                              || r_type == R_M32R_10_PCREL_RELA
-                              || r_type == R_M32R_18_PCREL_RELA
-                              || r_type == R_M32R_26_PCREL_RELA)
-                          && ((input_section->flags & SEC_ALLOC) != 0
-                              /* DWARF will emit R_M32R_16(24,32) relocations
-                                 in its sections against symbols defined
-                                 externally in shared libraries.  We can't do
-                                 anything with them here.  */
-                              || ((input_section->flags & SEC_DEBUGGING) != 0
-                                  && h->def_dynamic))))
-                    {
-                      /* In these cases, we don't need the relocation
-                         value.  We check specially because in some
-                         obscure cases sec->output_section will be NULL.  */
-                      relocation = 0;
-                    }
-		  else if (sec->output_section == NULL)
-                    {
-                      (*_bfd_error_handler)
-                        (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
-			 input_bfd,
-			 input_section,
-			 (long) rel->r_offset,
-			 howto->name,
-			 h->root.root.string);
-
-		       relocation = 0;
-                    }
-		  else
-		    relocation = (h->root.u.def.value
-				  + sec->output_section->vma
-				  + sec->output_offset);
-		}
-	      else if (h->root.type == bfd_link_hash_undefweak)
-		relocation = 0;
-              else if (info->unresolved_syms_in_objects == RM_IGNORE
-                       && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
-                relocation = 0;
-	      else
-		{
-		  if (! ((*info->callbacks->undefined_symbol)
-			 (info, h->root.root.string, input_bfd,
-			  input_section, offset,
-                          (info->unresolved_syms_in_objects == RM_GENERATE_ERROR
-                           || ELF_ST_VISIBILITY (h->other)))))
-		    return FALSE;
-		  relocation = 0;
-		}
-	    }
-
 	  /* Sanity check the address.  */
 	  if (offset > high_address)
 	    {

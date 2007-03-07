@@ -1,5 +1,5 @@
 /* IBM S/390-specific support for 64-bit ELF
-   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
    Contributed Martin Schwidefsky (schwidefsky@de.ibm.com).
 
@@ -2238,9 +2238,6 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
 
-  if (info->relocatable)
-    return TRUE;
-
   htab = elf_s390_hash_table (info);
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
@@ -2275,7 +2272,6 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
       howto = elf_howto_table + r_type;
       r_symndx = ELF64_R_SYM (rel->r_info);
 
-      /* This is a final link.  */
       h = NULL;
       sym = NULL;
       sec = NULL;
@@ -2295,6 +2291,20 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 				   h, sec, relocation,
 				   unresolved_reloc, warned);
 	}
+
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  Avoid any special processing.  */
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
+      if (info->relocatable)
+	continue;
 
       switch (r_type)
 	{
@@ -2519,15 +2529,6 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_390_PC32:
 	case R_390_PC32DBL:
 	case R_390_PC64:
-	  /* r_symndx will be zero only for relocs against symbols
-	     from removed linkonce sections, or sections discarded by
-	     a linker script.  */
-	  if (r_symndx == 0)
-	    {
-	      _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
-	      break;
-	    }
-
 	  if ((input_section->flags & SEC_ALLOC) == 0)
 	    break;
 

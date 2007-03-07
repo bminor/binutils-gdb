@@ -1,6 +1,6 @@
 /* BFD back-end for HP PA-RISC ELF files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
 
    Original code by
 	Center for Software Science
@@ -3651,9 +3651,6 @@ elf32_hppa_relocate_section (bfd *output_bfd,
   Elf_Internal_Rela *rela;
   Elf_Internal_Rela *relend;
 
-  if (info->relocatable)
-    return TRUE;
-
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
 
   htab = hppa_link_hash_table (info);
@@ -3685,7 +3682,6 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 	  || r_type == (unsigned int) R_PARISC_GNU_VTINHERIT)
 	continue;
 
-      /* This is a final link.  */
       r_symndx = ELF32_R_SYM (rela->r_info);
       hh = NULL;
       sym = NULL;
@@ -3709,7 +3705,8 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 				   eh, sym_sec, relocation,
 				   unresolved_reloc, warned_undef);
 
-	  if (relocation == 0
+	  if (!info->relocatable
+	      && relocation == 0
 	      && eh->root.type != bfd_link_hash_defined
 	      && eh->root.type != bfd_link_hash_defweak
 	      && eh->root.type != bfd_link_hash_undefweak)
@@ -3727,6 +3724,22 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 	    }
 	  hh = hppa_elf_hash_entry (eh);
 	}
+
+      if (sym_sec != NULL && elf_discarded_section (sym_sec))
+	{
+	  /* For relocs against symbols from removed linkonce
+	     sections, or sections discarded by a linker script,
+	     we just want the section contents zeroed.  Avoid any
+	     special processing.  */
+	  _bfd_clear_contents (elf_hppa_howto_table + r_type, input_bfd,
+			       contents + rela->r_offset);
+	  rela->r_info = 0;
+	  rela->r_addend = 0;
+	  continue;
+	}
+
+      if (info->relocatable)
+	continue;
 
       /* Do any required modifications to the relocation value, and
 	 determine what types of dynamic info we need to output, if
@@ -3939,16 +3952,6 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 	case R_PARISC_DPREL14R:
 	case R_PARISC_DPREL21L:
 	case R_PARISC_DIR32:
-	  /* r_symndx will be zero only for relocs against symbols
-	     from removed linkonce sections, or sections discarded by
-	     a linker script.  */
-	  if (r_symndx == 0)
-	    {
-	      _bfd_clear_contents (elf_hppa_howto_table + r_type, input_bfd,
-				   contents + rela->r_offset);
-	      break;
-	    }
-
 	  if ((input_section->flags & SEC_ALLOC) == 0)
 	    break;
 

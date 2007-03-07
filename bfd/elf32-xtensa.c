@@ -1986,6 +1986,53 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 
       r_symndx = ELF32_R_SYM (rel->r_info);
 
+      h = NULL;
+      sym = NULL;
+      sec = NULL;
+      is_weak_undef = FALSE;
+      unresolved_reloc = FALSE;
+      warned = FALSE;
+
+      if (howto->partial_inplace && !info->relocatable)
+	{
+	  /* Because R_XTENSA_32 was made partial_inplace to fix some
+	     problems with DWARF info in partial links, there may be
+	     an addend stored in the contents.  Take it out of there
+	     and move it back into the addend field of the reloc.  */
+	  rel->r_addend += bfd_get_32 (input_bfd, contents + rel->r_offset);
+	  bfd_put_32 (input_bfd, 0, contents + rel->r_offset);
+	}
+
+      if (r_symndx < symtab_hdr->sh_info)
+	{
+	  sym = local_syms + r_symndx;
+	  sec = local_sections[r_symndx];
+	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
+	}
+      else
+	{
+	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
+				   r_symndx, symtab_hdr, sym_hashes,
+				   h, sec, relocation,
+				   unresolved_reloc, warned);
+
+	  if (relocation == 0
+	      && !unresolved_reloc
+	      && h->root.type == bfd_link_hash_undefweak)
+	    is_weak_undef = TRUE;
+	}
+
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  Avoid any special processing.  */
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
       if (info->relocatable)
 	{
 	  /* This is a relocatable link.
@@ -2066,42 +2113,6 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 	}
 
       /* This is a final link.  */
-
-      h = NULL;
-      sym = NULL;
-      sec = NULL;
-      is_weak_undef = FALSE;
-      unresolved_reloc = FALSE;
-      warned = FALSE;
-
-      if (howto->partial_inplace)
-	{
-	  /* Because R_XTENSA_32 was made partial_inplace to fix some
-	     problems with DWARF info in partial links, there may be
-	     an addend stored in the contents.  Take it out of there
-	     and move it back into the addend field of the reloc.  */
-	  rel->r_addend += bfd_get_32 (input_bfd, contents + rel->r_offset);
-	  bfd_put_32 (input_bfd, 0, contents + rel->r_offset);
-	}
-
-      if (r_symndx < symtab_hdr->sh_info)
-	{
-	  sym = local_syms + r_symndx;
-	  sec = local_sections[r_symndx];
-	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
-	}
-      else
-	{
-	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
-				   r_symndx, symtab_hdr, sym_hashes,
-				   h, sec, relocation,
-				   unresolved_reloc, warned);
-
-	  if (relocation == 0
-	      && !unresolved_reloc
-	      && h->root.type == bfd_link_hash_undefweak)
-	    is_weak_undef = TRUE;
-	}
 
       if (relaxing_section)
 	{
@@ -2239,16 +2250,6 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 	     howto->name,
 	     h->root.root.string);
 	  return FALSE;
-	}
-
-      if (r_symndx == 0)
-	{
-	  /* r_symndx will be zero only for relocs against symbols from
-	     removed linkonce sections, or sections discarded by a linker
-	     script.  For these relocs, we just want the section contents
-	     zeroed.  Avoid any special processing.  */
-	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
-	  continue;
 	}
 
       /* There's no point in calling bfd_perform_relocation here.

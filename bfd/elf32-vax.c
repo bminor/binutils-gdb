@@ -1377,9 +1377,6 @@ elf_vax_relocate_section (bfd *output_bfd,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
 
-  if (info->relocatable)
-    return TRUE;
-
   dynobj = elf_hash_table (info)->dynobj;
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
@@ -1411,7 +1408,6 @@ elf_vax_relocate_section (bfd *output_bfd,
 	}
       howto = howto_table + r_type;
 
-      /* This is a final link.  */
       r_symndx = ELF32_R_SYM (rel->r_info);
       h = NULL;
       sym = NULL;
@@ -1466,6 +1462,20 @@ elf_vax_relocate_section (bfd *output_bfd,
 	       obscure cases sec->output_section will be NULL.  */
 	    relocation = 0;
 	}
+
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  Avoid any special processing.  */
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
+      if (info->relocatable)
+	continue;
 
       switch (r_type)
 	{

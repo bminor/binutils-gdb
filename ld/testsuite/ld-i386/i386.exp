@@ -113,3 +113,4 @@ run_ld_link_tests $i386tests
 run_dump_test "abs"
 run_dump_test "pcrel8"
 run_dump_test "pcrel16"
+run_dump_test "pcrel16abs"

@@ -9896,13 +9896,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		    relocation += adjust;
 		}
 	    }
-	  if (info->relocatable)
-	    continue;
 	}
       else
 	{
-	  if (info->relocatable)
-	    continue;
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, sym_hashes,
 				   h_elf, sec, relocation,
@@ -9911,6 +9907,21 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  sym_type = h_elf->type;
 	}
       h = (struct ppc_link_hash_entry *) h_elf;
+
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  Avoid any special processing.  */
+	  _bfd_clear_contents (ppc64_elf_howto_table[r_type], input_bfd,
+			       contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
+      if (info->relocatable)
+	continue;
 
       /* TLS optimizations.  Replace instruction sequences and relocs
 	 based on information we collected in tls_optimize.  We edit
@@ -10731,7 +10742,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    relocation += htab->stub_group[sec->id].toc_off;
 	  else
 	    unresolved_reloc = TRUE;
-	  goto dodyn2;
+	  goto dodyn;
 
 	  /* TOC16 relocs.  We want the offset relative to the TOC base,
 	     which is the address of the start of the TOC plus 0x8000.
@@ -10831,19 +10842,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_UADDR16:
 	case R_PPC64_UADDR32:
 	case R_PPC64_UADDR64:
-	  /* r_symndx will be zero only for relocs against symbols
-	     from removed linkonce sections, or sections discarded by
-	     a linker script.  */
 	dodyn:
-	  if (r_symndx == 0)
-	    {
-	      _bfd_clear_contents (ppc64_elf_howto_table[r_type], input_bfd,
-				   contents + rel->r_offset);
-	      break;
-	    }
-	  /* Fall thru.  */
-
-	dodyn2:
 	  if ((input_section->flags & SEC_ALLOC) == 0)
 	    break;
 

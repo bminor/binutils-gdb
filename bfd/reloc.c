@@ -1,6 +1,6 @@
 /* BFD support for handling relocation entries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -5148,13 +5148,31 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
       for (parent = reloc_vector; *parent != NULL; parent++)
 	{
 	  char *error_message = NULL;
-	  bfd_reloc_status_type r =
-	    bfd_perform_relocation (input_bfd,
-				    *parent,
-				    data,
-				    input_section,
-				    relocatable ? abfd : NULL,
-				    &error_message);
+	  asymbol *symbol;
+	  bfd_reloc_status_type r;
+
+	  symbol = *(*parent)->sym_ptr_ptr;
+	  if (symbol->section && elf_discarded_section (symbol->section))
+	    {
+	      bfd_byte *p;
+	      static const reloc_howto_type none_howto
+		= HOWTO (0, 0, 0, 0, FALSE, 0, complain_overflow_dont, NULL,
+			 "unused", FALSE, 0, 0, FALSE);
+
+	      p = data + (*parent)->address * bfd_octets_per_byte (input_bfd);
+	      _bfd_clear_contents ((*parent)->howto, input_bfd, p);
+	      (*parent)->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
+	      (*parent)->addend = 0;
+	      (*parent)->howto = &none_howto;
+	      r = bfd_reloc_ok;
+	    }
+	  else
+	    r = bfd_perform_relocation (input_bfd,
+					*parent,
+					data,
+					input_section,
+					relocatable ? abfd : NULL,
+					&error_message);
 
 	  if (relocatable)
 	    {

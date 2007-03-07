@@ -1,5 +1,5 @@
 /* MMIX-specific support for 64-bit ELF.
-   Copyright 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
    Contributed by Hans-Peter Nilsson <hp@bitrange.com>
 
@@ -1365,22 +1365,53 @@ mmix_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
       r_symndx = ELF64_R_SYM (rel->r_info);
 
+      howto = elf_mmix_howto_table + ELF64_R_TYPE (rel->r_info);
+      h = NULL;
+      sym = NULL;
+      sec = NULL;
+
+      if (r_symndx < symtab_hdr->sh_info)
+	{
+	  sym = local_syms + r_symndx;
+	  sec = local_sections [r_symndx];
+	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
+
+	  name = bfd_elf_string_from_elf_section (input_bfd,
+						  symtab_hdr->sh_link,
+						  sym->st_name);
+	  if (name == NULL)
+	    name = bfd_section_name (input_bfd, sec);
+	}
+      else
+	{
+	  bfd_boolean unresolved_reloc;
+
+	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
+				   r_symndx, symtab_hdr, sym_hashes,
+				   h, sec, relocation,
+				   unresolved_reloc, undefined_signalled);
+	  name = h->root.root.string;
+	}
+
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  Avoid any special processing.  */
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
       if (info->relocatable)
 	{
 	  /* This is a relocatable link.  For most relocs we don't have to
 	     change anything, unless the reloc is against a section
 	     symbol, in which case we have to adjust according to where
 	     the section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-
-	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sec = local_sections [r_symndx];
-		  rel->r_addend += sec->output_offset + sym->st_value;
-		}
-	    }
+	  if (sym != NULL && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+	    rel->r_addend += sec->output_offset;
 
 	  /* For PUSHJ stub relocs however, we may need to change the
 	     reloc and the section contents, if the reloc doesn't reach
@@ -1452,35 +1483,6 @@ mmix_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      pjsno++;
 	    }
 	  continue;
-	}
-
-      /* This is a final link.  */
-      howto = elf_mmix_howto_table + ELF64_R_TYPE (rel->r_info);
-      h = NULL;
-      sym = NULL;
-      sec = NULL;
-
-      if (r_symndx < symtab_hdr->sh_info)
-	{
-	  sym = local_syms + r_symndx;
-	  sec = local_sections [r_symndx];
-	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
-
-	  name = bfd_elf_string_from_elf_section (input_bfd,
-						  symtab_hdr->sh_link,
-						  sym->st_name);
-	  if (name == NULL)
-	    name = bfd_section_name (input_bfd, sec);
-	}
-      else
-	{
-	  bfd_boolean unresolved_reloc;
-
-	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
-				   r_symndx, symtab_hdr, sym_hashes,
-				   h, sec, relocation,
-				   unresolved_reloc, undefined_signalled);
-	  name = h->root.root.string;
 	}
 
       r = mmix_final_link_relocate (howto, input_section,

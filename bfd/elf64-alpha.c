@@ -1,6 +1,6 @@
 /* Alpha specific support for 64-bit ELF
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006 Free Software Foundation, Inc.
+   2006, 2007 Free Software Foundation, Inc.
    Contributed by Richard Henderson <rth@tamu.edu>.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -3912,9 +3912,11 @@ elf64_alpha_relocate_section_r (bfd *output_bfd ATTRIBUTE_UNUSED,
   unsigned long symtab_hdr_sh_info;
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
+  struct elf_link_hash_entry **sym_hashes;
   bfd_boolean ret_val = TRUE;
 
   symtab_hdr_sh_info = elf_tdata (input_bfd)->symtab_hdr.sh_info;
+  sym_hashes = elf_sym_hashes (input_bfd);
 
   relend = relocs + input_section->reloc_count;
   for (rel = relocs; rel < relend; rel++)
@@ -3924,7 +3926,7 @@ elf64_alpha_relocate_section_r (bfd *output_bfd ATTRIBUTE_UNUSED,
       asection *sec;
       unsigned long r_type;
 
-      r_type = ELF64_R_TYPE(rel->r_info);
+      r_type = ELF64_R_TYPE (rel->r_info);
       if (r_type >= R_ALPHA_max)
 	{
 	  (*_bfd_error_handler)
@@ -3935,22 +3937,49 @@ elf64_alpha_relocate_section_r (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  continue;
 	}
 
-      r_symndx = ELF64_R_SYM(rel->r_info);
-
       /* The symbol associated with GPDISP and LITUSE is
 	 immaterial.  Only the addend is significant.  */
       if (r_type == R_ALPHA_GPDISP || r_type == R_ALPHA_LITUSE)
 	continue;
 
+      r_symndx = ELF64_R_SYM (rel->r_info);
       if (r_symndx < symtab_hdr_sh_info)
 	{
 	  sym = local_syms + r_symndx;
-	  if (ELF_ST_TYPE(sym->st_info) == STT_SECTION)
-	    {
-	      sec = local_sections[r_symndx];
-	      rel->r_addend += sec->output_offset + sym->st_value;
-	    }
+	  sec = local_sections[r_symndx];
 	}
+      else
+	{
+	  struct elf_link_hash_entry *h;
+
+	  h = sym_hashes[r_symndx - symtab_hdr_sh_info];
+
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+	  if (h->root.type != bfd_link_hash_defined
+	      && h->root.type != bfd_link_hash_defweak)
+	    continue;
+
+	  sym = NULL;
+	  sec = h->root.u.def.section;
+	}
+
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  */
+	  _bfd_clear_contents (elf64_alpha_howto_table + r_type,
+			       input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
+      if (sym != NULL && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+	rel->r_addend += sec->output_offset;
     }
 
   return ret_val;
@@ -4150,6 +4179,17 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  gotent = h->got_entries;
 	}
 
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  Avoid any special processing.  */
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
       addend = rel->r_addend;
       value += addend;
 
@@ -4209,18 +4249,6 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  goto default_reloc;
 
 	case R_ALPHA_GPREL32:
-	  /* If the target section was a removed linkonce section,
-	     r_symndx will be zero.  In this case, assume that the
-	     switch will not be used, so don't fill it in.  If we
-	     do nothing here, we'll get relocation truncated messages,
-	     due to the placement of the application above 4GB.  */
-	  if (r_symndx == 0)
-	    {
-	      r = bfd_reloc_ok;
-	      break;
-	    }
-	  /* FALLTHRU */
-
 	case R_ALPHA_GPREL16:
 	case R_ALPHA_GPRELLOW:
 	  if (dynamic_symbol_p)

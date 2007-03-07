@@ -1,5 +1,5 @@
 /* Infineon XC16X-specific support for 16-bit ELF.
-   Copyright 2006  Free Software Foundation, Inc.
+   Copyright 2006, 2007  Free Software Foundation, Inc.
    Contributed by KPIT Cummins Infosystems 
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -328,9 +328,6 @@ elf32_xc16x_relocate_section (bfd *output_bfd,
   struct elf_link_hash_entry **sym_hashes;
   Elf_Internal_Rela *rel, *relend;
 
-  if (info->relocatable)
-    return TRUE;
-
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
 
@@ -368,11 +365,27 @@ elf32_xc16x_relocate_section (bfd *output_bfd,
 				   unresolved_reloc, warned);
 	}
 
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  Avoid any special processing.  */
+	  reloc_howto_type *howto;
+	  howto = xc16x_reloc_type_lookup (input_bfd, r_type);
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
+      if (info->relocatable)
+	continue;
+
       r = elf32_xc16x_final_link_relocate (r_type, input_bfd, output_bfd,
-					input_section,
-					contents, rel->r_offset,
-					relocation, rel->r_addend,
-					info, sec, h == NULL);
+					   input_section,
+					   contents, rel->r_offset,
+					   relocation, rel->r_addend,
+					   info, sec, h == NULL);
     }
 
   return TRUE;

@@ -1351,9 +1351,6 @@ spu_elf_relocate_section (bfd *output_bfd,
   struct spu_link_hash_table *htab;
   bfd_boolean ret = TRUE;
 
-  if (info->relocatable)
-    return TRUE;
-
   htab = spu_hash_table (info);
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = (struct elf_link_hash_entry **) (elf_sym_hashes (input_bfd));
@@ -1399,6 +1396,20 @@ spu_elf_relocate_section (bfd *output_bfd,
 				   unresolved_reloc, warned);
 	  sym_name = h->root.root.string;
 	}
+
+      if (sec != NULL && elf_discarded_section (sec))
+	{
+	  /* For relocs against symbols from removed linkonce sections,
+	     or sections discarded by a linker script, we just want the
+	     section contents zeroed.  Avoid any special processing.  */
+	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+	  rel->r_info = 0;
+	  rel->r_addend = 0;
+	  continue;
+	}
+
+      if (info->relocatable)
+	continue;
 
       if (unresolved_reloc)
 	{
