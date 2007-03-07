@@ -1,3 +1,11 @@
+2007-03-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* mips-tdep.c (mips_insn16_frame_cache, mips_insn32_frame_sniffer):
+	Revert the previous change that had some unexpected side-effects
+	on mips32.
+	(mips_insn16_frame_cache, mips_insn32_frame_cache): Use the proper
+	function to get the address of the calling instruction.
+
 2007-03-07  Denis Pilat  <denis.pilat@st.com>
 
 	* tui/tui-hooks.c (tui_selected_frame_level_changed_hook): Replace

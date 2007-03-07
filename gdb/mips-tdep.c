@@ -1640,7 +1640,8 @@ mips_insn16_frame_cache (struct frame_info *next_frame, void **this_cache)
 
   /* Analyze the function prologue.  */
   {
-    const CORE_ADDR pc = frame_pc_unwind (next_frame);
+    const CORE_ADDR pc =
+      frame_unwind_address_in_block (next_frame, NORMAL_FRAME);
     CORE_ADDR start_addr;
 
     find_pc_partial_function (pc, NULL, &start_addr, NULL);
@@ -1693,7 +1694,7 @@ static const struct frame_unwind mips_insn16_frame_unwind =
 static const struct frame_unwind *
 mips_insn16_frame_sniffer (struct frame_info *next_frame)
 {
-  CORE_ADDR pc = frame_unwind_address_in_block (next_frame, NORMAL_FRAME);
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
   if (mips_pc_is_mips16 (pc))
     return &mips_insn16_frame_unwind;
   return NULL;
@@ -1961,7 +1962,8 @@ mips_insn32_frame_cache (struct frame_info *next_frame, void **this_cache)
 
   /* Analyze the function prologue.  */
   {
-    const CORE_ADDR pc = frame_pc_unwind (next_frame);
+    const CORE_ADDR pc =
+      frame_unwind_address_in_block (next_frame, NORMAL_FRAME);
     CORE_ADDR start_addr;
 
     find_pc_partial_function (pc, NULL, &start_addr, NULL);
@@ -2014,7 +2016,7 @@ static const struct frame_unwind mips_insn32_frame_unwind =
 static const struct frame_unwind *
 mips_insn32_frame_sniffer (struct frame_info *next_frame)
 {
-  CORE_ADDR pc = frame_unwind_address_in_block (next_frame, NORMAL_FRAME);
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
   if (! mips_pc_is_mips16 (pc))
     return &mips_insn32_frame_unwind;
   return NULL;
