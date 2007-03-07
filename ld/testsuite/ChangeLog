@@ -1,3 +1,8 @@
+2007-03-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elf/extract-symbol-1sec.d: xfail hppa.
+	* ld-elf/extract-symbol-1sym.d: xfail hppa.
+
 2007-03-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 3958

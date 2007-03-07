@@ -3,6 +3,7 @@
 #ld: -Textract-symbol-1.ld
 #objcopy_linked_file: --extract-symbol
 #objdump: --headers
+#xfail: "hppa*-*-*"
 #...
 Sections:
  *Idx +Name +Size +VMA +LMA .*

@@ -3,6 +3,7 @@
 #ld: -Textract-symbol-1.ld
 #objcopy_linked_file: --extract-symbol
 #nm: -n
+#xfail: "hppa*-*-*"
 0*00010010 T B
 0*00020123 T C
 0*00030000 A _entry
