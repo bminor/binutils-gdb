@@ -1,3 +1,8 @@
+2007-03-08  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* cli/cli-dump.c (struct callback_data): load_offset needs to 
+	have signed long type.
+
 2007-03-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* mips-tdep.c (mips_insn16_frame_cache, mips_insn32_frame_sniffer):

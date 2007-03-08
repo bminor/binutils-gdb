@@ -443,7 +443,7 @@ add_dump_command (char *name, void (*func) (char *args, char *mode),
 
 /* Opaque data for restore_section_callback. */
 struct callback_data {
-  unsigned long load_offset;
+  long load_offset;
   CORE_ADDR load_start;
   CORE_ADDR load_end;
 };
