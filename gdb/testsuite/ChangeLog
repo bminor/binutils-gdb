@@ -1,3 +1,8 @@
+2007-03-08  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.base/relativedebug.exp: Skip test if gdb,nosignals is set
+	in target_info.
+
 2007-03-02  Michael Snyder  <michael.snyder@palmsource.com>
 
 	* gdb.threads/manythreads.exp: Use $message string for 
