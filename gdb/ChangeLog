@@ -1,5 +1,10 @@
 2007-03-08  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* spu-linux-nat.c (spu_xfer_partial): Return -1 for unsupported
+	object types, not 0.
+
+2007-03-08  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* spu-tdep.c (spu_frame_align): New function.
 	(spu_gdbarch_init): Install it.  Set call dummy location to ON_STACK.
 

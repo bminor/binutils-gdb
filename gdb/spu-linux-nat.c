@@ -536,7 +536,7 @@ spu_xfer_partial (struct target_ops *ops,
       return spu_proc_xfer_spu (mem_annex, readbuf, writebuf, offset, len);
     }
 
-  return 0;
+  return -1;
 }
 
 /* Override the to_can_use_hw_breakpoint routine.  */
