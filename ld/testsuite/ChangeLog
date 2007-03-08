@@ -1,3 +1,8 @@
+2007-03-08  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-elf/extract-symbol-1.ld (data): Explicitly set the start address
+	to 0.
+
 2007-03-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-elf/extract-symbol-1sec.d: xfail hppa.

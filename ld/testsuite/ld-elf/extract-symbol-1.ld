@@ -1,7 +1,7 @@
 ENTRY(_entry)
 PHDRS
 {
-  data PT_LOAD;
+  data PT_LOAD AT (0);
 }
 SECTIONS
 {
