@@ -756,6 +756,12 @@ spu_write_pc (CORE_ADDR pc, ptid_t ptid)
 
 /* Function calling convention.  */
 
+static CORE_ADDR
+spu_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
+{
+  return sp & ~15;
+}
+
 static int
 spu_scalar_value_p (struct type *type)
 {
@@ -1079,6 +1085,8 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_double_format (gdbarch, floatformats_ieee_double);
 
   /* Inferior function calls.  */
+  set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
+  set_gdbarch_frame_align (gdbarch, spu_frame_align);
   set_gdbarch_push_dummy_call (gdbarch, spu_push_dummy_call);
   set_gdbarch_unwind_dummy_id (gdbarch, spu_unwind_dummy_id);
   set_gdbarch_return_value (gdbarch, spu_return_value);

@@ -1,5 +1,10 @@
 2007-03-08  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* spu-tdep.c (spu_frame_align): New function.
+	(spu_gdbarch_init): Install it.  Set call dummy location to ON_STACK.
+
+2007-03-08  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* spu-tdep.c (spu_unwind_pc): Mask off interrupt enable bit.
 	(spu_software_single_step): Likewise.
 	(spu_read_pc, spu_write_pc): New functions.
