@@ -76,6 +76,8 @@ config/tc-m68k.c
 config/tc-m68k.h
 config/tc-mcore.c
 config/tc-mcore.h
+config/tc-mep.c
+config/tc-mep.h
 config/tc-mips.c
 config/tc-mips.h
 config/tc-mmix.c

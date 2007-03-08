@@ -1112,8 +1112,8 @@ DEPTC_hppa_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-hppa.h $(BFDDIR)/elf32-hppa.h \
   $(BFDDIR)/elf-bfd.h $(BFDDIR)/libhppa.h $(INCDIR)/elf/hppa.h \
   $(INCDIR)/elf/reloc-macros.h $(INCDIR)/safe-ctype.h \
-  subsegs.h $(INCDIR)/obstack.h $(BFDDIR)/libhppa.h $(INCDIR)/opcode/hppa.h \
-  dwarf2dbg.h
+  subsegs.h $(INCDIR)/obstack.h dw2gencfi.h $(INCDIR)/elf/dwarf2.h \
+  $(BFDDIR)/libhppa.h $(INCDIR)/opcode/hppa.h dwarf2dbg.h
 DEPTC_i370_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i370.h dwarf2dbg.h \
@@ -1220,6 +1220,15 @@ DEPTC_mcore_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mcore.h dwarf2dbg.h \
   subsegs.h $(INCDIR)/obstack.h $(srcdir)/../opcodes/mcore-opc.h \
   $(INCDIR)/safe-ctype.h $(INCDIR)/elf/mcore.h $(INCDIR)/elf/reloc-macros.h
+DEPTC_mep_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mep.h dwarf2dbg.h \
+  dwarf2dbg.h subsegs.h $(INCDIR)/obstack.h $(srcdir)/../opcodes/mep-desc.h \
+  $(INCDIR)/opcode/cgen-bitset.h $(INCDIR)/opcode/cgen.h \
+  $(INCDIR)/opcode/cgen-bitset.h $(srcdir)/../opcodes/mep-opc.h \
+  cgen.h $(INCDIR)/elf/common.h $(INCDIR)/elf/mep.h $(INCDIR)/elf/reloc-macros.h \
+  $(BFDDIR)/libbfd.h $(INCDIR)/hashtab.h $(INCDIR)/xregex.h \
+  $(INCDIR)/xregex2.h
 DEPTC_mips_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-mips.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/mipspe.h $(INCDIR)/coff/external.h \
   $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h \
@@ -1438,20 +1447,6 @@ DEPTC_i386_multi = $(DEPTC_i386_aout) $(DEPTC_i386_coff) \
 DEPTC_mips_multi = $(DEPTC_mips_coff) $(DEPTC_mips_ecoff) \
   $(DEPTC_mips_elf)
 DEPTC_cris_multi = $(DEPTC_cris_aout) $(DEPTC_cris_elf)
-DEPTC_mep_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
-  $(srcdir)/config/tc-mep.h $(INCDIR)/coff/internal.h \
-  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h dwarf2dbg.h \
-  subsegs.h $(INCDIR)/obstack.h $(srcdir)/../opcodes/mep-desc.h \
-  $(INCDIR)/opcode/cgen.h $(srcdir)/../opcodes/mep-opc.h \
-  cgen.h $(INCDIR)/elf/common.h $(INCDIR)/elf/mep.h $(INCDIR)/elf/reloc-macros.h \
-  $(BFDDIR)/libbfd.h $(INCDIR)/safe-ctype.h
-DEPTC_mep_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
-  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
-  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mep.h \
-  dwarf2dbg.h subsegs.h $(INCDIR)/obstack.h $(srcdir)/../opcodes/mep-desc.h \
-  $(INCDIR)/opcode/cgen.h $(srcdir)/../opcodes/mep-opc.h \
-  cgen.h $(INCDIR)/elf/mep.h $(INCDIR)/elf/reloc-macros.h \
-  $(BFDDIR)/libbfd.h $(INCDIR)/safe-ctype.h
 DEPOBJ_alpha_ecoff = $(srcdir)/config/obj-ecoff.h $(srcdir)/config/tc-alpha.h \
   ecoff.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h \
   $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
@@ -1628,6 +1623,12 @@ DEPOBJ_mcore_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mcore.h dwarf2dbg.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
   $(INCDIR)/obstack.h struc-symbol.h dwarf2dbg.h $(INCDIR)/aout/aout64.h
+DEPOBJ_mep_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mep.h dwarf2dbg.h \
+  $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
+  $(INCDIR)/obstack.h struc-symbol.h dwarf2dbg.h $(INCDIR)/elf/mep.h \
+  $(INCDIR)/elf/reloc-macros.h $(INCDIR)/aout/aout64.h
 DEPOBJ_mips_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-mips.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/mipspe.h $(INCDIR)/coff/external.h \
   $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h \
@@ -1808,16 +1809,6 @@ DEPOBJ_i386_multi = $(DEPOBJ_i386_aout) $(DEPOBJ_i386_coff) \
 DEPOBJ_mips_multi = $(DEPOBJ_mips_coff) $(DEPOBJ_mips_ecoff) \
   $(DEPOBJ_mips_elf)
 DEPOBJ_cris_multi = $(DEPOBJ_cris_aout) $(DEPOBJ_cris_elf)
-DEPOBJ_mep_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
-  $(srcdir)/config/tc-mep.h $(INCDIR)/coff/internal.h \
-  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h \
-  subsegs.h $(INCDIR)/safe-ctype.h
-DEPOBJ_mep_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
-  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
-  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mep.h \
-  $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
-  $(INCDIR)/elf/mep.h $(INCDIR)/elf/reloc-macros.h $(INCDIR)/aout/aout64.h \
-  $(INCDIR)/safe-ctype.h
 DEP_alpha_ecoff = $(srcdir)/config/obj-ecoff.h $(srcdir)/config/tc-alpha.h \
   ecoff.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h
 DEP_alpha_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
@@ -1962,6 +1953,11 @@ DEP_mcore_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mcore.h dwarf2dbg.h \
   $(srcdir)/config/obj-coff.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/mcore.h $(INCDIR)/coff/external.h $(BFDDIR)/libcoff.h
+DEP_mep_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mep.h dwarf2dbg.h \
+  $(srcdir)/config/obj-coff.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h
 DEP_mips_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-mips.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/mipspe.h $(INCDIR)/coff/external.h \
   $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
@@ -2114,13 +2110,6 @@ DEP_i386_multi = $(DEP_i386_aout) $(DEP_i386_coff) \
 DEP_mips_multi = $(DEP_mips_coff) $(DEP_mips_ecoff) \
   $(DEP_mips_elf)
 DEP_cris_multi = $(DEP_cris_aout) $(DEP_cris_elf)
-DEP_mep_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-mep.h \
-  $(INCDIR)/symcat.h $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h
-DEP_mep_elf = $(srcdir)/config/obj-elf.h $(INCDIR)/symcat.h \
-  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
-  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mep.h \
-  $(INCDIR)/safe-ctype.h
 BMKDEP = #DO NOT PUT ANYTHING BETWEEN THIS LINE AND THE MATCHING WARNING ABOVE.
 #MKDEP    DO NOT PUT ANYTHING BETWEEN THIS LINE AND THE MATCHING WARNING BELOW.
 app.o: app.c
@@ -2133,7 +2122,8 @@ depend.o: depend.c
 dwarf2dbg.o: dwarf2dbg.c $(INCDIR)/safe-ctype.h dwarf2dbg.h \
   $(INCDIR)/filenames.h subsegs.h $(INCDIR)/obstack.h \
   $(INCDIR)/elf/dwarf2.h
-dw2gencfi.o: dw2gencfi.c dw2gencfi.h $(INCDIR)/elf/dwarf2.h
+dw2gencfi.o: dw2gencfi.c dw2gencfi.h $(INCDIR)/elf/dwarf2.h \
+  subsegs.h $(INCDIR)/obstack.h
 ecoff.o: ecoff.c ecoff.h
 ehopt.o: ehopt.c subsegs.h $(INCDIR)/obstack.h $(INCDIR)/elf/dwarf2.h
 expr.o: expr.c $(INCDIR)/safe-ctype.h $(INCDIR)/obstack.h
@@ -2159,7 +2149,7 @@ subsegs.o: subsegs.c subsegs.h $(INCDIR)/obstack.h
 symbols.o: symbols.c $(INCDIR)/safe-ctype.h $(INCDIR)/obstack.h \
   subsegs.h struc-symbol.h
 write.o: write.c subsegs.h $(INCDIR)/obstack.h output-file.h \
-  dwarf2dbg.h
+  dwarf2dbg.h $(BFDDIR)/libbfd.h $(INCDIR)/hashtab.h
 itbl-ops.o: itbl-ops.c itbl-ops.h
 e-crisaout.o: $(srcdir)/config/e-crisaout.c emul-target.h
 e-criself.o: $(srcdir)/config/e-criself.c emul-target.h

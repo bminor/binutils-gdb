@@ -100,6 +100,13 @@ m88k-dis.c
 maxq-dis.c
 mcore-dis.c
 mcore-opc.h
+mep-asm.c
+mep-desc.c
+mep-desc.h
+mep-dis.c
+mep-ibld.c
+mep-opc.c
+mep-opc.h
 mips16-opc.c
 mips-dis.c
 mips-opc.c

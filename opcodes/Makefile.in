@@ -1484,23 +1484,37 @@ maxq-dis.lo: maxq-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
 mcore-dis.lo: mcore-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   mcore-opc.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h
-mep-asm.lo: mep-asm.c sysdep.h config.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h mep-desc.h \
-  $(INCDIR)/opcode/cgen.h mep-opc.h opintl.h
-mep-desc.lo: mep-desc.c sysdep.h config.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h mep-desc.h \
-  $(INCDIR)/opcode/cgen.h mep-opc.h opintl.h
-mep-dis.lo: mep-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
-  $(BFD_H) $(INCDIR)/ansidecl.h \
-  $(INCDIR)/symcat.h mep-desc.h $(INCDIR)/opcode/cgen.h \
-  mep-opc.h opintl.h
-mep-ibld.lo: mep-ibld.c sysdep.h config.h $(INCDIR)/dis-asm.h \
-  $(BFD_H) $(INCDIR)/ansidecl.h \
-  $(INCDIR)/symcat.h mep-desc.h $(INCDIR)/opcode/cgen.h \
-  mep-opc.h opintl.h
-mep-opc.lo: mep-opc.c sysdep.h config.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h mep-desc.h \
-  $(INCDIR)/opcode/cgen.h mep-opc.h
+mep-asm.lo: mep-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/symcat.h \
+  mep-desc.h $(INCDIR)/opcode/cgen-bitset.h $(INCDIR)/opcode/cgen.h \
+  $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen-bitset.h mep-opc.h \
+  opintl.h $(INCDIR)/xregex.h $(INCDIR)/xregex2.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/ansidecl.h $(INCDIR)/safe-ctype.h
+mep-desc.lo: mep-desc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/symcat.h \
+  mep-desc.h $(INCDIR)/opcode/cgen-bitset.h $(INCDIR)/opcode/cgen.h \
+  $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen-bitset.h mep-opc.h \
+  opintl.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/xregex.h $(INCDIR)/xregex2.h
+mep-dis.lo: mep-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
+  $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
+  mep-desc.h $(INCDIR)/opcode/cgen-bitset.h $(INCDIR)/opcode/cgen.h \
+  $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen-bitset.h mep-opc.h \
+  opintl.h $(INCDIR)/elf/mep.h $(INCDIR)/elf/reloc-macros.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h
+mep-ibld.lo: mep-ibld.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
+  $(BFD_H) $(INCDIR)/symcat.h mep-desc.h $(INCDIR)/opcode/cgen-bitset.h \
+  $(INCDIR)/opcode/cgen.h $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen-bitset.h \
+  mep-opc.h opintl.h $(INCDIR)/safe-ctype.h
+mep-opc.lo: mep-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/symcat.h \
+  mep-desc.h $(INCDIR)/opcode/cgen-bitset.h $(INCDIR)/opcode/cgen.h \
+  $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen-bitset.h mep-opc.h \
+  $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h $(INCDIR)/elf/mep.h \
+  $(INCDIR)/elf/reloc-macros.h
 mips-dis.lo: mips-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
   $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mips.h \
