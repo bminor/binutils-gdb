@@ -1,3 +1,7 @@
+2007-03-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* m32r.opc: Formatting.
+
 2006-05-22  Nick Clifton  <nickc@redhat.com>
 
 	* iq2000.cpu: Fix include paths for iq2000m.cpu and iq10.cpu.
