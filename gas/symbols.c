@@ -2941,10 +2941,10 @@ symbol_print_statistics (FILE *file)
 #ifdef OBJ_COMPLEX_RELC
 
 /* Convert given symbol to a new complex-relocation symbol name.  This
-   may bee a recursive function, since it might be called for non-leaf
+   may be a recursive function, since it might be called for non-leaf
    nodes (plain symbols) in the expression tree.  The caller owns the
-   returning string, so should free() it eventually.  Errors are
-   indicated via as_bad() and a NULL return value.  The given symbol
+   returning string, so should free it eventually.  Errors are
+   indicated via as_bad and a NULL return value.  The given symbol
    is marked with sy_used_in_reloc.  */
 
 char *

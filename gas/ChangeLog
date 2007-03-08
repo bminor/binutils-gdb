@@ -1,5 +1,9 @@
 2007-03-08  Alan Modra  <amodra@bigpond.net.au>
 
+	* symbols.c (symbol_relc_make_sym): Comment typo fixes.
+
+2007-03-08  Alan Modra  <amodra@bigpond.net.au>
+
 	* Makefile.am: Run "make dep-am".
 	* Makefile.in: Regenerate.
 	* po/POTFILES.in: Regenerate.
