@@ -554,6 +554,7 @@ BFD64_BACKENDS = \
 	coff64-rs6000.lo \
 	demo64.lo \
 	efi-app-ia64.lo \
+	efi-app-x86_64.lo \
 	elf64-x86-64.lo \
 	elf64-alpha.lo \
 	elf64-hppa.lo \
@@ -584,6 +585,7 @@ BFD64_BACKENDS_CFILES = \
 	coff64-rs6000.c \
 	demo64.c \
 	efi-app-ia64.c \
+	efi-app-x86_64.c \
 	elf64-x86-64.c \
 	elf64-alpha.c \
 	elf64-hppa.c \
@@ -1414,9 +1416,10 @@ elf32-mcore.lo: elf32-mcore.c $(INCDIR)/filenames.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/hashtab.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/mcore.h \
   $(INCDIR)/elf/reloc-macros.h elf32-target.h
-elf32-mep.lo: elf32-mep.c elf-bfd.h $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/elf/mep.h $(INCDIR)/elf/reloc-macros.h \
+elf32-mep.lo: elf32-mep.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
+  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/mep.h \
+  $(INCDIR)/elf/reloc-macros.h $(INCDIR)/libiberty.h \
   elf32-target.h
 elfxx-mips.lo: elfxx-mips.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(INCDIR)/libiberty.h elf-bfd.h $(INCDIR)/elf/common.h \
@@ -1799,6 +1802,11 @@ efi-app-ia64.lo: efi-app-ia64.c $(INCDIR)/filenames.h \
   $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h coffcode.h \
   peicode.h libpei.h
+efi-app-x86_64.lo: efi-app-x86_64.c $(INCDIR)/filenames.h \
+  coff-x86_64.c $(INCDIR)/hashtab.h $(INCDIR)/coff/x86_64.h \
+  $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h \
+  coffcode.h peicode.h libpei.h
 elf64-x86-64.lo: elf64-x86-64.c $(INCDIR)/filenames.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/hashtab.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/x86-64.h \

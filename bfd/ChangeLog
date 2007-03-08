@@ -1,3 +1,11 @@
+2007-03-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (BFD64_BACKENDS): Add efi-app-x86_64.lo.
+	(BFD64_BACKENDS_CFILES): Add efi-app-x86_64.c.
+	Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
 2007-03-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config.bfd (x86_64-*-freebsd*): Add bfd_efi_app_x86_64_vec.
