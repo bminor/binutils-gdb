@@ -94,6 +94,7 @@ cpu-m68k.c
 cpu-m88k.c
 cpu-maxq.c
 cpu-mcore.c
+cpu-mep.c
 cpu-mips.c
 cpu-mmix.c
 cpu-msp430.c
@@ -131,6 +132,7 @@ ecofflink.c
 ecoffswap.h
 efi-app-ia32.c
 efi-app-ia64.c
+efi-app-x86_64.c
 elf32-am33lin.c
 elf32-arc.c
 elf32-arm.c
@@ -163,6 +165,7 @@ elf32-m68hc1x.c
 elf32-m68k.c
 elf32-m88k.c
 elf32-mcore.c
+elf32-mep.c
 elf32-mips.c
 elf32-msp430.c
 elf32-mt.c
