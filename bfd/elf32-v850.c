@@ -2083,7 +2083,7 @@ v850_elf_link_output_symbol_hook (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 				  const char *name ATTRIBUTE_UNUSED,
 				  Elf_Internal_Sym *sym,
 				  asection *input_sec,
-				  struct elf_link_hash_entry *h)
+				  struct elf_link_hash_entry *h ATTRIBUTE_UNUSED)
 {
   /* If we see a common symbol, which implies a relocatable link, then
      if a symbol was in a special common section in an input file, mark
@@ -2101,10 +2101,9 @@ v850_elf_link_output_symbol_hook (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 
   /* The price we pay for using h->other unused bits as flags in the
      linker is cleaning up after ourselves.  */
-     
-  if (h != NULL)
-    h->other &= ~(V850_OTHER_SDA | V850_OTHER_ZDA | V850_OTHER_TDA
-		  | V850_OTHER_ERROR);
+
+  sym->st_other &= ~(V850_OTHER_SDA | V850_OTHER_ZDA | V850_OTHER_TDA
+		     | V850_OTHER_ERROR);
 
   return TRUE;
 }
