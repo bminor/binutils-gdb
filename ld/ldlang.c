@@ -4411,19 +4411,21 @@ lang_size_sections_1
 
 		/* A backwards move of dot should be accompanied by
 		   an explicit assignment to the section LMA (ie.
-		   os->load_base set) because backwards moves normally
+		   os->load_base set) because backwards moves can
 		   create overlapping LMAs.  */
 		if (dot < last->vma
-		    && os->bfd_section->size != 0)
+		    && os->bfd_section->size != 0
+		    && dot + os->bfd_section->size <= last->vma)
 		  {
-		    einfo (_("%P: warning: dot moved backwards before `%s'\n"),
-			   os->name);
-
 		    /* If dot moved backwards then leave lma equal to
 		       vma.  This is the old default lma, which might
 		       just happen to work when the backwards move is
-		       sufficiently large.  Nag anyway, so people fix
-		       their linker scripts.  */
+		       sufficiently large.  Nag if this changes anything,
+		       so people can fix their linker scripts.  */
+
+		    if (last->vma != last->lma)
+		      einfo (_("%P: warning: dot moved backwards before `%s'\n"),
+			     os->name);
 		  }
 		else
 		  {

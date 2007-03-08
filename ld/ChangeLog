@@ -1,3 +1,9 @@
+2007-03-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (lang_size_sections_1): Correct backwards dot move
+	test to not trigger on overlays.  Only warn on backwards move
+	if non-default lma.
+
 2007-03-07  Joseph Myers  <joseph@codesourcery.com>
 
 	* configure.in (REPORT_BUGS_TEXI): Define to Texinfo version of
@@ -176,7 +182,7 @@
 
 	* pe-dll.c: (make_one) Conditionally include jump stubs.
 	* emultempl/pe.em (gld_${EMULATION_NAME}_after_open): Identify
-	redundant jump stubs from import libraries and exclude them from 
+	redundant jump stubs from import libraries and exclude them from
 	link.
 
 2007-01-19  H.J. Lu  <hongjiu.lu@intel.com>
@@ -189,7 +195,7 @@
 	symbolic_unset and command_line.dynamic_list to
 	dynamic_list_unset.  Check -Bsymbolic, -Bsymbolic-functions and
 	--dynamic-list* before setting link_info.symbolic,
-	link_info.dynamic and link_info.dynamic_data. 
+	link_info.dynamic and link_info.dynamic_data.
 
 	* lexsup.c (option_values): Add OPTION_SYMBOLIC_FUNCTIONS.
 	(ld_options): Use OPTION_SYMBOLIC_FUNCTIONS with
