@@ -1,5 +1,12 @@
 2007-03-08  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* spu-tdep.c (spu_unwind_pc): Mask off interrupt enable bit.
+	(spu_software_single_step): Likewise.
+	(spu_read_pc, spu_write_pc): New functions.
+	(spu_gdbarch_init): Install them.
+
+2007-03-08  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* cli/cli-dump.c (struct callback_data): load_offset needs to 
 	have signed long type.
 

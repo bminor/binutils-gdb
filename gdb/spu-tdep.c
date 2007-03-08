@@ -726,13 +726,31 @@ static const struct frame_base spu_frame_base = {
 static CORE_ADDR
 spu_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  return frame_unwind_register_unsigned (next_frame, SPU_PC_REGNUM);
+  CORE_ADDR pc = frame_unwind_register_unsigned (next_frame, SPU_PC_REGNUM);
+  /* Mask off interrupt enable bit.  */
+  return pc & -4;
 }
 
 static CORE_ADDR
 spu_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   return frame_unwind_register_unsigned (next_frame, SPU_SP_REGNUM);
+}
+
+static CORE_ADDR
+spu_read_pc (ptid_t ptid)
+{
+  CORE_ADDR pc = read_register_pid (SPU_PC_REGNUM, ptid);
+  /* Mask off interrupt enable bit.  */
+  return pc & -4;
+}
+
+static void
+spu_write_pc (CORE_ADDR pc, ptid_t ptid)
+{
+  /* Keep interrupt enabled state unchanged.  */
+  CORE_ADDR old_pc = read_register_pid (SPU_PC_REGNUM, ptid);
+  write_register_pid (SPU_PC_REGNUM, (pc & -4) | (old_pc & 3), ptid);
 }
 
 
@@ -970,7 +988,8 @@ spu_software_single_step (enum target_signal signal, int insert_breakpoints_p)
       gdb_byte buf[4];
 
       regcache_cooked_read (current_regcache, SPU_PC_REGNUM, buf);
-      pc = extract_unsigned_integer (buf, 4);
+      /* Mask off interrupt enable bit.  */
+      pc = extract_unsigned_integer (buf, 4) & -4;
 
       if (target_read_memory (pc, buf, 4))
 	return;
@@ -980,9 +999,9 @@ spu_software_single_step (enum target_signal signal, int insert_breakpoints_p)
 	  instruction is a PPE-assisted call, in which case it is at PC + 8.
 	  Wrap around LS limit to be on the safe side.  */
       if ((insn & 0xffffff00) == 0x00002100)
-	next_pc = (pc + 8) & (SPU_LS_SIZE - 1) & -4;
+	next_pc = (pc + 8) & (SPU_LS_SIZE - 1);
       else
-	next_pc = (pc + 4) & (SPU_LS_SIZE - 1) & -4;
+	next_pc = (pc + 4) & (SPU_LS_SIZE - 1);
 
       insert_single_step_breakpoint (next_pc);
 
@@ -995,10 +1014,10 @@ spu_software_single_step (enum target_signal signal, int insert_breakpoints_p)
 	  else if (reg != -1)
 	    {
 	      regcache_cooked_read_part (current_regcache, reg, 0, 4, buf);
-	      target += extract_unsigned_integer (buf, 4);
+	      target += extract_unsigned_integer (buf, 4) & -4;
 	    }
 
-	  target = target & (SPU_LS_SIZE - 1) & -4;
+	  target = target & (SPU_LS_SIZE - 1);
 	  if (target != next_pc)
 	    insert_single_step_breakpoint (target);
 	}
@@ -1035,6 +1054,8 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_num_pseudo_regs (gdbarch, SPU_NUM_PSEUDO_REGS);
   set_gdbarch_sp_regnum (gdbarch, SPU_SP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, SPU_PC_REGNUM);
+  set_gdbarch_read_pc (gdbarch, spu_read_pc);
+  set_gdbarch_write_pc (gdbarch, spu_write_pc);
   set_gdbarch_register_name (gdbarch, spu_register_name);
   set_gdbarch_register_type (gdbarch, spu_register_type);
   set_gdbarch_pseudo_register_read (gdbarch, spu_pseudo_register_read);
