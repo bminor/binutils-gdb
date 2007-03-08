@@ -1,5 +1,12 @@
 2007-03-08  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
+	* gdb.base/callfuncs.exp (do_get_all_registers): Remove.
+	(fetch_all_registers): New function, uses gdb_test_multiple and
+	exp_continue to fetch inferior output line-by-line.
+	Replace all uses of do_get_all_registers by fetch_all_registers.
+
+2007-03-08  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
 	* gdb.base/relativedebug.exp: Skip test if gdb,nosignals is set
 	in target_info.
 
