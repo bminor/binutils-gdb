@@ -1,5 +1,10 @@
 2007-03-08  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-v850.c (v850_elf_link_output_symbol_hook): Clean out
+	V850_OTHER_* bits.
+
+2007-03-08  Alan Modra  <amodra@bigpond.net.au>
+
 	* Makefile.am (BFD64_BACKENDS): Add efi-app-x86_64.lo.
 	(BFD64_BACKENDS_CFILES): Add efi-app-x86_64.c.
 	Run "make dep-am".
