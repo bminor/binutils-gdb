@@ -559,6 +559,101 @@ spu_virtual_frame_pointer (CORE_ADDR pc, int *reg, LONGEST *offset)
     }
 }
 
+/* Return true if we are in the function's epilogue, i.e. after the
+   instruction that destroyed the function's stack frame.
+
+   1) scan forward from the point of execution:
+       a) If you find an instruction that modifies the stack pointer
+          or transfers control (except a return), execution is not in
+          an epilogue, return.
+       b) Stop scanning if you find a return instruction or reach the
+          end of the function or reach the hard limit for the size of
+          an epilogue.
+   2) scan backward from the point of execution:
+        a) If you find an instruction that modifies the stack pointer,
+            execution *is* in an epilogue, return.
+        b) Stop scanning if you reach an instruction that transfers
+           control or the beginning of the function or reach the hard
+           limit for the size of an epilogue.  */
+
+static int
+spu_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  CORE_ADDR scan_pc, func_start, func_end, epilogue_start, epilogue_end;
+  bfd_byte buf[4];
+  unsigned int insn;
+  int rt, ra, rb, rc, immed;
+
+  /* Find the search limits based on function boundaries and hard limit.
+     We assume the epilogue can be up to 64 instructions long.  */
+
+  const int spu_max_epilogue_size = 64 * 4;
+
+  if (!find_pc_partial_function (pc, NULL, &func_start, &func_end))
+    return 0;
+
+  if (pc - func_start < spu_max_epilogue_size)
+    epilogue_start = func_start;
+  else
+    epilogue_start = pc - spu_max_epilogue_size;
+
+  if (func_end - pc < spu_max_epilogue_size)
+    epilogue_end = func_end;
+  else
+    epilogue_end = pc + spu_max_epilogue_size;
+
+  /* Scan forward until next 'bi $0'.  */
+
+  for (scan_pc = pc; scan_pc < epilogue_end; scan_pc += 4)
+    {
+      if (target_read_memory (scan_pc, buf, 4))
+	return 0;
+      insn = extract_unsigned_integer (buf, 4);
+
+      if (is_branch (insn, &immed, &ra))
+	{
+	  if (immed == 0 && ra == SPU_LR_REGNUM)
+	    break;
+
+	  return 0;
+	}
+
+      if (is_ri10 (insn, op_ai, &rt, &ra, &immed)
+	  || is_rr (insn, op_a, &rt, &ra, &rb)
+	  || is_ri10 (insn, op_lqd, &rt, &ra, &immed))
+	{
+	  if (rt == SPU_RAW_SP_REGNUM)
+	    return 0;
+	}
+    }
+
+  if (scan_pc >= epilogue_end)
+    return 0;
+
+  /* Scan backward until adjustment to stack pointer (R1).  */
+
+  for (scan_pc = pc - 4; scan_pc >= epilogue_start; scan_pc -= 4)
+    {
+      if (target_read_memory (scan_pc, buf, 4))
+	return 0;
+      insn = extract_unsigned_integer (buf, 4);
+
+      if (is_branch (insn, &immed, &ra))
+	return 0;
+
+      if (is_ri10 (insn, op_ai, &rt, &ra, &immed)
+	  || is_rr (insn, op_a, &rt, &ra, &rb)
+	  || is_ri10 (insn, op_lqd, &rt, &ra, &immed))
+	{
+	  if (rt == SPU_RAW_SP_REGNUM)
+	    return 1;
+	}
+    }
+
+  return 0;
+}
+
+
 /* Normal stack frames.  */
 
 struct spu_unwind_cache
@@ -1100,6 +1195,7 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_virtual_frame_pointer (gdbarch, spu_virtual_frame_pointer);
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_skip_prologue (gdbarch, spu_skip_prologue);
+  set_gdbarch_in_function_epilogue_p (gdbarch, spu_in_function_epilogue_p);
 
   /* Breakpoints.  */
   set_gdbarch_decr_pc_after_break (gdbarch, 4);
