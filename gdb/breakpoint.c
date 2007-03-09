@@ -3134,8 +3134,6 @@ bpstat_what (bpstat bs)
   /* step_resume entries: a step resume breakpoint overrides another
      breakpoint of signal handling (see comment in wait_for_inferior
      at where we set the step_resume breakpoint).  */
-  /* We handle the through_sigtramp_breakpoint the same way; having both
-     one of those and a step_resume_breakpoint is probably very rare (?).  */
 
   static const enum bpstat_what_main_action
     table[(int) class_last][(int) BPSTAT_WHAT_LAST] =

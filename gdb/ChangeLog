@@ -1,3 +1,9 @@
+2007-03-09  Markus Deuling  <deuling@de.ibm.com>
+
+	* infrun.c (breakpoints_failed): Remove unnecessary variable.
+	(handle_inferior_event): Remove unnecessary braces.
+	* breakpoint.c (bpstat_what): Remove wrong comment.
+
 2007-03-09  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* spu-tdep.c (spu_in_function_epilogue_p): New function.

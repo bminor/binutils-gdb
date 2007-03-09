@@ -288,10 +288,6 @@ int proceed_to_finish;
 
 struct regcache *stop_registers;
 
-/* Nonzero if program stopped due to error trying to insert breakpoints.  */
-
-static int breakpoints_failed;
-
 /* Nonzero after stop if current stack frame should be printed.  */
 
 static int stop_print_frame;
@@ -1830,7 +1826,6 @@ handle_inferior_event (struct execution_control_state *ecs)
   stop_print_frame = 1;
   ecs->random_signal = 0;
   stopped_by_random_signal = 0;
-  breakpoints_failed = 0;
 
   if (stop_signal == TARGET_SIGNAL_TRAP
       && trap_expected
@@ -2126,9 +2121,7 @@ process_event_stop_test:
         if (debug_infrun)
 	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_SINGLE\n");
 	if (breakpoints_inserted)
-	  {
-	    remove_breakpoints ();
-	  }
+	  remove_breakpoints ();
 	breakpoints_inserted = 0;
 	ecs->another_trap = 1;
 	/* Still need to check other stuff, at least the case
@@ -2909,8 +2902,9 @@ keep_going (struct execution_control_state *ecs)
 
       if (!breakpoints_inserted && !ecs->another_trap)
 	{
-	  breakpoints_failed = insert_breakpoints ();
-	  if (breakpoints_failed)
+	  /* Stop stepping when inserting breakpoints
+	     has failed.  */
+	  if (insert_breakpoints () != 0)
 	    {
 	      stop_stepping (ecs);
 	      return;
