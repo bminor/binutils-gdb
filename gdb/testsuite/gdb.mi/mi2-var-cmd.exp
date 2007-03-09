@@ -87,7 +87,7 @@ mi_gdb_test "-var-create lcharacter * lcharacter" \
 	"create local variable lcharacter "
 
 mi_gdb_test "-var-create lpcharacter * lpcharacter" \
-	"\\^done,name=\"lpcharacter\",numchild=\"1\",value=\"$hex \\\\\".*\\\\\"\",type=\"char \\*\"" \
+	"\\^done,name=\"lpcharacter\",numchild=\"1\",value=\"$hex.*\",type=\"char \\*\"" \
 	"create local variable lpcharacter"
 
 mi_gdb_test "-var-create llong * llong" \
