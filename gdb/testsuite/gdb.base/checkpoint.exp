@@ -359,8 +359,21 @@ gdb_expect {
 gdb_breakpoint $break2_loc
 gdb_test "continue" "breakpoint 2.*" "break2 with many checkpoints"
 
-gdb_test "info checkpoints" " 600 .* 0 .*" \
-    "info checkpoints with at least 600 checkpoints"
+set count 0
+set msg "info checkpoints with at least 600 checkpoints"
+gdb_test_multiple "info checkpoints" $msg {
+    -re "  $decimal process \[^\r\]*\r\n" {
+	incr count
+	exp_continue
+    }
+    -re "$gdb_prompt $" {
+	if { $count >= 600 } {
+	    pass $msg
+	} else {
+	    fail $msg
+	}
+    }
+}    
 
 #
 # OK, kill 'em all...

@@ -1,3 +1,8 @@
+2007-03-09  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/checkpoint.exp: Rewrite 600 checkpoint test to
+	collect output incrementally.
+
 2007-03-08  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* gdb.mi/mi-var-cmd.exp: Allow value without "..." string
