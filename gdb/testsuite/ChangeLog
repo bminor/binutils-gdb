@@ -1,5 +1,10 @@
 2007-03-08  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
+	* gdb.xml/tdesc-arch.exp: Test is unsupported on target with
+	just a single architecture.
+
+2007-03-08  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
 	* gdb.base/callfuncs.exp (do_get_all_registers): Remove.
 	(fetch_all_registers): New function, uses gdb_test_multiple and
 	exp_continue to fetch inferior output line-by-line.

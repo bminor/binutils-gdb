@@ -32,6 +32,11 @@ gdb_test_multiple "set architecture" $msg {
 	set arch2 $expect_out(2,string)
 	pass $msg
     }
+    -re "Requires an argument. Valid arguments are (\[^ \]*), auto\\.\r\n$gdb_prompt $" {
+	# If there is just one supported architecture, we can't do this test.
+	unsupported "tdesc-arch.exp"
+	return -1
+    }
 }
 
 set default_arch ""
