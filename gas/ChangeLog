@@ -1,3 +1,9 @@
+2007-03-09  Alexandre Oliva  <aoliva@redhat.com>
+
+	* app.c (do_scrub_chars): Recognize comments after # line "file".
+	* read.c (get_linefile_number): New.
+	(s_app_line): Accept ill-formed .linefile lines as comments.
+
 2007-03-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-i386.h (WORKING_DOT_WORD): Define.

@@ -355,7 +355,7 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 	  5: parsing a string, then go to old-state
 	  6: putting out \ escape in a "d string.
 	  7: no longer used
-	  8: After putting out a .appfile string, flush until newline.
+	  8: no longer used
 	  9: After seeing symbol char in state 3 (keep 1white after symchar)
 	 10: After seeing whitespace in state 9 (keep white before symchar)
 	 11: After seeing a symbol character in state 0 (eg a label definition)
@@ -514,7 +514,7 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 		  PUT (ch);
 		  quotechar = ch;
 		  state = 5;
-		  old_state = 8;
+		  old_state = 3;
 		}
 	      else
 		{
@@ -633,16 +633,6 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 	      break;
 	    }
 	  PUT (ch);
-	  continue;
-
-	case 8:
-	  do
-	    if ((ch = GET ()) == EOF)
-	      goto fromeof;
-	    else
-	      PUT (ch);
-	  while (ch != '\n');
-	  state = 0;
 	  continue;
 
 #ifdef DOUBLEBAR_PARALLEL
