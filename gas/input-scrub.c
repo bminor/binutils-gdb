@@ -1,6 +1,6 @@
 /* input_scrub.c - Break up input buffers into whole numbers of lines.
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   2000, 2001, 2003, 2006
+   2000, 2001, 2003, 2006, 2007
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -435,13 +435,34 @@ bump_line_counters (void)
    Returns nonzero if the filename actually changes.  */
 
 int
-new_logical_line (char *fname, /* DON'T destroy it!  We point to it!  */
-		  int line_number)
+new_logical_line_flags (char *fname, /* DON'T destroy it!  We point to it!  */
+			int line_number,
+			int flags)
 {
+  switch (flags)
+    {
+    case 0:
+      break;
+    case 1:
+      if (line_number != -1)
+	abort ();
+      break;
+    case 1 << 1:
+    case 1 << 2:
+      /* FIXME: we could check that include nesting is correct.  */
+      break;
+    default:
+      abort ();
+    }
+
   if (line_number >= 0)
     logical_input_line = line_number;
-  else if (line_number == -2 && logical_input_line > 0)
-    --logical_input_line;
+  else if (line_number == -1 && fname && !*fname && (flags & (1 << 2)))
+    {
+      logical_input_file = physical_input_file;
+      logical_input_line = physical_input_line;
+      fname = NULL;
+    }
 
   if (fname
       && (logical_input_file == NULL
@@ -453,6 +474,13 @@ new_logical_line (char *fname, /* DON'T destroy it!  We point to it!  */
   else
     return 0;
 }
+
+int
+new_logical_line (char *fname, int line_number)
+{
+  return new_logical_line_flags (fname, line_number, 0);
+}
+
 
 /* Return the current file name and line number.
    namep should be char * const *, but there are compilers which screw

@@ -1,6 +1,6 @@
 /* read.c - read a source file -
    Copyright 1986, 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
@@ -329,7 +329,7 @@ static const pseudo_typeS potable[] = {
 /* extend  */
   {"extern", s_ignore, 0},	/* We treat all undef as ext.  */
   {"appfile", s_app_file, 1},
-  {"appline", s_app_line, 0},
+  {"appline", s_app_line, 1},
   {"fail", s_fail, 0},
   {"file", s_app_file, 0},
   {"fill", s_fill, 0},
@@ -364,6 +364,7 @@ static const pseudo_typeS potable[] = {
   {"irepc", s_irp, 1},
   {"lcomm", s_lcomm, 0},
   {"lflags", listing_flags, 0},	/* Listing flags.  */
+  {"linefile", s_app_line, 0},
   {"linkonce", s_linkonce, 0},
   {"list", listing_list, 1},	/* Turn listing on.  */
   {"llen", listing_psize, 1},
@@ -1681,11 +1682,8 @@ s_app_file (int appfile)
   /* Some assemblers tolerate immediately following '"'.  */
   if ((s = demand_copy_string (&length)) != 0)
     {
-      /* If this is a fake .appfile, a fake newline was inserted into
-	 the buffer.  Passing -2 to new_logical_line tells it to
-	 account for it.  */
       int may_omit
-	= (!new_logical_line (s, appfile ? -2 : -1) && appfile);
+	= (!new_logical_line_flags (s, -1, 1) && appfile);
 
       /* In MRI mode, the preprocessor may have inserted an extraneous
 	 backquote.  */
@@ -1706,7 +1704,7 @@ s_app_file (int appfile)
    pseudo-ops.  */
 
 void
-s_app_line (int ignore ATTRIBUTE_UNUSED)
+s_app_line (int appline)
 {
   int l;
 
@@ -1727,7 +1725,57 @@ s_app_line (int ignore ATTRIBUTE_UNUSED)
 	     l + 1);
   else
     {
-      new_logical_line ((char *) NULL, l);
+      int flags = 0;
+      char *file = NULL;
+      int length = 0;
+
+      if (!appline)
+	{
+	  file = demand_copy_string (&length);
+
+	  if (file)
+	    {
+	      int this_flag;
+
+	      while ((this_flag = get_absolute_expression ()))
+		switch (this_flag)
+		  {
+		    /* From GCC's cpp documentation:
+		       1: start of a new file.
+		       2: returning to a file after having included
+		          another file.
+		       3: following text comes from a system header file.
+		       4: following text should be treated as extern "C".
+
+		       4 is nonsensical for the assembler; 3, we don't
+		       care about, so we ignore it just in case a
+		       system header file is included while
+		       preprocessing assembly.  So 1 and 2 are all we
+		       care about, and they are mutually incompatible.
+		       new_logical_line_flags() demands this.  */
+		  case 1:
+		  case 2:
+		    if (flags && flags != (1 << this_flag))
+		      as_warn (_("incompatible flag %i in line directive"),
+			       this_flag);
+		    else
+		      flags |= 1 << this_flag;
+		    break;
+
+		  case 3:
+		  case 4:
+		    /* We ignore these.  */
+		    break;
+
+		  default:
+		    as_warn (_("unsupported flag %i in line directive"),
+			     this_flag);
+		    break;
+		  }
+	    }
+	}
+
+      new_logical_line_flags (file, l, flags);
 #ifdef LISTING
       if (listing)
 	listing_source_line (l);

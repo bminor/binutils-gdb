@@ -1,3 +1,13 @@
+2007-03-09  Alexandre Oliva  <aoliva@redhat.com>
+
+	* app.c (do_scrub_chars): Turn #<line>"file"flags into .linefile.
+	* as.h (new_logical_line_flags): New.
+	* input-scrub.c (new_logical_line): Turned into wrapper for...
+	(new_logical_line_flags): this.  Handle flags.
+	* read.c (potable): Add linefile.  Adjust appline argument.
+	(s_app_file): Fake .appfiles no more.
+	(s_app_line): For .linefile, accept file name and flags.
+
 2007-03-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* symbols.c (symbol_relc_make_sym): Comment typo fixes.

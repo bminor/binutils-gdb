@@ -550,6 +550,7 @@ void   input_scrub_begin (void);
 void   input_scrub_close (void);
 void   input_scrub_end (void);
 int    new_logical_line (char *, int);
+int    new_logical_line_flags (char *, int, int);
 void   subsegs_begin (void);
 void   subseg_change (segT, int);
 segT   subseg_new (const char *, subsegT);

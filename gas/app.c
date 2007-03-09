@@ -1,6 +1,6 @@
 /* This is the Assembler Pre-Processor
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2006
+   1999, 2000, 2001, 2002, 2003, 2006, 2007
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -21,10 +21,10 @@
    02110-1301, USA.  */
 
 /* Modified by Allen Wirfs-Brock, Instantiations Inc 2/90.  */
-/* App, the assembler pre-processor.  This pre-processor strips out excess
-   spaces, turns single-quoted characters into a decimal constant, and turns
-   # <number> <filename> <garbage> into a .line <number>\n.file <filename>
-   pair.  This needs better error-handling.  */
+/* App, the assembler pre-processor.  This pre-processor strips out
+   excess spaces, turns single-quoted characters into a decimal
+   constant, and turns the # in # <number> <filename> <garbage> into a
+   .linefile.  This needs better error-handling.  */
 
 #include "as.h"
 
@@ -351,10 +351,10 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 	  1: After first whitespace on line (flush more white)
 	  2: After first non-white (opcode) on line (keep 1white)
 	  3: after second white on line (into operands) (flush white)
-	  4: after putting out a .line, put out digits
+	  4: after putting out a .linefile, put out digits
 	  5: parsing a string, then go to old-state
 	  6: putting out \ escape in a "d string.
-	  7: After putting out a .appfile, put out string.
+	  7: no longer used
 	  8: After putting out a .appfile string, flush until newline.
 	  9: After seeing symbol char in state 3 (keep 1white after symchar)
 	 10: After seeing whitespace in state 9 (keep white before symchar)
@@ -510,14 +510,11 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 		ch = GET ();
 	      if (ch == '"')
 		{
-		  UNGET (ch);
-		  if (scrub_m68k_mri)
-		    out_string = "\n\tappfile ";
-		  else
-		    out_string = "\n\t.appfile ";
-		  old_state = 7;
-		  state = -1;
-		  PUT (*out_string++);
+		  PUT (' ');
+		  PUT (ch);
+		  quotechar = ch;
+		  state = 5;
+		  old_state = 8;
 		}
 	      else
 		{
@@ -638,22 +635,14 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 	  PUT (ch);
 	  continue;
 
-	case 7:
-	  ch = GET ();
-	  quotechar = ch;
-	  state = 5;
-	  old_state = 8;
-	  PUT (ch);
-	  continue;
-
 	case 8:
 	  do
-	    ch = GET ();
-	  while (ch != '\n' && ch != EOF);
-	  if (ch == EOF)
-	    goto fromeof;
+	    if ((ch = GET ()) == EOF)
+	      goto fromeof;
+	    else
+	      PUT (ch);
+	  while (ch != '\n');
 	  state = 0;
-	  PUT (ch);
 	  continue;
 
 #ifdef DOUBLEBAR_PARALLEL
@@ -1196,9 +1185,9 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 	      old_state = 4;
 	      state = -1;
 	      if (scrub_m68k_mri)
-		out_string = "\tappline ";
+		out_string = "\tlinefile ";
 	      else
-		out_string = "\t.appline ";
+		out_string = "\t.linefile ";
 	      PUT (*out_string++);
 	      break;
 	    }
