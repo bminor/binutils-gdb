@@ -1,3 +1,7 @@
+2007-03-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-i386.h (WORKING_DOT_WORD): Define.
+
 2007-03-09  Alexandre Oliva  <aoliva@redhat.com>
 
 	* app.c (do_scrub_chars): Turn #<line>"file"flags into .linefile.

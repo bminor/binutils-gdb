@@ -500,6 +500,8 @@ void i386_print_statistics (FILE *);
 extern void sco_id (void);
 #endif
 
+#define WORKING_DOT_WORD 1
+
 /* We want .cfi_* pseudo-ops for generating unwind info.  */
 #define TARGET_USE_CFIPOP 1
 
