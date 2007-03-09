@@ -80,7 +80,7 @@ static void OP_DSreg (int, int);
 static void OP_C (int, int);
 static void OP_D (int, int);
 static void OP_T (int, int);
-static void OP_Rd (int, int);
+static void OP_R (int, int);
 static void OP_MMX (int, int);
 static void OP_XMM (int, int);
 static void OP_EM (int, int);
@@ -227,8 +227,8 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Gdq { OP_G, dq_mode }
 #define Gm { OP_G, m_mode }
 #define Gw { OP_G, w_mode }
-#define Rd { OP_Rd, d_mode }
-#define Rm { OP_Rd, m_mode }
+#define Rd { OP_R, d_mode }
+#define Rm { OP_R, m_mode }
 #define Ib { OP_I, b_mode }
 #define sIb { OP_sI, b_mode }	/* sign extened byte */
 #define Iv { OP_I, v_mode }
@@ -5102,7 +5102,7 @@ OP_T (int dummy ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 }
 
 static void
-OP_Rd (int bytemode, int sizeflag)
+OP_R (int bytemode, int sizeflag)
 {
   if (mod == 3)
     OP_E (bytemode, sizeflag);
