@@ -1,5 +1,10 @@
 2007-03-08  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
+	* gdb.mi/mi-var-cmd.exp: Allow -var-update null_ptr test to
+	pass on targets where address zero is readable.
+
+2007-03-08  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
 	* gdb.xml/tdesc-arch.exp: Test is unsupported on target with
 	just a single architecture.
 

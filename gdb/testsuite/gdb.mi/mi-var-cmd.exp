@@ -603,7 +603,7 @@ mi_gdb_test "-var-create null_ptr * **0" \
 # will not test what it was meant to.  Most important is that GDB
 # does not crash.
 mi_gdb_test "-var-update null_ptr" \
-    {\^done,changelist=\[{.*}\]} \
+    {\^done,changelist=\[.*\]} \
     "update null_ptr"
 
 mi_gdb_test "-var-delete null_ptr" \
