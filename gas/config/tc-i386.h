@@ -159,6 +159,11 @@ typedef struct
   /* base_opcode is the fundamental opcode byte without optional
      prefix(es).  */
   unsigned int base_opcode;
+#define Opcode_D	0x2 /* Direction bit:
+			       set if Reg --> Regmem;
+			       unset if Regmem --> Reg. */
+#define Opcode_FloatR	0x8 /* Bit to swap src/dest for float insns. */
+#define Opcode_FloatD 0x400 /* Direction bit for float insns. */
 
   /* extension_opcode is the 3 bit extension for group <n> insns.
      This field is also used to store the 8-bit opcode suffix for the
@@ -207,19 +212,18 @@ typedef struct
   unsigned int opcode_modifier;
 
   /* opcode_modifier bits: */
-#define W		   0x1	/* set if operands can be words or dwords
+#define D		   0x1	/* has direction bit. */
+#define W		   0x2	/* set if operands can be words or dwords
 				   encoded the canonical way */
-#define D		   0x2	/* D = 0 if Reg --> Regmem;
-				   D = 1 if Regmem --> Reg:    MUST BE 0x2 */
-#define Modrm		   0x4
-#define FloatR		   0x8	/* src/dest swap for floats:   MUST BE 0x8 */
+#define Modrm		   0x4	/* insn has a modrm byte. */
 #define ShortForm	  0x10	/* register is in low 3 bits of opcode */
-#define FloatMF		  0x20	/* FP insn memory format bit, sized by 0x4 */
 #define Jump		  0x40	/* special case for jump insns.  */
 #define JumpDword	  0x80  /* call and jump */
 #define JumpByte	 0x100  /* loop and jecxz */
 #define JumpInterSegment 0x200	/* special case for intersegment leaps/calls */
-#define FloatD		 0x400	/* direction for float insns:  MUST BE 0x400 */
+#define FloatMF		 0x400	/* FP insn memory format bit, sized by 0x4 */
+#define FloatR		 0x800	/* src/dest swap for floats. */
+#define FloatD		0x1000	/* has float insn direction bit. */
 #define Size16		0x2000	/* needs size prefix if in 32-bit mode */
 #define Size32		0x4000	/* needs size prefix if in 16-bit mode */
 #define Size64		0x8000	/* needs size prefix if in 64-bit mode */

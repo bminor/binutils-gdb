@@ -1,3 +1,19 @@
+2007-03-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (md_assemble): Use Opcode_XXX instead of XXX
+	on i.tm.base_opcode.
+	(match_template): Likewise.
+	(process_operands): Use ~0x3 mask to match MOV_AX_DISP32.
+
+	* config/tc-i386.h (Opcode_D): New.
+	(Opcode_FloatR): Likewise.
+	(Opcode_FloatD): Likewise.
+	(D): Redefined.
+	(W): Likewise.
+	(FloatMF): Likewise.
+	(FloatR): Likewise.
+	(FloatD): Likewise.
+
 2007-03-09  Alexandre Oliva  <aoliva@redhat.com>
 
 	* app.c (do_scrub_chars): Recognize comments after # line "file".

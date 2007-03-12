@@ -1766,7 +1766,7 @@ md_assemble (line)
       /* Undo SYSV386_COMPAT brokenness when in Intel mode.  See i386.h  */
       if (SYSV386_COMPAT
 	  && (i.tm.base_opcode & 0xfffffde0) == 0xdce0)
-	i.tm.base_opcode ^= FloatR;
+	i.tm.base_opcode ^= Opcode_FloatR;
 
       /* Zap movzx and movsx suffix.  The suffix may have been set from
 	 "word ptr" or "byte ptr" on the source operand, but we'll use
@@ -2657,7 +2657,14 @@ match_template (void)
 		}
 	      /* found_reverse_match holds which of D or FloatDR
 		 we've found.  */
-	      found_reverse_match = t->opcode_modifier & (D | FloatDR);
+	      if ((t->opcode_modifier & D))
+		found_reverse_match = Opcode_D;
+	      else if ((t->opcode_modifier & FloatD))
+		found_reverse_match = Opcode_FloatD;
+	      else
+		found_reverse_match = 0;
+	      if ((t->opcode_modifier & FloatR))
+		found_reverse_match |= Opcode_FloatR;
 	    }
 	  else
 	    {
@@ -3322,7 +3329,7 @@ process_operands (void)
 
       default_seg = build_modrm_byte ();
     }
-  else if ((i.tm.base_opcode & ~(D | W)) == MOV_AX_DISP32)
+  else if ((i.tm.base_opcode & ~0x3) == MOV_AX_DISP32)
     {
       default_seg = &ds;
     }
