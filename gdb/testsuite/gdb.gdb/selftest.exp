@@ -159,7 +159,7 @@ proc do_steps_and_nexts {} {
 		set description "next over textdomain PACKAGE"
 		set command "next"
 	    }
-	    -re "\[0-9\]*\t\{\r\n$gdb_prompt $" {
+	    -re "\[0-9\]+\[\t \]+\{\r\n$gdb_prompt $" {
 		set description "step over initial brace"
 		set command "step"
 	    }
@@ -196,10 +196,6 @@ proc do_steps_and_nexts {} {
 	    -re ".*gdb_stderr = stdio_fileopen .stderr.;.*$gdb_prompt $" {
 		set description "step over gdb_stderr initialization"
 		set command "step"
-	    }
-	    -re "\[ \t\]+\{\r\n$gdb_prompt $" {
-		setup_xfail "mips-*-irix5*"
-		fail "$description ended up at odd location"
 	    }
 	    -re ".*main.c.*No such file or directory.*$gdb_prompt $" {
 		setup_xfail "rs6000-*-aix3*"

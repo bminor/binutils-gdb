@@ -1,3 +1,8 @@
+2007-03-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.gdb/selftest.exp (do_steps_and_nexts): Match spaces as well
+	as tabs.  Remove redundant test pattern.
+
 2007-03-09  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* gdb.base/long_long.exp: Accept optional symbol name in <...>
