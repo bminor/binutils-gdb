@@ -1788,7 +1788,7 @@ get_machine_name (unsigned e_machine)
     case EM_XC16X:		return "Infineon Technologies xc16x";
     case EM_CYGNUS_MEP:         return "Toshiba MeP Media Engine";
     default:
-      snprintf (buff, sizeof (buff), _("<unknown>: %x"), e_machine);
+      snprintf (buff, sizeof (buff), _("<unknown>: 0x%x"), e_machine);
       return buff;
     }
 }
@@ -7697,7 +7697,7 @@ dump_section (Elf_Internal_Shdr *section, FILE *file)
        relsec < section_headers + elf_header.e_shnum;
        ++relsec)
     {
-      if (relsec->sh_type != SHT_RELA
+      if ((relsec->sh_type != SHT_RELA && relsec->sh_type != SHT_REL)
 	  || SECTION_HEADER_INDEX (relsec->sh_info) >= elf_header.e_shnum
 	  || SECTION_HEADER (relsec->sh_info) != section
 	  || relsec->sh_size == 0

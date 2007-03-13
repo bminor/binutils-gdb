@@ -1,3 +1,8 @@
+2007-03-13  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (dump_section): Also test for SHT_REL sections when
+	producing the warning about unapplied relocs.
+
 2007-03-07  Joseph Myers  <joseph@codesourcery.com>
 
 	* configure.in (REPORT_BUGS_TEXI): Define to Texinfo version of
