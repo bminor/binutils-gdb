@@ -514,13 +514,22 @@ frame_save_as_regcache (struct frame_info *this_frame)
 void
 frame_pop (struct frame_info *this_frame)
 {
+  struct frame_info *prev_frame;
+  struct regcache *scratch;
+  struct cleanup *cleanups;
+
+  /* Ensure that we have a frame to pop to.  */
+  prev_frame = get_prev_frame_1 (this_frame);
+
+  if (!prev_frame)
+    error (_("Cannot pop the initial frame."));
+
   /* Make a copy of all the register values unwound from this frame.
      Save them in a scratch buffer so that there isn't a race between
      trying to extract the old values from the current_regcache while
      at the same time writing new values into that same cache.  */
-  struct regcache *scratch
-    = frame_save_as_regcache (get_prev_frame_1 (this_frame));
-  struct cleanup *cleanups = make_cleanup_regcache_xfree (scratch);
+  scratch = frame_save_as_regcache (prev_frame);
+  cleanups = make_cleanup_regcache_xfree (scratch);
 
   /* FIXME: cagney/2003-03-16: It should be possible to tell the
      target's register cache that it is about to be hit with a burst

@@ -1,5 +1,10 @@
 2007-03-13  Nathan Froyd  <froydnj@codesourcery.com>
 
+	* frame.c (frame_pop): Check to see whether there's a frame to
+	which we can pop first.
+
+2007-03-13  Nathan Froyd  <froydnj@codesourcery.com>
+
 	* MAINTAINERS (Write After Approval): Add myself.
 
 2007-03-09  Markus Deuling  <deuling@de.ibm.com>
