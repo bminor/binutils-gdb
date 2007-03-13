@@ -4092,7 +4092,7 @@ skip_prologue_using_sal (CORE_ADDR func_addr)
 	 then it is probably a single line function, like
 	 "foo(){}". */
       if (prologue_sal.end == end_pc)
-	return start_pc;
+	return 0;
       while (prologue_sal.end < end_pc)
 	{
 	  struct symtab_and_line sal;

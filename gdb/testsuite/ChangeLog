@@ -1,3 +1,12 @@
+2007-03-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.arch/powerpc-prologue.c (optimized_1_marker, gdb2029_marker)
+	(optimized_1): New.
+	(main): Call optimized_1.
+	(gdb2029): Correct typos.  Call gdb2029_marker.
+	* gdb.arch/powerpc-prologue.exp: Run new test.  Use a breakpoint
+	for gdb2029.
+
 2007-03-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.gdb/selftest.exp (do_steps_and_nexts): Match spaces as well

@@ -1,3 +1,14 @@
+2007-03-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* rs6000-tdep.c (rs6000_skip_prologue): Use skip_prologue_using_sal.
+	(rs6000_in_function_epilogue_p): Use extract_unsigned_integer.
+	(refine_prologue_limit): Delete.
+	(skip_prologue): Don't call it.  Use extract_unsigned_integer.
+	Assume lim_pc is set.  Correct check for incomplete prologues.
+	Do not skip clobbers of the frame pointer.
+	* symtab.c (skip_prologue_using_sal): Fail if there is only one
+	sal.
+
 2007-03-13  Nathan Froyd  <froydnj@codesourcery.com>
 
 	* frame.c (frame_pop): Check to see whether there's a frame to

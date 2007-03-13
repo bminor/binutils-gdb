@@ -482,7 +482,29 @@ static CORE_ADDR
 rs6000_skip_prologue (CORE_ADDR pc)
 {
   struct rs6000_framedata frame;
-  pc = skip_prologue (pc, 0, &frame);
+  CORE_ADDR limit_pc, func_addr;
+
+  /* See if we can determine the end of the prologue via the symbol table.
+     If so, then return either PC, or the PC after the prologue, whichever
+     is greater.  */
+  if (find_pc_partial_function (pc, NULL, &func_addr, NULL))
+    {
+      CORE_ADDR post_prologue_pc = skip_prologue_using_sal (func_addr);
+      if (post_prologue_pc != 0)
+	return max (pc, post_prologue_pc);
+    }
+
+  /* Can't determine prologue from the symbol table, need to examine
+     instructions.  */
+
+  /* Find an upper limit on the function prologue using the debug
+     information.  If the debug information could not be used to provide
+     that bound, then use an arbitrary large number as the upper bound.  */
+  limit_pc = skip_prologue_using_sal (pc);
+  if (limit_pc == 0)
+    limit_pc = pc + 100;          /* Magic.  */
+
+  pc = skip_prologue (pc, limit_pc, &frame);
   return pc;
 }
 
@@ -565,7 +587,7 @@ rs6000_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
     {
       if (!safe_frame_unwind_memory (curfrm, scan_pc, insn_buf, PPC_INSN_SIZE))
         return 0;
-      insn = extract_signed_integer (insn_buf, PPC_INSN_SIZE);
+      insn = extract_unsigned_integer (insn_buf, PPC_INSN_SIZE);
       if (insn == 0x4e800020)
         break;
       if (insn_changes_sp_or_jumps (insn))
@@ -580,7 +602,7 @@ rs6000_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
     {
       if (!safe_frame_unwind_memory (curfrm, scan_pc, insn_buf, PPC_INSN_SIZE))
         return 0;
-      insn = extract_signed_integer (insn_buf, PPC_INSN_SIZE);
+      insn = extract_unsigned_integer (insn_buf, PPC_INSN_SIZE);
       if (insn_changes_sp_or_jumps (insn))
         return 1;
     }
@@ -775,57 +797,6 @@ rs6000_software_single_step (enum target_signal signal,
    of the prologue is expensive.  */
 static int max_skip_non_prologue_insns = 10;
 
-/* Given PC representing the starting address of a function, and
-   LIM_PC which is the (sloppy) limit to which to scan when looking
-   for a prologue, attempt to further refine this limit by using
-   the line data in the symbol table.  If successful, a better guess
-   on where the prologue ends is returned, otherwise the previous
-   value of lim_pc is returned.  */
-
-/* FIXME: cagney/2004-02-14: This function and logic have largely been
-   superseded by skip_prologue_using_sal.  */
-
-static CORE_ADDR
-refine_prologue_limit (CORE_ADDR pc, CORE_ADDR lim_pc)
-{
-  struct symtab_and_line prologue_sal;
-
-  prologue_sal = find_pc_line (pc, 0);
-  if (prologue_sal.line != 0)
-    {
-      int i;
-      CORE_ADDR addr = prologue_sal.end;
-
-      /* Handle the case in which compiler's optimizer/scheduler
-         has moved instructions into the prologue.  We scan ahead
-	 in the function looking for address ranges whose corresponding
-	 line number is less than or equal to the first one that we
-	 found for the function.  (It can be less than when the
-	 scheduler puts a body instruction before the first prologue
-	 instruction.)  */
-      for (i = 2 * max_skip_non_prologue_insns; 
-           i > 0 && (lim_pc == 0 || addr < lim_pc);
-	   i--)
-        {
-	  struct symtab_and_line sal;
-
-	  sal = find_pc_line (addr, 0);
-	  if (sal.line == 0)
-	    break;
-	  if (sal.line <= prologue_sal.line 
-	      && sal.symtab == prologue_sal.symtab)
-	    {
-	      prologue_sal = sal;
-	    }
-	  addr = sal.end;
-	}
-
-      if (lim_pc == 0 || prologue_sal.end < lim_pc)
-	lim_pc = prologue_sal.end;
-    }
-  return lim_pc;
-}
-
 /* Return nonzero if the given instruction OP can be part of the prologue
    of a function and saves a parameter on the stack.  FRAMEP should be
    set if one of the previous instructions in the function has set the
@@ -945,21 +916,6 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
   int r0_contains_arg = 0;
   const struct bfd_arch_info *arch_info = gdbarch_bfd_arch_info (current_gdbarch);
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  
-  /* Attempt to find the end of the prologue when no limit is specified.
-     Note that refine_prologue_limit() has been written so that it may
-     be used to "refine" the limits of non-zero PC values too, but this
-     is only safe if we 1) trust the line information provided by the
-     compiler and 2) iterate enough to actually find the end of the
-     prologue.  
-     
-     It may become a good idea at some point (for both performance and
-     accuracy) to unconditionally call refine_prologue_limit().  But,
-     until we can make a clear determination that this is beneficial,
-     we'll play it safe and only use it to obtain a limit when none
-     has been specified.  */
-  if (lim_pc == 0)
-    lim_pc = refine_prologue_limit (pc, lim_pc);
 
   memset (fdata, 0, sizeof (struct rs6000_framedata));
   fdata->saved_gpr = -1;
@@ -980,7 +936,7 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	last_prologue_pc = pc;
 
       /* Stop scanning if we've hit the limit.  */
-      if (lim_pc != 0 && pc >= lim_pc)
+      if (pc >= lim_pc)
 	break;
 
       prev_insn_was_prologue_insn = 1;
@@ -988,7 +944,7 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
       /* Fetch the instruction and convert it to an integer.  */
       if (target_read_memory (pc, buf, 4))
 	break;
-      op = extract_signed_integer (buf, 4);
+      op = extract_unsigned_integer (buf, 4);
 
       if ((op & 0xfc1fffff) == 0x7c0802a6)
 	{			/* mflr Rx */
@@ -1221,9 +1177,11 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
  	  offset = fdata->offset;
  	  continue;
  	}
-      /* Load up minimal toc pointer */
+      /* Load up minimal toc pointer.  Do not treat an epilogue restore
+	 of r31 as a minimal TOC load.  */
       else if (((op >> 22) == 0x20f	||	/* l r31,... or l r30,... */
 	       (op >> 22) == 0x3af)		/* ld r31,... or ld r30,... */
+	       && !framep
 	       && !minimal_toc_loaded)
 	{
 	  minimal_toc_loaded = 1;
@@ -1446,8 +1404,7 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	     Handle optimizer code motions into the prologue by continuing
 	     the search if we have no valid frame yet or if the return
 	     address is not yet saved in the frame.  */
-	  if (fdata->frameless == 0
-	      && (lr_reg == -1 || fdata->nosavedpc == 0))
+	  if (fdata->frameless == 0 && fdata->nosavedpc == 0)
 	    break;
 
 	  if (op == 0x4e800020		/* blr */
