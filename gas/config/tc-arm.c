@@ -8244,7 +8244,7 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
   X(cpsie, b660, f3af8400),			\
   X(cpsid, b670, f3af8600),			\
   X(cpy,   4600, ea4f0000),			\
-  X(dec_sp,80dd, f1bd0d00),			\
+  X(dec_sp,80dd, f1ad0d00),			\
   X(eor,   4040, ea800000),			\
   X(eors,  4040, ea900000),			\
   X(inc_sp,00dd, f10d0d00),			\

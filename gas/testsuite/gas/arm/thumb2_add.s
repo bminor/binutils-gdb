@@ -19,3 +19,13 @@ thumb2_add:
 	sub r3, r1, #0x101
 	add r3, #1
 	sub r3, #1
+	sub sp, sp, #0x100
+	sub sp, sp, #0x200
+	sub sp, sp, #0x101
+	add sp, sp, #0x100
+	add sp, sp, #0x200
+	add sp, sp, #0x101
+	add r0, sp, #0x100
+	add r5, sp, #0x400
+	add r9, sp, #0x101
+	nop

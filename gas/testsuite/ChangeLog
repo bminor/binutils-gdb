@@ -1,3 +1,8 @@
+2007-03-14  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb2_add.d: Add tests using sp.
+	* gas/arm/thumb2_add.s: Ditto.
+
 2007-03-14  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 4029

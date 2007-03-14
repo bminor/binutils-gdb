@@ -1,3 +1,7 @@
+2007-03-14  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (T16_32_TAB): Fix dec_sp encoding.
+
 2007-03-14  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 4029
