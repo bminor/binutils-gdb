@@ -265,6 +265,11 @@ if {  ([istarget "i*86-*-*pe*"] && ![istarget "i*86-*-openbsd*"]) \
 run_dump_test assign
 run_dump_test sleb128
 
+# .byte is 32 bits on tic4x, and .p2align isn't supported on tic54x
+if { ![istarget "tic4x*-*-*"] && ![istarget "tic54x*-*-*"] } {
+    run_dump_test relax
+}
+
 # .quad is 16 bytes on i960.
 if { ![istarget "i960-*-*"] } {
     run_dump_test quad
