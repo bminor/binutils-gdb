@@ -1960,13 +1960,38 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
   /* Do relax().  */
   {
     unsigned long max_iterations;
-    offsetT stretch;	/* May be any size, 0 or negative.  */
-    /* Cumulative number of addresses we have relaxed this pass.
-       We may have relaxed more than one address.  */
-    int stretched;	/* Have we stretched on this pass?  */
-    /* This is 'cuz stretch may be zero, when, in fact some piece of code
-       grew, and another shrank.  If a branch instruction doesn't fit anymore,
-       we could be scrod.  */
+
+    /* Cumulative address adjustment.  */
+    offsetT stretch;
+
+    /* Have we made any adjustment this pass?  We can't just test
+       stretch because one piece of code may have grown and another
+       shrank.  */
+    int stretched;
+
+    /* Most horrible, but gcc may give us some exception data that
+       is impossible to assemble, of the form
+
+       .align 4
+       .byte 0, 0
+       .uleb128 end - start
+       start:
+       .space 128*128 - 1
+       .align 4
+       end:
+
+       If the leb128 is two bytes in size, then end-start is 128*128,
+       which requires a three byte leb128.  If the leb128 is three
+       bytes in size, then end-start is 128*128-1, which requires a
+       two byte leb128.  We work around this dilemma by inserting
+       an extra 4 bytes of alignment just after the .align.  This
+       works because the data after the align is accessed relative to
+       the end label.
+
+       This counter is used in a tiny state machine to detect
+       whether a leb128 followed by an align is impossible to
+       relax.  */
+    int rs_leb128_fudge = 0;
 
     /* We want to prevent going into an infinite loop where one frag grows
        depending upon the location of a symbol which is in turn moved by
@@ -2089,6 +2114,49 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 		    }
 
 		  growth = newoff - oldoff;
+
+		  /* If this align happens to follow a leb128 and
+		     we have determined that the leb128 is bouncing
+		     in size, then break the cycle by inserting an
+		     extra alignment.  */
+		  if (growth < 0
+		      && (rs_leb128_fudge & 16) != 0
+		      && (rs_leb128_fudge & 15) >= 2)
+		    {
+		      segment_info_type *seginfo = seg_info (segment);
+		      struct obstack *ob = &seginfo->frchainP->frch_obstack;
+		      struct frag *newf;
+
+		      newf = frag_alloc (ob);
+		      obstack_blank_fast (ob, fragP->fr_var);
+		      obstack_finish (ob);
+		      memcpy (newf, fragP, SIZEOF_STRUCT_FRAG);
+		      memcpy (newf->fr_literal,
+			      fragP->fr_literal + fragP->fr_fix,
+			      fragP->fr_var);
+		      newf->fr_type = rs_fill;
+		      newf->fr_fix = 0;
+		      newf->fr_offset = (((offsetT) 1 << fragP->fr_offset)
+					 / fragP->fr_var);
+		      if (newf->fr_offset * newf->fr_var
+			  != (offsetT) 1 << fragP->fr_offset)
+			{
+			  newf->fr_offset = (offsetT) 1 << fragP->fr_offset;
+			  newf->fr_var = 1;
+			}
+		      /* Include growth of new frag, because rs_fill
+			 frags don't normally grow.  */
+		      growth += newf->fr_offset * newf->fr_var;
+		      /* The new frag address is newoff.  Adjust this
+			 for the amount we'll add when we process the
+			 new frag.  */
+		      newf->fr_address = newoff - stretch - growth;
+		      newf->relax_marker ^= 1;
+		      fragP->fr_next = newf;
+#ifdef DEBUG
+		      as_warn (_("padding added"));
+#endif
+		    }
 		}
 		break;
 
@@ -2228,8 +2296,23 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 	      {
 		stretch += growth;
 		stretched = 1;
+		if (fragP->fr_type == rs_leb128)
+		  rs_leb128_fudge += 16;
+		else if (fragP->fr_type == rs_align
+			 && (rs_leb128_fudge & 16) != 0
+			 && stretch == 0)
+		  rs_leb128_fudge += 16;
+		else
+		  rs_leb128_fudge = 0;
 	      }
 	  }
+
+	if (stretch == 0
+	    && (rs_leb128_fudge & 16) == 0
+	    && (rs_leb128_fudge & -16) != 0)
+	  rs_leb128_fudge += 1;
+	else
+	  rs_leb128_fudge = 0;
       }
     /* Until nothing further to relax.  */
     while (stretched && -- max_iterations);
