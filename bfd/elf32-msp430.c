@@ -656,21 +656,6 @@ elf32_msp430_object_p (bfd * abfd)
   return bfd_default_set_arch_mach (abfd, bfd_arch_msp430, e_set);
 }
 
-static void
-elf32_msp430_post_process_headers (bfd * abfd,
-				   struct bfd_link_info * link_info ATTRIBUTE_UNUSED)
-{
-  Elf_Internal_Ehdr * i_ehdrp;	/* ELF file header, internal form.  */
-
-  i_ehdrp = elf_elfheader (abfd);
-
-#ifndef ELFOSABI_STANDALONE
-#define ELFOSABI_STANDALONE	255
-#endif
-
-  i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_STANDALONE;
-}
-
 /* These functions handle relaxing for the msp430.
    Relaxation required only in two cases:
     - Bad hand coding like jumps from one section to another or
@@ -1174,6 +1159,7 @@ error_return:
 #define ELF_MACHINE_CODE	EM_MSP430
 #define ELF_MACHINE_ALT1	EM_MSP430_OLD
 #define ELF_MAXPAGESIZE		1
+#define	ELF_OSABI		ELFOSABI_STANDALONE
 
 #define TARGET_LITTLE_SYM       bfd_elf32_msp430_vec
 #define TARGET_LITTLE_NAME	"elf32-msp430"
@@ -1185,7 +1171,7 @@ error_return:
 #define elf_backend_can_gc_sections          1
 #define elf_backend_final_write_processing   bfd_elf_msp430_final_write_processing
 #define elf_backend_object_p		     elf32_msp430_object_p
-#define elf_backend_post_process_headers     elf32_msp430_post_process_headers
+#define elf_backend_post_process_headers     _bfd_elf_set_osabi
 #define bfd_elf32_bfd_relax_section	     msp430_elf_relax_section
 
 #include "elf32-target.h"

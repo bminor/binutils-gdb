@@ -500,6 +500,8 @@ elf_object_p (bfd *abfd)
   struct bfd_preserve preserve;
   asection *s;
   bfd_size_type amt;
+  const bfd_target *target;
+  const bfd_target * const *target_ptr;
 
   preserve.marker = NULL;
 
@@ -543,10 +545,12 @@ elf_object_p (bfd *abfd)
   if (!bfd_preserve_save (abfd, &preserve))
     goto got_no_match;
 
+  target = abfd->xvec;
+
   /* Allocate an instance of the elf_obj_tdata structure and hook it up to
      the tdata pointer in the bfd.  */
 
-  if (! (*abfd->xvec->_bfd_set_format[bfd_object]) (abfd))
+  if (! (*target->_bfd_set_format[bfd_object]) (abfd))
     goto got_no_match;
   preserve.marker = elf_tdata (abfd);
 
@@ -586,8 +590,6 @@ elf_object_p (bfd *abfd)
       && (ebd->elf_machine_alt2 == 0
 	  || i_ehdrp->e_machine != ebd->elf_machine_alt2))
     {
-      const bfd_target * const *target_ptr;
-
       if (ebd->elf_machine_code != EM_NONE)
 	goto got_wrong_format_error;
 
@@ -626,6 +628,45 @@ elf_object_p (bfd *abfd)
       /* It's OK if this fails for the generic target.  */
       if (ebd->elf_machine_code != EM_NONE)
 	goto got_no_match;
+    }
+
+  if (ebd->elf_machine_code != EM_NONE
+      && i_ehdrp->e_ident[EI_OSABI] != ebd->elf_osabi)
+    {
+      if (ebd->elf_osabi != ELFOSABI_NONE)
+	goto got_wrong_format_error;
+
+      /* This is an ELFOSABI_NONE ELF target.  Let it match any ELF
+	 target of the compatible machine for which we do not have a
+	 backend with matching ELFOSABI.  */
+      for (target_ptr = bfd_target_vector;
+	   *target_ptr != NULL;
+	   target_ptr++)
+	{
+	  const struct elf_backend_data *back;
+
+	  /* Skip this target and targets with incompatible byte
+	     order.  */
+	  if (*target_ptr == target
+	      || (*target_ptr)->flavour != bfd_target_elf_flavour
+	      || (*target_ptr)->byteorder != target->byteorder
+	      || ((*target_ptr)->header_byteorder
+		  != target->header_byteorder))
+	    continue;
+
+	  back = (const struct elf_backend_data *) (*target_ptr)->backend_data;
+	  if (back->elf_osabi == i_ehdrp->e_ident[EI_OSABI]
+	      && (back->elf_machine_code == i_ehdrp->e_machine
+		  || (back->elf_machine_alt1 != 0
+		      && back->elf_machine_alt1 == i_ehdrp->e_machine)
+		  || (back->elf_machine_alt2 != 0
+		      && back->elf_machine_alt2 == i_ehdrp->e_machine)))
+	    {
+	      /* target_ptr is an ELF backend which matches this
+		 object file, so reject the ELFOSABI_NONE ELF target.  */
+	      goto got_wrong_format_error;
+	    }
+	}
     }
 
   if (i_ehdrp->e_shoff != 0)
@@ -848,7 +889,7 @@ elf_object_p (bfd *abfd)
     }
 
   bfd_preserve_finish (abfd, &preserve);
-  return abfd->xvec;
+  return target;
 
  got_wrong_format_error:
   /* There is way too much undoing of half-known state here.  The caller,

@@ -291,6 +291,10 @@
 #define elf_info_to_howto_rel 0
 #endif
 
+#ifndef ELF_OSABI
+#define ELF_OSABI ELFOSABI_NONE
+#endif
+
 #ifndef ELF_MAXPAGESIZE
   #error ELF_MAXPAGESIZE is not defined
 #define ELF_MAXPAGESIZE 1
@@ -589,6 +593,7 @@ static struct elf_backend_data elfNN_bed =
 {
   ELF_ARCH,			/* arch */
   ELF_MACHINE_CODE,		/* elf_machine_code */
+  ELF_OSABI,			/* elf_osabi  */
   ELF_MAXPAGESIZE,		/* maxpagesize */
   ELF_MINPAGESIZE,		/* minpagesize */
   ELF_COMMONPAGESIZE,		/* commonpagesize */

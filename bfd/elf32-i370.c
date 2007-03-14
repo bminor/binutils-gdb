@@ -1417,16 +1417,6 @@ i370_elf_relocate_section (bfd *output_bfd,
 
   return ret;
 }
-
-static void
-i370_elf_post_process_headers (bfd * abfd,
-			       struct bfd_link_info * link_info ATTRIBUTE_UNUSED)
-{
-  Elf_Internal_Ehdr * i_ehdrp;  /* Elf file header, internal form.  */
-
-  i_ehdrp = elf_elfheader (abfd);
-  i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_LINUX;
-}
 
 #define TARGET_BIG_SYM		bfd_elf32_i370_vec
 #define TARGET_BIG_NAME		"elf32-i370"
@@ -1436,6 +1426,8 @@ i370_elf_post_process_headers (bfd * abfd,
 #define ELF_MACHINE_ALT1	EM_I370_OLD
 #endif
 #define ELF_MAXPAGESIZE		0x1000
+#define ELF_OSABI		ELFOSABI_LINUX
+
 #define elf_info_to_howto	i370_elf_info_to_howto
 
 #define elf_backend_plt_not_loaded 1
@@ -1456,7 +1448,7 @@ i370_elf_post_process_headers (bfd * abfd,
 #define elf_backend_section_from_shdr		i370_elf_section_from_shdr
 #define elf_backend_adjust_dynamic_symbol	i370_elf_adjust_dynamic_symbol
 #define elf_backend_check_relocs		i370_elf_check_relocs
-#define elf_backend_post_process_headers	i370_elf_post_process_headers
+#define elf_backend_post_process_headers	_bfd_elf_set_osabi
 
 static int
 i370_noop (void)

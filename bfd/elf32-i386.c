@@ -3847,6 +3847,8 @@ elf_i386_hash_symbol (struct elf_link_hash_entry *h)
 #define	TARGET_LITTLE_SYM		bfd_elf32_i386_freebsd_vec
 #undef	TARGET_LITTLE_NAME
 #define	TARGET_LITTLE_NAME		"elf32-i386-freebsd"
+#undef	ELF_OSABI
+#define	ELF_OSABI			ELFOSABI_FREEBSD
 
 /* The kernel recognizes executables as valid only if they carry a
    "FreeBSD" label in the ELF header.  So we put this label on all
@@ -3861,7 +3863,7 @@ elf_i386_post_process_headers (bfd *abfd,
   i_ehdrp = elf_elfheader (abfd);
 
   /* Put an ABI label supported by FreeBSD >= 4.1.  */
-  i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_FREEBSD;
+  i_ehdrp->e_ident[EI_OSABI] = get_elf_backend_data (abfd)->elf_osabi;
 #ifdef OLD_FREEBSD_ABI_LABEL
   /* The ABI label supported by FreeBSD <= 4.0 is quite nonstandard.  */
   memcpy (&i_ehdrp->e_ident[EI_ABIVERSION], "FreeBSD", 8);
@@ -3881,7 +3883,7 @@ elf_i386_post_process_headers (bfd *abfd,
 #define TARGET_LITTLE_SYM		bfd_elf32_i386_vxworks_vec
 #undef	TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME		"elf32-i386-vxworks"
-
+#undef	ELF_OSABI
 
 /* Like elf_i386_link_hash_table_create but with tweaks for VxWorks.  */
 

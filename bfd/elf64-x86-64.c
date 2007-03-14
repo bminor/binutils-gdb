@@ -3713,24 +3713,11 @@ static const struct bfd_elf_special_section
 #undef  TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME		    "elf64-x86-64-freebsd"
 
-/* The kernel recognizes executables as valid only if they carry a
-   "FreeBSD" label in the ELF header.  So we put this label on all
-   executables and (for simplicity) also all other object files.  */
-
-static void
-elf64_x86_64_fbsd_post_process_headers (bfd * abfd,
-					struct bfd_link_info * link_info ATTRIBUTE_UNUSED)
-{
-  Elf_Internal_Ehdr * i_ehdrp;	/* ELF file header, internal form.  */
-
-  i_ehdrp = elf_elfheader (abfd);
-
-  /* Put an ABI label supported by FreeBSD >= 4.1.  */
-  i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_FREEBSD;
-}
+#undef	ELF_OSABI
+#define	ELF_OSABI			    ELFOSABI_FREEBSD
 
 #undef  elf_backend_post_process_headers
-#define elf_backend_post_process_headers  elf64_x86_64_fbsd_post_process_headers
+#define elf_backend_post_process_headers  _bfd_elf_set_osabi
 
 #undef  elf64_bed
 #define elf64_bed elf64_x86_64_fbsd_bed

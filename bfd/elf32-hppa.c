@@ -4601,30 +4601,6 @@ elf32_hppa_finish_dynamic_sections (bfd *output_bfd,
   return TRUE;
 }
 
-/* Tweak the OSABI field of the elf header.  */
-
-static void
-elf32_hppa_post_process_headers (bfd *abfd,
-				 struct bfd_link_info *info ATTRIBUTE_UNUSED)
-{
-  Elf_Internal_Ehdr * i_ehdrp;
-
-  i_ehdrp = elf_elfheader (abfd);
-
-  if (strcmp (bfd_get_target (abfd), "elf32-hppa-linux") == 0)
-    {
-      i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_LINUX;
-    }
-  else if (strcmp (bfd_get_target (abfd), "elf32-hppa-netbsd") == 0)
-    {
-      i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_NETBSD;
-    }
-  else
-    {
-      i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_HPUX;
-    }
-}
-
 /* Called when writing out an object file to decide the type of a
    symbol.  */
 static int
@@ -4663,7 +4639,7 @@ elf32_hppa_elf_get_symbol_type (Elf_Internal_Sym *elf_sym, int type)
 #define elf_backend_grok_psinfo		     elf32_hppa_grok_psinfo
 #define elf_backend_object_p		     elf32_hppa_object_p
 #define elf_backend_final_write_processing   elf_hppa_final_write_processing
-#define elf_backend_post_process_headers     elf32_hppa_post_process_headers
+#define elf_backend_post_process_headers     _bfd_elf_set_osabi
 #define elf_backend_get_symbol_type	     elf32_hppa_elf_get_symbol_type
 #define elf_backend_reloc_type_class	     elf32_hppa_reloc_type_class
 #define elf_backend_action_discarded	     elf_hppa_action_discarded
@@ -4682,6 +4658,7 @@ elf32_hppa_elf_get_symbol_type (Elf_Internal_Sym *elf_sym, int type)
 #define ELF_ARCH		bfd_arch_hppa
 #define ELF_MACHINE_CODE	EM_PARISC
 #define ELF_MAXPAGESIZE		0x1000
+#define ELF_OSABI		ELFOSABI_HPUX
 #define elf32_bed		elf32_hppa_hpux_bed
 
 #include "elf32-target.h"
@@ -4690,6 +4667,8 @@ elf32_hppa_elf_get_symbol_type (Elf_Internal_Sym *elf_sym, int type)
 #define TARGET_BIG_SYM		bfd_elf32_hppa_linux_vec
 #undef TARGET_BIG_NAME
 #define TARGET_BIG_NAME		"elf32-hppa-linux"
+#undef ELF_OSABI
+#define ELF_OSABI		ELFOSABI_LINUX
 #undef elf32_bed
 #define elf32_bed		elf32_hppa_linux_bed
 
@@ -4699,6 +4678,8 @@ elf32_hppa_elf_get_symbol_type (Elf_Internal_Sym *elf_sym, int type)
 #define TARGET_BIG_SYM		bfd_elf32_hppa_nbsd_vec
 #undef TARGET_BIG_NAME
 #define TARGET_BIG_NAME		"elf32-hppa-netbsd"
+#undef ELF_OSABI
+#define ELF_OSABI		ELFOSABI_NETBSD
 #undef elf32_bed
 #define elf32_bed		elf32_hppa_netbsd_bed
 

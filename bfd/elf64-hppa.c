@@ -1198,16 +1198,9 @@ elf64_hppa_post_process_headers (abfd, link_info)
   Elf_Internal_Ehdr * i_ehdrp;
 
   i_ehdrp = elf_elfheader (abfd);
-
-  if (strcmp (bfd_get_target (abfd), "elf64-hppa-linux") == 0)
-    {
-      i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_LINUX;
-    }
-  else
-    {
-      i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_HPUX;
-      i_ehdrp->e_ident[EI_ABIVERSION] = 1;
-    }
+  
+  i_ehdrp->e_ident[EI_OSABI] = get_elf_backend_data (abfd)->elf_osabi;
+  i_ehdrp->e_ident[EI_ABIVERSION] = 1;
 }
 
 /* Create function descriptor section (.opd).  This section is called .opd
@@ -2800,6 +2793,8 @@ const struct elf_size_info hppa64_elf_size_info =
 /* This is not strictly correct.  The maximum page size for PA2.0 is
    64M.  But everything still uses 4k.  */
 #define ELF_MAXPAGESIZE			0x1000
+#define ELF_OSABI			ELFOSABI_HPUX
+
 #define bfd_elf64_bfd_reloc_type_lookup elf_hppa_reloc_type_lookup
 #define bfd_elf64_bfd_is_local_label_name       elf_hppa_is_local_label_name
 #define elf_info_to_howto		elf_hppa_info_to_howto
@@ -2874,6 +2869,10 @@ const struct elf_size_info hppa64_elf_size_info =
 #define TARGET_BIG_SYM			bfd_elf64_hppa_linux_vec
 #undef TARGET_BIG_NAME
 #define TARGET_BIG_NAME			"elf64-hppa-linux"
+#undef ELF_OSABI
+#define ELF_OSABI			ELFOSABI_LINUX
+#undef elf_backend_post_process_headers
+#define elf_backend_post_process_headers _bfd_elf_set_osabi
 #undef elf64_bed
 #define elf64_bed			elf64_hppa_linux_bed
 

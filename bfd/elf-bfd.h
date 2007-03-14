@@ -550,6 +550,9 @@ struct elf_backend_data
   /* The ELF machine code (EM_xxxx) for this backend.  */
   int elf_machine_code;
 
+  /* EI_OSABI. */
+  int elf_osabi;
+
   /* The maximum page size for this backend.  */
   bfd_vma maxpagesize;
 
@@ -1754,6 +1757,8 @@ extern void bfd_elf_perform_complex_relocation
 
 extern bfd_boolean _bfd_elf_setup_sections
   (bfd *);
+
+extern void _bfd_elf_set_osabi (bfd * , struct bfd_link_info *);
 
 extern const bfd_target *bfd_elf32_object_p
   (bfd *);

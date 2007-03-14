@@ -1,3 +1,61 @@
+2007-03-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/3826
+	* elf-bfd.h (elf_backend_data): Add elf_osabi.
+	(_bfd_elf_set_osabi): New.
+
+	* elf.c (_bfd_elf_set_osabi): New.
+
+	* elf32-hppa.c (elf32_hppa_post_process_headers): Removed.
+	(elf_backend_post_process_headers): Defined with
+	_bfd_elf_set_osabi.
+	(ELF_OSABI): Properly defined for each target.
+
+	* elf32-i370.c (i370_elf_post_process_headers): Removed.
+	(ELF_OSABI): Defined.
+	(elf_backend_post_process_headers): Defined with
+	_bfd_elf_set_osabi.
+
+	* elf32-i386.c (ELF_OSABI): Defined to ELFOSABI_FREEBSD for
+	freebsd.
+	(elf_i386_post_process_headers): Set EI_OSABI with elf_osabi.
+
+	* elf32-msp430.c (elf32_msp430_post_process_headers): Removed.
+	(ELF_OSABI): Defined.
+	(elf_backend_post_process_headers): Defined with
+	_bfd_elf_set_osabi.
+
+	* elf64-alpha.c (ELF_OSABI): Defined to ELFOSABI_FREEBSD for
+	freebsd.
+	(elf64_alpha_fbsd_post_process_headers): Set EI_OSABI with
+	elf_osabi.
+
+	* elf64-hppa.c (elf64_hppa_post_process_headers): Set EI_OSABI
+	with elf_osabi.
+	(ELF_OSABI): Properly defined for each target.
+	(elf_backend_post_process_headers): Defined with
+	_bfd_elf_set_osabi for Linux.
+
+	* elf64-sparc.c (elf64_sparc_fbsd_post_process_headers): Removed.
+	(ELF_OSABI): Defined to ELFOSABI_FREEBSD for freebsd.
+	(elf_backend_post_process_headers): Defined with
+	_bfd_elf_set_osabi.
+
+	* elf64-x86-64.c (elf64_x86_64_fbsd_post_process_headers): Removed.
+	(ELF_OSABI): Defined to ELFOSABI_FREEBSD for freebsd.
+	(elf_backend_post_process_headers): Defined with
+	_bfd_elf_set_osabi.
+
+	* elfcode.h (elf_object_p): Match the ELFOSABI_NONE ELF target
+	with any ELF target of the compatible machine for which we do not
+	have a specific backend.
+
+	* elfxx-ia64.c (elfNN_hpux_post_process_headers): Set EI_OSABI
+	with elf_osabi.
+
+	* elfxx-target.h (ELF_OSABI): Default to ELFOSABI_NONE.
+	(elfNN_bed): Initialize elf_osabi with ELF_OSABI.
+
 2007-03-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-v850.c (v850_elf_link_output_symbol_hook): Clean out

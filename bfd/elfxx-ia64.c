@@ -5681,7 +5681,7 @@ elfNN_hpux_post_process_headers (abfd, info)
 {
   Elf_Internal_Ehdr *i_ehdrp = elf_elfheader (abfd);
 
-  i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_HPUX;
+  i_ehdrp->e_ident[EI_OSABI] = get_elf_backend_data (abfd)->elf_osabi;
   i_ehdrp->e_ident[EI_ABIVERSION] = 1;
 }
 
@@ -5838,6 +5838,8 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
 #undef  ELF_MAXPAGESIZE
 #define ELF_MAXPAGESIZE                 0x1000  /* 4K */
 #undef ELF_COMMONPAGESIZE
+#undef ELF_OSABI
+#define ELF_OSABI			ELFOSABI_HPUX
 
 #undef  elfNN_bed
 #define elfNN_bed elfNN_ia64_hpux_bed
