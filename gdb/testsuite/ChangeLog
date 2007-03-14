@@ -1,3 +1,8 @@
+2007-03-14  Andreas Schwab  <schwab@suse.de>
+
+	* gdb.arch/altivec-regs.exp (decimal_vector): Adjust for output
+	format changes.
+
 2007-03-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.arch/powerpc-prologue.c (optimized_1_marker, gdb2029_marker)
