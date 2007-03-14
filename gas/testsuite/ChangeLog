@@ -1,3 +1,10 @@
+2007-03-14  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 4029
+	* gas/all/relax.s: New.
+	* gas/all/relax.d: New.
+	* gas/all/gas.exp: Run it.
+
 2007-03-11  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* gas/mmix/comment-1.d, gas/mmix/bspec-1.d, gas/mmix/bspec-2.d:
