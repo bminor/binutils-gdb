@@ -22,6 +22,7 @@
 
 #include "config.h"
 #include "bfd.h"
+#include "bfdver.h"
 #include "sysdep.h"
 #include "libiberty.h"
 #include <stdio.h>

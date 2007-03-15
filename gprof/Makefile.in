@@ -177,7 +177,6 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
-REPORT_BUGS_TO = "\"@REPORT_BUGS_TO@\""
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -240,7 +239,6 @@ AM_CFLAGS = $(WARN_CFLAGS)
 MKDEP = gcc -MM
 INCLUDES = -D_GNU_SOURCE -DDEBUG -I../bfd -I$(srcdir)/../include \
 	-I$(srcdir)/../bfd @INCINTL@ -I. \
-	-DREPORT_BUGS_TO=$(REPORT_BUGS_TO) \
 	-DLOCALEDIR="\"$(datadir)/locale\""
 
 sources = basic_blocks.c call_graph.c cg_arcs.c cg_dfn.c \
@@ -284,15 +282,15 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
-	      echo ' cd $(srcdir) && $(AUTOMAKE) --foreign '; \
-	      cd $(srcdir) && $(AUTOMAKE) --foreign  \
+	      echo ' cd $(srcdir) && $(AUTOMAKE) --cygnus '; \
+	      cd $(srcdir) && $(AUTOMAKE) --cygnus  \
 		&& exit 0; \
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --cygnus  Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  Makefile
+	  $(AUTOMAKE) --cygnus  Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \

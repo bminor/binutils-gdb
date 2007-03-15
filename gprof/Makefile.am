@@ -16,11 +16,8 @@ AM_CFLAGS = $(WARN_CFLAGS)
 
 MKDEP = gcc -MM
 
-REPORT_BUGS_TO = "\"@REPORT_BUGS_TO@\""
-
 INCLUDES = -D_GNU_SOURCE -DDEBUG -I../bfd -I$(srcdir)/../include \
 	-I$(srcdir)/../bfd @INCINTL@ -I. \
-	-DREPORT_BUGS_TO=$(REPORT_BUGS_TO) \
 	-DLOCALEDIR="\"$(datadir)/locale\""
 
 bin_PROGRAMS = gprof

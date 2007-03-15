@@ -1,3 +1,28 @@
+2007-03-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (REPORT_BUGS_TO): Removed.
+	(INCLUDES): Remove -DREPORT_BUGS_TO.
+	* Makefile.in: Regenerated.
+
+	* bucomm.c: Don't include bfdver.h.
+	* objdump.c: Likewise.
+	* version.c: Likewise.
+
+	* bucomm.h: Include bfdver.h.
+
+	* configure.in (--with-bugurl): Removed.
+	* configure: Regenerated.
+
+	* doc/Makefile.am (binutils_TEXINFOS): Removed.
+	(AM_MAKEINFOFLAGS): Add -I ../../bfd/doc.
+	(TEXI2DVI): Likewise.
+	(config.texi): Removed.
+	(MOSTLYCLEANFILES): Remove config.texi.
+	* doc/Makefile.in: Regenerated.
+
+	* doc/binutils.texi: Include bfdver.texi instead of
+	config.texi.
+
 2007-03-13  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (dump_section): Also test for SHT_REL sections when

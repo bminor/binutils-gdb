@@ -473,8 +473,6 @@ BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
 INCDIR = $(BASEDIR)/include
 
-REPORT_BUGS_TO = "\"@REPORT_BUGS_TO@\""
-
 # This is the variable actually used when we compile.
 # Specify the directories to be searched for header files.
 # Both . and srcdir are used, in that order,
@@ -482,7 +480,6 @@ REPORT_BUGS_TO = "\"@REPORT_BUGS_TO@\""
 # subdirectory rather than in the source directory.
 INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(srcdir)/config \
 	-I$(INCDIR) -I$(srcdir)/.. -I$(BFDDIR) @INCINTL@ \
-	-DREPORT_BUGS_TO=$(REPORT_BUGS_TO) \
 	-DLOCALEDIR="\"$(datadir)/locale\""
 
 # This should be parallel to INCLUDES, but should replace $(srcdir)
@@ -492,7 +489,6 @@ INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(srcdir)/config \
 DEP_INCLUDES = -D_GNU_SOURCE -I.. -I$${srcdir} -I../../bfd \
 	-I$${srcdir}/config -I$${srcdir}/../include -I$${srcdir}/.. \
 	-I$${srcdir}/../bfd @INCINTL@ \
-	-DREPORT_BUGS_TO=$(REPORT_BUGS_TO) \
 	-DLOCALEDIR="\"$(datadir)/locale\""
 
 DEP_FLAGS = -DOBJ_MAYBE_ELF \

@@ -20,7 +20,6 @@
 
 #include <stdio.h>
 #include "bfd.h"
-#include "bfdver.h"
 #include "bucomm.h"
 
 /* Print the version number and copyright information, and exit.  This

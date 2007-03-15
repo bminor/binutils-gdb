@@ -68,14 +68,11 @@ INCDIR	= $(BASEDIR)/include
 
 MKDEP = gcc -MM
 
-REPORT_BUGS_TO = "\"@REPORT_BUGS_TO@\""
-
 INCLUDES = -D_GNU_SOURCE \
 	 -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
 	 @HDEFINES@ \
 	 @INCINTL@ \
 	 -DLOCALEDIR="\"$(datadir)/locale\"" \
-	 -DREPORT_BUGS_TO=$(REPORT_BUGS_TO) \
 	 -Dbin_dummy_emulation=$(EMULATION_VECTOR)
 
 HFILES = \

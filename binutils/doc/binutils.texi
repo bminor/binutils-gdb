@@ -4,7 +4,7 @@
 @c Free Software Foundation, Inc.
 
 @c man begin INCLUDE
-@include config.texi
+@include bfdver.texi
 @c man end
 
 @ifinfo

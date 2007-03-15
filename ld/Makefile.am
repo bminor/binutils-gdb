@@ -91,18 +91,17 @@ CXX_FOR_TARGET = ` \
 
 noinst_PROGRAMS = ld-new
 info_TEXINFOS = ld.texinfo
-ld_TEXINFOS = configdoc.texi ldver.texi
+ld_TEXINFOS = configdoc.texi
 noinst_TEXINFOS = ldint.texinfo
 man_MANS = ld.1
 
-AM_MAKEINFOFLAGS = -I $(srcdir) -I $(BFDDIR)/doc -I $(top_srcdir)/../libiberty
-TEXI2DVI = texi2dvi -I $(srcdir) -I $(BFDDIR)/doc -I $(top_srcdir)/../libiberty
-
-REPORT_BUGS_TO = "\"@REPORT_BUGS_TO@\""
+AM_MAKEINFOFLAGS = -I $(srcdir) -I $(BFDDIR)/doc -I ../bfd/doc \
+		   -I $(top_srcdir)/../libiberty
+TEXI2DVI = texi2dvi -I $(srcdir) -I $(BFDDIR)/doc -I ../bfd/doc \
+		    -I $(top_srcdir)/../libiberty
 
 INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
 	@INCINTL@ $(HDEFINES) $(CFLAGS) \
-	-DREPORT_BUGS_TO=$(REPORT_BUGS_TO) \
 	-DLOCALEDIR="\"$(datadir)/locale\""
 
 BFDLIB = ../bfd/libbfd.la
@@ -1767,18 +1766,10 @@ configdoc.texi:	${DOCVER}-doc.texi
 	cp ${srcdir}/${DOCVER}-doc.texi ./configdoc.texi
 	chmod u+w ./configdoc.texi
 
-ldver.texi: $(srcdir)/../bfd/configure
-	rm -f $@
-	eval `grep '^ *VERSION=' $(srcdir)/../bfd/configure`; \
-	  echo "@set VERSION $$VERSION" > $@
-	if [ -n "$(REPORT_BUGS_TEXI)" ]; then \
-	  echo "@set BUGURL $(REPORT_BUGS_TEXI)" >> $@; \
-	fi
-
 # Build the man page from the texinfo file
 # The sed command removes the no-adjust Nroff command so that
 # the man output looks standard.
-ld.1: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
+ld.1: $(srcdir)/ld.texinfo configdoc.texi
 	touch $@
 	-$(TEXI2POD) $(MANCONF) < $(srcdir)/ld.texinfo > ld.pod
 	-($(POD2MAN) ld.pod | \
@@ -1787,7 +1778,7 @@ ld.1: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
 	        (rm -f $@.T$$$$ && exit 1)
 	rm -f ld.pod
 
-MAINTAINERCLEANFILES = ldver.texi configdoc.texi
+MAINTAINERCLEANFILES = configdoc.texi
 
 # We want to reconfigure if configure.host or configure.tgt changes.  We
 # extract version from bfd/configure.in, so we must depend on that also.
@@ -1881,7 +1872,7 @@ EXTRA_DIST = ldgram.c ldgram.h ldlex.c emultempl/spu_ovl.o $(man_MANS)
 diststuff: info $(EXTRA_DIST)
 all: info ld.1
 
-# Both info (ld.info) and ld.1 depend on configdoc.texi and ldver.texi.
+# Both info (ld.info) and ld.1 depend on configdoc.texi.
 # But info isn't a direct target. Make info-recursive to depend on
 # ld.1 to support parallel build.
 info-recursive: ld.1

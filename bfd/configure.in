@@ -76,6 +76,25 @@ AC_ARG_WITH(pkgversion,
 )
 AC_SUBST(PKGVERSION)
 
+# The location to which bugs should be reported.
+AC_ARG_WITH(bugurl,
+  AS_HELP_STRING([--with-bugurl=URL],
+                 [Direct users to URL to report a bug]),
+  [case "$withval" in
+    yes) AC_MSG_ERROR([bug URL not specified]) ;;
+    no)  REPORT_BUGS_TO="";
+	 REPORT_BUGS_TEXI=""
+	 ;;
+    *)   REPORT_BUGS_TO="<URL:$withval>"
+	 REPORT_BUGS_TEXI="@uref{`echo $withval | sed 's/@/@@/g'`}"
+	 ;;
+   esac],
+   REPORT_BUGS_TO="<URL:http://www.sourceware.org/bugzilla/>"
+   REPORT_BUGS_TEXI="@uref{http://www.sourceware.org/bugzilla/}"
+)
+AC_SUBST(REPORT_BUGS_TO)
+AC_SUBST(REPORT_BUGS_TEXI)
+
 AM_BINUTILS_WARNINGS
 
 AM_CONFIG_HEADER(config.h:config.in)

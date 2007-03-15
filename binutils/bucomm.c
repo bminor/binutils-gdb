@@ -24,7 +24,6 @@
    loaded, but for now it's not necessary.  */
 
 #include "bfd.h"
-#include "bfdver.h"
 #include "libiberty.h"
 #include "bucomm.h"
 #include "filenames.h"

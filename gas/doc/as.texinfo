@@ -22,7 +22,7 @@
 @c man begin NAME
 @c ---
 @include asconfig.texi
-@include gasver.texi
+@include bfdver.texi
 @c ---
 @c man end
 @c ---

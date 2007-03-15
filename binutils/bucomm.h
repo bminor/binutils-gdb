@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 
+#include "bfdver.h"
 #include "config.h"
 
 #include <stdarg.h>

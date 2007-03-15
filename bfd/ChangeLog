@@ -1,3 +1,14 @@
+2007-03-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (bfdver.h): Substitute report_bugs_to.  Also
+	create doc/bfdver.texi.
+	* Makefile.in: Regenerated.
+
+	* configure.in (--with-bugurl): New option.
+	* configure: Regenerated.
+
+	* version.h (REPORT_BUGS_TO): New.
+
 2007-03-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/3826

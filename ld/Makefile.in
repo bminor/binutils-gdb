@@ -205,8 +205,6 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
-REPORT_BUGS_TEXI = @REPORT_BUGS_TEXI@
-REPORT_BUGS_TO = "\"@REPORT_BUGS_TO@\""
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRINGIFY = @STRINGIFY@
@@ -329,14 +327,17 @@ CXX_FOR_TARGET = ` \
   fi`
 
 info_TEXINFOS = ld.texinfo
-ld_TEXINFOS = configdoc.texi ldver.texi
+ld_TEXINFOS = configdoc.texi
 noinst_TEXINFOS = ldint.texinfo
 man_MANS = ld.1
-AM_MAKEINFOFLAGS = -I $(srcdir) -I $(BFDDIR)/doc -I $(top_srcdir)/../libiberty
-TEXI2DVI = texi2dvi -I $(srcdir) -I $(BFDDIR)/doc -I $(top_srcdir)/../libiberty
+AM_MAKEINFOFLAGS = -I $(srcdir) -I $(BFDDIR)/doc -I ../bfd/doc \
+		   -I $(top_srcdir)/../libiberty
+
+TEXI2DVI = texi2dvi -I $(srcdir) -I $(BFDDIR)/doc -I ../bfd/doc \
+		    -I $(top_srcdir)/../libiberty
+
 INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
 	@INCINTL@ $(HDEFINES) $(CFLAGS) \
-	-DREPORT_BUGS_TO=$(REPORT_BUGS_TO) \
 	-DLOCALEDIR="\"$(datadir)/locale\""
 
 BFDLIB = ../bfd/libbfd.la
@@ -692,7 +693,7 @@ ld_new_SOURCES = ldgram.y ldlex.l lexsup.c ldlang.c mri.c ldctor.c ldmain.c \
 
 ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL_DEP)
 ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
-MAINTAINERCLEANFILES = ldver.texi configdoc.texi ld.info
+MAINTAINERCLEANFILES = configdoc.texi ld.info
 
 # We want to reconfigure if configure.host or configure.tgt changes.  We
 # extract version from bfd/configure.in, so we must depend on that also.
@@ -720,15 +721,15 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
-	      echo ' cd $(srcdir) && $(AUTOMAKE) --foreign '; \
-	      cd $(srcdir) && $(AUTOMAKE) --foreign  \
+	      echo ' cd $(srcdir) && $(AUTOMAKE) --cygnus '; \
+	      cd $(srcdir) && $(AUTOMAKE) --cygnus  \
 		&& exit 0; \
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --cygnus  Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  Makefile
+	  $(AUTOMAKE) --cygnus  Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -2568,18 +2569,10 @@ configdoc.texi:	${DOCVER}-doc.texi
 	cp ${srcdir}/${DOCVER}-doc.texi ./configdoc.texi
 	chmod u+w ./configdoc.texi
 
-ldver.texi: $(srcdir)/../bfd/configure
-	rm -f $@
-	eval `grep '^ *VERSION=' $(srcdir)/../bfd/configure`; \
-	  echo "@set VERSION $$VERSION" > $@
-	if [ -n "$(REPORT_BUGS_TEXI)" ]; then \
-	  echo "@set BUGURL $(REPORT_BUGS_TEXI)" >> $@; \
-	fi
-
 # Build the man page from the texinfo file
 # The sed command removes the no-adjust Nroff command so that
 # the man output looks standard.
-ld.1: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
+ld.1: $(srcdir)/ld.texinfo configdoc.texi
 	touch $@
 	-$(TEXI2POD) $(MANCONF) < $(srcdir)/ld.texinfo > ld.pod
 	-($(POD2MAN) ld.pod | \
@@ -2665,7 +2658,7 @@ install-data-local: install-info
 diststuff: info $(EXTRA_DIST)
 all: info ld.1
 
-# Both info (ld.info) and ld.1 depend on configdoc.texi and ldver.texi.
+# Both info (ld.info) and ld.1 depend on configdoc.texi.
 # But info isn't a direct target. Make info-recursive to depend on
 # ld.1 to support parallel build.
 info-recursive: ld.1

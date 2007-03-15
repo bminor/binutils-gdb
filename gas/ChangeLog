@@ -1,3 +1,22 @@
+2007-03-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (REPORT_BUGS_TO): Removed.
+	(INCLUDES): Remove -DREPORT_BUGS_TO.
+	* Makefile.in: Regenerated.
+
+	* configure.in (--with-bugurl): Removed.
+	* configure: Regenerated.
+
+	* doc/Makefile.am (as_TEXINFOS): Remove gasver.texi.
+	(AM_MAKEINFOFLAGS): Add -I ../../bfd/doc.
+	(TEXI2DVI): Likewise.
+	(gasver.texi): Removed.
+	(MOSTLYCLEANFILES): Remove gasver.texi.
+	(as.1): Don't depend on gasver.texi.
+	* doc/Makefile.in: Regenerated.
+
+	* doc/as.texi: Include bfdver.texi instead of gasver.texi.
+
 2007-03-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* config/tc-arm.c (arm_copy_symbol_attributes): New.

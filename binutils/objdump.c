@@ -49,7 +49,6 @@
    supplied by the disassembler() function.  */
 
 #include "bfd.h"
-#include "bfdver.h"
 #include "progress.h"
 #include "bucomm.h"
 #include "dwarf.h"

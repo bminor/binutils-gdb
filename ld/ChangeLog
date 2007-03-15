@@ -1,3 +1,22 @@
+2007-03-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (ld_TEXINFOS): Remove ldver.texi.
+	(AM_MAKEINFOFLAGS): Add -I ../../bfd/doc.
+	(TEXI2DVI): Likewise.
+	(REPORT_BUGS_TO): Removed.
+	(INCLUDES): Remove -DREPORT_BUGS_TO.
+	(ldver.texi): Likewise.
+	(ld.1): Don't depend on ldver.texi.
+	(MOSTLYCLEANFILES): Remove ldver.texi.
+	* Makefile.in: Regenerated.
+
+	* configure.in (--with-bugurl): Removed.
+	* configure: Regenerated.
+
+	* lexsup.c: Include bfdver.h.
+
+	* ld.texinfo: Include bfdver.texi instead of ldver.texi.
+
 2007-03-11  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* emultempl/mmixelf.em: Remove incorrect '#line' directive.

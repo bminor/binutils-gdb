@@ -37,8 +37,7 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 subdir = doc
-DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
-	$(binutils_TEXINFOS)
+DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/../bfd/acinclude.m4 \
@@ -153,8 +152,6 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
-REPORT_BUGS_TEXI = @REPORT_BUGS_TEXI@
-REPORT_BUGS_TO = @REPORT_BUGS_TO@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -238,13 +235,16 @@ man_MANS = \
 	$(DEMANGLER_NAME).1
 
 info_TEXINFOS = binutils.texi
-binutils_TEXINFOS = config.texi
 binutils_TEXI = $(srcdir)/binutils.texi
-AM_MAKEINFOFLAGS = -I "$(srcdir)" -I "$(top_srcdir)/../libiberty"
-TEXI2DVI = texi2dvi -I "$(srcdir)" -I "$(top_srcdir)/../libiberty"
-MAINTAINERCLEANFILES = config.texi binutils.info
+AM_MAKEINFOFLAGS = -I "$(srcdir)" -I "$(top_srcdir)/../libiberty" \
+		   -I ../../bfd/doc
+
+TEXI2DVI = texi2dvi -I "$(srcdir)" -I "$(top_srcdir)/../libiberty" \
+		    -I ../../bfd/doc
+
 MOSTLYCLEANFILES = $(DEMANGLER_NAME).1
 html__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
+MAINTAINERCLEANFILES = binutils.info
 
 # Automake 1.9 will only build info files in the objdir if they are
 # mentioned in DISTCLEANFILES.  It doesn't have to be unconditional,
@@ -263,9 +263,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  doc/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --cygnus  doc/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  doc/Makefile
+	  $(AUTOMAKE) --cygnus  doc/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -293,7 +293,7 @@ clean-libtool:
 distclean-libtool:
 	-rm -f libtool
 
-binutils.info: binutils.texi $(binutils_TEXINFOS)
+binutils.info: binutils.texi 
 	restore=: && backupdir="$(am__leading_dot)am$$$$" && \
 	rm -rf $$backupdir && mkdir $$backupdir && \
 	if ($(MAKEINFO) --version) >/dev/null 2>&1; then \
@@ -311,17 +311,17 @@ binutils.info: binutils.texi $(binutils_TEXINFOS)
 	fi; \
 	rm -rf $$backupdir; exit $$rc
 
-binutils.dvi: binutils.texi $(binutils_TEXINFOS) 
+binutils.dvi: binutils.texi  
 	TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
 	MAKEINFO='$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir)' \
 	$(TEXI2DVI) -o $@ `test -f 'binutils.texi' || echo '$(srcdir)/'`binutils.texi
 
-binutils.pdf: binutils.texi $(binutils_TEXINFOS) 
+binutils.pdf: binutils.texi  
 	TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
 	MAKEINFO='$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir)' \
 	$(TEXI2PDF) -o $@ `test -f 'binutils.texi' || echo '$(srcdir)/'`binutils.texi
 
-binutils.html: binutils.texi $(binutils_TEXINFOS) 
+binutils.html: binutils.texi  
 	rm -rf $(@:.html=.htp)
 	if $(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) -I $(srcdir) \
 	 -o $(@:.html=.htp) `test -f 'binutils.texi' || echo '$(srcdir)/'`binutils.texi; \
@@ -569,15 +569,6 @@ uninstall-man: uninstall-man1
 	pdf-am ps ps-am uninstall uninstall-am uninstall-info-am \
 	uninstall-man uninstall-man1
 
-
-config.texi: $(srcdir)/../../bfd/configure $(binutils_TEXI)
-	rm -f config.texi
-	eval `grep '^ *VERSION=' $(srcdir)/../../bfd/configure`; \
-	  echo "@set VERSION $$VERSION" > $@
-	echo "@set UPDATED `date '+%B %Y'`" >> config.texi
-	if [ -n "$(REPORT_BUGS_TEXI)" ]; then \
-	  echo "@set BUGURL $(REPORT_BUGS_TEXI)" >> config.texi; \
-	fi
 
 # Man page generation from texinfo
 addr2line.1:	$(binutils_TEXI) $(binutils_TEXINFOS)
