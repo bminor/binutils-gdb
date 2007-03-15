@@ -1947,6 +1947,10 @@ copy_symbol_attributes (symbolS *dest, symbolS *src)
 #ifdef OBJ_COPY_SYMBOL_ATTRIBUTES
   OBJ_COPY_SYMBOL_ATTRIBUTES (dest, src);
 #endif
+
+#ifdef TC_COPY_SYMBOL_ATTRIBUTES
+  TC_COPY_SYMBOL_ATTRIBUTES (dest, src);
+#endif
 }
 
 int

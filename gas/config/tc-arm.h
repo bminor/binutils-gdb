@@ -141,6 +141,12 @@ bfd_boolean arm_is_eabi (void);
 #define ARM_SET_INTERWORK(s,t)  ((t) ? ARM_SET_FLAG (s, ARM_FLAG_INTERWORK) : ARM_RESET_FLAG (s, ARM_FLAG_INTERWORK))
 #define THUMB_SET_FUNC(s,t)     ((t) ? ARM_SET_FLAG (s, THUMB_FLAG_FUNC)    : ARM_RESET_FLAG (s, THUMB_FLAG_FUNC))
 
+void arm_copy_symbol_attributes (symbolS *, symbolS *);
+#ifndef TC_COPY_SYMBOL_ATTRIBUTES
+#define TC_COPY_SYMBOL_ATTRIBUTES(DEST, SRC) \
+  (arm_copy_symbol_attributes (DEST, SRC))
+#endif
+
 #define TC_START_LABEL(C,STR)            (c == ':' || (c == '/' && arm_data_in_code ()))
 #define tc_canonicalize_symbol_name(str) arm_canonicalize_symbol_name (str);
 #define obj_adjust_symtab() 		 arm_adjust_symtab ()

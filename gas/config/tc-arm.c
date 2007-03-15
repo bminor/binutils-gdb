@@ -20527,3 +20527,9 @@ s_arm_fpu (int ignored ATTRIBUTE_UNUSED)
   ignore_rest_of_line ();
 }
 
+/* Copy symbol information.  */
+void
+arm_copy_symbol_attributes (symbolS *dest, symbolS *src)
+{
+  ARM_GET_FLAG (dest) = ARM_GET_FLAG (src);
+}

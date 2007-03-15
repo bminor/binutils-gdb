@@ -1,3 +1,7 @@
+2007-03-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gas/arm/thumbver.d, gas/arm/thumbver.s: New test.
+
 2007-03-14  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/thumb2_add.d: Add tests using sp.

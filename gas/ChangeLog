@@ -1,3 +1,11 @@
+2007-03-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* config/tc-arm.c (arm_copy_symbol_attributes): New.
+	* config/tc-arm.h (arm_copy_symbol_attributes): Declare.
+	(TC_COPY_SYMBOL_ATTRIBUTES): Define.
+	* gas/symbols.c (copy_symbol_attributes): Use
+	TC_COPY_SYMBOL_ATTRIBUTES.
+
 2007-03-14  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (T16_32_TAB): Fix dec_sp encoding.
