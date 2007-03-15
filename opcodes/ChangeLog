@@ -1,5 +1,24 @@
 2007-03-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* Makefile.am (CFILES): Add i386-opc.c.
+	(ALL_MACHINES): Add i386-opc.lo.
+	Run "make dep-am".
+	* Makefile.in: Regenerated.
+
+	* configure.in: Add i386-opc.lo for bfd_i386_arch.
+	* configure: Regenerated.
+
+	* i386-dis.c: Include "opcode/i386.h".
+	(MAXLEN): Renamed to MAX_MNEM_SIZE. Remove definition.
+	(FWAIT_OPCODE): Remove definition.
+	(UNIXWARE_COMPAT): Renamed to SYSV386_COMPAT. Remove definition.
+	(MAX_OPERANDS): Remove definition.
+
+	* i386-opc.c: New file.
+	* i386-opc.h: Likewise.
+
+2007-03-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* Makefile.in: Regenerated.
 
 2007-03-09  H.J. Lu  <hongjiu.lu@intel.com>

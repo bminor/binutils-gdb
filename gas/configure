@@ -4732,7 +4732,7 @@ _ACEOF
 
     # Do we need the opcodes library?
     case ${cpu_type} in
-      vax | i386 | tic30)
+      vax | tic30)
 	;;
 
       *)

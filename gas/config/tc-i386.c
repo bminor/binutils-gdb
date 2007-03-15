@@ -32,7 +32,7 @@
 #include "subsegs.h"
 #include "dwarf2dbg.h"
 #include "dw2gencfi.h"
-#include "opcode/i386.h"
+#include "opcodes/i386-opc.h"
 #include "elf/x86-64.h"
 
 #ifndef REGISTER_WARNINGS
@@ -1239,9 +1239,7 @@ md_begin ()
   {
     const reg_entry *regtab;
 
-    for (regtab = i386_regtab;
-	 regtab < i386_regtab + sizeof (i386_regtab) / sizeof (i386_regtab[0]);
-	 regtab++)
+    for (regtab = i386_regtab; regtab->reg_name != NULL; regtab++)
       {
 	hash_err = hash_insert (reg_hash, regtab->reg_name, (PTR) regtab);
 	if (hash_err)

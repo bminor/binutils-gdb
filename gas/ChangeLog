@@ -1,5 +1,21 @@
 2007-03-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerated.
+
+	* config/tc-i386.c: Include "opcodes/i386-opc.h" instead of
+	"opcode/i386.h".
+	(md_begin): Check reg_name != NULL for the last entry in
+	i386_regtab.
+
+	* config/tc-i386.h: Move many entries to opcode/i386.h and
+	opcodes/i386-opc.h.
+
+	* configure.in (need_opcodes): Set true for i386.
+	* configure: Regenerated.
+
+2007-03-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* Makefile.am (REPORT_BUGS_TO): Removed.
 	(INCLUDES): Remove -DREPORT_BUGS_TO.
 	* Makefile.in: Regenerated.

@@ -93,6 +93,7 @@ CFILES = \
 	i370-dis.c \
 	i370-opc.c \
 	i386-dis.c \
+	i386-opc.c \
 	i860-dis.c \
 	i960-dis.c \
 	ia64-dis.c \
@@ -238,6 +239,7 @@ ALL_MACHINES = \
 	h8500-dis.lo \
 	hppa-dis.lo \
 	i386-dis.lo \
+	i386-opc.lo \
 	i370-dis.lo \
 	i370-opc.lo \
 	i860-dis.lo \
@@ -777,7 +779,9 @@ i370-opc.lo: i370-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/i370.h
 i386-dis.lo: i386-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h sysdep.h config.h \
-  $(INCDIR)/ansidecl.h opintl.h
+  $(INCDIR)/ansidecl.h opintl.h $(INCDIR)/opcode/i386.h
+i386-opc.lo: i386-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  i386-opc.h $(INCDIR)/opcode/i386.h
 i860-dis.lo: i860-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/opcode/i860.h
 i960-dis.lo: i960-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \

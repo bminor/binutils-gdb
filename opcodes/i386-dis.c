@@ -34,16 +34,9 @@
 #include "dis-asm.h"
 #include "sysdep.h"
 #include "opintl.h"
-
-#define MAXLEN 15
+#include "opcode/i386.h"
 
 #include <setjmp.h>
-
-#ifndef UNIXWARE_COMPAT
-/* Set non-zero for broken, compatible instructions.  Set to zero for
-   non-broken opcodes.  */
-#define UNIXWARE_COMPAT 1
-#endif
 
 static int fetch_data (struct disassemble_info *, bfd_byte *);
 static void ckprefix (void);
@@ -109,15 +102,11 @@ static void CMPXCHG8B_Fixup (int, int);
 struct dis_private {
   /* Points to first byte not fetched.  */
   bfd_byte *max_fetched;
-  bfd_byte the_buffer[MAXLEN];
+  bfd_byte the_buffer[MAX_MNEM_SIZE];
   bfd_vma insn_start;
   int orig_sizeflag;
   jmp_buf bailout;
 };
-
-/* The opcode for the fwait instruction, which we treat as a prefix
-   when we can.  */
-#define FWAIT_OPCODE (0x9b)
 
 enum address_mode
 {
@@ -183,7 +172,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
   struct dis_private *priv = (struct dis_private *) info->private_data;
   bfd_vma start = priv->insn_start + (priv->max_fetched - priv->the_buffer);
 
-  if (addr <= priv->the_buffer + MAXLEN)
+  if (addr <= priv->the_buffer + MAX_MNEM_SIZE)
     status = (*info->read_memory_func) (start,
 					priv->max_fetched,
 					addr - priv->max_fetched,
@@ -489,8 +478,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define THREE_BYTE_1 NULL, { { NULL, IS_3BYTE_OPCODE }, { NULL, 1 } }
 
 typedef void (*op_rtn) (int bytemode, int sizeflag);
-
-#define MAX_OPERANDS 4
 
 struct dis386 {
   const char *name;
@@ -3515,7 +3502,7 @@ static const struct dis386 float_reg[][8] = {
     { "fmul",	{ STi, ST } },
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-#if UNIXWARE_COMPAT
+#if SYSV386_COMPAT
     { "fsub",	{ STi, ST } },
     { "fsubr",	{ STi, ST } },
     { "fdiv",	{ STi, ST } },
@@ -3544,7 +3531,7 @@ static const struct dis386 float_reg[][8] = {
     { "fmulp",	{ STi, ST } },
     { "(bad)",	{ XX } },
     { FGRPde_3 },
-#if UNIXWARE_COMPAT
+#if SYSV386_COMPAT
     { "fsubp",	{ STi, ST } },
     { "fsubrp",	{ STi, ST } },
     { "fdivp",	{ STi, ST } },
