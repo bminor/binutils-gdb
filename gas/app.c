@@ -510,11 +510,10 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 		ch = GET ();
 	      if (ch == '"')
 		{
-		  PUT (' ');
-		  PUT (ch);
 		  quotechar = ch;
 		  state = 5;
 		  old_state = 3;
+		  PUT (ch);
 		}
 	      else
 		{

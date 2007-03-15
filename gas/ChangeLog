@@ -1,3 +1,8 @@
+2007-03-15  Alexandre Oliva  <aoliva@redhat.com>
+
+	PR gas/4184
+	* app.c (do_scrub_chars): PUT after setting states.
+
 2007-03-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am: Run "make dep-am".
