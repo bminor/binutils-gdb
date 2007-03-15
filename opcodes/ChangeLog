@@ -1,5 +1,15 @@
 2007-03-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-opc.c: Include "libiberty.h".
+	(i386_regtab): Remove the last entry.
+	(i386_regtab_size): New.
+	(i386_float_regtab_size): Likewise.
+
+	* i386-opc.h (i386_regtab_size): New.
+	(i386_float_regtab_size): Likewise.
+
+2007-03-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* Makefile.am (CFILES): Add i386-opc.c.
 	(ALL_MACHINES): Add i386-opc.lo.
 	Run "make dep-am".

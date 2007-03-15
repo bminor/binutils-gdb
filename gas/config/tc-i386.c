@@ -1238,8 +1238,9 @@ md_begin ()
   reg_hash = hash_new ();
   {
     const reg_entry *regtab;
+    unsigned int regtab_size = i386_regtab_size;
 
-    for (regtab = i386_regtab; regtab->reg_name != NULL; regtab++)
+    for (regtab = i386_regtab; regtab_size--; regtab++)
       {
 	hash_err = hash_insert (reg_hash, regtab->reg_name, (PTR) regtab);
 	if (hash_err)
@@ -5791,7 +5792,7 @@ parse_register (char *reg_string, char **end_op)
 
 	  know (e->X_op == O_register);
 	  know (e->X_add_number >= 0
-		&& (valueT) e->X_add_number < ARRAY_SIZE (i386_regtab));
+		&& (valueT) e->X_add_number < i386_regtab_size);
 	  r = i386_regtab + e->X_add_number;
 	  *end_op = input_line_pointer;
 	}

@@ -19,6 +19,7 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 #include "sysdep.h"
+#include "libiberty.h"
 #include "i386-opc.h"
 
 const template i386_optab[] =
@@ -1631,10 +1632,9 @@ const reg_entry i386_regtab[] =
   /* No type will make this register rejected for all purposes except
      for addressing.  This saves creating one extra type for RIP.  */
   {"rip", BaseIndex, 0, 0},
-
-  /* sentinel */
-  {NULL, 0, 0, 0}
 };
+
+const unsigned int i386_regtab_size = ARRAY_SIZE (i386_regtab);
 
 const reg_entry i386_float_regtab[] =
 {
@@ -1647,6 +1647,8 @@ const reg_entry i386_float_regtab[] =
   {"st(6)", FloatReg, 0, 6},
   {"st(7)", FloatReg, 0, 7}
 };
+
+const unsigned int i386_float_regtab_size = ARRAY_SIZE (i386_float_regtab);
 
 /* Segment stuff.  */
 const seg_entry cs = { "cs", 0x2e };
