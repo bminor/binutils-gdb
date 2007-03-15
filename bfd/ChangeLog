@@ -1,5 +1,9 @@
 2007-03-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* doc/Makefile.in: Regenerated.
+
+2007-03-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* Makefile.am (bfdver.h): Substitute report_bugs_to.  Also
 	create doc/bfdver.texi.
 	* Makefile.in: Regenerated.
