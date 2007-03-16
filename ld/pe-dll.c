@@ -1975,7 +1975,11 @@ make_one (def_file_export *exp, bfd *parent, bfd_boolean include_jmp_stub)
       switch (pe_details->pe_arch)
 	{
 	case PE_ARCH_i386:
-	  quick_reloc (abfd, 2, BFD_RELOC_32, 2);
+#ifdef pe_use_x86_64
+	  quick_reloc (abfd, 2, BFD_RELOC_32_PCREL, 2);
+#else
+          quick_reloc (abfd, 2, BFD_RELOC_32, 2);
+#endif
 	  break;
 	case PE_ARCH_sh:
 	  quick_reloc (abfd, 8, BFD_RELOC_32, 2);

@@ -4706,7 +4706,10 @@ lang_size_sections_1
   return dot;
 }
 
-/* Callback routine that is used in _bfd_elf_map_sections_to_segments.  */
+/* Callback routine that is used in _bfd_elf_map_sections_to_segments.
+   The BFD library has set NEW_SEGMENT to TRUE iff it thinks that
+   CURRENT_SECTION and PREVIOUS_SECTION ought to be placed into different
+   segments.  We are allowed an opportunity to override this decision.  */
 
 bfd_boolean
 ldlang_override_segment_assignment (struct bfd_link_info * info ATTRIBUTE_UNUSED,
@@ -4717,7 +4720,9 @@ ldlang_override_segment_assignment (struct bfd_link_info * info ATTRIBUTE_UNUSED
 {
   lang_output_section_statement_type * cur;
   lang_output_section_statement_type * prev;
-  
+
+  /* The checks below are only necessary when the BFD library has decided
+     that the two sections ought to be placed into the same segment.  */
   if (new_segment)
     return TRUE;
 
@@ -4728,16 +4733,17 @@ ldlang_override_segment_assignment (struct bfd_link_info * info ATTRIBUTE_UNUSED
   /* Find the memory regions associated with the two sections.
      We call lang_output_section_find() here rather than scanning the list
      of output sections looking for a matching section pointer because if
-     we have a large number of sections a hash lookup is faster.  */
+     we have a large number of sections then a hash lookup is faster.  */
   cur  = lang_output_section_find (current_section->name);
   prev = lang_output_section_find (previous_section->name);
 
+  /* More paranoia.  */
   if (cur == NULL || prev == NULL)
     return new_segment;
 
   /* If the regions are different then force the sections to live in
-     different segments.  See the email thread starting here for the
-     reasons why this is necessary:
+     different segments.  See the email thread starting at the following
+     URL for the reasons why this is necessary:
      http://sourceware.org/ml/binutils/2007-02/msg00216.html  */
   return cur->region != prev->region;
 }
@@ -6211,6 +6217,7 @@ lang_record_phdrs (void)
   alc = 10;
   secs = xmalloc (alc * sizeof (asection *));
   last = NULL;
+
   for (l = lang_phdr_list; l != NULL; l = l->next)
     {
       unsigned int c;
@@ -6236,7 +6243,26 @@ lang_record_phdrs (void)
 		  || os->bfd_section == NULL
 		  || (os->bfd_section->flags & SEC_ALLOC) == 0)
 		continue;
-	      pl = last;
+
+	      if (last)
+		pl = last;
+	      else
+		{
+		  lang_output_section_statement_type * tmp_os;
+
+		  /* If we have not run across a section with a program
+		     header assigned to it yet, then scan forwards to find
+		     one.  This prevents inconsistencies in the linker's
+		     behaviour when a script has specified just a single
+		     header and there are sections in that script which are
+		     not assigned to it, and which occur before the first
+		     use of that header. See here for more details:
+		     http://sourceware.org/ml/binutils/2007-02/msg00291.html  */
+		  for (tmp_os = os; tmp_os; tmp_os = tmp_os->next)
+		    if (tmp_os->phdrs)
+		      break;
+		  pl = tmp_os->phdrs;
+		}
 	    }
 
 	  if (os->bfd_section == NULL)
@@ -6468,7 +6494,6 @@ lang_leave_overlay (etree_type *lma_expr,
 	 an LMA region was specified.  */
       if (l->next == 0)
 	l->os->load_base = lma_expr;
-
       if (phdrs != NULL && l->os->phdrs == NULL)
 	l->os->phdrs = phdrs;
 

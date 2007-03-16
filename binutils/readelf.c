@@ -711,7 +711,7 @@ slurp_rela_relocs (FILE *file,
       if (relas == NULL)
 	{
 	  free (erelas);
-	  error (_("out of memory parsing relocs"));
+	  error (_("out of memory parsing relocs\n"));
 	  return 0;
 	}
 
@@ -739,7 +739,7 @@ slurp_rela_relocs (FILE *file,
       if (relas == NULL)
 	{
 	  free (erelas);
-	  error (_("out of memory parsing relocs"));
+	  error (_("out of memory parsing relocs\n"));
 	  return 0;
 	}
 
@@ -783,7 +783,7 @@ slurp_rel_relocs (FILE *file,
       if (rels == NULL)
 	{
 	  free (erels);
-	  error (_("out of memory parsing relocs"));
+	  error (_("out of memory parsing relocs\n"));
 	  return 0;
 	}
 
@@ -811,7 +811,7 @@ slurp_rel_relocs (FILE *file,
       if (rels == NULL)
 	{
 	  free (erels);
-	  error (_("out of memory parsing relocs"));
+	  error (_("out of memory parsing relocs\n"));
 	  return 0;
 	}
 
@@ -2814,7 +2814,7 @@ request_dump (unsigned int section, int type)
       new_dump_sects = calloc (section + 1, 1);
 
       if (new_dump_sects == NULL)
-	error (_("Out of memory allocating dump request table."));
+	error (_("Out of memory allocating dump request table.\n"));
       else
 	{
 	  /* Copy current flag settings.  */
@@ -2842,11 +2842,11 @@ request_dump_byname (const char *section, int type)
 
   new_request = malloc (sizeof (struct dump_list_entry));
   if (!new_request)
-    error (_("Out of memory allocating dump request table."));
+    error (_("Out of memory allocating dump request table.\n"));
 
   new_request->name = strdup (section);
   if (!new_request->name)
-    error (_("Out of memory allocating dump request table."));
+    error (_("Out of memory allocating dump request table.\n"));
 
   new_request->type = type;
 
@@ -3512,7 +3512,7 @@ process_program_headers (FILE *file)
 	      sec = find_section (".dynamic");
 	      if (sec == NULL || sec->sh_size == 0)
 		{
-		  error (_("no .dynamic section in the dynamic segment"));
+		  error (_("no .dynamic section in the dynamic segment\n"));
 		  break;
 		}
 
@@ -3521,9 +3521,9 @@ process_program_headers (FILE *file)
 
 	      if (dynamic_addr < segment->p_offset
 		  || dynamic_addr > segment->p_offset + segment->p_filesz)
-		warn (_("the .dynamic section is not contained within the dynamic segment"));
+		warn (_("the .dynamic section is not contained within the dynamic segment\n"));
 	      else if (dynamic_addr > segment->p_offset)
-		warn (_("the .dynamic section is not the first section in the dynamic segment."));
+		warn (_("the .dynamic section is not the first section in the dynamic segment.\n"));
 	    }
 	  else
 	    {
@@ -3544,7 +3544,7 @@ process_program_headers (FILE *file)
 	      int ret = snprintf (fmt, sizeof (fmt), "%%%ds", PATH_MAX);
 
 	      if (ret >= (int) sizeof (fmt) || ret < 0)
-		error (_("Internal error: failed to create format string to display program interpreter"));
+		error (_("Internal error: failed to create format string to display program interpreter\n"));
 
 	      program_interpreter[0] = 0;
 	      if (fscanf (file, fmt, program_interpreter) <= 0)
@@ -5865,7 +5865,7 @@ process_dynamic_section (FILE *file)
 	  else
 	    {
 	      if (fseek (file, 0, SEEK_END))
-		error (_("Unable to seek to end of file!"));
+		error (_("Unable to seek to end of file!\n"));
 
 	      section.sh_size = ftell (file) - section.sh_offset;
 	    }
@@ -7063,7 +7063,7 @@ process_symbol_table (FILE *file)
 				     sizeof nb + sizeof nc)),
 		 SEEK_SET))
 	{
-	  error (_("Unable to seek to start of dynamic information"));
+	  error (_("Unable to seek to start of dynamic information\n"));
 	  return 0;
 	}
 
@@ -7289,7 +7289,7 @@ process_symbol_table (FILE *file)
 			      check_def = 0;
 			    }
 			  else if (! is_nobits)
-			    error (_("bad dynamic symbol"));
+			    error (_("bad dynamic symbol\n"));
 			  else
 			    check_def = 1;
 			}
@@ -7372,7 +7372,7 @@ process_symbol_table (FILE *file)
       lengths = calloc (nbuckets, sizeof (*lengths));
       if (lengths == NULL)
 	{
-	  error (_("Out of memory"));
+	  error (_("Out of memory\n"));
 	  return 0;
 	}
       for (hn = 0; hn < nbuckets; ++hn)
@@ -7388,7 +7388,7 @@ process_symbol_table (FILE *file)
       counts = calloc (maxlength + 1, sizeof (*counts));
       if (counts == NULL)
 	{
-	  error (_("Out of memory"));
+	  error (_("Out of memory\n"));
 	  return 0;
 	}
 
@@ -7437,7 +7437,7 @@ process_symbol_table (FILE *file)
 				     sizeof nb)),
 		 SEEK_SET))
 	{
-	  error (_("Unable to seek to start of dynamic information"));
+	  error (_("Unable to seek to start of dynamic information\n"));
 	  return 0;
 	}
 
@@ -7461,7 +7461,7 @@ process_symbol_table (FILE *file)
 		  + offset_from_vma (file, buckets_vma, 4)),
 		 SEEK_SET))
 	{
-	  error (_("Unable to seek to start of dynamic information"));
+	  error (_("Unable to seek to start of dynamic information\n"));
 	  return 0;
 	}
 
@@ -7491,7 +7491,7 @@ process_symbol_table (FILE *file)
 					   + 4 * (ngnubuckets + maxchain), 4)),
 		 SEEK_SET))
 	{
-	  error (_("Unable to seek to start of dynamic information"));
+	  error (_("Unable to seek to start of dynamic information\n"));
 	  return 0;
 	}
 
@@ -7515,7 +7515,7 @@ process_symbol_table (FILE *file)
 		  + offset_from_vma (file, buckets_vma + 4 * ngnubuckets, 4)),
 		 SEEK_SET))
 	{
-	  error (_("Unable to seek to start of dynamic information"));
+	  error (_("Unable to seek to start of dynamic information\n"));
 	  return 0;
 	}
 
@@ -7527,7 +7527,7 @@ process_symbol_table (FILE *file)
       lengths = calloc (ngnubuckets, sizeof (*lengths));
       if (lengths == NULL)
 	{
-	  error (_("Out of memory"));
+	  error (_("Out of memory\n"));
 	  return 0;
 	}
 
@@ -7552,7 +7552,7 @@ process_symbol_table (FILE *file)
       counts = calloc (maxlength + 1, sizeof (*counts));
       if (counts == NULL)
 	{
-	  error (_("Out of memory"));
+	  error (_("Out of memory\n"));
 	  return 0;
 	}
 
@@ -8550,7 +8550,7 @@ process_mips_specific (FILE *file)
 	  iopt = cmalloc ((sect->sh_size / sizeof (eopt)), sizeof (*iopt));
 	  if (iopt == NULL)
 	    {
-	      error (_("Out of memory"));
+	      error (_("Out of memory\n"));
 	      return 0;
 	    }
 
@@ -8735,14 +8735,14 @@ process_mips_specific (FILE *file)
 
       if (dynamic_symbols == NULL)
 	{
-	  error (_("conflict list found without a dynamic symbol table"));
+	  error (_("conflict list found without a dynamic symbol table\n"));
 	  return 0;
 	}
 
       iconf = cmalloc (conflictsno, sizeof (*iconf));
       if (iconf == NULL)
 	{
-	  error (_("Out of memory"));
+	  error (_("Out of memory\n"));
 	  return 0;
 	}
 
@@ -9699,7 +9699,7 @@ main (int argc, char **argv)
       /* Make a copy of the dump_sects array.  */
       cmdline_dump_sects = malloc (num_dump_sects);
       if (cmdline_dump_sects == NULL)
-	error (_("Out of memory allocating dump request table."));
+	error (_("Out of memory allocating dump request table.\n"));
       else
 	{
 	  memcpy (cmdline_dump_sects, dump_sects, num_dump_sects);

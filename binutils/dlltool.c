@@ -2412,6 +2412,12 @@ make_one_lib_file (export_type *exp, int i)
 						      BFD_RELOC_16_GOTOFF);
 		  rel->sym_ptr_ptr = iname_pp;
 		}
+	      else if (machine == MX86)
+		{
+		  rel->howto = bfd_reloc_type_lookup (abfd,
+						      BFD_RELOC_32_PCREL);
+		  rel->sym_ptr_ptr = iname_pp;
+		}
 	      else
 		{
 		  rel->howto = bfd_reloc_type_lookup (abfd, BFD_RELOC_32);
