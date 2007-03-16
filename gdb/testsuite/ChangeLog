@@ -1,3 +1,8 @@
+2007-03-16  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* lib/gdb.exp (gdb_run_cmd): Use -notransfer to make start-up
+	messages available to test cases (like chng-sym.exp).
+
 2007-03-14  Andreas Schwab  <schwab@suse.de>
 
 	* gdb.arch/altivec-regs.exp (decimal_vector): Adjust for output

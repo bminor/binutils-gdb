@@ -283,7 +283,9 @@ proc gdb_run_cmd {args} {
 	    send_gdb "y\n"
 	    exp_continue
 	}
-	-re "Starting program: \[^\r\n\]*" {}
+	# Use -notransfer here so that test cases (like chng-sym.exp)
+	# may test for additional start-up messages.
+	-notransfer -re "Starting program: \[^\r\n\]*" {}
     }
 }
 
