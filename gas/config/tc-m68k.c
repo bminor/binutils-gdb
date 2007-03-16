@@ -607,6 +607,7 @@ static const struct m68k_cpu m68k_cpus[] =
   {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcf5485_ctrl, "5485", -1},
   {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcf5485_ctrl, "548x", 0},
   
+  {fido_a,				fido_ctrl, "fidoa", 0},
   {fido_a,				fido_ctrl, "fido", 1},
 
   {0,NULL,NULL, 0}

@@ -1,3 +1,7 @@
+2007-03-16  Kazu Hirata  <kazu@codesourcery.com>
+
+	* config/tc-m68k.c (m68k_cpus): Add an entry for fidoa.
+
 2007-03-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (md_begin): Use i386_regtab_size to scan 
