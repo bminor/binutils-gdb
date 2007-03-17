@@ -801,6 +801,7 @@ spu_elf_size_stubs (bfd *output_bfd,
 	      struct spu_stub_hash_entry *sh;
 	      unsigned int sym_type;
 	      enum _insn_type { non_branch, branch, call } insn_type;
+	      bfd_boolean is_setjmp;
 
 	      r_type = ELF32_R_TYPE (irela->r_info);
 	      r_indx = ELF32_R_SYM (irela->r_info);
@@ -877,15 +878,26 @@ spu_elf_size_stubs (bfd *output_bfd,
 		    continue;
 		}
 
+	      /* setjmp always goes via an overlay stub, because
+		 then the return and hence the longjmp goes via
+		 __ovly_return.  That magically makes setjmp/longjmp
+		 between overlays work.  */
+	      is_setjmp = (h != NULL
+			   && strncmp (h->root.root.string, "setjmp", 6) == 0
+			   && (h->root.root.string[6] == '\0'
+			       || h->root.root.string[6] == '@'));
+
 	      /* Usually, non-overlay sections don't need stubs.  */
 	      if (!spu_elf_section_data (sym_sec->output_section)->ovl_index
-		  && !non_overlay_stubs)
+		  && !non_overlay_stubs
+		  && !is_setjmp)
 		continue;
 
 	      /* We need a reference from some other section before
 		 we consider that a symbol might need an overlay stub.  */
 	      if (spu_elf_section_data (sym_sec->output_section)->ovl_index
-		  == spu_elf_section_data (section->output_section)->ovl_index)
+		  == spu_elf_section_data (section->output_section)->ovl_index
+		  && !is_setjmp)
 		{
 		  /* Or we need this to *not* be a branch.  ie. We are
 		     possibly taking the address of a function and

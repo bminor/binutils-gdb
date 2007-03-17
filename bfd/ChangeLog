@@ -1,3 +1,8 @@
+2007-03-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (spu_elf_size_stubs): Always use an overlay stub
+	on setjmp calls.
+
 2007-03-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* doc/Makefile.in: Regenerated.
