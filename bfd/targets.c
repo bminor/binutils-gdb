@@ -874,8 +874,8 @@ static const bfd_target * const _bfd_target_vector[] =
 	&b_out_vec_big_host,
 	&b_out_vec_little_host,
 	&bfd_efi_app_ia32_vec,
-	&bfd_efi_app_x86_64_vec,
 #ifdef BFD64
+	&bfd_efi_app_x86_64_vec,
 	&bfd_efi_app_ia64_vec,
 #endif
 	&bfd_elf32_avr_vec,

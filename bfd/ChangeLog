@@ -1,3 +1,8 @@
+2003-03-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* targets.c (_bfd_target_vector): Add bfd_efi_app_x86_64_vec
+	only if BFD64 is defined.
+
 2007-03-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (spu_elf_size_stubs): Always use an overlay stub
