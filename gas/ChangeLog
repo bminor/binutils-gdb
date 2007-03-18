@@ -1,3 +1,10 @@
+2007-03-18  Mark Shinwell  <shinwell@codesourcery.com>
+
+	* config/tc-arm.c (do_mul): Don't warn about overlapping
+	Rd and Rm operands when assembling for v6 or above.
+	Correctly capitalize register names in the messages.
+	(do_mlas): Likewise.  Delete spurious blank line.
+
 2007-03-16  Kazu Hirata  <kazu@codesourcery.com>
 
 	* config/tc-m68k.c (m68k_cpus): Add an entry for fidoa.

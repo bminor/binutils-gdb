@@ -7051,17 +7051,16 @@ do_lstc (void)
 static void
 do_mlas (void)
 {
-  /* This restriction does not apply to mls (nor to mla in v6, but
-     that's hard to detect at present).	 */
+  /* This restriction does not apply to mls (nor to mla in v6 or later).  */
   if (inst.operands[0].reg == inst.operands[1].reg
+      && !ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v6)
       && !(inst.instruction & 0x00400000))
-    as_tsktsk (_("rd and rm should be different in mla"));
+    as_tsktsk (_("Rd and Rm should be different in mla"));
 
   inst.instruction |= inst.operands[0].reg << 16;
   inst.instruction |= inst.operands[1].reg;
   inst.instruction |= inst.operands[2].reg << 8;
   inst.instruction |= inst.operands[3].reg << 12;
-
 }
 
 static void
@@ -7169,8 +7168,9 @@ do_mul (void)
   inst.instruction |= inst.operands[1].reg;
   inst.instruction |= inst.operands[2].reg << 8;
 
-  if (inst.operands[0].reg == inst.operands[1].reg)
-    as_tsktsk (_("rd and rm should be different in mul"));
+  if (inst.operands[0].reg == inst.operands[1].reg
+      && !ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v6))
+    as_tsktsk (_("Rd and Rm should be different in mul"));
 }
 
 /* Long Multiply Parser
