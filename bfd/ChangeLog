@@ -1,3 +1,21 @@
+2003-03-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* peXXigen.c (_bfd_XXi_swap_aouthdr_in): Store Magic,
+	MajorLinkerVersion, MinorLinkerVersion, SizeOfCode,
+	SizeOfInitializedData, SizeOfUninitializedData,
+	AddressOfEntryPoint, BaseOfCode and BaseOfData in internal
+	extra PE a.out header.
+	(IMAGE_NT_OPTIONAL_HDR_MAGIC): Defined as 0x10b if not defined.
+	(IMAGE_NT_OPTIONAL_HDR64_MAGIC): Defined as 0x20b if not
+	defined.
+	(IMAGE_NT_OPTIONAL_HDRROM_MAGIC): Defined as 0x107 if not
+	defined.
+	(_bfd_XX_print_private_bfd_data_common): Also print Magic,
+	MajorLinkerVersion, MinorLinkerVersion, SizeOfCode,
+	SizeOfInitializedData, SizeOfUninitializedData,
+	AddressOfEntryPoint, BaseOfCode and BaseOfData from internal
+	extra PE a.out header.
+
 2003-03-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* targets.c (_bfd_target_vector): Add bfd_efi_app_x86_64_vec
