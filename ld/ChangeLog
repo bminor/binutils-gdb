@@ -1,3 +1,8 @@
+2007-03-19  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* configure.tgt (bfin-*-elf, bfin-*-uclinux*): Add targ_extra_libpath.
+	(bfin-*-linux-uclibc*): New target.
+
 2007-03-16  Kai Tietz  <Kai.Tietz@onevision.com>
 
 	* pe-dll.c (make_one): Use pc-relative relocation instead of an
