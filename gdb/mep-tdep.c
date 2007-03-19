@@ -1914,7 +1914,7 @@ mep_analyze_frame_prologue (struct frame_info *next_frame,
       *this_prologue_cache 
         = FRAME_OBSTACK_ZALLOC (struct mep_prologue);
 
-      func_start = frame_func_unwind (next_frame);
+      func_start = frame_func_unwind (next_frame, NORMAL_FRAME);
       stop_addr = frame_pc_unwind (next_frame);
 
       /* If we couldn't find any function containing the PC, then
@@ -1965,7 +1965,7 @@ mep_frame_this_id (struct frame_info *next_frame,
                    struct frame_id *this_id)
 {
   *this_id = frame_id_build (mep_frame_base (next_frame, this_prologue_cache),
-                             frame_func_unwind (next_frame));
+                             frame_func_unwind (next_frame, NORMAL_FRAME));
 }
 
 
