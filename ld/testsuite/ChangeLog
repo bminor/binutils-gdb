@@ -1,3 +1,9 @@
+2007-03-20  Paul Brook  <paul@codesourcery.com>
+
+	* ld-arm/arm-elf.exp (ld-arm/arm-elf.exp): Add arm-pic-veneer.
+	* ld-arm/arm-pic-veneer.d: New test.
+	* ld-arm/arm-pic-veneer.s: New test.
+
 2007-03-08  Richard Sandiford  <richard@codesourcery.com>
 
 	* ld-elf/extract-symbol-1.ld (data): Explicitly set the start address

@@ -5406,6 +5406,13 @@ trampoline address instead of the function address. This is typically the
 case when a pointer to a function is taken. The pointer will in fact
 point to the function trampoline.
 
+@cindex PIC_VENEER
+@kindex --pic-veneer
+The @samp{--pic-veneer} switch makes the linker use PIC sequences for
+ARM/Thumb interworking veneers, even if the rest of the binary
+is not PIC.  This avoids problems on uClinux targets where
+@samp{--emit-relocs} is used to generate relocatable binaries.
+
 @ifclear GENERIC
 @lowersections
 @end ifclear

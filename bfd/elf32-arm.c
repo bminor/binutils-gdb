@@ -2191,6 +2191,9 @@ struct elf32_arm_link_hash_table
     /* Global counter for the number of fixes we have emitted.  */
     int num_vfp11_fixes;
 
+    /* Nonzero to force PIC branch veneers.  */
+    int pic_veneer;
+
     /* The number of bytes in the initial entry in the PLT.  */
     bfd_size_type plt_header_size;
 
@@ -2714,7 +2717,8 @@ record_arm_to_thumb_glue (struct bfd_link_info * link_info,
 
   free (tmp_name);
 
-  if ((link_info->shared || globals->root.is_relocatable_executable))
+  if (link_info->shared || globals->root.is_relocatable_executable
+      || globals->pic_veneer)
     size = ARM2THUMB_PIC_GLUE_SIZE;
   else
     size = ARM2THUMB_STATIC_GLUE_SIZE;
@@ -3868,7 +3872,7 @@ bfd_elf32_arm_set_target_relocs (struct bfd *output_bfd,
                                  int fix_v4bx,
 				 int use_blx,
                                  bfd_arm_vfp11_fix vfp11_fix,
-				 int no_enum_warn)
+				 int no_enum_warn, int pic_veneer)
 {
   struct elf32_arm_link_hash_table *globals;
 
@@ -3889,6 +3893,7 @@ bfd_elf32_arm_set_target_relocs (struct bfd *output_bfd,
   globals->fix_v4bx = fix_v4bx;
   globals->use_blx |= use_blx;
   globals->vfp11_fix = vfp11_fix;
+  globals->pic_veneer = pic_veneer;
 
   elf32_arm_tdata (output_bfd)->no_enum_size_warning = no_enum_warn;
 }
@@ -4127,7 +4132,8 @@ elf32_arm_create_thumb_stub (struct bfd_link_info * info,
       --my_offset;
       myh->root.u.def.value = my_offset;
 
-      if ((info->shared || globals->root.is_relocatable_executable))
+      if (info->shared || globals->root.is_relocatable_executable
+	  || globals->pic_veneer)
 	{
 	  /* For relocatable objects we can't use absolute addresses,
 	     so construct the address from a relative offset.  */

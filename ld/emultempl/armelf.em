@@ -37,6 +37,7 @@ static int fix_v4bx = 0;
 static int use_blx = 0;
 static bfd_arm_vfp11_fix vfp11_denorm_fix = BFD_ARM_VFP11_FIX_DEFAULT;
 static int no_enum_size_warning = 0;
+static int pic_veneer = 0;
 
 static void
 gld${EMULATION_NAME}_before_parse (void)
@@ -241,7 +242,8 @@ arm_elf_create_output_section_statements (void)
 {
   bfd_elf32_arm_set_target_relocs (output_bfd, &link_info, target1_is_rel,
 				   target2_type, fix_v4bx, use_blx,
-				   vfp11_denorm_fix, no_enum_size_warning);
+				   vfp11_denorm_fix, no_enum_size_warning,
+				   pic_veneer);
 }
 
 EOF
@@ -259,6 +261,7 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_USE_BLX			307
 #define OPTION_VFP11_DENORM_FIX		308
 #define OPTION_NO_ENUM_SIZE_WARNING	309
+#define OPTION_PIC_VENEER		310
 '
 
 PARSE_AND_LIST_SHORTOPTS=p
@@ -274,6 +277,7 @@ PARSE_AND_LIST_LONGOPTS='
   { "use-blx", no_argument, NULL, OPTION_USE_BLX},
   { "vfp11-denorm-fix", required_argument, NULL, OPTION_VFP11_DENORM_FIX},
   { "no-enum-size-warning", no_argument, NULL, OPTION_NO_ENUM_SIZE_WARNING},
+  { "pic-veneer", no_argument, NULL, OPTION_PIC_VENEER},
 '
 
 PARSE_AND_LIST_OPTIONS='
@@ -286,6 +290,7 @@ PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("     --use-blx                Enable use of BLX instructions\n"));
   fprintf (file, _("     --vfp11-denorm-fix       Specify how to fix VFP11 denorm erratum\n"));
   fprintf (file, _("     --no-enum-size-warning   Don'\''t warn about objects with incompatible enum sizes\n"));
+  fprintf (file, _("     --pic-veneer             Always generate PIC interworking veneers\n"));
 '
 
 PARSE_AND_LIST_ARGS_CASES='
@@ -334,6 +339,10 @@ PARSE_AND_LIST_ARGS_CASES='
 
     case OPTION_NO_ENUM_SIZE_WARNING:
       no_enum_size_warning = 1;
+      break;
+
+    case OPTION_PIC_VENEER:
+      pic_veneer = 1;
       break;
 '
 

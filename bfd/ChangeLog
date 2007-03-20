@@ -1,3 +1,12 @@
+2007-03-20  Paul Brook  <paul@codesourcery.com>
+
+	* bfd-in.h (bfd_elf32_arm_set_target_relocs): Update prototype.
+	* bfd-in2.h: Regenerate.
+	* elf32-arm.c (elf32_arm_link_hash_table): Add pic_veneer.
+	(record_arm_to_thumb_glue): Use globals->pic_veneer.
+	(elf32_arm_create_thumb_stub): Ditto.
+	(bfd_elf32_arm_set_target_relocs): Set globals->pic_veneer.
+
 2007-03-18  Mark Shinwell  <shinwell@codesourcery.com>
 
 	* bfd-in.h (bfd_elf32_arm_set_target_relocs): Add "bfd *"
