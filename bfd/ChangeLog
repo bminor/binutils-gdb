@@ -1,3 +1,10 @@
+2007-03-20  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/3535
+	* elf.c (copy_private_bfd_data): Widen the scope of Solaris
+	specific conditions that need the program headers to be
+	rewritten.
+
 2003-03-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* peXXigen.c (_bfd_XXi_swap_aouthdr_in): Store Magic,

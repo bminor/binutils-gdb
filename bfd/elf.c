@@ -5915,21 +5915,15 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 	   i < num_segments;
 	   i++, segment++)
 	{
-	  /* This is a different version of the IS_SOLARIS_PT_INTERP
-	     macro to the one defined in rewrite_elf_program_header().  */
-#define IS_SOLARIS_PT_INTERP(p)			\
-  (p->p_type == PT_INTERP			\
-   && p->p_vaddr == 0				\
-   && p->p_paddr == 0				\
-   && p->p_memsz == 0				\
-   && p->p_filesz > 0)
- 
-	  /* PR binutils/3535.  The Solaris interpreter program header
-	     needs special treatment, so we always rewrite the headers
-	     when one is detected.  */
-	  if (IS_SOLARIS_PT_INTERP (segment))
+	  /* PR binutils/3535.  The Solaris linker always sets the p_paddr
+	     and p_memsz fields of special segments (DYNAMIC, INTERP) to 0
+	     which severly confuses things, so always regenerate the segment
+	     map in this case.  */
+	  if (segment->p_paddr == 0
+	      && segment->p_memsz == 0
+	      && (segment->p_type == PT_INTERP || segment->p_type == PT_DYNAMIC))
 	    goto rewrite;
-	  
+
 	  for (section = ibfd->sections;
 	       section != NULL; section = section->next)
 	    {
