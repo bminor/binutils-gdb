@@ -36,6 +36,7 @@ static char *target2_type = "${TARGET2_TYPE}";
 static int fix_v4bx = 0;
 static int use_blx = 0;
 static bfd_arm_vfp11_fix vfp11_denorm_fix = BFD_ARM_VFP11_FIX_DEFAULT;
+static int no_enum_size_warning = 0;
 
 static void
 gld${EMULATION_NAME}_before_parse (void)
@@ -233,13 +234,14 @@ arm_elf_finish (void)
 	   thumb_entry_symbol);
 }
 
-/* This is a convenitent point to tell BFD about target specific flags.
+/* This is a convenient point to tell BFD about target specific flags.
    After the output has been created, but before inputs are read.  */
 static void
 arm_elf_create_output_section_statements (void)
 {
-  bfd_elf32_arm_set_target_relocs (&link_info, target1_is_rel, target2_type,
-                                   fix_v4bx, use_blx, vfp11_denorm_fix);
+  bfd_elf32_arm_set_target_relocs (output_bfd, &link_info, target1_is_rel,
+				   target2_type, fix_v4bx, use_blx,
+				   vfp11_denorm_fix, no_enum_size_warning);
 }
 
 EOF
@@ -256,6 +258,7 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_FIX_V4BX			306
 #define OPTION_USE_BLX			307
 #define OPTION_VFP11_DENORM_FIX		308
+#define OPTION_NO_ENUM_SIZE_WARNING	309
 '
 
 PARSE_AND_LIST_SHORTOPTS=p
@@ -270,6 +273,7 @@ PARSE_AND_LIST_LONGOPTS='
   { "fix-v4bx", no_argument, NULL, OPTION_FIX_V4BX},
   { "use-blx", no_argument, NULL, OPTION_USE_BLX},
   { "vfp11-denorm-fix", required_argument, NULL, OPTION_VFP11_DENORM_FIX},
+  { "no-enum-size-warning", no_argument, NULL, OPTION_NO_ENUM_SIZE_WARNING},
 '
 
 PARSE_AND_LIST_OPTIONS='
@@ -281,6 +285,7 @@ PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("     --fix-v4bx               Rewrite BX rn as MOV pc, rn for ARMv4\n"));
   fprintf (file, _("     --use-blx                Enable use of BLX instructions\n"));
   fprintf (file, _("     --vfp11-denorm-fix       Specify how to fix VFP11 denorm erratum\n"));
+  fprintf (file, _("     --no-enum-size-warning   Don'\''t warn about objects with incompatible enum sizes\n"));
 '
 
 PARSE_AND_LIST_ARGS_CASES='
@@ -325,6 +330,10 @@ PARSE_AND_LIST_ARGS_CASES='
         vfp11_denorm_fix = BFD_ARM_VFP11_FIX_VECTOR;
       else
         einfo (_("Unrecognized VFP11 fix type '\''%s'\''.\n"), optarg);
+      break;
+
+    case OPTION_NO_ENUM_SIZE_WARNING:
+      no_enum_size_warning = 1;
       break;
 '
 

@@ -2064,6 +2064,9 @@ struct elf32_arm_obj_tdata
 
   aeabi_attribute known_eabi_attributes[NUM_KNOWN_ATTRIBUTES];
   aeabi_attribute_list *other_eabi_attributes;
+
+  /* Zero to warn when linking objects with incompatible enum sizes.  */
+  int no_enum_size_warning;
 };
 
 #define elf32_arm_tdata(abfd) \
@@ -3858,12 +3861,14 @@ bfd_elf32_arm_vfp11_fix_veneer_locations (bfd *abfd,
 /* Set target relocation values needed during linking.  */
 
 void
-bfd_elf32_arm_set_target_relocs (struct bfd_link_info *link_info,
+bfd_elf32_arm_set_target_relocs (struct bfd *output_bfd,
+				 struct bfd_link_info *link_info,
 				 int target1_is_rel,
 				 char * target2_type,
                                  int fix_v4bx,
 				 int use_blx,
-                                 bfd_arm_vfp11_fix vfp11_fix)
+                                 bfd_arm_vfp11_fix vfp11_fix,
+				 int no_enum_warn)
 {
   struct elf32_arm_link_hash_table *globals;
 
@@ -3884,6 +3889,8 @@ bfd_elf32_arm_set_target_relocs (struct bfd_link_info *link_info,
   globals->fix_v4bx = fix_v4bx;
   globals->use_blx |= use_blx;
   globals->vfp11_fix = vfp11_fix;
+
+  elf32_arm_tdata (output_bfd)->no_enum_size_warning = no_enum_warn;
 }
 
 /* The thumb form of a long branch is a bit finicky, because the offset
@@ -7193,10 +7200,15 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 		  out_attr[i].i = in_attr[i].i;
 		}
 	      else if (in_attr[i].i != AEABI_enum_forced_wide
-		       && out_attr[i].i != in_attr[i].i)
+		       && out_attr[i].i != in_attr[i].i
+		       && !elf32_arm_tdata (obfd)->no_enum_size_warning)
 		{
+		  const char *aeabi_enum_names[] =
+		    { "", "variable-size", "32-bit", "" };
 		  _bfd_error_handler
-		    (_("ERROR: %B: Conflicting enum sizes"), ibfd);
+		    (_("warning: %B uses %s enums yet the output is to use %s enums; use of enum values across objects may fail"),
+		     ibfd, aeabi_enum_names[in_attr[i].i],
+		     aeabi_enum_names[out_attr[i].i]);
 		}
 	    }
 	  break;

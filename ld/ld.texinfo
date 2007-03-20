@@ -5519,6 +5519,15 @@ instruction. The original instruction is then replaced with a branch to
 the veneer. The extra cycles required to call and return from the veneer
 are sufficient to avoid the erratum in both the scalar and vector cases.
 
+@cindex NO_ENUM_SIZE_WARNING
+@kindex --no-enum-size-warning
+The @samp{--no-enum-size-warning} switch prevents the linker from
+warning when linking object files that specify incompatible EABI
+enumeration size attributes.  For example, with this switch enabled,
+linking of an object file using 32-bit enumeration values with another
+using enumeration values fitted into the smallest possible space will
+not be diagnosed.
+
 @ifclear GENERIC
 @lowersections
 @end ifclear

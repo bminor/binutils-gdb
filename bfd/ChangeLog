@@ -1,3 +1,15 @@
+2007-03-18  Mark Shinwell  <shinwell@codesourcery.com>
+
+	* bfd-in.h (bfd_elf32_arm_set_target_relocs): Add "bfd *"
+	argument and extra last argument.
+	* bfd-in2.h: Regenerate.
+	* elf32-arm.c (elf32_arm_obj_tdata): Add no_enum_size_warning
+	member.
+	(bfd_elf32_arm_set_target_relocs): Add "bfd *" argument and
+	extra last argument.  Set no_enum_size_warning appropriately.
+	(elf32_arm_merge_eabi_attributes): Improve enum sizes
+	diagnostic, suppressing it when no_enum_size_warning dictates.
+
 2007-03-20  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/3535

@@ -1,3 +1,15 @@
+2007-03-18  Mark Shinwell  <shinwell@codesourcery.com>
+
+	* ld.texinfo: Document --no-enum-size-warning.
+	* emultempl/armelf.em (no_enum_size_warning): New.
+	(arm_elf_create_output_section_statements): Correct typo
+	in comment.  Pass no_enum_size_warning to
+	bfd_elf32_arm_set_target_relocs.
+	(PARSE_AND_LIST_PROLOGUE): Define OPTION_NO_ENUM_SIZE_WARNING.
+	(PARSE_AND_LIST_OPTIONS): Document --no-enum-size-warning.
+	(PARSE_AND_LIST_ARGS_CASES): Add OPTION_NO_ENUM_SIZE_WARNING
+	case.
+
 2007-03-19  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	* configure.tgt (bfin-*-elf, bfin-*-uclinux*): Add targ_extra_libpath.
