@@ -1,3 +1,10 @@
+2007-03-21  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Fix PR pascal/2232.
+	* p-valprint.c (pascal_object_print_value): Use type_name_no_tag 
+	instead of TYPE_NAME for object base class name.
+
+
 2007-03-19  Kevin Buettner  <kevinb@redhat.com>
 
 	* mep-tdep.c (mep_analyze_frame_prologue, mep_frame_this_id):

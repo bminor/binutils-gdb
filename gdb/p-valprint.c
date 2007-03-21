@@ -827,7 +827,7 @@ pascal_object_print_value (struct type *type, const gdb_byte *valaddr,
     {
       int boffset;
       struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
-      char *basename = TYPE_NAME (baseclass);
+      char *basename = type_name_no_tag (baseclass);
       const gdb_byte *base_valaddr;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
