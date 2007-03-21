@@ -114,6 +114,9 @@ extern const char *i386_comment_chars;
 #define IMMEDIATE_PREFIX '$'
 #define ABSOLUTE_PREFIX '*'
 
+/* Byte to use for filling in frag_align_code.  */
+#define NOP_OPCODE (char) 0x90
+
 /* these are the instruction mnemonic suffixes.  */
 #define WORD_MNEM_SUFFIX  'w'
 #define BYTE_MNEM_SUFFIX  'b'

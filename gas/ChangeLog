@@ -1,3 +1,7 @@
+2007-03-21  Andreas Schwab  <schwab@suse.de>
+
+	* config/tc-i386.h (NOP_OPCODE): Restore.
+
 2007-03-18  Mark Shinwell  <shinwell@codesourcery.com>
 
 	* config/tc-arm.c (do_mul): Don't warn about overlapping
