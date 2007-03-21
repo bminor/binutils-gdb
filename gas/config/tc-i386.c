@@ -991,9 +991,9 @@ add_prefix (unsigned int prefix)
   if (prefix >= REX_OPCODE && prefix < REX_OPCODE + 16
       && flag_code == CODE_64BIT)
     {
-      if ((i.prefix[REX_PREFIX] & prefix & REX_MODE64)
-	  || ((i.prefix[REX_PREFIX] & (REX_EXTX | REX_EXTY | REX_EXTZ))
-	      && (prefix & (REX_EXTX | REX_EXTY | REX_EXTZ))))
+      if ((i.prefix[REX_PREFIX] & prefix & REX_W)
+	  || ((i.prefix[REX_PREFIX] & (REX_R | REX_X | REX_B))
+	      && (prefix & (REX_R | REX_X | REX_B))))
 	ret = 0;
       q = REX_PREFIX;
     }
@@ -1353,10 +1353,10 @@ pi (char *line, i386_insn *x)
   fprintf (stdout, "  sib:  base %x  index %x  scale %x\n",
 	   x->sib.base, x->sib.index, x->sib.scale);
   fprintf (stdout, "  rex: 64bit %x  extX %x  extY %x  extZ %x\n",
-	   (x->rex & REX_MODE64) != 0,
-	   (x->rex & REX_EXTX) != 0,
-	   (x->rex & REX_EXTY) != 0,
-	   (x->rex & REX_EXTZ) != 0);
+	   (x->rex & REX_W) != 0,
+	   (x->rex & REX_R) != 0,
+	   (x->rex & REX_X) != 0,
+	   (x->rex & REX_B) != 0);
   for (i = 0; i < x->operands; i++)
     {
       fprintf (stdout, "    #%d:  ", i + 1);
@@ -1878,7 +1878,7 @@ md_assemble (line)
     }
 
   if ((i.tm.opcode_modifier & Rex64) != 0)
-    i.rex |= REX_MODE64;
+    i.rex |= REX_W;
 
   /* For 8 bit registers we need an empty rex prefix.  Also if the
      instruction already has a prefix, we need to convert old
@@ -2984,7 +2984,7 @@ process_suffix (void)
 	      || i.types [0] != (Acc | Reg64)
 	      || i.types [1] != (Acc | Reg64)
 	      || strcmp (i.tm.name, "xchg") != 0)
-	  i.rex |= REX_MODE64;
+	  i.rex |= REX_W;
 	}
 
       /* Size floating point instruction.  */
@@ -3298,7 +3298,7 @@ process_operands (void)
 	    }
 	  i.tm.base_opcode |= (i.op[0].regs->reg_num << 3);
 	  if ((i.op[0].regs->reg_flags & RegRex) != 0)
-	    i.rex |= REX_EXTZ;
+	    i.rex |= REX_B;
 	}
       else
 	{
@@ -3307,7 +3307,7 @@ process_operands (void)
 	  /* Register goes in low 3 bits of opcode.  */
 	  i.tm.base_opcode |= i.op[op].regs->reg_num;
 	  if ((i.op[op].regs->reg_flags & RegRex) != 0)
-	    i.rex |= REX_EXTZ;
+	    i.rex |= REX_B;
 	  if (!quiet_warnings && (i.tm.opcode_modifier & Ugh) != 0)
 	    {
 	      /* Warn about some common errors, but press on regardless.
@@ -3416,24 +3416,24 @@ build_modrm_byte (void)
 	  i.rm.reg = i.op[dest].regs->reg_num;
 	  i.rm.regmem = i.op[source].regs->reg_num;
 	  if ((i.op[dest].regs->reg_flags & RegRex) != 0)
-	    i.rex |= REX_EXTX;
+	    i.rex |= REX_R;
 	  if ((i.op[source].regs->reg_flags & RegRex) != 0)
-	    i.rex |= REX_EXTZ;
+	    i.rex |= REX_B;
 	}
       else
 	{
 	  i.rm.reg = i.op[source].regs->reg_num;
 	  i.rm.regmem = i.op[dest].regs->reg_num;
 	  if ((i.op[dest].regs->reg_flags & RegRex) != 0)
-	    i.rex |= REX_EXTZ;
+	    i.rex |= REX_B;
 	  if ((i.op[source].regs->reg_flags & RegRex) != 0)
-	    i.rex |= REX_EXTX;
+	    i.rex |= REX_R;
 	}
-      if (flag_code != CODE_64BIT && (i.rex & (REX_EXTX | REX_EXTZ)))
+      if (flag_code != CODE_64BIT && (i.rex & (REX_R | REX_B)))
 	{
 	  if (!((i.types[0] | i.types[1]) & Control))
 	    abort ();
-	  i.rex &= ~(REX_EXTX | REX_EXTZ);
+	  i.rex &= ~(REX_R | REX_B);
 	  add_prefix (LOCK_PREFIX_OPCODE);
 	}
     }
@@ -3495,7 +3495,7 @@ build_modrm_byte (void)
 		  else
 		    i.types[op] |= Disp32S;
 		  if ((i.index_reg->reg_flags & RegRex) != 0)
-		    i.rex |= REX_EXTY;
+		    i.rex |= REX_X;
 		}
 	    }
 	  /* RIP addressing for 64bit mode.  */
@@ -3548,7 +3548,7 @@ build_modrm_byte (void)
 
 	      i.rm.regmem = i.base_reg->reg_num;
 	      if ((i.base_reg->reg_flags & RegRex) != 0)
-		i.rex |= REX_EXTZ;
+		i.rex |= REX_B;
 	      i.sib.base = i.base_reg->reg_num;
 	      /* x86-64 ignores REX prefix bit here to avoid decoder
 		 complications.  */
@@ -3585,7 +3585,7 @@ build_modrm_byte (void)
 		  i.sib.index = i.index_reg->reg_num;
 		  i.rm.regmem = ESCAPE_TO_TWO_BYTE_ADDRESSING;
 		  if ((i.index_reg->reg_flags & RegRex) != 0)
-		    i.rex |= REX_EXTY;
+		    i.rex |= REX_X;
 		}
 
 	      if (i.disp_operands
@@ -3633,13 +3633,13 @@ build_modrm_byte (void)
 	    {
 	      i.rm.regmem = i.op[op].regs->reg_num;
 	      if ((i.op[op].regs->reg_flags & RegRex) != 0)
-		i.rex |= REX_EXTZ;
+		i.rex |= REX_B;
 	    }
 	  else
 	    {
 	      i.rm.reg = i.op[op].regs->reg_num;
 	      if ((i.op[op].regs->reg_flags & RegRex) != 0)
-		i.rex |= REX_EXTX;
+		i.rex |= REX_R;
 	    }
 
 	  /* Now, if no memory operand has set i.rm.mode = 0, 1, 2 we

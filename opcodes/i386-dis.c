@@ -124,10 +124,6 @@ static int prefixes;
 static int rex;
 /* Bits of REX we've already used.  */
 static int rex_used;
-#define REX_MODE64	8
-#define REX_EXTX	4
-#define REX_EXTY	2
-#define REX_EXTZ	1
 /* Mark parts used in the REX prefix.  When we are testing for
    empty prefix (for 8bit register REX extension), just mask it
    out.  Otherwise test for REX bit is excuse for existence of REX
@@ -135,9 +131,12 @@ static int rex_used;
 #define USED_REX(value)					\
   {							\
     if (value)						\
-      rex_used |= (rex & value) ? (value) | 0x40 : 0;	\
+      {							\
+	if ((rex & value))				\
+	  rex_used |= (value) | REX_OPCODE;		\
+      }							\
     else						\
-      rex_used |= 0x40;					\
+      rex_used |= REX_OPCODE;				\
   }
 
 /* Flags for prefixes which we somehow handled when printing the
@@ -3750,10 +3749,10 @@ putop (const char *template, int sizeflag)
 	case 'D':
 	  if (intel_syntax || !(sizeflag & SUFFIX_ALWAYS))
 	    break;
-	  USED_REX (REX_MODE64);
+	  USED_REX (REX_W);
 	  if (mod == 3)
 	    {
-	      if (rex & REX_MODE64)
+	      if (rex & REX_W)
 		*obufp++ = 'q';
 	      else if (sizeflag & DFLAG)
 		*obufp++ = intel_syntax ? 'd' : 'l';
@@ -3792,11 +3791,11 @@ putop (const char *template, int sizeflag)
 	case 'G':
 	  if (intel_syntax || (obufp[-1] != 's' && !(sizeflag & SUFFIX_ALWAYS)))
 	    break;
-	  if ((rex & REX_MODE64) || (sizeflag & DFLAG))
+	  if ((rex & REX_W) || (sizeflag & DFLAG))
 	    *obufp++ = 'l';
 	  else
 	    *obufp++ = 'w';
-	  if (!(rex & REX_MODE64))
+	  if (!(rex & REX_W))
 	    used_prefixes |= (prefixes & PREFIX_DATA);
 	  break;
 	case 'H':
@@ -3841,14 +3840,14 @@ putop (const char *template, int sizeflag)
 	    used_prefixes |= PREFIX_FWAIT;
 	  break;
 	case 'O':
-	  USED_REX (REX_MODE64);
-	  if (rex & REX_MODE64)
+	  USED_REX (REX_W);
+	  if (rex & REX_W)
 	    *obufp++ = 'o';
 	  else if (intel_syntax && (sizeflag & DFLAG))
 	    *obufp++ = 'q';
 	  else
 	    *obufp++ = 'd';
-	  if (!(rex & REX_MODE64))
+	  if (!(rex & REX_W))
 	    used_prefixes |= (prefixes & PREFIX_DATA);
 	  break;
 	case 'T':
@@ -3864,11 +3863,11 @@ putop (const char *template, int sizeflag)
 	  if (intel_syntax)
 	    break;
 	  if ((prefixes & PREFIX_DATA)
-	      || (rex & REX_MODE64)
+	      || (rex & REX_W)
 	      || (sizeflag & SUFFIX_ALWAYS))
 	    {
-	      USED_REX (REX_MODE64);
-	      if (rex & REX_MODE64)
+	      USED_REX (REX_W);
+	      if (rex & REX_W)
 		*obufp++ = 'q';
 	      else
 		{
@@ -3893,10 +3892,10 @@ putop (const char *template, int sizeflag)
 	case 'Q':
 	  if (intel_syntax && !alt)
 	    break;
-	  USED_REX (REX_MODE64);
+	  USED_REX (REX_W);
 	  if (mod != 3 || (sizeflag & SUFFIX_ALWAYS))
 	    {
-	      if (rex & REX_MODE64)
+	      if (rex & REX_W)
 		*obufp++ = 'q';
 	      else
 		{
@@ -3909,8 +3908,8 @@ putop (const char *template, int sizeflag)
 	    }
 	  break;
 	case 'R':
-	  USED_REX (REX_MODE64);
-	  if (rex & REX_MODE64)
+	  USED_REX (REX_W);
+	  if (rex & REX_W)
 	    *obufp++ = 'q';
 	  else if (sizeflag & DFLAG)
 	    {
@@ -3922,9 +3921,9 @@ putop (const char *template, int sizeflag)
 	  else
 	    *obufp++ = 'w';
 	  if (intel_syntax && !p[1]
-	      && ((rex & REX_MODE64) || (sizeflag & DFLAG)))
+	      && ((rex & REX_W) || (sizeflag & DFLAG)))
 	    *obufp++ = 'e';
-	  if (!(rex & REX_MODE64))
+	  if (!(rex & REX_W))
 	    used_prefixes |= (prefixes & PREFIX_DATA);
 	  break;
 	case 'V':
@@ -3942,7 +3941,7 @@ putop (const char *template, int sizeflag)
 	    break;
 	  if (sizeflag & SUFFIX_ALWAYS)
 	    {
-	      if (rex & REX_MODE64)
+	      if (rex & REX_W)
 		*obufp++ = 'q';
 	      else
 		{
@@ -3964,17 +3963,17 @@ putop (const char *template, int sizeflag)
 	case 'Y':
 	  if (intel_syntax)
 	    break;
-	  if (rex & REX_MODE64)
+	  if (rex & REX_W)
 	    {
-	      USED_REX (REX_MODE64);
+	      USED_REX (REX_W);
 	      *obufp++ = 'q';
 	    }
 	  break;
 	  /* implicit operand size 'l' for i386 or 'q' for x86-64 */
 	case 'W':
 	  /* operand size flag for cwtl, cbtw */
-	  USED_REX (REX_MODE64);
-	  if (rex & REX_MODE64)
+	  USED_REX (REX_W);
+	  if (rex & REX_W)
 	    {
 	      if (intel_syntax)
 		*obufp++ = 'd';
@@ -3985,7 +3984,7 @@ putop (const char *template, int sizeflag)
 	    *obufp++ = 'w';
 	  else
 	    *obufp++ = 'b';
-	  if (!(rex & REX_MODE64))
+	  if (!(rex & REX_W))
 	    used_prefixes |= (prefixes & PREFIX_DATA);
 	  break;
 	}
@@ -4124,8 +4123,8 @@ intel_operand_size (int bytemode, int sizeflag)
       /* FALLTHRU */
     case v_mode:
     case dq_mode:
-      USED_REX (REX_MODE64);
-      if (rex & REX_MODE64)
+      USED_REX (REX_W);
+      if (rex & REX_W)
 	oappend ("QWORD PTR ");
       else if ((sizeflag & DFLAG) || bytemode == dq_mode)
 	oappend ("DWORD PTR ");
@@ -4134,10 +4133,10 @@ intel_operand_size (int bytemode, int sizeflag)
       used_prefixes |= (prefixes & PREFIX_DATA);
       break;
     case z_mode:
-      if ((rex & REX_MODE64) || (sizeflag & DFLAG))
+      if ((rex & REX_W) || (sizeflag & DFLAG))
 	*obufp++ = 'D';
       oappend ("WORD PTR ");
-      if (!(rex & REX_MODE64))
+      if (!(rex & REX_W))
 	used_prefixes |= (prefixes & PREFIX_DATA);
       break;
     case d_mode:
@@ -4179,8 +4178,8 @@ OP_E (int bytemode, int sizeflag)
   bfd_vma disp;
   int add = 0;
   int riprel = 0;
-  USED_REX (REX_EXTZ);
-  if (rex & REX_EXTZ)
+  USED_REX (REX_B);
+  if (rex & REX_B)
     add += 8;
 
   /* Skip mod/rm byte.  */
@@ -4225,8 +4224,8 @@ OP_E (int bytemode, int sizeflag)
 	case v_mode:
 	case dq_mode:
 	case dqw_mode:
-	  USED_REX (REX_MODE64);
-	  if (rex & REX_MODE64)
+	  USED_REX (REX_W);
+	  if (rex & REX_W)
 	    oappend (names64[rm + add]);
 	  else if ((sizeflag & DFLAG) || bytemode != v_mode)
 	    oappend (names32[rm + add]);
@@ -4269,8 +4268,8 @@ OP_E (int bytemode, int sizeflag)
 	    /* When INDEX == 0x4 in 32 bit mode, SCALE is ignored.  */
 	    scale = (*codep >> 6) & 3;
 	  base = *codep & 7;
-	  USED_REX (REX_EXTY);
-	  if (rex & REX_EXTY)
+	  USED_REX (REX_X);
+	  if (rex & REX_X)
 	    index += 8;
 	  codep++;
 	}
@@ -4455,8 +4454,8 @@ static void
 OP_G (int bytemode, int sizeflag)
 {
   int add = 0;
-  USED_REX (REX_EXTX);
-  if (rex & REX_EXTX)
+  USED_REX (REX_R);
+  if (rex & REX_R)
     add += 8;
   switch (bytemode)
     {
@@ -4479,8 +4478,8 @@ OP_G (int bytemode, int sizeflag)
     case v_mode:
     case dq_mode:
     case dqw_mode:
-      USED_REX (REX_MODE64);
-      if (rex & REX_MODE64)
+      USED_REX (REX_W);
+      if (rex & REX_W)
 	oappend (names64[reg + add]);
       else if ((sizeflag & DFLAG) || bytemode != v_mode)
 	oappend (names32[reg + add]);
@@ -4587,8 +4586,8 @@ OP_REG (int code, int sizeflag)
 {
   const char *s;
   int add = 0;
-  USED_REX (REX_EXTZ);
-  if (rex & REX_EXTZ)
+  USED_REX (REX_B);
+  if (rex & REX_B)
     add = 8;
 
   switch (code)
@@ -4620,8 +4619,8 @@ OP_REG (int code, int sizeflag)
       /* Fall through.  */
     case eAX_reg: case eCX_reg: case eDX_reg: case eBX_reg:
     case eSP_reg: case eBP_reg: case eSI_reg: case eDI_reg:
-      USED_REX (REX_MODE64);
-      if (rex & REX_MODE64)
+      USED_REX (REX_W);
+      if (rex & REX_W)
 	s = names64[code - eAX_reg + add];
       else if (sizeflag & DFLAG)
 	s = names32[code - eAX_reg + add];
@@ -4667,8 +4666,8 @@ OP_IMREG (int code, int sizeflag)
       break;
     case eAX_reg: case eCX_reg: case eDX_reg: case eBX_reg:
     case eSP_reg: case eBP_reg: case eSI_reg: case eDI_reg:
-      USED_REX (REX_MODE64);
-      if (rex & REX_MODE64)
+      USED_REX (REX_W);
+      if (rex & REX_W)
 	s = names64[code - eAX_reg];
       else if (sizeflag & DFLAG)
 	s = names32[code - eAX_reg];
@@ -4677,11 +4676,11 @@ OP_IMREG (int code, int sizeflag)
       used_prefixes |= (prefixes & PREFIX_DATA);
       break;
     case z_mode_ax_reg:
-      if ((rex & REX_MODE64) || (sizeflag & DFLAG))
+      if ((rex & REX_W) || (sizeflag & DFLAG))
 	s = *names32;
       else
 	s = *names16;
-      if (!(rex & REX_MODE64))
+      if (!(rex & REX_W))
 	used_prefixes |= (prefixes & PREFIX_DATA);
       break;
     default:
@@ -4712,8 +4711,8 @@ OP_I (int bytemode, int sizeflag)
 	}
       /* Fall through.  */
     case v_mode:
-      USED_REX (REX_MODE64);
-      if (rex & REX_MODE64)
+      USED_REX (REX_W);
+      if (rex & REX_W)
 	op = get32s ();
       else if (sizeflag & DFLAG)
 	{
@@ -4767,8 +4766,8 @@ OP_I64 (int bytemode, int sizeflag)
       mask = 0xff;
       break;
     case v_mode:
-      USED_REX (REX_MODE64);
-      if (rex & REX_MODE64)
+      USED_REX (REX_W);
+      if (rex & REX_W)
 	op = get64 ();
       else if (sizeflag & DFLAG)
 	{
@@ -4814,8 +4813,8 @@ OP_sI (int bytemode, int sizeflag)
       mask = 0xffffffff;
       break;
     case v_mode:
-      USED_REX (REX_MODE64);
-      if (rex & REX_MODE64)
+      USED_REX (REX_W);
+      if (rex & REX_W)
 	op = get32s ();
       else if (sizeflag & DFLAG)
 	{
@@ -4863,7 +4862,7 @@ OP_J (int bytemode, int sizeflag)
 	disp -= 0x100;
       break;
     case v_mode:
-      if ((sizeflag & DFLAG) || (rex & REX_MODE64))
+      if ((sizeflag & DFLAG) || (rex & REX_W))
 	disp = get32s ();
       else
 	{
@@ -5063,9 +5062,9 @@ static void
 OP_C (int dummy ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 {
   int add = 0;
-  if (rex & REX_EXTX)
+  if (rex & REX_R)
     {
-      USED_REX (REX_EXTX);
+      USED_REX (REX_R);
       add = 8;
     }
   else if (address_mode != mode_64bit && (prefixes & PREFIX_LOCK))
@@ -5081,8 +5080,8 @@ static void
 OP_D (int dummy ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 {
   int add = 0;
-  USED_REX (REX_EXTX);
-  if (rex & REX_EXTX)
+  USED_REX (REX_R);
+  if (rex & REX_R)
     add = 8;
   if (intel_syntax)
     sprintf (scratchbuf, "db%d", reg + add);
@@ -5114,8 +5113,8 @@ OP_MMX (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
   if (prefixes & PREFIX_DATA)
     {
       int add = 0;
-      USED_REX (REX_EXTX);
-      if (rex & REX_EXTX)
+      USED_REX (REX_R);
+      if (rex & REX_R)
 	add = 8;
       sprintf (scratchbuf, "%%xmm%d", reg + add);
     }
@@ -5128,8 +5127,8 @@ static void
 OP_XMM (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 {
   int add = 0;
-  USED_REX (REX_EXTX);
-  if (rex & REX_EXTX)
+  USED_REX (REX_R);
+  if (rex & REX_R)
     add = 8;
   sprintf (scratchbuf, "%%xmm%d", reg + add);
   oappend (scratchbuf + intel_syntax);
@@ -5157,8 +5156,8 @@ OP_EM (int bytemode, int sizeflag)
     {
       int add = 0;
 
-      USED_REX (REX_EXTZ);
-      if (rex & REX_EXTZ)
+      USED_REX (REX_B);
+      if (rex & REX_B)
 	add = 8;
       sprintf (scratchbuf, "%%xmm%d", rm + add);
     }
@@ -5222,8 +5221,8 @@ OP_EX (int bytemode, int sizeflag)
       OP_E (bytemode, sizeflag);
       return;
     }
-  USED_REX (REX_EXTZ);
-  if (rex & REX_EXTZ)
+  USED_REX (REX_B);
+  if (rex & REX_B)
     add = 8;
 
   /* Skip mod/rm byte.  */
@@ -5764,8 +5763,8 @@ REP_Fixup (int bytemode, int sizeflag)
 static void
 CMPXCHG8B_Fixup (int bytemode, int sizeflag)
 {
-  USED_REX (REX_MODE64);
-  if (rex & REX_MODE64)
+  USED_REX (REX_W);
+  if (rex & REX_W)
     {
       /* Change cmpxchg8b to cmpxchg16b.  */
       char *p = obuf + strlen (obuf) - 2;

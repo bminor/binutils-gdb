@@ -1,5 +1,15 @@
 2003-03-21  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-dis.c (REX_MODE64): Remove definition.
+	(REX_EXTX): Likewise.
+	(REX_EXTY): Likewise.
+	(REX_EXTZ): Likewise.
+	(USED_REX): Use REX_OPCODE instead of 0x40.
+	Replace REX_MODE64, REX_EXTX, REX_EXTY and REX_EXTZ with REX_W,
+	REX_R, REX_X and REX_B respectively.
+
+2003-03-21  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutils/4218
 	* i386-dis.c (PREGRP38): New.
 	(dis386): Use PREGRP38 for 0x90.
