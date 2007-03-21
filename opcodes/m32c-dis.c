@@ -453,6 +453,9 @@ m32c_cgen_print_operand (CGEN_CPU_DESC cd,
     case M32C_OPERAND_DSP_40_U16 :
       print_normal (cd, info, fields->f_dsp_40_u16, 0, pc, length);
       break;
+    case M32C_OPERAND_DSP_40_U20 :
+      print_normal (cd, info, fields->f_dsp_40_u20, 0, pc, length);
+      break;
     case M32C_OPERAND_DSP_40_U24 :
       print_normal (cd, info, fields->f_dsp_40_u24, 0, pc, length);
       break;
@@ -467,6 +470,9 @@ m32c_cgen_print_operand (CGEN_CPU_DESC cd,
       break;
     case M32C_OPERAND_DSP_48_U16 :
       print_normal (cd, info, fields->f_dsp_48_u16, 0, pc, length);
+      break;
+    case M32C_OPERAND_DSP_48_U20 :
+      print_normal (cd, info, fields->f_dsp_48_u20, 0|(1<<CGEN_OPERAND_VIRTUAL), pc, length);
       break;
     case M32C_OPERAND_DSP_48_U24 :
       print_normal (cd, info, fields->f_dsp_48_u24, 0|(1<<CGEN_OPERAND_VIRTUAL), pc, length);

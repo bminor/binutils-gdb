@@ -1,3 +1,15 @@
+2007-03-20  DJ Delorie  <dj@redhat.com>
+
+	* m32c.cpu (f-dsp-40-u20, f-dsp-48-u20, Dsp-40-u20, Dsp-40-u20,
+	mem20): New.
+	(src16-16-20-An-relative-*): New.
+	(dst16-*-20-An-relative-*): New.
+	(dst16-16-16sa-*): New
+	(dst16-16-16ar-*): New
+	(dst32-16-16sa-Unprefixed-*): New
+	(jsri): Fix operands.
+	(setzx): Fix encoding.
+	
 2007-03-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* m32r.opc: Formatting.
