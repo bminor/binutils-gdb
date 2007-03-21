@@ -1,3 +1,14 @@
+2007-03-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am: Run dep-am.
+	* Makefile.in: Regenerated.
+
+	* config/tc-i386.c: Don't include "opcodes/i386-opc.h".
+
+	* config/tc-i386.h: Include "opcodes/i386-opc.h".
+	(NOP_OPCODE): Removed.
+	(template): Likewise.
+
 2007-03-21  Andreas Schwab  <schwab@suse.de>
 
 	* config/tc-i386.h (NOP_OPCODE): Restore.

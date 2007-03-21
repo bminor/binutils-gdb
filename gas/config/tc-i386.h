@@ -23,6 +23,8 @@
 #ifndef TC_I386
 #define TC_I386 1
 
+#include "opcodes/i386-opc.h"
+
 struct fix;
 
 #define TARGET_BYTES_BIG_ENDIAN	0
@@ -114,9 +116,6 @@ extern const char *i386_comment_chars;
 #define IMMEDIATE_PREFIX '$'
 #define ABSOLUTE_PREFIX '*'
 
-/* Byte to use for filling in frag_align_code.  */
-#define NOP_OPCODE (char) 0x90
-
 /* these are the instruction mnemonic suffixes.  */
 #define WORD_MNEM_SUFFIX  'w'
 #define BYTE_MNEM_SUFFIX  'b'
@@ -135,12 +134,10 @@ extern const char *i386_comment_chars;
   The templates themselves start at START and range up to (but not including)
   END.
   */
-struct template;
-
 typedef struct
 {
-  const struct template *start;
-  const struct template *end;
+  const template *start;
+  const template *end;
 }
 templates;
 

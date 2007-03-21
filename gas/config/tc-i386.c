@@ -32,7 +32,6 @@
 #include "subsegs.h"
 #include "dwarf2dbg.h"
 #include "dw2gencfi.h"
-#include "opcodes/i386-opc.h"
 #include "elf/x86-64.h"
 
 #ifndef REGISTER_WARNINGS
