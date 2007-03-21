@@ -144,12 +144,10 @@ const template i386_optab[] =
    xchg commutes:  we allow both operand orders.
  
    In the 64bit code, xchg rax, rax is reused for new nop instruction.  */
-{"xchg",   2,	0x90, X, CpuNo64, wl_Suf|ShortForm,	{ WordReg, Acc, 0 } },
-{"xchg",   2,	0x90, X, CpuNo64, wl_Suf|ShortForm,	{ Acc, WordReg, 0 } },
-{"xchg",   2,	0x90, X, Cpu64, wq_Suf|ShortForm,	{ Reg16|Reg64, Acc, 0 } },
-{"xchg",   2,	0x90, X, Cpu64, wq_Suf|ShortForm,	{ Acc, Reg16|Reg64, 0 } },
-{"xchg",   2,	0x86, X, 0,	 bwlq_Suf|W|Modrm,	{ Reg, Reg|AnyMem, 0 } },
-{"xchg",   2,	0x86, X, 0,	 bwlq_Suf|W|Modrm,	{ Reg|AnyMem, Reg, 0 } },
+{"xchg",   2,	0x90, X, 0,	wlq_Suf|ShortForm,	{ WordReg, Acc, 0 } },
+{"xchg",   2,	0x90, X, 0,	wlq_Suf|ShortForm,	{ Acc, WordReg, 0 } },
+{"xchg",   2,	0x86, X, 0,	bwlq_Suf|W|Modrm,	{ Reg, Reg|AnyMem, 0 } },
+{"xchg",   2,	0x86, X, 0,	bwlq_Suf|W|Modrm,	{ Reg|AnyMem, Reg, 0 } },
 
 /* In/out from ports.  */
 /* XXX should reject %rax */
@@ -517,7 +515,7 @@ const template i386_optab[] =
 
 {"hlt",	   0,	0xf4, X, 0,	 NoSuf,			{ 0, 0, 0} },
 
-{"nop",    1, 0x0f1f, X, Cpu686, wl_Suf|Modrm,		{ WordMem, 0, 0} },
+{"nop",    1, 0x0f1f, 0, Cpu686, wlq_Suf|Modrm,		{ WordReg|WordMem, 0, 0} },
 
 /* nop is actually "xchg %ax,%ax" in 16bit mode, "xchg %eax,%eax" in
    32bit mode and "xchg %rax,%rax" in 64bit mode.  */

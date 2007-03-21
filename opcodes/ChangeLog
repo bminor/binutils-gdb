@@ -1,3 +1,16 @@
+2003-03-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/4218
+	* i386-dis.c (PREGRP38): New.
+	(dis386): Use PREGRP38 for 0x90.
+	(prefix_user_table): Add PREGRP38.
+	(print_insn): Set uses_REPZ_prefix to 1 for pause.
+	(NOP_Fixup1): Properly handle REX bits.
+	(NOP_Fixup2): Likewise.
+
+	* i386-opc.c (i386_optab): Allow %eax with xchg in 64bit.
+	Allow register with nop.
+
 2007-03-20  DJ Delorie  <dj@redhat.com>
 
 	* m32c-asm.c: Regenerate.

@@ -397,6 +397,16 @@
 	xchg %rax,%rax		      # --  --	 -- --	 90
 	rex64 xchg %rax,%rax	      # --  --	 -- 48	 90
 	xchg %rax,%r8		      # --  --	 -- 49	 90
+	xchg %eax,%r8d		      # --  --	 -- 41	 90
+	xchg %r8d,%eax		      # --  --	 -- 41	 90
+	xchg %eax,%r9d		      # --  --	 -- 41	 91
+	xchg %r9d,%eax		      # --  --	 -- 41	 91
+	xchg %ebx,%eax		      # --  --	 -- 93
+	xchg %eax,%ebx		      # --  --	 -- 93
+	xchg %ax,%r8w		      # --  --	 -- 66 41 90
+	xchg %r8w,%ax		      # --  --	 -- 66 41 90
+	xchg %ax,%r9w		      # --  --	 -- 66 41 91
+	xchg %r9w,%ax		      # --  --	 -- 66 41 91
 
         smsw %rax	              #  --  --	 -- 48	 0F 01 e0
         smsw %eax	              #  --  --	 -- --	 0F 01 e0

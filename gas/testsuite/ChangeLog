@@ -1,5 +1,18 @@
 2003-03-21  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/4218
+	* gas/i386/nops.s: Add testcases for nop r/m.
+	* gas/i386/x86-64-nops.s: Likewise.
+
+	* gas/i386/x86-64-opcode.s: Add testcases for xchg with %ax,
+	%eax and %rax.
+
+	* gas/i386/nops.d: Updated.
+	* gas/i386/x86-64-nops.d: Likewise.
+	* gas/i386/x86-64-opcode.d: Likewise.
+
+2003-03-21  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* gas/i386/i386.exp: Run nops-3.
 
 	* gas/i386/nops-3.d: New file.

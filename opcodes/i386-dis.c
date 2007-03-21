@@ -467,6 +467,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define PREGRP35  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 35 } }
 #define PREGRP36  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 36 } }
 #define PREGRP37  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 37 } }
+#define PREGRP38  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 38 } }
 
 
 #define X86_64_0  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 0 } }
@@ -692,7 +693,7 @@ static const struct dis386 dis386[] = {
   { "movD",		{ Sw, Sv } },
   { "popU",		{ stackEv } },
   /* 90 */
-  { "xchgS",		{ { NOP_Fixup1, eAX_reg }, { NOP_Fixup2, eAX_reg } } },
+  { PREGRP38 },
   { "xchgS",		{ RMeCX, eAX } },
   { "xchgS",		{ RMeDX, eAX } },
   { "xchgS",		{ RMeBX, eAX } },
@@ -2017,6 +2018,14 @@ static const struct dis386 prefix_user_table[][4] = {
     { "(bad)", { XX } },
     { "(bad)", { XX } },    
   },
+
+  /* PREGRP38 */
+  {
+    { "xchgS", { { NOP_Fixup1, eAX_reg }, { NOP_Fixup2, eAX_reg } } },
+    { "pause", { XX } },
+    { "xchgS", { { NOP_Fixup1, eAX_reg }, { NOP_Fixup2, eAX_reg } } },
+    { "(bad)", { XX } },    
+  },
 };
 
 static const struct dis386 x86_64_table[][2] = {
@@ -3091,7 +3100,8 @@ print_insn (bfd_vma pc, disassemble_info *info)
       need_modrm = onebyte_has_modrm[*codep];
       uses_DATA_prefix = 0;
       uses_REPNZ_prefix = 0;
-      uses_REPZ_prefix = 0;
+      /* pause is 0xf3 0x90.  */
+      uses_REPZ_prefix = *codep == 0x90;
       uses_LOCK_prefix = 0;
       codep++;
     }
@@ -5284,17 +5294,15 @@ OP_0fae (int bytemode, int sizeflag)
 }
 
 /* NOP is an alias of "xchg %ax,%ax" in 16bit mode, "xchg %eax,%eax" in
-   32bit mode and "xchg %rax,%rax" in 64bit mode.  NOP with REPZ prefix
-   is called PAUSE.  We display "xchg %ax,%ax" instead of "data16 nop".
- */
+   32bit mode and "xchg %rax,%rax" in 64bit mode.  */  
 
 static void
 NOP_Fixup1 (int bytemode, int sizeflag)
 {
-  if (prefixes == PREFIX_REPZ)
-    strcpy (obuf, "pause");
-  else if (prefixes == PREFIX_DATA
-	   || ((rex & REX_MODE64) && rex != 0x48))
+  if ((prefixes & PREFIX_DATA) != 0
+      || (rex != 0
+	  && rex != 0x48
+	  && address_mode == mode_64bit))
     OP_REG (bytemode, sizeflag);
   else
     strcpy (obuf, "nop");
@@ -5303,8 +5311,10 @@ NOP_Fixup1 (int bytemode, int sizeflag)
 static void
 NOP_Fixup2 (int bytemode, int sizeflag)
 {
-  if (prefixes == PREFIX_DATA
-      || ((rex & REX_MODE64) && rex != 0x48))
+  if ((prefixes & PREFIX_DATA) != 0
+      || (rex != 0
+	  && rex != 0x48
+	  && address_mode == mode_64bit))
     OP_IMREG (bytemode, sizeflag);
 }
 

@@ -1,3 +1,9 @@
+2003-03-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/4218
+	* config/tc-i386.c (match_template): Properly handle 64bit mode
+	"xchg %eax, %eax".
+
 2007-03-21  Anton Ertl  <anton@mips.complang.tuw>
 
 	PR gas/4124

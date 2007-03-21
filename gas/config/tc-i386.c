@@ -2621,6 +2621,15 @@ match_template (void)
 	    continue;
 	  break;
 	case 2:
+	  /* xchg %eax, %eax is a special case. It is an aliase for nop
+	     only in 32bit mode and we can use opcode 0x90.  In 64bit
+	     mode, we can't use 0x90 for xchg %eax, %eax since it should
+	     zero-extend %eax to %rax.  */
+	  if (flag_code == CODE_64BIT
+	      && t->base_opcode == 0x90
+	      && i.types [0] == (Acc | Reg32)
+	      && i.types [1] == (Acc | Reg32))
+	    continue;
 	case 3:
 	case 4:
 	  overlap1 = i.types[1] & operand_types[1];
