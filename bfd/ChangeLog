@@ -1,3 +1,9 @@
+2003-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/4208
+	* elfxx-mips.c (_bfd_mips_elf_relocate_section): Report missing
+	matching LO16 relocation for HI16 relocation.
+
 2007-03-20  Paul Brook  <paul@codesourcery.com>
 
 	* bfd-in.h (bfd_elf32_arm_set_target_relocs): Update prototype.

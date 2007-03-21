@@ -7756,6 +7756,8 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       const char *msg;
       unsigned long r_symndx;
       asection *sec;
+      Elf_Internal_Shdr *symtab_hdr;
+      struct elf_link_hash_entry *h;
 
       /* Find the relocation howto for this relocation.  */
       howto = MIPS_ELF_RTYPE_TO_HOWTO (input_bfd, r_type,
@@ -7765,15 +7767,16 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 					    rel - relocs)));
 
       r_symndx = ELF_R_SYM (input_bfd, rel->r_info);
+      symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
       if (mips_elf_local_relocation_p (input_bfd, rel, local_sections, FALSE))
-	sec = local_sections[r_symndx];
+	{
+	  sec = local_sections[r_symndx];
+	  h = NULL;
+	}
       else
 	{
-	  Elf_Internal_Shdr *symtab_hdr;
 	  unsigned long extsymoff;
-	  struct elf_link_hash_entry *h;
 
-	  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
 	  extsymoff = 0;
 	  if (!elf_bad_symtab (input_bfd))
 	    extsymoff = symtab_hdr->sh_info;
@@ -7885,7 +7888,21 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 							      lo16_type,
 							      rel, relend);
 		  if (lo16_relocation == NULL)
-		    return FALSE;
+		    {
+		      const char *name;
+
+		      if (h)
+			name = h->root.root.string;
+		      else
+			name = bfd_elf_sym_name (input_bfd, symtab_hdr,
+						 local_syms + r_symndx,
+						 sec);
+		      (*_bfd_error_handler)
+			(_("%B: Can't find matching LO16 reloc against `%s' for %s at 0x%lx in section `%A'"),
+			 input_bfd, input_section, name, howto->name,
+			 rel->r_offset);
+		      return FALSE;
+		    }
 
 		  lo16_location = contents + lo16_relocation->r_offset;
 
