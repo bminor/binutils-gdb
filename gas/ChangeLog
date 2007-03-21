@@ -1,3 +1,8 @@
+2007-03-21  Anton Ertl  <anton@mips.complang.tuw>
+
+	PR gas/4124
+	* config/tc-alpha.c (emit_ustX): Fix ustq code generation.
+
 2007-03-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am: Run dep-am.
