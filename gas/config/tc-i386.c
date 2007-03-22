@@ -2983,7 +2983,7 @@ process_suffix (void)
 	  if (i.operands != 2
 	      || i.types [0] != (Acc | Reg64)
 	      || i.types [1] != (Acc | Reg64)
-	      || strcmp (i.tm.name, "xchg") != 0)
+	      || i.tm.base_opcode != 0x90)
 	  i.rex |= REX_W;
 	}
 
