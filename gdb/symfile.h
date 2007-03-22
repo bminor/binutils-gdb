@@ -24,6 +24,7 @@
 #define SYMFILE_H
 
 /* This file requires that you first include "bfd.h".  */
+#include "symtab.h"
 
 /* Opaque declarations.  */
 struct section_table;

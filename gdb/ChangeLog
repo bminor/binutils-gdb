@@ -1,3 +1,7 @@
+2007-03-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* symfile.h: #include "symtab.h"
+
 2007-03-22  Denis Pilat  <denis.pilat@st.com>
 
 	* utils.c (pagination_on_command, pagination_off_command):
