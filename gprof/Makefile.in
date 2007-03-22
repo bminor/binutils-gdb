@@ -95,11 +95,6 @@ PDFS = gprof.pdf
 PSS = gprof.ps
 HTMLS = gprof.html
 TEXINFOS = gprof.texi
-TEXI2DVI = `if test -f $(top_srcdir)/../texinfo/util/texi2dvi; then \
-             echo $(top_srcdir)/../texinfo/util/texi2dvi; \
-           else \
-             echo texi2dvi; \
-           fi`
 TEXI2PDF = $(TEXI2DVI) --pdf --batch
 MAKEINFOHTML = $(MAKEINFO) --html
 AM_MAKEINFOHTMLFLAGS = $(AM_MAKEINFOFLAGS)
@@ -258,11 +253,13 @@ BUILT_SOURCES = flat_bl.c bsd_callg_bl.c fsf_callg_bl.c
 EXTRA_DIST = $(BUILT_SOURCES) bbconv.pl $(man_MANS)
 POTFILES = $(sources) $(noinst_HEADERS)
 MANCONF = -Dman
-TEXI2POD = perl $(srcdir)/../etc/texi2pod.pl
+TEXI2POD = perl $(srcdir)/../etc/texi2pod.pl $(AM_MAKEINFOFLAGS)
 POD2MAN = pod2man --center="GNU" --release="binutils-$(VERSION)" --section=1
 info_TEXINFOS = gprof.texi
 gprof_TEXINFOS = config.texi
 man_MANS = gprof.1
+AM_MAKEINFOFLAGS = -I "$(srcdir)" -I ../bfd/doc
+TEXI2DVI = texi2dvi -I "$(srcdir)" -I ../bfd/doc
 html__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 CLEANFILES = dep.sed DEP DEPA DEP1 DEP2
 MAINTAINERCLEANFILES = gprof.info
@@ -282,15 +279,15 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
-	      echo ' cd $(srcdir) && $(AUTOMAKE) --cygnus '; \
-	      cd $(srcdir) && $(AUTOMAKE) --cygnus  \
+	      echo ' cd $(srcdir) && $(AUTOMAKE) --foreign '; \
+	      cd $(srcdir) && $(AUTOMAKE) --foreign  \
 		&& exit 0; \
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --cygnus  Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --cygnus  Makefile
+	  $(AUTOMAKE) --foreign  Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \

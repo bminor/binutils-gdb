@@ -69,6 +69,9 @@ notice identical to this one except for the removal of this paragraph
 @titlepage
 @finalout
 @title The @sc{gnu} Binary Utilities
+@ifset VERSION_PACKAGE
+@subtitle @value{VERSION_PACKAGE}
+@end ifset
 @subtitle Version @value{VERSION}
 @sp 1
 @subtitle @value{UPDATED}
@@ -100,7 +103,11 @@ Copyright @copyright{} 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
 
 @cindex version
 This brief manual contains documentation for the @sc{gnu} binary
-utilities (collectively version @value{VERSION}): 
+utilities
+@ifset VERSION_PACKAGE
+@value{VERSION_PACKAGE}
+@end ifset
+version @value{VERSION}:
 
 @iftex
 @table @code

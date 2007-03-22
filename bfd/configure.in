@@ -85,11 +85,11 @@ AC_ARG_WITH(bugurl,
     no)  REPORT_BUGS_TO="";
 	 REPORT_BUGS_TEXI=""
 	 ;;
-    *)   REPORT_BUGS_TO="<URL:$withval>"
+    *)   REPORT_BUGS_TO="<$withval>"
 	 REPORT_BUGS_TEXI="@uref{`echo $withval | sed 's/@/@@/g'`}"
 	 ;;
    esac],
-   REPORT_BUGS_TO="<URL:http://www.sourceware.org/bugzilla/>"
+   REPORT_BUGS_TO="<http://www.sourceware.org/bugzilla/>"
    REPORT_BUGS_TEXI="@uref{http://www.sourceware.org/bugzilla/}"
 )
 AC_SUBST(REPORT_BUGS_TO)

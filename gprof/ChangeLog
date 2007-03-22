@@ -1,3 +1,11 @@
+2007-03-22  Joseph Myers  <joseph@codesourcery.com>
+
+	* Makefile.am (TEXI2POD): Include $(AM_MAKEINFOFLAGS).
+	(AM_MAKEINFOFLAGS, TEXI2DVI): Define with -I ../bfd/doc.
+	* Makefile.in: Regenerate.
+	* gprof.texi: Include bfdver.texi.  Report both VERSION_PACKAGE
+	and VERSION.
+
 2007-03-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (REPORT_BUGS_TO): Removed.

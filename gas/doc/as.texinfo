@@ -127,6 +127,10 @@ notice identical to this one except for the removal of this paragraph
 @ifclear GENERIC
 @subtitle for the @value{TARGET} family
 @end ifclear
+@ifset VERSION_PACKAGE
+@sp 1
+@subtitle @value{VERSION_PACKAGE}
+@end ifset
 @sp 1
 @subtitle Version @value{VERSION}
 @sp 1
@@ -170,8 +174,11 @@ Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001, 2002,
 @node Top
 @top Using @value{AS}
 
-This file is a user guide to the @sc{gnu} assembler @command{@value{AS}} version
-@value{VERSION}.
+This file is a user guide to the @sc{gnu} assembler @command{@value{AS}}
+@ifset VERSION_PACKAGE
+@value{VERSION_PACKAGE}
+@end ifset
+version @value{VERSION}.
 @ifclear GENERIC
 This version of the file describes @command{@value{AS}} configured to generate
 code for @value{TARGET} architectures.

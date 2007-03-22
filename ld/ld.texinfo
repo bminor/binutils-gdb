@@ -61,7 +61,11 @@ END-INFO-DIR-ENTRY
 @end ifinfo
 
 @ifinfo
-This file documents the @sc{gnu} linker LD version @value{VERSION}.
+This file documents the @sc{gnu} linker LD
+@ifset VERSION_PACKAGE
+@value{VERSION_PACKAGE}
+@end ifset
+version @value{VERSION}.
 
 Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000,
 2001, 2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
@@ -89,7 +93,10 @@ notice identical to this one except for the removal of this paragraph
 @titlepage
 @title The GNU linker
 @sp 1
-@subtitle @code{ld} version 2
+@subtitle @code{ld}
+@ifset VERSION_PACKAGE
+@subtitle @value{VERSION_PACKAGE}
+@end ifset
 @subtitle Version @value{VERSION}
 @author Steve Chamberlain
 @author Ian Lance Taylor
@@ -125,7 +132,11 @@ section entitled ``GNU Free Documentation License''.
 @ifnottex
 @node Top
 @top LD
-This file documents the @sc{gnu} linker ld version @value{VERSION}.
+This file documents the @sc{gnu} linker ld
+@ifset VERSION_PACKAGE
+@value{VERSION_PACKAGE}
+@end ifset
+version @value{VERSION}.
 
 This document is distributed under the terms of the GNU Free
 Documentation License.  A copy of the license is included in the

@@ -56,13 +56,16 @@ po/POTFILES.in: @MAINT@ Makefile
 
 MANCONF  = -Dman
 
-TEXI2POD = perl $(srcdir)/../etc/texi2pod.pl
+TEXI2POD = perl $(srcdir)/../etc/texi2pod.pl $(AM_MAKEINFOFLAGS)
 
 POD2MAN = pod2man --center="GNU" --release="binutils-$(VERSION)" --section=1
 
 info_TEXINFOS = gprof.texi
 gprof_TEXINFOS = config.texi
 man_MANS = gprof.1
+
+AM_MAKEINFOFLAGS = -I "$(srcdir)" -I ../bfd/doc
+TEXI2DVI = texi2dvi -I "$(srcdir)" -I ../bfd/doc
 
 config.texi:
 	echo "@set top_srcdir $(top_srcdir)" >> ./config.texi

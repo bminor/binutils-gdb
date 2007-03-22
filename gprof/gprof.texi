@@ -5,6 +5,10 @@
 @settitle GNU gprof
 @setchapternewpage odd
 
+@c man begin INCLUDE
+@include bfdver.texi
+@c man end
+
 @ifinfo
 @c This is a dir.info fragment to support semi-automated addition of
 @c manuals to an info tree.  zoo@cygnus.com is developing this facility.
@@ -45,6 +49,10 @@ notice identical to this one except for the removal of this paragraph
 @titlepage
 @title GNU gprof
 @subtitle The @sc{gnu} Profiler 
+@ifset VERSION_PACKAGE
+@subtitle @value{VERSION_PACKAGE}
+@end ifset
+@subtitle Version @value{VERSION}
 @author Jay Fenlason and Richard Stallman
 
 @page
@@ -75,6 +83,12 @@ This manual describes the @sc{gnu} profiler, @code{gprof}, and how you
 can use it to determine which parts of a program are taking most of the
 execution time.  We assume that you know how to write, compile, and
 execute programs.  @sc{gnu} @code{gprof} was written by Jay Fenlason.
+
+This manual is for @code{gprof}
+@ifset VERSION_PACKAGE
+@value{VERSION_PACKAGE}
+@end ifset
+version @value{VERSION}.
 
 This document is distributed under the terms of the GNU Free
 Documentation License.  A copy of the license is included in the

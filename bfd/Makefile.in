@@ -958,15 +958,15 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
-	      echo ' cd $(srcdir) && $(AUTOMAKE) --cygnus '; \
-	      cd $(srcdir) && $(AUTOMAKE) --cygnus  \
+	      echo ' cd $(srcdir) && $(AUTOMAKE) --foreign '; \
+	      cd $(srcdir) && $(AUTOMAKE) --foreign  \
 		&& exit 0; \
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --cygnus  Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --cygnus  Makefile
+	  $(AUTOMAKE) --foreign  Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -1546,7 +1546,9 @@ bfdver.h: $(srcdir)/version.h $(srcdir)/Makefile.in
 	    -e "s,@report_bugs_to@,$$report_bugs_to," \
 	    < $(srcdir)/version.h > $@; \
 	 echo "@set VERSION $(VERSION)" > doc/bfdver.texi; \
-	 echo "@set VERSION_PACKAGE $(PKGVERSION)" >> doc/bfdver.texi; \
+	 if [ -n "$(PKGVERSION)" ]; then \
+	   echo "@set VERSION_PACKAGE $(PKGVERSION)" >> doc/bfdver.texi; \
+	 fi; \
 	 echo "@set UPDATED `date '+%B %Y'`" >> doc/bfdver.texi; \
 	 if [ -n "$(REPORT_BUGS_TEXI)" ]; then \
 	   echo "@set BUGURL $(REPORT_BUGS_TEXI)" >> doc/bfdver.texi; \

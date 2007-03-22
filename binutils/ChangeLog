@@ -1,3 +1,8 @@
+2007-03-22  Joseph Myers  <joseph@codesourcery.com>
+
+	* doc/binutils.texi: Include VERSION_PACKAGE when reporting
+	version.
+
 2007-03-16  Kai Tietz  <Kai.Tietz@onevision.com>
 
 	* dlltool.c (make_one_lib_file): Use pc-relative relocation

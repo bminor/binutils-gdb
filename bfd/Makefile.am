@@ -980,7 +980,9 @@ bfdver.h: $(srcdir)/version.h $(srcdir)/Makefile.in
 	    -e "s,@report_bugs_to@,$$report_bugs_to," \
 	    < $(srcdir)/version.h > $@; \
 	 echo "@set VERSION $(VERSION)" > doc/bfdver.texi; \
-	 echo "@set VERSION_PACKAGE $(PKGVERSION)" >> doc/bfdver.texi; \
+	 if [ -n "$(PKGVERSION)" ]; then \
+	   echo "@set VERSION_PACKAGE $(PKGVERSION)" >> doc/bfdver.texi; \
+	 fi; \
 	 echo "@set UPDATED `date '+%B %Y'`" >> doc/bfdver.texi; \
 	 if [ -n "$(REPORT_BUGS_TEXI)" ]; then \
 	   echo "@set BUGURL $(REPORT_BUGS_TEXI)" >> doc/bfdver.texi; \

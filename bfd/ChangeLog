@@ -1,3 +1,10 @@
+2007-03-22  Joseph Myers  <joseph@codesourcery.com>
+
+	* Makefile.am (bfdver.h): Only set VERSION_PACKAGE in bfdver.texi
+	if nonempty.
+	* configure.in (REPORT_BUGS_TO): Do not use "URL:" prefix.
+	* Makefile.in, configure, doc/Makefile.in: Regenerate.
+
 2003-03-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/4210
