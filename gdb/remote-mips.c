@@ -108,7 +108,7 @@ static unsigned int mips_fetch_word (CORE_ADDR addr);
 static int mips_store_word (CORE_ADDR addr, unsigned int value,
 			    char *old_contents);
 
-static int mips_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
+static int mips_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
 			     int write, 
 			     struct mem_attrib *attrib,
 			     struct target_ops *target);
@@ -2029,7 +2029,7 @@ mips_store_word (CORE_ADDR addr, unsigned int val, char *old_contents)
 static int mask_address_p = 1;
 
 static int
-mips_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+mips_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 		  struct mem_attrib *attrib, struct target_ops *target)
 {
   int i;
