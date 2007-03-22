@@ -1,3 +1,7 @@
+2007-03-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elf/elf.exp: Add "--local-store 0:0" to LDFLAGS for spu.
+
 2003-03-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/4210
