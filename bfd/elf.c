@@ -4246,7 +4246,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
   file_ptr off, voff;
   bfd_size_type maxpagesize;
   unsigned int alloc;
-  unsigned int i;
+  unsigned int i, j;
 
   if (link_info == NULL
       && !elf_modify_segment_map (abfd, link_info))
@@ -4284,9 +4284,9 @@ assign_file_positions_for_load_sections (bfd *abfd,
   off = bed->s->sizeof_ehdr;
   off += alloc * bed->s->sizeof_phdr;
 
-  for (m = elf_tdata (abfd)->segment_map, p = phdrs;
+  for (m = elf_tdata (abfd)->segment_map, p = phdrs, j = 0;
        m != NULL;
-       m = m->next, p++)
+       m = m->next, p++, j++)
     {
       asection **secpp;
 
@@ -4604,6 +4604,29 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		p->p_flags |= PF_W;
 	    }
 	}
+
+      /* Check if all sections are in the segment.  Skip PT_GNU_RELRO
+	 and PT_NOTE segments since they will be processed by
+	 assign_file_positions_for_non_load_sections later.  */
+      if (p->p_type != PT_GNU_RELRO
+	  && p->p_type != PT_NOTE)
+	for (i = 0, secpp = m->sections; i < m->count; i++, secpp++)
+	  {
+	    Elf_Internal_Shdr *this_hdr;
+	    asection *sec;
+
+	    sec = *secpp;
+	    this_hdr = &(elf_section_data(sec)->this_hdr);
+	    if (this_hdr->sh_size != 0
+		&& !ELF_IS_SECTION_IN_SEGMENT_FILE (this_hdr, p))
+	      {
+		(*_bfd_error_handler)
+		  (_("%B: section `%A' can't be allocated in segment %d"),
+		   abfd, sec, j);
+		bfd_set_error (bfd_error_bad_value);
+		return FALSE;
+	      }
+	  }
     }
 
   elf_tdata (abfd)->next_file_pos = off;

@@ -1,3 +1,15 @@
+2007-03-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/4007
+	* ld-elf/note-1.d: New file.
+	* ld-elf/note-1.s: Likewise.
+	* ld-elf/note-1.t: Likewise.
+	* ld-i386/alloc.d: Likewise.
+	* ld-i386/alloc.s: Likewise.
+	* ld-i386/alloc.t: Likewise.
+
+	* ld-i386/i386.exp: Run "alloc".
+
 2007-03-20  Paul Brook  <paul@codesourcery.com>
 
 	* ld-arm/arm-elf.exp (ld-arm/arm-elf.exp): Add arm-pic-veneer.
