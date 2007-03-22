@@ -2440,15 +2440,12 @@ subset_compare (char *string_to_compare, char *template_string)
   return match;
 }
 
-
-static void pagination_on_command (char *arg, int from_tty);
 static void
 pagination_on_command (char *arg, int from_tty)
 {
   pagination_enabled = 1;
 }
 
-static void pagination_on_command (char *arg, int from_tty);
 static void
 pagination_off_command (char *arg, int from_tty)
 {
