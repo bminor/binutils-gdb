@@ -1,3 +1,10 @@
+2003-03-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/4210
+	* peXXigen.c (_bfd_XXi_swap_aouthdr_out): Use the virtual
+	address and virtual size of the last section for the image
+	size.
+
 2007-03-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/4007

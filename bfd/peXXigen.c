@@ -645,16 +645,22 @@ _bfd_XXi_swap_aouthdr_out (bfd * abfd, void * in, void * out)
 	   in the virt_size field).  Files have been seen (from MSVC
 	   5.0 link.exe) where the file size of the .data segment is
 	   quite small compared to the virtual size.  Without this
-	   fix, strip munges the file.  */
+	   fix, strip munges the file.
+
+	   FIXME: We need to handle holes between sections, which may
+	   happpen when we covert from another format.  We just use
+	   the virtual address and virtual size of the last section
+	   for the image size.  */
 	if (coff_section_data (abfd, sec) != NULL
 	    && pei_section_data (abfd, sec) != NULL)
-	  isize += SA (FA (pei_section_data (abfd, sec)->virt_size));
+	  isize = (sec->vma - extra->ImageBase
+		   + SA (FA (pei_section_data (abfd, sec)->virt_size)));
       }
 
     aouthdr_in->dsize = dsize;
     aouthdr_in->tsize = tsize;
     extra->SizeOfHeaders = hsize;
-    extra->SizeOfImage = SA (hsize) + isize;
+    extra->SizeOfImage = isize;
   }
 
   H_PUT_16 (abfd, aouthdr_in->magic, aouthdr_out->standard.magic);

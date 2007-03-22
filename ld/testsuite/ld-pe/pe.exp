@@ -32,3 +32,5 @@ set pe_tests {
 }
 
 run_ld_link_tests $pe_tests
+
+run_dump_test "image_size"
