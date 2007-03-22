@@ -1,3 +1,8 @@
+2007-03-22  Nigel Stephens  <nigel@mips.com>
+	    Maciej W. Rozycki  <macro@mips.com>
+
+	* remote-mips.c (mips_xfer_memory): Update prototype.
+
 2007-03-22  Joel Brobecker  <brobecker@adacore.com>
 
 	* symfile.h: #include "symtab.h"
