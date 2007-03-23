@@ -1,6 +1,6 @@
 /* spu.c -- Assembler for the IBM Synergistic Processing Unit (SPU)
 
-   Copyright 2006 Free Software Foundation, Inc.
+   Copyright 2006, 2007 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -22,7 +22,6 @@
 #include "as.h"
 #include "safe-ctype.h"
 #include "subsegs.h"
-#include "opcode/spu.h"
 #include "dwarf2dbg.h" 
 
 const struct spu_opcode spu_opcodes[] = {
@@ -366,7 +365,8 @@ md_assemble (char *op)
 			    &insn.exp[i],
 			    pcrel,
 			    reloc);
-	fixP->tc_fix_data = insn.reloc_arg[i];
+	fixP->tc_fix_data.arg_format = insn.reloc_arg[i];
+	fixP->tc_fix_data.insn_tag = insn.tag;
       }
   dwarf2_emit_insn (4);
 }
@@ -941,10 +941,10 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     {
       fixP->fx_done = 1;
       res = 0;
-      if (fixP->tc_fix_data > A_P)
+      if (fixP->tc_fix_data.arg_format > A_P)
 	{
-	  int hi = arg_encode[fixP->tc_fix_data].hi;
-	  int lo = arg_encode[fixP->tc_fix_data].lo;
+	  int hi = arg_encode[fixP->tc_fix_data.arg_format].hi;
+	  int lo = arg_encode[fixP->tc_fix_data.arg_format].lo;
 	  if (hi > lo && ((offsetT) val < lo || (offsetT) val > hi))
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  "Relocation doesn't fit. (relocation value = 0x%lx)",

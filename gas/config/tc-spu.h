@@ -21,6 +21,8 @@
 
 #define TC_SPU
 
+#include "opcode/spu.h"
+
 #ifdef OBJ_ELF
 #define TARGET_FORMAT "elf32-spu"
 #define TARGET_ARCH bfd_arch_spu
@@ -44,12 +46,34 @@
 #define TC_KEEP_FX_OFFSET
 /* #define TC_CONS_RELOC RELOC_32 */
 
-/* If defined, fixS will have a member named tc_fix_data of this type.  */
-#define TC_FIX_TYPE int
-#define TC_INIT_FIX_DATA(FIXP) ((FIXP)->tc_fix_data = 0)
+struct tc_fix_info {
+  unsigned short arg_format;
+  unsigned short insn_tag;
+};
+
+/* fixS will have a member named tc_fix_data of this type.  */
+#define TC_FIX_TYPE struct tc_fix_info
+#define TC_INIT_FIX_DATA(FIXP) \
+  do						\
+    {						\
+      (FIXP)->tc_fix_data.arg_format = 0;	\
+      (FIXP)->tc_fix_data.insn_tag = 0;		\
+    }						\
+  while (0)
 
 /* Don't reduce function symbols to section symbols.  */
 #define tc_fix_adjustable(FIXP) (!S_IS_FUNCTION ((FIXP)->fx_addsy))
+
+/* Keep relocs on calls.  Branches to function symbols are tail or
+   sibling calls.  */
+#define TC_FORCE_RELOCATION(FIXP) \
+  ((FIXP)->tc_fix_data.insn_tag == M_BRSL		\
+   || (FIXP)->tc_fix_data.insn_tag == M_BRASL		\
+   || (((FIXP)->tc_fix_data.insn_tag == M_BR		\
+	|| (FIXP)->tc_fix_data.insn_tag == M_BRA)	\
+       && (FIXP)->fx_addsy != NULL			\
+       && S_IS_FUNCTION ((FIXP)->fx_addsy))		\
+   || generic_force_reloc (FIXP))
 
 /* Values passed to md_apply_fix don't include symbol values.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0

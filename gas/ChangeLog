@@ -1,3 +1,13 @@
+2007-03-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-spu.c: Don't include opcode/spu.h.
+	(md_assemble): Set tc_fix_data.insn_tag and arg_format.
+	(md_apply_fix): Adjust.
+	* config/tc-spu.h: Include opcode/spu.h.
+	(struct tc_fix_info): New.
+	(TC_FIX_TYPE, TC_INIT_FIX_DATA): Adjust.
+	(TC_FORCE_RELOCATION): Define.
+
 2007-03-22  Joseph Myers  <joseph@codesourcery.com>
 
 	* doc/as.texinfo: Include VERSION_PACKAGE when reporting version.
