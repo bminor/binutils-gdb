@@ -1,3 +1,9 @@
+2007-03-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-spu/ovl.s (f4_a2): Tail call.
+	* ld-spu/ovl.d: Add --emit-relocs to ld options, -r to objdump.
+	Update expected results.
+
 2007-03-23  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* ld-sh/ld-r-1.d: Update.

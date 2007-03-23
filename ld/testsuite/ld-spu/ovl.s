@@ -78,5 +78,5 @@ f3_a2:
 
  .type f4_a2,@function
 f4_a2:
- bi lr
+ br f3_a2
  .size f4_a2,.-f4_a2
