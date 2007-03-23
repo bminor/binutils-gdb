@@ -7803,6 +7803,10 @@ debug_apply_rela_addends (void *file,
   if (!is_relocatable)
     return 1;
 
+  /* SH uses RELA but uses in place value instead of the addend field.  */
+  if (elf_header.e_machine == EM_SH)
+    return 0;
+
   for (relsec = section_headers;
        relsec < section_headers + elf_header.e_shnum;
        ++relsec)
