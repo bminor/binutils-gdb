@@ -1,3 +1,7 @@
+2003-03-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
 2007-03-23  Joseph Myers  <joseph@codesourcery.com>
 
 	* configure.in: Use ACX_PKGVERSION and ACX_BUGURL.

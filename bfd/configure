@@ -4424,7 +4424,7 @@ echo "$as_me: error: bug URL not specified" >&2;}
      esac
 else
   REPORT_BUGS_TO="<http://www.sourceware.org/bugzilla/>"
-     REPORT_BUGS_TEXI="@uref{http://www.sourceware.org/bugzilla/}"
+     REPORT_BUGS_TEXI="@uref{`echo http://www.sourceware.org/bugzilla/ | sed 's/@/@@/g'`}"
 
 fi;
 
