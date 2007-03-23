@@ -63,37 +63,8 @@ if test $use_secureplt = true; then
     [Define if we should default to creating read-only plt entries])
 fi
 
-# Package version.  For an official FSF release, it is empty.
-AC_ARG_WITH(pkgversion,
-  AS_HELP_STRING([--with-pkgversion=PKG],
-                 [Add PKG to the version string]),
-  [case "$withval" in
-    yes) AC_MSG_ERROR([package version not specified]) ;;
-    no)  PKGVERSION= ;;
-    *)   PKGVERSION="($withval) " ;;
-   esac],
-  PKGVERSION="(GNU Binutils) "
-)
-AC_SUBST(PKGVERSION)
-
-# The location to which bugs should be reported.
-AC_ARG_WITH(bugurl,
-  AS_HELP_STRING([--with-bugurl=URL],
-                 [Direct users to URL to report a bug]),
-  [case "$withval" in
-    yes) AC_MSG_ERROR([bug URL not specified]) ;;
-    no)  REPORT_BUGS_TO="";
-	 REPORT_BUGS_TEXI=""
-	 ;;
-    *)   REPORT_BUGS_TO="<$withval>"
-	 REPORT_BUGS_TEXI="@uref{`echo $withval | sed 's/@/@@/g'`}"
-	 ;;
-   esac],
-   REPORT_BUGS_TO="<http://www.sourceware.org/bugzilla/>"
-   REPORT_BUGS_TEXI="@uref{http://www.sourceware.org/bugzilla/}"
-)
-AC_SUBST(REPORT_BUGS_TO)
-AC_SUBST(REPORT_BUGS_TEXI)
+ACX_PKGVERSION([GNU Binutils])
+ACX_BUGURL([http://www.sourceware.org/bugzilla/])
 
 AM_BINUTILS_WARNINGS
 

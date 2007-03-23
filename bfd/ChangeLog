@@ -1,3 +1,8 @@
+2007-03-23  Joseph Myers  <joseph@codesourcery.com>
+
+	* configure.in: Use ACX_PKGVERSION and ACX_BUGURL.
+	* configure: Regenerate.
+
 2007-03-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (spu_stub_name): Don't put input section in stub name.

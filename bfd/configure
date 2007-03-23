@@ -873,7 +873,8 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld default=no
   --with-pic              try to use only PIC/non-PIC objects default=use both
   --with-mmap             try using mmap for BFD input files if available
-  --with-pkgversion=PKG   Add PKG to the version string
+  --with-pkgversion=PKG   Use PKG in the version string in place of "GNU
+                          Binutils"
   --with-bugurl=URL       Direct users to URL to report a bug
 
 Some influential environment variables:
@@ -4033,7 +4034,7 @@ test x"$pic_mode" = xno && libtool_flags="$libtool_flags --prefer-non-pic"
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 4036 "configure"' > conftest.$ac_ext
+  echo '#line 4037 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -4387,45 +4388,46 @@ _ACEOF
 
 fi
 
-# Package version.  For an official FSF release, it is empty.
+
 
 # Check whether --with-pkgversion or --without-pkgversion was given.
 if test "${with_pkgversion+set}" = set; then
   withval="$with_pkgversion"
   case "$withval" in
-    yes) { { echo "$as_me:$LINENO: error: package version not specified" >&5
+      yes) { { echo "$as_me:$LINENO: error: package version not specified" >&5
 echo "$as_me: error: package version not specified" >&2;}
    { (exit 1); exit 1; }; } ;;
-    no)  PKGVERSION= ;;
-    *)   PKGVERSION="($withval) " ;;
-   esac
+      no)  PKGVERSION= ;;
+      *)   PKGVERSION="($withval) " ;;
+     esac
 else
   PKGVERSION="(GNU Binutils) "
 
 fi;
 
 
-# The location to which bugs should be reported.
+
 
 # Check whether --with-bugurl or --without-bugurl was given.
 if test "${with_bugurl+set}" = set; then
   withval="$with_bugurl"
   case "$withval" in
-    yes) { { echo "$as_me:$LINENO: error: bug URL not specified" >&5
+      yes) { { echo "$as_me:$LINENO: error: bug URL not specified" >&5
 echo "$as_me: error: bug URL not specified" >&2;}
    { (exit 1); exit 1; }; } ;;
-    no)  REPORT_BUGS_TO="";
-	 REPORT_BUGS_TEXI=""
-	 ;;
-    *)   REPORT_BUGS_TO="<$withval>"
-	 REPORT_BUGS_TEXI="@uref{`echo $withval | sed 's/@/@@/g'`}"
-	 ;;
-   esac
+      no)  REPORT_BUGS_TO="";
+	   REPORT_BUGS_TEXI=""
+	   ;;
+      *)   REPORT_BUGS_TO="<$withval>"
+	   REPORT_BUGS_TEXI="@uref{`echo $withval | sed 's/@/@@/g'`}"
+	   ;;
+     esac
 else
   REPORT_BUGS_TO="<http://www.sourceware.org/bugzilla/>"
-   REPORT_BUGS_TEXI="@uref{http://www.sourceware.org/bugzilla/}"
+     REPORT_BUGS_TEXI="@uref{http://www.sourceware.org/bugzilla/}"
 
 fi;
+
 
 
 
