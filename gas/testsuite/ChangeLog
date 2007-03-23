@@ -1,3 +1,14 @@
+2003-03-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/rex.s: Add tests for rex.WRXB.
+	* gas/i386/rex.d: Updated.
+
+	* gas/i386/rex.d: Replace rex64XYZ with rex.WRXB.
+	* gas/i386/x86-64-io-intel.d : Likewise.
+	* gas/i386/x86-64-io-suffix.d: Likewise.
+	* gas/i386/x86-64-io.d: Likewise.
+	* gas/i386/x86-64-opcode.d: Likewise.
+
 2003-03-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/4218

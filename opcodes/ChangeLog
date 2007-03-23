@@ -1,3 +1,9 @@
+2003-03-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (prefix_name): Replace rex64XYZ with rex.WRXB.
+
+	* i386-opc.c (i386_optab): Add rex.wrxb.
+
 2003-03-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (REX_MODE64): Remove definition.

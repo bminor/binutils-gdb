@@ -846,6 +846,21 @@ const template i386_optab[] =
 {"rex64xz",0,	0x4d, X, Cpu64,	 NoSuf|IsPrefix,	{ 0, 0, 0} },
 {"rex64xy",0,	0x4e, X, Cpu64,	 NoSuf|IsPrefix,	{ 0, 0, 0} },
 {"rex64xyz",0,	0x4f, X, Cpu64,	 NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"rex.b",  0,	0x41, X, Cpu64,	 NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"rex.x",  0,	0x42, X, Cpu64,	 NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"rex.xb", 0,	0x43, X, Cpu64,	 NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"rex.r",  0,	0x44, X, Cpu64,	 NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"rex.rb", 0,	0x45, X, Cpu64,	 NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"rex.rx", 0,	0x46, X, Cpu64,	 NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"rex.rxb",0,	0x47, X, Cpu64,	 NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"rex.w",  0,	0x48, X, Cpu64,	 NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"rex.wb", 0,	0x49, X, Cpu64,	 NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"rex.wx", 0,	0x4a, X, Cpu64,	 NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"rex.wxb",0,	0x4b, X, Cpu64,	 NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"rex.wr", 0,	0x4c, X, Cpu64,	 NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"rex.wrb",0,	0x4d, X, Cpu64,	 NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"rex.wrx",0,	0x4e, X, Cpu64,	 NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"rex.wrxb",0,	0x4f, X, Cpu64,	 NoSuf|IsPrefix,	{ 0, 0, 0} },
 
 /* 486 extensions.  */
 

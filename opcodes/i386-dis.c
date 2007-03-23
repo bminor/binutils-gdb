@@ -2734,41 +2734,46 @@ ckprefix (void)
 static const char *
 prefix_name (int pref, int sizeflag)
 {
+  static const char *rexes [16] =
+    {
+      "rex",		/* 0x40 */
+      "rex.B",		/* 0x41 */
+      "rex.X",		/* 0x42 */
+      "rex.XB",		/* 0x43 */
+      "rex.R",		/* 0x44 */
+      "rex.RB",		/* 0x45 */
+      "rex.RX",		/* 0x46 */
+      "rex.RXB",	/* 0x47 */
+      "rex.W",		/* 0x48 */
+      "rex.WB",		/* 0x49 */
+      "rex.WX",		/* 0x4a */
+      "rex.WXB",	/* 0x4b */
+      "rex.WR",		/* 0x4c */
+      "rex.WRB",	/* 0x4d */
+      "rex.WRX",	/* 0x4e */
+      "rex.WRXB",	/* 0x4f */
+    };
+
   switch (pref)
     {
     /* REX prefixes family.  */
     case 0x40:
-      return "rex";
     case 0x41:
-      return "rexZ";
     case 0x42:
-      return "rexY";
     case 0x43:
-      return "rexYZ";
     case 0x44:
-      return "rexX";
     case 0x45:
-      return "rexXZ";
     case 0x46:
-      return "rexXY";
     case 0x47:
-      return "rexXYZ";
     case 0x48:
-      return "rex64";
     case 0x49:
-      return "rex64Z";
     case 0x4a:
-      return "rex64Y";
     case 0x4b:
-      return "rex64YZ";
     case 0x4c:
-      return "rex64X";
     case 0x4d:
-      return "rex64XZ";
     case 0x4e:
-      return "rex64XY";
     case 0x4f:
-      return "rex64XYZ";
+      return rexes [pref - 0x40];
     case 0xf3:
       return "repz";
     case 0xf2:
