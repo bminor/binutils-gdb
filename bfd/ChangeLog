@@ -1,3 +1,12 @@
+2007-03-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (spu_stub_name): Don't put input section in stub name.
+	Remove input_sec param.  Adjust all calls.
+	(write_one_stub): Adjust stub symbol.
+	(needs_ovl_stub): New function, extracted from..
+	(spu_elf_size_stubs): ..here.
+	(spu_elf_relocate_section): Use needs_ovl_stub.
+
 2007-03-22  Joseph Myers  <joseph@codesourcery.com>
 
 	* Makefile.am (bfdver.h): Only set VERSION_PACKAGE in bfdver.texi

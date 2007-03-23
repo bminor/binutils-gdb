@@ -425,14 +425,11 @@ get_sym_h (struct elf_link_hash_entry **hp,
   return TRUE;
 }
 
-/* Build a name for an entry in the stub hash table.  The input section
-   id isn't really necessary but we add that in for consistency with
-   ppc32 and ppc64 stub names.  We can't use a local symbol name
-   because ld -r might generate duplicate local symbols.  */
+/* Build a name for an entry in the stub hash table.  We can't use a
+   local symbol name because ld -r might generate duplicate local symbols.  */
 
 static char *
-spu_stub_name (const asection *input_sec,
-	       const asection *sym_sec,
+spu_stub_name (const asection *sym_sec,
 	       const struct elf_link_hash_entry *h,
 	       const Elf_Internal_Rela *rel)
 {
@@ -441,26 +438,24 @@ spu_stub_name (const asection *input_sec,
 
   if (h)
     {
-      len = 8 + 1 + strlen (h->root.root.string) + 1 + 8 + 1;
+      len = strlen (h->root.root.string) + 1 + 8 + 1;
       stub_name = bfd_malloc (len);
       if (stub_name == NULL)
 	return stub_name;
 
-      sprintf (stub_name, "%08x.%s+%x",
-	       input_sec->id & 0xffffffff,
+      sprintf (stub_name, "%s+%x",
 	       h->root.root.string,
 	       (int) rel->r_addend & 0xffffffff);
       len -= 8;
     }
   else
     {
-      len = 8 + 1 + 8 + 1 + 8 + 1 + 8 + 1;
+      len = 8 + 1 + 8 + 1 + 8 + 1;
       stub_name = bfd_malloc (len);
       if (stub_name == NULL)
 	return stub_name;
 
-      sprintf (stub_name, "%08x.%x:%x+%x",
-	       input_sec->id & 0xffffffff,
+      sprintf (stub_name, "%x:%x+%x",
 	       sym_sec->id & 0xffffffff,
 	       (int) ELF32_R_SYM (rel->r_info) & 0xffffffff,
 	       (int) rel->r_addend & 0xffffffff);
@@ -682,6 +677,45 @@ is_branch (const unsigned char *insn)
 	  || (insn[0] & 0xfc) == 0x10);
 }
 
+/* Return TRUE if this reloc symbol should possibly go via an overlay stub.  */
+
+static bfd_boolean
+needs_ovl_stub (const char *sym_name,
+		asection *sym_sec,
+		asection *input_section,
+		struct spu_link_hash_table *htab,
+		bfd_boolean is_branch)
+{
+  if (htab->num_overlays == 0)
+    return FALSE;
+
+  if (sym_sec == NULL
+      || sym_sec->output_section == NULL)
+    return FALSE;
+
+  /* setjmp always goes via an overlay stub, because then the return
+     and hence the longjmp goes via __ovly_return.  That magically
+     makes setjmp/longjmp between overlays work.  */
+  if (strncmp (sym_name, "setjmp", 6) == 0
+      && (sym_name[6] == '\0' || sym_name[6] == '@'))
+    return TRUE;
+
+  /* Usually, symbols in non-overlay sections don't need stubs.  */
+  if (spu_elf_section_data (sym_sec->output_section)->ovl_index == 0
+      && !htab->non_overlay_stubs)
+    return FALSE;
+
+  /* A reference from some other section to a symbol in an overlay
+     section needs a stub.  */
+  if (spu_elf_section_data (sym_sec->output_section)->ovl_index
+       != spu_elf_section_data (input_section->output_section)->ovl_index)
+    return TRUE;
+
+  /* If this insn isn't a branch then we are possibly taking the
+     address of a function and passing it out somehow.  */
+  return !is_branch;
+}
+
 struct stubarr {
   struct spu_stub_hash_entry **sh;
   unsigned int count;
@@ -797,11 +831,11 @@ spu_elf_size_stubs (bfd *output_bfd,
 	      asection *sym_sec;
 	      Elf_Internal_Sym *sym;
 	      struct elf_link_hash_entry *h;
+	      const char *sym_name;
 	      char *stub_name;
 	      struct spu_stub_hash_entry *sh;
 	      unsigned int sym_type;
 	      enum _insn_type { non_branch, branch, call } insn_type;
-	      bfd_boolean is_setjmp;
 
 	      r_type = ELF32_R_TYPE (irela->r_info);
 	      r_indx = ELF32_R_SYM (irela->r_info);
@@ -847,9 +881,18 @@ spu_elf_size_stubs (bfd *output_bfd,
 
 	      /* We are only interested in function symbols.  */
 	      if (h != NULL)
-		sym_type = h->type;
+		{
+		  sym_type = h->type;
+		  sym_name = h->root.root.string;
+		}
 	      else
-		sym_type = ELF_ST_TYPE (sym->st_info);
+		{
+		  sym_type = ELF_ST_TYPE (sym->st_info);
+		  sym_name = bfd_elf_sym_name (sym_sec->owner,
+					       symtab_hdr,
+					       sym,
+					       sym_sec);
+		}
 	      if (sym_type != STT_FUNC)
 		{
 		  /* It's common for people to write assembly and forget
@@ -859,54 +902,18 @@ spu_elf_size_stubs (bfd *output_bfd,
 		     type to be correct to distinguish function pointer
 		     initialisation from other pointer initialisation.  */
 		  if (insn_type == call)
-		    {
-		      const char *sym_name;
-
-		      if (h != NULL)
-			sym_name = h->root.root.string;
-		      else
-			sym_name = bfd_elf_sym_name (sym_sec->owner,
-						     symtab_hdr,
-						     sym,
-						     sym_sec);
-
-		      (*_bfd_error_handler) (_("warning: call to non-function"
-					       " symbol %s defined in %B"),
-					     sym_sec->owner, sym_name);
-		    }
+		    (*_bfd_error_handler) (_("warning: call to non-function"
+					     " symbol %s defined in %B"),
+					   sym_sec->owner, sym_name);
 		  else
 		    continue;
 		}
 
-	      /* setjmp always goes via an overlay stub, because
-		 then the return and hence the longjmp goes via
-		 __ovly_return.  That magically makes setjmp/longjmp
-		 between overlays work.  */
-	      is_setjmp = (h != NULL
-			   && strncmp (h->root.root.string, "setjmp", 6) == 0
-			   && (h->root.root.string[6] == '\0'
-			       || h->root.root.string[6] == '@'));
-
-	      /* Usually, non-overlay sections don't need stubs.  */
-	      if (!spu_elf_section_data (sym_sec->output_section)->ovl_index
-		  && !non_overlay_stubs
-		  && !is_setjmp)
+	      if (!needs_ovl_stub (sym_name, sym_sec, section, htab,
+				   insn_type != non_branch))
 		continue;
 
-	      /* We need a reference from some other section before
-		 we consider that a symbol might need an overlay stub.  */
-	      if (spu_elf_section_data (sym_sec->output_section)->ovl_index
-		  == spu_elf_section_data (section->output_section)->ovl_index
-		  && !is_setjmp)
-		{
-		  /* Or we need this to *not* be a branch.  ie. We are
-		     possibly taking the address of a function and
-		     passing it out somehow.  */
-		  if (insn_type != non_branch)
-		    continue;
-		}
-
-	      stub_name = spu_stub_name (section, sym_sec, h, irela);
+	      stub_name = spu_stub_name (sym_sec, h, irela);
 	      if (stub_name == NULL)
 		goto error_ret_free_internal;
 
@@ -1157,14 +1164,13 @@ write_one_stub (struct bfd_hash_entry *bh, void *inf)
       size_t len1, len2;
       char *name;
 
-      len1 = sizeof ("ovl_call.") - 1;
+      len1 = sizeof ("00000000.ovl_call.") - 1;
       len2 = strlen (ent->root.string);
       name = bfd_malloc (len1 + len2 + 1);
       if (name == NULL)
 	return FALSE;
-      memcpy (name, ent->root.string, 9);
-      memcpy (name + 9, "ovl_call.", len1);
-      memcpy (name + 9 + len1, ent->root.string + 9, len2 - 9 + 1);
+      memcpy (name, "00000000.ovl_call.", len1);
+      memcpy (name + len1, ent->root.string, len2 + 1);
       h = elf_link_hash_lookup (&htab->elf, name, TRUE, FALSE, FALSE);
       if (h == NULL)
 	return FALSE;
@@ -1438,18 +1444,13 @@ spu_elf_relocate_section (bfd *output_bfd,
       /* If this symbol is in an overlay area, we may need to relocate
 	 to the overlay stub.  */
       addend = rel->r_addend;
-      if (sec != NULL
-	  && sec->output_section != NULL
-	  && sec->output_section->owner == output_bfd
-	  && (spu_elf_section_data (sec->output_section)->ovl_index != 0
-	      || htab->non_overlay_stubs)
-	  && !(sec == input_section
-	       && is_branch (contents + rel->r_offset)))
+      if (needs_ovl_stub (sym_name, sec, input_section, htab,
+			  is_branch (contents + rel->r_offset)))
 	{
 	  char *stub_name;
 	  struct spu_stub_hash_entry *sh;
 
-	  stub_name = spu_stub_name (input_section, sec, h, rel);
+	  stub_name = spu_stub_name (sec, h, rel);
 	  if (stub_name == NULL)
 	    return FALSE;
 
