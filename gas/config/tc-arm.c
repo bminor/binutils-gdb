@@ -18101,15 +18101,31 @@ md_apply_fix (fixS *	fixP,
 
     case BFD_RELOC_THUMB_PCREL_BRANCH7: /* CBZ */
       /* CBZ can only branch forward.  */
-      if (value & ~0x7e)
-	as_bad_where (fixP->fx_file, fixP->fx_line,
-		      _("branch out of range"));
 
-      if (fixP->fx_done || !seg->use_rela_p)
+      /* Attempts to use CBZ to branch to the next instruction
+         (which, strictly speaking, are prohibited) will be turned into
+         no-ops.
+
+	 FIXME: It may be better to remove the instruction completely and
+	 perform relaxation.  */
+      if (value == -2)
 	{
 	  newval = md_chars_to_number (buf, THUMB_SIZE);
-	  newval |= ((value & 0x3e) << 2) | ((value & 0x40) << 3);
+	  newval = 0xbf00; /* NOP encoding T1 */
 	  md_number_to_chars (buf, newval, THUMB_SIZE);
+	}
+      else
+	{
+	  if (value & ~0x7e)
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+		          _("branch out of range"));
+
+          if (fixP->fx_done || !seg->use_rela_p)
+	    {
+	      newval = md_chars_to_number (buf, THUMB_SIZE);
+	      newval |= ((value & 0x3e) << 2) | ((value & 0x40) << 3);
+	      md_number_to_chars (buf, newval, THUMB_SIZE);
+	    }
 	}
       break;
 

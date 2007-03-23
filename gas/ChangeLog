@@ -1,3 +1,8 @@
+2007-03-23  Mark Shinwell  <shinwell@codesourcery.com>
+
+	* config/tc-arm.c (md_apply_fix): Turn CZB instructions that
+	attempt to jump to the next instruction into NOPs.
+
 2007-03-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-spu.c: Don't include opcode/spu.h.
