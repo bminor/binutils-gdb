@@ -1,3 +1,9 @@
+2007-03-23  Nigel Stephens  <nigel@mips.com>
+            Maciej W. Rozycki  <macro@mips.com>
+
+	* gdb.base/sigbpt.exp: Fix the message when skipping test.
+	* gdb.base/signull.exp: Similarly.
+
 2007-03-16  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* lib/gdb.exp (gdb_run_cmd): Use -notransfer to make start-up

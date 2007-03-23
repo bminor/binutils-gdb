@@ -30,7 +30,7 @@
 # software single-step this is KFAILed rather than XFAILed.
 
 if [target_info exists gdb,nosignals] {
-    verbose "Skipping signals.exp because of nosignals."
+    verbose "Skipping sigbpt.exp because of nosignals."
     continue
 }
 
