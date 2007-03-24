@@ -955,3 +955,7 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> e890 0300 	ldmiaeq.w	r0, \{r8, r9\}
 0[0-9a-f]+ <[^>]+> e880 0300 	stmiaeq.w	r0, \{r8, r9\}
 0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> e98d c010 	srsia	sp, #16
+0[0-9a-f]+ <[^>]+> e80d c010 	srsdb	sp, #16
+0[0-9a-f]+ <[^>]+> e9ad c015 	srsia	sp!, #21
+0[0-9a-f]+ <[^>]+> e9ad c00a 	srsia	sp!, #10

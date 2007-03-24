@@ -5452,6 +5452,7 @@ enum operand_parse_code
 
   OP_oRR,	 /* ARM register */
   OP_oRRnpc,	 /* ARM register, not the PC */
+  OP_oRRw,	 /* ARM register, not r15, optional trailing ! */
   OP_oRND,       /* Optional Neon double precision register */
   OP_oRNQ,       /* Optional Neon quad precision register */
   OP_oRNDQ,      /* Optional Neon double or quad precision register */
@@ -5556,7 +5557,7 @@ parse_operands (char *str, const unsigned char *pattern)
 	  backtrack_index = i;
 	}
 
-      if (i > 0)
+      if (i > 0 && (i > 1 || inst.operands[0].present))
 	po_char_or_fail (',');
 
       switch (upat[i])
@@ -5712,6 +5713,7 @@ parse_operands (char *str, const unsigned char *pattern)
 	  break;
 
 	case OP_RRw:
+	case OP_oRRw:
 	  po_reg_or_fail (REG_TYPE_RN);
 	  if (skip_past_char (&str, '!') == SUCCESS)
 	    inst.operands[i].writeback = 1;
@@ -5999,6 +6001,7 @@ parse_operands (char *str, const unsigned char *pattern)
 	case OP_RRnpc:
 	case OP_RRnpcb:
 	case OP_RRw:
+	case OP_oRRw:
 	case OP_RRnpc_I0:
 	  if (inst.operands[i].isreg && inst.operands[i].reg == REG_PC)
 	    inst.error = BAD_PC;
@@ -7436,13 +7439,25 @@ do_smul (void)
   inst.instruction |= inst.operands[2].reg << 8;
 }
 
-/* ARM V6 srs (argument parse).	 */
+/* ARM V6 srs (argument parse).  The variable fields in the encoding are
+   the same for both ARM and Thumb-2.  */
 
 static void
 do_srs (void)
 {
-  inst.instruction |= inst.operands[0].imm;
-  if (inst.operands[0].writeback)
+  int reg;
+
+  if (inst.operands[0].present)
+    {
+      reg = inst.operands[0].reg;
+      constraint (reg != 13, _("SRS base register must be r13"));
+    }
+  else
+    reg = 13;
+
+  inst.instruction |= reg << 16;
+  inst.instruction |= inst.operands[1].imm;
+  if (inst.operands[0].writeback || inst.operands[1].writeback)
     inst.instruction |= WRITE_BACK;
 }
 
@@ -14970,10 +14985,10 @@ static const struct asm_opcode insns[] =
  TCE(smuadx,	700f030, fb20f010, 3, (RRnpc, RRnpc, RRnpc),	   smul, t_simd),
  TCE(smusd,	700f050, fb40f000, 3, (RRnpc, RRnpc, RRnpc),	   smul, t_simd),
  TCE(smusdx,	700f070, fb40f010, 3, (RRnpc, RRnpc, RRnpc),	   smul, t_simd),
- TUF(srsia,	8cd0500, e980c000, 1, (I31w),			   srs,  srs),
-  UF(srsib,	9cd0500,           1, (I31w),			   srs),
-  UF(srsda,	84d0500,	   1, (I31w),			   srs),
- TUF(srsdb,	94d0500, e800c000, 1, (I31w),			   srs,  srs),
+ TUF(srsia,	8c00500, e980c000, 2, (oRRw, I31w),		   srs,  srs),
+  UF(srsib,	9c00500,           2, (oRRw, I31w),		   srs),
+  UF(srsda,	8400500,	   2, (oRRw, I31w),		   srs),
+ TUF(srsdb,	9400500, e800c000, 2, (oRRw, I31w),		   srs,  srs),
  TCE(ssat16,	6a00f30, f3200000, 3, (RRnpc, I16, RRnpc),	   ssat16, t_ssat16),
  TCE(strex,	1800f90, e8400000, 3, (RRnpc, RRnpc, ADDR),	   strex,  t_strex),
  TCE(umaal,	0400090, fbe00060, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smlal,  t_mlal),

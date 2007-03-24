@@ -116,8 +116,8 @@ Disassembly of section .text:
 0+1b0 <[^>]*> d701f352 ?	smusdle	r1, r2, r3
 0+1b4 <[^>]*> e701f372 ?	smusdx	r1, r2, r3
 0+1b8 <[^>]*> d701f372 ?	smusdxle	r1, r2, r3
-0+1bc <[^>]*> f8cd0510 ?	srsia	#16
-0+1c0 <[^>]*> f9ed0510 ?	srsib	#16!
+0+1bc <[^>]*> f8cd0510 ?	srsia	sp, #16
+0+1c0 <[^>]*> f9ed0510 ?	srsib	sp!, #16
 0+1c4 <[^>]*> e6a01012 ?	ssat	r1, #1, r2
 0+1c8 <[^>]*> e6a01152 ?	ssat	r1, #1, r2, ASR #2
 0+1cc <[^>]*> e6a01112 ?	ssat	r1, #1, r2, LSL #2
@@ -219,3 +219,5 @@ Disassembly of section .text:
 0+34c <[^>]*> 16ef2475 ?	uxtbne r2,r5, ROR #8
 0+350 <[^>]*> f10a00ca ?	cpsie	if,#10
 0+354 <[^>]*> f10a00d5 ?	cpsie	if,#21
+0+358 <[^>]*> f8cd0510 ?	srsia	sp, #16
+0+35c <[^>]*> f9ed0510 ?	srsib	sp!, #16

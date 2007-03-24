@@ -1,3 +1,17 @@
+2007-03-24  Paul Brook  <paul@codesourcery.com>
+	Mark Shinwell  <shinwell@codesourcery.com>
+
+	* gas/arm/archv6.s: Add new SRS tests.
+	* gas/arm/archv6.d: Update expected output.
+	* gas/arm/thumb32.s: Add new SRS tests.
+	* gas/arm/thumb32.d: Update expected output.
+	* gas/arm/srs-t2.d: New.
+	* gas/arm/srs-t2.l: New.
+	* gas/arm/srs-t2.s: New.
+	* gas/arm/srs-arm.d: New.
+	* gas/arm/srs-arm.l: New.
+	* gas/arm/srs-arm.s: New.
+
 2003-03-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/rex.s: Add tests for rex.WRXB.

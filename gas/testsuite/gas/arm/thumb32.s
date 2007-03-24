@@ -769,3 +769,9 @@ xta:
 	ldmeq	r0, {r8, r9}
 	stmeq	r0, {r8, r9}
 	nop
+
+srs:
+	srsia sp, #16
+	srsdb sp, #16
+	srsia sp!, #21
+	srsia sp!, #10
