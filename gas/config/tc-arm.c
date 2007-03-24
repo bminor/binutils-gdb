@@ -9125,6 +9125,9 @@ do_t_ldmstm (void)
     {
       constraint (inst.operands[0].reg > 7
 		  || (inst.operands[1].imm & ~0xff), BAD_HIREG);
+      constraint (inst.instruction != T_MNEM_ldmia
+		  && inst.instruction != T_MNEM_stmia,
+		  _("Thumb-2 instruction only valid in unified syntax"));
       if (inst.instruction == T_MNEM_stmia)
 	{
 	  if (!inst.operands[0].writeback)
