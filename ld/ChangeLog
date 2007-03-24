@@ -1,3 +1,11 @@
+2007-03-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (lang_insert_orphan): Provide start/stop loadaddr syms
+	rather than defining unconditionally.
+	(lang_leave_overlay_section): Likewise.
+	* ld.texinfo (Overlay Description): Update description and examples
+	for start/stop syms.
+
 2007-03-22  Joseph Myers  <joseph@codesourcery.com>
 
 	* ld.texinfo: Include VERSION_PACKAGE when reporting version.

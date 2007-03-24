@@ -1,3 +1,7 @@
+2007-03-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elf/overlay.d: -u symbols we want to see in the output.
+
 2007-03-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-spu/ovl.s (f4_a2): Tail call.

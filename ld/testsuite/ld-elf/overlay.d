@@ -1,4 +1,4 @@
-# ld: -T overlay.t
+# ld: -T overlay.t -u __load_start_text1 -u __load_start_text2 -u __load_stop_text1 -u __load_stop_text2
 #readelf: -s
 
 #...

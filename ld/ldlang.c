@@ -1490,8 +1490,9 @@ lang_insert_orphan (asection *s,
 	  e_align = exp_unop (ALIGN_K,
 			      exp_intop ((bfd_vma) 1 << s->alignment_power));
 	  lang_add_assignment (exp_assop ('=', ".", e_align));
-	  lang_add_assignment (exp_assop ('=', symname,
-					  exp_nameop (NAME, ".")));
+	  lang_add_assignment (exp_provide (symname,
+					    exp_nameop (NAME, "."),
+					    FALSE));
 	}
     }
 
@@ -1521,8 +1522,9 @@ lang_insert_orphan (asection *s,
       symname = (char *) xmalloc (ps - secname + sizeof "__stop_" + 1);
       symname[0] = bfd_get_symbol_leading_char (output_bfd);
       sprintf (symname + (symname[0] != 0), "__stop_%s", secname);
-      lang_add_assignment (exp_assop ('=', symname,
-				      exp_nameop (NAME, ".")));
+      lang_add_assignment (exp_provide (symname,
+					exp_nameop (NAME, "."),
+					FALSE));
     }
 
   /* Restore the global list pointer.  */
@@ -6436,15 +6438,17 @@ lang_leave_overlay_section (fill_type *fill,
 
   buf = xmalloc (strlen (clean) + sizeof "__load_start_");
   sprintf (buf, "__load_start_%s", clean);
-  lang_add_assignment (exp_assop ('=', buf,
-				  exp_nameop (LOADADDR, name)));
+  lang_add_assignment (exp_provide (buf,
+				    exp_nameop (LOADADDR, name),
+				    FALSE));
 
   buf = xmalloc (strlen (clean) + sizeof "__load_stop_");
   sprintf (buf, "__load_stop_%s", clean);
-  lang_add_assignment (exp_assop ('=', buf,
-				  exp_binop ('+',
-					     exp_nameop (LOADADDR, name),
-					     exp_nameop (SIZEOF, name))));
+  lang_add_assignment (exp_provide (buf,
+				    exp_binop ('+',
+					       exp_nameop (LOADADDR, name),
+					       exp_nameop (SIZEOF, name)),
+				    FALSE));
 
   free (clean);
 }

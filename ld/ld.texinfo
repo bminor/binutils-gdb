@@ -4030,7 +4030,7 @@ section to refer directly to another.  @xref{Miscellaneous Commands,
 NOCROSSREFS}.
 
 For each section within the @code{OVERLAY}, the linker automatically
-defines two symbols.  The symbol @code{__load_start_@var{secname}} is
+provides two symbols.  The symbol @code{__load_start_@var{secname}} is
 defined as the starting load address of the section.  The symbol
 @code{__load_stop_@var{secname}} is defined as the final load address of
 the section.  Any characters within @var{secname} which are not legal
@@ -4055,7 +4055,7 @@ Here is an example.  Remember that this would appear inside a
 This will define both @samp{.text0} and @samp{.text1} to start at
 address 0x1000.  @samp{.text0} will be loaded at address 0x4000, and
 @samp{.text1} will be loaded immediately after @samp{.text0}.  The
-following symbols will be defined: @code{__load_start_text0},
+following symbols will be defined if referenced: @code{__load_start_text0},
 @code{__load_stop_text0}, @code{__load_start_text1},
 @code{__load_stop_text1}.
 
@@ -4077,11 +4077,11 @@ example could have been written identically as follows.
 @smallexample
 @group
   .text0 0x1000 : AT (0x4000) @{ o1/*.o(.text) @}
-  __load_start_text0 = LOADADDR (.text0);
-  __load_stop_text0 = LOADADDR (.text0) + SIZEOF (.text0);
+  PROVIDE (__load_start_text0 = LOADADDR (.text0));
+  PROVIDE (__load_stop_text0 = LOADADDR (.text0) + SIZEOF (.text0));
   .text1 0x1000 : AT (0x4000 + SIZEOF (.text0)) @{ o2/*.o(.text) @}
-  __load_start_text1 = LOADADDR (.text1);
-  __load_stop_text1 = LOADADDR (.text1) + SIZEOF (.text1);
+  PROVIDE (__load_start_text1 = LOADADDR (.text1));
+  PROVIDE (__load_stop_text1 = LOADADDR (.text1) + SIZEOF (.text1));
   . = 0x1000 + MAX (SIZEOF (.text0), SIZEOF (.text1));
 @end group
 @end smallexample
