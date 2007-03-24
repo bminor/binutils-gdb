@@ -279,8 +279,8 @@ static const struct opcode32 coprocessor_opcodes[] =
   {FPU_VFP_EXT_V1, 0x0e100b10, 0x0ff00fff, "fmrdl%c\t%12-15r, %z2"},
   {FPU_VFP_EXT_V1, 0x0e200b10, 0x0ff00fff, "fmdhr%c\t%z2, %12-15r"},
   {FPU_VFP_EXT_V1, 0x0e300b10, 0x0ff00fff, "fmrdh%c\t%12-15r, %z2"},
-  {FPU_VFP_EXT_V1xD, 0x0ee00a10, 0x0ff00fff, "fmxr%c\t<impl def 0x%16-19x>, %12-15r"},
-  {FPU_VFP_EXT_V1xD, 0x0ef00a10, 0x0ff00fff, "fmrx%c\t%12-15r, <impl def 0x%16-19x>"},
+  {FPU_VFP_EXT_V1xD, 0x0ee00a10, 0x0ff00fff, "fmxr%c\t<impl def %16-19x>, %12-15r"},
+  {FPU_VFP_EXT_V1xD, 0x0ef00a10, 0x0ff00fff, "fmrx%c\t%12-15r, <impl def %16-19x>"},
   {FPU_VFP_EXT_V1xD, 0x0e000a10, 0x0ff00f7f, "fmsr%c\t%y2, %12-15r"},
   {FPU_VFP_EXT_V1xD, 0x0e100a10, 0x0ff00f7f, "fmrs%c\t%12-15r, %y2"},
   {FPU_VFP_EXT_V1xD, 0x0eb50a40, 0x0fbf0f70, "fcmp%7'ezs%c\t%y1"},
@@ -1868,6 +1868,11 @@ print_insn_coprocessor (bfd_vma pc, struct disassemble_info *info, long given,
 			  case 'G':
 			    func (stream, "%s", iwmmxt_cregnames[value]);
 			    break;
+
+			  case 'x':
+			    func (stream, "0x%lx", value);
+			    break;
+
 			  case '`':
 			    c++;
 			    if (value == 0)
