@@ -1,3 +1,15 @@
+2007-03-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* doc/as.texinfo (Reloc): Document.
+	* read.c (potable): Add "reloc".
+	(s_reloc): New function.
+	* write.c (reloc_list): New global var.
+	(resolve_reloc_expr_symbols): New function.
+	(write_object_file): Call it.
+	(write_relocs): Process reloc_list.
+	* write.h (struct reloc_list): New.
+	(reloc_list): Declare.
+
 2007-03-24  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (do_t_ldmstm): Error on Thumb-2 addressing modes.

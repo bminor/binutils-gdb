@@ -213,6 +213,7 @@ static void do_align (int, char *, int, int);
 static void s_align (int, int);
 static void s_altmacro (int);
 static void s_bad_end (int);
+static void s_reloc (int);
 static int hex_float (int, char *);
 static segT get_known_segmented_expression (expressionS * expP);
 static void pobegin (void);
@@ -391,6 +392,7 @@ static const pseudo_typeS potable[] = {
   {"psize", listing_psize, 0},	/* Set paper size.  */
   {"purgem", s_purgem, 0},
   {"quad", cons, 8},
+  {"reloc", s_reloc, 0},
   {"rep", s_rept, 0},
   {"rept", s_rept, 0},
   {"rva", s_rva, 4},
@@ -3667,6 +3669,113 @@ void
 s_rva (int size)
 {
   cons_worker (size, 1);
+}
+
+/* .reloc offset, reloc_name, symbol+addend.  */
+
+void
+s_reloc (int ignore ATTRIBUTE_UNUSED)
+{
+  char *stop = NULL;
+  char stopc = 0;
+  expressionS exp;
+  char *r_name;
+  int c;
+  struct reloc_list *reloc;
+
+  reloc = xmalloc (sizeof (*reloc));
+
+  if (flag_mri)
+    stop = mri_comment_field (&stopc);
+
+  expression (&exp);
+  switch (exp.X_op)
+    {
+    case O_illegal:
+    case O_absent:
+    case O_big:
+    case O_register:
+      as_bad (_("missing or bad offset expression"));
+      goto err_out;
+    case O_constant:
+      exp.X_add_symbol = section_symbol (now_seg);
+      exp.X_op = O_symbol;
+      /* Fall thru */
+    case O_symbol:
+      if (exp.X_add_number == 0)
+	{
+	  reloc->u.a.offset_sym = exp.X_add_symbol;
+	  break;
+	}
+      /* Fall thru */
+    default:
+      reloc->u.a.offset_sym = make_expr_symbol (&exp);
+      break;
+    }
+
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer != ',')
+    {
+      as_bad (_("missing reloc type"));
+      goto err_out;
+    }
+
+  ++input_line_pointer;
+  SKIP_WHITESPACE ();
+  r_name = input_line_pointer;
+  c = get_symbol_end ();
+  reloc->u.a.howto = bfd_reloc_name_lookup (stdoutput, r_name);
+  *input_line_pointer = c;
+  if (reloc->u.a.howto == NULL)
+    {
+      as_bad (_("unrecognized reloc type"));
+      goto err_out;
+    }
+
+  exp.X_op = O_absent;
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer == ',')
+    {
+      ++input_line_pointer;
+      expression_and_evaluate (&exp);
+    }
+  switch (exp.X_op)
+    {
+    case O_illegal:
+    case O_big:
+    case O_register:
+      as_bad (_("bad reloc expression"));
+    err_out:
+      ignore_rest_of_line ();
+      free (reloc);
+      if (flag_mri)
+	mri_comment_end (stop, stopc);
+      return;
+    case O_absent:
+      reloc->u.a.sym = NULL;
+      reloc->u.a.addend = 0;
+      break;
+    case O_constant:
+      reloc->u.a.sym = NULL;
+      reloc->u.a.addend = exp.X_add_number;
+      break;
+    case O_symbol:
+      reloc->u.a.sym = exp.X_add_symbol;
+      reloc->u.a.addend = exp.X_add_number;
+      break;
+    default:
+      reloc->u.a.sym = make_expr_symbol (&exp);
+      reloc->u.a.addend = 0;
+      break;
+    }
+
+  as_where (&reloc->file, &reloc->line);
+  reloc->next = reloc_list;
+  reloc_list = reloc;
+
+  demand_empty_rest_of_line ();
+  if (flag_mri)
+    mri_comment_end (stop, stopc);
 }
 
 /* Put the contents of expression EXP into the object file using

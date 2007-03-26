@@ -142,11 +142,35 @@ struct fix
 
 typedef struct fix fixS;
 
+struct reloc_list
+{
+  struct reloc_list *next;
+  union
+  {
+    struct
+    {
+      symbolS *offset_sym;
+      reloc_howto_type *howto;
+      symbolS *sym;
+      bfd_vma addend;
+    } a;
+    struct
+    {
+      asection *sec;
+      asymbol *s;
+      arelent r;
+    } b;
+  } u;
+  char *file;
+  unsigned int line;
+};
+
 extern int finalize_syms;
 extern symbolS *abs_section_sym;
 extern addressT dot_value;
 extern long string_byte_count;
 extern int section_alignment[];
+extern struct reloc_list* reloc_list;
 
 extern void append (char **charPP, char *fromP, unsigned long length);
 extern void record_alignment (segT seg, int align);

@@ -3886,6 +3886,7 @@ Some machine configurations provide additional directives.
 @end ifset
 
 * Quad::                        @code{.quad @var{bignums}}
+* Reloc::			@code{.reloc @var{offset}, @var{reloc_name}[, @var{expression}]}
 * Rept::			@code{.rept @var{count}}
 * Sbttl::                       @code{.sbttl "@var{subheading}"}
 @ifset COFF
@@ -5432,6 +5433,20 @@ warning message; and just takes the lowest order 16 bytes of the bignum.
 @cindex sixteen-byte integer
 @cindex integer, 16-byte
 @end ifset
+
+@node Reloc
+@section @code{.reloc @var{offset}, @var{reloc_name}[, @var{expression}]}
+
+@cindex @code{reloc} directive
+Generate a relocation at @var{offset} of type @var{reloc_name} with value
+@var{expression}.  If @var{offset} is a number, the relocation is generated in
+the current section.  If @var{offset} is an expression that resolves to a
+symbol plus offset, the relocation is generated in the given symbol's section.
+@var{expression}, if present, must resolve to a symbol plus addend or to an
+absolute value, but note that not all targets support an addend.  e.g. ELF REL
+targets such as i386 store an addend in the section contents rather than in the
+relocation.  This low level interface does not support addends stored in the
+section.
 
 @node Rept
 @section @code{.rept @var{count}}
