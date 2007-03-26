@@ -200,6 +200,23 @@ bfd_elf32_bfd_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
   return NULL;
 }
 
+static reloc_howto_type *
+bfd_elf32_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+				 const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < (sizeof (elf_msp430_howto_table)
+	    / sizeof (elf_msp430_howto_table[0]));
+       i++)
+    if (elf_msp430_howto_table[i].name != NULL
+	&& strcasecmp (elf_msp430_howto_table[i].name, r_name) == 0)
+      return &elf_msp430_howto_table[i];
+
+  return NULL;
+}
+
 /* Set the howto pointer for an MSP430 ELF reloc.  */
 
 static void

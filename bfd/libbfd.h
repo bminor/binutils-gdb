@@ -358,6 +358,8 @@ extern long _bfd_norelocs_canonicalize_reloc (bfd *, asection *,
 					      arelent **, asymbol **);
 #define _bfd_norelocs_bfd_reloc_type_lookup \
   ((reloc_howto_type *(*) (bfd *, bfd_reloc_code_real_type)) bfd_nullvoidptr)
+#define _bfd_norelocs_bfd_reloc_name_lookup \
+  ((reloc_howto_type *(*) (bfd *, const char *)) bfd_nullvoidptr)
 
 /* Routines to use for BFD_JUMP_TABLE_WRITE for targets which may not
    be written.  Use BFD_JUMP_TABLE_WRITE (_bfd_nowrite).  */

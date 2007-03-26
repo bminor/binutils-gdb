@@ -1057,8 +1057,8 @@ bfin_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 
   else
     cache_ptr->howto = (reloc_howto_type *) NULL;
-
 }
+
 /* Given a BFD reloc type, return the howto.  */
 static reloc_howto_type *
 bfin_bfd_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
@@ -1078,8 +1078,33 @@ bfin_bfd_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
    return &bfin_gnuext_howto_table [r_type - BFIN_GNUEXT_RELOC_MIN];
 
   return (reloc_howto_type *) NULL;
-
 }
+
+static reloc_howto_type *
+bfin_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			    const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < (sizeof (bfin_howto_table)
+	    / sizeof (bfin_howto_table[0]));
+       i++)
+    if (bfin_howto_table[i].name != NULL
+	&& strcasecmp (bfin_howto_table[i].name, r_name) == 0)
+      return &bfin_howto_table[i];
+
+  for (i = 0;
+       i < (sizeof (bfin_gnuext_howto_table)
+	    / sizeof (bfin_gnuext_howto_table[0]));
+       i++)
+    if (bfin_gnuext_howto_table[i].name != NULL
+	&& strcasecmp (bfin_gnuext_howto_table[i].name, r_name) == 0)
+      return &bfin_gnuext_howto_table[i];
+
+  return NULL;
+}
+
 /* Given a bfin relocation type, return the howto.  */
 static reloc_howto_type *
 bfin_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
@@ -1092,7 +1117,6 @@ bfin_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
    return &bfin_gnuext_howto_table [r_type - BFIN_GNUEXT_RELOC_MIN];
 
   return (reloc_howto_type *) NULL;
-
 }
 
 /* Return TRUE if the name is a local label.
@@ -5475,6 +5499,8 @@ error_return:
 #define elf_symbol_leading_char		'_'
 
 #define bfd_elf32_bfd_reloc_type_lookup	bfin_bfd_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup \
+					bfin_bfd_reloc_name_lookup
 #define elf_info_to_howto		bfin_info_to_howto
 #define elf_info_to_howto_rel		0
 #define elf_backend_object_p		elf32_bfin_object_p

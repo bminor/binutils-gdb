@@ -4942,10 +4942,13 @@ CODE_FRAGMENT
 /*
 FUNCTION
 	bfd_reloc_type_lookup
+	bfd_reloc_name_lookup
 
 SYNOPSIS
 	reloc_howto_type *bfd_reloc_type_lookup
 	  (bfd *abfd, bfd_reloc_code_real_type code);
+	reloc_howto_type *bfd_reloc_name_lookup
+	  (bfd *abfd, const char *reloc_name);
 
 DESCRIPTION
 	Return a pointer to a howto structure which, when
@@ -4958,6 +4961,12 @@ reloc_howto_type *
 bfd_reloc_type_lookup (bfd *abfd, bfd_reloc_code_real_type code)
 {
   return BFD_SEND (abfd, reloc_type_lookup, (abfd, code));
+}
+
+reloc_howto_type *
+bfd_reloc_name_lookup (bfd *abfd, const char *reloc_name)
+{
+  return BFD_SEND (abfd, reloc_name_lookup, (abfd, reloc_name));
 }
 
 static reloc_howto_type bfd_howto_32 =

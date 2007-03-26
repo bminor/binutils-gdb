@@ -150,6 +150,20 @@ elf_cr16c_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   return 0;
 }
 
+static reloc_howto_type *
+elf_cr16c_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			     const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0; i < sizeof (elf_howto_table) / sizeof (elf_howto_table[0]); i++)
+    if (elf_howto_table[i].name != NULL
+	&& strcasecmp (elf_howto_table[i].name, r_name) == 0)
+      return &elf_howto_table[i];
+
+  return NULL;
+}
+
 static void
 elf_cr16c_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 			 arelent *cache_ptr ATTRIBUTE_UNUSED,
@@ -943,6 +957,7 @@ elf32_cr16c_link_output_symbol_hook (struct bfd_link_info *info ATTRIBUTE_UNUSED
 #define elf_symbol_leading_char		'_'
 
 #define bfd_elf32_bfd_reloc_type_lookup		elf_cr16c_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup	elf_cr16c_reloc_name_lookup
 #define elf_info_to_howto			elf_cr16c_info_to_howto
 #define elf_info_to_howto_rel			elf_cr16c_info_to_howto_rel
 #define elf_backend_relocate_section		elf32_cr16c_relocate_section

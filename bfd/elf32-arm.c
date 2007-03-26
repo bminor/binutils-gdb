@@ -1787,6 +1787,31 @@ elf32_arm_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   return NULL;
 }
 
+static reloc_howto_type *
+elf32_arm_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			     const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < (sizeof (elf32_arm_howto_table_1)
+	    / sizeof (elf32_arm_howto_table_1[0]));
+       i++)
+    if (elf32_arm_howto_table_1[i].name != NULL
+	&& strcasecmp (elf32_arm_howto_table_1[i].name, r_name) == 0)
+      return &elf32_arm_howto_table_1[i];
+
+  for (i = 0;
+       i < (sizeof (elf32_arm_howto_table_2)
+	    / sizeof (elf32_arm_howto_table_2[0]));
+       i++)
+    if (elf32_arm_howto_table_2[i].name != NULL
+	&& strcasecmp (elf32_arm_howto_table_2[i].name, r_name) == 0)
+      return &elf32_arm_howto_table_2[i];
+
+  return NULL;
+}
+
 /* Support for core dump NOTE sections */
 static bfd_boolean
 elf32_arm_nabi_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
@@ -10579,6 +10604,7 @@ const struct elf_size_info elf32_arm_size_info = {
 #define bfd_elf32_bfd_print_private_bfd_data	elf32_arm_print_private_bfd_data
 #define bfd_elf32_bfd_link_hash_table_create    elf32_arm_link_hash_table_create
 #define bfd_elf32_bfd_reloc_type_lookup		elf32_arm_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup	elf32_arm_reloc_name_lookup
 #define bfd_elf32_find_nearest_line	        elf32_arm_find_nearest_line
 #define bfd_elf32_find_inliner_info	        elf32_arm_find_inliner_info
 #define bfd_elf32_new_section_hook		elf32_arm_new_section_hook

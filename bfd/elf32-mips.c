@@ -1,6 +1,6 @@
 /* MIPS-specific support for 32-bit ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2007 Free Software Foundation, Inc.
 
    Most of the information added by Ian Lance Taylor, Cygnus Support,
    <ian@cygnus.com>.
@@ -1274,6 +1274,40 @@ bfd_elf32_bfd_reloc_type_lookup (bfd *abfd, bfd_reloc_code_real_type code)
     }
 }
 
+static reloc_howto_type *
+bfd_elf32_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+				 const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < (sizeof (elf_mips_howto_table_rel)
+	    / sizeof (elf_mips_howto_table_rel[0]));
+       i++)
+    if (elf_mips_howto_table_rel[i].name != NULL
+	&& strcasecmp (elf_mips_howto_table_rel[i].name, r_name) == 0)
+      return &elf_mips_howto_table_rel[i];
+
+  for (i = 0;
+       i < (sizeof (elf_mips16_howto_table_rel)
+	    / sizeof (elf_mips16_howto_table_rel[0]));
+       i++)
+    if (elf_mips16_howto_table_rel[i].name != NULL
+	&& strcasecmp (elf_mips16_howto_table_rel[i].name, r_name) == 0)
+      return &elf_mips16_howto_table_rel[i];
+
+  if (strcasecmp (elf_mips_gnu_pcrel32.name, r_name) == 0)
+    return &elf_mips_gnu_pcrel32;
+  if (strcasecmp (elf_mips_gnu_rel16_s2.name, r_name) == 0)
+    return &elf_mips_gnu_rel16_s2;
+  if (strcasecmp (elf_mips_gnu_vtinherit_howto.name, r_name) == 0)
+    return &elf_mips_gnu_vtinherit_howto;
+  if (strcasecmp (elf_mips_gnu_vtentry_howto.name, r_name) == 0)
+    return &elf_mips_gnu_vtentry_howto;
+
+  return NULL;
+}
+
 /* Given a MIPS Elf_Internal_Rel, fill in an arelent structure.  */
 
 static reloc_howto_type *
@@ -1664,6 +1698,17 @@ mips_vxworks_bfd_reloc_type_lookup (bfd *abfd, bfd_reloc_code_real_type code)
     }
 }
 
+static reloc_howto_type *
+mips_vxworks_bfd_reloc_name_lookup (bfd *abfd, const char *r_name)
+{
+  if (strcasecmp (mips_vxworks_copy_howto_rela.name, r_name) == 0)
+    return &mips_vxworks_copy_howto_rela;
+  if (strcasecmp (mips_vxworks_jump_slot_howto_rela.name, r_name) == 0)
+    return &mips_vxworks_jump_slot_howto_rela;
+
+  return bfd_elf32_bfd_reloc_name_lookup (abfd, r_name);
+}
+
 /* Implement elf_backend_mips_rtype_to_lookup for VxWorks.  */
 
 static reloc_howto_type *
@@ -1730,6 +1775,9 @@ mips_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
 #undef bfd_elf32_bfd_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_type_lookup \
   mips_vxworks_bfd_reloc_type_lookup
+#undef bfd_elf32_bfd_reloc_name_lookup
+#define bfd_elf32_bfd_reloc_name_lookup \
+  mips_vxworks_bfd_reloc_name_lookup
 #undef elf_backend_mips_rtype_to_howto
 #define elf_backend_mips_rtype_to_howto	\
   mips_vxworks_rtype_to_howto

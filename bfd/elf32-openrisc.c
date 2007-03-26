@@ -192,9 +192,9 @@ static const struct openrisc_reloc_map openrisc_reloc_map[] =
   { BFD_RELOC_32, 		R_OPENRISC_32 },
   { BFD_RELOC_16, 		R_OPENRISC_16 },
   { BFD_RELOC_8, 		R_OPENRISC_8 },
-  { BFD_RELOC_OPENRISC_REL_26,R_OPENRISC_INSN_REL_26 },
-  { BFD_RELOC_OPENRISC_ABS_26,R_OPENRISC_INSN_ABS_26 },
-    { BFD_RELOC_HI16, 		R_OPENRISC_HI_16_IN_INSN },
+  { BFD_RELOC_OPENRISC_REL_26,	R_OPENRISC_INSN_REL_26 },
+  { BFD_RELOC_OPENRISC_ABS_26,	R_OPENRISC_INSN_ABS_26 },
+  { BFD_RELOC_HI16, 		R_OPENRISC_HI_16_IN_INSN },
   { BFD_RELOC_LO16, 		R_OPENRISC_LO_16_IN_INSN },
   { BFD_RELOC_VTABLE_INHERIT,	R_OPENRISC_GNU_VTINHERIT },
   { BFD_RELOC_VTABLE_ENTRY, 	R_OPENRISC_GNU_VTENTRY }
@@ -210,6 +210,23 @@ openrisc_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
     if (openrisc_reloc_map[i].bfd_reloc_val == code)
       return & openrisc_elf_howto_table[openrisc_reloc_map[i].
 				       openrisc_reloc_val];
+
+  return NULL;
+}
+
+static reloc_howto_type *
+openrisc_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			    const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < (sizeof (openrisc_elf_howto_table)
+	    / sizeof (openrisc_elf_howto_table[0]));
+       i++)
+    if (openrisc_elf_howto_table[i].name != NULL
+	&& strcasecmp (openrisc_elf_howto_table[i].name, r_name) == 0)
+      return &openrisc_elf_howto_table[i];
 
   return NULL;
 }
@@ -550,6 +567,7 @@ openrisc_elf_final_write_processing (bfd *abfd,
 #define elf_backend_rela_normal		1
 
 #define bfd_elf32_bfd_reloc_type_lookup openrisc_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup openrisc_reloc_name_lookup
 
 #define elf_backend_object_p                openrisc_elf_object_p
 #define elf_backend_final_write_processing  openrisc_elf_final_write_processing

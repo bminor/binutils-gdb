@@ -272,6 +272,21 @@ m32c_reloc_type_lookup
   return NULL;
 }
 
+static reloc_howto_type *
+m32c_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED, const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (m32c_elf_howto_table) / sizeof (m32c_elf_howto_table[0]);
+       i++)
+    if (m32c_elf_howto_table[i].name != NULL
+	&& strcasecmp (m32c_elf_howto_table[i].name, r_name) == 0)
+      return &m32c_elf_howto_table[i];
+
+  return NULL;
+}
+
 /* Set the howto pointer for an M32C ELF reloc.  */
 
 static void
@@ -2003,6 +2018,7 @@ m32c_elf_relax_delete_bytes
 #define elf_backend_can_gc_sections		1
 
 #define bfd_elf32_bfd_reloc_type_lookup		m32c_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup	m32c_reloc_name_lookup
 #define bfd_elf32_bfd_relax_section		m32c_elf_relax_section
 #define bfd_elf32_bfd_set_private_flags		m32c_elf_set_private_flags
 #define bfd_elf32_bfd_merge_private_bfd_data	m32c_elf_merge_private_bfd_data

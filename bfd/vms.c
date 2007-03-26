@@ -1,7 +1,7 @@
 /* vms.c -- BFD back-end for VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006 Free Software Foundation, Inc.
+   2006, 2007 Free Software Foundation, Inc.
 
    Written by Klaus K"ampf (kkaempf@rmi.de)
 
@@ -1351,6 +1351,22 @@ vms_bfd_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
   vms_debug (2, "reloc is %s\n", alpha_howto_table[alpha_type].name);
 #endif
   return & alpha_howto_table[alpha_type];
+}
+
+static reloc_howto_type *
+vms_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			   const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (alpha_howto_table) / sizeof (alpha_howto_table[0]);
+       i++)
+    if (alpha_howto_table[i].name != NULL
+	&& strcasecmp (alpha_howto_table[i].name, r_name) == 0)
+      return &alpha_howto_table[i];
+
+  return NULL;
 }
 
 /* Part 4.7, writing an object file.  */

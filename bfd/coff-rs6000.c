@@ -1,5 +1,5 @@
 /* BFD back-end for IBM RS/6000 "XCOFF" files.
-   Copyright 1990-1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright 1990-1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
    FIXME: Can someone provide a transliteration of this name into ASCII?
    Using the following chars caused a compiler warning on HIUX (so I replaced
@@ -98,6 +98,7 @@ void xcoff_rtype2howto
 #define coff_bfd_copy_private_bfd_data _bfd_xcoff_copy_private_bfd_data
 #define coff_bfd_is_local_label_name _bfd_xcoff_is_local_label_name
 #define coff_bfd_reloc_type_lookup _bfd_xcoff_reloc_type_lookup
+#define coff_bfd_reloc_name_lookup _bfd_xcoff_reloc_name_lookup
 #ifdef AIX_CORE
 extern const bfd_target * rs6000coff_core_p
   PARAMS ((bfd *abfd));
@@ -1051,6 +1052,21 @@ _bfd_xcoff_reloc_type_lookup (abfd, code)
     }
 }
 
+static reloc_howto_type *
+_bfd_xcoff_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			      const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (xcoff_howto_table) / sizeof (xcoff_howto_table[0]);
+       i++)
+    if (xcoff_howto_table[i].name != NULL
+	&& strcasecmp (xcoff_howto_table[i].name, r_name) == 0)
+      return &xcoff_howto_table[i];
+
+  return NULL;
+}
 
 /* XCOFF archive support.  The original version of this code was by
    Damon A. Permezel.  It was enhanced to permit cross support, and
@@ -4178,6 +4194,7 @@ const bfd_target rs6000coff_vec =
     coff_get_reloc_upper_bound,
     coff_canonicalize_reloc,
     _bfd_xcoff_reloc_type_lookup,
+    _bfd_xcoff_reloc_name_lookup,
 
     /* Write */
     coff_set_arch_mach,
@@ -4428,6 +4445,7 @@ const bfd_target pmac_xcoff_vec =
     coff_get_reloc_upper_bound,
     coff_canonicalize_reloc,
     _bfd_xcoff_reloc_type_lookup,
+    _bfd_xcoff_reloc_name_lookup,
 
     /* Write */
     coff_set_arch_mach,

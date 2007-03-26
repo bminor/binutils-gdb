@@ -1,6 +1,6 @@
 /* BFD back-end for Intel 960 b.out binaries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -635,7 +635,8 @@ callj_callback (bfd *abfd,
 }
 
 static reloc_howto_type *
-b_out_bfd_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED, bfd_reloc_code_real_type code)
+b_out_bfd_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			     bfd_reloc_code_real_type code)
 {
   switch (code)
     {
@@ -649,6 +650,20 @@ b_out_bfd_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED, bfd_reloc_code_real_typ
     case BFD_RELOC_24_PCREL:
       return &howto_reloc_pcrel24;
     }
+}
+
+static reloc_howto_type *
+b_out_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			     const char *r_name)
+{
+  if (strcasecmp (howto_reloc_callj.name, r_name) == 0)
+    return &howto_reloc_callj;
+  if (strcasecmp (howto_reloc_abs32.name, r_name) == 0)
+    return &howto_reloc_abs32;
+  if (strcasecmp (howto_reloc_pcrel24.name, r_name) == 0)
+    return &howto_reloc_pcrel24;
+
+  return NULL;
 }
 
 /* Allocate enough room for all the reloc entries, plus pointers to them all.  */

@@ -457,6 +457,21 @@ cris_reloc_type_lookup (abfd, code)
   return NULL;
 }
 
+static reloc_howto_type *
+cris_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED, const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (cris_elf_howto_table) / sizeof (cris_elf_howto_table[0]);
+       i++)
+    if (cris_elf_howto_table[i].name != NULL
+	&& strcasecmp (cris_elf_howto_table[i].name, r_name) == 0)
+      return &cris_elf_howto_table[i];
+
+  return NULL;
+}
+
 /* Set the howto pointer for an CRIS ELF reloc.  */
 
 static void
@@ -3405,6 +3420,7 @@ elf_cris_reloc_type_class (rela)
 	cris_elf_copy_private_bfd_data
 
 #define bfd_elf32_bfd_reloc_type_lookup		cris_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup	cris_reloc_name_lookup
 
 #define bfd_elf32_bfd_link_hash_table_create \
 	elf_cris_link_hash_table_create

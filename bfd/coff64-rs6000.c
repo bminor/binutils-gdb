@@ -1,5 +1,5 @@
 /* BFD back-end for IBM RS/6000 "XCOFF64" files.
-   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
    Written Clinton Popetz.
    Contributed by Cygnus Support.
@@ -237,6 +237,7 @@ bfd_boolean (*xcoff64_calculate_relocation[XCOFF_MAX_CALCULATE_RELOCATION])
 #define coff_bfd_copy_private_bfd_data _bfd_xcoff_copy_private_bfd_data
 #define coff_bfd_is_local_label_name _bfd_xcoff_is_local_label_name
 #define coff_bfd_reloc_type_lookup xcoff64_reloc_type_lookup
+#define coff_bfd_reloc_name_lookup xcoff64_reloc_name_lookup
 #ifdef AIX_CORE
 extern const bfd_target * rs6000coff_core_p
   PARAMS ((bfd *abfd));
@@ -1843,6 +1844,22 @@ xcoff64_reloc_type_lookup (abfd, code)
     }
 }
 
+static reloc_howto_type *
+xcoff64_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			   const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (xcoff64_howto_table) / sizeof (xcoff64_howto_table[0]);
+       i++)
+    if (xcoff64_howto_table[i].name != NULL
+	&& strcasecmp (xcoff64_howto_table[i].name, r_name) == 0)
+      return &xcoff64_howto_table[i];
+
+  return NULL;
+}
+
 /* Read in the armap of an XCOFF archive.  */
 
 static bfd_boolean
@@ -2725,6 +2742,7 @@ const bfd_target rs6000coff64_vec =
     coff_get_reloc_upper_bound,
     coff_canonicalize_reloc,
     xcoff64_reloc_type_lookup,
+    xcoff64_reloc_name_lookup,
 
     /* Write */
     coff_set_arch_mach,
@@ -2976,6 +2994,7 @@ const bfd_target aix5coff64_vec =
     coff_get_reloc_upper_bound,
     coff_canonicalize_reloc,
     xcoff64_reloc_type_lookup,
+    xcoff64_reloc_name_lookup,
 
     /* Write */
     coff_set_arch_mach,

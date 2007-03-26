@@ -1,6 +1,6 @@
 /* BFD back-end for Renesas Super-H COFF binaries.
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2007 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    Written by Steve Chamberlain, <sac@cygnus.com>.
    Relaxing code written by Ian Lance Taylor, <ian@cygnus.com>.
@@ -494,6 +494,7 @@ static const struct shcoff_reloc_map sh_reloc_map[] =
 /* Given a BFD reloc code, return the howto structure for the
    corresponding SH PE reloc.  */
 #define coff_bfd_reloc_type_lookup	sh_coff_reloc_type_lookup
+#define coff_bfd_reloc_name_lookup sh_coff_reloc_name_lookup
 
 static reloc_howto_type *
 sh_coff_reloc_type_lookup (abfd, code)
@@ -507,6 +508,20 @@ sh_coff_reloc_type_lookup (abfd, code)
       return &sh_coff_howtos[(int) sh_reloc_map[i].shcoff_reloc_val];
 
   fprintf (stderr, "SH Error: unknown reloc type %d\n", code);
+  return NULL;
+}
+
+static reloc_howto_type *
+sh_coff_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			   const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0; i < sizeof (sh_coff_howtos) / sizeof (sh_coff_howtos[0]); i++)
+    if (sh_coff_howtos[i].name != NULL
+	&& strcasecmp (sh_coff_howtos[i].name, r_name) == 0)
+      return &sh_coff_howtos[i];
+
   return NULL;
 }
 

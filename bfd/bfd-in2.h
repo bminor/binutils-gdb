@@ -4352,6 +4352,8 @@ BFD_RELOC_XTENSA_ASM_EXPAND.  */
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 reloc_howto_type *bfd_reloc_type_lookup
    (bfd *abfd, bfd_reloc_code_real_type code);
+reloc_howto_type *bfd_reloc_name_lookup
+   (bfd *abfd, const char *reloc_name);
 
 const char *bfd_get_reloc_code_name (bfd_reloc_code_real_type code);
 
@@ -5198,7 +5200,8 @@ typedef struct bfd_target
 #define BFD_JUMP_TABLE_RELOCS(NAME) \
   NAME##_get_reloc_upper_bound, \
   NAME##_canonicalize_reloc, \
-  NAME##_bfd_reloc_type_lookup
+  NAME##_bfd_reloc_type_lookup, \
+  NAME##_bfd_reloc_name_lookup
 
   long        (*_get_reloc_upper_bound) (bfd *, sec_ptr);
   long        (*_bfd_canonicalize_reloc)
@@ -5206,6 +5209,8 @@ typedef struct bfd_target
   /* See documentation on reloc types.  */
   reloc_howto_type *
               (*reloc_type_lookup) (bfd *, bfd_reloc_code_real_type);
+  reloc_howto_type *
+              (*reloc_name_lookup) (bfd *, const char *);
 
 
   /* Routines used when writing an object file.  */

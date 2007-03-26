@@ -174,7 +174,21 @@ reloc_type_lookup (abfd, code)
   return 0;
 }
 
+static reloc_howto_type *
+reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED, const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0; i < sizeof (howto_table) / sizeof (howto_table[0]); i++)
+    if (howto_table[i].name != NULL
+	&& strcasecmp (howto_table[i].name, r_name) == 0)
+      return &howto_table[i];
+
+  return NULL;
+}
+
 #define bfd_elf32_bfd_reloc_type_lookup reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup reloc_name_lookup
 #define ELF_ARCH bfd_arch_m68k
 
 /* Functions for the m68k ELF linker.  */

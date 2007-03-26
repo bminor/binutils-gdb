@@ -129,8 +129,6 @@ DESCRIPTION
 #include "aout/stab_gnu.h"
 #include "aout/ar.h"
 
-reloc_howto_type * NAME (aout, reloc_type_lookup)  (bfd *, bfd_reloc_code_real_type);
-
 /*
 SUBSECTION
 	Relocations
@@ -317,6 +315,31 @@ NAME (aout, reloc_type_lookup) (bfd *abfd, bfd_reloc_code_real_type code)
       default:
 	return NULL;
       }
+}
+
+reloc_howto_type *
+NAME (aout, reloc_name_lookup) (bfd *abfd, const char *r_name)
+{
+  unsigned int i, size;
+  reloc_howto_type *howto_table;
+
+  if (obj_reloc_entry_size (abfd) == RELOC_EXT_SIZE)
+    {
+      howto_table = howto_table_ext;
+      size = sizeof (howto_table_ext) / sizeof (howto_table_ext[0]);
+    }
+  else
+    {
+      howto_table = howto_table_std;
+      size = sizeof (howto_table_std) / sizeof (howto_table_std[0]);
+    }
+
+  for (i = 0; i < size; i++)
+    if (howto_table[i].name != NULL
+	&& strcasecmp (howto_table[i].name, r_name) == 0)
+      return &howto_table[i];
+
+  return NULL;
 }
 
 /*

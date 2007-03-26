@@ -1,5 +1,5 @@
 /* Generic support for 64-bit ELF
-   Copyright 1993, 1995, 1998, 1999, 2001, 2002, 2004, 2005
+   Copyright 1993, 1995, 1998, 1999, 2001, 2002, 2004, 2005, 2007
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -94,6 +94,7 @@ elf64_generic_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 #define ELF_MACHINE_CODE		EM_NONE
 #define ELF_MAXPAGESIZE			0x1
 #define bfd_elf64_bfd_reloc_type_lookup bfd_default_reloc_type_lookup
+#define bfd_elf64_bfd_reloc_name_lookup _bfd_norelocs_bfd_reloc_name_lookup
 #define bfd_elf64_bfd_link_add_symbols	elf64_generic_link_add_symbols
 #define elf_info_to_howto		elf_generic_info_to_howto
 #define elf_info_to_howto_rel		elf_generic_info_to_howto_rel

@@ -1,5 +1,5 @@
 /* BFD back-end for MAXQ COFF binaries.
-   Copyright 2004    Free Software Foundation, Inc.
+   Copyright 2004, 2007  Free Software Foundation, Inc.
 
    Contributed by Vineet Sharma (vineets@noida.hcltech.com) Inderpreet S.
    (inderpreetb@noida.hcltech.com)
@@ -407,7 +407,21 @@ maxq_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
     }
 }
 
+static reloc_howto_type *
+maxq_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED, const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0; i < sizeof (howto_table) / sizeof (howto_table[0]); i++)
+    if (howto_table[i].name != NULL
+	&& strcasecmp (howto_table[i].name, r_name) == 0)
+      return &howto_table[i];
+
+  return NULL;
+}
+
 #define coff_bfd_reloc_type_lookup maxq_reloc_type_lookup
+#define coff_bfd_reloc_name_lookup maxq_reloc_name_lookup
 
 /* Perform any necessary magic to the addend in a reloc entry.  */
 #define CALC_ADDEND(abfd, symbol, ext_reloc, cache_ptr) \

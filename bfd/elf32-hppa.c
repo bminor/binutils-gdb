@@ -4615,6 +4615,7 @@ elf32_hppa_elf_get_symbol_type (Elf_Internal_Sym *elf_sym, int type)
 /* Misc BFD support code.  */
 #define bfd_elf32_bfd_is_local_label_name    elf_hppa_is_local_label_name
 #define bfd_elf32_bfd_reloc_type_lookup	     elf_hppa_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup elf_hppa_reloc_name_lookup
 #define elf_info_to_howto		     elf_hppa_info_to_howto
 #define elf_info_to_howto_rel		     elf_hppa_info_to_howto_rel
 

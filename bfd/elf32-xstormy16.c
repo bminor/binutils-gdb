@@ -349,6 +349,31 @@ xstormy16_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
   return NULL;
 }
 
+static reloc_howto_type *
+xstormy16_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			     const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < (sizeof (xstormy16_elf_howto_table)
+	    / sizeof (xstormy16_elf_howto_table[0]));
+       i++)
+    if (xstormy16_elf_howto_table[i].name != NULL
+	&& strcasecmp (xstormy16_elf_howto_table[i].name, r_name) == 0)
+      return &xstormy16_elf_howto_table[i];
+
+  for (i = 0;
+       i < (sizeof (xstormy16_elf_howto_table2)
+	    / sizeof (xstormy16_elf_howto_table2[0]));
+       i++)
+    if (xstormy16_elf_howto_table2[i].name != NULL
+	&& strcasecmp (xstormy16_elf_howto_table2[i].name, r_name) == 0)
+      return &xstormy16_elf_howto_table2[i];
+
+  return NULL;
+}
+
 /* Set the howto pointer for an XSTORMY16 ELF reloc.  */
 
 static void
@@ -1019,6 +1044,8 @@ xstormy16_elf_gc_mark_hook (asection *sec,
 #define elf_backend_rela_normal			1
 
 #define bfd_elf32_bfd_reloc_type_lookup		xstormy16_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup \
+  xstormy16_reloc_name_lookup
 #define bfd_elf32_bfd_relax_section		xstormy16_elf_relax_section
 
 #include "elf32-target.h"

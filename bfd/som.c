@@ -1,6 +1,6 @@
 /* bfd back-end for HP PA-RISC SOM objects.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
@@ -1622,6 +1622,22 @@ som_bfd_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
       BFD_ASSERT ((int) som_hppa_howto_table[(int) code].type == (int) code);
       return &som_hppa_howto_table[(int) code];
     }
+
+  return NULL;
+}
+
+static reloc_howto_type *
+som_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			   const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (som_hppa_howto_table) / sizeof (som_hppa_howto_table[0]);
+       i++)
+    if (som_hppa_howto_table[i].name != NULL
+	&& strcasecmp (som_hppa_howto_table[i].name, r_name) == 0)
+      return &som_hppa_howto_table[i];
 
   return NULL;
 }

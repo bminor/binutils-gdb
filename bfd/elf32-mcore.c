@@ -317,6 +317,22 @@ mcore_elf_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
   return mcore_elf_howto_table [(int) mcore_reloc];
 };
 
+static reloc_howto_type *
+mcore_elf_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			     const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (mcore_elf_howto_raw) / sizeof (mcore_elf_howto_raw[0]);
+       i++)
+    if (mcore_elf_howto_raw[i].name != NULL
+	&& strcasecmp (mcore_elf_howto_raw[i].name, r_name) == 0)
+      return &mcore_elf_howto_raw[i];
+
+  return NULL;
+}
+
 /* Set the howto pointer for a RCE ELF reloc.  */
 
 static void
@@ -651,6 +667,7 @@ static const struct bfd_elf_special_section mcore_elf_special_sections[]=
 #define bfd_elf32_bfd_merge_private_bfd_data	mcore_elf_merge_private_bfd_data
 #define bfd_elf32_bfd_set_private_flags		mcore_elf_set_private_flags
 #define bfd_elf32_bfd_reloc_type_lookup		mcore_elf_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup	mcore_elf_reloc_name_lookup
 #define elf_backend_relocate_section		mcore_elf_relocate_section
 #define elf_backend_gc_mark_hook		mcore_elf_gc_mark_hook
 #define elf_backend_gc_sweep_hook		mcore_elf_gc_sweep_hook

@@ -399,6 +399,22 @@ elf_crx_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   return 0;
 }
 
+static reloc_howto_type *
+elf_crx_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			   const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (crx_elf_howto_table) / sizeof (crx_elf_howto_table[0]);
+       i++)
+    if (crx_elf_howto_table[i].name != NULL
+	&& strcasecmp (crx_elf_howto_table[i].name, r_name) == 0)
+      return &crx_elf_howto_table[i];
+
+  return NULL;
+}
+
 /* Retrieve a howto ptr using an internal relocation entry.  */
 
 static void
@@ -1311,6 +1327,8 @@ elf32_crx_relax_section (bfd *abfd, asection *sec,
 #define elf_symbol_leading_char		'_'
 
 #define bfd_elf32_bfd_reloc_type_lookup	elf_crx_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup \
+					elf_crx_reloc_name_lookup
 #define elf_info_to_howto		elf_crx_info_to_howto
 #define elf_info_to_howto_rel		0
 #define elf_backend_relocate_section	elf32_crx_relocate_section

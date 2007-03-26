@@ -366,6 +366,21 @@ fr30_reloc_type_lookup (abfd, code)
   return NULL;
 }
 
+static reloc_howto_type *
+fr30_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED, const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (fr30_elf_howto_table) / sizeof (fr30_elf_howto_table[0]);
+       i++)
+    if (fr30_elf_howto_table[i].name != NULL
+	&& strcasecmp (fr30_elf_howto_table[i].name, r_name) == 0)
+      return &fr30_elf_howto_table[i];
+
+  return NULL;
+}
+
 /* Set the howto pointer for an FR30 ELF reloc.  */
 
 static void
@@ -727,5 +742,6 @@ fr30_elf_check_relocs (abfd, info, sec, relocs)
 #define elf_backend_rela_normal			1
 
 #define bfd_elf32_bfd_reloc_type_lookup		fr30_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup	fr30_reloc_name_lookup
 
 #include "elf32-target.h"

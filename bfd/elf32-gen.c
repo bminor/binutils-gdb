@@ -94,6 +94,7 @@ elf32_generic_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 #define ELF_MACHINE_CODE		EM_NONE
 #define ELF_MAXPAGESIZE			0x1
 #define bfd_elf32_bfd_reloc_type_lookup bfd_default_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup _bfd_norelocs_bfd_reloc_name_lookup
 #define bfd_elf32_bfd_link_add_symbols	elf32_generic_link_add_symbols
 #define elf_info_to_howto		elf_generic_info_to_howto
 #define elf_info_to_howto_rel		elf_generic_info_to_howto_rel

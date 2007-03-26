@@ -1,6 +1,6 @@
 /* BFD back-end for Motorola 68000 COFF binaries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
-   2000, 2001, 2002, 2003, 2005
+   2000, 2001, 2002, 2003, 2005, 2007
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -91,6 +91,7 @@ m68k_coff_is_local_label_name (abfd, name)
 #define m68k_rtype2howto	_bfd_m68kcoff_rtype2howto
 #define m68k_howto2rtype	_bfd_m68kcoff_howto2rtype
 #define m68k_reloc_type_lookup	_bfd_m68kcoff_reloc_type_lookup
+#define m68k_reloc_name_lookup _bfd_m68kcoff_reloc_name_lookup
 #endif
 
 #ifdef ONLY_DECLARE_RELOCS
@@ -123,6 +124,8 @@ extern void m68k_rtype2howto PARAMS ((arelent *internal, int relocentry));
 extern int m68k_howto2rtype PARAMS ((reloc_howto_type *));
 extern reloc_howto_type *m68k_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
+extern reloc_howto_type *m68k_reloc_name_lookup
+  PARAMS ((bfd *, const char *));
 #else
 
 #ifdef STATIC_RELOCS
@@ -132,6 +135,7 @@ extern reloc_howto_type *m68k_reloc_type_lookup
 #endif
 
 STAT_REL reloc_howto_type * m68k_reloc_type_lookup PARAMS ((bfd *, bfd_reloc_code_real_type));
+STAT_REL reloc_howto_type * m68k_reloc_name_lookup PARAMS ((bfd *, const char *));
 STAT_REL int m68k_howto2rtype PARAMS ((reloc_howto_type *));
 STAT_REL void m68k_rtype2howto PARAMS ((arelent *, int));
 
@@ -198,6 +202,22 @@ m68k_reloc_type_lookup (abfd, code)
   /*NOTREACHED*/
 }
 
+STAT_REL reloc_howto_type *
+m68k_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+		        const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (m68kcoff_howto_table) / sizeof (m68kcoff_howto_table[0]);
+       i++)
+    if (m68kcoff_howto_table[i].name != NULL
+	&& strcasecmp (m68kcoff_howto_table[i].name, r_name) == 0)
+      return &m68kcoff_howto_table[i];
+
+  return NULL;
+}
+
 #endif /* not ONLY_DECLARE_RELOCS */
 
 #define RTYPE2HOWTO(internal, relocentry) \
@@ -207,6 +227,7 @@ m68k_reloc_type_lookup (abfd, code)
   external.r_type = m68k_howto2rtype (internal)
 
 #define coff_bfd_reloc_type_lookup m68k_reloc_type_lookup
+#define coff_bfd_reloc_name_lookup m68k_reloc_name_lookup
 
 #ifndef COFF_COMMON_ADDEND
 #ifndef coff_rtype_to_howto

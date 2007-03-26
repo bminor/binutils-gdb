@@ -402,7 +402,8 @@ BFD_JUMP_TABLE macros.
 .#define BFD_JUMP_TABLE_RELOCS(NAME) \
 .  NAME##_get_reloc_upper_bound, \
 .  NAME##_canonicalize_reloc, \
-.  NAME##_bfd_reloc_type_lookup
+.  NAME##_bfd_reloc_type_lookup, \
+.  NAME##_bfd_reloc_name_lookup
 .
 .  long        (*_get_reloc_upper_bound) (bfd *, sec_ptr);
 .  long        (*_bfd_canonicalize_reloc)
@@ -410,6 +411,8 @@ BFD_JUMP_TABLE macros.
 .  {* See documentation on reloc types.  *}
 .  reloc_howto_type *
 .              (*reloc_type_lookup) (bfd *, bfd_reloc_code_real_type);
+.  reloc_howto_type *
+.              (*reloc_name_lookup) (bfd *, const char *);
 .
 .
 .  {* Routines used when writing an object file.  *}

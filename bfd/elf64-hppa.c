@@ -1,5 +1,5 @@
 /* Support for HPPA 64-bit ELF
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -2796,6 +2796,7 @@ const struct elf_size_info hppa64_elf_size_info =
 #define ELF_OSABI			ELFOSABI_HPUX
 
 #define bfd_elf64_bfd_reloc_type_lookup elf_hppa_reloc_type_lookup
+#define bfd_elf64_bfd_reloc_name_lookup elf_hppa_reloc_name_lookup
 #define bfd_elf64_bfd_is_local_label_name       elf_hppa_is_local_label_name
 #define elf_info_to_howto		elf_hppa_info_to_howto
 #define elf_info_to_howto_rel		elf_hppa_info_to_howto_rel

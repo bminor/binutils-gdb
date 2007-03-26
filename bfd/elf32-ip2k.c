@@ -223,6 +223,21 @@ ip2k_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
   return NULL;
 }
 
+static reloc_howto_type *
+ip2k_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED, const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (ip2k_elf_howto_table) / sizeof (ip2k_elf_howto_table[0]);
+       i++)
+    if (ip2k_elf_howto_table[i].name != NULL
+	&& strcasecmp (ip2k_elf_howto_table[i].name, r_name) == 0)
+      return &ip2k_elf_howto_table[i];
+
+  return NULL;
+}
+
 static void
 ip2k_get_mem (bfd *abfd ATTRIBUTE_UNUSED,
 	      bfd_byte *addr,
@@ -1529,6 +1544,7 @@ ip2k_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 
 #define elf_symbol_leading_char			'_'
 #define bfd_elf32_bfd_reloc_type_lookup		ip2k_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup	ip2k_reloc_name_lookup
 #define bfd_elf32_bfd_relax_section		ip2k_elf_relax_section
 
 #include "elf32-target.h"

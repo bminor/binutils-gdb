@@ -1,6 +1,6 @@
 /* BFD back-end data structures for a.out (and similar) files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -524,6 +524,9 @@ extern void NAME (aout, swap_std_reloc_in)
 
 extern reloc_howto_type * NAME (aout, reloc_type_lookup)
   (bfd *, bfd_reloc_code_real_type);
+
+extern reloc_howto_type * NAME (aout, reloc_name_lookup)
+  (bfd *, const char *);
 
 extern bfd_boolean NAME (aout, slurp_reloc_table)
   (bfd *, sec_ptr, asymbol **);

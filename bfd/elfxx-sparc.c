@@ -385,6 +385,30 @@ _bfd_sparc_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 }
 
 reloc_howto_type *
+_bfd_sparc_elf_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+				  const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < (sizeof (_bfd_sparc_elf_howto_table)
+	    / sizeof (_bfd_sparc_elf_howto_table[0]));
+       i++)
+    if (_bfd_sparc_elf_howto_table[i].name != NULL
+	&& strcasecmp (_bfd_sparc_elf_howto_table[i].name, r_name) == 0)
+      return &_bfd_sparc_elf_howto_table[i];
+
+  if (strcasecmp (sparc_vtinherit_howto.name, r_name) == 0)
+    return &sparc_vtinherit_howto;
+  if (strcasecmp (sparc_vtentry_howto.name, r_name) == 0)
+    return &sparc_vtentry_howto;
+  if (strcasecmp (sparc_rev32_howto.name, r_name) == 0)
+    return &sparc_rev32_howto;
+
+  return NULL;
+}
+
+reloc_howto_type *
 _bfd_sparc_elf_info_to_howto_ptr (unsigned int r_type)
 {
   switch (r_type)

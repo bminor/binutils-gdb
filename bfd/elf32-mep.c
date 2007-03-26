@@ -168,6 +168,20 @@ mep_reloc_type_lookup
 
 #undef MAP
 
+static reloc_howto_type *
+mep_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED, const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (mep_elf_howto_table) / sizeof (mep_elf_howto_table[0]);
+       i++)
+    if (mep_elf_howto_table[i].name != NULL
+	&& strcasecmp (mep_elf_howto_table[i].name, r_name) == 0)
+      return &mep_elf_howto_table[i];
+
+  return NULL;
+}
 
 /* Perform a single relocation.  */
 
@@ -929,6 +943,7 @@ mep_elf_fake_sections (bfd *               abfd ATTRIBUTE_UNUSED,
 #define elf_backend_can_gc_sections		1
 
 #define bfd_elf32_bfd_reloc_type_lookup		mep_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup	mep_reloc_name_lookup
 #define bfd_elf32_bfd_set_private_flags		mep_elf_set_private_flags
 #define bfd_elf32_bfd_copy_private_bfd_data	mep_elf_copy_private_bfd_data
 #define bfd_elf32_bfd_merge_private_bfd_data	mep_elf_merge_private_bfd_data

@@ -1017,6 +1017,22 @@ elf_hppa_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   return NULL;
 }
 
+static reloc_howto_type *
+elf_hppa_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			    const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (elf_hppa_howto_table) / sizeof (elf_hppa_howto_table[0]);
+       i++)
+    if (elf_hppa_howto_table[i].name != NULL
+	&& strcasecmp (elf_hppa_howto_table[i].name, r_name) == 0)
+      return &elf_hppa_howto_table[i];
+
+  return NULL;
+}
+
 /* Return TRUE if SYM represents a local label symbol.  */
 
 static bfd_boolean

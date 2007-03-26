@@ -1,5 +1,5 @@
 /* BFD back-end for PDP-11 a.out binaries.
-   Copyright 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -275,6 +275,22 @@ NAME (aout, reloc_type_lookup) (bfd * abfd ATTRIBUTE_UNUSED,
     default:
       return NULL;
     }
+}
+
+reloc_howto_type *
+NAME (aout, reloc_name_lookup) (bfd *abfd ATTRIBUTE_UNUSED,
+				      const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (howto_table_pdp11) / sizeof (howto_table_pdp11[0]);
+       i++)
+    if (howto_table_pdp11[i].name != NULL
+	&& strcasecmp (howto_table_pdp11[i].name, r_name) == 0)
+      return &howto_table_pdp11[i];
+
+  return NULL;
 }
 
 static int

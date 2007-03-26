@@ -1,3 +1,186 @@
+2007-03-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* aout-adobe.c (aout_32_bfd_reloc_name_lookup): Define.
+	* aout-arm.c (MY_bfd_reloc_name_lookup): Define.
+	(MY (bfd_reloc_name_lookup)): New function.
+	* aout-ns32k.c (MY (bfd_reloc_name_lookup)): New function.
+	* aout-target.h (NAME (aout, reloc_name_lookup)): Declare.
+	(MY_bfd_reloc_name_lookup): Define.
+	* aout-tic30.c (tic30_aout_reloc_name_lookup): New function.
+	(MY_bfd_reloc_name_lookup): Define.
+	* aoutx.h (NAME (aout, reloc_type_lookup)): Don't declare.
+	(NAME (aout, reloc_name_lookup)): New function.
+	* bout.c (b_out_bfd_reloc_name_lookup): New function.
+	* coff-alpha.c (alpha_bfd_reloc_name_lookup): New function.
+	(_bfd_ecoff_bfd_reloc_name_lookup): Define.
+	* coff-arm.c (coff_arm_reloc_name_lookup): New function.
+	(coff_bfd_reloc_name_lookup): Define.
+	* coff-i386.c (coff_bfd_reloc_name_lookup): Define.
+	(coff_i386_reloc_name_lookup): New function.
+	* coff-i860.c (coff_i860_reloc_name_lookup): New function.
+	(coff_bfd_reloc_name_lookup): Define.
+	* coff-i960.c (coff_i960_reloc_name_lookup): New function.
+	(coff_bfd_reloc_name_lookup): Define.
+	* coff-m68k.c (m68k_reloc_name_lookup): New function.
+	(coff_bfd_reloc_name_lookup): Define.
+	* coff-maxq.c (maxq_reloc_name_lookup): New function.
+	(coff_bfd_reloc_name_lookup): Define.
+	* coff-mcore.c (mcore_coff_reloc_name_lookup): New function.
+	(coff_bfd_reloc_name_lookup): Define.
+	* coff-mips.c (mips_bfd_reloc_name_lookup): New function.
+	(_bfd_ecoff_bfd_reloc_name_lookup): Define.
+	* coff-ppc.c (ppc_coff_reloc_name_lookup): New function.
+	(coff_bfd_reloc_name_lookup): Define.
+	* coff-rs6000.c (coff_bfd_reloc_name_lookup): Define.
+	(_bfd_xcoff_reloc_name_lookup): New function.
+	(rs6000coff_vec, pmac_xcoff_vec): Init new field.
+	* coff-sh.c (coff_bfd_reloc_name_lookup): Define.
+	(sh_coff_reloc_name_lookup): New function.
+	* coff-sparc.c (coff_sparc_reloc_name_lookup): New function.
+	(coff_bfd_reloc_name_lookup): Define.
+	* coff-tic30.c (coff_bfd_reloc_name_lookup): Define.
+	(tic30_coff_reloc_name_lookup): New function.
+	* coff-tic4x.c (coff_bfd_reloc_name_lookup): Define.
+	(tic4x_coff_reloc_name_lookup): New function.
+	* coff-tic54x.c (coff_bfd_reloc_name_lookup): Define.
+	(tic54x_coff_reloc_name_lookup): New function.
+	* coff-x86_64.c (coff_bfd_reloc_name_lookup): Define.
+	(coff_amd64_reloc_name_lookup): New function.
+	* coff-z80.c (coff_z80_reloc_name_lookup): New function.
+	(coff_bfd_reloc_name_lookup): Define.
+	* coff-z8k.c (coff_z8k_reloc_name_lookup): New function.
+	(coff_bfd_reloc_name_lookup): Define.
+	* coff64-rs6000.c (coff_bfd_reloc_name_lookup): Define.
+	(xcoff64_reloc_name_lookup): New function.
+	(rs6000coff64_vec, aix5coff64_vec): Init new field.
+	* coffcode.h (coff_bfd_reloc_name_lookup): Define.
+	* elf-hppa.h (elf_hppa_reloc_name_lookup): New function.
+	* elf-m10200.c (bfd_elf32_bfd_reloc_name_lookup): New function.
+	* elf-m10300.c (bfd_elf32_bfd_reloc_name_lookup): New function.
+	* elf32-arc.c (bfd_elf32_bfd_reloc_name_lookup): New function.
+	* elf32-arm.c (elf32_arm_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-avr.c (bfd_elf32_bfd_reloc_name_lookup): New function.
+	* elf32-bfin.c (bfin_bfd_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-cr16c.c (elf_cr16c_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-cris.c (cris_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-crx.c (elf_crx_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-d10v.c (bfd_elf32_bfd_reloc_name_lookup): New function.
+	* elf32-d30v.c (bfd_elf32_bfd_reloc_name_lookup): New function.
+	* elf32-dlx.c (elf32_dlx_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-fr30.c (fr30_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-frv.c (frv_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-gen.c (bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-h8300.c (elf32_h8_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-hppa.c (bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-i370.c (i370_elf_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-i386.c (elf_i386_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-i860.c (elf32_i860_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-i960.c (elf32_i960_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-ip2k.c (ip2k_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-iq2000.c (iq2000_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-m32c.c (m32c_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-m32r.c (bfd_elf32_bfd_reloc_name_lookup): New function.
+	* elf32-m68hc11.c (bfd_elf32_bfd_reloc_name_lookup): New function.
+	* elf32-m68hc12.c (bfd_elf32_bfd_reloc_name_lookup): New function.
+	* elf32-m68k.c (reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-m88k.c (bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-mcore.c (mcore_elf_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-mep.c (mep_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-mips.c (bfd_elf32_bfd_reloc_name_lookup): New function.
+	(mips_vxworks_bfd_reloc_name_lookup): Likewise.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-msp430.c (bfd_elf32_bfd_reloc_name_lookup): New function.
+	* elf32-mt.c (mt_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-openrisc.c (openrisc_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-or32.c (bfd_elf32_bfd_reloc_name_lookup): New function.
+	* elf32-pj.c (pj_elf_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-ppc.c (ppc_elf_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-s390.c (elf_s390_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-score.c (elf32_score_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-sh.c (sh_elf_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-sparc.c (bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-spu.c (spu_elf_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-v850.c (v850_elf_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-vax.c (reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-xc16x.c (xc16x_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-xstormy16.c (xstormy16_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf32-xtensa.c (elf_xtensa_reloc_name_lookup): New function.
+	(bfd_elf32_bfd_reloc_name_lookup): Define.
+	* elf64-alpha.c (elf64_alpha_bfd_reloc_name_lookup): New function.
+	(bfd_elf64_bfd_reloc_name_lookup): Define.
+	* elf64-gen.c (bfd_elf64_bfd_reloc_name_lookup): Define.
+	* elf64-hppa.c (bfd_elf64_bfd_reloc_name_lookup): Define.
+	* elf64-mips.c (bfd_elf64_bfd_reloc_name_lookup): New function.
+	* elf64-mmix.c (bfd_elf64_bfd_reloc_name_lookup): New function.
+	* elf64-ppc.c (ppc64_elf_reloc_name_lookup): New function.
+	(bfd_elf64_bfd_reloc_name_lookup): Define.
+	* elf64-s390.c (elf_s390_reloc_name_lookup): New function.
+	(bfd_elf64_bfd_reloc_name_lookup): Define.
+	* elf64-sh64.c (sh_elf64_reloc_name_lookup): New function.
+	(bfd_elf64_bfd_reloc_name_lookup): Define.
+	* elf64-sparc.c (bfd_elf64_bfd_reloc_name_lookup): Define.
+	* elf64-x86-64.c (elf64_x86_64_reloc_name_lookup): New function.
+	(bfd_elf64_bfd_reloc_name_lookup): Define.
+	* elfn32-mips.c (bfd_elf32_bfd_reloc_name_lookup): New function.
+	* elfxx-ia64.c (elfNN_ia64_reloc_name_lookup): New function.
+	(bfd_elfNN_bfd_reloc_name_lookup): Define.
+	* elfxx-sparc.c (_bfd_sparc_elf_reloc_name_lookup): New function.
+	* elfxx-sparc.h (_bfd_sparc_elf_reloc_name_lookup): Declare.
+	* i386msdos.c (msdos_bfd_reloc_name_lookup): Define.
+	* i386os9k.c (aout_32_bfd_reloc_name_lookup): Define.
+	* ieee.c (ieee_bfd_reloc_name_lookup): Define.
+	* libaout.h (NAME (aout, reloc_name_lookup)): Declare.
+	* libbfd-in.h (_bfd_norelocs_bfd_reloc_name_lookup): Declare.
+	* mipsbsd.c (MY_bfd_reloc_name_lookup): Define.
+	(MY(reloc_type_lookup)): Rename from MY(reloc_howto_type_lookup).
+	(MY(reloc_name_lookup)): New function.
+	* nlm-target.h (nlm_bfd_reloc_name_lookup): Define.
+	* oasys.c (oasys_bfd_reloc_name_lookup): Define.
+	* pdp11.c (NAME (aout, reloc_name_lookup)): New function.
+	* pe-mips.c (coff_mips_reloc_name_lookup): New function.
+	(coff_bfd_reloc_name_lookup): Define.
+	* reloc.c (bfd_reloc_name_lookup): New function.
+	* riscix.c (riscix_reloc_name_lookup): New function.
+	(MY_bfd_reloc_name_lookup): Define.
+	* som.c (som_bfd_reloc_name_lookup): New function.
+	* targets.c (struct bfd_target): Add reloc_name_lookup.
+	(BFD_JUMP_TABLE_RELOCS): Add NAME##_bfd_reloc_name_lookup.
+	* versados.c (versados_bfd_reloc_name_lookup): Define.
+	* vms.c (vms_bfd_reloc_name_lookup): New function.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2007-03-26  Thiemo Seufer  <ths@mips.com>
 
 	* elfxx-mips.c (mips_elf_next_relocation): Don't signal an error if no

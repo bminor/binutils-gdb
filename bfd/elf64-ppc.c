@@ -77,6 +77,7 @@ static bfd_vma opd_entry_value
 
 #define bfd_elf64_mkobject		      ppc64_elf_mkobject
 #define bfd_elf64_bfd_reloc_type_lookup	      ppc64_elf_reloc_type_lookup
+#define bfd_elf64_bfd_reloc_name_lookup ppc64_elf_reloc_name_lookup
 #define bfd_elf64_bfd_merge_private_bfd_data  ppc64_elf_merge_private_bfd_data
 #define bfd_elf64_new_section_hook	      ppc64_elf_new_section_hook
 #define bfd_elf64_bfd_link_hash_table_create  ppc64_elf_link_hash_table_create
@@ -2110,6 +2111,22 @@ ppc64_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 
   return ppc64_elf_howto_table[r];
 };
+
+static reloc_howto_type *
+ppc64_elf_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			     const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (ppc64_elf_howto_raw) / sizeof (ppc64_elf_howto_raw[0]);
+       i++)
+    if (ppc64_elf_howto_raw[i].name != NULL
+	&& strcasecmp (ppc64_elf_howto_raw[i].name, r_name) == 0)
+      return &ppc64_elf_howto_raw[i];
+
+  return NULL;
+}
 
 /* Set the howto pointer for a PowerPC ELF reloc.  */
 

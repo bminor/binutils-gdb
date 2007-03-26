@@ -848,6 +848,22 @@ bfd_elf64_bfd_reloc_type_lookup (abfd, code)
   return NULL;
 }
 
+static reloc_howto_type *
+bfd_elf64_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+				 const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (elf_mmix_howto_table) / sizeof (elf_mmix_howto_table[0]);
+       i++)
+    if (elf_mmix_howto_table[i].name != NULL
+	&& strcasecmp (elf_mmix_howto_table[i].name, r_name) == 0)
+      return &elf_mmix_howto_table[i];
+
+  return NULL;
+}
+
 static bfd_boolean
 mmix_elf_new_section_hook (abfd, sec)
      bfd *abfd;

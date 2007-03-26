@@ -334,6 +334,25 @@ elf_s390_reloc_type_lookup (abfd, code)
   return 0;
 }
 
+static reloc_howto_type *
+elf_s390_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			    const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0; i < sizeof (elf_howto_table) / sizeof (elf_howto_table[0]); i++)
+    if (elf_howto_table[i].name != NULL
+	&& strcasecmp (elf_howto_table[i].name, r_name) == 0)
+      return &elf_howto_table[i];
+
+  if (strcasecmp (elf32_s390_vtinherit_howto.name, r_name) == 0)
+    return &elf32_s390_vtinherit_howto;
+  if (strcasecmp (elf32_s390_vtentry_howto.name, r_name) == 0)
+    return &elf32_s390_vtentry_howto;
+
+  return NULL;
+}
+
 /* We need to use ELF32_R_TYPE so we have our own copy of this function,
    and elf32-s390.c has its own copy.  */
 
@@ -3540,6 +3559,7 @@ elf_s390_plt_sym_val (bfd_vma i, const asection *plt,
 #define bfd_elf32_bfd_is_local_label_name     elf_s390_is_local_label_name
 #define bfd_elf32_bfd_link_hash_table_create  elf_s390_link_hash_table_create
 #define bfd_elf32_bfd_reloc_type_lookup	      elf_s390_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup elf_s390_reloc_name_lookup
 
 #define elf_backend_adjust_dynamic_symbol     elf_s390_adjust_dynamic_symbol
 #define elf_backend_check_relocs	      elf_s390_check_relocs

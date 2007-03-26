@@ -613,6 +613,22 @@ elfNN_ia64_reloc_type_lookup (abfd, bfd_code)
   return lookup_howto (rtype);
 }
 
+static reloc_howto_type *
+elfNN_ia64_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			      const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (ia64_howto_table) / sizeof (ia64_howto_table[0]);
+       i++)
+    if (ia64_howto_table[i].name != NULL
+	&& strcasecmp (ia64_howto_table[i].name, r_name) == 0)
+      return &ia64_howto_table[i];
+
+  return NULL;
+}
+
 /* Given a ELF reloc, return the matching HOWTO structure.  */
 
 static void
@@ -5748,6 +5764,8 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
 
 #define bfd_elfNN_bfd_reloc_type_lookup \
 	elfNN_ia64_reloc_type_lookup
+#define bfd_elfNN_bfd_reloc_name_lookup \
+	elfNN_ia64_reloc_name_lookup
 #define bfd_elfNN_bfd_is_local_label_name \
 	elfNN_ia64_is_local_label_name
 #define bfd_elfNN_bfd_relax_section \

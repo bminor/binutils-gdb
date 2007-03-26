@@ -1,5 +1,5 @@
 /* Motorola 68HC12-specific support for 32-bit ELF
-   Copyright 1999, 2000, 2002, 2003, 2004, 2005, 2006
+   Copyright 1999, 2000, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
    Contributed by Stephane Carrez (stcarrez@nerim.fr)
    (Heavily copied from the D10V port by Martin Hunt (hunt@cygnus.com))
@@ -403,6 +403,23 @@ bfd_elf32_bfd_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
       if (m68hc11_reloc_map[i].bfd_reloc_val == code)
 	return &elf_m68hc11_howto_table[m68hc11_reloc_map[i].elf_reloc_val];
     }
+
+  return NULL;
+}
+
+static reloc_howto_type *
+bfd_elf32_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+				 const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < (sizeof (elf_m68hc11_howto_table)
+	    / sizeof (elf_m68hc11_howto_table[0]));
+       i++)
+    if (elf_m68hc11_howto_table[i].name != NULL
+	&& strcasecmp (elf_m68hc11_howto_table[i].name, r_name) == 0)
+      return &elf_m68hc11_howto_table[i];
 
   return NULL;
 }

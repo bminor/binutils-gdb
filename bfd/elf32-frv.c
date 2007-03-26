@@ -2590,6 +2590,26 @@ frv_reloc_type_lookup (abfd, code)
   return NULL;
 }
 
+static reloc_howto_type *
+frv_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED, const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (elf32_frv_howto_table) / sizeof (elf32_frv_howto_table[0]);
+       i++)
+    if (elf32_frv_howto_table[i].name != NULL
+	&& strcasecmp (elf32_frv_howto_table[i].name, r_name) == 0)
+      return &elf32_frv_howto_table[i];
+
+  if (strcasecmp (elf32_frv_vtinherit_howto.name, r_name) == 0)
+    return &elf32_frv_vtinherit_howto;
+  if (strcasecmp (elf32_frv_vtentry_howto.name, r_name) == 0)
+    return &elf32_frv_vtentry_howto;
+
+  return NULL;
+}
+
 /* Set the howto pointer for an FRV ELF reloc.  */
 
 static void
@@ -6866,6 +6886,7 @@ elf32_frv_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 #define elf_backend_rela_normal			1
 
 #define bfd_elf32_bfd_reloc_type_lookup		frv_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup	frv_reloc_name_lookup
 #define bfd_elf32_bfd_set_private_flags		frv_elf_set_private_flags
 #define bfd_elf32_bfd_copy_private_bfd_data	frv_elf_copy_private_bfd_data
 #define bfd_elf32_bfd_merge_private_bfd_data	frv_elf_merge_private_bfd_data

@@ -142,6 +142,20 @@ spu_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   return elf_howto_table + spu_elf_bfd_to_reloc_type (code);
 }
 
+static reloc_howto_type *
+spu_elf_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			   const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0; i < sizeof (elf_howto_table) / sizeof (elf_howto_table[0]); i++)
+    if (elf_howto_table[i].name != NULL
+	&& strcasecmp (elf_howto_table[i].name, r_name) == 0)
+      return &elf_howto_table[i];
+
+  return NULL;
+}
+
 /* Apply R_SPU_REL9 and R_SPU_REL9I relocs.  */
 
 static bfd_reloc_status_type
@@ -1756,6 +1770,7 @@ spu_elf_section_processing (bfd *abfd ATTRIBUTE_UNUSED,
 #define elf_backend_can_gc_sections	1
 
 #define bfd_elf32_bfd_reloc_type_lookup		spu_elf_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup	spu_elf_reloc_name_lookup
 #define elf_info_to_howto			spu_elf_info_to_howto
 #define elf_backend_gc_mark_hook		spu_elf_gc_mark_hook
 #define elf_backend_relocate_section		spu_elf_relocate_section

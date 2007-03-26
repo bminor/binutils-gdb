@@ -1055,6 +1055,23 @@ elf64_alpha_bfd_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   return 0;
 }
 
+static reloc_howto_type *
+elf64_alpha_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+				   const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < (sizeof (elf64_alpha_howto_table)
+	    / sizeof (elf64_alpha_howto_table[0]));
+       i++)
+    if (elf64_alpha_howto_table[i].name != NULL
+	&& strcasecmp (elf64_alpha_howto_table[i].name, r_name) == 0)
+      return &elf64_alpha_howto_table[i];
+
+  return NULL;
+}
+
 /* Given an Alpha ELF reloc type, fill in an arelent structure.  */
 
 static void
@@ -5282,6 +5299,8 @@ static const struct elf_size_info alpha_elf_size_info =
 
 #define bfd_elf64_bfd_reloc_type_lookup \
   elf64_alpha_bfd_reloc_type_lookup
+#define bfd_elf64_bfd_reloc_name_lookup \
+  elf64_alpha_bfd_reloc_name_lookup
 #define elf_info_to_howto \
   elf64_alpha_info_to_howto
 

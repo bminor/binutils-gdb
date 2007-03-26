@@ -187,6 +187,22 @@ mt_reloc_type_lookup
   return NULL;
 }
 
+static reloc_howto_type *
+mt_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+		      const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (mt_elf_howto_table) / sizeof (mt_elf_howto_table[0]);
+       i++)
+    if (mt_elf_howto_table[i].name != NULL
+	&& strcasecmp (mt_elf_howto_table[i].name, r_name) == 0)
+      return &mt_elf_howto_table[i];
+
+  return NULL;
+}
+
 bfd_reloc_status_type
 mt_elf_relocate_hi16
     (bfd *               input_bfd,
@@ -592,6 +608,7 @@ mt_elf_print_private_bfd_data (bfd * abfd, void * ptr)
 #define elf_backend_relocate_section		mt_elf_relocate_section
 
 #define bfd_elf32_bfd_reloc_type_lookup	        mt_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup   mt_reloc_name_lookup
 
 #define elf_backend_check_relocs                mt_elf_check_relocs
 #define elf_backend_object_p		        mt_elf_object_p

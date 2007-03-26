@@ -330,6 +330,20 @@ elf_i386_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   return 0;
 }
 
+static reloc_howto_type *
+elf_i386_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			    const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0; i < sizeof (elf_howto_table) / sizeof (elf_howto_table[0]); i++)
+    if (elf_howto_table[i].name != NULL
+	&& strcasecmp (elf_howto_table[i].name, r_name) == 0)
+      return &elf_howto_table[i];
+
+  return NULL;
+}
+
 static void
 elf_i386_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
 			    arelent *cache_ptr,
@@ -3818,6 +3832,7 @@ elf_i386_hash_symbol (struct elf_link_hash_entry *h)
 #define bfd_elf32_bfd_is_local_label_name     elf_i386_is_local_label_name
 #define bfd_elf32_bfd_link_hash_table_create  elf_i386_link_hash_table_create
 #define bfd_elf32_bfd_reloc_type_lookup	      elf_i386_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup elf_i386_reloc_name_lookup
 
 #define elf_backend_adjust_dynamic_symbol     elf_i386_adjust_dynamic_symbol
 #define elf_backend_check_relocs	      elf_i386_check_relocs

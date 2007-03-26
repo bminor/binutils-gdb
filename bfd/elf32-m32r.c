@@ -1254,6 +1254,22 @@ bfd_elf32_bfd_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   return NULL;
 }
 
+static reloc_howto_type *
+bfd_elf32_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+				 const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (m32r_elf_howto_table) / sizeof (m32r_elf_howto_table[0]);
+       i++)
+    if (m32r_elf_howto_table[i].name != NULL
+	&& strcasecmp (m32r_elf_howto_table[i].name, r_name) == 0)
+      return &m32r_elf_howto_table[i];
+
+  return NULL;
+}
+
 /* Set the howto pointer for an M32R ELF reloc.  */
 
 static void

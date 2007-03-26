@@ -1,6 +1,6 @@
 /* i370-specific support for 32-bit ELF
    Copyright 1994, 1995, 1996, 1997, 1998, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006 Free Software Foundation, Inc.
+   2005, 2006, 2007 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
    Hacked by Linas Vepstas for i370 linas@linas.org
 
@@ -266,6 +266,22 @@ i370_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 
   return i370_elf_howto_table[ (int)i370_reloc ];
 };
+
+static reloc_howto_type *
+i370_elf_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			    const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (i370_elf_howto_raw) / sizeof (i370_elf_howto_raw[0]);
+       i++)
+    if (i370_elf_howto_raw[i].name != NULL
+	&& strcasecmp (i370_elf_howto_raw[i].name, r_name) == 0)
+      return &i370_elf_howto_raw[i];
+
+  return NULL;
+}
 
 /* The name of the dynamic interpreter.  This is put in the .interp
     section.  */
@@ -1434,6 +1450,7 @@ i370_elf_relocate_section (bfd *output_bfd,
 #define elf_backend_rela_normal    1
 
 #define bfd_elf32_bfd_reloc_type_lookup		i370_elf_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup	i370_elf_reloc_name_lookup
 #define bfd_elf32_bfd_set_private_flags		i370_elf_set_private_flags
 #define bfd_elf32_bfd_merge_private_bfd_data	i370_elf_merge_private_bfd_data
 #define elf_backend_relocate_section		i370_elf_relocate_section

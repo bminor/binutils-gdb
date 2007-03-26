@@ -1,6 +1,6 @@
 /* Support for the generic parts of most COFF variants, for BFD.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -5332,6 +5332,9 @@ static const bfd_coff_backend_data ticoff1_swap_table =
    backend.  */
 #ifndef coff_bfd_reloc_type_lookup
 #define coff_bfd_reloc_type_lookup	    _bfd_norelocs_bfd_reloc_type_lookup
+#endif
+#ifndef coff_bfd_reloc_name_lookup
+#define coff_bfd_reloc_name_lookup    _bfd_norelocs_bfd_reloc_name_lookup
 #endif
 
 #ifndef coff_bfd_get_relocated_section_contents

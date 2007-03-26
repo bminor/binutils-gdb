@@ -205,6 +205,22 @@ xc16x_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   return NULL;
 }
 
+static reloc_howto_type *
+xc16x_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			 const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (xc16x_elf_howto_table) / sizeof (xc16x_elf_howto_table[0]);
+       i++)
+    if (xc16x_elf_howto_table[i].name != NULL
+	&& strcasecmp (xc16x_elf_howto_table[i].name, r_name) == 0)
+      return &xc16x_elf_howto_table[i];
+
+  return NULL;
+}
+
 /* For a particular operand this function is
    called to finalise the type of relocation.  */
 
@@ -454,6 +470,7 @@ elf32_xc16x_object_p (bfd *abfd)
 #define elf_backend_object_p   		elf32_xc16x_object_p
 #define elf_backend_can_gc_sections	1
 #define bfd_elf32_bfd_reloc_type_lookup	xc16x_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup xc16x_reloc_name_lookup
 #define elf_info_to_howto		elf32_xc16x_info_to_howto
 #define elf_info_to_howto_rel		elf32_xc16x_info_to_howto
 #define elf_backend_relocate_section  	elf32_xc16x_relocate_section

@@ -1,6 +1,6 @@
 /* SPARC-specific support for 32-bit ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2007 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -183,6 +183,8 @@ elf32_sparc_reloc_type_class (const Elf_Internal_Rela *rela)
 
 #define elf_info_to_howto		_bfd_sparc_elf_info_to_howto
 #define bfd_elf32_bfd_reloc_type_lookup	_bfd_sparc_elf_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup \
+  _bfd_sparc_elf_reloc_name_lookup
 #define bfd_elf32_bfd_link_hash_table_create \
 					_bfd_sparc_elf_link_hash_table_create
 #define bfd_elf32_bfd_relax_section	_bfd_sparc_elf_relax_section

@@ -1,6 +1,6 @@
 /* BFD back-end for ieee-695 objects.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    Written by Steve Chamberlain of Cygnus Support.
@@ -3747,6 +3747,7 @@ ieee_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
 #define ieee_minisymbol_to_symbol _bfd_generic_minisymbol_to_symbol
 
 #define ieee_bfd_reloc_type_lookup _bfd_norelocs_bfd_reloc_type_lookup
+#define ieee_bfd_reloc_name_lookup _bfd_norelocs_bfd_reloc_name_lookup
 
 #define ieee_set_arch_mach _bfd_generic_set_arch_mach
 

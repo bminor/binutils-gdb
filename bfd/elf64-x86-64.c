@@ -246,6 +246,23 @@ elf64_x86_64_reloc_type_lookup (bfd *abfd,
   return 0;
 }
 
+static reloc_howto_type *
+elf64_x86_64_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+				const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < (sizeof (x86_64_elf_howto_table)
+	    / sizeof (x86_64_elf_howto_table[0]));
+       i++)
+    if (x86_64_elf_howto_table[i].name != NULL
+	&& strcasecmp (x86_64_elf_howto_table[i].name, r_name) == 0)
+      return &x86_64_elf_howto_table[i];
+
+  return NULL;
+}
+
 /* Given an x86_64 ELF reloc type, fill in an arelent structure.  */
 
 static void
@@ -3660,6 +3677,8 @@ static const struct bfd_elf_special_section
 #define bfd_elf64_bfd_link_hash_table_create \
   elf64_x86_64_link_hash_table_create
 #define bfd_elf64_bfd_reloc_type_lookup	    elf64_x86_64_reloc_type_lookup
+#define bfd_elf64_bfd_reloc_name_lookup \
+  elf64_x86_64_reloc_name_lookup
 
 #define elf_backend_adjust_dynamic_symbol   elf64_x86_64_adjust_dynamic_symbol
 #define elf_backend_check_relocs	    elf64_x86_64_check_relocs

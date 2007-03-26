@@ -3699,6 +3699,23 @@ elf32_score_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED, bfd_reloc_code_real_t
   return NULL;
 }
 
+static reloc_howto_type *
+elf32_score_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			       const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < (sizeof (elf32_score_howto_table)
+	    / sizeof (elf32_score_howto_table[0]));
+       i++)
+    if (elf32_score_howto_table[i].name != NULL
+	&& strcasecmp (elf32_score_howto_table[i].name, r_name) == 0)
+      return &elf32_score_howto_table[i];
+
+  return NULL;
+}
+
 /* Create a score elf linker hash table.  */
 
 static struct bfd_link_hash_table *
@@ -3856,6 +3873,8 @@ elf32_score_new_section_hook (bfd *abfd, asection *sec)
 #define elf_backend_type_change_ok        TRUE
 
 #define bfd_elf32_bfd_reloc_type_lookup      elf32_score_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup \
+  elf32_score_reloc_name_lookup
 #define bfd_elf32_bfd_link_hash_table_create elf32_score_link_hash_table_create
 #define bfd_elf32_bfd_print_private_bfd_data elf32_score_print_private_bfd_data
 #define bfd_elf32_bfd_merge_private_bfd_data elf32_score_merge_private_bfd_data

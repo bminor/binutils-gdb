@@ -251,6 +251,22 @@ elf32_h8_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   return NULL;
 }
 
+static reloc_howto_type *
+elf32_h8_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			    const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (h8_elf_howto_table) / sizeof (h8_elf_howto_table[0]);
+       i++)
+    if (h8_elf_howto_table[i].name != NULL
+	&& strcasecmp (h8_elf_howto_table[i].name, r_name) == 0)
+      return &h8_elf_howto_table[i];
+
+  return NULL;
+}
+
 static void
 elf32_h8_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *bfd_reloc,
 			Elf_Internal_Rela *elf_reloc)
@@ -1502,6 +1518,7 @@ elf32_h8_get_relocated_section_contents (bfd *output_bfd,
 #define ELF_MACHINE_CODE		EM_H8_300
 #define ELF_MAXPAGESIZE			0x1
 #define bfd_elf32_bfd_reloc_type_lookup elf32_h8_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup elf32_h8_reloc_name_lookup
 #define elf_info_to_howto		elf32_h8_info_to_howto
 #define elf_info_to_howto_rel		elf32_h8_info_to_howto_rel
 

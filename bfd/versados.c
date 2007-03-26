@@ -1,6 +1,6 @@
 /* BFD back-end for VERSAdos-E objects.
    Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006 Free Software Foundation, Inc.
+   2006, 2007 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
    Versados is a Motorola trademark.
@@ -798,6 +798,7 @@ versados_canonicalize_reloc (bfd *abfd,
 #define versados_read_minisymbols                     _bfd_generic_read_minisymbols
 #define versados_minisymbol_to_symbol                 _bfd_generic_minisymbol_to_symbol
 #define versados_bfd_reloc_type_lookup                _bfd_norelocs_bfd_reloc_type_lookup
+#define versados_bfd_reloc_name_lookup          _bfd_norelocs_bfd_reloc_name_lookup
 #define versados_set_arch_mach                        bfd_default_set_arch_mach
 #define versados_bfd_get_relocated_section_contents   bfd_generic_get_relocated_section_contents
 #define versados_bfd_relax_section                    bfd_generic_relax_section

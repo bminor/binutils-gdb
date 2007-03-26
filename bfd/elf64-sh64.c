@@ -1392,6 +1392,22 @@ sh_elf64_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   return NULL;
 }
 
+static reloc_howto_type *
+sh_elf64_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			    const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (sh_elf64_howto_table) / sizeof (sh_elf64_howto_table[0]);
+       i++)
+    if (sh_elf64_howto_table[i].name != NULL
+	&& strcasecmp (sh_elf64_howto_table[i].name, r_name) == 0)
+      return &sh_elf64_howto_table[i];
+
+  return NULL;
+}
+
 /* Given an ELF reloc, fill in the howto field of a relent.
 
    See sh_elf_info_to_howto in elf32-sh.c for the original.  */
@@ -4060,6 +4076,8 @@ static const struct bfd_elf_special_section sh64_elf64_special_sections[]=
 #define elf_symbol_leading_char '_'
 
 #define bfd_elf64_bfd_reloc_type_lookup	sh_elf64_reloc_type_lookup
+#define bfd_elf64_bfd_reloc_name_lookup \
+					sh_elf64_reloc_name_lookup
 #define elf_info_to_howto		sh_elf64_info_to_howto
 
 /* Note: there's no relaxation at present.  */

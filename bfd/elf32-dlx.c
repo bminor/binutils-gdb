@@ -1,5 +1,6 @@
 /* DLX specific support for 32-bit ELF
-   Copyright 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2004, 2005, 2007
+   Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -27,6 +28,7 @@
 #define USE_REL 1
 
 #define bfd_elf32_bfd_reloc_type_lookup elf32_dlx_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup elf32_dlx_reloc_name_lookup
 #define elf_info_to_howto               elf32_dlx_info_to_howto
 #define elf_info_to_howto_rel           elf32_dlx_info_to_howto_rel
 #define elf_backend_check_relocs        elf32_dlx_check_relocs
@@ -503,6 +505,31 @@ elf32_dlx_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
     case BFD_RELOC_LO16:
       return &elf_dlx_reloc_16_lo;
     }
+}
+
+static reloc_howto_type *
+elf32_dlx_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			     const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (dlx_elf_howto_table) / sizeof (dlx_elf_howto_table[0]);
+       i++)
+    if (dlx_elf_howto_table[i].name != NULL
+	&& strcasecmp (dlx_elf_howto_table[i].name, r_name) == 0)
+      return &dlx_elf_howto_table[i];
+
+  if (strcasecmp (elf_dlx_gnu_rel16_s2.name, r_name) == 0)
+    return &elf_dlx_gnu_rel16_s2;
+  if (strcasecmp (elf_dlx_gnu_rel26_s2.name, r_name) == 0)
+    return &elf_dlx_gnu_rel26_s2;
+  if (strcasecmp (elf_dlx_reloc_16_hi.name, r_name) == 0)
+    return &elf_dlx_reloc_16_hi;
+  if (strcasecmp (elf_dlx_reloc_16_lo.name, r_name) == 0)
+    return &elf_dlx_reloc_16_lo;
+
+  return NULL;
 }
 
 static reloc_howto_type *

@@ -1339,6 +1339,22 @@ v850_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 
   return NULL;
 }
+
+static reloc_howto_type *
+v850_elf_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			    const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < sizeof (v850_elf_howto_table) / sizeof (v850_elf_howto_table[0]);
+       i++)
+    if (v850_elf_howto_table[i].name != NULL
+	&& strcasecmp (v850_elf_howto_table[i].name, r_name) == 0)
+      return &v850_elf_howto_table[i];
+
+  return NULL;
+}
 
 /* Set the howto pointer for an V850 ELF reloc.  */
 
@@ -3073,6 +3089,7 @@ static const struct bfd_elf_special_section v850_elf_special_sections[] =
 
 #define bfd_elf32_bfd_is_local_label_name	v850_elf_is_local_label_name
 #define bfd_elf32_bfd_reloc_type_lookup		v850_elf_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup	v850_elf_reloc_name_lookup
 #define bfd_elf32_bfd_merge_private_bfd_data 	v850_elf_merge_private_bfd_data
 #define bfd_elf32_bfd_set_private_flags		v850_elf_set_private_flags
 #define bfd_elf32_bfd_print_private_bfd_data	v850_elf_print_private_bfd_data

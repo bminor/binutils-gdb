@@ -350,6 +350,26 @@ iq2000_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   return NULL;
 }
 
+static reloc_howto_type *
+iq2000_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED, const char *r_name)
+{
+  unsigned int i;
+
+  for (i = 0;
+       i < (sizeof (iq2000_elf_howto_table)
+	    / sizeof (iq2000_elf_howto_table[0]));
+       i++)
+    if (iq2000_elf_howto_table[i].name != NULL
+	&& strcasecmp (iq2000_elf_howto_table[i].name, r_name) == 0)
+      return &iq2000_elf_howto_table[i];
+
+  if (strcasecmp (iq2000_elf_vtinherit_howto.name, r_name) == 0)
+    return &iq2000_elf_vtinherit_howto;
+  if (strcasecmp (iq2000_elf_vtentry_howto.name, r_name) == 0)
+    return &iq2000_elf_vtentry_howto;
+
+  return NULL;
+}
 
 /* Perform a single relocation.	 By default we use the standard BFD
    routines.  */
@@ -864,6 +884,7 @@ iq2000_elf_object_p (bfd *abfd)
 #define elf_backend_can_gc_sections		1
 
 #define bfd_elf32_bfd_reloc_type_lookup		iq2000_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup	iq2000_reloc_name_lookup
 #define bfd_elf32_bfd_set_private_flags		iq2000_elf_set_private_flags
 #define bfd_elf32_bfd_copy_private_bfd_data	iq2000_elf_copy_private_bfd_data
 #define bfd_elf32_bfd_merge_private_bfd_data	iq2000_elf_merge_private_bfd_data

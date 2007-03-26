@@ -1,6 +1,6 @@
 /* SPARC-specific support for 64-bit ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2007 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -859,6 +859,8 @@ const struct elf_size_info elf64_sparc_size_info =
   _bfd_sparc_elf_copy_indirect_symbol
 #define bfd_elf64_bfd_reloc_type_lookup \
   _bfd_sparc_elf_reloc_type_lookup
+#define bfd_elf64_bfd_reloc_name_lookup \
+  _bfd_sparc_elf_reloc_name_lookup
 #define bfd_elf64_bfd_relax_section \
   _bfd_sparc_elf_relax_section
 #define bfd_elf64_new_section_hook \
