@@ -144,11 +144,11 @@ Copyright (C) 1988-2006 Free Software Foundation, Inc.
 * Configurations::              Configuration-specific information
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
-* TUI::                         @value{GDBN} Text User Interface
 * Interpreters::		Command Interpreters
+* TUI::                         @value{GDBN} Text User Interface
 * Emacs::                       Using @value{GDBN} under @sc{gnu} Emacs
-* Annotations::                 @value{GDBN}'s annotation interface.
 * GDB/MI::                      @value{GDBN}'s Machine Interface.
+* Annotations::                 @value{GDBN}'s annotation interface.
 
 * GDB Bugs::                    Reporting bugs in @value{GDBN}
 
@@ -9184,10 +9184,6 @@ If an operator is redefined in the user code, @value{GDBN} usually
 attempts to invoke the redefined version instead of using the operator's
 predefined meaning.
 
-@menu
-* C Constants::
-@end menu
-
 @node C Constants
 @subsubsection C and C@t{++} constants
 
@@ -9247,14 +9243,6 @@ and @samp{@}}; for example, @samp{@{1,2,3@}} is a three-element array of
 integers, @samp{@{@{1,2@}, @{3,4@}, @{5,6@}@}} is a three-by-two array,
 and @samp{@{&"hi", &"there", &"fred"@}} is a three-element array of pointers.
 @end itemize
-
-@menu
-* C plus plus expressions::
-* C Defaults::
-* C Checks::
-
-* Debugging C::
-@end menu
 
 @node C plus plus expressions
 @subsubsection C@t{++} expressions
@@ -9419,10 +9407,6 @@ The @code{@@} operator aids in the debugging of dynamic arrays, formed
 with pointers and a memory allocation function.  @xref{Expressions,
 ,Expressions}.
 
-@menu
-* Debugging C plus plus::
-@end menu
-
 @node Debugging C plus plus
 @subsubsection @value{GDBN} features for C@t{++}
 
@@ -9524,7 +9508,7 @@ few more commands specific to Objective-C support.
 * The Print Command with Objective-C::
 @end menu
 
-@node Method Names in Commands, The Print Command with Objective-C, Objective-C, Objective-C
+@node Method Names in Commands
 @subsubsection Method Names in Commands
 
 The following commands have been extended to accept Objective-C method

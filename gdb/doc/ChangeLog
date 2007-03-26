@@ -1,4 +1,11 @@
-2007-03-23  Bob Wilson  <bob.wilson@acm.org>
+2007-03-26  Bob Wilson  <bob.wilson@acm.org>
+
+	* gdb.texinfo (Top): Move TUI and Annotations menu entries to match
+	the order of the nodes.
+	(C Operators, C Constants, Debugging C): Remove extra menus.
+	(Method Names in Commands): Do not specify next/prev/up nodes.
+	
+2007-03-26  Bob Wilson  <bob.wilson@acm.org>
 
 	* gdb.texinfo (File Options): Add missing parenthesis.
 	(Breakpoints, Special Fortran commands, PowerPC): Fix typos.
