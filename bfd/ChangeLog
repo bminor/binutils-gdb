@@ -1,3 +1,7 @@
+2003-03-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
 2007-03-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (struct stubarr): Add stub_hash_table and err fields.

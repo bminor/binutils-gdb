@@ -4415,18 +4415,25 @@ if test "${with_bugurl+set}" = set; then
       yes) { { echo "$as_me:$LINENO: error: bug URL not specified" >&5
 echo "$as_me: error: bug URL not specified" >&2;}
    { (exit 1); exit 1; }; } ;;
-      no)  REPORT_BUGS_TO="";
-	   REPORT_BUGS_TEXI=""
+      no)  BUGURL=
 	   ;;
-      *)   REPORT_BUGS_TO="<$withval>"
-	   REPORT_BUGS_TEXI="@uref{`echo $withval | sed 's/@/@@/g'`}"
+      *)   BUGURL="$withval"
 	   ;;
      esac
 else
-  REPORT_BUGS_TO="<http://www.sourceware.org/bugzilla/>"
-     REPORT_BUGS_TEXI="@uref{`echo http://www.sourceware.org/bugzilla/ | sed 's/@/@@/g'`}"
+  BUGURL="http://www.sourceware.org/bugzilla/"
 
 fi;
+  case ${BUGURL} in
+  "")
+    REPORT_BUGS_TO=
+    REPORT_BUGS_TEXI=
+    ;;
+  *)
+    REPORT_BUGS_TO="<$BUGURL>"
+    REPORT_BUGS_TEXI=@uref{`echo "$BUGURL" | sed 's/@/@@/g'`}
+    ;;
+  esac;
 
 
 
