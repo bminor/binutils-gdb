@@ -1,3 +1,22 @@
+2007-03-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Add dependency on ldemul-list.h for powerpc and
+	spu target emul files.
+	* configure.in: Check for mkstemp and waitpid.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* ldlang.c (input_file_chain): Make global.
+	(lang_add_input_file): Don't set lang_has_input_file here.
+	* ldlang.h (input_file_chain): Declare.
+	* emultempl/ppc32elf.em (ppc_recognized_file): New function.
+	(LDEMUL_RECOGNIZED_FILE): Define.
+	* emultempl/ppc64elf.em (ppc64_recognized_file): New function.
+	(LDEMUL_RECOGNIZED_FILE): Define.
+	* emultempl/spuelf.em (struct tflist): New.
+	(tmp_file_list): New var.
+	(clean_tmp, embedded_spu_file): New functions.
+
 2007-03-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (lang_insert_orphan): Provide start/stop loadaddr syms
