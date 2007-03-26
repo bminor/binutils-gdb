@@ -842,7 +842,7 @@ You can optionally have @code{@value{GDBP}} pass any arguments after the
 executable file to the inferior using @code{--args}.  This option stops
 option processing.
 @smallexample
-gdb --args gcc -O2 -c foo.c
+@value{GDBP} --args gcc -O2 -c foo.c
 @end smallexample
 This will cause @code{@value{GDBP}} to debug @code{gcc}, and to set
 @code{gcc}'s command-line arguments (@pxref{Arguments}) to @samp{-O2 -c foo.c}.
@@ -5136,7 +5136,7 @@ name to look up the sources.
 
 Using the previous example, suppose the @file{foo-1.0} tree has been
 moved from @file{/usr/src} to @file{/mnt/cross}, then you can tell
-GDB to replace @file{/usr/src} in all source path names with
+@value{GDBN} to replace @file{/usr/src} in all source path names with
 @file{/mnt/cross}.  The first lookup will then be
 @file{/mnt/cross/foo-1.0/lib/foo.c} in place of the original location
 of @file{/usr/src/foo-1.0/lib/foo.c}.  To define a source path
@@ -5166,7 +5166,7 @@ longer exists.  On the other hand, @code{set substitute-path} modifies
 the debugger behavior to look at the rewritten location instead.  So, if
 for any reason a source file that is not relevant to your executable is
 located at the original location, a substitution rule is the only
-method available to point GDB at the new location.
+method available to point @value{GDBN} at the new location.
 
 @table @code
 @item directory @var{dirname} @dots{}
@@ -7190,7 +7190,7 @@ mainframe operating systems.  (@sc{gnu}/Linux on the S/390 uses U.S. @sc{ascii}.
 @end table
 
 Note that these are all single-byte character sets.  More work inside
-GDB is needed to support multi-byte or variable-width character
+@value{GDBN} is needed to support multi-byte or variable-width character
 encodings, like the UTF-8 and UCS-2 encodings of Unicode.
 
 Here is an example of @value{GDBN}'s character set support in action.
@@ -7538,8 +7538,8 @@ the macro invocation explicit in the original text --- the invocation of
 @code{ADD} --- but does not expand the invocation of the macro @code{M},
 which was introduced by @code{ADD}.
 
-Once the program is running, GDB uses the macro definitions in force at
-the source line of the current stack frame:
+Once the program is running, @value{GDBN} uses the macro definitions in
+force at the source line of the current stack frame:
 
 @smallexample
 (@value{GDBP}) break main
@@ -16467,7 +16467,7 @@ definitions for all user-defined commands.
 @item show max-user-call-depth
 @itemx set max-user-call-depth
 The value of @code{max-user-call-depth} controls how many recursion
-levels are allowed in user-defined commands before GDB suspects an
+levels are allowed in user-defined commands before @value{GDBN} suspects an
 infinite recursion and aborts the command.
 @end table
 
@@ -17803,7 +17803,7 @@ running.
 
 @item "^connected"
 @findex ^connected
-GDB has connected to a remote target.
+@value{GDBN} has connected to a remote target.
 
 @item "^error" "," @var{c-string}
 @findex ^error
@@ -17812,7 +17812,7 @@ error message.
 
 @item "^exit"
 @findex ^exit
-GDB has terminated.
+@value{GDBN} has terminated.
 
 @end table
 
@@ -17941,9 +17941,9 @@ reason that execution stopped.
 <- (gdb)
 @end smallexample
 
-@subheading Quitting GDB
+@subheading Quitting @value{GDBN}
 
-Quitting GDB just prints the result class @samp{^exit}.
+Quitting @value{GDBN} just prints the result class @samp{^exit}.
 
 @smallexample
 -> (gdb)
@@ -18863,7 +18863,7 @@ args=[@{name="format",value="0x8048e9c \"%*s%c %d %c\\n\""@},
 @section @sc{gdb/mi} Program Execution
 
 These are the asynchronous commands which generate the out-of-band
-record @samp{*stopped}.  Currently GDB only really executes
+record @samp{*stopped}.  Currently @value{GDBN} only really executes
 asynchronously with remote targets and this interaction is mimicked in
 other cases.
 
@@ -20894,8 +20894,8 @@ The @value{GDBN} equivalent is @samp{info source}
 
 List the source files for the current executable.
 
-It will always output the filename, but only when GDB can find the absolute
-file name of a source file, will it output the fullname.
+It will always output the filename, but only when @value{GDBN} can find
+the absolute file name of a source file, will it output the fullname.
 
 @subsubheading @value{GDBN} Command
 
@@ -22034,9 +22034,9 @@ What compiler (and its version) was used to compile @value{GDBN}---e.g.@:
 @item
 What compiler (and its version) was used to compile the program you are
 debugging---e.g.@:  ``@value{GCC}--2.8.1'', or ``HP92453-01 A.10.32.03 HP
-C Compiler''.  For @value{NGCC}, you can say @kbd{gcc --version} to get this
-information; for other compilers, see the documentation for those
-compilers.
+C Compiler''.  For @value{NGCC}, you can say @kbd{@value{GCC} --version}
+to get this information; for other compilers, see the documentation for
+those compilers.
 
 @item
 The command arguments you gave the compiler to compile your example and
@@ -22833,7 +22833,7 @@ compiled with the @samp{-pg} compiler option.
 @item maint show-debug-regs
 Control whether to show variables that mirror the x86 hardware debug
 registers.  Use @code{ON} to enable, @code{OFF} to disable.  If
-enabled, the debug registers values are shown when GDB inserts or
+enabled, the debug registers values are shown when @value{GDBN} inserts or
 removes a hardware breakpoint or watchpoint, and when the inferior
 triggers a hardware-assisted breakpoint or watchpoint.
 
@@ -23034,7 +23034,7 @@ part of the packet's syntax.  No @value{GDBN} packet uses spaces to
 separate its components.  For example, a template like @samp{foo
 @var{bar} @var{baz}} describes a packet beginning with the three ASCII
 bytes @samp{foo}, followed by a @var{bar}, followed directly by a
-@var{baz}.  GDB does not transmit a space character between the
+@var{baz}.  @value{GDBN} does not transmit a space character between the
 @samp{foo} and the @var{bar}, or between the @var{bar} and the
 @var{baz}.
 
@@ -24556,8 +24556,8 @@ request from @value{GDBN} is required.
 (@value{GDBP}) continue
   <- target requests 'system call X'
   target is stopped, @value{GDBN} executes system call
-  -> GDB returns result
-  ... target continues, GDB returns to wait for the target
+  -> @value{GDBN} returns result
+  ... target continues, @value{GDBN} returns to wait for the target
   <- target hits breakpoint and sends a Txx packet
 @end smallexample
 
