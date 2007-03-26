@@ -2337,9 +2337,6 @@ xg_translate_idioms (char **popname, int *pnum_args, char **arg_strings)
   char *opname = *popname;
   bfd_boolean has_underbar = FALSE;
 
-  if (cur_vinsn.inside_bundle)
-    return 0;
-
   if (*opname == '_')
     {
       has_underbar = TRUE;
@@ -2382,7 +2379,11 @@ xg_translate_idioms (char **popname, int *pnum_args, char **arg_strings)
       return 0;
     }
 
-  if (xtensa_nop_opcode == XTENSA_UNDEFINED
+  /* Don't do anything special with NOPs inside FLIX instructions.  They
+     are handled elsewhere.  Real NOP instructions are always available 
+     in configurations with FLIX, so this should never be an issue but
+     check for it anyway.  */
+  if (!cur_vinsn.inside_bundle && xtensa_nop_opcode == XTENSA_UNDEFINED
       && strcmp (opname, "nop") == 0)
     {
       if (use_transform () && !has_underbar && density_supported)
