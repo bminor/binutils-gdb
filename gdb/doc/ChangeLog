@@ -1,5 +1,9 @@
 2007-03-26  Bob Wilson  <bob.wilson@acm.org>
 	
+	* gdb.texinfo (Omissions from Ada, Additions to Ada): Wrap long lines.
+	
+2007-03-26  Bob Wilson  <bob.wilson@acm.org>
+	
 	* gdb.texinfo (Invoking GDB): Use @value{GDBP}.
 	(Source Path, Character Sets, Macros, Define)
 	(GDB/MI Result Records, GDB/MI Simple Examples)

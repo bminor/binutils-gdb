@@ -10462,10 +10462,11 @@ Calls to dispatching subprograms are not implemented.
 
 @item
 The overloading algorithm is much more limited (i.e., less selective)
-than that of real Ada.  It makes only limited use of the context in which a subexpression
-appears to resolve its meaning, and it is much looser in its rules for allowing
-type matches.  As a result, some function calls will be ambiguous, and the user
-will be asked to choose the proper resolution.
+than that of real Ada.  It makes only limited use of the context in
+which a subexpression appears to resolve its meaning, and it is much
+looser in its rules for allowing type matches.  As a result, some
+function calls will be ambiguous, and the user will be asked to choose
+the proper resolution.
 
 @item
 The @code{new} operator is not implemented.
@@ -10490,19 +10491,19 @@ extensions to Ada (@pxref{Expressions}):
 
 @itemize @bullet
 @item
-If the expression @var{E} is a variable residing in memory 
-(typically a local variable or array element) and @var{N} is 
-a positive integer, then @code{@var{E}@@@var{N}} displays the values of
-@var{E} and the @var{N}-1 adjacent variables following it in memory as an array.  
-In Ada, this operator is generally not necessary, since its prime use
-is in displaying parts of an array, and slicing will usually do this in Ada.
-However, there are occasional uses when debugging programs
-in which certain debugging information has been optimized away.
+If the expression @var{E} is a variable residing in memory (typically
+a local variable or array element) and @var{N} is a positive integer,
+then @code{@var{E}@@@var{N}} displays the values of @var{E} and the
+@var{N}-1 adjacent variables following it in memory as an array.  In
+Ada, this operator is generally not necessary, since its prime use is
+in displaying parts of an array, and slicing will usually do this in
+Ada.  However, there are occasional uses when debugging programs in
+which certain debugging information has been optimized away.
 
 @item
-@code{@var{B}::@var{var}} means ``the variable named @var{var} that appears
-in function or file @var{B}.''  When @var{B} is a file name, you must typically
-surround it in single quotes.
+@code{@var{B}::@var{var}} means ``the variable named @var{var} that
+appears in function or file @var{B}.''  When @var{B} is a file name,
+you must typically surround it in single quotes.
 
 @item 
 The expression @code{@{@var{type}@} @var{addr}} means ``the variable of type
@@ -10513,8 +10514,8 @@ A name starting with @samp{$} is a convenience variable
 (@pxref{Convenience Vars}) or a machine register (@pxref{Registers}).
 @end itemize
 
-In addition, @value{GDBN} provides a few other shortcuts and outright additions specific 
-to Ada:
+In addition, @value{GDBN} provides a few other shortcuts and outright
+additions specific to Ada:
 
 @itemize @bullet
 @item 
@@ -10549,8 +10550,8 @@ in strings.   For example,
    "One line.["0a"]Next line.["0a"]"
 @end smallexample
 @noindent
-contains an ASCII newline character (@code{Ada.Characters.Latin_1.LF}) after each
-period.
+contains an ASCII newline character (@code{Ada.Characters.Latin_1.LF})
+after each period.
 
 @item
 The subtype used as a prefix for the attributes @t{'Pos}, @t{'Min}, and
@@ -10564,7 +10565,8 @@ print 'max(x, y)
 @item
 When printing arrays, @value{GDBN} uses positional notation when the 
 array has a lower bound of 1, and uses a modified named notation otherwise.
-For example, a one-dimensional array of three integers with a lower bound of 3 might print as
+For example, a one-dimensional array of three integers with a lower bound
+of 3 might print as
 
 @smallexample
 (3 => 10, 17, 1)
