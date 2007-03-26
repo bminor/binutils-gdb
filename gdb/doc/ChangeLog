@@ -1,5 +1,9 @@
 2007-03-26  Bob Wilson  <bob.wilson@acm.org>
 
+	* gdb.texinfo (Variables, C): Update cross reference to GCC docs.
+
+2007-03-26  Bob Wilson  <bob.wilson@acm.org>
+
 	* gdb.texinfo (Top): Move TUI and Annotations menu entries to match
 	the order of the nodes.
 	(C Operators, C Constants, Debugging C): Remove extra menus.

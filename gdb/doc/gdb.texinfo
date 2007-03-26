@@ -5623,8 +5623,9 @@ usually supports the @option{-gstabs+} option.  @option{-gstabs+}
 produces debug info in a format that is superior to formats such as
 COFF.  You may be able to use DWARF 2 (@option{-gdwarf-2}), which is also
 an effective form for debug info.  @xref{Debugging Options,,Options
-for Debugging Your Program or @sc{gnu} CC, gcc.info, Using @sc{gnu} CC}.
-@xref{C, , Debugging C++}, for more info about debug info formats
+for Debugging Your Program or GCC, gcc.info, Using the @sc{gnu}
+Compiler Collection (GCC)}.
+@xref{C, , Debugging C++}, for more information about debug info formats
 that are best suited to C@t{++} programs.
 
 If you ask to print an object whose contents are unknown to
@@ -9015,8 +9016,8 @@ For best results when using @sc{gnu} C@t{++}, use the DWARF 2 debugging
 format; if it doesn't work on your system, try the stabs+ debugging
 format.  You can select those formats explicitly with the @code{g++}
 command-line options @option{-gdwarf-2} and @option{-gstabs+}.
-@xref{Debugging Options,,Options for Debugging Your Program or @sc{gnu}
-CC, gcc.info, Using @sc{gnu} CC}.
+@xref{Debugging Options,,Options for Debugging Your Program or GCC,
+gcc.info, Using the @sc{gnu} Compiler Collection (GCC)}.
 
 @menu
 * C Operators::                 C and C@t{++} operators
