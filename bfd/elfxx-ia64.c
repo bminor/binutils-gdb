@@ -5820,6 +5820,7 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
 #define elf_backend_reloc_type_class	elfNN_ia64_reloc_type_class
 #define elf_backend_rela_normal		1
 #define elf_backend_special_sections	elfNN_ia64_special_sections
+#define elf_backend_default_execstack	0
 
 /* FIXME: PR 290: The Intel C compiler generates SHT_IA_64_UNWIND with
    SHF_LINK_ORDER. But it doesn't set the sh_link or sh_info fields.

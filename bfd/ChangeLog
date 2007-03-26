@@ -1,3 +1,7 @@
+2007-03-27  Andreas Schwab  <schwab@suse.de>
+
+	* elfxx-ia64.c (elf_backend_default_execstack): Define to 0.
+
 2003-03-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.
