@@ -3615,7 +3615,6 @@ mips_elf_next_relocation (bfd *abfd ATTRIBUTE_UNUSED, unsigned int r_type,
     }
 
   /* We didn't find it.  */
-  bfd_set_error (bfd_error_bad_value);
   return NULL;
 }
 
@@ -7857,10 +7856,8 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		      && mips_elf_local_relocation_p (input_bfd, rel,
 						      local_sections, FALSE)))
 		{
-		  bfd_vma l;
 		  const Elf_Internal_Rela *lo16_relocation;
 		  reloc_howto_type *lo16_howto;
-		  bfd_byte *lo16_location;
 		  int lo16_type;
 
 		  if (r_type == R_MIPS16_HI16)
@@ -7883,7 +7880,12 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		     several relocations for the same address.  In
 		     that case, the R_MIPS_LO16 relocation may occur
 		     as one of these.  We permit a similar extension
-		     in general, as that is useful for GCC.  */
+		     in general, as that is useful for GCC.
+
+		     In some cases GCC dead code elimination removes
+		     the LO16 but keeps the corresponding HI16.  This
+		     is strictly speaking a violation of the ABI but
+		     not immediately harmful.  */
 		  lo16_relocation = mips_elf_next_relocation (input_bfd,
 							      lo16_type,
 							      rel, relend);
@@ -7901,28 +7903,33 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			(_("%B: Can't find matching LO16 reloc against `%s' for %s at 0x%lx in section `%A'"),
 			 input_bfd, input_section, name, howto->name,
 			 rel->r_offset);
-		      return FALSE;
 		    }
+		  else
+		    {
+		      bfd_byte *lo16_location;
+		      bfd_vma l;
 
-		  lo16_location = contents + lo16_relocation->r_offset;
+		      lo16_location = contents + lo16_relocation->r_offset;
 
-		  /* Obtain the addend kept there.  */
-		  lo16_howto = MIPS_ELF_RTYPE_TO_HOWTO (input_bfd,
-							lo16_type, FALSE);
-		  _bfd_mips16_elf_reloc_unshuffle (input_bfd, lo16_type, FALSE,
-						   lo16_location);
-		  l = mips_elf_obtain_contents (lo16_howto, lo16_relocation,
-						input_bfd, contents);
-		  _bfd_mips16_elf_reloc_shuffle (input_bfd, lo16_type, FALSE,
-						 lo16_location);
-		  l &= lo16_howto->src_mask;
-		  l <<= lo16_howto->rightshift;
-		  l = _bfd_mips_elf_sign_extend (l, 16);
+		      /* Obtain the addend kept there.  */
+		      lo16_howto = MIPS_ELF_RTYPE_TO_HOWTO (input_bfd,
+							    lo16_type, FALSE);
+		      _bfd_mips16_elf_reloc_unshuffle (input_bfd, lo16_type,
+						       FALSE, lo16_location);
+		      l = mips_elf_obtain_contents (lo16_howto,
+						    lo16_relocation,
+						    input_bfd, contents);
+		      _bfd_mips16_elf_reloc_shuffle (input_bfd, lo16_type,
+						     FALSE, lo16_location);
+		      l &= lo16_howto->src_mask;
+		      l <<= lo16_howto->rightshift;
+		      l = _bfd_mips_elf_sign_extend (l, 16);
 
-		  addend <<= 16;
+		      addend <<= 16;
 
-		  /* Compute the combined addend.  */
-		  addend += l;
+		      /* Compute the combined addend.  */
+		      addend += l;
+		    }
 		}
 	      else
 		addend <<= howto->rightshift;
