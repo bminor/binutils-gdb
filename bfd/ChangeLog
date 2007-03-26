@@ -193,6 +193,7 @@
 
 2007-03-26  Thiemo Seufer  <ths@mips.com>
 
+	PR ld/4208
 	* elfxx-mips.c (mips_elf_next_relocation): Don't signal an error if no
 	matching relocation is found.
 	(_bfd_mips_elf_relocate_section): Only warn about missing relocations.
