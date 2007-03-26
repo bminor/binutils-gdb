@@ -1,3 +1,10 @@
+2007-03-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* embedspu.sh: Combine "_EAR_" and "_EAR_*" patterns.  Tighten
+	.toe section and .toe address checks.  Use .reloc for _EAR*
+	symbols defined in non-BSS sections.  Build table for _SPUEAR_
+	symbols.
+
 2007-03-23  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	PR gas/3811

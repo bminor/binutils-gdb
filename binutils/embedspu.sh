@@ -116,18 +116,27 @@ main ()
     exit 1
   fi
 
+  toe=`${READELF} -S ${INFILE} | sed -n -e 's, *\[ *\([0-9]*\)\] *\.toe *[PROGN]*BITS *\([0-9a-f]*\).*,\1 \2,p'`
+  toe_addr=`echo $toe | sed -n -e 's,.* ,,p'`
+  toe=`echo $toe | sed -n -e 's, .*,,p'`
+  sections=`${READELF} -S ${INFILE} | sed -n -e 's, *\[ *\([0-9]*\)\] *[^ ]* *PROGBITS *\([0-9a-f]*\) *\([0-9a-f]*\).*,\1 \2 \3,p'`
+  sections=`echo ${sections}`
+
   # Build embedded SPU image.
   # 1. The whole SPU ELF file is written to .rodata.speelf
   # 2. Symbols starting with the string "_EAR_" in the SPU ELF image are
   #    special.  They allow an SPU program to access corresponding symbols
   #    (ie. minus the _EAR_ prefix), in the PowerPC program.  _EAR_ without
   #    a suffix is used to refer to the addrress of the SPU image in
-  #    PowerPC address space.  _EAR_* symbols must all be defined in one
-  #    section at 16 byte intervals.
-  #    Find all _EAR_ symbols using readelf, sort by address, and write
-  #    the address of the corresponding PowerPC symbol in a table built
-  #    in .data.spetoe.
+  #    PowerPC address space.  _EAR_* symbols must all be defined in .toe
+  #    at 16 byte intervals, or they must be defined in other non-bss
+  #    sections.
+  #    Find all _EAR_ symbols in .toe using readelf, sort by address, and
+  #    write the address of the corresponding PowerPC symbol in a table
+  #    built in .data.spetoe.  For _EAE_ symbols not in .toe, create
+  #    .reloc commands to relocate their location directly.
   # 3. Write a struct spe_program_handle to .data.
+  # 4. Write a table of _SPUEAR_ symbols.
   ${CC} ${FLAGS} -x assembler-with-cpp -nostartfiles -nostdlib \
 	-Wa,-mbig -Wl,-r -Wl,-x -o ${OUTFILE} - <<EOF
  .section .rodata.speelf,"a",@progbits
@@ -140,29 +149,36 @@ __speelf__:
 __spetoe__:
 `${READELF} -s -W ${INFILE} | grep ' _EAR_' | sort -k 2 | awk \
 'BEGIN { \
-  last_addr = 0; \
-  last_sym = ""; \
+	addr = strtonum ("0x" '${toe_addr-0}'); \
+	split ("'"${sections}"'", s, " "); \
+	for (i = 1; i in s; i += 3) { \
+	    sec_off[s[i]] = strtonum ("0x" s[i+2]) - strtonum ("0x" s[i+1]); \
+	} \
 } \
-last_addr != 0 && strtonum("0x" $2) != last_addr + 16 { \
-	print "#error Symbols " last_sym " and " $8 " are not 16 bytes apart!"; \
+$7 == "'${toe}'" && strtonum ("0x" $2) != addr { \
+	print "#error Symbol " $8 " not in 16 byte element toe array!"; \
 } \
-{ last_addr = strtonum("0x" $2); \
-  last_sym = $8; \
+$7 == "'${toe}'" { \
+	addr = addr + 16; \
 } \
-$8 == "_EAR_" { \
+$7 == "'${toe}'" { \
 	print "#ifdef _LP64"; \
-	print " .quad __speelf__, 0"; \
+	print " .quad " ($8 == "_EAR_" ? "__speelf__" : substr($8, 6)) ", 0"; \
 	print "#else"; \
-	print " .int 0, __speelf__, 0, 0"; \
+	print " .int 0, " ($8 == "_EAR_" ? "__speelf__" : substr($8, 6)) ", 0, 0"; \
 	print "#endif"; \
 } \
-$8 != "_EAR_" { \
+$7 != "'${toe}'" && $7 in sec_off { \
 	print "#ifdef _LP64"; \
-	print " .quad " substr($8, 6) ", 0"; \
+	print " .reloc __speelf__+" strtonum ("0x" $2) + sec_off[$7] ", R_PPC64_ADDR64, " ($8 == "_EAR_" ? "__speelf__" : substr($8, 6)); \
 	print "#else"; \
-	print " .int 0, " substr($8, 6) ", 0, 0"; \
+	print " .reloc __speelf__+" strtonum ("0x" $2) + sec_off[$7] + 4 ", R_PPC_ADDR32, " ($8 == "_EAR_" ? "__speelf__" : substr($8, 6)); \
 	print "#endif"; \
-}'`
+} \
+$7 != "'${toe}'" && ! $7 in sec_off { \
+	print "#error Section not found for " $8; \
+} \
+'`
 
  .section .data,"aw",@progbits
  .globl ${SYMBOL}
@@ -183,6 +199,16 @@ ${SYMBOL}:
  .int __spetoe__
 #endif
  .size ${SYMBOL}, . - ${SYMBOL}
+
+`${READELF} -s -W ${INFILE} | grep ' _SPUEAR_' | sort -k 2 | awk \
+'{ \
+	print " .globl '${SYMBOL}'_" substr($8, 9); \
+	print " .type '${SYMBOL}'_" substr($8, 9) ", @object"; \
+	print " .size '${SYMBOL}'_" substr($8, 9) ", 4"; \
+	print "'${SYMBOL}'_" substr($8, 9) ":"; \
+	print " .int " $2; \
+} \
+'`
 EOF
 }
 
