@@ -1,4 +1,11 @@
 2007-03-26  Bob Wilson  <bob.wilson@acm.org>
+	
+	* gdb.texinfo (Help): Fix formatting of examples.
+	(Variables): Use @ifnotinfo instead of @iftex.
+	(Non-debug DLL symbols): Use @ref instead of @pxref.
+	(Sparclet File): Use @samp instead of quotes.
+	
+2007-03-26  Bob Wilson  <bob.wilson@acm.org>
 
 	* gdb.texinfo (Variables, C): Update cross reference to GCC docs.
 

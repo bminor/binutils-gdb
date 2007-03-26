@@ -1572,7 +1572,7 @@ running -- Running the program
 stack -- Examining the stack
 status -- Status inquiries
 support -- Support facilities
-tracepoints -- Tracing of program execution without@*
+tracepoints -- Tracing of program execution without
                stopping the program
 user-defined -- User-defined commands
 
@@ -1599,9 +1599,9 @@ List of commands:
 @c Line break in "show" line falsifies real output, but needed
 @c to fit in smallbook page size.
 info -- Generic command for showing things
- about the program being debugged
+        about the program being debugged
 show -- Generic command for showing things
- about the debugger
+        about the debugger
 
 Type "help" followed by command name for full
 documentation.
@@ -1629,9 +1629,9 @@ results in:
 @smallexample
 @c @group
 set symbol-reloading -- Set dynamic symbol table reloading
-                                 multiple times in one run
+                        multiple times in one run
 show symbol-reloading -- Show dynamic symbol table reloading
-                                 multiple times in one run
+                        multiple times in one run
 @c @end group
 @end smallexample
 
@@ -5556,10 +5556,10 @@ you can specify a static variable in a particular function or file,
 using the colon-colon (@code{::}) notation:
 
 @cindex colon-colon, context for variables/functions
-@iftex
+@ifnotinfo
 @c info cannot cope with a :: index entry, but why deprive hard copy readers?
 @cindex @code{::}, context for variables/functions
-@end iftex
+@end ifnotinfo
 @smallexample
 @var{file}::@var{variable}
 @var{function}::@var{variable}
@@ -13789,8 +13789,8 @@ will have been loaded. The easiest way around this problem is simply to
 start the program --- either by setting a breakpoint or letting the
 program run once to completion. It is also possible to force
 @value{GDBN} to load a particular DLL before starting the executable ---
-see the shared library information in @pxref{Files} or the
-@code{dll-symbols} command in @pxref{Cygwin Native}. Currently,
+see the shared library information in @ref{Files}, or the
+@code{dll-symbols} command in @ref{Cygwin Native}. Currently,
 explicitly loading symbols from a DLL with no debugging information will
 cause the symbol names to be duplicated in @value{GDBN}'s lookup table,
 which may adversely affect symbol lookup performance.
@@ -15227,7 +15227,7 @@ The @value{GDBN} command @code{file} lets you choose with program to debug.
 @value{GDBN} locates
 the file by searching the directories listed in the command search
 path.
-If the file was compiled with debug information (option "-g"), source
+If the file was compiled with debug information (option @samp{-g}), source
 files will be searched as well.
 @value{GDBN} locates
 the source files by searching the directories listed in the directory search
