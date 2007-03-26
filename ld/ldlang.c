@@ -52,7 +52,6 @@ static struct obstack map_obstack;
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free free
 static const char *startup_file;
-static lang_statement_list_type input_file_chain;
 static bfd_boolean placed_commons = FALSE;
 static bfd_boolean stripped_excluded_sections = FALSE;
 static lang_output_section_statement_type *default_common_section;
@@ -89,6 +88,7 @@ lang_output_section_statement_type *abs_output_section;
 lang_statement_list_type lang_output_section_statement;
 lang_statement_list_type *stat_ptr = &statement_list;
 lang_statement_list_type file_chain = { NULL, NULL };
+lang_statement_list_type input_file_chain;
 struct bfd_sym_chain entry_symbol = { NULL, NULL };
 static const char *entry_symbol_default = "start";
 const char *entry_section = ".text";
@@ -988,7 +988,6 @@ lang_add_input_file (const char *name,
 		     lang_input_file_enum_type file_type,
 		     const char *target)
 {
-  lang_has_input_file = TRUE;
   return new_afile (name, file_type, target, TRUE);
 }
 

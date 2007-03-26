@@ -238,6 +238,155 @@ gld${EMULATION_NAME}_finish (void)
 
 EOF
 
+if grep -q 'ld_elf.*ppc.*_emulation' ldemul-list.h; then
+  cat >>e${EMULATION_NAME}.c <<EOF
+#include "filenames.h"
+#include <fcntl.h>
+#include <sys/wait.h>
+
+struct tflist {
+  struct tflist *next;
+  char name[9];
+};
+
+static struct tflist *tmp_file_list;
+
+static void clean_tmp (void)
+{
+  for (; tmp_file_list != NULL; tmp_file_list = tmp_file_list->next)
+    unlink (tmp_file_list->name);
+}
+
+/* This function is called when building a ppc32 or ppc64 executable
+   to handle embedded spu images.  */
+extern bfd_boolean embedded_spu_file (lang_input_statement_type *, const char *);
+
+bfd_boolean
+embedded_spu_file (lang_input_statement_type *entry, const char *flags)
+{
+  const char *cmd[6];
+  const char *sym;
+  char *handle, *p;
+  struct tflist *tf;
+  char *oname;
+  int fd;
+  pid_t pid;
+  int status;
+  union lang_statement_union **old_stat_tail;
+  union lang_statement_union **old_file_tail;
+  union lang_statement_union *new_ent;
+
+  if (entry->the_bfd->format != bfd_object
+      || strcmp (entry->the_bfd->xvec->name, "elf32-spu") != 0
+      || (entry->the_bfd->tdata.elf_obj_data->elf_header->e_type != ET_EXEC
+	  && entry->the_bfd->tdata.elf_obj_data->elf_header->e_type != ET_DYN))
+    return FALSE;
+
+  /* Use the filename as the symbol marking the program handle struct.  */
+  sym = strrchr (entry->the_bfd->filename, '/');
+#ifdef HAVE_DOS_BASED_FILE_SYSTEM
+  {
+    char *bslash = strrchr (entry->the_bfd->filename, '\\');
+
+    if (sym == NULL || (bslash != NULL && bslash > sym))
+      sym = bslash;
+    if (sym == NULL
+	&& entry->the_bfd->filename[0] != '\0'
+	&& entry->the_bfd->filename[1] == ':')
+      sym = entry->the_bfd->filename + 1;
+  }
+#endif
+  if (sym == NULL)
+    sym = entry->the_bfd->filename;
+  else
+    ++sym;
+
+  handle = xstrdup (sym);
+  for (p = handle; *p; ++p)
+    if (!(ISALNUM (*p) || *p == '$' || *p == '.'))
+      *p = '_';
+
+  if (tmp_file_list == NULL)
+    atexit (clean_tmp);
+  tf = xmalloc (sizeof (*tf));
+  tf->next = tmp_file_list;
+  tmp_file_list = tf;
+  oname = tf->name;
+  memcpy (tf->name, "ldXXXXXX", sizeof (tf->name));
+
+#ifdef HAVE_MKSTEMP
+  fd = mkstemp (oname);
+#else
+  oname = mktemp (oname);
+  if (oname == NULL)
+    return FALSE;
+  fd = open (oname, O_RDWR | O_CREAT | O_EXCL, 0600);
+#endif
+  if (fd == -1)
+    return FALSE;
+  close (fd);
+
+  /* Use fork() and exec() rather than system() so that we don't
+     need to worry about quoting args.  */
+  cmd[0] = "embedspu";
+  cmd[1] = flags;
+  cmd[2] = handle;
+  cmd[3] = entry->the_bfd->filename;
+  cmd[4] = oname;
+  cmd[5] = NULL;
+  if (trace_file_tries)
+    {
+      info_msg (_("running: %s \"%s\" \"%s\" \"%s\" \"%s\"\n"),
+		cmd[0], cmd[1], cmd[2], cmd[3], cmd[4]);
+      fflush (stdout);
+    }
+
+  pid = fork ();
+  if (pid == -1)
+    return FALSE;
+  if (pid == 0)
+    {
+      execvp (cmd[0], (char *const *) cmd);
+      perror (cmd[0]);
+      _exit (127);
+    }
+#ifdef HAVE_WAITPID
+#define WAITFOR(PID, STAT) waitpid (PID, STAT, 0)
+#else
+#define WAITFOR(PID, STAT) wait (STAT)
+#endif
+  if (WAITFOR (pid, &status) != pid
+      || !WIFEXITED (status)
+      || WEXITSTATUS (status) != 0)
+    return FALSE;
+#undef WAITFOR
+
+  old_stat_tail = stat_ptr->tail;
+  old_file_tail = input_file_chain.tail;
+  if (lang_add_input_file (oname, lang_input_file_is_file_enum, NULL) == NULL)
+    return FALSE;
+
+  /* lang_add_input_file put the new list entry at the end of the statement
+     and input file lists.  Move it to just after the current entry.  */
+  new_ent = *old_stat_tail;
+  *old_stat_tail = NULL;
+  stat_ptr->tail = old_stat_tail;
+  *old_file_tail = NULL;
+  input_file_chain.tail = old_file_tail;
+  new_ent->header.next = entry->header.next;
+  entry->header.next = new_ent;
+  new_ent->input_statement.next_real_file = entry->next_real_file;
+  entry->next_real_file = new_ent;
+
+  /* Ensure bfd sections are excluded from the output.  */
+  bfd_section_list_clear (entry->the_bfd);
+  entry->loaded = TRUE;
+  return TRUE;
+}
+
+EOF
+fi
+
 # Define some shell vars to insert bits of code into the standard elf
 # parse_args and list_options functions.
 #

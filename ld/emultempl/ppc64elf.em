@@ -459,6 +459,24 @@ ppc_lang_for_each_input_file (void (*func) (lang_input_statement_type *))
 
 EOF
 
+if grep -q 'ld_elf32_spu_emulation' ldemul-list.h; then
+  cat >>e${EMULATION_NAME}.c <<EOF
+/* Special handling for embedded SPU executables.  */
+extern bfd_boolean embedded_spu_file (lang_input_statement_type *, const char *);
+static bfd_boolean gld${EMULATION_NAME}_load_symbols (lang_input_statement_type *);
+
+static bfd_boolean
+ppc64_recognized_file (lang_input_statement_type *entry)
+{
+  if (embedded_spu_file (entry, "-m64"))
+    return TRUE;
+
+  return gld${EMULATION_NAME}_load_symbols (entry);
+}
+EOF
+LDEMUL_RECOGNIZED_FILE=ppc64_recognized_file
+fi
+
 # Define some shell vars to insert bits of code into the standard elf
 # parse_args and list_options functions.
 #

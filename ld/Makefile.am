@@ -722,6 +722,7 @@ eelf32_sparc_vxworks.c: $(srcdir)/emulparams/elf32_sparc_vxworks.sh \
 	${GENSCRIPTS} elf32_sparc_vxworks "$(tdir_elf32_sparc_vxworks)"
 eelf32_spu.c: $(srcdir)/emulparams/elf32_spu.sh $(srcdir)/emultempl/spuelf.em \
   $(srcdir)/emultempl/spu_ovl.o \
+  ldemul-list.h \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_spu "$(tdir_elf32_spu)"
 $(srcdir)/emultempl/spu_ovl.o: @MAINT@ $(srcdir)/emultempl/spu_ovl.S
@@ -819,21 +820,25 @@ eelf32mt.c: $(srcdir)/emulparams/elf32mt.sh \
 eelf32lppc.c: $(srcdir)/emulparams/elf32lppc.sh \
   $(srcdir)/emulparams/elf32ppccommon.sh \
   $(srcdir)/emulparams/elf32ppc.sh $(srcdir)/emultempl/ppc32elf.em \
+  ldemul-list.h \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32lppc "$(tdir_elf32lppc)"
 eelf32lppcnto.c: $(srcdir)/emulparams/elf32lppcnto.sh \
   $(srcdir)/emulparams/elf32ppc.sh $(srcdir)/emulparams/elf32ppccommon.sh \
   $(srcdir)/emultempl/ppc32elf.em $(ELF_DEPS) \
+  ldemul-list.h \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32lppcnto "$(tdir_elf32lppcnto)"
 eelf32lppcsim.c: $(srcdir)/emulparams/elf32lppcsim.sh \
   $(srcdir)/emulparams/elf32lppc.sh $(srcdir)/emulparams/elf32ppc.sh \
   $(srcdir)/emulparams/elf32ppccommon.sh $(srcdir)/emultempl/ppc32elf.em \
+  ldemul-list.h \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32lppcsim "$(tdir_elf32lppcsim)"
 eelf32ppcnto.c: $(srcdir)/emulparams/elf32ppcnto.sh \
   $(srcdir)/emulparams/elf32ppc.sh $(srcdir)/emulparams/elf32ppccommon.sh \
   $(srcdir)/emultempl/ppc32elf.em $(ELF_DEPS) \
+  ldemul-list.h \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppcnto "$(tdir_elf32ppcnto)"
 eelf32ppcwindiss.c: $(srcdir)/emulparams/elf32ppcwindiss.sh \
@@ -854,28 +859,34 @@ eelf32openrisc.c: $(srcdir)/emulparams/elf32openrisc.sh \
 	${GENSCRIPTS} elf32openrisc "$(tdir_openrisc)"
 eelf32ppc.c: $(srcdir)/emulparams/elf32ppc.sh \
   $(srcdir)/emulparams/elf32ppccommon.sh $(srcdir)/emultempl/ppc32elf.em \
+  ldemul-list.h \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppc "$(tdir_elf32ppc)"
 eelf32ppc_fbsd.c: $(srcdir)/emulparams/elf32ppc_fbsd.sh \
   $(srcdir)/emulparams/elf32ppc.sh $(srcdir)/emulparams/elf32ppccommon.sh \
   $(srcdir)/emultempl/ppc32elf.em $(ELF_DEPS) \
+  ldemul-list.h \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppc_fbsd "$(tdir_elf32ppc_fbsd)"
 eelf32ppcsim.c: $(srcdir)/emulparams/elf32ppcsim.sh \
   $(srcdir)/emulparams/elf32ppc.sh $(srcdir)/emulparams/elf32ppccommon.sh \
   $(srcdir)/emultempl/ppc32elf.em $(ELF_DEPS) \
+  ldemul-list.h \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppcsim "$(tdir_elf32ppcsim)"
 eelf32ppclinux.c: $(srcdir)/emulparams/elf32ppclinux.sh \
   $(srcdir)/emulparams/elf32ppc.sh $(srcdir)/emulparams/elf32ppccommon.sh \
   $(srcdir)/emultempl/ppc32elf.em $(ELF_DEPS) \
+  ldemul-list.h \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppclinux "$(tdir_elf32ppclinux)"
 eelf64ppc.c: $(srcdir)/emulparams/elf64ppc.sh $(srcdir)/emultempl/ppc64elf.em \
+  ldemul-list.h \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64ppc "$(tdir_elf64ppc)"
 eelf64lppc.c: $(srcdir)/emulparams/elf64lppc.sh \
   $(srcdir)/emulparams/elf64ppc.sh $(srcdir)/emultempl/ppc64elf.em \
+  ldemul-list.h \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64lppc "$(tdir_elf64lppc)"
 eelf32i370.c: $(srcdir)/emulparams/elf32i370.sh \
