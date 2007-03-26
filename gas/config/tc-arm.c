@@ -333,6 +333,7 @@ struct arm_it
     unsigned immisreg	: 1;  /* .imm field is a second register.  */
     unsigned isscalar   : 1;  /* Operand is a (Neon) scalar.  */
     unsigned immisalign : 1;  /* Immediate is an alignment specifier.  */
+    unsigned immisfloat : 1;  /* Immediate was parsed as a float.  */
     /* Note: we abuse "regisimm" to mean "is Neon register" in VMOV
        instructions. This allows us to disambiguate ARM <-> vector insns.  */
     unsigned regisimm   : 1;  /* 64-bit immediate, reg forms high 32 bits.  */
@@ -4177,17 +4178,42 @@ is_quarter_float (unsigned imm)
 
 /* Parse an 8-bit "quarter-precision" floating point number of the form:
    0baBbbbbbc defgh000 00000000 00000000.
-   The minus-zero case needs special handling, since it can't be encoded in the
-   "quarter-precision" float format, but can nonetheless be loaded as an integer
-   constant.  */
+   The zero and minus-zero cases need special handling, since they can't be
+   encoded in the "quarter-precision" float format, but can nonetheless be
+   loaded as integer constants.  */
 
 static unsigned
 parse_qfloat_immediate (char **ccp, int *immed)
 {
   char *str = *ccp;
+  char *fpnum;
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
+  int found_fpchar = 0;
   
   skip_past_char (&str, '#');
+  
+  /* We must not accidentally parse an integer as a floating-point number. Make
+     sure that the value we parse is not an integer by checking for special
+     characters '.' or 'e'.
+     FIXME: This is a horrible hack, but doing better is tricky because type
+     information isn't in a very usable state at parse time.  */
+  fpnum = str;
+  skip_whitespace (fpnum);
+
+  if (strncmp (fpnum, "0x", 2) == 0)
+    return FAIL;
+  else
+    {
+      for (; *fpnum != '\0' && *fpnum != ' ' && *fpnum != '\n'; fpnum++)
+        if (*fpnum == '.' || *fpnum == 'e' || *fpnum == 'E')
+          {
+            found_fpchar = 1;
+            break;
+          }
+
+      if (!found_fpchar)
+        return FAIL;
+    }
   
   if ((str = atof_ieee (str, 's', words)) != NULL)
     {
@@ -4201,7 +4227,7 @@ parse_qfloat_immediate (char **ccp, int *immed)
           fpword |= words[i];
         }
       
-      if (is_quarter_float (fpword) || fpword == 0x80000000)
+      if (is_quarter_float (fpword) || (fpword & 0x7fffffff) == 0)
         *immed = fpword;
       else
         return FAIL;
@@ -5201,7 +5227,7 @@ parse_neon_mov (char **str, int *which_operand)
              Case 3: VMOV<c><q>.<dt> <Dd>, #<float-imm>
              Case 10: VMOV.F32 <Sd>, #<imm>
              Case 11: VMOV.F64 <Dd>, #<imm>  */
-        ;
+        inst.operands[i].immisfloat = 1;
       else if (parse_big_immediate (&ptr, i) == SUCCESS)
           /* Case 2: VMOV<c><q>.<dt> <Qd>, #<imm>
              Case 3: VMOV<c><q>.<dt> <Dd>, #<imm>  */
@@ -11568,9 +11594,15 @@ neon_qfloat_bits (unsigned imm)
    try smaller element sizes.  */
 
 static int
-neon_cmode_for_move_imm (unsigned immlo, unsigned immhi, unsigned *immbits,
-                         int *op, int size, enum neon_el_type type)
+neon_cmode_for_move_imm (unsigned immlo, unsigned immhi, int float_p,
+			 unsigned *immbits, int *op, int size,
+			 enum neon_el_type type)
 {
+  /* Only permit float immediates (including 0.0/-0.0) if the operand type is
+     float.  */
+  if (type == NT_float && !float_p)
+    return FAIL;
+
   if (type == NT_float && is_quarter_float (immlo) && immhi == 0)
     {
       if (size != 32 || *op == 1)
@@ -12566,7 +12598,7 @@ neon_move_immediate (void)
   struct neon_type_el et = neon_check_type (2, rs,
     N_I8 | N_I16 | N_I32 | N_I64 | N_F32 | N_KEY, N_EQK);
   unsigned immlo, immhi = 0, immbits;
-  int op, cmode;
+  int op, cmode, float_p;
 
   constraint (et.type == NT_invtype,
               _("operand size must be specified for immediate VMOV"));
@@ -12581,7 +12613,9 @@ neon_move_immediate (void)
   constraint (et.size < 32 && (immlo & ~((1 << et.size) - 1)) != 0,
               _("immediate has bits set outside the operand size"));
 
-  if ((cmode = neon_cmode_for_move_imm (immlo, immhi, &immbits, &op,
+  float_p = inst.operands[1].immisfloat;
+
+  if ((cmode = neon_cmode_for_move_imm (immlo, immhi, float_p, &immbits, &op,
                                         et.size, et.type)) == FAIL)
     {
       /* Invert relevant bits only.  */
@@ -12590,8 +12624,8 @@ neon_move_immediate (void)
          with one or the other; those cases are caught by
          neon_cmode_for_move_imm.  */
       op = !op;
-      if ((cmode = neon_cmode_for_move_imm (immlo, immhi, &immbits, &op,
-                                            et.size, et.type)) == FAIL)
+      if ((cmode = neon_cmode_for_move_imm (immlo, immhi, float_p, &immbits,
+					    &op, et.size, et.type)) == FAIL)
         {
           first_error (_("immediate out of range"));
           return;
