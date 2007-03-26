@@ -1,3 +1,7 @@
+2007-03-26  Julian Brown  <julian@codesourcery.com>
+
+	* doc/c-arm.texi: Add documentation for .dn/.qn directives.
+
 2007-03-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* doc/as.texinfo (Reloc): Document.
