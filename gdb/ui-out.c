@@ -493,12 +493,17 @@ ui_out_field_core_addr (struct ui_out *uiout,
 			CORE_ADDR address)
 {
   char addstr[20];
+  int addr_bit = TARGET_ADDR_BIT;
+
+  /* Truncate address to match deprecated_print_address_numeric().  */
+  if (addr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
+    address &= ((CORE_ADDR) 1 << addr_bit) - 1;
 
   /* FIXME: cagney/2002-05-03: Need local_address_string() function
      that returns the language localized string formatted to a width
      based on TARGET_ADDR_BIT.  */
   /* deprecated_print_address_numeric (address, 1, local_stream); */
-  if (TARGET_ADDR_BIT <= 32)
+  if (addr_bit <= 32)
     strcpy (addstr, hex_string_custom (address, 8));
   else
     strcpy (addstr, hex_string_custom (address, 16));

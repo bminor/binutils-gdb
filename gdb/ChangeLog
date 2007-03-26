@@ -1,5 +1,11 @@
+2007-03-26  Nigel Stephens  <nigel@mips.com>
+            Maciej W. Rozycki  <macro@mips.com>
+
+	* ui-out.c (ui_out_field_core_addr): Truncate address to
+	TARGET_ADDR_BIT size before printing.
+
 2007-03-22  Nigel Stephens  <nigel@mips.com>
-	    Maciej W. Rozycki  <macro@mips.com>
+            Maciej W. Rozycki  <macro@mips.com>
 
 	* remote-mips.c (mips_xfer_memory): Update prototype.
 
