@@ -1,3 +1,8 @@
+2007-03-23  Bob Wilson  <bob.wilson@acm.org>
+
+	* gdb.texinfo (File Options): Add missing parenthesis.
+	(Breakpoints, Special Fortran commands, PowerPC): Fix typos.
+
 2007-02-26  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (Monitor commands for gdbserver): New subsection.

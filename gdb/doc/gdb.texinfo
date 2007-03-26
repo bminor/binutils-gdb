@@ -886,7 +886,7 @@ in sequential order.  The order makes a difference when the
 When @value{GDBN} starts, it reads any arguments other than options as
 specifying an executable file and core file (or process ID).  This is
 the same as if the arguments were specified by the @samp{-se} and
-@samp{-c} (or @samp{-p} options respectively.  (@value{GDBN} reads the
+@samp{-c} (or @samp{-p}) options respectively.  (@value{GDBN} reads the
 first argument that does not have an associated option flag as
 equivalent to the @samp{-se} option followed by that argument; and the
 second argument that does not have an associated option flag, if any, as
@@ -2824,7 +2824,7 @@ Some @value{GDBN} commands accept a range of breakpoints on which to
 operate.  A breakpoint range is either a single breakpoint number, like
 @samp{5}, or two such numbers, in increasing order, separated by a
 hyphen, like @samp{5-7}.  When a breakpoint range is given to a command,
-all breakpoint in that range are operated on.
+all breakpoints in that range are operated on.
 
 @menu
 * Set Breaks::                  Setting breakpoints
@@ -9675,7 +9675,7 @@ such as common block displaying.
 @item info common @r{[}@var{common-name}@r{]}
 This command prints the values contained in the Fortran @code{COMMON}
 block whose name is @var{common-name}.  With no argument, the names of
-all @code{COMMON} blocks visible at current program location are
+all @code{COMMON} blocks visible at the current program location are
 printed.
 @end table
 
@@ -15117,7 +15117,7 @@ SDS monitor, running on a PowerPC board (such as Motorola's ADS).
 @end table
 
 @cindex SDS protocol
-The following commands specify to the SDS protocol are supported
+The following commands specific to the SDS protocol are supported
 by@value{GDBN}:
 
 @table @code
