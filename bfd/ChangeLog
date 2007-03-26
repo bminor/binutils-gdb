@@ -1,5 +1,11 @@
 2007-03-26  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-spu.c (struct stubarr): Add stub_hash_table and err fields.
+	(allocate_spuear_stubs): New function.
+	(spu_elf_size_stubs): Call allocate_spuear_stubs.
+
+2007-03-26  Alan Modra  <amodra@bigpond.net.au>
+
 	* aout-adobe.c (aout_32_bfd_reloc_name_lookup): Define.
 	* aout-arm.c (MY_bfd_reloc_name_lookup): Define.
 	(MY (bfd_reloc_name_lookup)): New function.
