@@ -21,7 +21,6 @@
 #ifndef TM_WINCE_H
 #define TM_WINCE_H 1
 
-#include "sh/tm-sh.h"
 #undef SOFTWARE_SINGLE_STEP_P
 #define SOFTWARE_SINGLE_STEP_P() 1
 

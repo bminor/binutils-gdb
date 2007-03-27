@@ -1,5 +1,13 @@
 2007-03-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* config/sh/tm-sh.h: Remove file.
+	* config/sh/embed.mt (DEPRECATED_TM_FILE): Remove.
+	* config/sh/linux.mt (DEPRECATED_TM_FILE): Remove.
+	* config/sh/nbsd.mt (DEPRECATED_TM_FILE): Remove.
+	* config/sh/tm-wince.h: Do not include "sh/tm-sh.h".
+
+2007-03-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* config/sh/tm-sh.h (DEPRECATED_BIG_REMOTE_BREAKPOINT,
 	DEPRECATED_LITTLE_REMOTE_BREAKPOINT): Remove.
 	* remote.c: Remove code under #ifdef DEPRECATED_REMOTE_BREAKPOINT,
