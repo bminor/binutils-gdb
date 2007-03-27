@@ -172,7 +172,7 @@ int remote_escape_output (const gdb_byte *buffer, int len,
 
 int look_up_one_symbol (const char *name, CORE_ADDR *addrp);
 
-void monitor_output (char *msg);
+void monitor_output (const char *msg);
 
 /* Functions from ``signals.c''.  */
 enum target_signal target_signal_from_host (int hostsig);

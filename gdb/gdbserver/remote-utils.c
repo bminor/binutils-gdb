@@ -1087,7 +1087,7 @@ look_up_one_symbol (const char *name, CORE_ADDR *addrp)
 }
 
 void
-monitor_output (char *msg)
+monitor_output (const char *msg)
 {
   char *buf = malloc (strlen (msg) * 2 + 2);
 

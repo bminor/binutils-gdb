@@ -576,6 +576,43 @@ win32_attach (unsigned long pid)
   return res;
 }
 
+/* Handle OUTPUT_DEBUG_STRING_EVENT from child process.  */
+static void
+handle_output_debug_string (struct target_waitstatus *ourstatus)
+{
+#define READ_BUFFER_LEN 1024
+  CORE_ADDR addr;
+  char s[READ_BUFFER_LEN + 1] = { 0 };
+  DWORD nbytes = current_event.u.DebugString.nDebugStringLength;
+
+  if (nbytes == 0)
+    return;
+
+  if (nbytes > READ_BUFFER_LEN)
+    nbytes = READ_BUFFER_LEN;
+
+  addr = (CORE_ADDR) (size_t) current_event.u.DebugString.lpDebugStringData;
+
+  if (current_event.u.DebugString.fUnicode)
+    {
+      /* The event tells us how many bytes, not chars, even
+         in Unicode.  */
+      WCHAR buffer[(READ_BUFFER_LEN + 1) / sizeof (WCHAR)] = { 0 };
+      if (read_inferior_memory (addr, (unsigned char *) buffer, nbytes) != 0)
+	return;
+      wcstombs (s, buffer, (nbytes + 1) / sizeof (WCHAR));
+    }
+  else
+    {
+      if (read_inferior_memory (addr, (unsigned char *) s, nbytes) != 0)
+	return;
+    }
+
+  if (strncmp (s, "cYg", 3) != 0)
+    monitor_output (s);
+#undef READ_BUFFER_LEN
+}
+
 /* Kill all inferiors.  */
 static void
 win32_kill (void)
@@ -592,6 +629,11 @@ win32_kill (void)
 	break;
       if (current_event.dwDebugEventCode == EXIT_PROCESS_DEBUG_EVENT)
 	break;
+      else if (current_event.dwDebugEventCode == OUTPUT_DEBUG_STRING_EVENT)
+	{
+  	  struct target_waitstatus our_status = { 0 };
+	  handle_output_debug_string (&our_status);
+  	}
     }
 }
 
@@ -939,6 +981,7 @@ in:
 		"for pid=%d tid=%x\n",
 		(unsigned) current_event.dwProcessId,
 		(unsigned) current_event.dwThreadId));
+      handle_output_debug_string (ourstatus);
       break;
 
     default:

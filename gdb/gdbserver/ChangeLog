@@ -1,3 +1,12 @@
+2007-03-27  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* remote-utils.c (monitor_output): Constify msg parameter.
+	* server.h (monitor_output): Likewise.
+	* win32-i386-low.c (handle_output_debug_string): New.
+	(win32_kill): Handle OUTPUT_DEBUG_STRING_EVENT events using
+	handle_output_debug_string.
+	(get_child_debug_event): Likewise.
+
 2007-03-27  Mat Hostetter  <mat@lcs.mit.edu>
 
 	* server.c (main): Correct strtoul check.
