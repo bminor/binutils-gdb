@@ -1,3 +1,8 @@
+2007-03-27  Anton Blanchard  <anton@samba.org>
+
+	* rs6000-tdep.c (rs6000_frame_cache): Use tdep->lr_frame_offset
+	instead of wordsize when looking for the LR in a stack frame.
+
 2007-03-27  Andreas Schwab  <schwab@suse.de>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 

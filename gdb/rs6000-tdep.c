@@ -3026,7 +3026,7 @@ rs6000_frame_cache (struct frame_info *next_frame, void **this_cache)
       if (make_frame)
 	{
 	  fdata.frameless = 0;
-	  fdata.lr_offset = wordsize;
+	  fdata.lr_offset = tdep->lr_frame_offset;
 	}
     }
 
