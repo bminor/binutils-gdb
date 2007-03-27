@@ -1,3 +1,7 @@
+2007-03-27  Mat Hostetter  <mat@lcs.mit.edu>
+
+	* server.c (main): Correct strtoul check.
+
 2007-03-27  Jon Ringle  <jon@ringle.org>
 
 	* linux-low.c: Check __ARCH_HAS_MMU__ also.

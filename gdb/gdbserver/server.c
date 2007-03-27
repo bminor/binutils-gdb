@@ -727,7 +727,7 @@ main (int argc, char *argv[])
   if (argc >= 3 && strcmp (argv[2], "--attach") == 0)
     {
       if (argc == 4
-	  && argv[3] != '\0'
+	  && argv[3][0] != '\0'
 	  && (pid = strtoul (argv[3], &arg_end, 10)) != 0
 	  && *arg_end == '\0')
 	{
