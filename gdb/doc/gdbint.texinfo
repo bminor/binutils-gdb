@@ -3321,18 +3321,6 @@ Similar to BREAKPOINT, but used for bi-endian targets.
 @code{BIG_BREAKPOINT} and @code{LITTLE_BREAKPOINT} have been deprecated in
 favor of @code{BREAKPOINT_FROM_PC}.
 
-@item DEPRECATED_REMOTE_BREAKPOINT
-@itemx DEPRECATED_LITTLE_REMOTE_BREAKPOINT
-@itemx DEPRECATED_BIG_REMOTE_BREAKPOINT
-@findex DEPRECATED_BIG_REMOTE_BREAKPOINT
-@findex DEPRECATED_LITTLE_REMOTE_BREAKPOINT
-@findex DEPRECATED_REMOTE_BREAKPOINT
-Specify the breakpoint instruction sequence for a remote target.
-@code{DEPRECATED_REMOTE_BREAKPOINT},
-@code{DEPRECATED_BIG_REMOTE_BREAKPOINT} and
-@code{DEPRECATED_LITTLE_REMOTE_BREAKPOINT} have been deprecated in
-favor of @code{BREAKPOINT_FROM_PC} (@pxref{BREAKPOINT_FROM_PC}).
-
 @item BREAKPOINT_FROM_PC (@var{pcptr}, @var{lenptr})
 @findex BREAKPOINT_FROM_PC
 @anchor{BREAKPOINT_FROM_PC} Use the program counter to determine the

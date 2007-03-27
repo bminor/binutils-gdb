@@ -389,6 +389,24 @@ sh_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
   /* 0xc3c3 is trapa #c3, and it works in big and little endian modes */
   static unsigned char breakpoint[] = { 0xc3, 0xc3 };
 
+  /* For remote stub targets, trapa #20 is used.  */
+  if (strcmp (target_shortname, "remote") == 0)
+    {
+      static unsigned char big_remote_breakpoint[] = { 0xc3, 0x20 };
+      static unsigned char little_remote_breakpoint[] = { 0x20, 0xc3 };
+
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+	{
+	  *lenptr = sizeof (big_remote_breakpoint);
+	  return big_remote_breakpoint;
+	}
+      else
+	{
+	  *lenptr = sizeof (little_remote_breakpoint);
+	  return little_remote_breakpoint;
+	}
+    }
+
   *lenptr = sizeof (breakpoint);
   return breakpoint;
 }

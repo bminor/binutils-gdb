@@ -5108,35 +5108,6 @@ extended_remote_async_create_inferior (char *exec_file, char *args,
 }
 
 
-/* On some machines, e.g. 68k, we may use a different breakpoint
-   instruction than other targets; in those use
-   DEPRECATED_REMOTE_BREAKPOINT instead of just BREAKPOINT_FROM_PC.
-   Also, bi-endian targets may define
-   DEPRECATED_LITTLE_REMOTE_BREAKPOINT and
-   DEPRECATED_BIG_REMOTE_BREAKPOINT.  If none of these are defined, we
-   just call the standard routines that are in mem-break.c.  */
-
-/* NOTE: cagney/2003-06-08: This is silly.  A remote and simulator
-   target should use an identical BREAKPOINT_FROM_PC.  As for native,
-   the ARCH-OS-tdep.c code can override the default.  */
-
-#if defined (DEPRECATED_LITTLE_REMOTE_BREAKPOINT) && defined (DEPRECATED_BIG_REMOTE_BREAKPOINT) && !defined(DEPRECATED_REMOTE_BREAKPOINT)
-#define DEPRECATED_REMOTE_BREAKPOINT
-#endif
-
-#ifdef DEPRECATED_REMOTE_BREAKPOINT
-
-/* If the target isn't bi-endian, just pretend it is.  */
-#if !defined (DEPRECATED_LITTLE_REMOTE_BREAKPOINT) && !defined (DEPRECATED_BIG_REMOTE_BREAKPOINT)
-#define DEPRECATED_LITTLE_REMOTE_BREAKPOINT DEPRECATED_REMOTE_BREAKPOINT
-#define DEPRECATED_BIG_REMOTE_BREAKPOINT DEPRECATED_REMOTE_BREAKPOINT
-#endif
-
-static unsigned char big_break_insn[] = DEPRECATED_BIG_REMOTE_BREAKPOINT;
-static unsigned char little_break_insn[] = DEPRECATED_LITTLE_REMOTE_BREAKPOINT;
-
-#endif /* DEPRECATED_REMOTE_BREAKPOINT */
-
 /* Insert a breakpoint.  On targets that have software breakpoint
    support, we ask the remote target to do the work; on targets
    which don't, we insert a traditional memory breakpoint.  */
@@ -5146,9 +5117,6 @@ remote_insert_breakpoint (struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr = bp_tgt->placed_address;
   struct remote_state *rs = get_remote_state ();
-#ifdef DEPRECATED_REMOTE_BREAKPOINT
-  int val;
-#endif
 
   /* Try the "Z" s/w breakpoint packet if it is not already disabled.
      If it succeeds, then set the support to PACKET_ENABLE.  If it
@@ -5181,24 +5149,7 @@ remote_insert_breakpoint (struct bp_target_info *bp_tgt)
 	}
     }
 
-#ifdef DEPRECATED_REMOTE_BREAKPOINT
-  bp_tgt->placed_size = bp_tgt->shadow_len = sizeof big_break_insn;
-  val = target_read_memory (addr, bp_tgt->shadow_contents, bp_tgt->shadow_len);
-
-  if (val == 0)
-    {
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-	val = target_write_memory (addr, (char *) big_break_insn,
-				   sizeof big_break_insn);
-      else
-	val = target_write_memory (addr, (char *) little_break_insn,
-				   sizeof little_break_insn);
-    }
-
-  return val;
-#else
   return memory_insert_breakpoint (bp_tgt);
-#endif /* DEPRECATED_REMOTE_BREAKPOINT */
 }
 
 static int
@@ -5226,12 +5177,7 @@ remote_remove_breakpoint (struct bp_target_info *bp_tgt)
       return (rs->buf[0] == 'E');
     }
 
-#ifdef DEPRECATED_REMOTE_BREAKPOINT
-  return target_write_memory (bp_tgt->placed_address, bp_tgt->shadow_contents,
-			      bp_tgt->shadow_len);
-#else
   return memory_remove_breakpoint (bp_tgt);
-#endif /* DEPRECATED_REMOTE_BREAKPOINT */
 }
 
 static int

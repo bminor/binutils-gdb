@@ -1,3 +1,12 @@
+2007-03-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* config/sh/tm-sh.h (DEPRECATED_BIG_REMOTE_BREAKPOINT,
+	DEPRECATED_LITTLE_REMOTE_BREAKPOINT): Remove.
+	* remote.c: Remove code under #ifdef DEPRECATED_REMOTE_BREAKPOINT,
+	DEPRECATED_BIG_REMOTE_BREAKPOINT, DEPRECATED_LITTLE_REMOTE_BREAKPOINT.
+	* sh-tdep.c (sh_breakpoint_from_pc): Return remote breakpoint
+	sequence if target_shortname is "remote".
+
 2007-03-27  Anton Blanchard  <anton@samba.org>
 
 	* rs6000-tdep.c (rs6000_frame_cache): Use tdep->lr_frame_offset

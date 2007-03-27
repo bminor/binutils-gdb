@@ -1,3 +1,9 @@
+2007-03-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdbint.texinfo (Target Conditionals): Remove mention of
+	DEPRECATED_REMOTE_BREAKPOINT, DEPRECATED_BIG_REMOTE_BREAKPOINT,
+	and DEPRECATED_LITTLE_REMOTE_BREAKPOINT.
+
 2007-03-27  Brooks Moses  <brooks.moses@codesourcery.com>
 
 	* Makefile.in: Add "pdfdir" installation
