@@ -1145,6 +1145,7 @@ static const struct opcode16 thumb_opcodes[] =
   /* format 17 */
   {ARM_EXT_V4T, 0xDF00, 0xFF00, "svc%c\t%0-7d"},
   /* format 16 */
+  {ARM_EXT_V4T, 0xDE00, 0xFE00, "undefined"},
   {ARM_EXT_V4T, 0xD000, 0xF000, "b%8-11c.n\t%0-7B%X"},
   /* format 18 */
   {ARM_EXT_V4T, 0xE000, 0xF800, "b%c.n\t%0-10B%x"},
