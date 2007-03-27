@@ -1,3 +1,8 @@
+2007-03-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/ppc/reloc.s: New.
+	* gas/ppc/reloc.d: New.
+
 2007-03-26  Julian Brown  <julian@codesourcery.com>
 
 	* gas/arm/neon-const.s: Use FP syntax for 0/-0.
