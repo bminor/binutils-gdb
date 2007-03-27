@@ -1,3 +1,7 @@
+2007-03-27  Jon Ringle  <jon@ringle.org>
+
+	* linux-low.c: Check __ARCH_HAS_MMU__ also.
+
 2007-03-27  Brooks Moses  <brooks.moses@codesourcery.com>
 
 	* Makefile.in: Add dummy "pdf" and "install-pdf" targets.

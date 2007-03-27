@@ -42,6 +42,12 @@
 # define PTRACE_SETSIGINFO 0x4203
 #endif
 
+#ifdef __UCLIBC__
+#if !(defined(__UCLIBC_HAS_MMU__) || defined(__ARCH_HAS_MMU__))
+#define HAS_NOMMU
+#endif
+#endif
+
 /* ``all_threads'' is keyed by the LWP ID - it should be the thread ID instead,
    however.  This requires changing the ID in place when we go from !using_threads
    to using_threads, immediately.
@@ -143,7 +149,7 @@ linux_create_inferior (char *program, char **allargs)
   void *new_process;
   int pid;
 
-#if defined(__UCLIBC__) && !defined(__UCLIBC_HAS_MMU__)
+#if defined(__UCLIBC__) && defined(HAS_NOMMU)
   pid = vfork ();
 #else
   pid = fork ();
@@ -1594,7 +1600,7 @@ linux_stopped_data_address (void)
     return 0;
 }
 
-#if defined(__UCLIBC__) && !defined(__UCLIBC_HAS_MMU__)
+#if defined(__UCLIBC__) && defined(HAS_NOMMU)
 #if defined(__mcoldfire__)
 /* These should really be defined in the kernel's ptrace.h header.  */
 #define PT_TEXT_ADDR 49*4
@@ -1664,7 +1670,7 @@ static struct target_ops linux_target_ops = {
   linux_remove_watchpoint,
   linux_stopped_by_watchpoint,
   linux_stopped_data_address,
-#if defined(__UCLIBC__) && !defined(__UCLIBC_HAS_MMU__)
+#if defined(__UCLIBC__) && defined(HAS_NOMMU)
   linux_read_offsets,
 #else
   NULL,
