@@ -726,15 +726,12 @@ struct amd64_frame_cache
   int frameless_p;
 };
 
-/* Allocate and initialize a frame cache.  */
+/* Initialize a frame cache.  */
 
-static struct amd64_frame_cache *
-amd64_alloc_frame_cache (void)
+static void
+amd64_init_frame_cache (struct amd64_frame_cache *cache)
 {
-  struct amd64_frame_cache *cache;
   int i;
-
-  cache = FRAME_OBSTACK_ZALLOC (struct amd64_frame_cache);
 
   /* Base address.  */
   cache->base = 0;
@@ -749,7 +746,17 @@ amd64_alloc_frame_cache (void)
 
   /* Frameless until proven otherwise.  */
   cache->frameless_p = 1;
+}
 
+/* Allocate and initialize a frame cache.  */
+
+static struct amd64_frame_cache *
+amd64_alloc_frame_cache (void)
+{
+  struct amd64_frame_cache *cache;
+
+  cache = FRAME_OBSTACK_ZALLOC (struct amd64_frame_cache);
+  amd64_init_frame_cache (cache);
   return cache;
 }
 
@@ -810,6 +817,7 @@ amd64_skip_prologue (CORE_ADDR start_pc)
   struct amd64_frame_cache cache;
   CORE_ADDR pc;
 
+  amd64_init_frame_cache (&cache);
   pc = amd64_analyze_prologue (start_pc, 0xffffffffffffffffLL, &cache);
   if (cache.frameless_p)
     return start_pc;

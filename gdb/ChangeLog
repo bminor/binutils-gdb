@@ -1,3 +1,8 @@
+2007-03-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* amd64-tdep.c (amd64_init_frame_cache): New function.
+	(amd64_alloc_frame_cache, amd64_skip_prologue): Use it.
+
 2007-03-26  Nigel Stephens  <nigel@mips.com>
             Maciej W. Rozycki  <macro@mips.com>
 
