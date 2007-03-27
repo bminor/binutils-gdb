@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%% gdb-refcard.tex %%%%%%%%%%%%%%%%
 
 %This file is TeX source for a reference card describing GDB, the GNU debugger.
-%Copyright (C) 1991, 1992, 1993, 1996, 1998, 1999, 2000
+%Copyright (C) 1991, 1992, 1993, 1996, 1998, 1999, 2000, 2007
 %Free Software Foundation, Inc.
 %Permission is granted to make and distribute verbatim copies of
 %this reference provided the copyright notices and permission notices
@@ -98,6 +98,10 @@
 \vmargin=.25in      % vertical margin width
 \secskip=1pc        % space between refcard secs
 \lskip=2pt          % extra skip between \sec entries
+\ifx\pdfoutput\undefined\else   % check if we are using pdfTeX
+  \pdfpagewidth=\totalwidth     % width of paper in pdf output
+  \pdfpageheight=\totalheight   % height of paper in pdf output
+\fi
 %------- end papersize params
 %%
 %%  change according to personal taste, not papersize dependent

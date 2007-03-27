@@ -186,6 +186,7 @@ check: force
 info:
 install-info:
 dvi:
+pdf:
 
 ### 
 ### 

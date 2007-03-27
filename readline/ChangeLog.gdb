@@ -1,3 +1,7 @@
+2007-03-27  Brooks Moses  <brooks.moses@codesourcery.com>
+
+	* Makefile.in: Add dummy "pdf" target.
+
 2006-11-13  Denis Pilat  <denis.pilat@st.com>
 
 	* terminal.c (_rl_get_screen_size): use wr and wc variable to store

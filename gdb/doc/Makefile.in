@@ -24,6 +24,7 @@ VPATH = @srcdir@
 prefix = @prefix@
 
 infodir = @infodir@
+pdfdir = $(prefix)/share/doc/gdb
 htmldir = $(prefix)/html
 
 SHELL = @SHELL@
@@ -33,6 +34,8 @@ LN_S = @LN_S@
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
+
+mkinstalldirs = $(SHELL) $(srcdir)/../../mkinstalldirs
 
 # main GDB source directory
 gdbdir = $(srcdir)/..
@@ -69,6 +72,9 @@ SET_TEXINPUTS = \
 # Files which should be generated via 'info' and installed by 'install-info'
 INFO_DEPS = gdb.info gdbint.info stabs.info annotate.info
 
+# Files which should be generated via 'pdf' and installed by 'install-pdf'
+PDFFILES = gdb.pdf gdbint.pdf stabs.pdf refcard.pdf annotate.pdf
+
 # There may be alternate predefined collections of switches to configure
 # the GDB manual.  Normally this is not done in synch with the software
 # config system, since this choice tends to be independent; most people
@@ -92,6 +98,7 @@ REFEDITS =
 
 # Don Knuth's TeX formatter
 TEX = tex
+PDFTEX = pdftex
 
 # Program to generate Postscript files from DVI files.
 DVIPS = dvips
@@ -151,7 +158,7 @@ info: $(INFO_DEPS)
 dvi: gdb.dvi gdbint.dvi stabs.dvi refcard.dvi annotate.dvi
 ps: gdb.ps gdbint.ps stabs.ps refcard.ps annotate.ps
 html: gdb_toc.html gdbint_toc.html stabs_toc.html annotate_toc.html
-pdf: gdb.pdf gdbint.pdf stabs.pdf annotate.pdf
+pdf: $(PDFFILES)
 all-doc: info dvi ps # pdf
 diststuff: info
 
@@ -195,6 +202,18 @@ uninstall-info:
 install-html: html
 	for i in *.html ; do \
 		$(INSTALL_DATA) $$i $(DESTDIR)$(htmldir)/$$i ; \
+	done
+
+pdf__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
+
+install-pdf: $(PDFFILES)
+	@$(NORMAL_INSTALL)
+	test -z "$(pdfdir)" || $(mkinstalldirs) "$(DESTDIR)$(pdfdir)"
+	@list='$(PDFFILES)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(pdf__strip_dir) \
+	  echo " $(INSTALL_DATA) '$$d$$p' '$(DESTDIR)$(pdfdir)/$$f'"; \
+	  $(INSTALL_DATA) "$$d$$p" "$(DESTDIR)$(pdfdir)/$$f"; \
 	done
 
 STAGESTUFF = *.info* gdb-all.texi GDBvn.texi *.ps *.dvi *.pdf
@@ -243,6 +262,17 @@ refcard.dvi : refcard.tex $(REFEDITS)
 
 refcard.ps : refcard.dvi
 	$(DVIPS) -t landscape -o $@ $?
+
+refcard.pdf : refcard.tex $(REFEDITS)
+	echo > tmp.sed
+	for f in x $(REFEDITS) ; do \
+		test x$$f = xx && continue ; \
+		cat $(srcdir)/$$f >>tmp.sed ; \
+	done
+	sed -f tmp.sed $(srcdir)/refcard.tex >sedref.tex
+	$(SET_TEXINPUTS) $(PDFTEX) sedref.tex
+	mv sedref.pdf refcard.pdf
+	rm -f sedref.log sedref.tex tmp.sed
 
 # File to record current GDB version number (copied from main dir version.in)
 GDBvn.texi : ${gdbdir}/version.in

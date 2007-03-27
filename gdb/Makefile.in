@@ -42,6 +42,7 @@ man7dir = $(mandir)/man7
 man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
 infodir = @infodir@
+pdfdir = $(prefix)/share/doc/gdb
 htmldir = $(prefix)/html
 includedir = @includedir@
 
@@ -435,6 +436,7 @@ FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \
 	"exec_prefix=$(exec_prefix)" \
 	"infodir=$(infodir)" \
+	"pdfdir=$(pdfdir)" \
 	"libdir=$(libdir)" \
 	"mandir=$(mandir)" \
 	"datadir=$(datadir)" \
@@ -1055,7 +1057,7 @@ check//%: force
 	    "$$target"; \
 	else true; fi
 
-info dvi install-info clean-info html install-html: force
+info install-info clean-info dvi pdf install-pdf html install-html: force
 	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
 gdb.z:gdb.1
