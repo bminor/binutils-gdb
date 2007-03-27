@@ -1,5 +1,9 @@
 2007-03-27  Alan Modra  <amodra@bigpond.net.au>
 
+	* embedspu.sh: Correct toe_addr quoting.
+
+2007-03-27  Alan Modra  <amodra@bigpond.net.au>
+
 	* embedspu.sh: Combine "_EAR_" and "_EAR_*" patterns.  Tighten
 	.toe section and .toe address checks.  Use .reloc for _EAR*
 	symbols defined in non-BSS sections.  Build table for _SPUEAR_

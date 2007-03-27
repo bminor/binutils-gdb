@@ -149,7 +149,7 @@ __speelf__:
 __spetoe__:
 `${READELF} -s -W ${INFILE} | grep ' _EAR_' | sort -k 2 | awk \
 'BEGIN { \
-	addr = strtonum ("0x" '${toe_addr-0}'); \
+	addr = strtonum ("0x" "'${toe_addr-0}'"); \
 	split ("'"${sections}"'", s, " "); \
 	for (i = 1; i in s; i += 3) { \
 	    sec_off[s[i]] = strtonum ("0x" s[i+2]) - strtonum ("0x" s[i+1]); \
