@@ -2054,28 +2054,30 @@ bpstat_find_step_resume_breakpoint (bpstat bsp)
 }
 
 
-/* Return the breakpoint number of the first breakpoint we are stopped
+/* Put in *NUM the breakpoint number of the first breakpoint we are stopped
    at.  *BSP upon return is a bpstat which points to the remaining
    breakpoints stopped at (but which is not guaranteed to be good for
    anything but further calls to bpstat_num).
-   Return 0 if passed a bpstat which does not indicate any breakpoints.  */
+   Return 0 if passed a bpstat which does not indicate any breakpoints.
+   Return -1 if stopped at a breakpoint that has been deleted since
+   we set it.
+   Return 1 otherwise.  */
 
 int
-bpstat_num (bpstat *bsp)
+bpstat_num (bpstat *bsp, int *num)
 {
   struct breakpoint *b;
 
   if ((*bsp) == NULL)
     return 0;			/* No more breakpoint values */
-  else
-    {
-      b = (*bsp)->breakpoint_at;
-      *bsp = (*bsp)->next;
-      if (b == NULL)
-	return -1;		/* breakpoint that's been deleted since */
-      else
-	return b->number;	/* We have its number */
-    }
+
+  b = (*bsp)->breakpoint_at;
+  *bsp = (*bsp)->next;
+  if (b == NULL)
+    return -1;			/* breakpoint that's been deleted since */
+
+  *num = b->number;		/* We have its number */
+  return 1;
 }
 
 /* Modify BS so that the actions will not be performed.  */

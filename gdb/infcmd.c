@@ -622,22 +622,26 @@ continue_command (char *proc_count_exp, int from_tty)
   if (proc_count_exp != NULL)
     {
       bpstat bs = stop_bpstat;
-      int num = bpstat_num (&bs);
-      if (num == 0 && from_tty)
+      int num, stat;
+      int stopped = 0;
+
+      while ((stat = bpstat_num (&bs, &num)) != 0)
+	if (stat > 0)
+	  {
+	    set_ignore_count (num,
+			      parse_and_eval_long (proc_count_exp) - 1,
+			      from_tty);
+	    /* set_ignore_count prints a message ending with a period.
+	       So print two spaces before "Continuing.".  */
+	    if (from_tty)
+	      printf_filtered ("  ");
+	    stopped = 1;
+	  }
+
+      if (!stopped && from_tty)
 	{
 	  printf_filtered
 	    ("Not stopped at any breakpoint; argument ignored.\n");
-	}
-      while (num != 0)
-	{
-	  set_ignore_count (num,
-			    parse_and_eval_long (proc_count_exp) - 1,
-			    from_tty);
-	  /* set_ignore_count prints a message ending with a period.
-	     So print two spaces before "Continuing.".  */
-	  if (from_tty)
-	    printf_filtered ("  ");
-	  num = bpstat_num (&bs);
 	}
     }
 
@@ -1386,7 +1390,8 @@ static void
 program_info (char *args, int from_tty)
 {
   bpstat bs = stop_bpstat;
-  int num = bpstat_num (&bs);
+  int num;
+  int stat = bpstat_num (&bs, &num);
 
   if (!target_has_execution)
     {
@@ -1399,20 +1404,20 @@ program_info (char *args, int from_tty)
 		   hex_string ((unsigned long) stop_pc));
   if (stop_step)
     printf_filtered (_("It stopped after being stepped.\n"));
-  else if (num != 0)
+  else if (stat != 0)
     {
       /* There may be several breakpoints in the same place, so this
          isn't as strange as it seems.  */
-      while (num != 0)
+      while (stat != 0)
 	{
-	  if (num < 0)
+	  if (stat < 0)
 	    {
 	      printf_filtered (_("\
 It stopped at a breakpoint that has since been deleted.\n"));
 	    }
 	  else
 	    printf_filtered (_("It stopped at breakpoint %d.\n"), num);
-	  num = bpstat_num (&bs);
+	  stat = bpstat_num (&bs, &num);
 	}
     }
   else if (stop_signal != TARGET_SIGNAL_0)

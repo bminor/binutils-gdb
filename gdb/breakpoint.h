@@ -562,12 +562,15 @@ extern int bpstat_have_active_hw_watchpoints (void);
    return means print the frame as well as the source line).  */
 extern enum print_stop_action bpstat_print (bpstat);
 
-/* Return the breakpoint number of the first breakpoint we are stopped
+/* Put in *NUM the breakpoint number of the first breakpoint we are stopped
    at.  *BSP upon return is a bpstat which points to the remaining
    breakpoints stopped at (but which is not guaranteed to be good for
    anything but further calls to bpstat_num).
-   Return 0 if passed a bpstat which does not indicate any breakpoints.  */
-extern int bpstat_num (bpstat *);
+   Return 0 if passed a bpstat which does not indicate any breakpoints.
+   Return -1 if stopped at a breakpoint that has been deleted since
+   we set it.
+   Return 1 otherwise.  */
+extern int bpstat_num (bpstat *, int *);
 
 /* Perform actions associated with having stopped at *BSP.  Actually, we just
    use this for breakpoint commands.  Perhaps other actions will go here

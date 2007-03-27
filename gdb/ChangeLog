@@ -1,3 +1,11 @@
+2007-03-27  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* breakpoint.c (bpstat_num): Add int *num parameter.
+	* breakpoint.h (bpstat_num): Likewise.
+	* infcmd.c (continue_command): Adjust to new bpstat_num
+	interface.
+	(program_info): Likewise.
+
 2007-03-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* config/sh/tm-sh.h: Remove file.
