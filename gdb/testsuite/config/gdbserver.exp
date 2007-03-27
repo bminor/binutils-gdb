@@ -74,10 +74,10 @@
 
 load_lib gdbserver-support.exp
 
-proc gdbserver_gdb_load { arg } {
-    return [gdbserver_spawn $arg ""]
+proc gdbserver_gdb_load { } {
+    return [gdbserver_spawn ""]
 }
 
-proc gdb_load { arg } {
-    return [gdbserver_load $arg ""]
+proc gdb_reload { } {
+    return [gdbserver_run ""]
 }

@@ -37,8 +37,12 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
 # For C programs, "start" should stop in main().
+if { [gdb_start_cmd] < 0 } {
+    untested start
+    return -1
+}
 
-gdb_test "start" \
+gdb_test "" \
          "main \\(\\) at .*start.c.*" \
          "start"
 

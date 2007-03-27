@@ -203,9 +203,7 @@ proc gdb_run_cmd {args} {
 
     if [target_info exists use_gdb_stub] {
 	if [target_info exists gdb,do_reload_on_run] {
-	    # Specifying no file, defaults to the executable
-	    # currently being debugged.
-	    if { [gdb_load ""] != 0 } {
+	    if { [gdb_reload] != 0 } {
 		return;
 	    }
 	    send_gdb "continue\n";
@@ -250,7 +248,7 @@ proc gdb_run_cmd {args} {
 		    send_gdb "y\n"
 		}
 		-re "The program is not being run.*$gdb_prompt $" {
-		    if { [gdb_load ""] != 0 } {
+		    if { [gdb_reload] != 0 } {
 			return;
 		    }
 		    send_gdb "jump *$start\n";
@@ -272,7 +270,7 @@ proc gdb_run_cmd {args} {
     }
 
     if [target_info exists gdb,do_reload_on_run] {
-	if { [gdb_load ""] != 0 } {
+	if { [gdb_reload] != 0 } {
 	    return;
 	}
     }
@@ -287,6 +285,42 @@ proc gdb_run_cmd {args} {
 	# may test for additional start-up messages.
 	-notransfer -re "Starting program: \[^\r\n\]*" {}
     }
+}
+
+# Generic start command.  Return 0 if we could start the program, -1
+# if we could not.
+
+proc gdb_start_cmd {args} {
+    global gdb_prompt
+
+    if [target_info exists gdb_init_command] {
+	send_gdb "[target_info gdb_init_command]\n";
+	gdb_expect 30 {
+	    -re "$gdb_prompt $" { }
+	    default {
+		perror "gdb_init_command for target failed";
+		return;
+	    }
+	}
+    }
+
+    if [target_info exists use_gdb_stub] {
+	return -1
+    }
+
+    send_gdb "start $args\n"
+    gdb_expect 60 {
+	-re "The program .* has been started already.*y or n. $" {
+	    send_gdb "y\n"
+	    exp_continue
+	}
+	# Use -notransfer here so that test cases (like chng-sym.exp)
+	# may test for additional start-up messages.
+	-notransfer -re "Starting program: \[^\r\n\]*" {
+	    return 0
+	}
+    }
+    return -1
 }
 
 # Set a breakpoint at FUNCTION.  If there is an additional argument it is
@@ -1001,6 +1035,9 @@ proc gdb_file_cmd { arg } {
     global gdb_prompt
     global verbose
     global GDB
+    global last_loaded_file
+
+    set last_loaded_file $arg
 
     # Set whether debug info was found.
     # Default to "fail".
@@ -1937,6 +1974,18 @@ proc gdb_load { arg } {
     return [gdb_file_cmd $arg]
 }
 
+# gdb_reload -- load a file into the target.  Called before "running",
+# either the first time or after already starting the program once,
+# for remote targets.  Most files that override gdb_load should now
+# override this instead.
+
+proc gdb_reload { } {
+    # For the benefit of existing configurations, default to gdb_load.
+    # Specifying no file defaults to the executable currently being
+    # debugged.
+    return [gdb_load ""]
+}
+
 proc gdb_continue { function } {
     global decimal
 
@@ -2381,8 +2430,8 @@ proc gdb_gnu_strip_debug { dest args } {
     gdb_exit
 
     set debug_file [separate_debug_filename $dest]
-    set strip_to_file_program strip
-    set objcopy_program objcopy
+    set strip_to_file_program [transform strip]
+    set objcopy_program [transform objcopy]
 
     # Make sure the directory that will hold the separated debug
     # info actually exists.

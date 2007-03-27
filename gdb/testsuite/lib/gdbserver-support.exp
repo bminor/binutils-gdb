@@ -80,6 +80,11 @@ proc gdb_target_cmd { targetname serialport } {
 	    -re "Timeout reading from remote system.*$gdb_prompt $" {
 		verbose "Got timeout error from gdb."
 	    }
+	    -notransfer -re "Remote debugging using .*\r\n> $" {
+		# We got an unexpected prompt while creating the target.
+		# Leave it there for the test to diagnose.
+		return 1
+	    }
 	    timeout {
 		send_gdb ""
 		break
@@ -129,8 +134,40 @@ proc skip_gdbserver_tests { } {
 #
 # Returns the target protocol and socket to connect to.
 
-proc gdbserver_spawn { server_exec child_args } {
+proc gdbserver_spawn { child_args } {
     global portnum
+    global gdbserver_host_exec
+    global gdbserver_host_mtime
+    global gdbserver_server_exec
+    global last_loaded_file
+
+    set host_exec $last_loaded_file
+
+    # If we already downloaded a file to the target, see if we can reuse it.
+    set reuse 0
+    if { [info exists gdbserver_server_exec] } {
+	set reuse 1
+
+	# If the file has changed, we can not.
+	if { $host_exec != $gdbserver_host_exec } {
+	    set reuse 0
+	}
+
+	# If the mtime has changed, we can not.
+	if { [file mtime $host_exec] != $gdbserver_host_mtime } {
+	    set reuse 0
+	}
+    }
+
+    if { $reuse == 0 } {
+	set gdbserver_host_exec $host_exec
+	set gdbserver_host_mtime [file mtime $host_exec]
+	if [is_remote target] {
+	    set gdbserver_server_exec [remote_download target $host_exec /tmp/[file tail $host_exec].[pid]]
+	} else {
+	    set gdbserver_server_exec $host_exec
+	}
+    }
 
     # Port id -- either specified in baseboard file, or managed here.
     if [target_info exists gdb,socketport] {
@@ -162,7 +199,7 @@ proc gdbserver_spawn { server_exec child_args } {
     # Fire off the debug agent.  This flavour of gdbserver takes as
     # arguments the port information, the name of the executable file to
     # be debugged, and any arguments.
-    set gdbserver_command "$gdbserver :$portnum $server_exec"
+    set gdbserver_command "$gdbserver :$portnum $gdbserver_server_exec"
     if { $child_args != "" } {
 	append gdbserver_command " $child_args"
     }
@@ -194,58 +231,13 @@ proc gdbserver_spawn { server_exec child_args } {
     return [list $protocol $gdbport]
 }
 
-proc infer_host_exec { } {
-    set host_exec ""
-
-    send_gdb "info files\n"
-    gdb_expect 30 {
-	-re "Symbols from \"(\[^\"\]+)\"" {
-	    set host_exec $expect_out(1,string)
-	    exp_continue
-	}
-	-re "Local exec file:\[\r\n\]+\[ \t\]*`(\[^'\]+)'," {
-	    set host_exec $expect_out(1,string)
-	    exp_continue
-	}
-	-re "$gdb_prompt $" { }
-    }
-
-    return $host_exec
-}
-
 # Start a gdbserver process running HOST_EXEC and pass CHILD_ARGS
 # to it.  Return 0 on success, or non-zero on failure.
 
-proc gdbserver_load { host_exec child_args } {
-    global gdbserver_host_exec
-    global gdbserver_server_exec
-
-    # If we weren't passed an explicit binary, try to reuse the current
-    # one.  If we were, be sure to redownload it.
-
-    if { $host_exec == "" && $gdbserver_host_exec == "" } {
-	set gdbserver_host_exec [infer_host_exec]
-    } elseif { $host_exec != "" } {
-	set gdbserver_host_exec $host_exec
-	if [info exists gdbserver_server_exec] { unset gdbserver_server_exec }
-    }
-
-    if { ! [info exists gdbserver_server_exec] } {
-	if [is_remote target] {
-	    set gdbserver_server_exec [remote_download target $host_exec /tmp/[file tail $gdbserver_host_exec].[pid]]
-	} else {
-	    set gdbserver_server_exec $gdbserver_host_exec
-	}
-    }
-
-    set res [gdbserver_spawn $gdbserver_server_exec $child_args]
+proc gdbserver_run { child_args } {
+    set res [gdbserver_spawn $child_args]
     set protocol [lindex $res 0]
     set gdbport [lindex $res 1]
 
-    if { $host_exec != "" } {
-	if [gdb_file_cmd $host_exec] {
-	    return -1
-	}
-    }
-    gdb_target_cmd $protocol $gdbport
+    return [gdb_target_cmd $protocol $gdbport]
 }

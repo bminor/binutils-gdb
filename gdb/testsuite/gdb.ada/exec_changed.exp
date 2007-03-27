@@ -55,7 +55,12 @@ gdb_test "shell mv ${binfile1} ${binfile}" "" ""
 gdb_load ${binfile}
 
 # Start the program, we should land in the program main procedure
-gdb_test "start" \
+if { [gdb_start_cmd] < 0 } {
+    untested start
+    return -1
+}
+
+gdb_test "" \
          "first \\(\\) at .*first.adb.*" \
          "start first"
 
@@ -76,12 +81,10 @@ gdb_test "set confirm off" "" ""
 # Start the program a second time, GDB should land in procedure Second
 # this time.
 
-if [is_remote target] {
-    unsupported "start the program a second time ";
+if { [gdb_start_cmd] < 0 } {
+    fail "start second"
 } else {
-    # Start the program, we should land in the program main procedure
-    gdb_test "start" \
+    gdb_test "" \
              "second \\(\\) at .*second.adb.*" \
              "start second"
 }
-

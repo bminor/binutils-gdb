@@ -1,3 +1,33 @@
+2007-03-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* config/gdbserver.exp (gdbserver_gdb_load): Update argument list.
+	(gdb_load): Delete, replace with...
+	(gdb_reload): ...this.
+	* gdb.server/server-run.exp: Use gdb_load and gdbserver_run.
+	* gdb.server/server-mon.exp: Likewise.
+	* lib/gdb.exp (gdb_run_cmd): Use gdb_reload.
+	(gdb_start_cmd): New.
+	(gdb_file_cmd): Save the last loaded file.
+	(gdb_reload): New.
+	(gdb_gnu_strip_debug): Use transform.
+	* lib/gdbserver-support.exp (gdbserver_spawn): Move file download
+	support here.  Use new $last_loaded_file.  Check mtime.
+	(gdb_target_cmd): Handle ObjC failure case.
+	(infer_host_exec): Delete.
+	(gdbserver_load): Rename to...
+	(gdbserver_run): ...this.  Simplify.
+	* lib/mi-support.exp (mi_gdb_file_cmd): Set last_loaded_file.
+	(mi_gdb_load): Move most contents to a new function...
+	(mi_gdb_target_load): ...here.  Simplify call to gdbserver_gdb_load.
+	(mi_run_cmd): Use mi_gdb_target_load.
+	* gdb.base/break.exp, gdb.base/ending-run.exp, gdb.base/pending.exp,
+	gdb.base/sepdebug.exp, gdb.base/unload.exp, gdb.objc/objcdecode.exp:
+	Use gdb_run_cmd.
+	* gdb.base/charsign.exp: Remove incorrect comment.
+	* gdb.base/dbx.exp (gdb_file_cmd): Set last_loaded_file.
+	* gdb.ada/exec_changed.exp, gdb.ada/null_record.exp, gdb.ada/start.exp,
+	gdb.base/start.exp: Use gdb_start_cmd.
+
 2007-03-23  Nigel Stephens  <nigel@mips.com>
             Maciej W. Rozycki  <macro@mips.com>
 

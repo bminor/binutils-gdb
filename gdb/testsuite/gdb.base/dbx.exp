@@ -184,6 +184,9 @@ proc gdb_file_cmd {arg} {
     global gdb_prompt
     global spawn_id
     upvar timeout timeout
+    global last_loaded_file
+
+    set last_loaded_file $arg
 
     if [is_remote host] {
         set arg [remote_download host $arg];

@@ -72,12 +72,13 @@ gdb_test_multiple "break multipleDef" $name \
 }
 
 set name "continue after break on multiply defined symbol"
-gdb_test_multiple "run" $name \
+gdb_run_cmd
+gdb_test_multiple "" $name \
 {
-    -re "Starting program.*Breakpoint \[0-9\]+, multipleDef \\\(\\\) at .*\r\n$gdb_prompt $" {
+    -re "Breakpoint \[0-9\]+, multipleDef \\\(\\\) at .*\r\n$gdb_prompt $" {
 	pass $name
     }
-    -re "Starting program.*\\\[0\\\] cancel\r\n\\\[1\\\] all\r\n\\\[2\\\] -.Decode multipleDef. at .*\r\n\\\[3\\\] multipleDef at .*\r\n> $" {
+    -re "\\\[0\\\] cancel\r\n\\\[1\\\] all\r\n\\\[2\\\] -.Decode multipleDef. at .*\r\n\\\[3\\\] multipleDef at .*\r\n> $" {
 	send_gdb "0\n"
 	kfail "gdb/1238" $name
 	# gdb is in a bad state here.

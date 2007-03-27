@@ -90,26 +90,27 @@ gdb_test "info break" \
 
 set unloadshr_line [gdb_get_line_number "unloadshr break" ${libsrcfile}]
 
-gdb_test "run" \
-"Starting program.*unload.*
-Breakpoint.*at.*
+gdb_run_cmd
+gdb_test "" \
+"Breakpoint.*at.*
 Pending breakpoint \"shrfunc1\" resolved.*
 Breakpoint.*, shrfunc1 \\\(x=3\\\).*unloadshr.c:$unloadshr_line.*" \
 "running program"
 
 gdb_test "continue" \
-"Continuing.*y is 7.*warning: Temporarily disabling breakpoints for.*unloadshr.sl.*Program exited normally." \
+"Continuing.*warning: Temporarily disabling breakpoints for.*unloadshr.sl.*Program exited normally." \
 "continuing to end of program"
 
 #
 # Try to rerun program and verify that shared breakpoint is reset properly
 #
 
-gdb_test "run" \
+gdb_run_cmd
+gdb_test "" \
 ".*Breakpoint.*shrfunc1.*at.*unloadshr.c:$unloadshr_line.*" \
 "rerun to shared library breakpoint"
 
 gdb_test "continue" \
-"Continuing.*y is 7.*warning: Temporarily disabling breakpoints for.*unloadshr.sl.*Program exited normally." \
+"Continuing.*warning: Temporarily disabling breakpoints for.*unloadshr.sl.*Program exited normally." \
 "continuing to end of program second time"
 

@@ -44,8 +44,6 @@ proc do_test { cflags } {
     gdb_reinitialize_dir $srcdir/$subdir
     gdb_load ${binfile}
 
-    # For C programs, "start" should stop in main().
-
     gdb_test "p n" \
 	     "= \"A\""
     gdb_test "p s" \

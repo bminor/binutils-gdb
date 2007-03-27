@@ -191,7 +191,8 @@ gdb_test "info break" \
 # Run to main which should resolve a pending breakpoint
 #
 
-gdb_test "run" \
+gdb_run_cmd
+gdb_test "" \
 "Breakpoint.*at.*
 Pending breakpoint \"pendshr.c:26 if x > 3\" resolved.*
 Breakpoint.*, main.*$mainline.*" \

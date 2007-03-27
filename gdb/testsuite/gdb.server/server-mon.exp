@@ -34,9 +34,10 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 
 gdb_exit
 gdb_start
-
-gdbserver_load $binfile ""
+gdb_load $binfile
 gdb_reinitialize_dir $srcdir/$subdir
+
+gdbserver_run ""
 
 gdb_test_multiple "monitor help" "" {
     -re "Unknown monitor command.*$gdb_prompt $" {

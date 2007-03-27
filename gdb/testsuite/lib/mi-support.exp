@@ -379,18 +379,10 @@ proc mi_gdb_file_cmd { arg } {
     global loadfile
     global GDB
     global mi_gdb_prompt
-    global last_mi_gdb_file
-    global last_mi_remote_file
+    global last_loaded_file
     upvar timeout timeout
 
-    if { $arg == "" } {
-	set arg $last_mi_gdb_file;
-    } else {
-	set last_mi_gdb_file $arg
-	if { [ info exists last_mi_remote_file ] } {
-	    unset last_mi_remote_file
-	}
-    }
+    set last_loaded_file $arg
 
     if [is_remote host] {
 	set arg [remote_download host $arg];
@@ -449,10 +441,10 @@ proc mi_gdb_file_cmd { arg } {
 }
 
 #
-# load a file into the debugger.
+# connect to the target and download a file, if necessary.
 # return a -1 if anything goes wrong.
 #
-proc mi_gdb_load { arg } {
+proc mi_gdb_target_load { } {
     global verbose
     global loadpath
     global loadfile
@@ -460,25 +452,8 @@ proc mi_gdb_load { arg } {
     global mi_gdb_prompt
     upvar timeout timeout
 
-    # ``gdb_unload''
-    if { $arg != "" } {
-	mi_gdb_file_cmd $arg
-    }
-
-    # ``load''
     if { [info procs gdbserver_gdb_load] != "" } {
-	global last_mi_gdb_file
-	global last_mi_remote_file
-
-	if { ! [info exists last_mi_remote_file] } {
-	    if [is_remote target] {
-		set last_mi_remote_file [remote_download target $arg /tmp/[file tail $arg].[pid]]
-	    } else {
-		set last_mi_remote_file $last_mi_gdb_file
-	    }
-	}
-
-	set res [gdbserver_gdb_load $last_mi_remote_file]
+	set res [gdbserver_gdb_load]
 	set protocol [lindex $res 0]
 	set gdbport [lindex $res 1]
 
@@ -540,6 +515,17 @@ proc mi_gdb_load { arg } {
 		return -1
 	    }
 	}
+    }
+    return 0
+}
+
+#
+# load a file into the debugger.
+# return a -1 if anything goes wrong.
+#
+proc mi_gdb_load { arg } {
+    if { $arg != "" } {
+	return [mi_gdb_file_cmd $arg]
     }
     return 0
 }
@@ -786,13 +772,12 @@ proc mi_run_cmd {args} {
 	}
     }
 
+    if { [mi_gdb_target_load] < 0 } {
+	return
+    }
+
     if [target_info exists use_gdb_stub] {
 	if [target_info exists gdb,do_reload_on_run] {
-	    # Specifying no file, defaults to the executable
-	    # currently being debugged.
-	    if { [mi_gdb_load ""] < 0 } {
-		return;
-	    }
 	    send_gdb "000-exec-continue\n";
 	    gdb_expect 60 {
 		-re "000\\^running\[\r\n\]+$mi_gdb_prompt$" {}

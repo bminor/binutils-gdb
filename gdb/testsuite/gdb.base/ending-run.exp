@@ -67,11 +67,9 @@ gdb_test "b ending-run.c:31" ".*Breakpoint 3.*ending-run.c, line 31.*"
 # Expect to hit the bp at line "1", but symbolize this
 # as line "13".  Then try to clear it--this should work.
 #
-if [target_info exists use_gdb_stub] {
-  gdb_test "continue" ".*Breakpoint.*1.*callee.*13.*"
-} else {
-  gdb_test "r" ".*Breakpoint.*1.*callee.*13.*"
-}
+gdb_run_cmd
+gdb_test "" ".*Breakpoint.*1.*callee.*13.*" "run"
+
 gdb_test "cle" ".*Deleted breakpoints 2 1.*" "clear worked"
 send_gdb "i b\n"
 gdb_expect {
