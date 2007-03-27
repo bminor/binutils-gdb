@@ -1,3 +1,22 @@
+2007-03-27  Andreas Schwab  <schwab@suse.de>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf2-frame.c (dwarf2_frame_eh_frame_regnum): Rename to...
+	(dwarf2_frame_adjust_regnum): ...this.  Make static.  Add eh_frame_p
+	argument.  Update all callers.
+	(struct dwarf2_frame_ops): Replace eh_frame_regnum with adjust_regnum.
+	(dwarf2_frame_set_eh_frame_regnum): Rename to...
+	(dwarf2_frame_set_adjust_regnum): ...this.  Update argument type.
+	* dwarf2frame.h (dwarf2_frame_set_eh_frame_regnum): Rename to...
+	(dwarf2_frame_set_adjust_regnum): ...this.
+	(dwarf2_frame_eh_frame_regnum): Delete prototype.
+	* rs6000-tdep.c: Include "dwarf2-frame.h".
+	(rs6000_adjust_frame_regnum): Define.
+	(rs6000_gdbarch_init): Enable use of DWARF CFI frame unwinder.
+	Register rs6000_adjust_frame_regnum.
+
+	* Makefile.in (rs6000-tdep.o): Update dependencies.
+
 2007-03-27  Brooks Moses  <brooks.moses@codesourcery.com>
 
 	* Makefile.in: Add support for a "pdf" target.

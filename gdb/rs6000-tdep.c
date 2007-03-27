@@ -40,6 +40,7 @@
 #include "sim-regno.h"
 #include "gdb/sim-ppc.h"
 #include "reggroups.h"
+#include "dwarf2-frame.h"
 
 #include "libbfd.h"		/* for bfd_default_set_arch_mach */
 #include "coff/internal.h"	/* for libcoff.h */
@@ -2294,6 +2295,69 @@ rs6000_dwarf2_reg_to_regnum (int num)
       }
 }
 
+/* Translate a .eh_frame register to DWARF register, or adjust a
+   .debug_frame register.  */
+
+static int
+rs6000_adjust_frame_regnum (struct gdbarch *gdbarch, int num, int eh_frame_p)
+{
+  /* GCC releases before 3.4 use GCC internal register numbering in
+     .debug_frame (and .debug_info, et cetera).  The numbering is
+     different from the standard SysV numbering for everything except
+     for GPRs and FPRs.  We can not detect this problem in most cases
+     - to get accurate debug info for variables living in lr, ctr, v0,
+     et cetera, use a newer version of GCC.  But we must detect
+     one important case - lr is in column 65 in .debug_frame output,
+     instead of 108.
+
+     GCC 3.4, and the "hammer" branch, have a related problem.  They
+     record lr register saves in .debug_frame as 108, but still record
+     the return column as 65.  We fix that up too.
+
+     We can do this because 65 is assigned to fpsr, and GCC never
+     generates debug info referring to it.  To add support for
+     handwritten debug info that restores fpsr, we would need to add a
+     producer version check to this.  */
+  if (!eh_frame_p)
+    {
+      if (num == 65)
+	return 108;
+      else
+	return num;
+    }
+
+  /* .eh_frame is GCC specific.  For binary compatibility, it uses GCC
+     internal register numbering; translate that to the standard DWARF2
+     register numbering.  */
+  if (0 <= num && num <= 63)	/* r0-r31,fp0-fp31 */
+    return num;
+  else if (68 <= num && num <= 75) /* cr0-cr8 */
+    return num - 68 + 86;
+  else if (77 <= num && num <= 108) /* vr0-vr31 */
+    return num - 77 + 1124;
+  else
+    switch (num)
+      {
+      case 64: /* mq */
+	return 100;
+      case 65: /* lr */
+	return 108;
+      case 66: /* ctr */
+	return 109;
+      case 76: /* xer */
+	return 101;
+      case 109: /* vrsave */
+	return 356;
+      case 110: /* vscr */
+	return 67;
+      case 111: /* spe_acc */
+	return 99;
+      case 112: /* spefscr */
+	return 612;
+      default:
+	return num;
+      }
+}
 
 /* Support for CONVERT_FROM_FUNC_PTR_ADDR (ARCH, ADDR, TARG).
 
@@ -3427,6 +3491,10 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_in_solib_return_trampoline
     (gdbarch, rs6000_in_solib_return_trampoline);
   set_gdbarch_skip_trampoline_code (gdbarch, rs6000_skip_trampoline_code);
+
+  /* Hook in the DWARF CFI frame unwinder.  */
+  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
+  dwarf2_frame_set_adjust_regnum (gdbarch, rs6000_adjust_frame_regnum);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
