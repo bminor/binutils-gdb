@@ -1,3 +1,7 @@
+2007-03-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* NEWS: Mention ".reloc".
+
 2007-03-26  Sterling Augustine  <sterling@tensilica.com>
 	
 	* config/tc-xtensa.c (xg_translate_idioms): Allow assembly idioms

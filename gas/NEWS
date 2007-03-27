@@ -1,4 +1,7 @@
 -*- text -*-
+* Added gas .reloc pseudo.  This is a low-level interface for creating
+  relocations.
+
 * Add support for x86_64 PE+ target.
 
 * Add support for Score target.
