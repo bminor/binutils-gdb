@@ -2,7 +2,7 @@
 
 	* elfxx-ia64.c (elf_backend_default_execstack): Define to 0.
 
-2003-03-26  H.J. Lu  <hongjiu.lu@intel.com>
+2007-03-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.
 
@@ -202,7 +202,7 @@
 	matching relocation is found.
 	(_bfd_mips_elf_relocate_section): Only warn about missing relocations.
 
-2003-03-23  H.J. Lu  <hongjiu.lu@intel.com>
+2007-03-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.
 
@@ -227,7 +227,7 @@
 	* configure.in (REPORT_BUGS_TO): Do not use "URL:" prefix.
 	* Makefile.in, configure, doc/Makefile.in: Regenerate.
 
-2003-03-22  H.J. Lu  <hongjiu.lu@intel.com>
+2007-03-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/4210
 	* peXXigen.c (_bfd_XXi_swap_aouthdr_out): Use the virtual
@@ -240,7 +240,7 @@
 	* elf.c (assign_file_positions_for_load_sections): Check if
 	all sections are in the segment.
 
-2003-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+2007-03-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/4208
 	* elfxx-mips.c (_bfd_mips_elf_relocate_section): Report missing
@@ -274,7 +274,7 @@
 	specific conditions that need the program headers to be
 	rewritten.
 
-2003-03-19  H.J. Lu  <hongjiu.lu@intel.com>
+2007-03-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* peXXigen.c (_bfd_XXi_swap_aouthdr_in): Store Magic,
 	MajorLinkerVersion, MinorLinkerVersion, SizeOfCode,
@@ -292,7 +292,7 @@
 	AddressOfEntryPoint, BaseOfCode and BaseOfData from internal
 	extra PE a.out header.
 
-2003-03-18  H.J. Lu  <hongjiu.lu@intel.com>
+2007-03-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* targets.c (_bfd_target_vector): Add bfd_efi_app_x86_64_vec
 	only if BFD64 is defined.

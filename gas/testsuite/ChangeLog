@@ -23,7 +23,7 @@
 	* gas/arm/srs-arm.l: New.
 	* gas/arm/srs-arm.s: New.
 
-2003-03-23  H.J. Lu  <hongjiu.lu@intel.com>
+2007-03-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/rex.s: Add tests for rex.WRXB.
 	* gas/i386/rex.d: Updated.
@@ -34,7 +34,7 @@
 	* gas/i386/x86-64-io.d: Likewise.
 	* gas/i386/x86-64-opcode.d: Likewise.
 
-2003-03-21  H.J. Lu  <hongjiu.lu@intel.com>
+2007-03-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/4218
 	* gas/i386/nops.s: Add testcases for nop r/m.
@@ -47,7 +47,7 @@
 	* gas/i386/x86-64-nops.d: Likewise.
 	* gas/i386/x86-64-opcode.d: Likewise.
 
-2003-03-21  H.J. Lu  <hongjiu.lu@intel.com>
+2007-03-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run nops-3.
 

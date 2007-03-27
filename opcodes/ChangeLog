@@ -1,4 +1,4 @@
-2006-03-27  Paul Brook  <paul@codesourcery.com>
+2007-03-27  Paul Brook  <paul@codesourcery.com>
 
 	opcodes/
 	* arm-dis.c (thumb_opcodes): Add entry for undefined insns (0xbe??).
@@ -13,13 +13,13 @@
 
 	* arm-dis.c (arm_opcodes): Print SRS base register.
 
-2003-03-23  H.J. Lu  <hongjiu.lu@intel.com>
+2007-03-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (prefix_name): Replace rex64XYZ with rex.WRXB.
 
 	* i386-opc.c (i386_optab): Add rex.wrxb.
 
-2003-03-21  H.J. Lu  <hongjiu.lu@intel.com>
+2007-03-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (REX_MODE64): Remove definition.
 	(REX_EXTX): Likewise.
@@ -29,7 +29,7 @@
 	Replace REX_MODE64, REX_EXTX, REX_EXTY and REX_EXTZ with REX_W,
 	REX_R, REX_X and REX_B respectively.
 
-2003-03-21  H.J. Lu  <hongjiu.lu@intel.com>
+2007-03-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/4218
 	* i386-dis.c (PREGRP38): New.
