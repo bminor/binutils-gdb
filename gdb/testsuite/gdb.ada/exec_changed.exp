@@ -73,11 +73,6 @@ gdb_test "shell mv ${binfile2} ${binfile}" "" ""
 gdb_test "shell sleep 1" "" ""
 gdb_test "shell touch ${binfile}" "" ""
 
-# Stop GDB from asking confirmations. This test will restart the program
-# and we don't need GDB to ask us to confirm that we want to kill the
-# current process.
-gdb_test "set confirm off" "" ""
-
 # Start the program a second time, GDB should land in procedure Second
 # this time.
 
