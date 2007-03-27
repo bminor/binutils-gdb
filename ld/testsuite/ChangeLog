@@ -1,5 +1,9 @@
 2007-03-27  Alan Modra  <amodra@bigpond.net.au>
 
+	* ld-elf/note-1.s: Increase .foo size.
+
+2007-03-27  Alan Modra  <amodra@bigpond.net.au>
+
 	* ld-spu/spu.exp (embed_test): New.
 	* ld-spu/ear.s: New.
 	* ld-spu/ear.d: New.
