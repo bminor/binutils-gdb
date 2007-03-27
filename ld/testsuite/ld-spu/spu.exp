@@ -20,8 +20,72 @@ if { ![istarget "spu-*-*"] } {
     return
 }
 
+proc embed_test { } {
+    global subdir srcdir
+    global AS ASFLAGS LD LDFLAGS READELF READELFFLAGS
+
+    set cmd "$AS $ASFLAGS -o tmpdir/ear.o $srcdir/$subdir/ear.s"
+    send_log "$cmd\n"
+    set cmdret [catch "exec $cmd" comp_output]
+    set comp_output [prune_warnings $comp_output]
+    if { $cmdret != 0 || $comp_output != ""} then {
+	send_log "$comp_output\n"
+	verbose "$comp_output" 3
+	fail "ear assembly"
+	return
+    }
+
+    set cmd "$LD $LDFLAGS -o tmpdir/ear tmpdir/ear.o"
+    send_log "$cmd\n"
+    set cmdret [catch "exec $cmd" comp_output]
+    set comp_output [prune_warnings $comp_output]
+    if { $cmdret != 0 || $comp_output != ""} then {
+	send_log "$comp_output\n"
+	verbose "$comp_output" 3
+	fail "ear link"
+	return
+    }
+
+    set cmd "sh $srcdir/../../binutils/embedspu.sh -m32 ear tmpdir/ear tmpdir/embed.o"
+    send_log "$cmd\n"
+    set cmdret [catch "exec $cmd" comp_output]
+    set comp_output [prune_warnings $comp_output]
+    if { $cmdret != 0 || $comp_output != ""} then {
+	send_log "$comp_output\n"
+	verbose "$comp_output" 3
+	if { [regexp "unknown pseudo-op: `.reloc'" $comp_output] } {
+	    untested "ear embedspu"
+	    return
+	}
+	fail "ear embedspu"
+	return
+    }
+
+    set cmd "$READELF $READELFFLAGS -r --wide tmpdir/embed.o > tmpdir/embed.out"
+    send_log "$cmd\n"
+    set cmdret [catch "exec $cmd" comp_output]
+    set comp_output [prune_warnings $comp_output]
+    if { $cmdret != 0 || $comp_output != ""} then {
+	send_log "$comp_output\n"
+	verbose "$comp_output" 3
+	fail "ear embed readelf"
+	return
+    }
+
+    if { [regexp_diff "tmpdir/embed.out" $srcdir/$subdir/embed.rd] } then {
+	fail "ear embed output"
+	return
+    }
+
+    pass "ear embed"
+}
+
 set rd_test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
 foreach sputest $rd_test_list {
     verbose [file rootname $sputest]
     run_dump_test [file rootname $sputest]
+}
+
+if { [isbuild "powerpc*-*-linux*"] } {
+    embed_test
 }

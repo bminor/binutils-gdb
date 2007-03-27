@@ -1,3 +1,12 @@
+2007-03-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-spu/spu.exp (embed_test): New.
+	* ld-spu/ear.s: New.
+	* ld-spu/ear.d: New.
+	* ld-spu/embed.rd: New.
+	* ld-spu/ovl2.s: New.
+	* ld-spu/ovl2.d: New.
+
 2007-03-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-elf/overlay.d: -u symbols we want to see in the output.
