@@ -1,3 +1,9 @@
+2007-03-28  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* gdb.cp/method2.cc: New test.
+	* gdb.cp/method2.exp: New test.
+	* gdb.cp/Makefile.in (EXECUTABLES): Add method2.
+
 2007-03-27  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.ada/exec_changed.exp: Avoid "set confirm off".
