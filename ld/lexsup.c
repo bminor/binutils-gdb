@@ -1045,17 +1045,14 @@ parse_args (unsigned argc, char **argv)
 	      /* First see whether OPTARG is already in the path.  */
 	      do
 		{
-		  size_t idx = 0;
-
-		  while (optarg[idx] != '\0' && optarg[idx] == cp[idx])
-		    ++idx;
-		  if (optarg[idx] == '\0'
-		      && (cp[idx] == '\0' || cp[idx] == ':'))
+		  if (strncmp (optarg, cp, optarg_len) == 0
+		      && (cp[optarg_len] == 0
+			  || cp[optarg_len] == config.rpath_separator))
 		    /* We found it.  */
 		    break;
 
 		  /* Not yet found.  */
-		  cp = strchr (cp, ':');
+		  cp = strchr (cp, config.rpath_separator);
 		  if (cp != NULL)
 		    ++cp;
 		}
@@ -1064,7 +1061,8 @@ parse_args (unsigned argc, char **argv)
 	      if (cp == NULL)
 		{
 		  buf = xmalloc (rpath_len + optarg_len + 2);
-		  sprintf (buf, "%s:%s", command_line.rpath, optarg);
+		  sprintf (buf, "%s%c%s", command_line.rpath,
+			   config.rpath_separator, optarg);
 		  free (command_line.rpath);
 		  command_line.rpath = buf;
 		}
@@ -1080,7 +1078,8 @@ parse_args (unsigned argc, char **argv)
 	      buf = xmalloc (strlen (command_line.rpath_link)
 			     + strlen (optarg)
 			     + 2);
-	      sprintf (buf, "%s:%s", command_line.rpath_link, optarg);
+	      sprintf (buf, "%s%c%s", command_line.rpath_link,
+		       config.rpath_separator, optarg);
 	      free (command_line.rpath_link);
 	      command_line.rpath_link = buf;
 	    }

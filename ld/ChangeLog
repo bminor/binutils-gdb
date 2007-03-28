@@ -1,4 +1,20 @@
 2007-03-28  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld.h (ld_config_type): Add rpath_separator.
+	* ldmain.c (main): Initialize it.
+	* lexsup.c (parse_args): Honor config.rpath_separator.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_search_needed): Likewise.
+	(gld${EMULATION_NAME}_add_sysroot): Likewise.
+	(gld${EMULATION_NAME}_parse_ld_so_conf): Use config.rpath_separator
+	rather than ':' when building the path.
+	* emultempl/vxworks.em (vxworks_before_parse): New function.
+	Override config.rpath_separator.
+	(LDEMUL_AFTER_OPEN): Do not change if EXTRA_EM_FILE has been
+	set to gld${EMULATION_NAME}_after_open; #define that identifier
+	to vxworks_foo instead.
+	(LDEMUL_BEFORE_PARSE): Override in the same way as LDEMUL_AFTER_OPEN.
+
+2007-03-28  Richard Sandiford  <richard@codesourcery.com>
 	    Phil Edwards  <phil@codesourcery.com>
 
 	* ld.texinfo: Put the contents after the title page rather

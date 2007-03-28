@@ -459,7 +459,7 @@ gld${EMULATION_NAME}_search_needed (const char *path,
     {
       char *filename, *sset;
 
-      s = strchr (path, ':');
+      s = strchr (path, config.rpath_separator);
       if (s == NULL)
 	s = path + strlen (path);
 
@@ -492,7 +492,8 @@ EOF
 if [ "x${USE_LIBPATH}" = xyes ] ; then
   cat >>e${EMULATION_NAME}.c <<EOF
 
-/* Add the sysroot to every entry in a colon-separated path.  */
+/* Add the sysroot to every entry in a path separated by
+   config.rpath_separator.  */
 
 static char *
 gld${EMULATION_NAME}_add_sysroot (const char *path)
@@ -504,7 +505,7 @@ gld${EMULATION_NAME}_add_sysroot (const char *path)
   colons = 0;
   i = 0;
   while (path[i])
-    if (path[i++] == ':')
+    if (path[i++] == config.rpath_separator)
       colons++;
 
   if (path[i])
@@ -516,7 +517,7 @@ gld${EMULATION_NAME}_add_sysroot (const char *path)
   p = ret + strlen (ret);
   i = 0;
   while (path[i])
-    if (path[i] == ':')
+    if (path[i] == config.rpath_separator)
       {
 	*p++ = path[i++];
 	strcpy (p, ld_sysroot);
@@ -745,7 +746,7 @@ gld${EMULATION_NAME}_parse_ld_so_conf
 		  info->alloc += p - dir + 256;
 		  info->path = xrealloc (info->path, info->alloc);
 		}
-	      info->path[info->len++] = ':';
+	      info->path[info->len++] = config.rpath_separator;
 	    }
 	  memcpy (info->path + info->len, dir, p - dir);
 	  info->len += p - dir;

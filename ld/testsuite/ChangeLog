@@ -1,3 +1,8 @@
+2007-03-28  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-vxworks/rpath-1.s, ld-vxworks/rpath-1.d,
+	* ld-vxworks/vxworks.exp: New files.
+
 2007-03-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-elf/note-1.s: Increase .foo size.

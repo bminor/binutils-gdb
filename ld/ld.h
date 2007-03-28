@@ -277,6 +277,9 @@ typedef struct {
   unsigned int split_by_reloc;
   bfd_size_type split_by_file;
 
+  /* The rpath separation character.  Usually ':'.  */
+  char rpath_separator;
+
   /* If set, only search library directories explicitly selected
      on the command line.  */
   bfd_boolean only_cmd_line_lib_dirs;

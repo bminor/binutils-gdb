@@ -247,6 +247,7 @@ main (int argc, char **argv)
   config.build_constructors = TRUE;
   config.dynamic_link = FALSE;
   config.has_shared = FALSE;
+  config.rpath_separator = ':';
   config.split_by_reloc = (unsigned) -1;
   config.split_by_file = (bfd_size_type) -1;
   config.hash_table_size = 0;
