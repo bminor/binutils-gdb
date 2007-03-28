@@ -1,4 +1,22 @@
 2007-03-28  Richard Sandiford  <richard@codesourcery.com>
+
+	* elfxx-sparc.h (_bfd_sparc_elf_link_hash_table): Remove append_rela.
+	* elfxx-sparc.c (sparc_elf_append_rela_64, sparc_elf_append_rela_32):
+	Merge into...
+	(sparc_elf_append_rela): ...this new function.
+	(SPARC_ELF_APPEND_RELA): Delete.
+	(_bfd_sparc_elf_link_hash_table_create): Don't initialize
+	the deleted append_rela field.
+	(_bfd_sparc_elf_relocate_section): Use sparc_elf_append_rela
+	instead of SPARC_ELF_APPEND_RELA.
+	(_bfd_sparc_elf_finish_dynamic_symbol): Likewise.  Use the
+	elf_size_info structure to find the size of a RELA entry and
+	the associated swap-out function.
+	(sparc64_finish_dyn, sparc64_finish_dyn): Merge into...
+	(sparc_finish_dyn): ...this new function.
+	(_bfd_sparc_elf_finish_dynamic_sections): Update calls accordingly.
+
+2007-03-28  Richard Sandiford  <richard@codesourcery.com>
 	    Phil Edwards  <phil@codesourcery.com>
 
 	* doc/bfd.texinfo: Put the contents after the title page rather
