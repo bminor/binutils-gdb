@@ -303,8 +303,8 @@ static int u_offsets[] =
     -1, -1, -1, -1, -1, -1, -1, -1,
   };
 
-CORE_ADDR
-register_addr (int regno, CORE_ADDR blockend)
+static CORE_ADDR
+ia64_register_addr (int regno)
 {
   CORE_ADDR addr;
 
@@ -319,14 +319,14 @@ register_addr (int regno, CORE_ADDR blockend)
   return addr;
 }
 
-int ia64_cannot_fetch_register (regno)
-     int regno;
+static int
+ia64_cannot_fetch_register (int regno)
 {
   return regno < 0 || regno >= NUM_REGS || u_offsets[regno] == -1;
 }
 
-int ia64_cannot_store_register (regno)
-     int regno;
+static int
+ia64_cannot_store_register (int regno)
 {
   /* Rationale behind not permitting stores to bspstore...
   
@@ -561,9 +561,10 @@ is_power_of_2 (int val)
   return onecount <= 1;
 }
 
-int
-ia64_linux_insert_watchpoint (ptid_t ptid, CORE_ADDR addr, int len, int rw)
+static int
+ia64_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw)
 {
+  ptid_t ptid = inferior_ptid;
   int idx;
   long dbr_addr, dbr_mask;
   int max_watchpoints = 4;
@@ -608,9 +609,10 @@ ia64_linux_insert_watchpoint (ptid_t ptid, CORE_ADDR addr, int len, int rw)
   return 0;
 }
 
-int
-ia64_linux_remove_watchpoint (ptid_t ptid, CORE_ADDR addr, int len)
+static int
+ia64_linux_remove_watchpoint (CORE_ADDR addr, int len, int type)
 {
+  ptid_t ptid = inferior_ptid;
   int idx;
   long dbr_addr, dbr_mask;
   int max_watchpoints = 4;
@@ -632,8 +634,8 @@ ia64_linux_remove_watchpoint (ptid_t ptid, CORE_ADDR addr, int len)
   return -1;
 }
 
-int
-ia64_linux_stopped_data_address (CORE_ADDR *addr_p)
+static int
+ia64_linux_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
 {
   CORE_ADDR psr;
   int tid;
@@ -660,12 +662,129 @@ ia64_linux_stopped_data_address (CORE_ADDR *addr_p)
   return 1;
 }
 
-int
+static int
 ia64_linux_stopped_by_watchpoint (void)
 {
   CORE_ADDR addr;
-  return ia64_linux_stopped_data_address (&addr);
+  return ia64_linux_stopped_data_address (&current_target, &addr);
 }
+
+static int
+ia64_linux_can_use_hw_breakpoint (int type, int cnt, int othertype)
+{
+  return 1;
+}
+
+
+/* Fetch register REGNUM from the inferior.  */
+
+static void
+ia64_linux_fetch_register (int regnum)
+{
+  CORE_ADDR addr;
+  size_t size;
+  PTRACE_TYPE_RET *buf;
+  int pid, i;
+
+  if (ia64_cannot_fetch_register (regnum))
+    {
+      regcache_raw_supply (current_regcache, regnum, NULL);
+      return;
+    }
+
+  /* Cater for systems like GNU/Linux, that implement threads as
+     separate processes.  */
+  pid = ptid_get_lwp (inferior_ptid);
+  if (pid == 0)
+    pid = ptid_get_pid (inferior_ptid);
+
+  /* This isn't really an address, but ptrace thinks of it as one.  */
+  addr = ia64_register_addr (regnum);
+  size = register_size (current_gdbarch, regnum);
+
+  gdb_assert ((size % sizeof (PTRACE_TYPE_RET)) == 0);
+  buf = alloca (size);
+
+  /* Read the register contents from the inferior a chunk at a time.  */
+  for (i = 0; i < size / sizeof (PTRACE_TYPE_RET); i++)
+    {
+      errno = 0;
+      buf[i] = ptrace (PT_READ_U, pid, (PTRACE_TYPE_ARG3)addr, 0);
+      if (errno != 0)
+	error (_("Couldn't read register %s (#%d): %s."),
+	       REGISTER_NAME (regnum), regnum, safe_strerror (errno));
+
+      addr += sizeof (PTRACE_TYPE_RET);
+    }
+  regcache_raw_supply (current_regcache, regnum, buf);
+}
+
+/* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
+   for all registers.  */
+
+static void
+ia64_linux_fetch_registers (int regnum)
+{
+  if (regnum == -1)
+    for (regnum = 0; regnum < NUM_REGS; regnum++)
+      ia64_linux_fetch_register (regnum);
+  else
+    ia64_linux_fetch_register (regnum);
+}
+
+/* Store register REGNUM into the inferior.  */
+
+static void
+ia64_linux_store_register (int regnum)
+{
+  CORE_ADDR addr;
+  size_t size;
+  PTRACE_TYPE_RET *buf;
+  int pid, i;
+
+  if (ia64_cannot_store_register (regnum))
+    return;
+
+  /* Cater for systems like GNU/Linux, that implement threads as
+     separate processes.  */
+  pid = ptid_get_lwp (inferior_ptid);
+  if (pid == 0)
+    pid = ptid_get_pid (inferior_ptid);
+
+  /* This isn't really an address, but ptrace thinks of it as one.  */
+  addr = ia64_register_addr (regnum);
+  size = register_size (current_gdbarch, regnum);
+
+  gdb_assert ((size % sizeof (PTRACE_TYPE_RET)) == 0);
+  buf = alloca (size);
+
+  /* Write the register contents into the inferior a chunk at a time.  */
+  regcache_raw_collect (current_regcache, regnum, buf);
+  for (i = 0; i < size / sizeof (PTRACE_TYPE_RET); i++)
+    {
+      errno = 0;
+      ptrace (PT_WRITE_U, pid, (PTRACE_TYPE_ARG3)addr, buf[i]);
+      if (errno != 0)
+	error (_("Couldn't write register %s (#%d): %s."),
+	       REGISTER_NAME (regnum), regnum, safe_strerror (errno));
+
+      addr += sizeof (PTRACE_TYPE_RET);
+    }
+}
+
+/* Store register REGNUM back into the inferior.  If REGNUM is -1, do
+   this for all registers.  */
+
+static void
+ia64_linux_store_registers (int regnum)
+{
+  if (regnum == -1)
+    for (regnum = 0; regnum < NUM_REGS; regnum++)
+      ia64_linux_store_register (regnum);
+  else
+    ia64_linux_store_register (regnum);
+}
+
 
 static LONGEST (*super_xfer_partial) (struct target_ops *, enum target_object,
 				      const char *, gdb_byte *, const gdb_byte *,
@@ -695,9 +814,31 @@ _initialize_ia64_linux_nat (void)
   /* Fill in the generic GNU/Linux methods.  */
   t = linux_target ();
 
+  /* Override the default fetch/store register routines.  */
+  t->to_fetch_registers = ia64_linux_fetch_registers;
+  t->to_store_registers = ia64_linux_store_registers;
+
   /* Override the default to_xfer_partial.  */
   super_xfer_partial = t->to_xfer_partial;
   t->to_xfer_partial = ia64_linux_xfer_partial;
+
+  /* Override watchpoint routines.  */
+
+  /* The IA-64 architecture can step over a watch point (without triggering
+     it again) if the "dd" (data debug fault disable) bit in the processor
+     status word is set.
+
+     This PSR bit is set in ia64_linux_stopped_by_watchpoint when the
+     code there has determined that a hardware watchpoint has indeed
+     been hit.  The CPU will then be able to execute one instruction
+     without triggering a watchpoint. */
+
+  t->to_have_steppable_watchpoint = 1;
+  t->to_can_use_hw_breakpoint = ia64_linux_can_use_hw_breakpoint;
+  t->to_stopped_by_watchpoint = ia64_linux_stopped_by_watchpoint;
+  t->to_stopped_data_address = ia64_linux_stopped_data_address;
+  t->to_insert_watchpoint = ia64_linux_insert_watchpoint;
+  t->to_remove_watchpoint = ia64_linux_remove_watchpoint;
 
   /* Register the target.  */
   linux_nat_add_target (t);

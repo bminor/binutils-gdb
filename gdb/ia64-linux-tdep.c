@@ -39,8 +39,8 @@
 /* Offset to sigcontext structure from frame of handler */
 #define IA64_LINUX_SIGCONTEXT_OFFSET 192
 
-int
-ia64_linux_in_sigtramp (CORE_ADDR pc, char *func_name)
+static int
+ia64_linux_pc_in_sigtramp (CORE_ADDR pc)
 {
   return (pc >= (CORE_ADDR) GATE_AREA_START && pc < (CORE_ADDR) GATE_AREA_END);
 }
@@ -124,6 +124,9 @@ ia64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Set the method of obtaining the sigcontext addresses at which
      registers are saved.  */
   tdep->sigcontext_register_address = ia64_linux_sigcontext_register_address;
+
+  /* Set the pc_in_sigtramp method.  */
+  tdep->pc_in_sigtramp = ia64_linux_pc_in_sigtramp;
 
   set_gdbarch_write_pc (gdbarch, ia64_linux_write_pc);
 

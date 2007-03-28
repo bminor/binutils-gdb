@@ -235,16 +235,6 @@ generic_register_byte (int regnum)
 
 
 int
-legacy_pc_in_sigtramp (CORE_ADDR pc, char *name)
-{
-#if defined (DEPRECATED_IN_SIGTRAMP)
-  return DEPRECATED_IN_SIGTRAMP (pc, name);
-#else
-  return name && strcmp ("_sigtramp", name) == 0;
-#endif
-}
-
-int
 generic_convert_register_p (int regnum, struct type *type)
 {
   return 0;

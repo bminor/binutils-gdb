@@ -197,13 +197,6 @@ a command like `return' or `jump' to continue execution."));
 /* Convert the #defines into values.  This is temporary until wfi control
    flow is completely sorted out.  */
 
-#ifndef HAVE_STEPPABLE_WATCHPOINT
-#define HAVE_STEPPABLE_WATCHPOINT 0
-#else
-#undef  HAVE_STEPPABLE_WATCHPOINT
-#define HAVE_STEPPABLE_WATCHPOINT 1
-#endif
-
 #ifndef CANNOT_STEP_HW_WATCHPOINTS
 #define CANNOT_STEP_HW_WATCHPOINTS 0
 #else

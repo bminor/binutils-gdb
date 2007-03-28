@@ -362,6 +362,7 @@ struct target_ops
     int (*to_remove_watchpoint) (CORE_ADDR, int, int);
     int (*to_insert_watchpoint) (CORE_ADDR, int, int);
     int (*to_stopped_by_watchpoint) (void);
+    int to_have_steppable_watchpoint;
     int to_have_continuable_watchpoint;
     int (*to_stopped_data_address) (struct target_ops *, CORE_ADDR *);
     int (*to_region_ok_for_hw_watchpoint) (CORE_ADDR, int);
@@ -1126,6 +1127,13 @@ extern void (*deprecated_target_new_objfile_hook) (struct objfile *);
 #ifndef STOPPED_BY_WATCHPOINT
 #define STOPPED_BY_WATCHPOINT(w) \
    (*current_target.to_stopped_by_watchpoint) ()
+#endif
+
+/* Non-zero if we have steppable watchpoints  */
+
+#ifndef HAVE_STEPPABLE_WATCHPOINT
+#define HAVE_STEPPABLE_WATCHPOINT \
+   (current_target.to_have_steppable_watchpoint)
 #endif
 
 /* Non-zero if we have continuable watchpoints  */

@@ -199,6 +199,7 @@
 struct gdbarch_tdep
 {
   CORE_ADDR (*sigcontext_register_address) (CORE_ADDR, int);
+  int (*pc_in_sigtramp) (CORE_ADDR);
 };
 
 extern void ia64_write_pc (CORE_ADDR, ptid_t);

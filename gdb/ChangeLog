@@ -1,3 +1,41 @@
+2007-03-28  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* arch-utils.c (legacy_pc_in_sigtramp): Remove.
+	* arch-utils.h (legacy_pc_in_sigtramp): Remove.
+
+	* config/ia64/linux.mt (DEPRECATED_TM_FILE): Remove.
+	* config/ia64/tm-linux.h: Remove file.
+	* ia64-tdep.h (struct gdbarch_tdep): Add pc_in_sigtramp callback.
+	* ia64-tdep.c (ia64_sigtramp_frame_sniffer): Use it instead of
+	legacy_pc_in_sigtramp.
+	(ia64_gdbarch_init): Initialize tdep->pc_in_sigtramp.
+	* ia64-linux-tdep.c (ia64_linux_pc_in_sigtramp): Make static.
+	Remove func_name argument.
+	(ia64_linux_init_abi): Install it as tdep->pc_in_sigtramp.
+
+	* infrun.c (HAVE_STEPPABLE_WATCHPOINT): Do not redefine.
+	* target.c (update_current_target): Add to_have_steppable_watchpoint.
+	* target.h (struct target_ops):  Add to_have_steppable_watchpoint.
+	(HAVE_STEPPABLE_WATCHPOINT): Define.
+
+	* config/ia64/linux.mh (NATDEPFILES): Remove core-aout.o.
+	* config/ia64/nm-linux.h (KERNEL_U_ADDR, U_REGS_OFFSET,
+	CANNOT_FETCH_REGISTER, CANNOT_STORE_REGISTER,
+	TARGET_CAN_USE_HARDWARE_WATCHPOINT, HAVE_STEPPABLE_WATCHPOINT,
+	STOPPED_BY_WATCHPOINT, target_stopped_data_address,
+	target_insert_watchpoint, target_remove_watchpoint): Remove.
+	(FETCH_INFERIOR_REGISTERS): Define.
+	* ia64-linux-nat.c (ia64_register_addr): Make static.
+	(ia64_cannot_fetch_register, ia64_cannot_store_register): Likewise.
+	(ia64_linux_insert_watchpoint): Make static.  Remove ptid_p argument.
+	(ia64_linux_remove_watchpoint): Likewise.  Add type argument.
+	(ia64_linux_stopped_data_address): Make static.  Add target_ops.
+	(ia64_linux_stopped_by_watchpoint): Make static.
+	(ia64_linux_can_use_hw_breakpoint): New function.
+	(ia64_linux_fetch_register, ia64_linux_fetch_registers): Likewise.
+	(ia64_linux_store_register, ia64_linux_store_registers): Likewise.
+	(_initialize_ia64_linux_nat): Install register and watchpoint ops.
+
 2007-03-28  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* linespec.c: Include language.h.

@@ -2078,12 +2078,14 @@ static const struct frame_unwind ia64_sigtramp_frame_unwind =
 static const struct frame_unwind *
 ia64_sigtramp_frame_sniffer (struct frame_info *next_frame)
 {
-  char *name;
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (next_frame));
+  if (tdep->pc_in_sigtramp)
+    {
+      CORE_ADDR pc = frame_pc_unwind (next_frame);
 
-  find_pc_partial_function (pc, &name, NULL, NULL);
-  if (legacy_pc_in_sigtramp (pc, name))
-    return &ia64_sigtramp_frame_unwind;
+      if (tdep->pc_in_sigtramp (pc))
+	return &ia64_sigtramp_frame_unwind;
+    }
 
   return NULL;
 }
@@ -3576,6 +3578,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdbarch = gdbarch_alloc (&info, tdep);
 
   tdep->sigcontext_register_address = 0;
+  tdep->pc_in_sigtramp = 0;
 
   /* Define the ia64 floating-point format to gdb.  */
   builtin_type_ia64_ext =
