@@ -5,7 +5,7 @@ of the GNU Binary Utilities project.  This includes the linker (ld),
 the assembler (gas), the profiler (gprof), a whole suite of other
 programs (binutils) and the libraries that they use (bfd and
 opcodes).  This project shares a common set of header files with the
-GCC and GDB projects (include), so maintainership of those files is 
+GCC and GDB projects (include), so maintainership of those files is
 shared amoungst the projects.
 
 The home page for binutils is:
@@ -14,8 +14,8 @@ The home page for binutils is:
 
 and patches should be sent to:
 
-  bug-binutils@gnu.org    or    binutils@sources.redhat.com
-  
+  binutils@sourceware.org
+
 with "[Patch]" as part of the subject line.  Note - patches to the
 top level config.guess and config.sub scripts should be sent to:
 
@@ -25,13 +25,13 @@ and not to the binutils lists.  Patches to the other top level
 configure files (configure, configure.in, config-ml.in) should
 be sent to the binutils lists, and copied to the gcc and gdb
 lists as well (gcc-patches@gcc.gnu.org and
-gdb-patches@sources.redhat.com).
+gdb-patches@sourceware.org).
 
 		--------- Blanket Write Privs ---------
 
 The following people have permission to check patches into the
 repository without obtaining approval first:
-		
+
   Nick Clifton <nickc@redhat.com> (head maintainer)
   Richard Henderson <rth@redhat.com>
   Ian Lance Taylor <ian@airs.com>
@@ -73,7 +73,7 @@ responsibility among the other maintainers.
   FR30		   Dave Brolley <brolley@redhat.com>
   FRV		   Dave Brolley <brolley@redhat.com>
   FRV		   Alexandre Oliva <aoliva@redhat.com>
-  H8300		   Anil Paranjpe <anilp1@kpitcummins.com> 
+  H8300		   Anil Paranjpe <anilp1@kpitcummins.com>
   HPPA		   Dave Anglin <dave.anglin@nrc.ca>
   HPPA elf32	   Alan Modra <amodra@bigpond.net.au>
   HPPA elf64	   Jeff Law <law@redhat.com> [Basic maintainance only]
@@ -97,6 +97,7 @@ responsibility among the other maintainers.
   MN10300	   Alexandre Oliva <aoliva@redhat.com>
   MSP430	   Dmitry Diky <diwil@spec.ru>
   PPC		   Geoff Keating <geoffk@geoffk.org>
+  PPC		   Alan Modra <amodra@bigpond.net.au>
   PPC vector ext   Aldy Hernandez <aldyh@redhat.com>
   s390, s390x	   Martin Schwidefsky <schwidefsky@de.ibm.com>
   SCORE		   Mei Ligang <ligang@sunnorth.com.cn>
@@ -122,11 +123,11 @@ CGEN is a tool for building, amongst other things, assemblers,
 disassemblers and simulators from a single description of a CPU.
 It creates files in several of the binutils directories, but it
 is mentioned here since there is a single group that maintains
-CGEN and the files that it creates. 
+CGEN and the files that it creates.
 
 If you have CGEN related problems you can send email to;
 
-   cgen@sources.redhat.com
+   cgen@sourceware.org
 
 The current CGEN maintainers are:
 
@@ -159,7 +160,7 @@ If a patch is approved for check in to the mainline sources, it can
 also be checked into the current release branch.  Normally however
 only bug fixes should be applied to the branch.  New features, new
 ports, etc, should be restricted to the mainline.  (Otherwise the
-burden of maintaining the branch in sync with the mainline becomes too 
+burden of maintaining the branch in sync with the mainline becomes too
 great).  If you are uncertain as to whether a patch is appropriate for
 the branch, ask the branch maintainer.  This is:
 
@@ -195,7 +196,7 @@ to contributions on a branch.
 Before creating the branch, you should select a name for the branch of
 the form:
 
-  binutils-<org>-<name> 
+  binutils-<org>-<name>
 
 where "org" is the initials of your organization, or your own initials
 if you are acting as an individual.  For example, for a branch created
@@ -239,7 +240,7 @@ Having selected the branch name, create the branch as follows:
 3. Create the branch:
 
      cvs rtag -b -r binutils-<org>-<name>-branchpoint \
-       binutils-<org>-<name>-branch 
+       binutils-<org>-<name>-branch
 
 4. Document the branch:
 

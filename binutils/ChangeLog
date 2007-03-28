@@ -1,3 +1,8 @@
+2007-03-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* MAINTAINERS: Update mailing list addresses.  Add myself
+	as PPC maintainer.
+
 2007-03-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* embedspu.sh: Correct toe_addr quoting.
