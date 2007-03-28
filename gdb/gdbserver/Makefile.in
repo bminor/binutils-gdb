@@ -311,7 +311,7 @@ linux-sh-low.o: linux-sh-low.c $(linux_low_h) $(server_h)
 linux-x86-64-low.o: linux-x86-64-low.c $(linux_low_h) $(server_h) \
 	$(gdb_proc_service_h)
 
-win32-i386-low.o: win32-i386-low.c $(server_h) $(regdef_h) $(regcache_h)
+win32-low.o: win32-low.c $(server_h) $(regdef_h) $(regcache_h)
 
 spu-low.o: spu-low.c $(server_h)
 

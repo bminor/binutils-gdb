@@ -1,3 +1,10 @@
+2007-03-28  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* win32-i386-low.c: Rename to ...
+	* win32-low.c: ... this.
+	* configure.srv: Replace win32-i386-low.o with win32-low.o.
+	* Makefile.in: Likewise.
+
 2007-03-27  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* remote-utils.c (monitor_output): Constify msg parameter.
