@@ -68,13 +68,13 @@ typedef BOOL winapi_DebugSetProcessKillOnExit (BOOL KillOnExit);
 
 /* Thread information structure used to track extra information about
    each thread.  */
-typedef struct thread_info_struct
+typedef struct win32_thread_info
 {
   DWORD tid;
   HANDLE h;
   int suspend_count;
   CONTEXT context;
-} thread_info;
+} win32_thread_info;
 static DWORD main_thread_id = 0;
 
 /* Get the thread ID from the current selected inferior (the current
@@ -82,17 +82,17 @@ static DWORD main_thread_id = 0;
 static DWORD
 current_inferior_tid (void)
 {
-  thread_info *th = inferior_target_data (current_inferior);
+  win32_thread_info *th = inferior_target_data (current_inferior);
   return th->tid;
 }
 
 /* Find a thread record given a thread id.  If GET_CONTEXT is set then
    also retrieve the context for this thread.  */
-static thread_info *
+static win32_thread_info *
 thread_rec (DWORD id, int get_context)
 {
   struct thread_info *thread;
-  thread_info *th;
+  win32_thread_info *th;
 
   thread = (struct thread_info *) find_inferior_id (&all_threads, id);
   if (thread == NULL)
@@ -126,15 +126,15 @@ thread_rec (DWORD id, int get_context)
 }
 
 /* Add a thread to the thread list.  */
-static thread_info *
+static win32_thread_info *
 child_add_thread (DWORD tid, HANDLE h)
 {
-  thread_info *th;
+  win32_thread_info *th;
 
   if ((th = thread_rec (tid, FALSE)))
     return th;
 
-  th = (thread_info *) malloc (sizeof (*th));
+  th = (win32_thread_info *) malloc (sizeof (*th));
   memset (th, 0, sizeof (*th));
   th->tid = tid;
   th->h = h;
@@ -170,7 +170,7 @@ child_add_thread (DWORD tid, HANDLE h)
 static void
 delete_thread_info (struct inferior_list_entry *thread)
 {
-  thread_info *th = inferior_target_data ((struct thread_info *) thread);
+  win32_thread_info *th = inferior_target_data ((struct thread_info *) thread);
 
   remove_thread ((struct thread_info *) thread);
   CloseHandle (th->h);
@@ -341,7 +341,7 @@ continue_one_thread (struct inferior_list_entry *this_thread, void *id_ptr)
 {
   struct thread_info *thread = (struct thread_info *) this_thread;
   int thread_id = * (int *) id_ptr;
-  thread_info *th = inferior_target_data (thread);
+  win32_thread_info *th = inferior_target_data (thread);
   int i;
 
   if ((thread_id == -1 || thread_id == th->tid)
@@ -386,7 +386,7 @@ child_continue (DWORD continue_status, int thread_id)
 
 /* Fetch register(s) from gdbserver regcache data.  */
 static void
-do_child_fetch_inferior_registers (thread_info *th, int r)
+do_child_fetch_inferior_registers (win32_thread_info *th, int r)
 {
   char *context_offset = ((char *) &th->context) + mappings[r];
   long l;
@@ -409,7 +409,7 @@ static void
 child_fetch_inferior_registers (int r)
 {
   int regno;
-  thread_info *th = thread_rec (current_inferior_tid (), TRUE);
+  win32_thread_info *th = thread_rec (current_inferior_tid (), TRUE);
   if (r == -1 || r == 0 || r > NUM_REGS)
     child_fetch_inferior_registers (NUM_REGS);
   else
@@ -419,7 +419,7 @@ child_fetch_inferior_registers (int r)
 
 /* Get register from gdbserver regcache data.  */
 static void
-do_child_store_inferior_registers (thread_info *th, int r)
+do_child_store_inferior_registers (win32_thread_info *th, int r)
 {
   collect_register (r, ((char *) &th->context) + mappings[r]);
 }
@@ -430,7 +430,7 @@ static void
 child_store_inferior_registers (int r)
 {
   int regno;
-  thread_info *th = thread_rec (current_inferior_tid (), TRUE);
+  win32_thread_info *th = thread_rec (current_inferior_tid (), TRUE);
   if (r == -1 || r == 0 || r > NUM_REGS)
     child_store_inferior_registers (NUM_REGS);
   else
@@ -686,7 +686,7 @@ win32_resume (struct thread_resume *resume_info)
   DWORD tid;
   enum target_signal sig;
   int step;
-  thread_info *th;
+  win32_thread_info *th;
   DWORD continue_status = DBG_CONTINUE;
 
   /* This handles the very limited set of resume packets that GDB can
@@ -764,7 +764,7 @@ win32_resume (struct thread_resume *resume_info)
 static int
 handle_exception (struct target_waitstatus *ourstatus)
 {
-  thread_info *th;
+  win32_thread_info *th;
   DWORD code = current_event.u.Exception.ExceptionRecord.ExceptionCode;
 
   ourstatus->kind = TARGET_WAITKIND_STOPPED;
@@ -872,8 +872,8 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 {
   BOOL debug_event;
   DWORD continue_status, event_code;
-  thread_info *th = NULL;
-  static thread_info dummy_thread_info;
+  win32_thread_info *th = NULL;
+  static win32_thread_info dummy_thread_info;
   int retval = 0;
 
 in:

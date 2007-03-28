@@ -1,5 +1,10 @@
 2007-03-28  Pedro Alves  <pedro_alves@portugalmail.pt>
 
+	* win32-low.c: Rename typedef thread_info to
+	win32_thread_info throughout.
+
+2007-03-28  Pedro Alves  <pedro_alves@portugalmail.pt>
+
 	* win32-i386-low.c: Rename to ...
 	* win32-low.c: ... this.
 	* configure.srv: Replace win32-i386-low.o with win32-low.o.
