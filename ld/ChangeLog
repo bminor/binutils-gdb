@@ -1,3 +1,9 @@
+2007-03-28  Richard Sandiford  <richard@codesourcery.com>
+	    Phil Edwards  <phil@codesourcery.com>
+
+	* ld.texinfo: Put the contents after the title page rather
+	than at the end of the document.
+
 2007-03-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Add dependency on ldemul-list.h for powerpc and

@@ -73,6 +73,7 @@ Copyright @copyright{} 1991, 2001, 2003, 2006 Free Software Foundation, Inc.
 
 @end titlepage
 @end iftex
+@contents
 
 @node Top, Overview, (dir), (dir)
 @ifinfo
@@ -333,5 +334,4 @@ All of BFD lives in one directory.
 % Blame: doc@cygnus.com, 28mar91.
 @end tex
 
-@contents
 @bye

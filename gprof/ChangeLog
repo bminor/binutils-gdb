@@ -1,3 +1,9 @@
+2007-03-28  Richard Sandiford  <richard@codesourcery.com>
+	    Phil Edwards  <phil@codesourcery.com>
+
+	* gprof.texi: Put the contents after the title page rather
+	than at the end of the document.
+
 2007-03-22  Joseph Myers  <joseph@codesourcery.com>
 
 	* Makefile.am (TEXI2POD): Include $(AM_MAKEINFOFLAGS).

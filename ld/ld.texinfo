@@ -127,6 +127,7 @@ section entitled ``GNU Free Documentation License''.
 
 @end titlepage
 @end iftex
+@contents
 @c FIXME: Talk about importance of *order* of args, cmds to linker!
 
 @ifnottex
@@ -6806,6 +6807,4 @@ If you have more than one @code{SECT} statement for the same
 % Blame: doc@cygnus.com, 28mar91.
 @end tex
 
-
-@contents
 @bye

@@ -74,6 +74,7 @@ Copyright @copyright{} 1988, 92, 97, 98, 99, 2000, 2003 Free Software Foundation
       section entitled ``GNU Free Documentation License''.
 
 @end titlepage
+@contents
 
 @ifnottex
 @node Top
@@ -2574,7 +2575,6 @@ recommend releasing these examples in parallel under your choice of
 free software license, such as the GNU General Public License,
 to permit their use in free software.
 
-@contents
 @bye
 
 NEEDS AN INDEX

@@ -1,3 +1,9 @@
+2007-03-28  Richard Sandiford  <richard@codesourcery.com>
+	    Phil Edwards  <phil@codesourcery.com>
+
+	* doc/bfd.texinfo: Put the contents after the title page rather
+	than at the end of the document.
+
 2007-03-27  Andreas Schwab  <schwab@suse.de>
 
 	* elfxx-ia64.c (elf_backend_default_execstack): Define to 0.

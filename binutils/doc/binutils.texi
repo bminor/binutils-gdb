@@ -97,6 +97,7 @@ Copyright @copyright{} 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
       section entitled ``GNU Free Documentation License''.
 
 @end titlepage
+@contents
 
 @node Top
 @top Introduction
@@ -3947,5 +3948,4 @@ things without first using the debugger to find the facts.
 
 @printindex cp
 
-@contents
 @bye

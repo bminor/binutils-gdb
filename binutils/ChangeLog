@@ -1,3 +1,9 @@
+2007-03-28  Richard Sandiford  <richard@codesourcery.com>
+	    Phil Edwards  <phil@codesourcery.com>
+
+	* doc/binutils.texi: Put the contents after the title page rather
+	than at the end of the document.
+
 2007-03-28  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (slurp_rela_relocs): Add newline to end of error
