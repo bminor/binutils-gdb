@@ -1,3 +1,11 @@
+2007-03-28  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (slurp_rela_relocs): Add newline to end of error
+	messages.
+	(slurp_rel_relocs, request_dump, request_dump_byname,
+	process_program_headers, process_dynamic_section,
+	process_symbol_table, process_mips_specific, main): Likewise.
+
 2007-03-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* MAINTAINERS: Update mailing list addresses.  Add myself
