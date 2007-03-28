@@ -474,17 +474,6 @@ extern void ada_reset_thread_registers (void);
 
 extern int ada_build_task_list (void);
 
-/* Look up a symbol by name using the search conventions of 
-   a specific language (optional block, optional symtab). 
-   FIXME: Should be symtab.h. */
-
-extern struct symbol *lookup_symbol_in_language (const char *, 
-						 const struct block *,
-						 domain_enum, 
-						 enum language,
-						 int *,
-						 struct symtab **);
-
 extern int ada_exception_catchpoint_p (struct breakpoint *b);
   
 extern struct symtab_and_line

@@ -84,6 +84,7 @@ static struct symbol *lookup_symbol_aux (const char *name,
 					 const char *linkage_name,
 					 const struct block *block,
 					 const domain_enum domain,
+					 enum language language,
 					 int *is_a_field_of_this,
 					 struct symtab **symtab);
 
@@ -1079,9 +1080,10 @@ fixup_psymbol_section (struct partial_symbol *psym, struct objfile *objfile)
    code).  */
 
 struct symbol *
-lookup_symbol (const char *name, const struct block *block,
-	       const domain_enum domain, int *is_a_field_of_this,
-	       struct symtab **symtab)
+lookup_symbol_in_language (const char *name, const struct block *block,
+			   const domain_enum domain, enum language lang,
+			   int *is_a_field_of_this,
+			   struct symtab **symtab)
 {
   char *demangled_name = NULL;
   const char *modified_name = NULL;
@@ -1093,7 +1095,7 @@ lookup_symbol (const char *name, const struct block *block,
 
   /* If we are using C++ or Java, demangle the name before doing a lookup, so
      we can always binary search. */
-  if (current_language->la_language == language_cplus)
+  if (lang == language_cplus)
     {
       demangled_name = cplus_demangle (name, DMGL_ANSI | DMGL_PARAMS);
       if (demangled_name)
@@ -1103,7 +1105,7 @@ lookup_symbol (const char *name, const struct block *block,
 	  needtofreename = 1;
 	}
     }
-  else if (current_language->la_language == language_java)
+  else if (lang == language_java)
     {
       demangled_name = cplus_demangle (name, 
 		      		       DMGL_ANSI | DMGL_PARAMS | DMGL_JAVA);
@@ -1129,7 +1131,8 @@ lookup_symbol (const char *name, const struct block *block,
     }
 
   returnval = lookup_symbol_aux (modified_name, mangled_name, block,
-				 domain, is_a_field_of_this, symtab);
+				 domain, lang,
+				 is_a_field_of_this, symtab);
   if (needtofreename)
     xfree (demangled_name);
 
@@ -1140,7 +1143,20 @@ lookup_symbol (const char *name, const struct block *block,
   return returnval;	 
 }
 
-/* Behave like lookup_symbol_aux except that NAME is the natural name
+/* Behave like lookup_symbol_in_language, but performed with the
+   current language.  */
+
+struct symbol *
+lookup_symbol (const char *name, const struct block *block,
+	       domain_enum domain, int *is_a_field_of_this,
+	       struct symtab **symtab)
+{
+  return lookup_symbol_in_language (name, block, domain,
+				    current_language->la_language,
+				    is_a_field_of_this, symtab);
+}
+
+/* Behave like lookup_symbol except that NAME is the natural name
    of the symbol that we're looking for and, if LINKAGE_NAME is
    non-NULL, ensure that the symbol's linkage name matches as
    well.  */
@@ -1148,9 +1164,11 @@ lookup_symbol (const char *name, const struct block *block,
 static struct symbol *
 lookup_symbol_aux (const char *name, const char *linkage_name,
 		   const struct block *block, const domain_enum domain,
+		   enum language language,
 		   int *is_a_field_of_this, struct symtab **symtab)
 {
   struct symbol *sym;
+  const struct language_defn *langdef;
 
   /* Make sure we do something sensible with is_a_field_of_this, since
      the callers that set this parameter to some non-null value will
@@ -1168,13 +1186,15 @@ lookup_symbol_aux (const char *name, const char *linkage_name,
   if (sym != NULL)
     return sym;
 
-  /* If requested to do so by the caller and if appropriate for the
-     current language, check to see if NAME is a field of `this'. */
+  /* If requested to do so by the caller and if appropriate for LANGUAGE,
+     check to see if NAME is a field of `this'. */
 
-  if (current_language->la_value_of_this != NULL
+  langdef = language_def (language);
+
+  if (langdef->la_value_of_this != NULL
       && is_a_field_of_this != NULL)
     {
-      struct value *v = current_language->la_value_of_this (0);
+      struct value *v = langdef->la_value_of_this (0);
 
       if (v && check_field (v, name))
 	{
@@ -1185,12 +1205,11 @@ lookup_symbol_aux (const char *name, const char *linkage_name,
 	}
     }
 
-  /* Now do whatever is appropriate for the current language to look
+  /* Now do whatever is appropriate for LANGUAGE to look
      up static and global variables.  */
 
-  sym = current_language->la_lookup_symbol_nonlocal (name, linkage_name,
-						     block, domain,
-						     symtab);
+  sym = langdef->la_lookup_symbol_nonlocal (name, linkage_name,
+					     block, domain, symtab);
   if (sym != NULL)
     return sym;
 
@@ -3070,7 +3089,8 @@ search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
 			|| lookup_symbol (SYMBOL_LINKAGE_NAME (msymbol),
 					  (struct block *) NULL,
 					  VAR_DOMAIN,
-					0, (struct symtab **) NULL) == NULL)
+					  0, (struct symtab **) NULL)
+			== NULL)
 		      found_misc = 1;
 		  }
 	      }

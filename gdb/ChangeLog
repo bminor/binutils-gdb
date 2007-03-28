@@ -1,3 +1,29 @@
+2007-03-28  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* linespec.c: Include language.h.
+	(find_methods): Add language parameter.  Call
+	lookup_symbol_in_language.  Pass language down.
+	(add_matching_methods): Likewise.  Call
+	lookup_symbol_in_language.
+	(add_constructors): Likewise.
+	(find_method): Pass sym_class to collect_methods.
+	(collect_methods): Add sym_class parameter.  Pass language
+	down.
+	* symtab.c (lookup_symbol): Rename to ...
+	(lookup_symbol_in_language): ... this.  Add language
+	parameter.  Use passed language instead of current_language.
+	(lookup_symbol): New as wrapper around
+	lookup_symbol_in_language.
+	(lookup_symbol_aux): Add language parameter.  Use passed
+	language instead of current_language.
+	(search_symbols): Indent.
+	* symtab.h (enum language): Forward declare.
+	(lookup_symbol_in_language): Declare.
+	(lookup_symbol): Update description.
+	* ada-lang.h (lookup_symbol_in_language): Remove declaration.
+	* ada-lang.c (restore_language): Remove.
+	(lookup_symbol_in_language): Remove.
+
 2007-03-27  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* breakpoint.c (bpstat_num): Add int *num parameter.

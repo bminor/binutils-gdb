@@ -34,6 +34,7 @@ struct block;
 struct blockvector;
 struct axs_value;
 struct agent_expr;
+enum language;
 
 /* Some of the structures in this file are space critical.
    The space-critical structures are:
@@ -1007,7 +1008,17 @@ extern int asm_demangle;
 
 extern struct symtab *lookup_symtab (const char *);
 
-/* lookup a symbol by name (optional block, optional symtab) */
+/* lookup a symbol by name (optional block, optional symtab) in language */
+
+extern struct symbol *lookup_symbol_in_language (const char *,
+						 const struct block *,
+						 const domain_enum,
+						 enum language,
+						 int *,
+						 struct symtab **);
+
+/* lookup a symbol by name (optional block, optional symtab)
+   in the current language */
 
 extern struct symbol *lookup_symbol (const char *, const struct block *,
 				     const domain_enum, int *,

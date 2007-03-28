@@ -37,6 +37,7 @@
 #include "objc-lang.h"
 #include "linespec.h"
 #include "exceptions.h"
+#include "language.h"
 
 /* We share this one with symtab.c, but it is not exported widely. */
 
@@ -75,6 +76,7 @@ static struct symtabs_and_lines find_method (int funfirstline,
 					     struct symbol *sym_class);
 
 static int collect_methods (char *copy, struct type *t,
+			    struct symbol *sym_class,
 			    struct symbol **sym_arr);
 
 static NORETURN void cplusplus_error (const char *name,
@@ -83,12 +85,15 @@ static NORETURN void cplusplus_error (const char *name,
 
 static int total_number_of_methods (struct type *type);
 
-static int find_methods (struct type *, char *, struct symbol **);
+static int find_methods (struct type *, char *,
+			 enum language, struct symbol **);
 
 static int add_matching_methods (int method_counter, struct type *t,
+				 enum language language,
 				 struct symbol **sym_arr);
 
 static int add_constructors (int method_counter, struct type *t,
+			     enum language language,
 			     struct symbol **sym_arr);
 
 static void build_canonical_line_spec (struct symtab_and_line *,
@@ -196,7 +201,8 @@ total_number_of_methods (struct type *type)
    Note that this function is g++ specific.  */
 
 static int
-find_methods (struct type *t, char *name, struct symbol **sym_arr)
+find_methods (struct type *t, char *name, enum language language,
+	      struct symbol **sym_arr)
 {
   int i1 = 0;
   int ibase;
@@ -206,8 +212,8 @@ find_methods (struct type *t, char *name, struct symbol **sym_arr)
      unless we figure out how to get the physname without the name of
      the class, then the loop can't do any good.  */
   if (class_name
-      && (lookup_symbol (class_name, (struct block *) NULL,
-			 STRUCT_DOMAIN, (int *) NULL,
+      && (lookup_symbol_in_language (class_name, (struct block *) NULL,
+			 STRUCT_DOMAIN, language, (int *) NULL,
 			 (struct symtab **) NULL)))
     {
       int method_counter;
@@ -238,12 +244,12 @@ find_methods (struct type *t, char *name, struct symbol **sym_arr)
 
 	  if (strcmp_iw (name, method_name) == 0)
 	    /* Find all the overloaded methods with that name.  */
-	    i1 += add_matching_methods (method_counter, t,
+	    i1 += add_matching_methods (method_counter, t, language,
 					sym_arr + i1);
 	  else if (strncmp (class_name, name, name_len) == 0
 		   && (class_name[name_len] == '\0'
 		       || class_name[name_len] == '<'))
-	    i1 += add_constructors (method_counter, t,
+	    i1 += add_constructors (method_counter, t, language,
 				    sym_arr + i1);
 	}
     }
@@ -261,7 +267,8 @@ find_methods (struct type *t, char *name, struct symbol **sym_arr)
 
   if (i1 == 0)
     for (ibase = 0; ibase < TYPE_N_BASECLASSES (t); ibase++)
-      i1 += find_methods (TYPE_BASECLASS (t, ibase), name, sym_arr + i1);
+      i1 += find_methods (TYPE_BASECLASS (t, ibase), name,
+			  language, sym_arr + i1);
 
   return i1;
 }
@@ -272,7 +279,7 @@ find_methods (struct type *t, char *name, struct symbol **sym_arr)
 
 static int
 add_matching_methods (int method_counter, struct type *t,
-		      struct symbol **sym_arr)
+		      enum language language, struct symbol **sym_arr)
 {
   int field_counter;
   int i1 = 0;
@@ -299,14 +306,15 @@ add_matching_methods (int method_counter, struct type *t,
 	}
       else
 	phys_name = TYPE_FN_FIELD_PHYSNAME (f, field_counter);
-		
+
       /* Destructor is handled by caller, don't add it to
 	 the list.  */
       if (is_destructor_name (phys_name) != 0)
 	continue;
 
-      sym_arr[i1] = lookup_symbol (phys_name,
+      sym_arr[i1] = lookup_symbol_in_language (phys_name,
 				   NULL, VAR_DOMAIN,
+				   language,
 				   (int *) NULL,
 				   (struct symtab **) NULL);
       if (sym_arr[i1])
@@ -333,7 +341,7 @@ add_matching_methods (int method_counter, struct type *t,
 
 static int
 add_constructors (int method_counter, struct type *t,
-		  struct symbol **sym_arr)
+		  enum language language, struct symbol **sym_arr)
 {
   int field_counter;
   int i1 = 0;
@@ -349,7 +357,7 @@ add_constructors (int method_counter, struct type *t,
     {
       struct fn_field *f;
       char *phys_name;
-		  
+
       f = TYPE_FN_FIELDLIST1 (t, method_counter);
 
       /* GCC 3.x will never produce stabs stub methods, so
@@ -362,8 +370,9 @@ add_constructors (int method_counter, struct type *t,
 
       /* If this method is actually defined, include it in the
 	 list.  */
-      sym_arr[i1] = lookup_symbol (phys_name,
+      sym_arr[i1] = lookup_symbol_in_language (phys_name,
 				   NULL, VAR_DOMAIN,
+				   language,
 				   (int *) NULL,
 				   (struct symtab **) NULL);
       if (sym_arr[i1])
@@ -1410,7 +1419,7 @@ find_method (int funfirstline, char ***canonical, char *saved_arg,
   /* Find all methods with a matching name, and put them in
      sym_arr.  */
 
-  i1 = collect_methods (copy, t, sym_arr);
+  i1 = collect_methods (copy, t, sym_class, sym_arr);
 
   if (i1 == 1)
     {
@@ -1466,7 +1475,7 @@ find_method (int funfirstline, char ***canonical, char *saved_arg,
 
 static int
 collect_methods (char *copy, struct type *t,
-		 struct symbol **sym_arr)
+		 struct symbol *sym_class, struct symbol **sym_arr)
 {
   int i1 = 0;	/*  Counter for the symbol array.  */
 
@@ -1488,7 +1497,7 @@ collect_methods (char *copy, struct type *t,
 	}
     }
   else
-    i1 = find_methods (t, copy, sym_arr);
+    i1 = find_methods (t, copy, SYMBOL_LANGUAGE (sym_class), sym_arr);
 
   return i1;
 }
