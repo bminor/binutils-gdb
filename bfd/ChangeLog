@@ -1,3 +1,12 @@
+2007-03-29  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/4110
+	* elf.c (IS_VALID_GROUP_SECTION_HEADER): New macro.
+	(setup_group): Use it.  Report corrupt group section headers.
+	(bfd_section_from_shdr): Use new macro.  Replace constant 4 with
+	GRP_ENTRY_SIZE.  Cope with NULLs in the group section table.
+	(elf_fake_section): Replace constant 4 with GRP_ENTRY_SIZE.
+
 2007-03-29  Alan Modra  <amodra@bigpond.net.au>
 
 	PR ld/4267

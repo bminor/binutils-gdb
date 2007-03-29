@@ -501,10 +501,18 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 	 section with just a flag word (ie. sh_size is 4), ignore it.  */
       shnum = elf_numsections (abfd);
       num_group = 0;
+      
+#define IS_VALID_GROUP_SECTION_HEADER(shdr)		\
+	(   (shdr)->sh_type == SHT_GROUP		\
+	 && (shdr)->sh_size >= (2 * GRP_ENTRY_SIZE)	\
+	 && (shdr)->sh_entsize == GRP_ENTRY_SIZE	\
+	 && ((shdr)->sh_size % GRP_ENTRY_SIZE) == 0)
+	
       for (i = 0; i < shnum; i++)
 	{
 	  Elf_Internal_Shdr *shdr = elf_elfsections (abfd)[i];
-	  if (shdr->sh_type == SHT_GROUP && shdr->sh_size >= 8)
+
+	  if (IS_VALID_GROUP_SECTION_HEADER (shdr))
 	    num_group += 1;
 	}
 
@@ -529,7 +537,8 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 	  for (i = 0; i < shnum; i++)
 	    {
 	      Elf_Internal_Shdr *shdr = elf_elfsections (abfd)[i];
-	      if (shdr->sh_type == SHT_GROUP && shdr->sh_size >= 8)
+
+	      if (IS_VALID_GROUP_SECTION_HEADER (shdr))
 		{
 		  unsigned char *src;
 		  Elf_Internal_Group *dest;
@@ -543,8 +552,18 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		  amt = shdr->sh_size * sizeof (*dest) / 4;
 		  shdr->contents = bfd_alloc2 (abfd, shdr->sh_size,
 					       sizeof (*dest) / 4);
-		  if (shdr->contents == NULL
-		      || bfd_seek (abfd, shdr->sh_offset, SEEK_SET) != 0
+		  /* PR binutils/4110: Handle corrupt group headers.  */
+		  if (shdr->contents == NULL)
+		    {
+		      _bfd_error_handler
+			(_("%B: Corrupt size field in group section header: 0x%lx"), abfd, shdr->sh_size);
+		      bfd_set_error (bfd_error_bad_value);
+		      return FALSE;
+		    }
+
+		  memset (shdr->contents, 0, amt);
+
+		  if (bfd_seek (abfd, shdr->sh_offset, SEEK_SET) != 0
 		      || (bfd_bread (shdr->contents, shdr->sh_size, abfd)
 			  != shdr->sh_size))
 		    return FALSE;
@@ -2136,7 +2155,7 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
       /* We need a BFD section for objcopy and relocatable linking,
 	 and it's handy to have the signature available as the section
 	 name.  */
-      if (hdr->sh_entsize != GRP_ENTRY_SIZE)
+      if (! IS_VALID_GROUP_SECTION_HEADER (hdr))
 	return FALSE;
       name = group_signature (abfd, hdr);
       if (name == NULL)
@@ -2146,7 +2165,7 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
       if (hdr->contents != NULL)
 	{
 	  Elf_Internal_Group *idx = (Elf_Internal_Group *) hdr->contents;
-	  unsigned int n_elt = hdr->sh_size / 4;
+	  unsigned int n_elt = hdr->sh_size / GRP_ENTRY_SIZE;
 	  asection *s;
 
 	  if (idx->flags & GRP_COMDAT)
@@ -2156,12 +2175,17 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	  /* We try to keep the same section order as it comes in.  */
 	  idx += n_elt;
 	  while (--n_elt != 0)
-	    if ((s = (--idx)->shdr->bfd_section) != NULL
-		&& elf_next_in_group (s) != NULL)
-	      {
-		elf_next_in_group (hdr->bfd_section) = s;
-		break;
-	      }
+	    {
+	      --idx;
+
+	      if (idx->shdr != NULL
+		  && (s = idx->shdr->bfd_section) != NULL
+		  && elf_next_in_group (s) != NULL)
+		{
+		  elf_next_in_group (hdr->bfd_section) = s;
+		  break;
+		}
+	    }
 	}
       break;
 
@@ -2830,7 +2854,7 @@ elf_fake_sections (bfd *abfd, asection *asect, void *failedptrarg)
       break;
 
     case SHT_GROUP:
-      this_hdr->sh_entsize = 4;
+      this_hdr->sh_entsize = GRP_ENTRY_SIZE;
       break;
 
     case SHT_GNU_HASH:
