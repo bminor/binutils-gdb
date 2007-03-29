@@ -124,24 +124,8 @@ tui_query_hook (const char * msg, va_list argp)
   return retval;
 }
 
-/* Prevent recursion of deprecated_registers_changed_hook().  */
+/* Prevent recursion of deprecated_register_changed_hook().  */
 static int tui_refreshing_registers = 0;
-
-static void
-tui_registers_changed_hook (void)
-{
-  struct frame_info *fi;
-
-  fi = get_selected_frame (NULL);
-  if (tui_refreshing_registers == 0)
-    {
-      tui_refreshing_registers = 1;
-#if 0
-      tui_check_data_values (fi);
-#endif
-      tui_refreshing_registers = 0;
-    }
-}
 
 static void
 tui_register_changed_hook (int regno)
@@ -230,7 +214,11 @@ tui_selected_frame_level_changed_hook (int level)
 {
   struct frame_info *fi;
 
-  fi = deprecated_safe_get_selected_frame ();
+  /* Negative level means that the selected frame was cleared.  */
+  if (level < 0)
+    return;
+
+  fi = get_selected_frame (NULL);
   /* Ensure that symbols for this frame are read in.  Also, determine the
      source language of this frame, and switch to it if desired.  */
   if (fi)
@@ -289,7 +277,6 @@ tui_install_hooks (void)
   /* Install the event hooks.  */
   tui_old_event_hooks = deprecated_set_gdb_event_hooks (&tui_event_hooks);
 
-  deprecated_registers_changed_hook = tui_registers_changed_hook;
   deprecated_register_changed_hook = tui_register_changed_hook;
   deprecated_detach_hook = tui_detach_hook;
 }
@@ -302,7 +289,6 @@ tui_remove_hooks (void)
   deprecated_selected_frame_level_changed_hook = 0;
   deprecated_print_frame_info_listing_hook = 0;
   deprecated_query_hook = 0;
-  deprecated_registers_changed_hook = 0;
   deprecated_register_changed_hook = 0;
   deprecated_detach_hook = 0;
 

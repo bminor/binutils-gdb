@@ -271,11 +271,6 @@ void (*deprecated_detach_hook) (void);
 
 void (*deprecated_interactive_hook) (void);
 
-/* Called when the registers have changed, as a hint to a GUI
-   to minimize window update. */
-
-void (*deprecated_registers_changed_hook) (void);
-
 /* Tell the GUI someone changed the register REGNO. -1 means
    that the caller does not know which register changed or
    that several registers have changed (see value_assign). */

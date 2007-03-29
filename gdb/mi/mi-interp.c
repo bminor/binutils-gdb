@@ -349,7 +349,6 @@ mi_command_loop (int mi_version)
   deprecated_delete_breakpoint_hook = 0;
   deprecated_modify_breakpoint_hook = 0;
   deprecated_interactive_hook = 0;
-  deprecated_registers_changed_hook = 0;
   deprecated_readline_begin_hook = 0;
   deprecated_readline_hook = 0;
   deprecated_readline_end_hook = 0;

@@ -1,3 +1,17 @@
+2007-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* defs.h (deprecated_registers_changed_hook): Delete declaration.
+	* interps.c (clear_interpreter_hooks): Do not clear
+	deprecated_registers_changed_hook.
+	* regcache.c (registers_changed): Do not call it.
+	* top.c (deprecated_registers_changed_hook): Do not define it.
+	* mi/mi-interp.c (mi_command_loop): Do not clear it.
+	* tui/tui-hooks.c (tui_install_hooks): Do not install it.
+	(tui_remove_hooks): Do not remove it.
+	(tui_selected_frame_level_changed_hook): Check for negative level.
+	Use get_selected_frame.
+	(tui_registers_changed_hook): Deleted.
+
 2007-03-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* stabsread.c (add_undefined_type): Add extra parameter.

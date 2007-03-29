@@ -1135,7 +1135,6 @@ extern void (*deprecated_create_breakpoint_hook) (struct breakpoint * b);
 extern void (*deprecated_delete_breakpoint_hook) (struct breakpoint * bpt);
 extern void (*deprecated_modify_breakpoint_hook) (struct breakpoint * bpt);
 extern void (*deprecated_interactive_hook) (void);
-extern void (*deprecated_registers_changed_hook) (void);
 extern void (*deprecated_readline_begin_hook) (char *, ...)
      ATTRIBUTE_FPTR_PRINTF_1;
 extern char *(*deprecated_readline_hook) (char *);
