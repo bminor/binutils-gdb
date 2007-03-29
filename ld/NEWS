@@ -1,4 +1,7 @@
 -*- text -*-
+* -l:foo now searches the library path for a filename called foo,
+  without converting it to libfoo.a or libfoo.so.
+
 * Add a new command line option '--default-script=FILE' or '-dT FILE'
   which specifies a replacement for the built in, default linker
   script.

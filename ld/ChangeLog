@@ -1,3 +1,12 @@
+2007-03-29  Richard Sandiford  <richard@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* NEWS: Mention -l:foo.
+	* ld.texinfo: Document it.
+	* ldlang.c (new_afile): If a lang_input_file_is_l_enum
+	entry as a name beginning with a coloh, convert it to a
+	lang_input_file_is_search_file_enum entry without the colon.
+
 2007-03-28  Richard Sandiford  <richard@codesourcery.com>
 
 	* ld.h (ld_config_type): Add rpath_separator.

@@ -913,6 +913,14 @@ new_afile (const char *name,
   lang_has_input_file = TRUE;
   p->target = target;
   p->sysrooted = FALSE;
+
+  if (file_type == lang_input_file_is_l_enum
+      && name[0] == ':' && name[1] != '\0')
+    {
+      file_type = lang_input_file_is_search_file_enum;
+      name = name + 1;
+    }
+
   switch (file_type)
     {
     case lang_input_file_is_symbols_only_enum:
