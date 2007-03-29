@@ -147,7 +147,7 @@ static struct type *read_array_type (char **, struct type *,
 
 static struct field *read_args (char **, int, struct objfile *, int *, int *);
 
-static void add_undefined_type (struct type *);
+static void add_undefined_type (struct type *, int[2]);
 
 static int
 read_cpp_abbrev (struct field_info *, char **, struct type *,
@@ -197,6 +197,20 @@ static struct type **undef_types;
 static int undef_types_allocated;
 static int undef_types_length;
 static struct symbol *current_symbol = NULL;
+
+/* Make a list of nameless types that are undefined.
+   This happens when another type is referenced by its number
+   before this type is actually defined. For instance "t(0,1)=k(0,2)"
+   and type (0,2) is defined only later.  */
+
+struct nat
+{
+  int typenums[2];
+  struct type *type;
+};
+static struct nat *noname_undefs;
+static int noname_undefs_allocated;
+static int noname_undefs_length;
 
 /* Check for and handle cretinous stabs symbol name continuation!  */
 #define STABS_CONTINUE(pp,objfile)				\
@@ -1447,7 +1461,7 @@ read_type (char **pp, struct objfile *objfile)
              doesn't get patched up by the time we're done
              reading.  */
           if (TYPE_CODE (type) == TYPE_CODE_UNDEF)
-            add_undefined_type (type);
+            add_undefined_type (type, typenums);
 
           return type;
         }
@@ -1573,7 +1587,7 @@ again:
 	INIT_CPLUS_SPECIFIC (type);
 	TYPE_FLAGS (type) |= TYPE_FLAG_STUB;
 
-	add_undefined_type (type);
+	add_undefined_type (type, typenums);
 	return type;
       }
 
@@ -4170,13 +4184,33 @@ fix_common_block (struct symbol *sym, int valu)
 
 
 
-/* What about types defined as forward references inside of a small lexical
-   scope?  */
-/* Add a type to the list of undefined types to be checked through
-   once this file has been read in.  */
+/* Add {TYPE, TYPENUMS} to the NONAME_UNDEFS vector.
+   See add_undefined_type for more details.  */
 
 static void
-add_undefined_type (struct type *type)
+add_undefined_type_noname (struct type *type, int typenums[2])
+{
+  struct nat nat;
+
+  nat.typenums[0] = typenums [0];
+  nat.typenums[1] = typenums [1];
+  nat.type = type;
+
+  if (noname_undefs_length == noname_undefs_allocated)
+    {
+      noname_undefs_allocated *= 2;
+      noname_undefs = (struct nat *)
+	xrealloc ((char *) noname_undefs,
+		  noname_undefs_allocated * sizeof (struct nat));
+    }
+  noname_undefs[noname_undefs_length++] = nat;
+}
+
+/* Add TYPE to the UNDEF_TYPES vector.
+   See add_undefined_type for more details.  */
+
+static void
+add_undefined_type_1 (struct type *type)
 {
   if (undef_types_length == undef_types_allocated)
     {
@@ -4188,6 +4222,48 @@ add_undefined_type (struct type *type)
   undef_types[undef_types_length++] = type;
 }
 
+/* What about types defined as forward references inside of a small lexical
+   scope?  */
+/* Add a type to the list of undefined types to be checked through
+   once this file has been read in.
+   
+   In practice, we actually maintain two such lists: The first list
+   (UNDEF_TYPES) is used for types whose name has been provided, and
+   concerns forward references (eg 'xs' or 'xu' forward references);
+   the second list (NONAME_UNDEFS) is used for types whose name is
+   unknown at creation time, because they were referenced through
+   their type number before the actual type was declared.
+   This function actually adds the given type to the proper list.  */
+
+static void
+add_undefined_type (struct type *type, int typenums[2])
+{
+  if (TYPE_TAG_NAME (type) == NULL)
+    add_undefined_type_noname (type, typenums);
+  else
+    add_undefined_type_1 (type);
+}
+
+/* Try to fix all undefined types pushed on the UNDEF_TYPES vector.  */
+
+void
+cleanup_undefined_types_noname (void)
+{
+  int i;
+
+  for (i = 0; i < noname_undefs_length; i++)
+    {
+      struct nat nat = noname_undefs[i];
+      struct type **type;
+
+      type = dbx_lookup_type (nat.typenums);
+      if (nat.type != *type && TYPE_CODE (*type) != TYPE_CODE_UNDEF)
+        replace_type (nat.type, *type);
+    }
+
+  noname_undefs_length = 0;
+}
+
 /* Go through each undefined type, see if it's still undefined, and fix it
    up if possible.  We have two kinds of undefined types:
 
@@ -4197,8 +4273,9 @@ add_undefined_type (struct type *type)
    TYPE_CODE_STRUCT, TYPE_CODE_UNION:  Structure whose fields were not
    yet defined at the time a pointer to it was made.
    Fix:  Do a full lookup on the struct/union tag.  */
+
 void
-cleanup_undefined_types (void)
+cleanup_undefined_types_1 (void)
 {
   struct type **type;
 
@@ -4257,6 +4334,16 @@ cleanup_undefined_types (void)
     }
 
   undef_types_length = 0;
+}
+
+/* Try to fix all the undefined types we ecountered while processing
+   this unit.  */
+
+void
+cleanup_undefined_types (void)
+{
+  cleanup_undefined_types_1 ();
+  cleanup_undefined_types_noname ();
 }
 
 /* Scan through all of the global symbols defined in the object file,
@@ -4494,4 +4581,9 @@ _initialize_stabsread (void)
   undef_types_length = 0;
   undef_types = (struct type **)
     xmalloc (undef_types_allocated * sizeof (struct type *));
+
+  noname_undefs_allocated = 20;
+  noname_undefs_length = 0;
+  noname_undefs = (struct nat *)
+    xmalloc (noname_undefs_allocated * sizeof (struct nat));
 }

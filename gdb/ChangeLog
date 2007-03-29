@@ -1,3 +1,18 @@
+2007-03-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* stabsread.c (add_undefined_type): Add extra parameter.
+	Now handles nameless types separately.
+	(struct nat): New type.
+	(noname_undefs, noname_undefs_allocated, noname_undefs_length):
+	New static variables.
+	(read_type): Update calls to add_undefined_type.
+	(add_undefined_type_noname): New function.
+	(add_undefined_type_1): Renames from add_undefined_type.
+	(cleanup_undefined_types_noname): New function.
+	(cleanup_undefined_types_1): Renames cleanup_undefined_types.
+	(cleanup_undefined_types): New handles nameless types separately.
+	(_initialize_stabsread): Initialize our new static constants.
+
 2007-03-29  Denis Pilat  <denis.pilat@st.com>
 
 	* configure.ac: Test for signal.h.
