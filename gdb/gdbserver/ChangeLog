@@ -1,11 +1,11 @@
 2007-03-29  Pedro Alves  <pedro_alves@portugalmail.pt>
 
-	* gdbserver/configure.ac: Add errno checking.
+	* configure.ac: Add errno checking.
 	(AC_CHECK_HEADERS): Add errno.h, fcntl.h, signal.h,
 	sys/file.h and malloc.h.
 	(AC_CHECK_DECLS): Add perror.
 	(srv_mingwce): Handle.
-	* gdbserver/configure.srv (i[34567]86-*-cygwin*): Add
+	* configure.srv (i[34567]86-*-cygwin*): Add
 	win32-i386-low.o to srv_tgtobj.
 	(i[34567]86-*-mingw*): Likewise.
 	(arm*-*-mingw32ce*): Add case.
