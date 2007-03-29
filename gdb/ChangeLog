@@ -1,3 +1,8 @@
+2007-03-29  Denis Pilat  <denis.pilat@st.com>
+
+	* stack.c (print_stack_frame): Always use LOC_AND_ADDRESS in MI output.
+	* infrun.c (normal_stop): Remove MI specific frame printing treatment.
+
 2007-03-29  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* arm-wince-tdep.c: New.

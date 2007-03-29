@@ -106,6 +106,8 @@ print_stack_frame (struct frame_info *frame, int print_level,
   args.frame = frame;
   args.print_level = print_level;
   args.print_what = print_what;
+  /* For mi, alway print location and address.  */
+  args.print_what = ui_out_is_mi_like_p (uiout) ? LOC_AND_ADDRESS : print_what;
   args.print_args = 1;
 
   catch_errors (print_stack_frame_stub, &args, "", RETURN_MASK_ALL);

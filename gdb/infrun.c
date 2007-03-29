@@ -3193,10 +3193,6 @@ Further execution is probably impossible.\n"));
 	    default:
 	      internal_error (__FILE__, __LINE__, _("Unknown value."));
 	    }
-	  /* For mi, have the same behavior every time we stop:
-	     print everything but the source line. */
-	  if (ui_out_is_mi_like_p (uiout))
-	    source_flag = LOC_AND_ADDRESS;
 
 	  if (ui_out_is_mi_like_p (uiout))
 	    ui_out_field_int (uiout, "thread-id",
