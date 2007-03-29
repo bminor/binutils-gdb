@@ -1,3 +1,8 @@
+2007-03-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf2/dw2-noloc.S: New file.
+	* gdb.dwarf2/dw2-noloc.exp: New file.
+
 2007-03-28  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* gdb.cp/method2.cc: New test.
