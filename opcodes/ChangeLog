@@ -1,3 +1,9 @@
+2007-03-29  DJ Delorie  <dj@redhat.com>
+
+	* m32c-desc.c: Regenerate.
+	* m32c-dis.c: Regenerate.
+	* m32c-opc.c: Regenerate.
+
 2007-03-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.c (i386_optab): Change InvMem to RegMem for mov and

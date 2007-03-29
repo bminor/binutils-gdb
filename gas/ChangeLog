@@ -1,3 +1,13 @@
+2007-03-29  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-m32c.c (rl_for, relaxable): Protect argument.
+	(md_relax_table): Add entries for ADJNZ macros.
+	(M32C_Macros): Add ADJNZ macros.
+	(subtype_mappings): Add entries for ADJNZ macros.
+	(insn_to_subtype): Check for adjnz and sbjnz insns.
+	(md_estimate_size_before_relax): Pass insn to insn_to_subtype.
+	(md_convert_frag): Convert adjnz and sbjnz.
+
 2007-03-29  Nick Clifton  <nickc@redhat.com>
 
 	* itbl-ops.c (itbl_entry): Remove unnecessary and excessively long

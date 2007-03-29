@@ -1,3 +1,10 @@
+2007-03-29  DJ Delorie  <dj@redhat.com>
+
+	* m32c.cpu (Imm-8-s4n): Fix print hook.
+	(Lab-24-8, Lab-32-8, Lab-40-8): Fix.
+	(arith-jnz-imm4-dst-defn): Make relaxable.
+	(arith-jnz16-imm4-dst-defn): Fix encodings.
+
 2007-03-20  DJ Delorie  <dj@redhat.com>
 
 	* m32c.cpu (f-dsp-40-u20, f-dsp-48-u20, Dsp-40-u20, Dsp-40-u20,

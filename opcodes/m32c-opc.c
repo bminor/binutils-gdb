@@ -5310,27 +5310,27 @@ static const CGEN_IFMT ifmt_sbjnz32_b_imm4_basic_Unprefixed_dst32_An_indirect_Un
 };
 
 static const CGEN_IFMT ifmt_sbjnz16_w_imm4_16_8_dst16_16_8_An_relative_HI ATTRIBUTE_UNUSED = {
-  32, 32, 0xff0e0000, { { F (F_0_4) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DSP_16_U8) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_16_8) }, { 0 } }
+  32, 32, 0xff0e0000, { { F (F_0_4) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DSP_16_U8) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_24_8) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_sbjnz16_w_imm4_16_8_dst16_16_8_SB_relative_HI ATTRIBUTE_UNUSED = {
-  32, 32, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_U8) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_16_8) }, { 0 } }
+  32, 32, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_U8) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_24_8) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_sbjnz16_w_imm4_16_8_dst16_16_8_FB_relative_HI ATTRIBUTE_UNUSED = {
-  32, 32, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_S8) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_16_8) }, { 0 } }
+  32, 32, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_S8) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_24_8) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_sbjnz16_w_imm4_16_16_dst16_16_16_An_relative_HI ATTRIBUTE_UNUSED = {
-  32, 40, 0xff0e0000, { { F (F_0_4) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DSP_16_U16) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_16_8) }, { 0 } }
+  32, 40, 0xff0e0000, { { F (F_0_4) }, { F (F_LAB_32_8) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DSP_16_U16) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_sbjnz16_w_imm4_16_16_dst16_16_16_SB_relative_HI ATTRIBUTE_UNUSED = {
-  32, 40, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_U16) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_16_8) }, { 0 } }
+  32, 40, 0xff0f0000, { { F (F_0_4) }, { F (F_LAB_32_8) }, { F (F_12_4) }, { F (F_DSP_16_U16) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_sbjnz16_w_imm4_16_16_dst16_16_16_absolute_HI ATTRIBUTE_UNUSED = {
-  32, 40, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_U16) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_16_8) }, { 0 } }
+  32, 40, 0xff0f0000, { { F (F_0_4) }, { F (F_LAB_32_8) }, { F (F_12_4) }, { F (F_DSP_16_U16) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_sbjnz16_w_imm4_basic_dst16_Rn_direct_HI ATTRIBUTE_UNUSED = {
@@ -5346,27 +5346,27 @@ static const CGEN_IFMT ifmt_sbjnz16_w_imm4_basic_dst16_An_indirect_HI ATTRIBUTE_
 };
 
 static const CGEN_IFMT ifmt_sbjnz16_b_imm4_16_8_dst16_16_8_An_relative_QI ATTRIBUTE_UNUSED = {
-  32, 32, 0xff0e0000, { { F (F_0_4) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DSP_16_U8) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_16_8) }, { 0 } }
+  32, 32, 0xff0e0000, { { F (F_0_4) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DSP_16_U8) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_24_8) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_sbjnz16_b_imm4_16_8_dst16_16_8_SB_relative_QI ATTRIBUTE_UNUSED = {
-  32, 32, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_U8) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_16_8) }, { 0 } }
+  32, 32, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_U8) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_24_8) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_sbjnz16_b_imm4_16_8_dst16_16_8_FB_relative_QI ATTRIBUTE_UNUSED = {
-  32, 32, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_S8) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_16_8) }, { 0 } }
+  32, 32, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_S8) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_24_8) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_sbjnz16_b_imm4_16_16_dst16_16_16_An_relative_QI ATTRIBUTE_UNUSED = {
-  32, 40, 0xff0e0000, { { F (F_0_4) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DSP_16_U16) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_16_8) }, { 0 } }
+  32, 40, 0xff0e0000, { { F (F_0_4) }, { F (F_LAB_32_8) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DSP_16_U16) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_sbjnz16_b_imm4_16_16_dst16_16_16_SB_relative_QI ATTRIBUTE_UNUSED = {
-  32, 40, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_U16) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_16_8) }, { 0 } }
+  32, 40, 0xff0f0000, { { F (F_0_4) }, { F (F_LAB_32_8) }, { F (F_12_4) }, { F (F_DSP_16_U16) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_sbjnz16_b_imm4_16_16_dst16_16_16_absolute_QI ATTRIBUTE_UNUSED = {
-  32, 40, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_U16) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_16_8) }, { 0 } }
+  32, 40, 0xff0f0000, { { F (F_0_4) }, { F (F_LAB_32_8) }, { F (F_12_4) }, { F (F_DSP_16_U16) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_sbjnz16_b_imm4_basic_dst16_Rn_direct_QI ATTRIBUTE_UNUSED = {
@@ -7550,27 +7550,27 @@ static const CGEN_IFMT ifmt_adjnz32_b_imm4_basic_Unprefixed_dst32_An_indirect_Un
 };
 
 static const CGEN_IFMT ifmt_adjnz16_w_imm4_16_8_dst16_16_8_An_relative_HI ATTRIBUTE_UNUSED = {
-  32, 32, 0xff0e0000, { { F (F_0_4) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DSP_16_U8) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_16_8) }, { 0 } }
+  32, 32, 0xff0e0000, { { F (F_0_4) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DSP_16_U8) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_24_8) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_adjnz16_w_imm4_16_8_dst16_16_8_SB_relative_HI ATTRIBUTE_UNUSED = {
-  32, 32, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_U8) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_16_8) }, { 0 } }
+  32, 32, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_U8) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_24_8) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_adjnz16_w_imm4_16_8_dst16_16_8_FB_relative_HI ATTRIBUTE_UNUSED = {
-  32, 32, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_S8) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_16_8) }, { 0 } }
+  32, 32, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_S8) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_24_8) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_adjnz16_w_imm4_16_16_dst16_16_16_An_relative_HI ATTRIBUTE_UNUSED = {
-  32, 40, 0xff0e0000, { { F (F_0_4) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DSP_16_U16) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_16_8) }, { 0 } }
+  32, 40, 0xff0e0000, { { F (F_0_4) }, { F (F_LAB_32_8) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DSP_16_U16) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_adjnz16_w_imm4_16_16_dst16_16_16_SB_relative_HI ATTRIBUTE_UNUSED = {
-  32, 40, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_U16) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_16_8) }, { 0 } }
+  32, 40, 0xff0f0000, { { F (F_0_4) }, { F (F_LAB_32_8) }, { F (F_12_4) }, { F (F_DSP_16_U16) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_adjnz16_w_imm4_16_16_dst16_16_16_absolute_HI ATTRIBUTE_UNUSED = {
-  32, 40, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_U16) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_16_8) }, { 0 } }
+  32, 40, 0xff0f0000, { { F (F_0_4) }, { F (F_LAB_32_8) }, { F (F_12_4) }, { F (F_DSP_16_U16) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_adjnz16_w_imm4_basic_dst16_Rn_direct_HI ATTRIBUTE_UNUSED = {
@@ -7586,27 +7586,27 @@ static const CGEN_IFMT ifmt_adjnz16_w_imm4_basic_dst16_An_indirect_HI ATTRIBUTE_
 };
 
 static const CGEN_IFMT ifmt_adjnz16_b_imm4_16_8_dst16_16_8_An_relative_QI ATTRIBUTE_UNUSED = {
-  32, 32, 0xff0e0000, { { F (F_0_4) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DSP_16_U8) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_16_8) }, { 0 } }
+  32, 32, 0xff0e0000, { { F (F_0_4) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DSP_16_U8) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_24_8) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_adjnz16_b_imm4_16_8_dst16_16_8_SB_relative_QI ATTRIBUTE_UNUSED = {
-  32, 32, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_U8) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_16_8) }, { 0 } }
+  32, 32, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_U8) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_24_8) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_adjnz16_b_imm4_16_8_dst16_16_8_FB_relative_QI ATTRIBUTE_UNUSED = {
-  32, 32, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_S8) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_16_8) }, { 0 } }
+  32, 32, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_S8) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_24_8) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_adjnz16_b_imm4_16_16_dst16_16_16_An_relative_QI ATTRIBUTE_UNUSED = {
-  32, 40, 0xff0e0000, { { F (F_0_4) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DSP_16_U16) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_16_8) }, { 0 } }
+  32, 40, 0xff0e0000, { { F (F_0_4) }, { F (F_LAB_32_8) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DSP_16_U16) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_adjnz16_b_imm4_16_16_dst16_16_16_SB_relative_QI ATTRIBUTE_UNUSED = {
-  32, 40, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_U16) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_16_8) }, { 0 } }
+  32, 40, 0xff0f0000, { { F (F_0_4) }, { F (F_LAB_32_8) }, { F (F_12_4) }, { F (F_DSP_16_U16) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_adjnz16_b_imm4_16_16_dst16_16_16_absolute_QI ATTRIBUTE_UNUSED = {
-  32, 40, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_U16) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { F (F_LAB_16_8) }, { 0 } }
+  32, 40, 0xff0f0000, { { F (F_0_4) }, { F (F_LAB_32_8) }, { F (F_12_4) }, { F (F_DSP_16_U16) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_adjnz16_b_imm4_basic_dst16_Rn_direct_QI ATTRIBUTE_UNUSED = {
