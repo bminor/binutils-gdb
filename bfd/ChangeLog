@@ -1,6 +1,9 @@
 2007-03-29  Alan Modra  <amodra@bigpond.net.au>
 
 	PR ld/4267
+	* elflink.c (evaluate_complex_relocation_symbols): Use bfd_vma
+	for rel->r_info values.
+	(bfd_elf_perform_complex_relocation): Likewise.
 	* elf32-ppc.c (allocate_dynrelocs): Set plt.offset to -1 for
 	unused entries.  Don't clear plt.plist in loop.
 

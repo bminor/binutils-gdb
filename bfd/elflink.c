@@ -6758,7 +6758,7 @@ evaluate_complex_relocation_symbols (bfd * input_bfd,
 	{
 	  Elf_Internal_Rela * rel;
 	  char * sym_name;
-	  unsigned long index;
+	  bfd_vma index;
 	  Elf_Internal_Sym * sym;
 	  bfd_vma result;
 	  bfd_vma section_offset;
@@ -6949,7 +6949,7 @@ bfd_elf_perform_complex_relocation
   Elf_Internal_Shdr * symtab_hdr;
   asection * sec;
   bfd_vma relocation = 0, shift, x;
-  unsigned long r_symndx;
+  bfd_vma r_symndx;
   bfd_vma mask;
   unsigned long start, oplen, len, wordsz, 
     chunksz, lsb0_p, signed_p, trunc_p;
