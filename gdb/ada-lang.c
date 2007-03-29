@@ -56,6 +56,7 @@ Boston, MA 02110-1301, USA.  */
 #include "annotate.h"
 #include "valprint.h"
 #include "source.h"
+#include "observer.h"
 
 #ifndef ADA_RETAIN_DOTS
 #define ADA_RETAIN_DOTS 0
@@ -289,23 +290,6 @@ static char *ada_completer_word_break_characters =
 /* The name of the symbol to use to get the name of the main subprogram.  */
 static const char ADA_MAIN_PROGRAM_SYMBOL_NAME[]
   = "__gnat_ada_main_program_name";
-
-/* The name of the runtime function called when an exception is raised.  */
-static const char raise_sym_name[] = "__gnat_raise_nodefer_with_msg";
-
-/* The name of the runtime function called when an unhandled exception
-   is raised.  */
-static const char raise_unhandled_sym_name[] = "__gnat_unhandled_exception";
-
-/* The name of the runtime function called when an assert failure is
-   raised.  */
-static const char raise_assert_sym_name[] =
-  "system__assertions__raise_assert_failure";
-
-/* A string that reflects the longest exception expression rewrite,
-   aside from the exception name.  */
-static const char longest_exception_template[] =
-  "'__gnat_raise_nodefer_with_msg' if long_integer(e) = long_integer(&)";
 
 /* Limit on the number of warnings to raise per expression evaluation.  */
 static int warning_limit = 2;
@@ -8967,6 +8951,12 @@ ada_modulus (struct type * type)
    breakpoint structure of the BP_BREAKPOINT type, but with its own set
    of breakpoint_ops.
 
+   Support in the runtime for exception catchpoints have been changed
+   a few times already, and these changes affect the implementation
+   of these catchpoints.  In order to be able to support several
+   variants of the runtime, we use a sniffer that will determine
+   the runtime variant used by the program being debugged.
+
    At this time, we do not support the use of conditions on Ada exception
    catchpoints.  The COND and COND_STRING fields are therefore set
    to NULL (most of the time, see below).
@@ -8988,6 +8978,136 @@ enum exception_catchpoint_kind
   ex_catch_exception_unhandled,
   ex_catch_assert
 };
+
+typedef CORE_ADDR (ada_unhandled_exception_name_addr_ftype) (void);
+
+/* A structure that describes how to support exception catchpoints
+   for a given executable.  */
+
+struct exception_support_info
+{
+   /* The name of the symbol to break on in order to insert
+      a catchpoint on exceptions.  */
+   const char *catch_exception_sym;
+
+   /* The name of the symbol to break on in order to insert
+      a catchpoint on unhandled exceptions.  */
+   const char *catch_exception_unhandled_sym;
+
+   /* The name of the symbol to break on in order to insert
+      a catchpoint on failed assertions.  */
+   const char *catch_assert_sym;
+
+   /* Assuming that the inferior just triggered an unhandled exception
+      catchpoint, this function is responsible for returning the address
+      in inferior memory where the name of that exception is stored.
+      Return zero if the address could not be computed.  */
+   ada_unhandled_exception_name_addr_ftype *unhandled_exception_name_addr;
+};
+
+static CORE_ADDR ada_unhandled_exception_name_addr (void);
+static CORE_ADDR ada_unhandled_exception_name_addr_from_raise (void);
+
+/* The following exception support info structure describes how to
+   implement exception catchpoints with the latest version of the
+   Ada runtime (as of 2007-03-06).  */
+
+static const struct exception_support_info default_exception_support_info =
+{
+  "__gnat_debug_raise_exception", /* catch_exception_sym */
+  "__gnat_unhandled_exception", /* catch_exception_unhandled_sym */
+  "__gnat_debug_raise_assert_failure", /* catch_assert_sym */
+  ada_unhandled_exception_name_addr
+};
+
+/* The following exception support info structure describes how to
+   implement exception catchpoints with a slightly older version
+   of the Ada runtime.  */
+
+static const struct exception_support_info exception_support_info_fallback =
+{
+  "__gnat_raise_nodefer_with_msg", /* catch_exception_sym */
+  "__gnat_unhandled_exception", /* catch_exception_unhandled_sym */
+  "system__assertions__raise_assert_failure",  /* catch_assert_sym */
+  ada_unhandled_exception_name_addr_from_raise
+};
+
+/* For each executable, we sniff which exception info structure to use
+   and cache it in the following global variable.  */
+
+static const struct exception_support_info *exception_info = NULL;
+
+/* Inspect the Ada runtime and determine which exception info structure
+   should be used to provide support for exception catchpoints.
+
+   This function will always set exception_info, or raise an error.  */
+
+static void
+ada_exception_support_info_sniffer (void)
+{
+  struct symbol *sym;
+
+  /* If the exception info is already known, then no need to recompute it.  */
+  if (exception_info != NULL)
+    return;
+
+  /* Check the latest (default) exception support info.  */
+  sym = standard_lookup (default_exception_support_info.catch_exception_sym,
+                         NULL, VAR_DOMAIN);
+  if (sym != NULL)
+    {
+      exception_info = &default_exception_support_info;
+      return;
+    }
+
+  /* Try our fallback exception suport info.  */
+  sym = standard_lookup (exception_support_info_fallback.catch_exception_sym,
+                         NULL, VAR_DOMAIN);
+  if (sym != NULL)
+    {
+      exception_info = &exception_support_info_fallback;
+      return;
+    }
+
+  /* Sometimes, it is normal for us to not be able to find the routine
+     we are looking for.  This happens when the program is linked with
+     the shared version of the GNAT runtime, and the program has not been
+     started yet.  Inform the user of these two possible causes if
+     applicable.  */
+
+  if (ada_update_initial_language (language_unknown, NULL) != language_ada)
+    error (_("Unable to insert catchpoint.  Is this an Ada main program?"));
+
+  /* If the symbol does not exist, then check that the program is
+     already started, to make sure that shared libraries have been
+     loaded.  If it is not started, this may mean that the symbol is
+     in a shared library.  */
+
+  if (ptid_get_pid (inferior_ptid) == 0)
+    error (_("Unable to insert catchpoint. Try to start the program first."));
+
+  /* At this point, we know that we are debugging an Ada program and
+     that the inferior has been started, but we still are not able to
+     find the run-time symbols. That can mean that we are in
+     configurable run time mode, or that a-except as been optimized
+     out by the linker...  In any case, at this point it is not worth
+     supporting this feature.  */
+
+  error (_("Cannot insert catchpoints in this configuration."));
+}
+
+/* An observer of "executable_changed" events.
+   Its role is to clear certain cached values that need to be recomputed
+   each time a new executable is loaded by GDB.  */
+
+static void
+ada_executable_changed_observer (void *unused)
+{
+  /* If the executable changed, then it is possible that the Ada runtime
+     is different.  So we need to invalidate the exception support info
+     cache.  */
+  exception_info = NULL;
+}
 
 /* Return the name of the function at PC, NULL if could not find it.
    This function only checks the debugging information, not the symbol
@@ -9089,6 +9209,17 @@ ada_find_printable_frame (struct frame_info *fi)
 static CORE_ADDR
 ada_unhandled_exception_name_addr (void)
 {
+  return parse_and_eval_address ("e.full_name");
+}
+
+/* Same as ada_unhandled_exception_name_addr, except that this function
+   should be used when the inferior uses an older version of the runtime,
+   where the exception name needs to be extracted from a specific frame
+   several frames up in the callstack.  */
+
+static CORE_ADDR
+ada_unhandled_exception_name_addr_from_raise (void)
+{
   int frame_level;
   struct frame_info *fi;
 
@@ -9106,7 +9237,7 @@ ada_unhandled_exception_name_addr (void)
       const char *func_name =
         function_name_from_pc (get_frame_address_in_block (fi));
       if (func_name != NULL
-          && strcmp (func_name, raise_sym_name) == 0)
+          && strcmp (func_name, exception_info->catch_exception_sym) == 0)
         break; /* We found the frame we were looking for...  */
       fi = get_prev_frame (fi);
     }
@@ -9135,7 +9266,7 @@ ada_exception_name_addr_1 (enum exception_catchpoint_kind ex,
         break;
 
       case ex_catch_exception_unhandled:
-        return ada_unhandled_exception_name_addr ();
+        return exception_info->unhandled_exception_name_addr ();
         break;
       
       case ex_catch_assert:
@@ -9386,39 +9517,6 @@ ada_exception_catchpoint_p (struct breakpoint *b)
           || b->ops == &catch_assert_breakpoint_ops);
 }
 
-/* Cause the appropriate error if no appropriate runtime symbol is
-   found to set a breakpoint, using ERR_DESC to describe the
-   breakpoint.  */
-
-static void
-error_breakpoint_runtime_sym_not_found (const char *err_desc)
-{
-  /* If we are not debugging an Ada program, we cannot put exception
-     catchpoints!  */
-
-  if (ada_update_initial_language (language_unknown, NULL) != language_ada)
-    error (_("Unable to break on %s.  Is this an Ada main program?"),
-           err_desc);
-
-  /* If the symbol does not exist, then check that the program is
-     already started, to make sure that shared libraries have been
-     loaded.  If it is not started, this may mean that the symbol is
-     in a shared library.  */
-
-  if (ptid_get_pid (inferior_ptid) == 0)
-    error (_("Unable to break on %s. Try to start the program first."),
-           err_desc);
-
-  /* At this point, we know that we are debugging an Ada program and
-     that the inferior has been started, but we still are not able to
-     find the run-time symbols. That can mean that we are in
-     configurable run time mode, or that a-except as been optimized
-     out by the linker...  In any case, at this point it is not worth
-     supporting this feature.  */
-
-  error (_("Cannot break on %s in this configuration."), err_desc);
-}
-
 /* Return a newly allocated copy of the first space-separated token
    in ARGSP, and then adjust ARGSP to point immediately after that
    token.
@@ -9512,16 +9610,18 @@ catch_ada_exception_command_split (char *args,
 static const char *
 ada_exception_sym_name (enum exception_catchpoint_kind ex)
 {
+  gdb_assert (exception_info != NULL);
+
   switch (ex)
     {
       case ex_catch_exception:
-        return (raise_sym_name);
+        return (exception_info->catch_exception_sym);
         break;
       case ex_catch_exception_unhandled:
-        return (raise_unhandled_sym_name);
+        return (exception_info->catch_exception_unhandled_sym);
         break;
       case ex_catch_assert:
-        return (raise_assert_sym_name);
+        return (exception_info->catch_assert_sym);
         break;
       default:
         internal_error (__FILE__, __LINE__,
@@ -9600,7 +9700,10 @@ ada_exception_sal (enum exception_catchpoint_kind ex, char *exp_string,
   struct symbol *sym;
   struct symtab_and_line sal;
 
-  /* First lookup the function on which we will break in order to catch
+  /* First, find out which exception support info to use.  */
+  ada_exception_support_info_sniffer ();
+
+  /* Then lookup the function on which we will break in order to catch
      the Ada exceptions requested by the user.  */
 
   sym_name = ada_exception_sym_name (ex);
@@ -9624,7 +9727,7 @@ ada_exception_sal (enum exception_catchpoint_kind ex, char *exp_string,
      this case for now.  */
 
   if (sym == NULL)
-    error_breakpoint_runtime_sym_not_found (sym_name);
+    error (_("Unable to break on '%s' in this configuration."), sym_name);
 
   /* Make sure that the symbol we found corresponds to a function.  */
   if (SYMBOL_CLASS (sym) != LOC_BLOCK)

@@ -1,3 +1,31 @@
+2007-03-29  Joel Brobecker  <brobecker@adacore.com>
+
+	Add support for exception handling with multiple versions of
+	the Ada runtime:
+	* ada-lang.c: Update general comments on how Ada exception catchpoints
+	are implemented.
+	(raise_sym_name, raise_unhandled_sym_name, raise_assert_sym_name)
+	(__gnat_raise_nodefer_with_msg): Delete.
+	(ada_unhandled_exception_name_addr_ftype): New type.
+	(exception_support_info): New type.
+	(ada_unhandled_exception_name_addr): Add forward declaration.
+	(ada_unhandled_exception_name_addr_from_raise): Likewise.
+	(default_exception_support_info): New constant.
+	(exception_support_info_fallback): Likewise.
+	(exception_info): New global variable.
+	(ada_exception_support_info_sniffer): New function.
+	(ada_executable_changed_observer): Likewise.
+	(ada_unhandled_exception_name_addr_from_raise): Renamed from
+	ada_unhandled_exception_name_addr.
+	(ada_unhandled_exception_name_addr): Reimplement to match the
+	latest Ada runtime implementation.
+	(error_breakpoint_runtime_sym_not_found): Delete.
+	(ada_exception_sym_name): Get the exception sym name from
+	exception_info rather than hardcoding it.
+	(ada_exception_sal): Add call to ada_exception_support_info_sniffer.
+	Update error handling.
+	* Makefile.in (ada-lang.o): Add dependency on observer.h.
+
 2007-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (coff_solib_h, coff-solib.o, i386v-nat.o, lynx-nat.o)
