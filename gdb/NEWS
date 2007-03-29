@@ -83,6 +83,29 @@ qXfer:features:read:
   Read an XML target description from the target, which describes its
   features.
 
+* Removed targets
+
+Support for these obsolete configurations has been removed.
+
+hppa*-*-hiux*
+i[34567]86-ncr-*
+i[34567]86-*-dgux*
+i[34567]86-*-lynxos*
+i[34567]86-*-netware*
+i[34567]86-*-sco3.2v5*
+i[34567]86-*-sco3.2v4*
+i[34567]86-*-sco*
+i[34567]86-*-sysv4.2*
+i[34567]86-*-sysv4*
+i[34567]86-*-sysv5*
+i[34567]86-*-unixware2*
+i[34567]86-*-unixware*
+i[34567]86-*-sysv*
+i[34567]86-*-isc*
+m68*-cisco*-*
+m68*-tandem-*
+rs6000-*-lynxos*
+
 *** Changes in GDB 6.6
 
 * New targets

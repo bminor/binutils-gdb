@@ -5,6 +5,21 @@
 #  gdb_target_cpu	generic name of CPU
 #  gdb_target		name of GDB target definition to use
 
+case $target in
+ hppa*-*-hiux* | \
+ i[34567]86-ncr-* | \
+ i[34567]86-*-lynxos* | \
+ m68*-cisco*-* | \
+ m68*-tandem-* | \
+ m68*-*-os68k* | \
+ rs6000-*-lynxos* | \
+ null)
+    echo "*** Configuration $target is obsolete." >&2
+    echo "*** Support has been REMOVED." >&2
+    exit 1
+    ;;
+esac
+
 # Map target cpu into the config cpu subdirectory name.
 # The default is $target_cpu.
 
@@ -85,24 +100,20 @@ h8300-*-*)		gdb_target=h8300 ;;
 
 hppa*64*-*-hpux11*)	gdb_target=hppa64 ;;
 hppa*-*-hpux*)		gdb_target=hppahpux ;;
-hppa*-*-hiux*)		gdb_target=hppahpux ;;
 hppa*-*-linux*)		gdb_target=linux ;;
 hppa*-*-openbsd*)	gdb_target=obsd ;;
 hppa*-*-*)		gdb_target=hppa ;;
 
-i[34567]86-ncr-*)	gdb_target=ncr3000 ;;
 i[34567]86-*-netbsd* | i[34567]86-*-knetbsd*-gnu)
 			gdb_target=nbsd ;;
 i[34567]86-*-openbsd*)	gdb_target=obsd ;;
 i[34567]86-*-nto*)	gdb_target=nto ;;
-i[34567]86-*-lynxos*)	gdb_target=i386lynx ;;
 i[34567]86-*-solaris2.1[0-9]*)	gdb_target=sol2-64 ;;
 i[34567]86-*-solaris*)	gdb_target=i386sol2 ;;
 i[34567]86-*-linux*)	gdb_target=linux
 			build_gdbserver=yes
 			;;
 i[34567]86-*-gnu*)	gdb_target=i386gnu ;;
-i[34567]86-*-netware*)	gdb_target=i386 ;;
 i[34567]86-*-cygwin*)	gdb_target=cygwin
 			build_gdbserver=yes
 			;;
@@ -127,8 +138,6 @@ m32r*-*-*)		gdb_target=m32r ;;
 
 m68hc11*-*-*|m6811*-*-*)	gdb_target=m68hc11 ;;
 
-m68*-cisco*-*)		gdb_target=cisco ;;
-m68*-tandem-*)		gdb_target=st2000 ;;
 m68*-*-aout*)		gdb_target=monitor ;;
 m68*-*-coff*)		gdb_target=monitor ;;
 m68*-*-elf*)		gdb_target=monitor ;;
@@ -139,7 +148,6 @@ m68*-*-linux*)		gdb_target=linux
 m68*-*-netbsd* | m68*-*-knetbsd*-gnu)
 			gdb_target=nbsd ;;
 m68*-*-openbsd*)	gdb_target=obsd ;;
-m68*-*-os68k*)		gdb_target=os68k ;;
 m68*-*-uclinux*)	gdb_target=monitor ;;
 
 m88*-*-openbsd*)	gdb_target=obsd ;;
@@ -177,7 +185,6 @@ powerpc*-*-*)		if test -f ../sim/ppc/Makefile; then
 			  gdb_target=ppc-eabi
 			fi ;;
 
-rs6000-*-lynxos*)	gdb_target=rs6000lynx ;;
 rs6000-*-aix4*)		gdb_target=aix4 ;;
 rs6000-*-*)		gdb_target=rs6000 ;;
 

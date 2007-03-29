@@ -1,5 +1,35 @@
 2007-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* Makefile.in (coff_solib_h, coff-solib.o, i386v-nat.o, lynx-nat.o)
+	(remote-st.o, uw-thread.o): Delete.
+	(HFILES_NO_SRCDIR, ALLDEPFILES): Update.
+	* configure.host: Move hppa*-*-hiux*, i[34567]86-ncr-*,
+	i[34567]86-*-dgux*, i[34567]86-*-lynxos*, i[34567]86-*-sco3.2v5*,
+	i[34567]86-*-sco3.2v4*, i[34567]86-*-sco*, i[34567]86-*-sysv4.2*,
+	i[34567]86-*-sysv4*, i[34567]86-*-sysv5*, i[34567]86-*-unixware2*,
+	i[34567]86-*-unixware*, i[34567]86-*-sysv*, i[34567]86-*-isc*, and
+	rs6000-*-lynxos* to an obsoletion stanza.
+	* configure.tgt: Move hppa*-*-hiux*, i[34567]86-ncr-*,
+	i[34567]86-*-lynxos*, m68*-cisco*-*, m68*-tandem-*, m68*-*-os68k*,
+	and rs6000-*-lynxos* to an obsoletion stanza.  Do not mention
+	i[34567]86-*-netware*.
+	* NEWS: Mention deleted targets.
+
+	* coff-solib.c, coff-solib.h, i386v-nat.c, lynx-nat.c, remote-st.c,
+	uw-thread.c, config/nm-lynx.h, config/i386/i386sco.mh,
+	config/i386/i386sco4.mh, config/i386/i386sco5.mh, config/i386/i386v.mh,
+	config/i386/i386v4.mh, config/i386/i386v42mp.mh,
+	config/i386/ncr3000.mh, config/i386/ncr3000.mt,
+	config/i386/nm-i386sco.h, config/i386/nm-i386sco4.h,
+	config/i386/nm-i386sco5.h, config/i386/nm-i386v.h,
+	config/i386/nm-i386v4.h, config/i386/nm-i386v42mp.h,
+	config/m68k/cisco.mt, config/m68k/os68k.mt, config/m68k/st2000.mt,
+	config/m68k/tm-cisco.h, config/m68k/tm-os68k.h,
+	config/rs6000/rs6000lynx.mh, config/rs6000/rs6000lynx.mt,
+	config/rs6000/tm-rs6000ly.h: Delete files.
+
+2007-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* defs.h (deprecated_registers_changed_hook): Delete declaration.
 	* interps.c (clear_interpreter_hooks): Do not clear
 	deprecated_registers_changed_hook.

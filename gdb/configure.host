@@ -12,6 +12,29 @@
 # Map host cpu into the config cpu subdirectory name.
 # The default is $host_cpu.
 
+case $host in
+ hppa*-*-hiux* | \
+ i[34567]86-ncr-* | \
+ i[34567]86-*-dgux* | \
+ i[34567]86-*-lynxos* | \
+ i[34567]86-*-sco3.2v5* | \
+ i[34567]86-*-sco3.2v4* | \
+ i[34567]86-*-sco* | \
+ i[34567]86-*-sysv4.2* | \
+ i[34567]86-*-sysv4* | \
+ i[34567]86-*-sysv5* | \
+ i[34567]86-*-unixware2* | \
+ i[34567]86-*-unixware* | \
+ i[34567]86-*-sysv* | \
+ i[34567]86-*-isc* | \
+ rs6000-*-lynxos* | \
+ null)
+    echo "*** Configuration $host is obsolete." >&2
+    echo "*** Support has been REMOVED." >&2
+    exit 1
+    ;;
+esac
+
 case "${host_cpu}" in
 
 alpha*)			gdb_host_cpu=alpha ;;
@@ -53,13 +76,11 @@ arm*-*-netbsdelf* | arm*-*-knetbsd*-gnu)
 arm*-*-netbsd*)		gdb_host=nbsdaout ;;
 arm*-*-openbsd*)	gdb_host=nbsdelf ;;
 
-hppa*-*-hpux* | hppa*-*-hiux*)
+hppa*-*-hpux*)
 			gdb_host=hpux ;;
 hppa*-*-linux*)		gdb_host=linux ;;
 hppa*-*-openbsd*)	gdb_host=obsd ;;
 
-i[34567]86-ncr-*)	gdb_host=ncr3000 ;;
-i[34567]86-*-dgux*)	gdb_host=i386v4 ;;
 i[34567]86-*-freebsd* | i[34567]86-*-kfreebsd*-gnu)
 			gdb_host=fbsd ;;
 i[34567]86-*-netbsdelf* | i[34567]86-*-knetbsd*-gnu)
@@ -71,24 +92,13 @@ i[34567]86-*-mingw32*)	gdb_host=mingw
 			;;
 i[34567]86-*-msdosdjgpp*) gdb_host=go32 ;;
 i[34567]86-*-linux*)	gdb_host=linux ;;
-i[34567]86-*-lynxos*)	gdb_host=i386lynx ;;
 i[34567]86-*-gnu*)	gdb_host=i386gnu ;;
 i[3456]86-*-nto*) 	gdb_host=nto ;;
 i[34567]86-*-openbsd[0-2].* | i[34567]86-*-openbsd3.[0-3])
 			gdb_host=obsdaout ;;
 i[34567]86-*-openbsd*)	gdb_host=obsd ;;
-i[34567]86-*-sco3.2v5*)	gdb_host=i386sco5 ;;
-i[34567]86-*-sco3.2v4*)	gdb_host=i386sco4 ;;
-i[34567]86-*-sco*)	gdb_host=i386sco ;;
 i[34567]86-*-solaris2.1[0-9]*)	gdb_host=sol2-64 ;;
 i[34567]86-*-solaris*)	gdb_host=i386sol2 ;;
-i[34567]86-*-sysv4.2*)	gdb_host=i386v42mp ;;
-i[34567]86-*-sysv4*)	gdb_host=i386v4 ;;
-i[34567]86-*-sysv5*)	gdb_host=i386v42mp ;;
-i[34567]86-*-unixware2*)	gdb_host=i386v42mp ;;
-i[34567]86-*-unixware*)	gdb_host=i386v4 ;;
-i[34567]86-*-sysv*)	gdb_host=i386v ;;
-i[34567]86-*-isc*)	gdb_host=i386v ;;
 i[34567]86-*-cygwin*)	gdb_host=cygwin ;;
 
 ia64-*-linux*)		gdb_host=linux ;;
@@ -122,7 +132,6 @@ powerpc64-*-linux*)     gdb_host=ppc64-linux
                         fi
 			;;
 
-rs6000-*-lynxos*)	gdb_host=rs6000lynx ;;
 rs6000-*-aix4*)		gdb_host=aix4 ;;
 rs6000-*-*)		gdb_host=rs6000 ;;
 
