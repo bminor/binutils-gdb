@@ -1,5 +1,10 @@
 2007-03-29  Denis Pilat  <denis.pilat@st.com>
 
+	* configure.ac: Test for signal.h.
+	* configure, config.in: Regenerate.
+
+2007-03-29  Denis Pilat  <denis.pilat@st.com>
+
 	* stack.c (print_stack_frame): Always use LOC_AND_ADDRESS in MI output.
 	* infrun.c (normal_stop): Remove MI specific frame printing treatment.
 

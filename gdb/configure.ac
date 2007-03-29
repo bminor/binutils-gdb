@@ -367,6 +367,7 @@ AC_CHECK_HEADERS(link.h, [], [],
 AC_CHECK_HEADERS(machine/reg.h)
 AC_CHECK_HEADERS(poll.h sys/poll.h)
 AC_CHECK_HEADERS(proc_service.h thread_db.h gnu/libc-version.h)
+AC_CHECK_HEADERS(signal.h)
 AC_CHECK_HEADERS(stddef.h)
 AC_CHECK_HEADERS(stdlib.h)
 AC_CHECK_HEADERS(stdint.h)
