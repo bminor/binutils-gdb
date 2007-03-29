@@ -33,6 +33,12 @@ case "${target}" in
 			  srv_regobj=reg-arm.o
 			fi
 			;;
+  arm*-*-mingw32ce*)	srv_regobj=reg-arm.o
+			srv_tgtobj="win32-low.o win32-arm-low.o"
+			srv_tgtobj="${srv_tgtobj} wincecompat.o"
+			srv_mingw=yes
+			srv_mingwce=yes
+			;;
   crisv32-*-linux*)	srv_regobj=reg-crisv32.o
 			srv_tgtobj="linux-low.o linux-crisv32-low.o"
 			srv_linux_regsets=yes
@@ -51,12 +57,6 @@ case "${target}" in
 			srv_linux_usrregs=yes
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
-			;;
-  arm*-*-mingw32ce*)	srv_regobj=reg-arm.o
-			srv_tgtobj="win32-low.o win32-arm-low.o"
-			srv_tgtobj="${srv_tgtobj} wincecompat.o"
-			srv_mingw=yes
-			srv_mingwce=yes
 			;;
   i[34567]86-*-mingw*)	srv_regobj=reg-i386.o
 			srv_tgtobj="win32-low.o win32-i386-low.o"

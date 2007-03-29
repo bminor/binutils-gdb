@@ -1,5 +1,10 @@
 2007-03-29  Pedro Alves  <pedro_alves@portugalmail.pt>
 
+	* configure.srv (arm*-*-mingw32ce*): Move near the other
+	arm targets.
+
+2007-03-29  Pedro Alves  <pedro_alves@portugalmail.pt>
+
 	* configure.ac: Add errno checking.
 	(AC_CHECK_HEADERS): Add errno.h, fcntl.h, signal.h,
 	sys/file.h and malloc.h.
