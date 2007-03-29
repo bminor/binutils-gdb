@@ -1,3 +1,9 @@
+2007-03-29  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/4267
+	* elf32-ppc.c (allocate_dynrelocs): Set plt.offset to -1 for
+	unused entries.  Don't clear plt.plist in loop.
+
 2007-03-28  Richard Sandiford  <richard@codesourcery.com>
 
 	* elfxx-sparc.h (_bfd_sparc_elf_link_hash_table): Remove append_rela.

@@ -4500,13 +4500,15 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	      }
 	    else
 	      ent->plt.offset = (bfd_vma) -1;
-
-	    if (!doneone)
-	      {
-		h->plt.plist = NULL;
-		h->needs_plt = 0;
-	      }
 	  }
+	else
+	  ent->plt.offset = (bfd_vma) -1;
+
+      if (!doneone)
+	{
+	  h->plt.plist = NULL;
+	  h->needs_plt = 0;
+	}
     }
   else
     {
