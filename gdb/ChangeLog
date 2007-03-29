@@ -1,3 +1,16 @@
+2007-03-29  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* arm-wince-tdep.c: New.
+	* config/arm/wince.mt (DEPRECATED_TM_FILE): Use tm-arm.h.
+	(MT_CFLAGS): Delete.
+	(TM_CLIBS): Delete.
+	(TDEPFILES): Add arm-wince-tdep.o, corelow.o, solib.o,
+	solib-legacy.o, solib-svr4.o, and remove wince.o.
+	* configure.tgt (arm*-*-mingw32ce*): Add.
+	* signals/signals.c [HAVE_SIGNAL_H]: Check.
+	(do_target_signal_to_host): Silence 'not used' warning.
+	* config/arm/tm-wince.h: Remove.
+
 2007-03-28  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* arch-utils.c (legacy_pc_in_sigtramp): Remove.

@@ -128,7 +128,9 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c \
 	$(srcdir)/linux-m68k-low.c $(srcdir)/linux-mips-low.c \
 	$(srcdir)/linux-ppc-low.c $(srcdir)/linux-ppc64-low.c \
 	$(srcdir)/linux-s390-low.c \
-	$(srcdir)/linux-sh-low.c $(srcdir)/linux-x86-64-low.c
+	$(srcdir)/linux-sh-low.c $(srcdir)/linux-x86-64-low.c \
+	$(srcdir)/win32-arm-low.c $(srcdir)/win32-i386-low.c \
+	$(srcdir)/win32-low.c $(srcdir)/wincecompat.c
 
 DEPFILES = @GDBSERVER_DEPFILES@
 
@@ -154,7 +156,7 @@ XML_BUILTIN = @srv_xmlbuiltin@
 .c.o:
 	${CC} -c ${INTERNAL_CFLAGS} $<
 
-all: gdbserver gdbreplay
+all: gdbserver$(EXEEXT) gdbreplay$(EXEEXT)
 
 # Traditionally "install" depends on "all".  But it may be useful
 # not to; for example, if the user has made some trivial change to a 
@@ -166,7 +168,7 @@ install-only:
 	n=`echo gdbserver | sed '$(program_transform_name)'`; \
 	if [ x$$n = x ]; then n=gdbserver; else true; fi; \
 	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(bindir); \
-	$(INSTALL_PROGRAM) gdbserver $(DESTDIR)$(bindir)/$$n; \
+	$(INSTALL_PROGRAM) gdbserver$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT); \
 	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(man1dir); \
 	$(INSTALL_DATA) $(srcdir)/gdbserver.1 $(DESTDIR)$(man1dir)/$$n.1
 
@@ -184,14 +186,14 @@ html:
 install-html:
 clean-info:
 
-gdbserver: $(OBS) ${ADD_DEPS} ${CDEPS}
-	rm -f gdbserver
-	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbserver $(OBS) \
+gdbserver$(EXEEXT): $(OBS) ${ADD_DEPS} ${CDEPS}
+	rm -f gdbserver$(EXEEXT)
+	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbserver$(EXEEXT) $(OBS) \
 	  $(GDBSERVER_LIBS) $(XM_CLIBS)
 
-gdbreplay: gdbreplay.o
-	rm -f gdbreplay
-	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbreplay gdbreplay.o \
+gdbreplay$(EXEEXT): gdbreplay.o
+	rm -f gdbreplay$(EXEEXT)
+	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbreplay$(EXEEXT) gdbreplay.o \
 	  $(XM_CLIBS)
 
 # Put the proper machine-specific files first, so M-. on a machine

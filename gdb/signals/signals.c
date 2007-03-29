@@ -28,7 +28,9 @@
 #include "gdb_string.h"
 #endif
 
+#ifdef HAVE_SIGNAL_H
 #include <signal.h>
+#endif
 
 /* Always use __SIGRTMIN if it's available.  SIGRTMIN is the lowest
    _available_ realtime signal, not the lowest supported; glibc takes
@@ -519,6 +521,9 @@ do_target_signal_to_host (enum target_signal oursig,
 			  int *oursig_ok)
 {
   int retsig;
+  /* Silence the 'not used' warning, for targets that
+     do not support signals.  */
+  (void) retsig;
 
   *oursig_ok = 1;
   switch (oursig)

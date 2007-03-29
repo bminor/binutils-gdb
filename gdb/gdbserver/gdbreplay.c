@@ -22,12 +22,19 @@
 
 #include "config.h"
 #include <stdio.h>
+#if HAVE_SYS_FILE_H
 #include <sys/file.h>
+#endif
+#if HAVE_SIGNAL_H
 #include <signal.h>
+#endif
 #include <ctype.h>
+#if HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
+#if HAVE_ERRNO_H
 #include <errno.h>
-
+#endif
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -49,6 +56,9 @@
 #if HAVE_NETINET_TCP_H
 #include <netinet/tcp.h>
 #endif
+#if HAVE_MALLOC_H
+#include <malloc.h>
+#endif
 
 #if USE_WIN32API
 #include <winsock.h>
@@ -62,6 +72,57 @@ typedef int socklen_t;
 #define EOL (EOF - 1)
 
 static int remote_desc;
+
+#ifdef __MINGW32CE__
+
+#ifndef COUNTOF
+#define COUNTOF(STR) (sizeof (STR) / sizeof ((STR)[0]))
+#endif
+
+#define errno (GetLastError ())
+
+char *
+strerror (DWORD error)
+{
+  static char buf[1024];
+  WCHAR *msgbuf;
+  DWORD lasterr = GetLastError ();
+  DWORD chars = FormatMessageW (FORMAT_MESSAGE_FROM_SYSTEM
+				| FORMAT_MESSAGE_ALLOCATE_BUFFER,
+				NULL,
+				error,
+				0, /* Default language */
+				(LPVOID)&msgbuf,
+				0,
+				NULL);
+  if (chars != 0)
+    {
+      /* If there is an \r\n appended, zap it.  */
+      if (chars >= 2
+	  && msgbuf[chars - 2] == '\r'
+	  && msgbuf[chars - 1] == '\n')
+	{
+	  chars -= 2;
+	  msgbuf[chars] = 0;
+	}
+
+      if (chars > ((COUNTOF (buf)) - 1))
+	{
+	  chars = COUNTOF (buf) - 1;
+	  msgbuf [chars] = 0;
+	}
+
+      wcstombs (buf, msgbuf, chars + 1);
+      LocalFree (msgbuf);
+    }
+  else
+    sprintf (buf, "unknown win32 error (%ld)", error);
+
+  SetLastError (lasterr);
+  return buf;
+}
+
+#endif /* __MINGW32CE__ */
 
 /* Print the system error message for errno, and also mention STRING
    as the file name for which the error was encountered.
@@ -177,8 +238,6 @@ remote_open (char *name)
       tmp = 1;
       setsockopt (remote_desc, IPPROTO_TCP, TCP_NODELAY,
 		  (char *) &tmp, sizeof (tmp));
-
-      close (tmp_desc);		/* No longer need this */
 
 #ifndef USE_WIN32API
       close (tmp_desc);		/* No longer need this */

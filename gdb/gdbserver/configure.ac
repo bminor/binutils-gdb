@@ -39,10 +39,27 @@ AC_HEADER_STDC
 AC_CHECK_HEADERS(sgtty.h termio.h termios.h sys/reg.h string.h dnl
 		 proc_service.h sys/procfs.h thread_db.h linux/elf.h dnl
 		 stdlib.h unistd.h dnl
+ 		 errno.h fcntl.h signal.h sys/file.h malloc.h dnl
 		 sys/ioctl.h netinet/in.h sys/socket.h netdb.h dnl
 		 netinet/tcp.h arpa/inet.h sys/wait.h)
 
-AC_CHECK_DECLS(strerror)
+have_errno=no
+AC_MSG_CHECKING(for errno)
+AC_TRY_LINK([
+#if HAVE_ERRNO_H
+#include <errno.h>
+#endif], [static int x; x = errno;],
+  [AC_MSG_RESULT(yes - in errno.h); AC_DEFINE(HAVE_ERRNO, 1, [Define if errno is available]) have_errno=yes])
+if test $have_errno = no; then
+AC_TRY_LINK([
+#if HAVE_ERRNO_H
+#include <errno.h>
+#endif], [extern int errno; static int x; x = errno;],
+  [AC_MSG_RESULT(yes - must define); AC_DEFINE(HAVE_ERRNO, 1, [Define if errno is available]) AC_DEFINE(MUST_DEFINE_ERRNO, 1, [Checking if errno must be defined])],
+  [AC_MSG_RESULT(no)])
+fi
+
+AC_CHECK_DECLS([strerror, perror])
 
 AC_CHECK_TYPES(socklen_t, [], [],
 [#include <sys/types.h>
@@ -68,8 +85,13 @@ esac
 
 . ${srcdir}/configure.srv
 
-if test "${srv_mingw}" = "yes"; then
+if test "${srv_mingwce}" = "yes"; then
+  LIBS="$LIBS -lws2"
+elif test "${srv_mingw}" = "yes"; then
   LIBS="$LIBS -lwsock32"
+fi
+
+if test "${srv_mingw}" = "yes"; then
   AC_DEFINE(USE_WIN32API, 1,
 	    [Define if we should use the Windows API, instead of the
 	     POSIX API.  On Windows, we use the Windows API when

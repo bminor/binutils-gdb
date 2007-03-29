@@ -24,10 +24,16 @@
 
 #include "config.h"
 
+#ifdef __MINGW32CE__
+#include "wincecompat.h"
+#endif
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef HAVE_ERRNO_H
 #include <errno.h>
+#endif
 #include <setjmp.h>
 
 #ifdef HAVE_STRING_H
@@ -37,6 +43,12 @@
 #if !HAVE_DECL_STRERROR
 #ifndef strerror
 extern char *strerror (int);	/* X3.159-1989  4.11.6.2 */
+#endif
+#endif
+
+#if !HAVE_DECL_PERROR
+#ifndef perror
+extern void perror (const char *);
 #endif
 #endif
 

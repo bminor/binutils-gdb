@@ -26,7 +26,9 @@
 #if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
+#if HAVE_SYS_FILE_H
 #include <sys/file.h>
+#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -42,15 +44,23 @@
 #if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
+#if HAVE_SIGNAL_H
 #include <signal.h>
+#endif
+#if HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
 #include <sys/time.h>
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 #include <sys/stat.h>
+#if HAVE_ERRNO_H
 #include <errno.h>
+#endif
 
 #if USE_WIN32API
 #include <winsock.h>
@@ -85,8 +95,8 @@ extern int using_threads;
 extern int debug_threads;
 
 #ifdef USE_WIN32API
-# define read(fd, buf, len) recv (fd, buf, len, 0)
-# define write(fd, buf, len) send (fd, buf, len, 0)
+# define read(fd, buf, len) recv (fd, (char *) buf, len, 0)
+# define write(fd, buf, len) send (fd, (char *) buf, len, 0)
 #endif
 
 /* Open a connection to a remote debugger.

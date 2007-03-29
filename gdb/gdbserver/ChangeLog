@@ -1,3 +1,85 @@
+2007-03-29  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* gdbserver/configure.ac: Add errno checking.
+	(AC_CHECK_HEADERS): Add errno.h, fcntl.h, signal.h,
+	sys/file.h and malloc.h.
+	(AC_CHECK_DECLS): Add perror.
+	(srv_mingwce): Handle.
+	* gdbserver/configure.srv (i[34567]86-*-cygwin*): Add
+	win32-i386-low.o to srv_tgtobj.
+	(i[34567]86-*-mingw*): Likewise.
+	(arm*-*-mingw32ce*): Add case.
+	* gdbreplay.c [HAVE_SYS_FILE_H, HAVE_SIGNAL_H,
+	HAVE_FCNTL_H, HAVE_ERRNO_H, HAVE_MALLOC_H]: Check.
+	[__MINGW32CE__] (strerror): New function.
+	[__MINGW32CE__] (errno): Define to GetLastError.
+	[__MINGW32CE__] (COUNTOF): New macro.
+	(remote_open): Remove extra close call.
+	* mem-break.c (delete_breakpoint_at): New function.
+	* mem-break.h (delete_breakpoint_at): Declare.
+	* remote-utils.c [HAVE_SYS_FILE_H, HAVE_SIGNAL_H,
+	HAVE_FCNTL_H, HAVE_UNISTD_H, HAVE_ERRNO_H]: Check.
+	[USE_WIN32API] (read, write): Add char* casts.
+	* server.c [HAVE_UNISTD_H, HAVE_SIGNAL_H]: Check.
+	* server.h: Include wincecompat.h on Windows CE.
+	[HAVE_ERRNO_H]: Check.
+	(perror): Declare if not declared.
+	* utils.c: Add stdlib.h, errno.h and malloc.h includes.
+	(perror_with_name): Remove errno declaration.
+	* wincecompat.h: New.
+	* wincecompat.c: New.
+	* win32-low.h: New.
+	* win32-arm-low.c: New.
+	* win32-i386-low.c: New.
+	(win32-low.c): Include mem-break.h and win32-low.h, and winnt.h.
+	(OUTMSG2): Make it safe.
+	(_T): New macro.
+	(COUNTOF): New macro.
+	(NUM_REGS): Get it from the low target.
+	(CONTEXT_EXTENDED_REGISTERS, CONTEXT_FLOATING_POINT,
+	CONTEXT_DEBUG_REGISTERS): Add fallbacks to 0.
+	(thread_rec): Let low target handle debug registers.
+	(child_add_thread): Likewise.
+	(child_init_thread_list): Likewise.
+	(continue_one_thread): Likewise.
+	(regptr): New.
+	(do_child_fetch_inferior_registers): Move to ...
+	* win32-i386-low.c: ... here, and rename to ...
+	(do_fetch_inferior_registers): ... this.
+	* win32-low.c (child_fetch_inferior_registers): 
+	Go through the low target.
+	(do_child_store_inferior_registers): Use regptr.
+	(strwinerror): New function.
+	(win32_create_inferior): Handle Windows CE.
+	Use strwinerror instead of strerror on Windows error
+	codes.  Add program to the error output.
+	Don't close the main thread handle on Windows CE.
+	(win32_attach): Use coredll.dll on Windows CE.
+	(win32_kill): Close current process and current
+	thread handles.
+	(win32_detach): Use coredll.dll on Windows CE.
+	(win32_resume): Let low target handle debug registers, and
+	step request.
+	(handle_exception): Add/Remove initial breakpoint.  Avoid
+	non-existant WSTOPSIG on Windows CE.
+	(win32_read_inferior_memory): Cast to remove warning.
+	(win32_arch_string): Go through the low target.
+	(initialize_low): Call set_breakpoint_data with the low
+	target's breakpoint.
+	* win32-low.c (dr, FLAG_TRACE_BIT, FCS_REGNUM,
+	FOP_REGNUM, mappings): Move to ...
+	* win32-i386-low.c: ... here.
+	* win32-low.c (win32_thread_info): Move to ...
+	* win32-low.h: ... here.
+	* Makefile.in (SFILES): Add win32-low.c, win32-i386-low.c,
+	win32-arm-low.c and wincecompat.c.
+	(all:): Add $EXEEXT.
+	(install-only:): Likewise.
+	(gdbserver:): Likewise.
+	(gdbreplay:): Likewise.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2007-03-28  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* win32-low.c: Rename typedef thread_info to

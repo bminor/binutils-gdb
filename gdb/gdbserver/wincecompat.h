@@ -1,5 +1,5 @@
-/* Definitions to target GDB for Windows CE target
-   Copyright 2000, 2007 Free Software Foundation, Inc.
+/* Compatibility routines for Windows CE.
+   Copyright (C) 2007 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -15,20 +15,18 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   Foundation, Inc., 51 Franklin Street, Fifth Floor,
+   Boston, MA 02110-1301, USA.  */
 
-#ifndef TM_WINCE_H
-#define TM_WINCE_H
+#ifndef WINCECOMPAT_H
+#define WINCECOMPAT_H
 
-#include "arm/tm-arm.h"
+#include <windows.h>
 
-#undef SOFTWARE_SINGLE_STEP_P
-#define SOFTWARE_SINGLE_STEP_P() 1
+#define errno (GetLastError ())
 
-#undef SOFTWARE_SINGLE_STEP
-#define SOFTWARE_SINGLE_STEP(sig, bp_p) wince_software_single_step (sig, bp_p)
+/* in win32-low.c */
+extern char * strwinerror (DWORD error);
+#define strerror strwinerror
 
-void wince_software_single_step (unsigned int, int);
-
-#endif /* TM_WINCE_H */
+#endif

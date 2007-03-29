@@ -31,6 +31,11 @@
 void set_breakpoint_at (CORE_ADDR where,
 			void (*handler) (CORE_ADDR));
 
+/* Delete a breakpoint previously inserted at ADDR with
+   set_breakpoint_at.  */
+
+void delete_breakpoint_at (CORE_ADDR addr);
+
 /* Create a reinsertion breakpoint at STOP_AT for the breakpoint
    currently at STOP_PC (and temporarily remove the breakpoint at
    STOP_PC).  */

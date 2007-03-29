@@ -22,6 +22,13 @@
 #include "server.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#if HAVE_ERRNO_H
+#include <errno.h>
+#endif
+#if HAVE_MALLOC_H
+#include <malloc.h>
+#endif
 
 /* Generally useful subroutines used throughout the program.  */
 
@@ -32,9 +39,6 @@
 void
 perror_with_name (char *string)
 {
-#ifndef STDC_HEADERS
-  extern int errno;
-#endif
   const char *err;
   char *combined;
 

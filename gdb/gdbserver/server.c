@@ -21,8 +21,12 @@
 
 #include "server.h"
 
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#if HAVE_SIGNAL_H
 #include <signal.h>
+#endif
 #if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
