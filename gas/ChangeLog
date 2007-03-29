@@ -1,3 +1,9 @@
+2007-03-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (build_modrm_byte): For instructions with 2
+	register operands, encode destination in i.rm.regmem if its
+	RegMem bit is set.
+
 2007-03-28  Richard Sandiford  <richard@codesourcery.com>
 	    Phil Edwards  <phil@codesourcery.com>
 

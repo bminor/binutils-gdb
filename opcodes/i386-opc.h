@@ -166,12 +166,12 @@ typedef struct template
 #define RegXMM	    0x20000000	/* XMM registers in PIII */
 #define EsSeg	    0x40000000	/* String insn operand with fixed es segment */
 
-  /* InvMem is for instructions with a modrm byte that only allow a
-     general register encoding in the i.tm.mode and i.tm.regmem fields,
-     eg. control reg moves.  They really ought to support a memory form,
-     but don't, so we add an InvMem flag to the register operand to
-     indicate that it should be encoded in the i.tm.regmem field.  */
-#define InvMem	    0x80000000
+  /* RegMem is for instructions with a modrm byte where the register
+     destination operand should be encoded in the mod and regmem fields.
+     Normally, it will be encoded in the reg field. We add a RegMem
+     flag to the destination register operand to indicate that it should
+     be encoded in the regmem field.  */
+#define RegMem	    0x80000000
 
 #define Reg	(Reg8|Reg16|Reg32|Reg64) /* gen'l register */
 #define WordReg (Reg16|Reg32|Reg64)
@@ -179,7 +179,7 @@ typedef struct template
 #define Imm	(Imm8|Imm8S|Imm16|Imm32S|Imm32|Imm64) /* gen'l immediate */
 #define EncImm	(Imm8|Imm16|Imm32|Imm32S) /* Encodable gen'l immediate */
 #define Disp	(Disp8|Disp16|Disp32|Disp32S|Disp64) /* General displacement */
-#define AnyMem	(Disp8|Disp16|Disp32|Disp32S|BaseIndex|InvMem)	/* General memory */
+#define AnyMem	(Disp8|Disp16|Disp32|Disp32S|BaseIndex)	/* General memory */
   /* The following aliases are defined because the opcode table
      carefully specifies the allowed memory types for each instruction.
      At the moment we can only tell a memory reference size by the

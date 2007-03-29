@@ -63,9 +63,9 @@ const template i386_optab[] =
    size prefix.  When moving to a 32 bit register, the upper 16 bits
    are set to an implementation defined value (on the Pentium Pro,
    the implementation defined value is zero).  */
-{ "mov",   2,	0x8c, X, 0,	 wl_Suf|Modrm,			{ SReg2, WordReg|InvMem, 0 } },
+{ "mov",   2,	0x8c, X, 0,	 wl_Suf|Modrm,			{ SReg2, WordReg|RegMem, 0 } },
 { "mov",   2,	0x8c, X, 0,	 w_Suf|Modrm|IgnoreSize,	{ SReg2, WordMem, 0 } },
-{ "mov",   2,	0x8c, X, Cpu386, wl_Suf|Modrm,			{ SReg3, WordReg|InvMem, 0 } },
+{ "mov",   2,	0x8c, X, Cpu386, wl_Suf|Modrm,			{ SReg3, WordReg|RegMem, 0 } },
 { "mov",   2,	0x8c, X, Cpu386, w_Suf|Modrm|IgnoreSize,	{ SReg3, WordMem, 0 } },
 { "mov",   2,	0x8e, X, 0,	 wl_Suf|Modrm|IgnoreSize,	{ WordReg, SReg2, 0 } },
 { "mov",   2,	0x8e, X, 0,	 w_Suf|Modrm|IgnoreSize,	{ WordMem, SReg2, 0 } },
@@ -73,11 +73,11 @@ const template i386_optab[] =
 { "mov",   2,	0x8e, X, Cpu386, w_Suf|Modrm|IgnoreSize,	{ WordMem, SReg3, 0 } },
 /* Move to/from control debug registers.  In the 16 or 32bit modes they are 32bit.  In the 64bit
    mode they are 64bit.*/
-{ "mov",   2, 0x0f20, X, Cpu386|CpuNo64, l_Suf|D|Modrm|IgnoreSize,{ Control, Reg32|InvMem, 0} },
-{ "mov",   2, 0x0f20, X, Cpu64,	 q_Suf|D|Modrm|IgnoreSize|NoRex64,{ Control, Reg64|InvMem, 0} },
-{ "mov",   2, 0x0f21, X, Cpu386|CpuNo64, l_Suf|D|Modrm|IgnoreSize,{ Debug, Reg32|InvMem, 0} },
-{ "mov",   2, 0x0f21, X, Cpu64,	 q_Suf|D|Modrm|IgnoreSize|NoRex64,{ Debug, Reg64|InvMem, 0} },
-{ "mov",   2, 0x0f24, X, Cpu386|CpuNo64, l_Suf|D|Modrm|IgnoreSize,	{ Test, Reg32|InvMem, 0} },
+{ "mov",   2, 0x0f20, X, Cpu386|CpuNo64, l_Suf|D|Modrm|IgnoreSize,{ Control, Reg32|RegMem, 0} },
+{ "mov",   2, 0x0f20, X, Cpu64,	 q_Suf|D|Modrm|IgnoreSize|NoRex64,{ Control, Reg64|RegMem, 0} },
+{ "mov",   2, 0x0f21, X, Cpu386|CpuNo64, l_Suf|D|Modrm|IgnoreSize,{ Debug, Reg32|RegMem, 0} },
+{ "mov",   2, 0x0f21, X, Cpu64,	 q_Suf|D|Modrm|IgnoreSize|NoRex64,{ Debug, Reg64|RegMem, 0} },
+{ "mov",   2, 0x0f24, X, Cpu386|CpuNo64, l_Suf|D|Modrm|IgnoreSize,	{ Test, Reg32|RegMem, 0} },
 { "movabs",2,	0xa0, X, Cpu64, bwlq_Suf|D|W,			{ Disp64, Acc, 0 } },
 { "movabs",2,	0xb0, X, Cpu64,	q_Suf|W|ShortForm,		{ Imm64, Reg64, 0 } },
 
@@ -537,11 +537,11 @@ const template i386_optab[] =
 {"sgdt",   1, 0x0f01, 0, Cpu64, q_Suf|Modrm|NoRex64,		{ LLongMem, 0, 0} },
 {"sidt",   1, 0x0f01, 1, Cpu286|CpuNo64, wl_Suf|Modrm,		{ WordMem, 0, 0} },
 {"sidt",   1, 0x0f01, 1, Cpu64, q_Suf|Modrm|NoRex64,		{ LLongMem, 0, 0} },
-{"sldt",   1, 0x0f00, 0, Cpu286, wlq_Suf|Modrm,		{ WordReg|InvMem, 0, 0} },
+{"sldt",   1, 0x0f00, 0, Cpu286, wlq_Suf|Modrm,		{ WordReg, 0, 0} },
 {"sldt",   1, 0x0f00, 0, Cpu286, w_Suf|Modrm|IgnoreSize,{ ShortMem, 0, 0} },
-{"smsw",   1, 0x0f01, 4, Cpu286, wlq_Suf|Modrm,		{ WordReg|InvMem, 0, 0} },
+{"smsw",   1, 0x0f01, 4, Cpu286, wlq_Suf|Modrm,		{ WordReg, 0, 0} },
 {"smsw",   1, 0x0f01, 4, Cpu286, w_Suf|Modrm|IgnoreSize,{ ShortMem, 0, 0} },
-{"str",	   1, 0x0f00, 1, Cpu286, wlq_Suf|Modrm,		{ WordReg|InvMem, 0, 0} },
+{"str",	   1, 0x0f00, 1, Cpu286, wlq_Suf|Modrm,		{ WordReg, 0, 0} },
 {"str",	   1, 0x0f00, 1, Cpu286, w_Suf|Modrm|IgnoreSize,{ ShortMem, 0, 0} },
 
 {"verr",   1, 0x0f00, 4, Cpu286, w_Suf|Modrm|IgnoreSize,{ Reg16|ShortMem, 0, 0} },
@@ -987,12 +987,12 @@ const template i386_optab[] =
 {"movq",   2,	0xb0, X, Cpu64,	 NoSuf|W|ShortForm|Size64,{ Imm64, Reg64, 0 } },
 /* The segment register moves accept Reg64 so that a segment register
    can be copied to a 64 bit register, and vice versa.  */
-{"movq",   2,	0x8c, X, Cpu64,  NoSuf|Modrm|Size64,	{ SReg2|SReg3, Reg64|InvMem, 0 } },
+{"movq",   2,	0x8c, X, Cpu64,  NoSuf|Modrm|Size64,	{ SReg2|SReg3, Reg64|RegMem, 0 } },
 {"movq",   2,	0x8e, X, Cpu64,	 NoSuf|Modrm|Size64,	{ Reg64, SReg2|SReg3, 0 } },
 /* Move to/from control debug registers.  In the 16 or 32bit modes they are 32bit.  In the 64bit
    mode they are 64bit.*/
-{"movq",   2, 0x0f20, X, Cpu64,	 NoSuf|D|Modrm|IgnoreSize|NoRex64|Size64,{ Control, Reg64|InvMem, 0} },
-{"movq",   2, 0x0f21, X, Cpu64,	 NoSuf|D|Modrm|IgnoreSize|NoRex64|Size64,{ Debug, Reg64|InvMem, 0} },
+{"movq",   2, 0x0f20, X, Cpu64,	 NoSuf|D|Modrm|IgnoreSize|NoRex64|Size64,{ Control, Reg64|RegMem, 0} },
+{"movq",   2, 0x0f21, X, Cpu64,	 NoSuf|D|Modrm|IgnoreSize|NoRex64|Size64,{ Debug, Reg64|RegMem, 0} },
 /* Real MMX instructions.  */
 {"packssdw", 2, 0x0f6b, X, CpuMMX, NoSuf|IgnoreSize|Modrm, { RegMMX|LongMem, RegMMX, 0 } },
 {"packssdw", 2, 0x660f6b,X,CpuSSE2,NoSuf|IgnoreSize|Modrm,		{ RegXMM|LLongMem, RegXMM, 0 } },

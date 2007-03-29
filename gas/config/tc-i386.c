@@ -3412,7 +3412,7 @@ build_modrm_byte (void)
 	 destination operand, then we assume the source operand may
 	 sometimes be a memory operand and so we need to store the
 	 destination in the i.rm.reg field.  */
-      if ((i.tm.operand_types[dest] & AnyMem) == 0)
+      if ((i.tm.operand_types[dest] & (AnyMem | RegMem)) == 0)
 	{
 	  i.rm.reg = i.op[dest].regs->reg_num;
 	  i.rm.regmem = i.op[source].regs->reg_num;
