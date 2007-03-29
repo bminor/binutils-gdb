@@ -1,3 +1,11 @@
+2007-03-29  Nick Clifton  <nickc@redhat.com>
+
+	* itbl-ops.c (itbl_entry): Remove unnecessary and excessively long
+	initialization.
+	* itbl-ops.h (enum e_processor): Initialise the e_nprocs field
+	using ITBL_NUMBER_OF_PROCESSORS.
+	* itbl-parse.y (yyerror): Remove use of redundant macro PARAMS.
+
 2007-03-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (build_modrm_byte): For instructions with 2

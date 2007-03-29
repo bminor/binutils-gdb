@@ -145,12 +145,7 @@ struct itbl_entry {
 
 static int itbl_num_opcodes = 0;
 /* Array of entries for each processor and entry type */
-static struct itbl_entry *entries[e_nprocs][e_ntypes] = {
-  {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0}
-};
+static struct itbl_entry *entries[e_nprocs][e_ntypes];
 
 /* local prototypes */
 static unsigned long build_opcode (struct itbl_entry *e);
