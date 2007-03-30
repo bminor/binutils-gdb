@@ -33,11 +33,6 @@
 
 #define U_REGS_OFFSET 0
 
-/* ptrace transfers longs, and expects addresses as longs.  */
-
-#define PTRACE_ARG3_TYPE long
-#define PTRACE_XFER_TYPE long
-
 #define REGISTER_U_ADDR(addr, blockend, regno) \
   (addr) = mips_register_addr ((regno),(blockend))
 

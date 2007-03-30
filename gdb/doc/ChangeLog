@@ -1,3 +1,7 @@
+2007-03-29  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdbint.texi (Native Conditionals): Remove PTRACE_ARG3_TYPE.
+
 2007-03-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdbint.texinfo (Target Conditionals): Remove mention of

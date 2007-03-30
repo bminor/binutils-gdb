@@ -4948,11 +4948,6 @@ Defines the format for the name of a @file{/proc} device.  Should be
 defined in @file{nm.h} @emph{only} in order to override the default
 definition in @file{procfs.c}.
 
-@item PTRACE_ARG3_TYPE
-@findex PTRACE_ARG3_TYPE
-The type of the third argument to the @code{ptrace} system call, if it
-exists and is different from @code{int}.
-
 @item REGISTER_U_ADDR
 @findex REGISTER_U_ADDR
 Defines the offset of the registers in the ``u area''.

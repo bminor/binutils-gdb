@@ -118,11 +118,6 @@ m68k_linux_register_u_addr (int blockend, int regnum)
 #define PT_WRITE_U PTRACE_POKEUSR
 #endif
 
-/* Default the type of the ptrace transfer to int.  */
-#ifndef PTRACE_XFER_TYPE
-#define PTRACE_XFER_TYPE int
-#endif
-
 /* Fetch one register.  */
 
 static void
@@ -152,12 +147,12 @@ fetch_register (int regno)
 
   regaddr = register_addr (regno, offset);
   for (i = 0; i < register_size (current_gdbarch, regno);
-       i += sizeof (PTRACE_XFER_TYPE))
+       i += sizeof (PTRACE_TYPE_RET))
     {
       errno = 0;
-      *(PTRACE_XFER_TYPE *) &buf[i] = ptrace (PT_READ_U, tid,
-					      (PTRACE_ARG3_TYPE) regaddr, 0);
-      regaddr += sizeof (PTRACE_XFER_TYPE);
+      *(PTRACE_TYPE_RET *) &buf[i] = ptrace (PT_READ_U, tid,
+					      (PTRACE_TYPE_ARG3) regaddr, 0);
+      regaddr += sizeof (PTRACE_TYPE_RET);
       if (errno != 0)
 	{
 	  sprintf (mess, "reading register %s (#%d)", 
@@ -220,12 +215,12 @@ store_register (int regno)
 
   /* Store the local buffer into the inferior a chunk at the time. */
   for (i = 0; i < register_size (current_gdbarch, regno);
-       i += sizeof (PTRACE_XFER_TYPE))
+       i += sizeof (PTRACE_TYPE_RET))
     {
       errno = 0;
-      ptrace (PT_WRITE_U, tid, (PTRACE_ARG3_TYPE) regaddr,
-	      *(PTRACE_XFER_TYPE *) (buf + i));
-      regaddr += sizeof (PTRACE_XFER_TYPE);
+      ptrace (PT_WRITE_U, tid, (PTRACE_TYPE_ARG3) regaddr,
+	      *(PTRACE_TYPE_RET *) (buf + i));
+      regaddr += sizeof (PTRACE_TYPE_RET);
       if (errno != 0)
 	{
 	  sprintf (mess, "writing register %s (#%d)", 

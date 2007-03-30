@@ -54,7 +54,7 @@ void _initialize_infptrace (void);
 
 
 int
-call_ptrace (int request, int pid, PTRACE_ARG3_TYPE addr, int data)
+call_ptrace (int request, int pid, PTRACE_TYPE_ARG3 addr, int data)
 {
   return ptrace (request, pid, addr, data);
 }

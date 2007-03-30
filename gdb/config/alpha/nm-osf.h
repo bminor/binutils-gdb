@@ -29,10 +29,6 @@
 
 #define U_REGS_OFFSET 0
 
-/* ptrace transfers longs, the ptrace man page is lying.  */
-
-#define PTRACE_XFER_TYPE long
-
 /* Given a pointer to either a gregset_t or fpregset_t, return a
    pointer to the first register.  */
 #define ALPHA_REGSET_BASE(regsetp)     ((regsetp)->regs)

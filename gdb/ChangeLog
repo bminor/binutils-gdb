@@ -1,3 +1,18 @@
+2007-03-29  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* config/alpha/nm-osf.h (PTRACE_XFER_TYPE): Remove.
+	* config/mips/nm-linux.h (PTRACE_ARG3_TYPE, PTRACE_XFER_TYPE): Remove.
+	* config/sparc/nm-linux.h (PTRACE_ARG3_TYPE, PTRACE_XFER_TYPE): Remove.
+	* config/powerpc/nm-ppc64-linux.h: Remove file.
+	* config/powerpc/ppc64-linux.mh (NATDEPFILES): Set to nm-linux.h.
+	* inferior.h (PTRACE_ARG3_TYPE): Do not define.
+	(call_ptrace): Change type of third argument to PTRACE_TYPE_ARG3.
+	* infptrace.c (call_ptrace): Likewise.
+	* m68klinux-nat.c (PTRACE_XFER_TYPE): Do not define.
+	(fetch_register): Replace PTRACE_ARG3_TYPE by PTRACE_TYPE_ARG3
+	and PTRACE_XFER_TYPE by PTRACE_TYPE_RET.
+	(store_register): Likewise.
+
 2007-03-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* Makefile.in (varobj.o): Add missing dependency.

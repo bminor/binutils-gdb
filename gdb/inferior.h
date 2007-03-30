@@ -236,11 +236,7 @@ int ptrace_wait (ptid_t, int *);
 
 extern void child_resume (ptid_t, int, enum target_signal);
 
-#ifndef PTRACE_ARG3_TYPE
-#define PTRACE_ARG3_TYPE PTRACE_TYPE_ARG3
-#endif
-
-extern int call_ptrace (int, int, PTRACE_ARG3_TYPE, int);
+extern int call_ptrace (int, int, PTRACE_TYPE_ARG3, int);
 
 extern void pre_fork_inferior (void);
 
