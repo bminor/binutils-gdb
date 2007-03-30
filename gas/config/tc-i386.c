@@ -2985,7 +2985,7 @@ process_suffix (void)
 	      || i.types [0] != (Acc | Reg64)
 	      || i.types [1] != (Acc | Reg64)
 	      || i.tm.base_opcode != 0x90)
-	  i.rex |= REX_W;
+	    i.rex |= REX_W;
 	}
 
       /* Size floating point instruction.  */
