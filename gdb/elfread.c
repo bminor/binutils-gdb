@@ -44,10 +44,6 @@ extern void _initialize_elfread (void);
 
 struct elfinfo
   {
-    file_ptr dboffset;		/* Offset to dwarf debug section */
-    unsigned int dbsize;	/* Size of dwarf debug section */
-    file_ptr lnoffset;		/* Offset to dwarf line number section */
-    unsigned int lnsize;	/* Size of dwarf line number section */
     asection *stabsect;		/* Section pointer for .stab section */
     asection *stabindexsect;	/* Section pointer for .stab.index section */
     asection *mdebugsect;	/* Section pointer for .mdebug section */
@@ -80,17 +76,7 @@ elf_locate_sections (bfd *ignore_abfd, asection *sectp, void *eip)
   struct elfinfo *ei;
 
   ei = (struct elfinfo *) eip;
-  if (strcmp (sectp->name, ".debug") == 0)
-    {
-      ei->dboffset = sectp->filepos;
-      ei->dbsize = bfd_get_section_size (sectp);
-    }
-  else if (strcmp (sectp->name, ".line") == 0)
-    {
-      ei->lnoffset = sectp->filepos;
-      ei->lnsize = bfd_get_section_size (sectp);
-    }
-  else if (strcmp (sectp->name, ".stab") == 0)
+  if (strcmp (sectp->name, ".stab") == 0)
     {
       ei->stabsect = sectp;
     }
@@ -451,7 +437,6 @@ elf_symtab_read (struct objfile *objfile, int dynamic,
    We look for sections with specific names, to tell us what debug
    format to look for:  FIXME!!!
 
-   dwarf_build_psymtabs() builds psymtabs for DWARF symbols;
    elfstab_build_psymtabs() handles STABS symbols;
    mdebug_build_psymtabs() handles ECOFF debugging information.
 
@@ -607,14 +592,6 @@ elf_symfile_read (struct objfile *objfile, int mainline)
     {
       /* DWARF 2 sections */
       dwarf2_build_psymtabs (objfile, mainline);
-    }
-  else if (ei.dboffset && ei.lnoffset)
-    {
-      /* DWARF sections */
-      dwarf_build_psymtabs (objfile,
-			    mainline,
-			    ei.dboffset, ei.dbsize,
-			    ei.lnoffset, ei.lnsize);
     }
 
   /* FIXME: kettenis/20030504: This still needs to be integrated with

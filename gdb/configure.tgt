@@ -6,6 +6,7 @@
 #  gdb_target		name of GDB target definition to use
 
 case $target in
+ d10v-*-* | \
  hppa*-*-hiux* | \
  i[34567]86-ncr-* | \
  i[34567]86-*-lynxos* | \
@@ -91,8 +92,6 @@ xscale-*-*)		gdb_target=embed
 avr-*-*)		gdb_target=avr ;;
 
 cris*)                  gdb_target=cris ;;
-
-# OBSOLETE d10v-*-*)		gdb_target=d10v ;;
 
 frv-*-*)		gdb_target=frv ;;
 

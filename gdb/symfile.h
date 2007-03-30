@@ -318,11 +318,6 @@ extern void symbol_file_clear (int from_tty);
 extern bfd_byte *symfile_relocate_debug_section (bfd *abfd, asection *sectp,
 						 bfd_byte * buf);
 
-/* From dwarfread.c */
-
-extern void dwarf_build_psymtabs (struct objfile *, int, file_ptr,
-				  unsigned int, file_ptr, unsigned int);
-
 /* From dwarf2read.c */
 
 extern int dwarf2_has_info (struct objfile *);

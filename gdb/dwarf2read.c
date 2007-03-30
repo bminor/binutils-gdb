@@ -8,7 +8,7 @@
    with the Ada Joint Program Office), and Silicon Graphics, Inc.
    Initial contribution by Brent Benson, Harris Computer Systems, Inc.,
    based on Fred Fish's (Cygnus Support) implementation of DWARF 1
-   support in dwarfread.c
+   support.
 
    This file is part of GDB.
 

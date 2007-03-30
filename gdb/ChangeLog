@@ -1,5 +1,25 @@
 2007-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* MAINTAINERS: Remove d10v entry.
+	* Makefile.in (SFILES): Remove dwarfread.c.
+	(COMMON_OBS): Remove dwarfread.o.
+	(gdb_sim_d10v_h, abug-rom.o, cpu32bug-rom.o, d10v-tdep.o, dwarfread.o)
+	(remote-est.o, rom68k-rom.o): Delete.
+	* NEWS: Mention removal of d10v, target abug, target cpu32bug,
+	target est, target rom68k, and DWARF 1.
+	* configure.tgt: Mark d10v as removed.
+	* dwarf2read.c: Doc update.
+	* elfread.c (struct elfinfo): Remove dboffset, dbsize, lnoffset,
+	and lnsize.
+	(elf_locate_sections): Do not set them.
+	(elf_symfile_read): Do not call dwarf_build_psymtabs.
+	* symfile.h (dwarf_build_psymtabs): Delete prototype.
+	* config/m68k/monitor.mt (TDEPFILES): Prune.
+	* abug-rom.c, cpu32bug-rom.c, d10v-tdep.c, dwarfread.c,
+	remote-est.c, rom68k-rom.c, config/d10v/d10v.mt: Delete.
+
+2007-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* doublest.c (convert_floatformat_to_doublest): Use
 	floatformat_classify.
 	(floatformat_is_nan): Rename to...

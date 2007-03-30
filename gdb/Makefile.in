@@ -532,7 +532,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
 	cp-abi.c cp-support.c cp-namespace.c cp-valprint.c \
 	cp-name-parser.y \
 	dbxread.c demangle.c dictionary.c disasm.c doublest.c dummy-frame.c \
-	dwarfread.c dwarf2expr.c dwarf2loc.c dwarf2read.c dwarf2-frame.c \
+	dwarf2expr.c dwarf2loc.c dwarf2read.c dwarf2-frame.c \
 	elfread.c environ.c eval.c event-loop.c event-top.c expprint.c \
 	f-exp.y f-lang.c f-typeprint.c f-valprint.c findvar.c frame.c \
 	frame-base.c \
@@ -611,7 +611,6 @@ mep_opc_h =	$(OPCODES_SRC)/mep-opc.h
 sh_opc_h = 	$(OPCODES_SRC)/sh-opc.h
 gdb_callback_h = $(INCLUDE_DIR)/gdb/callback.h
 gdb_sim_arm_h =	$(INCLUDE_DIR)/gdb/sim-arm.h
-gdb_sim_d10v_h = $(INCLUDE_DIR)/gdb/sim-d10v.h
 gdb_sim_frv_h = $(INCLUDE_DIR)/gdb/sim-frv.h
 gdb_sim_m32c_h = $(INCLUDE_DIR)/gdb/sim-m32c.h
 gdb_sim_ppc_h =	$(INCLUDE_DIR)/gdb/sim-ppc.h
@@ -956,7 +955,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	gdb-events.o \
 	exec.o bcache.o objfiles.o observer.o minsyms.o maint.o demangle.o \
 	dbxread.o coffread.o coff-pe-read.o elfread.o \
-	dwarfread.o dwarf2read.o mipsread.o stabsread.o corefile.o \
+	dwarf2read.o mipsread.o stabsread.o corefile.o \
 	dwarf2expr.o dwarf2loc.o dwarf2-frame.o \
 	ada-lang.o c-lang.o f-lang.o objc-lang.o \
 	ui-out.o cli-out.o \
@@ -1705,8 +1704,6 @@ stamp-xml: $(srcdir)/features/feature_to_c.sh Makefile $(XMLFILES)
 # gdb/ dependencies
 #
 
-abug-rom.o: abug-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
-	$(serial_h) $(regcache_h) $(m68k_tdep_h)
 ada-exp.o: ada-exp.c $(defs_h) $(gdb_string_h) $(expression_h) $(value_h) \
 	$(parser_defs_h) $(language_h) $(ada_lang_h) $(bfd_h) $(symfile_h) \
 	$(objfiles_h) $(frame_h) $(block_h) $(ada_lex_c)
@@ -1918,8 +1915,6 @@ cp-support.o: cp-support.c $(defs_h) $(cp_support_h) $(gdb_string_h) \
 	$(demangle_h) $(gdb_assert_h) $(gdbcmd_h) $(dictionary_h) \
 	$(objfiles_h) $(frame_h) $(symtab_h) $(block_h) $(complaints_h) \
 	$(gdbtypes_h)
-cpu32bug-rom.o: cpu32bug-rom.c $(defs_h) $(gdbcore_h) $(target_h) \
-	$(monitor_h) $(serial_h) $(regcache_h) $(m68k_tdep_h)
 cp-valprint.o: cp-valprint.c $(defs_h) $(gdb_obstack_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(command_h) $(gdbcmd_h) \
 	$(demangle_h) $(annotate_h) $(gdb_string_h) $(c_lang_h) $(target_h) \
@@ -1937,7 +1932,6 @@ c-typeprint.o: c-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
 c-valprint.o: c-valprint.c $(defs_h) $(gdb_string_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(valprint_h) $(language_h) \
 	$(c_lang_h) $(cp_abi_h) $(target_h)
-# OBSOLETE d10v-tdep.o: d10v-tdep.c
 dbug-rom.o: dbug-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(regcache_h) $(m68k_tdep_h)
 dbxread.o: dbxread.c $(defs_h) $(gdb_string_h) $(gdb_obstack_h) \
@@ -1979,9 +1973,6 @@ dwarf2read.o: dwarf2read.c $(defs_h) $(bfd_h) $(symtab_h) $(gdbtypes_h) \
 	$(complaints_h) $(bcache_h) $(dwarf2expr_h) $(dwarf2loc_h) \
 	$(cp_support_h) $(hashtab_h) $(command_h) $(gdbcmd_h) \
 	$(gdb_string_h) $(gdb_assert_h)
-dwarfread.o: dwarfread.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(objfiles_h) \
-	$(elf_dwarf_h) $(buildsym_h) $(demangle_h) $(expression_h) \
-	$(language_h) $(complaints_h) $(gdb_string_h)
 elfread.o: elfread.c $(defs_h) $(bfd_h) $(gdb_string_h) $(elf_bfd_h) \
 	$(elf_mips_h) $(symtab_h) $(symfile_h) $(objfiles_h) $(buildsym_h) \
 	$(stabsread_h) $(gdb_stabs_h) $(complaints_h) $(demangle_h)
@@ -2537,8 +2528,6 @@ remote-e7000.o: remote-e7000.c $(defs_h) $(gdbcore_h) $(gdbarch_h) \
 	$(inferior_h) $(target_h) $(value_h) $(command_h) $(gdb_string_h) \
 	$(exceptions_h) $(gdbcmd_h) $(serial_h) $(remote_utils_h) \
 	$(symfile_h) $(regcache_h)
-remote-est.o: remote-est.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
-	$(serial_h) $(regcache_h) $(m68k_tdep_h)
 remote-fileio.o: remote-fileio.c $(defs_h) $(gdb_string_h) $(gdbcmd_h) \
 	$(remote_h) $(gdb_fileio_h) $(gdb_wait_h) $(gdb_stat_h) \
 	$(exceptions_h) $(remote_fileio_h)
@@ -2558,8 +2547,6 @@ remote-sim.o: remote-sim.c $(defs_h) $(inferior_h) $(value_h) \
 remote-utils.o: remote-utils.c $(defs_h) $(gdb_string_h) $(gdbcmd_h) \
 	$(target_h) $(serial_h) $(gdbcore_h) $(inferior_h) $(remote_utils_h) \
 	$(regcache_h)
-rom68k-rom.o: rom68k-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
-	$(serial_h) $(regcache_h) $(value_h) $(m68k_tdep_h)
 rs6000-nat.o: rs6000-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdbcore_h) \
 	$(xcoffsolib_h) $(symfile_h) $(objfiles_h) $(libbfd_h) $(bfd_h) \
 	$(exceptions_h) $(gdb_stabs_h) $(regcache_h) $(arch_utils_h) \

@@ -259,8 +259,6 @@ the native maintainer when resolving ABI issues.
 	cris		--target=cris-elf ,-Werror ,
 			(sim does not build with -Werror)
 
-	d10v		OBSOLETE
-
 	frv		--target=frv-elf ,-Werror
 
 	h8300		--target=h8300-elf ,-Werror

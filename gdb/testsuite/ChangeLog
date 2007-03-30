@@ -1,5 +1,11 @@
 2007-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.asm/asm-source.exp: Remove d10v case.
+	* lib/gdb.exp (skip_cplus_tests): Likewise.
+	* gdb.asm/d10v.inc: Deleted.
+
+2007-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.base/infnan.c, gdb.base/infnan.exp: New files.
 
 2007-03-30  Daniel Jacobowitz  <dan@codesourcery.com>

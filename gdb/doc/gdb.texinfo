@@ -14743,38 +14743,14 @@ Instructs the remote to set breakpoints by DBT.
 @node M68K
 @subsection M68k
 
-The Motorola m68k configuration includes ColdFire support, and
-target command for the following ROM monitors.
+The Motorola m68k configuration includes ColdFire support, and a
+target command for the following ROM monitor.
 
 @table @code
-
-@kindex target abug
-@item target abug @var{dev}
-ABug ROM monitor for M68K.
-
-@kindex target cpu32bug
-@item target cpu32bug @var{dev}
-CPU32BUG monitor, running on a CPU32 (M68K) board.
 
 @kindex target dbug
 @item target dbug @var{dev}
 dBUG ROM monitor for Motorola ColdFire.
-
-@kindex target est
-@item target est @var{dev}
-EST-300 ICE monitor, running on a CPU32 (M68K) board.
-
-@kindex target rom68k
-@item target rom68k @var{dev}
-ROM 68K monitor, running on an M68K IDP board.
-
-@end table
-
-@table @code
-
-@kindex target rombug
-@item target rombug @var{dev}
-ROMBUG ROM monitor for OS/9000.
 
 @end table
 

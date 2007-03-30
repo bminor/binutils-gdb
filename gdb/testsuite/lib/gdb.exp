@@ -1191,9 +1191,6 @@ proc default_gdb_start { } {
 # test C++.
 
 proc skip_cplus_tests {} {
-    if { [istarget "d10v-*-*"] } {
-	return 1
-    }
     if { [istarget "h8300-*-*"] } {
 	return 1
     }

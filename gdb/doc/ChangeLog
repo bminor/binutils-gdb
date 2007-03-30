@@ -1,5 +1,11 @@
 2007-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.texinfo (M68K): Remove obsolete ROM monitors.
+	* gdbint.texinfo (DWARF 1): Delete section and other dwarfread.c
+	references.
+
+2007-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.texinfo (Startup): Delete references to some alternate
 	names for .gdbinit.
 	(Thread): Remove LynxOS reference.

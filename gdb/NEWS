@@ -87,6 +87,7 @@ qXfer:features:read:
 
 Support for these obsolete configurations has been removed.
 
+d10v-*-*
 hppa*-*-hiux*
 i[34567]86-ncr-*
 i[34567]86-*-dgux*
@@ -105,6 +106,20 @@ i[34567]86-*-isc*
 m68*-cisco*-*
 m68*-tandem-*
 rs6000-*-lynxos*
+
+* Other removed features
+
+target abug
+target cpu32bug
+target est
+target rom68k
+
+	Various m68k-only ROM monitors.
+
+DWARF 1 support
+
+	A debug information format.  The predecessor to DWARF 2 and 
+	DWARF 3, which are still supported.
 
 *** Changes in GDB 6.6
 

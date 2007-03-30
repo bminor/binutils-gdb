@@ -219,7 +219,7 @@ have to include all three kinds of information.
 The @value{GDBN} source directory has a mostly flat structure---there
 are only a few subdirectories.  A file's name usually gives a hint as
 to what it does; for example, @file{stabsread.c} reads stabs,
-@file{dwarfread.c} reads DWARF, etc.
+@file{dwarf2read.c} reads @sc{DWARF 2}, etc.
 
 Files that are related to some common task have names that share
 common substrings.  For example, @file{*-thread.c} files deal with
@@ -2142,20 +2142,6 @@ of support is minimal and non-extensible, and is not often used.
 ECOFF includes a definition of a special debug format.
 
 The file @file{mdebugread.c} implements reading for this format.
-
-@subsection DWARF 1
-
-@cindex DWARF 1 debugging info
-DWARF 1 is a debugging format that was originally designed to be
-used with ELF in SVR4 systems.
-
-@c GCC_PRODUCER
-@c GPLUS_PRODUCER
-@c LCC_PRODUCER
-@c If defined, these are the producer strings in a DWARF 1 file.  All of
-@c these have reasonable defaults already.
-
-The DWARF 1 reader is in @file{dwarfread.c}.
 
 @subsection DWARF 2
 
