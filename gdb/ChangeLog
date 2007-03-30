@@ -1,3 +1,20 @@
+2007-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (SFILES): Remove nlmread.c.
+	(COMMON_OBS): Remove nlmread.o.
+	(nlmread.o): Delete rule.
+	* README: Delete reference to remote-st.c.
+	* acinclude.m4 (CY_AC_TCL_LYNX_POSIX): Delete.
+	* defs.h (enum gdb_osabi): Delete GDB_OSABI_NETWARE and
+	GDB_OSABI_LYNXOS.
+	* i386-tdep.c (i386_nw_init_abi, i386_nlm_osabi_sniffer): Delete.
+	(_initialize_i386_tdep): Do not reference them.
+	* nlmread.c: Delete file.
+	* osabi.c (gdb_osabi_names): Remove NetWare and LynxOS.
+	* target.c: Doc update.
+	* thread.c: Delete commented include.
+	* config/alpha/tm-alpha.h: Doc update.
+
 2007-03-30  Chris Dearman  <chris@mips.com>
 
 	* utils.c (string_to_core_addr): Comment typo.

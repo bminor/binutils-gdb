@@ -1,3 +1,13 @@
+2007-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (Startup): Delete references to some alternate
+	names for .gdbinit.
+	(Thread): Remove LynxOS reference.
+	(Tandem ST2000): Delete target-specific documentation.
+	* gdbint.texinfo (Symbol Handling): Remove mention of NLM.
+	(Target Architecture Definition): Remove mention of GDB_OSABI_NETWARE
+	and GDB_OSABI_LYNXOS.
+
 2007-03-29  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdbint.texi (Native Conditionals): Remove PTRACE_ARG3_TYPE.

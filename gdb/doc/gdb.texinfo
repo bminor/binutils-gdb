@@ -1240,37 +1240,13 @@ option (@pxref{Mode Options, ,Choosing modes}).
 
 @cindex init file name
 @cindex @file{.gdbinit}
-The @value{GDBN} init files are normally called @file{.gdbinit}.
-On some configurations of @value{GDBN}, the init file is known by a
-different name (these are typically environments where a specialized
-form of @value{GDBN} may need to coexist with other forms, hence a
-different name for the specialized version's init file).  These are the
-environments with special init file names:
-
-@itemize @bullet
 @cindex @file{gdb.ini}
-@item
+The @value{GDBN} init files are normally called @file{.gdbinit}.
 The DJGPP port of @value{GDBN} uses the name @file{gdb.ini}, due to
 the limitations of file names imposed by DOS filesystems.  The Windows
 ports of @value{GDBN} use the standard name, but if they find a
 @file{gdb.ini} file, they warn you about that and suggest to rename
 the file to the standard name.
-
-@cindex @file{.vxgdbinit}
-@item
-VxWorks (Wind River Systems real-time OS): @file{.vxgdbinit}
-
-@cindex @file{.os68gdbinit}
-@item
-OS68K (Enea Data Systems real-time OS): @file{.os68gdbinit}
-
-@cindex @file{.esgdbinit}
-@item
-ES-1800 (Ericsson Telecom AB M68000 emulator): @file{.esgdbinit}
-
-@item
-CISCO 68k: @file{.cisco-gdbinit}
-@end itemize
 
 
 @node Quitting GDB
@@ -2296,10 +2272,10 @@ Whenever @value{GDBN} detects a new thread in your program, it displays
 the target system's identification for the thread with a message in the
 form @samp{[New @var{systag}]}.  @var{systag} is a thread identifier
 whose form varies depending on the particular system.  For example, on
-LynxOS, you might see
+@sc{gnu}/Linux, you might see
 
 @smallexample
-[New process 35 thread 27]
+[New Thread 46912507313328 (LWP 25582)]
 @end smallexample
 
 @noindent
@@ -14294,7 +14270,6 @@ acceptable commands.
 * SH::                          Renesas SH
 * Sparclet::                    Tsqware Sparclet
 * Sparclite::                   Fujitsu Sparclite
-* ST2000::                      Tandem ST2000
 * Z8000::                       Zilog Z8000
 * AVR::                         Atmel AVR
 * CRIS::                        CRIS
@@ -15322,55 +15297,6 @@ You must use an additional command to debug the program.
 For example: target remote @var{dev} using @value{GDBN} standard
 remote protocol.
 
-@end table
-
-@node ST2000
-@subsection Tandem ST2000
-
-@value{GDBN} may be used with a Tandem ST2000 phone switch, running Tandem's
-STDBUG protocol.
-
-To connect your ST2000 to the host system, see the manufacturer's
-manual.  Once the ST2000 is physically attached, you can run:
-
-@smallexample
-target st2000 @var{dev} @var{speed}
-@end smallexample
-
-@noindent
-to establish it as your debugging environment.  @var{dev} is normally
-the name of a serial device, such as @file{/dev/ttya}, connected to the
-ST2000 via a serial line.  You can instead specify @var{dev} as a TCP
-connection (for example, to a serial line attached via a terminal
-concentrator) using the syntax @code{@var{hostname}:@var{portnumber}}.
-
-The @code{load} and @code{attach} commands are @emph{not} defined for
-this target; you must load your program into the ST2000 as you normally
-would for standalone operation.  @value{GDBN} reads debugging information
-(such as symbols) from a separate, debugging version of the program
-available on your host computer.
-@c FIXME!! This is terribly vague; what little content is here is
-@c basically hearsay.
-
-@cindex ST2000 auxiliary commands
-These auxiliary @value{GDBN} commands are available to help you with the ST2000
-environment:
-
-@table @code
-@item st2000 @var{command}
-@kindex st2000 @var{cmd}
-@cindex STDBUG commands (ST2000)
-@cindex commands to STDBUG (ST2000)
-Send a @var{command} to the STDBUG monitor.  See the manufacturer's
-manual for available commands.
-
-@item connect
-@cindex connect (to STDBUG)
-Connect the controlling terminal to the STDBUG command monitor.  When
-you are done interacting with STDBUG, typing either of two character
-sequences gets you back to the @value{GDBN} command prompt:
-@kbd{@key{RET} ~ .} (Return, followed by tilde and period) or
-@kbd{@key{RET} ~ Ctrl-d} (Return, followed by tilde and control-D).
 @end table
 
 @node Z8000

@@ -42,8 +42,6 @@
 #include <signal.h>
 #include "ui-out.h"
 
-/*#include "lynxos-core.h" */
-
 /* Definition of struct thread_info exported to gdbthread.h */
 
 /* Prototypes for exported functions. */

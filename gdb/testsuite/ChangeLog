@@ -1,3 +1,7 @@
+2007-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* config/netware.exp: Delete file.
+
 2007-03-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.dwarf2/dw2-noloc.S: New file.

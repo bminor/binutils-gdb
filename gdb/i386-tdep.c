@@ -2195,16 +2195,6 @@ i386_go32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->jb_pc_offset = 36;
 }
-
-/* NetWare.  */
-
-static void
-i386_nw_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
-  tdep->jb_pc_offset = 24;
-}
 
 
 /* i386 register groups.  In addition to the normal groups, add "mmx"
@@ -2469,12 +2459,6 @@ i386_coff_osabi_sniffer (bfd *abfd)
 
   return GDB_OSABI_UNKNOWN;
 }
-
-static enum gdb_osabi
-i386_nlm_osabi_sniffer (bfd *abfd)
-{
-  return GDB_OSABI_NETWARE;
-}
 
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
@@ -2509,15 +2493,11 @@ is \"default\"."),
 
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_coff_flavour,
 				  i386_coff_osabi_sniffer);
-  gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_nlm_flavour,
-				  i386_nlm_osabi_sniffer);
 
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_SVR4,
 			  i386_svr4_init_abi);
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_GO32,
 			  i386_go32_init_abi);
-  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_NETWARE,
-			  i386_nw_init_abi);
 
   /* Initialize the i386-specific register groups & types.  */
   i386_init_reggroups ();

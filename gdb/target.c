@@ -1970,7 +1970,7 @@ generic_mourn_inferior (void)
     deprecated_detach_hook ();
 }
 
-/* Helper function for child_wait and the Lynx derivatives of child_wait.
+/* Helper function for child_wait and the derivatives of child_wait.
    HOSTSTATUS is the waitstatus from wait() or the equivalent; store our
    translation of that in OURSTATUS.  */
 void

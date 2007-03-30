@@ -17,42 +17,6 @@ sinclude(../config/lib-ld.m4)
 sinclude(../config/lib-prefix.m4)
 sinclude(../config/lib-link.m4)
 
-dnl CYGNUS LOCAL: This gets the right posix flag for gcc
-AC_DEFUN([CY_AC_TCL_LYNX_POSIX],
-[AC_REQUIRE([AC_PROG_CC])AC_REQUIRE([AC_PROG_CPP])
-AC_MSG_CHECKING([if running LynxOS])
-AC_CACHE_VAL(ac_cv_os_lynx,
-[AC_EGREP_CPP(yes,
-[/*
- * The old Lynx "cc" only defines "Lynx", but the newer one uses "__Lynx__"
- */
-#if defined(__Lynx__) || defined(Lynx)
-yes
-#endif
-], ac_cv_os_lynx=yes, ac_cv_os_lynx=no)])
-#
-if test "$ac_cv_os_lynx" = "yes" ; then
-  AC_MSG_RESULT(yes)
-  AC_DEFINE(LYNX)
-  AC_MSG_CHECKING([whether -mposix or -X is available])
-  AC_CACHE_VAL(ac_cv_c_posix_flag,
-  [AC_TRY_COMPILE(,[
-  /*
-   * This flag varies depending on how old the compiler is.
-   * -X is for the old "cc" and "gcc" (based on 1.42).
-   * -mposix is for the new gcc (at least 2.5.8).
-   */
-  #if defined(__GNUC__) && __GNUC__ >= 2
-  choke me
-  #endif
-  ], ac_cv_c_posix_flag=" -mposix", ac_cv_c_posix_flag=" -X")])
-  CC="$CC $ac_cv_c_posix_flag"
-  AC_MSG_RESULT($ac_cv_c_posix_flag)
-  else
-  AC_MSG_RESULT(no)
-fi
-])
-
 #
 # Sometimes the native compiler is a bogus stub for gcc or /usr/ucb/cc. This
 # makes configure think it's cross compiling. If --target wasn't used, then

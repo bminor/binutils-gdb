@@ -548,7 +548,6 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
 	m2-exp.y m2-lang.c m2-typeprint.c m2-valprint.c \
 	macrotab.c macroexp.c macrocmd.c macroscope.c main.c maint.c \
 	mdebugread.c memattr.c mem-break.c minsyms.c mipsread.c memory-map.c \
-	nlmread.c \
 	objc-exp.y objc-lang.c \
 	objfiles.c osabi.c observer.c \
 	p-exp.y p-lang.c p-typeprint.c p-valprint.c parse.c printcmd.c \
@@ -969,7 +968,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	complaints.o typeprint.o \
 	ada-typeprint.o c-typeprint.o f-typeprint.o m2-typeprint.o \
 	ada-valprint.o c-valprint.o cp-valprint.o f-valprint.o m2-valprint.o \
-	nlmread.o serial.o mdebugread.o top.o utils.o \
+	serial.o mdebugread.o top.o utils.o \
 	ui-file.o \
 	user-regs.o \
 	frame.o frame-unwind.o doublest.o \
@@ -2424,8 +2423,6 @@ ms1-tdep.o: ms1-tdep.c $(defs_h) $(frame_h) $(frame_unwind_h) $(frame_base_h) \
 	$(gdb_assert_h)
 nbsd-nat.o: nbsd-nat.c $(defs_h) $(nbsd_nat_h)
 nbsd-tdep.o: nbsd-tdep.c $(defs_h) $(gdb_string_h) $(solib_svr4_h)
-nlmread.o: nlmread.c $(defs_h) $(bfd_h) $(symtab_h) $(symfile_h) \
-	$(objfiles_h) $(buildsym_h) $(stabsread_h) $(block_h)
 nto-procfs.o: nto-procfs.c $(defs_h) $(gdb_dirent_h) $(exceptions_h) \
 	$(gdb_string_h) $(gdbcore_h) $(inferior_h) $(target_h) $(objfiles_h) \
 	$(gdbthread_h) $(nto_tdep_h) $(command_h) $(regcache_h) $(solib_h)

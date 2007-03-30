@@ -1,5 +1,5 @@
 /* Definitions to make GDB run on an Alpha box under OSF1.  This is
-   also used by the Alpha/Netware and Alpha GNU/Linux targets.
+   also used by the Alpha GNU/Linux target.
 
    Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2002, 2004, 2007
    Free Software Foundation, Inc.

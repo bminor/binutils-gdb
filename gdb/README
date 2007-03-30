@@ -461,7 +461,6 @@ monitors and other hardware:
 	remote-mips.c	 MIPS remote debugging protocol
 	remote-sds.c	 PowerPC SDS monitor
 	remote-sim.c	 Generalized simulator protocol
-	remote-st.c	 Tandem ST-2000 monitor
 
 
 Reporting Bugs in GDB

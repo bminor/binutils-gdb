@@ -2114,12 +2114,6 @@ SOM, which is a cross-language ABI).
 
 The SOM reader is in @file{hpread.c}.
 
-@subsection Other File Formats
-
-@cindex Netware Loadable Module format
-Other file formats that have been supported by @value{GDBN} include Netware
-Loadable Modules (@file{nlmread.c}).
-
 @section Debugging File Formats
 
 This section describes characteristics of debugging information that
@@ -2677,17 +2671,9 @@ Windows CE.
 @item GDB_OSABI_GO32
 DJGPP.
 
-@findex GDB_OSABI_NETWARE
-@item GDB_OSABI_NETWARE
-Novell NetWare.
-
 @findex GDB_OSABI_IRIX
 @item GDB_OSABI_IRIX
 Irix.
-
-@findex GDB_OSABI_LYNXOS
-@item GDB_OSABI_LYNXOS
-LynxOS.
 
 @findex GDB_OSABI_INTERIX
 @item GDB_OSABI_INTERIX
