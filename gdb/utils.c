@@ -2842,7 +2842,7 @@ string_to_core_addr (const char *my_string)
   CORE_ADDR addr = 0;
   if (my_string[0] == '0' && tolower (my_string[1]) == 'x')
     {
-      /* Assume that it is in decimal.  */
+      /* Assume that it is in hex.  */
       int i;
       for (i = 2; my_string[i] != '\0'; i++)
 	{
