@@ -1,5 +1,13 @@
 2007-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* i387-fp.c (struct i387_fsave, struct i387_fxsave): Make 16-bit
+	fields short instead of int.  Add explicit padding.
+	(i387_cache_to_fsave): Remove unnecessary casts.
+	(i387_fsave_to_cache): Doc fix.
+	(i387_cache_to_fxsave): Remove unnecessary casts and masking.
+
+2007-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* i387-fp.c (i387_cache_to_fxsave): Reinitialize val2 before use.
 	(i387_fxsave_to_cache): Check fp->ftag while building ftag value.
 
