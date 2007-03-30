@@ -449,7 +449,7 @@ static struct cmd_list_element *showmipscmdlist = NULL;
 
 /* Integer registers 0 thru 31 are handled explicitly by
    mips_register_name().  Processor specific registers 32 and above
-   are listed in the followign tables.  */
+   are listed in the following tables.  */
 
 enum
 { NUM_MIPS_PROCESSOR_REGS = (90 - 32) };

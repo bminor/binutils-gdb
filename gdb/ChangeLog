@@ -1,3 +1,7 @@
+2007-03-30  Chris Dearman  <chris@mips.com>
+
+	* mips-tdep.c: Comment typo.
+
 2007-03-29  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* config/alpha/nm-osf.h (PTRACE_XFER_TYPE): Remove.
