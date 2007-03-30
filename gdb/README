@@ -87,7 +87,9 @@ Bugs' section below; there are a few known problems.
    GDB requires an ISO C (ANSI C) compiler.  If you do not have an ISO
 C compiler for your system, you may be able to download and install
 the GNU CC compiler.  It is available via anonymous FTP from the
-directory `ftp://ftp.gnu.org/pub/gnu/gcc'.
+directory `ftp://ftp.gnu.org/pub/gnu/gcc'.  GDB also requires an ISO
+C standard library.  The GDB remote server, gdbserver, builds with some
+non-ISO standard libraries - e.g. for Windows CE.
 
    GDB uses Expat, an XML parsing library, to implement some target-specific
 features.  Expat will be linked in if it is available at build time, or

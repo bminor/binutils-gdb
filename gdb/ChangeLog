@@ -1,5 +1,9 @@
 2007-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* README: Mention ISO C library requirement.
+
+2007-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* Makefile.in (SFILES): Remove nlmread.c.
 	(COMMON_OBS): Remove nlmread.o.
 	(nlmread.o): Delete rule.
