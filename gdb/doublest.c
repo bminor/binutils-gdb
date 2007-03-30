@@ -180,9 +180,22 @@ convert_floatformat_to_doublest (const struct floatformat *fmt,
   int special_exponent;		/* It's a NaN, denorm or zero */
   enum floatformat_byteorders order;
   unsigned char newfrom[FLOATFORMAT_LARGEST_BYTES];
+  enum float_kind kind;
   
   gdb_assert (fmt->totalsize
 	      <= FLOATFORMAT_LARGEST_BYTES * FLOATFORMAT_CHAR_BIT);
+
+  /* For non-numbers, reuse libiberty's logic to find the correct
+     format.  We do not lose any precision in this case by passing
+     through a double.  */
+  kind = floatformat_classify (fmt, from);
+  if (kind == float_infinite || kind == float_nan)
+    {
+      double dto;
+      floatformat_to_double (fmt, from, &dto);
+      *to = (DOUBLEST) dto;
+      return;
+    }
 
   order = floatformat_normalize_byteorder (fmt, ufrom, newfrom);
 
@@ -495,9 +508,9 @@ floatformat_is_negative (const struct floatformat *fmt,
 
 /* Check if VAL is "not a number" (NaN) for FMT.  */
 
-int
-floatformat_is_nan (const struct floatformat *fmt,
-		    const bfd_byte *uval)
+enum float_kind
+floatformat_classify (const struct floatformat *fmt,
+		      const bfd_byte *uval)
 {
   long exponent;
   unsigned long mant;
@@ -505,6 +518,7 @@ floatformat_is_nan (const struct floatformat *fmt,
   int mant_bits_left;
   enum floatformat_byteorders order;
   unsigned char newfrom[FLOATFORMAT_LARGEST_BYTES];
+  int mant_zero;
   
   gdb_assert (fmt != NULL);
   gdb_assert (fmt->totalsize
@@ -515,18 +529,13 @@ floatformat_is_nan (const struct floatformat *fmt,
   if (order != fmt->byteorder)
     uval = newfrom;
 
-  if (! fmt->exp_nan)
-    return 0;
-
   exponent = get_field (uval, order, fmt->totalsize, fmt->exp_start,
 			fmt->exp_len);
-
-  if (exponent != fmt->exp_nan)
-    return 0;
 
   mant_bits_left = fmt->man_len;
   mant_off = fmt->man_start;
 
+  mant_zero = 1;
   while (mant_bits_left > 0)
     {
       mant_bits = min (mant_bits_left, 32);
@@ -539,13 +548,40 @@ floatformat_is_nan (const struct floatformat *fmt,
 	mant &= ~(1 << (mant_bits - 1));
 
       if (mant)
-	return 1;
+	{
+	  mant_zero = 0;
+	  break;
+	}
 
       mant_off += mant_bits;
       mant_bits_left -= mant_bits;
     }
 
-  return 0;
+  /* If exp_nan is not set, assume that inf, NaN, and subnormals are not
+     supported.  */
+  if (! fmt->exp_nan)
+    {
+      if (mant_zero)
+	return float_zero;
+      else
+	return float_normal;
+    }
+
+  if (exponent == 0 && !mant_zero)
+    return float_subnormal;
+
+  if (exponent == fmt->exp_nan)
+    {
+      if (mant_zero)
+	return float_infinite;
+      else
+	return float_nan;
+    }
+
+  if (mant_zero)
+    return float_zero;
+
+  return float_normal;
 }
 
 /* Convert the mantissa of VAL (which is assumed to be a floating

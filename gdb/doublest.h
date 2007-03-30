@@ -64,6 +64,17 @@ typedef double DOUBLEST;
 # undef SCANF_HAS_LONG_DOUBLE
 #endif
 
+/* Different kinds of floatformat numbers recognized by
+   floatformat_classify.  To avoid portability issues, we use local
+   values instead of the C99 macros (FP_NAN et cetera).  */
+enum float_kind {
+  float_nan,
+  float_infinite,
+  float_zero,
+  float_normal,
+  float_subnormal
+};
+
 extern void floatformat_to_doublest (const struct floatformat *,
 				     const void *in, DOUBLEST *out);
 extern void floatformat_from_doublest (const struct floatformat *,
@@ -71,7 +82,8 @@ extern void floatformat_from_doublest (const struct floatformat *,
 
 extern int floatformat_is_negative (const struct floatformat *,
 				    const bfd_byte *);
-extern int floatformat_is_nan (const struct floatformat *, const bfd_byte *);
+extern enum float_kind floatformat_classify (const struct floatformat *,
+					     const bfd_byte *);
 extern const char *floatformat_mantissa (const struct floatformat *,
 					 const bfd_byte *);
 

@@ -442,19 +442,31 @@ print_floating (const gdb_byte *valaddr, struct type *type,
   int inv;
   const struct floatformat *fmt = NULL;
   unsigned len = TYPE_LENGTH (type);
+  enum float_kind kind;
 
   /* If it is a floating-point, check for obvious problems.  */
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     fmt = floatformat_from_type (type);
-  if (fmt != NULL && floatformat_is_nan (fmt, valaddr))
+  if (fmt != NULL)
     {
-      if (floatformat_is_negative (fmt, valaddr))
-	fprintf_filtered (stream, "-");
-      fprintf_filtered (stream, "nan(");
-      fputs_filtered ("0x", stream);
-      fputs_filtered (floatformat_mantissa (fmt, valaddr), stream);
-      fprintf_filtered (stream, ")");
-      return;
+      kind = floatformat_classify (fmt, valaddr);
+      if (kind == float_nan)
+	{
+	  if (floatformat_is_negative (fmt, valaddr))
+	    fprintf_filtered (stream, "-");
+	  fprintf_filtered (stream, "nan(");
+	  fputs_filtered ("0x", stream);
+	  fputs_filtered (floatformat_mantissa (fmt, valaddr), stream);
+	  fprintf_filtered (stream, ")");
+	  return;
+	}
+      else if (kind == float_infinite)
+	{
+	  if (floatformat_is_negative (fmt, valaddr))
+	    fputs_filtered ("-", stream);
+	  fputs_filtered ("inf", stream);
+	  return;
+	}
     }
 
   /* NOTE: cagney/2002-01-15: The TYPE passed into print_floating()

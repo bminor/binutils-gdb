@@ -1,5 +1,9 @@
 2007-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.base/infnan.c, gdb.base/infnan.exp: New files.
+
+2007-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* config/netware.exp: Delete file.
 
 2007-03-29  Joel Brobecker  <brobecker@adacore.com>

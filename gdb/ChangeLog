@@ -1,5 +1,17 @@
 2007-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* doublest.c (convert_floatformat_to_doublest): Use
+	floatformat_classify.
+	(floatformat_is_nan): Rename to...
+	(floatformat_classify): ...this.  Return more information.
+	* doublest.h (enum float_kind): New.
+	(floatformat_is_nan): Replace prototype...
+	(floatformat_classify): ...with this one.
+	* valprint.c (print_floating): Use floatformat_classify.  Handle
+	infinity.
+
+2007-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* README: Mention ISO C library requirement.
 
 2007-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
