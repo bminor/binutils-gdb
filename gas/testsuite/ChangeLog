@@ -1,3 +1,8 @@
+2007-03-30  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb2_ldmstm.d: New test.
+	* gas/arm/thumb2_ldmstm.s: New test.
+
 2007-03-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/ppc/reloc.s: New.

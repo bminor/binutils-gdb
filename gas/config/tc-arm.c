@@ -9086,6 +9086,68 @@ do_t_it (void)
   inst.instruction |= cond << 4;
 }
 
+/* Helper function used for both push/pop and ldm/stm.  */
+static void
+encode_thumb2_ldmstm (int base, unsigned mask, bfd_boolean writeback)
+{
+  bfd_boolean load;
+
+  load = (inst.instruction & (1 << 20)) != 0;
+
+  if (mask & (1 << 13))
+    inst.error =  _("SP not allowed in register list");
+  if (load)
+    {
+      if (mask & (1 << 14)
+	  && mask & (1 << 15))
+	inst.error = _("LR and PC should not both be in register list");
+
+      if ((mask & (1 << base)) != 0
+	  && writeback)
+	as_warn (_("base register should not be in register list "
+		   "when written back"));
+    }
+  else
+    {
+      if (mask & (1 << 15))
+	inst.error = _("PC not allowed in register list");
+
+      if (mask & (1 << base))
+	as_warn (_("value stored for r%d is UNPREDICTABLE"), base);
+    }
+
+  if ((mask & (mask - 1)) == 0)
+    {
+      /* Single register transfers implemented as str/ldr.  */
+      if (writeback)
+	{
+	  if (inst.instruction & (1 << 23))
+	    inst.instruction = 0x00000b04; /* ia! -> [base], #4 */
+	  else
+	    inst.instruction = 0x00000d04; /* db! -> [base, #-4]! */
+	}
+      else
+	{
+	  if (inst.instruction & (1 << 23))
+	    inst.instruction = 0x00800000; /* ia -> [base] */
+	  else
+	    inst.instruction = 0x00000c04; /* db -> [base, #-4] */
+	}
+
+      inst.instruction |= 0xf8400000;
+      if (load)
+	inst.instruction |= 0x00100000;
+
+      mask = ffs(mask) - 1;
+      mask <<= 12;
+    }
+  else if (writeback)
+    inst.instruction |= WRITE_BACK;
+
+  inst.instruction |= mask;
+  inst.instruction |= base << 16;
+}
+
 static void
 do_t_ldmstm (void)
 {
@@ -9097,54 +9159,51 @@ do_t_ldmstm (void)
 
   if (unified_syntax)
     {
+      bfd_boolean narrow;
+      unsigned mask;
+
+      narrow = FALSE;
       /* See if we can use a 16-bit instruction.  */
       if (inst.instruction < 0xffff /* not ldmdb/stmdb */
 	  && inst.size_req != 4
-	  && inst.operands[0].reg <= 7
-	  && !(inst.operands[1].imm & ~0xff)
-	  && (inst.instruction == T_MNEM_stmia
-	      ? inst.operands[0].writeback
-	      : (inst.operands[0].writeback
-		 == !(inst.operands[1].imm & (1 << inst.operands[0].reg)))))
+	  && !(inst.operands[1].imm & ~0xff))
 	{
-	  if (inst.instruction == T_MNEM_stmia
-	      && (inst.operands[1].imm & (1 << inst.operands[0].reg))
-	      && (inst.operands[1].imm & ((1 << inst.operands[0].reg) - 1)))
-	    as_warn (_("value stored for r%d is UNPREDICTABLE"),
-		     inst.operands[0].reg);
+	  mask = 1 << inst.operands[0].reg;
 
-	  inst.instruction = THUMB_OP16 (inst.instruction);
-	  inst.instruction |= inst.operands[0].reg << 8;
-	  inst.instruction |= inst.operands[1].imm;
-	}
-      else
-	{
-	  if (inst.operands[1].imm & (1 << 13))
-	    as_warn (_("SP should not be in register list"));
-	  if (inst.instruction == T_MNEM_stmia)
+	  if (inst.operands[0].reg <= 7
+	      && (inst.instruction == T_MNEM_stmia
+		  ? inst.operands[0].writeback
+		  : (inst.operands[0].writeback
+		     == !(inst.operands[1].imm & mask))))
 	    {
-	      if (inst.operands[1].imm & (1 << 15))
-		as_warn (_("PC should not be in register list"));
-	      if (inst.operands[1].imm & (1 << inst.operands[0].reg))
+	      if (inst.instruction == T_MNEM_stmia
+		  && (inst.operands[1].imm & mask)
+		  && (inst.operands[1].imm & (mask - 1)))
 		as_warn (_("value stored for r%d is UNPREDICTABLE"),
 			 inst.operands[0].reg);
+
+	      inst.instruction = THUMB_OP16 (inst.instruction);
+	      inst.instruction |= inst.operands[0].reg << 8;
+	      inst.instruction |= inst.operands[1].imm;
+	      narrow = TRUE;
 	    }
-	  else
+	  else if (inst.operands[0] .reg == REG_SP
+		   && inst.operands[0].writeback)
 	    {
-	      if (inst.operands[1].imm & (1 << 14)
-		  && inst.operands[1].imm & (1 << 15))
-		as_warn (_("LR and PC should not both be in register list"));
-	      if ((inst.operands[1].imm & (1 << inst.operands[0].reg))
-		  && inst.operands[0].writeback)
-		as_warn (_("base register should not be in register list "
-			   "when written back"));
+	      inst.instruction = THUMB_OP16 (inst.instruction == T_MNEM_stmia
+					     ? T_MNEM_push : T_MNEM_pop);
+	      inst.instruction |= inst.operands[1].imm;
+	      narrow = TRUE;
 	    }
+	}
+
+      if (!narrow)
+	{
 	  if (inst.instruction < 0xffff)
 	    inst.instruction = THUMB_OP32 (inst.instruction);
-	  inst.instruction |= inst.operands[0].reg << 16;
-	  inst.instruction |= inst.operands[1].imm;
-	  if (inst.operands[0].writeback)
-	    inst.instruction |= WRITE_BACK;
+
+	  encode_thumb2_ldmstm(inst.operands[0].reg, inst.operands[1].imm,
+			       inst.operands[0].writeback);
 	}
     }
   else
@@ -9833,7 +9892,7 @@ do_t_push_pop (void)
 
   mask = inst.operands[0].imm;
   if ((mask & ~0xff) == 0)
-    inst.instruction = THUMB_OP16 (inst.instruction);
+    inst.instruction = THUMB_OP16 (inst.instruction) | mask;
   else if ((inst.instruction == T_MNEM_push
 	    && (mask & ~0xff) == 1 << REG_LR)
 	   || (inst.instruction == T_MNEM_pop
@@ -9841,43 +9900,18 @@ do_t_push_pop (void)
     {
       inst.instruction = THUMB_OP16 (inst.instruction);
       inst.instruction |= THUMB_PP_PC_LR;
-      mask &= 0xff;
+      inst.instruction |= mask & 0xff;
     }
   else if (unified_syntax)
     {
-      if (mask & (1 << 13))
-	inst.error =  _("SP not allowed in register list");
-      if (inst.instruction == T_MNEM_push)
-	{
-	  if (mask & (1 << 15))
-	    inst.error = _("PC not allowed in register list");
-	}
-      else
-	{
-	  if (mask & (1 << 14)
-	      && mask & (1 << 15))
-	    inst.error = _("LR and PC should not both be in register list");
-	}
-      if ((mask & (mask - 1)) == 0)
-	{
-	  /* Single register push/pop implemented as str/ldr.  */
-	  if (inst.instruction == T_MNEM_push)
-	    inst.instruction = 0xf84d0d04; /* str reg, [sp, #-4]! */
-	  else
-	    inst.instruction = 0xf85d0b04; /* ldr reg, [sp], #4 */
-	  mask = ffs(mask) - 1;
-	  mask <<= 12;
-	}
-      else
-	inst.instruction = THUMB_OP32 (inst.instruction);
+      inst.instruction = THUMB_OP32 (inst.instruction);
+      encode_thumb2_ldmstm(13, mask, TRUE);
     }
   else
     {
       inst.error = _("invalid register list to push/pop instruction");
       return;
     }
-
-  inst.instruction |= mask;
 }
 
 static void
