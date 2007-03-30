@@ -1,3 +1,7 @@
+2007-03-30  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* win32-low.c: Commit leftover changes from 2007-03-29.
+
 2007-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* i387-fp.c (struct i387_fsave, struct i387_fxsave): Make 16-bit

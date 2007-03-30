@@ -23,8 +23,11 @@
 #include "server.h"
 #include "regcache.h"
 #include "gdb/signals.h"
+#include "mem-break.h"
+#include "win32-low.h"
 
 #include <windows.h>
+#include <winnt.h>
 #include <imagehlp.h>
 #include <psapi.h>
 #include <sys/param.h>
@@ -41,7 +44,15 @@
 #if LOG
 #define OUTMSG2(X) do { printf X; fflush (stdout); } while (0)
 #else
-#define OUTMSG2(X)
+#define OUTMSG2(X) do ; while (0)
+#endif
+
+#ifndef _T
+#define _T(x) TEXT (x)
+#endif
+
+#ifndef COUNTOF
+#define COUNTOF(STR) (sizeof (STR) / sizeof ((STR)[0]))
 #endif
 
 int using_threads = 1;
@@ -56,25 +67,28 @@ static DEBUG_EVENT current_event;
 
 static int debug_registers_changed = 0;
 static int debug_registers_used = 0;
-static unsigned dr[8];
+
+#define NUM_REGS (the_low_target.num_regs)
 
 typedef BOOL winapi_DebugActiveProcessStop (DWORD dwProcessId);
 typedef BOOL winapi_DebugSetProcessKillOnExit (BOOL KillOnExit);
 
-#define FLAG_TRACE_BIT 0x100
+#ifndef CONTEXT_EXTENDED_REGISTERS
+#define CONTEXT_EXTENDED_REGISTERS 0
+#endif
+
+#ifndef CONTEXT_FLOATING_POINT
+#define CONTEXT_FLOATING_POINT 0
+#endif
+
+#ifndef CONTEXT_DEBUG_REGISTERS
+#define CONTEXT_DEBUG_REGISTERS 0
+#endif
+
 #define CONTEXT_DEBUGGER (CONTEXT_FULL | CONTEXT_FLOATING_POINT)
 #define CONTEXT_DEBUGGER_DR CONTEXT_DEBUGGER | CONTEXT_DEBUG_REGISTERS	\
   | CONTEXT_EXTENDED_REGISTERS
 
-/* Thread information structure used to track extra information about
-   each thread.  */
-typedef struct win32_thread_info
-{
-  DWORD tid;
-  HANDLE h;
-  int suspend_count;
-  CONTEXT context;
-} win32_thread_info;
 static DWORD main_thread_id = 0;
 
 /* Get the thread ID from the current selected inferior (the current
@@ -113,12 +127,8 @@ thread_rec (DWORD id, int get_context)
       if (id == current_event.dwThreadId)
 	{
 	  /* Copy dr values from that thread.  */
-	  dr[0] = th->context.Dr0;
-	  dr[1] = th->context.Dr1;
-	  dr[2] = th->context.Dr2;
-	  dr[3] = th->context.Dr3;
-	  dr[6] = th->context.Dr6;
-	  dr[7] = th->context.Dr7;
+	  if (the_low_target.store_debug_registers != NULL)
+	    (*the_low_target.store_debug_registers) (th);
 	}
     }
 
@@ -145,20 +155,16 @@ child_add_thread (DWORD tid, HANDLE h)
 			      new_register_cache ());
 
   /* Set the debug registers for the new thread if they are used.  */
-  if (debug_registers_used)
+  if (debug_registers_used
+      && the_low_target.load_debug_registers != NULL)
     {
       /* Only change the value of the debug registers.  */
       th->context.ContextFlags = CONTEXT_DEBUGGER_DR;
 
       GetThreadContext (th->h, &th->context);
 
-      th->context.Dr0 = dr[0];
-      th->context.Dr1 = dr[1];
-      th->context.Dr2 = dr[2];
-      th->context.Dr3 = dr[3];
-      /* th->context.Dr6 = dr[6];
-         FIXME: should we set dr6 also ?? */
-      th->context.Dr7 = dr[7];
+      (*the_low_target.load_debug_registers) (th);
+
       SetThreadContext (th->h, &th->context);
       th->context.ContextFlags = 0;
     }
@@ -257,60 +263,26 @@ struct target_waitstatus
   value;
 };
 
-#define NUM_REGS 41
-#define FCS_REGNUM 27
-#define FOP_REGNUM 31
+/* Return a pointer into a CONTEXT field indexed by gdb register number.
+   Return a pointer to an dummy register holding zero if there is no
+   corresponding CONTEXT field for the given register number.  */
+char *
+regptr (CONTEXT* c, int r)
+{
+  if (the_low_target.regmap[r] < 0)
+  {
+    static ULONG zero;
+    /* Always force value to zero, in case the user tried to write
+       to this register before.  */
+    zero = 0;
+    return (char *) &zero;
+  }
+  else
+    return (char *) c + the_low_target.regmap[r];
+}
 
-#define context_offset(x) ((int)&(((CONTEXT *)NULL)->x))
-static const int mappings[] = {
-  context_offset (Eax),
-  context_offset (Ecx),
-  context_offset (Edx),
-  context_offset (Ebx),
-  context_offset (Esp),
-  context_offset (Ebp),
-  context_offset (Esi),
-  context_offset (Edi),
-  context_offset (Eip),
-  context_offset (EFlags),
-  context_offset (SegCs),
-  context_offset (SegSs),
-  context_offset (SegDs),
-  context_offset (SegEs),
-  context_offset (SegFs),
-  context_offset (SegGs),
-  context_offset (FloatSave.RegisterArea[0 * 10]),
-  context_offset (FloatSave.RegisterArea[1 * 10]),
-  context_offset (FloatSave.RegisterArea[2 * 10]),
-  context_offset (FloatSave.RegisterArea[3 * 10]),
-  context_offset (FloatSave.RegisterArea[4 * 10]),
-  context_offset (FloatSave.RegisterArea[5 * 10]),
-  context_offset (FloatSave.RegisterArea[6 * 10]),
-  context_offset (FloatSave.RegisterArea[7 * 10]),
-  context_offset (FloatSave.ControlWord),
-  context_offset (FloatSave.StatusWord),
-  context_offset (FloatSave.TagWord),
-  context_offset (FloatSave.ErrorSelector),
-  context_offset (FloatSave.ErrorOffset),
-  context_offset (FloatSave.DataSelector),
-  context_offset (FloatSave.DataOffset),
-  context_offset (FloatSave.ErrorSelector),
-  /* XMM0-7 */
-  context_offset (ExtendedRegisters[10 * 16]),
-  context_offset (ExtendedRegisters[11 * 16]),
-  context_offset (ExtendedRegisters[12 * 16]),
-  context_offset (ExtendedRegisters[13 * 16]),
-  context_offset (ExtendedRegisters[14 * 16]),
-  context_offset (ExtendedRegisters[15 * 16]),
-  context_offset (ExtendedRegisters[16 * 16]),
-  context_offset (ExtendedRegisters[17 * 16]),
-  /* MXCSR */
-  context_offset (ExtendedRegisters[24])
-};
 
-#undef context_offset
-
-/* Clear out any old thread list and reintialize it to a pristine
+/* Clear out any old thread list and reinitialize it to a pristine
    state. */
 static void
 child_init_thread_list (void)
@@ -321,17 +293,17 @@ child_init_thread_list (void)
 static void
 do_initial_child_stuff (DWORD pid)
 {
-  int i;
-
   last_sig = TARGET_SIGNAL_0;
 
   debug_registers_changed = 0;
   debug_registers_used = 0;
-  for (i = 0; i < sizeof (dr) / sizeof (dr[0]); i++)
-    dr[i] = 0;
+
   memset (&current_event, 0, sizeof (current_event));
 
   child_init_thread_list ();
+
+  if (the_low_target.initial_stuff != NULL)
+    (*the_low_target.initial_stuff) ();
 }
 
 /* Resume all artificially suspended threads if we are continuing
@@ -354,13 +326,10 @@ continue_one_thread (struct inferior_list_entry *this_thread, void *id_ptr)
 	{
 	  /* Only change the value of the debug registers.  */
 	  th->context.ContextFlags = CONTEXT_DEBUG_REGISTERS;
-	  th->context.Dr0 = dr[0];
-	  th->context.Dr1 = dr[1];
-	  th->context.Dr2 = dr[2];
-	  th->context.Dr3 = dr[3];
-	  /* th->context.Dr6 = dr[6];
-	     FIXME: should we set dr6 also ?? */
-	  th->context.Dr7 = dr[7];
+
+	  if (the_low_target.load_debug_registers != NULL)
+	    the_low_target.load_debug_registers (th);
+
 	  SetThreadContext (th->h, &th->context);
 	  th->context.ContextFlags = 0;
 	}
@@ -384,26 +353,6 @@ child_continue (DWORD continue_status, int thread_id)
   return res;
 }
 
-/* Fetch register(s) from gdbserver regcache data.  */
-static void
-do_child_fetch_inferior_registers (win32_thread_info *th, int r)
-{
-  char *context_offset = ((char *) &th->context) + mappings[r];
-  long l;
-  if (r == FCS_REGNUM)
-    {
-      l = *((long *) context_offset) & 0xffff;
-      supply_register (r, (char *) &l);
-    }
-  else if (r == FOP_REGNUM)
-    {
-      l = (*((long *) context_offset) >> 16) & ((1 << 11) - 1);
-      supply_register (r, (char *) &l);
-    }
-  else
-    supply_register (r, context_offset);
-}
-
 /* Fetch register(s) from the current thread context.  */
 static void
 child_fetch_inferior_registers (int r)
@@ -414,14 +363,14 @@ child_fetch_inferior_registers (int r)
     child_fetch_inferior_registers (NUM_REGS);
   else
     for (regno = 0; regno < r; regno++)
-      do_child_fetch_inferior_registers (th, regno);
+      (*the_low_target.fetch_inferior_registers) (th, regno);
 }
 
 /* Get register from gdbserver regcache data.  */
 static void
 do_child_store_inferior_registers (win32_thread_info *th, int r)
 {
-  collect_register (r, ((char *) &th->context) + mappings[r]);
+  collect_register (r, regptr (&th->context, r));
 }
 
 /* Store a new register value into the current thread context.  We don't
@@ -438,6 +387,61 @@ child_store_inferior_registers (int r)
       do_child_store_inferior_registers (th, regno);
 }
 
+/* Map the Windows error number in ERROR to a locale-dependent error
+   message string and return a pointer to it.  Typically, the values
+   for ERROR come from GetLastError.
+
+   The string pointed to shall not be modified by the application,
+   but may be overwritten by a subsequent call to strwinerror
+
+   The strwinerror function does not change the current setting
+   of GetLastError.  */
+
+char *
+strwinerror (DWORD error)
+{
+  static char buf[1024];
+  TCHAR *msgbuf;
+  DWORD lasterr = GetLastError ();
+  DWORD chars = FormatMessage (FORMAT_MESSAGE_FROM_SYSTEM
+			       | FORMAT_MESSAGE_ALLOCATE_BUFFER,
+			       NULL,
+			       error,
+			       0, /* Default language */
+			       (LPVOID)&msgbuf,
+			       0,
+			       NULL);
+  if (chars != 0)
+    {
+      /* If there is an \r\n appended, zap it.  */
+      if (chars >= 2
+	  && msgbuf[chars - 2] == '\r'
+	  && msgbuf[chars - 1] == '\n')
+	{
+	  chars -= 2;
+	  msgbuf[chars] = 0;
+	}
+
+      if (chars > ((COUNTOF (buf)) - 1))
+	{
+	  chars = COUNTOF (buf) - 1;
+	  msgbuf [chars] = 0;
+	}
+
+#ifdef UNICODE
+      wcstombs (buf, msgbuf, chars + 1);
+#else
+      strncpy (buf, msgbuf, chars + 1);
+#endif
+      LocalFree (msgbuf);
+    }
+  else
+    sprintf (buf, "unknown win32 error (%ld)", error);
+
+  SetLastError (lasterr);
+  return buf;
+}
+
 /* Start a new process.
    PROGRAM is a path to the program to execute.
    ARGS is a standard NULL-terminated array of arguments,
@@ -451,20 +455,21 @@ win32_create_inferior (char *program, char **program_args)
   char real_path[MAXPATHLEN];
   char *orig_path, *new_path, *path_ptr;
 #endif
-  char *winenv = NULL;
-  STARTUPINFO si;
-  PROCESS_INFORMATION pi;
   BOOL ret;
   DWORD flags;
   char *args;
   int argslen;
   int argc;
+  PROCESS_INFORMATION pi;
+#ifndef __MINGW32CE__
+  STARTUPINFO si = { sizeof (STARTUPINFO) };
+  char *winenv = NULL;
+#else
+  wchar_t *wargs, *wprogram;
+#endif
 
   if (!program)
     error ("No executable specified, specify executable to debug.\n");
-
-  memset (&si, 0, sizeof (si));
-  si.cb = sizeof (si);
 
   flags = DEBUG_PROCESS | DEBUG_ONLY_THIS_PROCESS;
 
@@ -483,11 +488,11 @@ win32_create_inferior (char *program, char **program_args)
   program = real_path;
 #endif
 
-  argslen = strlen (program) + 1;
+  argslen = 1;
   for (argc = 1; program_args[argc]; argc++)
     argslen += strlen (program_args[argc]) + 1;
   args = alloca (argslen);
-  strcpy (args, program);
+  args[0] = '\0';
   for (argc = 1; program_args[argc]; argc++)
     {
       /* FIXME: Can we do better about quoting?  How does Cygwin
@@ -495,17 +500,40 @@ win32_create_inferior (char *program, char **program_args)
       strcat (args, " ");
       strcat (args, program_args[argc]);
     }
-  OUTMSG2 (("Command line is %s\n", args));
+  OUTMSG2 (("Command line is \"%s\"\n", args));
 
+#ifdef CREATE_NEW_PROCESS_GROUP
   flags |= CREATE_NEW_PROCESS_GROUP;
+#endif
 
-  ret = CreateProcess (0, args,	/* command line */
-		       NULL,	/* Security */
+#ifdef __MINGW32CE__
+  to_back_slashes (program);
+  wargs = alloca (argslen * sizeof (wchar_t));
+  mbstowcs (wargs, args, argslen);
+  wprogram = alloca ((strlen (program) + 1) * sizeof (wchar_t));
+  mbstowcs (wprogram, program, strlen (program) + 1);
+  ret = CreateProcessW (wprogram, /* image name */
+                        wargs,    /* command line */
+                        NULL,     /* security, not supported */
+                        NULL,     /* thread, not supported */
+                        FALSE,    /* inherit handles, not supported */
+                        flags,    /* start flags */
+                        NULL,     /* environment, not supported */
+                        NULL,     /* current directory, not supported */
+                        NULL,     /* start info, not supported */
+                        &pi);     /* proc info */
+#else
+  ret = CreateProcess (program, /* image name */
+		       args,	/* command line */
+		       NULL,	/* security */
 		       NULL,	/* thread */
 		       TRUE,	/* inherit handles */
 		       flags,	/* start flags */
-		       winenv, NULL,	/* current directory */
-		       &si, &pi);
+		       winenv,  /* environment */
+		       NULL,	/* current directory */
+		       &si,     /* start info */
+		       &pi);    /* proc info */
+#endif
 
 #ifndef USE_WIN32API
   if (orig_path)
@@ -514,15 +542,21 @@ win32_create_inferior (char *program, char **program_args)
 
   if (!ret)
     {
-      error ("Error creating process %s, (error %d): %s\n", args,
-	     (int) GetLastError (), strerror (GetLastError ()));
+      DWORD err = GetLastError ();
+      error ("Error creating process \"%s%s\", (error %d): %s\n",
+	     program, args, (int) err, strwinerror (err));
     }
   else
     {
       OUTMSG2 (("Process created: %s\n", (char *) args));
     }
 
+#ifndef _WIN32_WCE
+  /* On Windows CE this handle can't be closed.  The OS reuses
+     it in the debug events, while the 9x/NT versions of Windows
+     probably use a DuplicateHandle'd one.  */
   CloseHandle (pi.hThread);
+#endif
 
   current_process_handle = pi.hProcess;
   current_process_id = pi.dwProcessId;
@@ -539,16 +573,18 @@ static int
 win32_attach (unsigned long pid)
 {
   int res = 0;
-  HMODULE kernel32 = LoadLibrary ("KERNEL32.DLL");
   winapi_DebugActiveProcessStop *DebugActiveProcessStop = NULL;
-  winapi_DebugSetProcessKillOnExit *DebugSetProcessKillOnExit = NULL;
 
-  DebugActiveProcessStop =
-    (winapi_DebugActiveProcessStop *) GetProcAddress (kernel32,
-						      "DebugActiveProcessStop");
-  DebugSetProcessKillOnExit =
-    (winapi_DebugSetProcessKillOnExit *) GetProcAddress (kernel32,
-							 "DebugSetProcessKillOnExit");
+  winapi_DebugSetProcessKillOnExit *DebugSetProcessKillOnExit = NULL;
+#ifdef _WIN32_WCE
+  HMODULE dll = GetModuleHandle (_T("COREDLL.DLL"));
+#else
+  HMODULE dll = GetModuleHandle (_T("KERNEL32.DLL"));
+#endif
+  DebugActiveProcessStop = (winapi_DebugActiveProcessStop *)
+    GetProcAddress (dll, _T("DebugActiveProcessStop"));
+  DebugSetProcessKillOnExit = (winapi_DebugSetProcessKillOnExit *)
+    GetProcAddress (dll, _T("DebugSetProcessKillOnExit"));
 
   res = DebugActiveProcess (pid) ? 1 : 0;
 
@@ -570,8 +606,6 @@ win32_attach (unsigned long pid)
 
   if (res)
     do_initial_child_stuff (pid);
-
-  FreeLibrary (kernel32);
 
   return res;
 }
@@ -617,6 +651,8 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
 static void
 win32_kill (void)
 {
+  win32_thread_info *current_thread;
+
   if (current_process_handle == NULL)
     return;
 
@@ -635,22 +671,32 @@ win32_kill (void)
 	  handle_output_debug_string (&our_status);
   	}
     }
+
+  CloseHandle (current_process_handle);
+
+  current_thread = inferior_target_data (current_inferior);
+  if (current_thread && current_thread->h)
+    {
+      /* This may fail in an attached process, so don't check.  */
+      (void) CloseHandle (current_thread->h);
+    }
 }
 
 /* Detach from all inferiors.  */
 static void
 win32_detach (void)
 {
-  HMODULE kernel32 = LoadLibrary ("KERNEL32.DLL");
   winapi_DebugActiveProcessStop *DebugActiveProcessStop = NULL;
   winapi_DebugSetProcessKillOnExit *DebugSetProcessKillOnExit = NULL;
-
-  DebugActiveProcessStop =
-    (winapi_DebugActiveProcessStop *) GetProcAddress (kernel32,
-						      "DebugActiveProcessStop");
-  DebugSetProcessKillOnExit =
-    (winapi_DebugSetProcessKillOnExit *) GetProcAddress (kernel32,
-							 "DebugSetProcessKillOnExit");
+#ifdef _WIN32_WCE
+  HMODULE dll = GetModuleHandle (_T("COREDLL.DLL"));
+#else
+  HMODULE dll = GetModuleHandle (_T("KERNEL32.DLL"));
+#endif
+  DebugActiveProcessStop = (winapi_DebugActiveProcessStop *)
+    GetProcAddress (dll, _T("DebugActiveProcessStop"));
+  DebugSetProcessKillOnExit = (winapi_DebugSetProcessKillOnExit *)
+    GetProcAddress (dll, _T("DebugSetProcessKillOnExit"));
 
   if (DebugSetProcessKillOnExit != NULL)
     DebugSetProcessKillOnExit (FALSE);
@@ -659,8 +705,6 @@ win32_detach (void)
     DebugActiveProcessStop (current_process_id);
   else
     win32_kill ();
-
-  FreeLibrary (kernel32);
 }
 
 /* Return 1 iff the thread with thread ID TID is alive.  */
@@ -733,23 +777,21 @@ win32_resume (struct thread_resume *resume_info)
       if (th->context.ContextFlags)
 	{
 	  if (debug_registers_changed)
-	    {
-	      th->context.Dr0 = dr[0];
-	      th->context.Dr1 = dr[1];
-	      th->context.Dr2 = dr[2];
-	      th->context.Dr3 = dr[3];
-	      /* th->context.Dr6 = dr[6];
-	         FIXME: should we set dr6 also ?? */
-	      th->context.Dr7 = dr[7];
-	    }
+	    if (the_low_target.load_debug_registers != NULL)
+	      (*the_low_target.load_debug_registers) (th);
 
 	  /* Move register values from the inferior into the thread
 	     context structure.  */
 	  regcache_invalidate ();
 
 	  if (step)
-	    th->context.EFlags |= FLAG_TRACE_BIT;
-
+	    {
+	      if (the_low_target.single_step != NULL)
+		(*the_low_target.single_step) (th);
+	      else
+		error ("Single stepping is not supported "
+		       "in this configuration.\n");
+	    }
 	  SetThreadContext (th->h, &th->context);
 	  th->context.ContextFlags = 0;
 	}
@@ -825,6 +867,11 @@ handle_exception (struct target_waitstatus *ourstatus)
     case EXCEPTION_BREAKPOINT:
       OUTMSG2 (("EXCEPTION_BREAKPOINT"));
       ourstatus->value.sig = TARGET_SIGNAL_TRAP;
+#ifdef _WIN32_WCE
+      /* Remove the initial breakpoint.  */
+      check_breakpoints ((CORE_ADDR) (long) current_event
+                         .u.Exception.ExceptionRecord.ExceptionAddress);
+#endif
       break;
     case DBG_CONTROL_C:
       OUTMSG2 (("DBG_CONTROL_C"));
@@ -934,6 +981,14 @@ in:
 			  current_event.u.CreateProcessInfo.hThread);
 
       retval = ourstatus->value.related_pid = current_event.dwThreadId;
+#ifdef _WIN32_WCE
+      /* Windows CE doesn't set the initial breakpoint automatically
+	 like the desktop versions of Windows do.  We add it explicitly
+	 here.  It will be removed as soon as it is hit.  */
+      set_breakpoint_at ((CORE_ADDR) (long) current_event.u
+			 .CreateProcessInfo.lpStartAddress,
+			 delete_breakpoint_at);
+#endif
       break;
 
     case EXIT_PROCESS_DEBUG_EVENT:
@@ -1037,8 +1092,13 @@ win32_wait (char *status)
 	}
       else if (our_status.kind == TARGET_WAITKIND_STOPPED)
 	{
+#ifndef __MINGW32CE__
 	  OUTMSG2 (("Child Stopped with signal = %x \n",
 		    WSTOPSIG (our_status.value.sig)));
+#else
+	  OUTMSG2 (("Child Stopped with signal = %x \n",
+		    our_status.value.sig));
+#endif
 
 	  *status = 'T';
 
@@ -1082,7 +1142,7 @@ win32_store_inferior_registers (int regno)
 static int
 win32_read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 {
-  return child_xfer_memory (memaddr, myaddr, len, 0, 0) != len;
+  return child_xfer_memory (memaddr, (char *) myaddr, len, 0, 0) != len;
 }
 
 /* Write memory to the inferior process.  This should generally be
@@ -1099,7 +1159,7 @@ win32_write_inferior_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
 static const char *
 win32_arch_string (void)
 {
-  return "i386";
+  return the_low_target.arch_string;
 }
 
 static struct target_ops win32_target_ops = {
@@ -1131,6 +1191,8 @@ void
 initialize_low (void)
 {
   set_target_ops (&win32_target_ops);
-
+  if (the_low_target.breakpoint != NULL)
+    set_breakpoint_data (the_low_target.breakpoint,
+			 the_low_target.breakpoint_len);
   init_registers ();
 }
