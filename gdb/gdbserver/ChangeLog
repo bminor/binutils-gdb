@@ -1,3 +1,8 @@
+2007-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* i387-fp.c (i387_cache_to_fxsave): Reinitialize val2 before use.
+	(i387_fxsave_to_cache): Check fp->ftag while building ftag value.
+
 2007-03-29  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* configure.srv (arm*-*-mingw32ce*): Move near the other

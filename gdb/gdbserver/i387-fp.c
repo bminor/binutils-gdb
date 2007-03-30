@@ -174,6 +174,7 @@ i387_cache_to_fxsave (void *buf)
   /* Convert to the simplifed tag form stored in fxsave data.  */
   collect_register_by_name ("ftag", &val);
   val &= 0xFFFF;
+  val2 = 0;
   for (i = 7; i >= 0; i--)
     {
       int tag = (val >> (i * 2)) & 3;
@@ -270,7 +271,7 @@ i387_fxsave_to_cache (const void *buf)
   for (i = 7; i >= 0; i--)
     {
       int tag;
-      if (val & (1 << i))
+      if (fp->ftag & (1 << i))
 	tag = i387_ftag (fp, (i + 8 - top) % 8);
       else
 	tag = 3;
