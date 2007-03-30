@@ -833,7 +833,6 @@ varobj_h = varobj.h $(symtab_h) $(gdbtypes_h)
 vax_tdep_h = vax-tdep.h
 vec_h = vec.h $(gdb_assert_h) $(gdb_string_h)
 version_h = version.h
-wince_stub_h = wince-stub.h
 wrapper_h = wrapper.h $(gdb_h)
 xcoffsolib_h = xcoffsolib.h
 xml_support_h = xml-support.h $(gdb_obstack_h) $(vec_h)
@@ -2866,11 +2865,6 @@ win32-nat.o: win32-nat.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
 	$(regcache_h) $(top_h) $(buildsym_h) $(symfile_h) $(objfiles_h) \
 	$(gdb_string_h) $(gdbthread_h) $(gdbcmd_h) $(exec_h) $(solist_h) \
 	$(solib_h) $(i386_tdep_h) $(i387_tdep_h)
-wince.o: wince.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
-	$(exceptions_h) $(gdbcore_h) $(command_h) $(buildsym_h) $(symfile_h) \
-	$(objfiles_h) $(gdb_string_h) $(gdbthread_h) $(gdbcmd_h) \
-	$(wince_stub_h) $(regcache_h) $(mips_tdep_h)
-wince-stub.o: wince-stub.c $(wince_stub_h)
 wrapper.o: wrapper.c $(defs_h) $(value_h) $(exceptions_h) $(wrapper_h) \
 	$(ui_out_h)
 xcoffread.o: xcoffread.c $(defs_h) $(bfd_h) $(gdb_string_h) $(gdb_stat_h) \

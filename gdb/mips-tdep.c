@@ -1352,7 +1352,7 @@ mips16_next_pc (CORE_ADDR pc)
    It works by decoding the current instruction and predicting where a
    branch will go. This isnt hard because all the data is available.
    The MIPS32 and MIPS16 variants are quite different */
-CORE_ADDR
+static CORE_ADDR
 mips_next_pc (CORE_ADDR pc)
 {
   if (pc & 0x01)

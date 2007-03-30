@@ -105,7 +105,9 @@ i[34567]86-*-sysv*
 i[34567]86-*-isc*
 m68*-cisco*-*
 m68*-tandem-*
+mips*-*-pe
 rs6000-*-lynxos*
+sh*-*-pe
 
 * Other removed features
 

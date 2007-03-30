@@ -13,7 +13,9 @@ case $target in
  m68*-cisco*-* | \
  m68*-tandem-* | \
  m68*-*-os68k* | \
+ mips*-*-pe | \
  rs6000-*-lynxos* | \
+ sh*-*-pe | \
  null)
     echo "*** Configuration $target is obsolete." >&2
     echo "*** Support has been REMOVED." >&2
@@ -153,7 +155,6 @@ m88*-*-openbsd*)	gdb_target=obsd ;;
 
 mep-*-*)		gdb_target=mep ;;
 
-mips*-*-pe)		gdb_target=wince ;;
 mips*-sgi-irix5*)	gdb_target=irix5 ;;
 mips*-sgi-irix6*)	gdb_target=irix6 ;;
 mips*-*-linux*)		gdb_target=linux
@@ -192,7 +193,6 @@ s390*-*-*)		gdb_target=s390
 			;;
 
 score-*-*)		gdb_target=embed ;;
-sh*-*-pe)		gdb_target=wince ;;
 sh-*-coff*)		gdb_target=embed ;;
 sh-*-elf*)		gdb_target=embed ;;
 # FIXME should that be sh*-*-linux*, perhaps?

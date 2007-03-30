@@ -1,3 +1,7 @@
+2007-03-30  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* gdb.texinfo (WinCE): Delete obsolete subsection.
+
 2007-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (M68K): Remove obsolete ROM monitors.

@@ -14274,7 +14274,6 @@ acceptable commands.
 * AVR::                         Atmel AVR
 * CRIS::                        CRIS
 * Super-H::                     Renesas Super-H
-* WinCE::                       Windows CE child processes
 @end menu
 
 @node ARM
@@ -15388,44 +15387,6 @@ commands:
 @item regs
 @kindex regs@r{, Super-H}
 Show the values of all Super-H registers.
-@end table
-
-@node WinCE
-@subsection Windows CE
-@cindex Windows CE
-
-The following commands are available for Windows CE:
-
-@table @code
-@item set remotedirectory @var{dir}
-@kindex set remotedirectory
-Tell @value{GDBN} to upload files from the named directory @var{dir}.
-The default is @file{/gdb}, i.e.@: the root directory on the current
-drive.
-
-@item show remotedirectory
-@kindex show remotedirectory
-Show the current value of the upload directory.
-
-@item set remoteupload @var{method}
-@kindex set remoteupload
-Set the method used to upload files to remote device.  Valid values
-for @var{method} are @samp{always}, @samp{newer}, and @samp{never}.
-The default is @samp{newer}.
-
-@item show remoteupload
-@kindex show remoteupload
-Show the current setting of the upload method.
-
-@item set remoteaddhost
-@kindex set remoteaddhost
-Tell @value{GDBN} whether to add this host to the remote stub's
-arguments when you debug over a network.
-
-@item show remoteaddhost
-@kindex show remoteaddhost
-Show whether to add this host to remote stub's arguments when
-debugging over a network.
 @end table
 
 

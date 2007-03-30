@@ -1,3 +1,30 @@
+2007-03-30  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* configure.tgt: Move mips*-*-pe and sh*-*-pe to 
+	the obsoletion stanza.
+	* NEWS: Mention deleted targets.
+
+	* config/sh/tm-wince.h: Remove.
+	* config/sh/wince.mt: Remove.
+	* config/mips/tm-wince.h: Remove.
+	* config/mips/wince.mt: Remove.
+
+	* wince.c: Remove.
+	* wince-stub.c: Remove.
+	* wince-stub.h: Remove.
+	* Makefile.in (wince.o): Remove rule.
+	(wince-stub.o): Likewise.
+
+	* mips-tdep.c (mips_next_pc): Make static.
+	* mips-tdep.h (mips_next_pc): Remove declaration.
+	* arm-tdep.c (arm_pc_is_thumb): Make static.
+	(thumb_get_next_pc): Likewise.
+	(arm_get_next_pc): Likewise.
+	* arm-tdep.h (arm_pc_is_thumb_dummy): Remove declaration.
+	(arm_pc_is_thumb): Likewise.
+	(thumb_get_next_pc): Likewise.
+	(arm_get_next_pc): Likewise.
+
 2007-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* MAINTAINERS: Remove d10v entry.

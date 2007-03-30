@@ -217,7 +217,7 @@ int arm_apcs_32 = 1;
 /* Determine if the program counter specified in MEMADDR is in a Thumb
    function.  */
 
-int
+static int
 arm_pc_is_thumb (CORE_ADDR memaddr)
 {
   struct minimal_symbol *sym;
@@ -1603,7 +1603,7 @@ bitcount (unsigned long val)
   return nbits;
 }
 
-CORE_ADDR
+static CORE_ADDR
 thumb_get_next_pc (CORE_ADDR pc)
 {
   unsigned long pc_val = ((unsigned long) pc) + 4;	/* PC after prefetch */
@@ -1659,7 +1659,7 @@ thumb_get_next_pc (CORE_ADDR pc)
   return nextpc;
 }
 
-CORE_ADDR
+static CORE_ADDR
 arm_get_next_pc (CORE_ADDR pc)
 {
   unsigned long pc_val;

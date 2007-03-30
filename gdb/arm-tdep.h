@@ -187,15 +187,6 @@ struct gdbarch_tdep
 #define LOWEST_PC (gdbarch_tdep (current_gdbarch)->lowest_pc)
 #endif
 
-/* Prototypes for internal interfaces needed by more than one MD file.  */
-int arm_pc_is_thumb_dummy (CORE_ADDR);
-
-int arm_pc_is_thumb (CORE_ADDR);
-
-CORE_ADDR thumb_get_next_pc (CORE_ADDR);
-
-CORE_ADDR arm_get_next_pc (CORE_ADDR);
-
 /* Functions exported from armbsd-tdep.h.  */
 
 /* Return the appropriate register set for the core section identified
