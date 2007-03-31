@@ -25,6 +25,10 @@ only ARM).
 * GDB and the GDB remote stub, gdbserver, now support the XScale
 iWMMXt coprocessor.
 
+* The GDB remote stub, gdbserver, has been updated to support
+ARM Windows CE (mingw32ce) debugging, and GDB Windows CE support
+has been rewritten to use the standard GDB remote protocol.
+
 * New commands
 
 set mem inaccessible-by-default
