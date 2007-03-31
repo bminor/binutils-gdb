@@ -959,43 +959,16 @@ xtensa_clear_insn_labels (void)
 }
 
 
-/* The "loops_ok" argument is provided to allow ignoring labels that
-   define loop ends.  This fixes a bug where the NOPs to align a
-   loop opcode were included in a previous zero-cost loop:
-
-   loop a0, loopend
-     <loop1 body>
-   loopend:
-
-   loop a2, loopend2
-     <loop2 body>
-
-   would become:
-
-   loop a0, loopend
-     <loop1 body>
-     nop.n <===== bad!
-   loopend:
-
-   loop a2, loopend2
-     <loop2 body>
-
-   This argument is used to prevent moving the NOP to before the
-   loop-end label, which is what you want in this special case.  */
-
 static void
-xtensa_move_labels (fragS *new_frag, valueT new_offset, bfd_boolean loops_ok)
+xtensa_move_labels (fragS *new_frag, valueT new_offset)
 {
   sym_list *lit;
 
   for (lit = insn_labels; lit; lit = lit->next)
     {
       symbolS *lit_sym = lit->sym;
-      if (loops_ok || ! symbol_get_tc (lit_sym)->is_loop_target)
-	{
-	  S_SET_VALUE (lit_sym, new_offset);
-	  symbol_set_frag (lit_sym, new_frag);
-	}
+      S_SET_VALUE (lit_sym, new_offset);
+      symbol_set_frag (lit_sym, new_frag);
     }
 }
 
@@ -5035,7 +5008,7 @@ xtensa_frob_label (symbolS *sym)
 		frag_now->fr_symbol, frag_now->fr_offset, NULL);
 
       xtensa_set_frag_assembly_state (frag_now);
-      xtensa_move_labels (frag_now, 0, TRUE);
+      xtensa_move_labels (frag_now, 0);
     }
 
   /* No target aligning in the absolute section.  */
@@ -5051,7 +5024,7 @@ xtensa_frob_label (symbolS *sym)
 		RELAX_DESIRE_ALIGN_IF_TARGET,
 		frag_now->fr_symbol, frag_now->fr_offset, NULL);
       xtensa_set_frag_assembly_state (frag_now);
-      xtensa_move_labels (frag_now, 0, TRUE);
+      xtensa_move_labels (frag_now, 0);
     }
 
   /* We need to mark the following properties even if we aren't aligning.  */
@@ -6734,15 +6707,13 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
 	frag_var (rs_machine_dependent, 0, 0,
 		  RELAX_CHECK_ALIGN_NEXT_OPCODE, target_sym, 0, NULL);
       xtensa_set_frag_assembly_state (frag_now);
-
-      xtensa_move_labels (frag_now, 0, FALSE);
     }
 
   if (vinsn->slots[0].opcode == xtensa_entry_opcode
       && !vinsn->slots[0].is_specific_opcode)
     {
       xtensa_mark_literal_pool_location ();
-      xtensa_move_labels (frag_now, 0, TRUE);
+      xtensa_move_labels (frag_now, 0);
       frag_var (rs_align_test, 1, 1, 0, NULL, 2, NULL);
     }
 

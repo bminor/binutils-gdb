@@ -1,3 +1,12 @@
+2007-03-30  Sterling Augustine  <sterling@tensilica.com>
+	    Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (xtensa_move_labels): Remove loops_ok argument.
+	Do not check is_loop_target flag.
+	(xtensa_frob_label): Adjust calls to xtensa_move_labels.
+	(xg_assemble_vliw_tokens): Likewise.  Also avoid calling
+	xtensa_move_labels for alignment of loop opcodes.
+	
 2007-03-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (process_suffix): Reindent a bit.
