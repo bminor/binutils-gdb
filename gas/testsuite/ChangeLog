@@ -1,3 +1,15 @@
+2007-04-01  Christian Groessler  <chris@groessler.org>
+
+	* gas/z8k/calr.d: Fix for 64bit bfd.
+	* gas/z8k/djnz.d: Likewise.
+	* gas/z8k/inout.d: Likewise.
+	* gas/z8k/jmp-cc.d: Likewise.
+	* gas/z8k/jr-back.d: Likewise.
+	* gas/z8k/jr-forw.d: Likewise.
+	* gas/z8k/reglabel.d: Likewise.
+	* gas/z8k/ctrl-names.d: Fix name.  Fix for 64bit bfd.
+	* gas/z8k/ret-cc.d: Likewise.
+
 2007-03-31  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/i386/nops-3.s: Don't use .align.
