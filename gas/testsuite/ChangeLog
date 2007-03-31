@@ -1,3 +1,7 @@
+2007-03-31  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/i386/nops-3.s: Don't use .align.
+
 2007-03-30  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/thumb2_ldmstm.d: New test.
@@ -136,7 +140,7 @@
 	gas/d10v/address-033.l, gas/d10v/address-034.l,
 	gas/d10v/address-035.l, gas/d10v/address-036.l,
 	gas/d10v/address-037.l, gas/d10v/address-038.l,
-	gas/d10v/address-039.l, gas/d10v/address-040.l, 
+	gas/d10v/address-039.l, gas/d10v/address-040.l,
 	gas/d10v/address-041.l: Likewise.
 
 2007-02-28  Nick Clifton  <nickc@redhat.com>
