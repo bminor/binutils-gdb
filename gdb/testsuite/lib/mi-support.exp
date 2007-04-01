@@ -1224,11 +1224,11 @@ proc mi_send_resuming_command {command test} {
 # be determined.
 # Does not check that the line is the same as requested.
 # The caller can check itself if required.
-proc mi_continue_to_line {location command} {
+proc mi_continue_to_line {location test} {
 
     mi_tbreak $location   
     mi_send_resuming_command "exec-continue" "run to $location (exec-continue)"
-    return [mi_wait_for_stop]
+    return [mi_wait_for_stop $test]
 }
 
 # Wait until gdb prints the current line.

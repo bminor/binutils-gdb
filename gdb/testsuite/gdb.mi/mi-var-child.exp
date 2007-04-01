@@ -43,16 +43,15 @@ mi_gdb_load ${binfile}
 
 mi_runto do_children_tests
 
+set line_dlt_first_real [gdb_get_line_number "weird = &struct_declarations;"]
+mi_continue_to_line $line_dlt_first_real "step to real start of do_children_test"
+
+
 #####        #####
 #                #
 # children tests #
 #                #
 #####        #####
-
-# Step past the initialization of struct_declarations.
-set line_weird [gdb_get_line_number "weird = &struct_declarations;"]
-mi_execute_to "exec-next" "end-stepping-range" do_children_tests {} ".*${srcfile}" \
-    [expr $line_weird] {} "step \$line_weird"
 
 # Test: c_variable-4.2
 # Desc: create variable "struct_declarations"
@@ -859,7 +858,7 @@ mi_gdb_test "-var-update --no-values *" \
  "update all vars struct_declarations.long_array.10 changed, don't print values."
 
 # Step over "struct_declarations.long_array[11] = 5678";
-set line_dct_a0_0 [gdb_get_line_number "a0 = '0';"]
+set line_dct_a0_0 [gdb_get_line_number "a0\[0\] = '0';"]
 mi_step_to  do_children_tests {} ".*${srcfile}" \
     $line_dct_a0_0 "step \$line_dct_a0_0"
 

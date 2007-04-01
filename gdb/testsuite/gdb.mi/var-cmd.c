@@ -113,16 +113,16 @@ int *array_ptr = array;
 void
 do_locals_tests ()
 {
-  int linteger;
-  int *lpinteger;
-  char lcharacter;
-  char *lpcharacter;
-  long llong;
-  long *lplong;
-  float lfloat;
-  float *lpfloat;
-  double ldouble;
-  double *lpdouble;
+  int linteger = 0;
+  int *lpinteger = 0;
+  char lcharacter = 0;
+  char *lpcharacter = 0;
+  long llong = 0;
+  long *lplong = 0;
+  float lfloat = 0;
+  float *lpfloat = 0;
+  double ldouble = 0;
+  double *lpdouble = 0;
   struct _simple_struct lsimple;
   struct _simple_struct *lpsimple;
   void (*func) (void);
@@ -202,9 +202,9 @@ do_children_tests (void)
   weird_struct *weird;
   struct _struct_n_pointer *psnp;
   struct _struct_n_pointer snp0, snp1, snp2;
-  char a0, *a1, **a2, ***a3;
-  char b0, *b1, **b2, ***b3;
-  char c0, *c1, **c2, ***c3;
+  char a0[2] = {}, *a1, **a2, ***a3;
+  char b0[2] = {}, *b1, **b2, ***b3;
+  char c0[2] = {}, *c1, **c2, ***c3;
   long z0, *z1, **z2, ***z3;
   long y0, *y1, **y2, ***y3;
   long x0, *x1, **x2, ***x3;
@@ -233,16 +233,16 @@ do_children_tests (void)
   weird->func_ptr = nothing;
 
   /* Struct/pointer/array tests */
-  a0 = '0';
-  a1 = &a0;
+  a0[0] = '0';
+  a1 = a0;
   a2 = &a1;
   a3 = &a2;
-  b0 = '1';
-  b1 = &b0;
+  b0[0] = '1';
+  b1 = b0;
   b2 = &b1;
   b3 = &b2;
-  c0 = '2';
-  c1 = &c0;
+  c0[0] = '2';
+  c1 = c0;
   c2 = &c1;
   c3 = &c2;
   z0 = 0xdead + 0;

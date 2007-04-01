@@ -1,3 +1,23 @@
+2007-04-01  Vladimir Prus  <vladimir@codesourcery.com>
+	
+	* gdb.mi/mi-var-child.c	
+	(do_children_tests): User char[2] instead of
+	char so that automatic printing of pointers to char
+	don't give unpredicable result.
+	* gdb.mi/var-cmd.c (do_locals_test): Initialize
+	local variables.
+	* gdb.mi/mi-var-child.exp: Step to right line
+	of do_children_tests.
+	* gdb.mi/mi2-var-child.exp: Likewise.
+	* gdb.mi/mi-var-cmd.exp: Step to right line of
+	do_locals_tests. 
+	(do_children_tests): User char[2] instead of
+	char so that automatic printing of pointers to char
+	don't give unpredicable result.	
+	* gdb.mi/mi2-var-cmd.exp: Likewise.
+	* lib/mi-support.exp (mi_continue_to_line): 
+	Pass test name to mi_wait_for_stop.
+
 2007-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.asm/asm-source.exp: Remove d10v case.

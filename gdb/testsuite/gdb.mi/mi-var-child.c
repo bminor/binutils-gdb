@@ -199,9 +199,9 @@ do_children_tests (void)
   weird_struct *weird;
   struct _struct_n_pointer *psnp;
   struct _struct_n_pointer snp0, snp1, snp2;
-  char a0, *a1, **a2, ***a3;
-  char b0, *b1, **b2, ***b3;
-  char c0, *c1, **c2, ***c3;
+  char a0[2] = {}, *a1, **a2, ***a3;
+  char b0[2] = {}, *b1, **b2, ***b3;
+  char c0[2] = {}, *c1, **c2, ***c3;
   long z0, *z1, **z2, ***z3;
   long y0, *y1, **y2, ***y3;
   long x0, *x1, **x2, ***x3;
@@ -233,16 +233,16 @@ do_children_tests (void)
   struct_declarations.long_array[11] = 5678;
 
   /* Struct/pointer/array tests */
-  a0 = '0';
-  a1 = &a0;
+  a0[0] = '0';  
+  a1 = a0;
   a2 = &a1;
   a3 = &a2;
-  b0 = '1';
-  b1 = &b0;
+  b0[0] = '1';
+  b1 = b0;
   b2 = &b1;
   b3 = &b2;
-  c0 = '2';
-  c1 = &c0;
+  c0[1] = '2';
+  c1 = c0;
   c2 = &c1;
   c3 = &c2;
   z0 = 0xdead + 0;

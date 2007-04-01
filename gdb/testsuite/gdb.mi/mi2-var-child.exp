@@ -42,6 +42,9 @@ mi_gdb_load ${binfile}
 
 mi_runto do_children_tests
 
+set line_dlt_first_real [gdb_get_line_number "weird = &struct_declarations;"]
+mi_continue_to_line $line_dlt_first_real "step to real start of do_children_test"
+
 #####        #####
 #                #
 # children tests #
@@ -836,7 +839,7 @@ mi_gdb_test "-var-update *" \
 
 
 # Step over "weird->func_ptr = nothing;"
-set line_dct_a0_0 [gdb_get_line_number "a0 = '0';"]
+set line_dct_a0_0 [gdb_get_line_number "a0\[0\] = '0';"]
 mi_step_to do_children_tests {} {.*var-cmd.c} \
     $line_dct_a0_0 "step \$line_dct_a0_0"
 

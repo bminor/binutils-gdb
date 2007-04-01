@@ -71,6 +71,11 @@ mi_gdb_test "113-var-create argc * argc" \
 
 mi_runto do_locals_tests
 
+set line_dlt_first_real [gdb_get_line_number "linteger = 1234;"]
+
+mi_continue_to_line $line_dlt_first_real "step to real start of do_locals_test"
+
+
 # Test: c_variable-1.4
 # Desc: create local variables
 
