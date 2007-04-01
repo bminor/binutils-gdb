@@ -1,3 +1,8 @@
+2007-04-01  Andreas Schwab  <schwab@suse.de>
+
+	* rs6000-tdep.c (rs6000_convert_from_func_ptr_addr): Use parameter
+	gdbarch instead of current_gdbarch.
+
 2007-04-01  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* varobj.c (varobj_create): Keep varobj value

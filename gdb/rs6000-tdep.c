@@ -2390,7 +2390,7 @@ rs6000_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
     return addr;
 
   /* ADDR is in the data space, so it's a special function pointer. */
-  return read_memory_addr (addr, gdbarch_tdep (current_gdbarch)->wordsize);
+  return read_memory_addr (addr, gdbarch_tdep (gdbarch)->wordsize);
 }
 
 
