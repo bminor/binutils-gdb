@@ -433,7 +433,7 @@ varobj_create (char *objname,
     {
       char *p;
       enum varobj_languages lang;
-      struct value *value;
+      struct value *value = NULL;
 
       /* Parse and evaluate the expression, filling in as much
          of the variable's data as possible */
@@ -495,11 +495,15 @@ varobj_create (char *objname,
          If evaluate_expression succeeds we got the value we wanted.
          But if it fails, we still go on with a call to evaluate_type()  */
       if (!gdb_evaluate_expression (var->root->exp, &value))
-	/* Error getting the value.  Try to at least get the
-	   right type.  */
-	value = evaluate_type (var->root->exp);
+	{
+	  /* Error getting the value.  Try to at least get the
+	     right type.  */
+	  struct value *type_only_value = evaluate_type (var->root->exp);
+	  var->type = value_type (type_only_value);
+	}
+      else 
+	var->type = value_type (value);
 
-      var->type = value_type (value);
       install_new_value (var, value, 1 /* Initial assignment */);
 
       /* Set language info */

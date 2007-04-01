@@ -1,3 +1,8 @@
+2007-04-01  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* varobj.c (varobj_create): Keep varobj value
+	NULL when evaluating the type.
+	
 2007-03-31  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* NEWS: Mention new Windows CE support.
