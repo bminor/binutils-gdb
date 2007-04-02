@@ -1,3 +1,9 @@
+2007-04-02  Richard Sandiford  <richard@codesourcery.com>
+
+	* doc/as.texinfo: Add -mvxworks-pic to the list of MIPS options.
+	* doc/c-mips.texi (-KPIC, -mvxworks-pic): Document.
+	* config/tc-mips.c (md_show_usage): Mention -mvxworks-pic.
+
 2007-03-30  Sterling Augustine  <sterling@tensilica.com>
 	    Bob Wilson  <bob.wilson@acm.org>
 

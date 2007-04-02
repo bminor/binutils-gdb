@@ -14947,6 +14947,7 @@ MIPS options:\n\
 #ifdef OBJ_ELF
   fprintf (stream, _("\
 -KPIC, -call_shared	generate SVR4 position independent code\n\
+-mvxworks-pic		generate VxWorks position independent code\n\
 -non_shared		do not generate position independent code\n\
 -xgot			assume a 32 bit GOT\n\
 -mpdr, -mno-pdr		enable/disable creation of .pdr sections\n\

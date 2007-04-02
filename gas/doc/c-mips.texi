@@ -60,6 +60,18 @@ little-endian output at run time (unlike the other @sc{gnu} development
 tools, which must be configured for one or the other).  Use @samp{-EB}
 to select big-endian output, and @samp{-EL} for little-endian.
 
+@item -KPIC
+@cindex PIC selection, MIPS
+@cindex @option{-KPIC} option, MIPS
+Generate SVR4-style PIC.  This option tells the assembler to generate
+SVR4-style position-independent macro expansions.  It also tells the
+assembler to mark the output file as PIC.
+
+@item -mvxworks-pic
+@cindex @option{-mvxworks-pic} option, MIPS
+Generate VxWorks PIC.  This option tells the assembler to generate
+VxWorks-style position-independent macro expansions.
+
 @cindex MIPS architecture options
 @item -mips1
 @itemx -mips2
