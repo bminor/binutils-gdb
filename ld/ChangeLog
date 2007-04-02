@@ -1,3 +1,21 @@
+2007-04-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/4090
+	* ldexp.h (node_type): Add lineno.
+	* ldexp.c: Include "ldlex.h".
+	(exp_intop): Set the lineno field from lineno.
+	(exp_bigintop): Likewise.
+	(exp_relop): Likewise.
+	(exp_nameop): Likewise.
+	(exp_binop): Set the lineno field from lineno of lhs.
+	(exp_trinop): Likewise.
+	(exp_unop): Set the lineno field from lineno of child.
+	(exp_assop): Set the lineno field from lineno of src.
+	(exp_provide): Likewise.
+	(exp_assert): Set the lineno field from lineno of exp.
+	(exp_get_abs_int): Set lineno from lineno of nonconstant
+	expression when report problem.
+
 2007-03-29  Richard Sandiford  <richard@codesourcery.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 

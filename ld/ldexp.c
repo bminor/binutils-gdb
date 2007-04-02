@@ -36,6 +36,7 @@
 #include "ldmain.h"
 #include "ldmisc.h"
 #include "ldexp.h"
+#include "ldlex.h"
 #include <ldgram.h>
 #include "ldlang.h"
 #include "libiberty.h"
@@ -150,6 +151,7 @@ exp_intop (bfd_vma value)
 {
   etree_type *new = stat_alloc (sizeof (new->value));
   new->type.node_code = INT;
+  new->type.lineno = lineno;
   new->value.value = value;
   new->value.str = NULL;
   new->type.node_class = etree_value;
@@ -161,6 +163,7 @@ exp_bigintop (bfd_vma value, char *str)
 {
   etree_type *new = stat_alloc (sizeof (new->value));
   new->type.node_code = INT;
+  new->type.lineno = lineno;
   new->value.value = value;
   new->value.str = str;
   new->type.node_class = etree_value;
@@ -174,6 +177,7 @@ exp_relop (asection *section, bfd_vma value)
 {
   etree_type *new = stat_alloc (sizeof (new->rel));
   new->type.node_code = REL;
+  new->type.lineno = lineno;
   new->type.node_class = etree_rel;
   new->rel.section = section;
   new->rel.value = value;
@@ -829,6 +833,7 @@ exp_binop (int code, etree_type *lhs, etree_type *rhs)
   etree_type value, *new;
 
   value.type.node_code = code;
+  value.type.lineno = lhs->type.lineno;
   value.binary.lhs = lhs;
   value.binary.rhs = rhs;
   value.type.node_class = etree_binary;
@@ -847,6 +852,7 @@ exp_trinop (int code, etree_type *cond, etree_type *lhs, etree_type *rhs)
   etree_type value, *new;
 
   value.type.node_code = code;
+  value.type.lineno = lhs->type.lineno;
   value.trinary.lhs = lhs;
   value.trinary.cond = cond;
   value.trinary.rhs = rhs;
@@ -866,6 +872,7 @@ exp_unop (int code, etree_type *child)
   etree_type value, *new;
 
   value.unary.type.node_code = code;
+  value.unary.type.lineno = child->type.lineno;
   value.unary.child = child;
   value.unary.type.node_class = etree_unary;
   exp_fold_tree_no_dot (&value);
@@ -883,6 +890,7 @@ exp_nameop (int code, const char *name)
   etree_type value, *new;
 
   value.name.type.node_code = code;
+  value.name.type.lineno = lineno;
   value.name.name = name;
   value.name.type.node_class = etree_name;
 
@@ -903,6 +911,7 @@ exp_assop (int code, const char *dst, etree_type *src)
 
   new = stat_alloc (sizeof (new->assign));
   new->type.node_code = code;
+  new->type.lineno = src->type.lineno;
   new->type.node_class = etree_assign;
   new->assign.src = src;
   new->assign.dst = dst;
@@ -918,6 +927,7 @@ exp_provide (const char *dst, etree_type *src, bfd_boolean hidden)
 
   n = stat_alloc (sizeof (n->assign));
   n->assign.type.node_code = '=';
+  n->assign.type.lineno = src->type.lineno;
   n->assign.type.node_class = etree_provide;
   n->assign.src = src;
   n->assign.dst = dst;
@@ -934,6 +944,7 @@ exp_assert (etree_type *exp, const char *message)
 
   n = stat_alloc (sizeof (n->assert_s));
   n->assert_s.type.node_code = '!';
+  n->assert_s.type.lineno = exp->type.lineno;
   n->assert_s.type.node_class = etree_assert;
   n->assert_s.child = exp;
   n->assert_s.message = message;
@@ -1112,7 +1123,10 @@ exp_get_abs_int (etree_type *tree, int def, char *name)
 	  return expld.result.value;
 	}
       else if (name != NULL && expld.phase != lang_mark_phase_enum)
-	einfo (_("%F%S nonconstant expression for %s\n"), name);
+	{
+	  lineno = tree->type.lineno;
+	  einfo (_("%F%S: nonconstant expression for %s\n"), name);
+	}
     }
   return def;
 }

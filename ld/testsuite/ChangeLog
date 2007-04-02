@@ -1,3 +1,10 @@
+2007-04-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/4090
+	* ld-elf/expr1.d: New file.
+	* ld-elf/expr1.s: Likewise.
+	* ld-elf/expr1.t: Likewise.
+
 2007-03-29  Richard Sandiford  <richard@codesourcery.com>
 
 	* ld-libs/lib-1.s, ld-libs/lib-2.s, ld-libs/lib-2.d,
