@@ -1,3 +1,11 @@
+2007-04-02  Bob Wilson  <bob.wilson@acm.org>
+	
+	* gdb.texinfo: Consistently capitalize all significant words in
+	node names, chapter titles, section titles, and headings.  Update
+	cross references to match.
+	(Starting and Stopping Trace Experiment): Make node name plural.
+	(Breakpoint related warnings): Hyphenate "Breakpoint-related".
+	
 2007-03-30  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* gdb.texinfo (WinCE): Delete obsolete subsection.
