@@ -5093,6 +5093,15 @@ xtensa_unrecognized_line (int ch)
 void
 xtensa_flush_pending_output (void)
 {
+  /* This line fixes a bug where automatically generated gstabs info
+     separates a function label from its entry instruction, ending up
+     with the literal position between the function label and the entry
+     instruction and crashing code.  It only happens with --gstabs and
+     --text-section-literals, and when several other obscure relaxation
+     conditions are met.  */
+  if (outputting_stabs_line_debug)
+    return;
+
   if (cur_vinsn.inside_bundle)
     as_bad (_("missing closing brace"));
 
