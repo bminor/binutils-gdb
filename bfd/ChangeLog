@@ -1,3 +1,10 @@
+2007-04-02  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/4292
+	* bfd.c (bfd_fprintf_vma): Do not print addresses of 32-bit
+	targets as 64-bit values, even if running on a 64-bit host.
+	* coffgen.c (coff_print_symbol): Likewise.
+
 2007-03-29  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/4110

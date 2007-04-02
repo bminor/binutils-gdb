@@ -1388,6 +1388,15 @@ bfd_fprintf_vma (bfd *abfd, void *stream, bfd_vma value)
 {
   if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
     get_elf_backend_data (abfd)->elf_backend_fprintf_vma (abfd, stream, value);
+#ifdef BFD64
+  /* fprintf_vma() on a 64-bit enabled host will always print a 64-bit
+     value, but really we want to display the address in the target's
+     address size.  Since we do not have a field in the bfd structure
+     to tell us this, we take a guess, based on the target's name.  */
+  else if (strstr (bfd_get_target (abfd), "64") == NULL
+	   && strcmp (bfd_get_target (abfd), "mmo") != 0)
+    fprintf ((FILE *) stream, "%08lx", (unsigned long) (value & 0xffffffff));
+#endif
   else
     fprintf_vma ((FILE *) stream, value);
 }

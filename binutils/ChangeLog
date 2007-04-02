@@ -1,3 +1,18 @@
+2007-04-02  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/4292
+	* nm.c (value_format): Replace with value_format_32bit and
+	value_format_64bit.
+	(set_radix): Update setting of value_format.
+	(set_print_width): New function.  Compute the address size of a
+	given bfd and set the print_width global appropriately.
+	(display_archive): Use set_print_width.
+	(display_file): Likewise,
+	(print_object_filename_sysv): Update use of print_width.
+	(print_archive_member_sysv): Likewise.
+	(print_symbol_filename_posix): Likewise.
+	(print_sumbol_info_bfd, print_symbol_info_sysv): Likewise.
+
 2007-03-28  Richard Sandiford  <richard@codesourcery.com>
 	    Phil Edwards  <phil@codesourcery.com>
 

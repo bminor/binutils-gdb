@@ -159,20 +159,9 @@ static int filename_per_file = 0;	/* Once per file, on its own line.  */
 static int filename_per_symbol = 0;	/* Once per symbol, at start of line.  */
 
 /* Print formats for printing a symbol value.  */
-#ifndef BFD64
-static char value_format[] = "%08lx";
-#else
-#if BFD_HOST_64BIT_LONG
-static char value_format[] = "%016lx";
-#else
-/* We don't use value_format for this case.  */
-#endif
-#endif
-#ifdef BFD64
-static int print_width = 16;
-#else
-static int print_width = 8;
-#endif
+static char value_format_32bit[] = "%08lx";
+static char value_format_64bit[] = "%016lx";
+static int print_width = 0;
 static int print_radix = 16;
 /* Print formats for printing stab info.  */
 static char other_format[] = "%02x";
@@ -279,16 +268,8 @@ set_print_radix (char *radix)
 	print_radix = 10;
       else
 	print_radix = 8;
-#ifndef BFD64
-      value_format[4] = *radix;
-#else
-#if BFD_HOST_64BIT_LONG
-      value_format[5] = *radix;
-#else
-      /* This case requires special handling for octal and decimal
-         printing.  */
-#endif
-#endif
+      value_format_32bit[4] = *radix;
+      value_format_64bit[5] = *radix;
       other_format[3] = desc_format[3] = *radix;
       break;
     default:
@@ -1094,6 +1075,26 @@ display_rel_file (bfd *abfd, bfd *archive_bfd)
 }
 
 static void
+set_print_width (bfd *file)
+{
+  print_width = bfd_get_arch_size (file);
+
+  if (print_width == -1)
+    {
+      /* PR binutils/4292
+	 Guess the target's bitsize based on its name.
+	 We assume here than any 64-bit format will include
+	 "64" somewhere in its name.  The only known exception
+	 is the MMO object file format.  */
+      if (strstr (bfd_get_target (file), "64") != NULL
+	  || strcmp (bfd_get_target (file), "mmo") == 0)
+	print_width = 64;
+      else
+	print_width = 32;
+    }
+}
+
+static void
 display_archive (bfd *file)
 {
   bfd *arfile = NULL;
@@ -1120,10 +1121,7 @@ display_archive (bfd *file)
 
       if (bfd_check_format_matches (arfile, bfd_object, &matching))
 	{
-	  char buf[30];
-
-	  bfd_sprintf_vma (arfile, buf, (bfd_vma) -1);
-	  print_width = strlen (buf);
+	  set_print_width (arfile);
 	  format->print_archive_member (bfd_get_filename (file),
 					bfd_get_filename (arfile));
 	  display_rel_file (arfile, file);
@@ -1178,10 +1176,7 @@ display_file (char *filename)
     }
   else if (bfd_check_format_matches (file, bfd_object, &matching))
     {
-      char buf[30];
-
-      bfd_sprintf_vma (file, buf, (bfd_vma) -1);
-      print_width = strlen (buf);
+      set_print_width (file);
       format->print_object_filename (filename);
       display_rel_file (file, NULL);
     }
@@ -1227,7 +1222,7 @@ print_object_filename_sysv (char *filename)
     printf (_("\n\nUndefined symbols from %s:\n\n"), filename);
   else
     printf (_("\n\nSymbols from %s:\n\n"), filename);
-  if (print_width == 8)
+  if (print_width == 32)
     printf (_("\
 Name                  Value   Class        Type         Size     Line  Section\n\n"));
   else
@@ -1278,7 +1273,7 @@ print_archive_member_sysv (char *archive, const char *filename)
     printf (_("\n\nUndefined symbols from %s[%s]:\n\n"), archive, filename);
   else
     printf (_("\n\nSymbols from %s[%s]:\n\n"), archive, filename);
-  if (print_width == 8)
+  if (print_width == 32)
     printf (_("\
 Name                  Value   Class        Type         Size     Line  Section\n\n"));
   else
@@ -1336,29 +1331,42 @@ print_symbol_filename_posix (bfd *archive_bfd, bfd *abfd)
 static void
 print_value (bfd *abfd ATTRIBUTE_UNUSED, bfd_vma val)
 {
-#if ! defined (BFD64) || BFD_HOST_64BIT_LONG
-  printf (value_format, val);
-#else
-  /* We have a 64 bit value to print, but the host is only 32 bit.  */
-  if (print_radix == 16)
-    bfd_fprintf_vma (abfd, stdout, val);
-  else
+  switch (print_width)
     {
-      char buf[30];
-      char *s;
+    case 32:
+      printf (value_format_32bit, val);
+      break;
 
-      s = buf + sizeof buf;
-      *--s = '\0';
-      while (val > 0)
+    case 64:
+#if BFD_HOST_64BIT_LONG
+      printf (value_format_64bit, val);
+#else
+      /* We have a 64 bit value to print, but the host is only 32 bit.  */
+      if (print_radix == 16)
+	bfd_fprintf_vma (abfd, stdout, val);
+      else
 	{
-	  *--s = (val % print_radix) + '0';
-	  val /= print_radix;
+	  char buf[30];
+	  char *s;
+
+	  s = buf + sizeof buf;
+	  *--s = '\0';
+	  while (val > 0)
+	    {
+	      *--s = (val % print_radix) + '0';
+	      val /= print_radix;
+	    }
+	  while ((buf + sizeof buf - 1) - s < 16)
+	    *--s = '0';
+	  printf ("%s", s);
 	}
-      while ((buf + sizeof buf - 1) - s < 16)
-	*--s = '0';
-      printf ("%s", s);
-    }
 #endif
+      break;
+
+    default:
+      fatal (_("Print width has not been initialized (%d)"), print_width);
+      break;
+    }
 }
 
 /* Print a line of information about a symbol.  */
@@ -1368,7 +1376,7 @@ print_symbol_info_bsd (struct extended_symbol_info *info, bfd *abfd)
 {
   if (bfd_is_undefined_symclass (SYM_TYPE (info)))
     {
-      if (print_width == 16)
+      if (print_width == 64)
 	printf ("        ");
       printf ("        ");
     }
@@ -1411,7 +1419,7 @@ print_symbol_info_sysv (struct extended_symbol_info *info, bfd *abfd)
 
   if (bfd_is_undefined_symclass (SYM_TYPE (info)))
     {
-      if (print_width == 8)
+      if (print_width == 32)
 	printf ("        ");
       else
 	printf ("                ");
@@ -1441,7 +1449,7 @@ print_symbol_info_sysv (struct extended_symbol_info *info, bfd *abfd)
 	print_value (abfd, SYM_SIZE (info));
       else
 	{
-	  if (print_width == 8)
+	  if (print_width == 32)
 	    printf ("        ");
 	  else
 	    printf ("                ");
