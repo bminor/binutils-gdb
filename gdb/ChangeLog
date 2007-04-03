@@ -1,3 +1,8 @@
+2007-04-03  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* dbxread.c (read_ofile_symtab): Move current_objfile
+	clearing to after end_stabs.
+
 2007-04-01  Andreas Schwab  <schwab@suse.de>
 
 	* rs6000-tdep.c (rs6000_convert_from_func_ptr_addr): Use parameter

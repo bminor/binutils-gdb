@@ -2608,8 +2608,6 @@ read_ofile_symtab (struct partial_symtab *pst)
 	}
     }
 
-  current_objfile = NULL;
-
   /* In a Solaris elf file, this variable, which comes from the
      value of the N_SO symbol, will still be 0.  Luckily, text_offset,
      which comes from pst->textlow is correct. */
@@ -2625,6 +2623,8 @@ read_ofile_symtab (struct partial_symtab *pst)
   pst->symtab = end_symtab (text_offset + text_size, objfile, SECT_OFF_TEXT (objfile));
 
   end_stabs ();
+
+  current_objfile = NULL;
 }
 
 
