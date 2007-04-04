@@ -334,7 +334,7 @@ struct m68k_it
 #define arch_coldfire_fpu(x)	((x) & cfloat)
 
 /* Macros for determining if cpu supports a specific addressing mode.  */
-#define HAVE_LONG_BRANCH(x)     ((x) & (m68020|m68030|m68040|m68060|cpu32|mcfisa_b))
+#define HAVE_LONG_BRANCH(x)     ((x) & (m68020|m68030|m68040|m68060|cpu32|fido_a|mcfisa_b))
 
 static struct m68k_it the_ins;	/* The instruction being assembled.  */
 

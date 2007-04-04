@@ -1,3 +1,7 @@
+2007-04-04  Kazu Hirata  <kazu@codesourcery.com>
+
+	* config/tc-m68k.c (HAVE_LONG_BRANCH): Add fido_a.
+
 2007-04-04  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (do_neon_ext): Enforce immediate range.
