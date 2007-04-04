@@ -1,3 +1,7 @@
+2007-04-04  Paul Brook  <paul@codesourcery.com>
+
+	* configure.tgt: Loosen checks for arm uclinux eabi targets.
+
 2007-04-02  Sterling Augustine  <sterling@tensilica.com>
 
 	* config/tc-xtensa.c (xtensa_flush_pending_output): Check
