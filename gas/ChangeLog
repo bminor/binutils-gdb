@@ -1,5 +1,10 @@
 2007-04-04  Paul Brook  <paul@codesourcery.com>
 
+	* config/tc-arm.c (do_neon_ext): Enforce immediate range.
+	(insns): Use I15 for vext.
+
+2007-04-04  Paul Brook  <paul@codesourcery.com>
+
 	* configure.tgt: Loosen checks for arm uclinux eabi targets.
 
 2007-04-02  Sterling Augustine  <sterling@tensilica.com>

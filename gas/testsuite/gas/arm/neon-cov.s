@@ -561,6 +561,7 @@
 	vext.8 q0,q0,q0,0
 	vextq.8 q0,q0,q0,0
 	vext.8 d0,d0,d0,0
+	vext.8 q0,q0,q0,8
 
 	.macro revs op opq vtype
 	\op\vtype q0,q0
