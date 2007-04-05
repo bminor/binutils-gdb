@@ -1590,6 +1590,47 @@ spu_elf_relocate_section (bfd *output_bfd,
   return ret;
 }
 
+/* Adjust _SPUEAR_ syms to point at their overlay stubs.  */
+
+static bfd_boolean
+spu_elf_output_symbol_hook (struct bfd_link_info *info,
+			    const char *sym_name ATTRIBUTE_UNUSED,
+			    Elf_Internal_Sym *sym,
+			    asection *sym_sec ATTRIBUTE_UNUSED,
+			    struct elf_link_hash_entry *h)
+{
+  struct spu_link_hash_table *htab = spu_hash_table (info);
+
+  if (!info->relocatable
+      && htab->num_overlays != 0
+      && h != NULL
+      && (h->root.type == bfd_link_hash_defined
+	  || h->root.type == bfd_link_hash_defweak)
+      && h->def_regular
+      && strncmp (h->root.root.string, "_SPUEAR_", 8) == 0)
+    {
+      static Elf_Internal_Rela zero_rel;
+      char *stub_name = spu_stub_name (h->root.u.def.section, h, &zero_rel);
+      struct spu_stub_hash_entry *sh;
+
+      if (stub_name == NULL)
+	return FALSE;
+      sh = (struct spu_stub_hash_entry *)
+	bfd_hash_lookup (&htab->stub_hash_table, stub_name, FALSE, FALSE);
+      free (stub_name);
+      if (sh == NULL)
+	return TRUE;
+      sym->st_shndx
+	= _bfd_elf_section_from_bfd_section (htab->stub->output_section->owner,
+					     htab->stub->output_section);
+      sym->st_value = (htab->stub->output_section->vma
+		       + htab->stub->output_offset
+		       + sh->off);
+    }
+
+  return TRUE;
+}
+
 static int spu_plugin = 0;
 
 void
@@ -1830,6 +1871,7 @@ spu_elf_section_processing (bfd *abfd ATTRIBUTE_UNUSED,
 #define elf_backend_gc_mark_hook		spu_elf_gc_mark_hook
 #define elf_backend_relocate_section		spu_elf_relocate_section
 #define elf_backend_symbol_processing		spu_elf_backend_symbol_processing
+#define elf_backend_link_output_symbol_hook	spu_elf_output_symbol_hook
 #define bfd_elf32_new_section_hook		spu_elf_new_section_hook
 #define bfd_elf32_bfd_link_hash_table_create	spu_elf_link_hash_table_create
 #define bfd_elf32_bfd_link_hash_table_free	spu_elf_link_hash_table_free

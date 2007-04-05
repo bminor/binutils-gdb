@@ -1,3 +1,7 @@
+2007-04-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-spu/ovl2.d: Update.
+
 2007-04-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/4090

@@ -33,7 +33,7 @@ Disassembly of section \.text:
  138:	42 00 00 ce 	ila	\$78,1
  13c:	32 00 08 80 	br	180 <__ovly_load>	# 180
 
-00000140 <00000000\.ovl_call\._SPUEAR_f1_a2>:
+00000140 <_SPUEAR_f1_a2>:
  140:	42 02 00 4f 	ila	\$79,1024	# 400
  144:	40 20 00 00 	nop	\$0
  148:	42 00 01 4e 	ila	\$78,2
@@ -46,7 +46,7 @@ Disassembly of section \.ov_a1:
 	\.\.\.
 Disassembly of section \.ov_a2:
 
-00000400 <_SPUEAR_f1_a2>:
+00000400 <f1_a2>:
  400:	32 7f a2 00 	br	110 <longjmp>	# 110
 			400: SPU_REL16	longjmp
 	\.\.\.
