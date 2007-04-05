@@ -9944,8 +9944,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
 	      if (dyn.d_tag == DT_TEXTREL)
 		{
-		  _bfd_error_handler
-		    (_("warning: creating a DT_TEXTREL in a shared object."));
+		 info->callbacks->einfo 
+		    (_("%P: warning: creating a DT_TEXTREL in a shared object.\n"));
 		  break;
 		}
 	    }

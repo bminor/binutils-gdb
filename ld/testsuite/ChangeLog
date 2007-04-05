@@ -1,5 +1,13 @@
 2007-04-05  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/4304
+	* ld-i386/i386.exp: Run "warn1".
+
+	* ld-i386/warn1.d: New file.
+	* ld-i386/warn1.s: Likewise.
+
+2007-04-05  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-i386/combreloc.d: Remove #target: i?86-*-*.
 	* ld-i386/reloc.d: Likewise.
 
