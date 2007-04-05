@@ -1,3 +1,9 @@
+2007-04-05  Alan Modra  <amodra@bigpond.net.au>
+
+	PR binutils/4292
+	* nm.c (print_value): Cast bfd_vma to unsigned long to suit
+	value_format_32bit.
+
 2007-04-02  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/4292
