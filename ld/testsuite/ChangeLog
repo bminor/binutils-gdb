@@ -1,3 +1,8 @@
+2007-04-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/combreloc.d: Remove #target: i?86-*-*.
+	* ld-i386/reloc.d: Likewise.
+
 2007-04-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-spu/ovl2.d: Update.
