@@ -1625,8 +1625,9 @@ elf_vax_relocate_section (bfd *output_bfd,
 	      && ((r_type != R_VAX_PC8
 		   && r_type != R_VAX_PC16
 		   && r_type != R_VAX_PC32)
-		  || (!info->symbolic
-		      || !h->def_regular)))
+		  || ((input_section->flags & SEC_CODE)
+		      && (!info->symbolic
+			  || (!h->def_regular && h->type != STT_SECTION)))))
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_byte *loc;

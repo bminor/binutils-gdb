@@ -1,3 +1,9 @@
+2007-04-03  Matt Thomas  <matt@netbsd.org>
+
+	* elf32-vax.c (elf_vax_relocate_section): Do not emit a PCREL reloc 
+	in a shared object if it is not in a CODE section or if it is against
+	a section symbol.  This allows DWARF2 to use pcrel format.
+
 2007-04-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/4304
