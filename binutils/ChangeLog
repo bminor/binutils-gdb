@@ -1,3 +1,7 @@
+2007-04-06  Matt Thomas  <matt@netbsd.org>
+
+	* MAINTAINERS: Add myself as VAX and NetBSD support maintainer.
+
 2007-04-05  Alan Modra  <amodra@bigpond.net.au>
 
 	PR binutils/4292
