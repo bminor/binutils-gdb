@@ -343,6 +343,48 @@ generic_readchar (struct serial *scb, int timeout,
 	    }
 	}
     }
+  /* Read any error output we might have.  */
+  if (scb->error_fd != -1)
+    {
+      ssize_t s;
+      char buf[81];
+
+      for (;;)
+        {
+ 	  char *current;
+ 	  char *newline;
+	  int to_read = 80;
+
+	  int num_bytes = -1;
+	  if (scb->ops->avail)
+	    num_bytes = (scb->ops->avail)(scb, scb->error_fd);
+	  if (num_bytes != -1)
+	    to_read = (num_bytes < to_read) ? num_bytes : to_read;
+
+	  if (to_read == 0)
+	    break;
+
+	  s = read (scb->error_fd, &buf, to_read);
+	  if (s == -1)
+	    break;
+
+	  /* In theory, embedded newlines are not a problem.
+	     But for MI, we want each output line to have just
+	     one newline for legibility.  So output things
+	     in newline chunks.  */
+	  buf[s] = '\0';
+	  current = buf;
+	  while ((newline = strstr (current, "\n")) != NULL)
+	    {
+	      *newline = '\0';
+	      fputs_unfiltered (current, gdb_stderr);
+	      fputs_unfiltered ("\n", gdb_stderr);
+	      current = newline + 1;
+	    }
+	  fputs_unfiltered (current, gdb_stderr);
+	}
+    }
+
   reschedule (scb);
   return ch;
 }

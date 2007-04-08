@@ -62,8 +62,11 @@ pipe_open (struct serial *scb, const char *name)
    * published in UNIX Review, Vol. 6, No. 8.
    */
   int pdes[2];
+  int err_pdes[2];
   int pid;
   if (socketpair (AF_UNIX, SOCK_STREAM, 0, pdes) < 0)
+    return -1;
+  if (socketpair (AF_UNIX, SOCK_STREAM, 0, err_pdes) < 0)
     return -1;
 
   /* Create the child process to run the command in.  Note that the
@@ -77,7 +80,16 @@ pipe_open (struct serial *scb, const char *name)
     {
       close (pdes[0]);
       close (pdes[1]);
+      close (err_pdes[0]);
+      close (err_pdes[1]);
       return -1;
+    }
+
+  if (fcntl (err_pdes[0], F_SETFL, O_NONBLOCK) == -1)
+    {
+      close (err_pdes[0]);
+      close (err_pdes[1]);
+      err_pdes[0] = err_pdes[1] = -1;
     }
 
   /* Child. */
@@ -91,6 +103,13 @@ pipe_open (struct serial *scb, const char *name)
 	  close (pdes[1]);
 	}
       dup2 (STDOUT_FILENO, STDIN_FILENO);
+
+      if (err_pdes[0] != -1)
+	{
+	  close (err_pdes[0]);
+	  dup2 (err_pdes[1], STDERR_FILENO);
+	  close (err_pdes[1]);
+	}
 #if 0
       /* close any stray FD's - FIXME - how? */
       /* POSIX.2 B.3.2.2 "popen() shall ensure that any streams
@@ -109,6 +128,7 @@ pipe_open (struct serial *scb, const char *name)
   state = XMALLOC (struct pipe_state);
   state->pid = pid;
   scb->fd = pdes[0];
+  scb->error_fd = err_pdes[0];
   scb->state = state;
 
   /* If we don't do this, GDB simply exits when the remote side dies.  */

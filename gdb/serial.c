@@ -211,6 +211,7 @@ serial_open (const char *name)
 
   scb->bufcnt = 0;
   scb->bufp = scb->buf;
+  scb->error_fd = -1;
 
   if (scb->ops->open (scb, open_name))
     {

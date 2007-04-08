@@ -1,3 +1,20 @@
+2007-04-08  Vladimir Prus  <vladimir@codesourcery.com>
+        
+	Pass stderr of program run with "target remote |"
+        via gdb_stderr.
+	* serial.c (serial_open): Set error_fd to -1.
+	* serial.h (struct serial): New field error_fd.
+	(struct serial_opts): New field avail.
+	* ser-pipe.c (pipe_open): Create another pair
+	of sockets.  Pass stderr to gdb.
+	* ser-mingw.c (pipe_windows_open): Pass
+	PEX_STDERR_TO_PIPE to pex_run.  Initialize
+	sd->error_fd.
+	(pipe_avail): New.
+	(_initialize_ser_windows): Hook pipe_avail.
+	* ser-base.c (generic_readchar): Check if there's
+	anything in stderr channel and route that to gdb_stderr.
+
 2007-04-03  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* dbxread.c (read_ofile_symtab): Move current_objfile

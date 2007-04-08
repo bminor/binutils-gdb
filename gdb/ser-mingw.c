@@ -697,6 +697,7 @@ static int
 pipe_windows_open (struct serial *scb, const char *name)
 {
   struct pipe_state *ps;
+  FILE *pex_stderr;
 
   char **argv = buildargv (name);
   struct cleanup *back_to = make_cleanup_freeargv (argv);
@@ -717,7 +718,8 @@ pipe_windows_open (struct serial *scb, const char *name)
   {
     int err;
     const char *err_msg
-      = pex_run (ps->pex, PEX_SEARCH | PEX_BINARY_INPUT | PEX_BINARY_OUTPUT,
+      = pex_run (ps->pex, PEX_SEARCH | PEX_BINARY_INPUT | PEX_BINARY_OUTPUT
+		 | PEX_STDERR_TO_PIPE,
                  argv[0], argv, NULL, NULL,
                  &err);
 
@@ -739,8 +741,13 @@ pipe_windows_open (struct serial *scb, const char *name)
   ps->output = pex_read_output (ps->pex, 1);
   if (! ps->output)
     goto fail;
-
   scb->fd = fileno (ps->output);
+
+  pex_stderr = pex_read_err (ps->pex, 1);
+  if (! pex_stderr)
+    goto fail;
+  scb->error_fd = fileno (pex_stderr);
+
   scb->state = (void *) ps;
 
   discard_cleanups (back_to);
@@ -863,6 +870,17 @@ pipe_done_wait_handle (struct serial *scb)
 
   SetEvent (ps->wait.stop_select);
   WaitForSingleObject (ps->wait.have_stopped, INFINITE);
+}
+
+static int
+pipe_avail (struct serial *scb, int fd)
+{
+  HANDLE h = (HANDLE) _get_osfhandle (fd);
+  DWORD numBytes;
+  BOOL r = PeekNamedPipe (h, NULL, 0, NULL, &numBytes, NULL);
+  if (r == FALSE)
+    numBytes = 0;
+  return numBytes;
 }
 
 struct net_windows_state
@@ -1164,6 +1182,7 @@ _initialize_ser_windows (void)
   ops->write_prim = pipe_windows_write;
   ops->wait_handle = pipe_wait_handle;
   ops->done_wait_handle = pipe_done_wait_handle;
+  ops->avail = pipe_avail;
 
   serial_add_interface (ops);
 
