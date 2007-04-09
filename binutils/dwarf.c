@@ -1733,7 +1733,6 @@ process_debug_info (struct dwarf_section *section, void *file,
 	      need_base_address = 1;
 	      break;
 	    case DW_TAG_entry_point:
-	    case DW_TAG_inlined_subroutine:
 	    case DW_TAG_subprogram:
 	      need_base_address = 0;
 	      /* Assuming that there is no DW_AT_frame_base.  */

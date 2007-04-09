@@ -1,3 +1,8 @@
+2007-04-09  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf.c (process_debug_info): Do not require DW_AT_frame_base for
+	DW_TAG_inlined_subroutine.
+
 2007-04-06  Matt Thomas  <matt@netbsd.org>
 
 	* MAINTAINERS: Add myself as VAX and NetBSD support maintainer.
