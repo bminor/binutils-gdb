@@ -1475,6 +1475,12 @@ print_insn_m68k (bfd_vma memaddr, disassemble_info *info)
 
   bfd_byte *buffer = priv.the_buffer;
 
+  /* Save these printing functions in case we need to restore them
+     later.  */
+  fprintf_ftype save_printer = info->fprintf_func;
+  void (* save_print_address) (bfd_vma, struct disassemble_info *)
+    = info->print_address_func;
+
   info->private_data = (PTR) &priv;
   /* Tell objdump to use two bytes per chunk
      and six bytes per line for displaying raw data.  */
@@ -1485,8 +1491,26 @@ print_insn_m68k (bfd_vma memaddr, disassemble_info *info)
   priv.insn_start = memaddr;
 
   if (setjmp (priv.bailout) != 0)
-    /* Error return.  */
-    return -1;
+    {
+      /* longjmp may be called while these printing functions are
+	 temporarily replaced with dummy functions.  Restore them
+	 before we leave.
+
+	 Admittedly, this save-and-restore operation is somewhat ugly
+	 in that we are exposing the fact that match_insn_m68k
+	 temporarily replaces insn->fprintf_func and
+	 insn->print_address_func.  Perhaps, a real fix is to report a
+	 FETCH_DATA failure with a return value of some sort, without
+	 using setjmp/longjmp.  A better fix may be to teach the m68k
+	 disassembler do its job without temporarily replacing
+	 insn->fprintf_func and insn->print_address_func, but that's a
+	 task for another day.  */
+      info->fprintf_func = save_printer;
+      info->print_address_func = save_print_address;
+
+      /* Error return.  */
+      return -1;
+    }
 
   arch_mask = bfd_m68k_mach_to_features (info->mach);
   if (!arch_mask)

@@ -1,3 +1,8 @@
+2007-04-09  Kazu Hirata  <kazu@codesourcery.com>
+
+	* m68k-dis.c (print_insn_m68k): Restore info->fprintf_func and
+	info->print_address_func if longjmp is called.
+
 2007-03-29  DJ Delorie  <dj@redhat.com>
 
 	* m32c-desc.c: Regenerate.
