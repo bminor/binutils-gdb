@@ -8,7 +8,8 @@ DOCFILES = aoutx.texi  archive.texi archures.texi \
 	libbfd.texi bfdwin.texi bfdio.texi \
 	opncls.texi  reloc.texi  section.texi  \
 	syms.texi  targets.texi init.texi hash.texi linker.texi \
-	mmo.texi
+	mmo.texi \
+	bfdver.texi
 
 PROTOS = archive.p archures.p bfd.p \
 	 core.p format.p \
@@ -272,6 +273,17 @@ bfd.h: $(BFD_H_DEP)
 	echo "}" >> $@
 	echo "#endif" >> $@
 	echo "#endif" >> $@
+
+bfdver.texi: $(srcdir)/Makefile.in
+	@echo "creating $@"; \
+	echo "@set VERSION $(VERSION)" > bfdver.texi; \
+	if [ -n "$(PKGVERSION)" ]; then \
+	  echo "@set VERSION_PACKAGE $(PKGVERSION)" >> bfdver.texi; \
+	fi; \
+	echo "@set UPDATED `date '+%B %Y'`" >> bfdver.texi; \
+	if [ -n "$(REPORT_BUGS_TEXI)" ]; then \
+	  echo "@set BUGURL $(REPORT_BUGS_TEXI)" >> bfdver.texi; \
+	fi
 
 noinst_TEXINFOS = bfdint.texi
 
