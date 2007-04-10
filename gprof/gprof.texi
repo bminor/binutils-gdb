@@ -2082,11 +2082,12 @@ New-style histogram records are read by @code{hist.c:@-hist_read_rec}.
 For the first histogram record, allocate a memory array to hold
 all the bins, and read them in.
 When multiple profile data files (or files with multiple histogram
-records) are read, the starting address, ending address, number
-of bins and sampling rate must match between the various histograms,
-or a fatal error will result.
-If everything matches, just sum the additional histograms into
-the existing in-memory array.
+records) are read, the memory ranges of each pair of histogram records
+must be either equal, or non-overlapping.  For each pair of histogram
+records, the resolution (memory region size divided by the number of
+bins) must be the same.  The time unit must be the same for all 
+histogram records. If the above containts are met, all histograms
+for the same memory range are merged.
 
 As each call graph record is read (@code{call_graph.c:@-cg_read_rec}),
 the parent and child addresses

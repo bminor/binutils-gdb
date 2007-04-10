@@ -1,3 +1,35 @@
+2007-04-10  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* hist.h (struct histogram)
+	(histograms, num_histograms): New.
+	* hist.c (find_histogram, find_histogram_for_pc)
+	(read_histogram_header): New.
+	(s_lowpc, s_highpc, lowpc, highpc, hist_num_bins)
+	(hist_sample): Remove.
+	(hist_read_rec): Use the above, and handle multiple
+	histogram records with disjoint address ranges.
+	(hist_write_hist): Support several histogram records.
+	(scale_and_align_entries): Adjust for multiple histograms.
+	(hist_assign_samples_1): New.
+	(hist_assign_samples): Use the above.
+	(hist_clip_symbol_address): New.
+	* hist.h (hist_check_address)
+	(hist_clip_symbol_address): Declare.
+	* gmon_io.c (gmon_out_read, gmon_out_write): Adjust handling
+	of legacy format for multiple histogram changes.
+	* corefile.c (find_call): Check for core_text_space and
+	clip symbol address range here.
+	* vax.c	(vax_find_call): Don't check for
+	core_text_space, or clip the symbol's address range here.
+	Use hist_check_address to check call's target address.	
+	* sparc.c: Likewise.
+	* tahoe.c: Likewise.
+	* i386.c: Likewise.
+	* mips.c: Likewise. Also use core_text_sect->vma as the base
+	address for code accesses, just like other machine-specific
+	routines do.
+	* gprof.texi: Adjust for the new logic.
+	
 2007-03-28  Richard Sandiford  <richard@codesourcery.com>
 	    Phil Edwards  <phil@codesourcery.com>
 
