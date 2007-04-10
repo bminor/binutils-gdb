@@ -703,7 +703,7 @@ hist_clip_symbol_address (bfd_vma *p_lowpc, bfd_vma *p_highpc)
 	    {
 	      fprintf (stderr,
 		       _("%s: found a symbol that covers "
-			 "several histogram records")
+			 "several histogram records"),
 			 whoami);
 	      done (1);
 	    }
