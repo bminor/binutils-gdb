@@ -1,3 +1,8 @@
+2007-04-10  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* NEWS: Mention disjoint histograms support in
+	gprof.
+
 2007-04-09  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf.c (process_debug_info): Do not require DW_AT_frame_base for
