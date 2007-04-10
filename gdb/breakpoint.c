@@ -3757,8 +3757,11 @@ gdb_breakpoint_query (struct ui_out *uiout, int bnum, char **error_message)
   args.bnum = bnum;
   /* For the moment we don't trust print_one_breakpoint() to not throw
      an error. */
-  return catch_exceptions_with_msg (uiout, do_captured_breakpoint_query, &args,
-				    error_message, RETURN_MASK_ALL);
+  if (catch_exceptions_with_msg (uiout, do_captured_breakpoint_query, &args,
+				 error_message, RETURN_MASK_ALL) < 0)
+    return GDB_RC_FAIL;
+  else
+    return GDB_RC_OK;
 }
 
 /* Return non-zero if B is user settable (breakpoints, watchpoints,
@@ -5600,8 +5603,11 @@ gdb_breakpoint (char *address, char *condition,
   args.tempflag = tempflag;
   args.thread = thread;
   args.ignore_count = ignore_count;
-  return catch_exceptions_with_msg (uiout, do_captured_breakpoint, &args,
-				    error_message, RETURN_MASK_ALL);
+  if (catch_exceptions_with_msg (uiout, do_captured_breakpoint, &args,
+				 error_message, RETURN_MASK_ALL) < 0)
+    return GDB_RC_FAIL;
+  else
+    return GDB_RC_OK;
 }
 
 

@@ -253,11 +253,7 @@ mi_cmd_thread_select (char *command, char **argv, int argc)
   else
     rc = gdb_thread_select (uiout, argv[0], &mi_error_message);
 
-  /* RC is enum gdb_rc if it is successful (>=0)
-     enum return_reason if not (<0).  */
-  if ((int) rc < 0 && (enum return_reason) rc == RETURN_ERROR)
-    return MI_CMD_ERROR;
-  else if ((int) rc >= 0 && rc == GDB_RC_FAIL)
+  if (rc == GDB_RC_FAIL)
     return MI_CMD_ERROR;
   else
     return MI_CMD_DONE;
@@ -266,7 +262,7 @@ mi_cmd_thread_select (char *command, char **argv, int argc)
 enum mi_cmd_result
 mi_cmd_thread_list_ids (char *command, char **argv, int argc)
 {
-  enum gdb_rc rc = MI_CMD_DONE;
+  enum gdb_rc rc;
 
   if (argc != 0)
     {

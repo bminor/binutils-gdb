@@ -1,5 +1,15 @@
 2007-04-10  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* breakpoint.c (gdb_breakpoint_query): Really return an
+	enum gdb_rc.
+	(gdb_breakpoint): Likewise.
+	* thread.c (do_captured_list_thread_ids): Likewise.
+	(do_captured_thread_select): Likewise.
+	* mi/mi-main.c (mi_cmd_thread_select): Expect an enum gdb_rc.
+	(mi_cmd_thread_list_ids): Remove bogus initialization.
+
+2007-04-10  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* Makefile.in (SFILES): Remove hpacc-abi.c.
 	(COMMON_OBS): Remove hpacc-abi.o.
 	(ALLDEPFILES): Remove hpread.c and $(HPREAD_SOURCE).

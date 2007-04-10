@@ -284,8 +284,10 @@ do_captured_list_thread_ids (struct ui_out *uiout, void *arg)
 enum gdb_rc
 gdb_list_thread_ids (struct ui_out *uiout, char **error_message)
 {
-  return catch_exceptions_with_msg (uiout, do_captured_list_thread_ids, NULL,
-				    error_message, RETURN_MASK_ALL);
+  if (catch_exceptions_with_msg (uiout, do_captured_list_thread_ids, NULL,
+				 error_message, RETURN_MASK_ALL) < 0)
+    return GDB_RC_FAIL;
+  return GDB_RC_OK;
 }
 
 /* Load infrun state for the thread PID.  */
@@ -705,8 +707,10 @@ do_captured_thread_select (struct ui_out *uiout, void *tidstr)
 enum gdb_rc
 gdb_thread_select (struct ui_out *uiout, char *tidstr, char **error_message)
 {
-  return catch_exceptions_with_msg (uiout, do_captured_thread_select, tidstr,
-				    error_message, RETURN_MASK_ALL);
+  if (catch_exceptions_with_msg (uiout, do_captured_thread_select, tidstr,
+				 error_message, RETURN_MASK_ALL) < 0)
+    return GDB_RC_FAIL;
+  return GDB_RC_OK;
 }
 
 /* Commands with a prefix of `thread'.  */
