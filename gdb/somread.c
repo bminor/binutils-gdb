@@ -40,16 +40,6 @@
 /* Prototypes for local functions.  */
 static int init_import_symbols (struct objfile *objfile);
 
-/* FIXME: These should really be in a common header somewhere */
-
-extern void hpread_build_psymtabs (struct objfile *, int);
-
-extern void hpread_symfile_finish (struct objfile *);
-
-extern void hpread_symfile_init (struct objfile *);
-
-extern void do_pxdb (bfd *);
-
 /*
 
    LOCAL FUNCTION
@@ -327,8 +317,6 @@ som_symfile_read (struct objfile *objfile, int mainline)
   bfd *abfd = objfile->obfd;
   struct cleanup *back_to;
 
-  do_pxdb (symfile_bfd_open (objfile->name));
-
   init_minimal_symbol_collection ();
   back_to = make_cleanup_discard_minimal_symbols ();
 
@@ -363,12 +351,6 @@ som_symfile_read (struct objfile *objfile, int mainline)
      This is emitted by gcc.  */
   stabsect_build_psymtabs (objfile, mainline,
 			   "$GDB_SYMBOLS$", "$GDB_STRINGS$", "$TEXT$");
-
-  /* Now read the native debug information. 
-     This builds the psymtab. This used to be done via a scan of
-     the DNTT, but is now done via the PXDB-built quick-lookup tables
-     together with a scan of the GNTT. See hp-psymtab-read.c. */
-  hpread_build_psymtabs (objfile, mainline);
 }
 
 /* Initialize anything that needs initializing when a completely new symbol
@@ -396,7 +378,6 @@ som_symfile_finish (struct objfile *objfile)
     {
       xfree (objfile->deprecated_sym_stab_info);
     }
-  hpread_symfile_finish (objfile);
 }
 
 /* SOM specific initialization routine for reading symbols.  */
@@ -408,7 +389,6 @@ som_symfile_init (struct objfile *objfile)
      find this causes a significant slowdown in gdb then we could
      set it in the debug symbol readers only when necessary.  */
   objfile->flags |= OBJF_REORDERED;
-  hpread_symfile_init (objfile);
 }
 
 /* SOM specific parsing routine for section offsets.

@@ -2112,7 +2112,7 @@ The basic ELF reader is in @file{elfread.c}.
 SOM is HP's object file and debug format (not to be confused with IBM's
 SOM, which is a cross-language ABI).
 
-The SOM reader is in @file{hpread.c}.
+The SOM reader is in @file{somread.c}.
 
 @section Debugging File Formats
 

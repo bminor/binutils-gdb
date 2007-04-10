@@ -1,5 +1,19 @@
 2007-04-10  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* Makefile.in (SFILES): Remove hpacc-abi.c.
+	(COMMON_OBS): Remove hpacc-abi.o.
+	(ALLDEPFILES): Remove hpread.c and $(HPREAD_SOURCE).
+	(hpacc-abi.o, hpread.o): Delete rules.
+	* somread.c: Delete extern declarations from hpread.c.
+	(som_symfile_read): Do not call do_pxdb or hpread_build_psymtabs.
+	(som_symfile_finish): Do not call hpread_symfile_finish.
+	(som_symfile_init): Do not call hpread_symfile_init.
+	* config/pa/hppa64.mt (TDEPFILES): Remove hpread.o.
+	* config/pa/hppahpux.mt (TDEPFILES): Likewise.
+	* hpacc-abi.c, hpread.c: Deleted.
+
+2007-04-10  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* solib-svr4.c (enable_break): Simplify return value.
 	(svr4_solib_create_inferior_hook): Do not warn if enable_break fails.
 
