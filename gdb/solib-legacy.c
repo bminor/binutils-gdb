@@ -63,51 +63,28 @@ legacy_svr4_fetch_link_map_offsets (void)
       lmo.link_map_size = sizeof (struct link_map);
 
       lmo.l_addr_offset = offsetof (struct link_map, l_addr);
-      lmo.l_addr_size = fieldsize (struct link_map, l_addr);
-
       lmo.l_next_offset = offsetof (struct link_map, l_next);
-      lmo.l_next_size = fieldsize (struct link_map, l_next);
-
       lmo.l_ld_offset = offsetof (struct link_map, l_ld);
-      lmo.l_ld_size = fieldsize (struct link_map, l_ld);
-
       lmo.l_prev_offset = offsetof (struct link_map, l_prev);
-      lmo.l_prev_size = fieldsize (struct link_map, l_prev);
-
       lmo.l_name_offset = offsetof (struct link_map, l_name);
-      lmo.l_name_size = fieldsize (struct link_map, l_name);
 #else /* !defined(HAVE_STRUCT_LINK_MAP_WITH_L_MEMBERS) */
 #ifdef HAVE_STRUCT_LINK_MAP_WITH_LM_MEMBERS
       lmo.link_map_size = sizeof (struct link_map);
 
       lmo.l_addr_offset = offsetof (struct link_map, lm_addr);
-      lmo.l_addr_size = fieldsize (struct link_map, lm_addr);
-
       lmo.l_next_offset = offsetof (struct link_map, lm_next);
-      lmo.l_next_size = fieldsize (struct link_map, lm_next);
-
       /* FIXME: Is this the right field name, or is it available at all?  */
       lmo.l_ld_offset = offsetof (struct link_map, lm_ld);
-      lmo.l_ld_size = fieldsize (struct link_map, lm_ld);
-
       lmo.l_name_offset = offsetof (struct link_map, lm_name);
-      lmo.l_name_size = fieldsize (struct link_map, lm_name);
 #else /* !defined(HAVE_STRUCT_LINK_MAP_WITH_LM_MEMBERS) */
 #if HAVE_STRUCT_SO_MAP_WITH_SOM_MEMBERS
       lmo.link_map_size = sizeof (struct so_map);
 
       lmo.l_addr_offset = offsetof (struct so_map, som_addr);
-      lmo.l_addr_size = fieldsize (struct so_map, som_addr);
-
       lmo.l_next_offset = offsetof (struct so_map, som_next);
-      lmo.l_next_size = fieldsize (struct so_map, som_next);
-
       lmo.l_name_offset = offsetof (struct so_map, som_path);
-      lmo.l_name_size = fieldsize (struct so_map, som_path);
-
       /* FIXME: Is the address of the dynamic table available?  */
-      lmo.l_ld_offset = 0;
-      lmo.l_ld_size = 0;
+      lmo.l_ld_offset = -1;
 #endif /* HAVE_STRUCT_SO_MAP_WITH_SOM_MEMBERS */
 #endif /* HAVE_STRUCT_LINK_MAP_WITH_LM_MEMBERS */
 #endif /* HAVE_STRUCT_LINK_MAP_WITH_L_MEMBERS */
@@ -126,16 +103,9 @@ legacy_svr4_fetch_link_map_offsets (void)
       lmo32.link_map_size = sizeof (struct link_map32);
 
       lmo32.l_addr_offset = offsetof (struct link_map32, l_addr);
-      lmo32.l_addr_size = fieldsize (struct link_map32, l_addr);
-
       lmo32.l_next_offset = offsetof (struct link_map32, l_next);
-      lmo32.l_next_size = fieldsize (struct link_map32, l_next);
-
       lmo32.l_prev_offset = offsetof (struct link_map32, l_prev);
-      lmo32.l_prev_size = fieldsize (struct link_map32, l_prev);
-
       lmo32.l_name_offset = offsetof (struct link_map32, l_name);
-      lmo32.l_name_size = fieldsize (struct link_map32, l_name);
     }
 #endif /* defined (HAVE_STRUCT_LINK_MAP32) */
 

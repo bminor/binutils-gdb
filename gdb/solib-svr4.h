@@ -46,32 +46,17 @@ struct link_map_offsets
     /* Offset to l_addr field in struct link_map.  */
     int l_addr_offset;
 
-    /* Size of l_addr field in struct link_map.  */
-    int l_addr_size;
-
     /* Offset to l_ld field in struct link_map.  */
     int l_ld_offset;
-
-    /* Size of l_ld field in struct link_map.  */
-    int l_ld_size;
 
     /* Offset to l_next field in struct link_map.  */
     int l_next_offset;
 
-    /* Size of l_next field in struct link_map.  */
-    int l_next_size;
-
     /* Offset to l_prev field in struct link_map.  */
     int l_prev_offset;
 
-    /* Size of l_prev field in struct link_map.  */
-    int l_prev_size;
-
     /* Offset to l_name field in struct link_map.  */
     int l_name_offset;
-
-    /* Size of l_name field in struct link_map.  */
-    int l_name_size;
   };
 
 /* set_solib_svr4_fetch_link_map_offsets() is intended to be called by

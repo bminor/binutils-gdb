@@ -118,19 +118,6 @@ static char *main_name_list[] =
   NULL
 };
 
-/* Macro to extract an address from a solib structure.  When GDB is
-   configured for some 32-bit targets (e.g. Solaris 2.7 sparc), BFD is
-   configured to handle 64-bit targets, so CORE_ADDR is 64 bits.  We
-   have to extract only the significant bits of addresses to get the
-   right address when accessing the core file BFD.
-
-   Assume that the address is unsigned.  */
-
-#define SOLIB_EXTRACT_ADDRESS(MEMBER) \
-	extract_unsigned_integer (&(MEMBER), sizeof (MEMBER))
-
-/* local data declarations */
-
 /* link map access functions */
 
 static CORE_ADDR
@@ -138,9 +125,8 @@ LM_ADDR_FROM_LINK_MAP (struct so_list *so)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
 
-  return (CORE_ADDR) extract_signed_integer (so->lm_info->lm
-					     + lmo->l_addr_offset,
-					     lmo->l_addr_size);
+  return extract_typed_address (so->lm_info->lm + lmo->l_addr_offset,
+				builtin_type_void_data_ptr);
 }
 
 static int
@@ -148,7 +134,7 @@ HAS_LM_DYNAMIC_FROM_LINK_MAP ()
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
 
-  return (lmo->l_ld_size != 0);
+  return lmo->l_ld_offset >= 0;
 }
 
 static CORE_ADDR
@@ -156,11 +142,8 @@ LM_DYNAMIC_FROM_LINK_MAP (struct so_list *so)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
 
-  gdb_assert (lmo->l_ld_size != 0);
-
-  return (CORE_ADDR) extract_signed_integer (so->lm_info->lm
-					     + lmo->l_ld_offset,
-					     lmo->l_ld_size);
+  return extract_typed_address (so->lm_info->lm + lmo->l_ld_offset,
+				builtin_type_void_data_ptr);
 }
 
 static CORE_ADDR
@@ -238,9 +221,8 @@ LM_NEXT (struct so_list *so)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
 
-  /* Assume that the address is unsigned.  */
-  return extract_unsigned_integer (so->lm_info->lm + lmo->l_next_offset,
-				   lmo->l_next_size);
+  return extract_typed_address (so->lm_info->lm + lmo->l_next_offset,
+				builtin_type_void_data_ptr);
 }
 
 static CORE_ADDR
@@ -248,9 +230,8 @@ LM_NAME (struct so_list *so)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
 
-  /* Assume that the address is unsigned.  */
-  return extract_unsigned_integer (so->lm_info->lm + lmo->l_name_offset,
-				   lmo->l_name_size);
+  return extract_typed_address (so->lm_info->lm + lmo->l_name_offset,
+				builtin_type_void_data_ptr);
 }
 
 static int
@@ -258,9 +239,8 @@ IGNORE_FIRST_LINK_MAP_ENTRY (struct so_list *so)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
 
-  /* Assume that the address is unsigned.  */
-  return extract_unsigned_integer (so->lm_info->lm + lmo->l_prev_offset,
-				   lmo->l_prev_size) == 0;
+  return extract_typed_address (so->lm_info->lm + lmo->l_prev_offset,
+				builtin_type_void_data_ptr) == 0;
 }
 
 static CORE_ADDR debug_base;	/* Base of dynamic linker structures */
@@ -446,7 +426,7 @@ elf_locate_base (void)
 	  else if (dyn_tag == DT_MIPS_RLD_MAP)
 	    {
 	      gdb_byte *pbuf;
-	      int pbuf_size = TARGET_PTR_BIT / HOST_CHAR_BIT;
+	      int pbuf_size = TYPE_LENGTH (builtin_type_void_data_ptr);
 
 	      pbuf = alloca (pbuf_size);
 	      /* DT_MIPS_RLD_MAP contains a pointer to the address
@@ -455,7 +435,7 @@ elf_locate_base (void)
 				      (bfd_byte *) x_dynp->d_un.d_ptr);
 	      if (target_read_memory (dyn_ptr, pbuf, pbuf_size))
 		return 0;
-	      return extract_unsigned_integer (pbuf, pbuf_size);
+	      return extract_typed_address (pbuf, builtin_type_void_data_ptr);
 	    }
 	}
     }
@@ -481,7 +461,7 @@ elf_locate_base (void)
 	  else if (dyn_tag == DT_MIPS_RLD_MAP)
 	    {
 	      gdb_byte *pbuf;
-	      int pbuf_size = TARGET_PTR_BIT / HOST_CHAR_BIT;
+	      int pbuf_size = TYPE_LENGTH (builtin_type_void_data_ptr);
 
 	      pbuf = alloca (pbuf_size);
 	      /* DT_MIPS_RLD_MAP contains a pointer to the address
@@ -490,7 +470,7 @@ elf_locate_base (void)
 				      (bfd_byte *) x_dynp->d_un.d_ptr);
 	      if (target_read_memory (dyn_ptr, pbuf, pbuf_size))
 		return 0;
-	      return extract_unsigned_integer (pbuf, pbuf_size);
+	      return extract_typed_address (pbuf, builtin_type_void_data_ptr);
 	    }
 	}
     }
@@ -620,7 +600,8 @@ open_symbol_file_object (void *from_ttyp)
   int errcode;
   int from_tty = *(int *)from_ttyp;
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
-  gdb_byte *l_name_buf = xmalloc (lmo->l_name_size);
+  int l_name_size = TYPE_LENGTH (builtin_type_void_data_ptr);
+  gdb_byte *l_name_buf = xmalloc (l_name_size);
   struct cleanup *cleanups = make_cleanup (xfree, l_name_buf);
 
   if (symfile_objfile)
@@ -636,11 +617,10 @@ open_symbol_file_object (void *from_ttyp)
     return 0;	/* failed somehow... */
 
   /* Read address of name from target memory to GDB.  */
-  read_memory (lm + lmo->l_name_offset, l_name_buf, lmo->l_name_size);
+  read_memory (lm + lmo->l_name_offset, l_name_buf, l_name_size);
 
-  /* Convert the address to host format.  Assume that the address is
-     unsigned.  */
-  l_name = extract_unsigned_integer (l_name_buf, lmo->l_name_size);
+  /* Convert the address to host format.  */
+  l_name = extract_typed_address (l_name_buf, builtin_type_void_data_ptr);
 
   /* Free l_name_buf.  */
   do_cleanups (cleanups);
@@ -836,7 +816,8 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
       struct lm_info objfile_lm_info;
       struct cleanup *old_chain;
       CORE_ADDR name_address;
-      gdb_byte *l_name_buf = xmalloc (lmo->l_name_size);
+      int l_name_size = TYPE_LENGTH (builtin_type_void_data_ptr);
+      gdb_byte *l_name_buf = xmalloc (l_name_size);
       old_chain = make_cleanup (xfree, l_name_buf);
 
       /* Set up the buffer to contain the portion of the link_map
@@ -849,11 +830,11 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
       read_memory (lm, objfile_lm_info.lm, lmo->link_map_size);
 
       /* Read address of name from target memory to GDB.  */
-      read_memory (lm + lmo->l_name_offset, l_name_buf, lmo->l_name_size);
+      read_memory (lm + lmo->l_name_offset, l_name_buf, l_name_size);
 
-      /* Extract this object's name.  Assume that the address is
-         unsigned.  */
-      name_address = extract_unsigned_integer (l_name_buf, lmo->l_name_size);
+      /* Extract this object's name.  */
+      name_address = extract_typed_address (l_name_buf,
+					    builtin_type_void_data_ptr);
       target_read_string (name_address, &buffer,
       			  SO_NAME_MAX_PATH_SIZE - 1, &errcode);
       make_cleanup (xfree, buffer);
@@ -872,10 +853,9 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
     	      return lm;
       	    }
   	}
-      /* Not the file we wanted, continue checking.  Assume that the
-         address is unsigned.  */
-      lm = extract_unsigned_integer (objfile_lm_info.lm + lmo->l_next_offset,
-				     lmo->l_next_size);
+      /* Not the file we wanted, continue checking.  */
+      lm = extract_typed_address (objfile_lm_info.lm + lmo->l_next_offset,
+				  builtin_type_void_data_ptr);
       do_cleanups (old_chain);
     }
   return 0;
@@ -1521,15 +1501,10 @@ svr4_ilp32_fetch_link_map_offsets (void)
       /* Everything we need is in the first 20 bytes.  */
       lmo.link_map_size = 20;
       lmo.l_addr_offset = 0;
-      lmo.l_addr_size = 4;
       lmo.l_name_offset = 4;
-      lmo.l_name_size = 4;
       lmo.l_ld_offset = 8;
-      lmo.l_ld_size = 4;
       lmo.l_next_offset = 12;
-      lmo.l_next_size = 4;
       lmo.l_prev_offset = 16;
-      lmo.l_prev_size = 4;
     }
 
   return lmp;
@@ -1556,15 +1531,10 @@ svr4_lp64_fetch_link_map_offsets (void)
       /* Everything we need is in the first 40 bytes.  */
       lmo.link_map_size = 40;
       lmo.l_addr_offset = 0;
-      lmo.l_addr_size = 8;
       lmo.l_name_offset = 8;
-      lmo.l_name_size = 8;
       lmo.l_ld_offset = 16;
-      lmo.l_ld_size = 8;
       lmo.l_next_offset = 24;
-      lmo.l_next_size = 8;
       lmo.l_prev_offset = 32;
-      lmo.l_prev_size = 8;
     }
 
   return lmp;
