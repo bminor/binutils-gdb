@@ -8,8 +8,8 @@
 	* breakpoint.c (gdb_breakpoint_query): Really return an
 	enum gdb_rc.
 	(gdb_breakpoint): Likewise.
-	* thread.c (do_captured_list_thread_ids): Likewise.
-	(do_captured_thread_select): Likewise.
+	* thread.c (gdb_list_thread_ids): Likewise.
+	(gdb_thread_select): Likewise.
 	* mi/mi-main.c (mi_cmd_thread_select): Expect an enum gdb_rc.
 	(mi_cmd_thread_list_ids): Remove bogus initialization.
 
