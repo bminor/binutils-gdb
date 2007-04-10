@@ -1,3 +1,8 @@
+2007-04-10  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* solib-svr4.c (enable_break): Simplify return value.
+	(svr4_solib_create_inferior_hook): Do not warn if enable_break fails.
+
 2007-04-10  Andreas Schwab  <schwab@suse.de>
 
 	* solib-svr4.h (struct link_map_offsets): Remove l_addr_size,

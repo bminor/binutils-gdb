@@ -959,8 +959,6 @@ exec_entry_point (struct bfd *abfd, struct target_ops *targ)
 static int
 enable_break (void)
 {
-  int success = 0;
-
 #ifdef BKPT_AT_SYMBOL
 
   struct minimal_symbol *msymbol;
@@ -1126,13 +1124,9 @@ enable_break (void)
 	  return 1;
 	}
     }
-
-  /* Nothing good happened.  */
-  success = 0;
-
 #endif /* BKPT_AT_SYMBOL */
 
-  return (success);
+  return 0;
 }
 
 /*
@@ -1337,10 +1331,7 @@ svr4_solib_create_inferior_hook (void)
     }
 
   if (!enable_break ())
-    {
-      warning (_("shared library handler failed to enable breakpoint"));
-      return;
-    }
+    return;
 
 #if defined(_SCO_DS)
   /* SCO needs the loop below, other systems should be using the
