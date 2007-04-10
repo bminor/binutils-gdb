@@ -5664,9 +5664,11 @@ relax_sections (void)
   /* Keep relaxing until bfd_relax_section gives up.  */
   bfd_boolean relax_again;
 
+  link_info.relax_trip = -1;
   do
     {
       relax_again = FALSE;
+      link_info.relax_trip++;
 
       /* Note: pe-dll.c does something like this also.  If you find
 	 you need to change this code, you probably need to change

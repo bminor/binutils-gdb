@@ -1,3 +1,12 @@
+2007-04-10  Richard Henderson  <rth@redhat.com>
+
+	* elf64-alpha.c (struct alpha_elf_link_hash_table): Add relax_trip.
+	(elf64_alpha_size_got_sections): Remove unused something_changed local.
+	(elf64_alpha_size_plt_section): Return void.
+	(elf64_alpha_size_rela_got_section): Likewise.
+	(elf64_alpha_relax_section): Only regenerate got+plt if the 
+	relax_trip counter has changed.
+
 2007-04-09  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.am (bfdver.h): Do not generate doc/bfdver.texi.

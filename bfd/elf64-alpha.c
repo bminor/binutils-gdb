@@ -184,6 +184,10 @@ struct alpha_elf_link_hash_table
   /* The head of a list of .got subsections linked through
      alpha_elf_tdata(abfd)->got_link_next.  */
   bfd *got_list;
+
+  /* The most recent relax pass that we've seen.  The GOTs
+     should be regenerated if this doesn't match.  */
+  int relax_trip;
 };
 
 /* Look up an entry in a Alpha ELF linker hash table.  */
@@ -2375,7 +2379,6 @@ static bfd_boolean
 elf64_alpha_size_got_sections (struct bfd_link_info *info)
 {
   bfd *i, *got_list, *cur_got_obj = NULL;
-  int something_changed = 0;
 
   got_list = alpha_elf_hash_table (info)->got_list;
 
@@ -2413,9 +2416,6 @@ elf64_alpha_size_got_sections (struct bfd_link_info *info)
 	return TRUE;
 
       alpha_elf_hash_table (info)->got_list = got_list;
-
-      /* Force got offsets to be recalculated.  */
-      something_changed = 1;
     }
 
   cur_got_obj = got_list;
@@ -2429,8 +2429,6 @@ elf64_alpha_size_got_sections (struct bfd_link_info *info)
 	  alpha_elf_tdata(i)->got->size = 0;
 	  i = alpha_elf_tdata(i)->got_link_next;
 	  alpha_elf_tdata(cur_got_obj)->got_link_next = i;
-	  
-	  something_changed = 1;
 	}
       else
 	{
@@ -2441,8 +2439,7 @@ elf64_alpha_size_got_sections (struct bfd_link_info *info)
 
   /* Once the gots have been merged, fill in the got offsets for
      everything therein.  */
-  if (1 || something_changed)
-    elf64_alpha_calc_got_offsets (info);
+  elf64_alpha_calc_got_offsets (info);
 
   return TRUE;
 }
@@ -2477,10 +2474,10 @@ elf64_alpha_size_plt_section_1 (struct alpha_elf_link_hash_entry *h, PTR data)
   return TRUE;
 }
 
-/* Called from relax_section to rebuild the PLT in light of
-   potential changes in the function's status.  */
+/* Called from relax_section to rebuild the PLT in light of potential changes
+   in the function's status.  */
 
-static bfd_boolean
+static void
 elf64_alpha_size_plt_section (struct bfd_link_info *info)
 {
   asection *splt, *spltrel, *sgotplt;
@@ -2490,7 +2487,7 @@ elf64_alpha_size_plt_section (struct bfd_link_info *info)
   dynobj = elf_hash_table(info)->dynobj;
   splt = bfd_get_section_by_name (dynobj, ".plt");
   if (splt == NULL)
-    return TRUE;
+    return;
 
   splt->size = 0;
 
@@ -2499,6 +2496,7 @@ elf64_alpha_size_plt_section (struct bfd_link_info *info)
 
   /* Every plt entry requires a JMP_SLOT relocation.  */
   spltrel = bfd_get_section_by_name (dynobj, ".rela.plt");
+  entries = 0;
   if (splt->size)
     {
       if (elf64_alpha_use_secureplt)
@@ -2506,8 +2504,6 @@ elf64_alpha_size_plt_section (struct bfd_link_info *info)
       else
 	entries = (splt->size - OLD_PLT_HEADER_SIZE) / OLD_PLT_ENTRY_SIZE;
     }
-  else
-    entries = 0;
   spltrel->size = entries * sizeof (Elf64_External_Rela);
 
   /* When using the secureplt, we need two words somewhere in the data
@@ -2518,8 +2514,6 @@ elf64_alpha_size_plt_section (struct bfd_link_info *info)
       sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
       sgotplt->size = entries ? 16 : 0;
     }
-
-  return TRUE;
 }
 
 static bfd_boolean
@@ -2690,7 +2684,7 @@ elf64_alpha_size_rela_got_1 (struct alpha_elf_link_hash_entry *h,
 
 /* Set the sizes of the dynamic relocation sections.  */
 
-static bfd_boolean
+static void
 elf64_alpha_size_rela_got_section (struct bfd_link_info *info)
 {
   unsigned long entries;
@@ -2729,15 +2723,13 @@ elf64_alpha_size_rela_got_section (struct bfd_link_info *info)
   if (!srel)
     {
       BFD_ASSERT (entries == 0);
-      return TRUE;
+      return;
     }
   srel->size = sizeof (Elf64_External_Rela) * entries;
 
   /* Now do the non-local symbols.  */
   alpha_elf_link_hash_traverse (alpha_elf_hash_table (info),
 				elf64_alpha_size_rela_got_1, info);
-
-  return TRUE;
 }
 
 /* Set the sizes of the dynamic sections.  */
@@ -3609,7 +3601,7 @@ elf64_alpha_relax_section (bfd *abfd, asection *sec,
   struct alpha_elf_got_entry **local_got_entries;
   struct alpha_relax_info info;
 
-  /* We are not currently changing any sizes, so only one pass.  */
+  /* There's nothing to change, yet.  */
   *again = FALSE;
 
   if (link_info->relocatable
@@ -3617,6 +3609,22 @@ elf64_alpha_relax_section (bfd *abfd, asection *sec,
 	  != (SEC_CODE | SEC_RELOC | SEC_ALLOC))
       || sec->reloc_count == 0)
     return TRUE;
+
+  /* Make sure our GOT and PLT tables are up-to-date.  */
+  if (alpha_elf_hash_table(link_info)->relax_trip != link_info->relax_trip)
+    {
+      alpha_elf_hash_table(link_info)->relax_trip = link_info->relax_trip;
+
+      /* This should never fail after the initial round, since the only
+	 error is GOT overflow, and relaxation only shrinks the table.  */
+      if (!elf64_alpha_size_got_sections (link_info))
+	abort ();
+      if (elf_hash_table (link_info)->dynamic_sections_created)
+	{
+	  elf64_alpha_size_plt_section (link_info);
+	  elf64_alpha_size_rela_got_section (link_info);
+	}
+    }
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   local_got_entries = alpha_elf_tdata(abfd)->local_got_entries;
@@ -3826,13 +3834,6 @@ elf64_alpha_relax_section (bfd *abfd, asection *sec,
 	  break;
 	}
     }
-
-  if (!elf64_alpha_size_plt_section (link_info))
-    return FALSE;
-  if (!elf64_alpha_size_got_sections (link_info))
-    return FALSE;
-  if (!elf64_alpha_size_rela_got_section (link_info))
-    return FALSE;
 
   if (isymbuf != NULL
       && symtab_hdr->contents != (unsigned char *) isymbuf)
