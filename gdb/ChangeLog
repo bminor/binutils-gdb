@@ -1,3 +1,8 @@
+2007-04-10  Andreas Schwab  <schwab@suse.de>
+
+	* rs6000-tdep.c (rs6000_dwarf2_reg_to_regnum): Decode 64 as CR
+	register.
+
 2007-04-10  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* breakpoint.c (gdb_breakpoint_query): Really return an

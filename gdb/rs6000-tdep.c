@@ -2274,6 +2274,8 @@ rs6000_dwarf2_reg_to_regnum (int num)
   else
     switch (num)
       {
+      case 64:
+	return tdep->ppc_cr_regnum;
       case 67:
         return tdep->ppc_vrsave_regnum - 1; /* vscr */
       case 99:
