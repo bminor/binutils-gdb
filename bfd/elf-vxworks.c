@@ -170,7 +170,8 @@ elf_vxworks_emit_relocs (bfd *output_bfd,
 	  && *rel_hash
 	  && (*rel_hash)->def_dynamic
 	  && !(*rel_hash)->def_regular
-	  && (*rel_hash)->root.type == bfd_link_hash_defined
+	  && ((*rel_hash)->root.type == bfd_link_hash_defined
+	      || (*rel_hash)->root.type == bfd_link_hash_weakdef)
 	  && (*rel_hash)->root.u.def.section->output_section != NULL)
 	{
 	  /* This is a relocation from an executable or shared library
