@@ -82,6 +82,7 @@ struct regset;
 #define X_IMM22(i) ((i) & 0x3fffff)
 #define X_OP3(i) (((i) >> 19) & 0x3f)
 #define X_RS1(i) (((i) >> 14) & 0x1f)
+#define X_RS2(i) ((i) & 0x1f)
 #define X_I(i) (((i) >> 13) & 1)
 /* Sign extension macros.  */
 #define X_DISP22(i) ((X_IMM22 (i) ^ 0x200000) - 0x200000)
@@ -571,6 +572,156 @@ sparc_alloc_frame_cache (void)
   return cache;
 }
 
+/* GCC generates several well-known sequences of instructions at the begining
+   of each function prologue when compiling with -fstack-check.  If one of
+   such sequences starts at START_PC, then return the address of the
+   instruction immediately past this sequence.  Otherwise, return START_PC.  */
+   
+static CORE_ADDR
+sparc_skip_stack_check (const CORE_ADDR start_pc)
+{
+  CORE_ADDR pc = start_pc;
+  unsigned long insn;
+  int offset_stack_checking_sequence = 0;
+
+  /* With GCC, all stack checking sequences begin with the same two
+     instructions.  */
+
+  /* sethi <some immediate>,%g1 */
+  insn = sparc_fetch_instruction (pc);
+  pc = pc + 4;
+  if (!(X_OP (insn) == 0 && X_OP2 (insn) == 0x4 && X_RD (insn) == 1))
+    return start_pc;
+
+  /* sub %sp, %g1, %g1 */
+  insn = sparc_fetch_instruction (pc);
+  pc = pc + 4;
+  if (!(X_OP (insn) == 2 && X_OP3 (insn) == 0x4 && !X_I(insn)
+        && X_RD (insn) == 1 && X_RS1 (insn) == 14 && X_RS2 (insn) == 1))
+    return start_pc;
+
+  insn = sparc_fetch_instruction (pc);
+  pc = pc + 4;
+
+  /* First possible sequence:
+         [first two instructions above]
+         clr [%g1 - some immediate]  */
+
+  /* clr [%g1 - some immediate]  */
+  if (X_OP (insn) == 3 && X_OP3(insn) == 0x4 && X_I(insn)
+      && X_RS1 (insn) == 1 && X_RD (insn) == 0)
+    {
+      /* Valid stack-check sequence, return the new PC.  */
+      return pc;
+    }
+
+  /* Second possible sequence: A small number of probes.
+         [first two instructions above]
+         clr [%g1]
+         add   %g1, -<some immediate>, %g1
+         clr [%g1]
+         [repeat the two instructions above any (small) number of times]
+         clr [%g1 - some immediate]  */
+
+  /* clr [%g1] */
+  else if (X_OP (insn) == 3 && X_OP3(insn) == 0x4 && !X_I(insn)
+      && X_RS1 (insn) == 1 && X_RD (insn) == 0)
+    {
+      while (1)
+        {
+          /* add %g1, -<some immediate>, %g1 */
+          insn = sparc_fetch_instruction (pc);
+          pc = pc + 4;
+          if (!(X_OP (insn) == 2  && X_OP3(insn) == 0 && X_I(insn)
+                && X_RS1 (insn) == 1 && X_RD (insn) == 1))
+            break;
+
+          /* clr [%g1] */
+          insn = sparc_fetch_instruction (pc);
+          pc = pc + 4;
+          if (!(X_OP (insn) == 3 && X_OP3(insn) == 0x4 && !X_I(insn)
+                && X_RD (insn) == 0 && X_RS1 (insn) == 1))
+            return start_pc;
+        }
+
+      /* clr [%g1 - some immediate] */
+      if (!(X_OP (insn) == 3 && X_OP3(insn) == 0x4 && X_I(insn)
+            && X_RS1 (insn) == 1 && X_RD (insn) == 0))
+        return start_pc;
+
+      /* We found a valid stack-check sequence, return the new PC.  */
+      return pc;
+    }
+  
+  /* Third sequence: A probing loop.
+         [first two instructions above]
+         sethi  <some immediate>, %g4
+         sub  %g1, %g4, %g4
+         cmp  %g1, %g4
+         be  <disp>
+         add  %g1, -<some immediate>, %g1
+         ba  <disp>
+         clr  [%g1]
+         clr [%g4 - some immediate]  */
+
+  /* sethi  <some immediate>, %g4 */
+  else if (X_OP (insn) == 0 && X_OP2 (insn) == 0x4 && X_RD (insn) == 4)
+    {
+      /* sub  %g1, %g4, %g4 */
+      insn = sparc_fetch_instruction (pc);
+      pc = pc + 4;
+      if (!(X_OP (insn) == 2 && X_OP3 (insn) == 0x4 && !X_I(insn)
+            && X_RD (insn) == 4 && X_RS1 (insn) == 1 && X_RS2 (insn) == 4))
+        return start_pc;
+
+      /* cmp  %g1, %g4 */
+      insn = sparc_fetch_instruction (pc);
+      pc = pc + 4;
+      if (!(X_OP (insn) == 2 && X_OP3 (insn) == 0x14 && !X_I(insn)
+            && X_RD (insn) == 0 && X_RS1 (insn) == 1 && X_RS2 (insn) == 4))
+        return start_pc;
+
+      /* be  <disp> */
+      insn = sparc_fetch_instruction (pc);
+      pc = pc + 4;
+      if (!(X_OP (insn) == 0 && X_COND (insn) == 0x1))
+        return start_pc;
+
+      /* add  %g1, -<some immediate>, %g1 */
+      insn = sparc_fetch_instruction (pc);
+      pc = pc + 4;
+      if (!(X_OP (insn) == 2  && X_OP3(insn) == 0 && X_I(insn)
+            && X_RS1 (insn) == 1 && X_RD (insn) == 1))
+        return start_pc;
+
+      /* ba  <disp> */
+      insn = sparc_fetch_instruction (pc);
+      pc = pc + 4;
+      if (!(X_OP (insn) == 0 && X_COND (insn) == 0x8))
+        return start_pc;
+
+      /* clr  [%g1] */
+      insn = sparc_fetch_instruction (pc);
+      pc = pc + 4;
+      if (!(X_OP (insn) == 3 && X_OP3(insn) == 0x4 && !X_I(insn)
+            && X_RD (insn) == 0 && X_RS1 (insn) == 1))
+        return start_pc;
+
+      /* clr [%g4 - some immediate]  */
+      insn = sparc_fetch_instruction (pc);
+      pc = pc + 4;
+      if (!(X_OP (insn) == 3 && X_OP3(insn) == 0x4 && X_I(insn)
+            && X_RS1 (insn) == 4 && X_RD (insn) == 0))
+        return start_pc;
+
+      /* We found a valid stack-check sequence, return the new PC.  */
+      return pc;
+    }
+
+  /* No stack check code in our prologue, return the start_pc.  */
+  return start_pc;
+}
+
 CORE_ADDR
 sparc_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 			struct sparc_frame_cache *cache)
@@ -579,6 +730,8 @@ sparc_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
   unsigned long insn;
   int offset = 0;
   int dest = -1;
+
+  pc = sparc_skip_stack_check (pc);
 
   if (current_pc <= pc)
     return current_pc;

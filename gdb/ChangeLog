@@ -1,3 +1,10 @@
+2007-04-11  Joel Brobecker  <brobecker@adacore.com>
+
+	* sparc-tdep.c (X_RS2): New macro.
+	(sparc_skip_stack_check): New function.
+	(sparc_analyze_prologue): Adjust PC past stack probing
+	sequence if necessary.
+
 2007-04-10  Andreas Schwab  <schwab@suse.de>
 
 	* rs6000-tdep.c (rs6000_dwarf2_reg_to_regnum): Decode 64 as CR
