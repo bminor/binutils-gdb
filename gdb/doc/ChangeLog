@@ -1,3 +1,18 @@
+2007-04-11  Bob Wilson  <bob.wilson@acm.org>
+
+        * gdb.texinfo (Contributors, Continuing and Stepping)
+        (Fortran Defaults, HPPA, TUI, TUI Commands, Configure Options)
+        (General Query Packets, File-I/O Remote Protocol Extension)
+        (Protocol Basics, The F Reply Packet, Write)
+        (Protocol-specific Representation of Datatypes, Memory Transfer):
+        Fix hyphenation, punctuation and grammar problems.
+        (Cygwin Native): Likewise.  Also fix misuse of @pxref and use
+        'section' instead of 'subsection' in the text.
+        (Non-debug DLL Symbols): Avoid 'subsubsection' in the text.
+        (i386): Remove period from section name.
+	(Installing GDB, Requirements, Running Configure,  Separate Objdir)
+	(Config Names, Configure Options): Use @file{configure}.
+
 2007-04-11  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdbint.texinfo (Writing Tests): Mention gdb_test_multiple

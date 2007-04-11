@@ -491,7 +491,7 @@ unwinder framework, this consisting of a fresh new design featuring
 frame IDs, independent frame sniffers, and the sentinel frame.  Mark
 Kettenis implemented the @sc{dwarf 2} unwinder, Jeff Johnston the
 libunwind unwinder, and Andrew Cagney the dummy, sentinel, tramp, and
-trad unwinders.  The architecture specific changes, each involving a
+trad unwinders.  The architecture-specific changes, each involving a
 complete rewrite of the architecture's frame code, were carried out by
 Jim Blandy, Joel Brobecker, Kevin Buettner, Andrew Cagney, Stephane
 Carrez, Randolph Chung, Orjan Friberg, Richard Henderson, Daniel
@@ -4097,7 +4097,7 @@ location is actually reached only if it is in the current frame.  This
 implies that @code{until} can be used to skip over recursive function
 invocations.  For instance in the code below, if the current location is
 line @code{96}, issuing @code{until 99} will execute the program up to
-line @code{99} in the same invocation of factorial, i.e. after the inner
+line @code{99} in the same invocation of factorial, i.e., after the inner
 invocations have returned.
 
 @smallexample
@@ -9628,8 +9628,8 @@ change that with the @samp{set case-insensitive} command, see
 
 @cindex Special Fortran commands
 
-@value{GDBN} had some commands to support Fortran specific feature,
-such as common block displaying.
+@value{GDBN} has some commands to support Fortran-specific features,
+such as displaying common blocks.
 
 @table @code
 @cindex @code{COMMON} blocks, Fortran
@@ -13643,16 +13643,15 @@ counts of various errors encountered so far.
 @cindex Cygwin-specific commands
 
 @value{GDBN} supports native debugging of MS Windows programs, including
-DLLs with and without symbolic debugging information. There are various
-additional Cygwin-specific commands, described in this subsection.  The
-subsubsection @pxref{Non-debug DLL Symbols} describes working with DLLs
-that have no debugging symbols.
-
+DLLs with and without symbolic debugging information.  There are various
+additional Cygwin-specific commands, described in this section.
+Working with DLLs that have no debugging symbols is described in
+@ref{Non-debug DLL Symbols}.
 
 @table @code
 @kindex info w32
 @item info w32
-This is a prefix of MS Windows specific commands which print
+This is a prefix of MS Windows-specific commands which print
 information about the target system and important OS structures.
 
 @item info w32 selector
@@ -13665,7 +13664,7 @@ about the six segment registers.
 
 @kindex info dll
 @item info dll
-This is a Cygwin specific alias of info shared.
+This is a Cygwin-specific alias of @code{info shared}.
 
 @kindex dll-symbols
 @item dll-symbols
@@ -13757,19 +13756,19 @@ Displays if the debuggee will be started with a shell.
 
 Very often on windows, some of the DLLs that your program relies on do
 not include symbolic debugging information (for example,
-@file{kernel32.dll}). When @value{GDBN} doesn't recognize any debugging
+@file{kernel32.dll}).  When @value{GDBN} doesn't recognize any debugging
 symbols in a DLL, it relies on the minimal amount of symbolic
-information contained in the DLL's export table. This subsubsection
+information contained in the DLL's export table.  This section
 describes working with such symbols, known internally to @value{GDBN} as
 ``minimal symbols''.
 
 Note that before the debugged program has started execution, no DLLs
-will have been loaded. The easiest way around this problem is simply to
+will have been loaded.  The easiest way around this problem is simply to
 start the program --- either by setting a breakpoint or letting the
-program run once to completion. It is also possible to force
+program run once to completion.  It is also possible to force
 @value{GDBN} to load a particular DLL before starting the executable ---
 see the shared library information in @ref{Files}, or the
-@code{dll-symbols} command in @ref{Cygwin Native}. Currently,
+@code{dll-symbols} command in @ref{Cygwin Native}.  Currently,
 explicitly loading symbols from a DLL with no debugging information will
 cause the symbol names to be duplicated in @value{GDBN}'s lookup table,
 which may adversely affect symbol lookup performance.
@@ -15406,7 +15405,7 @@ all uses of @value{GDBN} with the architecture, both native and cross.
 @end menu
 
 @node i386
-@subsection x86 Architecture-specific Issues.
+@subsection x86 Architecture-specific Issues
 
 @table @code
 @item set struct-convention @var{mode}
@@ -15596,7 +15595,7 @@ following special commands:
 @table @code
 @item set debug hppa
 @kindex set debug hppa
-This command determines whether HPPA architecture specific debugging
+This command determines whether HPPA architecture-specific debugging
 messages are to be displayed.
 
 @item show debug hppa
@@ -16686,7 +16685,7 @@ interpreter-exec mi "-data-list-register-names"
 * TUI Overview::                TUI overview
 * TUI Keys::                    TUI key bindings
 * TUI Single Key Mode::         TUI single key mode
-* TUI Commands::                TUI specific commands
+* TUI Commands::                TUI-specific commands
 * TUI Configuration::           TUI configuration variables
 @end menu
 
@@ -16980,7 +16979,7 @@ this mode is by typing @kbd{q} or @kbd{C-x s}.
 
 
 @node TUI Commands
-@section TUI Specific Commands
+@section TUI-specific Commands
 @cindex TUI commands
 
 The TUI has specific commands to control the text windows.
@@ -22104,7 +22103,7 @@ Then give @file{gdb.dvi} to your @sc{dvi} printing program.
 
 @menu
 * Requirements::                Requirements for building @value{GDBN}
-* Running Configure::           Invoking the @value{GDBN} @code{configure} script
+* Running Configure::           Invoking the @value{GDBN} @file{configure} script
 * Separate Objdir::             Compiling @value{GDBN} in another directory
 * Config Names::                Specifying names for hosts and targets
 * Configure Options::           Summary of options for configure
@@ -22132,7 +22131,7 @@ working C90 compiler, e.g.@: GCC.
 @value{GDBN} can use the Expat XML parsing library.  This library may be
 included with your operating system distribution; if it is not, you
 can get the latest version from @url{http://expat.sourceforge.net}.
-The @code{configure} script will search for this library in several
+The @file{configure} script will search for this library in several
 standard locations; if it is installed in an unusual path, you can
 use the @option{--with-libexpat-prefix} option to specify its location.
 
@@ -22142,9 +22141,9 @@ and for target descriptions (@pxref{Target Descriptions}).
 @end table
 
 @node Running Configure
-@section Invoking the @value{GDBN} @code{configure} Script
+@section Invoking the @value{GDBN} @file{configure} Script
 @cindex configuring @value{GDBN}
-@value{GDBN} comes with a @code{configure} script that automates the process
+@value{GDBN} comes with a @file{configure} script that automates the process
 of preparing @value{GDBN} for installation; you can then use @code{make} to
 build the @code{gdb} program.
 @iftex
@@ -22190,12 +22189,12 @@ source for the @sc{gnu} filename pattern-matching subroutine
 source for the @sc{gnu} memory-mapped malloc package
 @end table
 
-The simplest way to configure and build @value{GDBN} is to run @code{configure}
+The simplest way to configure and build @value{GDBN} is to run @file{configure}
 from the @file{gdb-@var{version-number}} source directory, which in
 this example is the @file{gdb-@value{GDBVN}} directory.
 
 First switch to the @file{gdb-@var{version-number}} source directory
-if you are not already in it; then run @code{configure}.  Pass the
+if you are not already in it; then run @file{configure}.  Pass the
 identifier for the platform on which @value{GDBN} will run as an
 argument.
 
@@ -22210,7 +22209,7 @@ make
 @noindent
 where @var{host} is an identifier such as @samp{sun4} or
 @samp{decstation}, that identifies the platform where @value{GDBN} will run.
-(You can often leave off @var{host}; @code{configure} tries to guess the
+(You can often leave off @var{host}; @file{configure} tries to guess the
 correct value by examining your system.)
 
 Running @samp{configure @var{host}} and then running @code{make} builds the
@@ -22219,7 +22218,7 @@ libraries, then @code{gdb} itself.  The configured source files, and the
 binaries, are left in the corresponding source directories.
 
 @need 750
-@code{configure} is a Bourne-shell (@code{/bin/sh}) script; if your
+@file{configure} is a Bourne-shell (@code{/bin/sh}) script; if your
 system does not recognize this automatically when you run a different
 shell, you may need to run @code{sh} on it explicitly:
 
@@ -22227,17 +22226,18 @@ shell, you may need to run @code{sh} on it explicitly:
 sh configure @var{host}
 @end smallexample
 
-If you run @code{configure} from a directory that contains source
+If you run @file{configure} from a directory that contains source
 directories for multiple libraries or programs, such as the
-@file{gdb-@value{GDBVN}} source directory for version @value{GDBVN}, @code{configure}
+@file{gdb-@value{GDBVN}} source directory for version @value{GDBVN},
+@file{configure}
 creates configuration files for every directory level underneath (unless
 you tell it not to, with the @samp{--norecursion} option).
 
-You should run the @code{configure} script from the top directory in the
+You should run the @file{configure} script from the top directory in the
 source tree, the @file{gdb-@var{version-number}} directory.  If you run
-@code{configure} from one of the subdirectories, you will configure only
+@file{configure} from one of the subdirectories, you will configure only
 that subdirectory.  That is usually not what you want.  In particular,
-if you run the first @code{configure} from the @file{gdb} subdirectory
+if you run the first @file{configure} from the @file{gdb} subdirectory
 of the @file{gdb-@var{version-number}} directory, you will omit the
 configuration of @file{bfd}, @file{readline}, and other sibling
 directories of the @file{gdb} subdirectory.  This leads to build errors
@@ -22254,17 +22254,17 @@ let @value{GDBN} debug child processes whose programs are not readable.
 
 If you want to run @value{GDBN} versions for several host or target machines,
 you need a different @code{gdb} compiled for each combination of
-host and target.  @code{configure} is designed to make this easy by
+host and target.  @file{configure} is designed to make this easy by
 allowing you to generate each configuration in a separate subdirectory,
 rather than in the source directory.  If your @code{make} program
 handles the @samp{VPATH} feature (@sc{gnu} @code{make} does), running
 @code{make} in each of these directories builds the @code{gdb}
 program specified there.
 
-To build @code{gdb} in a separate directory, run @code{configure}
+To build @code{gdb} in a separate directory, run @file{configure}
 with the @samp{--srcdir} option to specify where to find the source.
-(You also need to specify a path to find @code{configure}
-itself from your working directory.  If the path to @code{configure}
+(You also need to specify a path to find @file{configure}
+itself from your working directory.  If the path to @file{configure}
 would be the same as the argument to @samp{--srcdir}, you can leave out
 the @samp{--srcdir} option; it is assumed.)
 
@@ -22281,7 +22281,7 @@ make
 @end group
 @end smallexample
 
-When @code{configure} builds a configuration using a remote source
+When @file{configure} builds a configuration using a remote source
 directory, it creates a tree for the binaries with the same structure
 (and using the same names) as the tree under the source directory.  In
 the example, you'd find the Sun 4 library @file{libiberty.a} in the
@@ -22299,13 +22299,13 @@ directories is to configure @value{GDBN} for cross-compiling (where
 @value{GDBN} runs on one machine---the @dfn{host}---while debugging
 programs that run on another machine---the @dfn{target}).
 You specify a cross-debugging target by
-giving the @samp{--target=@var{target}} option to @code{configure}.
+giving the @samp{--target=@var{target}} option to @file{configure}.
 
 When you run @code{make} to build a program or library, you must run
 it in a configured directory---whatever directory you were in when you
-called @code{configure} (or one of its subdirectories).
+called @file{configure} (or one of its subdirectories).
 
-The @code{Makefile} that @code{configure} generates in each source
+The @code{Makefile} that @file{configure} generates in each source
 directory also runs recursively.  If you type @code{make} in a source
 directory such as @file{gdb-@value{GDBVN}} (or in a separate configured
 directory configured with @samp{--srcdir=@var{dirname}/gdb-@value{GDBVN}}), you
@@ -22319,7 +22319,7 @@ with each other.
 @node Config Names
 @section Specifying Names for Hosts and Targets
 
-The specifications used for hosts and targets in the @code{configure}
+The specifications used for hosts and targets in the @file{configure}
 script are based on a three-part naming scheme, but some short predefined
 aliases are also supported.  The full naming scheme encodes three pieces
 of information in the following pattern:
@@ -22332,9 +22332,9 @@ For example, you can use the alias @code{sun4} as a @var{host} argument,
 or as the value for @var{target} in a @code{--target=@var{target}}
 option.  The equivalent full name is @samp{sparc-sun-sunos4}.
 
-The @code{configure} script accompanying @value{GDBN} does not provide
+The @file{configure} script accompanying @value{GDBN} does not provide
 any query facility to list all supported host and target names or
-aliases.  @code{configure} calls the Bourne shell script
+aliases.  @file{configure} calls the Bourne shell script
 @code{config.sub} to map abbreviations to full names; you can read the
 script, if you wish, or you can use it to test your guesses on
 abbreviations---for example:
@@ -22359,12 +22359,12 @@ Invalid configuration `i986v': machine `i986v' not recognized
 directory (@file{gdb-@value{GDBVN}}, for version @value{GDBVN}).
 
 @node Configure Options
-@section @code{configure} Options
+@section @file{configure} Options
 
-Here is a summary of the @code{configure} options and arguments that
-are most often useful for building @value{GDBN}.  @code{configure} also has
+Here is a summary of the @file{configure} options and arguments that
+are most often useful for building @value{GDBN}.  @file{configure} also has
 several other options not listed here.  @inforef{What Configure
-Does,,configure.info}, for a full explanation of @code{configure}.
+Does,,configure.info}, for a full explanation of @file{configure}.
 
 @smallexample
 configure @r{[}--help@r{]}
@@ -22383,7 +22383,7 @@ You may introduce options with a single @samp{-} rather than
 
 @table @code
 @item --help
-Display a quick summary of how to invoke @code{configure}.
+Display a quick summary of how to invoke @file{configure}.
 
 @item --prefix=@var{dir}
 Configure the source to install programs and files under directory
@@ -22401,14 +22401,14 @@ Configure the source to install programs under directory
 Use this option to make configurations in directories separate from the
 @value{GDBN} source directories.  Among other things, you can use this to
 build (or maintain) several configurations simultaneously, in separate
-directories.  @code{configure} writes configuration specific files in
+directories.  @file{configure} writes configuration-specific files in
 the current directory, but arranges for them to use the source in the
-directory @var{dirname}.  @code{configure} creates directories under
+directory @var{dirname}.  @file{configure} creates directories under
 the working directory in parallel to the source directories below
 @var{dirname}.
 
 @item --norecursion
-Configure only the directory level where @code{configure} is executed; do not
+Configure only the directory level where @file{configure} is executed; do not
 propagate configuration to subdirectories.
 
 @item --target=@var{target}
@@ -23647,7 +23647,7 @@ thread for which to fetch the TLS address.
 thread local variable.  (This offset is obtained from the debug
 information associated with the variable.)
 
-@var{lm} is the (big endian, hex encoded) OS/ABI specific encoding of the
+@var{lm} is the (big endian, hex encoded) OS/ABI-specific encoding of the
 the load module associated with the thread local storage.  For example,
 a @sc{gnu}/Linux system will pass the link map address of the shared
 object associated with the thread local storage under consideration. 
@@ -24382,7 +24382,7 @@ Example sequence of a target being stepped by a single instruction:
 * The Ctrl-C Message::
 * Console I/O::
 * List of Supported Calls::
-* Protocol Specific Representation of Datatypes::
+* Protocol-specific Representation of Datatypes::
 * Constants::
 * File-I/O Examples::
 @end menu
@@ -24452,7 +24452,7 @@ A unique identifier for the requested system call.
 All parameters to the system call.  Pointers are given as addresses
 in the target memory address space.  Pointers to strings are given as
 pointer/length pair.  Numerical values are given as they are.
-Numerical control flags are given in a protocol specific representation.
+Numerical control flags are given in a protocol-specific representation.
 
 @end itemize
 
@@ -24537,11 +24537,13 @@ The @code{F} reply packet has the following format:
 
 @table @samp
 
-@item F@var{retcode},@var{errno},@var{Ctrl-C flag};@var{call specific attachment}
+@item F@var{retcode},@var{errno},@var{Ctrl-C flag};@var{call-specific
+attachment}
 
 @var{retcode} is the return code of the system call as hexadecimal value.
 
-@var{errno} is the @code{errno} set by the call, in protocol specific representation.
+@var{errno} is the @code{errno} set by the call, in protocol-specific
+representation.
 This parameter can be omitted if the call was successful.
 
 @var{Ctrl-C flag} is only sent if the user requested a break.  In this
@@ -24560,7 +24562,7 @@ F-1,4,C
 @end smallexample
 
 @noindent
-assuming 4 is the protocol specific representation of @code{EINTR}.
+assuming 4 is the protocol-specific representation of @code{EINTR}.
 
 @end table
 
@@ -24872,7 +24874,7 @@ writing.
 
 @item EFBIG
 An attempt was made to write a file that exceeds the
-host specific maximum file size allowed.
+host-specific maximum file size allowed.
 
 @item ENOSPC
 No space on device to write the data.
@@ -25210,9 +25212,9 @@ Show whether the @code{system} calls are allowed in the File I/O
 protocol.
 @end table
 
-@node Protocol Specific Representation of Datatypes
-@subsection Protocol Specific Representation of Datatypes
-@cindex protocol specific representation of datatypes, in file-i/o protocol
+@node Protocol-specific Representation of Datatypes
+@subsection Protocol-specific Representation of Datatypes
+@cindex protocol-specific representation of datatypes, in file-i/o protocol
 
 @menu
 * Integral Datatypes::
@@ -25272,7 +25274,7 @@ at address 0x123456 is transmitted as
 @cindex memory transfer, in file-i/o protocol
 
 Structured data which is transferred using a memory read or write (for
-example, a @code{struct stat}) is expected to be in a protocol specific format 
+example, a @code{struct stat}) is expected to be in a protocol-specific format 
 with all scalar multibyte datatypes being big endian.  Translation to
 this representation needs to be done both by the target before the @code{F} 
 packet is sent, and by @value{GDBN} before 
