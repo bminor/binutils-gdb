@@ -73,7 +73,9 @@ struct libunwind_frame_cache
 #define STRINGIFY(name)		STRINGIFY2(name)
 
 #ifndef LIBUNWIND_SO
-#define LIBUNWIND_SO "libunwind-" STRINGIFY(UNW_TARGET) ".so"
+/* Use the stable ABI major version number.  `libunwind-ia64.so' is a link time
+   only library, not a runtime one.  */
+#define LIBUNWIND_SO "libunwind-" STRINGIFY(UNW_TARGET) ".so.7"
 #endif
 
 static char *get_reg_name = STRINGIFY(UNW_OBJ(get_reg));

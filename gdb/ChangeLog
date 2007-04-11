@@ -1,5 +1,9 @@
 2007-04-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* libunwind-frame.c (LIBUNWIND_SO): Use major version number for `.so'.
+
+2007-04-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdbtypes.h (TYPE_FLAG_STUB_SUPPORTED, TYPE_STUB_SUPPORTED): New
 	macros.
 	(TYPE_IS_OPAQUE): Empty vs. opaque structures are now
