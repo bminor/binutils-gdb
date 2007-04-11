@@ -5638,6 +5638,7 @@ is being used.
 
 @item -Wno-unused
 @itemx -Wno-switch
+@itemx -Wno-char-subscripts
 These are warnings which might be useful for @value{GDBN}, but are
 currently too noisy to enable with @samp{-Werror}.
 

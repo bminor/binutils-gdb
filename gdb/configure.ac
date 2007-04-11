@@ -1169,7 +1169,7 @@ fi
 # gdb/doc/gdbint.texinfo.
 build_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith \
 -Wformat-nonliteral -Wno-pointer-sign \
--Wno-unused -Wno-switch"
+-Wno-unused -Wno-switch -Wno-char-subscripts"
 
 AC_ARG_ENABLE(build-warnings,
 [  --enable-build-warnings Enable build-time compiler warnings if gcc is used],

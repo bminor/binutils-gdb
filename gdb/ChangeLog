@@ -1,3 +1,9 @@
+2007-04-11  Steve Ellcey  <sje@cup.hp.com>
+
+	* configure.ac (build_warnings): Add -Wno-char-subscripts.
+	* configure: Regenerate.
+	* doc/gdbint.texinfo (warning flags): Add -Wno-char-subscripts.
+
 2007-04-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* libunwind-frame.c (LIBUNWIND_SO): Use major version number for `.so'.
