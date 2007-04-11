@@ -400,33 +400,34 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 
 #define FLOAT	  NULL, { { NULL, FLOATCODE } }
 
-#define GRP1b	  NULL, { { NULL, USE_GROUPS }, { NULL,  0 } }
-#define GRP1S	  NULL, { { NULL, USE_GROUPS }, { NULL,  1 } }
-#define GRP1Ss	  NULL, { { NULL, USE_GROUPS }, { NULL,  2 } }
-#define GRP2b	  NULL, { { NULL, USE_GROUPS }, { NULL,  3 } }
-#define GRP2S	  NULL, { { NULL, USE_GROUPS }, { NULL,  4 } }
-#define GRP2b_one NULL, { { NULL, USE_GROUPS }, { NULL,  5 } }
-#define GRP2S_one NULL, { { NULL, USE_GROUPS }, { NULL,  6 } }
-#define GRP2b_cl  NULL, { { NULL, USE_GROUPS }, { NULL,  7 } }
-#define GRP2S_cl  NULL, { { NULL, USE_GROUPS }, { NULL,  8 } }
-#define GRP3b	  NULL, { { NULL, USE_GROUPS }, { NULL,  9 } }
-#define GRP3S	  NULL, { { NULL, USE_GROUPS }, { NULL, 10 } }
-#define GRP4	  NULL, { { NULL, USE_GROUPS }, { NULL, 11 } }
-#define GRP5	  NULL, { { NULL, USE_GROUPS }, { NULL, 12 } }
-#define GRP6	  NULL, { { NULL, USE_GROUPS }, { NULL, 13 } }
-#define GRP7	  NULL, { { NULL, USE_GROUPS }, { NULL, 14 } }
-#define GRP8	  NULL, { { NULL, USE_GROUPS }, { NULL, 15 } }
-#define GRP9	  NULL, { { NULL, USE_GROUPS }, { NULL, 16 } }
-#define GRP11_C6  NULL, { { NULL, USE_GROUPS }, { NULL, 17 } }
-#define GRP11_C7  NULL, { { NULL, USE_GROUPS }, { NULL, 18 } }
-#define GRP12	  NULL, { { NULL, USE_GROUPS }, { NULL, 19 } }
-#define GRP13	  NULL, { { NULL, USE_GROUPS }, { NULL, 20 } }
-#define GRP14	  NULL, { { NULL, USE_GROUPS }, { NULL, 21 } }
-#define GRP15	  NULL, { { NULL, USE_GROUPS }, { NULL, 22 } }
-#define GRP16	  NULL, { { NULL, USE_GROUPS }, { NULL, 23 } }
-#define GRPAMD	  NULL, { { NULL, USE_GROUPS }, { NULL, 24 } }
-#define GRPPADLCK1 NULL, { { NULL, USE_GROUPS }, { NULL, 25 } }
-#define GRPPADLCK2 NULL, { { NULL, USE_GROUPS }, { NULL, 26 } }
+#define GRP1a	  NULL, { { NULL, USE_GROUPS }, { NULL,  0 } }
+#define GRP1b	  NULL, { { NULL, USE_GROUPS }, { NULL,  1 } }
+#define GRP1S	  NULL, { { NULL, USE_GROUPS }, { NULL,  2 } }
+#define GRP1Ss	  NULL, { { NULL, USE_GROUPS }, { NULL,  3 } }
+#define GRP2b	  NULL, { { NULL, USE_GROUPS }, { NULL,  4 } }
+#define GRP2S	  NULL, { { NULL, USE_GROUPS }, { NULL,  5 } }
+#define GRP2b_one NULL, { { NULL, USE_GROUPS }, { NULL,  6 } }
+#define GRP2S_one NULL, { { NULL, USE_GROUPS }, { NULL,  7 } }
+#define GRP2b_cl  NULL, { { NULL, USE_GROUPS }, { NULL,  8 } }
+#define GRP2S_cl  NULL, { { NULL, USE_GROUPS }, { NULL,  9 } }
+#define GRP3b	  NULL, { { NULL, USE_GROUPS }, { NULL, 10 } }
+#define GRP3S	  NULL, { { NULL, USE_GROUPS }, { NULL, 11 } }
+#define GRP4	  NULL, { { NULL, USE_GROUPS }, { NULL, 12 } }
+#define GRP5	  NULL, { { NULL, USE_GROUPS }, { NULL, 13 } }
+#define GRP6	  NULL, { { NULL, USE_GROUPS }, { NULL, 14 } }
+#define GRP7	  NULL, { { NULL, USE_GROUPS }, { NULL, 15 } }
+#define GRP8	  NULL, { { NULL, USE_GROUPS }, { NULL, 16 } }
+#define GRP9	  NULL, { { NULL, USE_GROUPS }, { NULL, 17 } }
+#define GRP11_C6  NULL, { { NULL, USE_GROUPS }, { NULL, 18 } }
+#define GRP11_C7  NULL, { { NULL, USE_GROUPS }, { NULL, 19 } }
+#define GRP12	  NULL, { { NULL, USE_GROUPS }, { NULL, 20 } }
+#define GRP13	  NULL, { { NULL, USE_GROUPS }, { NULL, 21 } }
+#define GRP14	  NULL, { { NULL, USE_GROUPS }, { NULL, 22 } }
+#define GRP15	  NULL, { { NULL, USE_GROUPS }, { NULL, 23 } }
+#define GRP16	  NULL, { { NULL, USE_GROUPS }, { NULL, 24 } }
+#define GRPAMD	  NULL, { { NULL, USE_GROUPS }, { NULL, 25 } }
+#define GRPPADLCK1 NULL, { { NULL, USE_GROUPS }, { NULL, 26 } }
+#define GRPPADLCK2 NULL, { { NULL, USE_GROUPS }, { NULL, 27 } }
 
 #define PREGRP0   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  0 } }
 #define PREGRP1   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  1 } }
@@ -690,7 +691,7 @@ static const struct dis386 dis386[] = {
   { "movD",		{ Sv, Sw } },
   { "leaS",		{ Gv, M } },
   { "movD",		{ Sw, Sv } },
-  { "popU",		{ stackEv } },
+  { GRP1a },
   /* 90 */
   { PREGRP38 },
   { "xchgS",		{ RMeCX, eAX } },
@@ -1376,9 +1377,13 @@ static unsigned char *start_codep;
 static unsigned char *insn_codep;
 static unsigned char *codep;
 static disassemble_info *the_info;
-static int mod;
-static int rm;
-static int reg;
+static struct
+  {
+    int mod;
+    int rm;
+    int reg;
+  }
+modrm;
 static unsigned char need_modrm;
 
 /* If we are accessing mod/rm/reg without need_modrm set, then the
@@ -1447,6 +1452,17 @@ static const char *att_index16[] = {
 };
 
 static const struct dis386 grps[][8] = {
+  /* GRP1a */
+  {
+    { "popU",	{ stackEv } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+  },
   /* GRP1b */
   {
     { "addA",	{ Eb, Ib } },
@@ -3158,16 +3174,16 @@ print_insn (bfd_vma pc, disassemble_info *info)
   if (dp->name == NULL && dp->op[0].bytemode == IS_3BYTE_OPCODE)
     {
       dp = &three_byte_table[dp->op[1].bytemode][op];
-      mod = (*codep >> 6) & 3;
-      reg = (*codep >> 3) & 7;
-      rm = *codep & 7;
+      modrm.mod = (*codep >> 6) & 3;
+      modrm.reg = (*codep >> 3) & 7;
+      modrm.rm = *codep & 7;
     }
   else if (need_modrm)
     {
       FETCH_DATA (info, codep + 1);
-      mod = (*codep >> 6) & 3;
-      reg = (*codep >> 3) & 7;
-      rm = *codep & 7;
+      modrm.mod = (*codep >> 6) & 3;
+      modrm.reg = (*codep >> 3) & 7;
+      modrm.rm = *codep & 7;
     }
 
   if (dp->name == NULL && dp->op[0].bytemode == FLOATCODE)
@@ -3182,7 +3198,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
 	  switch (dp->op[0].bytemode)
 	    {
 	    case USE_GROUPS:
-	      dp = &grps[dp->op[1].bytemode][reg];
+	      dp = &grps[dp->op[1].bytemode][modrm.reg];
 	      break;
 
 	    case USE_PREFIX_USER_TABLE:
@@ -3626,9 +3642,9 @@ dofloat (int sizeflag)
 
   floatop = codep[-1];
 
-  if (mod != 3)
+  if (modrm.mod != 3)
     {
-      int fp_indx = (floatop - 0xd8) * 8 + reg;
+      int fp_indx = (floatop - 0xd8) * 8 + modrm.reg;
 
       putop (float_mem[fp_indx], sizeflag);
       obufp = op_out[0];
@@ -3640,10 +3656,10 @@ dofloat (int sizeflag)
   MODRM_CHECK;
   codep++;
 
-  dp = &float_reg[floatop - 0xd8][reg];
+  dp = &float_reg[floatop - 0xd8][modrm.reg];
   if (dp->name == NULL)
     {
-      putop (fgrps[dp->op[0].bytemode][rm], sizeflag);
+      putop (fgrps[dp->op[0].bytemode][modrm.rm], sizeflag);
 
       /* Instruction fnstsw is only one with strange arg.  */
       if (floatop == 0xdf && codep[-1] == 0xe0)
@@ -3674,7 +3690,7 @@ OP_ST (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 static void
 OP_STi (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 {
-  sprintf (scratchbuf, "%%st(%d)", rm);
+  sprintf (scratchbuf, "%%st(%d)", modrm.rm);
   oappend (scratchbuf + intel_syntax);
 }
 
@@ -3730,7 +3746,7 @@ putop (const char *template, int sizeflag)
 	case 'A':
 	  if (intel_syntax)
 	    break;
-	  if (mod != 3 || (sizeflag & SUFFIX_ALWAYS))
+	  if (modrm.mod != 3 || (sizeflag & SUFFIX_ALWAYS))
 	    *obufp++ = 'b';
 	  break;
 	case 'B':
@@ -3755,7 +3771,7 @@ putop (const char *template, int sizeflag)
 	  if (intel_syntax || !(sizeflag & SUFFIX_ALWAYS))
 	    break;
 	  USED_REX (REX_W);
-	  if (mod == 3)
+	  if (modrm.mod == 3)
 	    {
 	      if (rex & REX_W)
 		*obufp++ = 'q';
@@ -3889,7 +3905,7 @@ putop (const char *template, int sizeflag)
 	    break;
 	  if (address_mode == mode_64bit && (sizeflag & DFLAG))
 	    {
-	      if (mod != 3 || (sizeflag & SUFFIX_ALWAYS))
+	      if (modrm.mod != 3 || (sizeflag & SUFFIX_ALWAYS))
 		*obufp++ = 'q';
 	      break;
 	    }
@@ -3898,7 +3914,7 @@ putop (const char *template, int sizeflag)
 	  if (intel_syntax && !alt)
 	    break;
 	  USED_REX (REX_W);
-	  if (mod != 3 || (sizeflag & SUFFIX_ALWAYS))
+	  if (modrm.mod != 3 || (sizeflag & SUFFIX_ALWAYS))
 	    {
 	      if (rex & REX_W)
 		*obufp++ = 'q';
@@ -4191,36 +4207,36 @@ OP_E (int bytemode, int sizeflag)
   MODRM_CHECK;
   codep++;
 
-  if (mod == 3)
+  if (modrm.mod == 3)
     {
       switch (bytemode)
 	{
 	case b_mode:
 	  USED_REX (0);
 	  if (rex)
-	    oappend (names8rex[rm + add]);
+	    oappend (names8rex[modrm.rm + add]);
 	  else
-	    oappend (names8[rm + add]);
+	    oappend (names8[modrm.rm + add]);
 	  break;
 	case w_mode:
-	  oappend (names16[rm + add]);
+	  oappend (names16[modrm.rm + add]);
 	  break;
 	case d_mode:
-	  oappend (names32[rm + add]);
+	  oappend (names32[modrm.rm + add]);
 	  break;
 	case q_mode:
-	  oappend (names64[rm + add]);
+	  oappend (names64[modrm.rm + add]);
 	  break;
 	case m_mode:
 	  if (address_mode == mode_64bit)
-	    oappend (names64[rm + add]);
+	    oappend (names64[modrm.rm + add]);
 	  else
-	    oappend (names32[rm + add]);
+	    oappend (names32[modrm.rm + add]);
 	  break;
 	case stack_v_mode:
 	  if (address_mode == mode_64bit && (sizeflag & DFLAG))
 	    {
-	      oappend (names64[rm + add]);
+	      oappend (names64[modrm.rm + add]);
 	      used_prefixes |= (prefixes & PREFIX_DATA);
 	      break;
 	    }
@@ -4231,11 +4247,11 @@ OP_E (int bytemode, int sizeflag)
 	case dqw_mode:
 	  USED_REX (REX_W);
 	  if (rex & REX_W)
-	    oappend (names64[rm + add]);
+	    oappend (names64[modrm.rm + add]);
 	  else if ((sizeflag & DFLAG) || bytemode != v_mode)
-	    oappend (names32[rm + add]);
+	    oappend (names32[modrm.rm + add]);
 	  else
-	    oappend (names16[rm + add]);
+	    oappend (names16[modrm.rm + add]);
 	  used_prefixes |= (prefixes & PREFIX_DATA);
 	  break;
 	case 0:
@@ -4262,7 +4278,7 @@ OP_E (int bytemode, int sizeflag)
 
       havesib = 0;
       havebase = 1;
-      base = rm;
+      base = modrm.rm;
 
       if (base == 4)
 	{
@@ -4280,7 +4296,7 @@ OP_E (int bytemode, int sizeflag)
 	}
       base += add;
 
-      switch (mod)
+      switch (modrm.mod)
 	{
 	case 0:
 	  if ((base & 7) == 5)
@@ -4303,7 +4319,7 @@ OP_E (int bytemode, int sizeflag)
 	}
 
       if (!intel_syntax)
-	if (mod != 0 || (base & 7) == 5)
+	if (modrm.mod != 0 || (base & 7) == 5)
 	  {
 	    print_operand_value (scratchbuf, !riprel, disp);
 	    oappend (scratchbuf);
@@ -4350,14 +4366,14 @@ OP_E (int bytemode, int sizeflag)
 		  *obufp++ = '+';
 		  *obufp = '\0';
 		}
-	      else if (mod != 1)
+	      else if (modrm.mod != 1)
 		{
 		  *obufp++ = '-';
 		  *obufp = '\0';
 		  disp = - (bfd_signed_vma) disp;
 		}
 
-	      print_operand_value (scratchbuf, mod != 1, disp);
+	      print_operand_value (scratchbuf, modrm.mod != 1, disp);
 	      oappend (scratchbuf);
 	    }
 
@@ -4366,7 +4382,7 @@ OP_E (int bytemode, int sizeflag)
 	}
       else if (intel_syntax)
 	{
-	  if (mod != 0 || (base & 7) == 5)
+	  if (modrm.mod != 0 || (base & 7) == 5)
 	    {
 	      if (prefixes & (PREFIX_CS | PREFIX_SS | PREFIX_DS
 			      | PREFIX_ES | PREFIX_FS | PREFIX_GS))
@@ -4383,10 +4399,10 @@ OP_E (int bytemode, int sizeflag)
     }
   else
     { /* 16 bit address mode */
-      switch (mod)
+      switch (modrm.mod)
 	{
 	case 0:
-	  if (rm == 6)
+	  if (modrm.rm == 6)
 	    {
 	      disp = get16 ();
 	      if ((disp & 0x8000) != 0)
@@ -4407,17 +4423,17 @@ OP_E (int bytemode, int sizeflag)
 	}
 
       if (!intel_syntax)
-	if (mod != 0 || rm == 6)
+	if (modrm.mod != 0 || modrm.rm == 6)
 	  {
 	    print_operand_value (scratchbuf, 0, disp);
 	    oappend (scratchbuf);
 	  }
 
-      if (mod != 0 || rm != 6)
+      if (modrm.mod != 0 || modrm.rm != 6)
 	{
 	  *obufp++ = open_char;
 	  *obufp = '\0';
-	  oappend (index16[rm]);
+	  oappend (index16[modrm.rm]);
 	  if (intel_syntax && disp)
 	    {
 	      if ((bfd_signed_vma) disp > 0)
@@ -4425,14 +4441,14 @@ OP_E (int bytemode, int sizeflag)
 		  *obufp++ = '+';
 		  *obufp = '\0';
 		}
-	      else if (mod != 1)
+	      else if (modrm.mod != 1)
 		{
 		  *obufp++ = '-';
 		  *obufp = '\0';
 		  disp = - (bfd_signed_vma) disp;
 		}
 
-	      print_operand_value (scratchbuf, mod != 1, disp);
+	      print_operand_value (scratchbuf, modrm.mod != 1, disp);
 	      oappend (scratchbuf);
 	    }
 
@@ -4467,36 +4483,36 @@ OP_G (int bytemode, int sizeflag)
     case b_mode:
       USED_REX (0);
       if (rex)
-	oappend (names8rex[reg + add]);
+	oappend (names8rex[modrm.reg + add]);
       else
-	oappend (names8[reg + add]);
+	oappend (names8[modrm.reg + add]);
       break;
     case w_mode:
-      oappend (names16[reg + add]);
+      oappend (names16[modrm.reg + add]);
       break;
     case d_mode:
-      oappend (names32[reg + add]);
+      oappend (names32[modrm.reg + add]);
       break;
     case q_mode:
-      oappend (names64[reg + add]);
+      oappend (names64[modrm.reg + add]);
       break;
     case v_mode:
     case dq_mode:
     case dqw_mode:
       USED_REX (REX_W);
       if (rex & REX_W)
-	oappend (names64[reg + add]);
+	oappend (names64[modrm.reg + add]);
       else if ((sizeflag & DFLAG) || bytemode != v_mode)
-	oappend (names32[reg + add]);
+	oappend (names32[modrm.reg + add]);
       else
-	oappend (names16[reg + add]);
+	oappend (names16[modrm.reg + add]);
       used_prefixes |= (prefixes & PREFIX_DATA);
       break;
     case m_mode:
       if (address_mode == mode_64bit)
-	oappend (names64[reg + add]);
+	oappend (names64[modrm.reg + add]);
       else
-	oappend (names32[reg + add]);
+	oappend (names32[modrm.reg + add]);
       break;
     default:
       oappend (INTERNAL_DISASSEMBLER_ERROR);
@@ -4899,9 +4915,9 @@ static void
 OP_SEG (int bytemode, int sizeflag)
 {
   if (bytemode == w_mode)
-    oappend (names_seg[reg]);
+    oappend (names_seg[modrm.reg]);
   else
-    OP_E (mod == 3 ? bytemode : w_mode, sizeflag);
+    OP_E (modrm.mod == 3 ? bytemode : w_mode, sizeflag);
 }
 
 static void
@@ -5077,7 +5093,7 @@ OP_C (int dummy ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
       used_prefixes |= PREFIX_LOCK;
       add = 8;
     }
-  sprintf (scratchbuf, "%%cr%d", reg + add);
+  sprintf (scratchbuf, "%%cr%d", modrm.reg + add);
   oappend (scratchbuf + intel_syntax);
 }
 
@@ -5089,23 +5105,23 @@ OP_D (int dummy ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
   if (rex & REX_R)
     add = 8;
   if (intel_syntax)
-    sprintf (scratchbuf, "db%d", reg + add);
+    sprintf (scratchbuf, "db%d", modrm.reg + add);
   else
-    sprintf (scratchbuf, "%%db%d", reg + add);
+    sprintf (scratchbuf, "%%db%d", modrm.reg + add);
   oappend (scratchbuf);
 }
 
 static void
 OP_T (int dummy ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 {
-  sprintf (scratchbuf, "%%tr%d", reg);
+  sprintf (scratchbuf, "%%tr%d", modrm.reg);
   oappend (scratchbuf + intel_syntax);
 }
 
 static void
 OP_R (int bytemode, int sizeflag)
 {
-  if (mod == 3)
+  if (modrm.mod == 3)
     OP_E (bytemode, sizeflag);
   else
     BadOp ();
@@ -5121,10 +5137,10 @@ OP_MMX (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
       USED_REX (REX_R);
       if (rex & REX_R)
 	add = 8;
-      sprintf (scratchbuf, "%%xmm%d", reg + add);
+      sprintf (scratchbuf, "%%xmm%d", modrm.reg + add);
     }
   else
-    sprintf (scratchbuf, "%%mm%d", reg);
+    sprintf (scratchbuf, "%%mm%d", modrm.reg);
   oappend (scratchbuf + intel_syntax);
 }
 
@@ -5135,14 +5151,14 @@ OP_XMM (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
   USED_REX (REX_R);
   if (rex & REX_R)
     add = 8;
-  sprintf (scratchbuf, "%%xmm%d", reg + add);
+  sprintf (scratchbuf, "%%xmm%d", modrm.reg + add);
   oappend (scratchbuf + intel_syntax);
 }
 
 static void
 OP_EM (int bytemode, int sizeflag)
 {
-  if (mod != 3)
+  if (modrm.mod != 3)
     {
       if (intel_syntax && bytemode == v_mode)
 	{
@@ -5164,10 +5180,10 @@ OP_EM (int bytemode, int sizeflag)
       USED_REX (REX_B);
       if (rex & REX_B)
 	add = 8;
-      sprintf (scratchbuf, "%%xmm%d", rm + add);
+      sprintf (scratchbuf, "%%xmm%d", modrm.rm + add);
     }
   else
-    sprintf (scratchbuf, "%%mm%d", rm);
+    sprintf (scratchbuf, "%%mm%d", modrm.rm);
   oappend (scratchbuf + intel_syntax);
 }
 
@@ -5179,7 +5195,7 @@ OP_EM (int bytemode, int sizeflag)
 static void
 OP_EMC (int bytemode, int sizeflag)
 {
-  if (mod != 3)
+  if (modrm.mod != 3)
     {
       if (intel_syntax && bytemode == v_mode)
 	{
@@ -5194,7 +5210,7 @@ OP_EMC (int bytemode, int sizeflag)
   MODRM_CHECK;
   codep++;
   used_prefixes |= (prefixes & PREFIX_DATA);
-  sprintf (scratchbuf, "%%mm%d", rm);
+  sprintf (scratchbuf, "%%mm%d", modrm.rm);
   oappend (scratchbuf + intel_syntax);
 }
 
@@ -5202,7 +5218,7 @@ static void
 OP_MXC (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 {
   used_prefixes |= (prefixes & PREFIX_DATA);
-  sprintf (scratchbuf, "%%mm%d", reg);
+  sprintf (scratchbuf, "%%mm%d", modrm.reg);
   oappend (scratchbuf + intel_syntax);
 }
 
@@ -5210,7 +5226,7 @@ static void
 OP_EX (int bytemode, int sizeflag)
 {
   int add = 0;
-  if (mod != 3)
+  if (modrm.mod != 3)
     {
       if (intel_syntax && bytemode == v_mode)
 	{
@@ -5233,14 +5249,14 @@ OP_EX (int bytemode, int sizeflag)
   /* Skip mod/rm byte.  */
   MODRM_CHECK;
   codep++;
-  sprintf (scratchbuf, "%%xmm%d", rm + add);
+  sprintf (scratchbuf, "%%xmm%d", modrm.rm + add);
   oappend (scratchbuf + intel_syntax);
 }
 
 static void
 OP_MS (int bytemode, int sizeflag)
 {
-  if (mod == 3)
+  if (modrm.mod == 3)
     OP_EM (bytemode, sizeflag);
   else
     BadOp ();
@@ -5249,7 +5265,7 @@ OP_MS (int bytemode, int sizeflag)
 static void
 OP_XS (int bytemode, int sizeflag)
 {
-  if (mod == 3)
+  if (modrm.mod == 3)
     OP_EX (bytemode, sizeflag);
   else
     BadOp ();
@@ -5258,7 +5274,7 @@ OP_XS (int bytemode, int sizeflag)
 static void
 OP_M (int bytemode, int sizeflag)
 {
-  if (mod == 3)
+  if (modrm.mod == 3)
     /* bad bound,lea,lds,les,lfs,lgs,lss,cmpxchg8b,vmptrst modrm */
     BadOp ();
   else
@@ -5268,7 +5284,7 @@ OP_M (int bytemode, int sizeflag)
 static void
 OP_0f07 (int bytemode, int sizeflag)
 {
-  if (mod != 3 || rm != 0)
+  if (modrm.mod != 3 || modrm.rm != 0)
     BadOp ();
   else
     OP_E (bytemode, sizeflag);
@@ -5277,18 +5293,18 @@ OP_0f07 (int bytemode, int sizeflag)
 static void
 OP_0fae (int bytemode, int sizeflag)
 {
-  if (mod == 3)
+  if (modrm.mod == 3)
     {
-      if (reg == 7)
+      if (modrm.reg == 7)
 	strcpy (obuf + strlen (obuf) - sizeof ("clflush") + 1, "sfence");
 
-      if (reg < 5 || rm != 0)
+      if (modrm.reg < 5 || modrm.rm != 0)
 	{
 	  BadOp ();	/* bad sfence, mfence, or lfence */
 	  return;
 	}
     }
-  else if (reg != 7)
+  else if (modrm.reg != 7)
     {
       BadOp ();		/* bad clflush */
       return;
@@ -5470,7 +5486,7 @@ SIMD_Fixup (int extrachar, int sizeflag ATTRIBUTE_UNUSED)
 {
   /* Change movlps/movhps to movhlps/movlhps for 2 register operand
      forms of these instructions.  */
-  if (mod == 3)
+  if (modrm.mod == 3)
     {
       char *p = obuf + strlen (obuf);
       *(p + 1) = '\0';
@@ -5484,7 +5500,7 @@ SIMD_Fixup (int extrachar, int sizeflag ATTRIBUTE_UNUSED)
 static void
 PNI_Fixup (int extrachar ATTRIBUTE_UNUSED, int sizeflag)
 {
-  if (mod == 3 && reg == 1 && rm <= 1)
+  if (modrm.mod == 3 && modrm.reg == 1 && modrm.rm <= 1)
     {
       /* Override "sidt".  */
       size_t olen = strlen (obuf);
@@ -5506,7 +5522,7 @@ PNI_Fixup (int extrachar ATTRIBUTE_UNUSED, int sizeflag)
 	      || CONST_STRNEQ (p - 3, "32")))
 	p -= 7;
 
-      if (rm)
+      if (modrm.rm)
 	{
 	  /* mwait %eax,%ecx  */
 	  strcpy (p, "mwait");
@@ -5648,7 +5664,10 @@ BadOp (void)
 static void
 VMX_Fixup (int extrachar ATTRIBUTE_UNUSED, int sizeflag)
 {
-  if (mod == 3 && reg == 0 && rm >=1 && rm <= 4)
+  if (modrm.mod == 3
+      && modrm.reg == 0
+      && modrm.rm >=1
+      && modrm.rm <= 4)
     {
       /* Override "sgdt".  */
       char *p = obuf + strlen (obuf) - 4;
@@ -5657,7 +5676,7 @@ VMX_Fixup (int extrachar ATTRIBUTE_UNUSED, int sizeflag)
       if (*p == 'g')
 	--p;
 
-      switch (rm)
+      switch (modrm.rm)
 	{
 	case 1:
 	  strcpy (p, "vmcall");

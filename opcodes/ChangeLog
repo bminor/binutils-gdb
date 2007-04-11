@@ -1,3 +1,13 @@
+2007-04-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/4333
+	* i386-dis.c (GRP1a): New.
+	(GRP1b ... GRPPADLCK2): Update index.
+	(dis386): Use GRP1a for entry 0x8f.
+	(mod, rm, reg): Removed. Replaced by ...
+	(modrm): This.
+	(grps): Add GRP1a.
+
 2007-04-09  Kazu Hirata  <kazu@codesourcery.com>
 
 	* m68k-dis.c (print_insn_m68k): Restore info->fprintf_func and
