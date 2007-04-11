@@ -1,3 +1,11 @@
+2007-04-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdbtypes.h (TYPE_FLAG_STUB_SUPPORTED, TYPE_STUB_SUPPORTED): New
+	macros.
+	(TYPE_IS_OPAQUE): Empty vs. opaque structures are now
+	distinct on the TYPE_STUB_SUPPORTED debug targets.
+	* dwarf2read.c (read_structure_type): Set TYPE_FLAG_STUB_SUPPORTED.
+
 2007-04-11  Joel Brobecker  <brobecker@adacore.com>
 
 	* sparc-tdep.c (X_RS2): New macro.

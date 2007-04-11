@@ -319,6 +319,14 @@ enum type_code
 
 #define TYPE_FLAG_FIXED_INSTANCE (1 << 15)
 
+/* This debug target supports TYPE_STUB(t).  In the unsupported case we have to
+   rely on NFIELDS to be zero etc., see TYPE_IS_OPAQUE ().
+   TYPE_STUB(t) with !TYPE_STUB_SUPPORTED(t) may exist if we only guessed
+   the TYPE_STUB(t) value (see dwarfread.c).  */
+
+#define TYPE_FLAG_STUB_SUPPORTED (1 << 16)
+#define TYPE_STUB_SUPPORTED(t)   (TYPE_FLAGS (t) & TYPE_FLAG_STUB_SUPPORTED)
+
 /*  Array bound type.  */
 enum array_bound_type
 {
@@ -969,7 +977,8 @@ extern void allocate_cplus_struct_type (struct type *);
 #define TYPE_IS_OPAQUE(thistype) (((TYPE_CODE (thistype) == TYPE_CODE_STRUCT) ||        \
                                    (TYPE_CODE (thistype) == TYPE_CODE_UNION))        && \
                                   (TYPE_NFIELDS (thistype) == 0)                     && \
-                                  (TYPE_CPLUS_SPECIFIC (thistype) && (TYPE_NFN_FIELDS (thistype) == 0)))
+                                  (TYPE_CPLUS_SPECIFIC (thistype) && (TYPE_NFN_FIELDS (thistype) == 0)) && \
+                                  (TYPE_STUB (thistype) || !TYPE_STUB_SUPPORTED (thistype)))
 
 struct builtin_type
 {

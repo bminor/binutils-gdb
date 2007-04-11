@@ -3879,6 +3879,7 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
       TYPE_LENGTH (type) = 0;
     }
 
+  TYPE_FLAGS (type) |= TYPE_FLAG_STUB_SUPPORTED;
   if (die_is_declaration (die, cu))
     TYPE_FLAGS (type) |= TYPE_FLAG_STUB;
 
