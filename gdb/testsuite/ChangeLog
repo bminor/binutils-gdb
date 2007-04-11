@@ -1,3 +1,8 @@
+2007-04-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/type-opaque-lib.c, gdb.base/type-opaque-main.c,
+	gdb.base/type-opaque.exp: New files.
+
 2007-04-01  Vladimir Prus  <vladimir@codesourcery.com>
 	
 	* gdb.mi/mi-var-child.c	
