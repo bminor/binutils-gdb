@@ -1,3 +1,8 @@
+2007-04-11  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdbint.texinfo (Writing Tests): Mention gdb_test_multiple
+	and tab expansion.
+
 2007-04-10  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdbint.texinfo (SOM): Correct location of the SOM reader.

@@ -7144,7 +7144,14 @@ instance, @file{gdb.base/exprs.exp} defines a @code{test_expr} that
 calls @code{gdb_test} multiple times.
 
 Only use @code{send_gdb} and @code{gdb_expect} when absolutely
-necessary, such as when @value{GDBN} has several valid responses to a command.
+necessary.  Even if @value{GDBN} has several valid responses to
+a command, you can use @code{gdb_test_multiple}.  Like @code{gdb_test},
+@code{gdb_test_multiple} recognizes internal errors and unexpected
+prompts.
+
+Do not write tests which expect a literal tab character from @value{GDBN}.
+On some operating systems (e.g.@: OpenBSD) the TTY layer expands tabs to
+spaces, so by the time @value{GDBN}'s output reaches expect the tab is gone.
 
 The source language programs do @emph{not} need to be in a consistent
 style.  Since @value{GDBN} is used to debug programs written in many different
