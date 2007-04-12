@@ -1,3 +1,8 @@
+2007-04-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (needs_ovl_stub): Test that spu_elf_section_data
+	is non-NULL before dereferencing.
+
 2007-04-11  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* elf-vxworks.c (elf_vxworks_emit_relocs): Remap weakdef PLT slot

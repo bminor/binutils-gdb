@@ -704,7 +704,8 @@ needs_ovl_stub (const char *sym_name,
     return FALSE;
 
   if (sym_sec == NULL
-      || sym_sec->output_section == NULL)
+      || sym_sec->output_section == NULL
+      || spu_elf_section_data (sym_sec->output_section) == NULL)
     return FALSE;
 
   /* setjmp always goes via an overlay stub, because then the return
