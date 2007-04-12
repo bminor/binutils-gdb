@@ -1521,13 +1521,8 @@ copy_object (bfd *ibfd, bfd *obfd)
 	}
     }
 
-  if (bfd_count_sections (obfd) == 0)
-    {
-      non_fatal (_("there are no sections to be copied!"));
-      return FALSE;
-    }
-
-  if (gap_fill_set || pad_to_set)
+  if (bfd_count_sections (obfd) != 0
+      && (gap_fill_set || pad_to_set))
     {
       asection **set;
       unsigned int c, i;

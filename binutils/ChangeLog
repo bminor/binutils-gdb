@@ -1,3 +1,9 @@
+2007-04-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/4348
+	* objcopy.c (copy_object): Don't stop when there are no
+	sections to be copied.
+
 2007-04-10  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* NEWS: Mention disjoint histograms support in
