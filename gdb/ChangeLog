@@ -1,3 +1,12 @@
+2007-04-12  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* config/m68k/tm-monitor.h: Delete file.
+	* config/m68k/monitor.mt (DEPRECATED_TM_FILE): Remove.
+	* m68k-tdep.c (m68k_gdbarch_init): set_gdbarch_decr_pc_after_break
+	call moved to ...
+	* m68kbsd-tdep.c (m68kbsd_init_abi): ... here and ...
+	* m68klinux-tdep.c (m68k_linux_init_abi): ... here.
+
 2007-04-12  Luis Machado  <luisgpm@br.ibm.com>
 
 	* gdbarch.sh (software_single_step): Change the return type

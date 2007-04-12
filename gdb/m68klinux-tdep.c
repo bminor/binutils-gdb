@@ -294,6 +294,8 @@ m68k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->struct_value_regnum = M68K_A1_REGNUM;
   tdep->struct_return = reg_struct_return;
 
+  set_gdbarch_decr_pc_after_break (gdbarch, 2);
+
   frame_unwind_append_sniffer (gdbarch, m68k_linux_sigtramp_frame_sniffer);
 
   /* Shared library handling.  */

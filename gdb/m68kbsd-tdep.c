@@ -193,6 +193,8 @@ m68kbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->jb_pc = 5;
   tdep->jb_elt_size = 4;
 
+  set_gdbarch_decr_pc_after_break (gdbarch, 2);
+
   set_gdbarch_regset_from_core_section
     (gdbarch, m68kbsd_regset_from_core_section);
 }
