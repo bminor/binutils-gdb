@@ -1,3 +1,23 @@
+2007-04-12  Luis Machado  <luisgpm@br.ibm.com>
+
+	* gdbarch.sh (software_single_step): Change the return type
+	from void to int and reformatted some comments to <= 80
+	columns.
+	* gdbarch.c, gdbarch.h: Regenerated.
+	* alpha-tdep.c (alpha_software_single_step): Likewise.
+	* alpha-tdep.h (alpha_software_single_step): Likewise.
+	* arm-tdep.c (arm_software_single_step): Likewise.
+	* cris-tdep.c (cris_software_single_step): Likewise.
+	* mips-tdep.c (mips_software_single_step): Likewise.
+	* mips-tdep.h (mips_software_single_step): Likewise.
+	* rs6000-tdep.c (rs6000_software_single_step): Likewise.
+	* rs6000-tdep.h (rs6000_software_single_step): Likewise.
+	* sparc-tdep.c (sparc_software_single_step): Likewise.
+	* sparc-tdep.h (sparc_software_single_step): Likewise.
+	* spu-tdep.c (spu_software_single_step): Likewise.
+	* infrun.c (resume): Check the return value from SOFTWARE_SINGLE_STEP
+	and act accordingly.
+
 2007-04-11  Steve Ellcey  <sje@cup.hp.com>
 
 	* configure.ac (build_warnings): Add -Wno-char-subscripts.

@@ -3289,14 +3289,14 @@ gdbarch_software_single_step_p (struct gdbarch *gdbarch)
   return gdbarch->software_single_step != NULL;
 }
 
-void
+int
 gdbarch_software_single_step (struct gdbarch *gdbarch, enum target_signal sig, int insert_breakpoints_p)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->software_single_step != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_software_single_step called\n");
-  gdbarch->software_single_step (sig, insert_breakpoints_p);
+  return gdbarch->software_single_step (sig, insert_breakpoints_p);
 }
 
 void

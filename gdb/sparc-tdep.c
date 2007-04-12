@@ -1329,7 +1329,7 @@ sparc_step_trap (unsigned long insn)
   return 0;
 }
 
-void
+int
 sparc_software_single_step (enum target_signal sig, int insert_breakpoints_p)
 {
   struct gdbarch *arch = current_gdbarch;
@@ -1359,6 +1359,8 @@ sparc_software_single_step (enum target_signal sig, int insert_breakpoints_p)
     }
   else
     remove_single_step_breakpoints ();
+
+  return 1;
 }
 
 static void

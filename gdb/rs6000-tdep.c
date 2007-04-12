@@ -722,7 +722,7 @@ rs6000_breakpoint_from_pc (CORE_ADDR *bp_addr, int *bp_size)
 
 /* AIX does not support PT_STEP. Simulate it. */
 
-void
+int
 rs6000_software_single_step (enum target_signal signal,
 			     int insert_breakpoints_p)
 {
@@ -761,6 +761,7 @@ rs6000_software_single_step (enum target_signal signal,
 
   errno = 0;			/* FIXME, don't ignore errors! */
   /* What errors?  {read,write}_memory call error().  */
+  return 1;
 }
 
 

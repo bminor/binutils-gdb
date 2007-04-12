@@ -2204,7 +2204,7 @@ mips_addr_bits_remove (CORE_ADDR addr)
    single_step is also called just after the inferior stops.  If we had
    set up a simulated single-step, we undo our damage.  */
 
-void
+int
 mips_software_single_step (enum target_signal sig, int insert_breakpoints_p)
 {
   CORE_ADDR pc, next_pc;
@@ -2218,6 +2218,8 @@ mips_software_single_step (enum target_signal sig, int insert_breakpoints_p)
     }
   else
     remove_single_step_breakpoints ();
+
+  return 1;
 }
 
 /* Test whether the PC points to the return instruction at the

@@ -2119,7 +2119,7 @@ find_step_target (inst_env_type *inst_env)
    digs through the opcodes in order to find all possible targets. 
    Either one ordinary target or two targets for branches may be found.  */
 
-static void
+static int
 cris_software_single_step (enum target_signal ignore, int insert_breakpoints)
 {
   inst_env_type inst_env;
@@ -2152,6 +2152,8 @@ cris_software_single_step (enum target_signal ignore, int insert_breakpoints)
     }
   else
     remove_single_step_breakpoints ();
+
+  return 1;
 }
 
 /* Calculates the prefix value for quick offset addressing mode.  */

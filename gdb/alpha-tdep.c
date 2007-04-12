@@ -1518,7 +1518,7 @@ alpha_next_pc (CORE_ADDR pc)
   return (pc + ALPHA_INSN_SIZE);
 }
 
-void
+int
 alpha_software_single_step (enum target_signal sig, int insert_breakpoints_p)
 {
   static CORE_ADDR next_pc;
@@ -1536,6 +1536,7 @@ alpha_software_single_step (enum target_signal sig, int insert_breakpoints_p)
       remove_single_step_breakpoints ();
       write_pc (next_pc);
     }
+  return 1;
 }
 
 

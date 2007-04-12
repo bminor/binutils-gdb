@@ -1907,7 +1907,7 @@ arm_get_next_pc (CORE_ADDR pc)
    single_step() is also called just after the inferior stops.  If we
    had set up a simulated single-step, we undo our damage.  */
 
-static void
+static int
 arm_software_single_step (enum target_signal sig, int insert_bpt)
 {
   /* NOTE: This may insert the wrong breakpoint instruction when
@@ -1922,6 +1922,8 @@ arm_software_single_step (enum target_signal sig, int insert_bpt)
     }
   else
     remove_single_step_breakpoints ();
+
+  return 1;
 }
 
 #include "bfd-in2.h"

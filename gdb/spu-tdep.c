@@ -1078,7 +1078,7 @@ spu_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
 
 /* Software single-stepping support.  */
 
-void
+int
 spu_software_single_step (enum target_signal signal, int insert_breakpoints_p)
 {
   if (insert_breakpoints_p)
@@ -1093,7 +1093,7 @@ spu_software_single_step (enum target_signal signal, int insert_breakpoints_p)
       pc = extract_unsigned_integer (buf, 4) & -4;
 
       if (target_read_memory (pc, buf, 4))
-	return;
+	return 1;
       insn = extract_unsigned_integer (buf, 4);
 
        /* Next sequential instruction is at PC + 4, except if the current
@@ -1125,6 +1125,8 @@ spu_software_single_step (enum target_signal signal, int insert_breakpoints_p)
     }
   else
     remove_single_step_breakpoints ();
+
+  return 1;
 }
 
 

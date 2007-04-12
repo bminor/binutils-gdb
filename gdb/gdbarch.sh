@@ -614,15 +614,22 @@ f:=:CORE_ADDR:addr_bits_remove:CORE_ADDR addr:addr::core_addr_identity::0
 # It is not at all clear why SMASH_TEXT_ADDRESS is not folded into
 # ADDR_BITS_REMOVE.
 f:=:CORE_ADDR:smash_text_address:CORE_ADDR addr:addr::core_addr_identity::0
-# FIXME/cagney/2001-01-18: This should be split in two.  A target method that indicates if
-# the target needs software single step.  An ISA method to implement it.
+
+# FIXME/cagney/2001-01-18: This should be split in two.  A target method that
+# indicates if the target needs software single step.  An ISA method to
+# implement it.
 #
-# FIXME/cagney/2001-01-18: This should be replaced with something that inserts breakpoints
-# using the breakpoint system instead of blatting memory directly (as with rs6000).
+# FIXME/cagney/2001-01-18: This should be replaced with something that inserts
+# breakpoints using the breakpoint system instead of blatting memory directly
+# (as with rs6000).
 #
-# FIXME/cagney/2001-01-18: The logic is backwards.  It should be asking if the target can
-# single step.  If not, then implement single step using breakpoints.
-F:=:void:software_single_step:enum target_signal sig, int insert_breakpoints_p:sig, insert_breakpoints_p
+# FIXME/cagney/2001-01-18: The logic is backwards.  It should be asking if the
+# target can single step.  If not, then implement single step using breakpoints.
+#
+# A return value of 1 means that the software_single_step breakpoints 
+# were inserted; 0 means they were not.
+F:=:int:software_single_step:enum target_signal sig, int insert_breakpoints_p:sig, insert_breakpoints_p
+
 # Return non-zero if the processor is executing a delay slot and a
 # further single-step is needed before the instruction finishes.
 M::int:single_step_through_delay:struct frame_info *frame:frame

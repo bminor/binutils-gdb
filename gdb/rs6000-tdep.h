@@ -21,8 +21,8 @@
 
 #include "defs.h"
 
-extern void rs6000_software_single_step (enum target_signal signal,
-					 int insert_breakpoints_p);
+extern int rs6000_software_single_step (enum target_signal signal,
+                                        int insert_breakpoints_p);
 
 /* Hook in rs6000-tdep.c for determining the TOC address when
    calling functions in the inferior.  */
