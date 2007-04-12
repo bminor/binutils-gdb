@@ -1,3 +1,8 @@
+2007-04-12  Bob Wilson  <bob.wilson@acm.org>
+	
+	* elf32-xtensa.c (elf_xtensa_gc_mark_hook): Don't follow references
+	from Xtensa property sections.
+	
 2007-04-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (needs_ovl_stub): Test that spu_elf_section_data

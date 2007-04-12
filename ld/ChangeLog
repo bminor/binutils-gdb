@@ -1,3 +1,7 @@
+2007-04-12  Bob Wilson  <bob.wilson@acm.org>
+	
+	* emulparams/elf32xtensa.sh (OTHER_SECTIONS): KEEP property sections.
+	
 2007-04-10  Richard Henderson  <rth@redhat.com>
 
 	* ldlang.c (relax_sections): Initialize and increment

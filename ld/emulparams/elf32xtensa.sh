@@ -36,7 +36,7 @@ OTHER_SDATA_SECTIONS="
   }
 "
 OTHER_SECTIONS="
-  .xt.lit       0 : { *(.xt.lit${RELOCATING+ .xt.lit.* .gnu.linkonce.p.*}) }
-  .xt.insn      0 : { *(.xt.insn${RELOCATING+ .gnu.linkonce.x.*}) }
-  .xt.prop      0 : { *(.xt.prop${RELOCATING+ .xt.prop.* .gnu.linkonce.prop.*}) }
+  .xt.lit       0 : { KEEP (*(.xt.lit${RELOCATING+ .xt.lit.* .gnu.linkonce.p.*})) }
+  .xt.insn      0 : { KEEP (*(.xt.insn${RELOCATING+ .gnu.linkonce.x.*})) }
+  .xt.prop      0 : { KEEP (*(.xt.prop${RELOCATING+ .xt.prop.* .gnu.linkonce.prop.*})) }
 "

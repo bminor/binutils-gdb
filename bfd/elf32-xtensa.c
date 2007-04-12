@@ -969,6 +969,19 @@ elf_xtensa_gc_mark_hook (asection *sec,
 			 struct elf_link_hash_entry *h,
 			 Elf_Internal_Sym *sym)
 {
+  /* Property sections are marked "KEEP" in the linker scripts, but they
+     should not cause other sections to be marked.  (This approach relies
+     on elf_xtensa_discard_info to remove property table entries that
+     describe discarded sections.  Alternatively, it might be more
+     efficient to avoid using "KEEP" in the linker scripts and instead use
+     the gc_mark_extra_sections hook to mark only the property sections
+     that describe marked sections.  That alternative does not work well
+     with the current property table sections, which do not correspond
+     one-to-one with the sections they describe, but that should be fixed
+     someday.) */
+  if (xtensa_is_property_section (sec))
+    return NULL;
+
   if (h != NULL)
     switch (ELF32_R_TYPE (rel->r_info))
       {
