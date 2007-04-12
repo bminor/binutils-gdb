@@ -1,4 +1,20 @@
 2007-04-12  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (xtensa_is_insntable_section): New.
+	(xtensa_is_proptable_section): New.
+	(elf_xtensa_discard_info_for_section): Handle "full" .xt.prop property
+	tables with 12-byte entries, as well as tables with 8-byte entries.
+	Sort the relocations before examining them.
+	(relax_property_section): Use xtensa_is_proptable_section and
+	xtensa_is_littable_section.  Rewrite code for combining table entries
+	to be more robust in case of unexpected relocations.  Do not set offset
+	of unused relocations to less than zero.
+	(xtensa_is_property_section): Use other functions instead of
+	duplicating section name comparisons.
+	(xtensa_is_littable_section): Use CONST_STRNEQ for ".gnu.linkonce.p.".
+	(xtensa_get_property_predef_flags): Use xtensa_is_insntable_section.
+	
+2007-04-12  Bob Wilson  <bob.wilson@acm.org>
 	
 	* elf32-xtensa.c (elf_xtensa_gc_mark_hook): Don't follow references
 	from Xtensa property sections.

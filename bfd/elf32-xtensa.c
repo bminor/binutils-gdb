@@ -103,7 +103,9 @@ static bfd_vma get_elf_r_symndx_offset (bfd *, unsigned long);
 static bfd_boolean is_reloc_sym_weak (bfd *, Elf_Internal_Rela *);
 static bfd_boolean pcrel_reloc_fits (xtensa_opcode, int, bfd_vma, bfd_vma);
 static bfd_boolean xtensa_is_property_section (asection *);
+static bfd_boolean xtensa_is_insntable_section (asection *);
 static bfd_boolean xtensa_is_littable_section (asection *);
+static bfd_boolean xtensa_is_proptable_section (asection *);
 static int internal_reloc_compare (const void *, const void *);
 static int internal_reloc_matches (const void *, const void *);
 extern asection *xtensa_get_property_section (asection *, const char *);
@@ -2829,14 +2831,20 @@ elf_xtensa_discard_info_for_section (bfd *abfd,
   bfd_byte *contents;
   bfd_vma section_size;
   bfd_vma offset, actual_offset;
-  size_t removed_bytes = 0;
-
-  section_size = sec->size;
-  if (section_size == 0 || section_size % 8 != 0)
-    return FALSE;
+  bfd_size_type removed_bytes = 0;
+  bfd_size_type entry_size;
 
   if (sec->output_section
       && bfd_is_abs_section (sec->output_section))
+    return FALSE;
+
+  if (xtensa_is_proptable_section (sec))
+    entry_size = 12;
+  else
+    entry_size = 8;
+
+  section_size = sec->size;
+  if (section_size == 0 || section_size % entry_size != 0)
     return FALSE;
 
   contents = retrieve_contents (abfd, sec, info->keep_memory);
@@ -2850,10 +2858,15 @@ elf_xtensa_discard_info_for_section (bfd *abfd,
       return FALSE;
     }
 
+  /* Sort the relocations.  They should already be in order when
+     relaxation is enabled, but it might not be.  */
+  qsort (cookie->rels, sec->reloc_count, sizeof (Elf_Internal_Rela),
+	 internal_reloc_compare);
+
   cookie->rel = cookie->rels;
   cookie->relend = cookie->rels + sec->reloc_count;
 
-  for (offset = 0; offset < section_size; offset += 8)
+  for (offset = 0; offset < section_size; offset += entry_size)
     {
       actual_offset = offset - removed_bytes;
 
@@ -2877,11 +2890,11 @@ elf_xtensa_discard_info_for_section (bfd *abfd,
 	      if (ELF32_R_TYPE (cookie->rel->r_info) != R_XTENSA_NONE)
 		{
 		  /* Shift the contents up.  */
-		  if (offset + 8 < section_size)
+		  if (offset + entry_size < section_size)
 		    memmove (&contents[actual_offset],
-			     &contents[actual_offset+8],
-			     section_size - offset - 8);
-		  removed_bytes += 8;
+			     &contents[actual_offset + entry_size],
+			     section_size - offset - entry_size);
+		  removed_bytes += entry_size;
 		}
 
 	      /* Remove this relocation.  */
@@ -8840,12 +8853,13 @@ relax_property_section (bfd *abfd,
 {
   Elf_Internal_Rela *internal_relocs;
   bfd_byte *contents;
-  unsigned i, nexti;
+  unsigned i;
   bfd_boolean ok = TRUE;
   bfd_boolean is_full_prop_section;
   size_t last_zfill_target_offset = 0;
   asection *last_zfill_target_sec = NULL;
   bfd_size_type sec_size;
+  bfd_size_type entry_size;
 
   sec_size = bfd_get_section_limit (abfd, sec);
   internal_relocs = retrieve_internal_relocs (abfd, sec, 
@@ -8857,9 +8871,11 @@ relax_property_section (bfd *abfd,
       goto error_return;
     }
 
-  is_full_prop_section =
-    (   CONST_STRNEQ (sec->name, XTENSA_PROP_SEC_NAME)
-     || CONST_STRNEQ (sec->name, ".gnu.linkonce.prop."));
+  is_full_prop_section = xtensa_is_proptable_section (sec);
+  if (is_full_prop_section)
+    entry_size = 12;
+  else
+    entry_size = 8;
 
   if (internal_relocs)
     {
@@ -8888,12 +8904,8 @@ relax_property_section (bfd *abfd,
 	  size_p = &contents[irel->r_offset + 4];
 	  flags_p = NULL;
 	  if (is_full_prop_section)
-	    {
-	      flags_p = &contents[irel->r_offset + 8];
-	      BFD_ASSERT (irel->r_offset + 12 <= sec_size);
-	    }
-	  else
-	    BFD_ASSERT (irel->r_offset + 8 <= sec_size);
+	    flags_p = &contents[irel->r_offset + 8];
+	  BFD_ASSERT (irel->r_offset + entry_size <= sec_size);
 
 	  target_sec = r_reloc_get_section (&val.r_rel);
 	  target_relax_info = get_xtensa_relax_info (target_sec);
@@ -8977,74 +8989,106 @@ relax_property_section (bfd *abfd,
      reclaim the space in the output section, so we do this twice.  */
 
   if (internal_relocs && (!link_info->relocatable
-			  || strcmp (sec->name, XTENSA_LIT_SEC_NAME) == 0))
+			  || xtensa_is_littable_section (sec)))
     {
       Elf_Internal_Rela *last_irel = NULL;
+      Elf_Internal_Rela *irel, *next_rel, *rel_end;
       int removed_bytes = 0;
-      bfd_vma offset, last_irel_offset;
+      bfd_vma offset;
       bfd_vma section_size;
-      bfd_size_type entry_size;
       flagword predef_flags;
-
-      if (is_full_prop_section)
-	entry_size = 12;
-      else
-	entry_size = 8;
 
       predef_flags = xtensa_get_property_predef_flags (sec);
 
-      /* Walk over memory and irels at the same time.
+      /* Walk over memory and relocations at the same time.
          This REQUIRES that the internal_relocs be sorted by offset.  */
       qsort (internal_relocs, sec->reloc_count, sizeof (Elf_Internal_Rela),
 	     internal_reloc_compare);
-      nexti = 0; /* Index into internal_relocs.  */
 
       pin_internal_relocs (sec, internal_relocs);
       pin_contents (sec, contents);
 
-      last_irel_offset = (bfd_vma) -1;
+      next_rel = internal_relocs;
+      rel_end = internal_relocs + sec->reloc_count;
+
       section_size = sec->size;
       BFD_ASSERT (section_size % entry_size == 0);
 
       for (offset = 0; offset < section_size; offset += entry_size)
 	{
-	  Elf_Internal_Rela *irel, *next_irel;
+	  Elf_Internal_Rela *offset_rel, *extra_rel;
 	  bfd_vma bytes_to_remove, size, actual_offset;
-	  bfd_boolean remove_this_irel;
+	  bfd_boolean remove_this_rel;
 	  flagword flags;
 
-	  irel = NULL;
-	  next_irel = NULL;
-
-	  /* Find the next two relocations (if there are that many left),
-	     skipping over any R_XTENSA_NONE relocs.  On entry, "nexti" is
-	     the starting reloc index.  After these two loops, "i"
-	     is the index of the first non-NONE reloc past that starting
-	     index, and "nexti" is the index for the next non-NONE reloc
-	     after "i".  */
-
-	  for (i = nexti; i < sec->reloc_count; i++)
+	  /* Find the first relocation for the entry at the current offset.
+	     Adjust the offsets of any extra relocations for the previous
+	     entry.  */
+	  offset_rel = NULL;
+	  if (next_rel)
 	    {
-	      if (ELF32_R_TYPE (internal_relocs[i].r_info) != R_XTENSA_NONE)
+	      for (irel = next_rel; irel < rel_end; irel++)
 		{
-		  irel = &internal_relocs[i];
-		  break;
+		  if ((irel->r_offset == offset
+		       && ELF32_R_TYPE (irel->r_info) != R_XTENSA_NONE)
+		      || irel->r_offset > offset)
+		    {
+		      offset_rel = irel;
+		      break;
+		    }
+		  irel->r_offset -= removed_bytes;
+		  irel++;
 		}
-	      internal_relocs[i].r_offset -= removed_bytes;
 	    }
 
-	  for (nexti = i + 1; nexti < sec->reloc_count; nexti++)
+	  /* Find the next relocation (if there are any left).  */
+	  extra_rel = NULL;
+	  if (offset_rel)
 	    {
-	      if (ELF32_R_TYPE (internal_relocs[nexti].r_info)
-		  != R_XTENSA_NONE)
+	      for (irel = offset_rel + 1; irel < rel_end; irel++)
 		{
-		  next_irel = &internal_relocs[nexti];
-		  break;
+		  if (ELF32_R_TYPE (irel->r_info) != R_XTENSA_NONE)
+		    {
+		      extra_rel = irel;
+		      break;
+		    }
 		}
-	      internal_relocs[nexti].r_offset -= removed_bytes;
 	    }
 
-	  remove_this_irel = FALSE;
+	  /* Check if there are relocations on the current entry.  There
+	     should usually be a relocation on the offset field.  If there
+	     are relocations on the size or flags, then we can't optimize
+	     this entry.  Also, find the next relocation to examine on the
+	     next iteration.  */
+	  if (offset_rel)
+	    {
+	      if (offset_rel->r_offset >= offset + entry_size)
+		{
+		  next_rel = offset_rel;
+		  /* There are no relocations on the current entry, but we
+		     might still be able to remove it if the size is zero.  */
+		  offset_rel = NULL;
+		}
+	      else if (offset_rel->r_offset > offset
+		       || (extra_rel
+			   && extra_rel->r_offset < offset + entry_size))
+		{
+		  /* There is a relocation on the size or flags, so we can't
+		     do anything with this entry.  Continue with the next.  */
+		  next_rel = offset_rel;
+		  continue;
+		}
+	      else
+		{
+		  BFD_ASSERT (offset_rel->r_offset == offset);
+		  offset_rel->r_offset -= removed_bytes;
+		  next_rel = offset_rel + 1;
+		}
+	    }
+	  else
+	    next_rel = NULL;
+
+	  remove_this_rel = FALSE;
 	  bytes_to_remove = 0;
 	  actual_offset = offset - removed_bytes;
 	  size = bfd_get_32 (abfd, &contents[actual_offset + 4]);
@@ -9054,90 +9098,64 @@ relax_property_section (bfd *abfd,
 	  else
 	    flags = predef_flags;
 
-	  /* Check that the irels are sorted by offset,
-	     with only one per address.  */
-	  BFD_ASSERT (!irel || (int) irel->r_offset > (int) last_irel_offset); 
-	  BFD_ASSERT (!next_irel || next_irel->r_offset > irel->r_offset);
-
-	  /* Make sure there aren't relocs on the size or flag fields.  */
-	  if ((irel && irel->r_offset == offset + 4)
-	      || (is_full_prop_section 
-		  && irel && irel->r_offset == offset + 8))
-	    {
-	      irel->r_offset -= removed_bytes;
-	      last_irel_offset = irel->r_offset;
-	    }
-	  else if (next_irel && (next_irel->r_offset == offset + 4
-				 || (is_full_prop_section 
-				     && next_irel->r_offset == offset + 8)))
-	    {
-	      nexti += 1;
-	      irel->r_offset -= removed_bytes;
-	      next_irel->r_offset -= removed_bytes;
-	      last_irel_offset = next_irel->r_offset;
-	    }
-	  else if (size == 0 && (flags & XTENSA_PROP_ALIGN) == 0
-		   && (flags & XTENSA_PROP_UNREACHABLE) == 0)
+	  if (size == 0
+	      && (flags & XTENSA_PROP_ALIGN) == 0
+	      && (flags & XTENSA_PROP_UNREACHABLE) == 0)
 	    {
 	      /* Always remove entries with zero size and no alignment.  */
 	      bytes_to_remove = entry_size;
-	      if (irel && irel->r_offset == offset)
-		{
-		  remove_this_irel = TRUE;
-
-		  irel->r_offset -= removed_bytes;
-		  last_irel_offset = irel->r_offset;
-		}
+	      if (offset_rel)
+		remove_this_rel = TRUE;
 	    }
-	  else if (irel && irel->r_offset == offset)
+	  else if (offset_rel
+		   && ELF32_R_TYPE (offset_rel->r_info) == R_XTENSA_32)
 	    {
-	      if (ELF32_R_TYPE (irel->r_info) == R_XTENSA_32)
+	      if (last_irel)
 		{
-		  if (last_irel)
-		    {
-		      flagword old_flags;
-		      bfd_vma old_size =
-			bfd_get_32 (abfd, &contents[last_irel->r_offset + 4]);
-		      bfd_vma old_address =
-			(last_irel->r_addend
-			 + bfd_get_32 (abfd, &contents[last_irel->r_offset]));
-		      bfd_vma new_address =
-			(irel->r_addend
-			 + bfd_get_32 (abfd, &contents[actual_offset]));
-		      if (is_full_prop_section) 
-			old_flags = bfd_get_32
-			  (abfd, &contents[last_irel->r_offset + 8]);
-		      else
-			old_flags = predef_flags;
+		  flagword old_flags;
+		  bfd_vma old_size =
+		    bfd_get_32 (abfd, &contents[last_irel->r_offset + 4]);
+		  bfd_vma old_address =
+		    (last_irel->r_addend
+		     + bfd_get_32 (abfd, &contents[last_irel->r_offset]));
+		  bfd_vma new_address =
+		    (offset_rel->r_addend
+		     + bfd_get_32 (abfd, &contents[actual_offset]));
+		  if (is_full_prop_section) 
+		    old_flags = bfd_get_32
+		      (abfd, &contents[last_irel->r_offset + 8]);
+		  else
+		    old_flags = predef_flags;
 
-		      if ((ELF32_R_SYM (irel->r_info)
-			   == ELF32_R_SYM (last_irel->r_info))
-			  && old_address + old_size == new_address
-			  && old_flags == flags
-			  && (old_flags & XTENSA_PROP_INSN_BRANCH_TARGET) == 0
-			  && (old_flags & XTENSA_PROP_INSN_LOOP_TARGET) == 0)
-			{
-			  /* Fix the old size.  */
-			  bfd_put_32 (abfd, old_size + size,
-				      &contents[last_irel->r_offset + 4]);
-			  bytes_to_remove = entry_size;
-			  remove_this_irel = TRUE;
-			}
-		      else
-			last_irel = irel;
+		  if ((ELF32_R_SYM (offset_rel->r_info)
+		       == ELF32_R_SYM (last_irel->r_info))
+		      && old_address + old_size == new_address
+		      && old_flags == flags
+		      && (old_flags & XTENSA_PROP_INSN_BRANCH_TARGET) == 0
+		      && (old_flags & XTENSA_PROP_INSN_LOOP_TARGET) == 0)
+		    {
+		      /* Fix the old size.  */
+		      bfd_put_32 (abfd, old_size + size,
+				  &contents[last_irel->r_offset + 4]);
+		      bytes_to_remove = entry_size;
+		      remove_this_rel = TRUE;
 		    }
 		  else
-		    last_irel = irel;
+		    last_irel = offset_rel;
 		}
-
-	      irel->r_offset -= removed_bytes;
-	      last_irel_offset = irel->r_offset;
+	      else
+		last_irel = offset_rel;
 	    }
 
-	  if (remove_this_irel)
+	  if (remove_this_rel)
 	    {
-	      irel->r_info = ELF32_R_INFO (0, R_XTENSA_NONE);
-	      irel->r_offset -= bytes_to_remove;
+	      offset_rel->r_info = ELF32_R_INFO (0, R_XTENSA_NONE);
+	      /* In case this is the last entry, move the relocation offset
+		 to the previous entry, if there is one.  */
+	      if (offset_rel->r_offset >= bytes_to_remove)
+		offset_rel->r_offset -= bytes_to_remove;
+	      else
+		offset_rel->r_offset = 0;
 	    }
 
 	  if (bytes_to_remove != 0)
@@ -9152,6 +9170,10 @@ relax_property_section (bfd *abfd,
 
       if (removed_bytes)
 	{
+	  /* Fix up any extra relocations on the last entry.  */
+	  for (irel = next_rel; irel < rel_end; irel++)
+	    irel->r_offset -= removed_bytes;
+
 	  /* Clear the removed bytes.  */
 	  memset (&contents[section_size - removed_bytes], 0, removed_bytes);
 
@@ -9526,20 +9548,23 @@ pcrel_reloc_fits (xtensa_opcode opc,
 }
 
 
-static int linkonce_len = sizeof (".gnu.linkonce.") - 1;
-
 static bfd_boolean 
 xtensa_is_property_section (asection *sec)
 {
-  if (CONST_STRNEQ (sec->name, XTENSA_INSN_SEC_NAME)
-      || CONST_STRNEQ (sec->name, XTENSA_LIT_SEC_NAME)
-      || CONST_STRNEQ (sec->name, XTENSA_PROP_SEC_NAME))
+  if (xtensa_is_insntable_section (sec)
+      || xtensa_is_littable_section (sec)
+      || xtensa_is_proptable_section (sec))
     return TRUE;
 
-  if (strncmp (".gnu.linkonce.", sec->name, linkonce_len) == 0
-      && (CONST_STRNEQ (&sec->name[linkonce_len], "x.")
-	  || CONST_STRNEQ (&sec->name[linkonce_len], "p.")
-	  || CONST_STRNEQ (&sec->name[linkonce_len], "prop.")))
+  return FALSE;
+}
+
+
+static bfd_boolean 
+xtensa_is_insntable_section (asection *sec)
+{
+  if (CONST_STRNEQ (sec->name, XTENSA_INSN_SEC_NAME)
+      || CONST_STRNEQ (sec->name, ".gnu.linkonce.x."))
     return TRUE;
 
   return FALSE;
@@ -9549,12 +9574,19 @@ xtensa_is_property_section (asection *sec)
 static bfd_boolean 
 xtensa_is_littable_section (asection *sec)
 {
-  if (CONST_STRNEQ (sec->name, XTENSA_LIT_SEC_NAME))
+  if (CONST_STRNEQ (sec->name, XTENSA_LIT_SEC_NAME)
+      || CONST_STRNEQ (sec->name, ".gnu.linkonce.p."))
     return TRUE;
 
-  if (strncmp (".gnu.linkonce.", sec->name, linkonce_len) == 0
-      && sec->name[linkonce_len] == 'p'
-      && sec->name[linkonce_len + 1] == '.')
+  return FALSE;
+}
+
+
+static bfd_boolean 
+xtensa_is_proptable_section (asection *sec)
+{
+  if (CONST_STRNEQ (sec->name, XTENSA_PROP_SEC_NAME)
+      || CONST_STRNEQ (sec->name, ".gnu.linkonce.prop."))
     return TRUE;
 
   return FALSE;
@@ -9610,6 +9642,8 @@ match_section_group (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
 	      && strcmp (group_name, gname) == 0));
 }
 
+
+static int linkonce_len = sizeof (".gnu.linkonce.") - 1;
 
 asection *
 xtensa_get_property_section (asection *sec, const char *base_name)
@@ -9685,8 +9719,7 @@ xtensa_get_property_section (asection *sec, const char *base_name)
 flagword
 xtensa_get_property_predef_flags (asection *sec)
 {
-  if (CONST_STRNEQ (sec->name, XTENSA_INSN_SEC_NAME)
-      || CONST_STRNEQ (sec->name, ".gnu.linkonce.x."))
+  if (xtensa_is_insntable_section (sec))
     return (XTENSA_PROP_INSN
 	    | XTENSA_PROP_INSN_NO_TRANSFORM
 	    | XTENSA_PROP_INSN_NO_REORDER);
