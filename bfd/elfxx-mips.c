@@ -4275,6 +4275,13 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       outrel.r_info = ELF32_R_INFO (h->root.dynindx, r_type);
       outrel.r_addend = addend;
       bfd_elf32_swap_reloca_out (abfd, &outrel, loc);
+
+      /* If we've written this relocation for a readonly section,
+	 we need to set DF_TEXTREL again, so that we do not delete the
+	 DT_TEXTREL tag.  */
+      if (MIPS_ELF_READONLY_SECTION (input_section))
+	info->flags |= DF_TEXTREL;
+
       *valuep = 0;
       return bfd_reloc_ok;
     }
@@ -6493,6 +6500,10 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		    return FALSE;
 		}
 	      mips_elf_allocate_dynamic_relocations (dynobj, info, 1);
+	      if (MIPS_ELF_READONLY_SECTION (sec))
+		/* We tell the dynamic linker that there are
+		   relocations against the text segment.  */
+		info->flags |= DF_TEXTREL;
 	    }
 	}
       else if (r_type == R_MIPS_CALL_LO16

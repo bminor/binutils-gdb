@@ -1,3 +1,10 @@
+2007-04-12  Richard Sandiford  <richard@codesourcery.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Set DT_TEXTREL
+	when creating a __GOTT_BASE__ or __GOTT_INDEX__ relocation
+	in a read-only section.
+	(_bfd_mips_elf_check_relocs): Likewise.
+
 2007-04-12  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (xtensa_is_insntable_section): New.
