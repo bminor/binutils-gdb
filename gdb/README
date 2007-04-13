@@ -457,9 +457,6 @@ Linux.
    There are a number of remote interfaces for talking to existing ROM
 monitors and other hardware:
 
-	remote-e7000.c	 Renesas E7000 ICE
-	remote-est.c	 EST emulator
-	remote-hms.c	 Renesas Micro Systems H8/300 monitor
 	remote-mips.c	 MIPS remote debugging protocol
 	remote-sds.c	 PowerPC SDS monitor
 	remote-sim.c	 Generalized simulator protocol

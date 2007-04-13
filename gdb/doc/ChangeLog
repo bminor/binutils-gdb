@@ -1,3 +1,14 @@
+2007-04-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (Memory): Reference Remote Debugging chapter.
+	(Character Sets, Caching Data of Remote Targets): Likewise.
+	(Targets): Delete Remote node.  Move its text...
+	(Debugging Remote Programs): ...to here.  Delete description
+	of the "remote" command.
+	(Remote configuration): Delete description of "set remotedevice"
+	and "show remotedevice".
+	(Embedded Processors): Delete H8/300, H8/500, and SH nodes.
+
 2007-04-11  Bob Wilson  <bob.wilson@acm.org>
 
         * gdb.texinfo (Contributors, Continuing and Stepping)

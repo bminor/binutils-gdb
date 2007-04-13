@@ -31,7 +31,6 @@
 #include "gdbcmd.h"
 #include "target.h"
 #include "language.h"
-#include "scm-lang.h"
 #include "demangle.h"
 #include "doublest.h"
 #include "gdb_assert.h"
@@ -1075,10 +1074,6 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
   enum type_code code = TYPE_CODE (type);
   int len = TYPE_LENGTH (type);
   int nosign = TYPE_UNSIGNED (type);
-
-  if (current_language->la_language == language_scm
-      && is_scmvalue_type (type))
-    return scm_unpack (type, valaddr, TYPE_CODE_INT);
 
   switch (code)
     {

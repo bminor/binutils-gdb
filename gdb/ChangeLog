@@ -1,5 +1,29 @@
 2007-04-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* mips-mdebug-tdep.c, mips-mdebug-tdep.h, ocd.c, ocd.h, ppc-bdm.c,
+	remote-e7000.c, remote-hms.c, remote-utils.c, remote-utils.h,
+	scm-exp.c, scm-lang.c, scm-lang.h, scm-tags.h, scm-valprint.c,
+	ser-e7kpc.c, sh3-rom.c, stop-gdb.c: Delete.
+	* Makefile.in: Remove references to deleted files.
+	* README: Do not mention deleted ROM monitor interfaces.
+	* defs.h (enum language): Delete language_scm.
+	* expprint.c (print_subexp_standard): Do not handle OP_EXPRSTRING.
+	(dump_subexp_body_standard): Likewise.
+	* parse.c (operator_length_standard): Likewise.
+	* expression.h (enum exp_opcode): Delete OP_EXPRSTRING.
+	* remote-mips.c: Do not include remote-utils.h.
+	* remote-sim.c: Likewise.  Use remote_debug instead of sr_get_debug
+	throughout.
+	* value.c: Do not include scm-lang.h.
+	(unpack_long): Delete scm_unpack call.
+	* config/h8300/h8300.mt, config/mips/embed.mt,
+	config/powerpc/ppc-eabi.mt, config/powerpc/ppc-sim.mt,
+	config/sh/embed.mt, config/sh/linux.mt: Remove references to
+	deleted files.
+	* NEWS: Mention removed files.
+
+2007-04-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* symfile.c (add_psymbol_with_dem_name_to_list): Remove.
 	* symfile.h (add_psymbol_with_dem_name_to_list): Remove prototype.
 

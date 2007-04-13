@@ -37,7 +37,6 @@
 #include "gdbcore.h"
 #include "gdb/callback.h"
 #include "gdb/remote-sim.h"
-#include "remote-utils.h"
 #include "command.h"
 #include "regcache.h"
 #include "gdb_assert.h"
@@ -329,7 +328,7 @@ gdbsim_fetch_register (int regno)
 	/* Else if (nr_bytes < 0): an old simulator, that doesn't
 	   think to return the register size.  Just assume all is ok.  */
 	regcache_raw_supply (current_regcache, regno, buf);
-	if (sr_get_debug ())
+	if (remote_debug)
 	  {
 	    printf_filtered ("gdbsim_fetch_register: %d", regno);
 	    /* FIXME: We could print something more intelligible.  */
@@ -364,7 +363,7 @@ gdbsim_store_register (int regno)
       /* FIXME: cagney/2002-05-27: Should check `nr_bytes == 0'
 	 indicating that GDB and the SIM have different ideas about
 	 which registers are fetchable.  */
-      if (sr_get_debug ())
+      if (remote_debug)
 	{
 	  printf_filtered ("gdbsim_store_register: %d", regno);
 	  /* FIXME: We could print something more intelligible.  */
@@ -379,7 +378,7 @@ gdbsim_store_register (int regno)
 static void
 gdbsim_kill (void)
 {
-  if (sr_get_debug ())
+  if (remote_debug)
     printf_filtered ("gdbsim_kill\n");
 
   /* There is no need to `kill' running simulator - the simulator is
@@ -407,7 +406,7 @@ gdbsim_load (char *args, int fromtty)
   if (argv[1] != NULL)
     error (_("GDB sim does not yet support a load offset."));
 
-  if (sr_get_debug ())
+  if (remote_debug)
     printf_filtered ("gdbsim_load: prog \"%s\"\n", prog);
 
   /* FIXME: We will print two messages on error.
@@ -442,7 +441,7 @@ gdbsim_create_inferior (char *exec_file, char *args, char **env, int from_tty)
   if (!program_loaded)
     warning (_("No program loaded."));
 
-  if (sr_get_debug ())
+  if (remote_debug)
     printf_filtered ("gdbsim_create_inferior: exec_file \"%s\", args \"%s\"\n",
 		     (exec_file ? exec_file : "(NULL)"),
 		     args);
@@ -485,7 +484,7 @@ gdbsim_open (char *args, int from_tty)
   char *arg_buf;
   char **argv;
 
-  if (sr_get_debug ())
+  if (remote_debug)
     printf_filtered ("gdbsim_open: args \"%s\"\n", args ? args : "(null)");
 
   /* Remove current simulator if one exists.  Only do this if the simulator
@@ -562,7 +561,7 @@ gdbsim_open (char *args, int from_tty)
 static void
 gdbsim_close (int quitting)
 {
-  if (sr_get_debug ())
+  if (remote_debug)
     printf_filtered ("gdbsim_close: quitting %d\n", quitting);
 
   program_loaded = 0;
@@ -589,7 +588,7 @@ gdbsim_close (int quitting)
 static void
 gdbsim_detach (char *args, int from_tty)
 {
-  if (sr_get_debug ())
+  if (remote_debug)
     printf_filtered ("gdbsim_detach: args \"%s\"\n", args);
 
   pop_target ();		/* calls gdbsim_close to do the real work */
@@ -610,7 +609,7 @@ gdbsim_resume (ptid_t ptid, int step, enum target_signal siggnal)
   if (PIDGET (inferior_ptid) != 42)
     error (_("The program is not being run."));
 
-  if (sr_get_debug ())
+  if (remote_debug)
     printf_filtered ("gdbsim_resume: step %d, signal %d\n", step, siggnal);
 
   resume_siggnal = siggnal;
@@ -673,7 +672,7 @@ gdbsim_wait (ptid_t ptid, struct target_waitstatus *status)
   int sigrc = 0;
   enum sim_stop reason = sim_running;
 
-  if (sr_get_debug ())
+  if (remote_debug)
     printf_filtered ("gdbsim_wait\n");
 
 #if defined (HAVE_SIGACTION) && defined (SA_RESTART)
@@ -759,14 +758,14 @@ gdbsim_xfer_inferior_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
   if (!program_loaded)
     error (_("No program loaded."));
 
-  if (sr_get_debug ())
+  if (remote_debug)
     {
       /* FIXME: Send to something other than STDOUT? */
       printf_filtered ("gdbsim_xfer_inferior_memory: myaddr 0x");
       gdb_print_host_address (myaddr, gdb_stdout);
       printf_filtered (", memaddr 0x%s, len %d, write %d\n",
 		       paddr_nz (memaddr), len, write);
-      if (sr_get_debug () && write)
+      if (remote_debug && write)
 	dump_mem (myaddr, len);
     }
 
@@ -777,7 +776,7 @@ gdbsim_xfer_inferior_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
   else
     {
       len = sim_read (gdbsim_desc, memaddr, myaddr, len);
-      if (sr_get_debug () && len > 0)
+      if (remote_debug && len > 0)
 	dump_mem (myaddr, len);
     }
   return len;
@@ -791,7 +790,7 @@ gdbsim_files_info (struct target_ops *target)
   if (exec_bfd)
     file = bfd_get_filename (exec_bfd);
 
-  if (sr_get_debug ())
+  if (remote_debug)
     printf_filtered ("gdbsim_files_info: file \"%s\"\n", file);
 
   if (exec_bfd)
@@ -807,7 +806,7 @@ gdbsim_files_info (struct target_ops *target)
 static void
 gdbsim_mourn_inferior (void)
 {
-  if (sr_get_debug ())
+  if (remote_debug)
     printf_filtered ("gdbsim_mourn_inferior:\n");
 
   remove_breakpoints ();

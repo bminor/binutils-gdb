@@ -166,7 +166,6 @@ print_subexp_standard (struct expression *exp, int *pos,
       return;
 
     case OP_NAME:
-    case OP_EXPRSTRING:
       nargs = longest_to_int (exp->elts[pc + 1].longconst);
       (*pos) += 3 + BYTES_TO_EXP_ELEM (nargs + 1);
       fputs_filtered (&exp->elts[pc + 2].string, stream);
@@ -1075,7 +1074,6 @@ dump_subexp_body_standard (struct expression *exp,
     case OP_THIS:
     case OP_LABELED:
     case OP_NAME:
-    case OP_EXPRSTRING:
       fprintf_filtered (stream, "Unknown format");
     }
 

@@ -122,6 +122,20 @@ target rom68k
 
 	Various m68k-only ROM monitors.
 
+target hms
+target e7000
+target sh3
+target sh3e
+
+	Various Renesas ROM monitors and debugging interfaces for SH and
+	H8/300.
+
+target ocd
+
+	Support for a Macraigor serial interface to on-chip debugging.
+	GDB does not directly support the newer parallel or USB
+	interfaces.
+
 DWARF 1 support
 
 	A debug information format.  The predecessor to DWARF 2 and 
@@ -133,6 +147,16 @@ Support for the HP aCC compiler on HP-UX/PA-RISC
 	invocation of pxdb, and the aCC custom C++ ABI.  This does not
 	affect HP-UX for Itanium or GCC for HP-UX/PA-RISC.  Code compiled
 	with aCC can still be debugged on an assembly level.
+
+MIPS ".pdr" sections
+
+	A MIPS-specific format used to describe stack frame layout
+	in debugging information.
+
+Scheme support
+
+	GDB could work with an older version of Guile to debug
+	the interpreter and Scheme programs running in it.
 
 *** Changes in GDB 6.6
 

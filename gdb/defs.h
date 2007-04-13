@@ -210,7 +210,6 @@ enum language
     language_fortran,		/* Fortran */
     language_m2,		/* Modula-2 */
     language_asm,		/* Assembly language */
-    language_scm,    		/* Scheme / Guile */
     language_pascal,		/* Pascal */
     language_ada,		/* Ada */
     language_minimal,		/* All other languages, minimal support only */

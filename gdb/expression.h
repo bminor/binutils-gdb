@@ -325,9 +325,6 @@ enum exp_opcode
     /* An un-looked-up identifier. */
     OP_NAME,
 
-    /* An unparsed expression.  Used for Scheme (for now at least) */
-    OP_EXPRSTRING,
-
     /* An Objective C Foundation Class NSString constant */
     OP_OBJC_NSSTRING,
 
