@@ -1,5 +1,9 @@
 2007-04-12  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* configure.tgt (arm-*-nto*, sh-*-nto*): Remove.
+
+2007-04-12  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* config/m68k/tm-monitor.h: Delete file.
 	* config/m68k/monitor.mt (DEPRECATED_TM_FILE): Remove.
 	* m68k-tdep.c (m68k_gdbarch_init): set_gdbarch_decr_pc_after_break

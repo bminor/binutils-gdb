@@ -81,7 +81,6 @@ arm*-*-linux*)		gdb_target=linux
 			;;
 arm*-*-netbsd* | arm*-*-knetbsd*-gnu)
 			gdb_target=nbsd ;;
-arm-*-nto*)		gdb_target=nto ;;
 arm*-*-openbsd*)	gdb_target=obsd ;;
 arm*-*-* | thumb*-*-* | strongarm*-*-*)
 			gdb_target=embed
@@ -201,7 +200,6 @@ sh-*-linux*)		gdb_target=linux
 			;;
 sh*-*-netbsdelf* | sh*-*-knetbsd*-gnu)
 			gdb_target=nbsd ;;
-sh-*-nto*)		gdb_target=nto ;;
 sh*-*-openbsd*)		gdb_target=obsd ;;
 sh64-*-elf*)		gdb_target=sh64 ;;
 sh*)			gdb_target=embed ;;
