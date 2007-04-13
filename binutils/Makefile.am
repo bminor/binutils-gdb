@@ -60,7 +60,7 @@ noinst_PROGRAMS = $(RENAMED_PROGS) @BUILD_MISC@
 EXTRA_PROGRAMS = $(NLMCONV_PROG) srconv sysdump coffdump $(DLLTOOL_PROG) $(WINDRES_PROG) $(DLLWRAP_PROG)
 
 # Stuff that goes in tooldir/ if appropriate.
-TOOL_PROGS = nm-new strip-new ar ranlib dlltool objdump
+TOOL_PROGS = nm-new strip-new ar ranlib dlltool objdump objcopy
 
 BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd

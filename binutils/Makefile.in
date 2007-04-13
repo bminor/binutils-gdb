@@ -364,7 +364,7 @@ SRCONV_PROG = srconv$(EXEEXT) sysdump$(EXEEXT) coffdump$(EXEEXT)
 RENAMED_PROGS = $(NM_PROG) $(STRIP_PROG) $(DEMANGLER_PROG)
 
 # Stuff that goes in tooldir/ if appropriate.
-TOOL_PROGS = nm-new strip-new ar ranlib dlltool objdump
+TOOL_PROGS = nm-new strip-new ar ranlib dlltool objdump objcopy
 BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
 INCDIR = $(BASEDIR)/include

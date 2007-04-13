@@ -1,3 +1,8 @@
+2007-04-13  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* Makefile.am (TOOL_PROGS): Add objcopy.
+	* Makefile.in: Rebuilt.
+
 2007-04-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/4348
