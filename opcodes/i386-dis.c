@@ -1226,7 +1226,7 @@ static const unsigned char twobyte_uses_REPZ_prefix[256] = {
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
 };
 
-/* This is used to determine if opcode 0f 38 XX uses DATA prefix.  */ 
+/* This is used to determine if opcode 0f 38 XX uses DATA prefix.  */
 static const unsigned char threebyte_0x38_uses_DATA_prefix[256] = {
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
   /*       -------------------------------        */
@@ -1250,7 +1250,7 @@ static const unsigned char threebyte_0x38_uses_DATA_prefix[256] = {
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
 };
 
-/* This is used to determine if opcode 0f 38 XX uses REPNZ prefix.  */ 
+/* This is used to determine if opcode 0f 38 XX uses REPNZ prefix.  */
 static const unsigned char threebyte_0x38_uses_REPNZ_prefix[256] = {
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
   /*       -------------------------------        */
@@ -1274,7 +1274,7 @@ static const unsigned char threebyte_0x38_uses_REPNZ_prefix[256] = {
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
 };
 
-/* This is used to determine if opcode 0f 38 XX uses REPZ prefix.  */ 
+/* This is used to determine if opcode 0f 38 XX uses REPZ prefix.  */
 static const unsigned char threebyte_0x38_uses_REPZ_prefix[256] = {
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
   /*       -------------------------------        */
@@ -1298,7 +1298,7 @@ static const unsigned char threebyte_0x38_uses_REPZ_prefix[256] = {
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
 };
 
-/* This is used to determine if opcode 0f 3a XX uses DATA prefix.  */ 
+/* This is used to determine if opcode 0f 3a XX uses DATA prefix.  */
 static const unsigned char threebyte_0x3a_uses_DATA_prefix[256] = {
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
   /*       -------------------------------        */
@@ -1322,7 +1322,7 @@ static const unsigned char threebyte_0x3a_uses_DATA_prefix[256] = {
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
 };
 
-/* This is used to determine if opcode 0f 3a XX uses REPNZ prefix.  */ 
+/* This is used to determine if opcode 0f 3a XX uses REPNZ prefix.  */
 static const unsigned char threebyte_0x3a_uses_REPNZ_prefix[256] = {
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
   /*       -------------------------------        */
@@ -1346,7 +1346,7 @@ static const unsigned char threebyte_0x3a_uses_REPNZ_prefix[256] = {
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
 };
 
-/* This is used to determine if opcode 0f 3a XX uses REPZ prefix.  */ 
+/* This is used to determine if opcode 0f 3a XX uses REPZ prefix.  */
 static const unsigned char threebyte_0x3a_uses_REPZ_prefix[256] = {
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
   /*       -------------------------------        */
@@ -2009,14 +2009,14 @@ static const struct dis386 prefix_user_table[][4] = {
     {"extrq",	{ XS, Ib, Ib } },
     {"insertq",	{ XM, XS, Ib, Ib } },
   },
-  
- /* PREGRP35 */  
+
+ /* PREGRP35 */
   {
     {"vmwrite",	{ Gm, Em } },
     {"(bad)",	{ XX } },
     {"extrq",	{ XM, XS } },
     {"insertq",	{ XM, XS } },
-  }, 
+  },
 
   /* PREGRP36 */
   {
@@ -2031,7 +2031,7 @@ static const struct dis386 prefix_user_table[][4] = {
     { "(bad)", { XX } },
     { "popcntS", { Gv, Ev } },
     { "(bad)", { XX } },
-    { "(bad)", { XX } },    
+    { "(bad)", { XX } },
   },
 
   /* PREGRP38 */
@@ -2039,7 +2039,7 @@ static const struct dis386 prefix_user_table[][4] = {
     { "xchgS", { { NOP_Fixup1, eAX_reg }, { NOP_Fixup2, eAX_reg } } },
     { "pause", { XX } },
     { "xchgS", { { NOP_Fixup1, eAX_reg }, { NOP_Fixup2, eAX_reg } } },
-    { "(bad)", { XX } },    
+    { "(bad)", { XX } },
   },
 };
 
@@ -3125,7 +3125,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
       uses_LOCK_prefix = 0;
       codep++;
     }
-  
+
   if (!uses_REPZ_prefix && (prefixes & PREFIX_REPZ))
     {
       oappend ("repz ");
@@ -3238,7 +3238,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
         {
 	  for (i = 0; i < MAX_OPERANDS; ++i)
 	    {
-	      obufp = op_out[i];		  
+	      obufp = op_out[i];
 	      op_ad = MAX_OPERANDS - 1 - i;
 	      if (dp->op[i].rtn)
 		(*dp->op[i].rtn) (dp->op[i].bytemode, sizeflag);
@@ -3281,7 +3281,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
     {
       for (i = 0; i < MAX_OPERANDS; ++i)
         op_txt[i] = op_out[i];
-	
+
       for (i = 0; i < (MAX_OPERANDS >> 1); ++i)
 	{
           op_ad = op_index[i];
@@ -5187,10 +5187,10 @@ OP_EM (int bytemode, int sizeflag)
   oappend (scratchbuf + intel_syntax);
 }
 
-/* cvt* are the only instructions in sse2 which have 
-   both SSE and MMX operands and also have 0x66 prefix 
-   in their opcode. 0x66 was originally used to differentiate 
-   between SSE and MMX instruction(operands). So we have to handle the 
+/* cvt* are the only instructions in sse2 which have
+   both SSE and MMX operands and also have 0x66 prefix
+   in their opcode. 0x66 was originally used to differentiate
+   between SSE and MMX instruction(operands). So we have to handle the
    cvt* separately using OP_EMC and OP_MXC */
 static void
 OP_EMC (int bytemode, int sizeflag)
@@ -5205,7 +5205,7 @@ OP_EMC (int bytemode, int sizeflag)
       OP_E (bytemode, sizeflag);
       return;
     }
-  
+
   /* Skip mod/rm byte.  */
   MODRM_CHECK;
   codep++;
@@ -5314,7 +5314,7 @@ OP_0fae (int bytemode, int sizeflag)
 }
 
 /* NOP is an alias of "xchg %ax,%ax" in 16bit mode, "xchg %eax,%eax" in
-   32bit mode and "xchg %rax,%rax" in 64bit mode.  */  
+   32bit mode and "xchg %rax,%rax" in 64bit mode.  */
 
 static void
 NOP_Fixup1 (int bytemode, int sizeflag)
@@ -5719,7 +5719,7 @@ REP_Fixup (int bytemode, int sizeflag)
   size_t ilen = 0;
 
   if (prefixes & PREFIX_REPZ)
-    switch (*insn_codep) 
+    switch (*insn_codep)
       {
       case 0x6e:	/* outsb */
       case 0x6f:	/* outsw/outsl */
