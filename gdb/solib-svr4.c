@@ -239,12 +239,16 @@ IGNORE_FIRST_LINK_MAP_ENTRY (struct so_list *so)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
 
+  /* Assume that everything is a library if the dynamic loader was loaded
+     late by a static executable.  */
+  if (bfd_get_section_by_name (exec_bfd, ".dynamic") == NULL)
+    return 0;
+
   return extract_typed_address (so->lm_info->lm + lmo->l_prev_offset,
 				builtin_type_void_data_ptr) == 0;
 }
 
 static CORE_ADDR debug_base;	/* Base of dynamic linker structures */
-static CORE_ADDR breakpoint_addr;	/* Address where end bkpt is set */
 
 /* Validity flag for debug_loader_offset.  */
 static int debug_loader_offset_p;
@@ -387,7 +391,18 @@ elf_locate_base (void)
   /* Find the start address of the .dynamic section.  */
   dyninfo_sect = bfd_get_section_by_name (exec_bfd, ".dynamic");
   if (dyninfo_sect == NULL)
-    return 0;
+    {
+      /* This may be a static executable.  Look for the symbol
+	 conventionally named _r_debug, as a last resort.  */
+      struct minimal_symbol *msymbol;
+
+      msymbol = lookup_minimal_symbol ("_r_debug", NULL, symfile_objfile);
+      if (msymbol != NULL)
+	return SYMBOL_VALUE_ADDRESS (msymbol);
+      else
+	return 0;
+    }
+
   dyninfo_addr = bfd_section_vma (exec_bfd, dyninfo_sect);
 
   /* Read in .dynamic section, silently ignore errors.  */
@@ -1111,10 +1126,19 @@ enable_break (void)
                "and track explicitly loaded dynamic code."));
     }
 
-  /* Scan through the list of symbols, trying to look up the symbol and
-     set a breakpoint there.  Terminate loop when we/if we succeed. */
+  /* Scan through the lists of symbols, trying to look up the symbol and
+     set a breakpoint there.  Terminate loop when we/if we succeed.  */
 
-  breakpoint_addr = 0;
+  for (bkpt_namep = solib_break_names; *bkpt_namep != NULL; bkpt_namep++)
+    {
+      msymbol = lookup_minimal_symbol (*bkpt_namep, NULL, symfile_objfile);
+      if ((msymbol != NULL) && (SYMBOL_VALUE_ADDRESS (msymbol) != 0))
+	{
+	  create_solib_event_breakpoint (SYMBOL_VALUE_ADDRESS (msymbol));
+	  return 1;
+	}
+    }
+
   for (bkpt_namep = bkpt_names; *bkpt_namep != NULL; bkpt_namep++)
     {
       msymbol = lookup_minimal_symbol (*bkpt_namep, NULL, symfile_objfile);

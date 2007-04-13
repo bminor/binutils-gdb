@@ -1,5 +1,14 @@
 2007-04-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* solib-svr4.c (IGNORE_FIRST_LINK_MAP_ENTRY): Do not ignore the
+	first entry for static executables.
+	(breakpoint_addr): Delete unused variable.
+	(elf_locate_base): Search for _r_debug in static executables.
+	(enable_break): Do not set breakpoint_addr.  Scan solib_break_names
+	also.
+
+2007-04-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* breakpoint.c (update_breakpoints_after_exec, print_it_typical)
 	(bpstat_what, print_one_breakpoint, allocate_bp_location)
 	(mention): Remove bp_through_sigtramp support.
