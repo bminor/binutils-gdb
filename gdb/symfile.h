@@ -160,15 +160,6 @@ struct partial_symbol *add_psymbol_to_list (char *, int, domain_enum,
 					    long, CORE_ADDR,
 					    enum language, struct objfile *);
 
-extern void add_psymbol_with_dem_name_to_list (char *, int, char *, int,
-					       domain_enum,
-					       enum address_class,
-					       struct psymbol_allocation_list
-					       *, long, CORE_ADDR,
-					       enum language,
-					       struct objfile *);
-
-
 extern void init_psymbol_list (struct objfile *, int);
 
 extern void sort_pst_symbols (struct partial_symtab *);

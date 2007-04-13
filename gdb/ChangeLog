@@ -1,5 +1,10 @@
 2007-04-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* symfile.c (add_psymbol_with_dem_name_to_list): Remove.
+	* symfile.h (add_psymbol_with_dem_name_to_list): Remove prototype.
+
+2007-04-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* NEWS: Mention removal of HP aCC support.
 
 2007-04-13  Daniel Jacobowitz  <dan@codesourcery.com>
