@@ -1,3 +1,9 @@
+2007-04-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* infrun.c: Doc fixes.
+	(handle_inferior_event): Clarify debug message.
+	(insert_step_resume_breakpoint_at_sal): Print a debug message.
+
 2007-04-12  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* configure.tgt (arm-*-nto*, sh-*-nto*): Remove.

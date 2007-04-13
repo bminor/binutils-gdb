@@ -2022,6 +2022,7 @@ process_event_stop_test:
 	     code paths as single-step - set a breakpoint at the
 	     signal return address and then, once hit, step off that
 	     breakpoint.  */
+
 	  insert_step_resume_breakpoint_at_frame (get_current_frame ());
 	  ecs->step_after_step_resume_breakpoint = 1;
 	  keep_going (ecs);
@@ -2338,7 +2339,8 @@ process_event_stop_test:
   if (step_resume_breakpoint)
     {
       if (debug_infrun)
-	 fprintf_unfiltered (gdb_stdlog, "infrun: step-resume breakpoint\n");
+	 fprintf_unfiltered (gdb_stdlog,
+			     "infrun: step-resume breakpoint is inserted\n");
 
       /* Having a step-resume breakpoint overrides anything
          else having to do with stepping commands until
@@ -2785,7 +2787,7 @@ step_into_function (struct execution_control_state *ecs)
   keep_going (ecs);
 }
 
-/* Insert a "step resume breakpoint" at SR_SAL with frame ID SR_ID.
+/* Insert a "step-resume breakpoint" at SR_SAL with frame ID SR_ID.
    This is used to both functions and to skip over code.  */
 
 static void
@@ -2796,13 +2798,19 @@ insert_step_resume_breakpoint_at_sal (struct symtab_and_line sr_sal,
      thread, so we should never be setting a new
      step_resume_breakpoint when one is already active.  */
   gdb_assert (step_resume_breakpoint == NULL);
+
+  if (debug_infrun)
+    fprintf_unfiltered (gdb_stdlog,
+			"infrun: inserting step-resume breakpoint at 0x%s\n",
+			paddr_nz (sr_sal.pc));
+
   step_resume_breakpoint = set_momentary_breakpoint (sr_sal, sr_id,
 						     bp_step_resume);
   if (breakpoints_inserted)
     insert_breakpoints ();
 }
 
-/* Insert a "step resume breakpoint" at RETURN_FRAME.pc.  This is used
+/* Insert a "step-resume breakpoint" at RETURN_FRAME.pc.  This is used
    to skip a potential signal handler.
 
    This is called with the interrupted function's frame.  The signal
