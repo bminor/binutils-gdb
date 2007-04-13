@@ -1,3 +1,9 @@
+2007-04-13  Paul Brook  <paul@codesourcery.com>
+
+	* target-descriptions.c (tdesc_named_type): Add ieee_single and
+	ieee_double.
+	* doc/gdb.texinfo: Document ieee_single and ieee_double target types.
+
 2007-04-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* mips-mdebug-tdep.c, mips-mdebug-tdep.h, ocd.c, ocd.h, ppc-bdm.c,

@@ -382,6 +382,12 @@ tdesc_named_type (const struct tdesc_feature *feature, const char *id)
   if (strcmp (id, "uint64") == 0)
     return builtin_type_uint64;
 
+  if (strcmp (id, "ieee_single") == 0)
+    return builtin_type_ieee_single;
+
+  if (strcmp (id, "ieee_double") == 0)
+    return builtin_type_ieee_double;
+
   if (strcmp (id, "arm_fpa_ext") == 0)
     return builtin_type_arm_ext;
 
