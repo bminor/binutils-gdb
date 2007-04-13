@@ -1,5 +1,10 @@
 2007-04-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* breakpoint.c (bpstat_what): Give step-resume higher priority than
+	shlib events.
+
+2007-04-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* infrun.c: Doc fixes.
 	(handle_inferior_event): Clarify debug message.
 	(insert_step_resume_breakpoint_at_sal): Print a debug message.

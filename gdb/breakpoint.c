@@ -3120,10 +3120,10 @@ bpstat_what (bpstat bs)
      clrs < err shl shlr sn sr ss ts
      ss   < shl shlr sn sr ts
      sn   < shl shlr sr ts
-     sr   < shl shlr ts
-     shl  < shlr
+     shl  < shlr sr
+     shlr < sr
+     sr   < ts
      ts   < 
-     shlr <
 
      What I think this means is that we don't need a damned table
      here.  If you just put the rows and columns in the right order,
@@ -3160,13 +3160,13 @@ bpstat_what (bpstat bs)
 /*long_resume */
     {clr, ss, sn, clrs, err, err, err, sr, ts, shl, shlr},
 /*step_resume */
-    {sr, sr, sr, sr, sr, sr, sr, sr, ts, shl, shlr},
+    {sr, sr, sr, sr, sr, sr, sr, sr, ts, sr, sr},
 /*through_sig */
     {ts, ts, ts, ts, ts, ts, ts, ts, ts, shl, shlr},
 /*shlib */
-    {shl, shl, shl, shl, shl, shl, shl, shl, ts, shl, shlr},
+    {shl, shl, shl, shl, shl, shl, shl, sr, ts, shl, shlr},
 /*catch_shlib */
-    {shlr, shlr, shlr, shlr, shlr, shlr, shlr, shlr, ts, shlr, shlr}
+    {shlr, shlr, shlr, shlr, shlr, shlr, shlr, sr, ts, shlr, shlr}
   };
 
 #undef kc
