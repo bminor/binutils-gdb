@@ -127,6 +127,13 @@ DWARF 1 support
 	A debug information format.  The predecessor to DWARF 2 and 
 	DWARF 3, which are still supported.
 
+Support for the HP aCC compiler on HP-UX/PA-RISC
+
+	SOM-encapsulated symbolic debugging information, automatic
+	invocation of pxdb, and the aCC custom C++ ABI.  This does not
+	affect HP-UX for Itanium or GCC for HP-UX/PA-RISC.  Code compiled
+	with aCC can still be debugged on an assembly level.
+
 *** Changes in GDB 6.6
 
 * New targets

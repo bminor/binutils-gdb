@@ -1,5 +1,9 @@
 2007-04-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* NEWS: Mention removal of HP aCC support.
+
+2007-04-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* solib-svr4.c (IGNORE_FIRST_LINK_MAP_ENTRY): Do not ignore the
 	first entry for static executables.
 	(breakpoint_addr): Delete unused variable.
