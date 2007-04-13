@@ -142,7 +142,7 @@ const template i386_optab[] =
 
 /* Exchange instructions.
    xchg commutes:  we allow both operand orders.
- 
+
    In the 64bit code, xchg rax, rax is reused for new nop instruction.  */
 {"xchg",   2,	0x90, X, 0,	wlq_Suf|ShortForm,	{ WordReg, Acc, 0 } },
 {"xchg",   2,	0x90, X, 0,	wlq_Suf|ShortForm,	{ Acc, WordReg, 0 } },

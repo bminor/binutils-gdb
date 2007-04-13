@@ -1,6 +1,8 @@
 2007-04-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c: Remove trailing white spaces.
+	* i386-opc.c: Likewise.
+	* i386-opc.h: Likewise.
 
 2007-04-11  H.J. Lu  <hongjiu.lu@intel.com>
 

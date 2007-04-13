@@ -67,7 +67,7 @@ typedef struct template
 #define CpuSVME	      0x20000	/* AMD Secure Virtual Machine Ext-s required */
 #define CpuVMX	      0x40000	/* VMX Instructions required */
 #define CpuSSSE3      0x80000	/* Supplemental Streaming SIMD extensions 3 required */
-#define CpuSSE4a     0x100000   /* SSE4a New Instuctions required */ 
+#define CpuSSE4a     0x100000   /* SSE4a New Instuctions required */
 #define CpuABM       0x200000   /* ABM New Instructions required */
 
   /* These flags are set by gas depending on the flag_code.  */
