@@ -1407,13 +1407,6 @@ update_breakpoints_after_exec (void)
 	continue;
       }
 
-    /* Ditto the sigtramp handler breakpoints. */
-    if (b->type == bp_through_sigtramp)
-      {
-	delete_breakpoint (b);
-	continue;
-      }
-
     /* Ditto the exception-handling catchpoints. */
     if ((b->type == bp_catch_catch) || (b->type == bp_catch_throw))
       {
@@ -2449,7 +2442,6 @@ print_it_typical (bpstat bs)
     case bp_longjmp:
     case bp_longjmp_resume:
     case bp_step_resume:
-    case bp_through_sigtramp:
     case bp_watchpoint_scope:
     case bp_call_dummy:
     default:
@@ -3066,9 +3058,6 @@ bpstat_what (bpstat bs)
       /* We hit the step_resume breakpoint.  */
       step_resume,
 
-      /* We hit the through_sigtramp breakpoint.  */
-      through_sig,
-
       /* We hit the shared library event breakpoint.  */
       shlib_event,
 
@@ -3090,7 +3079,6 @@ bpstat_what (bpstat bs)
 #define clr BPSTAT_WHAT_CLEAR_LONGJMP_RESUME
 #define clrs BPSTAT_WHAT_CLEAR_LONGJMP_RESUME_SINGLE
 #define sr BPSTAT_WHAT_STEP_RESUME
-#define ts BPSTAT_WHAT_THROUGH_SIGTRAMP
 #define shl BPSTAT_WHAT_CHECK_SHLIBS
 #define shlr BPSTAT_WHAT_CHECK_SHLIBS_RESUME_FROM_HOOK
 
@@ -3113,17 +3101,16 @@ bpstat_what (bpstat bs)
      back and decide something of a lower priority is better.  The
      ordering is:
 
-     kc   < clr sgl shl shlr slr sn sr ss ts
-     sgl  < clrs shl shlr slr sn sr ss ts
-     slr  < err shl shlr sn sr ss ts
-     clr  < clrs err shl shlr sn sr ss ts
-     clrs < err shl shlr sn sr ss ts
-     ss   < shl shlr sn sr ts
-     sn   < shl shlr sr ts
+     kc   < clr sgl shl shlr slr sn sr ss
+     sgl  < clrs shl shlr slr sn sr ss
+     slr  < err shl shlr sn sr ss
+     clr  < clrs err shl shlr sn sr ss
+     clrs < err shl shlr sn sr ss
+     ss   < shl shlr sn sr
+     sn   < shl shlr sr
      shl  < shlr sr
      shlr < sr
-     sr   < ts
-     ts   < 
+     sr   <
 
      What I think this means is that we don't need a damned table
      here.  If you just put the rows and columns in the right order,
@@ -3141,32 +3128,30 @@ bpstat_what (bpstat bs)
     table[(int) class_last][(int) BPSTAT_WHAT_LAST] =
   {
   /*                              old action */
-  /*       kc    ss    sn    sgl    slr   clr    clrs   sr    ts   shl   shlr
+  /*       kc    ss    sn    sgl    slr   clr    clrs   sr   shl   shlr
    */
 /*no_effect */
-    {kc, ss, sn, sgl, slr, clr, clrs, sr, ts, shl, shlr},
+    {kc, ss, sn, sgl, slr, clr, clrs, sr, shl, shlr},
 /*wp_silent */
-    {ss, ss, sn, ss, ss, ss, ss, sr, ts, shl, shlr},
+    {ss, ss, sn, ss, ss, ss, ss, sr, shl, shlr},
 /*wp_noisy */
-    {sn, sn, sn, sn, sn, sn, sn, sr, ts, shl, shlr},
+    {sn, sn, sn, sn, sn, sn, sn, sr, shl, shlr},
 /*bp_nostop */
-    {sgl, ss, sn, sgl, slr, clrs, clrs, sr, ts, shl, shlr},
+    {sgl, ss, sn, sgl, slr, clrs, clrs, sr, shl, shlr},
 /*bp_silent */
-    {ss, ss, sn, ss, ss, ss, ss, sr, ts, shl, shlr},
+    {ss, ss, sn, ss, ss, ss, ss, sr, shl, shlr},
 /*bp_noisy */
-    {sn, sn, sn, sn, sn, sn, sn, sr, ts, shl, shlr},
+    {sn, sn, sn, sn, sn, sn, sn, sr, shl, shlr},
 /*long_jump */
-    {slr, ss, sn, slr, slr, err, err, sr, ts, shl, shlr},
+    {slr, ss, sn, slr, slr, err, err, sr, shl, shlr},
 /*long_resume */
-    {clr, ss, sn, clrs, err, err, err, sr, ts, shl, shlr},
+    {clr, ss, sn, clrs, err, err, err, sr, shl, shlr},
 /*step_resume */
-    {sr, sr, sr, sr, sr, sr, sr, sr, ts, sr, sr},
-/*through_sig */
-    {ts, ts, ts, ts, ts, ts, ts, ts, ts, shl, shlr},
+    {sr, sr, sr, sr, sr, sr, sr, sr, sr, sr},
 /*shlib */
-    {shl, shl, shl, shl, shl, shl, shl, sr, ts, shl, shlr},
+    {shl, shl, shl, shl, shl, shl, shl, sr, shl, shlr},
 /*catch_shlib */
-    {shlr, shlr, shlr, shlr, shlr, shlr, shlr, sr, ts, shlr, shlr}
+    {shlr, shlr, shlr, shlr, shlr, shlr, shlr, sr, shlr, shlr}
   };
 
 #undef kc
@@ -3241,9 +3226,6 @@ bpstat_what (bpstat bs)
 	  else
 	    /* It is for the wrong frame.  */
 	    bs_class = bp_nostop;
-	  break;
-	case bp_through_sigtramp:
-	  bs_class = through_sig;
 	  break;
 	case bp_watchpoint_scope:
 	  bs_class = bp_nostop;
@@ -3422,7 +3404,6 @@ print_one_breakpoint (struct breakpoint *b,
     {bp_longjmp, "longjmp"},
     {bp_longjmp_resume, "longjmp resume"},
     {bp_step_resume, "step resume"},
-    {bp_through_sigtramp, "sigtramp"},
     {bp_watchpoint_scope, "watchpoint scope"},
     {bp_call_dummy, "call dummy"},
     {bp_shlib_event, "shlib events"},
@@ -3585,7 +3566,6 @@ print_one_breakpoint (struct breakpoint *b,
       case bp_longjmp:
       case bp_longjmp_resume:
       case bp_step_resume:
-      case bp_through_sigtramp:
       case bp_watchpoint_scope:
       case bp_call_dummy:
       case bp_shlib_event:
@@ -4146,7 +4126,6 @@ allocate_bp_location (struct breakpoint *bpt, enum bptype bp_type)
     case bp_longjmp:
     case bp_longjmp_resume:
     case bp_step_resume:
-    case bp_through_sigtramp:
     case bp_watchpoint_scope:
     case bp_call_dummy:
     case bp_shlib_event:
@@ -5007,7 +4986,6 @@ mention (struct breakpoint *b)
       case bp_longjmp:
       case bp_longjmp_resume:
       case bp_step_resume:
-      case bp_through_sigtramp:
       case bp_call_dummy:
       case bp_watchpoint_scope:
       case bp_shlib_event:

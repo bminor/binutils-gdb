@@ -62,9 +62,6 @@ enum bptype
        stepping over signal handlers, and for skipping prologues.  */
     bp_step_resume,
 
-    /* Used by wait_for_inferior for stepping over signal handlers.  */
-    bp_through_sigtramp,
-
     /* Used to detect when a watchpoint expression has gone out of
        scope.  These breakpoints are usually not visible to the user.
 
