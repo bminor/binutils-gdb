@@ -5522,15 +5522,16 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 
 	      for (sub = info->input_bfds; sub != NULL;
 		   sub = sub->link_next)
-		for (o = sub->sections; o != NULL; o = o->next)
-		  if (elf_section_data (o)->this_hdr.sh_type
-		      == SHT_PREINIT_ARRAY)
-		    {
-		      (*_bfd_error_handler)
-			(_("%B: .preinit_array section is not allowed in DSO"),
-			 sub);
-		      break;
-		    }
+		if (bfd_get_flavour (sub) == bfd_target_elf_flavour)
+		  for (o = sub->sections; o != NULL; o = o->next)
+		    if (elf_section_data (o)->this_hdr.sh_type
+			== SHT_PREINIT_ARRAY)
+		      {
+			(*_bfd_error_handler)
+			  (_("%B: .preinit_array section is not allowed in DSO"),
+			   sub);
+			break;
+		      }
 
 	      bfd_set_error (bfd_error_nonrepresentable_section);
 	      return FALSE;
@@ -9533,7 +9534,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   if (!info->reduce_memory_overheads)
     {
       for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
-	if (elf_tdata (sub)->symbuf)
+	if (bfd_get_flavour (sub) == bfd_target_elf_flavour
+	    && elf_tdata (sub)->symbuf)
 	  {
 	    free (elf_tdata (sub)->symbuf);
 	    elf_tdata (sub)->symbuf = NULL;

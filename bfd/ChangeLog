@@ -1,3 +1,10 @@
+2007-04-14  Jakub Jelinek  <jakub@redhat.com>
+
+	* elflink.c (bfd_elf_final_link): Don't free symbuf for
+	non-elf input bfds.
+	(bfd_elf_size_dynamic_sections): Don't access elf_section_data
+	for non-elf input bfds.
+
 2007-04-12  Richard Sandiford  <richard@codesourcery.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_size_dynamic_sections): Don't add
