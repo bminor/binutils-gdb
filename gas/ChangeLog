@@ -1,3 +1,10 @@
+2007-04-14  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* config/tc-sh.c (align_test_frag_offset_fixed_p): New.
+	(sh_optimize_expr): Likewise.
+	* config/tc-sh.h (md_optimize_expr): Define.
+	(sh_optimize_expr): Prototype.
+
 2007-04-06  Matt Thomas  <matt@netbsd.org>
 
 	* config/tc-vax.c (vax_cons): Added to support %pcrel{8,16,32}(exp)

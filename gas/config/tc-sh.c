@@ -825,8 +825,91 @@ sh_elf_cons (register int nbytes)
   else
     demand_empty_rest_of_line ();
 }
+
+/* The regular frag_offset_fixed_p doesn't work for rs_align_test
+   frags.  */
+
+static bfd_boolean
+align_test_frag_offset_fixed_p (const fragS *frag1, const fragS *frag2,
+				bfd_vma *offset)
+{
+  const fragS *frag;
+  bfd_vma off;
+
+  /* Start with offset initialised to difference between the two frags.
+     Prior to assigning frag addresses this will be zero.  */
+  off = frag1->fr_address - frag2->fr_address;
+  if (frag1 == frag2)
+    {
+      *offset = off;
+      return TRUE;
+    }
+
+  /* Maybe frag2 is after frag1.  */
+  frag = frag1;
+  while (frag->fr_type == rs_align_test)
+    {
+      off += frag->fr_fix;
+      frag = frag->fr_next;
+      if (frag == NULL)
+	break;
+      if (frag == frag2)
+	{
+	  *offset = off;
+	  return TRUE;
+	}
+    }
+
+  /* Maybe frag1 is after frag2.  */
+  off = frag1->fr_address - frag2->fr_address;
+  frag = frag2;
+  while (frag->fr_type == rs_align_test)
+    {
+      off -= frag->fr_fix;
+      frag = frag->fr_next;
+      if (frag == NULL)
+	break;
+      if (frag == frag1)
+	{
+	  *offset = off;
+	  return TRUE;
+	}
+    }
+
+  return FALSE;
+}
 #endif /* OBJ_ELF */
 
+/* Optimize a difference of symbols which have rs_align_test frag if
+   possible.  */
+
+int
+sh_optimize_expr (expressionS *l, operatorT op, expressionS *r)
+{
+#ifdef OBJ_ELF
+  bfd_vma frag_off;
+
+  if (op == O_subtract
+      && l->X_op == O_symbol
+      && r->X_op == O_symbol
+      && S_GET_SEGMENT (l->X_add_symbol) == S_GET_SEGMENT (r->X_add_symbol)
+      && (SEG_NORMAL (S_GET_SEGMENT (l->X_add_symbol))
+	  || r->X_add_symbol == l->X_add_symbol)
+      && align_test_frag_offset_fixed_p (symbol_get_frag (l->X_add_symbol),
+					 symbol_get_frag (r->X_add_symbol),
+					 &frag_off))
+    {
+      l->X_add_number -= r->X_add_number;
+      l->X_add_number -= frag_off / OCTETS_PER_BYTE;
+      l->X_add_number += (S_GET_VALUE (l->X_add_symbol)
+			  - S_GET_VALUE (r->X_add_symbol));
+      l->X_op = O_constant;
+      l->X_add_symbol = 0;
+      return 1;
+    }
+#endif /* OBJ_ELF */
+  return 0;
+}
 
 /* This function is called once, at assembler startup time.  This should
    set up all the tables, etc that the MD part of the assembler needs.  */
