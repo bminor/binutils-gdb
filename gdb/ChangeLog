@@ -1,3 +1,8 @@
+2007-04-14  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* alpha-tdep.c (alpha_software_single_step): Do not call write_pc
+	when removing single-step breakpoints.
+
 2007-04-14  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* varobj.h (varobj_set_frozen): New

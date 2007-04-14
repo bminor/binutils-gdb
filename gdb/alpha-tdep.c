@@ -1521,7 +1521,7 @@ alpha_next_pc (CORE_ADDR pc)
 int
 alpha_software_single_step (enum target_signal sig, int insert_breakpoints_p)
 {
-  static CORE_ADDR next_pc;
+  CORE_ADDR next_pc;
   CORE_ADDR pc;
 
   if (insert_breakpoints_p)
@@ -1534,7 +1534,6 @@ alpha_software_single_step (enum target_signal sig, int insert_breakpoints_p)
   else
     {
       remove_single_step_breakpoints ();
-      write_pc (next_pc);
     }
   return 1;
 }
