@@ -137,6 +137,16 @@ struct varobj
 
   /* Last print value.  */
   char *print_value;
+
+  /* Is this variable frozen.  Frozen variables are never implicitly
+     updated by -var-update * 
+     or -var-update <direct-or-indirect-parent>.  */
+  int frozen;
+
+  /* Is the value of this variable intentionally not fetched?  It is
+     not fetched if either the variable is frozen, or any parents is
+     frozen.  */
+  int not_fetched;
 };
 
 struct cpstack
@@ -669,6 +679,26 @@ varobj_get_display_format (struct varobj *var)
   return var->format;
 }
 
+void
+varobj_set_frozen (struct varobj *var, int frozen)
+{
+  /* When a variable is unfrozen, we don't fetch its value.
+     The 'not_fetched' flag remains set, so next -var-update
+     won't complain.
+
+     We don't fetch the value, because for structures the client
+     should do -var-update anyway.  It would be bad to have different
+     client-size logic for structure and other types.  */
+  var->frozen = frozen;
+}
+
+int
+varobj_get_frozen (struct varobj *var)
+{
+  return var->frozen;
+}
+
+
 int
 varobj_get_num_children (struct varobj *var)
 {
@@ -915,6 +945,7 @@ install_new_value (struct varobj *var, struct value *value, int initial)
   int changeable;
   int need_to_fetch;
   int changed = 0;
+  int intentionally_not_fetched = 0;
 
   /* We need to know the varobj's type to decide if the value should
      be fetched or not.  C++ fake children (public/protected/private) don't have
@@ -950,7 +981,20 @@ install_new_value (struct varobj *var, struct value *value, int initial)
      will be lazy, which means we've lost that old value.  */
   if (need_to_fetch && value && value_lazy (value))
     {
-      if (!gdb_value_fetch_lazy (value))
+      struct varobj *parent = var->parent;
+      int frozen = var->frozen;
+      for (; !frozen && parent; parent = parent->parent)
+	frozen |= parent->frozen;
+
+      if (frozen && initial)
+	{
+	  /* For variables that are frozen, or are children of frozen
+	     variables, we don't do fetch on initial assignment.
+	     For non-initial assignemnt we do the fetch, since it means we're
+	     explicitly asked to compare the new value with the old one.  */
+	  intentionally_not_fetched = 1;
+	}
+      else if (!gdb_value_fetch_lazy (value))
 	{
 	  /* Set the value to NULL, so that for the next -var-update,
 	     we don't try to compare the new value with this value,
@@ -980,9 +1024,16 @@ install_new_value (struct varobj *var, struct value *value, int initial)
 	{
 	  /* Try to compare the values.  That requires that both
 	     values are non-lazy.  */
-	  
-	  /* Quick comparison of NULL values.  */
-	  if (var->value == NULL && value == NULL)
+	  if (var->not_fetched && value_lazy (var->value))
+	    {
+	      /* This is a frozen varobj and the value was never read.
+		 Presumably, UI shows some "never read" indicator.
+		 Now that we've fetched the real value, we need to report
+		 this varobj as changed so that UI can show the real
+		 value.  */
+	      changed = 1;
+	    }
+          else  if (var->value == NULL && value == NULL)
 	    /* Equal. */
 	    ;
 	  else if (var->value == NULL || value == NULL)
@@ -1012,9 +1063,13 @@ install_new_value (struct varobj *var, struct value *value, int initial)
     }
 
   /* We must always keep the new value, since children depend on it.  */
-  if (var->value != NULL)
+  if (var->value != NULL && var->value != value)
     value_free (var->value);
   var->value = value;
+  if (value && value_lazy (value) && intentionally_not_fetched)
+    var->not_fetched = 1;
+  else
+    var->not_fetched = 0;
   var->updated = 0;
 
   gdb_assert (!var->value || value_type (var->value));
@@ -1031,17 +1086,21 @@ install_new_value (struct varobj *var, struct value *value, int initial)
     < 0 for error values, see varobj.h.
     Otherwise it is the number of children + parent changed.
 
-   Only root variables can be updated... 
+   The EXPLICIT parameter specifies if this call is result
+   of MI request to update this specific variable, or 
+   result of implicit -var-update *. For implicit request, we don't
+   update frozen variables.
 
    NOTE: This function may delete the caller's varobj. If it
    returns TYPE_CHANGED, then it has done this and VARP will be modified
    to point to the new varobj.  */
 
 int
-varobj_update (struct varobj **varp, struct varobj ***changelist)
+varobj_update (struct varobj **varp, struct varobj ***changelist,
+	       int explicit)
 {
   int changed = 0;
-  int type_changed;
+  int type_changed = 0;
   int i;
   int vleft;
   struct varobj *v;
@@ -1056,48 +1115,56 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
   /* sanity check: have we been passed a pointer?  */
   gdb_assert (changelist);
 
-  if (!is_root_p (*varp))
-    error (_("Only root variables can be updated"));
+  /* Frozen means frozen -- we don't check for any change in
+     this varobj, including its going out of scope, or
+     changing type.  One use case for frozen varobjs is
+     retaining previously evaluated expressions, and we don't
+     want them to be reevaluated at all.  */
+  if (!explicit && (*varp)->frozen)
+    return 0;
 
   if (!(*varp)->root->is_valid)
     return INVALID;
 
-  /* Save the selected stack frame, since we will need to change it
-     in order to evaluate expressions.  */
-  old_fid = get_frame_id (deprecated_safe_get_selected_frame ());
-
-  /* Update the root variable. value_of_root can return NULL
-     if the variable is no longer around, i.e. we stepped out of
-     the frame in which a local existed. We are letting the 
-     value_of_root variable dispose of the varobj if the type
-     has changed.  */
-  type_changed = 1;
-  new = value_of_root (varp, &type_changed);
-
-  /* Restore selected frame.  */
-  fi = frame_find_by_id (old_fid);
-  if (fi)
-    select_frame (fi);
-
-  /* If this is a "use_selected_frame" varobj, and its type has changed,
-     them note that it's changed.  */
-  if (type_changed)
-    VEC_safe_push (varobj_p, result, *varp);
-
-  if (install_new_value ((*varp), new, type_changed))
+  if ((*varp)->root->rootvar == *varp)
     {
-      /* If type_changed is 1, install_new_value will never return
-	 non-zero, so we'll never report the same variable twice.  */
-      gdb_assert (!type_changed);
-      VEC_safe_push (varobj_p, result, *varp);
-    }
+      /* Save the selected stack frame, since we will need to change it
+	 in order to evaluate expressions.  */
+      old_fid = get_frame_id (deprecated_safe_get_selected_frame ());
+      
+      /* Update the root variable. value_of_root can return NULL
+	 if the variable is no longer around, i.e. we stepped out of
+	 the frame in which a local existed. We are letting the 
+	 value_of_root variable dispose of the varobj if the type
+	 has changed.  */
+      type_changed = 1;
+      new = value_of_root (varp, &type_changed);
 
-  if (new == NULL)
-    {
-      /* This means the varobj itself is out of scope.
-	 Report it.  */
-      VEC_free (varobj_p, result);
-      return NOT_IN_SCOPE;
+      /* Restore selected frame.  */
+      fi = frame_find_by_id (old_fid);
+      if (fi)
+	select_frame (fi);
+      
+      /* If this is a "use_selected_frame" varobj, and its type has changed,
+	 them note that it's changed.  */
+      if (type_changed)
+	VEC_safe_push (varobj_p, result, *varp);
+      
+        if (install_new_value ((*varp), new, type_changed))
+	  {
+	    /* If type_changed is 1, install_new_value will never return
+	       non-zero, so we'll never report the same variable twice.  */
+	    gdb_assert (!type_changed);
+	    VEC_safe_push (varobj_p, result, *varp);
+	  }
+
+      if (new == NULL)
+	{
+	  /* This means the varobj itself is out of scope.
+	     Report it.  */
+	  VEC_free (varobj_p, result);
+	  return NOT_IN_SCOPE;
+	}
     }
 
   VEC_safe_push (varobj_p, stack, *varp);
@@ -1115,13 +1182,13 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
 	{
 	  varobj_p c = VEC_index (varobj_p, v->children, i);
 	  /* Child may be NULL if explicitly deleted by -var-delete.  */
-	  if (c != NULL)
+	  if (c != NULL && !c->frozen)
 	    VEC_safe_push (varobj_p, stack, c);
 	}
 
       /* Update this variable, unless it's a root, which is already
 	 updated.  */
-      if (v != *varp)
+      if (v->root->rootvar != v)
 	{	  
 	  new = value_of_child (v->parent, v->index);
 	  if (install_new_value (v, new, 0 /* type not changed */))
@@ -1403,6 +1470,8 @@ new_variable (void)
   var->root = NULL;
   var->updated = 0;
   var->print_value = NULL;
+  var->frozen = 0;
+  var->not_fetched = 0;
 
   return var;
 }
@@ -2116,6 +2185,12 @@ c_value_of_variable (struct varobj *var)
 	  }
 	else
 	  {
+	    if (var->not_fetched && value_lazy (var->value))
+	      /* Frozen variable and no value yet.  We don't
+		 implicitly fetch the value.  MI response will
+		 use empty string for the value, which is OK.  */
+	      return NULL;
+
 	    gdb_assert (varobj_value_is_changeable_p (var));
 	    gdb_assert (!value_lazy (var->value));
 	    return value_get_print_value (var->value, var->format);

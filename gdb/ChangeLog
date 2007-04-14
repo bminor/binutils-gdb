@@ -1,3 +1,29 @@
+2007-04-14  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* varobj.h (varobj_set_frozen): New
+	(varobj_get_frozen): New.
+	(varobj_update): New parameter explicit.
+	* varobj.c (struct varobj): New fields frozen
+	and not_fetched.
+	(varobj_set_frozen, varobj_get_frozen): New.
+	(install_new_value): Don't fetch values for 
+	frozen variable object, or children thereof.  Allow
+	a frozen variable object to have non-fetched value.
+	(varobj_update): Allow updating child variables.
+	Don't traverse frozen children.
+	(new_variable): Initialize the frozen field.
+	(c_value_of_variable): Return NULL for frozen
+	variable without any value yet. 
+	* mi/mi-cmd-var.c (varobj_update_one): New parameter
+	'explicit'.
+	(mi_cmd_var_create): Output the 'frozen' field,
+	as soon as testsuite is adjusted to expect that field.
+	(mi_cmd_var_set_frozen): New.
+	(mi_cmd_var_update): Pass the 'explicit' parameter to
+	varobj_update_one.
+	* mi/mi-cmds.c (mi_cmds): Register '-var-set-frozen'.
+	* mi/mi-cmds.h (mi_cmd_var_set_frozen): Declare.
+	
 2007-04-13  Paul Brook  <paul@codesourcery.com>
 
 	* target-descriptions.c (tdesc_named_type): Add ieee_single and

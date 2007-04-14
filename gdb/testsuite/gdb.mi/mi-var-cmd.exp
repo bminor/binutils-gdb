@@ -596,6 +596,20 @@ mi_gdb_test "-var-update selected_a" \
 	"\\^done,changelist=\\\[\{name=\"selected_a\",in_scope=\"true\",new_type=\"int\",new_num_children=\"0\"\}\\\]" \
 	"update selected_a in do_special_tests"
 
+mi_delete_varobj selected_a "delete selected_a"
+mi_delete_varobj array_ptr "delete array_ptr"
+
+proc set_frozen {varobjs flag} {
+    foreach v $varobjs {
+        mi_gdb_test "-var-set-frozen $v $flag" \
+            "\\^done" \
+            "-var-set-frozen $v $flag"
+    }
+}
+
+mi_prepare_inline_tests $srcfile
+mi_run_inline_test frozen
+
 # Test whether bad varobjs crash GDB.
 
 # A varobj we fail to read during -var-update should be considered

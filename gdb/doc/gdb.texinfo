@@ -17296,7 +17296,7 @@ New fields may be added to the output of any MI command.
 
 @item
 The range of values for fields with specified values, e.g.,
-@code{in_scope} (@pxref{-var-update}) may be extended.
+@code{in_scope} (@pxref{-var-update-fields}) may be extended.
 
 @c The format of field's content e.g type prefix, may change so parse it
 @c   at your own risk.  Yes, in general?
@@ -19223,7 +19223,10 @@ that corresponds to a composite type, such as structure in C, has
 a number of child variable objects, for example corresponding to each
 element of a structure.  A child variable object can itself have 
 children, recursively.  Recursion ends when we reach 
-leaf variable objects, which always have built-in types.
+leaf variable objects, which always have built-in types.  Child variable
+objects are created only by explicit request, so if a frontend 
+is not interested in the children of a particular variable object, no
+child will be created.
 
 For a leaf variable object it is possible to obtain its value as a
 string, or set the value from a string.  String value can be also
@@ -19235,7 +19238,19 @@ A frontend does not need to read the values of all variable objects each time
 the program stops.  Instead, MI provides an update command that lists all
 variable objects whose values has changed since the last update
 operation.  This considerably reduces the amount of data that must
-be transferred to the frontend.
+be transferred to the frontend.  As noted above, children variable
+objects are created on demand, and only leaf variable objects have a
+real value.  As result, gdb will read target memory only for leaf
+variables that frontend has created.
+
+The automatic update is not always desirable.  For example, a frontend
+might want to keep a value of some expression for future reference,
+and never update it.  For another example,  fetching memory is
+relatively slow for embedded targets, so a frontend might want
+to disable automatic update for the variables that are either not
+visible on the screen, or ``closed''.  This is possible using so
+called ``frozen variable objects''.  Such variable objects are never
+implicitly updated.  
 
 The following is the complete set of @sc{gdb/mi} operations defined to
 access this functionality:
@@ -19268,6 +19283,8 @@ access this functionality:
 @tab set the value of this variable
 @item @code{-var-update}
 @tab update the variable and its children
+@item @code{-var-set-frozen}
+@tab set frozeness attribute
 @end multitable
 
 In the next subsection we describe each operation in detail and suggest
@@ -19533,6 +19550,7 @@ subsequent @code{-var-update} list.
 
 @subheading The @code{-var-update} Command
 @findex -var-update
+@anchor{-var-update}
 
 @subsubheading Synopsis
 
@@ -19567,7 +19585,7 @@ type_changed="false"@}]
 (gdb)
 @end smallexample
 
-@anchor{-var-update} 
+@anchor{-var-update-fields}
 The field in_scope may take three values:
 
 @table @code
@@ -19589,6 +19607,37 @@ objects.
 
 In the future new values may be added to this list so the front should
 be prepared for this possibility.  @xref{GDB/MI Development and Front Ends, ,@sc{GDB/MI} Development and Front Ends}.
+
+@subheading The @code{-var-set-frozen} Command
+@findex -var-set-frozen
+
+@subsubheading Synopsis
+
+@smallexample
+ -var-set-frozen @var{name} @samp{flag}
+@end smallexample
+
+Set the frozeness flag on the variable object @var{name}.  The
+@var{flag} parameter should be either @samp{1} to make the variable
+frozen or @samp{0} to make it unfozen.  If a variable object is
+frozen, then neither itself, nor any of its children, are 
+implicitly updated by @code{-var-update} (@pxref{-var-update}) of 
+a parent variable or by @code{-var-update *}.  Only
+@code{-var-update} of the variable itself will update its value and
+values of its children.  After a variable object is unfrozen, it is
+implicitly updated by all subsequent @code{-var-update} operations.  
+Unfreezing a variable does not update it, only subsequent
+@code{-var-update} does.
+
+@subsubheading Example
+
+@smallexample
+(gdb)
+-var-set-frozen V 1
+^done
+(gdb)
+@end smallexample
+
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Data Manipulation

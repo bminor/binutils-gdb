@@ -1,3 +1,8 @@
+2007-04-14  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Variable Objects): Document
+	frozen variables objects.
+	
 2007-04-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (Memory): Reference Remote Debugging chapter.

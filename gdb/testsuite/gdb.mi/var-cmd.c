@@ -315,6 +315,92 @@ do_special_tests (void)
   incr_a(2);
 }
 
+void do_frozen_tests ()
+{
+  /*: BEGIN: frozen :*/
+  struct {
+    int i;
+    struct {
+      int j;
+      int k;
+    } nested;
+  } v1 = {1, {2, 3}};
+
+  int v2 = 4;
+  /*: 
+    mi_create_varobj V1 v1 "create varobj for v1" 
+    mi_create_varobj V2 v2 "create varobj for v2"
+
+    mi_list_varobj_children "V1" {
+        {"V1.i" "i" "0" "int"}
+	{"V1.nested" "nested" "2" "struct {...}"}
+    } "list children of v1"
+
+    mi_list_varobj_children "V1.nested" {
+        {"V1.nested.j" "j" "0" "int"}
+        {"V1.nested.k" "k" "0" "int"}
+    } "list children of v1.nested"
+
+    mi_check_varobj_value V1.i 1 "check V1.i: 1"
+    mi_check_varobj_value V1.nested.j 2 "check V1.nested.j: 2"
+    mi_check_varobj_value V1.nested.k 3 "check V1.nested.k: 3"
+    mi_check_varobj_value V2 4 "check V2: 4"
+  :*/
+  v2 = 5;
+  /*: 
+    mi_varobj_update * {V2} "update varobjs: V2 changed"
+    set_frozen V2 1
+  :*/
+  v2 = 6;
+  /*: 
+    mi_varobj_update * {} "update varobjs: nothing changed"
+    mi_check_varobj_value V2 5 "check V2: 5"
+    mi_varobj_update V2 {V2} "update V2 explicitly"
+    mi_check_varobj_value V2 6 "check V2: 6"
+  :*/
+  v1.i = 7;
+  v1.nested.j = 8;
+  v1.nested.k = 9;
+  /*:
+    set_frozen V1 1
+    mi_varobj_update * {} "update varobjs: nothing changed"
+    mi_check_varobj_value V1.i 1 "check V1.i: 1"
+    mi_check_varobj_value V1.nested.j 2 "check V1.nested.j: 2"
+    mi_check_varobj_value V1.nested.k 3 "check V1.nested.k: 3"    
+    # Check that explicit update for elements of structures
+    # works.
+    # Update v1.j
+    mi_varobj_update V1.nested.j {V1.nested.j} "update V1.nested.j"
+    mi_check_varobj_value V1.i 1 "check V1.i: 1"
+    mi_check_varobj_value V1.nested.j 8 "check V1.nested.j: 8"
+    mi_check_varobj_value V1.nested.k 3 "check V1.nested.k: 3"    
+    # Update v1.nested, check that children is updated.
+    mi_varobj_update V1.nested {V1.nested.k} "update V1.nested"
+    mi_check_varobj_value V1.i 1 "check V1.i: 1"
+    mi_check_varobj_value V1.nested.j 8 "check V1.nested.j: 8"
+    mi_check_varobj_value V1.nested.k 9 "check V1.nested.k: 9"    
+    # Update v1.i
+    mi_varobj_update V1.i {V1.i} "update V1.i"
+    mi_check_varobj_value V1.i 7 "check V1.i: 7"
+  :*/
+  v1.i = 10;
+  v1.nested.j = 11;
+  v1.nested.k = 12;
+  /*:
+    # Check that unfreeze itself does not updates the values.
+    set_frozen V1 0
+    mi_check_varobj_value V1.i 7 "check V1.i: 7"
+    mi_check_varobj_value V1.nested.j 8 "check V1.nested.j: 8"
+    mi_check_varobj_value V1.nested.k 9 "check V1.nested.k: 9"    
+    mi_varobj_update V1 {V1.i V1.nested.j V1.nested.k} "update V1"
+    mi_check_varobj_value V1.i 10 "check V1.i: 10"
+    mi_check_varobj_value V1.nested.j 11 "check V1.nested.j: 11"
+    mi_check_varobj_value V1.nested.k 12 "check V1.nested.k: 12"    
+  :*/    
+  
+  /*: END: frozen :*/
+}
+
 int
 main (int argc, char *argv [])
 {
@@ -322,6 +408,7 @@ main (int argc, char *argv [])
   do_block_tests ();
   do_children_tests ();
   do_special_tests ();
+  do_frozen_tests ();
   exit (0);
 }
 

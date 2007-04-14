@@ -1024,8 +1024,9 @@ proc mi_varobj_update { name expected testname } {
     set first 1
     foreach item $expected {
         set v "{name=\"$item\",in_scope=\"true\",type_changed=\"false\"}"
-        if {$first} {
+        if {$first == 1} {
             set er "$er$v"
+            set first 0
         } else {
             set er "$er,$v"
         }
@@ -1312,7 +1313,7 @@ proc mi_run_inline_test { testcase } {
             set line_now [mi_wait_for_stop "$testcase: step to $line"]
             set first 0
         } elseif {$line_now!=$line} {
-            set line_now [mi_continue_to_line "$mi_autotest_source:$line"]
+            set line_now [mi_continue_to_line "$mi_autotest_source:$line" "continue to $line"]
         }
 
         if {$line_now!=$line} {

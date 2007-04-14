@@ -86,6 +86,10 @@ extern enum varobj_display_formats varobj_set_display_format (
 extern enum varobj_display_formats varobj_get_display_format (
 							struct varobj *var);
 
+extern void varobj_set_frozen (struct varobj *var, int frozen);
+
+extern int varobj_get_frozen (struct varobj *var);
+
 extern int varobj_get_num_children (struct varobj *var);
 
 extern int varobj_list_children (struct varobj *var,
@@ -105,7 +109,8 @@ extern int varobj_set_value (struct varobj *var, char *expression);
 
 extern int varobj_list (struct varobj ***rootlist);
 
-extern int varobj_update (struct varobj **varp, struct varobj ***changelist);
+extern int varobj_update (struct varobj **varp, struct varobj ***changelist,
+			  int explicit);
 
 extern void varobj_invalidate (void);
 

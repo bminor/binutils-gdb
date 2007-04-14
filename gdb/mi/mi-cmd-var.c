@@ -37,7 +37,8 @@ const char mi_all_values[] = "--all-values";
 extern int varobjdebug;		/* defined in varobj.c.  */
 
 static void varobj_update_one (struct varobj *var,
-			      enum print_values print_values);
+			      enum print_values print_values,
+			      int explicit);
 
 static int mi_print_value_p (struct type *type, enum print_values print_values);
 
@@ -64,6 +65,9 @@ print_varobj (struct varobj *var, enum print_values print_values,
       ui_out_field_string (uiout, "type", type);
       xfree (type);
     }
+
+  if (varobj_get_frozen (var))
+    ui_out_field_int (uiout, "frozen", 1);
 }
 
 /* VAROBJ operations */
@@ -231,6 +235,35 @@ mi_cmd_var_set_format (char *command, char **argv, int argc)
   ui_out_field_string (uiout, "format", varobj_format_string[(int) format]);
   return MI_CMD_DONE;
 }
+
+enum mi_cmd_result
+mi_cmd_var_set_frozen (char *command, char **argv, int argc)
+{
+  struct varobj *var;
+  int frozen;
+
+  if (argc != 2)
+    error (_("-var-set-format: Usage: NAME FROZEN_FLAG."));
+
+  var = varobj_get_handle (argv[0]);
+  if (var == NULL)
+    error (_("Variable object not found"));
+
+  if (strcmp (argv[1], "0") == 0)
+    frozen = 0;
+  else if (strcmp (argv[1], "1") == 0)
+    frozen = 1;
+  else
+    error (_("Invalid flag value"));
+
+  varobj_set_frozen (var, frozen);
+
+  /* We don't automatically return the new value, or what varobjs got new
+     values during unfreezing.  If this information is required, client
+     should call -var-update explicitly.  */
+  return MI_CMD_DONE;
+}
+
 
 enum mi_cmd_result
 mi_cmd_var_show_format (char *command, char **argv, int argc)
@@ -513,7 +546,7 @@ mi_cmd_var_update (char *command, char **argv, int argc)
       cr = rootlist;
       while (*cr != NULL)
 	{
-	  varobj_update_one (*cr, print_values);
+	  varobj_update_one (*cr, print_values, 0 /* implicit */);
 	  cr++;
 	}
       do_cleanups (cleanup);
@@ -529,7 +562,7 @@ mi_cmd_var_update (char *command, char **argv, int argc)
         cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, "changelist");
       else
         cleanup = make_cleanup_ui_out_list_begin_end (uiout, "changelist");
-      varobj_update_one (var, print_values);
+      varobj_update_one (var, print_values, 1 /* explicit */);
       do_cleanups (cleanup);
     }
     return MI_CMD_DONE;
@@ -538,14 +571,15 @@ mi_cmd_var_update (char *command, char **argv, int argc)
 /* Helper for mi_cmd_var_update().  */
 
 static void
-varobj_update_one (struct varobj *var, enum print_values print_values)
+varobj_update_one (struct varobj *var, enum print_values print_values,
+		   int explicit)
 {
   struct varobj **changelist;
   struct varobj **cc;
   struct cleanup *cleanup = NULL;
   int nc;
 
-  nc = varobj_update (&var, &changelist);
+  nc = varobj_update (&var, &changelist, explicit);
 
   /* nc >= 0  represents the number of changes reported into changelist.
      nc < 0   means that an error occured or the the variable has 

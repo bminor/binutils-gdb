@@ -1,3 +1,10 @@
+2007-04-14  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.mi/mi-var-cmd.exp: Delete varobjs left by previous
+	tests. Run the frozen varobjs test.
+	* gdb.mi/var-cmd.c (do_frozen_tests): New.
+	* lib/mi-support.exp (mi_varobj_update): Fix thinko.	
+
 2007-04-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/type-opaque-lib.c, gdb.base/type-opaque-main.c,
