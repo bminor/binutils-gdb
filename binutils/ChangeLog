@@ -1,3 +1,10 @@
+2007-04-14  Steve Ellcey  <sje@cup.hp.com>
+
+	* Makefile.am: Add ACLOCAL_AMFLAGS.
+	* configure.in: Change macro call order.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
 2007-04-13  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* Makefile.am (TOOL_PROGS): Add objcopy.
