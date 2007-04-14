@@ -1,6 +1,7 @@
 ## Process this file with automake to generate Makefile.in
 
 AUTOMAKE_OPTIONS = 1.8 cygnus dejagnu
+ACLOCAL_AMFLAGS = -I ..
 
 SUBDIRS = doc po
 # Automake should figure this out on its own.  It doesn't, because

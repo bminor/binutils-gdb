@@ -266,6 +266,7 @@ target_os = @target_os@
 target_vendor = @target_vendor@
 use_sysroot = @use_sysroot@
 AUTOMAKE_OPTIONS = cygnus dejagnu
+ACLOCAL_AMFLAGS = -I ..
 SUBDIRS = po
 tooldir = $(exec_prefix)/$(target_alias)
 YFLAGS = -d
@@ -721,15 +722,15 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
-	      echo ' cd $(srcdir) && $(AUTOMAKE) --foreign '; \
-	      cd $(srcdir) && $(AUTOMAKE) --foreign  \
+	      echo ' cd $(srcdir) && $(AUTOMAKE) --cygnus '; \
+	      cd $(srcdir) && $(AUTOMAKE) --cygnus  \
 		&& exit 0; \
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --cygnus  Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  Makefile
+	  $(AUTOMAKE) --cygnus  Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \

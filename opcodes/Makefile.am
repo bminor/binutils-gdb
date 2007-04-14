@@ -1,6 +1,7 @@
 ## Process this file with automake to generate Makefile.in
 
 AUTOMAKE_OPTIONS = 1.9 cygnus
+ACLOCAL_AMFLAGS = -I ..
 
 SUBDIRS = po
 

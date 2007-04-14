@@ -1,3 +1,8 @@
+2007-04-14  Steve Ellcey  <sje@cup.hp.com>
+
+	* Makefile.am: Add ACLOCAL_AMFLAGS.
+	* Makefile.in: Regenerate.
+
 2007-04-12  Bob Wilson  <bob.wilson@acm.org>
 	
 	* emulparams/elf32xtensa.sh (OTHER_SECTIONS): KEEP property sections.
