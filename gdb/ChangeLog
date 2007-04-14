@@ -1,5 +1,29 @@
 2007-04-14  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbarch.sh (software_single_step): Remove "insert_breakpoints_p" and
+	"sig" arguments, add "regcache" argument.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+	* infrun.c (resume): Update SOFTWARE_SINGLE_STEP call arguments.
+	(handle_inferior_event): Call remove_single_step_breakpoints directly
+	instead of calling SOFTWARE_SINGLE_STEP to remove breakpoints.
+
+	* alpha-tdep.c (alpha_software_single_step): Update argument list.
+	Remove handling of !insert_breakpoints_p case.
+	* arm-tdep.c (arm_software_single_step): Likewise.
+	* cris-tdep.c (cris_software_single_step): Likewise.
+	* mips-tdep.c (mips_software_single_step): Likewise.
+	* rs6000-tdep.c (rs6000_software_single_step): Likewise.
+	* sparc-tdep.c (sparc_software_single_step): Likewise.
+	* spu-tdep.c (spu_software_single_step): Likewise.
+
+	* alpha-tdep.h (alpha_software_single_step): Update prototype.
+	* mips-tdep.h (mips_software_single_step): Likewise.
+	* rs6000-tdep.h (rs6000_software_single_step): Likewise.
+	* sparc-tdep.h (sparc_software_single_step): Likewise.
+
+2007-04-14  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* alpha-tdep.c (alpha_software_single_step): Do not call write_pc
 	when removing single-step breakpoints.
 

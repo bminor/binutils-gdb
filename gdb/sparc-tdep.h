@@ -167,8 +167,7 @@ extern struct sparc_frame_cache *
 
 
 
-extern int sparc_software_single_step (enum target_signal sig,
-                                       int insert_breakpoints_p);
+extern int sparc_software_single_step (struct regcache *regcache);
 
 extern void sparc_supply_rwindow (struct regcache *regcache,
 				  CORE_ADDR sp, int regnum);

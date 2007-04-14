@@ -548,7 +548,7 @@ resume (int step, enum target_signal sig)
   if (SOFTWARE_SINGLE_STEP_P () && step)
     {
       /* Do it the hard way, w/temp breakpoints */
-      if (SOFTWARE_SINGLE_STEP (sig, 1 /*insert-breakpoints */ ))
+      if (SOFTWARE_SINGLE_STEP (current_regcache))
         {
           /* ...and don't ask hardware to do it.  */
           step = 0;
@@ -1571,7 +1571,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  if (debug_infrun)
 	    fprintf_unfiltered (gdb_stdlog, "infrun: stepping_past_singlestep_breakpoint\n");
 	  /* Pull the single step breakpoints out of the target.  */
-	  (void) SOFTWARE_SINGLE_STEP (0, 0);
+	  remove_single_step_breakpoints ();
 	  singlestep_breakpoints_inserted_p = 0;
 
 	  ecs->random_signal = 0;
@@ -1680,7 +1680,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  if (SOFTWARE_SINGLE_STEP_P () && singlestep_breakpoints_inserted_p)
 	    {
 	      /* Pull the single step breakpoints out of the target. */
-	      (void) SOFTWARE_SINGLE_STEP (0, 0);
+	      remove_single_step_breakpoints ();
 	      singlestep_breakpoints_inserted_p = 0;
 	    }
 
@@ -1751,7 +1751,7 @@ handle_inferior_event (struct execution_control_state *ecs)
   if (SOFTWARE_SINGLE_STEP_P () && singlestep_breakpoints_inserted_p)
     {
       /* Pull the single step breakpoints out of the target. */
-      (void) SOFTWARE_SINGLE_STEP (0, 0);
+      remove_single_step_breakpoints ();
       singlestep_breakpoints_inserted_p = 0;
     }
 

@@ -1902,26 +1902,17 @@ arm_get_next_pc (CORE_ADDR pc)
 /* single_step() is called just before we want to resume the inferior,
    if we want to single-step it but there is no hardware or kernel
    single-step support.  We find the target of the coming instruction
-   and breakpoint it.
-
-   single_step() is also called just after the inferior stops.  If we
-   had set up a simulated single-step, we undo our damage.  */
+   and breakpoint it.  */
 
 static int
-arm_software_single_step (enum target_signal sig, int insert_bpt)
+arm_software_single_step (struct regcache *regcache)
 {
   /* NOTE: This may insert the wrong breakpoint instruction when
      single-stepping over a mode-changing instruction, if the
      CPSR heuristics are used.  */
 
-  if (insert_bpt)
-    {
-      CORE_ADDR next_pc = arm_get_next_pc (read_register (ARM_PC_REGNUM));
-
-      insert_single_step_breakpoint (next_pc);
-    }
-  else
-    remove_single_step_breakpoints ();
+  CORE_ADDR next_pc = arm_get_next_pc (read_register (ARM_PC_REGNUM));
+  insert_single_step_breakpoint (next_pc);
 
   return 1;
 }

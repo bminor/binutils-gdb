@@ -21,8 +21,7 @@
 
 #include "defs.h"
 
-extern int rs6000_software_single_step (enum target_signal signal,
-                                        int insert_breakpoints_p);
+extern int rs6000_software_single_step (struct regcache *regcache);
 
 /* Hook in rs6000-tdep.c for determining the TOC address when
    calling functions in the inferior.  */

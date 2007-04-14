@@ -2199,26 +2199,17 @@ mips_addr_bits_remove (CORE_ADDR addr)
 /* mips_software_single_step() is called just before we want to resume
    the inferior, if we want to single-step it but there is no hardware
    or kernel single-step support (MIPS on GNU/Linux for example).  We find
-   the target of the coming instruction and breakpoint it.
-
-   single_step is also called just after the inferior stops.  If we had
-   set up a simulated single-step, we undo our damage.  */
+   the target of the coming instruction and breakpoint it.  */
 
 int
-mips_software_single_step (enum target_signal sig, int insert_breakpoints_p)
+mips_software_single_step (struct regcache *regcache)
 {
   CORE_ADDR pc, next_pc;
 
-  if (insert_breakpoints_p)
-    {
-      pc = read_register (mips_regnum (current_gdbarch)->pc);
-      next_pc = mips_next_pc (pc);
+  pc = read_register (mips_regnum (current_gdbarch)->pc);
+  next_pc = mips_next_pc (pc);
 
-      insert_single_step_breakpoint (next_pc);
-    }
-  else
-    remove_single_step_breakpoints ();
-
+  insert_single_step_breakpoint (next_pc);
   return 1;
 }
 

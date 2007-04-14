@@ -1079,52 +1079,47 @@ spu_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
 /* Software single-stepping support.  */
 
 int
-spu_software_single_step (enum target_signal signal, int insert_breakpoints_p)
+spu_software_single_step (struct regcache *regcache)
 {
-  if (insert_breakpoints_p)
-    {
-      CORE_ADDR pc, next_pc;
-      unsigned int insn;
-      int offset, reg;
-      gdb_byte buf[4];
+  CORE_ADDR pc, next_pc;
+  unsigned int insn;
+  int offset, reg;
+  gdb_byte buf[4];
 
-      regcache_cooked_read (current_regcache, SPU_PC_REGNUM, buf);
-      /* Mask off interrupt enable bit.  */
-      pc = extract_unsigned_integer (buf, 4) & -4;
+  regcache_cooked_read (regcache, SPU_PC_REGNUM, buf);
+  /* Mask off interrupt enable bit.  */
+  pc = extract_unsigned_integer (buf, 4) & -4;
 
-      if (target_read_memory (pc, buf, 4))
-	return 1;
-      insn = extract_unsigned_integer (buf, 4);
+  if (target_read_memory (pc, buf, 4))
+    return 1;
+  insn = extract_unsigned_integer (buf, 4);
 
-       /* Next sequential instruction is at PC + 4, except if the current
-	  instruction is a PPE-assisted call, in which case it is at PC + 8.
-	  Wrap around LS limit to be on the safe side.  */
-      if ((insn & 0xffffff00) == 0x00002100)
-	next_pc = (pc + 8) & (SPU_LS_SIZE - 1);
-      else
-	next_pc = (pc + 4) & (SPU_LS_SIZE - 1);
-
-      insert_single_step_breakpoint (next_pc);
-
-      if (is_branch (insn, &offset, &reg))
-	{
-	  CORE_ADDR target = offset;
-
-	  if (reg == SPU_PC_REGNUM)
-	    target += pc;
-	  else if (reg != -1)
-	    {
-	      regcache_cooked_read_part (current_regcache, reg, 0, 4, buf);
-	      target += extract_unsigned_integer (buf, 4) & -4;
-	    }
-
-	  target = target & (SPU_LS_SIZE - 1);
-	  if (target != next_pc)
-	    insert_single_step_breakpoint (target);
-	}
-    }
+  /* Next sequential instruction is at PC + 4, except if the current
+     instruction is a PPE-assisted call, in which case it is at PC + 8.
+     Wrap around LS limit to be on the safe side.  */
+  if ((insn & 0xffffff00) == 0x00002100)
+    next_pc = (pc + 8) & (SPU_LS_SIZE - 1);
   else
-    remove_single_step_breakpoints ();
+    next_pc = (pc + 4) & (SPU_LS_SIZE - 1);
+
+  insert_single_step_breakpoint (next_pc);
+
+  if (is_branch (insn, &offset, &reg))
+    {
+      CORE_ADDR target = offset;
+
+      if (reg == SPU_PC_REGNUM)
+	target += pc;
+      else if (reg != -1)
+	{
+	  regcache_cooked_read_part (regcache, reg, 0, 4, buf);
+	  target += extract_unsigned_integer (buf, 4) & -4;
+	}
+
+      target = target & (SPU_LS_SIZE - 1);
+      if (target != next_pc)
+	insert_single_step_breakpoint (target);
+    }
 
   return 1;
 }

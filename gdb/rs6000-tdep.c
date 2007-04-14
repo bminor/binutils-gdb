@@ -723,8 +723,7 @@ rs6000_breakpoint_from_pc (CORE_ADDR *bp_addr, int *bp_size)
 /* AIX does not support PT_STEP. Simulate it. */
 
 int
-rs6000_software_single_step (enum target_signal signal,
-			     int insert_breakpoints_p)
+rs6000_software_single_step (struct regcache *regcache)
 {
   CORE_ADDR dummy;
   int breakp_sz;
@@ -734,30 +733,25 @@ rs6000_software_single_step (enum target_signal signal,
   CORE_ADDR breaks[2];
   int opcode;
 
-  if (insert_breakpoints_p)
+  loc = read_pc ();
+
+  insn = read_memory_integer (loc, 4);
+
+  breaks[0] = loc + breakp_sz;
+  opcode = insn >> 26;
+  breaks[1] = branch_dest (opcode, insn, loc, breaks[0]);
+
+  /* Don't put two breakpoints on the same address. */
+  if (breaks[1] == breaks[0])
+    breaks[1] = -1;
+
+  for (ii = 0; ii < 2; ++ii)
     {
-      loc = read_pc ();
-
-      insn = read_memory_integer (loc, 4);
-
-      breaks[0] = loc + breakp_sz;
-      opcode = insn >> 26;
-      breaks[1] = branch_dest (opcode, insn, loc, breaks[0]);
-
-      /* Don't put two breakpoints on the same address. */
-      if (breaks[1] == breaks[0])
-	breaks[1] = -1;
-
-      for (ii = 0; ii < 2; ++ii)
-	{
-	  /* ignore invalid breakpoint. */
-	  if (breaks[ii] == -1)
-	    continue;
-	  insert_single_step_breakpoint (breaks[ii]);
-	}
+      /* ignore invalid breakpoint. */
+      if (breaks[ii] == -1)
+	continue;
+      insert_single_step_breakpoint (breaks[ii]);
     }
-  else
-    remove_single_step_breakpoints ();
 
   errno = 0;			/* FIXME, don't ignore errors! */
   /* What errors?  {read,write}_memory call error().  */

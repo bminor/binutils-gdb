@@ -2120,38 +2120,33 @@ find_step_target (inst_env_type *inst_env)
    Either one ordinary target or two targets for branches may be found.  */
 
 static int
-cris_software_single_step (enum target_signal ignore, int insert_breakpoints)
+cris_software_single_step (struct regcache *regcache)
 {
   inst_env_type inst_env;
 
-  if (insert_breakpoints)
+  /* Analyse the present instruction environment and insert 
+     breakpoints.  */
+  int status = find_step_target (&inst_env);
+  if (status == -1)
     {
-      /* Analyse the present instruction environment and insert 
-         breakpoints.  */
-      int status = find_step_target (&inst_env);
-      if (status == -1)
-        {
-          /* Could not find a target.  Things are likely to go downhill 
-	     from here.  */
-	  warning (_("CRIS software single step could not find a step target."));
-        }
-      else
-        {
-          /* Insert at most two breakpoints.  One for the next PC content
-             and possibly another one for a branch, jump, etc.  */
-          CORE_ADDR next_pc = (CORE_ADDR) inst_env.reg[PC_REGNUM];
-          insert_single_step_breakpoint (next_pc);
-          if (inst_env.branch_found 
-              && (CORE_ADDR) inst_env.branch_break_address != next_pc)
-            {
-              CORE_ADDR branch_target_address
-                = (CORE_ADDR) inst_env.branch_break_address;
-              insert_single_step_breakpoint (branch_target_address);
-            }
-        }
+      /* Could not find a target.  Things are likely to go downhill 
+	 from here.  */
+      warning (_("CRIS software single step could not find a step target."));
     }
   else
-    remove_single_step_breakpoints ();
+    {
+      /* Insert at most two breakpoints.  One for the next PC content
+         and possibly another one for a branch, jump, etc.  */
+      CORE_ADDR next_pc = (CORE_ADDR) inst_env.reg[PC_REGNUM];
+      insert_single_step_breakpoint (next_pc);
+      if (inst_env.branch_found 
+	  && (CORE_ADDR) inst_env.branch_break_address != next_pc)
+	{
+	  CORE_ADDR branch_target_address
+		= (CORE_ADDR) inst_env.branch_break_address;
+	  insert_single_step_breakpoint (branch_target_address);
+	}
+    }
 
   return 1;
 }

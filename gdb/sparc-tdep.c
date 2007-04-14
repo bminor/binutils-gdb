@@ -1330,35 +1330,30 @@ sparc_step_trap (unsigned long insn)
 }
 
 int
-sparc_software_single_step (enum target_signal sig, int insert_breakpoints_p)
+sparc_software_single_step (struct regcache *regcache)
 {
   struct gdbarch *arch = current_gdbarch;
   struct gdbarch_tdep *tdep = gdbarch_tdep (arch);
   CORE_ADDR npc, nnpc;
 
-  if (insert_breakpoints_p)
-    {
-      CORE_ADDR pc, orig_npc;
+  CORE_ADDR pc, orig_npc;
 
-      pc = sparc_address_from_register (tdep->pc_regnum);
-      orig_npc = npc = sparc_address_from_register (tdep->npc_regnum);
+  pc = sparc_address_from_register (tdep->pc_regnum);
+  orig_npc = npc = sparc_address_from_register (tdep->npc_regnum);
 
-      /* Analyze the instruction at PC.  */
-      nnpc = sparc_analyze_control_transfer (arch, pc, &npc);
-      if (npc != 0)
-	insert_single_step_breakpoint (npc);
+  /* Analyze the instruction at PC.  */
+  nnpc = sparc_analyze_control_transfer (arch, pc, &npc);
+  if (npc != 0)
+    insert_single_step_breakpoint (npc);
 
-      if (nnpc != 0)
-	insert_single_step_breakpoint (nnpc);
+  if (nnpc != 0)
+    insert_single_step_breakpoint (nnpc);
 
-      /* Assert that we have set at least one breakpoint, and that
-	 they're not set at the same spot - unless we're going
-	 from here straight to NULL, i.e. a call or jump to 0.  */
-      gdb_assert (npc != 0 || nnpc != 0 || orig_npc == 0);
-      gdb_assert (nnpc != npc || orig_npc == 0);
-    }
-  else
-    remove_single_step_breakpoints ();
+  /* Assert that we have set at least one breakpoint, and that
+     they're not set at the same spot - unless we're going
+     from here straight to NULL, i.e. a call or jump to 0.  */
+  gdb_assert (npc != 0 || nnpc != 0 || orig_npc == 0);
+  gdb_assert (nnpc != npc || orig_npc == 0);
 
   return 1;
 }

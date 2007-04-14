@@ -628,7 +628,7 @@ f:=:CORE_ADDR:smash_text_address:CORE_ADDR addr:addr::core_addr_identity::0
 #
 # A return value of 1 means that the software_single_step breakpoints 
 # were inserted; 0 means they were not.
-F:=:int:software_single_step:enum target_signal sig, int insert_breakpoints_p:sig, insert_breakpoints_p
+F:=:int:software_single_step:struct regcache *regcache:regcache
 
 # Return non-zero if the processor is executing a delay slot and a
 # further single-step is needed before the instruction finishes.

@@ -1391,10 +1391,7 @@ fp_register_sign_bit (LONGEST reg)
 /* alpha_software_single_step() is called just before we want to resume
    the inferior, if we want to single-step it but there is no hardware
    or kernel single-step support (NetBSD on Alpha, for example).  We find
-   the target of the coming instruction and breakpoint it.
-
-   single_step is also called just after the inferior stops.  If we had
-   set up a simulated single-step, we undo our damage.  */
+   the target of the coming instruction and breakpoint it.  */
 
 static CORE_ADDR
 alpha_next_pc (CORE_ADDR pc)
@@ -1519,22 +1516,14 @@ alpha_next_pc (CORE_ADDR pc)
 }
 
 int
-alpha_software_single_step (enum target_signal sig, int insert_breakpoints_p)
+alpha_software_single_step (struct regcache *regcache)
 {
-  CORE_ADDR next_pc;
-  CORE_ADDR pc;
+  CORE_ADDR pc, next_pc;
 
-  if (insert_breakpoints_p)
-    {
-      pc = read_pc ();
-      next_pc = alpha_next_pc (pc);
+  pc = read_pc ();
+  next_pc = alpha_next_pc (pc);
 
-      insert_single_step_breakpoint (next_pc);
-    }
-  else
-    {
-      remove_single_step_breakpoints ();
-    }
+  insert_single_step_breakpoint (next_pc);
   return 1;
 }
 

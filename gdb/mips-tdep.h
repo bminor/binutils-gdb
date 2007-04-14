@@ -100,7 +100,7 @@ enum
 };
 
 /* Single step based on where the current instruction will take us.  */
-extern int mips_software_single_step (enum target_signal, int);
+extern int mips_software_single_step (struct regcache *regcache);
 
 /* Tell if the program counter value in MEMADDR is in a MIPS16
    function.  */
