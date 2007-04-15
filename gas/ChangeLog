@@ -1,3 +1,8 @@
+2007-04-15  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* config/tc-sh.c (align_test_frag_offset_fixed_p): Handle
+	rs_fill frags.
+
 2007-04-14  Steve Ellcey  <sje@cup.hp.com>
 
 	* Makefile.am: Add ACLOCAL_AMFLAGS.

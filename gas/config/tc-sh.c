@@ -847,9 +847,13 @@ align_test_frag_offset_fixed_p (const fragS *frag1, const fragS *frag2,
 
   /* Maybe frag2 is after frag1.  */
   frag = frag1;
-  while (frag->fr_type == rs_align_test)
+  while (frag->fr_type == rs_fill
+	 || frag->fr_type == rs_align_test)
     {
-      off += frag->fr_fix;
+      if (frag->fr_type == rs_fill)
+	off += frag->fr_fix + frag->fr_offset * frag->fr_var;
+      else
+	off += frag->fr_fix;
       frag = frag->fr_next;
       if (frag == NULL)
 	break;
@@ -863,9 +867,13 @@ align_test_frag_offset_fixed_p (const fragS *frag1, const fragS *frag2,
   /* Maybe frag1 is after frag2.  */
   off = frag1->fr_address - frag2->fr_address;
   frag = frag2;
-  while (frag->fr_type == rs_align_test)
+  while (frag->fr_type == rs_fill
+	 || frag->fr_type == rs_align_test)
     {
-      off -= frag->fr_fix;
+      if (frag->fr_type == rs_fill)
+	off -= frag->fr_fix + frag->fr_offset * frag->fr_var;
+      else
+	off -= frag->fr_fix;
       frag = frag->fr_next;
       if (frag == NULL)
 	break;
