@@ -1,3 +1,7 @@
+2007-04-16  Denis Pilat  <denis.pilat@st.com>
+
+	* gdb.mi/mi2-var-display.exp: Test for the fullname field.
+
 2007-04-14  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.mi/mi-var-cmd.exp: Delete varobjs left by previous

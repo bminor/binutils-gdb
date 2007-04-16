@@ -50,7 +50,7 @@ mi_gdb_test "200-break-insert $srcfile:$line_dct_end" \
 mi_run_cmd
 # The running part has been checked already by mi_run_cmd
 gdb_expect {
-    -re "\[\r\n\]*000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"$line_dct_end\"\}\r\n$mi_gdb_prompt$" {
+    -re "\[\r\n\]*000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\\\[\\\],file=\".*var-cmd.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$line_dct_end\"\}\r\n$mi_gdb_prompt$" {
 	pass "run to do_children_tests"
     }
     -re ".*$mi_gdb_prompt$" {fail "run to do_children_tests (2)"}
@@ -334,7 +334,7 @@ mi_gdb_test "200-break-insert do_special_tests" \
 
 send_gdb "-exec-continue\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"breakpoint-hit\",bkptno=\"2\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"do_special_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"$line_dst_a_1\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"breakpoint-hit\",bkptno=\"2\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"do_special_tests\",args=\\\[\\\],file=\".*var-cmd.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$line_dst_a_1\"\}\r\n$mi_gdb_prompt$" {
 	pass "continue to do_special_tests"
     }
     timeout {
