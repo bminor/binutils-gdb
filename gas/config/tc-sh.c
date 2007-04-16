@@ -3777,7 +3777,7 @@ sh_handle_align (fragS *frag)
   else if (frag->fr_type == rs_align_test)
     {
       if (bytes != 0)
-	as_warn_where (frag->fr_file, frag->fr_line, _("misaligned data"));
+	as_bad_where (frag->fr_file, frag->fr_line, _("misaligned data"));
     }
 
   if (sh_relax

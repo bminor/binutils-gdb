@@ -1,3 +1,8 @@
+2007-04-16  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* config/tc-sh.c (sh_handle_align):  Call as_bad_where instead
+	of as_warn_where for misaligned data.
+
 2007-04-15  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* config/tc-sh.c (align_test_frag_offset_fixed_p): Handle
