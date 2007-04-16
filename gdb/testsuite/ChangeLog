@@ -1,5 +1,9 @@
 2007-04-16  Denis Pilat  <denis.pilat@st.com>
 
+	* gdb.base/setshow.exp: Reset height after having set it to 100.
+
+2007-04-16  Denis Pilat  <denis.pilat@st.com>
+
 	* gdb.mi/mi2-stack.exp: update from mi-stack.exp.
 
 2007-04-16  Denis Pilat  <denis.pilat@st.com>
