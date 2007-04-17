@@ -1,3 +1,8 @@
+2007-04-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_size_dynamic_sections): Put
+	DT_MIPS_RLD_MAP before DT_DEBUG again.
+
 2007-04-14  Steve Ellcey  <sje@cup.hp.com>
 
 	* Makefile.am: Add ACLOCAL_AMFLAGS.
