@@ -1,3 +1,8 @@
+2007-04-17  Andreas Schwab  <schwab@suse.de>
+
+	* symtab.c (skip_prologue_using_sal): Allow the end of the prologue
+	sal to be bigger than the end of the function.
+
 2007-04-17  Maciej W. Rozycki  <macro@mips.com>
             Nigel Stephens  <nigel@mips.com>
 
