@@ -2857,9 +2857,9 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 		     cagney/2001-07-23: gdb/179: Also, GCC, when
 		     outputting LE O32 with sizeof (struct) <
-		     mips_abi_regsize(), generates a left shift as
-		     part of storing the argument in a register a
-		     register (the left shift isn't generated when
+		     mips_abi_regsize(), generates a left shift
+		     as part of storing the argument in a register
+		     (the left shift isn't generated when
 		     sizeof (struct) >= mips_abi_regsize()).  Since
 		     it is quite possible that this is GCC
 		     contradicting the LE/O32 ABI, GDB has not been
@@ -3291,9 +3291,9 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 		     cagney/2001-07-23: gdb/179: Also, GCC, when
 		     outputting LE O32 with sizeof (struct) <
-		     mips_abi_regsize(), generates a left shift as
-		     part of storing the argument in a register a
-		     register (the left shift isn't generated when
+		     mips_abi_regsize(), generates a left shift
+		     as part of storing the argument in a register
+		     (the left shift isn't generated when
 		     sizeof (struct) >= mips_abi_regsize()).  Since
 		     it is quite possible that this is GCC
 		     contradicting the LE/O32 ABI, GDB has not been
