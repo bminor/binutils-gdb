@@ -2558,8 +2558,8 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    {
 	      /* Remember if the argument was written to the stack.  */
 	      int stack_used_p = 0;
-	      int partial_len = (len < mips_abi_regsize (gdbarch)
-				 ? len : mips_abi_regsize (gdbarch));
+	      int partial_len = (len < mips_abi_regsize (gdbarch))
+				? len : mips_abi_regsize (gdbarch);
 
 	      if (mips_debug)
 		fprintf_unfiltered (gdb_stdlog, " -- partial=%d",
@@ -2785,8 +2785,8 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    {
 	      /* Remember if the argument was written to the stack.  */
 	      int stack_used_p = 0;
-	      int partial_len = (len < mips_abi_regsize (gdbarch)
-				 ? len : mips_abi_regsize (gdbarch));
+	      int partial_len = (len < mips_abi_regsize (gdbarch))
+				? len : mips_abi_regsize (gdbarch);
 
 	      if (mips_debug)
 		fprintf_unfiltered (gdb_stdlog, " -- partial=%d",
@@ -2871,10 +2871,10 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 		  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
 		      && partial_len < mips_abi_regsize (gdbarch)
-		      && (typecode == TYPE_CODE_STRUCT ||
-			  typecode == TYPE_CODE_UNION))
-		    regval <<= ((mips_abi_regsize (gdbarch) - partial_len) *
-				TARGET_CHAR_BIT);
+		      && (typecode == TYPE_CODE_STRUCT
+			  || typecode == TYPE_CODE_UNION))
+		    regval <<= (mips_abi_regsize (gdbarch) - partial_len)
+			       * TARGET_CHAR_BIT;
 
 		  if (mips_debug)
 		    fprintf_filtered (gdb_stdlog, " - reg=%d val=%s",
@@ -3219,8 +3219,8 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    {
 	      /* Remember if the argument was written to the stack.  */
 	      int stack_used_p = 0;
-	      int partial_len = (len < mips_abi_regsize (gdbarch)
-				 ? len : mips_abi_regsize (gdbarch));
+	      int partial_len = (len < mips_abi_regsize (gdbarch))
+				? len : mips_abi_regsize (gdbarch);
 
 	      if (mips_debug)
 		fprintf_unfiltered (gdb_stdlog, " -- partial=%d",
@@ -3306,10 +3306,10 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  if (mips_abi_regsize (gdbarch) < 8
 		      && TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
 		      && partial_len < mips_abi_regsize (gdbarch)
-		      && (typecode == TYPE_CODE_STRUCT ||
-			  typecode == TYPE_CODE_UNION))
-		    regval <<= ((mips_abi_regsize (gdbarch) - partial_len) *
-				TARGET_CHAR_BIT);
+		      && (typecode == TYPE_CODE_STRUCT
+			  || typecode == TYPE_CODE_UNION))
+		    regval <<= (mips_abi_regsize (gdbarch) - partial_len)
+			       * TARGET_CHAR_BIT;
 
 		  if (mips_debug)
 		    fprintf_filtered (gdb_stdlog, " - reg=%d val=%s",
@@ -3680,8 +3680,8 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    {
 	      /* Remember if the argument was written to the stack.  */
 	      int stack_used_p = 0;
-	      int partial_len = (len < mips_abi_regsize (gdbarch)
-				 ? len : mips_abi_regsize (gdbarch));
+	      int partial_len = (len < mips_abi_regsize (gdbarch))
+				? len : mips_abi_regsize (gdbarch);
 
 	      if (mips_debug)
 		fprintf_unfiltered (gdb_stdlog, " -- partial=%d",
@@ -3750,10 +3750,10 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 		  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
 		      && partial_len < mips_abi_regsize (gdbarch)
-		      && (typecode == TYPE_CODE_STRUCT ||
-			  typecode == TYPE_CODE_UNION))
-		    regval <<= ((mips_abi_regsize (gdbarch) - partial_len) *
-				TARGET_CHAR_BIT);
+		      && (typecode == TYPE_CODE_STRUCT
+			  || typecode == TYPE_CODE_UNION))
+		    regval <<= (mips_abi_regsize (gdbarch) - partial_len)
+			       * TARGET_CHAR_BIT;
 
 		  if (mips_debug)
 		    fprintf_filtered (gdb_stdlog, " - reg=%d val=%s",
