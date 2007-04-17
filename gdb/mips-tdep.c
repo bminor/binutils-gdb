@@ -3064,8 +3064,17 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Now make space on the stack for the args.  */
   for (argnum = 0; argnum < nargs; argnum++)
-    len += align_up (TYPE_LENGTH (value_type (args[argnum])),
-		     mips_stack_argsize (gdbarch));
+    {
+      struct type *arg_type = check_typedef (value_type (args[argnum]));
+      int arglen = TYPE_LENGTH (arg_type);
+
+      /* Align to double-word if necessary.  */
+      if (mips_abi_regsize (gdbarch) < 8
+	  && mips_type_needs_double_align (arg_type))
+	len = align_up (len, mips_stack_argsize (gdbarch) * 2);
+      /* Allocate space on the stack.  */
+      len += align_up (arglen, mips_stack_argsize (gdbarch));
+    }
   sp -= align_up (len, 16);
 
   if (mips_debug)
@@ -3201,10 +3210,11 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      && mips_type_needs_double_align (arg_type))
 	    {
 	      if ((argreg & 1))
-		argreg++;
+		{
+		  argreg++;
+		  stack_offset += mips_abi_regsize (gdbarch);
+		}
 	    }
-	  /* Note: Floating-point values that didn't fit into an FP
-	     register are only written to memory.  */
 	  while (len > 0)
 	    {
 	      /* Remember if the argument was written to the stack.  */
@@ -3218,8 +3228,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 	      /* Write this portion of the argument to the stack.  */
 	      if (argreg > MIPS_LAST_ARG_REGNUM
-		  || odd_sized_struct
-		  || fp_register_arg_p (typecode, arg_type))
+		  || odd_sized_struct)
 		{
 		  /* Should shorter than int integer values be
 		     promoted to int before being stored? */
@@ -3260,12 +3269,10 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		}
 
 	      /* Note!!! This is NOT an else clause.  Odd sized
-	         structs may go thru BOTH paths.  Floating point
-	         arguments will not.  */
+	         structs may go thru BOTH paths.  */
 	      /* Write this portion of the argument to a general
 	         purpose register.  */
-	      if (argreg <= MIPS_LAST_ARG_REGNUM
-		  && !fp_register_arg_p (typecode, arg_type))
+	      if (argreg <= MIPS_LAST_ARG_REGNUM)
 		{
 		  LONGEST regval = extract_signed_integer (val, partial_len);
 		  /* Value may need to be sign extended, because
@@ -3518,8 +3525,17 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Now make space on the stack for the args.  */
   for (argnum = 0; argnum < nargs; argnum++)
-    len += align_up (TYPE_LENGTH (value_type (args[argnum])),
-		     mips_stack_argsize (gdbarch));
+    {
+      struct type *arg_type = check_typedef (value_type (args[argnum]));
+      int arglen = TYPE_LENGTH (arg_type);
+
+      /* Align to double-word if necessary.  */
+      if (mips_abi_regsize (gdbarch) < 8
+	  && mips_type_needs_double_align (arg_type))
+	len = align_up (len, mips_stack_argsize (gdbarch) * 2);
+      /* Allocate space on the stack.  */
+      len += align_up (arglen, mips_stack_argsize (gdbarch));
+    }
   sp -= align_up (len, 16);
 
   if (mips_debug)
@@ -3655,10 +3671,11 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      && mips_type_needs_double_align (arg_type))
 	    {
 	      if ((argreg & 1))
-		argreg++;
+		{
+		  argreg++;
+		  stack_offset += mips_abi_regsize (gdbarch);
+		}
 	    }
-	  /* Note: Floating-point values that didn't fit into an FP
-	     register are only written to memory.  */
 	  while (len > 0)
 	    {
 	      /* Remember if the argument was written to the stack.  */
@@ -3672,8 +3689,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 	      /* Write this portion of the argument to the stack.  */
 	      if (argreg > MIPS_LAST_ARG_REGNUM
-		  || odd_sized_struct
-		  || fp_register_arg_p (typecode, arg_type))
+		  || odd_sized_struct)
 		{
 		  /* Should shorter than int integer values be
 		     promoted to int before being stored? */
@@ -3714,12 +3730,10 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		}
 
 	      /* Note!!! This is NOT an else clause.  Odd sized
-	         structs may go thru BOTH paths.  Floating point
-	         arguments will not.  */
+	         structs may go thru BOTH paths.  */
 	      /* Write this portion of the argument to a general
 	         purpose register.  */
-	      if (argreg <= MIPS_LAST_ARG_REGNUM
-		  && !fp_register_arg_p (typecode, arg_type))
+	      if (argreg <= MIPS_LAST_ARG_REGNUM)
 		{
 		  LONGEST regval = extract_signed_integer (val, partial_len);
 		  /* Value may need to be sign extended, because

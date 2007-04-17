@@ -1,3 +1,13 @@
+2007-04-17  Maciej W. Rozycki  <macro@mips.com>
+            Nigel Stephens  <nigel@mips.com>
+
+	* mips-tdep.c (mips_o32_push_dummy_call): Take account of
+	argument alignment requirements when calculating stack space
+	required.  When aligning an arg register to eight bytes
+	boundary, align stack_offset too.  Write floating-point
+	arguments to the appropriate integer register if need go there.
+	(mips_o64_push_dummy_call): Likewise.
+
 2007-04-14  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdbarch.sh (software_single_step): Remove "insert_breakpoints_p" and
