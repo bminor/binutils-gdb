@@ -2783,7 +2783,7 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	     register are only written to memory.  */
 	  while (len > 0)
 	    {
-	      /* Rememer if the argument was written to the stack.  */
+	      /* Remember if the argument was written to the stack.  */
 	      int stack_used_p = 0;
 	      int partial_len = (len < mips_abi_regsize (gdbarch)
 				 ? len : mips_abi_regsize (gdbarch));
