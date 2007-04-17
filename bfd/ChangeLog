@@ -1,3 +1,17 @@
+2007-04-17  Paul Brook  <paul@codesourcery.com>
+
+	* elf.c (_bfd_elf_is_function_type): New function.
+	* elflink.c (_bfd_elf_merge_symbol): Use bed->is_function_type.
+	(_bfd_elf_dynamic_symbol_p, _bfd_elf_symbol_refs_local_p,
+	is_global_data_symbol_definition, elf_link_add_object_symbols): Ditto.
+	* elf-bfd.h (elf_backend_data): Add is_function_type.
+	(_bfd_elf_is_function_type): Add prototype.
+	* elfxx-target.h (elf_backend_is_function_type): Add default
+	definition.
+	(elfNN_bed): Add elf_backend_is_function_type.
+	* elf32-arm.c (elf32_arm_is_function_type): New function.
+	(elf_backend_is_function_type): Define.
+
 2007-04-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_size_dynamic_sections): Put

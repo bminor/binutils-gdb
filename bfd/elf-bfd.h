@@ -1050,6 +1050,9 @@ struct elf_backend_data
   /* Return TRUE if symbol should be hashed in the `.gnu.hash' section.  */
   bfd_boolean (*elf_hash_symbol) (struct elf_link_hash_entry *);
 
+  /* Return TRUE if type is a function symbol type.  */
+  bfd_boolean (*is_function_type) (unsigned int type);
+
   /* Used to handle bad SHF_LINK_ORDER input.  */
   bfd_error_handler_type link_order_error_handler;
 
@@ -1918,6 +1921,8 @@ extern struct elf_segment_map * _bfd_elf_make_dynamic_segment
 
 extern bfd_boolean _bfd_elf_map_sections_to_segments
   (bfd *, struct bfd_link_info *);
+
+extern bfd_boolean _bfd_elf_is_function_type (unsigned int);
 
 /* Exported interface for writing elf corefile notes. */
 extern char *elfcore_write_note

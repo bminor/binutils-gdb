@@ -9167,3 +9167,14 @@ _bfd_elf_set_osabi (bfd * abfd,
 
   i_ehdrp->e_ident[EI_OSABI] = get_elf_backend_data (abfd)->elf_osabi;
 }
+
+
+/* Return TRUE for ELF symbol types that represent functions.
+   This is the default version of this function, which is sufficient for
+   most targets.  It returns true if TYPE is STT_FUNC.  */
+
+bfd_boolean
+_bfd_elf_is_function_type (unsigned int type)
+{
+  return (type == STT_FUNC);
+}

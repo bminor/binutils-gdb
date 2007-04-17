@@ -10557,6 +10557,13 @@ elf32_arm_additional_program_headers (bfd *abfd,
     return 0;
 }
 
+/* We have two function types: STT_FUNC and STT_ARM_TFUNC.  */
+static bfd_boolean
+elf32_arm_is_function_type (unsigned int type)
+{
+  return (type == STT_FUNC) || (type == STT_ARM_TFUNC);
+}
+
 /* We use this to override swap_symbol_in and swap_symbol_out.  */
 const struct elf_size_info elf32_arm_size_info = {
   sizeof (Elf32_External_Ehdr),
@@ -10643,6 +10650,7 @@ const struct elf_size_info elf32_arm_size_info = {
   elf32_arm_output_arch_local_syms
 #define elf_backend_begin_write_processing \
     elf32_arm_begin_write_processing
+#define elf_backend_is_function_type		elf32_arm_is_function_type 
 
 #define elf_backend_can_refcount    1
 #define elf_backend_can_gc_sections 1

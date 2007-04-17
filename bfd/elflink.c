@@ -947,6 +947,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	    && h->root.type != bfd_link_hash_undefweak
 	    && h->root.type != bfd_link_hash_common);
 
+  bed = get_elf_backend_data (abfd);
   /* When we try to create a default indirect symbol from the dynamic
      definition with the default version, we skip it if its type and
      the type of existing regular definition mismatch.  We only do it
@@ -961,7 +962,9 @@ _bfd_elf_merge_symbol (bfd *abfd,
       && (olddef || h->root.type == bfd_link_hash_common)
       && ELF_ST_TYPE (sym->st_info) != h->type
       && ELF_ST_TYPE (sym->st_info) != STT_NOTYPE
-      && h->type != STT_NOTYPE)
+      && h->type != STT_NOTYPE
+      && !(bed->is_function_type (ELF_ST_TYPE (sym->st_info))
+	   && bed->is_function_type (h->type)))
     {
       *skip = TRUE;
       return TRUE;
@@ -1152,6 +1155,11 @@ _bfd_elf_merge_symbol (bfd *abfd,
   if (olddef && newdyn)
     oldweak = FALSE;
 
+  /* Allow changes between different types of funciton symbol.  */
+  if (bed->is_function_type (ELF_ST_TYPE (sym->st_info))
+      && bed->is_function_type (h->type))
+    *type_change_ok = TRUE;
+
   /* It's OK to change the type if either the existing symbol or the
      new symbol is weak.  A type change is also OK if the old symbol
      is undefined and the new symbol is defined.  */
@@ -1198,7 +1206,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
       && (sec->flags & SEC_ALLOC) != 0
       && (sec->flags & SEC_LOAD) == 0
       && sym->st_size > 0
-      && ELF_ST_TYPE (sym->st_info) != STT_FUNC)
+      && !bed->is_function_type (ELF_ST_TYPE (sym->st_info)))
     newdyncommon = TRUE;
   else
     newdyncommon = FALSE;
@@ -1210,14 +1218,13 @@ _bfd_elf_merge_symbol (bfd *abfd,
       && (h->root.u.def.section->flags & SEC_ALLOC) != 0
       && (h->root.u.def.section->flags & SEC_LOAD) == 0
       && h->size > 0
-      && h->type != STT_FUNC)
+      && !bed->is_function_type (h->type))
     olddyncommon = TRUE;
   else
     olddyncommon = FALSE;
 
   /* We now know everything about the old and new symbols.  We ask the
      backend to check if we can merge them.  */
-  bed = get_elf_backend_data (abfd);
   if (bed->merge_symbol
       && !bed->merge_symbol (info, sym_hash, h, sym, psec, pvalue,
 			     pold_alignment, skip, override,
@@ -1272,7 +1279,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
       && (olddef
 	  || (h->root.type == bfd_link_hash_common
 	      && (newweak
-		  || ELF_ST_TYPE (sym->st_info) == STT_FUNC))))
+		  || bed->is_function_type (ELF_ST_TYPE (sym->st_info))))))
     {
       *override = TRUE;
       newdef = FALSE;
@@ -1327,7 +1334,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
       && (newdef
 	  || (bfd_is_com_section (sec)
 	      && (oldweak
-		  || h->type == STT_FUNC)))
+		  || bed->is_function_type (h->type))))
       && olddyn
       && olddef
       && h->def_dynamic)
@@ -2640,6 +2647,8 @@ _bfd_elf_dynamic_symbol_p (struct elf_link_hash_entry *h,
 			   bfd_boolean ignore_protected)
 {
   bfd_boolean binding_stays_local_p;
+  const struct elf_backend_data *bed;
+  struct elf_link_hash_table *hash_table;
 
   if (h == NULL)
     return FALSE;
@@ -2665,10 +2674,16 @@ _bfd_elf_dynamic_symbol_p (struct elf_link_hash_entry *h,
       return FALSE;
 
     case STV_PROTECTED:
+      hash_table = elf_hash_table (info);
+      if (!is_elf_hash_table (hash_table))
+	return FALSE;
+
+      bed = get_elf_backend_data (hash_table->dynobj);
+
       /* Proper resolution for function pointer equality may require
 	 that these symbols perhaps be resolved dynamically, even though
 	 we should be resolving them to the current module.  */
-      if (!ignore_protected || h->type != STT_FUNC)
+      if (!ignore_protected || !bed->is_function_type (h->type))
 	binding_stays_local_p = TRUE;
       break;
 
@@ -2695,6 +2710,9 @@ _bfd_elf_symbol_refs_local_p (struct elf_link_hash_entry *h,
 			      struct bfd_link_info *info,
 			      bfd_boolean local_protected)
 {
+  const struct elf_backend_data *bed;
+  struct elf_link_hash_table *hash_table;
+
   /* If it's a local sym, of course we resolve locally.  */
   if (h == NULL)
     return TRUE;
@@ -2731,8 +2749,14 @@ _bfd_elf_symbol_refs_local_p (struct elf_link_hash_entry *h,
   if (ELF_ST_VISIBILITY (h->other) != STV_PROTECTED)
     return TRUE;
 
+  hash_table = elf_hash_table (info);
+  if (!is_elf_hash_table (hash_table))
+    return TRUE;
+
+  bed = get_elf_backend_data (hash_table->dynobj);
+
   /* STV_PROTECTED non-function symbols are local.  */
-  if (h->type != STT_FUNC)
+  if (!bed->is_function_type (h->type))
     return TRUE;
 
   /* Function pointer equality tests may require that STV_PROTECTED
@@ -2781,8 +2805,9 @@ is_global_data_symbol_definition (bfd *abfd ATTRIBUTE_UNUSED,
       && ELF_ST_BIND (sym->st_info) < STB_LOOS)
     return FALSE;
 
+  bed = get_elf_backend_data (abfd);
   /* Function symbols do not count.  */
-  if (ELF_ST_TYPE (sym->st_info) == STT_FUNC)
+  if (bed->is_function_type (ELF_ST_TYPE (sym->st_info)))
     return FALSE;
 
   /* If the section is undefined, then so is the symbol.  */
@@ -2791,7 +2816,6 @@ is_global_data_symbol_definition (bfd *abfd ATTRIBUTE_UNUSED,
 
   /* If the symbol is defined in the common section, then
      it is a common definition and so does not count.  */
-  bed = get_elf_backend_data (abfd);
   if (bed->common_definition (sym))
     return FALSE;
 
@@ -3799,8 +3823,9 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	     if it is not a function, because it might be the version
 	     symbol itself.  FIXME: What if it isn't?  */
 	  if ((iver.vs_vers & VERSYM_HIDDEN) != 0
-	      || (vernum > 1 && (! bfd_is_abs_section (sec)
-				 || ELF_ST_TYPE (isym->st_info) == STT_FUNC)))
+	      || (vernum > 1
+		  && (!bfd_is_abs_section (sec)
+		      || bed->is_function_type (ELF_ST_TYPE (isym->st_info)))))
 	    {
 	      const char *verstr;
 	      size_t namelen, verlen, newlen;
@@ -3947,7 +3972,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       if (dynamic
 	  && definition
 	  && (flags & BSF_WEAK) != 0
-	  && ELF_ST_TYPE (isym->st_info) != STT_FUNC
+	  && !bed->is_function_type (ELF_ST_TYPE (isym->st_info))
 	  && is_elf_hash_table (htab)
 	  && h->u.weakdef == NULL)
 	{
@@ -4072,7 +4097,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	     to be the size of the common symbol.  The code just above
 	     won't fix the size if a common symbol becomes larger.  We
 	     don't warn about a size change here, because that is
-	     covered by --warn-common.  */
+	     covered by --warn-common.  Allow changed between different
+	     function types.  */
 	  if (h->root.type == bfd_link_hash_common)
 	    h->size = h->root.u.c.size;
 
@@ -4414,7 +4440,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  h = *hpp;
 	  if (h != NULL
 	      && h->root.type == bfd_link_hash_defined
-	      && h->type != STT_FUNC)
+	      && !bed->is_function_type (h->type))
 	    {
 	      *sym_hash = h;
 	      sym_hash++;

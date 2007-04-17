@@ -159,6 +159,10 @@ set armelftests {
     {"arm-pic-veneer" "-static -T arm.ld --pic-veneer" "" {arm-pic-veneer.s}
      {{objdump -d arm-pic-veneer.d}}
      "arm-pic-veneer"}
+    {"Preempt Thumb symbol" "tmpdir/mixed-lib.so -T arm-dyn.ld --use-blx" ""
+     {preempt-app.s}
+     {{readelf -Ds preempt-app.sym}}
+     "preempt-app"}
 }
 
 run_ld_link_tests $armelftests
