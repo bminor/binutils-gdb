@@ -1,3 +1,27 @@
+2007-04-18  H.J. Lu <hongjiu.lu@intel.com>
+
+	* i386-dis.c (XMM_Fixup): New.
+	(Edqb): New.
+	(Edqd): New.
+	(XMM0): New.
+	(dqb_mode): New.
+	(dqd_mode): New.
+	(PREGRP39 ... PREGRP85): New.
+	(threebyte_0x38_uses_DATA_prefix): Updated for SSE4.
+	(threebyte_0x3a_uses_DATA_prefix): Likewise.
+	(prefix_user_table): Add PREGRP39 ... PREGRP85.
+	(three_byte_table): Likewise.
+	(putop): Handle 'K'.
+	(intel_operand_size): Handle dqb_mode, dqd_mode):
+	(OP_E): Likewise.
+	(OP_G): Likewise.
+
+	* i386-opc.c (i386_optab): Add SSE4.1 opcodes.
+
+	* i386-opc.h (CpuSSE4_1): New.
+	(CpuUnknownFlags): Add CpuSSE4_1.
+	(regKludge): Update comment.
+
 2007-04-18  Matthias Klose  <doko@ubuntu.com>
 
 	* Makefile.am (libopcodes_la_LDFLAGS): Use bfd soversion.

@@ -98,6 +98,7 @@ static void BadOp (void);
 static void VMX_Fixup (int, int);
 static void REP_Fixup (int, int);
 static void CMPXCHG8B_Fixup (int, int);
+static void XMM_Fixup (int, int);
 
 struct dis_private {
   /* Points to first byte not fetched.  */
@@ -200,6 +201,8 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Ed { OP_E, d_mode }
 #define Edq { OP_E, dq_mode }
 #define Edqw { OP_E, dqw_mode }
+#define Edqb { OP_E, dqb_mode }
+#define Edqd { OP_E, dqd_mode }
 #define indirEv { OP_indirE, stack_v_mode }
 #define indirEp { OP_indirE, f_mode }
 #define stackEv { OP_E, stack_v_mode }
@@ -309,6 +312,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define VM { OP_VMX, q_mode }
 #define OPSUF { OP_3DNowSuffix, 0 }
 #define OPSIMD { OP_SIMD_Suffix, 0 }
+#define XMM0 { XMM_Fixup, 0 }
 
 /* Used handle "rep" prefix for string instructions.  */
 #define Xbr { REP_Fixup, eSI_reg }
@@ -345,6 +349,8 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define stack_v_mode 15 /* v_mode for stack-related opcodes.  */
 #define z_mode 16 /* non-quad operand size depends on prefixes */
 #define o_mode 17  /* 16-byte operand */
+#define dqb_mode 18 /* registers like dq_mode, memory like b_mode.  */
+#define dqd_mode 19 /* registers like dq_mode, memory like d_mode.  */
 
 #define es_reg 100
 #define cs_reg 101
@@ -468,6 +474,53 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define PREGRP36  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 36 } }
 #define PREGRP37  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 37 } }
 #define PREGRP38  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 38 } }
+#define PREGRP39  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 39 } }
+#define PREGRP40  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 40 } }
+#define PREGRP41  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 41 } }
+#define PREGRP42  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 42 } }
+#define PREGRP43  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 43 } }
+#define PREGRP44  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 44 } }
+#define PREGRP45  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 45 } }
+#define PREGRP46  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 46 } }
+#define PREGRP47  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 47 } }
+#define PREGRP48  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 48 } }
+#define PREGRP49  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 49 } }
+#define PREGRP50  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 50 } }
+#define PREGRP51  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 51 } }
+#define PREGRP52  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 52 } }
+#define PREGRP53  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 53 } }
+#define PREGRP54  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 54 } }
+#define PREGRP55  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 55 } }
+#define PREGRP56  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 56 } }
+#define PREGRP57  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 57 } }
+#define PREGRP58  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 58 } }
+#define PREGRP59  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 59 } }
+#define PREGRP60  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 60 } }
+#define PREGRP61  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 61 } }
+#define PREGRP62  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 62 } }
+#define PREGRP63  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 63 } }
+#define PREGRP64  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 64 } }
+#define PREGRP65  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 65 } }
+#define PREGRP66  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 66 } }
+#define PREGRP67  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 67 } }
+#define PREGRP68  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 68 } }
+#define PREGRP69  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 69 } }
+#define PREGRP70  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 70 } }
+#define PREGRP71  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 71 } }
+#define PREGRP72  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 72 } }
+#define PREGRP73  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 73 } }
+#define PREGRP74  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 74 } }
+#define PREGRP75  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 75 } }
+#define PREGRP76  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 76 } }
+#define PREGRP77  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 77 } }
+#define PREGRP78  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 78 } }
+#define PREGRP79  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 79 } }
+#define PREGRP80  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 80 } }
+#define PREGRP81  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 81 } }
+#define PREGRP82  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 82 } }
+#define PREGRP83  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 83 } }
+#define PREGRP84  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 84 } }
+#define PREGRP85  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 85 } }
 
 
 #define X86_64_0  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 0 } }
@@ -503,6 +556,7 @@ struct dis386 {
    'I' => honor following macro letter even in Intel mode (implemented only
    .      for some of the macro letters)
    'J' => print 'l'
+   'K' => print 'd' or 'q' if rex prefix is present.
    'L' => print 'l' if suffix_always is true
    'N' => print 'n' if instruction has no wait "prefix"
    'O' => print 'd' or 'o' (or 'q' in Intel mode)
@@ -1231,10 +1285,10 @@ static const unsigned char threebyte_0x38_uses_DATA_prefix[256] = {
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
   /*       -------------------------------        */
   /* 00 */ 1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0, /* 0f */
-  /* 10 */ 0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0, /* 1f */
-  /* 20 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 2f */
-  /* 30 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 3f */
-  /* 40 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
+  /* 10 */ 0,0,0,0,1,1,0,1,0,0,0,0,1,1,1,0, /* 1f */
+  /* 20 */ 1,1,1,1,1,1,0,0,1,1,1,1,0,0,0,0, /* 2f */
+  /* 30 */ 1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1, /* 3f */
+  /* 40 */ 1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
   /* 50 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 5f */
   /* 60 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 6f */
   /* 70 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 7f */
@@ -1302,11 +1356,11 @@ static const unsigned char threebyte_0x38_uses_REPZ_prefix[256] = {
 static const unsigned char threebyte_0x3a_uses_DATA_prefix[256] = {
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
   /*       -------------------------------        */
-  /* 00 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1, /* 0f */
-  /* 10 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 1f */
-  /* 20 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 2f */
+  /* 00 */ 0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1, /* 0f */
+  /* 10 */ 0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0, /* 1f */
+  /* 20 */ 1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 2f */
   /* 30 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 3f */
-  /* 40 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
+  /* 40 */ 1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
   /* 50 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 5f */
   /* 60 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 6f */
   /* 70 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 7f */
@@ -2041,6 +2095,382 @@ static const struct dis386 prefix_user_table[][4] = {
     { "xchgS", { { NOP_Fixup1, eAX_reg }, { NOP_Fixup2, eAX_reg } } },
     { "(bad)", { XX } },
   },
+
+  /* PREGRP39 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pblendvb", {XM, EX, XMM0 } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP40 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "blendvps", {XM, EX, XMM0 } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP41 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "blendvpd", { XM, EX, XMM0 } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP42 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "ptest",  { XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP43 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmovsxbw", { XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP44 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmovsxbd", { XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP45 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmovsxbq", { XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP46 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmovsxwd", { XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP47 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmovsxwq", { XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP48 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmovsxdq", { XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP49 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmuldq", { XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP50 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pcmpeqq", { XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP51 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "movntdqa", { XM, EM } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP52 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "packusdw", { XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP53 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmovzxbw", { XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP54 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmovzxbd", { XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP55 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmovzxbq", { XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP56 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmovzxwd", { XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP57 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmovzxwq", { XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP58 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmovzxdq", { XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP59 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pminsb",	{ XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP60 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pminsd",	{ XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP61 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pminuw",	{ XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP62 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pminud",	{ XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP63 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmaxsb",	{ XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP64 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmaxsd",	{ XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP65 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmaxuw", { XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP66 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmaxud", { XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP67 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmulld", { XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP68 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "phminposuw", { XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP69 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "roundps", { XM, EX, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP70 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "roundpd", { XM, EX, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP71 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "roundss", { XM, EX, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP72 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "roundsd", { XM, EX, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP73 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "blendps", { XM, EX, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP74 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "blendpd", { XM, EX, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP75 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pblendw", { XM, EX, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP76 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pextrb",	{ Edqb, XM, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP77 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pextrw",	{ Edqw, XM, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP78 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pextrK",	{ Edq, XM, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP79 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "extractps", { Edqd, XM, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP80 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pinsrb",	{ XM, Edqb, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP81 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "insertps", { XM, EX, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP82 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pinsrK",	{ XM, Edq, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP83 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "dpps",	{ XM, EX, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP84 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "dppd",	{ XM, EX, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP85 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "mpsadbw", { XM, EX, Ib } },
+    { "(bad)",	{ XX } },
+  },
 };
 
 static const struct dis386 x86_64_table[][2] = {
@@ -2084,14 +2514,14 @@ static const struct dis386 three_byte_table[][256] = {
     { "(bad)", { XX } },
     { "(bad)", { XX } },
     /* 10 */
+    { PREGRP39 },
     { "(bad)", { XX } },
     { "(bad)", { XX } },
     { "(bad)", { XX } },
+    { PREGRP40 },
+    { PREGRP41 },
     { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
+    { PREGRP42 },
     /* 18 */
     { "(bad)", { XX } },
     { "(bad)", { XX } },
@@ -2102,44 +2532,44 @@ static const struct dis386 three_byte_table[][256] = {
     { "pabsd", { MX, EM } },
     { "(bad)", { XX } },
     /* 20 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
+    { PREGRP43 },
+    { PREGRP44 },
+    { PREGRP45 },
+    { PREGRP46 },
+    { PREGRP47 },
+    { PREGRP48 },
     { "(bad)", { XX } },
     { "(bad)", { XX } },
     /* 28 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
+    { PREGRP49 },
+    { PREGRP50 },
+    { PREGRP51 },
+    { PREGRP52 },
     { "(bad)", { XX } },
     { "(bad)", { XX } },
     { "(bad)", { XX } },
     { "(bad)", { XX } },
     /* 30 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
+    { PREGRP53 },
+    { PREGRP54 },
+    { PREGRP55 },
+    { PREGRP56 },
+    { PREGRP57 },
+    { PREGRP58 },
     { "(bad)", { XX } },
     { "(bad)", { XX } },
     /* 38 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
+    { PREGRP59 },
+    { PREGRP60 },
+    { PREGRP61 },
+    { PREGRP62 },
+    { PREGRP63 },
+    { PREGRP64 },
+    { PREGRP65 },
+    { PREGRP66 },
     /* 40 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
+    { PREGRP67 },
+    { PREGRP68 },
     { "(bad)", { XX } },
     { "(bad)", { XX } },
     { "(bad)", { XX } },
@@ -2366,23 +2796,23 @@ static const struct dis386 three_byte_table[][256] = {
     { "(bad)", { XX } },
     { "(bad)", { XX } },
     /* 08 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
+    { PREGRP69 },
+    { PREGRP70 },
+    { PREGRP71 },
+    { PREGRP72 },
+    { PREGRP73 },
+    { PREGRP74 },
+    { PREGRP75 },
     { "palignr", { MX, EM, Ib } },
     /* 10 */
     { "(bad)", { XX } },
     { "(bad)", { XX } },
     { "(bad)", { XX } },
     { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
+    { PREGRP76 },
+    { PREGRP77 },
+    { PREGRP78 },
+    { PREGRP79 },
     /* 18 */
     { "(bad)", { XX } },
     { "(bad)", { XX } },
@@ -2393,9 +2823,9 @@ static const struct dis386 three_byte_table[][256] = {
     { "(bad)", { XX } },
     { "(bad)", { XX } },
     /* 20 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
+    { PREGRP80 },
+    { PREGRP81 },
+    { PREGRP82 },
     { "(bad)", { XX } },
     { "(bad)", { XX } },
     { "(bad)", { XX } },
@@ -2429,9 +2859,9 @@ static const struct dis386 three_byte_table[][256] = {
     { "(bad)", { XX } },
     { "(bad)", { XX } },
     /* 40 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
+    { PREGRP83 },
+    { PREGRP84 },
+    { PREGRP85 },
     { "(bad)", { XX } },
     { "(bad)", { XX } },
     { "(bad)", { XX } },
@@ -3839,6 +4269,13 @@ putop (const char *template, int sizeflag)
 	    break;
 	  *obufp++ = 'l';
 	  break;
+	case 'K':
+	  USED_REX (REX_W);
+	  if (rex & REX_W)
+	    *obufp++ = 'q';
+	  else
+	    *obufp++ = 'd';
+	  break;
 	case 'Z':
 	  if (intel_syntax)
 	    break;
@@ -4128,6 +4565,7 @@ intel_operand_size (int bytemode, int sizeflag)
   switch (bytemode)
     {
     case b_mode:
+    case dqb_mode:
       oappend ("BYTE PTR ");
       break;
     case w_mode:
@@ -4161,6 +4599,7 @@ intel_operand_size (int bytemode, int sizeflag)
 	used_prefixes |= (prefixes & PREFIX_DATA);
       break;
     case d_mode:
+    case dqd_mode:
       oappend ("DWORD PTR ");
       break;
     case q_mode:
@@ -4244,6 +4683,8 @@ OP_E (int bytemode, int sizeflag)
 	  /* FALLTHRU */
 	case v_mode:
 	case dq_mode:
+	case dqb_mode:
+	case dqd_mode:
 	case dqw_mode:
 	  USED_REX (REX_W);
 	  if (rex & REX_W)
@@ -4498,6 +4939,8 @@ OP_G (int bytemode, int sizeflag)
       break;
     case v_mode:
     case dq_mode:
+    case dqb_mode:
+    case dqd_mode:
     case dqw_mode:
       USED_REX (REX_W);
       if (rex & REX_W)
@@ -5796,4 +6239,11 @@ CMPXCHG8B_Fixup (int bytemode, int sizeflag)
       bytemode = o_mode;
     }
   OP_M (bytemode, sizeflag);
+}
+
+static void
+XMM_Fixup (int reg, int sizeflag ATTRIBUTE_UNUSED)
+{
+  sprintf (scratchbuf, "%%xmm%d", reg);
+  oappend (scratchbuf + intel_syntax);
 }

@@ -1,3 +1,10 @@
+2007-04-18  H.J. Lu <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .sse4.1.
+	(process_operands): Adjust implicit operand for blendvpd,
+	blendvps and pblendvb in SSE4.1.
+	(output_insn): Support SSE4.1.
+
 2007-04-18  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (do_t_rsb): Use 16-bit encoding when possible.

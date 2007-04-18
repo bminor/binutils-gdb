@@ -69,6 +69,7 @@ typedef struct template
 #define CpuSSSE3      0x80000	/* Supplemental Streaming SIMD extensions 3 required */
 #define CpuSSE4a     0x100000   /* SSE4a New Instuctions required */
 #define CpuABM       0x200000   /* ABM New Instructions required */
+#define CpuSSE4_1    0x400000	/* SSE4.1 Instructions required */
 
   /* These flags are set by gas depending on the flag_code.  */
 #define Cpu64	     0x4000000   /* 64bit support required  */
@@ -77,7 +78,8 @@ typedef struct template
   /* The default value for unknown CPUs - enable all features to avoid problems.  */
 #define CpuUnknownFlags (Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686 \
 	|CpuP4|CpuSledgehammer|CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3|CpuVMX \
-	|Cpu3dnow|Cpu3dnowA|CpuK6|CpuPadLock|CpuSVME|CpuSSSE3|CpuABM|CpuSSE4a)
+	|Cpu3dnow|Cpu3dnowA|CpuK6|CpuPadLock|CpuSVME|CpuSSSE3|CpuSSE4_1 \
+	|CpuABM|CpuSSE4a)
 
   /* the bits in opcode_modifier are used to generate the final opcode from
      the base_opcode.  These bits also are used to detect alternate forms of
@@ -110,7 +112,9 @@ typedef struct template
 #define No_xSuf       0x800000  /* x suffix on instruction illegal */
 #define FWait	     0x1000000	/* instruction needs FWAIT */
 #define IsString     0x2000000	/* quick test for string instructions */
-#define regKludge    0x4000000	/* fake an extra reg operand for clr, imul */
+#define regKludge    0x4000000	/* fake an extra reg operand for clr, imul
+				   and special register processing for
+				   some instructions.  */
 #define IsPrefix     0x8000000	/* opcode is a prefix */
 #define ImmExt	    0x10000000	/* instruction has extension in 8 bit imm */
 #define NoRex64	    0x20000000  /* instruction don't need Rex64 prefix.  */

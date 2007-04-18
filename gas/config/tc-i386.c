@@ -498,6 +498,8 @@ static const arch_entry cpu_arch[] =
    CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3},
   {".ssse3", PROCESSOR_UNKNOWN,
    CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3},
+  {".sse4.1", PROCESSOR_UNKNOWN,
+   CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuSSE4_1},
   {".3dnow", PROCESSOR_UNKNOWN,
    CpuMMX|Cpu3dnow},
   {".3dnowa", PROCESSOR_UNKNOWN,
@@ -3277,14 +3279,47 @@ process_operands (void)
      is converted into xor %reg, %reg.  */
   if (i.tm.opcode_modifier & regKludge)
     {
-      unsigned int first_reg_op = (i.types[0] & Reg) ? 0 : 1;
-      /* Pretend we saw the extra register operand.  */
-      assert (i.reg_operands == 1
-	      && i.op[first_reg_op + 1].regs == 0);
-      i.op[first_reg_op + 1].regs = i.op[first_reg_op].regs;
-      i.types[first_reg_op + 1] = i.types[first_reg_op];
-      i.operands++;
-      i.reg_operands++;
+       if ((i.tm.cpu_flags & CpuSSE4_1))
+	 {
+	   /* The first operand in instruction blendvpd, blendvps and
+	      pblendvb in SSE4.1 is implicit and must be xmm0.  */
+	   assert (i.operands == 3
+		   && i.reg_operands >= 2
+		   && i.types[0] == RegXMM);
+	   if (i.op[0].regs->reg_num != 0)
+	     {
+	       if (intel_syntax)
+		 as_bad (_("the last operand of `%s' must be `%sxmm0'"),
+			 i.tm.name, register_prefix);
+	       else
+		 as_bad (_("the first operand of `%s' must be `%sxmm0'"),
+			 i.tm.name, register_prefix);
+	       return 0;
+	     }
+	   i.op[0] = i.op[1];
+	   i.op[1] = i.op[2];
+	   i.types[0] = i.types[1];
+	   i.types[1] = i.types[2];
+	   i.operands--;
+	   i.reg_operands--;
+
+	   /* We need to adjust fields in i.tm since they are used by
+	      build_modrm_byte.  */
+	   i.tm.operand_types [0] = i.tm.operand_types [1];
+	   i.tm.operand_types [1] = i.tm.operand_types [2];
+	   i.tm.operands--;
+	 }
+       else
+	 {
+	   unsigned int first_reg_op = (i.types[0] & Reg) ? 0 : 1;
+	   /* Pretend we saw the extra register operand.  */
+	   assert (i.reg_operands == 1
+		   && i.op[first_reg_op + 1].regs == 0);
+	   i.op[first_reg_op + 1].regs = i.op[first_reg_op].regs;
+	   i.types[first_reg_op + 1] = i.types[first_reg_op];
+	   i.operands++;
+	   i.reg_operands++;
+	 }
     }
 
   if (i.tm.opcode_modifier & ShortForm)
@@ -3893,11 +3928,10 @@ output_insn (void)
       unsigned char *q;
       unsigned int prefix;
 
-      /* All opcodes on i386 have either 1 or 2 bytes.  Supplemental
-	 Streaming SIMD extensions 3 Instructions have 3 bytes.  We may
-	 use one more higher byte to specify a prefix the instruction
-	 requires.  */
-      if ((i.tm.cpu_flags & CpuSSSE3) != 0)
+      /* All opcodes on i386 have either 1 or 2 bytes.  SSSE3 and
+	 SSE4.1 instructions have 3 bytes.  We may use one more higher
+	 byte to specify a prefix the instruction requires.  */
+      if ((i.tm.cpu_flags & (CpuSSSE3 | CpuSSE4_1)) != 0)
 	{
 	  if (i.tm.base_opcode & 0xff000000)
 	    {
@@ -3938,7 +3972,7 @@ output_insn (void)
 	}
       else
 	{
-	  if ((i.tm.cpu_flags & CpuSSSE3) != 0)
+	  if ((i.tm.cpu_flags & (CpuSSSE3 | CpuSSE4_1)) != 0)
 	    {
 	      p = frag_more (3);
 	      *p++ = (i.tm.base_opcode >> 16) & 0xff;
