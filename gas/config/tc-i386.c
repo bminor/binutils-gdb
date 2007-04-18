@@ -500,6 +500,10 @@ static const arch_entry cpu_arch[] =
    CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3},
   {".sse4.1", PROCESSOR_UNKNOWN,
    CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuSSE4_1},
+  {".sse4.2", PROCESSOR_UNKNOWN,
+   CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuSSE4},
+  {".sse4", PROCESSOR_UNKNOWN,
+   CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuSSE4},
   {".3dnow", PROCESSOR_UNKNOWN,
    CpuMMX|Cpu3dnow},
   {".3dnowa", PROCESSOR_UNKNOWN,
@@ -2640,9 +2644,10 @@ match_template (void)
 	      || !MATCH (overlap1, i.types[1], operand_types[1])
 	      /* monitor in SSE3 is a very special case.  The first
 		 register and the second register may have different
-		 sizes.  */
+		 sizes.  The same applies to crc32 in SSE4.2.  */
 	      || !((t->base_opcode == 0x0f01
 		    && t->extension_opcode == 0xc8)
+		   || t->base_opcode == 0xf20f38f1
 		   || CONSISTENT_REGISTER_MATCH (overlap0, i.types[0],
 						 operand_types[0],
 						 overlap1, i.types[1],
@@ -2829,19 +2834,30 @@ process_suffix (void)
 	{
 	  /* We take i.suffix from the last register operand specified,
 	     Destination register type is more significant than source
-	     register type.  */
-	  int op;
-
-	  for (op = i.operands; --op >= 0;)
-	    if ((i.types[op] & Reg)
-		&& !(i.tm.operand_types[op] & InOutPortReg))
-	      {
-		i.suffix = ((i.types[op] & Reg8) ? BYTE_MNEM_SUFFIX :
-			    (i.types[op] & Reg16) ? WORD_MNEM_SUFFIX :
-			    (i.types[op] & Reg64) ? QWORD_MNEM_SUFFIX :
+	     register type.  crc32 in SSE4.2 prefers source register
+	     type. */
+	  if (i.tm.base_opcode == 0xf20f38f1)
+	    {
+	      if ((i.types[0] & Reg))
+		i.suffix = ((i.types[0] & Reg16) ? WORD_MNEM_SUFFIX :
 			    LONG_MNEM_SUFFIX);
-		break;
-	      }
+	    }
+
+	  if (!i.suffix)
+	    {
+	      int op;
+
+	      for (op = i.operands; --op >= 0;)
+		if ((i.types[op] & Reg)
+		    && !(i.tm.operand_types[op] & InOutPortReg))
+		  {
+		    i.suffix = ((i.types[op] & Reg8) ? BYTE_MNEM_SUFFIX :
+				(i.types[op] & Reg16) ? WORD_MNEM_SUFFIX :
+				(i.types[op] & Reg64) ? QWORD_MNEM_SUFFIX :
+				LONG_MNEM_SUFFIX);
+		    break;
+		  }
+	    }
 	}
       else if (i.suffix == BYTE_MNEM_SUFFIX)
 	{
@@ -3929,9 +3945,11 @@ output_insn (void)
       unsigned int prefix;
 
       /* All opcodes on i386 have either 1 or 2 bytes.  SSSE3 and
-	 SSE4.1 instructions have 3 bytes.  We may use one more higher
-	 byte to specify a prefix the instruction requires.  */
-      if ((i.tm.cpu_flags & (CpuSSSE3 | CpuSSE4_1)) != 0)
+	 SSE4 instructions have 3 bytes.  We may use one more higher
+	 byte to specify a prefix the instruction requires.  Exclude
+	 instructions which are in both SSE4 and ABM.  */
+      if ((i.tm.cpu_flags & (CpuSSSE3 | CpuSSE4)) != 0
+	  && (i.tm.cpu_flags & CpuABM) == 0)
 	{
 	  if (i.tm.base_opcode & 0xff000000)
 	    {
@@ -3972,7 +3990,8 @@ output_insn (void)
 	}
       else
 	{
-	  if ((i.tm.cpu_flags & (CpuSSSE3 | CpuSSE4_1)) != 0)
+	  if ((i.tm.cpu_flags & (CpuSSSE3 | CpuSSE4)) != 0
+	      && (i.tm.cpu_flags & CpuABM) == 0)
 	    {
 	      p = frag_more (3);
 	      *p++ = (i.tm.base_opcode >> 16) & 0xff;

@@ -99,6 +99,7 @@ static void VMX_Fixup (int, int);
 static void REP_Fixup (int, int);
 static void CMPXCHG8B_Fixup (int, int);
 static void XMM_Fixup (int, int);
+static void CRC32_Fixup (int, int);
 
 struct dis_private {
   /* Points to first byte not fetched.  */
@@ -521,6 +522,13 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define PREGRP83  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 83 } }
 #define PREGRP84  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 84 } }
 #define PREGRP85  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 85 } }
+#define PREGRP86  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 86 } }
+#define PREGRP87  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 87 } }
+#define PREGRP88  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 88 } }
+#define PREGRP89  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 89 } }
+#define PREGRP90  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 90 } }
+#define PREGRP91  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 91 } }
+#define PREGRP92  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 92 } }
 
 
 #define X86_64_0  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 0 } }
@@ -1287,7 +1295,7 @@ static const unsigned char threebyte_0x38_uses_DATA_prefix[256] = {
   /* 00 */ 1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0, /* 0f */
   /* 10 */ 0,0,0,0,1,1,0,1,0,0,0,0,1,1,1,0, /* 1f */
   /* 20 */ 1,1,1,1,1,1,0,0,1,1,1,1,0,0,0,0, /* 2f */
-  /* 30 */ 1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1, /* 3f */
+  /* 30 */ 1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1, /* 3f */
   /* 40 */ 1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
   /* 50 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 5f */
   /* 60 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 6f */
@@ -1323,7 +1331,7 @@ static const unsigned char threebyte_0x38_uses_REPNZ_prefix[256] = {
   /* c0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* cf */
   /* d0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* df */
   /* e0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ef */
-  /* f0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ff */
+  /* f0 */ 1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ff */
   /*       -------------------------------        */
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
 };
@@ -2471,6 +2479,62 @@ static const struct dis386 prefix_user_table[][4] = {
     { "mpsadbw", { XM, EX, Ib } },
     { "(bad)",	{ XX } },
   },
+
+  /* PREGRP86 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pcmpgtq", { XM, EX } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP87 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "crc32",	{ Gdq, { CRC32_Fixup, b_mode } } },	
+  },
+
+  /* PREGRP88 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "crc32",	{ Gdq, { CRC32_Fixup, v_mode } } },	
+  },
+
+  /* PREGRP89 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pcmpestrm", { XM, EX, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP90 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pcmpestri", { XM, EX, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP91 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pcmpistrm", { XM, EX, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP92 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pcmpistri", { XM, EX, Ib } },
+    { "(bad)",	{ XX } },
+  },
 };
 
 static const struct dis386 x86_64_table[][2] = {
@@ -2557,7 +2621,7 @@ static const struct dis386 three_byte_table[][256] = {
     { PREGRP57 },
     { PREGRP58 },
     { "(bad)", { XX } },
-    { "(bad)", { XX } },
+    { PREGRP86 },
     /* 38 */
     { PREGRP59 },
     { PREGRP60 },
@@ -2766,8 +2830,8 @@ static const struct dis386 three_byte_table[][256] = {
     { "(bad)", { XX } },
     { "(bad)", { XX } },
     /* f0 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
+    { PREGRP87 },
+    { PREGRP88 },
     { "(bad)", { XX } },
     { "(bad)", { XX } },
     { "(bad)", { XX } },
@@ -2895,10 +2959,10 @@ static const struct dis386 three_byte_table[][256] = {
     { "(bad)", { XX } },
     { "(bad)", { XX } },
     /* 60 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
+    { PREGRP89 },
+    { PREGRP90 },
+    { PREGRP91 },
+    { PREGRP92 },
     { "(bad)", { XX } },
     { "(bad)", { XX } },
     { "(bad)", { XX } },
@@ -6246,4 +6310,66 @@ XMM_Fixup (int reg, int sizeflag ATTRIBUTE_UNUSED)
 {
   sprintf (scratchbuf, "%%xmm%d", reg);
   oappend (scratchbuf + intel_syntax);
+}
+
+static void
+CRC32_Fixup (int bytemode, int sizeflag)
+{
+  /* Add proper suffix to "crc32".  */
+  char *p = obuf + strlen (obuf);
+
+  switch (bytemode)
+    {
+    case b_mode:
+      *p++ = 'b';
+      break;
+    case v_mode:
+      USED_REX (REX_W);
+      if (rex & REX_W)
+	*p++ = 'q';
+      else if ((prefixes & PREFIX_DATA))
+	{
+	  *p++ = 'w';
+	  used_prefixes |= (prefixes & PREFIX_DATA);
+	}
+      else
+	*p++ = 'l';
+      break;
+    default:
+      oappend (INTERNAL_DISASSEMBLER_ERROR);
+      break;
+    }
+  *p = '\0';
+
+  if (modrm.mod == 3)
+    {
+      int add;
+
+      /* Skip mod/rm byte.  */
+      MODRM_CHECK;
+      codep++;
+
+      USED_REX (REX_B);
+      add = (rex & REX_B) ? 8 : 0;
+      if (bytemode == b_mode)
+	{
+	  USED_REX (0);
+	  if (rex)
+	    oappend (names8rex[modrm.rm + add]);
+	  else
+	    oappend (names8[modrm.rm + add]);
+	}
+      else
+	{
+	  USED_REX (REX_W);
+	  if (rex & REX_W)
+	    oappend (names64[modrm.rm + add]);
+	  else if ((prefixes & PREFIX_DATA))
+	    oappend (names16[modrm.rm + add]);
+	  else
+	    oappend (names32[modrm.rm + add]);
+	}
+    }
+  else
+    OP_E (v_mode, sizeflag);
 }

@@ -1435,6 +1435,18 @@ const template i386_optab[] =
 {"roundsd",  3,  0x660f3a0b,X, CpuSSE4_1, NoSuf|IgnoreSize|Modrm,	{ Imm8, RegXMM|LLongMem, RegXMM } },
 {"roundss",  3,  0x660f3a0a,X, CpuSSE4_1, NoSuf|IgnoreSize|Modrm,	{ Imm8, RegXMM|LongMem, RegXMM } },
 
+/* Streaming SIMD extensions 4.2 Instructions.  */
+
+{"pcmpgtq",   2,  0x660f3837,X, CpuSSE4_2, NoSuf|IgnoreSize|Modrm,	{ RegXMM|LLongMem, RegXMM, 0 } },
+{"pcmpestri", 3,  0x660f3a61,X, CpuSSE4_2, NoSuf|IgnoreSize|Modrm,	{ Imm8, RegXMM|LLongMem, RegXMM } },
+{"pcmpestrm", 3,  0x660f3a60,X, CpuSSE4_2, NoSuf|IgnoreSize|Modrm,	{ Imm8, RegXMM|LLongMem, RegXMM } },
+{"pcmpistri", 3,  0x660f3a63,X, CpuSSE4_2, NoSuf|IgnoreSize|Modrm,	{ Imm8, RegXMM|LLongMem, RegXMM } },
+{"pcmpistrm", 3,  0x660f3a62,X, CpuSSE4_2, NoSuf|IgnoreSize|Modrm,	{ Imm8, RegXMM|LLongMem, RegXMM } },
+{"crc32b",    2,  0xf20f38f0,X, CpuSSE4_2, NoSuf|IgnoreSize|Modrm,	{ Reg8|ByteMem, Reg32|Reg64, 0 } },
+{"crc32",     2,  0xf20f38f0,X, CpuSSE4_2, NoSuf|IgnoreSize|Modrm,	{ Reg8, Reg32|Reg64, 0 } },
+{"crc32",     2,  0xf20f38f1,X, CpuSSE4_2, wl_Suf|Modrm,		{ WordReg|WordMem, Reg32, 0 } },
+{"crc32",     2,  0xf20f38f1,X, CpuSSE4_2|Cpu64, q_Suf|IgnoreSize|Modrm|Rex64, { Reg64|LLongMem, Reg64, 0 } },
+
 /* AMD 3DNow! instructions.  */
 
 {"prefetch", 1, 0x0f0d,	   0, Cpu3dnow, NoSuf|IgnoreSize|Modrm,	{ ByteMem, 0, 0 } },
@@ -1497,7 +1509,7 @@ const template i386_optab[] =
 {"insertq",  4, 0xf20f78,  X, CpuSSE4a, NoSuf|IgnoreSize|Modrm, { Imm8, Imm8, RegXMM, RegXMM} },
 
 /* ABM instructions */
-{"popcnt",   2, 0xf30fb8,  X, CpuABM, wlq_Suf|Modrm,          { WordReg|WordMem, WordReg, 0} },
+{"popcnt",   2, 0xf30fb8,  X, CpuABM|CpuSSE4_2, wlq_Suf|Modrm,	{ WordReg|WordMem, WordReg, 0} },
 {"lzcnt",    2, 0xf30fbd,  X, CpuABM, wlq_Suf|Modrm,          { WordReg|WordMem, WordReg, 0} },
 
 

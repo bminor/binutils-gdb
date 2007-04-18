@@ -1,5 +1,14 @@
 2007-04-18  H.J. Lu <hongjiu.lu@intel.com>
 
+	* gas/i386/i386.exp: Add sse4.2 and x86-64-sse4.2.
+
+	* gas/i386/sse4_2.d: New file.
+	* gas/i386/sse4_2.s: Likewise.
+	* gas/i386/x86-64-sse4_2.d: Likewise.
+	* gas/i386/x86-64-sse4_2.s: Likewise.
+
+2007-04-18  H.J. Lu <hongjiu.lu@intel.com>
+
 	* gas/i386/i386.exp: Add sse4.1 and x86-64-sse4.1.
 
 	* gas/i386/sse4_1.d: New file.
