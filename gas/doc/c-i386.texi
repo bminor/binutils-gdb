@@ -756,6 +756,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{amdfam10}
 @item @samp{k6} @tab @samp{athlon} @tab @samp{sledgehammer} @tab @samp{k8} 
 @item @samp{.mmx} @tab @samp{.sse} @tab @samp{.sse2} @tab @samp{.sse3}
+@item @samp{.ssse3} @tab @samp{.sse4.1} @tab @samp{.sse4.2} @tab @samp{.sse4}
 @item @samp{.sse4a} @tab @samp{.3dnow} @tab @samp{.3dnowa} @tab @samp{.padlock}
 @item @samp{.pacifica} @tab @samp{.svme} @tab @samp{.abm}
 @end multitable

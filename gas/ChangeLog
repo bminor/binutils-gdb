@@ -1,5 +1,9 @@
 2007-04-18  H.J. Lu <hongjiu.lu@intel.com>
 
+	* doc/c-i386.texi; Document .ssse3, .sse4.1, .sse4.2 and .sse4.
+
+2007-04-18  H.J. Lu <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (cpu_arch): Add .sse4.2 and .sse4.
 	(match_template): Handle operand size for crc32 in SSE4.2.
 	(process_suffix): Handle operand type for crc32 in SSE4.2.
