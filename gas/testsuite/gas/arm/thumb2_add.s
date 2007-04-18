@@ -28,4 +28,4 @@ thumb2_add:
 	add r0, sp, #0x100
 	add r5, sp, #0x400
 	add r9, sp, #0x101
-	nop
+	rsbs r1, r6, #0

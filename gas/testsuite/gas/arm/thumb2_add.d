@@ -27,4 +27,4 @@ Disassembly of section .text:
 0+04c <[^>]+> a840      	add	r0, sp, #256
 0+04e <[^>]+> f50d 6580 	add.w	r5, sp, #1024	; 0x400
 0+052 <[^>]+> f20d 1901 	addw	r9, sp, #257	; 0x101
-0+056 <[^>]+> bf00      	nop
+0+056 <[^>]+> 4271      	negs	r1, r6

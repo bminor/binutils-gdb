@@ -9956,8 +9956,37 @@ do_t_rsb (void)
   inst.instruction |= Rs << 16;
   if (!inst.operands[2].isreg)
     {
-      inst.instruction = (inst.instruction & 0xe1ffffff) | 0x10000000;
-      inst.reloc.type = BFD_RELOC_ARM_T32_IMMEDIATE;
+      bfd_boolean narrow;
+
+      if ((inst.instruction & 0x00100000) != 0)
+	narrow = (current_it_mask == 0);
+      else
+	narrow = (current_it_mask != 0);
+
+      if (Rd > 7 || Rs > 7)
+	narrow = FALSE;
+
+      if (inst.size_req == 4 || !unified_syntax)
+	narrow = FALSE;
+
+      if (inst.reloc.exp.X_op != O_constant
+	  || inst.reloc.exp.X_add_number != 0)
+	narrow = FALSE;
+
+      /* Turn rsb #0 into 16-bit neg.  We should probably do this via
+         relaxation, but it doesn't seem worth the hassle.  */
+      if (narrow)
+	{
+	  inst.reloc.type = BFD_RELOC_UNUSED;
+	  inst.instruction = THUMB_OP16 (T_MNEM_negs);
+	  inst.instruction |= Rs << 3;
+	  inst.instruction |= Rd;
+	}
+      else
+	{
+	  inst.instruction = (inst.instruction & 0xe1ffffff) | 0x10000000;
+	  inst.reloc.type = BFD_RELOC_ARM_T32_IMMEDIATE;
+	}
     }
   else
     encode_thumb32_shifted_operand (2);

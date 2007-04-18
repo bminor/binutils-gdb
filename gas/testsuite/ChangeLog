@@ -1,3 +1,8 @@
+2007-04-18  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb2_add.s: Add rsb #0 test.
+	* gas/arm/thumb2_add.d: Update expected output.
+
 2007-04-04  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/neon-cov.s: Add new vext test.
