@@ -2040,6 +2040,7 @@ lang_add_section (lang_statement_list_type *ptr,
       switch (output->sectype)
 	{
 	case normal_section:
+	case overlay_section:
 	  break;
 	case noalloc_section:
 	  flags &= ~SEC_ALLOC;
@@ -4438,14 +4439,9 @@ lang_size_sections_1
 		  }
 		else
 		  {
-		    /* If the current vma overlaps the previous section,
-		       then set the current lma to that at the end of
-		       the previous section.  The previous section was
-		       probably an overlay.  */
-		    if ((dot >= last->vma
-			 && dot < last->vma + last->size)
-			|| (last->vma >= dot
-			    && last->vma < dot + os->bfd_section->size))
+		    /* If this is an overlay, set the current lma to that
+		       at the end of the previous section.  */
+		    if (os->sectype == overlay_section)
 		      lma = last->lma + last->size;
 
 		    /* Otherwise, keep the same lma to vma relationship
@@ -6392,7 +6388,7 @@ lang_enter_overlay_section (const char *name)
   struct overlay_list *n;
   etree_type *size;
 
-  lang_enter_output_section_statement (name, overlay_vma, normal_section,
+  lang_enter_output_section_statement (name, overlay_vma, overlay_section,
 				       0, overlay_subalign, 0, 0);
 
   /* If this is the first section, then base the VMA of future
@@ -6506,7 +6502,10 @@ lang_leave_overlay (etree_type *lma_expr,
 	 The base address is not needed (and should be null) if
 	 an LMA region was specified.  */
       if (l->next == 0)
-	l->os->load_base = lma_expr;
+	{
+	  l->os->load_base = lma_expr;
+	  l->os->sectype = normal_section;
+	}
       if (phdrs != NULL && l->os->phdrs == NULL)
 	l->os->phdrs = phdrs;
 

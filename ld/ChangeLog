@@ -1,3 +1,13 @@
+2007-04-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.h (enum section_type): Add overlay_section.
+	* ldlang.c (lang_add_section): Handle flags for overlay_section
+	as per normal_section.
+	(lang_size_sections_1): When setting lma, detect overlays by
+	os->sectype rather than by looking for overlapping vmas.
+	(lang_enter_overlay_section): Use overlay_section type.
+	(lang_leave_overlay): Set first overlay section to normal.
+
 2007-04-14  Steve Ellcey  <sje@cup.hp.com>
 
 	* Makefile.am: Add ACLOCAL_AMFLAGS.
