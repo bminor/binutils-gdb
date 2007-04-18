@@ -406,6 +406,9 @@ tty_command (char *file, int from_tty)
 void
 post_create_inferior (struct target_ops *target, int from_tty)
 {
+  /* Be sure we own the terminal in case write operations are performed.  */ 
+  target_terminal_ours ();
+
   /* If the target hasn't taken care of this already, do it now.
      Targets which need to access registers during to_open,
      to_create_inferior, or to_attach should do it earlier; but many
