@@ -1,3 +1,9 @@
+2007-04-18  Denis Pilat  <denis.pilat@st.com>
+
+	* dwarf2read.c (read_subrange_type): Use DW_ATE_signed default type
+	when missing from DW_TAG_subrange_type.  Remove the handling of null
+	return from die_type.
+
 2007-04-18  Maciej W. Rozycki  <macro@mips.com>
 
 	* mips-tdep.c (mips_eabi_push_dummy_call): Revert the last
@@ -9,7 +15,7 @@
 2007-04-18  Denis Pilat  <denis.pilat@st.com>
 
 	* infcmd.c (post_create_inferior): Start with a call to 
-	target_terminal_ours().
+	target_terminal_ours.
 
 2007-04-17  Maciej W. Rozycki  <macro@mips.com>
 

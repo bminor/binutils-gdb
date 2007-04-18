@@ -4914,15 +4914,12 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
     return;
 
   base_type = die_type (die, cu);
-  if (base_type == NULL)
+  if (TYPE_CODE (base_type) == TYPE_CODE_VOID)
     {
       complaint (&symfile_complaints,
                 _("DW_AT_type missing from DW_TAG_subrange_type"));
-      return;
+      base_type = dwarf_base_type (DW_ATE_signed, TARGET_ADDR_BIT / 8, cu);
     }
-
-  if (TYPE_CODE (base_type) == TYPE_CODE_VOID)
-    base_type = alloc_type (NULL);
 
   if (cu->language == language_fortran)
     { 
