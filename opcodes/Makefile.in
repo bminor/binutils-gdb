@@ -571,7 +571,7 @@ libopcodes_la_SOURCES = dis-buf.c disassemble.c dis-init.c
 # if host != build.
 libopcodes_la_DEPENDENCIES = $(OFILES)
 libopcodes_la_LIBADD = $(OFILES) @WIN32LIBADD@
-libopcodes_la_LDFLAGS = -release $(VERSION) @WIN32LDFLAGS@
+libopcodes_la_LDFLAGS = -release `cat ../bfd/libtool-soversion` @WIN32LDFLAGS@
 
 # libtool will build .libs/libopcodes.a.  We create libopcodes.a in
 # the build directory so that we don't have to convert all the
