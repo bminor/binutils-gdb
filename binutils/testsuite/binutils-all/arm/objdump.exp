@@ -44,7 +44,7 @@ if [is_remote host] {
 
 set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS --disassemble --start-address=6 $objfile"]
 
-set want "bcc.w\te12.*bx\tlr"
+set want "bcc.w\[ \t\]*e12.*bx\[ \t\]*lr"
 
 if [regexp $want $got] then {
     pass "thumb2-cond test1"
@@ -54,10 +54,10 @@ if [regexp $want $got] then {
 
 set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS --disassemble --start-address=10 $objfile"]
 
-set want "bx\tlr"
+set want "bx\[ \t\]*lr"
 
 if [regexp $want $got] then {
-    pass "thumb2-cond test1"
+    pass "thumb2-cond test2"
 } else {
-    fail "thumb2-cond test1"
+    fail "thumb2-cond test2"
 }

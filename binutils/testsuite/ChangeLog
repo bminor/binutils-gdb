@@ -1,3 +1,8 @@
+2007-04-20  Richard Earnshaw  <rearnsha@arm.com>
+
+	* binutils-all/arm/thumb2-cond.s: Allow for tab expansion by the pty.
+	Rename the second test.
+
 2007-04-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/4348
