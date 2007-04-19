@@ -58,6 +58,12 @@ Generate code for PowerPC 7400/7410/7450/7455.
 @item -mppc64, -m620
 Generate code for PowerPC 620/625/630.
 
+@item -me500, -me500x2
+Generate code for Motorola e500 core complex.
+
+@item -mspe
+Generate code for Motorola SPE instructions.
+
 @item -mppc64bridge
 Generate code for PowerPC 64, including bridge insns.
 

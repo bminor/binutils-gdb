@@ -1,3 +1,7 @@
+2007-04-19  Nathan Froyd <froydnj@codesourcery.com>
+
+	* doc/c-ppc.texi (PowerPC-Opts): Document -me500, -me500x2, -mspe.
+
 2007-04-18  H.J. Lu <hongjiu.lu@intel.com>
 
 	* doc/c-i386.texi; Document .ssse3, .sse4.1, .sse4.2 and .sse4.
