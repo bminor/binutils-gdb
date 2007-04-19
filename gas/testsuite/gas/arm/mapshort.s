@@ -19,3 +19,6 @@ foo:
 	.byte 9
 bar:
 	.byte 10
+	.data
+wibble:
+	.word 0

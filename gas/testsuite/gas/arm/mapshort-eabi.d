@@ -21,6 +21,8 @@ SYMBOL TABLE:
 0+18 l       .text	00000000 \$a
 0+1c l       .text	00000000 \$d
 0+1f l       .text	00000000 bar
+0+00 l       .data	00000000 wibble
+0+00 l       .data	00000000 \$d
 0+00 l    d  .ARM.attributes	00000000 .ARM.attributes
 
 
