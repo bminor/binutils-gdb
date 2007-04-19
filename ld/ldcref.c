@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. 
 #include "sysdep.h"
 #include "bfdlink.h"
 #include "libiberty.h"
+#include "demangle.h"
 #include "objalloc.h"
 
 #include "ld.h"
@@ -324,7 +325,8 @@ cref_fill_array (struct cref_hash_entry *h, void *data)
   struct cref_hash_entry ***pph = data;
 
   ASSERT (h->demangled == NULL);
-  h->demangled = demangle (h->root.string);
+  h->demangled = bfd_demangle (output_bfd, h->root.string,
+			       DMGL_ANSI | DMGL_PARAMS);
 
   **pph = h;
 

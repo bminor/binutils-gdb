@@ -5267,7 +5267,8 @@ lang_one_common (struct bfd_link_hash_entry *h, void *info)
 	  header_printed = TRUE;
 	}
 
-      name = demangle (h->root.string);
+      name = bfd_demangle (output_bfd, h->root.string,
+			   DMGL_ANSI | DMGL_PARAMS);
       minfo ("%s", name);
       len = strlen (name);
       free (name);
