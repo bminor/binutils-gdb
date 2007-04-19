@@ -4950,6 +4950,7 @@ coff_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 {
   arelent genrel;
 
+  genrel.howto = NULL;
   RTYPE2HOWTO (&genrel, rel);
   return genrel.howto;
 }
