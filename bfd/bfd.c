@@ -1,6 +1,6 @@
 /* Generic BFD library interface and support routines.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -207,6 +207,7 @@ CODE_FRAGMENT
 #include "sysdep.h"
 #include <stdarg.h>
 #include "libiberty.h"
+#include "demangle.h"
 #include "safe-ctype.h"
 #include "bfdlink.h"
 #include "libbfd.h"
@@ -1701,4 +1702,86 @@ bfd_emul_set_commonpagesize (const char *emul, bfd_vma size)
     bfd_elf_set_pagesize (target, size,
 			  offsetof (struct elf_backend_data,
 				    commonpagesize), target);
+}
+
+/*
+FUNCTION
+	bfd_demangle
+
+SYNOPSIS
+	char *bfd_demangle (bfd *, const char *, int);
+
+DESCRIPTION
+	Wrapper around cplus_demangle.  Strips leading underscores and
+	other such chars that would otherwise confuse the demangler.
+	If passed a g++ v3 ABI mangled name, returns a buffer allocated
+	with malloc holding the demangled name.  Returns NULL otherwise
+	and on memory alloc failure.
+*/
+
+char *
+bfd_demangle (bfd *abfd, const char *name, int options)
+{
+  char *res, *alloc;
+  const char *pre, *suf;
+  size_t pre_len;
+
+  if (abfd != NULL
+      && *name != '\0'
+      && bfd_get_symbol_leading_char (abfd) == *name)
+    ++name;
+
+  /* This is a hack for better error reporting on XCOFF, PowerPC64-ELF
+     or the MS PE format.  These formats have a number of leading '.'s
+     on at least some symbols, so we remove all dots to avoid
+     confusing the demangler.  */
+  pre = name;
+  while (*name == '.' || *name == '$')
+    ++name;
+  pre_len = name - pre;
+
+  /* Strip off @plt and suchlike too.  */
+  alloc = NULL;
+  suf = strchr (name, '@');
+  if (suf != NULL)
+    {
+      alloc = bfd_malloc (suf - name + 1);
+      if (alloc == NULL)
+	return NULL;
+      memcpy (alloc, name, suf - name);
+      alloc[suf - name] = '\0';
+      name = alloc;
+    }
+
+  res = cplus_demangle (name, options);
+
+  if (alloc != NULL)
+    free (alloc);
+
+  if (res == NULL)
+    return NULL;
+
+  /* Put back any prefix or suffix.  */
+  if (pre_len != 0 || suf != NULL)
+    {
+      size_t len;
+      size_t suf_len;
+      char *final;
+
+      len = strlen (res);
+      if (suf == NULL)
+	suf = res + len;
+      suf_len = strlen (suf) + 1;
+      final = bfd_malloc (pre_len + len + suf_len);
+      if (final == NULL)
+	return NULL;
+
+      memcpy (final, pre, pre_len);
+      memcpy (final + pre_len, res, len);
+      memcpy (final + pre_len + len, suf, suf_len);
+      free (res);
+      res = final;
+    }
+
+  return res;
 }
