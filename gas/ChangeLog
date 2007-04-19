@@ -1,3 +1,8 @@
+2007-04-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2007-04-19  Nathan Froyd <froydnj@codesourcery.com>
 
 	* doc/c-ppc.texi (PowerPC-Opts): Document -me500, -me500x2, -mspe.
