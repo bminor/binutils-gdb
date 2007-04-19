@@ -1,3 +1,8 @@
+2007-04-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c (powerpc_opcodes): Add cctpl, cctpm, cctph, db8cyc,
+	db10cyc, db12cyc, db16cyc.
+
 2007-04-19  Nathan Froyd <froydnj@codesourcery.com>
 
 	* ppc-opc.c (powerpc_opcodes): Recognize three-operand tlbsxe.

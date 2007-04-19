@@ -4034,6 +4034,13 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "sthuxe",  X(31,447),	X_MASK,		BOOKE64,	{ RS, RAS, RB } },
 
+{ "cctpl",   0x7c210b78,    0xffffffff,	CELL,		{ 0 }},
+{ "cctpm",   0x7c421378,    0xffffffff,	CELL,		{ 0 }},
+{ "cctph",   0x7c631b78,    0xffffffff,	CELL,		{ 0 }},
+{ "db8cyc",  0x7f9ce378,    0xffffffff,	CELL,		{ 0 }},
+{ "db10cyc", 0x7fbdeb78,    0xffffffff,	CELL,		{ 0 }},
+{ "db12cyc", 0x7fdef378,    0xffffffff,	CELL,		{ 0 }},
+{ "db16cyc", 0x7ffffb78,    0xffffffff,	CELL,		{ 0 }},
 { "mr",	     XRC(31,444,0), X_MASK,	COM,		{ RA, RS, RBS } },
 { "or",      XRC(31,444,0), X_MASK,	COM,		{ RA, RS, RB } },
 { "mr.",     XRC(31,444,1), X_MASK,	COM,		{ RA, RS, RBS } },
