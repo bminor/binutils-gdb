@@ -14827,6 +14827,10 @@ static const struct asm_opcode insns[] =
  tCE(push,	92d0000, push,     1, (REGLST),	     push_pop, t_push_pop),
  tCE(pop,	8bd0000, pop,	   1, (REGLST),	     push_pop, t_push_pop),
 
+ /* These may simplify to neg.  */
+ TCE(rsb,	0600000, ebc00000, 3, (RR, oRR, SH), arit, t_rsb),
+ TC3(rsbs,	0700000, ebd00000, 3, (RR, oRR, SH), arit, t_rsb),
+
 #undef THUMB_VARIANT
 #define THUMB_VARIANT &arm_ext_v6
  TCE(cpy,       1a00000, 4600,     2, (RR, RR),      rd_rm, t_cpy),
@@ -14834,8 +14838,6 @@ static const struct asm_opcode insns[] =
  /* V1 instructions with no Thumb analogue prior to V6T2.  */
 #undef THUMB_VARIANT
 #define THUMB_VARIANT &arm_ext_v6t2
- TCE(rsb,	0600000, ebc00000, 3, (RR, oRR, SH), arit, t_rsb),
- TC3(rsbs,	0700000, ebd00000, 3, (RR, oRR, SH), arit, t_rsb),
  TCE(teq,	1300000, ea900f00, 2, (RR, SH),      cmp,  t_mvn_tst),
  TC3w(teqs,	1300000, ea900f00, 2, (RR, SH),      cmp,  t_mvn_tst),
   CL(teqp,	130f000,           2, (RR, SH),      cmp),
