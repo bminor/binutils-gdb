@@ -782,7 +782,8 @@ i386-dis.lo: i386-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h sysdep.h config.h \
   $(INCDIR)/ansidecl.h opintl.h $(INCDIR)/opcode/i386.h
 i386-opc.lo: i386-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  i386-opc.h $(INCDIR)/opcode/i386.h
+  $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h i386-opc.h \
+  $(INCDIR)/opcode/i386.h
 i860-dis.lo: i860-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/opcode/i860.h
 i960-dis.lo: i960-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
