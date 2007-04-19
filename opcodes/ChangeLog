@@ -1,5 +1,11 @@
 2007-04-19  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
+2007-04-19  Alan Modra  <amodra@bigpond.net.au>
+
 	* ppc-opc.c (powerpc_opcodes): Add cctpl, cctpm, cctph, db8cyc,
 	db10cyc, db12cyc, db16cyc.
 
