@@ -8,8 +8,6 @@ binemul.h
 bucomm.c
 bucomm.h
 budbg.h
-budemang.c
-budemang.h
 coffdump.c
 coffgrok.c
 coffgrok.h

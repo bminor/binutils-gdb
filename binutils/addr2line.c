@@ -37,7 +37,6 @@
 #include "libiberty.h"
 #include "demangle.h"
 #include "bucomm.h"
-#include "budemang.h"
 
 static bfd_boolean unwind_inlines;	/* -i, unwind inlined functions. */
 static bfd_boolean with_functions;	/* -f, show function names.  */
@@ -224,8 +223,9 @@ translate_addresses (bfd *abfd, asection *section)
 		  name = "??";
 		else if (do_demangle)
 		  {
-		    alloc = demangle (abfd, name);
-		    name = alloc;
+		    alloc = bfd_demangle (abfd, name, DMGL_ANSI | DMGL_PARAMS);
+		    if (alloc != NULL)
+		      name = alloc;
 		  }
 
 		printf ("%s\n", name);

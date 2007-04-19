@@ -1,3 +1,18 @@
+2007-04-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* budemang.c: Delete.
+	* budemang.h: Delete.
+	* addr2line.c (translate_addresses): Call bfd_demangle rather than
+	demangle.
+	* nm.c (print_symname): Likewise.
+	* objdump.c (objdump_print_symname, dump_symbols): Likewise.
+	(dump_bfd): Likewise.
+	* prdbg.c (struct pr_handle <demangler>): Add int param.
+	(tg_variable, tg_start_function): Adjust demangler calls.
+	* Makefile.am: Remove mention of budemang.[ch].  Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2007-04-14  Steve Ellcey  <sje@cup.hp.com>
 
 	* Makefile.am: Add ACLOCAL_AMFLAGS.

@@ -1,5 +1,5 @@
 /* prdbg.c -- Print out generic debugging information.
-   Copyright 1995, 1996, 1999, 2002, 2003, 2004, 2006
+   Copyright 1995, 1996, 1999, 2002, 2003, 2004, 2006, 2007
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
    Tags style generation written by Salvador E. Tropea <set@computer.org>.
@@ -30,6 +30,7 @@
 #include "bfd.h"
 #include "bucomm.h"
 #include "libiberty.h"
+#include "demangle.h"
 #include "debug.h"
 #include "budbg.h"
 
@@ -53,7 +54,7 @@ struct pr_handle
   /* The symbols table for this BFD.  */
   asymbol **syms;
   /* Pointer to a function to demangle symbols.  */
-  char *(*demangler) (bfd *, const char *);
+  char *(*demangler) (bfd *, const char *, int);
 };
 
 /* The type stack.  */
@@ -2536,7 +2537,7 @@ tg_variable (void *p, const char *name, enum debug_var_kind kind,
   dname = name;
   if (info->demangler)
     {
-      dname = info->demangler (info->abfd, name);
+      dname = info->demangler (info->abfd, name, DMGL_ANSI | DMGL_PARAMS);
       if (strcmp (name, dname) == 0)
 	{
 	  free ((char *) dname);
@@ -2608,7 +2609,7 @@ tg_start_function (void *p, const char *name, bfd_boolean global)
   dname = name;
   if (info->demangler)
     {
-      dname = info->demangler (info->abfd, name);
+      dname = info->demangler (info->abfd, name, DMGL_ANSI | DMGL_PARAMS);
       if (strcmp (name, dname) == 0)
 	{
 	  free ((char *) dname);

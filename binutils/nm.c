@@ -23,7 +23,6 @@
 #include "bfd.h"
 #include "progress.h"
 #include "bucomm.h"
-#include "budemang.h"
 #include "getopt.h"
 #include "aout/stab_gnu.h"
 #include "aout/ranlib.h"
@@ -335,11 +334,14 @@ print_symname (const char *format, const char *name, bfd *abfd)
 {
   if (do_demangle && *name)
     {
-      char *res = demangle (abfd, name);
+      char *res = bfd_demangle (abfd, name, DMGL_ANSI | DMGL_PARAMS);
 
-      printf (format, res);
-      free (res);
-      return;
+      if (res != NULL)
+	{
+	  printf (format, res);
+	  free (res);
+	  return;
+	}
     }
 
   printf (format, name);

@@ -52,7 +52,6 @@
 #include "progress.h"
 #include "bucomm.h"
 #include "dwarf.h"
-#include "budemang.h"
 #include "getopt.h"
 #include "safe-ctype.h"
 #include "dis-asm.h"
@@ -649,8 +648,9 @@ objdump_print_symname (bfd *abfd, struct disassemble_info *info,
   if (do_demangle && name[0] != '\0')
     {
       /* Demangle the name.  */
-      alloc = demangle (abfd, name);
-      name = alloc;
+      alloc = bfd_demangle (abfd, name, DMGL_ANSI | DMGL_PARAMS);
+      if (alloc != NULL)
+	name = alloc;
     }
 
   if (info != NULL)
@@ -2514,12 +2514,16 @@ dump_symbols (bfd *abfd ATTRIBUTE_UNUSED, bfd_boolean dynamic)
 	      /* If we want to demangle the name, we demangle it
 		 here, and temporarily clobber it while calling
 		 bfd_print_symbol.  FIXME: This is a gross hack.  */
-	      alloc = demangle (cur_bfd, name);
-	      (*current)->name = alloc;
+	      alloc = bfd_demangle (cur_bfd, name, DMGL_ANSI | DMGL_PARAMS);
+	      if (alloc != NULL)
+		(*current)->name = alloc;
 	      bfd_print_symbol (cur_bfd, stdout, *current,
 				bfd_print_symbol_all);
-	      (*current)->name = name;
-	      free (alloc);
+	      if (alloc != NULL)
+		{
+		  (*current)->name = name;
+		  free (alloc);
+		}
 	    }
 	  else
 	    bfd_print_symbol (cur_bfd, stdout, *current,
@@ -2825,8 +2829,9 @@ dump_bfd (bfd *abfd)
       dhandle = read_debugging_info (abfd, syms, symcount);
       if (dhandle != NULL)
 	{
-	  if (! print_debugging_info (stdout, dhandle, abfd, syms, demangle,
-	      dump_debugging_tags ? TRUE : FALSE))
+	  if (!print_debugging_info (stdout, dhandle, abfd, syms,
+				     bfd_demangle,
+				     dump_debugging_tags ? TRUE : FALSE))
 	    {
 	      non_fatal (_("%s: printing debugging information failed"),
 			 bfd_get_filename (abfd));
