@@ -4902,6 +4902,8 @@ bfd_vma bfd_emul_get_commonpagesize (const char *);
 
 void bfd_emul_set_commonpagesize (const char *, bfd_vma);
 
+char *bfd_demangle (bfd *, const char *, int);
+
 /* Extracted from archive.c.  */
 symindex bfd_get_next_mapent
    (bfd *abfd, symindex previous, carsym **sym);

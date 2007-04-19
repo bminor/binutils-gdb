@@ -993,10 +993,11 @@ archive.lo: archive.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
 archures.lo: archures.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(INCDIR)/safe-ctype.h
 bfd.lo: bfd.c bfdver.h $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/safe-ctype.h $(INCDIR)/bfdlink.h $(INCDIR)/hashtab.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/sym.h libcoff.h \
-  libecoff.h $(INCDIR)/coff/ecoff.h elf-bfd.h $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h
+  $(INCDIR)/demangle.h $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/hashtab.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/sym.h libcoff.h libecoff.h $(INCDIR)/coff/ecoff.h \
+  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h
 bfdio.lo: bfdio.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
 bfdwin.lo: bfdwin.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
 cache.lo: cache.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
