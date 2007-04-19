@@ -1,5 +1,10 @@
 2007-04-19  Paul Brook  <paul@codesourcery.com>
 
+	* config/tc-arm.c (md_assemble): Only allow 16-bit instructions on
+	Thumb-1.  Add sanity check for bogus relaxations.
+
+2007-04-19  Paul Brook  <paul@codesourcery.com>
+
 	* config/tc-arm.c (insns): Allow rsb and rsbs on Thumb-1.
 
 2007-04-19  Alan Modra  <amodra@bigpond.net.au>

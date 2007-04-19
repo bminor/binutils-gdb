@@ -14110,6 +14110,14 @@ md_assemble (char *str)
 	  return;
 	}
 
+      if (!ARM_CPU_HAS_FEATURE (variant, arm_ext_v6t2) && !inst.size_req)
+	{
+	  /* Implicit require narrow instructions on Thumb-1.  This avoids
+	     relaxation accidentally introducing Thumb-2 instructions.  */
+	  if (opcode->tencode != do_t_blx && opcode->tencode != do_t_branch23)
+	    inst.size_req = 2;
+	}
+
       /* Check conditional suffixes.  */
       if (current_it_mask)
 	{
@@ -14151,6 +14159,11 @@ md_assemble (char *str)
 	      return;
 	    }
 	}
+
+      /* Something has gone badly wrong if we try to relax a fixed size
+         instruction.  */
+      assert (inst.size_req == 0 || !inst.relax);
+
       ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used,
 			      *opcode->tvariant);
       /* Many Thumb-2 instructions also have Thumb-1 variants, so explicitly

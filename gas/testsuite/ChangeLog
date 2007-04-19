@@ -1,3 +1,8 @@
+2007-04-19  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb1_unified.d: New test.
+	* gas/arm/thumb1_unified.s: New test.
+
 2007-04-19  Nathan Froyd <froydnj@codesourcery.com>
 
 	* gas/ppc/booke.s: Add tlbsx, tlbsxe.
