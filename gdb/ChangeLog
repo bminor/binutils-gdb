@@ -1,3 +1,8 @@
+2007-04-19  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* win32-nat.c (win32_detach): Remove delete_command call.
+	Resume inferior with win32_resume instead of win32_continue.
+
 2007-04-19  Jerome Guitton  <guitton@adacore.com>
 
 	* ser-mingw.c (fd_is_file): New function.

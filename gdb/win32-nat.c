@@ -1775,8 +1775,9 @@ win32_detach (char *args, int from_tty)
 
   if (has_detach_ability ())
     {
-      delete_command (NULL, 0);
-      win32_continue (DBG_CONTINUE, -1);
+      ptid_t ptid = {-1};
+      win32_resume (ptid, 0, TARGET_SIGNAL_0);
+
       if (!DebugActiveProcessStop (current_event.dwProcessId))
 	{
 	  error (_("Can't detach process %lu (error %lu)"),
