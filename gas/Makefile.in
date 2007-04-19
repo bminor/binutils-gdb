@@ -1181,10 +1181,9 @@ DEPTC_sparc_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
 
 DEPTC_spu_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-spu.h dwarf2dbg.h \
-  $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
-  $(INCDIR)/opcode/spu.h $(INCDIR)/opcode/spu-insns.h \
-  dwarf2dbg.h $(INCDIR)/opcode/spu-insns.h
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-spu.h $(INCDIR)/opcode/spu.h \
+  $(INCDIR)/opcode/spu-insns.h dwarf2dbg.h $(INCDIR)/safe-ctype.h \
+  subsegs.h $(INCDIR)/obstack.h dwarf2dbg.h $(INCDIR)/opcode/spu-insns.h
 
 DEPTC_tic30_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-tic30.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h \
@@ -1636,9 +1635,10 @@ DEPOBJ_sparc_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
 
 DEPOBJ_spu_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-spu.h dwarf2dbg.h \
-  $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
-  $(INCDIR)/obstack.h struc-symbol.h dwarf2dbg.h $(INCDIR)/aout/aout64.h
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-spu.h $(INCDIR)/opcode/spu.h \
+  $(INCDIR)/opcode/spu-insns.h dwarf2dbg.h $(INCDIR)/safe-ctype.h \
+  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/obstack.h struc-symbol.h \
+  dwarf2dbg.h $(INCDIR)/aout/aout64.h
 
 DEPOBJ_tic30_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-tic30.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
@@ -2031,9 +2031,9 @@ DEP_sparc_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
 
 DEP_spu_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-spu.h dwarf2dbg.h \
-  $(srcdir)/config/obj-coff.h $(INCDIR)/coff/internal.h \
-  $(BFDDIR)/libcoff.h
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-spu.h $(INCDIR)/opcode/spu.h \
+  $(INCDIR)/opcode/spu-insns.h dwarf2dbg.h $(srcdir)/config/obj-coff.h \
+  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h
 
 DEP_tic30_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-tic30.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h
@@ -2110,15 +2110,15 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
-	      echo ' cd $(srcdir) && $(AUTOMAKE) --cygnus '; \
-	      cd $(srcdir) && $(AUTOMAKE) --cygnus  \
+	      echo ' cd $(srcdir) && $(AUTOMAKE) --foreign '; \
+	      cd $(srcdir) && $(AUTOMAKE) --foreign  \
 		&& exit 0; \
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --cygnus  Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --cygnus  Makefile
+	  $(AUTOMAKE) --foreign  Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \

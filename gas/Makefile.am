@@ -1369,10 +1369,9 @@ DEPTC_sparc_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   dwarf2dbg.h
 DEPTC_spu_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-spu.h dwarf2dbg.h \
-  $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
-  $(INCDIR)/opcode/spu.h $(INCDIR)/opcode/spu-insns.h \
-  dwarf2dbg.h $(INCDIR)/opcode/spu-insns.h
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-spu.h $(INCDIR)/opcode/spu.h \
+  $(INCDIR)/opcode/spu-insns.h dwarf2dbg.h $(INCDIR)/safe-ctype.h \
+  subsegs.h $(INCDIR)/obstack.h dwarf2dbg.h $(INCDIR)/opcode/spu-insns.h
 DEPTC_tic30_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-tic30.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h \
   $(INCDIR)/opcode/tic30.h
@@ -1745,9 +1744,10 @@ DEPOBJ_sparc_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/obstack.h struc-symbol.h dwarf2dbg.h $(INCDIR)/aout/aout64.h
 DEPOBJ_spu_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-spu.h dwarf2dbg.h \
-  $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
-  $(INCDIR)/obstack.h struc-symbol.h dwarf2dbg.h $(INCDIR)/aout/aout64.h
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-spu.h $(INCDIR)/opcode/spu.h \
+  $(INCDIR)/opcode/spu-insns.h dwarf2dbg.h $(INCDIR)/safe-ctype.h \
+  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/obstack.h struc-symbol.h \
+  dwarf2dbg.h $(INCDIR)/aout/aout64.h
 DEPOBJ_tic30_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-tic30.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/obstack.h
@@ -2061,9 +2061,9 @@ DEP_sparc_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/coff/sparc.h $(INCDIR)/coff/external.h $(BFDDIR)/libcoff.h
 DEP_spu_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-spu.h dwarf2dbg.h \
-  $(srcdir)/config/obj-coff.h $(INCDIR)/coff/internal.h \
-  $(BFDDIR)/libcoff.h
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-spu.h $(INCDIR)/opcode/spu.h \
+  $(INCDIR)/opcode/spu-insns.h dwarf2dbg.h $(srcdir)/config/obj-coff.h \
+  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h
 DEP_tic30_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-tic30.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h
 DEP_tic30_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-tic30.h \
