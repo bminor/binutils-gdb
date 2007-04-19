@@ -581,12 +581,6 @@ core_create_function_syms ()
       else
 	max_vma = MAX (symtab.limit->addr, max_vma);
 
-      /* If we see "main" without an initial '_', we assume names
-	 are *not* prefixed by '_'.  */
-      if (symtab.limit->name[0] == 'm' && discard_underscores
-	  && strcmp (symtab.limit->name, "main") == 0)
-	discard_underscores = 0;
-
       DBG (AOUTDEBUG, printf ("[core_create_function_syms] %ld %s 0x%lx\n",
 			      (long) (symtab.limit - symtab.base),
 			      symtab.limit->name,
@@ -745,12 +739,6 @@ core_create_line_syms ()
 	}
 
       prev = ltab.limit;
-
-      /* If we see "main" without an initial '_', we assume names
-	 are *not* prefixed by '_'.  */
-      if (ltab.limit->name[0] == 'm' && discard_underscores
-	  && strcmp (ltab.limit->name, "main") == 0)
-	discard_underscores = 0;
 
       DBG (AOUTDEBUG, printf ("[core_create_line_syms] %lu %s 0x%lx\n",
 			      (unsigned long) (ltab.limit - ltab.base),

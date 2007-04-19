@@ -226,7 +226,7 @@ corefile.o: corefile.c $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
   gprof.h $(BFDDIR)/sysdep.h $(INCDIR)/ansidecl.h ../bfd/config.h \
   $(INCDIR)/fopen-same.h $(INCDIR)/filenames.h ../bfd/bfd.h \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h gconfig.h search_list.h \
-  source.h symtab.h corefile.h
+  source.h symtab.h hist.h corefile.h
 gmon_io.o: gmon_io.c gprof.h $(BFDDIR)/sysdep.h $(INCDIR)/ansidecl.h \
   ../bfd/config.h $(INCDIR)/fopen-same.h $(INCDIR)/filenames.h \
   ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
@@ -270,13 +270,13 @@ sym_ids.o: sym_ids.c $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
   ../bfd/config.h $(INCDIR)/fopen-same.h $(INCDIR)/filenames.h \
   ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
   gconfig.h search_list.h source.h symtab.h cg_arcs.h \
-  sym_ids.h
+  sym_ids.h corefile.h
 utils.o: utils.c $(INCDIR)/demangle.h $(INCDIR)/libiberty.h \
   $(INCDIR)/ansidecl.h gprof.h $(BFDDIR)/sysdep.h $(INCDIR)/ansidecl.h \
   ../bfd/config.h $(INCDIR)/fopen-same.h $(INCDIR)/filenames.h \
   ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
   gconfig.h search_list.h source.h symtab.h cg_arcs.h \
-  utils.h
+  utils.h corefile.h
 i386.o: i386.c gprof.h $(BFDDIR)/sysdep.h $(INCDIR)/ansidecl.h \
   ../bfd/config.h $(INCDIR)/fopen-same.h $(INCDIR)/filenames.h \
   ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \

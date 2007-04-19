@@ -1,3 +1,16 @@
+2007-04-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* corefile.c (core_create_function_syms, core_create_line_syms): Don't
+	set discard_underscores.
+	* gprof.c (discard_underscores): Delete.
+	* gprof.h (discard_underscores): Delete.
+	* sym_ids.c (match): Use bfd_get_symbol_leading_char to check for
+	leading underscores.
+	* utils.c (print_name_only): Call bfd_demangle rather than
+	cplus_demangle.
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2007-04-14  Steve Ellcey  <sje@cup.hp.com>
 
 	* Makefile.am: Add ACLOCAL_AMFLAGS.

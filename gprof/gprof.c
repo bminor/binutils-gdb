@@ -60,7 +60,6 @@ int output_style = 0;
 int output_width = 80;
 bfd_boolean bsd_style_output = FALSE;
 bfd_boolean demangle = TRUE;
-bfd_boolean discard_underscores = TRUE;
 bfd_boolean ignore_direct_calls = FALSE;
 bfd_boolean ignore_static_funcs = FALSE;
 bfd_boolean ignore_zeros = TRUE;
