@@ -477,14 +477,11 @@ info_assert (const char *file, unsigned int line)
 void
 minfo (const char *fmt, ...)
 {
-  if (config.map_file != NULL)
-    {
-      va_list arg;
+  va_list arg;
 
-      va_start (arg, fmt);
-      vfinfo (config.map_file, fmt, arg, FALSE);
-      va_end (arg);
-    }
+  va_start (arg, fmt);
+  vfinfo (config.map_file, fmt, arg, FALSE);
+  va_end (arg);
 }
 
 void
