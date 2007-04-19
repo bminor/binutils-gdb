@@ -26,7 +26,7 @@
 
 	* i386-opc.c (i386_optab): Add SSE4.2 opcodes.
 
-	* gas/config/tc-i386.h (CpuSSE4_2): New.
+	* i386-opc.h (CpuSSE4_2): New.
 	(CpuSSE4): Likewise.
 	(CpuUnknownFlags): Add CpuSSE4_2.
 
