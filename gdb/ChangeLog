@@ -1,3 +1,9 @@
+2007-04-19  Jerome Guitton  <guitton@adacore.com>
+
+	* ser-mingw.c (fd_is_file): New function.
+	(file_select_thread): New function.
+	(ser_console_wait_handle): Add special handling for files.
+
 2007-04-18  Denis Pilat  <denis.pilat@st.com>
 
 	* dwarf2read.c (read_subrange_type): Use DW_ATE_signed default type

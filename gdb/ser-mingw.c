@@ -453,6 +453,15 @@ fd_is_pipe (int fd)
     return 0;
 }
 
+static int
+fd_is_file (int fd)
+{
+  if (GetFileType ((HANDLE) _get_osfhandle (fd)) == FILE_TYPE_DISK)
+    return 1;
+  else
+    return 0;
+}
+
 static DWORD WINAPI
 pipe_select_thread (void *arg)
 {
@@ -501,6 +510,42 @@ pipe_select_thread (void *arg)
     }
 }
 
+static DWORD WINAPI
+file_select_thread (void *arg)
+{
+  struct serial *scb = arg;
+  struct ser_console_state *state;
+  int event_index;
+  HANDLE h;
+
+  state = scb->state;
+  h = (HANDLE) _get_osfhandle (scb->fd);
+
+  while (1)
+    {
+      HANDLE wait_events[2];
+      DWORD n_avail;
+
+      SetEvent (state->have_stopped);
+
+      wait_events[0] = state->start_select;
+      wait_events[1] = state->exit_select;
+
+      if (WaitForMultipleObjects (2, wait_events, FALSE, INFINITE) != WAIT_OBJECT_0)
+	return 0;
+
+      ResetEvent (state->have_stopped);
+
+      if (SetFilePointer (h, 0, NULL, FILE_CURRENT) == INVALID_SET_FILE_POINTER)
+	{
+	  SetEvent (state->except_event);
+	  continue;
+	}
+
+      SetEvent (state->read_event);
+    }
+}
+
 static void
 ser_console_wait_handle (struct serial *scb, HANDLE *read, HANDLE *except)
 {
@@ -512,7 +557,7 @@ ser_console_wait_handle (struct serial *scb, HANDLE *read, HANDLE *except)
       int is_tty;
 
       is_tty = isatty (scb->fd);
-      if (!is_tty && !fd_is_pipe (scb->fd))
+      if (!is_tty && !fd_is_file (scb->fd) && !fd_is_pipe (scb->fd))
 	{
 	  *read = NULL;
 	  *except = NULL;
@@ -541,8 +586,11 @@ ser_console_wait_handle (struct serial *scb, HANDLE *read, HANDLE *except)
       if (is_tty)
 	state->thread = CreateThread (NULL, 0, console_select_thread, scb, 0,
 				      &threadId);
-      else
+      else if (fd_is_pipe (scb->fd))
 	state->thread = CreateThread (NULL, 0, pipe_select_thread, scb, 0,
+				      &threadId);
+      else
+	state->thread = CreateThread (NULL, 0, file_select_thread, scb, 0,
 				      &threadId);
     }
 
