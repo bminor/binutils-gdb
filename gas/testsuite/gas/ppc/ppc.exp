@@ -2,6 +2,19 @@
 # Some PowerPC tests
 #
 
+proc run_list_test { name opts } {
+    global srcdir subdir
+    set testname "ppc $name"
+    set file $srcdir/$subdir/$name
+    gas_run ${name}.s $opts ">&dump.out"
+    if { [regexp_diff "dump.out" "${file}.l"] } then {
+	fail $testname
+	verbose "output is [file_contents "dump.out"]" 2
+	return
+    }
+    pass $testname
+}
+
 # These tests are currently ELF specific, only because nobody has
 # converted them to look for XCOFF relocations.
 
@@ -12,6 +25,7 @@ if { [istarget powerpc64*-*-*] || [istarget *-*-elf64*]} then {
     run_dump_test "test1elf64"
     run_dump_test "power4"
     run_dump_test "cell"
+    run_list_test "range64" "-a64"
 } elseif { [istarget powerpc*-*aix*] } then {
     run_dump_test "test1xcoff32"
 } elseif { [istarget powerpc*-*-*bsd*] \
@@ -39,5 +53,6 @@ if { [istarget powerpc*-*-*] } then {
 	run_dump_test "altivec"
 	run_dump_test "booke"
 	run_dump_test "e500"
+	run_list_test "range" "-a32"
     }
 }

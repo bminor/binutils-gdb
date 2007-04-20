@@ -1,3 +1,11 @@
+2007-04-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/ppc/range64.s: New.
+	* gas/ppc/range64.l: New.
+	* gas/ppc/range.s: New.
+	* gas/ppc/range.l: New.
+	* gas/ppc/ppc.exp (run_list_test): New.  Use to run new tests.
+
 2007-04-20  Richard Earnshaw  <rearnsha@arm.com>
 
 	* gas/arm/mapshort.s: Add a small .data section.
