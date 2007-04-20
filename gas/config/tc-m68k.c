@@ -173,39 +173,43 @@ static const enum m68k_register m68060_ctrl[] = {
 };
 static const enum m68k_register mcf_ctrl[] = {
   CACR, TC, ACR0, ACR1, ACR2, ACR3, VBR, ROMBAR,
-  RAMBAR0, RAMBAR1, MBAR,
+  RAMBAR0, RAMBAR1, RAMBAR, MBAR,
+  0
+};
+static const enum m68k_register mcf5206_ctrl[] = {
+  CACR, ACR0, ACR1,  VBR, RAMBAR0, RAMBAR_ALT, MBAR,
   0
 };
 static const enum m68k_register mcf5208_ctrl[] = {
-  CACR, ACR0, ACR1, VBR, RAMBAR1,
+  CACR, ACR0, ACR1, VBR,  RAMBAR, RAMBAR1,
   0
 };
 static const enum m68k_register mcf5210a_ctrl[] = {
-  VBR, CACR, ACR0, ACR1, ROMBAR, RAMBAR, MBAR,
+  VBR, CACR, ACR0, ACR1, ROMBAR, RAMBAR, RAMBAR1, MBAR,
   0
 };
 static const enum m68k_register mcf5213_ctrl[] = {
-  VBR, RAMBAR, FLASHBAR,
+  VBR, RAMBAR, RAMBAR1, FLASHBAR,
   0
 };
 static const enum m68k_register mcf5216_ctrl[] = {
-  VBR, CACR, ACR0, ACR1, FLASHBAR, RAMBAR,
+  VBR, CACR, ACR0, ACR1, FLASHBAR, RAMBAR, RAMBAR1,
   0
 };
 static const enum m68k_register mcf52235_ctrl[] = {
-  VBR, FLASHBAR, RAMBAR,
+  VBR, FLASHBAR, RAMBAR, RAMBAR1,
   0
 };
 static const enum m68k_register mcf5225_ctrl[] = {
-  VBR, CACR, ACR0, ACR1, FLASHBAR, RAMBAR, MBAR,
+  VBR, CACR, ACR0, ACR1, FLASHBAR, RAMBAR, MBAR, RAMBAR1,
   0
 };
 static const enum m68k_register mcf5235_ctrl[] = {
-  VBR, CACR, ACR0, ACR1, RAMBAR,
+  VBR, CACR, ACR0, ACR1, RAMBAR, RAMBAR1,
   0
 };
 static const enum m68k_register mcf5249_ctrl[] = {
-  VBR, CACR, ACR0, ACR1, RAMBAR0, RAMBAR1, MBAR, MBAR2,
+  VBR, CACR, ACR0, ACR1, RAMBAR0, RAMBAR1, RAMBAR, MBAR, MBAR2,
   0
 };
 static const enum m68k_register mcf5250_ctrl[] = {
@@ -213,27 +217,31 @@ static const enum m68k_register mcf5250_ctrl[] = {
   0
 };
 static const enum m68k_register mcf5271_ctrl[] = {
-  VBR, CACR, ACR0, ACR1, RAMBAR,
+  VBR, CACR, ACR0, ACR1, RAMBAR, RAMBAR1,
   0
 };
 static const enum m68k_register mcf5272_ctrl[] = {
-  VBR, CACR, ACR0, ACR1, ROMBAR, RAMBAR, MBAR,
+  VBR, CACR, ACR0, ACR1, ROMBAR, RAMBAR_ALT, RAMBAR0, MBAR,
   0
 };
 static const enum m68k_register mcf5275_ctrl[] = {
-  VBR, CACR, ACR0, ACR1, RAMBAR,
+  VBR, CACR, ACR0, ACR1, RAMBAR, RAMBAR1,
   0
 };
 static const enum m68k_register mcf5282_ctrl[] = {
-  VBR, CACR, ACR0, ACR1, FLASHBAR, RAMBAR,
+  VBR, CACR, ACR0, ACR1, FLASHBAR, RAMBAR, RAMBAR1,
+  0
+};
+static const enum m68k_register mcf5307_ctrl[] = {
+  CACR, ACR0, ACR1,  VBR, RAMBAR0, RAMBAR_ALT, MBAR,
   0
 };
 static const enum m68k_register mcf5329_ctrl[] = {
-  VBR, CACR, ACR0, ACR1, RAMBAR,
+  VBR, CACR, ACR0, ACR1, RAMBAR, RAMBAR1,
   0
 };
 static const enum m68k_register mcf5373_ctrl[] = {
-  VBR, CACR, ACR0, ACR1, RAMBAR,
+  VBR, CACR, ACR0, ACR1, RAMBAR, RAMBAR1,
   0
 };
 static const enum m68k_register mcfv4e_ctrl[] = {
@@ -249,7 +257,7 @@ static const enum m68k_register mcfv4e_ctrl[] = {
   TC /* ASID */, BUSCR /* MMUBAR */,
   ITT0 /* ACR0 */, ITT1 /* ACR1 */, DTT0 /* ACR2 */, DTT1 /* ACR3 */,
   MBAR1 /* MBAR */, MBAR2 /* SECMBAR */, MBAR0 /* SECMBAR */,
-  ROMBAR /* ROMBAR0 */,
+  ROMBAR /* ROMBAR0 */, RAMBAR /* RAMBAR1 */,
   0
 };
 static const enum m68k_register mcf5475_ctrl[] = {
@@ -258,7 +266,7 @@ static const enum m68k_register mcf5475_ctrl[] = {
   /* Legacy names */
   TC /* ASID */, BUSCR /* MMUBAR */,
   ITT0 /* ACR0 */, ITT1 /* ACR1 */, DTT0 /* ACR2 */, DTT1 /* ACR3 */,
-  MBAR1 /* MBAR */, ROMBAR /* ROMBAR0 */,
+  MBAR1 /* MBAR */, RAMBAR /* RAMBAR1 */,
   0
 };
 static const enum m68k_register mcf5485_ctrl[] = {
@@ -267,7 +275,7 @@ static const enum m68k_register mcf5485_ctrl[] = {
   /* Legacy names */
   TC /* ASID */, BUSCR /* MMUBAR */,
   ITT0 /* ACR0 */, ITT1 /* ACR1 */, DTT0 /* ACR2 */, DTT1 /* ACR3 */,
-  MBAR1 /* MBAR */, ROMBAR /* ROMBAR0 */,
+  MBAR1 /* MBAR */, RAMBAR /* RAMBAR1 */,
   0
 };
 static const enum m68k_register fido_ctrl[] = {
@@ -530,9 +538,9 @@ static const struct m68k_cpu m68k_cpus[] =
   {mcfisa_a,					mcf_ctrl, "5200", 0},
   {mcfisa_a,					mcf_ctrl, "5202", 1},
   {mcfisa_a,					mcf_ctrl, "5204", 1},
-  {mcfisa_a,					mcf_ctrl, "5206", 1},
+  {mcfisa_a,					mcf5206_ctrl, "5206", 1},
   
-  {mcfisa_a|mcfhwdiv|mcfmac,			mcf_ctrl, "5206e", 0},
+  {mcfisa_a|mcfhwdiv|mcfmac,			mcf5206_ctrl, "5206e", 0},
   
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5208_ctrl, "5207", -1},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5208_ctrl, "5208", 0},
@@ -578,7 +586,7 @@ static const struct m68k_cpu m68k_cpus[] =
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5282_ctrl, "5282", -1},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5282_ctrl, "528x", 0},
   
-  {mcfisa_a|mcfhwdiv|mcfmac,			mcf_ctrl, "5307", 0},
+  {mcfisa_a|mcfhwdiv|mcfmac,			mcf5307_ctrl, "5307", 0},
   
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5329_ctrl, "5327", -1},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5329_ctrl, "5328", -1},
@@ -1743,8 +1751,18 @@ m68k_ip (char *instring)
 		      const enum m68k_register *rp;
 		      
 		      for (rp = control_regs; *rp; rp++)
-			if (*rp == opP->reg)
-			  break;
+			{
+			  if (*rp == opP->reg)
+			    break;
+			  /* In most CPUs RAMBAR refers to control reg
+	     	 	     c05 (RAMBAR1), but a few CPUs have it
+	     	 	     refer to c04 (RAMBAR0).  */
+			  else if (*rp == RAMBAR_ALT && opP->reg == RAMBAR)
+			    {
+			      opP->reg = RAMBAR_ALT;
+			      break;
+			    }
+			}
 		      if (*rp == 0)
 			losing++;
 		    }
@@ -3075,6 +3093,7 @@ m68k_ip (char *instring)
               break;
 	    case FLASHBAR:
 	    case RAMBAR0:
+	    case RAMBAR_ALT:
 	      tmpreg = 0xC04;
 	      break;
 	    case RAMBAR:

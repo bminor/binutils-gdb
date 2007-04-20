@@ -1,3 +1,9 @@
+2007-04-20  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gas/m68k/ctrl-1.d, gas/m68k/ctrl-1.s: New.
+	* gas/m68k/ctrl-2.d, gas/m68k/ctrl-2.s: New.
+	* gas/m68k/all.exp: Add them.
+
 2007-04-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/ppc/range64.s: New.

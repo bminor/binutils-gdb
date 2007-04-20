@@ -1,3 +1,8 @@
+2007-04-20  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* m68k-dis.c (print_insn_arg): Show c04 as rambar0 and c05 as
+	rambar1.
+
 2007-04-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* ppc-dis.c (print_insn_powerpc): Adjust for struct powerpc_operand

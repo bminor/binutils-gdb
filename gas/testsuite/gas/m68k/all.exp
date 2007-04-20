@@ -52,6 +52,9 @@ if { [istarget m68*-*-*] || [istarget fido*-*-*] } then {
     run_dump_test arch-cpu-1
     run_dump_test cpu32
 
+    run_dump_test ctrl-1
+    run_dump_test ctrl-2
+
     set testname "68000 operands"
     gas_run "operands.s" "-m68000" "2>err.out"
     if ![string match "child process exited abnormally" $comp_output] then {

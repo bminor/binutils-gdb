@@ -1,3 +1,17 @@
+2007-04-20  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* config/m68k-parse.h (RAMBAR_ALT): New.
+	* config/tc-m68k.c (mcf5206_ctrl, mcf5307_ctrl): New.
+	(mcf_ctrl, mcf5208_ctrl, mcf5210a_ctrl, mcf5213_ctrl, mcf52235_ctrl,
+	mcf5225_ctrl, mcf5235_ctrl, mcf5271_ctrl, mcf5275_ctrl,
+	mcf5282_ctrl, mcf5329_ctrl, mcf5373_ctrl, mcfv4e_ctrl,
+	mcf5475_ctrl, mcf5485_ctrl): Add RAMBAR synonym for
+	RAMBAR1.
+	(mcf5272_ctrl): Add RAMBAR0, replace add RAMBAR with RAMBAR_ALT.
+	(m68k_cpus): Adjust 5206, 5206e & 5307 entries.
+	(m68k_ip) <Case J>: Detect when RAMBAR_ALT should be used.  Add it
+	to control register mapping.
+
 2007-04-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* messages.c (as_internal_value_out_of_range): Fix typo in

@@ -645,7 +645,9 @@ print_insn_arg (const char *d,
              {"%dtt0",0x006}, {"%dtt1",0x007}, {"%buscr",0x008},
 	     {"%usp", 0x800}, {"%vbr", 0x801}, {"%caar", 0x802},
 	     {"%msp", 0x803}, {"%isp", 0x804},
-	     {"%flashbar", 0xc04}, {"%rambar", 0xc05}, /* mcf528x added these.  */
+	     /* reg c04 is sometimes called flashbar or rambar.
+		rec c05 is also sometimes called rambar.  */
+	     {"%rambar0", 0xc04}, {"%rambar1", 0xc05},
 
 	     /* Should we be calling this psr like we do in case 'Y'?  */
 	     {"%mmusr",0x805},

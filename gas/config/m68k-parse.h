@@ -113,6 +113,8 @@ enum m68k_register
   BUSCR,			/* 68060 added these.  */
   PCR,
   ROMBAR,			/* mcf5200 added these.  */
+  RAMBAR_ALT,			/* Some CF chips have RAMBAR using
+				   RAMBAR0's number */
   RAMBAR0,
   RAMBAR1,
   MMUBAR,			/* mcfv4e added these.  */
