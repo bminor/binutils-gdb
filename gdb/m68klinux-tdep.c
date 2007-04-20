@@ -37,6 +37,9 @@
 #include "frame-unwind.h"
 #include "glibc-tdep.h"
 #include "solib-svr4.h"
+#include "auxv.h"
+#include "observer.h"
+#include "elf/common.h"
 
 /* Offsets (in target ints) into jmp_buf.  */
 
@@ -112,7 +115,7 @@ static int m68k_linux_sigcontext_reg_offset[M68K_NUM_REGS] =
   -1,				/* %a5 */
   -1,				/* %fp */
   1 * 4,			/* %sp */
-  5 * 4 + 2,			/* %sr */
+  6 * 4,			/* %sr */
   6 * 4 + 2,			/* %pc */
   8 * 4,			/* %fp0 */
   11 * 4,			/* %fp1 */
@@ -125,6 +128,39 @@ static int m68k_linux_sigcontext_reg_offset[M68K_NUM_REGS] =
   14 * 4,			/* %fpcr */
   15 * 4,			/* %fpsr */
   16 * 4			/* %fpiaddr */
+};
+
+static int m68k_uclinux_sigcontext_reg_offset[M68K_NUM_REGS] =
+{
+  2 * 4,			/* %d0 */
+  3 * 4,			/* %d1 */
+  -1,				/* %d2 */
+  -1,				/* %d3 */
+  -1,				/* %d4 */
+  -1,				/* %d5 */
+  -1,				/* %d6 */
+  -1,				/* %d7 */
+  4 * 4,			/* %a0 */
+  5 * 4,			/* %a1 */
+  -1,				/* %a2 */
+  -1,				/* %a3 */
+  -1,				/* %a4 */
+  6 * 4,			/* %a5 */
+  -1,				/* %fp */
+  1 * 4,			/* %sp */
+  7 * 4,			/* %sr */
+  7 * 4 + 2,			/* %pc */
+  -1,				/* %fp0 */
+  -1,				/* %fp1 */
+  -1,				/* %fp2 */
+  -1,				/* %fp3 */
+  -1,				/* %fp4 */
+  -1,				/* %fp5 */
+  -1,				/* %fp6 */
+  -1,				/* %fp7 */
+  -1,				/* %fpcr */
+  -1,				/* %fpsr */
+  -1				/* %fpiaddr */
 };
 
 /* From <asm/ucontext.h>.  */
@@ -173,12 +209,35 @@ struct m68k_linux_sigtramp_info
   int *sc_reg_offset;
 };
 
+/* Nonzero if running on uClinux.  */
+static int target_is_uclinux;
+
+static void
+m68k_linux_inferior_created (struct target_ops *objfile, int from_tty)
+{
+  /* Record that we will need to re-evaluate whether we are running on
+     a uClinux or normal Linux target (see m68k_linux_get_sigtramp_info).  */
+  target_is_uclinux = -1;
+}
+
 static struct m68k_linux_sigtramp_info
 m68k_linux_get_sigtramp_info (struct frame_info *next_frame)
 {
   CORE_ADDR sp;
   char buf[4];
   struct m68k_linux_sigtramp_info info;
+
+  if (target_is_uclinux == -1)
+    {
+      /* Determine whether we are running on a uClinux or normal Linux
+         target so we can use the correct sigcontext layouts.  */
+    
+      CORE_ADDR dummy;
+    
+      target_is_uclinux
+        = target_auxv_search (&current_target, AT_NULL, &dummy) > 0
+          && target_auxv_search (&current_target, AT_PAGESZ, &dummy) == 0;
+    }
 
   frame_unwind_register (next_frame, M68K_SP_REGNUM, buf);
   sp = extract_unsigned_integer (buf, 4);
@@ -189,7 +248,9 @@ m68k_linux_get_sigtramp_info (struct frame_info *next_frame)
   if (m68k_linux_pc_in_sigtramp (frame_pc_unwind (next_frame), 0) == 2)
     info.sc_reg_offset = m68k_linux_ucontext_reg_offset;
   else
-    info.sc_reg_offset = m68k_linux_sigcontext_reg_offset;
+    info.sc_reg_offset
+      = target_is_uclinux ? m68k_uclinux_sigcontext_reg_offset
+			  : m68k_linux_sigcontext_reg_offset;
   return info;
 }
 
@@ -319,4 +380,5 @@ _initialize_m68k_linux_tdep (void)
 {
   gdbarch_register_osabi (bfd_arch_m68k, 0, GDB_OSABI_LINUX,
 			  m68k_linux_init_abi);
+  observer_attach_inferior_created (m68k_linux_inferior_created);
 }
