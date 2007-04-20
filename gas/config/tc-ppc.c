@@ -1,6 +1,6 @@
 /* tc-ppc.c -- Assemble for the PowerPC or POWER (RS/6000)
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -1248,7 +1248,8 @@ ppc_setup_opcodes (void)
   const struct powerpc_opcode *op_end;
   const struct powerpc_macro *macro;
   const struct powerpc_macro *macro_end;
-  bfd_boolean dup_insn = FALSE;
+  unsigned int i;
+  bfd_boolean bad_insn = FALSE;
 
   if (ppc_hash != NULL)
     hash_die (ppc_hash);
@@ -1258,10 +1259,60 @@ ppc_setup_opcodes (void)
   /* Insert the opcodes into a hash table.  */
   ppc_hash = hash_new ();
 
+  /* Check operand masks.  Code here and in the disassembler assumes
+     all the 1's in the mask are contiguous.  */
+  for (i = 0; i < num_powerpc_operands; ++i)
+    {
+      unsigned long mask = powerpc_operands[i].bitm;
+      unsigned long right_bit;
+
+      right_bit = mask & -mask;
+      mask += right_bit;
+      right_bit = mask & -mask;
+      if (mask != right_bit)
+	{
+	  as_bad (_("powerpc_operands[%d].bitm invalid"), i);
+	  bad_insn = TRUE;
+	}
+    }
+
   op_end = powerpc_opcodes + powerpc_num_opcodes;
   for (op = powerpc_opcodes; op < op_end; op++)
     {
-      know ((op->opcode & op->mask) == op->opcode);
+      const unsigned char *o;
+      unsigned long omask = op->mask;
+
+      /* The mask had better not trim off opcode bits.  */
+      if ((op->opcode & omask) != op->opcode)
+	{
+	  as_bad (_("mask trims opcode bits for %s"),
+		  op->name);
+	  bad_insn = TRUE;
+	}
+
+      /* The operands must not overlap the opcode or each other.  */
+      for (o = op->operands; *o; ++o)
+	if (*o >= num_powerpc_operands)
+	  {
+	    as_bad (_("operand index error for %s"),
+		    op->name);
+	    bad_insn = TRUE;
+	  }
+	else
+	  {
+	    const struct powerpc_operand *operand = &powerpc_operands[*o];
+	    if (operand->shift >= 0)
+	      {
+		unsigned long mask = operand->bitm << operand->shift;
+		if (omask & mask)
+		  {
+		    as_bad (_("operand %d overlap in %s"),
+			    (int) (o - op->operands), op->name);
+		    bad_insn = TRUE;
+		  }
+		omask |= mask;
+	      }
+	  }
 
       if ((op->flags & ppc_cpu & ~(PPC_OPCODE_32 | PPC_OPCODE_64)) != 0
 	  && ((op->flags & (PPC_OPCODE_32 | PPC_OPCODE_64)) == 0
@@ -1296,9 +1347,9 @@ ppc_setup_opcodes (void)
 		  && (op->flags & PPC_OPCODE_POWER) != 0)
 		continue;
 
-	      as_bad (_("Internal assembler error for instruction %s"),
+	      as_bad (_("duplicate instruction %s"),
 		      op->name);
-	      dup_insn = TRUE;
+	      bad_insn = TRUE;
 	    }
 	}
     }
@@ -1320,13 +1371,13 @@ ppc_setup_opcodes (void)
 	  retval = hash_insert (ppc_macro_hash, macro->name, (PTR) macro);
 	  if (retval != (const char *) NULL)
 	    {
-	      as_bad (_("Internal assembler error for macro %s"), macro->name);
-	      dup_insn = TRUE;
+	      as_bad (_("duplicate macro %s"), macro->name);
+	      bad_insn = TRUE;
 	    }
 	}
     }
 
-  if (dup_insn)
+  if (bad_insn)
     abort ();
 }
 
@@ -1447,48 +1498,51 @@ ppc_insert_operand (insn, operand, val, file, line)
      char *file;
      unsigned int line;
 {
-  if (operand->bits != 32)
+  long min, max, right;
+  offsetT test;
+  
+  max = operand->bitm;
+  right = max & -max;
+  min = 0;
+
+  if ((operand->flags & PPC_OPERAND_SIGNED) != 0)
     {
-      long min, max;
-      offsetT test;
+      if ((operand->flags & PPC_OPERAND_SIGNOPT) == 0)
+	max >>= 1;
+      min = ~(max | ((max & -max) - 1)) ;
 
-      if ((operand->flags & PPC_OPERAND_SIGNED) != 0)
+      if (!ppc_obj64)
 	{
-	  if ((operand->flags & PPC_OPERAND_SIGNOPT) != 0)
-	    max = (1 << operand->bits) - 1;
-	  else
-	    max = (1 << (operand->bits - 1)) - 1;
-	  min = - (1 << (operand->bits - 1));
-
-	  if (!ppc_obj64)
+	  /* Some people write 32 bit hex constants with the sign
+	     extension done by hand.  This shouldn't really be
+	     valid, but, to permit this code to assemble on a 64
+	     bit host, we sign extend the 32 bit value.  */
+	  if (val > 0
+	      && (val & (offsetT) 0x80000000) != 0
+	      && (val & (offsetT) 0xffffffff) == val)
 	    {
-	      /* Some people write 32 bit hex constants with the sign
-		 extension done by hand.  This shouldn't really be
-		 valid, but, to permit this code to assemble on a 64
-		 bit host, we sign extend the 32 bit value.  */
-	      if (val > 0
-		  && (val & (offsetT) 0x80000000) != 0
-		  && (val & (offsetT) 0xffffffff) == val)
-		{
-		  val -= 0x80000000;
-		  val -= 0x80000000;
-		}
+	      val -= 0x80000000;
+	      val -= 0x80000000;
 	    }
 	}
-      else
-	{
-	  max = (1 << operand->bits) - 1;
-	  min = 0;
-	}
-
-      if ((operand->flags & PPC_OPERAND_NEGATIVE) != 0)
-	test = - val;
-      else
-	test = val;
-
-      if (test < (offsetT) min || test > (offsetT) max)
-	as_bad_value_out_of_range (_("operand"), test, (offsetT) min, (offsetT) max, file, line);
     }
+
+  if ((operand->flags & PPC_OPERAND_PLUS1) != 0)
+    {
+      max++;
+      min++;
+    }
+
+  if ((operand->flags & PPC_OPERAND_NEGATIVE) != 0)
+    test = - val;
+  else
+    test = val;
+
+  if (test < (offsetT) min
+      || test > (offsetT) max
+      || (test & (right - 1)) != 0)
+    as_bad_value_out_of_range (_("operand"),
+			       test, (offsetT) min, (offsetT) max, file, line);
 
   if (operand->insert)
     {
@@ -1500,8 +1554,7 @@ ppc_insert_operand (insn, operand, val, file, line)
 	as_bad_where (file, line, errmsg);
     }
   else
-    insn |= (((long) val & ((1 << operand->bits) - 1))
-	     << operand->shift);
+    insn |= ((long) val & operand->bitm) << operand->shift;
 
   return insn;
 }
@@ -5637,7 +5690,7 @@ md_apply_fix (fixP, valP, seg)
 	 csect.  Other usages, such as `.long sym', generate relocs.  This
 	 is the documented behaviour of non-TOC symbols.  */
       if ((operand->flags & PPC_OPERAND_PARENS) != 0
-	  && operand->bits == 16
+	  && (operand->bitm & 0xfff0) == 0xfff0
 	  && operand->shift == 0
 	  && (operand->insert == NULL || ppc_obj64)
 	  && fixP->fx_addsy != NULL
@@ -5675,11 +5728,11 @@ md_apply_fix (fixP, valP, seg)
 	 We are only prepared to turn a few of the operands into
 	 relocs.  */
       if ((operand->flags & PPC_OPERAND_RELATIVE) != 0
-	  && operand->bits == 26
+	  && operand->bitm == 0x3fffffc
 	  && operand->shift == 0)
 	fixP->fx_r_type = BFD_RELOC_PPC_B26;
       else if ((operand->flags & PPC_OPERAND_RELATIVE) != 0
-	  && operand->bits == 16
+	  && operand->bitm == 0xfffc
 	  && operand->shift == 0)
 	{
 	  fixP->fx_r_type = BFD_RELOC_PPC_B16;
@@ -5690,11 +5743,11 @@ md_apply_fix (fixP, valP, seg)
 #endif
 	}
       else if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0
-	       && operand->bits == 26
+	       && operand->bitm == 0x3fffffc
 	       && operand->shift == 0)
 	fixP->fx_r_type = BFD_RELOC_PPC_BA26;
       else if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0
-	       && operand->bits == 16
+	       && operand->bitm == 0xfffc
 	       && operand->shift == 0)
 	{
 	  fixP->fx_r_type = BFD_RELOC_PPC_BA16;
@@ -5706,7 +5759,7 @@ md_apply_fix (fixP, valP, seg)
 	}
 #if defined (OBJ_XCOFF) || defined (OBJ_ELF)
       else if ((operand->flags & PPC_OPERAND_PARENS) != 0
-	       && operand->bits == 16
+	       && (operand->bitm & 0xfff0) == 0xfff0
 	       && operand->shift == 0)
 	{
 	  if (ppc_is_toc_sym (fixP->fx_addsy))

@@ -1,3 +1,14 @@
+2007-04-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* messages.c (as_internal_value_out_of_range): Extend to report
+	errors for values with invalid low bits set.
+	* config/tc-ppc.c (ppc_setup_opcodes): Check powerpc_operands bitm
+	fields.  Check that operands and opcode fields are disjoint.
+	(ppc_insert_operand): Check operands using mask rather than bit
+	count.   Check low bits too.  Handle PPC_OPERAND_PLUS1.  Adjust
+	insertion code.
+	(md_apply_fix): Adjust for struct powerpc_operand change.
+
 2007-04-19  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (md_assemble): Only allow 16-bit instructions on

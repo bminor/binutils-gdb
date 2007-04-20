@@ -222,10 +222,18 @@ print_insn_powerpc (bfd_vma memaddr,
 	    value = (*operand->extract) (insn, dialect, &invalid);
 	  else
 	    {
-	      value = (insn >> operand->shift) & ((1 << operand->bits) - 1);
-	      if ((operand->flags & PPC_OPERAND_SIGNED) != 0
-		  && (value & (1 << (operand->bits - 1))) != 0)
-		value -= 1 << operand->bits;
+	      value = (insn >> operand->shift) & operand->bitm;
+	      if ((operand->flags & PPC_OPERAND_SIGNED) != 0)
+		{
+		  /* BITM is always some number of zeros followed by some
+		     number of ones, followed by some numer of zeros.  */
+		  unsigned long top = operand->bitm;
+		  /* top & -top gives the rightmost 1 bit, so this
+		     fills in any trailing zeros.  */
+		  top |= (top & -top) - 1;
+		  top &= ~(top >> 1);
+		  value = (value ^ top) - top;
+		}
 	    }
 
 	  /* If the operand is optional, and the value is zero, don't
@@ -258,7 +266,7 @@ print_insn_powerpc (bfd_vma memaddr,
 	    (*info->fprintf_func) (info->stream, "%ld", value);
 	  else
 	    {
-	      if (operand->bits == 3)
+	      if (operand->bitm == 7)
 		(*info->fprintf_func) (info->stream, "cr%ld", value);
 	      else
 		{

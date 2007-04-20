@@ -1,5 +1,21 @@
 2007-04-20  Alan Modra  <amodra@bigpond.net.au>
 
+	* ppc-dis.c (print_insn_powerpc): Adjust for struct powerpc_operand
+	change.
+	* ppc-opc.c (powerpc_operands): Replace bit count with bit mask
+	in all entries.  Add PPC_OPERAND_SIGNED to DE entry.  Remove
+	references to following deleted functions.
+	(insert_bd, extract_bd, insert_dq, extract_dq): Delete.
+	(insert_ds, extract_ds, insert_de, extract_de): Delete.
+	(insert_des, extract_des, insert_li, extract_li): Delete.
+	(insert_nb, insert_rsq, insert_rtq, insert_ev2, extract_ev2): Delete.
+	(insert_ev4, extract_ev4, insert_ev8, extract_ev8): Delete.
+	(num_powerpc_operands): New constant.
+	(XSPRG_MASK): Remove entire SPRG field.
+	(powerpc_opcodes <bcctre, bcctrel>): Use XLBB_MASK not XLYBB_MASK.
+
+2007-04-20  Alan Modra  <amodra@bigpond.net.au>
+
 	* ppc-opc.c (DCM, DGM, TE, RMC, R, SP, S): Correct shift.
 	(Z2_MASK): Define.
 	(powerpc_opcodes): Use Z2_MASK in all insns taking RMC operand.

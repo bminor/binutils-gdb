@@ -42,8 +42,6 @@ static unsigned long insert_bat (unsigned long, long, int, const char **);
 static long extract_bat (unsigned long, int, int *);
 static unsigned long insert_bba (unsigned long, long, int, const char **);
 static long extract_bba (unsigned long, int, int *);
-static unsigned long insert_bd (unsigned long, long, int, const char **);
-static long extract_bd (unsigned long, int, int *);
 static unsigned long insert_bdm (unsigned long, long, int, const char **);
 static long extract_bdm (unsigned long, int, int *);
 static unsigned long insert_bdp (unsigned long, long, int, const char **);
@@ -52,23 +50,12 @@ static unsigned long insert_bo (unsigned long, long, int, const char **);
 static long extract_bo (unsigned long, int, int *);
 static unsigned long insert_boe (unsigned long, long, int, const char **);
 static long extract_boe (unsigned long, int, int *);
-static unsigned long insert_dq (unsigned long, long, int, const char **);
-static long extract_dq (unsigned long, int, int *);
-static unsigned long insert_ds (unsigned long, long, int, const char **);
-static long extract_ds (unsigned long, int, int *);
-static unsigned long insert_de (unsigned long, long, int, const char **);
-static long extract_de (unsigned long, int, int *);
-static unsigned long insert_des (unsigned long, long, int, const char **);
-static long extract_des (unsigned long, int, int *);
 static unsigned long insert_fxm (unsigned long, long, int, const char **);
 static long extract_fxm (unsigned long, int, int *);
-static unsigned long insert_li (unsigned long, long, int, const char **);
-static long extract_li (unsigned long, int, int *);
 static unsigned long insert_mbe (unsigned long, long, int, const char **);
 static long extract_mbe (unsigned long, int, int *);
 static unsigned long insert_mb6 (unsigned long, long, int, const char **);
 static long extract_mb6 (unsigned long, int, int *);
-static unsigned long insert_nb (unsigned long, long, int, const char **);
 static long extract_nb (unsigned long, int, int *);
 static unsigned long insert_nsi (unsigned long, long, int, const char **);
 static long extract_nsi (unsigned long, int, int *);
@@ -78,8 +65,6 @@ static unsigned long insert_raq (unsigned long, long, int, const char **);
 static unsigned long insert_ras (unsigned long, long, int, const char **);
 static unsigned long insert_rbs (unsigned long, long, int, const char **);
 static long extract_rbs (unsigned long, int, int *);
-static unsigned long insert_rsq (unsigned long, long, int, const char **);
-static unsigned long insert_rtq (unsigned long, long, int, const char **);
 static unsigned long insert_sh6 (unsigned long, long, int, const char **);
 static long extract_sh6 (unsigned long, int, int *);
 static unsigned long insert_spr (unsigned long, long, int, const char **);
@@ -88,12 +73,6 @@ static unsigned long insert_sprg (unsigned long, long, int, const char **);
 static long extract_sprg (unsigned long, int, int *);
 static unsigned long insert_tbr (unsigned long, long, int, const char **);
 static long extract_tbr (unsigned long, int, int *);
-static unsigned long insert_ev2 (unsigned long, long, int, const char **);
-static long extract_ev2 (unsigned long, int, int *);
-static unsigned long insert_ev4 (unsigned long, long, int, const char **);
-static long extract_ev4 (unsigned long, int, int *);
-static unsigned long insert_ev8 (unsigned long, long, int, const char **);
-static long extract_ev8 (unsigned long, int, int *);
 
 /* The operands table.
 
@@ -116,301 +95,301 @@ const struct powerpc_operand powerpc_operands[] =
   /* The BA field in an XL form instruction.  */
 #define BA UNUSED + 1
 #define BA_MASK (0x1f << 16)
-  { 5, 16, NULL, NULL, PPC_OPERAND_CR },
+  { 0x1f, 16, NULL, NULL, PPC_OPERAND_CR },
 
   /* The BA field in an XL form instruction when it must be the same
      as the BT field in the same instruction.  */
 #define BAT BA + 1
-  { 5, 16, insert_bat, extract_bat, PPC_OPERAND_FAKE },
+  { 0x1f, 16, insert_bat, extract_bat, PPC_OPERAND_FAKE },
 
   /* The BB field in an XL form instruction.  */
 #define BB BAT + 1
 #define BB_MASK (0x1f << 11)
-  { 5, 11, NULL, NULL, PPC_OPERAND_CR },
+  { 0x1f, 11, NULL, NULL, PPC_OPERAND_CR },
 
   /* The BB field in an XL form instruction when it must be the same
      as the BA field in the same instruction.  */
 #define BBA BB + 1
-  { 5, 11, insert_bba, extract_bba, PPC_OPERAND_FAKE },
+  { 0x1f, 11, insert_bba, extract_bba, PPC_OPERAND_FAKE },
 
   /* The BD field in a B form instruction.  The lower two bits are
      forced to zero.  */
 #define BD BBA + 1
-  { 16, 0, insert_bd, extract_bd, PPC_OPERAND_RELATIVE | PPC_OPERAND_SIGNED },
+  { 0xfffc, 0, NULL, NULL, PPC_OPERAND_RELATIVE | PPC_OPERAND_SIGNED },
 
   /* The BD field in a B form instruction when absolute addressing is
      used.  */
 #define BDA BD + 1
-  { 16, 0, insert_bd, extract_bd, PPC_OPERAND_ABSOLUTE | PPC_OPERAND_SIGNED },
+  { 0xfffc, 0, NULL, NULL, PPC_OPERAND_ABSOLUTE | PPC_OPERAND_SIGNED },
 
   /* The BD field in a B form instruction when the - modifier is used.
      This sets the y bit of the BO field appropriately.  */
 #define BDM BDA + 1
-  { 16, 0, insert_bdm, extract_bdm,
+  { 0xfffc, 0, insert_bdm, extract_bdm,
       PPC_OPERAND_RELATIVE | PPC_OPERAND_SIGNED },
 
   /* The BD field in a B form instruction when the - modifier is used
      and absolute address is used.  */
 #define BDMA BDM + 1
-  { 16, 0, insert_bdm, extract_bdm,
+  { 0xfffc, 0, insert_bdm, extract_bdm,
       PPC_OPERAND_ABSOLUTE | PPC_OPERAND_SIGNED },
 
   /* The BD field in a B form instruction when the + modifier is used.
      This sets the y bit of the BO field appropriately.  */
 #define BDP BDMA + 1
-  { 16, 0, insert_bdp, extract_bdp,
+  { 0xfffc, 0, insert_bdp, extract_bdp,
       PPC_OPERAND_RELATIVE | PPC_OPERAND_SIGNED },
 
   /* The BD field in a B form instruction when the + modifier is used
      and absolute addressing is used.  */
 #define BDPA BDP + 1
-  { 16, 0, insert_bdp, extract_bdp,
+  { 0xfffc, 0, insert_bdp, extract_bdp,
       PPC_OPERAND_ABSOLUTE | PPC_OPERAND_SIGNED },
 
   /* The BF field in an X or XL form instruction.  */
 #define BF BDPA + 1
-  { 3, 23, NULL, NULL, PPC_OPERAND_CR },
+  { 0x7, 23, NULL, NULL, PPC_OPERAND_CR },
 
   /* An optional BF field.  This is used for comparison instructions,
      in which an omitted BF field is taken as zero.  */
 #define OBF BF + 1
-  { 3, 23, NULL, NULL, PPC_OPERAND_CR | PPC_OPERAND_OPTIONAL },
+  { 0x7, 23, NULL, NULL, PPC_OPERAND_CR | PPC_OPERAND_OPTIONAL },
 
   /* The BFA field in an X or XL form instruction.  */
 #define BFA OBF + 1
-  { 3, 18, NULL, NULL, PPC_OPERAND_CR },
+  { 0x7, 18, NULL, NULL, PPC_OPERAND_CR },
 
   /* The BI field in a B form or XL form instruction.  */
 #define BI BFA + 1
 #define BI_MASK (0x1f << 16)
-  { 5, 16, NULL, NULL, PPC_OPERAND_CR },
+  { 0x1f, 16, NULL, NULL, PPC_OPERAND_CR },
 
   /* The BO field in a B form instruction.  Certain values are
      illegal.  */
 #define BO BI + 1
 #define BO_MASK (0x1f << 21)
-  { 5, 21, insert_bo, extract_bo, 0 },
+  { 0x1f, 21, insert_bo, extract_bo, 0 },
 
   /* The BO field in a B form instruction when the + or - modifier is
      used.  This is like the BO field, but it must be even.  */
 #define BOE BO + 1
-  { 5, 21, insert_boe, extract_boe, 0 },
+  { 0x1e, 21, insert_boe, extract_boe, 0 },
 
 #define BH BOE + 1
-  { 2, 11, NULL, NULL, PPC_OPERAND_OPTIONAL },
+  { 0x3, 11, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
   /* The BT field in an X or XL form instruction.  */
 #define BT BH + 1
-  { 5, 21, NULL, NULL, PPC_OPERAND_CR },
+  { 0x1f, 21, NULL, NULL, PPC_OPERAND_CR },
 
   /* The condition register number portion of the BI field in a B form
      or XL form instruction.  This is used for the extended
      conditional branch mnemonics, which set the lower two bits of the
      BI field.  This field is optional.  */
 #define CR BT + 1
-  { 3, 18, NULL, NULL, PPC_OPERAND_CR | PPC_OPERAND_OPTIONAL },
+  { 0x7, 18, NULL, NULL, PPC_OPERAND_CR | PPC_OPERAND_OPTIONAL },
 
   /* The CRB field in an X form instruction.  */
 #define CRB CR + 1
-  { 5, 6, NULL, NULL, 0 },
+  { 0x1f, 6, NULL, NULL, 0 },
 
   /* The CRFD field in an X form instruction.  */
 #define CRFD CRB + 1
-  { 3, 23, NULL, NULL, PPC_OPERAND_CR },
+  { 0x7, 23, NULL, NULL, PPC_OPERAND_CR },
 
   /* The CRFS field in an X form instruction.  */
 #define CRFS CRFD + 1
-  { 3, 0, NULL, NULL, PPC_OPERAND_CR },
+  { 0x7, 0, NULL, NULL, PPC_OPERAND_CR },
 
   /* The CT field in an X form instruction.  */
 #define CT CRFS + 1
-  { 5, 21, NULL, NULL, PPC_OPERAND_OPTIONAL },
+  { 0x1f, 21, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
   /* The D field in a D form instruction.  This is a displacement off
      a register, and implies that the next operand is a register in
      parentheses.  */
 #define D CT + 1
-  { 16, 0, NULL, NULL, PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED },
+  { 0xffff, 0, NULL, NULL, PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED },
 
   /* The DE field in a DE form instruction.  This is like D, but is 12
      bits only.  */
 #define DE D + 1
-  { 14, 0, insert_de, extract_de, PPC_OPERAND_PARENS },
+  { 0xfff, 4, NULL, NULL, PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED },
 
   /* The DES field in a DES form instruction.  This is like DS, but is 14
      bits only (12 stored.)  */
 #define DES DE + 1
-  { 14, 0, insert_des, extract_des, PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED },
+  { 0x3ffc, 2, NULL, NULL, PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED },
 
   /* The DQ field in a DQ form instruction.  This is like D, but the
      lower four bits are forced to zero. */
 #define DQ DES + 1
-  { 16, 0, insert_dq, extract_dq,
-      PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED | PPC_OPERAND_DQ },
+  { 0xfff0, 0, NULL, NULL,
+    PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED | PPC_OPERAND_DQ },
 
   /* The DS field in a DS form instruction.  This is like D, but the
      lower two bits are forced to zero.  */
 #define DS DQ + 1
-  { 16, 0, insert_ds, extract_ds,
-      PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED | PPC_OPERAND_DS },
+  { 0xfffc, 0, NULL, NULL,
+    PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED | PPC_OPERAND_DS },
 
   /* The E field in a wrteei instruction.  */
 #define E DS + 1
-  { 1, 15, NULL, NULL, 0 },
+  { 0x1, 15, NULL, NULL, 0 },
 
   /* The FL1 field in a POWER SC form instruction.  */
 #define FL1 E + 1
-  { 4, 12, NULL, NULL, 0 },
+  { 0xf, 12, NULL, NULL, 0 },
 
   /* The FL2 field in a POWER SC form instruction.  */
 #define FL2 FL1 + 1
-  { 3, 2, NULL, NULL, 0 },
+  { 0x7, 2, NULL, NULL, 0 },
 
   /* The FLM field in an XFL form instruction.  */
 #define FLM FL2 + 1
-  { 8, 17, NULL, NULL, 0 },
+  { 0xff, 17, NULL, NULL, 0 },
 
   /* The FRA field in an X or A form instruction.  */
 #define FRA FLM + 1
 #define FRA_MASK (0x1f << 16)
-  { 5, 16, NULL, NULL, PPC_OPERAND_FPR },
+  { 0x1f, 16, NULL, NULL, PPC_OPERAND_FPR },
 
   /* The FRB field in an X or A form instruction.  */
 #define FRB FRA + 1
 #define FRB_MASK (0x1f << 11)
-  { 5, 11, NULL, NULL, PPC_OPERAND_FPR },
+  { 0x1f, 11, NULL, NULL, PPC_OPERAND_FPR },
 
   /* The FRC field in an A form instruction.  */
 #define FRC FRB + 1
 #define FRC_MASK (0x1f << 6)
-  { 5, 6, NULL, NULL, PPC_OPERAND_FPR },
+  { 0x1f, 6, NULL, NULL, PPC_OPERAND_FPR },
 
   /* The FRS field in an X form instruction or the FRT field in a D, X
      or A form instruction.  */
 #define FRS FRC + 1
 #define FRT FRS
-  { 5, 21, NULL, NULL, PPC_OPERAND_FPR },
+  { 0x1f, 21, NULL, NULL, PPC_OPERAND_FPR },
 
   /* The FXM field in an XFX instruction.  */
 #define FXM FRS + 1
 #define FXM_MASK (0xff << 12)
-  { 8, 12, insert_fxm, extract_fxm, 0 },
+  { 0xff, 12, insert_fxm, extract_fxm, 0 },
 
   /* Power4 version for mfcr.  */
 #define FXM4 FXM + 1
-  { 8, 12, insert_fxm, extract_fxm, PPC_OPERAND_OPTIONAL },
+  { 0xff, 12, insert_fxm, extract_fxm, PPC_OPERAND_OPTIONAL },
 
   /* The L field in a D or X form instruction.  */
 #define L FXM4 + 1
-  { 1, 21, NULL, NULL, PPC_OPERAND_OPTIONAL },
+  { 0x1, 21, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
   /* The LEV field in a POWER SVC form instruction.  */
 #define SVC_LEV L + 1
-  { 7, 5, NULL, NULL, 0 },
+  { 0x7f, 5, NULL, NULL, 0 },
 
   /* The LEV field in an SC form instruction.  */
 #define LEV SVC_LEV + 1
-  { 7, 5, NULL, NULL, PPC_OPERAND_OPTIONAL },
+  { 0x7f, 5, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
   /* The LI field in an I form instruction.  The lower two bits are
      forced to zero.  */
 #define LI LEV + 1
-  { 26, 0, insert_li, extract_li, PPC_OPERAND_RELATIVE | PPC_OPERAND_SIGNED },
+  { 0x3fffffc, 0, NULL, NULL, PPC_OPERAND_RELATIVE | PPC_OPERAND_SIGNED },
 
   /* The LI field in an I form instruction when used as an absolute
      address.  */
 #define LIA LI + 1
-  { 26, 0, insert_li, extract_li, PPC_OPERAND_ABSOLUTE | PPC_OPERAND_SIGNED },
+  { 0x3fffffc, 0, NULL, NULL, PPC_OPERAND_ABSOLUTE | PPC_OPERAND_SIGNED },
 
   /* The LS field in an X (sync) form instruction.  */
 #define LS LIA + 1
-  { 2, 21, NULL, NULL, PPC_OPERAND_OPTIONAL },
+  { 0x3, 21, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
   /* The MB field in an M form instruction.  */
 #define MB LS + 1
 #define MB_MASK (0x1f << 6)
-  { 5, 6, NULL, NULL, 0 },
+  { 0x1f, 6, NULL, NULL, 0 },
 
   /* The ME field in an M form instruction.  */
 #define ME MB + 1
 #define ME_MASK (0x1f << 1)
-  { 5, 1, NULL, NULL, 0 },
+  { 0x1f, 1, NULL, NULL, 0 },
 
   /* The MB and ME fields in an M form instruction expressed a single
      operand which is a bitmask indicating which bits to select.  This
      is a two operand form using PPC_OPERAND_NEXT.  See the
      description in opcode/ppc.h for what this means.  */
 #define MBE ME + 1
-  { 5, 6, NULL, NULL, PPC_OPERAND_OPTIONAL | PPC_OPERAND_NEXT },
-  { 32, 0, insert_mbe, extract_mbe, 0 },
+  { 0x1f, 6, NULL, NULL, PPC_OPERAND_OPTIONAL | PPC_OPERAND_NEXT },
+  { 0xff, 0, insert_mbe, extract_mbe, 0 },
 
   /* The MB or ME field in an MD or MDS form instruction.  The high
      bit is wrapped to the low end.  */
 #define MB6 MBE + 2
 #define ME6 MB6
 #define MB6_MASK (0x3f << 5)
-  { 6, 5, insert_mb6, extract_mb6, 0 },
+  { 0x3f, 5, insert_mb6, extract_mb6, 0 },
 
   /* The MO field in an mbar instruction.  */
 #define MO MB6 + 1
-  { 5, 21, NULL, NULL, PPC_OPERAND_OPTIONAL },
+  { 0x1f, 21, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
   /* The NB field in an X form instruction.  The value 32 is stored as
      0.  */
 #define NB MO + 1
-  { 6, 11, insert_nb, extract_nb, 0 },
+  { 0x1f, 11, NULL, extract_nb, PPC_OPERAND_PLUS1 },
 
   /* The NSI field in a D form instruction.  This is the same as the
      SI field, only negated.  */
 #define NSI NB + 1
-  { 16, 0, insert_nsi, extract_nsi,
+  { 0xffff, 0, insert_nsi, extract_nsi,
       PPC_OPERAND_NEGATIVE | PPC_OPERAND_SIGNED },
 
   /* The RA field in an D, DS, DQ, X, XO, M, or MDS form instruction.  */
 #define RA NSI + 1
 #define RA_MASK (0x1f << 16)
-  { 5, 16, NULL, NULL, PPC_OPERAND_GPR },
+  { 0x1f, 16, NULL, NULL, PPC_OPERAND_GPR },
 
   /* As above, but 0 in the RA field means zero, not r0.  */
 #define RA0 RA + 1
-  { 5, 16, NULL, NULL, PPC_OPERAND_GPR_0 },
+  { 0x1f, 16, NULL, NULL, PPC_OPERAND_GPR_0 },
 
   /* The RA field in the DQ form lq instruction, which has special
      value restrictions.  */
 #define RAQ RA0 + 1
-  { 5, 16, insert_raq, NULL, PPC_OPERAND_GPR_0 },
+  { 0x1f, 16, insert_raq, NULL, PPC_OPERAND_GPR_0 },
 
   /* The RA field in a D or X form instruction which is an updating
      load, which means that the RA field may not be zero and may not
      equal the RT field.  */
 #define RAL RAQ + 1
-  { 5, 16, insert_ral, NULL, PPC_OPERAND_GPR_0 },
+  { 0x1f, 16, insert_ral, NULL, PPC_OPERAND_GPR_0 },
 
   /* The RA field in an lmw instruction, which has special value
      restrictions.  */
 #define RAM RAL + 1
-  { 5, 16, insert_ram, NULL, PPC_OPERAND_GPR_0 },
+  { 0x1f, 16, insert_ram, NULL, PPC_OPERAND_GPR_0 },
 
   /* The RA field in a D or X form instruction which is an updating
      store or an updating floating point load, which means that the RA
      field may not be zero.  */
 #define RAS RAM + 1
-  { 5, 16, insert_ras, NULL, PPC_OPERAND_GPR_0 },
+  { 0x1f, 16, insert_ras, NULL, PPC_OPERAND_GPR_0 },
 
   /* The RA field of the tlbwe instruction, which is optional.  */
 #define RAOPT RAS + 1
-  { 5, 16, NULL, NULL, PPC_OPERAND_GPR | PPC_OPERAND_OPTIONAL },
+  { 0x1f, 16, NULL, NULL, PPC_OPERAND_GPR | PPC_OPERAND_OPTIONAL },
 
   /* The RB field in an X, XO, M, or MDS form instruction.  */
 #define RB RAOPT + 1
 #define RB_MASK (0x1f << 11)
-  { 5, 11, NULL, NULL, PPC_OPERAND_GPR },
+  { 0x1f, 11, NULL, NULL, PPC_OPERAND_GPR },
 
   /* The RB field in an X form instruction when it must be the same as
      the RS field in the instruction.  This is used for extended
      mnemonics like mr.  */
 #define RBS RB + 1
-  { 5, 1, insert_rbs, extract_rbs, PPC_OPERAND_FAKE },
+  { 0x1f, 11, insert_rbs, extract_rbs, PPC_OPERAND_FAKE },
 
   /* The RS field in a D, DS, X, XFX, XS, M, MD or MDS form
      instruction or the RT field in a D, DS, X, XFX or XO form
@@ -418,180 +397,183 @@ const struct powerpc_operand powerpc_operands[] =
 #define RS RBS + 1
 #define RT RS
 #define RT_MASK (0x1f << 21)
-  { 5, 21, NULL, NULL, PPC_OPERAND_GPR },
+  { 0x1f, 21, NULL, NULL, PPC_OPERAND_GPR },
 
   /* The RS field of the DS form stq instruction, which has special
      value restrictions.  */
 #define RSQ RS + 1
-  { 5, 21, insert_rsq, NULL, PPC_OPERAND_GPR_0 },
+  { 0x1e, 21, NULL, NULL, PPC_OPERAND_GPR_0 },
 
   /* The RT field of the DQ form lq instruction, which has special
      value restrictions.  */
 #define RTQ RSQ + 1
-  { 5, 21, insert_rtq, NULL, PPC_OPERAND_GPR_0 },
+  { 0x1e, 21, NULL, NULL, PPC_OPERAND_GPR_0 },
 
   /* The RS field of the tlbwe instruction, which is optional.  */
 #define RSO RTQ + 1
 #define RTO RSO
-  { 5, 21, NULL, NULL, PPC_OPERAND_GPR | PPC_OPERAND_OPTIONAL },
+  { 0x1f, 21, NULL, NULL, PPC_OPERAND_GPR | PPC_OPERAND_OPTIONAL },
 
   /* The SH field in an X or M form instruction.  */
 #define SH RSO + 1
 #define SH_MASK (0x1f << 11)
-  { 5, 11, NULL, NULL, 0 },
+  { 0x1f, 11, NULL, NULL, 0 },
 
   /* The SH field in an MD form instruction.  This is split.  */
 #define SH6 SH + 1
 #define SH6_MASK ((0x1f << 11) | (1 << 1))
-  { 6, 1, insert_sh6, extract_sh6, 0 },
+  { 0x3f, -1, insert_sh6, extract_sh6, 0 },
 
   /* The SH field of the tlbwe instruction, which is optional.  */
 #define SHO SH6 + 1
-  { 5, 11,NULL, NULL, PPC_OPERAND_OPTIONAL },
+  { 0x1f, 11, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
   /* The SI field in a D form instruction.  */
 #define SI SHO + 1
-  { 16, 0, NULL, NULL, PPC_OPERAND_SIGNED },
+  { 0xffff, 0, NULL, NULL, PPC_OPERAND_SIGNED },
 
   /* The SI field in a D form instruction when we accept a wide range
      of positive values.  */
 #define SISIGNOPT SI + 1
-  { 16, 0, NULL, NULL, PPC_OPERAND_SIGNED | PPC_OPERAND_SIGNOPT },
+  { 0xffff, 0, NULL, NULL, PPC_OPERAND_SIGNED | PPC_OPERAND_SIGNOPT },
 
   /* The SPR field in an XFX form instruction.  This is flipped--the
      lower 5 bits are stored in the upper 5 and vice- versa.  */
 #define SPR SISIGNOPT + 1
 #define PMR SPR
 #define SPR_MASK (0x3ff << 11)
-  { 10, 11, insert_spr, extract_spr, 0 },
+  { 0x3ff, 11, insert_spr, extract_spr, 0 },
 
   /* The BAT index number in an XFX form m[ft]ibat[lu] instruction.  */
 #define SPRBAT SPR + 1
 #define SPRBAT_MASK (0x3 << 17)
-  { 2, 17, NULL, NULL, 0 },
+  { 0x3, 17, NULL, NULL, 0 },
 
   /* The SPRG register number in an XFX form m[ft]sprg instruction.  */
 #define SPRG SPRBAT + 1
-  { 5, 16, insert_sprg, extract_sprg, 0 },
+  { 0x1f, 16, insert_sprg, extract_sprg, 0 },
 
   /* The SR field in an X form instruction.  */
 #define SR SPRG + 1
-  { 4, 16, NULL, NULL, 0 },
+  { 0xf, 16, NULL, NULL, 0 },
 
   /* The STRM field in an X AltiVec form instruction.  */
 #define STRM SR + 1
 #define STRM_MASK (0x3 << 21)
-  { 2, 21, NULL, NULL, 0 },
+  { 0x3, 21, NULL, NULL, 0 },
 
   /* The SV field in a POWER SC form instruction.  */
 #define SV STRM + 1
-  { 14, 2, NULL, NULL, 0 },
+  { 0x3fff, 2, NULL, NULL, 0 },
 
   /* The TBR field in an XFX form instruction.  This is like the SPR
      field, but it is optional.  */
 #define TBR SV + 1
-  { 10, 11, insert_tbr, extract_tbr, PPC_OPERAND_OPTIONAL },
+  { 0x3ff, 11, insert_tbr, extract_tbr, PPC_OPERAND_OPTIONAL },
 
   /* The TO field in a D or X form instruction.  */
 #define TO TBR + 1
 #define TO_MASK (0x1f << 21)
-  { 5, 21, NULL, NULL, 0 },
+  { 0x1f, 21, NULL, NULL, 0 },
 
   /* The U field in an X form instruction.  */
 #define U TO + 1
-  { 4, 12, NULL, NULL, 0 },
+  { 0xf, 12, NULL, NULL, 0 },
 
   /* The UI field in a D form instruction.  */
 #define UI U + 1
-  { 16, 0, NULL, NULL, 0 },
+  { 0xffff, 0, NULL, NULL, 0 },
 
   /* The VA field in a VA, VX or VXR form instruction.  */
 #define VA UI + 1
 #define VA_MASK	(0x1f << 16)
-  { 5, 16, NULL, NULL, PPC_OPERAND_VR },
+  { 0x1f, 16, NULL, NULL, PPC_OPERAND_VR },
 
   /* The VB field in a VA, VX or VXR form instruction.  */
 #define VB VA + 1
 #define VB_MASK (0x1f << 11)
-  { 5, 11, NULL, NULL, PPC_OPERAND_VR },
+  { 0x1f, 11, NULL, NULL, PPC_OPERAND_VR },
 
   /* The VC field in a VA form instruction.  */
 #define VC VB + 1
 #define VC_MASK (0x1f << 6)
-  { 5, 6, NULL, NULL, PPC_OPERAND_VR },
+  { 0x1f, 6, NULL, NULL, PPC_OPERAND_VR },
 
   /* The VD or VS field in a VA, VX, VXR or X form instruction.  */
 #define VD VC + 1
 #define VS VD
 #define VD_MASK (0x1f << 21)
-  { 5, 21, NULL, NULL, PPC_OPERAND_VR },
+  { 0x1f, 21, NULL, NULL, PPC_OPERAND_VR },
 
   /* The SIMM field in a VX form instruction.  */
 #define SIMM VD + 1
-  { 5, 16, NULL, NULL, PPC_OPERAND_SIGNED},
+  { 0x1f, 16, NULL, NULL, PPC_OPERAND_SIGNED},
 
   /* The UIMM field in a VX form instruction, and TE in Z form.  */
 #define UIMM SIMM + 1
 #define TE UIMM
-  { 5, 16, NULL, NULL, 0 },
+  { 0x1f, 16, NULL, NULL, 0 },
 
   /* The SHB field in a VA form instruction.  */
 #define SHB UIMM + 1
-  { 4, 6, NULL, NULL, 0 },
+  { 0xf, 6, NULL, NULL, 0 },
 
   /* The other UIMM field in a EVX form instruction.  */
 #define EVUIMM SHB + 1
-  { 5, 11, NULL, NULL, 0 },
+  { 0x1f, 11, NULL, NULL, 0 },
 
   /* The other UIMM field in a half word EVX form instruction.  */
 #define EVUIMM_2 EVUIMM + 1
-  { 32, 11, insert_ev2, extract_ev2, PPC_OPERAND_PARENS },
+  { 0x3e, 10, NULL, NULL, PPC_OPERAND_PARENS },
 
   /* The other UIMM field in a word EVX form instruction.  */
 #define EVUIMM_4 EVUIMM_2 + 1
-  { 32, 11, insert_ev4, extract_ev4, PPC_OPERAND_PARENS },
+  { 0x7c, 9, NULL, NULL, PPC_OPERAND_PARENS },
 
   /* The other UIMM field in a double EVX form instruction.  */
 #define EVUIMM_8 EVUIMM_4 + 1
-  { 32, 11, insert_ev8, extract_ev8, PPC_OPERAND_PARENS },
+  { 0xf8, 8, NULL, NULL, PPC_OPERAND_PARENS },
 
   /* The WS field.  */
 #define WS EVUIMM_8 + 1
 #define WS_MASK (0x7 << 11)
-  { 3, 11, NULL, NULL, 0 },
+  { 0x7, 11, NULL, NULL, 0 },
 
   /* The L field in an mtmsrd or A form instruction.  */
 #define MTMSRD_L WS + 1
 #define A_L MTMSRD_L
-  { 1, 16, NULL, NULL, PPC_OPERAND_OPTIONAL },
+  { 0x1, 16, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
 #define RMC A_L + 1
-  { 2, 9, NULL, NULL, 0 },
+  { 0x3, 9, NULL, NULL, 0 },
 
 #define R RMC + 1
-  { 1, 16, NULL, NULL, 0 },
+  { 0x1, 16, NULL, NULL, 0 },
 
 #define SP R + 1
-  { 2, 19, NULL, NULL, 0 },
+  { 0x3, 19, NULL, NULL, 0 },
 
 #define S SP + 1
-  { 1, 20, NULL, NULL, 0 },
+  { 0x1, 20, NULL, NULL, 0 },
 
   /* SH field starting at bit position 16.  */
 #define SH16 S + 1
   /* The DCM and DGM fields in a Z form instruction.  */
 #define DCM SH16
 #define DGM DCM
-  { 6, 10, NULL, NULL, 0 },
+  { 0x3f, 10, NULL, NULL, 0 },
 
   /* The L field in an X form with the RT field fixed instruction.  */
 #define XRT_L SH16 + 1
-  { 2, 21, NULL, NULL, PPC_OPERAND_OPTIONAL },
+  { 0x1, 21, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
   /* The EH field in larx instruction.  */
 #define EH XRT_L + 1
-  { 1, 0, NULL, NULL, PPC_OPERAND_OPTIONAL },
+  { 0x1, 0, NULL, NULL, PPC_OPERAND_OPTIONAL },
 };
+
+const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
+					   / sizeof (powerpc_operands[0]));
 
 /* The functions used to insert and extract complicated operands.  */
 
@@ -643,26 +625,6 @@ extract_bba (unsigned long insn,
   if (((insn >> 16) & 0x1f) != ((insn >> 11) & 0x1f))
     *invalid = 1;
   return 0;
-}
-
-/* The BD field in a B form instruction.  The lower two bits are
-   forced to zero.  */
-
-static unsigned long
-insert_bd (unsigned long insn,
-	   long value,
-	   int dialect ATTRIBUTE_UNUSED,
-	   const char **errmsg ATTRIBUTE_UNUSED)
-{
-  return insn | (value & 0xfffc);
-}
-
-static long
-extract_bd (unsigned long insn,
-	    int dialect ATTRIBUTE_UNUSED,
-	    int *invalid ATTRIBUTE_UNUSED)
-{
-  return ((insn & 0xfffc) ^ 0x8000) - 0x8000;
 }
 
 /* The BD field in a B form instruction when the - modifier is used.
@@ -885,157 +847,6 @@ extract_boe (unsigned long insn,
   return value & 0x1e;
 }
 
-/* The DQ field in a DQ form instruction.  This is like D, but the
-   lower four bits are forced to zero. */
-
-static unsigned long
-insert_dq (unsigned long insn,
-	   long value,
-	   int dialect ATTRIBUTE_UNUSED,
-	   const char **errmsg)
-{
-  if ((value & 0xf) != 0)
-    *errmsg = _("offset not a multiple of 16");
-  return insn | (value & 0xfff0);
-}
-
-static long
-extract_dq (unsigned long insn,
-	    int dialect ATTRIBUTE_UNUSED,
-	    int *invalid ATTRIBUTE_UNUSED)
-{
-  return ((insn & 0xfff0) ^ 0x8000) - 0x8000;
-}
-
-static unsigned long
-insert_ev2 (unsigned long insn,
-	    long value,
-	    int dialect ATTRIBUTE_UNUSED,
-	    const char **errmsg)
-{
-  if ((value & 1) != 0)
-    *errmsg = _("offset not a multiple of 2");
-  if ((value > 62) != 0)
-    *errmsg = _("offset greater than 62");
-  return insn | ((value & 0x3e) << 10);
-}
-
-static long
-extract_ev2 (unsigned long insn,
-	     int dialect ATTRIBUTE_UNUSED,
-	     int *invalid ATTRIBUTE_UNUSED)
-{
-  return (insn >> 10) & 0x3e;
-}
-
-static unsigned long
-insert_ev4 (unsigned long insn,
-	    long value,
-	    int dialect ATTRIBUTE_UNUSED,
-	    const char **errmsg)
-{
-  if ((value & 3) != 0)
-    *errmsg = _("offset not a multiple of 4");
-  if ((value > 124) != 0)
-    *errmsg = _("offset greater than 124");
-  return insn | ((value & 0x7c) << 9);
-}
-
-static long
-extract_ev4 (unsigned long insn,
-	     int dialect ATTRIBUTE_UNUSED,
-	     int *invalid ATTRIBUTE_UNUSED)
-{
-  return (insn >> 9) & 0x7c;
-}
-
-static unsigned long
-insert_ev8 (unsigned long insn,
-	    long value,
-	    int dialect ATTRIBUTE_UNUSED,
-	    const char **errmsg)
-{
-  if ((value & 7) != 0)
-    *errmsg = _("offset not a multiple of 8");
-  if ((value > 248) != 0)
-    *errmsg = _("offset greater than 248");
-  return insn | ((value & 0xf8) << 8);
-}
-
-static long
-extract_ev8 (unsigned long insn,
-	     int dialect ATTRIBUTE_UNUSED,
-	     int *invalid ATTRIBUTE_UNUSED)
-{
-  return (insn >> 8) & 0xf8;
-}
-
-/* The DS field in a DS form instruction.  This is like D, but the
-   lower two bits are forced to zero.  */
-
-static unsigned long
-insert_ds (unsigned long insn,
-	   long value,
-	   int dialect ATTRIBUTE_UNUSED,
-	   const char **errmsg)
-{
-  if ((value & 3) != 0)
-    *errmsg = _("offset not a multiple of 4");
-  return insn | (value & 0xfffc);
-}
-
-static long
-extract_ds (unsigned long insn,
-	    int dialect ATTRIBUTE_UNUSED,
-	    int *invalid ATTRIBUTE_UNUSED)
-{
-  return ((insn & 0xfffc) ^ 0x8000) - 0x8000;
-}
-
-/* The DE field in a DE form instruction.  */
-
-static unsigned long
-insert_de (unsigned long insn,
-	   long value,
-	   int dialect ATTRIBUTE_UNUSED,
-	   const char **errmsg)
-{
-  if (value > 2047 || value < -2048)
-    *errmsg = _("offset not between -2048 and 2047");
-  return insn | ((value << 4) & 0xfff0);
-}
-
-static long
-extract_de (unsigned long insn,
-	    int dialect ATTRIBUTE_UNUSED,
-	    int *invalid ATTRIBUTE_UNUSED)
-{
-  return (insn & 0xfff0) >> 4;
-}
-
-/* The DES field in a DES form instruction.  */
-
-static unsigned long
-insert_des (unsigned long insn,
-	    long value,
-	    int dialect ATTRIBUTE_UNUSED,
-	    const char **errmsg)
-{
-  if (value > 8191 || value < -8192)
-    *errmsg = _("offset not between -8192 and 8191");
-  else if ((value & 3) != 0)
-    *errmsg = _("offset not a multiple of 4");
-  return insn | ((value << 2) & 0xfff0);
-}
-
-static long
-extract_des (unsigned long insn,
-	     int dialect ATTRIBUTE_UNUSED,
-	     int *invalid ATTRIBUTE_UNUSED)
-{
-  return (((insn >> 2) & 0x3ffc) ^ 0x2000) - 0x2000;
-}
-
 /* FXM mask in mfcr and mtcrf instructions.  */
 
 static unsigned long
@@ -1106,28 +917,6 @@ extract_fxm (unsigned long insn,
     }
 
   return mask;
-}
-
-/* The LI field in an I form instruction.  The lower two bits are
-   forced to zero.  */
-
-static unsigned long
-insert_li (unsigned long insn,
-	   long value,
-	   int dialect ATTRIBUTE_UNUSED,
-	   const char **errmsg)
-{
-  if ((value & 3) != 0)
-    *errmsg = _("ignoring least significant bits in branch offset");
-  return insn | (value & 0x3fffffc);
-}
-
-static long
-extract_li (unsigned long insn,
-	    int dialect ATTRIBUTE_UNUSED,
-	    int *invalid ATTRIBUTE_UNUSED)
-{
-  return ((insn & 0x3fffffc) ^ 0x2000000) - 0x2000000;
 }
 
 /* The MB and ME fields in an M form instruction expressed as a single
@@ -1240,19 +1029,6 @@ extract_mb6 (unsigned long insn,
 
 /* The NB field in an X form instruction.  The value 32 is stored as
    0.  */
-
-static unsigned long
-insert_nb (unsigned long insn,
-	   long value,
-	   int dialect ATTRIBUTE_UNUSED,
-	   const char **errmsg)
-{
-  if (value < 0 || value > 32)
-    *errmsg = _("value out of range");
-  if (value == 32)
-    value = 0;
-  return insn | ((value & 0x1f) << 11);
-}
 
 static long
 extract_nb (unsigned long insn,
@@ -1374,34 +1150,6 @@ extract_rbs (unsigned long insn,
   if (((insn >> 21) & 0x1f) != ((insn >> 11) & 0x1f))
     *invalid = 1;
   return 0;
-}
-
-/* The RT field of the DQ form lq instruction, which has special
-   value restrictions.  */
-
-static unsigned long
-insert_rtq (unsigned long insn,
-	    long value,
-	    int dialect ATTRIBUTE_UNUSED,
-	    const char **errmsg)
-{
-  if ((value & 1) != 0)
-    *errmsg = _("target register operand must be even");
-  return insn | ((value & 0x1f) << 21);
-}
-
-/* The RS field of the DS form stq instruction, which has special
-   value restrictions.  */
-
-static unsigned long
-insert_rsq (unsigned long insn,
-	    long value ATTRIBUTE_UNUSED,
-	    int dialect ATTRIBUTE_UNUSED,
-	    const char **errmsg)
-{
-  if ((value & 1) != 0)
-    *errmsg = _("source register operand must be even");
-  return insn | ((value & 0x1f) << 21);
 }
 
 /* The SH field in an MD form instruction.  This is split.  */
@@ -1811,7 +1559,7 @@ extract_tbr (unsigned long insn,
 
 /* An XFX form instruction with the SPR field filled in except for the
    SPRG field.  */
-#define XSPRG_MASK (XSPR_MASK & ~(0x17 << 16))
+#define XSPRG_MASK (XSPR_MASK & ~(0x1f << 16))
 
 /* An X form instruction with everything filled in except the E field.  */
 #define XE_MASK (0xffff7fff)
@@ -3242,8 +2990,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "bcctrl",  XLLK(19,528,1),     XLBH_MASK,   PPCCOM,	{ BO, BI, BH } },
 { "bcc",     XLLK(19,528,0),     XLBB_MASK,   PWRCOM,	{ BO, BI } },
 { "bccl",    XLLK(19,528,1),     XLBB_MASK,   PWRCOM,	{ BO, BI } },
-{ "bcctre",  XLLK(19,529,0),     XLYBB_MASK,  BOOKE64,	{ BO, BI } },
-{ "bcctrel", XLLK(19,529,1),     XLYBB_MASK,  BOOKE64,	{ BO, BI } },
+{ "bcctre",  XLLK(19,529,0),     XLBB_MASK,   BOOKE64,	{ BO, BI } },
+{ "bcctrel", XLLK(19,529,1),     XLBB_MASK,   BOOKE64,	{ BO, BI } },
 
 { "rlwimi",  M(20,0),	M_MASK,		PPCCOM,		{ RA,RS,SH,MBE,ME } },
 { "rlimi",   M(20,0),	M_MASK,		PWRCOM,		{ RA,RS,SH,MBE,ME } },

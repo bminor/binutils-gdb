@@ -1,6 +1,6 @@
 /* messages.c - error reporter -
    Copyright 1987, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 2000, 2001,
-   2003, 2004, 2005, 2006
+   2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
    This file is part of GAS, the GNU Assembler.
 
@@ -455,6 +455,23 @@ as_internal_value_out_of_range (char *    prefix,
 
   if (prefix == NULL)
     prefix = "";
+
+  if (val >= min && val <= max)
+    {
+      addressT right = max & -max;
+
+      if (max <= 1)
+	abort ();
+
+      /* xgettext:c-format  */
+      err = _("%s out of domain (%d is not a multiple of %d");
+      if (bad)
+	as_bad_where (file, line, err,
+		      prefix, (int) val, (int) right);
+      else
+	as_warn_where (file, line, err,
+		       prefix, (int) val, (int) right);
+    }
 
   if (   val < HEX_MAX_THRESHOLD
       && min < HEX_MAX_THRESHOLD
