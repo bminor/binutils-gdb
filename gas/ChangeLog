@@ -1,5 +1,9 @@
 2007-04-20  Nathan Sidwell  <nathan@codesourcery.com>
 
+	* config/tc-m68k.c (mcf5253_ctrl): New.
+	(mcf52223_ctrl): New.
+	(m68k_cpus): Add 5253, 52221, 52223.
+
 	* config/m68k-parse.h (RAMBAR_ALT): New.
 	* config/tc-m68k.c (mcf5206_ctrl, mcf5307_ctrl): New.
 	(mcf_ctrl, mcf5208_ctrl, mcf5210a_ctrl, mcf5213_ctrl, mcf52235_ctrl,

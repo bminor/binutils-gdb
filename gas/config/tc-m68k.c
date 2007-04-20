@@ -196,6 +196,10 @@ static const enum m68k_register mcf5216_ctrl[] = {
   VBR, CACR, ACR0, ACR1, FLASHBAR, RAMBAR, RAMBAR1,
   0
 };
+static const enum m68k_register mcf52223_ctrl[] = {
+  VBR, CACR, ACR0, ACR1, FLASHBAR, RAMBAR, RAMBAR1,
+  0
+};
 static const enum m68k_register mcf52235_ctrl[] = {
   VBR, FLASHBAR, RAMBAR, RAMBAR1,
   0
@@ -214,6 +218,10 @@ static const enum m68k_register mcf5249_ctrl[] = {
 };
 static const enum m68k_register mcf5250_ctrl[] = {
   VBR,
+  0
+};
+static const enum m68k_register mcf5253_ctrl[] = {
+  VBR, CACR, ACR0, ACR1, RAMBAR0, RAMBAR1, MBAR,
   0
 };
 static const enum m68k_register mcf5271_ctrl[] = {
@@ -556,6 +564,9 @@ static const struct m68k_cpu m68k_cpus[] =
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5216_ctrl, "5216", 0},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5216_ctrl, "521x", 2},
 
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,   mcf52223_ctrl, "52221", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,   mcf52223_ctrl, "52223", 0},
+
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,  mcf52235_ctrl, "52230", -1},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,  mcf52235_ctrl, "52233", -1},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,  mcf52235_ctrl, "52234", -1},
@@ -572,6 +583,7 @@ static const struct m68k_cpu m68k_cpus[] =
   
   {mcfisa_a|mcfhwdiv|mcfemac,			mcf5249_ctrl, "5249", 0},
   {mcfisa_a|mcfhwdiv|mcfemac,			mcf5250_ctrl, "5250", 0},
+  {mcfisa_a|mcfhwdiv|mcfemac, 			mcf5253_ctrl, "5253", 0},
   
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5271_ctrl, "5270", -1},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5271_ctrl, "5271", 0},
