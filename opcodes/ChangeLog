@@ -1,3 +1,8 @@
+2007-04-20  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-dis.c (print_insn): Only look for a mapping symbol in the section
+	being disassembled.
+
 2007-04-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".

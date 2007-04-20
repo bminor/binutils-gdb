@@ -1,6 +1,6 @@
 /* Instruction printing code for the ARM
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
-   Free Software Foundation, Inc.
+   2007, Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
    Modification by James G. Smith (jsmith@cygnus.co.uk)
 
@@ -3982,7 +3982,9 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
 	  addr = bfd_asymbol_value (info->symtab[n]);
 	  if (addr > pc)
 	    break;
-	  if (get_sym_code_type (info, n, &type))
+	  if ((info->section == NULL
+	       || info->section == info->symtab[n]->section)
+	      && get_sym_code_type (info, n, &type))
 	    {
 	      last_sym = n;
 	      found = TRUE;
