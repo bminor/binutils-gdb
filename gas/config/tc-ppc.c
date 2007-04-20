@@ -1508,8 +1508,8 @@ ppc_insert_operand (insn, operand, val, file, line)
   if ((operand->flags & PPC_OPERAND_SIGNED) != 0)
     {
       if ((operand->flags & PPC_OPERAND_SIGNOPT) == 0)
-	max >>= 1;
-      min = ~(max | ((max & -max) - 1)) ;
+	max = (max >> 1) & -right;
+      min = ~max & -right;
 
       if (!ppc_obj64)
 	{

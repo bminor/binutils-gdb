@@ -464,13 +464,14 @@ as_internal_value_out_of_range (char *    prefix,
 	abort ();
 
       /* xgettext:c-format  */
-      err = _("%s out of domain (%d is not a multiple of %d");
+      err = _("%s out of domain (%d is not a multiple of %d)");
       if (bad)
 	as_bad_where (file, line, err,
 		      prefix, (int) val, (int) right);
       else
 	as_warn_where (file, line, err,
 		       prefix, (int) val, (int) right);
+      return;
     }
 
   if (   val < HEX_MAX_THRESHOLD

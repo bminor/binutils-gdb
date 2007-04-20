@@ -1,5 +1,12 @@
 2007-04-20  Alan Modra  <amodra@bigpond.net.au>
 
+	* messages.c (as_internal_value_out_of_range): Fix typo in
+	error message.  Return after printing domain error.
+	* config/tc-ppc.c (ppc_insert_operand): Preserve low zero bits
+	in max when shifting right.
+
+2007-04-20  Alan Modra  <amodra@bigpond.net.au>
+
 	* messages.c (as_internal_value_out_of_range): Extend to report
 	errors for values with invalid low bits set.
 	* config/tc-ppc.c (ppc_setup_opcodes): Check powerpc_operands bitm
