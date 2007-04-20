@@ -530,8 +530,9 @@ const struct powerpc_operand powerpc_operands[] =
 #define SIMM VD + 1
   { 5, 16, NULL, NULL, PPC_OPERAND_SIGNED},
 
-  /* The UIMM field in a VX form instruction.  */
+  /* The UIMM field in a VX form instruction, and TE in Z form.  */
 #define UIMM SIMM + 1
+#define TE UIMM
   { 5, 16, NULL, NULL, 0 },
 
   /* The SHB field in a VA form instruction.  */
@@ -564,31 +565,23 @@ const struct powerpc_operand powerpc_operands[] =
 #define A_L MTMSRD_L
   { 1, 16, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
-  /* The DCM field in a Z form instruction.  */
-#define DCM MTMSRD_L + 1
-  { 6, 16, NULL, NULL, 0 },
-
-  /* Likewise, the DGM field in a Z form instruction.  */
-#define DGM DCM + 1
-  { 6, 16, NULL, NULL, 0 },
-
-#define TE DGM + 1
-  { 5, 11, NULL, NULL, 0 },
-
-#define RMC TE + 1
-  { 2, 21, NULL, NULL, 0 },
+#define RMC A_L + 1
+  { 2, 9, NULL, NULL, 0 },
 
 #define R RMC + 1
-  { 1, 15, NULL, NULL, 0 },
+  { 1, 16, NULL, NULL, 0 },
 
 #define SP R + 1
-  { 2, 11, NULL, NULL, 0 },
+  { 2, 19, NULL, NULL, 0 },
 
 #define S SP + 1
-  { 1, 11, NULL, NULL, 0 },
+  { 1, 20, NULL, NULL, 0 },
 
   /* SH field starting at bit position 16.  */
 #define SH16 S + 1
+  /* The DCM and DGM fields in a Z form instruction.  */
+#define DCM SH16
+#define DGM DCM
   { 6, 10, NULL, NULL, 0 },
 
   /* The L field in an X form with the RT field fixed instruction.  */
@@ -1683,6 +1676,7 @@ extract_tbr (unsigned long insn,
 
 /* The mask for a Z form instruction.  */
 #define Z_MASK ZRC (0x3f, 0x1ff, 1)
+#define Z2_MASK ZRC (0x3f, 0xff, 1)
 
 /* An X_MASK with the RA field fixed.  */
 #define XRA_MASK (X_MASK | RA_MASK)
@@ -4639,8 +4633,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "dadd",    XRC(59,2,0), X_MASK,	POWER6,		{ FRT, FRA, FRB } },
 { "dadd.",   XRC(59,2,1), X_MASK,	POWER6,		{ FRT, FRA, FRB } },
 
-{ "dqua",    ZRC(59,3,0), Z_MASK,	POWER6,		{ FRT, FRA, FRB, RMC } },
-{ "dqua.",   ZRC(59,3,1), Z_MASK,	POWER6,		{ FRT, FRA, FRB, RMC } },
+{ "dqua",    ZRC(59,3,0), Z2_MASK,	POWER6,		{ FRT, FRA, FRB, RMC } },
+{ "dqua.",   ZRC(59,3,1), Z2_MASK,	POWER6,		{ FRT, FRA, FRB, RMC } },
 
 { "fdivs",   A(59,18,0), AFRC_MASK,	PPC,		{ FRT, FRA, FRB } },
 { "fdivs.",  A(59,18,1), AFRC_MASK,	PPC,		{ FRT, FRA, FRB } },
@@ -4678,20 +4672,20 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "dmul",    XRC(59,34,0), X_MASK,	POWER6,		{ FRT, FRA, FRB } },
 { "dmul.",   XRC(59,34,1), X_MASK,	POWER6,		{ FRT, FRA, FRB } },
 
-{ "drrnd",   ZRC(59,35,0), Z_MASK,	POWER6,		{ FRT, FRA, FRB, RMC } },
-{ "drrnd.",  ZRC(59,35,1), Z_MASK,	POWER6,		{ FRT, FRA, FRB, RMC } },
+{ "drrnd",   ZRC(59,35,0), Z2_MASK,	POWER6,		{ FRT, FRA, FRB, RMC } },
+{ "drrnd.",  ZRC(59,35,1), Z2_MASK,	POWER6,		{ FRT, FRA, FRB, RMC } },
 
 { "dscli",   ZRC(59,66,0), Z_MASK,	POWER6,		{ FRT, FRA, SH16 } },
 { "dscli.",  ZRC(59,66,1), Z_MASK,	POWER6,		{ FRT, FRA, SH16 } },
 
-{ "dquai",   ZRC(59,67,0), Z_MASK,	POWER6,		{ TE,  FRT, FRB, RMC } },
-{ "dquai.",  ZRC(59,67,1), Z_MASK,	POWER6,		{ TE,  FRT, FRB, RMC } },
+{ "dquai",   ZRC(59,67,0), Z2_MASK,	POWER6,		{ TE,  FRT, FRB, RMC } },
+{ "dquai.",  ZRC(59,67,1), Z2_MASK,	POWER6,		{ TE,  FRT, FRB, RMC } },
 
 { "dscri",   ZRC(59,98,0), Z_MASK,	POWER6,		{ FRT, FRA, SH16 } },
 { "dscri.",  ZRC(59,98,1), Z_MASK,	POWER6,		{ FRT, FRA, SH16 } },
 
-{ "drintx",  ZRC(59,99,0), Z_MASK,	POWER6,		{ R, FRT, FRB, RMC } },
-{ "drintx.", ZRC(59,99,1), Z_MASK,	POWER6,		{ R, FRT, FRB, RMC } },
+{ "drintx",  ZRC(59,99,0), Z2_MASK,	POWER6,		{ R, FRT, FRB, RMC } },
+{ "drintx.", ZRC(59,99,1), Z2_MASK,	POWER6,		{ R, FRT, FRB, RMC } },
 
 { "dcmpo",   X(59,130),	   X_MASK,	POWER6,		{ BF,  FRA, FRB } },
 
@@ -4699,8 +4693,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "dtstdc",  Z(59,194),	   Z_MASK,	POWER6,		{ BF,  FRA, DCM } },
 { "dtstdg",  Z(59,226),	   Z_MASK,	POWER6,		{ BF,  FRA, DGM } },
 
-{ "drintn",  ZRC(59,227,0), Z_MASK,	POWER6,		{ R, FRT, FRB, RMC } },
-{ "drintn.", ZRC(59,227,1), Z_MASK,	POWER6,		{ R, FRT, FRB, RMC } },
+{ "drintn",  ZRC(59,227,0), Z2_MASK,	POWER6,		{ R, FRT, FRB, RMC } },
+{ "drintn.", ZRC(59,227,1), Z2_MASK,	POWER6,		{ R, FRT, FRB, RMC } },
 
 { "dctdp",   XRC(59,258,0), X_MASK,	POWER6,		{ FRT, FRB } },
 { "dctdp.",  XRC(59,258,1), X_MASK,	POWER6,		{ FRT, FRB } },
@@ -4766,8 +4760,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "daddq",   XRC(63,2,0), X_MASK,	POWER6,		{ FRT, FRA, FRB } },
 { "daddq.",  XRC(63,2,1), X_MASK,	POWER6,		{ FRT, FRA, FRB } },
 
-{ "dquaq",   ZRC(63,3,0), Z_MASK,	POWER6,		{ FRT, FRA, FRB, RMC } },
-{ "dquaq.",  ZRC(63,3,1), Z_MASK,	POWER6,		{ FRT, FRA, FRB, RMC } },
+{ "dquaq",   ZRC(63,3,0), Z2_MASK,	POWER6,		{ FRT, FRA, FRB, RMC } },
+{ "dquaq.",  ZRC(63,3,1), Z2_MASK,	POWER6,		{ FRT, FRA, FRB, RMC } },
 
 { "fcpsgn",  XRC(63,8,0), X_MASK,	POWER6,		{ FRT, FRA, FRB } },
 { "fcpsgn.", XRC(63,8,1), X_MASK,	POWER6,		{ FRT, FRA, FRB } },
@@ -4842,8 +4836,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "dmulq",   XRC(63,34,0), X_MASK,	POWER6,		{ FRT, FRA, FRB } },
 { "dmulq.",  XRC(63,34,1), X_MASK,	POWER6,		{ FRT, FRA, FRB } },
 
-{ "drrndq",  ZRC(63,35,0), Z_MASK,	POWER6,		{ FRT, FRA, FRB, RMC } },
-{ "drrndq.", ZRC(63,35,1), Z_MASK,	POWER6,		{ FRT, FRA, FRB, RMC } },
+{ "drrndq",  ZRC(63,35,0), Z2_MASK,	POWER6,		{ FRT, FRA, FRB, RMC } },
+{ "drrndq.", ZRC(63,35,1), Z2_MASK,	POWER6,		{ FRT, FRA, FRB, RMC } },
 
 { "mtfsb1",  XRC(63,38,0), XRARB_MASK,	COM,		{ BT } },
 { "mtfsb1.", XRC(63,38,1), XRARB_MASK,	COM,		{ BT } },
@@ -4856,8 +4850,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "dscliq",  ZRC(63,66,0), Z_MASK,	POWER6,		{ FRT, FRA, SH16 } },
 { "dscliq.", ZRC(63,66,1), Z_MASK,	POWER6,		{ FRT, FRA, SH16 } },
 
-{ "dquaiq",  ZRC(63,67,0), Z_MASK,	POWER6,		{ TE,  FRT, FRB, RMC } },
-{ "dquaiq.", ZRC(63,67,1), Z_MASK,	POWER6,		{ FRT, FRA, FRB, RMC } },
+{ "dquaiq",  ZRC(63,67,0), Z2_MASK,	POWER6,		{ TE,  FRT, FRB, RMC } },
+{ "dquaiq.", ZRC(63,67,1), Z2_MASK,	POWER6,		{ FRT, FRA, FRB, RMC } },
 
 { "mtfsb0",  XRC(63,70,0), XRARB_MASK,	COM,		{ BT } },
 { "mtfsb0.", XRC(63,70,1), XRARB_MASK,	COM,		{ BT } },
@@ -4868,8 +4862,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "dscriq",  ZRC(63,98,0), Z_MASK,	POWER6,		{ FRT, FRA, SH16 } },
 { "dscriq.", ZRC(63,98,1), Z_MASK,	POWER6,		{ FRT, FRA, SH16 } },
 
-{ "drintxq", ZRC(63,99,0), Z_MASK,	POWER6,		{ R, FRT, FRB, RMC } },
-{ "drintxq.",ZRC(63,99,1), Z_MASK,	POWER6,		{ R, FRT, FRB, RMC } },
+{ "drintxq", ZRC(63,99,0), Z2_MASK,	POWER6,		{ R, FRT, FRB, RMC } },
+{ "drintxq.",ZRC(63,99,1), Z2_MASK,	POWER6,		{ R, FRT, FRB, RMC } },
 
 { "dcmpoq",  X(63,130),	   X_MASK,	POWER6,		{ BF,  FRA, FRB } },
 
@@ -4883,8 +4877,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "dtstdcq", Z(63,194),	    Z_MASK,	POWER6,		{ BF,  FRA, DCM } },
 { "dtstdgq", Z(63,226),	    Z_MASK,	POWER6,		{ BF,  FRA, DGM } },
 
-{ "drintnq", ZRC(63,227,0), Z_MASK,	POWER6,		{ R, FRT, FRB, RMC } },
-{ "drintnq.",ZRC(63,227,1), Z_MASK,	POWER6,		{ R, FRT, FRB, RMC } },
+{ "drintnq", ZRC(63,227,0), Z2_MASK,	POWER6,		{ R, FRT, FRB, RMC } },
+{ "drintnq.",ZRC(63,227,1), Z2_MASK,	POWER6,		{ R, FRT, FRB, RMC } },
 
 { "dctqpq",  XRC(63,258,0), X_MASK,	POWER6,		{ FRT, FRB } },
 { "dctqpq.", XRC(63,258,1), X_MASK,	POWER6,		{ FRT, FRB } },

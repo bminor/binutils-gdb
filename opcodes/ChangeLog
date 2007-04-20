@@ -1,3 +1,9 @@
+2007-04-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c (DCM, DGM, TE, RMC, R, SP, S): Correct shift.
+	(Z2_MASK): Define.
+	(powerpc_opcodes): Use Z2_MASK in all insns taking RMC operand.
+
 2007-04-20  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-dis.c (print_insn): Only look for a mapping symbol in the section
