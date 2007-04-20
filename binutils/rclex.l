@@ -217,7 +217,7 @@ static char *get_string (int);
 			    }
 			}
 
-[A-Za-z][^ ,\t\r\n]*	{
+[_A-Za-z][^ ,\t\r\n]*	{
 			  char *s;
 
 			  /* I rejected comma in a string in order to

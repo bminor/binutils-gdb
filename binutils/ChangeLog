@@ -1,3 +1,7 @@
+2007-04-20  Nick Clifton  <nickc@redhat.com>
+
+	* rclex.l: Allow underscores at the start of identifiers.
+
 2007-04-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* budemang.c: Delete.
