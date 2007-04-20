@@ -1,3 +1,8 @@
+2007-04-20  Nick Clifton  <nickc@redhat.com>
+
+	* xc16x.cpu: Restore after accidentally overwriting this file with
+	xc16x.opc.
+
 2007-03-29  DJ Delorie  <dj@redhat.com>
 
 	* m32c.cpu (Imm-8-s4n): Fix print hook.
