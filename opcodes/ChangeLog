@@ -1,5 +1,10 @@
 2007-04-21  Alan Modra  <amodra@bigpond.net.au>
 
+	* i386-opc.c (i386_float_regtab, i386_float_regtab_size): Delete.
+	Move contents to..
+	(i386_regtab): ..here.
+	* i386-opc.h (i386_float_regtab, i386_float_regtab_size): Delete.
+
 	* ppc-opc.c (powerpc_operands): Delete duplicate entries.
 	(BA_MASK, FXM_MASK, STRM_MASK, VA_MASK, VB_MASK, VC_MASK): Delete.
 	(VD_MASK, WS_MASK, MTMSRD_L, XRT_L): Delete.

@@ -1712,12 +1712,7 @@ const reg_entry i386_regtab[] =
   /* No type will make this register rejected for all purposes except
      for addressing.  This saves creating one extra type for RIP.  */
   {"rip", BaseIndex, 0, 0},
-};
-
-const unsigned int i386_regtab_size = ARRAY_SIZE (i386_regtab);
-
-const reg_entry i386_float_regtab[] =
-{
+  /* fp regs.  */
   {"st(0)", FloatReg|FloatAcc, 0, 0},
   {"st(1)", FloatReg, 0, 1},
   {"st(2)", FloatReg, 0, 2},
@@ -1728,7 +1723,7 @@ const reg_entry i386_float_regtab[] =
   {"st(7)", FloatReg, 0, 7}
 };
 
-const unsigned int i386_float_regtab_size = ARRAY_SIZE (i386_float_regtab);
+const unsigned int i386_regtab_size = ARRAY_SIZE (i386_regtab);
 
 /* Segment stuff.  */
 const seg_entry cs = { "cs", 0x2e };

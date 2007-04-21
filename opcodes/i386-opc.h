@@ -223,8 +223,6 @@ reg_entry;
 
 extern const reg_entry i386_regtab[];
 extern const unsigned int i386_regtab_size;
-extern const reg_entry i386_float_regtab[];
-extern const unsigned int i386_float_regtab_size;
 
 typedef struct
 {

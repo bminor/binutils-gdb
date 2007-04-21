@@ -1,6 +1,6 @@
 /* expr.c -operands, expressions-
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -1636,7 +1636,7 @@ expr (int rankarg,		/* Larger # is higher rank.  */
   operatorT op_right;
   int op_chars;
 
-  know (rank >= 0);
+  know (rankarg >= 0);
 
   /* Save the value of dot for the fixup code.  */
   if (rank == 0)

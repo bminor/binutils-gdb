@@ -2816,7 +2816,7 @@ ppc_macro (str, macro)
   char *s;
   unsigned int len;
   const char *format;
-  int arg;
+  unsigned int arg;
   char *send;
   char *complete;
 
@@ -2854,7 +2854,7 @@ ppc_macro (str, macro)
       else
 	{
 	  arg = strtol (format + 1, &send, 10);
-	  know (send != format && arg >= 0 && arg < count);
+	  know (send != format && arg < count);
 	  len += strlen (operands[arg]);
 	  format = send;
 	}

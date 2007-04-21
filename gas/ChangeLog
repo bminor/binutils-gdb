@@ -1,5 +1,15 @@
 2007-04-21  Alan Modra  <amodra@bigpond.net.au>
 
+	* expr.c (expr): Assert on rankarg, not rank which can be unsigned.
+	* read.c (read_a_source_file): Remove buffer_limit[-1] assertion.
+	Don't skip over NUL char.
+	(pseudo_set): Set X_op for registers to O_register.
+	* symbols.c (symbol_clone): Remove assertion that sym is defined.
+	(resolve_symbol_value): Resolve O_register symbols.
+	* config/tc-i386.c (parse_real_register): Don't use i386_float_regtab.
+	Instead find st(0) by hash lookup.
+	* config/tc-ppc.c (ppc_macro): Warning fix.
+
 	* as.h (ENABLE_CHECKING): Default define to 0.
 	(know): Assert if ENABLE_CHECKING.
 	(struct relax_type): Remove superfluous declaration.

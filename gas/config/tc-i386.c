@@ -5804,14 +5804,16 @@ parse_real_register (char *reg_string, char **end_op)
 	    ++s;
 	  if (*s >= '0' && *s <= '7')
 	    {
-	      r = &i386_float_regtab[*s - '0'];
+	      int fpr = *s - '0';
 	      ++s;
 	      if (is_space_char (*s))
 		++s;
 	      if (*s == ')')
 		{
 		  *end_op = s + 1;
-		  return r;
+		  r = hash_find (reg_hash, "st(0)");
+		  know (r);
+		  return r + fpr;
 		}
 	    }
 	  /* We have "%st(" then garbage.  */

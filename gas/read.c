@@ -607,8 +607,6 @@ read_a_source_file (char *name)
 
       last_eol = NULL;
 #endif
-      know (buffer_limit[-1] == '\n');	/* Must have a sentinel.  */
-
       while (input_line_pointer < buffer_limit)
 	{
 	  /* We have more of this buffer to parse.  */
@@ -705,8 +703,7 @@ read_a_source_file (char *name)
 	     If you must pass stuff, please pass a tree!)  */
 	  if ((c = *input_line_pointer++) == '\t'
 	      || c == ' '
-	      || c == '\f'
-	      || c == 0)
+	      || c == '\f')
 	    c = *input_line_pointer++;
 
 	  know (c != ' ');	/* No further leading whitespace.  */
@@ -3491,6 +3488,7 @@ pseudo_set (symbolS *symbolP)
       S_SET_SEGMENT (symbolP, reg_section);
       S_SET_VALUE (symbolP, (valueT) exp.X_add_number);
       set_zero_frag (symbolP);
+      symbol_get_value_expression (symbolP)->X_op = O_register;
       break;
 
     case O_symbol:
