@@ -1,3 +1,7 @@
+2007-04-21  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-ia64.c (emit_one_bundle): Fix typo.
+
 2007-04-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* expr.c (expr): Assert on rankarg, not rank which can be unsigned.

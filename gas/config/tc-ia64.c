@@ -6691,7 +6691,7 @@ emit_one_bundle ()
   int addr_mod;
 
   first = (md.curr_slot + NUM_SLOTS - md.num_slots_in_use) % NUM_SLOTS;
-  know (first >= 0 & first < NUM_SLOTS);
+  know (first >= 0 && first < NUM_SLOTS);
   n = MIN (3, md.num_slots_in_use);
 
   /* Determine template: user user_template if specified, best match
