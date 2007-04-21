@@ -1,3 +1,7 @@
+2007-04-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* config.bfd (spu-*-elf): Delete targ_selvecs.
+
 2007-04-19  Nick Clifton  <nickc@redhat.com>
 
 	* coffcode.h (coff_rtype_to_howto): Initialise genrel.howto.

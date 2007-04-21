@@ -1392,7 +1392,6 @@ case "${targ}" in
 
   spu-*-elf)
     targ_defvec=bfd_elf32_spu_vec
-    targ_selvecs="bfd_elf32_powerpc_vec bfd_elf64_powerpc_vec"
     ;;
 
 #if HAVE_host_aout_vec
