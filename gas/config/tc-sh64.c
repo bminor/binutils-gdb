@@ -3035,8 +3035,6 @@ sh64_target_mach (void)
 valueT
 shmedia_md_pcrel_from_section (struct fix *fixP, segT sec ATTRIBUTE_UNUSED)
 {
-  know (fixP->fx_frag->fr_type == rs_machine_dependent);
-
   /* Use the ISA for the instruction to decide which offset to use.  We
      can glean it from the fisup type.  */
   switch (fixP->fx_r_type)

@@ -9513,11 +9513,6 @@ convert_frag_immed_finish_loop (segT segP, fragS *fragP, TInsn *tinsn)
       target = 0;
     }
 
-  know (symbolP);
-  know (symbolP->sy_frag);
-  know (!(S_GET_SEGMENT (symbolP) == absolute_section)
-	|| symbol_get_frag (symbolP) == &zero_address_frag);
-
   loop_length = target - (fragP->fr_address + fragP->fr_fix);
   loop_length_hi = loop_length & ~0x0ff;
   loop_length_lo = loop_length & 0x0ff;

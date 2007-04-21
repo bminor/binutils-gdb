@@ -886,7 +886,6 @@ align_test_frag_offset_fixed_p (const fragS *frag1, const fragS *frag2,
 
   return FALSE;
 }
-#endif /* OBJ_ELF */
 
 /* Optimize a difference of symbols which have rs_align_test frag if
    possible.  */
@@ -894,7 +893,6 @@ align_test_frag_offset_fixed_p (const fragS *frag1, const fragS *frag2,
 int
 sh_optimize_expr (expressionS *l, operatorT op, expressionS *r)
 {
-#ifdef OBJ_ELF
   bfd_vma frag_off;
 
   if (op == O_subtract
@@ -915,9 +913,9 @@ sh_optimize_expr (expressionS *l, operatorT op, expressionS *r)
       l->X_add_symbol = 0;
       return 1;
     }
-#endif /* OBJ_ELF */
   return 0;
 }
+#endif /* OBJ_ELF */
 
 /* This function is called once, at assembler startup time.  This should
    set up all the tables, etc that the MD part of the assembler needs.  */

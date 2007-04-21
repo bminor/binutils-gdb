@@ -47,8 +47,10 @@ extern void sh_cons_align (int);
 /* We need to optimize expr with taking account of rs_align_test
    frags.  */
 
+#ifdef OBJ_ELF
 #define md_optimize_expr(l,o,r) sh_optimize_expr (l, o, r)
 extern int sh_optimize_expr (expressionS *, operatorT, expressionS *);
+#endif
 
 /* When relaxing, we need to generate relocations for alignment
    directives.  */
