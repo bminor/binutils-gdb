@@ -3087,7 +3087,7 @@ _bfd_ecoff_write_armap (bfd *abfd,
   last_elt = current;
   for (i = 0; i < orl_count; i++)
     {
-      unsigned int hash, rehash;
+      unsigned int hash, rehash = 0;
 
       /* Advance firstreal to the file position of this archive
 	 element.  */
@@ -3757,7 +3757,7 @@ ecoff_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
   while (*pundef != NULL)
     {
       struct bfd_link_hash_entry *h;
-      unsigned int hash, rehash;
+      unsigned int hash, rehash = 0;
       unsigned int file_offset;
       const char *name;
       bfd *element;

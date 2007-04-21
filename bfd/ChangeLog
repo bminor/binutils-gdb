@@ -1,3 +1,13 @@
+2007-04-21  Nick Clifton  <nickc@redhat.com>
+
+	* ecoff.c (_bfd_ecoff_write_armap): Initialise rehash.
+	(ecoff_link_add_archive_symbols): Likewise.
+	* coff-m68k.c (m68kcoff_common_addend_rtype_to_howto): Initialise
+	relent.howto.
+	* ieee.c (parse_int): Initialise x.
+	(must_parse_int): Initialise result.
+	(ieee_slurp_external_symbols): Initialise value.
+
 2007-04-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* config.bfd (spu-*-elf): Delete targ_selvecs.
