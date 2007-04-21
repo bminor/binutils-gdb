@@ -1,3 +1,23 @@
+2007-04-21  Richard Earnshaw  <rearnsha@arm.com>
+
+	* gas/arm/arch4t.d: Convert to unified syntax.
+	* gas/arm/archv6.d: Likewise.
+	* gas/arm/archv6t2.d: Likewise.
+	* gas/arm/arch3.d: Likewise.
+	* gas/arm/arch7dm.d: Likewise.
+	* gas/arm/arch7t.d: Likewise.
+	* gas/arm/archv1.d: Likewise.
+	* gas/arm/copro.d: Likewise.
+	* gas/arm/inst.d: Likewise.
+	* gas/arm/macro1.d: Likewise.
+	* gas/arm/tcompat.d: Likewise.
+	* gas/arm/wince_inst.d: Likewise.
+	* gas/arm/xscale.d: Likewise.
+
+	* gas/arm/thumb.d: White space cleanup.
+	* gas/arm/thumb2_relax.d: Likewise.
+	* gas/arm/thumb32.d: Likewise.
+	
 2007-04-20  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* gas/m68k/ctrl-1.d, gas/m68k/ctrl-1.s: New.

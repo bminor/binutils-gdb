@@ -142,7 +142,7 @@ Disassembly of section .text:
 0+1e0 <[^>]+> f8cf 1006 	str.w	r1, \[pc, #6\]	; 0+1ea <[^>]+>
 0+1e4 <[^>]+> f84f 103a 	str.w	r1, \[pc, #-58\]	; 0+1ae <[^>]+>
 0+1e8 <[^>]+> bf00      	nop
-0+1ea <[^>]+> a104      	add	r1, pc, #16	\(adr r1,0+1fc <[^>]+>\)
+0+1ea <[^>]+> a104      	add	r1, pc, #16	\(adr r1, 0+1fc <[^>]+>\)
 0+1ec <[^>]+> f20f 010c 	addw	r1, pc, #12	; 0xc
 0+1f0 <[^>]+> f20f 0808 	addw	r8, pc, #8	; 0x8
 0+1f4 <[^>]+> f20f 0106 	addw	r1, pc, #6	; 0x6

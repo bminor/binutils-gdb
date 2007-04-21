@@ -12,7 +12,7 @@ Disassembly of section .text:
 0+008 <[^>]*> ed939500 	cfldr32	mvfx9, \[r3\]
 0+00c <[^>]*> edd1e108 	ldfp	f6, \[r1, #32\]
 0+010 <[^>]*> 4db200ff 	ldcmi	0, cr0, \[r2, #1020\]!
-0+014 <[^>]*> 5cf31710 	ldcpll	7, cr1, \[r3\], #64
+0+014 <[^>]*> 5cf31710 	ldclpl	7, cr1, \[r3\], #64
 0+018 <[^>]*> ed1f8001 	ldc	0, cr8, \[pc, #-4\]
 0+01c <[^>]*> ed830500 	cfstr32	mvfx0, \[r3\]
 0+020 <[^>]*> edc0f302 	stcl	3, cr15, \[r0, #8\]
