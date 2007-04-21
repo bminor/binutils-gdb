@@ -258,7 +258,11 @@ typedef addressT valueT;
 #endif
 /* COMMON now defined */
 
-#ifdef DEBUG
+#ifndef ENABLE_CHECKING
+#define ENABLE_CHECKING 0
+#endif
+
+#if ENABLE_CHECKING || defined (DEBUG)
 #ifndef know
 #define know(p) assert(p)	/* Verify our assumptions!  */
 #endif /* not yet defined */
@@ -566,7 +570,6 @@ segT   subseg_get (const char *, int);
 struct expressionS;
 struct fix;
 typedef struct symbol symbolS;
-struct relax_type;
 typedef struct frag fragS;
 
 /* literal.c */

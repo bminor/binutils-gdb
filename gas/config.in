@@ -29,6 +29,9 @@
 /* Supported emulations. */
 #undef EMULATIONS
 
+/* Define if you want run-time sanity checks. */
+#undef ENABLE_CHECKING
+
 /* Define to 1 if translation of program messages to the user's native
    language is requested. */
 #undef ENABLE_NLS

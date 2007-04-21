@@ -858,6 +858,7 @@ Optional Features:
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --enable-targets        alternative target configurations besides the primary
   --enable-commonbfdlib   build shared BFD/opcodes/libiberty library
+  --enable-checking       enable run-time checks
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings
   --disable-nls           do not use Native Language Support
@@ -3866,7 +3867,7 @@ test x"$pic_mode" = xno && libtool_flags="$libtool_flags --prefer-non-pic"
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 3869 "configure"' > conftest.$ac_ext
+  echo '#line 3870 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -4164,7 +4165,8 @@ echo "$as_me: error: enable-targets option must specify target names or 'all'" >
   no)	    enable_targets= ;;
   *)	    enable_targets=$enableval ;;
 esac
-fi; # Check whether --enable-commonbfdlib or --disable-commonbfdlib was given.
+fi;
+# Check whether --enable-commonbfdlib or --disable-commonbfdlib was given.
 if test "${enable_commonbfdlib+set}" = set; then
   enableval="$enable_commonbfdlib"
   case "${enableval}" in
@@ -4175,6 +4177,25 @@ echo "$as_me: error: bad value ${enableval} for BFD commonbfdlib option" >&2;}
    { (exit 1); exit 1; }; } ;;
 esac
 fi;
+ac_checking=yes
+if grep '^RELEASE=y' ${srcdir}/../bfd/Makefile.am >/dev/null 2>/dev/null ; then
+  ac_checking=
+fi
+# Check whether --enable-checking or --disable-checking was given.
+if test "${enable_checking+set}" = set; then
+  enableval="$enable_checking"
+  case "${enableval}" in
+  no|none)  ac_checking= ;;
+  *)	    ac_checking=yes ;;
+esac
+fi; if test x$ac_checking != x ; then
+
+cat >>confdefs.h <<\_ACEOF
+#define ENABLE_CHECKING 1
+_ACEOF
+
+fi
+
 using_cgen=no
 
 

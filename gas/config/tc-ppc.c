@@ -1248,7 +1248,6 @@ ppc_setup_opcodes (void)
   const struct powerpc_opcode *op_end;
   const struct powerpc_macro *macro;
   const struct powerpc_macro *macro_end;
-  unsigned int i;
   bfd_boolean bad_insn = FALSE;
 
   if (ppc_hash != NULL)
@@ -1259,60 +1258,77 @@ ppc_setup_opcodes (void)
   /* Insert the opcodes into a hash table.  */
   ppc_hash = hash_new ();
 
-  /* Check operand masks.  Code here and in the disassembler assumes
-     all the 1's in the mask are contiguous.  */
-  for (i = 0; i < num_powerpc_operands; ++i)
+  if (ENABLE_CHECKING)
     {
-      unsigned long mask = powerpc_operands[i].bitm;
-      unsigned long right_bit;
+      unsigned int i;
 
-      right_bit = mask & -mask;
-      mask += right_bit;
-      right_bit = mask & -mask;
-      if (mask != right_bit)
+      /* Check operand masks.  Code here and in the disassembler assumes
+	 all the 1's in the mask are contiguous.  */
+      for (i = 0; i < num_powerpc_operands; ++i)
 	{
-	  as_bad (_("powerpc_operands[%d].bitm invalid"), i);
-	  bad_insn = TRUE;
+	  unsigned long mask = powerpc_operands[i].bitm;
+	  unsigned long right_bit;
+	  unsigned int j;
+
+	  right_bit = mask & -mask;
+	  mask += right_bit;
+	  right_bit = mask & -mask;
+	  if (mask != right_bit)
+	    {
+	      as_bad (_("powerpc_operands[%d].bitm invalid"), i);
+	      bad_insn = TRUE;
+	    }
+	  for (j = i + 1; j < num_powerpc_operands; ++j)
+	    if (memcmp (&powerpc_operands[i], &powerpc_operands[j],
+			sizeof (powerpc_operands[0])) == 0)
+	      {
+		as_bad (_("powerpc_operands[%d] duplicates powerpc_operands[%d]"),
+			j, i);
+		bad_insn = TRUE;
+	      }
 	}
     }
 
   op_end = powerpc_opcodes + powerpc_num_opcodes;
   for (op = powerpc_opcodes; op < op_end; op++)
     {
-      const unsigned char *o;
-      unsigned long omask = op->mask;
-
-      /* The mask had better not trim off opcode bits.  */
-      if ((op->opcode & omask) != op->opcode)
+      if (ENABLE_CHECKING)
 	{
-	  as_bad (_("mask trims opcode bits for %s"),
-		  op->name);
-	  bad_insn = TRUE;
-	}
+	  const unsigned char *o;
+	  unsigned long omask = op->mask;
 
-      /* The operands must not overlap the opcode or each other.  */
-      for (o = op->operands; *o; ++o)
-	if (*o >= num_powerpc_operands)
-	  {
-	    as_bad (_("operand index error for %s"),
-		    op->name);
-	    bad_insn = TRUE;
-	  }
-	else
-	  {
-	    const struct powerpc_operand *operand = &powerpc_operands[*o];
-	    if (operand->shift >= 0)
+	  /* The mask had better not trim off opcode bits.  */
+	  if ((op->opcode & omask) != op->opcode)
+	    {
+	      as_bad (_("mask trims opcode bits for %s"),
+		      op->name);
+	      bad_insn = TRUE;
+	    }
+
+	  /* The operands must not overlap the opcode or each other.  */
+	  for (o = op->operands; *o; ++o)
+	    if (*o >= num_powerpc_operands)
 	      {
-		unsigned long mask = operand->bitm << operand->shift;
-		if (omask & mask)
-		  {
-		    as_bad (_("operand %d overlap in %s"),
-			    (int) (o - op->operands), op->name);
-		    bad_insn = TRUE;
-		  }
-		omask |= mask;
+		as_bad (_("operand index error for %s"),
+			op->name);
+		bad_insn = TRUE;
 	      }
-	  }
+	    else
+	      {
+		const struct powerpc_operand *operand = &powerpc_operands[*o];
+		if (operand->shift >= 0)
+		  {
+		    unsigned long mask = operand->bitm << operand->shift;
+		    if (omask & mask)
+		      {
+			as_bad (_("operand %d overlap in %s"),
+				(int) (o - op->operands), op->name);
+			bad_insn = TRUE;
+		      }
+		    omask |= mask;
+		  }
+	      }
+	}
 
       if ((op->flags & ppc_cpu & ~(PPC_OPCODE_32 | PPC_OPCODE_64)) != 0
 	  && ((op->flags & (PPC_OPCODE_32 | PPC_OPCODE_64)) == 0
