@@ -1,3 +1,11 @@
+2007-04-21  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-dis.c (arm_opcodes): Disassemble to unified syntax.
+	(thumb_opcodes): Add missing white space in adr.
+	(arm_decode_shift): New parameter, print_shift.  Only decode the 
+	shift parameter if set.  Adjust callers.
+	(print_insn_arm): Support for operand type q with no shift decode.
+
 2007-04-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* i386-opc.c (i386_float_regtab, i386_float_regtab_size): Delete.

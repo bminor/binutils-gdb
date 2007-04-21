@@ -63,6 +63,7 @@ struct opcode16
    %%			%
 
    %c			print condition code (always bits 28-31 in ARM mode)
+   %q			print shifter argument
    %u			print condition code (unconditional in ARM mode)
    %A			print address for ldc/stc/ldf/stf instruction
    %B			print vstm/vldm register list
@@ -436,8 +437,8 @@ static const struct opcode32 coprocessor_opcodes[] =
   {ARM_EXT_V2, 0x0e000000, 0x0f000010, "cdp%c\t%8-11d, %20-23d, cr%12-15d, cr%16-19d, cr%0-3d, {%5-7d}"},
   {ARM_EXT_V2, 0x0e100010, 0x0f100010, "mrc%c\t%8-11d, %21-23d, %12-15r, cr%16-19d, cr%0-3d, {%5-7d}"},
   {ARM_EXT_V2, 0x0e000010, 0x0f100010, "mcr%c\t%8-11d, %21-23d, %12-15r, cr%16-19d, cr%0-3d, {%5-7d}"},
-  {ARM_EXT_V2, 0x0c000000, 0x0e100000, "stc%c%22'l\t%8-11d, cr%12-15d, %A"},
-  {ARM_EXT_V2, 0x0c100000, 0x0e100000, "ldc%c%22'l\t%8-11d, cr%12-15d, %A"},
+  {ARM_EXT_V2, 0x0c000000, 0x0e100000, "stc%22'l%c\t%8-11d, cr%12-15d, %A"},
+  {ARM_EXT_V2, 0x0c100000, 0x0e100000, "ldc%22'l%c\t%8-11d, cr%12-15d, %A"},
 
   /* V6 coprocessor instructions */
   {ARM_EXT_V6, 0xfc500000, 0xfff00000, "mrrc2%c\t%8-11d, %4-7d, %12-15r, %16-19r, cr%0-3d"},
@@ -770,11 +771,11 @@ static const struct opcode32 arm_opcodes[] =
   /* ARM instructions.  */
   {ARM_EXT_V1, 0xe1a00000, 0xffffffff, "nop\t\t\t(mov r0,r0)"},
   {ARM_EXT_V4T | ARM_EXT_V5, 0x012FFF10, 0x0ffffff0, "bx%c\t%0-3r"},
-  {ARM_EXT_V2, 0x00000090, 0x0fe000f0, "mul%c%20's\t%16-19r, %0-3r, %8-11r"},
-  {ARM_EXT_V2, 0x00200090, 0x0fe000f0, "mla%c%20's\t%16-19r, %0-3r, %8-11r, %12-15r"},
-  {ARM_EXT_V2S, 0x01000090, 0x0fb00ff0, "swp%c%22'b\t%12-15r, %0-3r, [%16-19r]"},
-  {ARM_EXT_V3M, 0x00800090, 0x0fa000f0, "%22?sumull%c%20's\t%12-15r, %16-19r, %0-3r, %8-11r"},
-  {ARM_EXT_V3M, 0x00a00090, 0x0fa000f0, "%22?sumlal%c%20's\t%12-15r, %16-19r, %0-3r, %8-11r"},
+  {ARM_EXT_V2, 0x00000090, 0x0fe000f0, "mul%20's%c\t%16-19r, %0-3r, %8-11r"},
+  {ARM_EXT_V2, 0x00200090, 0x0fe000f0, "mla%20's%c\t%16-19r, %0-3r, %8-11r, %12-15r"},
+  {ARM_EXT_V2S, 0x01000090, 0x0fb00ff0, "swp%22'b%c\t%12-15r, %0-3r, [%16-19r]"},
+  {ARM_EXT_V3M, 0x00800090, 0x0fa000f0, "%22?sumull%20's%c\t%12-15r, %16-19r, %0-3r, %8-11r"},
+  {ARM_EXT_V3M, 0x00a00090, 0x0fa000f0, "%22?sumlal%20's%c\t%12-15r, %16-19r, %0-3r, %8-11r"},
 
   /* V7 instructions.  */
   {ARM_EXT_V7, 0xf450f000, 0xfd70f000, "pli\t%P"},
@@ -787,8 +788,8 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_EXT_V6T2, 0x07c0001f, 0x0fe0007f, "bfc%c\t%12-15r, %E"},
   {ARM_EXT_V6T2, 0x07c00010, 0x0fe00070, "bfi%c\t%12-15r, %0-3r, %E"},
   {ARM_EXT_V6T2, 0x00600090, 0x0ff000f0, "mls%c\t%16-19r, %0-3r, %8-11r, %12-15r"},
-  {ARM_EXT_V6T2, 0x006000b0, 0x0f7000f0, "str%cht\t%12-15r, %s"},
-  {ARM_EXT_V6T2, 0x00300090, 0x0f300090, "ldr%c%6's%5?hbt\t%12-15r, %s"},
+  {ARM_EXT_V6T2, 0x006000b0, 0x0f7000f0, "strht%c\t%12-15r, %s"},
+  {ARM_EXT_V6T2, 0x00300090, 0x0f300090, "ldr%6's%5?hbt%c\t%12-15r, %s"},
   {ARM_EXT_V6T2, 0x03000000, 0x0ff00000, "movw%c\t%12-15r, %V"},
   {ARM_EXT_V6T2, 0x03400000, 0x0ff00000, "movt%c\t%12-15r, %V"},
   {ARM_EXT_V6T2, 0x06ff0f30, 0x0fff0ff0, "rbit%c\t%12-15r, %0-3r"},
@@ -820,9 +821,9 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_EXT_V6, 0xf10e0000, 0xfffffe20, "cpsid\t%8'a%7'i%6'f,#%0-4d"},
   {ARM_EXT_V6, 0xf1000000, 0xfff1fe20, "cps\t#%0-4d"},
   {ARM_EXT_V6, 0x06800010, 0x0ff00ff0, "pkhbt%c\t%12-15r, %16-19r, %0-3r"},
-  {ARM_EXT_V6, 0x06800010, 0x0ff00070, "pkhbt%c\t%12-15r, %16-19r, %0-3r, LSL #%7-11d"},
-  {ARM_EXT_V6, 0x06800050, 0x0ff00ff0, "pkhtb%c\t%12-15r, %16-19r, %0-3r, ASR #32"},
-  {ARM_EXT_V6, 0x06800050, 0x0ff00070, "pkhtb%c\t%12-15r, %16-19r, %0-3r, ASR #%7-11d"},
+  {ARM_EXT_V6, 0x06800010, 0x0ff00070, "pkhbt%c\t%12-15r, %16-19r, %0-3r, lsl #%7-11d"},
+  {ARM_EXT_V6, 0x06800050, 0x0ff00ff0, "pkhtb%c\t%12-15r, %16-19r, %0-3r, asr #32"},
+  {ARM_EXT_V6, 0x06800050, 0x0ff00070, "pkhtb%c\t%12-15r, %16-19r, %0-3r, asr #%7-11d"},
   {ARM_EXT_V6, 0x01900f9f, 0x0ff00fff, "ldrex%c\tr%12-15d, [%16-19r]"},
   {ARM_EXT_V6, 0x06200f10, 0x0ff00ff0, "qadd16%c\t%12-15r, %16-19r, %0-3r"},
   {ARM_EXT_V6, 0x06200f90, 0x0ff00ff0, "qadd8%c\t%12-15r, %16-19r, %0-3r"},
@@ -864,54 +865,54 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_EXT_V6, 0x06bf0fb0, 0x0fff0ff0, "rev16%c\t\%12-15r, %0-3r"},
   {ARM_EXT_V6, 0x06ff0fb0, 0x0fff0ff0, "revsh%c\t\%12-15r, %0-3r"},
   {ARM_EXT_V6, 0xf8100a00, 0xfe50ffff, "rfe%23?id%24?ba\t\%16-19r%21'!"},
-  {ARM_EXT_V6, 0x06bf0070, 0x0fff0ff0, "sxth%c %12-15r,%0-3r"},
-  {ARM_EXT_V6, 0x06bf0470, 0x0fff0ff0, "sxth%c %12-15r,%0-3r, ROR #8"},
-  {ARM_EXT_V6, 0x06bf0870, 0x0fff0ff0, "sxth%c %12-15r,%0-3r, ROR #16"},
-  {ARM_EXT_V6, 0x06bf0c70, 0x0fff0ff0, "sxth%c %12-15r,%0-3r, ROR #24"},
-  {ARM_EXT_V6, 0x068f0070, 0x0fff0ff0, "sxtb16%c %12-15r,%0-3r"},
-  {ARM_EXT_V6, 0x068f0470, 0x0fff0ff0, "sxtb16%c %12-15r,%0-3r, ROR #8"},
-  {ARM_EXT_V6, 0x068f0870, 0x0fff0ff0, "sxtb16%c %12-15r,%0-3r, ROR #16"},
-  {ARM_EXT_V6, 0x068f0c70, 0x0fff0ff0, "sxtb16%c %12-15r,%0-3r, ROR #24"},
-  {ARM_EXT_V6, 0x06af0070, 0x0fff0ff0, "sxtb%c %12-15r,%0-3r"},
-  {ARM_EXT_V6, 0x06af0470, 0x0fff0ff0, "sxtb%c %12-15r,%0-3r, ROR #8"},
-  {ARM_EXT_V6, 0x06af0870, 0x0fff0ff0, "sxtb%c %12-15r,%0-3r, ROR #16"},
-  {ARM_EXT_V6, 0x06af0c70, 0x0fff0ff0, "sxtb%c %12-15r,%0-3r, ROR #24"},
-  {ARM_EXT_V6, 0x06ff0070, 0x0fff0ff0, "uxth%c %12-15r,%0-3r"},
-  {ARM_EXT_V6, 0x06ff0470, 0x0fff0ff0, "uxth%c %12-15r,%0-3r, ROR #8"},
-  {ARM_EXT_V6, 0x06ff0870, 0x0fff0ff0, "uxth%c %12-15r,%0-3r, ROR #16"},
-  {ARM_EXT_V6, 0x06ff0c70, 0x0fff0ff0, "uxth%c %12-15r,%0-3r, ROR #24"},
-  {ARM_EXT_V6, 0x06cf0070, 0x0fff0ff0, "uxtb16%c %12-15r,%0-3r"},
-  {ARM_EXT_V6, 0x06cf0470, 0x0fff0ff0, "uxtb16%c %12-15r,%0-3r, ROR #8"},
-  {ARM_EXT_V6, 0x06cf0870, 0x0fff0ff0, "uxtb16%c %12-15r,%0-3r, ROR #16"},
-  {ARM_EXT_V6, 0x06cf0c70, 0x0fff0ff0, "uxtb16%c %12-15r,%0-3r, ROR #24"},
-  {ARM_EXT_V6, 0x06ef0070, 0x0fff0ff0, "uxtb%c %12-15r,%0-3r"},
-  {ARM_EXT_V6, 0x06ef0470, 0x0fff0ff0, "uxtb%c %12-15r,%0-3r, ROR #8"},
-  {ARM_EXT_V6, 0x06ef0870, 0x0fff0ff0, "uxtb%c %12-15r,%0-3r, ROR #16"},
-  {ARM_EXT_V6, 0x06ef0c70, 0x0fff0ff0, "uxtb%c %12-15r,%0-3r, ROR #24"},
+  {ARM_EXT_V6, 0x06bf0070, 0x0fff0ff0, "sxth%c\t%12-15r, %0-3r"},
+  {ARM_EXT_V6, 0x06bf0470, 0x0fff0ff0, "sxth%c\t%12-15r, %0-3r, ror #8"},
+  {ARM_EXT_V6, 0x06bf0870, 0x0fff0ff0, "sxth%c\t%12-15r, %0-3r, ror #16"},
+  {ARM_EXT_V6, 0x06bf0c70, 0x0fff0ff0, "sxth%c\t%12-15r, %0-3r, ror #24"},
+  {ARM_EXT_V6, 0x068f0070, 0x0fff0ff0, "sxtb16%c\t%12-15r, %0-3r"},
+  {ARM_EXT_V6, 0x068f0470, 0x0fff0ff0, "sxtb16%c\t%12-15r, %0-3r, ror #8"},
+  {ARM_EXT_V6, 0x068f0870, 0x0fff0ff0, "sxtb16%c\t%12-15r, %0-3r, ror #16"},
+  {ARM_EXT_V6, 0x068f0c70, 0x0fff0ff0, "sxtb16%c\t%12-15r, %0-3r, ror #24"},
+  {ARM_EXT_V6, 0x06af0070, 0x0fff0ff0, "sxtb%c\t%12-15r, %0-3r"},
+  {ARM_EXT_V6, 0x06af0470, 0x0fff0ff0, "sxtb%c\t%12-15r, %0-3r, ror #8"},
+  {ARM_EXT_V6, 0x06af0870, 0x0fff0ff0, "sxtb%c\t%12-15r, %0-3r, ror #16"},
+  {ARM_EXT_V6, 0x06af0c70, 0x0fff0ff0, "sxtb%c\t%12-15r, %0-3r, ror #24"},
+  {ARM_EXT_V6, 0x06ff0070, 0x0fff0ff0, "uxth%c\t%12-15r, %0-3r"},
+  {ARM_EXT_V6, 0x06ff0470, 0x0fff0ff0, "uxth%c\t%12-15r, %0-3r, ror #8"},
+  {ARM_EXT_V6, 0x06ff0870, 0x0fff0ff0, "uxth%c\t%12-15r, %0-3r, ror #16"},
+  {ARM_EXT_V6, 0x06ff0c70, 0x0fff0ff0, "uxth%c\t%12-15r, %0-3r, ror #24"},
+  {ARM_EXT_V6, 0x06cf0070, 0x0fff0ff0, "uxtb16%c\t%12-15r, %0-3r"},
+  {ARM_EXT_V6, 0x06cf0470, 0x0fff0ff0, "uxtb16%c\t%12-15r, %0-3r, ror #8"},
+  {ARM_EXT_V6, 0x06cf0870, 0x0fff0ff0, "uxtb16%c\t%12-15r, %0-3r, ror #16"},
+  {ARM_EXT_V6, 0x06cf0c70, 0x0fff0ff0, "uxtb16%c\t%12-15r, %0-3r, ror #24"},
+  {ARM_EXT_V6, 0x06ef0070, 0x0fff0ff0, "uxtb%c\t%12-15r, %0-3r"},
+  {ARM_EXT_V6, 0x06ef0470, 0x0fff0ff0, "uxtb%c\t%12-15r, %0-3r, ror #8"},
+  {ARM_EXT_V6, 0x06ef0870, 0x0fff0ff0, "uxtb%c\t%12-15r, %0-3r, ror #16"},
+  {ARM_EXT_V6, 0x06ef0c70, 0x0fff0ff0, "uxtb%c\t%12-15r, %0-3r, ror #24"},
   {ARM_EXT_V6, 0x06b00070, 0x0ff00ff0, "sxtah%c\t%12-15r, %16-19r, %0-3r"},
-  {ARM_EXT_V6, 0x06b00470, 0x0ff00ff0, "sxtah%c\t%12-15r, %16-19r, %0-3r, ROR #8"},
-  {ARM_EXT_V6, 0x06b00870, 0x0ff00ff0, "sxtah%c\t%12-15r, %16-19r, %0-3r, ROR #16"},
-  {ARM_EXT_V6, 0x06b00c70, 0x0ff00ff0, "sxtah%c\t%12-15r, %16-19r, %0-3r, ROR #24"},
+  {ARM_EXT_V6, 0x06b00470, 0x0ff00ff0, "sxtah%c\t%12-15r, %16-19r, %0-3r, ror #8"},
+  {ARM_EXT_V6, 0x06b00870, 0x0ff00ff0, "sxtah%c\t%12-15r, %16-19r, %0-3r, ror #16"},
+  {ARM_EXT_V6, 0x06b00c70, 0x0ff00ff0, "sxtah%c\t%12-15r, %16-19r, %0-3r, ror #24"},
   {ARM_EXT_V6, 0x06800070, 0x0ff00ff0, "sxtab16%c\t%12-15r, %16-19r, %0-3r"},
-  {ARM_EXT_V6, 0x06800470, 0x0ff00ff0, "sxtab16%c\t%12-15r, %16-19r, %0-3r, ROR #8"},
-  {ARM_EXT_V6, 0x06800870, 0x0ff00ff0, "sxtab16%c\t%12-15r, %16-19r, %0-3r, ROR #16"},
-  {ARM_EXT_V6, 0x06800c70, 0x0ff00ff0, "sxtab16%c\t%12-15r, %16-19r, %0-3r, ROR #24"},
+  {ARM_EXT_V6, 0x06800470, 0x0ff00ff0, "sxtab16%c\t%12-15r, %16-19r, %0-3r, ror #8"},
+  {ARM_EXT_V6, 0x06800870, 0x0ff00ff0, "sxtab16%c\t%12-15r, %16-19r, %0-3r, ror #16"},
+  {ARM_EXT_V6, 0x06800c70, 0x0ff00ff0, "sxtab16%c\t%12-15r, %16-19r, %0-3r, ror #24"},
   {ARM_EXT_V6, 0x06a00070, 0x0ff00ff0, "sxtab%c\t%12-15r, %16-19r, %0-3r"},
-  {ARM_EXT_V6, 0x06a00470, 0x0ff00ff0, "sxtab%c\t%12-15r, %16-19r, %0-3r, ROR #8"},
-  {ARM_EXT_V6, 0x06a00870, 0x0ff00ff0, "sxtab%c\t%12-15r, %16-19r, %0-3r, ROR #16"},
-  {ARM_EXT_V6, 0x06a00c70, 0x0ff00ff0, "sxtab%c\t%12-15r, %16-19r, %0-3r, ROR #24"},
+  {ARM_EXT_V6, 0x06a00470, 0x0ff00ff0, "sxtab%c\t%12-15r, %16-19r, %0-3r, ror #8"},
+  {ARM_EXT_V6, 0x06a00870, 0x0ff00ff0, "sxtab%c\t%12-15r, %16-19r, %0-3r, ror #16"},
+  {ARM_EXT_V6, 0x06a00c70, 0x0ff00ff0, "sxtab%c\t%12-15r, %16-19r, %0-3r, ror #24"},
   {ARM_EXT_V6, 0x06f00070, 0x0ff00ff0, "uxtah%c\t%12-15r, %16-19r, %0-3r"},
-  {ARM_EXT_V6, 0x06f00470, 0x0ff00ff0, "uxtah%c\t%12-15r, %16-19r, %0-3r, ROR #8"},
-  {ARM_EXT_V6, 0x06f00870, 0x0ff00ff0, "uxtah%c\t%12-15r, %16-19r, %0-3r, ROR #16"},
-  {ARM_EXT_V6, 0x06f00c70, 0x0ff00ff0, "uxtah%c\t%12-15r, %16-19r, %0-3r, ROR #24"},
+  {ARM_EXT_V6, 0x06f00470, 0x0ff00ff0, "uxtah%c\t%12-15r, %16-19r, %0-3r, ror #8"},
+  {ARM_EXT_V6, 0x06f00870, 0x0ff00ff0, "uxtah%c\t%12-15r, %16-19r, %0-3r, ror #16"},
+  {ARM_EXT_V6, 0x06f00c70, 0x0ff00ff0, "uxtah%c\t%12-15r, %16-19r, %0-3r, ror #24"},
   {ARM_EXT_V6, 0x06c00070, 0x0ff00ff0, "uxtab16%c\t%12-15r, %16-19r, %0-3r"},
-  {ARM_EXT_V6, 0x06c00470, 0x0ff00ff0, "uxtab16%c\t%12-15r, %16-19r, %0-3r, ROR #8"},
-  {ARM_EXT_V6, 0x06c00870, 0x0ff00ff0, "uxtab16%c\t%12-15r, %16-19r, %0-3r, ROR #16"},
+  {ARM_EXT_V6, 0x06c00470, 0x0ff00ff0, "uxtab16%c\t%12-15r, %16-19r, %0-3r, ror #8"},
+  {ARM_EXT_V6, 0x06c00870, 0x0ff00ff0, "uxtab16%c\t%12-15r, %16-19r, %0-3r, ror #16"},
   {ARM_EXT_V6, 0x06c00c70, 0x0ff00ff0, "uxtab16%c\t%12-15r, %16-19r, %0-3r, ROR #24"},
   {ARM_EXT_V6, 0x06e00070, 0x0ff00ff0, "uxtab%c\t%12-15r, %16-19r, %0-3r"},
-  {ARM_EXT_V6, 0x06e00470, 0x0ff00ff0, "uxtab%c\t%12-15r, %16-19r, %0-3r, ROR #8"},
-  {ARM_EXT_V6, 0x06e00870, 0x0ff00ff0, "uxtab%c\t%12-15r, %16-19r, %0-3r, ROR #16"},
-  {ARM_EXT_V6, 0x06e00c70, 0x0ff00ff0, "uxtab%c\t%12-15r, %16-19r, %0-3r, ROR #24"},
+  {ARM_EXT_V6, 0x06e00470, 0x0ff00ff0, "uxtab%c\t%12-15r, %16-19r, %0-3r, ror #8"},
+  {ARM_EXT_V6, 0x06e00870, 0x0ff00ff0, "uxtab%c\t%12-15r, %16-19r, %0-3r, ror #16"},
+  {ARM_EXT_V6, 0x06e00c70, 0x0ff00ff0, "uxtab%c\t%12-15r, %16-19r, %0-3r, ror #24"},
   {ARM_EXT_V6, 0x06800fb0, 0x0ff00ff0, "sel%c\t%12-15r, %16-19r, %0-3r"},
   {ARM_EXT_V6, 0xf1010000, 0xfffffc00, "setend\t%9?ble"},
   {ARM_EXT_V6, 0x0700f010, 0x0ff0f0d0, "smuad%5'x%c\t%16-19r, %0-3r, %8-11r"},
@@ -925,16 +926,16 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_EXT_V6, 0x075000d0, 0x0ff000d0, "smmls%5'r%c\t%16-19r, %0-3r, %8-11r, %12-15r"},
   {ARM_EXT_V6, 0xf84d0500, 0xfe5fffe0, "srs%23?id%24?ba\t%16-19r%21'!, #%0-4d"},
   {ARM_EXT_V6, 0x06a00010, 0x0fe00ff0, "ssat%c\t%12-15r, #%16-20W, %0-3r"},
-  {ARM_EXT_V6, 0x06a00010, 0x0fe00070, "ssat%c\t%12-15r, #%16-20W, %0-3r, LSL #%7-11d"},
-  {ARM_EXT_V6, 0x06a00050, 0x0fe00070, "ssat%c\t%12-15r, #%16-20W, %0-3r, ASR #%7-11d"},
+  {ARM_EXT_V6, 0x06a00010, 0x0fe00070, "ssat%c\t%12-15r, #%16-20W, %0-3r, lsl #%7-11d"},
+  {ARM_EXT_V6, 0x06a00050, 0x0fe00070, "ssat%c\t%12-15r, #%16-20W, %0-3r, asr #%7-11d"},
   {ARM_EXT_V6, 0x06a00f30, 0x0ff00ff0, "ssat16%c\t%12-15r, #%16-19W, %0-3r"},
   {ARM_EXT_V6, 0x01800f90, 0x0ff00ff0, "strex%c\t%12-15r, %0-3r, [%16-19r]"},
   {ARM_EXT_V6, 0x00400090, 0x0ff000f0, "umaal%c\t%12-15r, %16-19r, %0-3r, %8-11r"},
   {ARM_EXT_V6, 0x0780f010, 0x0ff0f0f0, "usad8%c\t%16-19r, %0-3r, %8-11r"},
   {ARM_EXT_V6, 0x07800010, 0x0ff000f0, "usada8%c\t%16-19r, %0-3r, %8-11r, %12-15r"},
   {ARM_EXT_V6, 0x06e00010, 0x0fe00ff0, "usat%c\t%12-15r, #%16-20d, %0-3r"},
-  {ARM_EXT_V6, 0x06e00010, 0x0fe00070, "usat%c\t%12-15r, #%16-20d, %0-3r, LSL #%7-11d"},
-  {ARM_EXT_V6, 0x06e00050, 0x0fe00070, "usat%c\t%12-15r, #%16-20d, %0-3r, ASR #%7-11d"},
+  {ARM_EXT_V6, 0x06e00010, 0x0fe00070, "usat%c\t%12-15r, #%16-20d, %0-3r, lsl #%7-11d"},
+  {ARM_EXT_V6, 0x06e00050, 0x0fe00070, "usat%c\t%12-15r, #%16-20d, %0-3r, asr #%7-11d"},
   {ARM_EXT_V6, 0x06e00f30, 0x0ff00ff0, "usat16%c\t%12-15r, #%16-19d, %0-3r"},
 
   /* V5J instruction.  */
@@ -947,8 +948,8 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_EXT_V5, 0x016f0f10, 0x0fff0ff0, "clz%c\t%12-15r, %0-3r"},
 
   /* V5E "El Segundo" Instructions.  */    
-  {ARM_EXT_V5E, 0x000000d0, 0x0e1000f0, "ldr%cd\t%12-15r, %s"},
-  {ARM_EXT_V5E, 0x000000f0, 0x0e1000f0, "str%cd\t%12-15r, %s"},
+  {ARM_EXT_V5E, 0x000000d0, 0x0e1000f0, "ldrd%c\t%12-15r, %s"},
+  {ARM_EXT_V5E, 0x000000f0, 0x0e1000f0, "strd%c\t%12-15r, %s"},
   {ARM_EXT_V5E, 0xf450f000, 0xfc70f000, "pld\t%a"},
   {ARM_EXT_V5ExP, 0x01000080, 0x0ff000f0, "smlabb%c\t%16-19r, %0-3r, %8-11r, %12-15r"},
   {ARM_EXT_V5ExP, 0x010000a0, 0x0ff000f0, "smlatb%c\t%16-19r, %0-3r, %8-11r, %12-15r"},
@@ -977,33 +978,45 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_EXT_V5ExP, 0x01600050, 0x0ff00ff0, "qdsub%c\t%12-15r, %0-3r, %16-19r"},
 
   /* ARM Instructions.  */
-  {ARM_EXT_V1, 0x00000090, 0x0e100090, "str%c%6's%5?hb\t%12-15r, %s"},
-  {ARM_EXT_V1, 0x00100090, 0x0e100090, "ldr%c%6's%5?hb\t%12-15r, %s"},
-  {ARM_EXT_V1, 0x00000000, 0x0de00000, "and%c%20's\t%12-15r, %16-19r, %o"},
-  {ARM_EXT_V1, 0x00200000, 0x0de00000, "eor%c%20's\t%12-15r, %16-19r, %o"},
-  {ARM_EXT_V1, 0x00400000, 0x0de00000, "sub%c%20's\t%12-15r, %16-19r, %o"},
-  {ARM_EXT_V1, 0x00600000, 0x0de00000, "rsb%c%20's\t%12-15r, %16-19r, %o"},
-  {ARM_EXT_V1, 0x00800000, 0x0de00000, "add%c%20's\t%12-15r, %16-19r, %o"},
-  {ARM_EXT_V1, 0x00a00000, 0x0de00000, "adc%c%20's\t%12-15r, %16-19r, %o"},
-  {ARM_EXT_V1, 0x00c00000, 0x0de00000, "sbc%c%20's\t%12-15r, %16-19r, %o"},
-  {ARM_EXT_V1, 0x00e00000, 0x0de00000, "rsc%c%20's\t%12-15r, %16-19r, %o"},
+  {ARM_EXT_V1, 0x00000090, 0x0e100090, "str%6's%5?hb%c\t%12-15r, %s"},
+  {ARM_EXT_V1, 0x00100090, 0x0e100090, "ldr%6's%5?hb%c\t%12-15r, %s"},
+  {ARM_EXT_V1, 0x00000000, 0x0de00000, "and%20's%c\t%12-15r, %16-19r, %o"},
+  {ARM_EXT_V1, 0x00200000, 0x0de00000, "eor%20's%c\t%12-15r, %16-19r, %o"},
+  {ARM_EXT_V1, 0x00400000, 0x0de00000, "sub%20's%c\t%12-15r, %16-19r, %o"},
+  {ARM_EXT_V1, 0x00600000, 0x0de00000, "rsb%20's%c\t%12-15r, %16-19r, %o"},
+  {ARM_EXT_V1, 0x00800000, 0x0de00000, "add%20's%c\t%12-15r, %16-19r, %o"},
+  {ARM_EXT_V1, 0x00a00000, 0x0de00000, "adc%20's%c\t%12-15r, %16-19r, %o"},
+  {ARM_EXT_V1, 0x00c00000, 0x0de00000, "sbc%20's%c\t%12-15r, %16-19r, %o"},
+  {ARM_EXT_V1, 0x00e00000, 0x0de00000, "rsc%20's%c\t%12-15r, %16-19r, %o"},
   {ARM_EXT_V3, 0x0120f000, 0x0db0f000, "msr%c\t%22?SCPSR%C, %o"},
   {ARM_EXT_V3, 0x010f0000, 0x0fbf0fff, "mrs%c\t%12-15r, %22?SCPSR"},
-  {ARM_EXT_V1, 0x01000000, 0x0de00000, "tst%c%p\t%16-19r, %o"},
-  {ARM_EXT_V1, 0x01200000, 0x0de00000, "teq%c%p\t%16-19r, %o"},
-  {ARM_EXT_V1, 0x01400000, 0x0de00000, "cmp%c%p\t%16-19r, %o"},
-  {ARM_EXT_V1, 0x01600000, 0x0de00000, "cmn%c%p\t%16-19r, %o"},
-  {ARM_EXT_V1, 0x01800000, 0x0de00000, "orr%c%20's\t%12-15r, %16-19r, %o"},
-  {ARM_EXT_V1, 0x01a00000, 0x0de00000, "mov%c%20's\t%12-15r, %o"},
-  {ARM_EXT_V1, 0x01c00000, 0x0de00000, "bic%c%20's\t%12-15r, %16-19r, %o"},
-  {ARM_EXT_V1, 0x01e00000, 0x0de00000, "mvn%c%20's\t%12-15r, %o"},
-  {ARM_EXT_V1, 0x04000000, 0x0e100000, "str%c%22'b%t\t%12-15r, %a"},
-  {ARM_EXT_V1, 0x06000000, 0x0e100ff0, "str%c%22'b%t\t%12-15r, %a"},
-  {ARM_EXT_V1, 0x04000000, 0x0c100010, "str%c%22'b%t\t%12-15r, %a"},
+  {ARM_EXT_V1, 0x01000000, 0x0de00000, "tst%p%c\t%16-19r, %o"},
+  {ARM_EXT_V1, 0x01200000, 0x0de00000, "teq%p%c\t%16-19r, %o"},
+  {ARM_EXT_V1, 0x01400000, 0x0de00000, "cmp%p%c\t%16-19r, %o"},
+  {ARM_EXT_V1, 0x01600000, 0x0de00000, "cmn%p%c\t%16-19r, %o"},
+  {ARM_EXT_V1, 0x01800000, 0x0de00000, "orr%20's%c\t%12-15r, %16-19r, %o"},
+  {ARM_EXT_V1, 0x03a00000, 0x0fef0000, "mov%20's%c\t%12-15r, %o"},
+  {ARM_EXT_V1, 0x01a00000, 0x0def0ff0, "mov%20's%c\t%12-15r, %0-3r"},
+  {ARM_EXT_V1, 0x01a00000, 0x0def0060, "lsl%20's%c\t%12-15r, %q"},
+  {ARM_EXT_V1, 0x01a00020, 0x0def0060, "lsr%20's%c\t%12-15r, %q"},
+  {ARM_EXT_V1, 0x01a00040, 0x0def0060, "asr%20's%c\t%12-15r, %q"},
+  {ARM_EXT_V1, 0x01a00060, 0x0def0ff0, "rrx%20's%c\t%12-15r, %0-3r"},
+  {ARM_EXT_V1, 0x01a00060, 0x0def0060, "ror%20's%c\t%12-15r, %q"},
+  {ARM_EXT_V1, 0x01c00000, 0x0de00000, "bic%20's%c\t%12-15r, %16-19r, %o"},
+  {ARM_EXT_V1, 0x01e00000, 0x0de00000, "mvn%20's%c\t%12-15r, %o"},
+  {ARM_EXT_V1, 0x052d0004, 0x0fff0fff, "push%c\t{%12-15r}\t\t; (str%c %12-15r, %a)"},
+  {ARM_EXT_V1, 0x04000000, 0x0e100000, "str%22'b%t%c\t%12-15r, %a"},
+  {ARM_EXT_V1, 0x06000000, 0x0e100ff0, "str%22'b%t%c\t%12-15r, %a"},
+  {ARM_EXT_V1, 0x04000000, 0x0c100010, "str%22'b%t%c\t%12-15r, %a"},
   {ARM_EXT_V1, 0x06000010, 0x0e000010, "undefined"},
-  {ARM_EXT_V1, 0x04100000, 0x0c100000, "ldr%c%22'b%t\t%12-15r, %a"},
-  {ARM_EXT_V1, 0x08000000, 0x0e100000, "stm%c%23?id%24?ba\t%16-19r%21'!, %m%22'^"},
-  {ARM_EXT_V1, 0x08100000, 0x0e100000, "ldm%c%23?id%24?ba\t%16-19r%21'!, %m%22'^"},
+  {ARM_EXT_V1, 0x049d0004, 0x0fff0fff, "pop%c\t{%12-15r}\t\t; (ldr%c %12-15r, %a)"},
+  {ARM_EXT_V1, 0x04100000, 0x0c100000, "ldr%22'b%t%c\t%12-15r, %a"},
+  {ARM_EXT_V1, 0x092d0000, 0x0fff0000, "push%c\t%m"},
+  {ARM_EXT_V1, 0x08800000, 0x0ff00000, "stm%c\t%16-19r%21'!, %m%22'^"},
+  {ARM_EXT_V1, 0x08000000, 0x0e100000, "stm%23?id%24?ba%c\t%16-19r%21'!, %m%22'^"},
+  {ARM_EXT_V1, 0x08bd0000, 0x0fff0000, "pop%c\t%m"},
+  {ARM_EXT_V1, 0x08900000, 0x0f900000, "ldm%c\t%16-19r%21'!, %m%22'^"},
+  {ARM_EXT_V1, 0x08100000, 0x0e100000, "ldm%23?id%24?ba%c\t%16-19r%21'!, %m%22'^"},
   {ARM_EXT_V1, 0x0a000000, 0x0e000000, "b%24'l%c\t%b"},
   {ARM_EXT_V1, 0x0f000000, 0x0f000000, "svc%c\t%0-23x"},
 
@@ -1137,7 +1150,7 @@ static const struct opcode16 thumb_opcodes[] =
   {ARM_EXT_V4T, 0x9000, 0xF800, "str%c\t%8-10r, [sp, #%0-7W]"},
   {ARM_EXT_V4T, 0x9800, 0xF800, "ldr%c\t%8-10r, [sp, #%0-7W]"},
   /* format 12 */
-  {ARM_EXT_V4T, 0xA000, 0xF800, "add%c\t%8-10r, pc, #%0-7W\t(adr %8-10r,%0-7a)"},
+  {ARM_EXT_V4T, 0xA000, 0xF800, "add%c\t%8-10r, pc, #%0-7W\t(adr %8-10r, %0-7a)"},
   {ARM_EXT_V4T, 0xA800, 0xF800, "add%c\t%8-10r, sp, #%0-7W"},
   /* format 15 */
   {ARM_EXT_V4T, 0xC000, 0xF800, "stmia%c\t%8-10r!, %M"},
@@ -1556,7 +1569,8 @@ arm_decode_bitfield (const char *ptr, unsigned long insn,
 }
 
 static void
-arm_decode_shift (long given, fprintf_ftype func, void *stream)
+arm_decode_shift (long given, fprintf_ftype func, void *stream,
+		  int print_shift)
 {
   func (stream, "%s", arm_regnames[given & 0xf]);
 
@@ -1578,11 +1592,16 @@ arm_decode_shift (long given, fprintf_ftype func, void *stream)
 	      amount = 32;
 	    }
 
-	  func (stream, ", %s #%d", arm_shift[shift], amount);
+	  if (print_shift)
+	    func (stream, ", %s #%d", arm_shift[shift], amount);
+	  else
+	    func (stream, ", #%d", amount);
 	}
-      else
+      else if (print_shift)
 	func (stream, ", %s %s", arm_shift[(given & 0x60) >> 5],
 	      arm_regnames[(given & 0xf00) >> 8]);
+      else
+	func (stream, ", %s", arm_regnames[(given & 0xf00) >> 8]);
     }
 }
 
@@ -2147,7 +2166,7 @@ print_arm_address (bfd_vma pc, struct disassemble_info *info, long given)
 	      func (stream, ", %s",
 		    (((given & 0x00800000) == 0)
 		     ? "-" : ""));
-	      arm_decode_shift (given, func, stream);
+	      arm_decode_shift (given, func, stream, 1);
 	    }
 
 	  func (stream, "]%s",
@@ -2170,7 +2189,7 @@ print_arm_address (bfd_vma pc, struct disassemble_info *info, long given)
 	      func (stream, "], %s",
 		    (((given & 0x00800000) == 0)
 		     ? "-" : ""));
-	      arm_decode_shift (given, func, stream);
+	      arm_decode_shift (given, func, stream, 1);
 	    }
 	}
     }
@@ -2784,6 +2803,10 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 		      }
 		      break;
 
+		    case 'q':
+		      arm_decode_shift (given, func, stream, 0);
+		      break;
+
 		    case 'o':
 		      if ((given & 0x02000000) != 0)
 			{
@@ -2794,7 +2817,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			  func (stream, "#%d\t; 0x%x", immed, immed);
 			}
 		      else
-			arm_decode_shift (given, func, stream);
+			arm_decode_shift (given, func, stream, 1);
 		      break;
 
 		    case 'p':
