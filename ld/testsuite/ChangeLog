@@ -1,3 +1,15 @@
+2007-04-21  Richard Earnshaw  <rearnsha@arm.com>
+
+	* ld-arm/arm-app-abs32.d: Convert to unified syntax.
+	* ld-arm/arm-app.d: Likewise.
+	* ld-arm/arm-lib-plt32.d: Likewise.
+	* ld-arm/arm-lib.d: Likewise.
+	* ld-arm/arm-static-app.d: Likewise.
+	* ld-arm/armthumb-lib.d: Likewise.
+	* ld-arm/mixed-app-v5.d: Likewise.
+	* ld-arm/mixed-app.d: Likewise.
+	* ld-arm/mixed-lib.d: Likewise.
+
 2007-04-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-spu/ovl.lnk: Use OVERLAY keyword.
