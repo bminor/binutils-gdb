@@ -76,7 +76,7 @@ static long extract_tbr (unsigned long, int, int *);
 
 /* The operands table.
 
-   The fields are bits, shift, insert, extract, flags.
+   The fields are bitm, shift, insert, extract, flags.
 
    We used to put parens around the various additions, like the one
    for BA just below.  However, that caused trouble with feeble
@@ -94,7 +94,9 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The BA field in an XL form instruction.  */
 #define BA UNUSED + 1
-#define BA_MASK (0x1f << 16)
+  /* The BI field in a B form or XL form instruction.  */
+#define BI BA
+#define BI_MASK (0x1f << 16)
   { 0x1f, 16, NULL, NULL, PPC_OPERAND_CR },
 
   /* The BA field in an XL form instruction when it must be the same
@@ -148,6 +150,8 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The BF field in an X or XL form instruction.  */
 #define BF BDPA + 1
+  /* The CRFD field in an X form instruction.  */
+#define CRFD BF
   { 0x7, 23, NULL, NULL, PPC_OPERAND_CR },
 
   /* An optional BF field.  This is used for comparison instructions,
@@ -159,14 +163,9 @@ const struct powerpc_operand powerpc_operands[] =
 #define BFA OBF + 1
   { 0x7, 18, NULL, NULL, PPC_OPERAND_CR },
 
-  /* The BI field in a B form or XL form instruction.  */
-#define BI BFA + 1
-#define BI_MASK (0x1f << 16)
-  { 0x1f, 16, NULL, NULL, PPC_OPERAND_CR },
-
   /* The BO field in a B form instruction.  Certain values are
      illegal.  */
-#define BO BI + 1
+#define BO BFA + 1
 #define BO_MASK (0x1f << 21)
   { 0x1f, 21, insert_bo, extract_bo, 0 },
 
@@ -191,18 +190,19 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The CRB field in an X form instruction.  */
 #define CRB CR + 1
+  /* The MB field in an M form instruction.  */
+#define MB CRB
+#define MB_MASK (0x1f << 6)
   { 0x1f, 6, NULL, NULL, 0 },
 
-  /* The CRFD field in an X form instruction.  */
-#define CRFD CRB + 1
-  { 0x7, 23, NULL, NULL, PPC_OPERAND_CR },
-
   /* The CRFS field in an X form instruction.  */
-#define CRFS CRFD + 1
+#define CRFS CRB + 1
   { 0x7, 0, NULL, NULL, PPC_OPERAND_CR },
 
   /* The CT field in an X form instruction.  */
 #define CT CRFS + 1
+  /* The MO field in an mbar instruction.  */
+#define MO CT
   { 0x1f, 21, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
   /* The D field in a D form instruction.  This is a displacement off
@@ -239,6 +239,8 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The FL1 field in a POWER SC form instruction.  */
 #define FL1 E + 1
+  /* The U field in an X form instruction.  */
+#define U FL1
   { 0xf, 12, NULL, NULL, 0 },
 
   /* The FL2 field in a POWER SC form instruction.  */
@@ -272,7 +274,6 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The FXM field in an XFX instruction.  */
 #define FXM FRS + 1
-#define FXM_MASK (0xff << 12)
   { 0xff, 12, insert_fxm, extract_fxm, 0 },
 
   /* Power4 version for mfcr.  */
@@ -305,13 +306,8 @@ const struct powerpc_operand powerpc_operands[] =
 #define LS LIA + 1
   { 0x3, 21, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
-  /* The MB field in an M form instruction.  */
-#define MB LS + 1
-#define MB_MASK (0x1f << 6)
-  { 0x1f, 6, NULL, NULL, 0 },
-
   /* The ME field in an M form instruction.  */
-#define ME MB + 1
+#define ME LS + 1
 #define ME_MASK (0x1f << 1)
   { 0x1f, 1, NULL, NULL, 0 },
 
@@ -330,13 +326,9 @@ const struct powerpc_operand powerpc_operands[] =
 #define MB6_MASK (0x3f << 5)
   { 0x3f, 5, insert_mb6, extract_mb6, 0 },
 
-  /* The MO field in an mbar instruction.  */
-#define MO MB6 + 1
-  { 0x1f, 21, NULL, NULL, PPC_OPERAND_OPTIONAL },
-
   /* The NB field in an X form instruction.  The value 32 is stored as
      0.  */
-#define NB MO + 1
+#define NB MB6 + 1
   { 0x1f, 11, NULL, extract_nb, PPC_OPERAND_PLUS1 },
 
   /* The NSI field in a D form instruction.  This is the same as the
@@ -399,24 +391,22 @@ const struct powerpc_operand powerpc_operands[] =
 #define RT_MASK (0x1f << 21)
   { 0x1f, 21, NULL, NULL, PPC_OPERAND_GPR },
 
-  /* The RS field of the DS form stq instruction, which has special
-     value restrictions.  */
+  /* The RS and RT fields of the DS form stq instruction, which have
+     special value restrictions.  */
 #define RSQ RS + 1
-  { 0x1e, 21, NULL, NULL, PPC_OPERAND_GPR_0 },
-
-  /* The RT field of the DQ form lq instruction, which has special
-     value restrictions.  */
-#define RTQ RSQ + 1
+#define RTQ RSQ
   { 0x1e, 21, NULL, NULL, PPC_OPERAND_GPR_0 },
 
   /* The RS field of the tlbwe instruction, which is optional.  */
-#define RSO RTQ + 1
+#define RSO RSQ + 1
 #define RTO RSO
   { 0x1f, 21, NULL, NULL, PPC_OPERAND_GPR | PPC_OPERAND_OPTIONAL },
 
   /* The SH field in an X or M form instruction.  */
 #define SH RSO + 1
 #define SH_MASK (0x1f << 11)
+  /* The other UIMM field in a EVX form instruction.  */
+#define EVUIMM SH
   { 0x1f, 11, NULL, NULL, 0 },
 
   /* The SH field in an MD form instruction.  This is split.  */
@@ -459,7 +449,6 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The STRM field in an X AltiVec form instruction.  */
 #define STRM SR + 1
-#define STRM_MASK (0x3 << 21)
   { 0x3, 21, NULL, NULL, 0 },
 
   /* The SV field in a POWER SC form instruction.  */
@@ -476,33 +465,25 @@ const struct powerpc_operand powerpc_operands[] =
 #define TO_MASK (0x1f << 21)
   { 0x1f, 21, NULL, NULL, 0 },
 
-  /* The U field in an X form instruction.  */
-#define U TO + 1
-  { 0xf, 12, NULL, NULL, 0 },
-
   /* The UI field in a D form instruction.  */
-#define UI U + 1
+#define UI TO + 1
   { 0xffff, 0, NULL, NULL, 0 },
 
   /* The VA field in a VA, VX or VXR form instruction.  */
 #define VA UI + 1
-#define VA_MASK	(0x1f << 16)
   { 0x1f, 16, NULL, NULL, PPC_OPERAND_VR },
 
   /* The VB field in a VA, VX or VXR form instruction.  */
 #define VB VA + 1
-#define VB_MASK (0x1f << 11)
   { 0x1f, 11, NULL, NULL, PPC_OPERAND_VR },
 
   /* The VC field in a VA form instruction.  */
 #define VC VB + 1
-#define VC_MASK (0x1f << 6)
   { 0x1f, 6, NULL, NULL, PPC_OPERAND_VR },
 
   /* The VD or VS field in a VA, VX, VXR or X form instruction.  */
 #define VD VC + 1
 #define VS VD
-#define VD_MASK (0x1f << 21)
   { 0x1f, 21, NULL, NULL, PPC_OPERAND_VR },
 
   /* The SIMM field in a VX form instruction.  */
@@ -518,12 +499,8 @@ const struct powerpc_operand powerpc_operands[] =
 #define SHB UIMM + 1
   { 0xf, 6, NULL, NULL, 0 },
 
-  /* The other UIMM field in a EVX form instruction.  */
-#define EVUIMM SHB + 1
-  { 0x1f, 11, NULL, NULL, 0 },
-
   /* The other UIMM field in a half word EVX form instruction.  */
-#define EVUIMM_2 EVUIMM + 1
+#define EVUIMM_2 SHB + 1
   { 0x3e, 10, NULL, NULL, PPC_OPERAND_PARENS },
 
   /* The other UIMM field in a word EVX form instruction.  */
@@ -536,12 +513,10 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The WS field.  */
 #define WS EVUIMM_8 + 1
-#define WS_MASK (0x7 << 11)
   { 0x7, 11, NULL, NULL, 0 },
 
   /* The L field in an mtmsrd or A form instruction.  */
-#define MTMSRD_L WS + 1
-#define A_L MTMSRD_L
+#define A_L WS + 1
   { 0x1, 16, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
 #define RMC A_L + 1
@@ -563,12 +538,8 @@ const struct powerpc_operand powerpc_operands[] =
 #define DGM DCM
   { 0x3f, 10, NULL, NULL, 0 },
 
-  /* The L field in an X form with the RT field fixed instruction.  */
-#define XRT_L SH16 + 1
-  { 0x1, 21, NULL, NULL, PPC_OPERAND_OPTIONAL },
-
   /* The EH field in larx instruction.  */
-#define EH XRT_L + 1
+#define EH SH16 + 1
   { 0x1, 0, NULL, NULL, PPC_OPERAND_OPTIONAL },
 };
 
@@ -3236,7 +3207,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "ldarx",   X(31,84),	XEH_MASK,	PPC64,		{ RT, RA0, RB, EH } },
 
 { "dcbfl",   XOPL(31,86,1), XRT_MASK,	POWER5,		{ RA, RB } },
-{ "dcbf",    X(31,86),	XLRT_MASK,	PPC,		{ RA, RB, XRT_L } },
+{ "dcbf",    X(31,86),	XLRT_MASK,	PPC,		{ RA, RB, L } },
 
 { "lbzx",    X(31,87),	X_MASK,		COM,		{ RT, RA0, RB } },
 
@@ -3325,7 +3296,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "dcbtls",  X(31,166),	X_MASK,		PPCCHLK,	{ CT, RA, RB }},
 { "dcbtlse", X(31,174),	X_MASK,		PPCCHLK64,	{ CT, RA, RB }},
 
-{ "mtmsrd",  X(31,178),	XRLARB_MASK,	PPC64,		{ RS, MTMSRD_L } },
+{ "mtmsrd",  X(31,178),	XRLARB_MASK,	PPC64,		{ RS, A_L } },
 
 { "stdux",   X(31,181),	X_MASK,		PPC64,		{ RS, RAS, RB } },
 

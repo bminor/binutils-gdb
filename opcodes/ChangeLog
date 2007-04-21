@@ -1,3 +1,10 @@
+2007-04-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c (powerpc_operands): Delete duplicate entries.
+	(BA_MASK, FXM_MASK, STRM_MASK, VA_MASK, VB_MASK, VC_MASK): Delete.
+	(VD_MASK, WS_MASK, MTMSRD_L, XRT_L): Delete.
+	(powerpc_opcodes): Replace uses of MTMSRD_L and XRT_L.
+
 2007-04-20  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* m68k-dis.c (print_insn_arg): Show c04 as rambar0 and c05 as
