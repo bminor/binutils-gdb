@@ -1,5 +1,7 @@
 2007-04-21  Nick Clifton  <nickc@redhat.com>
 
+	* config/atof-vax.c (md_atof): Fix comparison inside know().
+
 	* config/tc-ia64.c (emit_one_bundle): Fix typo.
 
 2007-04-21  Alan Modra  <amodra@bigpond.net.au>

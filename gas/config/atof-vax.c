@@ -435,7 +435,7 @@ md_atof (int what_statement_type,
          a little-endian machine, be very careful about
          converting words to chars.  */
       number_of_chars = atof_vax_sizeof (kind_of_float);
-      know (number_of_chars <= MAXIMUM_NUMBER_OF_LITTLENUMS * sizeof (LITTLENUM_TYPE));
+      know (number_of_chars <= (int)(MAXIMUM_NUMBER_OF_LITTLENUMS * sizeof (LITTLENUM_TYPE)));
       limit = words + (number_of_chars / sizeof (LITTLENUM_TYPE));
       for (littlenumP = words; littlenumP < limit; littlenumP++)
 	{
