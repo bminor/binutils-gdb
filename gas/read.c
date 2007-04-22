@@ -695,18 +695,11 @@ read_a_source_file (char *name)
 
 	     Depending on what compiler is used, the order of these tests
 	     may vary to catch most common case 1st.
-	     Each test is independent of all other tests at the (top) level.
-	     PLEASE make a compiler that doesn't use this assembler.
-	     It is crufty to waste a compiler's time encoding things for this
-	     assembler, which then wastes more time decoding it.
-	     (And communicating via (linear) files is silly!
-	     If you must pass stuff, please pass a tree!)  */
-	  if ((c = *input_line_pointer++) == '\t'
-	      || c == ' '
-	      || c == '\f')
+	     Each test is independent of all other tests at the (top)
+	     level.  */
+	  do
 	    c = *input_line_pointer++;
-
-	  know (c != ' ');	/* No further leading whitespace.  */
+	  while (c == '\t' || c == ' ' || c == '\f');
 
 #ifndef NO_LISTING
 	  /* If listing is on, and we are expanding a macro, then give
