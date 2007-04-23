@@ -45,7 +45,8 @@ architectures are recognized:
 @code{cpu32},
 @code{isaa},
 @code{isaaplus},
-@code{isab} and
+@code{isab},
+@code{isac} and
 @code{cfv4e}.
 
 

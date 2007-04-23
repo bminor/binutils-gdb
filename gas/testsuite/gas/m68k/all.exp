@@ -52,6 +52,10 @@ if { [istarget m68*-*-*] || [istarget fido*-*-*] } then {
     run_dump_test arch-cpu-1
     run_dump_test cpu32
 
+    run_dump_test br-isaa
+    run_dump_test br-isab
+    run_dump_test br-isac
+
     run_dump_test ctrl-1
     run_dump_test ctrl-2
 

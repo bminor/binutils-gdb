@@ -1,3 +1,16 @@
+2007-04-23  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* archures.c (bfd_mach_mcf_isa_c, bfd_mach_mcf_isa_c_mac,
+	bfd_mach_mcf_isa_c_emac): New.
+	* elf32-m68k.c (ISAC_PLT_ENTRY_SIZE, elf_isac_plt0_entry,
+	elf_isac_plt_entry, elf_isac_plt_info): New.
+	(elf32_m68k_object_p): Add ISA_C.
+	(elf32_m68k_print_private_bfd_data): Print ISA_C.
+	(elf32_m68k_get_plt_info): Detect ISA_C.
+	* cpu-m68k.c (arch_info): Add ISAC.
+	(m68k_arch_features): Likewise,
+	(bfd_m68k_compatible): ISAs B & C are not compatible.
+
 2007-04-21  Nick Clifton  <nickc@redhat.com>
 
 	* ecoff.c (_bfd_ecoff_write_armap): Initialise rehash.

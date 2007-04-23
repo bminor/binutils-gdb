@@ -1,3 +1,7 @@
+2007-04-23  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* m68k-opc.c: Mark mcfisa_c instructions.
+
 2007-04-21  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-dis.c (arm_opcodes): Disassemble to unified syntax.

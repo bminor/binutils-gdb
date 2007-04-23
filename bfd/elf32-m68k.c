@@ -300,6 +300,40 @@ static const struct elf_m68k_plt_info elf_isab_plt_info = {
   elf_isab_plt_entry, { 2, 20 }, 12
 };
 
+#define ISAC_PLT_ENTRY_SIZE 24 
+
+static const bfd_byte elf_isac_plt0_entry[ISAC_PLT_ENTRY_SIZE] =
+{
+  0x20, 0x3c,		  /* move.l #offset,%d0 */
+  0, 0, 0, 0,		  /* replaced with .got + 4 - . */
+  0x2e, 0xbb, 0x08, 0xfa, /* move.l (-6,%pc,%d0:l),(%sp) */
+  0x20, 0x3c,		  /* move.l #offset,%d0 */
+  0, 0, 0, 0,		  /* replaced with .got + 8 - . */
+  0x20, 0x7b, 0x08, 0xfa, /* move.l (-6,%pc,%d0:l), %a0 */
+  0x4e, 0xd0,		  /* jmp (%a0) */
+  0x4e, 0x71		  /* nop */
+};
+
+/* Subsequent entries in a procedure linkage table look like this.  */
+
+static const bfd_byte elf_isac_plt_entry[ISAC_PLT_ENTRY_SIZE] =
+{
+  0x20, 0x3c,		  /* move.l #offset,%d0 */
+  0, 0, 0, 0,		  /* replaced with (.got entry) - . */
+  0x20, 0x7b, 0x08, 0xfa, /* move.l (-6,%pc,%d0:l), %a0 */
+  0x4e, 0xd0,		  /* jmp (%a0) */
+  0x2f, 0x3c,		  /* move.l #offset,-(%sp) */
+  0, 0, 0, 0,		  /* replaced with offset into relocation table */
+  0x61, 0xff,		  /* bsr.l .plt */
+  0, 0, 0, 0 		  /* replaced with .plt - . */
+};
+
+static const struct elf_m68k_plt_info elf_isac_plt_info = {
+  ISAC_PLT_ENTRY_SIZE,
+  elf_isac_plt0_entry, { 2, 12},
+  elf_isac_plt_entry, { 2, 20 }, 12
+};
+
 #define CPU32_PLT_ENTRY_SIZE 24
 /* Procedure linkage table entries for the cpu32 */
 static const bfd_byte elf_cpu32_plt0_entry[CPU32_PLT_ENTRY_SIZE] =
@@ -468,6 +502,9 @@ elf32_m68k_object_p (bfd *abfd)
 	case EF_M68K_CF_ISA_B:
 	  features |= mcfisa_a|mcfisa_b|mcfhwdiv|mcfusp;
 	  break;
+	case EF_M68K_CF_ISA_C:
+	  features |= mcfisa_a|mcfisa_c|mcfhwdiv|mcfusp;
+	  break;
 	}
       switch (eflags & EF_M68K_CF_MAC_MASK)
 	{
@@ -616,6 +653,9 @@ elf32_m68k_print_private_bfd_data (abfd, ptr)
 	      break;
 	    case EF_M68K_CF_ISA_B:
 	      isa = "B";
+	      break;
+	    case EF_M68K_CF_ISA_C:
+	      isa = "C";
 	      break;
 	    }
 	  fprintf (file, " [isa %s]%s", isa, additional);
@@ -1145,6 +1185,8 @@ elf_m68k_get_plt_info (bfd *output_bfd)
     return &elf_cpu32_plt_info;
   if (features & mcfisa_b)
     return &elf_isab_plt_info;
+  if (features & mcfisa_c)
+    return &elf_isac_plt_info;
   return &elf_m68k_plt_info;
 }
 

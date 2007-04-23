@@ -1,3 +1,13 @@
+2007-04-23  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* config/tc-m68k.c (mcf54455_ctrl): New.
+	(HAVE_LONG_DISP, HAVE_LONG_CALL, HAVE_LONG_COND): New.
+	(m68k_archs): Add isac.
+	(m68k_cpus): Add 54455 family.
+	(m68k_ip): Split Bg into Bb, Bs, Bg.
+	(m68k_elf_final_processing): Add ISA_C.
+	* doc/c-m68k.texi (M680x0 Options): Add isac.
+
 2007-04-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* read.c (read_a_source_file): Skip multiple spaces to
