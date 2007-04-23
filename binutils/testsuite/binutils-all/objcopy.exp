@@ -113,6 +113,40 @@ proc objcopy_test {testname srcfile} {
 
 objcopy_test "simple copy" bintest.s
 
+# Test reversing bytes in a section.
+
+set reversed ${tempfile}-reversed
+set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS -j .data --reverse-bytes=4 $tempfile $reversed"]
+
+if ![string match "" $got] then {
+    fail "objcopy --reverse-bytes"
+} else {
+    if [is_remote host] {
+        remote_upload host ${reversed} tmpdir/copy-reversed.o
+        set reversed tmpdir/copy-reversed.o
+    }
+
+    set origdata [binutils_run $OBJDUMP "$OBJDUMPFLAGS -s -j .data $tempfile"]
+    set revdata [binutils_run $OBJDUMP "$OBJDUMPFLAGS -s -j .data $reversed"]
+
+    set want "^ \[0-9\]+ (\[0-9\]+)"
+    set found_orig [regexp -lineanchor $want $origdata -> origdata]
+    set found_rev [regexp -lineanchor $want $revdata -> revdata]
+
+    if {$found_orig == 0 || $found_rev == 0} then {
+        fail "objcopy --reverse-bytes"
+    } else {
+        scan $origdata "%2x%2x%2x%2x" b1 b2 b3 b4
+        scan $revdata "%2x%2x%2x%2x" c4 c3 c2 c1
+
+        if {$b1 == $c1 && $b2 == $c2 && $b3 == $c3 && $b4 == $c4} then {
+            pass "objcopy --reverse-bytes"
+        } else {
+            fail "objcopy --reverse-bytes"
+        }
+    }
+}
+
 # Test generating S records.
 
 # We make the srec filename 8.3 compatible. Note that the header string

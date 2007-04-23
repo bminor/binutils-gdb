@@ -1,3 +1,9 @@
+2007-04-20  Nathan Froyd  <froydnj@codesourcery.com>
+	    Phil Edwards  <phil@codesourcery.com>
+	    Thomas de Lellis <tdel@windriver.com>
+
+	* binutils-all/objcopy.exp: Add test for --reverse-bytes.
+
 2007-04-21  Richard Earnshaw  <rearnsha@arm.com>
 
 	* binutils-all/readelf.exp (regexp_diff): Delete.

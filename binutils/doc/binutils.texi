@@ -987,6 +987,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--add-section} @var{sectionname}=@var{filename}]
         [@option{--rename-section} @var{oldname}=@var{newname}[,@var{flags}]]
         [@option{--change-leading-char}] [@option{--remove-leading-char}]
+        [@option{--reverse-bytes=}@var{num}]
         [@option{--srec-len=}@var{ival}] [@option{--srec-forceS3}]
         [@option{--redefine-sym} @var{old}=@var{new}]
         [@option{--redefine-syms=}@var{filename}]
@@ -1052,6 +1053,7 @@ Note---@command{objcopy} is not able to change the endianness of its input
 files.  If the input format has an endianness (some formats do not),
 @command{objcopy} can only copy the inputs into file formats that have the
 same endianness or which have no endianness (e.g., @samp{srec}).
+(However, see the @option{--reverse-bytes} option.)
 
 @c man end
 
@@ -1341,6 +1343,30 @@ different conventions for symbol names.  This is different from
 @option{--change-leading-char} because it always changes the symbol name
 when appropriate, regardless of the object file format of the output
 file.
+
+@item --reverse-bytes=@var{num}
+Reverse the bytes in a section with output contents.  A section length must
+be evenly divisible by the value given in order for the swap to be able to
+take place. Reversing takes place before the interleaving is performed.
+
+This option is used typically in generating ROM images for problematic
+target systems.  For example, on some target boards, the 32-bit words
+fetched from 8-bit ROMs are re-assembled in little-endian byte order
+regardless of the CPU byte order.  Depending on the programming model, the
+endianness of the ROM may need to be modified.
+
+Consider a simple file with a section containing the following eight
+bytes:  @code{12345678}.
+
+Using @samp{--reverse-bytes=2} for the above example, the bytes in the
+output file would be ordered @code{21436587}.
+
+Using @samp{--reverse-bytes=4} for the above example, the bytes in the
+output file would be ordered @code{43218765}.
+
+By using @samp{--reverse-bytes=2} for the above example, followed by
+@samp{--reverse-bytes=4} on the output file, the bytes in the second
+output file would be ordered @code{34127856}.
 
 @item --srec-len=@var{ival}
 Meaningful only for srec output.  Set the maximum length of the Srecords
