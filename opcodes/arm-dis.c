@@ -3987,7 +3987,7 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
       bfd_vma addr;
       int n;
       int last_sym = -1;
-      enum map_type type;
+      enum map_type type = MAP_ARM;
 
       if (pc <= last_mapping_addr)
 	last_mapping_sym = -1;
