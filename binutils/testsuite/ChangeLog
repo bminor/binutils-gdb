@@ -1,3 +1,10 @@
+2007-04-24  Nathan Froyd  <froydnj@codesourcery.com>
+	    Phil Edwards  <phil@codesourcery.com>
+
+	* binutils-all/objcopy.exp: Add test for stripping a symbol
+	used in a relocation.
+	* binutils-all/needed-by-reloc.s: New file.
+
 2007-04-20  Nathan Froyd  <froydnj@codesourcery.com>
 	    Phil Edwards  <phil@codesourcery.com>
 	    Thomas de Lellis <tdel@windriver.com>

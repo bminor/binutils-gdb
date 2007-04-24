@@ -1,3 +1,10 @@
+2007-04-24  Nathan Froyd  <froydnj@codesourcery.com>
+	    Phil Edwards  <phil@codesourcery.com>
+
+	* objcopy.c (filter_symbols): Explicitly stripping a symbol
+	used in relocations is an error.
+	Retype 'keep' to bfd_boolean.
+
 2007-04-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.in: Regenerate.
