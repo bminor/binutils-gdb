@@ -704,6 +704,7 @@ walk_tree_type_1 (struct coff_sfile *sfile, struct coff_symbol *symbol,
       {
 	struct IT_dpt dpt;
 
+	dpt.dunno = 0;
 	walk_tree_type_1 (sfile, symbol, type->u.pointer.points_to, nest + 1);
 	dpt.neg = 0x1001;
 	sysroff_swap_dpt_out (file, &dpt);
