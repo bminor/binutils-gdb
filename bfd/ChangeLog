@@ -1,5 +1,10 @@
 2007-04-24  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Warn if
+	eh_frame_hdr table won't be created.
+
+2007-04-24  Alan Modra  <amodra@bigpond.net.au>
+
 	* acinclude.m4: Include config/stdint.m4.
 	* configure.in: Invoke GCC_HEADER_STDINT.
 	* sysdep.h: Don't include ansidecl.h here.
