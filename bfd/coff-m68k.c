@@ -251,11 +251,12 @@ m68kcoff_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
   arelent relent;
   reloc_howto_type *howto;
 
+  relent.howto = NULL;
   RTYPE2HOWTO (&relent, rel);
 
   howto = relent.howto;
 
-  if (howto->pc_relative)
+  if (howto != NULL && howto->pc_relative)
     *addendp += sec->vma;
 
   return howto;

@@ -1,3 +1,8 @@
+2007-04-24  Nick Clifton  <nickc@redhat.com>
+
+	* coffcode.h (coff_slurp_reloc_table): Initialise dst.r_offset.
+	* coff-m68k.c (m68kcoff_rtype_to_howto): Initialize relent.howto.
+
 2007-04-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Warn if
