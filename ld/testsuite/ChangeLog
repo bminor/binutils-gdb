@@ -1,3 +1,13 @@
+2007-04-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-linkonce/x.s: Use .gcc_except_table instead of .eh_frame
+	to test that entry for deleted function is zeroed.  Add a
+	somewhat closer to normal .eh_frame to test that fde for
+	deleted function is removed.
+	* ld-linkonce/y.s: Likewise.
+	* ld-linkonce/zeroeh.ld: Place .gcc_except_table too.
+	* ld-linkonce/zeroehl32.d: Update.
+
 2007-04-21  Richard Earnshaw  <rearnsha@arm.com>
 
 	* ld-arm/arm-app-abs32.d: Convert to unified syntax.
