@@ -1,3 +1,8 @@
+2007-04-24  Andreas Krebbel  <krebbel1@de.ibm.com>
+
+	* opcodes/s390-opc.c (MASK_SSF_RRDRD): Fourth nybble belongs to the
+	opcode.
+	* opcodes/s390-opc.txt (pfpo, ectg, csst): New z9-ec instructions added.
 2007-04-24  Nick Clifton  <nickc@redhat.com>
 
 	* arm-dis.c (print_insn): Initialise type.

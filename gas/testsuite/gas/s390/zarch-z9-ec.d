@@ -69,3 +69,8 @@ Disassembly of section .text:
 .*:	ed 61 20 03 00 51 [	 ]*tget	%f6,3\(%r1,%r2\)
 .*:	ed 61 20 03 00 55 [	 ]*tgdt	%f6,3\(%r1,%r2\)
 .*:	ed 61 20 03 00 59 [	 ]*tgxt	%f6,3\(%r1,%r2\)
+.*:	01 0a [	 ]*pfpo
+.*:	c8 31 10 0a 20 14 [	 ]*ectg	10\(%r1\),20\(%r2\),%r3
+.*:	c8 32 10 0a 20 14 [	 ]*csst	10\(%r1\),20\(%r2\),%r3
+# Expect 2 bytes of padding.
+.*:	07 07 [	 ]*bcr	0,%r7

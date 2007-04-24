@@ -63,3 +63,10 @@ foo:
 	tget	%f6,3(%r1,%r2)
 	tgdt	%f6,3(%r1,%r2)
 	tgxt	%f6,3(%r1,%r2)
+	pfpo
+	ectg	10(%r1),20(%r2),%r3
+	csst	10(%r1),20(%r2),%r3
+	/* The following .data section is 4 byte aligned.
+	   So we get 2 additional bytes of 07 07 wherefor
+	   we have to provide an instruction.  */
+	bcr	0,%r7

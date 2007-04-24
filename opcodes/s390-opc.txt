@@ -926,3 +926,6 @@ ed0000000058 tcxt RXE_FRRD "test data class extended dfp" z9-ec zarch
 ed0000000051 tget RXE_FRRD "test data group short dfp" z9-ec zarch
 ed0000000055 tgdt RXE_FRRD "test data group long dfp" z9-ec zarch
 ed0000000059 tgxt RXE_FRRD "test data group extended dfp" z9-ec zarch
+010a pfpo E "perform floating point operation" z9-ec zarch
+c801 ectg SSF_RRDRD "extract cpu time" z9-ec zarch
+c802 csst SSF_RRDRD "compare and swap and store" z9-ec zarch

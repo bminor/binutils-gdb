@@ -1,3 +1,8 @@
+2007-04-24  Andreas Krebbel  <krebbel1@de.ibm.com>
+
+	* gas/s390/zarch-z9-ec.d: Add pfpo, ectg and csst.
+	* gas/s390/zarch-z9-ec.s: Likewise.
+
 2007-04-23  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* gas/m68k/br-isaa.s: New.
