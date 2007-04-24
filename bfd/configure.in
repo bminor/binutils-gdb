@@ -140,6 +140,7 @@ BFD_CC_FOR_BUILD
 
 AC_CHECK_HEADERS(stddef.h string.h strings.h stdlib.h time.h unistd.h)
 AC_CHECK_HEADERS(fcntl.h sys/file.h sys/time.h)
+GCC_HEADER_STDINT(bfd_stdint.h)
 AC_HEADER_TIME
 AC_HEADER_DIRENT
 ACX_HEADER_STRING

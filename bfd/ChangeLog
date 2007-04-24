@@ -1,3 +1,12 @@
+2007-04-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* acinclude.m4: Include config/stdint.m4.
+	* configure.in: Invoke GCC_HEADER_STDINT.
+	* sysdep.h: Don't include ansidecl.h here.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* Makefile.in: Regenerate.
+
 2007-04-23  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* archures.c (bfd_mach_mcf_isa_c, bfd_mach_mcf_isa_c_mac,

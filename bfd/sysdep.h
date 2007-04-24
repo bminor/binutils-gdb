@@ -22,8 +22,6 @@ Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. 
 #ifndef BFD_SYSDEP_H
 #define BFD_SYSDEP_H
 
-#include "ansidecl.h"
-
 #include "config.h"
 
 #ifdef HAVE_STDDEF_H

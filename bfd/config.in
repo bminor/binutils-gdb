@@ -236,6 +236,12 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
+/* The size of a `char', as computed by sizeof. */
+#undef SIZEOF_CHAR
+
+/* The size of a `int', as computed by sizeof. */
+#undef SIZEOF_INT
+
 /* The size of a `long', as computed by sizeof. */
 #undef SIZEOF_LONG
 
@@ -244,6 +250,12 @@
 
 /* The size of a `off_t', as computed by sizeof. */
 #undef SIZEOF_OFF_T
+
+/* The size of a `short', as computed by sizeof. */
+#undef SIZEOF_SHORT
+
+/* The size of a `void *', as computed by sizeof. */
+#undef SIZEOF_VOID_P
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS

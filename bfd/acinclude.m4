@@ -3,6 +3,7 @@ sinclude(../config/gettext-sister.m4)
 sinclude(../config/nls.m4)
 sinclude(../config/po.m4)
 sinclude(../config/progtest.m4)
+sinclude(../config/stdint.m4)
 sinclude(../bfd/bfd.m4)
 sinclude(../bfd/warning.m4)
 
