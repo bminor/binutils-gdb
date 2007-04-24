@@ -944,10 +944,10 @@ DEPTC_m32c_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   subsegs.h $(INCDIR)/obstack.h $(srcdir)/../opcodes/m32c-desc.h \
   $(INCDIR)/opcode/cgen-bitset.h $(INCDIR)/opcode/cgen.h \
   $(INCDIR)/opcode/cgen-bitset.h $(srcdir)/../opcodes/m32c-opc.h \
-  $(srcdir)/../opcodes/cgen-types.h $(srcdir)/../opcodes/cgen-ops.h \
-  cgen.h $(INCDIR)/elf/common.h $(INCDIR)/elf/m32c.h \
-  $(INCDIR)/elf/reloc-macros.h $(BFDDIR)/libbfd.h $(INCDIR)/hashtab.h \
-  $(INCDIR)/safe-ctype.h
+  $(srcdir)/../opcodes/cgen-types.h ../bfd/bfd_stdint.h \
+  $(srcdir)/../opcodes/cgen-ops.h cgen.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/m32c.h $(INCDIR)/elf/reloc-macros.h $(BFDDIR)/libbfd.h \
+  $(INCDIR)/hashtab.h $(INCDIR)/safe-ctype.h
 
 DEPTC_m32r_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
