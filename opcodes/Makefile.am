@@ -873,33 +873,37 @@ m32c-asm.lo: m32c-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/symcat.h \
   m32c-desc.h $(INCDIR)/opcode/cgen-bitset.h $(INCDIR)/opcode/cgen.h \
   $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen-bitset.h m32c-opc.h \
-  cgen-types.h cgen-ops.h opintl.h $(INCDIR)/xregex.h \
-  $(INCDIR)/xregex2.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/safe-ctype.h
+  cgen-types.h ../bfd/bfd_stdint.h cgen-ops.h opintl.h \
+  $(INCDIR)/xregex.h $(INCDIR)/xregex2.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/ansidecl.h $(INCDIR)/safe-ctype.h
 m32c-desc.lo: m32c-desc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/symcat.h \
   m32c-desc.h $(INCDIR)/opcode/cgen-bitset.h $(INCDIR)/opcode/cgen.h \
   $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen-bitset.h m32c-opc.h \
-  cgen-types.h cgen-ops.h opintl.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/ansidecl.h $(INCDIR)/xregex.h $(INCDIR)/xregex2.h
+  cgen-types.h ../bfd/bfd_stdint.h cgen-ops.h opintl.h \
+  $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h $(INCDIR)/xregex.h \
+  $(INCDIR)/xregex2.h
 m32c-dis.lo: m32c-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
   $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
   m32c-desc.h $(INCDIR)/opcode/cgen-bitset.h $(INCDIR)/opcode/cgen.h \
   $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen-bitset.h m32c-opc.h \
-  cgen-types.h cgen-ops.h opintl.h $(INCDIR)/elf/m32c.h \
-  $(INCDIR)/elf/reloc-macros.h $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h
+  cgen-types.h ../bfd/bfd_stdint.h cgen-ops.h opintl.h \
+  $(INCDIR)/elf/m32c.h $(INCDIR)/elf/reloc-macros.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h
 m32c-ibld.lo: m32c-ibld.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
   $(BFD_H) $(INCDIR)/symcat.h m32c-desc.h $(INCDIR)/opcode/cgen-bitset.h \
   $(INCDIR)/opcode/cgen.h $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen-bitset.h \
-  m32c-opc.h cgen-types.h cgen-ops.h opintl.h $(INCDIR)/safe-ctype.h
+  m32c-opc.h cgen-types.h ../bfd/bfd_stdint.h cgen-ops.h \
+  opintl.h $(INCDIR)/safe-ctype.h
 m32c-opc.lo: m32c-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/symcat.h \
   m32c-desc.h $(INCDIR)/opcode/cgen-bitset.h $(INCDIR)/opcode/cgen.h \
   $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen-bitset.h m32c-opc.h \
-  cgen-types.h cgen-ops.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h
+  cgen-types.h ../bfd/bfd_stdint.h cgen-ops.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/ansidecl.h
 m32r-asm.lo: m32r-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/symcat.h \
   m32r-desc.h $(INCDIR)/opcode/cgen-bitset.h $(INCDIR)/opcode/cgen.h \
