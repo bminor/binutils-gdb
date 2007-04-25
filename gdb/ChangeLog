@@ -1,5 +1,21 @@
 2007-04-25  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* mips-linux-nat.c: No longer include "gdbcore.h".
+	(mips_linux_register_addr): Move from mips-linux-tdep.c.
+	(mips64_linux_register_addr): Likewise.
+	(mips_linux_register_u_offset): Call mips_linux_register_addr or
+	mips64_linux_register_addr instead of register_addr.
+	* mips-linux-tdep.c (mips_linux_register_addr,
+	mips64_linux_register_addr): Move to mips-linux-nat.c.
+	(register_addr): Remove.
+	(register_addr_data, init_register_addr_data): Remove.
+	(_initialize_mips_linux_tdep): Do not initialize register_addr_data.
+	(set_mips_linux_register_addr): Remove.
+	(mips_linux_init_abi): Do not call set_mips_linux_register_addr.
+	* Makefile.in (mips-linux-nat.o): Update dependencies.
+
+2007-04-25  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* linux-nat.c (linux_register_u_offset): Remove.
 	(linux_target_install_ops): New function.
 	(linux_target): Use it.

@@ -218,42 +218,6 @@ mips_fill_fpregset (mips_elf_fpregset_t *fpregsetp, int regno)
     }
 }
 
-/* Map gdb internal register number to ptrace ``address''.
-   These ``addresses'' are normally defined in <asm/ptrace.h>.  */
-
-static CORE_ADDR
-mips_linux_register_addr (int regno, CORE_ADDR blockend)
-{
-  int regaddr;
-
-  if (regno < 0 || regno >= NUM_REGS)
-    error (_("Bogon register number %d."), regno);
-
-  if (regno < 32)
-    regaddr = regno;
-  else if ((regno >= mips_regnum (current_gdbarch)->fp0)
-	   && (regno < mips_regnum (current_gdbarch)->fp0 + 32))
-    regaddr = FPR_BASE + (regno - mips_regnum (current_gdbarch)->fp0);
-  else if (regno == mips_regnum (current_gdbarch)->pc)
-    regaddr = PC;
-  else if (regno == mips_regnum (current_gdbarch)->cause)
-    regaddr = CAUSE;
-  else if (regno == mips_regnum (current_gdbarch)->badvaddr)
-    regaddr = BADVADDR;
-  else if (regno == mips_regnum (current_gdbarch)->lo)
-    regaddr = MMLO;
-  else if (regno == mips_regnum (current_gdbarch)->hi)
-    regaddr = MMHI;
-  else if (regno == mips_regnum (current_gdbarch)->fp_control_status)
-    regaddr = FPC_CSR;
-  else if (regno == mips_regnum (current_gdbarch)->fp_implementation_revision)
-    regaddr = FPC_EIR;
-  else
-    error (_("Unknowable register number %d."), regno);
-
-  return regaddr;
-}
-
 /* Support for 64-bit ABIs.  */
 
 /* Figure out where the longjmp will land.
@@ -487,42 +451,6 @@ mips64_fill_fpregset (mips64_elf_fpregset_t *fpregsetp, int regno)
 }
 
 
-/* Map gdb internal register number to ptrace ``address''.
-   These ``addresses'' are normally defined in <asm/ptrace.h>.  */
-
-static CORE_ADDR
-mips64_linux_register_addr (int regno, CORE_ADDR blockend)
-{
-  int regaddr;
-
-  if (regno < 0 || regno >= NUM_REGS)
-    error (_("Bogon register number %d."), regno);
-
-  if (regno < 32)
-    regaddr = regno;
-  else if ((regno >= mips_regnum (current_gdbarch)->fp0)
-	   && (regno < mips_regnum (current_gdbarch)->fp0 + 32))
-    regaddr = MIPS64_FPR_BASE + (regno - FP0_REGNUM);
-  else if (regno == mips_regnum (current_gdbarch)->pc)
-    regaddr = MIPS64_PC;
-  else if (regno == mips_regnum (current_gdbarch)->cause)
-    regaddr = MIPS64_CAUSE;
-  else if (regno == mips_regnum (current_gdbarch)->badvaddr)
-    regaddr = MIPS64_BADVADDR;
-  else if (regno == mips_regnum (current_gdbarch)->lo)
-    regaddr = MIPS64_MMLO;
-  else if (regno == mips_regnum (current_gdbarch)->hi)
-    regaddr = MIPS64_MMHI;
-  else if (regno == mips_regnum (current_gdbarch)->fp_control_status)
-    regaddr = MIPS64_FPC_CSR;
-  else if (regno == mips_regnum (current_gdbarch)->fp_implementation_revision)
-    regaddr = MIPS64_FPC_EIR;
-  else
-    error (_("Unknowable register number %d."), regno);
-
-  return regaddr;
-}
-
 /*  Use a local version of this function to get the correct types for
     regsets, until multi-arch core support is ready.  */
 
@@ -584,35 +512,6 @@ static struct core_fns regset_core_fns =
   NULL					/* next */
 };
 
-/* Handle for obtaining pointer to the current register_addr()
-   function for a given architecture.  */
-static struct gdbarch_data *register_addr_data;
-
-CORE_ADDR
-register_addr (int regno, CORE_ADDR blockend)
-{
-  CORE_ADDR (*register_addr_ptr) (int, CORE_ADDR) =
-    gdbarch_data (current_gdbarch, register_addr_data);
-
-  gdb_assert (register_addr_ptr != 0);
-
-  return register_addr_ptr (regno, blockend);
-}
-
-static void
-set_mips_linux_register_addr (struct gdbarch *gdbarch,
-                              CORE_ADDR (*register_addr_ptr) (int,
-							      CORE_ADDR))
-{
-  deprecated_set_gdbarch_data (gdbarch, register_addr_data,
-			       register_addr_ptr);
-}
-
-static void *
-init_register_addr_data (struct gdbarch *gdbarch)
-{
-  return 0;
-}
 
 /* Check the code at PC for a dynamic linker lazy resolution stub.
    Because they aren't in the .plt section, we pattern-match on the
@@ -1139,7 +1038,6 @@ mips_linux_init_abi (struct gdbarch_info info,
 	                                mips_linux_get_longjmp_target);
 	set_solib_svr4_fetch_link_map_offsets
 	  (gdbarch, svr4_ilp32_fetch_link_map_offsets);
-	set_mips_linux_register_addr (gdbarch, mips_linux_register_addr);
 	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_o32_sigframe);
 	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_o32_rt_sigframe);
 	break;
@@ -1148,7 +1046,6 @@ mips_linux_init_abi (struct gdbarch_info info,
 	                                mips_linux_get_longjmp_target);
 	set_solib_svr4_fetch_link_map_offsets
 	  (gdbarch, svr4_ilp32_fetch_link_map_offsets);
-	set_mips_linux_register_addr (gdbarch, mips64_linux_register_addr);
 	set_gdbarch_long_double_bit (gdbarch, 128);
 	/* These floatformats should probably be renamed.  MIPS uses
 	   the same 128-bit IEEE floating point format that IA-64 uses,
@@ -1162,7 +1059,6 @@ mips_linux_init_abi (struct gdbarch_info info,
 	                                mips64_linux_get_longjmp_target);
 	set_solib_svr4_fetch_link_map_offsets
 	  (gdbarch, svr4_lp64_fetch_link_map_offsets);
-	set_mips_linux_register_addr (gdbarch, mips64_linux_register_addr);
 	set_gdbarch_long_double_bit (gdbarch, 128);
 	/* These floatformats should probably be renamed.  MIPS uses
 	   the same 128-bit IEEE floating point format that IA-64 uses,
@@ -1190,9 +1086,6 @@ void
 _initialize_mips_linux_tdep (void)
 {
   const struct bfd_arch_info *arch_info;
-
-  register_addr_data =
-    gdbarch_data_register_post_init (init_register_addr_data);
 
   for (arch_info = bfd_lookup_arch (bfd_arch_mips, 0);
        arch_info != NULL;

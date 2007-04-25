@@ -26,7 +26,6 @@
 #include "target.h"
 #include "linux-nat.h"
 #include "mips-linux-tdep.h"
-#include "gdbcore.h"
 
 #include "gdb_proc_service.h"
 
@@ -85,6 +84,75 @@ mips_linux_cannot_store_register (int regno)
     return 0;
   else
     return 1;
+}
+
+/* Map gdb internal register number to ptrace ``address''.
+   These ``addresses'' are normally defined in <asm/ptrace.h>.  */
+
+static CORE_ADDR
+mips_linux_register_addr (int regno)
+{
+  int regaddr;
+
+  if (regno < 0 || regno >= NUM_REGS)
+    error (_("Bogon register number %d."), regno);
+
+  if (regno < 32)
+    regaddr = regno;
+  else if ((regno >= mips_regnum (current_gdbarch)->fp0)
+	   && (regno < mips_regnum (current_gdbarch)->fp0 + 32))
+    regaddr = FPR_BASE + (regno - mips_regnum (current_gdbarch)->fp0);
+  else if (regno == mips_regnum (current_gdbarch)->pc)
+    regaddr = PC;
+  else if (regno == mips_regnum (current_gdbarch)->cause)
+    regaddr = CAUSE;
+  else if (regno == mips_regnum (current_gdbarch)->badvaddr)
+    regaddr = BADVADDR;
+  else if (regno == mips_regnum (current_gdbarch)->lo)
+    regaddr = MMLO;
+  else if (regno == mips_regnum (current_gdbarch)->hi)
+    regaddr = MMHI;
+  else if (regno == mips_regnum (current_gdbarch)->fp_control_status)
+    regaddr = FPC_CSR;
+  else if (regno == mips_regnum (current_gdbarch)->fp_implementation_revision)
+    regaddr = FPC_EIR;
+  else
+    error (_("Unknowable register number %d."), regno);
+
+  return regaddr;
+}
+
+static CORE_ADDR
+mips64_linux_register_addr (int regno)
+{
+  int regaddr;
+
+  if (regno < 0 || regno >= NUM_REGS)
+    error (_("Bogon register number %d."), regno);
+
+  if (regno < 32)
+    regaddr = regno;
+  else if ((regno >= mips_regnum (current_gdbarch)->fp0)
+	   && (regno < mips_regnum (current_gdbarch)->fp0 + 32))
+    regaddr = MIPS64_FPR_BASE + (regno - FP0_REGNUM);
+  else if (regno == mips_regnum (current_gdbarch)->pc)
+    regaddr = MIPS64_PC;
+  else if (regno == mips_regnum (current_gdbarch)->cause)
+    regaddr = MIPS64_CAUSE;
+  else if (regno == mips_regnum (current_gdbarch)->badvaddr)
+    regaddr = MIPS64_BADVADDR;
+  else if (regno == mips_regnum (current_gdbarch)->lo)
+    regaddr = MIPS64_MMLO;
+  else if (regno == mips_regnum (current_gdbarch)->hi)
+    regaddr = MIPS64_MMHI;
+  else if (regno == mips_regnum (current_gdbarch)->fp_control_status)
+    regaddr = MIPS64_FPC_CSR;
+  else if (regno == mips_regnum (current_gdbarch)->fp_implementation_revision)
+    regaddr = MIPS64_FPC_EIR;
+  else
+    error (_("Unknowable register number %d."), regno);
+
+  return regaddr;
 }
 
 /* Fetch the thread-local storage pointer for libthread_db.  */
@@ -253,10 +321,10 @@ mips64_linux_store_registers (int regnum)
 static CORE_ADDR
 mips_linux_register_u_offset (int regno)
 {
-  /* FIXME drow/2005-09-04: The hardcoded use of register_addr should go
-     away.  This requires disentangling the various definitions of it
-     (particularly alpha-nat.c's).  */
-  return register_addr (regno, 0);
+  if (mips_abi_regsize (current_gdbarch) == 8)
+    return mips64_linux_register_addr (regno);
+  else
+    return mips_linux_register_addr (regno);
 }
 
 void _initialize_mips_linux_nat (void);
