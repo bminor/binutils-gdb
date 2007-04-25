@@ -23,7 +23,6 @@ load_lib gdb.exp
 #
 proc gdb_target_sim { } {
     global gdb_prompt
-    global exit_status
     
     set target_sim_options "[board_info target gdb,target_sim_options]";
 
@@ -37,11 +36,12 @@ proc gdb_target_sim { } {
 	timeout { 
 	    perror "Couldn't set target for simulator."
 	    cleanup
-	    exit $exit_status
+	    return -1
 	}
     }
     set timeout 10
     verbose "Timeout is now $timeout seconds" 2
+    return 0
 }
 
 #
@@ -59,7 +59,7 @@ proc gdb_load { arg } {
 	if [gdb_file_cmd $arg] then { return -1 }
     }
 
-    gdb_target_sim
+    if [gdb_target_sim] then { return -1 }
 
     send_gdb "load\n"
     set timeout 2400

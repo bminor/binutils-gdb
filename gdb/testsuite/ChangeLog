@@ -1,3 +1,9 @@
+2007-04-25  Corinna Vinschen <vinschen@redhat.com>
+
+	* config/sim.exp (gdb_target_sim): Just return with -1 when setting
+	target sim fails.  Return 0 otherwise.
+	(gdb_load): Return prematurely if gdb_target_sim fails.
+
 2007-04-16  Denis Pilat  <denis.pilat@st.com>
 
 	* gdb.base/setshow.exp: Reset height after having set it to 100.
