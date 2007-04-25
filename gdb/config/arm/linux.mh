@@ -1,6 +1,6 @@
 # Host: ARM based machine running GNU/Linux
 
-NAT_FILE= nm-linux.h
+NAT_FILE= config/nm-linux.h
 NATDEPFILES= inf-ptrace.o fork-child.o arm-linux-nat.o gcore.o \
 	proc-service.o linux-thread-db.o linux-nat.o linux-fork.o
 

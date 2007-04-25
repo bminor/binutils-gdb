@@ -50,9 +50,5 @@ extern void amd64_linux_dr_reset_addr (int regnum);
 extern unsigned long amd64_linux_dr_get_status (void);
 #define I386_DR_LOW_GET_STATUS() \
   amd64_linux_dr_get_status ()
-
-
-/* Override copies of {fetch,store}_inferior_registers in `infptrace.c'.  */
-#define FETCH_INFERIOR_REGISTERS
 
 #endif /* nm-linux64.h */

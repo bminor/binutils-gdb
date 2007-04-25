@@ -26,6 +26,7 @@
 #include "target.h"
 #include "linux-nat.h"
 #include "mips-linux-tdep.h"
+#include "gdbcore.h"
 
 #include "gdb_proc_service.h"
 
@@ -246,12 +247,24 @@ mips64_linux_store_registers (int regnum)
     super_store_registers (regnum);
 }
 
+/* Return the address in the core dump or inferior of register
+   REGNO.  */
+
+static CORE_ADDR
+mips_linux_register_u_offset (int regno)
+{
+  /* FIXME drow/2005-09-04: The hardcoded use of register_addr should go
+     away.  This requires disentangling the various definitions of it
+     (particularly alpha-nat.c's).  */
+  return register_addr (regno, 0);
+}
+
 void _initialize_mips_linux_nat (void);
 
 void
 _initialize_mips_linux_nat (void)
 {
-  struct target_ops *t = linux_target ();
+  struct target_ops *t = linux_trad_target (mips_linux_register_u_offset);
 
   super_fetch_registers = t->to_fetch_registers;
   super_store_registers = t->to_store_registers;

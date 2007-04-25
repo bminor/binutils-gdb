@@ -88,6 +88,11 @@ struct lwp_info *iterate_over_lwps (int (*callback) (struct lwp_info *,
    override it with local methods.  */
 struct target_ops * linux_target (void);
 
+/* Create a generic GNU/Linux target using traditional 
+   ptrace register access.  */
+struct target_ops *
+linux_trad_target (CORE_ADDR (*register_u_offset)(int));
+
 /* Register the customized GNU/Linux target.  This should be used
    instead of calling add_target directly.  */
 void linux_nat_add_target (struct target_ops *);

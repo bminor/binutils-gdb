@@ -3164,35 +3164,12 @@ linux_xfer_partial (struct target_ops *ops, enum target_object object,
 			     offset, len);
 }
 
-#ifndef FETCH_INFERIOR_REGISTERS
-
-/* Return the address in the core dump or inferior of register
-   REGNO.  */
-
-static CORE_ADDR
-linux_register_u_offset (int regno)
-{
-  /* FIXME drow/2005-09-04: The hardcoded use of register_addr should go
-     away.  This requires disentangling the various definitions of it
-     (particularly alpha-nat.c's).  */
-  return register_addr (regno, 0);
-}
-
-#endif
-
 /* Create a prototype generic Linux target.  The client can override
    it with local methods.  */
 
-struct target_ops *
-linux_target (void)
+static void
+linux_target_install_ops (struct target_ops *t)
 {
-  struct target_ops *t;
-
-#ifdef FETCH_INFERIOR_REGISTERS
-  t = inf_ptrace_target ();
-#else
-  t = inf_ptrace_trad_target (linux_register_u_offset);
-#endif
   t->to_insert_fork_catchpoint = child_insert_fork_catchpoint;
   t->to_insert_vfork_catchpoint = child_insert_vfork_catchpoint;
   t->to_insert_exec_catchpoint = child_insert_exec_catchpoint;
@@ -3205,6 +3182,26 @@ linux_target (void)
 
   super_xfer_partial = t->to_xfer_partial;
   t->to_xfer_partial = linux_xfer_partial;
+}
+
+struct target_ops *
+linux_target (void)
+{
+  struct target_ops *t;
+
+  t = inf_ptrace_target ();
+  linux_target_install_ops (t);
+
+  return t;
+}
+
+struct target_ops *
+linux_trad_target (CORE_ADDR (*register_u_offset)(int))
+{
+  struct target_ops *t;
+
+  t = inf_ptrace_trad_target (register_u_offset);
+  linux_target_install_ops (t);
 
   return t;
 }

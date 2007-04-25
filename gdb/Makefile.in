@@ -1716,7 +1716,8 @@ alphabsd-tdep.o: alphabsd-tdep.c $(defs_h) $(alpha_tdep_h) \
 	$(alphabsd_tdep_h)
 alphafbsd-tdep.o: alphafbsd-tdep.c $(defs_h) $(value_h) $(osabi_h) \
 	$(alpha_tdep_h) $(solib_svr4_h)
-alpha-linux-nat.o: alpha-linux-nat.c $(defs_h) $(target_h) $(linux_nat_h)
+alpha-linux-nat.o: alpha-linux-nat.c $(defs_h) $(target_h) $(linux_nat_h) \
+	$(gdbcore_h)
 alpha-linux-tdep.o: alpha-linux-tdep.c $(defs_h) $(frame_h) $(gdb_assert_h) \
 	$(osabi_h) $(solib_svr4_h) $(symtab_h) $(alpha_tdep_h)
 alpha-mdebug-tdep.o: alpha-mdebug-tdep.c $(defs_h) $(frame_h) \
@@ -2340,7 +2341,7 @@ mips64obsd-tdep.o: mips64obsd-tdep.c $(defs_h) $(osabi_h) $(regcache_h) \
 mips-irix-tdep.o: mips-irix-tdep.c $(defs_h) $(osabi_h) $(elf_bfd_h)
 mips-linux-nat.o: mips-linux-nat.c $(defs_h) $(mips_tdep_h) $(target_h) \
 	$(linux_nat_h) $(gdb_proc_service_h) $(mips_linux_tdep_h) \
-	$(inferior_h)
+	$(gdbcore_h) $(inferior_h)
 mips-linux-tdep.o: mips-linux-tdep.c $(defs_h) $(gdbcore_h) $(target_h) \
 	$(solib_svr4_h) $(osabi_h) $(mips_tdep_h) $(gdb_string_h) \
 	$(gdb_assert_h) $(frame_h) $(regcache_h) $(trad_frame_h) \

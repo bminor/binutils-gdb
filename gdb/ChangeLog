@@ -1,5 +1,53 @@
 2007-04-25  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* linux-nat.c (linux_register_u_offset): Remove.
+	(linux_target_install_ops): New function.
+	(linux_target): Use it.
+	(linux_trad_target): New function.
+	* linux-nat.h (linux_trad_target): Declare.
+
+	* alpha-linux-nat.c: Include "gdbcore.h".
+	(alpha_linux_register_u_offset): New function.
+	(_initialize_alpha_linux_nat): Use linux_trad_target.
+
+	* mips-linux-nat.c: Include "gdbcore.h".
+	(mips_linux_register_u_offset): New function.
+	(_initialize_mips_linux_nat): Use linux_trad_target.
+
+	* config/arm/linux.mh (NAT_FILE): Set to config/nm-linux.h.
+	* config/arm/nm-linux.h: Delete file.
+
+	* config/i386/nm-linux64.h (FETCH_INFERIOR_REGISTERS): Remove.
+	* config/i386/nm-linux.h (FETCH_INFERIOR_REGISTERS): Remove.
+
+	* config/ia64/linux.mh (NAT_FILE): Set to config/nm-linux.h.
+	* config/ia64/nm-linux.h: Delete file.
+
+	* config/m32r/linux.mh (NAT_FILE): Set to config/nm-linux.h.
+	* config/m32r/nm-linux.h: Delete file.
+
+	* config/m68k/linux.mh (NAT_FILE): Set to config/nm-linux.h.
+	* config/m68k/nm-linux.h: Delete file.
+
+	* config/pa/linux.mh (NAT_FILE): Set to config/nm-linux.h.
+	* config/pa/nm-linux.h: Delete file.
+
+	* config/powerpc/linux.mh (NAT_FILE): Set to config/nm-linux.h.
+	* config/powerpc/ppc64-linux.mh (NAT_FILE): Likewise.
+	* config/powerpc/nm-linux.h: Delete file.
+
+	* config/s390/s390.mh (NAT_FILE): Set to config/nm-linux.h.
+	* config/s390/nm-linux.h: Delete file.
+
+	* config/sparc/linux.mh (NAT_FILE): Set to config/nm-linux.h.
+	* config/sparc/linux64.mh (NAT_FILE): Likewise.
+	* config/sparc/nm-linux.h: Delete file.
+
+	* Makefile.in (alpha-linux-nat.o): Update dependencies.
+	(mips-linux-nat.o): Likewise.
+
+2007-04-25  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* core-aout.c: Delete file.
 	* Makefile.in (ALLDEPFILES): Remove core-aout.c.
 	(core-aout.o): Delete rule.

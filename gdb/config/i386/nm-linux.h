@@ -48,9 +48,6 @@ extern unsigned long i386_linux_dr_get_status (void);
   i386_linux_dr_get_status ()
 
 
-/* Override copies of {fetch,store}_inferior_registers in `infptrace.c'.  */
-#define FETCH_INFERIOR_REGISTERS
-
 #ifdef HAVE_PTRACE_GETFPXREGS
 /* Include register set support for the SSE registers.  */
 #define FILL_FPXREGSET
