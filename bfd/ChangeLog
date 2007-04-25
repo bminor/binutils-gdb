@@ -1,3 +1,7 @@
+2007-04-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* sysdep.h: Revert last change.
+
 2007-04-24  Nick Clifton  <nickc@redhat.com>
 
 	* coffcode.h (coff_slurp_reloc_table): Initialise dst.r_offset.
