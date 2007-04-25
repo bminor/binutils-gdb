@@ -38,7 +38,7 @@ set testfile sigstep
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested "Couldn't compile ${module}.c"
+    untested "Couldn't compile ${srcfile}.c"
     return -1
 }
 

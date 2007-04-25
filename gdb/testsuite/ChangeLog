@@ -1,3 +1,13 @@
+2007-04-25  Vladimir Prus  <vladimir@codesourcery.com>
+	
+	* gdb.base/sigaltstack.exp: Use 'srcfile' in error
+	message, not the undefined 'module' variable.
+	* gdb.base/siginfo.exp: Likewise.
+	* gdb.base/sigstep.exp: Likewise.
+	* lib/gdbserver-support.exp (gdb_target_cmd): Quote
+	serialport.
+	* lib/mi-support.exp (mi_gdb_target_cmd): Likewise.
+
 2007-04-25  Corinna Vinschen <vinschen@redhat.com>
 
 	* config/sim.exp (gdb_target_sim): Just return with -1 when setting

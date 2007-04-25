@@ -45,6 +45,7 @@
 proc gdb_target_cmd { targetname serialport } {
     global gdb_prompt
 
+    set serialport_re [string_to_regexp $serialport]
     for {set i 1} {$i <= 3} {incr i} {
 	send_gdb "target $targetname $serialport\n"
 	gdb_expect 60 {
@@ -59,7 +60,7 @@ proc gdb_target_cmd { targetname serialport } {
 		verbose "Set target to $targetname"
 		return 0
 	    }
-	    -re "Remote debugging using .*$serialport.*$gdb_prompt $" {
+	    -re "Remote debugging using .*$serialport_re.*$gdb_prompt $" {
 		verbose "Set target to $targetname"
 		return 0
 	    }
