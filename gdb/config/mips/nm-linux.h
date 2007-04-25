@@ -24,18 +24,6 @@
 
 #include "config/nm-linux.h"
 
-/* Return sizeof user struct to callers in less machine dependent
-   routines.  Hard coded for cross-compilation friendliness. */
-
-#define KERNEL_U_SIZE 504
-
-/* ptrace register ``addresses'' are absolute.  */
-
-#define U_REGS_OFFSET 0
-
-#define REGISTER_U_ADDR(addr, blockend, regno) \
-  (addr) = mips_register_addr ((regno),(blockend))
-
 int mips_linux_cannot_fetch_register (int regno);
 int mips_linux_cannot_store_register (int regno);
 #define CANNOT_FETCH_REGISTER(regno) mips_linux_cannot_fetch_register (regno)

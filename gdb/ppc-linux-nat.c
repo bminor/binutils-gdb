@@ -152,12 +152,6 @@ static CORE_ADDR last_stopped_data_address = 0;
    error.  */
 int have_ptrace_getsetevrregs = 1;
 
-int
-kernel_u_size (void)
-{
-  return (sizeof (struct user));
-}
-
 /* *INDENT-OFF* */
 /* registers layout, as presented by the ptrace interface:
 PT_R0, PT_R1, PT_R2, PT_R3, PT_R4, PT_R5, PT_R6, PT_R7,

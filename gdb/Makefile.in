@@ -1433,7 +1433,7 @@ ALLDEPFILES = \
 	armnbsd-nat.c armbsd-tdep.c armnbsd-tdep.c armobsd-tdep.c \
 	avr-tdep.c \
 	bsd-uthread.c bsd-kvm.c \
-	core-regset.c core-aout.c corelow.c \
+	core-regset.c corelow.c \
 	dcache.c exec.c \
 	fbsd-nat.c \
 	fork-child.c \
@@ -1876,8 +1876,6 @@ completer.o: completer.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
 	$(filenames_h) $(language_h) $(cli_decode_h) $(gdbcmd_h) \
 	$(readline_h) $(completer_h)
 copying.o: copying.c $(defs_h) $(command_h) $(gdbcmd_h)
-core-aout.o: core-aout.c $(defs_h) $(gdbcore_h) $(value_h) $(regcache_h) \
-	$(gdb_dirent_h) $(gdb_stat_h)
 corefile.o: corefile.c $(defs_h) $(gdb_string_h) $(inferior_h) $(symtab_h) \
 	$(command_h) $(gdbcmd_h) $(bfd_h) $(target_h) $(gdbcore_h) \
 	$(dis_asm_h) $(gdb_stat_h) $(completer_h) $(exceptions_h)

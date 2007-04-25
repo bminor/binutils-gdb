@@ -25,10 +25,6 @@
 
 #include "config/nm-linux.h"
 
-/* ptrace register ``addresses'' are absolute.  */
-
-#define U_REGS_OFFSET 0
-
 /* Given a pointer to either a gregset_t or fpregset_t, return a
    pointer to the first register.  */
 #define ALPHA_REGSET_BASE(regsetp)  ((long *) (regsetp))

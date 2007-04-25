@@ -137,26 +137,6 @@ int have_ptrace_getfpxregs =
 ;
 
 
-/* Support for the user struct.  */
-
-/* Return the address of register REGNUM.  BLOCKEND is the value of
-   u.u_ar0, which should point to the registers.  */
-
-CORE_ADDR
-register_u_addr (CORE_ADDR blockend, int regnum)
-{
-  return (blockend + 4 * regmap[regnum]);
-}
-
-/* Return the size of the user struct.  */
-
-int
-kernel_u_size (void)
-{
-  return (sizeof (struct user));
-}
-
-
 /* Accessing registers through the U area, one at a time.  */
 
 /* Fetch one register.  */
@@ -168,7 +148,7 @@ fetch_register (int regno)
   int val;
 
   gdb_assert (!have_ptrace_getregs);
-  if (cannot_fetch_register (regno))
+  if (regmap[regno] == -1)
     {
       regcache_raw_supply (current_regcache, regno, NULL);
       return;
@@ -180,7 +160,7 @@ fetch_register (int regno)
     tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
 
   errno = 0;
-  val = ptrace (PTRACE_PEEKUSER, tid, register_addr (regno, 0), 0);
+  val = ptrace (PTRACE_PEEKUSER, tid, 4 * regmap[regno], 0);
   if (errno != 0)
     error (_("Couldn't read register %s (#%d): %s."), REGISTER_NAME (regno),
 	   regno, safe_strerror (errno));
@@ -197,7 +177,7 @@ store_register (int regno)
   int val;
 
   gdb_assert (!have_ptrace_getregs);
-  if (cannot_store_register (regno))
+  if (regmap[regno] == -1)
     return;
 
   /* GNU/Linux LWP ID's are process ID's.  */
@@ -207,7 +187,7 @@ store_register (int regno)
 
   errno = 0;
   regcache_raw_collect (current_regcache, regno, &val);
-  ptrace (PTRACE_POKEUSER, tid, register_addr (regno, 0), val);
+  ptrace (PTRACE_POKEUSER, tid, 4 * regmap[regno], val);
   if (errno != 0)
     error (_("Couldn't write register %s (#%d): %s."), REGISTER_NAME (regno),
 	   regno, safe_strerror (errno));
@@ -457,25 +437,6 @@ static int store_fpxregs (int tid, int regno) { return 0; }
 
 
 /* Transferring arbitrary registers between GDB and inferior.  */
-
-/* Check if register REGNO in the child process is accessible.
-   If we are accessing registers directly via the U area, only the
-   general-purpose registers are available.
-   All registers should be accessible if we have GETREGS support.  */
-   
-int
-cannot_fetch_register (int regno)
-{
-  gdb_assert (regno >= 0 && regno < NUM_REGS);
-  return (!have_ptrace_getregs && regmap[regno] == -1);
-}
-
-int
-cannot_store_register (int regno)
-{
-  gdb_assert (regno >= 0 && regno < NUM_REGS);
-  return (!have_ptrace_getregs && regmap[regno] == -1);
-}
 
 /* Fetch register REGNO from the child process.  If REGNO is -1, do
    this for all registers (including the floating point and SSE

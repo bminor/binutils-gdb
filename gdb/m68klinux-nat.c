@@ -92,16 +92,6 @@ int have_ptrace_getregs =
 
 
 
-/* BLOCKEND is the value of u.u_ar0, and points to the place where GS
-   is stored.  */
-
-int
-m68k_linux_register_u_addr (int blockend, int regnum)
-{
-  return (blockend + 4 * regmap[regnum]);
-}
-
-
 /* Fetching registers directly from the U area, one at a time.  */
 
 /* FIXME: This duplicates code from `inptrace.c'.  The problem is that we
@@ -127,7 +117,6 @@ fetch_register (int regno)
   CORE_ADDR regaddr;
   char mess[128];		/* For messages */
   int i;
-  unsigned int offset;		/* Offset of registers within the u area.  */
   char buf[MAX_REGISTER_SIZE];
   int tid;
 
@@ -143,9 +132,7 @@ fetch_register (int regno)
   if (tid == 0)
     tid = PIDGET (inferior_ptid);	/* no thread id, just use process id */
 
-  offset = U_REGS_OFFSET;
-
-  regaddr = register_addr (regno, offset);
+  regaddr = 4 * regmap[regno];
   for (i = 0; i < register_size (current_gdbarch, regno);
        i += sizeof (PTRACE_TYPE_RET))
     {
@@ -192,7 +179,6 @@ store_register (int regno)
   CORE_ADDR regaddr;
   char mess[128];		/* For messages */
   int i;
-  unsigned int offset;		/* Offset of registers within the u area.  */
   int tid;
   char buf[MAX_REGISTER_SIZE];
 
@@ -206,9 +192,7 @@ store_register (int regno)
   if (tid == 0)
     tid = PIDGET (inferior_ptid);	/* no thread id, just use process id */
 
-  offset = U_REGS_OFFSET;
-
-  regaddr = register_addr (regno, offset);
+  regaddr = 4 * regmap[regno];
 
   /* Put the contents of regno into a local buffer */
   regcache_raw_collect (current_regcache, regno, buf);
@@ -595,12 +579,6 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 }
 
 
-int
-kernel_u_size (void)
-{
-  return (sizeof (struct user));
-}
-
 /* Register that we are able to handle GNU/Linux ELF core file
    formats.  */
 

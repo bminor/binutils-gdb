@@ -48,7 +48,7 @@
 
 /* Address of the user structure.  This is the the value for 32V; 3BSD
    uses a different value, but hey, who's still using those systems?  */
-CORE_ADDR vax_kernel_u_addr = 0x80020000;
+static CORE_ADDR vax_kernel_u_addr = 0x80020000;
 
 /* Location of the user's stored registers; usage is `u.u_ar0[XX]'.
    For 4.2BSD and ULTRIX these are negative!  See <machine/reg.h>.  */
@@ -59,7 +59,7 @@ static int vax_register_index[] =
   AP, FP, SP, PC, PS
 };
 
-CORE_ADDR
+static CORE_ADDR
 vax_register_u_addr (CORE_ADDR u_ar0, int regnum)
 {
   gdb_assert (regnum >= 0 && regnum < ARRAY_SIZE (vax_register_index));

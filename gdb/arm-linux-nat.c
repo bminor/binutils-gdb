@@ -529,12 +529,6 @@ supply_fpregset (gdb_fpregset_t *fpregsetp)
   arm_linux_supply_nwfpe (NULL, current_regcache, -1, fpregsetp, 0);
 }
 
-int
-arm_linux_kernel_u_size (void)
-{
-  return (sizeof (struct user));
-}
-
 /* Fetch the thread-local storage pointer for libthread_db.  */
 
 ps_err_e

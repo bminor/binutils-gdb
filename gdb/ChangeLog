@@ -1,3 +1,49 @@
+2007-04-25  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* core-aout.c: Delete file.
+	* Makefile.in (ALLDEPFILES): Remove core-aout.c.
+	(core-aout.o): Delete rule.
+	* gdbcore.h (kernel_u_addr, KERNEL_U_ADDR): Remove.
+
+	* config/alpha/nm-linux.h (U_REGS_OFFSET): Remove.
+
+	* arm-linux-nat.c (arm_linux_kernel_u_size): Remove.
+	* config/arm/nm-linux.h (U_REGS_OFFSET, KERNEL_U_SIZE,
+	KERNEL_U_ADDR): Remove.
+
+	* i386-linux-nat.c (register_u_addr, kernel_u_size): Remove.
+	(cannot_fetch_register, cannot_store_register): Remove.
+	(fetch_register): Inline cannot_fetch_register and register_addr.
+	(store_register): Inline cannot_store_register and register_addr.
+	* config/i386/linux.mh (NATDEPFILES): Remove core-aout.o.
+	* config/i386/nm-linux.h (KERNEL_U_SIZE, KERNEL_U_ADDR,
+	REGISTER_U_ADDR, CANNOT_FETCH_REGISTER, CANNOT_STORE_REGISTER):
+	Remove.
+
+	* m68klinux-nat.c (m68k_linux_register_u_addr, kernel_u_size): Remove.
+	(fetch_register): Inline register_addr.
+	(store_register): Inline register_addr.
+	* config/m68k/linux.mh (NATDEPFILES): Remove core-aout.o.
+	* config/m68k/nm-linux.h (KERNEL_U_SIZE, KERNEL_U_ADDR,
+	U_REGS_OFFSET, REGISTER_U_ADDR): Remove.
+
+	* config/mips/nm-irix5.h (REGISTER_U_ADDR): Remove.
+	* config/mips/nm-linux.h (KERNEL_U_SIZE, U_REGS_OFFSET,
+	REGISTER_U_ADDR): Remove.
+
+	* hppa-linux-nat.c (register_addr): Rename to ...
+	(hppa_linux_register_addr): ... this.  Make static.
+	(fetch_register, store_register): Adapt callers.
+	* config/pa/nm-linux.h (U_REGS_OFFSET): Remove.
+
+	* ppc-linux-nat.c (kernel_u_size): Remove.
+	* config/powerpc/nm-linux.h (KERNEL_U_SIZE, KERNEL_U_ADDR): Remove.
+
+	* vax-nat.c (vax_kernel_u_addr, vax_register_u_addr): Make static.
+	* config/vax/vax.mh (NATDEPFILES): Remove core-aout.o.
+	(NAT_FILE): Remove.
+	* config/vax/nm-vax.h: Delete file.
+
 2007-04-20  Mark Shinwell  <shinwell@codesourcery.com>
 
 	* MAINTAINERS (Write After Approval): Add myself.

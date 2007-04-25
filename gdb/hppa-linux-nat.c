@@ -153,8 +153,8 @@ static const int u_offsets[] =
     PT_FR31, PT_FR31 + 4,
   };
 
-CORE_ADDR
-register_addr (int regno, CORE_ADDR blockend)
+static CORE_ADDR
+hppa_linux_register_addr (int regno, CORE_ADDR blockend)
 {
   CORE_ADDR addr;
 
@@ -233,7 +233,7 @@ fetch_register (int regno)
     tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
 
   errno = 0;
-  val = ptrace (PTRACE_PEEKUSER, tid, register_addr (regno, 0), 0);
+  val = ptrace (PTRACE_PEEKUSER, tid, hppa_linux_register_addr (regno, 0), 0);
   if (errno != 0)
     error (_("Couldn't read register %s (#%d): %s."), REGISTER_NAME (regno),
 	   regno, safe_strerror (errno));
@@ -259,7 +259,7 @@ store_register (int regno)
 
   errno = 0;
   regcache_raw_collect (current_regcache, regno, &val);
-  ptrace (PTRACE_POKEUSER, tid, register_addr (regno, 0), val);
+  ptrace (PTRACE_POKEUSER, tid, hppa_linux_register_addr (regno, 0), val);
   if (errno != 0)
     error (_("Couldn't write register %s (#%d): %s."), REGISTER_NAME (regno),
 	   regno, safe_strerror (errno));

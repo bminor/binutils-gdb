@@ -23,8 +23,6 @@
 
 #include "config/nm-linux.h"
 
-#define U_REGS_OFFSET 0
-
 /* Override copies of {fetch,store}_inferior_registers in `infptrace.c'.  */
 #define FETCH_INFERIOR_REGISTERS
 

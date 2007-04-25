@@ -29,20 +29,6 @@
 #include "i386/nm-i386.h"
 #include "config/nm-linux.h"
 
-/* Support for the user area.  */
-
-/* Return the size of the user struct.  */
-extern int kernel_u_size (void);
-#define KERNEL_U_SIZE kernel_u_size()
-
-/* This is the amount to substract from u.u_ar0 to get the offset in
-   the core file of the register values.  */
-#define KERNEL_U_ADDR 0
-
-extern CORE_ADDR register_u_addr (CORE_ADDR blockend, int regnum);
-#define REGISTER_U_ADDR(addr, blockend, regnum) \
-  (addr) = register_u_addr (blockend, regnum)
-
 /* Provide access to the i386 hardware debugging registers.  */
 
 extern void i386_linux_dr_set_control (unsigned long control);
@@ -64,15 +50,6 @@ extern unsigned long i386_linux_dr_get_status (void);
 
 /* Override copies of {fetch,store}_inferior_registers in `infptrace.c'.  */
 #define FETCH_INFERIOR_REGISTERS
-
-/* Nevertheless, define CANNOT_{FETCH,STORE}_REGISTER, because we
-   might fall back on the code `infptrace.c' (well a copy of that code
-   in `i386-linux-nat.c' for now) and we can access only the
-   general-purpose registers in that way.  */
-extern int cannot_fetch_register (int regno);
-extern int cannot_store_register (int regno);
-#define CANNOT_FETCH_REGISTER(regno) cannot_fetch_register (regno)
-#define CANNOT_STORE_REGISTER(regno) cannot_store_register (regno)
 
 #ifdef HAVE_PTRACE_GETFPXREGS
 /* Include register set support for the SSE registers.  */
