@@ -1,3 +1,9 @@
+2007-04-27  Alan Modra  <amodra@bigpond.net.au>
+
+	Many files: Include sysdep.h first.  Remove duplicate headers.
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2007-04-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.in: Regenerate.

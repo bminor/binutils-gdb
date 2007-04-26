@@ -1,3 +1,11 @@
+2007-04-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* bucumm.h: Split off host dependencies to..
+	* sysdep.h: ..here.
+	Many files: Include sysdep.h.  Remove duplicate headers and reorder.
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2007-04-24  Nick Clifton  <nickc@redhat.com>
 
 	* srconv.c (walk_tree_type_1): Initialise dpt.dunno.

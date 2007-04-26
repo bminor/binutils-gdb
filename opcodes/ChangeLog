@@ -1,8 +1,15 @@
+2007-04-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* ns32k-dis.c: Include sysdep.h first.
+
 2007-04-24  Andreas Krebbel  <krebbel1@de.ibm.com>
 
 	* opcodes/s390-opc.c (MASK_SSF_RRDRD): Fourth nybble belongs to the
 	opcode.
-	* opcodes/s390-opc.txt (pfpo, ectg, csst): New z9-ec instructions added.
+	* opcodes/s390-opc.txt (pfpo, ectg, csst): Add new z9-ec instructions.
+
 2007-04-24  Nick Clifton  <nickc@redhat.com>
 
 	* arm-dis.c (print_insn): Initialise type.
