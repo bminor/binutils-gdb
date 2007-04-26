@@ -1,3 +1,14 @@
+2007-04-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/4429
+	* gas/i386/i386.exp: Run "x86-64-addr32-intel" and
+	"x86-64-rip-intel".
+
+	* gas/i386/intelok.d: Updated.
+
+	* gas/i386/x86-64-addr32-intel.d: New file.
+	* gas/i386/x86-64-rip-intel.d: Likewise.
+
 2007-04-24  Andreas Krebbel  <krebbel1@de.ibm.com>
 
 	* gas/s390/zarch-z9-ec.d: Add pfpo, ectg and csst.

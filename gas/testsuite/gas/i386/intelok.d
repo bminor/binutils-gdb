@@ -106,10 +106,10 @@ Disassembly of section .text:
 [ 	]*[0-9a-f]+:	8b 40 12[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+18\]
 [ 	]*[0-9a-f]+:	8b 04 85 02 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\*4\+(0x)?2\]
 [ 	]*[0-9a-f]+:	8b 04 85 02 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\*4\+(0x)?2\]
-[ 	]*[0-9a-f]+:	8b 04 45 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\*2\]
-[ 	]*[0-9a-f]+:	8b 04 45 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\*2\]
-[ 	]*[0-9a-f]+:	8b 04 8d 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[ecx\*4\]
-[ 	]*[0-9a-f]+:	8b 04 8d 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[ecx\*4\]
+[ 	]*[0-9a-f]+:	8b 04 45 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\*2\+(0x)?0]
+[ 	]*[0-9a-f]+:	8b 04 45 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\*2\+(0x)?0]
+[ 	]*[0-9a-f]+:	8b 04 8d 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[ecx\*4\+(0x)?0]
+[ 	]*[0-9a-f]+:	8b 04 8d 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[ecx\*4\+(0x)?0]
 [ 	]*[0-9a-f]+:	8b 40 01[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+1\]
 [ 	]*[0-9a-f]+:	8b 40 01[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+1\]
 [ 	]*[0-9a-f]+:	8b 44 08 fb[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+ecx\-5\]
@@ -153,11 +153,11 @@ Disassembly of section .text:
 [ 	]*[0-9a-f]+:	b8 00 00 00 00[ 	]+mov[ 	]+eax,0x0
 [ 	]*[0-9a-f]+:	b8 00 00 00 00[ 	]+mov[ 	]+eax,0x0
 [ 	]*[0-9a-f]+:	b8 00 00 00 00[ 	]+mov[ 	]+eax,0x0
-[ 	]*[0-9a-f]+:	8b 80 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\]
+[ 	]*[0-9a-f]+:	8b 80 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+(0x)?0\]
 [ 	]*[0-9a-f]+:	8b 40 01[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+1]
-[ 	]*[0-9a-f]+:	8b 80 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\]
+[ 	]*[0-9a-f]+:	8b 80 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+(0x)?0\]
 [ 	]*[0-9a-f]+:	8b 80 01 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+(0x)?1\]
-[ 	]*[0-9a-f]+:	8b 80 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\]
+[ 	]*[0-9a-f]+:	8b 80 00 00 00 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+(0x)?0\]
 [ 	]*[0-9a-f]+:	8b 40 01[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+1\]
 [ 	]*[0-9a-f]+:	a1 01 00 00 00[ 	]+mov[ 	]+eax,ds:0x1
 [ 	]*[0-9a-f]+:	a1 ff ff ff ff[ 	]+mov[ 	]+eax,ds:0xffffffff

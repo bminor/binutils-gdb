@@ -3773,6 +3773,8 @@ print_insn (bfd_vma pc, disassemble_info *info)
      order as the intel book; everything else is printed in reverse order.  */
   if (intel_syntax || two_source_ops)
     {
+      bfd_vma riprel;
+
       for (i = 0; i < MAX_OPERANDS; ++i)
         op_txt[i] = op_out[i];
 
@@ -3781,6 +3783,9 @@ print_insn (bfd_vma pc, disassemble_info *info)
           op_ad = op_index[i];
           op_index[i] = op_index[MAX_OPERANDS - 1 - i];
           op_index[MAX_OPERANDS - 1 - i] = op_ad;
+	  riprel = op_riprel[i];
+	  op_riprel[i] = op_riprel [MAX_OPERANDS - 1 - i];
+	  op_riprel[MAX_OPERANDS - 1 - i] = riprel;
 	}
     }
   else
@@ -3808,6 +3813,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
 	(*info->fprintf_func) (info->stream, "        # ");
 	(*info->print_address_func) ((bfd_vma) (start_pc + codep - start_codep
 						+ op_address[op_index[i]]), info);
+	break;
       }
   return codep - priv.the_buffer;
 }
@@ -4835,11 +4841,16 @@ OP_E (int bytemode, int sizeflag)
 	      }
 	  }
 
-      if (havebase || (havesib && (index != 4 || scale != 0)))
+      if (havebase
+	  || (intel_syntax && riprel)
+	  || (havesib && (index != 4 || scale != 0)))
 	{
 	  *obufp++ = open_char;
 	  if (intel_syntax && riprel)
-	    oappend ("rip + ");
+	    {
+	      set_op (disp, 1);
+	      oappend ("rip");
+	    }
 	  *obufp = '\0';
 	  if (havebase)
 	    oappend (address_mode == mode_64bit && (sizeflag & AFLAG)
@@ -4864,9 +4875,10 @@ OP_E (int bytemode, int sizeflag)
 		  oappend (scratchbuf);
 		}
 	    }
-	  if (intel_syntax && disp)
+	  if (intel_syntax
+	      && (disp || modrm.mod != 0 || (base & 7) == 5))
 	    {
-	      if ((bfd_signed_vma) disp > 0)
+	      if ((bfd_signed_vma) disp >= 0)
 		{
 		  *obufp++ = '+';
 		  *obufp = '\0';
