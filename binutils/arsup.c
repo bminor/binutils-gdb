@@ -1,6 +1,6 @@
 /* arsup.c - Archive support for MRI compatibility
    Copyright 1992, 1994, 1995, 1996, 1997, 1999, 2000, 2001, 2002, 2003,
-   2004 Free Software Foundation, Inc.
+   2004, 2007 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -25,11 +25,12 @@
    This file looks after requests from arparse.y, to provide the MRI
    style librarian command syntax + 1 word LIST.  */
 
+#include "sysdep.h"
 #include "bfd.h"
-#include "arsup.h"
 #include "libiberty.h"
-#include "bucomm.h"
 #include "filenames.h"
+#include "bucomm.h"
+#include "arsup.h"
 
 static void map_over_list
   (bfd *, void (*function) (bfd *, bfd *), struct list *);

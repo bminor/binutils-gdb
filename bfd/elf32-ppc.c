@@ -25,9 +25,9 @@
    suggestions from the in-progress Embedded PowerPC ABI, and that
    information may also not match.  */
 
+#include "sysdep.h"
 #include <stdarg.h>
 #include "bfd.h"
-#include "sysdep.h"
 #include "bfdlink.h"
 #include "libbfd.h"
 #include "elf-bfd.h"

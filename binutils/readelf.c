@@ -41,10 +41,9 @@
   ELF file than is provided by objdump.  In particular it can display DWARF
   debugging information which (at the moment) objdump cannot.  */
 
+#include "sysdep.h"
 #include <assert.h>
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <stdio.h>
 #include <time.h>
 
 /* for PATH_MAX */
@@ -74,6 +73,8 @@
 #define BFD64
 #endif
 
+#include "bfd.h"
+#include "bucomm.h"
 #include "dwarf.h"
 
 #include "elf/common.h"
@@ -154,7 +155,6 @@
 
 #include "aout/ar.h"
 
-#include "bucomm.h"
 #include "getopt.h"
 #include "libiberty.h"
 

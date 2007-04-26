@@ -27,8 +27,8 @@
    else is a wild card.  In particular, don't expect shared libs or
    dynamic loading to work ...  its never been tested.  */
 
-#include "bfd.h"
 #include "sysdep.h"
+#include "bfd.h"
 #include "bfdlink.h"
 #include "libbfd.h"
 #include "elf-bfd.h"

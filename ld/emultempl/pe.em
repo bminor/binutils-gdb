@@ -49,8 +49,8 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	bfd_${EMULATION_NAME}_process_before_allocation
 #endif
  
-#include "bfd.h"
 #include "sysdep.h"
+#include "bfd.h"
 #include "bfdlink.h"
 #include "getopt.h"
 #include "libiberty.h"

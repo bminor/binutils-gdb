@@ -992,7 +992,7 @@ archive.lo: archive.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   $(INCDIR)/safe-ctype.h
 archures.lo: archures.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(INCDIR)/safe-ctype.h
-bfd.lo: bfd.c bfdver.h $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
+bfd.lo: bfd.c $(INCDIR)/filenames.h bfdver.h $(INCDIR)/libiberty.h \
   $(INCDIR)/demangle.h $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/hashtab.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/sym.h libcoff.h libecoff.h $(INCDIR)/coff/ecoff.h \
@@ -1244,7 +1244,7 @@ coff-tic54x.lo: coff-tic54x.c $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h $(INCDIR)/bfdlink.h $(INCDIR)/coff/tic54x.h \
   $(INCDIR)/coff/ti.h $(INCDIR)/coff/internal.h libcoff.h \
   coffcode.h coffswap.h
-coff-tic80.lo: coff-tic80.c $(INCDIR)/bfdlink.h $(INCDIR)/filenames.h \
+coff-tic80.lo: coff-tic80.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/hashtab.h $(INCDIR)/coff/tic80.h $(INCDIR)/coff/external.h \
   $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
 coff-u68k.lo: coff-u68k.c coff-m68k.c $(INCDIR)/filenames.h \
@@ -1632,7 +1632,7 @@ m88kopenbsd.lo: m88kopenbsd.c netbsd.h $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h libaout.h $(INCDIR)/bfdlink.h aout-target.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
   $(INCDIR)/aout/ar.h
-mach-o.lo: mach-o.c mach-o.h $(INCDIR)/filenames.h \
+mach-o.lo: mach-o.c $(INCDIR)/filenames.h mach-o.h \
   $(INCDIR)/hashtab.h $(INCDIR)/libiberty.h mach-o-target.c
 mipsbsd.lo: mipsbsd.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   libaout.h $(INCDIR)/bfdlink.h aout-target.h $(INCDIR)/aout/aout64.h \
@@ -1672,8 +1672,8 @@ pdp11.lo: pdp11.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   libaout.h $(INCDIR)/bfdlink.h aout-target.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h \
   $(INCDIR)/safe-ctype.h
-pef.lo: pef.c $(INCDIR)/safe-ctype.h pef.h pef-traceback.h \
-  $(INCDIR)/filenames.h $(INCDIR)/hashtab.h $(INCDIR)/libiberty.h
+pef.lo: pef.c $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h \
+  pef.h pef-traceback.h $(INCDIR)/hashtab.h $(INCDIR)/libiberty.h
 pe-arm.lo: pe-arm.c $(INCDIR)/filenames.h coff-arm.c \
   $(INCDIR)/hashtab.h $(INCDIR)/coff/arm.h $(INCDIR)/coff/external.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
@@ -1734,7 +1734,7 @@ pei-mips.lo: pei-mips.c $(INCDIR)/filenames.h pe-mips.c \
   $(INCDIR)/hashtab.h $(INCDIR)/coff/mipspe.h $(INCDIR)/coff/external.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
   $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
-ppcboot.lo: ppcboot.c $(INCDIR)/safe-ctype.h $(INCDIR)/filenames.h \
+ppcboot.lo: ppcboot.c $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h \
   $(INCDIR)/hashtab.h
 reloc16.lo: reloc16.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(INCDIR)/bfdlink.h genlink.h $(INCDIR)/coff/internal.h \
@@ -1775,7 +1775,7 @@ vms.lo: vms.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/hashtab.h vms.h
 vms-gsd.lo: vms-gsd.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/hashtab.h vms.h
-vms-hdr.lo: vms-hdr.c bfdver.h $(INCDIR)/filenames.h \
+vms-hdr.lo: vms-hdr.c $(INCDIR)/filenames.h bfdver.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h $(INCDIR)/hashtab.h \
   vms.h
 vms-misc.lo: vms-misc.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
@@ -1785,12 +1785,12 @@ vms-tir.lo: vms-tir.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
 xcofflink.lo: xcofflink.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/hashtab.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/xcoff.h \
   libcoff.h libxcoff.h
-xsym.lo: xsym.c xsym.h $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
+xsym.lo: xsym.c $(INCDIR)/filenames.h xsym.h $(INCDIR)/hashtab.h
 xtensa-isa.lo: xtensa-isa.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(INCDIR)/xtensa-isa.h $(INCDIR)/xtensa-isa-internal.h
 xtensa-modules.lo: xtensa-modules.c $(INCDIR)/xtensa-isa.h \
   $(INCDIR)/xtensa-isa-internal.h
-aix5ppc-core.lo: aix5ppc-core.c
+aix5ppc-core.lo: aix5ppc-core.c $(INCDIR)/filenames.h
 aout64.lo: aout64.c aoutx.h $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h \
   $(INCDIR)/bfdlink.h libaout.h $(INCDIR)/hashtab.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h

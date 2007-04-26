@@ -48,6 +48,7 @@
    disassembling is done by the libopcodes library, via a function pointer
    supplied by the disassembler() function.  */
 
+#include "sysdep.h"
 #include "bfd.h"
 #include "progress.h"
 #include "bucomm.h"

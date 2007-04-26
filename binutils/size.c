@@ -28,10 +28,11 @@
    If you write shell scripts which manipulate this info then you may be
    out of luck; there's no --compatibility or --pedantic option.  */
 
+#include "sysdep.h"
 #include "bfd.h"
-#include "bucomm.h"
 #include "libiberty.h"
 #include "getopt.h"
+#include "bucomm.h"
 
 #ifndef BSD_DEFAULT
 #define BSD_DEFAULT 1

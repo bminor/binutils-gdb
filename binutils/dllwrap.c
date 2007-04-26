@@ -27,19 +27,15 @@
 #endif
 #endif
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
+#include "sysdep.h"
 #include "bfd.h"
 #include "libiberty.h"
-#include "bucomm.h"
 #include "getopt.h"
 #include "dyn-string.h"
+#include "bucomm.h"
 
 #include <time.h>
 #include <sys/stat.h>
-#include <stdarg.h>
 
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>

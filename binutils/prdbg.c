@@ -24,11 +24,9 @@
 /* This file prints out the generic debugging information, by
    supplying a set of routines to debug_write.  */
 
-#include <stdio.h>
+#include "sysdep.h"
 #include <assert.h>
-
 #include "bfd.h"
-#include "bucomm.h"
 #include "libiberty.h"
 #include "demangle.h"
 #include "debug.h"

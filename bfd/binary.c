@@ -32,8 +32,8 @@
    the file.  objcopy cooperates by specially setting the start
    address to zero by default.  */
 
-#include "bfd.h"
 #include "sysdep.h"
+#include "bfd.h"
 #include "safe-ctype.h"
 #include "libbfd.h"
 

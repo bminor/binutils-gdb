@@ -19,8 +19,8 @@
 
 /* This file handles functionality common to the different SPARC ABI's.  */
 
-#include "bfd.h"
 #include "sysdep.h"
+#include "bfd.h"
 #include "bfdlink.h"
 #include "libbfd.h"
 #include "libiberty.h"

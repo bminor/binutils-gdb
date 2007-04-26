@@ -27,8 +27,8 @@
    token (which is one byte in this lexicon) lookahead recursive decent
    parser.  */
 
-#include "bfd.h"
 #include "sysdep.h"
+#include "bfd.h"
 #include "libbfd.h"
 #include "ieee.h"
 #include "libieee.h"

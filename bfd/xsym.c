@@ -18,9 +18,9 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
 
+#include "sysdep.h"
 #include "xsym.h"
 #include "bfd.h"
-#include "sysdep.h"
 #include "libbfd.h"
 
 #define bfd_sym_close_and_cleanup                   _bfd_generic_close_and_cleanup

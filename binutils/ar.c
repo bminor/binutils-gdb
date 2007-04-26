@@ -26,12 +26,13 @@
    when name truncated. No way to specify pos_end. Error messages should be
    more consistent.  */
 
+#include "sysdep.h"
 #include "bfd.h"
 #include "libiberty.h"
 #include "progress.h"
-#include "bucomm.h"
 #include "aout/ar.h"
 #include "libbfd.h"
+#include "bucomm.h"
 #include "arsup.h"
 #include "filenames.h"
 #include "binemul.h"

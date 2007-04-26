@@ -28,8 +28,8 @@
    which contains a value, a section to which it is relative and a
    valid bit.  */
 
-#include "bfd.h"
 #include "sysdep.h"
+#include "bfd.h"
 #include "bfdlink.h"
 
 #include "ld.h"

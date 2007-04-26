@@ -33,9 +33,8 @@
    - dlltool will not produce correct output in some .reloc cases, and will
      not produce the right glue code for dll function calls.  */
 
-#include "bfd.h"
 #include "sysdep.h"
-
+#include "bfd.h"
 #include "libbfd.h"
 
 #include "coff/powerpc.h"

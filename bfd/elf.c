@@ -33,8 +33,8 @@ SECTION
 
 /* For sparc64-cross-sparc32.  */
 #define _SYSCALL32
-#include "bfd.h"
 #include "sysdep.h"
+#include "bfd.h"
 #include "bfdlink.h"
 #include "libbfd.h"
 #define ARCH_SIZE 0

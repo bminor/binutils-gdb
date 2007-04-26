@@ -1,5 +1,6 @@
 /* BFD back-end for ARM PECOFF files.
-   Copyright 1995, 1996, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1999, 2000, 2001, 2002, 2007
+   Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -28,8 +29,8 @@ Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. 
   bfd_armpe_process_before_allocation
 #endif
 
-#include "bfd.h"
 #include "sysdep.h"
+#include "bfd.h"
 
 #ifndef TARGET_LITTLE_SYM
 #define TARGET_LITTLE_SYM    armpe_little_vec

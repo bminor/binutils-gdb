@@ -1,5 +1,5 @@
 /* BFD support for the score processor
-   Copyright 2006 Free Software Foundation, Inc.   
+   Copyright 2006, 2007 Free Software Foundation, Inc.   
    Contributed by
    Mei Ligang (ligang@sunnorth.com.cn)
    Pei-Lin Tsai (pltsai@sunplus.com)  
@@ -20,8 +20,8 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
 
-#include "bfd.h"
 #include "sysdep.h"
+#include "bfd.h"
 #include "libbfd.h"
 
 const bfd_arch_info_type

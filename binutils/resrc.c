@@ -1,5 +1,5 @@
 /* resrc.c -- read and write Windows rc files.
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2007
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
@@ -23,18 +23,15 @@
 /* This file contains functions that read and write Windows rc files.
    These are text files that represent resources.  */
 
+#include "sysdep.h"
 #include "bfd.h"
-#include "bucomm.h"
 #include "libiberty.h"
 #include "safe-ctype.h"
+#include "bucomm.h"
 #include "windres.h"
 
 #include <assert.h>
-#include <errno.h>
 #include <sys/stat.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>

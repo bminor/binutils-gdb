@@ -202,10 +202,10 @@ CODE_FRAGMENT
 .
 */
 
-#include "bfd.h"
-#include "bfdver.h"
 #include "sysdep.h"
 #include <stdarg.h>
+#include "bfd.h"
+#include "bfdver.h"
 #include "libiberty.h"
 #include "demangle.h"
 #include "safe-ctype.h"

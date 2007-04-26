@@ -243,12 +243,13 @@
 
 #define PAGE_SIZE 4096
 #define PAGE_MASK (-PAGE_SIZE)
+#include "sysdep.h"
 #include "bfd.h"
 #include "libiberty.h"
-#include "bucomm.h"
 #include "getopt.h"
 #include "demangle.h"
 #include "dyn-string.h"
+#include "bucomm.h"
 #include "dlltool.h"
 #include "safe-ctype.h"
 

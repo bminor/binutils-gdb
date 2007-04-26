@@ -19,12 +19,12 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
-#include <stdio.h>
-
-#include "dwarf.h"
-
-#include "bucomm.h"
+#include "sysdep.h"
 #include "libiberty.h"
+#include "bfd.h"
+#include "bucomm.h"
+#include "elf/dwarf2.h"
+#include "dwarf.h"
 
 static int have_frame_base;
 static int need_base_address;

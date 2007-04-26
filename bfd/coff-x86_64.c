@@ -23,8 +23,8 @@
 #define COFF_WITH_pex64
 #endif
 
-#include "bfd.h"
 #include "sysdep.h"
+#include "bfd.h"
 #include "libbfd.h"
 #include "coff/x86_64.h"
 #include "coff/internal.h"

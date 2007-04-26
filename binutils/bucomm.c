@@ -1,6 +1,6 @@
 /* bucomm.c -- Bin Utils COMmon code.
    Copyright 1991, 1992, 1993, 1994, 1995, 1997, 1998, 2000, 2001, 2002,
-   2003, 2006
+   2003, 2006, 2007
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -23,15 +23,16 @@
 /* We might put this in a library someday so it could be dynamically
    loaded, but for now it's not necessary.  */
 
+#include "sysdep.h"
 #include "bfd.h"
 #include "libiberty.h"
-#include "bucomm.h"
 #include "filenames.h"
 #include "libbfd.h"
 
 #include <sys/stat.h>
 #include <time.h>		/* ctime, maybe time_t */
 #include <assert.h>
+#include "bucomm.h"
 
 #ifndef HAVE_TIME_T_IN_TIME_H
 #ifndef HAVE_TIME_T_IN_TYPES_H

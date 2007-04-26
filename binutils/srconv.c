@@ -26,6 +26,7 @@
 
    All debugging information is preserved */
 
+#include "sysdep.h"
 #include "bfd.h"
 #include "bucomm.h"
 #include "sysroff.h"

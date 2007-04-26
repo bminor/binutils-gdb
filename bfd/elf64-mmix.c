@@ -27,8 +27,8 @@ Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. 
    - GETA stub relaxation (call a stub for out of range new
      R_MMIX_GETA_STUBBABLE).  */
 
-#include "bfd.h"
 #include "sysdep.h"
+#include "bfd.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf/mmix.h"

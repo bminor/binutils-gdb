@@ -1,5 +1,5 @@
 %{ /* rcparse.y -- parser for Windows rc files
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2007
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
@@ -23,8 +23,8 @@
 /* This is a parser for Windows rc files.  It is based on the parser
    by Gunther Ebert <gunther.ebert@ixos-leipzig.de>.  */
 
+#include "sysdep.h"
 #include "bfd.h"
-#include "bucomm.h"
 #include "libiberty.h"
 #include "windres.h"
 #include "safe-ctype.h"

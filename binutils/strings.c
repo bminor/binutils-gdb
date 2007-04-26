@@ -58,17 +58,13 @@
    Written by Richard Stallman <rms@gnu.ai.mit.edu>
    and David MacKenzie <djm@gnu.ai.mit.edu>.  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "sysdep.h"
 #include "bfd.h"
-#include <stdio.h>
 #include "getopt.h"
-#include <errno.h>
-#include "bucomm.h"
 #include "libiberty.h"
 #include "safe-ctype.h"
 #include <sys/stat.h>
+#include "bucomm.h"
 
 /* Some platforms need to put stdin into binary mode, to read
     binary files.  */

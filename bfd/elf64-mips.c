@@ -40,8 +40,8 @@ Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. 
  .     the OldABI version is still lying around and should be removed.
  */
 
-#include "bfd.h"
 #include "sysdep.h"
+#include "bfd.h"
 #include "libbfd.h"
 #include "aout/ar.h"
 #include "bfdlink.h"

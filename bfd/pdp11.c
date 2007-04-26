@@ -70,6 +70,7 @@
 		  && ((x).a_info != A_MAGIC5) \
 		  && ((x).a_info != A_MAGIC6))
 
+#include "sysdep.h"
 #include "bfd.h"
 
 #define external_exec pdp11_external_exec
@@ -123,7 +124,6 @@ struct pdp11_external_nlist
 
 #define WRITE_HEADERS(abfd, execp) pdp11_aout_write_headers (abfd, execp)
 
-#include "sysdep.h"
 #include "libbfd.h"
 #include "libaout.h"
 

@@ -101,8 +101,8 @@
 	We allow symbols to be anywhere in the data stream - the module names
 	are always ignored.  */
 
-#include "bfd.h"
 #include "sysdep.h"
+#include "bfd.h"
 #include "libbfd.h"
 #include "libiberty.h"
 #include "safe-ctype.h"

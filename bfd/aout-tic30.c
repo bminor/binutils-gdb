@@ -35,8 +35,8 @@
 #define TARGETNAME "a.out-tic30"
 #define NAME(x,y) CONCAT3 (tic30_aout,_32_,y)
 
-#include "bfd.h"
 #include "sysdep.h"
+#include "bfd.h"
 #include "libaout.h"
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"

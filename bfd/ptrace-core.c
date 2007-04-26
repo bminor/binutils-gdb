@@ -1,6 +1,6 @@
 /* BFD backend for core files which use the ptrace_user structure
-   Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2001, 2002, 2003, 2004, 2006
-   Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2001, 2002, 2003, 2004,
+   2006, 2007  Free Software Foundation, Inc.
    The structure of this file is based on trad-core.c written by John Gilmore
    of Cygnus Support.
    Modified to work with the ptrace_user structure by Kevin A. Buettner.
@@ -24,8 +24,8 @@ Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. 
 
 #ifdef PTRACE_CORE
 
-#include "bfd.h"
 #include "sysdep.h"
+#include "bfd.h"
 #include "libbfd.h"
 
 #include <sys/param.h>

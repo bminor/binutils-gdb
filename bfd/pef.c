@@ -18,11 +18,11 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
 
+#include "sysdep.h"
 #include "safe-ctype.h"
 #include "pef.h"
 #include "pef-traceback.h"
 #include "bfd.h"
-#include "sysdep.h"
 #include "libbfd.h"
 #include "libiberty.h"
 

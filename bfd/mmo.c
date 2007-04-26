@@ -195,8 +195,8 @@ EXAMPLE
 | 0x81000000
 | 0x980c0005 - lop_end; symbol table contained five 32-bit words.  */
 
-#include "bfd.h"
 #include "sysdep.h"
+#include "bfd.h"
 #include "libbfd.h"
 #include "libiberty.h"
 #include "elf/mmix.h"

@@ -34,18 +34,15 @@
 
    * The res2coff program, written by Pedro A. Aranda <paag@tid.es>.  */
 
-#include "config.h"
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+#include "sysdep.h"
 #include <assert.h>
 #include <time.h>
 #include "bfd.h"
 #include "getopt.h"
-#include "bucomm.h"
 #include "libiberty.h"
 #include "safe-ctype.h"
 #include "obstack.h"
+#include "bucomm.h"
 #include "windres.h"
 
 /* Used by resrc.c at least.  */

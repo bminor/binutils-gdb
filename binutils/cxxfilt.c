@@ -22,13 +22,13 @@
    Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
-#include "config.h"
+#include "sysdep.h"
 #include "bfd.h"
-#include "bucomm.h"
 #include "libiberty.h"
 #include "demangle.h"
 #include "getopt.h"
 #include "safe-ctype.h"
+#include "bucomm.h"
 
 static int flags = DMGL_PARAMS | DMGL_ANSI | DMGL_VERBOSE;
 static int strip_underscore = TARGET_PREPENDS_UNDERSCORE;

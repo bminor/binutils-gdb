@@ -118,8 +118,8 @@ The MRI compiler uses this, which is a repeat of type 5:
    18..19	Checksum in hex notation
    20..21	Carriage return, line feed.  */
 
-#include "bfd.h"
 #include "sysdep.h"
+#include "bfd.h"
 #include "libbfd.h"
 #include "libiberty.h"
 #include "safe-ctype.h"

@@ -18,9 +18,9 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
 
+#include "sysdep.h"
 #include "mach-o.h"
 #include "bfd.h"
-#include "sysdep.h"
 #include "libbfd.h"
 #include "libiberty.h"
 #include <ctype.h>

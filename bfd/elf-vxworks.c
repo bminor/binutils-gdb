@@ -1,5 +1,5 @@
 /* VxWorks support for ELF
-   Copyright 2005 Free Software Foundation, Inc.
+   Copyright 2005, 2007 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -20,8 +20,8 @@
 
 /* This file provides routines used by all VxWorks targets.  */
 
-#include "bfd.h"
 #include "sysdep.h"
+#include "bfd.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf-vxworks.h"

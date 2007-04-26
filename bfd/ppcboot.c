@@ -32,9 +32,9 @@ Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. 
    the file.  objcopy cooperates by specially setting the start
    address to zero by default.  */
 
+#include "sysdep.h"
 #include "safe-ctype.h"
 #include "bfd.h"
-#include "sysdep.h"
 #include "libbfd.h"
 
 /* PPCbug location structure */

@@ -1,5 +1,6 @@
 /* winduni.c -- unicode support for the windres program.
-   Copyright 1997, 1998, 2000, 2001, 2003 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 2000, 2001, 2003, 2007
+   Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GNU Binutils.
@@ -27,8 +28,8 @@
    hosts, but that seems better than not really supporting unicode at
    all.  */
 
+#include "sysdep.h"
 #include "bfd.h"
-#include "bucomm.h"
 #include "winduni.h"
 #include "safe-ctype.h"
 

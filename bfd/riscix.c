@@ -103,8 +103,8 @@
                   && ((x).a_info != NMAGIC))
 #define N_MAGIC(x) ((x).a_info & ~07200)
 
-#include "bfd.h"
 #include "sysdep.h"
+#include "bfd.h"
 #include "libbfd.h"
 
 #define WRITE_HEADERS(abfd, execp)					    \

@@ -32,9 +32,9 @@
 #endif
 #endif
 
+#include "sysdep.h"
 #include "bfd.h"
 #include "libiberty.h"
-#include "bucomm.h"
 #include "safe-ctype.h"
 
 #include "ansidecl.h"
@@ -52,6 +52,8 @@
 #include "coff/sym.h"
 #include "coff/ecoff.h"
 #endif
+
+#include "bucomm.h"
 
 /* If strerror is just a macro, we want to use the one from libiberty
    since it will handle undefined values.  */

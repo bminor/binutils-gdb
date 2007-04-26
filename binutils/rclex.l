@@ -1,5 +1,5 @@
 %{ /* rclex.l -- lexer for Windows rc files parser  */
-/* Copyright 1997, 1998, 1999, 2001, 2002, 2003, 2005
+/* Copyright 1997, 1998, 1999, 2001, 2002, 2003, 2005, 2007
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
@@ -24,8 +24,8 @@
    Windows rc file parser.  It basically just recognized a bunch of
    keywords.  */
 
+#include "sysdep.h"
 #include "bfd.h"
-#include "bucomm.h"
 #include "libiberty.h"
 #include "safe-ctype.h"
 #include "windres.h"

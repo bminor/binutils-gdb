@@ -22,8 +22,8 @@ Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. 
 #define I960 1
 #define BADMAG(x) I960BADMAG(x)
 
-#include "bfd.h"
 #include "sysdep.h"
+#include "bfd.h"
 #include "libbfd.h"
 #include "coff/i960.h"
 #include "coff/internal.h"

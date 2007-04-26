@@ -18,7 +18,7 @@
    along with this program; if not, write to the Free Software
    Foundation, 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
 
-#include <stdio.h>
+#include "sysdep.h"
 #include "bfd.h"
 #include "bucomm.h"
 

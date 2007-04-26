@@ -22,8 +22,8 @@
 /* This file is based on a preliminary RCE ELF ABI.  The
    information may not match the final RCE ELF ABI.   */
 
-#include "bfd.h"
 #include "sysdep.h"
+#include "bfd.h"
 #include "bfdlink.h"
 #include "libbfd.h"
 #include "elf-bfd.h"

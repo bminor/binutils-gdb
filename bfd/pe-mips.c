@@ -23,8 +23,8 @@
 #define COFF_LONG_SECTION_NAMES
 #define PCRELOFFSET TRUE
 
-#include "bfd.h"
 #include "sysdep.h"
+#include "bfd.h"
 #include "libbfd.h"
 #include "coff/mipspe.h"
 #include "coff/internal.h"

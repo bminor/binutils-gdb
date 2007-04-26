@@ -1,5 +1,5 @@
 /* BFD library support routines for the AVR architecture.
-   Copyright 1999, 2000, 2002, 2006 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2002, 2006, 2007 Free Software Foundation, Inc.
    Contributed by Denis Chertykov <denisc@overta.ru>
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -18,8 +18,8 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
 
-#include "bfd.h"
 #include "sysdep.h"
+#include "bfd.h"
 #include "libbfd.h"
 
 /* This routine is provided two arch_infos and works out which AVR

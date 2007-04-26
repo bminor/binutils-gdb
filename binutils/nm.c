@@ -20,9 +20,9 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
+#include "sysdep.h"
 #include "bfd.h"
 #include "progress.h"
-#include "bucomm.h"
 #include "getopt.h"
 #include "aout/stab_gnu.h"
 #include "aout/ranlib.h"
@@ -30,6 +30,7 @@
 #include "libiberty.h"
 #include "elf-bfd.h"
 #include "elf/common.h"
+#include "bucomm.h"
 
 /* When sorting by size, we use this structure to hold the size and a
    pointer to the minisymbol.  */

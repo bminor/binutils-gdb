@@ -1,6 +1,6 @@
 /* BFD back-end for linux flavored i386 a.out binaries.
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1999, 2001, 2002, 2003,
-   2004, 2006 Free Software Foundation, Inc.
+   2004, 2006, 2007 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -26,8 +26,8 @@ Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. 
 
 #define MACHTYPE_OK(mtype) ((mtype) == M_386 || (mtype) == M_UNKNOWN)
 
-#include "bfd.h"
 #include "sysdep.h"
+#include "bfd.h"
 #include "libbfd.h"
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"

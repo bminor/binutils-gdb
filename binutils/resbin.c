@@ -1,5 +1,5 @@
 /* resbin.c -- manipulate the Windows binary resource format.
-   Copyright 1997, 1998, 1999, 2002, 2003
+   Copyright 1997, 1998, 1999, 2002, 2003, 2007
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
@@ -24,9 +24,10 @@
    format and the internal structures that we want to use.  The same
    binary resource format is used in both res and COFF files.  */
 
+#include "sysdep.h"
 #include "bfd.h"
-#include "bucomm.h"
 #include "libiberty.h"
+#include "bucomm.h"
 #include "windres.h"
 
 /* Macros to swap in values.  */
