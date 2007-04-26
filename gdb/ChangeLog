@@ -1,5 +1,33 @@
 2007-04-25  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* alpha-linux-tdep.c: Include "gdb_string.h", "regset.h",
+	and "regcache.h".
+	(alpha_linux_supply_gregset, alpha_linux_supply_fpregset): New.
+	(alpha_linux_gregset, alpha_linux_fpregset): New variables.
+	(alpha_linux_regset_from_core_section): New function.
+	(alpha_linux_init_abi): Install it.
+	* alpha-linux-nat.c: Do not include "gdbcore.h".  Include
+	"alpha-tdep.h", <sys/ptrace.h>, <alpha/ptrace.h>,
+	<sys/procfs.h>, and "gregset.h".
+	(ALPHA_REGSET_BASE, ALPHA_REGSET_UNIQUE, ALPHA_UNIQUE_PTRACE_ADDR):
+	Move from config/alpha/nm-linux.h.
+	(supply_gregset, fill_gregset, supply_fpregset, fill_fpregset): Copy
+	from alpha-nat.c.
+	(alpha_linux_register_u_offset): Inline register_addr from alpha-nat.c.
+	* alpha-nat.c: Remove #ifdef __linux__ section.
+	(fetch_elf_core_registers, alpha_elf_core_fns): Remove.
+	(_initialize_core_alpha): Do not register alpha_elf_core_fns.
+	(ALPHA_UNIQUE_PTRACE_ADDR, ALPHA_REGSET_UNIQUE): Define unconditionally.
+	(ALPHA_REGSET_BASE): Move from config/alpha/nm-osf.h.
+	* config/alpha/alpha-linux.mh (NAT_FILE): Set to config/nm-linux.h.
+	(NATDEPFILES): Remove alpha-nat.o.
+	* config/alpha/nm-linux.h: Delete file.
+	* config/alpha/nm-osf.h (ALPHA_REGSET_BASE): Move to alpha-nat.c.
+	* Makefile.in (alpha-linux-nat.o): Update dependencies.
+	(alpha-linux-tdep.o): Likewise.
+
+2007-04-25  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* mips-linux-nat.c: No longer include "gdbcore.h".
 	(mips_linux_register_addr): Move from mips-linux-tdep.c.
 	(mips64_linux_register_addr): Likewise.

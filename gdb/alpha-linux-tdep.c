@@ -21,9 +21,12 @@
 #include "defs.h"
 #include "frame.h"
 #include "gdb_assert.h"
+#include "gdb_string.h"
 #include "osabi.h"
 #include "solib-svr4.h"
 #include "symtab.h"
+#include "regset.h"
+#include "regcache.h"
 
 #include "alpha-tdep.h"
 
@@ -125,6 +128,84 @@ alpha_linux_sigcontext_addr (struct frame_info *next_frame)
   return sp;
 }
 
+/* Supply register REGNUM from the buffer specified by GREGS and LEN
+   in the general-purpose register set REGSET to register cache
+   REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
+
+static void
+alpha_linux_supply_gregset (const struct regset *regset,
+			    struct regcache *regcache,
+			    int regnum, const void *gregs, size_t len)
+{
+  const gdb_byte *regs = gregs;
+  int i;
+  gdb_assert (len >= 32 * 8);
+
+  for (i = 0; i < ALPHA_ZERO_REGNUM; i++)
+    {
+      if (regnum == i || regnum == -1)
+	regcache_raw_supply (regcache, i, regs + i * 8);
+    }
+
+  if (regnum == ALPHA_PC_REGNUM || regnum == -1)
+    regcache_raw_supply (regcache, ALPHA_PC_REGNUM, regs + 31 * 8);
+
+  if (regnum == ALPHA_UNIQUE_REGNUM || regnum == -1)
+    regcache_raw_supply (regcache, ALPHA_UNIQUE_REGNUM,
+			 len >= 33 * 8 ? regs + 32 * 8 : NULL);
+}
+
+/* Supply register REGNUM from the buffer specified by FPREGS and LEN
+   in the floating-point register set REGSET to register cache
+   REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
+
+static void
+alpha_linux_supply_fpregset (const struct regset *regset,
+			     struct regcache *regcache,
+			     int regnum, const void *fpregs, size_t len)
+{
+  const gdb_byte *regs = fpregs;
+  int i;
+  gdb_assert (len >= 32 * 8);
+
+  for (i = ALPHA_FP0_REGNUM; i < ALPHA_FP0_REGNUM + 31; i++)
+    {
+      if (regnum == i || regnum == -1)
+	regcache_raw_supply (regcache, i, regs + (i - ALPHA_FP0_REGNUM) * 8);
+    }
+
+  if (regnum == ALPHA_FPCR_REGNUM || regnum == -1)
+    regcache_raw_supply (regcache, ALPHA_FPCR_REGNUM, regs + 32 * 8);
+}
+
+static struct regset alpha_linux_gregset =
+{
+  NULL,
+  alpha_linux_supply_gregset
+};
+
+static struct regset alpha_linux_fpregset =
+{
+  NULL,
+  alpha_linux_supply_fpregset
+};
+
+/* Return the appropriate register set for the core section identified
+   by SECT_NAME and SECT_SIZE.  */
+
+const struct regset *
+alpha_linux_regset_from_core_section (struct gdbarch *gdbarch,
+				      const char *sect_name, size_t sect_size)
+{
+  if (strcmp (sect_name, ".reg") == 0 && sect_size >= 32 * 8)
+    return &alpha_linux_gregset;
+
+  if (strcmp (sect_name, ".reg2") == 0 && sect_size >= 32 * 8)
+    return &alpha_linux_fpregset;
+
+  return NULL;
+}
+
 static void
 alpha_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -148,6 +229,9 @@ alpha_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
                                              svr4_fetch_objfile_link_map);
+
+  set_gdbarch_regset_from_core_section
+    (gdbarch, alpha_linux_regset_from_core_section);
 }
 
 void

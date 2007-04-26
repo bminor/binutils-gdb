@@ -1,6 +1,6 @@
 # Host: Little-endian Alpha running Linux
-NAT_FILE= nm-linux.h
-NATDEPFILES= inf-ptrace.o corelow.o alpha-nat.o alpha-linux-nat.o \
+NAT_FILE= config/nm-linux.h
+NATDEPFILES= inf-ptrace.o corelow.o alpha-linux-nat.o \
 	fork-child.o proc-service.o linux-thread-db.o gcore.o \
 	linux-nat.o linux-fork.o
 

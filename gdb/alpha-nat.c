@@ -29,18 +29,9 @@
 #include "alpha-tdep.h"
 
 #include <sys/ptrace.h>
-#ifdef __linux__
-#include <asm/reg.h>
-#include <alpha/ptrace.h>
-#else
 #include <alpha/coreregs.h>
-#endif
 #include <sys/user.h>
 
-/* Prototypes for local functions. */
-
-static void fetch_osf_core_registers (char *, unsigned, int, CORE_ADDR);
-static void fetch_elf_core_registers (char *, unsigned, int, CORE_ADDR);
 
 /* Extract the register values out of the core file and store
    them where `read_register' will find them.
@@ -125,43 +116,12 @@ fetch_osf_core_registers (char *core_reg_sect, unsigned core_reg_size,
     }
 }
 
-static void
-fetch_elf_core_registers (char *core_reg_sect, unsigned core_reg_size,
-			  int which, CORE_ADDR reg_addr)
-{
-  if (core_reg_size < 32 * 8)
-    {
-      error (_("Core file register section too small (%u bytes)."), core_reg_size);
-      return;
-    }
-
-  switch (which)
-    {
-    case 0: /* integer registers */
-      /* PC is in slot 32; UNIQUE is in slot 33, if present.  */
-      alpha_supply_int_regs (-1, core_reg_sect, core_reg_sect + 31*8,
-			     (core_reg_size >= 33 * 8
-			      ? core_reg_sect + 32*8 : NULL));
-      break;
-
-    case 2: /* floating-point registers */
-      /* FPCR is in slot 32.  */
-      alpha_supply_fp_regs (-1, core_reg_sect, core_reg_sect + 31*8);
-      break;
-
-    default:
-      break;
-    }
-}
-
 
 /* Map gdb internal register number to a ptrace ``address''.
    These ``addresses'' are defined in <sys/ptrace.h>, with
    the exception of ALPHA_UNIQUE_PTRACE_ADDR.  */
 
-#ifndef ALPHA_UNIQUE_PTRACE_ADDR
 #define ALPHA_UNIQUE_PTRACE_ADDR 0
-#endif
 
 CORE_ADDR
 register_addr (int regno, CORE_ADDR blockend)
@@ -188,10 +148,12 @@ kernel_u_size (void)
 /* Prototypes for supply_gregset etc. */
 #include "gregset.h"
 
+/* Given a pointer to either a gregset_t or fpregset_t, return a
+   pointer to the first register.  */
+#define ALPHA_REGSET_BASE(regsetp)     ((regsetp)->regs)
+
 /* Locate the UNIQUE value within the gregset_t.  */
-#ifndef ALPHA_REGSET_UNIQUE
 #define ALPHA_REGSET_UNIQUE(ptr) NULL
-#endif
 
 /*
  * See the comment in m68k-tdep.c regarding the utility of these functions.
@@ -255,18 +217,8 @@ static struct core_fns alpha_osf_core_fns =
   NULL					/* next */
 };
 
-static struct core_fns alpha_elf_core_fns =
-{
-  bfd_target_elf_flavour,		/* core_flavour */
-  default_check_format,			/* check_format */
-  default_core_sniffer,			/* core_sniffer */
-  fetch_elf_core_registers,		/* core_read_registers */
-  NULL					/* next */
-};
-
 void
 _initialize_core_alpha (void)
 {
   deprecated_add_core_fns (&alpha_osf_core_fns);
-  deprecated_add_core_fns (&alpha_elf_core_fns);
 }
