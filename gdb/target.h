@@ -1112,12 +1112,6 @@ extern void (*deprecated_target_new_objfile_hook) (struct objfile *);
 #define target_get_thread_local_address_p() \
     (target_get_thread_local_address != NULL)
 
-/* Hook to call target dependent code just after inferior target process has
-   started.  */
-
-#ifndef TARGET_CREATE_INFERIOR_HOOK
-#define TARGET_CREATE_INFERIOR_HOOK(PID)
-#endif
 
 /* Hardware watchpoint interfaces.  */
 

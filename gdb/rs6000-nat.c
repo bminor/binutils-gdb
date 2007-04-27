@@ -999,13 +999,17 @@ vmap_exec (void)
 /* Set the current architecture from the host running GDB.  Called when
    starting a child process. */
 
-void
-rs6000_create_inferior (int pid)
+static void (*super_create_inferior) (char *exec_file, char *allargs,
+				      char **env, int from_tty);
+static void
+rs6000_create_inferior (char *exec_file, char *allargs, char **env, int from_tty)
 {
   enum bfd_architecture arch;
   unsigned long mach;
   bfd abfd;
   struct gdbarch_info info;
+
+  super_create_inferior (exec_file, allargs, env, from_tty);
 
   if (__power_rs ())
     {
@@ -1250,6 +1254,10 @@ _initialize_core_rs6000 (void)
   t->to_fetch_registers = rs6000_fetch_inferior_registers;
   t->to_store_registers = rs6000_store_inferior_registers;
   t->to_xfer_partial = rs6000_xfer_partial;
+
+  super_create_inferior = t->to_create_inferior;
+  t->to_create_inferior = rs6000_create_inferior;
+
   add_target (t);
 
   /* Initialize hook in rs6000-tdep.c for determining the TOC address

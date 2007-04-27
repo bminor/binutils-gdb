@@ -64,8 +64,3 @@ extern char *xcoff_solib_address (CORE_ADDR);
   /* A normal waitstatus.  Let the usual macros deal with it.  */ \
   0)
 
-/* Notice when a new child process is started. */
-
-#define TARGET_CREATE_INFERIOR_HOOK rs6000_create_inferior
-extern void rs6000_create_inferior (int);
-

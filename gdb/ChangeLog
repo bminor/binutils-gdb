@@ -1,5 +1,14 @@
 2007-04-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* config/rs6000/nm-rs6000.h (TARGET_CREATE_INFERIOR_HOOK): Remove.
+	* fork-child.c (fork_inferior): Don't call TARGET_CREATE_INFERIOR_HOOK.
+	* rs6000-nat.c (super_create_inferior): New variable.
+	(rs6000_create_inferior): Make static.  Adapt argument list.  Call
+	original version of create_inferior via super_create_inferior.
+	(_initialize_core_rs6000): Install to_create_inferior target method.
+
+2007-04-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* aix-thread.c (aix_thread_xfer_memory): Replace by ...
 	(aix_thread_xfer_partial): ... this.
 	(init_aix_thread_ops): Install to_xfer_partial instead

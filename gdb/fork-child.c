@@ -398,11 +398,6 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
   /* We are now in the child process of interest, having exec'd the
      correct program, and are poised at the first instruction of the
      new program.  */
-
-  /* Allow target dependent code to play with the new process.  This
-     might be used to have target-specific code initialize a variable
-     in the new process prior to executing the first instruction.  */
-  TARGET_CREATE_INFERIOR_HOOK (pid);
 }
 
 /* Accept NTRAPS traps from the inferior.  */
