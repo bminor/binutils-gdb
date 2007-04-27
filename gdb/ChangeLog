@@ -1,3 +1,8 @@
+2007-04-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* alpha-linux-tdep.c (alpha_linux_supply_fpregset): Correct location
+	of FPCR register in fpregset.
+
 2007-04-27  Maciej W. Rozycki  <macro@mips.com>
 
 	* Makefile.in (gdbtk-wrapper.o): Update dependencies.

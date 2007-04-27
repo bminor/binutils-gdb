@@ -175,7 +175,7 @@ alpha_linux_supply_fpregset (const struct regset *regset,
     }
 
   if (regnum == ALPHA_FPCR_REGNUM || regnum == -1)
-    regcache_raw_supply (regcache, ALPHA_FPCR_REGNUM, regs + 32 * 8);
+    regcache_raw_supply (regcache, ALPHA_FPCR_REGNUM, regs + 31 * 8);
 }
 
 static struct regset alpha_linux_gregset =
