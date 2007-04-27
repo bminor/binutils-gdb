@@ -19,14 +19,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
-
-#define FETCH_INFERIOR_REGISTERS
-
-/* Override child_xfer_memory in infptrace.c. */
-
-#define CHILD_XFER_MEMORY
-
 /* When a child process is just starting, we sneak in and relocate
    the symbol table (and other stuff) after the dynamic linker has
    figured out where they go.  */
@@ -55,11 +47,6 @@ extern void xcoff_relocate_core (struct target_ops *);
 
 #define	PC_SOLIB(PC)	xcoff_solib_address(PC)
 extern char *xcoff_solib_address (CORE_ADDR);
-
-/* Return sizeof user struct to callers in less machine dependent routines */
-
-#define KERNEL_U_SIZE kernel_u_size()
-extern int kernel_u_size (void);
 
 /* Flag for machine-specific stuff in shared files.  FIXME */
 #define DEPRECATED_IBM6000_TARGET

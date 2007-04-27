@@ -34,9 +34,11 @@
 #include "gdb-stabs.h"
 #include "regcache.h"
 #include "arch-utils.h"
+#include "inf-ptrace.h"
 #include "ppc-tdep.h"
 #include "rs6000-tdep.h"
 #include "exec.h"
+#include "gdb_stdint.h"
 
 #include <sys/ptrace.h>
 #include <sys/reg.h>
@@ -343,8 +345,8 @@ store_register (int regno)
 /* Read from the inferior all registers if REGNO == -1 and just register
    REGNO otherwise. */
 
-void
-fetch_inferior_registers (int regno)
+static void
+rs6000_fetch_inferior_registers (int regno)
 {
   if (regno != -1)
     fetch_register (regno);
@@ -384,8 +386,8 @@ fetch_inferior_registers (int regno)
    If REGNO is -1, do this for all registers.
    Otherwise, REGNO specifies which register (so we can save time).  */
 
-void
-store_inferior_registers (int regno)
+static void
+rs6000_store_inferior_registers (int regno)
 {
   if (regno != -1)
     store_register (regno);
@@ -421,103 +423,106 @@ store_inferior_registers (int regno)
     }
 }
 
-/* Store in *TO the 32-bit word at 32-bit-aligned ADDR in the child
-   process, which is 64-bit if ARCH64 and 32-bit otherwise.  Return
-   success. */
 
-static int
-read_word (CORE_ADDR from, int *to, int arch64)
+/* Attempt a transfer all LEN bytes starting at OFFSET between the
+   inferior's OBJECT:ANNEX space and GDB's READBUF/WRITEBUF buffer.
+   Return the number of bytes actually transferred.  */
+
+static LONGEST
+rs6000_xfer_partial (struct target_ops *ops, enum target_object object,
+		     const char *annex, gdb_byte *readbuf,
+		     const gdb_byte *writebuf,
+		     ULONGEST offset, LONGEST len)
 {
-  /* Retrieved values may be -1, so infer errors from errno. */
-  errno = 0;
-
-  if (arch64)
-    *to = rs6000_ptrace64 (PT_READ_I, PIDGET (inferior_ptid), from, 0, NULL);
-  else
-    *to = rs6000_ptrace32 (PT_READ_I, PIDGET (inferior_ptid), (int *)(long) from,
-                    0, NULL);
-
-  return !errno;
-}
-
-/* Copy LEN bytes to or from inferior's memory starting at MEMADDR
-   to debugger memory starting at MYADDR.  Copy to inferior if
-   WRITE is nonzero.
-
-   Returns the length copied, which is either the LEN argument or
-   zero.  This xfer function does not do partial moves, since
-   deprecated_child_ops doesn't allow memory operations to cross below
-   us in the target stack anyway.  */
-
-int
-child_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
-		   int write, struct mem_attrib *attrib,
-		   struct target_ops *target)
-{
-  /* Round starting address down to 32-bit word boundary. */
-  int mask = sizeof (int) - 1;
-  CORE_ADDR addr = memaddr & ~(CORE_ADDR)mask;
-
-  /* Round ending address up to 32-bit word boundary. */
-  int count = ((memaddr + len - addr + mask) & ~(CORE_ADDR)mask)
-    / sizeof (int);
-
-  /* Allocate word transfer buffer. */
-  /* FIXME (alloca): This code, cloned from infptrace.c, is unsafe
-     because it uses alloca to allocate a buffer of arbitrary size.
-     For very large xfers, this could crash GDB's stack.  */
-  int *buf = (int *) alloca (count * sizeof (int));
-
+  pid_t pid = ptid_get_pid (inferior_ptid);
   int arch64 = ARCH64 ();
-  int i;
 
-  if (!write)
+  switch (object)
     {
-      /* Retrieve memory a word at a time. */
-      for (i = 0; i < count; i++, addr += sizeof (int))
+    case TARGET_OBJECT_MEMORY:
+      {
+	union
 	{
-	  if (!read_word (addr, buf + i, arch64))
-	    return 0;
-	  QUIT;
-	}
+	  PTRACE_TYPE_RET word;
+	  gdb_byte byte[sizeof (PTRACE_TYPE_RET)];
+	} buffer;
+	ULONGEST rounded_offset;
+	LONGEST partial_len;
 
-      /* Copy memory to supplied buffer. */
-      addr -= count * sizeof (int);
-      memcpy (myaddr, (char *)buf + (memaddr - addr), len);
+	/* Round the start offset down to the next long word
+	   boundary.  */
+	rounded_offset = offset & -(ULONGEST) sizeof (PTRACE_TYPE_RET);
+
+	/* Since ptrace will transfer a single word starting at that
+	   rounded_offset the partial_len needs to be adjusted down to
+	   that (remember this function only does a single transfer).
+	   Should the required length be even less, adjust it down
+	   again.  */
+	partial_len = (rounded_offset + sizeof (PTRACE_TYPE_RET)) - offset;
+	if (partial_len > len)
+	  partial_len = len;
+
+	if (writebuf)
+	  {
+	    /* If OFFSET:PARTIAL_LEN is smaller than
+	       ROUNDED_OFFSET:WORDSIZE then a read/modify write will
+	       be needed.  Read in the entire word.  */
+	    if (rounded_offset < offset
+		|| (offset + partial_len
+		    < rounded_offset + sizeof (PTRACE_TYPE_RET)))
+	      {
+		/* Need part of initial word -- fetch it.  */
+		if (arch64)
+		  buffer.word = rs6000_ptrace64 (PT_READ_I, pid,
+						 rounded_offset, 0, NULL);
+		else
+		  buffer.word = rs6000_ptrace32 (PT_READ_I, pid,
+						 (int *)(uintptr_t)rounded_offset,
+						 0, NULL);
+	      }
+
+	    /* Copy data to be written over corresponding part of
+	       buffer.  */
+	    memcpy (buffer.byte + (offset - rounded_offset),
+		    writebuf, partial_len);
+
+	    errno = 0;
+	    if (arch64)
+	      rs6000_ptrace64 (PT_WRITE_D, pid,
+			       rounded_offset, buffer.word, NULL);
+	    else
+	      rs6000_ptrace32 (PT_WRITE_D, pid,
+			       (int *)(uintptr_t)rounded_offset, buffer.word, NULL);
+	    if (errno)
+	      return 0;
+	  }
+
+	if (readbuf)
+	  {
+	    errno = 0;
+	    if (arch64)
+	      buffer.word = rs6000_ptrace64 (PT_READ_I, pid,
+					     rounded_offset, 0, NULL);
+	    else
+	      buffer.word = rs6000_ptrace32 (PT_READ_I, pid,
+					     (int *)(uintptr_t)rounded_offset,
+					     0, NULL);
+	    if (errno)
+	      return 0;
+
+	    /* Copy appropriate bytes out of the buffer.  */
+	    memcpy (readbuf, buffer.byte + (offset - rounded_offset),
+		    partial_len);
+	  }
+
+	return partial_len;
+      }
+
+    default:
+      return -1;
     }
-  else
-    {
-      /* Fetch leading memory needed for alignment. */
-      if (addr < memaddr)
-	if (!read_word (addr, buf, arch64))
-	  return 0;
-
-      /* Fetch trailing memory needed for alignment. */
-      if (addr + count * sizeof (int) > memaddr + len)
-	if (!read_word (addr + (count - 1) * sizeof (int),
-                        buf + count - 1, arch64))
-	  return 0;
-
-      /* Copy supplied data into memory buffer. */
-      memcpy ((char *)buf + (memaddr - addr), myaddr, len);
-
-      /* Store memory one word at a time. */
-      for (i = 0, errno = 0; i < count; i++, addr += sizeof (int))
-	{
-	  if (arch64)
-	    rs6000_ptrace64 (PT_WRITE_D, PIDGET (inferior_ptid), addr, buf[i], NULL);
-	  else
-	    rs6000_ptrace32 (PT_WRITE_D, PIDGET (inferior_ptid), (int *)(long) addr,
-		      buf[i], NULL);
-
-	  if (errno)
-	    return 0;
-	  QUIT;
-	}
-    }
-
-  return len;
 }
+
 
 /* Execute one dummy breakpoint instruction.  This way we give the kernel
    a chance to do some housekeeping and update inferior's internal data,
@@ -1200,12 +1205,6 @@ xcoff_relocate_core (struct target_ops *target)
   breakpoint_re_set ();
   do_cleanups (old);
 }
-
-int
-kernel_u_size (void)
-{
-  return (sizeof (struct user));
-}
 
 /* Under AIX, we have to pass the correct TOC pointer to a function
    when calling functions in the inferior.
@@ -1245,6 +1244,14 @@ static struct core_fns rs6000_core_fns =
 void
 _initialize_core_rs6000 (void)
 {
+  struct target_ops *t;
+
+  t = inf_ptrace_target ();
+  t->to_fetch_registers = rs6000_fetch_inferior_registers;
+  t->to_store_registers = rs6000_store_inferior_registers;
+  t->to_xfer_partial = rs6000_xfer_partial;
+  add_target (t);
+
   /* Initialize hook in rs6000-tdep.c for determining the TOC address
      when calling functions in the inferior.  */
   rs6000_find_toc_address_hook = find_toc_address;

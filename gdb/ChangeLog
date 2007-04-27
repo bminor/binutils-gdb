@@ -1,5 +1,27 @@
 2007-04-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* aix-thread.c (aix_thread_xfer_memory): Replace by ...
+	(aix_thread_xfer_partial): ... this.
+	(init_aix_thread_ops): Install to_xfer_partial instead
+	of deprecated_xfer_memory target method.
+
+	* config/powerpc/aix.mh (NATDEPFILES): Remove infptrace.o
+	and inftarg.o, add inf-ptrace.o.
+	* config/rs6000/nm-rs6000.h (FETCH_INFERIOR_REGISTERS,
+	CHILD_XFER_MEMORY, KERNEL_U_SIZE, kernel_u_size): Remove.
+	* rs6000-nat.c: Include "inf-ptrace.h" and "gdb_stdint.h".
+	(fetch_inferior_registers): Rename to ...
+	(rs6000_fetch_inferior_registers): ... this.  Make static.
+	(store_inferior_registers): Rename to ...
+	(rs6000_store_inferior_registers): ... this.  Make static.
+	(read_word, child_xfer_memory): Remove.
+	(rs6000_xfer_partial): New function.
+	(kernel_u_size): Remove.
+	(_initialize_core_rs6000): Add inf_ptrace-based target.
+	* Makefile.in (rs6000-nat.o): Update dependencies.
+
+2007-04-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* inf-ptrace.c: Include "gdb_stdint.h".
 	(inf_ptrace_xfer_partial): Use "uintptr_t" instead of "long" as 
 	intermediate type when casting CORE_ADDR to PTRACE_TYPE_ARG3.

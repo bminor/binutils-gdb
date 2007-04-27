@@ -1615,23 +1615,24 @@ aix_thread_store_registers (int regno)
     }
 }
 
-/* Transfer LEN bytes of memory from GDB address MYADDR to target
-   address MEMADDR if WRITE and vice versa otherwise.  */
+/* Attempt a transfer all LEN bytes starting at OFFSET between the
+   inferior's OBJECT:ANNEX space and GDB's READBUF/WRITEBUF buffer.
+   Return the number of bytes actually transferred.  */
 
-static int
-aix_thread_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
-		      struct mem_attrib *attrib,
-		      struct target_ops *target)
+static LONGEST
+aix_thread_xfer_partial (struct target_ops *ops, enum target_object object,
+			 const char *annex, gdb_byte *readbuf,
+			 const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
 {
-  int n;
-  struct cleanup *cleanup = save_inferior_ptid ();
+  struct cleanup *old_chain = save_inferior_ptid ();
+  LONGEST xfer;
 
   inferior_ptid = pid_to_ptid (PIDGET (inferior_ptid));
-  n = base_target.deprecated_xfer_memory (memaddr, myaddr, len, 
-					  write, attrib, &base_target);
-  do_cleanups (cleanup);
+  xfer = base_target.to_xfer_partial (ops, object, annex,
+				      readbuf, writebuf, offset, len);
 
-  return n;
+  do_cleanups (old_chain);
+  return xfer;
 }
 
 /* Kill and forget about the inferior process.  */
@@ -1763,7 +1764,7 @@ init_aix_thread_ops (void)
   aix_thread_ops.to_wait               = aix_thread_wait;
   aix_thread_ops.to_fetch_registers    = aix_thread_fetch_registers;
   aix_thread_ops.to_store_registers    = aix_thread_store_registers;
-  aix_thread_ops.deprecated_xfer_memory = aix_thread_xfer_memory;
+  aix_thread_ops.to_xfer_partial       = aix_thread_xfer_partial;
   /* No need for aix_thread_ops.to_create_inferior, because we activate thread
      debugging when the inferior reaches pd_brk_addr.  */
   aix_thread_ops.to_kill               = aix_thread_kill;
