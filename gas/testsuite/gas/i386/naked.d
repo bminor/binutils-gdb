@@ -14,7 +14,7 @@ Disassembly of section .text:
   13:	36 8c a4 81 d2 04 00 00 [ 	]*mov    %fs,%ss:0x4d2\(%ecx,%eax,4\)
   1b:	8c 2c ed 00 00 00 00 [ 	]*mov    %gs,0x0\(,%ebp,8\)
   22:	26 88 25 00 00 00 00 [ 	]*mov    %ah,%es:0x0
-  29:	2e 8b 74 14 80 [ 	]*mov    %cs:0xffffff80\(%esp,%edx,1\),%esi
+  29:	2e 8b 74 14 80 [ 	]*mov    %cs:-0x80\(%esp,%edx,1\),%esi
   2e:	65 f3 a5 [ 	]*rep movsl %gs:\(%esi\),%es:\(%edi\)
   31:	ec [ 	]*in     \(%dx\),%al
   32:	66 ef [ 	]*out    %ax,\(%dx\)

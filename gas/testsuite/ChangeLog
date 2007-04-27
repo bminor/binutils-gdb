@@ -1,5 +1,26 @@
 2007-04-26  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/4430
+	* gas/i386/amd.d: Updated.
+	* gas/i386/immed32.d: Likewise.
+	* gas/i386/intel.d: Likewise.
+	* gas/i386/intel16.d: Likewise.
+	* gas/i386/intelok.d: Likewise.
+	* gas/i386/jump16.d: Likewise.
+	* gas/i386/naked.d: Likewise.
+	* gas/i386/opcode-suffix.d: Likewise.
+	* gas/i386/opcode.d: Likewise.
+	* gas/i386/prescott.d: Likewise.
+	* gas/i386/ssemmx2.d: Likewise.
+	* gas/i386/tlsd.d: Likewise.
+	* gas/i386/tlspic.d: Likewise.
+	* gas/i386/x86-64-addr32.d: Likewise.
+	* gas/i386/x86-64-prescott.d: Likewise.
+	* gas/i386/x86-64-rip.d: Likewise.
+	* gas/i386/x86_64.d: Likewise.
+
+2007-04-26  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutils/4429
 	* gas/i386/i386.exp: Run "x86-64-addr32-intel" and
 	"x86-64-rip-intel".

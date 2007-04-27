@@ -1,3 +1,18 @@
+2007-04-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/4430
+	* ld-i386/tlsbin.dd: Updated.
+	* ld-i386/tlsbindesc.dd: Likewise
+	* ld-i386/tlsdesc.dd: Likewise
+	* ld-i386/tlsgdesc.dd: Likewise
+	* ld-i386/tlsnopic.dd: Likewise
+	* ld-i386/tlspic.dd: Likewise
+	* ld-x86-64/tlsbin.dd: Likewise
+	* ld-x86-64/tlsbindesc.dd: Likewise
+	* ld-x86-64/tlsdesc.dd: Likewise
+	* ld-x86-64/tlsgdesc.dd: Likewise
+	* ld-x86-64/tlspic.dd: Likewise
+
 2007-04-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-linkonce/x.s: Use .gcc_except_table instead of .eh_frame
