@@ -1,5 +1,7 @@
 # If you change this file, please also look at files which source this one:
-# elf_i386_vxworks.sh elf32ppcvxworks.sh elf32ebmipvxworks.sh
+# armelf_vxworks.sh elf32ebmipvxworks.sh elf32elmipvxworks.sh
+# elf_i386_vxworks.sh elf32ppcvxworks.sh elf32_sparc_vxworks.sh
+# shelf_vxworks.sh
 
 # The Diab tools use a different init/fini convention.  Initialization code
 # is place in sections named ".init$NN".  These sections are then concatenated

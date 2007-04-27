@@ -1,3 +1,6 @@
+# If you change this file, please also look at files which source this one:
+# elf32_sparc_vxworks.sh
+
 SCRIPT_NAME=elf
 OUTPUT_FORMAT="elf32-sparc"
 TEXT_START_ADDR=0x10000

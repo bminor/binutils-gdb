@@ -1,5 +1,6 @@
 # If you change this file, please also look at files which source this one:
 # elf32b4300.sh elf32bsmip.sh elf32btsmip.sh elf32ebmip.sh elf32lmip.sh
+# elf32ebmipvxworks.sh elf32elmipvxworks.sh
 
 SCRIPT_NAME=elf
 OUTPUT_FORMAT="elf32-bigmips"

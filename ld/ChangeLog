@@ -1,3 +1,10 @@
+2007-04-27  Nathan Froyd  <froydnj@codesourcery.com>
+
+	* emulparams/elf32_sparc.sh: Update comments.
+	* emulparams/elf32bmip.sh: Likewise.
+	* emulparams/elf32ppc.sh: Likewise.
+	* emulparams/vxworks.sh: Likewise.
+
 2007-04-27  Alan Modra  <amodra@bigpond.net.au>
 
 	Many files: Include sysdep.h first.  Remove duplicate headers.
@@ -34,9 +41,9 @@
 	* Makefile.in: Regenerate.
 
 2007-04-12  Bob Wilson  <bob.wilson@acm.org>
-	
+
 	* emulparams/elf32xtensa.sh (OTHER_SECTIONS): KEEP property sections.
-	
+
 2007-04-10  Richard Henderson  <rth@redhat.com>
 
 	* ldlang.c (relax_sections): Initialize and increment
