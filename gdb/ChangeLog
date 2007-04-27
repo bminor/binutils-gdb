@@ -1,5 +1,11 @@
 2007-04-27  Kevin Buettner  <kevinb@redhat.com>
 
+	* dwarf2expr.c (unsigned_address_type): Add forward declaration.
+	(dwarf2_read_address): Sign extend return address as required by
+	target architecture.
+
+2007-04-27  Kevin Buettner  <kevinb@redhat.com>
+
 	* solib-frv.c (lm_base): Bail out if the main executable has
 	not been relocated.
 

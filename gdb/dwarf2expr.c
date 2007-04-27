@@ -33,6 +33,7 @@
 
 static void execute_stack_op (struct dwarf_expr_context *,
 			      gdb_byte *, gdb_byte *);
+static struct type *unsigned_address_type (void);
 
 /* Create a new context for the expression evaluator.  */
 
@@ -205,9 +206,35 @@ dwarf2_read_address (gdb_byte *buf, gdb_byte *buf_end, int *bytes_read)
     error (_("dwarf2_read_address: Corrupted DWARF expression."));
 
   *bytes_read = TARGET_ADDR_BIT / TARGET_CHAR_BIT;
-  /* NOTE: cagney/2003-05-22: This extract is assuming that a DWARF 2
-     address is always unsigned.  That may or may not be true.  */
-  result = extract_unsigned_integer (buf, TARGET_ADDR_BIT / TARGET_CHAR_BIT);
+
+  /* For most architectures, calling extract_unsigned_integer() alone
+     is sufficient for extracting an address.  However, some
+     architectures (e.g. MIPS) use signed addresses and using
+     extract_unsigned_integer() will not produce a correct
+     result.  Turning the unsigned integer into a value and then
+     decomposing that value as an address will cause
+     gdbarch_integer_to_address() to be invoked for those
+     architectures which require it.  Thus, using value_as_address()
+     will produce the correct result for both types of architectures.
+
+     One concern regarding the use of values for this purpose is
+     efficiency.  Obviously, these extra calls will take more time to
+     execute and creating a value takes more space, space which will
+     have to be garbage collected at a later time.  If constructing
+     and then decomposing a value for this purpose proves to be too
+     inefficient, then gdbarch_integer_to_address() can be called
+     directly.
+
+     The use of `unsigned_address_type' in the code below refers to
+     the type of buf and has no bearing on the signedness of the
+     address being returned.  */
+
+  result = value_as_address (value_from_longest 
+			      (unsigned_address_type (),
+			       extract_unsigned_integer 
+				 (buf,
+				  TARGET_ADDR_BIT / TARGET_CHAR_BIT)));
+
   return result;
 }
 
