@@ -523,6 +523,63 @@ rs6000_xfer_partial (struct target_ops *ops, enum target_object object,
     }
 }
 
+/* Wait for the child specified by PTID to do something.  Return the
+   process ID of the child, or MINUS_ONE_PTID in case of error; store
+   the status in *OURSTATUS.  */
+
+static ptid_t
+rs6000_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
+{
+  pid_t pid;
+  int status, save_errno;
+
+  do
+    {
+      set_sigint_trap ();
+      set_sigio_trap ();
+
+      do
+	{
+	  pid = waitpid (ptid_get_pid (ptid), &status, 0);
+	  save_errno = errno;
+	}
+      while (pid == -1 && errno == EINTR);
+
+      clear_sigio_trap ();
+      clear_sigint_trap ();
+
+      if (pid == -1)
+	{
+	  fprintf_unfiltered (gdb_stderr,
+			      _("Child process unexpectedly missing: %s.\n"),
+			      safe_strerror (save_errno));
+
+	  /* Claim it exited with unknown signal.  */
+	  ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
+	  ourstatus->value.sig = TARGET_SIGNAL_UNKNOWN;
+	  return minus_one_ptid;
+	}
+
+      /* Ignore terminated detached child processes.  */
+      if (!WIFSTOPPED (status) && pid != ptid_get_pid (inferior_ptid))
+	pid = -1;
+    }
+  while (pid == -1);
+
+  /* AIX has a couple of strange returns from wait().  */
+
+  /* stop after load" status.  */
+  if (status == 0x57c)
+    ourstatus->kind = TARGET_WAITKIND_LOADED;
+  /* signal 0. I have no idea why wait(2) returns with this status word.  */
+  else if (status == 0x7f)
+    ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+  /* A normal waitstatus.  Let the usual macros deal with it.  */
+  else
+    store_waitstatus (ourstatus, status);
+
+  return pid_to_ptid (pid);
+}
 
 /* Execute one dummy breakpoint instruction.  This way we give the kernel
    a chance to do some housekeeping and update inferior's internal data,
@@ -1257,6 +1314,8 @@ _initialize_core_rs6000 (void)
 
   super_create_inferior = t->to_create_inferior;
   t->to_create_inferior = rs6000_create_inferior;
+
+  t->to_wait = rs6000_wait;
 
   add_target (t);
 

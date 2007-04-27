@@ -1976,13 +1976,6 @@ generic_mourn_inferior (void)
 void
 store_waitstatus (struct target_waitstatus *ourstatus, int hoststatus)
 {
-#ifdef CHILD_SPECIAL_WAITSTATUS
-  /* CHILD_SPECIAL_WAITSTATUS should return nonzero and set *OURSTATUS
-     if it wants to deal with hoststatus.  */
-  if (CHILD_SPECIAL_WAITSTATUS (ourstatus, hoststatus))
-    return;
-#endif
-
   if (WIFEXITED (hoststatus))
     {
       ourstatus->kind = TARGET_WAITKIND_EXITED;

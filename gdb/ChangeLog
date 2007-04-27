@@ -1,5 +1,12 @@
 2007-04-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* config/rs6000/nm-rs6000.h (CHILD_SPECIAL_WAITSTATUS): Remove.
+	* rs6000-nat.c (rs6000_wait): New function.
+	(_initialize_core_rs6000): Install it as to_wait target method.
+	* target.c (store_waitstatus): Don't check CHILD_SPECIAL_WAITSTATUS.
+
+2007-04-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* config/rs6000/nm-rs6000.h (TARGET_CREATE_INFERIOR_HOOK): Remove.
 	* fork-child.c (fork_inferior): Don't call TARGET_CREATE_INFERIOR_HOOK.
 	* rs6000-nat.c (super_create_inferior): New variable.
