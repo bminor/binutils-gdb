@@ -2971,7 +2971,7 @@ gdbtk-cmds.o: $(srcdir)/gdbtk/generic/gdbtk-cmds.c \
 	$(defs_h) $(inferior_h)	$(source_h) $(symfile_h) $(objfiles_h) \
 	$(gdbcore_h) $(demangle_h) $(linespec_h) $(tui_file_h) $(top_h) \
 	$(annotate_h) $(block_h) $(dictionary_h) $(gdb_string_h) \
-	$(dis_asm_h) $(gdbcmd_h)
+	$(dis_asm_h) $(gdbcmd_h) $(varobj_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS)	\
 	 $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS)		\
 	$(GDBTK_CFLAGS) $(srcdir)/gdbtk/generic/gdbtk-cmds.c		\
@@ -3013,7 +3013,7 @@ gdbtk-stack.o: $(srcdir)/gdbtk/generic/gdbtk-stack.c \
 	$(srcdir)/gdbtk/generic/gdbtk.h $(srcdir)/gdbtk/generic/gdbtk-cmds.h \
 	$(srcdir)/gdbtk/generic/gdbtk-wrapper.h \
 	$(defs_h) $(target_h) $(breakpoint_h) $(linespec_h) \
-	$(block_h) $(dictionary_h)
+	$(block_h) $(dictionary_h) $(varobj_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
 	 $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS)   \
 	$(GDBTK_CFLAGS) $(srcdir)/gdbtk/generic/gdbtk-stack.c \
@@ -3021,6 +3021,7 @@ gdbtk-stack.o: $(srcdir)/gdbtk/generic/gdbtk-stack.c \
 
 gdbtk-varobj.o: $(srcdir)/gdbtk/generic/gdbtk-varobj.c \
 		$(srcdir)/gdbtk/generic/gdbtk.h \
+		$(srcdir)/gdbtk/generic/gdbtk-wrapper.h \
 		$(defs_h) $(value_h) $(varobj_h) $(gdb_string_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS)  \
 	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
@@ -3028,7 +3029,7 @@ gdbtk-varobj.o: $(srcdir)/gdbtk/generic/gdbtk-varobj.c \
 
 gdbtk-wrapper.o: $(srcdir)/gdbtk/generic/gdbtk-wrapper.c \
 	$(srcdir)/gdbtk/generic/gdbtk-wrapper.h \
-	$(defs_h) $(frame_h) $(value_h)
+	$(defs_h) $(frame_h) $(value_h) $(varobj_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(GDBTK_CFLAGS)\
 		$(srcdir)/gdbtk/generic/gdbtk-wrapper.c
 

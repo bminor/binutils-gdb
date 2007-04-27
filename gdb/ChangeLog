@@ -1,3 +1,8 @@
+2007-04-27  Maciej W. Rozycki  <macro@mips.com>
+
+	* Makefile.in (gdbtk-wrapper.o): Update dependencies.
+	(gdbtk-varobj.o, gdbtk-cmds.o, gdbtk-stack.o): Likewise.
+
 2007-04-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* config/rs6000/nm-rs6000.h (CHILD_SPECIAL_WAITSTATUS): Remove.
