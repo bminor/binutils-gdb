@@ -1443,8 +1443,8 @@ static disassemble_info *the_info;
 static struct
   {
     int mod;
-    int rm;
     int reg;
+    int rm;
   }
 modrm;
 static unsigned char need_modrm;

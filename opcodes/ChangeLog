@@ -1,3 +1,7 @@
+2007-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (modrm): Put reg before rm.
+
 2007-04-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/4430
