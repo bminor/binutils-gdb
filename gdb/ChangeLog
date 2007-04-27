@@ -1,3 +1,7 @@
+2007-04-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* vec.h (vec_free): Rename to vec_free_.  Adapt users.
+
 2007-04-25  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* alpha-linux-tdep.c: Include "gdb_string.h", "regset.h",

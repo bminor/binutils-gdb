@@ -378,7 +378,7 @@
 /* Reallocate an array of elements with prefix.  */
 extern void *vec_p_reserve (void *, int);
 extern void *vec_o_reserve (void *, int, size_t, size_t);
-#define vec_free(V) xfree (V)
+#define vec_free_(V) xfree (V)
 
 #define VEC_ASSERT_INFO ,__FILE__,__LINE__
 #define VEC_ASSERT_DECL ,const char *file_,unsigned line_
@@ -458,7 +458,7 @@ static inline void VEC_OP (T,free)					  \
      (VEC(T) **vec_)							  \
 {									  \
   if (*vec_)								  \
-    vec_free (*vec_);							  \
+    vec_free_ (*vec_);							  \
   *vec_ = NULL;								  \
 }									  \
 									  \
@@ -696,7 +696,7 @@ static inline void VEC_OP (T,free)					  \
      (VEC(T) **vec_)							  \
 {									  \
   if (*vec_)								  \
-    vec_free (*vec_);							  \
+    vec_free_ (*vec_);							  \
   *vec_ = NULL;								  \
 }									  \
 									  \
@@ -954,7 +954,7 @@ static inline void VEC_OP (T,free)					  \
      (VEC(T) **vec_)							  \
 {									  \
   if (*vec_)								  \
-    vec_free (*vec_);							  \
+    vec_free_ (*vec_);							  \
   *vec_ = NULL;								  \
 }									  \
 									  \
