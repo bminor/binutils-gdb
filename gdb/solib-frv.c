@@ -361,6 +361,14 @@ lm_base (void)
   CORE_ADDR addr;
   gdb_byte buf[FRV_PTR_SIZE];
 
+  /* One of our assumptions is that the main executable has been relocated.
+     Bail out if this has not happened.  (Note that post_create_inferior()
+     in infcmd.c will call solib_add prior to solib_create_inferior_hook().
+     If we allow this to happen, lm_base_cache will be initialized with
+     a bogus value.  */
+  if (main_executable_lm_info == 0)
+    return 0;
+
   /* If we already have a cached value, return it.  */
   if (lm_base_cache)
     return lm_base_cache;

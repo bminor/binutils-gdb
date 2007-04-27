@@ -1,3 +1,8 @@
+2007-04-27  Kevin Buettner  <kevinb@redhat.com>
+
+	* solib-frv.c (lm_base): Bail out if the main executable has
+	not been relocated.
+
 2007-04-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* alpha-linux-tdep.c (alpha_linux_supply_fpregset): Correct location
