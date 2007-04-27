@@ -28,6 +28,7 @@
 #include "gdbcore.h"
 #include "regcache.h"
 
+#include "gdb_stdint.h"
 #include "gdb_assert.h"
 #include "gdb_string.h"
 #include "gdb_ptrace.h"
@@ -504,7 +505,8 @@ inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
 		    < rounded_offset + sizeof (PTRACE_TYPE_RET)))
 	      /* Need part of initial word -- fetch it.  */
 	      buffer.word = ptrace (PT_READ_I, pid,
-				    (PTRACE_TYPE_ARG3)(long)rounded_offset, 0);
+				    (PTRACE_TYPE_ARG3)(uintptr_t)
+				    rounded_offset, 0);
 
 	    /* Copy data to be written over corresponding part of
 	       buffer.  */
@@ -513,14 +515,16 @@ inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
 
 	    errno = 0;
 	    ptrace (PT_WRITE_D, pid,
-		    (PTRACE_TYPE_ARG3)(long)rounded_offset, buffer.word);
+		    (PTRACE_TYPE_ARG3)(uintptr_t)rounded_offset,
+		    buffer.word);
 	    if (errno)
 	      {
 		/* Using the appropriate one (I or D) is necessary for
 		   Gould NP1, at least.  */
 		errno = 0;
 		ptrace (PT_WRITE_I, pid,
-			(PTRACE_TYPE_ARG3)(long)rounded_offset, buffer.word);
+			(PTRACE_TYPE_ARG3)(uintptr_t)rounded_offset,
+			buffer.word);
 		if (errno)
 		  return 0;
 	      }
@@ -530,7 +534,8 @@ inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
 	  {
 	    errno = 0;
 	    buffer.word = ptrace (PT_READ_I, pid,
-				  (PTRACE_TYPE_ARG3)(long)rounded_offset, 0);
+				  (PTRACE_TYPE_ARG3)(uintptr_t)rounded_offset,
+				  0);
 	    if (errno)
 	      return 0;
 	    /* Copy appropriate bytes out of the buffer.  */
@@ -642,7 +647,7 @@ inf_ptrace_fetch_register (int regnum)
   for (i = 0; i < size / sizeof (PTRACE_TYPE_RET); i++)
     {
       errno = 0;
-      buf[i] = ptrace (PT_READ_U, pid, (PTRACE_TYPE_ARG3)addr, 0);
+      buf[i] = ptrace (PT_READ_U, pid, (PTRACE_TYPE_ARG3)(uintptr_t)addr, 0);
       if (errno != 0)
 	error (_("Couldn't read register %s (#%d): %s."),
 	       REGISTER_NAME (regnum), regnum, safe_strerror (errno));
@@ -696,7 +701,7 @@ inf_ptrace_store_register (int regnum)
   for (i = 0; i < size / sizeof (PTRACE_TYPE_RET); i++)
     {
       errno = 0;
-      ptrace (PT_WRITE_U, pid, (PTRACE_TYPE_ARG3)addr, buf[i]);
+      ptrace (PT_WRITE_U, pid, (PTRACE_TYPE_ARG3)(uintptr_t)addr, buf[i]);
       if (errno != 0)
 	error (_("Couldn't write register %s (#%d): %s."),
 	       REGISTER_NAME (regnum), regnum, safe_strerror (errno));

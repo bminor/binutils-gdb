@@ -1,5 +1,15 @@
 2007-04-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* inf-ptrace.c: Include "gdb_stdint.h".
+	(inf_ptrace_xfer_partial): Use "uintptr_t" instead of "long" as 
+	intermediate type when casting CORE_ADDR to PTRACE_TYPE_ARG3.
+	(inf_ptrace_fetch_register): Add intermediate cast to "uintptr_t"
+	before casting CORE_ADDR to PTRACE_TYPE_ARG3.
+	(inf_ptrace_store_register): Likewise.
+	* Makefile.in (inf-ptrace.o): Update dependencies.
+
+2007-04-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* configure.host (rs6000-*-*): Merge with powerpc-*-aix* rules.
 	* configure.tgt (rs6000-*-*): Likewise.
 	* config/rs6000/aix4.mh: Delete file.
