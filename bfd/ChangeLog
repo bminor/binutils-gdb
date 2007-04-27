@@ -1,5 +1,11 @@
 2007-04-27  Alan Modra  <amodra@bigpond.net.au>
 
+	* cpu-rs6000.c: Write Mimi's name in ASCII.
+	* coff-rs6000.c: Likewise.
+	* rs6000-core.c: Likewise.
+
+2007-04-27  Alan Modra  <amodra@bigpond.net.au>
+
 	* sysdep.h: Include config.h first.
 	Many files: Include sysdep.h before bfd.h.
 	* Makefile.am: Run "make dep-am".
