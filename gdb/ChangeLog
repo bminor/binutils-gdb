@@ -1,5 +1,17 @@
 2007-04-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* configure.host (rs6000-*-*): Merge with powerpc-*-aix* rules.
+	* configure.tgt (rs6000-*-*): Likewise.
+	* config/rs6000/aix4.mh: Delete file.
+	* config/rs6000/aix4.mt: Delete file.
+	* config/rs6000/rs6000.mh: Delete file.
+	* config/rs6000/rs6000.mt: Delete file.
+
+	* config/powerpc/nm-aix.h: Delete file.
+	* config/powerpc/aix.mh (NAT_FILE): Set to config/rs6000/nm-rs6000.h.
+
+2007-04-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* aix-thread.c (fill_sprs32): Change argument types to "uint32_t *".
 	Remove obsolete part of comment.
 	(store_regs_user_thread): Use uint32_t temporaries when calling

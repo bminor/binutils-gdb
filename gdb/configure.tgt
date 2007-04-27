@@ -38,7 +38,7 @@ m68hc11*|m6811*)	gdb_target_cpu=m68hc11 ;;
 m68*)			gdb_target_cpu=m68k ;;
 m88*)			gdb_target_cpu=m88k ;;
 mips*)			gdb_target_cpu=mips ;;
-powerpc*)		gdb_target_cpu=powerpc ;;
+powerpc* | rs6000)	gdb_target_cpu=powerpc ;;
 sparc*)			gdb_target_cpu=sparc ;;
 thumb*)			gdb_target_cpu=arm ;;
 s390*)			gdb_target_cpu=s390 ;;
@@ -171,7 +171,8 @@ mt-*-*)			gdb_target=mt ;;
 powerpc-*-netbsd* | powerpc-*-knetbsd*-gnu)
 			gdb_target=nbsd ;;
 powerpc-*-openbsd*)	gdb_target=obsd ;;
-powerpc-*-aix*)		gdb_target=aix ;;
+powerpc-*-aix* | rs6000-*-*)
+			gdb_target=aix ;;
 powerpc-*-linux*)	gdb_target=linux
 			build_gdbserver=yes
 			;;
@@ -183,9 +184,6 @@ powerpc*-*-*)		if test -f ../sim/ppc/Makefile; then
 			else
 			  gdb_target=ppc-eabi
 			fi ;;
-
-rs6000-*-aix4*)		gdb_target=aix4 ;;
-rs6000-*-*)		gdb_target=rs6000 ;;
 
 s390*-*-*)		gdb_target=s390
 			build_gdbserver=yes

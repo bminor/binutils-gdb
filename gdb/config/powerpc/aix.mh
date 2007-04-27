@@ -1,6 +1,6 @@
 # Host: IBM PowerPC running AIX
 
-NAT_FILE= nm-aix.h
+NAT_FILE= config/rs6000/nm-rs6000.h
 
 # aix-thread.o is not listed in NATDEPFILES as it is pulled in by configure.
 NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o rs6000-nat.o \
