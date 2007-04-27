@@ -1,5 +1,18 @@
 2007-04-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* aix-thread.c (fill_sprs32): Change argument types to "uint32_t *".
+	Remove obsolete part of comment.
+	(store_regs_user_thread): Use uint32_t temporaries when calling
+	fill_sprs32.
+	(store_regs_kernel_thread): Likewise.  Add assertion to verify
+	correct size of struct ptsprs members.
+	(aix_thread_xfer_memory): Fix type of myaddr.
+	(aix_thread_extra_thread_info): Fix compiler warning.
+	* rs6000-nat.c (rs6000_ptrace64): Change type of buf to "void *".
+	(fetch_register, store_register): Adapt callers.
+
+2007-04-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* vec.h (vec_free): Rename to vec_free_.  Adapt users.
 
 2007-04-25  Ulrich Weigand  <uweigand@de.ibm.com>

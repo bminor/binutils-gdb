@@ -1365,9 +1365,9 @@ fill_sprs64 (uint64_t *iar, uint64_t *msr, uint32_t *cr,
 }
 
 static void
-fill_sprs32 (unsigned long *iar, unsigned long *msr, unsigned long *cr,
-	     unsigned long *lr,  unsigned long *ctr, unsigned long *xer,
-	     unsigned long *fpscr)
+fill_sprs32 (uint32_t *iar, uint32_t *msr, uint32_t *cr,
+	     uint32_t *lr, uint32_t *ctr, uint32_t *xer,
+	     uint32_t *fpscr)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
@@ -1375,12 +1375,7 @@ fill_sprs32 (unsigned long *iar, unsigned long *msr, unsigned long *cr,
      same as the raw size of the PC (in the register cache).  If
      they're not, then either GDB has been built incorrectly, or
      there's some other kind of internal error.  To be really safe,
-     we should check all of the sizes. 
-
-     If this assert() fails, the most likely reason is that GDB was
-     built incorrectly.  In order to make use of many of the header
-     files in /usr/include/sys, GDB needs to be configured so that
-     sizeof (long) == 4).  */
+     we should check all of the sizes.  */
   gdb_assert (sizeof (*iar) == register_size (current_gdbarch, PC_REGNUM));
 
   if (register_cached (PC_REGNUM))
@@ -1459,11 +1454,9 @@ store_regs_user_thread (pthdb_pthread_t pdtid)
   else
     {
       /* Problem: ctx.iar etc. are 64 bits, but raw_registers are 32.
-	 Solution: use 32-bit temp variables.  (The assert() in fill_sprs32()
-	 will fail if the size of an unsigned long is incorrect.  If this
-	 happens, GDB needs to be reconfigured so that longs are 32-bits.)  */
-      unsigned long tmp_iar, tmp_msr, tmp_cr, tmp_lr, tmp_ctr, tmp_xer,
-                    tmp_fpscr;
+	 Solution: use 32-bit temp variables.  */
+      uint32_t tmp_iar, tmp_msr, tmp_cr, tmp_lr, tmp_ctr, tmp_xer,
+	       tmp_fpscr;
 
       fill_sprs32 (&tmp_iar, &tmp_msr, &tmp_cr, &tmp_lr, &tmp_ctr, &tmp_xer,
                    &tmp_fpscr);
@@ -1564,12 +1557,30 @@ store_regs_kernel_thread (int regno, pthdb_tid_t tid)
 	}
       else
 	{
+	  /* The contents of "struct ptspr" were declared as "unsigned
+	     long" up to AIX 5.2, but are "unsigned int" since 5.3.
+	     Use temporaries to work around this problem.  Also, add an
+	     assert here to make sure we fail if the system header files
+	     use "unsigned long", and the size of that type is not what
+	     the headers expect.  */
+	  uint32_t tmp_iar, tmp_msr, tmp_cr, tmp_lr, tmp_ctr, tmp_xer,
+		   tmp_fpscr;
+
+	  gdb_assert (sizeof (sprs32.pt_iar) == 4);
+
 	  /* Pre-fetch: some registers won't be in the cache.  */
 	  ptrace32 (PTT_READ_SPRS, tid, (int *) &sprs32, 0, NULL);
 
-	  fill_sprs32 (&sprs32.pt_iar, &sprs32.pt_msr, &sprs32.pt_cr,
-		       &sprs32.pt_lr,  &sprs32.pt_ctr, &sprs32.pt_xer,
-		       &sprs32.pt_fpscr);
+	  fill_sprs32 (&tmp_iar, &tmp_msr, &tmp_cr, &tmp_lr, &tmp_ctr,
+		       &tmp_xer, &tmp_fpscr);
+
+	  sprs32.pt_iar = tmp_iar;
+	  sprs32.pt_msr = tmp_msr;
+	  sprs32.pt_cr = tmp_cr;
+	  sprs32.pt_lr = tmp_lr;
+	  sprs32.pt_ctr = tmp_ctr;
+	  sprs32.pt_xer = tmp_xer;
+	  sprs32.pt_fpscr = tmp_fpscr;
 
 	  if (tdep->ppc_mq_regnum >= 0)
 	    if (register_cached (tdep->ppc_mq_regnum))
@@ -1608,7 +1619,7 @@ aix_thread_store_registers (int regno)
    address MEMADDR if WRITE and vice versa otherwise.  */
 
 static int
-aix_thread_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+aix_thread_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 		      struct mem_attrib *attrib,
 		      struct target_ops *target)
 {
@@ -1703,7 +1714,7 @@ aix_thread_extra_thread_info (struct thread_info *thread)
 
   if (tid != PTHDB_INVALID_TID)
     /* i18n: Like "thread-identifier %d, [state] running, suspended" */
-    fprintf_unfiltered (buf, _("tid %d"), tid);
+    fprintf_unfiltered (buf, _("tid %d"), (int)tid);
 
   status = pthdb_pthread_state (pd_session, pdtid, &state);
   if (status != PTHDB_SUCCESS)

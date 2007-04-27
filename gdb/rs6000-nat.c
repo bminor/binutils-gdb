@@ -204,7 +204,7 @@ rs6000_ptrace32 (int req, int id, int *addr, int data, int *buf)
 /* Call ptracex(REQ, ID, ADDR, DATA, BUF). */
 
 static int
-rs6000_ptrace64 (int req, int id, long long addr, int data, int *buf)
+rs6000_ptrace64 (int req, int id, long long addr, int data, void *buf)
 {
 #ifdef ARCH3264
   int ret = ptracex (req, id, addr, data, buf);
@@ -255,7 +255,7 @@ fetch_register (int regno)
 	  /* PT_READ_GPR requires the buffer parameter to point to long long,
 	     even if the register is really only 32 bits. */
 	  long long buf;
-	  rs6000_ptrace64 (PT_READ_GPR, PIDGET (inferior_ptid), nr, 0, (int *)&buf);
+	  rs6000_ptrace64 (PT_READ_GPR, PIDGET (inferior_ptid), nr, 0, &buf);
 	  if (register_size (current_gdbarch, regno) == 8)
 	    memcpy (addr, &buf, 8);
 	  else
@@ -329,7 +329,7 @@ store_register (int regno)
 	    memcpy (&buf, addr, 8);
 	  else
 	    buf = *addr;
-	  rs6000_ptrace64 (PT_WRITE_GPR, PIDGET (inferior_ptid), nr, 0, (int *)&buf);
+	  rs6000_ptrace64 (PT_WRITE_GPR, PIDGET (inferior_ptid), nr, 0, &buf);
 	}
     }
 
