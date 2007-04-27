@@ -1,5 +1,10 @@
 2007-04-27  Bob Wilson  <bob.wilson@acm.org>
 
+	* elf32-xtensa.c (xtensa_read_table_entries): Step through table
+	contents and relocs in parallel.
+	
+2007-04-27  Bob Wilson  <bob.wilson@acm.org>
+
 	* elf32-xtensa.c (relax_property_section): Remove extra irel increment.
 
 2007-04-27  Alan Modra  <amodra@bigpond.net.au>

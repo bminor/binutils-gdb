@@ -612,10 +612,10 @@ xtensa_read_table_entries (bfd *abfd,
   property_table_entry *blocks;
   int blk, block_count;
   bfd_size_type num_records;
-  Elf_Internal_Rela *internal_relocs;
-  bfd_vma section_addr;
+  Elf_Internal_Rela *internal_relocs, *irel, *rel_end;
+  bfd_vma section_addr, off;
   flagword predef_flags;
-  bfd_size_type table_entry_size;
+  bfd_size_type table_entry_size, section_limit;
 
   if (!section
       || !(section->flags & SEC_ALLOC)
@@ -651,67 +651,63 @@ xtensa_read_table_entries (bfd *abfd,
   else
     section_addr = section->vma;
 
-  /* If the file has not yet been relocated, process the relocations
-     and sort out the table entries that apply to the specified section.  */
   internal_relocs = retrieve_internal_relocs (abfd, table_section, TRUE);
   if (internal_relocs && !table_section->reloc_done)
     {
-      unsigned i;
-
-      for (i = 0; i < table_section->reloc_count; i++)
-	{
-	  Elf_Internal_Rela *rel = &internal_relocs[i];
-	  unsigned long r_symndx;
-
-	  if (ELF32_R_TYPE (rel->r_info) == R_XTENSA_NONE)
-	    continue;
-
-	  BFD_ASSERT (ELF32_R_TYPE (rel->r_info) == R_XTENSA_32);
-	  r_symndx = ELF32_R_SYM (rel->r_info);
-
-	  if (get_elf_r_symndx_section (abfd, r_symndx) == section)
-	    {
-	      bfd_vma sym_off = get_elf_r_symndx_offset (abfd, r_symndx);
-	      BFD_ASSERT (sym_off == 0);
-	      blocks[block_count].address =
-		(section_addr + sym_off + rel->r_addend
-		 + bfd_get_32 (abfd, table_data + rel->r_offset));
-	      blocks[block_count].size =
-		bfd_get_32 (abfd, table_data + rel->r_offset + 4);
-	      if (predef_flags)
-		blocks[block_count].flags = predef_flags;
-	      else
-		blocks[block_count].flags =
-		  bfd_get_32 (abfd, table_data + rel->r_offset + 8);
-	      block_count++;
-	    }
-	}
+      qsort (internal_relocs, table_section->reloc_count,
+	     sizeof (Elf_Internal_Rela), internal_reloc_compare);
+      irel = internal_relocs;
     }
   else
+    irel = NULL;
+
+  section_limit = bfd_get_section_limit (abfd, section);
+  rel_end = internal_relocs + table_section->reloc_count;
+
+  for (off = 0; off < table_size; off += table_entry_size) 
     {
-      /* The file has already been relocated and the addresses are
-	 already in the table.  */
-      bfd_vma off;
-      bfd_size_type section_limit = bfd_get_section_limit (abfd, section);
+      bfd_vma address = bfd_get_32 (abfd, table_data + off);
 
-      for (off = 0; off < table_size; off += table_entry_size) 
+      /* Skip any relocations before the current offset.  This should help
+	 avoid confusion caused by unexpected relocations for the preceding
+	 table entry.  */
+      while (irel &&
+	     (irel->r_offset < off
+	      || (irel->r_offset == off
+		  && ELF32_R_TYPE (irel->r_info) == R_XTENSA_NONE)))
 	{
-	  bfd_vma address = bfd_get_32 (abfd, table_data + off);
-
-	  if (address >= section_addr
-	      && address < section_addr + section_limit)
-	    {
-	      blocks[block_count].address = address;
-	      blocks[block_count].size =
-		bfd_get_32 (abfd, table_data + off + 4);
-	      if (predef_flags)
-		blocks[block_count].flags = predef_flags;
-	      else
-		blocks[block_count].flags =
-		  bfd_get_32 (abfd, table_data + off + 8);
-	      block_count++;
-	    }
+	  irel += 1;
+	  if (irel >= rel_end)
+	    irel = 0;
 	}
+
+      if (irel && irel->r_offset == off)
+	{
+	  bfd_vma sym_off;
+	  unsigned long r_symndx = ELF32_R_SYM (irel->r_info);
+	  BFD_ASSERT (ELF32_R_TYPE (irel->r_info) == R_XTENSA_32);
+
+	  if (get_elf_r_symndx_section (abfd, r_symndx) != section)
+	    continue;
+
+	  sym_off = get_elf_r_symndx_offset (abfd, r_symndx);
+	  BFD_ASSERT (sym_off == 0);
+	  address += (section_addr + sym_off + irel->r_addend);
+	}
+      else
+	{
+	  if (address < section_addr
+	      || address >= section_addr + section_limit)
+	    continue;
+	}
+
+      blocks[block_count].address = address;
+      blocks[block_count].size = bfd_get_32 (abfd, table_data + off + 4);
+      if (predef_flags)
+	blocks[block_count].flags = predef_flags;
+      else
+	blocks[block_count].flags = bfd_get_32 (abfd, table_data + off + 8);
+      block_count++;
     }
 
   release_contents (table_section, table_data);
