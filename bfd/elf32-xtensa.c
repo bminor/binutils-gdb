@@ -957,6 +957,44 @@ elf_xtensa_check_relocs (bfd *abfd,
 }
 
 
+static void
+elf_xtensa_make_sym_local (struct bfd_link_info *info,
+                           struct elf_link_hash_entry *h)
+{
+  if (info->shared)
+    {
+      if (h->plt.refcount > 0)
+        {
+	  /* For shared objects, there's no need for PLT entries for local
+	     symbols (use RELATIVE relocs instead of JMP_SLOT relocs).  */
+          if (h->got.refcount < 0)
+            h->got.refcount = 0;
+          h->got.refcount += h->plt.refcount;
+          h->plt.refcount = 0;
+        }
+    }
+  else
+    {
+      /* Don't need any dynamic relocations at all.  */
+      h->plt.refcount = 0;
+      h->got.refcount = 0;
+    }
+}
+
+
+static void
+elf_xtensa_hide_symbol (struct bfd_link_info *info,
+                        struct elf_link_hash_entry *h,
+                        bfd_boolean force_local)
+{
+  /* For a shared link, move the plt refcount to the got refcount to leave
+     space for RELATIVE relocs.  */
+  elf_xtensa_make_sym_local (info, h);
+
+  _bfd_elf_link_hash_hide_symbol (info, h, force_local);
+}
+
+
 /* Return the section that should be marked against GC for a given
    relocation.  */
 
@@ -1204,26 +1242,7 @@ elf_xtensa_allocate_dynrelocs (struct elf_link_hash_entry *h, void *arg)
   is_dynamic = elf_xtensa_dynamic_symbol_p (h, info);
 
   if (! is_dynamic)
-    {
-      if (info->shared)
-	{
-	  /* For shared objects, there's no need for PLT entries for local
-	     symbols (use RELATIVE relocs instead of JMP_SLOT relocs).  */
-	  if (h->plt.refcount > 0)
-	    {
-	      if (h->got.refcount < 0)
-		h->got.refcount = 0;
-	      h->got.refcount += h->plt.refcount;
-	      h->plt.refcount = 0;
-	    }
-	}
-      else
-	{
-	  /* Don't need any dynamic relocations at all.  */
-	  h->plt.refcount = 0;
-	  h->got.refcount = 0;
-	}
-    }
+    elf_xtensa_make_sym_local (info, h);
 
   if (h->plt.refcount > 0)
     htab->srelplt->size += (h->plt.refcount * sizeof (Elf32_External_Rela));
@@ -9880,6 +9899,7 @@ static const struct bfd_elf_special_section elf_xtensa_special_sections[] =
 #define elf_backend_gc_sweep_hook	     elf_xtensa_gc_sweep_hook
 #define elf_backend_grok_prstatus	     elf_xtensa_grok_prstatus
 #define elf_backend_grok_psinfo		     elf_xtensa_grok_psinfo
+#define elf_backend_hide_symbol		     elf_xtensa_hide_symbol
 #define elf_backend_object_p		     elf_xtensa_object_p
 #define elf_backend_reloc_type_class	     elf_xtensa_reloc_type_class
 #define elf_backend_relocate_section	     elf_xtensa_relocate_section

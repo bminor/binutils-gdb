@@ -1,5 +1,11 @@
 2007-04-27  Bob Wilson  <bob.wilson@acm.org>
 
+	* elf32-xtensa.c (elf_xtensa_make_sym_local): Restore deleted function.
+	(elf_xtensa_hide_symbol, elf_backend_hide_symbol): Likewise.
+	(elf_xtensa_allocate_dynrelocs): Use elf_xtensa_make_sym_local.
+
+2007-04-27  Bob Wilson  <bob.wilson@acm.org>
+
 	* elf32-xtensa.c (xtensa_read_table_entries): Step through table
 	contents and relocs in parallel.
 	
