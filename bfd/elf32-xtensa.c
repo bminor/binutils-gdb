@@ -9037,7 +9037,6 @@ relax_property_section (bfd *abfd,
 		      break;
 		    }
 		  irel->r_offset -= removed_bytes;
-		  irel++;
 		}
 	    }
 

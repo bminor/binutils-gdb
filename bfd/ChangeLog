@@ -1,3 +1,7 @@
+2007-04-27  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (relax_property_section): Remove extra irel increment.
+
 2007-04-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* cpu-rs6000.c: Write Mimi's name in ASCII.
