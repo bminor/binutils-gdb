@@ -1,3 +1,20 @@
+2007-04-28  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* rs6000-aix-tdep.c: Include "regcache.h", "regset.h", and
+	"gdb_string.h".
+	(rs6000_aix32_reg_offsets, rs6000_aix64_reg_offsets): New variables.
+	(rs6000_aix_supply_regset, rs6000_aix_collect_regset): New functions.
+	(rs6000_aix32_regset, rs6000_aix64_regset): New variables.
+	(rs6000_aix_regset_from_core_section): New function.
+	(rs6000_aix_init_osabi): Register it.
+	(_initialize_rs6000_aix_tdep): Register GDB_OSABI_AIX osabi and
+	sniffer for bfd_arch_powerpc as well as bfd_arch_rs6000. 
+	* rs6000-nat.c (CoreRegs): Do not define type.
+	(fetch_core_registers, rs6000_core_fns): Remove.
+	(_initialize_core_rs6000): Do not register it.  Rename to ...
+	(_initialize_rs6000_nat): ... this.
+	* Makefile.in (rs6000-aix-tdep.o): Update dependencies.
+
 2007-04-27  Kevin Buettner  <kevinb@redhat.com>
 
 	* dwarf2expr.c (unsigned_address_type): Add forward declaration.

@@ -79,17 +79,6 @@
 # define ARCH64() (register_size (current_gdbarch, 0) == 8)
 #endif
 
-/* Union of 32-bit and 64-bit ".reg" core file sections. */
-
-typedef union {
-#ifdef ARCH3264
-  struct __context64 r64;
-#else
-  struct mstsave r64;
-#endif
-  struct mstsave r32;
-} CoreRegs;
-
 /* Union of 32-bit and 64-bit versions of ld_info. */
 
 typedef union {
@@ -141,8 +130,6 @@ static struct vmap *add_vmap (LdInfo *);
 static int objfile_symbol_add (void *);
 
 static void vmap_symtab (struct vmap *);
-
-static void fetch_core_registers (char *, unsigned int, int, CORE_ADDR);
 
 static void exec_one_dummy_insn (void);
 
@@ -623,87 +610,6 @@ exec_one_dummy_insn (void)
 
   write_pc (prev_pc);
   deprecated_remove_raw_breakpoint (bp);
-}
-
-/* Fetch registers from the register section in core bfd. */
-
-static void
-fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
-		      int which, CORE_ADDR reg_addr)
-{
-  CoreRegs *regs;
-  int regi;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
-
-  if (which != 0)
-    {
-      fprintf_unfiltered
-	(gdb_stderr,
-	 "Gdb error: unknown parameter to fetch_core_registers().\n");
-      return;
-    }
-
-  regs = (CoreRegs *) core_reg_sect;
-
-  /* Put the register values from the core file section in the regcache.  */
-
-  if (ARCH64 ())
-    {
-      for (regi = 0; regi < ppc_num_gprs; regi++)
-        regcache_raw_supply (current_regcache, tdep->ppc_gp0_regnum + regi,
-			     (char *) &regs->r64.gpr[regi]);
-
-      if (tdep->ppc_fp0_regnum >= 0)
-        for (regi = 0; regi < ppc_num_fprs; regi++)
-          regcache_raw_supply (current_regcache, tdep->ppc_fp0_regnum + regi,
-			       (char *) &regs->r64.fpr[regi]);
-
-      regcache_raw_supply (current_regcache, PC_REGNUM,
-			   (char *) &regs->r64.iar);
-      regcache_raw_supply (current_regcache, tdep->ppc_ps_regnum,
-			   (char *) &regs->r64.msr);
-      regcache_raw_supply (current_regcache, tdep->ppc_cr_regnum,
-			   (char *) &regs->r64.cr);
-      regcache_raw_supply (current_regcache, tdep->ppc_lr_regnum,
-			   (char *) &regs->r64.lr);
-      regcache_raw_supply (current_regcache, tdep->ppc_ctr_regnum,
-			   (char *) &regs->r64.ctr);
-      regcache_raw_supply (current_regcache, tdep->ppc_xer_regnum,
-			   (char *) &regs->r64.xer);
-      if (tdep->ppc_fpscr_regnum >= 0)
-        regcache_raw_supply (current_regcache, tdep->ppc_fpscr_regnum,
-			     (char *) &regs->r64.fpscr);
-    }
-  else
-    {
-      for (regi = 0; regi < ppc_num_gprs; regi++)
-        regcache_raw_supply (current_regcache, tdep->ppc_gp0_regnum + regi,
-			     (char *) &regs->r32.gpr[regi]);
-
-      if (tdep->ppc_fp0_regnum >= 0)
-        for (regi = 0; regi < ppc_num_fprs; regi++)
-          regcache_raw_supply (current_regcache, tdep->ppc_fp0_regnum + regi,
-			       (char *) &regs->r32.fpr[regi]);
-
-      regcache_raw_supply (current_regcache, PC_REGNUM,
-			   (char *) &regs->r32.iar);
-      regcache_raw_supply (current_regcache, tdep->ppc_ps_regnum,
-			   (char *) &regs->r32.msr);
-      regcache_raw_supply (current_regcache, tdep->ppc_cr_regnum,
-			   (char *) &regs->r32.cr);
-      regcache_raw_supply (current_regcache, tdep->ppc_lr_regnum,
-			   (char *) &regs->r32.lr);
-      regcache_raw_supply (current_regcache, tdep->ppc_ctr_regnum,
-			   (char *) &regs->r32.ctr);
-      regcache_raw_supply (current_regcache, tdep->ppc_xer_regnum,
-			   (char *) &regs->r32.xer);
-      if (tdep->ppc_fpscr_regnum >= 0)
-        regcache_raw_supply (current_regcache, tdep->ppc_fpscr_regnum,
-			     (char *) &regs->r32.fpscr);
-      if (tdep->ppc_mq_regnum >= 0)
-	regcache_raw_supply (current_regcache, tdep->ppc_mq_regnum,
-			     (char *) &regs->r32.mq);
-    }
 }
 
 
@@ -1291,19 +1197,9 @@ find_toc_address (CORE_ADDR pc)
   error (_("Unable to find TOC entry for pc %s."), hex_string (pc));
 }
 
-/* Register that we are able to handle rs6000 core file formats. */
-
-static struct core_fns rs6000_core_fns =
-{
-  bfd_target_xcoff_flavour,		/* core_flavour */
-  default_check_format,			/* check_format */
-  default_core_sniffer,			/* core_sniffer */
-  fetch_core_registers,			/* core_read_registers */
-  NULL					/* next */
-};
 
 void
-_initialize_core_rs6000 (void)
+_initialize_rs6000_nat (void)
 {
   struct target_ops *t;
 
@@ -1322,6 +1218,4 @@ _initialize_core_rs6000 (void)
   /* Initialize hook in rs6000-tdep.c for determining the TOC address
      when calling functions in the inferior.  */
   rs6000_find_toc_address_hook = find_toc_address;
-
-  deprecated_add_core_fns (&rs6000_core_fns);
 }
