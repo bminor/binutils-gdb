@@ -2525,25 +2525,18 @@ tg_variable (void *p, const char *name, enum debug_var_kind kind,
 	     bfd_vma val ATTRIBUTE_UNUSED)
 {
   struct pr_handle *info = (struct pr_handle *) p;
-  char *t;
-  const char *dname, *from_class;
+  char *t, *dname, *from_class;
 
   t = pop_type (info);
   if (t == NULL)
     return FALSE;
 
-  dname = name;
+  dname = NULL;
   if (info->demangler)
-    {
-      dname = info->demangler (info->abfd, name, DMGL_ANSI | DMGL_PARAMS);
-      if (strcmp (name, dname) == 0)
-	{
-	  free ((char *) dname);
-	  dname = name;
-	}
-    }
+    dname = info->demangler (info->abfd, name, DMGL_ANSI | DMGL_PARAMS);
 
-  if (dname != name)
+  from_class = NULL;
+  if (dname != NULL)
     {
       char *sep;
       sep = strstr (dname, "::");
@@ -2554,14 +2547,9 @@ tg_variable (void *p, const char *name, enum debug_var_kind kind,
 	  from_class = dname;
 	}
       else
-	{
-	  /* Obscure types as vts and type_info nodes.  */
-	  name = dname;
-	  from_class = NULL;
-	}
+	/* Obscure types as vts and type_info nodes.  */
+	name = dname;
     }
-  else
-    from_class = NULL;
 
   fprintf (info->f, "%s\t%s\t0;\"\tkind:v\ttype:%s", name, info->filename, t);
 
@@ -2579,10 +2567,10 @@ tg_variable (void *p, const char *name, enum debug_var_kind kind,
     }
 
   if (from_class)
-    {
-      fprintf (info->f, "\tclass:%s",from_class);
-      free ((char *) dname);
-    }
+    fprintf (info->f, "\tclass:%s", from_class);
+
+  if (dname)
+    free (dname);
 
   fprintf (info->f, "\n");
 
@@ -2597,28 +2585,22 @@ static bfd_boolean
 tg_start_function (void *p, const char *name, bfd_boolean global)
 {
   struct pr_handle *info = (struct pr_handle *) p;
-  const char *dname;
+  char *dname;
 
   if (! global)
     info->stack->flavor = "static";
   else
     info->stack->flavor = NULL;
 
-  dname = name;
+  dname = NULL;
   if (info->demangler)
-    {
-      dname = info->demangler (info->abfd, name, DMGL_ANSI | DMGL_PARAMS);
-      if (strcmp (name, dname) == 0)
-	{
-	  free ((char *) dname);
-	  dname = name;
-	}
-    }
+    dname = info->demangler (info->abfd, name, DMGL_ANSI | DMGL_PARAMS);
 
-  if (! substitute_type (info, dname))
+  if (! substitute_type (info, dname ? dname : name))
     return FALSE;
 
-  if (dname != name)
+  info->stack->method = NULL;
+  if (dname != NULL)
     {
       char *sep;
       sep = strstr (dname, "::");
@@ -2638,8 +2620,6 @@ tg_start_function (void *p, const char *name, bfd_boolean global)
 	*sep = 0;
       /* Obscure functions as type_info function.  */
     }
-  else
-    info->stack->method = NULL;
 
   info->stack->parents = strdup (name);
 
