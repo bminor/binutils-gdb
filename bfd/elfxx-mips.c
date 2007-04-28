@@ -4786,10 +4786,13 @@ mips_elf_create_dynamic_relocation (bfd *output_bfd,
 
   outrel[0].r_offset =
     _bfd_elf_section_offset (output_bfd, info, input_section, rel[0].r_offset);
-  outrel[1].r_offset =
-    _bfd_elf_section_offset (output_bfd, info, input_section, rel[1].r_offset);
-  outrel[2].r_offset =
-    _bfd_elf_section_offset (output_bfd, info, input_section, rel[2].r_offset);
+  if (ABI_64_P (output_bfd))
+    {
+      outrel[1].r_offset =
+	_bfd_elf_section_offset (output_bfd, info, input_section, rel[1].r_offset);
+      outrel[2].r_offset =
+	_bfd_elf_section_offset (output_bfd, info, input_section, rel[2].r_offset);
+    }
 
   if (outrel[0].r_offset == MINUS_ONE)
     /* The relocation field has been deleted.  */

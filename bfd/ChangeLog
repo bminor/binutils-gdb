@@ -1,3 +1,8 @@
+2007-04-28  Sergey Rogozhkin  <rogozhkin@niisi.msk.ru>
+
+	* elfxx-mips.c (mips_elf_create_dynamic_relocation): Don't access
+	memory which we might not own.
+
 2007-04-27  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (elf_xtensa_make_sym_local): Restore deleted function.
