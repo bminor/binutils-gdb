@@ -207,32 +207,6 @@ legacy_virtual_frame_pointer (CORE_ADDR pc,
   *frame_offset = 0;
 }
 
-/* Assume the world is sane, every register's virtual and real size
-   is identical.  */
-
-int
-generic_register_size (int regnum)
-{
-  gdb_assert (regnum >= 0 && regnum < NUM_REGS + NUM_PSEUDO_REGS);
-  return TYPE_LENGTH (register_type (current_gdbarch, regnum));
-}
-
-/* Assume all registers are adjacent.  */
-
-int
-generic_register_byte (int regnum)
-{
-  int byte;
-  int i;
-  gdb_assert (regnum >= 0 && regnum < NUM_REGS + NUM_PSEUDO_REGS);
-  byte = 0;
-  for (i = 0; i < regnum; i++)
-    {
-      byte += generic_register_size (i);
-    }
-  return byte;
-}
-
 
 int
 generic_convert_register_p (int regnum, struct type *type)

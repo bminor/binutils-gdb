@@ -165,7 +165,6 @@ struct gdbarch
   gdbarch_dwarf2_reg_to_regnum_ftype *dwarf2_reg_to_regnum;
   gdbarch_register_name_ftype *register_name;
   gdbarch_register_type_ftype *register_type;
-  gdbarch_deprecated_register_byte_ftype *deprecated_register_byte;
   gdbarch_unwind_dummy_id_ftype *unwind_dummy_id;
   int deprecated_fp_regnum;
   gdbarch_push_dummy_call_ftype *push_dummy_call;
@@ -293,7 +292,6 @@ struct gdbarch startup_gdbarch =
   0,  /* dwarf2_reg_to_regnum */
   0,  /* register_name */
   0,  /* register_type */
-  generic_register_byte,  /* deprecated_register_byte */
   0,  /* unwind_dummy_id */
   -1,  /* deprecated_fp_regnum */
   0,  /* push_dummy_call */
@@ -426,7 +424,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->dwarf_reg_to_regnum = no_op_reg_to_regnum;
   current_gdbarch->sdb_reg_to_regnum = no_op_reg_to_regnum;
   current_gdbarch->dwarf2_reg_to_regnum = no_op_reg_to_regnum;
-  current_gdbarch->deprecated_register_byte = generic_register_byte;
   current_gdbarch->deprecated_fp_regnum = -1;
   current_gdbarch->call_dummy_location = AT_ENTRY_POINT;
   current_gdbarch->print_registers_info = default_print_registers_info;
@@ -552,7 +549,6 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of sdb_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of dwarf2_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of register_type, has predicate */
-  /* Skip verify of deprecated_register_byte, has predicate */
   /* Skip verify of unwind_dummy_id, has predicate */
   /* Skip verify of deprecated_fp_regnum, invalid_p == 0 */
   /* Skip verify of push_dummy_call, has predicate */
@@ -893,24 +889,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: deprecated_reg_struct_has_addr = <0x%lx>\n",
                       (long) current_gdbarch->deprecated_reg_struct_has_addr);
-#ifdef DEPRECATED_REGISTER_BYTE_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_REGISTER_BYTE_P()",
-                      XSTRING (DEPRECATED_REGISTER_BYTE_P ()));
-#endif
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: gdbarch_deprecated_register_byte_p() = %d\n",
-                      gdbarch_deprecated_register_byte_p (current_gdbarch));
-#ifdef DEPRECATED_REGISTER_BYTE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_REGISTER_BYTE(reg_nr)",
-                      XSTRING (DEPRECATED_REGISTER_BYTE (reg_nr)));
-#endif
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: deprecated_register_byte = <0x%lx>\n",
-                      (long) current_gdbarch->deprecated_register_byte);
 #ifdef DEPRECATED_REGISTER_SIZE
   fprintf_unfiltered (file,
                       "gdbarch_dump: DEPRECATED_REGISTER_SIZE # %s\n",
@@ -2257,31 +2235,6 @@ set_gdbarch_register_type (struct gdbarch *gdbarch,
                            gdbarch_register_type_ftype register_type)
 {
   gdbarch->register_type = register_type;
-}
-
-int
-gdbarch_deprecated_register_byte_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_register_byte != generic_register_byte;
-}
-
-int
-gdbarch_deprecated_register_byte (struct gdbarch *gdbarch, int reg_nr)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->deprecated_register_byte != NULL);
-  /* Do not check predicate: gdbarch->deprecated_register_byte != generic_register_byte, allow call.  */
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_register_byte called\n");
-  return gdbarch->deprecated_register_byte (reg_nr);
-}
-
-void
-set_gdbarch_deprecated_register_byte (struct gdbarch *gdbarch,
-                                      gdbarch_deprecated_register_byte_ftype deprecated_register_byte)
-{
-  gdbarch->deprecated_register_byte = deprecated_register_byte;
 }
 
 int

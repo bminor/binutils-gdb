@@ -99,7 +99,6 @@ static int do_timings = 0;
 static char *last_async_command;
 static char *previous_async_command;
 char *mi_error_message;
-static char *old_regs;
 
 extern void _initialize_mi_main (void);
 static enum mi_cmd_result mi_cmd_execute (struct mi_parse *parse);
@@ -110,7 +109,8 @@ static enum mi_cmd_result mi_execute_async_cli_command (char *mi, char *args, in
 
 static void mi_exec_async_cli_cmd_continuation (struct continuation_arg *arg);
 
-static int register_changed_p (int regnum);
+static int register_changed_p (int regnum, struct regcache *,
+			       struct regcache *);
 static int get_register (int regnum, int format);
 
 /* Command implementations.  FIXME: Is this libgdb?  No.  This is the MI
@@ -332,9 +332,19 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
 enum mi_cmd_result
 mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 {
+  static struct regcache *this_regs = NULL;
+  struct regcache *prev_regs;
   int regnum, numregs, changed;
   int i;
   struct cleanup *cleanup;
+
+  /* The last time we visited this function, the current frame's register
+     contents were saved in THIS_REGS.  Move THIS_REGS over to PREV_REGS,
+     and refresh THIS_REGS with the now-current register contents.  */
+
+  prev_regs = this_regs;
+  this_regs = frame_save_as_regcache (get_selected_frame (NULL));
+  cleanup = make_cleanup_regcache_xfree (prev_regs);
 
   /* Note that the test for a valid register must include checking the
      REGISTER_NAME because NUM_REGS may be allocated for the union of
@@ -344,7 +354,7 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 
   numregs = NUM_REGS + NUM_PSEUDO_REGS;
 
-  cleanup = make_cleanup_ui_out_list_begin_end (uiout, "changed-registers");
+  make_cleanup_ui_out_list_begin_end (uiout, "changed-registers");
 
   if (argc == 0)		/* No args, just do all the regs.  */
     {
@@ -355,7 +365,7 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 	  if (REGISTER_NAME (regnum) == NULL
 	      || *(REGISTER_NAME (regnum)) == '\0')
 	    continue;
-	  changed = register_changed_p (regnum);
+	  changed = register_changed_p (regnum, prev_regs, this_regs);
 	  if (changed < 0)
 	    {
 	      do_cleanups (cleanup);
@@ -377,7 +387,7 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 	  && REGISTER_NAME (regnum) != NULL
 	  && *REGISTER_NAME (regnum) != '\000')
 	{
-	  changed = register_changed_p (regnum);
+	  changed = register_changed_p (regnum, prev_regs, this_regs);
 	  if (changed < 0)
 	    {
 	      do_cleanups (cleanup);
@@ -399,23 +409,29 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 }
 
 static int
-register_changed_p (int regnum)
+register_changed_p (int regnum, struct regcache *prev_regs,
+		    struct regcache *this_regs)
 {
-  gdb_byte raw_buffer[MAX_REGISTER_SIZE];
+  struct gdbarch *gdbarch = get_regcache_arch (this_regs);
+  gdb_byte prev_buffer[MAX_REGISTER_SIZE];
+  gdb_byte this_buffer[MAX_REGISTER_SIZE];
 
-  if (! frame_register_read (get_selected_frame (NULL), regnum, raw_buffer))
-    return -1;
-
-  if (memcmp (&old_regs[DEPRECATED_REGISTER_BYTE (regnum)], raw_buffer,
-	      register_size (current_gdbarch, regnum)) == 0)
+  /* Registers not valid in this frame return count as unchanged.  */
+  if (!regcache_valid_p (this_regs, regnum))
     return 0;
 
-  /* Found a changed register.  Return 1.  */
+  /* First time through or after gdbarch change consider all registers as
+     changed.  Same for registers not valid in the previous frame.  */
+  if (!prev_regs || get_regcache_arch (prev_regs) != gdbarch
+      || !regcache_valid_p (prev_regs, regnum))
+    return 1;
 
-  memcpy (&old_regs[DEPRECATED_REGISTER_BYTE (regnum)], raw_buffer,
-	  register_size (current_gdbarch, regnum));
+  /* Get register contents and compare.  */
+  regcache_cooked_read (prev_regs, regnum, prev_buffer);
+  regcache_cooked_read (this_regs, regnum, this_buffer);
 
-  return 1;
+  return memcmp (prev_buffer, this_buffer,
+		 register_size (gdbarch, regnum)) != 0;
 }
 
 /* Return a list of register number and value pairs.  The valid
@@ -1504,20 +1520,6 @@ mi_load_progress (const char *section_name,
 
   xfree (uiout);
   uiout = saved_uiout;
-}
-
-void
-mi_setup_architecture_data (void)
-{
-  old_regs = xmalloc ((NUM_REGS + NUM_PSEUDO_REGS) * MAX_REGISTER_SIZE + 1);
-  memset (old_regs, 0, (NUM_REGS + NUM_PSEUDO_REGS) * MAX_REGISTER_SIZE + 1);
-}
-
-void
-_initialize_mi_main (void)
-{
-  DEPRECATED_REGISTER_GDBARCH_SWAP (old_regs);
-  deprecated_register_gdbarch_swap (NULL, 0, mi_setup_architecture_data);
 }
 
 static void 

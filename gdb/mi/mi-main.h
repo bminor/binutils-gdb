@@ -22,8 +22,6 @@
 #ifndef MI_MAIN_H
 #define MI_MAIN_H
 
-extern void mi_setup_architecture_data (void);
-
 extern void mi_load_progress (const char *section_name,
 			      unsigned long sent_so_far,
 			      unsigned long total_section,

@@ -89,14 +89,6 @@ extern int generic_in_solib_return_trampoline (CORE_ADDR pc, char *name);
 
 extern int generic_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc);
 
-/* Assume that the world is sane, a registers raw and virtual size
-   both match its type.  */
-
-extern int generic_register_size (int regnum);
-
-/* Assume that the world is sane, the registers are all adjacent.  */
-extern int generic_register_byte (int regnum);
-
 /* By default, registers are not convertible.  */
 extern int generic_convert_register_p (int regnum, struct type *type);
 

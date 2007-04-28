@@ -481,39 +481,6 @@ typedef struct type * (gdbarch_register_type_ftype) (struct gdbarch *gdbarch, in
 extern struct type * gdbarch_register_type (struct gdbarch *gdbarch, int reg_nr);
 extern void set_gdbarch_register_type (struct gdbarch *gdbarch, gdbarch_register_type_ftype *register_type);
 
-/* If the value returned by DEPRECATED_REGISTER_BYTE agrees with the
-   register offsets computed using just REGISTER_TYPE, this can be
-   deleted.  See: maint print registers.  NOTE: cagney/2002-05-02: This
-   function with predicate has a valid (callable) initial value.  As a
-   consequence, even when the predicate is false, the corresponding
-   function works.  This simplifies the migration process - old code,
-   calling DEPRECATED_REGISTER_BYTE, doesn't need to be modified. */
-
-#if defined (DEPRECATED_REGISTER_BYTE)
-/* Legacy for systems yet to multi-arch DEPRECATED_REGISTER_BYTE */
-#if !defined (DEPRECATED_REGISTER_BYTE_P)
-#define DEPRECATED_REGISTER_BYTE_P() (1)
-#endif
-#endif
-
-extern int gdbarch_deprecated_register_byte_p (struct gdbarch *gdbarch);
-#if !defined (GDB_TM_FILE) && defined (DEPRECATED_REGISTER_BYTE_P)
-#error "Non multi-arch definition of DEPRECATED_REGISTER_BYTE"
-#endif
-#if !defined (DEPRECATED_REGISTER_BYTE_P)
-#define DEPRECATED_REGISTER_BYTE_P() (gdbarch_deprecated_register_byte_p (current_gdbarch))
-#endif
-
-typedef int (gdbarch_deprecated_register_byte_ftype) (int reg_nr);
-extern int gdbarch_deprecated_register_byte (struct gdbarch *gdbarch, int reg_nr);
-extern void set_gdbarch_deprecated_register_byte (struct gdbarch *gdbarch, gdbarch_deprecated_register_byte_ftype *deprecated_register_byte);
-#if !defined (GDB_TM_FILE) && defined (DEPRECATED_REGISTER_BYTE)
-#error "Non multi-arch definition of DEPRECATED_REGISTER_BYTE"
-#endif
-#if !defined (DEPRECATED_REGISTER_BYTE)
-#define DEPRECATED_REGISTER_BYTE(reg_nr) (gdbarch_deprecated_register_byte (current_gdbarch, reg_nr))
-#endif
-
 /* See gdbint.texinfo, and PUSH_DUMMY_CALL. */
 
 extern int gdbarch_unwind_dummy_id_p (struct gdbarch *gdbarch);

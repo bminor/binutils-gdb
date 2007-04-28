@@ -70,10 +70,6 @@ mi_interpreter_init (void)
 {
   struct mi_interp *mi = XMALLOC (struct mi_interp);
 
-  /* Why is this a part of the mi architecture? */
-
-  mi_setup_architecture_data ();
-
   /* HACK: We need to force stdout/stderr to point at the console.  This avoids
      any potential side effects caused by legacy code that is still
      using the TUI / fputs_unfiltered_hook.  So we set up output channels for

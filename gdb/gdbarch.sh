@@ -461,14 +461,6 @@ f:=:const char *:register_name:int regnr:regnr
 # the register cache should call this function directly; others should
 # use "register_type".
 M::struct type *:register_type:int reg_nr:reg_nr
-# If the value returned by DEPRECATED_REGISTER_BYTE agrees with the
-# register offsets computed using just REGISTER_TYPE, this can be
-# deleted.  See: maint print registers.  NOTE: cagney/2002-05-02: This
-# function with predicate has a valid (callable) initial value.  As a
-# consequence, even when the predicate is false, the corresponding
-# function works.  This simplifies the migration process - old code,
-# calling DEPRECATED_REGISTER_BYTE, doesn't need to be modified.
-F:=:int:deprecated_register_byte:int reg_nr:reg_nr:generic_register_byte:generic_register_byte
 
 # See gdbint.texinfo, and PUSH_DUMMY_CALL.
 M::struct frame_id:unwind_dummy_id:struct frame_info *info:info

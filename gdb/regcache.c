@@ -381,10 +381,15 @@ regcache_dup_no_passthrough (struct regcache *src)
 }
 
 int
-regcache_valid_p (struct regcache *regcache, int regnum)
+regcache_valid_p (const struct regcache *regcache, int regnum)
 {
   gdb_assert (regcache != NULL);
-  gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
+  gdb_assert (regnum >= 0);
+  if (regcache->readonly_p)
+    gdb_assert (regnum < regcache->descr->nr_cooked_registers);
+  else
+    gdb_assert (regnum < regcache->descr->nr_raw_registers);
+
   return regcache->register_valid_p[regnum];
 }
 
@@ -1107,7 +1112,6 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 	  fprintf_unfiltered (file, " %6ld",
 			      regcache->descr->register_offset[regnum]);
 	  if (register_offset != regcache->descr->register_offset[regnum]
-	      || register_offset != DEPRECATED_REGISTER_BYTE (regnum)
 	      || (regnum > 0
 		  && (regcache->descr->register_offset[regnum]
 		      != (regcache->descr->register_offset[regnum - 1]
