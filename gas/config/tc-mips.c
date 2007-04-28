@@ -507,7 +507,7 @@ static int mips_any_noreorder;
    an mfhi/mflo instruction is read in the next two instructions.  */
 static int mips_7000_hilo_fix;
 
-/* The size of the small data section.  */
+/* The size of objects in the small data section.  */
 static unsigned int g_switch_value = 8;
 /* Whether the -G option was used.  */
 static int g_switch_seen = 0;
