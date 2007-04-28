@@ -1,5 +1,12 @@
 2007-04-28  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* hpux-thread.c (hpux_thread_store_registers): Use
+	regcache_raw_collect, not regcache_raw_read.
+	* irix5-nat.c (fetch_core_registers): Use regcache_raw_supply,
+	not regcache_raw_write.
+
+2007-04-28  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbarch.sh: Remove deprecated_register_byte.
 	* gdbarch.c, gdbarch.h: Regenerate.
 	* arch-utils.h (generic_register_size, generic_register_byte): Remove.

@@ -359,7 +359,7 @@ hpux_thread_store_registers (int regno)
 	    deprecated_child_ops.to_store_registers (regno);	/* Let lower layer handle this... */
 	  else if (regno == HPPA_SP_REGNUM)
 	    {
-	      regcache_raw_read (current_regcache, regno, buf);
+	      regcache_raw_collect (current_regcache, regno, buf);
 	      write_memory ((CORE_ADDR) &tcb_ptr->static_ctx.sp, buf,
 			    register_size (current_gdbarch, regno));
 	      tcb_ptr->static_ctx.sp
@@ -367,13 +367,13 @@ hpux_thread_store_registers (int regno)
 	    }
 	  else if (regno == HPPA_PCOQ_HEAD_REGNUM)
 	    {
-	      regcache_raw_read (current_regcache, regno, buf);
+	      regcache_raw_collect (current_regcache, regno, buf);
 	      write_memory (sp - 20, buf,
 			    register_size (current_gdbarch, regno));
 	    }
 	  else
 	    {
-	      regcache_raw_read (current_regcache, regno, buf);
+	      regcache_raw_collect (current_regcache, regno, buf);
 	      write_memory (sp + regmap[regno], buf,
 			    register_size (current_gdbarch, regno));
 	    }

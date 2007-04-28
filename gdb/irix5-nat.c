@@ -255,7 +255,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 
   for (regno = 0; regno < NUM_REGS; regno++)
     {
-      regcache_raw_write (current_regcache, regno, srcp);
+      regcache_raw_supply (current_regcache, regno, srcp);
       srcp += regsize;
     }
 }
