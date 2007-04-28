@@ -1,5 +1,11 @@
 2007-04-28  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* alpha-nat.c (ALPHA_REGSET_BASE, ALPHA_REGSET_UNIQUE): Do not define,
+	inline definition at the places the macros are used.
+	* alpha-linux-nat.c (ALPHA_REGSET_BASE, ALPHA_REGSET_UNIQUE): Likewise.
+
+2007-04-28  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* rs6000-aix-tdep.c: Include "regcache.h", "regset.h", and
 	"gdb_string.h".
 	(rs6000_aix32_reg_offsets, rs6000_aix64_reg_offsets): New variables.

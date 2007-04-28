@@ -30,13 +30,6 @@
 #include <sys/procfs.h>
 #include "gregset.h"
 
-/* Given a pointer to either a gregset_t or fpregset_t, return a
-   pointer to the first register.  */
-#define ALPHA_REGSET_BASE(regsetp)  ((long *) (regsetp))
-
-/* Given a pointer to a gregset_t, locate the UNIQUE value.  */
-#define ALPHA_REGSET_UNIQUE(regsetp)  ((long *)(regsetp) + 32)
-
 /* The address of UNIQUE for ptrace.  */
 #define ALPHA_UNIQUE_PTRACE_ADDR 65
 
@@ -48,21 +41,19 @@
 void
 supply_gregset (gdb_gregset_t *gregsetp)
 {
-  long *regp = ALPHA_REGSET_BASE (gregsetp);
-  void *unique = ALPHA_REGSET_UNIQUE (gregsetp);
+  long *regp = (long *)gregsetp;
 
-  /* PC is in slot 32.  */
-  alpha_supply_int_regs (-1, regp, regp + 31, unique);
+  /* PC is in slot 32, UNIQUE is in slot 33.  */
+  alpha_supply_int_regs (-1, regp, regp + 31, regp + 32);
 }
 
 void
 fill_gregset (gdb_gregset_t *gregsetp, int regno)
 {
-  long *regp = ALPHA_REGSET_BASE (gregsetp);
-  void *unique = ALPHA_REGSET_UNIQUE (gregsetp);
+  long *regp = (long *)gregsetp;
 
-  /* PC is in slot 32.  */
-  alpha_fill_int_regs (regno, regp, regp + 31, unique);
+  /* PC is in slot 32, UNIQUE is in slot 33.  */
+  alpha_fill_int_regs (regno, regp, regp + 31, regp + 32);
 }
 
 /*
@@ -73,7 +64,7 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
 void
 supply_fpregset (gdb_fpregset_t *fpregsetp)
 {
-  long *regp = ALPHA_REGSET_BASE (fpregsetp);
+  long *regp = (long *)fpregsetp;
 
   /* FPCR is in slot 32.  */
   alpha_supply_fp_regs (-1, regp, regp + 31);
@@ -82,7 +73,7 @@ supply_fpregset (gdb_fpregset_t *fpregsetp)
 void
 fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
 {
-  long *regp = ALPHA_REGSET_BASE (fpregsetp);
+  long *regp = (long *)fpregsetp;
 
   /* FPCR is in slot 32.  */
   alpha_fill_fp_regs (regno, regp, regp + 31);
