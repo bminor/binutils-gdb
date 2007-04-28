@@ -1,3 +1,9 @@
+2007-04-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldcref.c (struct cref_hash_entry): Make "demangled" const.
+	(cref_fill_array): Adjust for changed demangler.
+	* ldlang.c (lang_one_common): Likewise.
+
 2007-04-27  Nathan Froyd  <froydnj@codesourcery.com>
 
 	* emulparams/elf32_sparc.sh: Update comments.

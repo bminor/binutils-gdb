@@ -5269,9 +5269,17 @@ lang_one_common (struct bfd_link_hash_entry *h, void *info)
 
       name = bfd_demangle (output_bfd, h->root.string,
 			   DMGL_ANSI | DMGL_PARAMS);
-      minfo ("%s", name);
-      len = strlen (name);
-      free (name);
+      if (name == NULL)
+	{
+	  minfo ("%s", h->root.string);
+	  len = strlen (h->root.string);
+	}
+      else
+	{
+	  minfo ("%s", name);
+	  len = strlen (name);
+	  free (name);
+	}
 
       if (len >= 19)
 	{
