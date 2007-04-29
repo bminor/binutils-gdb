@@ -574,14 +574,6 @@ regcache_raw_write_unsigned (struct regcache *regcache, int regnum,
 }
 
 void
-deprecated_read_register_gen (int regnum, gdb_byte *buf)
-{
-  gdb_assert (current_regcache != NULL);
-  gdb_assert (current_regcache->descr->gdbarch == current_gdbarch);
-  regcache_cooked_read (current_regcache, regnum, buf);
-}
-
-void
 regcache_cooked_read (struct regcache *regcache, int regnum, gdb_byte *buf)
 {
   gdb_assert (regnum >= 0);
@@ -682,14 +674,6 @@ regcache_raw_write (struct regcache *regcache, int regnum,
 	  regcache->descr->sizeof_register[regnum]);
   regcache->register_valid_p[regnum] = 1;
   target_store_registers (regnum);
-}
-
-void
-deprecated_write_register_gen (int regnum, gdb_byte *buf)
-{
-  gdb_assert (current_regcache != NULL);
-  gdb_assert (current_regcache->descr->gdbarch == current_gdbarch);
-  regcache_cooked_write (current_regcache, regnum, buf);
 }
 
 void
@@ -806,7 +790,9 @@ ULONGEST
 read_register (int regnum)
 {
   gdb_byte *buf = alloca (register_size (current_gdbarch, regnum));
-  deprecated_read_register_gen (regnum, buf);
+  gdb_assert (current_regcache != NULL);
+  gdb_assert (current_regcache->descr->gdbarch == current_gdbarch);
+  regcache_cooked_read (current_regcache, regnum, buf);
   return (extract_unsigned_integer (buf, register_size (current_gdbarch, regnum)));
 }
 
@@ -841,7 +827,9 @@ write_register (int regnum, LONGEST val)
   size = register_size (current_gdbarch, regnum);
   buf = alloca (size);
   store_signed_integer (buf, size, (LONGEST) val);
-  deprecated_write_register_gen (regnum, buf);
+  gdb_assert (current_regcache != NULL);
+  gdb_assert (current_regcache->descr->gdbarch == current_gdbarch);
+  regcache_cooked_write (current_regcache, regnum, buf);
 }
 
 void

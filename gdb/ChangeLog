@@ -1,5 +1,20 @@
 2007-04-28  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* regcache.c (deprecated_read_register_gen): Remove, inline ...
+	(read_register): ... here.
+	(deprecated_write_register_gen): Remove, inline ...
+	(write_register): ... here.
+	* regcache.h (deprecated_read_register_gen): Remove prototype.
+	(deprecated_write_register_gen): Likewise.
+
+	* remote-sim.c (gdbsim_store_register): Replace call to
+	deprecated_read_register_gen with regcache_cooked_read.
+	* target.c (debug_print_register): Replace calls to
+	deprecated_read_register_gen and read_register with
+	regcache_cooked_read.
+
+2007-04-28  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* hpux-thread.c (hpux_thread_store_registers): Use
 	regcache_raw_collect, not regcache_raw_read.
 	* irix5-nat.c (fetch_core_registers): Use regcache_raw_supply,

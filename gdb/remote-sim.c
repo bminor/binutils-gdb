@@ -353,7 +353,7 @@ gdbsim_store_register (int regno)
     {
       char tmp[MAX_REGISTER_SIZE];
       int nr_bytes;
-      deprecated_read_register_gen (regno, tmp);
+      regcache_cooked_read (current_regcache, regno, tmp);
       nr_bytes = sim_store_register (gdbsim_desc,
 				     REGISTER_SIM_REGNO (regno),
 				     tmp, register_size (current_gdbarch, regno));

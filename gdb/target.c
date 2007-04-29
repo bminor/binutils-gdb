@@ -2160,19 +2160,19 @@ debug_print_register (const char * func, int regno)
     fprintf_unfiltered (gdb_stdlog, "(%d)", regno);
   if (regno >= 0)
     {
-      int i;
+      int i, size = register_size (current_gdbarch, regno);
       unsigned char buf[MAX_REGISTER_SIZE];
-      deprecated_read_register_gen (regno, buf);
+      regcache_cooked_read (current_regcache, regno, buf);
       fprintf_unfiltered (gdb_stdlog, " = ");
-      for (i = 0; i < register_size (current_gdbarch, regno); i++)
+      for (i = 0; i < size; i++)
 	{
 	  fprintf_unfiltered (gdb_stdlog, "%02x", buf[i]);
 	}
-      if (register_size (current_gdbarch, regno) <= sizeof (LONGEST))
+      if (size <= sizeof (LONGEST))
 	{
+	  ULONGEST val = extract_unsigned_integer (buf, size);
 	  fprintf_unfiltered (gdb_stdlog, " 0x%s %s",
-			      paddr_nz (read_register (regno)),
-			      paddr_d (read_register (regno)));
+			      paddr_nz (val), paddr_d (val));
 	}
     }
   fprintf_unfiltered (gdb_stdlog, "\n");
