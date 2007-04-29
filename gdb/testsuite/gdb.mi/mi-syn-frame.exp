@@ -37,7 +37,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 }
 
 mi_gdb_exit
-mi_gdb_start separate-inferior-tty
+mi_gdb_start
 mi_delete_breakpoints
 mi_gdb_reinitialize_dir $srcdir/$subdir
 mi_gdb_load ${binfile}
@@ -61,8 +61,7 @@ mi_gdb_test "402-stack-list-frames" "402\\^done,stack=\\\[frame=\{level=\"0\",ad
 #
 mi_gdb_test "403-exec-continue" \
   "403\\^running" \
-  "testing exec continue" \
-  "hi in foo\[\r\n\]\+"
+  "testing exec continue"
 
 mi_gdb_test "" "403\\*stopped" "finished exec continue"
 
@@ -81,8 +80,7 @@ mi_gdb_test "405-break-insert subroutine" \
 
 mi_gdb_test "406-data-evaluate-expression have_a_very_merry_interrupt()" \
   "\\&\"The program being debugged stopped while in a function called from GDB.\\\\n\"\[\r\n\]+\\&\"When the function \\(have_a_very_merry_interrupt\\) is done executing, GDB will silently\\\\n\"\[\r\n\]+\\&\"stop \\(instead of continuing to evaluate the expression containing\\\\n\"\[\r\n\]+\\&\"the function call\\).\\\\n\"\[\r\n\]+406\\^error,msg=\"The program being debugged stopped while in a function called from GDB.\\\\nWhen the function \\(have_a_very_merry_interrupt\\) is done executing, GDB will silently\\\\nstop \\(instead of continuing to evaluate the expression containing\\\\nthe function call\\).\"" \
-  "data evaluate expression" \
-  "Waiting to get a signal\[\r\n\]+"
+  "data evaluate expression"
 
 # We should have both a signal handler and a call dummy frame
 # in this next output.
@@ -106,8 +104,7 @@ mi_gdb_test "409-stack-list-frames 0 0" \
 
 mi_gdb_test "410-data-evaluate-expression bar()" \
   "\\&\"The program being debugged was signaled while in a function called from GDB.\\\\n\"\[\r\n\]+\\&\"GDB remains in the frame where the signal was received.\\\\n\"\[\r\n\]+\\&\"To change this behavior use \\\\\"set unwindonsignal on\\\\\"\\\\n\"\[\r\n\]+\\&\"Evaluation of the expression containing the function \\(bar\\) will be abandoned.\\\\n\"\[\r\n\]+410\\^error,msg=\"The program being debugged was signaled while in a function called from GDB.\\\\nGDB remains in the frame where the signal was received.\\\\nTo change this behavior use \\\\\"set unwindonsignal on\\\\\"\\\\nEvaluation of the expression containing the function \\(bar\\) will be abandoned.\"" \
-  "call inferior function which raises exception" \
-  "hi in bar\[\r\n\]+"
+  "call inferior function which raises exception"
 
 mi_gdb_test "411-stack-list-frames" "411\\^done,stack=\\\[frame=\{level=\"0\",addr=\"$hex\",func=\"bar\",file=\".*mi-syn-frame.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$decimal\"},frame=\{level=\"1\",addr=\"$hex\",func=\"<function called from gdb>\"\},frame=\{level=\"2\",addr=\"$hex\",func=\"main\",file=\".*mi-syn-frame.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$decimal\"}.*\\\]" "backtrace from inferior function at exception"
 

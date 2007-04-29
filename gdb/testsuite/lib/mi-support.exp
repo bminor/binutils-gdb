@@ -732,15 +732,19 @@ proc mi_gdb_test { args } {
     # If the GDB output matched, compare the inferior output.
     if { $result == 0 } {
 	if [ info exists ipattern ] {
-	    global mi_inferior_spawn_id
-	    expect {
-		-i $mi_inferior_spawn_id -re "$ipattern" {
-		    pass "inferior_output:$message"
+	    if { ![target_info exists gdb,noinferiorio] } {
+		global mi_inferior_spawn_id
+		expect {
+		    -i $mi_inferior_spawn_id -re "$ipattern" {
+			pass "$message inferior output"
+		    }
+		    timeout {
+			fail "$message inferior output (timeout)"
+			set result 1
+		    }
 		}
-		timeout {
-		    fail "inferior output timeout"
-		    set result 1
-		}
+	    } else {
+		unsupported "$message inferior output"
 	    }
         }
     }
