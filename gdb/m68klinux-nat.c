@@ -51,6 +51,9 @@
 #include "floatformat.h"
 
 #include "target.h"
+
+/* Prototypes for supply_gregset etc. */
+#include "gregset.h"
 
 /* This table must line up with REGISTER_NAME in "m68k-tdep.c".  */
 static const int regmap[] =
@@ -238,20 +241,6 @@ old_store_inferior_registers (int regno)
    (elf_gregset_t *), unpack the register contents and supply
    them as gdb's idea of the current register values. */
 
-
-/* Note both m68k-tdep.c and m68klinux-nat.c contain definitions
-   for supply_gregset and supply_fpregset. The definitions
-   in m68k-tdep.c are valid if USE_PROC_FS is defined. Otherwise,
-   the definitions in m68klinux-nat.c will be used. This is a 
-   bit of a hack. The supply_* routines do not belong in 
-   *_tdep.c files. But, there are several lynx ports that currently 
-   depend on these definitions. */
-
-#ifndef USE_PROC_FS
-
-/* Prototypes for supply_gregset etc. */
-#include "gregset.h"
-
 void
 supply_gregset (elf_gregset_t *gregsetp)
 {
@@ -412,8 +401,6 @@ store_fpregs (int tid, int regno)
 
 static void fetch_fpregs (int tid) {}
 static void store_fpregs (int tid, int regno) {}
-
-#endif
 
 #endif
 

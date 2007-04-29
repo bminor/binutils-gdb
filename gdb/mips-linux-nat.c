@@ -28,6 +28,7 @@
 #include "mips-linux-tdep.h"
 
 #include "gdb_proc_service.h"
+#include "gregset.h"
 
 #include <sys/ptrace.h>
 
@@ -171,6 +172,45 @@ ps_get_thread_area (const struct ps_prochandle *ph,
 
   return PS_OK;
 }
+
+/* Wrapper functions.  These are only used by libthread_db.  */
+
+void
+supply_gregset (gdb_gregset_t *gregsetp)
+{
+  if (mips_isa_regsize (current_gdbarch) == 4)
+    mips_supply_gregset ((void *) gregsetp);
+  else
+    mips64_supply_gregset ((void *) gregsetp);
+}
+
+void
+fill_gregset (gdb_gregset_t *gregsetp, int regno)
+{
+  if (mips_isa_regsize (current_gdbarch) == 4)
+    mips_fill_gregset ((void *) gregsetp, regno);
+  else
+    mips64_fill_gregset ((void *) gregsetp, regno);
+}
+
+void
+supply_fpregset (gdb_fpregset_t *fpregsetp)
+{
+  if (mips_isa_regsize (current_gdbarch) == 4)
+    mips_supply_fpregset ((void *) fpregsetp);
+  else
+    mips64_supply_fpregset ((void *) fpregsetp);
+}
+
+void
+fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
+{
+  if (mips_isa_regsize (current_gdbarch) == 4)
+    mips_fill_fpregset ((void *) fpregsetp, regno);
+  else
+    mips64_fill_fpregset ((void *) fpregsetp, regno);
+}
+
 
 /* Fetch REGNO (or all registers if REGNO == -1) from the target
    using PTRACE_GETREGS et al.  */

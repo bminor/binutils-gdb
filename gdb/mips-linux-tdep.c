@@ -979,48 +979,6 @@ mips_linux_n32n64_sigframe_init (const struct tramp_frame *self,
 				     func));
 }
 
-/* Wrapper functions.  These are only used by libthread_db.  */
-
-void
-supply_gregset (mips_elf_gregset_t *gregsetp)
-{
-  if (mips_isa_regsize (current_gdbarch) == 4)
-    mips_supply_gregset (gregsetp);
-  else
-    mips64_supply_gregset ((void *) gregsetp);
-}
-
-void
-fill_gregset (mips_elf_gregset_t *gregsetp, int regno)
-{
-  if (mips_isa_regsize (current_gdbarch) == 4)
-    mips_fill_gregset (gregsetp, regno);
-  else
-    mips64_fill_gregset ((void *) gregsetp, regno);
-}
-
-/* Likewise, unpack an elf_fpregset_t.  */
-
-void
-supply_fpregset (mips_elf_fpregset_t *fpregsetp)
-{
-  if (mips_isa_regsize (current_gdbarch) == 4)
-    mips_supply_fpregset (fpregsetp);
-  else
-    mips64_supply_fpregset ((void *) fpregsetp);
-}
-
-/* Likewise, pack one or all floating point registers into an
-   elf_fpregset_t.  */
-
-void
-fill_fpregset (mips_elf_fpregset_t *fpregsetp, int regno)
-{
-  if (mips_isa_regsize (current_gdbarch) == 4)
-    mips_fill_fpregset (fpregsetp, regno);
-  else
-    mips64_fill_fpregset ((void *) fpregsetp, regno);
-}
 
 /* Initialize one of the GNU/Linux OS ABIs.  */
 
