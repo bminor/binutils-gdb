@@ -50,12 +50,14 @@ gdb_test "set print sevenbit-strings" ".*"
 
 set bpmain "Breakpoint .* file .*jmain.java, line 5\."
 
+# Where GCC PR 16439 puts the breakpoint.
+set earlybpmain "Breakpoint .* file .*jmain.java, line 4\."
+
 gdb_load "${binfile}"
 setup_kfail *-*-* java/1567
 gdb_test "break main" "${bpmain}"
 
 # Check that an unqualified "main" works.
-
 
 gdb_load "${binfile}"
 setup_kfail *-*-* java/1565
@@ -63,5 +65,31 @@ gdb_test "break jmain.main" "${bpmain}"
 
 # Check that a fully qualified "main" works.
 gdb_load "${binfile}"
-setup_xfail *-*-* gcc/16439
-gdb_test "break \'${testfile}.main(java.lang.String\[\])\'" "${bpmain}"
+set cmd "break \'${testfile}.main(java.lang.String\[\])\'"
+set msg $cmd
+gdb_test_multiple $cmd $msg {
+    -re "${bpmain}\r\n$gdb_prompt $" {
+	pass $msg
+    }
+    -re "${earlybpmain}\r\n$gdb_prompt $" {
+	setup_xfail *-*-* gcc/16439
+	fail $msg
+    }
+    -re "Make breakpoint pending.* \\(y or \\\[n\\\]\\) $" {
+	gdb_test "n" "" ""
+
+	# Check again with a method signature at the end.
+	set cmd "break \'${testfile}.main(java.lang.String\[\])void\'"
+	set msg $cmd
+	gdb_test_multiple $cmd $msg {
+	    -re "${bpmain}\r\n$gdb_prompt $" {
+		pass $msg
+	    }
+	    -re "${earlybpmain}\r\n$gdb_prompt $" {
+		setup_xfail *-*-* gcc/16439
+		fail $msg
+	    }
+	}
+    }
+}
+
