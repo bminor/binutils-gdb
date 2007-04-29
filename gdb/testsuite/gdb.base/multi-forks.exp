@@ -18,7 +18,7 @@ if $tracelevel then {
 	strace $tracelevel
 	}
 
-if { ![isnative] } then {
+if { [is_remote target] || ![isnative] } then {
     continue
 }
 

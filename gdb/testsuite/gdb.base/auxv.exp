@@ -50,7 +50,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 # Make it the working directory for gdb and its child.
 set coredir "${objdir}/${subdir}/coredir.[getpid]"
 file mkdir $coredir
-set core_works [isnative]
+set core_works [expr [isnative] && ! [is_remote target]]
 
 # Run GDB on the test program up to where it will dump core.
 

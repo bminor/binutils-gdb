@@ -1,3 +1,9 @@
+2007-04-29  Markus Deuling  <deuling@de.ibm.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/auxv.exp (core_works): Also check is_remote.
+	* gdb.base/checkpoint.exp, gdb.base/multi-forks.exp: Likewise.
+
 2007-04-25  Vladimir Prus  <vladimir@codesourcery.com>
 	
 	* gdb.base/sigaltstack.exp: Use 'srcfile' in error
