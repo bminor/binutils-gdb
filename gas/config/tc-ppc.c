@@ -1516,7 +1516,7 @@ ppc_insert_operand (insn, operand, val, file, line)
 {
   long min, max, right;
   offsetT test;
-  
+
   max = operand->bitm;
   right = max & -max;
   min = 0;
@@ -1554,8 +1554,7 @@ ppc_insert_operand (insn, operand, val, file, line)
   else
     test = val;
 
-  if (test < (offsetT) min
-      || test > (offsetT) max
+  if ((min <= max && (test < (offsetT) min || test > (offsetT) max))
       || (test & (right - 1)) != 0)
     as_bad_value_out_of_range (_("operand"),
 			       test, (offsetT) min, (offsetT) max, file, line);

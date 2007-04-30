@@ -317,7 +317,7 @@ const struct powerpc_operand powerpc_operands[] =
      description in opcode/ppc.h for what this means.  */
 #define MBE ME + 1
   { 0x1f, 6, NULL, NULL, PPC_OPERAND_OPTIONAL | PPC_OPERAND_NEXT },
-  { 0xff, 0, insert_mbe, extract_mbe, 0 },
+  { -1, 0, insert_mbe, extract_mbe, 0 },
 
   /* The MB or ME field in an MD or MDS form instruction.  The high
      bit is wrapped to the low end.  */
