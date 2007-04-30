@@ -34,6 +34,12 @@ static int non_overlay_stubs = 0;
 /* Whether to emit symbols for stubs.  */
 static int emit_stub_syms = 0;
 
+/* Non-zero to perform stack space analysis.  */
+static int stack_analysis = 0;
+
+/* Whether to emit symbols with stack requirements for each function.  */
+static int emit_stack_syms = 0;
+
 /* Range of valid addresses for loadable sections.  */
 static bfd_vma local_store_lo = 0;
 static bfd_vma local_store_hi = 0x3ffff;
@@ -70,7 +76,8 @@ spu_after_open (void)
   if (is_spu_target ()
       && !link_info.relocatable
       && link_info.input_bfds != NULL
-      && !spu_elf_create_sections (output_bfd, &link_info))
+      && !spu_elf_create_sections (output_bfd, &link_info,
+				   stack_analysis, emit_stack_syms))
     einfo ("%X%P: can not create note section: %E\n");
 
   gld${EMULATION_NAME}_after_open ();
@@ -187,7 +194,7 @@ spu_before_allocation (void)
 	  asection *stub, *ovtab;
 
 	  if (!spu_elf_size_stubs (output_bfd, &link_info, non_overlay_stubs,
-				   &stub, &ovtab, &toe))
+				   stack_analysis, &stub, &ovtab, &toe))
 	    einfo ("%X%P: can not size overlay stubs: %E\n");
 
 	  if (stub != NULL)
@@ -396,6 +403,8 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_SPU_STUB_SYMS		(OPTION_SPU_NO_OVERLAYS + 1)
 #define OPTION_SPU_NON_OVERLAY_STUBS	(OPTION_SPU_STUB_SYMS + 1)
 #define OPTION_SPU_LOCAL_STORE		(OPTION_SPU_NON_OVERLAY_STUBS + 1)
+#define OPTION_SPU_STACK_ANALYSIS	(OPTION_SPU_LOCAL_STORE + 1)
+#define OPTION_SPU_STACK_SYMS		(OPTION_SPU_STACK_ANALYSIS + 1)
 '
 
 PARSE_AND_LIST_LONGOPTS='
@@ -404,6 +413,8 @@ PARSE_AND_LIST_LONGOPTS='
   { "emit-stub-syms", no_argument, NULL, OPTION_SPU_STUB_SYMS },
   { "extra-overlay-stubs", no_argument, NULL, OPTION_SPU_NON_OVERLAY_STUBS },
   { "local-store", required_argument, NULL, OPTION_SPU_LOCAL_STORE },
+  { "stack-analysis", no_argument, NULL, OPTION_SPU_STACK_ANALYSIS },
+  { "emit-stack-syms", no_argument, NULL, OPTION_SPU_STACK_SYMS },
 '
 
 PARSE_AND_LIST_OPTIONS='
@@ -412,7 +423,9 @@ PARSE_AND_LIST_OPTIONS='
   --no-overlays         No overlay handling.\n\
   --emit-stub-syms      Add symbols on overlay call stubs.\n\
   --extra-overlay-stubs Add stubs on all calls out of overlay regions.\n\
-  --local-store=lo:hi   Valid address range.\n"
+  --local-store=lo:hi   Valid address range.\n\
+  --stack-analysis      Estimate maximum stack requirement.\n\
+  --emit-stack-syms     Add __stack_func giving stack needed for each func.\n"
 		   ));
 '
 
@@ -445,6 +458,14 @@ PARSE_AND_LIST_ARGS_CASES='
 	  }
 	einfo (_("%P%F: invalid --local-store address range `%s'\''\n"), optarg);
       }
+      break;
+
+    case OPTION_SPU_STACK_ANALYSIS:
+      stack_analysis = 1;
+      break;
+
+    case OPTION_SPU_STACK_SYMS:
+      emit_stack_syms = 1;
       break;
 '
 

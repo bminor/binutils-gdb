@@ -161,6 +161,8 @@ static struct bfd_link_callbacks link_callbacks =
   unattached_reloc,
   notice,
   einfo,
+  info_msg,
+  minfo,
   ldlang_override_segment_assignment
 };
 

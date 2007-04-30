@@ -1,3 +1,17 @@
+2007-04-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldmain.c (link_callbacks): Init info and minfo fields.
+	* ldmisc.c (minfo): Do nothing if no map file.
+	* emultempl/spuelf.em (stack_analysis, emit_stack_syms): New vars.
+	(spu_after_open): Adjust spu_elf_create_sections call.
+	(spu_before_allocation): Likewise for spu_elf_size_stubs.
+	(OPTION_SPU_STACK_ANALYSIS, OPTION_SPU_STACK_SYMS): Define.
+	(PARSE_AND_LIST_LONGOPTS): Add new entries.
+	(PARSE_AND_LIST_OPTIONS, PARSE_AND_LIST_ARGS_CASES): Likewise.
+	* gen-doc.texi: Add @set for SPU and other missing targets.
+	* ld.texinfo: Update man page selection to match gen-doc.texi.
+	Document SPU features.
+
 2007-04-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldcref.c (struct cref_hash_entry): Make "demangled" const.

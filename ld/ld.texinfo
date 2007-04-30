@@ -20,33 +20,18 @@
 @c Configure for the generation of man pages
 @set UsesEnvVars
 @set GENERIC
-@set ARC
 @set ARM
-@set D10V
-@set D30V
-@set H8/300
-@set H8/500
+@set H8300
 @set HPPA
-@set I370
-@set I80386
-@set I860
 @set I960
-@set M32R
 @set M68HC11
-@set M680X0
-@set MCORE
-@set MIPS
 @set MMIX
 @set MSP430
-@set PDP11
-@set PJ
 @set POWERPC
 @set POWERPC64
-@set SH
-@set SPARC
-@set TIC54X
-@set V850
-@set VAX
+@set Renesas
+@set SPU
+@set TICOFF
 @set WIN32
 @set XTENSA
 @end ifset
@@ -174,6 +159,9 @@ section entitled ``GNU Free Documentation License''.
 @end ifset
 @ifset POWERPC64
 * PowerPC64 ELF64::             ld and PowerPC64 64-bit ELF Support
+@end ifset
+@ifset SPU
+* SPU ELF::			ld and SPU ELF Support
 @end ifset
 @ifset TICOFF
 * TI COFF::                     ld and the TI COFF
@@ -5235,6 +5223,9 @@ functionality are not listed.
 @ifset POWERPC64
 * PowerPC64 ELF64::		@command{ld} and PowerPC64 64-bit ELF Support
 @end ifset
+@ifset SPU
+* SPU ELF::			@command{ld} and SPU ELF Support
+@end ifset
 @ifset TICOFF
 * TI COFF::                     @command{ld} and TI COFF
 @end ifset
@@ -5842,6 +5833,87 @@ calls.  @command{ld} does not split apart input sections, so cannot
 help if a single input file has a @code{.toc} section that exceeds
 64K, most likely from linking multiple files with @command{ld -r}.
 Use this option to turn off this feature.
+@end table
+
+@ifclear GENERIC
+@lowersections
+@end ifclear
+@end ifset
+
+@ifset SPU
+@ifclear GENERIC
+@raisesections
+@end ifclear
+
+@node SPU ELF
+@section @command{ld} and SPU ELF Support
+
+@cindex SPU ELF options
+@table @option
+
+@cindex SPU plugins
+@kindex --plugin
+@item --plugin
+This option marks an executable as a PIC plugin module.
+
+@cindex SPU overlays
+@kindex --no-overlays
+@item --no-overlays
+Normally, @command{ld} recognizes calls to functions within overlay
+regions, and redirects such calls to an overlay manager via a stub.
+@command{ld} also provides a built-in overlay manager.  This option
+turns off all this special overlay handling.
+
+@cindex SPU overlay stub symbols
+@kindex --emit-stub-syms
+@item --emit-stub-syms
+This option causes @command{ld} to label overlay stubs with a local
+symbol that encodes the stub type and destination.
+
+@cindex SPU extra overlay stubs
+@kindex --extra-overlay-stubs
+@item --extra-overlay-stubs
+This option causes @command{ld} to add overlay call stubs on all
+function calls out of overlay regions.  Normally stubs are not added
+on calls to non-overlay regions.
+
+@cindex SPU local store size
+@kindex --local-store=lo:hi
+@item --local-store=lo:hi
+@command{ld} usually checks that a final executable for SPU fits in
+the address range 0 to 256k.  This option may be used to change the
+range.  Disable the check entirely with @option{--local-store=0:0}.
+
+@cindex SPU 
+@kindex --stack-analysis
+@item --stack-analysis
+SPU local store space is limited.  Over-allocation of stack space
+unnecessarily limits space available for code and data, while
+under-allocation results in runtime failures.  If given this option,
+@command{ld} will provide an estimate of maximum stack usage.
+@command{ld} does this by examining symbols in code sections to
+determine the extents of functions, and looking at function prologues
+for stack adjusting instructions.  A call-graph is created by looking
+for relocations on branch instructions.  The graph is then searched
+for the maximum stack usage path.  Note that this analysis does not
+find calls made via function pointers, and does not handle recursion
+and other cycles in the call graph.  Stack usage may be
+under-estimated if your code makes such calls.  Also, stack usage for
+dynamic allocation, e.g. alloca, will not be detected.  If a link map
+is requested, detailed information about each function's stack usage
+and calls will be given.
+
+@cindex SPU 
+@kindex --emit-stack-syms
+@item --emit-stack-syms
+This option, if given along with @option{--stack-analysis} will result
+in @command{ld} emitting stack sizing symbols for each function.
+These take the form @code{__stack_<function_name>} for global
+functions, and @code{__stack_<number>_<function_name>} for static
+functions.  @code{<number>} is the section id in hex.  The value of
+such symbols is the stack requirement for the corresponding function.
+The symbol size will be zero, type @code{STT_NOTYPE}, binding
+@code{STB_LOCAL}, and section @code{SHN_ABS}. 
 @end table
 
 @ifclear GENERIC

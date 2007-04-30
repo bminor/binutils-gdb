@@ -1,3 +1,30 @@
+2007-04-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (struct spu_link_hash_table): Add stack_analysis
+	and emit_stack_syms bitfields.
+	(get_sym_h): Read all symbols if stack analysis will be done.
+	(spu_elf_create_sections): Add stack_analysis and emit_stack_syms
+	params, and stash in hash table.
+	(is_hint): Split off from..
+	(is_branch): ..here.  Adjust callers.
+	(spu_elf_size_stubs): Add stack_analysis param.  Arrange to read
+	and keep all syms.
+	(write_one_stub): Fix mem leak.
+	(find_function_stack_adjust): New function.
+	(sort_syms_syms, sort_syms_psecs): New vars.
+	(sort_syms): New function.
+	(struct call_info, struct function_info): New.
+	(struct spu_elf_stack_info): New.
+	(alloc_stack_info, maybe_insert_function, func_name): New functions.
+	(is_nop, insns_at_end, check_function_ranges): Likewise.
+	(find_function, insert_callee, mark_functions_via_relocs): Likewise.
+	(pasted_function, interesting_section, discover_functions): Likewise.
+	(mark_non_root, call_graph_traverse, build_call_tree): Likewise.
+	(sum_stack, spu_elf_stack_analysis, spu_elf_final_link): Likewise.
+	(bfd_elf32_bfd_final_link): Define.
+	* elf32-spu.h (struct _spu_elf_section_data): Add stack_info field.
+	(spu_elf_create_sections, spu_elf_size_stubs): Update prototypes.
+
 2007-04-28  Sergey Rogozhkin  <rogozhkin@niisi.msk.ru>
 
 	* elfxx-mips.c (mips_elf_create_dynamic_relocation): Don't access
