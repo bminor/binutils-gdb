@@ -1,3 +1,13 @@
+2007-04-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (md_assemble): Use register_prefix in
+	error/warning message.
+	(check_byte_reg): Likewise.
+	(check_long_reg): Likewise.
+	(check_qword_reg): Likewise.
+	(check_word_reg): Likewise.
+	(process_operands): Likewise.
+
 2007-04-30  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 4436

@@ -1835,8 +1835,11 @@ md_assemble (line)
 
 	  for (x = 0; x < i.operands; x++)
 	    if (i.op[x].regs->reg_num != x)
-	      as_bad (_("can't use register '%%%s' as operand %d in '%s'."),
-		      i.op[x].regs->reg_name, x + 1, i.tm.name);
+	      as_bad (_("can't use register '%s%s' as operand %d in '%s'."),
+		      register_prefix,
+		      i.op[x].regs->reg_name,
+		      x + 1,
+		      i.tm.name);
 	  i.operands = 0;
  	}
 
@@ -1909,9 +1912,9 @@ md_assemble (line)
 	    {
 	      /* In case it is "hi" register, give up.  */
 	      if (i.op[x].regs->reg_num > 3)
-		as_bad (_("can't encode register '%%%s' in an "
+		as_bad (_("can't encode register '%s%s' in an "
 			  "instruction requiring REX prefix."),
-			i.op[x].regs->reg_name);
+			register_prefix, i.op[x].regs->reg_name);
 
 	      /* Otherwise it is equivalent to the extended register.
 		 Since the encoding doesn't change this is merely
@@ -3052,10 +3055,12 @@ check_byte_reg (void)
 #if REGISTER_WARNINGS
 	  if (!quiet_warnings
 	      && (i.tm.operand_types[op] & InOutPortReg) == 0)
-	    as_warn (_("using `%%%s' instead of `%%%s' due to `%c' suffix"),
+	    as_warn (_("using `%s%s' instead of `%s%s' due to `%c' suffix"),
+		     register_prefix,
 		     (i.op[op].regs + (i.types[op] & Reg16
 				       ? REGNAM_AL - REGNAM_AX
 				       : REGNAM_AL - REGNAM_EAX))->reg_name,
+		     register_prefix,
 		     i.op[op].regs->reg_name,
 		     i.suffix);
 #endif
@@ -3067,7 +3072,8 @@ check_byte_reg (void)
 			 | Control | Debug | Test
 			 | FloatReg | FloatAcc))
 	{
-	  as_bad (_("`%%%s' not allowed with `%s%c'"),
+	  as_bad (_("`%s%s' not allowed with `%s%c'"),
+		  register_prefix,
 		  i.op[op].regs->reg_name,
 		  i.tm.name,
 		  i.suffix);
@@ -3088,7 +3094,8 @@ check_long_reg (void)
     if ((i.types[op] & Reg8) != 0
 	&& (i.tm.operand_types[op] & (Reg16 | Reg32 | Acc)) != 0)
       {
-	as_bad (_("`%%%s' not allowed with `%s%c'"),
+	as_bad (_("`%s%s' not allowed with `%s%c'"),
+		register_prefix,
 		i.op[op].regs->reg_name,
 		i.tm.name,
 		i.suffix);
@@ -3110,8 +3117,10 @@ check_long_reg (void)
 	  }
 #if REGISTER_WARNINGS
 	else
-	  as_warn (_("using `%%%s' instead of `%%%s' due to `%c' suffix"),
+	  as_warn (_("using `%s%s' instead of `%s%s' due to `%c' suffix"),
+		   register_prefix,
 		   (i.op[op].regs + REGNAM_EAX - REGNAM_AX)->reg_name,
+		   register_prefix,
 		   i.op[op].regs->reg_name,
 		   i.suffix);
 #endif
@@ -3139,7 +3148,8 @@ check_qword_reg (void)
     if ((i.types[op] & Reg8) != 0
 	&& (i.tm.operand_types[op] & (Reg16 | Reg32 | Acc)) != 0)
       {
-	as_bad (_("`%%%s' not allowed with `%s%c'"),
+	as_bad (_("`%s%s' not allowed with `%s%c'"),
+		register_prefix,
 		i.op[op].regs->reg_name,
 		i.tm.name,
 		i.suffix);
@@ -3170,7 +3180,8 @@ check_word_reg (void)
     if ((i.types[op] & Reg8) != 0
 	&& (i.tm.operand_types[op] & (Reg16 | Reg32 | Acc)) != 0)
       {
-	as_bad (_("`%%%s' not allowed with `%s%c'"),
+	as_bad (_("`%s%s' not allowed with `%s%c'"),
+		register_prefix,
 		i.op[op].regs->reg_name,
 		i.tm.name,
 		i.suffix);
@@ -3192,8 +3203,10 @@ check_word_reg (void)
 	  }
 	else
 #if REGISTER_WARNINGS
-	  as_warn (_("using `%%%s' instead of `%%%s' due to `%c' suffix"),
+	  as_warn (_("using `%s%s' instead of `%s%s' due to `%c' suffix"),
+		   register_prefix,
 		   (i.op[op].regs + REGNAM_AX - REGNAM_EAX)->reg_name,
+		   register_prefix,
 		   i.op[op].regs->reg_name,
 		   i.suffix);
 #endif
@@ -3367,15 +3380,15 @@ process_operands (void)
 	      if (i.operands == 2)
 		{
 		  /* Reversed arguments on faddp, fsubp, etc.  */
-		  as_warn (_("translating to `%s %%%s,%%%s'"), i.tm.name,
-			   i.op[1].regs->reg_name,
-			   i.op[0].regs->reg_name);
+		  as_warn (_("translating to `%s %s%s,%s%s'"), i.tm.name,
+			   register_prefix, i.op[1].regs->reg_name,
+			   register_prefix, i.op[0].regs->reg_name);
 		}
 	      else
 		{
 		  /* Extraneous `l' suffix on fp insn.  */
-		  as_warn (_("translating to `%s %%%s'"), i.tm.name,
-			   i.op[0].regs->reg_name);
+		  as_warn (_("translating to `%s %s%s'"), i.tm.name,
+			   register_prefix, i.op[0].regs->reg_name);
 		}
 	    }
 	}
