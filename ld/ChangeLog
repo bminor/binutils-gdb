@@ -1,3 +1,7 @@
+2007-05-01  Robert Millan  <rmh@aybabtu.com>
+
+	* ldlang.c (lang_check): Error on architecture mismatch.
+
 2007-04-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldmain.c (link_callbacks): Init info and minfo fields.
