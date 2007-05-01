@@ -1,3 +1,11 @@
+2007-05-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (CRC32_Fixup): Properly handle Intel mode and
+	check data size prefix in 16bit mode.
+
+	* i386-opc.c (i386_optab): Default crc32 to non-8bit and
+	support Intel mode.
+
 2007-04-30  Mark Salter  <msalter@redhat.com>
 	
 	* frv-desc.c: Regenerate.

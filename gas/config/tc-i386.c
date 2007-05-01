@@ -2557,9 +2557,11 @@ match_template (void)
       if (i.operands != t->operands)
 	continue;
 
-      /* Check the suffix, except for some instructions in intel mode.  */
+      /* Check the suffix, except for some instructions in intel mode.
+	 We do want to check suffix for crc32 even in intel mode.  */
       if ((t->opcode_modifier & suffix_check)
 	  && !(intel_syntax
+	       && t->base_opcode != 0xf20f38f1
 	       && (t->opcode_modifier & IgnoreSize)))
 	continue;
 
@@ -2845,6 +2847,8 @@ process_suffix (void)
 		i.suffix = ((i.types[0] & Reg16) ? WORD_MNEM_SUFFIX :
 			    LONG_MNEM_SUFFIX);
 	    }
+	  else if (i.tm.base_opcode == 0xf20f38f0)
+	    i.suffix = BYTE_MNEM_SUFFIX;
 
 	  if (!i.suffix)
 	    {
@@ -3038,6 +3042,10 @@ check_byte_reg (void)
 	      || i.tm.base_opcode == 0x63
 	      || i.tm.base_opcode == 0xfbe
 	      || i.tm.base_opcode == 0xfbf))
+	continue;
+
+      /* crc32 doesn't generate this warning.  */
+      if (i.tm.base_opcode == 0xf20f38f0)
 	continue;
 
       if ((i.types[op] & WordReg) && i.op[op].regs->reg_num < 4)

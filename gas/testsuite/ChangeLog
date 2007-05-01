@@ -1,3 +1,15 @@
+2007-05-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/crc32-intel.d: New file.
+	* gas/i386/crc32.d:Likewise.
+	* gas/i386/crc32.s:Likewise.
+	* gas/i386/x86-64-crc32-intel.d:Likewise.
+	* gas/i386/x86-64-crc32.d:Likewise.
+	* gas/i386/x86-64-crc32.s:Likewise.
+
+	* gas/i386/i386.exp: Run crc32, crc32-intel, x86-64-crc32
+	and x86-64-crc32-intel.
+
 2007-04-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/4430

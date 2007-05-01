@@ -6390,13 +6390,11 @@ CRC32_Fixup (int bytemode, int sizeflag)
       USED_REX (REX_W);
       if (rex & REX_W)
 	*p++ = 'q';
-      else if ((prefixes & PREFIX_DATA))
-	{
-	  *p++ = 'w';
-	  used_prefixes |= (prefixes & PREFIX_DATA);
-	}
+      else if (sizeflag & DFLAG)
+	*p++ = intel_syntax ? 'd' : 'l';
       else
-	*p++ = 'l';
+	*p++ = 'w';
+      used_prefixes |= (prefixes & PREFIX_DATA);
       break;
     default:
       oappend (INTERNAL_DISASSEMBLER_ERROR);
@@ -6434,5 +6432,5 @@ CRC32_Fixup (int bytemode, int sizeflag)
 	}
     }
   else
-    OP_E (v_mode, sizeflag);
+    OP_E (bytemode, sizeflag);
 }

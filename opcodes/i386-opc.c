@@ -1442,10 +1442,12 @@ const template i386_optab[] =
 {"pcmpestrm", 3,  0x660f3a60,X, CpuSSE4_2, NoSuf|IgnoreSize|Modrm,	{ Imm8, RegXMM|LLongMem, RegXMM } },
 {"pcmpistri", 3,  0x660f3a63,X, CpuSSE4_2, NoSuf|IgnoreSize|Modrm,	{ Imm8, RegXMM|LLongMem, RegXMM } },
 {"pcmpistrm", 3,  0x660f3a62,X, CpuSSE4_2, NoSuf|IgnoreSize|Modrm,	{ Imm8, RegXMM|LLongMem, RegXMM } },
-{"crc32b",    2,  0xf20f38f0,X, CpuSSE4_2, NoSuf|IgnoreSize|Modrm,	{ Reg8|ByteMem, Reg32|Reg64, 0 } },
-{"crc32",     2,  0xf20f38f0,X, CpuSSE4_2, NoSuf|IgnoreSize|Modrm,	{ Reg8, Reg32|Reg64, 0 } },
+/* We put non-8bit version before 8bit so that crc32 with memory operand
+   defaults to non-8bit.  */
 {"crc32",     2,  0xf20f38f1,X, CpuSSE4_2, wl_Suf|Modrm,		{ WordReg|WordMem, Reg32, 0 } },
 {"crc32",     2,  0xf20f38f1,X, CpuSSE4_2|Cpu64, q_Suf|IgnoreSize|Modrm|Rex64, { Reg64|LLongMem, Reg64, 0 } },
+{"crc32",     2,  0xf20f38f0,X, CpuSSE4_2, b_Suf|Modrm,			{ Reg8|ByteMem, Reg32, 0 } },
+{"crc32",     2,  0xf20f38f0,X, CpuSSE4_2|Cpu64, b_Suf|IgnoreSize|Modrm|Rex64, { Reg8|ByteMem, Reg64, 0 } },
 
 /* AMD 3DNow! instructions.  */
 
