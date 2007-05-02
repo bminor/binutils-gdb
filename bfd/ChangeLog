@@ -1,3 +1,12 @@
+2007-05-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (assign_file_positions_for_load_sections): Set sh_offset
+	here.  Set sh_type to SHT_NOBITS if we won't be allocating
+	file space.  Don't bump p_memsz for non-alloc sections.  Adjust
+	section-in-segment check.
+	(assign_file_positions_for_non_load_sections): Don't set sh_offset
+	here for sections that have already been handled above.
+
 2007-04-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (struct spu_link_hash_table): Add stack_analysis

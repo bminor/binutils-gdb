@@ -4511,6 +4511,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	  asection *sec;
 	  flagword flags;
 	  bfd_size_type align;
+	  Elf_Internal_Shdr *this_hdr;
 
 	  sec = *secpp;
 	  flags = sec->flags;
@@ -4543,13 +4544,14 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		}
 	    }
 
+	  this_hdr = &elf_section_data (sec)->this_hdr;
 	  if (p->p_type == PT_NOTE && bfd_get_format (abfd) == bfd_core)
 	    {
 	      /* The section at i == 0 is the one that actually contains
 		 everything.  */
 	      if (i == 0)
 		{
-		  sec->filepos = off;
+		  this_hdr->sh_offset = sec->filepos = off;
 		  off += sec->size;
 		  p->p_filesz = sec->size;
 		  p->p_memsz = 0;
@@ -4568,7 +4570,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	    {
 	      if (p->p_type == PT_LOAD)
 		{
-		  sec->filepos = off + voff;
+		  this_hdr->sh_offset = sec->filepos = off + voff;
 		  /* FIXME: The SEC_HAS_CONTENTS test here dates back to
 		     1997, and the exact reason for it isn't clear.  One
 		     plausible explanation is that it is to work around
@@ -4586,12 +4588,22 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		  if ((flags & SEC_LOAD) != 0
 		      || (flags & SEC_HAS_CONTENTS) != 0)
 		    off += sec->size;
+		  else
+		    /* If we aren't making room for this section, then
+		       it must be SHT_NOBITS regardless of what we've
+		       set via struct bfd_elf_special_section.  */
+		    this_hdr->sh_type = SHT_NOBITS;
 		}
 
 	      if ((flags & SEC_LOAD) != 0)
 		{
 		  p->p_filesz += sec->size;
-		  p->p_memsz += sec->size;
+		  /* SEC_LOAD without SEC_ALLOC is a weird combination
+		     used by note sections to signify that a PT_NOTE
+		     segment should be created.  These take file space
+		     but are not actually loaded into memory.  */
+		  if ((flags & SEC_ALLOC) != 0)
+		    p->p_memsz += sec->size;
 		}
 
 	      /* .tbss is special.  It doesn't contribute to p_memsz of
@@ -4629,11 +4641,9 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	    }
 	}
 
-      /* Check if all sections are in the segment.  Skip PT_GNU_RELRO
-	 and PT_NOTE segments since they will be processed by
-	 assign_file_positions_for_non_load_sections later.  */
-      if (p->p_type != PT_GNU_RELRO
-	  && p->p_type != PT_NOTE)
+      /* Check that all sections are in the segment.  */
+      if (p->p_type == PT_LOAD
+	  || (p->p_type == PT_NOTE && bfd_get_format (abfd) == bfd_core))
 	for (i = 0, secpp = m->sections; i < m->count; i++, secpp++)
 	  {
 	    Elf_Internal_Shdr *this_hdr;
@@ -4689,7 +4699,7 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 	  && (hdr->bfd_section->filepos != 0
 	      || (hdr->sh_type == SHT_NOBITS
 		  && hdr->contents == NULL)))
-	hdr->sh_offset = hdr->bfd_section->filepos;
+	BFD_ASSERT (hdr->sh_offset == hdr->bfd_section->filepos);
       else if ((hdr->sh_flags & SHF_ALLOC) != 0)
 	{
 	  if (hdr->sh_size != 0)
