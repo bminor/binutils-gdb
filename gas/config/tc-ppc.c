@@ -1544,10 +1544,7 @@ ppc_insert_operand (insn, operand, val, file, line)
     }
 
   if ((operand->flags & PPC_OPERAND_PLUS1) != 0)
-    {
-      max++;
-      min++;
-    }
+    max++;
 
   if ((operand->flags & PPC_OPERAND_NEGATIVE) != 0)
     test = - val;

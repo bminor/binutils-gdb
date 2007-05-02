@@ -1,3 +1,9 @@
+2007-05-02  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 4448
+	* config/tc-ppc.c (ppc_insert_operand): Don't increase min for
+	PPC_OPERAND_PLUS1.
+
 2007-05-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (match_template): Check suffix for crc32 in
