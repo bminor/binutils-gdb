@@ -5156,7 +5156,7 @@ lang_check (void)
       if (compatible == NULL)
 	{
 	  if (command_line.warn_mismatch)
-	    einfo (_("%P%X: warning: %s architecture of input file `%B'"
+	    einfo (_("%P%X: %s architecture of input file `%B'"
 		     " is incompatible with %s output\n"),
 		   bfd_printable_name (input_bfd), input_bfd,
 		   bfd_printable_name (output_bfd));
