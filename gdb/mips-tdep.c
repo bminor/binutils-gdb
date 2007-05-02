@@ -3069,8 +3069,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       int arglen = TYPE_LENGTH (arg_type);
 
       /* Align to double-word if necessary.  */
-      if (mips_abi_regsize (gdbarch) < 8
-	  && mips_type_needs_double_align (arg_type))
+      if (mips_type_needs_double_align (arg_type))
 	len = align_up (len, mips_stack_argsize (gdbarch) * 2);
       /* Allocate space on the stack.  */
       len += align_up (arglen, mips_stack_argsize (gdbarch));
@@ -3120,8 +3119,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
          up before the check to see if there are any FP registers
          left.  O32/O64 targets also pass the FP in the integer
          registers so also round up normal registers.  */
-      if (mips_abi_regsize (gdbarch) < 8
-	  && fp_register_arg_p (typecode, arg_type))
+      if (fp_register_arg_p (typecode, arg_type))
 	{
 	  if ((float_argreg & 1))
 	    float_argreg++;
@@ -3187,7 +3185,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		fprintf_unfiltered (gdb_stdlog, " - reg=%d val=%s",
 				    argreg, phex (regval, len));
 	      write_register (argreg, regval);
-	      argreg += (mips_abi_regsize (gdbarch) == 8) ? 1 : 2;
+	      argreg += 2;
 	    }
 	  /* Reserve space for the FP register.  */
 	  stack_offset += align_up (len, mips_stack_argsize (gdbarch));
@@ -3206,8 +3204,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 				  && (len % mips_abi_regsize (gdbarch) != 0));
 	  /* Structures should be aligned to eight bytes (even arg registers)
 	     on MIPS_ABI_O32, if their first member has double precision.  */
-	  if (mips_abi_regsize (gdbarch) < 8
-	      && mips_type_needs_double_align (arg_type))
+	  if (mips_type_needs_double_align (arg_type))
 	    {
 	      if ((argreg & 1))
 		{
@@ -3303,8 +3300,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		     identified as such and GDB gets tweaked
 		     accordingly.  */
 
-		  if (mips_abi_regsize (gdbarch) < 8
-		      && TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
+		  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
 		      && partial_len < mips_abi_regsize (gdbarch)
 		      && (typecode == TYPE_CODE_STRUCT
 			  || typecode == TYPE_CODE_UNION))
@@ -3529,10 +3525,6 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       struct type *arg_type = check_typedef (value_type (args[argnum]));
       int arglen = TYPE_LENGTH (arg_type);
 
-      /* Align to double-word if necessary.  */
-      if (mips_abi_regsize (gdbarch) < 8
-	  && mips_type_needs_double_align (arg_type))
-	len = align_up (len, mips_stack_argsize (gdbarch) * 2);
       /* Allocate space on the stack.  */
       len += align_up (arglen, mips_stack_argsize (gdbarch));
     }
@@ -3576,18 +3568,6 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       val = value_contents (arg);
 
-      /* 32-bit ABIs always start floating point arguments in an
-         even-numbered floating point register.  Round the FP register
-         up before the check to see if there are any FP registers
-         left.  O32/O64 targets also pass the FP in the integer
-         registers so also round up normal registers.  */
-      if (mips_abi_regsize (gdbarch) < 8
-	  && fp_register_arg_p (typecode, arg_type))
-	{
-	  if ((float_argreg & 1))
-	    float_argreg++;
-	}
-
       /* Floating point arguments passed in registers have to be
          treated specially.  On 32-bit architectures, doubles
          are passed in register pairs; the even register gets
@@ -3601,55 +3581,16 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       if (fp_register_arg_p (typecode, arg_type)
 	  && float_argreg <= MIPS_LAST_FP_ARG_REGNUM)
 	{
-	  if (mips_abi_regsize (gdbarch) < 8 && len == 8)
-	    {
-	      int low_offset = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 4 : 0;
-	      unsigned long regval;
-
-	      /* Write the low word of the double to the even register(s).  */
-	      regval = extract_unsigned_integer (val + low_offset, 4);
-	      if (mips_debug)
-		fprintf_unfiltered (gdb_stdlog, " - fpreg=%d val=%s",
-				    float_argreg, phex (regval, 4));
-	      write_register (float_argreg++, regval);
-	      if (mips_debug)
-		fprintf_unfiltered (gdb_stdlog, " - reg=%d val=%s",
-				    argreg, phex (regval, 4));
-	      write_register (argreg++, regval);
-
-	      /* Write the high word of the double to the odd register(s).  */
-	      regval = extract_unsigned_integer (val + 4 - low_offset, 4);
-	      if (mips_debug)
-		fprintf_unfiltered (gdb_stdlog, " - fpreg=%d val=%s",
-				    float_argreg, phex (regval, 4));
-	      write_register (float_argreg++, regval);
-
-	      if (mips_debug)
-		fprintf_unfiltered (gdb_stdlog, " - reg=%d val=%s",
-				    argreg, phex (regval, 4));
-	      write_register (argreg++, regval);
-	    }
-	  else
-	    {
-	      /* This is a floating point value that fits entirely
-	         in a single register.  */
-	      /* On 32 bit ABI's the float_argreg is further adjusted
-	         above to ensure that it is even register aligned.  */
-	      LONGEST regval = extract_unsigned_integer (val, len);
-	      if (mips_debug)
-		fprintf_unfiltered (gdb_stdlog, " - fpreg=%d val=%s",
-				    float_argreg, phex (regval, len));
-	      write_register (float_argreg++, regval);
-	      /* CAGNEY: 32 bit MIPS ABI's always reserve two FP
-	         registers for each argument.  The below is (my
-	         guess) to ensure that the corresponding integer
-	         register has reserved the same space.  */
-	      if (mips_debug)
-		fprintf_unfiltered (gdb_stdlog, " - reg=%d val=%s",
-				    argreg, phex (regval, len));
-	      write_register (argreg, regval);
-	      argreg += (mips_abi_regsize (gdbarch) == 8) ? 1 : 2;
-	    }
+	  LONGEST regval = extract_unsigned_integer (val, len);
+	  if (mips_debug)
+	    fprintf_unfiltered (gdb_stdlog, " - fpreg=%d val=%s",
+				float_argreg, phex (regval, len));
+	  write_register (float_argreg++, regval);
+	  if (mips_debug)
+	    fprintf_unfiltered (gdb_stdlog, " - reg=%d val=%s",
+				argreg, phex (regval, len));
+	  write_register (argreg, regval);
+	  argreg++;
 	  /* Reserve space for the FP register.  */
 	  stack_offset += align_up (len, mips_stack_argsize (gdbarch));
 	}
@@ -3665,17 +3606,6 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	     both places.  */
 	  int odd_sized_struct = ((len > mips_abi_regsize (gdbarch))
 				  && (len % mips_abi_regsize (gdbarch) != 0));
-	  /* Structures should be aligned to eight bytes (even arg registers)
-	     on MIPS_ABI_O32, if their first member has double precision.  */
-	  if (mips_abi_regsize (gdbarch) < 8
-	      && mips_type_needs_double_align (arg_type))
-	    {
-	      if ((argreg & 1))
-		{
-		  argreg++;
-		  stack_offset += mips_abi_regsize (gdbarch);
-		}
-	    }
 	  while (len > 0)
 	    {
 	      /* Remember if the argument was written to the stack.  */
