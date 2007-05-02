@@ -1,3 +1,10 @@
+2007-05-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* binutils-all/objcopy.exp (copy_setup): Don't perror, use send_log.
+	(copy_executable): Return early if test2 is blank.
+	Return unsupported rather than unresolved if we can't run
+	executables.  Do test1 if we can compile.
+
 2007-04-24  Nathan Froyd  <froydnj@codesourcery.com>
 	    Phil Edwards  <phil@codesourcery.com>
 

@@ -516,7 +516,7 @@ proc copy_setup { } {
     set status [lindex $result 0]
 
     if { $status != "pass"  } {
-	perror "unresolved setup, status = $status"
+	send_log "cannot run executable, status = ${status}\n"
 	return 3
     }
 
@@ -541,6 +541,9 @@ proc copy_executable { prog flags test1 test2 } {
 
     if ![string match "" $exec_output] {
 	fail $test1
+	if [string match "" $test2] {
+	    return
+	}
 	fail $test2
 	return
     }
@@ -580,6 +583,10 @@ proc copy_executable { prog flags test1 test2 } {
 	setup_xfail "thumb*-*-pe"
     
 	fail $test1
+    }
+
+    if [string match "" $test2] {
+	return
     }
 
     set output [remote_load target tmpdir/copyprog]
@@ -693,10 +700,10 @@ switch [copy_setup] {
 	untested $test4
     }
     "3" {
-	unresolved $test1
-	unresolved $test2
-	unresolved $test3
-	unresolved $test4
+	copy_executable "$OBJCOPY" "$OBJCOPYFLAGS" "$test1" ""
+	unsupported $test2
+	unsupported $test3
+	unsupported $test4
     }
     "0" {
 	copy_executable "$OBJCOPY" "$OBJCOPYFLAGS" "$test1" "$test2"
