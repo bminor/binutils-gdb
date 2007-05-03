@@ -2507,7 +2507,12 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       if (fp_register_arg_p (typecode, arg_type)
 	  && float_argreg <= MIPS_LAST_FP_ARG_REGNUM)
 	{
-	  if (register_size (gdbarch, float_argreg) < 8 && len == 8)
+	  /* EABI32 will pass doubles in consecutive registers, even on
+	     64-bit cores.  At one time, we used to check the size of
+	     `float_argreg' to determine whether or not to pass doubles
+	     in consecutive registers, but this is not sufficient for
+	     making the ABI determination.  */
+	  if (len == 8 && mips_abi (gdbarch) == MIPS_ABI_EABI32)
 	    {
 	      int low_offset = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 4 : 0;
 	      unsigned long regval;

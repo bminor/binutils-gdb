@@ -1,5 +1,12 @@
 2007-05-03  Kevin Buettner  <kevinb@redhat.com>
 
+	* mips-tdep.c (mips_eabi_push_dummy_call): When pushing floating
+	point arguments, test explicitly for use of the EABI32 ABI
+	instead of inferring this condition from tests on register
+	sizes.
+
+2007-05-03  Kevin Buettner  <kevinb@redhat.com>
+
 	* breakpoint.c (set_raw_breakpoint): Adjust breakpoint's address
 	prior to allocating its location.
 
