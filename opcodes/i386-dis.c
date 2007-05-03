@@ -6384,14 +6384,20 @@ CRC32_Fixup (int bytemode, int sizeflag)
   switch (bytemode)
     {
     case b_mode:
+      if (intel_syntax)
+	break;
+
       *p++ = 'b';
       break;
     case v_mode:
+      if (intel_syntax)
+	break;
+
       USED_REX (REX_W);
       if (rex & REX_W)
 	*p++ = 'q';
       else if (sizeflag & DFLAG)
-	*p++ = intel_syntax ? 'd' : 'l';
+	*p++ = 'l';
       else
 	*p++ = 'w';
       used_prefixes |= (prefixes & PREFIX_DATA);

@@ -1,3 +1,10 @@
+2007-05-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (CRC32_Fixup): Don't print suffix in Intel mode.
+
+	* i386-opc.c (i386_optab): Remove IgnoreSize and correct operand
+	type for crc32.
+
 2007-05-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (CRC32_Fixup): Properly handle Intel mode and

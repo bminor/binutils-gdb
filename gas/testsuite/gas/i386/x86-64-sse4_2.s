@@ -2,8 +2,6 @@
 
 	.text
 foo:
-	crc32		(%rcx),%ebx
-	crc32		(%rcx),%rbx
 	crc32		%cl,%ebx
 	crc32		%cl,%rbx
 	crc32		%cx,%ebx

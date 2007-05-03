@@ -1,3 +1,10 @@
+2007-05-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (match_template): Don't explicitly check
+	suffix for crc32 in Intel mode.
+	(process_suffix): Issue an error for crc32 if the operand size
+	is ambiguous.
+
 2007-05-03  Vincent Riviere  <vincent.riviere@freesbee.fr>
 	    Nick Clifton  <nickc@redhat.com>
 

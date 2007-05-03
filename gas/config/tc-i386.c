@@ -2557,11 +2557,9 @@ match_template (void)
       if (i.operands != t->operands)
 	continue;
 
-      /* Check the suffix, except for some instructions in intel mode.
-	 We do want to check suffix for crc32 even in intel mode.  */
+      /* Check the suffix, except for some instructions in intel mode.  */
       if ((t->opcode_modifier & suffix_check)
 	  && !(intel_syntax
-	       && t->base_opcode != 0xf20f38f1
 	       && (t->opcode_modifier & IgnoreSize)))
 	continue;
 
@@ -2848,11 +2846,23 @@ process_suffix (void)
 			    LONG_MNEM_SUFFIX);
 	    }
 	  else if (i.tm.base_opcode == 0xf20f38f0)
-	    i.suffix = BYTE_MNEM_SUFFIX;
+	    {
+	      if ((i.types[0] & Reg8))
+		i.suffix = BYTE_MNEM_SUFFIX;
+	    }
 
 	  if (!i.suffix)
 	    {
 	      int op;
+
+	      if (i.tm.base_opcode == 0xf20f38f1
+		  || i.tm.base_opcode == 0xf20f38f0)
+		{
+		  /* We have to know the operand size for crc32.  */
+		  as_bad (_("ambiguous memory operand size for `%s`"),
+			  i.tm.name);
+		  return 0;
+		}
 
 	      for (op = i.operands; --op >= 0;)
 		if ((i.types[op] & Reg)

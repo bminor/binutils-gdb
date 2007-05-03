@@ -6,8 +6,6 @@
 Disassembly of section .text:
 
 0+000 <foo>:
-[ 	]*[0-9a-f]+:	f2 0f 38 f1 19       	crc32l \(%rcx\),%ebx
-[ 	]*[0-9a-f]+:	f2 48 0f 38 f1 19    	crc32q \(%rcx\),%rbx
 [ 	]*[0-9a-f]+:	f2 0f 38 f0 d9       	crc32b %cl,%ebx
 [ 	]*[0-9a-f]+:	f2 48 0f 38 f0 d9    	crc32b %cl,%rbx
 [ 	]*[0-9a-f]+:	66 f2 0f 38 f1 d9    	crc32w %cx,%ebx

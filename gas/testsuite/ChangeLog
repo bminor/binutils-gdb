@@ -1,3 +1,27 @@
+2007-05-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/crc32-intel.d: Updated.
+	* gas/i386/crc32.d: Likewise.
+	* gas/i386/sse4_2.d: Likewise.
+	* gas/i386/x86-64-crc32-intel.d: Likewise.
+	* gas/i386/x86-64-crc32.d: Likewise.
+	* gas/i386/x86-64-sse4_2.d: Likewise.
+
+	* gas/i386/crc32.s: Remove crc32 instructions with ambiguous
+	operand size and suffix in crc32 instructions in Intel mode.
+	* gas/i386/x86-64-crc32.s: Likewise.
+
+	* gas/i386/sse4_2.s: Remove crc32 instructions with ambiguous
+	operand size.
+	* gas/i386/x86-64-sse4_2.s: Likewise.
+
+	* gas/i386/i386.exp: Run inval-crc32 and x86-64-inval-crc32.
+
+	* gas/i386/inval-crc32.l: New.
+	* gas/i386/inval-crc32.s: Likewise.
+	* gas/i386/x86-64-inval-crc32.l: Likewise.
+	* gas/i386/x86-64-inval-crc32.s: Likewise.
+
 2007-05-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/crc32-intel.d: New file.
