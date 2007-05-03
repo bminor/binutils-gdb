@@ -1952,7 +1952,10 @@ NAME (aout, swap_std_reloc_out) (bfd *abfd,
 
   if (bfd_is_com_section (output_section)
       || bfd_is_abs_section (output_section)
-      || bfd_is_und_section (output_section))
+      || bfd_is_und_section (output_section)
+      /* PR gas/3041  a.out relocs against weak symbols
+	 must be treated as if they were against externs.  */
+      || (sym->flags & BSF_WEAK))
     {
       if (bfd_abs_section_ptr->symbol == sym)
 	{

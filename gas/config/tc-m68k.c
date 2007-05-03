@@ -1,6 +1,6 @@
 /* tc-m68k.c -- Assemble for the m68k family
    Copyright 1987, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1059,7 +1059,9 @@ tc_m68k_fix_adjustable (fixS *fixP)
 
 #define get_reloc_code(SIZE,PCREL,OTHER) NO_RELOC
 
-#define relaxable_symbol(symbol) 1
+/* PR gas/3041 Weak symbols are not relaxable
+   because they must be treated as extern.  */
+#define relaxable_symbol(symbol)   (!(S_IS_WEAK (symbol)))
 
 #endif /* OBJ_ELF */
 
@@ -1153,6 +1155,13 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 #ifndef OBJ_ELF
   if (fixp->fx_pcrel)
     reloc->addend = fixp->fx_addnumber;
+  else if (OUTPUT_FLAVOR == bfd_target_aout_flavour
+	   && fixp->fx_addsy
+	   && S_IS_WEAK (fixp->fx_addsy)
+	   && ! bfd_is_und_section (S_GET_SEGMENT (fixp->fx_addsy)))
+    /* PR gas/3041 Adjust addend in order to force bfd_install_relocation()
+       to put a zero value into frags referencing a weak symbol.  */
+    reloc->addend = - S_GET_VALUE (fixp->fx_addsy);
   else
     reloc->addend = 0;
 #else
@@ -4690,6 +4699,13 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  && !S_IS_DEFINED (fixP->fx_addsy)
 	  && !S_IS_WEAK (fixP->fx_addsy))
 	S_SET_WEAK (fixP->fx_addsy);
+      return;
+    }
+#elif defined(OBJ_AOUT)
+  /* PR gas/3041 Always put zero values into frags referencing a weak symbol.  */
+  if (fixP->fx_addsy && S_IS_WEAK (fixP->fx_addsy))
+    {
+      memset (buf, 0, fixP->fx_size);
       return;
     }
 #endif

@@ -1,3 +1,10 @@
+2007-05-03  Vincent Riviere  <vincent.riviere@freesbee.fr>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR gas/3041
+	* aoutx.h (swap_std_reloc_out): Treat relocs against weak symbols
+	in the same way as relocs against external symbols.
+
 2007-05-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (assign_file_positions_for_load_sections): Set sh_offset

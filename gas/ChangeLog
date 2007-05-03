@@ -1,3 +1,12 @@
+2007-05-03  Vincent Riviere  <vincent.riviere@freesbee.fr>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR gas/3041
+	* config/tc-m68k.c (relaxable_symbol): Do not relax weak symbols.
+	(tc_gen_reloc): Adjust the addend of relocs against weak symbols.
+	(md_apply_fix): Put zero values into the frags referencing weak
+	symbols.
+
 2007-05-02  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 4448
