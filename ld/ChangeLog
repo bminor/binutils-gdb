@@ -1,5 +1,16 @@
 2007-05-03  Alan Modra  <amodra@bigpond.net.au>
 
+	* ld.texinfo (--no-warn-search-mismatch): Document.
+	* ldfile.c (ldfile_try_open_bfd): Don't warn about skipping
+	incompatible libraries if --no-warn-search-mismatch.
+	* ld.h (args_type): Add warn_search_mismatch.
+	* ldmain.c (main): Init it.
+	* lexsup.c (enum option_values): Add OPTION_NO_WARN_SEARCH_MISMATCH.
+	(ld_options): Add entry for --no-warn-search-mismatch.
+	(parse_args): Handle OPTION_NO_WARN_SEARCH_MISMATCH.
+
+2007-05-03  Alan Modra  <amodra@bigpond.net.au>
+
 	* scripttempl/elf.sc: Add .debug_pubtypes and .debug_ranges.
 
 2007-05-01  Robert Millan  <rmh@aybabtu.com>

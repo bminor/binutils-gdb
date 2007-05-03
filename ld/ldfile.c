@@ -252,8 +252,10 @@ ldfile_try_open_bfd (const char *attempt,
 		  yyin = NULL;
 		  if (skip)
 		    {
-		      einfo (_("%P: skipping incompatible %s when searching for %s\n"),
-			     attempt, entry->local_sym_name);
+		      if (command_line.warn_search_mismatch)
+			einfo (_("%P: skipping incompatible %s "
+				 "when searching for %s\n"),
+			       attempt, entry->local_sym_name);
 		      bfd_close (entry->the_bfd);
 		      entry->the_bfd = NULL;
 		      return FALSE;
@@ -279,8 +281,10 @@ ldfile_try_open_bfd (const char *attempt,
 		    && bfd_get_flavour (output_bfd) == bfd_target_xcoff_flavour
 		    && bfd_check_format (entry->the_bfd, bfd_archive)))
 	    {
-	      einfo (_("%P: skipping incompatible %s when searching for %s\n"),
-		     attempt, entry->local_sym_name);
+	      if (command_line.warn_search_mismatch)
+		einfo (_("%P: skipping incompatible %s "
+			 "when searching for %s\n"),
+		       attempt, entry->local_sym_name);
 	      bfd_close (entry->the_bfd);
 	      entry->the_bfd = NULL;
 	      return FALSE;

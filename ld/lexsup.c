@@ -83,6 +83,7 @@ enum option_values
   OPTION_NO_DEMANGLE,
   OPTION_NO_KEEP_MEMORY,
   OPTION_NO_WARN_MISMATCH,
+  OPTION_NO_WARN_SEARCH_MISMATCH,
   OPTION_NOINHIBIT_EXEC,
   OPTION_NON_SHARED,
   OPTION_NO_WHOLE_ARCHIVE,
@@ -428,6 +429,10 @@ static const struct ld_option ld_options[] =
     TWO_DASHES },
   { {"no-warn-mismatch", no_argument, NULL, OPTION_NO_WARN_MISMATCH},
     '\0', NULL, N_("Don't warn about mismatched input files"), TWO_DASHES},
+  { {"no-warn-search-mismatch", no_argument, NULL,
+     OPTION_NO_WARN_SEARCH_MISMATCH},
+    '\0', NULL, N_("Don't warn on finding an incompatible library"),
+    TWO_DASHES},
   { {"no-whole-archive", no_argument, NULL, OPTION_NO_WHOLE_ARCHIVE},
     '\0', NULL, N_("Turn off --whole-archive"), TWO_DASHES },
   { {"noinhibit-exec", no_argument, NULL, OPTION_NOINHIBIT_EXEC},
@@ -962,6 +967,9 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_NO_WARN_MISMATCH:
 	  command_line.warn_mismatch = FALSE;
+	  break;
+	case OPTION_NO_WARN_SEARCH_MISMATCH:
+	  command_line.warn_search_mismatch = FALSE;
 	  break;
 	case OPTION_NOINHIBIT_EXEC:
 	  force_make_executable = TRUE;

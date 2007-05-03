@@ -177,6 +177,10 @@ typedef struct {
      files.  */
   bfd_boolean warn_mismatch;
 
+  /* Warn on attempting to open an incompatible library during a library
+     search.  */
+  bfd_boolean warn_search_mismatch;
+
   /* Name of shared object whose symbol table should be filtered with
      this shared object.  From the --filter option.  */
   char *filter_shlib;

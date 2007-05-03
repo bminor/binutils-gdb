@@ -1390,6 +1390,11 @@ errors.  This option should only be used with care, in cases when you
 have taken some special action that ensures that the linker errors are
 inappropriate.
 
+@kindex --no-warn-search-mismatch
+@item --no-warn-search-mismatch
+Normally @command{ld} will give a warning if it finds an incompatible
+library during a library search.  This option silences the warning.
+
 @kindex --no-whole-archive
 @item --no-whole-archive
 Turn off the effect of the @option{--whole-archive} option for subsequent
