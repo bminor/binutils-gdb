@@ -1,3 +1,7 @@
+2007-05-03  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* elf32-arm.c (allocate_dynrelocs): Fix typo in comment.
+
 2007-05-03  Vincent Riviere  <vincent.riviere@freesbee.fr>
 	    Nick Clifton  <nickc@redhat.com>
 

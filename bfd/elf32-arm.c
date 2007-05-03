@@ -8743,7 +8743,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 
   if (info->shared || htab->root.is_relocatable_executable)
     {
-      /* The only reloc thats uses pc_count are R_ARM_REL32 and
+      /* The only relocs that use pc_count are R_ARM_REL32 and
          R_ARM_REL32_NOI, which will appear on something like
          ".long foo - .".  We want calls to protected symbols to resolve
          directly to the function rather than going via the plt.  If people
