@@ -1,3 +1,7 @@
+2007-05-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* scripttempl/elf.sc: Add .debug_pubtypes and .debug_ranges.
+
 2007-05-01  Robert Millan  <rmh@aybabtu.com>
 
 	* ldlang.c (lang_check): Error on architecture mismatch.
