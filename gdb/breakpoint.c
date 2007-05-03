@@ -4189,13 +4189,23 @@ struct breakpoint *
 set_raw_breakpoint (struct symtab_and_line sal, enum bptype bptype)
 {
   struct breakpoint *b, *b1;
+  CORE_ADDR adjusted_address;
 
   b = (struct breakpoint *) xmalloc (sizeof (struct breakpoint));
   memset (b, 0, sizeof (*b));
+
+  /* Adjust the breakpoint's address prior to allocating a location.
+     Once we call allocate_bp_location(), that mostly uninitialized
+     location will be placed on the location chain.  Adjustment of the
+     breakpoint may cause read_memory_nobpt() to be called and we do
+     not want its scan of the location chain to find a breakpoint and
+     location that's only been partially initialized.  */
+  adjusted_address = adjust_breakpoint_address (sal.pc, bptype);
+
   b->loc = allocate_bp_location (b, bptype);
   b->loc->requested_address = sal.pc;
-  b->loc->address = adjust_breakpoint_address (b->loc->requested_address,
-                                               bptype);
+  b->loc->address = adjusted_address;
+
   if (sal.symtab == NULL)
     b->source_file = NULL;
   else

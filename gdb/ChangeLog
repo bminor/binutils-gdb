@@ -1,3 +1,8 @@
+2007-05-03  Kevin Buettner  <kevinb@redhat.com>
+
+	* breakpoint.c (set_raw_breakpoint): Adjust breakpoint's address
+	prior to allocating its location.
+
 2007-05-02  Maciej W. Rozycki  <macro@mips.com>
 
 	* mips-tdep.c (mips_o32_push_dummy_call): Remove conditions
