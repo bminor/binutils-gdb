@@ -4477,9 +4477,6 @@ lex_got (enum bfd_reloc_code_real *reloc,
 	      if (GOT_symbol == NULL)
 		GOT_symbol = symbol_find_or_make (GLOBAL_OFFSET_TABLE_NAME);
 
-	      /* Replace the relocation token with ' ', so that
-		 errors like foo@GOTOFF1 will be detected.  */
-
 	      /* The length of the first part of our input line.  */
 	      first = cp - input_line_pointer;
 
@@ -4495,9 +4492,12 @@ lex_got (enum bfd_reloc_code_real *reloc,
 		 be necessary, but be safe.  */
 	      tmpbuf = xmalloc (first + second + 2);
 	      memcpy (tmpbuf, input_line_pointer, first);
-	      tmpbuf[first] = ' ';
-	      memcpy (tmpbuf + first + 1, past_reloc, second);
-	      tmpbuf[first + second + 1] = '\0';
+	      if (second != 0 && *past_reloc != ' ')
+		/* Replace the relocation token with ' ', so that
+		   errors like foo@GOTOFF1 will be detected.  */
+		tmpbuf[first++] = ' ';
+	      memcpy (tmpbuf + first, past_reloc, second);
+	      tmpbuf[first + second] = '\0';
 	      return tmpbuf;
 	    }
 
