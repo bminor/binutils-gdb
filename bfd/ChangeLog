@@ -1,3 +1,8 @@
+2007-05-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (elf_link_sort_relocs): Return if both .rela.dyn
+	and .rel.dyn aren't present.
+
 2007-05-04  Nick Clifton  <nickc@redhat.com>
 
 	* elflink.c (elf_link_sort_relocs): If both .rela.dyn and .rel.dyn

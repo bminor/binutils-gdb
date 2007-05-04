@@ -7221,8 +7221,8 @@ static size_t
 elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 {
   asection *dynamic_relocs;
-  asection * rela_dyn;
-  asection * rel_dyn;
+  asection *rela_dyn;
+  asection *rel_dyn;
   bfd_size_type count, size;
   size_t i, ret, sort_elt, ext_size;
   bfd_byte *sort, *s_non_relative, *p;
@@ -7361,10 +7361,12 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 	/* Make a guess.  */
 	use_rela = TRUE;
     }
-  else if (rela_dyn == NULL || rela_dyn->size == 0)
+  else if (rela_dyn != NULL && rela_dyn->size > 0)
+    use_rela = TRUE;
+  else if (rel_dyn != NULL && rel_dyn->size > 0)
     use_rela = FALSE;
   else
-    use_rela = TRUE;
+    return 0;
 
   if (use_rela)
     {
