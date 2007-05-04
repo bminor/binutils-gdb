@@ -1,5 +1,14 @@
 2007-05-03  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gas/4460
+	* gas/i386/gotpc.s: Add a new test.
+	* gas/i386/reloc64.s: Likewise.
+
+	* gas/i386/gotpc.d: Updated.
+	* gas/i386/reloc64.d: Likewise.
+
+2007-05-03  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* gas/i386/crc32-intel.d: Updated.
 	* gas/i386/crc32.d: Likewise.
 	* gas/i386/sse4_2.d: Likewise.
