@@ -1,3 +1,10 @@
+2007-05-04  Nick Clifton  <nickc@redhat.com>
+
+	* elflink.c (elf_link_sort_relocs): If both .rela.dyn and .rel.dyn
+	sections are present examine the indirect sections in an attempt
+	to compute the correct relocation size.  If there is any
+	ambiguity, produce an error and refuse to sort.
+
 2007-05-03  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* elf32-arm.c (allocate_dynrelocs): Fix typo in comment.

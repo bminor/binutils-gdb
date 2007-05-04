@@ -7220,7 +7220,9 @@ elf_link_sort_cmp2 (const void *A, const void *B)
 static size_t
 elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 {
-  asection *reldyn;
+  asection *dynamic_relocs;
+  asection * rela_dyn;
+  asection * rel_dyn;
   bfd_size_type count, size;
   size_t i, ret, sort_elt, ext_size;
   bfd_byte *sort, *s_non_relative, *p;
@@ -7231,39 +7233,168 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
   void (*swap_out) (bfd *, const Elf_Internal_Rela *, bfd_byte *);
   struct bfd_link_order *lo;
   bfd_vma r_sym_mask;
+  bfd_boolean use_rela;
 
-  reldyn = bfd_get_section_by_name (abfd, ".rela.dyn");
-  if (reldyn == NULL || reldyn->size == 0)
+  /* Find a dynamic reloc section.  */
+  rela_dyn = bfd_get_section_by_name (abfd, ".rela.dyn");
+  rel_dyn  = bfd_get_section_by_name (abfd, ".rel.dyn");
+  if (rela_dyn != NULL && rela_dyn->size > 0
+      && rel_dyn != NULL && rel_dyn->size > 0)
     {
-      reldyn = bfd_get_section_by_name (abfd, ".rel.dyn");
-      if (reldyn == NULL || reldyn->size == 0)
-	return 0;
-      ext_size = bed->s->sizeof_rel;
-      swap_in = bed->s->swap_reloc_in;
-      swap_out = bed->s->swap_reloc_out;
+      bfd_boolean use_rela_initialised = FALSE;
+
+      /* This is just here to stop gcc from complaining.
+	 It's initialization checking code is not perfect.  */
+      use_rela = TRUE;
+
+      /* Both sections are present.  Examine the sizes
+	 of the indirect sections to help us choose.  */
+      for (lo = rela_dyn->map_head.link_order; lo != NULL; lo = lo->next)
+	if (lo->type == bfd_indirect_link_order)
+	  {
+	    asection *o = lo->u.indirect.section;
+
+	    if ((o->size % bed->s->sizeof_rela) == 0)
+	      {
+		if ((o->size % bed->s->sizeof_rel) == 0)
+		  /* Section size is divisible by both rel and rela sizes.
+		     It is of no help to us.  */
+		  ;
+		else
+		  {
+		    /* Section size is only divisible by rela.  */
+		    if (use_rela_initialised && (use_rela == FALSE))
+		      {
+			_bfd_error_handler
+			  (_("%B: Unable to sort relocs - they are in more than one size"), abfd);
+			bfd_set_error (bfd_error_invalid_operation);
+			return 0;
+		      }
+		    else
+		      {
+			use_rela = TRUE;
+			use_rela_initialised = TRUE;
+		      }
+		  }
+	      }
+	    else if ((o->size % bed->s->sizeof_rel) == 0)
+	      {
+		/* Section size is only divisible by rel.  */
+		if (use_rela_initialised && (use_rela == TRUE))
+		  {
+		    _bfd_error_handler
+		      (_("%B: Unable to sort relocs - they are in more than one size"), abfd);
+		    bfd_set_error (bfd_error_invalid_operation);
+		    return 0;
+		  }
+		else
+		  {
+		    use_rela = FALSE;
+		    use_rela_initialised = TRUE;
+		  }
+	      }
+	    else
+	      {
+		/* The section size is not divisible by either - something is wrong.  */
+		_bfd_error_handler
+		  (_("%B: Unable to sort relocs - they are of an unknown size"), abfd);
+		bfd_set_error (bfd_error_invalid_operation);
+		return 0;
+	      }
+	  }
+
+      for (lo = rel_dyn->map_head.link_order; lo != NULL; lo = lo->next)
+	if (lo->type == bfd_indirect_link_order)
+	  {
+	    asection *o = lo->u.indirect.section;
+
+	    if ((o->size % bed->s->sizeof_rela) == 0)
+	      {
+		if ((o->size % bed->s->sizeof_rel) == 0)
+		  /* Section size is divisible by both rel and rela sizes.
+		     It is of no help to us.  */
+		  ;
+		else
+		  {
+		    /* Section size is only divisible by rela.  */
+		    if (use_rela_initialised && (use_rela == FALSE))
+		      {
+			_bfd_error_handler
+			  (_("%B: Unable to sort relocs - they are in more than one size"), abfd);
+			bfd_set_error (bfd_error_invalid_operation);
+			return 0;
+		      }
+		    else
+		      {
+			use_rela = TRUE;
+			use_rela_initialised = TRUE;
+		      }
+		  }
+	      }
+	    else if ((o->size % bed->s->sizeof_rel) == 0)
+	      {
+		/* Section size is only divisible by rel.  */
+		if (use_rela_initialised && (use_rela == TRUE))
+		  {
+		    _bfd_error_handler
+		      (_("%B: Unable to sort relocs - they are in more than one size"), abfd);
+		    bfd_set_error (bfd_error_invalid_operation);
+		    return 0;
+		  }
+		else
+		  {
+		    use_rela = FALSE;
+		    use_rela_initialised = TRUE;
+		  }
+	      }
+	    else
+	      {
+		/* The section size is not divisible by either - something is wrong.  */
+		_bfd_error_handler
+		  (_("%B: Unable to sort relocs - they are of an unknown size"), abfd);
+		bfd_set_error (bfd_error_invalid_operation);
+		return 0;
+	      }
+	  }
+
+      if (! use_rela_initialised)
+	/* Make a guess.  */
+	use_rela = TRUE;
     }
+  else if (rela_dyn == NULL || rela_dyn->size == 0)
+    use_rela = FALSE;
   else
+    use_rela = TRUE;
+
+  if (use_rela)
     {
+      dynamic_relocs = rela_dyn;
       ext_size = bed->s->sizeof_rela;
       swap_in = bed->s->swap_reloca_in;
       swap_out = bed->s->swap_reloca_out;
     }
-  count = reldyn->size / ext_size;
+  else
+    {
+      dynamic_relocs = rel_dyn;
+      ext_size = bed->s->sizeof_rel;
+      swap_in = bed->s->swap_reloc_in;
+      swap_out = bed->s->swap_reloc_out;
+    }
 
   size = 0;
-  for (lo = reldyn->map_head.link_order; lo != NULL; lo = lo->next)
+  for (lo = dynamic_relocs->map_head.link_order; lo != NULL; lo = lo->next)
     if (lo->type == bfd_indirect_link_order)
-      {
-	asection *o = lo->u.indirect.section;
-	size += o->size;
-      }
+      size += lo->u.indirect.section->size;
 
-  if (size != reldyn->size)
+  if (size != dynamic_relocs->size)
     return 0;
 
   sort_elt = (sizeof (struct elf_link_sort_rela)
 	      + (i2e - 1) * sizeof (Elf_Internal_Rela));
+
+  count = dynamic_relocs->size / ext_size;
   sort = bfd_zmalloc (sort_elt * count);
+
   if (sort == NULL)
     {
       (*info->callbacks->warning)
@@ -7276,7 +7407,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
   else
     r_sym_mask = ~(bfd_vma) 0xffffffff;
 
-  for (lo = reldyn->map_head.link_order; lo != NULL; lo = lo->next)
+  for (lo = dynamic_relocs->map_head.link_order; lo != NULL; lo = lo->next)
     if (lo->type == bfd_indirect_link_order)
       {
 	bfd_byte *erel, *erelend;
@@ -7293,9 +7424,11 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 	erel = o->contents;
 	erelend = o->contents + o->size;
 	p = sort + o->output_offset / ext_size * sort_elt;
+
 	while (erel < erelend)
 	  {
 	    struct elf_link_sort_rela *s = (struct elf_link_sort_rela *) p;
+
 	    (*swap_in) (abfd, erel, s->rela);
 	    s->type = (*bed->elf_backend_reloc_type_class) (s->rela);
 	    s->u.sym_mask = r_sym_mask;
@@ -7326,7 +7459,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 
   qsort (s_non_relative, count - ret, sort_elt, elf_link_sort_cmp2);
 
-  for (lo = reldyn->map_head.link_order; lo != NULL; lo = lo->next)
+  for (lo = dynamic_relocs->map_head.link_order; lo != NULL; lo = lo->next)
     if (lo->type == bfd_indirect_link_order)
       {
 	bfd_byte *erel, *erelend;
@@ -7345,7 +7478,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
       }
 
   free (sort);
-  *psec = reldyn;
+  *psec = dynamic_relocs;
   return ret;
 }
 
