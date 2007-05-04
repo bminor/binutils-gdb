@@ -42,7 +42,12 @@ if { [istarget m68*-*-*] || [istarget fido*-*-*] } then {
     }
 
     run_dump_test link
-    run_dump_test fmoveml
+
+    # fido does not have a floating point unit.
+    if ![istarget fido-*-*] then {
+	run_dump_test fmoveml
+    }
+
     run_dump_test mcf-mov3q
     run_dump_test mode5
     run_dump_test mcf-mac
