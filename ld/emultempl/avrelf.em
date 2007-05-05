@@ -202,7 +202,7 @@ PARSE_AND_LIST_OPTIONS='
                    "                              "
                            "program counter wrap-around occures at address\n"
                    "                              "
-                           "<val>. Supported values are 16k, 32k and 64k.\n"));
+                           "<val>. Supported values are 8k, 16k, 32k and 64k.\n"));
   fprintf (file, _("     --no-call-ret-replacement "
                            "The relaxation machine normally will\n"
                    "                               "
@@ -230,6 +230,8 @@ PARSE_AND_LIST_ARGS_CASES='
         /* This variable is defined in the bfd library.  */
         if ((!strcmp (optarg,"32k"))      || (!strcmp (optarg,"32K")))
           avr_pc_wrap_around = 32768;
+        else if ((!strcmp (optarg,"8k")) || (!strcmp (optarg,"8K")))
+          avr_pc_wrap_around = 8192;
         else if ((!strcmp (optarg,"16k")) || (!strcmp (optarg,"16K")))
           avr_pc_wrap_around = 16384;
         else if ((!strcmp (optarg,"64k")) || (!strcmp (optarg,"64K")))

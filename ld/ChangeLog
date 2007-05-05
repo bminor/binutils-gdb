@@ -1,3 +1,9 @@
+2007-05-05  Anatoly Sokolov <aesok@post.ru>
+
+	* multempl/avrelf.em (PARSE_AND_LIST_ARGS_CASES): Add new value for 
+	"--pmem-wrap-around".
+	(PARSE_AND_LIST_OPTIONS): Describe new value for "--pmem-wrap-around".
+
 2007-05-03  Bob Wilson  <bob.wilson@acm.org>
 
 	* scripttempl/elfxtensa.sc: Merge changes from elf.sc.
