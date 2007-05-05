@@ -1,3 +1,9 @@
+2007-05-05  Mark Shinwell  <shinwell@codesourcery.com>
+ 
+	* config/tc-arm.c (md_apply_fix): Generate more accurate
+	diagnostic when 8-bit immediate range is exceeded for
+	BFD_RELOC_ARM_OFFSET_IMM8.
+
 2007-05-04  Alan Modra  <amodra@bigpond.net.au>
 
 	PR gas/4460

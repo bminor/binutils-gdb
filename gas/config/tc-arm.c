@@ -17922,7 +17922,7 @@ md_apply_fix (fixS *	fixP,
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("invalid literal constant: pool needs to be closer"));
 	  else
-	    as_bad (_("bad immediate value for half-word offset (%ld)"),
+	    as_bad (_("bad immediate value for 8-bit offset (%ld)"),
 		    (long) value);
 	  break;
 	}
