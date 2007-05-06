@@ -1,5 +1,37 @@
 2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* target.h (struct target_ops): Add REGCACHE parameter to
+	to_prepare_to_store.
+	(target_prepare_to_store): Likewise.
+	* target.c (debug_to_prepare_to_store): Add REGCACHE parameter.
+	(update_current_target): Adapt prepare_to_store de_fault rule.
+
+	* regcache.c (regcache_raw_write): Pass regcache to
+	target_prepare_to_store.
+
+	* inftarg.c (child_prepare_to_store): Add REGCACHE parameter.
+	Do not call CHILD_PREPARE_TO_STORE.
+	* gnu-nat.c (gnu_prepare_to_store): Likewise.
+	* procfs.c (procfs_prepare_to_store): Likewise.
+
+	* inf-child.c (inf_child_prepare_to_store): Add REGCACHE parameter.
+	* go32-nat.c (go32_prepare_to_store): Likewise.
+	* monitor.c (monitor_prepare_to_store): Likewise.
+	* nto-procfs.c (procfs_prepare_to_store): Likewise.
+	* remote-m32r-sdi.c (m32r_prepare_to_store): Likewise.
+	* remote-mips.c (mips_prepare_to_store): Likewise.
+	* remote-sim.c (gdbsim_prepare_to_store): Likewise.
+	* win32-nat.c (win32_prepare_to_store): Likewise.
+
+	* remote.c (remote_prepare_to_store): Add REGCACHE parameter.
+	Use it instead of current_regcache.
+
+	* hpux-thread.c (hpux_thread_prepare_to_store): Add REGCACHE
+	parameter.  Pass it on to next target.
+	* sol-thread.c (sol_thread_prepare_to_store): Likewise.
+
+2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* target.h (struct regcache): Add forward declaration.
 	(struct target_ops): Add REGCACHE parameter to to_fetch_registers
 	and to_store_registers target operations.

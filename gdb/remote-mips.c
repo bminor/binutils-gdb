@@ -98,7 +98,7 @@ static int mips_map_regno (int regno);
 
 static void mips_fetch_registers (struct regcache *regcache, int regno);
 
-static void mips_prepare_to_store (void);
+static void mips_prepare_to_store (struct regcache *regcache);
 
 static void mips_store_registers (struct regcache *regcache, int regno);
 
@@ -1946,7 +1946,7 @@ mips_fetch_registers (struct regcache *regcache, int regno)
    registers, so this function doesn't have to do anything.  */
 
 static void
-mips_prepare_to_store (void)
+mips_prepare_to_store (struct regcache *regcache)
 {
 }
 

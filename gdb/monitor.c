@@ -1367,7 +1367,7 @@ monitor_store_registers (struct regcache *regcache, int regno)
    debugged.  */
 
 static void
-monitor_prepare_to_store (void)
+monitor_prepare_to_store (struct regcache *regcache)
 {
   /* Do nothing, since we can store individual regs */
 }

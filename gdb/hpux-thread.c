@@ -390,9 +390,9 @@ hpux_thread_store_registers (struct regcache *regcache, int regno)
    debugged.  */
 
 static void
-hpux_thread_prepare_to_store (void)
+hpux_thread_prepare_to_store (struct regcache *regcache)
 {
-  deprecated_child_ops.to_prepare_to_store ();
+  deprecated_child_ops.to_prepare_to_store (regcache);
 }
 
 static int

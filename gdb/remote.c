@@ -89,7 +89,7 @@ static void build_remote_gdbarch_data (void);
 
 static void remote_files_info (struct target_ops *ignore);
 
-static void remote_prepare_to_store (void);
+static void remote_prepare_to_store (struct regcache *regcache);
 
 static void remote_fetch_registers (struct regcache *regcache, int regno);
 
@@ -3730,7 +3730,7 @@ remote_fetch_registers (struct regcache *regcache, int regnum)
    first.  */
 
 static void
-remote_prepare_to_store (void)
+remote_prepare_to_store (struct regcache *regcache)
 {
   struct remote_arch_state *rsa = get_remote_arch_state ();
   int i;
@@ -3744,7 +3744,7 @@ remote_prepare_to_store (void)
       /* Make sure all the necessary registers are cached.  */
       for (i = 0; i < NUM_REGS; i++)
 	if (rsa->regs[i].in_g_packet)
-	  regcache_raw_read (current_regcache, rsa->regs[i].regnum, buf);
+	  regcache_raw_read (regcache, rsa->regs[i].regnum, buf);
       break;
     case PACKET_ENABLE:
       break;

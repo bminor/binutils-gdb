@@ -91,7 +91,7 @@ static void gdbsim_resume (ptid_t ptid, int step, enum target_signal siggnal);
 
 static ptid_t gdbsim_wait (ptid_t ptid, struct target_waitstatus *status);
 
-static void gdbsim_prepare_to_store (void);
+static void gdbsim_prepare_to_store (struct regcache *regcache);
 
 static void gdbsim_files_info (struct target_ops *target);
 
@@ -734,7 +734,7 @@ gdbsim_wait (ptid_t ptid, struct target_waitstatus *status)
    debugged.  */
 
 static void
-gdbsim_prepare_to_store (void)
+gdbsim_prepare_to_store (struct regcache *regcache)
 {
   /* Do nothing, since we can store individual regs */
 }

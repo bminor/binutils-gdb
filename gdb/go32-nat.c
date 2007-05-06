@@ -177,7 +177,7 @@ static ptid_t go32_wait (ptid_t ptid,
 static void go32_fetch_registers (struct regcache *, int regno);
 static void store_register (const struct regcache *, int regno);
 static void go32_store_registers (struct regcache *, int regno);
-static void go32_prepare_to_store (void);
+static void go32_prepare_to_store (struct regcache *);
 static int go32_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
 			     int write,
 			     struct mem_attrib *attrib,
@@ -519,7 +519,7 @@ go32_store_registers (struct regcache *regcache, int regno)
 }
 
 static void
-go32_prepare_to_store (void)
+go32_prepare_to_store (struct regcache *regcache)
 {
 }
 

@@ -123,7 +123,7 @@ static void procfs_files_info (struct target_ops *);
 static void procfs_fetch_registers (struct regcache *, int);
 static void procfs_store_registers (struct regcache *, int);
 static void procfs_notice_signals (ptid_t);
-static void procfs_prepare_to_store (void);
+static void procfs_prepare_to_store (struct regcache *);
 static void procfs_kill_inferior (void);
 static void procfs_mourn_inferior (void);
 static void procfs_create_inferior (char *, char *, char **, int);
@@ -3732,11 +3732,8 @@ procfs_fetch_registers (struct regcache *regcache, int regnum)
    from the program being debugged.  */
 
 static void
-procfs_prepare_to_store (void)
+procfs_prepare_to_store (struct regcache *regcache)
 {
-#ifdef CHILD_PREPARE_TO_STORE
-  CHILD_PREPARE_TO_STORE ();
-#endif
 }
 
 /* Store register REGNUM back into the inferior.  If REGNUM is -1, do

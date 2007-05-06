@@ -669,7 +669,7 @@ regcache_raw_write (struct regcache *regcache, int regnum,
 		  regcache->descr->sizeof_register[regnum]) == 0))
     return;
 
-  target_prepare_to_store ();
+  target_prepare_to_store (regcache);
   memcpy (register_buffer (regcache, regnum), buf,
 	  regcache->descr->sizeof_register[regnum]);
   regcache->register_valid_p[regnum] = 1;

@@ -110,7 +110,7 @@ static void debug_to_fetch_registers (struct regcache *, int);
 
 static void debug_to_store_registers (struct regcache *, int);
 
-static void debug_to_prepare_to_store (void);
+static void debug_to_prepare_to_store (struct regcache *);
 
 static void debug_to_files_info (struct target_ops *);
 
@@ -509,7 +509,7 @@ update_current_target (void)
 	    (void (*) (struct regcache *, int))
 	    noprocess);
   de_fault (to_prepare_to_store,
-	    (void (*) (void))
+	    (void (*) (struct regcache *))
 	    noprocess);
   de_fault (deprecated_xfer_memory,
 	    (int (*) (CORE_ADDR, gdb_byte *, int, int, struct mem_attrib *, struct target_ops *))
@@ -2195,9 +2195,9 @@ debug_to_store_registers (struct regcache *regcache, int regno)
 }
 
 static void
-debug_to_prepare_to_store (void)
+debug_to_prepare_to_store (struct regcache *regcache)
 {
-  debug_target.to_prepare_to_store ();
+  debug_target.to_prepare_to_store (regcache);
 
   fprintf_unfiltered (gdb_stdlog, "target_prepare_to_store ()\n");
 }

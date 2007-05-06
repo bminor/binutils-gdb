@@ -46,7 +46,7 @@ extern struct exception_event_record
 
 extern void _initialize_inftarg (void);
 
-static void child_prepare_to_store (void);
+static void child_prepare_to_store (struct regcache *);
 
 #ifndef CHILD_WAIT
 static ptid_t child_wait (ptid_t, struct target_waitstatus *);
@@ -259,11 +259,8 @@ child_detach (char *args, int from_tty)
    debugged.  */
 
 static void
-child_prepare_to_store (void)
+child_prepare_to_store (struct regcache *regcache)
 {
-#ifdef CHILD_PREPARE_TO_STORE
-  CHILD_PREPARE_TO_STORE ();
-#endif
 }
 
 /* Print status information about what we're accessing.  */

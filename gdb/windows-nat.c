@@ -2039,7 +2039,7 @@ win32_kill_inferior (void)
 }
 
 static void
-win32_prepare_to_store (void)
+win32_prepare_to_store (struct regcache *regcache)
 {
   /* Do nothing, since we can store individual regs */
 }

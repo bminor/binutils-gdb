@@ -326,7 +326,7 @@ struct target_ops
     ptid_t (*to_wait) (ptid_t, struct target_waitstatus *);
     void (*to_fetch_registers) (struct regcache *, int);
     void (*to_store_registers) (struct regcache *, int);
-    void (*to_prepare_to_store) (void);
+    void (*to_prepare_to_store) (struct regcache *);
 
     /* Transfer LEN bytes of memory between GDB address MYADDR and
        target address MEMADDR.  If WRITE, transfer them to the target, else
@@ -606,8 +606,8 @@ extern void target_disconnect (char *, int);
    that REGISTERS contains all the registers from the program being
    debugged.  */
 
-#define	target_prepare_to_store()	\
-     (*current_target.to_prepare_to_store) ()
+#define	target_prepare_to_store(regcache)	\
+     (*current_target.to_prepare_to_store) (regcache)
 
 extern DCACHE *target_dcache;
 

@@ -66,7 +66,7 @@ inf_child_post_attach (int pid)
    program being debugged.  */
 
 static void
-inf_child_prepare_to_store (void)
+inf_child_prepare_to_store (struct regcache *regcache)
 {
 }
 

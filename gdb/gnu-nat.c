@@ -2207,11 +2207,8 @@ gnu_terminal_init_inferior (void)
    that registers contains all the registers from the program being
    debugged.  */
 static void
-gnu_prepare_to_store (void)
+gnu_prepare_to_store (struct regcache *regcache)
 {
-#ifdef CHILD_PREPARE_TO_STORE
-  CHILD_PREPARE_TO_STORE ();
-#endif
 }
 
 static void

@@ -1109,7 +1109,7 @@ procfs_kill_inferior (void)
 /* Store register REGNO, or all registers if REGNO == -1, from the contents
    of REGISTERS.  */
 static void
-procfs_prepare_to_store (void)
+procfs_prepare_to_store (struct regcache *regcache)
 {
 }
 

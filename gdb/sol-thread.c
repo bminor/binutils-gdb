@@ -649,9 +649,9 @@ sol_thread_store_registers (struct regcache *regcache, int regnum)
    program being debugged.  */
 
 static void
-sol_thread_prepare_to_store (void)
+sol_thread_prepare_to_store (struct regcache *regcache)
 {
-  procfs_ops.to_prepare_to_store ();
+  procfs_ops.to_prepare_to_store (regcache);
 }
 
 /* Transfer LEN bytes between GDB address MYADDR and target address

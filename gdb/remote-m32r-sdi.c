@@ -1014,7 +1014,7 @@ m32r_store_register (struct regcache *regcache, int regno)
    debugged.  */
 
 static void
-m32r_prepare_to_store (void)
+m32r_prepare_to_store (struct regcache *regcache)
 {
   /* Do nothing, since we can store individual regs */
   if (remote_debug)
