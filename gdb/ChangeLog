@@ -1,5 +1,16 @@
 2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* arnmnbsd-nat.c (supply_gregset): Rename to ...
+	(arm_supply_gregset): ... this.  Add REGCACHE parameter.
+	Use it instead of current_regcache.
+	(supply_fparegset): Rename to ...
+	(arm_supply_fparegset): ... this.  Add REGCACHE parameter.
+	Use it instead of current_regcache.
+	(fetch_regs, fetch_fp_regs): Update calls.  Pass current_regcache.
+	(fetch_core_registers, fetch_elfcore_registers): Likewise.
+
+2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* alpha-tdep.c (alpha_supply_int_regs, alpha_fill_int_regs,
 	alpha_supply_fp_regs, alpha_fill_fp_regs): Add REGCACHE parameter,
 	use it instead of current_regcache.

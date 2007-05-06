@@ -38,41 +38,41 @@
 extern int arm_apcs_32;
 
 static void
-supply_gregset (struct reg *gregset)
+arm_supply_gregset (struct regcache *regcache, struct reg *gregset)
 {
   int regno;
   CORE_ADDR r_pc;
 
   /* Integer registers.  */
   for (regno = ARM_A1_REGNUM; regno < ARM_SP_REGNUM; regno++)
-    regcache_raw_supply (current_regcache, regno, (char *) &gregset->r[regno]);
+    regcache_raw_supply (regcache, regno, (char *) &gregset->r[regno]);
 
-  regcache_raw_supply (current_regcache, ARM_SP_REGNUM,
+  regcache_raw_supply (regcache, ARM_SP_REGNUM,
 		       (char *) &gregset->r_sp);
-  regcache_raw_supply (current_regcache, ARM_LR_REGNUM,
+  regcache_raw_supply (regcache, ARM_LR_REGNUM,
 		       (char *) &gregset->r_lr);
   /* This is ok: we're running native...  */
   r_pc = ADDR_BITS_REMOVE (gregset->r_pc);
-  regcache_raw_supply (current_regcache, ARM_PC_REGNUM, (char *) &r_pc);
+  regcache_raw_supply (regcache, ARM_PC_REGNUM, (char *) &r_pc);
 
   if (arm_apcs_32)
-    regcache_raw_supply (current_regcache, ARM_PS_REGNUM,
+    regcache_raw_supply (regcache, ARM_PS_REGNUM,
 			 (char *) &gregset->r_cpsr);
   else
-    regcache_raw_supply (current_regcache, ARM_PS_REGNUM,
+    regcache_raw_supply (regcache, ARM_PS_REGNUM,
 			 (char *) &gregset->r_pc);
 }
 
 static void
-supply_fparegset (struct fpreg *fparegset)
+arm_supply_fparegset (struct regcache *regcache, struct fpreg *fparegset)
 {
   int regno;
 
   for (regno = ARM_F0_REGNUM; regno <= ARM_F7_REGNUM; regno++)
-    regcache_raw_supply (current_regcache, regno,
+    regcache_raw_supply (regcache, regno,
 			 (char *) &fparegset->fpr[regno - ARM_F0_REGNUM]);
 
-  regcache_raw_supply (current_regcache, ARM_FPS_REGNUM,
+  regcache_raw_supply (regcache, ARM_FPS_REGNUM,
 		       (char *) &fparegset->fpr_fpsr);
 }
 
@@ -142,7 +142,7 @@ fetch_regs (void)
       return;
     }
 
-  supply_gregset (&inferior_registers);
+  arm_supply_gregset (current_regcache, &inferior_registers);
 }
 
 static void
@@ -190,7 +190,7 @@ fetch_fp_regs (void)
       return;
     }
 
-  supply_fparegset (&inferior_fp_registers);
+  arm_supply_fparegset (current_regcache, &inferior_fp_registers);
 }
 
 static void
@@ -421,8 +421,8 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
   int regno;
   CORE_ADDR r_pc;
 
-  supply_gregset (&core_reg->intreg);
-  supply_fparegset (&core_reg->freg);
+  arm_supply_gregset (current_regcache, &core_reg->intreg);
+  arm_supply_fparegset (current_regcache, &core_reg->freg);
 }
 
 static void
@@ -442,7 +442,7 @@ fetch_elfcore_registers (char *core_reg_sect, unsigned core_reg_size,
 	  /* The memcpy may be unnecessary, but we can't really be sure
 	     of the alignment of the data in the core file.  */
 	  memcpy (&gregset, core_reg_sect, sizeof (gregset));
-	  supply_gregset (&gregset);
+	  arm_supply_gregset (current_regcache, &gregset);
 	}
       break;
 
@@ -454,7 +454,7 @@ fetch_elfcore_registers (char *core_reg_sect, unsigned core_reg_size,
 	  /* The memcpy may be unnecessary, but we can't really be sure
 	     of the alignment of the data in the core file.  */
 	  memcpy (&fparegset, core_reg_sect, sizeof (fparegset));
-	  supply_fparegset (&fparegset);
+	  arm_supply_fparegset (current_regcache, &fparegset);
 	}
       break;
 
