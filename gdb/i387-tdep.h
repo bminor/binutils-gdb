@@ -90,13 +90,6 @@ extern void i387_supply_fsave (struct regcache *regcache, int regnum,
 extern void i387_collect_fsave (const struct regcache *regcache, int regnum,
 				void *fsave);
 
-/* Fill register REGNUM (if it is a floating-point register) in *FSAVE
-   with the value in GDB's register cache.  If REGNUM is -1, do this
-   for all registers.  This function doesn't touch any of the reserved
-   bits in *FSAVE.  */
-
-extern void i387_fill_fsave (void *fsave, int regnum);
-
 /* Fill register REGNUM in REGCACHE with the appropriate
    floating-point or SSE register value from *FXSAVE.  This function
    masks off any of the reserved bits in *FXSAVE.  */
@@ -111,13 +104,6 @@ extern void i387_supply_fxsave (struct regcache *regcache, int regnum,
 
 extern void i387_collect_fxsave (const struct regcache *regcache, int regnum,
 				 void *fxsave);
-
-/* Fill register REGNUM (if it is a floating-point or SSE register) in
-   *FXSAVE with the value in GDB's register cache.  If REGNUM is -1, do
-   this for all registers.  This function doesn't touch any of the
-   reserved bits in *FXSAVE.  */
-
-extern void i387_fill_fxsave (void *fxsave, int regnum);
 
 /* Prepare the FPU stack in REGCACHE for a function return.  */
 

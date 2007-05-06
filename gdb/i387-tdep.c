@@ -473,17 +473,6 @@ i387_collect_fsave (const struct regcache *regcache, int regnum, void *fsave)
       }
 #undef I387_ST0_REGNUM
 }
-
-/* Fill register REGNUM (if it is a floating-point register) in *FSAVE
-   with the value in GDB's register cache.  If REGNUM is -1, do this
-   for all registers.  This function doesn't touch any of the reserved
-   bits in *FSAVE.  */
-
-void
-i387_fill_fsave (void *fsave, int regnum)
-{
-  i387_collect_fsave (current_regcache, regnum, fsave);
-}
 
 
 /* At fxsave_offset[REGNUM] you'll find the offset to the location in
@@ -699,17 +688,6 @@ i387_collect_fxsave (const struct regcache *regcache, int regnum, void *fxsave)
 
 #undef I387_ST0_REGNUM
 #undef I387_NUM_XMM_REGS
-}
-
-/* Fill register REGNUM (if it is a floating-point or SSE register) in
-   *FXSAVE with the value in GDB's register cache.  If REGNUM is -1, do
-   this for all registers.  This function doesn't touch any of the
-   reserved bits in *FXSAVE.  */
-
-void
-i387_fill_fxsave (void *fxsave, int regnum)
-{
-  i387_collect_fxsave (current_regcache, regnum, fxsave);
 }
 
 /* Recreate the FTW (tag word) valid bits from the 80-bit FP data in

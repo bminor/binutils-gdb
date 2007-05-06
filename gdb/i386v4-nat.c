@@ -154,7 +154,7 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
   if (FP0_REGNUM == 0)
     return;
 
-  i387_fill_fsave ((char *) fpregsetp, regno);
+  i387_collect_fsave (current_regcache, regno, fpregsetp);
 }
 
 #endif /* HAVE_FPREGSET_T */

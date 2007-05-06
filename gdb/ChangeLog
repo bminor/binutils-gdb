@@ -1,5 +1,16 @@
 2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* i387-tdep.c (i387_fill_fsave, i387_fill_fxsave): Remove.
+	* i387-tdep.h (i387_fill_fsave, i387_fill_fxsave): Remove prototypes.
+	* i368-linux-nat.c (supply_fpregset, supply_fpxregset): Replace
+	i387_fill_fsave and i387_fill_fxsave calls by inline copies.
+	* i386-nto-tdep.c (i386nto_regset_fill): Likewise.
+	* i386gnu-nat.c (store_fpregs): Likewise.
+	* i386v4-nat.c (fill_fpregset): Likewise.
+	* go32-nat.c (store_register, go32_store_registers): Likewise.
+
+2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* cris-tdep.c (supply_gregset): Rename to ...
 	(cris_supply_gregset): ... this.  Add REGCACHE parameter.  Use it
 	instead of current_regcache.

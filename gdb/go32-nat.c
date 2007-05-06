@@ -497,7 +497,7 @@ store_register (int regno)
     regcache_raw_collect (current_regcache, regno,
 			  (char *) &a_tss + regno_mapping[regno].tss_ofs);
   else if (i386_fp_regnum_p (regno) || i386_fpc_regnum_p (regno))
-    i387_fill_fsave ((char *) &npx, regno);
+    i387_collect_fsave (current_regcache, regno, &npx);
   else
     internal_error (__FILE__, __LINE__,
 		    _("Invalid register no. %d in store_register."), regno);
@@ -514,7 +514,7 @@ go32_store_registers (int regno)
     {
       for (r = 0; r < FP0_REGNUM; r++)
 	store_register (r);
-      i387_fill_fsave ((char *) &npx, -1);
+      i387_collect_fsave (current_regcache, -1, &npx);
     }
 }
 

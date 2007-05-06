@@ -303,7 +303,7 @@ supply_fpregset (elf_fpregset_t *fpregsetp)
 void
 fill_fpregset (elf_fpregset_t *fpregsetp, int regno)
 {
-  i387_fill_fsave ((char *) fpregsetp, regno);
+  i387_collect_fsave (current_regcache, regno, fpregsetp);
 }
 
 #ifdef HAVE_PTRACE_GETREGS
@@ -367,7 +367,7 @@ supply_fpxregset (elf_fpxregset_t *fpxregsetp)
 void
 fill_fpxregset (elf_fpxregset_t *fpxregsetp, int regno)
 {
-  i387_fill_fxsave ((char *) fpxregsetp, regno);
+  i387_collect_fxsave (current_regcache, regno, fpxregsetp);
 }
 
 /* Fetch all registers covered by the PTRACE_GETFPXREGS request from

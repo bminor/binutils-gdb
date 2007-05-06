@@ -193,9 +193,9 @@ i386nto_regset_fill (int regset, char *data)
   else if (regset == NTO_REG_FLOAT)
     {
       if (nto_cpuinfo_valid && nto_cpuinfo_flags | X86_CPU_FXSR)
-	i387_fill_fxsave (data, -1);
+	i387_collect_fxsave (current_regcache, -1, data);
       else
-	i387_fill_fsave (data, -1);
+	i387_collect_fsave (current_regcache, -1, data);
     }
   else
     return -1;

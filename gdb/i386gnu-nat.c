@@ -186,7 +186,7 @@ store_fpregs (struct proc *thread, int regno)
 
   /* FIXME: kettenis/2001-07-15: Is this right?  Should we somehow
      take into account DEPRECATED_REGISTER_VALID like the old code did?  */
-  i387_fill_fsave (state.hw_state, regno);
+  i387_collect_fsave (current_regcache, regno, state.hw_state);
 
   err = thread_set_state (thread->port, i386_FLOAT_STATE,
 			  (thread_state_t) &state, i386_FLOAT_STATE_COUNT);
