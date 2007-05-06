@@ -50,10 +50,10 @@ typedef mips_elf_fpreg_t mips_elf_fpregset_t[ELF_NFPREG];
 
 #define EF_SIZE			180
 
-void mips_supply_gregset (mips_elf_gregset_t *);
-void mips_fill_gregset (mips_elf_gregset_t *, int);
-void mips_supply_fpregset (mips_elf_fpregset_t *);
-void mips_fill_fpregset (mips_elf_fpregset_t *, int);
+void mips_supply_gregset (struct regcache *, const mips_elf_gregset_t *);
+void mips_fill_gregset (const struct regcache *, mips_elf_gregset_t *, int);
+void mips_supply_fpregset (struct regcache *, const mips_elf_fpregset_t *);
+void mips_fill_fpregset (const struct regcache *, mips_elf_fpregset_t *, int);
 
 /* 64-bit support.  */
 
@@ -88,7 +88,7 @@ typedef mips64_elf_fpreg_t mips64_elf_fpregset_t[MIPS64_ELF_NFPREG];
 
 #define MIPS64_EF_SIZE			304
 
-void mips64_supply_gregset (mips64_elf_gregset_t *);
-void mips64_fill_gregset (mips64_elf_gregset_t *, int);
-void mips64_supply_fpregset (mips64_elf_fpregset_t *);
-void mips64_fill_fpregset (mips64_elf_fpregset_t *, int);
+void mips64_supply_gregset (struct regcache *, const mips64_elf_gregset_t *);
+void mips64_fill_gregset (const struct regcache *, mips64_elf_gregset_t *, int);
+void mips64_supply_fpregset (struct regcache *, const mips64_elf_fpregset_t *);
+void mips64_fill_fpregset (const struct regcache *, mips64_elf_fpregset_t *, int);

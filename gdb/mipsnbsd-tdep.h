@@ -22,11 +22,11 @@
 #ifndef MIPSNBSD_TDEP_H
 #define MIPSNBSD_TDEP_H
 
-void mipsnbsd_supply_reg (char *, int);
-void mipsnbsd_fill_reg (char *, int);
+void mipsnbsd_supply_reg (struct regcache *, const char *, int);
+void mipsnbsd_fill_reg (const struct regcache *, char *, int);
 
-void mipsnbsd_supply_fpreg (char *, int);
-void mipsnbsd_fill_fpreg (char *, int);
+void mipsnbsd_supply_fpreg (struct regcache *, const char *, int);
+void mipsnbsd_fill_fpreg (const struct regcache *, char *, int);
 
 #define SIZEOF_STRUCT_REG	(38 * mips_isa_regsize (current_gdbarch))
 #define SIZEOF_STRUCT_FPREG	(33 * mips_isa_regsize (current_gdbarch))

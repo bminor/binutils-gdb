@@ -142,7 +142,7 @@ mipsnbsd_regset_from_core_section (struct gdbarch *gdbarch,
    ptrace register structure used by NetBSD/mips.  */
 
 void
-mipsnbsd_supply_reg (char *regs, int regno)
+mipsnbsd_supply_reg (struct regcache *regcache, const char *regs, int regno)
 {
   int i;
 
@@ -151,27 +151,27 @@ mipsnbsd_supply_reg (char *regs, int regno)
       if (regno == i || regno == -1)
 	{
 	  if (CANNOT_FETCH_REGISTER (i))
-	    regcache_raw_supply (current_regcache, i, NULL);
+	    regcache_raw_supply (regcache, i, NULL);
 	  else
-            regcache_raw_supply (current_regcache, i,
+            regcache_raw_supply (regcache, i,
 				 regs + (i * mips_isa_regsize (current_gdbarch)));
         }
     }
 }
 
 void
-mipsnbsd_fill_reg (char *regs, int regno)
+mipsnbsd_fill_reg (const struct regcache *regcache, char *regs, int regno)
 {
   int i;
 
   for (i = 0; i <= PC_REGNUM; i++)
     if ((regno == i || regno == -1) && ! CANNOT_STORE_REGISTER (i))
-      regcache_raw_collect (current_regcache, i,
+      regcache_raw_collect (regcache, i,
 			    regs + (i * mips_isa_regsize (current_gdbarch)));
 }
 
 void
-mipsnbsd_supply_fpreg (char *fpregs, int regno)
+mipsnbsd_supply_fpreg (struct regcache *regcache, const char *fpregs, int regno)
 {
   int i;
 
@@ -182,23 +182,23 @@ mipsnbsd_supply_fpreg (char *fpregs, int regno)
       if (regno == i || regno == -1)
 	{
 	  if (CANNOT_FETCH_REGISTER (i))
-	    regcache_raw_supply (current_regcache, i, NULL);
+	    regcache_raw_supply (regcache, i, NULL);
 	  else
-            regcache_raw_supply (current_regcache, i,
+            regcache_raw_supply (regcache, i,
 				 fpregs + ((i - FP0_REGNUM) * mips_isa_regsize (current_gdbarch)));
 	}
     }
 }
 
 void
-mipsnbsd_fill_fpreg (char *fpregs, int regno)
+mipsnbsd_fill_fpreg (const struct regcache *regcache, char *fpregs, int regno)
 {
   int i;
 
   for (i = FP0_REGNUM; i <= mips_regnum (current_gdbarch)->fp_control_status;
        i++)
     if ((regno == i || regno == -1) && ! CANNOT_STORE_REGISTER (i))
-      regcache_raw_collect (current_regcache, i,
+      regcache_raw_collect (regcache, i,
 			    fpregs + ((i - FP0_REGNUM) * mips_isa_regsize (current_gdbarch)));
 }
 

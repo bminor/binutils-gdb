@@ -24,6 +24,7 @@
 #include "inferior.h"
 #include "mips-tdep.h"
 #include "target.h"
+#include "regcache.h"
 #include "linux-nat.h"
 #include "mips-linux-tdep.h"
 
@@ -179,36 +180,36 @@ void
 supply_gregset (gdb_gregset_t *gregsetp)
 {
   if (mips_isa_regsize (current_gdbarch) == 4)
-    mips_supply_gregset ((void *) gregsetp);
+    mips_supply_gregset (current_regcache, (void *) gregsetp);
   else
-    mips64_supply_gregset ((void *) gregsetp);
+    mips64_supply_gregset (current_regcache, (void *) gregsetp);
 }
 
 void
 fill_gregset (gdb_gregset_t *gregsetp, int regno)
 {
   if (mips_isa_regsize (current_gdbarch) == 4)
-    mips_fill_gregset ((void *) gregsetp, regno);
+    mips_fill_gregset (current_regcache, (void *) gregsetp, regno);
   else
-    mips64_fill_gregset ((void *) gregsetp, regno);
+    mips64_fill_gregset (current_regcache, (void *) gregsetp, regno);
 }
 
 void
 supply_fpregset (gdb_fpregset_t *fpregsetp)
 {
   if (mips_isa_regsize (current_gdbarch) == 4)
-    mips_supply_fpregset ((void *) fpregsetp);
+    mips_supply_fpregset (current_regcache, (void *) fpregsetp);
   else
-    mips64_supply_fpregset ((void *) fpregsetp);
+    mips64_supply_fpregset (current_regcache, (void *) fpregsetp);
 }
 
 void
 fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
 {
   if (mips_isa_regsize (current_gdbarch) == 4)
-    mips_fill_fpregset ((void *) fpregsetp, regno);
+    mips_fill_fpregset (current_regcache, (void *) fpregsetp, regno);
   else
-    mips64_fill_fpregset ((void *) fpregsetp, regno);
+    mips64_fill_fpregset (current_regcache, (void *) fpregsetp, regno);
 }
 
 
@@ -249,7 +250,8 @@ mips64_linux_regsets_fetch_registers (int regno)
 	  perror_with_name (_("Couldn't get registers"));
 	}
 
-      mips64_supply_gregset (&regs);
+      mips64_supply_gregset (current_regcache,
+			     (const mips64_elf_gregset_t *) &regs);
     }
 
   if (regno == -1 || is_fp)
@@ -267,7 +269,8 @@ mips64_linux_regsets_fetch_registers (int regno)
 	  perror_with_name (_("Couldn't get FP registers"));
 	}
 
-      mips64_supply_fpregset (&fp_regs);
+      mips64_supply_fpregset (current_regcache,
+			      (const mips64_elf_fpregset_t *) &fp_regs);
     }
 }
 
@@ -301,7 +304,7 @@ mips64_linux_regsets_store_registers (int regno)
       if (ptrace (PTRACE_GETREGS, tid, 0L, (PTRACE_TYPE_ARG3) &regs) == -1)
 	perror_with_name (_("Couldn't get registers"));
 
-      mips64_fill_gregset (&regs, regno);
+      mips64_fill_gregset (current_regcache, &regs, regno);
 
       if (ptrace (PTRACE_SETREGS, tid, 0L, (PTRACE_TYPE_ARG3) &regs) == -1)
 	perror_with_name (_("Couldn't set registers"));
@@ -315,7 +318,7 @@ mips64_linux_regsets_store_registers (int regno)
 		  (PTRACE_TYPE_ARG3) &fp_regs) == -1)
 	perror_with_name (_("Couldn't get FP registers"));
 
-      mips64_fill_fpregset (&fp_regs, regno);
+      mips64_fill_fpregset (current_regcache, &fp_regs, regno);
 
       if (ptrace (PTRACE_SETFPREGS, tid, 0L,
 		  (PTRACE_TYPE_ARG3) &fp_regs) == -1)
