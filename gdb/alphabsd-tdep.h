@@ -22,11 +22,13 @@
 #ifndef ALPHABSD_TDEP_H
 #define ALPHABSD_TDEP_H
 
-void alphabsd_supply_reg (char *, int);
-void alphabsd_fill_reg (char *, int);
+struct regcache;
 
-void alphabsd_supply_fpreg (char *, int);
-void alphabsd_fill_fpreg (char *, int);
+void alphabsd_supply_reg (struct regcache *, const char *, int);
+void alphabsd_fill_reg (const struct regcache *, char *, int);
+
+void alphabsd_supply_fpreg (struct regcache *, const char *, int);
+void alphabsd_fill_fpreg (const struct regcache *, char *, int);
 
 
 /* Functions exported from alphanbsd-tdep.c.  */

@@ -1,5 +1,37 @@
 2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* alpha-tdep.c (alpha_supply_int_regs, alpha_fill_int_regs,
+	alpha_supply_fp_regs, alpha_fill_fp_regs): Add REGCACHE parameter,
+	use it instead of current_regcache.
+	* alpha-tdep.h (struct regcache): Add forward declaration.
+	(alpha_supply_int_regs, alpha_fill_int_regs, alpha_supply_fp_regs,
+	alpha_fill_fp_regs): Update prototypes.
+
+	* alpha-nat.c: (supply_gregset, fill_gregset, supply_fpregset,
+	fill_fpregset): Pass current_regcache to alpha_supply/fill_ routines.
+	* alpha-linux-nat.c: Include "regcache.h".
+	(supply_gregset, fill_gregset, supply_fpregset, fill_fpregset): Pass
+	current_regcache to alpha_supply/fill_ routines.
+
+	* alphabsd-tdep.c: Include "regcache.h".
+	(alphabsd_supply_reg, alphabsd_supply_fpreg): Add REGCACHE paramter,
+	pass it to alpha_supply_ routines.  Make REGS const.
+	(alphabsd_fill_reg, alphabsd_fill_fpreg): Add REGCACHE parameter,
+	pass it to alpha_fill_ routines.
+	* alphabsd-tdep.h (struct regcache): Add forward declaration.
+	(alphabsd_supply_reg, alphabsd_fill_reg, alphabsd_supply_fpreg,
+	alphabsd_fill_fpreg): Update prototypes.
+
+	* alphanbsd-nat.c (supply_gregset, fill_gregset, supply_fpregset,
+	fill_fpregset, alphabsd_fetch_inferior_registers,
+	alphabsd_store_inferior_registers): Pass current_regcache to
+	alphabsd_supply/fill_ routines.
+
+	* Makefile.in (alpha-linux-nat.o, alphabsd-tdep.o): Update
+	dependencies.
+
+2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* aix-thread.c (supply_gprs64, supply_reg32, supply_fprs,
 	supply_sprs64, supply_sprs32): Add REGCACHE parameter, use it
 	instead of current_regcache.

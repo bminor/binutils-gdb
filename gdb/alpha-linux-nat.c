@@ -20,6 +20,7 @@
 
 #include "defs.h"
 #include "target.h"
+#include "regcache.h"
 #include "linux-nat.h"
 
 #include "alpha-tdep.h"
@@ -44,7 +45,7 @@ supply_gregset (gdb_gregset_t *gregsetp)
   long *regp = (long *)gregsetp;
 
   /* PC is in slot 32, UNIQUE is in slot 33.  */
-  alpha_supply_int_regs (-1, regp, regp + 31, regp + 32);
+  alpha_supply_int_regs (current_regcache, -1, regp, regp + 31, regp + 32);
 }
 
 void
@@ -53,7 +54,7 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
   long *regp = (long *)gregsetp;
 
   /* PC is in slot 32, UNIQUE is in slot 33.  */
-  alpha_fill_int_regs (regno, regp, regp + 31, regp + 32);
+  alpha_fill_int_regs (current_regcache, regno, regp, regp + 31, regp + 32);
 }
 
 /*
@@ -67,7 +68,7 @@ supply_fpregset (gdb_fpregset_t *fpregsetp)
   long *regp = (long *)fpregsetp;
 
   /* FPCR is in slot 32.  */
-  alpha_supply_fp_regs (-1, regp, regp + 31);
+  alpha_supply_fp_regs (current_regcache, -1, regp, regp + 31);
 }
 
 void
@@ -76,7 +77,7 @@ fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
   long *regp = (long *)fpregsetp;
 
   /* FPCR is in slot 32.  */
-  alpha_fill_fp_regs (regno, regp, regp + 31);
+  alpha_fill_fp_regs (current_regcache, regno, regp, regp + 31);
 }
 
 

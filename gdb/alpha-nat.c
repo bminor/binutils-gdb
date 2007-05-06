@@ -158,7 +158,7 @@ supply_gregset (gdb_gregset_t *gregsetp)
   long *regp = gregsetp->regs;
 
   /* PC is in slot 32.  */
-  alpha_supply_int_regs (-1, regp, regp + 31, NULL);
+  alpha_supply_int_regs (current_regcache, -1, regp, regp + 31, NULL);
 }
 
 void
@@ -167,7 +167,7 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
   long *regp = gregsetp->regs;
 
   /* PC is in slot 32.  */
-  alpha_fill_int_regs (regno, regp, regp + 31, NULL);
+  alpha_fill_int_regs (current_regcache, regno, regp, regp + 31, NULL);
 }
 
 /*
@@ -181,7 +181,7 @@ supply_fpregset (gdb_fpregset_t *fpregsetp)
   long *regp = fpregsetp->regs;
 
   /* FPCR is in slot 32.  */
-  alpha_supply_fp_regs (-1, regp, regp + 31);
+  alpha_supply_fp_regs (current_regcache, -1, regp, regp + 31);
 }
 
 void
@@ -190,7 +190,7 @@ fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
   long *regp = fpregsetp->regs;
 
   /* FPCR is in slot 32.  */
-  alpha_fill_fp_regs (regno, regp, regp + 31);
+  alpha_fill_fp_regs (current_regcache, regno, regp, regp + 31);
 }
 #endif
 
