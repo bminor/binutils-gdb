@@ -87,7 +87,7 @@ hppa_hpux_save_state_offset (struct regcache *regcache, int regnum)
 #endif
 
 static void
-hppa_hpux_fetch_register (int regnum)
+hppa_hpux_fetch_register (struct regcache *regcache, int regnum)
 {
   CORE_ADDR addr;
   size_t size;
@@ -98,7 +98,7 @@ hppa_hpux_fetch_register (int regnum)
   pid = ptid_get_pid (inferior_ptid);
 
   /* This isn't really an address, but ptrace thinks of it as one.  */
-  addr = hppa_hpux_save_state_offset(current_regcache, regnum);
+  addr = hppa_hpux_save_state_offset (regcache, regnum);
   size = register_size (current_gdbarch, regnum);
 
   gdb_assert (size == 4 || size == 8);
@@ -138,23 +138,23 @@ hppa_hpux_fetch_register (int regnum)
       store_unsigned_integer ((gdb_byte *)buf, 8, flags);
     }
 
-  regcache_raw_supply (current_regcache, regnum, buf);
+  regcache_raw_supply (regcache, regnum, buf);
 }
 
 static void
-hppa_hpux_fetch_inferior_registers (int regnum)
+hppa_hpux_fetch_inferior_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
     for (regnum = 0; regnum < NUM_REGS; regnum++)
-      hppa_hpux_fetch_register (regnum);
+      hppa_hpux_fetch_register (regcache, regnum);
   else
-    hppa_hpux_fetch_register (regnum);
+    hppa_hpux_fetch_register (regcache, regnum);
 }
 
 /* Store register REGNUM into the inferior.  */
 
 static void
-hppa_hpux_store_register (int regnum)
+hppa_hpux_store_register (struct regcache *regcache, int regnum)
 {
   CORE_ADDR addr;
   size_t size;
@@ -164,13 +164,13 @@ hppa_hpux_store_register (int regnum)
   pid = ptid_get_pid (inferior_ptid);
 
   /* This isn't really an address, but ptrace thinks of it as one.  */
-  addr = hppa_hpux_save_state_offset(current_regcache, regnum);
+  addr = hppa_hpux_save_state_offset (regcache, regnum);
   size = register_size (current_gdbarch, regnum);
 
   gdb_assert (size == 4 || size == 8);
   buf = alloca (size);
 
-  regcache_raw_collect (current_regcache, regnum, buf);
+  regcache_raw_collect (regcache, regnum, buf);
 
   /* Take care with the "flags" register.  It's stored as an `int' in
      `struct save_state', even for 64-bit code.  */
@@ -212,13 +212,13 @@ hppa_hpux_store_register (int regnum)
    this for all registers (including the floating point registers).  */
 
 static void
-hppa_hpux_store_inferior_registers (int regnum)
+hppa_hpux_store_inferior_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
     for (regnum = 0; regnum < NUM_REGS; regnum++)
-      hppa_hpux_store_register (regnum);
+      hppa_hpux_store_register (regcache, regnum);
   else
-    hppa_hpux_store_register (regnum);
+    hppa_hpux_store_register (regcache, regnum);
 }
 
 static int

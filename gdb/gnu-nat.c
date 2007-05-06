@@ -2584,8 +2584,8 @@ gnu_pid_to_str (ptid_t ptid)
 }
 
 
-extern void gnu_store_registers (int regno);
-extern void gnu_fetch_registers (int regno);
+extern void gnu_store_registers (struct regcache *regcache, int regno);
+extern void gnu_fetch_registers (struct regcache *regcache, int regno);
 
 struct target_ops gnu_ops;
 

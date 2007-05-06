@@ -508,8 +508,8 @@ regcache_raw_read (struct regcache *regcache, int regnum, gdb_byte *buf)
 	  registers_changed ();
 	  registers_ptid = inferior_ptid;
 	}
-      if (!register_cached (regnum))
-	target_fetch_registers (regnum);
+      if (!regcache_valid_p (regcache, regnum))
+	target_fetch_registers (regcache, regnum);
 #if 0
       /* FIXME: cagney/2004-08-07: At present a number of targets
 	 forget (or didn't know that they needed) to set this leading to
@@ -673,7 +673,7 @@ regcache_raw_write (struct regcache *regcache, int regnum,
   memcpy (register_buffer (regcache, regnum), buf,
 	  regcache->descr->sizeof_register[regnum]);
   regcache->register_valid_p[regnum] = 1;
-  target_store_registers (regnum);
+  target_store_registers (regcache, regnum);
 }
 
 void

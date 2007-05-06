@@ -73,9 +73,9 @@ static void gdb_os_evprintf_filtered (host_callback *, const char *, va_list);
 
 static void gdb_os_error (host_callback *, const char *, ...);
 
-static void gdbsim_fetch_register (int regno);
+static void gdbsim_fetch_register (struct regcache *regcache, int regno);
 
-static void gdbsim_store_register (int regno);
+static void gdbsim_store_register (struct regcache *regcache, int regno);
 
 static void gdbsim_kill (void);
 
@@ -279,12 +279,12 @@ one2one_register_sim_regno (int regnum)
 }
 
 static void
-gdbsim_fetch_register (int regno)
+gdbsim_fetch_register (struct regcache *regcache, int regno)
 {
   if (regno == -1)
     {
       for (regno = 0; regno < NUM_REGS; regno++)
-	gdbsim_fetch_register (regno);
+	gdbsim_fetch_register (regcache, regno);
       return;
     }
 
@@ -299,10 +299,11 @@ gdbsim_fetch_register (int regno)
 	char buf[MAX_REGISTER_SIZE];
 	int nr_bytes;
 	memset (buf, 0, MAX_REGISTER_SIZE);
-	regcache_raw_supply (current_regcache, regno, buf);
+	regcache_raw_supply (regcache, regno, buf);
 	set_register_cached (regno, -1);
 	break;
       }
+      
     default:
       {
 	static int warn_user = 1;
@@ -327,7 +328,7 @@ gdbsim_fetch_register (int regno)
 	   which registers are fetchable.  */
 	/* Else if (nr_bytes < 0): an old simulator, that doesn't
 	   think to return the register size.  Just assume all is ok.  */
-	regcache_raw_supply (current_regcache, regno, buf);
+	regcache_raw_supply (regcache, regno, buf);
 	if (remote_debug)
 	  {
 	    printf_filtered ("gdbsim_fetch_register: %d", regno);
@@ -341,19 +342,19 @@ gdbsim_fetch_register (int regno)
 
 
 static void
-gdbsim_store_register (int regno)
+gdbsim_store_register (struct regcache *regcache, int regno)
 {
   if (regno == -1)
     {
       for (regno = 0; regno < NUM_REGS; regno++)
-	gdbsim_store_register (regno);
+	gdbsim_store_register (regcache, regno);
       return;
     }
   else if (REGISTER_SIM_REGNO (regno) >= 0)
     {
       char tmp[MAX_REGISTER_SIZE];
       int nr_bytes;
-      regcache_cooked_read (current_regcache, regno, tmp);
+      regcache_cooked_read (regcache, regno, tmp);
       nr_bytes = sim_store_register (gdbsim_desc,
 				     REGISTER_SIM_REGNO (regno),
 				     tmp, register_size (current_gdbarch, regno));

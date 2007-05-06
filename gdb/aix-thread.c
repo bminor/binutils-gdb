@@ -1270,22 +1270,22 @@ fetch_regs_kernel_thread (struct regcache *regcache, int regno,
    thread/process specified by inferior_ptid.  */
 
 static void
-aix_thread_fetch_registers (int regno)
+aix_thread_fetch_registers (struct regcache *regcache, int regno)
 {
   struct thread_info *thread;
   pthdb_tid_t tid;
 
   if (!PD_TID (inferior_ptid))
-    base_target.to_fetch_registers (regno);
+    base_target.to_fetch_registers (regcache, regno);
   else
     {
       thread = find_thread_pid (inferior_ptid);
       tid = thread->private->tid;
 
       if (tid == PTHDB_INVALID_TID)
-	fetch_regs_user_thread (current_regcache, thread->private->pdtid);
+	fetch_regs_user_thread (regcache, thread->private->pdtid);
       else
-	fetch_regs_kernel_thread (current_regcache, regno, tid);
+	fetch_regs_kernel_thread (regcache, regno, tid);
     }
 }
 
@@ -1602,22 +1602,22 @@ store_regs_kernel_thread (const struct regcache *regcache, int regno,
    thread/process specified by inferior_ptid.  */
 
 static void
-aix_thread_store_registers (int regno)
+aix_thread_store_registers (struct regcache *regcache, int regno)
 {
   struct thread_info *thread;
   pthdb_tid_t tid;
 
   if (!PD_TID (inferior_ptid))
-    base_target.to_store_registers (regno);
+    base_target.to_store_registers (regcache, regno);
   else
     {
       thread = find_thread_pid (inferior_ptid);
       tid = thread->private->tid;
 
       if (tid == PTHDB_INVALID_TID)
-	store_regs_user_thread (current_regcache, thread->private->pdtid);
+	store_regs_user_thread (regcache, thread->private->pdtid);
       else
-	store_regs_kernel_thread (current_regcache, regno, tid);
+	store_regs_kernel_thread (regcache, regno, tid);
     }
 }
 

@@ -234,7 +234,7 @@ ps_lgetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, prgregset_t gregset)
 
   inferior_ptid = BUILD_LWP (lwpid, ph->pid);
 
-  target_fetch_registers (-1);
+  target_fetch_registers (current_regcache, -1);
   fill_gregset (current_regcache, (gdb_gregset_t *) gregset, -1);
 
   do_cleanups (old_chain);
@@ -252,7 +252,7 @@ ps_lsetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, const prgregset_t gregset)
   inferior_ptid = BUILD_LWP (lwpid, ph->pid);
 
   supply_gregset (current_regcache, (const gdb_gregset_t *) gregset);
-  target_store_registers (-1);
+  target_store_registers (current_regcache, -1);
 
   do_cleanups (old_chain);
   return PS_OK;
@@ -269,7 +269,7 @@ ps_lgetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 
   inferior_ptid = BUILD_LWP (lwpid, ph->pid);
 
-  target_fetch_registers (-1);
+  target_fetch_registers (current_regcache, -1);
   fill_fpregset (current_regcache, (gdb_fpregset_t *) fpregset, -1);
 
   do_cleanups (old_chain);
@@ -288,7 +288,7 @@ ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
   inferior_ptid = BUILD_LWP (lwpid, ph->pid);
 
   supply_fpregset (current_regcache, (const gdb_fpregset_t *) fpregset);
-  target_store_registers (-1);
+  target_store_registers (current_regcache, -1);
 
   do_cleanups (old_chain);
   return PS_OK;

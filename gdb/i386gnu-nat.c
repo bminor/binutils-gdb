@@ -66,7 +66,7 @@ static int reg_offset[] =
    of the corresponding (pseudo) registers.  */
 
 static void
-fetch_fpregs (struct proc *thread)
+fetch_fpregs (struct regcache *regcache, struct proc *thread)
 {
   mach_msg_type_number_t count = i386_FLOAT_STATE_COUNT;
   struct i386_float_state state;
@@ -84,12 +84,12 @@ fetch_fpregs (struct proc *thread)
   if (!state.initialized)
     {
       /* The floating-point state isn't initialized.  */
-      i387_supply_fsave (current_regcache, -1, NULL);
+      i387_supply_fsave (regcache, -1, NULL);
     }
   else
     {
       /* Supply the floating-point registers.  */
-      i387_supply_fsave (current_regcache, -1, state.hw_state);
+      i387_supply_fsave (regcache, -1, state.hw_state);
     }
 }
 
@@ -113,7 +113,7 @@ supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregs)
 
 /* Fetch register REGNO, or all regs if REGNO is -1.  */
 void
-gnu_fetch_registers (int regno)
+gnu_fetch_registers (struct regcache *regcache, int regno)
 {
   struct proc *thread;
 
@@ -145,14 +145,14 @@ gnu_fetch_registers (int regno)
 	  proc_debug (thread, "fetching all register");
 
 	  for (i = 0; i < I386_NUM_GREGS; i++)
-	    regcache_raw_supply (current_regcache, i, REG_ADDR (state, i));
+	    regcache_raw_supply (regcache, i, REG_ADDR (state, i));
 	  thread->fetched_regs = ~0;
 	}
       else
 	{
 	  proc_debug (thread, "fetching register %s", REGISTER_NAME (regno));
 
-	  regcache_raw_supply (current_regcache, regno,
+	  regcache_raw_supply (regcache, regno,
 			       REG_ADDR (state, regno));
 	  thread->fetched_regs |= (1 << regno);
 	}
@@ -162,7 +162,7 @@ gnu_fetch_registers (int regno)
     {
       proc_debug (thread, "fetching floating-point registers");
 
-      fetch_fpregs (thread);
+      fetch_fpregs (regcache, thread);
     }
 }
 
@@ -170,7 +170,7 @@ gnu_fetch_registers (int regno)
 /* Store the whole floating-point state into THREAD using information
    from the corresponding (pseudo) registers.  */
 static void
-store_fpregs (struct proc *thread, int regno)
+store_fpregs (const struct regcache *regcache, struct proc *thread, int regno)
 {
   mach_msg_type_number_t count = i386_FLOAT_STATE_COUNT;
   struct i386_float_state state;
@@ -187,7 +187,7 @@ store_fpregs (struct proc *thread, int regno)
 
   /* FIXME: kettenis/2001-07-15: Is this right?  Should we somehow
      take into account DEPRECATED_REGISTER_VALID like the old code did?  */
-  i387_collect_fsave (current_regcache, regno, state.hw_state);
+  i387_collect_fsave (regcache, regno, state.hw_state);
 
   err = thread_set_state (thread->port, i386_FLOAT_STATE,
 			  (thread_state_t) &state, i386_FLOAT_STATE_COUNT);
@@ -201,9 +201,8 @@ store_fpregs (struct proc *thread, int regno)
 
 /* Store at least register REGNO, or all regs if REGNO == -1.  */
 void
-gnu_store_registers (int regno)
+gnu_store_registers (struct regcache *regcache, int regno)
 {
-  struct regcache *regcache = current_regcache;
   struct proc *thread;
 
   /* Make sure we know about new threads.  */
@@ -286,6 +285,6 @@ gnu_store_registers (int regno)
     {
       proc_debug (thread, "storing floating-point registers");
 
-      store_fpregs (thread, regno);
+      store_fpregs (regcache, thread, regno);
     }
 }

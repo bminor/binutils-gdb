@@ -1,5 +1,162 @@
 2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* target.h (struct regcache): Add forward declaration.
+	(struct target_ops): Add REGCACHE parameter to to_fetch_registers
+	and to_store_registers target operations.
+	(target_fetch_registers, target_store_registers): Update.
+
+	* regcache.c (regcache_raw_read): Replace register_cached by
+	regcache_valid_p.  Pass regcache to target_fetch_registers.
+	(regcache_raw_write): Pass regcache to target_store_registers.
+
+	* arm-linux-nat.c (store_fpregister, store_fpregs, store_register,
+	store_regs, store_wmmx_regs): Replace register_cached by
+	regcache_valid_p.
+
+	* bsd-kvm.c (bsd_kvm_open, bsd_kvm_proc_cmd): Pass current_regcache
+	to target_fetch_registers calls.
+	* corelow.c (core_open): Likewise.
+	* linux-nat.c (linux_nat_corefile_thread_callback): Likewise.
+	* proc-service.c (ps_lgetregs, ps_lsetregs, ps_lgetfpregs,
+	ps_lsetfpregs): Likewise.
+	* sol-thread.c (ps_lgetregs, ps_lsetregs, ps_lgetfpregs,
+	ps_lsetfpregs): Likewise.
+	* win32-nat.c (win32_resume): Likewise.
+	* ia64-tdep.c (ia64_store_return_value): Pass current_regcache
+	to target_store_registers call.
+	* rs6000-tdep.c (rs6000_push_dummy_call): Likewise.
+
+	* inferior.h (store_inferior_registers): Update prototype.
+	(fetch_inferior_registers): Likewise.
+	* gnu-nat.c (gnu_store_registers, gnu_fetch_registers): Likewise.
+	* mips-linux-nat.c (super_fetch_registers, super_store_registers):
+	Update function pointer signatures.
+
+	* aix-thread.c (aix_thread_fetch_registers): Add REGCACHE parameter,
+	use it instead of current_regcache, update calls.
+	(aix_thread_store_registers): Likewise.
+	* alphabsd-nat.c (alphabsd_fetch_inferior_registers): Likewise.
+	(alphabsd_store_inferior_registers): Likewise.
+	* amd64bsd-nat.c (amd64bsd_fetch_inferior_registers): Likewise.
+	(amd64bsd_store_inferior_registers): Likewise.
+	* amd64-linux-nat.c (amd64_linux_fetch_inferior_registers): Likewise.
+	(amd64_linux_store_inferior_registers): Likewise.
+	* arm-linux-nat.c (fetch_fpregister, fetch_fpregs, store_fpregister,
+	store_fpregs, fetch_register, fetch_regs, store_register, store_regs,
+	fetch_wmmx_regs, store_wmmx_regs): Likewise.
+	(arm_linux_fetch_inferior_registers): Likewise.
+	(arm_linux_store_inferior_registers): Likewise.
+	* armnbsd-nat.c (fetch_register, fetch_regs, fetch_fp_register,
+	fetch_fp_regs, armnbsd_fetch_registers): Likewise.
+	(store_register, store_regs, store_fp_register, store_fp_regs,
+	armnbsd_store_registers): Likewise.
+	* bsd-kvm.c (bsd_kvm_fetch_pcb, bsd_kvm_fetch_registers): Likewise.
+	* bsd-uthread.c (bsd_uthread_fetch_registers): Likewise.
+	(bsd_uthread_store_registers): Likewise.
+	* corelow.c (get_core_registers): Likewise.
+	* go32-nat.c (fetch_register, go32_fetch_registers, store_register,
+	go32_store_registers): Likewise.
+	* hppabsd-nat.c (hppabsd_fetch_registers): Likewise.
+	(hppabsd_store_registers): Likewise.
+	* hppa-hpux-nat.c (hppa_hpux_fetch_register): Likewise.
+	(hppa_hpux_fetch_inferior_registers): Likewise.
+	(hppa_hpux_store_register): Likewise.
+	(hppa_hpux_store_inferior_registers): Likewise.
+	* hppa-linux-nat.c (fetch_register, store_register): Likewise.
+	(hppa_linux_fetch_inferior_registers): Likewise.
+	(hppa_linux_store_inferior_registers): Likewise.
+	* hpux-thread.c (hpux_thread_fetch_registers): Likewise.
+	(hpux_thread_store_registers): Likewise.
+	* i386bsd-nat.c (i386bsd_fetch_inferior_registers): Likewise.
+	(i386bsd_store_inferior_registers): Likewise.
+	* i386gnu-nat.c (fetch_fpregs, gnu_fetch_registers, store_fpregs,
+	gnu_store_registers): Likewise.
+	* i386-linux-nat.c (fetch_register, store_register, fetch_regs,
+	store_regs, fetch_fpregs, store_fpregs, fetch_fpxregs, store_fpxregs):
+	Likewise.
+	(i386_linux_fetch_inferior_registers): Likewise.
+	(i386_linux_store_inferior_registers): Likewise.
+	* ia64-linux-nat.c (ia64_linux_fetch_register): Likewise.
+	(ia64_linux_fetch_registers): Likewise.
+	(ia64_linux_store_register): Likewise.
+	(ia64_linux_store_registers): Likewise.
+	* inf-child.c (inf_child_fetch_inferior_registers): Likewise.
+	(inf_child_store_inferior_registers): Likewise.
+	* inf-ptrace.c (inf_ptrace_fetch_register): Likewise.
+	(inf_ptrace_fetch_registers): Likewise.
+	(inf_ptrace_store_register): Likewise.
+	(inf_ptrace_store_registers): Likewise.
+	* infptrace.c (fetch_register, store_register): Likewise.
+	(fetch_inferior_registers, store_inferior_registers): Likewise.
+	* m32r-linux-nat.c (fetch_regs, store_regs): Likewise.
+	(m32r_linux_fetch_inferior_registers): Likewise.
+	(m32r_linux_store_inferior_registers): Likewise.
+	* m68kbsd-nat.c (m68kbsd_fetch_inferior_registers): Likewise.
+	(m68kbsd_store_inferior_registers): Likewise.
+	* m68klinux-nat.c (fetch_register, old_fetch_inferior_registers,
+	store_register, old_store_inferior_registers, fetch_regs, store_regs,
+	fetch_fpregs, store_fpregs): Likewise.
+	(m68k_linux_fetch_inferior_registers): Likewise.
+	(m68k_linux_store_inferior_registers): Likewise.
+	* m88kbsd-nat.c (m88kbsd_fetch_inferior_registers): Likewise.
+	(m88kbsd_store_inferior_registers): Likewise.
+	* mips64obsd-nat.c (mips64obsd_fetch_inferior_registers): Likewise.
+	(mips64obsd_store_inferior_registers): Likewise.
+	* mips-linux-nat.c (mips64_linux_regsets_fetch_registers): Likewise.
+	(mips64_linux_regsets_store_registers): Likewise.
+	(mips64_linux_fetch_registers): Likewise.
+	(mips64_linux_store_registers): Likewise.
+	* mipsnbsd-nat.c (mipsnbsd_fetch_inferior_registers): Likewise.
+	(mipsnbsd_store_inferior_registers): Likewise.
+	* monitor.c (monitor_fetch_register, monitor_store_register): Likewise.
+	(monitor_fetch_registers, monitor_store_registers): Likewise.
+	* nto-procfs.c (procfs_fetch_registers): Likewise.
+	(procfs_store_registers): Likewise.
+	* ppc-linux-nat.c (fetch_altivec_register, fetch_spe_register,
+	fetch_register, supply_vrregset, fetch_altivec_registers,
+	fetch_ppc_registers, ppc_linux_fetch_inferior_registers): Likewise.
+	(store_altivec_register, store_spe_register, store_register, 
+	fill_vrregset, store_altivec_registers, store_ppc_registers,
+	ppc_linux_store_inferior_registers): Likewise.
+	* ppcnbsd-nat.c (ppcnbsd_fetch_inferior_registers): Likewise.
+	(ppcnbsd_store_inferior_registers): Likewise.
+	* ppcobsd-nat.c (ppcobsd_fetch_registers): Likewise.
+	(ppcobsd_store_registers): Likewise.
+	* procfs.c (procfs_fetch_registers, procfs_store_registers): Likewise.
+	* remote.c (fetch_register_using_p, process_g_packet,
+	fetch_registers_using_g, remote_fetch_registers): Likewise.
+	(store_register_using_P, store_registers_using_G, 
+	remote_store_registers): Likewise.
+	* remote-m32r-sdi.c (m32r_fetch_registers, m32r_fetch_register,
+	m32r_store_register, m32r_store_register): Likewise.
+	* remote-mips.c (mips_fetch_registers, mips_store_registers): Likewise.
+	* remote-sim.c (gdbsim_fetch_register): Likewise.
+	(gdbsim_store_register): Likewise.
+	* rs6000-nat.c (fetch_register, store_register): Likewise.
+	(rs6000_fetch_inferior_registers): Likewise.
+	(rs6000_store_inferior_registers): Likewise.
+	* s390-nat.c (fetch_regs, store_regs): Likewise.
+	(fetch_fpregs, store_fpregs): Likewise.
+	(s390_linux_fetch_inferior_registers): Likewise.
+	(s390_linux_store_inferior_registers): Likewise.
+	* shnbsd-nat.c (shnbsd_fetch_inferior_registers): Likewise.
+	(shnbsd_store_inferior_registers): Likewise.
+	* sol-thread.c (sol_thread_fetch_registers): Likewise.
+	(sol_thread_store_registers): Likewise.
+	* sparc-nat.c (fetch_inferior_registers): Likewise.
+	(store_inferior_registers): Likewise.
+	* spu-linux-nat.c (spu_fetch_inferior_registers): Likewise.
+	(spu_store_inferior_registers): Likewise.
+	* target.c (debug_print_register): Likewise.
+	(debug_to_fetch_registers, debug_to_store_registers): Likewise.
+	* vaxbsd-nat.c (vaxbsd_fetch_inferior_registers): Likewise.
+	(vaxbsd_store_inferior_registers): Likewise.
+	* win32-nat.c (do_win32_fetch_inferior_registers): Likewise.
+	(win32_fetch_inferior_registers): Likewise.
+	(win32_store_inferior_registers): Likewise.
+
+2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbcore.h (struct regcache): Add forward declaration.
 	(struct core_fns): Add REGCACHE argument to core_read_registers
 	callback.

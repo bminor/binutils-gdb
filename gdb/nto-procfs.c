@@ -67,7 +67,7 @@ static int procfs_xfer_memory (CORE_ADDR, char *, int, int,
 			       struct mem_attrib *attrib,
 			       struct target_ops *);
 
-static void procfs_fetch_registers (int);
+static void procfs_fetch_registers (struct regcache *, int);
 
 static void notice_signals (void);
 
@@ -714,7 +714,7 @@ procfs_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
    general register set and floating point registers (if supported)
    and update gdb's idea of their current values.  */
 static void
-procfs_fetch_registers (int regno)
+procfs_fetch_registers (struct regcache *regcache, int regno)
 {
   union
   {
@@ -727,13 +727,13 @@ procfs_fetch_registers (int regno)
 
   procfs_set_thread (inferior_ptid);
   if (devctl (ctl_fd, DCMD_PROC_GETGREG, &reg, sizeof (reg), &regsize) == EOK)
-    nto_supply_gregset (current_regcache, (char *) &reg.greg);
+    nto_supply_gregset (regcache, (char *) &reg.greg);
   if (devctl (ctl_fd, DCMD_PROC_GETFPREG, &reg, sizeof (reg), &regsize)
       == EOK)
-    nto_supply_fpregset (current_regcache, (char *) &reg.fpreg);
+    nto_supply_fpregset (regcache, (char *) &reg.fpreg);
   if (devctl (ctl_fd, DCMD_PROC_GETALTREG, &reg, sizeof (reg), &regsize)
       == EOK)
-    nto_supply_altregset (current_regcache, (char *) &reg.altreg);
+    nto_supply_altregset (regcache, (char *) &reg.altreg);
 }
 
 /* Copy LEN bytes to/from inferior's memory starting at MEMADDR
@@ -1147,7 +1147,7 @@ get_regset (int regset, char *buf, int bufsize, int *regsize)
 }
 
 void
-procfs_store_registers (int regno)
+procfs_store_registers (struct regcache *regcache, int regno)
 {
   union
   {
@@ -1173,7 +1173,7 @@ procfs_store_registers (int regno)
 	  if (dev_set == -1)
 	    continue;
 
-	  if (nto_regset_fill (current_regcache, regset, (char *) &reg) == -1)
+	  if (nto_regset_fill (regcache, regset, (char *) &reg) == -1)
 	    continue;
 
 	  err = devctl (ctl_fd, dev_set, &reg, regsize, 0);
@@ -1198,7 +1198,7 @@ procfs_store_registers (int regno)
       if (len < 1)
 	return;
 
-      regcache_raw_collect (current_regcache, regno, (char *) &reg + off);
+      regcache_raw_collect (regcache, regno, (char *) &reg + off);
 
       err = devctl (ctl_fd, dev_set, &reg, regsize, 0);
       if (err != EOK)

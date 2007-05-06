@@ -209,9 +209,9 @@ extern void default_print_registers_info (struct gdbarch *gdbarch,
 					  struct frame_info *frame,
 					  int regnum, int all);
 
-extern void store_inferior_registers (int);
+extern void store_inferior_registers (struct regcache *, int);
 
-extern void fetch_inferior_registers (int);
+extern void fetch_inferior_registers (struct regcache *, int);
 
 extern void child_terminal_info (char *, int);
 

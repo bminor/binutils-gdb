@@ -135,9 +135,8 @@ sparc32_fpregset_supplies_p (int regnum)
    for all registers (including the floating-point registers).  */
 
 void
-fetch_inferior_registers (int regnum)
+fetch_inferior_registers (struct regcache *regcache, int regnum)
 {
-  struct regcache *regcache = current_regcache;
   int pid;
 
   /* NOTE: cagney/2002-12-03: This code assumes that the currently
@@ -187,9 +186,8 @@ fetch_inferior_registers (int regnum)
 }
 
 void
-store_inferior_registers (int regnum)
+store_inferior_registers (struct regcache *regcache, int regnum)
 {
-  struct regcache *regcache = current_regcache;
   int pid;
 
   /* NOTE: cagney/2002-12-02: See comment in fetch_inferior_registers

@@ -33,22 +33,22 @@
    for all registers.  */
 
 static void
-inf_child_fetch_inferior_registers (int regnum)
+inf_child_fetch_inferior_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
     {
       for (regnum = 0; regnum < NUM_REGS; regnum++)
-	regcache_raw_supply (current_regcache, regnum, NULL);
+	regcache_raw_supply (regcache, regnum, NULL);
     }
   else
-    regcache_raw_supply (current_regcache, regnum, NULL);
+    regcache_raw_supply (regcache, regnum, NULL);
 }
 
 /* Store register REGNUM back into the inferior.  If REGNUM is -1, do
    this for all registers (including the floating point registers).  */
 
 static void
-inf_child_store_inferior_registers (int regnum)
+inf_child_store_inferior_registers (struct regcache *regcache, int regnum)
 {
 }
 

@@ -617,7 +617,7 @@ static CORE_ADDR (*inf_ptrace_register_u_offset)(int);
 /* Fetch register REGNUM from the inferior.  */
 
 static void
-inf_ptrace_fetch_register (int regnum)
+inf_ptrace_fetch_register (struct regcache *regcache, int regnum)
 {
   CORE_ADDR addr;
   size_t size;
@@ -626,7 +626,7 @@ inf_ptrace_fetch_register (int regnum)
 
   if (CANNOT_FETCH_REGISTER (regnum))
     {
-      regcache_raw_supply (current_regcache, regnum, NULL);
+      regcache_raw_supply (regcache, regnum, NULL);
       return;
     }
 
@@ -654,26 +654,26 @@ inf_ptrace_fetch_register (int regnum)
 
       addr += sizeof (PTRACE_TYPE_RET);
     }
-  regcache_raw_supply (current_regcache, regnum, buf);
+  regcache_raw_supply (regcache, regnum, buf);
 }
 
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers.  */
 
 static void
-inf_ptrace_fetch_registers (int regnum)
+inf_ptrace_fetch_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
     for (regnum = 0; regnum < NUM_REGS; regnum++)
-      inf_ptrace_fetch_register (regnum);
+      inf_ptrace_fetch_register (regcache, regnum);
   else
-    inf_ptrace_fetch_register (regnum);
+    inf_ptrace_fetch_register (regcache, regnum);
 }
 
 /* Store register REGNUM into the inferior.  */
 
 static void
-inf_ptrace_store_register (int regnum)
+inf_ptrace_store_register (const struct regcache *regcache, int regnum)
 {
   CORE_ADDR addr;
   size_t size;
@@ -697,7 +697,7 @@ inf_ptrace_store_register (int regnum)
   buf = alloca (size);
 
   /* Write the register contents into the inferior a chunk at a time.  */
-  regcache_raw_collect (current_regcache, regnum, buf);
+  regcache_raw_collect (regcache, regnum, buf);
   for (i = 0; i < size / sizeof (PTRACE_TYPE_RET); i++)
     {
       errno = 0;
@@ -714,13 +714,13 @@ inf_ptrace_store_register (int regnum)
    this for all registers.  */
 
 void
-inf_ptrace_store_registers (int regnum)
+inf_ptrace_store_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
     for (regnum = 0; regnum < NUM_REGS; regnum++)
-      inf_ptrace_store_register (regnum);
+      inf_ptrace_store_register (regcache, regnum);
   else
-    inf_ptrace_store_register (regnum);
+    inf_ptrace_store_register (regcache, regnum);
 }
 
 /* Create a "traditional" ptrace target.  REGISTER_U_OFFSET should be

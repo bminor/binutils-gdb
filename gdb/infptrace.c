@@ -203,7 +203,7 @@ detach (int signal)
 /* Fetch register REGNUM from the inferior.  */
 
 static void
-fetch_register (int regnum)
+fetch_register (struct regcache *regcache, int regnum)
 {
   CORE_ADDR addr;
   size_t size;
@@ -212,7 +212,7 @@ fetch_register (int regnum)
 
   if (CANNOT_FETCH_REGISTER (regnum))
     {
-      regcache_raw_supply (current_regcache, regnum, NULL);
+      regcache_raw_supply (regcache, regnum, NULL);
       return;
     }
 
@@ -239,26 +239,26 @@ fetch_register (int regnum)
 
       addr += sizeof (PTRACE_TYPE_RET);
     }
-  regcache_raw_supply (current_regcache, regnum, buf);
+  regcache_raw_supply (regcache, regnum, buf);
 }
 
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers.  */
 
 void
-fetch_inferior_registers (int regnum)
+fetch_inferior_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
     for (regnum = 0; regnum < NUM_REGS; regnum++)
-      fetch_register (regnum);
+      fetch_register (regcache, regnum);
   else
-    fetch_register (regnum);
+    fetch_register (regcache, regnum);
 }
 
 /* Store register REGNUM into the inferior.  */
 
 static void
-store_register (int regnum)
+store_register (const struct regcache *regcache, int regnum)
 {
   CORE_ADDR addr;
   size_t size;
@@ -281,7 +281,7 @@ store_register (int regnum)
   buf = alloca (size);
 
   /* Write the register contents into the inferior a chunk at the time.  */
-  regcache_raw_collect (current_regcache, regnum, buf);
+  regcache_raw_collect (regcache, regnum, buf);
   for (i = 0; i < size / sizeof (PTRACE_TYPE_RET); i++)
     {
       errno = 0;
@@ -298,13 +298,13 @@ store_register (int regnum)
    this for all registers (including the floating point registers).  */
 
 void
-store_inferior_registers (int regnum)
+store_inferior_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
     for (regnum = 0; regnum < NUM_REGS; regnum++)
-      store_register (regnum);
+      store_register (regcache, regnum);
   else
-    store_register (regnum);
+    store_register (regcache, regnum);
 }
 
 #endif /* not FETCH_INFERIOR_REGISTERS.  */

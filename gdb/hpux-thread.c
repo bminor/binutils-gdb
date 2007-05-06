@@ -249,7 +249,7 @@ static char regmap[] =
 };
 
 static void
-hpux_thread_fetch_registers (int regno)
+hpux_thread_fetch_registers (struct regcache *regcache, int regno)
 {
   cma__t_int_tcb tcb, *tcb_ptr;
   struct cleanup *old_chain;
@@ -264,7 +264,7 @@ hpux_thread_fetch_registers (int regno)
 
   if (tcb_ptr->state == cma__c_state_running)
     {
-      deprecated_child_ops.to_fetch_registers (regno);
+      deprecated_child_ops.to_fetch_registers (regcache, regno);
 
       do_cleanups (old_chain);
 
@@ -285,7 +285,7 @@ hpux_thread_fetch_registers (int regno)
   for (regno = first_regno; regno <= last_regno; regno++)
     {
       if (regmap[regno] == -1)
-	deprecated_child_ops.to_fetch_registers (regno);
+	deprecated_child_ops.to_fetch_registers (regcache, regno);
       else
 	{
 	  unsigned char buf[MAX_REGISTER_SIZE];
@@ -303,7 +303,7 @@ hpux_thread_fetch_registers (int regno)
 	  else
 	    read_memory (sp + regmap[regno], buf, register_size (current_gdbarch, regno));
 
-	  regcache_raw_supply (current_regcache, regno, buf);
+	  regcache_raw_supply (regcache, regno, buf);
 	}
     }
 
@@ -311,7 +311,7 @@ hpux_thread_fetch_registers (int regno)
 }
 
 static void
-hpux_thread_store_registers (int regno)
+hpux_thread_store_registers (struct regcache *regcache, int regno)
 {
   cma__t_int_tcb tcb, *tcb_ptr;
   struct cleanup *old_chain;
@@ -326,7 +326,7 @@ hpux_thread_store_registers (int regno)
 
   if (tcb_ptr->state == cma__c_state_running)
     {
-      deprecated_child_ops.to_store_registers (regno);
+      deprecated_child_ops.to_store_registers (regcache, regno);
 
       do_cleanups (old_chain);
 
@@ -347,7 +347,7 @@ hpux_thread_store_registers (int regno)
   for (regno = first_regno; regno <= last_regno; regno++)
     {
       if (regmap[regno] == -1)
-	deprecated_child_ops.to_store_registers (regno);
+	deprecated_child_ops.to_store_registers (regcache, regno);
       else
 	{
 	  unsigned char buf[MAX_REGISTER_SIZE];
@@ -356,10 +356,10 @@ hpux_thread_store_registers (int regno)
 	  sp = (CORE_ADDR) tcb_ptr->static_ctx.sp - 160;
 
 	  if (regno == HPPA_FLAGS_REGNUM)
-	    deprecated_child_ops.to_store_registers (regno);	/* Let lower layer handle this... */
+	    deprecated_child_ops.to_store_registers (regcache, regno);	/* Let lower layer handle this... */
 	  else if (regno == HPPA_SP_REGNUM)
 	    {
-	      regcache_raw_collect (current_regcache, regno, buf);
+	      regcache_raw_collect (regcache, regno, buf);
 	      write_memory ((CORE_ADDR) &tcb_ptr->static_ctx.sp, buf,
 			    register_size (current_gdbarch, regno));
 	      tcb_ptr->static_ctx.sp
@@ -367,13 +367,13 @@ hpux_thread_store_registers (int regno)
 	    }
 	  else if (regno == HPPA_PCOQ_HEAD_REGNUM)
 	    {
-	      regcache_raw_collect (current_regcache, regno, buf);
+	      regcache_raw_collect (regcache, regno, buf);
 	      write_memory (sp - 20, buf,
 			    register_size (current_gdbarch, regno));
 	    }
 	  else
 	    {
-	      regcache_raw_collect (current_regcache, regno, buf);
+	      regcache_raw_collect (regcache, regno, buf);
 	      write_memory (sp + regmap[regno], buf,
 			    register_size (current_gdbarch, regno));
 	    }

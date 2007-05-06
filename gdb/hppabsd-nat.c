@@ -124,10 +124,8 @@ hppabsd_collect_fpregset (struct regcache *regcache,
    for all registers (including the floating-point registers).  */
 
 static void
-hppabsd_fetch_registers (int regnum)
+hppabsd_fetch_registers (struct regcache *regcache, int regnum)
 {
-  struct regcache *regcache = current_regcache;
-
   if (regnum == -1 || hppabsd_gregset_supplies_p (regnum))
     {
       struct reg regs;
@@ -147,7 +145,7 @@ hppabsd_fetch_registers (int regnum)
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get floating point status"));
 
-      hppabsd_supply_fpregset (current_regcache, &fpregs);
+      hppabsd_supply_fpregset (regcache, &fpregs);
     }
 }
 
@@ -155,7 +153,7 @@ hppabsd_fetch_registers (int regnum)
    this for all registers (including the floating-point registers).  */
 
 static void
-hppabsd_store_registers (int regnum)
+hppabsd_store_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1 || hppabsd_gregset_supplies_p (regnum))
     {
@@ -165,7 +163,7 @@ hppabsd_store_registers (int regnum)
                   (PTRACE_TYPE_ARG3) &regs, 0) == -1)
         perror_with_name (_("Couldn't get registers"));
 
-      hppabsd_collect_gregset (current_regcache, &regs, regnum);
+      hppabsd_collect_gregset (regcache, &regs, regnum);
 
       if (ptrace (PT_SETREGS, PIDGET (inferior_ptid),
 	          (PTRACE_TYPE_ARG3) &regs, 0) == -1)
@@ -180,7 +178,7 @@ hppabsd_store_registers (int regnum)
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get floating point status"));
 
-      hppabsd_collect_fpregset (current_regcache, &fpregs, regnum);
+      hppabsd_collect_fpregset (regcache, &fpregs, regnum);
 
       if (ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)

@@ -106,9 +106,9 @@ static void debug_to_resume (ptid_t, int, enum target_signal);
 
 static ptid_t debug_to_wait (ptid_t, struct target_waitstatus *);
 
-static void debug_to_fetch_registers (int);
+static void debug_to_fetch_registers (struct regcache *, int);
 
-static void debug_to_store_registers (int);
+static void debug_to_store_registers (struct regcache *, int);
 
 static void debug_to_prepare_to_store (void);
 
@@ -503,10 +503,10 @@ update_current_target (void)
 	    (ptid_t (*) (ptid_t, struct target_waitstatus *))
 	    noprocess);
   de_fault (to_fetch_registers,
-	    (void (*) (int))
+	    (void (*) (struct regcache *, int))
 	    target_ignore);
   de_fault (to_store_registers,
-	    (void (*) (int))
+	    (void (*) (struct regcache *, int))
 	    noprocess);
   de_fault (to_prepare_to_store,
 	    (void (*) (void))
@@ -2150,7 +2150,8 @@ debug_to_wait (ptid_t ptid, struct target_waitstatus *status)
 }
 
 static void
-debug_print_register (const char * func, int regno)
+debug_print_register (const char * func,
+		      struct regcache *regcache, int regno)
 {
   fprintf_unfiltered (gdb_stdlog, "%s ", func);
   if (regno >= 0 && regno < NUM_REGS + NUM_PSEUDO_REGS
@@ -2162,7 +2163,7 @@ debug_print_register (const char * func, int regno)
     {
       int i, size = register_size (current_gdbarch, regno);
       unsigned char buf[MAX_REGISTER_SIZE];
-      regcache_cooked_read (current_regcache, regno, buf);
+      regcache_cooked_read (regcache, regno, buf);
       fprintf_unfiltered (gdb_stdlog, " = ");
       for (i = 0; i < size; i++)
 	{
@@ -2179,17 +2180,17 @@ debug_print_register (const char * func, int regno)
 }
 
 static void
-debug_to_fetch_registers (int regno)
+debug_to_fetch_registers (struct regcache *regcache, int regno)
 {
-  debug_target.to_fetch_registers (regno);
-  debug_print_register ("target_fetch_registers", regno);
+  debug_target.to_fetch_registers (regcache, regno);
+  debug_print_register ("target_fetch_registers", regcache, regno);
 }
 
 static void
-debug_to_store_registers (int regno)
+debug_to_store_registers (struct regcache *regcache, int regno)
 {
-  debug_target.to_store_registers (regno);
-  debug_print_register ("target_store_registers", regno);
+  debug_target.to_store_registers (regcache, regno);
+  debug_print_register ("target_store_registers", regcache, regno);
   fprintf_unfiltered (gdb_stdlog, "\n");
 }
 

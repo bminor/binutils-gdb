@@ -157,7 +157,7 @@ fill_fpregset (const struct regcache *regcache,
    registers).  */
 
 static void
-amd64_linux_fetch_inferior_registers (int regnum)
+amd64_linux_fetch_inferior_registers (struct regcache *regcache, int regnum)
 {
   int tid;
 
@@ -173,7 +173,7 @@ amd64_linux_fetch_inferior_registers (int regnum)
       if (ptrace (PTRACE_GETREGS, tid, 0, (long) &regs) < 0)
 	perror_with_name (_("Couldn't get registers"));
 
-      amd64_supply_native_gregset (current_regcache, &regs, -1);
+      amd64_supply_native_gregset (regcache, &regs, -1);
       if (regnum != -1)
 	return;
     }
@@ -185,7 +185,7 @@ amd64_linux_fetch_inferior_registers (int regnum)
       if (ptrace (PTRACE_GETFPREGS, tid, 0, (long) &fpregs) < 0)
 	perror_with_name (_("Couldn't get floating point status"));
 
-      amd64_supply_fxsave (current_regcache, -1, &fpregs);
+      amd64_supply_fxsave (regcache, -1, &fpregs);
     }
 }
 
@@ -194,7 +194,7 @@ amd64_linux_fetch_inferior_registers (int regnum)
    registers).  */
 
 static void
-amd64_linux_store_inferior_registers (int regnum)
+amd64_linux_store_inferior_registers (struct regcache *regcache, int regnum)
 {
   int tid;
 
@@ -210,7 +210,7 @@ amd64_linux_store_inferior_registers (int regnum)
       if (ptrace (PTRACE_GETREGS, tid, 0, (long) &regs) < 0)
 	perror_with_name (_("Couldn't get registers"));
 
-      amd64_collect_native_gregset (current_regcache, &regs, regnum);
+      amd64_collect_native_gregset (regcache, &regs, regnum);
 
       if (ptrace (PTRACE_SETREGS, tid, 0, (long) &regs) < 0)
 	perror_with_name (_("Couldn't write registers"));
@@ -226,7 +226,7 @@ amd64_linux_store_inferior_registers (int regnum)
       if (ptrace (PTRACE_GETFPREGS, tid, 0, (long) &fpregs) < 0)
 	perror_with_name (_("Couldn't get floating point status"));
 
-      amd64_collect_fxsave (current_regcache, regnum, &fpregs);
+      amd64_collect_fxsave (regcache, regnum, &fpregs);
 
       if (ptrace (PTRACE_SETFPREGS, tid, 0, (long) &fpregs) < 0)
 	perror_with_name (_("Couldn't write floating point status"));

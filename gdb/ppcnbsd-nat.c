@@ -80,7 +80,7 @@ getfpregs_supplies (int regnum)
 }
 
 static void
-ppcnbsd_fetch_inferior_registers (int regnum)
+ppcnbsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1 || getregs_supplies (regnum))
     {
@@ -90,7 +90,7 @@ ppcnbsd_fetch_inferior_registers (int regnum)
 		  (PTRACE_TYPE_ARG3) &regs, 0) == -1)
         perror_with_name (_("Couldn't get registers"));
 
-      ppc_supply_gregset (&ppcnbsd_gregset, current_regcache,
+      ppc_supply_gregset (&ppcnbsd_gregset, regcache,
 			  regnum, &regs, sizeof regs);
     }
 
@@ -102,13 +102,13 @@ ppcnbsd_fetch_inferior_registers (int regnum)
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get FP registers"));
 
-      ppc_supply_fpregset (&ppcnbsd_fpregset, current_regcache,
+      ppc_supply_fpregset (&ppcnbsd_fpregset, regcache,
 			   regnum, &fpregs, sizeof fpregs);
     }
 }
 
 static void
-ppcnbsd_store_inferior_registers (int regnum)
+ppcnbsd_store_inferior_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1 || getregs_supplies (regnum))
     {
@@ -118,7 +118,7 @@ ppcnbsd_store_inferior_registers (int regnum)
 		  (PTRACE_TYPE_ARG3) &regs, 0) == -1)
 	perror_with_name (_("Couldn't get registers"));
 
-      ppc_collect_gregset (&ppcnbsd_gregset, current_regcache,
+      ppc_collect_gregset (&ppcnbsd_gregset, regcache,
 			   regnum, &regs, sizeof regs);
 
       if (ptrace (PT_SETREGS, PIDGET (inferior_ptid),
@@ -134,7 +134,7 @@ ppcnbsd_store_inferior_registers (int regnum)
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get FP registers"));
 
-      ppc_collect_fpregset (&ppcnbsd_fpregset, current_regcache,
+      ppc_collect_fpregset (&ppcnbsd_fpregset, regcache,
 			    regnum, &fpregs, sizeof fpregs);
 
       if (ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),

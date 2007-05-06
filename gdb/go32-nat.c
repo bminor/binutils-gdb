@@ -174,9 +174,9 @@ static void go32_resume (ptid_t ptid, int step,
                          enum target_signal siggnal);
 static ptid_t go32_wait (ptid_t ptid,
                                struct target_waitstatus *status);
-static void go32_fetch_registers (int regno);
-static void store_register (int regno);
-static void go32_store_registers (int regno);
+static void go32_fetch_registers (struct regcache *, int regno);
+static void store_register (const struct regcache *, int regno);
+static void go32_store_registers (struct regcache *, int regno);
 static void go32_prepare_to_store (void);
 static int go32_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
 			     int write,
@@ -465,56 +465,56 @@ go32_wait (ptid_t ptid, struct target_waitstatus *status)
 }
 
 static void
-fetch_register (int regno)
+fetch_register (struct regcache *regcache, int regno)
 {
   if (regno < FP0_REGNUM)
-    regcache_raw_supply (current_regcache, regno,
+    regcache_raw_supply (regcache, regno,
 			 (char *) &a_tss + regno_mapping[regno].tss_ofs);
   else if (i386_fp_regnum_p (regno) || i386_fpc_regnum_p (regno))
-    i387_supply_fsave (current_regcache, regno, &npx);
+    i387_supply_fsave (regcache, regno, &npx);
   else
     internal_error (__FILE__, __LINE__,
 		    _("Invalid register no. %d in fetch_register."), regno);
 }
 
 static void
-go32_fetch_registers (int regno)
+go32_fetch_registers (struct regcache *regcache, int regno)
 {
   if (regno >= 0)
-    fetch_register (regno);
+    fetch_register (regcache, regno);
   else
     {
       for (regno = 0; regno < FP0_REGNUM; regno++)
-	fetch_register (regno);
-      i387_supply_fsave (current_regcache, -1, &npx);
+	fetch_register (regcache, regno);
+      i387_supply_fsave (regcache, -1, &npx);
     }
 }
 
 static void
-store_register (int regno)
+store_register (const struct regcache *regcache, int regno)
 {
   if (regno < FP0_REGNUM)
-    regcache_raw_collect (current_regcache, regno,
+    regcache_raw_collect (regcache, regno,
 			  (char *) &a_tss + regno_mapping[regno].tss_ofs);
   else if (i386_fp_regnum_p (regno) || i386_fpc_regnum_p (regno))
-    i387_collect_fsave (current_regcache, regno, &npx);
+    i387_collect_fsave (regcache, regno, &npx);
   else
     internal_error (__FILE__, __LINE__,
 		    _("Invalid register no. %d in store_register."), regno);
 }
 
 static void
-go32_store_registers (int regno)
+go32_store_registers (struct regcache *regcache, int regno)
 {
   unsigned r;
 
   if (regno >= 0)
-    store_register (regno);
+    store_register (regcache, regno);
   else
     {
       for (r = 0; r < FP0_REGNUM; r++)
-	store_register (r);
-      i387_collect_fsave (current_regcache, -1, &npx);
+	store_register (regcache, r);
+      i387_collect_fsave (regcache, -1, &npx);
     }
 }
 

@@ -96,11 +96,11 @@ static ptid_t mips_wait (ptid_t ptid,
 
 static int mips_map_regno (int regno);
 
-static void mips_fetch_registers (int regno);
+static void mips_fetch_registers (struct regcache *regcache, int regno);
 
 static void mips_prepare_to_store (void);
 
-static void mips_store_registers (int regno);
+static void mips_store_registers (struct regcache *regcache, int regno);
 
 static unsigned int mips_fetch_word (CORE_ADDR addr);
 
@@ -1892,7 +1892,7 @@ mips_map_regno (int regno)
 /* Fetch the remote registers.  */
 
 static void
-mips_fetch_registers (int regno)
+mips_fetch_registers (struct regcache *regcache, int regno)
 {
   unsigned LONGEST val;
   int err;
@@ -1900,7 +1900,7 @@ mips_fetch_registers (int regno)
   if (regno == -1)
     {
       for (regno = 0; regno < NUM_REGS; regno++)
-	mips_fetch_registers (regno);
+	mips_fetch_registers (regcache, regno);
       return;
     }
 
@@ -1938,7 +1938,7 @@ mips_fetch_registers (int regno)
     /* We got the number the register holds, but gdb expects to see a
        value in the target byte ordering.  */
     store_unsigned_integer (buf, register_size (current_gdbarch, regno), val);
-    regcache_raw_supply (current_regcache, regno, buf);
+    regcache_raw_supply (regcache, regno, buf);
   }
 }
 
@@ -1953,19 +1953,20 @@ mips_prepare_to_store (void)
 /* Store remote register(s).  */
 
 static void
-mips_store_registers (int regno)
+mips_store_registers (struct regcache *regcache, int regno)
 {
+  ULONGEST val;
   int err;
 
   if (regno == -1)
     {
       for (regno = 0; regno < NUM_REGS; regno++)
-	mips_store_registers (regno);
+	mips_store_registers (regcache, regno);
       return;
     }
 
-  mips_request ('R', mips_map_regno (regno),
-		read_register (regno),
+  regcache_cooked_read_unsigned (regcache, regno, &val);
+  mips_request ('R', mips_map_regno (regno), val,
 		&err, mips_receive_wait, NULL);
   if (err)
     mips_error ("Can't write register %d: %s", regno, safe_strerror (errno));

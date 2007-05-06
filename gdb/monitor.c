@@ -1129,7 +1129,7 @@ monitor_wait (ptid_t ptid, struct target_waitstatus *status)
    errno value.  */
 
 static void
-monitor_fetch_register (int regno)
+monitor_fetch_register (struct regcache *regcache, int regno)
 {
   const char *name;
   char *zerobuf;
@@ -1149,7 +1149,7 @@ monitor_fetch_register (int regno)
   if (!name || (*name == '\0'))
     {
       monitor_debug ("No register known for %d\n", regno);
-      regcache_raw_supply (current_regcache, regno, zerobuf);
+      regcache_raw_supply (regcache, regno, zerobuf);
       return;
     }
 
@@ -1228,7 +1228,7 @@ monitor_fetch_register (int regno)
       current_monitor->getreg.term_cmd)		/* ack expected */
     monitor_expect_prompt (NULL, 0);	/* get response */
 
-  monitor_supply_register (current_regcache, regno, regbuf);
+  monitor_supply_register (regcache, regno, regbuf);
 }
 
 /* Sometimes, it takes several commands to dump the registers */
@@ -1268,30 +1268,30 @@ monitor_dump_regs (struct regcache *regcache)
 }
 
 static void
-monitor_fetch_registers (int regno)
+monitor_fetch_registers (struct regcache *regcache, int regno)
 {
   monitor_debug ("MON fetchregs\n");
   if (current_monitor->getreg.cmd)
     {
       if (regno >= 0)
 	{
-	  monitor_fetch_register (regno);
+	  monitor_fetch_register (regcache, regno);
 	  return;
 	}
 
       for (regno = 0; regno < NUM_REGS; regno++)
-	monitor_fetch_register (regno);
+	monitor_fetch_register (regcache, regno);
     }
   else
     {
-      monitor_dump_regs (current_regcache);
+      monitor_dump_regs (regcache);
     }
 }
 
 /* Store register REGNO, or all if REGNO == 0.  Return errno value.  */
 
 static void
-monitor_store_register (int regno)
+monitor_store_register (struct regcache *regcache, int regno)
 {
   const char *name;
   ULONGEST val;
@@ -1307,7 +1307,7 @@ monitor_store_register (int regno)
       return;
     }
 
-  val = read_register (regno);
+  regcache_cooked_read_unsigned (regcache, regno, &val);
   monitor_debug ("MON storeg %d %s\n", regno,
 		 phex (val, register_size (current_gdbarch, regno)));
 
@@ -1348,16 +1348,16 @@ monitor_store_register (int regno)
 /* Store the remote registers.  */
 
 static void
-monitor_store_registers (int regno)
+monitor_store_registers (struct regcache *regcache, int regno)
 {
   if (regno >= 0)
     {
-      monitor_store_register (regno);
+      monitor_store_register (regcache, regno);
       return;
     }
 
   for (regno = 0; regno < NUM_REGS; regno++)
-    monitor_store_register (regno);
+    monitor_store_register (regcache, regno);
 }
 
 /* Get ready to modify the registers array.  On machines which store

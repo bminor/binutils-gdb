@@ -132,7 +132,7 @@ i386bsd_collect_gregset (const struct regcache *regcache,
    for all registers (including the floating point registers).  */
 
 static void
-i386bsd_fetch_inferior_registers (int regnum)
+i386bsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1 || GETREGS_SUPPLIES (regnum))
     {
@@ -142,7 +142,7 @@ i386bsd_fetch_inferior_registers (int regnum)
 		  (PTRACE_TYPE_ARG3) &regs, 0) == -1)
 	perror_with_name (_("Couldn't get registers"));
 
-      i386bsd_supply_gregset (current_regcache, &regs);
+      i386bsd_supply_gregset (regcache, &regs);
       if (regnum != -1)
 	return;
     }
@@ -158,7 +158,7 @@ i386bsd_fetch_inferior_registers (int regnum)
 		    (PTRACE_TYPE_ARG3) xmmregs, 0) == 0)
 	{
 	  have_ptrace_xmmregs = 1;
-	  i387_supply_fxsave (current_regcache, -1, xmmregs);
+	  i387_supply_fxsave (regcache, -1, xmmregs);
 	}
       else
 	{
@@ -166,14 +166,14 @@ i386bsd_fetch_inferior_registers (int regnum)
 		      (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	    perror_with_name (_("Couldn't get floating point status"));
 
-	  i387_supply_fsave (current_regcache, -1, &fpregs);
+	  i387_supply_fsave (regcache, -1, &fpregs);
 	}
 #else
       if (ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get floating point status"));
 
-      i387_supply_fsave (current_regcache, -1, &fpregs);
+      i387_supply_fsave (regcache, -1, &fpregs);
 #endif
     }
 }
@@ -182,7 +182,7 @@ i386bsd_fetch_inferior_registers (int regnum)
    this for all registers (including the floating point registers).  */
 
 static void
-i386bsd_store_inferior_registers (int regnum)
+i386bsd_store_inferior_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1 || GETREGS_SUPPLIES (regnum))
     {
@@ -192,7 +192,7 @@ i386bsd_store_inferior_registers (int regnum)
                   (PTRACE_TYPE_ARG3) &regs, 0) == -1)
         perror_with_name (_("Couldn't get registers"));
 
-      i386bsd_collect_gregset (current_regcache, &regs, regnum);
+      i386bsd_collect_gregset (regcache, &regs, regnum);
 
       if (ptrace (PT_SETREGS, PIDGET (inferior_ptid),
 	          (PTRACE_TYPE_ARG3) &regs, 0) == -1)
@@ -214,7 +214,7 @@ i386bsd_store_inferior_registers (int regnum)
 	{
 	  have_ptrace_xmmregs = 1;
 
-	  i387_collect_fxsave (current_regcache, regnum, xmmregs);
+	  i387_collect_fxsave (regcache, regnum, xmmregs);
 
 	  if (ptrace (PT_SETXMMREGS, PIDGET (inferior_ptid),
 		      (PTRACE_TYPE_ARG3) xmmregs, 0) == -1)
@@ -228,7 +228,7 @@ i386bsd_store_inferior_registers (int regnum)
 		      (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	    perror_with_name (_("Couldn't get floating point status"));
 
-          i387_collect_fsave (current_regcache, regnum, &fpregs);
+          i387_collect_fsave (regcache, regnum, &fpregs);
 
           if (ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),
 		      (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)

@@ -86,7 +86,7 @@ getregs_supplies (int regno)
    for all registers (including the floating point registers).  */
 
 static void
-alphabsd_fetch_inferior_registers (int regno)
+alphabsd_fetch_inferior_registers (struct regcache *regcache, int regno)
 {
   if (regno == -1 || getregs_supplies (regno))
     {
@@ -96,7 +96,7 @@ alphabsd_fetch_inferior_registers (int regno)
 		  (PTRACE_TYPE_ARG3) &gregs, 0) == -1)
 	perror_with_name (_("Couldn't get registers"));
 
-      alphabsd_supply_reg (current_regcache, (char *) &gregs, regno);
+      alphabsd_supply_reg (regcache, (char *) &gregs, regno);
       if (regno != -1)
 	return;
     }
@@ -109,7 +109,7 @@ alphabsd_fetch_inferior_registers (int regno)
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get floating point status"));
 
-      alphabsd_supply_fpreg (current_regcache, (char *) &fpregs, regno);
+      alphabsd_supply_fpreg (regcache, (char *) &fpregs, regno);
     }
 }
 
@@ -117,7 +117,7 @@ alphabsd_fetch_inferior_registers (int regno)
    this for all registers (including the floating point registers).  */
 
 static void
-alphabsd_store_inferior_registers (int regno)
+alphabsd_store_inferior_registers (struct regcache *regcache, int regno)
 {
   if (regno == -1 || getregs_supplies (regno))
     {
@@ -126,7 +126,7 @@ alphabsd_store_inferior_registers (int regno)
                   (PTRACE_TYPE_ARG3) &gregs, 0) == -1)
         perror_with_name (_("Couldn't get registers"));
 
-      alphabsd_fill_reg (current_regcache, (char *) &gregs, regno);
+      alphabsd_fill_reg (regcache, (char *) &gregs, regno);
 
       if (ptrace (PT_SETREGS, PIDGET (inferior_ptid),
                   (PTRACE_TYPE_ARG3) &gregs, 0) == -1)
@@ -144,7 +144,7 @@ alphabsd_store_inferior_registers (int regno)
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get floating point status"));
 
-      alphabsd_fill_fpreg (current_regcache, (char *) &fpregs, regno);
+      alphabsd_fill_fpreg (regcache, (char *) &fpregs, regno);
 
       if (ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)

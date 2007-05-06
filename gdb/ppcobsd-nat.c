@@ -74,7 +74,7 @@ getfpregs_supplies (int regnum)
    for all registers.  */
 
 static void
-ppcobsd_fetch_registers (int regnum)
+ppcobsd_fetch_registers (struct regcache *regcache, int regnum)
 {
   struct reg regs;
 
@@ -82,10 +82,10 @@ ppcobsd_fetch_registers (int regnum)
 	      (PTRACE_TYPE_ARG3) &regs, 0) == -1)
     perror_with_name (_("Couldn't get registers"));
 
-  ppc_supply_gregset (&ppcobsd_gregset, current_regcache, -1,
+  ppc_supply_gregset (&ppcobsd_gregset, regcache, -1,
 		      &regs, sizeof regs);
 #ifndef PT_GETFPREGS
-  ppc_supply_fpregset (&ppcobsd_gregset, current_regcache, -1,
+  ppc_supply_fpregset (&ppcobsd_gregset, regcache, -1,
 		       &regs, sizeof regs);
 #endif
 
@@ -98,7 +98,7 @@ ppcobsd_fetch_registers (int regnum)
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get floating point status"));
 
-      ppc_supply_fpregset (&ppcobsd_fpregset, current_regcache, -1,
+      ppc_supply_fpregset (&ppcobsd_fpregset, regcache, -1,
 			   &fpregs, sizeof fpregs);
     }
 #endif
@@ -108,7 +108,7 @@ ppcobsd_fetch_registers (int regnum)
    this for all registers.  */
 
 static void
-ppcobsd_store_registers (int regnum)
+ppcobsd_store_registers (struct regcache *regcache, int regnum)
 {
   struct reg regs;
 
@@ -116,10 +116,10 @@ ppcobsd_store_registers (int regnum)
 	      (PTRACE_TYPE_ARG3) &regs, 0) == -1)
     perror_with_name (_("Couldn't get registers"));
 
-  ppc_collect_gregset (&ppcobsd_gregset, current_regcache,
+  ppc_collect_gregset (&ppcobsd_gregset, regcache,
 		       regnum, &regs, sizeof regs);
 #ifndef PT_GETFPREGS
-  ppc_collect_fpregset (&ppcobsd_gregset, current_regcache,
+  ppc_collect_fpregset (&ppcobsd_gregset, regcache,
 			regnum, &regs, sizeof regs);
 #endif
 
@@ -136,7 +136,7 @@ ppcobsd_store_registers (int regnum)
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get floating point status"));
 
-      ppc_collect_fpregset (&ppcobsd_fpregset, current_regcache,
+      ppc_collect_fpregset (&ppcobsd_fpregset, regcache,
 			    regnum, &fpregs, sizeof fpregs);
 
       if (ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),

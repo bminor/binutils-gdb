@@ -2650,8 +2650,8 @@ linux_nat_corefile_thread_callback (struct lwp_info *ti, void *data)
 
   inferior_ptid = ti->ptid;
   registers_changed ();
-  target_fetch_registers (-1);	/* FIXME should not be necessary;
-				   fill_gregset should do it automatically. */
+  /* FIXME should not be necessary; fill_gregset should do it automatically. */
+  target_fetch_registers (current_regcache, -1);
   args->note_data = linux_nat_do_thread_registers (args->obfd,
 						   ti->ptid,
 						   args->note_data,
@@ -2659,8 +2659,9 @@ linux_nat_corefile_thread_callback (struct lwp_info *ti, void *data)
   args->num_notes++;
   inferior_ptid = saved_ptid;
   registers_changed ();
-  target_fetch_registers (-1);	/* FIXME should not be necessary;
-				   fill_gregset should do it automatically. */
+  /* FIXME should not be necessary; fill_gregset should do it automatically. */
+  target_fetch_registers (current_regcache, -1);
+
   return 0;
 }
 
@@ -2671,8 +2672,8 @@ linux_nat_do_registers (bfd *obfd, ptid_t ptid,
 			char *note_data, int *note_size)
 {
   registers_changed ();
-  target_fetch_registers (-1);	/* FIXME should not be necessary;
-				   fill_gregset should do it automatically. */
+  /* FIXME should not be necessary; fill_gregset should do it automatically. */
+  target_fetch_registers (current_regcache, -1);
   return linux_nat_do_thread_registers (obfd,
 					ptid_build (ptid_get_pid (inferior_ptid),
 						    ptid_get_pid (inferior_ptid),

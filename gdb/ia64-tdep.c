@@ -3540,7 +3540,7 @@ ia64_store_return_value (struct type *type, struct regcache *regcache,
       char to[MAX_REGISTER_SIZE];
       convert_typed_floating (valbuf, type, to, builtin_type_ia64_ext);
       regcache_cooked_write (regcache, IA64_FR8_REGNUM, (void *)to);
-      target_store_registers (IA64_FR8_REGNUM);
+      target_store_registers (regcache, IA64_FR8_REGNUM);
     }
   else
     regcache_cooked_write (regcache, IA64_GR8_REGNUM, valbuf);

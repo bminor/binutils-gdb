@@ -120,8 +120,8 @@ static void procfs_resume (ptid_t, int, enum target_signal);
 static int procfs_can_run (void);
 static void procfs_stop (void);
 static void procfs_files_info (struct target_ops *);
-static void procfs_fetch_registers (int);
-static void procfs_store_registers (int);
+static void procfs_fetch_registers (struct regcache *, int);
+static void procfs_store_registers (struct regcache *, int);
 static void procfs_notice_signals (ptid_t);
 static void procfs_prepare_to_store (void);
 static void procfs_kill_inferior (void);
@@ -3682,7 +3682,7 @@ do_detach (int signo)
    when the process is resumed.  */
 
 static void
-procfs_fetch_registers (int regnum)
+procfs_fetch_registers (struct regcache *regcache, int regnum)
 {
   gdb_gregset_t *gregs;
   procinfo *pi;
@@ -3706,7 +3706,7 @@ procfs_fetch_registers (int regnum)
   if (gregs == NULL)
     proc_error (pi, "fetch_registers, get_gregs", __LINE__);
 
-  supply_gregset (current_regcache, (const gdb_gregset_t *) gregs);
+  supply_gregset (regcache, (const gdb_gregset_t *) gregs);
 
   if (FP0_REGNUM >= 0)		/* Do we have an FPU?  */
     {
@@ -3721,7 +3721,7 @@ procfs_fetch_registers (int regnum)
       if (fpregs == NULL)
 	proc_error (pi, "fetch_registers, get_fpregs", __LINE__);
 
-      supply_fpregset (current_regcache, (const gdb_fpregset_t *) fpregs);
+      supply_fpregset (regcache, (const gdb_fpregset_t *) fpregs);
     }
 }
 
@@ -3750,7 +3750,7 @@ procfs_prepare_to_store (void)
    writing one register might affect the value of others, etc.  */
 
 static void
-procfs_store_registers (int regnum)
+procfs_store_registers (struct regcache *regcache, int regnum)
 {
   gdb_gregset_t *gregs;
   procinfo *pi;
@@ -3774,7 +3774,7 @@ procfs_store_registers (int regnum)
   if (gregs == NULL)
     proc_error (pi, "store_registers, get_gregs", __LINE__);
 
-  fill_gregset (current_regcache, gregs, regnum);
+  fill_gregset (regcache, gregs, regnum);
   if (!proc_set_gregs (pi))
     proc_error (pi, "store_registers, set_gregs", __LINE__);
 
@@ -3791,7 +3791,7 @@ procfs_store_registers (int regnum)
       if (fpregs == NULL)
 	proc_error (pi, "store_registers, get_fpregs", __LINE__);
 
-      fill_fpregset (current_regcache, fpregs, regnum);
+      fill_fpregset (regcache, fpregs, regnum);
       if (!proc_set_fpregs (pi))
 	proc_error (pi, "store_registers, set_fpregs", __LINE__);
     }

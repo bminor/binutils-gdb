@@ -114,7 +114,7 @@ int have_ptrace_getregs =
 /* Fetch one register.  */
 
 static void
-fetch_register (int regno)
+fetch_register (struct regcache *regcache, int regno)
 {
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr;
@@ -126,7 +126,7 @@ fetch_register (int regno)
   if (CANNOT_FETCH_REGISTER (regno))
     {
       memset (buf, '\0', register_size (current_gdbarch, regno));	/* Supply zeroes */
-      regcache_raw_supply (current_regcache, regno, buf);
+      regcache_raw_supply (regcache, regno, buf);
       return;
     }
 
@@ -150,7 +150,7 @@ fetch_register (int regno)
 	  perror_with_name (mess);
 	}
     }
-  regcache_raw_supply (current_regcache, regno, buf);
+  regcache_raw_supply (regcache, regno, buf);
 }
 
 /* Fetch register values from the inferior.
@@ -158,17 +158,17 @@ fetch_register (int regno)
    Otherwise, REGNO specifies which register (so we can save time). */
 
 static void
-old_fetch_inferior_registers (int regno)
+old_fetch_inferior_registers (struct regcache *regcache, int regno)
 {
   if (regno >= 0)
     {
-      fetch_register (regno);
+      fetch_register (regcache, regno);
     }
   else
     {
       for (regno = 0; regno < NUM_REGS; regno++)
 	{
-	  fetch_register (regno);
+	  fetch_register (regcache, regno);
 	}
     }
 }
@@ -176,7 +176,7 @@ old_fetch_inferior_registers (int regno)
 /* Store one register. */
 
 static void
-store_register (int regno)
+store_register (const struct regcache *regcache, int regno)
 {
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr;
@@ -198,7 +198,7 @@ store_register (int regno)
   regaddr = 4 * regmap[regno];
 
   /* Put the contents of regno into a local buffer */
-  regcache_raw_collect (current_regcache, regno, buf);
+  regcache_raw_collect (regcache, regno, buf);
 
   /* Store the local buffer into the inferior a chunk at the time. */
   for (i = 0; i < register_size (current_gdbarch, regno);
@@ -222,17 +222,17 @@ store_register (int regno)
    Otherwise, REGNO specifies which register (so we can save time).  */
 
 static void
-old_store_inferior_registers (int regno)
+old_store_inferior_registers (const struct regcache *regcache, int regno)
 {
   if (regno >= 0)
     {
-      store_register (regno);
+      store_register (regcache, regno);
     }
   else
     {
       for (regno = 0; regno < NUM_REGS; regno++)
 	{
-	  store_register (regno);
+	  store_register (regcache, regno);
 	}
     }
 }
@@ -274,7 +274,7 @@ fill_gregset (const struct regcache *regcache,
    store their values in GDB's register array.  */
 
 static void
-fetch_regs (int tid)
+fetch_regs (struct regcache *regcache, int tid)
 {
   elf_gregset_t regs;
 
@@ -291,21 +291,21 @@ fetch_regs (int tid)
       perror_with_name (_("Couldn't get registers"));
     }
 
-  supply_gregset (current_regcache, (const elf_gregset_t *) &regs);
+  supply_gregset (regcache, (const elf_gregset_t *) &regs);
 }
 
 /* Store all valid general-purpose registers in GDB's register array
    into the process/thread specified by TID.  */
 
 static void
-store_regs (int tid, int regno)
+store_regs (const struct regcache *regcache, int tid, int regno)
 {
   elf_gregset_t regs;
 
   if (ptrace (PTRACE_GETREGS, tid, 0, (int) &regs) < 0)
     perror_with_name (_("Couldn't get registers"));
 
-  fill_gregset (current_regcache, &regs, regno);
+  fill_gregset (regcache, &regs, regno);
 
   if (ptrace (PTRACE_SETREGS, tid, 0, (int) &regs) < 0)
     perror_with_name (_("Couldn't write registers"));
@@ -313,8 +313,8 @@ store_regs (int tid, int regno)
 
 #else
 
-static void fetch_regs (int tid) {}
-static void store_regs (int tid, int regno) {}
+static void fetch_regs (struct regcache *regcache, int tid) {}
+static void store_regs (const struct regcache *regcache, int tid, int regno) {}
 
 #endif
 
@@ -369,28 +369,28 @@ fill_fpregset (const struct regcache *regcache,
    thier values in GDB's register array.  */
 
 static void
-fetch_fpregs (int tid)
+fetch_fpregs (struct regcache *regcache, int tid)
 {
   elf_fpregset_t fpregs;
 
   if (ptrace (PTRACE_GETFPREGS, tid, 0, (int) &fpregs) < 0)
     perror_with_name (_("Couldn't get floating point status"));
 
-  supply_fpregset (current_regcache, (const elf_fpregset_t *) &fpregs);
+  supply_fpregset (regcache, (const elf_fpregset_t *) &fpregs);
 }
 
 /* Store all valid floating-point registers in GDB's register array
    into the process/thread specified by TID.  */
 
 static void
-store_fpregs (int tid, int regno)
+store_fpregs (const struct regcache *regcache, int tid, int regno)
 {
   elf_fpregset_t fpregs;
 
   if (ptrace (PTRACE_GETFPREGS, tid, 0, (int) &fpregs) < 0)
     perror_with_name (_("Couldn't get floating point status"));
 
-  fill_fpregset (current_regcache, &fpregs, regno);
+  fill_fpregset (regcache, &fpregs, regno);
 
   if (ptrace (PTRACE_SETFPREGS, tid, 0, (int) &fpregs) < 0)
     perror_with_name (_("Couldn't write floating point status"));
@@ -398,8 +398,8 @@ store_fpregs (int tid, int regno)
 
 #else
 
-static void fetch_fpregs (int tid) {}
-static void store_fpregs (int tid, int regno) {}
+static void fetch_fpregs (struct regcache *regcache, int tid) {}
+static void store_fpregs (const struct regcache *regcache, int tid, int regno) {}
 
 #endif
 
@@ -410,7 +410,7 @@ static void store_fpregs (int tid, int regno) {}
    registers).  */
 
 static void
-m68k_linux_fetch_inferior_registers (int regno)
+m68k_linux_fetch_inferior_registers (struct regcache *regcache, int regno)
 {
   int tid;
 
@@ -418,7 +418,7 @@ m68k_linux_fetch_inferior_registers (int regno)
      GETREGS request isn't available.  */
   if (! have_ptrace_getregs)
     {
-      old_fetch_inferior_registers (regno);
+      old_fetch_inferior_registers (regcache, regno);
       return;
     }
 
@@ -433,28 +433,28 @@ m68k_linux_fetch_inferior_registers (int regno)
      zero.  */
   if (regno == -1)
     {
-      fetch_regs (tid);
+      fetch_regs (regcache, tid);
 
       /* The call above might reset `have_ptrace_getregs'.  */
       if (! have_ptrace_getregs)
 	{
-	  old_fetch_inferior_registers (-1);
+	  old_fetch_inferior_registers (regcache, -1);
 	  return;
 	}
 
-      fetch_fpregs (tid);
+      fetch_fpregs (regcache, tid);
       return;
     }
 
   if (getregs_supplies (regno))
     {
-      fetch_regs (tid);
+      fetch_regs (regcache, tid);
       return;
     }
 
   if (getfpregs_supplies (regno))
     {
-      fetch_fpregs (tid);
+      fetch_fpregs (regcache, tid);
       return;
     }
 
@@ -466,7 +466,7 @@ m68k_linux_fetch_inferior_registers (int regno)
    do this for all registers (including the floating point and SSE
    registers).  */
 static void
-m68k_linux_store_inferior_registers (int regno)
+m68k_linux_store_inferior_registers (struct regcache *regcache, int regno)
 {
   int tid;
 
@@ -474,7 +474,7 @@ m68k_linux_store_inferior_registers (int regno)
      SETREGS request isn't available.  */
   if (! have_ptrace_getregs)
     {
-      old_store_inferior_registers (regno);
+      old_store_inferior_registers (regcache, regno);
       return;
     }
 
@@ -488,20 +488,20 @@ m68k_linux_store_inferior_registers (int regno)
      store_fpregs can fail, and return zero.  */
   if (regno == -1)
     {
-      store_regs (tid, regno);
-      store_fpregs (tid, regno);
+      store_regs (regcache, tid, regno);
+      store_fpregs (regcache, tid, regno);
       return;
     }
 
   if (getregs_supplies (regno))
     {
-      store_regs (tid, regno);
+      store_regs (regcache, tid, regno);
       return;
     }
 
   if (getfpregs_supplies (regno))
     {
-      store_fpregs (tid, regno);
+      store_fpregs (regcache, tid, regno);
       return;
     }
 

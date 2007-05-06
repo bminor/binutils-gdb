@@ -903,26 +903,26 @@ get_reg_id (int regno)
 
 /* Read the remote registers into the block REGS.  */
 
-static void m32r_fetch_register (int);
+static void m32r_fetch_register (struct regcache *, int);
 
 static void
-m32r_fetch_registers (void)
+m32r_fetch_registers (struct regcache *regcache)
 {
   int regno;
 
   for (regno = 0; regno < NUM_REGS; regno++)
-    m32r_fetch_register (regno);
+    m32r_fetch_register (regcache, regno);
 }
 
 /* Fetch register REGNO, or all registers if REGNO is -1.
    Returns errno value.  */
 static void
-m32r_fetch_register (int regno)
+m32r_fetch_register (struct regcache *regcache, int regno)
 {
   unsigned long val, val2, regid;
 
   if (regno == -1)
-    m32r_fetch_registers ();
+    m32r_fetch_registers (regcache);
   else
     {
       char buffer[MAX_REGISTER_SIZE];
@@ -945,22 +945,22 @@ m32r_fetch_register (int regno)
       /* We got the number the register holds, but gdb expects to see a
          value in the target byte ordering.  */
       store_unsigned_integer (buffer, 4, val);
-      regcache_raw_supply (current_regcache, regno, buffer);
+      regcache_raw_supply (regcache, regno, buffer);
     }
   return;
 }
 
 /* Store the remote registers from the contents of the block REGS.  */
 
-static void m32r_store_register (int);
+static void m32r_store_register (struct regcache *, int);
 
 static void
-m32r_store_registers (void)
+m32r_store_registers (struct regcache *regcache)
 {
   int regno;
 
   for (regno = 0; regno < NUM_REGS; regno++)
-    m32r_store_register (regno);
+    m32r_store_register (regcache, regno);
 
   registers_changed ();
 }
@@ -968,16 +968,16 @@ m32r_store_registers (void)
 /* Store register REGNO, or all if REGNO == 0.
    Return errno value.  */
 static void
-m32r_store_register (int regno)
+m32r_store_register (struct regcache *regcache, int regno)
 {
   int regid;
   ULONGEST regval, tmp;
 
   if (regno == -1)
-    m32r_store_registers ();
+    m32r_store_registers (regcache);
   else
     {
-      regcache_cooked_read_unsigned (current_regcache, regno, &regval);
+      regcache_cooked_read_unsigned (regcache, regno, &regval);
       regid = get_reg_id (regno);
 
       if (regid == SDI_REG_PSW)

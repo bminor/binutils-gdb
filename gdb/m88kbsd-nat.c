@@ -65,7 +65,7 @@ m88kbsd_collect_gregset (const struct regcache *regcache,
    for all registers.  */
 
 static void
-m88kbsd_fetch_inferior_registers (int regnum)
+m88kbsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
 {
   struct reg regs;
 
@@ -73,14 +73,14 @@ m88kbsd_fetch_inferior_registers (int regnum)
 	      (PTRACE_TYPE_ARG3) &regs, 0) == -1)
     perror_with_name (_("Couldn't get registers"));
 
-  m88kbsd_supply_gregset (current_regcache, &regs);
+  m88kbsd_supply_gregset (regcache, &regs);
 }
 
 /* Store register REGNUM back into the inferior.  If REGNUM is -1, do
    this for all registers.  */
 
 static void
-m88kbsd_store_inferior_registers (int regnum)
+m88kbsd_store_inferior_registers (struct regcache *regcache, int regnum)
 {
   struct reg regs;
 
@@ -88,7 +88,7 @@ m88kbsd_store_inferior_registers (int regnum)
 	      (PTRACE_TYPE_ARG3) &regs, 0) == -1)
     perror_with_name (_("Couldn't get registers"));
 
-  m88kbsd_collect_gregset (current_regcache, &regs, regnum);
+  m88kbsd_collect_gregset (regcache, &regs, regnum);
 
   if (ptrace (PT_SETREGS, PIDGET (inferior_ptid),
 	      (PTRACE_TYPE_ARG3) &regs, 0) == -1)

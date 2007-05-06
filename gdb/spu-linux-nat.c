@@ -441,7 +441,7 @@ spu_child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 
 /* Override the fetch_inferior_register routine.  */
 static void
-spu_fetch_inferior_registers (int regno)
+spu_fetch_inferior_registers (struct regcache *regcache, int regno)
 {
   int fd;
   CORE_ADDR addr;
@@ -455,7 +455,7 @@ spu_fetch_inferior_registers (int regno)
     {
       char buf[4];
       store_unsigned_integer (buf, 4, fd);
-      regcache_raw_supply (current_regcache, SPU_ID_REGNUM, buf);
+      regcache_raw_supply (regcache, SPU_ID_REGNUM, buf);
     }
 
   /* The NPC register is found at ADDR.  */
@@ -463,7 +463,7 @@ spu_fetch_inferior_registers (int regno)
     {
       gdb_byte buf[4];
       if (fetch_ppc_memory (addr, buf, 4) == 0)
-	regcache_raw_supply (current_regcache, SPU_PC_REGNUM, buf);
+	regcache_raw_supply (regcache, SPU_PC_REGNUM, buf);
     }
 
   /* The GPRs are found in the "regs" spufs file.  */
@@ -476,13 +476,13 @@ spu_fetch_inferior_registers (int regno)
       xsnprintf (annex, sizeof annex, "%d/regs", fd);
       if (spu_proc_xfer_spu (annex, buf, NULL, 0, sizeof buf) == sizeof buf)
 	for (i = 0; i < SPU_NUM_GPRS; i++)
-	  regcache_raw_supply (current_regcache, i, buf + i*16);
+	  regcache_raw_supply (regcache, i, buf + i*16);
     }
 }
 
 /* Override the store_inferior_register routine.  */
 static void
-spu_store_inferior_registers (int regno)
+spu_store_inferior_registers (struct regcache *regcache, int regno)
 {
   int fd;
   CORE_ADDR addr;
@@ -495,7 +495,7 @@ spu_store_inferior_registers (int regno)
   if (regno == -1 || regno == SPU_PC_REGNUM)
     {
       gdb_byte buf[4];
-      regcache_raw_collect (current_regcache, SPU_PC_REGNUM, buf);
+      regcache_raw_collect (regcache, SPU_PC_REGNUM, buf);
       store_ppc_memory (addr, buf, 4);
     }
 
@@ -507,7 +507,7 @@ spu_store_inferior_registers (int regno)
       int i;
 
       for (i = 0; i < SPU_NUM_GPRS; i++)
-	regcache_raw_collect (current_regcache, i, buf + i*16);
+	regcache_raw_collect (regcache, i, buf + i*16);
 
       xsnprintf (annex, sizeof annex, "%d/regs", fd);
       spu_proc_xfer_spu (annex, NULL, buf, 0, sizeof buf);

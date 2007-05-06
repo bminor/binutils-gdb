@@ -44,8 +44,8 @@ static int have_ptrace_regsets = 1;
 /* Saved function pointers to fetch and store a single register using
    PTRACE_PEEKUSER and PTRACE_POKEUSER.  */
 
-void (*super_fetch_registers) (int);
-void (*super_store_registers) (int);
+void (*super_fetch_registers) (struct regcache *, int);
+void (*super_store_registers) (struct regcache *, int);
 
 /* Pseudo registers can not be read.  ptrace does not provide a way to
    read (or set) MIPS_PS_REGNUM, and there's no point in reading or
@@ -219,7 +219,7 @@ fill_fpregset (const struct regcache *regcache,
    using PTRACE_GETREGS et al.  */
 
 static void
-mips64_linux_regsets_fetch_registers (int regno)
+mips64_linux_regsets_fetch_registers (struct regcache *regcache, int regno)
 {
   int is_fp;
   int tid;
@@ -252,7 +252,7 @@ mips64_linux_regsets_fetch_registers (int regno)
 	  perror_with_name (_("Couldn't get registers"));
 	}
 
-      mips64_supply_gregset (current_regcache,
+      mips64_supply_gregset (regcache,
 			     (const mips64_elf_gregset_t *) &regs);
     }
 
@@ -271,7 +271,7 @@ mips64_linux_regsets_fetch_registers (int regno)
 	  perror_with_name (_("Couldn't get FP registers"));
 	}
 
-      mips64_supply_fpregset (current_regcache,
+      mips64_supply_fpregset (regcache,
 			      (const mips64_elf_fpregset_t *) &fp_regs);
     }
 }
@@ -280,7 +280,7 @@ mips64_linux_regsets_fetch_registers (int regno)
    using PTRACE_SETREGS et al.  */
 
 static void
-mips64_linux_regsets_store_registers (int regno)
+mips64_linux_regsets_store_registers (const struct regcache *regcache, int regno)
 {
   int is_fp;
   int tid;
@@ -306,7 +306,7 @@ mips64_linux_regsets_store_registers (int regno)
       if (ptrace (PTRACE_GETREGS, tid, 0L, (PTRACE_TYPE_ARG3) &regs) == -1)
 	perror_with_name (_("Couldn't get registers"));
 
-      mips64_fill_gregset (current_regcache, &regs, regno);
+      mips64_fill_gregset (regcache, &regs, regno);
 
       if (ptrace (PTRACE_SETREGS, tid, 0L, (PTRACE_TYPE_ARG3) &regs) == -1)
 	perror_with_name (_("Couldn't set registers"));
@@ -320,7 +320,7 @@ mips64_linux_regsets_store_registers (int regno)
 		  (PTRACE_TYPE_ARG3) &fp_regs) == -1)
 	perror_with_name (_("Couldn't get FP registers"));
 
-      mips64_fill_fpregset (current_regcache, &fp_regs, regno);
+      mips64_fill_fpregset (regcache, &fp_regs, regno);
 
       if (ptrace (PTRACE_SETFPREGS, tid, 0L,
 		  (PTRACE_TYPE_ARG3) &fp_regs) == -1)
@@ -332,32 +332,32 @@ mips64_linux_regsets_store_registers (int regno)
    using any working method.  */
 
 static void
-mips64_linux_fetch_registers (int regnum)
+mips64_linux_fetch_registers (struct regcache *regcache, int regnum)
 {
   /* Unless we already know that PTRACE_GETREGS does not work, try it.  */
   if (have_ptrace_regsets)
-    mips64_linux_regsets_fetch_registers (regnum);
+    mips64_linux_regsets_fetch_registers (regcache, regnum);
 
   /* If we know, or just found out, that PTRACE_GETREGS does not work, fall
      back to PTRACE_PEEKUSER.  */
   if (!have_ptrace_regsets)
-    super_fetch_registers (regnum);
+    super_fetch_registers (regcache, regnum);
 }
 
 /* Store REGNO (or all registers if REGNO == -1) to the target
    using any working method.  */
 
 static void
-mips64_linux_store_registers (int regnum)
+mips64_linux_store_registers (struct regcache *regcache, int regnum)
 {
   /* Unless we already know that PTRACE_GETREGS does not work, try it.  */
   if (have_ptrace_regsets)
-    mips64_linux_regsets_store_registers (regnum);
+    mips64_linux_regsets_store_registers (regcache, regnum);
 
   /* If we know, or just found out, that PTRACE_GETREGS does not work, fall
      back to PTRACE_PEEKUSER.  */
   if (!have_ptrace_regsets)
-    super_store_registers (regnum);
+    super_store_registers (regcache, regnum);
 }
 
 /* Return the address in the core dump or inferior of register

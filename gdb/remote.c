@@ -91,7 +91,7 @@ static void remote_files_info (struct target_ops *ignore);
 
 static void remote_prepare_to_store (void);
 
-static void remote_fetch_registers (int regno);
+static void remote_fetch_registers (struct regcache *regcache, int regno);
 
 static void remote_resume (ptid_t ptid, int step,
                            enum target_signal siggnal);
@@ -108,7 +108,7 @@ static void remote_open_1 (char *, int, struct target_ops *, int extended_p,
 
 static void remote_close (int quitting);
 
-static void remote_store_registers (int regno);
+static void remote_store_registers (struct regcache *regcache, int regno);
 
 static void remote_mourn (void);
 static void remote_async_mourn (void);
@@ -3486,7 +3486,7 @@ got_status:
 /* Fetch a single register using a 'p' packet.  */
 
 static int
-fetch_register_using_p (struct packet_reg *reg)
+fetch_register_using_p (struct regcache *regcache, struct packet_reg *reg)
 {
   struct remote_state *rs = get_remote_state ();
   char *buf, *p;
@@ -3521,7 +3521,7 @@ fetch_register_using_p (struct packet_reg *reg)
   /* If this register is unfetchable, tell the regcache.  */
   if (buf[0] == 'x')
     {
-      regcache_raw_supply (current_regcache, reg->regnum, NULL);
+      regcache_raw_supply (regcache, reg->regnum, NULL);
       set_register_cached (reg->regnum, -1);
       return 1;
     }
@@ -3537,7 +3537,7 @@ fetch_register_using_p (struct packet_reg *reg)
       regp[i++] = fromhex (p[0]) * 16 + fromhex (p[1]);
       p += 2;
     }
-  regcache_raw_supply (current_regcache, reg->regnum, regp);
+  regcache_raw_supply (regcache, reg->regnum, regp);
   return 1;
 }
 
@@ -3578,7 +3578,7 @@ send_g_packet (void)
 }
 
 static void
-process_g_packet (void)
+process_g_packet (struct regcache *regcache)
 {
   struct remote_state *rs = get_remote_state ();
   struct remote_arch_state *rsa = get_remote_arch_state ();
@@ -3660,11 +3660,11 @@ process_g_packet (void)
 		gdb_assert (r->offset * 2 < strlen (rs->buf));
 		/* The register isn't available, mark it as such (at
                    the same time setting the value to zero).  */
-		regcache_raw_supply (current_regcache, r->regnum, NULL);
+		regcache_raw_supply (regcache, r->regnum, NULL);
 		set_register_cached (i, -1);
 	      }
 	    else
-	      regcache_raw_supply (current_regcache, r->regnum,
+	      regcache_raw_supply (regcache, r->regnum,
 				   regs + r->offset);
 	  }
       }
@@ -3672,14 +3672,14 @@ process_g_packet (void)
 }
 
 static void
-fetch_registers_using_g (void)
+fetch_registers_using_g (struct regcache *regcache)
 {
   send_g_packet ();
-  process_g_packet ();
+  process_g_packet (regcache);
 }
 
 static void
-remote_fetch_registers (int regnum)
+remote_fetch_registers (struct regcache *regcache, int regnum)
 {
   struct remote_state *rs = get_remote_state ();
   struct remote_arch_state *rsa = get_remote_arch_state ();
@@ -3698,29 +3698,29 @@ remote_fetch_registers (int regnum)
 	 contents, so fall back to 'p'.  */
       if (reg->in_g_packet)
 	{
-	  fetch_registers_using_g ();
+	  fetch_registers_using_g (regcache);
 	  if (reg->in_g_packet)
 	    return;
 	}
 
-      if (fetch_register_using_p (reg))
+      if (fetch_register_using_p (regcache, reg))
 	return;
 
       /* This register is not available.  */
-      regcache_raw_supply (current_regcache, reg->regnum, NULL);
+      regcache_raw_supply (regcache, reg->regnum, NULL);
       set_register_cached (reg->regnum, -1);
 
       return;
     }
 
-  fetch_registers_using_g ();
+  fetch_registers_using_g (regcache);
 
   for (i = 0; i < NUM_REGS; i++)
     if (!rsa->regs[i].in_g_packet)
-      if (!fetch_register_using_p (&rsa->regs[i]))
+      if (!fetch_register_using_p (regcache, &rsa->regs[i]))
 	{
 	  /* This register is not available.  */
-	  regcache_raw_supply (current_regcache, i, NULL);
+	  regcache_raw_supply (regcache, i, NULL);
 	  set_register_cached (i, -1);
 	}
 }
@@ -3755,7 +3755,7 @@ remote_prepare_to_store (void)
    packet was not recognized.  */
 
 static int
-store_register_using_P (struct packet_reg *reg)
+store_register_using_P (const struct regcache *regcache, struct packet_reg *reg)
 {
   struct remote_state *rs = get_remote_state ();
   struct remote_arch_state *rsa = get_remote_arch_state ();
@@ -3772,7 +3772,7 @@ store_register_using_P (struct packet_reg *reg)
 
   xsnprintf (buf, get_remote_packet_size (), "P%s=", phex_nz (reg->pnum, 0));
   p = buf + strlen (buf);
-  regcache_raw_collect (current_regcache, reg->regnum, regp);
+  regcache_raw_collect (regcache, reg->regnum, regp);
   bin2hex (regp, p, register_size (current_gdbarch, reg->regnum));
   remote_send (&rs->buf, &rs->buf_size);
 
@@ -3794,7 +3794,7 @@ store_register_using_P (struct packet_reg *reg)
    contents of the register cache buffer.  FIXME: ignores errors.  */
 
 static void
-store_registers_using_G (void)
+store_registers_using_G (const struct regcache *regcache)
 {
   struct remote_state *rs = get_remote_state ();
   struct remote_arch_state *rsa = get_remote_arch_state ();
@@ -3811,7 +3811,7 @@ store_registers_using_G (void)
       {
 	struct packet_reg *r = &rsa->regs[i];
 	if (r->in_g_packet)
-	  regcache_raw_collect (current_regcache, r->regnum, regs + r->offset);
+	  regcache_raw_collect (regcache, r->regnum, regs + r->offset);
       }
   }
 
@@ -3829,7 +3829,7 @@ store_registers_using_G (void)
    of the register cache buffer.  FIXME: ignores errors.  */
 
 static void
-remote_store_registers (int regnum)
+remote_store_registers (struct regcache *regcache, int regnum)
 {
   struct remote_state *rs = get_remote_state ();
   struct remote_arch_state *rsa = get_remote_arch_state ();
@@ -3846,7 +3846,7 @@ remote_store_registers (int regnum)
 	 possible; we often change only a small number of registers.
 	 Sometimes we change a larger number; we'd need help from a
 	 higher layer to know to use 'G'.  */
-      if (store_register_using_P (reg))
+      if (store_register_using_P (regcache, reg))
 	return;
 
       /* For now, don't complain if we have no way to write the
@@ -3856,15 +3856,15 @@ remote_store_registers (int regnum)
       if (!reg->in_g_packet)
 	return;
 
-      store_registers_using_G ();
+      store_registers_using_G (regcache);
       return;
     }
 
-  store_registers_using_G ();
+  store_registers_using_G (regcache);
 
   for (i = 0; i < NUM_REGS; i++)
     if (!rsa->regs[i].in_g_packet)
-      if (!store_register_using_P (&rsa->regs[i]))
+      if (!store_register_using_P (regcache, &rsa->regs[i]))
 	/* See above for why we do not issue an error here.  */
 	continue;
 }

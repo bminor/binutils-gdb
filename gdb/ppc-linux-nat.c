@@ -226,7 +226,7 @@ ppc_register_u_addr (int regno)
    registers set mechanism, as opposed to the interface for all the
    other registers, that stores/fetches each register individually.  */
 static void
-fetch_altivec_register (int tid, int regno)
+fetch_altivec_register (struct regcache *regcache, int tid, int regno)
 {
   int ret;
   int offset = 0;
@@ -252,7 +252,7 @@ fetch_altivec_register (int tid, int regno)
   if (regno == (tdep->ppc_vrsave_regnum - 1))
     offset = vrregsize - register_size (current_gdbarch, tdep->ppc_vrsave_regnum);
   
-  regcache_raw_supply (current_regcache, regno,
+  regcache_raw_supply (regcache, regno,
 		       regs + (regno - tdep->ppc_vr0_regnum) * vrregsize + offset);
 }
 
@@ -291,7 +291,7 @@ get_spe_registers (int tid, struct gdb_evrregset_t *evrregset)
    be the number of an upper half register, acc, spefscr, or -1 to
    supply the values of all registers.  */
 static void
-fetch_spe_register (int tid, int regno)
+fetch_spe_register (struct regcache *regcache, int tid, int regno)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   struct gdb_evrregset_t evrregs;
@@ -310,26 +310,26 @@ fetch_spe_register (int tid, int regno)
       int i;
 
       for (i = 0; i < ppc_num_gprs; i++)
-        regcache_raw_supply (current_regcache, tdep->ppc_ev0_upper_regnum + i,
+        regcache_raw_supply (regcache, tdep->ppc_ev0_upper_regnum + i,
                              &evrregs.evr[i]);
     }
   else if (tdep->ppc_ev0_upper_regnum <= regno
            && regno < tdep->ppc_ev0_upper_regnum + ppc_num_gprs)
-    regcache_raw_supply (current_regcache, regno,
+    regcache_raw_supply (regcache, regno,
                          &evrregs.evr[regno - tdep->ppc_ev0_upper_regnum]);
 
   if (regno == -1
       || regno == tdep->ppc_acc_regnum)
-    regcache_raw_supply (current_regcache, tdep->ppc_acc_regnum, &evrregs.acc);
+    regcache_raw_supply (regcache, tdep->ppc_acc_regnum, &evrregs.acc);
 
   if (regno == -1
       || regno == tdep->ppc_spefscr_regnum)
-    regcache_raw_supply (current_regcache, tdep->ppc_spefscr_regnum,
+    regcache_raw_supply (regcache, tdep->ppc_spefscr_regnum,
                          &evrregs.spefscr);
 }
 
 static void
-fetch_register (int tid, int regno)
+fetch_register (struct regcache *regcache, int tid, int regno)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   /* This isn't really an address.  But ptrace thinks of it as one.  */
@@ -346,7 +346,7 @@ fetch_register (int tid, int regno)
          register.  */
       if (have_ptrace_getvrregs)
        {
-         fetch_altivec_register (tid, regno);
+         fetch_altivec_register (regcache, tid, regno);
          return;
        }
      /* If we have discovered that there is no ptrace support for
@@ -355,14 +355,14 @@ fetch_register (int tid, int regno)
     }
   else if (spe_register_p (regno))
     {
-      fetch_spe_register (tid, regno);
+      fetch_spe_register (regcache, tid, regno);
       return;
     }
 
   if (regaddr == -1)
     {
       memset (buf, '\0', register_size (current_gdbarch, regno));   /* Supply zeroes */
-      regcache_raw_supply (current_regcache, regno, buf);
+      regcache_raw_supply (regcache, regno, buf);
       return;
     }
 
@@ -393,7 +393,7 @@ fetch_register (int tid, int regno)
     {
       /* Little-endian values are always found at the left end of the
          bytes transferred.  */
-      regcache_raw_supply (current_regcache, regno, buf);
+      regcache_raw_supply (regcache, regno, buf);
     }
   else if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     {
@@ -401,7 +401,7 @@ fetch_register (int tid, int regno)
          transferred.  */
       size_t padding = (bytes_transferred
                         - register_size (current_gdbarch, regno));
-      regcache_raw_supply (current_regcache, regno, buf + padding);
+      regcache_raw_supply (regcache, regno, buf + padding);
     }
   else 
     internal_error (__FILE__, __LINE__,
@@ -410,7 +410,7 @@ fetch_register (int tid, int regno)
 }
 
 static void
-supply_vrregset (gdb_vrregset_t *vrregsetp)
+supply_vrregset (struct regcache *regcache, gdb_vrregset_t *vrregsetp)
 {
   int i;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
@@ -425,16 +425,16 @@ supply_vrregset (gdb_vrregset_t *vrregsetp)
          occupies a whole vector, while VRSAVE occupies a full 4 bytes
          slot.  */
       if (i == (num_of_vrregs - 2))
-        regcache_raw_supply (current_regcache, tdep->ppc_vr0_regnum + i,
+        regcache_raw_supply (regcache, tdep->ppc_vr0_regnum + i,
 			     *vrregsetp + i * vrregsize + offset);
       else
-        regcache_raw_supply (current_regcache, tdep->ppc_vr0_regnum + i,
+        regcache_raw_supply (regcache, tdep->ppc_vr0_regnum + i,
 			     *vrregsetp + i * vrregsize);
     }
 }
 
 static void
-fetch_altivec_registers (int tid)
+fetch_altivec_registers (struct regcache *regcache, int tid)
 {
   int ret;
   gdb_vrregset_t regs;
@@ -449,47 +449,47 @@ fetch_altivec_registers (int tid)
 	}
       perror_with_name (_("Unable to fetch AltiVec registers"));
     }
-  supply_vrregset (&regs);
+  supply_vrregset (regcache, &regs);
 }
 
 static void 
-fetch_ppc_registers (int tid)
+fetch_ppc_registers (struct regcache *regcache, int tid)
 {
   int i;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
   for (i = 0; i < ppc_num_gprs; i++)
-    fetch_register (tid, tdep->ppc_gp0_regnum + i);
+    fetch_register (regcache, tid, tdep->ppc_gp0_regnum + i);
   if (tdep->ppc_fp0_regnum >= 0)
     for (i = 0; i < ppc_num_fprs; i++)
-      fetch_register (tid, tdep->ppc_fp0_regnum + i);
-  fetch_register (tid, PC_REGNUM);
+      fetch_register (regcache, tid, tdep->ppc_fp0_regnum + i);
+  fetch_register (regcache, tid, PC_REGNUM);
   if (tdep->ppc_ps_regnum != -1)
-    fetch_register (tid, tdep->ppc_ps_regnum);
+    fetch_register (regcache, tid, tdep->ppc_ps_regnum);
   if (tdep->ppc_cr_regnum != -1)
-    fetch_register (tid, tdep->ppc_cr_regnum);
+    fetch_register (regcache, tid, tdep->ppc_cr_regnum);
   if (tdep->ppc_lr_regnum != -1)
-    fetch_register (tid, tdep->ppc_lr_regnum);
+    fetch_register (regcache, tid, tdep->ppc_lr_regnum);
   if (tdep->ppc_ctr_regnum != -1)
-    fetch_register (tid, tdep->ppc_ctr_regnum);
+    fetch_register (regcache, tid, tdep->ppc_ctr_regnum);
   if (tdep->ppc_xer_regnum != -1)
-    fetch_register (tid, tdep->ppc_xer_regnum);
+    fetch_register (regcache, tid, tdep->ppc_xer_regnum);
   if (tdep->ppc_mq_regnum != -1)
-    fetch_register (tid, tdep->ppc_mq_regnum);
+    fetch_register (regcache, tid, tdep->ppc_mq_regnum);
   if (tdep->ppc_fpscr_regnum != -1)
-    fetch_register (tid, tdep->ppc_fpscr_regnum);
+    fetch_register (regcache, tid, tdep->ppc_fpscr_regnum);
   if (have_ptrace_getvrregs)
     if (tdep->ppc_vr0_regnum != -1 && tdep->ppc_vrsave_regnum != -1)
-      fetch_altivec_registers (tid);
+      fetch_altivec_registers (regcache, tid);
   if (tdep->ppc_ev0_upper_regnum >= 0)
-    fetch_spe_register (tid, -1);
+    fetch_spe_register (regcache, tid, -1);
 }
 
 /* Fetch registers from the child process.  Fetch all registers if
    regno == -1, otherwise fetch all general registers or all floating
    point registers depending upon the value of regno.  */
 static void
-ppc_linux_fetch_inferior_registers (int regno)
+ppc_linux_fetch_inferior_registers (struct regcache *regcache, int regno)
 {
   /* Overload thread id onto process id */
   int tid = TIDGET (inferior_ptid);
@@ -499,14 +499,14 @@ ppc_linux_fetch_inferior_registers (int regno)
     tid = PIDGET (inferior_ptid);
 
   if (regno == -1)
-    fetch_ppc_registers (tid);
+    fetch_ppc_registers (regcache, tid);
   else 
-    fetch_register (tid, regno);
+    fetch_register (regcache, tid, regno);
 }
 
 /* Store one register. */
 static void
-store_altivec_register (int tid, int regno)
+store_altivec_register (const struct regcache *regcache, int tid, int regno)
 {
   int ret;
   int offset = 0;
@@ -530,7 +530,7 @@ store_altivec_register (int tid, int regno)
   if (regno == (tdep->ppc_vrsave_regnum - 1))
     offset = vrregsize - register_size (current_gdbarch, tdep->ppc_vrsave_regnum);
 
-  regcache_raw_collect (current_regcache, regno,
+  regcache_raw_collect (regcache, regno,
 			regs + (regno - tdep->ppc_vr0_regnum) * vrregsize + offset);
 
   ret = ptrace (PTRACE_SETVRREGS, tid, 0, &regs);
@@ -571,7 +571,7 @@ set_spe_registers (int tid, struct gdb_evrregset_t *evrregset)
    If REGNO is -1, write the values of all the SPE-specific
    registers.  */
 static void
-store_spe_register (int tid, int regno)
+store_spe_register (const struct regcache *regcache, int tid, int regno)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   struct gdb_evrregset_t evrregs;
@@ -599,24 +599,24 @@ store_spe_register (int tid, int regno)
       int i;
 
       for (i = 0; i < ppc_num_gprs; i++)
-        regcache_raw_collect (current_regcache,
+        regcache_raw_collect (regcache,
                               tdep->ppc_ev0_upper_regnum + i,
                               &evrregs.evr[i]);
     }
   else if (tdep->ppc_ev0_upper_regnum <= regno
            && regno < tdep->ppc_ev0_upper_regnum + ppc_num_gprs)
-    regcache_raw_collect (current_regcache, regno,
+    regcache_raw_collect (regcache, regno,
                           &evrregs.evr[regno - tdep->ppc_ev0_upper_regnum]);
 
   if (regno == -1
       || regno == tdep->ppc_acc_regnum)
-    regcache_raw_collect (current_regcache,
+    regcache_raw_collect (regcache,
                           tdep->ppc_acc_regnum,
                           &evrregs.acc);
 
   if (regno == -1
       || regno == tdep->ppc_spefscr_regnum)
-    regcache_raw_collect (current_regcache,
+    regcache_raw_collect (regcache,
                           tdep->ppc_spefscr_regnum,
                           &evrregs.spefscr);
 
@@ -625,7 +625,7 @@ store_spe_register (int tid, int regno)
 }
 
 static void
-store_register (int tid, int regno)
+store_register (const struct regcache *regcache, int tid, int regno)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   /* This isn't really an address.  But ptrace thinks of it as one.  */
@@ -636,12 +636,12 @@ store_register (int tid, int regno)
 
   if (altivec_register_p (regno))
     {
-      store_altivec_register (tid, regno);
+      store_altivec_register (regcache, tid, regno);
       return;
     }
   else if (spe_register_p (regno))
     {
-      store_spe_register (tid, regno);
+      store_spe_register (regcache, tid, regno);
       return;
     }
 
@@ -657,14 +657,14 @@ store_register (int tid, int regno)
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
     {
       /* Little-endian values always sit at the left end of the buffer.  */
-      regcache_raw_collect (current_regcache, regno, buf);
+      regcache_raw_collect (regcache, regno, buf);
     }
   else if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     {
       /* Big-endian values sit at the right end of the buffer.  */
       size_t padding = (bytes_to_transfer
                         - register_size (current_gdbarch, regno));
-      regcache_raw_collect (current_regcache, regno, buf + padding);
+      regcache_raw_collect (regcache, regno, buf + padding);
     }
 
   for (i = 0; i < bytes_to_transfer; i += sizeof (long))
@@ -692,7 +692,7 @@ store_register (int tid, int regno)
 }
 
 static void
-fill_vrregset (gdb_vrregset_t *vrregsetp)
+fill_vrregset (const struct regcache *regcache, gdb_vrregset_t *vrregsetp)
 {
   int i;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
@@ -705,16 +705,16 @@ fill_vrregset (gdb_vrregset_t *vrregsetp)
       /* The last 2 registers of this set are only 32 bit long, not
          128, but only VSCR is fetched as a 16 bytes quantity.  */
       if (i == (num_of_vrregs - 2))
-        regcache_raw_collect (current_regcache, tdep->ppc_vr0_regnum + i,
+        regcache_raw_collect (regcache, tdep->ppc_vr0_regnum + i,
 			      *vrregsetp + i * vrregsize + offset);
       else
-        regcache_raw_collect (current_regcache, tdep->ppc_vr0_regnum + i,
+        regcache_raw_collect (regcache, tdep->ppc_vr0_regnum + i,
 			      *vrregsetp + i * vrregsize);
     }
 }
 
 static void
-store_altivec_registers (int tid)
+store_altivec_registers (const struct regcache *regcache, int tid)
 {
   int ret;
   gdb_vrregset_t regs;
@@ -730,43 +730,43 @@ store_altivec_registers (int tid)
       perror_with_name (_("Couldn't get AltiVec registers"));
     }
 
-  fill_vrregset (&regs);
+  fill_vrregset (regcache, &regs);
   
   if (ptrace (PTRACE_SETVRREGS, tid, 0, &regs) < 0)
     perror_with_name (_("Couldn't write AltiVec registers"));
 }
 
 static void
-store_ppc_registers (int tid)
+store_ppc_registers (const struct regcache *regcache, int tid)
 {
   int i;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   
   for (i = 0; i < ppc_num_gprs; i++)
-    store_register (tid, tdep->ppc_gp0_regnum + i);
+    store_register (regcache, tid, tdep->ppc_gp0_regnum + i);
   if (tdep->ppc_fp0_regnum >= 0)
     for (i = 0; i < ppc_num_fprs; i++)
-      store_register (tid, tdep->ppc_fp0_regnum + i);
-  store_register (tid, PC_REGNUM);
+      store_register (regcache, tid, tdep->ppc_fp0_regnum + i);
+  store_register (regcache, tid, PC_REGNUM);
   if (tdep->ppc_ps_regnum != -1)
-    store_register (tid, tdep->ppc_ps_regnum);
+    store_register (regcache, tid, tdep->ppc_ps_regnum);
   if (tdep->ppc_cr_regnum != -1)
-    store_register (tid, tdep->ppc_cr_regnum);
+    store_register (regcache, tid, tdep->ppc_cr_regnum);
   if (tdep->ppc_lr_regnum != -1)
-    store_register (tid, tdep->ppc_lr_regnum);
+    store_register (regcache, tid, tdep->ppc_lr_regnum);
   if (tdep->ppc_ctr_regnum != -1)
-    store_register (tid, tdep->ppc_ctr_regnum);
+    store_register (regcache, tid, tdep->ppc_ctr_regnum);
   if (tdep->ppc_xer_regnum != -1)
-    store_register (tid, tdep->ppc_xer_regnum);
+    store_register (regcache, tid, tdep->ppc_xer_regnum);
   if (tdep->ppc_mq_regnum != -1)
-    store_register (tid, tdep->ppc_mq_regnum);
+    store_register (regcache, tid, tdep->ppc_mq_regnum);
   if (tdep->ppc_fpscr_regnum != -1)
-    store_register (tid, tdep->ppc_fpscr_regnum);
+    store_register (regcache, tid, tdep->ppc_fpscr_regnum);
   if (have_ptrace_getvrregs)
     if (tdep->ppc_vr0_regnum != -1 && tdep->ppc_vrsave_regnum != -1)
-      store_altivec_registers (tid);
+      store_altivec_registers (regcache, tid);
   if (tdep->ppc_ev0_upper_regnum >= 0)
-    store_spe_register (tid, -1);
+    store_spe_register (regcache, tid, -1);
 }
 
 static int
@@ -888,7 +888,7 @@ ppc_linux_stopped_by_watchpoint (void)
 }
 
 static void
-ppc_linux_store_inferior_registers (int regno)
+ppc_linux_store_inferior_registers (struct regcache *regcache, int regno)
 {
   /* Overload thread id onto process id */
   int tid = TIDGET (inferior_ptid);
@@ -898,9 +898,9 @@ ppc_linux_store_inferior_registers (int regno)
     tid = PIDGET (inferior_ptid);
 
   if (regno >= 0)
-    store_register (tid, regno);
+    store_register (regcache, tid, regno);
   else
-    store_ppc_registers (tid);
+    store_ppc_registers (regcache, tid);
 }
 
 void
@@ -957,7 +957,7 @@ fill_gregset (const struct regcache *regcache,
     regcache_raw_collect (regcache, tdep->ppc_xer_regnum,
 			  regp + PT_XER);
   if ((regno == -1) || regno == tdep->ppc_ctr_regnum)
-    right_fill_reg (tdep->ppc_ctr_regnum, regp + PT_CTR);
+    right_fill_reg (regcache, tdep->ppc_ctr_regnum, regp + PT_CTR);
 #ifdef PT_MQ
   if (((regno == -1) || regno == tdep->ppc_mq_regnum)
       && (tdep->ppc_mq_regnum != -1))
@@ -995,7 +995,7 @@ fill_fpregset (const struct regcache *regcache,
 				  fpp + 8 * regi);
         }
       if (regno == -1 || regno == tdep->ppc_fpscr_regnum)
-        right_fill_reg (tdep->ppc_fpscr_regnum, (fpp + 8 * 32));
+        right_fill_reg (regcache, tdep->ppc_fpscr_regnum, (fpp + 8 * 32));
     }
 }
 

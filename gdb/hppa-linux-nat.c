@@ -216,14 +216,14 @@ static const int greg_map[] =
 /* Fetch one register.  */
 
 static void
-fetch_register (int regno)
+fetch_register (struct regcache *regcache, int regno)
 {
   int tid;
   int val;
 
   if (CANNOT_FETCH_REGISTER (regno))
     {
-      regcache_raw_supply (current_regcache, regno, NULL);
+      regcache_raw_supply (regcache, regno, NULL);
       return;
     }
 
@@ -238,13 +238,13 @@ fetch_register (int regno)
     error (_("Couldn't read register %s (#%d): %s."), REGISTER_NAME (regno),
 	   regno, safe_strerror (errno));
 
-  regcache_raw_supply (current_regcache, regno, &val);
+  regcache_raw_supply (regcache, regno, &val);
 }
 
 /* Store one register. */
 
 static void
-store_register (int regno)
+store_register (const struct regcache *regcache, int regno)
 {
   int tid;
   int val;
@@ -258,7 +258,7 @@ store_register (int regno)
     tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
 
   errno = 0;
-  regcache_raw_collect (current_regcache, regno, &val);
+  regcache_raw_collect (regcache, regno, &val);
   ptrace (PTRACE_POKEUSER, tid, hppa_linux_register_addr (regno, 0), val);
   if (errno != 0)
     error (_("Couldn't write register %s (#%d): %s."), REGISTER_NAME (regno),
@@ -270,16 +270,16 @@ store_register (int regno)
    point registers depending upon the value of regno.  */
 
 static void
-hppa_linux_fetch_inferior_registers (int regno)
+hppa_linux_fetch_inferior_registers (struct regcache *regcache, int regno)
 {
   if (-1 == regno)
     {
       for (regno = 0; regno < NUM_REGS; regno++)
-        fetch_register (regno);
+        fetch_register (regcache, regno);
     }
   else 
     {
-      fetch_register (regno);
+      fetch_register (regcache, regno);
     }
 }
 
@@ -288,16 +288,16 @@ hppa_linux_fetch_inferior_registers (int regno)
    point registers depending upon the value of regno.  */
 
 static void
-hppa_linux_store_inferior_registers (int regno)
+hppa_linux_store_inferior_registers (struct regcache *regcache, int regno)
 {
   if (-1 == regno)
     {
       for (regno = 0; regno < NUM_REGS; regno++)
-	store_register (regno);
+	store_register (regcache, regno);
     }
   else
     {
-      store_register (regno);
+      store_register (regcache, regno);
     }
 }
 

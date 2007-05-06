@@ -108,14 +108,14 @@ supply_gregset (struct regcache *regcache, const elf_gregset_t * gregsetp)
    store their values in GDB's register array.  */
 
 static void
-fetch_regs (int tid)
+fetch_regs (struct regcache *regcache, int tid)
 {
   elf_gregset_t regs;
 
   if (ptrace (PTRACE_GETREGS, tid, 0, (int) &regs) < 0)
     perror_with_name (_("Couldn't get registers"));
 
-  supply_gregset (current_regcache, (const elf_gregset_t *) &regs);
+  supply_gregset (regcache, (const elf_gregset_t *) &regs);
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in
@@ -157,14 +157,14 @@ fill_gregset (const struct regcache *regcache,
    into the process/thread specified by TID.  */
 
 static void
-store_regs (int tid, int regno)
+store_regs (const struct regcache *regcache, int tid, int regno)
 {
   elf_gregset_t regs;
 
   if (ptrace (PTRACE_GETREGS, tid, 0, (int) &regs) < 0)
     perror_with_name (_("Couldn't get registers"));
 
-  fill_gregset (current_regcache, &regs, regno);
+  fill_gregset (regcache, &regs, regno);
 
   if (ptrace (PTRACE_SETREGS, tid, 0, (int) &regs) < 0)
     perror_with_name (_("Couldn't write registers"));
@@ -195,7 +195,7 @@ fill_fpregset (const struct regcache *regcache,
    registers).  */
 
 static void
-m32r_linux_fetch_inferior_registers (int regno)
+m32r_linux_fetch_inferior_registers (struct regcache *regcache, int regno)
 {
   int tid;
 
@@ -209,7 +209,7 @@ m32r_linux_fetch_inferior_registers (int regno)
      results.  */
   if (regno == -1 || GETREGS_SUPPLIES (regno))
     {
-      fetch_regs (tid);
+      fetch_regs (regcache, tid);
       return;
     }
 
@@ -221,7 +221,7 @@ m32r_linux_fetch_inferior_registers (int regno)
    do this for all registers (including the floating point and SSE
    registers).  */
 static void
-m32r_linux_store_inferior_registers (int regno)
+m32r_linux_store_inferior_registers (struct regcache *regcache, int regno)
 {
   int tid;
 
@@ -233,7 +233,7 @@ m32r_linux_store_inferior_registers (int regno)
      transfers more registers in one system call.  */
   if (regno == -1 || GETREGS_SUPPLIES (regno))
     {
-      store_regs (tid, regno);
+      store_regs (regcache, tid, regno);
       return;
     }
 

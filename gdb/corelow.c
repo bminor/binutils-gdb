@@ -82,7 +82,7 @@ static void core_close (int);
 
 static void core_close_cleanup (void *ignore);
 
-static void get_core_registers (int);
+static void get_core_registers (struct regcache *, int);
 
 static void add_to_thread_list (bfd *, asection *, void *);
 
@@ -375,7 +375,7 @@ core_open (char *filename, int from_tty)
   if (ontop)
     {
       /* Fetch all registers from core file.  */
-      target_fetch_registers (-1);
+      target_fetch_registers (current_regcache, -1);
 
       /* Now, set up the frame cache, and print the top of stack.  */
       reinit_frame_cache ();
@@ -483,7 +483,7 @@ get_core_register_section (struct regcache *regcache,
 /* We just get all the registers, so we don't use regno.  */
 
 static void
-get_core_registers (int regno)
+get_core_registers (struct regcache *regcache, int regno)
 {
   int status;
 
@@ -495,11 +495,11 @@ get_core_registers (int regno)
       return;
     }
 
-  get_core_register_section (current_regcache,
+  get_core_register_section (regcache,
 			     ".reg", 0, "general-purpose", 1);
-  get_core_register_section (current_regcache,
+  get_core_register_section (regcache,
 			     ".reg2", 2, "floating-point", 0);
-  get_core_register_section (current_regcache,
+  get_core_register_section (regcache,
 			     ".reg-xfp", 3, "extended floating-point", 0);
 
   deprecated_registers_fetched ();

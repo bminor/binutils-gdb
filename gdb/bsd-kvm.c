@@ -91,7 +91,7 @@ bsd_kvm_open (char *filename, int from_tty)
   core_kd = temp_kd;
   push_target (&bsd_kvm_ops);
 
-  target_fetch_registers (-1);
+  target_fetch_registers (current_regcache, -1);
 
   reinit_frame_cache ();
   print_stack_frame (get_selected_frame (NULL), -1, 1);
@@ -150,7 +150,7 @@ bsd_kvm_files_info (struct target_ops *ops)
 /* Fetch process control block at address PADDR.  */
 
 static int
-bsd_kvm_fetch_pcb (struct pcb *paddr)
+bsd_kvm_fetch_pcb (struct regcache *regcache, struct pcb *paddr)
 {
   struct pcb pcb;
 
@@ -158,17 +158,17 @@ bsd_kvm_fetch_pcb (struct pcb *paddr)
     error (("%s"), kvm_geterr (core_kd));
 
   gdb_assert (bsd_kvm_supply_pcb);
-  return bsd_kvm_supply_pcb (current_regcache, &pcb);
+  return bsd_kvm_supply_pcb (regcache, &pcb);
 }
 
 static void
-bsd_kvm_fetch_registers (int regnum)
+bsd_kvm_fetch_registers (struct regcache *regcache, int regnum)
 {
   struct nlist nl[2];
 
   if (bsd_kvm_paddr)
     {
-      bsd_kvm_fetch_pcb (bsd_kvm_paddr);
+      bsd_kvm_fetch_pcb (regcache, bsd_kvm_paddr);
       return;
     }
 
@@ -184,7 +184,7 @@ bsd_kvm_fetch_registers (int regnum)
     {
       /* Found dumppcb. If it contains a valid context, return
 	 immediately.  */
-      if (bsd_kvm_fetch_pcb ((struct pcb *) nl[0].n_value))
+      if (bsd_kvm_fetch_pcb (regcache, (struct pcb *) nl[0].n_value))
 	return;
     }
 
@@ -206,7 +206,7 @@ bsd_kvm_fetch_registers (int regnum)
       if (kvm_read (core_kd, nl[0].n_value, &paddr, sizeof paddr) == -1)
 	error (("%s"), kvm_geterr (core_kd));
 
-      bsd_kvm_fetch_pcb (paddr);
+      bsd_kvm_fetch_pcb (regcache, paddr);
       return;
     }
 
@@ -231,7 +231,7 @@ bsd_kvm_fetch_registers (int regnum)
       if (kvm_read (core_kd, nl[0].n_value, &paddr, sizeof paddr) == -1)
 	error (("%s"), kvm_geterr (core_kd));
 
-      bsd_kvm_fetch_pcb (paddr);
+      bsd_kvm_fetch_pcb (regcache, paddr);
       return;
     }
 #endif
@@ -273,7 +273,7 @@ bsd_kvm_proc_cmd (char *arg, int fromtty)
   if (kvm_read (core_kd, addr, &bsd_kvm_paddr, sizeof bsd_kvm_paddr) == -1)
     error (("%s"), kvm_geterr (core_kd));
 
-  target_fetch_registers (-1);
+  target_fetch_registers (current_regcache, -1);
 
   reinit_frame_cache ();
   print_stack_frame (get_selected_frame (NULL), -1, 1);
@@ -293,7 +293,7 @@ bsd_kvm_pcb_cmd (char *arg, int fromtty)
 
   bsd_kvm_paddr = (struct pcb *)(u_long) parse_and_eval_address (arg);
 
-  target_fetch_registers (-1);
+  target_fetch_registers (current_regcache, -1);
 
   reinit_frame_cache ();
   print_stack_frame (get_selected_frame (NULL), -1, 1);

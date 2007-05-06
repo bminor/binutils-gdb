@@ -343,7 +343,7 @@ win32_delete_thread (DWORD id)
 }
 
 static void
-do_win32_fetch_inferior_registers (int r)
+do_win32_fetch_inferior_registers (struct regcache *regcache, int r)
 {
   char *context_offset = ((char *) &current_thread->context) + mappings[r];
   long l;
@@ -385,58 +385,58 @@ do_win32_fetch_inferior_registers (int r)
   if (r == I387_FISEG_REGNUM)
     {
       l = *((long *) context_offset) & 0xffff;
-      regcache_raw_supply (current_regcache, r, (char *) &l);
+      regcache_raw_supply (regcache, r, (char *) &l);
     }
   else if (r == I387_FOP_REGNUM)
     {
       l = (*((long *) context_offset) >> 16) & ((1 << 11) - 1);
-      regcache_raw_supply (current_regcache, r, (char *) &l);
+      regcache_raw_supply (regcache, r, (char *) &l);
     }
   else if (r >= 0)
-    regcache_raw_supply (current_regcache, r, context_offset);
+    regcache_raw_supply (regcache, r, context_offset);
   else
     {
       for (r = 0; r < NUM_REGS; r++)
-	do_win32_fetch_inferior_registers (r);
+	do_win32_fetch_inferior_registers (regcache, r);
     }
 
 #undef I387_ST0_REGNUM
 }
 
 static void
-win32_fetch_inferior_registers (int r)
+win32_fetch_inferior_registers (struct regcache *regcache, int r)
 {
   current_thread = thread_rec (PIDGET (inferior_ptid), TRUE);
   /* Check if current_thread exists.  Windows sometimes uses a non-existent
      thread id in its events */
   if (current_thread)
-    do_win32_fetch_inferior_registers (r);
+    do_win32_fetch_inferior_registers (regcache, r);
 }
 
 static void
-do_win32_store_inferior_registers (int r)
+do_win32_store_inferior_registers (const struct regcache *regcache, int r)
 {
   if (!current_thread)
     /* Windows sometimes uses a non-existent thread id in its events */;
   else if (r >= 0)
-    regcache_raw_collect (current_regcache, r,
+    regcache_raw_collect (regcache, r,
 			  ((char *) &current_thread->context) + mappings[r]);
   else
     {
       for (r = 0; r < NUM_REGS; r++)
-	do_win32_store_inferior_registers (r);
+	do_win32_store_inferior_registers (regcache, r);
     }
 }
 
 /* Store a new register value into the current thread context */
 static void
-win32_store_inferior_registers (int r)
+win32_store_inferior_registers (struct regcache *regcache, int r)
 {
   current_thread = thread_rec (PIDGET (inferior_ptid), TRUE);
   /* Check if current_thread exists.  Windows sometimes uses a non-existent
      thread id in its events */
   if (current_thread)
-    do_win32_store_inferior_registers (r);
+    do_win32_store_inferior_registers (regcache, r);
 }
 
 static int psapi_loaded = 0;
@@ -1318,7 +1318,7 @@ win32_resume (ptid_t ptid, int step, enum target_signal sig)
       if (step)
 	{
 	  /* Single step by setting t bit */
-	  win32_fetch_inferior_registers (PS_REGNUM);
+	  win32_fetch_inferior_registers (current_regcache, PS_REGNUM);
 	  th->context.EFlags |= FLAG_TRACE_BIT;
 	}
 

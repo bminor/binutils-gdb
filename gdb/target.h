@@ -31,6 +31,7 @@ struct ui_file;
 struct mem_attrib;
 struct target_ops;
 struct bp_target_info;
+struct regcache;
 
 /* This include file defines the interface between the main part
    of the debugger, and the part which is target-specific, or
@@ -323,8 +324,8 @@ struct target_ops
     void (*to_disconnect) (struct target_ops *, char *, int);
     void (*to_resume) (ptid_t, int, enum target_signal);
     ptid_t (*to_wait) (ptid_t, struct target_waitstatus *);
-    void (*to_fetch_registers) (int);
-    void (*to_store_registers) (int);
+    void (*to_fetch_registers) (struct regcache *, int);
+    void (*to_store_registers) (struct regcache *, int);
     void (*to_prepare_to_store) (void);
 
     /* Transfer LEN bytes of memory between GDB address MYADDR and
@@ -589,15 +590,15 @@ extern void target_disconnect (char *, int);
 
 /* Fetch at least register REGNO, or all regs if regno == -1.  No result.  */
 
-#define	target_fetch_registers(regno)	\
-     (*current_target.to_fetch_registers) (regno)
+#define	target_fetch_registers(regcache, regno)	\
+     (*current_target.to_fetch_registers) (regcache, regno)
 
 /* Store at least register REGNO, or all regs if REGNO == -1.
    It can store as many registers as it wants to, so target_prepare_to_store
    must have been previously called.  Calls error() if there are problems.  */
 
-#define	target_store_registers(regs)	\
-     (*current_target.to_store_registers) (regs)
+#define	target_store_registers(regcache, regs)	\
+     (*current_target.to_store_registers) (regcache, regs)
 
 /* Get ready to modify the registers array.  On machines which store
    individual registers, this doesn't need to do anything.  On machines

@@ -210,7 +210,7 @@ rs6000_ptrace64 (int req, int id, long long addr, int data, void *buf)
 /* Fetch register REGNO from the inferior. */
 
 static void
-fetch_register (int regno)
+fetch_register (struct regcache *regcache, int regno)
 {
   int addr[MAX_REGISTER_SIZE];
   int nr, isfloat;
@@ -253,7 +253,7 @@ fetch_register (int regno)
     }
 
   if (!errno)
-    regcache_raw_supply (current_regcache, regno, (char *) addr);
+    regcache_raw_supply (regcache, regno, (char *) addr);
   else
     {
 #if 0
@@ -267,13 +267,13 @@ fetch_register (int regno)
 /* Store register REGNO back into the inferior. */
 
 static void
-store_register (int regno)
+store_register (const struct regcache *regcache, int regno)
 {
   int addr[MAX_REGISTER_SIZE];
   int nr, isfloat;
 
   /* Fetch the register's value from the register cache.  */
-  regcache_raw_collect (current_regcache, regno, addr);
+  regcache_raw_collect (regcache, regno, addr);
 
   /* -1 can be a successful return value, so infer errors from errno. */
   errno = 0;
@@ -333,10 +333,10 @@ store_register (int regno)
    REGNO otherwise. */
 
 static void
-rs6000_fetch_inferior_registers (int regno)
+rs6000_fetch_inferior_registers (struct regcache *regcache, int regno)
 {
   if (regno != -1)
-    fetch_register (regno);
+    fetch_register (regcache, regno);
 
   else
     {
@@ -347,25 +347,25 @@ rs6000_fetch_inferior_registers (int regno)
            regno < tdep->ppc_gp0_regnum + ppc_num_gprs;
 	   regno++)
 	{
-	  fetch_register (regno);
+	  fetch_register (regcache, regno);
 	}
 
       /* Read general purpose floating point registers.  */
       if (tdep->ppc_fp0_regnum >= 0)
         for (regno = 0; regno < ppc_num_fprs; regno++)
-          fetch_register (tdep->ppc_fp0_regnum + regno);
+          fetch_register (regcache, tdep->ppc_fp0_regnum + regno);
 
       /* Read special registers.  */
-      fetch_register (PC_REGNUM);
-      fetch_register (tdep->ppc_ps_regnum);
-      fetch_register (tdep->ppc_cr_regnum);
-      fetch_register (tdep->ppc_lr_regnum);
-      fetch_register (tdep->ppc_ctr_regnum);
-      fetch_register (tdep->ppc_xer_regnum);
+      fetch_register (regcache, PC_REGNUM);
+      fetch_register (regcache, tdep->ppc_ps_regnum);
+      fetch_register (regcache, tdep->ppc_cr_regnum);
+      fetch_register (regcache, tdep->ppc_lr_regnum);
+      fetch_register (regcache, tdep->ppc_ctr_regnum);
+      fetch_register (regcache, tdep->ppc_xer_regnum);
       if (tdep->ppc_fpscr_regnum >= 0)
-        fetch_register (tdep->ppc_fpscr_regnum);
+        fetch_register (regcache, tdep->ppc_fpscr_regnum);
       if (tdep->ppc_mq_regnum >= 0)
-	fetch_register (tdep->ppc_mq_regnum);
+	fetch_register (regcache, tdep->ppc_mq_regnum);
     }
 }
 
@@ -374,10 +374,10 @@ rs6000_fetch_inferior_registers (int regno)
    Otherwise, REGNO specifies which register (so we can save time).  */
 
 static void
-rs6000_store_inferior_registers (int regno)
+rs6000_store_inferior_registers (struct regcache *regcache, int regno)
 {
   if (regno != -1)
-    store_register (regno);
+    store_register (regcache, regno);
 
   else
     {
@@ -388,25 +388,25 @@ rs6000_store_inferior_registers (int regno)
            regno < tdep->ppc_gp0_regnum + ppc_num_gprs;
 	   regno++)
 	{
-	  store_register (regno);
+	  store_register (regcache, regno);
 	}
 
       /* Write floating point registers.  */
       if (tdep->ppc_fp0_regnum >= 0)
         for (regno = 0; regno < ppc_num_fprs; regno++)
-          store_register (tdep->ppc_fp0_regnum + regno);
+          store_register (regcache, tdep->ppc_fp0_regnum + regno);
 
       /* Write special registers.  */
-      store_register (PC_REGNUM);
-      store_register (tdep->ppc_ps_regnum);
-      store_register (tdep->ppc_cr_regnum);
-      store_register (tdep->ppc_lr_regnum);
-      store_register (tdep->ppc_ctr_regnum);
-      store_register (tdep->ppc_xer_regnum);
+      store_register (regcache, PC_REGNUM);
+      store_register (regcache, tdep->ppc_ps_regnum);
+      store_register (regcache, tdep->ppc_cr_regnum);
+      store_register (regcache, tdep->ppc_lr_regnum);
+      store_register (regcache, tdep->ppc_ctr_regnum);
+      store_register (regcache, tdep->ppc_xer_regnum);
       if (tdep->ppc_fpscr_regnum >= 0)
-        store_register (tdep->ppc_fpscr_regnum);
+        store_register (regcache, tdep->ppc_fpscr_regnum);
       if (tdep->ppc_mq_regnum >= 0)
-	store_register (tdep->ppc_mq_regnum);
+	store_register (regcache, tdep->ppc_mq_regnum);
     }
 }
 

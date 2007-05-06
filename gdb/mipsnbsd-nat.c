@@ -40,7 +40,7 @@ getregs_supplies (int regno)
 }
 
 static void
-mipsnbsd_fetch_inferior_registers (int regno)
+mipsnbsd_fetch_inferior_registers (struct regcache *regcache, int regno)
 {
   if (regno == -1 || getregs_supplies (regno))
     {
@@ -50,7 +50,7 @@ mipsnbsd_fetch_inferior_registers (int regno)
 		  (PTRACE_TYPE_ARG3) &regs, 0) == -1)
 	perror_with_name (_("Couldn't get registers"));
       
-      mipsnbsd_supply_reg (current_regcache, (char *) &regs, regno);
+      mipsnbsd_supply_reg (regcache, (char *) &regs, regno);
       if (regno != -1)
 	return;
     }
@@ -63,12 +63,12 @@ mipsnbsd_fetch_inferior_registers (int regno)
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get floating point status"));
 
-      mipsnbsd_supply_fpreg (current_regcache, (char *) &fpregs, regno);
+      mipsnbsd_supply_fpreg (regcache, (char *) &fpregs, regno);
     }
 }
 
 static void
-mipsnbsd_store_inferior_registers (int regno)
+mipsnbsd_store_inferior_registers (struct regcache *regcache, int regno)
 {
   if (regno == -1 || getregs_supplies (regno))
     {
@@ -78,7 +78,7 @@ mipsnbsd_store_inferior_registers (int regno)
 		  (PTRACE_TYPE_ARG3) &regs, 0) == -1)
 	perror_with_name (_("Couldn't get registers"));
 
-      mipsnbsd_fill_reg (current_regcache, (char *) &regs, regno);
+      mipsnbsd_fill_reg (regcache, (char *) &regs, regno);
 
       if (ptrace (PT_SETREGS, PIDGET (inferior_ptid), 
 		  (PTRACE_TYPE_ARG3) &regs, 0) == -1)
@@ -96,7 +96,7 @@ mipsnbsd_store_inferior_registers (int regno)
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get floating point status"));
 
-      mipsnbsd_fill_fpreg (current_regcache, (char *) &fpregs, regno);
+      mipsnbsd_fill_fpreg (regcache, (char *) &fpregs, regno);
 
       if (ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
