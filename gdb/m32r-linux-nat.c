@@ -80,19 +80,23 @@ supply_gregset (elf_gregset_t * gregsetp)
 
   for (i = 0; i < M32R_LINUX_NUM_REGS; i++)
     {
+      elf_greg_t regval;
+
       switch (i)
 	{
 	case PSW_REGNUM:
-	  *(regp + regmap[i]) =
-	    ((0x00c1 & bbpsw) << 8) | ((0xc100 & psw) >> 8);
+	  regval = ((0x00c1 & bbpsw) << 8) | ((0xc100 & psw) >> 8);
 	  break;
 	case CBR_REGNUM:
-	  *(regp + regmap[i]) = ((psw >> 8) & 1);
+	  regval = ((psw >> 8) & 1);
+	  break;
+	default:
+	  regval = *(regp + regmap[i]);
 	  break;
 	}
 
       if (i != M32R_SP_REGNUM)
-	regcache_raw_supply (current_regcache, i, regp + regmap[i]);
+	regcache_raw_supply (current_regcache, i, &regval);
       else if (psw & 0x8000)
 	regcache_raw_supply (current_regcache, i, regp + SPU_REGMAP);
       else

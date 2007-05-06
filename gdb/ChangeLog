@@ -1,5 +1,10 @@
 2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* m32r-linux-nat.c (supply_gregset): Do not modify contents
+	pointed to by GREGSETP.
+
+2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* irix5-nat.c (fill_gregset): Use regcache_raw_collect instead
 	of regcache_raw_read_signed.
 	(fill_fpregset): Use regcache_raw_collect instead of
