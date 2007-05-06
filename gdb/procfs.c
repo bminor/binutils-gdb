@@ -30,6 +30,7 @@ Boston, MA 02110-1301, USA.  */
 #include "elf-bfd.h"		/* for elfcore_write_* */
 #include "gdbcmd.h"
 #include "gdbthread.h"
+#include "regcache.h"
 
 #if defined (NEW_PROC_API)
 #define _STRUCTURED_PROC 1	/* Should be done by configure script. */
@@ -3705,7 +3706,7 @@ procfs_fetch_registers (int regnum)
   if (gregs == NULL)
     proc_error (pi, "fetch_registers, get_gregs", __LINE__);
 
-  supply_gregset (gregs);
+  supply_gregset (current_regcache, (const gdb_gregset_t *) gregs);
 
   if (FP0_REGNUM >= 0)		/* Do we have an FPU?  */
     {
@@ -3720,7 +3721,7 @@ procfs_fetch_registers (int regnum)
       if (fpregs == NULL)
 	proc_error (pi, "fetch_registers, get_fpregs", __LINE__);
 
-      supply_fpregset (fpregs);
+      supply_fpregset (current_regcache, (const gdb_fpregset_t *) fpregs);
     }
 }
 
@@ -3773,7 +3774,7 @@ procfs_store_registers (int regnum)
   if (gregs == NULL)
     proc_error (pi, "store_registers, get_gregs", __LINE__);
 
-  fill_gregset (gregs, regnum);
+  fill_gregset (current_regcache, gregs, regnum);
   if (!proc_set_gregs (pi))
     proc_error (pi, "store_registers, set_gregs", __LINE__);
 
@@ -3790,7 +3791,7 @@ procfs_store_registers (int regnum)
       if (fpregs == NULL)
 	proc_error (pi, "store_registers, get_fpregs", __LINE__);
 
-      fill_fpregset (fpregs, regnum);
+      fill_fpregset (current_regcache, fpregs, regnum);
       if (!proc_set_fpregs (pi))
 	proc_error (pi, "store_registers, set_fpregs", __LINE__);
     }
@@ -6020,7 +6021,7 @@ procfs_do_thread_registers (bfd *obfd, ptid_t ptid,
 
   merged_pid = TIDGET (ptid) << 16 | PIDGET (ptid);
 
-  fill_gregset (&gregs, -1);
+  fill_gregset (current_regcache, &gregs, -1);
 #if defined (UNIXWARE)
   note_data = (char *) elfcore_write_lwpstatus (obfd,
 						note_data,
@@ -6036,7 +6037,7 @@ procfs_do_thread_registers (bfd *obfd, ptid_t ptid,
 					       stop_signal,
 					       &gregs);
 #endif
-  fill_fpregset (&fpregs, -1);
+  fill_fpregset (current_regcache, &fpregs, -1);
   note_data = (char *) elfcore_write_prfpreg (obfd,
 					      note_data,
 					      note_size,
@@ -6107,7 +6108,7 @@ procfs_make_note_section (bfd *obfd, int *note_size)
 					       psargs);
 
 #ifdef UNIXWARE
-  fill_gregset (&gregs, -1);
+  fill_gregset (current_regcache, &gregs, -1);
   note_data = elfcore_write_pstatus (obfd, note_data, note_size,
 				     PIDGET (inferior_ptid),
 				     stop_signal, &gregs);

@@ -305,15 +305,15 @@ hppa_linux_store_inferior_registers (int regno)
    in *gregsetp.  */
 
 void
-supply_gregset (gdb_gregset_t *gregsetp)
+supply_gregset (struct regcache *regcache, const gdb_gregset_t *gregsetp)
 {
   int i;
-  greg_t *regp = (elf_greg_t *) gregsetp;
+  const greg_t *regp = (const elf_greg_t *) gregsetp;
 
   for (i = 0; i < sizeof (greg_map) / sizeof (greg_map[0]); i++, regp++)
     {
       int regno = greg_map[i];
-      regcache_raw_supply (current_regcache, regno, regp);
+      regcache_raw_supply (regcache, regno, regp);
     }
 }
 
@@ -322,7 +322,8 @@ supply_gregset (gdb_gregset_t *gregsetp)
    If regno is -1, do this for all registers.  */
 
 void
-fill_gregset (gdb_gregset_t *gregsetp, int regno)
+fill_gregset (const struct regcache *regcache,
+	      gdb_gregset_t *gregsetp, int regno)
 {
   int i;
 
@@ -332,7 +333,7 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
 
       if (regno == -1 || regno == mregno)
 	{
-          regcache_raw_collect(current_regcache, mregno, &(*gregsetp)[i]);
+          regcache_raw_collect(regcache, mregno, &(*gregsetp)[i]);
 	}
     }
 }
@@ -342,17 +343,16 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
    idea of the current floating point register values. */
 
 void
-supply_fpregset (gdb_fpregset_t *fpregsetp)
+supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregsetp)
 {
   int regi;
-  char *from;
+  const char *from;
 
   for (regi = 0; regi <= 31; regi++)
     {
-      from = (char *) &((*fpregsetp)[regi]);
-      regcache_raw_supply (current_regcache, 2*regi + HPPA_FP0_REGNUM, from);
-      regcache_raw_supply (current_regcache, 2*regi + HPPA_FP0_REGNUM + 1,
-			   from + 4);
+      from = (const char *) &((*fpregsetp)[regi]);
+      regcache_raw_supply (regcache, 2*regi + HPPA_FP0_REGNUM, from);
+      regcache_raw_supply (regcache, 2*regi + HPPA_FP0_REGNUM + 1, from + 4);
     }
 }
 
@@ -362,7 +362,8 @@ supply_fpregset (gdb_fpregset_t *fpregsetp)
    them all. */
 
 void
-fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
+fill_fpregset (const struct regcache *regcache,
+	       gdb_fpregset_t *fpregsetp, int regno)
 {
   int i;
 
@@ -373,7 +374,7 @@ fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
       char *to = (char *) &((*fpregsetp)[(i - HPPA_FP0_REGNUM) / 2]);
       if ((i - HPPA_FP0_REGNUM) & 1)
 	to += 4;
-      regcache_raw_collect (current_regcache, i, to);
+      regcache_raw_collect (regcache, i, to);
    }
 }
 

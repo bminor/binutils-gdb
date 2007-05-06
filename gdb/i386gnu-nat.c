@@ -59,6 +59,7 @@ static int reg_offset[] =
 };
 
 #define REG_ADDR(state, regnum) ((char *)(state) + reg_offset[regnum])
+#define CREG_ADDR(state, regnum) ((const char *)(state) + reg_offset[regnum])
 
 
 /* Get the whole floating-point state of THREAD and record the values
@@ -96,17 +97,17 @@ fetch_fpregs (struct proc *thread)
 /* These two calls are used by the core-regset.c code for
    reading ELF core files.  */
 void
-supply_gregset (gdb_gregset_t *gregs)
+supply_gregset (struct regcache *regcache, const gdb_gregset_t *gregs)
 {
   int i;
   for (i = 0; i < I386_NUM_GREGS; i++)
-    regcache_raw_supply (current_regcache, i, REG_ADDR (gregs, i));
+    regcache_raw_supply (regcache, i, CREG_ADDR (gregs, i));
 }
 
 void
-supply_fpregset (gdb_fpregset_t *fpregs)
+supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregs)
 {
-  i387_supply_fsave (current_regcache, -1, fpregs);
+  i387_supply_fsave (regcache, -1, fpregs);
 }
 #endif
 

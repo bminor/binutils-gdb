@@ -201,16 +201,16 @@ store_register (int regno)
    in *GREGSETP.  */
 
 void
-supply_gregset (elf_gregset_t *gregsetp)
+supply_gregset (struct regcache *regcache, const elf_gregset_t *gregsetp)
 {
-  elf_greg_t *regp = (elf_greg_t *) gregsetp;
+  const elf_greg_t *regp = (const elf_greg_t *) gregsetp;
   int i;
 
   for (i = 0; i < I386_NUM_GREGS; i++)
-    regcache_raw_supply (current_regcache, i, regp + regmap[i]);
+    regcache_raw_supply (regcache, i, regp + regmap[i]);
 
   if (I386_LINUX_ORIG_EAX_REGNUM < NUM_REGS)
-    regcache_raw_supply (current_regcache, I386_LINUX_ORIG_EAX_REGNUM,
+    regcache_raw_supply (regcache, I386_LINUX_ORIG_EAX_REGNUM,
 			 regp + ORIG_EAX);
 }
 
@@ -219,18 +219,19 @@ supply_gregset (elf_gregset_t *gregsetp)
    do this for all registers.  */
 
 void
-fill_gregset (elf_gregset_t *gregsetp, int regno)
+fill_gregset (const struct regcache *regcache,
+	      elf_gregset_t *gregsetp, int regno)
 {
   elf_greg_t *regp = (elf_greg_t *) gregsetp;
   int i;
 
   for (i = 0; i < I386_NUM_GREGS; i++)
     if (regno == -1 || regno == i)
-      regcache_raw_collect (current_regcache, i, regp + regmap[i]);
+      regcache_raw_collect (regcache, i, regp + regmap[i]);
 
   if ((regno == -1 || regno == I386_LINUX_ORIG_EAX_REGNUM)
       && I386_LINUX_ORIG_EAX_REGNUM < NUM_REGS)
-    regcache_raw_collect (current_regcache, I386_LINUX_ORIG_EAX_REGNUM,
+    regcache_raw_collect (regcache, I386_LINUX_ORIG_EAX_REGNUM,
 			  regp + ORIG_EAX);
 }
 
@@ -257,7 +258,7 @@ fetch_regs (int tid)
       perror_with_name (_("Couldn't get registers"));
     }
 
-  supply_gregset (&regs);
+  supply_gregset (current_regcache, (const elf_gregset_t *) &regs);
 }
 
 /* Store all valid general-purpose registers in GDB's register array
@@ -271,7 +272,7 @@ store_regs (int tid, int regno)
   if (ptrace (PTRACE_GETREGS, tid, 0, (int) &regs) < 0)
     perror_with_name (_("Couldn't get registers"));
 
-  fill_gregset (&regs, regno);
+  fill_gregset (current_regcache, &regs, regno);
   
   if (ptrace (PTRACE_SETREGS, tid, 0, (int) &regs) < 0)
     perror_with_name (_("Couldn't write registers"));
@@ -291,9 +292,9 @@ static void store_regs (int tid, int regno) {}
    *FPREGSETP.  */
 
 void 
-supply_fpregset (elf_fpregset_t *fpregsetp)
+supply_fpregset (struct regcache *regcache, const elf_fpregset_t *fpregsetp)
 {
-  i387_supply_fsave (current_regcache, -1, fpregsetp);
+  i387_supply_fsave (regcache, -1, fpregsetp);
 }
 
 /* Fill register REGNO (if it is a floating-point register) in
@@ -301,9 +302,10 @@ supply_fpregset (elf_fpregset_t *fpregsetp)
    do this for all registers.  */
 
 void
-fill_fpregset (elf_fpregset_t *fpregsetp, int regno)
+fill_fpregset (const struct regcache *regcache,
+	       elf_fpregset_t *fpregsetp, int regno)
 {
-  i387_collect_fsave (current_regcache, regno, fpregsetp);
+  i387_collect_fsave (regcache, regno, fpregsetp);
 }
 
 #ifdef HAVE_PTRACE_GETREGS
@@ -319,7 +321,7 @@ fetch_fpregs (int tid)
   if (ptrace (PTRACE_GETFPREGS, tid, 0, (int) &fpregs) < 0)
     perror_with_name (_("Couldn't get floating point status"));
 
-  supply_fpregset (&fpregs);
+  supply_fpregset (current_regcache, (const elf_fpregset_t *) &fpregs);
 }
 
 /* Store all valid floating-point registers in GDB's register array
@@ -333,7 +335,7 @@ store_fpregs (int tid, int regno)
   if (ptrace (PTRACE_GETFPREGS, tid, 0, (int) &fpregs) < 0)
     perror_with_name (_("Couldn't get floating point status"));
 
-  fill_fpregset (&fpregs, regno);
+  fill_fpregset (current_regcache, &fpregs, regno);
 
   if (ptrace (PTRACE_SETFPREGS, tid, 0, (int) &fpregs) < 0)
     perror_with_name (_("Couldn't write floating point status"));
@@ -355,9 +357,10 @@ static void store_fpregs (int tid, int regno) {}
    values in *FPXREGSETP.  */
 
 void
-supply_fpxregset (elf_fpxregset_t *fpxregsetp)
+supply_fpxregset (struct regcache *regcache,
+		  const elf_fpxregset_t *fpxregsetp)
 {
-  i387_supply_fxsave (current_regcache, -1, fpxregsetp);
+  i387_supply_fxsave (regcache, -1, fpxregsetp);
 }
 
 /* Fill register REGNO (if it is a floating-point or SSE register) in
@@ -365,9 +368,10 @@ supply_fpxregset (elf_fpxregset_t *fpxregsetp)
    -1, do this for all registers.  */
 
 void
-fill_fpxregset (elf_fpxregset_t *fpxregsetp, int regno)
+fill_fpxregset (const struct regcache *regcache,
+		elf_fpxregset_t *fpxregsetp, int regno)
 {
-  i387_collect_fxsave (current_regcache, regno, fpxregsetp);
+  i387_collect_fxsave (regcache, regno, fpxregsetp);
 }
 
 /* Fetch all registers covered by the PTRACE_GETFPXREGS request from
@@ -393,7 +397,7 @@ fetch_fpxregs (int tid)
       perror_with_name (_("Couldn't read floating-point and SSE registers"));
     }
 
-  supply_fpxregset (&fpxregs);
+  supply_fpxregset (current_regcache, (const elf_fpxregset_t *) &fpxregs);
   return 1;
 }
 
@@ -420,7 +424,7 @@ store_fpxregs (int tid, int regno)
       perror_with_name (_("Couldn't read floating-point and SSE registers"));
     }
 
-  fill_fpxregset (&fpxregs, regno);
+  fill_fpxregset (current_regcache, &fpxregs, regno);
 
   if (ptrace (PTRACE_SETFPXREGS, tid, 0, &fpxregs) == -1)
     perror_with_name (_("Couldn't write floating-point and SSE registers"));

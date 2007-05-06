@@ -2591,7 +2591,7 @@ linux_nat_do_thread_registers (bfd *obfd, ptid_t ptid,
     regset->collect_regset (regset, current_regcache, -1,
 			    &gregs, sizeof (gregs));
   else
-    fill_gregset (&gregs, -1);
+    fill_gregset (current_regcache, &gregs, -1);
 
   note_data = (char *) elfcore_write_prstatus (obfd,
 					       note_data,
@@ -2606,7 +2606,7 @@ linux_nat_do_thread_registers (bfd *obfd, ptid_t ptid,
     regset->collect_regset (regset, current_regcache, -1,
 			    &fpregs, sizeof (fpregs));
   else
-    fill_fpregset (&fpregs, -1);
+    fill_fpregset (current_regcache, &fpregs, -1);
 
   note_data = (char *) elfcore_write_prfpreg (obfd,
 					      note_data,
@@ -2621,7 +2621,7 @@ linux_nat_do_thread_registers (bfd *obfd, ptid_t ptid,
     regset->collect_regset (regset, current_regcache, -1,
 			    &fpxregs, sizeof (fpxregs));
   else
-    fill_fpxregset (&fpxregs, -1);
+    fill_fpxregset (current_regcache, &fpxregs, -1);
 
   note_data = (char *) elfcore_write_prxfpreg (obfd,
 					       note_data,

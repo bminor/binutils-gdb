@@ -242,29 +242,30 @@ old_store_inferior_registers (int regno)
    them as gdb's idea of the current register values. */
 
 void
-supply_gregset (elf_gregset_t *gregsetp)
+supply_gregset (struct regcache *regcache, const elf_gregset_t *gregsetp)
 {
-  elf_greg_t *regp = (elf_greg_t *) gregsetp;
+  const elf_greg_t *regp = (const elf_greg_t *) gregsetp;
   int regi;
 
   for (regi = M68K_D0_REGNUM; regi <= SP_REGNUM; regi++)
-    regcache_raw_supply (current_regcache, regi, (char *) &regp[regmap[regi]]);
-  regcache_raw_supply (current_regcache, PS_REGNUM, (char *) &regp[PT_SR]);
-  regcache_raw_supply (current_regcache, PC_REGNUM, (char *) &regp[PT_PC]);
+    regcache_raw_supply (regcache, regi, &regp[regmap[regi]]);
+  regcache_raw_supply (regcache, PS_REGNUM, &regp[PT_SR]);
+  regcache_raw_supply (regcache, PC_REGNUM, &regp[PT_PC]);
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in
    *GREGSETPS with the value in GDB's register array.  If REGNO is -1,
    do this for all registers.  */
 void
-fill_gregset (elf_gregset_t *gregsetp, int regno)
+fill_gregset (const struct regcache *regcache,
+	      elf_gregset_t *gregsetp, int regno)
 {
   elf_greg_t *regp = (elf_greg_t *) gregsetp;
   int i;
 
   for (i = 0; i < NUM_GREGS; i++)
     if (regno == -1 || regno == i)
-      regcache_raw_collect (current_regcache, i, regp + regmap[i]);
+      regcache_raw_collect (regcache, i, regp + regmap[i]);
 }
 
 #ifdef HAVE_PTRACE_GETREGS
@@ -290,7 +291,7 @@ fetch_regs (int tid)
       perror_with_name (_("Couldn't get registers"));
     }
 
-  supply_gregset (&regs);
+  supply_gregset (current_regcache, (const elf_gregset_t *) &regs);
 }
 
 /* Store all valid general-purpose registers in GDB's register array
@@ -304,7 +305,7 @@ store_regs (int tid, int regno)
   if (ptrace (PTRACE_GETREGS, tid, 0, (int) &regs) < 0)
     perror_with_name (_("Couldn't get registers"));
 
-  fill_gregset (&regs, regno);
+  fill_gregset (current_regcache, &regs, regno);
 
   if (ptrace (PTRACE_SETREGS, tid, 0, (int) &regs) < 0)
     perror_with_name (_("Couldn't write registers"));
@@ -321,25 +322,22 @@ static void store_regs (int tid, int regno) {}
 /* Transfering floating-point registers between GDB, inferiors and cores.  */
 
 /* What is the address of fpN within the floating-point register set F?  */
-#define FPREG_ADDR(f, n) ((char *) &(f)->fpregs[(n) * 3])
+#define FPREG_ADDR(f, n) (&(f)->fpregs[(n) * 3])
 
 /* Fill GDB's register array with the floating-point register values in
    *FPREGSETP.  */
 
 void
-supply_fpregset (elf_fpregset_t *fpregsetp)
+supply_fpregset (struct regcache *regcache, const elf_fpregset_t *fpregsetp)
 {
   int regi;
 
   for (regi = FP0_REGNUM; regi < FP0_REGNUM + 8; regi++)
-    regcache_raw_supply (current_regcache, regi,
+    regcache_raw_supply (regcache, regi,
 			 FPREG_ADDR (fpregsetp, regi - FP0_REGNUM));
-  regcache_raw_supply (current_regcache, M68K_FPC_REGNUM,
-		       (char *) &fpregsetp->fpcntl[0]);
-  regcache_raw_supply (current_regcache, M68K_FPS_REGNUM,
-		       (char *) &fpregsetp->fpcntl[1]);
-  regcache_raw_supply (current_regcache, M68K_FPI_REGNUM,
-		       (char *) &fpregsetp->fpcntl[2]);
+  regcache_raw_supply (regcache, M68K_FPC_REGNUM, &fpregsetp->fpcntl[0]);
+  regcache_raw_supply (regcache, M68K_FPS_REGNUM, &fpregsetp->fpcntl[1]);
+  regcache_raw_supply (regcache, M68K_FPI_REGNUM, &fpregsetp->fpcntl[2]);
 }
 
 /* Fill register REGNO (if it is a floating-point register) in
@@ -347,21 +345,22 @@ supply_fpregset (elf_fpregset_t *fpregsetp)
    do this for all registers.  */
 
 void
-fill_fpregset (elf_fpregset_t *fpregsetp, int regno)
+fill_fpregset (const struct regcache *regcache,
+	       elf_fpregset_t *fpregsetp, int regno)
 {
   int i;
 
   /* Fill in the floating-point registers.  */
   for (i = FP0_REGNUM; i < FP0_REGNUM + 8; i++)
     if (regno == -1 || regno == i)
-      regcache_raw_collect (current_regcache, i,
+      regcache_raw_collect (regcache, i,
 			    FPREG_ADDR (fpregsetp, i - FP0_REGNUM));
 
   /* Fill in the floating-point control registers.  */
   for (i = M68K_FPC_REGNUM; i <= M68K_FPI_REGNUM; i++)
     if (regno == -1 || regno == i)
-      regcache_raw_collect (current_regcache, i,
-			    (char *) &fpregsetp->fpcntl[i - M68K_FPC_REGNUM]);
+      regcache_raw_collect (regcache, i,
+			    &fpregsetp->fpcntl[i - M68K_FPC_REGNUM]);
 }
 
 #ifdef HAVE_PTRACE_GETREGS
@@ -377,7 +376,7 @@ fetch_fpregs (int tid)
   if (ptrace (PTRACE_GETFPREGS, tid, 0, (int) &fpregs) < 0)
     perror_with_name (_("Couldn't get floating point status"));
 
-  supply_fpregset (&fpregs);
+  supply_fpregset (current_regcache, (const elf_fpregset_t *) &fpregs);
 }
 
 /* Store all valid floating-point registers in GDB's register array
@@ -391,7 +390,7 @@ store_fpregs (int tid, int regno)
   if (ptrace (PTRACE_GETFPREGS, tid, 0, (int) &fpregs) < 0)
     perror_with_name (_("Couldn't get floating point status"));
 
-  fill_fpregset (&fpregs, regno);
+  fill_fpregset (current_regcache, &fpregs, regno);
 
   if (ptrace (PTRACE_SETFPREGS, tid, 0, (int) &fpregs) < 0)
     perror_with_name (_("Couldn't write floating point status"));
@@ -543,7 +542,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       else
 	{
 	  memcpy (&gregset, core_reg_sect, sizeof (gregset));
-	  supply_gregset (&gregset);
+	  supply_gregset (current_regcache, (const elf_gregset_t *) &gregset);
 	}
       break;
 
@@ -553,7 +552,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       else
 	{
 	  memcpy (&fpregset, core_reg_sect, sizeof (fpregset));
-	  supply_fpregset (&fpregset);
+	  supply_fpregset (current_regcache, (const elf_fpregset_t *) &fpregset);
 	}
       break;
 

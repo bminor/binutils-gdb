@@ -111,9 +111,9 @@ static int amd64_linux_gregset32_reg_offset[] =
    in *GREGSETP.  */
 
 void
-supply_gregset (elf_gregset_t *gregsetp)
+supply_gregset (struct regcache *regcache, const elf_gregset_t *gregsetp)
 {
-  amd64_supply_native_gregset (current_regcache, gregsetp, -1);
+  amd64_supply_native_gregset (regcache, gregsetp, -1);
 }
 
 /* Fill register REGNUM (if it is a general-purpose register) in
@@ -121,9 +121,10 @@ supply_gregset (elf_gregset_t *gregsetp)
    do this for all registers.  */
 
 void
-fill_gregset (elf_gregset_t *gregsetp, int regnum)
+fill_gregset (const struct regcache *regcache,
+	      elf_gregset_t *gregsetp, int regnum)
 {
-  amd64_collect_native_gregset (current_regcache, gregsetp, regnum);
+  amd64_collect_native_gregset (regcache, gregsetp, regnum);
 }
 
 /* Transfering floating-point registers between GDB, inferiors and cores.  */
@@ -132,9 +133,9 @@ fill_gregset (elf_gregset_t *gregsetp, int regnum)
    values in *FPREGSETP.  */
 
 void
-supply_fpregset (elf_fpregset_t *fpregsetp)
+supply_fpregset (struct regcache *regcache, const elf_fpregset_t *fpregsetp)
 {
-  amd64_supply_fxsave (current_regcache, -1, fpregsetp);
+  amd64_supply_fxsave (regcache, -1, fpregsetp);
 }
 
 /* Fill register REGNUM (if it is a floating-point or SSE register) in
@@ -142,9 +143,10 @@ supply_fpregset (elf_fpregset_t *fpregsetp)
    -1, do this for all registers.  */
 
 void
-fill_fpregset (elf_fpregset_t *fpregsetp, int regnum)
+fill_fpregset (const struct regcache *regcache,
+	       elf_fpregset_t *fpregsetp, int regnum)
 {
-  amd64_collect_fxsave (current_regcache, regnum, fpregsetp);
+  amd64_collect_fxsave (regcache, regnum, fpregsetp);
 }
 
 

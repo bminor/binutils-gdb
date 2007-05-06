@@ -104,13 +104,13 @@ static int regmap[] =
    in *GREGSETP.  */
 
 void
-supply_gregset (gregset_t *gregsetp)
+supply_gregset (struct regcache *regcache, const gregset_t *gregsetp)
 {
-  greg_t *regp = (greg_t *) gregsetp;
+  const greg_t *regp = (const greg_t *) gregsetp;
   int regnum;
 
   for (regnum = 0; regnum < I386_NUM_GREGS; regnum++)
-    regcache_raw_supply (current_regcache, regnum, regp + regmap[regnum]);
+    regcache_raw_supply (regcache, regnum, regp + regmap[regnum]);
 }
 
 /* Fill register REGNUM (if it is a general-purpose register) in
@@ -118,14 +118,15 @@ supply_gregset (gregset_t *gregsetp)
    do this for all registers.  */
 
 void
-fill_gregset (gregset_t *gregsetp, int regnum)
+fill_gregset (const struct regcache *regcache,
+	      gregset_t *gregsetp, int regnum)
 {
   greg_t *regp = (greg_t *) gregsetp;
   int i;
 
   for (i = 0; i < I386_NUM_GREGS; i++)
     if (regnum == -1 || regnum == i)
-      regcache_raw_collect (current_regcache, i, regp + regmap[i]);
+      regcache_raw_collect (regcache, i, regp + regmap[i]);
 }
 
 #endif /* HAVE_GREGSET_T */
@@ -136,12 +137,12 @@ fill_gregset (gregset_t *gregsetp, int regnum)
    *FPREGSETP.  */
 
 void
-supply_fpregset (fpregset_t *fpregsetp)
+supply_fpregset (struct regcache *regcache, const fpregset_t *fpregsetp)
 {
   if (FP0_REGNUM == 0)
     return;
 
-  i387_supply_fsave (current_regcache, -1, fpregsetp);
+  i387_supply_fsave (regcache, -1, fpregsetp);
 }
 
 /* Fill register REGNO (if it is a floating-point register) in
@@ -149,12 +150,13 @@ supply_fpregset (fpregset_t *fpregsetp)
    do this for all registers.  */
 
 void
-fill_fpregset (fpregset_t *fpregsetp, int regno)
+fill_fpregset (const struct regcache *regcache,
+	       fpregset_t *fpregsetp, int regno)
 {
   if (FP0_REGNUM == 0)
     return;
 
-  i387_collect_fsave (current_regcache, regno, fpregsetp);
+  i387_collect_fsave (regcache, regno, fpregsetp);
 }
 
 #endif /* HAVE_FPREGSET_T */

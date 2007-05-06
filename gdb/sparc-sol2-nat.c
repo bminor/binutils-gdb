@@ -74,25 +74,25 @@
 #endif
 
 void
-supply_gregset (prgregset_t *gregs)
+supply_gregset (struct regcache *regcache, const prgregset_t *gregs)
 {
-  sparc_supply_gregset (&sparc_sol2_gregset, current_regcache, -1, gregs);
+  sparc_supply_gregset (&sparc_sol2_gregset, regcache, -1, gregs);
 }
 
 void
-supply_fpregset (prfpregset_t *fpregs)
+supply_fpregset (struct regcache *regcache, const prfpregset_t *fpregs)
 {
-  sparc_supply_fpregset (current_regcache, -1, fpregs);
+  sparc_supply_fpregset (regcache, -1, fpregs);
 }
 
 void
-fill_gregset (prgregset_t *gregs, int regnum)
+fill_gregset (const struct regcache *regcache, prgregset_t *gregs, int regnum)
 {
-  sparc_collect_gregset (&sparc_sol2_gregset, current_regcache, regnum, gregs);
+  sparc_collect_gregset (&sparc_sol2_gregset, regcache, regnum, gregs);
 }
 
 void
-fill_fpregset (prfpregset_t *fpregs, int regnum)
+fill_fpregset (const struct regcache *regcache, prfpregset_t *fpregs, int regnum)
 {
-  sparc_collect_fpregset (current_regcache, regnum, fpregs);
+  sparc_collect_fpregset (regcache, regnum, fpregs);
 }

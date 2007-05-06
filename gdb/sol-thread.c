@@ -531,8 +531,8 @@ sol_thread_fetch_registers (int regnum)
      calling the td routines because the td routines call ps_lget*
      which affect the values stored in the registers array.  */
 
-  supply_gregset ((gdb_gregset_t *) &gregset);
-  supply_fpregset ((gdb_fpregset_t *) &fpregset);
+  supply_gregset (current_regcache, (const gdb_gregset_t *) &gregset);
+  supply_fpregset (current_regcache, (const gdb_fpregset_t *) &fpregset);
 
 #if 0
   /* FIXME: libthread_db doesn't seem to handle this right.  */
@@ -618,8 +618,8 @@ sol_thread_store_registers (int regnum)
 #endif
     }
 
-  fill_gregset ((gdb_gregset_t *) &gregset, regnum);
-  fill_fpregset ((gdb_fpregset_t *) &fpregset, regnum);
+  fill_gregset (current_regcache, (gdb_gregset_t *) &gregset, regnum);
+  fill_fpregset (current_regcache, (gdb_fpregset_t *) &fpregset, regnum);
 
   val = p_td_thr_setgregs (&thandle, gregset);
   if (val != TD_OK)
@@ -1107,7 +1107,7 @@ ps_lgetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, prgregset_t gregset)
     procfs_ops.to_fetch_registers (-1);
   else
     orig_core_ops.to_fetch_registers (-1);
-  fill_gregset ((gdb_gregset_t *) gregset, -1);
+  fill_gregset (current_regcache, (gdb_gregset_t *) gregset, -1);
 
   do_cleanups (old_chain);
 
@@ -1126,7 +1126,7 @@ ps_lsetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 
   inferior_ptid = BUILD_LWP (lwpid, PIDGET (inferior_ptid));
 
-  supply_gregset ((gdb_gregset_t *) gregset);
+  supply_gregset (current_regcache, (const gdb_gregset_t *) gregset);
   if (target_has_execution)
     procfs_ops.to_store_registers (-1);
   else
@@ -1239,7 +1239,7 @@ ps_lgetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
     procfs_ops.to_fetch_registers (-1);
   else
     orig_core_ops.to_fetch_registers (-1);
-  fill_fpregset ((gdb_fpregset_t *) fpregset, -1);
+  fill_fpregset (current_regcache, (gdb_fpregset_t *) fpregset, -1);
 
   do_cleanups (old_chain);
 
@@ -1258,7 +1258,7 @@ ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 
   inferior_ptid = BUILD_LWP (lwpid, PIDGET (inferior_ptid));
 
-  supply_fpregset ((gdb_fpregset_t *) fpregset);
+  supply_fpregset (current_regcache, (const gdb_fpregset_t *) fpregset);
   if (target_has_execution)
     procfs_ops.to_store_registers (-1);
   else

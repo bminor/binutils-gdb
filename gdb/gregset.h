@@ -32,6 +32,8 @@
 typedef GDB_GREGSET_T gdb_gregset_t;
 typedef GDB_FPREGSET_T gdb_fpregset_t;
 
+struct regcache;
+
 /* A gregset is a data structure supplied by the native OS containing
    the general register values of the debugged process.  Usually this
    includes integer registers and control registers.  An fpregset is a
@@ -42,15 +44,19 @@ typedef GDB_FPREGSET_T gdb_fpregset_t;
 /* Copy register values from the native target gregset/fpregset
    into GDB's internal register cache.  */
 
-extern void supply_gregset (gdb_gregset_t *gregs);
-extern void supply_fpregset (gdb_fpregset_t *fpregs);
+extern void supply_gregset (struct regcache *regcache,
+			    const gdb_gregset_t *gregs);
+extern void supply_fpregset (struct regcache *regcache,
+			     const gdb_fpregset_t *fpregs);
 
 /* Copy register values from GDB's register cache into
    the native target gregset/fpregset.  If regno is -1, 
    copy all the registers.  */
 
-extern void fill_gregset (gdb_gregset_t *gregs, int regno);
-extern void fill_fpregset (gdb_fpregset_t *fpregs, int regno);
+extern void fill_gregset (const struct regcache *regcache,
+			  gdb_gregset_t *gregs, int regno);
+extern void fill_fpregset (const struct regcache *regcache,
+			   gdb_fpregset_t *fpregs, int regno);
 
 #ifdef FILL_FPXREGSET
 /* GNU/Linux i386: Copy register values between GDB's internal register cache
@@ -62,8 +68,10 @@ extern void fill_fpregset (gdb_fpregset_t *fpregs, int regno);
 
 typedef GDB_FPXREGSET_T gdb_fpxregset_t;
 
-extern void supply_fpxregset (gdb_fpxregset_t *fpxregs);
-extern void fill_fpxregset (gdb_fpxregset_t *fpxregs, int regno);
+extern void supply_fpxregset (struct regcache *regcache,
+			      const gdb_fpxregset_t *fpxregs);
+extern void fill_fpxregset (const struct regcache *regcache,
+			    gdb_fpxregset_t *fpxregs, int regno);
 #endif
 
 #endif

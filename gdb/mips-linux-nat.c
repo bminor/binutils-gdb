@@ -177,39 +177,41 @@ ps_get_thread_area (const struct ps_prochandle *ph,
 /* Wrapper functions.  These are only used by libthread_db.  */
 
 void
-supply_gregset (gdb_gregset_t *gregsetp)
+supply_gregset (struct regcache *regcache, const gdb_gregset_t *gregsetp)
 {
   if (mips_isa_regsize (current_gdbarch) == 4)
-    mips_supply_gregset (current_regcache, (void *) gregsetp);
+    mips_supply_gregset (regcache, (const mips_elf_gregset_t *) gregsetp);
   else
-    mips64_supply_gregset (current_regcache, (void *) gregsetp);
+    mips64_supply_gregset (regcache, (const mips64_elf_gregset_t *) gregsetp);
 }
 
 void
-fill_gregset (gdb_gregset_t *gregsetp, int regno)
+fill_gregset (const struct regcache *regcache,
+	      gdb_gregset_t *gregsetp, int regno)
 {
   if (mips_isa_regsize (current_gdbarch) == 4)
-    mips_fill_gregset (current_regcache, (void *) gregsetp, regno);
+    mips_fill_gregset (regcache, (mips_elf_gregset_t *) gregsetp, regno);
   else
-    mips64_fill_gregset (current_regcache, (void *) gregsetp, regno);
+    mips64_fill_gregset (regcache, (mips64_elf_gregset_t *) gregsetp, regno);
 }
 
 void
-supply_fpregset (gdb_fpregset_t *fpregsetp)
+supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregsetp)
 {
   if (mips_isa_regsize (current_gdbarch) == 4)
-    mips_supply_fpregset (current_regcache, (void *) fpregsetp);
+    mips_supply_fpregset (regcache, (const mips_elf_fpregset_t *) fpregsetp);
   else
-    mips64_supply_fpregset (current_regcache, (void *) fpregsetp);
+    mips64_supply_fpregset (regcache, (const mips64_elf_fpregset_t *) fpregsetp);
 }
 
 void
-fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
+fill_fpregset (const struct regcache *regcache,
+	       gdb_fpregset_t *fpregsetp, int regno)
 {
   if (mips_isa_regsize (current_gdbarch) == 4)
-    mips_fill_fpregset (current_regcache, (void *) fpregsetp, regno);
+    mips_fill_fpregset (regcache, (mips_elf_fpregset_t *) fpregsetp, regno);
   else
-    mips64_fill_fpregset (current_regcache, (void *) fpregsetp, regno);
+    mips64_fill_fpregset (regcache, (mips64_elf_fpregset_t *) fpregsetp, regno);
 }
 
 

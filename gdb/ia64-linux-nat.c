@@ -362,65 +362,51 @@ ia64_cannot_store_register (int regno)
 }
 
 void
-supply_gregset (gregset_t *gregsetp)
+supply_gregset (struct regcache *regcache, const gregset_t *gregsetp)
 {
   int regi;
-  greg_t *regp = (greg_t *) gregsetp;
+  const greg_t *regp = (const greg_t *) gregsetp;
 
   for (regi = IA64_GR0_REGNUM; regi <= IA64_GR31_REGNUM; regi++)
     {
-      regcache_raw_supply (current_regcache, regi,
-			   (char *) (regp + (regi - IA64_GR0_REGNUM)));
+      regcache_raw_supply (regcache, regi, regp + (regi - IA64_GR0_REGNUM));
     }
 
   /* FIXME: NAT collection bits are at index 32; gotta deal with these
      somehow... */
 
-  regcache_raw_supply (current_regcache, IA64_PR_REGNUM, (char *) (regp + 33));
+  regcache_raw_supply (regcache, IA64_PR_REGNUM, regp + 33);
 
   for (regi = IA64_BR0_REGNUM; regi <= IA64_BR7_REGNUM; regi++)
     {
-      regcache_raw_supply (current_regcache, regi,
-			   (char *) (regp + 34 + (regi - IA64_BR0_REGNUM)));
+      regcache_raw_supply (regcache, regi,
+			   regp + 34 + (regi - IA64_BR0_REGNUM));
     }
 
-  regcache_raw_supply (current_regcache, IA64_IP_REGNUM,
-		       (char *) (regp + 42));
-  regcache_raw_supply (current_regcache, IA64_CFM_REGNUM,
-		       (char *) (regp + 43));
-  regcache_raw_supply (current_regcache, IA64_PSR_REGNUM,
-		       (char *) (regp + 44));
-  regcache_raw_supply (current_regcache, IA64_RSC_REGNUM,
-		       (char *) (regp + 45));
-  regcache_raw_supply (current_regcache, IA64_BSP_REGNUM,
-		       (char *) (regp + 46));
-  regcache_raw_supply (current_regcache, IA64_BSPSTORE_REGNUM,
-		       (char *) (regp + 47));
-  regcache_raw_supply (current_regcache, IA64_RNAT_REGNUM,
-		       (char *) (regp + 48));
-  regcache_raw_supply (current_regcache, IA64_CCV_REGNUM,
-		       (char *) (regp + 49));
-  regcache_raw_supply (current_regcache, IA64_UNAT_REGNUM,
-		       (char *) (regp + 50));
-  regcache_raw_supply (current_regcache, IA64_FPSR_REGNUM,
-		       (char *) (regp + 51));
-  regcache_raw_supply (current_regcache, IA64_PFS_REGNUM,
-		       (char *) (regp + 52));
-  regcache_raw_supply (current_regcache, IA64_LC_REGNUM,
-		       (char *) (regp + 53));
-  regcache_raw_supply (current_regcache, IA64_EC_REGNUM,
-		       (char *) (regp + 54));
+  regcache_raw_supply (regcache, IA64_IP_REGNUM, regp + 42);
+  regcache_raw_supply (regcache, IA64_CFM_REGNUM, regp + 43);
+  regcache_raw_supply (regcache, IA64_PSR_REGNUM, regp + 44);
+  regcache_raw_supply (regcache, IA64_RSC_REGNUM, regp + 45);
+  regcache_raw_supply (regcache, IA64_BSP_REGNUM, regp + 46);
+  regcache_raw_supply (regcache, IA64_BSPSTORE_REGNUM, regp + 47);
+  regcache_raw_supply (regcache, IA64_RNAT_REGNUM, regp + 48);
+  regcache_raw_supply (regcache, IA64_CCV_REGNUM, regp + 49);
+  regcache_raw_supply (regcache, IA64_UNAT_REGNUM, regp + 50);
+  regcache_raw_supply (regcache, IA64_FPSR_REGNUM, regp + 51);
+  regcache_raw_supply (regcache, IA64_PFS_REGNUM, regp + 52);
+  regcache_raw_supply (regcache, IA64_LC_REGNUM, regp + 53);
+  regcache_raw_supply (regcache, IA64_EC_REGNUM, regp + 54);
 }
 
 void
-fill_gregset (gregset_t *gregsetp, int regno)
+fill_gregset (const struct regcache *regcache, gregset_t *gregsetp, int regno)
 {
   int regi;
   greg_t *regp = (greg_t *) gregsetp;
 
 #define COPY_REG(_idx_,_regi_) \
   if ((regno == -1) || regno == _regi_) \
-    regcache_raw_collect (current_regcache, _regi_, regp + _idx_)
+    regcache_raw_collect (regcache, _regi_, regp + _idx_)
 
   for (regi = IA64_GR0_REGNUM; regi <= IA64_GR31_REGNUM; regi++)
     {
@@ -456,15 +442,15 @@ fill_gregset (gregset_t *gregsetp, int regno)
    idea of the current floating point register values. */
 
 void
-supply_fpregset (fpregset_t *fpregsetp)
+supply_fpregset (struct regcache *regcache, const fpregset_t *fpregsetp)
 {
   int regi;
-  char *from;
+  const char *from;
 
   for (regi = IA64_FR0_REGNUM; regi <= IA64_FR127_REGNUM; regi++)
     {
-      from = (char *) &((*fpregsetp)[regi - IA64_FR0_REGNUM]);
-      regcache_raw_supply (current_regcache, regi, from);
+      from = (const char *) &((*fpregsetp)[regi - IA64_FR0_REGNUM]);
+      regcache_raw_supply (regcache, regi, from);
     }
 }
 
@@ -474,14 +460,15 @@ supply_fpregset (fpregset_t *fpregsetp)
    them all. */
 
 void
-fill_fpregset (fpregset_t *fpregsetp, int regno)
+fill_fpregset (const struct regcache *regcache,
+	       fpregset_t *fpregsetp, int regno)
 {
   int regi;
 
   for (regi = IA64_FR0_REGNUM; regi <= IA64_FR127_REGNUM; regi++)
     {
       if ((regno == -1) || (regno == regi))
-	regcache_raw_collect (current_regcache, regi,
+	regcache_raw_collect (regcache, regi,
 			      &((*fpregsetp)[regi - IA64_FR0_REGNUM]));
     }
 }

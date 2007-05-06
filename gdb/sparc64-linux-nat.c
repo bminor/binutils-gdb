@@ -47,27 +47,28 @@ static const struct sparc_gregset sparc64_linux_ptrace_gregset =
 
 
 void
-supply_gregset (prgregset_t *gregs)
+supply_gregset (struct regcache *regcache, const prgregset_t *gregs)
 {
-  sparc64_supply_gregset (sparc_gregset, current_regcache, -1, gregs);
+  sparc64_supply_gregset (sparc_gregset, regcache, -1, gregs);
 }
 
 void
-supply_fpregset (prfpregset_t *fpregs)
+supply_fpregset (struct regcache *regcache, const prfpregset_t *fpregs)
 {
-  sparc64_supply_fpregset (current_regcache, -1, fpregs);
+  sparc64_supply_fpregset (regcache, -1, fpregs);
 }
 
 void
-fill_gregset (prgregset_t *gregs, int regnum)
+fill_gregset (const struct regcache *regcache, prgregset_t *gregs, int regnum)
 {
-  sparc64_collect_gregset (sparc_gregset, current_regcache, regnum, gregs);
+  sparc64_collect_gregset (sparc_gregset, regcache, regnum, gregs);
 }
 
 void
-fill_fpregset (prfpregset_t *fpregs, int regnum)
+fill_fpregset (const struct regcache *regcache,
+	       prfpregset_t *fpregs, int regnum)
 {
-  sparc64_collect_fpregset (current_regcache, regnum, fpregs);
+  sparc64_collect_fpregset (regcache, regnum, fpregs);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

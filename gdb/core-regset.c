@@ -34,6 +34,7 @@
 #include "gdbcore.h"
 #include "inferior.h"
 #include "target.h"
+#include "regcache.h"
 
 #include <fcntl.h>
 #include <errno.h>
@@ -73,7 +74,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
       else
 	{
 	  memcpy (&gregset, core_reg_sect, sizeof (gregset));
-	  supply_gregset (&gregset);
+	  supply_gregset (current_regcache, (const gdb_gregset_t *) &gregset);
 	}
       break;
 
@@ -84,7 +85,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
 	{
 	  memcpy (&fpregset, core_reg_sect, sizeof (fpregset));
 	  if (FP0_REGNUM >= 0)
-	    supply_fpregset (&fpregset);
+	    supply_fpregset (current_regcache, (const gdb_fpregset_t *) &fpregset);
 	}
       break;
 

@@ -50,27 +50,27 @@ typedef struct fpreg fpregset_t;
    supply/fill routines.  */
 
 void
-supply_gregset (gregset_t *gregsetp)
+supply_gregset (struct regcache *regcache, const gregset_t *gregsetp)
 {
-  alphabsd_supply_reg (current_regcache, (char *) gregsetp, -1);
+  alphabsd_supply_reg (regcache, (const char *) gregsetp, -1);
 }
 
 void
-fill_gregset (gregset_t *gregsetp, int regno)
+fill_gregset (const struct regcache *regcache, gregset_t *gregsetp, int regno)
 {
-  alphabsd_fill_reg (current_regcache, (char *) gregsetp, regno);
+  alphabsd_fill_reg (regcache, (char *) gregsetp, regno);
 }
 
 void
-supply_fpregset (fpregset_t *fpregsetp)
+supply_fpregset (struct regcache *regcache, const fpregset_t *fpregsetp)
 {
-  alphabsd_supply_fpreg (current_regcache, (char *) fpregsetp, -1);
+  alphabsd_supply_fpreg (regcache, (const char *) fpregsetp, -1);
 }
 
 void
-fill_fpregset (fpregset_t *fpregsetp, int regno)
+fill_fpregset (const struct regcache *regcache, fpregset_t *fpregsetp, int regno)
 {
-  alphabsd_fill_fpreg (current_regcache, (char *) fpregsetp, regno);
+  alphabsd_fill_fpreg (regcache, (char *) fpregsetp, regno);
 }
 
 /* Determine if PT_GETREGS fetches this register.  */

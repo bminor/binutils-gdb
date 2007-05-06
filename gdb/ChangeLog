@@ -1,5 +1,73 @@
 2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gregset.h (struct regcache): Add forward declaration.
+	(supply_gregset): Add REGCACHE parameter, make GREGS const.
+	(supply_fpregset): Add REGCACHE parameter, make FPREGS const.
+	(supply_fpxregset): Add REGCACHE parameter, make FPXREGS const.
+	(fill_gregset): Add REGCACHE parameter.
+	(fill_fpregset): Likewise.
+	(fill_fpxregset): Likewise.
+
+	Update all definitions accordingly:
+	* alphabsd-nat.c, alpha-linux-nat.c, alpha-nat.c, amd64-linux-nat.c,
+	arm-linux-nat.c, hppa-linux-nat.c, i386gnu-nat.c, i386-linux-nat.c,
+	i386-sol2-nat.c, i386v4-nat.c, ia64-linux-nat.c, irix5-nat.c, 
+	m32r-linux-nat.c, m68klinux-nat.c, mips-linux-nat.c, ppc-linux-nat.c,
+	s390-nat.c, sparc64-linux-nat.c, sparc-linux-nat.c, sparc-sol2-nat.c 
+	(supply_gregset): Add REGCACHE parameter, use it instead of 
+	current_regcache.  Make GREGSETP parameter const, adapt casts.
+	(supply_fpregset): Add REGCACHE parameter, use it instead of
+	current_regcache.  Make FPREGSETP parameter const, adapt casts.
+	(fill_gregset): Add REGCACHE parameter, use it instead of
+	current_regcache.
+	(fill_fpregset): Likewise.
+
+	Update all callers to pass in current_regcache as the new argument:
+	* core-regset.c: Include "regcache.h".
+	(fetch_core_registers): Update supply_gregset,and supply_fpregset calls.
+	* procfs.c: Include "regcache.h".
+	(procfs_fetch_registers): Update supply_gregset, supply_fpregset calls.
+	(procfs_store_registers): Update fill_gregset, fill_fpregset calls.
+	(procfs_do_thread_registers): Likewise.
+	(procfs_make_note_section): Likewise.
+	* proc-service.c: Include "regcache.h".
+	(ps_lgetregs): Update fill_gregset call.
+	(ps_lsetregs): Update supply_gregset call.
+	(ps_lgetfpregs): Update fill_fpregset call.
+	(ps_lsetfpregs): Update supply_fpregset call.
+	* sol-thread.c (sol_thread_fetch_registers): Update supply_gregset,
+	supply_fpregset calls.
+	(sol_thread_store_registers): Update fill_gregset, fill_fpregset calls.
+	(ps_lgetregs): Update fill_gregset call.
+	(ps_lsetregs): Update supply_gregset call.
+	(ps_lgetfpregs): Update fill_fpregset call.
+	(ps_lsetfpregs): Update supply_fpregset call.
+	
+	* linux-nat.c (linux_nat_do_thread_registers): Update fill_gregset,
+	fill_fpregset, and fill_fpxregset calls.
+	* i386-linux-nat.c (fetch_regs): Update supply_gregset call.
+	(store_regs): Update fill_gregset call.
+	(fetch_fpregs): Update supply_fpregset call.
+	(store_fpregs): Update fill_fpregset call.
+	(fetch_fpxregs): Update supply_fpxregset call.
+	(store_fpxregs): Update fill_fpxregset call.
+	* m32r-linux-nat.c (fetch_regs): Update supply_gregset call.
+	(store_regs): Update fill_gregset call.
+	* m68klinux-nat.c (fetch_regs): Update supply_gregset call.
+	(store_regs): Update fill_gregset call.
+	(fetch_fpregs): Update supply_fpregset call.
+	(store_fpregs): Update fill_fpregset call.
+	(fetch_core_registers): Update supply_gregset, supply_fpregset calls.
+	* s390-nat.c (fetch_regs): Update supply_gregset call.
+	(store_regs): Update fill_gregset call.
+	(fetch_fpregs): Update supply_fpregset call.
+	(store_fpregs): Update fill_fpregset call.
+
+	* Makefile.in (core-regset.o, procfs.o, proc-service.o): Update
+	dependencies.
+
+2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* monitor.c (monitor_supply_register): Add REGCACHE parameter, use
 	it instead of current_regcache.
 	(parse_register_dump): Add REGCACHE parameter, pass it to 

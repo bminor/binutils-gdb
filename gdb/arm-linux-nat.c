@@ -503,30 +503,32 @@ arm_linux_store_inferior_registers (int regno)
    thread debugging.  */
 
 void
-fill_gregset (gdb_gregset_t *gregsetp, int regno)
+fill_gregset (const struct regcache *regcache,	
+	      gdb_gregset_t *gregsetp, int regno)
 {
-  arm_linux_collect_gregset (NULL, current_regcache, regno, gregsetp, 0);
+  arm_linux_collect_gregset (NULL, regcache, regno, gregsetp, 0);
 }
 
 void
-supply_gregset (gdb_gregset_t *gregsetp)
+supply_gregset (struct regcache *regcache, const gdb_gregset_t *gregsetp)
 {
-  arm_linux_supply_gregset (NULL, current_regcache, -1, gregsetp, 0);
+  arm_linux_supply_gregset (NULL, regcache, -1, gregsetp, 0);
 }
 
 void
-fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
+fill_fpregset (const struct regcache *regcache,
+	       gdb_fpregset_t *fpregsetp, int regno)
 {
-  arm_linux_collect_nwfpe (NULL, current_regcache, regno, fpregsetp, 0);
+  arm_linux_collect_nwfpe (NULL, regcache, regno, fpregsetp, 0);
 }
 
 /* Fill GDB's register array with the floating-point register values
    in *fpregsetp.  */
 
 void
-supply_fpregset (gdb_fpregset_t *fpregsetp)
+supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregsetp)
 {
-  arm_linux_supply_nwfpe (NULL, current_regcache, -1, fpregsetp, 0);
+  arm_linux_supply_nwfpe (NULL, regcache, -1, fpregsetp, 0);
 }
 
 /* Fetch the thread-local storage pointer for libthread_db.  */

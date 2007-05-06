@@ -54,32 +54,32 @@ static void fetch_core_registers (char *, unsigned int, int, CORE_ADDR);
  */
 
 void
-supply_gregset (gregset_t *gregsetp)
+supply_gregset (struct regcache *regcache, const gregset_t *gregsetp)
 {
   int regi;
-  greg_t *regp = &(*gregsetp)[0];
+  const greg_t *regp = &(*gregsetp)[0];
   int gregoff = sizeof (greg_t) - mips_isa_regsize (current_gdbarch);
   static char zerobuf[32] = {0};
 
   for (regi = 0; regi <= CTX_RA; regi++)
-    regcache_raw_supply (current_regcache, regi,
-			 (char *) (regp + regi) + gregoff);
+    regcache_raw_supply (regcache, regi,
+			 (const char *) (regp + regi) + gregoff);
 
-  regcache_raw_supply (current_regcache, mips_regnum (current_gdbarch)->pc,
-		       (char *) (regp + CTX_EPC) + gregoff);
-  regcache_raw_supply (current_regcache, mips_regnum (current_gdbarch)->hi,
-		       (char *) (regp + CTX_MDHI) + gregoff);
-  regcache_raw_supply (current_regcache, mips_regnum (current_gdbarch)->lo,
-		       (char *) (regp + CTX_MDLO) + gregoff);
-  regcache_raw_supply (current_regcache, mips_regnum (current_gdbarch)->cause,
-		       (char *) (regp + CTX_CAUSE) + gregoff);
+  regcache_raw_supply (regcache, mips_regnum (current_gdbarch)->pc,
+		       (const char *) (regp + CTX_EPC) + gregoff);
+  regcache_raw_supply (regcache, mips_regnum (current_gdbarch)->hi,
+		       (const char *) (regp + CTX_MDHI) + gregoff);
+  regcache_raw_supply (regcache, mips_regnum (current_gdbarch)->lo,
+		       (const char *) (regp + CTX_MDLO) + gregoff);
+  regcache_raw_supply (regcache, mips_regnum (current_gdbarch)->cause,
+		       (const char *) (regp + CTX_CAUSE) + gregoff);
 
   /* Fill inaccessible registers with zero.  */
-  regcache_raw_supply (current_regcache, mips_regnum (current_gdbarch)->badvaddr, zerobuf);
+  regcache_raw_supply (regcache, mips_regnum (current_gdbarch)->badvaddr, zerobuf);
 }
 
 void
-fill_gregset (gregset_t *gregsetp, int regno)
+fill_gregset (const struct regcache *regcache, gregset_t *gregsetp, int regno)
 {
   int regi, size;
   greg_t *regp = &(*gregsetp)[0];
@@ -93,7 +93,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
     if ((regno == -1) || (regno == regi))
       {
 	size = register_size (current_gdbarch, regi);
-	regcache_raw_collect (current_regcache, regi, buf);
+	regcache_raw_collect (regcache, regi, buf);
 	*(regp + regi) = extract_signed_integer (buf, size);
       }
 
@@ -101,7 +101,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
     {
       regi = mips_regnum (current_gdbarch)->pc;
       size = register_size (current_gdbarch, regi);
-      regcache_raw_collect (current_regcache, regi, buf);
+      regcache_raw_collect (regcache, regi, buf);
       *(regp + CTX_EPC) = extract_signed_integer (buf, size);
     }
 
@@ -109,7 +109,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
     {
       regi = mips_regnum (current_gdbarch)->cause;
       size = register_size (current_gdbarch, regi);
-      regcache_raw_collect (current_regcache, regi, buf);
+      regcache_raw_collect (regcache, regi, buf);
       *(regp + CTX_CAUSE) = extract_signed_integer (buf, size);
     }
 
@@ -117,7 +117,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
     {
       regi = mips_regnum (current_gdbarch)->hi;
       size = register_size (current_gdbarch, regi);
-      regcache_raw_collect (current_regcache, regi, buf);
+      regcache_raw_collect (regcache, regi, buf);
       *(regp + CTX_MDHI) = extract_signed_integer (buf, size);
     }
 
@@ -125,7 +125,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
     {
       regi = mips_regnum (current_gdbarch)->lo;
       size = register_size (current_gdbarch, regi);
-      regcache_raw_collect (current_regcache, regi, buf);
+      regcache_raw_collect (regcache, regi, buf);
       *(regp + CTX_MDLO) = extract_signed_integer (buf, size);
     }
 }
@@ -139,7 +139,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
  */
 
 void
-supply_fpregset (fpregset_t *fpregsetp)
+supply_fpregset (struct regcache *regcache, const fpregset_t *fpregsetp)
 {
   int regi;
   static char zerobuf[32] = {0};
@@ -148,8 +148,8 @@ supply_fpregset (fpregset_t *fpregsetp)
   /* FIXME, this is wrong for the N32 ABI which has 64 bit FP regs. */
 
   for (regi = 0; regi < 32; regi++)
-    regcache_raw_supply (current_regcache, FP0_REGNUM + regi,
-			 (char *) &fpregsetp->fp_r.fp_regs[regi]);
+    regcache_raw_supply (regcache, FP0_REGNUM + regi,
+			 (const char *) &fpregsetp->fp_r.fp_regs[regi]);
 
   /* We can't supply the FSR register directly to the regcache,
      because there is a size issue: On one hand, fpregsetp->fp_csr
@@ -159,18 +159,18 @@ supply_fpregset (fpregset_t *fpregsetp)
   memset (fsrbuf, 0, 4);
   memcpy (fsrbuf + 4, &fpregsetp->fp_csr, 4);
 
-  regcache_raw_supply (current_regcache,
+  regcache_raw_supply (regcache,
 		       mips_regnum (current_gdbarch)->fp_control_status,
 		       fsrbuf);
 
   /* FIXME: how can we supply FCRIR?  SGI doesn't tell us. */
-  regcache_raw_supply (current_regcache,
+  regcache_raw_supply (regcache,
 		       mips_regnum (current_gdbarch)->fp_implementation_revision,
 		       zerobuf);
 }
 
 void
-fill_fpregset (fpregset_t *fpregsetp, int regno)
+fill_fpregset (const struct regcache *regcache, fpregset_t *fpregsetp, int regno)
 {
   int regi;
   char *from, *to;
@@ -182,7 +182,7 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
       if ((regno == -1) || (regno == regi))
 	{
 	  to = (char *) &(fpregsetp->fp_r.fp_regs[regi - FP0_REGNUM]);
-          regcache_raw_collect (current_regcache, regi, to);
+          regcache_raw_collect (regcache, regi, to);
 	}
     }
 
@@ -196,7 +196,7 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
          is 32bits long, while the regcache expects a 64bits long buffer.
          So we use a buffer of the correct size and copy the register
          value from that buffer.  */
-      regcache_raw_collect (current_regcache,
+      regcache_raw_collect (regcache,
 			    mips_regnum (current_gdbarch)->fp_control_status,
 			    fsrbuf);
 

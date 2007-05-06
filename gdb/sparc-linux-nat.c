@@ -31,27 +31,27 @@
 #include "linux-nat.h"
 
 void
-supply_gregset (prgregset_t *gregs)
+supply_gregset (struct regcache *regcache, const prgregset_t *gregs)
 {
-  sparc32_supply_gregset (sparc_gregset, current_regcache, -1, gregs);
+  sparc32_supply_gregset (sparc_gregset, regcache, -1, gregs);
 }
 
 void
-supply_fpregset (prfpregset_t *fpregs)
+supply_fpregset (struct regcache *regcache, const prfpregset_t *fpregs)
 {
-  sparc32_supply_fpregset (current_regcache, -1, fpregs);
+  sparc32_supply_fpregset (regcache, -1, fpregs);
 }
 
 void
-fill_gregset (prgregset_t *gregs, int regnum)
+fill_gregset (const struct regcache *regcache, prgregset_t *gregs, int regnum)
 {
-  sparc32_collect_gregset (sparc_gregset, current_regcache, regnum, gregs);
+  sparc32_collect_gregset (sparc_gregset, regcache, regnum, gregs);
 }
 
 void
-fill_fpregset (prfpregset_t *fpregs, int regnum)
+fill_fpregset (const struct regcache *regcache, prfpregset_t *fpregs, int regnum)
 {
-  sparc32_collect_fpregset (current_regcache, regnum, fpregs);
+  sparc32_collect_fpregset (regcache, regnum, fpregs);
 }
 
 void _initialialize_sparc_linux_nat (void);

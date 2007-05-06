@@ -69,9 +69,9 @@ static int regmap[] = {
    in *GREGSETP.  */
 
 void
-supply_gregset (elf_gregset_t * gregsetp)
+supply_gregset (struct regcache *regcache, const elf_gregset_t * gregsetp)
 {
-  elf_greg_t *regp = (elf_greg_t *) gregsetp;
+  const elf_greg_t *regp = (const elf_greg_t *) gregsetp;
   int i;
   unsigned long psw, bbpsw;
 
@@ -96,11 +96,11 @@ supply_gregset (elf_gregset_t * gregsetp)
 	}
 
       if (i != M32R_SP_REGNUM)
-	regcache_raw_supply (current_regcache, i, &regval);
+	regcache_raw_supply (regcache, i, &regval);
       else if (psw & 0x8000)
-	regcache_raw_supply (current_regcache, i, regp + SPU_REGMAP);
+	regcache_raw_supply (regcache, i, regp + SPU_REGMAP);
       else
-	regcache_raw_supply (current_regcache, i, regp + SPI_REGMAP);
+	regcache_raw_supply (regcache, i, regp + SPI_REGMAP);
     }
 }
 
@@ -115,7 +115,7 @@ fetch_regs (int tid)
   if (ptrace (PTRACE_GETREGS, tid, 0, (int) &regs) < 0)
     perror_with_name (_("Couldn't get registers"));
 
-  supply_gregset (&regs);
+  supply_gregset (current_regcache, (const elf_gregset_t *) &regs);
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in
@@ -123,7 +123,8 @@ fetch_regs (int tid)
    do this for all registers.  */
 
 void
-fill_gregset (elf_gregset_t * gregsetp, int regno)
+fill_gregset (const struct regcache *regcache,
+	      elf_gregset_t * gregsetp, int regno)
 {
   elf_greg_t *regp = (elf_greg_t *) gregsetp;
   int i;
@@ -144,11 +145,11 @@ fill_gregset (elf_gregset_t * gregsetp, int regno)
 	continue;
 
       if (i != M32R_SP_REGNUM)
-	regcache_raw_collect (current_regcache, i, regp + regmap[i]);
+	regcache_raw_collect (regcache, i, regp + regmap[i]);
       else if (psw & 0x8000)
-	regcache_raw_collect (current_regcache, i, regp + SPU_REGMAP);
+	regcache_raw_collect (regcache, i, regp + SPU_REGMAP);
       else
-	regcache_raw_collect (current_regcache, i, regp + SPI_REGMAP);
+	regcache_raw_collect (regcache, i, regp + SPI_REGMAP);
     }
 }
 
@@ -163,7 +164,7 @@ store_regs (int tid, int regno)
   if (ptrace (PTRACE_GETREGS, tid, 0, (int) &regs) < 0)
     perror_with_name (_("Couldn't get registers"));
 
-  fill_gregset (&regs, regno);
+  fill_gregset (current_regcache, &regs, regno);
 
   if (ptrace (PTRACE_SETREGS, tid, 0, (int) &regs) < 0)
     perror_with_name (_("Couldn't write registers"));
@@ -175,12 +176,13 @@ store_regs (int tid, int regno)
    Since M32R has no floating-point registers, these functions do nothing.  */
 
 void
-supply_fpregset (gdb_fpregset_t *fpregs)
+supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregs)
 {
 }
 
 void
-fill_fpregset (gdb_fpregset_t *fpregs, int regno)
+fill_fpregset (const struct regcache *regcache,
+	       gdb_fpregset_t *fpregs, int regno)
 {
 }
 

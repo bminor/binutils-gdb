@@ -99,27 +99,29 @@ static int amd64_sol2_gregset32_reg_offset[] = {
 };
 
 void
-supply_gregset (prgregset_t *gregs)
+supply_gregset (struct regcache *regcache, const prgregset_t *gregs)
 {
-  amd64_supply_native_gregset (current_regcache, gregs, -1);
+  amd64_supply_native_gregset (regcache, gregs, -1);
 }
 
 void
-supply_fpregset (prfpregset_t *fpregs)
+supply_fpregset (struct regcache *regcache, const prfpregset_t *fpregs)
 {
-  amd64_supply_fxsave (current_regcache, -1, fpregs);
+  amd64_supply_fxsave (regcache, -1, fpregs);
 }
 
 void
-fill_gregset (prgregset_t *gregs, int regnum)
+fill_gregset (const struct regcache *regcache,
+	      prgregset_t *gregs, int regnum)
 {
-  amd64_collect_native_gregset (current_regcache, gregs, regnum);
+  amd64_collect_native_gregset (regcache, gregs, regnum);
 }
 
 void
-fill_fpregset (prfpregset_t *fpregs, int regnum)
+fill_fpregset (const struct regcache *regcache,
+	       prfpregset_t *fpregs, int regnum)
 {
-  amd64_collect_fxsave (current_regcache, regnum, fpregs);
+  amd64_collect_fxsave (regcache, regnum, fpregs);
 }
 
 #else

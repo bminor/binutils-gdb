@@ -40,21 +40,22 @@
  */
 
 void
-supply_gregset (gdb_gregset_t *gregsetp)
+supply_gregset (struct regcache *regcache, const gdb_gregset_t *gregsetp)
 {
-  long *regp = (long *)gregsetp;
+  const long *regp = (const long *)gregsetp;
 
   /* PC is in slot 32, UNIQUE is in slot 33.  */
-  alpha_supply_int_regs (current_regcache, -1, regp, regp + 31, regp + 32);
+  alpha_supply_int_regs (regcache, -1, regp, regp + 31, regp + 32);
 }
 
 void
-fill_gregset (gdb_gregset_t *gregsetp, int regno)
+fill_gregset (const struct regcache *regcache,
+	      gdb_gregset_t *gregsetp, int regno)
 {
   long *regp = (long *)gregsetp;
 
   /* PC is in slot 32, UNIQUE is in slot 33.  */
-  alpha_fill_int_regs (current_regcache, regno, regp, regp + 31, regp + 32);
+  alpha_fill_int_regs (regcache, regno, regp, regp + 31, regp + 32);
 }
 
 /*
@@ -63,21 +64,22 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
  */
 
 void
-supply_fpregset (gdb_fpregset_t *fpregsetp)
+supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregsetp)
 {
-  long *regp = (long *)fpregsetp;
+  const long *regp = (const long *)fpregsetp;
 
   /* FPCR is in slot 32.  */
-  alpha_supply_fp_regs (current_regcache, -1, regp, regp + 31);
+  alpha_supply_fp_regs (regcache, -1, regp, regp + 31);
 }
 
 void
-fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
+fill_fpregset (const struct regcache *regcache,
+	       gdb_fpregset_t *fpregsetp, int regno)
 {
   long *regp = (long *)fpregsetp;
 
   /* FPCR is in slot 32.  */
-  alpha_fill_fp_regs (current_regcache, regno, regp, regp + 31);
+  alpha_fill_fp_regs (regcache, regno, regp, regp + 31);
 }
 
 
