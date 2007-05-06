@@ -3887,7 +3887,8 @@ cris_supply_gregset (struct regcache *regcache, elf_gregset_t *gregsetp)
     regsets, until multi-arch core support is ready.  */
 
 static void
-fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
+fetch_core_registers (struct regcache *regcache,
+		      char *core_reg_sect, unsigned core_reg_size,
                       int which, CORE_ADDR reg_addr)
 {
   elf_gregset_t gregset;
@@ -3903,7 +3904,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       else
         {
           memcpy (&gregset, core_reg_sect, sizeof (gregset));
-          cris_supply_gregset (current_regcache, &gregset);
+          cris_supply_gregset (regcache, &gregset);
         }
 
     default:

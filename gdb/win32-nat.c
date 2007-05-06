@@ -2244,7 +2244,8 @@ win32_current_sos (void)
 }
 
 static void
-fetch_elf_core_registers (char *core_reg_sect,
+fetch_elf_core_registers (struct regcache *regcache,
+			  char *core_reg_sect,
 			  unsigned core_reg_size,
 			  int which,
 			  CORE_ADDR reg_addr)
@@ -2256,7 +2257,7 @@ fetch_elf_core_registers (char *core_reg_sect,
       return;
     }
   for (r = 0; r < NUM_REGS; r++)
-    regcache_raw_supply (current_regcache, r, core_reg_sect + mappings[r]);
+    regcache_raw_supply (regcache, r, core_reg_sect + mappings[r]);
 }
 
 static int

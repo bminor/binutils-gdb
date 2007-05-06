@@ -1,5 +1,27 @@
 2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbcore.h (struct regcache): Add forward declaration.
+	(struct core_fns): Add REGCACHE argument to core_read_registers
+	callback.
+	* corelow.c (get_core_register_section): Add REGCACHE argument,
+	use it instead of current_regcache, pass it to core_read_registers
+	callback.
+	(get_core_registers): Add current_regcache as parameter to
+	get_core_register_section calls.
+
+	* alpha-nat.c (fetch_osf_core_registers): Add REGCACHE argument,
+	use it instead of current_regcache.
+	* armnbsd-nat.c (fetch_core_registers): Likewise.
+	(fetch_elfcore_registers): Likewise.
+	* core-regset.c (fetch_core_registers): Likewise.
+	* cris-tdep.c (fetch_core_registers): Likewise.
+	* irix5-nat.c (fetch_core_registers): Likewise.
+	* m68klinux-nat.c (fetch_core_registers): Likewise.
+	* mips-linux-tdep.c (fetch_core_registers): Likewise.
+	* win32-nat.c (fetch_elf_core_registers): Likewise.
+
+2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gregset.h (struct regcache): Add forward declaration.
 	(supply_gregset): Add REGCACHE parameter, make GREGS const.
 	(supply_fpregset): Add REGCACHE parameter, make FPREGS const.

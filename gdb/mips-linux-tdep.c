@@ -472,7 +472,8 @@ mips64_fill_fpregset (const struct regcache *regcache,
     regsets, until multi-arch core support is ready.  */
 
 static void
-fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
+fetch_core_registers (struct regcache *regcache,
+		      char *core_reg_sect, unsigned core_reg_size,
 		      int which, CORE_ADDR reg_addr)
 {
   mips_elf_gregset_t gregset;
@@ -485,13 +486,13 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       if (core_reg_size == sizeof (gregset))
 	{
 	  memcpy ((char *) &gregset, core_reg_sect, sizeof (gregset));
-	  mips_supply_gregset (current_regcache,
+	  mips_supply_gregset (regcache,
 			       (const mips_elf_gregset_t *) &gregset);
 	}
       else if (core_reg_size == sizeof (gregset64))
 	{
 	  memcpy ((char *) &gregset64, core_reg_sect, sizeof (gregset64));
-	  mips64_supply_gregset (current_regcache,
+	  mips64_supply_gregset (regcache,
 				 (const mips64_elf_gregset_t *) &gregset64);
 	}
       else
@@ -504,14 +505,14 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       if (core_reg_size == sizeof (fpregset))
 	{
 	  memcpy ((char *) &fpregset, core_reg_sect, sizeof (fpregset));
-	  mips_supply_fpregset (current_regcache,
+	  mips_supply_fpregset (regcache,
 				(const mips_elf_fpregset_t *) &fpregset);
 	}
       else if (core_reg_size == sizeof (fpregset64))
 	{
 	  memcpy ((char *) &fpregset64, core_reg_sect,
 		  sizeof (fpregset64));
-	  mips64_supply_fpregset (current_regcache,
+	  mips64_supply_fpregset (regcache,
 				  (const mips64_elf_fpregset_t *) &fpregset64);
 	}
       else

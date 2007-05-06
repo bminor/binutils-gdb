@@ -47,7 +47,8 @@
  */
 
 static void
-fetch_osf_core_registers (char *core_reg_sect, unsigned core_reg_size,
+fetch_osf_core_registers (struct regcache *regcache,
+			  char *core_reg_sect, unsigned core_reg_size,
 			  int which, CORE_ADDR reg_addr)
 {
   int regno;
@@ -90,7 +91,7 @@ fetch_osf_core_registers (char *core_reg_sect, unsigned core_reg_size,
     {
       if (CANNOT_FETCH_REGISTER (regno))
 	{
-	  regcache_raw_supply (current_regcache, regno, NULL);
+	  regcache_raw_supply (regcache, regno, NULL);
 	  continue;
 	}
       addr = 8 * core_reg_mapping[regno];
@@ -99,7 +100,7 @@ fetch_osf_core_registers (char *core_reg_sect, unsigned core_reg_size,
 	  /* ??? UNIQUE is a new addition.  Don't generate an error.  */
 	  if (regno == ALPHA_UNIQUE_REGNUM)
 	    {
-	      regcache_raw_supply (current_regcache, regno, NULL);
+	      regcache_raw_supply (regcache, regno, NULL);
 	      continue;
 	    }
 	  if (bad_reg < 0)
@@ -107,7 +108,7 @@ fetch_osf_core_registers (char *core_reg_sect, unsigned core_reg_size,
 	}
       else
 	{
-	  regcache_raw_supply (current_regcache, regno, core_reg_sect + addr);
+	  regcache_raw_supply (regcache, regno, core_reg_sect + addr);
 	}
     }
   if (bad_reg >= 0)

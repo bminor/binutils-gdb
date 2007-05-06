@@ -417,7 +417,8 @@ core_detach (char *args, int from_tty)
    have a section by the appropriate name.  Otherwise, just do nothing.  */
 
 static void
-get_core_register_section (char *name,
+get_core_register_section (struct regcache *regcache,
+			   char *name,
 			   int which,
 			   char *human_name,
 			   int required)
@@ -464,12 +465,12 @@ get_core_register_section (char *name,
 	  return;
 	}
 
-      regset->supply_regset (regset, current_regcache, -1, contents, size);
+      regset->supply_regset (regset, regcache, -1, contents, size);
       return;
     }
 
   gdb_assert (core_vec);
-  core_vec->core_read_registers (contents, size, which,
+  core_vec->core_read_registers (regcache, contents, size, which,
 				 ((CORE_ADDR)
 				  bfd_section_vma (core_bfd, section)));
 }
@@ -494,9 +495,12 @@ get_core_registers (int regno)
       return;
     }
 
-  get_core_register_section (".reg", 0, "general-purpose", 1);
-  get_core_register_section (".reg2", 2, "floating-point", 0);
-  get_core_register_section (".reg-xfp", 3, "extended floating-point", 0);
+  get_core_register_section (current_regcache,
+			     ".reg", 0, "general-purpose", 1);
+  get_core_register_section (current_regcache,
+			     ".reg2", 2, "floating-point", 0);
+  get_core_register_section (current_regcache,
+			     ".reg-xfp", 3, "extended floating-point", 0);
 
   deprecated_registers_fetched ();
 }

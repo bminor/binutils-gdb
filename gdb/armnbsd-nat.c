@@ -414,19 +414,21 @@ struct md_core
 };
 
 static void
-fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
+fetch_core_registers (struct regcache *regcache,
+		      char *core_reg_sect, unsigned core_reg_size,
 		      int which, CORE_ADDR ignore)
 {
   struct md_core *core_reg = (struct md_core *) core_reg_sect;
   int regno;
   CORE_ADDR r_pc;
 
-  arm_supply_gregset (current_regcache, &core_reg->intreg);
-  arm_supply_fparegset (current_regcache, &core_reg->freg);
+  arm_supply_gregset (regcache, &core_reg->intreg);
+  arm_supply_fparegset (regcache, &core_reg->freg);
 }
 
 static void
-fetch_elfcore_registers (char *core_reg_sect, unsigned core_reg_size,
+fetch_elfcore_registers (struct regcache *regcache,
+			 char *core_reg_sect, unsigned core_reg_size,
 			 int which, CORE_ADDR ignore)
 {
   struct reg gregset;
@@ -442,7 +444,7 @@ fetch_elfcore_registers (char *core_reg_sect, unsigned core_reg_size,
 	  /* The memcpy may be unnecessary, but we can't really be sure
 	     of the alignment of the data in the core file.  */
 	  memcpy (&gregset, core_reg_sect, sizeof (gregset));
-	  arm_supply_gregset (current_regcache, &gregset);
+	  arm_supply_gregset (regcache, &gregset);
 	}
       break;
 
@@ -454,7 +456,7 @@ fetch_elfcore_registers (char *core_reg_sect, unsigned core_reg_size,
 	  /* The memcpy may be unnecessary, but we can't really be sure
 	     of the alignment of the data in the core file.  */
 	  memcpy (&fparegset, core_reg_sect, sizeof (fparegset));
-	  arm_supply_fparegset (current_regcache, &fparegset);
+	  arm_supply_fparegset (regcache, &fparegset);
 	}
       break;
 

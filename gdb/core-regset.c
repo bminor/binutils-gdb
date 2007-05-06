@@ -60,7 +60,8 @@
    REG_ADDR is ignored.  */
 
 static void
-fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
+fetch_core_registers (struct regcache *regcache,
+		      char *core_reg_sect, unsigned core_reg_size, int which,
 		      CORE_ADDR reg_addr)
 {
   gdb_gregset_t gregset;
@@ -74,7 +75,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
       else
 	{
 	  memcpy (&gregset, core_reg_sect, sizeof (gregset));
-	  supply_gregset (current_regcache, (const gdb_gregset_t *) &gregset);
+	  supply_gregset (regcache, (const gdb_gregset_t *) &gregset);
 	}
       break;
 
@@ -85,7 +86,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
 	{
 	  memcpy (&fpregset, core_reg_sect, sizeof (fpregset));
 	  if (FP0_REGNUM >= 0)
-	    supply_fpregset (current_regcache, (const gdb_fpregset_t *) &fpregset);
+	    supply_fpregset (regcache, (const gdb_fpregset_t *) &fpregset);
 	}
       break;
 

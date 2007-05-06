@@ -40,7 +40,8 @@
 #include "gregset.h"
 #include "mips-tdep.h"
 
-static void fetch_core_registers (char *, unsigned int, int, CORE_ADDR);
+static void fetch_core_registers (struct regcache *, char *,
+				  unsigned int, int, CORE_ADDR);
 
 /* Size of elements in jmpbuf */
 
@@ -242,7 +243,8 @@ get_longjmp_target (CORE_ADDR *pc)
    REG_ADDR is also unused.  */
 
 static void
-fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
+fetch_core_registers (struct regcache *regcache,
+		      char *core_reg_sect, unsigned core_reg_size,
 		      int which, CORE_ADDR reg_addr)
 {
   char *srcp = core_reg_sect;
@@ -259,7 +261,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 
   for (regno = 0; regno < NUM_REGS; regno++)
     {
-      regcache_raw_supply (current_regcache, regno, srcp);
+      regcache_raw_supply (regcache, regno, srcp);
       srcp += regsize;
     }
 }

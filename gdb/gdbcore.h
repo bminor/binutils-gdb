@@ -26,6 +26,7 @@
 #define GDBCORE_H 1
 
 struct type;
+struct regcache;
 
 #include "bfd.h"
 
@@ -168,8 +169,8 @@ struct core_fns
 
     int (*core_sniffer) (struct core_fns *, bfd *);
 
-    /* Extract the register values out of the core file and store them where
-       `read_register' will find them.
+    /* Extract the register values out of the core file and supply them
+       into REGCACHE.
 
        CORE_REG_SECT points to the register values themselves, read into
        memory.
@@ -189,7 +190,8 @@ struct core_fns
        registers in a large upage-plus-stack ".reg" section.  Original upage
        address X is at location core_reg_sect+x+reg_addr. */
 
-    void (*core_read_registers) (char *core_reg_sect,
+    void (*core_read_registers) (struct regcache *regcache,
+				 char *core_reg_sect,
 				 unsigned core_reg_size,
 				 int which, CORE_ADDR reg_addr);
 

@@ -528,7 +528,8 @@ m68k_linux_store_inferior_registers (int regno)
    REG_ADDR isn't used on GNU/Linux.  */
 
 static void
-fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
+fetch_core_registers (struct regcache *regcache,
+		      char *core_reg_sect, unsigned core_reg_size,
 		      int which, CORE_ADDR reg_addr)
 {
   elf_gregset_t gregset;
@@ -542,7 +543,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       else
 	{
 	  memcpy (&gregset, core_reg_sect, sizeof (gregset));
-	  supply_gregset (current_regcache, (const elf_gregset_t *) &gregset);
+	  supply_gregset (regcache, (const elf_gregset_t *) &gregset);
 	}
       break;
 
@@ -552,7 +553,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       else
 	{
 	  memcpy (&fpregset, core_reg_sect, sizeof (fpregset));
-	  supply_fpregset (current_regcache, (const elf_fpregset_t *) &fpregset);
+	  supply_fpregset (regcache, (const elf_fpregset_t *) &fpregset);
 	}
       break;
 
