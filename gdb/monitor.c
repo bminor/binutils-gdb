@@ -63,7 +63,7 @@ static struct target_ops *targ_ops;
 static void monitor_interrupt_query (void);
 static void monitor_interrupt_twice (int);
 static void monitor_stop (void);
-static void monitor_dump_regs (void);
+static void monitor_dump_regs (struct regcache *regcache);
 
 #if 0
 static int from_hex (int a);
@@ -848,7 +848,7 @@ monitor_detach (char *args, int from_tty)
 /* Convert VALSTR into the target byte-ordered value of REGNO and store it.  */
 
 char *
-monitor_supply_register (int regno, char *valstr)
+monitor_supply_register (struct regcache *regcache, int regno, char *valstr)
 {
   ULONGEST val;
   unsigned char regbuf[MAX_REGISTER_SIZE];
@@ -887,7 +887,7 @@ monitor_supply_register (int regno, char *valstr)
 
   store_unsigned_integer (regbuf, register_size (current_gdbarch, regno), val);
 
-  regcache_raw_supply (current_regcache, regno, regbuf);
+  regcache_raw_supply (regcache, regno, regbuf);
 
   return p;
 }
@@ -926,7 +926,7 @@ monitor_resume (ptid_t ptid, int step, enum target_signal sig)
    string which are passed down to monitor specific code.  */
 
 static void
-parse_register_dump (char *buf, int len)
+parse_register_dump (struct regcache *regcache, char *buf, int len)
 {
   monitor_debug ("MON Parsing  register dump\n");
   while (1)
@@ -948,7 +948,8 @@ parse_register_dump (char *buf, int len)
       vallen = register_strings.end[2] - register_strings.start[2];
       val = buf + register_strings.start[2];
 
-      current_monitor->supply_register (regname, regnamelen, val, vallen);
+      current_monitor->supply_register (regcache, regname, regnamelen,
+					val, vallen);
 
       buf += register_strings.end[0];
       len -= register_strings.end[0];
@@ -1108,10 +1109,10 @@ monitor_wait (ptid_t ptid, struct target_waitstatus *status)
     }
 
   if (current_monitor->register_pattern)
-    parse_register_dump (buf, resp_len);
+    parse_register_dump (current_regcache, buf, resp_len);
 #else
   monitor_debug ("Wait fetching registers after stop\n");
-  monitor_dump_regs ();
+  monitor_dump_regs (current_regcache);
 #endif
 
   status->kind = TARGET_WAITKIND_STOPPED;
@@ -1227,7 +1228,7 @@ monitor_fetch_register (int regno)
       current_monitor->getreg.term_cmd)		/* ack expected */
     monitor_expect_prompt (NULL, 0);	/* get response */
 
-  monitor_supply_register (regno, regbuf);
+  monitor_supply_register (current_regcache, regno, regbuf);
 }
 
 /* Sometimes, it takes several commands to dump the registers */
@@ -1235,13 +1236,13 @@ monitor_fetch_register (int regno)
    case they need to compose the operation.
  */
 int
-monitor_dump_reg_block (char *block_cmd)
+monitor_dump_reg_block (struct regcache *regcache, char *block_cmd)
 {
   char buf[TARGET_BUF_SIZE];
   int resp_len;
   monitor_printf (block_cmd);
   resp_len = monitor_expect_prompt (buf, sizeof (buf));
-  parse_register_dump (buf, resp_len);
+  parse_register_dump (regcache, buf, resp_len);
   return 1;
 }
 
@@ -1250,17 +1251,17 @@ monitor_dump_reg_block (char *block_cmd)
 /* Call the specific function if it has been provided */
 
 static void
-monitor_dump_regs (void)
+monitor_dump_regs (struct regcache *regcache)
 {
   char buf[TARGET_BUF_SIZE];
   int resp_len;
   if (current_monitor->dumpregs)
-    (*(current_monitor->dumpregs)) ();	/* call supplied function */
+    (*(current_monitor->dumpregs)) (regcache);	/* call supplied function */
   else if (current_monitor->dump_registers)	/* default version */
     {
       monitor_printf (current_monitor->dump_registers);
       resp_len = monitor_expect_prompt (buf, sizeof (buf));
-      parse_register_dump (buf, resp_len);
+      parse_register_dump (regcache, buf, resp_len);
     }
   else
     internal_error (__FILE__, __LINE__, _("failed internal consistency check"));			/* Need some way to read registers */
@@ -1283,7 +1284,7 @@ monitor_fetch_registers (int regno)
     }
   else
     {
-      monitor_dump_regs ();
+      monitor_dump_regs (current_regcache);
     }
 }
 

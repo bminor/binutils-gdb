@@ -31,7 +31,8 @@
 static void dink32_open (char *args, int from_tty);
 
 static void
-dink32_supply_register (char *regname, int regnamelen, char *val, int vallen)
+dink32_supply_register (struct regcache *regcache, char *regname,
+			int regnamelen, char *val, int vallen)
 {
   int regno = 0;
 
@@ -93,7 +94,7 @@ dink32_supply_register (char *regname, int regnamelen, char *val, int vallen)
       return;
     }
 
-  monitor_supply_register (regno, val);
+  monitor_supply_register (regcache, regno, val);
 }
 
 /* This array of registers needs to match the indexes used by GDB. The

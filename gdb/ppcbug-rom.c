@@ -30,7 +30,8 @@
 #include "regcache.h"
 
 static void
-ppcbug_supply_register (char *regname, int regnamelen, char *val, int vallen)
+ppcbug_supply_register (struct regcache *regcache, char *regname,
+			int regnamelen, char *val, int vallen)
 {
   int regno = 0;
 
@@ -92,7 +93,7 @@ ppcbug_supply_register (char *regname, int regnamelen, char *val, int vallen)
       return;
     }
 
-  monitor_supply_register (regno, val);
+  monitor_supply_register (regcache, regno, val);
 }
 
 /*

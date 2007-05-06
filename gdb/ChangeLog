@@ -1,5 +1,32 @@
 2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* monitor.c (monitor_supply_register): Add REGCACHE parameter, use
+	it instead of current_regcache.
+	(parse_register_dump): Add REGCACHE parameter, pass it to 
+	supply_register callback.
+	(monitor_dump_reg_block): Add REGCACHE parameter, pass it to
+	parse_register_dump.
+	(monitor_dump_regs): Add REGCACHE parameter, pass it to
+	parse_register_dump and dumpregs callback.
+	(monitor_wait): Pass current_regcache to parse_register_dump and
+	monitor_dump_regs.
+	(monitor_fetch_register): Pass current_regcache to
+	monitor_supply_register.
+	(monitor_fetch_registers): Pass current_regcache to
+	monitor_dump_regs.
+	* monitor.h (struct monitor_ops): Add REGCACHE parameter to
+	supply_register and dumpregs callbacks.
+	(monitor_supply_register, monitor_dump_reg_block): Update
+	prototypes.
+	* dbug-rom.c (dbug_supply_register): Add REGCACHE parameter.  Pass
+	it to monitor_supply_register.
+	* dink32-rom.c (dink32_supply_register): Likewise.
+	* ppcbug-rom.c (ppcbug_supply_register): Likewise.
+	* m32r-rom.c (m32r_supply_register): Likewise.  Also, use REGCACHE
+	instead of current_regcache.
+
+2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* i386-nto-tdep.c (i386nto_supply_gregset, i386nto_supply_fpregset):
 	Add REGCACHE parameter.  Use it instead of current_regcache.
 	(i386nto_supply_regset): Add REGCACHE parameter, pass it to
