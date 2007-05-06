@@ -81,9 +81,9 @@ supply_gregset (gregset_t *gregsetp)
 void
 fill_gregset (gregset_t *gregsetp, int regno)
 {
-  int regi;
+  int regi, size;
   greg_t *regp = &(*gregsetp)[0];
-  LONGEST regval;
+  gdb_byte buf[MAX_REGISTER_SIZE];
 
   /* Under Irix6, if GDB is built with N32 ABI and is debugging an O32
      executable, we have to sign extend the registers to 64 bits before
@@ -92,37 +92,41 @@ fill_gregset (gregset_t *gregsetp, int regno)
   for (regi = 0; regi <= CTX_RA; regi++)
     if ((regno == -1) || (regno == regi))
       {
-        regcache_raw_read_signed (current_regcache, regi, &regval);
-        *(regp + regi) = regval;
+	size = register_size (current_gdbarch, regi);
+	regcache_raw_collect (current_regcache, regi, buf);
+	*(regp + regi) = extract_signed_integer (buf, size);
       }
 
   if ((regno == -1) || (regno == PC_REGNUM))
     {
-      regcache_raw_read_signed
-        (current_regcache, mips_regnum (current_gdbarch)->pc, &regval);
-      *(regp + CTX_EPC) = regval;
+      regi = mips_regnum (current_gdbarch)->pc;
+      size = register_size (current_gdbarch, regi);
+      regcache_raw_collect (current_regcache, regi, buf);
+      *(regp + CTX_EPC) = extract_signed_integer (buf, size);
     }
 
   if ((regno == -1) || (regno == mips_regnum (current_gdbarch)->cause))
     {
-      regcache_raw_read_signed
-        (current_regcache, mips_regnum (current_gdbarch)->cause, &regval);
-      *(regp + CTX_CAUSE) = regval;
+      regi = mips_regnum (current_gdbarch)->cause;
+      size = register_size (current_gdbarch, regi);
+      regcache_raw_collect (current_regcache, regi, buf);
+      *(regp + CTX_CAUSE) = extract_signed_integer (buf, size);
     }
 
-  if ((regno == -1)
-      || (regno == mips_regnum (current_gdbarch)->hi))
+  if ((regno == -1) || (regno == mips_regnum (current_gdbarch)->hi))
     {
-      regcache_raw_read_signed
-        (current_regcache, mips_regnum (current_gdbarch)->hi, &regval);
-      *(regp + CTX_MDHI) = regval;
+      regi = mips_regnum (current_gdbarch)->hi;
+      size = register_size (current_gdbarch, regi);
+      regcache_raw_collect (current_regcache, regi, buf);
+      *(regp + CTX_MDHI) = extract_signed_integer (buf, size);
     }
 
   if ((regno == -1) || (regno == mips_regnum (current_gdbarch)->lo))
     {
-      regcache_raw_read_signed
-        (current_regcache, mips_regnum (current_gdbarch)->lo, &regval);
-      *(regp + CTX_MDLO) = regval;
+      regi = mips_regnum (current_gdbarch)->lo;
+      size = register_size (current_gdbarch, regi);
+      regcache_raw_collect (current_regcache, regi, buf);
+      *(regp + CTX_MDLO) = extract_signed_integer (buf, size);
     }
 }
 
@@ -178,7 +182,7 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
       if ((regno == -1) || (regno == regi))
 	{
 	  to = (char *) &(fpregsetp->fp_r.fp_regs[regi - FP0_REGNUM]);
-          regcache_raw_read (current_regcache, regi, to);
+          regcache_raw_collect (current_regcache, regi, to);
 	}
     }
 
@@ -192,9 +196,9 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
          is 32bits long, while the regcache expects a 64bits long buffer.
          So we use a buffer of the correct size and copy the register
          value from that buffer.  */
-      regcache_raw_read (current_regcache,
-                         mips_regnum (current_gdbarch)->fp_control_status,
-                         fsrbuf);
+      regcache_raw_collect (current_regcache,
+			    mips_regnum (current_gdbarch)->fp_control_status,
+			    fsrbuf);
 
       memcpy (&fpregsetp->fp_csr, fsrbuf + 4, 4);
     }

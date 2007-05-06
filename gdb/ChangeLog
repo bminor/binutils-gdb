@@ -1,3 +1,10 @@
+2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* irix5-nat.c (fill_gregset): Use regcache_raw_collect instead
+	of regcache_raw_read_signed.
+	(fill_fpregset): Use regcache_raw_collect instead of
+	regcache_raw_read.
+
 2007-05-03  Kevin Buettner  <kevinb@redhat.com>
 
 	* mips-tdep.c (mips_eabi_push_dummy_call): When pushing floating
