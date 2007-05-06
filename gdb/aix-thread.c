@@ -1030,28 +1030,28 @@ aix_thread_wait (ptid_t ptid, struct target_waitstatus *status)
 /* Record that the 64-bit general-purpose registers contain VALS.  */
 
 static void
-supply_gprs64 (uint64_t *vals)
+supply_gprs64 (struct regcache *regcache, uint64_t *vals)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int regno;
 
   for (regno = 0; regno < ppc_num_gprs; regno++)
-    regcache_raw_supply (current_regcache, tdep->ppc_gp0_regnum + regno,
+    regcache_raw_supply (regcache, tdep->ppc_gp0_regnum + regno,
 			 (char *) (vals + regno));
 }
 
 /* Record that 32-bit register REGNO contains VAL.  */
 
 static void
-supply_reg32 (int regno, uint32_t val)
+supply_reg32 (struct regcache *regcache, int regno, uint32_t val)
 {
-  regcache_raw_supply (current_regcache, regno, (char *) &val);
+  regcache_raw_supply (regcache, regno, (char *) &val);
 }
 
 /* Record that the floating-point registers contain VALS.  */
 
 static void
-supply_fprs (double *vals)
+supply_fprs (struct regcache *regcache, double *vals)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int regno;
@@ -1061,7 +1061,7 @@ supply_fprs (double *vals)
   gdb_assert (ppc_floating_point_unit_p (current_gdbarch));
 
   for (regno = 0; regno < ppc_num_fprs; regno++)
-    regcache_raw_supply (current_regcache, regno + tdep->ppc_fp0_regnum,
+    regcache_raw_supply (regcache, regno + tdep->ppc_fp0_regnum,
 			 (char *) (vals + regno));
 }
 
@@ -1086,20 +1086,21 @@ special_register_p (int regno)
    32-bit values.  */
 
 static void
-supply_sprs64 (uint64_t iar, uint64_t msr, uint32_t cr,
+supply_sprs64 (struct regcache *regcache,
+	       uint64_t iar, uint64_t msr, uint32_t cr,
 	       uint64_t lr, uint64_t ctr, uint32_t xer,
 	       uint32_t fpscr)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  regcache_raw_supply (current_regcache, PC_REGNUM, (char *) &iar);
-  regcache_raw_supply (current_regcache, tdep->ppc_ps_regnum, (char *) &msr);
-  regcache_raw_supply (current_regcache, tdep->ppc_cr_regnum, (char *) &cr);
-  regcache_raw_supply (current_regcache, tdep->ppc_lr_regnum, (char *) &lr);
-  regcache_raw_supply (current_regcache, tdep->ppc_ctr_regnum, (char *) &ctr);
-  regcache_raw_supply (current_regcache, tdep->ppc_xer_regnum, (char *) &xer);
+  regcache_raw_supply (regcache, PC_REGNUM, (char *) &iar);
+  regcache_raw_supply (regcache, tdep->ppc_ps_regnum, (char *) &msr);
+  regcache_raw_supply (regcache, tdep->ppc_cr_regnum, (char *) &cr);
+  regcache_raw_supply (regcache, tdep->ppc_lr_regnum, (char *) &lr);
+  regcache_raw_supply (regcache, tdep->ppc_ctr_regnum, (char *) &ctr);
+  regcache_raw_supply (regcache, tdep->ppc_xer_regnum, (char *) &xer);
   if (tdep->ppc_fpscr_regnum >= 0)
-    regcache_raw_supply (current_regcache, tdep->ppc_fpscr_regnum,
+    regcache_raw_supply (regcache, tdep->ppc_fpscr_regnum,
 			 (char *) &fpscr);
 }
 
@@ -1107,20 +1108,21 @@ supply_sprs64 (uint64_t iar, uint64_t msr, uint32_t cr,
    values.  */
 
 static void
-supply_sprs32 (uint32_t iar, uint32_t msr, uint32_t cr,
+supply_sprs32 (struct regcache *regcache,
+	       uint32_t iar, uint32_t msr, uint32_t cr,
 	       uint32_t lr, uint32_t ctr, uint32_t xer,
 	       uint32_t fpscr)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  regcache_raw_supply (current_regcache, PC_REGNUM, (char *) &iar);
-  regcache_raw_supply (current_regcache, tdep->ppc_ps_regnum, (char *) &msr);
-  regcache_raw_supply (current_regcache, tdep->ppc_cr_regnum, (char *) &cr);
-  regcache_raw_supply (current_regcache, tdep->ppc_lr_regnum, (char *) &lr);
-  regcache_raw_supply (current_regcache, tdep->ppc_ctr_regnum, (char *) &ctr);
-  regcache_raw_supply (current_regcache, tdep->ppc_xer_regnum, (char *) &xer);
+  regcache_raw_supply (regcache, PC_REGNUM, (char *) &iar);
+  regcache_raw_supply (regcache, tdep->ppc_ps_regnum, (char *) &msr);
+  regcache_raw_supply (regcache, tdep->ppc_cr_regnum, (char *) &cr);
+  regcache_raw_supply (regcache, tdep->ppc_lr_regnum, (char *) &lr);
+  regcache_raw_supply (regcache, tdep->ppc_ctr_regnum, (char *) &ctr);
+  regcache_raw_supply (regcache, tdep->ppc_xer_regnum, (char *) &xer);
   if (tdep->ppc_fpscr_regnum >= 0)
-    regcache_raw_supply (current_regcache, tdep->ppc_fpscr_regnum,
+    regcache_raw_supply (regcache, tdep->ppc_fpscr_regnum,
 			 (char *) &fpscr);
 }
 
@@ -1132,7 +1134,7 @@ supply_sprs32 (uint32_t iar, uint32_t msr, uint32_t cr,
    function.  */
 
 static void
-fetch_regs_user_thread (pthdb_pthread_t pdtid)
+fetch_regs_user_thread (struct regcache *regcache, pthdb_pthread_t pdtid)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int status, i;
@@ -1149,24 +1151,24 @@ fetch_regs_user_thread (pthdb_pthread_t pdtid)
   /* General-purpose registers.  */
 
   if (arch64)
-    supply_gprs64 (ctx.gpr);
+    supply_gprs64 (regcache, ctx.gpr);
   else
     for (i = 0; i < ppc_num_gprs; i++)
-      supply_reg32 (tdep->ppc_gp0_regnum + i, ctx.gpr[i]);
+      supply_reg32 (regcache, tdep->ppc_gp0_regnum + i, ctx.gpr[i]);
 
   /* Floating-point registers.  */
 
   if (ppc_floating_point_unit_p (current_gdbarch))
-    supply_fprs (ctx.fpr);
+    supply_fprs (regcache, ctx.fpr);
 
   /* Special registers.  */
 
   if (arch64)
-    supply_sprs64 (ctx.iar, ctx.msr, ctx.cr, ctx.lr, ctx.ctr, ctx.xer,
-                   ctx.fpscr);
+    supply_sprs64 (regcache, ctx.iar, ctx.msr, ctx.cr, ctx.lr, ctx.ctr,
+			     ctx.xer, ctx.fpscr);
   else
-    supply_sprs32 (ctx.iar, ctx.msr, ctx.cr, ctx.lr, ctx.ctr, ctx.xer,
-                   ctx.fpscr);
+    supply_sprs32 (regcache, ctx.iar, ctx.msr, ctx.cr, ctx.lr, ctx.ctr,
+			     ctx.xer, ctx.fpscr);
 }
 
 /* Fetch register REGNO if != -1 or all registers otherwise from
@@ -1185,7 +1187,8 @@ fetch_regs_user_thread (pthdb_pthread_t pdtid)
    be retrieved.  */
 
 static void
-fetch_regs_kernel_thread (int regno, pthdb_tid_t tid)
+fetch_regs_kernel_thread (struct regcache *regcache, int regno,
+			  pthdb_tid_t tid)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   uint64_t gprs64[ppc_num_gprs];
@@ -1210,14 +1213,14 @@ fetch_regs_kernel_thread (int regno, pthdb_tid_t tid)
 	  if (!ptrace64aix (PTT_READ_GPRS, tid, 
 			    (unsigned long) gprs64, 0, NULL))
 	    memset (gprs64, 0, sizeof (gprs64));
-	  supply_gprs64 (gprs64);
+	  supply_gprs64 (regcache, gprs64);
 	}
       else
 	{
 	  if (!ptrace32 (PTT_READ_GPRS, tid, gprs32, 0, NULL))
 	    memset (gprs32, 0, sizeof (gprs32));
 	  for (i = 0; i < ppc_num_gprs; i++)
-	    supply_reg32 (tdep->ppc_gp0_regnum + i, gprs32[i]);
+	    supply_reg32 (regcache, tdep->ppc_gp0_regnum + i, gprs32[i]);
 	}
     }
 
@@ -1230,7 +1233,7 @@ fetch_regs_kernel_thread (int regno, pthdb_tid_t tid)
     {
       if (!ptrace32 (PTT_READ_FPRS, tid, (int *) fprs, 0, NULL))
 	memset (fprs, 0, sizeof (fprs));
-      supply_fprs (fprs);
+      supply_fprs (regcache, fprs);
     }
 
   /* Special-purpose registers.  */
@@ -1242,9 +1245,9 @@ fetch_regs_kernel_thread (int regno, pthdb_tid_t tid)
 	  if (!ptrace64aix (PTT_READ_SPRS, tid, 
 			    (unsigned long) &sprs64, 0, NULL))
 	    memset (&sprs64, 0, sizeof (sprs64));
-	  supply_sprs64 (sprs64.pt_iar, sprs64.pt_msr, sprs64.pt_cr,
-			 sprs64.pt_lr, sprs64.pt_ctr, sprs64.pt_xer,
-			 sprs64.pt_fpscr);
+	  supply_sprs64 (regcache, sprs64.pt_iar, sprs64.pt_msr,
+			 sprs64.pt_cr, sprs64.pt_lr, sprs64.pt_ctr,
+			 sprs64.pt_xer, sprs64.pt_fpscr);
 	}
       else
 	{
@@ -1252,12 +1255,12 @@ fetch_regs_kernel_thread (int regno, pthdb_tid_t tid)
 
 	  if (!ptrace32 (PTT_READ_SPRS, tid, (int *) &sprs32, 0, NULL))
 	    memset (&sprs32, 0, sizeof (sprs32));
-	  supply_sprs32 (sprs32.pt_iar, sprs32.pt_msr, sprs32.pt_cr,
+	  supply_sprs32 (regcache, sprs32.pt_iar, sprs32.pt_msr, sprs32.pt_cr,
 			 sprs32.pt_lr, sprs32.pt_ctr, sprs32.pt_xer,
 			 sprs32.pt_fpscr);
 
 	  if (tdep->ppc_mq_regnum >= 0)
-	    regcache_raw_supply (current_regcache, tdep->ppc_mq_regnum,
+	    regcache_raw_supply (regcache, tdep->ppc_mq_regnum,
 				 (char *) &sprs32.pt_mq);
 	}
     }
@@ -1280,41 +1283,41 @@ aix_thread_fetch_registers (int regno)
       tid = thread->private->tid;
 
       if (tid == PTHDB_INVALID_TID)
-	fetch_regs_user_thread (thread->private->pdtid);
+	fetch_regs_user_thread (current_regcache, thread->private->pdtid);
       else
-	fetch_regs_kernel_thread (regno, tid);
+	fetch_regs_kernel_thread (current_regcache, regno, tid);
     }
 }
 
 /* Store the gp registers into an array of uint32_t or uint64_t.  */
 
 static void
-fill_gprs64 (uint64_t *vals)
+fill_gprs64 (const struct regcache *regcache, uint64_t *vals)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int regno;
 
   for (regno = 0; regno < ppc_num_gprs; regno++)
-    if (register_cached (tdep->ppc_gp0_regnum + regno))
-      regcache_raw_collect (current_regcache, tdep->ppc_gp0_regnum + regno,
+    if (regcache_valid_p (regcache, tdep->ppc_gp0_regnum + regno))
+      regcache_raw_collect (regcache, tdep->ppc_gp0_regnum + regno,
 			    vals + regno);
 }
 
 static void 
-fill_gprs32 (uint32_t *vals)
+fill_gprs32 (const struct regcache *regcache, uint32_t *vals)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int regno;
 
   for (regno = 0; regno < ppc_num_gprs; regno++)
-    if (register_cached (tdep->ppc_gp0_regnum + regno))
-      regcache_raw_collect (current_regcache, tdep->ppc_gp0_regnum + regno,
+    if (regcache_valid_p (regcache, tdep->ppc_gp0_regnum + regno))
+      regcache_raw_collect (regcache, tdep->ppc_gp0_regnum + regno,
 			    vals + regno);
 }
 
 /* Store the floating point registers into a double array.  */
 static void
-fill_fprs (double *vals)
+fill_fprs (const struct regcache *regcache, double *vals)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int regno;
@@ -1326,15 +1329,16 @@ fill_fprs (double *vals)
   for (regno = tdep->ppc_fp0_regnum;
        regno < tdep->ppc_fp0_regnum + ppc_num_fprs;
        regno++)
-    if (register_cached (regno))
-      regcache_raw_collect (current_regcache, regno, vals + regno);
+    if (regcache_valid_p (regcache, regno))
+      regcache_raw_collect (regcache, regno, vals + regno);
 }
 
 /* Store the special registers into the specified 64-bit and 32-bit
    locations.  */
 
 static void
-fill_sprs64 (uint64_t *iar, uint64_t *msr, uint32_t *cr,
+fill_sprs64 (const struct regcache *regcache,
+	     uint64_t *iar, uint64_t *msr, uint32_t *cr,
 	     uint64_t *lr, uint64_t *ctr, uint32_t *xer,
 	     uint32_t *fpscr)
 {
@@ -1347,25 +1351,26 @@ fill_sprs64 (uint64_t *iar, uint64_t *msr, uint32_t *cr,
      we should check all of the sizes.   */
   gdb_assert (sizeof (*iar) == register_size (current_gdbarch, PC_REGNUM));
 
-  if (register_cached (PC_REGNUM))
-    regcache_raw_collect (current_regcache, PC_REGNUM, iar);
-  if (register_cached (tdep->ppc_ps_regnum))
-    regcache_raw_collect (current_regcache, tdep->ppc_ps_regnum, msr);
-  if (register_cached (tdep->ppc_cr_regnum))
-    regcache_raw_collect (current_regcache, tdep->ppc_cr_regnum, cr);
-  if (register_cached (tdep->ppc_lr_regnum))
-    regcache_raw_collect (current_regcache, tdep->ppc_lr_regnum, lr);
-  if (register_cached (tdep->ppc_ctr_regnum))
-    regcache_raw_collect (current_regcache, tdep->ppc_ctr_regnum, ctr);
-  if (register_cached (tdep->ppc_xer_regnum))
-    regcache_raw_collect (current_regcache, tdep->ppc_xer_regnum, xer);
+  if (regcache_valid_p (regcache, PC_REGNUM))
+    regcache_raw_collect (regcache, PC_REGNUM, iar);
+  if (regcache_valid_p (regcache, tdep->ppc_ps_regnum))
+    regcache_raw_collect (regcache, tdep->ppc_ps_regnum, msr);
+  if (regcache_valid_p (regcache, tdep->ppc_cr_regnum))
+    regcache_raw_collect (regcache, tdep->ppc_cr_regnum, cr);
+  if (regcache_valid_p (regcache, tdep->ppc_lr_regnum))
+    regcache_raw_collect (regcache, tdep->ppc_lr_regnum, lr);
+  if (regcache_valid_p (regcache, tdep->ppc_ctr_regnum))
+    regcache_raw_collect (regcache, tdep->ppc_ctr_regnum, ctr);
+  if (regcache_valid_p (regcache, tdep->ppc_xer_regnum))
+    regcache_raw_collect (regcache, tdep->ppc_xer_regnum, xer);
   if (tdep->ppc_fpscr_regnum >= 0
-      && register_cached (tdep->ppc_fpscr_regnum))
-    regcache_raw_collect (current_regcache, tdep->ppc_fpscr_regnum, fpscr);
+      && regcache_valid_p (regcache, tdep->ppc_fpscr_regnum))
+    regcache_raw_collect (regcache, tdep->ppc_fpscr_regnum, fpscr);
 }
 
 static void
-fill_sprs32 (uint32_t *iar, uint32_t *msr, uint32_t *cr,
+fill_sprs32 (const struct regcache *regcache,
+	     uint32_t *iar, uint32_t *msr, uint32_t *cr,
 	     uint32_t *lr, uint32_t *ctr, uint32_t *xer,
 	     uint32_t *fpscr)
 {
@@ -1378,21 +1383,21 @@ fill_sprs32 (uint32_t *iar, uint32_t *msr, uint32_t *cr,
      we should check all of the sizes.  */
   gdb_assert (sizeof (*iar) == register_size (current_gdbarch, PC_REGNUM));
 
-  if (register_cached (PC_REGNUM))
-    regcache_raw_collect (current_regcache, PC_REGNUM, iar);
-  if (register_cached (tdep->ppc_ps_regnum))
-    regcache_raw_collect (current_regcache, tdep->ppc_ps_regnum, msr);
-  if (register_cached (tdep->ppc_cr_regnum))
-    regcache_raw_collect (current_regcache, tdep->ppc_cr_regnum, cr);
-  if (register_cached (tdep->ppc_lr_regnum))
-    regcache_raw_collect (current_regcache, tdep->ppc_lr_regnum, lr);
-  if (register_cached (tdep->ppc_ctr_regnum))
-    regcache_raw_collect (current_regcache, tdep->ppc_ctr_regnum, ctr);
-  if (register_cached (tdep->ppc_xer_regnum))
-    regcache_raw_collect (current_regcache, tdep->ppc_xer_regnum, xer);
+  if (regcache_valid_p (regcache, PC_REGNUM))
+    regcache_raw_collect (regcache, PC_REGNUM, iar);
+  if (regcache_valid_p (regcache, tdep->ppc_ps_regnum))
+    regcache_raw_collect (regcache, tdep->ppc_ps_regnum, msr);
+  if (regcache_valid_p (regcache, tdep->ppc_cr_regnum))
+    regcache_raw_collect (regcache, tdep->ppc_cr_regnum, cr);
+  if (regcache_valid_p (regcache, tdep->ppc_lr_regnum))
+    regcache_raw_collect (regcache, tdep->ppc_lr_regnum, lr);
+  if (regcache_valid_p (regcache, tdep->ppc_ctr_regnum))
+    regcache_raw_collect (regcache, tdep->ppc_ctr_regnum, ctr);
+  if (regcache_valid_p (regcache, tdep->ppc_xer_regnum))
+    regcache_raw_collect (regcache, tdep->ppc_xer_regnum, xer);
   if (tdep->ppc_fpscr_regnum >= 0
-      && register_cached (tdep->ppc_fpscr_regnum))
-    regcache_raw_collect (current_regcache, tdep->ppc_fpscr_regnum, fpscr);
+      && regcache_valid_p (regcache, tdep->ppc_fpscr_regnum))
+    regcache_raw_collect (regcache, tdep->ppc_fpscr_regnum, fpscr);
 }
 
 /* Store all registers into pthread PDTID, which doesn't have a kernel
@@ -1402,7 +1407,7 @@ fill_sprs32 (uint32_t *iar, uint32_t *msr, uint32_t *cr,
    but I doubt it's worth the effort.  */
 
 static void
-store_regs_user_thread (pthdb_pthread_t pdtid)
+store_regs_user_thread (const struct regcache *regcache, pthdb_pthread_t pdtid)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int status, i;
@@ -1425,17 +1430,17 @@ store_regs_user_thread (pthdb_pthread_t pdtid)
   /* Collect general-purpose register values from the regcache.  */
 
   for (i = 0; i < ppc_num_gprs; i++)
-    if (register_cached (tdep->ppc_gp0_regnum + i))
+    if (regcache_valid_p (regcache, tdep->ppc_gp0_regnum + i))
       {
 	if (arch64)
 	  {
-	    regcache_raw_collect (current_regcache, tdep->ppc_gp0_regnum + i,
+	    regcache_raw_collect (regcache, tdep->ppc_gp0_regnum + i,
 				  (void *) &int64);
 	    ctx.gpr[i] = int64;
 	  }
 	else
 	  {
-	    regcache_raw_collect (current_regcache, tdep->ppc_gp0_regnum + i,
+	    regcache_raw_collect (regcache, tdep->ppc_gp0_regnum + i,
 				  (void *) &int32);
 	    ctx.gpr[i] = int32;
 	  }
@@ -1443,13 +1448,13 @@ store_regs_user_thread (pthdb_pthread_t pdtid)
 
   /* Collect floating-point register values from the regcache.  */
   if (ppc_floating_point_unit_p (current_gdbarch))
-    fill_fprs (ctx.fpr);
+    fill_fprs (regcache, ctx.fpr);
 
   /* Special registers (always kept in ctx as 64 bits).  */
   if (arch64)
     {
-      fill_sprs64 (&ctx.iar, &ctx.msr, &ctx.cr, &ctx.lr, &ctx.ctr, &ctx.xer,
-                   &ctx.fpscr);
+      fill_sprs64 (regcache, &ctx.iar, &ctx.msr, &ctx.cr, &ctx.lr, &ctx.ctr,
+			     &ctx.xer, &ctx.fpscr);
     }
   else
     {
@@ -1458,21 +1463,21 @@ store_regs_user_thread (pthdb_pthread_t pdtid)
       uint32_t tmp_iar, tmp_msr, tmp_cr, tmp_lr, tmp_ctr, tmp_xer,
 	       tmp_fpscr;
 
-      fill_sprs32 (&tmp_iar, &tmp_msr, &tmp_cr, &tmp_lr, &tmp_ctr, &tmp_xer,
-                   &tmp_fpscr);
-      if (register_cached (PC_REGNUM))
+      fill_sprs32 (regcache, &tmp_iar, &tmp_msr, &tmp_cr, &tmp_lr, &tmp_ctr,
+			     &tmp_xer, &tmp_fpscr);
+      if (regcache_valid_p (regcache, PC_REGNUM))
 	ctx.iar = tmp_iar;
-      if (register_cached (tdep->ppc_ps_regnum))
+      if (regcache_valid_p (regcache, tdep->ppc_ps_regnum))
 	ctx.msr = tmp_msr;
-      if (register_cached (tdep->ppc_cr_regnum))
+      if (regcache_valid_p (regcache, tdep->ppc_cr_regnum))
 	ctx.cr  = tmp_cr;
-      if (register_cached (tdep->ppc_lr_regnum))
+      if (regcache_valid_p (regcache, tdep->ppc_lr_regnum))
 	ctx.lr  = tmp_lr;
-      if (register_cached (tdep->ppc_ctr_regnum))
+      if (regcache_valid_p (regcache, tdep->ppc_ctr_regnum))
 	ctx.ctr = tmp_ctr;
-      if (register_cached (tdep->ppc_xer_regnum))
+      if (regcache_valid_p (regcache, tdep->ppc_xer_regnum))
 	ctx.xer = tmp_xer;
-      if (register_cached (tdep->ppc_xer_regnum))
+      if (regcache_valid_p (regcache, tdep->ppc_xer_regnum))
 	ctx.fpscr = tmp_fpscr;
     }
 
@@ -1491,7 +1496,8 @@ store_regs_user_thread (pthdb_pthread_t pdtid)
    group.  */
 
 static void
-store_regs_kernel_thread (int regno, pthdb_tid_t tid)
+store_regs_kernel_thread (const struct regcache *regcache, int regno,
+			  pthdb_tid_t tid)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   uint64_t gprs64[ppc_num_gprs];
@@ -1515,14 +1521,14 @@ store_regs_kernel_thread (int regno, pthdb_tid_t tid)
 	{
 	  /* Pre-fetch: some regs may not be in the cache.  */
 	  ptrace64aix (PTT_READ_GPRS, tid, (unsigned long) gprs64, 0, NULL);
-	  fill_gprs64 (gprs64);
+	  fill_gprs64 (regcache, gprs64);
 	  ptrace64aix (PTT_WRITE_GPRS, tid, (unsigned long) gprs64, 0, NULL);
 	}
       else
 	{
 	  /* Pre-fetch: some regs may not be in the cache.  */
 	  ptrace32 (PTT_READ_GPRS, tid, gprs32, 0, NULL);
-	  fill_gprs32 (gprs32);
+	  fill_gprs32 (regcache, gprs32);
 	  ptrace32 (PTT_WRITE_GPRS, tid, gprs32, 0, NULL);
 	}
     }
@@ -1536,7 +1542,7 @@ store_regs_kernel_thread (int regno, pthdb_tid_t tid)
     {
       /* Pre-fetch: some regs may not be in the cache.  */
       ptrace32 (PTT_READ_FPRS, tid, (int *) fprs, 0, NULL);
-      fill_fprs (fprs);
+      fill_fprs (regcache, fprs);
       ptrace32 (PTT_WRITE_FPRS, tid, (int *) fprs, 0, NULL);
     }
 
@@ -1549,9 +1555,9 @@ store_regs_kernel_thread (int regno, pthdb_tid_t tid)
 	  /* Pre-fetch: some registers won't be in the cache.  */
 	  ptrace64aix (PTT_READ_SPRS, tid, 
 		       (unsigned long) &sprs64, 0, NULL);
-	  fill_sprs64 (&sprs64.pt_iar, &sprs64.pt_msr, &sprs64.pt_cr,
-		       &sprs64.pt_lr,  &sprs64.pt_ctr, &sprs64.pt_xer,
-		       &sprs64.pt_fpscr);
+	  fill_sprs64 (regcache, &sprs64.pt_iar, &sprs64.pt_msr,
+		       &sprs64.pt_cr, &sprs64.pt_lr, &sprs64.pt_ctr,
+		       &sprs64.pt_xer, &sprs64.pt_fpscr);
 	  ptrace64aix (PTT_WRITE_SPRS, tid, 
 		       (unsigned long) &sprs64, 0, NULL);
 	}
@@ -1571,8 +1577,8 @@ store_regs_kernel_thread (int regno, pthdb_tid_t tid)
 	  /* Pre-fetch: some registers won't be in the cache.  */
 	  ptrace32 (PTT_READ_SPRS, tid, (int *) &sprs32, 0, NULL);
 
-	  fill_sprs32 (&tmp_iar, &tmp_msr, &tmp_cr, &tmp_lr, &tmp_ctr,
-		       &tmp_xer, &tmp_fpscr);
+	  fill_sprs32 (regcache, &tmp_iar, &tmp_msr, &tmp_cr, &tmp_lr,
+		       &tmp_ctr, &tmp_xer, &tmp_fpscr);
 
 	  sprs32.pt_iar = tmp_iar;
 	  sprs32.pt_msr = tmp_msr;
@@ -1583,8 +1589,8 @@ store_regs_kernel_thread (int regno, pthdb_tid_t tid)
 	  sprs32.pt_fpscr = tmp_fpscr;
 
 	  if (tdep->ppc_mq_regnum >= 0)
-	    if (register_cached (tdep->ppc_mq_regnum))
-	      regcache_raw_collect (current_regcache, tdep->ppc_mq_regnum,
+	    if (regcache_valid_p (regcache, tdep->ppc_mq_regnum))
+	      regcache_raw_collect (regcache, tdep->ppc_mq_regnum,
 				    &sprs32.pt_mq);
 
 	  ptrace32 (PTT_WRITE_SPRS, tid, (int *) &sprs32, 0, NULL);
@@ -1609,9 +1615,9 @@ aix_thread_store_registers (int regno)
       tid = thread->private->tid;
 
       if (tid == PTHDB_INVALID_TID)
-	store_regs_user_thread (thread->private->pdtid);
+	store_regs_user_thread (current_regcache, thread->private->pdtid);
       else
-	store_regs_kernel_thread (regno, tid);
+	store_regs_kernel_thread (current_regcache, regno, tid);
     }
 }
 

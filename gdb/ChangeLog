@@ -1,5 +1,23 @@
 2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* aix-thread.c (supply_gprs64, supply_reg32, supply_fprs,
+	supply_sprs64, supply_sprs32): Add REGCACHE parameter, use it
+	instead of current_regcache.
+	(fetch_regs_user_thread, fetch_regs_kernel_thread): Add
+	REGCACHE parameter, pass it to supply_ routines.
+	(aix_thread_fetch_registers): Pass current_regcache to
+	fetch_regs_user_thread and fetch_regs_kernel_thread.
+
+	(fill_gprs64, fill_gprs32, fill_fprs, fill_sprs64, fill_sprs32):
+	Add REGCACHE parameter, use it instead of current_regcache.
+	Call regcache_valid_p instead of register_cached.
+	(store_regs_user_thread, store_regs_kernel_thread): Likewise.
+	Also, pass REGCACHE to fill_ routines.
+	(aix_thread_store_registers): Pass current_regcache to
+	store_regs_user_thread and store_regs_kernel_thread.
+
+2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* m32r-linux-nat.c (supply_gregset): Do not modify contents
 	pointed to by GREGSETP.
 
