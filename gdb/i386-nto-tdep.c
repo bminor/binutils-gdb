@@ -81,7 +81,7 @@ nto_reg_offset (int regnum)
 }
 
 static void
-i386nto_supply_gregset (char *gpregs)
+i386nto_supply_gregset (struct regcache *regcache, char *gpregs)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
@@ -90,29 +90,29 @@ i386nto_supply_gregset (char *gpregs)
 				  i386_collect_gregset);
 
   gdb_assert (tdep->gregset_reg_offset == i386nto_gregset_reg_offset);
-  tdep->gregset->supply_regset (tdep->gregset, current_regcache, -1,
+  tdep->gregset->supply_regset (tdep->gregset, regcache, -1,
 				gpregs, NUM_GPREGS * 4);
 }
 
 static void
-i386nto_supply_fpregset (char *fpregs)
+i386nto_supply_fpregset (struct regcache *regcache, char *fpregs)
 {
   if (nto_cpuinfo_valid && nto_cpuinfo_flags | X86_CPU_FXSR)
-    i387_supply_fxsave (current_regcache, -1, fpregs);
+    i387_supply_fxsave (regcache, -1, fpregs);
   else
-    i387_supply_fsave (current_regcache, -1, fpregs);
+    i387_supply_fsave (regcache, -1, fpregs);
 }
 
 static void
-i386nto_supply_regset (int regset, char *data)
+i386nto_supply_regset (struct regcache *regcache, int regset, char *data)
 {
   switch (regset)
     {
     case NTO_REG_GENERAL:
-      i386nto_supply_gregset (data);
+      i386nto_supply_gregset (regcache, data);
       break;
     case NTO_REG_FLOAT:
-      i386nto_supply_fpregset (data);
+      i386nto_supply_fpregset (regcache, data);
       break;
     }
 }
@@ -177,7 +177,7 @@ i386nto_register_area (int regno, int regset, unsigned *off)
 }
 
 static int
-i386nto_regset_fill (int regset, char *data)
+i386nto_regset_fill (const struct regcache *regcache, int regset, char *data)
 {
   if (regset == NTO_REG_GENERAL)
     {
@@ -187,15 +187,15 @@ i386nto_regset_fill (int regset, char *data)
 	{
 	  int offset = nto_reg_offset (regno);
 	  if (offset != -1)
-	    regcache_raw_collect (current_regcache, regno, data + offset);
+	    regcache_raw_collect (regcache, regno, data + offset);
 	}
     }
   else if (regset == NTO_REG_FLOAT)
     {
       if (nto_cpuinfo_valid && nto_cpuinfo_flags | X86_CPU_FXSR)
-	i387_collect_fxsave (current_regcache, -1, data);
+	i387_collect_fxsave (regcache, -1, data);
       else
-	i387_collect_fsave (current_regcache, -1, data);
+	i387_collect_fsave (regcache, -1, data);
     }
   else
     return -1;

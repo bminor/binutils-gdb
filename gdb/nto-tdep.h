@@ -51,14 +51,14 @@ struct nto_target_ops
    regset it came from.  If reg == -1 update all regsets.  */
   int (*regset_id) (int);
 
-  void (*supply_gregset) (char *);
+  void (*supply_gregset) (struct regcache *, char *);
 
-  void (*supply_fpregset) (char *);
+  void (*supply_fpregset) (struct regcache *, char *);
 
-  void (*supply_altregset) (char *);
+  void (*supply_altregset) (struct regcache *, char *);
 
 /* Given a regset, tell gdb about registers stored in data.  */
-  void (*supply_regset) (int, char *);
+  void (*supply_regset) (struct regcache *, int, char *);
 
 /* Given a register and regset, calculate the offset into the regset
    and stuff it into the last argument.  If regno is -1, calculate the
@@ -68,7 +68,7 @@ struct nto_target_ops
 
 /* Build the Neutrino register set info into the data buffer.  
    Return -1 if unknown regset, 0 otherwise.  */
-  int (*regset_fill) (int, char *);
+  int (*regset_fill) (const struct regcache *, int, char *);
 
 /* Gives the fetch_link_map_offsets function exposure outside of
    solib-svr4.c so that we can override relocate_section_addresses().  */
@@ -174,7 +174,7 @@ void nto_generic_supply_altregset (const struct regset *, struct regcache *,
 
 /* Dummy function for initializing nto_target_ops on targets which do
    not define a particular regset.  */
-void nto_dummy_supply_regset (char *regs);
+void nto_dummy_supply_regset (struct regcache *regcache, char *regs);
 
 int nto_in_dynsym_resolve_code (CORE_ADDR pc);
 

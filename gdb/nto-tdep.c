@@ -339,7 +339,7 @@ nto_generic_supply_altregset (const struct regset *regset,
 }
 
 void
-nto_dummy_supply_regset (char *regs)
+nto_dummy_supply_regset (struct regcache *regcache, char *regs)
 {
   /* Do nothing.  */
 }

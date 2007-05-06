@@ -727,13 +727,13 @@ procfs_fetch_registers (int regno)
 
   procfs_set_thread (inferior_ptid);
   if (devctl (ctl_fd, DCMD_PROC_GETGREG, &reg, sizeof (reg), &regsize) == EOK)
-    nto_supply_gregset ((char *) &reg.greg);
+    nto_supply_gregset (current_regcache, (char *) &reg.greg);
   if (devctl (ctl_fd, DCMD_PROC_GETFPREG, &reg, sizeof (reg), &regsize)
       == EOK)
-    nto_supply_fpregset ((char *) &reg.fpreg);
+    nto_supply_fpregset (current_regcache, (char *) &reg.fpreg);
   if (devctl (ctl_fd, DCMD_PROC_GETALTREG, &reg, sizeof (reg), &regsize)
       == EOK)
-    nto_supply_altregset ((char *) &reg.altreg);
+    nto_supply_altregset (current_regcache, (char *) &reg.altreg);
 }
 
 /* Copy LEN bytes to/from inferior's memory starting at MEMADDR
@@ -1173,7 +1173,7 @@ procfs_store_registers (int regno)
 	  if (dev_set == -1)
 	    continue;
 
-	  if (nto_regset_fill (regset, (char *) &reg) == -1)
+	  if (nto_regset_fill (current_regcache, regset, (char *) &reg) == -1)
 	    continue;
 
 	  err = devctl (ctl_fd, dev_set, &reg, regsize, 0);

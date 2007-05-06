@@ -1,5 +1,25 @@
 2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* i386-nto-tdep.c (i386nto_supply_gregset, i386nto_supply_fpregset):
+	Add REGCACHE parameter.  Use it instead of current_regcache.
+	(i386nto_supply_regset): Add REGCACHE parameter, pass it to
+	i386nto_supply_gregset and i386nto_supply_fpregset.
+	(i386nto_regset_fill): Add REGCACHE parameter; use it instead
+	of current_regcache.
+
+	* nto-procfs.c (procfs_fetch_registers): Pass current_regcache to
+	nto_supply_ helper functions.
+	(procfs_store_registers): Pass current_regcache to nto_regset_fill.
+
+	* nto-tdep.c (nto_dummy_supply_regset): Add REGCACHE parameter.
+
+	* nto-tdep.h (struct nto_target_ops): Add REGCACHE parameter to
+	supply_greget, supply_fpregset, supply_altregset, supply_regset,
+	and regset_fill member function pointers.
+	(nto_dummy_supply_regset): Adapt prototype.
+
+2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* shnbsd-tdep.c (shnbsd_supply_reg): Add REGCACHE parameter, use it
 	instead of current_regcache.  Make REGS const.
 	(shnbsd_fill_reg): Add REGCACHE parameter; replace current_regcache.
