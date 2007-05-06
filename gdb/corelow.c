@@ -485,7 +485,7 @@ get_core_register_section (struct regcache *regcache,
 static void
 get_core_registers (struct regcache *regcache, int regno)
 {
-  int status;
+  int i;
 
   if (!(core_gdbarch && gdbarch_regset_from_core_section_p (core_gdbarch))
       && (core_vec == NULL || core_vec->core_read_registers == NULL))
@@ -502,7 +502,10 @@ get_core_registers (struct regcache *regcache, int regno)
   get_core_register_section (regcache,
 			     ".reg-xfp", 3, "extended floating-point", 0);
 
-  deprecated_registers_fetched ();
+  /* Supply dummy value for all registers not found in the core.  */
+  for (i = 0; i < NUM_REGS; i++)
+    if (!regcache_valid_p (regcache, i))
+      regcache_raw_supply (regcache, i, NULL);
 }
 
 static void

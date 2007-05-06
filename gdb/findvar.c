@@ -250,10 +250,7 @@ store_typed_address (gdb_byte *buf, struct type *type, CORE_ADDR addr)
 
 /* Return a `value' with the contents of (virtual or cooked) register
    REGNUM as found in the specified FRAME.  The register's type is
-   determined by register_type().
-
-   NOTE: returns NULL if register value is not available.  Caller will
-   check return value or die!  */
+   determined by register_type().  */
 
 struct value *
 value_of_register (int regnum, struct frame_info *frame)
@@ -271,16 +268,6 @@ value_of_register (int regnum, struct frame_info *frame)
     return value_of_user_reg (regnum, frame);
 
   frame_register (frame, regnum, &optim, &lval, &addr, &realnum, raw_buffer);
-
-  /* FIXME: cagney/2002-05-15: This test is just bogus.
-
-     It indicates that the target failed to supply a value for a
-     register because it was "not available" at this time.  Problem
-     is, the target still has the register and so get saved_register()
-     may be returning a value saved on the stack.  */
-
-  if (register_cached (regnum) < 0)
-    return NULL;		/* register value not available */
 
   reg_val = allocate_value (register_type (current_gdbarch, regnum));
 

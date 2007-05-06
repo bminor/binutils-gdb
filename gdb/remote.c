@@ -3522,7 +3522,6 @@ fetch_register_using_p (struct regcache *regcache, struct packet_reg *reg)
   if (buf[0] == 'x')
     {
       regcache_raw_supply (regcache, reg->regnum, NULL);
-      set_register_cached (reg->regnum, -1);
       return 1;
     }
 
@@ -3661,7 +3660,6 @@ process_g_packet (struct regcache *regcache)
 		/* The register isn't available, mark it as such (at
                    the same time setting the value to zero).  */
 		regcache_raw_supply (regcache, r->regnum, NULL);
-		set_register_cached (i, -1);
 	      }
 	    else
 	      regcache_raw_supply (regcache, r->regnum,
@@ -3708,7 +3706,6 @@ remote_fetch_registers (struct regcache *regcache, int regnum)
 
       /* This register is not available.  */
       regcache_raw_supply (regcache, reg->regnum, NULL);
-      set_register_cached (reg->regnum, -1);
 
       return;
     }
@@ -3721,7 +3718,6 @@ remote_fetch_registers (struct regcache *regcache, int regnum)
 	{
 	  /* This register is not available.  */
 	  regcache_raw_supply (regcache, i, NULL);
-	  set_register_cached (i, -1);
 	}
 }
 

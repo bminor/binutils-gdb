@@ -1,5 +1,36 @@
 2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* regcache.c (regcache_invalidate): New function.
+	(register_cached): Remove.
+	(set_register_cached): Remove.
+	(deprecated_registers_fetched): Remove.
+	(registers_changed): Use regcache_invalidate instead
+	of set_register_cached.
+	(regcache_raw_read): Update comment.
+
+	* regcache.h (regcache_invalidate): Add prototype.
+	(register_cached): Remove.
+	(set_register_cached): Remove.
+	(deprecated_registers_fetched): Remove.
+
+	* findvar.c (value_of_register): Do not call register_cached.
+	* frame.c (frame_register): Likewise.
+	* tui/tui-regs.c (tui_get_register): Likewise.
+
+	* remote.c (fetch_register_using_p): Do not call set_register_cached.
+	(process_g_packet): Likewise.
+	(remote_fetch_registers): Likewise.
+	* remote-sim.c (gdbsim_fetch_register): Likewise.
+	* mt-tdep.c (mt_select_coprocessor): Replace set_register_cached call
+	by regcache_invalidate.
+	(mt_pseudo_register_write): Likewise.
+	* sh-tdep.c (sh_pseudo_register_write): Likewise.
+
+	* corelow.c (get_core_registers): Replace deprecated_registers_fetched
+	call by loop over regcache_raw_supply (..., NULL).
+
+2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* target.h (struct target_ops): Add REGCACHE parameter to
 	to_prepare_to_store.
 	(target_prepare_to_store): Likewise.

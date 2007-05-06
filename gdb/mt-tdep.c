@@ -495,7 +495,7 @@ mt_select_coprocessor (struct gdbarch *gdbarch,
       
       /* We must flush the cache, as it is now invalid.  */
       for (ix = MT_NUM_CPU_REGS; ix != MT_NUM_REGS; ix++)
-	set_register_cached (ix, 0);
+	regcache_invalidate (regcache, ix);
     }
   
   return index;
@@ -573,7 +573,7 @@ mt_pseudo_register_write (struct gdbarch *gdbarch,
     case MT_COPRO_PSEUDOREG_REGNUM:
       regcache_raw_write (regcache, MT_COPRO_REGNUM, buf);
       for (i = MT_NUM_CPU_REGS; i < MT_NUM_REGS; i++)
-	set_register_cached (i, 0);
+	regcache_invalidate (regcache, i);
       break;
     case MT_MAC_REGNUM:
     case MT_MAC_PSEUDOREG_REGNUM:

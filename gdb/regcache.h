@@ -61,6 +61,8 @@ void regcache_raw_write_part (struct regcache *regcache, int regnum,
 
 int regcache_valid_p (const struct regcache *regcache, int regnum);
 
+void regcache_invalidate (struct regcache *regcache, int regnum);
+
 /* Transfer a cooked register [0..NUM_REGS+NUM_PSEUDO_REGS).  */
 void regcache_cooked_read (struct regcache *regcache, int rawnum,
 			   gdb_byte *buf);
@@ -156,14 +158,6 @@ extern struct regcache *regcache_dup (struct regcache *regcache);
 extern struct regcache *regcache_dup_no_passthrough (struct regcache *regcache);
 extern void regcache_cpy (struct regcache *dest, struct regcache *src);
 extern void regcache_cpy_no_passthrough (struct regcache *dest, struct regcache *src);
-
-/* NOTE: cagney/2002-11-05: This function has been superseeded by
-   regcache_raw_supply().  */
-extern void deprecated_registers_fetched (void);
-
-extern int register_cached (int regnum);
-
-extern void set_register_cached (int regnum, int state);
 
 extern void registers_changed (void);
 

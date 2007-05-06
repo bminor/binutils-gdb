@@ -710,32 +710,27 @@ tui_get_register (struct gdbarch *gdbarch, struct frame_info *frame,
   if (target_has_registers)
     {
       gdb_byte buf[MAX_REGISTER_SIZE];
-
       get_frame_register (frame, regnum, buf);
-      /* NOTE: cagney/2003-03-13: This is bogus.  It is refering to
-         the register cache and not the frame which could have pulled
-         the register value off the stack.  */
-      if (register_cached (regnum) >= 0)
-        {
-          if (changedp)
-            {
-              int size = register_size (gdbarch, regnum);
-              char *old = (char*) data->value;
-              int i;
 
-              for (i = 0; i < size; i++)
-                if (buf[i] != old[i])
-                  {
-                    *changedp = TRUE;
-                    old[i] = buf[i];
-                  }
-            }
+      if (changedp)
+	{
+	  int size = register_size (gdbarch, regnum);
+	  char *old = (char*) data->value;
+	  int i;
 
-          /* Reformat the data content if the value changed.  */
-          if (changedp == 0 || *changedp == TRUE)
-            tui_register_format (gdbarch, frame, data, regnum);
-          ret = TUI_SUCCESS;
-        }
+	  for (i = 0; i < size; i++)
+	    if (buf[i] != old[i])
+	      {
+		*changedp = TRUE;
+		old[i] = buf[i];
+	      }
+	}
+
+      /* Reformat the data content if the value changed.  */
+      if (changedp == 0 || *changedp == TRUE)
+	tui_register_format (gdbarch, frame, data, regnum);
+
+      ret = TUI_SUCCESS;
     }
   return ret;
 }

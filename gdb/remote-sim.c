@@ -300,7 +300,6 @@ gdbsim_fetch_register (struct regcache *regcache, int regno)
 	int nr_bytes;
 	memset (buf, 0, MAX_REGISTER_SIZE);
 	regcache_raw_supply (regcache, regno, buf);
-	set_register_cached (regno, -1);
 	break;
       }
       

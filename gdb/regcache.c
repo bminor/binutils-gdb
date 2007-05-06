@@ -393,6 +393,17 @@ regcache_valid_p (const struct regcache *regcache, int regnum)
   return regcache->register_valid_p[regnum];
 }
 
+void
+regcache_invalidate (struct regcache *regcache, int regnum)
+{
+  gdb_assert (regcache != NULL);
+  gdb_assert (regnum >= 0);
+  gdb_assert (!regcache->readonly_p);
+  gdb_assert (regnum < regcache->descr->nr_raw_registers);
+  regcache->register_valid_p[regnum] = 0;
+}
+
+
 /* Global structure containing the current regcache.  */
 /* FIXME: cagney/2002-05-11: The two global arrays registers[] and
    deprecated_register_valid[] currently point into this structure.  */
@@ -406,33 +417,6 @@ struct regcache *current_regcache;
 /* The thread/process associated with the current set of registers. */
 
 static ptid_t registers_ptid;
-
-/*
- * FUNCTIONS:
- */
-
-/* REGISTER_CACHED()
-
-   Returns 0 if the value is not in the cache (needs fetch).
-          >0 if the value is in the cache.
-	  <0 if the value is permanently unavailable (don't ask again).  */
-
-int
-register_cached (int regnum)
-{
-  return current_regcache->register_valid_p[regnum];
-}
-
-/* Record that REGNUM's value is cached if STATE is >0, uncached but
-   fetchable if STATE is 0, and uncached and unfetchable if STATE is <0.  */
-
-void
-set_register_cached (int regnum, int state)
-{
-  gdb_assert (regnum >= 0);
-  gdb_assert (regnum < current_regcache->descr->nr_raw_registers);
-  current_regcache->register_valid_p[regnum] = state;
-}
 
 /* Observer for the target_changed event.  */
 
@@ -468,28 +452,9 @@ registers_changed (void)
   alloca (0);
 
   for (i = 0; i < current_regcache->descr->nr_raw_registers; i++)
-    set_register_cached (i, 0);
+    regcache_invalidate (current_regcache, i);
 }
 
-/* DEPRECATED_REGISTERS_FETCHED ()
-
-   Indicate that all registers have been fetched, so mark them all valid.  */
-
-/* FIXME: cagney/2001-12-04: This function is DEPRECATED.  The target
-   code was blatting the registers[] array and then calling this.
-   Since targets should only be using regcache_raw_supply() the need for
-   this function/hack is eliminated.  */
-
-void
-deprecated_registers_fetched (void)
-{
-  int i;
-
-  for (i = 0; i < NUM_REGS; i++)
-    set_register_cached (i, 1);
-  /* Do not assume that the pseudo-regs have also been fetched.
-     Fetching all real regs NEVER accounts for pseudo-regs.  */
-}
 
 void
 regcache_raw_read (struct regcache *regcache, int regnum, gdb_byte *buf)
@@ -517,7 +482,7 @@ regcache_raw_read (struct regcache *regcache, int regnum, gdb_byte *buf)
 	 that a register is in one of the possible states: valid,
 	 undefined, unknown.  The last of which isn't yet
 	 possible.  */
-      gdb_assert (register_cached (regnum));
+      gdb_assert (regcache_valid_p (regcache, regnum));
 #endif
     }
   /* Copy the value directly into the register cache.  */
