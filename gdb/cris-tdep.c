@@ -3856,7 +3856,7 @@ typedef elf_greg_t crisv32_elf_gregset_t[CRISV32_ELF_NGREG];
 /* Unpack an elf_gregset_t into GDB's register cache.  */
 
 static void 
-supply_gregset (elf_gregset_t *gregsetp)
+cris_supply_gregset (struct regcache *regcache, elf_gregset_t *gregsetp)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int i;
@@ -3867,7 +3867,7 @@ supply_gregset (elf_gregset_t *gregsetp)
      knows about the actual size of each register so that's no problem.  */
   for (i = 0; i < NUM_GENREGS + NUM_SPECREGS; i++)
     {
-      regcache_raw_supply (current_regcache, i, (char *)&regp[i]);
+      regcache_raw_supply (regcache, i, (char *)&regp[i]);
     }
 
   if (tdep->cris_version == 32)
@@ -3875,7 +3875,7 @@ supply_gregset (elf_gregset_t *gregsetp)
       /* Needed to set pseudo-register PC for CRISv32.  */
       /* FIXME: If ERP is in a delay slot at this point then the PC will
 	 be wrong.  Issue a warning to alert the user.  */
-      regcache_raw_supply (current_regcache, PC_REGNUM, 
+      regcache_raw_supply (regcache, PC_REGNUM, 
 			   (char *)&regp[ERP_REGNUM]);
 
       if (*(char *)&regp[ERP_REGNUM] & 0x1)
@@ -3903,7 +3903,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       else
         {
           memcpy (&gregset, core_reg_sect, sizeof (gregset));
-          supply_gregset (&gregset);
+          cris_supply_gregset (current_regcache, &gregset);
         }
 
     default:

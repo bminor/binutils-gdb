@@ -1,5 +1,12 @@
 2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* cris-tdep.c (supply_gregset): Rename to ...
+	(cris_supply_gregset): ... this.  Add REGCACHE parameter.  Use it
+	instead of current_regcache.
+	(fetch_core_registers): Update call.  Pass current_regcache.
+
+2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* arnmnbsd-nat.c (supply_gregset): Rename to ...
 	(arm_supply_gregset): ... this.  Add REGCACHE parameter.
 	Use it instead of current_regcache.
