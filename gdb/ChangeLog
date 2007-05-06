@@ -1,5 +1,19 @@
 2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* shnbsd-tdep.c (shnbsd_supply_reg): Add REGCACHE parameter, use it
+	instead of current_regcache.  Make REGS const.
+	(shnbsd_fill_reg): Add REGCACHE parameter; replace current_regcache.
+	* shnbsd-tdep.h (shnbsd_supply_reg, shnbsd_fill_reg): Update
+	prototypes.
+	* shnbsd-nat.c: Include "regcache.h".
+	(shnbsd_fetch_inferior_registers): Pass current_regcache to
+	shnbsd_supply_reg.
+	(shnbsd_store_inferior_registers): Pass current_regcache to
+	shnbsd_fill_reg.
+	* Makefile.in (shbsd-nat.o): Update dependencies.
+
+2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* mips-linux-tdep.c (supply_32bit_reg): Add REGCACHE parameter.  Use it
 	instead of current_regcache.
 	(mips_supply_gregset): Likewise.  Pass REGCACHE to supply_32bit_reg.

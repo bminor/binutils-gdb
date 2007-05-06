@@ -156,16 +156,16 @@ shnbsd_regset_from_core_section (struct gdbarch *gdbarch,
 }
 
 void
-shnbsd_supply_reg (char *regs, int regnum)
+shnbsd_supply_reg (struct regcache *regcache, const char *regs, int regnum)
 {
-  shnbsd_supply_gregset (&shnbsd_gregset, current_regcache, regnum,
+  shnbsd_supply_gregset (&shnbsd_gregset, regcache, regnum,
 			 regs, SHNBSD_SIZEOF_GREGS);
 }
 
 void
-shnbsd_fill_reg (char *regs, int regnum)
+shnbsd_fill_reg (const struct regcache *regcache, char *regs, int regnum)
 {
-  shnbsd_collect_gregset (&shnbsd_gregset, current_regcache, regnum,
+  shnbsd_collect_gregset (&shnbsd_gregset, regcache, regnum,
 			  regs, SHNBSD_SIZEOF_GREGS);
 }
 

@@ -2553,7 +2553,7 @@ sh64-tdep.o: sh64-tdep.c $(defs_h) $(frame_h) $(frame_base_h) \
 	$(gdb_string_h) $(gdb_assert_h) $(arch_utils_h) $(regcache_h) \
 	$(osabi_h) $(elf_bfd_h) $(elf_sh_h) $(gdb_sim_sh_h)
 shnbsd-nat.o: shnbsd-nat.c $(defs_h) $(inferior_h) $(sh_tdep_h) \
-	$(shnbsd_tdep_h) $(inf_ptrace_h)
+	$(shnbsd_tdep_h) $(inf_ptrace_h) $(regcache_h)
 shnbsd-tdep.o: shnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) $(regset_h) \
 	$(value_h) $(osabi_h) $(gdb_assert_h) $(gdb_string_h) $(sh_tdep_h) \
 	$(shnbsd_tdep_h) $(solib_svr4_h)

@@ -31,6 +31,8 @@
 #include "sh-tdep.h"
 #include "shnbsd-tdep.h"
 #include "inf-ptrace.h"
+#include "regcache.h"
+
 
 /* Determine if PT_GETREGS fetches this register. */
 #define GETREGS_SUPPLIES(regno) \
@@ -50,7 +52,7 @@ shnbsd_fetch_inferior_registers (int regno)
 		  (PTRACE_TYPE_ARG3) &inferior_registers, 0) == -1)
 	perror_with_name (_("Couldn't get registers"));
 
-      shnbsd_supply_reg ((char *) &inferior_registers, regno);
+      shnbsd_supply_reg (current_regcache, (char *) &inferior_registers, regno);
 
       if (regno != -1)
 	return;
@@ -68,7 +70,7 @@ shnbsd_store_inferior_registers (int regno)
 		  (PTRACE_TYPE_ARG3) &inferior_registers, 0) == -1)
 	perror_with_name (_("Couldn't get registers"));
 
-      shnbsd_fill_reg ((char *) &inferior_registers, regno);
+      shnbsd_fill_reg (current_regcache, (char *) &inferior_registers, regno);
 
       if (ptrace (PT_SETREGS, PIDGET (inferior_ptid),
 		  (PTRACE_TYPE_ARG3) &inferior_registers, 0) == -1)
