@@ -18,10 +18,19 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* OSF/1-3.x fixes some OSF/1-2.x procfs peculiarities and adds
-   a new one.  */
-#include "alpha/nm-osf2.h"
+/* Number of traps that happen between exec'ing the shell
+   to run an inferior, and when we finally get to
+   the inferior code.  This is 2 on most implementations.  */
+#define START_INFERIOR_TRAPS_EXPECTED 3
 
-#undef PROCFS_NEED_PIOCSSIG_FOR_KILL
-#undef PROCFS_DONT_PIOCSSIG_CURSIG
+/* Don't trace faults under OSF/1, rely on the posting of the appropriate
+   signal if fault tracing is disabled.
+   Tracing T_IFAULT under Alpha OSF/1 causes a `floating point enable'
+   fault from which we cannot continue (except by disabling the
+   tracing).
+   And as OSF/1 doesn't provide the standard fault definitions, the
+   mapping of faults to appropriate signals in procfs_wait is difficult.  */
+#define PROCFS_DONT_TRACE_FAULTS
+
+/* Work around some peculiarities in the OSF/1 procfs implementation.  */
 #define PROCFS_NEED_CLEAR_CURSIG_FOR_KILL

@@ -13,6 +13,8 @@
 # The default is $host_cpu.
 
 case $host in
+ alpha*-*-osf1* | \
+ alpha*-*-osf2* | \
  hppa*-*-hiux* | \
  i[34567]86-ncr-* | \
  i[34567]86-*-dgux* | \
@@ -60,8 +62,6 @@ esac
 
 case "${host}" in
 
-alpha*-*-osf1*)		gdb_host=alpha-osf1 ;;
-alpha*-*-osf2*)		gdb_host=alpha-osf2 ;;
 alpha*-*-osf[3456789]*)	gdb_host=alpha-osf3 ;;
 alpha*-*-linux*)	gdb_host=alpha-linux ;;
 alpha*-*-freebsd* | alpha*-*-kfreebsd*-gnu)

@@ -91,6 +91,8 @@ qXfer:features:read:
 
 Support for these obsolete configurations has been removed.
 
+alpha*-*-osf1*
+alpha*-*-osf2*
 d10v-*-*
 hppa*-*-hiux*
 i[34567]86-ncr-*

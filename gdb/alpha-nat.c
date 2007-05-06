@@ -118,34 +118,7 @@ fetch_osf_core_registers (struct regcache *regcache,
 }
 
 
-/* Map gdb internal register number to a ptrace ``address''.
-   These ``addresses'' are defined in <sys/ptrace.h>, with
-   the exception of ALPHA_UNIQUE_PTRACE_ADDR.  */
-
-#define ALPHA_UNIQUE_PTRACE_ADDR 0
-
-CORE_ADDR
-register_addr (int regno, CORE_ADDR blockend)
-{
-  if (regno == PC_REGNUM)
-    return PC;
-  if (regno == ALPHA_UNIQUE_REGNUM)
-    return ALPHA_UNIQUE_PTRACE_ADDR;
-  if (regno < FP0_REGNUM)
-    return GPR_BASE + regno;
-  else
-    return FPR_BASE + regno - FP0_REGNUM;
-}
-
-int
-kernel_u_size (void)
-{
-  return (sizeof (struct user));
-}
-
-#if defined(USE_PROC_FS) || defined(HAVE_GREGSET_T)
 #include <sys/procfs.h>
-
 /* Prototypes for supply_gregset etc. */
 #include "gregset.h"
 
@@ -195,7 +168,6 @@ fill_fpregset (const struct regcache *regcache,
   /* FPCR is in slot 32.  */
   alpha_fill_fp_regs (regcache, regno, regp, regp + 31);
 }
-#endif
 
 
 /* Register that we are able to handle alpha core file formats. */

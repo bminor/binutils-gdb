@@ -1,5 +1,24 @@
 2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* configure.host (alpha*-*-osf[12]*): Remove support.
+	* NEWS: Mention removed configurations.
+
+	* config/alpha/alpha-osf1.mh: Delete file.
+	* config/alpha/alpha-osf2.mh: Delete file.
+	* config/alpha/alpha-osf3.mh (NATDEPFILES): Remove inftarg.o
+	and infptrace.o.
+	* config/alpha/nm-osf.h: Delete file.
+	* config/alpha/nm-osf2.h: Delete file.
+	* config/alpha/nm-osf3.h: Do not include "nm-osf2.h".
+	(START_INFERIOR_TRAPS_EXPECTED): Copy from nm-osf.h.
+	(PROCFS_DONT_TRACE_FAULTS): Copy from nm-osf2.h.
+
+	* alpha-nat.c (ALPHA_UNIQUE_PTRACE_ADDR): Do not define.
+	(register_addr, kernel_u_size): Remove.
+	Do not check for "defined(USE_PROC_FS) || defined(HAVE_GREGSET_T)".
+
+2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* regcache.c (regcache_invalidate): New function.
 	(register_cached): Remove.
 	(set_register_cached): Remove.
