@@ -1,5 +1,23 @@
 2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* inftarg.c, infptrace.c: Remove files.
+	* Makefile.in (ALLDEPFILES): Remove inftarg.c and infptrace.c
+	(inftarg.o, infptrace.o): Remove rules.
+	* gdbcore.h (register_addr): Remove prototype.
+	* inferior.h (kill_inferior, store_inferior_registers,
+	fetch_inferior_registers, attach, detach, ptrace_wait, child_resume,
+	call_ptrace, pre_fork_inferior): Remove prototypes.
+	* target.h (child_xfer_memory, child_pid_to_exec_file, 
+	child_core_file_to_sym_file, child_post_attach,
+	child_post_startup_inferior, child_acknowledge_created_inferior,
+	child_insert_fork_catchpoint, child_remove_fork_catchpoint,
+	child_insert_vfork_catchpoint, child_remove_vfork_catchpoint,
+	child_insert_exec_catchpoint, child_remove_exec_catchpoint,
+	child_follow_fork, child_reported_exec_events_per_exec_call,
+	child_has_exited, child_thread_alive): Remove prototypes.
+
+2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* sparc-nat.h (sparc_fetch_inferior_registers): Add prototype.
 	(sparc_store_inferior_registers): Likewise.
 	* sparc-nat.c (fetch_inferior_registers): Rename to ...

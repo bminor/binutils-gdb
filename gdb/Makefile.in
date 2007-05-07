@@ -1452,7 +1452,7 @@ ALLDEPFILES = \
 	i386gnu-nat.c i386gnu-tdep.c \
 	ia64-linux-nat.c ia64-linux-tdep.c ia64-tdep.c \
 	inf-ptrace.c inf-ttrace.c \
-	infptrace.c inftarg.c irix5-nat.c \
+	irix5-nat.c \
 	libunwind-frame.c \
 	linux-fork.c \
 	m68hc11-tdep.c \
@@ -2172,18 +2172,12 @@ inflow.o: inflow.c $(defs_h) $(frame_h) $(inferior_h) $(command_h) \
 inf-ptrace.o: inf-ptrace.c $(defs_h) $(command_h) $(inferior_h) $(inflow_h) \
 	$(gdbcore_h) $(regcache_h) $(gdb_stdint_h) $(gdb_assert_h) \
 	$(gdb_string_h) $(gdb_ptrace_h) $(gdb_wait_h) $(inf_child_h)
-infptrace.o: infptrace.c $(defs_h) $(command_h) $(frame_h) $(gdbcore_h) \
-	$(inferior_h) $(regcache_h) $(target_h) $(gdb_assert_h) \
-	$(gdb_wait_h) $(gdb_string_h) $(gdb_dirent_h) $(gdb_ptrace_h)
 infrun.o: infrun.c $(defs_h) $(gdb_string_h) $(symtab_h) $(frame_h) \
 	$(inferior_h) $(exceptions_h) $(breakpoint_h) $(gdb_wait_h) \
 	$(gdbcore_h) $(gdbcmd_h) $(cli_script_h) $(target_h) $(gdbthread_h) \
 	$(annotate_h) $(symfile_h) $(top_h) $(inf_loop_h) $(regcache_h) \
 	$(value_h) $(observer_h) $(language_h) $(solib_h) $(gdb_assert_h) \
 	$(mi_common_h) $(main_h)
-inftarg.o: inftarg.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
-	$(gdbcore_h) $(command_h) $(gdb_stat_h) $(gdb_wait_h) \
-	$(inflow_h)
 inf-ttrace.o: inf-ttrace.c $(defs_h) $(command_h) $(gdbcore_h) \
 	$(gdbthread_h) $(inferior_h) $(target_h) \
 	$(gdb_assert_h) $(gdb_string_h) $(inf_child_h) $(inf_ttrace_h)

@@ -158,8 +158,6 @@ extern void proceed (CORE_ADDR, enum target_signal, int);
    over such function.  */
 extern int step_stop_if_no_debug;
 
-extern void kill_inferior (void);
-
 extern void generic_mourn_inferior (void);
 
 extern void terminal_save_ours (void);
@@ -209,10 +207,6 @@ extern void default_print_registers_info (struct gdbarch *gdbarch,
 					  struct frame_info *frame,
 					  int regnum, int all);
 
-extern void store_inferior_registers (struct regcache *, int);
-
-extern void fetch_inferior_registers (struct regcache *, int);
-
 extern void child_terminal_info (char *, int);
 
 extern void term_info (char *, int);
@@ -224,21 +218,6 @@ extern void terminal_inferior (void);
 extern void terminal_init_inferior (void);
 
 extern void terminal_init_inferior_with_pgrp (int pgrp);
-
-/* From infptrace.c or infttrace.c */
-
-extern int attach (int);
-
-extern void detach (int);
-
-/* PTRACE method of waiting for inferior process.  */
-int ptrace_wait (ptid_t, int *);
-
-extern void child_resume (ptid_t, int, enum target_signal);
-
-extern int call_ptrace (int, int, PTRACE_TYPE_ARG3, int);
-
-extern void pre_fork_inferior (void);
 
 /* From procfs.c */
 

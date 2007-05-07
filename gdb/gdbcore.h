@@ -129,8 +129,6 @@ extern void exec_file_clear (int from_tty);
 
 extern void validate_files (void);
 
-extern CORE_ADDR register_addr (int regno, CORE_ADDR blockend);
-
 /* The target vector for core files. */
 
 extern struct target_ops core_ops;

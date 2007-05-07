@@ -621,9 +621,6 @@ extern int target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr,
 extern int xfer_memory (CORE_ADDR, gdb_byte *, int, int,
 			struct mem_attrib *, struct target_ops *);
 
-extern int child_xfer_memory (CORE_ADDR, gdb_byte *, int, int,
-			      struct mem_attrib *, struct target_ops *);
-
 /* Fetches the target's memory map.  If one is found it is sorted
    and returned, after some consistency checking.  Otherwise, NULL
    is returned.  */
@@ -677,41 +674,6 @@ enum flash_preserve_mode
 int target_write_memory_blocks (VEC(memory_write_request_s) *requests,
 				enum flash_preserve_mode preserve_flash_p,
 				void (*progress_cb) (ULONGEST, void *));
-
-
-extern char *child_pid_to_exec_file (int);
-
-extern char *child_core_file_to_sym_file (char *);
-
-#if defined(CHILD_POST_ATTACH)
-extern void child_post_attach (int);
-#endif
-
-extern void child_post_startup_inferior (ptid_t);
-
-extern void child_acknowledge_created_inferior (int);
-
-extern void child_insert_fork_catchpoint (int);
-
-extern int child_remove_fork_catchpoint (int);
-
-extern void child_insert_vfork_catchpoint (int);
-
-extern int child_remove_vfork_catchpoint (int);
-
-extern void child_acknowledge_created_inferior (int);
-
-extern int child_follow_fork (struct target_ops *, int);
-
-extern void child_insert_exec_catchpoint (int);
-
-extern int child_remove_exec_catchpoint (int);
-
-extern int child_reported_exec_events_per_exec_call (void);
-
-extern int child_has_exited (int, int, int *);
-
-extern int child_thread_alive (ptid_t);
 
 /* From infrun.c.  */
 
