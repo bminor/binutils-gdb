@@ -1,5 +1,11 @@
 2007-05-07  Alan Modra  <amodra@bigpond.net.au>
 
+	* elflink.c (bfd_elf_final_link): Correct reloc handling for
+	elf_backend_count_relocs.
+	(bfd_elf_discard_info): Print an error if we can't read syms.
+
+2007-05-07  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-spu.c (spu_elf_reloc_type_lookup): Return NULL on
 	invalid reloc code.
 	(spu_elf_gc_mark_hook, spu_elf_section_processing): Delete functions.

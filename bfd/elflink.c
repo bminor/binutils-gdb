@@ -9312,13 +9312,18 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		{
 		  Elf_Internal_Rela * relocs;
 
-		  relocs = _bfd_elf_link_read_relocs (abfd, sec, NULL, NULL,
+		  relocs = _bfd_elf_link_read_relocs (sec->owner, sec,
+						      NULL, NULL,
 						      info->keep_memory);
 
-		  reloc_count = (*bed->elf_backend_count_relocs) (sec, relocs);
+		  if (relocs != NULL)
+		    {
+		      reloc_count
+			= (*bed->elf_backend_count_relocs) (sec, relocs);
 
-		  if (elf_section_data (o)->relocs != relocs)
-		    free (relocs);
+		      if (elf_section_data (sec)->relocs != relocs)
+			free (relocs);
+		    }
 		}
 
 	      if (sec->rawsize > max_contents_size)
@@ -11147,7 +11152,10 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 						 cookie.locsymcount, 0,
 						 NULL, NULL, NULL);
 	  if (cookie.locsyms == NULL)
-	    return FALSE;
+	    {
+	      info->callbacks->einfo (_("%P%X: can not read symbols: %E\n"));
+	      return FALSE;
+	    }
 	}
 
       if (stab != NULL)
