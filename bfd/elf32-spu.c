@@ -139,7 +139,12 @@ static reloc_howto_type *
 spu_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 			   bfd_reloc_code_real_type code)
 {
-  return elf_howto_table + spu_elf_bfd_to_reloc_type (code);
+  enum elf_spu_reloc_type r_type = spu_elf_bfd_to_reloc_type (code);
+
+  if (r_type == R_SPU_NONE)
+    return NULL;
+
+  return elf_howto_table + r_type;
 }
 
 static reloc_howto_type *
@@ -556,37 +561,6 @@ spu_elf_create_sections (bfd *output_bfd,
     }
 
   return TRUE;
-}
-
-/* Return the section that should be marked against GC for a given
-   relocation.  */
-
-static asection *
-spu_elf_gc_mark_hook (asection *sec,
-		      struct bfd_link_info *info ATTRIBUTE_UNUSED,
-		      Elf_Internal_Rela *rel ATTRIBUTE_UNUSED,
-		      struct elf_link_hash_entry *h,
-		      Elf_Internal_Sym *sym)
-{
-  if (h != NULL)
-    {
-      switch (h->root.type)
-	{
-	case bfd_link_hash_defined:
-	case bfd_link_hash_defweak:
-	  return h->root.u.def.section;
-
-	case bfd_link_hash_common:
-	  return h->root.u.c.p->section;
-
-	default:
-	  break;
-	}
-    }
-  else
-    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
-
-  return NULL;
 }
 
 /* qsort predicate to sort sections by vma.  */
@@ -3072,24 +3046,6 @@ spu_elf_modify_program_headers (bfd *abfd, struct bfd_link_info *info)
   return TRUE;
 }
 
-/* Arrange for our linker created section to be output.  */
-
-static bfd_boolean
-spu_elf_section_processing (bfd *abfd ATTRIBUTE_UNUSED,
-			    Elf_Internal_Shdr *i_shdrp)
-{
-  asection *sec;
-
-  sec = i_shdrp->bfd_section;
-  if (sec != NULL
-      && (sec->flags & SEC_LINKER_CREATED) != 0
-      && sec->name != NULL
-      && strcmp (sec->name, SPU_PTNOTE_SPUNAME) == 0)
-    i_shdrp->contents = sec->contents;
-
-  return TRUE;
-}
-
 #define TARGET_BIG_SYM		bfd_elf32_spu_vec
 #define TARGET_BIG_NAME		"elf32-spu"
 #define ELF_ARCH		bfd_arch_spu
@@ -3102,7 +3058,6 @@ spu_elf_section_processing (bfd *abfd ATTRIBUTE_UNUSED,
 #define bfd_elf32_bfd_reloc_type_lookup		spu_elf_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup	spu_elf_reloc_name_lookup
 #define elf_info_to_howto			spu_elf_info_to_howto
-#define elf_backend_gc_mark_hook		spu_elf_gc_mark_hook
 #define elf_backend_relocate_section		spu_elf_relocate_section
 #define elf_backend_symbol_processing		spu_elf_backend_symbol_processing
 #define elf_backend_link_output_symbol_hook	spu_elf_output_symbol_hook
@@ -3114,7 +3069,6 @@ spu_elf_section_processing (bfd *abfd ATTRIBUTE_UNUSED,
 #define elf_backend_modify_segment_map		spu_elf_modify_segment_map
 #define elf_backend_modify_program_headers	spu_elf_modify_program_headers
 #define elf_backend_post_process_headers        spu_elf_post_process_headers
-#define elf_backend_section_processing		spu_elf_section_processing
 #define elf_backend_special_sections		spu_elf_special_sections
 #define bfd_elf32_bfd_final_link		spu_elf_final_link
 

@@ -1,5 +1,13 @@
 2007-05-07  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-spu.c (spu_elf_reloc_type_lookup): Return NULL on
+	invalid reloc code.
+	(spu_elf_gc_mark_hook, spu_elf_section_processing): Delete functions.
+	(elf_backend_gc_mark_hook, elf_backend_section_processing): Don't
+	define.
+
+2007-05-07  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf.c (assign_file_positions_for_load_sections): Don't check
 	core segment.
 
