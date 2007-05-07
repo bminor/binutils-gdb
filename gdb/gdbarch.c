@@ -237,6 +237,7 @@ struct gdbarch
   gdbarch_regset_from_core_section_ftype *regset_from_core_section;
   int vtable_function_descriptors;
   int vbit_in_delta;
+  gdbarch_skip_permanent_breakpoint_ftype *skip_permanent_breakpoint;
 };
 
 
@@ -364,6 +365,7 @@ struct gdbarch startup_gdbarch =
   0,  /* regset_from_core_section */
   0,  /* vtable_function_descriptors */
   0,  /* vbit_in_delta */
+  0,  /* skip_permanent_breakpoint */
   /* startup_gdbarch() */
 };
 
@@ -618,6 +620,7 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of regset_from_core_section, has predicate */
   /* Skip verify of vtable_function_descriptors, invalid_p == 0 */
   /* Skip verify of vbit_in_delta, invalid_p == 0 */
+  /* Skip verify of skip_permanent_breakpoint, has predicate */
   buf = ui_file_xstrdup (log, &dummy);
   make_cleanup (xfree, buf);
   if (strlen (buf) > 0)
@@ -1458,6 +1461,12 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: single_step_through_delay = <0x%lx>\n",
                       (long) current_gdbarch->single_step_through_delay);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_skip_permanent_breakpoint_p() = %d\n",
+                      gdbarch_skip_permanent_breakpoint_p (current_gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: skip_permanent_breakpoint = <0x%lx>\n",
+                      (long) current_gdbarch->skip_permanent_breakpoint);
 #ifdef SKIP_PROLOGUE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -3639,6 +3648,30 @@ set_gdbarch_vbit_in_delta (struct gdbarch *gdbarch,
                            int vbit_in_delta)
 {
   gdbarch->vbit_in_delta = vbit_in_delta;
+}
+
+int
+gdbarch_skip_permanent_breakpoint_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->skip_permanent_breakpoint != NULL;
+}
+
+void
+gdbarch_skip_permanent_breakpoint (struct gdbarch *gdbarch, struct regcache *regcache)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->skip_permanent_breakpoint != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_skip_permanent_breakpoint called\n");
+  gdbarch->skip_permanent_breakpoint (regcache);
+}
+
+void
+set_gdbarch_skip_permanent_breakpoint (struct gdbarch *gdbarch,
+                                       gdbarch_skip_permanent_breakpoint_ftype skip_permanent_breakpoint)
+{
+  gdbarch->skip_permanent_breakpoint = skip_permanent_breakpoint;
 }
 
 

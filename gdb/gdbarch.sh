@@ -682,6 +682,9 @@ v::int:vtable_function_descriptors:::0:0::0
 # Set if the least significant bit of the delta is used instead of the least
 # significant bit of the pfn for pointers to virtual member functions.
 v::int:vbit_in_delta:::0:0::0
+
+# Advance PC to next instruction in order to skip a permanent breakpoint.
+F::void:skip_permanent_breakpoint:struct regcache *regcache:regcache
 EOF
 }
 

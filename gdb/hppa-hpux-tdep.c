@@ -548,8 +548,8 @@ hppa_hpux_skip_trampoline_code (CORE_ADDR pc)
     }
 }
 
-void
-hppa_skip_permanent_breakpoint (void)
+static void
+hppa_skip_permanent_breakpoint (struct regcache *regcache)
 {
   /* To step over a breakpoint instruction on the PA takes some
      fiddling with the instruction address queue.
@@ -565,10 +565,15 @@ hppa_skip_permanent_breakpoint (void)
      front to the back.  But what do we put in the back?  What
      instruction comes after that one?  Because of the branch delay
      slot, the next insn is always at the back + 4.  */
-  write_register (HPPA_PCOQ_HEAD_REGNUM, read_register (HPPA_PCOQ_TAIL_REGNUM));
-  write_register (HPPA_PCSQ_HEAD_REGNUM, read_register (HPPA_PCSQ_TAIL_REGNUM));
 
-  write_register (HPPA_PCOQ_TAIL_REGNUM, read_register (HPPA_PCOQ_TAIL_REGNUM) + 4);
+  ULONGEST pcoq_tail, pcsq_tail;
+  regcache_cooked_read_unsigned (regcache, HPPA_PCOQ_TAIL_REGNUM, &pcoq_tail);
+  regcache_cooked_read_unsigned (regcache, HPPA_PCSQ_TAIL_REGNUM, &pcsq_tail);
+
+  regcache_cooked_write_unsigned (regcache, HPPA_PCOQ_HEAD_REGNUM, pcoq_tail);
+  regcache_cooked_write_unsigned (regcache, HPPA_PCSQ_HEAD_REGNUM, pcsq_tail);
+
+  regcache_cooked_write_unsigned (regcache, HPPA_PCOQ_TAIL_REGNUM, pcoq_tail + 4);
   /* We can leave the tail's space the same, since there's no jump.  */
 }
 
@@ -2037,6 +2042,8 @@ hppa_hpux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_read_pc (gdbarch, hppa_hpux_read_pc);
   set_gdbarch_write_pc (gdbarch, hppa_hpux_write_pc);
   set_gdbarch_unwind_pc (gdbarch, hppa_hpux_unwind_pc);
+  set_gdbarch_skip_permanent_breakpoint
+    (gdbarch, hppa_skip_permanent_breakpoint);
 
   set_gdbarch_regset_from_core_section
     (gdbarch, hppa_hpux_regset_from_core_section);

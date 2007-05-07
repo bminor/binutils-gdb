@@ -176,23 +176,6 @@ show_debug_infrun (struct ui_file *file, int from_tty,
 #define SOLIB_IN_DYNAMIC_LINKER(pid,pc) 0
 #endif
 
-/* We can't step off a permanent breakpoint in the ordinary way, because we
-   can't remove it.  Instead, we have to advance the PC to the next
-   instruction.  This macro should expand to a pointer to a function that
-   does that, or zero if we have no such function.  If we don't have a
-   definition for it, we have to report an error.  */
-#ifndef SKIP_PERMANENT_BREAKPOINT
-#define SKIP_PERMANENT_BREAKPOINT (default_skip_permanent_breakpoint)
-static void
-default_skip_permanent_breakpoint (void)
-{
-  error (_("\
-The program is stopped at a permanent breakpoint, but GDB does not know\n\
-how to step past a permanent breakpoint on this architecture.  Try using\n\
-a command like `return' or `jump' to continue execution."));
-}
-#endif
-
 
 /* Convert the #defines into values.  This is temporary until wfi control
    flow is completely sorted out.  */
@@ -543,7 +526,15 @@ resume (int step, enum target_signal sig)
      at a permanent breakpoint; we need to step over it, but permanent
      breakpoints can't be removed.  So we have to test for it here.  */
   if (breakpoint_here_p (read_pc ()) == permanent_breakpoint_here)
-    SKIP_PERMANENT_BREAKPOINT ();
+    {
+      if (gdbarch_skip_permanent_breakpoint_p (current_gdbarch))
+	gdbarch_skip_permanent_breakpoint (current_gdbarch, current_regcache);
+      else
+	error (_("\
+The program is stopped at a permanent breakpoint, but GDB does not know\n\
+how to step past a permanent breakpoint on this architecture.  Try using\n\
+a command like `return' or `jump' to continue execution."));
+    }
 
   if (SOFTWARE_SINGLE_STEP_P () && step)
     {

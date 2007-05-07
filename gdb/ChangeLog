@@ -1,3 +1,20 @@
+2007-05-07  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdbarch.sh: Add skip_permanent_breakpoint callback.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+	* infrun.c (SKIP_PERMANENT_BREAKPOINT): Remove default definition.
+	(resume): Call gdbarch_skip_permanent_breakpoint instead of
+	SKIP_PERMANENT_BREAKPOINT.  Inline default case.
+
+	* hppa-hpux-tdep.c (hppa_skip_permanent_breakpoint): Make static.
+	Add REGCACHE argument.  Use it instead of read/write_register.
+	(hppa_hpux_init_abi): Install hppa_skip_permanent_breakpoint.
+
+	* config/pa/tm-hppah.h: Delete file.
+	* config/pa/hppa64.mt (DEPRECATED_TM_FILE): Set to tm-hppa.h.
+	* config/pa/hppahpux.mt (DEPRECATED_TM_FILE): Likewise.
+
 2007-05-07  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (c-lang.o, gnu-v3-abi.o): Update.

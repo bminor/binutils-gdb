@@ -1368,6 +1368,14 @@ extern void set_gdbarch_vtable_function_descriptors (struct gdbarch *gdbarch, in
 extern int gdbarch_vbit_in_delta (struct gdbarch *gdbarch);
 extern void set_gdbarch_vbit_in_delta (struct gdbarch *gdbarch, int vbit_in_delta);
 
+/* Advance PC to next instruction in order to skip a permanent breakpoint. */
+
+extern int gdbarch_skip_permanent_breakpoint_p (struct gdbarch *gdbarch);
+
+typedef void (gdbarch_skip_permanent_breakpoint_ftype) (struct regcache *regcache);
+extern void gdbarch_skip_permanent_breakpoint (struct gdbarch *gdbarch, struct regcache *regcache);
+extern void set_gdbarch_skip_permanent_breakpoint (struct gdbarch *gdbarch, gdbarch_skip_permanent_breakpoint_ftype *skip_permanent_breakpoint);
+
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
 
