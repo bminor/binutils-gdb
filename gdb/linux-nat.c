@@ -335,8 +335,8 @@ linux_enable_event_reporting (ptid_t ptid)
   ptrace (PTRACE_SETOPTIONS, pid, 0, options);
 }
 
-void
-child_post_attach (int pid)
+static void
+linux_child_post_attach (int pid)
 {
   linux_enable_event_reporting (pid_to_ptid (pid));
   check_for_thread_db ();
@@ -349,8 +349,8 @@ linux_child_post_startup_inferior (ptid_t ptid)
   check_for_thread_db ();
 }
 
-int
-child_follow_fork (struct target_ops *ops, int follow_child)
+static int
+linux_child_follow_fork (struct target_ops *ops, int follow_child)
 {
   ptid_t last_ptid;
   struct target_waitstatus last_status;
@@ -520,22 +520,22 @@ child_follow_fork (struct target_ops *ops, int follow_child)
 }
 
 
-void
-child_insert_fork_catchpoint (int pid)
+static void
+linux_child_insert_fork_catchpoint (int pid)
 {
   if (! linux_supports_tracefork (pid))
     error (_("Your system does not support fork catchpoints."));
 }
 
-void
-child_insert_vfork_catchpoint (int pid)
+static void
+linux_child_insert_vfork_catchpoint (int pid)
 {
   if (!linux_supports_tracefork (pid))
     error (_("Your system does not support vfork catchpoints."));
 }
 
-void
-child_insert_exec_catchpoint (int pid)
+static void
+linux_child_insert_exec_catchpoint (int pid)
 {
   if (!linux_supports_tracefork (pid))
     error (_("Your system does not support exec catchpoints."));
@@ -616,6 +616,7 @@ static sigset_t blocked_mask;
 /* Prototypes for local functions.  */
 static int stop_wait_callback (struct lwp_info *lp, void *data);
 static int linux_nat_thread_alive (ptid_t ptid);
+static char *linux_child_pid_to_exec_file (int pid);
 
 /* Convert wait status STATUS to a string.  Used for printing debug
    messages only.  */
@@ -1325,7 +1326,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
     {
       ourstatus->kind = TARGET_WAITKIND_EXECD;
       ourstatus->value.execd_pathname
-	= xstrdup (child_pid_to_exec_file (pid));
+	= xstrdup (linux_child_pid_to_exec_file (pid));
 
       if (linux_parent_pid)
 	{
@@ -2463,8 +2464,8 @@ sigchld_handler (int signo)
 /* Accepts an integer PID; Returns a string representing a file that
    can be opened to get the symbols for the child process.  */
 
-char *
-child_pid_to_exec_file (int pid)
+static char *
+linux_child_pid_to_exec_file (int pid)
 {
   char *name1, *name2;
 
@@ -3171,13 +3172,13 @@ linux_xfer_partial (struct target_ops *ops, enum target_object object,
 static void
 linux_target_install_ops (struct target_ops *t)
 {
-  t->to_insert_fork_catchpoint = child_insert_fork_catchpoint;
-  t->to_insert_vfork_catchpoint = child_insert_vfork_catchpoint;
-  t->to_insert_exec_catchpoint = child_insert_exec_catchpoint;
-  t->to_pid_to_exec_file = child_pid_to_exec_file;
+  t->to_insert_fork_catchpoint = linux_child_insert_fork_catchpoint;
+  t->to_insert_vfork_catchpoint = linux_child_insert_vfork_catchpoint;
+  t->to_insert_exec_catchpoint = linux_child_insert_exec_catchpoint;
+  t->to_pid_to_exec_file = linux_child_pid_to_exec_file;
   t->to_post_startup_inferior = linux_child_post_startup_inferior;
-  t->to_post_attach = child_post_attach;
-  t->to_follow_fork = child_follow_fork;
+  t->to_post_attach = linux_child_post_attach;
+  t->to_follow_fork = linux_child_follow_fork;
   t->to_find_memory_regions = linux_nat_find_memory_regions;
   t->to_make_corefile_notes = linux_nat_make_corefile_notes;
 

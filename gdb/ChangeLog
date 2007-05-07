@@ -1,5 +1,23 @@
 2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* linux-nat.c (child_post_attach): Rename to ...
+	(linux_child_post_attach): ... this.  Make static.
+	(child_follow_fork): Rename to ...
+	(linux_child_follow_fork): ... this.  Make static.
+	(child_insert_fork_catchpoint): Rename to ...
+	(linux_child_insert_fork_catchpoint): ... this.  Make static.
+	(child_insert_vfork_catchpoint): Rename to ...
+	(linux_child_insert_vfork_catchpoint): ... this.  Make static.
+	(child_insert_exec_catchpoint): Rename to ...
+	(linux_child_insert_exec_catchpoint): ... this.  Make static.
+	(child_pid_to_exec_file): Rename to ...
+	(linux_child_pid_to_exec_file): ... this.  Make static.
+	Add prototype.
+	(linux_handle_extended_wait): Update call.
+	(linux_xfer_partial): Update callback routine names.
+
+2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* configure.host (alpha*-*-osf[12]*): Remove support.
 	* NEWS: Mention removed configurations.
 
