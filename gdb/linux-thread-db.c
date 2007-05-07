@@ -52,11 +52,6 @@
 /* If we're running on GNU/Linux, we must explicitly attach to any new
    threads.  */
 
-/* FIXME: There is certainly some room for improvements:
-   - Cache LWP ids.
-   - Bypass libthread_db when fetching or storing registers for
-   threads bound to a LWP.  */
-
 /* This module's target vector.  */
 static struct target_ops thread_db_ops;
 
@@ -486,9 +481,9 @@ enable_thread_event_reporting (void)
   td_event_addset (&events, TD_CREATE);
 
 #ifdef HAVE_GNU_LIBC_VERSION_H
-  /* FIXME: kettenis/2000-04-23: The event reporting facility is
-     broken for TD_DEATH events in glibc 2.1.3, so don't enable it for
-     now.  */
+  /* The event reporting facility is broken for TD_DEATH events in
+     glibc 2.1.3, so don't enable it we have glibc but a lower
+     version.  */
   libc_version = gnu_get_libc_version ();
   if (sscanf (libc_version, "%d.%d", &libc_major, &libc_minor) == 2
       && (libc_major > 2 || (libc_major == 2 && libc_minor > 1)))
@@ -926,31 +921,6 @@ thread_db_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   return ptid;
 }
 
-static LONGEST
-thread_db_xfer_partial (struct target_ops *ops, enum target_object object,
-			const char *annex, gdb_byte *readbuf,
-			const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
-{
-  struct cleanup *old_chain = save_inferior_ptid ();
-  LONGEST xfer;
-
-  if (is_thread (inferior_ptid))
-    {
-      /* FIXME: This seems to be necessary to make sure breakpoints
-         are removed.  */
-      if (!target_thread_alive (inferior_ptid))
-	inferior_ptid = pid_to_ptid (GET_PID (inferior_ptid));
-      else
-	inferior_ptid = lwp_from_thread (inferior_ptid);
-    }
-
-  xfer = target_beneath->to_xfer_partial (ops, object, annex,
-					  readbuf, writebuf, offset, len);
-
-  do_cleanups (old_chain);
-  return xfer;
-}
-
 static void
 thread_db_kill (void)
 {
@@ -1146,7 +1116,6 @@ init_thread_db_ops (void)
   thread_db_ops.to_detach = thread_db_detach;
   thread_db_ops.to_resume = thread_db_resume;
   thread_db_ops.to_wait = thread_db_wait;
-  thread_db_ops.to_xfer_partial = thread_db_xfer_partial;
   thread_db_ops.to_kill = thread_db_kill;
   thread_db_ops.to_create_inferior = thread_db_create_inferior;
   thread_db_ops.to_post_startup_inferior = thread_db_post_startup_inferior;
