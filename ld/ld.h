@@ -147,22 +147,6 @@ typedef struct {
   bfd_boolean inhibit_common_definition;
   bfd_boolean relax;
 
-  /* Name of runtime interpreter to invoke.  */
-  char *interpreter;
-
-  /* Name to give runtime libary from the -soname argument.  */
-  char *soname;
-
-  /* Runtime library search path from the -rpath argument.  */
-  char *rpath;
-
-  /* Link time runtime library search path from the -rpath-link
-     argument.  */
-  char *rpath_link;
-
-  /* Big or little endian as set on command line.  */
-  enum { ENDIAN_UNSET = 0, ENDIAN_BIG, ENDIAN_LITTLE } endian;
-
   /* If TRUE, build MIPS embedded PIC relocation tables in the output
      file.  */
   bfd_boolean embedded_relocs;
@@ -181,20 +165,6 @@ typedef struct {
      search.  */
   bfd_boolean warn_search_mismatch;
 
-  /* Name of shared object whose symbol table should be filtered with
-     this shared object.  From the --filter option.  */
-  char *filter_shlib;
-
-  /* Name of shared object for whose symbol table this shared object
-     is an auxiliary filter.  From the --auxiliary option.  */
-  char **auxiliary_filters;
-
-  /* A version symbol to be applied to the symbol names found in the
-     .exports sections.  */
-  char *version_exports_section;
-
-  /* Default linker script.  */
-  char *default_script;
 
   /* If TRUE (the default) check section addresses, once compute,
      fpor overlaps.  */
@@ -205,6 +175,9 @@ typedef struct {
      behaviour of the linker.  The new default behaviour is to reject such
      input files.  */
   bfd_boolean accept_unknown_input_arch;
+
+  /* Big or little endian as set on command line.  */
+  enum { ENDIAN_UNSET = 0, ENDIAN_BIG, ENDIAN_LITTLE } endian;
 
   /* -Bsymbolic and -Bsymbolic-functions, as set on command line.  */
   enum
@@ -222,6 +195,34 @@ typedef struct {
       dynamic_list_data,
       dynamic_list
     } dynamic_list;
+
+  /* Name of runtime interpreter to invoke.  */
+  char *interpreter;
+
+  /* Name to give runtime libary from the -soname argument.  */
+  char *soname;
+
+  /* Runtime library search path from the -rpath argument.  */
+  char *rpath;
+
+  /* Link time runtime library search path from the -rpath-link
+     argument.  */
+  char *rpath_link;
+
+  /* Name of shared object whose symbol table should be filtered with
+     this shared object.  From the --filter option.  */
+  char *filter_shlib;
+
+  /* Name of shared object for whose symbol table this shared object
+     is an auxiliary filter.  From the --auxiliary option.  */
+  char **auxiliary_filters;
+
+  /* A version symbol to be applied to the symbol names found in the
+     .exports sections.  */
+  char *version_exports_section;
+
+  /* Default linker script.  */
+  char *default_script;
 } args_type;
 
 extern args_type command_line;
@@ -229,7 +230,6 @@ extern args_type command_line;
 typedef int token_code_type;
 
 typedef struct {
-  bfd_size_type specified_data_size;
   bfd_boolean magic_demand_paged;
   bfd_boolean make_executable;
 
@@ -269,24 +269,26 @@ typedef struct {
 
   bfd_boolean text_read_only;
 
-  char *map_filename;
-  FILE *map_file;
-
   bfd_boolean stats;
 
   /* If set, orphan input sections will be mapped to separate output
      sections.  */
   bfd_boolean unique_orphan_sections;
 
-  unsigned int split_by_reloc;
-  bfd_size_type split_by_file;
+  /* If set, only search library directories explicitly selected
+     on the command line.  */
+  bfd_boolean only_cmd_line_lib_dirs;
 
   /* The rpath separation character.  Usually ':'.  */
   char rpath_separator;
 
-  /* If set, only search library directories explicitly selected
-     on the command line.  */
-  bfd_boolean only_cmd_line_lib_dirs;
+  char *map_filename;
+  FILE *map_file;
+
+  unsigned int split_by_reloc;
+  bfd_size_type split_by_file;
+
+  bfd_size_type specified_data_size;
 
   /* The size of the hash table to use.  */
   bfd_size_type hash_table_size;

@@ -1,3 +1,9 @@
+2007-05-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld.h (args_type, ld_config_type): Reorder fields.
+	* ldmain.c (main): Don't initialise a bunch of vars we know are
+	zero already.
+
 2007-05-05  Anatoly Sokolov <aesok@post.ru>
 
 	* multempl/avrelf.em (PARSE_AND_LIST_ARGS_CASES): Add new value for 

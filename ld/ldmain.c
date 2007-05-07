@@ -242,28 +242,17 @@ main (int argc, char **argv)
   }
 #endif
 
-  /* Initialize the data about options.  */
-  trace_files = trace_file_tries = version_printed = FALSE;
-  whole_archive = FALSE;
   config.build_constructors = TRUE;
-  config.dynamic_link = FALSE;
-  config.has_shared = FALSE;
   config.rpath_separator = ':';
   config.split_by_reloc = (unsigned) -1;
   config.split_by_file = (bfd_size_type) -1;
-  config.hash_table_size = 0;
-  command_line.force_common_definition = FALSE;
-  command_line.inhibit_common_definition = FALSE;
-  command_line.interpreter = NULL;
-  command_line.rpath = NULL;
+  config.make_executable = TRUE;
+  config.magic_demand_paged = TRUE;
+  config.text_read_only = TRUE;
+
   command_line.warn_mismatch = TRUE;
   command_line.warn_search_mismatch = TRUE;
   command_line.check_section_addresses = TRUE;
-  command_line.accept_unknown_input_arch = FALSE;
-  command_line.symbolic = symbolic_unset;
-  command_line.dynamic_list = dynamic_list_unset;
-
-  sort_section = none;
 
   /* We initialize DEMANGLING based on the environment variable
      COLLECT_NO_DEMANGLE.  The gcc collect2 program will demangle the
@@ -272,73 +261,21 @@ main (int argc, char **argv)
      interface by default.  */
   demangling = getenv ("COLLECT_NO_DEMANGLE") == NULL;
 
-  link_info.relocatable = FALSE;
-  link_info.emitrelocations = FALSE;
-  link_info.task_link = FALSE;
-  link_info.shared = FALSE;
-  link_info.pie = FALSE;
-  link_info.executable = FALSE;
-  link_info.symbolic = FALSE;
-  link_info.export_dynamic = FALSE;
-  link_info.static_link = FALSE;
-  link_info.traditional_format = FALSE;
-  link_info.optimize = FALSE;
-  link_info.unresolved_syms_in_objects = RM_NOT_YET_SET;
-  link_info.unresolved_syms_in_shared_libs = RM_NOT_YET_SET;
-  link_info.allow_multiple_definition = FALSE;
   link_info.allow_undefined_version = TRUE;
-  link_info.create_default_symver = FALSE;
-  link_info.default_imported_symver = FALSE;
   link_info.keep_memory = TRUE;
-  link_info.notice_all = FALSE;
-  link_info.nocopyreloc = FALSE;
-  link_info.new_dtags = FALSE;
   link_info.combreloc = TRUE;
-  link_info.eh_frame_hdr = FALSE;
-  link_info.relro = FALSE;
   link_info.strip_discarded = TRUE;
-  link_info.strip = strip_none;
-  link_info.discard = discard_sec_merge;
-  link_info.common_skip_ar_aymbols = bfd_link_common_skip_none;
   link_info.callbacks = &link_callbacks;
-  link_info.hash = NULL;
-  link_info.keep_hash = NULL;
-  link_info.notice_hash = NULL;
-  link_info.wrap_hash = NULL;
-  link_info.input_bfds = NULL;
-  link_info.create_object_symbols_section = NULL;
-  link_info.gc_sym_list = NULL;
-  link_info.base_file = NULL;
   link_info.emit_hash = TRUE;
-  link_info.emit_gnu_hash = FALSE;
   /* SVR4 linkers seem to set DT_INIT and DT_FINI based on magic _init
      and _fini symbols.  We are compatible.  */
   link_info.init_function = "_init";
   link_info.fini_function = "_fini";
   link_info.pei386_auto_import = -1;
-  link_info.pei386_runtime_pseudo_reloc = FALSE;
   link_info.spare_dynamic_tags = 5;
-  link_info.flags = 0;
-  link_info.flags_1 = 0;
   link_info.relax_pass = 1;
-  link_info.warn_shared_textrel = FALSE;
-  link_info.gc_sections = FALSE;
-  link_info.print_gc_sections = FALSE;
-  link_info.dynamic = FALSE;
-  link_info.dynamic_list = NULL;
-  link_info.dynamic_data = FALSE;
-  link_info.reduce_memory_overheads = FALSE;
-
-  config.maxpagesize = 0;
-  config.commonpagesize = 0;
 
   ldfile_add_arch ("");
-
-  config.make_executable = TRUE;
-  force_make_executable = FALSE;
-  config.magic_demand_paged = TRUE;
-  config.text_read_only = TRUE;
-
   emulation = get_emulation (argc, argv);
   ldemul_choose_mode (emulation);
   default_target = ldemul_choose_target (argc, argv);
