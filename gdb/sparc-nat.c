@@ -135,7 +135,7 @@ sparc32_fpregset_supplies_p (int regnum)
    for all registers (including the floating-point registers).  */
 
 void
-fetch_inferior_registers (struct regcache *regcache, int regnum)
+sparc_fetch_inferior_registers (struct regcache *regcache, int regnum)
 {
   int pid;
 
@@ -186,7 +186,7 @@ fetch_inferior_registers (struct regcache *regcache, int regnum)
 }
 
 void
-store_inferior_registers (struct regcache *regcache, int regnum)
+sparc_store_inferior_registers (struct regcache *regcache, int regnum)
 {
   int pid;
 
@@ -332,8 +332,8 @@ sparc_target (void)
   struct target_ops *t;
 
   t = inf_ptrace_target ();
-  t->to_fetch_registers = fetch_inferior_registers;
-  t->to_store_registers = store_inferior_registers;
+  t->to_fetch_registers = sparc_fetch_inferior_registers;
+  t->to_store_registers = sparc_store_inferior_registers;
   inf_ptrace_xfer_partial = t->to_xfer_partial;
   t->to_xfer_partial = sparc_xfer_partial;
   return t;

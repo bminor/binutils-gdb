@@ -1,5 +1,17 @@
 2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* sparc-nat.h (sparc_fetch_inferior_registers): Add prototype.
+	(sparc_store_inferior_registers): Likewise.
+	* sparc-nat.c (fetch_inferior_registers): Rename to ...
+	(sparc_fetch_inferior_registers): ... this.
+	(store_inferior_registers): Rename to ...
+	(sparc_store_inferior_registers): ... this.
+	(sparc_target): Update callback names.
+	* sparc-linux.nat.c (_initialize_sparc_linux_nat): Likewise. 
+	* sparc64-linux.nat.c (_initialize_sparc64_linux_nat): Likewise. 
+
+2007-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* linux-nat.c (child_post_attach): Rename to ...
 	(linux_child_post_attach): ... this.  Make static.
 	(child_follow_fork): Rename to ...

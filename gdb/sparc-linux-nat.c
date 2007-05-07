@@ -65,8 +65,8 @@ _initialize_sparc_linux_nat (void)
   t = linux_target ();
 
   /* Add our register access methods.  */
-  t->to_fetch_registers = fetch_inferior_registers;
-  t->to_store_registers = store_inferior_registers;
+  t->to_fetch_registers = sparc_fetch_inferior_registers;
+  t->to_store_registers = sparc_store_inferior_registers;
 
   /* Register the target.  */
   linux_nat_add_target (t);
