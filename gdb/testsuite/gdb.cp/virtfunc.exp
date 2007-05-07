@@ -254,6 +254,10 @@ proc do_tests {} {
     gdb_breakpoint test_calls
     gdb_test "continue" ".*Breakpoint .* test_calls.*" ""
     test_virtual_calls
+
+    gdb_test "next" ".*pAa->f.*" "next to pAa->f call"
+    gdb_test "next" ".*pDe->vg.*" "next to pDe->vg call"
+    gdb_test "step" ".*E::vg.*" "step through thunk into E::vg"
 }
 
 do_tests

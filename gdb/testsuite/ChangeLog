@@ -1,3 +1,7 @@
+2007-05-07  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.cp/virtfunc.exp (proc do_tests): Test stepping through a thunk.
+
 2007-05-06  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.fortran/complex.exp, gdb.fortran/complex.f: New files.

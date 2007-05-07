@@ -121,6 +121,14 @@ cplus_make_method_ptr (gdb_byte *contents, CORE_ADDR value, int is_virtual)
   (*current_cp_abi.make_method_ptr) (contents, value, is_virtual);
 }
 
+CORE_ADDR
+cplus_skip_trampoline (CORE_ADDR stop_pc)
+{
+  if (current_cp_abi.skip_trampoline == NULL)
+    return 0;
+  return (*current_cp_abi.skip_trampoline) (stop_pc);
+}
+
 struct value *
 cplus_method_ptr_to_value (struct value **this_p, struct value *method_ptr)
 {

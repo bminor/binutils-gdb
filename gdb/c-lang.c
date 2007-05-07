@@ -33,6 +33,7 @@
 #include "charset.h"
 #include "gdb_string.h"
 #include "demangle.h"
+#include "cp-abi.h"
 #include "cp-support.h"
 
 extern void _initialize_c_language (void);
@@ -642,7 +643,7 @@ const struct language_defn cplus_language_defn =
   c_print_type,			/* Print a type using appropriate syntax */
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
-  NULL,				/* Language specific skip_trampoline */
+  cplus_skip_trampoline,	/* Language specific skip_trampoline */
   value_of_this,		/* value_of_this */
   cp_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   cp_lookup_transparent_type,   /* lookup_transparent_type */

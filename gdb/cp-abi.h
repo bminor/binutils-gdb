@@ -170,6 +170,11 @@ struct value *cplus_method_ptr_to_value (struct value **this_p,
 void cplus_make_method_ptr (gdb_byte *CONTENTS, CORE_ADDR address,
 			    int is_virtual);
 
+/* Determine if we are currently in a C++ thunk.  If so, get the address
+   of the routine we are thunking to and continue to there instead.  */
+
+CORE_ADDR cplus_skip_trampoline (CORE_ADDR stop_pc);
+
 struct cp_abi_ops
 {
   const char *shortname;
@@ -192,6 +197,7 @@ struct cp_abi_ops
   int (*method_ptr_size) (void);
   void (*make_method_ptr) (gdb_byte *, CORE_ADDR, int);
   struct value * (*method_ptr_to_value) (struct value **, struct value *);
+  CORE_ADDR (*skip_trampoline) (CORE_ADDR);
 };
 
 

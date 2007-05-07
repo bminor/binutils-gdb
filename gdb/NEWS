@@ -29,6 +29,8 @@ iWMMXt coprocessor.
 ARM Windows CE (mingw32ce) debugging, and GDB Windows CE support
 has been rewritten to use the standard GDB remote protocol.
 
+* GDB can now step into C++ functions which are called through thunks.
+
 * New commands
 
 set mem inaccessible-by-default

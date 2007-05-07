@@ -1862,7 +1862,7 @@ charset.o: charset.c $(defs_h) $(charset_h) $(gdbcmd_h) $(gdb_assert_h) \
 c-lang.o: c-lang.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
 	$(parser_defs_h) $(language_h) $(c_lang_h) $(valprint_h) \
 	$(macroscope_h) $(gdb_assert_h) $(charset_h) $(gdb_string_h) \
-	$(demangle_h) $(cp_support_h)
+	$(demangle_h) $(cp_abi_h) $(cp_support_h)
 cli-out.o: cli-out.c $(defs_h) $(ui_out_h) $(cli_out_h) $(gdb_string_h) \
 	$(gdb_assert_h)
 coff-pe-read.o: coff-pe-read.c $(coff_pe_read_h) $(bfd_h) $(defs_h) \
@@ -2043,7 +2043,8 @@ gnu-v2-abi.o: gnu-v2-abi.c $(defs_h) $(gdb_string_h) $(symtab_h) \
 	$(gdbtypes_h) $(value_h) $(demangle_h) $(cp_abi_h) $(cp_support_h) \
 	$(gnu_v2_abi_h)
 gnu-v3-abi.o: gnu-v3-abi.c $(defs_h) $(value_h) $(cp_abi_h) $(cp_support_h) \
-	$(demangle_h) $(valprint_h) $(gdb_assert_h) $(gdb_string_h)
+	$(demangle_h) $(objfiles_h) $(valprint_h) \
+	$(gdb_assert_h) $(gdb_string_h)
 go32-nat.o: go32-nat.c $(defs_h) $(inferior_h) $(gdb_wait_h) $(gdbcore_h) \
 	$(command_h) $(gdbcmd_h) $(floatformat_h) $(buildsym_h) \
 	$(i387_tdep_h) $(i386_tdep_h) $(value_h) $(regcache_h) \

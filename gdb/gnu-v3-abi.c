@@ -26,6 +26,7 @@
 #include "cp-abi.h"
 #include "cp-support.h"
 #include "demangle.h"
+#include "objfiles.h"
 #include "valprint.h"
 
 #include "gdb_assert.h"
@@ -673,6 +674,47 @@ gnuv3_method_ptr_to_value (struct value **this_p, struct value *method_ptr)
     return value_from_pointer (lookup_pointer_type (method_type), ptr_value);
 }
 
+/* Determine if we are currently in a C++ thunk.  If so, get the address
+   of the routine we are thunking to and continue to there instead.  */
+
+static CORE_ADDR 
+gnuv3_skip_trampoline (CORE_ADDR stop_pc)
+{
+  CORE_ADDR real_stop_pc, method_stop_pc;
+  struct minimal_symbol *thunk_sym, *fn_sym;
+  struct obj_section *section;
+  char *thunk_name, *fn_name;
+  
+  real_stop_pc = SKIP_TRAMPOLINE_CODE (stop_pc);
+  if (real_stop_pc == 0)
+    real_stop_pc = stop_pc;
+
+  /* Find the linker symbol for this potential thunk.  */
+  thunk_sym = lookup_minimal_symbol_by_pc (real_stop_pc);
+  section = find_pc_section (real_stop_pc);
+  if (thunk_sym == NULL || section == NULL)
+    return 0;
+
+  /* The symbol's demangled name should be something like "virtual
+     thunk to FUNCTION", where FUNCTION is the name of the function
+     being thunked to.  */
+  thunk_name = SYMBOL_DEMANGLED_NAME (thunk_sym);
+  if (thunk_name == NULL || strstr (thunk_name, " thunk to ") == NULL)
+    return 0;
+
+  fn_name = strstr (thunk_name, " thunk to ") + strlen (" thunk to ");
+  fn_sym = lookup_minimal_symbol (fn_name, NULL, section->objfile);
+  if (fn_sym == NULL)
+    return 0;
+
+  method_stop_pc = SYMBOL_VALUE_ADDRESS (fn_sym);
+  real_stop_pc = SKIP_TRAMPOLINE_CODE (method_stop_pc);
+  if (real_stop_pc == 0)
+    real_stop_pc = method_stop_pc;
+
+  return real_stop_pc;
+}
+
 static void
 init_gnuv3_ops (void)
 {
@@ -694,6 +736,7 @@ init_gnuv3_ops (void)
   gnu_v3_abi_ops.method_ptr_size = gnuv3_method_ptr_size;
   gnu_v3_abi_ops.make_method_ptr = gnuv3_make_method_ptr;
   gnu_v3_abi_ops.method_ptr_to_value = gnuv3_method_ptr_to_value;
+  gnu_v3_abi_ops.skip_trampoline = gnuv3_skip_trampoline;
 }
 
 extern initialize_file_ftype _initialize_gnu_v3_abi; /* -Wmissing-prototypes */

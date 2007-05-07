@@ -1,3 +1,14 @@
+2007-05-07  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (c-lang.o, gnu-v3-abi.o): Update.
+	* NEWS: Mention improved C++ thunk support.
+	* c-lang.c (cplus_language_defn): Mention cplus_skip_trampoline.
+	* cp-abi.c (cplus_skip_trampoline): New.
+	* cp-abi.h (cplus_skip_trampoline): New prototype.
+	(struct cp_abi_ops): Add skip_trampoline member.
+	* gnu-v3-abi.c (gnuv3_skip_trampoline): New.
+	(init_gnuv3_ops): Set skip_trampoline.
+
 2007-05-06  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* rs6000-tdep.c (struct frame_extra_info): Delete.
