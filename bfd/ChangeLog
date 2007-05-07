@@ -1,3 +1,8 @@
+2007-05-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (assign_file_positions_for_load_sections): Don't check
+	core segment.
+
 2007-05-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elflink.c (elf_link_sort_relocs): Return if both .rela.dyn

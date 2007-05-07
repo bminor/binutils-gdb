@@ -4641,9 +4641,9 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	    }
 	}
 
-      /* Check that all sections are in the segment.  */
-      if (p->p_type == PT_LOAD
-	  || (p->p_type == PT_NOTE && bfd_get_format (abfd) == bfd_core))
+      /* Check that all sections are in a PT_LOAD segment.
+	 Don't check funky gdb generated core files.  */
+      if (p->p_type == PT_LOAD && bfd_get_format (abfd) != bfd_core)
 	for (i = 0, secpp = m->sections; i < m->count; i++, secpp++)
 	  {
 	    Elf_Internal_Shdr *this_hdr;
