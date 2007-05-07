@@ -1,5 +1,15 @@
 2007-05-07  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* spu-linux-nat.c (fetch_ppc_register, fetch_ppc_memory_1,
+	store_ppc_memory_1, fetch_ppc_memory, store_ppc_memory,
+	parse_spufs_run, spu_bfd_iovec_pread, spu_bfd_open,
+	spu_symbol_file_add_from_memory, spu_child_post_startup_inferior,
+	spu_child_post_attach, spu_fetch_inferior_registers,
+	spu_store_inferior_registers, spu_xfer_partial): Store PPE-side
+	memory addresses as ULONGEST, not CORE_ADDR.
+
+2007-05-07  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbarch.sh: Add skip_permanent_breakpoint callback.
 	* gdbarch.h, gdbarch.c: Regenerate.
 

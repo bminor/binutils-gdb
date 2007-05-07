@@ -43,7 +43,7 @@
 
 
 /* Fetch PPU register REGNO.  */
-static CORE_ADDR
+static ULONGEST
 fetch_ppc_register (int regno)
 {
   PTRACE_TYPE_RET res;
@@ -67,7 +67,7 @@ fetch_ppc_register (int regno)
       ptrace (PPC_PTRACE_PEEKUSR_3264, tid,
 	      (PTRACE_TYPE_ARG3) (regno * 8 + 4), buf + 4);
     if (errno == 0)
-      return (CORE_ADDR) *(unsigned long long *)buf;
+      return (ULONGEST) *(unsigned long long *)buf;
   }
 #endif
 
@@ -81,12 +81,12 @@ fetch_ppc_register (int regno)
       perror_with_name (_(mess));
     }
 
-  return (CORE_ADDR) (unsigned long) res;
+  return (ULONGEST) (unsigned long) res;
 }
 
 /* Fetch WORD from PPU memory at (aligned) MEMADDR in thread TID.  */
 static int
-fetch_ppc_memory_1 (int tid, CORE_ADDR memaddr, PTRACE_TYPE_RET *word)
+fetch_ppc_memory_1 (int tid, ULONGEST memaddr, PTRACE_TYPE_RET *word)
 {
   errno = 0;
 
@@ -105,7 +105,7 @@ fetch_ppc_memory_1 (int tid, CORE_ADDR memaddr, PTRACE_TYPE_RET *word)
 
 /* Store WORD into PPU memory at (aligned) MEMADDR in thread TID.  */
 static int
-store_ppc_memory_1 (int tid, CORE_ADDR memaddr, PTRACE_TYPE_RET word)
+store_ppc_memory_1 (int tid, ULONGEST memaddr, PTRACE_TYPE_RET word)
 {
   errno = 0;
 
@@ -124,11 +124,11 @@ store_ppc_memory_1 (int tid, CORE_ADDR memaddr, PTRACE_TYPE_RET word)
 
 /* Fetch LEN bytes of PPU memory at MEMADDR to MYADDR.  */
 static int
-fetch_ppc_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
+fetch_ppc_memory (ULONGEST memaddr, gdb_byte *myaddr, int len)
 {
   int i, ret;
 
-  CORE_ADDR addr = memaddr & -(CORE_ADDR) sizeof (PTRACE_TYPE_RET);
+  ULONGEST addr = memaddr & -(ULONGEST) sizeof (PTRACE_TYPE_RET);
   int count = ((((memaddr + len) - addr) + sizeof (PTRACE_TYPE_RET) - 1)
 	       / sizeof (PTRACE_TYPE_RET));
   PTRACE_TYPE_RET *buffer;
@@ -151,11 +151,11 @@ fetch_ppc_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
 
 /* Store LEN bytes from MYADDR to PPU memory at MEMADDR.  */
 static int
-store_ppc_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
+store_ppc_memory (ULONGEST memaddr, const gdb_byte *myaddr, int len)
 {
   int i, ret;
 
-  CORE_ADDR addr = memaddr & -(CORE_ADDR) sizeof (PTRACE_TYPE_RET);
+  ULONGEST addr = memaddr & -(ULONGEST) sizeof (PTRACE_TYPE_RET);
   int count = ((((memaddr + len) - addr) + sizeof (PTRACE_TYPE_RET) - 1)
 	       / sizeof (PTRACE_TYPE_RET));
   PTRACE_TYPE_RET *buffer;
@@ -191,10 +191,10 @@ store_ppc_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
    return to FD and ADDR the file handle and NPC parameter address
    used with the system call.  Return non-zero if successful.  */
 static int 
-parse_spufs_run (int *fd, CORE_ADDR *addr)
+parse_spufs_run (int *fd, ULONGEST *addr)
 {
   gdb_byte buf[4];
-  CORE_ADDR pc = fetch_ppc_register (32);  /* nip */
+  ULONGEST pc = fetch_ppc_register (32);  /* nip */
 
   /* Fetch instruction preceding current NIP.  */
   if (fetch_ppc_memory (pc-4, buf, 4) != 0)
@@ -270,7 +270,7 @@ static file_ptr
 spu_bfd_iovec_pread (struct bfd *abfd, void *stream, void *buf,
 	             file_ptr nbytes, file_ptr offset)
 {
-  CORE_ADDR addr = *(CORE_ADDR *)stream;
+  ULONGEST addr = *(ULONGEST *)stream;
 
   if (fetch_ppc_memory (addr + offset, buf, nbytes) != 0)
     {
@@ -294,11 +294,11 @@ spu_bfd_iovec_stat (struct bfd *abfd, void *stream, struct stat *sb)
 }
 
 static bfd *
-spu_bfd_open (CORE_ADDR addr)
+spu_bfd_open (ULONGEST addr)
 {
   struct bfd *nbfd;
 
-  CORE_ADDR *open_closure = xmalloc (sizeof (CORE_ADDR));
+  ULONGEST *open_closure = xmalloc (sizeof (ULONGEST));
   *open_closure = addr;
 
   nbfd = bfd_openr_iovec (xstrdup ("<in-memory>"), "elf32-spu",
@@ -324,7 +324,7 @@ spu_bfd_open (CORE_ADDR addr)
 static void
 spu_symbol_file_add_from_memory (int inferior_fd)
 {
-  CORE_ADDR addr;
+  ULONGEST addr;
   struct bfd *nbfd;
 
   char id[128];
@@ -353,7 +353,7 @@ static void
 spu_child_post_startup_inferior (ptid_t ptid)
 {
   int fd;
-  CORE_ADDR addr;
+  ULONGEST addr;
 
   int tid = TIDGET (ptid);
   if (tid == 0)
@@ -372,7 +372,7 @@ static void
 spu_child_post_attach (int pid)
 {
   int fd;
-  CORE_ADDR addr;
+  ULONGEST addr;
 
   /* Like child_post_startup_inferior, if we happened to attach to
      the inferior while it wasn't currently in spu_run, continue 
@@ -444,7 +444,7 @@ static void
 spu_fetch_inferior_registers (struct regcache *regcache, int regno)
 {
   int fd;
-  CORE_ADDR addr;
+  ULONGEST addr;
 
   /* We must be stopped on a spu_run system call.  */
   if (!parse_spufs_run (&fd, &addr))
@@ -485,7 +485,7 @@ static void
 spu_store_inferior_registers (struct regcache *regcache, int regno)
 {
   int fd;
-  CORE_ADDR addr;
+  ULONGEST addr;
 
   /* We must be stopped on a spu_run system call.  */
   if (!parse_spufs_run (&fd, &addr))
@@ -524,7 +524,7 @@ spu_xfer_partial (struct target_ops *ops,
   if (object == TARGET_OBJECT_MEMORY)
     {
       int fd;
-      CORE_ADDR addr;
+      ULONGEST addr;
       char mem_annex[32];
 
       /* We must be stopped on a spu_run system call.  */
