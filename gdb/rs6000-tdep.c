@@ -611,19 +611,6 @@ rs6000_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   return 0;
 }
 
-
-/* Fill in fi->saved_regs */
-
-struct frame_extra_info
-{
-  /* Functions calling alloca() change the value of the stack
-     pointer. We need to use initial stack pointer (which is saved in
-     r31 by gcc) in such cases. If a compiler emits traceback table,
-     then we should use the alloca register specified in traceback
-     table. FIXME. */
-  CORE_ADDR initial_sp;		/* initial stack pointer. */
-};
-
 /* Get the ith function argument for the current function.  */
 static CORE_ADDR
 rs6000_fetch_pointer_argument (struct frame_info *frame, int argi, 

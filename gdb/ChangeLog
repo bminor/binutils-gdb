@@ -1,5 +1,9 @@
 2007-05-06  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* rs6000-tdep.c (struct frame_extra_info): Delete.
+
+2007-05-06  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* linux-thread-db.c: Update some FIXME comments.
 	(thread_db_xfer_partial): Delete.
 	(init_thread_db_ops): Do not set to_xfer_partial.
