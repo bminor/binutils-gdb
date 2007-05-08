@@ -707,7 +707,95 @@ rs6000_breakpoint_from_pc (CORE_ADDR *bp_addr, int *bp_size)
 }
 
 
-/* AIX does not support PT_STEP. Simulate it. */
+/* Instruction masks used during single-stepping of atomic sequences.  */
+#define LWARX_MASK 0xfc0007fe
+#define LWARX_INSTRUCTION 0x7c000028
+#define LDARX_INSTRUCTION 0x7c0000A8
+#define STWCX_MASK 0xfc0007ff
+#define STWCX_INSTRUCTION 0x7c00012d
+#define STDCX_INSTRUCTION 0x7c0001ad
+#define BC_MASK 0xfc000000
+#define BC_INSTRUCTION 0x40000000
+
+/* Checks for an atomic sequence of instructions beginning with a LWARX/LDARX
+   instruction and ending with a STWCX/STDCX instruction.  If such a sequence
+   is found, attempt to step through it.  A breakpoint is placed at the end of 
+   the sequence.  */
+
+static int 
+deal_with_atomic_sequence (struct regcache *regcache)
+{
+  CORE_ADDR pc = read_pc ();
+  CORE_ADDR breaks[2] = {-1, -1};
+  CORE_ADDR loc = pc;
+  CORE_ADDR branch_bp; /* Breakpoint at branch instruction's destination.  */
+  int insn = read_memory_integer (loc, PPC_INSN_SIZE);
+  int insn_count;
+  int index;
+  int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */  
+  const int atomic_sequence_length = 16; /* Instruction sequence length.  */
+  const int opcode = BC_INSTRUCTION; /* Branch instruction's OPcode.  */
+  int bc_insn_count = 0; /* Conditional branch instruction count.  */
+
+  /* Assume all atomic sequences start with a lwarx/ldarx instruction.  */
+  if ((insn & LWARX_MASK) != LWARX_INSTRUCTION
+      && (insn & LWARX_MASK) != LDARX_INSTRUCTION)
+    return 0;
+
+  /* Assume that no atomic sequence is longer than "atomic_sequence_length" 
+     instructions.  */
+  for (insn_count = 0; insn_count < atomic_sequence_length; ++insn_count)
+    {
+      loc += PPC_INSN_SIZE;
+      insn = read_memory_integer (loc, PPC_INSN_SIZE);
+
+      /* Assume that there is at most one conditional branch in the atomic
+         sequence.  If a conditional branch is found, put a breakpoint in 
+         its destination address.  */
+      if ((insn & BC_MASK) == BC_INSTRUCTION)
+        {
+          if (bc_insn_count >= 1)
+            return 0; /* More than one conditional branch found, fallback 
+                         to the standard single-step code.  */
+          
+          branch_bp = branch_dest (opcode, insn, pc, breaks[0]);
+          
+          if (branch_bp != -1)
+            {
+              breaks[1] = branch_bp;
+              bc_insn_count++;
+              last_breakpoint++;
+            }
+        }
+
+      if ((insn & STWCX_MASK) == STWCX_INSTRUCTION
+          || (insn & STWCX_MASK) == STDCX_INSTRUCTION)
+        break;
+    }
+
+  /* Assume that the atomic sequence ends with a stwcx/stdcx instruction.  */
+  if ((insn & STWCX_MASK) != STWCX_INSTRUCTION
+      && (insn & STWCX_MASK) != STDCX_INSTRUCTION)
+    return 0;
+
+  loc += PPC_INSN_SIZE;
+  insn = read_memory_integer (loc, PPC_INSN_SIZE);
+
+  /* Insert a breakpoint right after the end of the atomic sequence.  */
+  breaks[0] = loc;
+
+  /* Check for duplicated breakpoints.  */
+  if (last_breakpoint && (breaks[1] == breaks[0]))
+    last_breakpoint = 0;
+
+  /* Effectively inserts the breakpoints.  */
+  for (index = 0; index <= last_breakpoint; index++)
+    insert_single_step_breakpoint (breaks[index]);
+
+  return 1;
+}
+
+/* AIX does not support PT_STEP.  Simulate it.  */
 
 int
 rs6000_software_single_step (struct regcache *regcache)
@@ -724,6 +812,9 @@ rs6000_software_single_step (struct regcache *regcache)
 
   insn = read_memory_integer (loc, 4);
 
+  if (deal_with_atomic_sequence (regcache))
+    return 1;
+  
   breaks[0] = loc + breakp_sz;
   opcode = insn >> 26;
   breaks[1] = branch_dest (opcode, insn, loc, breaks[0]);
@@ -3448,6 +3539,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_breakpoint_from_pc (gdbarch, rs6000_breakpoint_from_pc);
 
+  /* Handles single stepping of atomic sequences.  */
+  set_gdbarch_software_single_step (gdbarch, deal_with_atomic_sequence);
+  
   /* Handle the 64-bit SVR4 minimal-symbol convention of using "FN"
      for the descriptor and ".FN" for the entry-point -- a user
      specifying "break FN" will unexpectedly end up with a breakpoint
