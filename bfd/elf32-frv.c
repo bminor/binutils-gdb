@@ -3644,6 +3644,8 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 						input_section->output_section)
 			 & (SEC_ALLOC | SEC_LOAD)) == (SEC_ALLOC | SEC_LOAD))
 		      {
+			bfd_vma offset;
+
 			if (_frvfdpic_osec_readonly_p (output_bfd,
 						       input_section
 						       ->output_section))
@@ -3654,22 +3656,27 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 			       name, input_bfd, input_section, rel->r_offset);
 			    return FALSE;
 			  }
-			_frvfdpic_add_rofixup (output_bfd,
-					       frvfdpic_gotfixup_section
-					       (info),
-					       _bfd_elf_section_offset
-					       (output_bfd, info,
-						input_section, rel->r_offset)
-					       + input_section
-					       ->output_section->vma
-					       + input_section->output_offset,
-					       picrel);
+
+			offset = _bfd_elf_section_offset
+			  (output_bfd, info,
+			   input_section, rel->r_offset);
+
+			if (offset != (bfd_vma)-1)
+			  _frvfdpic_add_rofixup (output_bfd,
+						 frvfdpic_gotfixup_section
+						 (info),
+						 offset + input_section
+						 ->output_section->vma
+						 + input_section->output_offset,
+						 picrel);
 		      }
 		  }
 		else if ((bfd_get_section_flags (output_bfd,
 						 input_section->output_section)
 			  & (SEC_ALLOC | SEC_LOAD)) == (SEC_ALLOC | SEC_LOAD))
 		  {
+		    bfd_vma offset;
+
 		    if (_frvfdpic_osec_readonly_p (output_bfd,
 						   input_section
 						   ->output_section))
@@ -3680,15 +3687,18 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 			   name, input_bfd, input_section, rel->r_offset);
 			return FALSE;
 		      }
-		    _frvfdpic_add_dyn_reloc (output_bfd,
-					     frvfdpic_gotrel_section (info),
-					     _bfd_elf_section_offset
-					     (output_bfd, info,
-					      input_section, rel->r_offset)
-					     + input_section
-					     ->output_section->vma
-					     + input_section->output_offset,
-					     r_type, dynindx, addend, picrel);
+
+		    offset = _bfd_elf_section_offset
+		      (output_bfd, info,
+		       input_section, rel->r_offset);
+
+		    if (offset != (bfd_vma)-1)
+		      _frvfdpic_add_dyn_reloc (output_bfd,
+					       frvfdpic_gotrel_section (info),
+					       offset + input_section
+					       ->output_section->vma
+					       + input_section->output_offset,
+					       r_type, dynindx, addend, picrel);
 		  }
 		else
 		  addend += frvfdpic_got_section (info)->output_section->vma;
@@ -3769,25 +3779,27 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 		      }
 		    if (!h || h->root.type != bfd_link_hash_undefweak)
 		      {
-			_frvfdpic_add_rofixup (output_bfd,
-					       frvfdpic_gotfixup_section
-					       (info),
-					       _bfd_elf_section_offset
-					       (output_bfd, info,
-						input_section, rel->r_offset)
-					       + input_section
-					       ->output_section->vma
-					       + input_section->output_offset,
-					       picrel);
-			if (r_type == R_FRV_FUNCDESC_VALUE)
-			  _frvfdpic_add_rofixup
-			    (output_bfd,
-			     frvfdpic_gotfixup_section (info),
-			     _bfd_elf_section_offset
-			     (output_bfd, info,
-			      input_section, rel->r_offset)
-			     + input_section->output_section->vma
-			     + input_section->output_offset + 4, picrel);
+			bfd_vma offset = _bfd_elf_section_offset
+			  (output_bfd, info,
+			   input_section, rel->r_offset);
+
+			if (offset != (bfd_vma)-1)
+			  {
+			    _frvfdpic_add_rofixup (output_bfd,
+						   frvfdpic_gotfixup_section
+						   (info),
+						   offset + input_section
+						   ->output_section->vma
+						   + input_section->output_offset,
+						   picrel);
+			    if (r_type == R_FRV_FUNCDESC_VALUE)
+			      _frvfdpic_add_rofixup
+				(output_bfd,
+				 frvfdpic_gotfixup_section (info),
+				 offset
+				 + input_section->output_section->vma
+				 + input_section->output_offset + 4, picrel);
+			  }
 		      }
 		  }
 	      }
@@ -3797,6 +3809,8 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 					    input_section->output_section)
 		     & (SEC_ALLOC | SEC_LOAD)) == (SEC_ALLOC | SEC_LOAD))
 		  {
+		    bfd_vma offset;
+
 		    if (_frvfdpic_osec_readonly_p (output_bfd,
 						   input_section
 						   ->output_section))
@@ -3807,15 +3821,18 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 			   name, input_bfd, input_section, rel->r_offset);
 			return FALSE;
 		      }
-		    _frvfdpic_add_dyn_reloc (output_bfd,
-					     frvfdpic_gotrel_section (info),
-					     _bfd_elf_section_offset
-					     (output_bfd, info,
-					      input_section, rel->r_offset)
-					     + input_section
-					     ->output_section->vma
-					     + input_section->output_offset,
-					     r_type, dynindx, addend, picrel);
+
+		    offset = _bfd_elf_section_offset
+		      (output_bfd, info,
+		       input_section, rel->r_offset);
+
+		    if (offset != (bfd_vma)-1)
+		      _frvfdpic_add_dyn_reloc (output_bfd,
+					       frvfdpic_gotrel_section (info),
+					       offset + input_section
+					       ->output_section->vma
+					       + input_section->output_offset,
+					       r_type, dynindx, addend, picrel);
 		  }
 		else if (osec)
 		  addend += osec->output_section->vma;
