@@ -29,6 +29,7 @@
 #include "regcache.h"
 #include "symfile.h"
 #include "gdb_wait.h"
+#include "gdb_stdint.h"
 
 #include <sys/ptrace.h>
 #include <asm/ptrace.h>
@@ -67,7 +68,7 @@ fetch_ppc_register (int regno)
       ptrace (PPC_PTRACE_PEEKUSR_3264, tid,
 	      (PTRACE_TYPE_ARG3) (regno * 8 + 4), buf + 4);
     if (errno == 0)
-      return (ULONGEST) *(unsigned long long *)buf;
+      return (ULONGEST) *(uint64_t *)buf;
   }
 #endif
 
@@ -93,7 +94,7 @@ fetch_ppc_memory_1 (int tid, ULONGEST memaddr, PTRACE_TYPE_RET *word)
 #ifndef __powerpc64__
   if (memaddr >> 32)
     {
-      unsigned long long addr_8 = (unsigned long long) memaddr;
+      uint64_t addr_8 = (uint64_t) memaddr;
       ptrace (PPC_PTRACE_PEEKTEXT_3264, tid, (PTRACE_TYPE_ARG3) &addr_8, word);
     }
   else
@@ -112,7 +113,7 @@ store_ppc_memory_1 (int tid, ULONGEST memaddr, PTRACE_TYPE_RET word)
 #ifndef __powerpc64__
   if (memaddr >> 32)
     {
-      unsigned long long addr_8 = (unsigned long long) memaddr;
+      uint64_t addr_8 = (uint64_t) memaddr;
       ptrace (PPC_PTRACE_POKEDATA_3264, tid, (PTRACE_TYPE_ARG3) &addr_8, word);
     }
   else
@@ -139,8 +140,11 @@ fetch_ppc_memory (ULONGEST memaddr, gdb_byte *myaddr, int len)
 
   buffer = (PTRACE_TYPE_RET *) alloca (count * sizeof (PTRACE_TYPE_RET));
   for (i = 0; i < count; i++, addr += sizeof (PTRACE_TYPE_RET))
-    if ((ret = fetch_ppc_memory_1 (tid, addr, &buffer[i])) != 0)
-      return ret;
+    {
+      ret = fetch_ppc_memory_1 (tid, addr, &buffer[i]);
+      if (ret)
+	return ret;
+    }
 
   memcpy (myaddr,
 	  (char *) buffer + (memaddr & (sizeof (PTRACE_TYPE_RET) - 1)),
@@ -167,21 +171,30 @@ store_ppc_memory (ULONGEST memaddr, const gdb_byte *myaddr, int len)
   buffer = (PTRACE_TYPE_RET *) alloca (count * sizeof (PTRACE_TYPE_RET));
 
   if (addr != memaddr || len < (int) sizeof (PTRACE_TYPE_RET))
-    if ((ret = fetch_ppc_memory_1 (tid, addr, &buffer[0])) != 0)
-      return ret;
+    {
+      ret = fetch_ppc_memory_1 (tid, addr, &buffer[0]);
+      if (ret)
+	return ret;
+    }
 
   if (count > 1)
-    if ((ret = fetch_ppc_memory_1 (tid, addr + (count - 1)
+    {
+      ret = fetch_ppc_memory_1 (tid, addr + (count - 1)
 					       * sizeof (PTRACE_TYPE_RET),
-				   &buffer[count - 1])) != 0)
-      return ret;
+				&buffer[count - 1]);
+      if (ret)
+	return ret;
+    }
 
   memcpy ((char *) buffer + (memaddr & (sizeof (PTRACE_TYPE_RET) - 1)),
           myaddr, len);
 
   for (i = 0; i < count; i++, addr += sizeof (PTRACE_TYPE_RET))
-    if ((ret = store_ppc_memory_1 (tid, addr, buffer[i])) != 0)
-      return ret;
+    {
+      ret = store_ppc_memory_1 (tid, addr, buffer[i]);
+      if (ret)
+	return ret;
+    }
 
   return 0;
 }
@@ -337,7 +350,8 @@ spu_symbol_file_add_from_memory (int inferior_fd)
   if (len <= 0 || len >= sizeof id)
     return;
   id[len] = 0;
-  if (sscanf (id, "0x%llx", &addr) != 1)
+  addr = strtoulst (id, NULL, 16);
+  if (!addr)
     return;
 
   /* Open BFD representing SPE executable and read its symbols.  */
@@ -426,7 +440,7 @@ spu_child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 
   if (pid == -1)
     {
-      warning ("Child process unexpectedly missing: %s",
+      warning (_("Child process unexpectedly missing: %s"),
 	       safe_strerror (save_errno));
 
       /* Claim it exited with unknown signal.  */

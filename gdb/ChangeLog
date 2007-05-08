@@ -1,3 +1,12 @@
+2007-05-08  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* spu-linux-nat.c: Include "gdb_stdint.h".
+	(fetch_ppc_register): Use uint64_t instead of unsigned long long.
+	(fetch_ppc_memory_1, store_ppc_memory_1): Likewise.
+	(fetch_ppc_memory, store_ppc_memory): Fix coding style.
+	(spu_symbol_file_add_from_memory): Use strtoulst instead of sscanf.
+	(spu_child_wait): Mark up string for translation.
+
 2007-05-08  Paul Gilliam  <pgilliam@us.ibm.com>
 	    Luis Machado  <luisgpm@br.ibm.com>
 
