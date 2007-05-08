@@ -18,10 +18,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* SVR4 has /proc support, so use it instead of ptrace. */
-
-#define USE_PROC_FS
-
 #ifdef NEW_PROC_API	/* Solaris 6 and above can do HW watchpoints */
 
 #define TARGET_HAS_HARDWARE_WATCHPOINTS

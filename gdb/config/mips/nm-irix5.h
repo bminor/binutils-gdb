@@ -19,10 +19,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* SVR4 has /proc support, so use it instead of ptrace. */
-
-#define USE_PROC_FS
-
 #undef IN_SOLIB_DYNSYM_RESOLVE_CODE
 
 #define TARGET_HAS_HARDWARE_WATCHPOINTS

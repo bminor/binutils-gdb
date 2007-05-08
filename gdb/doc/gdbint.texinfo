@@ -4954,12 +4954,6 @@ the shell execs, and once when the program itself execs.  If the actual
 number of traps is something other than 2, then define this macro to
 expand into the number expected.
 
-@item USE_PROC_FS
-@findex USE_PROC_FS
-This determines whether small routines in @file{*-tdep.c}, which
-translate register values between @value{GDBN}'s internal
-representation and the @file{/proc} representation, are compiled.
-
 @item U_REGS_OFFSET
 @findex U_REGS_OFFSET
 This is the offset of the registers in the upage.  It need only be

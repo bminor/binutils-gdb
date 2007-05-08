@@ -22,9 +22,6 @@
 
 struct target_ops;
 
-/* GNU/Linux is SVR4-ish but its /proc file system isn't.  */
-#undef USE_PROC_FS
-
 extern void lin_thread_get_thread_signals (sigset_t *mask);
 #define GET_THREAD_SIGNALS(mask) lin_thread_get_thread_signals (mask)
 
