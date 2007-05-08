@@ -858,7 +858,7 @@ spu_elf_size_stubs (bfd *output_bfd,
       Elf_Internal_Shdr *symtab_hdr;
       asection *section;
       Elf_Internal_Sym *local_syms = NULL;
-      Elf_Internal_Sym **psyms;
+      void *psyms;
 
       if (ibfd->xvec != &bfd_elf32_spu_vec)
 	continue;
@@ -871,7 +871,7 @@ spu_elf_size_stubs (bfd *output_bfd,
       /* Arrange to read and keep global syms for later stack analysis.  */
       psyms = &local_syms;
       if (stack_analysis)
-	psyms = (Elf_Internal_Sym **) &symtab_hdr->contents;
+	psyms = &symtab_hdr->contents;
 
       /* Walk over each section attached to the input bfd.  */
       for (section = ibfd->sections; section != NULL; section = section->next)
@@ -1889,7 +1889,8 @@ mark_functions_via_relocs (asection *sec,
 {
   Elf_Internal_Rela *internal_relocs, *irelaend, *irela;
   Elf_Internal_Shdr *symtab_hdr = &elf_tdata (sec->owner)->symtab_hdr;
-  Elf_Internal_Sym *syms, **psyms;
+  Elf_Internal_Sym *syms;
+  void *psyms;
   static bfd_boolean warned;
 
   internal_relocs = _bfd_elf_link_read_relocs (sec->owner, sec, NULL, NULL,
@@ -1898,8 +1899,8 @@ mark_functions_via_relocs (asection *sec,
     return FALSE;
 
   symtab_hdr = &elf_tdata (sec->owner)->symtab_hdr;
-  psyms = (Elf_Internal_Sym **) &symtab_hdr->contents;
-  syms = *psyms;
+  psyms = &symtab_hdr->contents;
+  syms = *(Elf_Internal_Sym **) psyms;
   irela = internal_relocs;
   irelaend = irela + sec->reloc_count;
   for (; irela < irelaend; irela++)

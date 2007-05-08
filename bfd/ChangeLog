@@ -1,3 +1,8 @@
+2007-05-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (spu_elf_size_stubs): Use "void *" for psyms.
+	(mark_functions_via_relocs): Likewise.
+
 2007-05-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (bfd_elf_final_link): Correct reloc handling for
