@@ -3648,6 +3648,10 @@ bfd_elf32_arm_vfp11_erratum_scan (bfd *abfd, struct bfd_link_info *link_info)
 
   if (globals->vfp11_fix == BFD_ARM_VFP11_FIX_NONE)
     return TRUE;
+
+  /* Skip if this bfd does not correspond to an ELF image.  */
+  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
+    return TRUE;
   
   for (sec = abfd->sections; sec != NULL; sec = sec->next)
     {
@@ -3819,7 +3823,11 @@ bfd_elf32_arm_vfp11_fix_veneer_locations (bfd *abfd,
   
   if (link_info->relocatable)
     return;
-  
+
+  /* Skip if this bfd does not correspond to an ELF image.  */
+  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
+    return;
+
   globals = elf32_arm_hash_table (link_info);
   
   tmp_name = bfd_malloc ((bfd_size_type) strlen
