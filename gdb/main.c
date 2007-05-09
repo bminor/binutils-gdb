@@ -298,9 +298,7 @@ captured_main (void *data)
     };
     static struct option long_options[] =
     {
-#if defined(TUI)
       {"tui", no_argument, 0, OPT_TUI},
-#endif
       {"xdb", no_argument, &xdb_commands, 1},
       {"dbx", no_argument, &dbx_commands, 1},
       {"readnow", no_argument, &readnow_symbol_files, 1},
@@ -398,8 +396,15 @@ captured_main (void *data)
 	    break;
 	  case OPT_TUI:
 	    /* --tui is equivalent to -i=tui.  */
+#ifdef TUI
 	    xfree (interpreter_p);
 	    interpreter_p = xstrdup (INTERP_TUI);
+#else
+	    fprintf_unfiltered (gdb_stderr,
+				_("%s: TUI mode is not supported\n"),
+				argv[0]);
+	    exit (1);
+#endif
 	    break;
 	  case OPT_WINDOWS:
 	    /* FIXME: cagney/2003-03-01: Not sure if this option is
