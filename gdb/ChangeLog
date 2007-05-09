@@ -1,3 +1,9 @@
+2007-05-09  Andreas Schwab  <schwab@suse.de>
+
+	* mipsnbsd-tdep.c (mipsnbsd_ilp32_fetch_link_map_offsets): Don't
+	set removed members.
+	(mipsnbsd_lp64_fetch_link_map_offsets): Likewise.
+
 2007-05-08  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdbarch.sh (deprecated_store_struct_return): Remove.
