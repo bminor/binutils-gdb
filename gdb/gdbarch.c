@@ -187,7 +187,6 @@ struct gdbarch
   gdbarch_pointer_to_address_ftype *pointer_to_address;
   gdbarch_address_to_pointer_ftype *address_to_pointer;
   gdbarch_integer_to_address_ftype *integer_to_address;
-  gdbarch_deprecated_store_struct_return_ftype *deprecated_store_struct_return;
   gdbarch_return_value_ftype *return_value;
   gdbarch_extract_return_value_ftype *extract_return_value;
   gdbarch_store_return_value_ftype *store_return_value;
@@ -315,7 +314,6 @@ struct gdbarch startup_gdbarch =
   0,  /* pointer_to_address */
   0,  /* address_to_pointer */
   0,  /* integer_to_address */
-  0,  /* deprecated_store_struct_return */
   0,  /* return_value */
   0,  /* extract_return_value */
   0,  /* store_return_value */
@@ -569,7 +567,6 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of pointer_to_address, invalid_p == 0 */
   /* Skip verify of address_to_pointer, invalid_p == 0 */
   /* Skip verify of integer_to_address, has predicate */
-  /* Skip verify of deprecated_store_struct_return, has predicate */
   /* Skip verify of return_value, has predicate */
   /* Skip verify of deprecated_use_struct_convention, invalid_p == 0 */
   /* Skip verify of deprecated_extract_struct_value_address, has predicate */
@@ -918,24 +915,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: deprecated_stack_align = <0x%lx>\n",
                       (long) current_gdbarch->deprecated_stack_align);
-#ifdef DEPRECATED_STORE_STRUCT_RETURN_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_STORE_STRUCT_RETURN_P()",
-                      XSTRING (DEPRECATED_STORE_STRUCT_RETURN_P ()));
-#endif
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: gdbarch_deprecated_store_struct_return_p() = %d\n",
-                      gdbarch_deprecated_store_struct_return_p (current_gdbarch));
-#ifdef DEPRECATED_STORE_STRUCT_RETURN
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_STORE_STRUCT_RETURN(addr, sp)",
-                      XSTRING (DEPRECATED_STORE_STRUCT_RETURN (addr, sp)));
-#endif
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: deprecated_store_struct_return = <0x%lx>\n",
-                      (long) current_gdbarch->deprecated_store_struct_return);
 #ifdef DEPRECATED_USE_STRUCT_CONVENTION
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -2672,30 +2651,6 @@ set_gdbarch_integer_to_address (struct gdbarch *gdbarch,
                                 gdbarch_integer_to_address_ftype integer_to_address)
 {
   gdbarch->integer_to_address = integer_to_address;
-}
-
-int
-gdbarch_deprecated_store_struct_return_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_store_struct_return != NULL;
-}
-
-void
-gdbarch_deprecated_store_struct_return (struct gdbarch *gdbarch, CORE_ADDR addr, CORE_ADDR sp)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->deprecated_store_struct_return != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_store_struct_return called\n");
-  gdbarch->deprecated_store_struct_return (addr, sp);
-}
-
-void
-set_gdbarch_deprecated_store_struct_return (struct gdbarch *gdbarch,
-                                            gdbarch_deprecated_store_struct_return_ftype deprecated_store_struct_return)
-{
-  gdbarch->deprecated_store_struct_return = deprecated_store_struct_return;
 }
 
 int

@@ -1,5 +1,12 @@
 2007-05-08  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbarch.sh (deprecated_store_struct_return): Remove.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* frv-tdep.c (frv_store_struct_return): Remove.
+	(frv_gdbarch_init): Do not install it.
+
+2007-05-08  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* config/i386/nm-i386sol2.h (USE_PROC_FS): Do not define.
 	* config/mips/nm-irix5.h (USE_PROC_FS): Do not define.
 	* config/nm-linux.h (USE_PROC_FS): Do not undefine.

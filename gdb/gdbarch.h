@@ -710,33 +710,6 @@ typedef CORE_ADDR (gdbarch_integer_to_address_ftype) (struct gdbarch *gdbarch, s
 extern CORE_ADDR gdbarch_integer_to_address (struct gdbarch *gdbarch, struct type *type, const gdb_byte *buf);
 extern void set_gdbarch_integer_to_address (struct gdbarch *gdbarch, gdbarch_integer_to_address_ftype *integer_to_address);
 
-/* NOTE: kettenis/2005-09-01: Replaced by PUSH_DUMMY_CALL. */
-
-#if defined (DEPRECATED_STORE_STRUCT_RETURN)
-/* Legacy for systems yet to multi-arch DEPRECATED_STORE_STRUCT_RETURN */
-#if !defined (DEPRECATED_STORE_STRUCT_RETURN_P)
-#define DEPRECATED_STORE_STRUCT_RETURN_P() (1)
-#endif
-#endif
-
-extern int gdbarch_deprecated_store_struct_return_p (struct gdbarch *gdbarch);
-#if !defined (GDB_TM_FILE) && defined (DEPRECATED_STORE_STRUCT_RETURN_P)
-#error "Non multi-arch definition of DEPRECATED_STORE_STRUCT_RETURN"
-#endif
-#if !defined (DEPRECATED_STORE_STRUCT_RETURN_P)
-#define DEPRECATED_STORE_STRUCT_RETURN_P() (gdbarch_deprecated_store_struct_return_p (current_gdbarch))
-#endif
-
-typedef void (gdbarch_deprecated_store_struct_return_ftype) (CORE_ADDR addr, CORE_ADDR sp);
-extern void gdbarch_deprecated_store_struct_return (struct gdbarch *gdbarch, CORE_ADDR addr, CORE_ADDR sp);
-extern void set_gdbarch_deprecated_store_struct_return (struct gdbarch *gdbarch, gdbarch_deprecated_store_struct_return_ftype *deprecated_store_struct_return);
-#if !defined (GDB_TM_FILE) && defined (DEPRECATED_STORE_STRUCT_RETURN)
-#error "Non multi-arch definition of DEPRECATED_STORE_STRUCT_RETURN"
-#endif
-#if !defined (DEPRECATED_STORE_STRUCT_RETURN)
-#define DEPRECATED_STORE_STRUCT_RETURN(addr, sp) (gdbarch_deprecated_store_struct_return (current_gdbarch, addr, sp))
-#endif
-
 /* It has been suggested that this, well actually its predecessor,
    should take the type/value of the function to be called and not the
    return type.  This is left as an exercise for the reader.

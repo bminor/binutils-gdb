@@ -1054,12 +1054,6 @@ frv_extract_struct_value_address (struct regcache *regcache)
   return addr;
 }
 
-static void
-frv_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
-{
-  write_register (struct_return_regnum, addr);
-}
-
 static CORE_ADDR
 frv_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 {
@@ -1504,7 +1498,6 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_use_struct_convention (gdbarch, always_use_struct_convention);
   set_gdbarch_extract_return_value (gdbarch, frv_extract_return_value);
 
-  set_gdbarch_deprecated_store_struct_return (gdbarch, frv_store_struct_return);
   set_gdbarch_store_return_value (gdbarch, frv_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, frv_extract_struct_value_address);
 

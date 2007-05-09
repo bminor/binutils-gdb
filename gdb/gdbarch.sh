@@ -501,9 +501,6 @@ f::struct value *:value_from_register:struct type *type, int regnum, struct fram
 f:=:CORE_ADDR:pointer_to_address:struct type *type, const gdb_byte *buf:type, buf::unsigned_pointer_to_address::0
 f:=:void:address_to_pointer:struct type *type, gdb_byte *buf, CORE_ADDR addr:type, buf, addr::unsigned_address_to_pointer::0
 M::CORE_ADDR:integer_to_address:struct type *type, const gdb_byte *buf:type, buf
-#
-# NOTE: kettenis/2005-09-01: Replaced by PUSH_DUMMY_CALL.
-F:=:void:deprecated_store_struct_return:CORE_ADDR addr, CORE_ADDR sp:addr, sp
 
 # It has been suggested that this, well actually its predecessor,
 # should take the type/value of the function to be called and not the
