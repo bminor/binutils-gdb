@@ -1,5 +1,10 @@
 2007-05-10  Pedro Alves  <pedro_alves@portugalmail.pt>
 
+	* linux-low.c (linux_detach): Change return type to int.  Return 0.
+	* spu-low.c (spu_detach): Likewise.
+
+2007-05-10  Pedro Alves  <pedro_alves@portugalmail.pt>
+
 	* target.h (target_ops): Change return type of detach to int.
 	Add join.
 	(join_inferior): New.

@@ -314,10 +314,11 @@ spu_kill (void)
 }
 
 /* Detach from inferior process.  */
-static void
+static int
 spu_detach (void)
 {
   ptrace (PTRACE_DETACH, current_tid, 0, 0);
+  return 0;
 }
 
 static void

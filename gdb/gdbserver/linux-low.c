@@ -287,10 +287,11 @@ linux_detach_one_process (struct inferior_list_entry *entry)
   ptrace (PTRACE_DETACH, pid_of (process), 0, 0);
 }
 
-static void
+static int
 linux_detach (void)
 {
   for_each_inferior (&all_threads, linux_detach_one_process);
+  return 0;
 }
 
 static void
