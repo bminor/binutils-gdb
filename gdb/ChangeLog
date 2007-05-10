@@ -1,3 +1,7 @@
+2007-05-10  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* remote.c (remote_detach): Error out if remote can't detach.
+
 2007-05-10  Luis Machado  <luisgpm@br.ibm.com>
 
 	* rs6000-tdep.c: (deal_with_atomic_sequence) Stores branch

@@ -2600,7 +2600,11 @@ remote_detach (char *args, int from_tty)
 
   /* Tell the remote target to detach.  */
   strcpy (rs->buf, "D");
-  remote_send (&rs->buf, &rs->buf_size);
+  putpkt (rs->buf);
+  getpkt (&rs->buf, &rs->buf_size, 0);
+
+  if (rs->buf[0] == 'E')
+    error (_("Can't detach process."));
 
   /* Unregister the file descriptor from the event loop.  */
   if (target_is_async_p ())
