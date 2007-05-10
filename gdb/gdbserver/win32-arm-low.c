@@ -20,12 +20,24 @@
 #include "server.h"
 #include "win32-low.h"
 
-/* Fetch register(s) from gdbserver regcache data.  */
+#ifndef CONTEXT_FLOATING_POINT
+#define CONTEXT_FLOATING_POINT 0
+#endif
+
 static void
-do_fetch_inferior_registers (win32_thread_info *th, int r)
+arm_get_thread_context (win32_thread_info *th, DEBUG_EVENT* current_event)
 {
-  char *context_offset = regptr (&th->context, r);
-  supply_register (r, context_offset);
+  th->context.ContextFlags = \
+    CONTEXT_FULL | \
+    CONTEXT_FLOATING_POINT;
+
+  GetThreadContext (th->h, &th->context);
+}
+
+static void
+arm_set_thread_context (win32_thread_info *th, DEBUG_EVENT* current_event)
+{
+  SetThreadContext (th->h, &th->context);
 }
 
 #define context_offset(x) ((int)&(((CONTEXT *)NULL)->x))
@@ -59,18 +71,53 @@ static const int mappings[] = {
 };
 #undef context_offset
 
-static const unsigned char arm_wince_le_breakpoint[] =
-  { 0x10, 0x00, 0x00, 0xe6 };
+/* Return a pointer into a CONTEXT field indexed by gdb register number.
+   Return a pointer to an dummy register holding zero if there is no
+   corresponding CONTEXT field for the given register number.  */
+static char *
+regptr (CONTEXT* c, int r)
+{
+  if (mappings[r] < 0)
+  {
+    static ULONG zero;
+    /* Always force value to zero, in case the user tried to write
+       to this register before.  */
+    zero = 0;
+    return (char *) &zero;
+  }
+  else
+    return (char *) c + mappings[r];
+}
+
+/* Fetch register from gdbserver regcache data.  */
+static void
+arm_fetch_inferior_register (win32_thread_info *th, int r)
+{
+  char *context_offset = regptr (&th->context, r);
+  supply_register (r, context_offset);
+}
+
+/* Store a new register value into the thread context of TH.  */
+static void
+arm_store_inferior_register (win32_thread_info *th, int r)
+{
+  collect_register (r, regptr (&th->context, r));
+}
+
+/* Correct in either endianness.  We do not support Thumb yet.  */
+static const unsigned long arm_wince_breakpoint = 0xe6000001;
+#define arm_wince_breakpoint_len 4
 
 struct win32_target_ops the_low_target = {
-  mappings,
   sizeof (mappings) / sizeof (mappings[0]),
   NULL, /* initial_stuff */
-  NULL, /* store_debug_registers */
-  NULL, /* load_debug_registers */
-  do_fetch_inferior_registers,
+  arm_get_thread_context,
+  arm_set_thread_context,
+  NULL, /* thread_added */
+  arm_fetch_inferior_register,
+  arm_store_inferior_register,
   NULL, /* single_step */
-  arm_wince_le_breakpoint,
-  sizeof (arm_wince_le_breakpoint) / sizeof (arm_wince_le_breakpoint[0]),
+  (const unsigned char *) &arm_wince_breakpoint,
+  arm_wince_breakpoint_len,
   "arm" /* arch_string */
 };

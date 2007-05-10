@@ -32,25 +32,26 @@ typedef struct win32_thread_info
 
 struct win32_target_ops
 {
-  /* An array of offset mappings into a Win32 Context structure.
-     This is a one-to-one mapping which is indexed by gdb's register
-     numbers.  It retrieves an offset into the context structure where
-     the 4 byte register is located.
-     An offset value of -1 indicates that Win32 does not provide this
-     register in it's CONTEXT structure.  In this case regptr will return
-     a pointer into a dummy register.  */
-  const int *regmap;
-
-  /* The number of elements of regmap.  */
+  /* The number of target registers.  */
   int num_regs;
 
+  /* Perform initializations on startup.  */
   void (*initial_stuff) (void);
 
-  void (*store_debug_registers) (win32_thread_info *);
-  void (*load_debug_registers) (win32_thread_info *);
+  /* Fetch the context from the inferior.  */
+  void (*get_thread_context) (win32_thread_info *th, DEBUG_EVENT *current_event);
 
-  /* Fetch register(s) from gdbserver regcache data.  */
-  void (*fetch_inferior_registers) (win32_thread_info *th, int r);
+  /* Flush the context back to the inferior.  */
+  void (*set_thread_context) (win32_thread_info *th, DEBUG_EVENT *current_event);
+
+  /* Called when a thread was added.  */
+  void (*thread_added) (win32_thread_info *th);
+
+  /* Fetch register from gdbserver regcache data.  */
+  void (*fetch_inferior_register) (win32_thread_info *th, int r);
+
+  /* Store a new register value into the thread context of TH.  */
+  void (*store_inferior_register) (win32_thread_info *th, int r);
 
   void (*single_step) (win32_thread_info *th);
 
@@ -63,13 +64,6 @@ struct win32_target_ops
 };
 
 extern struct win32_target_ops the_low_target;
-
-/* in win32-low.c */
-
-/* Return a pointer into a CONTEXT field indexed by gdb register number.
-   Return a pointer to an dummy register holding zero if there is no
-   corresponding CONTEXT field for the given register number.  */
-extern char * regptr (CONTEXT* c, int r);
 
 /* Map the Windows error number in ERROR to a locale-dependent error
    message string and return a pointer to it.  Typically, the values

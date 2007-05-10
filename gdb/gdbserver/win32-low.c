@@ -73,31 +73,14 @@ static enum target_signal last_sig = TARGET_SIGNAL_0;
 /* The current debug event from WaitForDebugEvent.  */
 static DEBUG_EVENT current_event;
 
-static int debug_registers_changed = 0;
-static int debug_registers_used = 0;
-
 #define NUM_REGS (the_low_target.num_regs)
 
 typedef BOOL WINAPI (*winapi_DebugActiveProcessStop) (DWORD dwProcessId);
 typedef BOOL WINAPI (*winapi_DebugSetProcessKillOnExit) (BOOL KillOnExit);
 
-#ifndef CONTEXT_EXTENDED_REGISTERS
-#define CONTEXT_EXTENDED_REGISTERS 0
-#endif
-
-#ifndef CONTEXT_FLOATING_POINT
-#define CONTEXT_FLOATING_POINT 0
-#endif
-
-#ifndef CONTEXT_DEBUG_REGISTERS
-#define CONTEXT_DEBUG_REGISTERS 0
-#endif
-
-#define CONTEXT_DEBUGGER (CONTEXT_FULL | CONTEXT_FLOATING_POINT)
-#define CONTEXT_DEBUGGER_DR CONTEXT_DEBUGGER | CONTEXT_DEBUG_REGISTERS	\
-  | CONTEXT_EXTENDED_REGISTERS
-
 static DWORD main_thread_id = 0;
+
+static void win32_resume (struct thread_resume *resume_info);
 
 /* Get the thread ID from the current selected inferior (the current
    thread).  */
@@ -123,21 +106,10 @@ thread_rec (DWORD id, int get_context)
   th = inferior_target_data (thread);
   if (!th->suspend_count && get_context)
     {
-      if (get_context > 0 && id != current_event.dwThreadId)
+      if (id != current_event.dwThreadId)
 	th->suspend_count = SuspendThread (th->h) + 1;
-      else if (get_context < 0)
-	th->suspend_count = -1;
 
-      th->context.ContextFlags = CONTEXT_DEBUGGER_DR;
-
-      GetThreadContext (th->h, &th->context);
-
-      if (id == current_event.dwThreadId)
-	{
-	  /* Copy dr values from that thread.  */
-	  if (the_low_target.store_debug_registers != NULL)
-	    (*the_low_target.store_debug_registers) (th);
-	}
+      (*the_low_target.get_thread_context) (th, &current_event);
     }
 
   return th;
@@ -162,20 +134,8 @@ child_add_thread (DWORD tid, HANDLE h)
 			      find_inferior_id (&all_threads, tid),
 			      new_register_cache ());
 
-  /* Set the debug registers for the new thread if they are used.  */
-  if (debug_registers_used
-      && the_low_target.load_debug_registers != NULL)
-    {
-      /* Only change the value of the debug registers.  */
-      th->context.ContextFlags = CONTEXT_DEBUGGER_DR;
-
-      GetThreadContext (th->h, &th->context);
-
-      (*the_low_target.load_debug_registers) (th);
-
-      SetThreadContext (th->h, &th->context);
-      th->context.ContextFlags = 0;
-    }
+  if (the_low_target.thread_added != NULL)
+    (*the_low_target.thread_added) (th);
 
   return th;
 }
@@ -246,7 +206,6 @@ enum target_waitkind
 
   /* The program has exec'ed a new executable file.  The new file's
      pathname is pointed to by value.execd_pathname.  */
-
   TARGET_WAITKIND_EXECD,
 
   /* Nothing happened, but we stopped anyway.  This perhaps should be handled
@@ -271,25 +230,6 @@ struct target_waitstatus
   value;
 };
 
-/* Return a pointer into a CONTEXT field indexed by gdb register number.
-   Return a pointer to an dummy register holding zero if there is no
-   corresponding CONTEXT field for the given register number.  */
-char *
-regptr (CONTEXT* c, int r)
-{
-  if (the_low_target.regmap[r] < 0)
-  {
-    static ULONG zero;
-    /* Always force value to zero, in case the user tried to write
-       to this register before.  */
-    zero = 0;
-    return (char *) &zero;
-  }
-  else
-    return (char *) c + the_low_target.regmap[r];
-}
-
-
 /* Clear out any old thread list and reinitialize it to a pristine
    state. */
 static void
@@ -302,9 +242,6 @@ static void
 do_initial_child_stuff (DWORD pid)
 {
   last_sig = TARGET_SIGNAL_0;
-
-  debug_registers_changed = 0;
-  debug_registers_used = 0;
 
   memset (&current_event, 0, sizeof (current_event));
 
@@ -327,20 +264,15 @@ continue_one_thread (struct inferior_list_entry *this_thread, void *id_ptr)
   if ((thread_id == -1 || thread_id == th->tid)
       && th->suspend_count)
     {
+      if (th->context.ContextFlags)
+	{
+	  (*the_low_target.set_thread_context) (th, &current_event);
+	  th->context.ContextFlags = 0;
+	}
+
       for (i = 0; i < th->suspend_count; i++)
 	(void) ResumeThread (th->h);
       th->suspend_count = 0;
-      if (debug_registers_changed)
-	{
-	  /* Only change the value of the debug registers.  */
-	  th->context.ContextFlags = CONTEXT_DEBUG_REGISTERS;
-
-	  if (the_low_target.load_debug_registers != NULL)
-	    the_low_target.load_debug_registers (th);
-
-	  SetThreadContext (th->h, &th->context);
-	  th->context.ContextFlags = 0;
-	}
     }
 
   return 0;
@@ -353,11 +285,9 @@ child_continue (DWORD continue_status, int thread_id)
 
   res = ContinueDebugEvent (current_event.dwProcessId,
 			    current_event.dwThreadId, continue_status);
-  continue_status = 0;
   if (res)
     find_inferior (&all_threads, continue_one_thread, &thread_id);
 
-  debug_registers_changed = 0;
   return res;
 }
 
@@ -371,14 +301,7 @@ child_fetch_inferior_registers (int r)
     child_fetch_inferior_registers (NUM_REGS);
   else
     for (regno = 0; regno < r; regno++)
-      (*the_low_target.fetch_inferior_registers) (th, regno);
-}
-
-/* Get register from gdbserver regcache data.  */
-static void
-do_child_store_inferior_registers (win32_thread_info *th, int r)
-{
-  collect_register (r, regptr (&th->context, r));
+      (*the_low_target.fetch_inferior_register) (th, regno);
 }
 
 /* Store a new register value into the current thread context.  We don't
@@ -392,7 +315,7 @@ child_store_inferior_registers (int r)
     child_store_inferior_registers (NUM_REGS);
   else
     for (regno = 0; regno < r; regno++)
-      do_child_store_inferior_registers (th, regno);
+      (*the_low_target.store_inferior_register) (th, regno);
 }
 
 /* Map the Windows error number in ERROR to a locale-dependent error
@@ -816,10 +739,6 @@ win32_resume (struct thread_resume *resume_info)
     {
       if (th->context.ContextFlags)
 	{
-	  if (debug_registers_changed)
-	    if (the_low_target.load_debug_registers != NULL)
-	      (*the_low_target.load_debug_registers) (th);
-
 	  /* Move register values from the inferior into the thread
 	     context structure.  */
 	  regcache_invalidate ();
@@ -832,7 +751,8 @@ win32_resume (struct thread_resume *resume_info)
 		error ("Single stepping is not supported "
 		       "in this configuration.\n");
 	    }
-	  SetThreadContext (th->h, &th->context);
+
+	  (*the_low_target.set_thread_context) (th, &current_event);
 	  th->context.ContextFlags = 0;
 	}
     }
@@ -843,16 +763,12 @@ win32_resume (struct thread_resume *resume_info)
   child_continue (continue_status, tid);
 }
 
-static int
+static void
 handle_exception (struct target_waitstatus *ourstatus)
 {
-  win32_thread_info *th;
   DWORD code = current_event.u.Exception.ExceptionRecord.ExceptionCode;
 
   ourstatus->kind = TARGET_WAITKIND_STOPPED;
-
-  /* Record the context of the current thread.  */
-  th = thread_rec (current_event.dwThreadId, -1);
 
   switch (code)
     {
@@ -939,7 +855,10 @@ handle_exception (struct target_waitstatus *ourstatus)
       break;
     default:
       if (current_event.u.Exception.dwFirstChance)
-	return 0;
+	{
+	  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+	  return;
+	}
       OUTMSG2 (("gdbserver: unknown target exception 0x%08lx at 0x%08lx",
 		current_event.u.Exception.ExceptionRecord.ExceptionCode,
 		(DWORD) current_event.u.Exception.ExceptionRecord.
@@ -949,36 +868,25 @@ handle_exception (struct target_waitstatus *ourstatus)
     }
   OUTMSG2 (("\n"));
   last_sig = ourstatus->value.sig;
-  return 1;
 }
 
-/* Get the next event from the child.  Return 1 if the event requires
-   handling.  */
-static int
+/* Get the next event from the child.  */
+static void
 get_child_debug_event (struct target_waitstatus *ourstatus)
 {
   BOOL debug_event;
-  DWORD continue_status, event_code;
-  win32_thread_info *th = NULL;
-  static win32_thread_info dummy_thread_info;
-  int retval = 0;
-
-in:
 
   last_sig = TARGET_SIGNAL_0;
   ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
 
   if (!(debug_event = WaitForDebugEvent (&current_event, 1000)))
-    goto out;
+    return;
 
   current_inferior =
     (struct thread_info *) find_inferior_id (&all_threads,
 					     current_event.dwThreadId);
 
-  continue_status = DBG_CONTINUE;
-  event_code = current_event.dwDebugEventCode;
-
-  switch (event_code)
+  switch (current_event.dwDebugEventCode)
     {
     case CREATE_THREAD_DEBUG_EVENT:
       OUTMSG2 (("gdbserver: kernel event CREATE_THREAD_DEBUG_EVENT "
@@ -987,10 +895,8 @@ in:
 		(unsigned) current_event.dwThreadId));
 
       /* Record the existence of this thread.  */
-      th = child_add_thread (current_event.dwThreadId,
+      child_add_thread (current_event.dwThreadId,
 			     current_event.u.CreateThread.hThread);
-
-      retval = current_event.dwThreadId;
       break;
 
     case EXIT_THREAD_DEBUG_EVENT:
@@ -999,7 +905,6 @@ in:
 		(unsigned) current_event.dwProcessId,
 		(unsigned) current_event.dwThreadId));
       child_delete_thread (current_event.dwThreadId);
-      th = &dummy_thread_info;
       break;
 
     case CREATE_PROCESS_DEBUG_EVENT:
@@ -1016,11 +921,10 @@ in:
       ourstatus->value.execd_pathname = "Main executable";
 
       /* Add the main thread.  */
-      th =
-	child_add_thread (main_thread_id,
-			  current_event.u.CreateProcessInfo.hThread);
+      child_add_thread (main_thread_id,
+			current_event.u.CreateProcessInfo.hThread);
 
-      retval = ourstatus->value.related_pid = current_event.dwThreadId;
+      ourstatus->value.related_pid = current_event.dwThreadId;
 #ifdef _WIN32_WCE
       /* Windows CE doesn't set the initial breakpoint automatically
 	 like the desktop versions of Windows do.  We add it explicitly
@@ -1040,7 +944,6 @@ in:
       ourstatus->value.integer = current_event.u.ExitProcess.dwExitCode;
       CloseHandle (current_process_handle);
       current_process_handle = NULL;
-      retval = main_thread_id;
       break;
 
     case LOAD_DLL_DEBUG_EVENT:
@@ -1052,7 +955,6 @@ in:
 
       ourstatus->kind = TARGET_WAITKIND_LOADED;
       ourstatus->value.integer = 0;
-      retval = main_thread_id;
       break;
 
     case UNLOAD_DLL_DEBUG_EVENT:
@@ -1067,7 +969,7 @@ in:
 		"for pid=%d tid=%x\n",
 		(unsigned) current_event.dwProcessId,
 		(unsigned) current_event.dwThreadId));
-      retval = handle_exception (ourstatus);
+      handle_exception (ourstatus);
       break;
 
     case OUTPUT_DEBUG_STRING_EVENT:
@@ -1091,18 +993,6 @@ in:
   current_inferior =
     (struct thread_info *) find_inferior_id (&all_threads,
 					     current_event.dwThreadId);
-
-  if (!retval || (event_code != EXCEPTION_DEBUG_EVENT && event_code != EXIT_PROCESS_DEBUG_EVENT))
-    {
-      child_continue (continue_status, -1);
-      goto in;
-    }
-
-  if (th == NULL)
-    thread_rec (current_event.dwThreadId, TRUE);
-
-out:
-  return retval;
 }
 
 /* Wait for the inferior process to change state.
@@ -1119,8 +1009,9 @@ win32_wait (char *status)
     {
       get_child_debug_event (&our_status);
 
-      if (our_status.kind == TARGET_WAITKIND_EXITED)
+      switch (our_status.kind)
 	{
+	case TARGET_WAITKIND_EXITED:
 	  OUTMSG2 (("Child exited with retcode = %x\n",
 		    our_status.value.integer));
 
@@ -1129,9 +1020,7 @@ win32_wait (char *status)
 	  child_fetch_inferior_registers (-1);
 
 	  return our_status.value.integer;
-	}
-      else if (our_status.kind == TARGET_WAITKIND_STOPPED)
-	{
+	case TARGET_WAITKIND_STOPPED:
 	  OUTMSG2 (("Child Stopped with signal = %d \n",
 		    our_status.value.sig));
 
@@ -1140,18 +1029,16 @@ win32_wait (char *status)
 	  child_fetch_inferior_registers (-1);
 
 	  return our_status.value.sig;
+ 	default:
+	  OUTMSG (("Ignoring unknown internal event, %d\n", our_status.kind));
+ 	  /* fall-through */
+ 	case TARGET_WAITKIND_SPURIOUS:
+ 	case TARGET_WAITKIND_LOADED:
+ 	case TARGET_WAITKIND_EXECD:
+	  /* do nothing, just continue */
+	  child_continue (DBG_CONTINUE, -1);
+	  break;
 	}
-      else
-	OUTMSG (("Ignoring unknown internal event, %d\n", our_status.kind));
-
-      {
-	struct thread_resume resume;
-	resume.thread = -1;
-	resume.step = 0;
-	resume.sig = 0;
-	resume.leave_stopped = 0;
-	win32_resume (&resume);
-      }
     }
 }
 

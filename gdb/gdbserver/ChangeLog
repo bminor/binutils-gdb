@@ -1,5 +1,67 @@
 2007-05-10  Pedro Alves  <pedro_alves@portugalmail.pt>
 
+	* win32-low.c (debug_registers_changed,
+	debug_registers_used, CONTEXT_EXTENDED_REGISTERS,
+	CONTEXT_FLOATING_POINT, CONTEXT_DEBUG_REGISTERS,
+	CONTEXT_DEBUGGER, CONTEXT_DEBUGGER_DR): Delete.
+	(thread_rec): Get context using the low target.
+	(child_add_thread): Call thread_added on the low target,
+	which does the same thing.
+	(regptr): Delete.
+	(do_initial_child_stuff): Remove debug registers references.
+	Set context using the low target.  Resume threads after
+	setting the contexts.
+	(child_continue): Remove dead variable.  Remove debug
+	registers references.
+	(child_fetch_inferior_registers): Go through the low target.
+	(do_child_store_inferior_registers): Remove.
+	(child_store_inferior_registers): Go through the low target.
+	(win32_resume): Remove debug registers references.
+	Set context using the low target.
+	(handle_exception): Change return type to void.  Don't record
+	context here.  Set status to TARGET_WAITKIND_SPURIOUS on a
+	first chance exception.
+	(get_child_debug_event): Change return type to void.  Remove 
+	goto loop.  Always return after waiting for debug event.
+	(win32_wait): Convert to switch statement.  Handle spurious
+	events.
+
+	* win32-i386-low.c (debug_registers_changed,
+	debug_registers_used): New.
+	(initial_stuff): Rename to ...
+	(i386_initial_stuff): ... this.  Clear debug registers
+	state variables.
+	(store_debug_registers): Delete.
+	(i386_get_thread_context): New.
+	(load_debug_registers): Delete.
+	(i386_set_thread_context): New.
+	(i386_thread_added): New.
+	(single_step): Rename to ...
+	(i386_single_step): ... this.
+	(do_fetch_inferior_registers): Rename to ...
+	(i386_fetch_inferior_register): ... this.
+	(i386_store_inferior_register): New.
+	(the_low_target): Adapt to new interface.
+
+	* win32-arm-low.c (CONTEXT_FLOATING_POINT): Define.
+	(arm_get_thread_context): New.
+	(arm_set_thread_context): New.
+	(regptr): New.
+	(do_fetch_inferior_registers): Rename to ...
+	(arm_fetch_inferior_register): ... this.
+	(arm_store_inferior_register): New.
+	(arm_wince_breakpoint): Reimplement as unsigned long.
+	(arm_wince_breakpoint_len): Define.
+	(the_low_target): Adapt to new interface.
+
+	* win32-low.h (target_ops): Remove regmap, store_debug_registers and
+	load_debug_registers.  Add get_thread_context, set_thread_context,
+	thread_added and store_inferior_register.  Rename
+	fetch_inferior_registers to fetch_inferior_register.
+	(regptr): Remove declaration.
+
+2007-05-10  Pedro Alves  <pedro_alves@portugalmail.pt>
+
 	* linux-low.c (linux_detach): Change return type to int.  Return 0.
 	* spu-low.c (spu_detach): Likewise.
 

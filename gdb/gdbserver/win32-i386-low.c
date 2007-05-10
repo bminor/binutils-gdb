@@ -27,58 +27,83 @@
 
 static unsigned dr[8];
 
+static int debug_registers_changed = 0;
+static int debug_registers_used = 0;
+
 static void
-initial_stuff (void)
+i386_initial_stuff (void)
 {
   memset (&dr, 0, sizeof (dr));
+  debug_registers_changed = 0;
+  debug_registers_used = 0;
 }
 
 static void
-store_debug_registers (win32_thread_info *th)
+i386_get_thread_context (win32_thread_info *th, DEBUG_EVENT* current_event)
 {
-  dr[0] = th->context.Dr0;
-  dr[1] = th->context.Dr1;
-  dr[2] = th->context.Dr2;
-  dr[3] = th->context.Dr3;
-  dr[6] = th->context.Dr6;
-  dr[7] = th->context.Dr7;
-}
+  th->context.ContextFlags = \
+    CONTEXT_FULL | \
+    CONTEXT_FLOATING_POINT | \
+    CONTEXT_EXTENDED_REGISTERS | \
+    CONTEXT_DEBUG_REGISTERS;
 
-static void
-load_debug_registers (win32_thread_info *th)
-{
-  th->context.Dr0 = dr[0];
-  th->context.Dr1 = dr[1];
-  th->context.Dr2 = dr[2];
-  th->context.Dr3 = dr[3];
-  /* th->context.Dr6 = dr[6];
-     FIXME: should we set dr6 also ?? */
-  th->context.Dr7 = dr[7];
-}
+  GetThreadContext (th->h, &th->context);
 
-/* Fetch register(s) from gdbserver regcache data.  */
-static void
-do_fetch_inferior_registers (win32_thread_info *th, int r)
-{
-  char *context_offset = regptr (&th->context, r);
+  debug_registers_changed = 0;
 
-  long l;
-  if (r == FCS_REGNUM)
+  if (th->tid == current_event->dwThreadId)
     {
-      l = *((long *) context_offset) & 0xffff;
-      supply_register (r, (char *) &l);
+      /* Copy dr values from the current thread.  */
+      dr[0] = th->context.Dr0;
+      dr[1] = th->context.Dr1;
+      dr[2] = th->context.Dr2;
+      dr[3] = th->context.Dr3;
+      dr[6] = th->context.Dr6;
+      dr[7] = th->context.Dr7;
     }
-  else if (r == FOP_REGNUM)
-    {
-      l = (*((long *) context_offset) >> 16) & ((1 << 11) - 1);
-      supply_register (r, (char *) &l);
-    }
-  else
-    supply_register (r, context_offset);
 }
 
 static void
-single_step (win32_thread_info *th)
+i386_set_thread_context (win32_thread_info *th, DEBUG_EVENT* current_event)
+{
+  if (debug_registers_changed)
+    {
+      th->context.Dr0 = dr[0];
+      th->context.Dr1 = dr[1];
+      th->context.Dr2 = dr[2];
+      th->context.Dr3 = dr[3];
+      /* th->context.Dr6 = dr[6];
+	 FIXME: should we set dr6 also ?? */
+      th->context.Dr7 = dr[7];
+    }
+
+  SetThreadContext (th->h, &th->context);
+}
+
+static void
+i386_thread_added (win32_thread_info *th)
+{
+  /* Set the debug registers for the new thread if they are used.  */
+  if (debug_registers_used)
+    {
+      th->context.ContextFlags = CONTEXT_DEBUG_REGISTERS;
+      GetThreadContext (th->h, &th->context);
+
+      th->context.Dr0 = dr[0];
+      th->context.Dr1 = dr[1];
+      th->context.Dr2 = dr[2];
+      th->context.Dr3 = dr[3];
+      /* th->context.Dr6 = dr[6];
+	 FIXME: should we set dr6 also ?? */
+      th->context.Dr7 = dr[7];
+
+      SetThreadContext (th->h, &th->context);
+      th->context.ContextFlags = 0;
+    }
+}
+
+static void
+i386_single_step (win32_thread_info *th)
 {
   th->context.EFlags |= FLAG_TRACE_BIT;
 }
@@ -138,15 +163,45 @@ static const int mappings[] = {
 };
 #undef context_offset
 
+/* Fetch register from gdbserver regcache data.  */
+static void
+i386_fetch_inferior_register (win32_thread_info *th, int r)
+{
+  char *context_offset = (char *) &th->context + mappings[r];
+
+  long l;
+  if (r == FCS_REGNUM)
+    {
+      l = *((long *) context_offset) & 0xffff;
+      supply_register (r, (char *) &l);
+    }
+  else if (r == FOP_REGNUM)
+    {
+      l = (*((long *) context_offset) >> 16) & ((1 << 11) - 1);
+      supply_register (r, (char *) &l);
+    }
+  else
+    supply_register (r, context_offset);
+}
+
+/* Store a new register value into the thread context of TH.  */
+static void
+i386_store_inferior_register (win32_thread_info *th, int r)
+{
+  char *context_offset = (char *) &th->context + mappings[r];
+  collect_register (r, context_offset);
+}
+
 struct win32_target_ops the_low_target = {
-  mappings,
   sizeof (mappings) / sizeof (mappings[0]),
-  initial_stuff,
-  store_debug_registers,
-  load_debug_registers,
-  do_fetch_inferior_registers,
-  single_step,
-  (const char*)NULL, /* breakpoint */
+  i386_initial_stuff,
+  i386_get_thread_context,
+  i386_set_thread_context,
+  i386_thread_added,
+  i386_fetch_inferior_register,
+  i386_store_inferior_register,
+  i386_single_step,
+  NULL, /* breakpoint */
   0, /* breakpoint_len */
   "i386" /* arch_string */
 };
