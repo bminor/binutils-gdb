@@ -805,32 +805,27 @@ main (int argc, char *argv[])
 	    case 'Q':
 	      handle_general_set (own_buf);
 	      break;
-#ifndef USE_WIN32API
-	    /* Skip "detach" support on mingw32, since we don't have
-	       waitpid.  */
 	    case 'D':
 	      fprintf (stderr, "Detaching from inferior\n");
-	      detach_inferior ();
-	      write_ok (own_buf);
-	      putpkt (own_buf);
-	      remote_close ();
-
-	      /* If we are attached, then we can exit.  Otherwise, we need to
-		 hang around doing nothing, until the child is gone.  */
-	      if (!attached)
+	      if (detach_inferior () != 0)
 		{
-		  int status, ret;
-
-		  do {
-		    ret = waitpid (signal_pid, &status, 0);
-		    if (WIFEXITED (status) || WIFSIGNALED (status))
-		      break;
-		  } while (ret != -1 || errno != ECHILD);
+		  write_enn (own_buf);
+		  putpkt (own_buf);
 		}
+	      else
+		{
+		  write_ok (own_buf);
+		  putpkt (own_buf);
+		  remote_close ();
 
-	      exit (0);
-#endif
+		  /* If we are attached, then we can exit.  Otherwise, we
+		     need to hang around doing nothing, until the child
+		     is gone.  */
+		  if (!attached)
+		    join_inferior ();
 
+		  exit (0);
+		}
 	    case '!':
 	      if (attached == 0)
 		{

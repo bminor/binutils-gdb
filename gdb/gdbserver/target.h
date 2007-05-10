@@ -69,9 +69,14 @@ struct target_ops
 
   void (*kill) (void);
 
-  /* Detach from all inferiors.  */
+  /* Detach from all inferiors.
+     Return -1 on failure, and 0 on success.  */
 
-  void (*detach) (void);
+  int (*detach) (void);
+
+  /* Wait for inferiors to end.  */
+
+  void (*join) (void);
 
   /* Return 1 iff the thread with process ID PID is alive.  */
 
@@ -206,6 +211,9 @@ void set_target_ops (struct target_ops *);
 
 #define store_inferior_registers(regno) \
   (*the_target->store_registers) (regno)
+
+#define join_inferior() \
+  (*the_target->join) ()
 
 unsigned char mywait (char *statusp, int connected_wait);
 

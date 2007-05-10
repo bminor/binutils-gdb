@@ -320,6 +320,18 @@ spu_detach (void)
   ptrace (PTRACE_DETACH, current_tid, 0, 0);
 }
 
+static void
+spu_join (void)
+{
+  int status, ret;
+
+  do {
+    ret = waitpid (current_tid, &status, 0);
+    if (WIFEXITED (status) || WIFSIGNALED (status))
+      break;
+  } while (ret != -1 || errno != ECHILD);
+}
+
 /* Return nonzero if the given thread is still alive.  */
 static int
 spu_thread_alive (unsigned long tid)
@@ -567,6 +579,7 @@ static struct target_ops spu_target_ops = {
   spu_attach,
   spu_kill,
   spu_detach,
+  spu_join,
   spu_thread_alive,
   spu_resume,
   spu_wait,

@@ -1,5 +1,23 @@
 2007-05-10  Pedro Alves  <pedro_alves@portugalmail.pt>
 
+	* target.h (target_ops): Change return type of detach to int.
+	Add join.
+	(join_inferior): New.
+	* server.c (main): Don't skip detach support on mingw32.
+	If the inferior doesn't support detaching return error.
+	Call join_inferior instead of using waitpid.
+	* linux-low.c (linux_join): New.
+	(linux_target_op): Add linux_join.
+	* spu-low.c (spu_join): New.
+	(spu_target_ops): Add spu_join.
+	* win32-low.c (win32_detach): Adapt to new interface.
+	Reopen current_process_handle before detaching.  Issue a child
+	resume before detaching.
+	(win32_join): New.
+	(win32_target_op): Add win32_join.
+
+2007-05-10  Pedro Alves  <pedro_alves@portugalmail.pt>
+
 	* win32-low.c (win32-attach): Fix return value.
 	* target.h (target_ops): Describe ATTACH return values.
 

@@ -293,6 +293,19 @@ linux_detach (void)
   for_each_inferior (&all_threads, linux_detach_one_process);
 }
 
+static void
+linux_join (void)
+{
+  extern unsigned long signal_pid;
+  int status, ret;
+
+  do {
+    ret = waitpid (signal_pid, &status, 0);
+    if (WIFEXITED (status) || WIFSIGNALED (status))
+      break;
+  } while (ret != -1 || errno != ECHILD);
+}
+
 /* Return nonzero if the given thread is still alive.  */
 static int
 linux_thread_alive (unsigned long tid)
@@ -1656,6 +1669,7 @@ static struct target_ops linux_target_ops = {
   linux_attach,
   linux_kill,
   linux_detach,
+  linux_join,
   linux_thread_alive,
   linux_resume,
   linux_wait,

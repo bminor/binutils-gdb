@@ -683,9 +683,11 @@ win32_kill (void)
 }
 
 /* Detach from all inferiors.  */
-static void
+static int
 win32_detach (void)
 {
+  HANDLE h;
+
   winapi_DebugActiveProcessStop DebugActiveProcessStop = NULL;
   winapi_DebugSetProcessKillOnExit DebugSetProcessKillOnExit = NULL;
 #ifdef _WIN32_WCE
@@ -696,13 +698,53 @@ win32_detach (void)
   DebugActiveProcessStop = GETPROCADDRESS (dll, DebugActiveProcessStop);
   DebugSetProcessKillOnExit = GETPROCADDRESS (dll, DebugSetProcessKillOnExit);
 
-  if (DebugSetProcessKillOnExit != NULL)
-    DebugSetProcessKillOnExit (FALSE);
+  if (DebugSetProcessKillOnExit == NULL
+      || DebugActiveProcessStop == NULL)
+    return -1;
 
-  if (DebugActiveProcessStop != NULL)
-    DebugActiveProcessStop (current_process_id);
-  else
-    win32_kill ();
+  /* We need a new handle, since DebugActiveProcessStop
+     closes all the ones that came through the events.  */
+  if ((h = OpenProcess (PROCESS_ALL_ACCESS,
+			FALSE,
+			current_process_id)) == NULL)
+    {
+      /* The process died.  */
+      return -1;
+    }
+
+  {
+    struct thread_resume resume;
+    resume.thread = -1;
+    resume.step = 0;
+    resume.sig = 0;
+    resume.leave_stopped = 0;
+    win32_resume (&resume);
+  }
+
+  if (!DebugActiveProcessStop (current_process_id))
+    {
+      CloseHandle (h);
+      return -1;
+    }
+  DebugSetProcessKillOnExit (FALSE);
+
+  current_process_handle = h;
+  return 0;
+}
+
+/* Wait for inferiors to end.  */
+static void
+win32_join (void)
+{
+  if (current_process_id == 0
+      || current_process_handle == NULL)
+    return;
+
+  WaitForSingleObject (current_process_handle, INFINITE);
+  CloseHandle (current_process_handle);
+
+  current_process_handle = NULL;
+  current_process_id = 0;
 }
 
 /* Return 1 iff the thread with thread ID TID is alive.  */
@@ -1160,6 +1202,7 @@ static struct target_ops win32_target_ops = {
   win32_attach,
   win32_kill,
   win32_detach,
+  win32_join,
   win32_thread_alive,
   win32_resume,
   win32_wait,
