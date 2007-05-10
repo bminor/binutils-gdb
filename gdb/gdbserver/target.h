@@ -58,7 +58,10 @@ struct target_ops
   /* Attach to a running process.
 
      PID is the process ID to attach to, specified by the user
-     or a higher layer.  */
+     or a higher layer.
+
+     Returns -1 if attaching is unsupported, 0 on success, and calls
+     error() otherwise.  */
 
   int (*attach) (unsigned long pid);
 

@@ -580,7 +580,6 @@ win32_create_inferior (char *program, char **program_args)
 static int
 win32_attach (unsigned long pid)
 {
-  int res = 0;
   winapi_DebugActiveProcessStop DebugActiveProcessStop = NULL;
   winapi_DebugSetProcessKillOnExit DebugSetProcessKillOnExit = NULL;
 #ifdef _WIN32_WCE
@@ -591,28 +590,24 @@ win32_attach (unsigned long pid)
   DebugActiveProcessStop = GETPROCADDRESS (dll, DebugActiveProcessStop);
   DebugSetProcessKillOnExit = GETPROCADDRESS (dll, DebugSetProcessKillOnExit);
 
-  res = DebugActiveProcess (pid) ? 1 : 0;
-
-  if (!res)
-    error ("Attach to process failed.");
-
-  if (DebugSetProcessKillOnExit != NULL)
-    DebugSetProcessKillOnExit (FALSE);
-
-  current_process_id = pid;
-  current_process_handle = OpenProcess (PROCESS_ALL_ACCESS, FALSE, pid);
-
-  if (current_process_handle == NULL)
+  if (DebugActiveProcess (pid))
     {
-      res = 0;
+      if (DebugSetProcessKillOnExit != NULL)
+ 	DebugSetProcessKillOnExit (FALSE);
+
+      current_process_handle = OpenProcess (PROCESS_ALL_ACCESS, FALSE, pid);
+
+      if (current_process_handle != NULL)
+ 	{
+ 	  current_process_id = pid;
+ 	  do_initial_child_stuff (pid);
+ 	  return 0;
+ 	}
       if (DebugActiveProcessStop != NULL)
 	DebugActiveProcessStop (current_process_id);
     }
 
-  if (res)
-    do_initial_child_stuff (pid);
-
-  return res;
+  error ("Attach to process failed.");
 }
 
 /* Handle OUTPUT_DEBUG_STRING_EVENT from child process.  */

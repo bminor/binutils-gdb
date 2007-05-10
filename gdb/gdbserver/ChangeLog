@@ -1,5 +1,10 @@
 2007-05-10  Pedro Alves  <pedro_alves@portugalmail.pt>
 
+	* win32-low.c (win32-attach): Fix return value.
+	* target.h (target_ops): Describe ATTACH return values.
+
+2007-05-10  Pedro Alves  <pedro_alves@portugalmail.pt>
+
 	* win32-low.c (GETPROCADDRESS): Define.
 	(winapi_DebugActiveProcessStop): Add WINAPI.  typedef as pointer.
 	(winapi_DebugSetProcessKillOnExit): Likewise.
