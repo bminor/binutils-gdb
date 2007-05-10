@@ -5618,6 +5618,122 @@ elf32_frvfdpic_always_size_sections (bfd *output_bfd,
   return TRUE;
 }
 
+/* Check whether any of the relocations was optimized away, and
+   subtract it from the relocation or fixup count.  */
+static bfd_boolean
+_frvfdpic_check_discarded_relocs (bfd *abfd, asection *sec,
+				  struct bfd_link_info *info,
+				  
+				  bfd_boolean *changed)
+{
+  Elf_Internal_Shdr *symtab_hdr;
+  struct elf_link_hash_entry **sym_hashes, **sym_hashes_end;
+  Elf_Internal_Rela *rel, *erel;
+
+  if ((sec->flags & SEC_RELOC) == 0
+      || sec->reloc_count == 0)
+    return TRUE;
+
+  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  sym_hashes = elf_sym_hashes (abfd);
+  sym_hashes_end = sym_hashes + symtab_hdr->sh_size/sizeof(Elf32_External_Sym);
+  if (!elf_bad_symtab (abfd))
+    sym_hashes_end -= symtab_hdr->sh_info;
+
+  rel = elf_section_data (sec)->relocs;
+
+  /* Now examine each relocation.  */
+  for (erel = rel + sec->reloc_count; rel < erel; rel++)
+    {
+      struct elf_link_hash_entry *h;
+      unsigned long r_symndx;
+      struct frvfdpic_relocs_info *picrel;
+      struct _frvfdpic_dynamic_got_info *dinfo;
+
+      if (ELF32_R_TYPE (rel->r_info) != R_FRV_32
+	  && ELF32_R_TYPE (rel->r_info) != R_FRV_FUNCDESC)
+	continue;
+
+      if (_bfd_elf_section_offset (sec->output_section->owner,
+				   info, sec, rel->r_offset)
+	  != (bfd_vma)-1)
+	continue;
+
+      r_symndx = ELF32_R_SYM (rel->r_info);
+      if (r_symndx < symtab_hdr->sh_info)
+	h = NULL;
+      else
+	{
+	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *)h->root.u.i.link;
+	}
+
+      if (h != NULL)
+	picrel = frvfdpic_relocs_info_for_global (frvfdpic_relocs_info (info),
+						  abfd, h,
+						  rel->r_addend, NO_INSERT);
+      else
+	picrel = frvfdpic_relocs_info_for_local (frvfdpic_relocs_info (info),
+						 abfd, r_symndx,
+						 rel->r_addend, NO_INSERT);
+
+      if (! picrel)
+	return FALSE;
+
+      *changed = TRUE;
+      dinfo = frvfdpic_dynamic_got_plt_info (info);
+
+      _frvfdpic_count_relocs_fixups (picrel, dinfo, TRUE);
+      if (ELF32_R_TYPE (rel->r_info) == R_FRV_32)
+	picrel->relocs32--;
+      else /* we know (ELF32_R_TYPE (rel->r_info) == R_FRV_FUNCDESC) */
+	picrel->relocsfd--;
+      _frvfdpic_count_relocs_fixups (picrel, dinfo, FALSE);
+    }
+
+  return TRUE;
+}
+
+static bfd_boolean
+frvfdpic_elf_discard_info (bfd *ibfd,
+			   struct elf_reloc_cookie *cookie ATTRIBUTE_UNUSED,
+			   struct bfd_link_info *info)
+{
+  bfd_boolean changed = FALSE;
+  asection *s;
+  bfd *obfd = NULL;
+
+  /* Account for relaxation of .eh_frame section.  */
+  for (s = ibfd->sections; s; s = s->next)
+    if (s->sec_info_type == ELF_INFO_TYPE_EH_FRAME)
+      {
+	if (!_frvfdpic_check_discarded_relocs (ibfd, s, info, &changed))
+	  return FALSE;
+	obfd = s->output_section->owner;
+      }
+
+  if (changed)
+    {
+      struct _frvfdpic_dynamic_got_plt_info gpinfo;
+
+      memset (&gpinfo, 0, sizeof (gpinfo));
+      memcpy (&gpinfo.g, frvfdpic_dynamic_got_plt_info (info),
+	      sizeof (gpinfo.g));
+
+      /* Clear GOT and PLT assignments.  */
+      htab_traverse (frvfdpic_relocs_info (info),
+		     _frvfdpic_reset_got_plt_entries,
+		     NULL);
+
+      if (!_frvfdpic_size_got_plt (obfd, &gpinfo))
+	return FALSE;
+    }
+
+  return TRUE;
+}
+
 /* Look for opportunities to relax TLS relocations.  We can assume
    we're linking the main executable or a static-tls library, since
    otherwise we wouldn't have got here.  */
@@ -6969,6 +7085,9 @@ elf32_frv_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 #define elf_backend_finish_dynamic_sections \
 		elf32_frvfdpic_finish_dynamic_sections
 
+#undef elf_backend_discard_info
+#define elf_backend_discard_info \
+		frvfdpic_elf_discard_info
 #undef elf_backend_can_make_relative_eh_frame
 #define elf_backend_can_make_relative_eh_frame \
 		frvfdpic_elf_use_relative_eh_frame
