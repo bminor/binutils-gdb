@@ -95,35 +95,35 @@ typedef struct template
 #define W		   0x2	/* set if operands can be words or dwords
 				   encoded the canonical way */
 #define Modrm		   0x4	/* insn has a modrm byte. */
-#define ShortForm	  0x10	/* register is in low 3 bits of opcode */
-#define Jump		  0x40	/* special case for jump insns.  */
-#define JumpDword	  0x80  /* call and jump */
-#define JumpByte	 0x100  /* loop and jecxz */
-#define JumpInterSegment 0x200	/* special case for intersegment leaps/calls */
-#define FloatMF		 0x400	/* FP insn memory format bit, sized by 0x4 */
-#define FloatR		 0x800	/* src/dest swap for floats. */
-#define FloatD		0x1000	/* has float insn direction bit. */
-#define Size16		0x2000	/* needs size prefix if in 32-bit mode */
-#define Size32		0x4000	/* needs size prefix if in 16-bit mode */
-#define Size64		0x8000	/* needs size prefix if in 64-bit mode */
-#define IgnoreSize     0x10000  /* instruction ignores operand size prefix */
-#define DefaultSize    0x20000  /* default insn size depends on mode */
-#define No_bSuf	       0x40000	/* b suffix on instruction illegal */
-#define No_wSuf	       0x80000	/* w suffix on instruction illegal */
-#define No_lSuf	      0x100000 	/* l suffix on instruction illegal */
-#define No_sSuf	      0x200000	/* s suffix on instruction illegal */
-#define No_qSuf       0x400000  /* q suffix on instruction illegal */
-#define No_xSuf       0x800000  /* x suffix on instruction illegal */
-#define FWait	     0x1000000	/* instruction needs FWAIT */
-#define IsString     0x2000000	/* quick test for string instructions */
-#define regKludge    0x4000000	/* fake an extra reg operand for clr, imul
+#define ShortForm	   0x8	/* register is in low 3 bits of opcode */
+#define Jump		  0x10	/* special case for jump insns.  */
+#define JumpDword	  0x20  /* call and jump */
+#define JumpByte	  0x40  /* loop and jecxz */
+#define JumpInterSegment  0x80	/* special case for intersegment leaps/calls */
+#define FloatMF		 0x100	/* FP insn memory format bit, sized by 0x4 */
+#define FloatR		 0x200	/* src/dest swap for floats. */
+#define FloatD		 0x400	/* has float insn direction bit. */
+#define Size16		 0x800	/* needs size prefix if in 32-bit mode */
+#define Size32		0x1000	/* needs size prefix if in 16-bit mode */
+#define Size64		0x2000	/* needs size prefix if in 64-bit mode */
+#define IgnoreSize      0x4000  /* instruction ignores operand size prefix */
+#define DefaultSize     0x8000  /* default insn size depends on mode */
+#define No_bSuf	       0x10000	/* b suffix on instruction illegal */
+#define No_wSuf	       0x20000	/* w suffix on instruction illegal */
+#define No_lSuf	       0x40000 	/* l suffix on instruction illegal */
+#define No_sSuf	       0x80000	/* s suffix on instruction illegal */
+#define No_qSuf       0x100000  /* q suffix on instruction illegal */
+#define No_xSuf       0x200000  /* x suffix on instruction illegal */
+#define FWait	      0x400000	/* instruction needs FWAIT */
+#define IsString      0x800000	/* quick test for string instructions */
+#define regKludge    0x1000000	/* fake an extra reg operand for clr, imul
 				   and special register processing for
 				   some instructions.  */
-#define IsPrefix     0x8000000	/* opcode is a prefix */
-#define ImmExt	    0x10000000	/* instruction has extension in 8 bit imm */
-#define NoRex64	    0x20000000  /* instruction don't need Rex64 prefix.  */
-#define Rex64	    0x40000000  /* instruction require Rex64 prefix.  */
-#define Ugh	    0x80000000	/* deprecated fp insn, gets a warning */
+#define IsPrefix     0x2000000	/* opcode is a prefix */
+#define ImmExt	     0x4000000	/* instruction has extension in 8 bit imm */
+#define NoRex64	     0x8000000  /* instruction don't need Rex64 prefix.  */
+#define Rex64	    0x10000000  /* instruction require Rex64 prefix.  */
+#define Ugh	    0x20000000	/* deprecated fp insn, gets a warning */
 
   /* operand_types[i] describes the type of operand i.  This is made
      by OR'ing together all of the possible type masks.  (e.g.

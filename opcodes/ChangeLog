@@ -1,3 +1,33 @@
+2007-05-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.h (ShortForm): Redefined.
+	(Jump): Likewise.
+	(JumpDword): Likewise.
+	(JumpByte): Likewise.
+	(JumpInterSegment): Likewise.
+	(FloatMF): Likewise.
+	(FloatR): Likewise.
+	(FloatD): Likewise.
+	(Size16): Likewise.
+	(Size32): Likewise.
+	(Size64): Likewise.
+	(IgnoreSize): Likewise.
+	(DefaultSize): Likewise.
+	(No_bSuf): Likewise.
+	(No_wSuf): Likewise.
+	(No_lSuf): Likewise.
+	(No_sSuf): Likewise.
+	(No_qSuf): Likewise.
+	(No_xSuf): Likewise.
+	(FWait): Likewise.
+	(IsString): Likewise.
+	(regKludge): Likewise.
+	(IsPrefix): Likewise.
+	(ImmExt): Likewise.
+	(NoRex64): Likewise.
+	(Rex64): Likewise.
+	(Ugh): Likewise.
+
 2007-05-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (threebyte_0x38_uses_DATA_prefix): Correct entries
