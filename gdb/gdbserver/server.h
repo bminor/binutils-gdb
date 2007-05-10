@@ -161,6 +161,7 @@ void enable_async_io (void);
 void disable_async_io (void);
 void unblock_async_io (void);
 void block_async_io (void);
+void check_remote_input_interrupt_request (void);
 void convert_ascii_to_int (char *from, unsigned char *to, int n);
 void convert_int_to_ascii (unsigned char *from, char *to, int n);
 void new_thread_notify (int id);

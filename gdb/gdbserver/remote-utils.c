@@ -70,6 +70,12 @@
 typedef int socklen_t;
 #endif
 
+#if USE_WIN32API
+# define INVALID_DESCRIPTOR INVALID_SOCKET
+#else
+# define INVALID_DESCRIPTOR -1
+#endif
+
 /* A cache entry for a successfully looked-up symbol.  */
 struct sym_cache
 {
@@ -88,7 +94,7 @@ int all_symbols_looked_up;
 int remote_debug = 0;
 struct ui_file *gdb_stdlog;
 
-static int remote_desc;
+static int remote_desc = INVALID_DESCRIPTOR;
 
 /* FIXME headerize? */
 extern int using_threads;
@@ -588,8 +594,6 @@ putpkt (char *buf)
   return putpkt_binary (buf, strlen (buf));
 }
 
-#ifndef USE_WIN32API
-
 /* Come here when we get an input interrupt from the remote side.  This
    interrupt should only be active while we are waiting for the child to do
    something.  About the only thing that should come through is a ^C, which
@@ -610,7 +614,7 @@ input_interrupt (int unused)
     {
       int cc;
       char c = 0;
-      
+
       cc = read (remote_desc, &c, 1);
 
       if (cc != 1 || c != '\003')
@@ -619,11 +623,23 @@ input_interrupt (int unused)
 		   cc, c, c);
 	  return;
 	}
-      
+
       (*the_target->request_interrupt) ();
     }
 }
-#endif
+
+/* Check if the remote side sent us an interrupt request (^C).  */
+void
+check_remote_input_interrupt_request (void)
+{
+  /* This function may be called before establishing communications,
+     therefore we need to validate the remote descriptor.  */
+
+  if (remote_desc == INVALID_DESCRIPTOR)
+    return;
+
+  input_interrupt (0);
+}
 
 /* Asynchronous I/O support.  SIGIO must be enabled when waiting, in order to
    accept Control-C from the client, and must be disabled when talking to

@@ -77,6 +77,8 @@ static DEBUG_EVENT current_event;
 
 typedef BOOL WINAPI (*winapi_DebugActiveProcessStop) (DWORD dwProcessId);
 typedef BOOL WINAPI (*winapi_DebugSetProcessKillOnExit) (BOOL KillOnExit);
+typedef BOOL WINAPI (*winapi_DebugBreakProcess) (HANDLE);
+typedef BOOL WINAPI (*winapi_GenerateConsoleCtrlEvent) (DWORD, DWORD);
 
 static DWORD main_thread_id = 0;
 
@@ -208,9 +210,8 @@ enum target_waitkind
      pathname is pointed to by value.execd_pathname.  */
   TARGET_WAITKIND_EXECD,
 
-  /* Nothing happened, but we stopped anyway.  This perhaps should be handled
-     within target_wait, but I'm not sure target_wait should be resuming the
-     inferior.  */
+  /* Nothing interesting happened, but we stopped anyway.  We take the
+     chance to check if GDB requested an interrupt.  */
   TARGET_WAITKIND_SPURIOUS,
 };
 
@@ -879,7 +880,9 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
   last_sig = TARGET_SIGNAL_0;
   ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
 
-  if (!(debug_event = WaitForDebugEvent (&current_event, 1000)))
+  /* Keep the wait time low enough for confortable remote interruption,
+     but high enough so gdbserver doesn't become a bottleneck.  */
+  if (!(debug_event = WaitForDebugEvent (&current_event, 250)))
     return;
 
   current_inferior =
@@ -1007,6 +1010,9 @@ win32_wait (char *status)
 
   while (1)
     {
+      /* Check if GDB sent us an interrupt request.  */
+      check_remote_input_interrupt_request ();
+
       get_child_debug_event (&our_status);
 
       switch (our_status.kind)
@@ -1078,6 +1084,39 @@ win32_write_inferior_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
   return child_xfer_memory (memaddr, (char *) myaddr, len, 1, 0) != len;
 }
 
+/* Send an interrupt request to the inferior process. */
+static void
+win32_request_interrupt (void)
+{
+  winapi_DebugBreakProcess DebugBreakProcess;
+  winapi_GenerateConsoleCtrlEvent GenerateConsoleCtrlEvent;
+
+#ifdef _WIN32_WCE
+  HMODULE dll = GetModuleHandle (_T("COREDLL.DLL"));
+#else
+  HMODULE dll = GetModuleHandle (_T("KERNEL32.DLL"));
+#endif
+
+  GenerateConsoleCtrlEvent = GETPROCADDRESS (dll, GenerateConsoleCtrlEvent);
+
+  if (GenerateConsoleCtrlEvent != NULL
+      && GenerateConsoleCtrlEvent (CTRL_BREAK_EVENT, current_process_id))
+    return;
+
+  /* GenerateConsoleCtrlEvent can fail if process id being debugged is
+     not a process group id.
+     Fallback to XP/Vista 'DebugBreakProcess', which generates a
+     breakpoint exception in the interior process.  */
+
+  DebugBreakProcess = GETPROCADDRESS (dll, DebugBreakProcess);
+
+  if (DebugBreakProcess != NULL
+      && DebugBreakProcess (current_process_handle))
+    return;
+
+  OUTMSG (("Could not interrupt process.\n"));
+}
+
 static const char *
 win32_arch_string (void)
 {
@@ -1098,7 +1137,7 @@ static struct target_ops win32_target_ops = {
   win32_read_inferior_memory,
   win32_write_inferior_memory,
   NULL,
-  NULL,
+  win32_request_interrupt,
   NULL,
   NULL,
   NULL,

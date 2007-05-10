@@ -1,4 +1,23 @@
 2007-05-10  Pedro Alves  <pedro_alves@portugalmail.pt>
+	    Leo Zayas  <lerele@champenstudios@com>
+
+	* server.h (check_remote_input_interrupt_request): New function.
+	* remote_utils.c (INVALID_DESCRIPTOR): New define.
+	(remote_desc): Initialize with INVALID_DESCRIPTOR.
+	(input_interrupt): Expose on USE_WIN32API too.  Fix whitespace.
+	(check_remote_input_interrupt_request): New function.
+	* server.h (check_remote_input_interrupt_request): Declare.
+
+	* win32-low.(winapi_DebugBreakProcess,
+	winapi_GenerateConsoleCtrlEvent): New typedefs.
+	(get_child_debug_event): Lower Win32 debug event polling from 1 sec
+	to 250 ms.
+	(win32_wait): Check for remote interrupt request
+	with check_remote_input_interrupt_request.
+	(win32_request_interrupt): New function.
+	(win32_target_op): Set request_interrupt to win32_request_interrupt.
+
+2007-05-10  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* win32-low.c (debug_registers_changed,
 	debug_registers_used, CONTEXT_EXTENDED_REGISTERS,
