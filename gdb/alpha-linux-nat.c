@@ -84,7 +84,7 @@ fill_fpregset (const struct regcache *regcache,
 
 
 static CORE_ADDR
-alpha_linux_register_u_offset (int regno)
+alpha_linux_register_u_offset (struct gdbarch *gdbarch, int regno, int store_p)
 {
   if (regno == PC_REGNUM)
     return PC;

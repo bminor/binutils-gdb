@@ -91,7 +91,7 @@ struct target_ops * linux_target (void);
 /* Create a generic GNU/Linux target using traditional 
    ptrace register access.  */
 struct target_ops *
-linux_trad_target (CORE_ADDR (*register_u_offset)(int));
+linux_trad_target (CORE_ADDR (*register_u_offset)(struct gdbarch *, int, int));
 
 /* Register the customized GNU/Linux target.  This should be used
    instead of calling add_target directly.  */

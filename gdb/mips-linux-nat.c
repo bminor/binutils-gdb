@@ -47,112 +47,75 @@ static int have_ptrace_regsets = 1;
 void (*super_fetch_registers) (struct regcache *, int);
 void (*super_store_registers) (struct regcache *, int);
 
-/* Pseudo registers can not be read.  ptrace does not provide a way to
-   read (or set) MIPS_PS_REGNUM, and there's no point in reading or
-   setting MIPS_ZERO_REGNUM.  We also can not set BADVADDR, CAUSE, or
-   FCRIR via ptrace().  */
-
-int
-mips_linux_cannot_fetch_register (int regno)
-{
-  if (regno > MIPS_ZERO_REGNUM && regno < MIPS_ZERO_REGNUM + 32)
-    return 0;
-  else if (regno >= mips_regnum (current_gdbarch)->fp0
-	   && regno <= mips_regnum (current_gdbarch)->fp0 + 32)
-    return 0;
-  else if (regno == mips_regnum (current_gdbarch)->lo
-	   || regno == mips_regnum (current_gdbarch)->hi
-	   || regno == mips_regnum (current_gdbarch)->badvaddr
-	   || regno == mips_regnum (current_gdbarch)->cause
-	   || regno == mips_regnum (current_gdbarch)->pc
-	   || regno == mips_regnum (current_gdbarch)->fp_control_status
-	   || regno == mips_regnum (current_gdbarch)->fp_implementation_revision)
-    return 0;
-  else
-    return 1;
-}
-
-int
-mips_linux_cannot_store_register (int regno)
-{
-  if (regno > MIPS_ZERO_REGNUM && regno < MIPS_ZERO_REGNUM + 32)
-    return 0;
-  else if (regno >= FP0_REGNUM && regno <= FP0_REGNUM + 32)
-    return 0;
-  else if (regno == mips_regnum (current_gdbarch)->lo
-	   || regno == mips_regnum (current_gdbarch)->hi
-	   || regno == mips_regnum (current_gdbarch)->pc
-	   || regno == mips_regnum (current_gdbarch)->fp_control_status)
-    return 0;
-  else
-    return 1;
-}
-
 /* Map gdb internal register number to ptrace ``address''.
-   These ``addresses'' are normally defined in <asm/ptrace.h>.  */
+   These ``addresses'' are normally defined in <asm/ptrace.h>. 
+
+   ptrace does not provide a way to read (or set) MIPS_PS_REGNUM,
+   and there's no point in reading or setting MIPS_ZERO_REGNUM.
+   We also can not set BADVADDR, CAUSE, or FCRIR via ptrace().  */
 
 static CORE_ADDR
-mips_linux_register_addr (int regno)
+mips_linux_register_addr (struct gdbarch *gdbarch, int regno, int store)
 {
-  int regaddr;
+  CORE_ADDR regaddr;
 
   if (regno < 0 || regno >= NUM_REGS)
     error (_("Bogon register number %d."), regno);
 
-  if (regno < 32)
+  if (regno > MIPS_ZERO_REGNUM && regno < MIPS_ZERO_REGNUM + 32)
     regaddr = regno;
-  else if ((regno >= mips_regnum (current_gdbarch)->fp0)
-	   && (regno < mips_regnum (current_gdbarch)->fp0 + 32))
-    regaddr = FPR_BASE + (regno - mips_regnum (current_gdbarch)->fp0);
-  else if (regno == mips_regnum (current_gdbarch)->pc)
+  else if ((regno >= mips_regnum (gdbarch)->fp0)
+	   && (regno < mips_regnum (gdbarch)->fp0 + 32))
+    regaddr = FPR_BASE + (regno - mips_regnum (gdbarch)->fp0);
+  else if (regno == mips_regnum (gdbarch)->pc)
     regaddr = PC;
-  else if (regno == mips_regnum (current_gdbarch)->cause)
-    regaddr = CAUSE;
-  else if (regno == mips_regnum (current_gdbarch)->badvaddr)
-    regaddr = BADVADDR;
-  else if (regno == mips_regnum (current_gdbarch)->lo)
+  else if (regno == mips_regnum (gdbarch)->cause)
+    regaddr = store? (CORE_ADDR) -1 : CAUSE;
+  else if (regno == mips_regnum (gdbarch)->badvaddr)
+    regaddr = store? (CORE_ADDR) -1 : BADVADDR;
+  else if (regno == mips_regnum (gdbarch)->lo)
     regaddr = MMLO;
-  else if (regno == mips_regnum (current_gdbarch)->hi)
+  else if (regno == mips_regnum (gdbarch)->hi)
     regaddr = MMHI;
-  else if (regno == mips_regnum (current_gdbarch)->fp_control_status)
+  else if (regno == mips_regnum (gdbarch)->fp_control_status)
     regaddr = FPC_CSR;
-  else if (regno == mips_regnum (current_gdbarch)->fp_implementation_revision)
-    regaddr = FPC_EIR;
+  else if (regno == mips_regnum (gdbarch)->fp_implementation_revision)
+    regaddr = store? (CORE_ADDR) -1 : FPC_EIR;
   else
-    error (_("Unknowable register number %d."), regno);
+    regaddr = (CORE_ADDR) -1;
 
   return regaddr;
 }
 
 static CORE_ADDR
-mips64_linux_register_addr (int regno)
+mips64_linux_register_addr (struct gdbarch *gdbarch, int regno, int store)
 {
-  int regaddr;
+  CORE_ADDR regaddr;
 
   if (regno < 0 || regno >= NUM_REGS)
     error (_("Bogon register number %d."), regno);
 
-  if (regno < 32)
+  if (regno > MIPS_ZERO_REGNUM && regno < MIPS_ZERO_REGNUM + 32)
     regaddr = regno;
-  else if ((regno >= mips_regnum (current_gdbarch)->fp0)
-	   && (regno < mips_regnum (current_gdbarch)->fp0 + 32))
+  else if ((regno >= mips_regnum (gdbarch)->fp0)
+	   && (regno < mips_regnum (gdbarch)->fp0 + 32))
     regaddr = MIPS64_FPR_BASE + (regno - FP0_REGNUM);
-  else if (regno == mips_regnum (current_gdbarch)->pc)
+  else if (regno == mips_regnum (gdbarch)->pc)
     regaddr = MIPS64_PC;
-  else if (regno == mips_regnum (current_gdbarch)->cause)
-    regaddr = MIPS64_CAUSE;
-  else if (regno == mips_regnum (current_gdbarch)->badvaddr)
-    regaddr = MIPS64_BADVADDR;
-  else if (regno == mips_regnum (current_gdbarch)->lo)
+  else if (regno == mips_regnum (gdbarch)->cause)
+    regaddr = store? (CORE_ADDR) -1 : MIPS64_CAUSE;
+  else if (regno == mips_regnum (gdbarch)->badvaddr)
+    regaddr = store? (CORE_ADDR) -1 : MIPS64_BADVADDR;
+  else if (regno == mips_regnum (gdbarch)->lo)
     regaddr = MIPS64_MMLO;
-  else if (regno == mips_regnum (current_gdbarch)->hi)
+  else if (regno == mips_regnum (gdbarch)->hi)
     regaddr = MIPS64_MMHI;
-  else if (regno == mips_regnum (current_gdbarch)->fp_control_status)
+  else if (regno == mips_regnum (gdbarch)->fp_control_status)
     regaddr = MIPS64_FPC_CSR;
-  else if (regno == mips_regnum (current_gdbarch)->fp_implementation_revision)
-    regaddr = MIPS64_FPC_EIR;
+  else if (regno == mips_regnum (gdbarch)->fp_implementation_revision)
+    regaddr = store? (CORE_ADDR) -1 : MIPS64_FPC_EIR;
   else
-    error (_("Unknowable register number %d."), regno);
+    regaddr = (CORE_ADDR) -1;
 
   return regaddr;
 }
@@ -364,12 +327,12 @@ mips64_linux_store_registers (struct regcache *regcache, int regnum)
    REGNO.  */
 
 static CORE_ADDR
-mips_linux_register_u_offset (int regno)
+mips_linux_register_u_offset (struct gdbarch *gdbarch, int regno, int store_p)
 {
-  if (mips_abi_regsize (current_gdbarch) == 8)
-    return mips64_linux_register_addr (regno);
+  if (mips_abi_regsize (gdbarch) == 8)
+    return mips64_linux_register_addr (gdbarch, regno, store_p);
   else
-    return mips_linux_register_addr (regno);
+    return mips_linux_register_addr (gdbarch, regno, store_p);
 }
 
 void _initialize_mips_linux_nat (void);

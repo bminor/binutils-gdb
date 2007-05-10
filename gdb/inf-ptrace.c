@@ -612,7 +612,7 @@ inf_ptrace_target (void)
 
 /* Pointer to a function that returns the offset within the user area
    where a particular register is stored.  */
-static CORE_ADDR (*inf_ptrace_register_u_offset)(int);
+static CORE_ADDR (*inf_ptrace_register_u_offset)(struct gdbarch *, int, int);
 
 /* Fetch register REGNUM from the inferior.  */
 
@@ -624,7 +624,9 @@ inf_ptrace_fetch_register (struct regcache *regcache, int regnum)
   PTRACE_TYPE_RET *buf;
   int pid, i;
 
-  if (CANNOT_FETCH_REGISTER (regnum))
+  /* This isn't really an address, but ptrace thinks of it as one.  */
+  addr = inf_ptrace_register_u_offset (current_gdbarch, regnum, 0);
+  if (addr == (CORE_ADDR)-1 || CANNOT_FETCH_REGISTER (regnum))
     {
       regcache_raw_supply (regcache, regnum, NULL);
       return;
@@ -636,10 +638,7 @@ inf_ptrace_fetch_register (struct regcache *regcache, int regnum)
   if (pid == 0)
     pid = ptid_get_pid (inferior_ptid);
 
-  /* This isn't really an address, but ptrace thinks of it as one.  */
-  addr = inf_ptrace_register_u_offset (regnum);
   size = register_size (current_gdbarch, regnum);
-
   gdb_assert ((size % sizeof (PTRACE_TYPE_RET)) == 0);
   buf = alloca (size);
 
@@ -680,7 +679,9 @@ inf_ptrace_store_register (const struct regcache *regcache, int regnum)
   PTRACE_TYPE_RET *buf;
   int pid, i;
 
-  if (CANNOT_STORE_REGISTER (regnum))
+  /* This isn't really an address, but ptrace thinks of it as one.  */
+  addr = inf_ptrace_register_u_offset (current_gdbarch, regnum, 1);
+  if (addr == (CORE_ADDR)-1 || CANNOT_STORE_REGISTER (regnum))
     return;
 
   /* Cater for systems like GNU/Linux, that implement threads as
@@ -689,10 +690,7 @@ inf_ptrace_store_register (const struct regcache *regcache, int regnum)
   if (pid == 0)
     pid = ptid_get_pid (inferior_ptid);
 
-  /* This isn't really an address, but ptrace thinks of it as one.  */
-  addr = inf_ptrace_register_u_offset (regnum);
   size = register_size (current_gdbarch, regnum);
-
   gdb_assert ((size % sizeof (PTRACE_TYPE_RET)) == 0);
   buf = alloca (size);
 
@@ -728,7 +726,8 @@ inf_ptrace_store_registers (struct regcache *regcache, int regnum)
    particular register is stored.  */
 
 struct target_ops *
-inf_ptrace_trad_target (CORE_ADDR (*register_u_offset)(int))
+inf_ptrace_trad_target (CORE_ADDR (*register_u_offset)
+					(struct gdbarch *, int, int))
 {
   struct target_ops *t = inf_ptrace_target();
 

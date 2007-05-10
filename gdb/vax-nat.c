@@ -69,7 +69,7 @@ vax_register_u_addr (CORE_ADDR u_ar0, int regnum)
 }
 
 static CORE_ADDR
-vax_register_u_offset (int regnum)
+vax_register_u_offset (struct gdbarch *gdbarch, int regnum, int store_p)
 {
   size_t u_ar0_offset = offsetof (struct user, u_ar0);
   CORE_ADDR u_ar0;

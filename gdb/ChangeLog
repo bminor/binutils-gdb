@@ -1,3 +1,31 @@
+2007-05-10  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* inf-ptrace.c (inf_ptrace_register_u_offset): Adapt parameter list.
+	(inf_ptrace_fetch_register): Add register_u_offset callback parameters
+	GDBARCH and STORE_P.  Handle callback (CORE_ADDR) -1 return value.
+	(inf_ptrace_store_register): Likewise.
+	(inf_ptrace_trad_target): Adapt register_u_offset parameter list.
+	* inf-ptrace.h (inf_ptrace_trad_target): Likewise.
+
+	* vax-nat.c (vax_register_u_offset): Adapt parameter list.
+
+	* linux-nat.c (linux_trad_target): Adapt parameter list.
+	* linux-nat.h (linux_trad_target): Likewise.
+
+	* alpha-linux-nat.c (alpha_linux_register_u_offset): Adapt parameters.
+
+	* mips-linux-nat.c (mips_linux_cannot_fetch_register): Remove.
+	(mips_linux_cannot_store_register): Likewise.
+	(mips_linux_register_addr): Add GDBARCH and STORE_P parameters.
+	Return (CORE_ADDR) -1 for registers that cannot be fetched or
+	stored via ptrace.  Use GDBARCH instead of current_gdbarch.
+	(mips64_linux_register_addr): Likewise.
+	(mips_linux_register_u_offset): Adapt parameter list.  Pass
+	GDBARCH and STORE_P on to mips{64}_linux_register_addr.
+
+	* config/mips/linux.mh (NAT_FILE): Set to config/nm-linux.h.
+	* config/mips/nm-linux.h: Delete file.
+
 2007-05-10  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* remote.c (remote_detach): Error out if remote can't detach.

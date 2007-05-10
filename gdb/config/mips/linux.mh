@@ -1,5 +1,5 @@
 # Host: Linux/MIPS
-NAT_FILE= nm-linux.h
+NAT_FILE= config/nm-linux.h
 NATDEPFILES= inf-ptrace.o fork-child.o mips-linux-nat.o \
 	linux-thread-db.o proc-service.o gcore.o \
 	linux-nat.o linux-fork.o

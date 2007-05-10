@@ -3198,7 +3198,7 @@ linux_target (void)
 }
 
 struct target_ops *
-linux_trad_target (CORE_ADDR (*register_u_offset)(int))
+linux_trad_target (CORE_ADDR (*register_u_offset)(struct gdbarch *, int, int))
 {
   struct target_ops *t;
 

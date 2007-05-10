@@ -32,6 +32,7 @@ extern struct target_ops *inf_ptrace_target (void);
    particular register is stored.  */
 
 extern struct target_ops *
-  inf_ptrace_trad_target (CORE_ADDR (*register_u_offset)(int));
+  inf_ptrace_trad_target (CORE_ADDR (*register_u_offset)
+					(struct gdbarch *, int, int));
 
 #endif
