@@ -192,6 +192,13 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	    error_no_arg (_("filename to set it to."));
 	  if (*(char **) c->var != NULL)
 	    xfree (*(char **) c->var);
+	  {
+	    /* Clear trailing whitespace of filename.  */
+	    char *ptr = arg + strlen (arg) - 1;
+	    while (ptr >= arg && (*ptr == ' ' || *ptr == '\t'))
+	      ptr--;
+	    *(ptr + 1) = '\0';
+	  }
 	  *(char **) c->var = tilde_expand (arg);
 	  break;
 	case var_boolean:

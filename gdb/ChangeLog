@@ -1,3 +1,9 @@
+2007-05-10  Chris Dearman  <chris@mips.com>
+            Maciej W. Rozycki  <macro@mips.com>
+
+	* cli/cli-setshow.c (do_setshow_command): Remove trailing
+	whitespace when setting a var_filename.
+
 2007-05-09  Bob Wilson  <bob.wilson@acm.org>
 	
 	* main.c (captured_main): Recognize -tui option and print an error
