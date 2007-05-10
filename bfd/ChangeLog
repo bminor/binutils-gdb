@@ -1,3 +1,10 @@
+2007-05-11  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 4454
+	* elf-eh-frame.c (struct cie): Make "personality" a bfd_vma.
+	(_bfd_elf_discard_section_eh_frame): Handle local syms on
+	personality relocation.
+
 2007-05-10  Richard Sandiford  <richard@codesourcery.com>
 
 	* elf.c (assign_file_positions_for_load_sections): Use p_memsz

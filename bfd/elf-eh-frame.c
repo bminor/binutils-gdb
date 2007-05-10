@@ -37,7 +37,7 @@ struct cie
   bfd_signed_vma data_align;
   bfd_vma ra_column;
   bfd_vma augmentation_size;
-  struct elf_link_hash_entry *personality;
+  bfd_vma personality;
   asection *output_sec;
   struct eh_cie_fde *cie_inf;
   unsigned char per_encoding;
@@ -675,6 +675,7 @@ _bfd_elf_discard_section_eh_frame
 		      if (GET_RELOC (buf) != NULL)
 			{
 			  unsigned long r_symndx;
+			  asection *sym_sec = NULL;
 
 #ifdef BFD64
 			  if (ptr_size == 8)
@@ -694,8 +695,34 @@ _bfd_elf_discard_section_eh_frame
 				h = (struct elf_link_hash_entry *)
 				    h->root.u.i.link;
 
-			      cie->personality = h;
+			      if (h->root.type == bfd_link_hash_defined
+				  || h->root.type == bfd_link_hash_defweak)
+				{
+				  cie->personality = h->root.u.def.value;
+				  sym_sec = h->root.u.def.section;
+				}
 			    }
+			  else
+			    {
+			      Elf_Internal_Shdr *symtab_hdr;
+			      Elf_Internal_Sym *sym;
+
+			      symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+			      sym = bfd_elf_get_elf_syms (abfd, symtab_hdr,
+							  1, r_symndx,
+							  NULL, NULL, NULL);
+			      if (sym != NULL)
+				{
+				  cie->personality = sym->st_value;
+				  sym_sec = (bfd_section_from_elf_index
+					     (abfd, sym->st_shndx));
+				  free (sym);
+				}
+			    }
+			  if (sym_sec != NULL)
+			    cie->personality += (sym_sec->output_section->vma
+						 + sym_sec->output_offset);
+
 			  /* Cope with MIPS-style composite relocations.  */
 			  do
 			    cookie->rel++;
