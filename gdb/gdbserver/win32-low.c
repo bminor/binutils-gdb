@@ -55,6 +55,14 @@
 #define COUNTOF(STR) (sizeof (STR) / sizeof ((STR)[0]))
 #endif
 
+#ifdef _WIN32_WCE
+# define GETPROCADDRESS(DLL, PROC) \
+  ((winapi_ ## PROC) GetProcAddress (DLL, TEXT (#PROC)))
+#else
+# define GETPROCADDRESS(DLL, PROC) \
+  ((winapi_ ## PROC) GetProcAddress (DLL, #PROC))
+#endif
+
 int using_threads = 1;
 
 /* Globals.  */
@@ -70,8 +78,8 @@ static int debug_registers_used = 0;
 
 #define NUM_REGS (the_low_target.num_regs)
 
-typedef BOOL winapi_DebugActiveProcessStop (DWORD dwProcessId);
-typedef BOOL winapi_DebugSetProcessKillOnExit (BOOL KillOnExit);
+typedef BOOL WINAPI (*winapi_DebugActiveProcessStop) (DWORD dwProcessId);
+typedef BOOL WINAPI (*winapi_DebugSetProcessKillOnExit) (BOOL KillOnExit);
 
 #ifndef CONTEXT_EXTENDED_REGISTERS
 #define CONTEXT_EXTENDED_REGISTERS 0
@@ -462,7 +470,7 @@ win32_create_inferior (char *program, char **program_args)
   int argc;
   PROCESS_INFORMATION pi;
 #ifndef __MINGW32CE__
-  STARTUPINFO si = { sizeof (STARTUPINFO) };
+  STARTUPINFOA si = { sizeof (STARTUPINFOA) };
   char *winenv = NULL;
 #else
   wchar_t *wargs, *wprogram;
@@ -523,16 +531,16 @@ win32_create_inferior (char *program, char **program_args)
                         NULL,     /* start info, not supported */
                         &pi);     /* proc info */
 #else
-  ret = CreateProcess (program, /* image name */
-		       args,	/* command line */
-		       NULL,	/* security */
-		       NULL,	/* thread */
-		       TRUE,	/* inherit handles */
-		       flags,	/* start flags */
-		       winenv,  /* environment */
-		       NULL,	/* current directory */
-		       &si,     /* start info */
-		       &pi);    /* proc info */
+  ret = CreateProcessA (program,  /* image name */
+			args,     /* command line */
+			NULL,     /* security */
+			NULL,     /* thread */
+			TRUE,     /* inherit handles */
+			flags,    /* start flags */
+			winenv,   /* environment */
+			NULL,     /* current directory */
+			&si,      /* start info */
+			&pi);     /* proc info */
 #endif
 
 #ifndef USE_WIN32API
@@ -573,18 +581,15 @@ static int
 win32_attach (unsigned long pid)
 {
   int res = 0;
-  winapi_DebugActiveProcessStop *DebugActiveProcessStop = NULL;
-
-  winapi_DebugSetProcessKillOnExit *DebugSetProcessKillOnExit = NULL;
+  winapi_DebugActiveProcessStop DebugActiveProcessStop = NULL;
+  winapi_DebugSetProcessKillOnExit DebugSetProcessKillOnExit = NULL;
 #ifdef _WIN32_WCE
   HMODULE dll = GetModuleHandle (_T("COREDLL.DLL"));
 #else
   HMODULE dll = GetModuleHandle (_T("KERNEL32.DLL"));
 #endif
-  DebugActiveProcessStop = (winapi_DebugActiveProcessStop *)
-    GetProcAddress (dll, _T("DebugActiveProcessStop"));
-  DebugSetProcessKillOnExit = (winapi_DebugSetProcessKillOnExit *)
-    GetProcAddress (dll, _T("DebugSetProcessKillOnExit"));
+  DebugActiveProcessStop = GETPROCADDRESS (dll, DebugActiveProcessStop);
+  DebugSetProcessKillOnExit = GETPROCADDRESS (dll, DebugSetProcessKillOnExit);
 
   res = DebugActiveProcess (pid) ? 1 : 0;
 
@@ -686,17 +691,15 @@ win32_kill (void)
 static void
 win32_detach (void)
 {
-  winapi_DebugActiveProcessStop *DebugActiveProcessStop = NULL;
-  winapi_DebugSetProcessKillOnExit *DebugSetProcessKillOnExit = NULL;
+  winapi_DebugActiveProcessStop DebugActiveProcessStop = NULL;
+  winapi_DebugSetProcessKillOnExit DebugSetProcessKillOnExit = NULL;
 #ifdef _WIN32_WCE
   HMODULE dll = GetModuleHandle (_T("COREDLL.DLL"));
 #else
   HMODULE dll = GetModuleHandle (_T("KERNEL32.DLL"));
 #endif
-  DebugActiveProcessStop = (winapi_DebugActiveProcessStop *)
-    GetProcAddress (dll, _T("DebugActiveProcessStop"));
-  DebugSetProcessKillOnExit = (winapi_DebugSetProcessKillOnExit *)
-    GetProcAddress (dll, _T("DebugSetProcessKillOnExit"));
+  DebugActiveProcessStop = GETPROCADDRESS (dll, DebugActiveProcessStop);
+  DebugSetProcessKillOnExit = GETPROCADDRESS (dll, DebugSetProcessKillOnExit);
 
   if (DebugSetProcessKillOnExit != NULL)
     DebugSetProcessKillOnExit (FALSE);

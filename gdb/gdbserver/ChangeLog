@@ -1,5 +1,14 @@
 2007-05-10  Pedro Alves  <pedro_alves@portugalmail.pt>
 
+	* win32-low.c (GETPROCADDRESS): Define.
+	(winapi_DebugActiveProcessStop): Add WINAPI.  typedef as pointer.
+	(winapi_DebugSetProcessKillOnExit): Likewise.
+	(win32_create_inferior): Force usage of ansi CreateProcessA.
+	(win32_attach): Use GETPROCADDRESS.
+	(win32_detach): Likewise.
+
+2007-05-10  Pedro Alves  <pedro_alves@portugalmail.pt>
+
 	* win32-low.c (win32_wait): Don't use WSTOPSIG.
 
 2007-03-30  Pedro Alves  <pedro_alves@portugalmail.pt>
