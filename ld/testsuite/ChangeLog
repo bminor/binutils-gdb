@@ -1,3 +1,7 @@
+2007-05-10  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-elf/multibss1.d, ld-elf/multibss1.s: New test.
+
 2007-04-27  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-m68k/plt1-isac.d: New.

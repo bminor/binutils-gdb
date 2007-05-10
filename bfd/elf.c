@@ -4520,7 +4520,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	  if (p->p_type == PT_LOAD
 	      || p->p_type == PT_TLS)
 	    {
-	      bfd_signed_vma adjust = sec->lma - (p->p_paddr + p->p_filesz);
+	      bfd_signed_vma adjust = sec->lma - (p->p_paddr + p->p_memsz);
 
 	      if ((flags & SEC_LOAD) != 0
 		  || ((flags & SEC_ALLOC) != 0

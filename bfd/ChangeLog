@@ -1,3 +1,8 @@
+2007-05-10  Richard Sandiford  <richard@codesourcery.com>
+
+	* elf.c (assign_file_positions_for_load_sections): Use p_memsz
+	rather than p_filesz to calculate the LMA of the end of a segment.
+
 2007-05-10  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf64-ppc.c (ppc64_elf_adjust_dynamic_symbol): Don't do copyreloc
