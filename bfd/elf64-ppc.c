@@ -5851,6 +5851,10 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (!h->non_got_ref)
     return TRUE;
 
+  /* Don't generate a copy reloc for symbols defined in the executable.  */
+  if (!h->def_dynamic || !h->ref_regular || h->def_regular)
+    return TRUE;
+
   if (ELIMINATE_COPY_RELOCS)
     {
       struct ppc_link_hash_entry * eh;
