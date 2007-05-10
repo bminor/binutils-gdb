@@ -1,5 +1,13 @@
 2007-05-10  Richard Sandiford  <richard@codesourcery.com>
 
+	* ld-arm/vxworks1-lib.dd: Expect "push" instead of stmdb and
+	"pop" instead of ldmia.  Don't require specific symbolic addresses
+	for in-text addresses.  Expect data to be rendered as .words rather
+	than disassembled.
+	* ld-arm/vxworks1.dd: Likewise.
+
+2007-05-10  Richard Sandiford  <richard@codesourcery.com>
+
 	* ld-elf/multibss1.d, ld-elf/multibss1.s: New test.
 
 2007-04-27  Nathan Sidwell  <nathan@codesourcery.com>

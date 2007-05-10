@@ -8062,7 +8062,8 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		if (r_type != R_ARM_ABS32
                     && r_type != R_ARM_REL32
                     && r_type != R_ARM_ABS32_NOI
-                    && r_type != R_ARM_REL32_NOI)
+                    && r_type != R_ARM_REL32_NOI
+                    && r_type != R_ARM_ABS12)
 		  h->needs_plt = 1;
 
 		/* If we create a PLT entry, this relocation will reference
@@ -9248,7 +9249,7 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd, struct bfd_link_info * info,
 	      unsigned int i;
 	      bfd_vma val;
 
-	      for (i = 0; i != htab->plt_entry_size / 4; i++)
+	      for (i = 0; i != htab->plt_entry_size / 4; i++, ptr += 4)
 		{
 		  val = elf32_arm_vxworks_exec_plt_entry[i];
 		  if (i == 2)

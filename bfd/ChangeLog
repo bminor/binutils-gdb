@@ -1,3 +1,10 @@
+2007-05-10  Richard Sandiford  <richard@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_check_relocs): Don't create PLT entries
+	for R_ARM_ABS12 relocs.
+	(elf32_arm_finish_dynamic_symbol): Fix the loop that creates
+	non-shared VxWorks PLT entries.
+
 2007-05-11  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 4454
