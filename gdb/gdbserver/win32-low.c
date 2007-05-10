@@ -1092,13 +1092,8 @@ win32_wait (char *status)
 	}
       else if (our_status.kind == TARGET_WAITKIND_STOPPED)
 	{
-#ifndef __MINGW32CE__
-	  OUTMSG2 (("Child Stopped with signal = %x \n",
-		    WSTOPSIG (our_status.value.sig)));
-#else
-	  OUTMSG2 (("Child Stopped with signal = %x \n",
+	  OUTMSG2 (("Child Stopped with signal = %d \n",
 		    our_status.value.sig));
-#endif
 
 	  *status = 'T';
 

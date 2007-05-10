@@ -1,3 +1,7 @@
+2007-05-10  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* win32-low.c (win32_wait): Don't use WSTOPSIG.
+
 2007-03-30  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* win32-low.c: Commit leftover changes from 2007-03-29.
