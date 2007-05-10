@@ -729,12 +729,13 @@ deal_with_atomic_sequence (struct regcache *regcache)
   CORE_ADDR breaks[2] = {-1, -1};
   CORE_ADDR loc = pc;
   CORE_ADDR branch_bp; /* Breakpoint at branch instruction's destination.  */
+  CORE_ADDR closing_insn; /* Instruction that closes the atomic sequence.  */
   int insn = read_memory_integer (loc, PPC_INSN_SIZE);
   int insn_count;
   int index;
   int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */  
   const int atomic_sequence_length = 16; /* Instruction sequence length.  */
-  const int opcode = BC_INSTRUCTION; /* Branch instruction's OPcode.  */
+  int opcode; /* Branch instruction's OPcode.  */
   int bc_insn_count = 0; /* Conditional branch instruction count.  */
 
   /* Assume all atomic sequences start with a lwarx/ldarx instruction.  */
@@ -758,6 +759,7 @@ deal_with_atomic_sequence (struct regcache *regcache)
             return 0; /* More than one conditional branch found, fallback 
                          to the standard single-step code.  */
           
+          opcode = insn >> 26;
           branch_bp = branch_dest (opcode, insn, pc, breaks[0]);
           
           if (branch_bp != -1)
@@ -778,14 +780,19 @@ deal_with_atomic_sequence (struct regcache *regcache)
       && (insn & STWCX_MASK) != STDCX_INSTRUCTION)
     return 0;
 
+  closing_insn = loc;
   loc += PPC_INSN_SIZE;
   insn = read_memory_integer (loc, PPC_INSN_SIZE);
 
   /* Insert a breakpoint right after the end of the atomic sequence.  */
   breaks[0] = loc;
 
-  /* Check for duplicated breakpoints.  */
-  if (last_breakpoint && (breaks[1] == breaks[0]))
+  /* Check for duplicated breakpoints.  Check also for a breakpoint
+     placed (branch instruction's destination) at the stwcx/stdcx 
+     instruction, this resets the reservation and take us back to the 
+     lwarx/ldarx instruction at the beginning of the atomic sequence.  */
+  if (last_breakpoint && ((breaks[1] == breaks[0]) 
+      || (breaks[1] == closing_insn)))
     last_breakpoint = 0;
 
   /* Effectively inserts the breakpoints.  */
