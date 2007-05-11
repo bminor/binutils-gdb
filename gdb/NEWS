@@ -35,6 +35,8 @@ has been rewritten to use the standard GDB remote protocol.
 
 * GDB can now step into C++ functions which are called through thunks.
 
+* GDB for the Cell/B.E. SPU now supports overlay debugging.
+
 * New commands
 
 set mem inaccessible-by-default
