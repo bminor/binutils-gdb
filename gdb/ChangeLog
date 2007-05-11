@@ -1,3 +1,8 @@
+2007-05-11  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-thread-db.c (enable_thread_event_reporting): Fix comment
+	typo.
+
 2007-05-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* breakpoint.c (single_step_breakpoint_inserted_here_p): New function.

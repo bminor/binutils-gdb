@@ -482,7 +482,7 @@ enable_thread_event_reporting (void)
 
 #ifdef HAVE_GNU_LIBC_VERSION_H
   /* The event reporting facility is broken for TD_DEATH events in
-     glibc 2.1.3, so don't enable it we have glibc but a lower
+     glibc 2.1.3, so don't enable it if we have glibc but a lower
      version.  */
   libc_version = gnu_get_libc_version ();
   if (sscanf (libc_version, "%d.%d", &libc_major, &libc_minor) == 2
