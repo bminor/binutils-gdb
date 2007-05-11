@@ -1587,8 +1587,14 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
 		 don't know what the overlay manager might do.  */
 	      if (b->loc_type == bp_loc_hardware_breakpoint)
 		val = target_remove_hw_breakpoint (&b->target_info);
-	      else
+
+	      /* However, we should remove *software* breakpoints only
+		 if the section is still mapped, or else we overwrite
+		 wrong code with the saved shadow contents.  */
+	      else if (section_is_mapped (b->section))
 		val = target_remove_breakpoint (&b->target_info);
+	      else
+		val = 0;
 	    }
 	  else
 	    {
