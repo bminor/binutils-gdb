@@ -1,3 +1,14 @@
+2007-05-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/ppc32elf.em (plt_style): New variable.
+	(old_plt): Delete.
+	(ppc_after_open): Adjust ppc_elf_select_plt_layout call.
+	(PARSE_AND_LIST_PROLOGUE): Define OPTION_NEW_PLT, renumber
+	OPTION_OLD_PLT, OPTION_OLD_GOT and OPTION_STUBSYMS.
+	(PARSE_AND_LIST_LONGOPTS, PARSE_AND_LIST_OPTIONS): Add secure-plt.
+	(PARSE_AND_LIST_ARGS_CASES): Handle OPTION_NEW_PLT.
+	* ld.texinfo (--secure-plt): Document.
+
 2007-05-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld.h (args_type, ld_config_type): Reorder fields.

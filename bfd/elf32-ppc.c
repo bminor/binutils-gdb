@@ -1712,6 +1712,10 @@ struct ppc_elf_obj_tdata
   /* A mapping from local symbols to offsets into the various linker
      sections added.  This is index by the symbol index.  */
   elf_linker_section_pointers_t **linker_section_pointers;
+
+  /* Flags used to auto-detect plt type.  */
+  unsigned int makes_plt_call : 1;
+  unsigned int has_rel16 : 1;
 };
 
 #define ppc_elf_tdata(bfd) \
@@ -2381,13 +2385,6 @@ struct ppc_elf_link_hash_entry
 
 #define ppc_elf_hash_entry(ent) ((struct ppc_elf_link_hash_entry *) (ent))
 
-enum ppc_elf_plt_type {
-  PLT_UNSET,
-  PLT_OLD,
-  PLT_NEW,
-  PLT_VXWORKS
-};
-
 /* PPC ELF linker hash table.  */
 
 struct ppc_elf_link_hash_table
@@ -2407,9 +2404,18 @@ struct ppc_elf_link_hash_table
   elf_linker_section_t sdata[2];
   asection *sbss;
 
+  /* The (unloaded but important) .rela.plt.unloaded on VxWorks.  */
+  asection *srelplt2;
+
+  /* The .got.plt section (VxWorks only)*/
+  asection *sgotplt;
+
   /* Shortcut to .__tls_get_addr.  */
   struct elf_link_hash_entry *tls_get_addr;
 
+  /* The bfd that forced an old-style PLT.  */
+  bfd *old_bfd;
+ 
   /* TLS local dynamic got entry handling.  */
   union {
     bfd_signed_vma refcount;
@@ -2427,23 +2433,11 @@ struct ppc_elf_link_hash_table
   /* The type of PLT we have chosen to use.  */
   enum ppc_elf_plt_type plt_type;
 
-  /* Whether we can use the new PLT layout.  */
-  unsigned int can_use_new_plt:1;
-
   /* Set if we should emit symbols for stubs.  */
   unsigned int emit_stub_syms:1;
 
-  /* Small local sym to section mapping cache.  */
-  struct sym_sec_cache sym_sec;
-
-  /* The (unloaded but important) .rela.plt.unloaded on VxWorks.  */
-  asection *srelplt2;
-
-  /* The .got.plt section (VxWorks only)*/
-  asection *sgotplt;
-
   /* True if the target system is VxWorks.  */
-  int is_vxworks;
+  unsigned int is_vxworks:1;
 
   /* The size of PLT entries.  */
   int plt_entry_size;
@@ -2451,6 +2445,9 @@ struct ppc_elf_link_hash_table
   int plt_slot_size;
   /* The size of the first PLT entry.  */
   int plt_initial_entry_size;
+
+  /* Small local sym to section mapping cache.  */
+  struct sym_sec_cache sym_sec;
 };
 
 /* Get the PPC ELF linker hash table from a link_info structure.  */
@@ -2522,8 +2519,6 @@ ppc_elf_link_hash_table_create (bfd *abfd)
   ret->plt_entry_size = 12;
   ret->plt_slot_size = 8;
   ret->plt_initial_entry_size = 72;
-  
-  ret->is_vxworks = 0;
 
   return &ret->elf.root;
 }
@@ -3293,8 +3288,13 @@ ppc_elf_check_relocs (bfd *abfd,
 	    }
 	  else
 	    {
-	      bfd_vma addend = r_type == R_PPC_PLTREL24 ? rel->r_addend : 0;
+	      bfd_vma addend = 0;
 
+	      if (r_type == R_PPC_PLTREL24)
+		{
+		  ppc_elf_tdata (abfd)->makes_plt_call = 1;
+		  addend = rel->r_addend;
+		}
 	      h->needs_plt = 1;
 	      if (!update_plt_info (abfd, h, got2, addend))
 		return FALSE;
@@ -3319,7 +3319,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	case R_PPC_REL16_LO:
 	case R_PPC_REL16_HI:
 	case R_PPC_REL16_HA:
-	  htab->can_use_new_plt = 1;
+	  ppc_elf_tdata (abfd)->has_rel16 = 1;
 	  break;
 
 	  /* These are just markers.  */
@@ -3348,7 +3348,10 @@ ppc_elf_check_relocs (bfd *abfd,
 	  /* This refers only to functions defined in the shared library.  */
 	case R_PPC_LOCAL24PC:
 	  if (h && h == htab->elf.hgot && htab->plt_type == PLT_UNSET)
-	    htab->plt_type = PLT_OLD;
+	    {
+	      htab->plt_type = PLT_OLD;
+	      htab->old_bfd = abfd;
+	    }
 	  break;
 
 	  /* This relocation describes the C++ object vtable hierarchy.
@@ -3402,7 +3405,10 @@ ppc_elf_check_relocs (bfd *abfd,
 	      s = bfd_section_from_r_symndx (abfd, &htab->sym_sec, sec,
 					     r_symndx);
 	      if (s == got2)
-		htab->plt_type = PLT_OLD;
+		{
+		  htab->plt_type = PLT_OLD;
+		  htab->old_bfd = abfd;
+		}
 	    }
 	  if (h == NULL || h == htab->elf.hgot)
 	    break;
@@ -3417,7 +3423,10 @@ ppc_elf_check_relocs (bfd *abfd,
 	  if (h == htab->elf.hgot)
 	    {
 	      if (htab->plt_type == PLT_UNSET)
-		htab->plt_type = PLT_OLD;
+		{
+		  htab->plt_type = PLT_OLD;
+		  htab->old_bfd = abfd;
+		}
 	      break;
 	    }
 	  /* fall through */
@@ -3671,7 +3680,7 @@ ppc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 int
 ppc_elf_select_plt_layout (bfd *output_bfd ATTRIBUTE_UNUSED,
 			   struct bfd_link_info *info,
-			   int force_old_plt,
+			   enum ppc_elf_plt_type plt_style,
 			   int emit_stub_syms)
 {
   struct ppc_elf_link_hash_table *htab;
@@ -3680,8 +3689,37 @@ ppc_elf_select_plt_layout (bfd *output_bfd ATTRIBUTE_UNUSED,
   htab = ppc_elf_hash_table (info);
 
   if (htab->plt_type == PLT_UNSET)
-    htab->plt_type = (force_old_plt || !htab->can_use_new_plt
-		      ? PLT_OLD : PLT_NEW);
+    {
+      if (plt_style == PLT_OLD)
+	htab->plt_type = PLT_OLD;
+      else
+	{
+	  bfd *ibfd;
+	  enum ppc_elf_plt_type plt_type = plt_style;
+
+	  /* Look through the reloc flags left by ppc_elf_check_relocs.
+	     Use the old style bss plt if a file makes plt calls
+	     without using the new relocs, and if ld isn't given
+	     --secure-plt and we never see REL16 relocs.  */
+	  if (plt_type == PLT_UNSET)
+	    plt_type = PLT_OLD;
+	  for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->next)
+	    if (is_ppc_elf_target (ibfd->xvec))
+	      {
+		if (ppc_elf_tdata (ibfd)->has_rel16)
+		  plt_type = PLT_NEW;
+		else if (ppc_elf_tdata (ibfd)->makes_plt_call)
+		  {
+		    plt_type = PLT_OLD;
+		    htab->old_bfd = ibfd;
+		    break;
+		  }
+	      }
+	  htab->plt_type = plt_type;
+	}
+    }
+  if (htab->plt_type == PLT_OLD && plt_style == PLT_NEW)
+    info->callbacks->info (_("Using bss-plt due to %B"), htab->old_bfd);
 
   htab->emit_stub_syms = emit_stub_syms;
 

@@ -1,5 +1,20 @@
 2007-05-11  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.h (ppc_elf_select_plt_layout): Update prototype.
+	(enum ppc_elf_plt_type): Move from..
+	* elf32-ppc.c: ..here.
+	(struct ppc_elf_obj_tdata): Add makes_plt_call and has_rel16.
+	(struct ppc_elf_link_hash_table): Reorder.  Add old_bfd.  Delete
+	can_use_new_plt.  Make is_vxworks a bitfield.
+	(ppc_elf_link_hash_table_create): Don't clear is_vxworks (again).
+	(ppc_elf_check_relocs): Update setting of reloc flags.  Set old_bfd.
+	(ppc_elf_select_plt_layout): Modify parameters.  Use bfd reloc
+	flags to better detect object files needing old bss-style plt.
+	Allow secure plt to be used without rel16 relocs being detected.
+	Warn if secure plt request cannot be allowed.
+
+2007-05-11  Alan Modra  <amodra@bigpond.net.au>
+
 	* reloc.c (BFD_RELOC_SPU_PPU32, BFD_RELOC_SPU_PPU64): Define.
 	* elf-bfd.h (struct elf_backend_data): Change return type of
 	elf_backend_relocate_section to int.

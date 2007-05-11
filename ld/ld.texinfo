@@ -5699,6 +5699,14 @@ PLT, if all input files (including startup and static libraries) were
 compiled with @samp{-msecure-plt}.  @samp{--bss-plt} forces the old
 BSS PLT (and GOT layout) which can give slightly better performance.
 
+@kindex --secure-plt
+@item --secure-plt
+@command{ld} will use the new PLT and GOT layout if it is linking new
+@samp{-fpic} or @samp{-fPIC} code, but does not do so automatically
+when linking non-PIC code.  This option requests the new PLT and GOT
+layout.  A warning will be given if some object file requires the old
+style BSS PLT.
+
 @cindex PowerPC GOT
 @kindex --sdata-got
 @item --sdata-got
