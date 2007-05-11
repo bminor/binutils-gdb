@@ -42,6 +42,7 @@
 #include "regcache.h"
 #include "reggroups.h"
 #include "floatformat.h"
+#include "observer.h"
 
 #include "spu-tdep.h"
 
@@ -671,6 +672,7 @@ spu_frame_unwind_cache (struct frame_info *next_frame,
 {
   struct spu_unwind_cache *info;
   struct spu_prologue_data data;
+  gdb_byte buf[16];
 
   if (*this_prologue_cache)
     return *this_prologue_cache;
@@ -698,7 +700,6 @@ spu_frame_unwind_cache (struct frame_info *next_frame,
     {
       CORE_ADDR cfa;
       int i;
-      gdb_byte buf[16];
 
       /* Determine CFA via unwound CFA_REG plus CFA_OFFSET.  */
       frame_unwind_register (next_frame, data.cfa_reg, buf);
@@ -710,15 +711,6 @@ spu_frame_unwind_cache (struct frame_info *next_frame,
 	    || (i >= SPU_SAVED1_REGNUM && i <= SPU_SAVEDN_REGNUM))
 	  if (data.reg_offset[i] != -1)
 	    info->saved_regs[i].addr = cfa - data.reg_offset[i];
-
-      /* The previous PC comes from the link register.  */
-      if (trad_frame_addr_p (info->saved_regs, SPU_LR_REGNUM))
-	info->saved_regs[SPU_PC_REGNUM] = info->saved_regs[SPU_LR_REGNUM];
-      else
-	info->saved_regs[SPU_PC_REGNUM].realreg = SPU_LR_REGNUM;
-
-      /* The previous SP is equal to the CFA.  */
-      trad_frame_set_value (info->saved_regs, SPU_SP_REGNUM, cfa);
 
       /* Frame bases.  */
       info->frame_base = cfa;
@@ -742,20 +734,28 @@ spu_frame_unwind_cache (struct frame_info *next_frame,
 	  if (backchain + 16 < SPU_LS_SIZE)
 	    info->saved_regs[SPU_LR_REGNUM].addr = backchain + 16;
 
-	  /* This will also be the previous PC.  */
-	  if (trad_frame_addr_p (info->saved_regs, SPU_LR_REGNUM))
-	    info->saved_regs[SPU_PC_REGNUM] = info->saved_regs[SPU_LR_REGNUM];
-	  else
-	    info->saved_regs[SPU_PC_REGNUM].realreg = SPU_LR_REGNUM;
-
-	  /* The previous SP will equal the backchain value.  */
-	  trad_frame_set_value (info->saved_regs, SPU_SP_REGNUM, backchain);
-
           /* Frame bases.  */
 	  info->frame_base = backchain;
 	  info->local_base = reg;
 	}
     }
+
+  /* The previous SP is equal to the CFA.  */
+  trad_frame_set_value (info->saved_regs, SPU_SP_REGNUM, info->frame_base);
+
+  /* The previous PC comes from the link register.  In the case
+     of overlay return stubs, we unwind to the real return address.  */
+  if (trad_frame_addr_p (info->saved_regs, SPU_LR_REGNUM))
+    target_read_memory (info->saved_regs[SPU_LR_REGNUM].addr, buf, 16);
+  else
+    frame_unwind_register (next_frame, SPU_LR_REGNUM, buf);
+
+  if (extract_unsigned_integer (buf + 8, 4) != 0)
+    trad_frame_set_value (info->saved_regs, SPU_PC_REGNUM,
+			  extract_unsigned_integer (buf + 8, 4));
+  else
+    trad_frame_set_value (info->saved_regs, SPU_PC_REGNUM,
+			  extract_unsigned_integer (buf, 4));
  
   return info;
 }
@@ -1124,6 +1124,189 @@ spu_software_single_step (struct regcache *regcache)
   return 1;
 }
 
+/* Target overlays for the SPU overlay manager.
+
+   See the documentation of simple_overlay_update for how the
+   interface is supposed to work.
+
+   Data structures used by the overlay manager:
+
+   struct ovly_table
+     {
+        u32 vma;
+        u32 size;
+        u32 pos;
+        u32 buf;
+     } _ovly_table[];   -- one entry per overlay section
+
+   struct ovly_buf_table
+     {
+        u32 mapped;
+     } _ovly_buf_table[];  -- one entry per overlay buffer
+
+   _ovly_table should never change.
+
+   Both tables are aligned to a 16-byte boundary, the symbols _ovly_table
+   and _ovly_buf_table are of type STT_OBJECT and their size set to the size
+   of the respective array. buf in _ovly_table is an index into _ovly_buf_table.
+
+   mapped is an index into _ovly_table. Both the mapped and buf indices start
+   from one to reference the first entry in their respective tables.  */
+
+/* Using the per-objfile private data mechanism, we store for each
+   objfile an array of "struct spu_overlay_table" structures, one
+   for each obj_section of the objfile.  This structure holds two
+   fields, MAPPED_PTR and MAPPED_VAL.  If MAPPED_PTR is zero, this
+   is *not* an overlay section.  If it is non-zero, it represents
+   a target address.  The overlay section is mapped iff the target
+   integer at this location equals MAPPED_VAL.  */
+
+static const struct objfile_data *spu_overlay_data;
+
+struct spu_overlay_table
+  {
+    CORE_ADDR mapped_ptr;
+    CORE_ADDR mapped_val;
+  };
+
+/* Retrieve the overlay table for OBJFILE.  If not already cached, read
+   the _ovly_table data structure from the target and initialize the
+   spu_overlay_table data structure from it.  */
+static struct spu_overlay_table *
+spu_get_overlay_table (struct objfile *objfile)
+{
+  struct minimal_symbol *ovly_table_msym, *ovly_buf_table_msym;
+  CORE_ADDR ovly_table_base, ovly_buf_table_base;
+  unsigned ovly_table_size, ovly_buf_table_size;
+  struct spu_overlay_table *tbl;
+  struct obj_section *osect;
+  char *ovly_table;
+  int i;
+
+  tbl = objfile_data (objfile, spu_overlay_data);
+  if (tbl)
+    return tbl;
+
+  ovly_table_msym = lookup_minimal_symbol ("_ovly_table", NULL, objfile);
+  if (!ovly_table_msym)
+    return NULL;
+
+  ovly_buf_table_msym = lookup_minimal_symbol ("_ovly_buf_table", NULL, objfile);
+  if (!ovly_buf_table_msym)
+    return NULL;
+
+  ovly_table_base = SYMBOL_VALUE_ADDRESS (ovly_table_msym);
+  ovly_table_size = MSYMBOL_SIZE (ovly_table_msym);
+
+  ovly_buf_table_base = SYMBOL_VALUE_ADDRESS (ovly_buf_table_msym);
+  ovly_buf_table_size = MSYMBOL_SIZE (ovly_buf_table_msym);
+
+  ovly_table = xmalloc (ovly_table_size);
+  read_memory (ovly_table_base, ovly_table, ovly_table_size);
+
+  tbl = OBSTACK_CALLOC (&objfile->objfile_obstack,
+			objfile->sections_end - objfile->sections,
+			struct spu_overlay_table);
+
+  for (i = 0; i < ovly_table_size / 16; i++)
+    {
+      CORE_ADDR vma  = extract_unsigned_integer (ovly_table + 16*i + 0, 4);
+      CORE_ADDR size = extract_unsigned_integer (ovly_table + 16*i + 4, 4);
+      CORE_ADDR pos  = extract_unsigned_integer (ovly_table + 16*i + 8, 4);
+      CORE_ADDR buf  = extract_unsigned_integer (ovly_table + 16*i + 12, 4);
+
+      if (buf == 0 || (buf - 1) * 4 >= ovly_buf_table_size)
+	continue;
+
+      ALL_OBJFILE_OSECTIONS (objfile, osect)
+	if (vma == bfd_section_vma (objfile->obfd, osect->the_bfd_section)
+	    && pos == osect->the_bfd_section->filepos)
+	  {
+	    int ndx = osect - objfile->sections;
+	    tbl[ndx].mapped_ptr = ovly_buf_table_base + (buf - 1) * 4;
+	    tbl[ndx].mapped_val = i + 1;
+	    break;
+	  }
+    }
+
+  xfree (ovly_table);
+  set_objfile_data (objfile, spu_overlay_data, tbl);
+  return tbl;
+}
+
+/* Read _ovly_buf_table entry from the target to dermine whether
+   OSECT is currently mapped, and update the mapped state.  */
+static void
+spu_overlay_update_osect (struct obj_section *osect)
+{
+  struct spu_overlay_table *ovly_table;
+  CORE_ADDR val;
+
+  ovly_table = spu_get_overlay_table (osect->objfile);
+  if (!ovly_table)
+    return;
+
+  ovly_table += osect - osect->objfile->sections;
+  if (ovly_table->mapped_ptr == 0)
+    return;
+
+  val = read_memory_unsigned_integer (ovly_table->mapped_ptr, 4);
+  osect->ovly_mapped = (val == ovly_table->mapped_val);
+}
+
+/* If OSECT is NULL, then update all sections' mapped state.
+   If OSECT is non-NULL, then update only OSECT's mapped state.  */
+static void
+spu_overlay_update (struct obj_section *osect)
+{
+  /* Just one section.  */
+  if (osect)
+    spu_overlay_update_osect (osect);
+
+  /* All sections.  */
+  else
+    {
+      struct objfile *objfile;
+
+      ALL_OBJSECTIONS (objfile, osect)
+	if (section_is_overlay (osect->the_bfd_section))
+	  spu_overlay_update_osect (osect);
+    }
+}
+
+/* Whenever a new objfile is loaded, read the target's _ovly_table.
+   If there is one, go through all sections and make sure for non-
+   overlay sections LMA equals VMA, while for overlay sections LMA
+   is larger than local store size.  */
+static void
+spu_overlay_new_objfile (struct objfile *objfile)
+{
+  struct spu_overlay_table *ovly_table;
+  struct obj_section *osect;
+
+  /* If we've already touched this file, do nothing.  */
+  if (!objfile || objfile_data (objfile, spu_overlay_data) != NULL)
+    return;
+
+  /* Check if this objfile has overlays.  */
+  ovly_table = spu_get_overlay_table (objfile);
+  if (!ovly_table)
+    return;
+
+  /* Now go and fiddle with all the LMAs.  */
+  ALL_OBJFILE_OSECTIONS (objfile, osect)
+    {
+      bfd *obfd = objfile->obfd;
+      asection *bsect = osect->the_bfd_section;
+      int ndx = osect - objfile->sections;
+
+      if (ovly_table[ndx].mapped_ptr == 0)
+	bfd_section_lma (obfd, bsect) = bfd_section_vma (obfd, bsect);
+      else
+	bfd_section_lma (obfd, bsect) = bsect->filepos + SPU_LS_SIZE;
+    }
+}
+
 
 /* Set up gdbarch struct.  */
 
@@ -1200,6 +1383,9 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_cannot_step_breakpoint (gdbarch, 1);
   set_gdbarch_software_single_step (gdbarch, spu_software_single_step);
 
+  /* Overlays.  */
+  set_gdbarch_overlay_update (gdbarch, spu_overlay_update);
+
   return gdbarch;
 }
 
@@ -1230,4 +1416,8 @@ _initialize_spu_tdep (void)
   register_gdbarch_init (bfd_arch_spu, spu_gdbarch_init);
 
   spu_init_vector_type ();
+
+  /* Add ourselves to objfile event chain.  */
+  observer_attach_new_objfile (spu_overlay_new_objfile);
+  spu_overlay_data = register_objfile_data ();
 }

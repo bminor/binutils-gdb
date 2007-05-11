@@ -1,5 +1,17 @@
 2007-05-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* spu-tdep.c: Include "observer.h".
+	(spu_frame_unwind_cache): Unwind PC through overlay return stubs.
+	(spu_overlay_data): New variable.
+	(struct spu_overlay_table): New type.
+	(spu_get_overlay_table, spu_overlay_update_osect, spu_overlay_update,
+	spu_overlay_new_objfile): New functions.
+	(spu_gdbarch_init): Install spu_overlay_update.
+	(_initialize_spu_tdep): Register spu_overlay_new_objfile, 
+	allocate spu_overlay_data objfile data.
+
+2007-05-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbarch.sh (overlay_update): New gdbarch function.
 	(struct obj_section): Add forward declaration.
 	* gdbarch.c, gdbarch.h: Regenerate.

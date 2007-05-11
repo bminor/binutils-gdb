@@ -2681,7 +2681,7 @@ spu-tdep.o: spu-tdep.c $(defs_h) $(arch_utils_h) $(gdbtypes_h) $(gdbcmd_h) \
 	$(frame_unwind_h) $(frame_base_h) $(trad_frame_h) $(symtab_h) \
 	$(symfile_h) $(value_h) $(inferior_h) $(dis_asm_h) $(objfiles_h) \
 	$(language_h) $(regcache_h) $(reggroups_h) $(floatformat_h) \
-	$(spu_tdep_h)
+	$(observer_h) $(spu_tdep_h)
 stabsread.o: stabsread.c $(defs_h) $(gdb_string_h) $(bfd_h) $(gdb_obstack_h) \
 	$(symtab_h) $(gdbtypes_h) $(expression_h) $(symfile_h) $(objfiles_h) \
 	$(aout_stab_gnu_h) $(libaout_h) $(aout_aout64_h) $(gdb_stabs_h) \
