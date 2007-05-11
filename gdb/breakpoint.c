@@ -202,6 +202,8 @@ static void tcatch_command (char *arg, int from_tty);
 
 static void ep_skip_leading_whitespace (char **s);
 
+static int single_step_breakpoint_inserted_here_p (CORE_ADDR pc);
+
 /* Prototypes for exported functions. */
 
 /* If FALSE, gdb will not use hardware support for watchpoints, even
@@ -1841,6 +1843,10 @@ breakpoint_inserted_here_p (CORE_ADDR pc)
 	}
     }
 
+  /* Also check for software single-step breakpoints.  */
+  if (single_step_breakpoint_inserted_here_p (pc))
+    return 1;
+
   return 0;
 }
 
@@ -1871,6 +1877,10 @@ software_breakpoint_inserted_here_p (CORE_ADDR pc)
 	    return 1;
 	}
     }
+
+  /* Also check for software single-step breakpoints.  */
+  if (single_step_breakpoint_inserted_here_p (pc))
+    return 1;
 
   return 0;
 }
@@ -7949,6 +7959,23 @@ remove_single_step_breakpoints (void)
       deprecated_remove_raw_breakpoint (single_step_breakpoints[1]);
       single_step_breakpoints[1] = NULL;
     }
+}
+
+/* Check whether a software single-step breakpoint is inserted at PC.  */
+
+static int
+single_step_breakpoint_inserted_here_p (CORE_ADDR pc)
+{
+  int i;
+
+  for (i = 0; i < 2; i++)
+    {
+      struct bp_target_info *bp_tgt = single_step_breakpoints[i];
+      if (bp_tgt && bp_tgt->placed_address == pc)
+	return 1;
+    }
+
+  return 0;
 }
 
 

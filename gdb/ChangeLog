@@ -1,3 +1,9 @@
+2007-05-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* breakpoint.c (single_step_breakpoint_inserted_here_p): New function.
+	(breakpoint_inserted_here_p): Call it.
+	(software_breakpoint_inserted_here_p): Likewise.
+
 2007-05-10  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* inf-ptrace.c (inf_ptrace_register_u_offset): Adapt parameter list.
