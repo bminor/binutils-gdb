@@ -1,3 +1,7 @@
+2007-05-11  Bob Wilson  <bob.wilson@acm.org>
+
+	* NEWS: Mention change in handling the -tui option.
+
 2007-05-11  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-thread-db.c (enable_thread_event_reporting): Fix comment

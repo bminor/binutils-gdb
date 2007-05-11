@@ -3,6 +3,10 @@
 
 *** Changes since GDB 6.6
 
+* When the Text User Interface (TUI) is not configured, GDB will now
+recognize the -tui command-line option and print a message that the TUI
+is not supported.
+
 * The GDB remote stub, gdbserver, now has lower overhead for high 
 frequency signals (e.g. SIGALRM) via the QPassSignals packet.
 
