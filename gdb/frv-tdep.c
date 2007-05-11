@@ -1518,9 +1518,6 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
 
-  set_gdbarch_remote_translate_xfer_address
-    (gdbarch, generic_remote_translate_xfer_address);
-
   /* Hardware watchpoint / breakpoint support.  */
   switch (info.bfd_arch_info->mach)
     {

@@ -1,3 +1,16 @@
+2007-05-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdbarch.sh (remote_translate_xfer_address): Remove.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* arch-utils.c (generic_remote_translate_xfer_address): Remove.
+	* arch-utils.h (generic_remote_translate_xfer_address): Remove.
+	* remote.c (remote_write_bytes_aux, remote_read_bytes): Do not
+	call gdbarch_remote_translate_xfer_address.
+	* frv-tdep.c (frv_gdbarch_init): Do not call
+	set_gdbarch_remote_translate_xfer_address.
+	* ia64-tdep.c (ia64_remote_translate_xfer_address): Remove.
+	(ia64_gdbarch_init): Do not install it.
+
 2007-05-11  Bob Wilson  <bob.wilson@acm.org>
 
 	* NEWS: Mention change in handling the -tui option.

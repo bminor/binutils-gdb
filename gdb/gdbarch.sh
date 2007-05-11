@@ -561,8 +561,6 @@ v:=:CORE_ADDR:decr_pc_after_break:::0:::0
 
 v:=:CORE_ADDR:deprecated_function_start_offset:::0:::0
 
-m::void:remote_translate_xfer_address:struct regcache *regcache, CORE_ADDR gdb_addr, int gdb_len, CORE_ADDR *rem_addr, int *rem_len:regcache, gdb_addr, gdb_len, rem_addr, rem_len::generic_remote_translate_xfer_address::0
-
 # Return the remote protocol register number associated with this
 # register.  Normally the identity mapping.
 m::int:remote_register_number:int regno:regno::default_remote_register_number::0

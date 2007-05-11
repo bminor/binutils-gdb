@@ -119,16 +119,6 @@ generic_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   return 0;
 }
 
-void
-generic_remote_translate_xfer_address (struct gdbarch *gdbarch,
-				       struct regcache *regcache,
-				       CORE_ADDR gdb_addr, int gdb_len,
-				       CORE_ADDR * rem_addr, int *rem_len)
-{
-  *rem_addr = gdb_addr;
-  *rem_len = gdb_len;
-}
-
 /* Helper functions for INNER_THAN */
 
 int

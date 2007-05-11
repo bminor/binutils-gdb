@@ -4108,12 +4108,6 @@ remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
     internal_error (__FILE__, __LINE__,
 		    "remote_write_bytes_aux: bad packet format");
 
-  /* Should this be the selected frame?  */
-  gdbarch_remote_translate_xfer_address (current_gdbarch,
-					 current_regcache,
-					 memaddr, len,
-					 &memaddr, &len);
-
   if (len <= 0)
     return 0;
 
@@ -4305,12 +4299,6 @@ remote_read_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
   struct remote_state *rs = get_remote_state ();
   int max_buf_size;		/* Max size of packet output buffer.  */
   int origlen;
-
-  /* Should this be the selected frame?  */
-  gdbarch_remote_translate_xfer_address (current_gdbarch,
-					 current_regcache,
-					 memaddr, len,
-					 &memaddr, &len);
 
   if (len <= 0)
     return 0;

@@ -883,10 +883,6 @@ extern void set_gdbarch_deprecated_function_start_offset (struct gdbarch *gdbarc
 #define DEPRECATED_FUNCTION_START_OFFSET (gdbarch_deprecated_function_start_offset (current_gdbarch))
 #endif
 
-typedef void (gdbarch_remote_translate_xfer_address_ftype) (struct gdbarch *gdbarch, struct regcache *regcache, CORE_ADDR gdb_addr, int gdb_len, CORE_ADDR *rem_addr, int *rem_len);
-extern void gdbarch_remote_translate_xfer_address (struct gdbarch *gdbarch, struct regcache *regcache, CORE_ADDR gdb_addr, int gdb_len, CORE_ADDR *rem_addr, int *rem_len);
-extern void set_gdbarch_remote_translate_xfer_address (struct gdbarch *gdbarch, gdbarch_remote_translate_xfer_address_ftype *remote_translate_xfer_address);
-
 /* Return the remote protocol register number associated with this
    register.  Normally the identity mapping. */
 

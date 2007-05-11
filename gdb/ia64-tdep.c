@@ -3546,16 +3546,6 @@ ia64_store_return_value (struct type *type, struct regcache *regcache,
     regcache_cooked_write (regcache, IA64_GR8_REGNUM, valbuf);
 }
 
-static void
-ia64_remote_translate_xfer_address (struct gdbarch *gdbarch,
-				    struct regcache *regcache,
-				    CORE_ADDR memaddr, int nr_bytes,
-				    CORE_ADDR *targ_addr, int *targ_len)
-{
-  *targ_addr = memaddr;
-  *targ_len  = nr_bytes;
-}
-
 static int
 ia64_print_insn (bfd_vma memaddr, struct disassemble_info *info)
 {
@@ -3656,9 +3646,6 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Settings that should be unnecessary.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-
-  set_gdbarch_remote_translate_xfer_address (
-    gdbarch, ia64_remote_translate_xfer_address);
 
   set_gdbarch_print_insn (gdbarch, ia64_print_insn);
   set_gdbarch_convert_from_func_ptr_addr (gdbarch, ia64_convert_from_func_ptr_addr);

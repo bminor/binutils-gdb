@@ -45,9 +45,6 @@ enum return_value_convention legacy_return_value (struct gdbarch *gdbarch,
    address passed as an invisible first argument to the function.  */
 extern gdbarch_deprecated_use_struct_convention_ftype always_use_struct_convention;
 
-/* Typical remote_translate_xfer_address */
-extern gdbarch_remote_translate_xfer_address_ftype generic_remote_translate_xfer_address;
-
 /* The only possible cases for inner_than. */
 extern int core_addr_lessthan (CORE_ADDR lhs, CORE_ADDR rhs);
 extern int core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs);
