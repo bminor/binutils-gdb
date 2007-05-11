@@ -236,6 +236,7 @@ struct gdbarch
   int vtable_function_descriptors;
   int vbit_in_delta;
   gdbarch_skip_permanent_breakpoint_ftype *skip_permanent_breakpoint;
+  gdbarch_overlay_update_ftype *overlay_update;
 };
 
 
@@ -362,6 +363,7 @@ struct gdbarch startup_gdbarch =
   0,  /* vtable_function_descriptors */
   0,  /* vbit_in_delta */
   0,  /* skip_permanent_breakpoint */
+  0,  /* overlay_update */
   /* startup_gdbarch() */
 };
 
@@ -614,6 +616,7 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of vtable_function_descriptors, invalid_p == 0 */
   /* Skip verify of vbit_in_delta, invalid_p == 0 */
   /* Skip verify of skip_permanent_breakpoint, has predicate */
+  /* Skip verify of overlay_update, has predicate */
   buf = ui_file_xstrdup (log, &dummy);
   make_cleanup (xfree, buf);
   if (strlen (buf) > 0)
@@ -1224,6 +1227,12 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: osabi = %s\n",
                       paddr_d (current_gdbarch->osabi));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_overlay_update_p() = %d\n",
+                      gdbarch_overlay_update_p (current_gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: overlay_update = <0x%lx>\n",
+                      (long) current_gdbarch->overlay_update);
 #ifdef PC_REGNUM
   fprintf_unfiltered (file,
                       "gdbarch_dump: PC_REGNUM # %s\n",
@@ -3603,6 +3612,30 @@ set_gdbarch_skip_permanent_breakpoint (struct gdbarch *gdbarch,
                                        gdbarch_skip_permanent_breakpoint_ftype skip_permanent_breakpoint)
 {
   gdbarch->skip_permanent_breakpoint = skip_permanent_breakpoint;
+}
+
+int
+gdbarch_overlay_update_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->overlay_update != NULL;
+}
+
+void
+gdbarch_overlay_update (struct gdbarch *gdbarch, struct obj_section *osect)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->overlay_update != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_overlay_update called\n");
+  gdbarch->overlay_update (osect);
+}
+
+void
+set_gdbarch_overlay_update (struct gdbarch *gdbarch,
+                            gdbarch_overlay_update_ftype overlay_update)
+{
+  gdbarch->overlay_update = overlay_update;
 }
 
 

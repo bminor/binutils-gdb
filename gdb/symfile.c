@@ -3042,10 +3042,6 @@ init_psymbol_list (struct objfile *objfile, int total_symbols)
 enum overlay_debugging_state overlay_debugging = ovly_off;
 int overlay_cache_invalid = 0;	/* True if need to refresh mapped state */
 
-/* Target vector for refreshing overlay mapped state */
-static void simple_overlay_update (struct obj_section *);
-void (*target_overlay_update) (struct obj_section *) = simple_overlay_update;
-
 /* Function: section_is_overlay (SECTION)
    Returns true if SECTION has VMA not equal to LMA, ie.
    SECTION is loaded at an address different from where it will "run".  */
@@ -3099,9 +3095,9 @@ overlay_is_mapped (struct obj_section *osect)
     case ovly_off:
       return 0;			/* overlay debugging off */
     case ovly_auto:		/* overlay debugging automatic */
-      /* Unles there is a target_overlay_update function,
+      /* Unles there is a gdbarch_overlay_update function,
          there's really nothing useful to do here (can't really go auto)  */
-      if (target_overlay_update)
+      if (gdbarch_overlay_update_p (current_gdbarch))
 	{
 	  if (overlay_cache_invalid)
 	    {
@@ -3109,7 +3105,7 @@ overlay_is_mapped (struct obj_section *osect)
 	      overlay_cache_invalid = 0;
 	    }
 	  if (osect->ovly_mapped == -1)
-	    (*target_overlay_update) (osect);
+	    gdbarch_overlay_update (current_gdbarch, osect);
 	}
       /* fall thru to manual case */
     case ovly_on:		/* overlay debugging manual */
@@ -3462,8 +3458,8 @@ overlay_off_command (char *args, int from_tty)
 static void
 overlay_load_command (char *args, int from_tty)
 {
-  if (target_overlay_update)
-    (*target_overlay_update) (NULL);
+  if (gdbarch_overlay_update_p (current_gdbarch))
+    gdbarch_overlay_update (current_gdbarch, NULL);
   else
     error (_("This target does not know how to read its overlay state."));
 }
@@ -3487,7 +3483,7 @@ overlay_command (char *args, int from_tty)
 
    This is GDB's default target overlay layer.  It works with the
    minimal overlay manager supplied as an example by Cygnus.  The
-   entry point is via a function pointer "target_overlay_update",
+   entry point is via a function pointer "gdbarch_overlay_update",
    so targets that use a different runtime overlay manager can
    substitute their own overlay_update function and take over the
    function pointer.
@@ -3690,7 +3686,7 @@ simple_overlay_update_1 (struct obj_section *osect)
    If a cached entry can't be found or the cache isn't valid, then
    re-read the entire cache, and go ahead and update all sections.  */
 
-static void
+void
 simple_overlay_update (struct obj_section *osect)
 {
   struct objfile *objfile;

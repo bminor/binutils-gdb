@@ -963,6 +963,9 @@ m32r_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Hook in the default unwinders.  */
   frame_unwind_append_sniffer (gdbarch, m32r_frame_sniffer);
 
+  /* Support simple overlay manager.  */
+  set_gdbarch_overlay_update (gdbarch, simple_overlay_update);
+
   return gdbarch;
 }
 

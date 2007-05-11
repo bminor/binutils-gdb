@@ -1,5 +1,21 @@
 2007-05-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbarch.sh (overlay_update): New gdbarch function.
+	(struct obj_section): Add forward declaration.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+	* symfile.c (simple_overlay_update): Make global.
+	(target_overlay_update): Remove variable.
+	(overlay_is_mapped): Call gdbarch_overlay_update instead of
+	target_overlay_update.
+	(overlay_load_command): Likewise.
+	* symfile.h (struct obj_section): Add forward declaration.
+	(simple_overlay_update): Add prototype.
+
+	* m32r-tdep.c (m32r_gdbarch_init): Install simple_overlay_update.
+
+2007-05-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* observer.sh: Add "struct objfile" forward declaration.
 	* target.h (deprecated_target_new_objfile_hook): Remove.
 	* symfile.c (deprecated_target_new_objfile_hook): Remove.

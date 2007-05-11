@@ -680,6 +680,9 @@ v::int:vbit_in_delta:::0:0::0
 
 # Advance PC to next instruction in order to skip a permanent breakpoint.
 F::void:skip_permanent_breakpoint:struct regcache *regcache:regcache
+
+# Refresh overlay mapped state for section OSECT.
+F::void:overlay_update:struct obj_section *osect:osect
 EOF
 }
 
@@ -782,6 +785,7 @@ struct ui_file;
 struct frame_info;
 struct value;
 struct objfile;
+struct obj_section;
 struct minimal_symbol;
 struct regcache;
 struct reggroup;

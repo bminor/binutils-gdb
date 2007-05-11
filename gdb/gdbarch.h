@@ -42,6 +42,7 @@ struct ui_file;
 struct frame_info;
 struct value;
 struct objfile;
+struct obj_section;
 struct minimal_symbol;
 struct regcache;
 struct reggroup;
@@ -1344,6 +1345,14 @@ extern int gdbarch_skip_permanent_breakpoint_p (struct gdbarch *gdbarch);
 typedef void (gdbarch_skip_permanent_breakpoint_ftype) (struct regcache *regcache);
 extern void gdbarch_skip_permanent_breakpoint (struct gdbarch *gdbarch, struct regcache *regcache);
 extern void set_gdbarch_skip_permanent_breakpoint (struct gdbarch *gdbarch, gdbarch_skip_permanent_breakpoint_ftype *skip_permanent_breakpoint);
+
+/* Refresh overlay mapped state for section OSECT. */
+
+extern int gdbarch_overlay_update_p (struct gdbarch *gdbarch);
+
+typedef void (gdbarch_overlay_update_ftype) (struct obj_section *osect);
+extern void gdbarch_overlay_update (struct gdbarch *gdbarch, struct obj_section *osect);
+extern void set_gdbarch_overlay_update (struct gdbarch *gdbarch, gdbarch_overlay_update_ftype *overlay_update);
 
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 

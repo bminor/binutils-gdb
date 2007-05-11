@@ -29,6 +29,7 @@
 /* Opaque declarations.  */
 struct section_table;
 struct objfile;
+struct obj_section;
 struct obstack;
 struct block;
 
@@ -305,6 +306,9 @@ extern void symbol_file_add_main (char *args, int from_tty);
 
 /* Clear GDB symbol tables.  */
 extern void symbol_file_clear (int from_tty);
+
+/* Default overlay update function.  */
+extern void simple_overlay_update (struct obj_section *);
 
 extern bfd_byte *symfile_relocate_debug_section (bfd *abfd, asection *sectp,
 						 bfd_byte * buf);
