@@ -78,6 +78,12 @@ static reloc_howto_type elf_howto_table[] = {
   HOWTO (R_SPU_REL32,   0, 2, 32, TRUE,  0, complain_overflow_dont,
 	 bfd_elf_generic_reloc, "SPU_REL32",
 	 FALSE, 0, 0xffffffff, TRUE),
+  HOWTO (R_SPU_PPU32,   0, 2, 32, FALSE,  0, complain_overflow_dont,
+	 bfd_elf_generic_reloc, "SPU_PPU32",
+	 FALSE, 0, 0xffffffff, FALSE),
+  HOWTO (R_SPU_PPU64,   0, 4, 64, FALSE,  0, complain_overflow_dont,
+	 bfd_elf_generic_reloc, "SPU_PPU64",
+	 FALSE, 0, -1, FALSE),
 };
 
 static struct bfd_elf_special_section const spu_elf_special_sections[] = {
@@ -120,6 +126,10 @@ spu_elf_bfd_to_reloc_type (bfd_reloc_code_real_type code)
       return R_SPU_ADDR32;
     case BFD_RELOC_32_PCREL:
       return R_SPU_REL32;
+    case BFD_RELOC_SPU_PPU32:
+      return R_SPU_PPU32;
+    case BFD_RELOC_SPU_PPU64:
+      return R_SPU_PPU64;
     }
 }
 
@@ -2627,6 +2637,26 @@ spu_elf_final_link (bfd *output_bfd, struct bfd_link_info *info)
   return bfd_elf_final_link (output_bfd, info);
 }
 
+/* Called when not normally emitting relocs, ie. !info->relocatable
+   and !info->emitrelocations.  Returns a count of special relocs
+   that need to be emitted.  */
+
+static unsigned int
+spu_elf_count_relocs (asection *sec, Elf_Internal_Rela *relocs)
+{
+  unsigned int count = 0;
+  Elf_Internal_Rela *relend = relocs + sec->reloc_count;
+
+  for (; relocs < relend; relocs++)
+    {
+      int r_type = ELF32_R_TYPE (relocs->r_info);
+      if (r_type == R_SPU_PPU32 || r_type == R_SPU_PPU64)
+	++count;
+    }
+
+  return count;
+}
+
 /* Apply RELOCS to CONTENTS of INPUT_SECTION from INPUT_BFD.  */
 
 static bfd_boolean
@@ -2644,6 +2674,7 @@ spu_elf_relocate_section (bfd *output_bfd,
   Elf_Internal_Rela *rel, *relend;
   struct spu_link_hash_table *htab;
   bfd_boolean ret = TRUE;
+  bfd_boolean emit_these_relocs = FALSE;
 
   htab = spu_hash_table (info);
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
@@ -2669,10 +2700,15 @@ spu_elf_relocate_section (bfd *output_bfd,
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
+      if (r_type == R_SPU_PPU32 || r_type == R_SPU_PPU64)
+	{
+	  emit_these_relocs = TRUE;
+	  continue;
+	}
+
       howto = elf_howto_table + r_type;
       unresolved_reloc = FALSE;
       warned = FALSE;
-
       h = NULL;
       sym = NULL;
       sec = NULL;
@@ -2794,6 +2830,31 @@ spu_elf_relocate_section (bfd *output_bfd,
 	      break;
 	    }
 	}
+    }
+
+  if (ret
+      && emit_these_relocs
+      && !info->relocatable
+      && !info->emitrelocations)
+    {
+      Elf_Internal_Rela *wrel;
+      Elf_Internal_Shdr *rel_hdr;
+
+      wrel = rel = relocs;
+      relend = relocs + input_section->reloc_count;
+      for (; rel < relend; rel++)
+	{
+	  int r_type;
+
+	  r_type = ELF32_R_TYPE (rel->r_info);
+	  if (r_type == R_SPU_PPU32 || r_type == R_SPU_PPU64)
+	    *wrel++ = *rel;
+	}
+      input_section->reloc_count = wrel - relocs;
+      /* Backflips for _bfd_elf_link_output_relocs.  */
+      rel_hdr = &elf_section_data (input_section)->rel_hdr;
+      rel_hdr->sh_size = input_section->reloc_count * rel_hdr->sh_entsize;
+      ret = 2;
     }
 
   return ret;
@@ -3059,6 +3120,7 @@ spu_elf_modify_program_headers (bfd *abfd, struct bfd_link_info *info)
 #define bfd_elf32_bfd_reloc_type_lookup		spu_elf_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup	spu_elf_reloc_name_lookup
 #define elf_info_to_howto			spu_elf_info_to_howto
+#define elf_backend_count_relocs		spu_elf_count_relocs
 #define elf_backend_relocate_section		spu_elf_relocate_section
 #define elf_backend_symbol_processing		spu_elf_backend_symbol_processing
 #define elf_backend_link_output_symbol_hook	spu_elf_output_symbol_hook

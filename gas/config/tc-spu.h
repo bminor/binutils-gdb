@@ -61,8 +61,12 @@ struct tc_fix_info {
     }						\
   while (0)
 
-/* Don't reduce function symbols to section symbols.  */
-#define tc_fix_adjustable(FIXP) (!S_IS_FUNCTION ((FIXP)->fx_addsy))
+/* Don't reduce function symbols to section symbols, and don't adjust
+   references to PPU symbols.  */
+#define tc_fix_adjustable(FIXP) \
+  (!(S_IS_FUNCTION ((FIXP)->fx_addsy)			\
+     || (FIXP)->fx_r_type == BFD_RELOC_SPU_PPU32	\
+     || (FIXP)->fx_r_type == BFD_RELOC_SPU_PPU64))
 
 /* Keep relocs on calls.  Branches to function symbols are tail or
    sibling calls.  */
@@ -73,6 +77,8 @@ struct tc_fix_info {
 	|| (FIXP)->tc_fix_data.insn_tag == M_BRA)	\
        && (FIXP)->fx_addsy != NULL			\
        && S_IS_FUNCTION ((FIXP)->fx_addsy))		\
+   || (FIXP)->fx_r_type == BFD_RELOC_SPU_PPU32		\
+   || (FIXP)->fx_r_type == BFD_RELOC_SPU_PPU64		\
    || generic_force_reloc (FIXP))
 
 /* Values passed to md_apply_fix don't include symbol values.  */

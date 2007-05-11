@@ -38,12 +38,12 @@ mydir=`dirname "$0"`
 find_prog ()
 {
   prog=`echo $1 | sed "$program_transform_name"`
-  which $prog > /dev/null 2> /dev/null && return 0
   prog="$mydir/$prog"
   test -x "$prog" && return 0
   prog="$mydir/$1"
   test -x "$prog" && return 0
   prog=`echo $1 | sed "$program_transform_name"`
+  which $prog > /dev/null 2> /dev/null && return 0
   return 1
 }
 
@@ -95,7 +95,7 @@ main ()
     CC="$prog"
   fi
 
-  # Find readelf.  Any old readelf should do.  We only want to read syms.
+  # Find readelf.  Any old readelf should do.
   find_prog readelf
   if test $? -ne 0; then
     if which readelf > /dev/null 2> /dev/null; then
@@ -119,8 +119,13 @@ main ()
   toe=`${READELF} -S ${INFILE} | sed -n -e 's, *\[ *\([0-9]*\)\] *\.toe *[PROGN]*BITS *\([0-9a-f]*\).*,\1 \2,p'`
   toe_addr=`echo $toe | sed -n -e 's,.* ,,p'`
   toe=`echo $toe | sed -n -e 's, .*,,p'`
+  # For loaded sections, pick off section number, address, and file offset
   sections=`${READELF} -S ${INFILE} | sed -n -e 's, *\[ *\([0-9]*\)\] *[^ ]* *PROGBITS *\([0-9a-f]*\) *\([0-9a-f]*\).*,\1 \2 \3,p'`
   sections=`echo ${sections}`
+  # For relocation sections, pick off file offset and info (points to
+  # section where relocs apply)
+  relas=`${READELF} -S ${INFILE} | sed -n -e 's, *\[ *[0-9]*\] *[^ ]* *RELA *[0-9a-f]* *0*\([0-9a-f][0-9a-f]*\) .*\([0-9a-f][0-9a-f]*\) *[0-9a-f][0-9a-f]*$,\1 \2,p'`
+  relas=`echo ${relas}`
 
   # Build embedded SPU image.
   # 1. The whole SPU ELF file is written to .rodata.speelf
@@ -135,8 +140,10 @@ main ()
   #    write the address of the corresponding PowerPC symbol in a table
   #    built in .data.spetoe.  For _EAE_ symbols not in .toe, create
   #    .reloc commands to relocate their location directly.
-  # 3. Write a struct spe_program_handle to .data.
-  # 4. Write a table of _SPUEAR_ symbols.
+  # 3. Look for R_SPU_PPU32 and R_SPU_PPU64 relocations in the SPU ELF image
+  #    and create .reloc commands for them.
+  # 4. Write a struct spe_program_handle to .data.
+  # 5. Write a table of _SPUEAR_ symbols.
   ${CC} ${FLAGS} -x assembler-with-cpp -nostartfiles -nostdlib \
 	-Wa,-mbig -Wl,-r -Wl,-x -o ${OUTFILE} - <<EOF
  .section .rodata.speelf,"a",@progbits
@@ -177,6 +184,35 @@ $7 != "'${toe}'" && $7 in sec_off { \
 } \
 $7 != "'${toe}'" && ! $7 in sec_off { \
 	print "#error Section not found for " $8; \
+} \
+'`
+`test -z "${relas}" || ${READELF} -r -W ${INFILE} | awk \
+'BEGIN { \
+	split ("'"${sections}"'", s, " "); \
+	for (i = 1; i in s; i += 3) { \
+	    sec_off[s[i]] = strtonum ("0x" s[i+2]) - strtonum ("0x" s[i+1]); \
+	} \
+	split ("'"${relas}"'", s, " "); \
+	for (i = 1; i in s; i += 2) { \
+	    rela[s[i]] = strtonum (s[i+1]); \
+	} \
+} \
+/^Relocation section/ { \
+	sec = substr($6, 3); \
+} \
+$3 ~ /R_SPU_PPU/ { \
+	print "#ifdef _LP64"; \
+	print " .reloc __speelf__+" strtonum ("0x" $1) + sec_off[rela[sec]] ", R_PPC64_ADDR" substr($3, 10) ", " $5 "+0x" $7; \
+	print "#else"; \
+	print " .reloc __speelf__+" strtonum ("0x" $1) + sec_off[rela[sec]] + (substr($3, 10) == "64" ? 4 : 0)", R_PPC_ADDR32, " $5 "+0x" $7; \
+	print "#endif"; \
+} \
+$3 ~ /unrecognized:/ { \
+	print "#ifdef _LP64"; \
+	print " .reloc __speelf__+" strtonum ("0x" $1) + sec_off[rela[sec]] ", R_PPC64_ADDR" ($4 == "f" ? "64" : "32") ", " $6 "+0x" $8; \
+	print "#else"; \
+	print " .reloc __speelf__+" strtonum ("0x" $1) + sec_off[rela[sec]] + ($4 == "f" ? 4 : 0)", R_PPC_ADDR32, " $6 "+0x" $8; \
+	print "#endif"; \
 } \
 '`
 

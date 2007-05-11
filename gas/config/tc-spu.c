@@ -51,9 +51,9 @@ struct spu_insn
 static const char *get_imm (const char *param, struct spu_insn *insn, int arg);
 static const char *get_reg (const char *param, struct spu_insn *insn, int arg,
 			    int accept_expr);
-
 static int calcop (struct spu_opcode *format, const char *param,
 		   struct spu_insn *insn);
+static void spu_cons (int);
 
 extern char *myname;
 static struct hash_control *op_hash = NULL;
@@ -82,14 +82,17 @@ const char FLT_CHARS[] = "dDfF";
 const pseudo_typeS md_pseudo_table[] =
 {
   {"align", s_align_ptwo, 4},
+  {"bss", s_lcomm_bytes, 1},
   {"def", s_set, 0},
   {"dfloat", float_cons, 'd'},
   {"ffloat", float_cons, 'f'},
   {"global", s_globl, 0},
   {"half", cons, 2},
-  {"bss", s_lcomm_bytes, 1},
+  {"int", spu_cons, 4},
+  {"long", spu_cons, 4},
+  {"quad", spu_cons, 8},
   {"string", stringer, 1},
-  {"word", cons, 4},
+  {"word", spu_cons, 4},
   /* Force set to be treated as an instruction.  */
   {"set", NULL, 0},
   {".set", s_set, 0},
@@ -351,13 +354,14 @@ md_assemble (char *op)
         fixS *fixP;
         bfd_reloc_code_real_type reloc = arg_encode[insn.reloc_arg[i]].reloc;
 	int pcrel = 0;
+
         if (reloc == BFD_RELOC_SPU_PCREL9a
 	    || reloc == BFD_RELOC_SPU_PCREL9b
             || reloc == BFD_RELOC_SPU_PCREL16)
 	  pcrel = 1;
-	if (insn.flag[i] & 1)
+	if (insn.flag[i] == 1)
 	  reloc = BFD_RELOC_SPU_HI16;
-	else if (insn.flag[i] & 2)
+	else if (insn.flag[i] == 2)
 	  reloc = BFD_RELOC_SPU_LO16;
 	fixP = fix_new_exp (frag_now,
 			    thisfrag - frag_now->fr_literal,
@@ -585,30 +589,30 @@ get_imm (const char *param, struct spu_insn *insn, int arg)
   int low = 0, high = 0;
   int reloc_i = insn->reloc_arg[0] >= 0 ? 1 : 0;
 
-  if (strncmp (param, "%lo(", 4) == 0)
+  if (strncasecmp (param, "%lo(", 4) == 0)
     {
       param += 3;
       low = 1;
       as_warn (_("Using old style, %%lo(expr), please change to PPC style, expr@l."));
     }
-  else if (strncmp (param, "%hi(", 4) == 0)
+  else if (strncasecmp (param, "%hi(", 4) == 0)
     {
       param += 3;
       high = 1;
       as_warn (_("Using old style, %%hi(expr), please change to PPC style, expr@h."));
     }
-  else if (strncmp (param, "%pic(", 5) == 0)
+  else if (strncasecmp (param, "%pic(", 5) == 0)
     {
       /* Currently we expect %pic(expr) == expr, so do nothing here.
-       * i.e. for code loaded at address 0 $toc will be 0.  */
+	 i.e. for code loaded at address 0 $toc will be 0.  */
       param += 4;
     }
       
   if (*param == '$')
     {
       /* Symbols can start with $, but if this symbol matches a register
-       * name, it's probably a mistake.   The only way to avoid this
-       * warning is to rename the symbol.  */
+	 name, it's probably a mistake.  The only way to avoid this
+	 warning is to rename the symbol.  */
       struct spu_insn tmp_insn;
       const char *np = get_reg (param, &tmp_insn, arg, 0);
 
@@ -623,7 +627,7 @@ get_imm (const char *param, struct spu_insn *insn, int arg)
   input_line_pointer = save_ptr;
 
   /* Similar to ppc_elf_suffix in tc-ppc.c.  We have so few cases to
-   * handle we do it inlined here. */
+     handle we do it inlined here. */
   if (param[0] == '@' && !ISALNUM (param[2]) && param[2] != '@')
     {
       if (param[1] == 'h' || param[1] == 'H')
@@ -638,10 +642,10 @@ get_imm (const char *param, struct spu_insn *insn, int arg)
 	}
     }
 
-  val = insn->exp[reloc_i].X_add_number;
-
   if (insn->exp[reloc_i].X_op == O_constant)
     {
+      val = insn->exp[reloc_i].X_add_number;
+
       if (emulate_apuasm)
 	{
 	  /* Convert the value to a format we expect. */ 
@@ -691,9 +695,9 @@ get_imm (const char *param, struct spu_insn *insn, int arg)
     {
       insn->reloc_arg[reloc_i] = arg;
       if (high)
-	insn->flag[reloc_i] |= 1;
-      if (low)
-	insn->flag[reloc_i] |= 2;
+	insn->flag[reloc_i] = 1;
+      else if (low)
+	insn->flag[reloc_i] = 2;
     }
 
   return param;
@@ -801,6 +805,52 @@ md_create_long_jump (char *ptr,
 	   BFD_RELOC_SPU_PCREL16);
 }
 #endif
+
+/* Support @ppu on symbols referenced in .int/.long/.word/.quad.  */
+static void
+spu_cons (int nbytes)
+{
+  expressionS exp;
+
+  if (is_it_end_of_statement ())
+    {
+      demand_empty_rest_of_line ();
+      return;
+    }
+
+  do
+    {
+      expression (&exp);
+      if (exp.X_op == O_symbol
+	  && strncasecmp (input_line_pointer, "@ppu", 4) == 0)
+	{
+	  char *p = frag_more (nbytes);
+	  enum bfd_reloc_code_real reloc;
+
+	  /* Check for identifier@suffix+constant.  */
+	  input_line_pointer += 4;
+	  if (*input_line_pointer == '-' || *input_line_pointer == '+')
+	    {
+	      expressionS new_exp;
+
+	      expression (&new_exp);
+	      if (new_exp.X_op == O_constant)
+		exp.X_add_number += new_exp.X_add_number;
+	    }
+
+	  reloc = nbytes == 4 ? BFD_RELOC_SPU_PPU32 : BFD_RELOC_SPU_PPU64;
+	  fix_new_exp (frag_now, p - frag_now->fr_literal, nbytes,
+		       &exp, 0, reloc);
+	}
+      else
+	emit_expr (&exp, nbytes);
+    }
+  while (*input_line_pointer++ == ',');
+
+  /* Put terminator back into stream.  */
+  input_line_pointer--;
+  demand_empty_rest_of_line ();
+}
 
 int
 md_estimate_size_before_relax (fragS *fragP ATTRIBUTE_UNUSED,

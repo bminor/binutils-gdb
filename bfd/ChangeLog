@@ -1,3 +1,20 @@
+2007-05-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* reloc.c (BFD_RELOC_SPU_PPU32, BFD_RELOC_SPU_PPU64): Define.
+	* elf-bfd.h (struct elf_backend_data): Change return type of
+	elf_backend_relocate_section to int.
+	* elf32-spu.c (elf_howto_table): Add howtos for R_SPU_PPU32 and
+	R_SPU_PPU64.
+	(spu_elf_bfd_to_reloc_type): Convert new relocs.
+	(spu_elf_count_relocs): New function.
+	(elf_backend_count_relocs): Define.
+	(spu_elf_relocate_section): Arrange to emit R_SPU_PPU32 and
+	R_SPU_PPU64 relocs.
+	* elflink.c (elf_link_input_bfd): Emit relocs if relocate_section
+	returns 2.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2007-05-10  Richard Sandiford  <richard@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_check_relocs): Don't create PLT entries

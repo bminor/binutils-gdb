@@ -8198,7 +8198,7 @@ _bfd_elf_check_kept_section (asection *sec, struct bfd_link_info *info)
 static bfd_boolean
 elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 {
-  bfd_boolean (*relocate_section)
+  int (*relocate_section)
     (bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
      Elf_Internal_Rela *, Elf_Internal_Sym *, asection **);
   bfd *output_bfd;
@@ -8212,7 +8212,6 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
   asection **ppsection;
   asection *o;
   const struct elf_backend_data *bed;
-  bfd_boolean emit_relocs;
   struct elf_link_hash_entry **sym_hashes;
 
   output_bfd = finfo->output_bfd;
@@ -8224,9 +8223,6 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
      contents.  */
   if ((input_bfd->flags & DYNAMIC) != 0)
     return TRUE;
-
-  emit_relocs = (finfo->info->relocatable
-		 || finfo->info->emitrelocations);
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   if (elf_bad_symtab (input_bfd))
@@ -8443,6 +8439,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	  Elf_Internal_Rela *internal_relocs;
 	  bfd_vma r_type_mask;
 	  int r_sym_shift;
+	  int ret;
 
 	  /* Get the swapped relocs.  */
 	  internal_relocs
@@ -8580,14 +8577,17 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	     corresponding to the output section, which will require
 	     the addend to be adjusted.  */
 
-	  if (! (*relocate_section) (output_bfd, finfo->info,
+	  ret = (*relocate_section) (output_bfd, finfo->info,
 				     input_bfd, o, contents,
 				     internal_relocs,
 				     isymbuf,
-				     finfo->sections))
+				     finfo->sections);
+	  if (!ret)
 	    return FALSE;
 
-	  if (emit_relocs)
+	  if (ret == 2
+	      || finfo->info->relocatable
+	      || finfo->info->emitrelocations)
 	    {
 	      Elf_Internal_Rela *irela;
 	      Elf_Internal_Rela *irelaend;

@@ -792,8 +792,11 @@ struct elf_backend_data
      STB_LOCAL/STT_SECTION symbols specially.  The output symbol is
      going to be the section symbol corresponding to the output
      section, which means that the addend must be adjusted
-     accordingly.  */
-  bfd_boolean (*elf_backend_relocate_section)
+     accordingly.
+
+     Returns FALSE on error, TRUE on success, 2 if successful and
+     relocations should be written for this section.  */
+  int (*elf_backend_relocate_section)
     (bfd *output_bfd, struct bfd_link_info *info, bfd *input_bfd,
      asection *input_section, bfd_byte *contents, Elf_Internal_Rela *relocs,
      Elf_Internal_Sym *local_syms, asection **local_sections);
