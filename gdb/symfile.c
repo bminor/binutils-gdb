@@ -71,7 +71,6 @@ void (*deprecated_show_load_progress) (const char *section,
 			    unsigned long total_size);
 void (*deprecated_pre_add_symbol_hook) (const char *);
 void (*deprecated_post_add_symbol_hook) (void);
-void (*deprecated_target_new_objfile_hook) (struct objfile *);
 
 static void clear_symtab_users_cleanup (void *ignore);
 
@@ -1067,8 +1066,7 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd, int from_tty,
 
   new_symfile_objfile (objfile, mainline, from_tty);
 
-  if (deprecated_target_new_objfile_hook)
-    deprecated_target_new_objfile_hook (objfile);
+  observer_notify_new_objfile (objfile);
 
   bfd_cache_close_all ();
   return (objfile);
@@ -2643,8 +2641,7 @@ clear_symtab_users (void)
   breakpoint_re_set ();
   set_default_breakpoint (0, 0, 0, 0);
   clear_pc_function_cache ();
-  if (deprecated_target_new_objfile_hook)
-    deprecated_target_new_objfile_hook (NULL);
+  observer_notify_new_objfile (NULL);
 
   /* Clear globals which might have pointed into a removed objfile.
      FIXME: It's not clear which of these are supposed to persist

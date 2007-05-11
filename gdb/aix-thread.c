@@ -50,6 +50,7 @@
 #include "gdbcmd.h"
 #include "ppc-tdep.h"
 #include "gdb_string.h"
+#include "observer.h"
 
 #include <procinfo.h>
 #include <sys/types.h>
@@ -128,11 +129,6 @@ static int pd_active = 0;
    Only valid when pd_able is true.  */
 
 static int arch64;
-
-/* Saved pointer to previous owner of
-   deprecated_target_new_objfile_hook.  */
-
-static void (*target_new_objfile_chain)(struct objfile *);
 
 /* Forward declarations for pthdb callbacks.  */
 
@@ -925,7 +921,7 @@ pd_disable (void)
   unpush_target (&aix_thread_ops);
 }
 
-/* deprecated_target_new_objfile_hook callback.
+/* new_objfile observer callback.
 
    If OBJFILE is non-null, check whether a threaded application is
    being debugged, and if so, prepare for thread debugging.
@@ -939,9 +935,6 @@ new_objfile (struct objfile *objfile)
     pd_enable ();
   else
     pd_disable ();
-
-  if (target_new_objfile_chain)
-    target_new_objfile_chain (objfile);
 }
 
 /* Attach to process specified by ARGS.  */
@@ -1792,8 +1785,7 @@ _initialize_aix_thread (void)
   add_target (&aix_thread_ops);
 
   /* Notice when object files get loaded and unloaded.  */
-  target_new_objfile_chain = deprecated_target_new_objfile_hook;
-  deprecated_target_new_objfile_hook = new_objfile;
+  observer_attach_new_objfile (new_objfile);
 
   add_setshow_boolean_cmd ("aix-thread", class_maintenance, &debug_aix_thread,
 			    _("Set debugging of AIX thread module."),

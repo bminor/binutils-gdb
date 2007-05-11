@@ -66,6 +66,7 @@
 #include "regcache.h"
 #include "solib.h"
 #include "symfile.h"
+#include "observer.h"
 
 #include "gdb_string.h"
 
@@ -777,16 +778,9 @@ sol_thread_create_inferior (char *exec_file, char *allargs, char **env,
    when all symbol tables are removed.  libthread_db can only be
    initialized when it finds the right variables in libthread.so.
    Since it's a shared library, those variables don't show up until
-   the library gets mapped and the symbol table is read in.
+   the library gets mapped and the symbol table is read in.  */
 
-   This new_objfile event is managed by a chained function pointer.
-   It is the callee's responsability to call the next client on the
-   chain.  */
-
-/* Saved pointer to previous owner of the new_objfile event. */
-static void (*target_new_objfile_chain) (struct objfile *);
-
-void
+static void
 sol_thread_new_objfile (struct objfile *objfile)
 {
   td_err_e val;
@@ -794,13 +788,13 @@ sol_thread_new_objfile (struct objfile *objfile)
   if (!objfile)
     {
       sol_thread_active = 0;
-      goto quit;
+      return;
     }
 
   /* Don't do anything if init failed to resolve the libthread_db
      library.  */
   if (!procfs_suppress_run)
-    goto quit;
+    return;
 
   /* Now, initialize libthread_db.  This needs to be done after the
      shared libraries are located because it needs information from
@@ -810,24 +804,19 @@ sol_thread_new_objfile (struct objfile *objfile)
   if (val != TD_OK)
     {
       warning (_("sol_thread_new_objfile: td_init: %s"), td_err_string (val));
-      goto quit;
+      return;
     }
 
   val = p_td_ta_new (&main_ph, &main_ta);
   if (val == TD_NOLIBTHREAD)
-    goto quit;
+    return;
   else if (val != TD_OK)
     {
       warning (_("sol_thread_new_objfile: td_ta_new: %s"), td_err_string (val));
-      goto quit;
+      return;
     }
 
   sol_thread_active = 1;
-
-quit:
-  /* Call predecessor on chain, if any.  */
-  if (target_new_objfile_chain)
-    target_new_objfile_chain (objfile);
 }
 
 /* Clean up after the inferior dies.  */
@@ -1667,8 +1656,7 @@ _initialize_sol_thread (void)
   add_target (&core_ops);
 
   /* Hook into new_objfile notification.  */
-  target_new_objfile_chain = deprecated_target_new_objfile_hook;
-  deprecated_target_new_objfile_hook  = sol_thread_new_objfile;
+  observer_attach_new_objfile (sol_thread_new_objfile);
   return;
 
  die:

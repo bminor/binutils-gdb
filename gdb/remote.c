@@ -6350,20 +6350,12 @@ build_remote_gdbarch_data (void)
   remote_address_size = TARGET_ADDR_BIT;
 }
 
-/* Saved pointer to previous owner of the new_objfile event.  */
-static void (*remote_new_objfile_chain) (struct objfile *);
-
 /* Function to be called whenever a new objfile (shlib) is detected.  */
 static void
 remote_new_objfile (struct objfile *objfile)
 {
   if (remote_desc != 0)		/* Have a remote connection.  */
-    {
-      remote_check_symbols (objfile);
-    }
-  /* Call predecessor on chain, if any.  */
-  if (remote_new_objfile_chain)
-    remote_new_objfile_chain (objfile);
+    remote_check_symbols (objfile);
 }
 
 void
@@ -6403,8 +6395,7 @@ _initialize_remote (void)
   add_target (&extended_async_remote_ops);
 
   /* Hook into new objfile notification.  */
-  remote_new_objfile_chain = deprecated_target_new_objfile_hook;
-  deprecated_target_new_objfile_hook  = remote_new_objfile;
+  observer_attach_new_objfile (remote_new_objfile);
 
 #if 0
   init_remote_threadtests ();

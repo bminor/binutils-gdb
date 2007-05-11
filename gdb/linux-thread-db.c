@@ -37,6 +37,7 @@
 #include "regcache.h"
 #include "solib-svr4.h"
 #include "gdbcore.h"
+#include "observer.h"
 #include "linux-nat.h"
 
 #include <signal.h>
@@ -57,9 +58,6 @@ static struct target_ops thread_db_ops;
 
 /* The target vector that we call for things this module can't handle.  */
 static struct target_ops *target_beneath;
-
-/* Pointer to the next function on the objfile event chain.  */
-static void (*target_new_objfile_chain) (struct objfile * objfile);
 
 /* Non-zero if we're using this module's target vector.  */
 static int using_thread_db;
@@ -650,9 +648,6 @@ thread_db_new_objfile (struct objfile *objfile)
 {
   if (objfile != NULL)
     check_for_thread_db ();
-
-  if (target_new_objfile_chain)
-    target_new_objfile_chain (objfile);
 }
 
 /* Attach to a new thread.  This function is called when we receive a
@@ -1140,7 +1135,6 @@ _initialize_thread_db (void)
       add_target (&thread_db_ops);
 
       /* Add ourselves to objfile event chain.  */
-      target_new_objfile_chain = deprecated_target_new_objfile_hook;
-      deprecated_target_new_objfile_hook = thread_db_new_objfile;
+      observer_attach_new_objfile (thread_db_new_objfile);
     }
 }

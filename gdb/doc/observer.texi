@@ -122,3 +122,10 @@ haven't been loaded yet.
 @deftypefun void solib_unloaded (struct so_list *@var{solib})
 The shared library specified by @var{solib} has been unloaded.
 @end deftypefun
+
+@deftypefun void new_objfile (struct objfile *@var{objfile})
+The symbol file specified by @var{objfile} has been loaded.
+Called with @var{objfile} equal to @code{NULL} to indicate
+previously loaded symbol table data has now been invalidated.
+@end deftypefun
+

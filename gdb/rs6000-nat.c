@@ -39,6 +39,7 @@
 #include "rs6000-tdep.h"
 #include "exec.h"
 #include "gdb_stdint.h"
+#include "observer.h"
 
 #include <sys/ptrace.h>
 #include <sys/reg.h>
@@ -880,8 +881,8 @@ vmap_ldinfo (LdInfo *ldi)
 
 	  /* Announce new object files.  Doing this after symbol relocation
 	     makes aix-thread.c's job easier.  */
-	  if (deprecated_target_new_objfile_hook && vp->objfile)
-	    deprecated_target_new_objfile_hook (vp->objfile);
+	  if (vp->objfile)
+	    observer_notify_new_objfile (vp->objfile);
 
 	  /* There may be more, so we don't break out of the loop.  */
 	}
@@ -1164,8 +1165,8 @@ xcoff_relocate_core (struct target_ops *target)
 
       vmap_symtab (vp);
 
-      if (deprecated_target_new_objfile_hook && vp != vmap && vp->objfile)
-	deprecated_target_new_objfile_hook (vp->objfile);
+      if (vp != vmap && vp->objfile)
+	observer_notify_new_objfile (vp->objfile);
     }
   while (LDI_NEXT (ldi, arch64) != 0);
   vmap_exec ();

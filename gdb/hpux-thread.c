@@ -48,6 +48,7 @@
 #include "gdb_stat.h"
 #include "gdbcore.h"
 #include "hppa-tdep.h"
+#include "observer.h"
 
 extern int child_suppress_run;
 
@@ -461,14 +462,7 @@ hpux_thread_create_inferior (char *exec_file, char *allargs, char **env,
    those variables don't show up until the library gets mapped and the symbol
    table is read in.  */
 
-/* This new_objfile event is now managed by a chained function pointer. 
- * It is the callee's responsability to call the next client on the chain.
- */
-
-/* Saved pointer to previous owner of the new_objfile event. */
-static void (*target_new_objfile_chain) (struct objfile *);
-
-void
+static void
 hpux_thread_new_objfile (struct objfile *objfile)
 {
   struct minimal_symbol *ms;
@@ -476,28 +470,24 @@ hpux_thread_new_objfile (struct objfile *objfile)
   if (!objfile)
     {
       hpux_thread_active = 0;
-      goto quit;
+      return;
     }
 
   ms = lookup_minimal_symbol ("cma__g_known_threads", NULL, objfile);
 
   if (!ms)
-    goto quit;
+    return;
 
   P_cma__g_known_threads = SYMBOL_VALUE_ADDRESS (ms);
 
   ms = lookup_minimal_symbol ("cma__g_current_thread", NULL, objfile);
 
   if (!ms)
-    goto quit;
+    return;
 
   P_cma__g_current_thread = SYMBOL_VALUE_ADDRESS (ms);
 
   hpux_thread_active = 1;
-quit:
-  /* Call predecessor on chain, if any. */
-  if (target_new_objfile_chain)
-    target_new_objfile_chain (objfile);
 }
 
 /* Clean up after the inferior dies.  */
@@ -589,6 +579,5 @@ _initialize_hpux_thread (void)
 
   child_suppress_run = 1;
   /* Hook into new_objfile notification.  */
-  target_new_objfile_chain = deprecated_target_new_objfile_hook;
-  deprecated_target_new_objfile_hook  = hpux_thread_new_objfile;
+  observer_attach_new_objfile (hpux_thread_new_objfile);
 }

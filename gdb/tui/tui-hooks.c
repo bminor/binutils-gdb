@@ -36,6 +36,7 @@
 #include "gdb-events.h"
 #include "ui-out.h"
 #include "top.h"
+#include "observer.h"
 #include <unistd.h>
 #include <fcntl.h>
 
@@ -59,16 +60,11 @@
 
 int tui_target_has_run = 0;
 
-static void (* tui_target_new_objfile_chain) (struct objfile*);
-
 static void
 tui_new_objfile_hook (struct objfile* objfile)
 {
   if (tui_active)
     tui_display_main ();
-  
-  if (tui_target_new_objfile_chain)
-    tui_target_new_objfile_chain (objfile);
 }
 
 static int ATTR_FORMAT (printf, 1, 0)
@@ -302,6 +298,5 @@ void
 _initialize_tui_hooks (void)
 {
   /* Install the permanent hooks.  */
-  tui_target_new_objfile_chain = deprecated_target_new_objfile_hook;
-  deprecated_target_new_objfile_hook = tui_new_objfile_hook;
+  observer_attach_new_objfile (tui_new_objfile_hook);
 }

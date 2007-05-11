@@ -1,3 +1,7 @@
+2007-05-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* observer.texi (GDB Observers): New observer "new_objfile".
+
 2007-05-08  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdbint.texinfo (Native Conditionals): Remove USE_PROC_FS.

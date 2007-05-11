@@ -1,5 +1,43 @@
 2007-05-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* observer.sh: Add "struct objfile" forward declaration.
+	* target.h (deprecated_target_new_objfile_hook): Remove.
+	* symfile.c (deprecated_target_new_objfile_hook): Remove.
+	(clear_symtab_users): Call observer_notify_new_objfile.
+	(symbol_file_add_with_addrs_or_offsets): Likewise.
+	* rs6000-nat.c: Include "observer.h".
+	(vmap_ldinfo): Call observer_notify_new_objfile.
+	(xcoff_relocate_core): Likewise.
+	* remote.c (remote_new_objfile_chain): Remove.
+	(remote_new_objfile): Do not call remote_new_objfile_chain.
+	(_initialize_remote): Use observer_attach_new_objfile.
+	* tui/tui-hooks.c (tui_target_new_objfile_chain): Remove.
+	(tui_new_objfile_hook): Do not call tui_target_new_objfile_chain.
+	(_initialize_tui_hooks): Use observer_attach_new_objfile.
+	* aix-thread.c: Include "observer.h".
+	(target_new_objfile_chain): Remove.
+	(new_objfile): Do not call target_new_objfile_chain.
+	(_initialize_aix_thread): Use observer_attach_new_objfile.
+	* hpux-thread.c: Include "observer.h"
+	(target_new_objfile_chain): Remove.
+	(hpux_thread_new_objfile): Make static.  Do not call
+	target_new_objfile_chain.
+	(_initialize_hpux_thread): Use observer_attach_new_objfile.
+	* linux-thread-db.c: Include "observer.h".
+	(target_new_objfile_chain): Remove.
+	(thread_db_new_objfile): Do not call target_new_objfile_chain.
+	(_initialize_thread_db): Use observer_attach_new_objfile.
+	* sol-thread.c: Include "observer.h".
+	(target_new_objfile_chain): Remove.
+	(sol_thread_new_objfile): Make static.  Do not call
+	target_new_objfile_chain.
+	(_initialize_sol_thread): Use observer_attach_new_objfile.
+	* Makefile.in (aix-thread.o, hpux-thread.o, linux-thread-db.o,
+	rs6000-nat.o, sol-thread.o, tui-hooks.o): Add dependency on
+	$(observer_h).
+
+2007-05-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbarch.sh (remote_translate_xfer_address): Remove.
 	* gdbarch.h, gdbarch.c: Regenerate.
 	* arch-utils.c (generic_remote_translate_xfer_address): Remove.
