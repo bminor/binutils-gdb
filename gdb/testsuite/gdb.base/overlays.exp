@@ -31,10 +31,15 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
+set data_overlays 1
+
 if [istarget "d10v-*-*"] then {
     set linker_script "${srcdir}/${subdir}/d10v.ld";
 } elseif [istarget "m32r-*-*"] then {
     set linker_script "${srcdir}/${subdir}/m32r.ld";
+} elseif [istarget "spu-*-*"] then {
+    set linker_script "${srcdir}/${subdir}/spu.ld";
+    set data_overlays 0
 } else {
     verbose "Skipping overlay test -- not implemented for this target."
     return 
@@ -131,14 +136,16 @@ set bar_lma  [get_func_address "bar"  "\\*bar\\*"  "bar  load address"]
 set baz_lma  [get_func_address "baz"  "\\*baz\\*"  "baz  load address"]
 set grbx_lma [get_func_address "grbx" "\\*grbx\\*" "grbx load address"]
 
-gdb_test "print \$foox_lma = &foox" \
+if $data_overlays then {
+    gdb_test "print \$foox_lma = &foox" \
 	".* $iptrcast 0x.*"  "foox load addr"
-gdb_test "print \$barx_lma = &barx" \
+    gdb_test "print \$barx_lma = &barx" \
 	".* $iptrcast 0x.*"  "barx load addr"
-gdb_test "print \$bazx_lma = &bazx" \
+    gdb_test "print \$bazx_lma = &bazx" \
 	".* $iptrcast 0x.*"  "bazx load addr"
-gdb_test "print \$grbxx_lma = &grbxx" \
+    gdb_test "print \$grbxx_lma = &grbxx" \
 	".* $iptrcast 0x.*" "grbxx load addr"
+}
 
 # map each overlay successively, and
 # capture the VMA addresses of [foo bar baz grbx foox barx bazx grbxx]
@@ -159,36 +166,39 @@ gdb_test "overlay map .ovly3" ""
 gdb_test "overlay list" "Section .ovly3, loaded at.*, mapped at.*" "List ovly3"
 set grbx_vma [get_func_address "grbx" "grbx" "grbx runtime address"]
 
-gdb_test "overlay map .data00" "" 
-gdb_test "overlay list" "Section .data00, loaded .*, mapped .*" "List data00"
-gdb_test "print \$foox_vma = &foox" \
+if $data_overlays then {
+    gdb_test "overlay map .data00" "" 
+    gdb_test "overlay list" "Section .data00, loaded .*, mapped .*" "List data00"
+    gdb_test "print \$foox_vma = &foox" \
 	".* $iptrcast 0x.*"  "foox runtime addr"
 
-gdb_test "overlay map .data01" "" 
-gdb_test "overlay list" "Section .data01, loaded .*, mapped .*" "List data01"
-gdb_test "print \$barx_vma = &barx" \
+    gdb_test "overlay map .data01" "" 
+    gdb_test "overlay list" "Section .data01, loaded .*, mapped .*" "List data01"
+    gdb_test "print \$barx_vma = &barx" \
 	".* $iptrcast 0x.*"  "barx runtime addr"
 
-gdb_test "overlay map .data02" "" 
-gdb_test "overlay list" "Section .data02, loaded .*, mapped .*" "List data02"
-gdb_test "print \$bazx_vma = &bazx" \
+    gdb_test "overlay map .data02" "" 
+    gdb_test "overlay list" "Section .data02, loaded .*, mapped .*" "List data02"
+    gdb_test "print \$bazx_vma = &bazx" \
 	".* $iptrcast 0x.*"  "bazx runtime addr"
 
-gdb_test "overlay map .data03" "" 
-gdb_test "overlay list" "Section .data03, loaded .*, mapped .*" "List data03"
-gdb_test "print \$grbxx_vma = &grbxx" \
+    gdb_test "overlay map .data03" "" 
+    gdb_test "overlay list" "Section .data03, loaded .*, mapped .*" "List data03"
+    gdb_test "print \$grbxx_vma = &grbxx" \
 	".* $iptrcast 0x.*"  "grbxx runtime addr"
-
+}
 # Verify that LMA != VMA
 
 gdb_test "print $foo_lma   != $foo_vma" ".* = 1"   "foo's LMA   != VMA"
 gdb_test "print $bar_lma   != $bar_vma" ".* = 1"   "bar's LMA   != VMA"
 gdb_test "print $baz_lma   != $baz_vma" ".* = 1"   "baz's LMA   != VMA"
 gdb_test "print $grbx_lma  != $grbx_vma" ".* = 1"  "grbx's LMA  != VMA"
-gdb_test "print \$foox_lma  != \$foox_vma" ".* = 1"  "foox's LMA  != VMA"
-gdb_test "print \$barx_lma  != \$barx_vma" ".* = 1"  "barx's LMA  != VMA"
-gdb_test "print \$bazx_lma  != \$bazx_vma" ".* = 1"  "bazx's LMA  != VMA"
-gdb_test "print \$grbxx_lma != \$grbxx_vma" ".* = 1" "grbxx's LMA != VMA"
+if $data_overlays then {
+    gdb_test "print \$foox_lma  != \$foox_vma" ".* = 1"  "foox's LMA  != VMA"
+    gdb_test "print \$barx_lma  != \$barx_vma" ".* = 1"  "barx's LMA  != VMA"
+    gdb_test "print \$bazx_lma  != \$bazx_vma" ".* = 1"  "bazx's LMA  != VMA"
+    gdb_test "print \$grbxx_lma != \$grbxx_vma" ".* = 1" "grbxx's LMA != VMA"
+}
 
 # Verify that early-mapped overlays have been bumped out 
 # by later-mapped overlays layed over in the same VMA range.
@@ -234,10 +244,12 @@ simultaneous_pair .ovly0 .ovly3
 simultaneous_pair .ovly1 .ovly2
 simultaneous_pair .ovly1 .ovly3
 
-simultaneous_pair .data00 .data02
-simultaneous_pair .data00 .data03
-simultaneous_pair .data01 .data02
-simultaneous_pair .data01 .data03
+if $data_overlays then {
+    simultaneous_pair .data00 .data02
+    simultaneous_pair .data00 .data03
+    simultaneous_pair .data01 .data02
+    simultaneous_pair .data01 .data03
+}
 
 # test automatic mode
 

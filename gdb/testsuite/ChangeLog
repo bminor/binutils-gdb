@@ -1,3 +1,11 @@
+2007-05-11  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.base/overlays.exp: Add support for targets with only code
+	overlay support, not data overlay.  Support spu-*-* target in 
+	this mode.
+	* gdb.base/ovlymgr.c: Provide stubs for spu target.
+	* gdb.base/spu.ld: New file.
+
 2007-05-07  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.cp/virtfunc.exp (proc do_tests): Test stepping through a thunk.
