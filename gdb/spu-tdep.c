@@ -743,13 +743,19 @@ spu_frame_unwind_cache (struct frame_info *next_frame,
   /* The previous SP is equal to the CFA.  */
   trad_frame_set_value (info->saved_regs, SPU_SP_REGNUM, info->frame_base);
 
-  /* The previous PC comes from the link register.  In the case
-     of overlay return stubs, we unwind to the real return address.  */
+  /* Read full contents of the unwound link register in order to
+     be able to determine the return address.  */
   if (trad_frame_addr_p (info->saved_regs, SPU_LR_REGNUM))
     target_read_memory (info->saved_regs[SPU_LR_REGNUM].addr, buf, 16);
   else
     frame_unwind_register (next_frame, SPU_LR_REGNUM, buf);
 
+  /* Normally, the return address is contained in the slot 0 of the
+     link register, and slots 1-3 are zero.  For an overlay return,
+     slot 0 contains the address of the overlay manager return stub,
+     slot 1 contains the partition number of the overlay section to
+     be returned to, and slot 2 contains the return address within
+     that section.  Return the latter address in that case.  */
   if (extract_unsigned_integer (buf + 8, 4) != 0)
     trad_frame_set_value (info->saved_regs, SPU_PC_REGNUM,
 			  extract_unsigned_integer (buf + 8, 4));

@@ -1,5 +1,9 @@
 2007-05-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* spu-tdep.c (spu_frame_unwind_cache): Add comment.
+
+2007-05-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* breakpoint.c (remove_breakpoint): Do not remove software
 	breakpoints in unmapped overlay sections.
 
